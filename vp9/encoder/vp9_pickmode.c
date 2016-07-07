@@ -1185,16 +1185,52 @@ static INLINE void find_predictors(VP9_COMP *cpi, MACROBLOCK *x,
   }
 }
 
-static void vp9_large_block_mv_bias(const NOISE_ESTIMATE *ne, RD_COST *this_rdc,
-                                    BLOCK_SIZE bsize, int mv_row, int mv_col,
-                                    int is_last_frame) {
-  // Bias against non-zero (above some threshold) motion for large blocks.
-  // This is temporary fix to avoid selection of large mv for big blocks.
-  if (mv_row > 64 || mv_row < -64 || mv_col > 64 || mv_col < -64) {
-    if (bsize == BLOCK_64X64)
-      this_rdc->rdcost = this_rdc->rdcost << 1;
-    else if (bsize >= BLOCK_32X32)
-      this_rdc->rdcost = 3 * this_rdc->rdcost >> 1;
+static void vp9_NEWMV_diff_bias(const NOISE_ESTIMATE *ne, MACROBLOCKD *xd,
+                                PREDICTION_MODE this_mode, RD_COST *this_rdc,
+                                BLOCK_SIZE bsize, int mv_row, int mv_col,
+                                int is_last_frame) {
+  // Bias against MVs associated with NEWMV mode that are very different from
+  // top/left neighbors.
+  if (this_mode == NEWMV) {
+    int al_mv_average_row;
+    int al_mv_average_col;
+    int left_row, left_col;
+    int row_diff, col_diff;
+    int above_mv_valid = 0;
+    int left_mv_valid = 0;
+    int above_row = 0;
+    int above_col = 0;
+
+    if (xd->above_mi) {
+      above_mv_valid = xd->above_mi->mv[0].as_int != INVALID_MV;
+      above_row = xd->above_mi->mv[0].as_mv.row;
+      above_col = xd->above_mi->mv[0].as_mv.col;
+    }
+    if (xd->left_mi) {
+      left_mv_valid = xd->left_mi->mv[0].as_int != INVALID_MV;
+      left_row = xd->left_mi->mv[0].as_mv.row;
+      left_col = xd->left_mi->mv[0].as_mv.col;
+    }
+    if (above_mv_valid && left_mv_valid) {
+        al_mv_average_row = (above_row + left_row + 1) >> 1;
+        al_mv_average_col = (above_col + left_col + 1) >> 1;
+    } else if (above_mv_valid) {
+        al_mv_average_row = above_row;
+        al_mv_average_col = above_col;
+    } else if (left_mv_valid) {
+        al_mv_average_row = left_row;
+        al_mv_average_col = left_col;
+    } else {
+        al_mv_average_row = al_mv_average_col = 0;
+    }
+    row_diff = (al_mv_average_row - mv_row);
+    col_diff = (al_mv_average_col - mv_col);
+    if (row_diff > 48 || row_diff < -48 || col_diff > 48 || col_diff < -48) {
+      if (bsize > BLOCK_32X32)
+        this_rdc->rdcost = this_rdc->rdcost << 1;
+      else
+        this_rdc->rdcost = 3 * this_rdc->rdcost >> 1;
+    }
   }
   // If noise estimation is enabled, and estimated level is above threshold,
   // add a bias to LAST reference with small motion, for large blocks.
@@ -1810,15 +1846,15 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     this_rdc.rate += ref_frame_cost[ref_frame];
     this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv, this_rdc.rate, this_rdc.dist);
 
-    // Bias against non-zero motion
+    // Bias against NEWMV that is very different from its neighbors, and bias
+    // to small motion-lastref for noisy input.
     if (cpi->oxcf.rc_mode == VPX_CBR &&
         cpi->oxcf.speed >= 5 &&
-        cpi->oxcf.content != VP9E_CONTENT_SCREEN &&
-        !x->sb_is_skin) {
-      vp9_large_block_mv_bias(&cpi->noise_estimate, &this_rdc, bsize,
-                              frame_mv[this_mode][ref_frame].as_mv.row,
-                              frame_mv[this_mode][ref_frame].as_mv.col,
-                              ref_frame == LAST_FRAME);
+        cpi->oxcf.content != VP9E_CONTENT_SCREEN) {
+      vp9_NEWMV_diff_bias(&cpi->noise_estimate, xd, this_mode, &this_rdc, bsize,
+                          frame_mv[this_mode][ref_frame].as_mv.row,
+                          frame_mv[this_mode][ref_frame].as_mv.col,
+                          ref_frame == LAST_FRAME);
     }
 
     // Skipping checking: test to see if this block can be reconstructed by
