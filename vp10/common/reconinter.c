@@ -486,8 +486,7 @@ static void build_masked_compound_wedge_extend_highbd(
                          h, w, subh, subw, bd);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-
-#else   // CONFIG_SUPERTX
+#endif  // CONFIG_SUPERTX
 
 static void build_masked_compound_wedge(uint8_t *dst, int dst_stride,
                                         uint8_t *src0, int src0_stride,
@@ -528,7 +527,6 @@ static void build_masked_compound_wedge_highbd(uint8_t *dst_8, int dst_stride,
                          h, w, subh, subw, bd);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-#endif  // CONFIG_SUPERTX
 
 void vp10_make_masked_inter_predictor(
     const uint8_t *pre,
@@ -2441,12 +2439,7 @@ void vp10_build_inter_predictors_for_planes_single_buf(
 }
 
 static void build_wedge_inter_predictor_from_buf(MACROBLOCKD *xd, int plane,
-                                                 int block, int bw, int bh,
                                                  int x, int y, int w, int h,
-#if CONFIG_SUPERTX
-                                                 int wedge_offset_x,
-                                                 int wedge_offset_y,
-#endif  // CONFIG_SUPERTX
                                                  uint8_t *ext_dst0,
                                                  int ext_dst_stride0,
                                                  uint8_t *ext_dst1,
@@ -2457,36 +2450,9 @@ static void build_wedge_inter_predictor_from_buf(MACROBLOCKD *xd, int plane,
   struct buf_2d *const dst_buf = &pd->dst;
   uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
 
-  (void) block;
-  (void) bw;
-  (void) bh;
-
   if (is_compound
       && is_interinter_wedge_used(mbmi->sb_type)
       && mbmi->use_wedge_interinter) {
-#if CONFIG_SUPERTX
-#if CONFIG_VP9_HIGHBITDEPTH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
-      build_masked_compound_wedge_extend_highbd(
-          dst, dst_buf->stride,
-          CONVERT_TO_BYTEPTR(ext_dst0), ext_dst_stride0,
-          CONVERT_TO_BYTEPTR(ext_dst1), ext_dst_stride1,
-          mbmi->interinter_wedge_index,
-          mbmi->interinter_wedge_sign,
-          mbmi->sb_type,
-          wedge_offset_x, wedge_offset_y, h, w,
-          xd->bd);
-    else
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-      build_masked_compound_wedge_extend(
-          dst, dst_buf->stride,
-          ext_dst0, ext_dst_stride0,
-          ext_dst1, ext_dst_stride1,
-          mbmi->interinter_wedge_index,
-          mbmi->interinter_wedge_sign,
-          mbmi->sb_type,
-          wedge_offset_x, wedge_offset_y, h, w);
-#else   // CONFIG_SUPERTX
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
       build_masked_compound_wedge_highbd(
@@ -2506,7 +2472,6 @@ static void build_wedge_inter_predictor_from_buf(MACROBLOCKD *xd, int plane,
           mbmi->interinter_wedge_index,
           mbmi->interinter_wedge_sign,
           mbmi->sb_type, h, w);
-#endif  // CONFIG_SUPERTX
   } else {
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
@@ -2531,29 +2496,23 @@ void vp10_build_wedge_inter_predictor_from_buf(
                                                         &xd->plane[plane]);
     const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
     const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
-    const int bw = 4 * num_4x4_w;
-    const int bh = 4 * num_4x4_h;
 
     if (xd->mi[0]->mbmi.sb_type < BLOCK_8X8) {
-      int i = 0, x, y;
+      int x, y;
       assert(bsize == BLOCK_8X8);
       for (y = 0; y < num_4x4_h; ++y)
         for (x = 0; x < num_4x4_w; ++x)
-          build_wedge_inter_predictor_from_buf(xd, plane, i++, bw, bh,
+          build_wedge_inter_predictor_from_buf(xd, plane,
                                                4 * x, 4 * y, 4, 4,
-#if CONFIG_SUPERTX
-                                               0, 0,
-#endif
                                                ext_dst0[plane],
                                                ext_dst_stride0[plane],
                                                ext_dst1[plane],
                                                ext_dst_stride1[plane]);
     } else {
-      build_wedge_inter_predictor_from_buf(xd, plane, 0, bw, bh,
+      const int bw = 4 * num_4x4_w;
+      const int bh = 4 * num_4x4_h;
+      build_wedge_inter_predictor_from_buf(xd, plane,
                                            0, 0, bw, bh,
-#if CONFIG_SUPERTX
-                                           0, 0,
-#endif
                                            ext_dst0[plane],
                                            ext_dst_stride0[plane],
                                            ext_dst1[plane],
