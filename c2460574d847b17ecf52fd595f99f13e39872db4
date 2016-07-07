@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fd8f92ab_a169f8aa",
+        "filename": "vp10/encoder/dct.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1307,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-07-07T17:25:41Z",
+      "side": 1,
+      "message": "Use 8 here",
+      "range": {
+        "startLine": 1307,
+        "startChar": 17,
+        "endLine": 1307,
+        "endChar": 22
+      },
+      "revId": "c2460574d847b17ecf52fd595f99f13e39872db4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd8f92ab_e16300c5",
+        "filename": "vp10/encoder/dct.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1338,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-07-07T17:25:41Z",
+      "side": 1,
+      "message": "Use 8 here",
+      "range": {
+        "startLine": 1338,
+        "startChar": 12,
+        "endLine": 1338,
+        "endChar": 23
+      },
+      "revId": "c2460574d847b17ecf52fd595f99f13e39872db4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
