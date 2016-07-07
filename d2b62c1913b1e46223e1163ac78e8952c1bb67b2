@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9d7a1632_ee623f23",
+        "filename": "test/function_equivalence_test.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-07T01:00:48Z",
+      "side": 1,
+      "message": "this would be more readable using a proper struct instead of an abstract \u0027tuple\u0027 with undocumented fields/params.\n\nEspecially since line 56-58 fields are your struct, actually.\n\ntemplate\u003ctypename T\u003e\nstruct EquivalenceFunctions {\n  T ref_func_;\n  T tst_func_;\n  int bd_;\n};\n\netc.",
+      "range": {
+        "startLine": 41,
+        "startChar": 45,
+        "endLine": 41,
+        "endChar": 50
+      },
+      "revId": "d2b62c1913b1e46223e1163ac78e8952c1bb67b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d7a1632_8e57fb43",
+        "filename": "test/function_equivalence_test.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-07T01:00:48Z",
+      "side": 1,
+      "message": "see comment above. Could be an \"EquivalenceFunctions\u003cT\u003e func_;\" field.",
+      "range": {
+        "startLine": 56,
+        "startChar": 1,
+        "endLine": 59,
+        "endChar": 2
+      },
+      "revId": "d2b62c1913b1e46223e1163ac78e8952c1bb67b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
