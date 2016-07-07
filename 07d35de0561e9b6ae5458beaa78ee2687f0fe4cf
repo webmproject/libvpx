@@ -22,6 +22,30 @@
       "revId": "07d35de0561e9b6ae5458beaa78ee2687f0fe4cf",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a142433_b96e3f79",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-07-07T22:29:49Z",
+      "side": 1,
+      "message": "A 32x32 to 64 multiply is faster than a 64x64 multiply on most 32-bit systems.",
+      "parentUuid": "5a142433_19476b10",
+      "range": {
+        "startLine": 194,
+        "startChar": 20,
+        "endLine": 194,
+        "endChar": 22
+      },
+      "revId": "07d35de0561e9b6ae5458beaa78ee2687f0fe4cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
