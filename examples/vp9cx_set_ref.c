@@ -306,7 +306,7 @@ int main(int argc, char **argv) {
   unsigned int frame_out = 0;
 
   // The frame number to set reference frame on
-  int update_frame_num = 0;
+  unsigned int update_frame_num = 0;
   int mismatch_seen = 0;
 
   const int fps = 30;
