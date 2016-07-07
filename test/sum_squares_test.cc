@@ -21,12 +21,15 @@
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
-
+#include "test/function_equivalence_test.h"
 
 using libvpx_test::ACMRandom;
+using libvpx_test::FunctionEquivalenceTest;
 
 namespace {
 const int kNumIterations = 10000;
+
+static const int16_t kInt13Max = (1 << 12) - 1;
 
 typedef uint64_t (*SSI16Func)(const int16_t *src,
                              int stride ,
@@ -127,6 +130,72 @@ INSTANTIATE_TEST_CASE_P(
     SSE2, SumSquaresTest,
     ::testing::Values(
         make_tuple(&vpx_sum_squares_2d_i16_c, &vpx_sum_squares_2d_i16_sse2)
+    )
+);
+#endif  // HAVE_SSE2
+
+//////////////////////////////////////////////////////////////////////////////
+// 1D version
+//////////////////////////////////////////////////////////////////////////////
+
+typedef uint64_t (*F1D)(const int16_t *src, uint32_t N);
+
+class SumSquares1DTest : public FunctionEquivalenceTest<F1D> {
+ protected:
+  SumSquares1DTest() : rng_(ACMRandom::DeterministicSeed()) {}
+
+  static const int kIterations = 1000;
+  static const int kMaxSize = 256;
+
+  ACMRandom rng_;
+};
+
+TEST_P(SumSquares1DTest, RandomValues) {
+  DECLARE_ALIGNED(16, int16_t, src[kMaxSize * kMaxSize]);
+
+  for (int iter = 0 ; iter < kIterations && !HasFatalFailure(); ++iter) {
+    for (int i = 0 ; i < kMaxSize * kMaxSize ; ++i)
+      src[i] = rng_(kInt13Max * 2 + 1) - kInt13Max;
+
+    const int N = rng_(2) ? rng_(kMaxSize * kMaxSize + 1 - kMaxSize) + kMaxSize
+                          : rng_(kMaxSize) + 1;
+
+    const uint64_t ref_res = ref_func_(src, N);
+    const uint64_t tst_res = tst_func_(src, N);
+
+    ASSERT_EQ(ref_res, tst_res);
+  }
+}
+
+TEST_P(SumSquares1DTest, ExtremeValues) {
+  DECLARE_ALIGNED(16, int16_t, src[kMaxSize * kMaxSize]);
+
+  for (int iter = 0 ; iter < kIterations && !HasFatalFailure(); ++iter) {
+    if (rng_(2)) {
+      for (int i = 0 ; i < kMaxSize * kMaxSize ; ++i)
+        src[i] = kInt13Max;
+    } else {
+      for (int i = 0 ; i < kMaxSize * kMaxSize ; ++i)
+        src[i] = -kInt13Max;
+    }
+
+    const int N = rng_(2) ? rng_(kMaxSize * kMaxSize + 1 - kMaxSize) + kMaxSize
+                          : rng_(kMaxSize) + 1;
+
+    const uint64_t ref_res = ref_func_(src, N);
+    const uint64_t tst_res = tst_func_(src, N);
+
+    ASSERT_EQ(ref_res, tst_res);
+  }
+}
+
+using std::tr1::make_tuple;
+
+#if HAVE_SSE2
+INSTANTIATE_TEST_CASE_P(
+    SSE2, SumSquares1DTest,
+    ::testing::Values(
+        make_tuple(&vpx_sum_squares_i16_c, &vpx_sum_squares_i16_sse2)
     )
 );
 #endif  // HAVE_SSE2
