@@ -7899,6 +7899,10 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       *rate2 += vp10_cost_bit(vp10_get_skip_prob(cm, xd), 1);
 
       *distortion = skip_sse_sb;
+      *psse = skip_sse_sb;
+      *rate_y = 0;
+      *rate_uv = 0;
+      *skippable = 1;
     }
 
 #if CONFIG_OBMC || CONFIG_WARPED_MOTION
