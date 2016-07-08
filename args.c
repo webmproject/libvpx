@@ -9,6 +9,7 @@
  * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
@@ -119,13 +120,13 @@ void arg_show_usage(FILE *fp, const struct arg_def *const *defs) {
 }
 
 unsigned int arg_parse_uint(const struct arg *arg) {
-  long int rawval;
+  uint32_t rawval;
   char *endptr;
 
-  rawval = strtol(arg->val, &endptr, 10);
+  rawval = strtoul(arg->val, &endptr, 10);
 
   if (arg->val[0] != '\0' && endptr[0] == '\0') {
-    if (rawval >= 0 && rawval <= UINT_MAX) return rawval;
+    if (rawval <= UINT_MAX) return rawval;
 
     die("Option %s: Value %ld out of range for unsigned int\n", arg->name,
         rawval);
@@ -136,7 +137,7 @@ unsigned int arg_parse_uint(const struct arg *arg) {
 }
 
 int arg_parse_int(const struct arg *arg) {
-  long int rawval;
+  int32_t rawval;
   char *endptr;
 
   rawval = strtol(arg->val, &endptr, 10);
