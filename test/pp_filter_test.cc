@@ -11,7 +11,7 @@
 #include "test/register_state_check.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "./vpx_config.h"
-#include "./vp8_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_mem/vpx_mem.h"
 
@@ -25,7 +25,7 @@ typedef void (*PostProcFunc)(unsigned char *src_ptr,
 
 namespace {
 
-class VP8PostProcessingFilterTest
+class VPxPostProcessingFilterTest
     : public ::testing::TestWithParam<PostProcFunc> {
  public:
   virtual void TearDown() {
@@ -33,10 +33,10 @@ class VP8PostProcessingFilterTest
   }
 };
 
-// Test routine for the VP8 post-processing function
-// vp8_post_proc_down_and_across_mb_row_c.
+// Test routine for the VPx post-processing function
+// vpx_post_proc_down_and_across_mb_row_c.
 
-TEST_P(VP8PostProcessingFilterTest, FilterOutputCheck) {
+TEST_P(VPxPostProcessingFilterTest, FilterOutputCheck) {
   // Size of the underlying data block that will be filtered.
   const int block_width  = 16;
   const int block_height = 16;
@@ -92,7 +92,7 @@ TEST_P(VP8PostProcessingFilterTest, FilterOutputCheck) {
   for (int i = 0; i < block_height; ++i) {
     for (int j = 0; j < block_width; ++j) {
       EXPECT_EQ(expected_data[i], pixel_ptr[j])
-          << "VP8PostProcessingFilterTest failed with invalid filter output";
+          << "VPxPostProcessingFilterTest failed with invalid filter output";
     }
     pixel_ptr += output_stride;
   }
@@ -102,17 +102,17 @@ TEST_P(VP8PostProcessingFilterTest, FilterOutputCheck) {
   vpx_free(flimits);
 };
 
-INSTANTIATE_TEST_CASE_P(C, VP8PostProcessingFilterTest,
-    ::testing::Values(vp8_post_proc_down_and_across_mb_row_c));
+INSTANTIATE_TEST_CASE_P(C, VPxPostProcessingFilterTest,
+    ::testing::Values(vpx_post_proc_down_and_across_mb_row_c));
 
 #if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(SSE2, VP8PostProcessingFilterTest,
-    ::testing::Values(vp8_post_proc_down_and_across_mb_row_sse2));
+INSTANTIATE_TEST_CASE_P(SSE2, VPxPostProcessingFilterTest,
+    ::testing::Values(vpx_post_proc_down_and_across_mb_row_sse2));
 #endif
 
 #if HAVE_MSA
-INSTANTIATE_TEST_CASE_P(MSA, VP8PostProcessingFilterTest,
-    ::testing::Values(vp8_post_proc_down_and_across_mb_row_msa));
+INSTANTIATE_TEST_CASE_P(MSA, VPxPostProcessingFilterTest,
+    ::testing::Values(vpx_post_proc_down_and_across_mb_row_msa));
 #endif
 
 }  // namespace

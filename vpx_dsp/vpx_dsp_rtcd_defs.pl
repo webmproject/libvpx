@@ -1894,6 +1894,18 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 if (vpx_config("CONFIG_POSTPROC") eq "yes" || vpx_config("CONFIG_VP9_POSTPROC") eq "yes") {
     add_proto qw/void vpx_plane_add_noise/, "uint8_t *Start, char *noise, char blackclamp[16], char whiteclamp[16], char bothclamp[16], unsigned int Width, unsigned int Height, int Pitch";
     specialize qw/vpx_plane_add_noise sse2 msa/;
+
+    add_proto qw/void vpx_mbpost_proc_down/, "unsigned char *dst, int pitch, int rows, int cols,int flimit";
+    specialize qw/vpx_mbpost_proc_down sse2 msa/;
+    $vpx_mbpost_proc_down_sse2=vpx_mbpost_proc_down_xmm;
+
+    add_proto qw/void vpx_mbpost_proc_across_ip/, "unsigned char *dst, int pitch, int rows, int cols,int flimit";
+    specialize qw/vpx_mbpost_proc_across_ip sse2 msa/;
+    $vpx_mbpost_proc_across_ip_sse2=vpx_mbpost_proc_across_ip_xmm;
+
+    add_proto qw/void vpx_post_proc_down_and_across_mb_row/, "unsigned char *src, unsigned char *dst, int src_pitch, int dst_pitch, int cols, unsigned char *flimits, int size";
+    specialize qw/vpx_post_proc_down_and_across_mb_row sse2 msa/;
+
 }
 
 }  # CONFIG_ENCODERS || CONFIG_POSTPROC || CONFIG_VP9_POSTPROC

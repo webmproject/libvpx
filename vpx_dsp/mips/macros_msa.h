@@ -1060,6 +1060,7 @@
   ILVL_B2(RTYPE, in4, in5, in6, in7, out2, out3);               \
 }
 #define ILVL_B4_SB(...) ILVL_B4(v16i8, __VA_ARGS__)
+#define ILVL_B4_SH(...) ILVL_B4(v8i16, __VA_ARGS__)
 #define ILVL_B4_UH(...) ILVL_B4(v8u16, __VA_ARGS__)
 
 /* Description : Interleave left half of halfword elements from vectors
@@ -1074,6 +1075,7 @@
   out1 = (RTYPE)__msa_ilvl_h((v8i16)in2, (v8i16)in3);     \
 }
 #define ILVL_H2_SH(...) ILVL_H2(v8i16, __VA_ARGS__)
+#define ILVL_H2_SW(...) ILVL_H2(v4i32, __VA_ARGS__)
 
 /* Description : Interleave left half of word elements from vectors
    Arguments   : Inputs  - in0, in1, in2, in3
@@ -1137,6 +1139,7 @@
   out1 = (RTYPE)__msa_ilvr_h((v8i16)in2, (v8i16)in3);     \
 }
 #define ILVR_H2_SH(...) ILVR_H2(v8i16, __VA_ARGS__)
+#define ILVR_H2_SW(...) ILVR_H2(v4i32, __VA_ARGS__)
 
 #define ILVR_H4(RTYPE, in0, in1, in2, in3, in4, in5, in6, in7,  \
                 out0, out1, out2, out3) {                       \
@@ -1215,6 +1218,7 @@
   out0 = (RTYPE)__msa_ilvr_w((v4i32)in0, (v4i32)in1);  \
   out1 = (RTYPE)__msa_ilvl_w((v4i32)in0, (v4i32)in1);  \
 }
+#define ILVRL_W2_UB(...) ILVRL_W2(v16u8, __VA_ARGS__)
 #define ILVRL_W2_SH(...) ILVRL_W2(v8i16, __VA_ARGS__)
 #define ILVRL_W2_SW(...) ILVRL_W2(v4i32, __VA_ARGS__)
 

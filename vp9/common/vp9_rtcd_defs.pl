@@ -35,18 +35,6 @@ if ($opts{arch} eq "x86_64") {
 # post proc
 #
 if (vpx_config("CONFIG_VP9_POSTPROC") eq "yes") {
-add_proto qw/void vp9_mbpost_proc_down/, "uint8_t *dst, int pitch, int rows, int cols, int flimit";
-specialize qw/vp9_mbpost_proc_down sse2/;
-$vp9_mbpost_proc_down_sse2=vp9_mbpost_proc_down_xmm;
-
-add_proto qw/void vp9_mbpost_proc_across_ip/, "uint8_t *src, int pitch, int rows, int cols, int flimit";
-specialize qw/vp9_mbpost_proc_across_ip sse2/;
-$vp9_mbpost_proc_across_ip_sse2=vp9_mbpost_proc_across_ip_xmm;
-
-add_proto qw/void vp9_post_proc_down_and_across/, "const uint8_t *src_ptr, uint8_t *dst_ptr, int src_pixels_per_line, int dst_pixels_per_line, int rows, int cols, int flimit";
-specialize qw/vp9_post_proc_down_and_across sse2/;
-$vp9_post_proc_down_and_across_sse2=vp9_post_proc_down_and_across_xmm;
-
 add_proto qw/void vp9_filter_by_weight16x16/, "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int src_weight";
 specialize qw/vp9_filter_by_weight16x16 sse2 msa/;
 
