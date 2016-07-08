@@ -74,6 +74,10 @@ VP10_COMMON_SRCS-yes += common/vp10_inv_txfm2d.c
 VP10_COMMON_SRCS-yes += common/vp10_inv_txfm2d_cfg.h
 VP10_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/vp10_convolve_ssse3.c
 VP10_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/vp10_convolve_filters_ssse3.c
+ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
+VP10_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/vp10_highbd_convolve_sse4.c
+VP10_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/vp10_highbd_convolve_filters_sse4.c
+endif
 VP10_COMMON_SRCS-yes += common/vp10_convolve.c
 VP10_COMMON_SRCS-yes += common/vp10_convolve.h
 VP10_COMMON_SRCS-$(CONFIG_ANS) += common/ans.h

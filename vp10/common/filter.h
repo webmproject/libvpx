@@ -95,6 +95,10 @@ static INLINE int vp10_is_interpolating_filter(
 #if USE_TEMPORALFILTER_12TAP
 extern const int8_t sub_pel_filters_temporalfilter_12_signal_dir[15][2][16];
 extern const int8_t sub_pel_filters_temporalfilter_12_ver_signal_dir[15][6][16];
+#if CONFIG_VP9_HIGHBITDEPTH
+extern const
+int16_t sub_pel_filters_temporalfilter_12_highbd_ver_signal_dir[15][6][8];
+#endif
 #endif
 
 #if CONFIG_EXT_INTERP
@@ -102,15 +106,26 @@ extern const int8_t sub_pel_filters_12sharp_signal_dir[15][2][16];
 extern const int8_t sub_pel_filters_10sharp_signal_dir[15][2][16];
 extern const int8_t sub_pel_filters_12sharp_ver_signal_dir[15][6][16];
 extern const int8_t sub_pel_filters_10sharp_ver_signal_dir[15][6][16];
+#if CONFIG_VP9_HIGHBITDEPTH
+extern const int16_t sub_pel_filters_12sharp_highbd_ver_signal_dir[15][6][8];
+extern const int16_t sub_pel_filters_10sharp_highbd_ver_signal_dir[15][6][8];
+#endif
 #endif
 
 typedef const int8_t (*SubpelFilterCoeffs)[16];
+#if CONFIG_VP9_HIGHBITDEPTH
+typedef const int16_t (*HbdSubpelFilterCoeffs)[8];
+#endif
 
 SubpelFilterCoeffs vp10_get_subpel_filter_signal_dir(
     const InterpFilterParams p, int index);
 
 SubpelFilterCoeffs vp10_get_subpel_filter_ver_signal_dir(
     const InterpFilterParams p, int index);
+#if CONFIG_VP9_HIGHBITDEPTH
+HbdSubpelFilterCoeffs vp10_hbd_get_subpel_filter_ver_signal_dir(
+    const InterpFilterParams p, int index);
+#endif
 
 #ifdef __cplusplus
 }  // extern "C"
