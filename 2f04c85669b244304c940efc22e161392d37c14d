@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "5a142433_88e67f50",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1041,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-08T19:40:56Z",
+      "side": 1,
+      "message": "this clean-up should precede, otherwise the debt is growing with each new copy-paste",
+      "parentUuid": "9a2e9c8f_abb0099d",
+      "range": {
+        "startLine": 1041,
+        "startChar": 13,
+        "endLine": 1041,
+        "endChar": 20
+      },
+      "revId": "2f04c85669b244304c940efc22e161392d37c14d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a142433_e2d51c1b",
         "filename": "vpx_dsp/blend_hmask6.c",
         "patchSetId": 3
@@ -78,6 +102,47 @@
       "side": 1,
       "message": "Not really. These functions use 6 bit masks. You could have a blend_mask8 to use masks from [0, 256], which the interintra predictors use for example. I could call MASK_BITS whatever other name.",
       "parentUuid": "5a142433_e2d51c1b",
+      "revId": "2f04c85669b244304c940efc22e161392d37c14d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a142433_4842a700",
+        "filename": "vpx_dsp/blend_hmask6.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-08T19:40:56Z",
+      "side": 1,
+      "message": "it\u0027s not obvious. I\u0027d use \u00276b\u0027 or \u00276bit\u0027 in the function\u0027s name then.\n\nand yet, MASK_BITS is shared by all implementations, so a common definition would be needed. It\u0027s not like you have choice over its value here.\n\nIsn\u0027t there a .h where this one could go?\n\nformat_constants.h would be a self-documented name, if i had to pick one...",
+      "parentUuid": "9a2e9c8f_8bad4d47",
+      "revId": "2f04c85669b244304c940efc22e161392d37c14d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a142433_e8d61b5e",
+        "filename": "vpx_dsp/blend_hmask6.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-08T19:40:56Z",
+      "side": 1,
+      "message": "should be uint32_t instead of \u0027int\u0027, i\u0027d say (and below too).",
+      "range": {
+        "startLine": 37,
+        "startChar": 12,
+        "endLine": 37,
+        "endChar": 15
+      },
       "revId": "2f04c85669b244304c940efc22e161392d37c14d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -167,6 +232,30 @@
       "side": 1,
       "message": "\u003e const\u0027ing the \u0027src\u0027 parameter is a protection against code trying to mistakenly write to *src instead of *dst.\nYes, I know that.\n\nI was worried about this:\nhttp://www.compileroptimizations.com/category/alias_optimization_const_qualifier.htm\n\nBut if you can take the note at the bottom of that website at face value, then it should be ok.\n\nLet\u0027s leave this for now and I will submit a patch which changes all prototypes and related uses to const there are enough to cases to warrant a separate change.",
       "parentUuid": "5a142433_2d8f853f",
+      "range": {
+        "startLine": 53,
+        "startChar": 2,
+        "endLine": 53,
+        "endChar": 10
+      },
+      "revId": "2f04c85669b244304c940efc22e161392d37c14d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a142433_c88a3782",
+        "filename": "vpx_dsp/blend_vmask6.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-08T19:40:56Z",
+      "side": 1,
+      "message": "i see this as an API problem then: if dst and src can be alias, then the function\u0027s API should be explicit about that and only take 1 param (instead of *dst and const* src).\n\na later patch for fixing this is ok, thanks",
+      "parentUuid": "9a2e9c8f_0b4ddd7c",
       "range": {
         "startLine": 53,
         "startChar": 2,
