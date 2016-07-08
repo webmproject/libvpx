@@ -117,6 +117,30 @@
       "revId": "bec0d20f27f311d5a6b2ad1797b4ed358baef448",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a142433_13f064cd",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2779,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-07-08T21:57:13Z",
+      "side": 1,
+      "message": "For this commit, it is triggered by line 2799.  Since the interp_filter for an intra block is a \"don\u0027t care\", it should be able to be modified to any value without side effects. IMO, this is a bug.\n\nvp9_rd_pick_intra_mode_sb() is only called for keyframes.  So for this test, interp_filter is set for all blocks in the keyframe.  The first interframe picks up the residual interp_filter value from the keyframe.  This should not happen, agreed?",
+      "parentUuid": "5a142433_b311b855",
+      "range": {
+        "startLine": 2776,
+        "startChar": 0,
+        "endLine": 2779,
+        "endChar": 6
+      },
+      "revId": "bec0d20f27f311d5a6b2ad1797b4ed358baef448",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
