@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "5a142433_4813c751",
+        "filename": "test/function_equivalence_test.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-08T19:18:46Z",
+      "side": 1,
+      "message": "ok. But the snowball keeps growing...",
+      "parentUuid": "9a2e9c8f_ab8929d7",
+      "range": {
+        "startLine": 41,
+        "startChar": 45,
+        "endLine": 41,
+        "endChar": 50
+      },
+      "revId": "d2b62c1913b1e46223e1163ac78e8952c1bb67b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9d7a1632_8e57fb43",
         "filename": "test/function_equivalence_test.h",
         "patchSetId": 1
@@ -143,6 +167,30 @@
     },
     {
       "key": {
+        "uuid": "5a142433_284d337d",
+        "filename": "vpx_dsp/x86/obmc_variance_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-08T19:18:46Z",
+      "side": 1,
+      "message": "it\u0027s a visual clutter that brings no optimization in practice\n(the param is on the stack, so modifying it or not won\u0027t affect the caller).\n\nIt\u0027s also no consistent with the other signatures.",
+      "parentUuid": "9a2e9c8f_6b55810e",
+      "range": {
+        "startLine": 72,
+        "startChar": 43,
+        "endLine": 72,
+        "endChar": 46
+      },
+      "revId": "d2b62c1913b1e46223e1163ac78e8952c1bb67b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9d7a1632_0e4c6bb5",
         "filename": "vpx_dsp/x86/obmc_variance_sse4.c",
         "patchSetId": 1
@@ -195,6 +243,30 @@
       "side": 1,
       "message": "Please quote the relevant section of the style guide.",
       "parentUuid": "9d7a1632_2e4927a6",
+      "range": {
+        "startLine": 286,
+        "startChar": 24,
+        "endLine": 286,
+        "endChar": 25
+      },
+      "revId": "d2b62c1913b1e46223e1163ac78e8952c1bb67b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a142433_0804af0f",
+        "filename": "vpx_dsp/x86/obmc_variance_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-08T19:18:46Z",
+      "side": 1,
+      "message": "\"Use common sense and BE CONSISTENT.\" would be a good start.\n\nmulti-expression lines are rare or non-existent (or should, at least) in the code-base. Not a precedent we want to encourage anyway.\n\nI\u0027m surprised jenkins style-check didn\u0027t catch these...",
+      "parentUuid": "9a2e9c8f_2b4f7980",
       "range": {
         "startLine": 286,
         "startChar": 24,
