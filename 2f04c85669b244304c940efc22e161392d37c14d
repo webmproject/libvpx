@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a142433_02d93055",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1041,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-08T14:44:41Z",
+      "side": 1,
+      "message": "these mask values are based on the MASK_BITS value that is buried (several times!) deep inside the vpx_dsp/ implementation.\nThis is a liability. There should be a common definition somewhere in some .h",
+      "range": {
+        "startLine": 1041,
+        "startChar": 13,
+        "endLine": 1041,
+        "endChar": 20
+      },
+      "revId": "2f04c85669b244304c940efc22e161392d37c14d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a142433_e2d51c1b",
+        "filename": "vpx_dsp/blend_hmask6.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-08T14:44:41Z",
+      "side": 1,
+      "message": "see other comment",
+      "revId": "2f04c85669b244304c940efc22e161392d37c14d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a142433_c2d21831",
+        "filename": "vpx_dsp/blend_vmask6.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-08T14:44:41Z",
+      "side": 1,
+      "message": "consts uint16_t* ...",
+      "range": {
+        "startLine": 53,
+        "startChar": 2,
+        "endLine": 53,
+        "endChar": 10
+      },
+      "revId": "2f04c85669b244304c940efc22e161392d37c14d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a142433_a2cf2489",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 3
+      },
+      "lineNbr": 966,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-08T14:44:41Z",
+      "side": 1,
+      "message": "signatures should be \u0027const uint8_t* src...\u0027 for sources.",
+      "range": {
+        "startLine": 966,
+        "startChar": 39,
+        "endLine": 966,
+        "endChar": 46
+      },
+      "revId": "2f04c85669b244304c940efc22e161392d37c14d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
