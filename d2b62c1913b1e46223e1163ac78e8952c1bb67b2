@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9a2e9c8f_ab8929d7",
+        "filename": "test/function_equivalence_test.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-08T15:18:21Z",
+      "side": 1,
+      "message": "This is consistent with the non high-bitdepth version. \n\nChanging both of this and their use sites is a different patch.",
+      "parentUuid": "9d7a1632_ee623f23",
+      "range": {
+        "startLine": 41,
+        "startChar": 45,
+        "endLine": 41,
+        "endChar": 50
+      },
+      "revId": "d2b62c1913b1e46223e1163ac78e8952c1bb67b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9d7a1632_8e57fb43",
         "filename": "test/function_equivalence_test.h",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "9a2e9c8f_8b866dc5",
+        "filename": "test/function_equivalence_test.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-08T15:18:21Z",
+      "side": 1,
+      "message": "See above.",
+      "parentUuid": "9d7a1632_8e57fb43",
+      "range": {
+        "startLine": 56,
+        "startChar": 1,
+        "endLine": 59,
+        "endChar": 2
+      },
+      "revId": "d2b62c1913b1e46223e1163ac78e8952c1bb67b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9d7a1632_6e4f2fad",
         "filename": "vpx_dsp/x86/obmc_variance_sse4.c",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2016-07-07T01:03:37Z",
       "side": 1,
       "message": "you don\u0027t need to \u0027const\u0027 the arithmetic-typed parameters.",
+      "range": {
+        "startLine": 72,
+        "startChar": 43,
+        "endLine": 72,
+        "endChar": 46
+      },
+      "revId": "d2b62c1913b1e46223e1163ac78e8952c1bb67b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a2e9c8f_6b55810e",
+        "filename": "vpx_dsp/x86/obmc_variance_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-08T15:18:21Z",
+      "side": 1,
+      "message": "Why not?\n\n\u0027width\u0027 and \u0027height\u0027 are local variable which I want to make sure are not reassigned, as the function body assumes they do not change.",
+      "parentUuid": "9d7a1632_6e4f2fad",
       "range": {
         "startLine": 72,
         "startChar": 43,
@@ -99,6 +171,30 @@
       "writtenOn": "2016-07-07T01:03:37Z",
       "side": 1,
       "message": "one statement per line please.",
+      "range": {
+        "startLine": 286,
+        "startChar": 24,
+        "endLine": 286,
+        "endChar": 25
+      },
+      "revId": "d2b62c1913b1e46223e1163ac78e8952c1bb67b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a2e9c8f_2b4f7980",
+        "filename": "vpx_dsp/x86/obmc_variance_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-08T15:18:21Z",
+      "side": 1,
+      "message": "Please quote the relevant section of the style guide.",
+      "parentUuid": "9d7a1632_2e4927a6",
       "range": {
         "startLine": 286,
         "startChar": 24,
