@@ -49,7 +49,7 @@ void vp10_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
 
 typedef struct vp10_token_state {
   int           rate;
-  int           error;
+  int64_t       error;
   int           next;
   int16_t       token;
   tran_low_t    qc;
@@ -113,7 +113,8 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
   const int64_t rdmult = (mb->rdmult * plane_rd_mult[ref][type]) >> 1;
   const int64_t rddiv = mb->rddiv;
   int64_t rd_cost0, rd_cost1;
-  int rate0, rate1, error0, error1;
+  int rate0, rate1;
+  int64_t error0, error1;
   int16_t t0, t1;
   int best, band = (eob < default_eob) ?
       band_translate[eob] : band_translate[eob - 1];
@@ -152,7 +153,8 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
   }
 
   for (i = eob; i-- > 0;) {
-    int base_bits, d2, dx;
+    int base_bits, dx;
+    int64_t d2;
     const int rc = scan[i];
     int x = qcoeff[rc];
     next_shortcut = shortcut;
@@ -189,7 +191,7 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
         dx >>= xd->bd - 8;
       }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-      d2 = dx * dx;
+      d2 = (int64_t)dx * dx;
       tokens[i][0].rate += (best ? rate1 : rate0);
       tokens[i][0].error = d2 + (best ? error1 : error0);
       tokens[i][0].next = next;
@@ -299,7 +301,7 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
       dx -= (dequant_ptr[rc != 0] + sz) ^ sz;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_NEW_QUANT
-      d2 = dx * dx;
+      d2 = (int64_t)dx * dx;
 
       tokens[i][1].rate = base_bits + (best ? rate1 : rate0);
       tokens[i][1].error = d2 + (best ? error1 : error0);
