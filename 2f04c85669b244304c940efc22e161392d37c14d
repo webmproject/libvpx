@@ -316,6 +316,30 @@
     },
     {
       "key": {
+        "uuid": "ba3360f4_cc17ef49",
+        "filename": "vpx_dsp/blend_vmask6.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-08T20:43:11Z",
+      "side": 1,
+      "message": "Some use cases of this function require separate sources, and a separate destination. Some other uses require that the destination is the same as one of the sources. How do you suggest I reconcile that with your last comment?",
+      "parentUuid": "5a142433_c88a3782",
+      "range": {
+        "startLine": 53,
+        "startChar": 2,
+        "endLine": 53,
+        "endChar": 10
+      },
+      "revId": "2f04c85669b244304c940efc22e161392d37c14d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a142433_a2cf2489",
         "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
         "patchSetId": 3
