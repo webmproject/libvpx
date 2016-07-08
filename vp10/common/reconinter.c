@@ -1067,177 +1067,123 @@ static const uint8_t mask_32_uv[32] = {
   28, 18, 10,  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
 };
 
-static void generate_1dmask(int length, uint8_t *mask, int plane) {
+static const uint8_t* get_supertx_mask(int length, int plane) {
   switch (length) {
     case 8:
-      memcpy(mask, plane ? mask_8_uv : mask_8, length);
-      break;
+      return plane ? mask_8_uv : mask_8;
     case 16:
-      memcpy(mask, plane ? mask_16_uv : mask_16, length);
-      break;
+      return plane ? mask_16_uv : mask_16;
     case 32:
-      memcpy(mask, plane ? mask_32_uv : mask_32, length);
-      break;
+      return plane ? mask_32_uv : mask_32;
     default:
       assert(0);
   }
+  return NULL;
 }
 
 void vp10_build_masked_inter_predictor_complex(
     MACROBLOCKD *xd,
-    uint8_t *dst, int dst_stride, uint8_t *dst2, int dst2_stride,
+    uint8_t *dst, int dst_stride,
+    const uint8_t *pre, int pre_stride,
     int mi_row, int mi_col,
     int mi_row_ori, int mi_col_ori, BLOCK_SIZE bsize, BLOCK_SIZE top_bsize,
     PARTITION_TYPE partition, int plane) {
-  int i, j;
   const struct macroblockd_plane *pd = &xd->plane[plane];
-  uint8_t mask[MAX_TX_SIZE];
-  int top_w = 4 << b_width_log2_lookup[top_bsize];
-  int top_h = 4 << b_height_log2_lookup[top_bsize];
-  int w = 4 << b_width_log2_lookup[bsize];
-  int h = 4 << b_height_log2_lookup[bsize];
-  int w_offset = (mi_col - mi_col_ori) * MI_SIZE;
-  int h_offset = (mi_row - mi_row_ori) * MI_SIZE;
+  const int ssx = pd->subsampling_x;
+  const int ssy = pd->subsampling_y;
+  const int top_w = (4 << b_width_log2_lookup[top_bsize]) >> ssx;
+  const int top_h = (4 << b_height_log2_lookup[top_bsize]) >> ssy;
+  const int w = (4 << b_width_log2_lookup[bsize]) >> ssx;
+  const int h = (4 << b_height_log2_lookup[bsize]) >> ssy;
+  const int w_offset = ((mi_col - mi_col_ori) * MI_SIZE) >> ssx;
+  const int h_offset = ((mi_row - mi_row_ori) * MI_SIZE) >> ssy;
+
+  int w_remain, h_remain;
 
 #if CONFIG_VP9_HIGHBITDEPTH
-  uint16_t *dst16= CONVERT_TO_SHORTPTR(dst);
-  uint16_t *dst216 = CONVERT_TO_SHORTPTR(dst2);
-  int b_hdb = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ? 1 : 0;
+  const int is_hdb = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ? 1 : 0;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   assert(bsize <= BLOCK_32X32);
-
-  top_w >>= pd->subsampling_x;
-  top_h >>= pd->subsampling_y;
-  w >>= pd->subsampling_x;
-  h >>= pd->subsampling_y;
-  w_offset >>= pd->subsampling_x;
-  h_offset >>= pd->subsampling_y;
+  assert(IMPLIES(plane == 0, ssx == 0));
+  assert(IMPLIES(plane == 0, ssy == 0));
 
   switch (partition) {
-    case PARTITION_HORZ:
-    {
+    case PARTITION_HORZ: {
+      const uint8_t *const mask = get_supertx_mask(h, ssy);
+
+      w_remain = top_w;
+      h_remain = top_h - h_offset - h;
+      dst += h_offset * dst_stride;
+      pre += h_offset * pre_stride;
+
 #if CONFIG_VP9_HIGHBITDEPTH
-      if (b_hdb) {
-        uint16_t *dst_tmp = dst16 + h_offset * dst_stride;
-        uint16_t *dst2_tmp = dst216 + h_offset * dst2_stride;
-        generate_1dmask(h, mask + h_offset,
-                        plane && xd->plane[plane].subsampling_y);
-
-        for (i = h_offset; i < h_offset + h; i++) {
-          for (j = 0; j < top_w; j++) {
-            const int m = mask[i];  assert(m >= 0 && m <= 64);
-            if (m == 64)
-              continue;
-
-            if (m == 0)
-              dst_tmp[j] = dst2_tmp[j];
-            else
-              dst_tmp[j] = ROUND_POWER_OF_TWO(dst_tmp[j] * m +
-                                              dst2_tmp[j] * (64 - m), 6);
-          }
-          dst_tmp += dst_stride;
-          dst2_tmp += dst2_stride;
-        }
-
-        for (; i < top_h; i ++) {
-          memcpy(dst_tmp, dst2_tmp, top_w * sizeof(uint16_t));
-          dst_tmp += dst_stride;
-          dst2_tmp += dst2_stride;
-        }
-      } else {
+      if (is_hdb)
+        vpx_highbd_blend_a64_vmask(dst, dst_stride,
+                                   dst, dst_stride,
+                                   pre, pre_stride,
+                                   mask, h, top_w, xd->bd);
+      else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-        uint8_t *dst_tmp = dst + h_offset * dst_stride;
-        uint8_t *dst2_tmp = dst2 + h_offset * dst2_stride;
-        generate_1dmask(h, mask + h_offset,
-                        plane && xd->plane[plane].subsampling_y);
+        vpx_blend_a64_vmask(dst, dst_stride,
+                            dst, dst_stride,
+                            pre, pre_stride,
+                            mask, h, top_w);
 
-        for (i = h_offset; i < h_offset + h; i++) {
-          for (j = 0; j < top_w; j++) {
-            const int m = mask[i];  assert(m >= 0 && m <= 64);
-            if (m == 64)
-              continue;
-
-            if (m == 0)
-              dst_tmp[j] = dst2_tmp[j];
-            else
-              dst_tmp[j] = ROUND_POWER_OF_TWO(dst_tmp[j] * m +
-                                              dst2_tmp[j] * (64 - m), 6);
-          }
-          dst_tmp += dst_stride;
-          dst2_tmp += dst2_stride;
-        }
-
-        for (; i < top_h; i ++) {
-          memcpy(dst_tmp, dst2_tmp, top_w * sizeof(uint8_t));
-          dst_tmp += dst_stride;
-          dst2_tmp += dst2_stride;
-        }
-#if CONFIG_VP9_HIGHBITDEPTH
-      }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-    }
-
+      dst += h * dst_stride;
+      pre += h * pre_stride;
       break;
-    case PARTITION_VERT:
-    {
-#if CONFIG_VP9_HIGHBITDEPTH
-      if (b_hdb) {
-        uint16_t *dst_tmp = dst16;
-        uint16_t *dst2_tmp = dst216;
-        generate_1dmask(w, mask + w_offset,
-                        plane && xd->plane[plane].subsampling_x);
-
-        for (i = 0; i < top_h; i++) {
-          for (j = w_offset; j < w_offset + w; j++) {
-            const int m = mask[j];   assert(m >= 0 && m <= 64);
-            if (m == 64)
-              continue;
-
-            if (m == 0)
-              dst_tmp[j] = dst2_tmp[j];
-            else
-              dst_tmp[j] = ROUND_POWER_OF_TWO(dst_tmp[j] * m +
-                                              dst2_tmp[j] * (64 - m), 6);
-          }
-          memcpy(dst_tmp + j, dst2_tmp + j,
-                     (top_w - w_offset - w) * sizeof(uint16_t));
-          dst_tmp += dst_stride;
-          dst2_tmp += dst2_stride;
-        }
-      } else {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-        uint8_t *dst_tmp = dst;
-        uint8_t *dst2_tmp = dst2;
-        generate_1dmask(w, mask + w_offset,
-                        plane && xd->plane[plane].subsampling_x);
-
-        for (i = 0; i < top_h; i++) {
-          for (j = w_offset; j < w_offset + w; j++) {
-            const int m = mask[j];   assert(m >= 0 && m <= 64);
-            if (m == 64)
-              continue;
-
-            if (m == 0)
-              dst_tmp[j] = dst2_tmp[j];
-            else
-              dst_tmp[j] = ROUND_POWER_OF_TWO(dst_tmp[j] * m +
-                                              dst2_tmp[j] * (64 - m), 6);
-          }
-            memcpy(dst_tmp + j, dst2_tmp + j,
-                       (top_w - w_offset - w) * sizeof(uint8_t));
-          dst_tmp += dst_stride;
-          dst2_tmp += dst2_stride;
-        }
-#if CONFIG_VP9_HIGHBITDEPTH
-      }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
     }
+    case PARTITION_VERT: {
+      const uint8_t *const mask = get_supertx_mask(w, ssx);
+
+      w_remain = top_w - w_offset - w;
+      h_remain = top_h;
+      dst += w_offset;
+      pre += w_offset;
+
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (is_hdb)
+        vpx_highbd_blend_a64_hmask(dst, dst_stride,
+                                   dst, dst_stride,
+                                   pre, pre_stride,
+                                   mask, top_h, w, xd->bd);
+      else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+        vpx_blend_a64_hmask(dst, dst_stride,
+                            dst, dst_stride,
+                            pre, pre_stride,
+                            mask, top_h, w);
+
+      dst += w;
+      pre += w;
       break;
-    default:
+    }
+    default: {
       assert(0);
+      return;
+    }
   }
-  (void) xd;
+
+  if (w_remain == 0 || h_remain == 0) {
+    return;
+  }
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (is_hdb) {
+    dst = (uint8_t*)CONVERT_TO_SHORTPTR(dst);
+    pre = (const uint8_t*)CONVERT_TO_SHORTPTR(pre);
+    dst_stride *= 2;
+    pre_stride *= 2;
+    w_remain *= 2;
+  }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+  do {
+    memcpy(dst, pre, w_remain * sizeof(uint8_t));
+    dst += dst_stride;
+    pre += pre_stride;
+  } while (--h_remain);
 }
 
 void vp10_build_inter_predictors_sb_sub8x8_extend(
