@@ -131,6 +131,30 @@
     },
     {
       "key": {
+        "uuid": "5a142433_2d8f853f",
+        "filename": "vpx_dsp/blend_vmask6.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-08T15:47:10Z",
+      "side": 1,
+      "message": "it\u0027s ok to have a non-const alias for writing.\n const\u0027ing the \u0027src\u0027 parameter is a protection against code trying to mistakenly write to *src instead of *dst.",
+      "parentUuid": "9a2e9c8f_0b7b9da4",
+      "range": {
+        "startLine": 53,
+        "startChar": 2,
+        "endLine": 53,
+        "endChar": 10
+      },
+      "revId": "2f04c85669b244304c940efc22e161392d37c14d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a142433_a2cf2489",
         "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
         "patchSetId": 3
