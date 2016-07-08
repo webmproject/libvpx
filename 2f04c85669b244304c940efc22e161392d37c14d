@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9a2e9c8f_abb0099d",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1041,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-08T15:10:34Z",
+      "side": 1,
+      "message": "Agreed. Somebody needs to go and fix this large scale in the whole codebase. \n\nHowever, I did not write the original, and fixing this needs to be a separate patch, it has nothing to do with the optimizations in this patch.",
+      "parentUuid": "5a142433_02d93055",
+      "range": {
+        "startLine": 1041,
+        "startChar": 13,
+        "endLine": 1041,
+        "endChar": 20
+      },
+      "revId": "2f04c85669b244304c940efc22e161392d37c14d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a142433_e2d51c1b",
         "filename": "vpx_dsp/blend_hmask6.c",
         "patchSetId": 3
@@ -36,6 +60,24 @@
       "writtenOn": "2016-07-08T14:44:41Z",
       "side": 1,
       "message": "see other comment",
+      "revId": "2f04c85669b244304c940efc22e161392d37c14d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a2e9c8f_8bad4d47",
+        "filename": "vpx_dsp/blend_hmask6.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-08T15:10:34Z",
+      "side": 1,
+      "message": "Not really. These functions use 6 bit masks. You could have a blend_mask8 to use masks from [0, 256], which the interintra predictors use for example. I could call MASK_BITS whatever other name.",
+      "parentUuid": "5a142433_e2d51c1b",
       "revId": "2f04c85669b244304c940efc22e161392d37c14d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "9a2e9c8f_0b7b9da4",
+        "filename": "vpx_dsp/blend_vmask6.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-08T15:10:34Z",
+      "side": 1,
+      "message": "src0 or src1 might alias dst. Are you sure this would be safe const?",
+      "parentUuid": "5a142433_c2d21831",
+      "range": {
+        "startLine": 53,
+        "startChar": 2,
+        "endLine": 53,
+        "endChar": 10
+      },
+      "revId": "2f04c85669b244304c940efc22e161392d37c14d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a142433_a2cf2489",
         "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
         "patchSetId": 3
@@ -76,6 +142,30 @@
       "writtenOn": "2016-07-08T14:44:41Z",
       "side": 1,
       "message": "signatures should be \u0027const uint8_t* src...\u0027 for sources.",
+      "range": {
+        "startLine": 966,
+        "startChar": 39,
+        "endLine": 966,
+        "endChar": 46
+      },
+      "revId": "2f04c85669b244304c940efc22e161392d37c14d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a2e9c8f_eb7f318d",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 3
+      },
+      "lineNbr": 966,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-08T15:10:34Z",
+      "side": 1,
+      "message": "see other comment",
+      "parentUuid": "5a142433_a2cf2489",
       "range": {
         "startLine": 966,
         "startChar": 39,
