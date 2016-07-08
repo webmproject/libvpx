@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5a142433_c8d23731",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1364,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-07-08T20:22:18Z",
+      "side": 1,
+      "message": "I thought I had a test case for this code, but none of my test cases failed if I commented out the code.  I guess I was thinking that since different PICK_MODE_CONTEXT * could be passed in, this would be a good place to initialize.  I can remove for now.",
+      "parentUuid": "5a142433_a887037a",
+      "range": {
+        "startLine": 1352,
+        "startChar": 0,
+        "endLine": 1364,
+        "endChar": 6
+      },
+      "revId": "bec0d20f27f311d5a6b2ad1797b4ed358baef448",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a142433_08914fb6",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-07-08T19:38:17Z",
       "side": 1,
       "message": "Do you still need this part?",
+      "range": {
+        "startLine": 2776,
+        "startChar": 0,
+        "endLine": 2779,
+        "endChar": 6
+      },
+      "revId": "bec0d20f27f311d5a6b2ad1797b4ed358baef448",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a142433_53a37caf",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2779,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-07-08T20:22:18Z",
+      "side": 1,
+      "message": "If you agree that interp_filter is using residual values, then it should always be initialized.  This commit was meant to show that interp_filter is in an invalid state at this point.",
+      "parentUuid": "5a142433_08914fb6",
       "range": {
         "startLine": 2776,
         "startChar": 0,
