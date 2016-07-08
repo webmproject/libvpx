@@ -340,6 +340,30 @@
     },
     {
       "key": {
+        "uuid": "5a142433_ee90635b",
+        "filename": "vpx_dsp/blend_vmask6.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-08T22:07:06Z",
+      "side": 1,
+      "message": "if we can\u0027t disentangle the callers case, then it\u0027s probably ok to have a (*dst, const* src0, const* src1) signature, with a comment that *src0 can alias to *dst.",
+      "parentUuid": "ba3360f4_cc17ef49",
+      "range": {
+        "startLine": 53,
+        "startChar": 2,
+        "endLine": 53,
+        "endChar": 10
+      },
+      "revId": "2f04c85669b244304c940efc22e161392d37c14d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a142433_a2cf2489",
         "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
         "patchSetId": 3
