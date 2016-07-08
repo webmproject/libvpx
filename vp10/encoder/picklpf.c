@@ -120,11 +120,11 @@ int vp10_search_filter_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
       }
       // If value is close to the best so far then bias towards a lower loop
       // filter value.
-      if ((ss_err[filt_low] - bias) < best_err) {
+      if (ss_err[filt_low] < (best_err + bias)) {
         // Was it actually better than the previous best?
-        if (ss_err[filt_low] < best_err)
+        if (ss_err[filt_low] < best_err) {
           best_err = ss_err[filt_low];
-
+        }
         filt_best = filt_low;
       }
     }
@@ -134,7 +134,8 @@ int vp10_search_filter_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
       if (ss_err[filt_high] < 0) {
         ss_err[filt_high] = try_filter_frame(sd, cpi, filt_high, partial_frame);
       }
-      // Was it better than the previous best?
+      // If value is significantly better than previous best, bias added against
+      // raising filter value
       if (ss_err[filt_high] < (best_err - bias)) {
         best_err = ss_err[filt_high];
         filt_best = filt_high;
@@ -150,6 +151,10 @@ int vp10_search_filter_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
       filt_mid = filt_best;
     }
   }
+
+  // Update best error
+  best_err = ss_err[filt_best];
+
   if (best_cost_ret)
     *best_cost_ret = RDCOST_DBL(x->rdmult, x->rddiv, 0, best_err);
   return filt_best;

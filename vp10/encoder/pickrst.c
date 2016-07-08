@@ -146,17 +146,16 @@ static int search_filter_bilateral_level(const YV12_BUFFER_CONFIG *sd,
     if (filt_direction <= 0 && filt_low != filt_mid) {
       // Get Low filter error score
       if (ss_err[filt_low] < 0) {
-        bilateral_lev = search_bilateral_level(sd, cpi, filt_low,
-                                          partial_frame, &ss_err[filt_low]);
+        bilateral_lev = search_bilateral_level(
+            sd, cpi, filt_low, partial_frame, &ss_err[filt_low]);
       }
       // If value is close to the best so far then bias towards a lower loop
       // filter value.
-      if ((ss_err[filt_low] - bias) < best_err) {
+      if (ss_err[filt_low] < (best_err + bias)) {
         // Was it actually better than the previous best?
         if (ss_err[filt_low] < best_err) {
           best_err = ss_err[filt_low];
         }
-
         filt_best = filt_low;
         restoration_best = bilateral_lev;
       }
@@ -168,7 +167,8 @@ static int search_filter_bilateral_level(const YV12_BUFFER_CONFIG *sd,
         bilateral_lev = search_bilateral_level(
             sd, cpi, filt_high, partial_frame, &ss_err[filt_high]);
       }
-      // Was it better than the previous best?
+      // If value is significantly better than previous best, bias added against
+      // raising filter value
       if (ss_err[filt_high] < (best_err - bias)) {
         best_err = ss_err[filt_high];
         filt_best = filt_high;
@@ -185,6 +185,10 @@ static int search_filter_bilateral_level(const YV12_BUFFER_CONFIG *sd,
       filt_mid = filt_best;
     }
   }
+
+  // Update best error
+  best_err = ss_err[filt_best];
+
   *restoration_level = restoration_best;
   if (best_cost_ret) *best_cost_ret = best_err;
   return filt_best;
