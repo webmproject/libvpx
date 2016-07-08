@@ -562,16 +562,13 @@ static INLINE int vp10_is_interp_needed(const MACROBLOCKD *const xd) {
 #endif  // CONFIG_EXT_INTERP
 
 #if CONFIG_OBMC
-void setup_obmc_mask(int length, const uint8_t *mask[2]);
+const uint8_t* vp10_get_obmc_mask(int length);
 void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
                                       MACROBLOCKD *xd, int mi_row, int mi_col,
-                                      int use_tmp_dst_buf,
-                                      uint8_t *final_buf[MAX_MB_PLANE],
-                                      int final_stride[MAX_MB_PLANE],
-                                      uint8_t *tmp_buf1[MAX_MB_PLANE],
-                                      int tmp_stride1[MAX_MB_PLANE],
-                                      uint8_t *tmp_buf2[MAX_MB_PLANE],
-                                      int tmp_stride2[MAX_MB_PLANE]);
+                                      uint8_t *above[MAX_MB_PLANE],
+                                      int above_stride[MAX_MB_PLANE],
+                                      uint8_t *left[MAX_MB_PLANE],
+                                      int left_stride[MAX_MB_PLANE]);
 void vp10_build_prediction_by_above_preds(VP10_COMMON *cm,
                                           MACROBLOCKD *xd,
                                           int mi_row, int mi_col,

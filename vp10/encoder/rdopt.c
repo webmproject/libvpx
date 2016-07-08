@@ -15,6 +15,7 @@
 #include "./vpx_dsp_rtcd.h"
 
 #include "vpx_dsp/vpx_dsp_common.h"
+#include "vpx_dsp/blend.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 #include "vpx_ports/system_state.h"
@@ -7780,8 +7781,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
         vp10_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
 #endif  // CONFIG_EXT_INTER
       }
-      vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, 0,
-                                       NULL, NULL,
+      vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col,
                                        dst_buf1, dst_stride1,
                                        dst_buf2, dst_stride2);
       model_rd_for_sb(cpi, bsize, x, xd, 0, MAX_MB_PLANE - 1,
@@ -8398,6 +8398,18 @@ static void pick_ext_intra_iframe(VP10_COMP *cpi, MACROBLOCK *x,
   }
 }
 #endif  // CONFIG_EXT_INTRA
+
+#if CONFIG_OBMC
+static void calc_target_weighted_pred(
+    const VP10_COMMON *cm,
+    const MACROBLOCK *x,
+    const MACROBLOCKD *xd,
+    int mi_row, int mi_col,
+    const uint8_t *above, int above_stride,
+    const uint8_t *left, int left_stride,
+    int32_t *mask_buf,
+    int32_t *wsrc_buf);
+#endif  // CONFIG_OBMC
 
 void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
                                 TileDataEnc *tile_data,
@@ -9579,7 +9591,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
       vp10_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
 #if CONFIG_OBMC
       if (mbmi->motion_variation == OBMC_CAUSAL)
-        vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, 0, NULL, NULL,
+        vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col,
                                          dst_buf1, dst_stride1,
                                          dst_buf2, dst_stride2);
 #endif  // CONFIG_OBMC
@@ -10980,189 +10992,225 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
 }
 
 #if CONFIG_OBMC
-void calc_target_weighted_pred(VP10_COMMON *cm,
-                               MACROBLOCK *x,
-                               MACROBLOCKD *xd,
-                               int mi_row, int mi_col,
-                               uint8_t *above_buf, int above_stride,
-                               uint8_t *left_buf,  int left_stride,
-                               int32_t *mask_buf,
-                               int32_t *weighted_src_buf) {
-  BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
-  int row, col, i, mi_step;
-  int bw = 8 * xd->n8_w;
-  int bh = 8 * xd->n8_h;
+// This function has a structure similar to vp10_build_obmc_inter_prediction
+//
+// The OBMC predictor is computed as:
+//
+//  PObmc(x,y) =
+//    VPX_BLEND_A64(Mh(x),
+//                  VPX_BLEND_A64(Mv(y), P(x,y), PAbove(x,y)),
+//                  PLeft(x, y))
+//
+// Scaling up by VPX_BLEND_A64_MAX_ALPHA ** 2 and omitting the intermediate
+// rounding, this can be written as:
+//
+//  VPX_BLEND_A64_MAX_ALPHA * VPX_BLEND_A64_MAX_ALPHA * Pobmc(x,y) =
+//    Mh(x) * Mv(y) * P(x,y) +
+//      Mh(x) * Cv(y) * Pabove(x,y) +
+//      VPX_BLEND_A64_MAX_ALPHA * Ch(x) * PLeft(x, y)
+//
+// Where :
+//
+//  Cv(y) = VPX_BLEND_A64_MAX_ALPHA - Mv(y)
+//  Ch(y) = VPX_BLEND_A64_MAX_ALPHA - Mh(y)
+//
+// This function computes 'wsrc' and 'mask' as:
+//
+//  wsrc(x, y) =
+//    VPX_BLEND_A64_MAX_ALPHA * VPX_BLEND_A64_MAX_ALPHA * src(x, y) -
+//      Mh(x) * Cv(y) * Pabove(x,y) +
+//      VPX_BLEND_A64_MAX_ALPHA * Ch(x) * PLeft(x, y)
+//
+//  mask(x, y) = Mh(x) * Mv(y)
+//
+// These can then be used to efficiently approximate the error for any
+// predictor P in the context of the provided neighbouring predictors by
+// computing:
+//
+//  error(x, y) =
+//    wsrc(x, y) - mask(x, y) * P(x, y) / (VPX_BLEND_A64_MAX_ALPHA ** 2)
+//
+static void calc_target_weighted_pred(
+    const VP10_COMMON *cm,
+    const MACROBLOCK *x,
+    const MACROBLOCKD *xd,
+    int mi_row, int mi_col,
+    const uint8_t *above, int above_stride,
+    const uint8_t *left,  int left_stride,
+    int32_t *mask_buf,
+    int32_t *wsrc_buf) {
+  const BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
+  int row, col, i;
+  const int bw = 8 * xd->n8_w;
+  const int bh = 8 * xd->n8_h;
+  const int wsrc_stride = bw;
   const int mask_stride = bw;
-  const int weighted_src_stride = bw;
-  int32_t *dst = weighted_src_buf;
-  int32_t *mask2d = mask_buf;
-  uint8_t *src;
+  const int src_scale = VPX_BLEND_A64_MAX_ALPHA * VPX_BLEND_A64_MAX_ALPHA;
 #if CONFIG_VP9_HIGHBITDEPTH
-  int is_hbd = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ? 1 : 0;
+  const int is_hbd = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ? 1 : 0;
+#else
+  const int is_hbd = 0;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-  for (row = 0; row < bh; ++row) {
-    for (col = 0; col < bw; ++col) {
-      dst[col] = 0;
-      mask2d[col] = 64;
-    }
-    dst += weighted_src_stride;
-    mask2d += mask_stride;
-  }
+
+  // plane 0 should not be subsampled
+  assert(xd->plane[0].subsampling_x == 0);
+  assert(xd->plane[0].subsampling_y == 0);
+
+  vp10_zero_array(wsrc_buf, bw * bh);
+  for (i = 0; i < bw * bh; ++i)
+    mask_buf[i] = VPX_BLEND_A64_MAX_ALPHA;
 
   // handle above row
   if (xd->up_available) {
-    for (i = 0; i < VPXMIN(xd->n8_w, cm->mi_cols - mi_col); i += mi_step) {
-      int mi_row_offset = -1;
-      int mi_col_offset = i;
-      MODE_INFO *above_mi = xd->mi[mi_col_offset +
-                                   mi_row_offset * xd->mi_stride];
-      MB_MODE_INFO *above_mbmi = &above_mi->mbmi;
-      int overlap = num_4x4_blocks_high_lookup[bsize] << 1;
+    const int overlap = num_4x4_blocks_high_lookup[bsize] * 2;
+    const int miw = VPXMIN(xd->n8_w, cm->mi_cols - mi_col);
+    const int mi_row_offset = -1;
+    const uint8_t *const mask1d = vp10_get_obmc_mask(overlap);
 
-      mi_step = VPXMIN(xd->n8_w,
-                       num_8x8_blocks_wide_lookup[above_mbmi->sb_type]);
+    assert(miw > 0);
+
+    i = 0;
+    do {  // for each mi in the above row
+      const int mi_col_offset = i;
+      const MB_MODE_INFO *const above_mbmi =
+          &xd->mi[mi_col_offset + mi_row_offset * xd->mi_stride]->mbmi;
+      const int mi_step =
+          VPXMIN(xd->n8_w, num_8x8_blocks_wide_lookup[above_mbmi->sb_type]);
+      const int neighbor_bw = mi_step * MI_SIZE;
 
       if (is_neighbor_overlappable(above_mbmi)) {
-        const struct macroblockd_plane *pd = &xd->plane[0];
-        int bw = (mi_step * MI_SIZE) >> pd->subsampling_x;
-        int bh = overlap >> pd->subsampling_y;
-        int dst_stride = weighted_src_stride;
-        int32_t *dst = weighted_src_buf + (i * MI_SIZE >> pd->subsampling_x);
-        int tmp_stride = above_stride;
-        uint8_t *tmp = above_buf + (i * MI_SIZE >> pd->subsampling_x);
-        int mask2d_stride = mask_stride;
-        int32_t *mask2d = mask_buf + (i * MI_SIZE >> pd->subsampling_x);
-        const uint8_t *mask1d[2];
+        const int tmp_stride = above_stride;
+        int32_t *wsrc = wsrc_buf + (i * MI_SIZE);
+        int32_t *mask = mask_buf + (i * MI_SIZE);
 
-        setup_obmc_mask(bh, mask1d);
+        if (!is_hbd) {
+          const uint8_t *tmp = above;
 
-#if CONFIG_VP9_HIGHBITDEPTH
-        if (is_hbd) {
-          uint16_t *tmp16 = CONVERT_TO_SHORTPTR(tmp);
-
-          for (row = 0; row < bh; ++row) {
-            for (col = 0; col < bw; ++col) {
-              dst[col] = mask1d[1][row] * tmp16[col];
-              mask2d[col] = mask1d[0][row];
+          for (row = 0; row < overlap; ++row) {
+            const uint8_t m0 = mask1d[row];
+            const uint8_t m1 = VPX_BLEND_A64_MAX_ALPHA - m0;
+            for (col = 0; col < neighbor_bw; ++col) {
+              wsrc[col] = m1 * tmp[col];
+              mask[col] = m0;
             }
-            dst += dst_stride;
-            tmp16 += tmp_stride;
-            mask2d += mask2d_stride;
+            wsrc += wsrc_stride;
+            mask += mask_stride;
+            tmp += tmp_stride;
           }
-        } else {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-        for (row = 0; row < bh; ++row) {
-          for (col = 0; col < bw; ++col) {
-            dst[col] = mask1d[1][row] * tmp[col];
-            mask2d[col] = mask1d[0][row];
-          }
-          dst += dst_stride;
-          tmp += tmp_stride;
-          mask2d += mask2d_stride;
-        }
 #if CONFIG_VP9_HIGHBITDEPTH
-        }
+        } else {
+          const uint16_t *tmp = CONVERT_TO_SHORTPTR(above);
+
+          for (row = 0; row < overlap; ++row) {
+            const uint8_t m0 = mask1d[row];
+            const uint8_t m1 = VPX_BLEND_A64_MAX_ALPHA - m0;
+            for (col = 0; col < neighbor_bw; ++col) {
+              wsrc[col] = m1 * tmp[col];
+              mask[col] = m0;
+            }
+            wsrc += wsrc_stride;
+            mask += mask_stride;
+            tmp += tmp_stride;
+          }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+        }
       }
-    }  // each mi in the above row
+
+      above += neighbor_bw;
+      i += mi_step;
+    } while (i < miw);
+  }
+
+  for (i = 0; i < bw * bh; ++i) {
+    wsrc_buf[i] *= VPX_BLEND_A64_MAX_ALPHA;
+    mask_buf[i] *= VPX_BLEND_A64_MAX_ALPHA;
   }
 
   // handle left column
-  dst = weighted_src_buf;
-  mask2d = mask_buf;
-  for (row = 0; row < bh; ++row) {
-    for (col = 0; col < bw; ++col) {
-      dst[col] = dst[col] << 6;
-      mask2d[col] = mask2d[col] << 6;
-    }
-    dst += weighted_src_stride;
-    mask2d += mask_stride;
-  }
-
   if (xd->left_available) {
-    for (i = 0; i < VPXMIN(xd->n8_h, cm->mi_rows - mi_row); i += mi_step) {
-      int mi_row_offset = i;
-      int mi_col_offset = -1;
-      int overlap = num_4x4_blocks_wide_lookup[bsize] << 1;
-      MODE_INFO *left_mi = xd->mi[mi_col_offset +
-                                  mi_row_offset * xd->mi_stride];
-      MB_MODE_INFO *left_mbmi = &left_mi->mbmi;
+    const int overlap = num_4x4_blocks_wide_lookup[bsize] * 2;
+    const int mih = VPXMIN(xd->n8_h, cm->mi_rows - mi_row);
+    const int mi_col_offset = -1;
+    const uint8_t *const mask1d = vp10_get_obmc_mask(overlap);
 
-      mi_step = VPXMIN(xd->n8_h,
-                       num_8x8_blocks_high_lookup[left_mbmi->sb_type]);
+    assert(mih > 0);
+
+    i = 0;
+    do {  // for each mi in the left column
+      const int mi_row_offset = i;
+      const MB_MODE_INFO *const left_mbmi =
+          &xd->mi[mi_col_offset + mi_row_offset * xd->mi_stride]->mbmi;
+      const int mi_step =
+          VPXMIN(xd->n8_h, num_8x8_blocks_high_lookup[left_mbmi->sb_type]);
+      const int neighbor_bh = mi_step * MI_SIZE;
 
       if (is_neighbor_overlappable(left_mbmi)) {
-        const struct macroblockd_plane *pd = &xd->plane[0];
-        int bw = overlap >> pd->subsampling_x;
-        int bh = (mi_step * MI_SIZE) >> pd->subsampling_y;
-        int dst_stride = weighted_src_stride;
-        int32_t *dst = weighted_src_buf +
-                   (i * MI_SIZE * dst_stride >> pd->subsampling_y);
-        int tmp_stride = left_stride;
-        uint8_t *tmp = left_buf +
-                       (i * MI_SIZE * tmp_stride >> pd->subsampling_y);
-        int mask2d_stride = mask_stride;
-        int32_t *mask2d = mask_buf +
-                          (i * MI_SIZE * mask2d_stride >> pd->subsampling_y);
-        const uint8_t *mask1d[2];
+        const int tmp_stride = left_stride;
+        int32_t *wsrc = wsrc_buf + (i * MI_SIZE * wsrc_stride);
+        int32_t *mask = mask_buf + (i * MI_SIZE * mask_stride);
 
-        setup_obmc_mask(bw, mask1d);
+        if (!is_hbd) {
+          const uint8_t *tmp = left;
 
-#if CONFIG_VP9_HIGHBITDEPTH
-        if (is_hbd) {
-          uint16_t *tmp16 = CONVERT_TO_SHORTPTR(tmp);
-
-          for (row = 0; row < bh; ++row) {
-            for (col = 0; col < bw; ++col) {
-              dst[col] = (dst[col] >> 6) * mask1d[0][col] +
-                         (tmp16[col] << 6) * mask1d[1][col];
-              mask2d[col] = (mask2d[col] >> 6) * mask1d[0][col];
+          for (row = 0; row < neighbor_bh; ++row) {
+            for (col = 0; col < overlap; ++col) {
+              const uint8_t m0 = mask1d[col];
+              const uint8_t m1 = VPX_BLEND_A64_MAX_ALPHA - m0;
+              wsrc[col] = (wsrc[col] >> VPX_BLEND_A64_ROUND_BITS) * m0 +
+                          (tmp[col] << VPX_BLEND_A64_ROUND_BITS) * m1;
+              mask[col] = (mask[col] >> VPX_BLEND_A64_ROUND_BITS) * m0;
             }
-            dst += dst_stride;
-            tmp16 += tmp_stride;
-            mask2d += mask2d_stride;
+            wsrc += wsrc_stride;
+            mask += mask_stride;
+            tmp += tmp_stride;
           }
-        } else {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-        for (row = 0; row < bh; ++row) {
-          for (col = 0; col < bw; ++col) {
-            dst[col] = (dst[col] >> 6) * mask1d[0][col] +
-                       (tmp[col] << 6) * mask1d[1][col];
-            mask2d[col] = (mask2d[col] >> 6) * mask1d[0][col];
-          }
-          dst += dst_stride;
-          tmp += tmp_stride;
-          mask2d += mask2d_stride;
-        }
 #if CONFIG_VP9_HIGHBITDEPTH
+        } else {
+          const uint16_t *tmp = CONVERT_TO_SHORTPTR(left);
+
+          for (row = 0; row < neighbor_bh; ++row) {
+            for (col = 0; col < overlap; ++col) {
+              const uint8_t m0 = mask1d[col];
+              const uint8_t m1 = VPX_BLEND_A64_MAX_ALPHA - m0;
+              wsrc[col] = (wsrc[col] >> VPX_BLEND_A64_ROUND_BITS) * m0 +
+                          (tmp[col] << VPX_BLEND_A64_ROUND_BITS) * m1;
+              mask[col] = (mask[col] >> VPX_BLEND_A64_ROUND_BITS) * m0;
+            }
+            wsrc += wsrc_stride;
+            mask += mask_stride;
+            tmp += tmp_stride;
+          }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
         }
-#endif  //  CONFIG_VP9_HIGHBITDEPTH
       }
-    }  // each mi in the left column
+
+      left += neighbor_bh * left_stride;
+      i += mi_step;
+    } while (i < mih);
   }
 
-  dst = weighted_src_buf;
-  src = x->plane[0].src.buf;
-#if CONFIG_VP9_HIGHBITDEPTH
-  if (is_hbd) {
-    uint16_t *src16 = CONVERT_TO_SHORTPTR(src);
+  if (!is_hbd) {
+    const uint8_t *src = x->plane[0].src.buf;
 
     for (row = 0; row < bh; ++row) {
-      for (col = 0; col < bw; ++col)
-        dst[col] = (src16[col] << 12) - dst[col];
-      dst += weighted_src_stride;
-      src16 += x->plane[0].src.stride;
+      for (col = 0; col < bw; ++col) {
+        wsrc_buf[col] = src[col] * src_scale - wsrc_buf[col];
+      }
+      wsrc_buf += wsrc_stride;
+      src += x->plane[0].src.stride;
     }
-  } else {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-  for (row = 0; row < bh; ++row) {
-    for (col = 0; col < bw; ++col)
-      dst[col] = (src[col] << 12) - dst[col];
-    dst += weighted_src_stride;
-    src += x->plane[0].src.stride;
-  }
 #if CONFIG_VP9_HIGHBITDEPTH
-  }
+  } else {
+    const uint16_t *src = CONVERT_TO_SHORTPTR(x->plane[0].src.buf);
+
+    for (row = 0; row < bh; ++row) {
+      for (col = 0; col < bw; ++col) {
+        wsrc_buf[col] = src[col] * src_scale - wsrc_buf[col];
+      }
+      wsrc_buf += wsrc_stride;
+      src += x->plane[0].src.stride;
+    }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+  }
 }
 #endif  // CONFIG_OBMC
