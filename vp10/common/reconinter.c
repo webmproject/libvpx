@@ -459,11 +459,11 @@ static void build_masked_compound_wedge_extend(
   const int subw = (2 << b_width_log2_lookup[sb_type]) == w;
   const uint8_t *mask = vp10_get_soft_mask(
      wedge_index, wedge_sign, sb_type, wedge_offset_x, wedge_offset_y);
-  vpx_blend_mask6(dst, dst_stride,
-                  src0, src0_stride,
-                  src1, src1_stride,
-                  mask, MASK_MASTER_STRIDE,
-                  h, w, subh, subw);
+  vpx_blend_mask6b(dst, dst_stride,
+                   src0, src0_stride,
+                   src1, src1_stride,
+                   mask, MASK_MASTER_STRIDE,
+                   h, w, subh, subw);
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -479,11 +479,11 @@ static void build_masked_compound_wedge_extend_highbd(
   const int subw = (2 << b_width_log2_lookup[sb_type]) == w;
   const uint8_t *mask = vp10_get_soft_mask(
       wedge_index, wedge_sign, sb_type, wedge_offset_x, wedge_offset_y);
-  vpx_highbd_blend_mask6(dst_8, dst_stride,
-                         src0_8, src0_stride,
-                         src1_8, src1_stride,
-                         mask, MASK_MASTER_STRIDE,
-                         h, w, subh, subw, bd);
+  vpx_highbd_blend_mask6b(dst_8, dst_stride,
+                          src0_8, src0_stride,
+                          src1_8, src1_stride,
+                          mask, MASK_MASTER_STRIDE,
+                          h, w, subh, subw, bd);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_SUPERTX
@@ -500,11 +500,11 @@ static void build_masked_compound_wedge(uint8_t *dst, int dst_stride,
   const int subw = (2 << b_width_log2_lookup[sb_type]) == w;
   const uint8_t *mask = vp10_get_contiguous_soft_mask(wedge_index, wedge_sign,
                                                       sb_type);
-  vpx_blend_mask6(dst, dst_stride,
-                  src0, src0_stride,
-                  src1, src1_stride,
-                  mask, 4 * num_4x4_blocks_wide_lookup[sb_type],
-                  h, w, subh, subw);
+  vpx_blend_mask6b(dst, dst_stride,
+                   src0, src0_stride,
+                   src1, src1_stride,
+                   mask, 4 * num_4x4_blocks_wide_lookup[sb_type],
+                   h, w, subh, subw);
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -520,11 +520,11 @@ static void build_masked_compound_wedge_highbd(uint8_t *dst_8, int dst_stride,
   const int subw = (2 << b_width_log2_lookup[sb_type]) == w;
   const uint8_t *mask = vp10_get_contiguous_soft_mask(wedge_index, wedge_sign,
                                                       sb_type);
-  vpx_highbd_blend_mask6(dst_8, dst_stride,
-                         src0_8, src0_stride,
-                         src1_8, src1_stride,
-                         mask, 4 * num_4x4_blocks_wide_lookup[sb_type],
-                         h, w, subh, subw, bd);
+  vpx_highbd_blend_mask6b(dst_8, dst_stride,
+                          src0_8, src0_stride,
+                          src1_8, src1_stride,
+                          mask, 4 * num_4x4_blocks_wide_lookup[sb_type],
+                          h, w, subh, subw, bd);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
@@ -1896,11 +1896,11 @@ static void combine_interintra(INTERINTRA_MODE mode,
                                                           bsize);
       const int subw = 2 * num_4x4_blocks_wide_lookup[bsize] == bw;
       const int subh = 2 * num_4x4_blocks_high_lookup[bsize] == bh;
-      vpx_blend_mask6(comppred, compstride,
-                      intrapred, intrastride,
-                      interpred, interstride,
-                      mask, 4 * num_4x4_blocks_wide_lookup[bsize],
-                      bh, bw, subh, subw);
+      vpx_blend_mask6b(comppred, compstride,
+                       intrapred, intrastride,
+                       interpred, interstride,
+                       mask, 4 * num_4x4_blocks_wide_lookup[bsize],
+                       bh, bw, subh, subw);
     }
     return;
   }
@@ -2036,11 +2036,11 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
                                                           bsize);
       const int subh = 2 * num_4x4_blocks_high_lookup[bsize] == bh;
       const int subw = 2 * num_4x4_blocks_wide_lookup[bsize] == bw;
-      vpx_highbd_blend_mask6(comppred8, compstride,
-                             intrapred8, intrastride,
-                             interpred8, interstride,
-                             mask, bw,
-                             bh, bw, subh, subw, bd);
+      vpx_highbd_blend_mask6b(comppred8, compstride,
+                              intrapred8, intrastride,
+                              interpred8, interstride,
+                              mask, bw,
+                              bh, bw, subh, subw, bd);
     }
     return;
   }

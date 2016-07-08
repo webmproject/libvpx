@@ -189,7 +189,7 @@ TEST_P(BlendMask6Test8B, ExtremeValues) {
 #if HAVE_SSE4_1
 INSTANTIATE_TEST_CASE_P(
   SSE4_1_C_COMPARE, BlendMask6Test8B,
-  ::testing::Values(make_tuple(&vpx_blend_mask6_c, &vpx_blend_mask6_sse4_1)));
+  ::testing::Values(make_tuple(&vpx_blend_mask6b_c, &vpx_blend_mask6b_sse4_1)));
 #endif  // HAVE_SSE4_1
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -287,8 +287,8 @@ TEST_P(BlendMask6TestHBD, ExtremeValues) {
 #if HAVE_SSE4_1
 INSTANTIATE_TEST_CASE_P(
   SSE4_1_C_COMPARE, BlendMask6TestHBD,
-  ::testing::Values(make_tuple(&vpx_highbd_blend_mask6_c,
-                               &vpx_highbd_blend_mask6_sse4_1)));
+  ::testing::Values(make_tuple(&vpx_highbd_blend_mask6b_c,
+                               &vpx_highbd_blend_mask6b_sse4_1)));
 #endif  // HAVE_SSE4_1
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 }  // namespace
