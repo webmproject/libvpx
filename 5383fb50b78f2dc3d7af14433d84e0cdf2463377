@@ -46,6 +46,30 @@
       "revId": "5383fb50b78f2dc3d7af14433d84e0cdf2463377",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a142433_5848346d",
+        "filename": "vpx_dsp/x86/blend_a64_mask_sse4.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-11T17:00:31Z",
+      "side": 1,
+      "message": "e.g.:   w\u003d5, h\u003d6, w|h\u003d7, (w|h)\u00263 is equal to 3, which is !\u003d 0. So you will enter the block below even if none of w or h is \u003c\u003d 2.",
+      "parentUuid": "fa295886_f1b6029b",
+      "range": {
+        "startLine": 493,
+        "startChar": 44,
+        "endLine": 493,
+        "endChar": 45
+      },
+      "revId": "5383fb50b78f2dc3d7af14433d84e0cdf2463377",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
