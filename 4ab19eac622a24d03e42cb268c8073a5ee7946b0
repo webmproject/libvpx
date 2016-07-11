@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3ad6900d_006066e4",
+        "filename": "vp10/common/vp10_rtcd_defs.pl",
+        "patchSetId": 2
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-11T21:25:18Z",
+      "side": 1,
+      "message": "Fixed. https://chromium-review.googlesource.com/#/c/359630/",
+      "parentUuid": "5a142433_56336554",
+      "range": {
+        "startLine": 271,
+        "startChar": 6,
+        "endLine": 271,
+        "endChar": 40
+      },
+      "revId": "4ab19eac622a24d03e42cb268c8073a5ee7946b0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a142433_1635ed35",
         "filename": "vp10/common/vp10_rtcd_defs.pl",
         "patchSetId": 2
@@ -72,6 +96,24 @@
       "side": 1,
       "message": "right, but really only the specialization (specialize ...) not the add_proto call again.",
       "parentUuid": "5a142433_36dc71ed",
+      "revId": "4ab19eac622a24d03e42cb268c8073a5ee7946b0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_203e4acf",
+        "filename": "vp10/common/vp10_rtcd_defs.pl",
+        "patchSetId": 2
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-11T21:25:18Z",
+      "side": 1,
+      "message": "Fixed. https://chromium-review.googlesource.com/#/c/359630/",
+      "parentUuid": "3ad6900d_20c80a2f",
       "revId": "4ab19eac622a24d03e42cb268c8073a5ee7946b0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
