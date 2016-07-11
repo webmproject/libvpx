@@ -39,6 +39,24 @@
       "revId": "4ab19eac622a24d03e42cb268c8073a5ee7946b0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a142433_36dc71ed",
+        "filename": "vp10/common/vp10_rtcd_defs.pl",
+        "patchSetId": 2
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-11T20:02:15Z",
+      "side": 1,
+      "message": "Why? I just want to keep using msa implementation since when CONFIG_EXT is not enabled, it will not cause any problem.",
+      "parentUuid": "5a142433_1635ed35",
+      "revId": "4ab19eac622a24d03e42cb268c8073a5ee7946b0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
