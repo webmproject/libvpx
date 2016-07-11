@@ -104,7 +104,7 @@ TEST_F(WedgeUtilsSSEFuncTest, ResidualBlendingEquiv) {
       p1[j] = clamp(s[j] + rng_(33) - 16, 0, UINT8_MAX);
     }
 
-    vpx_blend_mask6b(p, w, p0, w, p1, w, m, w, h, w, 0, 0);
+    vpx_blend_a64_mask(p, w, p0, w, p1, w, m, w, h, w, 0, 0);
 
     vpx_subtract_block(h, w, r0, w, s, w, p0, w);
     vpx_subtract_block(h, w, r1, w, s, w, p1, w);

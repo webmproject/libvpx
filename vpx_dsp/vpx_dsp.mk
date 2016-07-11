@@ -70,11 +70,14 @@ DSP_SRCS-$(HAVE_DSPR2)  += mips/common_dspr2.c
 # inter predictions
 
 ifeq ($(CONFIG_VP10),yes)
-ifeq ($(CONFIG_EXT_INTER),yes)
-DSP_SRCS-yes            += blend_mask6b.c
-DSP_SRCS-yes            += blend_mask.h
-DSP_SRCS-$(HAVE_SSE4_1) += x86/blend_mask6b_sse4.c
-endif  #CONFIG_EXT_INTER
+DSP_SRCS-yes            += blend.h
+DSP_SRCS-yes            += blend_a64_mask.c
+DSP_SRCS-yes            += blend_a64_hmask.c
+DSP_SRCS-yes            += blend_a64_vmask.c
+DSP_SRCS-$(HAVE_SSE4_1) += x86/blend_sse4.h
+DSP_SRCS-$(HAVE_SSE4_1) += x86/blend_a64_mask_sse4.c
+DSP_SRCS-$(HAVE_SSE4_1) += x86/blend_a64_hmask_sse4.c
+DSP_SRCS-$(HAVE_SSE4_1) += x86/blend_a64_vmask_sse4.c
 endif  #CONFIG_VP10
 
 # interpolation filters

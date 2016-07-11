@@ -15,6 +15,7 @@
 #include "./vpx_config.h"
 
 #include "vpx/vpx_integer.h"
+#include "vpx_dsp/blend.h"
 
 #include "vp10/common/blockd.h"
 #include "vp10/common/reconinter.h"
@@ -448,8 +449,8 @@ void vp10_init_wedge_masks() {
 #if CONFIG_SUPERTX
 static void build_masked_compound_wedge_extend(
     uint8_t *dst, int dst_stride,
-    uint8_t *src0, int src0_stride,
-    uint8_t *src1, int src1_stride,
+    const uint8_t *src0, int src0_stride,
+    const uint8_t *src1, int src1_stride,
     int wedge_index,
     int wedge_sign,
     BLOCK_SIZE sb_type,
@@ -459,18 +460,18 @@ static void build_masked_compound_wedge_extend(
   const int subw = (2 << b_width_log2_lookup[sb_type]) == w;
   const uint8_t *mask = vp10_get_soft_mask(
      wedge_index, wedge_sign, sb_type, wedge_offset_x, wedge_offset_y);
-  vpx_blend_mask6b(dst, dst_stride,
-                   src0, src0_stride,
-                   src1, src1_stride,
-                   mask, MASK_MASTER_STRIDE,
-                   h, w, subh, subw);
+  vpx_blend_a64_mask(dst, dst_stride,
+                     src0, src0_stride,
+                     src1, src1_stride,
+                     mask, MASK_MASTER_STRIDE,
+                     h, w, subh, subw);
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
 static void build_masked_compound_wedge_extend_highbd(
     uint8_t *dst_8, int dst_stride,
-    uint8_t *src0_8, int src0_stride,
-    uint8_t *src1_8, int src1_stride,
+    const uint8_t *src0_8, int src0_stride,
+    const uint8_t *src1_8, int src1_stride,
     int wedge_index, int wedge_sign,
     BLOCK_SIZE sb_type,
     int wedge_offset_x, int wedge_offset_y,
@@ -479,52 +480,54 @@ static void build_masked_compound_wedge_extend_highbd(
   const int subw = (2 << b_width_log2_lookup[sb_type]) == w;
   const uint8_t *mask = vp10_get_soft_mask(
       wedge_index, wedge_sign, sb_type, wedge_offset_x, wedge_offset_y);
-  vpx_highbd_blend_mask6b(dst_8, dst_stride,
-                          src0_8, src0_stride,
-                          src1_8, src1_stride,
-                          mask, MASK_MASTER_STRIDE,
-                          h, w, subh, subw, bd);
+  vpx_highbd_blend_a64_mask(dst_8, dst_stride,
+                            src0_8, src0_stride,
+                            src1_8, src1_stride,
+                            mask, MASK_MASTER_STRIDE,
+                            h, w, subh, subw, bd);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_SUPERTX
 
-static void build_masked_compound_wedge(uint8_t *dst, int dst_stride,
-                                        uint8_t *src0, int src0_stride,
-                                        uint8_t *src1, int src1_stride,
-                                        int wedge_index, int wedge_sign,
-                                        BLOCK_SIZE sb_type,
-                                        int h, int w) {
+static void build_masked_compound_wedge(
+    uint8_t *dst, int dst_stride,
+    const uint8_t *src0, int src0_stride,
+    const uint8_t *src1, int src1_stride,
+    int wedge_index, int wedge_sign,
+    BLOCK_SIZE sb_type,
+    int h, int w) {
   // Derive subsampling from h and w passed in. May be refactored to
   // pass in subsampling factors directly.
   const int subh = (2 << b_height_log2_lookup[sb_type]) == h;
   const int subw = (2 << b_width_log2_lookup[sb_type]) == w;
   const uint8_t *mask = vp10_get_contiguous_soft_mask(wedge_index, wedge_sign,
                                                       sb_type);
-  vpx_blend_mask6b(dst, dst_stride,
-                   src0, src0_stride,
-                   src1, src1_stride,
-                   mask, 4 * num_4x4_blocks_wide_lookup[sb_type],
-                   h, w, subh, subw);
+  vpx_blend_a64_mask(dst, dst_stride,
+                     src0, src0_stride,
+                     src1, src1_stride,
+                     mask, 4 * num_4x4_blocks_wide_lookup[sb_type],
+                     h, w, subh, subw);
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static void build_masked_compound_wedge_highbd(uint8_t *dst_8, int dst_stride,
-                                               uint8_t *src0_8, int src0_stride,
-                                               uint8_t *src1_8, int src1_stride,
-                                               int wedge_index, int wedge_sign,
-                                               BLOCK_SIZE sb_type,
-                                               int h, int w, int bd) {
+static void build_masked_compound_wedge_highbd(
+    uint8_t *dst_8, int dst_stride,
+    const uint8_t *src0_8, int src0_stride,
+    const uint8_t *src1_8, int src1_stride,
+    int wedge_index, int wedge_sign,
+    BLOCK_SIZE sb_type,
+    int h, int w, int bd) {
   // Derive subsampling from h and w passed in. May be refactored to
   // pass in subsampling factors directly.
   const int subh = (2 << b_height_log2_lookup[sb_type]) == h;
   const int subw = (2 << b_width_log2_lookup[sb_type]) == w;
   const uint8_t *mask = vp10_get_contiguous_soft_mask(wedge_index, wedge_sign,
                                                       sb_type);
-  vpx_highbd_blend_mask6b(dst_8, dst_stride,
-                          src0_8, src0_stride,
-                          src1_8, src1_stride,
-                          mask, 4 * num_4x4_blocks_wide_lookup[sb_type],
-                          h, w, subh, subw, bd);
+  vpx_highbd_blend_a64_mask(dst_8, dst_stride,
+                            src0_8, src0_stride,
+                            src1_8, src1_stride,
+                            mask, 4 * num_4x4_blocks_wide_lookup[sb_type],
+                            h, w, subh, subw, bd);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
@@ -1878,12 +1881,10 @@ static void combine_interintra(INTERINTRA_MODE mode,
                                BLOCK_SIZE plane_bsize,
                                uint8_t *comppred,
                                int compstride,
-                               uint8_t *interpred,
+                               const uint8_t *interpred,
                                int interstride,
-                               uint8_t *intrapred,
+                               const uint8_t *intrapred,
                                int intrastride) {
-  const int scale_bits = 8;
-  const int scale_max = (1 << scale_bits);
   const int bw = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
   const int size_scale = ii_size_scales[plane_bsize];
@@ -1896,11 +1897,11 @@ static void combine_interintra(INTERINTRA_MODE mode,
                                                           bsize);
       const int subw = 2 * num_4x4_blocks_wide_lookup[bsize] == bw;
       const int subh = 2 * num_4x4_blocks_high_lookup[bsize] == bh;
-      vpx_blend_mask6b(comppred, compstride,
-                       intrapred, intrastride,
-                       interpred, interstride,
-                       mask, 4 * num_4x4_blocks_wide_lookup[bsize],
-                       bh, bw, subh, subw);
+      vpx_blend_a64_mask(comppred, compstride,
+                         intrapred, intrastride,
+                         interpred, interstride,
+                         mask, 4 * num_4x4_blocks_wide_lookup[bsize],
+                         bh, bw, subh, subw);
     }
     return;
   }
@@ -1911,10 +1912,9 @@ static void combine_interintra(INTERINTRA_MODE mode,
         for (j = 0; j < bw; ++j) {
           int scale = ii_weights1d[i * size_scale];
           comppred[i * compstride + j] =
-              ROUND_POWER_OF_TWO(
-                  (scale_max - scale) * interpred[i * interstride + j] +
-                  scale * intrapred[i * intrastride + j],
-                  scale_bits);
+              VPX_BLEND_A256(scale,
+                             intrapred[i * intrastride + j],
+                             interpred[i * interstride + j]);
         }
       }
       break;
@@ -1924,10 +1924,9 @@ static void combine_interintra(INTERINTRA_MODE mode,
         for (j = 0; j < bw; ++j) {
           int scale = ii_weights1d[j * size_scale];
           comppred[i * compstride + j] =
-              ROUND_POWER_OF_TWO(
-                  (scale_max - scale) * interpred[i * interstride + j] +
-                  scale * intrapred[i * intrastride + j],
-                  scale_bits);
+              VPX_BLEND_A256(scale,
+                             intrapred[i * intrastride + j],
+                             interpred[i * interstride + j]);
         }
       }
       break;
@@ -1939,10 +1938,9 @@ static void combine_interintra(INTERINTRA_MODE mode,
           int scale = (ii_weights1d[i * size_scale] * 3 +
                        ii_weights1d[j * size_scale]) >> 2;
           comppred[i * compstride + j] =
-              ROUND_POWER_OF_TWO(
-                  (scale_max - scale) * interpred[i * interstride + j] +
-                  scale * intrapred[i * intrastride + j],
-                  scale_bits);
+              VPX_BLEND_A256(scale,
+                             intrapred[i * intrastride + j],
+                             interpred[i * interstride + j]);
         }
       }
       break;
@@ -1954,10 +1952,9 @@ static void combine_interintra(INTERINTRA_MODE mode,
           int scale = (ii_weights1d[j * size_scale] * 3 +
                        ii_weights1d[i * size_scale]) >> 2;
           comppred[i * compstride + j] =
-              ROUND_POWER_OF_TWO(
-                  (scale_max - scale) * interpred[i * interstride + j] +
-                  scale * intrapred[i * intrastride + j],
-                  scale_bits);
+              VPX_BLEND_A256(scale,
+                             intrapred[i * intrastride + j],
+                             interpred[i * interstride + j]);
         }
       }
       break;
@@ -1967,10 +1964,9 @@ static void combine_interintra(INTERINTRA_MODE mode,
         for (j = 0; j < bw; ++j) {
           int scale = ii_weights1d[(i < j ? i : j) * size_scale];
           comppred[i * compstride + j] =
-              ROUND_POWER_OF_TWO(
-                  (scale_max - scale) * interpred[i * interstride + j] +
-                  scale * intrapred[i * intrastride + j],
-                  scale_bits);
+              VPX_BLEND_A256(scale,
+                             intrapred[i * intrastride + j],
+                             interpred[i * interstride + j]);
         }
       }
       break;
@@ -1981,10 +1977,9 @@ static void combine_interintra(INTERINTRA_MODE mode,
           int scale = (ii_weights1d[i * size_scale] +
                        ii_weights1d[j * size_scale]) >> 1;
           comppred[i * compstride + j] =
-              ROUND_POWER_OF_TWO(
-                  (scale_max - scale) * interpred[i * interstride + j] +
-                  scale * intrapred[i * intrastride + j],
-                  scale_bits);
+              VPX_BLEND_A256(scale,
+                             intrapred[i * intrastride + j],
+                             interpred[i * interstride + j]);
         }
       }
       break;
@@ -1995,10 +1990,8 @@ static void combine_interintra(INTERINTRA_MODE mode,
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
           comppred[i * compstride + j] =
-              ROUND_POWER_OF_TWO(
-                  interpred[i * interstride + j] +
-                  intrapred[i * intrastride + j],
-                  1);
+              VPX_BLEND_AVG(intrapred[i * intrastride + j],
+                            interpred[i * interstride + j]);
         }
       }
       break;
@@ -2014,20 +2007,18 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
                                       BLOCK_SIZE plane_bsize,
                                       uint8_t *comppred8,
                                       int compstride,
-                                      uint8_t *interpred8,
+                                      const uint8_t *interpred8,
                                       int interstride,
-                                      uint8_t *intrapred8,
+                                      const uint8_t *intrapred8,
                                       int intrastride, int bd) {
-  const int scale_bits = 8;
-  const int scale_max = (1 << scale_bits);
   const int bw = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
   const int size_scale = ii_size_scales[plane_bsize];
   int i, j;
 
   uint16_t *comppred = CONVERT_TO_SHORTPTR(comppred8);
-  uint16_t *interpred = CONVERT_TO_SHORTPTR(interpred8);
-  uint16_t *intrapred = CONVERT_TO_SHORTPTR(intrapred8);
+  const uint16_t *interpred = CONVERT_TO_SHORTPTR(interpred8);
+  const uint16_t *intrapred = CONVERT_TO_SHORTPTR(intrapred8);
 
   if (use_wedge_interintra) {
     if (is_interintra_wedge_used(bsize)) {
@@ -2036,11 +2027,11 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
                                                           bsize);
       const int subh = 2 * num_4x4_blocks_high_lookup[bsize] == bh;
       const int subw = 2 * num_4x4_blocks_wide_lookup[bsize] == bw;
-      vpx_highbd_blend_mask6b(comppred8, compstride,
-                              intrapred8, intrastride,
-                              interpred8, interstride,
-                              mask, bw,
-                              bh, bw, subh, subw, bd);
+      vpx_highbd_blend_a64_mask(comppred8, compstride,
+                                intrapred8, intrastride,
+                                interpred8, interstride,
+                                mask, bw,
+                                bh, bw, subh, subw, bd);
     }
     return;
   }
@@ -2051,10 +2042,9 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
         for (j = 0; j < bw; ++j) {
           int scale = ii_weights1d[i * size_scale];
           comppred[i * compstride + j] =
-              ROUND_POWER_OF_TWO(
-                  (scale_max - scale) * interpred[i * interstride + j] +
-                  scale * intrapred[i * intrastride + j],
-                  scale_bits);
+              VPX_BLEND_A256(scale,
+                             intrapred[i * intrastride + j],
+                             interpred[i * interstride + j]);
         }
       }
       break;
@@ -2064,10 +2054,9 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
         for (j = 0; j < bw; ++j) {
           int scale = ii_weights1d[j * size_scale];
           comppred[i * compstride + j] =
-              ROUND_POWER_OF_TWO(
-                  (scale_max - scale) * interpred[i * interstride + j] +
-                  scale * intrapred[i * intrastride + j],
-                  scale_bits);
+              VPX_BLEND_A256(scale,
+                             intrapred[i * intrastride + j],
+                             interpred[i * interstride + j]);
         }
       }
       break;
@@ -2079,10 +2068,9 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
           int scale = (ii_weights1d[i * size_scale] * 3 +
                        ii_weights1d[j * size_scale]) >> 2;
           comppred[i * compstride + j] =
-              ROUND_POWER_OF_TWO(
-                  (scale_max - scale) * interpred[i * interstride + j] +
-                  scale * intrapred[i * intrastride + j],
-                  scale_bits);
+              VPX_BLEND_A256(scale,
+                             intrapred[i * intrastride + j],
+                             interpred[i * interstride + j]);
         }
       }
       break;
@@ -2094,10 +2082,9 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
           int scale = (ii_weights1d[j * size_scale] * 3 +
                        ii_weights1d[i * size_scale]) >> 2;
           comppred[i * compstride + j] =
-              ROUND_POWER_OF_TWO(
-                  (scale_max - scale) * interpred[i * interstride + j] +
-                  scale * intrapred[i * intrastride + j],
-                  scale_bits);
+              VPX_BLEND_A256(scale,
+                             intrapred[i * intrastride + j],
+                             interpred[i * interstride + j]);
         }
       }
       break;
@@ -2107,10 +2094,9 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
         for (j = 0; j < bw; ++j) {
           int scale = ii_weights1d[(i < j ? i : j) * size_scale];
           comppred[i * compstride + j] =
-              ROUND_POWER_OF_TWO(
-                  (scale_max - scale) * interpred[i * interstride + j] +
-                  scale * intrapred[i * intrastride + j],
-                  scale_bits);
+              VPX_BLEND_A256(scale,
+                             intrapred[i * intrastride + j],
+                             interpred[i * interstride + j]);
         }
       }
       break;
@@ -2121,10 +2107,9 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
           int scale = (ii_weights1d[i * size_scale] +
                        ii_weights1d[j * size_scale]) >> 1;
           comppred[i * compstride + j] =
-              ROUND_POWER_OF_TWO(
-                  (scale_max - scale) * interpred[i * interstride + j] +
-                  scale * intrapred[i * intrastride + j],
-                  scale_bits);
+              VPX_BLEND_A256(scale,
+                             intrapred[i * intrastride + j],
+                             interpred[i * interstride + j]);
         }
       }
       break;
@@ -2135,10 +2120,8 @@ static void combine_interintra_highbd(INTERINTRA_MODE mode,
       for (i = 0; i < bh; ++i) {
         for (j = 0; j < bw; ++j) {
           comppred[i * compstride + j] =
-              ROUND_POWER_OF_TWO(
-                  interpred[i * interstride + j] +
-                  intrapred[i * intrastride + j],
-                  1);
+              VPX_BLEND_AVG(interpred[i * interstride + j],
+                            intrapred[i * intrastride + j]);
         }
       }
       break;
@@ -2239,8 +2222,8 @@ void vp10_build_intra_predictors_for_interintra(
 
 void vp10_combine_interintra(MACROBLOCKD *xd,
                              BLOCK_SIZE bsize, int plane,
-                             uint8_t *inter_pred, int inter_stride,
-                             uint8_t *intra_pred, int intra_stride) {
+                             const uint8_t *inter_pred, int inter_stride,
+                             const uint8_t *intra_pred, int intra_stride) {
   const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, &xd->plane[plane]);
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
