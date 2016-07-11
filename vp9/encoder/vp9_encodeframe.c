@@ -2773,6 +2773,12 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   if (cpi->sf.adaptive_motion_search)
     store_pred_mv(x, ctx);
 
+  // If the interp_filter is marked as SWITCHABLE_FILTERS, it was for an
+  // intra block and used for context purposes.
+  if (ctx->mic.interp_filter == SWITCHABLE_FILTERS) {
+    ctx->mic.interp_filter = EIGHTTAP;
+  }
+
   // PARTITION_SPLIT
   // TODO(jingning): use the motion vectors given by the above search as
   // the starting point of motion search in the following partition type check.
