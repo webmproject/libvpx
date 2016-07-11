@@ -160,7 +160,7 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
     next_shortcut = shortcut;
 
     /* Only add a trellis state for non-zero coefficients. */
-    if (x) {
+    if (UNLIKELY(x)) {
       error0 = tokens[next][0].error;
       error1 = tokens[next][1].error;
       /* Evaluate the first possibility for this state. */
@@ -204,7 +204,7 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
       rate1 = tokens[next][1].rate;
 
       // The threshold of 3 is empirically obtained.
-      if (abs(x) > 3) {
+      if (UNLIKELY(abs(x) > 3)) {
         shortcut = 0;
       } else {
 #if CONFIG_NEW_QUANT
@@ -233,7 +233,7 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
         best_index[i][1] = best_index[i][0];
         next = i;
 
-        if (!(--band_left)) {
+        if (UNLIKELY(!(--band_left))) {
           --band_counts;
           band_left = *band_counts;
           --token_costs;
@@ -255,7 +255,7 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
       }
 
       if (next_shortcut) {
-        if (next < default_eob) {
+        if (LIKELY(next < default_eob)) {
           if (t0 != EOB_TOKEN) {
             token_cache[rc] = vp10_pt_energy_class[t0];
             pt = get_coef_context(nb, token_cache, i + 1);
@@ -350,7 +350,7 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
       /* Don't update next, because we didn't add a new node. */
     }
 
-    if (!(--band_left)) {
+    if (UNLIKELY(!(--band_left))) {
       --band_counts;
       band_left = *band_counts;
       --token_costs;
