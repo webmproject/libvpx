@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a142433_bbe50ad8",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1186,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-11T18:18:18Z",
+      "side": 1,
+      "message": "(pre-decrement is preferred)",
+      "range": {
+        "startLine": 1186,
+        "startChar": 13,
+        "endLine": 1186,
+        "endChar": 21
+      },
+      "revId": "cd489264e1011c367476664b65db589380115c6f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
