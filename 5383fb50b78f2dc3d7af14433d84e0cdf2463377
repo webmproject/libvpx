@@ -22,6 +22,30 @@
       "revId": "5383fb50b78f2dc3d7af14433d84e0cdf2463377",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa295886_f1b6029b",
+        "filename": "vpx_dsp/x86/blend_a64_mask_sse4.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-11T16:46:29Z",
+      "side": 1,
+      "message": "Care to elaborate?",
+      "parentUuid": "5a142433_188e3cf1",
+      "range": {
+        "startLine": 493,
+        "startChar": 44,
+        "endLine": 493,
+        "endChar": 45
+      },
+      "revId": "5383fb50b78f2dc3d7af14433d84e0cdf2463377",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
