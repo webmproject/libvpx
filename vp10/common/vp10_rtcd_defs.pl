@@ -683,7 +683,7 @@ specialize qw/vp10_full_search_sad sse3 sse4_1/;
 $vp10_full_search_sad_sse3=vp10_full_search_sadx3;
 $vp10_full_search_sad_sse4_1=vp10_full_search_sadx8;
 
-add_proto qw/int vp10_diamond_search_sad/, "const struct macroblock *x, const struct search_site_config *cfg,  struct mv *ref_mv, struct mv *best_mv, int search_param, int sad_per_bit, int *num00, const struct vp10_variance_vtable *fn_ptr, const struct mv *center_mv";
+add_proto qw/int vp10_diamond_search_sad/, "struct macroblock *x, const struct search_site_config *cfg,  struct mv *ref_mv, struct mv *best_mv, int search_param, int sad_per_bit, int *num00, const struct vp10_variance_vtable *fn_ptr, const struct mv *center_mv";
 specialize qw/vp10_diamond_search_sad/;
 
 add_proto qw/int vp10_full_range_search/, "const struct macroblock *x, const struct search_site_config *cfg, struct mv *ref_mv, struct mv *best_mv, int search_param, int sad_per_bit, int *num00, const struct vp10_variance_vtable *fn_ptr, const struct mv *center_mv";
