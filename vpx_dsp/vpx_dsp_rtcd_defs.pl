@@ -959,6 +959,27 @@ if ((vpx_config("CONFIG_VP9_ENCODER") eq "yes") || (vpx_config("CONFIG_VP10_ENCO
   }  # CONFIG_VP9_HIGHBITDEPTH
 }  # CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
 
+if (vpx_config("CONFIG_VP10") eq "yes") {
+  #
+  # Alpha blending with mask
+  #
+  add_proto qw/void vpx_blend_a64_mask/, "uint8_t *dst, uint32_t dst_stride, const uint8_t *src0, uint32_t src0_stride, const uint8_t *src1, uint32_t src1_stride, const uint8_t *mask, uint32_t mask_stride, int h, int w, int suby, int subx";
+  add_proto qw/void vpx_blend_a64_hmask/, "uint8_t *dst, uint32_t dst_stride, const uint8_t *src0, uint32_t src0_stride, const uint8_t *src1, uint32_t src1_stride, const uint8_t *mask, int h, int w";
+  add_proto qw/void vpx_blend_a64_vmask/, "uint8_t *dst, uint32_t dst_stride, const uint8_t *src0, uint32_t src0_stride, const uint8_t *src1, uint32_t src1_stride, const uint8_t *mask, int h, int w";
+  specialize "vpx_blend_a64_mask", qw/sse4_1/;
+  specialize "vpx_blend_a64_hmask", qw/sse4_1/;
+  specialize "vpx_blend_a64_vmask", qw/sse4_1/;
+
+  if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+    add_proto qw/void vpx_highbd_blend_a64_mask/, "uint8_t *dst, uint32_t dst_stride, const uint8_t *src0, uint32_t src0_stride, const uint8_t *src1, uint32_t src1_stride, const uint8_t *mask, uint32_t mask_stride, int h, int w, int suby, int subx, int bd";
+    add_proto qw/void vpx_highbd_blend_a64_hmask/, "uint8_t *dst, uint32_t dst_stride, const uint8_t *src0, uint32_t src0_stride, const uint8_t *src1, uint32_t src1_stride, const uint8_t *mask, int h, int w, int bd";
+    add_proto qw/void vpx_highbd_blend_a64_vmask/, "uint8_t *dst, uint32_t dst_stride, const uint8_t *src0, uint32_t src0_stride, const uint8_t *src1, uint32_t src1_stride, const uint8_t *mask, int h, int w, int bd";
+    specialize "vpx_highbd_blend_a64_mask", qw/sse4_1/;
+    specialize "vpx_highbd_blend_a64_hmask", qw/sse4_1/;
+    specialize "vpx_highbd_blend_a64_vmask", qw/sse4_1/;
+  }
+}  # CONFIG_VP10
+
 if (vpx_config("CONFIG_ENCODERS") eq "yes") {
 #
 # Block subtraction
@@ -1383,14 +1404,6 @@ if (vpx_config("CONFIG_EXT_INTER") eq "yes") {
         specialize "vpx_highbd${bd}masked_sub_pixel_variance${w}x${h}", qw/ssse3/;
       }
     }
-  }
-
-  add_proto qw/void vpx_blend_mask6b/, "uint8_t *dst, uint32_t dst_stride,  uint8_t *src0, uint32_t src0_stride, uint8_t *src1, uint32_t src1_stride, const uint8_t *mask, uint32_t mask_stride, int h, int w, int suby, int subx";
-  specialize "vpx_blend_mask6b", qw/sse4_1/;
-
-  if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
-    add_proto qw/void vpx_highbd_blend_mask6b/, "uint8_t *dst, uint32_t dst_stride,  uint8_t *src0, uint32_t src0_stride, uint8_t *src1, uint32_t src1_stride, const uint8_t *mask, uint32_t mask_stride, int h, int w, int suby, int subx, int bd";
-    specialize "vpx_highbd_blend_mask6b", qw/sse4_1/;
   }
 }
 

@@ -631,8 +631,8 @@ void vp10_build_intra_predictors_for_interintra(
 void vp10_combine_interintra(
     MACROBLOCKD *xd,
     BLOCK_SIZE bsize, int plane,
-    uint8_t *inter_pred, int inter_stride,
-    uint8_t *intra_pred, int intra_stride);
+    const uint8_t *inter_pred, int inter_stride,
+    const uint8_t *intra_pred, int intra_stride);
 void vp10_build_interintra_predictors_sbuv(MACROBLOCKD *xd,
                                            uint8_t *upred,
                                            uint8_t *vpred,
