@@ -197,6 +197,7 @@ TEST_P(VP10ConvolveOptimzTest, VerticalBitExactCheck) {
 
 using std::tr1::make_tuple;
 
+#if HAVE_SSSE3 && CONFIG_EXT_INTERP
 const BlockDimension kBlockDim[] = {
   make_tuple(2, 2),
   make_tuple(2, 4),
@@ -218,7 +219,6 @@ const BlockDimension kBlockDim[] = {
   make_tuple(128, 128),
 };
 
-#if HAVE_SSSE3 && CONFIG_EXT_INTERP
 // 10/12-tap filters
 const INTERP_FILTER kFilter[] = {6, 4, 2};
 
