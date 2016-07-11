@@ -9780,6 +9780,7 @@ void av1_rd_pick_inter_mode_sb_seg_skip(const AV1_COMP *cpi,
 #else   // CONFIG_GLOBAL_MOTION
   mbmi->mv[0].as_int = 0;
 #endif  // CONFIG_GLOBAL_MOTION
+  mbmi->tx_size = max_txsize_lookup[bsize];
   x->skip = 1;
 
 #if CONFIG_REF_MV
