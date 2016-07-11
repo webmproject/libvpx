@@ -85,19 +85,19 @@ static void projectPointsTranslation(int *mat, int *points, int *proj,
   for (i = 0; i < n; ++i) {
     const int x = *(points++), y = *(points++);
     if (subsampling_x)
-      *(proj++) = ROUNDZ_POWER_OF_TWO_SIGNED(
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
           ((x << (WARPEDMODEL_PREC_BITS + 1)) + mat[0]),
           WARPEDPIXEL_PREC_BITS + 1);
     else
-      *(proj++) = ROUNDZ_POWER_OF_TWO_SIGNED(
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
           ((x << WARPEDMODEL_PREC_BITS)) + mat[0],
           WARPEDPIXEL_PREC_BITS);
     if (subsampling_y)
-      *(proj++) = ROUNDZ_POWER_OF_TWO_SIGNED(
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
           ((y << (WARPEDMODEL_PREC_BITS + 1)) + mat[1]),
           WARPEDPIXEL_PREC_BITS + 1);
     else
-      *(proj++) = ROUNDZ_POWER_OF_TWO_SIGNED(
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
           ((y << WARPEDMODEL_PREC_BITS)) + mat[1],
           WARPEDPIXEL_PREC_BITS);
     points += stride_points - 2;
@@ -115,21 +115,21 @@ void projectPointsRotZoom(int *mat, int *points, int *proj,
   for (i = 0; i < n; ++i) {
     const int x = *(points++), y = *(points++);
     if (subsampling_x)
-      *(proj++) = ROUNDZ_POWER_OF_TWO_SIGNED(
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
           mat[0] * 2 * x + mat[1] * 2 * y + mat[2] +
           (mat[0] + mat[1] - (1 << WARPEDMODEL_PREC_BITS)) / 2,
           WARPEDDIFF_PREC_BITS + 1);
     else
-      *(proj++) = ROUNDZ_POWER_OF_TWO_SIGNED(mat[0] * x + mat[1] * y + mat[2],
-                                             WARPEDDIFF_PREC_BITS);
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(mat[0] * x + mat[1] * y + mat[2],
+                                            WARPEDDIFF_PREC_BITS);
     if (subsampling_y)
-      *(proj++) = ROUNDZ_POWER_OF_TWO_SIGNED(
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
           -mat[1] * 2 * x + mat[0] * 2 * y + mat[3] +
           (-mat[1] + mat[0] - (1 << WARPEDMODEL_PREC_BITS)) / 2,
           WARPEDDIFF_PREC_BITS + 1);
     else
-      *(proj++) = ROUNDZ_POWER_OF_TWO_SIGNED(-mat[1] * x + mat[0] * y + mat[3],
-                                             WARPEDDIFF_PREC_BITS);
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(-mat[1] * x + mat[0] * y + mat[3],
+                                            WARPEDDIFF_PREC_BITS);
     points += stride_points - 2;
     proj += stride_proj - 2;
   }
@@ -145,21 +145,21 @@ static void projectPointsAffine(int *mat, int *points, int *proj,
   for (i = 0; i < n; ++i) {
     const int x = *(points++), y = *(points++);
     if (subsampling_x)
-      *(proj++) = ROUNDZ_POWER_OF_TWO_SIGNED(
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
           mat[0] * 2 * x + mat[1] * 2 * y + mat[4] +
           (mat[0] + mat[1] - (1 << WARPEDMODEL_PREC_BITS)) / 2,
           WARPEDDIFF_PREC_BITS + 1);
     else
-      *(proj++) = ROUNDZ_POWER_OF_TWO_SIGNED(mat[0] * x + mat[1] * y + mat[4],
-                                             WARPEDDIFF_PREC_BITS);
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(mat[0] * x + mat[1] * y + mat[4],
+                                            WARPEDDIFF_PREC_BITS);
     if (subsampling_y)
-      *(proj++) = ROUNDZ_POWER_OF_TWO_SIGNED(
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
           mat[2] * 2 * x + mat[3] * 2 * y + mat[5] +
           (mat[2] + mat[3] - (1 << WARPEDMODEL_PREC_BITS)) / 2,
           WARPEDDIFF_PREC_BITS + 1);
     else
-      *(proj++) = ROUNDZ_POWER_OF_TWO_SIGNED(mat[2] * x + mat[3] * y + mat[5],
-                                             WARPEDDIFF_PREC_BITS);
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(mat[2] * x + mat[3] * y + mat[5],
+                                            WARPEDDIFF_PREC_BITS);
     points += stride_points - 2;
     proj += stride_proj - 2;
   }
@@ -357,7 +357,7 @@ static int32_t do_cubic_filter(int32_t *p, int x) {
     const int64_t v2 = x * x * (2 * p[-1] - 5 * p[0] + 4 * p[1] - p[2]);
     const int64_t v3 = x * (p[1] - p[-1]);
     const int64_t v4 = 2 * p[0];
-    return (int32_t)ROUNDZ_POWER_OF_TWO_SIGNED(
+    return (int32_t)ROUND_POWER_OF_TWO_SIGNED(
         (v4 << (3 * WARPEDPIXEL_PREC_BITS)) +
         (v3 << (2 * WARPEDPIXEL_PREC_BITS)) +
         (v2 << WARPEDPIXEL_PREC_BITS) + v1,

@@ -1217,7 +1217,7 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
       sse = vpx_sum_squares_2d_i16(diff, diff_stride, bs);
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
-        sse = ROUNDZ_POWER_OF_TWO(sse, (xd->bd - 8) * 2);
+        sse = ROUND_POWER_OF_TWO(sse, (xd->bd - 8) * 2);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       sse = (int64_t)sse * 16;
 
@@ -3027,7 +3027,7 @@ void vp10_tx_block_rd_b(const VP10_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
-    tmp = ROUNDZ_POWER_OF_TWO(tmp, (xd->bd - 8) * 2);
+    tmp = ROUND_POWER_OF_TWO(tmp, (xd->bd - 8) * 2);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   *bsse += tmp * 16;
 
@@ -6664,7 +6664,7 @@ static int64_t pick_wedge(const VP10_COMP *const cpi,
 
     mask = vp10_get_contiguous_soft_mask(wedge_index, wedge_sign, bsize);
     sse = vp10_wedge_sse_from_residuals(r1, d10, mask, N);
-    sse = ROUNDZ_POWER_OF_TWO(sse, bd_round);
+    sse = ROUND_POWER_OF_TWO(sse, bd_round);
 
     model_rd_from_sse(cpi, xd, bsize, 0, sse, &rate, &dist);
     rd =  RDCOST(x->rdmult, x->rddiv, rate, dist);
@@ -6726,7 +6726,7 @@ static int64_t pick_wedge_fixed_sign(const VP10_COMP *const cpi,
   for (wedge_index = 0; wedge_index < wedge_types; ++wedge_index) {
     mask = vp10_get_contiguous_soft_mask(wedge_index, wedge_sign, bsize);
     sse = vp10_wedge_sse_from_residuals(r1, d10, mask, N);
-    sse = ROUNDZ_POWER_OF_TWO(sse, bd_round);
+    sse = ROUND_POWER_OF_TWO(sse, bd_round);
 
     model_rd_from_sse(cpi, xd, bsize, 0, sse, &rate, &dist);
     rd =  RDCOST(x->rdmult, x->rddiv, rate, dist);

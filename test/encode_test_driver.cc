@@ -188,8 +188,8 @@ static bool compare_img(const vpx_image_t *img1,
 
   const unsigned int w_y = img1->d_w;
   const unsigned int h_y = img1->d_h;
-  const unsigned int w_uv = ROUNDZ_POWER_OF_TWO(w_y, img1->x_chroma_shift);
-  const unsigned int h_uv = ROUNDZ_POWER_OF_TWO(h_y, img1->y_chroma_shift);
+  const unsigned int w_uv = ROUND_POWER_OF_TWO(w_y, img1->x_chroma_shift);
+  const unsigned int h_uv = ROUND_POWER_OF_TWO(h_y, img1->y_chroma_shift);
 
   if (img1->fmt != img2->fmt
       || img1->cs != img2->cs
