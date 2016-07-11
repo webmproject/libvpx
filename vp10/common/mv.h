@@ -13,6 +13,9 @@
 
 #include "vp10/common/common.h"
 #include "vpx_dsp/vpx_filter.h"
+#if CONFIG_GLOBAL_MOTION
+#include "vp10/common/warped_motion.h"
+#endif  // CONFIG_GLOBAL_MOTION
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,6 +35,64 @@ typedef struct mv32 {
   int32_t row;
   int32_t col;
 } MV32;
+
+#if CONFIG_GLOBAL_MOTION
+// ALPHA here refers to parameters a and b in rotzoom model:
+// | a   b|
+// |-b   a|
+//
+// Anything ending in PREC_BITS is the number of bits of precision
+// to maintain when converting from double to integer.
+//
+// The ABS parameters are used to create an upper and lower bound
+// for each parameter. In other words, after a parameter is integerized
+// it is clamped between -(1 << ABS_XXX_BITS) and (1 << ABS_XXX_BITS)
+//
+// XXX_PREC_DIFF and XXX_DECODE_FACTOR are computed once here to
+// prevent repetetive computation on the decoder side. These are
+// to allow the global motion parameters to be encoded in a lower
+// precision than the warped model precision. This means that they
+// need to be changed to warped precision when they are decoded.
+//
+// XX_MIN, XX_MAX are also computed to avoid repeated computation
+
+#define GM_TRANS_PREC_BITS        3
+#define GM_TRANS_PREC_DIFF        (WARPEDMODEL_PREC_BITS - GM_TRANS_PREC_BITS)
+#define GM_TRANS_DECODE_FACTOR    (1 << GM_TRANS_PREC_DIFF)
+
+#define GM_ALPHA_PREC_BITS        5
+#define GM_ALPHA_PREC_DIFF        (WARPEDMODEL_PREC_BITS - GM_ALPHA_PREC_BITS)
+#define GM_ALPHA_DECODE_FACTOR    (1 << GM_ALPHA_PREC_DIFF)
+
+#define GM_ABS_ALPHA_BITS         5
+#define GM_ABS_TRANS_BITS         5
+
+#define GM_TRANS_MAX              (1 << GM_ABS_TRANS_BITS)
+#define GM_ALPHA_MAX              (1 << GM_ABS_ALPHA_BITS)
+#define GM_TRANS_MIN              -GM_TRANS_MAX
+#define GM_ALPHA_MIN              -GM_ALPHA_MAX
+
+typedef enum {
+  GLOBAL_ZERO = 0,
+  GLOBAL_TRANSLATION = 1,
+  GLOBAL_ROTZOOM = 2,
+  GLOBAL_MOTION_TYPES
+} GLOBAL_MOTION_TYPE;
+
+typedef struct {
+  GLOBAL_MOTION_TYPE gmtype;
+  WarpedMotionParams motion_params;
+} Global_Motion_Params;
+
+static INLINE GLOBAL_MOTION_TYPE get_gmtype(const Global_Motion_Params *gm) {
+  if (gm->motion_params.wmmat[2] == 0 && gm->motion_params.wmmat[3] == 0) {
+    return ((gm->motion_params.wmmat[0] | gm->motion_params.wmmat[1]) ?
+            GLOBAL_TRANSLATION : GLOBAL_ZERO);
+  } else {
+    return GLOBAL_ROTZOOM;
+  }
+}
+#endif  // CONFIG_GLOBAL_MOTION
 
 #if CONFIG_REF_MV
 typedef struct candidate_mv {

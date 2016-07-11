@@ -286,3 +286,16 @@ int vp10_cond_prob_diff_update_savings(vpx_prob *oldp,
                                                            upd);
   return savings;
 }
+
+void vp10_write_primitive_symmetric(vp10_writer *w, int word,
+                                   unsigned int abs_bits) {
+  if (word == 0) {
+    vp10_write_bit(w, 0);
+  } else {
+    const int x = abs(word);
+    const int s = word < 0;
+    vp10_write_bit(w, 1);
+    vp10_write_bit(w, s);
+    vp10_write_literal(w, x - 1, abs_bits);
+  }
+}

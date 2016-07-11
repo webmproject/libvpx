@@ -132,6 +132,11 @@ typedef struct {
 
 void vp10_inc_mv(const MV *mv, nmv_context_counts *mvctx, const int usehp);
 
+#if CONFIG_GLOBAL_MOTION
+extern const vpx_tree_index vp10_global_motion_types_tree
+                             [TREE_SIZE(GLOBAL_MOTION_TYPES)];
+#endif  // CONFIG_GLOBAL_MOTION
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

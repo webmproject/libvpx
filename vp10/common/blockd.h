@@ -388,6 +388,9 @@ typedef struct macroblockd {
   int corrupted;
 
   struct vpx_internal_error_info *error_info;
+#if CONFIG_GLOBAL_MOTION
+  Global_Motion_Params *global_motion;
+#endif  // CONFIG_GLOBAL_MOTION
 } MACROBLOCKD;
 
 static INLINE BLOCK_SIZE get_subsize(BLOCK_SIZE bsize,

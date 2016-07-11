@@ -118,6 +118,9 @@ typedef struct frame_contexts {
   vpx_prob ext_intra_probs[PLANE_TYPES];
   vpx_prob intra_filter_probs[INTRA_FILTERS + 1][INTRA_FILTERS - 1];
 #endif  // CONFIG_EXT_INTRA
+#if CONFIG_GLOBAL_MOTION
+  vpx_prob global_motion_types_prob[GLOBAL_MOTION_TYPES - 1];
+#endif  // CONFIG_GLOBAL_MOTION
 } FRAME_CONTEXT;
 
 typedef struct FRAME_COUNTS {

@@ -50,6 +50,13 @@ int vp10_prob_update_search_model_subframe(unsigned int ct[ENTROPY_NODES]
                                            int stepsize, int n);
 #endif  // CONFIG_ENTROPY
 
+//
+// mag_bits is number of bits for magnitude. The alphabet is of size
+// 2 * 2^mag_bits + 1, symmetric around 0, where one bit is used to
+// indicate 0 or non-zero, mag_bits bits are used to indicate magnitide
+// and 1 more bit for the sign if non-zero.
+void vp10_write_primitive_symmetric(vp10_writer *w, int word,
+                                   unsigned int mag_bits);
 #ifdef __cplusplus
 }  // extern "C"
 #endif

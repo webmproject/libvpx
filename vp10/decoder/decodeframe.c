@@ -3443,6 +3443,55 @@ static void read_supertx_probs(FRAME_CONTEXT *fc, vp10_reader *r) {
 }
 #endif  // CONFIG_SUPERTX
 
+#if CONFIG_GLOBAL_MOTION
+static void read_global_motion_params(Global_Motion_Params *params,
+                                      vpx_prob *probs,
+                                      vp10_reader *r) {
+  GLOBAL_MOTION_TYPE gmtype = vp10_read_tree(r, vp10_global_motion_types_tree,
+                                             probs);
+  params->gmtype = gmtype;
+  switch (gmtype) {
+    case GLOBAL_ZERO:
+      break;
+    case GLOBAL_TRANSLATION:
+      params->motion_params.wmtype = TRANSLATION;
+      params->motion_params.wmmat[0] =
+          vp10_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
+          GM_TRANS_DECODE_FACTOR;
+      params->motion_params.wmmat[1] =
+          vp10_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
+          GM_TRANS_DECODE_FACTOR;
+      break;
+    case GLOBAL_ROTZOOM:
+      params->motion_params.wmtype = ROTZOOM;
+      params->motion_params.wmmat[2] =
+          vp10_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
+          GM_TRANS_DECODE_FACTOR;
+      params->motion_params.wmmat[3] =
+          vp10_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
+          GM_TRANS_DECODE_FACTOR;
+      params->motion_params.wmmat[0] =
+          (vp10_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
+          GM_ALPHA_DECODE_FACTOR) + (1 << WARPEDMODEL_PREC_BITS);
+      params->motion_params.wmmat[1] =
+          vp10_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
+          GM_ALPHA_DECODE_FACTOR;
+      break;
+    default:
+      assert(0);
+  }
+}
+
+static void read_global_motion(VP10_COMMON *cm, vp10_reader *r) {
+  int frame;
+  memset(cm->global_motion, 0, sizeof(cm->global_motion));
+  for (frame = LAST_FRAME; frame <= ALTREF_FRAME; ++frame) {
+    read_global_motion_params(
+        &cm->global_motion[frame], cm->fc->global_motion_types_prob, r);
+  }
+}
+#endif  // CONFIG_GLOBAL_MOTION
+
 static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
                                   size_t partition_size) {
   VP10_COMMON *const cm = &pbi->common;
@@ -3585,6 +3634,9 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
     if (!xd->lossless[0])
       read_supertx_probs(fc, &r);
 #endif
+#if CONFIG_GLOBAL_MOTION
+    read_global_motion(cm, &r);
+#endif  // CONFIG_GLOBAL_MOTION
   }
 
   return vp10_reader_has_error(&r);
@@ -3714,6 +3766,9 @@ void vp10_decode_frame(VP10Decoder *pbi,
       init_read_bit_buffer(pbi, &rb, data, data_end, clear_data));
   YV12_BUFFER_CONFIG *const new_fb = get_frame_new_buffer(cm);
   xd->cur_buf = new_fb;
+#if CONFIG_GLOBAL_MOTION
+  xd->global_motion = cm->global_motion;
+#endif  // CONFIG_GLOBAL_MOTION
 
   if (!first_partition_size) {
     // showing a frame directly

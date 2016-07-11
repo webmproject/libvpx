@@ -74,3 +74,13 @@ void vp10_diff_update_prob(vp10_reader *r, vpx_prob* p) {
     *p = (vpx_prob)inv_remap_prob(delp, *p);
   }
 }
+
+int vp10_read_primitive_symmetric(vp10_reader *r, unsigned int mag_bits) {
+  if (vp10_read_bit(r)) {
+    int s = vp10_read_bit(r);
+    int x = vp10_read_literal(r, mag_bits) + 1;
+    return (s > 0 ? -x : x);
+  } else {
+    return 0;
+  }
+}

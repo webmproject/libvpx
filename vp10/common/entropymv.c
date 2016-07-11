@@ -120,6 +120,17 @@ static const uint8_t log_in_base_2[] = {
   9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10
 };
 
+#if CONFIG_GLOBAL_MOTION
+const vpx_tree_index vp10_global_motion_types_tree
+          [TREE_SIZE(GLOBAL_MOTION_TYPES)] = {
+          -GLOBAL_ZERO, 2,
+          -GLOBAL_TRANSLATION, -GLOBAL_ROTZOOM
+};
+
+static const vpx_prob default_global_motion_types_prob
+                 [GLOBAL_MOTION_TYPES - 1] = {224, 128};
+#endif  // CONFIG_GLOBAL_MOTION
+
 static INLINE int mv_class_base(MV_CLASS_TYPE c) {
   return c ? CLASS0_SIZE << (c + 2) : 0;
 }
@@ -277,4 +288,7 @@ void vp10_init_mv_probs(VP10_COMMON *cm) {
 #else
   cm->fc->nmvc = default_nmv_context;
 #endif
+#if CONFIG_GLOBAL_MOTION
+  vp10_copy(cm->fc->global_motion_types_prob, default_global_motion_types_prob);
+#endif  // CONFIG_GLOBAL_MOTION
 }

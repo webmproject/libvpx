@@ -24,4 +24,9 @@ void vp10_diff_update_prob(vp10_reader *r, vpx_prob* p);
 }  // extern "C"
 #endif
 
+// mag_bits is number of bits for magnitude. The alphabet is of size
+// 2 * 2^mag_bits + 1, symmetric around 0, where one bit is used to
+// indicate 0 or non-zero, mag_bits bits are used to indicate magnitide
+// and 1 more bit for the sign if non-zero.
+int vp10_read_primitive_symmetric(vp10_reader *r, unsigned int mag_bits);
 #endif  // VP10_DECODER_DSUBEXP_H_

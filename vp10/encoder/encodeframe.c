@@ -4536,6 +4536,78 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 }
 #endif
 
+#if CONFIG_GLOBAL_MOTION
+#define MIN_TRANS_THRESH 8
+
+static void convert_translation_to_params(
+    double *H, Global_Motion_Params *model) {
+  model->motion_params.wmmat[0] = (int) floor(H[0] *
+                                              (1 << GM_TRANS_PREC_BITS) + 0.5);
+  model->motion_params.wmmat[1] = (int) floor(H[1] *
+                                              (1 << GM_TRANS_PREC_BITS) + 0.5);
+  if (abs(model->motion_params.wmmat[0]) < MIN_TRANS_THRESH &&
+      abs(model->motion_params.wmmat[1]) < MIN_TRANS_THRESH) {
+    model->motion_params.wmmat[0] = 0;
+    model->motion_params.wmmat[1] = 0;
+  } else {
+    model->motion_params.wmmat[0] =
+        clamp(model->motion_params.wmmat[0],
+              GM_TRANS_MIN, GM_TRANS_MAX);
+    model->motion_params.wmmat[1] =
+        clamp(model->motion_params.wmmat[1],
+              GM_TRANS_MIN, GM_TRANS_MAX);
+  }
+}
+
+static void convert_rotzoom_to_params(double *H, Global_Motion_Params *model) {
+  model->motion_params.wmmat[0] = (int) floor(H[0] *
+                                              (1 << GM_TRANS_PREC_BITS) + 0.5);
+  model->motion_params.wmmat[1] = (int) floor(H[1] *
+                                              (1 << GM_TRANS_PREC_BITS) + 0.5);
+  model->motion_params.wmmat[0] =
+      clamp(model->motion_params.wmmat[0],
+            GM_TRANS_MIN, GM_TRANS_MAX);
+  model->motion_params.wmmat[1] =
+      clamp(model->motion_params.wmmat[1],
+            GM_TRANS_MIN, GM_TRANS_MAX);
+
+  model->motion_params.wmmat[2] = (int) floor(H[2] *
+                                              (1 << GM_ALPHA_PREC_BITS) + 0.5) -
+                                               (1 << GM_ALPHA_PREC_BITS);
+  model->motion_params.wmmat[3] = (int) floor(H[3] *
+                                              (1 << GM_ALPHA_PREC_BITS) + 0.5);
+
+  model->motion_params.wmmat[2] = clamp(model->motion_params.wmmat[2],
+                                        GM_ALPHA_MIN, GM_ALPHA_MAX);
+  model->motion_params.wmmat[3] = clamp(model->motion_params.wmmat[3],
+                                        GM_ALPHA_MIN, GM_ALPHA_MAX);
+
+  if (model->motion_params.wmmat[2] == 0 &&
+      model->motion_params.wmmat[3] == 0) {
+    if (abs(model->motion_params.wmmat[0]) < MIN_TRANS_THRESH &&
+        abs(model->motion_params.wmmat[1]) < MIN_TRANS_THRESH) {
+      model->motion_params.wmmat[0] = 0;
+      model->motion_params.wmmat[1] = 0;
+    }
+  }
+}
+
+static void convert_model_to_params(double *H, TransformationType type,
+                                    Global_Motion_Params *model) {
+  switch (type) {
+    case ROTZOOM:
+      convert_rotzoom_to_params(H, model);
+      break;
+    case TRANSLATION:
+      convert_translation_to_params(H, model);
+      break;
+    default:
+      break;
+  }
+  model->gmtype = get_gmtype(model);
+}
+#endif  // CONFIG_GLOBAL_MOTION
+
 static void encode_frame_internal(VP10_COMP *cpi) {
   ThreadData *const td = &cpi->td;
   MACROBLOCK *const x = &td->mb;
@@ -4556,6 +4628,18 @@ static void encode_frame_internal(VP10_COMP *cpi) {
   rdc->m_search_count = 0;   // Count of motion search hits.
   rdc->ex_search_count = 0;  // Exhaustive mesh search hits.
 
+#if CONFIG_GLOBAL_MOTION
+  // TODO(sarahparker) this is a placeholder for gm computation
+  vpx_clear_system_state();
+  vp10_zero(cpi->global_motion_used);
+  if (cpi->common.frame_type == INTER_FRAME && cpi->Source) {
+    int frame;
+    double H[9] = {0, 0, 0, 0, 0, 0, 0, 0, 1};
+    for (frame = LAST_FRAME; frame <= ALTREF_FRAME; ++frame)
+      convert_model_to_params(H, ROTZOOM, &cm->global_motion[frame]);
+  }
+#endif  // CONFIG_GLOBAL_MOTION
+
   for (i = 0; i < MAX_SEGMENTS; ++i) {
     const int qindex = cm->seg.enabled ?
         vp10_get_qindex(&cm->seg, i, cm->base_qindex) : cm->base_qindex;
@@ -4569,7 +4653,6 @@ static void encode_frame_internal(VP10_COMP *cpi) {
     x->optimize = 0;
 
   cm->tx_mode = select_tx_mode(cpi, xd);
-
   vp10_frame_init_quantizer(cpi);
 
   vp10_initialize_rd_consts(cpi);

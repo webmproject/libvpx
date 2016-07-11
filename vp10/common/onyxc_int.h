@@ -350,6 +350,9 @@ typedef struct VP10Common {
   // - this is intentionally not placed in FRAME_CONTEXT since it's reset upon
   // each keyframe and not used afterwards
   vpx_prob kf_y_prob[INTRA_MODES][INTRA_MODES][INTRA_MODES - 1];
+#if CONFIG_GLOBAL_MOTION
+  Global_Motion_Params global_motion[MAX_REF_FRAMES];
+#endif
 
   BLOCK_SIZE sb_size;   // Size of the superblock used for this frame
   int mib_size;         // Size of the superblock in units of MI blocks

@@ -615,6 +615,9 @@ typedef struct VP10_COMP {
   int refresh_frame_mask;
   int existing_fb_idx_to_show;
 #endif  // CONFIG_EXT_REFS
+#if CONFIG_GLOBAL_MOTION
+  int global_motion_used[MAX_REF_FRAMES];
+#endif
 } VP10_COMP;
 
 void vp10_initialize_enc(void);
