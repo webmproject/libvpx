@@ -135,6 +135,24 @@
       "revId": "5383fb50b78f2dc3d7af14433d84e0cdf2463377",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa523822_c623424b",
+        "filename": "vpx_dsp/x86/blend_a64_vmask_sse4.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-11T18:09:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a142433_58e6f420",
+      "revId": "5383fb50b78f2dc3d7af14433d84e0cdf2463377",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
