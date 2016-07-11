@@ -689,8 +689,9 @@ static int fp_estimate_block_noise(MACROBLOCK *x, BLOCK_SIZE bsize) {
   int stride = x->plane[0].src.stride;
   int block_noise = 0;
 
-  for (h = 0; h < height; ++h) {
-    for (w = 0; w < width; ++w) {
+  // Sampled points to reduce cost overhead.
+  for (h = 0; h < height; h += 2) {
+    for (w = 0; w < width; w += 2) {
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
         block_noise += fp_highbd_estimate_point_noise(src_ptr, stride);
@@ -703,7 +704,7 @@ static int fp_estimate_block_noise(MACROBLOCK *x, BLOCK_SIZE bsize) {
     }
     src_ptr += (stride - width);
   }
-  return block_noise;
+  return block_noise << 2;  // Scale << 2 to account for sampling.
 }
 
 #define INVALID_ROW -1
