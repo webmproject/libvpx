@@ -396,7 +396,8 @@ void vp10_build_inter_predictors_sb_extend(
 struct macroblockd_plane;
 void vp10_build_masked_inter_predictor_complex(
     MACROBLOCKD *xd,
-    uint8_t *dst, int dst_stride, uint8_t *dst2, int dst2_stride,
+    uint8_t *dst, int dst_stride,
+    const uint8_t *pre, int pre_stride,
     int mi_row, int mi_col, int mi_row_ori, int mi_col_ori,
     BLOCK_SIZE bsize, BLOCK_SIZE top_bsize,
     PARTITION_TYPE partition, int plane);
