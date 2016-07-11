@@ -932,6 +932,7 @@ static aom_codec_frame_flags_t get_frame_pkt_flags(const AV1_COMP *cpi,
   return flags;
 }
 
+const size_t kMinCompressedSize = 8192;
 static aom_codec_err_t encoder_encode(aom_codec_alg_priv_t *ctx,
                                       const aom_image_t *img,
                                       aom_codec_pts_t pts,
@@ -959,7 +960,7 @@ static aom_codec_err_t encoder_encode(aom_codec_alg_priv_t *ctx,
       data_sz = ctx->cfg.g_w * ctx->cfg.g_h * get_image_bps(img) / 8 *
                 (cpi->multi_arf_allowed ? 8 : 2);
 #endif  // CONFIG_EXT_REFS
-      if (data_sz < 4096) data_sz = 4096;
+      if (data_sz < kMinCompressedSize) data_sz = kMinCompressedSize;
       if (ctx->cx_data == NULL || ctx->cx_data_sz < data_sz) {
         ctx->cx_data_sz = data_sz;
         free(ctx->cx_data);
