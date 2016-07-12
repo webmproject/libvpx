@@ -16,6 +16,24 @@
       "revId": "8d629dc0c47653c65d7ca6ea1a64b93e649b5599",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_af8de5f5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 10
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-07-12T14:44:52Z",
+      "side": 1,
+      "message": "Done : split \nadded https://chromium-review.googlesource.com/#/c/359602/ which does moves the noise setup functions to vpx_dsp\n\nand rebased this patch on top of that - changing the description to match what this patch does.",
+      "parentUuid": "3ad6900d_e9b0cd9e",
+      "revId": "8d629dc0c47653c65d7ca6ea1a64b93e649b5599",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
