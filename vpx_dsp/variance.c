@@ -1025,10 +1025,9 @@ HIGHBD_MASK_SUBPIX_VAR(128, 128)
 #endif  // CONFIG_VP10 && CONFIG_EXT_INTER
 
 #if CONFIG_VP10 && CONFIG_OBMC
-void obmc_variance(const uint8_t *a, int  a_stride,
-                   const int32_t *b,
-                   const int32_t *m,
-                   int w, int h, unsigned int *sse, int *sum) {
+static INLINE void obmc_variance(const uint8_t *pre, int  pre_stride,
+                                 const int32_t *wsrc, const int32_t *mask,
+                                 int w, int h, unsigned int *sse, int *sum) {
   int i, j;
 
   *sse = 0;
@@ -1036,34 +1035,36 @@ void obmc_variance(const uint8_t *a, int  a_stride,
 
   for (i = 0; i < h; i++) {
     for (j = 0; j < w; j++) {
-      int diff = ROUND_POWER_OF_TWO_SIGNED(b[j] - a[j] * m[j], 12);
+      int diff = ROUND_POWER_OF_TWO_SIGNED(wsrc[j] - pre[j] * mask[j], 12);
       *sum += diff;
       *sse += diff * diff;
     }
 
-    a += a_stride;
-    b += w;
-    m += w;
+    pre += pre_stride;
+    wsrc += w;
+    mask += w;
   }
 }
 
 #define OBMC_VAR(W, H) \
-unsigned int vpx_obmc_variance##W##x##H##_c(const uint8_t *a, int a_stride, \
-                                            const int32_t *b, \
-                                            const int32_t *m, \
-                                            unsigned int *sse) { \
-  int sum; \
-  obmc_variance(a, a_stride, b, m, W, H, sse, &sum); \
-  return *sse - (((int64_t)sum * sum) / (W * H)); \
+unsigned int vpx_obmc_variance##W##x##H##_c(const uint8_t *pre,               \
+                                            int pre_stride,                   \
+                                            const int32_t *wsrc,              \
+                                            const int32_t *mask,              \
+                                            unsigned int *sse) {              \
+  int sum;                                                                    \
+  obmc_variance(pre, pre_stride, wsrc, mask, W, H, sse, &sum);                \
+  return *sse - (((int64_t)sum * sum) / (W * H));                             \
 }
 
 #define OBMC_SUBPIX_VAR(W, H) \
-unsigned int vpx_obmc_sub_pixel_variance##W##x##H##_c(                        \
-                                        const uint8_t *pre, int pre_stride,   \
-                                        int xoffset, int  yoffset,            \
-                                        const int32_t *wsrc,                 \
-                                        const int32_t *msk,                   \
-                                        unsigned int *sse) {                  \
+unsigned int vpx_obmc_sub_pixel_variance##W##x##H##_c(const uint8_t *pre,     \
+                                                      int pre_stride,         \
+                                                      int xoffset,            \
+                                                      int yoffset,            \
+                                                      const int32_t *wsrc,    \
+                                                      const int32_t *mask,    \
+                                                      unsigned int *sse) {    \
   uint16_t fdata3[(H + 1) * W];                                               \
   uint8_t temp2[H * W];                                                       \
                                                                               \
@@ -1072,7 +1073,7 @@ unsigned int vpx_obmc_sub_pixel_variance##W##x##H##_c(                        \
   var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W,               \
                                      bilinear_filters_2t[yoffset]);           \
                                                                               \
-  return vpx_obmc_variance##W##x##H##_c(temp2, W, wsrc, msk, sse);            \
+  return vpx_obmc_variance##W##x##H##_c(temp2, W, wsrc, mask, sse);           \
 }
 
 OBMC_VAR(4, 4)
@@ -1126,86 +1127,94 @@ OBMC_SUBPIX_VAR(128, 128)
 #endif  // CONFIG_EXT_PARTITION
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void highbd_obmc_variance64(const uint8_t *a8, int  a_stride,
-                            const int32_t *b, const int32_t *m,
-                            int w, int h, uint64_t *sse, int64_t *sum) {
+static INLINE void highbd_obmc_variance64(const uint8_t *pre8, int pre_stride,
+                                          const int32_t *wsrc,
+                                          const int32_t *mask,
+                                          int w, int h,
+                                          uint64_t *sse, int64_t *sum) {
   int i, j;
-  uint16_t *a = CONVERT_TO_SHORTPTR(a8);
+  uint16_t *pre = CONVERT_TO_SHORTPTR(pre8);
 
   *sse = 0;
   *sum = 0;
 
   for (i = 0; i < h; i++) {
     for (j = 0; j < w; j++) {
-      int diff = ROUND_POWER_OF_TWO_SIGNED(b[j] - a[j] * m[j], 12);
+      int diff = ROUND_POWER_OF_TWO_SIGNED(wsrc[j] - pre[j] * mask[j], 12);
       *sum += diff;
       *sse += diff * diff;
     }
 
-    a += a_stride;
-    b += w;
-    m += w;
+    pre += pre_stride;
+    wsrc += w;
+    mask += w;
   }
 }
 
-void highbd_obmc_variance(const uint8_t *a8, int  a_stride,
-                          const int32_t *b, const int32_t *m,
-                          int w, int h, unsigned int *sse, int *sum) {
+static INLINE void highbd_obmc_variance(const uint8_t *pre8, int pre_stride,
+                                        const int32_t *wsrc,
+                                        const int32_t *mask,
+                                        int w, int h,
+                                        unsigned int *sse, int *sum) {
   int64_t sum64;
   uint64_t sse64;
-  highbd_obmc_variance64(a8, a_stride, b, m, w, h, &sse64, &sum64);
+  highbd_obmc_variance64(pre8, pre_stride, wsrc, mask, w, h, &sse64, &sum64);
   *sum = (int)sum64;
   *sse = (unsigned int)sse64;
 }
 
-void highbd_10_obmc_variance(const uint8_t *a8, int  a_stride,
-                             const int32_t *b, const int32_t *m,
-                             int w, int h, unsigned int *sse, int *sum) {
+static INLINE void highbd_10_obmc_variance(const uint8_t *pre8, int  pre_stride,
+                                           const int32_t *wsrc,
+                                           const int32_t *mask,
+                                           int w, int h,
+                                           unsigned int *sse, int *sum) {
   int64_t sum64;
   uint64_t sse64;
-  highbd_obmc_variance64(a8, a_stride, b, m, w, h, &sse64, &sum64);
+  highbd_obmc_variance64(pre8, pre_stride, wsrc, mask, w, h, &sse64, &sum64);
   *sum = (int)ROUND_POWER_OF_TWO(sum64, 2);
   *sse = (unsigned int)ROUND_POWER_OF_TWO(sse64, 4);
 }
 
-void highbd_12_obmc_variance(const uint8_t *a8, int  a_stride,
-                             const int32_t *b, const int32_t *m,
-                             int w, int h, unsigned int *sse, int *sum) {
+static INLINE void highbd_12_obmc_variance(const uint8_t *pre8, int  pre_stride,
+                                           const int32_t *wsrc,
+                                           const int32_t *mask,
+                                           int w, int h,
+                                           unsigned int *sse, int *sum) {
   int64_t sum64;
   uint64_t sse64;
-  highbd_obmc_variance64(a8, a_stride, b, m, w, h, &sse64, &sum64);
+  highbd_obmc_variance64(pre8, pre_stride, wsrc, mask, w, h, &sse64, &sum64);
   *sum = (int)ROUND_POWER_OF_TWO(sum64, 4);
   *sse = (unsigned int)ROUND_POWER_OF_TWO(sse64, 8);
 }
 
 #define HIGHBD_OBMC_VAR(W, H)                                                 \
-unsigned int vpx_highbd_obmc_variance##W##x##H##_c(const uint8_t *a,          \
-                                                   int a_stride,              \
-                                                   const int32_t *b,          \
-                                                   const int32_t *m,          \
+unsigned int vpx_highbd_obmc_variance##W##x##H##_c(const uint8_t *pre,        \
+                                                   int pre_stride,            \
+                                                   const int32_t *wsrc,       \
+                                                   const int32_t *mask,       \
                                                    unsigned int *sse) {       \
   int sum;                                                                    \
-  highbd_obmc_variance(a, a_stride, b, m, W, H, sse, &sum);                   \
+  highbd_obmc_variance(pre, pre_stride, wsrc, mask, W, H, sse, &sum);         \
   return *sse - (((int64_t)sum * sum) / (W * H));                             \
 }                                                                             \
                                                                               \
-unsigned int vpx_highbd_10_obmc_variance##W##x##H##_c(const uint8_t *a,       \
-                                                      int a_stride,           \
-                                                      const int32_t *b,       \
-                                                      const int32_t *m,       \
+unsigned int vpx_highbd_10_obmc_variance##W##x##H##_c(const uint8_t *pre,     \
+                                                      int pre_stride,         \
+                                                      const int32_t *wsrc,    \
+                                                      const int32_t *mask,    \
                                                       unsigned int *sse) {    \
   int sum;                                                                    \
-  highbd_10_obmc_variance(a, a_stride, b, m, W, H, sse, &sum);                \
+  highbd_10_obmc_variance(pre, pre_stride, wsrc, mask, W, H, sse, &sum);      \
   return *sse - (((int64_t)sum * sum) / (W * H));                             \
 }                                                                             \
                                                                               \
-unsigned int vpx_highbd_12_obmc_variance##W##x##H##_c(const uint8_t *a,       \
-                                                      int a_stride,           \
-                                                      const int32_t *b,       \
-                                                      const int32_t *m,       \
+unsigned int vpx_highbd_12_obmc_variance##W##x##H##_c(const uint8_t *pre,     \
+                                                      int pre_stride,         \
+                                                      const int32_t *wsrc,    \
+                                                      const int32_t *mask,    \
                                                       unsigned int *sse) {    \
   int sum;                                                                    \
-  highbd_12_obmc_variance(a, a_stride, b, m, W, H, sse, &sum);                \
+  highbd_12_obmc_variance(pre, pre_stride, wsrc, mask, W, H, sse, &sum);      \
   return *sse - (((int64_t)sum * sum) / (W * H));                             \
 }
 
@@ -1214,7 +1223,7 @@ unsigned int vpx_highbd_obmc_sub_pixel_variance##W##x##H##_c(                 \
                                         const uint8_t *pre, int pre_stride,   \
                                         int xoffset, int  yoffset,            \
                                         const int32_t *wsrc,                  \
-                                        const int32_t *msk,                   \
+                                        const int32_t *mask,                  \
                                         unsigned int *sse) {                  \
   uint16_t fdata3[(H + 1) * W];                                               \
   uint16_t temp2[H * W];                                                      \
@@ -1226,14 +1235,14 @@ unsigned int vpx_highbd_obmc_sub_pixel_variance##W##x##H##_c(                 \
                                                bilinear_filters_2t[yoffset]); \
                                                                               \
   return vpx_highbd_obmc_variance##W##x##H##_c(CONVERT_TO_BYTEPTR(temp2),     \
-                                               W, wsrc, msk, sse);            \
+                                               W, wsrc, mask, sse);           \
 }                                                                             \
                                                                               \
 unsigned int vpx_highbd_10_obmc_sub_pixel_variance##W##x##H##_c(              \
                                         const uint8_t *pre, int pre_stride,   \
                                         int xoffset, int  yoffset,            \
                                         const int32_t *wsrc,                  \
-                                        const int32_t *msk,                   \
+                                        const int32_t *mask,                  \
                                         unsigned int *sse) {                  \
   uint16_t fdata3[(H + 1) * W];                                               \
   uint16_t temp2[H * W];                                                      \
@@ -1245,14 +1254,14 @@ unsigned int vpx_highbd_10_obmc_sub_pixel_variance##W##x##H##_c(              \
                                                bilinear_filters_2t[yoffset]); \
                                                                               \
   return vpx_highbd_10_obmc_variance##W##x##H##_c(CONVERT_TO_BYTEPTR(temp2),  \
-                                                  W, wsrc, msk, sse);         \
+                                                  W, wsrc, mask, sse);        \
 }                                                                             \
                                                                               \
 unsigned int vpx_highbd_12_obmc_sub_pixel_variance##W##x##H##_c(              \
                                         const uint8_t *pre, int pre_stride,   \
                                         int xoffset, int  yoffset,            \
                                         const int32_t *wsrc,                  \
-                                        const int32_t *msk,                   \
+                                        const int32_t *mask,                  \
                                         unsigned int *sse) {                  \
   uint16_t fdata3[(H + 1) * W];                                               \
   uint16_t temp2[H * W];                                                      \
@@ -1264,7 +1273,7 @@ unsigned int vpx_highbd_12_obmc_sub_pixel_variance##W##x##H##_c(              \
                                                bilinear_filters_2t[yoffset]); \
                                                                               \
   return vpx_highbd_12_obmc_variance##W##x##H##_c(CONVERT_TO_BYTEPTR(temp2),  \
-                                                  W, wsrc, msk, sse);         \
+                                                  W, wsrc, mask, sse);        \
 }
 
 HIGHBD_OBMC_VAR(4, 4)

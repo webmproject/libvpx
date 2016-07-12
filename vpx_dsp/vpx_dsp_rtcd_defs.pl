@@ -1413,9 +1413,9 @@ if (vpx_config("CONFIG_EXT_INTER") eq "yes") {
 if (vpx_config("CONFIG_OBMC") eq "yes") {
   foreach (@block_sizes) {
     ($w, $h) = @$_;
-    add_proto qw/unsigned int/, "vpx_obmc_variance${w}x${h}", "const uint8_t *pre_ptr, int pre_stride, const int32_t *wsrc_ptr, const int32_t *mask, unsigned int *sse";
-    add_proto qw/unsigned int/, "vpx_obmc_sub_pixel_variance${w}x${h}", "const uint8_t *pre_ptr, int pre_stride, int xoffset, int  yoffset, const int32_t *wsrc_ptr, const int32_t *mask, unsigned int *sse";
-    specialize "vpx_obmc_variance${w}x${h}";
+    add_proto qw/unsigned int/, "vpx_obmc_variance${w}x${h}", "const uint8_t *pre, int pre_stride, const int32_t *wsrc, const int32_t *mask, unsigned int *sse";
+    add_proto qw/unsigned int/, "vpx_obmc_sub_pixel_variance${w}x${h}", "const uint8_t *pre, int pre_stride, int xoffset, int yoffset, const int32_t *wsrc, const int32_t *mask, unsigned int *sse";
+    specialize "vpx_obmc_variance${w}x${h}", q/sse4_1/;
     specialize "vpx_obmc_sub_pixel_variance${w}x${h}";
   }
 
@@ -1423,9 +1423,9 @@ if (vpx_config("CONFIG_OBMC") eq "yes") {
     foreach $bd ("_", "_10_", "_12_") {
       foreach (@block_sizes) {
         ($w, $h) = @$_;
-        add_proto qw/unsigned int/, "vpx_highbd${bd}obmc_variance${w}x${h}", "const uint8_t *pre_ptr, int pre_stride, const int32_t *wsrc_ptr, const int32_t *mask, unsigned int *sse";
-        add_proto qw/unsigned int/, "vpx_highbd${bd}obmc_sub_pixel_variance${w}x${h}", "const uint8_t *pre_ptr, int pre_stride, int xoffset, int  yoffset, const int32_t *wsrc_ptr, const int32_t *mask, unsigned int *sse";
-        specialize "vpx_highbd${bd}obmc_variance${w}x${h}";
+        add_proto qw/unsigned int/, "vpx_highbd${bd}obmc_variance${w}x${h}", "const uint8_t *pre, int pre_stride, const int32_t *wsrc, const int32_t *mask, unsigned int *sse";
+        add_proto qw/unsigned int/, "vpx_highbd${bd}obmc_sub_pixel_variance${w}x${h}", "const uint8_t *pre, int pre_stride, int xoffset, int yoffset, const int32_t *wsrc, const int32_t *mask, unsigned int *sse";
+        specialize "vpx_highbd${bd}obmc_variance${w}x${h}", qw/sse4_1/;
         specialize "vpx_highbd${bd}obmc_sub_pixel_variance${w}x${h}";
       }
     }

@@ -15,6 +15,7 @@
 #include "vpx_ports/mem.h"
 #include "vpx/vpx_integer.h"
 
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_dsp/x86/synonyms.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -52,8 +53,7 @@ static INLINE unsigned int obmc_sad_w4(const uint8_t *pre,
 
     n += 4;
 
-    if (n % 4 == 0)
-      pre += pre_step;
+    if (n % 4 == 0) pre += pre_step;
   } while (n < 4 * height);
 
   return xx_hsum_epi32_si32(v_sad_d);
@@ -68,7 +68,9 @@ static INLINE unsigned int obmc_sad_w8n(const uint8_t *pre,
   const int pre_step = pre_stride - width;
   int n = 0;
   __m128i v_sad_d = _mm_setzero_si128();
-  assert(width >= 8 && (width & (width - 1)) == 0);
+
+  assert(width >= 8);
+  assert(IS_POWER_OF_TWO(width));
 
   do {
     const __m128i v_p1_b = xx_loadl_32(pre + n + 4);
@@ -101,8 +103,7 @@ static INLINE unsigned int obmc_sad_w8n(const uint8_t *pre,
 
     n += 8;
 
-    if (n % width == 0)
-      pre += pre_step;
+    if (n % width == 0) pre += pre_step;
   } while (n < width * height);
 
   return xx_hsum_epi32_si32(v_sad_d);
@@ -113,10 +114,11 @@ unsigned int vpx_obmc_sad##w##x##h##_sse4_1(const uint8_t *pre,               \
                                             int pre_stride,                   \
                                             const int32_t *wsrc,              \
                                             const int32_t *msk) {             \
-  if (w == 4)                                                                 \
+  if (w == 4) {                                                               \
     return obmc_sad_w4(pre, pre_stride, wsrc, msk, h);                        \
-  else                                                                        \
+  } else {                                                                    \
     return obmc_sad_w8n(pre, pre_stride, wsrc, msk, w, h);                    \
+  }                                                                           \
 }
 
 #if CONFIG_EXT_PARTITION
@@ -175,8 +177,7 @@ static INLINE unsigned int hbd_obmc_sad_w4(const uint8_t *pre8,
 
     n += 4;
 
-    if (n % 4 == 0)
-      pre += pre_step;
+    if (n % 4 == 0) pre += pre_step;
   } while (n < 4 * height);
 
   return xx_hsum_epi32_si32(v_sad_d);
@@ -192,7 +193,9 @@ static INLINE unsigned int hbd_obmc_sad_w8n(const uint8_t *pre8,
   const int pre_step = pre_stride - width;
   int n = 0;
   __m128i v_sad_d = _mm_setzero_si128();
-  assert(width >= 8 && (width & (width - 1)) == 0);
+
+  assert(width >= 8);
+  assert(IS_POWER_OF_TWO(width));
 
   do {
     const __m128i v_p1_w = xx_loadl_64(pre + n + 4);
@@ -225,8 +228,7 @@ static INLINE unsigned int hbd_obmc_sad_w8n(const uint8_t *pre8,
 
     n += 8;
 
-    if (n % width == 0)
-      pre += pre_step;
+    if (n % width == 0) pre += pre_step;
   } while (n < width * height);
 
   return xx_hsum_epi32_si32(v_sad_d);
@@ -237,10 +239,11 @@ unsigned int vpx_highbd_obmc_sad##w##x##h##_sse4_1(const uint8_t *pre,        \
                                                    int pre_stride,            \
                                                    const int32_t *wsrc,       \
                                                    const int32_t *mask) {     \
-  if (w == 4)                                                                 \
+  if (w == 4) {                                                               \
     return hbd_obmc_sad_w4(pre, pre_stride, wsrc, mask, h);                   \
-  else                                                                        \
+  } else {                                                                    \
     return hbd_obmc_sad_w8n(pre, pre_stride, wsrc, mask, w, h);               \
+  }                                                                           \
 }
 
 #if CONFIG_EXT_PARTITION
