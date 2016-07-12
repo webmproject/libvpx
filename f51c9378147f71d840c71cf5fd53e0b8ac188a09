@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3ad6900d_0f0b311e",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3290,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-07-12T15:56:14Z",
+      "side": 1,
+      "message": "can we use is_one_pass_cbr_svc once, and put both cases under that, and add some comments?",
+      "revId": "f51c9378147f71d840c71cf5fd53e0b8ac188a09",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_af032508",
+        "filename": "vp9/encoder/vp9_svc_layercontext.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-07-12T15:56:14Z",
+      "side": 1,
+      "message": "put these two after line 74, since they go with that",
+      "revId": "f51c9378147f71d840c71cf5fd53e0b8ac188a09",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
