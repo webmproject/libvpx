@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3aaf7091_7818016b",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1367,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-12T13:15:12Z",
+      "side": 1,
+      "message": "That yields a compiler warning, refer to:\n\nhttp://stackoverflow.com/questions/14562845/why-does-passing-char-as-const-char-generate-a-warning",
+      "parentUuid": "3ad6900d_4f29b9e5",
+      "range": {
+        "startLine": 1367,
+        "startChar": 47,
+        "endLine": 1367,
+        "endChar": 52
+      },
+      "revId": "2eefc96dfb7b0af6d5d66b852838af17fb46fe1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ad6900d_6f2e7df0",
         "filename": "vp10/common/reconinter.c",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-07-12T12:57:36Z",
       "side": 1,
       "message": "same here",
+      "range": {
+        "startLine": 1369,
+        "startChar": 47,
+        "endLine": 1369,
+        "endChar": 51
+      },
+      "revId": "2eefc96dfb7b0af6d5d66b852838af17fb46fe1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aaf7091_982cf58d",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1369,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-12T13:15:12Z",
+      "side": 1,
+      "message": "same",
+      "parentUuid": "3ad6900d_6f2e7df0",
       "range": {
         "startLine": 1369,
         "startChar": 47,
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "3aaf7091_b829b97c",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 11114,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-12T13:15:12Z",
+      "side": 1,
+      "message": "No, \u0027tmp\u0027 has different type.",
+      "parentUuid": "3ad6900d_cf34e93c",
+      "range": {
+        "startLine": 11114,
+        "startChar": 10,
+        "endLine": 11114,
+        "endChar": 11
+      },
+      "revId": "2eefc96dfb7b0af6d5d66b852838af17fb46fe1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ad6900d_ef41ad97",
         "filename": "vp10/encoder/rdopt.c",
         "patchSetId": 2
@@ -117,6 +189,30 @@
     },
     {
       "key": {
+        "uuid": "3aaf7091_d8266dab",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 11159,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-12T13:15:12Z",
+      "side": 1,
+      "message": "This is semantically correct (you don\u0027t need the max value to be a power of 2) and hence more readable. Trivial strength reduction is a job for the compiler.",
+      "parentUuid": "3ad6900d_ef41ad97",
+      "range": {
+        "startLine": 11159,
+        "startChar": 39,
+        "endLine": 11159,
+        "endChar": 62
+      },
+      "revId": "2eefc96dfb7b0af6d5d66b852838af17fb46fe1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ad6900d_2f0d5590",
         "filename": "vp10/encoder/rdopt.c",
         "patchSetId": 2
@@ -128,6 +224,30 @@
       "writtenOn": "2016-07-12T12:57:36Z",
       "side": 1,
       "message": "here too, some factorization seems possible.",
+      "range": {
+        "startLine": 11182,
+        "startChar": 10,
+        "endLine": 11182,
+        "endChar": 11
+      },
+      "revId": "2eefc96dfb7b0af6d5d66b852838af17fb46fe1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aaf7091_f8233198",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 11182,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-12T13:15:12Z",
+      "side": 1,
+      "message": "\u0027tmp\u0027 has different type.",
+      "parentUuid": "3ad6900d_2f0d5590",
       "range": {
         "startLine": 11182,
         "startChar": 10,
