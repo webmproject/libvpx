@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3ad6900d_8ff02169",
+        "filename": "test/function_equivalence_test.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-12T14:40:04Z",
+      "side": 1,
+      "message": "so, why not a struct instead of tuple?\nI think it would render the use of MakeParam() unneeded, by relying on constructors instead (maybe using {{ .. }} to construct implicitly).",
+      "range": {
+        "startLine": 38,
+        "startChar": 45,
+        "endLine": 38,
+        "endChar": 50
+      },
+      "revId": "df04aee5ab7a12559cadea7adf8292ead4d55adc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
