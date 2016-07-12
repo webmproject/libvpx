@@ -46,6 +46,30 @@
       "revId": "df04aee5ab7a12559cadea7adf8292ead4d55adc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_3ad2f10f",
+        "filename": "test/function_equivalence_test.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-12T16:53:15Z",
+      "side": 1,
+      "message": "c++11 static initializer lists would be useful here.\nBut i think we can do without, at the expense of a little extra verbosity. Let me try that, i\u0027ll upload an updated patch...",
+      "parentUuid": "3aaf7091_38820971",
+      "range": {
+        "startLine": 38,
+        "startChar": 45,
+        "endLine": 38,
+        "endChar": 50
+      },
+      "revId": "df04aee5ab7a12559cadea7adf8292ead4d55adc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
