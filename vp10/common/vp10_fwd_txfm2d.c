@@ -10,6 +10,7 @@
 
 #include <assert.h>
 
+#include "./vp10_rtcd.h"
 #include "vp10/common/enums.h"
 #include "vp10/common/vp10_fwd_txfm1d.h"
 #include "vp10/common/vp10_fwd_txfm2d_cfg.h"

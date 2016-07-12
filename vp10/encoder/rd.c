@@ -582,10 +582,10 @@ void vp10_model_rd_from_var_lapndz(unsigned int var, unsigned int n_log2,
   }
 }
 
-void vp10_get_entropy_contexts_plane(BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
-                                     const struct macroblockd_plane *pd,
-                                     ENTROPY_CONTEXT t_above[2 * MAX_MIB_SIZE],
-                                     ENTROPY_CONTEXT t_left[2 * MAX_MIB_SIZE]) {
+static void get_entropy_contexts_plane(
+    BLOCK_SIZE plane_bsize, TX_SIZE tx_size, const struct macroblockd_plane *pd,
+    ENTROPY_CONTEXT t_above[2 * MAX_MIB_SIZE],
+    ENTROPY_CONTEXT t_left[2 * MAX_MIB_SIZE]) {
   const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
   const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
   const ENTROPY_CONTEXT *const above = pd->above_context;
@@ -626,7 +626,7 @@ void vp10_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
                               ENTROPY_CONTEXT t_above[2 * MAX_MIB_SIZE],
                               ENTROPY_CONTEXT t_left[2 * MAX_MIB_SIZE]) {
   const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
-  vp10_get_entropy_contexts_plane(plane_bsize, tx_size, pd, t_above, t_left);
+  get_entropy_contexts_plane(plane_bsize, tx_size, pd, t_above, t_left);
 }
 
 void vp10_mv_pred(VP10_COMP *cpi, MACROBLOCK *x,

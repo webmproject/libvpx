@@ -57,6 +57,12 @@ void vp10_iwht4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
                      int eob);
 void vp10_idct4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
                      int eob);
+void vp10_idct8x8_add(const tran_low_t *input, uint8_t *dest, int stride,
+                      int eob);
+void vp10_idct16x16_add(const tran_low_t *input, uint8_t *dest, int stride,
+                        int eob);
+void vp10_idct32x32_add(const tran_low_t *input, uint8_t *dest, int stride,
+                        int eob);
 
 void vp10_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
                            int stride, int eob, TX_TYPE tx_type, int lossless);

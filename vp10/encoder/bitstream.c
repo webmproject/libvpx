@@ -121,7 +121,7 @@ static struct vp10_token interintra_mode_encodings[INTERINTRA_MODES];
 static struct vp10_token motvar_encodings[MOTION_VARIATIONS];
 #endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
 
-void vp10_encode_token_init() {
+void vp10_encode_token_init(void) {
 #if CONFIG_EXT_TX
   int s;
   for (s = 1; s < EXT_TX_SETS_INTER; ++s) {

@@ -12,6 +12,7 @@
 #include <math.h>
 #include <string.h>
 
+#include "./vp10_rtcd.h"
 #include "vp10/common/vp10_inv_txfm.h"
 
 void vp10_iwht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride) {

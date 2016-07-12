@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "./vp10_rtcd.h"
 #include "vp10/common/enums.h"
 #include "vp10/common/vp10_txfm.h"
 #include "vp10/common/vp10_inv_txfm1d.h"
