@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3ad6900d_4f29b9e5",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1367,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-12T12:57:36Z",
+      "side": 1,
+      "message": "should be \u0027const uint8_t* above[MAX_MB_PLANE]\u0027",
+      "range": {
+        "startLine": 1367,
+        "startChar": 47,
+        "endLine": 1367,
+        "endChar": 52
+      },
+      "revId": "2eefc96dfb7b0af6d5d66b852838af17fb46fe1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_6f2e7df0",
+        "filename": "vp10/common/reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1369,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-12T12:57:36Z",
+      "side": 1,
+      "message": "same here",
+      "range": {
+        "startLine": 1369,
+        "startChar": 47,
+        "endLine": 1369,
+        "endChar": 51
+      },
+      "revId": "2eefc96dfb7b0af6d5d66b852838af17fb46fe1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_8f33c153",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 11060,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-12T12:57:36Z",
+      "side": 1,
+      "message": "add {}\u0027s",
+      "range": {
+        "startLine": 11060,
+        "startChar": 30,
+        "endLine": 11060,
+        "endChar": 31
+      },
+      "revId": "2eefc96dfb7b0af6d5d66b852838af17fb46fe1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_cf34e93c",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 11114,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-12T12:57:36Z",
+      "side": 1,
+      "message": "block 11104-11114 looks very similar to 11089-11099. Any chance for factorization?",
+      "range": {
+        "startLine": 11114,
+        "startChar": 10,
+        "endLine": 11114,
+        "endChar": 11
+      },
+      "revId": "2eefc96dfb7b0af6d5d66b852838af17fb46fe1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_ef41ad97",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 11159,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-12T12:57:36Z",
+      "side": 1,
+      "message": "what about using \"\u003e\u003eVPX_BLEND_A64_ROUND_BITS)\" here around and below?",
+      "range": {
+        "startLine": 11159,
+        "startChar": 39,
+        "endLine": 11159,
+        "endChar": 62
+      },
+      "revId": "2eefc96dfb7b0af6d5d66b852838af17fb46fe1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_2f0d5590",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 11182,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-12T12:57:36Z",
+      "side": 1,
+      "message": "here too, some factorization seems possible.",
+      "range": {
+        "startLine": 11182,
+        "startChar": 10,
+        "endLine": 11182,
+        "endChar": 11
+      },
+      "revId": "2eefc96dfb7b0af6d5d66b852838af17fb46fe1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
