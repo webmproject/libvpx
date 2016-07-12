@@ -203,7 +203,11 @@ int vp10_rc_clamp_pframe_target_size(const VP10_COMP *const cpi, int target) {
                                       rc->avg_frame_bandwidth >> 5);
   if (target < min_frame_target)
     target = min_frame_target;
+#if CONFIG_EXT_REFS
+  if (cpi->rc.is_src_frame_alt_ref) {
+#else
   if (cpi->refresh_golden_frame && rc->is_src_frame_alt_ref) {
+#endif
     // If there is an active ARF at this location use the minimum
     // bits on this frame even if it is a constructed arf.
     // The active maximum quantizer insures that an appropriate
@@ -1232,8 +1236,16 @@ static void update_alt_ref_frame_stats(VP10_COMP *cpi) {
 static void update_golden_frame_stats(VP10_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
 
+#if CONFIG_EXT_REFS
   // Update the Golden frame usage counts.
+  // Wei-Ting: If we use show_existing_frame for an OVERLAY frame, only the
+  //           virtual indices for the reference frame will be updated and
+  //           cpi->refresh_golden_frame will still be zero.
+  if (cpi->refresh_golden_frame || rc->is_src_frame_alt_ref) {
+#else
+    // Update the Golden frame usage counts.
   if (cpi->refresh_golden_frame) {
+#endif
     // this frame refreshes means next frames don't unless specified by user
     rc->frames_since_golden = 0;
 

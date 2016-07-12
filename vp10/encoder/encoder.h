@@ -614,6 +614,7 @@ typedef struct VP10_COMP {
 #if CONFIG_EXT_REFS
   int refresh_frame_mask;
   int existing_fb_idx_to_show;
+  int is_arf_filter_off;
 #endif  // CONFIG_EXT_REFS
 } VP10_COMP;
 

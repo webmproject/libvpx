@@ -85,6 +85,7 @@ FILE *yuv_skinmap_file = NULL;
 #endif
 #ifdef OUTPUT_YUV_REC
 FILE *yuv_rec_file;
+#define FILE_NAME_LEN 80
 #endif
 
 #if 0
@@ -3061,9 +3062,36 @@ void vp10_write_yuv_frame_420(YV12_BUFFER_CONFIG *s, FILE *f) {
 }
 #endif
 
+#if CONFIG_EXT_REFS
+static void check_show_existing_frame(VP10_COMP *cpi) {
+  const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
+  VP10_COMMON *const cm = &cpi->common;
+  const FRAME_UPDATE_TYPE next_frame_update_type =
+      gf_group->update_type[gf_group->index];
+
+  if (cpi->rc.is_last_bipred_frame) {
+    // NOTE(zoeliu): If the current frame is a last bi-predictive frame, it is
+    //               needed next to show the BWDREF_FRAME, which is pointed by
+    //               the last_fb_idxes[0] after reference frame buffer update
+    cpi->rc.is_last_bipred_frame = 0;
+    cm->show_existing_frame = 1;
+    cpi->existing_fb_idx_to_show = cpi->lst_fb_idxes[0];
+  } else if (next_frame_update_type == OVERLAY_UPDATE &&
+      cpi->is_arf_filter_off) {
+    // Other parameters related to OVERLAY_UPDATE will be taken care of
+    // in vp10_rc_get_second_pass_params(cpi)
+    cm->show_existing_frame = 1;
+    cpi->rc.is_src_frame_alt_ref = 1;
+    cpi->existing_fb_idx_to_show = cpi->alt_fb_idx;
+    cpi->is_arf_filter_off = 0;
+  } else {
+    cm->show_existing_frame = 0;
+  }
+}
+#endif
+
 #ifdef OUTPUT_YUV_REC
-void vp10_write_yuv_rec_frame(VP10_COMMON *cm) {
-  YV12_BUFFER_CONFIG *s = cm->frame_to_show;
+void vp10_write_one_yuv_frame(VP10_COMMON *cm, YV12_BUFFER_CONFIG *s) {
   uint8_t *src = s->y_buffer;
   int h = cm->height;
 
@@ -3120,7 +3148,7 @@ void vp10_write_yuv_rec_frame(VP10_COMMON *cm) {
 
   fflush(yuv_rec_file);
 }
-#endif
+#endif  // OUTPUT_YUV_REC
 
 #if CONFIG_VP9_HIGHBITDEPTH
 static void scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
@@ -4849,6 +4877,15 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
     // Update the frame type
     cm->last_frame_type = cm->frame_type;
 
+#if CONFIG_EXT_REFS
+    // Since we allocate a spot for the OVERLAY frame in the gf group, we need
+    // to do post-encoding update accordingly.
+    if (cpi->rc.is_src_frame_alt_ref) {
+      vp10_set_target_rate(cpi);
+      vp10_rc_postencode_update(cpi, *size);
+    }
+#endif
+
     cm->last_width = cm->width;
     cm->last_height = cm->height;
 
@@ -4976,14 +5013,6 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
     dump_filtered_recon_frames(cpi);
 #endif  // DUMP_RECON_FRAMES
 
-#if CONFIG_EXT_REFS
-  if (cpi->rc.is_last_bipred_frame) {
-    // NOTE: If the current frame is a LAST_BIPRED_FRAME, next it is needed
-    //       to show the BWDREF_FRAME.
-    cpi->existing_fb_idx_to_show = cpi->bwd_fb_idx;
-  }
-#endif  // CONFIG_EXT_REFS
-
   if (cm->seg.update_map)
     update_reference_segmentation_map(cpi);
 
@@ -5097,13 +5126,20 @@ static void Pass0Encode(VP10_COMP *cpi, size_t *size, uint8_t *dest,
 static void Pass2Encode(VP10_COMP *cpi, size_t *size,
                         uint8_t *dest, unsigned int *frame_flags) {
   cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
+
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
 
 #if CONFIG_EXT_REFS
-  // Donot do the post-encoding update for show_existing_frame==1.
-  if (!cpi->common.show_existing_frame)
-#endif  // CONFIG_EXT_REFS
+  // Do not do post-encoding update for those frames that do not have a spot in
+  // a gf group, but note that an OVERLAY frame always has a spot in a gf group,
+  // even when show_existing_frame is used.
+  if (!cpi->common.show_existing_frame || cpi->rc.is_src_frame_alt_ref) {
     vp10_twopass_postencode_update(cpi);
+  }
+  check_show_existing_frame(cpi);
+#else
+  vp10_twopass_postencode_update(cpi);
+#endif  // CONFIG_EXT_REFS
 }
 
 static void init_ref_frame_bufs(VP10_COMMON *cm) {
@@ -5500,6 +5536,11 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
     *time_stamp = source->ts_start;
     *time_end = source->ts_end;
 
+    // We need to adjust frame rate for an overlay frame
+    if (cpi->rc.is_src_frame_alt_ref) {
+      adjust_frame_rate(cpi, source);
+    }
+
     // Find a free buffer for the new frame, releasing the reference previously
     // held.
     if (cm->new_fb_idx != INVALID_IDX) {
@@ -5515,6 +5556,11 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
 
     // Start with a 0 size frame.
     *size = 0;
+
+    // We need to update the gf_group for show_existing overlay frame
+    if (cpi->rc.is_src_frame_alt_ref) {
+      vp10_rc_get_second_pass_params(cpi);
+    }
 
     Pass2Encode(cpi, size, dest, frame_flags);
 
@@ -5716,17 +5762,6 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
 #endif  // CONFIG_INTERNAL_STATS
 
   vpx_clear_system_state();
-
-#if CONFIG_EXT_REFS
-  if (cpi->rc.is_last_bipred_frame) {
-    // NOTE(zoeliu): If the current frame is a last bi-predictive frame, it is
-    //               needed next to show the BWDREF_FRAME.
-    cpi->rc.is_last_bipred_frame = 0;
-    cm->show_existing_frame = 1;
-  } else {
-    cm->show_existing_frame = 0;
-  }
-#endif  // CONFIG_EXT_REFS
 
   return 0;
 }
