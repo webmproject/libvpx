@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3ad6900d_6a43c854",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1157809
+      },
+      "writtenOn": "2016-07-12T22:09:15Z",
+      "side": 1,
+      "message": "Is this correct? This doesn\u0027t take into account the top and left borders of the image. I think it should be fb-\u003eplane[0] + border * fb-\u003estride[0] + border. Similarly for planes 1 and 2.\n\nI think this might be the issue that caused the change to need to be reverted.",
+      "range": {
+        "startLine": 222,
+        "startChar": 8,
+        "endLine": 222,
+        "endChar": 37
+      },
+      "revId": "6dd7f2b50a65373aa906d678cb5a29fb65531a55",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
