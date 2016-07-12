@@ -72,6 +72,8 @@ typedef struct {
   YV12_BUFFER_CONFIG scaled_frames[MAX_LAG_BUFFERS];
   // Temp buffer used for 2-stage down-sampling, for real-time mode.
   YV12_BUFFER_CONFIG scaled_temp;
+  int scaled_one_half;
+  int scaled_temp_is_alloc;
 
   // Layer context used for rate control in one pass temporal CBR mode or
   // two pass spatial mode.

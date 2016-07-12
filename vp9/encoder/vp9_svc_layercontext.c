@@ -33,6 +33,8 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->rc_drop_superframe = 0;
   svc->force_zero_mode_spatial_ref = 0;
   svc->use_base_mv = 0;
+  svc->scaled_temp_is_alloc = 0;
+  svc->scaled_one_half = 0;
   svc->current_superframe = 0;
   for (i = 0; i < REF_FRAMES; ++i)
     svc->ref_frame_index[i] = -1;
@@ -42,26 +44,6 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
     cpi->svc.ext_gld_fb_idx[sl] = 1;
     cpi->svc.ext_alt_fb_idx[sl] = 2;
   }
-
-  // For 1 pass cbr: allocate scaled_frame that may be used as an intermediate
-  // buffer for a 2 stage down-sampling: two stages of 1:2 down-sampling for a
-  // target of 1/4x1/4.
-  if (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR) {
-    if (vpx_realloc_frame_buffer(&cpi->svc.scaled_temp,
-                                 cpi->common.width >> 1,
-                                 cpi->common.height >> 1,
-                                 cpi->common.subsampling_x,
-                                 cpi->common.subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
-                                 cpi->common.use_highbitdepth,
-#endif
-                                 VP9_ENC_BORDER_IN_PIXELS,
-                                 cpi->common.byte_alignment,
-                                 NULL, NULL, NULL))
-      vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
-                         "Failed to allocate scaled_frame for svc ");
-  }
-
 
   if (cpi->oxcf.error_resilient_mode == 0 && cpi->oxcf.pass == 2) {
     if (vpx_realloc_frame_buffer(&cpi->svc.empty_frame.img,
