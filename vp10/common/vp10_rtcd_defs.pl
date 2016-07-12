@@ -93,6 +93,13 @@ specialize qw/vp10_convolve_horiz ssse3/;
 add_proto qw/void vp10_convolve_vert/, "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int w, int h, const InterpFilterParams fp, const int subpel_x_q4, int x_step_q4, int avg";
 specialize qw/vp10_convolve_vert ssse3/;
 
+if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+  add_proto qw/void vp10_highbd_convolve_horiz/, "const uint16_t *src, int src_stride, uint16_t *dst, int dst_stride, int w, int h, const InterpFilterParams fp, const int subpel_x_q4, int x_step_q4, int avg, int bd";
+  specialize qw/vp10_highbd_convolve_horiz sse4_1/;
+  add_proto qw/void vp10_highbd_convolve_vert/, "const uint16_t *src, int src_stride, uint16_t *dst, int dst_stride, int w, int h, const InterpFilterParams fp, const int subpel_x_q4, int x_step_q4, int avg, int bd";
+  specialize qw/vp10_highbd_convolve_vert sse4_1/;
+}
+
 #
 # dct
 #
