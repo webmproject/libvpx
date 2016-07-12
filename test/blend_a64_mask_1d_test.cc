@@ -23,14 +23,11 @@
 
 #include "./vp10_rtcd.h"
 
-#include "test/acm_random.h"
 #include "vp10/common/enums.h"
 
 #include "vpx_dsp/blend.h"
 
-using libvpx_test::ACMRandom;
 using libvpx_test::FunctionEquivalenceTest;
-using std::tr1::make_tuple;
 
 namespace {
 
@@ -44,29 +41,27 @@ class BlendA64Mask1DTest : public FunctionEquivalenceTest<F> {
   static const int kMaxMaskWidth = 2 * MAX_SB_SIZE;
   static const int kMaxMaskSize = kMaxMaskWidth;
 
-  BlendA64Mask1DTest() : rng_(ACMRandom::DeterministicSeed()) {}
-
   virtual ~BlendA64Mask1DTest() {}
 
-  virtual void Execute(T *p_src0, T *p_src1) = 0;
+  virtual void Execute(const T *p_src0, const T *p_src1) = 0;
 
   void Common() {
-    w_ = 1 << rng_(MAX_SB_SIZE_LOG2 + 1);
-    h_ = 1 << rng_(MAX_SB_SIZE_LOG2 + 1);
+    w_ = 1 << this->rng_(MAX_SB_SIZE_LOG2 + 1);
+    h_ = 1 << this->rng_(MAX_SB_SIZE_LOG2 + 1);
 
-    dst_offset_ = rng_(33);
-    dst_stride_ = rng_(kMaxWidth + 1 - w_) + w_;
+    dst_offset_ = this->rng_(33);
+    dst_stride_ = this->rng_(kMaxWidth + 1 - w_) + w_;
 
-    src0_offset_ = rng_(33);
-    src0_stride_ = rng_(kMaxWidth + 1 - w_) + w_;
+    src0_offset_ = this->rng_(33);
+    src0_stride_ = this->rng_(kMaxWidth + 1 - w_) + w_;
 
-    src1_offset_ = rng_(33);
-    src1_stride_ = rng_(kMaxWidth + 1 - w_) + w_;
+    src1_offset_ = this->rng_(33);
+    src1_stride_ = this->rng_(kMaxWidth + 1 - w_) + w_;
 
     T *p_src0;
     T *p_src1;
 
-    switch (rng_(3)) {
+    switch (this->rng_(3)) {
       case 0:   // Separate sources
         p_src0 = src0_;
         p_src1 = src1_;
@@ -97,8 +92,6 @@ class BlendA64Mask1DTest : public FunctionEquivalenceTest<F> {
     }
   }
 
-  ACMRandom rng_;
-
   T dst_ref_[kBufSize];
   T dst_tst_[kBufSize];
   size_t dst_stride_;
@@ -126,19 +119,18 @@ typedef void (*F8B)(uint8_t *dst, uint32_t dst_stride,
                     const uint8_t *src0, uint32_t src0_stride,
                     const uint8_t *src1, uint32_t src1_stride,
                     const uint8_t *mask, int h, int w);
+typedef libvpx_test::FuncParam<F8B> TestFuncs;
 
 class BlendA64Mask1DTest8B : public BlendA64Mask1DTest<F8B, uint8_t> {
  protected:
-  void Execute(uint8_t *p_src0, uint8_t *p_src1) {
-    ref_func_(dst_ref_ + dst_offset_, dst_stride_,
-              p_src0 + src0_offset_, src0_stride_,
-              p_src1 + src1_offset_, src1_stride_,
-              mask_, h_, w_);
-
-    tst_func_(dst_tst_ + dst_offset_, dst_stride_,
-              p_src0 + src0_offset_, src0_stride_,
-              p_src1 + src1_offset_, src1_stride_,
-              mask_, h_, w_);
+  void Execute(const uint8_t *p_src0, const uint8_t *p_src1) {
+    params_.ref_func(dst_ref_ + dst_offset_, dst_stride_,
+                     p_src0 + src0_offset_, src0_stride_,
+                     p_src1 + src1_offset_, src1_stride_, mask_, h_, w_);
+    ASM_REGISTER_STATE_CHECK(
+        params_.tst_func(dst_tst_ + dst_offset_, dst_stride_,
+                         p_src0 + src0_offset_, src0_stride_,
+                         p_src1 + src1_offset_, src1_stride_, mask_, h_, w_));
   }
 };
 
@@ -215,16 +207,15 @@ static void blend_a64_vmask_ref(
 
 INSTANTIATE_TEST_CASE_P(
   C, BlendA64Mask1DTest8B,
-  ::testing::Values(
-    make_tuple(blend_a64_hmask_ref, vpx_blend_a64_hmask_c),
-    make_tuple(blend_a64_vmask_ref, vpx_blend_a64_vmask_c)));
+  ::testing::Values(TestFuncs(blend_a64_hmask_ref, vpx_blend_a64_hmask_c),
+                    TestFuncs(blend_a64_vmask_ref, vpx_blend_a64_vmask_c)));
 
 #if HAVE_SSE4_1
 INSTANTIATE_TEST_CASE_P(
   SSE4_1, BlendA64Mask1DTest8B,
   ::testing::Values(
-    make_tuple(blend_a64_hmask_ref, vpx_blend_a64_hmask_sse4_1),
-    make_tuple(blend_a64_vmask_ref, vpx_blend_a64_vmask_sse4_1)));
+      TestFuncs(blend_a64_hmask_ref, vpx_blend_a64_hmask_sse4_1),
+      TestFuncs(blend_a64_vmask_ref, vpx_blend_a64_vmask_sse4_1)));
 #endif  // HAVE_SSE4_1
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -236,20 +227,20 @@ typedef void (*FHBD)(uint8_t *dst, uint32_t dst_stride,
                      const uint8_t *src0, uint32_t src0_stride,
                      const uint8_t *src1, uint32_t src1_stride,
                      const uint8_t *mask, int h, int w, int bd);
+typedef libvpx_test::FuncParam<FHBD> TestFuncsHBD;
 
 class BlendA64Mask1DTestHBD : public BlendA64Mask1DTest<FHBD, uint16_t> {
  protected:
-  void Execute(uint16_t *p_src0, uint16_t *p_src1) {
-    ref_func_(CONVERT_TO_BYTEPTR(dst_ref_ + dst_offset_), dst_stride_,
-              CONVERT_TO_BYTEPTR(p_src0 + src0_offset_), src0_stride_,
-              CONVERT_TO_BYTEPTR(p_src1 + src1_offset_), src1_stride_,
-              mask_, h_, w_, bit_depth_);
-
-    ASM_REGISTER_STATE_CHECK(
-      tst_func_(CONVERT_TO_BYTEPTR(dst_tst_ + dst_offset_), dst_stride_,
-                CONVERT_TO_BYTEPTR(p_src0 + src0_offset_), src0_stride_,
-                CONVERT_TO_BYTEPTR(p_src1 + src1_offset_), src1_stride_,
-                mask_, h_, w_, bit_depth_));
+  void Execute(const uint16_t *p_src0, const uint16_t *p_src1) {
+    params_.ref_func(CONVERT_TO_BYTEPTR(dst_ref_ + dst_offset_), dst_stride_,
+                     CONVERT_TO_BYTEPTR(p_src0 + src0_offset_), src0_stride_,
+                     CONVERT_TO_BYTEPTR(p_src1 + src1_offset_), src1_stride_,
+                     mask_, h_, w_, bit_depth_);
+    ASM_REGISTER_STATE_CHECK(params_.tst_func(
+        CONVERT_TO_BYTEPTR(dst_tst_ + dst_offset_), dst_stride_,
+        CONVERT_TO_BYTEPTR(p_src0 + src0_offset_), src0_stride_,
+        CONVERT_TO_BYTEPTR(p_src1 + src1_offset_), src1_stride_,
+        mask_, h_, w_, bit_depth_));
   }
 
   int bit_depth_;
@@ -359,15 +350,17 @@ static void highbd_blend_a64_vmask_ref(
 INSTANTIATE_TEST_CASE_P(
   C, BlendA64Mask1DTestHBD,
   ::testing::Values(
-    make_tuple(highbd_blend_a64_hmask_ref, vpx_highbd_blend_a64_hmask_c),
-    make_tuple(highbd_blend_a64_vmask_ref, vpx_highbd_blend_a64_vmask_c)));
+      TestFuncsHBD(highbd_blend_a64_hmask_ref, vpx_highbd_blend_a64_hmask_c),
+      TestFuncsHBD(highbd_blend_a64_vmask_ref, vpx_highbd_blend_a64_vmask_c)));
 
 #if HAVE_SSE4_1
 INSTANTIATE_TEST_CASE_P(
   SSE4_1, BlendA64Mask1DTestHBD,
   ::testing::Values(
-    make_tuple(highbd_blend_a64_hmask_ref, vpx_highbd_blend_a64_hmask_sse4_1),
-    make_tuple(highbd_blend_a64_vmask_ref, vpx_highbd_blend_a64_vmask_sse4_1)));
+      TestFuncsHBD(highbd_blend_a64_hmask_ref,
+                   vpx_highbd_blend_a64_hmask_sse4_1),
+      TestFuncsHBD(highbd_blend_a64_vmask_ref,
+                   vpx_highbd_blend_a64_vmask_sse4_1)));
 #endif  // HAVE_SSE4_1
 
 #endif  // CONFIG_VP9_HIGHBITDEPTH

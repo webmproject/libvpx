@@ -21,11 +21,11 @@
 
 #include "test/acm_random.h"
 #include "test/function_equivalence_test.h"
+#include "test/register_state_check.h"
 
 #define WEDGE_WEIGHT_BITS 6
 #define MAX_MASK_VALUE  (1 << (WEDGE_WEIGHT_BITS))
 
-using std::tr1::make_tuple;
 using libvpx_test::ACMRandom;
 using libvpx_test::FunctionEquivalenceTest;
 
@@ -154,8 +154,8 @@ TEST_F(WedgeUtilsSSEFuncTest, ResidualBlendingMethod) {
     for (int i = 0 ; i < N ; i++)
       r0[i] = r1[i] + d[i];
 
-    uint64_t ref_res = sse_from_residuals(r0, r1, m, N);
-    uint64_t tst_res = vp10_wedge_sse_from_residuals(r1, d, m, N);
+    const uint64_t ref_res = sse_from_residuals(r0, r1, m, N);
+    const uint64_t tst_res = vp10_wedge_sse_from_residuals(r1, d, m, N);
 
     ASSERT_EQ(ref_res, tst_res);
   }
@@ -169,14 +169,11 @@ typedef uint64_t (*FSSE)(const int16_t *r1,
                          const int16_t *d,
                          const uint8_t *m,
                          int N);
+typedef libvpx_test::FuncParam<FSSE> TestFuncsFSSE;
 
 class WedgeUtilsSSEOptTest : public FunctionEquivalenceTest<FSSE> {
  protected:
-  WedgeUtilsSSEOptTest() : rng_(ACMRandom::DeterministicSeed()) {}
-
   static const int kIterations = 10000;
-
-  ACMRandom rng_;
 };
 
 TEST_P(WedgeUtilsSSEOptTest, RandomValues) {
@@ -193,8 +190,9 @@ TEST_P(WedgeUtilsSSEOptTest, RandomValues) {
 
     const int N = 64 * (rng_(MAX_SB_SQUARE/64) + 1);
 
-    const uint64_t ref_res = ref_func_(r1, d, m, N);
-    const uint64_t tst_res = tst_func_(r1, d, m, N);
+    const uint64_t ref_res = params_.ref_func(r1, d, m, N);
+    uint64_t tst_res;
+    ASM_REGISTER_STATE_CHECK(tst_res = params_.tst_func(r1, d, m, N));
 
     ASSERT_EQ(ref_res, tst_res);
   }
@@ -227,8 +225,9 @@ TEST_P(WedgeUtilsSSEOptTest, ExtremeValues) {
 
     const int N = 64 * (rng_(MAX_SB_SQUARE/64) + 1);
 
-    const uint64_t ref_res = ref_func_(r1, d, m, N);
-    const uint64_t tst_res = tst_func_(r1, d, m, N);
+    const uint64_t ref_res = params_.ref_func(r1, d, m, N);
+    uint64_t tst_res;
+    ASM_REGISTER_STATE_CHECK(tst_res = params_.tst_func(r1, d, m, N));
 
     ASSERT_EQ(ref_res, tst_res);
   }
@@ -238,10 +237,9 @@ TEST_P(WedgeUtilsSSEOptTest, ExtremeValues) {
 INSTANTIATE_TEST_CASE_P(
     SSE2, WedgeUtilsSSEOptTest,
     ::testing::Values(
-        make_tuple(&vp10_wedge_sse_from_residuals_c,
-                   &vp10_wedge_sse_from_residuals_sse2)
-    )
-);
+        TestFuncsFSSE(vp10_wedge_sse_from_residuals_c,
+                      vp10_wedge_sse_from_residuals_sse2)));
+
 #endif  // HAVE_SSE2
 
 //////////////////////////////////////////////////////////////////////////////
@@ -252,15 +250,12 @@ typedef int (*FSign)(const int16_t *ds,
                      const uint8_t *m,
                      int N,
                      int64_t limit);
+typedef libvpx_test::FuncParam<FSign> TestFuncsFSign;
 
 class WedgeUtilsSignOptTest : public FunctionEquivalenceTest<FSign> {
  protected:
-  WedgeUtilsSignOptTest() : rng_(ACMRandom::DeterministicSeed()) {}
-
   static const int kIterations = 10000;
   static const int kMaxSize = 8196;  // Size limited by SIMD implementation.
-
-  ACMRandom rng_;
 };
 
 TEST_P(WedgeUtilsSignOptTest, RandomValues) {
@@ -287,8 +282,9 @@ TEST_P(WedgeUtilsSignOptTest, RandomValues) {
     for (int i = 0 ; i < N ; i++)
       ds[i] = clamp(r0[i]*r0[i] - r1[i]*r1[i], INT16_MIN, INT16_MAX);
 
-    const int ref_res = ref_func_(ds, m, N, limit);
-    const int tst_res = tst_func_(ds, m, N, limit);
+    const int ref_res = params_.ref_func(ds, m, N, limit);
+    int tst_res;
+    ASM_REGISTER_STATE_CHECK(tst_res = params_.tst_func(ds, m, N, limit));
 
     ASSERT_EQ(ref_res, tst_res);
   }
@@ -342,21 +338,22 @@ TEST_P(WedgeUtilsSignOptTest, ExtremeValues) {
     for (int i = 0 ; i < N ; i++)
       ds[i] = clamp(r0[i]*r0[i] - r1[i]*r1[i], INT16_MIN, INT16_MAX);
 
-    const int ref_res = ref_func_(ds, m, N, limit);
-    const int tst_res = tst_func_(ds, m, N, limit);
+    const int ref_res = params_.ref_func(ds, m, N, limit);
+    int tst_res;
+    ASM_REGISTER_STATE_CHECK(tst_res = params_.tst_func(ds, m, N, limit));
 
     ASSERT_EQ(ref_res, tst_res);
   }
 }
 
 #if HAVE_SSE2
+
 INSTANTIATE_TEST_CASE_P(
     SSE2, WedgeUtilsSignOptTest,
     ::testing::Values(
-        make_tuple(&vp10_wedge_sign_from_residuals_c,
-                   &vp10_wedge_sign_from_residuals_sse2)
-    )
-);
+      TestFuncsFSign(vp10_wedge_sign_from_residuals_c,
+                     vp10_wedge_sign_from_residuals_sse2)));
+
 #endif  // HAVE_SSE2
 
 //////////////////////////////////////////////////////////////////////////////
@@ -367,14 +364,11 @@ typedef void (*FDS)(int16_t *d,
                     const int16_t *a,
                     const int16_t *b,
                     int N);
+typedef libvpx_test::FuncParam<FDS> TestFuncsFDS;
 
 class WedgeUtilsDeltaSquaresOptTest : public FunctionEquivalenceTest<FDS> {
  protected:
-  WedgeUtilsDeltaSquaresOptTest() : rng_(ACMRandom::DeterministicSeed()) {}
-
   static const int kIterations = 10000;
-
-  ACMRandom rng_;
 };
 
 TEST_P(WedgeUtilsDeltaSquaresOptTest, RandomValues) {
@@ -394,8 +388,8 @@ TEST_P(WedgeUtilsDeltaSquaresOptTest, RandomValues) {
     memset(&d_ref, INT16_MAX, sizeof(d_ref));
     memset(&d_tst, INT16_MAX, sizeof(d_tst));
 
-    ref_func_(d_ref, a, b, N);
-    tst_func_(d_tst, a, b, N);
+    params_.ref_func(d_ref, a, b, N);
+    ASM_REGISTER_STATE_CHECK(params_.tst_func(d_tst, a, b, N));
 
     for (int i = 0 ; i < MAX_SB_SQUARE ; ++i)
       ASSERT_EQ(d_ref[i], d_tst[i]);
@@ -403,13 +397,13 @@ TEST_P(WedgeUtilsDeltaSquaresOptTest, RandomValues) {
 }
 
 #if HAVE_SSE2
+
 INSTANTIATE_TEST_CASE_P(
     SSE2, WedgeUtilsDeltaSquaresOptTest,
     ::testing::Values(
-        make_tuple(&vp10_wedge_compute_delta_squares_c,
-                   &vp10_wedge_compute_delta_squares_sse2)
-    )
-);
+      TestFuncsFDS(vp10_wedge_compute_delta_squares_c,
+                   vp10_wedge_compute_delta_squares_sse2)));
+
 #endif  // HAVE_SSE2
 
 }  // namespace
