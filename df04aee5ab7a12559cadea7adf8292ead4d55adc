@@ -70,6 +70,30 @@
       "revId": "df04aee5ab7a12559cadea7adf8292ead4d55adc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aaf7091_d8074dc2",
+        "filename": "test/function_equivalence_test.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-12T17:45:05Z",
+      "side": 1,
+      "message": "This project is build with C++03, how do you suggest using C++11 features?",
+      "parentUuid": "3ad6900d_3ad2f10f",
+      "range": {
+        "startLine": 38,
+        "startChar": 45,
+        "endLine": 38,
+        "endChar": 50
+      },
+      "revId": "df04aee5ab7a12559cadea7adf8292ead4d55adc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
