@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3ad6900d_e9b0cd9e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 10
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-12T02:35:58Z",
+      "side": 1,
+      "message": "it would probably be best to split that out",
+      "revId": "8d629dc0c47653c65d7ca6ea1a64b93e649b5599",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
