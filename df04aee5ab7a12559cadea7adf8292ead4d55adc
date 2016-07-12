@@ -22,6 +22,30 @@
       "revId": "df04aee5ab7a12559cadea7adf8292ead4d55adc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aaf7091_38820971",
+        "filename": "test/function_equivalence_test.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-07-12T15:19:07Z",
+      "side": 1,
+      "message": "C++ lacks template parameter inference from constructor parameters, so you will need MakeParam or explicit type parameters everywhere, which is cumbersome.",
+      "parentUuid": "3ad6900d_8ff02169",
+      "range": {
+        "startLine": 38,
+        "startChar": 45,
+        "endLine": 38,
+        "endChar": 50
+      },
+      "revId": "df04aee5ab7a12559cadea7adf8292ead4d55adc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
