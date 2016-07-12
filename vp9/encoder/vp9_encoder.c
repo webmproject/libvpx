@@ -753,6 +753,26 @@ static void alloc_util_frame_buffers(VP9_COMP *cpi) {
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate scaled source buffer");
 
+  // For 1 pass cbr: allocate scaled_frame that may be used as an intermediate
+  // buffer for a 2 stage down-sampling: two stages of 1:2 down-sampling for a
+  // target of 1/4x1/4.
+  if (is_one_pass_cbr_svc(cpi) && !cpi->svc.scaled_temp_is_alloc) {
+    cpi->svc.scaled_temp_is_alloc = 1;
+    if (vpx_realloc_frame_buffer(&cpi->svc.scaled_temp,
+                                 cm->width >> 1,
+                                 cm->height >> 1,
+                                 cm->subsampling_x,
+                                 cm->subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+                                 cm->use_highbitdepth,
+#endif
+                                 VP9_ENC_BORDER_IN_PIXELS,
+                                 cm->byte_alignment,
+                                 NULL, NULL, NULL))
+      vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+                         "Failed to allocate scaled_frame for svc ");
+  }
+
   if (vpx_realloc_frame_buffer(&cpi->scaled_last_source,
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
@@ -3262,10 +3282,22 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
       cpi->un_scaled_source->y_height == cm->height << 2 &&
       cpi->svc.scaled_temp.y_width == cm->width << 1 &&
       cpi->svc.scaled_temp.y_height == cm->height << 1) {
+    // For svc, if it is a 1/4x1/4 downscaling, do a two-stage scaling to take
+    // advantage of the 1:2 optimized scaler. In the process, the 1/2x1/2
+    // result will be saved in scaled_temp and might be used later.
     cpi->Source = vp9_svc_twostage_scale(cm,
                                          cpi->un_scaled_source,
                                          &cpi->scaled_source,
                                          &cpi->svc.scaled_temp);
+    cpi->svc.scaled_one_half = 1;
+  } else if (is_one_pass_cbr_svc(cpi) &&
+             cpi->un_scaled_source->y_width == cm->width << 1 &&
+             cpi->un_scaled_source->y_height == cm->height << 1 &&
+             cpi->svc.scaled_one_half) {
+    // If the spatial layer is 1/2x1/2 and the scaling is already done in the
+    // two-stage scaling, use the result directly.
+    cpi->Source = &cpi->svc.scaled_temp;
+    cpi->svc.scaled_one_half = 0;
   } else {
     cpi->Source = vp9_scale_if_required(cm,
                                         cpi->un_scaled_source,
