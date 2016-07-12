@@ -1124,14 +1124,14 @@ if (vpx_config("CONFIG_EXT_INTER") eq "yes") {
 if (vpx_config("CONFIG_OBMC") eq "yes") {
   foreach (@block_sizes) {
     ($w, $h) = @$_;
-    add_proto qw/unsigned int/, "vpx_obmc_sad${w}x${h}", "const uint8_t *ref_ptr, int ref_stride, const int32_t *wsrc_ptr, const int32_t *mask";
+    add_proto qw/unsigned int/, "vpx_obmc_sad${w}x${h}", "const uint8_t *pre, int pre_stride, const int32_t *wsrc, const int32_t *mask";
     specialize "vpx_obmc_sad${w}x${h}", qw/sse4_1/;
   }
 
   if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     foreach (@block_sizes) {
       ($w, $h) = @$_;
-      add_proto qw/unsigned int/, "vpx_highbd_obmc_sad${w}x${h}", "const uint8_t *ref_ptr, int ref_stride, const int32_t *wsrc_ptr, const int32_t *mask";
+      add_proto qw/unsigned int/, "vpx_highbd_obmc_sad${w}x${h}", "const uint8_t *pre, int pre_stride, const int32_t *wsrc, const int32_t *mask";
       specialize "vpx_highbd_obmc_sad${w}x${h}", qw/sse4_1/;
     }
   }

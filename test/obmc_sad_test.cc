@@ -29,7 +29,7 @@ namespace {
 static const int kIterations = 1000;
 static const int kMaskMax = 64;
 
-typedef unsigned int (*ObmcSadF)(const uint8_t *ref, int ref_stride,
+typedef unsigned int (*ObmcSadF)(const uint8_t *pre, int pre_stride,
                                  const int32_t *wsrc, const int32_t *mask);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,42 +45,42 @@ class ObmcSadTest : public FunctionEquivalenceTest<ObmcSadF> {
 };
 
 TEST_P(ObmcSadTest, RandomValues) {
-  DECLARE_ALIGNED(32, uint8_t, ref[MAX_SB_SQUARE]);
+  DECLARE_ALIGNED(32, uint8_t, pre[MAX_SB_SQUARE]);
   DECLARE_ALIGNED(32, int32_t, wsrc[MAX_SB_SQUARE]);
   DECLARE_ALIGNED(32, int32_t, mask[MAX_SB_SQUARE]);
 
   for (int iter = 0 ; iter < kIterations && !HasFatalFailure() ; ++iter) {
-    const int ref_stride = rng_(MAX_SB_SIZE + 1);
+    const int pre_stride = rng_(MAX_SB_SIZE + 1);
 
     for (int i = 0 ; i < MAX_SB_SQUARE ; ++i) {
-      ref[i] = rng_.Rand8();
+      pre[i] = rng_.Rand8();
       wsrc[i] = rng_.Rand8() * rng_(kMaskMax * kMaskMax + 1);
       mask[i] = rng_(kMaskMax * kMaskMax + 1);
     }
 
-    const unsigned int ref_res = ref_func_(ref, ref_stride, wsrc, mask);
-    const unsigned int tst_res = tst_func_(ref, ref_stride, wsrc, mask);
+    const unsigned int ref_res = ref_func_(pre, pre_stride, wsrc, mask);
+    const unsigned int tst_res = tst_func_(pre, pre_stride, wsrc, mask);
 
     ASSERT_EQ(ref_res, tst_res);
   }
 }
 
 TEST_P(ObmcSadTest, ExtremeValues) {
-  DECLARE_ALIGNED(32, uint8_t, ref[MAX_SB_SQUARE]);
+  DECLARE_ALIGNED(32, uint8_t, pre[MAX_SB_SQUARE]);
   DECLARE_ALIGNED(32, int32_t, wsrc[MAX_SB_SQUARE]);
   DECLARE_ALIGNED(32, int32_t, mask[MAX_SB_SQUARE]);
 
   for (int iter = 0 ; iter < MAX_SB_SIZE && !HasFatalFailure() ; ++iter) {
-    const int ref_stride = iter;
+    const int pre_stride = iter;
 
     for (int i = 0 ; i < MAX_SB_SQUARE ; ++i) {
-      ref[i] = UINT8_MAX;
+      pre[i] = UINT8_MAX;
       wsrc[i] = UINT8_MAX * kMaskMax * kMaskMax;
       mask[i] = kMaskMax * kMaskMax;
     }
 
-    const unsigned int ref_res = ref_func_(ref, ref_stride, wsrc, mask);
-    const unsigned int tst_res = tst_func_(ref, ref_stride, wsrc, mask);
+    const unsigned int ref_res = ref_func_(pre, pre_stride, wsrc, mask);
+    const unsigned int tst_res = tst_func_(pre, pre_stride, wsrc, mask);
 
     ASSERT_EQ(ref_res, tst_res);
   }
@@ -126,22 +126,22 @@ class ObmcSadHBDTest : public FunctionEquivalenceTest<ObmcSadF> {
 };
 
 TEST_P(ObmcSadHBDTest, RandomValues) {
-  DECLARE_ALIGNED(32, uint16_t, ref[MAX_SB_SQUARE]);
+  DECLARE_ALIGNED(32, uint16_t, pre[MAX_SB_SQUARE]);
   DECLARE_ALIGNED(32, int32_t, wsrc[MAX_SB_SQUARE]);
   DECLARE_ALIGNED(32, int32_t, mask[MAX_SB_SQUARE]);
 
   for (int iter = 0 ; iter < kIterations && !HasFatalFailure() ; ++iter) {
-    const int ref_stride = rng_(MAX_SB_SIZE + 1);
+    const int pre_stride = rng_(MAX_SB_SIZE + 1);
 
     for (int i = 0 ; i < MAX_SB_SQUARE ; ++i) {
-      ref[i] = rng_(1<<12);
+      pre[i] = rng_(1<<12);
       wsrc[i] = rng_(1<<12) * rng_(kMaskMax * kMaskMax + 1);
       mask[i] = rng_(kMaskMax * kMaskMax + 1);
     }
 
-    const unsigned int ref_res = ref_func_(CONVERT_TO_BYTEPTR(ref), ref_stride,
+    const unsigned int ref_res = ref_func_(CONVERT_TO_BYTEPTR(pre), pre_stride,
                                            wsrc, mask);
-    const unsigned int tst_res = tst_func_(CONVERT_TO_BYTEPTR(ref), ref_stride,
+    const unsigned int tst_res = tst_func_(CONVERT_TO_BYTEPTR(pre), pre_stride,
                                            wsrc, mask);
 
     ASSERT_EQ(ref_res, tst_res);
@@ -149,22 +149,22 @@ TEST_P(ObmcSadHBDTest, RandomValues) {
 }
 
 TEST_P(ObmcSadHBDTest, ExtremeValues) {
-  DECLARE_ALIGNED(32, uint16_t, ref[MAX_SB_SQUARE]);
+  DECLARE_ALIGNED(32, uint16_t, pre[MAX_SB_SQUARE]);
   DECLARE_ALIGNED(32, int32_t, wsrc[MAX_SB_SQUARE]);
   DECLARE_ALIGNED(32, int32_t, mask[MAX_SB_SQUARE]);
 
   for (int iter = 0 ; iter < MAX_SB_SIZE && !HasFatalFailure() ; ++iter) {
-    const int ref_stride = iter;
+    const int pre_stride = iter;
 
     for (int i = 0 ; i < MAX_SB_SQUARE ; ++i) {
-      ref[i] = (1 << 12) - 1;
+      pre[i] = (1 << 12) - 1;
       wsrc[i] = ((1 << 12) - 1) * kMaskMax * kMaskMax;
       mask[i] = kMaskMax * kMaskMax;
     }
 
-    const unsigned int ref_res = ref_func_(CONVERT_TO_BYTEPTR(ref), ref_stride,
+    const unsigned int ref_res = ref_func_(CONVERT_TO_BYTEPTR(pre), pre_stride,
                                            wsrc, mask);
-    const unsigned int tst_res = tst_func_(CONVERT_TO_BYTEPTR(ref), ref_stride,
+    const unsigned int tst_res = tst_func_(CONVERT_TO_BYTEPTR(pre), pre_stride,
                                            wsrc, mask);
 
     ASSERT_EQ(ref_res, tst_res);

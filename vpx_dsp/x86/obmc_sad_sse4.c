@@ -21,26 +21,28 @@
 // 8 bit
 ////////////////////////////////////////////////////////////////////////////////
 
-static INLINE unsigned int obmc_sad_w4(const uint8_t *a, const int a_stride,
-                                       const int32_t *b, const int32_t *m,
+static INLINE unsigned int obmc_sad_w4(const uint8_t *pre,
+                                       const int pre_stride,
+                                       const int32_t *wsrc,
+                                       const int32_t *mask,
                                        const int height) {
-  const int a_step = a_stride - 4;
+  const int pre_step = pre_stride - 4;
   int n = 0;
   __m128i v_sad_d = _mm_setzero_si128();
 
   do {
-    const __m128i v_a_b = xx_loadl_32(a + n);
-    const __m128i v_m_d = xx_load_128(m + n);
-    const __m128i v_b_d = xx_load_128(b + n);
+    const __m128i v_p_b = xx_loadl_32(pre + n);
+    const __m128i v_m_d = xx_load_128(mask + n);
+    const __m128i v_w_d = xx_load_128(wsrc + n);
 
-    const __m128i v_a_d = _mm_cvtepu8_epi32(v_a_b);
+    const __m128i v_p_d = _mm_cvtepu8_epi32(v_p_b);
 
-    // Values in both a and m fit in 15 bits, and are packed at 32 bit
+    // Values in both pre and mask fit in 15 bits, and are packed at 32 bit
     // boundaries. We use pmaddwd, as it has lower latency on Haswell
     // than pmulld but produces the same result with these inputs.
-    const __m128i v_am_d = _mm_madd_epi16(v_a_d, v_m_d);
+    const __m128i v_pm_d = _mm_madd_epi16(v_p_d, v_m_d);
 
-    const __m128i v_diff_d = _mm_sub_epi32(v_b_d, v_am_d);
+    const __m128i v_diff_d = _mm_sub_epi32(v_w_d, v_pm_d);
     const __m128i v_absdiff_d = _mm_abs_epi32(v_diff_d);
 
     // Rounded absolute difference
@@ -51,39 +53,42 @@ static INLINE unsigned int obmc_sad_w4(const uint8_t *a, const int a_stride,
     n += 4;
 
     if (n % 4 == 0)
-      a += a_step;
+      pre += pre_step;
   } while (n < 4 * height);
 
   return xx_hsum_epi32_si32(v_sad_d);
 }
 
-static INLINE unsigned int obmc_sad_w8n(const uint8_t *a, const int a_stride,
-                                        const int32_t *b, const int32_t *m,
-                                        const int width, const int height) {
-  const int a_step = a_stride - width;
+static INLINE unsigned int obmc_sad_w8n(const uint8_t *pre,
+                                        const int pre_stride,
+                                        const int32_t *wsrc,
+                                        const int32_t *mask,
+                                        const int width,
+                                        const int height) {
+  const int pre_step = pre_stride - width;
   int n = 0;
   __m128i v_sad_d = _mm_setzero_si128();
   assert(width >= 8 && (width & (width - 1)) == 0);
 
   do {
-    const __m128i v_a1_b = xx_loadl_32(a + n + 4);
-    const __m128i v_m1_d = xx_load_128(m + n + 4);
-    const __m128i v_b1_d = xx_load_128(b + n + 4);
-    const __m128i v_a0_b = xx_loadl_32(a + n);
-    const __m128i v_m0_d = xx_load_128(m + n);
-    const __m128i v_b0_d = xx_load_128(b + n);
+    const __m128i v_p1_b = xx_loadl_32(pre + n + 4);
+    const __m128i v_m1_d = xx_load_128(mask + n + 4);
+    const __m128i v_w1_d = xx_load_128(wsrc + n + 4);
+    const __m128i v_p0_b = xx_loadl_32(pre + n);
+    const __m128i v_m0_d = xx_load_128(mask + n);
+    const __m128i v_w0_d = xx_load_128(wsrc + n);
 
-    const __m128i v_a0_d = _mm_cvtepu8_epi32(v_a0_b);
-    const __m128i v_a1_d = _mm_cvtepu8_epi32(v_a1_b);
+    const __m128i v_p0_d = _mm_cvtepu8_epi32(v_p0_b);
+    const __m128i v_p1_d = _mm_cvtepu8_epi32(v_p1_b);
 
-    // Values in both a and m fit in 15 bits, and are packed at 32 bit
+    // Values in both pre and mask fit in 15 bits, and are packed at 32 bit
     // boundaries. We use pmaddwd, as it has lower latency on Haswell
     // than pmulld but produces the same result with these inputs.
-    const __m128i v_am0_d = _mm_madd_epi16(v_a0_d, v_m0_d);
-    const __m128i v_am1_d = _mm_madd_epi16(v_a1_d, v_m1_d);
+    const __m128i v_pm0_d = _mm_madd_epi16(v_p0_d, v_m0_d);
+    const __m128i v_pm1_d = _mm_madd_epi16(v_p1_d, v_m1_d);
 
-    const __m128i v_diff0_d = _mm_sub_epi32(v_b0_d, v_am0_d);
-    const __m128i v_diff1_d = _mm_sub_epi32(v_b1_d, v_am1_d);
+    const __m128i v_diff0_d = _mm_sub_epi32(v_w0_d, v_pm0_d);
+    const __m128i v_diff1_d = _mm_sub_epi32(v_w1_d, v_pm1_d);
     const __m128i v_absdiff0_d = _mm_abs_epi32(v_diff0_d);
     const __m128i v_absdiff1_d = _mm_abs_epi32(v_diff1_d);
 
@@ -97,21 +102,21 @@ static INLINE unsigned int obmc_sad_w8n(const uint8_t *a, const int a_stride,
     n += 8;
 
     if (n % width == 0)
-      a += a_step;
+      pre += pre_step;
   } while (n < width * height);
 
   return xx_hsum_epi32_si32(v_sad_d);
 }
 
 #define OBMCSADWXH(w, h)                                                      \
-unsigned int vpx_obmc_sad##w##x##h##_sse4_1(const uint8_t *ref,               \
-                                            int ref_stride,                   \
+unsigned int vpx_obmc_sad##w##x##h##_sse4_1(const uint8_t *pre,               \
+                                            int pre_stride,                   \
                                             const int32_t *wsrc,              \
                                             const int32_t *msk) {             \
   if (w == 4)                                                                 \
-    return obmc_sad_w4(ref, ref_stride, wsrc, msk, h);                        \
+    return obmc_sad_w4(pre, pre_stride, wsrc, msk, h);                        \
   else                                                                        \
-    return obmc_sad_w8n(ref, ref_stride, wsrc, msk, w, h);                    \
+    return obmc_sad_w8n(pre, pre_stride, wsrc, msk, w, h);                    \
 }
 
 #if CONFIG_EXT_PARTITION
@@ -138,28 +143,29 @@ OBMCSADWXH(4, 4)
 ////////////////////////////////////////////////////////////////////////////////
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static INLINE unsigned int hbd_obmc_sad_w4(const uint8_t *a8,
-                                           const int a_stride,
-                                           const int32_t *b, const int32_t *m,
+static INLINE unsigned int hbd_obmc_sad_w4(const uint8_t *pre8,
+                                           const int pre_stride,
+                                           const int32_t *wsrc,
+                                           const int32_t *mask,
                                            const int height) {
-  const uint16_t *a = CONVERT_TO_SHORTPTR(a8);
-  const int a_step = a_stride - 4;
+  const uint16_t *pre = CONVERT_TO_SHORTPTR(pre8);
+  const int pre_step = pre_stride - 4;
   int n = 0;
   __m128i v_sad_d = _mm_setzero_si128();
 
   do {
-    const __m128i v_a_w = xx_loadl_64(a + n);
-    const __m128i v_m_d = xx_load_128(m + n);
-    const __m128i v_b_d = xx_load_128(b + n);
+    const __m128i v_p_w = xx_loadl_64(pre + n);
+    const __m128i v_m_d = xx_load_128(mask + n);
+    const __m128i v_w_d = xx_load_128(wsrc + n);
 
-    const __m128i v_a_d = _mm_cvtepu16_epi32(v_a_w);
+    const __m128i v_p_d = _mm_cvtepu16_epi32(v_p_w);
 
-    // Values in both a and m fit in 15 bits, and are packed at 32 bit
+    // Values in both pre and mask fit in 15 bits, and are packed at 32 bit
     // boundaries. We use pmaddwd, as it has lower latency on Haswell
     // than pmulld but produces the same result with these inputs.
-    const __m128i v_am_d = _mm_madd_epi16(v_a_d, v_m_d);
+    const __m128i v_pm_d = _mm_madd_epi16(v_p_d, v_m_d);
 
-    const __m128i v_diff_d = _mm_sub_epi32(v_b_d, v_am_d);
+    const __m128i v_diff_d = _mm_sub_epi32(v_w_d, v_pm_d);
     const __m128i v_absdiff_d = _mm_abs_epi32(v_diff_d);
 
     // Rounded absolute difference
@@ -170,41 +176,43 @@ static INLINE unsigned int hbd_obmc_sad_w4(const uint8_t *a8,
     n += 4;
 
     if (n % 4 == 0)
-      a += a_step;
+      pre += pre_step;
   } while (n < 4 * height);
 
   return xx_hsum_epi32_si32(v_sad_d);
 }
 
-static INLINE unsigned int hbd_obmc_sad_w8n(const uint8_t *a8,
-                                            const int a_stride,
-                                            const int32_t *b, const int32_t *m,
-                                            const int width, const int height) {
-  const uint16_t *a = CONVERT_TO_SHORTPTR(a8);
-  const int a_step = a_stride - width;
+static INLINE unsigned int hbd_obmc_sad_w8n(const uint8_t *pre8,
+                                            const int pre_stride,
+                                            const int32_t *wsrc,
+                                            const int32_t *mask,
+                                            const int width,
+                                            const int height) {
+  const uint16_t *pre = CONVERT_TO_SHORTPTR(pre8);
+  const int pre_step = pre_stride - width;
   int n = 0;
   __m128i v_sad_d = _mm_setzero_si128();
   assert(width >= 8 && (width & (width - 1)) == 0);
 
   do {
-    const __m128i v_a1_w = xx_loadl_64(a + n + 4);
-    const __m128i v_m1_d = xx_load_128(m + n + 4);
-    const __m128i v_b1_d = xx_load_128(b + n + 4);
-    const __m128i v_a0_w = xx_loadl_64(a + n);
-    const __m128i v_m0_d = xx_load_128(m + n);
-    const __m128i v_b0_d = xx_load_128(b + n);
+    const __m128i v_p1_w = xx_loadl_64(pre + n + 4);
+    const __m128i v_m1_d = xx_load_128(mask + n + 4);
+    const __m128i v_w1_d = xx_load_128(wsrc + n + 4);
+    const __m128i v_p0_w = xx_loadl_64(pre + n);
+    const __m128i v_m0_d = xx_load_128(mask + n);
+    const __m128i v_w0_d = xx_load_128(wsrc + n);
 
-    const __m128i v_a0_d = _mm_cvtepu16_epi32(v_a0_w);
-    const __m128i v_a1_d = _mm_cvtepu16_epi32(v_a1_w);
+    const __m128i v_p0_d = _mm_cvtepu16_epi32(v_p0_w);
+    const __m128i v_p1_d = _mm_cvtepu16_epi32(v_p1_w);
 
-    // Values in both a and m fit in 15 bits, and are packed at 32 bit
+    // Values in both pre and mask fit in 15 bits, and are packed at 32 bit
     // boundaries. We use pmaddwd, as it has lower latency on Haswell
     // than pmulld but produces the same result with these inputs.
-    const __m128i v_am0_d = _mm_madd_epi16(v_a0_d, v_m0_d);
-    const __m128i v_am1_d = _mm_madd_epi16(v_a1_d, v_m1_d);
+    const __m128i v_pm0_d = _mm_madd_epi16(v_p0_d, v_m0_d);
+    const __m128i v_pm1_d = _mm_madd_epi16(v_p1_d, v_m1_d);
 
-    const __m128i v_diff0_d = _mm_sub_epi32(v_b0_d, v_am0_d);
-    const __m128i v_diff1_d = _mm_sub_epi32(v_b1_d, v_am1_d);
+    const __m128i v_diff0_d = _mm_sub_epi32(v_w0_d, v_pm0_d);
+    const __m128i v_diff1_d = _mm_sub_epi32(v_w1_d, v_pm1_d);
     const __m128i v_absdiff0_d = _mm_abs_epi32(v_diff0_d);
     const __m128i v_absdiff1_d = _mm_abs_epi32(v_diff1_d);
 
@@ -218,21 +226,21 @@ static INLINE unsigned int hbd_obmc_sad_w8n(const uint8_t *a8,
     n += 8;
 
     if (n % width == 0)
-      a += a_step;
+      pre += pre_step;
   } while (n < width * height);
 
   return xx_hsum_epi32_si32(v_sad_d);
 }
 
 #define HBD_OBMCSADWXH(w, h)                                                  \
-unsigned int vpx_highbd_obmc_sad##w##x##h##_sse4_1(const uint8_t *ref,        \
-                                                   int ref_stride,            \
+unsigned int vpx_highbd_obmc_sad##w##x##h##_sse4_1(const uint8_t *pre,        \
+                                                   int pre_stride,            \
                                                    const int32_t *wsrc,       \
-                                                   const int32_t *msk) {      \
+                                                   const int32_t *mask) {     \
   if (w == 4)                                                                 \
-    return hbd_obmc_sad_w4(ref, ref_stride, wsrc, msk, h);                    \
+    return hbd_obmc_sad_w4(pre, pre_stride, wsrc, mask, h);                   \
   else                                                                        \
-    return hbd_obmc_sad_w8n(ref, ref_stride, wsrc, msk, w, h);                \
+    return hbd_obmc_sad_w8n(pre, pre_stride, wsrc, mask, w, h);               \
 }
 
 #if CONFIG_EXT_PARTITION
