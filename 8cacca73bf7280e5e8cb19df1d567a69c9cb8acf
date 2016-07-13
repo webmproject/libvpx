@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "3ad6900d_f687bd2a",
+        "filename": "test/vp10_convolve_optimz_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-13T17:20:56Z",
+      "side": 1,
+      "message": "yes, 99% of the time, tuple are misused. struct offer better visibility of the fields, smaller code, etc.\n\nusing tuple is a pattern to get rid of in tests. One example of such clean-up is https://chromium-review.googlesource.com/#/c/360071/",
+      "parentUuid": "3ad6900d_d6d8f953",
+      "range": {
+        "startLine": 43,
+        "startChar": 8,
+        "endLine": 43,
+        "endChar": 13
+      },
+      "revId": "8cacca73bf7280e5e8cb19df1d567a69c9cb8acf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ad6900d_bb19a028",
         "filename": "test/vp10_convolve_optimz_test.cc",
         "patchSetId": 2
