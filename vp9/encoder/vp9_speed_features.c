@@ -546,7 +546,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->adaptive_interp_filter_search = 0;
   sf->allow_partition_search_skip = 0;
   sf->txfm_domain_distortion = 0;
-  sf->quant_coeff_opt = 1;
+  sf->quant_coeff_opt = sf->optimize_coefficients;
 
   for (i = 0; i < TX_SIZES; i++) {
     sf->intra_y_mode_mask[i] = INTRA_ALL;
