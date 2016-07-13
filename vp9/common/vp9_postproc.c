@@ -18,6 +18,7 @@
 #include "./vp9_rtcd.h"
 
 #include "vpx_dsp/vpx_dsp_common.h"
+#include "vpx_dsp/postproc.h"
 #include "vpx_ports/mem.h"
 #include "vpx_ports/system_state.h"
 #include "vpx_scale/vpx_scale.h"
@@ -294,59 +295,6 @@ void vp9_denoise(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
   vp9_deblock(src, dst, q, limits);
 }
 
-static double gaussian(double sigma, double mu, double x) {
-  return 1 / (sigma * sqrt(2.0 * 3.14159265)) *
-         (exp(-(x - mu) * (x - mu) / (2 * sigma * sigma)));
-}
-
-static void fillrd(struct postproc_state *state, int q, int a) {
-  char char_dist[300];
-
-  double sigma;
-  int ai = a, qi = q, i;
-
-  vpx_clear_system_state();
-
-  sigma = ai + .5 + .6 * (63 - qi) / 63.0;
-
-  /* set up a lookup table of 256 entries that matches
-   * a gaussian distribution with sigma determined by q.
-   */
-  {
-    int next, j;
-
-    next = 0;
-
-    for (i = -32; i < 32; i++) {
-      int a_i = (int)(0.5 + 256 * gaussian(sigma, 0, i));
-
-      if (a_i) {
-        for (j = 0; j < a_i; j++) {
-          char_dist[next + j] = (char) i;
-        }
-
-        next = next + j;
-      }
-    }
-
-    for (; next < 256; next++)
-      char_dist[next] = 0;
-  }
-
-  for (i = 0; i < 3072; i++) {
-    state->noise[i] = char_dist[rand() & 0xff];  // NOLINT
-  }
-
-  for (i = 0; i < 16; i++) {
-    state->blackclamp[i] = -char_dist[0];
-    state->whiteclamp[i] = -char_dist[0];
-    state->bothclamp[i] = -2 * char_dist[0];
-  }
-
-  state->last_q = q;
-  state->last_noise = a;
-}
-
 static void swap_mi_and_prev_mi(VP9_COMMON *cm) {
   // Current mip will be the prev_mip for the next frame.
   MODE_INFO *temp = cm->postproc_state.prev_mip;
@@ -469,7 +417,20 @@ int vp9_post_proc_frame(struct VP9Common *cm,
     const int noise_level = ppflags->noise_level;
     if (ppstate->last_q != q ||
         ppstate->last_noise != noise_level) {
-      fillrd(ppstate, 63 - q, noise_level);
+      double sigma;
+      int clamp, i;
+      vpx_clear_system_state();
+      sigma = noise_level + .5 + .6 * q / 63.0;
+      clamp = vpx_setup_noise(sizeof(ppstate->noise), sigma,
+                              ppstate->noise);
+
+      for (i = 0; i < 16; i++) {
+        ppstate->blackclamp[i] = clamp;
+        ppstate->whiteclamp[i] = clamp;
+        ppstate->bothclamp[i] = 2 * clamp;
+      }
+      ppstate->last_q = q;
+      ppstate->last_noise = noise_level;
     }
     vpx_plane_add_noise(ppbuf->y_buffer, ppstate->noise, ppstate->blackclamp,
                         ppstate->whiteclamp, ppstate->bothclamp,
