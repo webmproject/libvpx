@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3ad6900d_7519e070",
+        "filename": "vp10/common/blockd.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-07-13T23:12:14Z",
+      "side": 1,
+      "message": "See my comment in decodeframe",
+      "parentUuid": "3ad6900d_4cdc5c52",
+      "revId": "e59aac6b9b59da5c8b4e4fde379e6e5a268930ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ad6900d_2c88f887",
         "filename": "vp10/decoder/decodeframe.c",
         "patchSetId": 6
@@ -88,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "3ad6900d_f5033007",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 3772,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-07-13T23:12:14Z",
+      "side": 1,
+      "message": "You are correct but I think this will force me to change a ton of function signatures in reconinter.c and pass all of cm even though I only need one member from it. I can do this if you think it is much better.",
+      "parentUuid": "3ad6900d_ac324896",
+      "revId": "e59aac6b9b59da5c8b4e4fde379e6e5a268930ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ad6900d_6c2cc09f",
         "filename": "vp10/encoder/bitstream.c",
         "patchSetId": 6
@@ -111,6 +147,30 @@
     },
     {
       "key": {
+        "uuid": "3ad6900d_759ac02f",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 3227,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-07-13T23:12:14Z",
+      "side": 1,
+      "message": "(1) if global motion is not used, the only thing sent in the bitstream is gmtype, which will be GLOBAL_ZERO. This is enough for the decoder to determine gm is not used. Gm is only used if the mode is ZEROMV and gmtype is not GLOBAL_ZERO. This will eventually be a part of build_inter_predictors in reconinter, which I am currently working on. \n(2) currently addressing",
+      "parentUuid": "3ad6900d_6c2cc09f",
+      "range": {
+        "startLine": 3227,
+        "startChar": 15,
+        "endLine": 3227,
+        "endChar": 44
+      },
+      "revId": "e59aac6b9b59da5c8b4e4fde379e6e5a268930ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ad6900d_6cc84017",
         "filename": "vp10/encoder/bitstream.c",
         "patchSetId": 6
@@ -122,6 +182,24 @@
       "writtenOn": "2016-07-13T20:04:42Z",
       "side": 1,
       "message": "Should be less indented.",
+      "revId": "e59aac6b9b59da5c8b4e4fde379e6e5a268930ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_753e40d0",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 3406,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-07-13T23:12:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3ad6900d_6cc84017",
       "revId": "e59aac6b9b59da5c8b4e4fde379e6e5a268930ff",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
