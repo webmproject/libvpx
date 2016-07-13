@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "3ad6900d_12350a36",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 3475,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-07-13T20:30:22Z",
+      "side": 1,
+      "message": "The only reason I did it this way is to allow gm parameters to have lower precision than warped motion parameters. They then need to be decoded to higher precision to use with the warped motion model. Instead of doing integerize I could just H*(1 \u003c\u003c (WARPED_PRECISION - GM_PRECISION)) but this will break if someone sets GM_PRECISION \u003e WARPED_PRECISION. I can write it so it divides if GM \u003e WARPED but I thought it might be more readable to use integerize.",
+      "parentUuid": "3ad6900d_2c88f887",
+      "revId": "e59aac6b9b59da5c8b4e4fde379e6e5a268930ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ad6900d_2c5398cd",
         "filename": "vp10/decoder/decodeframe.c",
         "patchSetId": 6
