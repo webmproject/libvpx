@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3ad6900d_e0c2973b",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-13T00:16:21Z",
+      "side": 1,
+      "message": "(later) these should be c++ style casts",
+      "range": {
+        "startLine": 98,
+        "startChar": 14,
+        "endLine": 98,
+        "endChar": 19
+      },
+      "revId": "5a1cf647576e34e65099f41a123ac7d8b5323b6b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
