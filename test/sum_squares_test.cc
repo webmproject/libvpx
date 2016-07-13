@@ -31,25 +31,21 @@ const int kNumIterations = 10000;
 
 static const int16_t kInt13Max = (1 << 12) - 1;
 
-typedef uint64_t (*SSI16Func)(const int16_t *src,
-                             int stride ,
-                             int size);
+typedef uint64_t (*SSI16Func)(const int16_t *src, int stride, int size);
+typedef libvpx_test::FuncParam<SSI16Func> TestFuncs;
 
-typedef std::tr1::tuple<SSI16Func, SSI16Func> SumSquaresParam;
-
-class SumSquaresTest : public ::testing::TestWithParam<SumSquaresParam> {
+class SumSquaresTest :
+    public ::testing::TestWithParam<TestFuncs> {
  public:
   virtual ~SumSquaresTest() {}
   virtual void SetUp() {
-    ref_func_ = GET_PARAM(0);
-    tst_func_ = GET_PARAM(1);
+    params_ = this->GetParam();
   }
 
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
  protected:
-  SSI16Func ref_func_;
-  SSI16Func tst_func_;
+  TestFuncs params_;
 };
 
 TEST_P(SumSquaresTest, OperationCheck) {
@@ -74,9 +70,9 @@ TEST_P(SumSquaresTest, OperationCheck) {
       }
     }
 
-    uint64_t res_ref = ref_func_(src, stride, size);
+    const uint64_t res_ref = params_.ref_func(src, stride, size);
     uint64_t res_tst;
-    ASM_REGISTER_STATE_CHECK(res_tst = tst_func_(src, stride, size));
+    ASM_REGISTER_STATE_CHECK(res_tst = params_.tst_func(src, stride, size));
 
     if (!failed) {
       failed = res_ref != res_tst;
@@ -110,9 +106,9 @@ TEST_P(SumSquaresTest, ExtremeValues) {
       }
     }
 
-    uint64_t res_ref = ref_func_(src, stride, size);
+    const uint64_t res_ref = params_.ref_func(src, stride, size);
     uint64_t res_tst;
-    ASM_REGISTER_STATE_CHECK(res_tst = tst_func_(src, stride, size));
+    ASM_REGISTER_STATE_CHECK(res_tst = params_.tst_func(src, stride, size));
 
     if (!failed) {
       failed = res_ref != res_tst;
@@ -122,16 +118,14 @@ TEST_P(SumSquaresTest, ExtremeValues) {
     }
   }
 }
-using std::tr1::make_tuple;
 
 #if HAVE_SSE2
 
 INSTANTIATE_TEST_CASE_P(
     SSE2, SumSquaresTest,
     ::testing::Values(
-        make_tuple(&vpx_sum_squares_2d_i16_c, &vpx_sum_squares_2d_i16_sse2)
-    )
-);
+        TestFuncs(&vpx_sum_squares_2d_i16_c, &vpx_sum_squares_2d_i16_sse2)));
+
 #endif  // HAVE_SSE2
 
 //////////////////////////////////////////////////////////////////////////////
@@ -139,15 +133,12 @@ INSTANTIATE_TEST_CASE_P(
 //////////////////////////////////////////////////////////////////////////////
 
 typedef uint64_t (*F1D)(const int16_t *src, uint32_t N);
+typedef libvpx_test::FuncParam<F1D> TestFuncs1D;
 
 class SumSquares1DTest : public FunctionEquivalenceTest<F1D> {
  protected:
-  SumSquares1DTest() : rng_(ACMRandom::DeterministicSeed()) {}
-
   static const int kIterations = 1000;
   static const int kMaxSize = 256;
-
-  ACMRandom rng_;
 };
 
 TEST_P(SumSquares1DTest, RandomValues) {
@@ -160,8 +151,9 @@ TEST_P(SumSquares1DTest, RandomValues) {
     const int N = rng_(2) ? rng_(kMaxSize * kMaxSize + 1 - kMaxSize) + kMaxSize
                           : rng_(kMaxSize) + 1;
 
-    const uint64_t ref_res = ref_func_(src, N);
-    const uint64_t tst_res = tst_func_(src, N);
+    const uint64_t ref_res = params_.ref_func(src, N);
+    uint64_t tst_res;
+    ASM_REGISTER_STATE_CHECK(tst_res = params_.tst_func(src, N));
 
     ASSERT_EQ(ref_res, tst_res);
   }
@@ -182,21 +174,19 @@ TEST_P(SumSquares1DTest, ExtremeValues) {
     const int N = rng_(2) ? rng_(kMaxSize * kMaxSize + 1 - kMaxSize) + kMaxSize
                           : rng_(kMaxSize) + 1;
 
-    const uint64_t ref_res = ref_func_(src, N);
-    const uint64_t tst_res = tst_func_(src, N);
+    const uint64_t ref_res = params_.ref_func(src, N);
+    uint64_t tst_res;
+    ASM_REGISTER_STATE_CHECK(tst_res = params_.tst_func(src, N));
 
     ASSERT_EQ(ref_res, tst_res);
   }
 }
 
-using std::tr1::make_tuple;
-
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
     SSE2, SumSquares1DTest,
     ::testing::Values(
-        make_tuple(&vpx_sum_squares_i16_c, &vpx_sum_squares_i16_sse2)
-    )
-);
+        TestFuncs1D(vpx_sum_squares_i16_c, vpx_sum_squares_i16_sse2)));
+
 #endif  // HAVE_SSE2
 }  // namespace
