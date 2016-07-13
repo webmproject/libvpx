@@ -1298,97 +1298,63 @@ void vp10_build_inter_predictors_sb_extend(MACROBLOCKD *xd,
 #endif  // CONFIG_SUPERTX
 
 #if CONFIG_OBMC
-// obmc_mask_N[is_neighbor_predictor][overlap_position]
-static const uint8_t obmc_mask_1[2][1] = {
-    { 55},
-    {  9}
+// obmc_mask_N[overlap_position]
+static const uint8_t obmc_mask_1[1] = {
+  55
 };
 
-static const uint8_t obmc_mask_2[2][2] = {
-    { 45, 62},
-    { 19,  2}
+static const uint8_t obmc_mask_2[2] = {
+  45, 62
 };
 
-static const uint8_t obmc_mask_4[2][4] = {
-    { 39, 50, 59, 64},
-    { 25, 14,  5,  0}
+static const uint8_t obmc_mask_4[4] = {
+  39, 50, 59, 64
 };
 
-static const uint8_t obmc_mask_8[2][8] = {
-    { 36, 42, 48, 53, 57, 61, 63, 64},
-    { 28, 22, 16, 11,  7,  3,  1,  0}
+static const uint8_t obmc_mask_8[8] = {
+  36, 42, 48, 53, 57, 61, 63, 64
 };
 
-static const uint8_t obmc_mask_16[2][16] = {
-    { 34, 37, 40, 43, 46, 49, 52, 54, 56, 58, 60, 61, 63, 64, 64, 64},
-    { 30, 27, 24, 21, 18, 15, 12, 10,  8,  6,  4,  3,  1,  0,  0,  0}
+static const uint8_t obmc_mask_16[16] = {
+  34, 37, 40, 43, 46, 49, 52, 54, 56, 58, 60, 61, 63, 64, 64, 64
 };
 
-static const uint8_t obmc_mask_32[2][32] = {
-    { 33, 35, 36, 38, 40, 41, 43, 44,
-      45, 47, 48, 50, 51, 52, 53, 55,
-      56, 57, 58, 59, 60, 60, 61, 62,
-      62, 63, 63, 64, 64, 64, 64, 64 },
-    { 31, 29, 28, 26, 24, 23, 21, 20,
-      19, 17, 16, 14, 13, 12, 11,  9,
-       8,  7,  6,  5,  4,  4,  3,  2,
-       2,  1,  1,  0,  0,  0,  0,  0 }
+static const uint8_t obmc_mask_32[32] = {
+  33, 35, 36, 38, 40, 41, 43, 44, 45, 47, 48, 50, 51, 52, 53, 55,
+  56, 57, 58, 59, 60, 60, 61, 62, 62, 63, 63, 64, 64, 64, 64, 64
 };
 
 #if CONFIG_EXT_PARTITION
-static const uint8_t obmc_mask_64[2][64] = {
-    {
-      33, 34, 35, 35, 36, 37, 38, 39, 40, 40, 41, 42, 43, 44, 44, 44,
-      45, 46, 47, 47, 48, 49, 50, 51, 51, 51, 52, 52, 53, 54, 55, 56,
-      56, 56, 57, 57, 58, 58, 59, 60, 60, 60, 60, 60, 61, 62, 62, 62,
-      62, 62, 63, 63, 63, 63, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    }, {
-      31, 30, 29, 29, 28, 27, 26, 25, 24, 24, 23, 22, 21, 20, 20, 20,
-      19, 18, 17, 17, 16, 15, 14, 13, 13, 13, 12, 12, 11, 10,  9,  8,
-      8,  8,  7,  7,  6,  6,  5, 4,  4,  4,  4,  4,  3,  2,  2,  2,
-      2,  2,  1,  1, 1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-    }
+static const uint8_t obmc_mask_64[64] = {
+  33, 34, 35, 35, 36, 37, 38, 39, 40, 40, 41, 42, 43, 44, 44, 44,
+  45, 46, 47, 47, 48, 49, 50, 51, 51, 51, 52, 52, 53, 54, 55, 56,
+  56, 56, 57, 57, 58, 58, 59, 60, 60, 60, 60, 60, 61, 62, 62, 62,
+  62, 62, 63, 63, 63, 63, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
 };
 #endif  // CONFIG_EXT_PARTITION
 
 
-void setup_obmc_mask(int length, const uint8_t *mask[2]) {
+const uint8_t* vp10_get_obmc_mask(int length) {
   switch (length) {
     case 1:
-      mask[0] = obmc_mask_1[0];
-      mask[1] = obmc_mask_1[1];
-      break;
+      return obmc_mask_1;
     case 2:
-      mask[0] = obmc_mask_2[0];
-      mask[1] = obmc_mask_2[1];
-      break;
+      return obmc_mask_2;
     case 4:
-      mask[0] = obmc_mask_4[0];
-      mask[1] = obmc_mask_4[1];
-      break;
+      return obmc_mask_4;
     case 8:
-      mask[0] = obmc_mask_8[0];
-      mask[1] = obmc_mask_8[1];
-      break;
+      return obmc_mask_8;
     case 16:
-      mask[0] = obmc_mask_16[0];
-      mask[1] = obmc_mask_16[1];
-      break;
+      return obmc_mask_16;
     case 32:
-      mask[0] = obmc_mask_32[0];
-      mask[1] = obmc_mask_32[1];
-      break;
+      return obmc_mask_32;
 #if CONFIG_EXT_PARTITION
     case 64:
-      mask[0] = obmc_mask_64[0];
-      mask[1] = obmc_mask_64[1];
-      break;
+      return obmc_mask_64;
 #endif  // CONFIG_EXT_PARTITION
     default:
-      mask[0] = NULL;
-      mask[1] = NULL;
       assert(0);
-      break;
+      return NULL;
   }
 }
 
@@ -1398,168 +1364,101 @@ void setup_obmc_mask(int length, const uint8_t *mask[2]) {
 // xd->plane[].dst.buf
 void vp10_build_obmc_inter_prediction(VP10_COMMON *cm,
                                       MACROBLOCKD *xd, int mi_row, int mi_col,
-                                      int use_tmp_dst_buf,
-                                      uint8_t *final_buf[MAX_MB_PLANE],
-                                      int final_stride[MAX_MB_PLANE],
-                                      uint8_t *tmp_buf1[MAX_MB_PLANE],
-                                      int tmp_stride1[MAX_MB_PLANE],
-                                      uint8_t *tmp_buf2[MAX_MB_PLANE],
-                                      int tmp_stride2[MAX_MB_PLANE]) {
-  const TileInfo *const tile = &xd->tile;
-  BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
-  int plane, i, mi_step;
-  int above_available = mi_row > tile->mi_row_start;
+                                      uint8_t *above[MAX_MB_PLANE],
+                                      int above_stride[MAX_MB_PLANE],
+                                      uint8_t *left[MAX_MB_PLANE],
+                                      int left_stride[MAX_MB_PLANE]) {
+  const BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
+  int plane, i;
 #if CONFIG_VP9_HIGHBITDEPTH
-  int is_hbd = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ? 1 : 0;
+  const int is_hbd = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ? 1 : 0;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-
-  if (use_tmp_dst_buf) {
-    for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
-      const struct macroblockd_plane *pd = &xd->plane[plane];
-      int bw = (xd->n8_w * 8) >> pd->subsampling_x;
-      int bh = (xd->n8_h * 8) >> pd->subsampling_y;
-      int row;
-#if CONFIG_VP9_HIGHBITDEPTH
-      if (is_hbd) {
-        uint16_t *final_buf16 = CONVERT_TO_SHORTPTR(final_buf[plane]);
-        uint16_t *bmc_buf16 = CONVERT_TO_SHORTPTR(pd->dst.buf);
-        for (row = 0; row < bh; ++row)
-          memcpy(final_buf16 + row * final_stride[plane],
-                 bmc_buf16 + row * pd->dst.stride, bw * sizeof(uint16_t));
-      } else {
-#endif
-      for (row = 0; row < bh; ++row)
-        memcpy(final_buf[plane] + row * final_stride[plane],
-               pd->dst.buf + row * pd->dst.stride, bw);
-#if CONFIG_VP9_HIGHBITDEPTH
-      }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-    }
-  }
 
   // handle above row
-  for (i = 0; above_available && i < VPXMIN(xd->n8_w, cm->mi_cols - mi_col);
-       i += mi_step) {
-    int mi_row_offset = -1;
-    int mi_col_offset = i;
-    int overlap;
-    MODE_INFO *above_mi = xd->mi[mi_col_offset +
-                                 mi_row_offset * xd->mi_stride];
-    MB_MODE_INFO *above_mbmi = &above_mi->mbmi;
+  if (xd->up_available) {
+    const int overlap = num_4x4_blocks_high_lookup[bsize] * 2;
+    const int miw = VPXMIN(xd->n8_w, cm->mi_cols - mi_col);
+    const int mi_row_offset = -1;
 
-    mi_step = VPXMIN(xd->n8_w,
-                     num_8x8_blocks_wide_lookup[above_mbmi->sb_type]);
+    assert(miw > 0);
 
-    if (!is_neighbor_overlappable(above_mbmi))
-      continue;
+    i = 0;
+    do {  // for each mi in the above row
+      const int mi_col_offset = i;
+      const MB_MODE_INFO *const above_mbmi =
+          &xd->mi[mi_col_offset + mi_row_offset * xd->mi_stride]->mbmi;
+      const int mi_step =
+          VPXMIN(xd->n8_w, num_8x8_blocks_wide_lookup[above_mbmi->sb_type]);
 
-    overlap = num_4x4_blocks_high_lookup[bsize] << 1;
-
-    for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
-      const struct macroblockd_plane *pd = &xd->plane[plane];
-      int bw = (mi_step * MI_SIZE) >> pd->subsampling_x;
-      int bh = overlap >> pd->subsampling_y;
-      int row, col;
-      int dst_stride = use_tmp_dst_buf ? final_stride[plane] : pd->dst.stride;
-      uint8_t *dst = use_tmp_dst_buf ?
-          &final_buf[plane][(i * MI_SIZE) >> pd->subsampling_x] :
-          &pd->dst.buf[(i * MI_SIZE) >> pd->subsampling_x];
-      int tmp_stride = tmp_stride1[plane];
-      uint8_t *tmp = &tmp_buf1[plane][(i * MI_SIZE) >> pd->subsampling_x];
-      const uint8_t *mask[2];
-
-      setup_obmc_mask(bh, mask);
+      if (is_neighbor_overlappable(above_mbmi)) {
+        for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+          const struct macroblockd_plane *pd = &xd->plane[plane];
+          const int bw = (mi_step * MI_SIZE) >> pd->subsampling_x;
+          const int bh = overlap >> pd->subsampling_y;
+          const int dst_stride = pd->dst.stride;
+          uint8_t *const dst =
+              &pd->dst.buf[(i * MI_SIZE) >> pd->subsampling_x];
+          const int tmp_stride = above_stride[plane];
+          const uint8_t *const tmp =
+              &above[plane][(i * MI_SIZE) >> pd->subsampling_x];
+          const uint8_t *const mask = vp10_get_obmc_mask(bh);
 
 #if CONFIG_VP9_HIGHBITDEPTH
-      if (is_hbd) {
-        uint16_t *dst16 = CONVERT_TO_SHORTPTR(dst);
-        uint16_t *tmp16 = CONVERT_TO_SHORTPTR(tmp);
-
-        for (row = 0; row < bh; ++row) {
-          for (col = 0; col < bw; ++col)
-            dst16[col] = ROUND_POWER_OF_TWO(mask[0][row] * dst16[col] +
-                                            mask[1][row] * tmp16[col], 6);
-
-          dst16 += dst_stride;
-          tmp16 += tmp_stride;
+          if (is_hbd)
+            vpx_highbd_blend_a64_vmask(dst, dst_stride, dst, dst_stride,
+                                       tmp, tmp_stride, mask, bh, bw, xd->bd);
+          else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+            vpx_blend_a64_vmask(dst, dst_stride, dst, dst_stride,
+                                tmp, tmp_stride, mask, bh, bw);
         }
-      } else {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-      for (row = 0; row < bh; ++row) {
-        for (col = 0; col < bw; ++col)
-          dst[col] = ROUND_POWER_OF_TWO(mask[0][row] * dst[col] +
-                                        mask[1][row] * tmp[col], 6);
-        dst += dst_stride;
-        tmp += tmp_stride;
       }
-#if CONFIG_VP9_HIGHBITDEPTH
-      }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-    }
-  }  // each mi in the above row
+      i += mi_step;
+    } while (i < miw);
+  }
 
-  if (mi_col == 0 || (mi_col - 1 < tile->mi_col_start))
-    return;
   // handle left column
-  for (i = 0; i < VPXMIN(xd->n8_h, cm->mi_rows - mi_row);
-       i += mi_step) {
-    int mi_row_offset = i;
-    int mi_col_offset = -1;
-    int overlap;
-    MODE_INFO *left_mi = xd->mi[mi_col_offset +
-                                mi_row_offset * xd->mi_stride];
-    MB_MODE_INFO *left_mbmi = &left_mi->mbmi;
+  if (xd->left_available) {
+    const int overlap = num_4x4_blocks_wide_lookup[bsize] * 2;
+    const int mih = VPXMIN(xd->n8_h, cm->mi_rows - mi_row);
+    const int mi_col_offset = -1;
 
-    mi_step = VPXMIN(xd->n8_h,
-                     num_8x8_blocks_high_lookup[left_mbmi->sb_type]);
+    assert(mih > 0);
 
-    if (!is_neighbor_overlappable(left_mbmi))
-      continue;
+    i = 0;
+    do {  // for each mi in the left column
+      const int mi_row_offset = i;
+      const MB_MODE_INFO *const left_mbmi =
+          &xd->mi[mi_col_offset + mi_row_offset * xd->mi_stride]->mbmi;
+      const int mi_step =
+          VPXMIN(xd->n8_h, num_8x8_blocks_high_lookup[left_mbmi->sb_type]);
 
-    overlap = num_4x4_blocks_wide_lookup[bsize] << 1;
-
-    for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
-      const struct macroblockd_plane *pd = &xd->plane[plane];
-      int bw = overlap >> pd->subsampling_x;
-      int bh = (mi_step * MI_SIZE) >> pd->subsampling_y;
-      int row, col;
-      int dst_stride = use_tmp_dst_buf ? final_stride[plane] : pd->dst.stride;
-      uint8_t *dst = use_tmp_dst_buf ?
-          &final_buf[plane][(i * MI_SIZE * dst_stride) >> pd->subsampling_y] :
-          &pd->dst.buf[(i * MI_SIZE * dst_stride) >> pd->subsampling_y];
-      int tmp_stride = tmp_stride2[plane];
-      uint8_t *tmp = &tmp_buf2[plane]
-                              [(i * MI_SIZE * tmp_stride) >> pd->subsampling_y];
-      const uint8_t *mask[2];
-
-      setup_obmc_mask(bw, mask);
+      if (is_neighbor_overlappable(left_mbmi)) {
+        for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+          const struct macroblockd_plane *pd = &xd->plane[plane];
+          const int bw = overlap >> pd->subsampling_x;
+          const int bh = (mi_step * MI_SIZE) >> pd->subsampling_y;
+          const int dst_stride = pd->dst.stride;
+          uint8_t *const dst =
+              &pd->dst.buf[(i * MI_SIZE * dst_stride) >> pd->subsampling_y];
+          const int tmp_stride = left_stride[plane];
+          const uint8_t *const tmp =
+              &left[plane][(i * MI_SIZE * tmp_stride) >> pd->subsampling_y];
+          const uint8_t *const mask = vp10_get_obmc_mask(bw);
 
 #if CONFIG_VP9_HIGHBITDEPTH
-      if (is_hbd) {
-        uint16_t *dst16 = CONVERT_TO_SHORTPTR(dst);
-        uint16_t *tmp16 = CONVERT_TO_SHORTPTR(tmp);
-
-        for (row = 0; row < bh; ++row) {
-          for (col = 0; col < bw; ++col)
-            dst16[col] = ROUND_POWER_OF_TWO(mask[0][col] * dst16[col] +
-                                            mask[1][col] * tmp16[col], 6);
-          dst16 += dst_stride;
-          tmp16 += tmp_stride;
+          if (is_hbd)
+            vpx_highbd_blend_a64_hmask(dst, dst_stride, dst, dst_stride,
+                                       tmp, tmp_stride, mask, bh, bw, xd->bd);
+          else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+            vpx_blend_a64_hmask(dst, dst_stride, dst, dst_stride,
+                                tmp, tmp_stride, mask, bh, bw);
         }
-      } else {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-      for (row = 0; row < bh; ++row) {
-        for (col = 0; col < bw; ++col)
-          dst[col] = ROUND_POWER_OF_TWO(mask[0][col] * dst[col] +
-                                        mask[1][col] * tmp[col], 6);
-        dst += dst_stride;
-        tmp += tmp_stride;
       }
-#if CONFIG_VP9_HIGHBITDEPTH
-      }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-    }
-  }  // each mi in the left column
+      i += mi_step;
+    } while (i < mih);
+  }
 }
 
 #if CONFIG_EXT_INTER

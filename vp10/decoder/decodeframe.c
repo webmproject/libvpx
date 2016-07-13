@@ -1385,7 +1385,7 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                                           dst_buf2, dst_stride2);
       vp10_setup_dst_planes(xd->plane, get_frame_new_buffer(cm),
                             mi_row, mi_col);
-      vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, 0, NULL, NULL,
+      vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col,
                                        dst_buf1, dst_stride1,
                                        dst_buf2, dst_stride2);
     }

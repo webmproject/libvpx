@@ -90,16 +90,6 @@ void vp10_txfm_rd_in_plane_supertx(MACROBLOCK *x,
                                    int use_fast_coef_casting);
 #endif  // CONFIG_SUPERTX
 
-#if CONFIG_OBMC
-void calc_target_weighted_pred(VP10_COMMON *cm,
-                               MACROBLOCK *x,
-                               MACROBLOCKD *xd,
-                               int mi_row, int mi_col,
-                               uint8_t *above_buf, int above_stride,
-                               uint8_t *left_buf, int left_stride,
-                               int32_t *mask_buf, int32_t *weighted_src_buf);
-#endif  // CONFIG_OBMC
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif
