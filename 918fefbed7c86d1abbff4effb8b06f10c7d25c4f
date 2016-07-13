@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3ad6900d_1b6fec77",
+        "filename": "test/function_equivalence_test.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-13T08:02:24Z",
+      "side": 1,
+      "message": "is now unneeded.",
+      "range": {
+        "startLine": 65,
+        "startChar": 6,
+        "endLine": 65,
+        "endChar": 32
+      },
+      "revId": "918fefbed7c86d1abbff4effb8b06f10c7d25c4f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
