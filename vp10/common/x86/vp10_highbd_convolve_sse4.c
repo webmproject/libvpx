@@ -276,6 +276,9 @@ void vp10_highbd_convolve_horiz_sse4_1(const uint16_t *src, int src_stride,
     blkHeight--;
   }
 
+  if (blkResidu == 0)
+    return;
+
   for (col = 0; col < w; col += 4) {
     for (i = 0; i < 4; ++i) {
       highbd_filter_horiz(srcPtr, src_stride, verf, tapsNum, temp + (i * 4));
