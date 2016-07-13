@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3ad6900d_55b4dcdf",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-13T21:59:00Z",
+      "side": 1,
+      "message": "try to put a reason here. the revert message itself is good, but with a BUG\u003d or a reason a casual reader will have no idea what problem this caused",
+      "revId": "248f6ad77104310b48ee198b37f807a9b31d28dd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
