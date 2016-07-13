@@ -1,0 +1,112 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3ad6900d_4cdc5c52",
+        "filename": "vp10/common/blockd.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-13T20:04:42Z",
+      "side": 1,
+      "message": "Probably we do not need this pointer in xd. See comment in decodeframe.c",
+      "revId": "e59aac6b9b59da5c8b4e4fde379e6e5a268930ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_2c88f887",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 3475,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-13T20:04:42Z",
+      "side": 1,
+      "message": "Why not directly assigning the decoded integers to params-\u003emotion_params.wmmat[]? It seems not necessary to read the integers-\u003econvert to H[]-\u003econvert back to integers. Later to complete the functionality, if double type H[] is still needed in the prediction step, we can have a function at the decoder side doing the opposite of vp10_integerize_model to convert wmmat[] to H[].",
+      "revId": "e59aac6b9b59da5c8b4e4fde379e6e5a268930ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_2c5398cd",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 3487,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-13T20:04:42Z",
+      "side": 1,
+      "message": "For consistency with the encoder side, before coding the models, some flags like cpi-\u003eglobal_motion_used[frame] (moving them to cm could make things simpler) should have been decoded from uncompressed_header and be checked here.",
+      "revId": "e59aac6b9b59da5c8b4e4fde379e6e5a268930ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_ac324896",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 3772,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-13T20:04:42Z",
+      "side": 1,
+      "message": "Is it necessary to copy it to xd if the models do not vary from block to block? Later if predictors in commom/reconinter.c need the model, we can #include \"vp10/common/onyxc_int.h\" to use things in cm",
+      "revId": "e59aac6b9b59da5c8b4e4fde379e6e5a268930ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_6c2cc09f",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 3227,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-13T20:04:42Z",
+      "side": 1,
+      "message": "(1) we probably need to encode cpi-\u003eglobal_motion_used in write_uncompressed_header() if decoder cannot determine it by itself\n(2) \"if (!cpi-\u003eglobal...) {memset(...}\", should be outside the loop \"for (i \u003d 0; i \u003c...)\"",
+      "range": {
+        "startLine": 3227,
+        "startChar": 15,
+        "endLine": 3227,
+        "endChar": 44
+      },
+      "revId": "e59aac6b9b59da5c8b4e4fde379e6e5a268930ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_6cc84017",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 3406,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-13T20:04:42Z",
+      "side": 1,
+      "message": "Should be less indented.",
+      "revId": "e59aac6b9b59da5c8b4e4fde379e6e5a268930ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
