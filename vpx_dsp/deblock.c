@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 #include <stdlib.h>
-
+#include "vpx/vpx_integer.h"
 
 const int16_t vpx_rv[] = {8, 5, 2, 2, 8, 12, 4, 9, 8, 3, 0, 3, 9, 0, 0, 0, 8, 3,
     14, 4, 10, 1, 11, 14, 1, 14, 9, 6, 12, 11, 8, 6, 10, 0, 0, 8, 9, 0, 3, 14,
@@ -153,8 +153,7 @@ void vpx_mbpost_proc_across_ip_c(unsigned char *src, int pitch, int rows,
 void vpx_mbpost_proc_down_c(unsigned char *dst, int pitch, int rows, int cols,
                             int flimit) {
   int r, c, i;
-  unsigned int seed;
-  const int16_t *rv3 = &vpx_rv[63 & rand_r(&seed)];
+  const int16_t *rv3 = &vpx_rv[63 & rand()];
 
   for (c = 0; c < cols; c++) {
     unsigned char *s = &dst[c];

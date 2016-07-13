@@ -34,6 +34,7 @@ static const int16_t kernel5[] = {
 
 static const uint8_t q_diff_thresh = 20;
 static const uint8_t last_q_thresh = 170;
+extern int16_t vpx_rv[];
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void vp9_highbd_post_proc_down_and_across_c(const uint16_t *src_ptr,

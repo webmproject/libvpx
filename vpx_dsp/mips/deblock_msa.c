@@ -575,8 +575,7 @@ void vpx_mbpost_proc_across_ip_msa(uint8_t *src_ptr, int32_t pitch,
 void vpx_mbpost_proc_down_msa(uint8_t *dst_ptr, int32_t pitch, int32_t rows,
                               int32_t cols, int32_t flimit) {
   int32_t row, col, cnt, i;
-  unsigned int seed;
-  const int16_t *rv3 = &vpx_rv[63 & rand_r(&seed)];
+  const int16_t *rv3 = &vpx_rv[63 & rand()];
   v4i32 flimit_vec;
   v16u8 dst7, dst8, dst_r_b, dst_l_b;
   v16i8 mask;
