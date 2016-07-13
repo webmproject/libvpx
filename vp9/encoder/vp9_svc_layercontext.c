@@ -135,7 +135,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
         CHECK_MEM_ERROR(cm, lc->consec_zero_mv,
                         vpx_malloc(consec_zero_mv_size));
         memset(lc->consec_zero_mv, 0, consec_zero_mv_size);
-       }
+      }
     }
   }
 
@@ -293,6 +293,11 @@ void vp9_restore_layer_context(VP9_COMP *const cpi) {
   cpi->twopass = lc->twopass;
   cpi->oxcf.target_bandwidth = lc->target_bandwidth;
   cpi->alt_ref_source = lc->alt_ref_source;
+  // Check if it is one_pass_cbr_svc mode and lc->speed > 0 (real-time mode
+  // does not use speed = 0).
+  if (is_one_pass_cbr_svc(cpi) && lc->speed > 0) {
+    cpi->oxcf.speed = lc->speed;
+  }
   // Reset the frames_since_key and frames_to_key counters to their values
   // before the layer restore. Keep these defined for the stream (not layer).
   if (cpi->svc.number_temporal_layers > 1 ||

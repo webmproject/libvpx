@@ -1437,6 +1437,7 @@ static vpx_codec_err_t ctrl_set_svc_parameters(vpx_codec_alg_priv_t *ctx,
       lc->min_q = params->min_quantizers[layer];
       lc->scaling_factor_num = params->scaling_factor_num[sl];
       lc->scaling_factor_den = params->scaling_factor_den[sl];
+      lc->speed = params->speed_per_layer[sl];
     }
   }
 
