@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3ad6900d_d55e2c5f",
+        "filename": "test/vp9_intrapred_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-13T22:41:46Z",
+      "side": 1,
+      "message": "all fixed in #360420",
+      "parentUuid": "3ad6900d_559bfc7a",
+      "revId": "ce050afaf3e288895c3bee4160336e2d2133b6ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ad6900d_95ae6496",
         "filename": "test/vp9_intrapred_test.cc",
         "patchSetId": 2
