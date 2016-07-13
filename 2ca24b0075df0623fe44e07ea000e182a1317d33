@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3ad6900d_765acd3e",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 500,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-13T15:33:07Z",
+      "side": 1,
+      "message": "(this file is due for a serious style-check pass!)",
+      "range": {
+        "startLine": 500,
+        "startChar": 33,
+        "endLine": 500,
+        "endChar": 36
+      },
+      "revId": "2ca24b0075df0623fe44e07ea000e182a1317d33",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_166341f4",
+        "filename": "vp9/common/vp9_postproc.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-13T15:33:07Z",
+      "side": 1,
+      "message": "use of sizeof() will break if ppstate-\u003enoise changes from char* to int16* or array to pointer. Isn\u0027t there a better way to get the size?\nAt least, \"sizeof(ppstate-\u003enoise) / sizeof(ppstate-\u003enoise[0])\" would be more robust.",
+      "range": {
+        "startLine": 424,
+        "startChar": 30,
+        "endLine": 424,
+        "endChar": 36
+      },
+      "revId": "2ca24b0075df0623fe44e07ea000e182a1317d33",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_d668f9d1",
+        "filename": "vpx_dsp/postproc.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-13T15:33:07Z",
+      "side": 1,
+      "message": "a 1-line comment would be useful",
+      "range": {
+        "startLine": 18,
+        "startChar": 30,
+        "endLine": 18,
+        "endChar": 36
+      },
+      "revId": "2ca24b0075df0623fe44e07ea000e182a1317d33",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
