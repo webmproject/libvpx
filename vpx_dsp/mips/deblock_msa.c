@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include "./macros_msa.h"
 
-extern int16_t vpx_rv[];
+extern const int16_t vpx_rv[];
 
 #define VPX_TRANSPOSE8x16_UB_UB(in0, in1, in2, in3, in4, in5, in6, in7,  \
                                 out0, out1, out2, out3,                  \
