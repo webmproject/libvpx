@@ -333,6 +333,30 @@
     },
     {
       "key": {
+        "uuid": "3ad6900d_313dafab",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 11159,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-13T18:07:53Z",
+      "side": 1,
+      "message": "Thanks a lot for pointing out the issue and make the code better. Regarding the signed wsrc, there is some headache, in some cases (rare but still possible) it could be negative. For example, if we are blending two prediction and looking for weighted target prediction for pred1, wsrc \u003d src - mask0 * pred0 (assuming not scaled, 0 \u003c\u003d mask0 \u003c\u003d1) will be negative if src \u003d 50, mask0 \u003d 0.8, pred0 \u003d 200",
+      "parentUuid": "3ad6900d_76cacd80",
+      "range": {
+        "startLine": 11159,
+        "startChar": 39,
+        "endLine": 11159,
+        "endChar": 62
+      },
+      "revId": "2eefc96dfb7b0af6d5d66b852838af17fb46fe1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ad6900d_2f0d5590",
         "filename": "vp10/encoder/rdopt.c",
         "patchSetId": 2
