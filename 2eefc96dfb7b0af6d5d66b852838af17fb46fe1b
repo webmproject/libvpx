@@ -381,6 +381,30 @@
     },
     {
       "key": {
+        "uuid": "3ad6900d_f1fa67bc",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 11159,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-13T18:24:09Z",
+      "side": 1,
+      "message": "That is a good point. Later I will run a test in which wsrc are clamped to check the performance change.",
+      "parentUuid": "3ad6900d_b147ff0d",
+      "range": {
+        "startLine": 11159,
+        "startChar": 39,
+        "endLine": 11159,
+        "endChar": 62
+      },
+      "revId": "2eefc96dfb7b0af6d5d66b852838af17fb46fe1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ad6900d_2f0d5590",
         "filename": "vp10/encoder/rdopt.c",
         "patchSetId": 2
