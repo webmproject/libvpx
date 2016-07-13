@@ -495,7 +495,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
             struct postproc_state *ppstate = &oci->postproc_state;
             vp8_clear_system_state();
             sigma = noise_level + .5 + .6 * q / 63.0;
-            clamp = vpx_setup_noise(sizeof(ppstate->noise), sigma,
+            clamp = vpx_setup_noise(sigma, sizeof(ppstate->noise),
                                     ppstate->noise);
             for (i = 0; i < 16; i++)
             {

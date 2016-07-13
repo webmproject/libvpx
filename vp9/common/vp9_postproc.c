@@ -421,7 +421,7 @@ int vp9_post_proc_frame(struct VP9Common *cm,
       int clamp, i;
       vpx_clear_system_state();
       sigma = noise_level + .5 + .6 * q / 63.0;
-      clamp = vpx_setup_noise(sizeof(ppstate->noise), sigma,
+      clamp = vpx_setup_noise(sigma, sizeof(ppstate->noise),
                               ppstate->noise);
 
       for (i = 0; i < 16; i++) {

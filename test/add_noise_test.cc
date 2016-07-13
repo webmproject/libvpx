@@ -49,7 +49,7 @@ TEST_P(AddNoiseTest, CheckNoiseAdded) {
   const int height = 64;
   const int image_size = width * height;
   char noise[3072];
-  const int clamp = vpx_setup_noise(sizeof(noise), 4.4, noise);
+  const int clamp = vpx_setup_noise(4.4, sizeof(noise), noise);
 
   for (int i = 0; i < 16; i++) {
     blackclamp[i] = clamp;
@@ -84,7 +84,7 @@ TEST_P(AddNoiseTest, CheckNoiseAdded) {
 
   // Check to make sure don't roll over.
   for (int i = 0; i < image_size; ++i) {
-    EXPECT_GT((int)s[i], clamp) << "i = " << i;
+    EXPECT_GT(static_cast<int>(s[i]), clamp) << "i = " << i;
   }
 
   // Initialize pixels in the image to 0 and check for roll under.
@@ -95,7 +95,7 @@ TEST_P(AddNoiseTest, CheckNoiseAdded) {
 
   // Check to make sure don't roll under.
   for (int i = 0; i < image_size; ++i) {
-    EXPECT_LT((int)s[i], 255 - clamp) << "i = " << i;
+    EXPECT_LT(static_cast<int>(s[i]), 255 - clamp) << "i = " << i;
   }
 
   vpx_free(s);
@@ -110,7 +110,7 @@ TEST_P(AddNoiseTest, CheckCvsAssembly) {
   const int image_size = width * height;
   char noise[3072];
 
-  const int clamp = vpx_setup_noise(sizeof(noise), 4.4, noise);
+  const int clamp = vpx_setup_noise(4.4, sizeof(noise), noise);
 
   for (int i = 0; i < 16; i++) {
     blackclamp[i] = clamp;
@@ -133,7 +133,7 @@ TEST_P(AddNoiseTest, CheckCvsAssembly) {
                                                  width, height, width));
 
   for (int i = 0; i < image_size; ++i) {
-    EXPECT_EQ((int)s[i], (int)d[i]) << "i = " << i;
+    EXPECT_EQ(static_cast<int>(s[i]), static_cast<int>(d[i])) << "i = " << i;
   }
 
   vpx_free(d);
