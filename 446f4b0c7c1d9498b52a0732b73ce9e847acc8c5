@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3ad6900d_fdf960b8",
+        "filename": "test/function_equivalence_test.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-13T00:03:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3ad6900d_aa0cf091",
+      "revId": "446f4b0c7c1d9498b52a0732b73ce9e847acc8c5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ad6900d_8a2e4ced",
         "filename": "test/obmc_variance_test.cc",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2016-07-12T21:41:32Z",
       "side": 1,
       "message": "this seems like it could be brought in separately",
+      "revId": "446f4b0c7c1d9498b52a0732b73ce9e847acc8c5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_1df7e4c5",
+        "filename": "test/obmc_variance_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-13T00:03:00Z",
+      "side": 1,
+      "message": "dropped",
+      "parentUuid": "3ad6900d_8a2e4ced",
       "revId": "446f4b0c7c1d9498b52a0732b73ce9e847acc8c5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "3ad6900d_3dc58871",
+        "filename": "test/sum_squares_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-13T00:03:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3ad6900d_2acd4069",
+      "revId": "446f4b0c7c1d9498b52a0732b73ce9e847acc8c5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ad6900d_aafa3075",
         "filename": "test/sum_squares_test.cc",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2016-07-12T21:41:32Z",
       "side": 1,
       "message": "all tst_func_ calls (at least) should be contained in ASM_REGISTER_STATE_CHECK()",
+      "revId": "446f4b0c7c1d9498b52a0732b73ce9e847acc8c5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_5dca4c80",
+        "filename": "test/sum_squares_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-13T00:03:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3ad6900d_aafa3075",
       "revId": "446f4b0c7c1d9498b52a0732b73ce9e847acc8c5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
