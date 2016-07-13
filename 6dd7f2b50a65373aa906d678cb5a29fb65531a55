@@ -22,6 +22,24 @@
       "revId": "6dd7f2b50a65373aa906d678cb5a29fb65531a55",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7ac1e86b_7deff3b8",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1123405
+      },
+      "writtenOn": "2016-07-13T00:12:03Z",
+      "side": 1,
+      "message": "Looking at line 283 seems like you are probably right.\nI\u0027m going to try to change this and I\u0027ll reupload the patch. Thank you for catching this and reviving the patch.",
+      "parentUuid": "3ad6900d_6a43c854",
+      "revId": "6dd7f2b50a65373aa906d678cb5a29fb65531a55",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
