@@ -31,9 +31,6 @@ struct optimize_ctx {
   ENTROPY_CONTEXT tl[MAX_MB_PLANE][16];
 };
 
-#define HETEROMULT 12
-#define HETEROCOEF 4
-
 void vp9_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &x->e_mbd.plane[plane];
@@ -68,48 +65,6 @@ static const int plane_rd_mult[REF_TYPES][PLANE_TYPES] ={ {10, 6}, {8, 5}, };
 {\
   rd_cost0 = RDCOST(rdmult, rddiv, rate0, error0);\
   rd_cost1 = RDCOST(rdmult, rddiv, rate1, error1);\
-}
-
-// This function eliminates isolated small nonzero coefficients.
-static void eliminate_small_coeff(const tran_low_t *const coeff_ptr,
-                                  const TX_SIZE tx_size,
-                                  const int16_t *const zbin_ptr,
-                                  tran_low_t *const qcoeff_ptr,
-                                  tran_low_t *const dqcoeff_ptr,
-                                  uint16_t *const eob_ptr,
-                                  const int16_t *const scan) {
-  const int zbins[2] =
-      {tx_size == TX_32X32 ? ROUND_POWER_OF_TWO(zbin_ptr[0], 1) : zbin_ptr[0],
-       tx_size == TX_32X32 ? ROUND_POWER_OF_TWO(zbin_ptr[1], 1) : zbin_ptr[1]};
-  const int nzbins[2] = {zbins[0] * -1, zbins[1] * -1};
-  const int hetero_zbins[2] = {(HETEROCOEF + 1) * zbins[0] / HETEROCOEF,
-                               (HETEROCOEF + 1) * zbins[1] / HETEROCOEF};
-  const int hetero_nzbins[2] = {hetero_zbins[0] * -1, hetero_zbins[1] * -1};
-  int eob = *eob_ptr, i = eob - 1, rc, tail_count = 0;
-
-  assert(i >= 0);
-  rc = scan[i];
-  while (i > 0 && coeff_ptr[rc] <= hetero_zbins[rc != 0] &&
-      coeff_ptr[rc] >= hetero_nzbins[rc != 0]) {
-    if (coeff_ptr[rc] > zbins[rc != 0] || coeff_ptr[rc] < nzbins[rc != 0])
-      ++tail_count;
-    if ((eob - i) * HETEROMULT >= tail_count * zbins[1]) {
-      eob = i;
-      tail_count = 0;
-    }
-    --i;
-    rc = scan[i];
-  }
-
-  for (i = eob; i < (*eob_ptr); ++i) {
-    rc = scan[i];
-    qcoeff_ptr[rc] = 0;
-    dqcoeff_ptr[rc] = 0;
-  }
-
-  while (eob > 0 && qcoeff_ptr[scan[eob - 1]] == 0) --eob;
-
-  *eob_ptr = eob;
 }
 
 // This function is a place holder for now but may ultimately need
@@ -631,10 +586,6 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block, int row, int col,
       assert(0);
       break;
   }
-  if (!x->skip_block && *eob > 0) {
-    eliminate_small_coeff(coeff, tx_size, p->zbin, qcoeff, dqcoeff, eob,
-                          scan_order->scan);
-  }
 }
 
 static void encode_block(int plane, int block, int row, int col,
@@ -968,10 +919,6 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
                              p->quant, p->quant_shift, qcoeff, dqcoeff,
                              pd->dequant, eob, scan_order->scan,
                              scan_order->iscan);
-        if (!x->skip_block && *eob > 0) {
-          eliminate_small_coeff(coeff, tx_size, p->zbin, qcoeff, dqcoeff,
-                                eob, scan_order->scan);
-        }
       }
       if (args->enable_coeff_opt && !x->skip_recode) {
        *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
@@ -988,10 +935,6 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
                        p->quant, p->quant_shift, qcoeff, dqcoeff,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
-        if (!x->skip_block && *eob > 0) {
-          eliminate_small_coeff(coeff, tx_size, p->zbin, qcoeff, dqcoeff,
-                                eob, scan_order->scan);
-        }
       }
       if (args->enable_coeff_opt && !x->skip_recode) {
         *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
@@ -1008,10 +951,6 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
                        p->quant_shift, qcoeff, dqcoeff,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
-        if (!x->skip_block && *eob > 0) {
-          eliminate_small_coeff(coeff, tx_size, p->zbin, qcoeff, dqcoeff,
-                                eob, scan_order->scan);
-        }
       }
       if (args->enable_coeff_opt && !x->skip_recode) {
         *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
@@ -1031,10 +970,6 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
                        p->quant_shift, qcoeff, dqcoeff,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
-        if (!x->skip_block && *eob > 0) {
-          eliminate_small_coeff(coeff, tx_size, p->zbin, qcoeff, dqcoeff,
-                                eob, scan_order->scan);
-        }
       }
       if (args->enable_coeff_opt && !x->skip_recode) {
         *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
