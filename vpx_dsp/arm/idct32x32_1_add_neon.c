@@ -94,7 +94,7 @@ void vpx_idct32x32_1_add_neon(const tran_low_t *input, uint8_t *dest,
   uint8x16_t q0u8, q8u8, q9u8, q10u8, q11u8, q12u8, q13u8, q14u8, q15u8;
   int i, j, dest_stride8;
   uint8_t *d;
-  int16_t a1, cospi_16_64 = 11585;
+  int16_t a1;
   int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
 
   out = dct_const_round_shift(out * cospi_16_64);
