@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3ad6900d_59d09200",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-14T19:48:03Z",
+      "side": 1,
+      "message": "const x 2\n\n\u0026 1?",
+      "revId": "34fce2db6f0a6e62c104e1956d3ea90790f13cdf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_99fbfa7d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 420,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-14T19:48:03Z",
+      "side": 1,
+      "message": "const x 2",
+      "revId": "34fce2db6f0a6e62c104e1956d3ea90790f13cdf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_79e636e4",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 474,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-14T19:48:03Z",
+      "side": 1,
+      "message": "could be consistent with the pre/postfix here and the line above",
+      "range": {
+        "startLine": 474,
+        "startChar": 38,
+        "endLine": 474,
+        "endChar": 41
+      },
+      "revId": "34fce2db6f0a6e62c104e1956d3ea90790f13cdf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_9924da12",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 481,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-14T19:48:03Z",
+      "side": 1,
+      "message": "indent is off; could be 1 line I think",
+      "revId": "34fce2db6f0a6e62c104e1956d3ea90790f13cdf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
