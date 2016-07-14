@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3ad6900d_fbb6c19a",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-14T00:43:31Z",
+      "side": 0,
+      "message": "note that i think that the \u0027*2\u0027 on both of these lines were spurious. I removed them. Let\u0027s see what the tests will have to say...",
+      "range": {
+        "startLine": 239,
+        "startChar": 41,
+        "endLine": 239,
+        "endChar": 53
+      },
+      "revId": "8f23630076150a799be299e7d42db449b03f9074",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
