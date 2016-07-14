@@ -1251,9 +1251,6 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
 
   // TODO(jingning): temporarily enabled only for luma component
   rd = VPXMIN(rd1, rd2);
-  if (plane == 0)
-    x->zcoeff_blk[tx_size][block] = !x->plane[plane].eobs[block] ||
-        (rd1 > rd2 && !xd->lossless[mbmi->segment_id]);
 
   args->this_rate += rate;
   args->this_dist += dist;
@@ -1453,7 +1450,6 @@ static int64_t choose_tx_size_fix_type(VP10_COMP *cpi,
   int64_t best_rd = INT64_MAX, last_rd = INT64_MAX;
   const TX_SIZE max_tx_size = max_txsize_lookup[bs];
   TX_SIZE best_tx = max_tx_size;
-  uint8_t zcoeff_blk[TX_SIZES][MAX_MIB_SIZE * MAX_MIB_SIZE * 4];
   const int tx_select = cm->tx_mode == TX_MODE_SELECT;
   const int is_inter = is_inter_block(mbmi);
 #if CONFIG_EXT_TX
@@ -1530,16 +1526,9 @@ static int64_t choose_tx_size_fix_type(VP10_COMP *cpi,
       *rate       = r;
       *skip       = s;
       *psse       = sse;
-      memcpy(zcoeff_blk[mbmi->tx_size], x->zcoeff_blk[mbmi->tx_size],
-             sizeof(zcoeff_blk[mbmi->tx_size][0]) *
-             MAX_MIB_SIZE * MAX_MIB_SIZE * 4);
     }
   }
   mbmi->tx_size = best_tx;
-
-  memcpy(x->zcoeff_blk[mbmi->tx_size], zcoeff_blk[mbmi->tx_size],
-         sizeof(zcoeff_blk[mbmi->tx_size][0]) *
-         MAX_MIB_SIZE * MAX_MIB_SIZE * 4);
 
   return best_rd;
 }
@@ -1730,7 +1719,6 @@ static void choose_tx_size_type_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
                                         BLOCK_SIZE bs) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
-  uint8_t zcoeff_blk[TX_SIZES][MAX_MIB_SIZE * MAX_MIB_SIZE * 4];
   int r, s;
   int64_t d, sse;
   int64_t rd = INT64_MAX;
@@ -1765,9 +1753,6 @@ static void choose_tx_size_type_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
       *psse       = sse;
       best_tx_type = tx_type;
       best_tx = mbmi->tx_size;
-      memcpy(zcoeff_blk[mbmi->tx_size], x->zcoeff_blk[mbmi->tx_size],
-             sizeof(zcoeff_blk[mbmi->tx_size][0]) *
-             MAX_MIB_SIZE * MAX_MIB_SIZE * 4);
     }
   }
 
@@ -1778,10 +1763,6 @@ static void choose_tx_size_type_from_rd(VP10_COMP *cpi, MACROBLOCK *x,
   if (mbmi->tx_size >= TX_32X32)
     assert(mbmi->tx_type == DCT_DCT);
 #endif
-
-  memcpy(x->zcoeff_blk[mbmi->tx_size], zcoeff_blk[mbmi->tx_size],
-         sizeof(zcoeff_blk[mbmi->tx_size][0]) *
-         MAX_MIB_SIZE * MAX_MIB_SIZE * 4);
 }
 
 static void super_block_yrd(VP10_COMP *cpi, MACROBLOCK *x, int *rate,
@@ -2444,9 +2425,7 @@ static void pick_intra_angle_routine_sby(VP10_COMP *cpi, MACROBLOCK *x,
                                          TX_TYPE *best_tx_type,
                                          INTRA_FILTER *best_filter,
                                          BLOCK_SIZE bsize, int rate_overhead,
-                                         int64_t *best_rd,
-                                         uint8_t zcoeff_blk[][MAX_MIB_SIZE *
-                                                            MAX_MIB_SIZE * 4]) {
+                                         int64_t *best_rd) {
   int this_rate, this_rate_tokenonly, s;
   int64_t this_distortion, this_rd;
   MB_MODE_INFO *mbmi = &x->e_mbd.mi[0]->mbmi;
@@ -2468,9 +2447,6 @@ static void pick_intra_angle_routine_sby(VP10_COMP *cpi, MACROBLOCK *x,
     *rate_tokenonly     = this_rate_tokenonly;
     *distortion         = this_distortion;
     *skippable          = s;
-    memcpy(zcoeff_blk[mbmi->tx_size], x->zcoeff_blk[mbmi->tx_size],
-           sizeof(zcoeff_blk[mbmi->tx_size][0]) *
-           MAX_MIB_SIZE * MAX_MIB_SIZE * 4);
   }
 }
 
@@ -2490,7 +2466,6 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
   int64_t this_distortion, this_rd;
   TX_SIZE best_tx_size = mic->mbmi.tx_size;
   TX_TYPE best_tx_type = mbmi->tx_type;
-  uint8_t zcoeff_blk[TX_SIZES][MAX_MIB_SIZE * MAX_MIB_SIZE * 4];
 
   if (ANGLE_FAST_SEARCH) {
     int deltas_level1[3] = {0, -2, 2};
@@ -2537,9 +2512,6 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
           *rate_tokenonly     = this_rate_tokenonly;
           *distortion         = this_distortion;
           *skippable          = s;
-          memcpy(zcoeff_blk[mbmi->tx_size], x->zcoeff_blk[mbmi->tx_size],
-                 sizeof(zcoeff_blk[mbmi->tx_size][0]) *
-                 MAX_MIB_SIZE * MAX_MIB_SIZE * 4);
         }
       }
     }
@@ -2561,7 +2533,7 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
                                        rate_overhead +
                                        cpi->intra_filter_cost
                                        [intra_filter_ctx][filter],
-                                       &best_rd, zcoeff_blk);
+                                       &best_rd);
         }
       }
     }
@@ -2583,7 +2555,7 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
                                      rate_overhead +
                                      cpi->intra_filter_cost
                                      [intra_filter_ctx][filter],
-                                     &best_rd, zcoeff_blk);
+                                     &best_rd);
       }
     }
   }
@@ -2600,8 +2572,7 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
                                      &best_angle_delta, &best_tx_size,
                                      &best_tx_type, &best_filter, bsize,
                                      rate_overhead + cpi->intra_filter_cost
-                                     [intra_filter_ctx][filter], &best_rd,
-                                     zcoeff_blk);
+                                     [intra_filter_ctx][filter], &best_rd);
       }
     }
   }
@@ -2610,11 +2581,6 @@ static int64_t rd_pick_intra_angle_sby(VP10_COMP *cpi, MACROBLOCK *x,
   mbmi->angle_delta[0] = best_angle_delta;
   mic->mbmi.intra_filter = best_filter;
   mbmi->tx_type = best_tx_type;
-  if (*rate_tokenonly < INT_MAX)
-    memcpy(x->zcoeff_blk[mbmi->tx_size], zcoeff_blk[mbmi->tx_size],
-           sizeof(zcoeff_blk[mbmi->tx_size][0]) *
-           MAX_MIB_SIZE * MAX_MIB_SIZE * 4);
-
   return best_rd;
 }
 
@@ -8384,8 +8350,6 @@ static void pick_ext_intra_iframe(VP10_COMP *cpi, MACROBLOCK *x,
     *best_mbmode = *mbmi;
     *best_skip2 = 0;
     *best_mode_skippable = skippable;
-    memcpy(ctx->zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
-           sizeof(ctx->zcoeff_blk[0]) * ctx->num_4x4_blk);
   }
 }
 #endif  // CONFIG_EXT_INTRA
@@ -9492,9 +9456,6 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
         for (i = 0; i < MAX_MB_PLANE; ++i)
           memcpy(ctx->blk_skip[i], x->blk_skip[i],
                  sizeof(uint8_t) * ctx->num_4x4_blk);
-#else
-        memcpy(ctx->zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
-               sizeof(ctx->zcoeff_blk[0]) * ctx->num_4x4_blk);
 #endif
 
         // TODO(debargha): enhance this test with a better distortion prediction
@@ -9756,8 +9717,6 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
       best_mbmode = *mbmi;
       best_skip2 = 0;
       best_mode_skippable = skippable;
-      memcpy(ctx->zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
-             sizeof(ctx->zcoeff_blk[0]) * ctx->num_4x4_blk);
     }
   }
   PALETTE_EXIT:
@@ -10220,7 +10179,6 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
   best_rd = best_rd_so_far;
   best_yrd = best_rd_so_far;
 #endif  // CONFIG_SUPERTX
-  memset(x->zcoeff_blk[TX_4X4], 0, 4);
   vp10_zero(best_mbmode);
 
 #if CONFIG_EXT_INTRA
@@ -10648,7 +10606,6 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
               tmp_best_mbmode = *mbmi;
               for (i = 0; i < 4; i++) {
                 tmp_best_bmodes[i] = xd->mi[0]->bmi[i];
-                x->zcoeff_blk[TX_4X4][i] = !x->plane[0].eobs[i];
               }
               pred_exists = 1;
             }
@@ -10845,9 +10802,6 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
 #if CONFIG_VAR_TX
         for (i = 0; i < MAX_MB_PLANE; ++i)
           memset(ctx->blk_skip[i], 0, sizeof(uint8_t) * ctx->num_4x4_blk);
-#else
-        memcpy(ctx->zcoeff_blk, x->zcoeff_blk[TX_4X4],
-               sizeof(ctx->zcoeff_blk[0]) * ctx->num_4x4_blk);
 #endif
 
         for (i = 0; i < 4; i++)

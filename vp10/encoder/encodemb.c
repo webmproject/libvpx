@@ -982,16 +982,6 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
   ctx = combine_entropy_contexts(*a, *l);
 #endif
 
-  // TODO(jingning): per transformed block zero forcing only enabled for
-  // luma component. will integrate chroma components as well.
-  // Turn this back on when the rate-distortion loop is synchronized with
-  // the recursive transform block coding.
-//  if (x->zcoeff_blk[tx_size][block] && plane == 0) {
-//    p->eobs[block] = 0;
-//    *a = *l = 0;
-//    return;
-//  }
-
 #if CONFIG_VAR_TX
   // Assert not magic number (uninitialised).
   assert(x->blk_skip[plane][(blk_row << bwl) + blk_col] != 234);

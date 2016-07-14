@@ -1204,8 +1204,6 @@ static void update_state(VP10_COMP *cpi, ThreadData *td,
     memcpy(x->blk_skip[i], ctx->blk_skip[i],
            sizeof(uint8_t) * ctx->num_4x4_blk);
 #endif
-  memcpy(x->zcoeff_blk[mbmi->tx_size], ctx->zcoeff_blk,
-         sizeof(ctx->zcoeff_blk[0]) * ctx->num_4x4_blk);
 
   if (!output_enabled)
     return;
@@ -1362,8 +1360,6 @@ static void update_state_supertx(VP10_COMP *cpi, ThreadData *td,
     memcpy(x->blk_skip[i], ctx->blk_skip[i],
            sizeof(uint8_t) * ctx->num_4x4_blk);
 #endif  // CONFIG_VAR_TX
-  memcpy(x->zcoeff_blk[mbmi->tx_size], ctx->zcoeff_blk,
-         sizeof(uint8_t) * ctx->num_4x4_blk);
 
 #if CONFIG_VAR_TX
   {
@@ -1569,8 +1565,6 @@ static void update_supertx_param(ThreadData *td,
     memcpy(ctx->blk_skip[i], x->blk_skip[i],
            sizeof(uint8_t) * ctx->num_4x4_blk);
 #endif  // CONFIG_VAR_TX
-  memcpy(ctx->zcoeff_blk, x->zcoeff_blk[supertx_size],
-         sizeof(uint8_t) * ctx->num_4x4_blk);
   ctx->mic.mbmi.tx_size = supertx_size;
   ctx->skip = x->skip;
   ctx->mic.mbmi.tx_type = best_tx;
@@ -6083,7 +6077,6 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
 #endif  // CONFIG_EXT_TX
   int tmp_rate_tx = 0, skip_tx = 0;
   int64_t tmp_dist_tx = 0, rd_tx, bestrd_tx = INT64_MAX;
-  uint8_t tmp_zcoeff_blk = 0;
 
   set_skip_context(xd, mi_row, mi_col);
   set_mode_info_offsets(cpi, x, xd, mi_row, mi_col);
@@ -6230,10 +6223,8 @@ static void rd_supertx_sb(VP10_COMP *cpi, ThreadData *td,
       tmp_rate_tx = *tmp_rate;
       tmp_dist_tx = *tmp_dist;
       skip_tx = x->skip;
-      tmp_zcoeff_blk = x->zcoeff_blk[tx_size][0];
     }
   }
-  x->zcoeff_blk[tx_size][0] = tmp_zcoeff_blk;
   *tmp_rate = tmp_rate_tx;
   *tmp_dist = tmp_dist_tx;
   x->skip = skip_tx;

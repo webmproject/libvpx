@@ -140,9 +140,6 @@ struct macroblock {
   int mv_row_min;
   int mv_row_max;
 
-  // Notes transform blocks where no coefficents are coded.
-  // Set during mode selection. Read during block encoding.
-  uint8_t zcoeff_blk[TX_SIZES][MAX_MIB_SIZE * MAX_MIB_SIZE * 4];
 #if CONFIG_VAR_TX
   uint8_t blk_skip[MAX_MB_PLANE][MAX_MIB_SIZE * MAX_MIB_SIZE * 4];
 #if CONFIG_REF_MV

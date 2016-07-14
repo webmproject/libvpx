@@ -34,8 +34,6 @@ static void alloc_mode_context(VP10_COMMON *cm, int num_4x4_blk,
   ctx->partition = partition;
 #endif
 
-  CHECK_MEM_ERROR(cm, ctx->zcoeff_blk,
-                  vpx_calloc(num_blk, sizeof(uint8_t)));
   for (i = 0; i < MAX_MB_PLANE; ++i) {
 #if CONFIG_VAR_TX
     CHECK_MEM_ERROR(cm, ctx->blk_skip[i],
@@ -68,8 +66,6 @@ static void alloc_mode_context(VP10_COMMON *cm, int num_4x4_blk,
 
 static void free_mode_context(PICK_MODE_CONTEXT *ctx) {
   int i, k;
-  vpx_free(ctx->zcoeff_blk);
-  ctx->zcoeff_blk = 0;
   for (i = 0; i < MAX_MB_PLANE; ++i) {
 #if CONFIG_VAR_TX
     vpx_free(ctx->blk_skip[i]);
