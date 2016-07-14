@@ -70,6 +70,30 @@
       "revId": "122515d6adf49f70984cbdcc00a82a23e2ea432b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7ac1e86b_e3c7e006",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2016-07-14T18:36:35Z",
+      "side": 1,
+      "message": "In this situation, the actual encoding speed for each layer is 4,4,3. I didn\u0027t consider this case, since even speed 0 is set, it should be used in the first layer, for example 0, 4, 3. BTW, speed 0 should be too slow to use in SVC and the user should know this and avoid doing that. \nHowever, if you think it is better to cover all situations, I can use -1 as a flag to indicate lc-\u003espeed is not set.",
+      "parentUuid": "3ad6900d_0c724d5e",
+      "range": {
+        "startLine": 297,
+        "startChar": 34,
+        "endLine": 297,
+        "endChar": 47
+      },
+      "revId": "122515d6adf49f70984cbdcc00a82a23e2ea432b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
