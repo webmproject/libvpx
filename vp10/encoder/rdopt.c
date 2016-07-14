@@ -4831,6 +4831,8 @@ static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
 
         // Set pred for Y plane
         setup_pred_plane(&pd->pre[0], upsampled_ref->y_buffer,
+                         upsampled_ref->y_crop_width,
+                         upsampled_ref->y_crop_height,
                          upsampled_ref->y_stride, (mi_row << 3), (mi_col << 3),
                          NULL, pd->subsampling_x, pd->subsampling_y);
 
@@ -5258,6 +5260,8 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
 
               // Set pred for Y plane
               setup_pred_plane(&pd->pre[0], upsampled_ref->y_buffer,
+                               upsampled_ref->y_crop_width,
+                               upsampled_ref->y_crop_height,
                                upsampled_ref->y_stride,
                                (mi_row << 3), (mi_col << 3),
                                NULL, pd->subsampling_x, pd->subsampling_y);
@@ -5883,7 +5887,7 @@ static void single_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   const VP10_COMMON *cm = &cpi->common;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
-  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0, 0}};
+  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0, 0, 0, 0, 0}};
   int bestsme = INT_MAX;
   int step_param;
   int sadpb = x->sadperbit16;
@@ -6000,6 +6004,8 @@ static void single_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
 
       // Set pred for Y plane
       setup_pred_plane(&pd->pre[ref_idx], upsampled_ref->y_buffer,
+                       upsampled_ref->y_crop_width,
+                       upsampled_ref->y_crop_height,
                        upsampled_ref->y_stride, (mi_row << 3), (mi_col << 3),
                        NULL, pd->subsampling_x, pd->subsampling_y);
 
@@ -6064,7 +6070,7 @@ static void single_motion_search_obmc(VP10_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   const VP10_COMMON *cm = &cpi->common;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
-  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0, 0}};
+  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0, 0, 0, 0, 0}};
   int bestsme = INT_MAX;
   int step_param;
   int sadpb = x->sadperbit16;
@@ -6202,7 +6208,7 @@ static void do_masked_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   const VP10_COMMON *cm = &cpi->common;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
-  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0, 0}};
+  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0, 0, 0, 0, 0}};
   int bestsme = INT_MAX;
   int step_param;
   int sadpb = x->sadperbit16;
@@ -8489,6 +8495,10 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
   DECLARE_ALIGNED(16, int32_t, weighted_src_buf[MAX_SB_SQUARE]);
   DECLARE_ALIGNED(16, int32_t, mask2d_buf[MAX_SB_SQUARE]);
   uint8_t *dst_buf1[MAX_MB_PLANE], *dst_buf2[MAX_MB_PLANE];
+  int dst_width1[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
+  int dst_width2[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
+  int dst_height1[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
+  int dst_height2[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
   int dst_stride1[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
   int dst_stride2[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
 
@@ -8588,9 +8598,9 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
 #if CONFIG_OBMC
   vp10_build_prediction_by_above_preds(cm, xd, mi_row, mi_col, dst_buf1,
-                                       dst_stride1);
+                                       dst_width1, dst_height1, dst_stride1);
   vp10_build_prediction_by_left_preds(cm, xd, mi_row, mi_col, dst_buf2,
-                                      dst_stride2);
+                                      dst_width2, dst_height2, dst_stride2);
   vp10_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
   calc_target_weighted_pred(cm, x, xd, mi_row, mi_col,
                             dst_buf1[0], dst_stride1[0],

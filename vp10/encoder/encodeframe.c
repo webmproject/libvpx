@@ -1661,6 +1661,10 @@ static void update_supertx_param_sb(VP10_COMP *cpi, ThreadData *td,
 void vp10_setup_src_planes(MACROBLOCK *x, const YV12_BUFFER_CONFIG *src,
                           int mi_row, int mi_col) {
   uint8_t *const buffers[3] = {src->y_buffer, src->u_buffer, src->v_buffer };
+  const int widths[3] = {src->y_crop_width, src->uv_crop_width,
+                         src->uv_crop_width};
+  const int heights[3] = {src->y_crop_height, src->uv_crop_height,
+                          src->uv_crop_height};
   const int strides[3] = {src->y_stride, src->uv_stride, src->uv_stride };
   int i;
 
@@ -1668,7 +1672,8 @@ void vp10_setup_src_planes(MACROBLOCK *x, const YV12_BUFFER_CONFIG *src,
   x->e_mbd.cur_buf = src;
 
   for (i = 0; i < MAX_MB_PLANE; i++)
-    setup_pred_plane(&x->plane[i].src, buffers[i], strides[i], mi_row, mi_col,
+    setup_pred_plane(&x->plane[i].src, buffers[i], widths[i],
+                     heights[i], strides[i], mi_row, mi_col,
                      NULL, x->e_mbd.plane[i].subsampling_x,
                      x->e_mbd.plane[i].subsampling_y);
 }
@@ -5056,6 +5061,10 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
       uint8_t *dst_buf1[MAX_MB_PLANE], *dst_buf2[MAX_MB_PLANE];
       int dst_stride1[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
       int dst_stride2[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
+      int dst_width1[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
+      int dst_width2[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
+      int dst_height1[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
+      int dst_height2[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
 
       assert(mbmi->sb_type >= BLOCK_8X8);
 
@@ -5080,9 +5089,10 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
       }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       vp10_build_prediction_by_above_preds(cm, xd, mi_row, mi_col, dst_buf1,
+                                           dst_width1, dst_height1,
                                            dst_stride1);
       vp10_build_prediction_by_left_preds(cm, xd, mi_row, mi_col, dst_buf2,
-                                          dst_stride2);
+                                          dst_width2, dst_height2, dst_stride2);
       vp10_setup_dst_planes(xd->plane, get_frame_new_buffer(cm),
                             mi_row, mi_col);
       vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col,

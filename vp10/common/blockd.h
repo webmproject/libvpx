@@ -274,6 +274,9 @@ enum mv_precision {
 
 struct buf_2d {
   uint8_t *buf;
+  uint8_t *buf0;
+  int width;
+  int height;
   int stride;
 };
 

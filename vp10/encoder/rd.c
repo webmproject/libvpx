@@ -701,7 +701,10 @@ void vp10_setup_pred_block(const MACROBLOCKD *xd,
   dst[1].stride = dst[2].stride = src->uv_stride;
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
-    setup_pred_plane(dst + i, dst[i].buf, dst[i].stride, mi_row, mi_col,
+    setup_pred_plane(dst + i, dst[i].buf,
+                     i ? src->uv_crop_width : src->y_crop_width,
+                     i ? src->uv_crop_height : src->y_crop_height,
+                     dst[i].stride, mi_row, mi_col,
                      i ? scale_uv : scale,
                      xd->plane[i].subsampling_x, xd->plane[i].subsampling_y);
   }
