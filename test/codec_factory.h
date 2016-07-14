@@ -123,6 +123,9 @@ class AV1CodecFactory : public CodecFactory {
 #if CONFIG_AV1_DECODER
     return new AV1Decoder(cfg, flags, deadline);
 #else
+    (void)cfg;
+    (void)flags;
+    (void)deadline;
     return NULL;
 #endif
   }
@@ -134,6 +137,10 @@ class AV1CodecFactory : public CodecFactory {
 #if CONFIG_AV1_ENCODER
     return new AV1Encoder(cfg, deadline, init_flags, stats);
 #else
+    (void)cfg;
+    (void)deadline;
+    (void)init_flags;
+    (void)stats;
     return NULL;
 #endif
   }
@@ -143,6 +150,8 @@ class AV1CodecFactory : public CodecFactory {
 #if CONFIG_AV1_ENCODER
     return aom_codec_enc_config_default(&aom_codec_av1_cx_algo, cfg, usage);
 #else
+    (void)cfg;
+    (void)usage;
     return AOM_CODEC_INCAPABLE;
 #endif
   }

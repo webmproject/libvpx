@@ -141,7 +141,6 @@ class DecoderTest {
 
   // Hook to be called to handle decode result. Return true to continue.
   virtual bool HandleDecodeResult(const aom_codec_err_t res_dec,
-                                  const CompressedVideoSource & /*video*/,
                                   Decoder *decoder) {
     EXPECT_EQ(AOM_CODEC_OK, res_dec) << decoder->DecodeError();
     return AOM_CODEC_OK == res_dec;

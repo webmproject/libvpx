@@ -94,7 +94,6 @@ class AvxEncoderParmsGetToDecoder
   }
 
   virtual bool HandleDecodeResult(const aom_codec_err_t res_dec,
-                                  const libaom_test::VideoSource & /*video*/,
                                   libaom_test::Decoder *decoder) {
     aom_codec_ctx_t *const av1_decoder = decoder->GetDecoder();
     aom_codec_alg_priv_t *const priv =
