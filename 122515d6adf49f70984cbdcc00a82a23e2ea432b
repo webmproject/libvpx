@@ -94,6 +94,30 @@
       "revId": "122515d6adf49f70984cbdcc00a82a23e2ea432b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_a7489a6e",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-07-14T18:44:26Z",
+      "side": 1,
+      "message": "yes i think using -1 as flag to indicate its not set seems better to me...",
+      "parentUuid": "7ac1e86b_e3c7e006",
+      "range": {
+        "startLine": 297,
+        "startChar": 34,
+        "endLine": 297,
+        "endChar": 47
+      },
+      "revId": "122515d6adf49f70984cbdcc00a82a23e2ea432b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
