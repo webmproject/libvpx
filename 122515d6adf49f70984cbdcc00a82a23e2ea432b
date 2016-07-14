@@ -46,6 +46,30 @@
       "revId": "122515d6adf49f70984cbdcc00a82a23e2ea432b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_0c724d5e",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2016-07-14T18:07:26Z",
+      "side": 1,
+      "message": "We\u0027re not setting cpi-\u003eoxcf.speed to 0 each time before we encode a layer, are we? Let\u0027s say we have 3 layers with speeds 4, 0, 3. We set cpi-\u003eoxcf.speed to 1 for the first layer. Are we going to set cpi-\u003eoxcf.speed back to 0 somewhere when we encode the second layer?",
+      "parentUuid": "7ac1e86b_e39ec020",
+      "range": {
+        "startLine": 297,
+        "startChar": 34,
+        "endLine": 297,
+        "endChar": 47
+      },
+      "revId": "122515d6adf49f70984cbdcc00a82a23e2ea432b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
