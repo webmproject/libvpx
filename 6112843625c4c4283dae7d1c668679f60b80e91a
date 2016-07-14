@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a53fcc9_435fa6fa",
+        "filename": "vp10/encoder/x86/dct_intrin_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1291,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-07-14T21:58:01Z",
+      "side": 1,
+      "message": "(Off the topic since this is only a merge commit.)\nAll the inline functions make vp10_fht8x8_sse2() huge.\nThe common code \"right_shift_8x8(in, 1); write_buffer_8x8(output, in, 8);\" is shared by all cases but DCT_DCT. Better to make DCT_DCT a special if, and extract the common code out of the switch.\nSimilar to \"load_buffer_8x8(input, in, stride, flipud, fliplr);\". One way is to make const tables FLIPUD[NUM_DCT_CASES] \u003d {0, 0, ...}, FLIPLR[NUM_DCT_CASES] \u003d {0, 0, ...}, and call a single load_buffer_8x8(input, in, stride, FLIPUD[tx_type], FLIPLR[tx_type]); before entering the switch.",
+      "revId": "6112843625c4c4283dae7d1c668679f60b80e91a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a53fcc9_638e6299",
+        "filename": "vp10/encoder/x86/dct_intrin_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2476,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-07-14T21:58:01Z",
+      "side": 1,
+      "message": "Same comment as vp10_fht8x8_sse2() above.",
+      "revId": "6112843625c4c4283dae7d1c668679f60b80e91a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a53fcc9_43c6c652",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-07-14T21:58:01Z",
+      "side": 1,
+      "message": "Duplicate as Line 221 below.",
+      "range": {
+        "startLine": 216,
+        "startChar": 0,
+        "endLine": 220,
+        "endChar": 27
+      },
+      "revId": "6112843625c4c4283dae7d1c668679f60b80e91a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
