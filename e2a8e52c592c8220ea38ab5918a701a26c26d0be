@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "faca38dd_8984fd24",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-14T23:04:10Z",
+      "side": 1,
+      "message": "3072 should be a static constant:\n\nstatic const int kNoiseSize \u003d 3072;",
+      "range": {
+        "startLine": 47,
+        "startChar": 15,
+        "endLine": 47,
+        "endChar": 19
+      },
+      "revId": "e2a8e52c592c8220ea38ab5918a701a26c26d0be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
