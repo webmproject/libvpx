@@ -22,6 +22,30 @@
       "revId": "e2a8e52c592c8220ea38ab5918a701a26c26d0be",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_09012d00",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-07-14T23:48:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faca38dd_8984fd24",
+      "range": {
+        "startLine": 47,
+        "startChar": 15,
+        "endLine": 47,
+        "endChar": 19
+      },
+      "revId": "e2a8e52c592c8220ea38ab5918a701a26c26d0be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
