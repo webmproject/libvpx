@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "faca38dd_e6a2feaa",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-14T21:59:08Z",
+      "side": 1,
+      "message": "all done. Switched to \u0027*_stride\u0027, simply",
+      "parentUuid": "3ad6900d_59d09200",
+      "revId": "34fce2db6f0a6e62c104e1956d3ea90790f13cdf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ad6900d_99fbfa7d",
         "filename": "test/variance_test.cc",
         "patchSetId": 8
