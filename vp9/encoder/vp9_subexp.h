@@ -32,7 +32,7 @@ int vp9_prob_diff_update_savings_search(const unsigned int *ct,
 
 
 int vp9_prob_diff_update_savings_search_model(const unsigned int *ct,
-                                              const vpx_prob *oldp,
+                                              const vpx_prob oldp,
                                               vpx_prob *bestp,
                                               vpx_prob upd,
                                               int stepsize);

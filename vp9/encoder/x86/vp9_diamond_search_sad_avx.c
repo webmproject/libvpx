@@ -56,7 +56,7 @@ static int mvsad_err_cost(const MACROBLOCK *x, const int_mv mv, const MV *ref,
 }
 
 /*****************************************************************************
- * This function utilises 3 properties of the cost function lookup tables,   *
+ * This function utilizes 3 properties of the cost function lookup tables,   *
  * constructed in using 'cal_nmvjointsadcost' and 'cal_nmvsadcosts' in       *
  * vp9_encoder.c.                                                            *
  * For the joint cost:                                                       *
@@ -122,10 +122,7 @@ int vp9_diamond_search_sad_avx(const MACROBLOCK *x,
 #endif
 
   unsigned int best_sad;
-
-  int i;
-  int j;
-  int step;
+  int i, j, step;
 
   // Check the prerequisite cost function properties that are easy to check
   // in an assert. See the function-level documentation for details on all
@@ -141,11 +138,7 @@ int vp9_diamond_search_sad_avx(const MACROBLOCK *x,
 
   for (i = 0, step = 0; step < tot_steps; step++) {
     for (j = 0; j < cfg->searches_per_step; j += 4, i += 4) {
-      __m128i v_sad_d;
-      __m128i v_cost_d;
-      __m128i v_outside_d;
-      __m128i v_inside_d;
-      __m128i v_diff_mv_w;
+      __m128i v_sad_d, v_cost_d, v_outside_d, v_inside_d, v_diff_mv_w;
 #if ARCH_X86_64
       __m128i v_blocka[2];
 #else
@@ -153,7 +146,7 @@ int vp9_diamond_search_sad_avx(const MACROBLOCK *x,
 #endif
 
       // Compute the candidate motion vectors
-      const __m128i v_ss_mv_w = _mm_loadu_si128((const __m128i*)&ss_mv[i]);
+      const __m128i v_ss_mv_w = _mm_loadu_si128((const __m128i *)&ss_mv[i]);
       const __m128i v_these_mv_w = _mm_add_epi16(v_bmv_w, v_ss_mv_w);
       // Clamp them to the search bounds
       __m128i v_these_mv_clamp_w = v_these_mv_w;
@@ -185,8 +178,8 @@ int vp9_diamond_search_sad_avx(const MACROBLOCK *x,
       {
 #if ARCH_X86_64  //  sizeof(intptr_t) == 8
         // Load the offsets
-        __m128i v_bo10_q = _mm_loadu_si128((const __m128i*)&ss_os[i+0]);
-        __m128i v_bo32_q = _mm_loadu_si128((const __m128i*)&ss_os[i+2]);
+        __m128i v_bo10_q = _mm_loadu_si128((const __m128i *)&ss_os[i + 0]);
+        __m128i v_bo32_q = _mm_loadu_si128((const __m128i *)&ss_os[i + 2]);
         // Set the ones falling outside to zero
         v_bo10_q = _mm_and_si128(v_bo10_q,
                                  _mm_cvtepi32_epi64(v_inside_d));
@@ -196,7 +189,7 @@ int vp9_diamond_search_sad_avx(const MACROBLOCK *x,
         v_blocka[0] = _mm_add_epi64(v_ba_q, v_bo10_q);
         v_blocka[1] = _mm_add_epi64(v_ba_q, v_bo32_q);
 #else  // ARCH_X86 //  sizeof(intptr_t) == 4
-        __m128i v_bo_d = _mm_loadu_si128((const __m128i*)&ss_os[i]);
+        __m128i v_bo_d = _mm_loadu_si128((const __m128i *)&ss_os[i]);
         v_bo_d = _mm_and_si128(v_bo_d, v_inside_d);
         v_blocka[0] = _mm_add_epi32(v_ba_d, v_bo_d);
 #endif
@@ -224,13 +217,10 @@ int vp9_diamond_search_sad_avx(const MACROBLOCK *x,
         const uint32_t cost3 = x->nmvsadcost[0][row3] + x->nmvsadcost[0][col3];
 
         __m128i v_cost_10_d, v_cost_32_d;
-
         v_cost_10_d = _mm_cvtsi32_si128(cost0);
         v_cost_10_d = _mm_insert_epi32(v_cost_10_d, cost1, 1);
-
         v_cost_32_d = _mm_cvtsi32_si128(cost2);
         v_cost_32_d = _mm_insert_epi32(v_cost_32_d, cost3, 1);
-
         v_cost_d = _mm_unpacklo_epi64(v_cost_10_d, v_cost_32_d);
       }
 
@@ -246,9 +236,10 @@ int vp9_diamond_search_sad_avx(const MACROBLOCK *x,
 
       // Multiply by sad_per_bit
       v_cost_d = _mm_mullo_epi32(v_cost_d, v_spb_d);
-      // ROUND_POWER_OF_TWO(v_cost_d, 8)
-      v_cost_d = _mm_add_epi32(v_cost_d, _mm_set1_epi32(0x80));
-      v_cost_d = _mm_srai_epi32(v_cost_d, 8);
+      // ROUND_POWER_OF_TWO(v_cost_d, VP9_PROB_COST_SHIFT)
+      v_cost_d = _mm_add_epi32(v_cost_d,
+                               _mm_set1_epi32(1 << (VP9_PROB_COST_SHIFT - 1)));
+      v_cost_d = _mm_srai_epi32(v_cost_d, VP9_PROB_COST_SHIFT);
       // Add the cost to the sad
       v_sad_d = _mm_add_epi32(v_sad_d, v_cost_d);
 

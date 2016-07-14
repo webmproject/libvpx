@@ -36,15 +36,9 @@
 #include <windows.h>
 #include <winnt.h>
 
-namespace testing {
-namespace internal {
-
 inline bool operator==(const M128A& lhs, const M128A& rhs) {
   return (lhs.Low == rhs.Low && lhs.High == rhs.High);
 }
-
-}  // namespace internal
-}  // namespace testing
 
 namespace libvpx_test {
 

@@ -40,6 +40,7 @@ struct vp9_extracfg {
   unsigned int                rc_max_inter_bitrate_pct;
   unsigned int                gf_cbr_boost_pct;
   unsigned int                lossless;
+  unsigned int                target_level;
   unsigned int                frame_parallel_decoding_mode;
   AQ_MODE                     aq_mode;
   unsigned int                frame_periodic_boost;
@@ -69,6 +70,7 @@ static struct vp9_extracfg default_extra_cfg = {
   0,                          // rc_max_inter_bitrate_pct
   0,                          // gf_cbr_boost_pct
   0,                          // lossless
+  255,                        // target_level
   1,                          // frame_parallel_decoding_mode
   NO_AQ,                      // aq_mode
   0,                          // frame_periodic_delta_q
@@ -182,6 +184,17 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
 
   RANGE_CHECK(cfg, ss_number_layers, 1, VPX_SS_MAX_LAYERS);
   RANGE_CHECK(cfg, ts_number_layers, 1, VPX_TS_MAX_LAYERS);
+
+  {
+    unsigned int level = extra_cfg->target_level;
+    if (level != LEVEL_1 && level != LEVEL_1_1 && level != LEVEL_2 &&
+        level != LEVEL_2_1 && level != LEVEL_3 && level != LEVEL_3_1 &&
+        level != LEVEL_4 && level != LEVEL_4_1 && level != LEVEL_5 &&
+        level != LEVEL_5_1 && level != LEVEL_5_2 && level != LEVEL_6 &&
+        level != LEVEL_6_1 && level != LEVEL_6_2 &&
+        level != LEVEL_UNKNOWN && level != LEVEL_MAX)
+    ERROR("target_level is invalid");
+  }
 
   if (cfg->ss_number_layers * cfg->ts_number_layers > VPX_MAX_LAYERS)
     ERROR("ss_number_layers * ts_number_layers is out of range");
@@ -496,6 +509,8 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->temporal_layering_mode = (enum vp9e_temporal_layering_mode)
       cfg->temporal_layering_mode;
 
+  oxcf->target_level = extra_cfg->target_level;
+
   for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
 #if CONFIG_SPATIAL_SVC
     oxcf->ss_enable_auto_arf[sl] = cfg->ss_enable_auto_alt_ref[sl];
@@ -522,6 +537,7 @@ static vpx_codec_err_t set_encoder_config(
   /*
   printf("Current VP9 Settings: \n");
   printf("target_bandwidth: %d\n", oxcf->target_bandwidth);
+  printf("target_level: %d\n", oxcf->target_level);
   printf("noise_sensitivity: %d\n", oxcf->noise_sensitivity);
   printf("sharpness: %d\n",    oxcf->sharpness);
   printf("cpu_used: %d\n",  oxcf->cpu_used);
@@ -771,6 +787,20 @@ static vpx_codec_err_t ctrl_set_frame_periodic_boost(vpx_codec_alg_priv_t *ctx,
   return update_extra_cfg(ctx, &extra_cfg);
 }
 
+static vpx_codec_err_t ctrl_set_target_level(vpx_codec_alg_priv_t *ctx,
+                                             va_list args) {
+  struct vp9_extracfg extra_cfg = ctx->extra_cfg;
+  extra_cfg.target_level = CAST(VP9E_SET_TARGET_LEVEL, args);
+  return update_extra_cfg(ctx, &extra_cfg);
+}
+
+static vpx_codec_err_t ctrl_get_level(vpx_codec_alg_priv_t *ctx, va_list args) {
+  int *const arg = va_arg(args, int *);
+  if (arg == NULL) return VPX_CODEC_INVALID_PARAM;
+  *arg = (int)vp9_get_level(&ctx->cpi->level_info.level_spec);
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
                                     vpx_codec_priv_enc_mr_cfg_t *data) {
   vpx_codec_err_t res = VPX_CODEC_OK;
@@ -862,6 +892,11 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t *ctx,
       break;
   }
 
+  if (deadline == VPX_DL_REALTIME) {
+    ctx->oxcf.pass = 0;
+    new_mode = REALTIME;
+  }
+
   if (ctx->oxcf.mode != new_mode) {
     ctx->oxcf.mode = new_mode;
     vp9_change_config(ctx->cpi, &ctx->oxcf);
@@ -928,9 +963,6 @@ static int write_superframe_index(vpx_codec_alg_priv_t *ctx) {
   return index_sz;
 }
 
-// vp9 uses 10,000,000 ticks/second as time stamp
-#define TICKS_PER_SEC 10000000LL
-
 static int64_t timebase_units_to_ticks(const vpx_rational_t *timebase,
                                        int64_t n) {
   return n * TICKS_PER_SEC * timebase->num / timebase->den;
@@ -938,7 +970,7 @@ static int64_t timebase_units_to_ticks(const vpx_rational_t *timebase,
 
 static int64_t ticks_to_timebase_units(const vpx_rational_t *timebase,
                                        int64_t n) {
-  const int64_t round = TICKS_PER_SEC * timebase->num / 2 - 1;
+  const int64_t round = (int64_t)TICKS_PER_SEC * timebase->num / 2 - 1;
   return (n * timebase->den + round) / timebase->num / TICKS_PER_SEC;
 }
 
@@ -1503,6 +1535,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP9E_SET_MAX_GF_INTERVAL,          ctrl_set_max_gf_interval},
   {VP9E_SET_SVC_REF_FRAME_CONFIG,     ctrl_set_svc_ref_frame_config},
   {VP9E_SET_RENDER_SIZE,              ctrl_set_render_size},
+  {VP9E_SET_TARGET_LEVEL,             ctrl_set_target_level},
 
   // Getters
   {VP8E_GET_LAST_QUANTIZER,           ctrl_get_quantizer},
@@ -1510,6 +1543,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP9_GET_REFERENCE,                 ctrl_get_reference},
   {VP9E_GET_SVC_LAYER_ID,             ctrl_get_svc_layer_id},
   {VP9E_GET_ACTIVEMAP,                ctrl_get_active_map},
+  {VP9E_GET_LEVEL,                    ctrl_get_level},
 
   { -1, NULL},
 };

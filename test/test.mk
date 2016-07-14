@@ -25,6 +25,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += datarate_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += encode_api_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += error_resilience_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += i420_video_source.h
+LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += realtime_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += resize_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += y4m_video_source.h
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += yuv_video_source.h
@@ -43,6 +44,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += cpu_speed_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += frame_size_tests.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_lossless_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_ethread_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += level_test.cc
 
 LIBVPX_TEST_SRCS-yes                   += decode_test_driver.cc
 LIBVPX_TEST_SRCS-yes                   += decode_test_driver.h
@@ -108,6 +110,7 @@ LIBVPX_TEST_SRCS-yes                   += vp8_boolcoder_test.cc
 LIBVPX_TEST_SRCS-yes                   += vp8_fragments_test.cc
 endif
 
+LIBVPX_TEST_SRCS-$(CONFIG_POSTPROC)    += add_noise_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_POSTPROC)    += pp_filter_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_DECODER) += vp8_decrypt_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += quantize_test.cc
@@ -148,6 +151,8 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += dct16x16_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += dct32x32_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct4x4_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct8x8_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += hadamard_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += minmax_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += variance_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_error_block_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_quantize_test.cc

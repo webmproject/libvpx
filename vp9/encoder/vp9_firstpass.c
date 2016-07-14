@@ -41,11 +41,8 @@
 #define OUTPUT_FPF          0
 #define ARF_STATS_OUTPUT    0
 
-#define GROUP_ADAPTIVE_MAXQ 1
-
 #define BOOST_BREAKOUT      12.5
 #define BOOST_FACTOR        12.5
-#define ERR_DIVISOR         128.0
 #define FACTOR_PT_LOW       0.70
 #define FACTOR_PT_HIGH      0.90
 #define FIRST_PASS_Q        10.0
@@ -741,7 +738,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       xd->mi[0]->mode = DC_PRED;
       xd->mi[0]->tx_size = use_dc_pred ?
          (bsize >= BLOCK_16X16 ? TX_16X16 : TX_8X8) : TX_4X4;
-      vp9_encode_intra_block_plane(x, bsize, 0);
+      vp9_encode_intra_block_plane(x, bsize, 0, 0);
       this_error = vpx_get_mb_ss(x->plane[0].src_diff);
 
       // Keep a record of blocks that have almost no intra error residual
@@ -1124,7 +1121,8 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     fps.intra_skip_pct = (double)intra_skip_count / num_mbs;
     fps.intra_smooth_pct = (double)intra_smooth_count / num_mbs;
     fps.inactive_zone_rows = (double)image_data_start_row;
-    fps.inactive_zone_cols = (double)0;  // TODO(paulwilkins): fix
+    // Currently set to 0 as most issues relate to letter boxing.
+    fps.inactive_zone_cols = (double)0;
 
     if (mvcount > 0) {
       fps.MVr = (double)sum_mvr / mvcount;
@@ -1150,10 +1148,9 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       fps.pcnt_motion = 0.0;
     }
 
-    // TODO(paulwilkins):  Handle the case when duration is set to 0, or
-    // something less than the full time between subsequent values of
-    // cpi->source_time_stamp.
-    fps.duration = (double)(source->ts_end - source->ts_start);
+    // Dont allow a value of 0 for duration.
+    // (Section duration is also defaulted to minimum of 1.0).
+    fps.duration = VPXMAX(1.0, (double)(source->ts_end - source->ts_start));
 
     // Don't want to do output stats with a stack variable!
     twopass->this_frame_stats = fps;
@@ -1241,18 +1238,15 @@ static double calc_correction_factor(double err_per_mb,
   return fclamp(pow(error_term, power_term), 0.05, 5.0);
 }
 
-// Larger image formats are expected to be a little harder to code relatively
-// given the same prediction error score. This in part at least relates to the
-// increased size and hence coding cost of motion vectors.
-#define EDIV_SIZE_FACTOR 800
-
-static int get_twopass_worst_quality(const VP9_COMP *cpi,
+#define ERR_DIVISOR         115.0
+static int get_twopass_worst_quality(VP9_COMP *cpi,
                                      const double section_err,
                                      double inactive_zone,
-                                     int section_target_bandwidth,
-                                     double group_weight_factor) {
+                                     int section_target_bandwidth) {
   const RATE_CONTROL *const rc = &cpi->rc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  TWO_PASS *const twopass = &cpi->twopass;
+
   // Clamp the target rate to VBR min / max limts.
   const int target_rate =
       vp9_rc_clamp_pframe_target_size(cpi, section_target_bandwidth);
@@ -1267,29 +1261,36 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
     const int active_mbs = VPXMAX(1, num_mbs - (int)(num_mbs * inactive_zone));
     const double av_err_per_mb = section_err / active_mbs;
     const double speed_term = 1.0 + 0.04 * oxcf->speed;
-    const double ediv_size_correction = (double)num_mbs / EDIV_SIZE_FACTOR;
+    double last_group_rate_err;
     const int target_norm_bits_per_mb = ((uint64_t)target_rate <<
                                          BPER_MB_NORMBITS) / active_mbs;
-
     int q;
     int is_svc_upper_layer = 0;
 
     if (is_two_pass_svc(cpi) && cpi->svc.spatial_layer_id > 0)
       is_svc_upper_layer = 1;
 
+    // based on recent history adjust expectations of bits per macroblock.
+    last_group_rate_err = (double)twopass->rolling_arf_group_actual_bits /
+        DOUBLE_DIVIDE_CHECK((double)twopass->rolling_arf_group_target_bits);
+    last_group_rate_err =
+        VPXMAX(0.25, VPXMIN(4.0, last_group_rate_err));
+    twopass->bpm_factor *= (3.0 + last_group_rate_err) / 4.0;
+    twopass->bpm_factor =
+        VPXMAX(0.25, VPXMIN(4.0, twopass->bpm_factor));
 
     // Try and pick a max Q that will be high enough to encode the
     // content at the given rate.
     for (q = rc->best_quality; q < rc->worst_quality; ++q) {
       const double factor =
           calc_correction_factor(av_err_per_mb,
-                                 ERR_DIVISOR - ediv_size_correction,
+                                 ERR_DIVISOR,
                                  is_svc_upper_layer ? SVC_FACTOR_PT_LOW :
                                  FACTOR_PT_LOW, FACTOR_PT_HIGH, q,
                                  cpi->common.bit_depth);
       const int bits_per_mb =
         vp9_rc_bits_per_mb(INTER_FRAME, q,
-                           factor * speed_term * group_weight_factor,
+                           factor * speed_term * cpi->twopass.bpm_factor,
                            cpi->common.bit_depth);
       if (bits_per_mb <= target_norm_bits_per_mb)
         break;
@@ -1340,6 +1341,7 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   const int is_two_pass_svc = (svc->number_spatial_layers > 1) ||
                               (svc->number_temporal_layers > 1);
+  RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = is_two_pass_svc ?
       &svc->layer_context[svc->spatial_layer_id].twopass : &cpi->twopass;
   double frame_rate;
@@ -1396,14 +1398,20 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   }
 
   // Reset the vbr bits off target counters
-  cpi->rc.vbr_bits_off_target = 0;
-  cpi->rc.vbr_bits_off_target_fast = 0;
-
-  cpi->rc.rate_error_estimate = 0;
+  rc->vbr_bits_off_target = 0;
+  rc->vbr_bits_off_target_fast = 0;
+  rc->rate_error_estimate = 0;
 
   // Static sequence monitor variables.
   twopass->kf_zeromotion_pct = 100;
   twopass->last_kfgroup_zeromotion_pct = 100;
+
+  // Initialize bits per macro_block estimate correction factor.
+  twopass->bpm_factor = 1.0;
+  // Initiallize actual and target bits counters for ARF groups so that
+  // at the start we have a neutral bpm adjustment.
+  twopass->rolling_arf_group_target_bits = 1;
+  twopass->rolling_arf_group_actual_bits = 1;
 
   if (oxcf->resize_mode != RESIZE_NONE) {
     init_subsampling(cpi);
@@ -1929,9 +1937,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double boost_score = 0.0;
   double old_boost_score = 0.0;
   double gf_group_err = 0.0;
-#if GROUP_ADAPTIVE_MAXQ
   double gf_group_raw_error = 0.0;
-#endif
   double gf_group_skip_pct = 0.0;
   double gf_group_inactive_zone_rows = 0.0;
   double gf_first_frame_err = 0.0;
@@ -1981,9 +1987,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // the error score / cost of this frame has already been accounted for.
   if (arf_active_or_kf) {
     gf_group_err -= gf_first_frame_err;
-#if GROUP_ADAPTIVE_MAXQ
     gf_group_raw_error -= this_frame->coded_error;
-#endif
     gf_group_skip_pct -= this_frame->intra_skip_pct;
     gf_group_inactive_zone_rows -= this_frame->inactive_zone_rows;
   }
@@ -2037,9 +2041,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // Accumulate error score of frames in this gf group.
     mod_frame_err = calculate_modified_err(cpi, twopass, oxcf, this_frame);
     gf_group_err += mod_frame_err;
-#if GROUP_ADAPTIVE_MAXQ
     gf_group_raw_error += this_frame->coded_error;
-#endif
     gf_group_skip_pct += this_frame->intra_skip_pct;
     gf_group_inactive_zone_rows += this_frame->inactive_zone_rows;
 
@@ -2104,8 +2106,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     old_boost_score = boost_score;
   }
 
-  twopass->gf_zeromotion_pct = (int)(zero_motion_accumulator * 1000.0);
-
   // Was the group length constrained by the requirement for a new KF?
   rc->constrained_gf_group = (i >= rc->frames_to_key) ? 1 : 0;
 
@@ -2141,9 +2141,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       if (EOF == input_stats(twopass, this_frame))
         break;
       gf_group_err += calculate_modified_err(cpi, twopass, oxcf, this_frame);
-#if GROUP_ADAPTIVE_MAXQ
       gf_group_raw_error += this_frame->coded_error;
-#endif
       gf_group_skip_pct += this_frame->intra_skip_pct;
       gf_group_inactive_zone_rows += this_frame->inactive_zone_rows;
     }
@@ -2158,7 +2156,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Calculate the bits to be allocated to the gf/arf group as a whole
   gf_group_bits = calculate_total_gf_group_bits(cpi, gf_group_err);
 
-#if GROUP_ADAPTIVE_MAXQ
   // Calculate an estimate of the maxq needed for the group.
   // We are more agressive about correcting for sections
   // where there could be significant overshoot than for easier
@@ -2173,26 +2170,13 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     const double group_av_inactive_zone =
       ((gf_group_inactive_zone_rows * 2) /
        (rc->baseline_gf_interval * (double)cm->mb_rows));
-
-    int tmp_q;
-    // rc factor is a weight factor that corrects for local rate control drift.
-    double rc_factor = 1.0;
-    if (rc->rate_error_estimate > 0) {
-      rc_factor = VPXMAX(RC_FACTOR_MIN,
-                         (double)(100 - rc->rate_error_estimate) / 100.0);
-    } else {
-      rc_factor = VPXMIN(RC_FACTOR_MAX,
-                         (double)(100 - rc->rate_error_estimate) / 100.0);
-    }
-    tmp_q =
-      get_twopass_worst_quality(cpi, group_av_err,
-                                (group_av_skip_pct + group_av_inactive_zone),
-                                vbr_group_bits_per_frame,
-                                twopass->kfgroup_inter_fraction * rc_factor);
+    int tmp_q =
+        get_twopass_worst_quality(cpi, group_av_err,
+                                  (group_av_skip_pct + group_av_inactive_zone),
+                                  vbr_group_bits_per_frame);
     twopass->active_worst_quality =
-        VPXMAX(tmp_q, twopass->active_worst_quality >> 1);
+        (tmp_q + (twopass->active_worst_quality * 3)) >> 2;
   }
-#endif
 
   // Calculate the extra bits to be used for boosted frame(s)
   gf_arf_bits = calculate_boost_bits(rc->baseline_gf_interval,
@@ -2232,6 +2216,10 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // Default to starting GF groups at normal frame size.
     cpi->rc.next_frame_size_selector = UNSCALED;
   }
+
+  // Reset rolling actual and target bits counters for ARF groups.
+  twopass->rolling_arf_group_target_bits = 0;
+  twopass->rolling_arf_group_actual_bits = 0;
 }
 
 // Threshold for use of the lagging second reference frame. High second ref
@@ -2569,16 +2557,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   kf_bits = calculate_boost_bits((rc->frames_to_key - 1),
                                   rc->kf_boost, twopass->kf_group_bits);
 
-  // Work out the fraction of the kf group bits reserved for the inter frames
-  // within the group after discounting the bits for the kf itself.
-  if (twopass->kf_group_bits) {
-    twopass->kfgroup_inter_fraction =
-      (double)(twopass->kf_group_bits - kf_bits) /
-      (double)twopass->kf_group_bits;
-  } else {
-    twopass->kfgroup_inter_fraction = 1.0;
-  }
-
   twopass->kf_group_bits -= kf_bits;
 
   // Save the bits to spend on the key frame.
@@ -2672,20 +2650,11 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = &cpi->twopass;
   GF_GROUP *const gf_group = &twopass->gf_group;
-  int frames_left;
   FIRSTPASS_STATS this_frame;
 
   int target_rate;
   LAYER_CONTEXT *const lc = is_two_pass_svc(cpi) ?
         &cpi->svc.layer_context[cpi->svc.spatial_layer_id] : 0;
-
-  if (lc != NULL) {
-    frames_left = (int)(twopass->total_stats.count -
-                  lc->current_video_frame_in_layer);
-  } else {
-    frames_left = (int)(twopass->total_stats.count -
-                  cm->current_video_frame);
-  }
 
   if (!twopass->stats_in)
     return;
@@ -2728,6 +2697,9 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     twopass->active_worst_quality = cpi->oxcf.cq_level;
   } else if (cm->current_video_frame == 0 ||
              (lc != NULL && lc->current_video_frame_in_layer == 0)) {
+    const int frames_left = (int)(twopass->total_stats.count -
+        ((lc != NULL) ? lc->current_video_frame_in_layer
+                      : cm->current_video_frame));
     // Special case code for first frame.
     const int section_target_bandwidth = (int)(twopass->bits_left /
                                                frames_left);
@@ -2739,10 +2711,10 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     const double section_inactive_zone =
       (twopass->total_left_stats.inactive_zone_rows * 2) /
       ((double)cm->mb_rows * section_length);
-    const int tmp_q =
-      get_twopass_worst_quality(cpi, section_error,
-                                section_intra_skip + section_inactive_zone,
-                                section_target_bandwidth, DEFAULT_GRP_WEIGHT);
+    int tmp_q;
+
+    tmp_q = get_twopass_worst_quality(cpi, section_error,
+        section_intra_skip + section_inactive_zone, section_target_bandwidth);
 
     twopass->active_worst_quality = tmp_q;
     twopass->baseline_active_worst_quality = tmp_q;
@@ -2849,6 +2821,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 void vp9_twopass_postencode_update(VP9_COMP *cpi) {
   TWO_PASS *const twopass = &cpi->twopass;
   RATE_CONTROL *const rc = &cpi->rc;
+  VP9_COMMON *const cm = &cpi->common;
   const int bits_used = rc->base_frame_target;
 
   // VBR correction is done through rc->vbr_bits_off_target. Based on the
@@ -2858,6 +2831,10 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
   // or group of frames.
   rc->vbr_bits_off_target += rc->base_frame_target - rc->projected_frame_size;
   twopass->bits_left = VPXMAX(twopass->bits_left - bits_used, 0);
+
+  // Target vs actual bits for this arf group.
+  twopass->rolling_arf_group_target_bits += rc->this_frame_target;
+  twopass->rolling_arf_group_actual_bits += rc->projected_frame_size;
 
   // Calculate the pct rc error.
   if (rc->total_actual_bits) {
@@ -2880,12 +2857,27 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
 
   // If the rate control is drifting consider adjustment to min or maxq.
   if ((cpi->oxcf.rc_mode != VPX_Q) &&
-      (cpi->twopass.gf_zeromotion_pct < VLOW_MOTION_THRESHOLD) &&
       !cpi->rc.is_src_frame_alt_ref) {
     const int maxq_adj_limit =
       rc->worst_quality - twopass->active_worst_quality;
     const int minq_adj_limit =
         (cpi->oxcf.rc_mode == VPX_CQ ? MINQ_ADJ_LIMIT_CQ : MINQ_ADJ_LIMIT);
+    int aq_extend_min = 0;
+    int aq_extend_max = 0;
+
+    // Extend min or Max Q range to account for imbalance from the base
+    // value when using AQ.
+    if (cpi->oxcf.aq_mode != NO_AQ) {
+      if (cm->seg.aq_av_offset < 0) {
+        // The balance of the AQ map tends towarda lowering the average Q.
+        aq_extend_min = 0;
+        aq_extend_max = VPXMIN(maxq_adj_limit, -cm->seg.aq_av_offset);
+      } else {
+        // The balance of the AQ map tends towards raising the average Q.
+        aq_extend_min = VPXMIN(minq_adj_limit, cm->seg.aq_av_offset);
+        aq_extend_max = 0;
+      }
+    }
 
     // Undershoot.
     if (rc->rate_error_estimate > cpi->oxcf.under_shoot_pct) {
@@ -2910,8 +2902,10 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
         --twopass->extend_maxq;
     }
 
-    twopass->extend_minq = clamp(twopass->extend_minq, 0, minq_adj_limit);
-    twopass->extend_maxq = clamp(twopass->extend_maxq, 0, maxq_adj_limit);
+    twopass->extend_minq =
+        clamp(twopass->extend_minq, aq_extend_min, minq_adj_limit);
+    twopass->extend_maxq =
+        clamp(twopass->extend_maxq, aq_extend_max, maxq_adj_limit);
 
     // If there is a big and undexpected undershoot then feed the extra
     // bits back in quickly. One situation where this may happen is if a

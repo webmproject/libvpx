@@ -185,6 +185,25 @@ add_extralibs() {
 #
 # Boolean Manipulation Functions
 #
+
+enable_codec(){
+  enabled $1 || echo "  enabling $1"
+  set_all yes $1
+
+  is_in $1 vp8 vp9 vp10 && \
+    set_all yes $1_encoder && \
+    set_all yes $1_decoder
+}
+
+disable_codec(){
+  disabled $1 || echo "  disabling $1"
+  set_all no $1
+
+  is_in $1 vp8 vp9 vp10 && \
+    set_all no $1_encoder && \
+    set_all no $1_decoder
+}
+
 enable_feature(){
   set_all yes $*
 }
@@ -521,22 +540,20 @@ process_common_cmdline() {
         ;;
       --enable-?*|--disable-?*)
         eval `echo "$opt" | sed 's/--/action=/;s/-/ option=/;s/-/_/g'`
-        if echo "${ARCH_EXT_LIST}" | grep "^ *$option\$" >/dev/null; then
+        if is_in ${option} ${ARCH_EXT_LIST}; then
           [ $action = "disable" ] && RTCD_OPTIONS="${RTCD_OPTIONS}--disable-${option} "
         elif [ $action = "disable" ] && ! disabled $option ; then
-          echo "${CMDLINE_SELECT}" | grep "^ *$option\$" >/dev/null ||
-            die_unknown $opt
+          is_in ${option} ${CMDLINE_SELECT} || die_unknown $opt
           log_echo "  disabling $option"
         elif [ $action = "enable" ] && ! enabled $option ; then
-          echo "${CMDLINE_SELECT}" | grep "^ *$option\$" >/dev/null ||
-            die_unknown $opt
+          is_in ${option} ${CMDLINE_SELECT} || die_unknown $opt
           log_echo "  enabling $option"
         fi
         ${action}_feature $option
         ;;
       --require-?*)
         eval `echo "$opt" | sed 's/--/action=/;s/-/ option=/;s/-/_/g'`
-        if echo "${ARCH_EXT_LIST}" none | grep "^ *$option\$" >/dev/null; then
+        if is_in ${option} ${ARCH_EXT_LIST}; then
             RTCD_OPTIONS="${RTCD_OPTIONS}${opt} "
         else
             die_unknown $opt
@@ -636,6 +653,26 @@ show_darwin_sdk_path() {
 # Print the major version number of the Darwin SDK specified by $1.
 show_darwin_sdk_major_version() {
   xcrun --sdk $1 --show-sdk-version 2>/dev/null | cut -d. -f1
+}
+
+# Print the Xcode version.
+show_xcode_version() {
+  xcodebuild -version | head -n1 | cut -d' ' -f2
+}
+
+# Fails when Xcode version is less than 6.3.
+check_xcode_minimum_version() {
+  xcode_major=$(show_xcode_version | cut -f1 -d.)
+  xcode_minor=$(show_xcode_version | cut -f2 -d.)
+  xcode_min_major=6
+  xcode_min_minor=3
+  if [ ${xcode_major} -lt ${xcode_min_major} ]; then
+    return 1
+  fi
+  if [ ${xcode_major} -eq ${xcode_min_major} ] \
+    && [ ${xcode_minor} -lt ${xcode_min_minor} ]; then
+    return 1
+  fi
 }
 
 process_common_toolchain() {
@@ -751,7 +788,14 @@ process_common_toolchain() {
   enabled shared && soft_enable pic
 
   # Minimum iOS version for all target platforms (darwin and iphonesimulator).
-  IOS_VERSION_MIN="6.0"
+  # Shared library framework builds are only possible on iOS 8 and later.
+  if enabled shared; then
+    IOS_VERSION_OPTIONS="--enable-shared"
+    IOS_VERSION_MIN="8.0"
+  else
+    IOS_VERSION_OPTIONS=""
+    IOS_VERSION_MIN="6.0"
+  fi
 
   # Handle darwin variants. Newer SDKs allow targeting older
   # platforms, so use the newest one available.
@@ -1018,18 +1062,7 @@ EOF
           NM="$(${XCRUN_FIND} nm)"
           RANLIB="$(${XCRUN_FIND} ranlib)"
           AS_SFX=.s
-
-          # Special handling of ld for armv6 because libclang_rt.ios.a does
-          # not contain armv6 support in Apple's clang package:
-          #   Apple LLVM version 5.1 (clang-503.0.40) (based on LLVM 3.4svn).
-          # TODO(tomfinegan): Remove this. Our minimum iOS version (6.0)
-          # renders support for armv6 unnecessary because the 3GS and up
-          # support neon.
-          if [ "${tgt_isa}" = "armv6" ]; then
-            LD="$(${XCRUN_FIND} ld)"
-          else
-            LD="${CXX:-$(${XCRUN_FIND} ld)}"
-          fi
+          LD="${CXX:-$(${XCRUN_FIND} ld)}"
 
           # ASFLAGS is written here instead of using check_add_asflags
           # because we need to overwrite all of ASFLAGS and purge the
@@ -1055,6 +1088,19 @@ EOF
             [ -d "${try_dir}" ] && add_ldflags -L"${try_dir}"
           done
 
+          case ${tgt_isa} in
+            armv7|armv7s|armv8|arm64)
+              if enabled neon && ! check_xcode_minimum_version; then
+                soft_disable neon
+                log_echo "  neon disabled: upgrade Xcode (need v6.3+)."
+                if enabled neon_asm; then
+                  soft_disable neon_asm
+                  log_echo "  neon_asm disabled: upgrade Xcode (need v6.3+)."
+                fi
+              fi
+              ;;
+          esac
+
           asm_conversion_cmd="${source_path}/build/make/ads2gas_apple.pl"
 
           if [ "$(show_darwin_sdk_major_version iphoneos)" -gt 8 ]; then
@@ -1069,7 +1115,7 @@ EOF
           if enabled rvct; then
             # Check if we have CodeSourcery GCC in PATH. Needed for
             # libraries
-            hash arm-none-linux-gnueabi-gcc 2>&- || \
+            which arm-none-linux-gnueabi-gcc 2>&- || \
               die "Couldn't find CodeSourcery GCC from PATH"
 
             # Use armcc as a linker to enable translation of
@@ -1110,7 +1156,7 @@ EOF
             check_add_ldflags -mfp64
             ;;
           i6400)
-            check_add_cflags -mips64r6 -mabi=64 -funroll-loops -msched-weight 
+            check_add_cflags -mips64r6 -mabi=64 -funroll-loops -msched-weight
             check_add_cflags  -mload-store-pairs -mhard-float -mfp64
             check_add_asflags -mips64r6 -mabi=64 -mhard-float -mfp64
             check_add_ldflags -mips64r6 -mabi=64 -mfp64

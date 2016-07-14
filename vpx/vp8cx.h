@@ -570,6 +570,21 @@ enum vp8e_enc_control_id {
    */
   VP9E_SET_RENDER_SIZE,
 
+  /*!\brief Codec control function to set target level.
+   *
+   * 255: off (default); 0: only keep level stats; 10: target for level 1.0;
+   * 11: target for level 1.1; ... 62: target for level 6.2
+   *
+   * Supported in codecs: VP9
+   */
+  VP9E_SET_TARGET_LEVEL,
+
+  /*!\brief Codec control function to get bitstream level.
+   *
+   * Supported in codecs: VP9
+   */
+  VP9E_GET_LEVEL,
+
   /*!\brief Codec control function to set intended superblock size.
    *
    * By default, the superblock size is determined separately for each
@@ -847,6 +862,12 @@ VPX_CTRL_USE_TYPE(VP9E_SET_RENDER_SIZE, int *)
 
 VPX_CTRL_USE_TYPE(VP10E_SET_SUPERBLOCK_SIZE, unsigned int)
 #define VPX_CTRL_VP10E_SET_SUPERBLOCK_SIZE
+
+VPX_CTRL_USE_TYPE(VP9E_SET_TARGET_LEVEL,  unsigned int)
+#define VPX_CTRL_VP9E_SET_TARGET_LEVEL
+
+VPX_CTRL_USE_TYPE(VP9E_GET_LEVEL, int *)
+#define VPX_CTRL_VP9E_GET_LEVEL
 /*!\endcond */
 /*! @} - end defgroup vp8_encoder */
 #ifdef __cplusplus

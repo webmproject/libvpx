@@ -143,8 +143,8 @@ void vp9_temporal_filter_apply_c(uint8_t *frame1,
 
       for (idy = -1; idy <= 1; ++idy) {
         for (idx = -1; idx <= 1; ++idx) {
-          int row = i + idy;
-          int col = j + idx;
+          int row = (int)i + idy;
+          int col = (int)j + idx;
 
           if (row >= 0 && row < (int)block_height &&
               col >= 0 && col < (int)block_width) {
@@ -211,8 +211,8 @@ void vp9_highbd_temporal_filter_apply_c(uint8_t *frame1_8,
 
       for (idy = -1; idy <= 1; ++idy) {
         for (idx = -1; idx <= 1; ++idx) {
-          int row = i + idy;
-          int col = j + idx;
+          int row = (int)i + idy;
+          int col = (int)j + idx;
 
           if (row >= 0 && row < (int)block_height &&
               col >= 0 && col < (int)block_width) {
@@ -264,8 +264,8 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   int step_param;
   int sadpb = x->sadperbit16;
   int bestsme = INT_MAX;
-  int distortion;
-  unsigned int sse;
+  uint32_t distortion;
+  uint32_t sse;
   int cost_list[5];
 
   MV best_ref_mv1 = {0, 0};

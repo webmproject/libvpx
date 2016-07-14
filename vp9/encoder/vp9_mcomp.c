@@ -144,16 +144,6 @@ void vp9_init3smotion_compensation(search_site_config *cfg, int stride) {
   cfg->total_steps = ss_count / cfg->searches_per_step;
 }
 
-/*
- * To avoid the penalty for crossing cache-line read, preload the reference
- * area in a small buffer, which is aligned to make sure there won't be crossing
- * cache-line read while reading from this buffer. This reduced the cpu
- * cycles spent on reading ref data in sub-pixel filter functions.
- * TODO: Currently, since sub-pixel search range here is -3 ~ 3, copy 22 rows x
- * 32 cols area that is enough for 16x16 macroblock. Later, for SPLITMV, we
- * could reduce the area.
- */
-
 /* Estimated (square) error cost of a motion vector (r,c). The 14 scale comes
  * from the same math as in mv_err_cost(). */
 #define MVC(r, c)                                              \
@@ -172,6 +162,33 @@ static INLINE const uint8_t *pre(const uint8_t *buf, int stride, int r, int c) {
   return &buf[(r >> 3) * stride + (c >> 3)];
 }
 
+#if CONFIG_VP9_HIGHBITDEPTH
+/* checks if (r, c) has better score than previous best */
+#define CHECK_BETTER(v, r, c) \
+  if (c >= minc && c <= maxc && r >= minr && r <= maxr) {              \
+    int64_t tmpmse;                                                    \
+    if (second_pred == NULL) {                                         \
+      thismse = vfp->svf(pre(y, y_stride, r, c), y_stride, sp(c),      \
+                         sp(r), z, src_stride, &sse);                  \
+    } else {                                                           \
+      thismse = vfp->svaf(pre(y, y_stride, r, c), y_stride, sp(c),     \
+                          sp(r), z, src_stride, &sse, second_pred);    \
+    }                                                                  \
+    tmpmse = thismse;                                                  \
+    tmpmse += MVC(r, c);                                               \
+    if (tmpmse >= INT_MAX) {                                           \
+      v = INT_MAX;                                                     \
+    } else if ((v = (uint32_t)tmpmse) < besterr) {                     \
+      besterr = v;                                                     \
+      br = r;                                                          \
+      bc = c;                                                          \
+      *distortion = thismse;                                           \
+      *sse1 = sse;                                                     \
+    }                                                                  \
+  } else {                                                             \
+    v = INT_MAX;                                                       \
+  }
+#else
 /* checks if (r, c) has better score than previous best */
 #define CHECK_BETTER(v, r, c) \
   if (c >= minc && c <= maxc && r >= minr && r <= maxr) {              \
@@ -192,6 +209,7 @@ static INLINE const uint8_t *pre(const uint8_t *buf, int stride, int r, int c) {
     v = INT_MAX;                                                       \
   }
 
+#endif
 #define FIRST_LEVEL_CHECKS                              \
   {                                                     \
     unsigned int left, right, up, down, diag;           \
@@ -320,10 +338,10 @@ static unsigned int setup_center_error(const MACROBLOCKD *xd,
                                        const uint8_t *second_pred,
                                        int w, int h, int offset,
                                        int *mvjcost, int *mvcost[2],
-                                       unsigned int *sse1,
-                                       int *distortion) {
-  unsigned int besterr;
+                                       uint32_t *sse1,
+                                       uint32_t *distortion) {
 #if CONFIG_VP9_HIGHBITDEPTH
+  uint64_t besterr;
   if (second_pred != NULL) {
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       DECLARE_ALIGNED(16, uint16_t, comp_pred16[64 * 64]);
@@ -339,9 +357,13 @@ static unsigned int setup_center_error(const MACROBLOCKD *xd,
   } else {
     besterr = vfp->vf(y + offset, y_stride, src, src_stride, sse1);
   }
-  *distortion = besterr;
+  *distortion = (uint32_t)besterr;
   besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
+  if (besterr >= UINT32_MAX)
+    return UINT32_MAX;
+  return (uint32_t)besterr;
 #else
+  uint32_t besterr;
   (void) xd;
   if (second_pred != NULL) {
     DECLARE_ALIGNED(16, uint8_t, comp_pred[64 * 64]);
@@ -352,8 +374,8 @@ static unsigned int setup_center_error(const MACROBLOCKD *xd,
   }
   *distortion = besterr;
   besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
   return besterr;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 }
 
 static INLINE int divide_and_round(const int n, const int d) {
@@ -383,7 +405,7 @@ static void get_cost_surf_min(int *cost_list, int *ir, int *ic,
                          (cost_list[4] - 2 * cost_list[0] + cost_list[2]));
 }
 
-int vp9_skip_sub_pixel_tree(
+uint32_t vp9_skip_sub_pixel_tree(
     const MACROBLOCK *x,
     MV *bestmv, const MV *ref_mv,
     int allow_hp,
@@ -393,8 +415,8 @@ int vp9_skip_sub_pixel_tree(
     int iters_per_step,
     int *cost_list,
     int *mvjcost, int *mvcost[2],
-    int *distortion,
-    unsigned int *sse1,
+    uint32_t *distortion,
+    uint32_t *sse1,
     const uint8_t *second_pred,
     int w, int h) {
   SETUP_SUBPEL_SEARCH;
@@ -428,7 +450,7 @@ int vp9_skip_sub_pixel_tree(
   return besterr;
 }
 
-int vp9_find_best_sub_pixel_tree_pruned_evenmore(
+uint32_t vp9_find_best_sub_pixel_tree_pruned_evenmore(
     const MACROBLOCK *x,
     MV *bestmv, const MV *ref_mv,
     int allow_hp,
@@ -438,8 +460,8 @@ int vp9_find_best_sub_pixel_tree_pruned_evenmore(
     int iters_per_step,
     int *cost_list,
     int *mvjcost, int *mvcost[2],
-    int *distortion,
-    unsigned int *sse1,
+    uint32_t *distortion,
+    uint32_t *sse1,
     const uint8_t *second_pred,
     int w, int h) {
   SETUP_SUBPEL_SEARCH;
@@ -508,7 +530,7 @@ int vp9_find_best_sub_pixel_tree_pruned_evenmore(
   return besterr;
 }
 
-int vp9_find_best_sub_pixel_tree_pruned_more(const MACROBLOCK *x,
+uint32_t vp9_find_best_sub_pixel_tree_pruned_more(const MACROBLOCK *x,
                                              MV *bestmv, const MV *ref_mv,
                                              int allow_hp,
                                              int error_per_bit,
@@ -517,8 +539,8 @@ int vp9_find_best_sub_pixel_tree_pruned_more(const MACROBLOCK *x,
                                              int iters_per_step,
                                              int *cost_list,
                                              int *mvjcost, int *mvcost[2],
-                                             int *distortion,
-                                             unsigned int *sse1,
+                                             uint32_t *distortion,
+                                             uint32_t *sse1,
                                              const uint8_t *second_pred,
                                              int w, int h) {
   SETUP_SUBPEL_SEARCH;
@@ -582,7 +604,7 @@ int vp9_find_best_sub_pixel_tree_pruned_more(const MACROBLOCK *x,
   return besterr;
 }
 
-int vp9_find_best_sub_pixel_tree_pruned(const MACROBLOCK *x,
+uint32_t vp9_find_best_sub_pixel_tree_pruned(const MACROBLOCK *x,
                                         MV *bestmv, const MV *ref_mv,
                                         int allow_hp,
                                         int error_per_bit,
@@ -591,8 +613,8 @@ int vp9_find_best_sub_pixel_tree_pruned(const MACROBLOCK *x,
                                         int iters_per_step,
                                         int *cost_list,
                                         int *mvjcost, int *mvcost[2],
-                                        int *distortion,
-                                        unsigned int *sse1,
+                                        uint32_t *distortion,
+                                        uint32_t *sse1,
                                         const uint8_t *second_pred,
                                         int w, int h) {
   SETUP_SUBPEL_SEARCH;
@@ -684,19 +706,19 @@ static const MV search_step_table[12] = {
     {0, -1}, {0, 1}, {-1, 0}, {1, 0}
 };
 
-int vp9_find_best_sub_pixel_tree(const MACROBLOCK *x,
-                                 MV *bestmv, const MV *ref_mv,
-                                 int allow_hp,
-                                 int error_per_bit,
-                                 const vp9_variance_fn_ptr_t *vfp,
-                                 int forced_stop,
-                                 int iters_per_step,
-                                 int *cost_list,
-                                 int *mvjcost, int *mvcost[2],
-                                 int *distortion,
-                                 unsigned int *sse1,
-                                 const uint8_t *second_pred,
-                                 int w, int h) {
+uint32_t vp9_find_best_sub_pixel_tree(const MACROBLOCK *x,
+                                      MV *bestmv, const MV *ref_mv,
+                                      int allow_hp,
+                                      int error_per_bit,
+                                      const vp9_variance_fn_ptr_t *vfp,
+                                      int forced_stop,
+                                      int iters_per_step,
+                                      int *cost_list,
+                                      int *mvjcost, int *mvcost[2],
+                                      uint32_t *distortion,
+                                      uint32_t *sse1,
+                                      const uint8_t *second_pred,
+                                      int w, int h) {
   const uint8_t *const z = x->plane[0].src.buf;
   const uint8_t *const src_address = z;
   const int src_stride = x->plane[0].src.stride;
@@ -835,7 +857,6 @@ int vp9_find_best_sub_pixel_tree(const MACROBLOCK *x,
 }
 
 #undef MVC
-#undef PRE
 #undef CHECK_BETTER
 
 static INLINE int check_bounds(const MACROBLOCK *x, int row, int col,
@@ -1392,12 +1413,22 @@ int vp9_get_mvpred_var(const MACROBLOCK *x,
   const struct buf_2d *const what = &x->plane[0].src;
   const struct buf_2d *const in_what = &xd->plane[0].pre[0];
   const MV mv = {best_mv->row * 8, best_mv->col * 8};
-  unsigned int unused;
-
+  uint32_t unused;
+#if CONFIG_VP9_HIGHBITDEPTH
+  uint64_t err= vfp->vf(what->buf, what->stride,
+                        get_buf_from_mv(in_what, best_mv),
+                        in_what->stride, &unused);
+  err += (use_mvcost ?  mv_err_cost(&mv, center_mv, x->nmvjointcost,
+                                    x->mvcost, x->errorperbit) : 0);
+  if (err >= INT_MAX)
+    return INT_MAX;
+  return (int)err;
+#else
   return vfp->vf(what->buf, what->stride,
                  get_buf_from_mv(in_what, best_mv), in_what->stride, &unused) +
       (use_mvcost ?  mv_err_cost(&mv, center_mv, x->nmvjointcost,
                                  x->mvcost, x->errorperbit) : 0);
+#endif
 }
 
 int vp9_get_mvpred_av_var(const MACROBLOCK *x,

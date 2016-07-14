@@ -20,6 +20,7 @@
 #include "vpx_dsp/ssim.h"
 #endif
 #include "vpx_dsp/variance.h"
+#include "vpx_ports/system_state.h"
 #include "vpx_util/vpx_thread.h"
 
 #include "vp9/common/vp9_alloccommon.h"
@@ -50,6 +51,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// vp9 uses 10,000,000 ticks/second as time stamp
+#define TICKS_PER_SEC 10000000
 
 typedef struct {
   int nmvjointcost[MV_JOINTS];
@@ -129,7 +133,7 @@ typedef struct VP9EncoderConfig {
   int height;  // height of data passed to the compressor
   unsigned int input_bit_depth;  // Input bit depth.
   double init_framerate;  // set to passed in framerate
-  int64_t target_bandwidth;  // bandwidth to be used in kilobits per second
+  int64_t target_bandwidth;  // bandwidth to be used in bits per second
 
   int noise_sensitivity;  // pre processing blur: recommendation 0
   int sharpness;  // sharpening output: recommendation 0:
@@ -227,6 +231,8 @@ typedef struct VP9EncoderConfig {
 
   int max_threads;
 
+  int target_level;
+
   vpx_fixed_buf_t two_pass_stats_in;
   struct vpx_codec_pkt_list *output_pkt_list;
 
@@ -294,6 +300,69 @@ typedef struct IMAGE_STAT {
   double stat[ALL+1];
   double worst;
 } ImageStat;
+
+#define CPB_WINDOW_SIZE 4
+#define FRAME_WINDOW_SIZE 128
+#define SAMPLE_RATE_GRACE_P 0.015
+#define VP9_LEVELS 14
+
+typedef enum {
+  LEVEL_UNKNOWN = 0,
+  LEVEL_1 = 10,
+  LEVEL_1_1 = 11,
+  LEVEL_2 = 20,
+  LEVEL_2_1 = 21,
+  LEVEL_3 = 30,
+  LEVEL_3_1 = 31,
+  LEVEL_4 = 40,
+  LEVEL_4_1 = 41,
+  LEVEL_5 = 50,
+  LEVEL_5_1 = 51,
+  LEVEL_5_2 = 52,
+  LEVEL_6 = 60,
+  LEVEL_6_1 = 61,
+  LEVEL_6_2 = 62,
+  LEVEL_MAX = 255
+} VP9_LEVEL;
+
+typedef struct {
+  VP9_LEVEL level;
+  uint64_t max_luma_sample_rate;
+  uint32_t max_luma_picture_size;
+  double average_bitrate;  // in kilobits per second
+  double max_cpb_size;  // in kilobits
+  double compression_ratio;
+  uint8_t max_col_tiles;
+  uint32_t min_altref_distance;
+  uint8_t max_ref_frame_buffers;
+} Vp9LevelSpec;
+
+typedef struct {
+  int64_t ts;  // timestamp
+  uint32_t luma_samples;
+  uint32_t size;  // in bytes
+} FrameRecord;
+
+typedef struct {
+  FrameRecord buf[FRAME_WINDOW_SIZE];
+  uint8_t start;
+  uint8_t len;
+} FrameWindowBuffer;
+
+typedef struct {
+  uint8_t seen_first_altref;
+  uint32_t frames_since_last_altref;
+  uint64_t total_compressed_size;
+  uint64_t total_uncompressed_size;
+  double time_encoded;  // in seconds
+  FrameWindowBuffer frame_window_buffer;
+  int ref_refresh_map;
+} Vp9LevelStats;
+
+typedef struct {
+  Vp9LevelStats level_stats;
+  Vp9LevelSpec level_spec;
+} Vp9LevelInfo;
 
 typedef struct VP9_COMP {
   QUANTS quants;
@@ -494,7 +563,12 @@ typedef struct VP9_COMP {
 
   int use_skin_detection;
 
+  int target_level;
+
   NOISE_ESTIMATE noise_estimate;
+
+  // Count on how many consecutive times a block uses small/zeromv for encoding.
+  uint8_t *consec_zero_mv;
 
   // VAR_BASED_PARTITION thresholds
   // 0 - threshold_64x64; 1 - threshold_32x32;
@@ -509,6 +583,9 @@ typedef struct VP9_COMP {
   VPxWorker *workers;
   struct EncWorkerData *tile_thr_data;
   VP9LfSync lf_row_sync;
+
+  int keep_level_stats;
+  Vp9LevelInfo level_info;
 } VP9_COMP;
 
 void vp9_initialize_enc(void);
@@ -657,6 +734,8 @@ static INLINE int get_chessboard_index(const int frame_index) {
 static INLINE int *cond_cost_list(const struct VP9_COMP *cpi, int *cost_list) {
   return cpi->sf.mv.subpel_search_method != SUBPEL_TREE ? cost_list : NULL;
 }
+
+VP9_LEVEL vp9_get_level(const Vp9LevelSpec *const level_spec);
 
 void vp9_new_framerate(VP9_COMP *cpi, double framerate);
 

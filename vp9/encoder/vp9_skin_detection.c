@@ -88,7 +88,7 @@ int vp9_compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
                            int stride, int strideuv, int bsize,
                            int consec_zeromv, int curr_motion_magn) {
   // No skin if block has been zero/small motion for long consecutive time.
-  if (consec_zeromv > 80 && curr_motion_magn == 0) {
+  if (consec_zeromv > 60 && curr_motion_magn == 0) {
     return 0;
   } else {
     int motion = 1;
@@ -100,7 +100,7 @@ int vp9_compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
     const uint8_t ysource = y[y_height_shift * stride + y_width_shift];
     const uint8_t usource = u[uv_height_shift * strideuv + uv_width_shift];
     const uint8_t vsource = v[uv_height_shift * strideuv + uv_width_shift];
-    if (consec_zeromv > 30 && curr_motion_magn == 0)
+    if (consec_zeromv > 25 && curr_motion_magn == 0)
       motion = 0;
     return vp9_skin_pixel(ysource, usource, vsource, motion);
   }
@@ -112,7 +112,6 @@ int vp9_compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
 void vp9_compute_skin_map(VP9_COMP *const cpi, FILE *yuv_skinmap_file) {
   int i, j, mi_row, mi_col, num_bl;
   VP9_COMMON *const cm = &cpi->common;
-  CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   uint8_t *y;
   const uint8_t *src_y = cpi->Source->y_buffer;
   const uint8_t *src_u = cpi->Source->u_buffer;
@@ -166,19 +165,17 @@ void vp9_compute_skin_map(VP9_COMP *const cpi, FILE *yuv_skinmap_file) {
       } else {
         int block_size = BLOCK_8X8;
         int consec_zeromv = 0;
-        if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled) {
-          int bl_index = mi_row * cm->mi_cols + mi_col;
-          int bl_index1 = bl_index + 1;
-          int bl_index2 = bl_index + cm->mi_cols;
-          int bl_index3 = bl_index2 + 1;
-          if (y_bsize == 8)
-            consec_zeromv = cr->consec_zero_mv[bl_index];
-          else
-            consec_zeromv = VPXMIN(cr->consec_zero_mv[bl_index],
-                                     VPXMIN(cr->consec_zero_mv[bl_index1],
-                                     VPXMIN(cr->consec_zero_mv[bl_index2],
-                                     cr->consec_zero_mv[bl_index3])));
-        }
+        int bl_index = mi_row * cm->mi_cols + mi_col;
+        int bl_index1 = bl_index + 1;
+        int bl_index2 = bl_index + cm->mi_cols;
+        int bl_index3 = bl_index2 + 1;
+        if (y_bsize == 8)
+          consec_zeromv = cpi->consec_zero_mv[bl_index];
+        else
+          consec_zeromv = VPXMIN(cpi->consec_zero_mv[bl_index],
+                                 VPXMIN(cpi->consec_zero_mv[bl_index1],
+                                 VPXMIN(cpi->consec_zero_mv[bl_index2],
+                                 cpi->consec_zero_mv[bl_index3])));
         if (y_bsize == 16)
           block_size = BLOCK_16X16;
         is_skin  = vp9_compute_skin_block(src_y, src_u, src_v, src_ystride,

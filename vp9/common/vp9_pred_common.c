@@ -28,9 +28,9 @@ int vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
 
   if (left_type == above_type)
     return left_type;
-  else if (left_type == SWITCHABLE_FILTERS && above_type != SWITCHABLE_FILTERS)
+  else if (left_type == SWITCHABLE_FILTERS)
     return above_type;
-  else if (left_type != SWITCHABLE_FILTERS && above_type == SWITCHABLE_FILTERS)
+  else if (above_type == SWITCHABLE_FILTERS)
     return left_type;
   else
     return SWITCHABLE_FILTERS;

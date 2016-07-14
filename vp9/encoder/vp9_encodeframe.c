@@ -134,7 +134,7 @@ unsigned int vp9_high_get_sby_perpixel_variance(
                                0, &sse);
       break;
   }
-  return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
+  return ROUND_POWER_OF_TWO((int64_t)var, num_pels_log2_lookup[bs]);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
@@ -662,12 +662,79 @@ static void fill_variance_8x8avg(const uint8_t *s, int sp, const uint8_t *d,
   }
 }
 
+#if !CONFIG_VP9_HIGHBITDEPTH
+// Check if most of the superblock is skin content, and if so, force split to
+// 32x32, and set x->sb_is_skin for use in mode selection.
+static int skin_sb_split(VP9_COMP *cpi, MACROBLOCK *x, const int low_res,
+                         int mi_row, int mi_col, int *force_split) {
+  VP9_COMMON * const cm = &cpi->common;
+  // Avoid checking superblocks on/near boundary and avoid low resolutions.
+  // Note superblock may still pick 64X64 if y_sad is very small
+  // (i.e., y_sad < cpi->vbp_threshold_sad) below. For now leave this as is.
+  if (!low_res && (mi_col >= 8 && mi_col + 8 < cm->mi_cols && mi_row >= 8 &&
+      mi_row + 8 < cm->mi_rows)) {
+    int num_16x16_skin = 0;
+    int num_16x16_nonskin = 0;
+    uint8_t *ysignal = x->plane[0].src.buf;
+    uint8_t *usignal = x->plane[1].src.buf;
+    uint8_t *vsignal = x->plane[2].src.buf;
+    int sp = x->plane[0].src.stride;
+    int spuv = x->plane[1].src.stride;
+    const int block_index = mi_row * cm->mi_cols + mi_col;
+    const int bw = num_8x8_blocks_wide_lookup[BLOCK_64X64];
+    const int bh = num_8x8_blocks_high_lookup[BLOCK_64X64];
+    const int xmis = VPXMIN(cm->mi_cols - mi_col, bw);
+    const int ymis = VPXMIN(cm->mi_rows - mi_row, bh);
+    // Loop through the 16x16 sub-blocks.
+    int i, j;
+    for (i = 0; i < ymis; i+=2) {
+      for (j = 0; j < xmis; j+=2) {
+        int bl_index = block_index + i * cm->mi_cols + j;
+        int bl_index1 = bl_index + 1;
+        int bl_index2 = bl_index + cm->mi_cols;
+        int bl_index3 = bl_index2 + 1;
+        int consec_zeromv = VPXMIN(cpi->consec_zero_mv[bl_index],
+                                   VPXMIN(cpi->consec_zero_mv[bl_index1],
+                                   VPXMIN(cpi->consec_zero_mv[bl_index2],
+                                   cpi->consec_zero_mv[bl_index3])));
+        int is_skin = vp9_compute_skin_block(ysignal,
+                                             usignal,
+                                             vsignal,
+                                             sp,
+                                             spuv,
+                                             BLOCK_16X16,
+                                             consec_zeromv,
+                                             0);
+        num_16x16_skin += is_skin;
+        num_16x16_nonskin += (1 - is_skin);
+        if (num_16x16_nonskin > 3) {
+          // Exit loop if at least 4 of the 16x16 blocks are not skin.
+          i = ymis;
+          break;
+        }
+        ysignal += 16;
+        usignal += 8;
+        vsignal += 8;
+      }
+      ysignal += (sp << 4) - 64;
+      usignal += (spuv << 3) - 32;
+      vsignal += (spuv << 3) - 32;
+    }
+    if (num_16x16_skin > 12) {
+      *force_split = 1;
+      return 1;
+    }
+  }
+  return 0;
+}
+#endif
+
 // This function chooses partitioning based on the variance between source and
 // reconstructed last, where variance is computed for down-sampled inputs.
 static int choose_partitioning(VP9_COMP *cpi,
-                                const TileInfo *const tile,
-                                MACROBLOCK *x,
-                                int mi_row, int mi_col) {
+                               const TileInfo *const tile,
+                               MACROBLOCK *x,
+                               int mi_row, int mi_col) {
   VP9_COMMON * const cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   int i, j, k, m;
@@ -680,6 +747,8 @@ static int choose_partitioning(VP9_COMP *cpi,
   const uint8_t *d;
   int sp;
   int dp;
+  // Ref frame used in partitioning.
+  MV_REFERENCE_FRAME ref_frame_partition = LAST_FRAME;
   int pixels_wide = 64, pixels_high = 64;
   int64_t thresholds[4] = {cpi->vbp_thresholds[0], cpi->vbp_thresholds[1],
       cpi->vbp_thresholds[2], cpi->vbp_thresholds[3]};
@@ -704,6 +773,8 @@ static int choose_partitioning(VP9_COMP *cpi,
     }
   }
 
+  memset(x->variance_low, 0, sizeof(x->variance_low));
+
   if (xd->mb_to_right_edge < 0)
     pixels_wide += (xd->mb_to_right_edge >> 3);
   if (xd->mb_to_bottom_edge < 0)
@@ -725,7 +796,7 @@ static int choose_partitioning(VP9_COMP *cpi,
     const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
 
     const YV12_BUFFER_CONFIG *yv12_g = NULL;
-    unsigned int y_sad, y_sad_g;
+    unsigned int y_sad, y_sad_g, y_sad_thr;
     const BLOCK_SIZE bsize = BLOCK_32X32
         + (mi_col + 4 < cm->mi_cols) * 2 + (mi_row + 4 < cm->mi_rows);
 
@@ -758,84 +829,31 @@ static int choose_partitioning(VP9_COMP *cpi,
     mi->interp_filter = BILINEAR;
 
     y_sad = vp9_int_pro_motion_estimation(cpi, x, bsize, mi_row, mi_col);
-    if (y_sad_g < y_sad) {
+    // Pick ref frame for partitioning, bias last frame when y_sad_g and y_sad
+    // are close if short_circuit_low_temp_var is on.
+    y_sad_thr = cpi->sf.short_circuit_low_temp_var ? (y_sad * 7) >> 3 : y_sad;
+    if (y_sad_g < y_sad_thr) {
       vp9_setup_pre_planes(xd, 0, yv12_g, mi_row, mi_col,
                            &cm->frame_refs[GOLDEN_FRAME - 1].sf);
       mi->ref_frame[0] = GOLDEN_FRAME;
       mi->mv[0].as_int = 0;
       y_sad = y_sad_g;
+      ref_frame_partition = GOLDEN_FRAME;
     } else {
       x->pred_mv[LAST_FRAME] = mi->mv[0].as_mv;
+      ref_frame_partition = LAST_FRAME;
     }
 
     set_ref_ptrs(cm, xd, mi->ref_frame[0], mi->ref_frame[1]);
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_64X64);
 
-    // Check if most of the superblock is skin content, and if so, force split
-    // to 32x32, and set x->sb_is_skin for use in mode selection.
-    // Avoid checking superblocks on/near boundary and avoid low resolutions.
-    // Note superblock may still pick 64X64 if y_sad is very small
-    // (i.e., y_sad < cpi->vbp_threshold_sad) below. For now leave this as is.
     x->sb_is_skin = 0;
 #if !CONFIG_VP9_HIGHBITDEPTH
-    if (cpi->use_skin_detection && !low_res && (mi_col >= 8 &&
-        mi_col + 8 < cm->mi_cols && mi_row >= 8 && mi_row + 8 < cm->mi_rows)) {
-      CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
-      int bl_index1, bl_index2, bl_index3;
-      int num_16x16_skin = 0;
-      int num_16x16_nonskin = 0;
-      int is_skin = 0;
-      int consec_zeromv = 0;
-      uint8_t *ysignal = x->plane[0].src.buf;
-      uint8_t *usignal = x->plane[1].src.buf;
-      uint8_t *vsignal = x->plane[2].src.buf;
-      int spuv = x->plane[1].src.stride;
-      const int block_index = mi_row * cm->mi_cols + mi_col;
-      const int bw = num_8x8_blocks_wide_lookup[BLOCK_64X64];
-      const int bh = num_8x8_blocks_high_lookup[BLOCK_64X64];
-      const int xmis = VPXMIN(cm->mi_cols - mi_col, bw);
-      const int ymis = VPXMIN(cm->mi_rows - mi_row, bh);
-      // Loop through the 16x16 sub-blocks.
-      int j, i;
-      for (i = 0; i < ymis; i+=2) {
-        for (j = 0; j < xmis; j+=2) {
-          int bl_index = block_index + i * cm->mi_cols + j;
-          bl_index1 = bl_index + 1;
-          bl_index2 = bl_index + cm->mi_cols;
-          bl_index3 = bl_index2 + 1;
-          consec_zeromv = VPXMIN(cr->consec_zero_mv[bl_index],
-                                 VPXMIN(cr->consec_zero_mv[bl_index1],
-                                 VPXMIN(cr->consec_zero_mv[bl_index2],
-                                 cr->consec_zero_mv[bl_index3])));
-          is_skin = vp9_compute_skin_block(ysignal,
-                                           usignal,
-                                           vsignal,
-                                           sp,
-                                           spuv,
-                                           BLOCK_16X16,
-                                           consec_zeromv,
-                                           0);
-          num_16x16_skin += is_skin;
-          num_16x16_nonskin += (1 - is_skin);
-          if (num_16x16_nonskin > 3) {
-            // Exit loop if at least 4 of the 16x16 blocks are not skin.
-            i = ymis;
-            j = xmis;
-          }
-          ysignal += 16;
-          usignal += 8;
-          vsignal += 8;
-        }
-        ysignal += (sp << 4) - 64;
-        usignal += (spuv << 3) - 32;
-        vsignal += (spuv << 3) - 32;
-      }
-      if (num_16x16_skin > 12) {
-        x->sb_is_skin = 1;
-        force_split[0] = 1;
-      }
-    }
+    if (cpi->use_skin_detection)
+      x->sb_is_skin = skin_sb_split(cpi, x, low_res, mi_row, mi_col,
+                                    &force_split[0]);
 #endif
+
     for (i = 1; i <= 2; ++i) {
       struct macroblock_plane  *p = &x->plane[i];
       struct macroblockd_plane *pd = &xd->plane[i];
@@ -1057,6 +1075,59 @@ static int choose_partitioning(VP9_COMP *cpi,
                                (mi_row + y32_idx + y16_idx + y8_idx),
                                (mi_col + x32_idx + x16_idx + x8_idx),
                                BLOCK_8X8);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (cpi->sf.short_circuit_low_temp_var) {
+    const int mv_thr = cm->width > 640 ? 8 : 4;
+    // Check temporal variance for bsize >= 16x16, if LAST_FRAME was selected
+    // and int_pro mv is small. If the temporal variance is small set the
+    // variance_low flag for the block. The variance threshold can be adjusted,
+    // the higher the more aggressive.
+    if (ref_frame_partition == LAST_FRAME &&
+        (cpi->sf.short_circuit_low_temp_var == 1 ||
+         (xd->mi[0]->mv[0].as_mv.col < mv_thr &&
+          xd->mi[0]->mv[0].as_mv.col > -mv_thr &&
+          xd->mi[0]->mv[0].as_mv.row < mv_thr &&
+          xd->mi[0]->mv[0].as_mv.row > -mv_thr))) {
+      if (xd->mi[0]->sb_type == BLOCK_64X64 &&
+          vt.part_variances.none.variance < (thresholds[0] >> 1)) {
+        x->variance_low[0] = 1;
+      } else if (xd->mi[0]->sb_type == BLOCK_64X32) {
+        for (j = 0; j < 2; j++) {
+          if (vt.part_variances.horz[j].variance < (thresholds[0] >> 2))
+            x->variance_low[j + 1] = 1;
+        }
+      } else if (xd->mi[0]->sb_type == BLOCK_32X64) {
+        for (j = 0; j < 2; j++) {
+          if (vt.part_variances.vert[j].variance < (thresholds[0] >> 2))
+            x->variance_low[j + 3] = 1;
+        }
+      } else {
+        for (i = 0; i < 4; i++) {
+          if (!force_split[i + 1]) {
+            // 32x32
+            if (vt.split[i].part_variances.none.variance <
+                (thresholds[1] >> 1))
+              x->variance_low[i + 5] = 1;
+          } else if (cpi->sf.short_circuit_low_temp_var == 2) {
+            int idx[4] = {0, 4, xd->mi_stride << 2, (xd->mi_stride << 2) + 4};
+            const int idx_str = cm->mi_stride * mi_row + mi_col + idx[i];
+            MODE_INFO **this_mi = cm->mi_grid_visible + idx_str;
+            // For 32x16 and 16x32 blocks, the flag is set on each 16x16 block
+            // inside.
+            if ((*this_mi)->sb_type == BLOCK_16X16 ||
+                (*this_mi)->sb_type == BLOCK_32X16 ||
+                (*this_mi)->sb_type == BLOCK_16X32) {
+              for (j = 0; j < 4; j++) {
+                if (vt.split[i].split[j].part_variances.none.variance <
+                    (thresholds[2] >> 8))
+                  x->variance_low[(i << 2) + j + 9] = 1;
               }
             }
           }
@@ -3752,8 +3823,14 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi,
         break;
       case REFERENCE_PARTITION:
         set_offsets(cpi, tile_info, x, mi_row, mi_col, BLOCK_64X64);
-        if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled &&
-            xd->mi[0]->segment_id) {
+        // Use nonrd_pick_partition on scene-cut for VBR, or on qp-segment
+        // if cyclic_refresh is enabled.
+        // nonrd_pick_partition does not support 4x4 partition, so avoid it
+        // on key frame for now.
+        if ((cpi->oxcf.rc_mode == VPX_VBR && cpi->rc.high_source_sad &&
+            cm->frame_type != KEY_FRAME) ||
+            (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled &&
+            xd->mi[0]->segment_id)) {
           // Use lower max_partition_size for low resoultions.
           if (cm->width <= 352 && cm->height <= 288)
             x->max_partition_size = BLOCK_32X32;
@@ -4026,7 +4103,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   rdc->m_search_count = 0;   // Count of motion search hits.
   rdc->ex_search_count = 0;  // Exhaustive mesh search hits.
 
-
   xd->lossless = cm->base_qindex == 0 &&
                  cm->y_dc_delta_q == 0 &&
                  cm->uv_dc_delta_q == 0 &&
@@ -4136,6 +4212,31 @@ static INTERP_FILTER get_interp_filter(
   } else {
     return SWITCHABLE;
   }
+}
+
+static int compute_frame_aq_offset(struct VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  MODE_INFO **mi_8x8_ptr = cm->mi_grid_visible;
+  struct segmentation *const seg = &cm->seg;
+
+  int mi_row, mi_col;
+  int sum_delta = 0;
+  int map_index = 0;
+  int qdelta_index;
+  int segment_id;
+
+  for (mi_row = 0; mi_row < cm->mi_rows; mi_row++) {
+    MODE_INFO **mi_8x8 = mi_8x8_ptr;
+    for (mi_col = 0; mi_col < cm->mi_cols; mi_col++, mi_8x8++) {
+      segment_id = mi_8x8[0]->segment_id;
+      qdelta_index = get_segdata(seg, segment_id, SEG_LVL_ALT_Q);
+      sum_delta += qdelta_index;
+      map_index++;
+    }
+    mi_8x8_ptr += cm->mi_stride;
+  }
+
+  return sum_delta / (cm->mi_rows * cm->mi_cols);
 }
 
 void vp9_encode_frame(VP9_COMP *cpi) {
@@ -4260,8 +4361,13 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     cm->reference_mode = SINGLE_REFERENCE;
     encode_frame_internal(cpi);
   }
-}
 
+  // If segmentated AQ is enabled compute the average AQ weighting.
+  if (cm->seg.enabled && (cpi->oxcf.aq_mode != NO_AQ) &&
+      (cm->seg.update_map || cm->seg.update_data)) {
+    cm->seg.aq_av_offset = compute_frame_aq_offset(cpi);
+  }
+}
 static void sum_intra_stats(FRAME_COUNTS *counts, const MODE_INFO *mi) {
   const PREDICTION_MODE y_mode = mi->mode;
   const PREDICTION_MODE uv_mode = mi->uv_mode;
@@ -4279,6 +4385,32 @@ static void sum_intra_stats(FRAME_COUNTS *counts, const MODE_INFO *mi) {
   }
 
   ++counts->uv_mode[y_mode][uv_mode];
+}
+
+static void update_zeromv_cnt(VP9_COMP *const cpi,
+                              const MODE_INFO *const mi,
+                              int mi_row, int mi_col,
+                              BLOCK_SIZE bsize) {
+  const VP9_COMMON *const cm = &cpi->common;
+  MV mv = mi->mv[0].as_mv;
+  const int bw = num_8x8_blocks_wide_lookup[bsize];
+  const int bh = num_8x8_blocks_high_lookup[bsize];
+  const int xmis = VPXMIN(cm->mi_cols - mi_col, bw);
+  const int ymis = VPXMIN(cm->mi_rows - mi_row, bh);
+  const int block_index = mi_row * cm->mi_cols + mi_col;
+  int x, y;
+  for (y = 0; y < ymis; y++)
+    for (x = 0; x < xmis; x++) {
+      int map_offset = block_index + y * cm->mi_cols + x;
+      if (is_inter_block(mi) && mi->segment_id <= CR_SEGMENT_ID_BOOST2) {
+        if (abs(mv.row) < 8 && abs(mv.col) < 8) {
+          if (cpi->consec_zero_mv[map_offset] < 255)
+           cpi->consec_zero_mv[map_offset]++;
+        } else {
+          cpi->consec_zero_mv[map_offset] = 0;
+        }
+      }
+    }
 }
 
 static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
@@ -4311,9 +4443,15 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
 
   if (!is_inter_block(mi)) {
     int plane;
+#if CONFIG_BETTER_HW_COMPATIBILITY && CONFIG_VP9_HIGHBITDEPTH
+    if ((xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) &&
+        (xd->above_mi == NULL || xd->left_mi == NULL) &&
+        need_top_left[mi->uv_mode])
+      assert(0);
+#endif  // CONFIG_BETTER_HW_COMPATIBILITY && CONFIG_VP9_HIGHBITDEPTH
     mi->skip = 1;
     for (plane = 0; plane < MAX_MB_PLANE; ++plane)
-      vp9_encode_intra_block_plane(x, VPXMAX(bsize, BLOCK_8X8), plane);
+      vp9_encode_intra_block_plane(x, VPXMAX(bsize, BLOCK_8X8), plane, 1);
     if (output_enabled)
       sum_intra_stats(td->counts, mi);
     vp9_tokenize_sb(cpi, td, t, !output_enabled, seg_skip,
@@ -4361,5 +4499,7 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
     ++td->counts->tx.tx_totals[get_uv_tx_size(mi, &xd->plane[1])];
     if (cm->seg.enabled && cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
       vp9_cyclic_refresh_update_sb_postencode(cpi, mi, mi_row, mi_col, bsize);
+    if (cpi->oxcf.pass == 0 && cpi->svc.temporal_layer_id == 0)
+      update_zeromv_cnt(cpi, mi, mi_row, mi_col, bsize);
   }
 }

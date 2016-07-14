@@ -90,7 +90,7 @@ static int is_skin_color(int y, int cb, int cr, int consec_zeromv)
     {
       int i = 0;
       // No skin if block has been zero motion for long consecutive time.
-      if (consec_zeromv > 80)
+      if (consec_zeromv > 60)
         return 0;
       // Exit on grey.
        if (cb == 128 && cr == 128)
@@ -103,7 +103,7 @@ static int is_skin_color(int y, int cb, int cr, int consec_zeromv)
          if (skin_color_diff < skin_threshold[i + 1]) {
             if (y < 60 && skin_color_diff > 3 * (skin_threshold[i + 1] >> 2))
               return 0;
-            else if (consec_zeromv > 30 &&
+            else if (consec_zeromv > 25 &&
                      skin_color_diff > (skin_threshold[i + 1] >> 1))
               return 0;
             else

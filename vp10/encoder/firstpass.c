@@ -45,7 +45,6 @@
 
 #define BOOST_BREAKOUT      12.5
 #define BOOST_FACTOR        12.5
-#define ERR_DIVISOR         128.0
 #define FACTOR_PT_LOW       0.70
 #define FACTOR_PT_HIGH      0.90
 #define FIRST_PASS_Q        10.0
@@ -228,6 +227,13 @@ static void subtract_stats(FIRSTPASS_STATS *section,
   section->new_mv_count -= frame->new_mv_count;
   section->count      -= frame->count;
   section->duration   -= frame->duration;
+}
+
+// Calculate the linear size relative to a baseline of 1080P
+#define BASE_SIZE 2073600.0  // 1920x1080
+static double get_linear_size_factor(const VP10_COMP *cpi) {
+  const double this_area = cpi->initial_width * cpi->initial_height;
+  return pow(this_area / BASE_SIZE, 0.5);
 }
 
 // Calculate an active area of the image that discounts formatting
@@ -1121,11 +1127,7 @@ static double calc_correction_factor(double err_per_mb,
   return fclamp(pow(error_term, power_term), 0.05, 5.0);
 }
 
-// Larger image formats are expected to be a little harder to code relatively
-// given the same prediction error score. This in part at least relates to the
-// increased size and hence coding cost of motion vectors.
-#define EDIV_SIZE_FACTOR 800
-
+#define ERR_DIVISOR         100.0
 static int get_twopass_worst_quality(const VP10_COMP *cpi,
                                      const double section_err,
                                      double inactive_zone,
@@ -1144,11 +1146,21 @@ static int get_twopass_worst_quality(const VP10_COMP *cpi,
     const int active_mbs = VPXMAX(1, num_mbs - (int)(num_mbs * inactive_zone));
     const double av_err_per_mb = section_err / active_mbs;
     const double speed_term = 1.0 + 0.04 * oxcf->speed;
-    const double ediv_size_correction = (double)num_mbs / EDIV_SIZE_FACTOR;
+    double ediv_size_correction;
     const int target_norm_bits_per_mb = ((uint64_t)section_target_bandwidth <<
                                          BPER_MB_NORMBITS) / active_mbs;
-
     int q;
+
+    // Larger image formats are expected to be a little harder to code
+    // relatively given the same prediction error score. This in part at
+    // least relates to the increased size and hence coding overheads of
+    // motion vectors. Some account of this is made through adjustment of
+    // the error divisor.
+    ediv_size_correction =
+        VPXMAX(0.2, VPXMIN(5.0, get_linear_size_factor(cpi)));
+    if (ediv_size_correction < 1.0)
+      ediv_size_correction = -(1.0 / ediv_size_correction);
+    ediv_size_correction *= 4.0;
 
     // Try and pick a max Q that will be high enough to encode the
     // content at the given rate.

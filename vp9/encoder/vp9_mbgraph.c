@@ -59,8 +59,8 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   // Try sub-pixel MC
   // if (bestsme > error_thresh && bestsme < INT_MAX)
   {
-    int distortion;
-    unsigned int sse;
+    uint32_t distortion;
+    uint32_t sse;
     cpi->find_fractional_mv_step(
         x, dst_mv, ref_mv, cpi->common.allow_high_precision_mv, x->errorperbit,
         &v_fn_ptr, 0, mv_sf->subpel_iters_per_step,

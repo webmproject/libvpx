@@ -425,10 +425,10 @@ class FwdTrans8x8TestBase {
 
       for (int j = 0; j < kNumCoeffs; ++j) {
 #if CONFIG_VP9_HIGHBITDEPTH
-        const uint32_t diff =
+        const int diff =
             bit_depth_ == VPX_BITS_8 ? dst[j] - src[j] : dst16[j] - src16[j];
 #else
-        const uint32_t diff = dst[j] - src[j];
+        const int diff = dst[j] - src[j];
 #endif
         const uint32_t error = diff * diff;
         EXPECT_GE(1u << 2 * (bit_depth_ - 8), error)
@@ -458,7 +458,7 @@ class FwdTrans8x8TestBase {
         coeff_r[j] = static_cast<tran_low_t>(round(out_r[j]));
 
       for (int j = 0; j < kNumCoeffs; ++j) {
-        const uint32_t diff = coeff[j] - coeff_r[j];
+        const int32_t diff = coeff[j] - coeff_r[j];
         const uint32_t error = diff * diff;
         EXPECT_GE(9u << 2 * (bit_depth_ - 8), error)
             << "Error: 8x8 DCT has error " << error
@@ -511,10 +511,10 @@ void CompareInvReference(IdctFunc ref_txfm, int thresh) {
 
       for (int j = 0; j < kNumCoeffs; ++j) {
 #if CONFIG_VP9_HIGHBITDEPTH
-        const uint32_t diff =
+        const int diff =
             bit_depth_ == VPX_BITS_8 ? dst[j] - ref[j] : dst16[j] - ref16[j];
 #else
-        const uint32_t diff = dst[j] - ref[j];
+        const int diff = dst[j] - ref[j];
 #endif
         const uint32_t error = diff * diff;
         EXPECT_EQ(0u, error)

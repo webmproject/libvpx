@@ -34,14 +34,18 @@ static INLINE void inter_predictor(const uint8_t *src, int src_stride,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void high_inter_predictor(const uint8_t *src, int src_stride,
-                                 uint8_t *dst, int dst_stride,
-                                 const int subpel_x,
-                                 const int subpel_y,
-                                 const struct scale_factors *sf,
-                                 int w, int h, int ref,
-                                 const InterpKernel *kernel,
-                                 int xs, int ys, int bd);
+static INLINE void highbd_inter_predictor(const uint8_t *src, int src_stride,
+                                          uint8_t *dst, int dst_stride,
+                                          const int subpel_x,
+                                          const int subpel_y,
+                                          const struct scale_factors *sf,
+                                          int w, int h, int ref,
+                                          const InterpKernel *kernel,
+                                          int xs, int ys, int bd) {
+  sf->highbd_predict[subpel_x != 0][subpel_y != 0][ref](
+      src, src_stride, dst, dst_stride,
+      kernel[subpel_x], xs, kernel[subpel_y], ys, w, h, bd);
+}
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 MV average_split_mvs(const struct macroblockd_plane *pd, const MODE_INFO *mi,

@@ -67,7 +67,6 @@ static INLINE int get_unsigned_bits(unsigned int num_values) {
 
 #define VP9_FRAME_MARKER 0x2
 
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif

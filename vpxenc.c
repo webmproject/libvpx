@@ -444,6 +444,11 @@ static const struct arg_enum_list tune_content_enum[] = {
 
 static const arg_def_t tune_content = ARG_DEF_ENUM(
     NULL, "tune-content", 1, "Tune content type", tune_content_enum);
+
+static const arg_def_t target_level = ARG_DEF(
+    NULL, "target-level", 1,
+    "Target level (255: off (default); 0: only keep level stats; 10: level 1.0;"
+    " 11: level 1.1; ... 62: level 6.2)");
 #endif
 
 #if CONFIG_VP9_ENCODER
@@ -454,7 +459,7 @@ static const arg_def_t *vp9_args[] = {
   &gf_cbr_boost_pct, &lossless,
   &frame_parallel_decoding, &aq_mode, &frame_periodic_boost,
   &noise_sens, &tune_content, &input_color_space,
-  &min_gf_interval, &max_gf_interval,
+  &min_gf_interval, &max_gf_interval, &target_level,
 #if CONFIG_VP9_HIGHBITDEPTH
   &bitdeptharg, &inbitdeptharg,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -470,7 +475,7 @@ static const int vp9_arg_ctrl_map[] = {
   VP9E_SET_LOSSLESS, VP9E_SET_FRAME_PARALLEL_DECODING, VP9E_SET_AQ_MODE,
   VP9E_SET_FRAME_PERIODIC_BOOST, VP9E_SET_NOISE_SENSITIVITY,
   VP9E_SET_TUNE_CONTENT, VP9E_SET_COLOR_SPACE,
-  VP9E_SET_MIN_GF_INTERVAL, VP9E_SET_MAX_GF_INTERVAL,
+  VP9E_SET_MIN_GF_INTERVAL, VP9E_SET_MAX_GF_INTERVAL, VP9E_SET_TARGET_LEVEL,
   0
 };
 #endif
@@ -807,7 +812,7 @@ static int compare_img(const vpx_image_t *const img1,
 
 #if !CONFIG_WEBM_IO
 typedef int stereo_format_t;
-struct EbmlGlobal { int debug; };
+struct WebmOutputContext { int debug; };
 #endif
 
 /* Per-stream configuration */
@@ -835,7 +840,7 @@ struct stream_state {
   struct stream_config      config;
   FILE                     *file;
   struct rate_hist         *rate_hist;
-  struct EbmlGlobal         ebml;
+  struct WebmOutputContext  webm_ctx;
   uint64_t                  psnr_sse_total;
   uint64_t                  psnr_samples_total;
   double                    psnr_totals[4];
@@ -1078,13 +1083,13 @@ static struct stream_state *new_stream(struct VpxEncoderConfig *global,
     stream->config.write_webm = 1;
 #if CONFIG_WEBM_IO
     stream->config.stereo_fmt = STEREO_FORMAT_MONO;
-    stream->ebml.last_pts_ns = -1;
-    stream->ebml.writer = NULL;
-    stream->ebml.segment = NULL;
+    stream->webm_ctx.last_pts_ns = -1;
+    stream->webm_ctx.writer = NULL;
+    stream->webm_ctx.segment = NULL;
 #endif
 
     /* Allows removal of the application version from the EBML tags */
-    stream->ebml.debug = global->debug;
+    stream->webm_ctx.debug = global->debug;
 
     /* Default lag_in_frames is 0 in realtime mode */
     if (global->deadline == VPX_DL_REALTIME)
@@ -1466,8 +1471,8 @@ static void open_output_file(struct stream_state *stream,
 
 #if CONFIG_WEBM_IO
   if (stream->config.write_webm) {
-    stream->ebml.stream = stream->file;
-    write_webm_file_header(&stream->ebml, cfg,
+    stream->webm_ctx.stream = stream->file;
+    write_webm_file_header(&stream->webm_ctx, cfg,
                            &global->framerate,
                            stream->config.stereo_fmt,
                            global->codec->fourcc,
@@ -1492,7 +1497,7 @@ static void close_output_file(struct stream_state *stream,
 
 #if CONFIG_WEBM_IO
   if (stream->config.write_webm) {
-    write_webm_file_footer(&stream->ebml);
+    write_webm_file_footer(&stream->webm_ctx);
   }
 #endif
 
@@ -1730,7 +1735,7 @@ static void get_cx_data(struct stream_state *stream,
         update_rate_histogram(stream->rate_hist, cfg, pkt);
 #if CONFIG_WEBM_IO
         if (stream->config.write_webm) {
-          write_webm_block(&stream->ebml, cfg, pkt);
+          write_webm_block(&stream->webm_ctx, cfg, pkt);
         }
 #endif
         if (!stream->config.write_webm) {

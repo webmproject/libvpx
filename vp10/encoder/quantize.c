@@ -1158,12 +1158,12 @@ void vp10_highbd_quantize_dc(const tran_low_t *coeff_ptr,
 
 static void invert_quant(int16_t *quant, int16_t *shift, int d) {
   unsigned t;
-  int l;
+  int l, m;
   t = d;
   for (l = 0; t > 1; l++)
     t >>= 1;
-  t = 1 + (1 << (16 + l)) / d;
-  *quant = (int16_t)(t - (1 << 16));
+  m = 1 + (1 << (16 + l)) / d;
+  *quant = (int16_t)(m - (1 << 16));
   *shift = 1 << (16 - l);
 }
 

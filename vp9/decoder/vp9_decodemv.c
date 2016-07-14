@@ -371,9 +371,9 @@ static int dec_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
 
   if (left_type == above_type)
     return left_type;
-  else if (left_type == SWITCHABLE_FILTERS && above_type != SWITCHABLE_FILTERS)
+  else if (left_type == SWITCHABLE_FILTERS)
     return above_type;
-  else if (left_type != SWITCHABLE_FILTERS && above_type == SWITCHABLE_FILTERS)
+  else if (above_type == SWITCHABLE_FILTERS)
     return left_type;
   else
     return SWITCHABLE_FILTERS;
@@ -902,4 +902,10 @@ void vp9_read_mode_info(VP9Decoder *const pbi, MACROBLOCKD *xd,
       frame_mvs += cm->mi_cols;
     }
   }
+#if CONFIG_BETTER_HW_COMPATIBILITY && CONFIG_VP9_HIGHBITDEPTH
+    if ((xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) &&
+        (xd->above_mi == NULL || xd->left_mi == NULL) &&
+        !is_inter_block(mi) && need_top_left[mi->uv_mode])
+      assert(0);
+#endif  // CONFIG_BETTER_HW_COMPATIBILITY && CONFIG_VP9_HIGHBITDEPTH
 }

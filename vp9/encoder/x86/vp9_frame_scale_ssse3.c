@@ -18,9 +18,9 @@
 extern void vp9_scale_and_extend_frame_c(const YV12_BUFFER_CONFIG *src,
                                          YV12_BUFFER_CONFIG *dst);
 
-void downsample_2_to_1_ssse3(const uint8_t *src, ptrdiff_t src_stride,
-                             uint8_t *dst, ptrdiff_t dst_stride,
-                             int w, int h) {
+static void downsample_2_to_1_ssse3(const uint8_t *src, ptrdiff_t src_stride,
+                                    uint8_t *dst, ptrdiff_t dst_stride,
+                                    int w, int h) {
   const __m128i mask = _mm_set1_epi16(0x00FF);
   const int max_width = w & ~15;
   int y;
@@ -87,9 +87,9 @@ static void eight_tap_row_ssse3(const uint8_t *src, uint8_t *dst, int w) {
   }
 }
 
-void upsample_1_to_2_ssse3(const uint8_t *src, ptrdiff_t src_stride,
-                           uint8_t *dst, ptrdiff_t dst_stride,
-                           int dst_w, int dst_h) {
+static void upsample_1_to_2_ssse3(const uint8_t *src, ptrdiff_t src_stride,
+                                  uint8_t *dst, ptrdiff_t dst_stride,
+                                  int dst_w, int dst_h) {
   dst_w /= 2;
   dst_h /= 2;
   {

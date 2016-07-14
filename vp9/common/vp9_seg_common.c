@@ -28,6 +28,7 @@ static const int seg_feature_data_max[SEG_LVL_MAX] = {
 void vp9_clearall_segfeatures(struct segmentation *seg) {
   vp9_zero(seg->feature_data);
   vp9_zero(seg->feature_mask);
+  seg->aq_av_offset = 0;
 }
 
 void vp9_enable_segfeature(struct segmentation *seg, int segment_id,

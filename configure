@@ -98,7 +98,6 @@ EOF
 
 # all_platforms is a list of all supported target platforms. Maintain
 # alphabetically by architecture, generic-gnu last.
-all_platforms="${all_platforms} armv6-darwin-gcc"
 all_platforms="${all_platforms} armv6-linux-rvct"
 all_platforms="${all_platforms} armv6-linux-gcc"
 all_platforms="${all_platforms} armv6-none-rvct"
@@ -191,12 +190,12 @@ if [ ${doxy_major:-0} -ge 1 ]; then
 fi
 
 # disable codecs when their source directory does not exist
-[ -d "${source_path}/vp8" ] || disable_feature vp8
-[ -d "${source_path}/vp9" ] || disable_feature vp9
-[ -d "${source_path}/vp10" ] || disable_feature vp10
+[ -d "${source_path}/vp8" ] || disable_codec vp8
+[ -d "${source_path}/vp9" ] || disable_codec vp9
+[ -d "${source_path}/vp10" ] || disable_codec vp10
 
 # disable vp10 codec by default
-disable_feature vp10
+disable_codec vp10
 
 # install everything except the sources, by default. sources will have
 # to be enabled when doing dist builds, since that's no longer a common
@@ -406,15 +405,19 @@ process_cmdline() {
     for opt do
         optval="${opt#*=}"
         case "$opt" in
-        --disable-codecs) for c in ${CODECS}; do disable_feature $c; done ;;
+        --disable-codecs)
+          for c in ${CODEC_FAMILIES}; do disable_codec $c; done
+          ;;
         --enable-?*|--disable-?*)
         eval `echo "$opt" | sed 's/--/action=/;s/-/ option=/;s/-/_/g'`
-        if echo "${EXPERIMENT_LIST}" | grep "^ *$option\$" >/dev/null; then
+        if is_in ${option} ${EXPERIMENT_LIST}; then
             if enabled experimental; then
                 ${action}_feature $option
             else
                 log_echo "Ignoring $opt -- not in experimental mode."
             fi
+        elif is_in ${option} "${CODECS} ${CODEC_FAMILIES}"; then
+            ${action}_codec ${option}
         else
             process_common_cmdline $opt
         fi
@@ -427,14 +430,6 @@ process_cmdline() {
 
 post_process_cmdline() {
     c=""
-
-    # If the codec family is disabled, disable all components of that family.
-    # If the codec family is enabled, enable all components of that family.
-    log_echo "Configuring selected codecs"
-    for c in ${CODECS}; do
-        disabled ${c%%_*} && disable_feature ${c}
-        enabled ${c%%_*} && enable_feature ${c}
-    done
 
     # Enable all detected codecs, if they haven't been disabled
     for c in ${CODECS}; do soft_enable $c; done
@@ -530,13 +525,18 @@ process_detect() {
         # Can only build shared libs on a subset of platforms. Doing this check
         # here rather than at option parse time because the target auto-detect
         # magic happens after the command line has been parsed.
-        if ! enabled linux && ! enabled os2; then
+        case "${tgt_os}" in
+        linux|os2|darwin*|iphonesimulator*)
+            # Supported platforms
+            ;;
+        *)
             if enabled gnu; then
                 echo "--enable-shared is only supported on ELF; assuming this is OK"
             else
-                die "--enable-shared only supported on ELF and OS/2 for now"
+                die "--enable-shared only supported on ELF, OS/2, and Darwin for now"
             fi
-        fi
+            ;;
+        esac
     fi
     if [ -z "$CC" ] || enabled external_build; then
         echo "Bypassing toolchain for environment detection."

@@ -529,7 +529,7 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
         // Bias on zero motion vector sse.
         const int zero_bias = denoiser->denoise_pars.denoise_mv_bias;
         zero_mv_sse = (unsigned int)((int64_t)zero_mv_sse * zero_bias / 100);
-        sse_diff = zero_mv_sse - best_sse;
+        sse_diff = (int)zero_mv_sse - (int)best_sse;
 
         saved_mbmi = *mbmi;
 

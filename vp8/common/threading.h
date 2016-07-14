@@ -44,8 +44,8 @@ extern "C" {
 #include <os2.h>
 
 #include <stdlib.h>
-#define THREAD_FUNCTION void
-#define THREAD_FUNCTION_RETURN void
+#define THREAD_FUNCTION void *
+#define THREAD_FUNCTION_RETURN void *
 #define THREAD_SPECIFIC_INDEX PULONG
 #define pthread_t TID
 #define pthread_attr_t ULONG
