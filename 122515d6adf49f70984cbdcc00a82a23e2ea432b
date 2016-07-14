@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3ad6900d_4c129559",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2016-07-14T17:30:16Z",
+      "side": 1,
+      "message": "I remember 0 is also a valid speed setting, right? What if user wants speed 0 for a layer in the middle?",
+      "range": {
+        "startLine": 297,
+        "startChar": 34,
+        "endLine": 297,
+        "endChar": 47
+      },
+      "revId": "122515d6adf49f70984cbdcc00a82a23e2ea432b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
