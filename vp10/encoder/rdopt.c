@@ -1166,21 +1166,12 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
-#if CONFIG_NEW_QUANT
-  int ctx;
-  struct macroblockd_plane *const pd = &xd->plane[plane];
-#endif  //  CONFIG_NEW_QUANT
   int64_t rd1, rd2, rd;
   int rate;
   int64_t dist;
   int64_t sse;
-  ENTROPY_CONTEXT coeff_ctx = combine_entropy_contexts(
+  int coeff_ctx = combine_entropy_contexts(
       *(args->t_above + blk_col), *(args->t_left + blk_row));
-
-#if CONFIG_NEW_QUANT
-  ctx = get_entropy_context(tx_size, pd->above_context + blk_col,
-                            pd->left_context + blk_row);
-#endif  //  CONFIG_NEW_QUANT
 
   if (args->exit_early)
     return;
@@ -1228,7 +1219,7 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     // full forward transform and quantization
 #if CONFIG_NEW_QUANT
     vp10_xform_quant_fp_nuq(x, plane, block, blk_row, blk_col, plane_bsize,
-                            tx_size, ctx);
+                            tx_size, coeff_ctx);
 #else
     vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
                      VP10_XFORM_QUANT_FP);
@@ -2051,12 +2042,17 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
           if (xd->lossless[xd->mi[0]->mbmi.segment_id]) {
             TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
             const scan_order *so = get_scan(TX_4X4, tx_type, 0);
-#if CONFIG_VAR_TX
+#if CONFIG_VAR_TX | CONFIG_NEW_QUANT
             const int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
                                                            *(templ + idy));
-#endif  // CONFIG_VAR_TX
+#endif  // CONFIG_VAR_TX | CONFIG_NEW_QUANT
+#if CONFIG_NEW_QUANT
+            vp10_xform_quant_fp_nuq(x, 0, block, row + idy, col + idx,
+                                    BLOCK_8X8, TX_4X4, coeff_ctx);
+#else
             vp10_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8,
                              TX_4X4, VP10_XFORM_QUANT_FP);
+#endif  // CONFIG_NEW_QUANT
 #if CONFIG_VAR_TX
             ratey += cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
                                  so->neighbors, cpi->sf.use_fast_coef_costing);
@@ -2080,8 +2076,13 @@ static int64_t rd_pick_intra4x4block(VP10_COMP *cpi, MACROBLOCK *x,
             const scan_order *so = get_scan(TX_4X4, tx_type, 0);
             const int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
                                                            *(templ + idy));
+#if CONFIG_NEW_QUANT
+            vp10_xform_quant_fp_nuq(x, 0, block, row + idy, col + idx,
+                                    BLOCK_8X8, TX_4X4, coeff_ctx);
+#else
             vp10_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8,
                              TX_4X4, VP10_XFORM_QUANT_FP);
+#endif  // CONFIG_NEW_QUANT
             vp10_optimize_b(x, 0, block, TX_4X4, coeff_ctx);
 #if CONFIG_VAR_TX
             ratey += cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
@@ -2173,12 +2174,17 @@ next_highbd:
         if (xd->lossless[xd->mi[0]->mbmi.segment_id]) {
           TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
           const scan_order *so = get_scan(TX_4X4, tx_type, 0);
-#if CONFIG_VAR_TX
+#if CONFIG_VAR_TX | CONFIG_NEW_QUANT
           const int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
                                                          *(templ + idy));
-#endif
+#endif  // CONFIG_VAR_TX | CONFIG_NEW_QUANT
+#if CONFIG_NEW_QUANT
+          vp10_xform_quant_fp_nuq(x, 0, block, row + idy, col + idx, BLOCK_8X8,
+                                  TX_4X4, coeff_ctx);
+#else
           vp10_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8,
                            TX_4X4, VP10_XFORM_QUANT_B);
+#endif  // CONFIG_NEW_QUANT
 #if CONFIG_VAR_TX
           ratey += cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
                                so->neighbors, cpi->sf.use_fast_coef_costing);
@@ -2201,8 +2207,13 @@ next_highbd:
           const scan_order *so = get_scan(TX_4X4, tx_type, 0);
           const int coeff_ctx = combine_entropy_contexts(*(tempa + idx),
                                                          *(templ + idy));
+#if CONFIG_NEW_QUANT
+          vp10_xform_quant_fp_nuq(x, 0, block, row + idy, col + idx, BLOCK_8X8,
+                                  TX_4X4, coeff_ctx);
+#else
           vp10_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8,
                            TX_4X4, VP10_XFORM_QUANT_FP);
+#endif  // CONFIG_NEW_QUANT
           vp10_optimize_b(x, 0, block, TX_4X4, coeff_ctx);
 #if CONFIG_VAR_TX
           ratey += cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
@@ -4423,8 +4434,13 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi,
       k += (idy * 2 + idx);
       coeff_ctx = combine_entropy_contexts(*(ta + (k & 1)),
                                            *(tl + (k >> 1)));
+#if CONFIG_NEW_QUANT
+      vp10_xform_quant_fp_nuq(x, 0, k, idy + (i >> 1), idx + (i & 0x01),
+                              BLOCK_8X8, TX_4X4, coeff_ctx);
+#else
       vp10_xform_quant(x, 0, k, idy + (i >> 1), idx + (i & 0x01), BLOCK_8X8,
                        TX_4X4, VP10_XFORM_QUANT_FP);
+#endif  // CONFIG_NEW_QUANT
       if (xd->lossless[xd->mi[0]->mbmi.segment_id] == 0)
         vp10_optimize_b(x, 0, k, TX_4X4, coeff_ctx);
       dist_block(cpi, x, 0, k, idy + (i >> 1), idx + (i & 0x1), TX_4X4,
