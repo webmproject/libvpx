@@ -122,7 +122,7 @@ INSTANTIATE_TEST_CASE_P(SSE4_1_C_COMPARE, ObmcVarianceTest,
 ////////////////////////////////////////////////////////////////////////////////
 
 #if CONFIG_VP9_HIGHBITDEPTH
-class ObmcVarianceHBDTest : public FunctionEquivalenceTest<ObmcVarF> {}
+class ObmcVarianceHBDTest : public FunctionEquivalenceTest<ObmcVarF> {};
 
 TEST_P(ObmcVarianceHBDTest, RandomValues) {
   DECLARE_ALIGNED(32, uint16_t, pre[MAX_SB_SQUARE]);
@@ -133,19 +133,20 @@ TEST_P(ObmcVarianceHBDTest, RandomValues) {
     const int pre_stride = this->rng_(MAX_SB_SIZE + 1);
 
     for (int i = 0 ; i < MAX_SB_SQUARE ; ++i) {
-      pre[i] = this->rng_(1 << this->bit_depth);
-      wsrc[i] = this->rng_(1 << this->bit_depth) *
+      pre[i] = this->rng_(1 << params_.bit_depth);
+      wsrc[i] = this->rng_(1 << params_.bit_depth) *
                 this->rng_(kMaskMax * kMaskMax + 1);
       mask[i] = this->rng_(kMaskMax * kMaskMax + 1);
     }
 
     unsigned int ref_sse, tst_sse;
-    const unsigned int ref_res = ref_func_(CONVERT_TO_BYTEPTR(pre), pre_stride,
-                                           wsrc, mask, &ref_sse);
+    const unsigned int ref_res = params_.ref_func(CONVERT_TO_BYTEPTR(pre),
+                                                  pre_stride,
+                                                  wsrc, mask, &ref_sse);
     unsigned int tst_res;
     ASM_REGISTER_STATE_CHECK(
-        tst_res = tst_func_(CONVERT_TO_BYTEPTR(pre),
-                            pre_stride, wsrc, mask, &tst_sse));
+        tst_res = params_.tst_func(CONVERT_TO_BYTEPTR(pre),
+                                   pre_stride, wsrc, mask, &tst_sse));
 
     ASSERT_EQ(ref_res, tst_res);
     ASSERT_EQ(ref_sse, tst_sse);
@@ -161,18 +162,19 @@ TEST_P(ObmcVarianceHBDTest, ExtremeValues) {
     const int pre_stride = iter;
 
     for (int i = 0 ; i < MAX_SB_SQUARE ; ++i) {
-      pre[i] = (1 << this->bit_depth) - 1;
-      wsrc[i] = ((1 << this->bit_depth) - 1) * kMaskMax * kMaskMax;
+      pre[i] = (1 << params_.bit_depth) - 1;
+      wsrc[i] = ((1 << params_.bit_depth) - 1) * kMaskMax * kMaskMax;
       mask[i] = kMaskMax * kMaskMax;
     }
 
     unsigned int ref_sse, tst_sse;
-    const unsigned int ref_res = ref_func_(CONVERT_TO_BYTEPTR(pre), pre_stride,
-                                           wsrc, mask, &ref_sse);
+    const unsigned int ref_res = params_.ref_func(CONVERT_TO_BYTEPTR(pre),
+                                                  pre_stride,
+                                                  wsrc, mask, &ref_sse);
     unsigned int tst_res;
     ASM_REGISTER_STATE_CHECK(
-        tst_res = tst_func_(CONVERT_TO_BYTEPTR(pre), pre_stride,
-                            wsrc, mask, &tst_sse));
+        tst_res = params_.tst_func(CONVERT_TO_BYTEPTR(pre), pre_stride,
+                                   wsrc, mask, &tst_sse));
 
     ASSERT_EQ(ref_res, tst_res);
     ASSERT_EQ(ref_sse, tst_sse);
