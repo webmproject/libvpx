@@ -4754,7 +4754,7 @@ static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
     struct buf_2d ref_yv12[2];
     int bestsme = INT_MAX;
     int sadpb = x->sadperbit16;
-    MV tmp_mv;
+    MV *const best_mv = &x->best_mv.as_mv;
     int search_range = 3;
 
     int tmp_col_min = x->mv_col_min;
@@ -4815,23 +4815,22 @@ static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
     vp10_set_mv_search_range(x, &ref_mv[id].as_mv);
 
     // Use the mv result from the single mode as mv predictor.
-    tmp_mv = frame_mv[refs[id]].as_mv;
+    *best_mv = frame_mv[refs[id]].as_mv;
 
-    tmp_mv.col >>= 3;
-    tmp_mv.row >>= 3;
+    best_mv->col >>= 3;
+    best_mv->row >>= 3;
 
 #if CONFIG_REF_MV
     vp10_set_mvcost(x, refs[id]);
 #endif
 
     // Small-range full-pixel motion search.
-    bestsme = vp10_refining_search_8p_c(x, &tmp_mv, sadpb,
-                                       search_range,
-                                       &cpi->fn_ptr[bsize],
-                                       &ref_mv[id].as_mv, second_pred);
+    bestsme = vp10_refining_search_8p_c(x, sadpb, search_range,
+                                        &cpi->fn_ptr[bsize],
+                                        &ref_mv[id].as_mv, second_pred);
     if (bestsme < INT_MAX)
-      bestsme = vp10_get_mvpred_av_var(x, &tmp_mv, &ref_mv[id].as_mv,
-                                      second_pred, &cpi->fn_ptr[bsize], 1);
+      bestsme = vp10_get_mvpred_av_var(x, best_mv, &ref_mv[id].as_mv,
+                                       second_pred, &cpi->fn_ptr[bsize], 1);
 
     x->mv_col_min = tmp_col_min;
     x->mv_col_max = tmp_col_max;
@@ -4860,8 +4859,7 @@ static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
               pd->pre[0].stride)) << 3];
 
         bestsme = cpi->find_fractional_mv_step(
-            x, &tmp_mv,
-            &ref_mv[id].as_mv,
+            x, &ref_mv[id].as_mv,
             cpi->common.allow_high_precision_mv,
             x->errorperbit,
             &cpi->fn_ptr[bsize],
@@ -4876,8 +4874,7 @@ static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
       } else {
         (void) block;
         bestsme = cpi->find_fractional_mv_step(
-            x, &tmp_mv,
-            &ref_mv[id].as_mv,
+            x, &ref_mv[id].as_mv,
             cpi->common.allow_high_precision_mv,
             x->errorperbit,
             &cpi->fn_ptr[bsize],
@@ -4894,7 +4891,7 @@ static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
       xd->plane[0].pre[0] = ref_yv12[0];
 
     if (bestsme < last_besterr[id]) {
-      frame_mv[refs[id]].as_mv = tmp_mv;
+      frame_mv[refs[id]].as_mv = *best_mv;
       last_besterr[id] = bestsme;
     } else {
       break;
@@ -5197,11 +5194,6 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
                 run_mv_search)
 #endif  // CONFIG_EXT_INTER
             ) {
-#if CONFIG_EXT_INTER
-          MV *const new_mv = &mode_mv[this_mode][0].as_mv;
-#else
-          MV *const new_mv = &mode_mv[NEWMV][0].as_mv;
-#endif  // CONFIG_EXT_INTER
           int step_param = 0;
           int bestsme = INT_MAX;
           int sadpb = x->sadperbit4;
@@ -5269,8 +5261,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
           bestsme = vp10_full_pixel_search(
               cpi, x, bsize, &mvp_full, step_param, sadpb,
               cpi->sf.mv.subpel_search_method != SUBPEL_TREE ? cost_list : NULL,
-              &bsi->ref_mv[0]->as_mv, new_mv,
-              INT_MAX, 1);
+              &bsi->ref_mv[0]->as_mv, INT_MAX, 1);
 
           if (bestsme < INT_MAX) {
             int distortion;
@@ -5295,9 +5286,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
                   pd->pre[0].stride)) << 3];
 
               cpi->find_fractional_mv_step(
-                  x,
-                  new_mv,
-                  &bsi->ref_mv[0]->as_mv,
+                  x, &bsi->ref_mv[0]->as_mv,
                   cm->allow_high_precision_mv,
                   x->errorperbit, &cpi->fn_ptr[bsize],
                   cpi->sf.mv.subpel_force_stop,
@@ -5312,9 +5301,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
               pd->pre[0] = backup_pred;
             } else {
               cpi->find_fractional_mv_step(
-                  x,
-                  new_mv,
-                  &bsi->ref_mv[0]->as_mv,
+                  x, &bsi->ref_mv[0]->as_mv,
                   cm->allow_high_precision_mv,
                   x->errorperbit, &cpi->fn_ptr[bsize],
                   cpi->sf.mv.subpel_force_stop,
@@ -5328,14 +5315,20 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
 
             // save motion search result for use in compound prediction
 #if CONFIG_EXT_INTER
-            seg_mvs[i][mv_idx][mbmi->ref_frame[0]].as_mv = *new_mv;
+            seg_mvs[i][mv_idx][mbmi->ref_frame[0]].as_mv = x->best_mv.as_mv;
 #else
-            seg_mvs[i][mbmi->ref_frame[0]].as_mv = *new_mv;
+            seg_mvs[i][mbmi->ref_frame[0]].as_mv = x->best_mv.as_mv;
 #endif  // CONFIG_EXT_INTER
           }
 
           if (cpi->sf.adaptive_motion_search)
-            x->pred_mv[mbmi->ref_frame[0]] = *new_mv;
+            x->pred_mv[mbmi->ref_frame[0]] = x->best_mv.as_mv;
+
+#if CONFIG_EXT_INTER
+          mode_mv[this_mode][0] = x->best_mv;
+#else
+          mode_mv[NEWMV][0] = x->best_mv;
+#endif  // CONFIG_EXT_INTER
 
           // restore src pointers
           mi_buf_restore(x, orig_src, orig_pre);
@@ -5904,7 +5897,7 @@ static void single_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
                                  int ref_idx,
                                  int mv_idx,
 #endif  // CONFIG_EXT_INTER
-                                 int_mv *tmp_mv, int *rate_mv) {
+                                 int *rate_mv) {
   MACROBLOCKD *xd = &x->e_mbd;
   const VP10_COMMON *cm = &cpi->common;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
@@ -5986,7 +5979,7 @@ static void single_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
         if ((x->pred_mv_sad[ref] >> 3) > x->pred_mv_sad[i]) {
           x->pred_mv[ref].row = 0;
           x->pred_mv[ref].col = 0;
-          tmp_mv->as_int = INVALID_MV;
+          x->best_mv.as_int = INVALID_MV;
 
           if (scaled_ref_frame) {
             int i;
@@ -6006,7 +5999,7 @@ static void single_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
 
   bestsme = vp10_full_pixel_search(cpi, x, bsize, &mvp_full, step_param, sadpb,
                                    cond_cost_list(cpi, cost_list),
-                                   &ref_mv, &tmp_mv->as_mv, INT_MAX, 1);
+                                   &ref_mv, INT_MAX, 1);
 
   x->mv_col_min = tmp_col_min;
   x->mv_col_max = tmp_col_max;
@@ -6028,7 +6021,7 @@ static void single_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
                        upsampled_ref->y_stride, (mi_row << 3), (mi_col << 3),
                        NULL, pd->subsampling_x, pd->subsampling_y);
 
-      bestsme = cpi->find_fractional_mv_step(x, &tmp_mv->as_mv, &ref_mv,
+      bestsme = cpi->find_fractional_mv_step(x, &ref_mv,
                                              cm->allow_high_precision_mv,
                                              x->errorperbit,
                                              &cpi->fn_ptr[bsize],
@@ -6042,7 +6035,7 @@ static void single_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
       // Restore the reference frames.
       pd->pre[ref_idx] = backup_pred;
     } else {
-      cpi->find_fractional_mv_step(x, &tmp_mv->as_mv, &ref_mv,
+      cpi->find_fractional_mv_step(x, &ref_mv,
                                    cm->allow_high_precision_mv,
                                    x->errorperbit,
                                    &cpi->fn_ptr[bsize],
@@ -6053,11 +6046,11 @@ static void single_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
                                    &dis, &x->pred_sse[ref], NULL, 0, 0, 0);
     }
   }
-  *rate_mv = vp10_mv_bit_cost(&tmp_mv->as_mv, &ref_mv,
+  *rate_mv = vp10_mv_bit_cost(&x->best_mv.as_mv, &ref_mv,
                              x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
 
   if (cpi->sf.adaptive_motion_search)
-    x->pred_mv[ref] = tmp_mv->as_mv;
+    x->pred_mv[ref] = x->best_mv.as_mv;
 
   if (scaled_ref_frame) {
     int i;
@@ -6991,34 +6984,32 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
       }
 #endif  // CONFIG_EXT_INTER
     } else {
-      int_mv tmp_mv;
-
 #if CONFIG_EXT_INTER
       if (is_comp_interintra_pred) {
-        tmp_mv = single_newmvs[mv_idx][refs[0]];
+        x->best_mv = single_newmvs[mv_idx][refs[0]];
         rate_mv = single_newmvs_rate[mv_idx][refs[0]];
       } else {
         single_motion_search(cpi, x, bsize, mi_row, mi_col,
-                             0, mv_idx, &tmp_mv, &rate_mv);
-        single_newmvs[mv_idx][refs[0]] = tmp_mv;
+                             0, mv_idx, &rate_mv);
+        single_newmvs[mv_idx][refs[0]] = x->best_mv;
         single_newmvs_rate[mv_idx][refs[0]] = rate_mv;
       }
 #else
-      single_motion_search(cpi, x, bsize, mi_row, mi_col, &tmp_mv, &rate_mv);
-      single_newmv[refs[0]] = tmp_mv;
+      single_motion_search(cpi, x, bsize, mi_row, mi_col, &rate_mv);
+      single_newmv[refs[0]] = x->best_mv;
 #endif  // CONFIG_EXT_INTER
 
-      if (tmp_mv.as_int == INVALID_MV)
+      if (x->best_mv.as_int == INVALID_MV)
         return INT64_MAX;
 
-      frame_mv[refs[0]] = tmp_mv;
-      xd->mi[0]->bmi[0].as_mv[0] = tmp_mv;
+      frame_mv[refs[0]] = x->best_mv;
+      xd->mi[0]->bmi[0].as_mv[0] = x->best_mv;
 
       // Estimate the rate implications of a new mv but discount this
       // under certain circumstances where we want to help initiate a weak
       // motion field, where the distortion gain for a single block may not
       // be enough to overcome the cost of a new mv.
-      if (discount_newmv_test(cpi, this_mode, tmp_mv, mode_mv, refs[0])) {
+      if (discount_newmv_test(cpi, this_mode, x->best_mv, mode_mv, refs[0])) {
         rate_mv = VPXMAX((rate_mv / NEW_MV_DISCOUNT_FACTOR), 1);
       }
     }

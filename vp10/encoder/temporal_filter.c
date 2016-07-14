@@ -288,7 +288,6 @@ static int temporal_filter_find_matching_mb_c(VP10_COMP *cpi,
 
   MV best_ref_mv1 = {0, 0};
   MV best_ref_mv1_full; /* full-pixel value of best_ref_mv1 */
-  MV *ref_mv = &x->e_mbd.mi[0]->bmi[0].as_mv[0].as_mv;
 
   // Save input state
   struct buf_2d src = x->plane[0].src;
@@ -315,12 +314,11 @@ static int temporal_filter_find_matching_mb_c(VP10_COMP *cpi,
 
   // Ignore mv costing by sending NULL pointer instead of cost arrays
   vp10_hex_search(x, &best_ref_mv1_full, step_param, sadpb, 1,
-                 cond_cost_list(cpi, cost_list),
-                 &cpi->fn_ptr[BLOCK_16X16], 0, &best_ref_mv1, ref_mv);
+                  cond_cost_list(cpi, cost_list),
+                  &cpi->fn_ptr[BLOCK_16X16], 0, &best_ref_mv1);
 
   // Ignore mv costing by sending NULL pointer instead of cost array
-  bestsme = cpi->find_fractional_mv_step(x, ref_mv,
-                                         &best_ref_mv1,
+  bestsme = cpi->find_fractional_mv_step(x, &best_ref_mv1,
                                          cpi->common.allow_high_precision_mv,
                                          x->errorperbit,
                                          &cpi->fn_ptr[BLOCK_16X16],
@@ -328,6 +326,8 @@ static int temporal_filter_find_matching_mb_c(VP10_COMP *cpi,
                                          cond_cost_list(cpi, cost_list),
                                          NULL, NULL,
                                          &distortion, &sse, NULL, 0, 0, 0);
+
+  x->e_mbd.mi[0]->bmi[0].as_mv[0] = x->best_mv;
 
   // Restore input state
   x->plane[0].src = src;

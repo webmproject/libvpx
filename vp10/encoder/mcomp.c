@@ -315,6 +315,7 @@ static INLINE const uint8_t *upre(const uint8_t *buf, int stride,
   unsigned int sse;                                                        \
   unsigned int whichdir;                                                   \
   int thismse;                                                             \
+  MV *bestmv = &x->best_mv.as_mv;                                          \
   const unsigned int halfiters = iters_per_step;                           \
   const unsigned int quarteriters = iters_per_step;                        \
   const unsigned int eighthiters = iters_per_step;                         \
@@ -411,8 +412,8 @@ static void get_cost_surf_min(int *cost_list, int *ir, int *ic,
 }
 
 int vp10_find_best_sub_pixel_tree_pruned_evenmore(
-    const MACROBLOCK *x,
-    MV *bestmv, const MV *ref_mv,
+    MACROBLOCK *x,
+    const MV *ref_mv,
     int allow_hp,
     int error_per_bit,
     const vp10_variance_fn_ptr_t *vfp,
@@ -491,20 +492,20 @@ int vp10_find_best_sub_pixel_tree_pruned_evenmore(
   return besterr;
 }
 
-int vp10_find_best_sub_pixel_tree_pruned_more(const MACROBLOCK *x,
-                                             MV *bestmv, const MV *ref_mv,
-                                             int allow_hp,
-                                             int error_per_bit,
-                                             const vp10_variance_fn_ptr_t *vfp,
-                                             int forced_stop,
-                                             int iters_per_step,
-                                             int *cost_list,
-                                             int *mvjcost, int *mvcost[2],
-                                             int *distortion,
-                                             unsigned int *sse1,
-                                             const uint8_t *second_pred,
-                                             int w, int h,
-                                             int use_upsampled_ref) {
+int vp10_find_best_sub_pixel_tree_pruned_more(MACROBLOCK *x,
+                                              const MV *ref_mv,
+                                              int allow_hp,
+                                              int error_per_bit,
+                                              const vp10_variance_fn_ptr_t *vfp,
+                                              int forced_stop,
+                                              int iters_per_step,
+                                              int *cost_list,
+                                              int *mvjcost, int *mvcost[2],
+                                              int *distortion,
+                                              unsigned int *sse1,
+                                              const uint8_t *second_pred,
+                                              int w, int h,
+                                              int use_upsampled_ref) {
   SETUP_SUBPEL_SEARCH;
   (void) use_upsampled_ref;
 
@@ -568,19 +569,19 @@ int vp10_find_best_sub_pixel_tree_pruned_more(const MACROBLOCK *x,
   return besterr;
 }
 
-int vp10_find_best_sub_pixel_tree_pruned(const MACROBLOCK *x,
-                                        MV *bestmv, const MV *ref_mv,
-                                        int allow_hp,
-                                        int error_per_bit,
-                                        const vp10_variance_fn_ptr_t *vfp,
-                                        int forced_stop,
-                                        int iters_per_step,
-                                        int *cost_list,
-                                        int *mvjcost, int *mvcost[2],
-                                        int *distortion,
-                                        unsigned int *sse1,
-                                        const uint8_t *second_pred,
-                                        int w, int h, int use_upsampled_ref) {
+int vp10_find_best_sub_pixel_tree_pruned(MACROBLOCK *x,
+                                         const MV *ref_mv,
+                                         int allow_hp,
+                                         int error_per_bit,
+                                         const vp10_variance_fn_ptr_t *vfp,
+                                         int forced_stop,
+                                         int iters_per_step,
+                                         int *cost_list,
+                                         int *mvjcost, int *mvcost[2],
+                                         int *distortion,
+                                         unsigned int *sse1,
+                                         const uint8_t *second_pred,
+                                         int w, int h, int use_upsampled_ref) {
   SETUP_SUBPEL_SEARCH;
   (void) use_upsampled_ref;
 
@@ -724,19 +725,19 @@ static unsigned int upsampled_setup_center_error(
   return besterr;
 }
 
-int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
-                                 MV *bestmv, const MV *ref_mv,
-                                 int allow_hp,
-                                 int error_per_bit,
-                                 const vp10_variance_fn_ptr_t *vfp,
-                                 int forced_stop,
-                                 int iters_per_step,
-                                 int *cost_list,
-                                 int *mvjcost, int *mvcost[2],
-                                 int *distortion,
-                                 unsigned int *sse1,
-                                 const uint8_t *second_pred,
-                                 int w, int h, int use_upsampled_ref) {
+int vp10_find_best_sub_pixel_tree(MACROBLOCK *x,
+                                  const MV *ref_mv,
+                                  int allow_hp,
+                                  int error_per_bit,
+                                  const vp10_variance_fn_ptr_t *vfp,
+                                  int forced_stop,
+                                  int iters_per_step,
+                                  int *cost_list,
+                                  int *mvjcost, int *mvcost[2],
+                                  int *distortion,
+                                  unsigned int *sse1,
+                                  const uint8_t *second_pred,
+                                  int w, int h, int use_upsampled_ref) {
   const uint8_t *const src_address = x->plane[0].src.buf;
   const int src_stride = x->plane[0].src.stride;
   const MACROBLOCKD *xd = &x->e_mbd;
@@ -744,6 +745,7 @@ int vp10_find_best_sub_pixel_tree(const MACROBLOCK *x,
   unsigned int sse;
   unsigned int thismse;
   const int y_stride = xd->plane[0].pre[0].stride;
+  MV *bestmv = &x->best_mv.as_mv;
   const int offset = bestmv->row * y_stride + bestmv->col;
   const uint8_t *const y = xd->plane[0].pre[0].buf;
 
@@ -1037,19 +1039,18 @@ static INLINE void calc_int_sad_list(const MACROBLOCK *x,
 // candidates as indicated in the num_candidates and candidates arrays
 // passed into this function
 //
-static int vp10_pattern_search(const MACROBLOCK *x,
-                               MV *start_mv,
-                               int search_param,
-                               int sad_per_bit,
-                               int do_init_search,
-                               int *cost_list,
-                               const vp10_variance_fn_ptr_t *vfp,
-                               int use_mvcost,
-                               const MV *center_mv,
-                               MV *best_mv,
-                               const int num_candidates[MAX_PATTERN_SCALES],
-                               const MV candidates[MAX_PATTERN_SCALES]
-                                                  [MAX_PATTERN_CANDIDATES]) {
+static int pattern_search(MACROBLOCK *x,
+                          MV *start_mv,
+                          int search_param,
+                          int sad_per_bit,
+                          int do_init_search,
+                          int *cost_list,
+                          const vp10_variance_fn_ptr_t *vfp,
+                          int use_mvcost,
+                          const MV *center_mv,
+                          const int num_candidates[MAX_PATTERN_SCALES],
+                          const MV candidates[MAX_PATTERN_SCALES]
+                                              [MAX_PATTERN_CANDIDATES]) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   static const int search_param_to_steps[MAX_MVSEARCH_STEPS] = {
     10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,
@@ -1294,8 +1295,8 @@ static int vp10_pattern_search(const MACROBLOCK *x,
       calc_int_cost_list(x, center_mv, sad_per_bit, vfp, &best_mv, cost_list);
     }
   }
-  best_mv->row = br;
-  best_mv->col = bc;
+  x->best_mv.as_mv.row = br;
+  x->best_mv.as_mv.col = bc;
   return bestsad;
 }
 
@@ -1332,15 +1333,15 @@ int vp10_get_mvpred_av_var(const MACROBLOCK *x,
                                  x->mvcost, x->errorperbit) : 0);
 }
 
-int vp10_hex_search(const MACROBLOCK *x,
-                   MV *start_mv,
-                   int search_param,
-                   int sad_per_bit,
-                   int do_init_search,
-                   int *cost_list,
-                   const vp10_variance_fn_ptr_t *vfp,
-                   int use_mvcost,
-                   const MV *center_mv, MV *best_mv) {
+int vp10_hex_search(MACROBLOCK *x,
+                    MV *start_mv,
+                    int search_param,
+                    int sad_per_bit,
+                    int do_init_search,
+                    int *cost_list,
+                    const vp10_variance_fn_ptr_t *vfp,
+                    int use_mvcost,
+                    const MV *center_mv) {
   // First scale has 8-closest points, the rest have 6 points in hex shape
   // at increasing scales
   static const int hex_num_candidates[MAX_PATTERN_SCALES] = {
@@ -1361,22 +1362,20 @@ int vp10_hex_search(const MACROBLOCK *x,
     {{-512, -1024}, {512, -1024}, {1024, 0}, {512, 1024}, { -512, 1024},
       { -1024, 0}},
   };
-  return vp10_pattern_search(x, start_mv, search_param, sad_per_bit,
-                             do_init_search, cost_list, vfp, use_mvcost,
-                             center_mv, best_mv, hex_num_candidates,
-                             hex_candidates);
+  return pattern_search(x, start_mv, search_param, sad_per_bit,
+                        do_init_search, cost_list, vfp, use_mvcost,
+                        center_mv, hex_num_candidates, hex_candidates);
 }
 
-int vp10_bigdia_search(const MACROBLOCK *x,
-                      MV *start_mv,
-                      int search_param,
-                      int sad_per_bit,
-                      int do_init_search,
-                      int *cost_list,
-                      const vp10_variance_fn_ptr_t *vfp,
-                      int use_mvcost,
-                      const MV *center_mv,
-                      MV *best_mv) {
+static int bigdia_search(MACROBLOCK *x,
+                         MV *start_mv,
+                         int search_param,
+                         int sad_per_bit,
+                         int do_init_search,
+                         int *cost_list,
+                         const vp10_variance_fn_ptr_t *vfp,
+                         int use_mvcost,
+                         const MV *center_mv) {
   // First scale has 4-closest points, the rest have 8 points in diamond
   // shape at increasing scales
   static const int bigdia_num_candidates[MAX_PATTERN_SCALES] = {
@@ -1403,25 +1402,23 @@ int vp10_bigdia_search(const MACROBLOCK *x,
     {{-512, -512}, {0, -1024}, {512, -512}, {1024, 0}, {512, 512}, {0, 1024},
       {-512, 512}, {-1024, 0}},
   };
-  return vp10_pattern_search(x, start_mv, search_param, sad_per_bit,
-                             do_init_search, cost_list, vfp, use_mvcost,
-                             center_mv, best_mv, bigdia_num_candidates,
-                             bigdia_candidates);
+  return pattern_search(x, start_mv, search_param, sad_per_bit,
+                        do_init_search, cost_list, vfp, use_mvcost,
+                        center_mv, bigdia_num_candidates, bigdia_candidates);
 }
 
-int vp10_square_search(const MACROBLOCK *x,
-                      MV *start_mv,
-                      int search_param,
-                      int sad_per_bit,
-                      int do_init_search,
-                      int *cost_list,
-                      const vp10_variance_fn_ptr_t *vfp,
-                      int use_mvcost,
-                      const MV *center_mv,
-                      MV *best_mv) {
+static int square_search(MACROBLOCK *x,
+                         MV *start_mv,
+                         int search_param,
+                         int sad_per_bit,
+                         int do_init_search,
+                         int *cost_list,
+                         const vp10_variance_fn_ptr_t *vfp,
+                         int use_mvcost,
+                         const MV *center_mv) {
   // All scales have 8 closest points in square shape
   static const int square_num_candidates[MAX_PATTERN_SCALES] = {
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+      8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
   };
   // Note that the largest candidate step at each scale is 2^scale
   static const MV square_candidates[MAX_PATTERN_SCALES]
@@ -1445,40 +1442,37 @@ int vp10_square_search(const MACROBLOCK *x,
     {{-1024, -1024}, {0, -1024}, {1024, -1024}, {1024, 0}, {1024, 1024},
       {0, 1024}, {-1024, 1024}, {-1024, 0}},
   };
-  return vp10_pattern_search(x, start_mv, search_param, sad_per_bit,
-                             do_init_search, cost_list, vfp, use_mvcost,
-                             center_mv, best_mv, square_num_candidates,
-                             square_candidates);
+  return pattern_search(x, start_mv, search_param, sad_per_bit,
+                        do_init_search, cost_list, vfp, use_mvcost,
+                        center_mv, square_num_candidates, square_candidates);
 }
 
-int vp10_fast_hex_search(const MACROBLOCK *x,
-                        MV *ref_mv,
-                        int search_param,
-                        int sad_per_bit,
-                        int do_init_search,  // must be zero for fast_hex
-                        int *cost_list,
-                        const vp10_variance_fn_ptr_t *vfp,
-                        int use_mvcost,
-                        const MV *center_mv,
-                        MV *best_mv) {
+static int fast_hex_search(MACROBLOCK *x,
+                           MV *ref_mv,
+                           int search_param,
+                           int sad_per_bit,
+                           int do_init_search,  // must be zero for fast_hex
+                           int *cost_list,
+                           const vp10_variance_fn_ptr_t *vfp,
+                           int use_mvcost,
+                           const MV *center_mv) {
   return vp10_hex_search(
       x, ref_mv, VPXMAX(MAX_MVSEARCH_STEPS - 2, search_param), sad_per_bit,
-      do_init_search, cost_list, vfp, use_mvcost, center_mv, best_mv);
+      do_init_search, cost_list, vfp, use_mvcost, center_mv);
 }
 
-int vp10_fast_dia_search(const MACROBLOCK *x,
-                        MV *ref_mv,
-                        int search_param,
-                        int sad_per_bit,
-                        int do_init_search,
-                        int *cost_list,
-                        const vp10_variance_fn_ptr_t *vfp,
-                        int use_mvcost,
-                        const MV *center_mv,
-                        MV *best_mv) {
-  return vp10_bigdia_search(
+static int fast_dia_search(MACROBLOCK *x,
+                           MV *ref_mv,
+                           int search_param,
+                           int sad_per_bit,
+                           int do_init_search,
+                           int *cost_list,
+                           const vp10_variance_fn_ptr_t *vfp,
+                           int use_mvcost,
+                           const MV *center_mv) {
+  return bigdia_search(
       x, ref_mv, VPXMAX(MAX_MVSEARCH_STEPS - 2, search_param), sad_per_bit,
-      do_init_search, cost_list, vfp, use_mvcost, center_mv, best_mv);
+      do_init_search, cost_list, vfp, use_mvcost, center_mv);
 }
 
 #undef CHECK_BETTER
@@ -1924,12 +1918,12 @@ unsigned int vp10_int_pro_motion_estimation(const VP10_COMP *cpi, MACROBLOCK *x,
 /* do_refine: If last step (1-away) of n-step search doesn't pick the center
               point as the best match, we will do a final 1-away diamond
               refining search  */
-int vp10_full_pixel_diamond(const VP10_COMP *cpi, MACROBLOCK *x,
-                           MV *mvp_full, int step_param,
-                           int sadpb, int further_steps, int do_refine,
-                           int *cost_list,
-                           const vp10_variance_fn_ptr_t *fn_ptr,
-                           const MV *ref_mv, MV *dst_mv) {
+static int full_pixel_diamond(VP10_COMP *cpi, MACROBLOCK *x,
+                              MV *mvp_full, int step_param,
+                              int sadpb, int further_steps, int do_refine,
+                              int *cost_list,
+                              const vp10_variance_fn_ptr_t *fn_ptr,
+                              const MV *ref_mv) {
   MV temp_mv;
   int thissme, n, num00 = 0;
   int bestsme = cpi->diamond_search_sad(x, &cpi->ss_cfg, mvp_full, &temp_mv,
@@ -1937,7 +1931,7 @@ int vp10_full_pixel_diamond(const VP10_COMP *cpi, MACROBLOCK *x,
                                         fn_ptr, ref_mv);
   if (bestsme < INT_MAX)
     bestsme = vp10_get_mvpred_var(x, &temp_mv, ref_mv, fn_ptr, 1);
-  *dst_mv = temp_mv;
+  x->best_mv.as_mv = temp_mv;
 
   // If there won't be more n-step search, check to see if refining search is
   // needed.
@@ -1962,7 +1956,7 @@ int vp10_full_pixel_diamond(const VP10_COMP *cpi, MACROBLOCK *x,
 
       if (thissme < bestsme) {
         bestsme = thissme;
-        *dst_mv = temp_mv;
+        x->best_mv.as_mv = temp_mv;
       }
     }
   }
@@ -1970,20 +1964,20 @@ int vp10_full_pixel_diamond(const VP10_COMP *cpi, MACROBLOCK *x,
   // final 1-away diamond refining search
   if (do_refine) {
     const int search_range = 8;
-    MV best_mv = *dst_mv;
+    MV best_mv = x->best_mv.as_mv;
     thissme = vp10_refining_search_sad(x, &best_mv, sadpb, search_range,
                                        fn_ptr, ref_mv);
     if (thissme < INT_MAX)
       thissme = vp10_get_mvpred_var(x, &best_mv, ref_mv, fn_ptr, 1);
     if (thissme < bestsme) {
       bestsme = thissme;
-      *dst_mv = best_mv;
+      x->best_mv.as_mv = best_mv;
     }
   }
 
   // Return cost list.
   if (cost_list) {
-    calc_int_cost_list(x, ref_mv, sadpb, fn_ptr, dst_mv, cost_list);
+    calc_int_cost_list(x, ref_mv, sadpb, fn_ptr, &x->best_mv.as_mv, cost_list);
   }
   return bestsme;
 }
@@ -1994,7 +1988,8 @@ int vp10_full_pixel_diamond(const VP10_COMP *cpi, MACROBLOCK *x,
 // Runs an limited range exhaustive mesh search using a pattern set
 // according to the encode speed profile.
 static int full_pixel_exhaustive(VP10_COMP *cpi, MACROBLOCK *x,
-                                 MV *centre_mv_full, int sadpb,  int *cost_list,
+                                 const MV *centre_mv_full, int sadpb,
+                                 int *cost_list,
                                  const vp10_variance_fn_ptr_t *fn_ptr,
                                  const MV *ref_mv, MV *dst_mv) {
   const SPEED_FEATURES *const sf = &cpi->sf;
@@ -2053,9 +2048,9 @@ static int full_pixel_exhaustive(VP10_COMP *cpi, MACROBLOCK *x,
 }
 
 int vp10_full_search_sad_c(const MACROBLOCK *x, const MV *ref_mv,
-                          int sad_per_bit, int distance,
-                          const vp10_variance_fn_ptr_t *fn_ptr,
-                          const MV *center_mv, MV *best_mv) {
+                           int sad_per_bit, int distance,
+                           const vp10_variance_fn_ptr_t *fn_ptr,
+                           const MV *center_mv, MV *best_mv) {
   int r, c;
   const MACROBLOCKD *const xd = &x->e_mbd;
   const struct buf_2d *const what = &x->plane[0].src;
@@ -2086,9 +2081,9 @@ int vp10_full_search_sad_c(const MACROBLOCK *x, const MV *ref_mv,
 }
 
 int vp10_full_search_sadx3(const MACROBLOCK *x, const MV *ref_mv,
-                          int sad_per_bit, int distance,
-                          const vp10_variance_fn_ptr_t *fn_ptr,
-                          const MV *center_mv, MV *best_mv) {
+                           int sad_per_bit, int distance,
+                           const vp10_variance_fn_ptr_t *fn_ptr,
+                           const MV *center_mv, MV *best_mv) {
   int r;
   const MACROBLOCKD *const xd = &x->e_mbd;
   const struct buf_2d *const what = &x->plane[0].src;
@@ -2151,9 +2146,9 @@ int vp10_full_search_sadx3(const MACROBLOCK *x, const MV *ref_mv,
 }
 
 int vp10_full_search_sadx8(const MACROBLOCK *x, const MV *ref_mv,
-                          int sad_per_bit, int distance,
-                          const vp10_variance_fn_ptr_t *fn_ptr,
-                          const MV *center_mv, MV *best_mv) {
+                           int sad_per_bit, int distance,
+                           const vp10_variance_fn_ptr_t *fn_ptr,
+                           const MV *center_mv, MV *best_mv) {
   int r;
   const MACROBLOCKD *const xd = &x->e_mbd;
   const struct buf_2d *const what = &x->plane[0].src;
@@ -2318,29 +2313,30 @@ int vp10_refining_search_sad(const MACROBLOCK *x,
 
 // This function is called when we do joint motion search in comp_inter_inter
 // mode.
-int vp10_refining_search_8p_c(const MACROBLOCK *x,
-                             MV *ref_mv, int error_per_bit,
-                             int search_range,
-                             const vp10_variance_fn_ptr_t *fn_ptr,
-                             const MV *center_mv,
-                             const uint8_t *second_pred) {
+int vp10_refining_search_8p_c(MACROBLOCK *x,
+                              int error_per_bit,
+                              int search_range,
+                              const vp10_variance_fn_ptr_t *fn_ptr,
+                              const MV *center_mv,
+                              const uint8_t *second_pred) {
   const MV neighbors[8] = {{-1, 0}, {0, -1}, {0, 1}, {1, 0},
                            {-1, -1}, {1, -1}, {-1, 1}, {1, 1}};
   const MACROBLOCKD *const xd = &x->e_mbd;
   const struct buf_2d *const what = &x->plane[0].src;
   const struct buf_2d *const in_what = &xd->plane[0].pre[0];
   const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
+  MV *best_mv = &x->best_mv.as_mv;
   unsigned int best_sad = fn_ptr->sdaf(what->buf, what->stride,
-      get_buf_from_mv(in_what, ref_mv), in_what->stride, second_pred) +
-      mvsad_err_cost(x, ref_mv, &fcenter_mv, error_per_bit);
+      get_buf_from_mv(in_what, best_mv), in_what->stride, second_pred) +
+      mvsad_err_cost(x, best_mv, &fcenter_mv, error_per_bit);
   int i, j;
 
   for (i = 0; i < search_range; ++i) {
     int best_site = -1;
 
     for (j = 0; j < 8; ++j) {
-      const MV mv = {ref_mv->row + neighbors[j].row,
-                     ref_mv->col + neighbors[j].col};
+      const MV mv = {best_mv->row + neighbors[j].row,
+                     best_mv->col + neighbors[j].col};
 
       if (is_mv_in(x, &mv)) {
         unsigned int sad = fn_ptr->sdaf(what->buf, what->stride,
@@ -2358,8 +2354,8 @@ int vp10_refining_search_8p_c(const MACROBLOCK *x,
     if (best_site == -1) {
       break;
     } else {
-      ref_mv->row += neighbors[best_site].row;
-      ref_mv->col += neighbors[best_site].col;
+      best_mv->row += neighbors[best_site].row;
+      best_mv->col += neighbors[best_site].col;
     }
   }
   return best_sad;
@@ -2378,15 +2374,15 @@ static int is_exhaustive_allowed(VP10_COMP *cpi, MACROBLOCK *x) {
 }
 
 int vp10_full_pixel_search(VP10_COMP *cpi, MACROBLOCK *x,
-                          BLOCK_SIZE bsize, MV *mvp_full,
-                          int step_param, int error_per_bit,
-                          int *cost_list,
-                          const MV *ref_mv, MV *tmp_mv,
-                          int var_max, int rd) {
+                           BLOCK_SIZE bsize, MV *mvp_full,
+                           int step_param, int error_per_bit,
+                           int *cost_list, const MV *ref_mv,
+                           int var_max, int rd) {
   const SPEED_FEATURES *const sf = &cpi->sf;
   const SEARCH_METHODS method = sf->mv.search_method;
   vp10_variance_fn_ptr_t *fn_ptr = &cpi->fn_ptr[bsize];
   int var = 0;
+
   if (cost_list) {
     cost_list[0] = INT_MAX;
     cost_list[1] = INT_MAX;
@@ -2400,29 +2396,29 @@ int vp10_full_pixel_search(VP10_COMP *cpi, MACROBLOCK *x,
 
   switch (method) {
     case FAST_DIAMOND:
-      var = vp10_fast_dia_search(x, mvp_full, step_param, error_per_bit, 0,
-                                cost_list, fn_ptr, 1, ref_mv, tmp_mv);
+      var = fast_dia_search(x, mvp_full, step_param, error_per_bit, 0,
+                            cost_list, fn_ptr, 1, ref_mv);
       break;
     case FAST_HEX:
-      var = vp10_fast_hex_search(x, mvp_full, step_param, error_per_bit, 0,
-                                cost_list, fn_ptr, 1, ref_mv, tmp_mv);
+      var = fast_hex_search(x, mvp_full, step_param, error_per_bit, 0,
+                            cost_list, fn_ptr, 1, ref_mv);
       break;
     case HEX:
       var = vp10_hex_search(x, mvp_full, step_param, error_per_bit, 1,
-                           cost_list, fn_ptr, 1, ref_mv, tmp_mv);
+                            cost_list, fn_ptr, 1, ref_mv);
       break;
     case SQUARE:
-      var = vp10_square_search(x, mvp_full, step_param, error_per_bit, 1,
-                              cost_list, fn_ptr, 1, ref_mv, tmp_mv);
+      var = square_search(x, mvp_full, step_param, error_per_bit, 1,
+                          cost_list, fn_ptr, 1, ref_mv);
       break;
     case BIGDIA:
-      var = vp10_bigdia_search(x, mvp_full, step_param, error_per_bit, 1,
-                              cost_list, fn_ptr, 1, ref_mv, tmp_mv);
+      var = bigdia_search(x, mvp_full, step_param, error_per_bit, 1,
+                          cost_list, fn_ptr, 1, ref_mv);
       break;
     case NSTEP:
-      var = vp10_full_pixel_diamond(cpi, x, mvp_full, step_param, error_per_bit,
-                                   MAX_MVSEARCH_STEPS - 1 - step_param,
-                                   1, cost_list, fn_ptr, ref_mv, tmp_mv);
+      var = full_pixel_diamond(cpi, x, mvp_full, step_param, error_per_bit,
+                               MAX_MVSEARCH_STEPS - 1 - step_param,
+                               1, cost_list, fn_ptr, ref_mv);
 
       // Should we allow a follow on exhaustive search?
       if (is_exhaustive_allowed(cpi, x)) {
@@ -2434,13 +2430,13 @@ int vp10_full_pixel_search(VP10_COMP *cpi, MACROBLOCK *x,
         if (var > exhuastive_thr) {
             int var_ex;
           MV tmp_mv_ex;
-          var_ex = full_pixel_exhaustive(cpi, x, tmp_mv,
+          var_ex = full_pixel_exhaustive(cpi, x, &x->best_mv.as_mv,
                                          error_per_bit, cost_list, fn_ptr,
                                          ref_mv, &tmp_mv_ex);
 
           if (var_ex < var) {
             var = var_ex;
-            *tmp_mv = tmp_mv_ex;
+            x->best_mv.as_mv = tmp_mv_ex;
           }
         }
       }
@@ -2452,7 +2448,7 @@ int vp10_full_pixel_search(VP10_COMP *cpi, MACROBLOCK *x,
   }
 
   if (method != NSTEP && rd && var < var_max)
-    var = vp10_get_mvpred_var(x, tmp_mv, ref_mv, fn_ptr, 1);
+    var = vp10_get_mvpred_var(x, &x->best_mv.as_mv, ref_mv, fn_ptr, 1);
 
   return var;
 }

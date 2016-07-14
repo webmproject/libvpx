@@ -25,7 +25,6 @@
 
 static unsigned int do_16x16_motion_iteration(VP10_COMP *cpi,
                                               const MV *ref_mv,
-                                              MV *dst_mv,
                                               int mb_row,
                                               int mb_col) {
   MACROBLOCK *const x = &cpi->td.mb;
@@ -51,8 +50,7 @@ static unsigned int do_16x16_motion_iteration(VP10_COMP *cpi,
 
   /*cpi->sf.search_method == HEX*/
   vp10_hex_search(x, &ref_full, step_param, x->errorperbit, 0,
-                 cond_cost_list(cpi, cost_list),
-                 &v_fn_ptr, 0, ref_mv, dst_mv);
+                  cond_cost_list(cpi, cost_list), &v_fn_ptr, 0, ref_mv);
 
   // Try sub-pixel MC
   // if (bestsme > error_thresh && bestsme < INT_MAX)
@@ -60,7 +58,7 @@ static unsigned int do_16x16_motion_iteration(VP10_COMP *cpi,
     int distortion;
     unsigned int sse;
     cpi->find_fractional_mv_step(
-        x, dst_mv, ref_mv, cpi->common.allow_high_precision_mv, x->errorperbit,
+        x, ref_mv, cpi->common.allow_high_precision_mv, x->errorperbit,
         &v_fn_ptr, 0, mv_sf->subpel_iters_per_step,
         cond_cost_list(cpi, cost_list),
         NULL, NULL,
@@ -74,7 +72,7 @@ static unsigned int do_16x16_motion_iteration(VP10_COMP *cpi,
 #endif  // CONFIG_EXT_INTER
   xd->mi[0]->mbmi.mode = NEWMV;
 
-  xd->mi[0]->mbmi.mv[0].as_mv = *dst_mv;
+  xd->mi[0]->mbmi.mv[0] = x->best_mv;
 #if CONFIG_EXT_INTER
   xd->mi[0]->mbmi.ref_frame[1] = NONE;
 #endif  // CONFIG_EXT_INTER
@@ -92,40 +90,40 @@ static unsigned int do_16x16_motion_iteration(VP10_COMP *cpi,
 }
 
 static int do_16x16_motion_search(VP10_COMP *cpi, const MV *ref_mv,
-                                  int_mv *dst_mv, int mb_row, int mb_col) {
+                                  int mb_row, int mb_col) {
   MACROBLOCK *const x = &cpi->td.mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   unsigned int err, tmp_err;
-  MV tmp_mv;
+  MV best_mv;
 
   // Try zero MV first
   // FIXME should really use something like near/nearest MV and/or MV prediction
   err = vpx_sad16x16(x->plane[0].src.buf, x->plane[0].src.stride,
                      xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride);
-  dst_mv->as_int = 0;
+  best_mv.col = best_mv.row = 0;
 
   // Test last reference frame using the previous best mv as the
   // starting point (best reference) for the search
-  tmp_err = do_16x16_motion_iteration(cpi, ref_mv, &tmp_mv, mb_row, mb_col);
+  tmp_err = do_16x16_motion_iteration(cpi, ref_mv, mb_row, mb_col);
   if (tmp_err < err) {
     err = tmp_err;
-    dst_mv->as_mv = tmp_mv;
+    best_mv = x->best_mv.as_mv;
   }
 
   // If the current best reference mv is not centered on 0,0 then do a 0,0
   // based search as well.
   if (ref_mv->row != 0 || ref_mv->col != 0) {
     unsigned int tmp_err;
-    MV zero_ref_mv = {0, 0}, tmp_mv;
+    MV zero_ref_mv = {0, 0};
 
-    tmp_err = do_16x16_motion_iteration(cpi, &zero_ref_mv, &tmp_mv,
-                                        mb_row, mb_col);
+    tmp_err = do_16x16_motion_iteration(cpi, &zero_ref_mv, mb_row, mb_col);
     if (tmp_err < err) {
-      dst_mv->as_mv = tmp_mv;
       err = tmp_err;
+      best_mv = x->best_mv.as_mv;
     }
   }
 
+  x->best_mv.as_mv = best_mv;
   return err;
 }
 
@@ -213,8 +211,8 @@ static void update_mbgraph_mb_stats
     xd->plane[0].pre[0].stride = golden_ref->y_stride;
     g_motion_error = do_16x16_motion_search(cpi,
                                             prev_golden_ref_mv,
-                                            &stats->ref[GOLDEN_FRAME].m.mv,
                                             mb_row, mb_col);
+    stats->ref[GOLDEN_FRAME].m.mv = x->best_mv;
     stats->ref[GOLDEN_FRAME].err = g_motion_error;
   } else {
     stats->ref[GOLDEN_FRAME].err = INT_MAX;

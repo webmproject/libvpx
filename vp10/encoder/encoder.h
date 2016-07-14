@@ -447,7 +447,7 @@ typedef struct VP10_COMP {
   ActiveMap active_map;
 
   fractional_mv_step_fp *find_fractional_mv_step;
-  vp10_full_search_fn_t full_search_sad;
+  vp10_full_search_fn_t full_search_sad;  // It is currently unused.
   vp10_diamond_search_fn_t diamond_search_sad;
   vp10_variance_fn_ptr_t fn_ptr[BLOCK_SIZES];
   uint64_t time_receive_data;
