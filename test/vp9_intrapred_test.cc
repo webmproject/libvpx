@@ -28,50 +28,23 @@ using libvpx_test::ACMRandom;
 
 const int count_test_block = 100000;
 
-typedef void (*intra_pred_fn_t)(
-      uint16_t* dst, ptrdiff_t stride,
-      const uint16_t* above, const uint16_t* left, int bps);
+typedef void (*IntraPred)(uint16_t* dst, ptrdiff_t stride,
+                          const uint16_t* above, const uint16_t* left,
+                          int bps);
 
 struct IntraPredFunc {
-  IntraPredFunc(intra_pred_fn_t pred = NULL, intra_pred_fn_t ref = NULL,
+  IntraPredFunc(IntraPred pred = NULL, IntraPred ref = NULL,
                 int block_size_value = 0, int bit_depth_value = 0)
       : pred_fn(pred), ref_fn(ref),
         block_size(block_size_value), bit_depth(bit_depth_value) {}
 
-  intra_pred_fn_t pred_fn;
-  intra_pred_fn_t ref_fn;
+  IntraPred pred_fn;
+  IntraPred ref_fn;
   int block_size;
   int bit_depth;
 };
 
 class VP9IntraPredTest : public ::testing::TestWithParam<IntraPredFunc> {
-  virtual void SetUp() {
-    params_ = GetParam();
-    stride_ = params_.block_size * 3;
-    mask_   = (1 << params_.bit_depth) - 1;
-  }
-
-  void Predict() {
-    const int bit_depth = params_.bit_depth;
-    params_.ref_fn(ref_dst_, stride_, above_row_, left_col_, bit_depth);
-    ASM_REGISTER_STATE_CHECK(params_.pred_fn(dst_, stride_,
-                                             above_row_, left_col_, bit_depth));
-  }
-
-  void CheckPrediction(int test_case_number, int *error_count) const {
-    // For each pixel ensure that the calculated value is the same as reference.
-    const int block_size = params_.block_size;
-    for (int y = 0; y < block_size; y++) {
-      for (int x = 0; x < block_size; x++) {
-        *error_count += ref_dst_[x + y * stride_] != dst_[x + y * stride_];
-        if (*error_count == 1) {
-          ASSERT_EQ(ref_dst_[x + y * stride_], dst_[x + y * stride_])
-              << " Failed on Test Case Number "<< test_case_number;
-        }
-      }
-    }
-  }
-
  public:
   void RunTest(uint16_t* left_col, uint16_t* above_data,
                uint16_t* dst, uint16_t* ref_dst) {
@@ -104,10 +77,38 @@ class VP9IntraPredTest : public ::testing::TestWithParam<IntraPredFunc> {
     ASSERT_EQ(0, error_count);
   }
 
-  uint16_t* above_row_;
-  uint16_t* left_col_;
-  uint16_t* dst_;
-  uint16_t* ref_dst_;
+ protected:
+  virtual void SetUp() {
+    params_ = GetParam();
+    stride_ = params_.block_size * 3;
+    mask_   = (1 << params_.bit_depth) - 1;
+  }
+
+  void Predict() {
+    const int bit_depth = params_.bit_depth;
+    params_.ref_fn(ref_dst_, stride_, above_row_, left_col_, bit_depth);
+    ASM_REGISTER_STATE_CHECK(params_.pred_fn(dst_, stride_,
+                                             above_row_, left_col_, bit_depth));
+  }
+
+  void CheckPrediction(int test_case_number, int *error_count) const {
+    // For each pixel ensure that the calculated value is the same as reference.
+    const int block_size = params_.block_size;
+    for (int y = 0; y < block_size; y++) {
+      for (int x = 0; x < block_size; x++) {
+        *error_count += ref_dst_[x + y * stride_] != dst_[x + y * stride_];
+        if (*error_count == 1) {
+          ASSERT_EQ(ref_dst_[x + y * stride_], dst_[x + y * stride_])
+              << " Failed on Test Case Number "<< test_case_number;
+        }
+      }
+    }
+  }
+
+  uint16_t *above_row_;
+  uint16_t *left_col_;
+  uint16_t *dst_;
+  uint16_t *ref_dst_;
   ptrdiff_t stride_;
   int mask_;
 
@@ -150,8 +151,7 @@ INSTANTIATE_TEST_CASE_P(SSE2_TO_C_8, VP9IntraPredTest,
       IntraPredFunc(&vpx_highbd_tm_predictor_4x4_sse2,
                     &vpx_highbd_tm_predictor_4x4_c, 4, 8),
       IntraPredFunc(&vpx_highbd_tm_predictor_8x8_sse2,
-                    &vpx_highbd_tm_predictor_8x8_c, 8, 8)
-));
+                    &vpx_highbd_tm_predictor_8x8_c, 8, 8)));
 
 INSTANTIATE_TEST_CASE_P(SSE2_TO_C_10, VP9IntraPredTest,
     ::testing::Values(
@@ -178,8 +178,7 @@ INSTANTIATE_TEST_CASE_P(SSE2_TO_C_10, VP9IntraPredTest,
       IntraPredFunc(&vpx_highbd_tm_predictor_4x4_sse2,
                     &vpx_highbd_tm_predictor_4x4_c, 4, 10),
       IntraPredFunc(&vpx_highbd_tm_predictor_8x8_sse2,
-                    &vpx_highbd_tm_predictor_8x8_c, 8, 10)
-));
+                    &vpx_highbd_tm_predictor_8x8_c, 8, 10)));
 
 INSTANTIATE_TEST_CASE_P(SSE2_TO_C_12, VP9IntraPredTest,
     ::testing::Values(
@@ -206,8 +205,7 @@ INSTANTIATE_TEST_CASE_P(SSE2_TO_C_12, VP9IntraPredTest,
       IntraPredFunc(&vpx_highbd_tm_predictor_4x4_sse2,
                     &vpx_highbd_tm_predictor_4x4_c, 4, 12),
       IntraPredFunc(&vpx_highbd_tm_predictor_8x8_sse2,
-                    &vpx_highbd_tm_predictor_8x8_c, 8, 12)
-));
+                    &vpx_highbd_tm_predictor_8x8_c, 8, 12)));
 
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_SSE2
