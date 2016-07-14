@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3ad6900d_fb04014b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-14T04:18:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3ad6900d_f8c24794",
+      "range": {
+        "startLine": 9,
+        "startChar": 27,
+        "endLine": 9,
+        "endChar": 33
+      },
+      "revId": "8f23630076150a799be299e7d42db449b03f9074",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ad6900d_f89087b4",
         "filename": "test/vp9_intrapred_test.cc",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-07-13T23:59:23Z",
       "side": 1,
       "message": "this could be IntraPredFunc or so",
+      "range": {
+        "startLine": 31,
+        "startChar": 15,
+        "endLine": 31,
+        "endChar": 30
+      },
+      "revId": "8f23630076150a799be299e7d42db449b03f9074",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ad6900d_dbf01d6a",
+        "filename": "test/vp9_intrapred_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-14T04:18:11Z",
+      "side": 1,
+      "message": "Done (note that IntraPredFunc was already taken)",
+      "parentUuid": "3ad6900d_f89087b4",
       "range": {
         "startLine": 31,
         "startChar": 15,
