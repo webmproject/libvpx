@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "faca38dd_709b5d7c",
+        "filename": "vp10/common/mv.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-15T23:51:14Z",
+      "side": 1,
+      "message": "OK, got it.",
+      "parentUuid": "faca38dd_0d777272",
+      "revId": "3988460f7d5434b6482aa2444c6fc8e9b445b5ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faca38dd_db5fd7c9",
         "filename": "vp10/common/mv.h",
         "patchSetId": 16
@@ -101,6 +119,24 @@
       "side": 1,
       "message": "They are flipped on the encoder side because it is possible to start with ROTZOOM turned on and find that the 2 rotzoom parameters are not needed and to fall back to a translation model. It is simpler to do this if the translation parameters are the first 2 and the rotzoom parameters are the second 2. Otherwise you\u0027d have to copy the translation parameters from location 2 and 3 into the first two slots every time you switch between models; however, the warped motion is implemented so the translation parameters are always the last 2 slots of the array. Not sure if it is necessary to implement it this way, but it might be better to adjust that as a followup patch so the encoder and decoder can be consistent.",
       "parentUuid": "faca38dd_1bfb2fc3",
+      "revId": "3988460f7d5434b6482aa2444c6fc8e9b445b5ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_904d39b4",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 3462,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-15T23:51:14Z",
+      "side": 1,
+      "message": "Thanks for explaining it. Yes, we can do it in a future patch",
+      "parentUuid": "faca38dd_0d9e52d0",
       "revId": "3988460f7d5434b6482aa2444c6fc8e9b445b5ef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
