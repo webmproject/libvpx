@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "faca38dd_80084ad3",
+        "filename": "vp8/common/loopfilter_filters.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-15T19:53:27Z",
+      "side": 1,
+      "message": "fix it how? it\u0027s correct. merging the 2 lines would exceed 80 chars",
+      "parentUuid": "faca38dd_7a3ce1cf",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 23
+      },
+      "revId": "b51ba6be46cc01b05cecd659c3bd421a499426b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faca38dd_5a3925de",
         "filename": "vp8/common/onyx.h",
         "patchSetId": 2
@@ -59,6 +83,30 @@
       "writtenOn": "2016-07-15T13:35:09Z",
       "side": 1,
       "message": "kind of a shame that it leaves extra space.",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 0
+      },
+      "revId": "b51ba6be46cc01b05cecd659c3bd421a499426b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_e0313e95",
+        "filename": "vp8/common/onyx.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-15T19:53:27Z",
+      "side": 1,
+      "message": "not sure about that one. seems to preserve space between members if it\u0027s there, might generalize to this.",
+      "parentUuid": "faca38dd_5a3925de",
       "range": {
         "startLine": 34,
         "startChar": 0,
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "faca38dd_2024f652",
+        "filename": "vp8/decoder/decodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 699,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-15T19:53:27Z",
+      "side": 1,
+      "message": "clang-format just formats the existing code, maybe clang-tidy provides this, I haven\u0027t checked",
+      "parentUuid": "faca38dd_ba2659bf",
+      "range": {
+        "startLine": 699,
+        "startChar": 4,
+        "endLine": 699,
+        "endChar": 18
+      },
+      "revId": "b51ba6be46cc01b05cecd659c3bd421a499426b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faca38dd_9a2b9d87",
         "filename": "vp8/decoder/treereader.h",
         "patchSetId": 2
@@ -105,6 +177,30 @@
       "writtenOn": "2016-07-15T13:35:09Z",
       "side": 1,
       "message": "this is a funky formatting",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 2
+      },
+      "revId": "b51ba6be46cc01b05cecd659c3bd421a499426b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_601eee04",
+        "filename": "vp8/decoder/treereader.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-15T19:53:27Z",
+      "side": 1,
+      "message": "this is anti-style; should be while (...) {}",
+      "parentUuid": "faca38dd_9a2b9d87",
       "range": {
         "startLine": 35,
         "startChar": 0,
@@ -140,6 +236,30 @@
     },
     {
       "key": {
+        "uuid": "faca38dd_a0e0e604",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-15T19:53:27Z",
+      "side": 1,
+      "message": "the whitespace around {}s pushes it over 80",
+      "parentUuid": "faca38dd_fa20d1a4",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 8
+      },
+      "revId": "b51ba6be46cc01b05cecd659c3bd421a499426b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faca38dd_3a1b8978",
         "filename": "vp8/encoder/encodeframe.c",
         "patchSetId": 2
@@ -151,6 +271,30 @@
       "writtenOn": "2016-07-15T13:35:09Z",
       "side": 1,
       "message": "looks like it would fit on last line?  Just confusing",
+      "range": {
+        "startLine": 616,
+        "startChar": 29,
+        "endLine": 616,
+        "endChar": 32
+      },
+      "revId": "b51ba6be46cc01b05cecd659c3bd421a499426b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_40f012cf",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 616,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-15T19:53:27Z",
+      "side": 1,
+      "message": "again, over 80 chars. when keeping alignment like this it tends to break late. price you pay using an autotool...but since we can control style on reviews...",
+      "parentUuid": "faca38dd_3a1b8978",
       "range": {
         "startLine": 616,
         "startChar": 29,
