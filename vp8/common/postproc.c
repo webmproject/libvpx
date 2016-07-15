@@ -491,19 +491,12 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
             || oci->postproc_state.last_noise != noise_level)
         {
             double sigma;
-            int clamp, i;
             struct postproc_state *ppstate = &oci->postproc_state;
             vp8_clear_system_state();
             sigma = noise_level + .5 + .6 * q / 63.0;
-            clamp = vpx_setup_noise(sigma, sizeof(ppstate->noise),
-                                    ppstate->noise);
-            for (i = 0; i < 16; i++)
-            {
-                ppstate->blackclamp[i] = clamp;
-                ppstate->whiteclamp[i] = clamp;
-                ppstate->bothclamp[i] = 2 * clamp;
-            }
-
+            oci->postproc_state.clamp = vpx_setup_noise(sigma,
+                                                        ppstate->noise,
+                                                        sizeof(ppstate->noise));
             ppstate->last_q = q;
             ppstate->last_noise = noise_level;
         }
@@ -511,9 +504,8 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
         vpx_plane_add_noise
         (oci->post_proc_buffer.y_buffer,
          oci->postproc_state.noise,
-         oci->postproc_state.blackclamp,
-         oci->postproc_state.whiteclamp,
-         oci->postproc_state.bothclamp,
+         oci->postproc_state.clamp,
+         oci->postproc_state.clamp,
          oci->post_proc_buffer.y_width, oci->post_proc_buffer.y_height,
          oci->post_proc_buffer.y_stride);
     }

@@ -412,29 +412,21 @@ int vp9_post_proc_frame(struct VP9Common *cm,
 
   ppstate->last_base_qindex = cm->base_qindex;
   ppstate->last_frame_valid = 1;
-
   if (flags & VP9D_ADDNOISE) {
     const int noise_level = ppflags->noise_level;
     if (ppstate->last_q != q ||
         ppstate->last_noise != noise_level) {
       double sigma;
-      int clamp, i;
       vpx_clear_system_state();
       sigma = noise_level + .5 + .6 * q / 63.0;
-      clamp = vpx_setup_noise(sigma, sizeof(ppstate->noise),
-                              ppstate->noise);
-
-      for (i = 0; i < 16; i++) {
-        ppstate->blackclamp[i] = clamp;
-        ppstate->whiteclamp[i] = clamp;
-        ppstate->bothclamp[i] = 2 * clamp;
-      }
+      ppstate->clamp = vpx_setup_noise(sigma, ppstate->noise,
+                                       sizeof(ppstate->noise));
       ppstate->last_q = q;
       ppstate->last_noise = noise_level;
     }
-    vpx_plane_add_noise(ppbuf->y_buffer, ppstate->noise, ppstate->blackclamp,
-                        ppstate->whiteclamp, ppstate->bothclamp,
-                        ppbuf->y_width, ppbuf->y_height, ppbuf->y_stride);
+    vpx_plane_add_noise(ppbuf->y_buffer, ppstate->noise, ppstate->clamp,
+                        ppstate->clamp, ppbuf->y_width, ppbuf->y_height,
+                        ppbuf->y_stride);
   }
 
   *dest = *ppbuf;

@@ -1892,7 +1892,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 # Post Processing
 #
 if (vpx_config("CONFIG_POSTPROC") eq "yes" || vpx_config("CONFIG_VP9_POSTPROC") eq "yes") {
-    add_proto qw/void vpx_plane_add_noise/, "uint8_t *Start, char *noise, char blackclamp[16], char whiteclamp[16], char bothclamp[16], unsigned int Width, unsigned int Height, int Pitch";
+    add_proto qw/void vpx_plane_add_noise/, "uint8_t *start, const int8_t *noise, int blackclamp, int whiteclamp, int width, int height, int pitch";
     specialize qw/vpx_plane_add_noise sse2 msa/;
 
     add_proto qw/void vpx_mbpost_proc_down/, "unsigned char *dst, int pitch, int rows, int cols,int flimit";
