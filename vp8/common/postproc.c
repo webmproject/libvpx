@@ -411,6 +411,16 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
         oci->postproc_state.last_frame_valid = 1;
         return 0;
     }
+    if (flags & VP8D_ADDNOISE)
+    {
+      if (!oci->postproc_state.generated_noise)
+      {
+          oci->postproc_state.generated_noise = vpx_calloc(
+              oci->Width + 256, sizeof(*oci->postproc_state.generated_noise));
+          if (!oci->postproc_state.generated_noise)
+            return 1;
+      }
+    }
 
     /* Allocate post_proc_buffer_int if needed */
     if ((flags & VP8D_MFQE) && !oci->post_proc_buffer_int_used)
@@ -494,16 +504,15 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
             struct postproc_state *ppstate = &oci->postproc_state;
             vp8_clear_system_state();
             sigma = noise_level + .5 + .6 * q / 63.0;
-            oci->postproc_state.clamp = vpx_setup_noise(sigma,
-                                                        ppstate->noise,
-                                                        sizeof(ppstate->noise));
+            ppstate->clamp = vpx_setup_noise(sigma, ppstate->generated_noise,
+                                             oci->Width + 256);
             ppstate->last_q = q;
             ppstate->last_noise = noise_level;
         }
 
         vpx_plane_add_noise
         (oci->post_proc_buffer.y_buffer,
-         oci->postproc_state.noise,
+         oci->postproc_state.generated_noise,
          oci->postproc_state.clamp,
          oci->postproc_state.clamp,
          oci->post_proc_buffer.y_width, oci->post_proc_buffer.y_height,

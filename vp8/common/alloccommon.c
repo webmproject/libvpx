@@ -32,6 +32,9 @@ void vp8_de_alloc_frame_buffers(VP8_COMMON *oci)
 
     vpx_free(oci->pp_limits_buffer);
     oci->pp_limits_buffer = NULL;
+
+    vpx_free(oci->postproc_state.generated_noise);
+    oci->postproc_state.generated_noise = NULL;
 #endif
 
     vpx_free(oci->above_context);
