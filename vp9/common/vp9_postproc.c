@@ -29,15 +29,16 @@
 #include "vp9/common/vp9_textblit.h"
 
 #if CONFIG_VP9_POSTPROC
-static const int16_t kernel5[] = {
-  1, 1, 4, 1, 1
-};
 
 static const uint8_t q_diff_thresh = 20;
 static const uint8_t last_q_thresh = 170;
 extern const int16_t vpx_rv[];
 
 #if CONFIG_VP9_HIGHBITDEPTH
+static const int16_t kernel5[] = {
+  1, 1, 4, 1, 1
+};
+
 void vp9_highbd_post_proc_down_and_across_c(const uint16_t *src_ptr,
                                             uint16_t *dst_ptr,
                                             int src_pixels_per_line,
