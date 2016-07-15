@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "faca38dd_1ac04d8b",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 18
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-15T15:17:03Z",
+      "side": 1,
+      "message": "\u00271\u0027 -\u003e \u0027sizeof(*s)\u0027",
+      "range": {
+        "startLine": 51,
+        "startChar": 73,
+        "endLine": 51,
+        "endChar": 76
+      },
+      "revId": "2e378741019f289d779eefb56c8b49f95b6711ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_7abd0113",
+        "filename": "test/add_noise_test.cc",
+        "patchSetId": 18
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-15T15:17:03Z",
+      "side": 1,
+      "message": "image_size -\u003e image_size * sizeof(*s)",
+      "range": {
+        "startLine": 53,
+        "startChar": 16,
+        "endLine": 53,
+        "endChar": 26
+      },
+      "revId": "2e378741019f289d779eefb56c8b49f95b6711ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_3ac3899b",
+        "filename": "vpx_dsp/x86/add_noise_sse2.asm",
+        "patchSetId": 18
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-15T15:17:03Z",
+      "side": 1,
+      "message": "rdx still contain this value, from line 26",
+      "revId": "2e378741019f289d779eefb56c8b49f95b6711ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
