@@ -417,12 +417,9 @@ static MB_MODE_INFO *set_offsets(AV1_COMMON *const cm, MACROBLOCKD *const xd,
   // passing bsize from decode_partition().
   xd->mi[0]->mbmi.sb_type = bsize;
   for (y = 0; y < y_mis; ++y)
-    for (x = !y; x < x_mis; ++x) {
-      xd->mi[y * cm->mi_stride + x] = xd->mi[0];
-    }
+    for (x = !y; x < x_mis; ++x) xd->mi[y * cm->mi_stride + x] = xd->mi[0];
 
   set_plane_n4(xd, bw, bh, bwl, bhl);
-
   set_skip_context(xd, mi_row, mi_col);
 
 #if CONFIG_VAR_TX
