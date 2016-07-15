@@ -9,6 +9,8 @@
  * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 
+#include "./aom_config.h"
+
 #if CONFIG_DAALA_EC
 #include <string.h>
 #endif
