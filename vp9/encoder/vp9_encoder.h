@@ -477,6 +477,9 @@ typedef struct VP9_COMP {
 
   TWO_PASS twopass;
 
+  // Force recalculation of segment_ids for each mode info
+  uint8_t force_update_segmentation;
+
   YV12_BUFFER_CONFIG alt_ref_buffer;
 
 #if CONFIG_INTERNAL_STATS
