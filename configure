@@ -577,7 +577,7 @@ process_toolchain() {
         check_add_cflags -Wvla
         check_add_cflags -Wimplicit-function-declaration
         check_add_cflags -Wuninitialized
-        check_add_cflags -Wunused-variable
+        check_add_cflags -Wunused
         case ${CC} in
           *clang*)
               # libvpx and/or clang have issues with aliasing:
@@ -585,12 +585,9 @@ process_toolchain() {
               # work around them until they are fixed
               check_add_cflags -fno-strict-aliasing
           ;;
-          *) check_add_cflags -Wunused-but-set-variable ;;
         esac
         if enabled mips || [ -z "${INLINE}" ]; then
           enabled extra_warnings || check_add_cflags -Wno-unused-function
-        else
-          check_add_cflags -Wunused-function
         fi
     fi
 
