@@ -104,7 +104,7 @@ vp8_prob *vp8_mv_ref_probs(
 extern const unsigned char vp8_mbsplit_offset[4][16];
 
 
-static INLINE int left_block_mv(const MODE_INFO *cur_mb, int b)
+static INLINE uint32_t left_block_mv(const MODE_INFO *cur_mb, int b)
 {
     if (!(b & 3))
     {
@@ -119,7 +119,8 @@ static INLINE int left_block_mv(const MODE_INFO *cur_mb, int b)
     return (cur_mb->bmi + b - 1)->mv.as_int;
 }
 
-static INLINE int above_block_mv(const MODE_INFO *cur_mb, int b, int mi_stride)
+static INLINE uint32_t above_block_mv(const MODE_INFO *cur_mb, int b,
+                                      int mi_stride)
 {
     if (!(b >> 2))
     {

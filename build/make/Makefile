@@ -119,29 +119,25 @@ utiltest:
 test-no-data-check::
 exampletest-no-data-check utiltest-no-data-check:
 
-# Add compiler flags for intrinsic files
+# Force to realign stack always on OS/2
 ifeq ($(TOOLCHAIN), x86-os2-gcc)
-STACKREALIGN=-mstackrealign
-else
-STACKREALIGN=
+CFLAGS += -mstackrealign
 endif
 
 $(BUILD_PFX)%_mmx.c.d: CFLAGS += -mmmx
 $(BUILD_PFX)%_mmx.c.o: CFLAGS += -mmmx
-$(BUILD_PFX)%_sse2.c.d: CFLAGS += -msse2 $(STACKREALIGN)
-$(BUILD_PFX)%_sse2.c.o: CFLAGS += -msse2 $(STACKREALIGN)
-$(BUILD_PFX)%_sse3.c.d: CFLAGS += -msse3 $(STACKREALIGN)
-$(BUILD_PFX)%_sse3.c.o: CFLAGS += -msse3 $(STACKREALIGN)
-$(BUILD_PFX)%_ssse3.c.d: CFLAGS += -mssse3 $(STACKREALIGN)
-$(BUILD_PFX)%_ssse3.c.o: CFLAGS += -mssse3 $(STACKREALIGN)
-$(BUILD_PFX)%_sse4.c.d: CFLAGS += -msse4.1 $(STACKREALIGN)
-$(BUILD_PFX)%_sse4.c.o: CFLAGS += -msse4.1 $(STACKREALIGN)
-$(BUILD_PFX)%_avx.c.d: CFLAGS += -mavx $(STACKREALIGN)
-$(BUILD_PFX)%_avx.c.o: CFLAGS += -mavx $(STACKREALIGN)
-$(BUILD_PFX)%_avx2.c.d: CFLAGS += -mavx2 $(STACKREALIGN)
-$(BUILD_PFX)%_avx2.c.o: CFLAGS += -mavx2 $(STACKREALIGN)
-$(BUILD_PFX)%vp9_reconintra.c.d: CFLAGS += $(STACKREALIGN)
-$(BUILD_PFX)%vp9_reconintra.c.o: CFLAGS += $(STACKREALIGN)
+$(BUILD_PFX)%_sse2.c.d: CFLAGS += -msse2
+$(BUILD_PFX)%_sse2.c.o: CFLAGS += -msse2
+$(BUILD_PFX)%_sse3.c.d: CFLAGS += -msse3
+$(BUILD_PFX)%_sse3.c.o: CFLAGS += -msse3
+$(BUILD_PFX)%_ssse3.c.d: CFLAGS += -mssse3
+$(BUILD_PFX)%_ssse3.c.o: CFLAGS += -mssse3
+$(BUILD_PFX)%_sse4.c.d: CFLAGS += -msse4.1
+$(BUILD_PFX)%_sse4.c.o: CFLAGS += -msse4.1
+$(BUILD_PFX)%_avx.c.d: CFLAGS += -mavx
+$(BUILD_PFX)%_avx.c.o: CFLAGS += -mavx
+$(BUILD_PFX)%_avx2.c.d: CFLAGS += -mavx2
+$(BUILD_PFX)%_avx2.c.o: CFLAGS += -mavx2
 
 $(BUILD_PFX)%.c.d: %.c
 	$(if $(quiet),@echo "    [DEP] $@")

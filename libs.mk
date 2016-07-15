@@ -183,6 +183,9 @@ INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += third_party/x86inc/x86inc.asm
 endif
 CODEC_EXPORTS-yes += vpx/exports_com
 CODEC_EXPORTS-$(CONFIG_ENCODERS) += vpx/exports_enc
+ifeq ($(CONFIG_SPATIAL_SVC),yes)
+CODEC_EXPORTS-$(CONFIG_ENCODERS) += vpx/exports_spatial_svc
+endif
 CODEC_EXPORTS-$(CONFIG_DECODERS) += vpx/exports_dec
 
 INSTALL-LIBS-yes += include/vpx/vpx_codec.h
@@ -270,6 +273,12 @@ EXPORT_FILE             := libvpx.syms
 LIBVPX_SO_SYMLINKS      := $(addprefix $(LIBSUBDIR)/, \
                              libvpx.dylib  )
 else
+ifeq ($(filter iphonesimulator%,$(TGT_OS)),$(TGT_OS))
+LIBVPX_SO               := libvpx.$(SO_VERSION_MAJOR).dylib
+SHARED_LIB_SUF          := .dylib
+EXPORT_FILE             := libvpx.syms
+LIBVPX_SO_SYMLINKS      := $(addprefix $(LIBSUBDIR)/, libvpx.dylib)
+else
 ifeq ($(filter os2%,$(TGT_OS)),$(TGT_OS))
 LIBVPX_SO               := libvpx$(SO_VERSION_MAJOR).dll
 SHARED_LIB_SUF          := _dll.a
@@ -283,6 +292,7 @@ EXPORT_FILE             := libvpx.ver
 LIBVPX_SO_SYMLINKS      := $(addprefix $(LIBSUBDIR)/, \
                              libvpx.so libvpx.so.$(SO_VERSION_MAJOR) \
                              libvpx.so.$(SO_VERSION_MAJOR).$(SO_VERSION_MINOR))
+endif
 endif
 endif
 

@@ -337,6 +337,10 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->total_actual_bits = 0;
   rc->total_target_bits = 0;
   rc->total_target_vs_actual = 0;
+  rc->avg_frame_low_motion = 0;
+  rc->high_source_sad = 0;
+  rc->count_last_scene_change = 0;
+  rc->avg_source_sad = 0;
 
   rc->frames_since_key = 8;  // Sensible default for first frame.
   rc->this_key_frame_forced = 0;
@@ -948,11 +952,14 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
                              FIXED_GF_INTERVAL], cm->bit_depth);
       active_best_quality = VPXMAX(qindex + delta_qindex, rc->best_quality);
     } else {
-      // Use the lower of active_worst_quality and recent/average Q.
-      if (cm->current_video_frame > 1)
-        active_best_quality = inter_minq[rc->avg_frame_qindex[INTER_FRAME]];
-      else
+      // Use the min of the average Q and active_worst_quality as basis for
+      // active_best.
+      if (cm->current_video_frame > 1) {
+        q = VPXMIN(rc->avg_frame_qindex[INTER_FRAME], active_worst_quality);
+        active_best_quality = inter_minq[q];
+      } else {
         active_best_quality = inter_minq[rc->avg_frame_qindex[KEY_FRAME]];
+      }
       // For the constrained quality mode we don't want
       // q to fall below the cq level.
       if ((oxcf->rc_mode == VPX_CQ) &&
@@ -1152,8 +1159,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
 
   // Extension to max or min Q if undershoot or overshoot is outside
   // the permitted range.
-  if ((cpi->oxcf.rc_mode != VPX_Q) &&
-      (cpi->twopass.gf_zeromotion_pct < VLOW_MOTION_THRESHOLD)) {
+  if (cpi->oxcf.rc_mode != VPX_Q) {
     if (frame_is_intra_only(cm) ||
         (!rc->is_src_frame_alt_ref &&
          (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame))) {
@@ -1329,6 +1335,26 @@ static void update_golden_frame_stats(VP9_COMP *cpi) {
   }
 }
 
+static void compute_frame_low_motion(VP9_COMP *const cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  int mi_row, mi_col;
+  MODE_INFO **mi = cm->mi_grid_visible;
+  RATE_CONTROL *const rc = &cpi->rc;
+  const int rows = cm->mi_rows, cols = cm->mi_cols;
+  int cnt_zeromv = 0;
+  for (mi_row = 0; mi_row < rows; mi_row++) {
+    for (mi_col = 0; mi_col < cols; mi_col++) {
+      if (abs(mi[0]->mv[0].as_mv.row) < 16 &&
+          abs(mi[0]->mv[0].as_mv.col) < 16)
+        cnt_zeromv++;
+      mi++;
+    }
+    mi += 8;
+  }
+  cnt_zeromv = 100 * cnt_zeromv / (rows * cols);
+  rc->avg_frame_low_motion = (3 * rc->avg_frame_low_motion + cnt_zeromv) >> 2;
+}
+
 void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   const VP9_COMMON *const cm = &cpi->common;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
@@ -1438,6 +1464,11 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
         rc->next_frame_size_selector != rc->frame_size_selector;
     rc->frame_size_selector = rc->next_frame_size_selector;
   }
+
+  if (oxcf->pass == 0) {
+    if (cm->frame_type != KEY_FRAME)
+      compute_frame_low_motion(cpi);
+  }
 }
 
 void vp9_rc_postencode_update_drop_frame(VP9_COMP *cpi) {
@@ -1476,6 +1507,24 @@ static int calc_iframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
   return vp9_rc_clamp_iframe_target_size(cpi, target);
 }
 
+static void adjust_gf_key_frame(VP9_COMP *cpi) {
+  RATE_CONTROL *const rc = &cpi->rc;
+  rc->constrained_gf_group = 0;
+  // Reset gf interval to make more equal spacing for up-coming key frame.
+  if ((rc->frames_to_key <= 7 * rc->baseline_gf_interval >> 2) &&
+      (rc->frames_to_key > rc->baseline_gf_interval)) {
+    rc->baseline_gf_interval = rc->frames_to_key >> 1;
+    if (rc->baseline_gf_interval < 5)
+      rc->baseline_gf_interval = rc->frames_to_key;
+    rc->constrained_gf_group = 1;
+  } else {
+    // Reset since frames_till_gf_update_due must be <= frames_to_key.
+    if (rc->baseline_gf_interval > rc->frames_to_key) {
+      rc->baseline_gf_interval = rc->frames_to_key;
+      rc->constrained_gf_group = 1;
+    }
+  }
+}
 void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -1496,23 +1545,33 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
     cm->frame_type = INTER_FRAME;
   }
   if (rc->frames_till_gf_update_due == 0) {
+    double rate_err = 1.0;
+    rc->gfu_boost = DEFAULT_GF_BOOST;
     if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cpi->oxcf.pass == 0) {
       vp9_cyclic_refresh_set_golden_update(cpi);
     } else {
       rc->baseline_gf_interval =
           (rc->min_gf_interval + rc->max_gf_interval) / 2;
     }
-    rc->frames_till_gf_update_due = rc->baseline_gf_interval;
-    // NOTE: frames_till_gf_update_due must be <= frames_to_key.
-    if (rc->frames_till_gf_update_due > rc->frames_to_key) {
-      rc->frames_till_gf_update_due = rc->frames_to_key;
-      rc->constrained_gf_group = 1;
-    } else {
-      rc->constrained_gf_group = 0;
+    if (rc->rolling_target_bits > 0)
+      rate_err =
+          (double)rc->rolling_actual_bits / (double)rc->rolling_target_bits;
+    // Increase gf interval at high Q and high overshoot.
+    if (cm->current_video_frame > 30 &&
+        rc->avg_frame_qindex[INTER_FRAME] > (7 * rc->worst_quality) >> 3 &&
+        rate_err > 3.5) {
+      rc->baseline_gf_interval =
+          VPXMIN(15, (3 * rc->baseline_gf_interval) >> 1);
+    } else if (cm->current_video_frame > 30 &&
+               rc->avg_frame_low_motion < 20) {
+      // Decrease boost and gf interval for high motion case.
+      rc->gfu_boost = DEFAULT_GF_BOOST >> 1;
+      rc->baseline_gf_interval = VPXMAX(5, rc->baseline_gf_interval >> 1);
     }
+    adjust_gf_key_frame(cpi);
+    rc->frames_till_gf_update_due = rc->baseline_gf_interval;
     cpi->refresh_golden_frame = 1;
     rc->source_alt_ref_pending = USE_ALTREF_FOR_ONE_PASS;
-    rc->gfu_boost = DEFAULT_GF_BOOST;
   }
   if (cm->frame_type == KEY_FRAME)
     target = calc_iframe_target_size_one_pass_vbr(cpi);
@@ -1833,27 +1892,28 @@ static void vbr_rate_correction(VP9_COMP *cpi, int *this_frame_target) {
   RATE_CONTROL *const rc = &cpi->rc;
   int64_t vbr_bits_off_target = rc->vbr_bits_off_target;
   int max_delta;
-  double position_factor = 1.0;
+  int frame_window = VPXMIN(16,
+      ((int)cpi->twopass.total_stats.count - cpi->common.current_video_frame));
 
-  // How far through the clip are we.
-  // This number is used to damp the per frame rate correction.
-  // Range 0 - 1.0
-  if (cpi->twopass.total_stats.count) {
-    position_factor = sqrt((double)cpi->common.current_video_frame /
-                           cpi->twopass.total_stats.count);
-  }
-  max_delta = (int)(position_factor *
-                    ((*this_frame_target * VBR_PCT_ADJUSTMENT_LIMIT) / 100));
+  // Calcluate the adjustment to rate for this frame.
+  if (frame_window > 0) {
+    max_delta = (vbr_bits_off_target > 0)
+        ? (int)(vbr_bits_off_target / frame_window)
+        : (int)(-vbr_bits_off_target / frame_window);
 
-  // vbr_bits_off_target > 0 means we have extra bits to spend
-  if (vbr_bits_off_target > 0) {
-    *this_frame_target +=
-      (vbr_bits_off_target > max_delta) ? max_delta
-                                        : (int)vbr_bits_off_target;
-  } else {
-    *this_frame_target -=
-      (vbr_bits_off_target < -max_delta) ? max_delta
-                                         : (int)-vbr_bits_off_target;
+    max_delta = VPXMIN(max_delta,
+        ((*this_frame_target * VBR_PCT_ADJUSTMENT_LIMIT) / 100));
+
+    // vbr_bits_off_target > 0 means we have extra bits to spend
+    if (vbr_bits_off_target > 0) {
+      *this_frame_target +=
+        (vbr_bits_off_target > max_delta) ? max_delta
+                                          : (int)vbr_bits_off_target;
+    } else {
+      *this_frame_target -=
+        (vbr_bits_off_target < -max_delta) ? max_delta
+                                           : (int)-vbr_bits_off_target;
+    }
   }
 
   // Fast redistribution of bits arising from massive local undershoot.
@@ -2088,6 +2148,7 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
     // For VBR, under scene change/high content change, force golden refresh.
     if (cpi->oxcf.rc_mode == VPX_VBR &&
         rc->high_source_sad &&
+        rc->frames_to_key > 3 &&
         rc->count_last_scene_change > 4 &&
         cpi->ext_refresh_frame_flags_pending == 0) {
       int target;
@@ -2095,9 +2156,8 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
       rc->gfu_boost = DEFAULT_GF_BOOST >> 1;
       rc->baseline_gf_interval = VPXMIN(20,
           VPXMAX(10, rc->baseline_gf_interval));
+      adjust_gf_key_frame(cpi);
       rc->frames_till_gf_update_due = rc->baseline_gf_interval;
-      if (rc->frames_till_gf_update_due > rc->frames_to_key)
-        rc->frames_till_gf_update_due = rc->frames_to_key;
       target = calc_pframe_target_size_one_pass_vbr(cpi);
       vp9_rc_set_frame_target(cpi, target);
       rc->count_last_scene_change = 0;

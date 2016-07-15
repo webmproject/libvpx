@@ -194,7 +194,7 @@ void vp8_calculate_overlaps(MB_OVERLAP *overlap_ul,
         return;
     }
 
-    if (new_row <= (-4 << 3) || new_col <= (-4 << 3))
+    if (new_row <= -32 || new_col <= -32)
     {
         /* outside the frame */
         return;

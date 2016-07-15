@@ -138,7 +138,8 @@ void filter_block2d_8_c(const uint8_t *src_ptr,
   // and filter_max_width          = 16
   //
   uint8_t intermediate_buffer[(kMaxDimension+8) * kMaxDimension];
-  const int intermediate_next_stride = 1 - intermediate_height * output_width;
+  const int intermediate_next_stride =
+      1 - static_cast<int>(intermediate_height * output_width);
 
   // Horizontal pass (src -> transposed intermediate).
   uint8_t *output_ptr = intermediate_buffer;
@@ -250,7 +251,8 @@ void highbd_filter_block2d_8_c(const uint16_t *src_ptr,
    * and filter_max_width = 16
    */
   uint16_t intermediate_buffer[(kMaxDimension+8) * kMaxDimension];
-  const int intermediate_next_stride = 1 - intermediate_height * output_width;
+  const int intermediate_next_stride =
+      1 - static_cast<int>(intermediate_height * output_width);
 
   // Horizontal pass (src -> transposed intermediate).
   {

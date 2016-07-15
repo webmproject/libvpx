@@ -259,13 +259,12 @@ unsigned int vpx_highbd_12_mse8x8_sse2(const uint8_t *src8, int src_stride,
                                                  int height, \
                                                  unsigned int *sse, \
                                                  void *unused0, void *unused);
-#define DECLS(opt1, opt2) \
-  DECL(8, opt1); \
-  DECL(16, opt1)
+#define DECLS(opt) \
+  DECL(8, opt); \
+  DECL(16, opt)
 
-DECLS(sse2, sse);
-// TODO(johannkoenig): enable the ssse3 or delete
-// DECLS(ssse3, ssse3);
+DECLS(sse2);
+
 #undef DECLS
 #undef DECL
 
@@ -402,21 +401,21 @@ uint32_t vpx_highbd_12_sub_pixel_variance##w##x##h##_##opt( \
   return sse - ((cast se * se) >> (wlog2 + hlog2)); \
 }
 
-#define FNS(opt1, opt2) \
-FN(64, 64, 16, 6, 6, opt1, (int64_t)); \
-FN(64, 32, 16, 6, 5, opt1, (int64_t)); \
-FN(32, 64, 16, 5, 6, opt1, (int64_t)); \
-FN(32, 32, 16, 5, 5, opt1, (int64_t)); \
-FN(32, 16, 16, 5, 4, opt1, (int64_t)); \
-FN(16, 32, 16, 4, 5, opt1, (int64_t)); \
-FN(16, 16, 16, 4, 4, opt1, (int64_t)); \
-FN(16, 8, 16, 4, 3, opt1, (int64_t)); \
-FN(8, 16, 8, 3, 4, opt1, (int64_t)); \
-FN(8, 8, 8, 3, 3, opt1, (int64_t)); \
-FN(8, 4, 8, 3, 2, opt1, (int64_t));
+#define FNS(opt) \
+FN(64, 64, 16, 6, 6, opt, (int64_t)); \
+FN(64, 32, 16, 6, 5, opt, (int64_t)); \
+FN(32, 64, 16, 5, 6, opt, (int64_t)); \
+FN(32, 32, 16, 5, 5, opt, (int64_t)); \
+FN(32, 16, 16, 5, 4, opt, (int64_t)); \
+FN(16, 32, 16, 4, 5, opt, (int64_t)); \
+FN(16, 16, 16, 4, 4, opt, (int64_t)); \
+FN(16, 8, 16, 4, 3, opt, (int64_t)); \
+FN(8, 16, 8, 3, 4, opt, (int64_t)); \
+FN(8, 8, 8, 3, 3, opt, (int64_t)); \
+FN(8, 4, 8, 3, 2, opt, (int64_t));
 
 
-FNS(sse2, sse);
+FNS(sse2);
 
 #undef FNS
 #undef FN

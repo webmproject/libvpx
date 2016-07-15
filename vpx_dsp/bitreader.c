@@ -69,7 +69,7 @@ void vpx_reader_fill(vpx_reader *r) {
       buffer += (bits >> 3);
       value = r->value | (nv << (shift & 0x7));
   } else {
-    const int bits_over = (int)(shift + CHAR_BIT - bits_left);
+    const int bits_over = (int)(shift + CHAR_BIT - (int)bits_left);
     int loop_end = 0;
     if (bits_over >= 0) {
       count += LOTS_OF_BITS;

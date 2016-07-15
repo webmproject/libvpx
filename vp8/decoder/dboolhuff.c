@@ -44,7 +44,7 @@ void vp8dx_bool_decoder_fill(BOOL_DECODER *br)
     int shift = VP8_BD_VALUE_SIZE - CHAR_BIT - (count + CHAR_BIT);
     size_t bytes_left = br->user_buffer_end - bufptr;
     size_t bits_left = bytes_left * CHAR_BIT;
-    int x = (int)(shift + CHAR_BIT - bits_left);
+    int x = shift + CHAR_BIT - (int)bits_left;
     int loop_end = 0;
     unsigned char decrypted[sizeof(VP8_BD_VALUE) + 1];
 

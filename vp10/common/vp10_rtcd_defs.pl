@@ -73,10 +73,6 @@ add_proto qw/void vp10_post_proc_down_and_across/, "const uint8_t *src_ptr, uint
 specialize qw/vp10_post_proc_down_and_across sse2/;
 $vp10_post_proc_down_and_across_sse2=vp10_post_proc_down_and_across_xmm;
 
-add_proto qw/void vp10_plane_add_noise/, "uint8_t *Start, char *noise, char blackclamp[16], char whiteclamp[16], char bothclamp[16], unsigned int Width, unsigned int Height, int Pitch";
-specialize qw/vp10_plane_add_noise sse2/;
-$vp10_plane_add_noise_sse2=vp10_plane_add_noise_wmt;
-
 add_proto qw/void vp10_filter_by_weight16x16/, "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int src_weight";
 specialize qw/vp10_filter_by_weight16x16 sse2 msa/;
 
@@ -365,9 +361,6 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
     add_proto qw/void vp10_highbd_post_proc_down_and_across/, "const uint16_t *src_ptr, uint16_t *dst_ptr, int src_pixels_per_line, int dst_pixels_per_line, int rows, int cols, int flimit";
     specialize qw/vp10_highbd_post_proc_down_and_across/;
-
-    add_proto qw/void vp10_highbd_plane_add_noise/, "uint8_t *Start, char *noise, char blackclamp[16], char whiteclamp[16], char bothclamp[16], unsigned int Width, unsigned int Height, int Pitch";
-    specialize qw/vp10_highbd_plane_add_noise/;
   }
 
   #
@@ -447,7 +440,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vp10_fht32x32/;
 
   add_proto qw/void vp10_fwht4x4/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp10_fwht4x4/, "$mmx_x86inc";
+  specialize qw/vp10_fwht4x4/, "$sse2_x86inc";
 } else {
   add_proto qw/void vp10_fht4x4/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
   specialize qw/vp10_fht4x4 sse2/;
@@ -468,7 +461,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vp10_fht32x32/;
 
   add_proto qw/void vp10_fwht4x4/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp10_fwht4x4 msa/, "$mmx_x86inc";
+  specialize qw/vp10_fwht4x4 msa/, "$sse2_x86inc";
 }
 
 add_proto qw/void vp10_fwd_idtx/, "const int16_t *src_diff, tran_low_t *coeff, int stride, int bs, int tx_type";

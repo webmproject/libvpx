@@ -429,6 +429,11 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->mv.search_method = NSTEP;
     sf->mv.reduce_first_step_size = 1;
     sf->skip_encode_sb = 0;
+    if (!cpi->use_svc && cpi->oxcf.rc_mode == VPX_CBR &&
+        content != VP9E_CONTENT_SCREEN) {
+      // Enable short circuit for low temporal variance.
+      sf->short_circuit_low_temp_var = 1;
+    }
   }
 
   if (speed >= 7) {
@@ -445,6 +450,17 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->adaptive_rd_thresh = 4;
     sf->mv.subpel_force_stop = (content == VP9E_CONTENT_SCREEN) ? 3 : 2;
     sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
+    // Only keep INTRA_DC mode for speed 8.
+    if (!is_keyframe) {
+      int i = 0;
+      for (i = 0; i < BLOCK_SIZES; ++i)
+        sf->intra_y_mode_bsize_mask[i] = INTRA_DC;
+    }
+    if (!cpi->use_svc && cpi->oxcf.rc_mode == VPX_CBR &&
+        content != VP9E_CONTENT_SCREEN) {
+      // More aggressive short circuit for speed 8.
+      sf->short_circuit_low_temp_var = 2;
+    }
   }
 }
 
@@ -554,6 +570,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->default_interp_filter = SWITCHABLE;
   sf->simple_model_rd_from_var = 0;
   sf->short_circuit_flat_blocks = 0;
+  sf->short_circuit_low_temp_var = 0;
 
   // Some speed-up features even for best quality as minimal impact on quality.
   sf->adaptive_rd_thresh = 1;

@@ -163,7 +163,7 @@ void vp8_pack_tokens(vp8_writer *w, const TOKENEXTRA *p, int xcount)
 {
     const TOKENEXTRA *stop = p + xcount;
     unsigned int split;
-    unsigned int shift;
+    int shift;
     int count = w->count;
     unsigned int range = w->range;
     unsigned int lowvalue = w->lowvalue;

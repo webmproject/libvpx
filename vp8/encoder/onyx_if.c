@@ -1523,7 +1523,8 @@ static void update_layer_contexts (VP8_COMP *cpi)
 void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
 {
     VP8_COMMON *cm = &cpi->common;
-    int last_w, last_h, prev_number_of_layers;
+    int last_w, last_h;
+    unsigned int prev_number_of_layers;
 
     if (!cpi)
         return;
@@ -1786,10 +1787,8 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
     if (last_w != cpi->oxcf.Width || last_h != cpi->oxcf.Height)
         cpi->force_next_frame_intra = 1;
 
-    if (((cm->Width + 15) & 0xfffffff0) !=
-          cm->yv12_fb[cm->lst_fb_idx].y_width ||
-        ((cm->Height + 15) & 0xfffffff0) !=
-          cm->yv12_fb[cm->lst_fb_idx].y_height ||
+    if (((cm->Width + 15) & ~15) != cm->yv12_fb[cm->lst_fb_idx].y_width ||
+        ((cm->Height + 15) & ~15) != cm->yv12_fb[cm->lst_fb_idx].y_height ||
         cm->yv12_fb[cm->lst_fb_idx].y_width == 0)
     {
         dealloc_raw_frame_buffers(cpi);
@@ -2247,6 +2246,8 @@ void vp8_remove_compressor(VP8_COMP **ptr)
             double total_encode_time = (cpi->time_receive_data +
                                             cpi->time_compress_data) / 1000.000;
             double dr = (double)cpi->bytes * 8.0 / 1000.0 / time_encoded;
+            const double target_rate = (double)cpi->oxcf.target_bandwidth / 1000;
+            const double rate_err = ((100.0 * (dr - target_rate)) / target_rate);
 
             if (cpi->b_calculate_psnr)
             {
@@ -2292,12 +2293,14 @@ void vp8_remove_compressor(VP8_COMP **ptr)
                                                       cpi->summed_weights, 8.0);
 
                     fprintf(f, "Bitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\t"
-                               "GLPsnrP\tVPXSSIM\t  Time(us)\n");
+                               "GLPsnrP\tVPXSSIM\t  Time(us)  Rc-Err "
+                               "Abs Err\n");
                     fprintf(f, "%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t"
-                               "%7.3f\t%8.0f\n",
+                               "%7.3f\t%8.0f %7.2f %7.2f\n",
                                dr, cpi->total / cpi->count, total_psnr,
                                cpi->totalp / cpi->count, total_psnr2,
-                               total_ssim, total_encode_time);
+                               total_ssim, total_encode_time,
+                               rate_err, fabs(rate_err));
                 }
             }
             fclose(f);
@@ -5168,7 +5171,7 @@ static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
         vp8_second_pass(cpi);
 
     encode_frame_to_data_rate(cpi, size, dest, dest_end, frame_flags);
-    cpi->twopass.bits_left -= 8 * *size;
+    cpi->twopass.bits_left -= 8 * (int)(*size);
 
     if (!cpi->common.refresh_alt_ref_frame)
     {
@@ -5772,7 +5775,7 @@ int vp8_set_roimap(VP8_COMP *cpi, unsigned char *map, unsigned int rows, unsigne
         return -1;
 
     // Check number of rows and columns match
-    if (cpi->common.mb_rows != rows || cpi->common.mb_cols != cols)
+    if (cpi->common.mb_rows != (int)rows || cpi->common.mb_cols != (int)cols)
         return -1;
 
     // Range check the delta Q values and convert the external Q range values
@@ -5828,7 +5831,7 @@ int vp8_set_roimap(VP8_COMP *cpi, unsigned char *map, unsigned int rows, unsigne
 
 int vp8_set_active_map(VP8_COMP *cpi, unsigned char *map, unsigned int rows, unsigned int cols)
 {
-    if (rows == cpi->common.mb_rows && cols == cpi->common.mb_cols)
+    if ((int)rows == cpi->common.mb_rows && (int)cols == cpi->common.mb_cols)
     {
         if (map)
         {

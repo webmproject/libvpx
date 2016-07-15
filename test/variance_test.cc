@@ -1062,30 +1062,6 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::ValuesIn(kArrayHBDSubpelAvgVariance_c));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-#if HAVE_MMX
-INSTANTIATE_TEST_CASE_P(MMX, VpxMseTest,
-                        ::testing::Values(make_tuple(4, 4, &vpx_mse16x16_mmx)));
-
-INSTANTIATE_TEST_CASE_P(MMX, SumOfSquaresTest,
-                        ::testing::Values(vpx_get_mb_ss_mmx));
-
-INSTANTIATE_TEST_CASE_P(
-    MMX, VpxVarianceTest,
-    ::testing::Values(make_tuple(4, 4, &vpx_variance16x16_mmx, 0),
-                      make_tuple(4, 3, &vpx_variance16x8_mmx, 0),
-                      make_tuple(3, 4, &vpx_variance8x16_mmx, 0),
-                      make_tuple(3, 3, &vpx_variance8x8_mmx, 0),
-                      make_tuple(2, 2, &vpx_variance4x4_mmx, 0)));
-
-INSTANTIATE_TEST_CASE_P(
-    MMX, VpxSubpelVarianceTest,
-    ::testing::Values(make_tuple(4, 4, &vpx_sub_pixel_variance16x16_mmx, 0),
-                      make_tuple(4, 3, &vpx_sub_pixel_variance16x8_mmx, 0),
-                      make_tuple(3, 4, &vpx_sub_pixel_variance8x16_mmx, 0),
-                      make_tuple(3, 3, &vpx_sub_pixel_variance8x8_mmx, 0),
-                      make_tuple(2, 2, &vpx_sub_pixel_variance4x4_mmx, 0)));
-#endif  // HAVE_MMX
-
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(SSE2, SumOfSquaresTest,
                         ::testing::Values(vpx_get_mb_ss_sse2));
@@ -1126,8 +1102,8 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(3, 4, &vpx_sub_pixel_variance8x16_sse2, 0),
                       make_tuple(3, 3, &vpx_sub_pixel_variance8x8_sse2, 0),
                       make_tuple(3, 2, &vpx_sub_pixel_variance8x4_sse2, 0),
-                      make_tuple(2, 3, &vpx_sub_pixel_variance4x8_sse, 0),
-                      make_tuple(2, 2, &vpx_sub_pixel_variance4x4_sse, 0)));
+                      make_tuple(2, 3, &vpx_sub_pixel_variance4x8_sse2, 0),
+                      make_tuple(2, 2, &vpx_sub_pixel_variance4x4_sse2, 0)));
 
 INSTANTIATE_TEST_CASE_P(
     SSE2, VpxSubpelAvgVarianceTest,
@@ -1143,8 +1119,8 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(3, 4, &vpx_sub_pixel_avg_variance8x16_sse2, 0),
         make_tuple(3, 3, &vpx_sub_pixel_avg_variance8x8_sse2, 0),
         make_tuple(3, 2, &vpx_sub_pixel_avg_variance8x4_sse2, 0),
-        make_tuple(2, 3, &vpx_sub_pixel_avg_variance4x8_sse, 0),
-        make_tuple(2, 2, &vpx_sub_pixel_avg_variance4x4_sse, 0)));
+        make_tuple(2, 3, &vpx_sub_pixel_avg_variance4x8_sse2, 0),
+        make_tuple(2, 2, &vpx_sub_pixel_avg_variance4x4_sse2, 0)));
 #endif  // CONFIG_USE_X86INC
 
 #if HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH

@@ -43,7 +43,6 @@ endif
 DSP_SRCS-yes += intrapred.c
 
 ifeq ($(CONFIG_USE_X86INC),yes)
-DSP_SRCS-$(HAVE_MMX) += x86/loopfilter_mmx.asm
 DSP_SRCS-$(HAVE_SSE) += x86/intrapred_sse2.asm
 DSP_SRCS-$(HAVE_SSE2) += x86/intrapred_sse2.asm
 DSP_SRCS-$(HAVE_SSSE3) += x86/intrapred_ssse3.asm
@@ -56,6 +55,12 @@ DSP_SRCS-$(HAVE_SSE)  += x86/highbd_intrapred_sse2.asm
 DSP_SRCS-$(HAVE_SSE2) += x86/highbd_intrapred_sse2.asm
 endif  # CONFIG_USE_X86INC
 endif  # CONFIG_VP9_HIGHBITDEPTH
+
+ifneq ($(filter yes,$(CONFIG_POSTPROC) $(CONFIG_VP9_POSTPROC)),)
+DSP_SRCS-yes += add_noise.c
+DSP_SRCS-$(HAVE_MSA) += mips/add_noise_msa.c
+DSP_SRCS-$(HAVE_SSE2) += x86/add_noise_sse2.asm
+endif # CONFIG_POSTPROC
 
 DSP_SRCS-$(HAVE_NEON_ASM) += arm/intrapred_neon_asm$(ASM)
 DSP_SRCS-$(HAVE_NEON) += arm/intrapred_neon.c
@@ -275,6 +280,7 @@ DSP_SRCS-yes           += avg.c
 DSP_SRCS-$(HAVE_SSE2)  += x86/avg_intrin_sse2.c
 DSP_SRCS-$(HAVE_NEON)  += arm/avg_neon.c
 DSP_SRCS-$(HAVE_MSA)   += mips/avg_msa.c
+DSP_SRCS-$(HAVE_NEON)  += arm/hadamard_neon.c
 ifeq ($(ARCH_X86_64),yes)
 ifeq ($(CONFIG_USE_X86INC),yes)
 DSP_SRCS-$(HAVE_SSSE3) += x86/avg_ssse3_x86_64.asm
@@ -306,7 +312,6 @@ DSP_SRCS-$(HAVE_NEON)   += arm/subtract_neon.c
 DSP_SRCS-$(HAVE_MSA)    += mips/sad_msa.c
 DSP_SRCS-$(HAVE_MSA)    += mips/subtract_msa.c
 
-DSP_SRCS-$(HAVE_MMX)    += x86/sad_mmx.asm
 DSP_SRCS-$(HAVE_SSE3)   += x86/sad_sse3.asm
 DSP_SRCS-$(HAVE_SSSE3)  += x86/sad_ssse3.asm
 DSP_SRCS-$(HAVE_SSE4_1) += x86/sad_sse4.asm
@@ -354,8 +359,6 @@ DSP_SRCS-$(HAVE_NEON)   += arm/variance_neon.c
 DSP_SRCS-$(HAVE_MSA)    += mips/variance_msa.c
 DSP_SRCS-$(HAVE_MSA)    += mips/sub_pixel_variance_msa.c
 
-DSP_SRCS-$(HAVE_MMX)    += x86/variance_mmx.c
-DSP_SRCS-$(HAVE_MMX)    += x86/variance_impl_mmx.asm
 DSP_SRCS-$(HAVE_SSE)    += x86/variance_sse2.c
 DSP_SRCS-$(HAVE_SSE2)   += x86/variance_sse2.c  # Contains SSE2 and SSSE3
 DSP_SRCS-$(HAVE_SSE2)   += x86/halfpix_variance_sse2.c

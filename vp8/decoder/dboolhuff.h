@@ -83,7 +83,7 @@ static int vp8dx_decode_bool(BOOL_DECODER *br, int probability) {
     }
 
     {
-        register unsigned int shift = vp8_norm[range];
+        register int shift = vp8_norm[range];
         range <<= shift;
         value <<= shift;
         count -= shift;

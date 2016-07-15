@@ -70,10 +70,6 @@ add_proto qw/void vp9_post_proc_down_and_across/, "const uint8_t *src_ptr, uint8
 specialize qw/vp9_post_proc_down_and_across sse2/;
 $vp9_post_proc_down_and_across_sse2=vp9_post_proc_down_and_across_xmm;
 
-add_proto qw/void vp9_plane_add_noise/, "uint8_t *Start, char *noise, char blackclamp[16], char whiteclamp[16], char bothclamp[16], unsigned int Width, unsigned int Height, int Pitch";
-specialize qw/vp9_plane_add_noise sse2/;
-$vp9_plane_add_noise_sse2=vp9_plane_add_noise_wmt;
-
 add_proto qw/void vp9_filter_by_weight16x16/, "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int src_weight";
 specialize qw/vp9_filter_by_weight16x16 sse2 msa/;
 
@@ -169,9 +165,6 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
     add_proto qw/void vp9_highbd_post_proc_down_and_across/, "const uint16_t *src_ptr, uint16_t *dst_ptr, int src_pixels_per_line, int dst_pixels_per_line, int rows, int cols, int flimit";
     specialize qw/vp9_highbd_post_proc_down_and_across/;
-
-    add_proto qw/void vp9_highbd_plane_add_noise/, "uint8_t *Start, char *noise, char blackclamp[16], char whiteclamp[16], char bothclamp[16], unsigned int Width, unsigned int Height, int Pitch";
-    specialize qw/vp9_highbd_plane_add_noise/;
   }
 
   #
@@ -252,7 +245,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vp9_fht16x16 sse2/;
 
   add_proto qw/void vp9_fwht4x4/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fwht4x4/, "$mmx_x86inc";
+  specialize qw/vp9_fwht4x4/, "$sse2_x86inc";
 } else {
   add_proto qw/void vp9_fht4x4/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
   specialize qw/vp9_fht4x4 sse2 msa/;
@@ -264,7 +257,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vp9_fht16x16 sse2 msa/;
 
   add_proto qw/void vp9_fwht4x4/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fwht4x4 msa/, "$mmx_x86inc";
+  specialize qw/vp9_fwht4x4 msa/, "$sse2_x86inc";
 }
 
 #
@@ -276,7 +269,7 @@ $vp9_full_search_sad_sse3=vp9_full_search_sadx3;
 $vp9_full_search_sad_sse4_1=vp9_full_search_sadx8;
 
 add_proto qw/int vp9_diamond_search_sad/, "const struct macroblock *x, const struct search_site_config *cfg,  struct mv *ref_mv, struct mv *best_mv, int search_param, int sad_per_bit, int *num00, const struct vp9_variance_vtable *fn_ptr, const struct mv *center_mv";
-specialize qw/vp9_diamond_search_sad/;
+specialize qw/vp9_diamond_search_sad avx/;
 
 add_proto qw/void vp9_temporal_filter_apply/, "uint8_t *frame1, unsigned int stride, uint8_t *frame2, unsigned int block_width, unsigned int block_height, int strength, int filter_weight, unsigned int *accumulator, uint16_t *count";
 specialize qw/vp9_temporal_filter_apply sse2 msa/;

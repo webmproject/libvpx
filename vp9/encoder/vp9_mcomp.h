@@ -74,7 +74,7 @@ unsigned int vp9_int_pro_motion_estimation(const struct VP9_COMP *cpi,
                                            BLOCK_SIZE bsize,
                                            int mi_row, int mi_col);
 
-typedef int (fractional_mv_step_fp) (
+typedef uint32_t (fractional_mv_step_fp) (
     const MACROBLOCK *x,
     MV *bestmv, const MV *ref_mv,
     int allow_hp,
@@ -84,7 +84,7 @@ typedef int (fractional_mv_step_fp) (
     int iters_per_step,
     int *cost_list,
     int *mvjcost, int *mvcost[2],
-    int *distortion, unsigned int *sse1,
+    uint32_t *distortion, uint32_t *sse1,
     const uint8_t *second_pred,
     int w, int h);
 

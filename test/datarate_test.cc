@@ -90,7 +90,7 @@ class DatarateTestLarge : public ::libvpx_test::EncoderTest,
           << pkt->data.frame.pts;
     }
 
-    const size_t frame_size_in_bits = pkt->data.frame.sz * 8;
+    const int64_t frame_size_in_bits = pkt->data.frame.sz * 8;
 
     // Subtract from the buffer the bits associated with a played back frame.
     bits_in_buffer_model_ -= frame_size_in_bits;
@@ -450,7 +450,28 @@ class DatarateTestVP9Large : public ::libvpx_test::EncoderTest,
   int denoiser_offon_period_;
 };
 
-// Check basic rate targeting,
+// Check basic rate targeting for VBR mode.
+TEST_P(DatarateTestVP9Large, BasicRateTargetingVBR) {
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 63;
+  cfg_.g_error_resilient = 0;
+  cfg_.rc_end_usage = VPX_VBR;
+  cfg_.g_lag_in_frames = 0;
+
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 300);
+  for (int i = 400; i <= 800; i += 400) {
+    cfg_.rc_target_bitrate = i;
+    ResetModel();
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+    ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.75)
+        << " The datarate for the file is lower than target by too much!";
+    ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.25)
+        << " The datarate for the file is greater than target by too much!";
+  }
+}
+
+// Check basic rate targeting for CBR,
 TEST_P(DatarateTestVP9Large, BasicRateTargeting) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
@@ -474,7 +495,7 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting) {
   }
 }
 
-// Check basic rate targeting,
+// Check basic rate targeting for CBR.
 TEST_P(DatarateTestVP9Large, BasicRateTargeting444) {
   ::libvpx_test::Y4mVideoSource video("rush_hour_444.y4m", 0, 140);
 

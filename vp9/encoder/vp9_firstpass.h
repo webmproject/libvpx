@@ -39,8 +39,6 @@ typedef struct {
 } FIRSTPASS_MB_STATS;
 #endif
 
-#define VLOW_MOTION_THRESHOLD 950
-
 typedef struct {
   double frame;
   double weight;
@@ -124,14 +122,13 @@ typedef struct {
   // Error score of frames still to be coded in kf group
   int64_t kf_group_error_left;
 
-  // The fraction for a kf groups total bits allocated to the inter frames
-  double kfgroup_inter_fraction;
+  double bpm_factor;
+  int rolling_arf_group_target_bits;
+  int rolling_arf_group_actual_bits;
 
   int sr_update_lag;
-
   int kf_zeromotion_pct;
   int last_kfgroup_zeromotion_pct;
-  int gf_zeromotion_pct;
   int active_worst_quality;
   int baseline_active_worst_quality;
   int extend_minq;

@@ -14,8 +14,6 @@
 #include "vp9/encoder/vp9_cost.h"
 #include "vp9/encoder/vp9_subexp.h"
 
-#define vp9_cost_upd256  ((int)(vp9_cost_one(upd) - vp9_cost_zero(upd)))
-
 static const uint8_t update_bits[255] = {
    5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,
    6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,
@@ -34,6 +32,7 @@ static const uint8_t update_bits[255] = {
   11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
   11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,  0,
 };
+#define MIN_DELP_BITS 5
 
 static int recenter_nonneg(int v, int m) {
   if (v > (m << 1))
@@ -123,14 +122,17 @@ int vp9_prob_diff_update_savings_search(const unsigned int *ct,
   int bestsavings = 0;
   vpx_prob newp, bestnewp = oldp;
   const int step = *bestp > oldp ? -1 : 1;
+  const int upd_cost = vp9_cost_one(upd) - vp9_cost_zero(upd);
 
-  for (newp = *bestp; newp != oldp; newp += step) {
-    const int new_b = cost_branch256(ct, newp);
-    const int update_b = prob_diff_update_cost(newp, oldp) + vp9_cost_upd256;
-    const int savings = old_b - new_b - update_b;
-    if (savings > bestsavings) {
-      bestsavings = savings;
-      bestnewp = newp;
+  if (old_b > upd_cost + (MIN_DELP_BITS << VP9_PROB_COST_SHIFT)) {
+    for (newp = *bestp; newp != oldp; newp += step) {
+      const int new_b = cost_branch256(ct, newp);
+      const int update_b = prob_diff_update_cost(newp, oldp) + upd_cost;
+      const int savings = old_b - new_b - update_b;
+      if (savings > bestsavings) {
+        bestsavings = savings;
+        bestnewp = newp;
+      }
     }
   }
   *bestp = bestnewp;
@@ -138,41 +140,40 @@ int vp9_prob_diff_update_savings_search(const unsigned int *ct,
 }
 
 int vp9_prob_diff_update_savings_search_model(const unsigned int *ct,
-                                              const vpx_prob *oldp,
+                                              const vpx_prob oldp,
                                               vpx_prob *bestp,
                                               vpx_prob upd,
                                               int stepsize) {
   int i, old_b, new_b, update_b, savings, bestsavings;
   int newp;
-  const int step_sign = *bestp > oldp[PIVOT_NODE] ? -1 : 1;
+  const int step_sign = *bestp > oldp ? -1 : 1;
   const int step = stepsize * step_sign;
-  vpx_prob bestnewp, newplist[ENTROPY_NODES], oldplist[ENTROPY_NODES];
-  vp9_model_to_full_probs(oldp, oldplist);
-  memcpy(newplist, oldp, sizeof(vpx_prob) * UNCONSTRAINED_NODES);
-  for (i = UNCONSTRAINED_NODES, old_b = 0; i < ENTROPY_NODES; ++i)
-    old_b += cost_branch256(ct + 2 * i, oldplist[i]);
-  old_b += cost_branch256(ct + 2 * PIVOT_NODE, oldplist[PIVOT_NODE]);
+  const int upd_cost = vp9_cost_one(upd) - vp9_cost_zero(upd);
+  const vpx_prob *newplist, *oldplist;
+  vpx_prob bestnewp;
+  oldplist = vp9_pareto8_full[oldp - 1];
+  old_b = cost_branch256(ct + 2 * PIVOT_NODE, oldp);
+  for (i = UNCONSTRAINED_NODES; i < ENTROPY_NODES; ++i)
+    old_b += cost_branch256(ct + 2 * i, oldplist[i - UNCONSTRAINED_NODES]);
 
   bestsavings = 0;
-  bestnewp = oldp[PIVOT_NODE];
+  bestnewp = oldp;
 
   assert(stepsize > 0);
 
-  for (newp = *bestp; (newp - oldp[PIVOT_NODE]) * step_sign < 0;
-      newp += step) {
-    if (newp < 1 || newp > 255)
-      continue;
-    newplist[PIVOT_NODE] = newp;
-    vp9_model_to_full_probs(newplist, newplist);
-    for (i = UNCONSTRAINED_NODES, new_b = 0; i < ENTROPY_NODES; ++i)
-      new_b += cost_branch256(ct + 2 * i, newplist[i]);
-    new_b += cost_branch256(ct + 2 * PIVOT_NODE, newplist[PIVOT_NODE]);
-    update_b = prob_diff_update_cost(newp, oldp[PIVOT_NODE]) +
-        vp9_cost_upd256;
-    savings = old_b - new_b - update_b;
-    if (savings > bestsavings) {
-      bestsavings = savings;
-      bestnewp = newp;
+  if (old_b > upd_cost + (MIN_DELP_BITS << VP9_PROB_COST_SHIFT)) {
+    for (newp = *bestp; (newp - oldp) * step_sign < 0; newp += step) {
+      if (newp < 1 || newp > 255) continue;
+      newplist = vp9_pareto8_full[newp - 1];
+      new_b = cost_branch256(ct + 2 * PIVOT_NODE, newp);
+      for (i = UNCONSTRAINED_NODES; i < ENTROPY_NODES; ++i)
+        new_b += cost_branch256(ct + 2 * i, newplist[i - UNCONSTRAINED_NODES]);
+      update_b = prob_diff_update_cost(newp, oldp) + upd_cost;
+      savings = old_b - new_b - update_b;
+      if (savings > bestsavings) {
+        bestsavings = savings;
+        bestnewp = newp;
+      }
     }
   }
 

@@ -1214,6 +1214,11 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
     if (!(cpi->sf.intra_uv_mode_mask[max_tx_size] & (1 << mode)))
       continue;
+#if CONFIG_BETTER_HW_COMPATIBILITY && CONFIG_VP9_HIGHBITDEPTH
+    if ((xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) &&
+        (xd->above_mi == NULL || xd->left_mi == NULL) && need_top_left[mode])
+      continue;
+#endif  // CONFIG_BETTER_HW_COMPATIBILITY && CONFIG_VP9_HIGHBITDEPTH
 
     xd->mi[0]->uv_mode = mode;
 
@@ -1710,8 +1715,8 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     x->mv_row_max = tmp_row_max;
 
     if (bestsme < INT_MAX) {
-      int dis; /* TODO: use dis in distortion calculation later. */
-      unsigned int sse;
+      uint32_t dis; /* TODO: use dis in distortion calculation later. */
+      uint32_t sse;
       bestsme = cpi->find_fractional_mv_step(
           x, &tmp_mv,
           &ref_mv[id].as_mv,
@@ -1911,7 +1916,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
               INT_MAX, 1);
 
           if (bestsme < INT_MAX) {
-            int distortion;
+            uint32_t distortion;
             cpi->find_fractional_mv_step(
                 x,
                 new_mv,
@@ -2341,7 +2346,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   x->mv_row_max = tmp_row_max;
 
   if (bestsme < INT_MAX) {
-    int dis;  /* TODO: use dis in distortion calculation later. */
+    uint32_t dis;  /* TODO: use dis in distortion calculation later. */
     cpi->find_fractional_mv_step(x, &tmp_mv->as_mv, &ref_mv,
                                  cm->allow_high_precision_mv,
                                  x->errorperbit,

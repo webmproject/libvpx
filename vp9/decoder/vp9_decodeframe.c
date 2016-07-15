@@ -525,8 +525,8 @@ static void extend_and_predict(const uint8_t *buf_ptr1, int pre_buf_stride,
   }
 
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    high_inter_predictor(buf_ptr, b_w, dst, dst_buf_stride, subpel_x,
-                         subpel_y, sf, w, h, ref, kernel, xs, ys, xd->bd);
+    highbd_inter_predictor(buf_ptr, b_w, dst, dst_buf_stride, subpel_x,
+                           subpel_y, sf, w, h, ref, kernel, xs, ys, xd->bd);
   } else {
     inter_predictor(buf_ptr, b_w, dst, dst_buf_stride, subpel_x,
                     subpel_y, sf, w, h, ref, kernel, xs, ys);
@@ -699,8 +699,8 @@ static void dec_build_inter_predictors(VPxWorker *const worker, MACROBLOCKD *xd,
   }
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    high_inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
-                         subpel_y, sf, w, h, ref, kernel, xs, ys, xd->bd);
+    highbd_inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
+                           subpel_y, sf, w, h, ref, kernel, xs, ys, xd->bd);
   } else {
     inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
                     subpel_y, sf, w, h, ref, kernel, xs, ys);
@@ -1315,11 +1315,16 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   BufferPool *const pool = cm->buffer_pool;
   for (i = 0; i < REFS_PER_FRAME; ++i) {
     if (vpx_rb_read_bit(rb)) {
-      YV12_BUFFER_CONFIG *const buf = cm->frame_refs[i].buf;
-      width = buf->y_crop_width;
-      height = buf->y_crop_height;
-      found = 1;
-      break;
+      if (cm->frame_refs[i].idx != INVALID_IDX) {
+        YV12_BUFFER_CONFIG *const buf = cm->frame_refs[i].buf;
+        width = buf->y_crop_width;
+        height = buf->y_crop_height;
+        found = 1;
+        break;
+      } else {
+        vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                           "Failed to decode frame size");
+      }
     }
   }
 
@@ -1334,22 +1339,23 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   // has valid dimensions.
   for (i = 0; i < REFS_PER_FRAME; ++i) {
     RefBuffer *const ref_frame = &cm->frame_refs[i];
-    has_valid_ref_frame |= valid_ref_frame_size(ref_frame->buf->y_crop_width,
-                                                ref_frame->buf->y_crop_height,
-                                                width, height);
+    has_valid_ref_frame |= (ref_frame->idx != INVALID_IDX &&
+                            valid_ref_frame_size(ref_frame->buf->y_crop_width,
+                                                 ref_frame->buf->y_crop_height,
+                                                 width, height));
   }
   if (!has_valid_ref_frame)
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                        "Referenced frame has invalid size");
   for (i = 0; i < REFS_PER_FRAME; ++i) {
     RefBuffer *const ref_frame = &cm->frame_refs[i];
-    if (!valid_ref_frame_img_fmt(
-            ref_frame->buf->bit_depth,
-            ref_frame->buf->subsampling_x,
-            ref_frame->buf->subsampling_y,
-            cm->bit_depth,
-            cm->subsampling_x,
-            cm->subsampling_y))
+    if (ref_frame->idx == INVALID_IDX ||
+        !valid_ref_frame_img_fmt(ref_frame->buf->bit_depth,
+                                 ref_frame->buf->subsampling_x,
+                                 ref_frame->buf->subsampling_y,
+                                 cm->bit_depth,
+                                 cm->subsampling_x,
+                                 cm->subsampling_y))
       vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                          "Referenced frame has incompatible color format");
   }

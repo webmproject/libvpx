@@ -21,12 +21,6 @@
 #include "vp9/encoder/vp9_denoiser.h"
 #include "vp9/encoder/vp9_encoder.h"
 
-/* The VP9 denoiser is similar to that of the VP8 denoiser. While
- * choosing the motion vectors / reference frames, the denoiser is run, and if
- * it did not modify the signal to much, the denoised block is copied to the
- * signal.
- */
-
 #ifdef OUTPUT_YUV_DENOISED
 static void make_grayscale(YV12_BUFFER_CONFIG *yuv);
 #endif
@@ -49,16 +43,19 @@ static int noise_motion_thresh(BLOCK_SIZE bs, int increase_denoising) {
 }
 
 static unsigned int sse_thresh(BLOCK_SIZE bs, int increase_denoising) {
-  return (1 << num_pels_log2_lookup[bs]) * (increase_denoising ? 60 : 40);
+  return (1 << num_pels_log2_lookup[bs]) * (increase_denoising ? 80 : 40);
 }
 
 static int sse_diff_thresh(BLOCK_SIZE bs, int increase_denoising,
                            int motion_magnitude) {
   if (motion_magnitude >
       noise_motion_thresh(bs, increase_denoising)) {
-    return 0;
+    if (increase_denoising)
+      return (1 << num_pels_log2_lookup[bs]) << 2;
+    else
+      return 0;
   } else {
-    return (1 << num_pels_log2_lookup[bs]) * 20;
+    return (1 << num_pels_log2_lookup[bs]) << 4;
   }
 }
 
@@ -215,12 +212,14 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
   // Avoid denoising for small block (unless motion is small).
   // Small blocks are selected in variance partition (before encoding) and
   // will typically lie on moving areas.
-  if (motion_magnitude > 16 && bs <= BLOCK_8X8)
+  if (denoiser->denoising_level < kDenHigh &&
+      motion_magnitude > 16 && bs <= BLOCK_8X8)
     return COPY_BLOCK;
 
   // If the best reference frame uses inter-prediction and there is enough of a
   // difference in sum-squared-error, use it.
   if (frame != INTRA_FRAME &&
+      ctx->newmv_sse != UINT_MAX &&
       sse_diff > sse_diff_thresh(bs, increase_denoising, motion_magnitude)) {
     mi->ref_frame[0] = ctx->best_reference_frame;
     mi->mode = ctx->best_sse_inter_mode;
@@ -242,6 +241,9 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
     ctx->best_sse_inter_mode = ZEROMV;
     ctx->best_sse_mv.as_int = 0;
     *zeromv_filter = 1;
+    if (denoiser->denoising_level > kDenMedium) {
+      motion_magnitude = 0;
+    }
   }
 
   if (ctx->newmv_sse > sse_thresh(bs, increase_denoising)) {
@@ -334,14 +336,13 @@ void vp9_denoiser_denoise(VP9_COMP *cpi, MACROBLOCK *mb,
 
   if (cpi->use_skin_detection &&
       bs <= BLOCK_32X32 &&
-      denoiser->denoising_level >= kDenLow) {
+      denoiser->denoising_level < kDenHigh) {
     int motion_level = (motion_magnitude < 16) ? 0 : 1;
     // If motion for current block is small/zero, compute consec_zeromv for
     // skin detection (early exit in skin detection is done for large
     // consec_zeromv when current block has small/zero motion).
     consec_zeromv = 0;
     if (motion_level == 0) {
-      CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
       VP9_COMMON * const cm = &cpi->common;
       int j, i;
       // Loop through the 8x8 sub-blocks.
@@ -354,7 +355,7 @@ void vp9_denoiser_denoise(VP9_COMP *cpi, MACROBLOCK *mb,
       for (i = 0; i < ymis; i++) {
         for (j = 0; j < xmis; j++) {
           int bl_index = block_index + i * cm->mi_cols + j;
-          consec_zeromv = VPXMIN(cr->consec_zero_mv[bl_index], consec_zeromv);
+          consec_zeromv = VPXMIN(cpi->consec_zero_mv[bl_index], consec_zeromv);
           // No need to keep checking 8x8 blocks if any of the sub-blocks
           // has small consec_zeromv (since threshold for no_skin based on
           // zero/small motion in skin detection is high, i.e, > 4).
@@ -376,8 +377,7 @@ void vp9_denoiser_denoise(VP9_COMP *cpi, MACROBLOCK *mb,
                                      motion_level);
   }
   if (!is_skin &&
-      denoiser->denoising_level == kDenHigh &&
-      motion_magnitude < 16) {
+      denoiser->denoising_level == kDenHigh) {
     denoiser->increase_denoising = 1;
   } else {
     denoiser->increase_denoising = 0;
@@ -494,12 +494,12 @@ void vp9_denoiser_reset_frame_stats(PICK_MODE_CONTEXT *ctx) {
   ctx->zeromv_sse = UINT_MAX;
   ctx->newmv_sse = UINT_MAX;
   ctx->zeromv_lastref_sse = UINT_MAX;
+  ctx->best_sse_mv.as_int = 0;
 }
 
 void vp9_denoiser_update_frame_stats(MODE_INFO *mi, unsigned int sse,
                                      PREDICTION_MODE mode,
                                      PICK_MODE_CONTEXT *ctx) {
-  // TODO(tkopp): Use both MVs if possible
   if (mi->mv[0].as_int == 0 && sse < ctx->zeromv_sse) {
     ctx->zeromv_sse = sse;
     ctx->best_zeromv_reference_frame = mi->ref_frame[0];

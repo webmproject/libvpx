@@ -39,12 +39,10 @@ void vp9_noise_estimate_init(NOISE_ESTIMATE *const ne,
   ne->num_frames_estimate = 20;
 }
 
-int enable_noise_estimation(VP9_COMP *const cpi) {
-  // Enable noise estimation if denoising is on (and cyclic refresh, since
-  // noise estimate is currently using a struct defined in cyclic refresh).
+static int enable_noise_estimation(VP9_COMP *const cpi) {
+  // Enable noise estimation if denoising is on.
 #if CONFIG_VP9_TEMPORAL_DENOISING
-  if (cpi->oxcf.noise_sensitivity > 0 &&
-      cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
+  if (cpi->oxcf.noise_sensitivity > 0)
     return 1;
 #endif
   // Only allow noise estimate under certain encoding mode.
@@ -101,11 +99,10 @@ NOISE_LEVEL vp9_noise_estimate_extract_level(NOISE_ESTIMATE *const ne) {
 
 void vp9_update_noise_estimate(VP9_COMP *const cpi) {
   const VP9_COMMON *const cm = &cpi->common;
-  CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   NOISE_ESTIMATE *const ne = &cpi->noise_estimate;
   // Estimate of noise level every frame_period frames.
-  int frame_period = 10;
-  int thresh_consec_zeromv = 8;
+  int frame_period = 8;
+  int thresh_consec_zeromv = 6;
   unsigned int thresh_sum_diff = 100;
   unsigned int thresh_sum_spatial = (200 * 200) << 8;
   unsigned int thresh_spatial_var = (32 * 32) << 8;
@@ -131,6 +128,14 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
       ne->last_h = cm->height;
     }
     return;
+  } else if (cpi->rc.avg_frame_low_motion < 50) {
+    // Force noise estimation to 0 and denoiser off if content has high motion.
+    ne->level = kLowLow;
+#if CONFIG_VP9_TEMPORAL_DENOISING
+    if (cpi->oxcf.noise_sensitivity > 0)
+      vp9_denoiser_set_noise_level(&cpi->denoiser, ne->level);
+#endif
+    return;
   } else {
     int num_samples = 0;
     uint64_t avg_est = 0;
@@ -153,7 +158,7 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
     for (mi_row = 0; mi_row < cm->mi_rows; mi_row++) {
       for (mi_col = 0; mi_col < cm->mi_cols; mi_col++) {
         int bl_index = mi_row * cm->mi_cols + mi_col;
-        if (cr->consec_zero_mv[bl_index] > thresh_consec_zeromv)
+        if (cpi->consec_zero_mv[bl_index] > thresh_consec_zeromv)
           num_low_motion++;
       }
     }
@@ -173,23 +178,26 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
           // been encoded as zero/low motion x (= thresh_consec_zeromv) frames
           // in a row. consec_zero_mv[] defined for 8x8 blocks, so consider all
           // 4 sub-blocks for 16x16 block. Also, avoid skin blocks.
-          int consec_zeromv = VPXMIN(cr->consec_zero_mv[bl_index],
-                                     VPXMIN(cr->consec_zero_mv[bl_index1],
-                                     VPXMIN(cr->consec_zero_mv[bl_index2],
-                                     cr->consec_zero_mv[bl_index3])));
-          int is_skin = vp9_compute_skin_block(src_y,
-                                               src_u,
-                                               src_v,
-                                               src_ystride,
-                                               src_uvstride,
-                                               bsize,
-                                               consec_zeromv,
-                                               0);
+          int consec_zeromv = VPXMIN(cpi->consec_zero_mv[bl_index],
+                                     VPXMIN(cpi->consec_zero_mv[bl_index1],
+                                     VPXMIN(cpi->consec_zero_mv[bl_index2],
+                                     cpi->consec_zero_mv[bl_index3])));
+          int is_skin = 0;
+          if (cpi->use_skin_detection) {
+            is_skin = vp9_compute_skin_block(src_y,
+                                             src_u,
+                                             src_v,
+                                             src_ystride,
+                                             src_uvstride,
+                                             bsize,
+                                             consec_zeromv,
+                                             0);
+          }
           if (frame_low_motion &&
-              cr->consec_zero_mv[bl_index] > thresh_consec_zeromv &&
-              cr->consec_zero_mv[bl_index1] > thresh_consec_zeromv &&
-              cr->consec_zero_mv[bl_index2] > thresh_consec_zeromv &&
-              cr->consec_zero_mv[bl_index3] > thresh_consec_zeromv &&
+              cpi->consec_zero_mv[bl_index] > thresh_consec_zeromv &&
+              cpi->consec_zero_mv[bl_index1] > thresh_consec_zeromv &&
+              cpi->consec_zero_mv[bl_index2] > thresh_consec_zeromv &&
+              cpi->consec_zero_mv[bl_index3] > thresh_consec_zeromv &&
               !is_skin) {
             // Compute variance.
             unsigned int sse;

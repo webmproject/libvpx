@@ -268,8 +268,7 @@ static int read_frame(struct VpxDecInputContext *input, uint8_t **buf,
   switch (input->vpx_input_ctx->file_type) {
 #if CONFIG_WEBM_IO
     case FILE_TYPE_WEBM:
-      return webm_read_frame(input->webm_ctx,
-                             buf, bytes_in_buffer, buffer_size);
+      return webm_read_frame(input->webm_ctx, buf, bytes_in_buffer);
 #endif
     case FILE_TYPE_RAW:
       return raw_read_frame(input->vpx_input_ctx->file,

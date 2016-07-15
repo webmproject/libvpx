@@ -545,8 +545,8 @@ static void update_coef_probs_common(vpx_writer* const bc, VP9_COMP *cpi,
                 int u = 0;
                 if (t == PIVOT_NODE)
                   s = vp9_prob_diff_update_savings_search_model(
-                      frame_branch_ct[i][j][k][l][0],
-                      old_coef_probs[i][j][k][l], &newp, upd, stepsize);
+                      frame_branch_ct[i][j][k][l][0], oldp, &newp, upd,
+                      stepsize);
                 else
                   s = vp9_prob_diff_update_savings_search(
                       frame_branch_ct[i][j][k][l][t], oldp, &newp, upd);
@@ -584,7 +584,7 @@ static void update_coef_probs_common(vpx_writer* const bc, VP9_COMP *cpi,
                 if (t == PIVOT_NODE)
                   s = vp9_prob_diff_update_savings_search_model(
                       frame_branch_ct[i][j][k][l][0],
-                      old_coef_probs[i][j][k][l], &newp, upd, stepsize);
+                      *oldp, &newp, upd, stepsize);
                 else
                   s = vp9_prob_diff_update_savings_search(
                       frame_branch_ct[i][j][k][l][t],
@@ -622,7 +622,7 @@ static void update_coef_probs_common(vpx_writer* const bc, VP9_COMP *cpi,
                 if (t == PIVOT_NODE) {
                   s = vp9_prob_diff_update_savings_search_model(
                       frame_branch_ct[i][j][k][l][0],
-                      old_coef_probs[i][j][k][l], &newp, upd, stepsize);
+                      *oldp, &newp, upd, stepsize);
                 } else {
                   s = vp9_prob_diff_update_savings_search(
                       frame_branch_ct[i][j][k][l][t],
@@ -891,7 +891,7 @@ static void write_tile_info(const VP9_COMMON *const cm,
     vpx_wb_write_bit(wb, cm->log2_tile_rows != 1);
 }
 
-static int get_refresh_mask(VP9_COMP *cpi) {
+int vp9_get_refresh_mask(VP9_COMP *cpi) {
   if (vp9_preserve_existing_gf(cpi)) {
     // We have decided to preserve the previously existing golden frame as our
     // new ARF frame. However, in the short term we leave it in the GF slot and,
@@ -1107,11 +1107,11 @@ static void write_uncompressed_header(VP9_COMP *cpi,
         write_bitdepth_colorspace_sampling(cm, wb);
       }
 
-      vpx_wb_write_literal(wb, get_refresh_mask(cpi), REF_FRAMES);
+      vpx_wb_write_literal(wb, vp9_get_refresh_mask(cpi), REF_FRAMES);
       write_frame_size(cm, wb);
     } else {
       MV_REFERENCE_FRAME ref_frame;
-      vpx_wb_write_literal(wb, get_refresh_mask(cpi), REF_FRAMES);
+      vpx_wb_write_literal(wb, vp9_get_refresh_mask(cpi), REF_FRAMES);
       for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
         assert(get_ref_frame_map_idx(cpi, ref_frame) != INVALID_IDX);
         vpx_wb_write_literal(wb, get_ref_frame_map_idx(cpi, ref_frame),

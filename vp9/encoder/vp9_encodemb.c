@@ -50,29 +50,22 @@ void vp9_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
                      pd->dst.buf, pd->dst.stride);
 }
 
-#define RDTRUNC(RM, DM, R, D)                        \
-  (((1 << (VP9_PROB_COST_SHIFT - 1)) + (R) * (RM)) & \
-   ((1 << VP9_PROB_COST_SHIFT) - 1))
-
+// TODO(aconverse): Re-pack this structure.
 typedef struct vp9_token_state {
   int           rate;
-  int           error;
+  int64_t       error;
   int           next;
   int16_t       token;
-  int16_t       qc;
+  tran_low_t    qc;
+  tran_low_t    dqc;
 } vp9_token_state;
 
-// TODO(jimbankoski): experiment to find optimal RD numbers.
-static const int plane_rd_mult[PLANE_TYPES] = { 4, 2 };
+static const int plane_rd_mult[REF_TYPES][PLANE_TYPES] ={ {10, 6}, {8, 7}, };
 
 #define UPDATE_RD_COST()\
 {\
   rd_cost0 = RDCOST(rdmult, rddiv, rate0, error0);\
   rd_cost1 = RDCOST(rdmult, rddiv, rate1, error1);\
-  if (rd_cost0 == rd_cost1) {\
-    rd_cost0 = RDTRUNC(rdmult, rddiv, rate0, error0);\
-    rd_cost1 = RDTRUNC(rdmult, rddiv, rate1, error1);\
-  }\
 }
 
 // This function is a place holder for now but may ultimately need
@@ -103,16 +96,19 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   const int eob = p->eobs[block];
   const PLANE_TYPE type = get_plane_type(plane);
   const int default_eob = 16 << (tx_size << 1);
-  const int mul = 1 + (tx_size == TX_32X32);
-  const int16_t *dequant_ptr = pd->dequant;
-  const uint8_t *const band_translate = get_band_translate(tx_size);
+  const int shift = (tx_size == TX_32X32);
+  const int16_t* const dequant_ptr = pd->dequant;
+  const uint8_t* const band_translate = get_band_translate(tx_size);
   const scan_order *const so = get_scan(xd, tx_size, type, block);
   const int16_t *const scan = so->scan;
   const int16_t *const nb = so->neighbors;
+  const int dq_step[2] = { dequant_ptr[0] >> shift, dequant_ptr[1] >> shift };
   int next = eob, sz = 0;
-  int64_t rdmult = mb->rdmult * plane_rd_mult[type], rddiv = mb->rddiv;
+  const int64_t rdmult = (mb->rdmult * plane_rd_mult[ref][type]) >> 1;
+  const int64_t rddiv = mb->rddiv;
   int64_t rd_cost0, rd_cost1;
-  int rate0, rate1, error0, error1;
+  int rate0, rate1;
+  int64_t error0, error1;
   int16_t t0, t1;
   EXTRABIT e0;
   int best, band, pt, i, final_eob;
@@ -126,9 +122,6 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   assert(eob <= default_eob);
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
-  if (!ref)
-    rdmult = (rdmult * 9) >> 4;
-
   /* Initialize the sentinel node of the trellis. */
   tokens[eob][0].rate = 0;
   tokens[eob][0].error = 0;
@@ -167,7 +160,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       /* And pick the best. */
       best = rd_cost1 < rd_cost0;
       base_bits = vp9_get_cost(t0, e0, cat6_high_cost);
-      dx = mul * (dqcoeff[rc] - coeff[rc]);
+      dx = (dqcoeff[rc] - coeff[rc]) * (1 << shift);
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         dx >>= xd->bd - 8;
@@ -179,14 +172,15 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       tokens[i][0].next = next;
       tokens[i][0].token = t0;
       tokens[i][0].qc = x;
+      tokens[i][0].dqc = dqcoeff[rc];
       best_index[i][0] = best;
 
       /* Evaluate the second possibility for this state. */
       rate0 = tokens[next][0].rate;
       rate1 = tokens[next][1].rate;
 
-      if ((abs(x) * dequant_ptr[rc != 0] > abs(coeff[rc]) * mul) &&
-          (abs(x) * dequant_ptr[rc != 0] < abs(coeff[rc]) * mul +
+      if ((abs(x) * dequant_ptr[rc != 0] > (abs(coeff[rc]) << shift)) &&
+          (abs(x) * dequant_ptr[rc != 0] < (abs(coeff[rc]) << shift) +
                                                dequant_ptr[rc != 0]))
         shortcut = 1;
       else
@@ -195,6 +189,11 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       if (shortcut) {
         sz = -(x < 0);
         x -= 2 * sz + 1;
+      } else {
+        tokens[i][1] = tokens[i][0];
+        best_index[i][1] = best_index[i][0];
+        next = i;
+        continue;
       }
 
       /* Consider both possible successor states. */
@@ -245,6 +244,24 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       tokens[i][1].next = next;
       tokens[i][1].token = best ? t1 : t0;
       tokens[i][1].qc = x;
+
+      if (x) {
+        tran_low_t offset = dq_step[rc != 0];
+        // The 32x32 transform coefficient uses half quantization step size.
+        // Account for the rounding difference in the dequantized coefficeint
+        // value when the quantization index is dropped from an even number
+        // to an odd number.
+        if (shift & x)
+          offset += (dequant_ptr[rc != 0] & 0x01);
+
+        if (sz == 0)
+          tokens[i][1].dqc = dqcoeff[rc] - offset;
+        else
+          tokens[i][1].dqc = dqcoeff[rc] + offset;
+      } else {
+        tokens[i][1].dqc = 0;
+      }
+
       best_index[i][1] = best;
       /* Finally, make this the new head of the trellis. */
       next = i;
@@ -284,18 +301,13 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   UPDATE_RD_COST();
   best = rd_cost1 < rd_cost0;
   final_eob = -1;
-  memset(qcoeff, 0, sizeof(*qcoeff) * (16 << (tx_size * 2)));
-  memset(dqcoeff, 0, sizeof(*dqcoeff) * (16 << (tx_size * 2)));
+
   for (i = next; i < eob; i = next) {
     const int x = tokens[i][best].qc;
     const int rc = scan[i];
-    if (x) {
-      final_eob = i;
-    }
-
+    if (x) final_eob = i;
     qcoeff[rc] = x;
-    dqcoeff[rc] = (x * dequant_ptr[rc != 0]) / mul;
-
+    dqcoeff[rc] = tokens[i][best].dqc;
     next = tokens[i][best].next;
     best = best_index[i][best];
   }
@@ -785,10 +797,19 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   const int src_stride = p->src.stride;
   const int dst_stride = pd->dst.stride;
   int i, j;
+  struct optimize_ctx *const ctx = args->ctx;
+  ENTROPY_CONTEXT *a = NULL;
+  ENTROPY_CONTEXT *l = NULL;
+  int entropy_ctx = 0;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
   dst = &pd->dst.buf[4 * (j * dst_stride + i)];
   src = &p->src.buf[4 * (j * src_stride + i)];
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
+  if (args->ctx != NULL) {
+    a = &ctx->ta[plane][i];
+    l = &ctx->tl[plane][j];
+    entropy_ctx = combine_entropy_contexts(*a, *l);
+  }
 
   if (tx_size == TX_4X4) {
     tx_type = get_tx_type_4x4(get_plane_type(plane), xd, block);
@@ -907,6 +928,9 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                              pd->dequant, eob, scan_order->scan,
                              scan_order->iscan);
       }
+      if (args->ctx != NULL && !x->skip_recode) {
+       *a = *l = optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
+      }
       if (!x->skip_encode && *eob)
         vp9_idct32x32_add(dqcoeff, dst, dst_stride, *eob);
       break;
@@ -920,6 +944,9 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
       }
+      if (args->ctx != NULL && !x->skip_recode) {
+        *a = *l = optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
+      }
       if (!x->skip_encode && *eob)
         vp9_iht16x16_add(tx_type, dqcoeff, dst, dst_stride, *eob);
       break;
@@ -932,6 +959,9 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                        p->quant_shift, qcoeff, dqcoeff,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
+      }
+      if (args->ctx != NULL && !x->skip_recode) {
+        *a = *l = optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
       }
       if (!x->skip_encode && *eob)
         vp9_iht8x8_add(tx_type, dqcoeff, dst, dst_stride, *eob);
@@ -949,7 +979,9 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                        pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
       }
-
+      if (args->ctx != NULL && !x->skip_recode) {
+        *a = *l = optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
+      }
       if (!x->skip_encode && *eob) {
         if (tx_type == DCT_DCT)
           // this is like vp9_short_idct4x4 but has a special case around eob<=1
@@ -968,9 +1000,20 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
     *(args->skip) = 0;
 }
 
-void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
+void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane,
+                                  int enable_optimize_b) {
   const MACROBLOCKD *const xd = &x->e_mbd;
+  struct optimize_ctx ctx;
   struct encode_b_args arg = {x, NULL, &xd->mi[0]->skip};
+
+  if (enable_optimize_b && x->optimize &&
+      (!x->skip_recode || !x->skip_optimize)) {
+    const struct macroblockd_plane* const pd = &xd->plane[plane];
+    const TX_SIZE tx_size = plane ? get_uv_tx_size(xd->mi[0], pd) :
+        xd->mi[0]->tx_size;
+    vp9_get_entropy_contexts(bsize, tx_size, pd, ctx.ta[plane], ctx.tl[plane]);
+    arg.ctx = &ctx;
+  }
 
   vp9_foreach_transformed_block_in_plane(xd, bsize, plane,
                                          vp9_encode_block_intra, &arg);

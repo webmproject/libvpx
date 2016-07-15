@@ -12,6 +12,11 @@
 #ifndef VPX_PORTS_X86_H_
 #define VPX_PORTS_X86_H_
 #include <stdlib.h>
+
+#if defined(_MSC_VER)
+#include <intrin.h>  /* For __cpuidex, __rdtsc */
+#endif
+
 #include "vpx_config.h"
 #include "vpx/vpx_integer.h"
 
@@ -77,16 +82,12 @@ typedef enum {
 #else /* end __SUNPRO__ */
 #if ARCH_X86_64
 #if defined(_MSC_VER) && _MSC_VER > 1500
-void __cpuidex(int CPUInfo[4], int info_type, int ecxvalue);
-#pragma intrinsic(__cpuidex)
 #define cpuid(func, func2, a, b, c, d) do {\
     int regs[4];\
     __cpuidex(regs, func, func2); \
     a = regs[0];  b = regs[1];  c = regs[2];  d = regs[3];\
   } while(0)
 #else
-void __cpuid(int CPUInfo[4], int info_type);
-#pragma intrinsic(__cpuid)
 #define cpuid(func, func2, a, b, c, d) do {\
     int regs[4];\
     __cpuid(regs, func); \
@@ -172,7 +173,7 @@ x86_simd_caps(void) {
   env = getenv("VPX_SIMD_CAPS_MASK");
 
   if (env && *env)
-    mask = strtol(env, NULL, 0);
+    mask = (unsigned int)strtoul(env, NULL, 0);
 
   /* Ensure that the CPUID instruction supports extended features */
   cpuid(0, 0, max_cpuid_val, reg_ebx, reg_ecx, reg_edx);
@@ -212,10 +213,6 @@ x86_simd_caps(void) {
   return flags & mask;
 }
 
-#if ARCH_X86_64 && defined(_MSC_VER)
-unsigned __int64 __rdtsc(void);
-#pragma intrinsic(__rdtsc)
-#endif
 // Note:
 //  32-bit CPU cycle counter is light-weighted for most function performance
 //  measurement. For large function (CPU time > a couple of seconds), 64-bit

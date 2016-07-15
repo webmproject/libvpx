@@ -365,10 +365,10 @@ class Trans16x16TestBase {
 
       for (int j = 0; j < kNumCoeffs; ++j) {
 #if CONFIG_VP9_HIGHBITDEPTH
-        const uint32_t diff =
+        const int32_t diff =
             bit_depth_ == VPX_BITS_8 ?  dst[j] - src[j] : dst16[j] - src16[j];
 #else
-        const uint32_t diff = dst[j] - src[j];
+        const int32_t diff = dst[j] - src[j];
 #endif
         const uint32_t error = diff * diff;
         if (max_error < error)

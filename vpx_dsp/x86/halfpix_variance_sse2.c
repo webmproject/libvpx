@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <assert.h>
+
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
@@ -40,7 +42,9 @@ uint32_t vpx_variance_halfpixvar16x16_h_sse2(const unsigned char *src,
                                     &xsum0, &xxsum0);
 
   *sse = xxsum0;
-  return (xxsum0 - (((uint32_t)xsum0 * xsum0) >> 8));
+  assert(xsum0 <= 255 * 16 * 16);
+  assert(xsum0 >= -255 * 16 * 16);
+  return (xxsum0 - ((uint32_t)((int64_t)xsum0 * xsum0) >> 8));
 }
 
 uint32_t vpx_variance_halfpixvar16x16_v_sse2(const unsigned char *src,
@@ -54,7 +58,9 @@ uint32_t vpx_variance_halfpixvar16x16_v_sse2(const unsigned char *src,
                                    &xsum0, &xxsum0);
 
   *sse = xxsum0;
-  return (xxsum0 - (((uint32_t)xsum0 * xsum0) >> 8));
+  assert(xsum0 <= 255 * 16 * 16);
+  assert(xsum0 >= -255 * 16 * 16);
+  return (xxsum0 - ((uint32_t)((int64_t)xsum0 * xsum0) >> 8));
 }
 
 
@@ -70,5 +76,7 @@ uint32_t vpx_variance_halfpixvar16x16_hv_sse2(const unsigned char *src,
                                          &xsum0, &xxsum0);
 
   *sse = xxsum0;
-  return (xxsum0 - (((uint32_t)xsum0 * xsum0) >> 8));
+  assert(xsum0 <= 255 * 16 * 16);
+  assert(xsum0 >= -255 * 16 * 16);
+  return (xxsum0 - ((uint32_t)((int64_t)xsum0 * xsum0) >> 8));
 }
