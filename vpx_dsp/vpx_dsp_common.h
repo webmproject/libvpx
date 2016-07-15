@@ -22,6 +22,13 @@ extern "C" {
 #define VPXMIN(x, y) (((x) < (y)) ? (x) : (y))
 #define VPXMAX(x, y) (((x) > (y)) ? (x) : (y))
 
+#define VPX_SWAP(type, a, b) \
+  do {                       \
+    type c = (b);            \
+    b = a;                   \
+    a = c;                   \
+  } while (0)
+
 #if CONFIG_VP9_HIGHBITDEPTH
 // Note:
 // tran_low_t  is the datatype used for final transform coefficients.
