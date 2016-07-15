@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "faca38dd_0d913269",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 4556,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-15T23:26:12Z",
+      "side": 1,
+      "message": "Maybe use macros like GM_TRANS_MIN \u003d -(1 \u003c\u003c GM_ABS_TRANS_BITS), GM_TRANS_MAX \u003d (1 \u003c\u003c GM_ABS_TRANS_BITS) and reuse them here",
+      "revId": "089a7c473edca4d56a72a338fe2571af95c32f67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_6d82661c",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 4583,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-15T23:26:12Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "089a7c473edca4d56a72a338fe2571af95c32f67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
