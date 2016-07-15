@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "faca38dd_6d88a689",
+        "filename": "vp10/encoder/ratectrl.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1242,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-15T22:48:36Z",
+      "side": 1,
+      "message": "You may use the flag \"rc-\u003eis_src_frame_alt_ref\", instead of the use of cpi-\u003eis_gf_group_start. Also, consider the removal of cpi-\u003eis_gf_group_start, as it is true when either the current frame is a KEY or an OVERLAY frame. Check the value of cpi-\u003etwopass.gf_group.update_type[cpi-\u003etwopass.gf_group.index] to check whether it is a KEY/OVERLAY.",
+      "revId": "bd20eb451d22509f3225a45c5ab75d3791d01152",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
