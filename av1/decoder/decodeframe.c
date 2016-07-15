@@ -393,17 +393,6 @@ static INLINE void dec_reset_skip_context(MACROBLOCKD *xd) {
   }
 }
 
-static void set_plane_n4(MACROBLOCKD *const xd, int bw, int bh, int bwl,
-                         int bhl) {
-  int i;
-  for (i = 0; i < MAX_MB_PLANE; i++) {
-    xd->plane[i].n4_w = (bw << 1) >> xd->plane[i].subsampling_x;
-    xd->plane[i].n4_h = (bh << 1) >> xd->plane[i].subsampling_y;
-    xd->plane[i].n4_wl = bwl - xd->plane[i].subsampling_x;
-    xd->plane[i].n4_hl = bhl - xd->plane[i].subsampling_y;
-  }
-}
-
 static MB_MODE_INFO *set_offsets(AV1_COMMON *const cm, MACROBLOCKD *const xd,
                                  BLOCK_SIZE bsize, int mi_row, int mi_col,
                                  int bw, int bh, int x_mis, int y_mis, int bwl,
