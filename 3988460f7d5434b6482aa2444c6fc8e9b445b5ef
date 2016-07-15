@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "faca38dd_fbbe13e3",
+        "filename": "vp10/common/mv.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-15T21:38:56Z",
+      "side": 1,
+      "message": "Causing a bit confusion about the difference between GM_ABS_XXX_BITS and GM_XXX_PREC_BITS. Could you put some comment after it? \nI guess ABS means the bits of the absolute value since it is used by the second parameter of vp10_read_primitive..()? Then translation parameters should have 3 bit abs precision, but it is 5. Therefore get lost here.",
+      "revId": "3988460f7d5434b6482aa2444c6fc8e9b445b5ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_db5fd7c9",
+        "filename": "vp10/common/mv.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-15T21:38:56Z",
+      "side": 1,
+      "message": "Seems like the positions of ZERO and TRANSLATION are swapped here. If any of wmmat[0] and wmmat[1] is non zero, then it is non-zero translational model",
+      "revId": "3988460f7d5434b6482aa2444c6fc8e9b445b5ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_1bfb2fc3",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 3462,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-15T21:38:56Z",
+      "side": 1,
+      "message": "The precision is GM_ABS_ALPHA_BITS if wmmat[2] and [3] are ROTZOOM parameters",
+      "revId": "3988460f7d5434b6482aa2444c6fc8e9b445b5ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_7b0863d2",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 3465,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-15T21:38:56Z",
+      "side": 1,
+      "message": "Same as above",
+      "revId": "3988460f7d5434b6482aa2444c6fc8e9b445b5ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_fb2c533f",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 3468,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-15T21:38:56Z",
+      "side": 1,
+      "message": "If the above comment is correct, then here it would be GM_ABS_TRANS__BITS",
+      "revId": "3988460f7d5434b6482aa2444c6fc8e9b445b5ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_db319795",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 3472,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-15T21:38:56Z",
+      "side": 1,
+      "message": "Same as above",
+      "revId": "3988460f7d5434b6482aa2444c6fc8e9b445b5ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
