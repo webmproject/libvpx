@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "faca38dd_0d777272",
+        "filename": "vp10/common/mv.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-07-15T22:52:50Z",
+      "side": 1,
+      "message": "These are not tuned well, I just put in arbitrary defaults for the time being. I will add a comment to clarify the difference between the 2 parameters.",
+      "parentUuid": "faca38dd_fbbe13e3",
+      "revId": "3988460f7d5434b6482aa2444c6fc8e9b445b5ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faca38dd_db5fd7c9",
         "filename": "vp10/common/mv.h",
         "patchSetId": 16
@@ -30,6 +48,24 @@
       "writtenOn": "2016-07-15T21:38:56Z",
       "side": 1,
       "message": "Seems like the positions of ZERO and TRANSLATION are swapped here. If any of wmmat[0] and wmmat[1] is non zero, then it is non-zero translational model",
+      "revId": "3988460f7d5434b6482aa2444c6fc8e9b445b5ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_2d8eae97",
+        "filename": "vp10/common/mv.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-07-15T22:52:50Z",
+      "side": 1,
+      "message": "Yes, you are correct. Thank you for catching that.",
+      "parentUuid": "faca38dd_db5fd7c9",
       "revId": "3988460f7d5434b6482aa2444c6fc8e9b445b5ef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "faca38dd_0d9e52d0",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 3462,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-07-15T22:52:50Z",
+      "side": 1,
+      "message": "They are flipped on the encoder side because it is possible to start with ROTZOOM turned on and find that the 2 rotzoom parameters are not needed and to fall back to a translation model. It is simpler to do this if the translation parameters are the first 2 and the rotzoom parameters are the second 2. Otherwise you\u0027d have to copy the translation parameters from location 2 and 3 into the first two slots every time you switch between models; however, the warped motion is implemented so the translation parameters are always the last 2 slots of the array. Not sure if it is necessary to implement it this way, but it might be better to adjust that as a followup patch so the encoder and decoder can be consistent.",
+      "parentUuid": "faca38dd_1bfb2fc3",
+      "revId": "3988460f7d5434b6482aa2444c6fc8e9b445b5ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faca38dd_7b0863d2",
         "filename": "vp10/decoder/decodeframe.c",
         "patchSetId": 16
@@ -64,6 +118,24 @@
       "writtenOn": "2016-07-15T21:38:56Z",
       "side": 1,
       "message": "Same as above",
+      "revId": "3988460f7d5434b6482aa2444c6fc8e9b445b5ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_4da84af0",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 3465,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-07-15T22:52:50Z",
+      "side": 1,
+      "message": "see above",
+      "parentUuid": "faca38dd_7b0863d2",
       "revId": "3988460f7d5434b6482aa2444c6fc8e9b445b5ef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "faca38dd_2da50e18",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 3468,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-07-15T22:52:50Z",
+      "side": 1,
+      "message": "see above",
+      "parentUuid": "faca38dd_fb2c533f",
+      "revId": "3988460f7d5434b6482aa2444c6fc8e9b445b5ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faca38dd_db319795",
         "filename": "vp10/decoder/decodeframe.c",
         "patchSetId": 16
@@ -98,6 +188,24 @@
       "writtenOn": "2016-07-15T21:38:56Z",
       "side": 1,
       "message": "Same as above",
+      "revId": "3988460f7d5434b6482aa2444c6fc8e9b445b5ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_8db2425c",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 3472,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-07-15T22:52:50Z",
+      "side": 1,
+      "message": "see above",
+      "parentUuid": "faca38dd_db319795",
       "revId": "3988460f7d5434b6482aa2444c6fc8e9b445b5ef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
