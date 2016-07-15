@@ -16,7 +16,7 @@ extern "C" {
 #endif
 
 // Fills a noise buffer with gaussian noise strength determined by sigma.
-int vpx_setup_noise(double sigma, int size, char *noise);
+int vpx_setup_noise(double sigma, int8_t *noise, int size);
 
 #ifdef __cplusplus
 }

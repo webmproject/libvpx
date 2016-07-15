@@ -25,14 +25,12 @@ extern "C" {
 struct postproc_state {
   int last_q;
   int last_noise;
-  char noise[3072];
+  int8_t noise[3072];
   int last_base_qindex;
   int last_frame_valid;
   MODE_INFO *prev_mip;
   MODE_INFO *prev_mi;
-  DECLARE_ALIGNED(16, char, blackclamp[16]);
-  DECLARE_ALIGNED(16, char, whiteclamp[16]);
-  DECLARE_ALIGNED(16, char, bothclamp[16]);
+  int clamp;
   uint8_t *limits;
 };
 

@@ -11,17 +11,16 @@
 #include <stdlib.h>
 #include "./macros_msa.h"
 
-void vpx_plane_add_noise_msa(uint8_t *start_ptr, char *noise,
-                             char blackclamp[16], char whiteclamp[16],
-                             char bothclamp[16], uint32_t width,
-                             uint32_t height, int32_t pitch) {
+void vpx_plane_add_noise_msa(uint8_t *start_ptr, const int8_t *noise,
+                             int blackclamp, int whiteclamp,
+                             int width, int height, int32_t pitch) {
   uint32_t i, j;
 
   for (i = 0; i < height / 2; ++i) {
     uint8_t *pos0_ptr = start_ptr + (2 * i) * pitch;
-    int8_t *ref0_ptr = (int8_t *)(noise + (rand() & 0xff));
+    const int8_t *ref0_ptr = noise + (rand() & 0xff);
     uint8_t *pos1_ptr = start_ptr + (2 * i + 1) * pitch;
-    int8_t *ref1_ptr = (int8_t *)(noise + (rand() & 0xff));
+    const int8_t *ref1_ptr = noise + (rand() & 0xff);
     for (j = width / 16; j--;) {
       v16i8 temp00_s, temp01_s;
       v16u8 temp00, temp01, black_clamp, white_clamp;
@@ -32,8 +31,8 @@ void vpx_plane_add_noise_msa(uint8_t *start_ptr, char *noise,
       ref0 = LD_UB(ref0_ptr);
       pos1 = LD_UB(pos1_ptr);
       ref1 = LD_UB(ref1_ptr);
-      black_clamp = (v16u8)__msa_fill_b(blackclamp[0]);
-      white_clamp = (v16u8)__msa_fill_b(whiteclamp[0]);
+      black_clamp = (v16u8)__msa_fill_b(blackclamp);
+      white_clamp = (v16u8)__msa_fill_b(whiteclamp);
       temp00 = (pos0 < black_clamp);
       pos0 = __msa_bmnz_v(pos0, black_clamp, temp00);
       temp01 = (pos1 < black_clamp);
