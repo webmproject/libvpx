@@ -104,6 +104,24 @@
       "revId": "54294c9d0353bf78f3988a45758a09d8e7ad7530",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_207d1695",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1668,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-16T00:18:50Z",
+      "side": 1,
+      "message": "the plan is to clang-format this tree after master, but in the meantime cleanups are always a good way to make another pass through some old code.",
+      "parentUuid": "faca38dd_e05dbe63",
+      "revId": "54294c9d0353bf78f3988a45758a09d8e7ad7530",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
