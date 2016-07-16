@@ -17,10 +17,10 @@ struct postproc_state
 {
     int           last_q;
     int           last_noise;
-    int8_t        noise[3072];
     int           last_base_qindex;
     int           last_frame_valid;
     int           clamp;
+    int8_t       *generated_noise;
 };
 #include "onyxc_int.h"
 #include "ppflags.h"
