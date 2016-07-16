@@ -113,7 +113,7 @@ class SADTestBase : public ::testing::TestWithParam<ParamType> {
   static const int kDataBlockSize = 64 * 128;
   static const int kDataBufferSize = 4 * kDataBlockSize;
 
-  uint8_t *GetReference(int block_idx) {
+  uint8_t *GetReference(int block_idx) const {
 #if CONFIG_VP9_HIGHBITDEPTH
     if (use_high_bit_depth_)
       return CONVERT_TO_BYTEPTR(CONVERT_TO_SHORTPTR(reference_data_) +
@@ -124,7 +124,7 @@ class SADTestBase : public ::testing::TestWithParam<ParamType> {
 
   // Sum of Absolute Differences. Given two blocks, calculate the absolute
   // difference between two pixels in the same relative location; accumulate.
-  uint32_t ReferenceSAD(int block_idx) {
+  uint32_t ReferenceSAD(int block_idx) const {
     uint32_t sad = 0;
     const uint8_t *const reference8 = GetReference(block_idx);
     const uint8_t *const source8 = source_data_;
@@ -152,7 +152,7 @@ class SADTestBase : public ::testing::TestWithParam<ParamType> {
   // Sum of Absolute Differences Average. Given two blocks, and a prediction
   // calculate the absolute difference between one pixel and average of the
   // corresponding and predicted pixels; accumulate.
-  unsigned int ReferenceSADavg(int block_idx) {
+  unsigned int ReferenceSADavg(int block_idx) const {
     unsigned int sad = 0;
     const uint8_t *const reference8 = GetReference(block_idx);
     const uint8_t *const source8 = source_data_;
@@ -183,7 +183,7 @@ class SADTestBase : public ::testing::TestWithParam<ParamType> {
     return sad;
   }
 
-  void FillConstant(uint8_t *data, int stride, uint16_t fill_constant) {
+  void FillConstant(uint8_t *data, int stride, uint16_t fill_constant) const {
     uint8_t *data8 = data;
 #if CONFIG_VP9_HIGHBITDEPTH
     uint16_t *data16 = CONVERT_TO_SHORTPTR(data);
@@ -244,16 +244,16 @@ class SADx4Test : public SADTestBase<SadMxNx4Param> {
   SADx4Test() : SADTestBase(GetParam()) {}
 
  protected:
-  void SADs(unsigned int *results) {
-    const uint8_t *references[] = {GetReference(0), GetReference(1),
-                                   GetReference(2), GetReference(3)};
+  void SADs(unsigned int *results) const {
+    const uint8_t *references[] = { GetReference(0), GetReference(1),
+                                    GetReference(2), GetReference(3) };
 
     ASM_REGISTER_STATE_CHECK(params_.func(source_data_, source_stride_,
                                           references, reference_stride_,
                                           results));
   }
 
-  void CheckSADs() {
+  void CheckSADs() const {
     uint32_t reference_sad, exp_sad[4];
 
     SADs(exp_sad);
@@ -270,7 +270,7 @@ class SADTest : public SADTestBase<SadMxNParam> {
   SADTest() : SADTestBase(GetParam()) {}
 
  protected:
-  unsigned int SAD(int block_idx) {
+  unsigned int SAD(int block_idx) const {
     unsigned int ret;
     const uint8_t *const reference = GetReference(block_idx);
 
@@ -279,7 +279,7 @@ class SADTest : public SADTestBase<SadMxNParam> {
     return ret;
   }
 
-  void CheckSAD() {
+  void CheckSAD() const {
     const unsigned int reference_sad = ReferenceSAD(0);
     const unsigned int exp_sad = SAD(0);
 
@@ -292,7 +292,7 @@ class SADavgTest : public SADTestBase<SadMxNAvgParam> {
   SADavgTest() : SADTestBase(GetParam()) {}
 
  protected:
-  unsigned int SAD_avg(int block_idx) {
+  unsigned int SAD_avg(int block_idx) const {
     unsigned int ret;
     const uint8_t *const reference = GetReference(block_idx);
 
@@ -302,7 +302,7 @@ class SADavgTest : public SADTestBase<SadMxNAvgParam> {
     return ret;
   }
 
-  void CheckSAD() {
+  void CheckSAD() const {
     const unsigned int reference_sad = ReferenceSADavg(0);
     const unsigned int exp_sad = SAD_avg(0);
 
