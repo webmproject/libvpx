@@ -19,7 +19,7 @@
 
 void vpx_plane_add_noise_c(uint8_t *start, const int8_t *noise, int blackclamp,
                            int whiteclamp, int width, int height, int pitch) {
-  unsigned int i, j;
+  int i, j;
   int bothclamp = blackclamp + whiteclamp;
   for (i = 0; i < height; ++i) {
     uint8_t *pos = start + i * pitch;
