@@ -16,6 +16,24 @@
       "revId": "c2b4ab94b8802829b6419ef5bd601a6b0e4e7109",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_f07aad9e",
+        "filename": "vp10/common/quant_common.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-07-16T00:00:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faca38dd_ad845e24",
+      "revId": "c2b4ab94b8802829b6419ef5bd601a6b0e4e7109",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
