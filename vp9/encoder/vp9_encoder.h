@@ -29,6 +29,7 @@
 #include "vp9/common/vp9_thread_common.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
+#include "vp9/encoder/vp9_alt_ref_aq.h"
 #include "vp9/encoder/vp9_aq_cyclicrefresh.h"
 #include "vp9/encoder/vp9_context_tree.h"
 #include "vp9/encoder/vp9_encodemb.h"
@@ -487,6 +488,10 @@ typedef struct VP9_COMP {
   uint8_t force_update_segmentation;
 
   YV12_BUFFER_CONFIG alt_ref_buffer;
+
+  // class responsible for adaptive
+  // quantization of altref frames
+  struct ALT_REF_AQ *alt_ref_aq;
 
 #if CONFIG_INTERNAL_STATS
   unsigned int mode_chosen_counts[MAX_MODES];
