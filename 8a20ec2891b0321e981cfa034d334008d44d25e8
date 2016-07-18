@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "faca38dd_61754d46",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 3125,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-18T21:44:20Z",
+      "side": 1,
+      "message": "Since the original function only output the frame-to-show, so I add another function that can output any frame in the buffer. I will remove vp10_write_yuv_rec_frame(), and keep this one.",
+      "parentUuid": "faca38dd_21eb5580",
+      "revId": "8a20ec2891b0321e981cfa034d334008d44d25e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faca38dd_e1993d3b",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 9
@@ -30,6 +48,24 @@
       "writtenOn": "2016-07-18T17:39:52Z",
       "side": 1,
       "message": "Prefer the variable name of buf_idx, instead of phy_idx, and map_idx, instead of virtual_idx, to be consistent with the name convention in other files.",
+      "revId": "8a20ec2891b0321e981cfa034d334008d44d25e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_720b5d1e",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 3191,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-18T21:44:20Z",
+      "side": 1,
+      "message": "The entire function is removed.",
+      "parentUuid": "faca38dd_e1993d3b",
       "revId": "8a20ec2891b0321e981cfa034d334008d44d25e8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "faca38dd_f2174d3a",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 3194,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-18T21:44:20Z",
+      "side": 1,
+      "message": "The entire function is removed.",
+      "parentUuid": "faca38dd_01a9f944",
+      "revId": "8a20ec2891b0321e981cfa034d334008d44d25e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faca38dd_61b70d98",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 9
@@ -64,6 +118,24 @@
       "writtenOn": "2016-07-18T17:39:52Z",
       "side": 1,
       "message": "Should this be cleared up instead of being kept?",
+      "revId": "8a20ec2891b0321e981cfa034d334008d44d25e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_522d8186",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 3211,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-18T21:44:20Z",
+      "side": 1,
+      "message": "The entire function is removed.",
+      "parentUuid": "faca38dd_61b70d98",
       "revId": "8a20ec2891b0321e981cfa034d334008d44d25e8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "faca38dd_322a8570",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 4966,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-18T21:44:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faca38dd_c17081c4",
+      "revId": "8a20ec2891b0321e981cfa034d334008d44d25e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faca38dd_017bb9a4",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 9
@@ -98,6 +188,24 @@
       "writtenOn": "2016-07-18T17:39:52Z",
       "side": 1,
       "message": "Please try to see whether we could. Otherwise, put a TODO label here.",
+      "revId": "8a20ec2891b0321e981cfa034d334008d44d25e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_9227f9a6",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 5104,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-18T21:44:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faca38dd_017bb9a4",
       "revId": "8a20ec2891b0321e981cfa034d334008d44d25e8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "faca38dd_d241712e",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 5226,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-18T21:44:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faca38dd_6180adad",
+      "revId": "8a20ec2891b0321e981cfa034d334008d44d25e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faca38dd_816049e7",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 9
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "faca38dd_b2467542",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 5859,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-18T21:44:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faca38dd_816049e7",
+      "revId": "8a20ec2891b0321e981cfa034d334008d44d25e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faca38dd_21599578",
         "filename": "vp10/encoder/firstpass.c",
         "patchSetId": 9
@@ -149,6 +293,24 @@
       "writtenOn": "2016-07-18T17:39:52Z",
       "side": 1,
       "message": "Remove the extra word of \"move\"",
+      "revId": "8a20ec2891b0321e981cfa034d334008d44d25e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_124ca960",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 2523,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-18T21:44:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faca38dd_21599578",
       "revId": "8a20ec2891b0321e981cfa034d334008d44d25e8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
