@@ -1784,7 +1784,7 @@ unsigned int vp10_int_pro_motion_estimation(const VP10_COMP *cpi, MACROBLOCK *x,
                                            int mi_row, int mi_col) {
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
-  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0, 0}};
+  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0, 0, 0, 0, 0}};
   DECLARE_ALIGNED(16, int16_t, hbuf[2 * MAX_SB_SIZE]);
   DECLARE_ALIGNED(16, int16_t, vbuf[2 * MAX_SB_SIZE]);
   DECLARE_ALIGNED(16, int16_t, src_hbuf[MAX_SB_SQUARE]);
@@ -2721,6 +2721,7 @@ int vp10_find_best_masked_sub_pixel_tree_up(VP10_COMP *cpi,
     int ref = xd->mi[0]->mbmi.ref_frame[is_second];
     const YV12_BUFFER_CONFIG *upsampled_ref = get_upsampled_ref(cpi, ref);
     setup_pred_plane(&pd->pre[is_second], upsampled_ref->y_buffer,
+                     upsampled_ref->y_crop_width, upsampled_ref->y_crop_height,
                      upsampled_ref->y_stride, (mi_row << 3), (mi_col << 3),
                      NULL, pd->subsampling_x, pd->subsampling_y);
   }
@@ -3259,6 +3260,7 @@ int vp10_find_best_obmc_sub_pixel_tree_up(VP10_COMP *cpi, MACROBLOCK *x,
     int ref = xd->mi[0]->mbmi.ref_frame[is_second];
     const YV12_BUFFER_CONFIG *upsampled_ref = get_upsampled_ref(cpi, ref);
     setup_pred_plane(&pd->pre[is_second], upsampled_ref->y_buffer,
+                     upsampled_ref->y_crop_width, upsampled_ref->y_crop_height,
                      upsampled_ref->y_stride, (mi_row << 3), (mi_col << 3),
                      NULL, pd->subsampling_x, pd->subsampling_y);
   }

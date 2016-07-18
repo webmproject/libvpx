@@ -1011,13 +1011,18 @@ void vp10_setup_dst_planes(struct macroblockd_plane planes[MAX_MB_PLANE],
                           int mi_row, int mi_col) {
   uint8_t *const buffers[MAX_MB_PLANE] = { src->y_buffer, src->u_buffer,
       src->v_buffer};
+  const int widths[MAX_MB_PLANE] = { src->y_crop_width, src->uv_crop_width,
+      src->uv_crop_width};
+  const int heights[MAX_MB_PLANE] = { src->y_crop_height, src->uv_crop_height,
+      src->uv_crop_height};
   const int strides[MAX_MB_PLANE] = { src->y_stride, src->uv_stride,
       src->uv_stride};
   int i;
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     struct macroblockd_plane *const pd = &planes[i];
-    setup_pred_plane(&pd->dst, buffers[i], strides[i], mi_row, mi_col, NULL,
+    setup_pred_plane(&pd->dst, buffers[i], widths[i],
+                     heights[i], strides[i], mi_row, mi_col, NULL,
                      pd->subsampling_x, pd->subsampling_y);
   }
 }
@@ -1030,11 +1035,16 @@ void vp10_setup_pre_planes(MACROBLOCKD *xd, int idx,
     int i;
     uint8_t *const buffers[MAX_MB_PLANE] = { src->y_buffer, src->u_buffer,
         src->v_buffer};
+    const int widths[MAX_MB_PLANE] = { src->y_crop_width, src->uv_crop_width,
+        src->uv_crop_width};
+    const int heights[MAX_MB_PLANE] = { src->y_crop_height, src->uv_crop_height,
+        src->uv_crop_height};
     const int strides[MAX_MB_PLANE] = { src->y_stride, src->uv_stride,
         src->uv_stride};
     for (i = 0; i < MAX_MB_PLANE; ++i) {
       struct macroblockd_plane *const pd = &xd->plane[i];
-      setup_pred_plane(&pd->pre[idx], buffers[i], strides[i], mi_row, mi_col,
+      setup_pred_plane(&pd->pre[idx], buffers[i], widths[i],
+                       heights[i], strides[i], mi_row, mi_col,
                        sf, pd->subsampling_x, pd->subsampling_y);
     }
   }
@@ -1478,6 +1488,8 @@ void vp10_build_prediction_by_above_preds(VP10_COMMON *cm,
                                           MACROBLOCKD *xd,
                                           int mi_row, int mi_col,
                                           uint8_t *tmp_buf[MAX_MB_PLANE],
+                                          int tmp_width[MAX_MB_PLANE],
+                                          int tmp_height[MAX_MB_PLANE],
                                           int tmp_stride[MAX_MB_PLANE]) {
   const TileInfo *const tile = &xd->tile;
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
@@ -1511,7 +1523,8 @@ void vp10_build_prediction_by_above_preds(VP10_COMMON *cm,
     for (j = 0; j < MAX_MB_PLANE; ++j) {
       struct macroblockd_plane *const pd = &xd->plane[j];
       setup_pred_plane(&pd->dst,
-                       tmp_buf[j], tmp_stride[j],
+                       tmp_buf[j], tmp_width[j],
+                       tmp_height[j], tmp_stride[j],
                        0, i, NULL,
                        pd->subsampling_x, pd->subsampling_y);
     }
@@ -1580,6 +1593,8 @@ void vp10_build_prediction_by_left_preds(VP10_COMMON *cm,
                                          MACROBLOCKD *xd,
                                          int mi_row, int mi_col,
                                          uint8_t *tmp_buf[MAX_MB_PLANE],
+                                         int tmp_width[MAX_MB_PLANE],
+                                         int tmp_height[MAX_MB_PLANE],
                                          int tmp_stride[MAX_MB_PLANE]) {
   const TileInfo *const tile = &xd->tile;
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
@@ -1613,7 +1628,8 @@ void vp10_build_prediction_by_left_preds(VP10_COMMON *cm,
     for (j = 0; j < MAX_MB_PLANE; ++j) {
       struct macroblockd_plane *const pd = &xd->plane[j];
       setup_pred_plane(&pd->dst,
-                       tmp_buf[j], tmp_stride[j],
+                       tmp_buf[j], tmp_width[j],
+                       tmp_height[j], tmp_stride[j],
                        i, 0, NULL,
                        pd->subsampling_x, pd->subsampling_y);
     }

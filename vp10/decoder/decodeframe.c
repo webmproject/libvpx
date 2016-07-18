@@ -1355,6 +1355,10 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                       tmp_buf2[MAX_MB_PLANE * MAX_SB_SQUARE]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       uint8_t *dst_buf1[MAX_MB_PLANE], *dst_buf2[MAX_MB_PLANE];
+      int dst_width1[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
+      int dst_width2[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
+      int dst_height1[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
+      int dst_height2[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
       int dst_stride1[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
       int dst_stride2[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
 
@@ -1380,9 +1384,11 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
       }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       vp10_build_prediction_by_above_preds(cm, xd, mi_row, mi_col,
-                                           dst_buf1, dst_stride1);
+                                           dst_buf1, dst_width1,
+                                           dst_height1, dst_stride1);
       vp10_build_prediction_by_left_preds(cm, xd, mi_row, mi_col,
-                                          dst_buf2, dst_stride2);
+                                          dst_buf2, dst_width2,
+                                          dst_height2, dst_stride2);
       vp10_setup_dst_planes(xd->plane, get_frame_new_buffer(cm),
                             mi_row, mi_col);
       vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col,
