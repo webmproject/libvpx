@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "faca38dd_d2969162",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-18T22:13:35Z",
+      "side": 1,
+      "message": "should be bool, see line 280",
+      "revId": "8e36da0ea4e11dc78be5668e5efb2b9bfc37a657",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_528bc138",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-18T22:13:35Z",
+      "side": 1,
+      "message": "const TestParams\u003cFunc\u003e \u0026p",
+      "range": {
+        "startLine": 302,
+        "startChar": 43,
+        "endLine": 302,
+        "endChar": 68
+      },
+      "revId": "8e36da0ea4e11dc78be5668e5efb2b9bfc37a657",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
