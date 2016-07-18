@@ -43,6 +43,7 @@ struct vp9_extracfg {
   unsigned int target_level;
   unsigned int frame_parallel_decoding_mode;
   AQ_MODE aq_mode;
+  int alt_ref_aq;
   unsigned int frame_periodic_boost;
   vpx_bit_depth_t bit_depth;
   vp9e_tune_content content;
@@ -73,6 +74,7 @@ static struct vp9_extracfg default_extra_cfg = {
   255,                   // target_level
   1,                     // frame_parallel_decoding_mode
   NO_AQ,                 // aq_mode
+  0,                     // alt_ref_aq
   0,                     // frame_periodic_delta_q
   VPX_BITS_8,            // Bit depth
   VP9E_CONTENT_DEFAULT,  // content
@@ -155,7 +157,8 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK_HI(cfg, rc_max_quantizer, 63);
   RANGE_CHECK_HI(cfg, rc_min_quantizer, cfg->rc_max_quantizer);
   RANGE_CHECK_BOOL(extra_cfg, lossless);
-  RANGE_CHECK(extra_cfg, aq_mode, 0, AQ_MODE_COUNT - 1);
+  RANGE_CHECK(extra_cfg, aq_mode, 0, AQ_MODE_COUNT - 2);
+  RANGE_CHECK(extra_cfg, alt_ref_aq, 0, 1);
   RANGE_CHECK(extra_cfg, frame_periodic_boost, 0, 1);
   RANGE_CHECK_HI(cfg, g_threads, 64);
   RANGE_CHECK_HI(cfg, g_lag_in_frames, MAX_LAG_BUFFERS);
@@ -495,6 +498,7 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->frame_parallel_decoding_mode = extra_cfg->frame_parallel_decoding_mode;
 
   oxcf->aq_mode = extra_cfg->aq_mode;
+  oxcf->alt_ref_aq = extra_cfg->alt_ref_aq;
 
   oxcf->frame_periodic_boost = extra_cfg->frame_periodic_boost;
 
@@ -753,6 +757,13 @@ static vpx_codec_err_t ctrl_set_aq_mode(vpx_codec_alg_priv_t *ctx,
                                         va_list args) {
   struct vp9_extracfg extra_cfg = ctx->extra_cfg;
   extra_cfg.aq_mode = CAST(VP9E_SET_AQ_MODE, args);
+  return update_extra_cfg(ctx, &extra_cfg);
+}
+
+static vpx_codec_err_t ctrl_set_alt_ref_aq(vpx_codec_alg_priv_t *ctx,
+                                           va_list args) {
+  struct vp9_extracfg extra_cfg = ctx->extra_cfg;
+  extra_cfg.alt_ref_aq = CAST(VP9E_SET_ALT_REF_AQ, args);
   return update_extra_cfg(ctx, &extra_cfg);
 }
 
@@ -1497,6 +1508,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   { VP9E_SET_LOSSLESS, ctrl_set_lossless },
   { VP9E_SET_FRAME_PARALLEL_DECODING, ctrl_set_frame_parallel_decoding_mode },
   { VP9E_SET_AQ_MODE, ctrl_set_aq_mode },
+  { VP9E_SET_ALT_REF_AQ, ctrl_set_alt_ref_aq },
   { VP9E_SET_FRAME_PERIODIC_BOOST, ctrl_set_frame_periodic_boost },
   { VP9E_SET_SVC, ctrl_set_svc },
   { VP9E_SET_SVC_PARAMETERS, ctrl_set_svc_parameters },

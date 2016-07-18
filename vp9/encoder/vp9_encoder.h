@@ -116,6 +116,9 @@ typedef enum {
   COMPLEXITY_AQ = 2,
   CYCLIC_REFRESH_AQ = 3,
   EQUATOR360_AQ = 4,
+  // AQ based on lookahead temporal
+  // variance (only valid for altref frames)
+  LOOKAHEAD_AQ = 5,
   AQ_MODE_COUNT  // This should always be the last member of the enum
 } AQ_MODE;
 
@@ -177,6 +180,9 @@ typedef struct VP9EncoderConfig {
   int best_allowed_q;
   int cq_level;
   AQ_MODE aq_mode;  // Adaptive Quantization mode
+
+  // Special handling of Adaptive Quantization for AltRef frames
+  int alt_ref_aq;
 
   // Internal frame size scaling.
   RESIZE_TYPE resize_mode;
