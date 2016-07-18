@@ -448,3 +448,5 @@ all: $(BUILD_TARGETS)
 install:: $(INSTALL_TARGETS)
 dist: $(INSTALL_TARGETS)
 test::
+
+.SUFFIXES:  # Delete default suffix rules
