@@ -1111,7 +1111,7 @@ static void encode_block_pass1(int plane, int block, int blk_row, int blk_col,
                           tx_size, ctx);
 #else
   vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize,
-                   tx_size, VP10_XFORM_QUANT_FP);
+                   tx_size, VP10_XFORM_QUANT_B);
 #endif  // CONFIG_NEW_QUANT
 
   if (p->eobs[block] > 0) {
