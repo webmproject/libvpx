@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "faca38dd_524c612f",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 3066,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-18T22:29:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faca38dd_12fae910",
+      "revId": "fcbe33d43c54ff87d56daa82d79c6c4815bd7705",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faca38dd_b21dd55e",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 10
@@ -30,6 +48,24 @@
       "writtenOn": "2016-07-18T21:50:49Z",
       "side": 1,
       "message": "Suggest to remove \"However\". Also, \"have\" -\u003e \"has\"",
+      "revId": "fcbe33d43c54ff87d56daa82d79c6c4815bd7705",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_b265d59d",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 5106,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-18T22:29:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faca38dd_b21dd55e",
       "revId": "fcbe33d43c54ff87d56daa82d79c6c4815bd7705",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "faca38dd_d260518f",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 5107,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-18T22:29:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faca38dd_523621d4",
+      "revId": "fcbe33d43c54ff87d56daa82d79c6c4815bd7705",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faca38dd_b29835e6",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 10
@@ -64,6 +118,24 @@
       "writtenOn": "2016-07-18T21:50:49Z",
       "side": 1,
       "message": "A bug is here as when the if-condition (gf_group-\u003eupdate_type ...) is not true, we should set cm-\u003eshow_existing_frame to be 0.\n\nSuggest following code that\nif (oxcf-\u003epass \u003d\u003d 2) {\n  const GF_GROUP *const gf_group \u003d \u0026cpi-\u003etwopass.gf_group;\n  if (cpi-\u003erc.is_last_bipred_frame) {\n    ...\n  } else if (cpi-\u003erc.is_src_frame_alt_ref \u0026\u0026 cpi-\u003eis_arf_filter_off) {\n    ...\n  } else {\n    cm-\u003eshow_existing_frame \u003d 0;\n  }\n}",
+      "revId": "fcbe33d43c54ff87d56daa82d79c6c4815bd7705",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_14a81688",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 5753,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-18T22:29:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faca38dd_b29835e6",
       "revId": "fcbe33d43c54ff87d56daa82d79c6c4815bd7705",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
