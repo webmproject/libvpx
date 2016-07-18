@@ -14,9 +14,8 @@ void vp10_convolve(const uint8_t *src, int src_stride,
 #else
                    const INTERP_FILTER interp_filter,
 #endif
-                   const int subpel_x,
-                   const int subpel_y,
-                   int xstep, int ystep, int avg);
+                   const int subpel_x, int xstep,
+                   const int subpel_y, int ystep, int avg);
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void vp10_highbd_convolve(const uint8_t *src, int src_stride,
@@ -27,9 +26,9 @@ void vp10_highbd_convolve(const uint8_t *src, int src_stride,
 #else
                    const INTERP_FILTER interp_filter,
 #endif
-                   const int subpel_x,
-                   const int subpel_y,
-                   int xstep, int ystep, int avg, int bd);
+                   const int subpel_x, int xstep,
+                   const int subpel_y, int ystep,
+                   int avg, int bd);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #ifdef __cplusplus
