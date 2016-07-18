@@ -230,7 +230,7 @@ VP9_INSTANTIATE_TEST_CASE(
     ::testing::ValuesIn(kEncodeVectors),
     ::testing::ValuesIn(kMinArfVectors));
 
-#if CONFIG_VP9_HIGHBITDEPTH || CONFIG_BIDIR_PRED
+#if CONFIG_VP9_HIGHBITDEPTH || CONFIG_EXT_REFS
 #if CONFIG_VP10_ENCODER
 // TODO(angiebird): 25-29 fail in high bitdepth mode.
 // TODO(zoeliu): This ArfFreqTest does not work with BWDREF_FRAME, as
@@ -252,5 +252,5 @@ VP10_INSTANTIATE_TEST_CASE(
     ::testing::ValuesIn(kTestVectors),
     ::testing::ValuesIn(kEncodeVectors),
     ::testing::ValuesIn(kMinArfVectors));
-#endif  // CONFIG_VP9_HIGHBITDEPTH || CONFIG_BIDIR_PRED
+#endif  // CONFIG_VP9_HIGHBITDEPTH || CONFIG_EXT_REFS
 }  // namespace

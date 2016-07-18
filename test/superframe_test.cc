@@ -112,13 +112,13 @@ TEST_P(SuperframeTest, TestSuperframeIndexIsOptional) {
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 40);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-#if CONFIG_BIDIR_PRED
+#if CONFIG_EXT_REFS
   // NOTE: The use of BWDREF_FRAME will enable the coding of more non-show
   //       frames besides ALTREF_FRAME.
   EXPECT_GE(sf_count_, 1);
 #else
   EXPECT_EQ(sf_count_, 1);
-#endif  // CONFIG_BIDIR_PRED
+#endif  // CONFIG_EXT_REFS
 }
 
 VP9_INSTANTIATE_TEST_CASE(SuperframeTest, ::testing::Combine(
