@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "faca38dd_5cf0face",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 9
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-07-18T19:10:14Z",
+      "side": 1,
+      "message": "we typically refer to the invisible frame in the superframe as the altref.",
+      "range": {
+        "startLine": 7,
+        "startChar": 35,
+        "endLine": 7,
+        "endChar": 46
+      },
+      "revId": "94ec714cb3e3812041d9ff79cd31fcc348c3962f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_5cfe3ab3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 9
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-07-18T19:10:14Z",
+      "side": 1,
+      "message": "Don\u0027t indent these. See http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 27
+      },
+      "revId": "94ec714cb3e3812041d9ff79cd31fcc348c3962f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
