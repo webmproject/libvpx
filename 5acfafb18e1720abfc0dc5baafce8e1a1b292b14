@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ea534725_26d7b6f4",
+        "filename": "vp9/common/vp9_common.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-18T23:31:31Z",
+      "side": 1,
+      "message": "FWIW: this kind of hack should never have been introduced.\nThis just doesn\u0027t make sense, and -years later- i\u0027m fighting with the ripples of it (and the need to undo it).\nThat\u0027s pure technical debt.",
+      "range": {
+        "startLine": 69,
+        "startChar": 30,
+        "endLine": 69,
+        "endChar": 32
+      },
+      "revId": "5acfafb18e1720abfc0dc5baafce8e1a1b292b14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
