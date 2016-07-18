@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ea534725_a68286a2",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 5735,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-18T23:56:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faca38dd_74a22ac3",
+      "revId": "6dd122e6ef5b318831390d3e5a0ae85b0e864179",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faca38dd_d4b2fe11",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 12
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "ea534725_867f8aba",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 5737,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-18T23:56:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faca38dd_d4b2fe11",
+      "revId": "6dd122e6ef5b318831390d3e5a0ae85b0e864179",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "faca38dd_54244e53",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 12
@@ -47,6 +83,24 @@
       "writtenOn": "2016-07-18T23:23:40Z",
       "side": 1,
       "message": "Suggest to remove this line of code since is_src_frame_alt_ref will be set later on in firstpass.c",
+      "revId": "6dd122e6ef5b318831390d3e5a0ae85b0e864179",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea534725_06627a13",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 5752,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-18T23:56:22Z",
+      "side": 1,
+      "message": "This line has to be kept, since it is used as a condition to run vp10_rc_get_second_pass_params(cpi) which updates the parameter originally.",
+      "parentUuid": "faca38dd_54244e53",
       "revId": "6dd122e6ef5b318831390d3e5a0ae85b0e864179",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
