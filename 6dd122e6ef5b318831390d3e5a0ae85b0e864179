@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "faca38dd_74a22ac3",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 5735,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-18T23:23:40Z",
+      "side": 1,
+      "message": "Suggest to move the whole chunk of code within this if-condition to Pass2Encode().",
+      "revId": "6dd122e6ef5b318831390d3e5a0ae85b0e864179",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_d4b2fe11",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 5737,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-18T23:23:40Z",
+      "side": 1,
+      "message": "Suggest to define it as \"const\".",
+      "revId": "6dd122e6ef5b318831390d3e5a0ae85b0e864179",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_54244e53",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 5752,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-18T23:23:40Z",
+      "side": 1,
+      "message": "Suggest to remove this line of code since is_src_frame_alt_ref will be set later on in firstpass.c",
+      "revId": "6dd122e6ef5b318831390d3e5a0ae85b0e864179",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
