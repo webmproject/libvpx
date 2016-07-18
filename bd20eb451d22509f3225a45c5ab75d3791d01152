@@ -16,6 +16,24 @@
       "revId": "bd20eb451d22509f3225a45c5ab75d3791d01152",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faca38dd_d0fa117a",
+        "filename": "vp10/encoder/ratectrl.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1242,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-18T21:44:20Z",
+      "side": 1,
+      "message": "Updated!\nRemove cpi-\u003eis_gf_group_start and update the condition accordingly.",
+      "parentUuid": "faca38dd_6d88a689",
+      "revId": "bd20eb451d22509f3225a45c5ab75d3791d01152",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
