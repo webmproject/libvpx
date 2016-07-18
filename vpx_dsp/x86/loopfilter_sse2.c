@@ -111,7 +111,6 @@ void vpx_lpf_horizontal_4_sse2(uint8_t *s, int p /* pitch */,
   __m128i q1p1, q0p0, p3p2, p2p1, p1p0, q3q2, q2q1, q1q0, ps1ps0, qs1qs0;
   __m128i mask, hev;
 
-  p3p2 = _mm_loadl_epi64((__m128i *)(s - 3 * p));
   p3p2 = _mm_unpacklo_epi64(_mm_loadl_epi64((__m128i *)(s - 3 * p)),
                             _mm_loadl_epi64((__m128i *)(s - 4 * p)));
   q1p1 = _mm_unpacklo_epi64(_mm_loadl_epi64((__m128i *)(s - 2 * p)),

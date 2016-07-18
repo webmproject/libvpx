@@ -96,9 +96,7 @@ VP8_COMMON_SRCS-$(HAVE_SSE3) += common/x86/copy_sse3.asm
 VP8_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/subpixel_ssse3.asm
 
 ifeq ($(CONFIG_POSTPROC),yes)
-VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/postproc_mmx.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/mfqe_sse2.asm
-VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/postproc_sse2.asm
 endif
 
 ifeq ($(ARCH_X86_64),yes)
@@ -123,7 +121,6 @@ VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp8_macros_msa.h
 
 ifeq ($(CONFIG_POSTPROC),yes)
 VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/mfqe_msa.c
-VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/postproc_msa.c
 endif
 
 # common (c)

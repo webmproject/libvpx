@@ -10,8 +10,7 @@
 // Multi-threaded worker
 //
 // Original source:
-//  http://git.chromium.org/webm/libwebp.git
-//  100644 blob 264210ba2807e4da47eb5d18c04cf869d89b9784  src/utils/thread.c
+//  https://chromium.googlesource.com/webm/libwebp
 
 #include <assert.h>
 #include <string.h>   // for memset()

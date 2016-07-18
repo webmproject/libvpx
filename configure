@@ -98,11 +98,11 @@ EOF
 
 # all_platforms is a list of all supported target platforms. Maintain
 # alphabetically by architecture, generic-gnu last.
+all_platforms="${all_platforms} arm64-darwin-gcc"
+all_platforms="${all_platforms} arm64-linux-gcc"
 all_platforms="${all_platforms} armv6-linux-rvct"
 all_platforms="${all_platforms} armv6-linux-gcc"
 all_platforms="${all_platforms} armv6-none-rvct"
-all_platforms="${all_platforms} arm64-darwin-gcc"
-all_platforms="${all_platforms} arm64-linux-gcc"
 all_platforms="${all_platforms} armv7-android-gcc"   #neon Cortex-A8
 all_platforms="${all_platforms} armv7-darwin-gcc"    #neon Cortex-A8
 all_platforms="${all_platforms} armv7-linux-rvct"    #neon Cortex-A8
@@ -112,6 +112,7 @@ all_platforms="${all_platforms} armv7-win32-vs11"
 all_platforms="${all_platforms} armv7-win32-vs12"
 all_platforms="${all_platforms} armv7-win32-vs14"
 all_platforms="${all_platforms} armv7s-darwin-gcc"
+all_platforms="${all_platforms} armv8-linux-gcc"
 all_platforms="${all_platforms} mips32-linux-gcc"
 all_platforms="${all_platforms} mips64-linux-gcc"
 all_platforms="${all_platforms} sparc-solaris-gcc"
@@ -293,7 +294,6 @@ CONFIG_LIST="
     install_bins
     install_libs
     install_srcs
-    use_x86inc
     debug
     gprof
     gcov
@@ -355,7 +355,6 @@ CMDLINE_SELECT="
     gprof
     gcov
     pic
-    use_x86inc
     optimizations
     ccache
     runtime_cpu_detect

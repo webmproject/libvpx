@@ -101,7 +101,6 @@ ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_highbd_block_error_intrin_sse2.c
 endif
 
-ifeq ($(CONFIG_USE_X86INC),yes)
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_dct_sse2.asm
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_highbd_error_sse2.asm
@@ -109,12 +108,9 @@ VP9_CX_SRCS-$(HAVE_AVX) += encoder/x86/vp9_highbd_error_avx.asm
 else
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_error_sse2.asm
 endif
-endif
 
 ifeq ($(ARCH_X86_64),yes)
-ifeq ($(CONFIG_USE_X86INC),yes)
 VP9_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/vp9_quantize_ssse3_x86_64.asm
-endif
 endif
 
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_dct_intrin_sse2.c

@@ -135,7 +135,7 @@ class DatarateTestLarge : public ::libvpx_test::EncoderTest,
   double duration_;
   double file_datarate_;
   double effective_datarate_;
-  size_t bits_in_last_frame_;
+  int64_t bits_in_last_frame_;
   int denoiser_on_;
   int denoiser_offon_test_;
   int denoiser_offon_period_;
