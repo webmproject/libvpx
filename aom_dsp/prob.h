@@ -117,7 +117,7 @@ static INLINE void av1_tree_to_cdf(const aom_tree_index *tree,
     }                                           \
   } while (0)
 
-#define av1_tree_to_cdf_2D(tree, probs, cdf, u, v)     \
+#define av1_tree_to_cdf_2D(tree, probs, cdf, v, u)     \
   do {                                                 \
     int j;                                             \
     int i;                                             \
