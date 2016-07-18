@@ -26,7 +26,7 @@ void vp8_dequant_idct_add_y_block_mmx(short *q, short *dq, unsigned char *dst,
                                       int stride, char *eobs) {
   int i;
 
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 4; ++i) {
     if (eobs[0] > 1)
       vp8_dequant_idct_add_mmx(q, dq, dst, stride);
     else if (eobs[0] == 1) {
@@ -67,7 +67,7 @@ void vp8_dequant_idct_add_uv_block_mmx(short *q, short *dq, unsigned char *dstu,
                                        char *eobs) {
   int i;
 
-  for (i = 0; i < 2; i++) {
+  for (i = 0; i < 2; ++i) {
     if (eobs[0] > 1)
       vp8_dequant_idct_add_mmx(q, dq, dstu, stride);
     else if (eobs[0] == 1) {
@@ -88,7 +88,7 @@ void vp8_dequant_idct_add_uv_block_mmx(short *q, short *dq, unsigned char *dstu,
     eobs += 2;
   }
 
-  for (i = 0; i < 2; i++) {
+  for (i = 0; i < 2; ++i) {
     if (eobs[0] > 1)
       vp8_dequant_idct_add_mmx(q, dq, dstv, stride);
     else if (eobs[0] == 1) {

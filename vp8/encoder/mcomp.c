@@ -890,7 +890,7 @@ int vp8_hex_search(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   CHECK_BOUNDS(2)
 
   if (all_in) {
-    for (i = 0; i < 6; i++) {
+    for (i = 0; i < 6; ++i) {
       this_mv.as_mv.row = br + hex[i].row;
       this_mv.as_mv.col = bc + hex[i].col;
       this_offset = base_offset + (this_mv.as_mv.row * in_what_stride) +
@@ -899,7 +899,7 @@ int vp8_hex_search(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
       CHECK_BETTER
     }
   } else {
-    for (i = 0; i < 6; i++) {
+    for (i = 0; i < 6; ++i) {
       this_mv.as_mv.row = br + hex[i].row;
       this_mv.as_mv.col = bc + hex[i].col;
       CHECK_POINT
@@ -918,12 +918,12 @@ int vp8_hex_search(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
     k = best_site;
   }
 
-  for (j = 1; j < hex_range; j++) {
+  for (j = 1; j < hex_range; ++j) {
     best_site = -1;
     CHECK_BOUNDS(2)
 
     if (all_in) {
-      for (i = 0; i < 3; i++) {
+      for (i = 0; i < 3; ++i) {
         this_mv.as_mv.row = br + next_chkpts[k][i].row;
         this_mv.as_mv.col = bc + next_chkpts[k][i].col;
         this_offset = base_offset + (this_mv.as_mv.row * (in_what_stride)) +
@@ -932,7 +932,7 @@ int vp8_hex_search(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
         CHECK_BETTER
       }
     } else {
-      for (i = 0; i < 3; i++) {
+      for (i = 0; i < 3; ++i) {
         this_mv.as_mv.row = br + next_chkpts[k][i].row;
         this_mv.as_mv.col = bc + next_chkpts[k][i].col;
         CHECK_POINT
@@ -958,12 +958,12 @@ int vp8_hex_search(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
 
 /* check 4 1-away neighbors */
 cal_neighbors:
-  for (j = 0; j < dia_range; j++) {
+  for (j = 0; j < dia_range; ++j) {
     best_site = -1;
     CHECK_BOUNDS(1)
 
     if (all_in) {
-      for (i = 0; i < 4; i++) {
+      for (i = 0; i < 4; ++i) {
         this_mv.as_mv.row = br + neighbors[i].row;
         this_mv.as_mv.col = bc + neighbors[i].col;
         this_offset = base_offset + (this_mv.as_mv.row * (in_what_stride)) +
@@ -972,7 +972,7 @@ cal_neighbors:
         CHECK_BETTER
       }
     } else {
-      for (i = 0; i < 4; i++) {
+      for (i = 0; i < 4; ++i) {
         this_mv.as_mv.row = br + neighbors[i].row;
         this_mv.as_mv.col = bc + neighbors[i].col;
         CHECK_POINT
@@ -1064,8 +1064,8 @@ int vp8_diamond_search_sad_c(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
 
   i = 1;
 
-  for (step = 0; step < tot_steps; step++) {
-    for (j = 0; j < x->searches_per_step; j++) {
+  for (step = 0; step < tot_steps; ++step) {
+    for (j = 0; j < x->searches_per_step; ++j) {
       /* Trap illegal vectors */
       this_row_offset = best_mv->as_mv.row + ss[i].mv.row;
       this_col_offset = best_mv->as_mv.col + ss[i].mv.col;
@@ -1175,7 +1175,7 @@ int vp8_diamond_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
 
   i = 1;
 
-  for (step = 0; step < tot_steps; step++) {
+  for (step = 0; step < tot_steps; ++step) {
     int all_in = 1, t;
 
     /* To know if all neighbor points are within the bounds, 4 bounds
@@ -1193,7 +1193,7 @@ int vp8_diamond_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
       for (j = 0; j < x->searches_per_step; j += 4) {
         const unsigned char *block_offset[4];
 
-        for (t = 0; t < 4; t++)
+        for (t = 0; t < 4; ++t)
           block_offset[t] = ss[i + t].offset + best_address;
 
         fn_ptr->sdx4df(what, what_stride, block_offset, in_what_stride,
@@ -1214,7 +1214,7 @@ int vp8_diamond_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
         }
       }
     } else {
-      for (j = 0; j < x->searches_per_step; j++) {
+      for (j = 0; j < x->searches_per_step; ++j) {
         /* Trap illegal vectors */
         this_row_offset = best_mv->as_mv.row + ss[i].mv.row;
         this_col_offset = best_mv->as_mv.col + ss[i].mv.col;
@@ -1316,11 +1316,11 @@ int vp8_full_search_sad_c(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
 
   if (row_max > x->mv_row_max) row_max = x->mv_row_max;
 
-  for (r = row_min; r < row_max; r++) {
+  for (r = row_min; r < row_max; ++r) {
     this_mv.as_mv.row = r;
     check_here = r * mv_stride + in_what + col_min;
 
-    for (c = col_min; c < col_max; c++) {
+    for (c = col_min; c < col_max; ++c) {
       thissad = fn_ptr->sdf(what, what_stride, check_here, in_what_stride);
 
       this_mv.as_mv.col = c;
@@ -1404,7 +1404,7 @@ int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
 
   if (row_max > x->mv_row_max) row_max = x->mv_row_max;
 
-  for (r = row_min; r < row_max; r++) {
+  for (r = row_min; r < row_max; ++r) {
     this_mv.as_mv.row = r;
     check_here = r * mv_stride + in_what + col_min;
     c = col_min;
@@ -1414,7 +1414,7 @@ int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
 
       fn_ptr->sdx3f(what, what_stride, check_here, in_what_stride, sad_array);
 
-      for (i = 0; i < 3; i++) {
+      for (i = 0; i < 3; ++i) {
         thissad = sad_array[i];
 
         if (thissad < bestsad) {
@@ -1524,7 +1524,7 @@ int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
 
   if (row_max > x->mv_row_max) row_max = x->mv_row_max;
 
-  for (r = row_min; r < row_max; r++) {
+  for (r = row_min; r < row_max; ++r) {
     this_mv.as_mv.row = r;
     check_here = r * mv_stride + in_what + col_min;
     c = col_min;
@@ -1534,7 +1534,7 @@ int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
 
       fn_ptr->sdx8f(what, what_stride, check_here, in_what_stride, sad_array8);
 
-      for (i = 0; i < 8; i++) {
+      for (i = 0; i < 8; ++i) {
         thissad = sad_array8[i];
 
         if (thissad < bestsad) {
@@ -1560,7 +1560,7 @@ int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
 
       fn_ptr->sdx3f(what, what_stride, check_here, in_what_stride, sad_array);
 
-      for (i = 0; i < 3; i++) {
+      for (i = 0; i < 3; ++i) {
         thissad = sad_array[i];
 
         if (thissad < bestsad) {
@@ -1641,10 +1641,10 @@ int vp8_refining_search_sad_c(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   bestsad = fn_ptr->sdf(what, what_stride, best_address, in_what_stride) +
             mvsad_err_cost(ref_mv, &fcenter_mv, mvsadcost, error_per_bit);
 
-  for (i = 0; i < search_range; i++) {
+  for (i = 0; i < search_range; ++i) {
     int best_site = -1;
 
-    for (j = 0; j < 4; j++) {
+    for (j = 0; j < 4; ++j) {
       this_row_offset = ref_mv->as_mv.row + neighbors[j].row;
       this_col_offset = ref_mv->as_mv.col + neighbors[j].col;
 
@@ -1719,7 +1719,7 @@ int vp8_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   bestsad = fn_ptr->sdf(what, what_stride, best_address, in_what_stride) +
             mvsad_err_cost(ref_mv, &fcenter_mv, mvsadcost, error_per_bit);
 
-  for (i = 0; i < search_range; i++) {
+  for (i = 0; i < search_range; ++i) {
     int best_site = -1;
     int all_in = 1;
 
@@ -1739,7 +1739,7 @@ int vp8_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
       fn_ptr->sdx4df(what, what_stride, block_offset, in_what_stride,
                      sad_array);
 
-      for (j = 0; j < 4; j++) {
+      for (j = 0; j < 4; ++j) {
         if (sad_array[j] < bestsad) {
           this_mv.as_mv.row = ref_mv->as_mv.row + neighbors[j].row;
           this_mv.as_mv.col = ref_mv->as_mv.col + neighbors[j].col;
@@ -1753,7 +1753,7 @@ int vp8_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
         }
       }
     } else {
-      for (j = 0; j < 4; j++) {
+      for (j = 0; j < 4; ++j) {
         this_row_offset = ref_mv->as_mv.row + neighbors[j].row;
         this_col_offset = ref_mv->as_mv.col + neighbors[j].col;
 
@@ -1806,11 +1806,11 @@ void print_mode_context(void) {
   fprintf(f, "const int vp8_mode_contexts[6][4] =\n");
   fprintf(f, "{\n");
 
-  for (j = 0; j < 6; j++) {
+  for (j = 0; j < 6; ++j) {
     fprintf(f, "  { /* %d */\n", j);
     fprintf(f, "    ");
 
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < 4; ++i) {
       int overal_prob;
       int this_prob;
       int count;

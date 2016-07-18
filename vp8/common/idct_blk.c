@@ -22,8 +22,8 @@ void vp8_dequant_idct_add_y_block_c(short *q, short *dq, unsigned char *dst,
                                     int stride, char *eobs) {
   int i, j;
 
-  for (i = 0; i < 4; i++) {
-    for (j = 0; j < 4; j++) {
+  for (i = 0; i < 4; ++i) {
+    for (j = 0; j < 4; ++j) {
       if (*eobs++ > 1)
         vp8_dequant_idct_add_c(q, dq, dst, stride);
       else {
@@ -44,8 +44,8 @@ void vp8_dequant_idct_add_uv_block_c(short *q, short *dq, unsigned char *dstu,
                                      char *eobs) {
   int i, j;
 
-  for (i = 0; i < 2; i++) {
-    for (j = 0; j < 2; j++) {
+  for (i = 0; i < 2; ++i) {
+    for (j = 0; j < 2; ++j) {
       if (*eobs++ > 1)
         vp8_dequant_idct_add_c(q, dq, dstu, stride);
       else {
@@ -60,8 +60,8 @@ void vp8_dequant_idct_add_uv_block_c(short *q, short *dq, unsigned char *dstu,
     dstu += 4 * stride - 8;
   }
 
-  for (i = 0; i < 2; i++) {
-    for (j = 0; j < 2; j++) {
+  for (i = 0; i < 2; ++i) {
+    for (j = 0; j < 2; ++j) {
       if (*eobs++ > 1)
         vp8_dequant_idct_add_c(q, dq, dstv, stride);
       else {

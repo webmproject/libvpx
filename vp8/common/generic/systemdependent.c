@@ -69,7 +69,7 @@ static int get_cpu_count() {
     ULONG status;
 
     core_count = 0;
-    for (proc_id = 1;; proc_id++) {
+    for (proc_id = 1;; ++proc_id) {
       if (DosGetProcessorStatus(proc_id, &status)) break;
 
       if (status == PROC_ONLINE) core_count++;

@@ -33,8 +33,8 @@ static void filter_by_weight(unsigned char *src, int src_stride,
   int rounding_bit = 1 << (MFQE_PRECISION - 1);
   int r, c;
 
-  for (r = 0; r < block_size; r++) {
-    for (c = 0; c < block_size; c++) {
+  for (r = 0; r < block_size; ++r) {
+    for (c = 0; c < block_size; ++c) {
       dst[c] = (src[c] * src_weight + dst[c] * dst_weight + rounding_bit) >>
                MFQE_PRECISION;
     }
@@ -253,8 +253,8 @@ void vp8_multiframe_quality_enhance(VP8_COMMON *cm) {
   vd_ptr = dest->v_buffer;
 
   /* postprocess each macro block */
-  for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
-    for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
+  for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
+    for (mb_col = 0; mb_col < cm->mb_cols; ++mb_col) {
       /* if motion is high there will likely be no benefit */
       if (frame_type == INTER_FRAME)
         totmap = qualify_inter_mb(mode_info_context, map);

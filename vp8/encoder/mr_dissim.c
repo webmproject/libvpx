@@ -68,7 +68,7 @@ void vp8_cal_dissimilarity(VP8_COMP *cpi) {
 
     if (cm->frame_type != KEY_FRAME) {
       store_info->is_frame_dropped = 0;
-      for (i = 1; i < MAX_REF_FRAMES; i++)
+      for (i = 1; i < MAX_REF_FRAMES; ++i)
         store_info->low_res_ref_frames[i] = cpi->current_ref_frames[i];
     }
 
@@ -79,9 +79,9 @@ void vp8_cal_dissimilarity(VP8_COMP *cpi) {
       MODE_INFO *tmp = cm->mip + cm->mode_info_stride;
       LOWER_RES_MB_INFO *store_mode_info = store_info->mb_info;
 
-      for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
+      for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
         tmp++;
-        for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
+        for (mb_col = 0; mb_col < cm->mb_cols; ++mb_col) {
           int dissim = INT_MAX;
 
           if (tmp->mbmi.ref_frame != INTRA_FRAME) {
@@ -160,7 +160,7 @@ void vp8_cal_dissimilarity(VP8_COMP *cpi) {
               int i;
 
               if (cnt > 1) {
-                for (i = 1; i < cnt; i++) {
+                for (i = 1; i < cnt; ++i) {
                   if (mvx[i] > max_mvx)
                     max_mvx = mvx[i];
                   else if (mvx[i] < min_mvx)

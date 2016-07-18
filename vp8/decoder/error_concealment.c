@@ -66,7 +66,7 @@ static void assign_overlap(OVERLAP_NODE *overlaps, union b_mode_info *bmi,
   if (overlap <= 0) return;
   /* Find and assign to the next empty overlap node in the list of overlaps.
    * Empty is defined as bmi == NULL */
-  for (i = 0; i < MAX_OVERLAPS; i++) {
+  for (i = 0; i < MAX_OVERLAPS; ++i) {
     if (overlaps[i].bmi == NULL) {
       overlaps[i].bmi = bmi;
       overlaps[i].overlap = overlap;

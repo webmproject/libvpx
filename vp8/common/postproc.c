@@ -110,10 +110,10 @@ void vp8_deblock(VP8_COMMON *cm, YV12_BUFFER_CONFIG *source,
   (void)flag;
 
   if (ppl > 0) {
-    for (mbr = 0; mbr < cm->mb_rows; mbr++) {
+    for (mbr = 0; mbr < cm->mb_rows; ++mbr) {
       unsigned char *ylptr = ylimits;
       unsigned char *uvlptr = uvlimits;
-      for (mbc = 0; mbc < cm->mb_cols; mbc++) {
+      for (mbc = 0; mbc < cm->mb_cols; ++mbc) {
         unsigned char mb_ppl;
 
         if (mode_info_context->mbmi.mb_skip_coeff)
@@ -167,7 +167,7 @@ void vp8_de_noise(VP8_COMMON *cm, YV12_BUFFER_CONFIG *source,
   memset(limits, (unsigned char)ppl, 16 * mb_cols);
 
   /* TODO: The original code don't filter the 2 outer rows and columns. */
-  for (mbr = 0; mbr < mb_rows; mbr++) {
+  for (mbr = 0; mbr < mb_rows; ++mbr) {
     vpx_post_proc_down_and_across_mb_row(
         source->y_buffer + 16 * mbr * source->y_stride,
         source->y_buffer + 16 * mbr * source->y_stride, source->y_stride,
@@ -197,8 +197,8 @@ void vp8_blend_mb_inner_c(unsigned char *y, unsigned char *u, unsigned char *v,
   int v1_const = v_1 * ((1 << 16) - alpha);
 
   y += 2 * stride + 2;
-  for (i = 0; i < 12; i++) {
-    for (j = 0; j < 12; j++) {
+  for (i = 0; i < 12; ++i) {
+    for (j = 0; j < 12; ++j) {
       y[j] = (y[j] * alpha + y1_const) >> 16;
     }
     y += stride;
@@ -209,8 +209,8 @@ void vp8_blend_mb_inner_c(unsigned char *y, unsigned char *u, unsigned char *v,
   u += stride + 1;
   v += stride + 1;
 
-  for (i = 0; i < 6; i++) {
-    for (j = 0; j < 6; j++) {
+  for (i = 0; i < 6; ++i) {
+    for (j = 0; j < 6; ++j) {
       u[j] = (u[j] * alpha + u1_const) >> 16;
       v[j] = (v[j] * alpha + v1_const) >> 16;
     }
@@ -229,14 +229,14 @@ void vp8_blend_mb_outer_c(unsigned char *y, unsigned char *u, unsigned char *v,
   int u1_const = u_1 * ((1 << 16) - alpha);
   int v1_const = v_1 * ((1 << 16) - alpha);
 
-  for (i = 0; i < 2; i++) {
-    for (j = 0; j < 16; j++) {
+  for (i = 0; i < 2; ++i) {
+    for (j = 0; j < 16; ++j) {
       y[j] = (y[j] * alpha + y1_const) >> 16;
     }
     y += stride;
   }
 
-  for (i = 0; i < 12; i++) {
+  for (i = 0; i < 12; ++i) {
     y[0] = (y[0] * alpha + y1_const) >> 16;
     y[1] = (y[1] * alpha + y1_const) >> 16;
     y[14] = (y[14] * alpha + y1_const) >> 16;
@@ -244,8 +244,8 @@ void vp8_blend_mb_outer_c(unsigned char *y, unsigned char *u, unsigned char *v,
     y += stride;
   }
 
-  for (i = 0; i < 2; i++) {
-    for (j = 0; j < 16; j++) {
+  for (i = 0; i < 2; ++i) {
+    for (j = 0; j < 16; ++j) {
       y[j] = (y[j] * alpha + y1_const) >> 16;
     }
     y += stride;
@@ -253,14 +253,14 @@ void vp8_blend_mb_outer_c(unsigned char *y, unsigned char *u, unsigned char *v,
 
   stride >>= 1;
 
-  for (j = 0; j < 8; j++) {
+  for (j = 0; j < 8; ++j) {
     u[j] = (u[j] * alpha + u1_const) >> 16;
     v[j] = (v[j] * alpha + v1_const) >> 16;
   }
   u += stride;
   v += stride;
 
-  for (i = 0; i < 6; i++) {
+  for (i = 0; i < 6; ++i) {
     u[0] = (u[0] * alpha + u1_const) >> 16;
     v[0] = (v[0] * alpha + v1_const) >> 16;
 
@@ -271,7 +271,7 @@ void vp8_blend_mb_outer_c(unsigned char *y, unsigned char *u, unsigned char *v,
     v += stride;
   }
 
-  for (j = 0; j < 8; j++) {
+  for (j = 0; j < 8; ++j) {
     u[j] = (u[j] * alpha + u1_const) >> 16;
     v[j] = (v[j] * alpha + v1_const) >> 16;
   }
@@ -284,8 +284,8 @@ void vp8_blend_b_c(unsigned char *y, unsigned char *u, unsigned char *v,
   int u1_const = u_1 * ((1 << 16) - alpha);
   int v1_const = v_1 * ((1 << 16) - alpha);
 
-  for (i = 0; i < 4; i++) {
-    for (j = 0; j < 4; j++) {
+  for (i = 0; i < 4; ++i) {
+    for (j = 0; j < 4; ++j) {
       y[j] = (y[j] * alpha + y1_const) >> 16;
     }
     y += stride;
@@ -293,8 +293,8 @@ void vp8_blend_b_c(unsigned char *y, unsigned char *u, unsigned char *v,
 
   stride >>= 1;
 
-  for (i = 0; i < 2; i++) {
-    for (j = 0; j < 2; j++) {
+  for (i = 0; i < 2; ++i) {
+    for (j = 0; j < 2; ++j) {
       u[j] = (u[j] * alpha + u1_const) >> 16;
       v[j] = (v[j] * alpha + v1_const) >> 16;
     }
@@ -472,8 +472,8 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest,
     y_ptr = post->y_buffer + 4 * post->y_stride + 4;
 
     /* vp8_filter each macro block */
-    for (i = 0; i < mb_rows; i++) {
-      for (j = 0; j < mb_cols; j++) {
+    for (i = 0; i < mb_rows; ++i) {
+      for (j = 0; j < mb_cols; ++j) {
         char zz[4];
 
         sprintf(zz, "%c", mi[mb_index].mbmi.mode + 'a');
@@ -500,8 +500,8 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest,
     y_ptr = post->y_buffer + 4 * post->y_stride + 4;
 
     /* vp8_filter each macro block */
-    for (i = 0; i < mb_rows; i++) {
-      for (j = 0; j < mb_cols; j++) {
+    for (i = 0; i < mb_rows; ++i) {
+      for (j = 0; j < mb_cols; ++j) {
         char zz[4];
         int dc_diff = !(mi[mb_index].mbmi.mode != B_PRED &&
                         mi[mb_index].mbmi.mode != SPLITMV &&

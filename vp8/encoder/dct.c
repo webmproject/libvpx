@@ -18,7 +18,7 @@ void vp8_short_fdct4x4_c(short *input, short *output, int pitch) {
   short *ip = input;
   short *op = output;
 
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 4; ++i) {
     a1 = ((ip[0] + ip[3]) * 8);
     b1 = ((ip[1] + ip[2]) * 8);
     c1 = ((ip[1] - ip[2]) * 8);
@@ -35,7 +35,7 @@ void vp8_short_fdct4x4_c(short *input, short *output, int pitch) {
   }
   ip = output;
   op = output;
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 4; ++i) {
     a1 = ip[0] + ip[12];
     b1 = ip[4] + ip[8];
     c1 = ip[4] - ip[8];
@@ -64,7 +64,7 @@ void vp8_short_walsh4x4_c(short *input, short *output, int pitch) {
   short *ip = input;
   short *op = output;
 
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 4; ++i) {
     a1 = ((ip[0] + ip[2]) * 4);
     d1 = ((ip[1] + ip[3]) * 4);
     c1 = ((ip[1] - ip[3]) * 4);
@@ -81,7 +81,7 @@ void vp8_short_walsh4x4_c(short *input, short *output, int pitch) {
   ip = output;
   op = output;
 
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 4; ++i) {
     a1 = ip[0] + ip[8];
     d1 = ip[4] + ip[12];
     c1 = ip[4] - ip[12];

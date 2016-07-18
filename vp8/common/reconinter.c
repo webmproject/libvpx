@@ -24,7 +24,7 @@ void vp8_copy_mem16x16_c(unsigned char *src, int src_stride, unsigned char *dst,
                          int dst_stride) {
   int r;
 
-  for (r = 0; r < 16; r++) {
+  for (r = 0; r < 16; ++r) {
     memcpy(dst, src, 16);
 
     src += src_stride;
@@ -36,7 +36,7 @@ void vp8_copy_mem8x8_c(unsigned char *src, int src_stride, unsigned char *dst,
                        int dst_stride) {
   int r;
 
-  for (r = 0; r < 8; r++) {
+  for (r = 0; r < 8; ++r) {
     memcpy(dst, src, 8);
 
     src += src_stride;
@@ -48,7 +48,7 @@ void vp8_copy_mem8x4_c(unsigned char *src, int src_stride, unsigned char *dst,
                        int dst_stride) {
   int r;
 
-  for (r = 0; r < 4; r++) {
+  for (r = 0; r < 4; ++r) {
     memcpy(dst, src, 8);
 
     src += src_stride;
@@ -68,7 +68,7 @@ void vp8_build_inter_predictors_b(BLOCKD *d, int pitch, unsigned char *base_pre,
     sppf(ptr, pre_stride, d->bmi.mv.as_mv.col & 7, d->bmi.mv.as_mv.row & 7,
          pred_ptr, pitch);
   } else {
-    for (r = 0; r < 4; r++) {
+    for (r = 0; r < 4; ++r) {
       pred_ptr[0] = ptr[0];
       pred_ptr[1] = ptr[1];
       pred_ptr[2] = ptr[2];
@@ -121,7 +121,7 @@ static void build_inter_predictors_b(BLOCKD *d, unsigned char *dst,
     sppf(ptr, pre_stride, d->bmi.mv.as_mv.col & 7, d->bmi.mv.as_mv.row & 7, dst,
          dst_stride);
   } else {
-    for (r = 0; r < 4; r++) {
+    for (r = 0; r < 4; ++r) {
       dst[0] = ptr[0];
       dst[1] = ptr[1];
       dst[2] = ptr[2];
@@ -173,8 +173,8 @@ void vp8_build_inter4x4_predictors_mbuv(MACROBLOCKD *x) {
   unsigned char *base_pre;
 
   /* build uv mvs */
-  for (i = 0; i < 2; i++) {
-    for (j = 0; j < 2; j++) {
+  for (i = 0; i < 2; ++i) {
+    for (j = 0; j < 2; ++j) {
       int yoffset = i * 8 + j * 2;
       int uoffset = 16 + i * 2 + j;
       int voffset = 20 + i * 2 + j;
@@ -447,8 +447,8 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *x) {
 static void build_4x4uvmvs(MACROBLOCKD *x) {
   int i, j;
 
-  for (i = 0; i < 2; i++) {
-    for (j = 0; j < 2; j++) {
+  for (i = 0; i < 2; ++i) {
+    for (j = 0; j < 2; ++j) {
       int yoffset = i * 8 + j * 2;
       int uoffset = 16 + i * 2 + j;
       int voffset = 20 + i * 2 + j;

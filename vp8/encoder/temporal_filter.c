@@ -76,7 +76,7 @@ void vp8_temporal_filter_apply_c(unsigned char *frame1, unsigned int stride,
   int byte = 0;
   const int rounding = strength > 0 ? 1 << (strength - 1) : 0;
 
-  for (i = 0, k = 0; i < block_size; i++) {
+  for (i = 0, k = 0; i < block_size; ++i) {
     for (j = 0; j < block_size; j++, k++) {
       int src_byte = frame1[byte];
       int pixel_value = *frame2++;
@@ -205,7 +205,7 @@ static void vp8_temporal_filter_iterate_c(VP8_COMP *cpi, int frame_count,
   unsigned char *u_buffer = mbd->pre.u_buffer;
   unsigned char *v_buffer = mbd->pre.v_buffer;
 
-  for (mb_row = 0; mb_row < mb_rows; mb_row++) {
+  for (mb_row = 0; mb_row < mb_rows; ++mb_row) {
 #if ALT_REF_MC_ENABLED
     /* Source frames are extended to 16 pixels.  This is different than
      *  L/A/G reference frames that have a border of 32 (VP8BORDERINPIXELS)
@@ -222,7 +222,7 @@ static void vp8_temporal_filter_iterate_c(VP8_COMP *cpi, int frame_count,
     cpi->mb.mv_row_max = ((cpi->common.mb_rows - 1 - mb_row) * 16) + (16 - 5);
 #endif
 
-    for (mb_col = 0; mb_col < mb_cols; mb_col++) {
+    for (mb_col = 0; mb_col < mb_cols; ++mb_col) {
       int i, j, k;
       int stride;
 
@@ -234,7 +234,7 @@ static void vp8_temporal_filter_iterate_c(VP8_COMP *cpi, int frame_count,
       cpi->mb.mv_col_max = ((cpi->common.mb_cols - 1 - mb_col) * 16) + (16 - 5);
 #endif
 
-      for (frame = 0; frame < frame_count; frame++) {
+      for (frame = 0; frame < frame_count; ++frame) {
         if (cpi->frames[frame] == NULL) continue;
 
         mbd->block[0].bmi.mv.as_mv.row = 0;
@@ -287,7 +287,7 @@ static void vp8_temporal_filter_iterate_c(VP8_COMP *cpi, int frame_count,
       dst1 = cpi->alt_ref_buffer.y_buffer;
       stride = cpi->alt_ref_buffer.y_stride;
       byte = mb_y_offset;
-      for (i = 0, k = 0; i < 16; i++) {
+      for (i = 0, k = 0; i < 16; ++i) {
         for (j = 0; j < 16; j++, k++) {
           unsigned int pval = accumulator[k] + (count[k] >> 1);
           pval *= cpi->fixed_divide[count[k]];
@@ -306,7 +306,7 @@ static void vp8_temporal_filter_iterate_c(VP8_COMP *cpi, int frame_count,
       dst2 = cpi->alt_ref_buffer.v_buffer;
       stride = cpi->alt_ref_buffer.uv_stride;
       byte = mb_uv_offset;
-      for (i = 0, k = 256; i < 8; i++) {
+      for (i = 0, k = 256; i < 8; ++i) {
         for (j = 0; j < 8; j++, k++) {
           int m = k + 64;
 
@@ -413,7 +413,7 @@ void vp8_temporal_filter_prepare_c(VP8_COMP *cpi, int distance) {
 
   /* Setup frame pointers, NULL indicates frame not included in filter */
   memset(cpi->frames, 0, max_frames * sizeof(YV12_BUFFER_CONFIG *));
-  for (frame = 0; frame < frames_to_blur; frame++) {
+  for (frame = 0; frame < frames_to_blur; ++frame) {
     int which_buffer = start_frame - frame;
     struct lookahead_entry *buf =
         vp8_lookahead_peek(cpi->lookahead, which_buffer, PEEK_FORWARD);

@@ -924,7 +924,7 @@ void vp8_sixtap_predict16x16_neon(unsigned char *src_ptr,
 
     // load src data
     src_tmp = src_ptr - src_pixels_per_line * 2;
-    for (i = 0; i < 2; i++) {
+    for (i = 0; i < 2; ++i) {
       src = src_tmp + i * 8;
       dst = dst_ptr + i * 8;
       d18u8 = vld1_u8(src);
@@ -937,7 +937,7 @@ void vp8_sixtap_predict16x16_neon(unsigned char *src_ptr,
       src += src_pixels_per_line;
       d22u8 = vld1_u8(src);
       src += src_pixels_per_line;
-      for (j = 0; j < 4; j++) {
+      for (j = 0; j < 4; ++j) {
         d23u8 = vld1_u8(src);
         src += src_pixels_per_line;
         d24u8 = vld1_u8(src);
@@ -1034,7 +1034,7 @@ void vp8_sixtap_predict16x16_neon(unsigned char *src_ptr,
   if (yoffset == 0) {  // firstpass_filter4x4_only
     src = src_ptr - 2;
     dst = dst_ptr;
-    for (i = 0; i < 8; i++) {
+    for (i = 0; i < 8; ++i) {
       d6u8 = vld1_u8(src);
       d7u8 = vld1_u8(src + 8);
       d8u8 = vld1_u8(src + 16);
@@ -1128,7 +1128,7 @@ void vp8_sixtap_predict16x16_neon(unsigned char *src_ptr,
 
   src = src_ptr - 2 - src_pixels_per_line * 2;
   tmpp = tmp;
-  for (i = 0; i < 7; i++) {
+  for (i = 0; i < 7; ++i) {
     d6u8 = vld1_u8(src);
     d7u8 = vld1_u8(src + 8);
     d8u8 = vld1_u8(src + 16);
@@ -1273,7 +1273,7 @@ void vp8_sixtap_predict16x16_neon(unsigned char *src_ptr,
   d4u8 = vreinterpret_u8_s8(vabs_s8(d4s8));
   d5u8 = vreinterpret_u8_s8(vabs_s8(d5s8));
 
-  for (i = 0; i < 2; i++) {
+  for (i = 0; i < 2; ++i) {
     dst = dst_ptr + 8 * i;
     tmpp = tmp + 8 * i;
     d18u8 = vld1_u8(tmpp);
@@ -1286,7 +1286,7 @@ void vp8_sixtap_predict16x16_neon(unsigned char *src_ptr,
     tmpp += 16;
     d22u8 = vld1_u8(tmpp);
     tmpp += 16;
-    for (j = 0; j < 4; j++) {
+    for (j = 0; j < 4; ++j) {
       d23u8 = vld1_u8(tmpp);
       tmpp += 16;
       d24u8 = vld1_u8(tmpp);

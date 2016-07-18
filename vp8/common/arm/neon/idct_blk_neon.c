@@ -22,7 +22,7 @@ void vp8_dequant_idct_add_y_block_neon(short *q, short *dq, unsigned char *dst,
                                        int stride, char *eobs) {
   int i;
 
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 4; ++i) {
     if (((short *)(eobs))[0]) {
       if (((short *)eobs)[0] & 0xfefe)
         idct_dequant_full_2x_neon(q, dq, dst, stride);

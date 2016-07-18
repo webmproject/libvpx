@@ -189,8 +189,8 @@ void vp8_short_idct4x4llm_dspr2(short *input, unsigned char *pred_ptr,
 
   ip = output;
 
-  for (r = 0; r < 4; r++) {
-    for (c = 0; c < 4; c++) {
+  for (r = 0; r < 4; ++r) {
+    for (c = 0; c < 4; ++c) {
       short a = ip[c] + pred_ptr[c];
       dst_ptr[c] = cm[a];
     }
@@ -311,7 +311,7 @@ void vp8_short_inv_walsh4x4_dspr2(short *input, short *mb_dqcoeff) {
     op += 4;
   }
 
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < 16; ++i) {
     mb_dqcoeff[i * 16] = output[i];
   }
 }

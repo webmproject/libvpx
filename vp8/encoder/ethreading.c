@@ -105,7 +105,7 @@ static THREAD_FUNCTION thread_encoding_proc(void *p_data) {
         x->mb_activity_ptr = &cpi->mb_activity_map[map_index];
 
         /* for each macroblock col in image */
-        for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
+        for (mb_col = 0; mb_col < cm->mb_cols; ++mb_col) {
           if (((mb_col - 1) % nsync) == 0) {
             pthread_mutex_t *mutex = &cpi->pmutex[mb_row];
             protected_write(mutex, current_mb_col, mb_col - 1);
@@ -186,7 +186,7 @@ static THREAD_FUNCTION thread_encoding_proc(void *p_data) {
             if (xd->mbmi.mode == SPLITMV) {
               int b;
 
-              for (b = 0; b < xd->mbmi.partition_count; b++) {
+              for (b = 0; b < xd->mbmi.partition_count; ++b) {
                 inter_b_modes[x->partition->bmi[b].mode]++;
               }
             }
@@ -354,7 +354,7 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc) {
   z->intra_uv_mode_cost = x->intra_uv_mode_cost;
   z->bmode_costs = x->bmode_costs;
 
-  for (i = 0; i < 25; i++) {
+  for (i = 0; i < 25; ++i) {
     z->block[i].quant = x->block[i].quant;
     z->block[i].quant_fast = x->block[i].quant_fast;
     z->block[i].quant_shift = x->block[i].quant_shift;
@@ -412,8 +412,8 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc) {
      * the quantizer code uses a passed in pointer to the dequant constants.
      * This will also require modifications to the x86 and neon assembly.
      * */
-    for (i = 0; i < 16; i++) zd->block[i].dequant = zd->dequant_y1;
-    for (i = 16; i < 24; i++) zd->block[i].dequant = zd->dequant_uv;
+    for (i = 0; i < 16; ++i) zd->block[i].dequant = zd->dequant_y1;
+    for (i = 16; i < 24; ++i) zd->block[i].dequant = zd->dequant_uv;
     zd->block[24].dequant = zd->dequant_y2;
 #endif
 
@@ -434,7 +434,7 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
   int i;
 
-  for (i = 0; i < count; i++) {
+  for (i = 0; i < count; ++i) {
     MACROBLOCK *mb = &mbr_ei[i].mb;
     MACROBLOCKD *mbd = &mb->e_mbd;
 
@@ -526,7 +526,7 @@ int vp8cx_create_encoder_threads(VP8_COMP *cpi) {
            (cpi->encoding_thread_count +1));
     */
 
-    for (ithread = 0; ithread < th_count; ithread++) {
+    for (ithread = 0; ithread < th_count; ++ithread) {
       ENCODETHREAD_DATA *ethd = &cpi->en_thread_data[ithread];
 
       /* Setup block ptrs and offsets */
@@ -607,7 +607,7 @@ void vp8cx_remove_encoder_threads(VP8_COMP *cpi) {
     {
       int i;
 
-      for (i = 0; i < cpi->encoding_thread_count; i++) {
+      for (i = 0; i < cpi->encoding_thread_count; ++i) {
         sem_post(&cpi->h_event_start_encoding[i]);
         pthread_join(cpi->h_encoding_thread[i], 0);
 

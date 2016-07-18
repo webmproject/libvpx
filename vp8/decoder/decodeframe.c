@@ -43,7 +43,7 @@ void vp8cx_init_de_quantizer(VP8D_COMP *pbi) {
   int Q;
   VP8_COMMON *const pc = &pbi->common;
 
-  for (Q = 0; Q < QINDEX_RANGE; Q++) {
+  for (Q = 0; Q < QINDEX_RANGE; ++Q) {
     pc->Y1dequant[Q][0] = (short)vp8_dc_quant(Q, pc->y1dc_delta_q);
     pc->Y2dequant[Q][0] = (short)vp8_dc2quant(Q, pc->y2dc_delta_q);
     pc->UVdequant[Q][0] = (short)vp8_dc_uv_quant(Q, pc->uvdc_delta_q);
@@ -82,7 +82,7 @@ void vp8_mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   xd->dequant_y2[0] = pc->Y2dequant[QIndex][0];
   xd->dequant_uv[0] = pc->UVdequant[QIndex][0];
 
-  for (i = 1; i < 16; i++) {
+  for (i = 1; i < 16; ++i) {
     xd->dequant_y1_dc[i] = xd->dequant_y1[i] = pc->Y1dequant[QIndex][1];
     xd->dequant_y2[i] = pc->Y2dequant[QIndex][1];
     xd->dequant_uv[i] = pc->UVdequant[QIndex][1];
@@ -161,7 +161,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 
       intra_prediction_down_copy(xd, xd->recon_above[0] + 16);
 
-      for (i = 0; i < 16; i++) {
+      for (i = 0; i < 16; ++i) {
         BLOCKD *b = &xd->block[i];
         unsigned char *dst = xd->dst.y_buffer + b->offset;
         B_PREDICTION_MODE b_mode = xd->mode_info_context->bmi[i].as_mode;
@@ -266,7 +266,7 @@ static void yv12_extend_frame_top_c(YV12_BUFFER_CONFIG *ybf) {
   src_ptr1 = ybf->y_buffer - Border;
   dest_ptr1 = src_ptr1 - (Border * plane_stride);
 
-  for (i = 0; i < (int)Border; i++) {
+  for (i = 0; i < (int)Border; ++i) {
     memcpy(dest_ptr1, src_ptr1, plane_stride);
     dest_ptr1 += plane_stride;
   }
@@ -279,7 +279,7 @@ static void yv12_extend_frame_top_c(YV12_BUFFER_CONFIG *ybf) {
   src_ptr1 = ybf->u_buffer - Border;
   dest_ptr1 = src_ptr1 - (Border * plane_stride);
 
-  for (i = 0; i < (int)(Border); i++) {
+  for (i = 0; i < (int)(Border); ++i) {
     memcpy(dest_ptr1, src_ptr1, plane_stride);
     dest_ptr1 += plane_stride;
   }
@@ -291,7 +291,7 @@ static void yv12_extend_frame_top_c(YV12_BUFFER_CONFIG *ybf) {
   src_ptr1 = ybf->v_buffer - Border;
   dest_ptr1 = src_ptr1 - (Border * plane_stride);
 
-  for (i = 0; i < (int)(Border); i++) {
+  for (i = 0; i < (int)(Border); ++i) {
     memcpy(dest_ptr1, src_ptr1, plane_stride);
     dest_ptr1 += plane_stride;
   }
@@ -317,7 +317,7 @@ static void yv12_extend_frame_bottom_c(YV12_BUFFER_CONFIG *ybf) {
   src_ptr2 = src_ptr1 + (plane_height * plane_stride) - plane_stride;
   dest_ptr2 = src_ptr2 + plane_stride;
 
-  for (i = 0; i < (int)Border; i++) {
+  for (i = 0; i < (int)Border; ++i) {
     memcpy(dest_ptr2, src_ptr2, plane_stride);
     dest_ptr2 += plane_stride;
   }
@@ -333,7 +333,7 @@ static void yv12_extend_frame_bottom_c(YV12_BUFFER_CONFIG *ybf) {
   src_ptr2 = src_ptr1 + (plane_height * plane_stride) - plane_stride;
   dest_ptr2 = src_ptr2 + plane_stride;
 
-  for (i = 0; i < (int)(Border); i++) {
+  for (i = 0; i < (int)(Border); ++i) {
     memcpy(dest_ptr2, src_ptr2, plane_stride);
     dest_ptr2 += plane_stride;
   }
@@ -346,7 +346,7 @@ static void yv12_extend_frame_bottom_c(YV12_BUFFER_CONFIG *ybf) {
   src_ptr2 = src_ptr1 + (plane_height * plane_stride) - plane_stride;
   dest_ptr2 = src_ptr2 + plane_stride;
 
-  for (i = 0; i < (int)(Border); i++) {
+  for (i = 0; i < (int)(Border); ++i) {
     memcpy(dest_ptr2, src_ptr2, plane_stride);
     dest_ptr2 += plane_stride;
   }
@@ -379,7 +379,7 @@ static void yv12_extend_frame_left_right_c(YV12_BUFFER_CONFIG *ybf,
   dest_ptr1 = src_ptr1 - Border;
   dest_ptr2 = src_ptr2 + 1;
 
-  for (i = 0; i < plane_height; i++) {
+  for (i = 0; i < plane_height; ++i) {
     memset(dest_ptr1, src_ptr1[0], Border);
     memset(dest_ptr2, src_ptr2[0], Border);
     src_ptr1 += plane_stride;
@@ -402,7 +402,7 @@ static void yv12_extend_frame_left_right_c(YV12_BUFFER_CONFIG *ybf,
   dest_ptr1 = src_ptr1 - Border;
   dest_ptr2 = src_ptr2 + 1;
 
-  for (i = 0; i < plane_height; i++) {
+  for (i = 0; i < plane_height; ++i) {
     memset(dest_ptr1, src_ptr1[0], Border);
     memset(dest_ptr2, src_ptr2[0], Border);
     src_ptr1 += plane_stride;
@@ -421,7 +421,7 @@ static void yv12_extend_frame_left_right_c(YV12_BUFFER_CONFIG *ybf,
   dest_ptr1 = src_ptr1 - Border;
   dest_ptr2 = src_ptr2 + 1;
 
-  for (i = 0; i < plane_height; i++) {
+  for (i = 0; i < plane_height; ++i) {
     memset(dest_ptr1, src_ptr1[0], Border);
     memset(dest_ptr2, src_ptr2[0], Border);
     src_ptr1 += plane_stride;
@@ -458,7 +458,7 @@ static void decode_mb_rows(VP8D_COMP *pbi) {
 
   ref_fb_corrupted[INTRA_FRAME] = 0;
 
-  for (i = 1; i < MAX_REF_FRAMES; i++) {
+  for (i = 1; i < MAX_REF_FRAMES; ++i) {
     YV12_BUFFER_CONFIG *this_fb = pbi->dec_fb_ref[i];
 
     ref_buffer[i][0] = this_fb->y_buffer;
@@ -481,7 +481,7 @@ static void decode_mb_rows(VP8D_COMP *pbi) {
   vp8_setup_intra_recon_top_line(yv12_fb_new);
 
   /* Decode the individual macro block */
-  for (mb_row = 0; mb_row < pc->mb_rows; mb_row++) {
+  for (mb_row = 0; mb_row < pc->mb_rows; ++mb_row) {
     if (num_part > 1) {
       xd->current_bc = &pbi->mbc[ibc];
       ibc++;
@@ -521,7 +521,7 @@ static void decode_mb_rows(VP8D_COMP *pbi) {
                            xd->recon_left[2], xd->dst.y_stride,
                            xd->dst.uv_stride);
 
-    for (mb_col = 0; mb_col < pc->mb_cols; mb_col++) {
+    for (mb_col = 0; mb_col < pc->mb_cols; ++mb_col) {
       /* Distance of Mb to the various image edges.
        * These are specified to 8th pel as they are always compared to values
        * that are in 1/8th pel units
@@ -966,8 +966,8 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
       memset(xd->segment_feature_data, 0, sizeof(xd->segment_feature_data));
 
       /* For each segmentation feature (Quant and loop filter level) */
-      for (i = 0; i < MB_LVL_MAX; i++) {
-        for (j = 0; j < MAX_MB_SEGMENTS; j++) {
+      for (i = 0; i < MB_LVL_MAX; ++i) {
+        for (j = 0; j < MAX_MB_SEGMENTS; ++j) {
           /* Frame level data */
           if (vp8_read_bit(bc)) {
             xd->segment_feature_data[i][j] =
@@ -986,7 +986,7 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
       memset(xd->mb_segment_tree_probs, 255, sizeof(xd->mb_segment_tree_probs));
 
       /* Read the probs used to decode the segment id for each macro block. */
-      for (i = 0; i < MB_FEATURE_TREE_PROBS; i++) {
+      for (i = 0; i < MB_FEATURE_TREE_PROBS; ++i) {
         /* If not explicitly set value is defaulted to 255 by memset above */
         if (vp8_read_bit(bc))
           xd->mb_segment_tree_probs[i] = (vp8_prob)vp8_read_literal(bc, 8);
@@ -1014,7 +1014,7 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
 
     if (xd->mode_ref_lf_delta_update) {
       /* Send update */
-      for (i = 0; i < MAX_REF_LF_DELTAS; i++) {
+      for (i = 0; i < MAX_REF_LF_DELTAS; ++i) {
         if (vp8_read_bit(bc)) {
           /*sign = vp8_read_bit( bc );*/
           xd->ref_lf_deltas[i] = (signed char)vp8_read_literal(bc, 6);
@@ -1025,7 +1025,7 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
       }
 
       /* Send update */
-      for (i = 0; i < MAX_MODE_LF_DELTAS; i++) {
+      for (i = 0; i < MAX_MODE_LF_DELTAS; ++i) {
         if (vp8_read_bit(bc)) {
           /*sign = vp8_read_bit( bc );*/
           xd->mode_lf_deltas[i] = (signed char)vp8_read_literal(bc, 6);
@@ -1138,10 +1138,10 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
     pbi->independent_partitions = 1;
 
     /* read coef probability tree */
-    for (i = 0; i < BLOCK_TYPES; i++)
-      for (j = 0; j < COEF_BANDS; j++)
-        for (k = 0; k < PREV_COEF_CONTEXTS; k++)
-          for (l = 0; l < ENTROPY_NODES; l++) {
+    for (i = 0; i < BLOCK_TYPES; ++i)
+      for (j = 0; j < COEF_BANDS; ++j)
+        for (k = 0; k < PREV_COEF_CONTEXTS; ++k)
+          for (l = 0; l < ENTROPY_NODES; ++l) {
             vp8_prob *const p = pc->fc.coef_probs[i][j][k] + l;
 
             if (vp8_read(bc, vp8_coef_update_probs[i][j][k][l])) {

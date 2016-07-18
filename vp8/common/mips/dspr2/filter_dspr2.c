@@ -85,9 +85,9 @@ inline void prefetch_store(unsigned char *dst) {
 void dsputil_static_init(void) {
   int i;
 
-  for (i = 0; i < 256; i++) ff_cropTbl[i + CROP_WIDTH] = i;
+  for (i = 0; i < 256; ++i) ff_cropTbl[i + CROP_WIDTH] = i;
 
-  for (i = 0; i < CROP_WIDTH; i++) {
+  for (i = 0; i < CROP_WIDTH; ++i) {
     ff_cropTbl[i] = 0;
     ff_cropTbl[i + CROP_WIDTH + 256] = 255;
   }
@@ -112,7 +112,7 @@ void vp8_filter_block2d_first_pass_4(unsigned char *RESTRICT src_ptr,
 
   /* if (xoffset == 0) we don't need any filtering */
   if (vector3b == 0) {
-    for (i = 0; i < output_height; i++) {
+    for (i = 0; i < output_height; ++i) {
       /* prefetch src_ptr data to cache memory */
       prefetch_load(src_ptr + src_pixels_per_line);
       dst_ptr[0] = src_ptr[0];
@@ -290,7 +290,7 @@ void vp8_filter_block2d_first_pass_8_all(unsigned char *RESTRICT src_ptr,
 
   /* if (xoffset == 0) we don't need any filtering */
   if (xoffset == 0) {
-    for (i = 0; i < output_height; i++) {
+    for (i = 0; i < output_height; ++i) {
       /* prefetch src_ptr data to cache memory */
       prefetch_load(src_ptr + src_pixels_per_line);
 
@@ -802,7 +802,7 @@ void vp8_filter_block2d_first_pass16_0(unsigned char *RESTRICT src_ptr,
   prefetch_store(output_ptr + 32);
 
   /* copy memory from src buffer to dst buffer */
-  for (i = 0; i < 7; i++) {
+  for (i = 0; i < 7; ++i) {
     __asm__ __volatile__(
         "ulw    %[Temp1],   0(%[src_ptr])                               \n\t"
         "ulw    %[Temp2],   4(%[src_ptr])                               \n\t"

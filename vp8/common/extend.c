@@ -33,7 +33,7 @@ static void copy_and_extend_plane(unsigned char *s, /* source */
   dest_ptr1 = d - el;
   dest_ptr2 = d + w;
 
-  for (i = 0; i < h; i++) {
+  for (i = 0; i < h; ++i) {
     memset(dest_ptr1, src_ptr1[0], el);
     memcpy(dest_ptr1 + el, src_ptr1, w);
     memset(dest_ptr2, src_ptr2[0], er);
@@ -52,12 +52,12 @@ static void copy_and_extend_plane(unsigned char *s, /* source */
   dest_ptr2 = d + dp * (h)-el;
   linesize = el + er + w;
 
-  for (i = 0; i < et; i++) {
+  for (i = 0; i < et; ++i) {
     memcpy(dest_ptr1, src_ptr1, linesize);
     dest_ptr1 += dp;
   }
 
-  for (i = 0; i < eb; i++) {
+  for (i = 0; i < eb; ++i) {
     memcpy(dest_ptr2, src_ptr2, linesize);
     dest_ptr2 += dp;
   }
@@ -135,7 +135,7 @@ void vp8_extend_mb_row(YV12_BUFFER_CONFIG *ybf, unsigned char *YPtr,
   UPtr += ybf->uv_stride * 6;
   VPtr += ybf->uv_stride * 6;
 
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 4; ++i) {
     YPtr[i] = YPtr[-1];
     UPtr[i] = UPtr[-1];
     VPtr[i] = VPtr[-1];
@@ -145,7 +145,7 @@ void vp8_extend_mb_row(YV12_BUFFER_CONFIG *ybf, unsigned char *YPtr,
   UPtr += ybf->uv_stride;
   VPtr += ybf->uv_stride;
 
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 4; ++i) {
     YPtr[i] = YPtr[-1];
     UPtr[i] = UPtr[-1];
     VPtr[i] = VPtr[-1];

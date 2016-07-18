@@ -89,7 +89,7 @@ static int is_skin_color(int y, int cb, int cr, int consec_zeromv) {
       if (cb == 128 && cr == 128) return 0;
       // Exit on very strong cb.
       if (cb > 150 && cr < 110) return 0;
-      for (; i < 5; i++) {
+      for (; i < 5; ++i) {
         int skin_color_diff = evaluate_skin_color_difference(cb, cr, i);
         if (skin_color_diff < skin_threshold[i + 1]) {
           if (y < 60 && skin_color_diff > 3 * (skin_threshold[i + 1] >> 2))
@@ -259,7 +259,7 @@ static int pick_intra4x4block(MACROBLOCK *x, int ib,
   unsigned char *yleft = dst - 1;
   unsigned char top_left = Above[-1];
 
-  for (mode = B_DC_PRED; mode <= B_HE_PRED; mode++) {
+  for (mode = B_DC_PRED; mode <= B_HE_PRED; ++mode) {
     int this_rd;
 
     rate = mode_costs[mode];
@@ -294,7 +294,7 @@ static int pick_intra4x4mby_modes(MACROBLOCK *mb, int *Rate, int *best_dist) {
 
   bmode_costs = mb->inter_bmode_costs;
 
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < 16; ++i) {
     MODE_INFO *const mic = xd->mode_info_context;
     const int mis = xd->mode_info_stride;
 
@@ -354,7 +354,7 @@ static void pick_intra_mbuv_mode(MACROBLOCK *mb) {
   int pred_error[4] = { 0, 0, 0, 0 }, best_error = INT_MAX;
   MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
 
-  for (i = 0; i < 8; i++) {
+  for (i = 0; i < 8; ++i) {
     uleft_col[i] = x->dst.u_buffer[i * x->dst.uv_stride - 1];
     vleft_col[i] = x->dst.v_buffer[i * x->dst.uv_stride - 1];
   }
@@ -366,7 +366,7 @@ static void pick_intra_mbuv_mode(MACROBLOCK *mb) {
     shift = 2;
 
     if (x->up_available) {
-      for (i = 0; i < 8; i++) {
+      for (i = 0; i < 8; ++i) {
         Uaverage += uabove_row[i];
         Vaverage += vabove_row[i];
       }
@@ -375,7 +375,7 @@ static void pick_intra_mbuv_mode(MACROBLOCK *mb) {
     }
 
     if (x->left_available) {
-      for (i = 0; i < 8; i++) {
+      for (i = 0; i < 8; ++i) {
         Uaverage += uleft_col[i];
         Vaverage += vleft_col[i];
       }
@@ -387,8 +387,8 @@ static void pick_intra_mbuv_mode(MACROBLOCK *mb) {
     expected_vdc = (Vaverage + (1 << (shift - 1))) >> shift;
   }
 
-  for (i = 0; i < 8; i++) {
-    for (j = 0; j < 8; j++) {
+  for (i = 0; i < 8; ++i) {
+    for (j = 0; j < 8; ++j) {
       int predu = uleft_col[i] + uabove_row[j] - utop_left;
       int predv = vleft_col[i] + vabove_row[j] - vtop_left;
       int u_p, v_p;
@@ -434,7 +434,7 @@ static void pick_intra_mbuv_mode(MACROBLOCK *mb) {
     }
   }
 
-  for (i = DC_PRED; i <= TM_PRED; i++) {
+  for (i = DC_PRED; i <= TM_PRED; ++i) {
     if (best_error > pred_error[i]) {
       best_error = pred_error[i];
       best_mode = (MB_PREDICTION_MODE)i;
@@ -840,7 +840,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
   /* if we encode a new mv this is important
    * find the best new motion vector
    */
-  for (mode_index = 0; mode_index < MAX_MODES; mode_index++) {
+  for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
     int frame_cost;
     int this_rd = INT_MAX;
     int this_ref_frame = ref_frame_map[vp8_ref_frame_order[mode_index]];
@@ -1382,7 +1382,7 @@ void vp8_pick_intra_mode(MACROBLOCK *x, int *rate_) {
 
   pick_intra_mbuv_mode(x);
 
-  for (mode = DC_PRED; mode <= TM_PRED; mode++) {
+  for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
     xd->mode_info_context->mbmi.mode = mode;
     vp8_build_intra_predictors_mby_s(xd, xd->dst.y_buffer - xd->dst.y_stride,
                                      xd->dst.y_buffer - 1, xd->dst.y_stride,

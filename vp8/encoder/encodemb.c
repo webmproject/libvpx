@@ -59,7 +59,7 @@ static void build_dcblock(MACROBLOCK *x) {
   short *src_diff_ptr = &x->src_diff[384];
   int i;
 
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < 16; ++i) {
     src_diff_ptr[i] = x->coeff[i * 16];
   }
 }
@@ -360,7 +360,7 @@ static void check_reset_2nd_coeffs(MACROBLOCKD *x, int type, ENTROPY_CONTEXT *a,
 
   if (bd->dequant[0] >= 35 && bd->dequant[1] >= 35) return;
 
-  for (i = 0; i < (*bd->eob); i++) {
+  for (i = 0; i < (*bd->eob); ++i) {
     int coef = bd->dqcoeff[vp8_default_zig_zag1d[i]];
     sum += (coef >= 0) ? coef : -coef;
     if (sum >= 35) return;
@@ -374,7 +374,7 @@ static void check_reset_2nd_coeffs(MACROBLOCKD *x, int type, ENTROPY_CONTEXT *a,
   fall between -35 and +35.
   **************************************************************************/
   if (sum < 35) {
-    for (i = 0; i < (*bd->eob); i++) {
+    for (i = 0; i < (*bd->eob); ++i) {
       int rc = vp8_default_zig_zag1d[i];
       bd->qcoeff[rc] = 0;
       bd->dqcoeff[rc] = 0;
@@ -403,11 +403,11 @@ static void optimize_mb(MACROBLOCK *x) {
                    x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
   type = has_2nd_order ? PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC;
 
-  for (b = 0; b < 16; b++) {
+  for (b = 0; b < 16; ++b) {
     optimize_b(x, b, type, ta + vp8_block2above[b], tl + vp8_block2left[b]);
   }
 
-  for (b = 16; b < 24; b++) {
+  for (b = 16; b < 24; ++b) {
     optimize_b(x, b, PLANE_TYPE_UV, ta + vp8_block2above[b],
                tl + vp8_block2left[b]);
   }
@@ -444,7 +444,7 @@ void vp8_optimize_mby(MACROBLOCK *x) {
                    x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
   type = has_2nd_order ? PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC;
 
-  for (b = 0; b < 16; b++) {
+  for (b = 0; b < 16; ++b) {
     optimize_b(x, b, type, ta + vp8_block2above[b], tl + vp8_block2left[b]);
   }
 
@@ -473,7 +473,7 @@ void vp8_optimize_mbuv(MACROBLOCK *x) {
   ta = (ENTROPY_CONTEXT *)&t_above;
   tl = (ENTROPY_CONTEXT *)&t_left;
 
-  for (b = 16; b < 24; b++) {
+  for (b = 16; b < 24; ++b) {
     optimize_b(x, b, PLANE_TYPE_UV, ta + vp8_block2above[b],
                tl + vp8_block2left[b]);
   }

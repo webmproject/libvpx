@@ -17,7 +17,7 @@ void vp8_dequant_idct_add_dspr2(short *input, short *dq, unsigned char *dest,
                                 int stride) {
   int i;
 
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < 16; ++i) {
     input[i] = dq[i] * input[i];
   }
 

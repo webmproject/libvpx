@@ -53,7 +53,7 @@ void vp8_build_intra_predictors_mby_s(MACROBLOCKD *x, unsigned char *yabove_row,
   int i;
   intra_pred_fn fn;
 
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < 16; ++i) {
     yleft_col[i] = yleft[i * left_stride];
   }
 
@@ -76,7 +76,7 @@ void vp8_build_intra_predictors_mbuv_s(
   int i;
   intra_pred_fn fn;
 
-  for (i = 0; i < 8; i++) {
+  for (i = 0; i < 8; ++i) {
     uleft_col[i] = uleft[i * left_stride];
     vleft_col[i] = vleft[i * left_stride];
   }

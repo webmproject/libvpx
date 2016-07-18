@@ -392,7 +392,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
         xd->dst = pc->yv12_fb[pc->new_fb_idx];
 
 #if CONFIG_MULTITHREAD
-        for (i = 0; i < pbi->allocated_decoding_thread_count; i++) {
+        for (i = 0; i < pbi->allocated_decoding_thread_count; ++i) {
           pbi->mb_row_di[i].mbd.dst = pc->yv12_fb[pc->new_fb_idx];
           vp8_build_block_doffsets(&pbi->mb_row_di[i].mbd);
         }

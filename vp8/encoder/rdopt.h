@@ -22,8 +22,8 @@ extern "C" {
 static INLINE void insertsortmv(int arr[], int len) {
   int i, j, k;
 
-  for (i = 1; i <= len - 1; i++) {
-    for (j = 0; j < i; j++) {
+  for (i = 1; i <= len - 1; ++i) {
+    for (j = 0; j < i; ++j) {
       if (arr[j] > arr[i]) {
         int temp;
 
@@ -40,8 +40,8 @@ static INLINE void insertsortmv(int arr[], int len) {
 static INLINE void insertsortsad(int arr[], int idx[], int len) {
   int i, j, k;
 
-  for (i = 1; i <= len - 1; i++) {
-    for (j = 0; j < i; j++) {
+  for (i = 1; i <= len - 1; ++i) {
+    for (j = 0; j < i; ++j) {
       if (arr[j] > arr[i]) {
         int temp, tempi;
 
@@ -101,7 +101,7 @@ static INLINE void get_reference_search_order(const VP8_COMP *cpi,
   if (cpi->ref_frame_flags & VP8_LAST_FRAME) ref_frame_map[i++] = LAST_FRAME;
   if (cpi->ref_frame_flags & VP8_GOLD_FRAME) ref_frame_map[i++] = GOLDEN_FRAME;
   if (cpi->ref_frame_flags & VP8_ALTR_FRAME) ref_frame_map[i++] = ALTREF_FRAME;
-  for (; i < 4; i++) ref_frame_map[i] = -1;
+  for (; i < 4; ++i) ref_frame_map[i] = -1;
 }
 
 extern void vp8_mv_pred(VP8_COMP *cpi, MACROBLOCKD *xd, const MODE_INFO *here,

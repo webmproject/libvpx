@@ -27,7 +27,7 @@ extern "C" {
 static void eob_adjust(char *eobs, short *diff) {
   /* eob adjust.... the idct can only skip if both the dc and eob are zero */
   int js;
-  for (js = 0; js < 16; js++) {
+  for (js = 0; js < 16; ++js) {
     if ((eobs[js] == 0) && (diff[0] != 0)) eobs[js]++;
     diff += 16;
   }

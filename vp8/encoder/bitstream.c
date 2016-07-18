@@ -302,7 +302,7 @@ static void pack_tokens_into_partitions(VP8_COMP *cpi, unsigned char *cx_data,
   unsigned char *ptr_end = cx_data_end;
   vp8_writer *w;
 
-  for (i = 0; i < num_part; i++) {
+  for (i = 0; i < num_part; ++i) {
     int mb_row;
 
     w = cpi->bc + i + 1;
@@ -326,7 +326,7 @@ static void pack_tokens_into_partitions(VP8_COMP *cpi, unsigned char *cx_data,
 static void pack_mb_row_tokens(VP8_COMP *cpi, vp8_writer *w) {
   int mb_row;
 
-  for (mb_row = 0; mb_row < cpi->common.mb_rows; mb_row++) {
+  for (mb_row = 0; mb_row < cpi->common.mb_rows; ++mb_row) {
     const TOKENEXTRA *p = cpi->tplist[mb_row].start;
     const TOKENEXTRA *stop = cpi->tplist[mb_row].stop;
     int tokens = (int)(stop - p);
@@ -668,16 +668,16 @@ static void print_prob_tree(vp8_prob
     int i,j,k,l;
     FILE* f = fopen("enc_tree_probs.txt", "a");
     fprintf(f, "{\n");
-    for (i = 0; i < BLOCK_TYPES; i++)
+    for (i = 0; i < BLOCK_TYPES; ++i)
     {
         fprintf(f, "  {\n");
-        for (j = 0; j < COEF_BANDS; j++)
+        for (j = 0; j < COEF_BANDS; ++j)
         {
             fprintf(f, "    {\n");
-            for (k = 0; k < PREV_COEF_CONTEXTS; k++)
+            for (k = 0; k < PREV_COEF_CONTEXTS; ++k)
             {
                 fprintf(f, "      {");
-                for (l = 0; l < ENTROPY_NODES; l++)
+                for (l = 0; l < ENTROPY_NODES; ++l)
                 {
                     fprintf(f, "%3u, ",
                             (unsigned int)(coef_probs [i][j][k][l]));
@@ -1129,9 +1129,9 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
       vp8_write_bit(bc, xd->mb_segement_abs_delta);
 
       /* For each segmentation feature (Quant and loop filter level) */
-      for (i = 0; i < MB_LVL_MAX; i++) {
+      for (i = 0; i < MB_LVL_MAX; ++i) {
         /* For each of the segments */
-        for (j = 0; j < MAX_MB_SEGMENTS; j++) {
+        for (j = 0; j < MAX_MB_SEGMENTS; ++j) {
           Data = xd->segment_feature_data[i][j];
 
           /* Frame level data */
@@ -1154,7 +1154,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
 
     if (xd->update_mb_segmentation_map) {
       /* Write the probs used to decode the segment id for each mb */
-      for (i = 0; i < MB_FEATURE_TREE_PROBS; i++) {
+      for (i = 0; i < MB_FEATURE_TREE_PROBS; ++i) {
         int Data = xd->mb_segment_tree_probs[i];
 
         if (Data != 255) {
@@ -1185,7 +1185,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
       int Data;
 
       /* Send update */
-      for (i = 0; i < MAX_REF_LF_DELTAS; i++) {
+      for (i = 0; i < MAX_REF_LF_DELTAS; ++i) {
         Data = xd->ref_lf_deltas[i];
 
         /* Frame level data */
@@ -1207,7 +1207,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
       }
 
       /* Send update */
-      for (i = 0; i < MAX_MODE_LF_DELTAS; i++) {
+      for (i = 0; i < MAX_MODE_LF_DELTAS; ++i) {
         Data = xd->mode_lf_deltas[i];
 
         if (xd->mode_lf_deltas[i] != xd->last_mode_lf_deltas[i] ||
@@ -1356,7 +1356,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
 
       cpi->partition_sz[0] += 3 * (num_part - 1);
 
-      for (i = 1; i < num_part; i++) {
+      for (i = 1; i < num_part; ++i) {
         write_partition_size(dp, cpi->partition_sz[i]);
         dp += 3;
       }
@@ -1364,7 +1364,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
 
     if (!cpi->output_partition) {
       /* concatenate partition buffers */
-      for (i = 0; i < num_part; i++) {
+      for (i = 0; i < num_part; ++i) {
         memmove(dp, cpi->partition_d[i + 1], cpi->partition_sz[i + 1]);
         cpi->partition_d[i + 1] = dp;
         dp += cpi->partition_sz[i + 1];
@@ -1373,7 +1373,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
 
     /* update total size */
     *size = 0;
-    for (i = 0; i < num_part + 1; i++) {
+    for (i = 0; i < num_part + 1; ++i) {
       *size += cpi->partition_sz[i];
     }
   }
@@ -1387,14 +1387,14 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
 
     validate_buffer(cx_data, 3 * (num_part - 1), cx_data_end, &pc->error);
 
-    for (i = 1; i < num_part + 1; i++) {
+    for (i = 1; i < num_part + 1; ++i) {
       cpi->bc[i].error = &pc->error;
     }
 
     pack_tokens_into_partitions(cpi, cx_data + 3 * (num_part - 1), cx_data_end,
                                 num_part);
 
-    for (i = 1; i < num_part; i++) {
+    for (i = 1; i < num_part; ++i) {
       cpi->partition_sz[i] = cpi->bc[i].pos;
       write_partition_size(cx_data, cpi->partition_sz[i]);
       cx_data += 3;
@@ -1434,16 +1434,16 @@ void print_tree_update_probs() {
           "const vp8_prob tree_update_probs[BLOCK_TYPES] [COEF_BANDS] "
           "[PREV_COEF_CONTEXTS] [ENTROPY_NODES] = {\n");
 
-  for (i = 0; i < BLOCK_TYPES; i++) {
+  for (i = 0; i < BLOCK_TYPES; ++i) {
     fprintf(f, "  { \n");
 
-    for (j = 0; j < COEF_BANDS; j++) {
+    for (j = 0; j < COEF_BANDS; ++j) {
       fprintf(f, "    {\n");
 
-      for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
+      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
         fprintf(f, "      {");
 
-        for (l = 0; l < ENTROPY_NODES; l++) {
+        for (l = 0; l < ENTROPY_NODES; ++l) {
           Sum =
               tree_update_hist[i][j][k][l][0] + tree_update_hist[i][j][k][l][1];
 

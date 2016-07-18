@@ -38,7 +38,7 @@ void vp8_short_idct4x4llm_c(short *input, unsigned char *pred_ptr,
   int temp1, temp2;
   int shortpitch = 4;
 
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 4; ++i) {
     a1 = ip[0] + ip[8];
     b1 = ip[0] - ip[8];
 
@@ -63,7 +63,7 @@ void vp8_short_idct4x4llm_c(short *input, unsigned char *pred_ptr,
   ip = output;
   op = output;
 
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 4; ++i) {
     a1 = ip[0] + ip[2];
     b1 = ip[0] - ip[2];
 
@@ -86,8 +86,8 @@ void vp8_short_idct4x4llm_c(short *input, unsigned char *pred_ptr,
   }
 
   ip = output;
-  for (r = 0; r < 4; r++) {
-    for (c = 0; c < 4; c++) {
+  for (r = 0; r < 4; ++r) {
+    for (c = 0; c < 4; ++c) {
       int a = ip[c] + pred_ptr[c];
 
       if (a < 0) a = 0;
@@ -108,8 +108,8 @@ void vp8_dc_only_idct_add_c(short input_dc, unsigned char *pred_ptr,
   int a1 = ((input_dc + 4) >> 3);
   int r, c;
 
-  for (r = 0; r < 4; r++) {
-    for (c = 0; c < 4; c++) {
+  for (r = 0; r < 4; ++r) {
+    for (c = 0; c < 4; ++c) {
       int a = a1 + pred_ptr[c];
 
       if (a < 0) a = 0;
@@ -132,7 +132,7 @@ void vp8_short_inv_walsh4x4_c(short *input, short *mb_dqcoeff) {
   short *ip = input;
   short *op = output;
 
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 4; ++i) {
     a1 = ip[0] + ip[12];
     b1 = ip[4] + ip[8];
     c1 = ip[4] - ip[8];
@@ -149,7 +149,7 @@ void vp8_short_inv_walsh4x4_c(short *input, short *mb_dqcoeff) {
   ip = output;
   op = output;
 
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 4; ++i) {
     a1 = ip[0] + ip[3];
     b1 = ip[1] + ip[2];
     c1 = ip[1] - ip[2];
@@ -169,7 +169,7 @@ void vp8_short_inv_walsh4x4_c(short *input, short *mb_dqcoeff) {
     op += 4;
   }
 
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < 16; ++i) {
     mb_dqcoeff[i * 16] = output[i];
   }
 }
@@ -179,7 +179,7 @@ void vp8_short_inv_walsh4x4_1_c(short *input, short *mb_dqcoeff) {
   int a1;
 
   a1 = ((input[0] + 3) >> 3);
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < 16; ++i) {
     mb_dqcoeff[i * 16] = a1;
   }
 }

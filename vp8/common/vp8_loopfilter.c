@@ -17,7 +17,7 @@
 static void lf_init_lut(loop_filter_info_n *lfi) {
   int filt_lvl;
 
-  for (filt_lvl = 0; filt_lvl <= MAX_LOOP_FILTER; filt_lvl++) {
+  for (filt_lvl = 0; filt_lvl <= MAX_LOOP_FILTER; ++filt_lvl) {
     if (filt_lvl >= 40) {
       lfi->hev_thr_lut[KEY_FRAME][filt_lvl] = 2;
       lfi->hev_thr_lut[INTER_FRAME][filt_lvl] = 3;
@@ -51,7 +51,7 @@ void vp8_loop_filter_update_sharpness(loop_filter_info_n *lfi,
   int i;
 
   /* For each possible value for the loop filter fill out limits */
-  for (i = 0; i <= MAX_LOOP_FILTER; i++) {
+  for (i = 0; i <= MAX_LOOP_FILTER; ++i) {
     int filt_lvl = i;
     int block_inside_limit = 0;
 
@@ -85,7 +85,7 @@ void vp8_loop_filter_init(VP8_COMMON *cm) {
   lf_init_lut(lfi);
 
   /* init hev threshold const vectors */
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 4; ++i) {
     memset(lfi->hev_thr[i], i, SIMD_WIDTH);
   }
 }
@@ -104,7 +104,7 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm, MACROBLOCKD *mbd,
     cm->last_sharpness_level = cm->sharpness_level;
   }
 
-  for (seg = 0; seg < MAX_MB_SEGMENTS; seg++) {
+  for (seg = 0; seg < MAX_MB_SEGMENTS; ++seg) {
     int lvl_seg = default_filt_lvl;
     int lvl_ref, lvl_mode;
 
@@ -149,12 +149,12 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm, MACROBLOCKD *mbd,
     lfi->lvl[seg][ref][mode] = lvl_mode;
 
     /* LAST, GOLDEN, ALT */
-    for (ref = 1; ref < MAX_REF_FRAMES; ref++) {
+    for (ref = 1; ref < MAX_REF_FRAMES; ++ref) {
       /* Apply delta for reference frame */
       lvl_ref = lvl_seg + mbd->ref_lf_deltas[ref];
 
       /* Apply delta for Inter modes */
-      for (mode = 1; mode < 4; mode++) {
+      for (mode = 1; mode < 4; ++mode) {
         lvl_mode = lvl_ref + mbd->mode_lf_deltas[mode];
         /* clamp */
         lvl_mode = (lvl_mode > 0) ? (lvl_mode > 63 ? 63 : lvl_mode) : 0;
@@ -175,7 +175,7 @@ void vp8_loop_filter_row_normal(VP8_COMMON *cm, MODE_INFO *mode_info_context,
   loop_filter_info lfi;
   FRAME_TYPE frame_type = cm->frame_type;
 
-  for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
+  for (mb_col = 0; mb_col < cm->mb_cols; ++mb_col) {
     int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
                    mode_info_context->mbmi.mode != SPLITMV &&
                    mode_info_context->mbmi.mb_skip_coeff);
@@ -228,7 +228,7 @@ void vp8_loop_filter_row_simple(VP8_COMMON *cm, MODE_INFO *mode_info_context,
   loop_filter_info_n *lfi_n = &cm->lf_info;
   (void)post_uvstride;
 
-  for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
+  for (mb_col = 0; mb_col < cm->mb_cols; ++mb_col) {
     int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
                    mode_info_context->mbmi.mode != SPLITMV &&
                    mode_info_context->mbmi.mb_skip_coeff);
@@ -294,8 +294,8 @@ void vp8_loop_filter_frame(VP8_COMMON *cm, MACROBLOCKD *mbd, int frame_type) {
 
   /* vp8_filter each macro block */
   if (cm->filter_type == NORMAL_LOOPFILTER) {
-    for (mb_row = 0; mb_row < mb_rows; mb_row++) {
-      for (mb_col = 0; mb_col < mb_cols; mb_col++) {
+    for (mb_row = 0; mb_row < mb_rows; ++mb_row) {
+      for (mb_col = 0; mb_col < mb_cols; ++mb_col) {
         int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
                        mode_info_context->mbmi.mode != SPLITMV &&
                        mode_info_context->mbmi.mb_skip_coeff);
@@ -345,8 +345,8 @@ void vp8_loop_filter_frame(VP8_COMMON *cm, MACROBLOCKD *mbd, int frame_type) {
     }
   } else /* SIMPLE_LOOPFILTER */
   {
-    for (mb_row = 0; mb_row < mb_rows; mb_row++) {
-      for (mb_col = 0; mb_col < mb_cols; mb_col++) {
+    for (mb_row = 0; mb_row < mb_rows; ++mb_row) {
+      for (mb_col = 0; mb_col < mb_cols; ++mb_col) {
         int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
                        mode_info_context->mbmi.mode != SPLITMV &&
                        mode_info_context->mbmi.mb_skip_coeff);
@@ -416,8 +416,8 @@ void vp8_loop_filter_frame_yonly(VP8_COMMON *cm, MACROBLOCKD *mbd,
   y_ptr = post->y_buffer;
 
   /* vp8_filter each macro block */
-  for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
-    for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
+  for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
+    for (mb_col = 0; mb_col < cm->mb_cols; ++mb_col) {
       int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
                      mode_info_context->mbmi.mode != SPLITMV &&
                      mode_info_context->mbmi.mb_skip_coeff);
@@ -514,8 +514,8 @@ void vp8_loop_filter_partial_frame(VP8_COMMON *cm, MACROBLOCKD *mbd,
   mode_info_context = cm->mi + (post->y_height >> 5) * (mb_cols + 1);
 
   /* vp8_filter each macro block */
-  for (mb_row = 0; mb_row < (linestocopy >> 4); mb_row++) {
-    for (mb_col = 0; mb_col < mb_cols; mb_col++) {
+  for (mb_row = 0; mb_row < (linestocopy >> 4); ++mb_row) {
+    for (mb_col = 0; mb_col < mb_cols; ++mb_col) {
       int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
                      mode_info_context->mbmi.mode != SPLITMV &&
                      mode_info_context->mbmi.mb_skip_coeff);

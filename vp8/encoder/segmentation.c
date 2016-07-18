@@ -24,9 +24,9 @@ void vp8_update_gf_useage_maps(VP8_COMP *cpi, VP8_COMMON *cm, MACROBLOCK *x) {
     cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
   } else {
     /* for each macroblock row in image */
-    for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
+    for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
       /* for each macroblock col in image */
-      for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
+      for (mb_col = 0; mb_col < cm->mb_cols; ++mb_col) {
         /* If using golden then set GF active flag if not already set.
          * If using last frame 0,0 mode then leave flag as it is
          * else if using non 0,0 motion or intra modes then clear

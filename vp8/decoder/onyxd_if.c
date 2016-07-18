@@ -191,7 +191,7 @@ vpx_codec_err_t vp8dx_set_reference(VP8D_COMP *pbi,
 
 static int get_free_fb(VP8_COMMON *cm) {
   int i;
-  for (i = 0; i < NUM_YV12_BUFFERS; i++)
+  for (i = 0; i < NUM_YV12_BUFFERS; ++i)
     if (cm->fb_idx_ref_cnt[i] == 0) break;
 
   assert(i < NUM_YV12_BUFFERS);
@@ -421,7 +421,7 @@ int vp8dx_references_buffer(VP8_COMMON *oci, int ref_frame) {
   const MODE_INFO *mi = oci->mi;
   int mb_row, mb_col;
 
-  for (mb_row = 0; mb_row < oci->mb_rows; mb_row++) {
+  for (mb_row = 0; mb_row < oci->mb_rows; ++mb_row) {
     for (mb_col = 0; mb_col < oci->mb_cols; mb_col++, mi++) {
       if (mi->mbmi.ref_frame == ref_frame) return 1;
     }

@@ -22,7 +22,7 @@ void vp8_dc_only_idct_add_neon(int16_t input_dc, unsigned char *pred_ptr,
 
   qAdd = vdupq_n_u16(a1);
 
-  for (i = 0; i < 2; i++) {
+  for (i = 0; i < 2; ++i) {
     d2u32 = vld1_lane_u32((const uint32_t *)pred_ptr, d2u32, 0);
     pred_ptr += pred_stride;
     d2u32 = vld1_lane_u32((const uint32_t *)pred_ptr, d2u32, 1);

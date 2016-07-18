@@ -142,7 +142,7 @@ static void calc_av_activity(VP8_COMP *cpi, int64_t activity_sum) {
            sizeof(unsigned int) * cpi->common.MBs);
 
     /* Ripple each value down to its correct position */
-    for (i = 1; i < cpi->common.MBs; i++) {
+    for (i = 1; i < cpi->common.MBs; ++i) {
       for (j = i; j > 0; j--) {
         if (sortlist[j] < sortlist[j - 1]) {
           /* Swap values */
@@ -197,9 +197,9 @@ static void calc_activity_index(VP8_COMP *cpi, MACROBLOCK *x) {
   x->mb_activity_ptr = cpi->mb_activity_map;
 
   /* Calculate normalized mb activity number. */
-  for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
+  for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
     /* for each macroblock col in image */
-    for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
+    for (mb_col = 0; mb_col < cm->mb_cols; ++mb_col) {
       /* Read activity from the map */
       act = *(x->mb_activity_ptr);
 
@@ -249,14 +249,14 @@ static void build_activity_map(VP8_COMP *cpi) {
   int64_t activity_sum = 0;
 
   /* for each macroblock row in image */
-  for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
+  for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
 #if ALT_ACT_MEASURE
     /* reset above block coeffs */
     xd->up_available = (mb_row != 0);
     recon_yoffset = (mb_row * recon_y_stride * 16);
 #endif
     /* for each macroblock col in image */
-    for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
+    for (mb_col = 0; mb_col < cm->mb_cols; ++mb_col) {
 #if ALT_ACT_MEASURE
       xd->dst.y_buffer = new_yv12->y_buffer + recon_yoffset;
       xd->left_available = (mb_col != 0);
@@ -386,7 +386,7 @@ static void encode_mb_row(VP8_COMP *cpi, VP8_COMMON *cm, int mb_row,
   x->mb_activity_ptr = &cpi->mb_activity_map[map_index];
 
   /* for each macroblock col in image */
-  for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
+  for (mb_col = 0; mb_col < cm->mb_cols; ++mb_col) {
 #if (CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING)
     *tp = cpi->tok;
 #endif
@@ -465,7 +465,7 @@ static void encode_mb_row(VP8_COMP *cpi, VP8_COMMON *cm, int mb_row,
       if (xd->mbmi.mode == SPLITMV) {
         int b;
 
-        for (b = 0; b < xd->mbmi.partition_count; b++) {
+        for (b = 0; b < xd->mbmi.partition_count; ++b) {
           inter_b_modes[x->partition->bmi[b].mode]++;
         }
       }
@@ -726,7 +726,7 @@ void vp8_encode_frame(VP8_COMP *cpi) {
 #if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
   {
     int i;
-    for (i = 0; i < num_part; i++) {
+    for (i = 0; i < num_part; ++i) {
       vp8_start_encode(&bc[i], cpi->partition_d[i + 1],
                        cpi->partition_d_end[i + 1]);
       bc[i].error = &cm->error;
@@ -746,9 +746,9 @@ void vp8_encode_frame(VP8_COMP *cpi) {
       vp8cx_init_mbrthread_data(cpi, x, cpi->mb_row_ei,
                                 cpi->encoding_thread_count);
 
-      for (i = 0; i < cm->mb_rows; i++) cpi->mt_current_mb_col[i] = -1;
+      for (i = 0; i < cm->mb_rows; ++i) cpi->mt_current_mb_col[i] = -1;
 
-      for (i = 0; i < cpi->encoding_thread_count; i++) {
+      for (i = 0; i < cpi->encoding_thread_count; ++i) {
         sem_post(&cpi->h_event_start_encoding[i]);
       }
 
@@ -788,7 +788,7 @@ void vp8_encode_frame(VP8_COMP *cpi) {
       sem_wait(
           &cpi->h_event_end_encoding); /* wait for other threads to finish */
 
-      for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
+      for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
         cpi->tok_count += (unsigned int)(cpi->tplist[mb_row].stop -
                                          cpi->tplist[mb_row].start);
       }
@@ -797,29 +797,29 @@ void vp8_encode_frame(VP8_COMP *cpi) {
         int j;
 
         if (xd->segmentation_enabled) {
-          for (i = 0; i < cpi->encoding_thread_count; i++) {
-            for (j = 0; j < 4; j++)
+          for (i = 0; i < cpi->encoding_thread_count; ++i) {
+            for (j = 0; j < 4; ++j)
               segment_counts[j] += cpi->mb_row_ei[i].segment_counts[j];
           }
         }
       }
 
-      for (i = 0; i < cpi->encoding_thread_count; i++) {
+      for (i = 0; i < cpi->encoding_thread_count; ++i) {
         int mode_count;
         int c_idx;
         totalrate += cpi->mb_row_ei[i].totalrate;
 
         cpi->mb.skip_true_count += cpi->mb_row_ei[i].mb.skip_true_count;
 
-        for (mode_count = 0; mode_count < VP8_YMODES; mode_count++)
+        for (mode_count = 0; mode_count < VP8_YMODES; ++mode_count)
           cpi->mb.ymode_count[mode_count] +=
               cpi->mb_row_ei[i].mb.ymode_count[mode_count];
 
-        for (mode_count = 0; mode_count < VP8_UV_MODES; mode_count++)
+        for (mode_count = 0; mode_count < VP8_UV_MODES; ++mode_count)
           cpi->mb.uv_mode_count[mode_count] +=
               cpi->mb_row_ei[i].mb.uv_mode_count[mode_count];
 
-        for (c_idx = 0; c_idx < MVvals; c_idx++) {
+        for (c_idx = 0; c_idx < MVvals; ++c_idx) {
           cpi->mb.MVcount[0][c_idx] += cpi->mb_row_ei[i].mb.MVcount[0][c_idx];
           cpi->mb.MVcount[1][c_idx] += cpi->mb_row_ei[i].mb.MVcount[1][c_idx];
         }
@@ -827,11 +827,11 @@ void vp8_encode_frame(VP8_COMP *cpi) {
         cpi->mb.prediction_error += cpi->mb_row_ei[i].mb.prediction_error;
         cpi->mb.intra_error += cpi->mb_row_ei[i].mb.intra_error;
 
-        for (c_idx = 0; c_idx < MAX_REF_FRAMES; c_idx++)
+        for (c_idx = 0; c_idx < MAX_REF_FRAMES; ++c_idx)
           cpi->mb.count_mb_ref_frame_usage[c_idx] +=
               cpi->mb_row_ei[i].mb.count_mb_ref_frame_usage[c_idx];
 
-        for (c_idx = 0; c_idx < MAX_ERROR_BINS; c_idx++)
+        for (c_idx = 0; c_idx < MAX_ERROR_BINS; ++c_idx)
           cpi->mb.error_bins[c_idx] += cpi->mb_row_ei[i].mb.error_bins[c_idx];
 
         /* add up counts for each thread */
@@ -843,7 +843,7 @@ void vp8_encode_frame(VP8_COMP *cpi) {
     {
 
       /* for each macroblock row in image */
-      for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
+      for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
         vp8_zero(cm->left_context)
 
 #if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
@@ -864,7 +864,7 @@ void vp8_encode_frame(VP8_COMP *cpi) {
 #if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
     {
       int i;
-      for (i = 0; i < num_part; i++) {
+      for (i = 0; i < num_part; ++i) {
         vp8_stop_encode(&bc[i]);
         cpi->partition_sz[i + 1] = bc[i].pos;
       }
@@ -903,7 +903,7 @@ void vp8_encode_frame(VP8_COMP *cpi) {
         xd->mb_segment_tree_probs[2] = (segment_counts[2] * 255) / tot_count;
 
       /* Zero probabilities not allowed */
-      for (i = 0; i < MB_FEATURE_TREE_PROBS; i++) {
+      for (i = 0; i < MB_FEATURE_TREE_PROBS; ++i) {
         if (xd->mb_segment_tree_probs[i] == 0) xd->mb_segment_tree_probs[i] = 1;
       }
     }
@@ -945,27 +945,27 @@ void vp8_setup_block_ptrs(MACROBLOCK *x) {
   int r, c;
   int i;
 
-  for (r = 0; r < 4; r++) {
-    for (c = 0; c < 4; c++) {
+  for (r = 0; r < 4; ++r) {
+    for (c = 0; c < 4; ++c) {
       x->block[r * 4 + c].src_diff = x->src_diff + r * 4 * 16 + c * 4;
     }
   }
 
-  for (r = 0; r < 2; r++) {
-    for (c = 0; c < 2; c++) {
+  for (r = 0; r < 2; ++r) {
+    for (c = 0; c < 2; ++c) {
       x->block[16 + r * 2 + c].src_diff = x->src_diff + 256 + r * 4 * 8 + c * 4;
     }
   }
 
-  for (r = 0; r < 2; r++) {
-    for (c = 0; c < 2; c++) {
+  for (r = 0; r < 2; ++r) {
+    for (c = 0; c < 2; ++c) {
       x->block[20 + r * 2 + c].src_diff = x->src_diff + 320 + r * 4 * 8 + c * 4;
     }
   }
 
   x->block[24].src_diff = x->src_diff + 384;
 
-  for (i = 0; i < 25; i++) {
+  for (i = 0; i < 25; ++i) {
     x->block[i].coeff = x->coeff + i * 16;
   }
 }
@@ -978,8 +978,8 @@ void vp8_build_block_offsets(MACROBLOCK *x) {
 
   /* y blocks */
   x->thismb_ptr = &x->thismb[0];
-  for (br = 0; br < 4; br++) {
-    for (bc = 0; bc < 4; bc++) {
+  for (br = 0; br < 4; ++br) {
+    for (bc = 0; bc < 4; ++bc) {
       BLOCK *this_block = &x->block[block];
       this_block->base_src = &x->thismb_ptr;
       this_block->src_stride = 16;
@@ -989,8 +989,8 @@ void vp8_build_block_offsets(MACROBLOCK *x) {
   }
 
   /* u blocks */
-  for (br = 0; br < 2; br++) {
-    for (bc = 0; bc < 2; bc++) {
+  for (br = 0; br < 2; ++br) {
+    for (bc = 0; bc < 2; ++bc) {
       BLOCK *this_block = &x->block[block];
       this_block->base_src = &x->src.u_buffer;
       this_block->src_stride = x->src.uv_stride;
@@ -1000,8 +1000,8 @@ void vp8_build_block_offsets(MACROBLOCK *x) {
   }
 
   /* v blocks */
-  for (br = 0; br < 2; br++) {
-    for (bc = 0; bc < 2; bc++) {
+  for (br = 0; br < 2; ++br) {
+    for (bc = 0; bc < 2; ++bc) {
       BLOCK *this_block = &x->block[block];
       this_block->base_src = &x->src.v_buffer;
       this_block->src_stride = x->src.uv_stride;

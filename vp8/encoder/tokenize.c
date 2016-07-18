@@ -146,7 +146,7 @@ static void tokenize2nd_order_b(MACROBLOCK *x, TOKENEXTRA **tp, VP8_COMP *cpi) {
   t++;
   c = 1;
 
-  for (; c < eob; c++) {
+  for (; c < eob; ++c) {
     rc = vp8_default_zig_zag1d[c];
     band = vp8_coef_bands[c];
     v = qcoeff_ptr[rc];
@@ -238,7 +238,7 @@ static void tokenize1st_order_b(
     c++;
 
     assert(eob <= 16);
-    for (; c < eob; c++) {
+    for (; c < eob; ++c) {
       rc = vp8_default_zig_zag1d[c];
       band = vp8_coef_bands[c];
       v = qcoeff_ptr[rc];
@@ -307,7 +307,7 @@ static void tokenize1st_order_b(
     c = 1;
 
     assert(eob <= 16);
-    for (; c < eob; c++) {
+    for (; c < eob; ++c) {
       rc = vp8_default_zig_zag1d[c];
       band = vp8_coef_bands[c];
       v = qcoeff_ptr[rc];
@@ -346,10 +346,10 @@ static int mb_is_skippable(MACROBLOCKD *x, int has_y2_block) {
   int i = 0;
 
   if (has_y2_block) {
-    for (i = 0; i < 16; i++) skip &= (x->eobs[i] < 2);
+    for (i = 0; i < 16; ++i) skip &= (x->eobs[i] < 2);
   }
 
-  for (; i < 24 + has_y2_block; i++) skip &= (!x->eobs[i]);
+  for (; i < 24 + has_y2_block; ++i) skip &= (!x->eobs[i]);
 
   return skip;
 }
@@ -515,11 +515,11 @@ void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t) {
     plane_type = 0;
   }
 
-  for (b = 0; b < 16; b++)
+  for (b = 0; b < 16; ++b)
     stuff1st_order_b(t, A + vp8_block2above[b], L + vp8_block2left[b],
                      plane_type, cpi, x);
 
-  for (b = 16; b < 24; b++)
+  for (b = 16; b < 24; ++b)
     stuff1st_order_buv(t, A + vp8_block2above[b], L + vp8_block2left[b], cpi,
                        x);
 }

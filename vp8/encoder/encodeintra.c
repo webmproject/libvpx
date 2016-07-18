@@ -32,7 +32,7 @@ int vp8_encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_dc_pred) {
 
     vp8_inverse_transform_mby(&x->e_mbd);
   } else {
-    for (i = 0; i < 16; i++) {
+    for (i = 0; i < 16; ++i) {
       x->e_mbd.block[i].bmi.as_mode = B_DC_PRED;
       vp8_encode_intra4x4block(x, i);
     }
@@ -74,7 +74,7 @@ void vp8_encode_intra4x4mby(MACROBLOCK *mb) {
   MACROBLOCKD *xd = &mb->e_mbd;
   intra_prediction_down_copy(xd, xd->dst.y_buffer - xd->dst.y_stride + 16);
 
-  for (i = 0; i < 16; i++) vp8_encode_intra4x4block(mb, i);
+  for (i = 0; i < 16; ++i) vp8_encode_intra4x4block(mb, i);
   return;
 }
 

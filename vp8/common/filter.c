@@ -38,8 +38,8 @@ static void filter_block2d_first_pass(unsigned char *src_ptr, int *output_ptr,
   unsigned int i, j;
   int Temp;
 
-  for (i = 0; i < output_height; i++) {
-    for (j = 0; j < output_width; j++) {
+  for (i = 0; i < output_height; ++i) {
+    for (j = 0; j < output_width; ++j) {
       Temp = ((int)src_ptr[-2 * (int)pixel_step] * vp8_filter[0]) +
              ((int)src_ptr[-1 * (int)pixel_step] * vp8_filter[1]) +
              ((int)src_ptr[0] * vp8_filter[2]) +
@@ -76,8 +76,8 @@ static void filter_block2d_second_pass(int *src_ptr, unsigned char *output_ptr,
   unsigned int i, j;
   int Temp;
 
-  for (i = 0; i < output_height; i++) {
-    for (j = 0; j < output_width; j++) {
+  for (i = 0; i < output_height; ++i) {
+    for (j = 0; j < output_width; ++j) {
       /* Apply filter */
       Temp = ((int)src_ptr[-2 * (int)pixel_step] * vp8_filter[0]) +
              ((int)src_ptr[-1 * (int)pixel_step] * vp8_filter[1]) +
@@ -215,8 +215,8 @@ static void filter_block2d_bil_first_pass(
     unsigned int height, unsigned int width, const short *vp8_filter) {
   unsigned int i, j;
 
-  for (i = 0; i < height; i++) {
-    for (j = 0; j < width; j++) {
+  for (i = 0; i < height; ++i) {
+    for (j = 0; j < width; ++j) {
       /* Apply bilinear filter */
       dst_ptr[j] =
           (((int)src_ptr[0] * vp8_filter[0]) +
@@ -263,8 +263,8 @@ static void filter_block2d_bil_second_pass(unsigned short *src_ptr,
   unsigned int i, j;
   int Temp;
 
-  for (i = 0; i < height; i++) {
-    for (j = 0; j < width; j++) {
+  for (i = 0; i < height; ++i) {
+    for (j = 0; j < width; ++j) {
       /* Apply filter */
       Temp = ((int)src_ptr[0] * vp8_filter[0]) +
              ((int)src_ptr[width] * vp8_filter[1]) + (VP8_FILTER_WEIGHT / 2);
@@ -333,7 +333,7 @@ void vp8_bilinear_predict4x4_c(unsigned char *src_ptr, int src_pixels_per_line,
         bilinear_predict4x4_mmx(src_ptr, src_pixels_per_line, xoffset, yoffset, temp1, 4);
         filter_block2d_bil(src_ptr, temp2, src_pixels_per_line, 4, HFilter, VFilter, 4, 4);
 
-        for (i = 0; i < 16; i++)
+        for (i = 0; i < 16; ++i)
         {
             if (temp1[i] != temp2[i])
             {

@@ -334,7 +334,7 @@ static void reset_temporal_layer_change(VP8_COMP *cpi, VP8_CONFIG *oxcf,
     cpi->current_layer = 0;
     save_layer_context(cpi);
   }
-  for (i = 0; i < curr_num_layers; i++) {
+  for (i = 0; i < curr_num_layers; ++i) {
     LAYER_CONTEXT *lc = &cpi->layer_context[i];
     if (i >= prev_num_layers) {
       init_temporal_layer_context(cpi, oxcf, i, prev_layer_framerate);
@@ -447,7 +447,7 @@ static void dealloc_compressor_data(VP8_COMP *cpi) {
     VP8_COMMON *const pc = &cpi->common;
     int i;
 
-    for (i = 0; i < pc->mb_rows; i++) {
+    for (i = 0; i < pc->mb_rows; ++i) {
       pthread_mutex_destroy(&cpi->pmutex[i]);
     }
     vpx_free(cpi->pmutex);
@@ -727,7 +727,7 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
   int ref_frames;
 
   /* Initialise default mode frequency sampling variables */
-  for (i = 0; i < MAX_MODES; i++) {
+  for (i = 0; i < MAX_MODES; ++i) {
     cpi->mode_check_freq[i] = 0;
   }
 
@@ -753,7 +753,7 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
   sf->improved_mv_pred = 1;
 
   /* default thresholds to 0 */
-  for (i = 0; i < MAX_MODES; i++) sf->thresh_mult[i] = 0;
+  for (i = 0; i < MAX_MODES; ++i) sf->thresh_mult[i] = 0;
 
   /* Count enabled references */
   ref_frames = 1;
@@ -910,7 +910,7 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
 
         min >>= 7;
 
-        for (i = 0; i < min; i++) {
+        for (i = 0; i < min; ++i) {
           sum += cpi->mb.error_bins[i];
         }
 
@@ -918,7 +918,7 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
         sum = 0;
 
         /* i starts from 2 to make sure thresh started from 2048 */
-        for (; i < 1024; i++) {
+        for (; i < 1024; ++i) {
           sum += cpi->mb.error_bins[i];
 
           if (10 * sum >=
@@ -1167,7 +1167,7 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi) {
 
     /* De-allocate and re-allocate mutex */
     if (cpi->pmutex != NULL) {
-      for (i = 0; i < prev_mb_rows; i++) {
+      for (i = 0; i < prev_mb_rows; ++i) {
         pthread_mutex_destroy(&cpi->pmutex[i]);
       }
       vpx_free(cpi->pmutex);
@@ -1177,7 +1177,7 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi) {
     CHECK_MEM_ERROR(cpi->pmutex,
                     vpx_malloc(sizeof(*cpi->pmutex) * cm->mb_rows));
     if (cpi->pmutex) {
-      for (i = 0; i < cm->mb_rows; i++) {
+      for (i = 0; i < cm->mb_rows; ++i) {
         pthread_mutex_init(&cpi->pmutex[i], NULL);
       }
     }
@@ -1214,7 +1214,7 @@ static const int q_trans[] = {
 int vp8_reverse_trans(int x) {
   int i;
 
-  for (i = 0; i < 64; i++)
+  for (i = 0; i < 64; ++i)
     if (q_trans[i] >= x) return i;
 
   return 63;
@@ -1311,7 +1311,7 @@ static void init_config(VP8_COMP *cpi, VP8_CONFIG *oxcf) {
     unsigned int i;
     double prev_layer_framerate = 0;
 
-    for (i = 0; i < cpi->oxcf.number_of_layers; i++) {
+    for (i = 0; i < cpi->oxcf.number_of_layers; ++i) {
       init_temporal_layer_context(cpi, oxcf, i, prev_layer_framerate);
       prev_layer_framerate =
           cpi->output_framerate / cpi->oxcf.rate_decimator[i];
@@ -1324,7 +1324,7 @@ static void init_config(VP8_COMP *cpi, VP8_CONFIG *oxcf) {
 
     cpi->fixed_divide[0] = 0;
 
-    for (i = 1; i < 512; i++) cpi->fixed_divide[i] = 0x80000 / i;
+    for (i = 1; i < 512; ++i) cpi->fixed_divide[i] = 0x80000 / i;
   }
 #endif
 }
@@ -1484,7 +1484,7 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf) {
   {
     int i;
 
-    for (i = 0; i < MAX_MB_SEGMENTS; i++)
+    for (i = 0; i < MAX_MB_SEGMENTS; ++i)
       cpi->segment_encode_breakout[i] = cpi->oxcf.encode_breakout;
   }
 
@@ -1746,7 +1746,7 @@ struct VP8_COMP *vp8_create_compressor(VP8_CONFIG *oxcf) {
     {
         cpi->one_pass_frame_index = 0;
 
-        for (i = 0; i < MAX_LAG_BUFFERS; i++)
+        for (i = 0; i < MAX_LAG_BUFFERS; ++i)
         {
             cpi->one_pass_frame_stats[i].frames_so_far = 0;
             cpi->one_pass_frame_stats[i].frame_intra_error = 0.0;
@@ -1851,7 +1851,7 @@ struct VP8_COMP *vp8_create_compressor(VP8_CONFIG *oxcf) {
   cpi->gf_rate_correction_factor = 1.0;
   cpi->twopass.est_max_qcorrection_factor = 1.0;
 
-  for (i = 0; i < KEY_FRAME_CONTEXT; i++) {
+  for (i = 0; i < KEY_FRAME_CONTEXT; ++i) {
     cpi->prior_key_frame_distance[i] = (int)cpi->output_framerate;
   }
 
@@ -1894,7 +1894,7 @@ struct VP8_COMP *vp8_create_compressor(VP8_CONFIG *oxcf) {
   vp8_set_speed_features(cpi);
 
   /* Set starting values of RD threshold multipliers (128 = *1) */
-  for (i = 0; i < MAX_MODES; i++) {
+  for (i = 0; i < MAX_MODES; ++i) {
     cpi->mb.rd_thresh_mult[i] = 128;
   }
 
@@ -2054,7 +2054,7 @@ void vp8_remove_compressor(VP8_COMP **ptr) {
           fprintf(f,
                   "Layer\tBitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\t"
                   "GLPsnrP\tVPXSSIM\t\n");
-          for (i = 0; i < (int)cpi->oxcf.number_of_layers; i++) {
+          for (i = 0; i < (int)cpi->oxcf.number_of_layers; ++i) {
             double dr =
                 (double)cpi->bytes_in_layer[i] * 8.0 / 1000.0 / time_encoded;
             double samples = 3.0 / 2 * cpi->frames_in_layer[i] *
@@ -2112,7 +2112,7 @@ void vp8_remove_compressor(VP8_COMP **ptr) {
       FILE *f = fopen("cxspeed.stt", "a");
       cnt_pm /= cpi->common.MBs;
 
-      for (i = 0; i < 16; i++) fprintf(f, "%5d", frames_at_speed[i]);
+      for (i = 0; i < 16; ++i) fprintf(f, "%5d", frames_at_speed[i]);
 
       fprintf(f, "\n");
       fclose(f);
@@ -2135,7 +2135,7 @@ void vp8_remove_compressor(VP8_COMP **ptr) {
       {
         int i;
 
-        for (i = 0; i < 10; i++) fprintf(f, "%8d, ", b_modes[i]);
+        for (i = 0; i < 10; ++i) fprintf(f, "%8d, ", b_modes[i]);
 
         fprintf(f, "\n");
       }
@@ -2152,7 +2152,7 @@ void vp8_remove_compressor(VP8_COMP **ptr) {
       {
         int i;
 
-        for (i = 0; i < 15; i++) fprintf(f, "%8d, ", inter_b_modes[i]);
+        for (i = 0; i < 15; ++i) fprintf(f, "%8d, ", inter_b_modes[i]);
 
         fprintf(f, "\n");
       }
@@ -2176,13 +2176,13 @@ void vp8_remove_compressor(VP8_COMP **ptr) {
       fprintf(fmode,
               "[VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES] =\n{\n");
 
-      for (i = 0; i < 10; i++) {
+      for (i = 0; i < 10; ++i) {
         fprintf(fmode, "    { /* Above Mode :  %d */\n", i);
 
-        for (j = 0; j < 10; j++) {
+        for (j = 0; j < 10; ++j) {
           fprintf(fmode, "        {");
 
-          for (k = 0; k < 10; k++) {
+          for (k = 0; k < 10; ++k) {
             if (!intra_mode_stats[i][j][k])
               fprintf(fmode, " %5d, ", 1);
             else
@@ -2206,7 +2206,7 @@ void vp8_remove_compressor(VP8_COMP **ptr) {
       int i;
       FILE *f = fopen("tokenbits.stt", "a");
 
-      for (i = 0; i < 28; i++) fprintf(f, "%8d", (int)(Sectionbits[i] / 256));
+      for (i = 0; i < 28; ++i) fprintf(f, "%8d", (int)(Sectionbits[i] / 256));
 
       fprintf(f, "\n");
       fclose(f);
@@ -2283,8 +2283,8 @@ static uint64_t calc_plane_error(unsigned char *orig, int orig_stride,
       unsigned char *border_orig = orig;
       unsigned char *border_recon = recon;
 
-      for (border_row = 0; border_row < 16; border_row++) {
-        for (border_col = col; border_col < cols; border_col++) {
+      for (border_row = 0; border_row < 16; ++border_row) {
+        for (border_col = col; border_col < cols; ++border_col) {
           diff = border_orig[border_col] - border_recon[border_col];
           total_sse += diff * diff;
         }
@@ -2299,8 +2299,8 @@ static uint64_t calc_plane_error(unsigned char *orig, int orig_stride,
   }
 
   /* Handle odd-sized height */
-  for (; row < rows; row++) {
-    for (col = 0; col < cols; col++) {
+  for (; row < rows; ++row) {
+    for (col = 0; col < cols; ++col) {
       diff = orig[col] - recon[col];
       total_sse += diff * diff;
     }
@@ -2347,7 +2347,7 @@ static void generate_psnr_packet(VP8_COMP *cpi) {
   pkt.data.psnr.samples[0] += width * height;
   pkt.data.psnr.samples[3] = width * height;
 
-  for (i = 0; i < 4; i++)
+  for (i = 0; i < 4; ++i)
     pkt.data.psnr.psnr[i] = vpx_sse_to_psnr(pkt.data.psnr.samples[i], 255.0,
                                             (double)(pkt.data.psnr.sse[i]));
 
@@ -2777,21 +2777,21 @@ void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
     sprintf(filename, "cx\\y%04d.raw", this_frame);
     yframe = fopen(filename, "wb");
 
-    for (i = 0; i < frame->y_height; i++)
+    for (i = 0; i < frame->y_height; ++i)
         fwrite(frame->y_buffer + i * frame->y_stride, frame->y_width, 1, yframe);
 
     fclose(yframe);
     sprintf(filename, "cx\\u%04d.raw", this_frame);
     yframe = fopen(filename, "wb");
 
-    for (i = 0; i < frame->uv_height; i++)
+    for (i = 0; i < frame->uv_height; ++i)
         fwrite(frame->u_buffer + i * frame->uv_stride, frame->uv_width, 1, yframe);
 
     fclose(yframe);
     sprintf(filename, "cx\\v%04d.raw", this_frame);
     yframe = fopen(filename, "wb");
 
-    for (i = 0; i < frame->uv_height; i++)
+    for (i = 0; i < frame->uv_height; ++i)
         fwrite(frame->v_buffer + i * frame->uv_stride, frame->uv_width, 1, yframe);
 
     fclose(yframe);
@@ -3344,7 +3344,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size,
           unsigned int i;
           cpi->bits_off_target = cpi->oxcf.starting_buffer_level;
           cpi->buffer_level = cpi->oxcf.starting_buffer_level;
-          for (i = 0; i < cpi->oxcf.number_of_layers; i++) {
+          for (i = 0; i < cpi->oxcf.number_of_layers; ++i) {
             LAYER_CONTEXT *lc = &cpi->layer_context[i];
             lc->bits_off_target = lc->starting_buffer_level;
             lc->buffer_level = lc->starting_buffer_level;
@@ -3372,7 +3372,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size,
     } else if (cpi->ref_frame_flags & VP8_ALTR_FRAME) {
       closest_ref = ALTREF_FRAME;
     }
-    for (i = 1; i <= 3; i++) {
+    for (i = 1; i <= 3; ++i) {
       vpx_ref_frame_type_t ref_frame_type =
           (vpx_ref_frame_type_t)((i == 3) ? 4 : i);
       if (cpi->ref_frame_flags & ref_frame_type) {
@@ -3396,7 +3396,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size,
     cpi->source_alt_ref_active = 0;
 
     /* Reset the RD threshold multipliers to default of * 1 (128) */
-    for (i = 0; i < MAX_MODES; i++) {
+    for (i = 0; i < MAX_MODES; ++i) {
       cpi->mb.rd_thresh_mult[i] = 128;
     }
 
@@ -3505,7 +3505,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size,
         /* Propagate bits saved by dropping the frame to higher
          * layers
          */
-        for (i = cpi->current_layer + 1; i < cpi->oxcf.number_of_layers; i++) {
+        for (i = cpi->current_layer + 1; i < cpi->oxcf.number_of_layers; ++i) {
           LAYER_CONTEXT *lc = &cpi->layer_context[i];
           lc->bits_off_target += (int)(lc->target_bandwidth / lc->framerate);
           if (lc->bits_off_target > lc->maximum_buffer_size)
@@ -4207,8 +4207,8 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size,
     MODE_INFO *tmp = cm->mip;
 
     if (cm->frame_type != KEY_FRAME) {
-      for (mb_row = 0; mb_row < cm->mb_rows + 1; mb_row++) {
-        for (mb_col = 0; mb_col < cm->mb_cols + 1; mb_col++) {
+      for (mb_row = 0; mb_row < cm->mb_rows + 1; ++mb_row) {
+        for (mb_col = 0; mb_col < cm->mb_cols + 1; ++mb_col) {
           if (tmp->mbmi.ref_frame != INTRA_FRAME)
             cpi->lfmv[mb_col + mb_row * (cm->mode_info_stride + 1)].as_int =
                 tmp->mbmi.mv.as_int;
@@ -4234,8 +4234,8 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size,
     cpi->zeromv_count = 0;
 
     if (cm->frame_type != KEY_FRAME) {
-      for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
-        for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
+      for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
+        for (mb_col = 0; mb_col < cm->mb_cols; ++mb_col) {
           if (tmp->mbmi.mode == ZEROMV && tmp->mbmi.ref_frame == LAST_FRAME)
             cpi->zeromv_count++;
           tmp++;
@@ -4357,7 +4357,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size,
 
   if (cpi->oxcf.number_of_layers > 1) {
     unsigned int i;
-    for (i = cpi->current_layer + 1; i < cpi->oxcf.number_of_layers; i++)
+    for (i = cpi->current_layer + 1; i < cpi->oxcf.number_of_layers; ++i)
       cpi->layer_context[i].total_byte_count += (*size);
   }
 
@@ -4460,7 +4460,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size,
   if (cpi->oxcf.number_of_layers > 1) {
     unsigned int i;
 
-    for (i = cpi->current_layer + 1; i < cpi->oxcf.number_of_layers; i++) {
+    for (i = cpi->current_layer + 1; i < cpi->oxcf.number_of_layers; ++i) {
       LAYER_CONTEXT *lc = &cpi->layer_context[i];
       int bits_off_for_this_layer = (int)(lc->target_bandwidth / lc->framerate -
                                           cpi->projected_frame_size);
@@ -4926,7 +4926,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
     dp += dest_size / 10; /* reserve 1/10 for control partition */
     cpi->partition_d_end[0] = dp;
 
-    for (i = 0; i < num_part; i++) {
+    for (i = 0; i < num_part; ++i) {
       cpi->partition_d[i + 1] = dp;
       dp += tok_part_buff_size;
       cpi->partition_d_end[i + 1] = dp;
@@ -4960,7 +4960,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
   /* find a free buffer for the new frame */
   {
     int i = 0;
-    for (; i < NUM_YV12_BUFFERS; i++) {
+    for (; i < NUM_YV12_BUFFERS; ++i) {
       if (!cm->yv12_fb[i].flags) {
         cm->new_fb_idx = i;
         break;
@@ -5119,7 +5119,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
           if (cpi->oxcf.number_of_layers > 1) {
             unsigned int i;
 
-            for (i = cpi->current_layer; i < cpi->oxcf.number_of_layers; i++) {
+            for (i = cpi->current_layer; i < cpi->oxcf.number_of_layers; ++i) {
               cpi->frames_in_layer[i]++;
 
               cpi->bytes_in_layer[i] += *size;
@@ -5228,7 +5228,7 @@ int vp8_set_roimap(VP8_COMP *cpi, unsigned char *map, unsigned int rows,
   }
 
   // Translate the external delta q values to internal values.
-  for (i = 0; i < MAX_MB_SEGMENTS; i++)
+  for (i = 0; i < MAX_MB_SEGMENTS; ++i)
     internal_delta_q[i] =
         (delta_q[i] >= 0) ? q_trans[delta_q[i]] : -q_trans[-delta_q[i]];
 

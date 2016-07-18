@@ -18,7 +18,7 @@ void vp8_dequantize_b_c(BLOCKD *d, short *DQC) {
   short *DQ = d->dqcoeff;
   short *Q = d->qcoeff;
 
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < 16; ++i) {
     DQ[i] = Q[i] * DQC[i];
   }
 }
@@ -27,7 +27,7 @@ void vp8_dequant_idct_add_c(short *input, short *dq, unsigned char *dest,
                             int stride) {
   int i;
 
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < 16; ++i) {
     input[i] = dq[i] * input[i];
   }
 

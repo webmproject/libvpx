@@ -40,7 +40,7 @@ void vp8_blit_text(const char *msg, unsigned char *address, const int pitch) {
       letter_bitmap = font[0];
 
     for (fontcol = 6; fontcol >= 0; fontcol--)
-      for (fontrow = 0; fontrow < 5; fontrow++)
+      for (fontrow = 0; fontrow < 5; ++fontrow)
         output_pos[fontrow * pitch + fontcol] =
             ((letter_bitmap >> (fontcol * 5)) & (1 << fontrow) ? 255 : 0);
 
@@ -95,7 +95,7 @@ void vp8_blit_line(int x0, int x1, int y0, int y1, unsigned char *image,
     ystep = -1;
 
   if (steep) {
-    for (x = x0; x <= x1; x++) {
+    for (x = x0; x <= x1; ++x) {
       plot(y, x, image, pitch);
 
       error = error - deltay;
@@ -105,7 +105,7 @@ void vp8_blit_line(int x0, int x1, int y0, int y1, unsigned char *image,
       }
     }
   } else {
-    for (x = x0; x <= x1; x++) {
+    for (x = x0; x <= x1; ++x) {
       plot(x, y, image, pitch);
 
       error = error - deltay;

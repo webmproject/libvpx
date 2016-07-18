@@ -17,8 +17,8 @@ void vp8_dequant_idct_add_y_block_dspr2(short *q, short *dq, unsigned char *dst,
                                         int stride, char *eobs) {
   int i, j;
 
-  for (i = 0; i < 4; i++) {
-    for (j = 0; j < 4; j++) {
+  for (i = 0; i < 4; ++i) {
+    for (j = 0; j < 4; ++j) {
       if (*eobs++ > 1)
         vp8_dequant_idct_add_dspr2(q, dq, dst, stride);
       else {
@@ -40,8 +40,8 @@ void vp8_dequant_idct_add_uv_block_dspr2(short *q, short *dq,
                                          char *eobs) {
   int i, j;
 
-  for (i = 0; i < 2; i++) {
-    for (j = 0; j < 2; j++) {
+  for (i = 0; i < 2; ++i) {
+    for (j = 0; j < 2; ++j) {
       if (*eobs++ > 1)
         vp8_dequant_idct_add_dspr2(q, dq, dstu, stride);
       else {
@@ -56,8 +56,8 @@ void vp8_dequant_idct_add_uv_block_dspr2(short *q, short *dq,
     dstu += 4 * stride - 8;
   }
 
-  for (i = 0; i < 2; i++) {
-    for (j = 0; j < 2; j++) {
+  for (i = 0; i < 2; ++i) {
+    for (j = 0; j < 2; ++j) {
       if (*eobs++ > 1)
         vp8_dequant_idct_add_dspr2(q, dq, dstv, stride);
       else {

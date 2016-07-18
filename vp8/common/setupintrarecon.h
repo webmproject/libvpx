@@ -26,11 +26,11 @@ static INLINE void setup_intra_recon_left(unsigned char *y_buffer,
                                           int uv_stride) {
   int i;
 
-  for (i = 0; i < 16; i++) y_buffer[y_stride * i] = (unsigned char)129;
+  for (i = 0; i < 16; ++i) y_buffer[y_stride * i] = (unsigned char)129;
 
-  for (i = 0; i < 8; i++) u_buffer[uv_stride * i] = (unsigned char)129;
+  for (i = 0; i < 8; ++i) u_buffer[uv_stride * i] = (unsigned char)129;
 
-  for (i = 0; i < 8; i++) v_buffer[uv_stride * i] = (unsigned char)129;
+  for (i = 0; i < 8; ++i) v_buffer[uv_stride * i] = (unsigned char)129;
 }
 
 #ifdef __cplusplus

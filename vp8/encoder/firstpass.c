@@ -536,7 +536,7 @@ void vp8_first_pass(VP8_COMP *cpi) {
   }
 
   /* for each macroblock row in image */
-  for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
+  for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
     int_mv best_ref_mv;
 
     best_ref_mv.as_int = 0;
@@ -554,7 +554,7 @@ void vp8_first_pass(VP8_COMP *cpi) {
         ((cm->mb_rows - 1 - mb_row) * 16) + (VP8BORDERINPIXELS - 16);
 
     /* for each macroblock col in image */
-    for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
+    for (mb_col = 0; mb_col < cm->mb_cols; ++mb_col) {
       int this_error;
       int gf_motion_error = INT_MAX;
       int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
@@ -966,7 +966,7 @@ static int estimate_max_q(VP8_COMP *cpi, FIRSTPASS_STATS *fpstats,
   /* Try and pick a max Q that will be high enough to encode the
    * content at the given rate.
    */
-  for (Q = cpi->twopass.maxq_min_limit; Q < cpi->twopass.maxq_max_limit; Q++) {
+  for (Q = cpi->twopass.maxq_min_limit; Q < cpi->twopass.maxq_max_limit; ++Q) {
     int bits_per_mb_at_this_q;
 
     /* Error per MB based correction factor */
@@ -1061,7 +1061,7 @@ static int estimate_cq(VP8_COMP *cpi, FIRSTPASS_STATS *fpstats,
   if (clip_iifactor < 0.80) clip_iifactor = 0.80;
 
   /* Try and pick a Q that can encode the content at the given rate. */
-  for (Q = 0; Q < MAXQ; Q++) {
+  for (Q = 0; Q < MAXQ; ++Q) {
     int bits_per_mb_at_this_q;
 
     /* Error per MB based correction factor */
@@ -1118,7 +1118,7 @@ static int estimate_q(VP8_COMP *cpi, double section_err,
   }
 
   /* Try and pick a Q that can encode the content at the given rate. */
-  for (Q = 0; Q < MAXQ; Q++) {
+  for (Q = 0; Q < MAXQ; ++Q) {
     int bits_per_mb_at_this_q;
 
     /* Error per MB based correction factor */
@@ -1201,7 +1201,7 @@ static int estimate_kf_group_q(VP8_COMP *cpi, double section_err,
   /* Try and pick a Q that should be high enough to encode the content at
    * the given rate.
    */
-  for (Q = 0; Q < MAXQ; Q++) {
+  for (Q = 0; Q < MAXQ; ++Q) {
     /* Error per MB based correction factor */
     err_correction_factor =
         calc_correction_factor(err_per_mb, 150.0, pow_lowq, pow_highq, Q);
@@ -1379,7 +1379,7 @@ static int detect_transition_to_still(VP8_COMP *cpi, int frame_interval,
     double decay_rate;
 
     /* Look ahead a few frames to see if static condition persists... */
-    for (j = 0; j < still_interval; j++) {
+    for (j = 0; j < still_interval; ++j) {
       if (EOF == input_stats(cpi, &tmp_next_frame)) break;
 
       decay_rate = get_prediction_decay_rate(cpi, &tmp_next_frame);
@@ -1518,7 +1518,7 @@ static int calc_arf_boost(VP8_COMP *cpi, int offset, int f_frames, int b_frames,
   int flash_detected = 0;
 
   /* Search forward from the proposed arf/next gf position */
-  for (i = 0; i < f_frames; i++) {
+  for (i = 0; i < f_frames; ++i) {
     if (read_frame_stats(cpi, &this_frame, (i + offset)) == EOF) break;
 
     /* Update the motion related elements to the boost calculation */
@@ -2140,7 +2140,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     zero_stats(&sectionstats);
     reset_fpf_position(cpi, start_pos);
 
-    for (i = 0; i < cpi->baseline_gf_interval; i++) {
+    for (i = 0; i < cpi->baseline_gf_interval; ++i) {
       input_stats(cpi, &next_frame);
       accumulate_stats(&sectionstats, &next_frame);
     }
@@ -2440,7 +2440,7 @@ static int test_candidate_kf(VP8_COMP *cpi, FIRSTPASS_STATS *last_frame,
     start_pos = cpi->twopass.stats_in;
 
     /* Examine how well the key frame predicts subsequent frames */
-    for (i = 0; i < 16; i++) {
+    for (i = 0; i < 16; ++i) {
       next_iiratio = (IIKFACTOR1 * local_next_frame.intra_error /
                       DOUBLE_DIVIDE_CHECK(local_next_frame.coded_error));
 
@@ -2569,7 +2569,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
        */
       recent_loop_decay[i % 8] = loop_decay_rate;
       decay_accumulator = 1.0;
-      for (j = 0; j < 8; j++) {
+      for (j = 0; j < 8; ++j) {
         decay_accumulator = decay_accumulator * recent_loop_decay[j];
       }
 
@@ -2619,7 +2619,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     kf_group_coded_err = 0;
 
     /* Rescan to get the correct error data for the forced kf group */
-    for (i = 0; i < cpi->twopass.frames_to_key; i++) {
+    for (i = 0; i < cpi->twopass.frames_to_key; ++i) {
       /* Accumulate kf group errors */
       kf_group_err += calculate_modified_err(cpi, &tmp_frame);
       kf_group_intra_err += tmp_frame.intra_error;
@@ -2721,7 +2721,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   decay_accumulator = 1.0;
   boost_score = 0.0;
 
-  for (i = 0; i < cpi->twopass.frames_to_key; i++) {
+  for (i = 0; i < cpi->twopass.frames_to_key; ++i) {
     double r;
 
     if (EOF == input_stats(cpi, &next_frame)) break;
@@ -2757,7 +2757,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     zero_stats(&sectionstats);
     reset_fpf_position(cpi, start_position);
 
-    for (i = 0; i < cpi->twopass.frames_to_key; i++) {
+    for (i = 0; i < cpi->twopass.frames_to_key; ++i) {
       input_stats(cpi, &next_frame);
       accumulate_stats(&sectionstats, &next_frame);
     }

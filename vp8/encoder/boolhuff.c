@@ -55,7 +55,7 @@ void vp8_start_encode(BOOL_CODER *br, unsigned char *source,
 void vp8_stop_encode(BOOL_CODER *br) {
   int i;
 
-  for (i = 0; i < 32; i++) vp8_encode_bool(br, 0, 128);
+  for (i = 0; i < 32; ++i) vp8_encode_bool(br, 0, 128);
 }
 
 void vp8_encode_value(BOOL_CODER *br, int data, int bits) {

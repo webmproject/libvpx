@@ -51,7 +51,7 @@ DECLARE_ALIGNED(16, const short, vp8_default_inv_zig_zag[16]) = {
     {
         int i;
 
-        for (i = 0; i < 16; i++)
+        for (i = 0; i < 16; ++i)
         {
             vp8_default_zig_zag_mask[vp8_default_zig_zag1d[i]] = 1 << i;
         }

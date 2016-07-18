@@ -111,9 +111,9 @@ static void fill_token_costs(
         p[BLOCK_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES]) {
   int i, j, k;
 
-  for (i = 0; i < BLOCK_TYPES; i++)
-    for (j = 0; j < COEF_BANDS; j++)
-      for (k = 0; k < PREV_COEF_CONTEXTS; k++)
+  for (i = 0; i < BLOCK_TYPES; ++i)
+    for (j = 0; j < COEF_BANDS; ++j)
+      for (k = 0; k < PREV_COEF_CONTEXTS; ++k)
 
         /* check for pt=0 and band > 1 if block type 0
          * and 0 if blocktype 1
@@ -192,7 +192,7 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, MACROBLOCK *x, int Qvalue) {
 
   vp8_set_speed_features(cpi);
 
-  for (i = 0; i < MAX_MODES; i++) {
+  for (i = 0; i < MAX_MODES; ++i) {
     x->mode_test_hit_counts[i] = 0;
   }
 
@@ -204,7 +204,7 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, MACROBLOCK *x, int Qvalue) {
     cpi->RDDIV = 1;
     cpi->RDMULT /= 100;
 
-    for (i = 0; i < MAX_MODES; i++) {
+    for (i = 0; i < MAX_MODES; ++i) {
       if (cpi->sf.thresh_mult[i] < INT_MAX) {
         x->rd_threshes[i] = cpi->sf.thresh_mult[i] * q / 100;
       } else {
@@ -216,7 +216,7 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, MACROBLOCK *x, int Qvalue) {
   } else {
     cpi->RDDIV = 100;
 
-    for (i = 0; i < MAX_MODES; i++) {
+    for (i = 0; i < MAX_MODES; ++i) {
       if (cpi->sf.thresh_mult[i] < (INT_MAX / q)) {
         x->rd_threshes[i] = cpi->sf.thresh_mult[i] * q;
       } else {
@@ -311,7 +311,7 @@ int vp8_block_error_c(short *coeff, short *dqcoeff) {
   int i;
   int error = 0;
 
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < 16; ++i) {
     int this_diff = coeff[i] - dqcoeff[i];
     error += this_diff * this_diff;
   }
@@ -325,13 +325,13 @@ int vp8_mbblock_error_c(MACROBLOCK *mb, int dc) {
   int i, j;
   int berror, error = 0;
 
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < 16; ++i) {
     be = &mb->block[i];
     bd = &mb->e_mbd.block[i];
 
     berror = 0;
 
-    for (j = dc; j < 16; j++) {
+    for (j = dc; j < 16; ++j) {
       int this_diff = be->coeff[j] - bd->dqcoeff[j];
       berror += this_diff * this_diff;
     }
@@ -349,7 +349,7 @@ int vp8_mbuverror_c(MACROBLOCK *mb) {
   int i;
   int error = 0;
 
-  for (i = 16; i < 24; i++) {
+  for (i = 16; i < 24; ++i) {
     be = &mb->block[i];
     bd = &mb->e_mbd.block[i];
 
@@ -414,7 +414,7 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type, ENTROPY_CONTEXT *a,
   VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
   assert(eob <= 16);
-  for (; c < eob; c++) {
+  for (; c < eob; ++c) {
     const int v = qcoeff_ptr[vp8_default_zig_zag1d[c]];
     const int t = vp8_dct_value_tokens_ptr[v].Token;
     cost += mb->token_costs[type][vp8_coef_bands[c]][pt][t];
@@ -445,7 +445,7 @@ static int vp8_rdcost_mby(MACROBLOCK *mb) {
   ta = (ENTROPY_CONTEXT *)&t_above;
   tl = (ENTROPY_CONTEXT *)&t_left;
 
-  for (b = 0; b < 16; b++)
+  for (b = 0; b < 16; ++b)
     cost += cost_coeffs(mb, x->block + b, PLANE_TYPE_Y_NO_DC,
                         ta + vp8_block2above[b], tl + vp8_block2left[b]);
 
@@ -478,7 +478,7 @@ static void macro_block_yrd(MACROBLOCK *mb, int *Rate, int *Distortion) {
   mb->short_walsh4x4(mb_y2->src_diff, mb_y2->coeff, 8);
 
   /* Quantization */
-  for (b = 0; b < 16; b++) {
+  for (b = 0; b < 16; ++b) {
     mb->quantize_b(&mb->block[b], &mb->e_mbd.block[b]);
   }
 
@@ -531,7 +531,7 @@ static int rd_pick_intra4x4block(MACROBLOCK *x, BLOCK *be, BLOCKD *b,
   unsigned char *yleft = dst - 1;
   unsigned char top_left = Above[-1];
 
-  for (mode = B_DC_PRED; mode <= B_HU_PRED; mode++) {
+  for (mode = B_DC_PRED; mode <= B_HU_PRED; ++mode) {
     int this_rd;
     int ratey;
 
@@ -594,7 +594,7 @@ static int rd_pick_intra4x4mby_modes(MACROBLOCK *mb, int *Rate, int *rate_y,
 
   bmode_costs = mb->inter_bmode_costs;
 
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < 16; ++i) {
     MODE_INFO *const mic = xd->mode_info_context;
     const int mis = xd->mode_info_stride;
     B_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
@@ -641,7 +641,7 @@ static int rd_pick_intra16x16mby_mode(MACROBLOCK *x, int *Rate, int *rate_y,
   MACROBLOCKD *xd = &x->e_mbd;
 
   /* Y Search for 16x16 intra prediction mode */
-  for (mode = DC_PRED; mode <= TM_PRED; mode++) {
+  for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
     xd->mode_info_context->mbmi.mode = mode;
 
     vp8_build_intra_predictors_mby_s(xd, xd->dst.y_buffer - xd->dst.y_stride,
@@ -681,7 +681,7 @@ static int rd_cost_mbuv(MACROBLOCK *mb) {
   ta = (ENTROPY_CONTEXT *)&t_above;
   tl = (ENTROPY_CONTEXT *)&t_left;
 
-  for (b = 16; b < 24; b++)
+  for (b = 16; b < 24; ++b)
     cost += cost_coeffs(mb, x->block + b, PLANE_TYPE_UV,
                         ta + vp8_block2above[b], tl + vp8_block2left[b]);
 
@@ -735,7 +735,7 @@ static void rd_pick_intra_mbuv_mode(MACROBLOCK *x, int *rate,
   int rate_to;
   MACROBLOCKD *xd = &x->e_mbd;
 
-  for (mode = DC_PRED; mode <= TM_PRED; mode++) {
+  for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
     int this_rate;
     int this_distortion;
     int this_rd;
@@ -868,7 +868,7 @@ static int rdcost_mbsegment_y(MACROBLOCK *mb, const int *labels,
   int b;
   MACROBLOCKD *x = &mb->e_mbd;
 
-  for (b = 0; b < 16; b++)
+  for (b = 0; b < 16; ++b)
     if (labels[b] == which_label)
       cost += cost_coeffs(mb, x->block + b, PLANE_TYPE_Y_WITH_DC,
                           ta + vp8_block2above[b], tl + vp8_block2left[b]);
@@ -883,7 +883,7 @@ static unsigned int vp8_encode_inter_mb_segment(MACROBLOCK *x,
   int pre_stride = x->e_mbd.pre.y_stride;
   unsigned char *base_pre = x->e_mbd.pre.y_buffer;
 
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < 16; ++i) {
     if (labels[i] == which_label) {
       BLOCKD *bd = &x->e_mbd.block[i];
       BLOCK *be = &x->block[i];
@@ -977,14 +977,14 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
   this_segment_rd += RDCOST(x->rdmult, x->rddiv, rate, 0);
   br += rate;
 
-  for (i = 0; i < label_count; i++) {
+  for (i = 0; i < label_count; ++i) {
     int_mv mode_mv[B_MODE_COUNT];
     int best_label_rd = INT_MAX;
     B_PREDICTION_MODE mode_selected = ZERO4X4;
     int bestlabelyrate = 0;
 
     /* search for the best motion vector on this segment */
-    for (this_mode = LEFT4X4; this_mode <= NEW4X4; this_mode++) {
+    for (this_mode = LEFT4X4; this_mode <= NEW4X4; ++this_mode) {
       int this_rd;
       int distortion;
       int labelyrate;
@@ -1161,7 +1161,7 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
     bsi->segment_num = segmentation;
 
     /* store everything needed to come back to this!! */
-    for (i = 0; i < 16; i++) {
+    for (i = 0; i < 16; ++i) {
       bsi->mvs[i].as_mv = x->partition_info->bmi[i].mv.as_mv;
       bsi->modes[i] = x->partition_info->bmi[i].mode;
       bsi->eobs[i] = x->e_mbd.eobs[i];
@@ -1199,7 +1199,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
   bsi.mvthresh = mvthresh;
   bsi.mdcounts = mdcounts;
 
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < 16; ++i) {
     bsi.modes[i] = ZERO4X4;
   }
 
@@ -1289,7 +1289,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
   }
 
   /* set it to the best */
-  for (i = 0; i < 16; i++) {
+  for (i = 0; i < 16; ++i) {
     BLOCKD *bd = &x->e_mbd.block[i];
 
     bd->bmi.mv.as_int = bsi.mvs[i].as_int;
@@ -1304,7 +1304,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
   x->e_mbd.mode_info_context->mbmi.partitioning = bsi.segment_num;
   x->partition_info->count = vp8_mbsplit_count[bsi.segment_num];
 
-  for (i = 0; i < x->partition_info->count; i++) {
+  for (i = 0; i < x->partition_info->count; ++i) {
     int j;
 
     j = vp8_mbsplit_offset[bsi.segment_num][i];
@@ -1431,7 +1431,7 @@ void vp8_mv_pred(VP8_COMP *cpi, MACROBLOCKD *xd, const MODE_INFO *here,
       vcnt++;
     }
 
-    for (i = 0; i < vcnt; i++) {
+    for (i = 0; i < vcnt; ++i) {
       if (near_ref[near_sadidx[i]] != INTRA_FRAME) {
         if (here->mbmi.ref_frame == near_ref[near_sadidx[i]]) {
           mv.as_int = near_mvs[near_sadidx[i]].as_int;
@@ -1446,7 +1446,7 @@ void vp8_mv_pred(VP8_COMP *cpi, MACROBLOCKD *xd, const MODE_INFO *here,
     }
 
     if (!find) {
-      for (i = 0; i < vcnt; i++) {
+      for (i = 0; i < vcnt; ++i) {
         mvx[i] = near_mvs[i].as_mv.row;
         mvy[i] = near_mvs[i].as_mv.col;
       }
@@ -1543,7 +1543,7 @@ static void rd_update_mvcount(MACROBLOCK *x, int_mv *best_ref_mv) {
   if (x->e_mbd.mode_info_context->mbmi.mode == SPLITMV) {
     int i;
 
-    for (i = 0; i < x->partition_info->count; i++) {
+    for (i = 0; i < x->partition_info->count; ++i) {
       if (x->partition_info->bmi[i].mode == NEW4X4) {
         x->MVcount[0][mv_max + ((x->partition_info->bmi[i].mv.as_mv.row -
                                  best_ref_mv->as_mv.row) >>
@@ -1657,10 +1657,10 @@ static int calculate_final_rd_costs(int this_rd, RATE_DISTORTION *rd,
       tteob = 0;
       if (has_y2_block) tteob += x->e_mbd.eobs[24];
 
-      for (i = 0; i < 16; i++) tteob += (x->e_mbd.eobs[i] > has_y2_block);
+      for (i = 0; i < 16; ++i) tteob += (x->e_mbd.eobs[i] > has_y2_block);
 
       if (x->e_mbd.mode_info_context->mbmi.ref_frame) {
-        for (i = 16; i < 24; i++) tteob += x->e_mbd.eobs[i];
+        for (i = 16; i < 24; ++i) tteob += x->e_mbd.eobs[i];
       } else
         tteob += uv_intra_tteob;
 
@@ -1708,7 +1708,7 @@ static void update_best_mode(BEST_MODE *best_mode, int this_rd,
 
   if ((this_mode == B_PRED) || (this_mode == SPLITMV)) {
     int i;
-    for (i = 0; i < 16; i++) {
+    for (i = 0; i < 16; ++i) {
       best_mode->bmodes[i] = x->e_mbd.block[i].bmi;
     }
   }
@@ -1790,7 +1790,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
   x->skip = 0;
 
-  for (mode_index = 0; mode_index < MAX_MODES; mode_index++) {
+  for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
     int this_rd = INT_MAX;
     int disable_skip = 0;
     int other_cost = 0;
@@ -1896,7 +1896,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
        * block's intra eobs will be overwritten when we check inter modes,
        * we need to save uv_intra_tteob here.
        */
-      for (i = 16; i < 24; i++) uv_intra_tteob += x->e_mbd.eobs[i];
+      for (i = 16; i < 24; ++i) uv_intra_tteob += x->e_mbd.eobs[i];
 
       uv_intra_done = 1;
     }
@@ -2298,12 +2298,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
          sizeof(MB_MODE_INFO));
 
   if (best_mode.mbmode.mode == B_PRED) {
-    for (i = 0; i < 16; i++)
+    for (i = 0; i < 16; ++i)
       xd->mode_info_context->bmi[i].as_mode = best_mode.bmodes[i].as_mode;
   }
 
   if (best_mode.mbmode.mode == SPLITMV) {
-    for (i = 0; i < 16; i++)
+    for (i = 0; i < 16; ++i)
       xd->mode_info_context->bmi[i].mv.as_int = best_mode.bmodes[i].mv.as_int;
 
     memcpy(x->partition_info, &best_mode.partition, sizeof(PARTITION_INFO));

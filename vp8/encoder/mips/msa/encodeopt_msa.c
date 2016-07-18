@@ -55,7 +55,7 @@ int32_t vp8_mbblock_error_msa(MACROBLOCK *mb, int32_t dc) {
     mask0 = (v16u8)__msa_insve_w((v4i32)mask0, 0, (v4i32)zero);
   }
 
-  for (loop_cnt = 0; loop_cnt < 8; loop_cnt++) {
+  for (loop_cnt = 0; loop_cnt < 8; ++loop_cnt) {
     be = &mb->block[2 * loop_cnt];
     bd = &mb->e_mbd.block[2 * loop_cnt];
     coeff_ptr = be->coeff;

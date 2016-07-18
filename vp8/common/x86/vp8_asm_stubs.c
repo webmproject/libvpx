@@ -445,7 +445,7 @@ void vp8_sixtap_predict4x4_ssse3(unsigned char *src_ptr,
         * six-tap function handles all possible offsets. */
       int r;
 
-      for (r = 0; r < 4; r++) {
+      for (r = 0; r < 4; ++r) {
         dst_ptr[0] = src_ptr[0];
         dst_ptr[1] = src_ptr[1];
         dst_ptr[2] = src_ptr[2];

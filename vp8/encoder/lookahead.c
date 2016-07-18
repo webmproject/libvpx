@@ -40,7 +40,7 @@ void vp8_lookahead_destroy(struct lookahead_ctx *ctx) {
     if (ctx->buf) {
       unsigned int i;
 
-      for (i = 0; i < ctx->max_sz; i++)
+      for (i = 0; i < ctx->max_sz; ++i)
         vp8_yv12_de_alloc_frame_buffer(&ctx->buf[i].img);
       free(ctx->buf);
     }
@@ -73,7 +73,7 @@ struct lookahead_ctx *vp8_lookahead_init(unsigned int width,
     ctx->max_sz = depth;
     ctx->buf = calloc(depth, sizeof(*ctx->buf));
     if (!ctx->buf) goto bail;
-    for (i = 0; i < depth; i++)
+    for (i = 0; i < depth; ++i)
       if (vp8_yv12_alloc_frame_buffer(&ctx->buf[i].img, width, height,
                                       VP8BORDERINPIXELS))
         goto bail;

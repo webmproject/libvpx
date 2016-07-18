@@ -841,7 +841,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi) {
         unsigned int i;
 
         // Propagate bits saved by dropping the frame to higher layers.
-        for (i = cpi->current_layer + 1; i < cpi->oxcf.number_of_layers; i++) {
+        for (i = cpi->current_layer + 1; i < cpi->oxcf.number_of_layers; ++i) {
           LAYER_CONTEXT *lc = &cpi->layer_context[i];
           lc->bits_off_target += (int)(lc->target_bandwidth / lc->framerate);
           if (lc->bits_off_target > lc->maximum_buffer_size)
@@ -1235,7 +1235,7 @@ static int estimate_keyframe_frequency(VP8_COMP *cpi) {
     /* reset keyframe context and calculate weighted average of last
      * KEY_FRAME_CONTEXT keyframes
      */
-    for (i = 0; i < KEY_FRAME_CONTEXT; i++) {
+    for (i = 0; i < KEY_FRAME_CONTEXT; ++i) {
       if (i < KEY_FRAME_CONTEXT - 1)
         cpi->prior_key_frame_distance[i] = cpi->prior_key_frame_distance[i + 1];
       else
