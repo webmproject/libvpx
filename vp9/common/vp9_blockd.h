@@ -78,6 +78,9 @@ typedef struct MODE_INFO {
 
   // Only for INTER blocks
   INTERP_FILTER interp_filter;
+
+  // if ref_frame[idx] is equal to ALTREF_FRAME then
+  // MACROBLOCKD::block_ref[idx] is an altref
   MV_REFERENCE_FRAME ref_frame[2];
 
   // TODO(slavarnway): Delete and use bmi[3].as_mv[] instead.
@@ -154,6 +157,9 @@ typedef struct macroblockd {
 
   int mi_stride;
 
+  // Grid of 8x8 cells is placed over the block.
+  // If some of them belong to the same mbtree-block
+  // they will just have same mi[i][j] value
   MODE_INFO **mi;
   MODE_INFO *left_mi;
   MODE_INFO *above_mi;
