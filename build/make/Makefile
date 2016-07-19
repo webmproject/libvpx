@@ -26,7 +26,7 @@ test-no-data-check:: .DEFAULT
 testdata:: .DEFAULT
 utiltest: .DEFAULT
 exampletest-no-data-check utiltest-no-data-check: .DEFAULT
-
+test_%: .DEFAULT ;
 
 # Note: md5sum is not installed on OS X, but openssl is. Openssl may not be
 # installed on cygwin, so we need to autodetect here.
@@ -448,3 +448,5 @@ all: $(BUILD_TARGETS)
 install:: $(INSTALL_TARGETS)
 dist: $(INSTALL_TARGETS)
 test::
+
+.SUFFIXES:  # Delete default suffix rules
