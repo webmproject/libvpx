@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 // VP9 Set Reference Frame
 // ============================
 //
@@ -61,7 +60,8 @@
 static const char *exec_name;
 
 void usage_exit() {
-  fprintf(stderr, "Usage: %s <width> <height> <infile> <outfile> "
+  fprintf(stderr,
+          "Usage: %s <width> <height> <infile> <outfile> "
           "<frame> <limit(optional)>\n",
           exec_name);
   exit(EXIT_FAILURE);
@@ -70,8 +70,7 @@ void usage_exit() {
 static int compare_img(const vpx_image_t *const img1,
                        const vpx_image_t *const img2) {
   uint32_t l_w = img1->d_w;
-  uint32_t c_w =
-      (img1->d_w + img1->x_chroma_shift) >> img1->x_chroma_shift;
+  uint32_t c_w = (img1->d_w + img1->x_chroma_shift) >> img1->x_chroma_shift;
   const uint32_t c_h =
       (img1->d_h + img1->y_chroma_shift) >> img1->y_chroma_shift;
   uint32_t i;
@@ -99,10 +98,10 @@ static int compare_img(const vpx_image_t *const img1,
   return match;
 }
 
-#define mmin(a, b)  ((a) < (b) ? (a) : (b))
+#define mmin(a, b) ((a) < (b) ? (a) : (b))
 static void find_mismatch(const vpx_image_t *const img1,
-                          const vpx_image_t *const img2,
-                          int yloc[4], int uloc[4], int vloc[4]) {
+                          const vpx_image_t *const img2, int yloc[4],
+                          int uloc[4], int vloc[4]) {
   const uint32_t bsize = 64;
   const uint32_t bsizey = bsize >> img1->y_chroma_shift;
   const uint32_t bsizex = bsize >> img1->x_chroma_shift;
@@ -190,21 +189,18 @@ static void find_mismatch(const vpx_image_t *const img1,
   }
 }
 
-static void testing_decode(vpx_codec_ctx_t *encoder,
-                           vpx_codec_ctx_t *decoder,
-                           vpx_codec_enc_cfg_t *cfg,
-                           unsigned int frame_out,
+static void testing_decode(vpx_codec_ctx_t *encoder, vpx_codec_ctx_t *decoder,
+                           vpx_codec_enc_cfg_t *cfg, unsigned int frame_out,
                            int *mismatch_seen) {
   vpx_image_t enc_img, dec_img;
   struct vp9_ref_frame ref_enc, ref_dec;
 
-  if (*mismatch_seen)
-    return;
+  if (*mismatch_seen) return;
 
   ref_enc.idx = 0;
   ref_dec.idx = 0;
   if (vpx_codec_control(encoder, VP9_GET_REFERENCE, &ref_enc))
-    die_codec(encoder,  "Failed to get encoder reference frame");
+    die_codec(encoder, "Failed to get encoder reference frame");
   enc_img = ref_enc.img;
   if (vpx_codec_control(decoder, VP9_GET_REFERENCE, &ref_dec))
     die_codec(decoder, "Failed to get decoder reference frame");
@@ -216,37 +212,31 @@ static void testing_decode(vpx_codec_ctx_t *encoder,
     *mismatch_seen = 1;
 
     find_mismatch(&enc_img, &dec_img, y, u, v);
-    printf("Encode/decode mismatch on frame %d at"
-           " Y[%d, %d] {%d/%d},"
-           " U[%d, %d] {%d/%d},"
-           " V[%d, %d] {%d/%d}",
-           frame_out,
-           y[0], y[1], y[2], y[3],
-           u[0], u[1], u[2], u[3],
-           v[0], v[1], v[2], v[3]);
+    printf(
+        "Encode/decode mismatch on frame %d at"
+        " Y[%d, %d] {%d/%d},"
+        " U[%d, %d] {%d/%d},"
+        " V[%d, %d] {%d/%d}",
+        frame_out, y[0], y[1], y[2], y[3], u[0], u[1], u[2], u[3], v[0], v[1],
+        v[2], v[3]);
   }
 
   vpx_img_free(&enc_img);
   vpx_img_free(&dec_img);
 }
 
-static int encode_frame(vpx_codec_ctx_t *ecodec,
-                        vpx_codec_enc_cfg_t *cfg,
-                        vpx_image_t *img,
-                        unsigned int frame_in,
-                        VpxVideoWriter *writer,
-                        int test_decode,
-                        vpx_codec_ctx_t *dcodec,
-                        unsigned int *frame_out,
+static int encode_frame(vpx_codec_ctx_t *ecodec, vpx_codec_enc_cfg_t *cfg,
+                        vpx_image_t *img, unsigned int frame_in,
+                        VpxVideoWriter *writer, int test_decode,
+                        vpx_codec_ctx_t *dcodec, unsigned int *frame_out,
                         int *mismatch_seen) {
   int got_pkts = 0;
   vpx_codec_iter_t iter = NULL;
   const vpx_codec_cx_pkt_t *pkt = NULL;
   int got_data;
-  const vpx_codec_err_t res = vpx_codec_encode(ecodec, img, frame_in, 1,
-                                               0, VPX_DL_GOOD_QUALITY);
-  if (res != VPX_CODEC_OK)
-    die_codec(ecodec, "Failed to encode frame");
+  const vpx_codec_err_t res =
+      vpx_codec_encode(ecodec, img, frame_in, 1, 0, VPX_DL_GOOD_QUALITY);
+  if (res != VPX_CODEC_OK) die_codec(ecodec, "Failed to encode frame");
 
   got_data = 0;
 
@@ -257,11 +247,10 @@ static int encode_frame(vpx_codec_ctx_t *ecodec,
       const int keyframe = (pkt->data.frame.flags & VPX_FRAME_IS_KEY) != 0;
 
       if (!(pkt->data.frame.flags & VPX_FRAME_IS_FRAGMENT)) {
-                *frame_out += 1;
-        }
+        *frame_out += 1;
+      }
 
-      if (!vpx_video_writer_write_frame(writer,
-                                        pkt->data.frame.buf,
+      if (!vpx_video_writer_write_frame(writer, pkt->data.frame.buf,
                                         pkt->data.frame.sz,
                                         pkt->data.frame.pts)) {
         die_codec(ecodec, "Failed to write compressed frame");
@@ -290,12 +279,12 @@ static int encode_frame(vpx_codec_ctx_t *ecodec,
 int main(int argc, char **argv) {
   FILE *infile = NULL;
   // Encoder
-  vpx_codec_ctx_t ecodec = {0};
-  vpx_codec_enc_cfg_t cfg = {0};
+  vpx_codec_ctx_t ecodec = { 0 };
+  vpx_codec_enc_cfg_t cfg = { 0 };
   unsigned int frame_in = 0;
   vpx_image_t raw;
   vpx_codec_err_t res;
-  VpxVideoInfo info = {0};
+  VpxVideoInfo info = { 0 };
   VpxVideoWriter *writer = NULL;
   const VpxInterface *encoder = NULL;
 
@@ -319,8 +308,7 @@ int main(int argc, char **argv) {
   unsigned int limit = 0;
   exec_name = argv[0];
 
-  if (argc < 6)
-    die("Invalid number of arguments");
+  if (argc < 6) die("Invalid number of arguments");
 
   width_arg = argv[1];
   height_arg = argv[2];
@@ -328,15 +316,13 @@ int main(int argc, char **argv) {
   outfile_arg = argv[4];
 
   encoder = get_vpx_encoder_by_name("vp9");
-  if (!encoder)
-    die("Unsupported codec.");
+  if (!encoder) die("Unsupported codec.");
 
   update_frame_num = atoi(argv[5]);
   // In VP9, the reference buffers (cm->buffer_pool->frame_bufs[i].buf) are
   // allocated while calling vpx_codec_encode(), thus, setting reference for
   // 1st frame isn't supported.
-  if (update_frame_num <= 1)
-    die("Couldn't parse frame number '%s'\n", argv[5]);
+  if (update_frame_num <= 1) die("Couldn't parse frame number '%s'\n", argv[5]);
 
   if (argc > 6) {
     limit = atoi(argv[6]);
@@ -350,23 +336,20 @@ int main(int argc, char **argv) {
   info.time_base.numerator = 1;
   info.time_base.denominator = fps;
 
-  if (info.frame_width <= 0 ||
-      info.frame_height <= 0 ||
-      (info.frame_width % 2) != 0 ||
-      (info.frame_height % 2) != 0) {
+  if (info.frame_width <= 0 || info.frame_height <= 0 ||
+      (info.frame_width % 2) != 0 || (info.frame_height % 2) != 0) {
     die("Invalid frame size: %dx%d", info.frame_width, info.frame_height);
   }
 
   if (!vpx_img_alloc(&raw, VPX_IMG_FMT_I420, info.frame_width,
-                                             info.frame_height, 1)) {
+                     info.frame_height, 1)) {
     die("Failed to allocate image.");
   }
 
   printf("Using %s\n", vpx_codec_iface_name(encoder->codec_interface()));
 
   res = vpx_codec_enc_config_default(encoder->codec_interface(), &cfg, 0);
-  if (res)
-    die_codec(&ecodec, "Failed to get default codec config.");
+  if (res) die_codec(&ecodec, "Failed to get default codec config.");
 
   cfg.g_w = info.frame_width;
   cfg.g_h = info.frame_height;
@@ -376,8 +359,7 @@ int main(int argc, char **argv) {
   cfg.g_lag_in_frames = 3;
 
   writer = vpx_video_writer_open(outfile_arg, kContainerIVF, &info);
-  if (!writer)
-    die("Failed to open %s for writing.", outfile_arg);
+  if (!writer) die("Failed to open %s for writing.", outfile_arg);
 
   if (!(infile = fopen(infile_arg, "rb")))
     die("Failed to open %s for reading.", infile_arg);
@@ -390,15 +372,14 @@ int main(int argc, char **argv) {
     die_codec(&ecodec, "Failed to set enable auto alt ref");
 
   if (test_decode) {
-      const VpxInterface *decoder = get_vpx_decoder_by_name("vp9");
-      if (vpx_codec_dec_init(&dcodec, decoder->codec_interface(), NULL, 0))
-        die_codec(&dcodec, "Failed to initialize decoder.");
+    const VpxInterface *decoder = get_vpx_decoder_by_name("vp9");
+    if (vpx_codec_dec_init(&dcodec, decoder->codec_interface(), NULL, 0))
+      die_codec(&dcodec, "Failed to initialize decoder.");
   }
 
   // Encode frames.
   while (vpx_img_read(&raw, infile)) {
-    if (limit && frame_in >= limit)
-      break;
+    if (limit && frame_in >= limit) break;
     if (update_frame_num > 1 && frame_out + 1 == update_frame_num) {
       vpx_ref_frame_t ref;
       ref.frame_type = VP8_LAST_FRAME;
@@ -416,17 +397,17 @@ int main(int argc, char **argv) {
       }
     }
 
-    encode_frame(&ecodec, &cfg, &raw, frame_in, writer, test_decode,
-                 &dcodec, &frame_out, &mismatch_seen);
+    encode_frame(&ecodec, &cfg, &raw, frame_in, writer, test_decode, &dcodec,
+                 &frame_out, &mismatch_seen);
     frame_in++;
-    if (mismatch_seen)
-      break;
+    if (mismatch_seen) break;
   }
 
   // Flush encoder.
   if (!mismatch_seen)
     while (encode_frame(&ecodec, &cfg, NULL, frame_in, writer, test_decode,
-                        &dcodec, &frame_out, &mismatch_seen)) {}
+                        &dcodec, &frame_out, &mismatch_seen)) {
+    }
 
   printf("\n");
   fclose(infile);
