@@ -45,6 +45,30 @@
       "revId": "b704360260130689422d55fa1520b388431e78ba",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a371f0e_c381482b",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1431,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-19T18:36:57Z",
+      "side": 1,
+      "message": "dropped some in patch 2, will hit these too",
+      "parentUuid": "2a371f0e_63567cd7",
+      "range": {
+        "startLine": 1431,
+        "startChar": 4,
+        "endLine": 1431,
+        "endChar": 5
+      },
+      "revId": "b704360260130689422d55fa1520b388431e78ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
