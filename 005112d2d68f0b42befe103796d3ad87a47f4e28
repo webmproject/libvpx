@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ea534725_c9e91517",
+        "filename": "args.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-19T03:58:23Z",
+      "side": 1,
+      "message": "seems over-done here",
+      "range": {
+        "startLine": 31,
+        "startChar": 26,
+        "endLine": 31,
+        "endChar": 27
+      },
+      "revId": "005112d2d68f0b42befe103796d3ad87a47f4e28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea534725_a9f6d9f4",
+        "filename": "args.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-19T03:58:23Z",
+      "side": 1,
+      "message": "and here too...",
+      "range": {
+        "startLine": 41,
+        "startChar": 8,
+        "endLine": 41,
+        "endChar": 15
+      },
+      "revId": "005112d2d68f0b42befe103796d3ad87a47f4e28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
