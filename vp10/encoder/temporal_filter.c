@@ -733,6 +733,12 @@ void vp10_temporal_filter(VP10_COMP *cpi, int distance) {
 
   // Apply context specific adjustments to the arnr filter parameters.
   adjust_arnr_filter(cpi, distance, rc->gfu_boost, &frames_to_blur, &strength);
+#if CONFIG_EXT_REFS
+  if (strength == 0 && frames_to_blur == 1)
+    cpi->is_arf_filter_off = 1;
+  else
+    cpi->is_arf_filter_off = 0;
+#endif
   frames_to_blur_backward = (frames_to_blur / 2);
   frames_to_blur_forward = ((frames_to_blur - 1) / 2);
   start_frame = distance + frames_to_blur_forward;

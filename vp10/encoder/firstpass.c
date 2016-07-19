@@ -2519,6 +2519,9 @@ static void find_next_key_frame(VP10_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 static void configure_buffer_updates(VP10_COMP *cpi) {
   TWO_PASS *const twopass = &cpi->twopass;
 
+  // Wei-Ting: Should we define another function to take care of
+  // cpi->rc.is_$Source_Type to make this function as it is in the comment?
+
   cpi->rc.is_src_frame_alt_ref = 0;
 #if CONFIG_EXT_REFS
   cpi->rc.is_bwd_ref_frame = 0;
@@ -2739,6 +2742,7 @@ void vp10_rc_get_second_pass_params(VP10_COMP *cpi) {
   }
 
   target_rate = gf_group->bit_allocation[gf_group->index];
+
   if (cpi->common.frame_type == KEY_FRAME)
     target_rate = vp10_rc_clamp_iframe_target_size(cpi, target_rate);
   else
