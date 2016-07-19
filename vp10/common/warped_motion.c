@@ -116,19 +116,19 @@ void projectPointsRotZoom(int *mat, int *points, int *proj,
     const int x = *(points++), y = *(points++);
     if (subsampling_x)
       *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
-          mat[0] * 2 * x + mat[1] * 2 * y + mat[2] +
-          (mat[0] + mat[1] - (1 << WARPEDMODEL_PREC_BITS)) / 2,
+          mat[2] * 2 * x + mat[3] * 2 * y + mat[0] +
+          (mat[2] + mat[3] - (1 << WARPEDMODEL_PREC_BITS)) / 2,
           WARPEDDIFF_PREC_BITS + 1);
     else
-      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(mat[0] * x + mat[1] * y + mat[2],
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(mat[2] * x + mat[3] * y + mat[0],
                                             WARPEDDIFF_PREC_BITS);
     if (subsampling_y)
       *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
-          -mat[1] * 2 * x + mat[0] * 2 * y + mat[3] +
-          (-mat[1] + mat[0] - (1 << WARPEDMODEL_PREC_BITS)) / 2,
+          -mat[3] * 2 * x + mat[2] * 2 * y + mat[1] +
+          (-mat[3] + mat[2] - (1 << WARPEDMODEL_PREC_BITS)) / 2,
           WARPEDDIFF_PREC_BITS + 1);
     else
-      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(-mat[1] * x + mat[0] * y + mat[3],
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(-mat[3] * x + mat[2] * y + mat[1],
                                             WARPEDDIFF_PREC_BITS);
     points += stride_points - 2;
     proj += stride_proj - 2;
@@ -146,19 +146,19 @@ static void projectPointsAffine(int *mat, int *points, int *proj,
     const int x = *(points++), y = *(points++);
     if (subsampling_x)
       *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
-          mat[0] * 2 * x + mat[1] * 2 * y + mat[4] +
-          (mat[0] + mat[1] - (1 << WARPEDMODEL_PREC_BITS)) / 2,
-          WARPEDDIFF_PREC_BITS + 1);
-    else
-      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(mat[0] * x + mat[1] * y + mat[4],
-                                            WARPEDDIFF_PREC_BITS);
-    if (subsampling_y)
-      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
-          mat[2] * 2 * x + mat[3] * 2 * y + mat[5] +
+          mat[2] * 2 * x + mat[3] * 2 * y + mat[0] +
           (mat[2] + mat[3] - (1 << WARPEDMODEL_PREC_BITS)) / 2,
           WARPEDDIFF_PREC_BITS + 1);
     else
-      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(mat[2] * x + mat[3] * y + mat[5],
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(mat[2] * x + mat[3] * y + mat[0],
+                                            WARPEDDIFF_PREC_BITS);
+    if (subsampling_y)
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
+          mat[4] * 2 * x + mat[5] * 2 * y + mat[1] +
+          (mat[4] + mat[5] - (1 << WARPEDMODEL_PREC_BITS)) / 2,
+          WARPEDDIFF_PREC_BITS + 1);
+    else
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(mat[4] * x + mat[5] * y + mat[1],
                                             WARPEDDIFF_PREC_BITS);
     points += stride_points - 2;
     proj += stride_proj - 2;

@@ -3464,16 +3464,16 @@ static void read_global_motion_params(Global_Motion_Params *params,
       break;
     case GLOBAL_ROTZOOM:
       params->motion_params.wmtype = ROTZOOM;
-      params->motion_params.wmmat[2] =
-          vp10_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
-          GM_TRANS_DECODE_FACTOR;
-      params->motion_params.wmmat[3] =
-          vp10_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
-          GM_TRANS_DECODE_FACTOR;
       params->motion_params.wmmat[0] =
+          vp10_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
+          GM_TRANS_DECODE_FACTOR;
+      params->motion_params.wmmat[1] =
+          vp10_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
+          GM_TRANS_DECODE_FACTOR;
+      params->motion_params.wmmat[2] =
           (vp10_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
           GM_ALPHA_DECODE_FACTOR) + (1 << WARPEDMODEL_PREC_BITS);
-      params->motion_params.wmmat[1] =
+      params->motion_params.wmmat[3] =
           vp10_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
           GM_ALPHA_DECODE_FACTOR;
       break;
