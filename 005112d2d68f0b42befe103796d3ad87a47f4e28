@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ea534725_a9cdb9b6",
+        "filename": "args.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-19T04:10:22Z",
+      "side": 1,
+      "message": "not sure if that can be controlled minus /* clang-format off */",
+      "parentUuid": "ea534725_c9e91517",
+      "range": {
+        "startLine": 31,
+        "startChar": 26,
+        "endLine": 31,
+        "endChar": 27
+      },
+      "revId": "005112d2d68f0b42befe103796d3ad87a47f4e28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea534725_a9f6d9f4",
         "filename": "args.h",
         "patchSetId": 1
