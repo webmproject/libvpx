@@ -1479,7 +1479,7 @@ static int fast_dia_search(MACROBLOCK *x,
 
 // Exhuastive motion search around a given centre position with a given
 // step size.
-static int exhuastive_mesh_search(const MACROBLOCK *x,
+static int exhuastive_mesh_search(MACROBLOCK *x,
                                   MV *ref_mv, MV *best_mv,
                                   int range, int step, int sad_per_bit,
                                   const vp10_variance_fn_ptr_t *fn_ptr,
@@ -1517,6 +1517,7 @@ static int exhuastive_mesh_search(const MACROBLOCK *x,
           sad += mvsad_err_cost(x, &mv, ref_mv, sad_per_bit);
           if (sad < best_sad) {
             best_sad = sad;
+            x->second_best_mv.as_mv = *best_mv;
             *best_mv = mv;
           }
         }
@@ -1539,6 +1540,7 @@ static int exhuastive_mesh_search(const MACROBLOCK *x,
                   mvsad_err_cost(x, &mv, ref_mv, sad_per_bit);
               if (sad < best_sad) {
                 best_sad = sad;
+                x->second_best_mv.as_mv = *best_mv;
                 *best_mv = mv;
               }
             }
@@ -1552,6 +1554,7 @@ static int exhuastive_mesh_search(const MACROBLOCK *x,
               sad += mvsad_err_cost(x, &mv, ref_mv, sad_per_bit);
               if (sad < best_sad) {
                 best_sad = sad;
+                x->second_best_mv.as_mv = *best_mv;
                 *best_mv = mv;
               }
             }
@@ -1564,7 +1567,7 @@ static int exhuastive_mesh_search(const MACROBLOCK *x,
   return best_sad;
 }
 
-int vp10_diamond_search_sad_c(const MACROBLOCK *x,
+int vp10_diamond_search_sad_c(MACROBLOCK *x,
                               const search_site_config *cfg,
                               MV *ref_mv, MV *best_mv, int search_param,
                               int sad_per_bit, int *num00,
@@ -1673,6 +1676,7 @@ int vp10_diamond_search_sad_c(const MACROBLOCK *x,
       }
     }
     if (best_site != last_site) {
+      x->second_best_mv.as_mv = *best_mv;
       best_mv->row += ss[best_site].mv.row;
       best_mv->col += ss[best_site].mv.col;
       best_address += ss[best_site].offset;
@@ -2234,11 +2238,11 @@ int vp10_full_search_sadx8(const MACROBLOCK *x, const MV *ref_mv,
   return best_sad;
 }
 
-int vp10_refining_search_sad(const MACROBLOCK *x,
-                            MV *ref_mv, int error_per_bit,
-                            int search_range,
-                            const vp10_variance_fn_ptr_t *fn_ptr,
-                            const MV *center_mv) {
+int vp10_refining_search_sad(MACROBLOCK *x,
+                             MV *ref_mv, int error_per_bit,
+                             int search_range,
+                             const vp10_variance_fn_ptr_t *fn_ptr,
+                             const MV *center_mv) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   const MV neighbors[4] = {{ -1, 0}, {0, -1}, {0, 1}, {1, 0}};
   const struct buf_2d *const what = &x->plane[0].src;
@@ -2302,6 +2306,7 @@ int vp10_refining_search_sad(const MACROBLOCK *x,
     if (best_site == -1) {
       break;
     } else {
+      x->second_best_mv.as_mv = *ref_mv;
       ref_mv->row += neighbors[best_site].row;
       ref_mv->col += neighbors[best_site].col;
       best_address = get_buf_from_mv(in_what, ref_mv);

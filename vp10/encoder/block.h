@@ -164,6 +164,8 @@ struct macroblock {
 
   // Store the best motion vector during motion search
   int_mv best_mv;
+  // Store the second best motion vector during full-pixel motion search
+  int_mv second_best_mv;
 
   // Strong color activity detection. Used in RTC coding mode to enhance
   // the visual quality at the boundary of moving color objects.

@@ -66,11 +66,11 @@ struct SPEED_FEATURES;
 
 int vp10_init_search_range(int size);
 
-int vp10_refining_search_sad(const struct macroblock *x,
-                            struct mv *ref_mv,
-                            int sad_per_bit, int distance,
-                            const vp10_variance_fn_ptr_t *fn_ptr,
-                            const struct mv *center_mv);
+int vp10_refining_search_sad(struct macroblock *x,
+                             struct mv *ref_mv,
+                             int sad_per_bit, int distance,
+                             const vp10_variance_fn_ptr_t *fn_ptr,
+                             const struct mv *center_mv);
 
 // Runs sequence of diamond searches in smaller steps for RD.
 int vp10_full_pixel_diamond(const struct VP10_COMP *cpi, MACROBLOCK *x,
@@ -122,7 +122,7 @@ typedef int (*vp10_full_search_fn_t)(const MACROBLOCK *x,
                                      const vp10_variance_fn_ptr_t *fn_ptr,
                                      const MV *center_mv, MV *best_mv);
 
-typedef int (*vp10_diamond_search_fn_t)(const MACROBLOCK *x,
+typedef int (*vp10_diamond_search_fn_t)(MACROBLOCK *x,
                                         const search_site_config *cfg,
                                         MV *ref_mv, MV *best_mv,
                                         int search_param, int sad_per_bit,

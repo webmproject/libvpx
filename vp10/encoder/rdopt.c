@@ -5239,6 +5239,8 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
 
           vp10_set_mv_search_range(x, &bsi->ref_mv[0]->as_mv);
 
+          x->best_mv.as_int = x->second_best_mv.as_int = INVALID_MV;
+
 #if CONFIG_REF_MV
           vp10_set_mvcost(x, mbmi->ref_frame[0]);
 #endif
@@ -5250,6 +5252,10 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
           if (bestsme < INT_MAX) {
             int distortion;
             if (cpi->sf.use_upsampled_references) {
+              int best_mv_var;
+              const int try_second =
+                  x->second_best_mv.as_int != INVALID_MV &&
+                  x->second_best_mv.as_int != x->best_mv.as_int;
               const int pw = 4 * num_4x4_blocks_wide_lookup[bsize];
               const int ph = 4 * num_4x4_blocks_high_lookup[bsize];
               // Use up-sampled reference frames.
@@ -5271,17 +5277,52 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
                   &pd->pre[0].buf[(vp10_raster_block_offset(BLOCK_8X8, i,
                   pd->pre[0].stride)) << 3];
 
-              cpi->find_fractional_mv_step(
-                  x, &bsi->ref_mv[0]->as_mv,
-                  cm->allow_high_precision_mv,
-                  x->errorperbit, &cpi->fn_ptr[bsize],
-                  cpi->sf.mv.subpel_force_stop,
-                  cpi->sf.mv.subpel_iters_per_step,
-                  cond_cost_list(cpi, cost_list),
-                  x->nmvjointcost, x->mvcost,
-                  &distortion,
-                  &x->pred_sse[mbmi->ref_frame[0]],
-                  NULL, pw, ph, 1);
+              best_mv_var =
+                  cpi->find_fractional_mv_step(x, &bsi->ref_mv[0]->as_mv,
+                                               cm->allow_high_precision_mv,
+                                               x->errorperbit,
+                                               &cpi->fn_ptr[bsize],
+                                               cpi->sf.mv.subpel_force_stop,
+                                               cpi->sf.mv.subpel_iters_per_step,
+                                               cond_cost_list(cpi, cost_list),
+                                               x->nmvjointcost, x->mvcost,
+                                               &distortion,
+                                               &x->pred_sse[mbmi->ref_frame[0]],
+                                               NULL, pw, ph, 1);
+
+              if (try_second) {
+                int this_var;
+                MV best_mv = x->best_mv.as_mv;
+                const MV ref_mv = bsi->ref_mv[0]->as_mv;
+                const int minc = VPXMAX(x->mv_col_min * 8, ref_mv.col - MV_MAX);
+                const int maxc = VPXMIN(x->mv_col_max * 8, ref_mv.col + MV_MAX);
+                const int minr = VPXMAX(x->mv_row_min * 8, ref_mv.row - MV_MAX);
+                const int maxr = VPXMIN(x->mv_row_max * 8, ref_mv.row + MV_MAX);
+
+                x->best_mv = x->second_best_mv;
+                if (x->best_mv.as_mv.row * 8 <= maxr &&
+                    x->best_mv.as_mv.row * 8 >= minr &&
+                    x->best_mv.as_mv.col * 8 <= maxc &&
+                    x->best_mv.as_mv.col * 8 >= minc) {
+                  this_var =
+                      cpi->find_fractional_mv_step(x, &bsi->ref_mv[0]->as_mv,
+                                                   cm->allow_high_precision_mv,
+                                                   x->errorperbit,
+                                                   &cpi->fn_ptr[bsize],
+                                                   cpi->sf.mv.subpel_force_stop,
+                                                   cpi->
+                                                   sf.mv.subpel_iters_per_step,
+                                                   cond_cost_list(cpi,
+                                                                  cost_list),
+                                                   x->nmvjointcost, x->mvcost,
+                                                   &distortion,
+                                                   &x->pred_sse[mbmi->
+                                                                ref_frame[0]],
+                                                   NULL, pw, ph, 1);
+                  if (this_var < best_mv_var) best_mv = x->best_mv.as_mv;
+                  x->best_mv.as_mv = best_mv;
+                }
+              }
 
               // Restore the reference frames.
               pd->pre[0] = backup_pred;
@@ -5983,6 +6024,8 @@ static void single_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
   mvp_full.col >>= 3;
   mvp_full.row >>= 3;
 
+  x->best_mv.as_int = x->second_best_mv.as_int = INVALID_MV;
+
   bestsme = vp10_full_pixel_search(cpi, x, bsize, &mvp_full, step_param, sadpb,
                                    cond_cost_list(cpi, cost_list),
                                    &ref_mv, INT_MAX, 1);
@@ -5995,6 +6038,10 @@ static void single_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
   if (bestsme < INT_MAX) {
     int dis;  /* TODO: use dis in distortion calculation later. */
     if (cpi->sf.use_upsampled_references) {
+      int best_mv_var;
+      const int try_second =
+          x->second_best_mv.as_int != INVALID_MV &&
+          x->second_best_mv.as_int != x->best_mv.as_int;
       const int pw = 4 * num_4x4_blocks_wide_lookup[bsize];
       const int ph = 4 * num_4x4_blocks_high_lookup[bsize];
       // Use up-sampled reference frames.
@@ -6009,16 +6056,46 @@ static void single_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
                        upsampled_ref->y_stride, (mi_row << 3), (mi_col << 3),
                        NULL, pd->subsampling_x, pd->subsampling_y);
 
-      bestsme = cpi->find_fractional_mv_step(x, &ref_mv,
-                                             cm->allow_high_precision_mv,
-                                             x->errorperbit,
-                                             &cpi->fn_ptr[bsize],
-                                             cpi->sf.mv.subpel_force_stop,
-                                             cpi->sf.mv.subpel_iters_per_step,
-                                             cond_cost_list(cpi, cost_list),
-                                             x->nmvjointcost, x->mvcost,
-                                             &dis, &x->pred_sse[ref], NULL,
-                                             pw, ph, 1);
+      best_mv_var =
+          cpi->find_fractional_mv_step(x, &ref_mv,
+                                       cm->allow_high_precision_mv,
+                                       x->errorperbit,
+                                       &cpi->fn_ptr[bsize],
+                                       cpi->sf.mv.subpel_force_stop,
+                                       cpi->sf.mv.subpel_iters_per_step,
+                                       cond_cost_list(cpi, cost_list),
+                                       x->nmvjointcost, x->mvcost,
+                                       &dis, &x->pred_sse[ref], NULL,
+                                       pw, ph, 1);
+
+      if (try_second) {
+        const int minc = VPXMAX(x->mv_col_min * 8, ref_mv.col - MV_MAX);
+        const int maxc = VPXMIN(x->mv_col_max * 8, ref_mv.col + MV_MAX);
+        const int minr = VPXMAX(x->mv_row_min * 8, ref_mv.row - MV_MAX);
+        const int maxr = VPXMIN(x->mv_row_max * 8, ref_mv.row + MV_MAX);
+        int this_var;
+        MV best_mv = x->best_mv.as_mv;
+
+        x->best_mv = x->second_best_mv;
+        if (x->best_mv.as_mv.row * 8 <= maxr &&
+            x->best_mv.as_mv.row * 8 >= minr &&
+            x->best_mv.as_mv.col * 8 <= maxc &&
+            x->best_mv.as_mv.col * 8 >= minc) {
+          this_var =
+              cpi->find_fractional_mv_step(x, &ref_mv,
+                                           cm->allow_high_precision_mv,
+                                           x->errorperbit,
+                                           &cpi->fn_ptr[bsize],
+                                           cpi->sf.mv.subpel_force_stop,
+                                           cpi->sf.mv.subpel_iters_per_step,
+                                           cond_cost_list(cpi, cost_list),
+                                           x->nmvjointcost, x->mvcost,
+                                           &dis, &x->pred_sse[ref], NULL,
+                                           pw, ph, 1);
+          if (this_var < best_mv_var) best_mv = x->best_mv.as_mv;
+          x->best_mv.as_mv = best_mv;
+        }
+      }
 
       // Restore the reference frames.
       pd->pre[ref_idx] = backup_pred;
