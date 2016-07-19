@@ -931,7 +931,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
 
 #if CONFIG_FP_MB_STATS
         if (cpi->use_fp_mb_stats) {
-          // intra predication statistics
+          // intra prediction statistics
           cpi->twopass.frame_mb_stats_buf[mb_index] = 0;
           cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_DCINTRA_MASK;
           cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_MOTION_ZERO_MASK;
@@ -982,7 +982,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
 
 #if CONFIG_FP_MB_STATS
           if (cpi->use_fp_mb_stats) {
-            // inter predication statistics
+            // inter prediction statistics
             cpi->twopass.frame_mb_stats_buf[mb_index] = 0;
             cpi->twopass.frame_mb_stats_buf[mb_index] &= ~FPMB_DCINTRA_MASK;
             cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_MOTION_ZERO_MASK;
