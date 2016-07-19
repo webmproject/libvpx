@@ -63,18 +63,20 @@ void vp8_mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   /* Decide whether to use the default or alternate baseline Q value. */
   if (xd->segmentation_enabled) {
     /* Abs Value */
-    if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA)
+    if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA) {
       QIndex = xd->segment_feature_data[MB_LVL_ALT_Q][mbmi->segment_id];
 
-    /* Delta Value */
-    else
+      /* Delta Value */
+    } else {
       QIndex = pc->base_qindex +
                xd->segment_feature_data[MB_LVL_ALT_Q][mbmi->segment_id];
+    }
 
     QIndex = (QIndex >= 0) ? ((QIndex <= MAXQ) ? QIndex : MAXQ)
                            : 0; /* Clamp to valid range */
-  } else
+  } else {
     QIndex = pc->base_qindex;
+  }
 
   /* Set up the macroblock dequant constants */
   xd->dequant_y1_dc[0] = 1;
@@ -602,14 +604,15 @@ static void decode_mb_rows(VP8D_COMP *pbi) {
 
     if (pc->filter_level) {
       if (mb_row > 0) {
-        if (pc->filter_type == NORMAL_LOOPFILTER)
+        if (pc->filter_type == NORMAL_LOOPFILTER) {
           vp8_loop_filter_row_normal(pc, lf_mic, mb_row - 1, recon_y_stride,
                                      recon_uv_stride, lf_dst[0], lf_dst[1],
                                      lf_dst[2]);
-        else
+        } else {
           vp8_loop_filter_row_simple(pc, lf_mic, mb_row - 1, recon_y_stride,
                                      recon_uv_stride, lf_dst[0], lf_dst[1],
                                      lf_dst[2]);
+        }
         if (mb_row > 1) {
           yv12_extend_frame_left_right_c(yv12_fb_new, eb_dst[0], eb_dst[1],
                                          eb_dst[2]);
@@ -638,14 +641,15 @@ static void decode_mb_rows(VP8D_COMP *pbi) {
   }
 
   if (pc->filter_level) {
-    if (pc->filter_type == NORMAL_LOOPFILTER)
+    if (pc->filter_type == NORMAL_LOOPFILTER) {
       vp8_loop_filter_row_normal(pc, lf_mic, mb_row - 1, recon_y_stride,
                                  recon_uv_stride, lf_dst[0], lf_dst[1],
                                  lf_dst[2]);
-    else
+    } else {
       vp8_loop_filter_row_simple(pc, lf_mic, mb_row - 1, recon_y_stride,
                                  recon_uv_stride, lf_dst[0], lf_dst[1],
                                  lf_dst[2]);
+    }
 
     yv12_extend_frame_left_right_c(yv12_fb_new, eb_dst[0], eb_dst[1],
                                    eb_dst[2]);
@@ -688,28 +692,31 @@ static unsigned int read_available_partition_size(
    * or throw an error.
    */
   if (i < num_part - 1) {
-    if (read_is_valid(partition_size_ptr, 3, first_fragment_end))
+    if (read_is_valid(partition_size_ptr, 3, first_fragment_end)) {
       partition_size = read_partition_size(pbi, partition_size_ptr);
-    else if (pbi->ec_active)
+    } else if (pbi->ec_active) {
       partition_size = (unsigned int)bytes_left;
-    else
+    } else {
       vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                          "Truncated partition size data");
-  } else
+    }
+  } else {
     partition_size = (unsigned int)bytes_left;
+  }
 
   /* Validate the calculated partition length. If the buffer
    * described by the partition can't be fully read, then restrict
    * it to the portion that can be (for EC mode) or throw an error.
    */
   if (!read_is_valid(fragment_start, partition_size, fragment_end)) {
-    if (pbi->ec_active)
+    if (pbi->ec_active) {
       partition_size = (unsigned int)bytes_left;
-    else
+    } else {
       vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                          "Truncated packet or corrupt partition "
                          "%d length",
                          i + 1);
+    }
   }
   return partition_size;
 }
@@ -725,8 +732,9 @@ static void setup_token_decoder(VP8D_COMP *pbi,
 
   TOKEN_PARTITION multi_token_partition =
       (TOKEN_PARTITION)vp8_read_literal(&pbi->mbc[8], 2);
-  if (!vp8dx_bool_error(&pbi->mbc[8]))
+  if (!vp8dx_bool_error(&pbi->mbc[8])) {
     pbi->common.multi_token_partition = multi_token_partition;
+  }
   num_token_partitions = 1 << pbi->common.multi_token_partition;
 
   /* Check for partitions within the fragments and unpack the fragments
@@ -777,17 +785,19 @@ static void setup_token_decoder(VP8D_COMP *pbi,
        ++partition_idx) {
     if (vp8dx_start_decode(bool_decoder, pbi->fragments.ptrs[partition_idx],
                            pbi->fragments.sizes[partition_idx], pbi->decrypt_cb,
-                           pbi->decrypt_state))
+                           pbi->decrypt_state)) {
       vpx_internal_error(&pbi->common.error, VPX_CODEC_MEM_ERROR,
                          "Failed to allocate bool decoder %d", partition_idx);
+    }
 
     bool_decoder++;
   }
 
 #if CONFIG_MULTITHREAD
   /* Clamp number of decoder threads */
-  if (pbi->decoding_thread_count > num_token_partitions - 1)
+  if (pbi->decoding_thread_count > num_token_partitions - 1) {
     pbi->decoding_thread_count = num_token_partitions - 1;
+  }
 #endif
 }
 
@@ -836,8 +846,9 @@ static void init_frame(VP8D_COMP *pbi) {
       xd->subpixel_predict16x16 = vp8_bilinear_predict16x16;
     }
 
-    if (pbi->decoded_key_frame && pbi->ec_enabled && !pbi->ec_active)
+    if (pbi->decoded_key_frame && pbi->ec_enabled && !pbi->ec_active) {
       pbi->ec_active = 1;
+    }
   }
 
   xd->left_context = &pc->left_context;
@@ -900,9 +911,10 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
         (clear[0] | (clear[1] << 8) | (clear[2] << 16)) >> 5;
 
     if (!pbi->ec_active && (data + first_partition_length_in_bytes > data_end ||
-                            data + first_partition_length_in_bytes < data))
+                            data + first_partition_length_in_bytes < data)) {
       vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                          "Truncated packet or corrupt partition 0 length");
+    }
 
     data += 3;
     clear += 3;
@@ -915,9 +927,10 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
        * code if we have enough bits available
        */
       if (!pbi->ec_active || data + 3 < data_end) {
-        if (clear[0] != 0x9d || clear[1] != 0x01 || clear[2] != 0x2a)
+        if (clear[0] != 0x9d || clear[1] != 0x01 || clear[2] != 0x2a) {
           vpx_internal_error(&pc->error, VPX_CODEC_UNSUP_BITSTREAM,
                              "Invalid frame sync code");
+        }
       }
 
       /* If error concealment is enabled we should only parse the new size
@@ -943,9 +956,10 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
   init_frame(pbi);
 
   if (vp8dx_start_decode(bc, data, (unsigned int)(data_end - data),
-                         pbi->decrypt_cb, pbi->decrypt_state))
+                         pbi->decrypt_cb, pbi->decrypt_state)) {
     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder 0");
+  }
   if (pc->frame_type == KEY_FRAME) {
     (void)vp8_read_bit(bc);  // colorspace
     pc->clamp_type = (CLAMP_TYPE)vp8_read_bit(bc);
@@ -973,10 +987,12 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
             xd->segment_feature_data[i][j] =
                 (signed char)vp8_read_literal(bc, mb_feature_data_bits[i]);
 
-            if (vp8_read_bit(bc))
+            if (vp8_read_bit(bc)) {
               xd->segment_feature_data[i][j] = -xd->segment_feature_data[i][j];
-          } else
+            }
+          } else {
             xd->segment_feature_data[i][j] = 0;
+          }
         }
       }
     }
@@ -988,8 +1004,9 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
       /* Read the probs used to decode the segment id for each macro block. */
       for (i = 0; i < MB_FEATURE_TREE_PROBS; ++i) {
         /* If not explicitly set value is defaulted to 255 by memset above */
-        if (vp8_read_bit(bc))
+        if (vp8_read_bit(bc)) {
           xd->mb_segment_tree_probs[i] = (vp8_prob)vp8_read_literal(bc, 8);
+        }
       }
     }
   } else {
@@ -1019,8 +1036,9 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
           /*sign = vp8_read_bit( bc );*/
           xd->ref_lf_deltas[i] = (signed char)vp8_read_literal(bc, 6);
 
-          if (vp8_read_bit(bc)) /* Apply sign */
+          if (vp8_read_bit(bc)) { /* Apply sign */
             xd->ref_lf_deltas[i] = xd->ref_lf_deltas[i] * -1;
+          }
         }
       }
 
@@ -1030,8 +1048,9 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
           /*sign = vp8_read_bit( bc );*/
           xd->mode_lf_deltas[i] = (signed char)vp8_read_literal(bc, 6);
 
-          if (vp8_read_bit(bc)) /* Apply sign */
+          if (vp8_read_bit(bc)) { /* Apply sign */
             xd->mode_lf_deltas[i] = xd->mode_lf_deltas[i] * -1;
+          }
         }
       }
     }
@@ -1083,8 +1102,9 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
     /* Buffer to buffer copy flags. */
     pc->copy_buffer_to_gf = 0;
 
-    if (!pc->refresh_golden_frame)
+    if (!pc->refresh_golden_frame) {
       pc->copy_buffer_to_gf = vp8_read_literal(bc, 2);
+    }
 
 #if CONFIG_ERROR_CONCEALMENT
     /* Assume we shouldn't copy to the golden if the bit is missing */
@@ -1094,8 +1114,9 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
 
     pc->copy_buffer_to_arf = 0;
 
-    if (!pc->refresh_alt_ref_frame)
+    if (!pc->refresh_alt_ref_frame) {
       pc->copy_buffer_to_arf = vp8_read_literal(bc, 2);
+    }
 
 #if CONFIG_ERROR_CONCEALMENT
     /* Assume we shouldn't copy to the alt-ref if the bit is missing */
@@ -1138,18 +1159,22 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
     pbi->independent_partitions = 1;
 
     /* read coef probability tree */
-    for (i = 0; i < BLOCK_TYPES; ++i)
-      for (j = 0; j < COEF_BANDS; ++j)
-        for (k = 0; k < PREV_COEF_CONTEXTS; ++k)
+    for (i = 0; i < BLOCK_TYPES; ++i) {
+      for (j = 0; j < COEF_BANDS; ++j) {
+        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
           for (l = 0; l < ENTROPY_NODES; ++l) {
             vp8_prob *const p = pc->fc.coef_probs[i][j][k] + l;
 
             if (vp8_read(bc, vp8_coef_update_probs[i][j][k][l])) {
               *p = (vp8_prob)vp8_read_literal(bc, 8);
             }
-            if (k > 0 && *p != pc->fc.coef_probs[i][j][k - 1][l])
+            if (k > 0 && *p != pc->fc.coef_probs[i][j][k - 1][l]) {
               pbi->independent_partitions = 0;
+            }
           }
+        }
+      }
+    }
   }
 
   /* clear out the coeff buffer */
@@ -1174,8 +1199,9 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
     unsigned int thread;
     vp8mt_decode_mb_rows(pbi, xd);
     vp8_yv12_extend_frame_borders(yv12_fb_new);
-    for (thread = 0; thread < pbi->decoding_thread_count; ++thread)
+    for (thread = 0; thread < pbi->decoding_thread_count; ++thread) {
       corrupt_tokens |= pbi->mb_row_di[thread].mbd.corrupted;
+    }
   } else
 #endif
   {
@@ -1190,11 +1216,12 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
   yv12_fb_new->corrupted |= corrupt_tokens;
 
   if (!pbi->decoded_key_frame) {
-    if (pc->frame_type == KEY_FRAME && !yv12_fb_new->corrupted)
+    if (pc->frame_type == KEY_FRAME && !yv12_fb_new->corrupted) {
       pbi->decoded_key_frame = 1;
-    else
+    } else {
       vpx_internal_error(&pbi->common.error, VPX_CODEC_CORRUPT_FRAME,
                          "A stream must start with a complete key frame");
+    }
   }
 
   /* vpx_log("Decoder: Frame Decoded, Size Roughly:%d bytes

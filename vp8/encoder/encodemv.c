@@ -102,17 +102,17 @@ static unsigned int cost_mvcomponent(const int v,
     int i = 0;
     cost = vp8_cost_one(p[mvpis_short]);
 
-    do
+    do {
       cost += vp8_cost_bit(p[MVPbits + i], (x >> i) & 1);
 
-    while (++i < 3);
+    } while (++i < 3);
 
     i = mvlong_width - 1; /* Skip bit 3, which is sometimes implicit */
 
-    do
+    do {
       cost += vp8_cost_bit(p[MVPbits + i], (x >> i) & 1);
 
-    while (--i > 3);
+    } while (--i > 3);
 
     if (x & 0xFFF0) cost += vp8_cost_bit(p[MVPbits + 3], (x >> 3) & 1);
   }
@@ -242,10 +242,10 @@ static void write_component_probs(vp8_writer *const w,
         is_short_ct[1] += c; /* Long vector */
 
         /*  bit 3 not always encoded. */
-        do
+        do {
           bit_ct[k][(a >> k) & 1] += c;
 
-        while (--k >= 0);
+        } while (--k >= 0);
       }
     } while (++j <= mv_max);
   }
@@ -261,19 +261,19 @@ static void write_component_probs(vp8_writer *const w,
     vp8_tree_probs_from_distribution(8, vp8_small_mvencodings, vp8_small_mvtree,
                                      p, short_bct, short_ct, 256, 1);
 
-    do
+    do {
       calc_prob(Pnew + MVPshort + j, short_bct[j]);
 
-    while (++j < mvnum_short - 1);
+    } while (++j < mvnum_short - 1);
   }
 
   {
     int j = 0;
 
-    do
+    do {
       calc_prob(Pnew + MVPbits + j, bit_ct[j]);
 
-    while (++j < mvlong_width);
+    } while (++j < mvlong_width);
   }
 
   update(w, is_short_ct, Pcur + mvpis_short, Pnew[mvpis_short], *Pupdate++,
@@ -287,11 +287,10 @@ static void write_component_probs(vp8_writer *const w,
 
     int j = 0;
 
-    do
-
+    do {
       update(w, short_bct[j], cur_p + j, new_p[j], *Pupdate++, updated);
 
-    while (++j < mvnum_short - 1);
+    } while (++j < mvnum_short - 1);
   }
 
   {
@@ -300,11 +299,10 @@ static void write_component_probs(vp8_writer *const w,
 
     int j = 0;
 
-    do
-
+    do {
       update(w, bit_ct[j], cur_p + j, new_p[j], *Pupdate++, updated);
 
-    while (++j < mvlong_width);
+    } while (++j < mvlong_width);
   }
 }
 
@@ -322,9 +320,10 @@ void vp8_write_mvprobs(VP8_COMP *cpi) {
                         &vp8_mv_update_probs[1], cpi->mb.MVcount[1], 1,
                         &flags[1]);
 
-  if (flags[0] || flags[1])
+  if (flags[0] || flags[1]) {
     vp8_build_component_cost_table(
         cpi->mb.mvcost, (const MV_CONTEXT *)cpi->common.fc.mvc, flags);
+  }
 
 #ifdef VP8_ENTROPY_STATS
   active_section = 5;

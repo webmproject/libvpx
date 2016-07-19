@@ -18,10 +18,11 @@ static void cost(int *const C, vp8_tree T, const vp8_prob *const P, int i,
     const vp8_tree_index j = T[i];
     const int d = c + vp8_cost_bit(p, i & 1);
 
-    if (j <= 0)
+    if (j <= 0) {
       C[-j] = d;
-    else
+    } else {
       cost(C, T, P, j, d);
+    }
   } while (++i & 1);
 }
 void vp8_cost_tokens(int *c, const vp8_prob *p, vp8_tree t) {

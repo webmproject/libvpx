@@ -168,8 +168,9 @@ static void calc_av_activity(VP8_COMP *cpi, int64_t activity_sum) {
   cpi->activity_avg = (unsigned int)(activity_sum / cpi->common.MBs);
 #endif
 
-  if (cpi->activity_avg < VP8_ACTIVITY_AVG_MIN)
+  if (cpi->activity_avg < VP8_ACTIVITY_AVG_MIN) {
     cpi->activity_avg = VP8_ACTIVITY_AVG_MIN;
+  }
 
   /* Experimental code: return fixed value normalized for several clips */
   if (ALT_ACT_MEASURE) cpi->activity_avg = 100000;
@@ -347,10 +348,11 @@ static void encode_mb_row(VP8_COMP *cpi, VP8_COMMON *cm, int mb_row,
   const int *last_row_current_mb_col;
   int *current_mb_col = &cpi->mt_current_mb_col[mb_row];
 
-  if ((cpi->b_multi_threaded != 0) && (mb_row != 0))
+  if ((cpi->b_multi_threaded != 0) && (mb_row != 0)) {
     last_row_current_mb_col = &cpi->mt_current_mb_col[mb_row - 1];
-  else
+  } else {
     last_row_current_mb_col = &rightmost_col;
+  }
 #endif
 
 #if (CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING)
@@ -437,16 +439,18 @@ static void encode_mb_row(VP8_COMP *cpi, VP8_COMMON *cm, int mb_row,
       /* Code to set segment id in xd->mbmi.segment_id for current MB
        * (with range checking)
        */
-      if (cpi->segmentation_map[map_index + mb_col] <= 3)
+      if (cpi->segmentation_map[map_index + mb_col] <= 3) {
         xd->mode_info_context->mbmi.segment_id =
             cpi->segmentation_map[map_index + mb_col];
-      else
+      } else {
         xd->mode_info_context->mbmi.segment_id = 0;
+      }
 
       vp8cx_mb_init_quantizer(cpi, x, 1);
-    } else
+    } else {
       /* Set to Segment 0 by default */
       xd->mode_info_context->mbmi.segment_id = 0;
+    }
 
     x->active_ptr = cpi->active_map + map_index + mb_col;
 
@@ -479,16 +483,19 @@ static void encode_mb_row(VP8_COMP *cpi, VP8_COMMON *cm, int mb_row,
         if (xd->mode_info_context->mbmi.mode == ZEROMV &&
             xd->mode_info_context->mbmi.ref_frame == LAST_FRAME) {
           // Increment, check for wrap-around.
-          if (cpi->consec_zero_last[map_index + mb_col] < 255)
+          if (cpi->consec_zero_last[map_index + mb_col] < 255) {
             cpi->consec_zero_last[map_index + mb_col] += 1;
-          if (cpi->consec_zero_last_mvbias[map_index + mb_col] < 255)
+          }
+          if (cpi->consec_zero_last_mvbias[map_index + mb_col] < 255) {
             cpi->consec_zero_last_mvbias[map_index + mb_col] += 1;
+          }
         } else {
           cpi->consec_zero_last[map_index + mb_col] = 0;
           cpi->consec_zero_last_mvbias[map_index + mb_col] = 0;
         }
-        if (x->zero_last_dot_suppress)
+        if (x->zero_last_dot_suppress) {
           cpi->consec_zero_last_mvbias[map_index + mb_col] = 0;
+        }
       }
 
       /* Special case code for cyclic refresh
@@ -509,14 +516,16 @@ static void encode_mb_row(VP8_COMP *cpi, VP8_COMMON *cm, int mb_row,
          * been refreshed then mark it as a candidate for cleanup
          * next time (marked 0) else mark it as dirty (1).
          */
-        if (xd->mode_info_context->mbmi.segment_id)
+        if (xd->mode_info_context->mbmi.segment_id) {
           cpi->cyclic_refresh_map[map_index + mb_col] = -1;
-        else if ((xd->mode_info_context->mbmi.mode == ZEROMV) &&
-                 (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)) {
-          if (cpi->cyclic_refresh_map[map_index + mb_col] == 1)
+        } else if ((xd->mode_info_context->mbmi.mode == ZEROMV) &&
+                   (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)) {
+          if (cpi->cyclic_refresh_map[map_index + mb_col] == 1) {
             cpi->cyclic_refresh_map[map_index + mb_col] = 0;
-        } else
+          }
+        } else {
           cpi->cyclic_refresh_map[map_index + mb_col] = 1;
+        }
       }
     }
 
@@ -557,8 +566,9 @@ static void encode_mb_row(VP8_COMP *cpi, VP8_COMMON *cm, int mb_row,
                     xd->dst.u_buffer + 8, xd->dst.v_buffer + 8);
 
 #if CONFIG_MULTITHREAD
-  if (cpi->b_multi_threaded != 0)
+  if (cpi->b_multi_threaded != 0) {
     protected_write(&cpi->pmutex[mb_row], current_mb_col, rightmost_col);
+  }
 #endif
 
   /* this is to account for the border */
@@ -611,18 +621,19 @@ static void init_encode_frame_mb_context(VP8_COMP *cpi) {
   /* Special case treatment when GF and ARF are not sensible options
    * for reference
    */
-  if (cpi->ref_frame_flags == VP8_LAST_FRAME)
+  if (cpi->ref_frame_flags == VP8_LAST_FRAME) {
     vp8_calc_ref_frame_costs(x->ref_frame_cost, cpi->prob_intra_coded, 255,
                              128);
-  else if ((cpi->oxcf.number_of_layers > 1) &&
-           (cpi->ref_frame_flags == VP8_GOLD_FRAME))
+  } else if ((cpi->oxcf.number_of_layers > 1) &&
+             (cpi->ref_frame_flags == VP8_GOLD_FRAME)) {
     vp8_calc_ref_frame_costs(x->ref_frame_cost, cpi->prob_intra_coded, 1, 255);
-  else if ((cpi->oxcf.number_of_layers > 1) &&
-           (cpi->ref_frame_flags == VP8_ALTR_FRAME))
+  } else if ((cpi->oxcf.number_of_layers > 1) &&
+             (cpi->ref_frame_flags == VP8_ALTR_FRAME)) {
     vp8_calc_ref_frame_costs(x->ref_frame_cost, cpi->prob_intra_coded, 1, 1);
-  else
+  } else {
     vp8_calc_ref_frame_costs(x->ref_frame_cost, cpi->prob_intra_coded,
                              cpi->prob_last_coded, cpi->prob_gf_coded);
+  }
 
   xd->fullpixel_mask = 0xffffffff;
   if (cm->full_pixel) xd->fullpixel_mask = 0xfffffff8;
@@ -673,10 +684,11 @@ void vp8_encode_frame(VP8_COMP *cpi) {
   totalrate = 0;
 
   if (cpi->compressor_speed == 2) {
-    if (cpi->oxcf.cpu_used < 0)
+    if (cpi->oxcf.cpu_used < 0) {
       cpi->Speed = -(cpi->oxcf.cpu_used);
-    else
+    } else {
       vp8_auto_select_speed(cpi);
+    }
   }
 
   /* Functions setup for all frame types so we can use MC in AltRef */
@@ -798,8 +810,9 @@ void vp8_encode_frame(VP8_COMP *cpi) {
 
         if (xd->segmentation_enabled) {
           for (i = 0; i < cpi->encoding_thread_count; ++i) {
-            for (j = 0; j < 4; ++j)
+            for (j = 0; j < 4; ++j) {
               segment_counts[j] += cpi->mb_row_ei[i].segment_counts[j];
+            }
           }
         }
       }
@@ -811,13 +824,15 @@ void vp8_encode_frame(VP8_COMP *cpi) {
 
         cpi->mb.skip_true_count += cpi->mb_row_ei[i].mb.skip_true_count;
 
-        for (mode_count = 0; mode_count < VP8_YMODES; ++mode_count)
+        for (mode_count = 0; mode_count < VP8_YMODES; ++mode_count) {
           cpi->mb.ymode_count[mode_count] +=
               cpi->mb_row_ei[i].mb.ymode_count[mode_count];
+        }
 
-        for (mode_count = 0; mode_count < VP8_UV_MODES; ++mode_count)
+        for (mode_count = 0; mode_count < VP8_UV_MODES; ++mode_count) {
           cpi->mb.uv_mode_count[mode_count] +=
               cpi->mb_row_ei[i].mb.uv_mode_count[mode_count];
+        }
 
         for (c_idx = 0; c_idx < MVvals; ++c_idx) {
           cpi->mb.MVcount[0][c_idx] += cpi->mb_row_ei[i].mb.MVcount[0][c_idx];
@@ -827,12 +842,14 @@ void vp8_encode_frame(VP8_COMP *cpi) {
         cpi->mb.prediction_error += cpi->mb_row_ei[i].mb.prediction_error;
         cpi->mb.intra_error += cpi->mb_row_ei[i].mb.intra_error;
 
-        for (c_idx = 0; c_idx < MAX_REF_FRAMES; ++c_idx)
+        for (c_idx = 0; c_idx < MAX_REF_FRAMES; ++c_idx) {
           cpi->mb.count_mb_ref_frame_usage[c_idx] +=
               cpi->mb_row_ei[i].mb.count_mb_ref_frame_usage[c_idx];
+        }
 
-        for (c_idx = 0; c_idx < MAX_ERROR_BINS; ++c_idx)
+        for (c_idx = 0; c_idx < MAX_ERROR_BINS; ++c_idx) {
           cpi->mb.error_bins[c_idx] += cpi->mb_row_ei[i].mb.error_bins[c_idx];
+        }
 
         /* add up counts for each thread */
         sum_coef_counts(x, &cpi->mb_row_ei[i].mb);
@@ -899,8 +916,9 @@ void vp8_encode_frame(VP8_COMP *cpi) {
 
       tot_count = segment_counts[2] + segment_counts[3];
 
-      if (tot_count > 0)
+      if (tot_count > 0) {
         xd->mb_segment_tree_probs[2] = (segment_counts[2] * 255) / tot_count;
+      }
 
       /* Zero probabilities not allowed */
       for (i = 0; i < MB_FEATURE_TREE_PROBS; ++i) {
@@ -923,9 +941,10 @@ void vp8_encode_frame(VP8_COMP *cpi) {
                 cpi->mb.count_mb_ref_frame_usage[GOLDEN_FRAME] +
                 cpi->mb.count_mb_ref_frame_usage[ALTREF_FRAME];
 
-    if (tot_modes)
+    if (tot_modes) {
       cpi->this_frame_percent_intra =
           cpi->mb.count_mb_ref_frame_usage[INTRA_FRAME] * 100 / tot_modes;
+    }
   }
 
 #if !CONFIG_REALTIME_ONLY
@@ -1054,10 +1073,11 @@ static void adjust_act_zbin(VP8_COMP *cpi, MACROBLOCK *x) {
   a = act + 4 * cpi->activity_avg;
   b = 4 * act + cpi->activity_avg;
 
-  if (act > cpi->activity_avg)
+  if (act > cpi->activity_avg) {
     x->act_zbin_adj = (int)(((int64_t)b + (a >> 1)) / a) - 1;
-  else
+  } else {
     x->act_zbin_adj = 1 - (int)(((int64_t)a + (b >> 1)) / b);
+  }
 #endif
 }
 
@@ -1066,20 +1086,22 @@ int vp8cx_encode_intra_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   int rate;
 
-  if (cpi->sf.RD && cpi->compressor_speed != 2)
+  if (cpi->sf.RD && cpi->compressor_speed != 2) {
     vp8_rd_pick_intra_mode(x, &rate);
-  else
+  } else {
     vp8_pick_intra_mode(x, &rate);
+  }
 
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
     adjust_act_zbin(cpi, x);
     vp8_update_zbin_extra(cpi, x);
   }
 
-  if (x->e_mbd.mode_info_context->mbmi.mode == B_PRED)
+  if (x->e_mbd.mode_info_context->mbmi.mode == B_PRED) {
     vp8_encode_intra4x4mby(x);
-  else
+  } else {
     vp8_encode_intra16x16mby(x);
+  }
 
   vp8_encode_intra16x16mbuv(x);
 
@@ -1110,11 +1132,12 @@ int vp8cx_encode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
 
   x->skip = 0;
 
-  if (xd->segmentation_enabled)
+  if (xd->segmentation_enabled) {
     x->encode_breakout =
         cpi->segment_encode_breakout[xd->mode_info_context->mbmi.segment_id];
-  else
+  } else {
     x->encode_breakout = cpi->oxcf.encode_breakout;
+  }
 
 #if CONFIG_TEMPORAL_DENOISING
   /* Reset the best sse mode/mv for each macroblock. */
@@ -1192,14 +1215,16 @@ int vp8cx_encode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
       if (xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME) {
         if (xd->mode_info_context->mbmi.mode == ZEROMV) {
           if (xd->mode_info_context->mbmi.ref_frame != LAST_FRAME &&
-              cpi->oxcf.number_of_layers == 1)
+              cpi->oxcf.number_of_layers == 1) {
             x->zbin_mode_boost = GF_ZEROMV_ZBIN_BOOST;
-          else
+          } else {
             x->zbin_mode_boost = LF_ZEROMV_ZBIN_BOOST;
-        } else if (xd->mode_info_context->mbmi.mode == SPLITMV)
+          }
+        } else if (xd->mode_info_context->mbmi.mode == SPLITMV) {
           x->zbin_mode_boost = 0;
-        else
+        } else {
           x->zbin_mode_boost = MV_ZBIN_BOOST;
+        }
       }
     }
 
@@ -1223,12 +1248,13 @@ int vp8cx_encode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
   } else {
     int ref_fb_idx;
 
-    if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
+    if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME) {
       ref_fb_idx = cpi->common.lst_fb_idx;
-    else if (xd->mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
+    } else if (xd->mode_info_context->mbmi.ref_frame == GOLDEN_FRAME) {
       ref_fb_idx = cpi->common.gld_fb_idx;
-    else
+    } else {
       ref_fb_idx = cpi->common.alt_fb_idx;
+    }
 
     xd->pre.y_buffer = cpi->common.yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
     xd->pre.u_buffer =
@@ -1238,17 +1264,19 @@ int vp8cx_encode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
 
     if (!x->skip) {
       vp8_encode_inter16x16(x);
-    } else
+    } else {
       vp8_build_inter16x16_predictors_mb(xd, xd->dst.y_buffer, xd->dst.u_buffer,
                                          xd->dst.v_buffer, xd->dst.y_stride,
                                          xd->dst.uv_stride);
+    }
   }
 
   if (!x->skip) {
     vp8_tokenize_mb(cpi, x, t);
 
-    if (xd->mode_info_context->mbmi.mode != B_PRED)
+    if (xd->mode_info_context->mbmi.mode != B_PRED) {
       vp8_inverse_transform_mby(xd);
+    }
 
     vp8_dequant_idct_add_uv_block(xd->qcoeff + 16 * 16, xd->dequant_uv,
                                   xd->dst.u_buffer, xd->dst.v_buffer,

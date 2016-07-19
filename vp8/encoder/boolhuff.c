@@ -61,6 +61,7 @@ void vp8_stop_encode(BOOL_CODER *br) {
 void vp8_encode_value(BOOL_CODER *br, int data, int bits) {
   int bit;
 
-  for (bit = bits - 1; bit >= 0; bit--)
+  for (bit = bits - 1; bit >= 0; bit--) {
     vp8_encode_bool(br, (1 & (data >> bit)), 0x80);
+  }
 }

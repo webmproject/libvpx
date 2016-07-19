@@ -32,15 +32,17 @@ static INLINE void mv_bias(int refmb_ref_frame_sign_bias, int refframe,
 #define LEFT_TOP_MARGIN (16 << 3)
 #define RIGHT_BOTTOM_MARGIN (16 << 3)
 static INLINE void vp8_clamp_mv2(int_mv *mv, const MACROBLOCKD *xd) {
-  if (mv->as_mv.col < (xd->mb_to_left_edge - LEFT_TOP_MARGIN))
+  if (mv->as_mv.col < (xd->mb_to_left_edge - LEFT_TOP_MARGIN)) {
     mv->as_mv.col = xd->mb_to_left_edge - LEFT_TOP_MARGIN;
-  else if (mv->as_mv.col > xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN)
+  } else if (mv->as_mv.col > xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN) {
     mv->as_mv.col = xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN;
+  }
 
-  if (mv->as_mv.row < (xd->mb_to_top_edge - LEFT_TOP_MARGIN))
+  if (mv->as_mv.row < (xd->mb_to_top_edge - LEFT_TOP_MARGIN)) {
     mv->as_mv.row = xd->mb_to_top_edge - LEFT_TOP_MARGIN;
-  else if (mv->as_mv.row > xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN)
+  } else if (mv->as_mv.row > xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN) {
     mv->as_mv.row = xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN;
+  }
 }
 
 static INLINE void vp8_clamp_mv(int_mv *mv, int mb_to_left_edge,

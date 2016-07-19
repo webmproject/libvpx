@@ -101,8 +101,9 @@ static void transform_mb(MACROBLOCK *x) {
   }
 
   /* do 2nd order transform on the dc block */
-  if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
+  if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV) {
     x->short_walsh4x4(&x->block[24].src_diff[0], &x->block[24].coeff[0], 8);
+  }
 }
 
 static void transform_mby(MACROBLOCK *x) {
@@ -184,8 +185,9 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type, ENTROPY_CONTEXT *a,
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
   rdmult = mb->rdmult * err_mult;
-  if (mb->e_mbd.mode_info_context->mbmi.ref_frame == INTRA_FRAME)
+  if (mb->e_mbd.mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
     rdmult = (rdmult * 9) >> 4;
+  }
 
   rddiv = mb->rddiv;
   best_mask[0] = best_mask[1] = 0;
@@ -242,10 +244,11 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type, ENTROPY_CONTEXT *a,
       rate1 = tokens[next][1].rate;
 
       if ((abs(x) * dequant_ptr[rc] > abs(coeff_ptr[rc])) &&
-          (abs(x) * dequant_ptr[rc] < abs(coeff_ptr[rc]) + dequant_ptr[rc]))
+          (abs(x) * dequant_ptr[rc] < abs(coeff_ptr[rc]) + dequant_ptr[rc])) {
         shortcut = 1;
-      else
+      } else {
         shortcut = 0;
+      }
 
       if (shortcut) {
         sz = -(x < 0);

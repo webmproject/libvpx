@@ -208,9 +208,9 @@ void vp8_build_inter4x4_predictors_mbuv(MACROBLOCKD *x) {
     BLOCKD *d0 = &x->block[i];
     BLOCKD *d1 = &x->block[i + 1];
 
-    if (d0->bmi.mv.as_int == d1->bmi.mv.as_int)
+    if (d0->bmi.mv.as_int == d1->bmi.mv.as_int) {
       build_inter_predictors2b(x, d0, d0->predictor, 8, base_pre, pre_stride);
-    else {
+    } else {
       vp8_build_inter_predictors_b(d0, 8, base_pre, pre_stride,
                                    x->subpixel_predict);
       vp8_build_inter_predictors_b(d1, 8, base_pre, pre_stride,
@@ -223,9 +223,9 @@ void vp8_build_inter4x4_predictors_mbuv(MACROBLOCKD *x) {
     BLOCKD *d0 = &x->block[i];
     BLOCKD *d1 = &x->block[i + 1];
 
-    if (d0->bmi.mv.as_int == d1->bmi.mv.as_int)
+    if (d0->bmi.mv.as_int == d1->bmi.mv.as_int) {
       build_inter_predictors2b(x, d0, d0->predictor, 8, base_pre, pre_stride);
-    else {
+    } else {
       vp8_build_inter_predictors_b(d0, 8, base_pre, pre_stride,
                                    x->subpixel_predict);
       vp8_build_inter_predictors_b(d1, 8, base_pre, pre_stride,
@@ -264,15 +264,17 @@ static void clamp_mv_to_umv_border(MV *mv, const MACROBLOCKD *xd) {
    * filtering. The bottom and right edges use 16 pixels plus 2 pixels
    * left of the central pixel when filtering.
    */
-  if (mv->col < (xd->mb_to_left_edge - (19 << 3)))
+  if (mv->col < (xd->mb_to_left_edge - (19 << 3))) {
     mv->col = xd->mb_to_left_edge - (16 << 3);
-  else if (mv->col > xd->mb_to_right_edge + (18 << 3))
+  } else if (mv->col > xd->mb_to_right_edge + (18 << 3)) {
     mv->col = xd->mb_to_right_edge + (16 << 3);
+  }
 
-  if (mv->row < (xd->mb_to_top_edge - (19 << 3)))
+  if (mv->row < (xd->mb_to_top_edge - (19 << 3))) {
     mv->row = xd->mb_to_top_edge - (16 << 3);
-  else if (mv->row > xd->mb_to_bottom_edge + (18 << 3))
+  } else if (mv->row > xd->mb_to_bottom_edge + (18 << 3)) {
     mv->row = xd->mb_to_bottom_edge + (16 << 3);
+  }
 }
 
 /* A version of the above function for chroma block MVs.*/
@@ -392,10 +394,10 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *x) {
         clamp_mv_to_umv_border(&x->block[i + 1].bmi.mv.as_mv, x);
       }
 
-      if (d0->bmi.mv.as_int == d1->bmi.mv.as_int)
+      if (d0->bmi.mv.as_int == d1->bmi.mv.as_int) {
         build_inter_predictors2b(x, d0, base_dst + d0->offset, dst_stride,
                                  base_pre, dst_stride);
-      else {
+      } else {
         build_inter_predictors_b(d0, base_dst + d0->offset, dst_stride,
                                  base_pre, dst_stride, x->subpixel_predict);
         build_inter_predictors_b(d1, base_dst + d1->offset, dst_stride,
@@ -412,10 +414,10 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *x) {
 
     /* Note: uv mvs already clamped in build_4x4uvmvs() */
 
-    if (d0->bmi.mv.as_int == d1->bmi.mv.as_int)
+    if (d0->bmi.mv.as_int == d1->bmi.mv.as_int) {
       build_inter_predictors2b(x, d0, base_dst + d0->offset, dst_stride,
                                base_pre, dst_stride);
-    else {
+    } else {
       build_inter_predictors_b(d0, base_dst + d0->offset, dst_stride, base_pre,
                                dst_stride, x->subpixel_predict);
       build_inter_predictors_b(d1, base_dst + d1->offset, dst_stride, base_pre,
@@ -432,10 +434,10 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *x) {
 
     /* Note: uv mvs already clamped in build_4x4uvmvs() */
 
-    if (d0->bmi.mv.as_int == d1->bmi.mv.as_int)
+    if (d0->bmi.mv.as_int == d1->bmi.mv.as_int) {
       build_inter_predictors2b(x, d0, base_dst + d0->offset, dst_stride,
                                base_pre, dst_stride);
-    else {
+    } else {
       build_inter_predictors_b(d0, base_dst + d0->offset, dst_stride, base_pre,
                                dst_stride, x->subpixel_predict);
       build_inter_predictors_b(d1, base_dst + d1->offset, dst_stride, base_pre,
@@ -473,8 +475,9 @@ static void build_4x4uvmvs(MACROBLOCKD *x) {
 
       x->block[uoffset].bmi.mv.as_mv.col = (temp / 8) & x->fullpixel_mask;
 
-      if (x->mode_info_context->mbmi.need_to_clamp_mvs)
+      if (x->mode_info_context->mbmi.need_to_clamp_mvs) {
         clamp_uvmv_to_umv_border(&x->block[uoffset].bmi.mv.as_mv, x);
+      }
 
       x->block[voffset].bmi.mv.as_int = x->block[uoffset].bmi.mv.as_int;
     }

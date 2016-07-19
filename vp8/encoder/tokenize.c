@@ -515,13 +515,15 @@ void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t) {
     plane_type = 0;
   }
 
-  for (b = 0; b < 16; ++b)
+  for (b = 0; b < 16; ++b) {
     stuff1st_order_b(t, A + vp8_block2above[b], L + vp8_block2left[b],
                      plane_type, cpi, x);
+  }
 
-  for (b = 16; b < 24; ++b)
+  for (b = 16; b < 24; ++b) {
     stuff1st_order_buv(t, A + vp8_block2above[b], L + vp8_block2left[b], cpi,
                        x);
+  }
 }
 void vp8_fix_contexts(MACROBLOCKD *x) {
   /* Clear entropy contexts for Y2 blocks */

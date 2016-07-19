@@ -111,17 +111,20 @@ static void fill_token_costs(
         p[BLOCK_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES]) {
   int i, j, k;
 
-  for (i = 0; i < BLOCK_TYPES; ++i)
-    for (j = 0; j < COEF_BANDS; ++j)
-      for (k = 0; k < PREV_COEF_CONTEXTS; ++k)
-
+  for (i = 0; i < BLOCK_TYPES; ++i) {
+    for (j = 0; j < COEF_BANDS; ++j) {
+      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
         /* check for pt=0 and band > 1 if block type 0
          * and 0 if blocktype 1
          */
-        if (k == 0 && j > (i == 0))
+        if (k == 0 && j > (i == 0)) {
           vp8_cost_tokens2(c[i][j][k], p[i][j][k], vp8_coef_tree, 2);
-        else
+        } else {
           vp8_cost_tokens(c[i][j][k], p[i][j][k], vp8_coef_tree);
+        }
+      }
+    }
+  }
 }
 
 static const int rd_iifactor[32] = { 4, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0,
@@ -180,11 +183,12 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, MACROBLOCK *x, int Qvalue) {
   }
 
   if (cpi->pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
-    if (cpi->twopass.next_iiratio > 31)
+    if (cpi->twopass.next_iiratio > 31) {
       cpi->RDMULT += (cpi->RDMULT * rd_iifactor[31]) >> 4;
-    else
+    } else {
       cpi->RDMULT +=
           (cpi->RDMULT * rd_iifactor[cpi->twopass.next_iiratio]) >> 4;
+    }
   }
 
   cpi->mb.errorperbit = (cpi->RDMULT / 110);
@@ -231,10 +235,11 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, MACROBLOCK *x, int Qvalue) {
     /* build token cost array for the type of frame we have now */
     FRAME_CONTEXT *l = &cpi->lfc_n;
 
-    if (cpi->common.refresh_alt_ref_frame)
+    if (cpi->common.refresh_alt_ref_frame) {
       l = &cpi->lfc_a;
-    else if (cpi->common.refresh_golden_frame)
+    } else if (cpi->common.refresh_golden_frame) {
       l = &cpi->lfc_g;
+    }
 
     fill_token_costs(cpi->mb.token_costs,
                      (const vp8_prob(*)[8][3][11])l->coef_probs);
@@ -372,15 +377,17 @@ int VP8_UVSSE(MACROBLOCK *x) {
   int offset;
   int pre_stride = x->e_mbd.pre.uv_stride;
 
-  if (mv_row < 0)
+  if (mv_row < 0) {
     mv_row -= 1;
-  else
+  } else {
     mv_row += 1;
+  }
 
-  if (mv_col < 0)
+  if (mv_col < 0) {
     mv_col -= 1;
-  else
+  } else {
     mv_col += 1;
+  }
 
   mv_row /= 2;
   mv_col /= 2;
@@ -422,8 +429,9 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type, ENTROPY_CONTEXT *a,
     pt = vp8_prev_token_class[t];
   }
 
-  if (c < 16)
+  if (c < 16) {
     cost += mb->token_costs[type][vp8_coef_bands[c]][pt][DCT_EOB_TOKEN];
+  }
 
   pt = (c != !type); /* is eob first coefficient; */
   *a = *l = pt;
@@ -445,9 +453,10 @@ static int vp8_rdcost_mby(MACROBLOCK *mb) {
   ta = (ENTROPY_CONTEXT *)&t_above;
   tl = (ENTROPY_CONTEXT *)&t_left;
 
-  for (b = 0; b < 16; ++b)
+  for (b = 0; b < 16; ++b) {
     cost += cost_coeffs(mb, x->block + b, PLANE_TYPE_Y_NO_DC,
                         ta + vp8_block2above[b], tl + vp8_block2left[b]);
+  }
 
   cost += cost_coeffs(mb, x->block + 24, PLANE_TYPE_Y2,
                       ta + vp8_block2above[24], tl + vp8_block2left[24]);
@@ -681,9 +690,10 @@ static int rd_cost_mbuv(MACROBLOCK *mb) {
   ta = (ENTROPY_CONTEXT *)&t_above;
   tl = (ENTROPY_CONTEXT *)&t_left;
 
-  for (b = 16; b < 24; ++b)
+  for (b = 16; b < 24; ++b) {
     cost += cost_coeffs(mb, x->block + b, PLANE_TYPE_UV,
                         ta + vp8_block2above[b], tl + vp8_block2left[b]);
+  }
 
   return cost;
 }
@@ -815,11 +825,11 @@ static int labels2mode(MACROBLOCK *x, int const *labelings, int which_label,
 
     if (labelings[i] != which_label) continue;
 
-    if (col && labelings[i] == labelings[i - 1])
+    if (col && labelings[i] == labelings[i - 1]) {
       m = LEFT4X4;
-    else if (row && labelings[i] == labelings[i - 4])
+    } else if (row && labelings[i] == labelings[i - 4]) {
       m = ABOVE4X4;
-    else {
+    } else {
       /* the only time we should do costing for new motion vector
        * or mode is when we are on a new label  (jbb May 08, 2007)
        */
@@ -868,10 +878,12 @@ static int rdcost_mbsegment_y(MACROBLOCK *mb, const int *labels,
   int b;
   MACROBLOCKD *x = &mb->e_mbd;
 
-  for (b = 0; b < 16; ++b)
-    if (labels[b] == which_label)
+  for (b = 0; b < 16; ++b) {
+    if (labels[b] == which_label) {
       cost += cost_coeffs(mb, x->block + b, PLANE_TYPE_Y_WITH_DC,
                           ta + vp8_block2above[b], tl + vp8_block2left[b]);
+    }
+  }
 
   return cost;
 }
@@ -1018,8 +1030,9 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
         if (cpi->compressor_speed) {
           if (segmentation == BLOCK_8X16 || segmentation == BLOCK_16X8) {
             bsi->mvp.as_int = bsi->sv_mvp[i].as_int;
-            if (i == 1 && segmentation == BLOCK_16X8)
+            if (i == 1 && segmentation == BLOCK_16X8) {
               bsi->mvp.as_int = bsi->sv_mvp[2].as_int;
+            }
 
             step_param = bsi->sv_istep[i];
           }
@@ -1029,8 +1042,9 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
            */
           if (segmentation == BLOCK_4X4 && i > 0) {
             bsi->mvp.as_int = x->e_mbd.block[i - 1].bmi.mv.as_int;
-            if (i == 4 || i == 8 || i == 12)
+            if (i == 4 || i == 8 || i == 12) {
               bsi->mvp.as_int = x->e_mbd.block[i - 4].bmi.mv.as_int;
+            }
             step_param = 2;
           }
         }
@@ -1061,9 +1075,9 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
             while (n < further_steps) {
               n++;
 
-              if (num00)
+              if (num00) {
                 num00--;
-              else {
+              } else {
                 thissme = cpi->diamond_search_sad(
                     x, c, e, &mvp_full, &temp_mv, step_param + n, sadpb, &num00,
                     v_fn_ptr, x->mvcost, bsi->ref_mv);
@@ -1172,10 +1186,11 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
 static void vp8_cal_step_param(int sr, int *sp) {
   int step = 0;
 
-  if (sr > MAX_FIRST_STEP)
+  if (sr > MAX_FIRST_STEP) {
     sr = MAX_FIRST_STEP;
-  else if (sr < 1)
+  } else if (sr < 1) {
     sr = 1;
+  }
 
   while (sr >>= 1) step++;
 
@@ -1436,10 +1451,11 @@ void vp8_mv_pred(VP8_COMP *cpi, MACROBLOCKD *xd, const MODE_INFO *here,
         if (here->mbmi.ref_frame == near_ref[near_sadidx[i]]) {
           mv.as_int = near_mvs[near_sadidx[i]].as_int;
           find = 1;
-          if (i < 3)
+          if (i < 3) {
             *sr = 3;
-          else
+          } else {
             *sr = 2;
+          }
           break;
         }
       }
@@ -1514,22 +1530,26 @@ void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x,
     if (xd->mb_to_right_edge == 0) near_sad[6] = INT_MAX;
     if (xd->mb_to_bottom_edge == 0) near_sad[7] = INT_MAX;
 
-    if (near_sad[4] != INT_MAX)
+    if (near_sad[4] != INT_MAX) {
       near_sad[4] = cpi->fn_ptr[BLOCK_16X16].sdf(
           src_y_ptr, b->src_stride, pre_y_buffer - pre_y_stride * 16,
           pre_y_stride);
-    if (near_sad[5] != INT_MAX)
+    }
+    if (near_sad[5] != INT_MAX) {
       near_sad[5] = cpi->fn_ptr[BLOCK_16X16].sdf(
           src_y_ptr, b->src_stride, pre_y_buffer - 16, pre_y_stride);
+    }
     near_sad[3] = cpi->fn_ptr[BLOCK_16X16].sdf(src_y_ptr, b->src_stride,
                                                pre_y_buffer, pre_y_stride);
-    if (near_sad[6] != INT_MAX)
+    if (near_sad[6] != INT_MAX) {
       near_sad[6] = cpi->fn_ptr[BLOCK_16X16].sdf(
           src_y_ptr, b->src_stride, pre_y_buffer + 16, pre_y_stride);
-    if (near_sad[7] != INT_MAX)
+    }
+    if (near_sad[7] != INT_MAX) {
       near_sad[7] = cpi->fn_ptr[BLOCK_16X16].sdf(
           src_y_ptr, b->src_stride, pre_y_buffer + pre_y_stride * 16,
           pre_y_stride);
+    }
   }
 
   if (cpi->common.last_frame_type != KEY_FRAME) {
@@ -1661,8 +1681,9 @@ static int calculate_final_rd_costs(int this_rd, RATE_DISTORTION *rd,
 
       if (x->e_mbd.mode_info_context->mbmi.ref_frame) {
         for (i = 16; i < 24; ++i) tteob += x->e_mbd.eobs[i];
-      } else
+      } else {
         tteob += uv_intra_tteob;
+      }
 
       if (tteob == 0) {
         rd->rate2 -= (rd->rate_y + rd->rate_uv);
@@ -1683,8 +1704,9 @@ static int calculate_final_rd_costs(int this_rd, RATE_DISTORTION *rd,
     /* Calculate the final RD estimate for this mode */
     this_rd = RDCOST(x->rdmult, x->rddiv, rd->rate2, rd->distortion2);
     if (this_rd < INT_MAX &&
-        x->e_mbd.mode_info_context->mbmi.ref_frame == INTRA_FRAME)
+        x->e_mbd.mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
       this_rd += intra_rd_penalty;
+    }
   }
   return this_rd;
 }
@@ -1818,8 +1840,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
      */
     if (cpi->is_src_frame_alt_ref && (cpi->oxcf.arnr_max_frames == 0)) {
       if (this_mode != ZEROMV ||
-          x->e_mbd.mode_info_context->mbmi.ref_frame != ALTREF_FRAME)
+          x->e_mbd.mode_info_context->mbmi.ref_frame != ALTREF_FRAME) {
         continue;
+      }
     }
 
     /* everything but intra */
@@ -1848,8 +1871,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
          */
         x->rd_thresh_mult[mode_index] += 4;
 
-        if (x->rd_thresh_mult[mode_index] > MAX_THRESHMULT)
+        if (x->rd_thresh_mult[mode_index] > MAX_THRESHMULT) {
           x->rd_thresh_mult[mode_index] = MAX_THRESHMULT;
+        }
 
         x->rd_threshes[mode_index] =
             (cpi->rd_baseline_thresh[mode_index] >> 7) *
@@ -1869,18 +1893,20 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
      * Increase zbin size to supress noise
      */
     if (x->zbin_mode_boost_enabled) {
-      if (this_ref_frame == INTRA_FRAME)
+      if (this_ref_frame == INTRA_FRAME) {
         x->zbin_mode_boost = 0;
-      else {
+      } else {
         if (vp8_mode_order[mode_index] == ZEROMV) {
-          if (this_ref_frame != LAST_FRAME)
+          if (this_ref_frame != LAST_FRAME) {
             x->zbin_mode_boost = GF_ZEROMV_ZBIN_BOOST;
-          else
+          } else {
             x->zbin_mode_boost = LF_ZEROMV_ZBIN_BOOST;
-        } else if (vp8_mode_order[mode_index] == SPLITMV)
+          }
+        } else if (vp8_mode_order[mode_index] == SPLITMV) {
           x->zbin_mode_boost = 0;
-        else
+        } else {
           x->zbin_mode_boost = MV_ZBIN_BOOST;
+        }
       }
 
       vp8_update_zbin_extra(cpi, x);
@@ -2047,9 +2073,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
           while (n < further_steps) {
             n++;
 
-            if (num00)
+            if (num00) {
               num00--;
-            else {
+            } else {
               thissme = cpi->diamond_search_sad(
                   x, b, d, &mvp_full, &d->bmi.mv, step_param + n, sadpb, &num00,
                   &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv);
@@ -2117,8 +2143,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
          * mode.
          */
         if (((this_mode == NEARMV) || (this_mode == NEARESTMV)) &&
-            (mode_mv[this_mode].as_int == 0))
+            (mode_mv[this_mode].as_int == 0)) {
           continue;
+        }
 
       case ZEROMV:
 
@@ -2130,8 +2157,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         if (((mode_mv[this_mode].as_mv.row >> 3) < x->mv_row_min) ||
             ((mode_mv[this_mode].as_mv.row >> 3) > x->mv_row_max) ||
             ((mode_mv[this_mode].as_mv.col >> 3) < x->mv_col_min) ||
-            ((mode_mv[this_mode].as_mv.col >> 3) > x->mv_col_max))
+            ((mode_mv[this_mode].as_mv.col >> 3) > x->mv_col_max)) {
           continue;
+        }
 
         vp8_set_mbmode_and_mvs(x, this_mode, &mode_mv[this_mode]);
         this_rd = evaluate_inter_mode_rd(mdcounts, &rd, &disable_skip, cpi, x);
@@ -2207,8 +2235,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     else {
       x->rd_thresh_mult[mode_index] += 4;
 
-      if (x->rd_thresh_mult[mode_index] > MAX_THRESHMULT)
+      if (x->rd_thresh_mult[mode_index] > MAX_THRESHMULT) {
         x->rd_thresh_mult[mode_index] = MAX_THRESHMULT;
+      }
     }
     x->rd_threshes[mode_index] = (cpi->rd_baseline_thresh[mode_index] >> 7) *
                                  x->rd_thresh_mult[mode_index];
@@ -2298,13 +2327,15 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
          sizeof(MB_MODE_INFO));
 
   if (best_mode.mbmode.mode == B_PRED) {
-    for (i = 0; i < 16; ++i)
+    for (i = 0; i < 16; ++i) {
       xd->mode_info_context->bmi[i].as_mode = best_mode.bmodes[i].as_mode;
+    }
   }
 
   if (best_mode.mbmode.mode == SPLITMV) {
-    for (i = 0; i < 16; ++i)
+    for (i = 0; i < 16; ++i) {
       xd->mode_info_context->bmi[i].mv.as_int = best_mode.bmodes[i].mv.as_int;
+    }
 
     memcpy(x->partition_info, &best_mode.partition, sizeof(PARTITION_INFO));
 
@@ -2313,8 +2344,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
   }
 
   if (sign_bias !=
-      cpi->common.ref_frame_sign_bias[xd->mode_info_context->mbmi.ref_frame])
+      cpi->common.ref_frame_sign_bias[xd->mode_info_context->mbmi.ref_frame]) {
     best_ref_mv.as_int = best_ref_mv_sb[!sign_bias].as_int;
+  }
 
   rd_update_mvcount(x, &best_ref_mv);
 }

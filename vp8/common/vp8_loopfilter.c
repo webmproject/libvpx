@@ -60,8 +60,9 @@ void vp8_loop_filter_update_sharpness(loop_filter_info_n *lfi,
     block_inside_limit = block_inside_limit >> (sharpness_lvl > 4);
 
     if (sharpness_lvl > 0) {
-      if (block_inside_limit > (9 - sharpness_lvl))
+      if (block_inside_limit > (9 - sharpness_lvl)) {
         block_inside_limit = (9 - sharpness_lvl);
+      }
     }
 
     if (block_inside_limit < 1) block_inside_limit = 1;

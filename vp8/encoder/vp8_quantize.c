@@ -108,8 +108,9 @@ void vp8_quantize_mb(MACROBLOCK *x) {
   int has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED &&
                        x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
 
-  for (i = 0; i < 24 + has_2nd_order; ++i)
+  for (i = 0; i < 24 + has_2nd_order; ++i) {
     x->quantize_b(&x->block[i], &x->e_mbd.block[i]);
+  }
 }
 
 void vp8_quantize_mbuv(MACROBLOCK *x) {
@@ -296,19 +297,20 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x, int ok_to_skip) {
   /* Select the baseline MB Q index. */
   if (xd->segmentation_enabled) {
     /* Abs Value */
-    if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA)
+    if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA) {
       QIndex = xd->segment_feature_data[MB_LVL_ALT_Q][xd->mode_info_context
                                                           ->mbmi.segment_id];
-    /* Delta Value */
-    else {
+      /* Delta Value */
+    } else {
       QIndex = cpi->common.base_qindex +
                xd->segment_feature_data[MB_LVL_ALT_Q][xd->mode_info_context
                                                           ->mbmi.segment_id];
       /* Clamp to valid range */
       QIndex = (QIndex >= 0) ? ((QIndex <= MAXQ) ? QIndex : MAXQ) : 0;
     }
-  } else
+  } else {
     QIndex = cpi->common.base_qindex;
+  }
 
   /* This initialization should be called at least once. Use ok_to_skip to
    * decide if it is ok to skip.
@@ -452,8 +454,9 @@ void vp8_set_quantizer(struct VP8_COMP *cpi, int Q) {
 
   if (Q < 4) {
     new_delta_q = 4 - Q;
-  } else
+  } else {
     new_delta_q = 0;
+  }
 
   update |= cm->y2dc_delta_q != new_delta_q;
   cm->y2dc_delta_q = new_delta_q;

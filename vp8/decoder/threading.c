@@ -166,10 +166,11 @@ static void mt_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 
         /*Caution: For some b_mode, it needs 8 pixels (4 above + 4
          * above-right).*/
-        if (i < 4 && pbi->common.filter_level)
+        if (i < 4 && pbi->common.filter_level) {
           Above = xd->recon_above[0] + b->offset;
-        else
+        } else {
           Above = dst - dst_stride;
+        }
 
         if (i % 4 == 0 && pbi->common.filter_level) {
           yleft = xd->recon_left[0] + i;
@@ -179,10 +180,11 @@ static void mt_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
           left_stride = dst_stride;
         }
 
-        if ((i == 4 || i == 8 || i == 12) && pbi->common.filter_level)
+        if ((i == 4 || i == 8 || i == 12) && pbi->common.filter_level) {
           top_left = *(xd->recon_left[0] + i - 1);
-        else
+        } else {
           top_left = Above[-1];
+        }
 
         vp8_intra4x4_predict(Above, yleft, left_stride, b_mode, dst, dst_stride,
                              top_left);
@@ -299,10 +301,11 @@ static void mt_decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd,
     /* select bool coder for current partition */
     xd->current_bc = &pbi->mbc[mb_row % num_part];
 
-    if (mb_row > 0)
+    if (mb_row > 0) {
       last_row_current_mb_col = &pbi->mt_current_mb_col[mb_row - 1];
-    else
+    } else {
       last_row_current_mb_col = &first_row_no_sync_above;
+    }
 
     current_mb_col = &pbi->mt_current_mb_col[mb_row];
 
@@ -452,9 +455,10 @@ static void mt_decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd,
           MODE_INFO *next = xd->mode_info_context + 1;
 
           if (next->mbmi.ref_frame == INTRA_FRAME) {
-            for (i = 0; i < 16; ++i)
+            for (i = 0; i < 16; ++i) {
               pbi->mt_yleft_col[mb_row][i] =
                   xd->dst.y_buffer[i * recon_y_stride + 15];
+            }
             for (i = 0; i < 8; ++i) {
               pbi->mt_uleft_col[mb_row][i] =
                   xd->dst.u_buffer[i * recon_uv_stride + 7];
@@ -539,9 +543,10 @@ static void mt_decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd,
               pbi->mt_vabove_row[mb_row + 1][lastuv - 1];
         }
       }
-    } else
+    } else {
       vp8_extend_mb_row(yv12_fb_new, xd->dst.y_buffer + 16,
                         xd->dst.u_buffer + 8, xd->dst.v_buffer + 8);
+    }
 
     /* last MB of row is ready just after extension is done */
     protected_write(&pbi->pmutex[mb_row], current_mb_col, mb_col + nsync);
@@ -567,9 +572,9 @@ static THREAD_FUNCTION thread_decoding_proc(void *p_data) {
     if (protected_read(&pbi->mt_mutex, &pbi->b_multithreaded_rd) == 0) break;
 
     if (sem_wait(&pbi->h_event_start_decoding[ithread]) == 0) {
-      if (protected_read(&pbi->mt_mutex, &pbi->b_multithreaded_rd) == 0)
+      if (protected_read(&pbi->mt_mutex, &pbi->b_multithreaded_rd) == 0) {
         break;
-      else {
+      } else {
         MACROBLOCKD *xd = &mbrd->mbd;
         xd->left_context = &mb_row_left_context;
 
@@ -593,8 +598,9 @@ void vp8_decoder_create_threads(VP8D_COMP *pbi) {
   core_count = (pbi->max_threads > 8) ? 8 : pbi->max_threads;
 
   /* limit decoding threads to the available cores */
-  if (core_count > pbi->common.processor_core_count)
+  if (core_count > pbi->common.processor_core_count) {
     core_count = pbi->common.processor_core_count;
+  }
 
   if (core_count > 1) {
     pbi->b_multithreaded_rd = 1;
@@ -709,14 +715,15 @@ void vp8mt_alloc_temp_buffers(VP8D_COMP *pbi, int width, int prev_mb_rows) {
     /* our internal buffers are always multiples of 16 */
     if ((width & 0xf) != 0) width += 16 - (width & 0xf);
 
-    if (width < 640)
+    if (width < 640) {
       pbi->sync_range = 1;
-    else if (width <= 1280)
+    } else if (width <= 1280) {
       pbi->sync_range = 8;
-    else if (width <= 2560)
+    } else if (width <= 2560) {
       pbi->sync_range = 16;
-    else
+    } else {
       pbi->sync_range = 32;
+    }
 
     uv_width = width >> 1;
 
@@ -838,14 +845,16 @@ void vp8mt_decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd) {
 
     /* Initialize the loop filter for this frame. */
     vp8_loop_filter_frame_init(pc, &pbi->mb, filter_level);
-  } else
+  } else {
     vp8_setup_intra_recon_top_line(yv12_fb_new);
+  }
 
   setup_decoding_thread_data(pbi, xd, pbi->mb_row_di,
                              pbi->decoding_thread_count);
 
-  for (i = 0; i < pbi->decoding_thread_count; ++i)
+  for (i = 0; i < pbi->decoding_thread_count; ++i) {
     sem_post(&pbi->h_event_start_decoding[i]);
+  }
 
   mt_decode_mb_rows(pbi, xd, 0);
 

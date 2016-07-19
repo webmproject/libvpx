@@ -125,13 +125,13 @@ vpx_codec_err_t vp8dx_get_reference(VP8D_COMP *pbi,
   VP8_COMMON *cm = &pbi->common;
   int ref_fb_idx;
 
-  if (ref_frame_flag == VP8_LAST_FRAME)
+  if (ref_frame_flag == VP8_LAST_FRAME) {
     ref_fb_idx = cm->lst_fb_idx;
-  else if (ref_frame_flag == VP8_GOLD_FRAME)
+  } else if (ref_frame_flag == VP8_GOLD_FRAME) {
     ref_fb_idx = cm->gld_fb_idx;
-  else if (ref_frame_flag == VP8_ALTR_FRAME)
+  } else if (ref_frame_flag == VP8_ALTR_FRAME) {
     ref_fb_idx = cm->alt_fb_idx;
-  else {
+  } else {
     vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
                        "Invalid reference frame");
     return pbi->common.error.error_code;
@@ -156,13 +156,13 @@ vpx_codec_err_t vp8dx_set_reference(VP8D_COMP *pbi,
   int *ref_fb_ptr = NULL;
   int free_fb;
 
-  if (ref_frame_flag == VP8_LAST_FRAME)
+  if (ref_frame_flag == VP8_LAST_FRAME) {
     ref_fb_ptr = &cm->lst_fb_idx;
-  else if (ref_frame_flag == VP8_GOLD_FRAME)
+  } else if (ref_frame_flag == VP8_GOLD_FRAME) {
     ref_fb_ptr = &cm->gld_fb_idx;
-  else if (ref_frame_flag == VP8_ALTR_FRAME)
+  } else if (ref_frame_flag == VP8_ALTR_FRAME) {
     ref_fb_ptr = &cm->alt_fb_idx;
-  else {
+  } else {
     vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
                        "Invalid reference frame");
     return pbi->common.error.error_code;
@@ -191,8 +191,9 @@ vpx_codec_err_t vp8dx_set_reference(VP8D_COMP *pbi,
 
 static int get_free_fb(VP8_COMMON *cm) {
   int i;
-  for (i = 0; i < NUM_YV12_BUFFERS; ++i)
+  for (i = 0; i < NUM_YV12_BUFFERS; ++i) {
     if (cm->fb_idx_ref_cnt[i] == 0) break;
+  }
 
   assert(i < NUM_YV12_BUFFERS);
   cm->fb_idx_ref_cnt[i] = 1;
@@ -219,12 +220,13 @@ static int swap_frame_buffers(VP8_COMMON *cm) {
   if (cm->copy_buffer_to_arf) {
     int new_fb = 0;
 
-    if (cm->copy_buffer_to_arf == 1)
+    if (cm->copy_buffer_to_arf == 1) {
       new_fb = cm->lst_fb_idx;
-    else if (cm->copy_buffer_to_arf == 2)
+    } else if (cm->copy_buffer_to_arf == 2) {
       new_fb = cm->gld_fb_idx;
-    else
+    } else {
       err = -1;
+    }
 
     ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->alt_fb_idx, new_fb);
   }
@@ -232,28 +234,32 @@ static int swap_frame_buffers(VP8_COMMON *cm) {
   if (cm->copy_buffer_to_gf) {
     int new_fb = 0;
 
-    if (cm->copy_buffer_to_gf == 1)
+    if (cm->copy_buffer_to_gf == 1) {
       new_fb = cm->lst_fb_idx;
-    else if (cm->copy_buffer_to_gf == 2)
+    } else if (cm->copy_buffer_to_gf == 2) {
       new_fb = cm->alt_fb_idx;
-    else
+    } else {
       err = -1;
+    }
 
     ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->gld_fb_idx, new_fb);
   }
 
-  if (cm->refresh_golden_frame)
+  if (cm->refresh_golden_frame) {
     ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->gld_fb_idx, cm->new_fb_idx);
+  }
 
-  if (cm->refresh_alt_ref_frame)
+  if (cm->refresh_alt_ref_frame) {
     ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->alt_fb_idx, cm->new_fb_idx);
+  }
 
   if (cm->refresh_last_frame) {
     ref_cnt_fb(cm->fb_idx_ref_cnt, &cm->lst_fb_idx, cm->new_fb_idx);
 
     cm->frame_to_show = &cm->yv12_fb[cm->lst_fb_idx];
-  } else
+  } else {
     cm->frame_to_show = &cm->yv12_fb[cm->new_fb_idx];
+  }
 
   cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
 
@@ -322,8 +328,9 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, size_t size,
      */
     cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
 
-    if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
+    if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0) {
       cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
+    }
 
     goto decode_exit;
   }
@@ -333,8 +340,9 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, size_t size,
   retcode = vp8_decode_frame(pbi);
 
   if (retcode < 0) {
-    if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
+    if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0) {
       cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
+    }
 
     pbi->common.error.error_code = VPX_CODEC_ERROR;
     goto decode_exit;
@@ -456,8 +464,9 @@ int vp8_remove_decoder_instances(struct frame_buffers *fb) {
 
     if (!pbi) return VPX_CODEC_ERROR;
 #if CONFIG_MULTITHREAD
-    if (pbi->b_multithreaded_rd)
+    if (pbi->b_multithreaded_rd) {
       vp8mt_de_alloc_temp_buffers(pbi, pbi->common.mb_rows);
+    }
     vp8_decoder_remove_threads(pbi);
 #endif
 

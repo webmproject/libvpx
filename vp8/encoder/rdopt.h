@@ -80,17 +80,20 @@ static INLINE void get_predictor_pointers(const VP8_COMP *cpi,
                                           unsigned char *plane[4][3],
                                           unsigned int recon_yoffset,
                                           unsigned int recon_uvoffset) {
-  if (cpi->ref_frame_flags & VP8_LAST_FRAME)
+  if (cpi->ref_frame_flags & VP8_LAST_FRAME) {
     get_plane_pointers(&cpi->common.yv12_fb[cpi->common.lst_fb_idx],
                        plane[LAST_FRAME], recon_yoffset, recon_uvoffset);
+  }
 
-  if (cpi->ref_frame_flags & VP8_GOLD_FRAME)
+  if (cpi->ref_frame_flags & VP8_GOLD_FRAME) {
     get_plane_pointers(&cpi->common.yv12_fb[cpi->common.gld_fb_idx],
                        plane[GOLDEN_FRAME], recon_yoffset, recon_uvoffset);
+  }
 
-  if (cpi->ref_frame_flags & VP8_ALTR_FRAME)
+  if (cpi->ref_frame_flags & VP8_ALTR_FRAME) {
     get_plane_pointers(&cpi->common.yv12_fb[cpi->common.alt_fb_idx],
                        plane[ALTREF_FRAME], recon_yoffset, recon_uvoffset);
+  }
 }
 
 static INLINE void get_reference_search_order(const VP8_COMP *cpi,

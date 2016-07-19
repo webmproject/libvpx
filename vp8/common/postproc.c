@@ -116,10 +116,11 @@ void vp8_deblock(VP8_COMMON *cm, YV12_BUFFER_CONFIG *source,
       for (mbc = 0; mbc < cm->mb_cols; ++mbc) {
         unsigned char mb_ppl;
 
-        if (mode_info_context->mbmi.mb_skip_coeff)
+        if (mode_info_context->mbmi.mb_skip_coeff) {
           mb_ppl = (unsigned char)ppl >> 1;
-        else
+        } else {
           mb_ppl = (unsigned char)ppl;
+        }
 
         memset(ylptr, mb_ppl, 16);
         memset(uvlptr, mb_ppl, 8);
@@ -378,9 +379,10 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest,
       int height = (oci->Height + 15) & ~15;
 
       if (vp8_yv12_alloc_frame_buffer(&oci->post_proc_buffer_int, width, height,
-                                      VP8BORDERINPIXELS))
+                                      VP8BORDERINPIXELS)) {
         vpx_internal_error(&oci->error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate MFQE framebuffer");
+      }
 
       oci->post_proc_buffer_int_used = 1;
 
