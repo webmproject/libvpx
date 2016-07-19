@@ -201,8 +201,7 @@ int vp10_rc_clamp_pframe_target_size(const VP10_COMP *const cpi, int target) {
   const VP10EncoderConfig *oxcf = &cpi->oxcf;
   const int min_frame_target = VPXMAX(rc->min_frame_bandwidth,
                                       rc->avg_frame_bandwidth >> 5);
-  if (target < min_frame_target)
-    target = min_frame_target;
+  // Clip the frame target to the minimum setup value.
 #if CONFIG_EXT_REFS
   if (cpi->rc.is_src_frame_alt_ref) {
 #else
@@ -213,7 +212,10 @@ int vp10_rc_clamp_pframe_target_size(const VP10_COMP *const cpi, int target) {
     // The active maximum quantizer insures that an appropriate
     // number of bits will be spent if needed for constructed ARFs.
     target = min_frame_target;
+  } else if (target < min_frame_target) {
+    target = min_frame_target;
   }
+
   // Clip the frame target to the maximum allowed value.
   if (target > rc->max_frame_bandwidth)
     target = rc->max_frame_bandwidth;
@@ -222,6 +224,7 @@ int vp10_rc_clamp_pframe_target_size(const VP10_COMP *const cpi, int target) {
                          oxcf->rc_max_inter_bitrate_pct / 100;
     target = VPXMIN(target, max_rate);
   }
+
   return target;
 }
 
