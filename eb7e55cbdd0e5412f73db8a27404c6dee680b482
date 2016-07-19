@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "2a371f0e_636ddc9b",
+        "filename": "vp10/common/common_data.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-07-19T18:52:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faca38dd_14f5b6ef",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2a371f0e_03c970c0",
         "filename": "vp10/common/loopfilter.c",
         "patchSetId": 20
@@ -30,6 +48,24 @@
       "writtenOn": "2016-07-19T18:16:04Z",
       "side": 1,
       "message": "Is it possible to set the above and left transform mask properly for rec tx cases?",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a371f0e_a30524bf",
+        "filename": "vp10/common/loopfilter.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 725,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-07-19T18:52:52Z",
+      "side": 1,
+      "message": "Tried it, but it seems more complicated than I expected. Adding a TODO to revisit and handle rectangular transforms better.",
+      "parentUuid": "2a371f0e_03c970c0",
       "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "2a371f0e_63f2fcd6",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 1326,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-07-19T18:52:52Z",
+      "side": 1,
+      "message": "It is not to be used for intra blocks.\nHowever I changed the code here also to be consistent. In general I prefer to use functions/tables rather than things like (1 \u003c\u003c tx_size).",
+      "parentUuid": "2a371f0e_e3960ce1",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea534725_06ba7a26",
         "filename": "vp10/encoder/encodemb.c",
         "patchSetId": 20
@@ -64,6 +118,24 @@
       "writtenOn": "2016-07-19T18:16:04Z",
       "side": 1,
       "message": "Can we change this switch loop to if else loop, to reduce the size of code?",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a371f0e_e3828cfa",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 655,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-07-19T18:52:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea534725_06ba7a26",
       "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "2a371f0e_467f0612",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 719,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-07-19T18:52:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea534725_46975294",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea534725_268c5684",
         "filename": "vp10/encoder/encodemb.c",
         "patchSetId": 20
@@ -98,6 +188,24 @@
       "writtenOn": "2016-07-19T18:16:04Z",
       "side": 1,
       "message": "Same as above",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a371f0e_26848204",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 749,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-07-19T18:52:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea534725_268c5684",
       "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "2a371f0e_668e8a26",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 809,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-07-19T18:52:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea534725_e6a51efb",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea534725_a69f26a7",
         "filename": "vp10/encoder/encodemb.c",
         "patchSetId": 20
@@ -132,6 +258,24 @@
       "writtenOn": "2016-07-19T18:16:04Z",
       "side": 1,
       "message": "Same as above",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a371f0e_c692f647",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 838,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-07-19T18:52:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea534725_a69f26a7",
       "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "2a371f0e_a6b6d2d5",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 3138,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-07-19T18:52:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea534725_e9c05127",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea534725_a9ca5943",
         "filename": "vp10/encoder/rdopt.c",
         "patchSetId": 20
@@ -166,6 +328,24 @@
       "writtenOn": "2016-07-19T18:16:04Z",
       "side": 1,
       "message": "Remove this part.",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a371f0e_06cb3e4a",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 3521,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-07-19T18:52:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea534725_a9ca5943",
       "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "2a371f0e_86ee2eb8",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 4471,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-07-19T18:52:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2a371f0e_431b78d9",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2a371f0e_43b7f8a0",
         "filename": "vp10/encoder/rdopt.c",
         "patchSetId": 20
@@ -200,6 +398,24 @@
       "writtenOn": "2016-07-19T18:16:04Z",
       "side": 1,
       "message": "Why we cannot use k? What is the trick behind it?",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a371f0e_461b86d9",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 4501,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-07-19T18:52:52Z",
+      "side": 1,
+      "message": "block is used as offset to the coefficient arrays after multiplying by 16. When i is 1 or 2, we need to get to offset 32, for which block must be 2.",
+      "parentUuid": "2a371f0e_43b7f8a0",
       "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
