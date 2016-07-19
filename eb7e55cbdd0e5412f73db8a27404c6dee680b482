@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "faca38dd_14f5b6ef",
+        "filename": "vp10/common/common_data.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-19T18:16:04Z",
+      "side": 1,
+      "message": "For consistency, remove \"\u0026\u0026 USE_RECT_SUB8X8_INTER_TX\" or append it to #if",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a371f0e_03c970c0",
+        "filename": "vp10/common/loopfilter.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 725,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-19T18:16:04Z",
+      "side": 1,
+      "message": "Is it possible to set the above and left transform mask properly for rec tx cases?",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a371f0e_e3960ce1",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 1326,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-19T18:16:04Z",
+      "side": 1,
+      "message": "Is rec tx also enabled for intra blocks?",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea534725_06ba7a26",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 655,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-19T18:16:04Z",
+      "side": 1,
+      "message": "Can we change this switch loop to if else loop, to reduce the size of code?",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea534725_46975294",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 719,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-19T18:16:04Z",
+      "side": 1,
+      "message": "Same as above",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea534725_268c5684",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 749,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-19T18:16:04Z",
+      "side": 1,
+      "message": "Same as above",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea534725_e6a51efb",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 809,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-19T18:16:04Z",
+      "side": 1,
+      "message": "Same as above",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea534725_a69f26a7",
+        "filename": "vp10/encoder/encodemb.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 838,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-19T18:16:04Z",
+      "side": 1,
+      "message": "Same as above",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea534725_e9c05127",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 3138,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-19T18:16:04Z",
+      "side": 1,
+      "message": "Remove these two cases. The assertion above already indicates that we won\u0027t have rec tx here.",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea534725_a9ca5943",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 3521,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-19T18:16:04Z",
+      "side": 1,
+      "message": "Remove this part.",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a371f0e_431b78d9",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 4471,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-19T18:16:04Z",
+      "side": 1,
+      "message": "append \"\u0026\u0026 USE_RECT_SUB8X8_INTER_TX\"",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a371f0e_43b7f8a0",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 4501,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-19T18:16:04Z",
+      "side": 1,
+      "message": "Why we cannot use k? What is the trick behind it?",
+      "revId": "eb7e55cbdd0e5412f73db8a27404c6dee680b482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
