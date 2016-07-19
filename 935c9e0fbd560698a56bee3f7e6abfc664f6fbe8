@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2a371f0e_605672d7",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-07-19T16:45:20Z",
+      "side": 1,
+      "message": "_mm256_mulhrs_epi16 could have larger latency than _mm256_adds_epi16 plus _mm256_srai_epi16.",
+      "range": {
+        "startLine": 169,
+        "startChar": 23,
+        "endLine": 169,
+        "endChar": 42
+      },
+      "revId": "935c9e0fbd560698a56bee3f7e6abfc664f6fbe8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a371f0e_2073ca84",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-07-19T16:45:20Z",
+      "side": 1,
+      "message": "Same issue here.",
+      "range": {
+        "startLine": 237,
+        "startChar": 23,
+        "endLine": 237,
+        "endChar": 42
+      },
+      "revId": "935c9e0fbd560698a56bee3f7e6abfc664f6fbe8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
