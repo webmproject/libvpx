@@ -92,13 +92,14 @@ static int is_skin_color(int y, int cb, int cr, int consec_zeromv) {
       for (; i < 5; ++i) {
         int skin_color_diff = evaluate_skin_color_difference(cb, cr, i);
         if (skin_color_diff < skin_threshold[i + 1]) {
-          if (y < 60 && skin_color_diff > 3 * (skin_threshold[i + 1] >> 2))
+          if (y < 60 && skin_color_diff > 3 * (skin_threshold[i + 1] >> 2)) {
             return 0;
-          else if (consec_zeromv > 25 &&
-                   skin_color_diff > (skin_threshold[i + 1] >> 1))
+          } else if (consec_zeromv > 25 &&
+                     skin_color_diff > (skin_threshold[i + 1] >> 1)) {
             return 0;
-          else
+          } else {
             return 1;
+          }
         }
         // Exit if difference is much large than the threshold.
         if (skin_color_diff > (skin_threshold[i + 1] << 3)) {
@@ -523,10 +524,11 @@ static void check_for_encode_breakout(unsigned int sse, MACROBLOCK *x) {
 
     sse2 = VP8_UVSSE(x);
 
-    if (sse2 * 2 < x->encode_breakout)
+    if (sse2 * 2 < x->encode_breakout) {
       x->skip = 1;
-    else
+    } else {
       x->skip = 0;
+    }
   }
 }
 
@@ -546,9 +548,10 @@ static int evaluate_inter_mode(unsigned int *sse, int rate2, int *distortion2,
   }
 
   if ((this_mode != NEWMV) || !(cpi->sf.half_pixel_search) ||
-      cpi->common.full_pixel == 1)
+      cpi->common.full_pixel == 1) {
     *distortion2 =
         vp8_get_inter_mbpred_error(x, &cpi->fn_ptr[BLOCK_16X16], sse, mv);
+  }
 
   this_rd = RDCOST(x->rdmult, x->rddiv, rate2, *distortion2);
 
@@ -585,32 +588,39 @@ static void calculate_zeromv_rd_adjustment(VP8_COMP *cpi, MACROBLOCK *x,
     mic -= 1;
     mv_l = mic->mbmi.mv;
 
-    if (mic->mbmi.ref_frame != INTRA_FRAME)
-      if (abs(mv_l.as_mv.row) < 8 && abs(mv_l.as_mv.col) < 8)
+    if (mic->mbmi.ref_frame != INTRA_FRAME) {
+      if (abs(mv_l.as_mv.row) < 8 && abs(mv_l.as_mv.col) < 8) {
         local_motion_check++;
+      }
+    }
 
     /* above-left mb */
     mic -= x->e_mbd.mode_info_stride;
     mv_al = mic->mbmi.mv;
 
-    if (mic->mbmi.ref_frame != INTRA_FRAME)
-      if (abs(mv_al.as_mv.row) < 8 && abs(mv_al.as_mv.col) < 8)
+    if (mic->mbmi.ref_frame != INTRA_FRAME) {
+      if (abs(mv_al.as_mv.row) < 8 && abs(mv_al.as_mv.col) < 8) {
         local_motion_check++;
+      }
+    }
 
     /* above mb */
     mic += 1;
     mv_a = mic->mbmi.mv;
 
-    if (mic->mbmi.ref_frame != INTRA_FRAME)
-      if (abs(mv_a.as_mv.row) < 8 && abs(mv_a.as_mv.col) < 8)
+    if (mic->mbmi.ref_frame != INTRA_FRAME) {
+      if (abs(mv_a.as_mv.row) < 8 && abs(mv_a.as_mv.col) < 8) {
         local_motion_check++;
+      }
+    }
 
     if (((!x->e_mbd.mb_to_top_edge || !x->e_mbd.mb_to_left_edge) &&
          local_motion_check > 0) ||
-        local_motion_check > 2)
+        local_motion_check > 2) {
       *rd_adjustment = 80;
-    else if (local_motion_check > 0)
+    } else if (local_motion_check > 0) {
       *rd_adjustment = 90;
+    }
   }
 }
 
@@ -892,8 +902,9 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
          * likely to be chosen */
         x->rd_thresh_mult[mode_index] += 4;
 
-        if (x->rd_thresh_mult[mode_index] > MAX_THRESHMULT)
+        if (x->rd_thresh_mult[mode_index] > MAX_THRESHMULT) {
           x->rd_thresh_mult[mode_index] = MAX_THRESHMULT;
+        }
 
         x->rd_threshes[mode_index] =
             (cpi->rd_baseline_thresh[mode_index] >> 7) *
@@ -924,8 +935,9 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
      * an unfiltered alternative */
     if (cpi->is_src_frame_alt_ref && (cpi->oxcf.arnr_max_frames == 0)) {
       if (this_mode != ZEROMV ||
-          x->e_mbd.mode_info_context->mbmi.ref_frame != ALTREF_FRAME)
+          x->e_mbd.mode_info_context->mbmi.ref_frame != ALTREF_FRAME) {
         continue;
+      }
     }
 
     switch (this_mode) {
@@ -1105,9 +1117,9 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             while (n < further_steps) {
               n++;
 
-              if (num00)
+              if (num00) {
                 num00--;
-              else {
+              } else {
                 thissme = cpi->diamond_search_sad(
                     x, b, d, &mvp_full, &d->bmi.mv, step_param + n, sadpb,
                     &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv);
@@ -1126,10 +1138,11 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
           x->mv_row_min = tmp_row_min;
           x->mv_row_max = tmp_row_max;
 
-          if (bestsme < INT_MAX)
+          if (bestsme < INT_MAX) {
             cpi->find_fractional_mv_step(
                 x, b, d, &d->bmi.mv, &best_ref_mv, x->errorperbit,
                 &cpi->fn_ptr[BLOCK_16X16], cpi->mb.mvcost, &distortion2, &sse);
+          }
         }
 
         mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
@@ -1156,8 +1169,9 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         if (((mode_mv[this_mode].as_mv.row >> 3) < x->mv_row_min) ||
             ((mode_mv[this_mode].as_mv.row >> 3) > x->mv_row_max) ||
             ((mode_mv[this_mode].as_mv.col >> 3) < x->mv_col_min) ||
-            ((mode_mv[this_mode].as_mv.col >> 3) > x->mv_col_max))
+            ((mode_mv[this_mode].as_mv.col >> 3) > x->mv_col_max)) {
           continue;
+        }
 
         rate2 += vp8_cost_mv_ref(this_mode, mdcounts);
         x->e_mbd.mode_info_context->mbmi.mv.as_int = mode_mv[this_mode].as_int;
@@ -1226,8 +1240,9 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     else {
       x->rd_thresh_mult[mode_index] += 4;
 
-      if (x->rd_thresh_mult[mode_index] > MAX_THRESHMULT)
+      if (x->rd_thresh_mult[mode_index] > MAX_THRESHMULT) {
         x->rd_thresh_mult[mode_index] = MAX_THRESHMULT;
+      }
 
       x->rd_threshes[mode_index] = (cpi->rd_baseline_thresh[mode_index] >> 7) *
                                    x->rd_thresh_mult[mode_index];
@@ -1281,8 +1296,9 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     // labeling on there being significant denoising in the scene
     if (cpi->oxcf.noise_sensitivity == 4) {
       if (cpi->denoiser.nmse_source_diff >
-          70 * cpi->denoiser.threshold_aggressive_mode / 100)
+          70 * cpi->denoiser.threshold_aggressive_mode / 100) {
         is_noisy = 1;
+      }
     } else {
       if (cpi->mse_source_denoised > 1000) is_noisy = 1;
     }
@@ -1353,9 +1369,10 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
   /* set to the best mb mode, this copy can be skip if x->skip since it
    * already has the right content */
-  if (!x->skip)
+  if (!x->skip) {
     memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode,
            sizeof(MB_MODE_INFO));
+  }
 
   if (best_mbmode.mode <= B_PRED) {
     /* set mode_info_context->mbmi.uv_mode */
@@ -1363,8 +1380,9 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
   }
 
   if (sign_bias !=
-      cpi->common.ref_frame_sign_bias[xd->mode_info_context->mbmi.ref_frame])
+      cpi->common.ref_frame_sign_bias[xd->mode_info_context->mbmi.ref_frame]) {
     best_ref_mv.as_int = best_ref_mv_sb[!sign_bias].as_int;
+  }
 
   update_mvcount(x, &best_ref_mv);
 }

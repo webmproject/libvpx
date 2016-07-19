@@ -196,28 +196,31 @@ static void multiframe_quality_enhance_block(
     {
       vp8_copy_mem8x8(y, y_stride, yd, yd_stride);
       for (up = u, udp = ud, i = 0; i < uvblksize;
-           ++i, up += uv_stride, udp += uvd_stride)
+           ++i, up += uv_stride, udp += uvd_stride) {
         memcpy(udp, up, uvblksize);
+      }
       for (vp = v, vdp = vd, i = 0; i < uvblksize;
-           ++i, vp += uv_stride, vdp += uvd_stride)
+           ++i, vp += uv_stride, vdp += uvd_stride) {
         memcpy(vdp, vp, uvblksize);
+      }
     }
   }
 }
 
 static int qualify_inter_mb(const MODE_INFO *mode_info_context, int *map) {
-  if (mode_info_context->mbmi.mb_skip_coeff)
+  if (mode_info_context->mbmi.mb_skip_coeff) {
     map[0] = map[1] = map[2] = map[3] = 1;
-  else if (mode_info_context->mbmi.mode == SPLITMV) {
+  } else if (mode_info_context->mbmi.mode == SPLITMV) {
     static int ndx[4][4] = {
       { 0, 1, 4, 5 }, { 2, 3, 6, 7 }, { 8, 9, 12, 13 }, { 10, 11, 14, 15 }
     };
     int i, j;
     for (i = 0; i < 4; ++i) {
       map[i] = 1;
-      for (j = 0; j < 4 && map[j]; ++j)
+      for (j = 0; j < 4 && map[j]; ++j) {
         map[i] &= (mode_info_context->bmi[ndx[i][j]].mv.as_mv.row <= 2 &&
                    mode_info_context->bmi[ndx[i][j]].mv.as_mv.col <= 2);
+      }
     }
   } else {
     map[0] = map[1] = map[2] = map[3] =
@@ -256,14 +259,15 @@ void vp8_multiframe_quality_enhance(VP8_COMMON *cm) {
   for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
     for (mb_col = 0; mb_col < cm->mb_cols; ++mb_col) {
       /* if motion is high there will likely be no benefit */
-      if (frame_type == INTER_FRAME)
+      if (frame_type == INTER_FRAME) {
         totmap = qualify_inter_mb(mode_info_context, map);
-      else
+      } else {
         totmap = (frame_type == KEY_FRAME ? 4 : 0);
+      }
       if (totmap) {
         if (totmap < 4) {
           int i, j;
-          for (i = 0; i < 2; ++i)
+          for (i = 0; i < 2; ++i) {
             for (j = 0; j < 2; ++j) {
               if (map[i * 2 + j]) {
                 multiframe_quality_enhance_block(
@@ -292,6 +296,7 @@ void vp8_multiframe_quality_enhance(VP8_COMMON *cm) {
                 }
               }
             }
+          }
         } else /* totmap = 4 */
         {
           multiframe_quality_enhance_block(

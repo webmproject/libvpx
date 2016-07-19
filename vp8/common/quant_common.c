@@ -39,10 +39,11 @@ int vp8_dc_quant(int QIndex, int Delta) {
 
   QIndex = QIndex + Delta;
 
-  if (QIndex > 127)
+  if (QIndex > 127) {
     QIndex = 127;
-  else if (QIndex < 0)
+  } else if (QIndex < 0) {
     QIndex = 0;
+  }
 
   retval = dc_qlookup[QIndex];
   return retval;
@@ -53,10 +54,11 @@ int vp8_dc2quant(int QIndex, int Delta) {
 
   QIndex = QIndex + Delta;
 
-  if (QIndex > 127)
+  if (QIndex > 127) {
     QIndex = 127;
-  else if (QIndex < 0)
+  } else if (QIndex < 0) {
     QIndex = 0;
+  }
 
   retval = dc_qlookup[QIndex] * 2;
   return retval;
@@ -66,10 +68,11 @@ int vp8_dc_uv_quant(int QIndex, int Delta) {
 
   QIndex = QIndex + Delta;
 
-  if (QIndex > 127)
+  if (QIndex > 127) {
     QIndex = 127;
-  else if (QIndex < 0)
+  } else if (QIndex < 0) {
     QIndex = 0;
+  }
 
   retval = dc_qlookup[QIndex];
 
@@ -81,10 +84,11 @@ int vp8_dc_uv_quant(int QIndex, int Delta) {
 int vp8_ac_yquant(int QIndex) {
   int retval;
 
-  if (QIndex > 127)
+  if (QIndex > 127) {
     QIndex = 127;
-  else if (QIndex < 0)
+  } else if (QIndex < 0) {
     QIndex = 0;
+  }
 
   retval = ac_qlookup[QIndex];
   return retval;
@@ -95,10 +99,11 @@ int vp8_ac2quant(int QIndex, int Delta) {
 
   QIndex = QIndex + Delta;
 
-  if (QIndex > 127)
+  if (QIndex > 127) {
     QIndex = 127;
-  else if (QIndex < 0)
+  } else if (QIndex < 0) {
     QIndex = 0;
+  }
 
   /* For all x in [0..284], x*155/100 is bitwise equal to (x*101581) >> 16.
    * The smallest precision for that is '(x*6349) >> 12' but 16 is a good
@@ -114,10 +119,11 @@ int vp8_ac_uv_quant(int QIndex, int Delta) {
 
   QIndex = QIndex + Delta;
 
-  if (QIndex > 127)
+  if (QIndex > 127) {
     QIndex = 127;
-  else if (QIndex < 0)
+  } else if (QIndex < 0) {
     QIndex = 0;
+  }
 
   retval = ac_qlookup[QIndex];
   return retval;

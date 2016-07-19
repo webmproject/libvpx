@@ -62,8 +62,9 @@ void vp8_find_near_mvs(MACROBLOCKD *xd, const MODE_INFO *here, int_mv *nearest,
       }
 
       *cntx += 2;
-    } else
+    } else {
       cnt[CNT_INTRA] += 2;
+    }
   }
 
   /* Process above left */
@@ -81,8 +82,9 @@ void vp8_find_near_mvs(MACROBLOCKD *xd, const MODE_INFO *here, int_mv *nearest,
       }
 
       *cntx += 1;
-    } else
+    } else {
       cnt[CNT_INTRA] += 1;
+    }
   }
 
   /* If we have three distinct MV's ... */
@@ -107,8 +109,9 @@ void vp8_find_near_mvs(MACROBLOCKD *xd, const MODE_INFO *here, int_mv *nearest,
   }
 
   /* Use near_mvs[0] to store the "best" MV */
-  if (cnt[CNT_NEAREST] >= cnt[CNT_INTRA])
+  if (cnt[CNT_NEAREST] >= cnt[CNT_INTRA]) {
     near_mvs[CNT_INTRA] = near_mvs[CNT_NEAREST];
+  }
 
   /* Set up return values */
   best_mv->as_int = near_mvs[0].as_int;

@@ -47,11 +47,12 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
 static int validate_buffer(const unsigned char *start, size_t len,
                            const unsigned char *end,
                            struct vpx_internal_error_info *error) {
-  if (start + len > start && start + len < end)
+  if (start + len > start && start + len < end) {
     return 1;
-  else
+  } else {
     vpx_internal_error(error, VPX_CODEC_CORRUPT_FRAME,
                        "Truncated packet or corrupt partition ");
+  }
 
   return 0;
 }

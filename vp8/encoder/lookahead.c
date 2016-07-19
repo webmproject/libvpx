@@ -40,8 +40,9 @@ void vp8_lookahead_destroy(struct lookahead_ctx *ctx) {
     if (ctx->buf) {
       unsigned int i;
 
-      for (i = 0; i < ctx->max_sz; ++i)
+      for (i = 0; i < ctx->max_sz; ++i) {
         vp8_yv12_de_alloc_frame_buffer(&ctx->buf[i].img);
+      }
       free(ctx->buf);
     }
     free(ctx);
@@ -55,10 +56,11 @@ struct lookahead_ctx *vp8_lookahead_init(unsigned int width,
   unsigned int i;
 
   /* Clamp the lookahead queue depth */
-  if (depth < 1)
+  if (depth < 1) {
     depth = 1;
-  else if (depth > MAX_LAG_BUFFERS)
+  } else if (depth > MAX_LAG_BUFFERS) {
     depth = MAX_LAG_BUFFERS;
+  }
 
   /* Keep last frame in lookahead buffer by increasing depth by 1.*/
   depth += 1;
@@ -73,10 +75,12 @@ struct lookahead_ctx *vp8_lookahead_init(unsigned int width,
     ctx->max_sz = depth;
     ctx->buf = calloc(depth, sizeof(*ctx->buf));
     if (!ctx->buf) goto bail;
-    for (i = 0; i < depth; ++i)
+    for (i = 0; i < depth; ++i) {
       if (vp8_yv12_alloc_frame_buffer(&ctx->buf[i].img, width, height,
-                                      VP8BORDERINPIXELS))
+                                      VP8BORDERINPIXELS)) {
         goto bail;
+      }
+    }
   }
   return ctx;
 bail:
@@ -166,10 +170,11 @@ struct lookahead_entry *vp8_lookahead_peek(struct lookahead_ctx *ctx,
   } else if (direction == PEEK_BACKWARD) {
     assert(index == 1);
 
-    if (ctx->read_idx == 0)
+    if (ctx->read_idx == 0) {
       index = ctx->max_sz - 1;
-    else
+    } else {
       index = ctx->read_idx - index;
+    }
     buf = ctx->buf + index;
   }
 

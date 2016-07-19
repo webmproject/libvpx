@@ -43,12 +43,13 @@ int vp8_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int Weight) {
 static int mv_err_cost(int_mv *mv, int_mv *ref, int *mvcost[2],
                        int error_per_bit) {
   /* Ignore mv costing if mvcost is NULL */
-  if (mvcost)
+  if (mvcost) {
     return ((mvcost[0][(mv->as_mv.row - ref->as_mv.row) >> 1] +
              mvcost[1][(mv->as_mv.col - ref->as_mv.col) >> 1]) *
                 error_per_bit +
             128) >>
            8;
+  }
   return 0;
 }
 
@@ -56,12 +57,13 @@ static int mvsad_err_cost(int_mv *mv, int_mv *ref, int *mvsadcost[2],
                           int error_per_bit) {
   /* Calculate sad error cost on full pixel basis. */
   /* Ignore mv costing if mvsadcost is NULL */
-  if (mvsadcost)
+  if (mvsadcost) {
     return ((mvsadcost[0][(mv->as_mv.row - ref->as_mv.row)] +
              mvsadcost[1][(mv->as_mv.col - ref->as_mv.col)]) *
                 error_per_bit +
             128) >>
            8;
+  }
   return 0;
 }
 
@@ -346,8 +348,9 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   bestmv->as_mv.col = bc * 2;
 
   if ((abs(bestmv->as_mv.col - ref_mv->as_mv.col) > (MAX_FULL_PEL_VAL << 3)) ||
-      (abs(bestmv->as_mv.row - ref_mv->as_mv.row) > (MAX_FULL_PEL_VAL << 3)))
+      (abs(bestmv->as_mv.row - ref_mv->as_mv.row) > (MAX_FULL_PEL_VAL << 3))) {
     return INT_MAX;
+  }
 
   return besterr;
 }
@@ -910,9 +913,9 @@ int vp8_hex_search(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
     }
   }
 
-  if (best_site == -1)
+  if (best_site == -1) {
     goto cal_neighbors;
-  else {
+  } else {
     br += hex[best_site].row;
     bc += hex[best_site].col;
     k = best_site;
@@ -943,16 +946,17 @@ int vp8_hex_search(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
       }
     }
 
-    if (best_site == -1)
+    if (best_site == -1) {
       break;
-    else {
+    } else {
       br += next_chkpts[k][best_site].row;
       bc += next_chkpts[k][best_site].col;
       k += 5 + best_site;
-      if (k >= 12)
+      if (k >= 12) {
         k -= 12;
-      else if (k >= 6)
+      } else if (k >= 6) {
         k -= 6;
+      }
     }
   }
 
@@ -983,9 +987,9 @@ cal_neighbors:
       }
     }
 
-    if (best_site == -1)
+    if (best_site == -1) {
       break;
-    else {
+    } else {
       br += neighbors[best_site].row;
       bc += neighbors[best_site].col;
     }
@@ -1100,8 +1104,9 @@ int vp8_diamond_search_sad_c(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
       best_mv->as_mv.col += ss[best_site].mv.col;
       best_address += ss[best_site].offset;
       last_site = best_site;
-    } else if (best_address == in_what)
+    } else if (best_address == in_what) {
       (*num00)++;
+    }
   }
 
   this_mv.as_mv.row = best_mv->as_mv.row << 3;
@@ -1193,8 +1198,9 @@ int vp8_diamond_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
       for (j = 0; j < x->searches_per_step; j += 4) {
         const unsigned char *block_offset[4];
 
-        for (t = 0; t < 4; ++t)
+        for (t = 0; t < 4; ++t) {
           block_offset[t] = ss[i + t].offset + best_address;
+        }
 
         fn_ptr->sdx4df(what, what_stride, block_offset, in_what_stride,
                        sad_array);
@@ -1247,8 +1253,9 @@ int vp8_diamond_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
       best_mv->as_mv.col += ss[best_site].mv.col;
       best_address += ss[best_site].offset;
       last_site = best_site;
-    } else if (best_address == in_what)
+    } else if (best_address == in_what) {
       (*num00)++;
+    }
   }
 
   this_mv.as_mv.row = best_mv->as_mv.row * 8;
@@ -1670,9 +1677,9 @@ int vp8_refining_search_sad_c(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
       }
     }
 
-    if (best_site == -1)
+    if (best_site == -1) {
       break;
-    else {
+    } else {
       ref_mv->as_mv.row += neighbors[best_site].row;
       ref_mv->as_mv.col += neighbors[best_site].col;
       best_address += (neighbors[best_site].row) * in_what_stride +
@@ -1780,9 +1787,9 @@ int vp8_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
       }
     }
 
-    if (best_site == -1)
+    if (best_site == -1) {
       break;
-    else {
+    } else {
       ref_mv->as_mv.row += neighbors[best_site].row;
       ref_mv->as_mv.col += neighbors[best_site].col;
       best_address += (neighbors[best_site].row) * in_what_stride +

@@ -400,8 +400,9 @@ void vp8_convert_rfct_to_prob(VP8_COMP *const cpi) {
       rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
 
   /* Calculate the probabilities used to code the ref frame based on usage */
-  if (!(cpi->prob_intra_coded = rf_intra * 255 / (rf_intra + rf_inter)))
+  if (!(cpi->prob_intra_coded = rf_intra * 255 / (rf_intra + rf_inter))) {
     cpi->prob_intra_coded = 1;
+  }
 
   cpi->prob_last_coded = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
 
@@ -478,11 +479,13 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
       active_section = 9;
 #endif
 
-      if (cpi->mb.e_mbd.update_mb_segmentation_map)
+      if (cpi->mb.e_mbd.update_mb_segmentation_map) {
         write_mb_features(w, mi, &cpi->mb.e_mbd);
+      }
 
-      if (pc->mb_no_coeff_skip)
+      if (pc->mb_no_coeff_skip) {
         vp8_encode_bool(w, m->mbmi.mb_skip_coeff, prob_skip_false);
+      }
 
       if (rf == INTRA_FRAME) {
         vp8_write(w, 0, cpi->prob_intra_coded);
@@ -494,9 +497,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
         if (mode == B_PRED) {
           int j = 0;
 
-          do
+          do {
             write_bmode(w, m->bmi[j].as_mode, pc->fc.bmode_prob);
-          while (++j < 16);
+          } while (++j < 16);
         }
 
         write_uv_mode(w, mi->uv_mode, pc->fc.uv_mode_prob);
@@ -566,8 +569,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
               blockmode = cpi->mb.partition_info->bmi[j].mode;
               blockmv = cpi->mb.partition_info->bmi[j].mv;
 #if CONFIG_DEBUG
-              while (j != L[++k])
+              while (j != L[++k]) {
                 if (k >= 16) assert(0);
+              }
 #else
               while (j != L[++k])
                 ;
@@ -627,11 +631,13 @@ static void write_kfmodes(VP8_COMP *cpi) {
     while (++mb_col < c->mb_cols) {
       const int ym = m->mbmi.mode;
 
-      if (cpi->mb.e_mbd.update_mb_segmentation_map)
+      if (cpi->mb.e_mbd.update_mb_segmentation_map) {
         write_mb_features(bc, &m->mbmi, &cpi->mb.e_mbd);
+      }
 
-      if (c->mb_no_coeff_skip)
+      if (c->mb_no_coeff_skip) {
         vp8_encode_bool(bc, m->mbmi.mb_skip_coeff, prob_skip_false);
+      }
 
       kfwrite_ymode(bc, ym, vp8_kf_ymode_prob);
 
@@ -734,8 +740,9 @@ static int independent_coef_context_savings(VP8_COMP *cpi) {
       probs = (const unsigned int(*)[MAX_ENTROPY_TOKENS])x->coef_counts[i][j];
 
       /* Reset to default probabilities at key frames */
-      if (cpi->common.frame_type == KEY_FRAME)
+      if (cpi->common.frame_type == KEY_FRAME) {
         probs = default_coef_counts[i][j];
+      }
 
       sum_probs_over_prev_coef_context(probs, prev_coef_count_sum);
 
@@ -758,8 +765,9 @@ static int independent_coef_context_savings(VP8_COMP *cpi) {
           const int s = prob_update_savings(ct, oldp, newp, upd);
 
           if (cpi->common.frame_type != KEY_FRAME ||
-              (cpi->common.frame_type == KEY_FRAME && newp != oldp))
+              (cpi->common.frame_type == KEY_FRAME && newp != oldp)) {
             prev_coef_savings[t] += s;
+          }
         } while (++t < ENTROPY_NODES);
       } while (++k < PREV_COEF_CONTEXTS);
       k = 0;
@@ -769,8 +777,9 @@ static int independent_coef_context_savings(VP8_COMP *cpi) {
          * to get the equal probabilities across the prev coef
          * contexts.
          */
-        if (prev_coef_savings[k] > 0 || cpi->common.frame_type == KEY_FRAME)
+        if (prev_coef_savings[k] > 0 || cpi->common.frame_type == KEY_FRAME) {
           savings += prev_coef_savings[k];
+        }
       } while (++k < ENTROPY_NODES);
     } while (++j < COEF_BANDS);
   } while (++i < BLOCK_TYPES);
@@ -873,10 +882,11 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi) {
     savings += (oldtotal - newtotal) / 256;
   }
 
-  if (cpi->oxcf.error_resilient_mode & VPX_ERROR_RESILIENT_PARTITIONS)
+  if (cpi->oxcf.error_resilient_mode & VPX_ERROR_RESILIENT_PARTITIONS) {
     savings += independent_coef_context_savings(cpi);
-  else
+  } else {
     savings += default_coef_context_savings(cpi);
+  }
 
   return savings;
 }
@@ -961,8 +971,9 @@ void vp8_update_coef_probs(VP8_COMP *cpi) {
            */
           if ((cpi->oxcf.error_resilient_mode &
                VPX_ERROR_RESILIENT_PARTITIONS) &&
-              cpi->common.frame_type == KEY_FRAME && newp != *Pold)
+              cpi->common.frame_type == KEY_FRAME && newp != *Pold) {
             u = 1;
+          }
 
 #if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
           cpi->update_probs[i][j][k][t] = u;
@@ -1111,8 +1122,9 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
     vp8_write_bit(bc, 0);
     vp8_write_bit(bc, pc->clamp_type);
 
-  } else
+  } else {
     vp8_start_encode(bc, cx_data, cx_data_end);
+  }
 
   /* Signal whether or not Segmentation is enabled */
   vp8_write_bit(bc, xd->segmentation_enabled);
@@ -1270,10 +1282,11 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
 
 #if !(CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING)
   if (cpi->oxcf.error_resilient_mode & VPX_ERROR_RESILIENT_PARTITIONS) {
-    if (pc->frame_type == KEY_FRAME)
+    if (pc->frame_type == KEY_FRAME) {
       pc->refresh_entropy_probs = 1;
-    else
+    } else {
       pc->refresh_entropy_probs = 0;
+    }
   }
 #endif
 
@@ -1410,9 +1423,9 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
     vp8_start_encode(&cpi->bc[1], cx_data, cx_data_end);
 
 #if CONFIG_MULTITHREAD
-    if (cpi->b_multi_threaded)
+    if (cpi->b_multi_threaded) {
       pack_mb_row_tokens(cpi, &cpi->bc[1]);
-    else
+    } else
 #endif  // CONFIG_MULTITHREAD
       vp8_pack_tokens(&cpi->bc[1], cpi->tok, cpi->tok_count);
 

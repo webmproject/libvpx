@@ -96,25 +96,28 @@ int vp8_denoiser_filter_c(unsigned char *mc_running_avg_y, int mc_avg_y_stride,
         running_avg_y[c] = mc_running_avg_y[c];
         col_sum[c] += diff;
       } else {
-        if (absdiff >= 4 + shift_inc1 && absdiff <= 7)
+        if (absdiff >= 4 + shift_inc1 && absdiff <= 7) {
           adjustment = adj_val[0];
-        else if (absdiff >= 8 && absdiff <= 15)
+        } else if (absdiff >= 8 && absdiff <= 15) {
           adjustment = adj_val[1];
-        else
+        } else {
           adjustment = adj_val[2];
+        }
 
         if (diff > 0) {
-          if ((sig[c] + adjustment) > 255)
+          if ((sig[c] + adjustment) > 255) {
             running_avg_y[c] = 255;
-          else
+          } else {
             running_avg_y[c] = sig[c] + adjustment;
+          }
 
           col_sum[c] += adjustment;
         } else {
-          if ((sig[c] - adjustment) < 0)
+          if ((sig[c] - adjustment) < 0) {
             running_avg_y[c] = 0;
-          else
+          } else {
             running_avg_y[c] = sig[c] - adjustment;
+          }
 
           col_sum[c] -= adjustment;
         }
@@ -169,17 +172,19 @@ int vp8_denoiser_filter_c(unsigned char *mc_running_avg_y, int mc_avg_y_stride,
           if (adjustment > delta) adjustment = delta;
           if (diff > 0) {
             // Bring denoised signal down.
-            if (running_avg_y[c] - adjustment < 0)
+            if (running_avg_y[c] - adjustment < 0) {
               running_avg_y[c] = 0;
-            else
+            } else {
               running_avg_y[c] = running_avg_y[c] - adjustment;
+            }
             col_sum[c] -= adjustment;
           } else if (diff < 0) {
             // Bring denoised signal up.
-            if (running_avg_y[c] + adjustment > 255)
+            if (running_avg_y[c] + adjustment > 255) {
               running_avg_y[c] = 255;
-            else
+            } else {
               running_avg_y[c] = running_avg_y[c] + adjustment;
+            }
             col_sum[c] += adjustment;
           }
         }
@@ -263,23 +268,26 @@ int vp8_denoiser_filter_uv_c(unsigned char *mc_running_avg_uv,
         running_avg_uv[c] = mc_running_avg_uv[c];
         sum_diff += diff;
       } else {
-        if (absdiff >= 4 && absdiff <= 7)
+        if (absdiff >= 4 && absdiff <= 7) {
           adjustment = adj_val[0];
-        else if (absdiff >= 8 && absdiff <= 15)
+        } else if (absdiff >= 8 && absdiff <= 15) {
           adjustment = adj_val[1];
-        else
+        } else {
           adjustment = adj_val[2];
+        }
         if (diff > 0) {
-          if ((sig[c] + adjustment) > 255)
+          if ((sig[c] + adjustment) > 255) {
             running_avg_uv[c] = 255;
-          else
+          } else {
             running_avg_uv[c] = sig[c] + adjustment;
+          }
           sum_diff += adjustment;
         } else {
-          if ((sig[c] - adjustment) < 0)
+          if ((sig[c] - adjustment) < 0) {
             running_avg_uv[c] = 0;
-          else
+          } else {
             running_avg_uv[c] = sig[c] - adjustment;
+          }
           sum_diff -= adjustment;
         }
       }
@@ -315,17 +323,19 @@ int vp8_denoiser_filter_uv_c(unsigned char *mc_running_avg_uv,
           if (adjustment > delta) adjustment = delta;
           if (diff > 0) {
             // Bring denoised signal down.
-            if (running_avg_uv[c] - adjustment < 0)
+            if (running_avg_uv[c] - adjustment < 0) {
               running_avg_uv[c] = 0;
-            else
+            } else {
               running_avg_uv[c] = running_avg_uv[c] - adjustment;
+            }
             sum_diff -= adjustment;
           } else if (diff < 0) {
             // Bring denoised signal up.
-            if (running_avg_uv[c] + adjustment > 255)
+            if (running_avg_uv[c] + adjustment > 255) {
               running_avg_uv[c] = 255;
-            else
+            } else {
               running_avg_uv[c] = running_avg_uv[c] + adjustment;
+            }
             sum_diff += adjustment;
           }
         }
@@ -508,8 +518,9 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser, MACROBLOCK *x,
     // we will always choose zero_mv for denoising if
     // zero_mv_see <= best_sse (i.e., sse_diff <= 0).
     if ((unsigned int)(mv_row * mv_row + mv_col * mv_col) <=
-        NOISE_MOTION_THRESHOLD)
+        NOISE_MOTION_THRESHOLD) {
       sse_diff_thresh = (int)SSE_DIFF_THRESHOLD;
+    }
 
     if (frame == INTRA_FRAME || sse_diff <= sse_diff_thresh) {
       /*
@@ -539,15 +550,18 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser, MACROBLOCK *x,
         denoiser->denoise_pars.scale_motion_thresh * NOISE_MOTION_THRESHOLD;
 
     if (motion_magnitude2 <
-        denoiser->denoise_pars.scale_increase_filter * NOISE_MOTION_THRESHOLD)
+        denoiser->denoise_pars.scale_increase_filter * NOISE_MOTION_THRESHOLD) {
       x->increase_denoising = 1;
+    }
 
     sse_thresh = denoiser->denoise_pars.scale_sse_thresh * SSE_THRESHOLD;
-    if (x->increase_denoising)
+    if (x->increase_denoising) {
       sse_thresh = denoiser->denoise_pars.scale_sse_thresh * SSE_THRESHOLD_HIGH;
+    }
 
-    if (best_sse > sse_thresh || motion_magnitude2 > motion_threshold)
+    if (best_sse > sse_thresh || motion_magnitude2 > motion_threshold) {
       decision = COPY_BLOCK;
+    }
 
     // If block is considered skin, don't denoise if the block
     // (1) is selected as non-zero motion for current frame, or
@@ -555,8 +569,9 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser, MACROBLOCK *x,
     // in a row.
     // TODO(marpan): Parameter "x" should be varied with framerate.
     // In particualar, should be reduced for layers (base layer/LAST).
-    if (x->is_skin && (consec_zero_last < 2 || motion_magnitude2 > 0))
+    if (x->is_skin && (consec_zero_last < 2 || motion_magnitude2 > 0)) {
       decision = COPY_BLOCK;
+    }
 
     if (decision == FILTER_BLOCK) {
       saved_pre = filter_xd->pre;

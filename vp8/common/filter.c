@@ -51,10 +51,11 @@ static void filter_block2d_first_pass(unsigned char *src_ptr, int *output_ptr,
       /* Normalize back to 0-255 */
       Temp = Temp >> VP8_FILTER_SHIFT;
 
-      if (Temp < 0)
+      if (Temp < 0) {
         Temp = 0;
-      else if (Temp > 255)
+      } else if (Temp > 255) {
         Temp = 255;
+      }
 
       output_ptr[j] = Temp;
       src_ptr++;
@@ -90,10 +91,11 @@ static void filter_block2d_second_pass(int *src_ptr, unsigned char *output_ptr,
       /* Normalize back to 0-255 */
       Temp = Temp >> VP8_FILTER_SHIFT;
 
-      if (Temp < 0)
+      if (Temp < 0) {
         Temp = 0;
-      else if (Temp > 255)
+      } else if (Temp > 255) {
         Temp = 255;
+      }
 
       output_ptr[j] = (unsigned char)Temp;
       src_ptr++;

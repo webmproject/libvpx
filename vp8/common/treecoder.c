@@ -26,8 +26,9 @@ static void tree2tok(struct vp8_token_struct *const p, vp8_tree t, int i, int v,
     if (j <= 0) {
       p[-j].value = v;
       p[-j].Len = L;
-    } else
+    } else {
       tree2tok(p, t, j, v, L);
+    }
   } while (++v & 1);
 }
 
@@ -103,7 +104,8 @@ void vp8_tree_probs_from_distribution(int n, /* n = size of alphabet */
     if (tot) {
       const unsigned int p = ((c[0] * Pfac) + (rd ? tot >> 1 : 0)) / tot;
       probs[t] = p < 256 ? (p ? p : 1) : 255; /* agree w/old version for now */
-    } else
+    } else {
       probs[t] = vp8_prob_half;
+    }
   } while (++t < tree_len);
 }

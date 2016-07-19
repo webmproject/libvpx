@@ -369,8 +369,9 @@ void vp8_temporal_filter_prepare_c(VP8_COMP *cpi, int distance) {
 
       frames_to_blur_backward = num_frames_backward;
 
-      if (frames_to_blur_backward >= max_frames)
+      if (frames_to_blur_backward >= max_frames) {
         frames_to_blur_backward = max_frames - 1;
+      }
 
       frames_to_blur = frames_to_blur_backward + 1;
       break;
@@ -380,8 +381,9 @@ void vp8_temporal_filter_prepare_c(VP8_COMP *cpi, int distance) {
 
       frames_to_blur_forward = num_frames_forward;
 
-      if (frames_to_blur_forward >= max_frames)
+      if (frames_to_blur_forward >= max_frames) {
         frames_to_blur_forward = max_frames - 1;
+      }
 
       frames_to_blur = frames_to_blur_forward + 1;
       break;
@@ -392,18 +394,22 @@ void vp8_temporal_filter_prepare_c(VP8_COMP *cpi, int distance) {
       frames_to_blur_forward = num_frames_forward;
       frames_to_blur_backward = num_frames_backward;
 
-      if (frames_to_blur_forward > frames_to_blur_backward)
+      if (frames_to_blur_forward > frames_to_blur_backward) {
         frames_to_blur_forward = frames_to_blur_backward;
+      }
 
-      if (frames_to_blur_backward > frames_to_blur_forward)
+      if (frames_to_blur_backward > frames_to_blur_forward) {
         frames_to_blur_backward = frames_to_blur_forward;
+      }
 
       /* When max_frames is even we have 1 more frame backward than forward */
-      if (frames_to_blur_forward > (max_frames - 1) / 2)
+      if (frames_to_blur_forward > (max_frames - 1) / 2) {
         frames_to_blur_forward = ((max_frames - 1) / 2);
+      }
 
-      if (frames_to_blur_backward > (max_frames / 2))
+      if (frames_to_blur_backward > (max_frames / 2)) {
         frames_to_blur_backward = (max_frames / 2);
+      }
 
       frames_to_blur = frames_to_blur_backward + frames_to_blur_forward + 1;
       break;

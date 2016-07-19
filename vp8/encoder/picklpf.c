@@ -95,15 +95,16 @@ static int get_min_filter_level(VP8_COMP *cpi, int base_qindex) {
   int min_filter_level;
 
   if (cpi->source_alt_ref_active && cpi->common.refresh_golden_frame &&
-      !cpi->common.refresh_alt_ref_frame)
+      !cpi->common.refresh_alt_ref_frame) {
     min_filter_level = 0;
-  else {
-    if (base_qindex <= 6)
+  } else {
+    if (base_qindex <= 6) {
       min_filter_level = 0;
-    else if (base_qindex <= 16)
+    } else if (base_qindex <= 16) {
       min_filter_level = 1;
-    else
+    } else {
       min_filter_level = (base_qindex / 8);
+    }
   }
 
   return min_filter_level;
@@ -119,8 +120,9 @@ static int get_max_filter_level(VP8_COMP *cpi, int base_qindex) {
   int max_filter_level = MAX_LOOP_FILTER;
   (void)base_qindex;
 
-  if (cpi->twopass.section_intra_rating > 8)
+  if (cpi->twopass.section_intra_rating > 8) {
     max_filter_level = MAX_LOOP_FILTER * 3 / 4;
+  }
 
   return max_filter_level;
 }
@@ -139,10 +141,11 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
   /* Replace unfiltered frame buffer with a new one */
   cm->frame_to_show = &cpi->pick_lf_lvl_frame;
 
-  if (cm->frame_type == KEY_FRAME)
+  if (cm->frame_type == KEY_FRAME) {
     cm->sharpness_level = 0;
-  else
+  } else {
     cm->sharpness_level = cpi->oxcf.Sharpness;
+  }
 
   if (cm->sharpness_level != cm->last_sharpness_level) {
     vp8_loop_filter_update_sharpness(&cm->lf_info, cm->sharpness_level);
@@ -152,10 +155,11 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
   /* Start the search at the previous frame filter level unless it is
    * now out of range.
    */
-  if (cm->filter_level < min_filter_level)
+  if (cm->filter_level < min_filter_level) {
     cm->filter_level = min_filter_level;
-  else if (cm->filter_level > max_filter_level)
+  } else if (cm->filter_level > max_filter_level) {
     cm->filter_level = max_filter_level;
+  }
 
   filt_val = cm->filter_level;
   best_filt_val = filt_val;
@@ -183,8 +187,9 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
     if (filt_err < best_err) {
       best_err = filt_err;
       best_filt_val = filt_val;
-    } else
+    } else {
       break;
+    }
 
     /* Adjust filter level */
     filt_val -= 1 + (filt_val > 10);
@@ -214,8 +219,9 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
         best_err = filt_err - (filt_err >> 10);
 
         best_filt_val = filt_val;
-      } else
+      } else {
         break;
+      }
 
       /* Adjust filter level */
       filt_val += 1 + (filt_val > 10);
@@ -274,20 +280,22 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
   /* Replace unfiltered frame buffer with a new one */
   cm->frame_to_show = &cpi->pick_lf_lvl_frame;
 
-  if (cm->frame_type == KEY_FRAME)
+  if (cm->frame_type == KEY_FRAME) {
     cm->sharpness_level = 0;
-  else
+  } else {
     cm->sharpness_level = cpi->oxcf.Sharpness;
+  }
 
   /* Start the search at the previous frame filter level unless it is
    * now out of range.
    */
   filt_mid = cm->filter_level;
 
-  if (filt_mid < min_filter_level)
+  if (filt_mid < min_filter_level) {
     filt_mid = min_filter_level;
-  else if (filt_mid > max_filter_level)
+  } else if (filt_mid > max_filter_level) {
     filt_mid = max_filter_level;
+  }
 
   /* Define the initial step size */
   filter_step = (filt_mid < 16) ? 4 : filt_mid / 4;
@@ -309,8 +317,9 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
   while (filter_step > 0) {
     Bias = (best_err >> (15 - (filt_mid / 8))) * filter_step;
 
-    if (cpi->twopass.section_intra_rating < 20)
+    if (cpi->twopass.section_intra_rating < 20) {
       Bias = Bias * cpi->twopass.section_intra_rating / 20;
+    }
 
     filt_high = ((filt_mid + filter_step) > max_filter_level)
                     ? max_filter_level
@@ -328,8 +337,9 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
 
         filt_err = vp8_calc_ss_err(sd, cm->frame_to_show);
         ss_err[filt_low] = filt_err;
-      } else
+      } else {
         filt_err = ss_err[filt_low];
+      }
 
       /* If value is close to the best so far then bias towards a
        * lower loop filter value.
@@ -351,8 +361,9 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
 
         filt_err = vp8_calc_ss_err(sd, cm->frame_to_show);
         ss_err[filt_high] = filt_err;
-      } else
+      } else {
         filt_err = ss_err[filt_high];
+      }
 
       /* Was it better than the previous best? */
       if (filt_err < (best_err - Bias)) {

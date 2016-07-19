@@ -82,8 +82,9 @@ static int read_mvcomponent(vp8_reader *r, const MV_CONTEXT *mvc) {
     } while (--i > 3);
 
     if (!(x & 0xFFF0) || vp8_read(r, p[MVPbits + 3])) x += 8;
-  } else /* small */
+  } else { /* small */
     x = vp8_treed_read(r, vp8_small_mvtree, p + MVPshort);
+  }
 
   if (x && vp8_read(r, p[MVPsign])) x = -x;
 
@@ -135,8 +136,9 @@ static void mb_mode_mv_init(VP8D_COMP *pbi) {
   pbi->common.mb_no_coeff_skip = (int)vp8_read_bit(bc);
 
   pbi->prob_skip_false = 0;
-  if (pbi->common.mb_no_coeff_skip)
+  if (pbi->common.mb_no_coeff_skip) {
     pbi->prob_skip_false = (vp8_prob)vp8_read_literal(bc, 8);
+  }
 
   if (pbi->common.frame_type != KEY_FRAME) {
     pbi->prob_intra = (vp8_prob)vp8_read_literal(bc, 8);
@@ -218,21 +220,25 @@ static void decode_split_mv(vp8_reader *const bc, MODE_INFO *mi,
 
     if (!(k & 3)) {
       /* On L edge, get from MB to left of us */
-      if (left_mb->mbmi.mode != SPLITMV)
+      if (left_mb->mbmi.mode != SPLITMV) {
         leftmv.as_int = left_mb->mbmi.mv.as_int;
-      else
+      } else {
         leftmv.as_int = (left_mb->bmi + k + 4 - 1)->mv.as_int;
-    } else
+      }
+    } else {
       leftmv.as_int = (mi->bmi + k - 1)->mv.as_int;
+    }
 
     if (!(k >> 2)) {
       /* On top edge, get from MB above us */
-      if (above_mb->mbmi.mode != SPLITMV)
+      if (above_mb->mbmi.mode != SPLITMV) {
         abovemv.as_int = above_mb->mbmi.mv.as_int;
-      else
+      } else {
         abovemv.as_int = (above_mb->bmi + k + 16 - 4)->mv.as_int;
-    } else
+      }
+    } else {
       abovemv.as_int = (mi->bmi + k - 4)->mv.as_int;
+    }
 
     prob = get_sub_mv_ref_prob(leftmv.as_int, abovemv.as_int);
 
@@ -332,8 +338,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi,
         }
 
         *cntx += 2;
-      } else
+      } else {
         cnt[CNT_INTRA] += 2;
+      }
     }
 
     /* Process above left */
@@ -351,8 +358,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi,
         }
 
         *cntx += 1;
-      } else
+      } else {
         cnt[CNT_INTRA] += 1;
+      }
     }
 
     if (vp8_read(bc, vp8_mode_contexts[cnt[CNT_INTRA]][0])) {
@@ -471,12 +479,13 @@ static void read_mb_features(vp8_reader *r, MB_MODE_INFO *mi, MACROBLOCKD *x) {
   /* Is segmentation enabled */
   if (x->segmentation_enabled && x->update_mb_segmentation_map) {
     /* If so then read the segment id. */
-    if (vp8_read(r, x->mb_segment_tree_probs[0]))
+    if (vp8_read(r, x->mb_segment_tree_probs[0])) {
       mi->segment_id =
           (unsigned char)(2 + vp8_read(r, x->mb_segment_tree_probs[2]));
-    else
+    } else {
       mi->segment_id =
           (unsigned char)(vp8_read(r, x->mb_segment_tree_probs[1]));
+    }
   }
 }
 
@@ -488,23 +497,26 @@ static void decode_mb_mode_mvs(VP8D_COMP *pbi, MODE_INFO *mi,
    * this frame (reset to 0 above by default)
    * By default on a key frame reset all MBs to segment 0
    */
-  if (pbi->mb.update_mb_segmentation_map)
+  if (pbi->mb.update_mb_segmentation_map) {
     read_mb_features(&pbi->mbc[8], &mi->mbmi, &pbi->mb);
-  else if (pbi->common.frame_type == KEY_FRAME)
+  } else if (pbi->common.frame_type == KEY_FRAME) {
     mi->mbmi.segment_id = 0;
+  }
 
   /* Read the macroblock coeff skip flag if this feature is in use,
    * else default to 0 */
-  if (pbi->common.mb_no_coeff_skip)
+  if (pbi->common.mb_no_coeff_skip) {
     mi->mbmi.mb_skip_coeff = vp8_read(&pbi->mbc[8], pbi->prob_skip_false);
-  else
+  } else {
     mi->mbmi.mb_skip_coeff = 0;
+  }
 
   mi->mbmi.is_4x4 = 0;
-  if (pbi->common.frame_type == KEY_FRAME)
+  if (pbi->common.frame_type == KEY_FRAME) {
     read_kf_modes(pbi, mi);
-  else
+  } else {
     read_mb_modes_mv(pbi, mi, &mi->mbmi);
+  }
 }
 
 void vp8_decode_mode_mvs(VP8D_COMP *pbi) {

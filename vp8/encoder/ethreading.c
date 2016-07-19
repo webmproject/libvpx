@@ -158,16 +158,18 @@ static THREAD_FUNCTION thread_encoding_proc(void *p_data) {
             /* Code to set segment id in xd->mbmi.segment_id for
              * current MB (with range checking)
              */
-            if (cpi->segmentation_map[map_index + mb_col] <= 3)
+            if (cpi->segmentation_map[map_index + mb_col] <= 3) {
               xd->mode_info_context->mbmi.segment_id =
                   cpi->segmentation_map[map_index + mb_col];
-            else
+            } else {
               xd->mode_info_context->mbmi.segment_id = 0;
+            }
 
             vp8cx_mb_init_quantizer(cpi, x, 1);
-          } else
+          } else {
             /* Set to Segment 0 by default */
             xd->mode_info_context->mbmi.segment_id = 0;
+          }
 
           x->active_ptr = cpi->active_map + map_index + mb_col;
 
@@ -199,16 +201,19 @@ static THREAD_FUNCTION thread_encoding_proc(void *p_data) {
               if (xd->mode_info_context->mbmi.mode == ZEROMV &&
                   xd->mode_info_context->mbmi.ref_frame == LAST_FRAME) {
                 // Increment, check for wrap-around.
-                if (cpi->consec_zero_last[map_index + mb_col] < 255)
+                if (cpi->consec_zero_last[map_index + mb_col] < 255) {
                   cpi->consec_zero_last[map_index + mb_col] += 1;
-                if (cpi->consec_zero_last_mvbias[map_index + mb_col] < 255)
+                }
+                if (cpi->consec_zero_last_mvbias[map_index + mb_col] < 255) {
                   cpi->consec_zero_last_mvbias[map_index + mb_col] += 1;
+                }
               } else {
                 cpi->consec_zero_last[map_index + mb_col] = 0;
                 cpi->consec_zero_last_mvbias[map_index + mb_col] = 0;
               }
-              if (x->zero_last_dot_suppress)
+              if (x->zero_last_dot_suppress) {
                 cpi->consec_zero_last_mvbias[map_index + mb_col] = 0;
+              }
             }
 
             /* Special case code for cyclic refresh
@@ -232,14 +237,16 @@ static THREAD_FUNCTION thread_encoding_proc(void *p_data) {
                * candidate for cleanup next time (marked 0) else
                * mark it as dirty (1).
                */
-              if (mbmi->segment_id)
+              if (mbmi->segment_id) {
                 cpi->cyclic_refresh_map[map_index + mb_col] = -1;
-              else if ((mbmi->mode == ZEROMV) &&
-                       (mbmi->ref_frame == LAST_FRAME)) {
-                if (cpi->cyclic_refresh_map[map_index + mb_col] == 1)
+              } else if ((mbmi->mode == ZEROMV) &&
+                         (mbmi->ref_frame == LAST_FRAME)) {
+                if (cpi->cyclic_refresh_map[map_index + mb_col] == 1) {
                   cpi->cyclic_refresh_map[map_index + mb_col] = 0;
-              } else
+                }
+              } else {
                 cpi->cyclic_refresh_map[map_index + mb_col] = 1;
+              }
             }
           }
 
@@ -495,8 +502,9 @@ int vp8cx_create_encoder_threads(VP8_COMP *cpi) {
     int rc = 0;
 
     /* don't allocate more threads than cores available */
-    if (cpi->oxcf.multi_threaded > cm->processor_core_count)
+    if (cpi->oxcf.multi_threaded > cm->processor_core_count) {
       th_count = cm->processor_core_count - 1;
+    }
 
     /* we have th_count + 1 (main) threads processing one row each */
     /* no point to have more threads than the sync range allows */
