@@ -102,8 +102,8 @@ void vp10_convolve(const uint8_t *src, int src_stride, uint8_t *dst,
 #else
                    const INTERP_FILTER interp_filter,
 #endif
-                   const int subpel_x_q4, int x_step_q4, const int subpel_y_q4,
-                   int y_step_q4, int ref_idx) {
+                   const int subpel_x_q4, int x_step_q4,
+                   const int subpel_y_q4, int y_step_q4, int ref_idx) {
   int ignore_horiz = x_step_q4 == 16 && subpel_x_q4 == 0;
   int ignore_vert = y_step_q4 == 16 && subpel_y_q4 == 0;
 
