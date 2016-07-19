@@ -142,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "2a371f0e_46026663",
+        "filename": "vpxdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-19T18:52:54Z",
+      "side": 1,
+      "message": "without a lot of /* clang-format off */ you kind of have to accept it. I think these are caused by the #if in the table.\nnote we did a bit of this in aom, but didn\u0027t hit every case",
+      "parentUuid": "2a371f0e_208aaac2",
+      "range": {
+        "startLine": 99,
+        "startChar": 40,
+        "endLine": 99,
+        "endChar": 49
+      },
+      "revId": "005112d2d68f0b42befe103796d3ad87a47f4e28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2a371f0e_808f36d1",
         "filename": "y4minput.c",
         "patchSetId": 1
