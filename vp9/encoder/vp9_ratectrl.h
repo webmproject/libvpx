@@ -16,6 +16,7 @@
 #include "vpx/vpx_integer.h"
 
 #include "vp9/common/vp9_blockd.h"
+#include "vp9/encoder/vp9_lookahead.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -159,11 +160,16 @@ typedef struct {
   int frame_height[FRAME_SCALE_STEPS];
   int rf_level_maxq[RATE_FACTOR_LEVELS];
 
-  uint64_t avg_source_sad;
+  int fac_active_worst_inter;
+  int fac_active_worst_gf;
+  uint64_t avg_source_sad[MAX_LAG_BUFFERS];
+  uint64_t prev_avg_source_sad_lag;
+  int high_source_sad_lagindex;
   int high_source_sad;
   int count_last_scene_change;
   int avg_frame_low_motion;
   int af_ratio_onepass_vbr;
+  int force_qpmin;
 } RATE_CONTROL;
 
 struct VP9_COMP;

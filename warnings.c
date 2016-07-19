@@ -24,7 +24,7 @@ static const char quantizer_warning_string[] =
     "Bad quantizer values. Quantizer values should not be equal, and should "
     "differ by at least 8.";
 static const char lag_in_frames_with_realtime[] =
-    "Lag in frames is ignored when deadline is set to realtime.";
+    "Lag in frames is ignored when deadline is set to realtime for cbr mode.";
 
 struct WarningListNode {
   const char *warning_string;
@@ -80,8 +80,9 @@ static void check_quantizer(int min_q, int max_q,
 static void check_lag_in_frames_realtime_deadline(
     int lag_in_frames,
     int deadline,
+    int rc_end_usage,
     struct WarningList *warning_list) {
-  if (deadline == VPX_DL_REALTIME && lag_in_frames != 0)
+  if (deadline == VPX_DL_REALTIME && lag_in_frames != 0 && rc_end_usage == 1)
     add_warning(lag_in_frames_with_realtime, warning_list);
 }
 
@@ -97,6 +98,7 @@ void check_encoder_config(int disable_prompt,
                   &warning_list);
   check_lag_in_frames_realtime_deadline(stream_config->g_lag_in_frames,
                                         global_config->deadline,
+                                        stream_config->rc_end_usage,
                                         &warning_list);
   /* Count and print warnings. */
   for (warning = warning_list.warning_node;
