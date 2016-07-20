@@ -66,8 +66,8 @@ static int y4m_parse_tags(y4m_input *_y4m, char *_tags) {
     /*If that's all we have, stop.*/
     if (p[0] == '\0') break;
     /*Find the end of this tag.*/
-    for (q = p + 1; *q != '\0' && *q != ' '; q++)
-      ;
+    for (q = p + 1; *q != '\0' && *q != ' '; q++) {
+    }
     /*Process the tag.*/
     switch (p[0]) {
       case 'W': {
