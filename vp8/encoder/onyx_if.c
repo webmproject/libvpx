@@ -3273,23 +3273,26 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size,
     cpi->force_next_frame_intra = 0;
   }
 
-/* For an alt ref frame in 2 pass we skip the call to the second pass
- * function that sets the target bandwidth
- */
+  /* For an alt ref frame in 2 pass we skip the call to the second pass
+   * function that sets the target bandwidth
+   */
+  switch (cpi->pass) {
 #if !CONFIG_REALTIME_ONLY
-
-  if (cpi->pass == 2) {
-    if (cpi->common.refresh_alt_ref_frame) {
-      /* Per frame bit target for the alt ref frame */
-      cpi->per_frame_bandwidth = cpi->twopass.gf_bits;
-      /* per second target bitrate */
-      cpi->target_bandwidth =
-          (int)(cpi->twopass.gf_bits * cpi->output_framerate);
-    }
-  } else
-#endif
-    cpi->per_frame_bandwidth =
-        (int)(cpi->target_bandwidth / cpi->output_framerate);
+    case 2:
+      if (cpi->common.refresh_alt_ref_frame) {
+        /* Per frame bit target for the alt ref frame */
+        cpi->per_frame_bandwidth = cpi->twopass.gf_bits;
+        /* per second target bitrate */
+        cpi->target_bandwidth =
+            (int)(cpi->twopass.gf_bits * cpi->output_framerate);
+      }
+      break;
+#endif  // !CONFIG_REALTIME_ONLY
+    default:
+      cpi->per_frame_bandwidth =
+          (int)(cpi->target_bandwidth / cpi->output_framerate);
+      break;
+  }
 
   /* Default turn off buffer to buffer copying */
   cm->copy_buffer_to_gf = 0;
@@ -4057,7 +4060,9 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size,
       active_worst_qchanged = 0;
     }
 
-#if !CONFIG_REALTIME_ONLY
+#if CONFIG_REALTIME_ONLY
+    Loop = 0;
+#else
     /* Special case handling for forced key frames */
     if ((cm->frame_type == KEY_FRAME) && cpi->this_key_frame_forced) {
       int last_q = Q;
@@ -4232,9 +4237,10 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size,
                                           : cpi->mb.zbin_over_quant;
 
       Loop = Q != last_q;
-    } else
-#endif
+    } else {
       Loop = 0;
+    }
+#endif  // CONFIG_REALTIME_ONLY
 
     if (cpi->is_src_frame_alt_ref) Loop = 0;
 
@@ -5066,15 +5072,15 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
 
     assert(i < NUM_YV12_BUFFERS);
   }
+  switch (cpi->pass) {
 #if !CONFIG_REALTIME_ONLY
-
-  if (cpi->pass == 1) {
-    Pass1Encode(cpi, size, dest, frame_flags);
-  } else if (cpi->pass == 2) {
-    Pass2Encode(cpi, size, dest, dest_end, frame_flags);
-  } else
-#endif
-    encode_frame_to_data_rate(cpi, size, dest, dest_end, frame_flags);
+    case 1: Pass1Encode(cpi, size, dest, frame_flags); break;
+    case 2: Pass2Encode(cpi, size, dest, dest_end, frame_flags); break;
+#endif  // !CONFIG_REALTIME_ONLY
+    default:
+      encode_frame_to_data_rate(cpi, size, dest, dest_end, frame_flags);
+      break;
+  }
 
   if (cpi->compressor_speed == 2) {
     unsigned int duration, duration2;
