@@ -61,11 +61,12 @@ static int y4m_parse_tags(y4m_input *_y4m, char *_tags) {
   got_w = got_h = got_fps = got_interlace = got_par = got_chroma = 0;
   for (p = _tags;; p = q) {
     /*Skip any leading spaces.*/
-    while (*p == ' ')p++;
+    while (*p == ' ') p++;
     /*If that's all we have, stop.*/
-    if (p[0] == '\0')break;
+    if (p[0] == '\0') break;
     /*Find the end of this tag.*/
-    for (q = p + 1; *q != '\0' && *q != ' '; q++);
+    for (q = p + 1; *q != '\0' && *q != ' '; q++) {
+    }
     /*Process the tag.*/
     switch (p[0]) {
       case 'W': {
