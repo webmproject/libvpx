@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "4a2d33d5_d2f3ba03",
+        "filename": "CHANGELOG",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-07-20T23:14:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4a2d33d5_320fb635",
+      "range": {
+        "startLine": 1,
+        "startChar": 11,
+        "endLine": 1,
+        "endChar": 13
+      },
+      "revId": "b2ddc7edd0b571801aa832a575863ef3f11384ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a2d33d5_521eaa67",
         "filename": "CHANGELOG",
         "patchSetId": 2
@@ -89,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "4a2d33d5_32e05625",
+        "filename": "CHANGELOG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-07-20T23:14:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4a2d33d5_521eaa67",
+      "revId": "b2ddc7edd0b571801aa832a575863ef3f11384ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a2d33d5_921f8260",
         "filename": "CHANGELOG",
         "patchSetId": 2
@@ -100,6 +142,30 @@
       "writtenOn": "2016-07-20T22:56:34Z",
       "side": 1,
       "message": "sounds a bit floral",
+      "range": {
+        "startLine": 12,
+        "startChar": 4,
+        "endLine": 12,
+        "endChar": 58
+      },
+      "revId": "b2ddc7edd0b571801aa832a575863ef3f11384ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a2d33d5_72dace74",
+        "filename": "CHANGELOG",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-07-20T23:14:10Z",
+      "side": 1,
+      "message": "Yeah, fair. Tidied it up.",
+      "parentUuid": "4a2d33d5_921f8260",
       "range": {
         "startLine": 12,
         "startChar": 4,
@@ -135,6 +201,30 @@
     },
     {
       "key": {
+        "uuid": "4a2d33d5_52dfca62",
+        "filename": "CHANGELOG",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-07-20T23:14:10Z",
+      "side": 1,
+      "message": "Dang, thought I checked too. Oops.",
+      "parentUuid": "4a2d33d5_d229fa8c",
+      "range": {
+        "startLine": 13,
+        "startChar": 67,
+        "endLine": 13,
+        "endChar": 73
+      },
+      "revId": "b2ddc7edd0b571801aa832a575863ef3f11384ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a2d33d5_52350adc",
         "filename": "CHANGELOG",
         "patchSetId": 2
@@ -146,6 +236,24 @@
       "writtenOn": "2016-07-20T22:56:34Z",
       "side": 1,
       "message": ".",
+      "revId": "b2ddc7edd0b571801aa832a575863ef3f11384ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a2d33d5_b2d3a65b",
+        "filename": "CHANGELOG",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-07-20T23:14:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4a2d33d5_52350adc",
       "revId": "b2ddc7edd0b571801aa832a575863ef3f11384ae",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
