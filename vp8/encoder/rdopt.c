@@ -1949,7 +1949,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
           this_rd = INT_MAX;
           disable_skip = 1;
         }
-      } break;
+        break;
+      }
 
       case SPLITMV: {
         int tmp_rd;
@@ -1983,7 +1984,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
           this_rd = INT_MAX;
           disable_skip = 1;
         }
-      } break;
+        break;
+      }
       case DC_PRED:
       case V_PRED:
       case H_PRED:
@@ -2004,7 +2006,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         rd.rate_uv = uv_intra_rate_tokenonly;
         rd.distortion2 += uv_intra_distortion;
         rd.distortion_uv = uv_intra_distortion;
-      } break;
+        break;
+      }
 
       case NEWMV: {
         int thissme;

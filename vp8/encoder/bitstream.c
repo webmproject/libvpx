@@ -584,7 +584,8 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
                 write_mv(w, &blockmv.as_mv, &best_mv, (const MV_CONTEXT *)mvc);
               }
             } while (++j < cpi->mb.partition_info->count);
-          } break;
+            break;
+          }
           default: break;
         }
       }
