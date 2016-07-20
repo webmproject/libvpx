@@ -2120,7 +2120,7 @@ void adjust_gf_boost_lag_one_pass_vbr(VP9_COMP *cpi, uint64_t avg_sad_current) {
   double rate_err = 1.0;
   // Get measure of complexity over the future frames, and get the first
   // future frame with high_source_sad/scene-change.
-  int tot_frames = vp9_lookahead_depth(cpi->lookahead) - 1;
+  int tot_frames = (int)vp9_lookahead_depth(cpi->lookahead) - 1;
   for (frame = tot_frames; frame >= 1; --frame) {
     const int lagframe_idx = tot_frames - frame + 1;
     uint64_t reference_sad = rc->avg_source_sad[0];
@@ -2254,8 +2254,8 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
     }
     if (cpi->oxcf.lag_in_frames > 0) {
       frames_to_buffer = (cm->current_video_frame == 1) ?
-          vp9_lookahead_depth(cpi->lookahead) - 1: 2;
-      start_frame = vp9_lookahead_depth(cpi->lookahead) - 1;
+          (int)vp9_lookahead_depth(cpi->lookahead) - 1: 2;
+      start_frame = (int)vp9_lookahead_depth(cpi->lookahead) - 1;
       for (frame = 0; frame < frames_to_buffer; ++frame) {
         const int lagframe_idx = start_frame - frame;
         if (lagframe_idx >= 0) {
