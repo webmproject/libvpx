@@ -66,40 +66,46 @@ static int y4m_parse_tags(y4m_input *_y4m, char *_tags) {
     /*If that's all we have, stop.*/
     if (p[0] == '\0') break;
     /*Find the end of this tag.*/
-    for (q = p + 1; *q != '\0' && *q != ' '; q++)
-      ;
+    for (q = p + 1; *q != '\0' && *q != ' '; q++) {
+    }
     /*Process the tag.*/
     switch (p[0]) {
       case 'W': {
         if (sscanf(p + 1, "%d", &_y4m->pic_w) != 1) return -1;
         got_w = 1;
-      } break;
+        break;
+      }
       case 'H': {
         if (sscanf(p + 1, "%d", &_y4m->pic_h) != 1) return -1;
         got_h = 1;
-      } break;
+        break;
+      }
       case 'F': {
         if (sscanf(p + 1, "%d:%d", &_y4m->fps_n, &_y4m->fps_d) != 2) {
           return -1;
         }
         got_fps = 1;
-      } break;
+        break;
+      }
       case 'I': {
         _y4m->interlace = p[1];
         got_interlace = 1;
-      } break;
+        break;
+      }
       case 'A': {
         if (sscanf(p + 1, "%d:%d", &_y4m->par_n, &_y4m->par_d) != 2) {
           return -1;
         }
         got_par = 1;
-      } break;
+        break;
+      }
       case 'C': {
         if (q - p > 16) return -1;
         memcpy(_y4m->chroma_type, p + 1, q - p - 1);
         _y4m->chroma_type[q - p - 1] = '\0';
         got_chroma = 1;
-      } break;
+        break;
+      }
         /*Ignore unknown tags.*/
     }
   }
@@ -337,7 +343,8 @@ static void y4m_convert_42xpaldv_42xjpeg(y4m_input *_y4m, unsigned char *_dst,
         }
         _dst += c_sz - c_w;
         tmp -= c_w;
-      } break;
+        break;
+      }
       case 2: {
         /*Slide C_r down a quarter-pel.
           This is the same as the horizontal filter.*/
@@ -373,7 +380,8 @@ static void y4m_convert_42xpaldv_42xjpeg(y4m_input *_y4m, unsigned char *_dst,
           _dst++;
           tmp++;
         }
-      } break;
+        break;
+      }
     }
     /*For actual interlaced material, this would have to be done separately on
        each field, and the shift amounts would be different.

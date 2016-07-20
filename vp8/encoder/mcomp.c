@@ -587,7 +587,6 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
           this_mv.as_mv.col = (startmv.as_mv.col - 8) | 6;
           thismse = vfp->svf(y - 1, y_stride, 6, this_mv.as_mv.row & 7, z,
                              b->src_stride, &sse);
-          ;
         }
       } else {
         this_mv.as_mv.row = (startmv.as_mv.row - 8) | 6;
