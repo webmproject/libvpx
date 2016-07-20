@@ -127,6 +127,9 @@ static INLINE void av1_tree_to_cdf(const aom_tree_index *tree,
       }                                                \
     }                                                  \
   } while (0)
+
+void av1_indices_from_tree(int *ind, int *inv, int len,
+                           const aom_tree_index *tree);
 #endif
 
 DECLARE_ALIGNED(16, extern const uint8_t, aom_norm[256]);

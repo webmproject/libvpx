@@ -28,8 +28,6 @@ struct av1_token {
 };
 
 void av1_tokens_from_tree(struct av1_token *, const aom_tree_index *);
-void av1_indices_from_tree(int *ind, int *inv, int len,
-                           const aom_tree_index *tree);
 
 static INLINE void av1_write_token(aom_writer *w, const aom_tree_index *tree,
                                    const aom_prob *probs,
