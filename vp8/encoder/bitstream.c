@@ -568,14 +568,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
 
               blockmode = cpi->mb.partition_info->bmi[j].mode;
               blockmv = cpi->mb.partition_info->bmi[j].mv;
-#if CONFIG_DEBUG
               while (j != L[++k]) {
-                if (k >= 16) assert(0);
+                assert(k < 16);
               }
-#else
-              while (j != L[++k])
-                ;
-#endif
               leftmv.as_int = left_block_mv(m, k);
               abovemv.as_int = above_block_mv(m, k, mis);
               mv_contz = vp8_mv_cont(&leftmv, &abovemv);

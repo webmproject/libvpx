@@ -473,17 +473,15 @@ static vpx_image_t *vp8_get_frame(vpx_codec_alg_priv_t *ctx,
     vp8_zero(flags);
 
     if (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC) {
-      flags.post_proc_flag =
-          ctx->postproc_cfg.post_proc_flag
+      flags.post_proc_flag = ctx->postproc_cfg.post_proc_flag;
 #if CONFIG_POSTPROC_VISUALIZER
-
-          | ((ctx->dbg_color_ref_frame_flag != 0) ? VP8D_DEBUG_CLR_FRM_REF_BLKS
-                                                  : 0) |
+      flags.post_proc_flag |=
+          ((ctx->dbg_color_ref_frame_flag != 0) ? VP8D_DEBUG_CLR_FRM_REF_BLKS
+                                                : 0) |
           ((ctx->dbg_color_mb_modes_flag != 0) ? VP8D_DEBUG_CLR_BLK_MODES : 0) |
           ((ctx->dbg_color_b_modes_flag != 0) ? VP8D_DEBUG_CLR_BLK_MODES : 0) |
-          ((ctx->dbg_display_mv_flag != 0) ? VP8D_DEBUG_DRAW_MV : 0)
+          ((ctx->dbg_display_mv_flag != 0) ? VP8D_DEBUG_DRAW_MV : 0);
 #endif
-          ;
       flags.deblocking_level = ctx->postproc_cfg.deblocking_level;
       flags.noise_level = ctx->postproc_cfg.noise_level;
 #if CONFIG_POSTPROC_VISUALIZER
