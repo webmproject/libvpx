@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2a371f0e_b5f392d6",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-07-20T11:27:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2a371f0e_94bbf4da",
+      "range": {
+        "startLine": 255,
+        "startChar": 28,
+        "endLine": 255,
+        "endChar": 70
+      },
+      "revId": "171c18f66b36bb3489a2e572d3c3616cac66f204",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2a371f0e_b4a1d8a6",
         "filename": "vp10/decoder/decodeframe.c",
         "patchSetId": 22
@@ -36,6 +60,30 @@
       "writtenOn": "2016-07-19T22:55:25Z",
       "side": 1,
       "message": "Same here",
+      "range": {
+        "startLine": 261,
+        "startChar": 28,
+        "endLine": 261,
+        "endChar": 70
+      },
+      "revId": "171c18f66b36bb3489a2e572d3c3616cac66f204",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a371f0e_15019e9f",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-07-20T11:27:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2a371f0e_b4a1d8a6",
       "range": {
         "startLine": 261,
         "startChar": 28,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "2a371f0e_f5fd1aa3",
+        "filename": "vp10/decoder/detokenize.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-07-20T11:27:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2a371f0e_b488b81e",
+      "range": {
+        "startLine": 58,
+        "startChar": 22,
+        "endLine": 58,
+        "endChar": 65
+      },
+      "revId": "171c18f66b36bb3489a2e572d3c3616cac66f204",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2a371f0e_f48240fa",
         "filename": "vp10/decoder/detokenize.c",
         "patchSetId": 22
@@ -82,6 +154,30 @@
       "writtenOn": "2016-07-19T22:55:25Z",
       "side": 1,
       "message": "Can we use get_tx2d_size here",
+      "range": {
+        "startLine": 253,
+        "startChar": 22,
+        "endLine": 253,
+        "endChar": 64
+      },
+      "revId": "171c18f66b36bb3489a2e572d3c3616cac66f204",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a371f0e_55ca0674",
+        "filename": "vp10/decoder/detokenize.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-07-20T11:27:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2a371f0e_f48240fa",
       "range": {
         "startLine": 253,
         "startChar": 22,
@@ -140,6 +236,30 @@
     },
     {
       "key": {
+        "uuid": "2a371f0e_95c48e65",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-07-20T11:27:44Z",
+      "side": 1,
+      "message": "Done.\n\nThe change here is exactly equivalent to the logic before.",
+      "parentUuid": "2a371f0e_2fd29503",
+      "range": {
+        "startLine": 378,
+        "startChar": 2,
+        "endLine": 378,
+        "endChar": 25
+      },
+      "revId": "171c18f66b36bb3489a2e572d3c3616cac66f204",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2a371f0e_af2b45e5",
         "filename": "vp10/encoder/encodemb.c",
         "patchSetId": 22
@@ -186,6 +306,30 @@
     },
     {
       "key": {
+        "uuid": "2a371f0e_d5dd763a",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 1081,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-07-20T11:27:44Z",
+      "side": 1,
+      "message": "No - since this takes bsize as index and not tx_size",
+      "parentUuid": "2a371f0e_8ffc8164",
+      "range": {
+        "startLine": 1080,
+        "startChar": 0,
+        "endLine": 1081,
+        "endChar": 61
+      },
+      "revId": "171c18f66b36bb3489a2e572d3c3616cac66f204",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2a371f0e_4f69d929",
         "filename": "vp10/encoder/tokenize.c",
         "patchSetId": 22
@@ -197,6 +341,30 @@
       "writtenOn": "2016-07-19T22:55:25Z",
       "side": 1,
       "message": "Can we use get_tx2d_size here?",
+      "range": {
+        "startLine": 396,
+        "startChar": 2,
+        "endLine": 396,
+        "endChar": 64
+      },
+      "revId": "171c18f66b36bb3489a2e572d3c3616cac66f204",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a371f0e_75c90a7b",
+        "filename": "vp10/encoder/tokenize.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 396,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-07-20T11:27:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2a371f0e_4f69d929",
       "range": {
         "startLine": 396,
         "startChar": 2,
