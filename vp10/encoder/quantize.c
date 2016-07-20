@@ -1259,7 +1259,7 @@ void vp10_init_quantizer(VP10_COMP *cpi) {
 }
 
 void vp10_init_plane_quantizers(const VP10_COMP *cpi, MACROBLOCK *x,
-                                const int segment_id) {
+                                int segment_id) {
   const VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   const QUANTS *const quants = &cpi->quants;
