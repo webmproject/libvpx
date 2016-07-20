@@ -4944,9 +4944,13 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
             vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                                "Failed to allocate post processing buffer");
           }
-
-          vp9_deblock(cm->frame_to_show, pp,
-                      cm->lf.filter_level * 10 / 6, cm->postproc_state.limits);
+          {
+            vp9_ppflags_t ppflags;
+            ppflags.post_proc_flag = VP9D_DEBLOCK;
+            ppflags.deblocking_level = 0;  // not used in vp9_post_proc_frame()
+            ppflags.noise_level = 0;       // not used in vp9_post_proc_frame()
+            vp9_post_proc_frame(cm, pp, &ppflags);
+          }
 #endif
           vpx_clear_system_state();
 
