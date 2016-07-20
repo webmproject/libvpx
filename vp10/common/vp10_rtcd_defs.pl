@@ -386,16 +386,16 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vp10_fdct8x8_quant/;
 } else {
   add_proto qw/int64_t vp10_block_error/, "const tran_low_t *coeff, const tran_low_t *dqcoeff, intptr_t block_size, int64_t *ssz";
-  specialize qw/vp10_block_error avx2 msa/;
+  specialize qw/vp10_block_error sse2 avx2 msa/;
 
   add_proto qw/int64_t vp10_block_error_fp/, "const int16_t *coeff, const int16_t *dqcoeff, int block_size";
   specialize qw/vp10_block_error_fp neon sse2/;
 
   add_proto qw/void vp10_quantize_fp/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
-  specialize qw/vp10_quantize_fp neon sse2/;
+  specialize qw/vp10_quantize_fp neon sse2/, "$ssse3_x86_64";
 
   add_proto qw/void vp10_quantize_fp_32x32/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
-  specialize qw/vp10_quantize_fp_32x32/;
+  specialize qw/vp10_quantize_fp_32x32/, "$ssse3_x86_64";
 
   add_proto qw/void vp10_fdct8x8_quant/, "const int16_t *input, int stride, tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
   specialize qw/vp10_fdct8x8_quant sse2 ssse3 neon/;
