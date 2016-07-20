@@ -160,7 +160,6 @@ void vp8_de_noise(VP8_COMMON *cm, YV12_BUFFER_CONFIG *source,
   int mb_rows = cm->mb_rows;
   int mb_cols = cm->mb_cols;
   unsigned char *limits = cm->pp_limits_buffer;
-  ;
   (void)post;
   (void)low_var_thresh;
   (void)flag;

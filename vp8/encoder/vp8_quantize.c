@@ -212,7 +212,6 @@ void vp8cx_init_quantizer(VP8_COMP *cpi) {
     invert_quant(cpi->sf.improved_quant, cpi->UVquant[Q] + 0,
                  cpi->UVquant_shift[Q] + 0, quant_val);
     cpi->UVzbin[Q][0] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
-    ;
     cpi->UVround[Q][0] = (qrounding_factors[Q] * quant_val) >> 7;
     cpi->common.UVdequant[Q][0] = quant_val;
     cpi->zrun_zbin_boost_uv[Q][0] = (quant_val * zbin_boost[0]) >> 7;
