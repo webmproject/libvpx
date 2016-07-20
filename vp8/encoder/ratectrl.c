@@ -498,11 +498,9 @@ static void calc_gf_params(VP8_COMP *cpi) {
    * This is updated once the real frame size/boost is known.
    */
   if (cpi->oxcf.fixed_q == -1) {
-    if (cpi->pass == 2) /* 2 Pass */
-    {
+    if (cpi->pass == 2) { /* 2 Pass */
       cpi->frames_till_gf_update_due = cpi->baseline_gf_interval;
-    } else /* 1 Pass */
-    {
+    } else { /* 1 Pass */
       cpi->frames_till_gf_update_due = cpi->baseline_gf_interval;
 
       if (cpi->last_boost > 750) cpi->frames_till_gf_update_due++;

@@ -2925,8 +2925,7 @@ static void update_reference_frames(VP8_COMP *cpi) {
 
     cpi->current_ref_frames[GOLDEN_FRAME] = cm->current_video_frame;
     cpi->current_ref_frames[ALTREF_FRAME] = cm->current_video_frame;
-  } else /* For non key frames */
-  {
+  } else {
     if (cm->refresh_alt_ref_frame) {
       assert(!cm->copy_buffer_to_arf);
 
@@ -2947,8 +2946,7 @@ static void update_reference_frames(VP8_COMP *cpi) {
           cpi->current_ref_frames[ALTREF_FRAME] =
               cpi->current_ref_frames[LAST_FRAME];
         }
-      } else /* if (cm->copy_buffer_to_arf == 2) */
-      {
+      } else {
         if (cm->alt_fb_idx != cm->gld_fb_idx) {
           yv12_fb[cm->gld_fb_idx].flags |= VP8_ALTR_FRAME;
           yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALTR_FRAME;
@@ -2980,8 +2978,7 @@ static void update_reference_frames(VP8_COMP *cpi) {
           cpi->current_ref_frames[GOLDEN_FRAME] =
               cpi->current_ref_frames[LAST_FRAME];
         }
-      } else /* if (cm->copy_buffer_to_gf == 2) */
-      {
+      } else {
         if (cm->alt_fb_idx != cm->gld_fb_idx) {
           yv12_fb[cm->alt_fb_idx].flags |= VP8_GOLD_FRAME;
           yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FRAME;
@@ -3012,8 +3009,7 @@ static void update_reference_frames(VP8_COMP *cpi) {
       int i;
       for (i = LAST_FRAME; i < MAX_REF_FRAMES; ++i)
         vp8_yv12_copy_frame(cpi->Source, &cpi->denoiser.yv12_running_avg[i]);
-    } else /* For non key frames */
-    {
+    } else {
       vp8_yv12_extend_frame_borders(
           &cpi->denoiser.yv12_running_avg[INTRA_FRAME]);
 

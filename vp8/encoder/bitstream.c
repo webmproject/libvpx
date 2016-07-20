@@ -500,8 +500,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
         }
 
         write_uv_mode(w, mi->uv_mode, pc->fc.uv_mode_prob);
-      } else /* inter coded */
-      {
+      } else { /* inter coded */
         int_mv best_mv;
         vp8_prob mv_ref_p[VP8_MVREFS - 1];
 

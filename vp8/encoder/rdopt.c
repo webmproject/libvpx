@@ -853,8 +853,7 @@ static int labels2mode(MACROBLOCK *x, int const *labelings, int which_label,
         default: break;
       }
 
-      if (m == ABOVE4X4) /* replace above with left if same */
-      {
+      if (m == ABOVE4X4) { /* replace above with left if same */
         int_mv left_mv;
 
         left_mv.as_int = col ? d[-1].bmi.mv.as_int : left_block_mv(mic, i);
