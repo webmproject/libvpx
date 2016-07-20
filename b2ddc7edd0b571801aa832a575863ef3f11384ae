@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4a2d33d5_b243a699",
+        "filename": ".mailmap",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-07-20T22:28:36Z",
+      "side": 1,
+      "message": "weird as this looks, it is necessary to clean up this:\nhttps://chromium-review.googlesource.com/#/c/326890/",
+      "range": {
+        "startLine": 37,
+        "startChar": 10,
+        "endLine": 37,
+        "endChar": 11
+      },
+      "revId": "b2ddc7edd0b571801aa832a575863ef3f11384ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a2d33d5_12555253",
+        "filename": "CHANGELOG",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-07-20T22:28:36Z",
+      "side": 1,
+      "message": "Should I update the date?",
+      "range": {
+        "startLine": 1,
+        "startChar": 11,
+        "endLine": 1,
+        "endChar": 13
+      },
+      "revId": "b2ddc7edd0b571801aa832a575863ef3f11384ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a2d33d5_724aceb2",
+        "filename": "README",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-07-20T22:28:36Z",
+      "side": 1,
+      "message": "likewise",
+      "revId": "b2ddc7edd0b571801aa832a575863ef3f11384ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
