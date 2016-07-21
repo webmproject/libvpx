@@ -3187,6 +3187,7 @@ static void write_uncompressed_header(VP10_COMP *cpi,
 
   write_tile_info(cm, wb);
 }
+
 #if CONFIG_GLOBAL_MOTION
 static void write_global_motion_params(Global_Motion_Params *params,
                                        vpx_prob *probs,
@@ -3197,21 +3198,21 @@ static void write_global_motion_params(Global_Motion_Params *params,
   switch (gmtype) {
     case GLOBAL_ZERO:
       break;
+    case GLOBAL_AFFINE:
+      vp10_write_primitive_symmetric(w, params->motion_params.wmmat[4],
+                                     GM_ABS_ALPHA_BITS);
+      vp10_write_primitive_symmetric(w, params->motion_params.wmmat[5],
+                                     GM_ABS_ALPHA_BITS);
+    case GLOBAL_ROTZOOM:
+      vp10_write_primitive_symmetric(w, params->motion_params.wmmat[2],
+                                     GM_ABS_ALPHA_BITS);
+      vp10_write_primitive_symmetric(w, params->motion_params.wmmat[3],
+                                     GM_ABS_ALPHA_BITS);
     case GLOBAL_TRANSLATION:
       vp10_write_primitive_symmetric(w, params->motion_params.wmmat[0],
                                      GM_ABS_TRANS_BITS);
       vp10_write_primitive_symmetric(w, params->motion_params.wmmat[1],
                                      GM_ABS_TRANS_BITS);
-      break;
-    case GLOBAL_ROTZOOM:
-      vp10_write_primitive_symmetric(w, params->motion_params.wmmat[0],
-                                     GM_ABS_TRANS_BITS);
-      vp10_write_primitive_symmetric(w, params->motion_params.wmmat[1],
-                                     GM_ABS_TRANS_BITS);
-      vp10_write_primitive_symmetric(w, params->motion_params.wmmat[2],
-                                     GM_ABS_ALPHA_BITS);
-      vp10_write_primitive_symmetric(w, params->motion_params.wmmat[3],
-                                     GM_ABS_ALPHA_BITS);
       break;
     default:
       assert(0);

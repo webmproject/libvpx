@@ -3450,32 +3450,31 @@ static void read_global_motion_params(Global_Motion_Params *params,
   GLOBAL_MOTION_TYPE gmtype = vp10_read_tree(r, vp10_global_motion_types_tree,
                                              probs);
   params->gmtype = gmtype;
+  params->motion_params.wmtype = gm_to_trans_type(gmtype);
   switch (gmtype) {
     case GLOBAL_ZERO:
       break;
-    case GLOBAL_TRANSLATION:
-      params->motion_params.wmtype = TRANSLATION;
-      params->motion_params.wmmat[0] =
-          vp10_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
-          GM_TRANS_DECODE_FACTOR;
-      params->motion_params.wmmat[1] =
-          vp10_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
-          GM_TRANS_DECODE_FACTOR;
-      break;
+    case GLOBAL_AFFINE:
+      params->motion_params.wmmat[4] =
+          (vp10_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
+          GM_ALPHA_DECODE_FACTOR) + (1 << WARPEDMODEL_PREC_BITS);
+      params->motion_params.wmmat[5] =
+          vp10_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
+          GM_ALPHA_DECODE_FACTOR;
     case GLOBAL_ROTZOOM:
-      params->motion_params.wmtype = ROTZOOM;
-      params->motion_params.wmmat[0] =
-          vp10_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
-          GM_TRANS_DECODE_FACTOR;
-      params->motion_params.wmmat[1] =
-          vp10_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
-          GM_TRANS_DECODE_FACTOR;
       params->motion_params.wmmat[2] =
           (vp10_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
           GM_ALPHA_DECODE_FACTOR) + (1 << WARPEDMODEL_PREC_BITS);
       params->motion_params.wmmat[3] =
           vp10_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
           GM_ALPHA_DECODE_FACTOR;
+    case GLOBAL_TRANSLATION:
+      params->motion_params.wmmat[0] =
+          vp10_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
+          GM_TRANS_DECODE_FACTOR;
+      params->motion_params.wmmat[1] =
+          vp10_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
+          GM_TRANS_DECODE_FACTOR;
       break;
     default:
       assert(0);

@@ -4538,28 +4538,11 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 
 #if CONFIG_GLOBAL_MOTION
 #define MIN_TRANS_THRESH 8
-
-static void convert_translation_to_params(
-    double *H, Global_Motion_Params *model) {
-  model->motion_params.wmmat[0] = (int) floor(H[0] *
-                                              (1 << GM_TRANS_PREC_BITS) + 0.5);
-  model->motion_params.wmmat[1] = (int) floor(H[1] *
-                                              (1 << GM_TRANS_PREC_BITS) + 0.5);
-  if (abs(model->motion_params.wmmat[0]) < MIN_TRANS_THRESH &&
-      abs(model->motion_params.wmmat[1]) < MIN_TRANS_THRESH) {
-    model->motion_params.wmmat[0] = 0;
-    model->motion_params.wmmat[1] = 0;
-  } else {
-    model->motion_params.wmmat[0] =
-        clamp(model->motion_params.wmmat[0],
-              GM_TRANS_MIN, GM_TRANS_MAX);
-    model->motion_params.wmmat[1] =
-        clamp(model->motion_params.wmmat[1],
-              GM_TRANS_MIN, GM_TRANS_MAX);
-  }
-}
-
-static void convert_rotzoom_to_params(double *H, Global_Motion_Params *model) {
+static void convert_to_params(double *H, TransformationType type,
+                              Global_Motion_Params *model) {
+  int i;
+  int alpha_present = 0;
+  int n_params = n_trans_model_params[type];
   model->motion_params.wmmat[0] = (int) floor(H[0] *
                                               (1 << GM_TRANS_PREC_BITS) + 0.5);
   model->motion_params.wmmat[1] = (int) floor(H[1] *
@@ -4571,19 +4554,17 @@ static void convert_rotzoom_to_params(double *H, Global_Motion_Params *model) {
       clamp(model->motion_params.wmmat[1],
             GM_TRANS_MIN, GM_TRANS_MAX);
 
-  model->motion_params.wmmat[2] = (int) floor(H[2] *
-                                              (1 << GM_ALPHA_PREC_BITS) + 0.5) -
-                                               (1 << GM_ALPHA_PREC_BITS);
-  model->motion_params.wmmat[3] = (int) floor(H[3] *
-                                              (1 << GM_ALPHA_PREC_BITS) + 0.5);
+  for (i = 2; i < n_params; ++i) {
+    model->motion_params.wmmat[i] =
+        (int) floor(H[i] *
+                    (1 << GM_ALPHA_PREC_BITS) + 0.5) -
+                    (!(i & 1) * (1 << GM_ALPHA_PREC_BITS));
+    model->motion_params.wmmat[i] = clamp(model->motion_params.wmmat[i],
+                                          GM_ALPHA_MIN, GM_ALPHA_MAX);
+    alpha_present |= (model->motion_params.wmmat[i] != 0);
+  }
 
-  model->motion_params.wmmat[2] = clamp(model->motion_params.wmmat[2],
-                                        GM_ALPHA_MIN, GM_ALPHA_MAX);
-  model->motion_params.wmmat[3] = clamp(model->motion_params.wmmat[3],
-                                        GM_ALPHA_MIN, GM_ALPHA_MAX);
-
-  if (model->motion_params.wmmat[2] == 0 &&
-      model->motion_params.wmmat[3] == 0) {
+  if (!alpha_present) {
     if (abs(model->motion_params.wmmat[0]) < MIN_TRANS_THRESH &&
         abs(model->motion_params.wmmat[1]) < MIN_TRANS_THRESH) {
       model->motion_params.wmmat[0] = 0;
@@ -4594,16 +4575,9 @@ static void convert_rotzoom_to_params(double *H, Global_Motion_Params *model) {
 
 static void convert_model_to_params(double *H, TransformationType type,
                                     Global_Motion_Params *model) {
-  switch (type) {
-    case ROTZOOM:
-      convert_rotzoom_to_params(H, model);
-      break;
-    case TRANSLATION:
-      convert_translation_to_params(H, model);
-      break;
-    default:
-      break;
-  }
+  // TODO(sarahparker) implement for homography
+  if (type > HOMOGRAPHY)
+      convert_to_params(H, type, model);
   model->gmtype = get_gmtype(model);
 }
 #endif  // CONFIG_GLOBAL_MOTION
