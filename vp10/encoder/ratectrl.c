@@ -38,8 +38,6 @@
 #define DEFAULT_KF_BOOST 2000
 #define DEFAULT_GF_BOOST 2000
 
-#define LIMIT_QRANGE_FOR_ALTREF_AND_KEY 1
-
 #define MIN_BPB_FACTOR 0.005
 #define MAX_BPB_FACTOR 50
 
@@ -741,7 +739,6 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP10_COMP *cpi,
   *top_index = active_worst_quality;
   *bottom_index = active_best_quality;
 
-#if LIMIT_QRANGE_FOR_ALTREF_AND_KEY
   // Limit Q range for the adaptive loop.
   if (cm->frame_type == KEY_FRAME &&
       !rc->this_key_frame_forced  &&
@@ -749,19 +746,18 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP10_COMP *cpi,
     int qdelta = 0;
     vpx_clear_system_state();
     qdelta = vp10_compute_qdelta_by_rate(&cpi->rc, cm->frame_type,
-                                        active_worst_quality, 2.0,
-                                        cm->bit_depth);
+                                         active_worst_quality, 2.0,
+                                         cm->bit_depth);
     *top_index = active_worst_quality + qdelta;
-    *top_index = (*top_index > *bottom_index) ? *top_index : *bottom_index;
+    *top_index = VPXMAX(*top_index, *bottom_index);
   }
-#endif
 
   // Special case code to try and match quality with forced key frames
   if (cm->frame_type == KEY_FRAME && rc->this_key_frame_forced) {
     q = rc->last_boosted_qindex;
   } else {
     q = vp10_rc_regulate_q(cpi, rc->this_frame_target,
-                          active_best_quality, active_worst_quality);
+                           active_best_quality, active_worst_quality);
     if (q > *top_index) {
       // Special case when we are targeting the max allowed rate
       if (rc->this_frame_target >= rc->max_frame_bandwidth)
@@ -770,6 +766,7 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP10_COMP *cpi,
         q = *top_index;
     }
   }
+
   assert(*top_index <= rc->worst_quality &&
          *top_index >= rc->best_quality);
   assert(*bottom_index <= rc->worst_quality &&
@@ -908,12 +905,10 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP10_COMP *cpi,
   *top_index = active_worst_quality;
   *bottom_index = active_best_quality;
 
-#if LIMIT_QRANGE_FOR_ALTREF_AND_KEY
+  // Limit Q range for the adaptive loop.
   {
     int qdelta = 0;
     vpx_clear_system_state();
-
-    // Limit Q range for the adaptive loop.
     if (cm->frame_type == KEY_FRAME &&
         !rc->this_key_frame_forced &&
         !(cm->current_video_frame == 0)) {
@@ -927,9 +922,8 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP10_COMP *cpi,
                                           cm->bit_depth);
     }
     *top_index = active_worst_quality + qdelta;
-    *top_index = (*top_index > *bottom_index) ? *top_index : *bottom_index;
+    *top_index = VPXMAX(*top_index, *bottom_index);
   }
-#endif
 
   if (oxcf->rc_mode == VPX_Q) {
     q = active_best_quality;
@@ -1012,22 +1006,23 @@ static int rc_pick_q_and_bounds_two_pass(const VP10_COMP *cpi,
         active_best_quality = qindex;
         last_boosted_q = vp10_convert_qindex_to_q(qindex, cm->bit_depth);
         delta_qindex = vp10_compute_qdelta(rc, last_boosted_q,
-                                              last_boosted_q * 1.25,
-                                              cm->bit_depth);
+                                           last_boosted_q * 1.25,
+                                           cm->bit_depth);
         active_worst_quality =
             VPXMIN(qindex + delta_qindex, active_worst_quality);
       } else {
         qindex = rc->last_boosted_qindex;
         last_boosted_q = vp10_convert_qindex_to_q(qindex, cm->bit_depth);
         delta_qindex = vp10_compute_qdelta(rc, last_boosted_q,
-                                              last_boosted_q * 0.75,
-                                              cm->bit_depth);
+                                           last_boosted_q * 0.75,
+                                           cm->bit_depth);
         active_best_quality = VPXMAX(qindex + delta_qindex, rc->best_quality);
       }
     } else {
       // Not forced keyframe.
       double q_adj_factor = 1.0;
       double q_val;
+
       // Baseline value derived from cpi->active_worst_quality and kf boost.
       active_best_quality = get_kf_active_quality(rc, active_worst_quality,
                                                   cm->bit_depth);
@@ -1044,8 +1039,8 @@ static int rc_pick_q_and_bounds_two_pass(const VP10_COMP *cpi,
       // on active_best_quality.
       q_val = vp10_convert_qindex_to_q(active_best_quality, cm->bit_depth);
       active_best_quality += vp10_compute_qdelta(rc, q_val,
-                                                q_val * q_adj_factor,
-                                                cm->bit_depth);
+                                                 q_val * q_adj_factor,
+                                                 cm->bit_depth);
     }
   } else if (!rc->is_src_frame_alt_ref &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
@@ -1090,8 +1085,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP10_COMP *cpi,
 
       // For the constrained quality mode we don't want
       // q to fall below the cq level.
-      if ((oxcf->rc_mode == VPX_CQ) &&
-          (active_best_quality < cq_level)) {
+      if ((oxcf->rc_mode == VPX_CQ) && (active_best_quality < cq_level)) {
         active_best_quality = cq_level;
       }
     }
@@ -1114,24 +1108,22 @@ static int rc_pick_q_and_bounds_two_pass(const VP10_COMP *cpi,
     }
   }
 
-#if LIMIT_QRANGE_FOR_ALTREF_AND_KEY
   vpx_clear_system_state();
   // Static forced key frames Q restrictions dealt with elsewhere.
   if (!(frame_is_intra_only(cm)) ||
       !rc->this_key_frame_forced ||
       (cpi->twopass.last_kfgroup_zeromotion_pct < STATIC_MOTION_THRESH)) {
     int qdelta = vp10_frame_type_qdelta(cpi, gf_group->rf_level[gf_group->index],
-                                       active_worst_quality);
+                                        active_worst_quality);
     active_worst_quality = VPXMAX(active_worst_quality + qdelta,
                                   active_best_quality);
   }
-#endif
 
   // Modify active_best_quality for downscaled normal frames.
   if (rc->frame_size_selector != UNSCALED && !frame_is_kf_gf_arf(cpi)) {
     int qdelta = vp10_compute_qdelta_by_rate(rc, cm->frame_type,
-                                            active_best_quality, 2.0,
-                                            cm->bit_depth);
+                                             active_best_quality, 2.0,
+                                             cm->bit_depth);
     active_best_quality =
         VPXMAX(active_best_quality + qdelta, rc->best_quality);
   }
