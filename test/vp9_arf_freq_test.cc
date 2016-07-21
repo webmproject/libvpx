@@ -200,28 +200,27 @@ TEST_P(ArfFreqTestLarge, MinArfFreqTest) {
   if (cfg_.g_bit_depth > 8)
     init_flags_ |= VPX_CODEC_USE_HIGHBITDEPTH;
 
-  libvpx_test::VideoSource *video;
+  testing::internal::scoped_ptr<libvpx_test::VideoSource> video;
   if (is_extension_y4m(test_video_param_.filename)) {
-    video = new libvpx_test::Y4mVideoSource(test_video_param_.filename,
-                                            0, kFrames);
+    video.reset(new libvpx_test::Y4mVideoSource(test_video_param_.filename,
+                                                0, kFrames));
   } else {
-    video = new libvpx_test::YUVVideoSource(test_video_param_.filename,
-                                            test_video_param_.fmt,
-                                            test_video_param_.width,
-                                            test_video_param_.height,
-                                            test_video_param_.framerate_num,
-                                            test_video_param_.framerate_den,
-                                            0, kFrames);
+    video.reset(new libvpx_test::YUVVideoSource(test_video_param_.filename,
+                                                test_video_param_.fmt,
+                                                test_video_param_.width,
+                                                test_video_param_.height,
+                                                test_video_param_.framerate_num,
+                                                test_video_param_.framerate_den,
+                                                0, kFrames));
   }
 
-  ASSERT_NO_FATAL_FAILURE(RunLoop(video));
+  ASSERT_NO_FATAL_FAILURE(RunLoop(video.get()));
   const int min_run = GetMinVisibleRun();
   const int min_arf_dist_requested = GetMinArfDistanceRequested();
   if (min_run != ARF_NOT_SEEN && min_run != ARF_SEEN_ONCE) {
     const int min_arf_dist = min_run + 1;
     EXPECT_GE(min_arf_dist, min_arf_dist_requested);
   }
-  delete(video);
 }
 
 VP9_INSTANTIATE_TEST_CASE(
