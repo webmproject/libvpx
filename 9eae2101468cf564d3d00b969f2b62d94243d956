@@ -22,6 +22,30 @@
       "revId": "9eae2101468cf564d3d00b969f2b62d94243d956",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a7fbbe7_5b36e39b",
+        "filename": "vp9/common/vp9_pred_common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-07-21T18:15:49Z",
+      "side": 1,
+      "message": "It is in the master branch.  Do you see it in yours?  It shouldn\u0027t be part of this commit so I\u0027m wondering if it was a bad merge.",
+      "parentUuid": "2a371f0e_4a6ee433",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 1
+      },
+      "revId": "9eae2101468cf564d3d00b969f2b62d94243d956",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
