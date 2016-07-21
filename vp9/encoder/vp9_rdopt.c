@@ -3573,6 +3573,9 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
           /* required for left and above block mv */
           mi->mv[0].as_int = 0;
           max_plane = 1;
+          // Initialize interp_filter here so we do not have to check for
+          // inter block modes in get_pred_context_switchable_interp()
+          mi->interp_filter = SWITCHABLE_FILTERS;
         } else {
           best_pred_sse = x->pred_sse[ref_frame];
         }
@@ -4356,6 +4359,9 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
           /* required for left and above block mv */
           mi->mv[0].as_int = 0;
           max_plane = 1;
+          // Initialize interp_filter here so we do not have to check for
+          // inter block modes in get_pred_context_switchable_interp()
+          mi->interp_filter = SWITCHABLE_FILTERS;
         }
 
         rd_cost->rate = rate2;

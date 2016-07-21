@@ -1081,6 +1081,10 @@ void vp9_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
   vp9_rd_cost_reset(&this_rdc);
 
   mi->ref_frame[0] = INTRA_FRAME;
+  // Initialize interp_filter here so we do not have to check for inter block
+  // modes in get_pred_context_switchable_interp()
+  mi->interp_filter = SWITCHABLE_FILTERS;
+
   mi->mv[0].as_int = INVALID_MV;
   mi->uv_mode = DC_PRED;
   memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
@@ -1514,6 +1518,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   mi->sb_type = bsize;
   mi->ref_frame[0] = NONE;
   mi->ref_frame[1] = NONE;
+
   mi->tx_size = VPXMIN(max_txsize_lookup[bsize],
                        tx_mode_to_biggest_tx_size[cm->tx_mode]);
 

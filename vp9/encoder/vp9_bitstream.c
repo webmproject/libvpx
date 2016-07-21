@@ -293,7 +293,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
     }
 
     if (cm->interp_filter == SWITCHABLE) {
-      const int ctx = vp9_get_pred_context_switchable_interp(xd);
+      const int ctx = get_pred_context_switchable_interp(xd);
       vp9_write_token(w, vp9_switchable_interp_tree,
                       cm->fc->switchable_interp_prob[ctx],
                       &switchable_interp_encodings[mi->interp_filter]);

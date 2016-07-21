@@ -66,7 +66,27 @@ static INLINE vpx_prob vp9_get_skip_prob(const VP9_COMMON *cm,
   return cm->fc->skip_probs[vp9_get_skip_context(xd)];
 }
 
-int vp9_get_pred_context_switchable_interp(const MACROBLOCKD *xd);
+// Returns a context number for the given MB prediction signal
+static INLINE int get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
+  // Note:
+  // The mode info data structure has a one element border above and to the
+  // left of the entries corresponding to real macroblocks.
+  // The prediction flags in these dummy entries are initialized to 0.
+  const MODE_INFO *const left_mi = xd->left_mi;
+  const int left_type = left_mi ? left_mi->interp_filter : SWITCHABLE_FILTERS;
+  const MODE_INFO *const above_mi = xd->above_mi;
+  const int above_type = above_mi ? above_mi->interp_filter
+                             : SWITCHABLE_FILTERS;
+
+  if (left_type == above_type)
+    return left_type;
+  else if (left_type == SWITCHABLE_FILTERS)
+    return above_type;
+  else if (above_type == SWITCHABLE_FILTERS)
+    return left_type;
+  else
+    return SWITCHABLE_FILTERS;
+}
 
 // The mode info data structure has a one element border above and to the
 // left of the entries corresponding to real macroblocks.
