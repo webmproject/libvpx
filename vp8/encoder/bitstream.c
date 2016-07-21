@@ -1421,9 +1421,12 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
 #if CONFIG_MULTITHREAD
     if (cpi->b_multi_threaded) {
       pack_mb_row_tokens(cpi, &cpi->bc[1]);
-    } else
-#endif  // CONFIG_MULTITHREAD
+    } else {
       vp8_pack_tokens(&cpi->bc[1], cpi->tok, cpi->tok_count);
+    }
+#else
+    vp8_pack_tokens(&cpi->bc[1], cpi->tok, cpi->tok_count);
+#endif  // CONFIG_MULTITHREAD
 
     vp8_stop_encode(&cpi->bc[1]);
 
