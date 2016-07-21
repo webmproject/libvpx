@@ -107,9 +107,7 @@ VP10_CX_SRCS-$(HAVE_SSE2) += encoder/x86/dct_sse2.asm
 VP10_CX_SRCS-$(HAVE_SSE2) += encoder/x86/error_sse2.asm
 
 ifeq ($(ARCH_X86_64),yes)
-ifeq ($(CONFIG_USE_X86INC),yes)
 VP10_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/quantize_ssse3_x86_64.asm
-endif
 endif
 
 VP10_CX_SRCS-$(HAVE_SSE2) += encoder/x86/dct_intrin_sse2.c
