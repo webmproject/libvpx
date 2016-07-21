@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0a7fbbe7_016f9ec1",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3215,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-21T21:44:40Z",
+      "side": 1,
+      "message": "\"break;\"?",
+      "revId": "1912d3768cd9044710ddc5c62dd781c39048ee01",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a7fbbe7_e17b6a55",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 4561,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-21T21:44:40Z",
+      "side": 1,
+      "message": "I guess previously there is such offset because one of the rotzoom parameter will be always none-negative? Is it still true for affine, I mean, two none-negative, two signed?",
+      "revId": "1912d3768cd9044710ddc5c62dd781c39048ee01",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
