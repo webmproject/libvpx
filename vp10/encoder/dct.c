@@ -1038,29 +1038,29 @@ static void fhalfright32(const tran_low_t *input, tran_low_t *output) {
   // Note overall scaling factor is 4 times orthogonal
 }
 
-static void copy_block(const int16_t *src, int src_stride, int l,
+static void copy_block(const int16_t *src, int src_stride, int l, int w,
                        int16_t *dest, int dest_stride) {
   int i;
   for (i = 0; i < l; ++i) {
     memcpy(dest + dest_stride * i, src + src_stride * i,
-           l * sizeof(int16_t));
+           w * sizeof(int16_t));
   }
 }
 
-static void fliplr(int16_t *dest, int stride, int l) {
+static void fliplr(int16_t *dest, int stride, int l, int w) {
   int i, j;
   for (i = 0; i < l; ++i) {
-    for (j = 0; j < l / 2; ++j) {
+    for (j = 0; j < w / 2; ++j) {
       const int16_t tmp = dest[i * stride + j];
-      dest[i * stride + j] = dest[i * stride + l - 1 - j];
-      dest[i * stride + l - 1 - j] = tmp;
+      dest[i * stride + j] = dest[i * stride + w - 1 - j];
+      dest[i * stride + w - 1 - j] = tmp;
     }
   }
 }
 
-static void flipud(int16_t *dest, int stride, int l) {
+static void flipud(int16_t *dest, int stride, int l, int w) {
   int i, j;
-  for (j = 0; j < l; ++j) {
+  for (j = 0; j < w; ++j) {
     for (i = 0; i < l / 2; ++i) {
       const int16_t tmp = dest[i * stride + j];
       dest[i * stride + j] = dest[(l - 1 - i) * stride + j];
@@ -1069,36 +1069,40 @@ static void flipud(int16_t *dest, int stride, int l) {
   }
 }
 
-static void fliplrud(int16_t *dest, int stride, int l) {
+static void fliplrud(int16_t *dest, int stride, int l, int w) {
   int i, j;
   for (i = 0; i < l / 2; ++i) {
-    for (j = 0; j < l; ++j) {
+    for (j = 0; j < w; ++j) {
       const int16_t tmp = dest[i * stride + j];
-      dest[i * stride + j] = dest[(l - 1 - i) * stride + l - 1 - j];
-      dest[(l - 1 - i) * stride + l - 1 - j] = tmp;
+      dest[i * stride + j] = dest[(l - 1 - i) * stride + w - 1 - j];
+      dest[(l - 1 - i) * stride + w - 1 - j] = tmp;
     }
   }
 }
 
-static void copy_fliplr(const int16_t *src, int src_stride, int l,
+static void copy_fliplr(const int16_t *src, int src_stride,
+                        int l, int w,
+                        int16_t *dest, int dest_stride) {
+  copy_block(src, src_stride, l, w, dest, dest_stride);
+  fliplr(dest, dest_stride, l, w);
+}
+
+static void copy_flipud(const int16_t *src, int src_stride,
+                        int l, int w,
+                        int16_t *dest, int dest_stride) {
+  copy_block(src, src_stride, l, w, dest, dest_stride);
+  flipud(dest, dest_stride, l, w);
+}
+
+static void copy_fliplrud(const int16_t *src, int src_stride,
+                          int l, int w,
                           int16_t *dest, int dest_stride) {
-  copy_block(src, src_stride, l, dest, dest_stride);
-  fliplr(dest, dest_stride, l);
+  copy_block(src, src_stride, l, w, dest, dest_stride);
+  fliplrud(dest, dest_stride, l, w);
 }
 
-static void copy_flipud(const int16_t *src, int src_stride, int l,
-                          int16_t *dest, int dest_stride) {
-  copy_block(src, src_stride, l, dest, dest_stride);
-  flipud(dest, dest_stride, l);
-}
-
-static void copy_fliplrud(const int16_t *src, int src_stride, int l,
-                            int16_t *dest, int dest_stride) {
-  copy_block(src, src_stride, l, dest, dest_stride);
-  fliplrud(dest, dest_stride, l);
-}
-
-static void maybe_flip_input(const int16_t **src, int *src_stride, int l,
+static void maybe_flip_input(const int16_t **src, int *src_stride,
+                             int l, int w,
                              int16_t *buff, int tx_type) {
   switch (tx_type) {
     case DCT_DCT:
@@ -1114,21 +1118,21 @@ static void maybe_flip_input(const int16_t **src, int *src_stride, int l,
     case FLIPADST_DCT:
     case FLIPADST_ADST:
     case V_FLIPADST:
-      copy_flipud(*src, *src_stride, l, buff, l);
+      copy_flipud(*src, *src_stride, l, w, buff, w);
       *src = buff;
-      *src_stride = l;
+      *src_stride = w;
       break;
     case DCT_FLIPADST:
     case ADST_FLIPADST:
     case H_FLIPADST:
-      copy_fliplr(*src, *src_stride, l, buff, l);
+      copy_fliplr(*src, *src_stride, l, w, buff, w);
       *src = buff;
-      *src_stride = l;
+      *src_stride = w;
       break;
     case FLIPADST_FLIPADST:
-      copy_fliplrud(*src, *src_stride, l, buff, l);
+      copy_fliplrud(*src, *src_stride, l, w, buff, w);
       *src = buff;
-      *src_stride = l;
+      *src_stride = w;
       break;
     default:
       assert(0);
@@ -1219,6 +1223,44 @@ static const transform_2d FHT_32[] = {
   { fhalfright32, fidtx32 },           // V_FLIPADST
   { fidtx32, fhalfright32 },           // H_FLIPADST
 };
+
+static const transform_2d FHT_4x8[] = {
+  { fdct8,  fdct4  },  // DCT_DCT
+  { fadst8, fdct4  },  // ADST_DCT
+  { fdct8,  fadst4 },  // DCT_ADST
+  { fadst8, fadst4 },  // ADST_ADST
+  { fadst8, fdct4  },  // FLIPADST_DCT
+  { fdct8,  fadst4 },  // DCT_FLIPADST
+  { fadst8, fadst4 },  // FLIPADST_FLIPADST
+  { fadst8, fadst4 },  // ADST_FLIPADST
+  { fadst8, fadst4 },  // FLIPADST_ADST
+  { fidtx8, fidtx4 },  // IDTX
+  { fdct8,  fidtx4 },  // V_DCT
+  { fidtx8, fdct4  },  // H_DCT
+  { fadst8, fidtx4 },  // V_ADST
+  { fidtx8, fadst4 },  // H_ADST
+  { fadst8, fidtx4 },  // V_FLIPADST
+  { fidtx8, fadst4 },  // H_FLIPADST
+};
+
+static const transform_2d FHT_8x4[] = {
+  { fdct4,  fdct8  },  // DCT_DCT
+  { fadst4, fdct8  },  // ADST_DCT
+  { fdct4,  fadst8 },  // DCT_ADST
+  { fadst4, fadst8 },  // ADST_ADST
+  { fadst4, fdct8  },  // FLIPADST_DCT
+  { fdct4,  fadst8 },  // DCT_FLIPADST
+  { fadst4, fadst8 },  // FLIPADST_FLIPADST
+  { fadst4, fadst8 },  // ADST_FLIPADST
+  { fadst4, fadst8 },  // FLIPADST_ADST
+  { fidtx4, fidtx8 },  // IDTX
+  { fdct4,  fidtx8 },  // V_DCT
+  { fidtx4, fdct8  },  // H_DCT
+  { fadst4, fidtx8 },  // V_ADST
+  { fidtx4, fadst8 },  // H_ADST
+  { fadst4, fidtx8 },  // V_FLIPADST
+  { fidtx4, fadst8 },  // H_FLIPADST
+};
 #endif  // CONFIG_EXT_TX
 
 void vp10_fht4x4_c(const int16_t *input, tran_low_t *output,
@@ -1233,7 +1275,7 @@ void vp10_fht4x4_c(const int16_t *input, tran_low_t *output,
 
 #if CONFIG_EXT_TX
     int16_t flipped_input[4 * 4];
-    maybe_flip_input(&input, &stride, 4, flipped_input, tx_type);
+    maybe_flip_input(&input, &stride, 4, 4, flipped_input, tx_type);
 #endif
 
     // Columns
@@ -1257,6 +1299,70 @@ void vp10_fht4x4_c(const int16_t *input, tran_low_t *output,
     }
   }
 }
+
+#if CONFIG_EXT_TX
+void vp10_fht4x8_c(const int16_t *input, tran_low_t *output,
+                   int stride, int tx_type) {
+  const int n = 4;
+  const int n2 = 8;
+  tran_low_t out[8 * 4];
+  tran_low_t temp_in[8], temp_out[8];
+  int i, j;
+  const transform_2d ht = FHT_4x8[tx_type];
+  int16_t flipped_input[8 * 4];
+  maybe_flip_input(&input, &stride, n2, n, flipped_input, tx_type);
+
+  // Columns
+  for (i = 0; i < n; ++i) {
+    for (j = 0; j < n2; ++j)
+      temp_in[j] = input[j * stride + i] * 8;
+    ht.cols(temp_in, temp_out);
+    for (j = 0; j < n2; ++j)
+      out[j * n + i] = (tran_low_t)fdct_round_shift(temp_out[j] * Sqrt2);
+  }
+
+  // Rows
+  for (i = 0; i < n2; ++i) {
+    for (j = 0; j < n; ++j)
+      temp_in[j] = out[j + i * n];
+    ht.rows(temp_in, temp_out);
+    for (j = 0; j < n; ++j)
+      output[j + i * n] = (temp_out[j] + 1) >> 2;
+  }
+  // Note: overall scale factor of transform is 8 times unitary
+}
+
+void vp10_fht8x4_c(const int16_t *input, tran_low_t *output,
+                   int stride, int tx_type) {
+  const int n = 4;
+  const int n2 = 8;
+  tran_low_t out[8 * 4];
+  tran_low_t temp_in[8], temp_out[8];
+  int i, j;
+  const transform_2d ht = FHT_8x4[tx_type];
+  int16_t flipped_input[8 * 4];
+  maybe_flip_input(&input, &stride, n, n2, flipped_input, tx_type);
+
+  // Columns
+  for (i = 0; i < n2; ++i) {
+    for (j = 0; j < n; ++j)
+      temp_in[j] = input[j * stride + i] * 8;
+    ht.cols(temp_in, temp_out);
+    for (j = 0; j < n; ++j)
+      out[j * n2 + i] = (tran_low_t)fdct_round_shift(temp_out[j] * Sqrt2);
+  }
+
+  // Rows
+  for (i = 0; i < n; ++i) {
+    for (j = 0; j < n2; ++j)
+      temp_in[j] = out[j + i * n2];
+    ht.rows(temp_in, temp_out);
+    for (j = 0; j < n2; ++j)
+      output[j + i * n2] = (temp_out[j] + 1) >> 2;
+  }
+  // Note: overall scale factor of transform is 8 times unitary
+}
+#endif  // CONFIG_EXT_TX
 
 void vp10_fdct8x8_quant_c(const int16_t *input, int stride,
                           tran_low_t *coeff_ptr, intptr_t n_coeffs,
@@ -1382,7 +1488,7 @@ void vp10_fht8x8_c(const int16_t *input, tran_low_t *output,
 
 #if CONFIG_EXT_TX
     int16_t flipped_input[8 * 8];
-    maybe_flip_input(&input, &stride, 8, flipped_input, tx_type);
+    maybe_flip_input(&input, &stride, 8, 8, flipped_input, tx_type);
 #endif
 
     // Columns
@@ -1473,7 +1579,7 @@ void vp10_fht16x16_c(const int16_t *input, tran_low_t *output,
 
 #if CONFIG_EXT_TX
     int16_t flipped_input[16 * 16];
-    maybe_flip_input(&input, &stride, 16, flipped_input, tx_type);
+    maybe_flip_input(&input, &stride, 16, 16, flipped_input, tx_type);
 #endif
 
     // Columns
@@ -1498,17 +1604,29 @@ void vp10_fht16x16_c(const int16_t *input, tran_low_t *output,
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void vp10_highbd_fht4x4_c(const int16_t *input, tran_low_t *output,
-                         int stride, int tx_type) {
+                          int stride, int tx_type) {
   vp10_fht4x4_c(input, output, stride, tx_type);
 }
 
+#if CONFIG_EXT_TX
+void vp10_highbd_fht8x4_c(const int16_t *input, tran_low_t *output,
+                          int stride, int tx_type) {
+  vp10_fht8x4_c(input, output, stride, tx_type);
+}
+
+void vp10_highbd_fht4x8_c(const int16_t *input, tran_low_t *output,
+                          int stride, int tx_type) {
+  vp10_fht4x8_c(input, output, stride, tx_type);
+}
+#endif  // CONFIG_EXT_TX
+
 void vp10_highbd_fht8x8_c(const int16_t *input, tran_low_t *output,
-                         int stride, int tx_type) {
+                          int stride, int tx_type) {
   vp10_fht8x8_c(input, output, stride, tx_type);
 }
 
 void vp10_highbd_fwht4x4_c(const int16_t *input, tran_low_t *output,
-                          int stride) {
+                           int stride) {
   vp10_fwht4x4_c(input, output, stride);
 }
 
@@ -1530,7 +1648,7 @@ void vp10_fht32x32_c(const int16_t *input, tran_low_t *output,
     const transform_2d ht = FHT_32[tx_type];
 
     int16_t flipped_input[32 * 32];
-    maybe_flip_input(&input, &stride, 32, flipped_input, tx_type);
+    maybe_flip_input(&input, &stride, 32, 32, flipped_input, tx_type);
 
     // Columns
     for (i = 0; i < 32; ++i) {

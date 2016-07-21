@@ -267,6 +267,7 @@ EXPERIMENT_LIST="
     fp_mb_stats
     emulate_hardware
     var_tx
+    rect_tx
     ref_mv
     dual_filter
     ext_tx

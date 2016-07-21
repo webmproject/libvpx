@@ -144,7 +144,7 @@ static void inv_idtx_add_c(const tran_low_t *input, uint8_t *dest, int stride,
 
 static void maybe_flip_strides(uint8_t **dst, int *dstride,
                                tran_low_t **src, int *sstride,
-                               int tx_type, int size) {
+                               int tx_type, int sizey, int sizex) {
   // Note that the transpose of src will be added to dst. In order to LR
   // flip the addends (in dst coordinates), we UD flip the src. To UD flip
   // the addends, we UD flip the dst.
@@ -163,19 +163,19 @@ static void maybe_flip_strides(uint8_t **dst, int *dstride,
     case FLIPADST_ADST:
     case V_FLIPADST:
       // flip UD
-      FLIPUD_PTR(*dst, *dstride, size);
+      FLIPUD_PTR(*dst, *dstride, sizey);
       break;
     case DCT_FLIPADST:
     case ADST_FLIPADST:
     case H_FLIPADST:
       // flip LR
-      FLIPUD_PTR(*src, *sstride, size);
+      FLIPUD_PTR(*src, *sstride, sizex);
       break;
     case FLIPADST_FLIPADST:
       // flip UD
-      FLIPUD_PTR(*dst, *dstride, size);
+      FLIPUD_PTR(*dst, *dstride, sizey);
       // flip LR
-      FLIPUD_PTR(*src, *sstride, size);
+      FLIPUD_PTR(*src, *sstride, sizex);
       break;
     default:
       assert(0);
@@ -445,7 +445,7 @@ static void highbd_inv_idtx_add_c(const tran_low_t *input, uint8_t *dest8,
 
 static void maybe_flip_strides16(uint16_t **dst, int *dstride,
                                  tran_low_t **src, int *sstride,
-                                 int tx_type, int size) {
+                                 int tx_type, int sizey, int sizex) {
   // Note that the transpose of src will be added to dst. In order to LR
   // flip the addends (in dst coordinates), we UD flip the src. To UD flip
   // the addends, we UD flip the dst.
@@ -464,19 +464,19 @@ static void maybe_flip_strides16(uint16_t **dst, int *dstride,
     case FLIPADST_ADST:
     case V_FLIPADST:
       // flip UD
-      FLIPUD_PTR(*dst, *dstride, size);
+      FLIPUD_PTR(*dst, *dstride, sizey);
       break;
     case DCT_FLIPADST:
     case ADST_FLIPADST:
     case H_FLIPADST:
       // flip LR
-      FLIPUD_PTR(*src, *sstride, size);
+      FLIPUD_PTR(*src, *sstride, sizex);
       break;
     case FLIPADST_FLIPADST:
       // flip UD
-      FLIPUD_PTR(*dst, *dstride, size);
+      FLIPUD_PTR(*dst, *dstride, sizey);
       // flip LR
-      FLIPUD_PTR(*src, *sstride, size);
+      FLIPUD_PTR(*src, *sstride, sizex);
       break;
     default:
       assert(0);
@@ -536,7 +536,7 @@ void vp10_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride,
   }
 
 #if CONFIG_EXT_TX
-  maybe_flip_strides(&dest, &stride, &outp, &outstride, tx_type, 4);
+  maybe_flip_strides(&dest, &stride, &outp, &outstride, tx_type, 4, 4);
 #endif
 
   // Sum with the destination
@@ -545,6 +545,116 @@ void vp10_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride,
       int d = i * stride + j;
       int s = j * outstride + i;
       dest[d] = clip_pixel_add(dest[d], ROUND_POWER_OF_TWO(outp[s], 4));
+    }
+  }
+}
+
+void vp10_iht4x8_32_add_c(const tran_low_t *input, uint8_t *dest, int stride,
+                          int tx_type) {
+  static const transform_2d IHT_4x8[] = {
+    { idct8_c,  idct4_c  },  // DCT_DCT
+    { iadst8_c, idct4_c  },  // ADST_DCT
+    { idct8_c,  iadst4_c },  // DCT_ADST
+    { iadst8_c, iadst4_c },  // ADST_ADST
+#if CONFIG_EXT_TX
+    { iadst8_c, idct4_c  },  // FLIPADST_DCT
+    { idct8_c,  iadst4_c },  // DCT_FLIPADST
+    { iadst8_c, iadst4_c },  // FLIPADST_FLIPADST
+    { iadst8_c, iadst4_c },  // ADST_FLIPADST
+    { iadst8_c, iadst4_c },  // FLIPADST_ADST
+    { iidtx8_c, iidtx4_c },  // IDTX
+    { idct8_c,  iidtx4_c },  // V_DCT
+    { iidtx8_c, idct4_c  },  // H_DCT
+    { iadst8_c, iidtx4_c },  // V_ADST
+    { iidtx8_c, iadst4_c },  // H_ADST
+    { iadst8_c, iidtx4_c },  // V_FLIPADST
+    { iidtx8_c, iadst4_c },  // H_FLIPADST
+#endif  // CONFIG_EXT_TX
+  };
+
+  int i, j;
+  tran_low_t out[4][8], outtmp[4];
+  tran_low_t *outp = &out[0][0];
+  int outstride = 8;
+
+  // inverse transform row vectors and transpose
+  for (i = 0; i < 8; ++i) {
+    IHT_4x8[tx_type].rows(input, outtmp);
+    for (j = 0; j < 4; ++j)
+      out[j][i] = (tran_low_t)dct_const_round_shift(outtmp[j] * Sqrt2);
+    input  += 4;
+  }
+
+  // inverse transform column vectors
+  for (i = 0; i < 4; ++i) {
+    IHT_4x8[tx_type].cols(out[i], out[i]);
+  }
+
+#if CONFIG_EXT_TX
+  maybe_flip_strides(&dest, &stride, &outp, &outstride, tx_type, 8, 4);
+#endif
+
+  // Sum with the destination
+  for (i = 0; i < 8; ++i) {
+    for (j = 0; j < 4; ++j) {
+      int d = i * stride + j;
+      int s = j * outstride + i;
+      dest[d] = clip_pixel_add(dest[d], ROUND_POWER_OF_TWO(outp[s], 5));
+    }
+  }
+}
+
+void vp10_iht8x4_32_add_c(const tran_low_t *input, uint8_t *dest, int stride,
+                          int tx_type) {
+  static const transform_2d IHT_8x4[] = {
+    { idct4_c,  idct8_c  },  // DCT_DCT
+    { iadst4_c, idct8_c  },  // ADST_DCT
+    { idct4_c,  iadst8_c },  // DCT_ADST
+    { iadst4_c, iadst8_c },  // ADST_ADST
+#if CONFIG_EXT_TX
+    { iadst4_c, idct8_c  },  // FLIPADST_DCT
+    { idct4_c,  iadst8_c },  // DCT_FLIPADST
+    { iadst4_c, iadst8_c },  // FLIPADST_FLIPADST
+    { iadst4_c, iadst8_c },  // ADST_FLIPADST
+    { iadst4_c, iadst8_c },  // FLIPADST_ADST
+    { iidtx4_c, iidtx8_c },  // IDTX
+    { idct4_c,  iidtx8_c },  // V_DCT
+    { iidtx4_c, idct8_c  },  // H_DCT
+    { iadst4_c, iidtx8_c },  // V_ADST
+    { iidtx4_c, iadst8_c },  // H_ADST
+    { iadst4_c, iidtx8_c },  // V_FLIPADST
+    { iidtx4_c, iadst8_c },  // H_FLIPADST
+#endif  // CONFIG_EXT_TX
+  };
+
+  int i, j;
+  tran_low_t out[8][4], outtmp[8];
+  tran_low_t *outp = &out[0][0];
+  int outstride = 4;
+
+  // inverse transform row vectors and transpose
+  for (i = 0; i < 4; ++i) {
+    IHT_8x4[tx_type].rows(input, outtmp);
+    for (j = 0; j < 8; ++j)
+      out[j][i] = (tran_low_t)dct_const_round_shift(outtmp[j] * Sqrt2);
+    input  += 8;
+  }
+
+  // inverse transform column vectors
+  for (i = 0; i < 8; ++i) {
+    IHT_8x4[tx_type].cols(out[i], out[i]);
+  }
+
+#if CONFIG_EXT_TX
+  maybe_flip_strides(&dest, &stride, &outp, &outstride, tx_type, 4, 8);
+#endif
+
+  // Sum with the destination
+  for (i = 0; i < 4; ++i) {
+    for (j = 0; j < 8; ++j) {
+      int d = i * stride + j;
+      int s = j * outstride + i;
+      dest[d] = clip_pixel_add(dest[d], ROUND_POWER_OF_TWO(outp[s], 5));
     }
   }
 }
@@ -599,7 +709,7 @@ void vp10_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest, int stride,
   }
 
 #if CONFIG_EXT_TX
-  maybe_flip_strides(&dest, &stride, &outp, &outstride, tx_type, 8);
+  maybe_flip_strides(&dest, &stride, &outp, &outstride, tx_type, 8, 8);
 #endif
 
   // Sum with the destination
@@ -662,7 +772,7 @@ void vp10_iht16x16_256_add_c(const tran_low_t *input, uint8_t *dest, int stride,
   }
 
 #if CONFIG_EXT_TX
-  maybe_flip_strides(&dest, &stride, &outp, &outstride, tx_type, 16);
+  maybe_flip_strides(&dest, &stride, &outp, &outstride, tx_type, 16, 16);
 #endif
 
   // Sum with the destination
@@ -723,7 +833,7 @@ void vp10_iht32x32_1024_add_c(const tran_low_t *input, uint8_t *dest,
     IHT_32[tx_type].cols(out[i], out[i]);
   }
 
-  maybe_flip_strides(&dest, &stride, &outp, &outstride, tx_type, 32);
+  maybe_flip_strides(&dest, &stride, &outp, &outstride, tx_type, 32, 32);
 
   // Sum with the destination
   for (i = 0; i < 32; ++i) {
@@ -839,6 +949,20 @@ void vp10_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
       break;
   }
 }
+
+#if CONFIG_EXT_TX
+void vp10_inv_txfm_add_8x4(const tran_low_t *input, uint8_t *dest,
+                           int stride, int eob, TX_TYPE tx_type) {
+  (void) eob;
+  vp10_iht8x4_32_add(input, dest, stride, tx_type);
+}
+
+void vp10_inv_txfm_add_4x8(const tran_low_t *input, uint8_t *dest,
+                           int stride, int eob, TX_TYPE tx_type) {
+  (void) eob;
+  vp10_iht4x8_32_add(input, dest, stride, tx_type);
+}
+#endif  // CONFIG_EXT_TX
 
 void vp10_inv_txfm_add_8x8(const tran_low_t *input, uint8_t *dest,
                            int stride, int eob, TX_TYPE tx_type) {
@@ -1002,7 +1126,7 @@ void vp10_highbd_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 
 #if CONFIG_EXT_TX
-  maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, 4);
+  maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, 4, 4);
 #endif
 
   // Sum with the destination
@@ -1015,6 +1139,118 @@ void vp10_highbd_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
     }
   }
 }
+
+#if CONFIG_EXT_TX
+void vp10_highbd_iht4x8_32_add_c(const tran_low_t *input, uint8_t *dest8,
+                                int stride, int tx_type, int bd) {
+  static const highbd_transform_2d HIGH_IHT_4x8[] = {
+    { vpx_highbd_idct8_c,  vpx_highbd_idct4_c  },  // DCT_DCT
+    { vpx_highbd_iadst8_c, vpx_highbd_idct4_c  },  // ADST_DCT
+    { vpx_highbd_idct8_c,  vpx_highbd_iadst4_c },  // DCT_ADST
+    { vpx_highbd_iadst8_c, vpx_highbd_iadst4_c },  // ADST_ADST
+    { vpx_highbd_iadst8_c, vpx_highbd_idct4_c  },  // FLIPADST_DCT
+    { vpx_highbd_idct8_c,  vpx_highbd_iadst4_c },  // DCT_FLIPADST
+    { vpx_highbd_iadst8_c, vpx_highbd_iadst4_c },  // FLIPADST_FLIPADST
+    { vpx_highbd_iadst8_c, vpx_highbd_iadst4_c },  // ADST_FLIPADST
+    { vpx_highbd_iadst8_c, vpx_highbd_iadst4_c },  // FLIPADST_ADST
+    {     highbd_iidtx8_c,     highbd_iidtx4_c },  // IDTX
+    { vpx_highbd_idct8_c,      highbd_iidtx4_c },  // V_DCT
+    {     highbd_iidtx8_c, vpx_highbd_idct4_c  },  // H_DCT
+    { vpx_highbd_iadst8_c,     highbd_iidtx4_c },  // V_ADST
+    {     highbd_iidtx8_c, vpx_highbd_iadst4_c },  // H_ADST
+    { vpx_highbd_iadst8_c,     highbd_iidtx4_c },  // V_FLIPADST
+    {     highbd_iidtx8_c, vpx_highbd_iadst4_c },  // H_FLIPADST
+  };
+
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+
+  int i, j;
+  tran_low_t out[4][8], outtmp[4];
+  tran_low_t *outp = &out[0][0];
+  int outstride = 8;
+
+  // inverse transform row vectors, and transpose
+  for (i = 0; i < 8; ++i) {
+    HIGH_IHT_4x8[tx_type].rows(input, outtmp, bd);
+    for (j = 0; j < 4; ++j)
+      out[j][i] = (tran_low_t)highbd_dct_const_round_shift(outtmp[j] * Sqrt2,
+                                                           bd);
+    input  += 4;
+  }
+
+  // inverse transform column vectors
+  for (i = 0; i < 4; ++i) {
+    HIGH_IHT_4x8[tx_type].cols(out[i], out[i], bd);
+  }
+
+  maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, 8, 4);
+
+  // Sum with the destination
+  for (i = 0; i < 8; ++i) {
+    for (j = 0; j < 4; ++j) {
+      int d = i * stride + j;
+      int s = j * outstride + i;
+      dest[d] = highbd_clip_pixel_add(dest[d],
+                                      ROUND_POWER_OF_TWO(outp[s], 5), bd);
+    }
+  }
+}
+
+void vp10_highbd_iht8x4_32_add_c(const tran_low_t *input, uint8_t *dest8,
+                                int stride, int tx_type, int bd) {
+  static const highbd_transform_2d HIGH_IHT_8x4[] = {
+    { vpx_highbd_idct4_c,  vpx_highbd_idct8_c  },  // DCT_DCT
+    { vpx_highbd_iadst4_c, vpx_highbd_idct8_c  },  // ADST_DCT
+    { vpx_highbd_idct4_c,  vpx_highbd_iadst8_c },  // DCT_ADST
+    { vpx_highbd_iadst4_c, vpx_highbd_iadst8_c },  // ADST_ADST
+    { vpx_highbd_iadst4_c, vpx_highbd_idct8_c  },  // FLIPADST_DCT
+    { vpx_highbd_idct4_c,  vpx_highbd_iadst8_c },  // DCT_FLIPADST
+    { vpx_highbd_iadst4_c, vpx_highbd_iadst8_c },  // FLIPADST_FLIPADST
+    { vpx_highbd_iadst4_c, vpx_highbd_iadst8_c },  // ADST_FLIPADST
+    { vpx_highbd_iadst4_c, vpx_highbd_iadst8_c },  // FLIPADST_ADST
+    {     highbd_iidtx4_c,     highbd_iidtx8_c },  // IDTX
+    { vpx_highbd_idct4_c,      highbd_iidtx8_c },  // V_DCT
+    {     highbd_iidtx4_c, vpx_highbd_idct8_c  },  // H_DCT
+    { vpx_highbd_iadst4_c,     highbd_iidtx8_c },  // V_ADST
+    {     highbd_iidtx4_c, vpx_highbd_iadst8_c },  // H_ADST
+    { vpx_highbd_iadst4_c,     highbd_iidtx8_c },  // V_FLIPADST
+    {     highbd_iidtx4_c, vpx_highbd_iadst8_c },  // H_FLIPADST
+  };
+
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+
+  int i, j;
+  tran_low_t out[8][4], outtmp[8];
+  tran_low_t *outp = &out[0][0];
+  int outstride = 4;
+
+  // inverse transform row vectors, and transpose
+  for (i = 0; i < 4; ++i) {
+    HIGH_IHT_8x4[tx_type].rows(input, outtmp, bd);
+    for (j = 0; j < 8; ++j)
+      out[j][i] = (tran_low_t)highbd_dct_const_round_shift(outtmp[j] * Sqrt2,
+                                                           bd);
+    input  += 8;
+  }
+
+  // inverse transform column vectors
+  for (i = 0; i < 8; ++i) {
+    HIGH_IHT_8x4[tx_type].cols(out[i], out[i], bd);
+  }
+
+  maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, 4, 8);
+
+  // Sum with the destination
+  for (i = 0; i < 4; ++i) {
+    for (j = 0; j < 8; ++j) {
+      int d = i * stride + j;
+      int s = j * outstride + i;
+      dest[d] = highbd_clip_pixel_add(dest[d],
+                                      ROUND_POWER_OF_TWO(outp[s], 5), bd);
+    }
+  }
+}
+#endif  // CONFIG_EXT_TX
 
 void vp10_highbd_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest8,
                                 int stride, int tx_type, int bd) {
@@ -1068,7 +1304,7 @@ void vp10_highbd_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 
 #if CONFIG_EXT_TX
-  maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, 8);
+  maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, 8, 8);
 #endif
 
   // Sum with the destination
@@ -1134,7 +1370,7 @@ void vp10_highbd_iht16x16_256_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 
 #if CONFIG_EXT_TX
-  maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, 16);
+  maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, 16, 16);
 #endif
 
   // Sum with the destination
@@ -1198,7 +1434,7 @@ void vp10_highbd_iht32x32_1024_add_c(const tran_low_t *input, uint8_t *dest8,
     HIGH_IHT_32[tx_type].cols(out[i], out[i], bd);
   }
 
-  maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, 32);
+  maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, 32, 32);
 
   // Sum with the destination
   for (i = 0; i < 32; ++i) {
@@ -1319,6 +1555,22 @@ void vp10_highbd_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
       break;
   }
 }
+
+#if CONFIG_EXT_TX
+void vp10_highbd_inv_txfm_add_8x4(const tran_low_t *input, uint8_t *dest,
+                                  int stride, int eob, int bd,
+                                  TX_TYPE tx_type) {
+  (void) eob;
+  vp10_highbd_iht8x4_32_add_c(input, dest, stride, tx_type, bd);
+}
+
+void vp10_highbd_inv_txfm_add_4x8(const tran_low_t *input, uint8_t *dest,
+                                  int stride, int eob, int bd,
+                                  TX_TYPE tx_type) {
+  (void) eob;
+  vp10_highbd_iht4x8_32_add_c(input, dest, stride, tx_type, bd);
+}
+#endif  // CONFIG_EXT_TX
 
 void vp10_highbd_inv_txfm_add_8x8(const tran_low_t *input, uint8_t *dest,
                                   int stride, int eob, int bd,
@@ -1454,6 +1706,14 @@ void inv_txfm_add(const tran_low_t *input, uint8_t *dest, int stride,
     case TX_8X8:
       vp10_inv_txfm_add_8x8(input, dest, stride, eob, tx_type);
       break;
+#if CONFIG_EXT_TX
+    case TX_4X8:
+      vp10_inv_txfm_add_4x8(input, dest, stride, eob, tx_type);
+      break;
+    case TX_8X4:
+      vp10_inv_txfm_add_8x4(input, dest, stride, eob, tx_type);
+      break;
+#endif  // CONFIG_EXT_TX
     case TX_4X4:
       // this is like vp10_short_idct4x4 but has a special case around eob<=1
       // which is significant (not just an optimization) for the lossless
@@ -1486,6 +1746,14 @@ void highbd_inv_txfm_add(const tran_low_t *input, uint8_t *dest, int stride,
     case TX_8X8:
       vp10_highbd_inv_txfm_add_8x8(input, dest, stride, eob, bd, tx_type);
       break;
+#if CONFIG_EXT_TX
+    case TX_4X8:
+      vp10_highbd_inv_txfm_add_4x8(input, dest, stride, eob, bd, tx_type);
+      break;
+    case TX_8X4:
+      vp10_highbd_inv_txfm_add_8x4(input, dest, stride, eob, bd, tx_type);
+      break;
+#endif  // CONFIG_EXT_TX
     case TX_4X4:
       // this is like vp10_short_idct4x4 but has a special case around eob<=1
       // which is significant (not just an optimization) for the lossless

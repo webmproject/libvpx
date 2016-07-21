@@ -233,7 +233,7 @@ static int read_segment_id(vp10_reader *r,
 }
 
 #if CONFIG_VAR_TX
-static void read_tx_size_inter(VP10_COMMON *cm, MACROBLOCKD *xd,
+static void read_tx_size_vartx(VP10_COMMON *cm, MACROBLOCKD *xd,
                                MB_MODE_INFO *mbmi, FRAME_COUNTS *counts,
                                TX_SIZE tx_size, int blk_row, int blk_col,
                                vp10_reader *r) {
@@ -279,14 +279,14 @@ static void read_tx_size_inter(VP10_COMMON *cm, MACROBLOCKD *xd,
     for (i = 0; i < 4; ++i) {
       int offsetr = blk_row + ((i >> 1) << bsl);
       int offsetc = blk_col + ((i & 0x01) << bsl);
-      read_tx_size_inter(cm, xd, mbmi, counts,
+      read_tx_size_vartx(cm, xd, mbmi, counts,
                          tx_size - 1, offsetr, offsetc, r);
     }
   } else {
     int idx, idy;
     inter_tx_size[0][0] = tx_size;
-    for (idy = 0; idy < (1 << tx_size) / 2; ++idy)
-      for (idx = 0; idx < (1 << tx_size) / 2; ++idx)
+    for (idy = 0; idy < num_4x4_blocks_high_txsize_lookup[tx_size] / 2; ++idy)
+      for (idx = 0; idx < num_4x4_blocks_wide_txsize_lookup[tx_size] / 2; ++idx)
         inter_tx_size[idy][idx] = tx_size;
     mbmi->tx_size = tx_size;
     if (counts)
@@ -309,17 +309,44 @@ static TX_SIZE read_selected_tx_size(VP10_COMMON *cm, MACROBLOCKD *xd,
   return (TX_SIZE)tx_size;
 }
 
-static TX_SIZE read_tx_size(VP10_COMMON *cm, MACROBLOCKD *xd,
-                            int allow_select, vp10_reader *r) {
+static TX_SIZE read_tx_size_intra(VP10_COMMON *cm, MACROBLOCKD *xd,
+                                  vp10_reader *r) {
   TX_MODE tx_mode = cm->tx_mode;
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
-  const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
   if (xd->lossless[xd->mi[0]->mbmi.segment_id])
     return TX_4X4;
-  if (allow_select && tx_mode == TX_MODE_SELECT && bsize >= BLOCK_8X8)
-    return read_selected_tx_size(cm, xd, max_tx_size, r);
-  else
-    return VPXMIN(max_tx_size, tx_mode_to_biggest_tx_size[tx_mode]);
+  if (bsize >= BLOCK_8X8) {
+    const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
+    if (tx_mode == TX_MODE_SELECT) {
+      return read_selected_tx_size(cm, xd, max_tx_size, r);
+    } else {
+      return VPXMIN(max_tx_size, tx_mode_to_biggest_tx_size[tx_mode]);
+    }
+  } else {
+    return TX_4X4;
+  }
+}
+
+static TX_SIZE read_tx_size_inter(VP10_COMMON *cm, MACROBLOCKD *xd,
+                                  int allow_select, vp10_reader *r) {
+  TX_MODE tx_mode = cm->tx_mode;
+  BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
+  if (xd->lossless[xd->mi[0]->mbmi.segment_id])
+    return TX_4X4;
+  if (bsize >= BLOCK_8X8) {
+    const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
+    if (allow_select && tx_mode == TX_MODE_SELECT) {
+      return read_selected_tx_size(cm, xd, max_tx_size, r);
+    } else {
+      return VPXMIN(max_tx_size, tx_mode_to_biggest_tx_size[tx_mode]);
+    }
+  } else {
+#if CONFIG_EXT_TX && CONFIG_RECT_TX && !CONFIG_VAR_TX
+    return max_txsize_rect_lookup[bsize];
+#else
+    return TX_4X4;
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX && !CONFIG_VAR_TX
+  }
 }
 
 static int dec_get_segment_id(const VP10_COMMON *cm, const uint8_t *segment_ids,
@@ -577,7 +604,7 @@ static void read_intra_frame_mode_info(VP10_COMMON *const cm,
 
   mbmi->segment_id = read_intra_segment_id(cm, xd, mi_offset, x_mis, y_mis, r);
   mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
-  mbmi->tx_size = read_tx_size(cm, xd, 1, r);
+  mbmi->tx_size = read_tx_size_intra(cm, xd, r);
   mbmi->ref_frame[0] = INTRA_FRAME;
   mbmi->ref_frame[1] = NONE;
 
@@ -1670,14 +1697,18 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
       int idx, idy;
       for (idy = 0; idy < height; idy += bs)
         for (idx = 0; idx < width; idx += bs)
-          read_tx_size_inter(cm, xd, mbmi, xd->counts, max_tx_size,
+          read_tx_size_vartx(cm, xd, mbmi, xd->counts, max_tx_size,
                              idy, idx, r);
       if (xd->counts) {
         const int ctx = get_tx_size_context(xd);
         ++xd->counts->tx_size[max_tx_size - TX_8X8][ctx][mbmi->tx_size];
       }
     } else {
-      mbmi->tx_size = read_tx_size(cm, xd, !mbmi->skip || !inter_block, r);
+      if (inter_block)
+        mbmi->tx_size = read_tx_size_inter(cm, xd, !mbmi->skip, r);
+      else
+        mbmi->tx_size = read_tx_size_intra(cm, xd, r);
+
       if (inter_block) {
         const int width  = num_4x4_blocks_wide_lookup[bsize];
         const int height = num_4x4_blocks_high_lookup[bsize];
@@ -1691,7 +1722,10 @@ static void read_inter_frame_mode_info(VP10Decoder *const pbi,
       set_txfm_ctx(xd->above_txfm_context, mbmi->tx_size, xd->n8_w);
     }
 #else
-    mbmi->tx_size = read_tx_size(cm, xd, !mbmi->skip || !inter_block, r);
+    if (inter_block)
+      mbmi->tx_size = read_tx_size_inter(cm, xd, !mbmi->skip, r);
+    else
+      mbmi->tx_size = read_tx_size_intra(cm, xd, r);
 #endif  // CONFIG_VAR_TX
 #if CONFIG_SUPERTX
   }
