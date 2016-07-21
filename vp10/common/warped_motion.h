@@ -42,8 +42,12 @@ typedef enum {
   HOMOGRAPHY,      // homography, 8-parameter
   AFFINE,          // affine, 6-parameter
   ROTZOOM,         // simplified affine with rotation and zoom only, 4-parameter
-  TRANSLATION      // translational motion 2-parameter
+  TRANSLATION,     // translational motion 2-parameter
+  TRANS_TYPES
 } TransformationType;
+
+// number of parameters used by each transformation in TransformationTypes
+static const int n_trans_model_params[TRANS_TYPES] = {9, 6, 4, 2};
 
 typedef struct {
   TransformationType wmtype;

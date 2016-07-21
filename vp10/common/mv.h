@@ -41,6 +41,10 @@ typedef struct mv32 {
 // | a   b|
 // |-b   a|
 //
+// and a, b, c, d in affine model:
+// | a   b|
+// | c   d|
+//
 // Anything ending in PREC_BITS is the number of bits of precision
 // to maintain when converting from double to integer.
 //
@@ -76,6 +80,7 @@ typedef enum {
   GLOBAL_ZERO = 0,
   GLOBAL_TRANSLATION = 1,
   GLOBAL_ROTZOOM = 2,
+  GLOBAL_AFFINE = 3,
   GLOBAL_MOTION_TYPES
 } GLOBAL_MOTION_TYPE;
 
@@ -84,12 +89,36 @@ typedef struct {
   WarpedMotionParams motion_params;
 } Global_Motion_Params;
 
+static INLINE TransformationType gm_to_trans_type(GLOBAL_MOTION_TYPE gmtype) {
+  switch (gmtype) {
+    case GLOBAL_ZERO:
+      return UNKNOWN_TRANSFORM;
+      break;
+    case GLOBAL_TRANSLATION:
+      return TRANSLATION;
+      break;
+    case GLOBAL_ROTZOOM:
+      return ROTZOOM;
+      break;
+    case GLOBAL_AFFINE:
+      return AFFINE;
+      break;
+    default:
+      assert(0);
+  }
+  return UNKNOWN_TRANSFORM;
+}
+
 static INLINE GLOBAL_MOTION_TYPE get_gmtype(const Global_Motion_Params *gm) {
-  if (gm->motion_params.wmmat[2] == 0 && gm->motion_params.wmmat[3] == 0) {
-    return ((gm->motion_params.wmmat[0] | gm->motion_params.wmmat[1]) ?
-            GLOBAL_TRANSLATION : GLOBAL_ZERO);
+  if (gm->motion_params.wmmat[4] == 0 && gm->motion_params.wmmat[5] == 0) {
+    if (gm->motion_params.wmmat[2] == 0 && gm->motion_params.wmmat[3] == 0) {
+      return ((gm->motion_params.wmmat[0] | gm->motion_params.wmmat[1]) ?
+              GLOBAL_TRANSLATION : GLOBAL_ZERO);
+    } else {
+      return GLOBAL_ROTZOOM;
+    }
   } else {
-    return GLOBAL_ROTZOOM;
+    return GLOBAL_AFFINE;
   }
 }
 #endif  // CONFIG_GLOBAL_MOTION
