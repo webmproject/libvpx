@@ -8,9 +8,9 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <limits.h>
 #include <math.h>
 #include <stdio.h>
-#include <limits.h>
 
 #include "./vpx_config.h"
 
@@ -459,14 +459,12 @@ static void dealloc_compressor_data(VP10_COMP *cpi) {
     vpx_free_frame_buffer(&cpi->upsampled_ref_bufs[i].buf);
 
   vp10_free_ref_frame_buffers(cm->buffer_pool);
-#if CONFIG_LOOP_RESTORATION
-  vp10_free_restoration_buffers(cm);
-#endif  // CONFIG_LOOP_RESTORATION
   vp10_free_context_buffers(cm);
 
   vpx_free_frame_buffer(&cpi->last_frame_uf);
 #if CONFIG_LOOP_RESTORATION
   vpx_free_frame_buffer(&cpi->last_frame_db);
+  vp10_free_restoration_buffers(cm);
 #endif  // CONFIG_LOOP_RESTORATION
   vpx_free_frame_buffer(&cpi->scaled_source);
   vpx_free_frame_buffer(&cpi->scaled_last_source);
@@ -3492,7 +3490,8 @@ static void loopfilter_frame(VP10_COMP *cpi, VP10_COMMON *cm) {
 #if CONFIG_LOOP_RESTORATION
   if (cm->rst_info.restoration_type != RESTORE_NONE) {
     vp10_loop_restoration_init(&cm->rst_internal, &cm->rst_info,
-                               cm->frame_type == KEY_FRAME);
+                               cm->frame_type == KEY_FRAME, cm->width,
+                               cm->height);
     vp10_loop_restoration_rows(cm->frame_to_show, cm, 0, cm->mi_rows, 0);
   }
 #endif  // CONFIG_LOOP_RESTORATION

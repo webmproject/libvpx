@@ -9,8 +9,8 @@
  */
 
 #include <assert.h>
-#include <stdio.h>
 #include <limits.h>
+#include <stdio.h>
 
 #include "vpx/vpx_encoder.h"
 #include "vpx_dsp/bitwriter_buffer.h"
@@ -38,8 +38,8 @@
 #if CONFIG_ANS
 #include "vp10/encoder/buf_ans.h"
 #endif  // CONFIG_ANS
-#include "vp10/encoder/cost.h"
 #include "vp10/encoder/bitstream.h"
+#include "vp10/encoder/cost.h"
 #include "vp10/encoder/encodemv.h"
 #include "vp10/encoder/mcomp.h"
 #include "vp10/encoder/segmentation.h"
@@ -2410,27 +2410,42 @@ static void update_coef_probs(VP10_COMP *cpi, vp10_writer *w) {
 #if CONFIG_LOOP_RESTORATION
 static void encode_restoration(VP10_COMMON *cm,
                                struct vpx_write_bit_buffer *wb) {
+  int i;
   RestorationInfo *rst = &cm->rst_info;
   vpx_wb_write_bit(wb, rst->restoration_type != RESTORE_NONE);
   if (rst->restoration_type != RESTORE_NONE) {
     if (rst->restoration_type == RESTORE_BILATERAL) {
       vpx_wb_write_bit(wb, 1);
-      vpx_wb_write_literal(wb, rst->restoration_level,
-                           vp10_restoration_level_bits(cm));
+      for (i = 0; i < cm->rst_internal.ntiles; ++i) {
+        if (rst->bilateral_level[i] >= 0) {
+          vpx_wb_write_bit(wb, 1);
+          vpx_wb_write_literal(wb, rst->bilateral_level[i],
+                               vp10_bilateral_level_bits(cm));
+        } else {
+          vpx_wb_write_bit(wb, 0);
+        }
+      }
     } else {
       vpx_wb_write_bit(wb, 0);
-      vpx_wb_write_literal(wb, rst->vfilter[0] - WIENER_FILT_TAP0_MINV,
-                           WIENER_FILT_TAP0_BITS);
-      vpx_wb_write_literal(wb, rst->vfilter[1] - WIENER_FILT_TAP1_MINV,
-                           WIENER_FILT_TAP1_BITS);
-      vpx_wb_write_literal(wb, rst->vfilter[2] - WIENER_FILT_TAP2_MINV,
-                           WIENER_FILT_TAP2_BITS);
-      vpx_wb_write_literal(wb, rst->hfilter[0] - WIENER_FILT_TAP0_MINV,
-                           WIENER_FILT_TAP0_BITS);
-      vpx_wb_write_literal(wb, rst->hfilter[1] - WIENER_FILT_TAP1_MINV,
-                           WIENER_FILT_TAP1_BITS);
-      vpx_wb_write_literal(wb, rst->hfilter[2] - WIENER_FILT_TAP2_MINV,
-                           WIENER_FILT_TAP2_BITS);
+      for (i = 0; i < cm->rst_internal.ntiles; ++i) {
+        if (rst->wiener_level[i]) {
+          vpx_wb_write_bit(wb, 1);
+          vpx_wb_write_literal(wb, rst->vfilter[i][0] - WIENER_FILT_TAP0_MINV,
+                               WIENER_FILT_TAP0_BITS);
+          vpx_wb_write_literal(wb, rst->vfilter[i][1] - WIENER_FILT_TAP1_MINV,
+                               WIENER_FILT_TAP1_BITS);
+          vpx_wb_write_literal(wb, rst->vfilter[i][2] - WIENER_FILT_TAP2_MINV,
+                               WIENER_FILT_TAP2_BITS);
+          vpx_wb_write_literal(wb, rst->hfilter[i][0] - WIENER_FILT_TAP0_MINV,
+                               WIENER_FILT_TAP0_BITS);
+          vpx_wb_write_literal(wb, rst->hfilter[i][1] - WIENER_FILT_TAP1_MINV,
+                               WIENER_FILT_TAP1_BITS);
+          vpx_wb_write_literal(wb, rst->hfilter[i][2] - WIENER_FILT_TAP2_MINV,
+                               WIENER_FILT_TAP2_BITS);
+        } else {
+          vpx_wb_write_bit(wb, 0);
+        }
+      }
     }
   }
 }

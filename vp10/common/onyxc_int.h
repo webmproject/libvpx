@@ -168,10 +168,6 @@ typedef struct VP10Common {
 
   int new_fb_idx;
 
-#if CONFIG_LOOP_RESTORATION
-  YV12_BUFFER_CONFIG tmp_loop_buf;
-#endif  // CONFIG_LOOP_RESTORATION
-
   FRAME_TYPE last_frame_type; /* last frame's frame type for motion search.*/
 #if CONFIG_EXT_REFS
   // frame type of the frame before last frame

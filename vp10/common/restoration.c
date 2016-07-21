@@ -18,33 +18,33 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 
-#define RESTORATION_PARAM_PRECISION 16
-#define RESTORATION_RANGE 256
-#define RESTORATION_RANGE_SYM (2 * RESTORATION_RANGE + 1)
+#define BILATERAL_PARAM_PRECISION 16
+#define BILATERAL_AMP_RANGE 256
+#define BILATERAL_AMP_RANGE_SYM (2 * BILATERAL_AMP_RANGE + 1)
 
 static uint8_t
-    restoration_filters_r_kf[RESTORATION_LEVELS_KF][RESTORATION_RANGE_SYM];
-static uint8_t restoration_filters_r[RESTORATION_LEVELS][RESTORATION_RANGE_SYM];
-static uint8_t restoration_filters_s_kf[RESTORATION_LEVELS_KF][RESTORATION_WIN]
-                                       [RESTORATION_WIN];
+    bilateral_filter_coeffs_r_kf[BILATERAL_LEVELS_KF][BILATERAL_AMP_RANGE_SYM];
 static uint8_t
-    restoration_filters_s[RESTORATION_LEVELS][RESTORATION_WIN][RESTORATION_WIN];
+    bilateral_filter_coeffs_r[BILATERAL_LEVELS][BILATERAL_AMP_RANGE_SYM];
+static uint8_t bilateral_filter_coeffs_s_kf[BILATERAL_LEVELS_KF]
+                                           [RESTORATION_WIN][RESTORATION_WIN];
+static uint8_t bilateral_filter_coeffs_s[BILATERAL_LEVELS][RESTORATION_WIN]
+                                        [RESTORATION_WIN];
 
-typedef struct restoration_params {
+typedef struct bilateral_params {
   int sigma_x;  // spatial variance x
   int sigma_y;  // spatial variance y
   int sigma_r;  // range variance
-} RestorationParamsType;
+} BilateralParamsType;
 
-static RestorationParamsType
-    restoration_level_to_params_arr[RESTORATION_LEVELS] = {
-      // Values are rounded to 1/16 th precision
-      { 8, 9, 30 },   { 9, 8, 30 },   { 9, 11, 32 },  { 11, 9, 32 },
-      { 14, 14, 32 }, { 18, 18, 36 }, { 24, 24, 40 }, { 32, 32, 40 },
-    };
+static BilateralParamsType bilateral_level_to_params_arr[BILATERAL_LEVELS] = {
+  // Values are rounded to 1/16 th precision
+  { 8, 9, 30 },   { 9, 8, 30 },   { 9, 11, 32 },  { 11, 9, 32 },
+  { 14, 14, 32 }, { 18, 18, 36 }, { 24, 24, 40 }, { 32, 32, 40 },
+};
 
-static RestorationParamsType
-    restoration_level_to_params_arr_kf[RESTORATION_LEVELS_KF] = {
+static BilateralParamsType
+    bilateral_level_to_params_arr_kf[BILATERAL_LEVELS_KF] = {
       // Values are rounded to 1/16 th precision
       { 8, 8, 30 },   { 9, 9, 32 },   { 10, 10, 32 }, { 12, 12, 32 },
       { 14, 14, 32 }, { 18, 18, 36 }, { 24, 24, 40 }, { 30, 30, 44 },
@@ -55,7 +55,6 @@ static RestorationParamsType
 typedef void (*restore_func_type)(uint8_t *data8, int width, int height,
                                   int stride, RestorationInternal *rst,
                                   uint8_t *tmpdata8, int tmpstride);
-
 #if CONFIG_VP9_HIGHBITDEPTH
 typedef void (*restore_func_highbd_type)(uint8_t *data8, int width, int height,
                                          int stride, RestorationInternal *rst,
@@ -63,26 +62,56 @@ typedef void (*restore_func_highbd_type)(uint8_t *data8, int width, int height,
                                          int bit_depth);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-static INLINE RestorationParamsType vp10_restoration_level_to_params(int index,
-                                                                     int kf) {
-  return kf ? restoration_level_to_params_arr_kf[index]
-            : restoration_level_to_params_arr[index];
+static INLINE BilateralParamsType vp10_bilateral_level_to_params(int index,
+                                                                 int kf) {
+  return kf ? bilateral_level_to_params_arr_kf[index]
+            : bilateral_level_to_params_arr[index];
+}
+
+typedef struct TileParams {
+  int width;
+  int height;
+} TileParams;
+
+static TileParams restoration_tile_sizes[RESTORATION_TILESIZES] = {
+  { 64, 64 }, { 128, 128 }, { 256, 256 }
+};
+
+void vp10_get_restoration_tile_size(int tilesize, int width, int height,
+                                    int *tile_width, int *tile_height,
+                                    int *nhtiles, int *nvtiles) {
+  *tile_width = (tilesize < 0)
+                    ? width
+                    : VPXMIN(restoration_tile_sizes[tilesize].width, width);
+  *tile_height = (tilesize < 0)
+                     ? height
+                     : VPXMIN(restoration_tile_sizes[tilesize].height, height);
+  *nhtiles = (width + (*tile_width >> 1)) / *tile_width;
+  *nvtiles = (height + (*tile_height >> 1)) / *tile_height;
+}
+
+int vp10_get_restoration_ntiles(int tilesize, int width, int height) {
+  int nhtiles, nvtiles;
+  int tile_width, tile_height;
+  vp10_get_restoration_tile_size(tilesize, width, height, &tile_width,
+                                 &tile_height, &nhtiles, &nvtiles);
+  return (nhtiles * nvtiles);
 }
 
 void vp10_loop_restoration_precal() {
   int i;
-  for (i = 0; i < RESTORATION_LEVELS_KF; i++) {
-    const RestorationParamsType param = vp10_restoration_level_to_params(i, 1);
+  for (i = 0; i < BILATERAL_LEVELS_KF; i++) {
+    const BilateralParamsType param = vp10_bilateral_level_to_params(i, 1);
     const int sigma_x = param.sigma_x;
     const int sigma_y = param.sigma_y;
     const int sigma_r = param.sigma_r;
-    const double sigma_r_d = (double)sigma_r / RESTORATION_PARAM_PRECISION;
-    const double sigma_x_d = (double)sigma_x / RESTORATION_PARAM_PRECISION;
-    const double sigma_y_d = (double)sigma_y / RESTORATION_PARAM_PRECISION;
+    const double sigma_r_d = (double)sigma_r / BILATERAL_PARAM_PRECISION;
+    const double sigma_x_d = (double)sigma_x / BILATERAL_PARAM_PRECISION;
+    const double sigma_y_d = (double)sigma_y / BILATERAL_PARAM_PRECISION;
 
-    uint8_t *fr = restoration_filters_r_kf[i] + RESTORATION_RANGE;
+    uint8_t *fr = bilateral_filter_coeffs_r_kf[i] + BILATERAL_AMP_RANGE;
     int j, x, y;
-    for (j = 0; j <= RESTORATION_RANGE; j++) {
+    for (j = 0; j <= BILATERAL_AMP_RANGE; j++) {
       fr[j] = (uint8_t)(0.5 +
                         RESTORATION_FILT_STEP *
                             exp(-(j * j) / (2 * sigma_r_d * sigma_r_d)));
@@ -90,28 +119,27 @@ void vp10_loop_restoration_precal() {
     }
     for (y = -RESTORATION_HALFWIN; y <= RESTORATION_HALFWIN; y++) {
       for (x = -RESTORATION_HALFWIN; x <= RESTORATION_HALFWIN; x++) {
-        restoration_filters_s_kf[i][y +
-                                    RESTORATION_HALFWIN][x +
-                                                         RESTORATION_HALFWIN] =
-            (uint8_t)(0.5 +
-                      RESTORATION_FILT_STEP *
-                          exp(-(x * x) / (2 * sigma_x_d * sigma_x_d) -
-                              (y * y) / (2 * sigma_y_d * sigma_y_d)));
+        bilateral_filter_coeffs_s_kf
+            [i][y + RESTORATION_HALFWIN][x + RESTORATION_HALFWIN] =
+                (uint8_t)(0.5 +
+                          RESTORATION_FILT_STEP *
+                              exp(-(x * x) / (2 * sigma_x_d * sigma_x_d) -
+                                  (y * y) / (2 * sigma_y_d * sigma_y_d)));
       }
     }
   }
-  for (i = 0; i < RESTORATION_LEVELS; i++) {
-    const RestorationParamsType param = vp10_restoration_level_to_params(i, 0);
+  for (i = 0; i < BILATERAL_LEVELS; i++) {
+    const BilateralParamsType param = vp10_bilateral_level_to_params(i, 0);
     const int sigma_x = param.sigma_x;
     const int sigma_y = param.sigma_y;
     const int sigma_r = param.sigma_r;
-    const double sigma_r_d = (double)sigma_r / RESTORATION_PARAM_PRECISION;
-    const double sigma_x_d = (double)sigma_x / RESTORATION_PARAM_PRECISION;
-    const double sigma_y_d = (double)sigma_y / RESTORATION_PARAM_PRECISION;
+    const double sigma_r_d = (double)sigma_r / BILATERAL_PARAM_PRECISION;
+    const double sigma_x_d = (double)sigma_x / BILATERAL_PARAM_PRECISION;
+    const double sigma_y_d = (double)sigma_y / BILATERAL_PARAM_PRECISION;
 
-    uint8_t *fr = restoration_filters_r[i] + RESTORATION_RANGE;
+    uint8_t *fr = bilateral_filter_coeffs_r[i] + BILATERAL_AMP_RANGE;
     int j, x, y;
-    for (j = 0; j <= RESTORATION_RANGE; j++) {
+    for (j = 0; j <= BILATERAL_AMP_RANGE; j++) {
       fr[j] = (uint8_t)(0.5 +
                         RESTORATION_FILT_STEP *
                             exp(-(j * j) / (2 * sigma_r_d * sigma_r_d)));
@@ -119,7 +147,8 @@ void vp10_loop_restoration_precal() {
     }
     for (y = -RESTORATION_HALFWIN; y <= RESTORATION_HALFWIN; y++) {
       for (x = -RESTORATION_HALFWIN; x <= RESTORATION_HALFWIN; x++) {
-        restoration_filters_s[i][y + RESTORATION_HALFWIN][x +
+        bilateral_filter_coeffs_s[i][y +
+                                     RESTORATION_HALFWIN][x +
                                                           RESTORATION_HALFWIN] =
             (uint8_t)(0.5 +
                       RESTORATION_FILT_STEP *
@@ -130,31 +159,68 @@ void vp10_loop_restoration_precal() {
   }
 }
 
-int vp10_restoration_level_bits(const VP10_COMMON *const cm) {
-  return cm->frame_type == KEY_FRAME ? RESTORATION_LEVEL_BITS_KF
-                                     : RESTORATION_LEVEL_BITS;
+int vp10_bilateral_level_bits(const VP10_COMMON *const cm) {
+  return cm->frame_type == KEY_FRAME ? BILATERAL_LEVEL_BITS_KF
+                                     : BILATERAL_LEVEL_BITS;
 }
 
 void vp10_loop_restoration_init(RestorationInternal *rst, RestorationInfo *rsi,
-                                int kf) {
-  int i;
+                                int kf, int width, int height) {
+  int i, tile_idx;
   rst->restoration_type = rsi->restoration_type;
+  rst->subsampling_x = 0;
+  rst->subsampling_y = 0;
   if (rsi->restoration_type == RESTORE_BILATERAL) {
-    const int level = rsi->restoration_level;
-    assert(level >= 0);
-    rst->wr_lut =
-        kf ? restoration_filters_r_kf[level] : restoration_filters_r[level];
-    for (i = 0; i < RESTORATION_WIN; i++)
-      rst->wx_lut[i] = kf ? restoration_filters_s_kf[level][i]
-                          : restoration_filters_s[level][i];
+    rst->tilesize_index = BILATERAL_TILESIZE;
+    rst->ntiles =
+        vp10_get_restoration_ntiles(rst->tilesize_index, width, height);
+    vp10_get_restoration_tile_size(rst->tilesize_index, width, height,
+                                   &rst->tile_width, &rst->tile_height,
+                                   &rst->nhtiles, &rst->nvtiles);
+    rst->bilateral_level = rsi->bilateral_level;
+    rst->wr_lut = (uint8_t **)malloc(sizeof(*rst->wr_lut) * rst->ntiles);
+    assert(rst->wr_lut != NULL);
+    rst->wx_lut = (uint8_t(**)[RESTORATION_WIN])malloc(sizeof(*rst->wx_lut) *
+                                                       rst->ntiles);
+    assert(rst->wx_lut != NULL);
+    for (tile_idx = 0; tile_idx < rst->ntiles; ++tile_idx) {
+      const int level = rsi->bilateral_level[tile_idx];
+      if (level >= 0) {
+        rst->wr_lut[tile_idx] = kf ? bilateral_filter_coeffs_r_kf[level]
+                                   : bilateral_filter_coeffs_r[level];
+        rst->wx_lut[tile_idx] = kf ? bilateral_filter_coeffs_s_kf[level]
+                                   : bilateral_filter_coeffs_s[level];
+      }
+    }
   } else if (rsi->restoration_type == RESTORE_WIENER) {
-    rst->vfilter[RESTORATION_HALFWIN] = rst->hfilter[RESTORATION_HALFWIN] =
-        RESTORATION_FILT_STEP;
-    for (i = 0; i < RESTORATION_HALFWIN; ++i) {
-      rst->vfilter[i] = rst->vfilter[RESTORATION_WIN - 1 - i] = rsi->vfilter[i];
-      rst->hfilter[i] = rst->hfilter[RESTORATION_WIN - 1 - i] = rsi->hfilter[i];
-      rst->vfilter[RESTORATION_HALFWIN] -= 2 * rsi->vfilter[i];
-      rst->hfilter[RESTORATION_HALFWIN] -= 2 * rsi->hfilter[i];
+    rst->tilesize_index = WIENER_TILESIZE;
+    rst->ntiles =
+        vp10_get_restoration_ntiles(rst->tilesize_index, width, height);
+    vp10_get_restoration_tile_size(rst->tilesize_index, width, height,
+                                   &rst->tile_width, &rst->tile_height,
+                                   &rst->nhtiles, &rst->nvtiles);
+    rst->wiener_level = rsi->wiener_level;
+    rst->vfilter =
+        (int(*)[RESTORATION_WIN])malloc(sizeof(*rst->vfilter) * rst->ntiles);
+    assert(rst->vfilter != NULL);
+    rst->hfilter =
+        (int(*)[RESTORATION_WIN])malloc(sizeof(*rst->hfilter) * rst->ntiles);
+    assert(rst->hfilter != NULL);
+    for (tile_idx = 0; tile_idx < rst->ntiles; ++tile_idx) {
+      rst->vfilter[tile_idx][RESTORATION_HALFWIN] =
+          rst->hfilter[tile_idx][RESTORATION_HALFWIN] = RESTORATION_FILT_STEP;
+      for (i = 0; i < RESTORATION_HALFWIN; ++i) {
+        rst->vfilter[tile_idx][i] =
+            rst->vfilter[tile_idx][RESTORATION_WIN - 1 - i] =
+                rsi->vfilter[tile_idx][i];
+        rst->hfilter[tile_idx][i] =
+            rst->hfilter[tile_idx][RESTORATION_WIN - 1 - i] =
+                rsi->hfilter[tile_idx][i];
+        rst->vfilter[tile_idx][RESTORATION_HALFWIN] -=
+            2 * rsi->vfilter[tile_idx][i];
+        rst->hfilter[tile_idx][RESTORATION_HALFWIN] -=
+            2 * rsi->hfilter[tile_idx][i];
+      }
     }
   }
 }
@@ -162,39 +228,60 @@ void vp10_loop_restoration_init(RestorationInternal *rst, RestorationInfo *rsi,
 static void loop_bilateral_filter(uint8_t *data, int width, int height,
                                   int stride, RestorationInternal *rst,
                                   uint8_t *tmpdata, int tmpstride) {
-  int i, j;
-  const uint8_t *wr_lut_ = rst->wr_lut + RESTORATION_RANGE;
+  int i, j, tile_idx, htile_idx, vtile_idx;
+  int h_start, h_end, v_start, v_end;
+  int tile_width, tile_height;
 
-  uint8_t *data_p = data + RESTORATION_HALFWIN * stride;
-  uint8_t *tmpdata_p = tmpdata + RESTORATION_HALFWIN * tmpstride;
-  for (i = RESTORATION_HALFWIN; i < height - RESTORATION_HALFWIN; ++i) {
-    for (j = RESTORATION_HALFWIN; j < width - RESTORATION_HALFWIN; ++j) {
-      int x, y;
-      int flsum = 0, wtsum = 0, wt;
-      uint8_t *data_p2 = data_p + j - RESTORATION_HALFWIN * stride;
-      for (y = -RESTORATION_HALFWIN; y <= RESTORATION_HALFWIN; ++y) {
-        for (x = -RESTORATION_HALFWIN; x <= RESTORATION_HALFWIN; ++x) {
-          wt = (int)rst
-                   ->wx_lut[y + RESTORATION_HALFWIN][x + RESTORATION_HALFWIN] *
-               (int)wr_lut_[data_p2[x] - data_p[j]];
-          wtsum += wt;
-          flsum += wt * data_p2[x];
+  tile_width = rst->tile_width >> rst->subsampling_x;
+  tile_height = rst->tile_height >> rst->subsampling_y;
+
+  for (tile_idx = 0; tile_idx < rst->ntiles; ++tile_idx) {
+    uint8_t *data_p, *tmpdata_p;
+    const uint8_t *wr_lut_ = rst->wr_lut[tile_idx] + BILATERAL_AMP_RANGE;
+
+    if (rst->bilateral_level[tile_idx] < 0) continue;
+
+    htile_idx = tile_idx % rst->nhtiles;
+    vtile_idx = tile_idx / rst->nhtiles;
+    h_start =
+        htile_idx * tile_width + ((htile_idx > 0) ? 0 : RESTORATION_HALFWIN);
+    h_end = (htile_idx < rst->nhtiles - 1) ? ((htile_idx + 1) * tile_width)
+                                           : (width - RESTORATION_HALFWIN);
+    v_start =
+        vtile_idx * tile_height + ((vtile_idx > 0) ? 0 : RESTORATION_HALFWIN);
+    v_end = (vtile_idx < rst->nvtiles - 1) ? ((vtile_idx + 1) * tile_height)
+                                           : (height - RESTORATION_HALFWIN);
+
+    data_p = data + h_start + v_start * stride;
+    tmpdata_p = tmpdata + h_start + v_start * tmpstride;
+
+    for (i = 0; i < (v_end - v_start); ++i) {
+      for (j = 0; j < (h_end - h_start); ++j) {
+        int x, y;
+        int flsum = 0, wtsum = 0, wt;
+        uint8_t *data_p2 = data_p + j - RESTORATION_HALFWIN * stride;
+        for (y = -RESTORATION_HALFWIN; y <= RESTORATION_HALFWIN; ++y) {
+          for (x = -RESTORATION_HALFWIN; x <= RESTORATION_HALFWIN; ++x) {
+            wt = (int)rst->wx_lut[tile_idx][y + RESTORATION_HALFWIN]
+                                 [x + RESTORATION_HALFWIN] *
+                 (int)wr_lut_[data_p2[x] - data_p[j]];
+            wtsum += wt;
+            flsum += wt * data_p2[x];
+          }
+          data_p2 += stride;
         }
-        data_p2 += stride;
+        if (wtsum > 0)
+          tmpdata_p[j] = clip_pixel((int)((flsum + wtsum / 2) / wtsum));
+        else
+          tmpdata_p[j] = data_p[j];
       }
-      if (wtsum > 0)
-        tmpdata_p[j] = clip_pixel((int)((flsum + wtsum / 2) / wtsum));
-      else
-        tmpdata_p[j] = data_p[j];
+      tmpdata_p += tmpstride;
+      data_p += stride;
     }
-    tmpdata_p += tmpstride;
-    data_p += stride;
-  }
-
-  for (i = RESTORATION_HALFWIN; i < height - RESTORATION_HALFWIN; ++i) {
-    memcpy(data + i * stride + RESTORATION_HALFWIN,
-           tmpdata + i * tmpstride + RESTORATION_HALFWIN,
-           (width - RESTORATION_HALFWIN * 2) * sizeof(*data));
+    for (i = v_start; i < v_end; ++i) {
+      memcpy(data + i * stride + h_start, tmpdata + i * tmpstride + h_start,
+             (h_end - h_start) * sizeof(*data));
+    }
   }
 }
 
@@ -219,38 +306,70 @@ uint8_t ver_sym_filter(uint8_t *d, int stride, int *vfilter) {
 static void loop_wiener_filter(uint8_t *data, int width, int height, int stride,
                                RestorationInternal *rst, uint8_t *tmpdata,
                                int tmpstride) {
-  uint8_t *data_p = data;
-  uint8_t *tmpdata_p = tmpdata;
-  int i, j;
+  int i, j, tile_idx, htile_idx, vtile_idx;
+  int h_start, h_end, v_start, v_end;
+  int tile_width, tile_height;
+  uint8_t *data_p, *tmpdata_p;
 
-  for (i = 0; i < height; ++i) {
-    memcpy(tmpdata_p, data_p, sizeof(*data_p) * RESTORATION_HALFWIN);
-    data_p += RESTORATION_HALFWIN;
-    tmpdata_p += RESTORATION_HALFWIN;
-    for (j = RESTORATION_HALFWIN; j < width - RESTORATION_HALFWIN; ++j) {
-      *tmpdata_p++ = hor_sym_filter(data_p++, rst->hfilter);
-    }
-    memcpy(tmpdata_p, data_p, sizeof(*data_p) * RESTORATION_HALFWIN);
-    data_p += RESTORATION_HALFWIN - width + stride;
-    tmpdata_p += RESTORATION_HALFWIN - width + tmpstride;
-  }
+  tile_width = rst->tile_width >> rst->subsampling_x;
+  tile_height = rst->tile_height >> rst->subsampling_y;
+
+  // Initialize tmp buffer
   data_p = data;
   tmpdata_p = tmpdata;
-  for (i = 0; i < RESTORATION_HALFWIN; ++i) {
-    memcpy(data_p, tmpdata_p, sizeof(*data_p) * width);
+  for (i = 0; i < height; ++i) {
+    memcpy(tmpdata_p, data_p, sizeof(*data_p) * width);
     data_p += stride;
     tmpdata_p += tmpstride;
   }
-  for (; i < height - RESTORATION_HALFWIN; ++i) {
-    for (j = 0; j < width; ++j)
-      *data_p++ = ver_sym_filter(tmpdata_p++, tmpstride, rst->vfilter);
-    data_p += stride - width;
-    tmpdata_p += tmpstride - width;
+
+  // Filter row-wise tile-by-tile
+  for (tile_idx = 0; tile_idx < rst->ntiles; ++tile_idx) {
+    if (rst->wiener_level[tile_idx] == 0) continue;
+    htile_idx = tile_idx % rst->nhtiles;
+    vtile_idx = tile_idx / rst->nhtiles;
+    h_start =
+        htile_idx * tile_width + ((htile_idx > 0) ? 0 : RESTORATION_HALFWIN);
+    h_end = (htile_idx < rst->nhtiles - 1) ? ((htile_idx + 1) * tile_width)
+                                           : (width - RESTORATION_HALFWIN);
+    v_start = vtile_idx * tile_height;
+    v_end = (vtile_idx < rst->nvtiles - 1) ? ((vtile_idx + 1) * tile_height)
+                                           : height;
+    data_p = data + h_start + v_start * stride;
+    tmpdata_p = tmpdata + h_start + v_start * tmpstride;
+    for (i = 0; i < (v_end - v_start); ++i) {
+      for (j = 0; j < (h_end - h_start); ++j) {
+        *tmpdata_p++ = hor_sym_filter(data_p++, rst->hfilter[tile_idx]);
+      }
+      data_p += stride - (h_end - h_start);
+      tmpdata_p += tmpstride - (h_end - h_start);
+    }
   }
-  for (; i < height; ++i) {
-    memcpy(data_p, tmpdata_p, sizeof(*data_p) * width);
-    data_p += stride;
-    tmpdata_p += tmpstride;
+
+  // Filter column-wise tile-by-tile (bands of thickness RESTORATION_HALFWIN
+  // at top and bottom of tiles allow filtering overlap, and are not optimally
+  // filtered)
+  for (tile_idx = 0; tile_idx < rst->ntiles; ++tile_idx) {
+    if (rst->wiener_level[tile_idx] == 0) continue;
+    htile_idx = tile_idx % rst->nhtiles;
+    vtile_idx = tile_idx / rst->nhtiles;
+    h_start = htile_idx * tile_width;
+    h_end =
+        (htile_idx < rst->nhtiles - 1) ? ((htile_idx + 1) * tile_width) : width;
+    v_start =
+        vtile_idx * tile_height + ((vtile_idx > 0) ? 0 : RESTORATION_HALFWIN);
+    v_end = (vtile_idx < rst->nvtiles - 1) ? ((vtile_idx + 1) * tile_height)
+                                           : (height - RESTORATION_HALFWIN);
+    data_p = data + h_start + v_start * stride;
+    tmpdata_p = tmpdata + h_start + v_start * tmpstride;
+    for (i = 0; i < (v_end - v_start); ++i) {
+      for (j = 0; j < (h_end - h_start); ++j) {
+        *data_p++ =
+            ver_sym_filter(tmpdata_p++, tmpstride, rst->vfilter[tile_idx]);
+      }
+      data_p += stride - (h_end - h_start);
+      tmpdata_p += tmpstride - (h_end - h_start);
+    }
   }
 }
 
@@ -259,44 +378,64 @@ static void loop_bilateral_filter_highbd(uint8_t *data8, int width, int height,
                                          int stride, RestorationInternal *rst,
                                          uint8_t *tmpdata8, int tmpstride,
                                          int bit_depth) {
-  int i, j;
-  const uint8_t *wr_lut_ = rst->wr_lut + RESTORATION_RANGE;
+  int i, j, tile_idx, htile_idx, vtile_idx;
+  int h_start, h_end, v_start, v_end;
+  int tile_width, tile_height;
 
   uint16_t *data = CONVERT_TO_SHORTPTR(data8);
   uint16_t *tmpdata = CONVERT_TO_SHORTPTR(tmpdata8);
-  uint16_t *data_p = data + RESTORATION_HALFWIN * stride;
-  uint16_t *tmpdata_p = tmpdata + RESTORATION_HALFWIN * tmpstride;
-  for (i = RESTORATION_HALFWIN; i < height - RESTORATION_HALFWIN; ++i) {
-    for (j = RESTORATION_HALFWIN; j < width - RESTORATION_HALFWIN; ++j) {
-      int x, y, diff_r;
-      int flsum = 0, wtsum = 0, wt;
-      uint16_t *data_p2 = data_p + j - RESTORATION_HALFWIN * stride;
-      for (y = -RESTORATION_HALFWIN; y <= RESTORATION_HALFWIN; ++y) {
-        for (x = -RESTORATION_HALFWIN; x <= RESTORATION_HALFWIN; ++x) {
-          diff_r = (data_p2[x] - data_p[j]) >> (bit_depth - 8);
-          assert(diff_r >= -RESTORATION_RANGE && diff_r <= RESTORATION_RANGE);
-          wt = (int)rst
-                   ->wx_lut[y + RESTORATION_HALFWIN][x + RESTORATION_HALFWIN] *
-               (int)wr_lut_[diff_r];
-          wtsum += wt;
-          flsum += wt * data_p2[x];
-        }
-        data_p2 += stride;
-      }
-      if (wtsum > 0)
-        tmpdata_p[j] =
-            clip_pixel_highbd((int)((flsum + wtsum / 2) / wtsum), bit_depth);
-      else
-        tmpdata_p[j] = data_p[j];
-    }
-    tmpdata_p += tmpstride;
-    data_p += stride;
-  }
 
-  for (i = RESTORATION_HALFWIN; i < height - RESTORATION_HALFWIN; ++i) {
-    memcpy(data + i * stride + RESTORATION_HALFWIN,
-           tmpdata + i * tmpstride + RESTORATION_HALFWIN,
-           (width - RESTORATION_HALFWIN * 2) * sizeof(*data));
+  tile_width = rst->tile_width >> rst->subsampling_x;
+  tile_height = rst->tile_height >> rst->subsampling_y;
+
+  for (tile_idx = 0; tile_idx < rst->ntiles; ++tile_idx) {
+    uint16_t *data_p, *tmpdata_p;
+    const uint8_t *wr_lut_ = rst->wr_lut[tile_idx] + BILATERAL_AMP_RANGE;
+
+    if (rst->bilateral_level[tile_idx] < 0) continue;
+
+    htile_idx = tile_idx % rst->nhtiles;
+    vtile_idx = tile_idx / rst->nhtiles;
+    h_start =
+        htile_idx * tile_width + ((htile_idx > 0) ? 0 : RESTORATION_HALFWIN);
+    h_end = (htile_idx < rst->nhtiles - 1) ? ((htile_idx + 1) * tile_width)
+                                           : (width - RESTORATION_HALFWIN);
+    v_start =
+        vtile_idx * tile_height + ((vtile_idx > 0) ? 0 : RESTORATION_HALFWIN);
+    v_end = (vtile_idx < rst->nvtiles - 1) ? ((vtile_idx + 1) * tile_height)
+                                           : (height - RESTORATION_HALFWIN);
+
+    data_p = data + h_start + v_start * stride;
+    tmpdata_p = tmpdata + h_start + v_start * tmpstride;
+
+    for (i = 0; i < (v_end - v_start); ++i) {
+      for (j = 0; j < (h_end - h_start); ++j) {
+        int x, y;
+        int flsum = 0, wtsum = 0, wt;
+        uint16_t *data_p2 = data_p + j - RESTORATION_HALFWIN * stride;
+        for (y = -RESTORATION_HALFWIN; y <= RESTORATION_HALFWIN; ++y) {
+          for (x = -RESTORATION_HALFWIN; x <= RESTORATION_HALFWIN; ++x) {
+            wt = (int)rst->wx_lut[tile_idx][y + RESTORATION_HALFWIN]
+                                 [x + RESTORATION_HALFWIN] *
+                 (int)wr_lut_[data_p2[x] - data_p[j]];
+            wtsum += wt;
+            flsum += wt * data_p2[x];
+          }
+          data_p2 += stride;
+        }
+        if (wtsum > 0)
+          tmpdata_p[j] =
+              clip_pixel_highbd((int)((flsum + wtsum / 2) / wtsum), bit_depth);
+        else
+          tmpdata_p[j] = data_p[j];
+      }
+      tmpdata_p += tmpstride;
+      data_p += stride;
+    }
+    for (i = v_start; i < v_end; ++i) {
+      memcpy(data + i * stride + h_start, tmpdata + i * tmpstride + h_start,
+             (h_end - h_start) * sizeof(*data));
+    }
   }
 }
 
@@ -324,38 +463,71 @@ static void loop_wiener_filter_highbd(uint8_t *data8, int width, int height,
                                       int bit_depth) {
   uint16_t *data = CONVERT_TO_SHORTPTR(data8);
   uint16_t *tmpdata = CONVERT_TO_SHORTPTR(tmpdata8);
-  uint16_t *data_p = data;
-  uint16_t *tmpdata_p = tmpdata;
-  int i, j;
-  for (i = 0; i < height; ++i) {
-    memcpy(tmpdata_p, data_p, sizeof(*data_p) * RESTORATION_HALFWIN);
-    data_p += RESTORATION_HALFWIN;
-    tmpdata_p += RESTORATION_HALFWIN;
-    for (j = RESTORATION_HALFWIN; j < width - RESTORATION_HALFWIN; ++j) {
-      *tmpdata_p++ = hor_sym_filter_highbd(data_p++, rst->hfilter, bit_depth);
-    }
-    memcpy(tmpdata_p, data_p, sizeof(*data_p) * RESTORATION_HALFWIN);
-    data_p += RESTORATION_HALFWIN - width + stride;
-    tmpdata_p += RESTORATION_HALFWIN - width + tmpstride;
-  }
+  int i, j, tile_idx, htile_idx, vtile_idx;
+  int h_start, h_end, v_start, v_end;
+  int tile_width, tile_height;
+  uint16_t *data_p, *tmpdata_p;
+
+  tile_width = rst->tile_width >> rst->subsampling_x;
+  tile_height = rst->tile_height >> rst->subsampling_y;
+
+  // Initialize tmp buffer
   data_p = data;
   tmpdata_p = tmpdata;
-  for (i = 0; i < RESTORATION_HALFWIN; ++i) {
-    memcpy(data_p, tmpdata_p, sizeof(*data_p) * width);
+  for (i = 0; i < height; ++i) {
+    memcpy(tmpdata_p, data_p, sizeof(*data_p) * width);
     data_p += stride;
     tmpdata_p += tmpstride;
   }
-  for (; i < height - RESTORATION_HALFWIN; ++i) {
-    for (j = 0; j < width; ++j)
-      *data_p++ = ver_sym_filter_highbd(tmpdata_p++, tmpstride, rst->vfilter,
-                                        bit_depth);
-    data_p += stride - width;
-    tmpdata_p += tmpstride - width;
+
+  // Filter row-wise tile-by-tile
+  for (tile_idx = 0; tile_idx < rst->ntiles; ++tile_idx) {
+    if (rst->wiener_level[tile_idx] == 0) continue;
+    htile_idx = tile_idx % rst->nhtiles;
+    vtile_idx = tile_idx / rst->nhtiles;
+    h_start =
+        htile_idx * tile_width + ((htile_idx > 0) ? 0 : RESTORATION_HALFWIN);
+    h_end = (htile_idx < rst->nhtiles - 1) ? ((htile_idx + 1) * tile_width)
+                                           : (width - RESTORATION_HALFWIN);
+    v_start = vtile_idx * tile_height;
+    v_end = (vtile_idx < rst->nvtiles - 1) ? ((vtile_idx + 1) * tile_height)
+                                           : height;
+    data_p = data + h_start + v_start * stride;
+    tmpdata_p = tmpdata + h_start + v_start * tmpstride;
+    for (i = 0; i < (v_end - v_start); ++i) {
+      for (j = 0; j < (h_end - h_start); ++j) {
+        *tmpdata_p++ =
+            hor_sym_filter_highbd(data_p++, rst->hfilter[tile_idx], bit_depth);
+      }
+      data_p += stride - (h_end - h_start);
+      tmpdata_p += tmpstride - (h_end - h_start);
+    }
   }
-  for (; i < height; ++i) {
-    memcpy(data_p, tmpdata_p, sizeof(*data_p) * width);
-    data_p += stride;
-    tmpdata_p += tmpstride;
+
+  // Filter column-wise tile-by-tile (bands of thickness RESTORATION_HALFWIN
+  // at top and bottom of tiles allow filtering overlap, and are not optimally
+  // filtered)
+  for (tile_idx = 0; tile_idx < rst->ntiles; ++tile_idx) {
+    if (rst->wiener_level[tile_idx] == 0) continue;
+    htile_idx = tile_idx % rst->nhtiles;
+    vtile_idx = tile_idx / rst->nhtiles;
+    h_start = htile_idx * tile_width;
+    h_end =
+        (htile_idx < rst->nhtiles - 1) ? ((htile_idx + 1) * tile_width) : width;
+    v_start =
+        vtile_idx * tile_height + ((vtile_idx > 0) ? 0 : RESTORATION_HALFWIN);
+    v_end = (vtile_idx < rst->nvtiles - 1) ? ((vtile_idx + 1) * tile_height)
+                                           : (height - RESTORATION_HALFWIN);
+    data_p = data + h_start + v_start * stride;
+    tmpdata_p = tmpdata + h_start + v_start * tmpstride;
+    for (i = 0; i < (v_end - v_start); ++i) {
+      for (j = 0; j < (h_end - h_start); ++j) {
+        *data_p++ = ver_sym_filter_highbd(tmpdata_p++, tmpstride,
+                                          rst->vfilter[tile_idx], bit_depth);
+      }
+      data_p += stride - (h_end - h_start);
+      tmpdata_p += tmpstride - (h_end - h_start);
+    }
   }
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -380,59 +552,72 @@ void vp10_loop_restoration_rows(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
           ? loop_bilateral_filter_highbd
           : loop_wiener_filter_highbd;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-  YV12_BUFFER_CONFIG *tmp_buf;
+  YV12_BUFFER_CONFIG tmp_buf;
+  memset(&tmp_buf, 0, sizeof(YV12_BUFFER_CONFIG));
 
   yend = VPXMIN(yend, cm->height);
   uvend = VPXMIN(uvend, cm->subsampling_y ? (cm->height + 1) >> 1 : cm->height);
 
-  if (vpx_realloc_frame_buffer(&cm->tmp_loop_buf, cm->width, cm->height,
-                               cm->subsampling_x, cm->subsampling_y,
+  if (vpx_realloc_frame_buffer(
+          &tmp_buf, cm->width, cm->height, cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
-                               cm->use_highbitdepth,
+          cm->use_highbitdepth,
 #endif
-                               VPX_DEC_BORDER_IN_PIXELS, cm->byte_alignment,
-                               NULL, NULL, NULL) < 0)
+          VPX_DEC_BORDER_IN_PIXELS, cm->byte_alignment, NULL, NULL, NULL) < 0)
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate tmp restoration buffer");
-
-  tmp_buf = &cm->tmp_loop_buf;
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (cm->use_highbitdepth)
     restore_func_highbd(frame->y_buffer + ystart * ystride, ywidth,
                         yend - ystart, ystride, &cm->rst_internal,
-                        tmp_buf->y_buffer + ystart * tmp_buf->y_stride,
-                        tmp_buf->y_stride, cm->bit_depth);
+                        tmp_buf.y_buffer + ystart * tmp_buf.y_stride,
+                        tmp_buf.y_stride, cm->bit_depth);
   else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     restore_func(frame->y_buffer + ystart * ystride, ywidth, yend - ystart,
                  ystride, &cm->rst_internal,
-                 tmp_buf->y_buffer + ystart * tmp_buf->y_stride,
-                 tmp_buf->y_stride);
+                 tmp_buf.y_buffer + ystart * tmp_buf.y_stride,
+                 tmp_buf.y_stride);
   if (!y_only) {
+    cm->rst_internal.subsampling_x = cm->subsampling_x;
+    cm->rst_internal.subsampling_y = cm->subsampling_y;
 #if CONFIG_VP9_HIGHBITDEPTH
     if (cm->use_highbitdepth) {
       restore_func_highbd(frame->u_buffer + uvstart * uvstride, uvwidth,
                           uvend - uvstart, uvstride, &cm->rst_internal,
-                          tmp_buf->u_buffer + uvstart * tmp_buf->uv_stride,
-                          tmp_buf->uv_stride, cm->bit_depth);
+                          tmp_buf.u_buffer + uvstart * tmp_buf.uv_stride,
+                          tmp_buf.uv_stride, cm->bit_depth);
       restore_func_highbd(frame->v_buffer + uvstart * uvstride, uvwidth,
                           uvend - uvstart, uvstride, &cm->rst_internal,
-                          tmp_buf->v_buffer + uvstart * tmp_buf->uv_stride,
-                          tmp_buf->uv_stride, cm->bit_depth);
+                          tmp_buf.v_buffer + uvstart * tmp_buf.uv_stride,
+                          tmp_buf.uv_stride, cm->bit_depth);
     } else {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       restore_func(frame->u_buffer + uvstart * uvstride, uvwidth,
                    uvend - uvstart, uvstride, &cm->rst_internal,
-                   tmp_buf->u_buffer + uvstart * tmp_buf->uv_stride,
-                   tmp_buf->uv_stride);
+                   tmp_buf.u_buffer + uvstart * tmp_buf.uv_stride,
+                   tmp_buf.uv_stride);
       restore_func(frame->v_buffer + uvstart * uvstride, uvwidth,
                    uvend - uvstart, uvstride, &cm->rst_internal,
-                   tmp_buf->v_buffer + uvstart * tmp_buf->uv_stride,
-                   tmp_buf->uv_stride);
+                   tmp_buf.v_buffer + uvstart * tmp_buf.uv_stride,
+                   tmp_buf.uv_stride);
 #if CONFIG_VP9_HIGHBITDEPTH
     }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+  }
+  vpx_free_frame_buffer(&tmp_buf);
+  if (cm->rst_internal.restoration_type == RESTORE_BILATERAL) {
+    free(cm->rst_internal.wr_lut);
+    cm->rst_internal.wr_lut = NULL;
+    free(cm->rst_internal.wx_lut);
+    cm->rst_internal.wx_lut = NULL;
+  }
+  if (cm->rst_internal.restoration_type == RESTORE_WIENER) {
+    free(cm->rst_internal.vfilter);
+    cm->rst_internal.vfilter = NULL;
+    free(cm->rst_internal.hfilter);
+    cm->rst_internal.hfilter = NULL;
   }
 }
 
@@ -450,7 +635,8 @@ void vp10_loop_restoration_frame(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
     }
     end_mi_row = start_mi_row + mi_rows_to_filter;
     vp10_loop_restoration_init(&cm->rst_internal, rsi,
-                               cm->frame_type == KEY_FRAME);
+                               cm->frame_type == KEY_FRAME, cm->width,
+                               cm->height);
     vp10_loop_restoration_rows(frame, cm, start_mi_row, end_mi_row, y_only);
   }
 }
