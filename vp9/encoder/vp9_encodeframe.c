@@ -4453,7 +4453,6 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
   MODE_INFO *mi = xd->mi[0];
   const int seg_skip = segfeature_active(&cm->seg, mi->segment_id,
                                          SEG_LVL_SKIP);
-
   x->skip_recode = !x->select_tx_size && mi->sb_type >= BLOCK_8X8 &&
                    cpi->oxcf.aq_mode != COMPLEXITY_AQ &&
                    cpi->oxcf.aq_mode != CYCLIC_REFRESH_AQ &&
@@ -4509,10 +4508,14 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
                     VPXMAX(bsize, BLOCK_8X8));
   }
 
+  if (seg_skip) {
+    assert(mi->skip);
+  }
+
   if (output_enabled) {
     if (cm->tx_mode == TX_MODE_SELECT &&
         mi->sb_type >= BLOCK_8X8  &&
-        !(is_inter_block(mi) && (mi->skip || seg_skip))) {
+        !(is_inter_block(mi) && mi->skip)) {
       ++get_tx_counts(max_txsize_lookup[bsize], get_tx_size_context(xd),
                       &td->counts->tx)[mi->tx_size];
     } else {
