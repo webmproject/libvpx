@@ -2185,7 +2185,10 @@ void adjust_gf_boost_lag_one_pass_vbr(VP9_COMP *cpi, uint64_t avg_sad_current) {
           VPXMIN(15, (3 * rc->baseline_gf_interval) >> 1);
     } else if (high_content) {
       rc->gfu_boost = DEFAULT_GF_BOOST >> 1;
-      rc->baseline_gf_interval = VPXMAX(5, rc->baseline_gf_interval >> 1);
+      if (rate_err > 3.0)
+        rc->baseline_gf_interval = VPXMAX(10, rc->baseline_gf_interval >> 1);
+      else
+        rc->baseline_gf_interval = VPXMAX(5, rc->baseline_gf_interval >> 1);
     }
     // Check for constraining gf_interval for up-coming scene/content changes,
     // or for up-coming key frame, whichever is closer.
