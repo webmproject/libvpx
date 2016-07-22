@@ -1686,7 +1686,7 @@ static void vbr_rate_correction(VP10_COMP *cpi, int *this_frame_target) {
   // How far through the clip are we.
   // This number is used to damp the per frame rate correction.
   // Range 0 - 1.0
-  if (cpi->twopass.total_stats.count) {
+  if (cpi->twopass.total_stats.count != 0.) {
     position_factor = sqrt((double)cpi->common.current_video_frame /
                            cpi->twopass.total_stats.count);
   }
