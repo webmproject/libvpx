@@ -643,7 +643,17 @@ static void adjust_arnr_filter(VP9_COMP *cpi,
       vp9_lookahead_depth(cpi->lookahead) - distance - 1;
   int frames_fwd = (cpi->oxcf.arnr_max_frames - 1) >> 1;
   int frames_bwd;
-  int q, frames, strength;
+  int q, frames, base_strength, strength;
+
+  // Context dependent two pass adjustment to strength.
+  if (oxcf->pass == 2) {
+    base_strength =
+        oxcf->arnr_strength + cpi->twopass.arnr_strength_adjustment;
+    // Clip to allowed range.
+    base_strength = VPXMIN(6, VPXMAX(0, base_strength));
+  } else {
+    base_strength = oxcf->arnr_strength;
+  }
 
   // Define the forward and backwards filter limits for this arnr group.
   if (frames_fwd > frames_after_arf)
@@ -669,9 +679,9 @@ static void adjust_arnr_filter(VP9_COMP *cpi,
     q = ((int)vp9_convert_qindex_to_q(
         cpi->rc.avg_frame_qindex[KEY_FRAME], cpi->common.bit_depth));
   if (q > 16) {
-    strength = oxcf->arnr_strength;
+    strength = base_strength;
   } else {
-    strength = oxcf->arnr_strength - ((16 - q) / 2);
+    strength = base_strength - ((16 - q) / 2);
     if (strength < 0)
       strength = 0;
   }
