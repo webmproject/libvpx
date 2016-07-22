@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2a147fd3_8c7637e6",
+        "filename": "vp8/decoder/decodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 802,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2016-07-22T22:55:45Z",
+      "side": 1,
+      "message": "num_token_partitions is read from bitstream. if we want to ensure num_token_partitions \u003c\u003d pbi-\u003ecommon.mb_rows, may better to add it in encoder ?",
+      "revId": "3ecb7d56e68a162aa21a0336dec3aad8ee3f9eb6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
