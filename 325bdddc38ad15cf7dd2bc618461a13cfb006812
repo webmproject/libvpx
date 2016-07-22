@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2a147fd3_ccbf4fc5",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-07-22T23:52:13Z",
+      "side": 1,
+      "message": "Isn\u0027t comparing floats to exact values bad? Or is it OK because it\u0027s comparing to the value it was initialized to?",
+      "range": {
+        "startLine": 372,
+        "startChar": 24,
+        "endLine": 372,
+        "endChar": 25
+      },
+      "revId": "325bdddc38ad15cf7dd2bc618461a13cfb006812",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
