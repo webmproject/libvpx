@@ -16,6 +16,24 @@
       "revId": "3ecb7d56e68a162aa21a0336dec3aad8ee3f9eb6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a147fd3_ac021bd7",
+        "filename": "vp8/decoder/decodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 802,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-07-22T23:22:12Z",
+      "side": 1,
+      "message": "as discussed : even if we fix it in the encoder we also have to fix it here.    The decoder needs to be able to not crash on fuzzed files in which the num_token_partitions has been increased.",
+      "parentUuid": "2a147fd3_8c7637e6",
+      "revId": "3ecb7d56e68a162aa21a0336dec3aad8ee3f9eb6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
