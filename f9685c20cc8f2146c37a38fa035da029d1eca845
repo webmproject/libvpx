@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2a147fd3_7b06fbca",
+        "filename": "vp10/common/entropy.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-22T20:52:28Z",
+      "side": 1,
+      "message": "Is it supposed to be \"128 - 21\"?",
+      "revId": "f9685c20cc8f2146c37a38fa035da029d1eca845",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a147fd3_5b09b7d9",
+        "filename": "vp10/common/entropy.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-07-22T20:52:28Z",
+      "side": 1,
+      "message": "Is it supposed to be \"512 - 21\"?",
+      "revId": "f9685c20cc8f2146c37a38fa035da029d1eca845",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
