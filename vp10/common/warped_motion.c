@@ -545,7 +545,7 @@ static uint16_t highbd_bi_ntap_filter(uint16_t *ref,
   val = do_ntap_filter(arr + WARPEDPIXEL_FILTER_TAPS / 2 - 1,
                        x - (i << WARPEDPIXEL_PREC_BITS));
   val = ROUND_POWER_OF_TWO_SIGNED(val, WARPEDPIXEL_FILTER_BITS * 2);
-  return (uint16_t)highbd_clip_pixel(val, bd);
+  return (uint16_t)clip_pixel_highbd(val, bd);
 }
 
 static uint16_t highbd_bi_cubic_filter(uint16_t *ref,
@@ -563,7 +563,7 @@ static uint16_t highbd_bi_cubic_filter(uint16_t *ref,
   }
   val = do_cubic_filter(arr + 1, x - (i << WARPEDPIXEL_PREC_BITS));
   val = ROUND_POWER_OF_TWO_SIGNED(val, WARPEDPIXEL_FILTER_BITS * 2);
-  return (uint16_t)highbd_clip_pixel(val, bd);
+  return (uint16_t)clip_pixel_highbd(val, bd);
 }
 
 static uint16_t highbd_bi_linear_filter(uint16_t *ref,
@@ -581,7 +581,7 @@ static uint16_t highbd_bi_linear_filter(uint16_t *ref,
       ref[(iy + 1) * stride + ix] * sy * (WARPEDPIXEL_PREC_SHIFTS - sx) +
       ref[(iy + 1) * stride + ix + 1] * sy * sx,
       WARPEDPIXEL_PREC_BITS * 2);
-  return (uint16_t)highbd_clip_pixel(val, bd);
+  return (uint16_t)clip_pixel_highbd(val, bd);
 }
 
 static uint16_t highbd_warp_interpolate(uint16_t *ref,
@@ -606,25 +606,25 @@ static uint16_t highbd_warp_interpolate(uint16_t *ref,
         ref[iy * stride] * (WARPEDPIXEL_PREC_SHIFTS - sy) +
         ref[(iy + 1) * stride] * sy,
         WARPEDPIXEL_PREC_BITS);
-    return highbd_clip_pixel(v, bd);
+    return clip_pixel_highbd(v, bd);
   } else if (iy < 0) {
     v = ROUND_POWER_OF_TWO_SIGNED(
         ref[ix] * (WARPEDPIXEL_PREC_SHIFTS - sx) +
         ref[ix + 1] * sx,
         WARPEDPIXEL_PREC_BITS);
-    return highbd_clip_pixel(v, bd);
+    return clip_pixel_highbd(v, bd);
   } else if (ix > width - 1) {
     v = ROUND_POWER_OF_TWO_SIGNED(
         ref[iy * stride + width - 1] * (WARPEDPIXEL_PREC_SHIFTS - sy) +
         ref[(iy + 1) * stride + width - 1] * sy,
         WARPEDPIXEL_PREC_BITS);
-    return highbd_clip_pixel(v, bd);
+    return clip_pixel_highbd(v, bd);
   } else if (iy > height - 1) {
     v = ROUND_POWER_OF_TWO_SIGNED(
         ref[(height - 1) * stride + ix] * (WARPEDPIXEL_PREC_SHIFTS - sx) +
         ref[(height - 1) * stride + ix + 1] * sx,
         WARPEDPIXEL_PREC_BITS);
-    return highbd_clip_pixel(v, bd);
+    return clip_pixel_highbd(v, bd);
   } else if (ix >= WARPEDPIXEL_FILTER_TAPS / 2 - 1 &&
              iy >= WARPEDPIXEL_FILTER_TAPS / 2 - 1 &&
              ix < width - WARPEDPIXEL_FILTER_TAPS / 2 &&
@@ -644,7 +644,7 @@ void vp10_highbd_warp_plane(WarpedMotionParams *wm,
                             uint8_t *pred8,
                             int p_col, int p_row,
                             int p_width, int p_height, int p_stride,
-                            int subsampling_col, int subsampling_row,
+                            int subsampling_x, int subsampling_y,
                             int x_scale, int y_scale,
                             int bd) {
   int i, j;
