@@ -22,6 +22,30 @@
       "revId": "2cfa4b46ea5a6234ffa2b22e3919ff459ed5fa8c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a147fd3_8c471755",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3820,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-22T23:09:52Z",
+      "side": 1,
+      "message": "good point, though both are trending toward c99...",
+      "parentUuid": "2a147fd3_8c5ab787",
+      "range": {
+        "startLine": 3820,
+        "startChar": 39,
+        "endLine": 3820,
+        "endChar": 45
+      },
+      "revId": "2cfa4b46ea5a6234ffa2b22e3919ff459ed5fa8c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
