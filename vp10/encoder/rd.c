@@ -571,18 +571,6 @@ static void get_entropy_contexts_plane(
       memcpy(t_above, above, sizeof(ENTROPY_CONTEXT) * num_4x4_w);
       memcpy(t_left, left, sizeof(ENTROPY_CONTEXT) * num_4x4_h);
       break;
-#if CONFIG_EXT_TX
-    case TX_4X8:
-      memcpy(t_above, above, sizeof(ENTROPY_CONTEXT) * num_4x4_w);
-      for (i = 0; i < num_4x4_h; i += 2)
-        t_left[i] = !!*(const uint16_t *)&left[i];
-      break;
-    case TX_8X4:
-      for (i = 0; i < num_4x4_w; i += 2)
-        t_above[i] = !!*(const uint16_t *)&above[i];
-      memcpy(t_left, left, sizeof(ENTROPY_CONTEXT) * num_4x4_h);
-      break;
-#endif  // CONFIG_EXT_TX
     case TX_8X8:
       for (i = 0; i < num_4x4_w; i += 2)
         t_above[i] = !!*(const uint16_t *)&above[i];
@@ -601,7 +589,45 @@ static void get_entropy_contexts_plane(
       for (i = 0; i < num_4x4_h; i += 8)
         t_left[i] = !!*(const uint64_t *)&left[i];
       break;
-    default: assert(0 && "Invalid transform size."); break;
+#if CONFIG_EXT_TX
+    case TX_4X8:
+      memcpy(t_above, above, sizeof(ENTROPY_CONTEXT) * num_4x4_w);
+      for (i = 0; i < num_4x4_h; i += 2)
+        t_left[i] = !!*(const uint16_t *)&left[i];
+      break;
+    case TX_8X4:
+      for (i = 0; i < num_4x4_w; i += 2)
+        t_above[i] = !!*(const uint16_t *)&above[i];
+      memcpy(t_left, left, sizeof(ENTROPY_CONTEXT) * num_4x4_h);
+      break;
+    case TX_8X16:
+      for (i = 0; i < num_4x4_w; i += 2)
+        t_above[i] = !!*(const uint16_t *)&above[i];
+      for (i = 0; i < num_4x4_h; i += 4)
+        t_left[i] = !!*(const uint32_t *)&left[i];
+      break;
+    case TX_16X8:
+      for (i = 0; i < num_4x4_w; i += 4)
+        t_above[i] = !!*(const uint32_t *)&above[i];
+      for (i = 0; i < num_4x4_h; i += 2)
+        t_left[i] = !!*(const uint16_t *)&left[i];
+      break;
+    case TX_16X32:
+      for (i = 0; i < num_4x4_w; i += 4)
+        t_above[i] = !!*(const uint32_t *)&above[i];
+      for (i = 0; i < num_4x4_h; i += 8)
+        t_left[i] = !!*(const uint64_t *)&left[i];
+      break;
+    case TX_32X16:
+      for (i = 0; i < num_4x4_w; i += 8)
+        t_above[i] = !!*(const uint64_t *)&above[i];
+      for (i = 0; i < num_4x4_h; i += 4)
+        t_left[i] = !!*(const uint32_t *)&left[i];
+      break;
+#endif  // CONFIG_EXT_TX
+    default:
+      assert(0 && "Invalid transform size.");
+      break;
   }
 }
 

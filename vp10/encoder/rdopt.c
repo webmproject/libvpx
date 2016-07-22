@@ -1107,6 +1107,22 @@ static uint64_t sum_squares_2d(const int16_t *diff, int diff_stride,
       sse = vpx_sum_squares_2d_i16(diff, diff_stride, 4) +
             vpx_sum_squares_2d_i16(diff + 4, diff_stride, 4);
       break;
+    case TX_8X16:
+      sse = vpx_sum_squares_2d_i16(diff, diff_stride, 8) +
+            vpx_sum_squares_2d_i16(diff + 8 * diff_stride, diff_stride, 8);
+      break;
+    case TX_16X8:
+      sse = vpx_sum_squares_2d_i16(diff, diff_stride, 8) +
+            vpx_sum_squares_2d_i16(diff + 8, diff_stride, 8);
+      break;
+    case TX_16X32:
+      sse = vpx_sum_squares_2d_i16(diff, diff_stride, 16) +
+            vpx_sum_squares_2d_i16(diff + 16 * diff_stride, diff_stride, 16);
+      break;
+    case TX_32X16:
+      sse = vpx_sum_squares_2d_i16(diff, diff_stride, 16) +
+            vpx_sum_squares_2d_i16(diff + 16, diff_stride, 16);
+      break;
 #endif  // CONFIG_EXT_TX
     default:
       assert(tx_size < TX_SIZES);
