@@ -3817,12 +3817,12 @@ static void rd_pick_palette_intra_sbuv(VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_VP9_HIGHBITDEPTH
           if (cpi->common.use_highbitdepth)
             pmi->palette_colors[i * PALETTE_MAX_SIZE + j] =
-                clip_pixel_highbd(roundf(centroids[j * 2 + i - 1]),
+                clip_pixel_highbd((int)lroundf(centroids[j * 2 + i - 1]),
                                   cpi->common.bit_depth);
           else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
             pmi->palette_colors[i * PALETTE_MAX_SIZE + j] =
-                clip_pixel(roundf(centroids[j * 2 + i - 1]));
+                clip_pixel((int)lroundf(centroids[j * 2 + i - 1]));
         }
       }
       for (r = 0; r < rows; ++r)
