@@ -120,13 +120,13 @@ void vp10_highbd_iadst16_c(const tran_low_t *input, tran_low_t *output, int bd);
 static INLINE uint16_t highbd_clip_pixel_add(uint16_t dest, tran_high_t trans,
                                              int bd) {
   trans = HIGHBD_WRAPLOW(trans, bd);
-  return clip_pixel_highbd(dest + trans, bd);
+  return clip_pixel_highbd(dest + (int)trans, bd);
 }
 #endif
 
 static INLINE uint8_t clip_pixel_add(uint8_t dest, tran_high_t trans) {
   trans = WRAPLOW(trans);
-  return clip_pixel(dest + trans);
+  return clip_pixel(dest + (int)trans);
 }
 #ifdef __cplusplus
 }  // extern "C"

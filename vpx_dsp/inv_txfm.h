@@ -37,7 +37,7 @@ static INLINE tran_high_t check_range(tran_high_t input) {
 
 static INLINE tran_high_t dct_const_round_shift(tran_high_t input) {
   tran_high_t rv = ROUND_POWER_OF_TWO(input, DCT_CONST_BITS);
-  return (tran_high_t)rv;
+  return rv;
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -61,7 +61,7 @@ static INLINE tran_high_t highbd_check_range(tran_high_t input,
 
 static INLINE tran_high_t highbd_dct_const_round_shift(tran_high_t input) {
   tran_high_t rv = ROUND_POWER_OF_TWO(input, DCT_CONST_BITS);
-  return (tran_high_t)rv;
+  return rv;
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
