@@ -1172,9 +1172,10 @@ void vp10_highbd_iht4x8_32_add_c(const tran_low_t *input, uint8_t *dest8,
   // inverse transform row vectors, and transpose
   for (i = 0; i < 8; ++i) {
     HIGH_IHT_4x8[tx_type].rows(input, outtmp, bd);
-    for (j = 0; j < 4; ++j)
-      out[j][i] = (tran_low_t)highbd_dct_const_round_shift(outtmp[j] * Sqrt2,
-                                                           bd);
+    for (j = 0; j < 4; ++j) {
+      out[j][i] = HIGHBD_WRAPLOW(
+          highbd_dct_const_round_shift(outtmp[j] * Sqrt2), bd);
+    }
     input  += 4;
   }
 
@@ -1227,9 +1228,10 @@ void vp10_highbd_iht8x4_32_add_c(const tran_low_t *input, uint8_t *dest8,
   // inverse transform row vectors, and transpose
   for (i = 0; i < 4; ++i) {
     HIGH_IHT_8x4[tx_type].rows(input, outtmp, bd);
-    for (j = 0; j < 8; ++j)
-      out[j][i] = (tran_low_t)highbd_dct_const_round_shift(outtmp[j] * Sqrt2,
-                                                           bd);
+    for (j = 0; j < 8; ++j) {
+      out[j][i] = HIGHBD_WRAPLOW(
+          highbd_dct_const_round_shift(outtmp[j] * Sqrt2), bd);
+    }
     input  += 8;
   }
 
