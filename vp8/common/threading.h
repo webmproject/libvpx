@@ -185,6 +185,8 @@ static inline int sem_destroy(sem_t *sem) {
 #define x86_pause_hint()
 #endif
 
+#include "vpx_util/vpx_thread.h"
+
 #endif /* CONFIG_OS_SUPPORT && CONFIG_MULTITHREAD */
 
 #ifdef __cplusplus
