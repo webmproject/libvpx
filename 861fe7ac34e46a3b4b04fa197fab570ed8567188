@@ -22,6 +22,30 @@
       "revId": "861fe7ac34e46a3b4b04fa197fab570ed8567188",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a147fd3_78f9211f",
+        "filename": "vp10/common/idct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1175,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-07-22T16:44:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2a147fd3_78128169",
+      "range": {
+        "startLine": 1175,
+        "startChar": 26,
+        "endLine": 1175,
+        "endChar": 27
+      },
+      "revId": "861fe7ac34e46a3b4b04fa197fab570ed8567188",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
