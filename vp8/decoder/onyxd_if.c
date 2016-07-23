@@ -331,7 +331,6 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, size_t size,
     if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0) {
       cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
     }
-
     goto decode_exit;
   }
 
@@ -464,9 +463,6 @@ int vp8_remove_decoder_instances(struct frame_buffers *fb) {
 
     if (!pbi) return VPX_CODEC_ERROR;
 #if CONFIG_MULTITHREAD
-    if (pbi->b_multithreaded_rd) {
-      vp8mt_de_alloc_temp_buffers(pbi, pbi->common.mb_rows);
-    }
     vp8_decoder_remove_threads(pbi);
 #endif
 
