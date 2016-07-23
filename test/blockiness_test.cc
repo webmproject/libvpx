@@ -152,7 +152,7 @@ class BlockinessVP9Test
   BlockinessVP9Test() : BlockinessTestBase(GET_PARAM(0), GET_PARAM(1)) {}
 
  protected:
-  int CheckBlockiness() {
+  double GetBlockiness() const {
     return vp9_get_blockiness(source_data_, source_stride_,
                               reference_data_, reference_stride_,
                               width_, height_);
@@ -168,16 +168,17 @@ TEST_P(BlockinessVP9Test, SourceBlockierThanReference) {
   // Source is blockier than reference.
   FillRandomBlocky(source_data_, source_stride_);
   FillConstant(reference_data_, reference_stride_, 128);
-  int super_blocky = CheckBlockiness();
+  const double super_blocky = GetBlockiness();
 
-  EXPECT_EQ(0, super_blocky) << "Blocky source should produce 0 blockiness.";
+  EXPECT_DOUBLE_EQ(0.0, super_blocky)
+      << "Blocky source should produce 0 blockiness.";
 }
 
 TEST_P(BlockinessVP9Test, ReferenceBlockierThanSource) {
   // Source is blockier than reference.
   FillConstant(source_data_, source_stride_, 128);
   FillRandomBlocky(reference_data_, reference_stride_);
-  int super_blocky = CheckBlockiness();
+  const double super_blocky = GetBlockiness();
 
   EXPECT_GT(super_blocky, 0.0)
       << "Blocky reference should score high for blockiness.";
@@ -187,10 +188,10 @@ TEST_P(BlockinessVP9Test, BlurringDecreasesBlockiness) {
   // Source is blockier than reference.
   FillConstant(source_data_, source_stride_, 128);
   FillRandomBlocky(reference_data_, reference_stride_);
-  int super_blocky = CheckBlockiness();
+  const double super_blocky = GetBlockiness();
 
   Blur(reference_data_, reference_stride_, 4);
-  int less_blocky = CheckBlockiness();
+  const double less_blocky = GetBlockiness();
 
   EXPECT_GT(super_blocky, less_blocky)
       << "A straight blur should decrease blockiness.";
@@ -201,10 +202,10 @@ TEST_P(BlockinessVP9Test, WorstCaseBlockiness) {
   FillConstant(source_data_, source_stride_, 128);
   FillCheckerboard(reference_data_, reference_stride_);
 
-  int super_blocky = CheckBlockiness();
+  const double super_blocky = GetBlockiness();
 
   Blur(reference_data_, reference_stride_, 4);
-  int less_blocky = CheckBlockiness();
+  const double less_blocky = GetBlockiness();
 
   EXPECT_GT(super_blocky, less_blocky)
       << "A straight blur should decrease blockiness.";
