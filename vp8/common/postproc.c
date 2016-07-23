@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+/* clang-format off */
 #define RGB_TO_YUV(t)                                     \
   (unsigned char)((0.257 * (float)(t >> 16)) +            \
                   (0.504 * (float)(t >> 8 & 0xff)) +      \
@@ -34,6 +35,7 @@
   (unsigned char)((0.439 * (float)(t >> 16)) -            \
                   (0.368 * (float)(t >> 8 & 0xff)) -      \
                   (0.071 * (float)(t & 0xff)) + 128)
+/* clang-format on */
 
 /* global constants */
 #if CONFIG_POSTPROC_VISUALIZER
