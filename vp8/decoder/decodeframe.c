@@ -798,7 +798,8 @@ static void setup_token_decoder(VP8D_COMP *pbi,
   if (pbi->decoding_thread_count > num_token_partitions - 1) {
     pbi->decoding_thread_count = num_token_partitions - 1;
   }
-  if (pbi->decoding_thread_count > pbi->common.mb_rows - 1) {
+  if ((int)pbi->decoding_thread_count > pbi->common.mb_rows - 1) {
+    assert(pbi->common.mb_rows > 0);
     pbi->decoding_thread_count = pbi->common.mb_rows - 1;
   }
 #endif
