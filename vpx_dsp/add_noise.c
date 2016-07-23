@@ -48,7 +48,7 @@ int vpx_setup_noise(double sigma, int8_t *noise, int size) {
 
   // set up a 256 entry lookup that matches gaussian distribution
   for (i = -32; i < 32; ++i) {
-    const int a_i = (int) (0.5 + 256 * gaussian(sigma, 0, i));
+    const int a_i = (int)(0.5 + 256 * gaussian(sigma, 0, i));
     if (a_i) {
       for (j = 0; j < a_i; ++j) {
         char_dist[next + j] = (char)i;

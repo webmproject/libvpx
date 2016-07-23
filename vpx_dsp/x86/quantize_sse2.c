@@ -14,18 +14,19 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
 
-static INLINE __m128i load_coefficients(const tran_low_t *coeff_ptr) {
+static INLINE __m128i load_coefficients(const tran_low_t* coeff_ptr) {
 #if CONFIG_VP9_HIGHBITDEPTH
   return _mm_setr_epi16((int16_t)coeff_ptr[0], (int16_t)coeff_ptr[1],
-      (int16_t)coeff_ptr[2], (int16_t)coeff_ptr[3], (int16_t)coeff_ptr[4],
-      (int16_t)coeff_ptr[5], (int16_t)coeff_ptr[6], (int16_t)coeff_ptr[7]);
+                        (int16_t)coeff_ptr[2], (int16_t)coeff_ptr[3],
+                        (int16_t)coeff_ptr[4], (int16_t)coeff_ptr[5],
+                        (int16_t)coeff_ptr[6], (int16_t)coeff_ptr[7]);
 #else
-  return _mm_load_si128((const __m128i *)coeff_ptr);
+  return _mm_load_si128((const __m128i*)coeff_ptr);
 #endif
 }
 
 static INLINE void store_coefficients(__m128i coeff_vals,
-                                      tran_low_t *coeff_ptr) {
+                                      tran_low_t* coeff_ptr) {
 #if CONFIG_VP9_HIGHBITDEPTH
   __m128i one = _mm_set1_epi16(1);
   __m128i coeff_vals_hi = _mm_mulhi_epi16(coeff_vals, one);
@@ -44,8 +45,7 @@ void vpx_quantize_b_sse2(const tran_low_t* coeff_ptr, intptr_t n_coeffs,
                          const int16_t* round_ptr, const int16_t* quant_ptr,
                          const int16_t* quant_shift_ptr, tran_low_t* qcoeff_ptr,
                          tran_low_t* dqcoeff_ptr, const int16_t* dequant_ptr,
-                         uint16_t* eob_ptr,
-                         const int16_t* scan_ptr,
+                         uint16_t* eob_ptr, const int16_t* scan_ptr,
                          const int16_t* iscan_ptr) {
   __m128i zero;
   (void)scan_ptr;
