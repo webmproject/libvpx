@@ -306,7 +306,7 @@ int main(int argc, char **argv) {
   unsigned int frame_out = 0;
 
   // The frame number to set reference frame on
-  int update_frame_num = 0;
+  unsigned int update_frame_num = 0;
   int mismatch_seen = 0;
 
   const int fps = 30;
@@ -317,7 +317,7 @@ int main(int argc, char **argv) {
   const char *height_arg = NULL;
   const char *infile_arg = NULL;
   const char *outfile_arg = NULL;
-  int limit = 0;
+  unsigned int limit = 0;
   exec_name = argv[0];
 
   if (argc < 7)
