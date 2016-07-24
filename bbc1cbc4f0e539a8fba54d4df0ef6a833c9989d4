@@ -104,6 +104,24 @@
       "revId": "bbc1cbc4f0e539a8fba54d4df0ef6a833c9989d4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a147fd3_52fe749f",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-24T04:46:52Z",
+      "side": 1,
+      "message": "I don\u0027t think there are all that many that it should be a concern. I do think that if you rename this now TSan will fail, I\u0027ll post something for that.",
+      "parentUuid": "2a147fd3_92064cc8",
+      "revId": "bbc1cbc4f0e539a8fba54d4df0ef6a833c9989d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
