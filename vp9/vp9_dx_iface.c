@@ -64,11 +64,16 @@ static vpx_codec_err_t decoder_init(vpx_codec_ctx_t *ctx,
 static vpx_codec_err_t decoder_destroy(vpx_codec_alg_priv_t *ctx) {
   if (ctx->frame_workers != NULL) {
     int i;
+    // Shutdown all threads before reclaiming any memory. The frame-level
+    // parallel decoder may access data from another worker.
+    for (i = 0; i < ctx->num_frame_workers; ++i) {
+      VPxWorker *const worker = &ctx->frame_workers[i];
+      vpx_get_worker_interface()->end(worker);
+    }
     for (i = 0; i < ctx->num_frame_workers; ++i) {
       VPxWorker *const worker = &ctx->frame_workers[i];
       FrameWorkerData *const frame_worker_data =
           (FrameWorkerData *)worker->data1;
-      vpx_get_worker_interface()->end(worker);
       vp9_remove_common(&frame_worker_data->pbi->common);
 #if CONFIG_VP9_POSTPROC
       vp9_free_postproc_buffers(&frame_worker_data->pbi->common);
