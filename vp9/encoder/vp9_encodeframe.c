@@ -250,6 +250,7 @@ static void duplicate_mode_info_in_sb(VP9_COMMON *cm, MACROBLOCKD *xd,
   const int mi_stride = xd->mi_stride;
   MODE_INFO *const src_mi = xd->mi[0];
   int i, j;
+
   for (j = 0; j < block_height; ++j)
     for (i = 0; i < block_width; ++i)
       xd->mi[j * mi_stride + i] = src_mi;
@@ -1277,7 +1278,7 @@ static void update_state(VP9_COMP *cpi, ThreadData *td,
       vp9_update_mv_count(td);
 
       if (cm->interp_filter == SWITCHABLE) {
-        const int ctx = vp9_get_pred_context_switchable_interp(xd);
+        const int ctx = get_pred_context_switchable_interp(xd);
         ++td->counts->switchable_interp[ctx][xdmi->interp_filter];
       }
     }
@@ -1323,7 +1324,7 @@ static void set_mode_info_seg_skip(MACROBLOCK *x, TX_MODE tx_mode,
   MODE_INFO *const mi = xd->mi[0];
   INTERP_FILTER filter_ref;
 
-  filter_ref = vp9_get_pred_context_switchable_interp(xd);
+  filter_ref = get_pred_context_switchable_interp(xd);
   if (filter_ref == SWITCHABLE_FILTERS)
     filter_ref = EIGHTTAP;
 
@@ -1900,7 +1901,7 @@ static void update_state_rt(VP9_COMP *cpi, ThreadData *td,
   if (is_inter_block(mi)) {
     vp9_update_mv_count(td);
     if (cm->interp_filter == SWITCHABLE) {
-      const int pred_ctx = vp9_get_pred_context_switchable_interp(xd);
+      const int pred_ctx = get_pred_context_switchable_interp(xd);
       ++td->counts->switchable_interp[pred_ctx][mi->interp_filter];
     }
 
@@ -2554,6 +2555,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   RD_COST this_rdc, sum_rdc, best_rdc;
   int do_split = bsize >= BLOCK_8X8;
   int do_rect = 1;
+  INTERP_FILTER pred_interp_filter;
 
   // Override skipping rectangular partition operations for edge blocks
   const int force_horz_split = (mi_row + mi_step >= cm->mi_rows);
@@ -2776,7 +2778,9 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   // If the interp_filter is marked as SWITCHABLE_FILTERS, it was for an
   // intra block and used for context purposes.
   if (ctx->mic.interp_filter == SWITCHABLE_FILTERS) {
-    ctx->mic.interp_filter = EIGHTTAP;
+    pred_interp_filter = EIGHTTAP;
+  } else {
+    pred_interp_filter = ctx->mic.interp_filter;
   }
 
   // PARTITION_SPLIT
@@ -2787,8 +2791,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     if (bsize == BLOCK_8X8) {
       i = 4;
       if (cpi->sf.adaptive_pred_interp_filter && partition_none_allowed)
-        pc_tree->leaf_split[0]->pred_interp_filter =
-            ctx->mic.interp_filter;
+        pc_tree->leaf_split[0]->pred_interp_filter = pred_interp_filter;
       rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &sum_rdc, subsize,
                        pc_tree->leaf_split[0], best_rdc.rdcost);
 
@@ -2858,8 +2861,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
       load_pred_mv(x, ctx);
     if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
         partition_none_allowed)
-      pc_tree->horizontal[0].pred_interp_filter =
-          ctx->mic.interp_filter;
+      pc_tree->horizontal[0].pred_interp_filter = pred_interp_filter;
     rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &sum_rdc, subsize,
                      &pc_tree->horizontal[0], best_rdc.rdcost);
 
@@ -2873,8 +2875,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
         load_pred_mv(x, ctx);
       if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
           partition_none_allowed)
-        pc_tree->horizontal[1].pred_interp_filter =
-            ctx->mic.interp_filter;
+        pc_tree->horizontal[1].pred_interp_filter = pred_interp_filter;
       rd_pick_sb_modes(cpi, tile_data, x, mi_row + mi_step, mi_col,
                        &this_rdc, subsize, &pc_tree->horizontal[1],
                        best_rdc.rdcost - sum_rdc.rdcost);
@@ -2911,8 +2912,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
       load_pred_mv(x, ctx);
     if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
         partition_none_allowed)
-      pc_tree->vertical[0].pred_interp_filter =
-          ctx->mic.interp_filter;
+      pc_tree->vertical[0].pred_interp_filter = pred_interp_filter;
     rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &sum_rdc, subsize,
                      &pc_tree->vertical[0], best_rdc.rdcost);
     if (sum_rdc.rdcost < best_rdc.rdcost && mi_col + mi_step < cm->mi_cols &&
@@ -2925,8 +2925,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
         load_pred_mv(x, ctx);
       if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
           partition_none_allowed)
-        pc_tree->vertical[1].pred_interp_filter =
-            ctx->mic.interp_filter;
+        pc_tree->vertical[1].pred_interp_filter = pred_interp_filter;
       rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col + mi_step,
                        &this_rdc, subsize,
                        &pc_tree->vertical[1], best_rdc.rdcost - sum_rdc.rdcost);
