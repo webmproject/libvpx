@@ -422,39 +422,6 @@ static void dealloc_compressor_data(AV1_COMP *cpi) {
   aom_free(cpi->segmentation_map);
   cpi->segmentation_map = NULL;
 
-#if CONFIG_REF_MV
-  for (i = 0; i < NMV_CONTEXTS; ++i) {
-    aom_free(cpi->nmv_costs[i][0]);
-    aom_free(cpi->nmv_costs[i][1]);
-    aom_free(cpi->nmv_costs_hp[i][0]);
-    aom_free(cpi->nmv_costs_hp[i][1]);
-    cpi->nmv_costs[i][0] = NULL;
-    cpi->nmv_costs[i][1] = NULL;
-    cpi->nmv_costs_hp[i][0] = NULL;
-    cpi->nmv_costs_hp[i][1] = NULL;
-  }
-#endif
-
-  aom_free(cpi->nmvcosts[0]);
-  aom_free(cpi->nmvcosts[1]);
-  cpi->nmvcosts[0] = NULL;
-  cpi->nmvcosts[1] = NULL;
-
-  aom_free(cpi->nmvcosts_hp[0]);
-  aom_free(cpi->nmvcosts_hp[1]);
-  cpi->nmvcosts_hp[0] = NULL;
-  cpi->nmvcosts_hp[1] = NULL;
-
-  aom_free(cpi->nmvsadcosts[0]);
-  aom_free(cpi->nmvsadcosts[1]);
-  cpi->nmvsadcosts[0] = NULL;
-  cpi->nmvsadcosts[1] = NULL;
-
-  aom_free(cpi->nmvsadcosts_hp[0]);
-  aom_free(cpi->nmvsadcosts_hp[1]);
-  cpi->nmvsadcosts_hp[0] = NULL;
-  cpi->nmvsadcosts_hp[1] = NULL;
-
   av1_cyclic_refresh_free(cpi->cyclic_refresh);
   cpi->cyclic_refresh = NULL;
 
@@ -512,27 +479,15 @@ static void save_coding_context(AV1_COMP *cpi) {
 #if CONFIG_REF_MV
   for (i = 0; i < NMV_CONTEXTS; ++i) {
     av1_copy(cc->nmv_vec_cost[i], cpi->td.mb.nmv_vec_cost[i]);
-    memcpy(cc->nmv_costs[i][0], cpi->nmv_costs[i][0],
-           MV_VALS * sizeof(*cpi->nmv_costs[i][0]));
-    memcpy(cc->nmv_costs[i][1], cpi->nmv_costs[i][1],
-           MV_VALS * sizeof(*cpi->nmv_costs[i][1]));
-    memcpy(cc->nmv_costs_hp[i][0], cpi->nmv_costs_hp[i][0],
-           MV_VALS * sizeof(*cpi->nmv_costs_hp[i][0]));
-    memcpy(cc->nmv_costs_hp[i][1], cpi->nmv_costs_hp[i][1],
-           MV_VALS * sizeof(*cpi->nmv_costs_hp[i][1]));
+    av1_copy(cc->nmv_costs, cpi->nmv_costs);
+    av1_copy(cc->nmv_costs_hp, cpi->nmv_costs_hp);
   }
 #else
   av1_copy(cc->nmvjointcost, cpi->td.mb.nmvjointcost);
 #endif
 
-  memcpy(cc->nmvcosts[0], cpi->nmvcosts[0],
-         MV_VALS * sizeof(*cpi->nmvcosts[0]));
-  memcpy(cc->nmvcosts[1], cpi->nmvcosts[1],
-         MV_VALS * sizeof(*cpi->nmvcosts[1]));
-  memcpy(cc->nmvcosts_hp[0], cpi->nmvcosts_hp[0],
-         MV_VALS * sizeof(*cpi->nmvcosts_hp[0]));
-  memcpy(cc->nmvcosts_hp[1], cpi->nmvcosts_hp[1],
-         MV_VALS * sizeof(*cpi->nmvcosts_hp[1]));
+  av1_copy(cc->nmvcosts, cpi->nmvcosts);
+  av1_copy(cc->nmvcosts_hp, cpi->nmvcosts_hp);
 
   av1_copy(cc->last_ref_lf_deltas, cm->lf.last_ref_deltas);
   av1_copy(cc->last_mode_lf_deltas, cm->lf.last_mode_deltas);
@@ -552,25 +507,15 @@ static void restore_coding_context(AV1_COMP *cpi) {
 #if CONFIG_REF_MV
   for (i = 0; i < NMV_CONTEXTS; ++i) {
     av1_copy(cpi->td.mb.nmv_vec_cost[i], cc->nmv_vec_cost[i]);
-    memcpy(cpi->nmv_costs[i][0], cc->nmv_costs[i][0],
-           MV_VALS * sizeof(*cc->nmv_costs[i][0]));
-    memcpy(cpi->nmv_costs[i][1], cc->nmv_costs[i][1],
-           MV_VALS * sizeof(*cc->nmv_costs[i][1]));
-    memcpy(cpi->nmv_costs_hp[i][0], cc->nmv_costs_hp[i][0],
-           MV_VALS * sizeof(*cc->nmv_costs_hp[i][0]));
-    memcpy(cpi->nmv_costs_hp[i][1], cc->nmv_costs_hp[i][1],
-           MV_VALS * sizeof(*cc->nmv_costs_hp[i][1]));
+    av1_copy(cpi->nmv_costs, cc->nmv_costs);
+    av1_copy(cpi->nmv_costs_hp, cc->nmv_costs_hp);
   }
 #else
   av1_copy(cpi->td.mb.nmvjointcost, cc->nmvjointcost);
 #endif
 
-  memcpy(cpi->nmvcosts[0], cc->nmvcosts[0], MV_VALS * sizeof(*cc->nmvcosts[0]));
-  memcpy(cpi->nmvcosts[1], cc->nmvcosts[1], MV_VALS * sizeof(*cc->nmvcosts[1]));
-  memcpy(cpi->nmvcosts_hp[0], cc->nmvcosts_hp[0],
-         MV_VALS * sizeof(*cc->nmvcosts_hp[0]));
-  memcpy(cpi->nmvcosts_hp[1], cc->nmvcosts_hp[1],
-         MV_VALS * sizeof(*cc->nmvcosts_hp[1]));
+  av1_copy(cpi->nmvcosts, cc->nmvcosts);
+  av1_copy(cpi->nmvcosts_hp, cc->nmvcosts_hp);
 
   av1_copy(cm->lf.last_ref_deltas, cc->last_ref_lf_deltas);
   av1_copy(cm->lf.last_mode_deltas, cc->last_mode_lf_deltas);
@@ -2117,33 +2062,15 @@ AV1_COMP *av1_create_compressor(AV1EncoderConfig *oxcf,
 
 #if CONFIG_REF_MV
   for (i = 0; i < NMV_CONTEXTS; ++i) {
-    CHECK_MEM_ERROR(cm, cpi->nmv_costs[i][0],
-                    aom_calloc(MV_VALS, sizeof(*cpi->nmv_costs[i][0])));
-    CHECK_MEM_ERROR(cm, cpi->nmv_costs[i][1],
-                    aom_calloc(MV_VALS, sizeof(*cpi->nmv_costs[i][1])));
-    CHECK_MEM_ERROR(cm, cpi->nmv_costs_hp[i][0],
-                    aom_calloc(MV_VALS, sizeof(*cpi->nmv_costs_hp[i][0])));
-    CHECK_MEM_ERROR(cm, cpi->nmv_costs_hp[i][1],
-                    aom_calloc(MV_VALS, sizeof(*cpi->nmv_costs_hp[i][1])));
+    memset(cpi->nmv_costs, 0, sizeof(cpi->nmv_costs));
+    memset(cpi->nmv_costs_hp, 0, sizeof(cpi->nmv_costs_hp));
   }
 #endif
 
-  CHECK_MEM_ERROR(cm, cpi->nmvcosts[0],
-                  aom_calloc(MV_VALS, sizeof(*cpi->nmvcosts[0])));
-  CHECK_MEM_ERROR(cm, cpi->nmvcosts[1],
-                  aom_calloc(MV_VALS, sizeof(*cpi->nmvcosts[1])));
-  CHECK_MEM_ERROR(cm, cpi->nmvcosts_hp[0],
-                  aom_calloc(MV_VALS, sizeof(*cpi->nmvcosts_hp[0])));
-  CHECK_MEM_ERROR(cm, cpi->nmvcosts_hp[1],
-                  aom_calloc(MV_VALS, sizeof(*cpi->nmvcosts_hp[1])));
-  CHECK_MEM_ERROR(cm, cpi->nmvsadcosts[0],
-                  aom_calloc(MV_VALS, sizeof(*cpi->nmvsadcosts[0])));
-  CHECK_MEM_ERROR(cm, cpi->nmvsadcosts[1],
-                  aom_calloc(MV_VALS, sizeof(*cpi->nmvsadcosts[1])));
-  CHECK_MEM_ERROR(cm, cpi->nmvsadcosts_hp[0],
-                  aom_calloc(MV_VALS, sizeof(*cpi->nmvsadcosts_hp[0])));
-  CHECK_MEM_ERROR(cm, cpi->nmvsadcosts_hp[1],
-                  aom_calloc(MV_VALS, sizeof(*cpi->nmvsadcosts_hp[1])));
+  memset(cpi->nmvcosts, 0, sizeof(cpi->nmvcosts));
+  memset(cpi->nmvcosts_hp, 0, sizeof(cpi->nmvcosts_hp));
+  memset(cpi->nmvsadcosts, 0, sizeof(cpi->nmvsadcosts));
+  memset(cpi->nmvsadcosts_hp, 0, sizeof(cpi->nmvsadcosts_hp));
 
   for (i = 0; i < (sizeof(cpi->mbgraph_stats) / sizeof(cpi->mbgraph_stats[0]));
        i++) {

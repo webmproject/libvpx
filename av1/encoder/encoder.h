@@ -414,14 +414,14 @@ typedef struct AV1_COMP {
   CODING_CONTEXT coding_context;
 
 #if CONFIG_REF_MV
-  int *nmv_costs[NMV_CONTEXTS][2];
-  int *nmv_costs_hp[NMV_CONTEXTS][2];
+  int nmv_costs[NMV_CONTEXTS][2][MV_VALS];
+  int nmv_costs_hp[NMV_CONTEXTS][2][MV_VALS];
 #endif
 
-  int *nmvcosts[2];
-  int *nmvcosts_hp[2];
-  int *nmvsadcosts[2];
-  int *nmvsadcosts_hp[2];
+  int nmvcosts[2][MV_VALS];
+  int nmvcosts_hp[2][MV_VALS];
+  int nmvsadcosts[2][MV_VALS];
+  int nmvsadcosts_hp[2][MV_VALS];
 
   int64_t last_time_stamp_seen;
   int64_t last_end_time_stamp_seen;
