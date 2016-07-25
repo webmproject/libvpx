@@ -130,8 +130,6 @@ static void set_good_speed_feature(VP10_COMP *cpi, VP10_COMMON *cm,
                                    SPEED_FEATURES *sf, int speed) {
   const int boosted = frame_is_boosted(cpi);
 
-  sf->adaptive_rd_thresh = 1;
-
   if (speed >= 1) {
     if ((cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) ||
         vp10_internal_image_edge(cpi)) {
@@ -145,7 +143,7 @@ static void set_good_speed_feature(VP10_COMP *cpi, VP10_COMMON *cm,
     sf->use_rd_breakout = 1;
     sf->adaptive_motion_search = 1;
     sf->mv.auto_mv_step_size = 1;
-    sf->adaptive_rd_thresh = 2;
+    sf->adaptive_rd_thresh = 1;
     sf->mv.subpel_iters_per_step = 1;
     sf->mode_skip_start = 10;
     sf->adaptive_pred_interp_filter = 1;
@@ -183,6 +181,7 @@ static void set_good_speed_feature(VP10_COMP *cpi, VP10_COMMON *cm,
     sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;
     sf->allow_partition_search_skip = 1;
     sf->use_upsampled_references = 0;
+    sf->adaptive_rd_thresh = 2;
 #if CONFIG_EXT_TX
     sf->tx_type_search.prune_mode = PRUNE_TWO;
 #endif
