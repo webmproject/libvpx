@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4a50d3ef_da8b396c",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 837,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-25T23:38:48Z",
+      "side": 1,
+      "message": "you could compact this into one array, then use ValuesIn when creating the test",
+      "revId": "643bc9c44d4de50b1943b4b21c81bd643c6ef9f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
