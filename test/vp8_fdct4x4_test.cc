@@ -17,7 +17,6 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-#include "./vp8_rtcd.h"
 #include "test/acm_random.h"
 #include "vpx/vpx_integer.h"
 

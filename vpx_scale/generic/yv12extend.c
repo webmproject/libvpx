@@ -15,9 +15,6 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 #include "vpx_scale/yv12config.h"
-#if CONFIG_VP9_HIGHBITDEPTH
-#include "vp9/common/vp9_common.h"
-#endif
 
 static void extend_plane(uint8_t *const src, int src_stride,
                          int width, int height,

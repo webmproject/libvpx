@@ -53,62 +53,6 @@ CODEC_SRCS-yes += $(addprefix vpx_dsp/,$(call enabled,DSP_SRCS))
 include $(SRC_PATH_BARE)/vpx_util/vpx_util.mk
 CODEC_SRCS-yes += $(addprefix vpx_util/,$(call enabled,UTIL_SRCS))
 
-ifeq ($(CONFIG_VP8),yes)
-  VP8_PREFIX=vp8/
-  include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8_common.mk
-endif
-
-ifeq ($(CONFIG_VP8_ENCODER),yes)
-  include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8cx.mk
-  CODEC_SRCS-yes += $(addprefix $(VP8_PREFIX),$(call enabled,VP8_CX_SRCS))
-  CODEC_EXPORTS-yes += $(addprefix $(VP8_PREFIX),$(VP8_CX_EXPORTS))
-  INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8cx.h
-  INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
-  CODEC_DOC_SECTIONS += vp8 vp8_encoder
-endif
-
-ifeq ($(CONFIG_VP8_DECODER),yes)
-  include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8dx.mk
-  CODEC_SRCS-yes += $(addprefix $(VP8_PREFIX),$(call enabled,VP8_DX_SRCS))
-  CODEC_EXPORTS-yes += $(addprefix $(VP8_PREFIX),$(VP8_DX_EXPORTS))
-  INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8dx.h
-  INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
-  CODEC_DOC_SECTIONS += vp8 vp8_decoder
-endif
-
-ifeq ($(CONFIG_VP9),yes)
-  VP9_PREFIX=vp9/
-  include $(SRC_PATH_BARE)/$(VP9_PREFIX)vp9_common.mk
-endif
-
-ifeq ($(CONFIG_VP9_ENCODER),yes)
-  VP9_PREFIX=vp9/
-  include $(SRC_PATH_BARE)/$(VP9_PREFIX)vp9cx.mk
-  CODEC_SRCS-yes += $(addprefix $(VP9_PREFIX),$(call enabled,VP9_CX_SRCS))
-  CODEC_EXPORTS-yes += $(addprefix $(VP9_PREFIX),$(VP9_CX_EXPORTS))
-  CODEC_SRCS-yes += $(VP9_PREFIX)vp9cx.mk vpx/vp8.h vpx/vp8cx.h
-  INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8cx.h
-  INSTALL-LIBS-$(CONFIG_SPATIAL_SVC) += include/vpx/svc_context.h
-  INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP9_PREFIX)/%
-  CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8cx.h
-  CODEC_DOC_SECTIONS += vp9 vp9_encoder
-endif
-
-ifeq ($(CONFIG_VP9_DECODER),yes)
-  VP9_PREFIX=vp9/
-  include $(SRC_PATH_BARE)/$(VP9_PREFIX)vp9dx.mk
-  CODEC_SRCS-yes += $(addprefix $(VP9_PREFIX),$(call enabled,VP9_DX_SRCS))
-  CODEC_EXPORTS-yes += $(addprefix $(VP9_PREFIX),$(VP9_DX_EXPORTS))
-  CODEC_SRCS-yes += $(VP9_PREFIX)vp9dx.mk vpx/vp8.h vpx/vp8dx.h
-  INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8dx.h
-  INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP9_PREFIX)/%
-  CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8dx.h
-  CODEC_DOC_SECTIONS += vp9 vp9_decoder
-endif
-
-VP9_PREFIX=vp9/
-$(BUILD_PFX)$(VP9_PREFIX)%.c.o: CFLAGS += -Wextra
-
 #  VP10 make file
 ifeq ($(CONFIG_VP10),yes)
   VP10_PREFIX=vp10/

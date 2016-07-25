@@ -185,7 +185,7 @@ DSP_SRCS-yes            += txfm_common.h
 DSP_SRCS-$(HAVE_SSE2)   += x86/txfm_common_sse2.h
 DSP_SRCS-$(HAVE_MSA)    += mips/txfm_macros_msa.h
 # forward transform
-ifneq ($(filter yes,$(CONFIG_VP9_ENCODER) $(CONFIG_VP10_ENCODER)),)
+ifeq ($(CONFIG_VP10),yes)
 DSP_SRCS-yes            += fwd_txfm.c
 DSP_SRCS-yes            += fwd_txfm.h
 DSP_SRCS-$(HAVE_SSE2)   += x86/fwd_txfm_sse2.h

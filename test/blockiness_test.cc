@@ -15,9 +15,6 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "./vpx_config.h"
-#if CONFIG_VP9_ENCODER
-#include "./vp9_rtcd.h"
-#endif
 
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"

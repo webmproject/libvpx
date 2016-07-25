@@ -10,6 +10,7 @@ LIBVPX_TEST_SRCS-yes += test_vectors.h
 LIBVPX_TEST_SRCS-yes += util.h
 LIBVPX_TEST_SRCS-yes += video_source.h
 LIBVPX_TEST_SRCS-yes += transform_test_base.h
+LIBVPX_TEST_SRCS-yes += function_equivalence_test.h
 
 ##
 ## BLACK BOX TESTS
@@ -142,7 +143,7 @@ LIBVPX_TEST_SRCS-yes                   += vp9_boolcoder_test.cc
 LIBVPX_TEST_SRCS-yes                   += vp9_encoder_parms_get_to_decoder.cc
 endif
 
-LIBVPX_TEST_SRCS-yes                   += convolve_test.cc
+#LIBVPX_TEST_SRCS-yes                   += convolve_test.cc
 LIBVPX_TEST_SRCS-yes                   += lpf_8_test.cc
 LIBVPX_TEST_SRCS-yes                   += vp9_intrapred_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += vp9_decrypt_test.cc
@@ -173,7 +174,7 @@ endif # VP9
 
 ## VP10
 ifeq ($(CONFIG_VP10),yes)
-LIBVPX_TEST_SRCS-yes                    += vp10_inv_txfm_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_inv_txfm_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_dct_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_fht4x4_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_fht8x8_test.cc

@@ -32,10 +32,10 @@
 #include "./ivfenc.h"
 #include "./tools_common.h"
 
-#if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
+#if CONFIG_VP10_ENCODER
 #include "vpx/vp8cx.h"
 #endif
-#if CONFIG_VP8_DECODER || CONFIG_VP9_DECODER || CONFIG_VP10_DECODER
+#if CONFIG_VP10_DECODER
 #include "vpx/vp8dx.h"
 #endif
 
@@ -350,31 +350,8 @@ static const arg_def_t cq_level = ARG_DEF(
 static const arg_def_t max_intra_rate_pct = ARG_DEF(
     NULL, "max-intra-rate", 1, "Max I-frame bitrate (pct)");
 
-#if CONFIG_VP8_ENCODER
-static const arg_def_t cpu_used_vp8 = ARG_DEF(
-    NULL, "cpu-used", 1, "CPU Used (-16..16)");
-static const arg_def_t token_parts = ARG_DEF(
-    NULL, "token-parts", 1, "Number of token partitions to use, log2");
-static const arg_def_t screen_content_mode = ARG_DEF(
-    NULL, "screen-content-mode", 1, "Screen content mode");
-static const arg_def_t *vp8_args[] = {
-  &cpu_used_vp8, &auto_altref, &noise_sens, &sharpness, &static_thresh,
-  &token_parts, &arnr_maxframes, &arnr_strength, &arnr_type,
-  &tune_ssim, &cq_level, &max_intra_rate_pct, &screen_content_mode,
-  NULL
-};
-static const int vp8_arg_ctrl_map[] = {
-  VP8E_SET_CPUUSED, VP8E_SET_ENABLEAUTOALTREF,
-  VP8E_SET_NOISE_SENSITIVITY, VP8E_SET_SHARPNESS, VP8E_SET_STATIC_THRESHOLD,
-  VP8E_SET_TOKEN_PARTITIONS,
-  VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH, VP8E_SET_ARNR_TYPE,
-  VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT,
-  VP8E_SET_SCREEN_CONTENT_MODE,
-  0
-};
-#endif
 
-#if CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
+#if CONFIG_VP10_ENCODER
 static const arg_def_t cpu_used_vp9 = ARG_DEF(
     NULL, "cpu-used", 1, "CPU Used (-8..8)");
 static const arg_def_t tile_cols = ARG_DEF(
@@ -451,34 +428,6 @@ static const arg_def_t target_level = ARG_DEF(
     " 11: level 1.1; ... 62: level 6.2)");
 #endif
 
-#if CONFIG_VP9_ENCODER
-static const arg_def_t *vp9_args[] = {
-  &cpu_used_vp9, &auto_altref, &sharpness, &static_thresh,
-  &tile_cols, &tile_rows, &arnr_maxframes, &arnr_strength, &arnr_type,
-  &tune_ssim, &cq_level, &max_intra_rate_pct, &max_inter_rate_pct,
-  &gf_cbr_boost_pct, &lossless,
-  &frame_parallel_decoding, &aq_mode, &frame_periodic_boost,
-  &noise_sens, &tune_content, &input_color_space,
-  &min_gf_interval, &max_gf_interval, &target_level,
-#if CONFIG_VP9_HIGHBITDEPTH
-  &bitdeptharg, &inbitdeptharg,
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-  NULL
-};
-static const int vp9_arg_ctrl_map[] = {
-  VP8E_SET_CPUUSED, VP8E_SET_ENABLEAUTOALTREF,
-  VP8E_SET_SHARPNESS, VP8E_SET_STATIC_THRESHOLD,
-  VP9E_SET_TILE_COLUMNS, VP9E_SET_TILE_ROWS,
-  VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH, VP8E_SET_ARNR_TYPE,
-  VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT,
-  VP9E_SET_MAX_INTER_BITRATE_PCT, VP9E_SET_GF_CBR_BOOST_PCT,
-  VP9E_SET_LOSSLESS, VP9E_SET_FRAME_PARALLEL_DECODING, VP9E_SET_AQ_MODE,
-  VP9E_SET_FRAME_PERIODIC_BOOST, VP9E_SET_NOISE_SENSITIVITY,
-  VP9E_SET_TUNE_CONTENT, VP9E_SET_COLOR_SPACE,
-  VP9E_SET_MIN_GF_INTERVAL, VP9E_SET_MAX_GF_INTERVAL, VP9E_SET_TARGET_LEVEL,
-  0
-};
-#endif
 
 #if CONFIG_VP10_ENCODER
 #if CONFIG_EXT_PARTITION
@@ -545,14 +494,6 @@ void usage_exit(void) {
   arg_show_usage(stderr, rc_twopass_args);
   fprintf(stderr, "\nKeyframe Placement Options:\n");
   arg_show_usage(stderr, kf_args);
-#if CONFIG_VP8_ENCODER
-  fprintf(stderr, "\nVP8 Specific Options:\n");
-  arg_show_usage(stderr, vp8_args);
-#endif
-#if CONFIG_VP9_ENCODER
-  fprintf(stderr, "\nVP9 Specific Options:\n");
-  arg_show_usage(stderr, vp9_args);
-#endif
 #if CONFIG_VP10_ENCODER
   fprintf(stderr, "\nVP10 Specific Options:\n");
   arg_show_usage(stderr, vp10_args);
@@ -804,10 +745,6 @@ static int compare_img(const vpx_image_t *const img1,
 #define NELEMENTS(x) (sizeof(x)/sizeof(x[0]))
 #if CONFIG_VP10_ENCODER
 #define ARG_CTRL_CNT_MAX NELEMENTS(vp10_arg_ctrl_map)
-#elif CONFIG_VP9_ENCODER
-#define ARG_CTRL_CNT_MAX NELEMENTS(vp9_arg_ctrl_map)
-#else
-#define ARG_CTRL_CNT_MAX NELEMENTS(vp8_arg_ctrl_map)
 #endif
 
 #if !CONFIG_WEBM_IO
@@ -971,7 +908,7 @@ static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
   }
   /* Validate global config */
   if (global->passes == 0) {
-#if CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
+#if CONFIG_VP10_ENCODER
     // Make default VP9 passes = 2 until there is a better quality 1-pass
     // encoder
     if (global->codec != NULL && global->codec->name != NULL)
@@ -1119,16 +1056,6 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
 
   // Handle codec specific options
   if (0) {
-#if CONFIG_VP8_ENCODER
-  } else if (strcmp(global->codec->name, "vp8") == 0) {
-    ctrl_args = vp8_args;
-    ctrl_args_map = vp8_arg_ctrl_map;
-#endif
-#if CONFIG_VP9_ENCODER
-  } else if (strcmp(global->codec->name, "vp9") == 0) {
-    ctrl_args = vp9_args;
-    ctrl_args_map = vp9_arg_ctrl_map;
-#endif
 #if CONFIG_VP10_ENCODER
   } else if (strcmp(global->codec->name, "vp10") == 0) {
     // TODO(jingning): Reuse VP9 specific encoder configuration parameters.

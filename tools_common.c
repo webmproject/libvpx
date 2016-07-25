@@ -16,11 +16,11 @@
 
 #include "./tools_common.h"
 
-#if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
+#if CONFIG_VP10_ENCODER
 #include "vpx/vp8cx.h"
 #endif
 
-#if CONFIG_VP8_DECODER || CONFIG_VP9_DECODER || CONFIG_VP10_DECODER
+#if CONFIG_VP10_DECODER
 #include "vpx/vp8dx.h"
 #endif
 
@@ -136,14 +136,6 @@ static const VpxInterface vpx_encoders[] = {
 #if CONFIG_VP10_ENCODER
   {"vp10", VP10_FOURCC, &vpx_codec_vp10_cx},
 #endif
-
-#if CONFIG_VP8_ENCODER
-  {"vp8", VP8_FOURCC, &vpx_codec_vp8_cx},
-#endif
-
-#if CONFIG_VP9_ENCODER
-  {"vp9", VP9_FOURCC, &vpx_codec_vp9_cx},
-#endif
 };
 
 int get_vpx_encoder_count(void) {
@@ -171,13 +163,6 @@ const VpxInterface *get_vpx_encoder_by_name(const char *name) {
 #if CONFIG_DECODERS
 
 static const VpxInterface vpx_decoders[] = {
-#if CONFIG_VP8_DECODER
-  {"vp8", VP8_FOURCC, &vpx_codec_vp8_dx},
-#endif
-
-#if CONFIG_VP9_DECODER
-  {"vp9", VP9_FOURCC, &vpx_codec_vp9_dx},
-#endif
 
 #if CONFIG_VP10_DECODER
   {"vp10", VP10_FOURCC, &vpx_codec_vp10_dx},

@@ -248,10 +248,12 @@ endif
 ifeq ($(CONFIG_OS_SUPPORT), yes)
 CODEC_EXTRA_LIBS-$(CONFIG_VP8)         += m
 CODEC_EXTRA_LIBS-$(CONFIG_VP9)         += m
+CODEC_EXTRA_LIBS-$(CONFIG_VP10)        += m
 else
     ifeq ($(CONFIG_GCC), yes)
     CODEC_EXTRA_LIBS-$(CONFIG_VP8)         += m
     CODEC_EXTRA_LIBS-$(CONFIG_VP9)         += m
+    CODEC_EXTRA_LIBS-$(CONFIG_VP10)        += m
     endif
 endif
 #

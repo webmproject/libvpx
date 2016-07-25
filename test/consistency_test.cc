@@ -15,9 +15,6 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "./vpx_config.h"
-#if CONFIG_VP9_ENCODER
-#include "./vp9_rtcd.h"
-#endif
 
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
@@ -132,93 +129,15 @@ class ConsistencyTestBase : public ::testing::Test {
   ACMRandom rnd_;
 };
 
-#if CONFIG_VP9_ENCODER
-typedef std::tr1::tuple<int, int> ConsistencyParam;
-class ConsistencyVP9Test
-    : public ConsistencyTestBase,
-      public ::testing::WithParamInterface<ConsistencyParam> {
- public:
-  ConsistencyVP9Test() : ConsistencyTestBase(GET_PARAM(0), GET_PARAM(1)) {}
-
- protected:
-  double CheckConsistency(int frame) {
-    EXPECT_LT(frame, 2)<< "Frame to check has to be less than 2.";
-    return
-        vpx_get_ssim_metrics(source_data_[frame], source_stride_,
-                             reference_data_[frame], reference_stride_,
-                             width_, height_, ssim_array_, &metrics_, 1);
-  }
-};
-#endif  // CONFIG_VP9_ENCODER
-
 uint8_t* ConsistencyTestBase::source_data_[2] = {NULL, NULL};
 uint8_t* ConsistencyTestBase::reference_data_[2] = {NULL, NULL};
 Ssimv* ConsistencyTestBase::ssim_array_ = NULL;
 
-#if CONFIG_VP9_ENCODER
-TEST_P(ConsistencyVP9Test, ConsistencyIsZero) {
-  FillRandom(source_data_[0], source_stride_);
-  Copy(source_data_[1], source_data_[0]);
-  Copy(reference_data_[0], source_data_[0]);
-  Blur(reference_data_[0], reference_stride_, 3);
-  Copy(reference_data_[1], source_data_[0]);
-  Blur(reference_data_[1], reference_stride_, 3);
-
-  double inconsistency = CheckConsistency(1);
-  inconsistency = CheckConsistency(0);
-  EXPECT_EQ(inconsistency, 0.0)
-      << "Should have 0 inconsistency if they are exactly the same.";
-
-  // If sources are not consistent reference frames inconsistency should
-  // be less than if the source is consistent.
-  FillRandom(source_data_[0], source_stride_);
-  FillRandom(source_data_[1], source_stride_);
-  FillRandom(reference_data_[0], reference_stride_);
-  FillRandom(reference_data_[1], reference_stride_);
-  CheckConsistency(0);
-  inconsistency = CheckConsistency(1);
-
-  Copy(source_data_[1], source_data_[0]);
-  CheckConsistency(0);
-  double inconsistency2 = CheckConsistency(1);
-  EXPECT_LT(inconsistency, inconsistency2)
-      << "Should have less inconsistency if source itself is inconsistent.";
-
-  // Less of a blur should be less inconsistent than more blur coming off a
-  // a frame with no blur.
-  ClearSsim();
-  FillRandom(source_data_[0], source_stride_);
-  Copy(source_data_[1], source_data_[0]);
-  Copy(reference_data_[0], source_data_[0]);
-  Copy(reference_data_[1], source_data_[0]);
-  Blur(reference_data_[1], reference_stride_, 4);
-  CheckConsistency(0);
-  inconsistency = CheckConsistency(1);
-  ClearSsim();
-  Copy(reference_data_[1], source_data_[0]);
-  Blur(reference_data_[1], reference_stride_, 8);
-  CheckConsistency(0);
-  inconsistency2 = CheckConsistency(1);
-
-  EXPECT_LT(inconsistency, inconsistency2)
-      << "Stronger Blur should produce more inconsistency.";
-}
-#endif  // CONFIG_VP9_ENCODER
 
 
 using std::tr1::make_tuple;
 
 //------------------------------------------------------------------------------
 // C functions
-
-#if CONFIG_VP9_ENCODER
-const ConsistencyParam c_vp9_tests[] = {
-  make_tuple(320, 240),
-  make_tuple(318, 242),
-  make_tuple(318, 238),
-};
-INSTANTIATE_TEST_CASE_P(C, ConsistencyVP9Test,
-                        ::testing::ValuesIn(c_vp9_tests));
-#endif
 
 }  // namespace

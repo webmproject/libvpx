@@ -28,7 +28,7 @@
 #include "vpx_ports/mem_ops.h"
 #include "vpx_ports/vpx_timer.h"
 
-#if CONFIG_VP8_DECODER || CONFIG_VP9_DECODER || CONFIG_VP10_DECODER
+#if CONFIG_VP10_DECODER
 #include "vpx/vp8dx.h"
 #endif
 
@@ -116,34 +116,6 @@ static const arg_def_t *all_args[] = {
   NULL
 };
 
-#if CONFIG_VP8_DECODER
-static const arg_def_t addnoise_level = ARG_DEF(
-    NULL, "noise-level", 1, "Enable VP8 postproc add noise");
-static const arg_def_t deblock = ARG_DEF(
-    NULL, "deblock", 0, "Enable VP8 deblocking");
-static const arg_def_t demacroblock_level = ARG_DEF(
-    NULL, "demacroblock-level", 1, "Enable VP8 demacroblocking, w/ level");
-static const arg_def_t pp_debug_info = ARG_DEF(
-    NULL, "pp-debug-info", 1, "Enable VP8 visible debug info");
-static const arg_def_t pp_disp_ref_frame = ARG_DEF(
-    NULL, "pp-dbg-ref-frame", 1,
-    "Display only selected reference frame per macro block");
-static const arg_def_t pp_disp_mb_modes = ARG_DEF(
-    NULL, "pp-dbg-mb-modes", 1, "Display only selected macro block modes");
-static const arg_def_t pp_disp_b_modes = ARG_DEF(
-    NULL, "pp-dbg-b-modes", 1, "Display only selected block modes");
-static const arg_def_t pp_disp_mvs = ARG_DEF(
-    NULL, "pp-dbg-mvs", 1, "Draw only selected motion vectors");
-static const arg_def_t mfqe = ARG_DEF(
-    NULL, "mfqe", 0, "Enable multiframe quality enhancement");
-
-static const arg_def_t *vp8_pp_args[] = {
-  &addnoise_level, &deblock, &demacroblock_level, &pp_debug_info,
-  &pp_disp_ref_frame, &pp_disp_mb_modes, &pp_disp_b_modes, &pp_disp_mvs, &mfqe,
-  NULL
-};
-#endif
-
 #if CONFIG_LIBYUV
 static INLINE int libyuv_scale(vpx_image_t *src, vpx_image_t *dst,
                                   FilterModeEnum mode) {
@@ -187,10 +159,6 @@ void usage_exit(void) {
   fprintf(stderr, "Usage: %s <options> filename\n\n"
           "Options:\n", exec_name);
   arg_show_usage(stderr, all_args);
-#if CONFIG_VP8_DECODER
-  fprintf(stderr, "\nVP8 Postprocessing Options:\n");
-  arg_show_usage(stderr, vp8_pp_args);
-#endif
   fprintf(stderr,
           "\nOutput File Patterns:\n\n"
           "  The -o argument specifies the name of the file(s) to "
@@ -578,13 +546,6 @@ static int main_loop(int argc, const char **argv_) {
   int                     tile_row = -1;
   int                     tile_col = -1;
 #endif  // CONFIG_EXT_TILE
-#if CONFIG_VP8_DECODER
-  vp8_postproc_cfg_t      vp8_pp_cfg = {0};
-  int                     vp8_dbg_color_ref_frame = 0;
-  int                     vp8_dbg_color_mb_modes = 0;
-  int                     vp8_dbg_color_b_modes = 0;
-  int                     vp8_dbg_display_mv = 0;
-#endif
   int                     frames_corrupted = 0;
   int                     dec_flags = 0;
   int                     do_scale = 0;
@@ -679,57 +640,6 @@ static int main_loop(int argc, const char **argv_) {
     else if (arg_match(&arg, &tilec, argi))
       tile_col = arg_parse_int(&arg);
 #endif  // CONFIG_EXT_TILE
-#if CONFIG_VP8_DECODER
-    else if (arg_match(&arg, &addnoise_level, argi)) {
-      postproc = 1;
-      vp8_pp_cfg.post_proc_flag |= VP8_ADDNOISE;
-      vp8_pp_cfg.noise_level = arg_parse_uint(&arg);
-    } else if (arg_match(&arg, &demacroblock_level, argi)) {
-      postproc = 1;
-      vp8_pp_cfg.post_proc_flag |= VP8_DEMACROBLOCK;
-      vp8_pp_cfg.deblocking_level = arg_parse_uint(&arg);
-    } else if (arg_match(&arg, &deblock, argi)) {
-      postproc = 1;
-      vp8_pp_cfg.post_proc_flag |= VP8_DEBLOCK;
-    } else if (arg_match(&arg, &mfqe, argi)) {
-      postproc = 1;
-      vp8_pp_cfg.post_proc_flag |= VP8_MFQE;
-    } else if (arg_match(&arg, &pp_debug_info, argi)) {
-      unsigned int level = arg_parse_uint(&arg);
-
-      postproc = 1;
-      vp8_pp_cfg.post_proc_flag &= ~0x7;
-
-      if (level)
-        vp8_pp_cfg.post_proc_flag |= level;
-    } else if (arg_match(&arg, &pp_disp_ref_frame, argi)) {
-      unsigned int flags = arg_parse_int(&arg);
-      if (flags) {
-        postproc = 1;
-        vp8_dbg_color_ref_frame = flags;
-      }
-    } else if (arg_match(&arg, &pp_disp_mb_modes, argi)) {
-      unsigned int flags = arg_parse_int(&arg);
-      if (flags) {
-        postproc = 1;
-        vp8_dbg_color_mb_modes = flags;
-      }
-    } else if (arg_match(&arg, &pp_disp_b_modes, argi)) {
-      unsigned int flags = arg_parse_int(&arg);
-      if (flags) {
-        postproc = 1;
-        vp8_dbg_color_b_modes = flags;
-      }
-    } else if (arg_match(&arg, &pp_disp_mvs, argi)) {
-      unsigned int flags = arg_parse_int(&arg);
-      if (flags) {
-        postproc = 1;
-        vp8_dbg_display_mv = flags;
-      }
-    } else if (arg_match(&arg, &error_concealment, argi)) {
-      ec_enabled = 1;
-    }
-#endif  // CONFIG_VP8_DECODER
     else
       argj++;
   }
@@ -829,47 +739,6 @@ static int main_loop(int argc, const char **argv_) {
 
   if (!quiet)
     fprintf(stderr, "%s\n", decoder.name);
-
-#if CONFIG_VP8_DECODER
-  if (vp8_pp_cfg.post_proc_flag
-      && vpx_codec_control(&decoder, VP8_SET_POSTPROC, &vp8_pp_cfg)) {
-    fprintf(stderr, "Failed to configure postproc: %s\n",
-            vpx_codec_error(&decoder));
-    return EXIT_FAILURE;
-  }
-
-  if (vp8_dbg_color_ref_frame
-      && vpx_codec_control(&decoder, VP8_SET_DBG_COLOR_REF_FRAME,
-                           vp8_dbg_color_ref_frame)) {
-    fprintf(stderr, "Failed to configure reference block visualizer: %s\n",
-            vpx_codec_error(&decoder));
-    return EXIT_FAILURE;
-  }
-
-  if (vp8_dbg_color_mb_modes
-      && vpx_codec_control(&decoder, VP8_SET_DBG_COLOR_MB_MODES,
-                           vp8_dbg_color_mb_modes)) {
-    fprintf(stderr, "Failed to configure macro block visualizer: %s\n",
-            vpx_codec_error(&decoder));
-    return EXIT_FAILURE;
-  }
-
-  if (vp8_dbg_color_b_modes
-      && vpx_codec_control(&decoder, VP8_SET_DBG_COLOR_B_MODES,
-                           vp8_dbg_color_b_modes)) {
-    fprintf(stderr, "Failed to configure block visualizer: %s\n",
-            vpx_codec_error(&decoder));
-    return EXIT_FAILURE;
-  }
-
-  if (vp8_dbg_display_mv
-      && vpx_codec_control(&decoder, VP8_SET_DBG_DISPLAY_MV,
-                           vp8_dbg_display_mv)) {
-    fprintf(stderr, "Failed to configure motion vector visualizer: %s\n",
-            vpx_codec_error(&decoder));
-    return EXIT_FAILURE;
-  }
-#endif
 
 #if CONFIG_VP10_DECODER && CONFIG_EXT_TILE
   if (strncmp(decoder.name, "WebM Project VP10", 17) == 0) {

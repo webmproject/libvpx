@@ -10,10 +10,12 @@
 
 VP10_COMMON_SRCS-yes += vp10_common.mk
 VP10_COMMON_SRCS-yes += vp10_iface_common.h
+VP10_COMMON_SRCS-yes += common/ans.h
 VP10_COMMON_SRCS-yes += common/ppflags.h
 VP10_COMMON_SRCS-yes += common/alloccommon.c
 VP10_COMMON_SRCS-yes += common/blockd.c
 VP10_COMMON_SRCS-yes += common/debugmodes.c
+VP10_COMMON_SRCS-yes += common/divide.h
 VP10_COMMON_SRCS-yes += common/entropy.c
 VP10_COMMON_SRCS-yes += common/entropymode.c
 VP10_COMMON_SRCS-yes += common/entropymv.c
@@ -57,6 +59,7 @@ VP10_COMMON_SRCS-yes += common/mvref_common.h
 VP10_COMMON_SRCS-yes += common/quant_common.c
 VP10_COMMON_SRCS-yes += common/reconinter.c
 VP10_COMMON_SRCS-yes += common/reconintra.c
+VP10_COMMON_SRCS-yes += common/restoration.h
 VP10_COMMON_SRCS-$(CONFIG_POSTPROC_VISUALIZER) += common/textblit.c
 VP10_COMMON_SRCS-yes += common/common_data.h
 VP10_COMMON_SRCS-yes += common/scan.c

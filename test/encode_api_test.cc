@@ -20,12 +20,6 @@ namespace {
 
 TEST(EncodeAPI, InvalidParams) {
   static const vpx_codec_iface_t *kCodecs[] = {
-#if CONFIG_VP8_ENCODER
-    &vpx_codec_vp8_cx_algo,
-#endif
-#if CONFIG_VP9_ENCODER
-    &vpx_codec_vp9_cx_algo,
-#endif
 #if CONFIG_VP10_ENCODER
     &vpx_codec_vp10_cx_algo,
 #endif

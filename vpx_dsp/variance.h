@@ -57,22 +57,6 @@ typedef unsigned int (*vpx_subp_avg_variance_fn_t)(const uint8_t *a,
                                                    int b_stride,
                                                    unsigned int *sse,
                                                    const uint8_t *second_pred);
-#if CONFIG_VP8
-typedef struct variance_vtable {
-  vpx_sad_fn_t            sdf;
-  vpx_variance_fn_t       vf;
-  vpx_subpixvariance_fn_t svf;
-  vpx_variance_fn_t       svf_halfpix_h;
-  vpx_variance_fn_t       svf_halfpix_v;
-  vpx_variance_fn_t       svf_halfpix_hv;
-  vpx_sad_multi_fn_t      sdx3f;
-  vpx_sad_multi_fn_t      sdx8f;
-  vpx_sad_multi_d_fn_t    sdx4df;
-#if ARCH_X86 || ARCH_X86_64
-  vp8_copy32xn_fn_t       copymem;
-#endif
-} vp8_variance_fn_ptr_t;
-#endif  // CONFIG_VP8
 
 #if CONFIG_VP10 && CONFIG_EXT_INTER
 typedef unsigned int(*vpx_masked_sad_fn_t)(const uint8_t *src,

@@ -12,7 +12,7 @@ using libvpx_test::ACMRandom;
 
 namespace {
 void setup_convolve() {
-#if HAVE_SSSE3
+#if HAVE_SSSE3 && CONFIG_RUNTIME_CPU_DETECT
   vp10_convolve_horiz = vp10_convolve_horiz_c;
   vp10_convolve_vert = vp10_convolve_vert_c;
 #endif
