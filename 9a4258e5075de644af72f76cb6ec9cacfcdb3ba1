@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eff279a6_37e15a2b",
+        "filename": "vpx_scale/generic/vpx_scale.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-26T22:58:40Z",
+      "side": 1,
+      "message": "dropped this dead code to quiet the lint; it\u0027s handled at line 267",
+      "range": {
+        "startLine": 260,
+        "startChar": 30,
+        "endLine": 262,
+        "endChar": 52
+      },
+      "revId": "9a4258e5075de644af72f76cb6ec9cacfcdb3ba1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
