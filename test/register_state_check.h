@@ -48,7 +48,7 @@ namespace libvpx_test {
 class RegisterStateCheck {
  public:
   RegisterStateCheck() { initialized_ = StoreRegisters(&pre_context_); }
-  ~RegisterStateCheck() { EXPECT_TRUE(Check()); }
+  ~RegisterStateCheck() { Check(); }
 
  private:
   static bool StoreRegisters(CONTEXT* const context) {
@@ -61,10 +61,10 @@ class RegisterStateCheck {
   }
 
   // Compares the register state. Returns true if the states match.
-  bool Check() const {
-    if (!initialized_) return false;
+  void Check() const {
+    ASSERT_TRUE(initialized_);
     CONTEXT post_context;
-    if (!StoreRegisters(&post_context)) return false;
+    ASSERT_TRUE(StoreRegisters(&post_context));
 
     const M128A* xmm_pre = &pre_context_.Xmm6;
     const M128A* xmm_post = &post_context.Xmm6;
@@ -73,7 +73,6 @@ class RegisterStateCheck {
       ++xmm_pre;
       ++xmm_post;
     }
-    return !testing::Test::HasNonfatalFailure();
   }
 
   bool initialized_;
@@ -102,28 +101,20 @@ namespace libvpx_test {
 // arm platform.
 class RegisterStateCheck {
  public:
-  RegisterStateCheck() { initialized_ = StoreRegisters(pre_store_); }
-  ~RegisterStateCheck() { EXPECT_TRUE(Check()); }
+  RegisterStateCheck() { vpx_push_neon(pre_store_); }
+  ~RegisterStateCheck() { Check(); }
 
  private:
-  static bool StoreRegisters(int64_t store[8]) {
-    vpx_push_neon(store);
-    return true;
-  }
-
   // Compares the register state. Returns true if the states match.
-  bool Check() const {
-    if (!initialized_) return false;
+  void Check() const {
     int64_t post_store[8];
     vpx_push_neon(post_store);
     for (int i = 0; i < 8; ++i) {
       EXPECT_EQ(pre_store_[i], post_store[i]) << "d"
           << i + 8 << " has been modified";
     }
-    return !testing::Test::HasNonfatalFailure();
   }
 
-  bool initialized_;
   int64_t pre_store_[8];
 };
 
@@ -156,12 +147,12 @@ class RegisterStateCheckMMX {
   RegisterStateCheckMMX() {
     __asm__ volatile("fstenv %0" : "=rm"(pre_fpu_env_));
   }
-  ~RegisterStateCheckMMX() { EXPECT_TRUE(Check()); }
+  ~RegisterStateCheckMMX() { Check(); }
 
  private:
   // Checks the FPU tag word pre/post execution, returning false if not cleared
   // to 0xffff.
-  bool Check() const {
+  void Check() const {
     EXPECT_EQ(0xffff, pre_fpu_env_[4])
         << "FPU was in an inconsistent state prior to call";
 
@@ -169,7 +160,6 @@ class RegisterStateCheckMMX {
     __asm__ volatile("fstenv %0" : "=rm"(post_fpu_env));
     EXPECT_EQ(0xffff, post_fpu_env[4])
         << "FPU was left in an inconsistent state after call";
-    return !testing::Test::HasNonfatalFailure();
   }
 
   uint16_t pre_fpu_env_[14];
