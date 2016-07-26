@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eff279a6_d16c6605",
+        "filename": "vp10/common/blockd.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-07-26T19:25:13Z",
+      "side": 1,
+      "message": "is the negative sign needed?\n\nseems one can change the functions in reconintra.c accordingly.",
+      "revId": "bc3010aa578818353bd1c5d0fd34b295352a9b31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eff279a6_f16fe2f6",
+        "filename": "vp10/common/blockd.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-07-26T19:25:13Z",
+      "side": 1,
+      "message": "space",
+      "revId": "bc3010aa578818353bd1c5d0fd34b295352a9b31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
