@@ -71,23 +71,22 @@ int arm_cpu_caps(void) {
     return flags;
   }
   mask = arm_cpu_env_mask();
-  /* MSVC has no inline __asm support for ARM, but it does let you __emit
-   *  instructions via their assembled hex code.
-   * All of these instructions should be essentially nops.
-   */
+/* MSVC has no inline __asm support for ARM, but it does let you __emit
+ *  instructions via their assembled hex code.
+ * All of these instructions should be essentially nops.
+ */
 #if HAVE_MEDIA
-  if (mask & HAS_MEDIA)
-    __try {
+  if (mask & HAS_MEDIA) __try {
       /*SHADD8 r3,r3,r3*/
       __emit(0xE6333F93);
       flags |= HAS_MEDIA;
     } __except (GetExceptionCode() == EXCEPTION_ILLEGAL_INSTRUCTION) {
-    /*Ignore exception.*/
-  }
+      /*Ignore exception.*/
+    }
 }
 #endif /* HAVE_MEDIA */
 #if HAVE_NEON || HAVE_NEON_ASM
-if (mask &HAS_NEON) {
+if (mask & HAS_NEON) {
   __try {
     /*VORR q0,q0,q0*/
     __emit(0xF2200150);
@@ -117,8 +116,7 @@ int arm_cpu_caps(void) {
   flags |= HAS_MEDIA;
 #endif /* HAVE_MEDIA */
 #if HAVE_NEON || HAVE_NEON_ASM
-  if (features & ANDROID_CPU_ARM_FEATURE_NEON)
-    flags |= HAS_NEON;
+  if (features & ANDROID_CPU_ARM_FEATURE_NEON) flags |= HAS_NEON;
 #endif /* HAVE_NEON || HAVE_NEON_ASM */
   return flags & mask;
 }
@@ -169,7 +167,8 @@ int arm_cpu_caps(void) {
   }
   return flags & mask;
 }
-#else /* end __linux__ */
-#error "--enable-runtime-cpu-detect selected, but no CPU detection method " \
+#else  /* end __linux__ */
+#error \
+    "--enable-runtime-cpu-detect selected, but no CPU detection method " \
 "available for your platform. Reconfigure with --disable-runtime-cpu-detect."
 #endif
