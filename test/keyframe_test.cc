@@ -17,8 +17,9 @@
 
 namespace {
 
-class KeyframeTest : public ::libvpx_test::EncoderTest,
-    public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
+class KeyframeTest
+    : public ::libvpx_test::EncoderTest,
+      public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
  protected:
   KeyframeTest() : EncoderTest(GET_PARAM(0)) {}
   virtual ~KeyframeTest() {}
@@ -65,8 +66,7 @@ TEST_P(KeyframeTest, TestRandomVideoSource) {
 
   // In realtime mode - auto placed keyframes are exceedingly rare,  don't
   // bother with this check   if(GetParam() > 0)
-  if (GET_PARAM(1) > 0)
-    EXPECT_GT(kf_count_, 1);
+  if (GET_PARAM(1) > 0) EXPECT_GT(kf_count_, 1);
 }
 
 TEST_P(KeyframeTest, TestDisableKeyframes) {
@@ -114,8 +114,7 @@ TEST_P(KeyframeTest, TestAutoKeyframe) {
   // may not produce a keyframe like we expect. This is necessary when running
   // on very slow environments (like Valgrind). The step -11 was determined
   // experimentally as the fastest mode that still throws the keyframe.
-  if (deadline_ == VPX_DL_REALTIME)
-    set_cpu_used_ = -11;
+  if (deadline_ == VPX_DL_REALTIME) set_cpu_used_ = -11;
 
   // This clip has a cut scene every 30 frames -> Frame 0, 30, 60, 90, 120.
   // I check only the first 40 frames to make sure there's a keyframe at frame
@@ -135,7 +134,7 @@ TEST_P(KeyframeTest, TestAutoKeyframe) {
        iter != kf_pts_list_.end(); ++iter) {
     if (deadline_ == VPX_DL_REALTIME && *iter > 0)
       EXPECT_EQ(0, (*iter - 1) % 30) << "Unexpected keyframe at frame "
-        << *iter;
+                                     << *iter;
     else
       EXPECT_EQ(0, *iter % 30) << "Unexpected keyframe at frame " << *iter;
   }

@@ -52,9 +52,9 @@ TEST_P(SumSquaresTest, OperationCheck) {
   const int limit = 1 << (msb + 1);
 
   for (int k = 0; k < kNumIterations; k++) {
-    const int size = 4 << rnd(6);    // Up to 128x128
-    int stride = 4 << rnd(7);  // Up to 256 stride
-    while (stride < size) {   // Make sure it's valid
+    const int size = 4 << rnd(6);  // Up to 128x128
+    int stride = 4 << rnd(7);      // Up to 256 stride
+    while (stride < size) {        // Make sure it's valid
       stride = 4 << rnd(7);
     }
 
@@ -68,9 +68,8 @@ TEST_P(SumSquaresTest, OperationCheck) {
     uint64_t res_tst;
     ASM_REGISTER_STATE_CHECK(res_tst = tst_func_(src, stride, size));
 
-    ASSERT_EQ(res_ref, res_tst)
-        << "Error: Sum Squares Test"
-        << " C output does not match optimized output.";
+    ASSERT_EQ(res_ref, res_tst) << "Error: Sum Squares Test"
+                                << " C output does not match optimized output.";
   }
 }
 
@@ -81,9 +80,9 @@ TEST_P(SumSquaresTest, ExtremeValues) {
   const int limit = 1 << (msb + 1);
 
   for (int k = 0; k < kNumIterations; k++) {
-    const int size = 4 << rnd(6);    // Up to 128x128
-    int stride = 4 << rnd(7);  // Up to 256 stride
-    while (stride < size) {    // Make sure it's valid
+    const int size = 4 << rnd(6);  // Up to 128x128
+    int stride = 4 << rnd(7);      // Up to 256 stride
+    while (stride < size) {        // Make sure it's valid
       stride = 4 << rnd(7);
     }
 
@@ -98,9 +97,8 @@ TEST_P(SumSquaresTest, ExtremeValues) {
     uint64_t res_tst;
     ASM_REGISTER_STATE_CHECK(res_tst = tst_func_(src, stride, size));
 
-    ASSERT_EQ(res_ref, res_tst)
-        << "Error: Sum Squares Test"
-        << " C output does not match optimized output.";
+    ASSERT_EQ(res_ref, res_tst) << "Error: Sum Squares Test"
+                                << " C output does not match optimized output.";
   }
 }
 

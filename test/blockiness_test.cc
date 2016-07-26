@@ -26,11 +26,9 @@
 
 #include "vpx_mem/vpx_mem.h"
 
-
-extern "C"
-double vp9_get_blockiness(const unsigned char *img1, int img1_pitch,
-                          const unsigned char *img2, int img2_pitch,
-                          int width, int height);
+extern "C" double vp9_get_blockiness(const unsigned char *img1, int img1_pitch,
+                                     const unsigned char *img2, int img2_pitch,
+                                     int width, int height);
 
 using libvpx_test::ACMRandom;
 
@@ -40,9 +38,9 @@ class BlockinessTestBase : public ::testing::Test {
   BlockinessTestBase(int width, int height) : width_(width), height_(height) {}
 
   static void SetUpTestCase() {
-    source_data_ = reinterpret_cast<uint8_t*>(
+    source_data_ = reinterpret_cast<uint8_t *>(
         vpx_memalign(kDataAlignment, kDataBufferSize));
-    reference_data_ = reinterpret_cast<uint8_t*>(
+    reference_data_ = reinterpret_cast<uint8_t *>(
         vpx_memalign(kDataAlignment, kDataBufferSize));
   }
 
@@ -53,14 +51,12 @@ class BlockinessTestBase : public ::testing::Test {
     reference_data_ = NULL;
   }
 
-  virtual void TearDown() {
-    libvpx_test::ClearSystemState();
-  }
+  virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
  protected:
   // Handle frames up to 640x480
   static const int kDataAlignment = 16;
-  static const int kDataBufferSize = 640*480;
+  static const int kDataBufferSize = 640 * 480;
 
   virtual void SetUp() {
     source_stride_ = (width_ + 31) & ~31;
@@ -68,8 +64,8 @@ class BlockinessTestBase : public ::testing::Test {
     rnd_.Reset(ACMRandom::DeterministicSeed());
   }
 
-  void FillConstant(uint8_t *data, int stride, uint8_t fill_constant,
-                    int width, int height) {
+  void FillConstant(uint8_t *data, int stride, uint8_t fill_constant, int width,
+                    int height) {
     for (int h = 0; h < height; ++h) {
       for (int w = 0; w < width; ++w) {
         data[h * stride + w] = fill_constant;
@@ -104,7 +100,7 @@ class BlockinessTestBase : public ::testing::Test {
   void FillCheckerboard(uint8_t *data, int stride) {
     for (int h = 0; h < height_; h += 4) {
       for (int w = 0; w < width_; w += 4) {
-        if (((h/4) ^ (w/4)) & 1)
+        if (((h / 4) ^ (w / 4)) & 1)
           FillConstant(data + h * stride + w, stride, 255, 4, 4);
         else
           FillConstant(data + h * stride + w, stride, 0, 4, 4);
@@ -135,9 +131,9 @@ class BlockinessTestBase : public ::testing::Test {
     }
   }
   int width_, height_;
-  static uint8_t* source_data_;
+  static uint8_t *source_data_;
   int source_stride_;
-  static uint8_t* reference_data_;
+  static uint8_t *reference_data_;
   int reference_stride_;
 
   ACMRandom rnd_;
@@ -153,15 +149,14 @@ class BlockinessVP9Test
 
  protected:
   double GetBlockiness() const {
-    return vp9_get_blockiness(source_data_, source_stride_,
-                              reference_data_, reference_stride_,
-                              width_, height_);
+    return vp9_get_blockiness(source_data_, source_stride_, reference_data_,
+                              reference_stride_, width_, height_);
   }
 };
 #endif  // CONFIG_VP9_ENCODER
 
-uint8_t* BlockinessTestBase::source_data_ = NULL;
-uint8_t* BlockinessTestBase::reference_data_ = NULL;
+uint8_t *BlockinessTestBase::source_data_ = NULL;
+uint8_t *BlockinessTestBase::reference_data_ = NULL;
 
 #if CONFIG_VP9_ENCODER
 TEST_P(BlockinessVP9Test, SourceBlockierThanReference) {
@@ -212,7 +207,6 @@ TEST_P(BlockinessVP9Test, WorstCaseBlockiness) {
 }
 #endif  // CONFIG_VP9_ENCODER
 
-
 using std::tr1::make_tuple;
 
 //------------------------------------------------------------------------------
@@ -220,9 +214,7 @@ using std::tr1::make_tuple;
 
 #if CONFIG_VP9_ENCODER
 const BlockinessParam c_vp9_tests[] = {
-  make_tuple(320, 240),
-  make_tuple(318, 242),
-  make_tuple(318, 238),
+  make_tuple(320, 240), make_tuple(318, 242), make_tuple(318, 238),
 };
 INSTANTIATE_TEST_CASE_P(C, BlockinessVP9Test, ::testing::ValuesIn(c_vp9_tests));
 #endif

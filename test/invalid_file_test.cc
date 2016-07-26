@@ -34,21 +34,19 @@ std::ostream &operator<<(std::ostream &os, const DecodeParam &dp) {
   return os << "threads: " << dp.threads << " file: " << dp.filename;
 }
 
-class InvalidFileTest
-    : public ::libvpx_test::DecoderTest,
-      public ::libvpx_test::CodecTestWithParam<DecodeParam> {
+class InvalidFileTest : public ::libvpx_test::DecoderTest,
+                        public ::libvpx_test::CodecTestWithParam<DecodeParam> {
  protected:
   InvalidFileTest() : DecoderTest(GET_PARAM(0)), res_file_(NULL) {}
 
   virtual ~InvalidFileTest() {
-    if (res_file_ != NULL)
-      fclose(res_file_);
+    if (res_file_ != NULL) fclose(res_file_);
   }
 
   void OpenResFile(const std::string &res_file_name_) {
     res_file_ = libvpx_test::OpenTestDataFile(res_file_name_);
     ASSERT_TRUE(res_file_ != NULL) << "Result file open failed. Filename: "
-        << res_file_name_;
+                                   << res_file_name_;
   }
 
   virtual bool HandleDecodeResult(
@@ -72,8 +70,9 @@ class InvalidFileTest
       EXPECT_TRUE(res_dec == expected_res_dec ||
                   res_dec == VPX_CODEC_CORRUPT_FRAME)
           << "Results don't match: frame number = " << video.frame_number()
-          << ". (" << decoder->DecodeError() << "). Expected: "
-          << expected_res_dec << " or " << VPX_CODEC_CORRUPT_FRAME;
+          << ". (" << decoder->DecodeError()
+          << "). Expected: " << expected_res_dec << " or "
+          << VPX_CODEC_CORRUPT_FRAME;
     } else {
       EXPECT_EQ(expected_res_dec, res_dec)
           << "Results don't match: frame number = " << video.frame_number()
@@ -119,25 +118,23 @@ class InvalidFileTest
   FILE *res_file_;
 };
 
-TEST_P(InvalidFileTest, ReturnCode) {
-  RunTest();
-}
+TEST_P(InvalidFileTest, ReturnCode) { RunTest(); }
 
 const DecodeParam kVP9InvalidFileTests[] = {
-  {1, "invalid-vp90-02-v2.webm"},
+  { 1, "invalid-vp90-02-v2.webm" },
 #if CONFIG_VP9_HIGHBITDEPTH
-  {1, "invalid-vp90-2-00-quantizer-00.webm.ivf.s5861_r01-05_b6-.v2.ivf"},
+  { 1, "invalid-vp90-2-00-quantizer-00.webm.ivf.s5861_r01-05_b6-.v2.ivf" },
 #endif
-  {1, "invalid-vp90-03-v3.webm"},
-  {1, "invalid-vp90-2-00-quantizer-11.webm.ivf.s52984_r01-05_b6-.ivf"},
-  {1, "invalid-vp90-2-00-quantizer-11.webm.ivf.s52984_r01-05_b6-z.ivf"},
-  {1, "invalid-vp90-2-12-droppable_1.ivf.s3676_r01-05_b6-.ivf"},
-  {1, "invalid-vp90-2-05-resize.ivf.s59293_r01-05_b6-.ivf"},
-  {1, "invalid-vp90-2-09-subpixel-00.ivf.s20492_r01-05_b6-.v2.ivf"},
-  {1, "invalid-vp91-2-mixedrefcsp-444to420.ivf"},
-  {1, "invalid-vp90-2-12-droppable_1.ivf.s73804_r01-05_b6-.ivf"},
-  {1, "invalid-vp90-2-03-size-224x196.webm.ivf.s44156_r01-05_b6-.ivf"},
-  {1, "invalid-vp90-2-03-size-202x210.webm.ivf.s113306_r01-05_b6-.ivf"},
+  { 1, "invalid-vp90-03-v3.webm" },
+  { 1, "invalid-vp90-2-00-quantizer-11.webm.ivf.s52984_r01-05_b6-.ivf" },
+  { 1, "invalid-vp90-2-00-quantizer-11.webm.ivf.s52984_r01-05_b6-z.ivf" },
+  { 1, "invalid-vp90-2-12-droppable_1.ivf.s3676_r01-05_b6-.ivf" },
+  { 1, "invalid-vp90-2-05-resize.ivf.s59293_r01-05_b6-.ivf" },
+  { 1, "invalid-vp90-2-09-subpixel-00.ivf.s20492_r01-05_b6-.v2.ivf" },
+  { 1, "invalid-vp91-2-mixedrefcsp-444to420.ivf" },
+  { 1, "invalid-vp90-2-12-droppable_1.ivf.s73804_r01-05_b6-.ivf" },
+  { 1, "invalid-vp90-2-03-size-224x196.webm.ivf.s44156_r01-05_b6-.ivf" },
+  { 1, "invalid-vp90-2-03-size-202x210.webm.ivf.s113306_r01-05_b6-.ivf" },
 };
 
 VP9_INSTANTIATE_TEST_CASE(InvalidFileTest,
@@ -149,34 +146,34 @@ class InvalidFileInvalidPeekTest : public InvalidFileTest {
  protected:
   InvalidFileInvalidPeekTest() : InvalidFileTest() {}
   virtual void HandlePeekResult(libvpx_test::Decoder *const /*decoder*/,
-                                libvpx_test::CompressedVideoSource* /*video*/,
+                                libvpx_test::CompressedVideoSource * /*video*/,
                                 const vpx_codec_err_t /*res_peek*/) {}
 };
 
-TEST_P(InvalidFileInvalidPeekTest, ReturnCode) {
-  RunTest();
-}
+TEST_P(InvalidFileInvalidPeekTest, ReturnCode) { RunTest(); }
 
 const DecodeParam kVP9InvalidFileInvalidPeekTests[] = {
-  {1, "invalid-vp90-01-v3.webm"},
+  { 1, "invalid-vp90-01-v3.webm" },
 };
 
 VP9_INSTANTIATE_TEST_CASE(InvalidFileInvalidPeekTest,
                           ::testing::ValuesIn(kVP9InvalidFileInvalidPeekTests));
 
 const DecodeParam kMultiThreadedVP9InvalidFileTests[] = {
-  {4, "invalid-vp90-2-08-tile_1x4_frame_parallel_all_key.webm"},
-  {4, "invalid-"
-      "vp90-2-08-tile_1x2_frame_parallel.webm.ivf.s47039_r01-05_b6-.ivf"},
-  {4, "invalid-vp90-2-08-tile_1x8_frame_parallel.webm.ivf.s288_r01-05_b6-.ivf"},
-  {2, "invalid-vp90-2-09-aq2.webm.ivf.s3984_r01-05_b6-.v2.ivf"},
-  {4, "invalid-vp90-2-09-subpixel-00.ivf.s19552_r01-05_b6-.v2.ivf"},
+  { 4, "invalid-vp90-2-08-tile_1x4_frame_parallel_all_key.webm" },
+  { 4,
+    "invalid-"
+    "vp90-2-08-tile_1x2_frame_parallel.webm.ivf.s47039_r01-05_b6-.ivf" },
+  { 4,
+    "invalid-vp90-2-08-tile_1x8_frame_parallel.webm.ivf.s288_r01-05_b6-.ivf" },
+  { 2, "invalid-vp90-2-09-aq2.webm.ivf.s3984_r01-05_b6-.v2.ivf" },
+  { 4, "invalid-vp90-2-09-subpixel-00.ivf.s19552_r01-05_b6-.v2.ivf" },
 };
 
 INSTANTIATE_TEST_CASE_P(
     VP9MultiThreaded, InvalidFileTest,
     ::testing::Combine(
         ::testing::Values(
-            static_cast<const libvpx_test::CodecFactory*>(&libvpx_test::kVP9)),
+            static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP9)),
         ::testing::ValuesIn(kMultiThreadedVP9InvalidFileTests)));
 }  // namespace

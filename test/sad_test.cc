@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #include <string.h>
 #include <limits.h>
 #include <stdio.h>
@@ -25,7 +24,7 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 
-template<typename Function>
+template <typename Function>
 struct TestParams {
   TestParams(int w, int h, Function f, int bd = -1)
       : width(w), height(h), bit_depth(bd), func(f) {}
@@ -50,24 +49,24 @@ typedef TestParams<SadMxNx4Func> SadMxNx4Param;
 using libvpx_test::ACMRandom;
 
 namespace {
-template<typename ParamType>
+template <typename ParamType>
 class SADTestBase : public ::testing::TestWithParam<ParamType> {
  public:
-  explicit SADTestBase(const ParamType& params) : params_(params) {}
+  explicit SADTestBase(const ParamType &params) : params_(params) {}
 
   virtual void SetUp() {
-    source_data8_ = reinterpret_cast<uint8_t*>(
+    source_data8_ = reinterpret_cast<uint8_t *>(
         vpx_memalign(kDataAlignment, kDataBlockSize));
-    reference_data8_ = reinterpret_cast<uint8_t*>(
+    reference_data8_ = reinterpret_cast<uint8_t *>(
         vpx_memalign(kDataAlignment, kDataBufferSize));
-    second_pred8_ = reinterpret_cast<uint8_t*>(
-        vpx_memalign(kDataAlignment, 64*64));
-    source_data16_ = reinterpret_cast<uint16_t*>(
-        vpx_memalign(kDataAlignment, kDataBlockSize*sizeof(uint16_t)));
-    reference_data16_ = reinterpret_cast<uint16_t*>(
-        vpx_memalign(kDataAlignment, kDataBufferSize*sizeof(uint16_t)));
-    second_pred16_ = reinterpret_cast<uint16_t*>(
-        vpx_memalign(kDataAlignment, 64*64*sizeof(uint16_t)));
+    second_pred8_ =
+        reinterpret_cast<uint8_t *>(vpx_memalign(kDataAlignment, 64 * 64));
+    source_data16_ = reinterpret_cast<uint16_t *>(
+        vpx_memalign(kDataAlignment, kDataBlockSize * sizeof(uint16_t)));
+    reference_data16_ = reinterpret_cast<uint16_t *>(
+        vpx_memalign(kDataAlignment, kDataBufferSize * sizeof(uint16_t)));
+    second_pred16_ = reinterpret_cast<uint16_t *>(
+        vpx_memalign(kDataAlignment, 64 * 64 * sizeof(uint16_t)));
 
     if (params_.bit_depth == -1) {
       use_high_bit_depth_ = false;
@@ -167,13 +166,13 @@ class SADTestBase : public ::testing::TestWithParam<ParamType> {
       for (int w = 0; w < params_.width; ++w) {
         if (!use_high_bit_depth_) {
           const int tmp = second_pred8[h * params_.width + w] +
-              reference8[h * reference_stride_ + w];
+                          reference8[h * reference_stride_ + w];
           const uint8_t comp_pred = ROUND_POWER_OF_TWO(tmp, 1);
           sad += abs(source8[h * source_stride_ + w] - comp_pred);
 #if CONFIG_VP9_HIGHBITDEPTH
         } else {
           const int tmp = second_pred16[h * params_.width + w] +
-              reference16[h * reference_stride_ + w];
+                          reference16[h * reference_stride_ + w];
           const uint16_t comp_pred = ROUND_POWER_OF_TWO(tmp, 1);
           sad += abs(source16[h * source_stride_ + w] - comp_pred);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -248,9 +247,8 @@ class SADx4Test : public SADTestBase<SadMxNx4Param> {
     const uint8_t *references[] = { GetReference(0), GetReference(1),
                                     GetReference(2), GetReference(3) };
 
-    ASM_REGISTER_STATE_CHECK(params_.func(source_data_, source_stride_,
-                                          references, reference_stride_,
-                                          results));
+    ASM_REGISTER_STATE_CHECK(params_.func(
+        source_data_, source_stride_, references, reference_stride_, results));
   }
 
   void CheckSADs() const {
@@ -453,7 +451,7 @@ TEST_P(SADx4Test, ShortSrc) {
 }
 
 TEST_P(SADx4Test, SrcAlignedByWidth) {
-  uint8_t * tmp_source_data = source_data_;
+  uint8_t *tmp_source_data = source_data_;
   source_data_ += params_.width;
   FillRandom(source_data_, source_stride_);
   FillRandom(GetReference(0), reference_stride_);

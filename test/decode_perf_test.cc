@@ -70,8 +70,7 @@ const DecodePerfParam kVP9DecodePerfVectors[] = {
    power/temp/min max frame decode times/etc
  */
 
-class DecodePerfTest : public ::testing::TestWithParam<DecodePerfParam> {
-};
+class DecodePerfTest : public ::testing::TestWithParam<DecodePerfParam> {};
 
 TEST_P(DecodePerfTest, PerfTest) {
   const char *const video_name = GET_PARAM(VIDEO_NAME);
@@ -92,8 +91,7 @@ TEST_P(DecodePerfTest, PerfTest) {
   }
 
   vpx_usec_timer_mark(&t);
-  const double elapsed_secs = double(vpx_usec_timer_elapsed(&t))
-                              / kUsecsInSec;
+  const double elapsed_secs = double(vpx_usec_timer_elapsed(&t)) / kUsecsInSec;
   const unsigned frames = video.frame_number();
   const double fps = double(frames) / elapsed_secs;
 
@@ -111,17 +109,13 @@ TEST_P(DecodePerfTest, PerfTest) {
 INSTANTIATE_TEST_CASE_P(VP9, DecodePerfTest,
                         ::testing::ValuesIn(kVP9DecodePerfVectors));
 
-class VP9NewEncodeDecodePerfTest :
-    public ::libvpx_test::EncoderTest,
-    public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
+class VP9NewEncodeDecodePerfTest
+    : public ::libvpx_test::EncoderTest,
+      public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
  protected:
   VP9NewEncodeDecodePerfTest()
-      : EncoderTest(GET_PARAM(0)),
-        encoding_mode_(GET_PARAM(1)),
-        speed_(0),
-        outfile_(0),
-        out_frames_(0) {
-  }
+      : EncoderTest(GET_PARAM(0)), encoding_mode_(GET_PARAM(1)), speed_(0),
+        outfile_(0), out_frames_(0) {}
 
   virtual ~VP9NewEncodeDecodePerfTest() {}
 
@@ -182,9 +176,7 @@ class VP9NewEncodeDecodePerfTest :
 
   virtual bool DoDecode() { return false; }
 
-  void set_speed(unsigned int speed) {
-    speed_ = speed;
-  }
+  void set_speed(unsigned int speed) { speed_ = speed; }
 
  private:
   libvpx_test::TestMode encoding_mode_;
@@ -196,10 +188,7 @@ class VP9NewEncodeDecodePerfTest :
 struct EncodePerfTestVideo {
   EncodePerfTestVideo(const char *name_, uint32_t width_, uint32_t height_,
                       uint32_t bitrate_, int frames_)
-      : name(name_),
-        width(width_),
-        height(height_),
-        bitrate(bitrate_),
+      : name(name_), width(width_), height(height_), bitrate(bitrate_),
         frames(frames_) {}
   const char *name;
   uint32_t width;
@@ -225,10 +214,8 @@ TEST_P(VP9NewEncodeDecodePerfTest, PerfTest) {
 
   const char *video_name = kVP9EncodePerfTestVectors[i].name;
   libvpx_test::I420VideoSource video(
-      video_name,
-      kVP9EncodePerfTestVectors[i].width,
-      kVP9EncodePerfTestVectors[i].height,
-      timebase.den, timebase.num, 0,
+      video_name, kVP9EncodePerfTestVectors[i].width,
+      kVP9EncodePerfTestVectors[i].height, timebase.den, timebase.num, 0,
       kVP9EncodePerfTestVectors[i].frames);
   set_speed(2);
 
@@ -268,6 +255,6 @@ TEST_P(VP9NewEncodeDecodePerfTest, PerfTest) {
   printf("}\n");
 }
 
-VP9_INSTANTIATE_TEST_CASE(
-  VP9NewEncodeDecodePerfTest, ::testing::Values(::libvpx_test::kTwoPassGood));
+VP9_INSTANTIATE_TEST_CASE(VP9NewEncodeDecodePerfTest,
+                          ::testing::Values(::libvpx_test::kTwoPassGood));
 }  // namespace

@@ -23,11 +23,8 @@ class VPxEncoderThreadTest
       public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
  protected:
   VPxEncoderThreadTest()
-      : EncoderTest(GET_PARAM(0)),
-        encoder_initialized_(false),
-        tiles_(2),
-        encoding_mode_(GET_PARAM(1)),
-        set_cpu_used_(GET_PARAM(2)) {
+      : EncoderTest(GET_PARAM(0)), encoder_initialized_(false), tiles_(2),
+        encoding_mode_(GET_PARAM(1)), set_cpu_used_(GET_PARAM(2)) {
     init_flags_ = VPX_CODEC_USE_PSNR;
     md5_.clear();
   }
@@ -82,7 +79,7 @@ class VPxEncoderThreadTest
   }
 
   virtual bool HandleDecodeResult(const vpx_codec_err_t res,
-                                  const libvpx_test::VideoSource& /*video*/,
+                                  const libvpx_test::VideoSource & /*video*/,
                                   libvpx_test::Decoder * /*decoder*/) {
     if (res != VPX_CODEC_OK) {
       EXPECT_EQ(VPX_CODEC_OK, res);
@@ -123,9 +120,9 @@ TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
   ASSERT_EQ(single_thr_md5, multi_thr_md5);
 }
 
-VP9_INSTANTIATE_TEST_CASE(
-    VPxEncoderThreadTest,
-    ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood,
-                      ::libvpx_test::kRealTime),
-    ::testing::Range(1, 9));
+VP9_INSTANTIATE_TEST_CASE(VPxEncoderThreadTest,
+                          ::testing::Values(::libvpx_test::kTwoPassGood,
+                                            ::libvpx_test::kOnePassGood,
+                                            ::libvpx_test::kRealTime),
+                          ::testing::Range(1, 9));
 }  // namespace
