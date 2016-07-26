@@ -622,7 +622,9 @@ typedef struct VP10_COMP {
 #if CONFIG_EXT_REFS
   int refresh_frame_mask;
   int existing_fb_idx_to_show;
-  int is_arf_filter_off;
+  int is_arf_filter_off[MAX_EXT_ARFS + 1];
+  int num_extra_arfs;
+  int arf_map[MAX_EXT_ARFS + 1];
 #endif  // CONFIG_EXT_REFS
 #if CONFIG_GLOBAL_MOTION
   int global_motion_used[TOTAL_REFS_PER_FRAME];

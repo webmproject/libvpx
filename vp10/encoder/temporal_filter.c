@@ -625,15 +625,31 @@ void vp10_temporal_filter(VP10_COMP *cpi, int distance) {
   int frames_to_blur_forward;
   struct scale_factors sf;
   YV12_BUFFER_CONFIG *frames[MAX_LAG_BUFFERS] = { NULL };
+#if CONFIG_EXT_REFS
+  const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
+#endif
 
   // Apply context specific adjustments to the arnr filter parameters.
   adjust_arnr_filter(cpi, distance, rc->gfu_boost, &frames_to_blur, &strength);
+  // TODO(weitinglin): Currently, we enforce the filtering strength on
+  //                   extra ARFs' to be zeros. We should investigate in which
+  //                   case it is more beneficial to use non-zero strength
+  //                   filtering.
 #if CONFIG_EXT_REFS
-  if (strength == 0 && frames_to_blur == 1)
-    cpi->is_arf_filter_off = 1;
-  else
-    cpi->is_arf_filter_off = 0;
+  if (gf_group->rf_level[gf_group->index] == GF_ARF_LOW) {
+    strength = 0;
+    frames_to_blur = 1;
+  }
 #endif
+
+#if CONFIG_EXT_REFS
+  if (strength == 0 && frames_to_blur == 1) {
+    cpi->is_arf_filter_off[gf_group->arf_update_idx[gf_group->index]] = 1;
+  } else {
+    cpi->is_arf_filter_off[gf_group->arf_update_idx[gf_group->index]] = 0;
+  }
+#endif
+
   frames_to_blur_backward = (frames_to_blur / 2);
   frames_to_blur_forward = ((frames_to_blur - 1) / 2);
   start_frame = distance + frames_to_blur_forward;

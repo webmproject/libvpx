@@ -110,6 +110,7 @@ typedef struct {
   int is_bwd_ref_frame;
   int is_last_bipred_frame;
   int is_bipred_frame;
+  int is_src_frame_ext_arf;
 #endif  // CONFIG_EXT_REFS
 
   int avg_frame_bandwidth;  // Average frame size target for clip
