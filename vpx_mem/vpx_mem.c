@@ -19,6 +19,10 @@ static INLINE size_t *GetMallocAddressLocation(void *const mem) {
   return ((size_t *)mem) - 1;
 }
 
+static INLINE size_t GetAlignedMallocSize(size_t size, size_t align) {
+  return size + align - 1 + ADDRESS_STORAGE_SIZE;
+}
+
 static INLINE void SetActualMallocAddress(void *const mem,
                                           const void *const malloc_addr) {
   size_t *const malloc_addr_location = GetMallocAddressLocation(mem);
@@ -32,7 +36,8 @@ static INLINE void *GetActualMallocAddress(void *const mem) {
 
 void *vpx_memalign(size_t align, size_t size) {
   void *x = NULL;
-  void *const addr = malloc(size + align - 1 + ADDRESS_STORAGE_SIZE);
+  const size_t aligned_size = GetAlignedMallocSize(size, align);
+  void *const addr = malloc(aligned_size);
   if (addr) {
     x = align_addr((unsigned char *)addr + ADDRESS_STORAGE_SIZE, (int)align);
     SetActualMallocAddress(x, addr);
@@ -66,8 +71,9 @@ void *vpx_realloc(void *memblk, size_t size) {
     vpx_free(memblk);
   else {
     void *addr = GetActualMallocAddress(memblk);
+    const size_t aligned_size = GetAlignedMallocSize(size, DEFAULT_ALIGNMENT);
     memblk = NULL;
-    addr = realloc(addr, size + DEFAULT_ALIGNMENT + ADDRESS_STORAGE_SIZE);
+    addr = realloc(addr, aligned_size);
     if (addr) {
       new_addr = align_addr((unsigned char *)addr + ADDRESS_STORAGE_SIZE,
                             DEFAULT_ALIGNMENT);
