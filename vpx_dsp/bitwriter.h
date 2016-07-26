@@ -12,8 +12,8 @@
 #define VPX_DSP_BITWRITER_H_
 
 #include "vpx_ports/mem.h"
-
 #include "vpx_dsp/prob.h"
+#include "vpx_util/debug_util.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,6 +36,10 @@ static INLINE void vpx_write(vpx_writer *br, int bit, int probability) {
   unsigned int range = br->range;
   unsigned int lowvalue = br->lowvalue;
   register int shift;
+
+#if CONFIG_BITSTREAM_DEBUG
+  bitstream_queue_push(bit, probability);
+#endif  // CONFIG_BITSTREAM_DEBUG
 
   split = 1 + (((range - 1) * probability) >> 8);
 

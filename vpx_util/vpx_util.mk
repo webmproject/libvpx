@@ -11,4 +11,6 @@
 UTIL_SRCS-yes += vpx_util.mk
 UTIL_SRCS-yes += vpx_thread.c
 UTIL_SRCS-yes += vpx_thread.h
+UTIL_SRCS-yes += debug_util.c
+UTIL_SRCS-yes += debug_util.h
 UTIL_SRCS-yes += endian_inl.h
