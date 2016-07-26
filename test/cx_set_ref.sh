@@ -27,7 +27,12 @@ cx_set_ref_verify_environment() {
 # $1 is the codec name.
 vpx_set_ref() {
   local codec="$1"
-  local encoder="${LIBVPX_BIN_PATH}/${codec}cx_set_ref${VPX_TEST_EXE_SUFFIX}"
+  local encoder="${LIBVPX_BIN_PATH}/vpxcx_set_ref${VPX_TEST_EXE_SUFFIX}"
+
+  if [ "$codec" = "vp8" ]; then
+    encoder="${LIBVPX_BIN_PATH}/vp8cx_set_ref${VPX_TEST_EXE_SUFFIX}"
+  fi
+
   local output_file="${VPX_TEST_OUTPUT_DIR}/${codec}cx_set_ref_${codec}.ivf"
   local ref_frame_num=90
 
@@ -36,9 +41,15 @@ vpx_set_ref() {
     return 1
   fi
 
-  eval "${VPX_TEST_PREFIX}" "${encoder}" "${YUV_RAW_INPUT_WIDTH}" \
-      "${YUV_RAW_INPUT_HEIGHT}" "${YUV_RAW_INPUT}" "${output_file}" \
-      "${ref_frame_num}" ${devnull}
+  if [ "$codec" = "vp8" ]; then
+    eval "${VPX_TEST_PREFIX}" "${encoder}" "${YUV_RAW_INPUT_WIDTH}" \
+        "${YUV_RAW_INPUT_HEIGHT}" "${YUV_RAW_INPUT}" "${output_file}" \
+        "${ref_frame_num}" ${devnull}
+  else
+    eval "${VPX_TEST_PREFIX}" "${encoder}" "${codec}" "${YUV_RAW_INPUT_WIDTH}" \
+        "${YUV_RAW_INPUT_HEIGHT}" "${YUV_RAW_INPUT}" "${output_file}" \
+        "${ref_frame_num}" ${devnull}
+  fi
 
   [ -e "${output_file}" ] || return 1
 }
