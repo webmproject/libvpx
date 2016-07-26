@@ -458,7 +458,92 @@ static int cost_coeffs(MACROBLOCK *x, int plane, int block,
   return cost;
 }
 
-static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane, int block,
+static INLINE int num_4x4_to_edge(int plane_4x4_dim, int mb_to_edge_dim,
+                                  int subsampling_dim, int blk_dim) {
+  return plane_4x4_dim + (mb_to_edge_dim >> (5 + subsampling_dim)) - blk_dim;
+}
+
+// Compute the pixel domain sum square error on all visible 4x4s in the
+// transform block.
+static unsigned pixel_sse(const VP9_COMP *const cpi, const MACROBLOCKD *xd,
+                          const struct macroblockd_plane *const pd,
+                          const uint8_t *src, const int src_stride,
+                          const uint8_t *dst, const int dst_stride,
+                          int blk_row, int blk_col,
+                          const BLOCK_SIZE plane_bsize,
+                          const BLOCK_SIZE tx_bsize) {
+  unsigned int sse = 0;
+  const int plane_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
+  const int plane_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
+  const int tx_4x4_w = num_4x4_blocks_wide_lookup[tx_bsize];
+  const int tx_4x4_h = num_4x4_blocks_high_lookup[tx_bsize];
+  int b4x4s_to_right_edge = num_4x4_to_edge(plane_4x4_w, xd->mb_to_right_edge,
+                                            pd->subsampling_x, blk_col);
+  int b4x4s_to_bottom_edge = num_4x4_to_edge(plane_4x4_h, xd->mb_to_bottom_edge,
+                                             pd->subsampling_y, blk_row);
+  if (tx_bsize == BLOCK_4X4 ||
+      (b4x4s_to_right_edge >= tx_4x4_w && b4x4s_to_bottom_edge >= tx_4x4_h)) {
+    cpi->fn_ptr[tx_bsize].vf(src, src_stride, dst, dst_stride, &sse);
+  } else {
+    const vpx_variance_fn_t vf_4x4 = cpi->fn_ptr[BLOCK_4X4].vf;
+    int r, c;
+    unsigned this_sse = 0;
+    int max_r = VPXMIN(b4x4s_to_bottom_edge, tx_4x4_h);
+    int max_c = VPXMIN(b4x4s_to_right_edge, tx_4x4_w);
+    sse = 0;
+    // if we are in the unrestricted motion border.
+    for (r = 0; r < max_r; ++r) {
+      // Skip visiting the sub blocks that are wholly within the UMV.
+      for (c = 0; c < max_c; ++c) {
+        vf_4x4(src + r * src_stride * 4 + c * 4, src_stride,
+               dst + r * dst_stride * 4 + c * 4, dst_stride,
+               &this_sse);
+        sse += this_sse;
+      }
+    }
+  }
+  return sse;
+}
+
+// Compute the squares sum squares on all visible 4x4s in the transform block.
+static unsigned sum_squares_visible(const MACROBLOCKD *xd,
+                                    const struct macroblockd_plane *const pd,
+                                    const int16_t *diff, const int diff_stride,
+                                    int blk_row, int blk_col,
+                                    const BLOCK_SIZE plane_bsize,
+                                    const BLOCK_SIZE tx_bsize) {
+  unsigned int sse = 0;
+  const int plane_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
+  const int plane_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
+  const int tx_4x4_w = num_4x4_blocks_wide_lookup[tx_bsize];
+  const int tx_4x4_h = num_4x4_blocks_high_lookup[tx_bsize];
+  int b4x4s_to_right_edge = num_4x4_to_edge(plane_4x4_w, xd->mb_to_right_edge,
+                                            pd->subsampling_x, blk_col);
+  int b4x4s_to_bottom_edge = num_4x4_to_edge(plane_4x4_h, xd->mb_to_bottom_edge,
+                                             pd->subsampling_y, blk_row);
+  if (tx_bsize == BLOCK_4X4 ||
+      (b4x4s_to_right_edge >= tx_4x4_w && b4x4s_to_bottom_edge >= tx_4x4_h)) {
+    sse = vpx_sum_squares_2d_i16(diff, diff_stride, tx_bsize);
+  } else {
+    int r, c;
+    unsigned this_sse = 0;
+    int max_r = VPXMIN(b4x4s_to_bottom_edge, tx_4x4_h);
+    int max_c = VPXMIN(b4x4s_to_right_edge, tx_4x4_w);
+    sse = 0;
+    // if we are in the unrestricted motion border.
+    for (r = 0; r < max_r; ++r) {
+      // Skip visiting the sub blocks that are wholly within the UMV.
+      for (c = 0; c < max_c; ++c) {
+        this_sse = vpx_sum_squares_2d_i16(diff, diff_stride, BLOCK_4X4);
+        sse += this_sse;
+      }
+    }
+  }
+  return sse;
+}
+
+static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane,
+                       BLOCK_SIZE plane_bsize, int block,
                        int blk_row, int blk_col, TX_SIZE tx_size,
                        int64_t *out_dist, int64_t *out_sse) {
   MACROBLOCKD* const xd = &x->e_mbd;
@@ -508,7 +593,8 @@ static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane, int block,
     const uint16_t *eob = &p->eobs[block];
     unsigned int tmp;
 
-    cpi->fn_ptr[tx_bsize].vf(src, src_stride, dst, dst_stride, &tmp);
+    tmp = pixel_sse(cpi, xd, pd, src, src_stride, dst, dst_stride,
+                    blk_row, blk_col, plane_bsize, tx_bsize);
     *out_sse = (int64_t)tmp * 16;
 
     if (*eob) {
@@ -571,7 +657,8 @@ static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane, int block,
       }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-      cpi->fn_ptr[tx_bsize].vf(src, src_stride, recon, 32, &tmp);
+      tmp = pixel_sse(cpi, xd, pd, src, src_stride, recon, 32,
+                      blk_row, blk_col, plane_bsize, tx_bsize);
     }
 
     *out_dist = (int64_t)tmp * 16;
@@ -607,12 +694,10 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     vp9_encode_block_intra(plane, block, blk_row, blk_col, plane_bsize, tx_size,
                            &intra_arg);
     if (args->cpi->sf.txfm_domain_distortion) {
-      dist_block(args->cpi, x, plane, block, blk_row, blk_col, tx_size, &dist,
-                 &sse);
+      dist_block(args->cpi, x, plane, plane_bsize, block, blk_row, blk_col,
+                 tx_size, &dist, &sse);
     } else {
-      const int bs = 4 << tx_size;
       const BLOCK_SIZE tx_bsize = txsize_to_bsize[tx_size];
-      const vpx_variance_fn_t variance = args->cpi->fn_ptr[tx_bsize].vf;
       const struct macroblock_plane *const p = &x->plane[plane];
       const struct macroblockd_plane *const pd = &xd->plane[plane];
       const int src_stride = p->src.stride;
@@ -622,13 +707,15 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
       const uint8_t *dst = &pd->dst.buf[4 * (blk_row * dst_stride + blk_col)];
       const int16_t *diff = &p->src_diff[4 * (blk_row * diff_stride + blk_col)];
       unsigned int tmp;
-      sse = vpx_sum_squares_2d_i16(diff, diff_stride, bs);
+      sse = sum_squares_visible(xd, pd, diff, diff_stride, blk_row,
+                                blk_col, plane_bsize, tx_bsize);
 #if CONFIG_VP9_HIGHBITDEPTH
       if ((xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) && (xd->bd > 8))
         sse = ROUND_POWER_OF_TWO(sse, (xd->bd - 8) * 2);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       sse = sse * 16;
-      variance(src, src_stride, dst, dst_stride, &tmp);
+      tmp = pixel_sse(args->cpi, xd, pd, src, src_stride, dst, dst_stride,
+                      blk_row, blk_col, plane_bsize, tx_bsize);
       dist = (int64_t)tmp * 16;
     }
   } else if (max_txsize_lookup[plane_bsize] == tx_size) {
@@ -638,8 +725,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
       vp9_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size);
       if (args->cpi->sf.quant_coeff_opt)
         vp9_optimize_b(x, plane, block, tx_size, coeff_ctx);
-      dist_block(args->cpi, x, plane, block, blk_row, blk_col, tx_size, &dist,
-                 &sse);
+      dist_block(args->cpi, x, plane, plane_bsize, block, blk_row, blk_col,
+                 tx_size, &dist, &sse);
     } else if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] ==
                SKIP_TXFM_AC_ONLY) {
       // compute DC coefficient
@@ -673,8 +760,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     vp9_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size);
     if (args->cpi->sf.quant_coeff_opt)
       vp9_optimize_b(x, plane, block, tx_size, coeff_ctx);
-    dist_block(args->cpi, x, plane, block, blk_row, blk_col, tx_size, &dist,
-               &sse);
+    dist_block(args->cpi, x, plane, plane_bsize, block, blk_row, blk_col,
+               tx_size, &dist, &sse);
   }
 
   rd = RDCOST(x->rdmult, x->rddiv, 0, dist);
