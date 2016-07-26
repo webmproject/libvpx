@@ -18,35 +18,42 @@
 #include "include/aom_mem_intrnl.h"
 #include "aom/aom_integer.h"
 
+static inline size_t *GetMallocAddressLocation(void *const mem) {
+  return ((size_t *)mem) - 1;
+}
+
+static inline void SetActualMallocAddress(void *const mem,
+                                          const void *const malloc_addr) {
+  size_t *const malloc_addr_location = GetMallocAddressLocation(mem);
+  *malloc_addr_location = (size_t)malloc_addr;
+}
+
+static inline void *GetActualMallocAddress(void *const mem) {
+  const size_t *const malloc_addr_location = GetMallocAddressLocation(mem);
+  return (void *)(*malloc_addr_location);
+}
+
 void *aom_memalign(size_t align, size_t size) {
-  void *addr, *x = NULL;
-
-  addr = malloc(size + align - 1 + ADDRESS_STORAGE_SIZE);
-
+  void *x = NULL;
+  void *const addr = malloc(size + align - 1 + ADDRESS_STORAGE_SIZE);
   if (addr) {
     x = align_addr((unsigned char *)addr + ADDRESS_STORAGE_SIZE, (int)align);
-    /* save the actual malloc address */
-    ((size_t *)x)[-1] = (size_t)addr;
+    SetActualMallocAddress(x, addr);
   }
-
   return x;
 }
 
 void *aom_malloc(size_t size) { return aom_memalign(DEFAULT_ALIGNMENT, size); }
 
 void *aom_calloc(size_t num, size_t size) {
-  void *x;
-
-  x = aom_memalign(DEFAULT_ALIGNMENT, num * size);
-
-  if (x) memset(x, 0, num * size);
-
+  const size_t total_size = num * size;
+  void *const x = aom_malloc(total_size);
+  if (x) memset(x, 0, total_size);
   return x;
 }
 
 void *aom_realloc(void *memblk, size_t size) {
-  void *addr, *new_addr = NULL;
-  int align = DEFAULT_ALIGNMENT;
+  void *new_addr = NULL;
 
   /*
   The realloc() function changes the size of the object pointed to by
@@ -61,19 +68,13 @@ void *aom_realloc(void *memblk, size_t size) {
   else if (!size)
     aom_free(memblk);
   else {
-    addr = (void *)(((size_t *)memblk)[-1]);
+    void *addr = GetActualMallocAddress(memblk);
     memblk = NULL;
-
-    new_addr = realloc(addr, size + align + ADDRESS_STORAGE_SIZE);
-
-    if (new_addr) {
-      addr = new_addr;
-      new_addr =
-          (void *)(((size_t)((unsigned char *)new_addr + ADDRESS_STORAGE_SIZE) +
-                    (align - 1)) &
-                   (size_t)-align);
-      /* save the actual malloc address */
-      ((size_t *)new_addr)[-1] = (size_t)addr;
+    addr = realloc(addr, size + DEFAULT_ALIGNMENT + ADDRESS_STORAGE_SIZE);
+    if (addr) {
+      new_addr = align_addr((unsigned char *)addr + ADDRESS_STORAGE_SIZE,
+                            DEFAULT_ALIGNMENT);
+      SetActualMallocAddress(new_addr, addr);
     }
   }
 
@@ -82,7 +83,7 @@ void *aom_realloc(void *memblk, size_t size) {
 
 void aom_free(void *memblk) {
   if (memblk) {
-    void *addr = (void *)(((size_t *)memblk)[-1]);
+    void *addr = GetActualMallocAddress(memblk);
     free(addr);
   }
 }
