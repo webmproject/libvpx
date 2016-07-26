@@ -668,11 +668,41 @@ static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
   }
 }
 
+// Get the shift (up-scaled by 256) in X w.r.t a unit change in Y.
+// If angle > 0 && angle < 90, dx = -((int)(256 / t));
+// If angle > 90 && angle < 180, dx = (int)(256 / t);
+// If angle > 180 && angle < 270, dx = 1;
+static inline int get_dx(int angle) {
+  if (angle > 0 && angle < 90) {
+    return -dr_intra_derivative[angle];
+  } else if (angle > 90 && angle < 180) {
+    return dr_intra_derivative[180 - angle];
+  } else {
+    // In this case, we are not really going to use dx. We may return any value.
+    return 1;
+  }
+}
+
+// Get the shift (up-scaled by 256) in Y w.r.t a unit change in X.
+// If angle > 0 && angle < 90, dy = 1;
+// If angle > 90 && angle < 180, dy = (int)(256 * t);
+// If angle > 180 && angle < 270, dy = -((int)(256 * t));
+static inline int get_dy(int angle) {
+  if (angle > 90 && angle < 180) {
+      return dr_intra_derivative[angle - 90];
+    } else if (angle > 180 && angle < 270) {
+      return -dr_intra_derivative[270 -angle];
+    } else {
+    // In this case, we are not really going to use dy. We may return any value.
+    return 1;
+  }
+}
+
 static void dr_predictor(uint8_t *dst, ptrdiff_t stride, TX_SIZE tx_size,
                          const uint8_t *above, const uint8_t *left, int angle,
                          INTRA_FILTER filter_type) {
-  const int dx = (int)dr_intra_derivative[angle][0];
-  const int dy = (int)dr_intra_derivative[angle][1];
+  const int dx = get_dx(angle);
+  const int dy = get_dy(angle);
   const int bs = 4 * num_4x4_blocks_wide_txsize_lookup[tx_size];
   assert(angle > 0 && angle < 270);
 
@@ -997,8 +1027,8 @@ static INLINE void highbd_h_predictor(uint16_t *dst, ptrdiff_t stride,
 static void highbd_dr_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
                                 const uint16_t *above, const uint16_t *left,
                                 int angle, int bd, INTRA_FILTER filter) {
-  const int dx = (int)dr_intra_derivative[angle][0];
-  const int dy = (int)dr_intra_derivative[angle][1];
+  const int dx = get_dx(angle);
+  const int dy = get_dy(angle);
   assert(angle > 0 && angle < 270);
 
   if (angle > 0 && angle < 90) {
