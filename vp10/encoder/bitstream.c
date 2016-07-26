@@ -384,15 +384,26 @@ static void update_txfm_partition_probs(VP10_COMMON *cm, vp10_writer *w,
 
 static void write_selected_tx_size(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                                    vp10_writer *w) {
-  TX_SIZE tx_size = xd->mi[0]->mbmi.tx_size;
-  BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
-  const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
+  const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  const BLOCK_SIZE bsize = mbmi->sb_type;
   // For sub8x8 blocks the tx_size symbol does not need to be sent
   if (bsize >= BLOCK_8X8) {
-    vp10_write_token(
-        w, vp10_tx_size_tree[max_tx_size - TX_8X8],
-        cm->fc->tx_size_probs[max_tx_size - TX_8X8][get_tx_size_context(xd)],
-        &tx_size_encodings[max_tx_size - TX_8X8][tx_size]);
+    const TX_SIZE tx_size = mbmi->tx_size;
+    const int is_inter = is_inter_block(mbmi);
+    const int tx_size_ctx = get_tx_size_context(xd);
+    const int tx_size_cat = is_inter ? inter_tx_size_cat_lookup[bsize]
+                                     : intra_tx_size_cat_lookup[bsize];
+    const TX_SIZE coded_tx_size = txsize_sqr_up_map[tx_size];
+
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+    assert(IMPLIES(is_rect_tx(tx_size), is_rect_tx_allowed(mbmi)));
+    assert(
+        IMPLIES(is_rect_tx(tx_size), tx_size == max_txsize_rect_lookup[bsize]));
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
+
+    vp10_write_token(w, vp10_tx_size_tree[tx_size_cat],
+                     cm->fc->tx_size_probs[tx_size_cat][tx_size_ctx],
+                     &tx_size_encodings[tx_size_cat][coded_tx_size]);
   }
 }
 
@@ -1411,10 +1422,12 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
         !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
       int eset = get_ext_tx_set(mbmi->tx_size, bsize, is_inter);
       if (is_inter) {
+        assert(ext_tx_used_inter[eset][mbmi->tx_type]);
         if (eset > 0)
-          vp10_write_token(w, vp10_ext_tx_inter_tree[eset],
-                           cm->fc->inter_ext_tx_prob[eset][mbmi->tx_size],
-                           &ext_tx_inter_encodings[eset][mbmi->tx_type]);
+          vp10_write_token(
+              w, vp10_ext_tx_inter_tree[eset],
+              cm->fc->inter_ext_tx_prob[eset][txsize_sqr_map[mbmi->tx_size]],
+              &ext_tx_inter_encodings[eset][mbmi->tx_type]);
       } else if (ALLOW_INTRA_EXT_TX) {
         if (eset > 0)
           vp10_write_token(

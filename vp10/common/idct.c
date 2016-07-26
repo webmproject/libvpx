@@ -24,12 +24,12 @@ int get_tx_scale(const MACROBLOCKD *const xd, const TX_TYPE tx_type,
   (void)tx_type;
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    return tx_size == TX_32X32;
+    return txsize_sqr_up_map[tx_size] == TX_32X32;
   }
 #else
   (void)xd;
 #endif
-  return tx_size == TX_32X32;
+  return txsize_sqr_up_map[tx_size] == TX_32X32;
 }
 
 #if CONFIG_EXT_TX

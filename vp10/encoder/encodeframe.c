@@ -5041,25 +5041,29 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
   if (output_enabled) {
     if (cm->tx_mode == TX_MODE_SELECT && mbmi->sb_type >= BLOCK_8X8 &&
         !(is_inter_block(mbmi) && (mbmi->skip || seg_skip))) {
-      const int ctx = get_tx_size_context(xd);
-      const int tx_size_cat = max_txsize_lookup[bsize] - TX_8X8;
+      const int is_inter = is_inter_block(mbmi);
+      const int tx_size_ctx = get_tx_size_context(xd);
+      const int tx_size_cat = is_inter ? inter_tx_size_cat_lookup[bsize]
+                                       : intra_tx_size_cat_lookup[bsize];
+      const TX_SIZE coded_tx_size = txsize_sqr_up_map[mbmi->tx_size];
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+      assert(IMPLIES(is_rect_tx(mbmi->tx_size), is_rect_tx_allowed(mbmi)));
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
 #if CONFIG_VAR_TX
-      if (is_inter_block(mbmi))
+      if (is_inter)
         tx_partition_count_update(cm, xd, bsize, mi_row, mi_col, td->counts);
 #endif
-      ++td->counts->tx_size[tx_size_cat][ctx][txsize_sqr_up_map[mbmi->tx_size]];
+      ++td->counts->tx_size[tx_size_cat][tx_size_ctx][coded_tx_size];
     } else {
       int x, y;
       TX_SIZE tx_size;
       // The new intra coding scheme requires no change of transform size
       if (is_inter_block(&mi->mbmi)) {
-        tx_size = VPXMIN(tx_mode_to_biggest_tx_size[cm->tx_mode],
-                         max_txsize_lookup[bsize]);
-#if CONFIG_EXT_TX && CONFIG_RECT_TX
-        if (txsize_sqr_map[max_txsize_rect_lookup[bsize]] <= tx_size)
-          tx_size = max_txsize_rect_lookup[bsize];
-#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
-        if (xd->lossless[mbmi->segment_id]) tx_size = TX_4X4;
+        if (xd->lossless[mbmi->segment_id]) {
+          tx_size = TX_4X4;
+        } else {
+          tx_size = tx_size_from_tx_mode(bsize, cm->tx_mode, 1);
+        }
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
         ++td->counts->tx_size_implied[max_txsize_lookup[bsize]]
                                      [txsize_sqr_up_map[mbmi->tx_size]];
@@ -5082,7 +5086,8 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
       int eset = get_ext_tx_set(mbmi->tx_size, bsize, is_inter_block(mbmi));
       if (eset > 0) {
         if (is_inter_block(mbmi)) {
-          ++td->counts->inter_ext_tx[eset][mbmi->tx_size][mbmi->tx_type];
+          ++td->counts->inter_ext_tx[eset][txsize_sqr_map[mbmi->tx_size]]
+                                    [mbmi->tx_type];
         } else {
           ++td->counts
                 ->intra_ext_tx[eset][mbmi->tx_size][mbmi->mode][mbmi->tx_type];

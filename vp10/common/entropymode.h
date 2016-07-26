@@ -171,6 +171,9 @@ typedef struct FRAME_COUNTS {
 #else
   unsigned int comp_ref[REF_CONTEXTS][COMP_REFS - 1][2];
 #endif  // CONFIG_EXT_REFS
+  // TODO(any): tx_size_totals is only used by the encoder to decide whether
+  // to use forward updates for the coeff probs, and as such it does not really
+  // belong into this structure.
   unsigned int tx_size_totals[TX_SIZES];
   unsigned int tx_size[TX_SIZES - 1][TX_SIZE_CONTEXTS][TX_SIZES];
 #if CONFIG_VAR_TX

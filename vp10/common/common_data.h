@@ -355,9 +355,9 @@ static const TX_SIZE max_txsize_rect_lookup[BLOCK_SIZES] = {
   // 4X8,    8X4,      8X8
   TX_4X8,    TX_8X4,   TX_8X8,
   // 8X16,   16X8,     16X16
-  TX_8X8,    TX_8X8,   TX_16X16,
+  TX_8X16,   TX_16X8,  TX_16X16,
   // 16X32,  32X16,    32X32
-  TX_16X16,  TX_16X16, TX_32X32,
+  TX_16X32,  TX_32X16, TX_32X32,
   // 32X64,  64X32,    64X64
   TX_32X32,  TX_32X32, TX_32X32,
 #if CONFIG_EXT_PARTITION
@@ -366,6 +366,49 @@ static const TX_SIZE max_txsize_rect_lookup[BLOCK_SIZES] = {
 #endif  // CONFIG_EXT_PARTITION
 };
 #endif  // CONFIG_EXT_TX
+
+// Same as "max_txsize_lookup[bsize] - TX_8X8", invalid for bsize < 8X8
+static const int32_t intra_tx_size_cat_lookup[BLOCK_SIZES] = {
+  //                                      4X4
+                                          INT32_MIN,
+  // 4X8,             8X4,                8X8
+  INT32_MIN,          INT32_MIN,          TX_8X8 - TX_8X8,
+  // 8X16,            16X8,               16X16
+  TX_8X8 - TX_8X8,    TX_8X8 - TX_8X8,    TX_16X16 - TX_8X8,
+  // 16X32,           32X16,              32X32
+  TX_16X16 - TX_8X8,  TX_16X16 - TX_8X8,  TX_32X32 - TX_8X8,
+  // 32X64,           64X32,              64X64
+  TX_32X32 - TX_8X8,  TX_32X32 - TX_8X8,  TX_32X32 - TX_8X8,
+#if CONFIG_EXT_PARTITION
+  // 64x128,          128x64,             128x128
+  TX_32X32 - TX_8X8,  TX_32X32 - TX_8X8,  TX_32X32 - TX_8X8,
+#endif  // CONFIG_EXT_PARTITION
+};
+
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+// Same as "max_txsize_lookup[bsize] - TX_8X8", except for rectangular
+// block which may use a rectangular transform, in which  case it is
+// "(max_txsize_lookup[bsize] + 1) - TX_8X8", invalid for bsize < 8X8
+static const int32_t inter_tx_size_cat_lookup[BLOCK_SIZES] = {
+  //                                      4X4
+                                          INT32_MIN,
+  // 4X8,             8X4,                8X8
+  INT32_MIN,          INT32_MIN,           TX_8X8 - TX_8X8,
+  // 8X16,            16X8,               16X16
+  TX_16X16 - TX_8X8,  TX_16X16 - TX_8X8,  TX_16X16 - TX_8X8,
+  // 16X32,           32X16,              32X32
+  TX_32X32 - TX_8X8,  TX_32X32 - TX_8X8,  TX_32X32 - TX_8X8,
+  // 32X64,           64X32,              64X64
+  TX_32X32 - TX_8X8,  TX_32X32 - TX_8X8,  TX_32X32 - TX_8X8,
+#if CONFIG_EXT_PARTITION
+  // 64x128,          128x64,             128x128
+  TX_32X32 - TX_8X8,  TX_32X32 - TX_8X8,  TX_32X32 - TX_8X8,
+#endif  // CONFIG_EXT_PARTITION
+};
+#else
+#define inter_tx_size_cat_lookup intra_tx_size_cat_lookup
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
+
 /* clang-format on */
 
 static const TX_SIZE txsize_horz_map[TX_SIZES_ALL] = {

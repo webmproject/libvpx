@@ -524,7 +524,62 @@ static INLINE int get_ext_tx_types(TX_SIZE tx_size, BLOCK_SIZE bs,
   const int set = get_ext_tx_set(tx_size, bs, is_inter);
   return is_inter ? num_ext_tx_set_inter[set] : num_ext_tx_set_intra[set];
 }
+
+#if CONFIG_RECT_TX
+static INLINE int is_rect_tx_allowed_bsize(BLOCK_SIZE bsize) {
+  static const char LUT[BLOCK_SIZES] = {
+    0,  // BLOCK_4X4
+    1,  // BLOCK_4X8
+    1,  // BLOCK_8X4
+    0,  // BLOCK_8X8
+    1,  // BLOCK_8X16
+    1,  // BLOCK_16X8
+    0,  // BLOCK_16X16
+    1,  // BLOCK_16X32
+    1,  // BLOCK_32X16
+    0,  // BLOCK_32X32
+    0,  // BLOCK_32X64
+    0,  // BLOCK_64X32
+    0,  // BLOCK_64X64
+#if CONFIG_EXT_PARTITION
+    0,  // BLOCK_64X128
+    0,  // BLOCK_128X64
+    0,  // BLOCK_128X128
+#endif  // CONFIG_EXT_PARTITION
+  };
+
+  return LUT[bsize];
+}
+
+static INLINE int is_rect_tx_allowed(const MB_MODE_INFO *mbmi) {
+  return is_inter_block(mbmi) && is_rect_tx_allowed_bsize(mbmi->sb_type);
+}
+
+static INLINE int is_rect_tx(TX_SIZE tx_size) { return tx_size >= TX_SIZES; }
+#endif  // CONFIG_RECT_TX
 #endif  // CONFIG_EXT_TX
+
+static INLINE TX_SIZE tx_size_from_tx_mode(BLOCK_SIZE bsize, TX_MODE tx_mode,
+                                           int is_inter) {
+  const TX_SIZE largest_tx_size = tx_mode_to_biggest_tx_size[tx_mode];
+  const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
+
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+  if (!is_inter) {
+    return VPXMIN(max_tx_size, largest_tx_size);
+  } else {
+    const TX_SIZE max_rect_tx_size = max_txsize_rect_lookup[bsize];
+    if (txsize_sqr_up_map[max_rect_tx_size] <= largest_tx_size) {
+      return max_rect_tx_size;
+    } else {
+      return largest_tx_size;
+    }
+  }
+#else
+  (void)is_inter;
+  return VPXMIN(max_tx_size, largest_tx_size);
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
+}
 
 #if CONFIG_EXT_INTRA
 #define ALLOW_FILTER_INTRA_MODES 1

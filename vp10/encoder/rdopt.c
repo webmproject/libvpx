@@ -1320,16 +1320,19 @@ static int64_t txfm_yrd(VP10_COMP *cpi, MACROBLOCK *x, int *r, int64_t *d,
   int64_t rd = INT64_MAX;
   vpx_prob skip_prob = vp10_get_skip_prob(cm, xd);
   int s0, s1;
-  const TX_SIZE max_tx_size = max_txsize_lookup[bs];
-  const int tx_select = cm->tx_mode == TX_MODE_SELECT;
   const int is_inter = is_inter_block(mbmi);
+  const int tx_size_ctx = get_tx_size_context(xd);
+  const int tx_size_cat =
+      is_inter ? inter_tx_size_cat_lookup[bs] : intra_tx_size_cat_lookup[bs];
+  const TX_SIZE coded_tx_size = txsize_sqr_up_map[tx_size];
+  const int tx_select = cm->tx_mode == TX_MODE_SELECT;
   const int r_tx_size =
-      cpi->tx_size_cost[max_tx_size - TX_8X8][get_tx_size_context(xd)][tx_size];
-#if CONFIG_EXT_TX
-  int ext_tx_set;
-#endif  // CONFIG_EXT_TX
+      cpi->tx_size_cost[tx_size_cat][tx_size_ctx][coded_tx_size];
 
   assert(skip_prob > 0);
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+  assert(IMPLIES(is_rect_tx(tx_size), is_rect_tx_allowed_bsize(bs)));
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
 
   s0 = vp10_cost_bit(skip_prob, 0);
   s1 = vp10_cost_bit(skip_prob, 1);
@@ -1340,20 +1343,19 @@ static int64_t txfm_yrd(VP10_COMP *cpi, MACROBLOCK *x, int *r, int64_t *d,
                    cpi->sf.use_fast_coef_costing);
   if (*r == INT_MAX) return INT64_MAX;
 #if CONFIG_EXT_TX
-  ext_tx_set = get_ext_tx_set(tx_size, bs, is_inter);
   if (get_ext_tx_types(tx_size, bs, is_inter) > 1 &&
       !xd->lossless[xd->mi[0]->mbmi.segment_id]) {
+    const int ext_tx_set = get_ext_tx_set(tx_size, bs, is_inter);
     if (is_inter) {
       if (ext_tx_set > 0)
-        *r +=
-            cpi->inter_tx_type_costs[ext_tx_set][mbmi->tx_size][mbmi->tx_type];
+        *r += cpi->inter_tx_type_costs
+                  [ext_tx_set][txsize_sqr_map[mbmi->tx_size]][mbmi->tx_type];
     } else {
       if (ext_tx_set > 0 && ALLOW_INTRA_EXT_TX)
         *r += cpi->intra_tx_type_costs[ext_tx_set][mbmi->tx_size][mbmi->mode]
                                       [mbmi->tx_type];
     }
   }
-
 #else
   if (tx_size < TX_32X32 && !xd->lossless[xd->mi[0]->mbmi.segment_id] &&
       !FIXED_TX_TYPE) {
@@ -1400,19 +1402,29 @@ static int64_t choose_tx_size_fix_type(VP10_COMP *cpi, BLOCK_SIZE bs,
   int start_tx, end_tx;
   int64_t best_rd = INT64_MAX, last_rd = INT64_MAX;
   const TX_SIZE max_tx_size = max_txsize_lookup[bs];
-  TX_SIZE best_tx = max_tx_size;
+  TX_SIZE best_tx_size = max_tx_size;
   const int tx_select = cm->tx_mode == TX_MODE_SELECT;
   const int is_inter = is_inter_block(mbmi);
 #if CONFIG_EXT_TX
+#if CONFIG_RECT_TX
+  int evaulate_rect_tx = 0;
+#endif  // CONFIG_RECT_TX
   int ext_tx_set;
 #endif  // CONFIG_EXT_TX
 
   if (tx_select) {
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+    evaulate_rect_tx = is_rect_tx_allowed(mbmi);
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
     start_tx = max_tx_size;
     end_tx = 0;
   } else {
     const TX_SIZE chosen_tx_size =
-        VPXMIN(max_tx_size, tx_mode_to_biggest_tx_size[cm->tx_mode]);
+        tx_size_from_tx_mode(bs, cm->tx_mode, is_inter);
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+    evaulate_rect_tx = is_rect_tx(chosen_tx_size);
+    assert(IMPLIES(evaulate_rect_tx, is_rect_tx_allowed(mbmi)));
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
     start_tx = chosen_tx_size;
     end_tx = chosen_tx_size;
   }
@@ -1423,8 +1435,29 @@ static int64_t choose_tx_size_fix_type(VP10_COMP *cpi, BLOCK_SIZE bs,
   *psse = INT64_MAX;
 
   mbmi->tx_type = tx_type;
+
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+  if (evaulate_rect_tx) {
+    const TX_SIZE rect_tx_size = max_txsize_rect_lookup[bs];
+    const int ext_tx_set = get_ext_tx_set(rect_tx_size, bs, 1);
+    if (ext_tx_used_inter[ext_tx_set][tx_type]) {
+      rd = txfm_yrd(cpi, x, &r, &d, &s, &sse, ref_best_rd, bs, tx_type,
+                    rect_tx_size);
+      best_tx_size = rect_tx_size;
+      best_rd = rd;
+      *distortion = d;
+      *rate = r;
+      *skip = s;
+      *psse = sse;
+    }
+  }
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
+
   last_rd = INT64_MAX;
   for (n = start_tx; n >= end_tx; --n) {
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+    if (is_rect_tx(n)) break;
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
     if (FIXED_TX_TYPE && tx_type != get_default_tx_type(0, xd, 0, n)) continue;
     if (!is_inter && x->use_default_intra_tx_type &&
         tx_type != get_default_tx_type(0, xd, 0, n))
@@ -1463,7 +1496,7 @@ static int64_t choose_tx_size_fix_type(VP10_COMP *cpi, BLOCK_SIZE bs,
 
     last_rd = rd;
     if (rd < best_rd) {
-      best_tx = n;
+      best_tx_size = n;
       best_rd = rd;
       *distortion = d;
       *rate = r;
@@ -1471,7 +1504,7 @@ static int64_t choose_tx_size_fix_type(VP10_COMP *cpi, BLOCK_SIZE bs,
       *psse = sse;
     }
   }
-  mbmi->tx_size = best_tx;
+  mbmi->tx_size = best_tx_size;
 
   return best_rd;
 }
@@ -1488,9 +1521,7 @@ static int64_t estimate_yrd_for_sb(VP10_COMP *cpi, BLOCK_SIZE bs, MACROBLOCK *x,
 static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x, int *rate,
                                    int64_t *distortion, int *skip, int64_t *sse,
                                    int64_t ref_best_rd, BLOCK_SIZE bs) {
-  const TX_SIZE max_tx_size = max_txsize_lookup[bs];
   VP10_COMMON *const cm = &cpi->common;
-  const TX_SIZE largest_tx_size = tx_mode_to_biggest_tx_size[cm->tx_mode];
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   TX_TYPE tx_type, best_tx_type = DCT_DCT;
@@ -1505,7 +1536,7 @@ static void choose_largest_tx_size(VP10_COMP *cpi, MACROBLOCK *x, int *rate,
   int ext_tx_set;
 #endif  // CONFIG_EXT_TX
 
-  mbmi->tx_size = VPXMIN(max_tx_size, largest_tx_size);
+  mbmi->tx_size = tx_size_from_tx_mode(bs, cm->tx_mode, is_inter);
 
 #if CONFIG_EXT_TX
   ext_tx_set = get_ext_tx_set(mbmi->tx_size, bs, is_inter);
@@ -4225,7 +4256,7 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi, MACROBLOCK *x,
                  tx_size == max_txsize_rect_lookup[mi->mbmi.sb_type]));
 #else
   assert(tx_size == TX_4X4);
-#endif
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
   assert(tx_type == DCT_DCT);
 
   vp10_build_inter_predictor_sub8x8(xd, 0, i, ir, ic, mi_row, mi_col);
@@ -4750,7 +4781,7 @@ static int64_t rd_pick_best_sub8x8_mode(
       xd->lossless[mbmi->segment_id] ? TX_4X4 : max_txsize_rect_lookup[bsize];
 #else
   mbmi->tx_size = TX_4X4;
-#endif
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
 
   vp10_zero(*bsi);
 
@@ -10522,7 +10553,7 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
   *mbmi = best_mbmode;
 #if CONFIG_VAR_TX && CONFIG_EXT_TX && CONFIG_RECT_TX
   mbmi->inter_tx_size[0][0] = mbmi->tx_size;
-#endif
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
 
   x->skip |= best_skip2;
   if (!is_inter_block(&best_mbmode)) {

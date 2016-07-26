@@ -290,8 +290,7 @@ static void setup_frame(VP10_COMP *cpi) {
     else if (cpi->refresh_alt_ref_frame)
       cm->frame_context_idx = ARF_FRAME;
 #else
-    if (cpi->refresh_alt_ref_frame)
-      cm->frame_context_idx = ARF_FRAME;
+    if (cpi->refresh_alt_ref_frame) cm->frame_context_idx = ARF_FRAME;
 #endif
     else if (cpi->rc.is_src_frame_alt_ref)
       cm->frame_context_idx = OVERLAY_FRAME;
