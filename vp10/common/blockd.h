@@ -541,7 +541,7 @@ static INLINE int get_ext_tx_types(TX_SIZE tx_size, BLOCK_SIZE bs,
 #define ANGLE_STEP 3
 #define MAX_ANGLE_DELTAS 3
 
-extern const int16_t dr_intra_derivative[270][2];
+extern const int16_t dr_intra_derivative[90];
 
 static const uint8_t mode_to_angle_map[INTRA_MODES] = {
     0, 90, 180, 45, 135, 111, 157, 203, 67, 0,
