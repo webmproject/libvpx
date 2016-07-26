@@ -24,7 +24,7 @@ extern "C" {
 
 #define TX_SIZE_CONTEXTS 2
 
-#define INTER_OFFSET(mode) ((mode) - NEARESTMV)
+#define INTER_OFFSET(mode) ((mode)-NEARESTMV)
 
 struct VP9Common;
 
@@ -46,8 +46,9 @@ typedef struct frame_contexts {
   vpx_prob uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
   vpx_prob partition_prob[PARTITION_CONTEXTS][PARTITION_TYPES - 1];
   vp9_coeff_probs_model coef_probs[TX_SIZES][PLANE_TYPES];
-  vpx_prob switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
-                                 [SWITCHABLE_FILTERS - 1];
+  vpx_prob
+      switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS -
+                                                         1];
   vpx_prob inter_mode_probs[INTER_MODE_CONTEXTS][INTER_MODES - 1];
   vpx_prob intra_inter_prob[INTRA_INTER_CONTEXTS];
   vpx_prob comp_inter_prob[COMP_INTER_CONTEXTS];
@@ -64,10 +65,10 @@ typedef struct FRAME_COUNTS {
   unsigned int uv_mode[INTRA_MODES][INTRA_MODES];
   unsigned int partition[PARTITION_CONTEXTS][PARTITION_TYPES];
   vp9_coeff_count_model coef[TX_SIZES][PLANE_TYPES];
-  unsigned int eob_branch[TX_SIZES][PLANE_TYPES][REF_TYPES]
-                         [COEF_BANDS][COEFF_CONTEXTS];
-  unsigned int switchable_interp[SWITCHABLE_FILTER_CONTEXTS]
-                                [SWITCHABLE_FILTERS];
+  unsigned int
+      eob_branch[TX_SIZES][PLANE_TYPES][REF_TYPES][COEF_BANDS][COEFF_CONTEXTS];
+  unsigned int
+      switchable_interp[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];
   unsigned int inter_mode[INTER_MODE_CONTEXTS][INTER_MODES];
   unsigned int intra_inter[INTRA_INTER_CONTEXTS][2];
   unsigned int comp_inter[COMP_INTER_CONTEXTS][2];
@@ -79,15 +80,15 @@ typedef struct FRAME_COUNTS {
 } FRAME_COUNTS;
 
 extern const vpx_prob vp9_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
-extern const vpx_prob vp9_kf_y_mode_prob[INTRA_MODES][INTRA_MODES]
-                                        [INTRA_MODES - 1];
-extern const vpx_prob vp9_kf_partition_probs[PARTITION_CONTEXTS]
-                                            [PARTITION_TYPES - 1];
+extern const vpx_prob
+    vp9_kf_y_mode_prob[INTRA_MODES][INTRA_MODES][INTRA_MODES - 1];
+extern const vpx_prob
+    vp9_kf_partition_probs[PARTITION_CONTEXTS][PARTITION_TYPES - 1];
 extern const vpx_tree_index vp9_intra_mode_tree[TREE_SIZE(INTRA_MODES)];
 extern const vpx_tree_index vp9_inter_mode_tree[TREE_SIZE(INTER_MODES)];
 extern const vpx_tree_index vp9_partition_tree[TREE_SIZE(PARTITION_TYPES)];
-extern const vpx_tree_index vp9_switchable_interp_tree
-                                [TREE_SIZE(SWITCHABLE_FILTERS)];
+extern const vpx_tree_index
+    vp9_switchable_interp_tree[TREE_SIZE(SWITCHABLE_FILTERS)];
 
 void vp9_setup_past_independence(struct VP9Common *cm);
 

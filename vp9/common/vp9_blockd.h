@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_COMMON_VP9_BLOCKD_H_
 #define VP9_COMMON_VP9_BLOCKD_H_
 
@@ -55,12 +54,12 @@ typedef struct {
 // decoder implementation modules critically rely on the defined entry values
 // specified herein. They should be refactored concurrently.
 
-#define NONE           -1
-#define INTRA_FRAME     0
-#define LAST_FRAME      1
-#define GOLDEN_FRAME    2
-#define ALTREF_FRAME    3
-#define MAX_REF_FRAMES  4
+#define NONE -1
+#define INTRA_FRAME 0
+#define LAST_FRAME 1
+#define GOLDEN_FRAME 2
+#define ALTREF_FRAME 3
+#define MAX_REF_FRAMES 4
 typedef int8_t MV_REFERENCE_FRAME;
 
 // This structure now relates to 8x8 block regions.
@@ -90,8 +89,7 @@ typedef struct MODE_INFO {
 } MODE_INFO;
 
 static INLINE PREDICTION_MODE get_y_mode(const MODE_INFO *mi, int block) {
-  return mi->sb_type < BLOCK_8X8 ? mi->bmi[block].as_mode
-                                 : mi->mode;
+  return mi->sb_type < BLOCK_8X8 ? mi->bmi[block].as_mode : mi->mode;
 }
 
 static INLINE int is_inter_block(const MODE_INFO *mi) {
@@ -108,10 +106,7 @@ PREDICTION_MODE vp9_left_block_mode(const MODE_INFO *cur_mi,
 PREDICTION_MODE vp9_above_block_mode(const MODE_INFO *cur_mi,
                                      const MODE_INFO *above_mi, int b);
 
-enum mv_precision {
-  MV_PRECISION_Q3,
-  MV_PRECISION_Q4
-};
+enum mv_precision { MV_PRECISION_Q3, MV_PRECISION_Q4 };
 
 struct buf_2d {
   uint8_t *buf;
@@ -137,7 +132,7 @@ struct macroblockd_plane {
   const int16_t *dequant;
 };
 
-#define BLOCK_OFFSET(x, i) ((x) + (i) * 16)
+#define BLOCK_OFFSET(x, i) ((x) + (i)*16)
 
 typedef struct RefBuffer {
   // TODO(dkovalev): idx is not really required and should be removed, now it
@@ -249,8 +244,8 @@ static INLINE TX_SIZE get_uv_tx_size(const MODE_INFO *mi,
                              pd->subsampling_y);
 }
 
-static INLINE BLOCK_SIZE get_plane_block_size(BLOCK_SIZE bsize,
-    const struct macroblockd_plane *pd) {
+static INLINE BLOCK_SIZE
+get_plane_block_size(BLOCK_SIZE bsize, const struct macroblockd_plane *pd) {
   return ss_size_lookup[bsize][pd->subsampling_x][pd->subsampling_y];
 }
 
@@ -275,20 +270,19 @@ static INLINE const vpx_prob *get_y_mode_probs(const MODE_INFO *mi,
   return vp9_kf_y_mode_prob[above][left];
 }
 
-typedef void (*foreach_transformed_block_visitor)(int plane, int block,
-                                                  int row, int col,
+typedef void (*foreach_transformed_block_visitor)(int plane, int block, int row,
+                                                  int col,
                                                   BLOCK_SIZE plane_bsize,
-                                                  TX_SIZE tx_size,
-                                                  void *arg);
+                                                  TX_SIZE tx_size, void *arg);
 
 void vp9_foreach_transformed_block_in_plane(
     const MACROBLOCKD *const xd, BLOCK_SIZE bsize, int plane,
     foreach_transformed_block_visitor visit, void *arg);
 
-
-void vp9_foreach_transformed_block(
-    const MACROBLOCKD* const xd, BLOCK_SIZE bsize,
-    foreach_transformed_block_visitor visit, void *arg);
+void vp9_foreach_transformed_block(const MACROBLOCKD *const xd,
+                                   BLOCK_SIZE bsize,
+                                   foreach_transformed_block_visitor visit,
+                                   void *arg);
 
 void vp9_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
                       BLOCK_SIZE plane_bsize, TX_SIZE tx_size, int has_eob,

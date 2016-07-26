@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP9_COMMON_VP9_POSTPROC_H_
 #define VP9_COMMON_VP9_POSTPROC_H_
 
@@ -38,8 +37,8 @@ struct VP9Common;
 
 #define MFQE_PRECISION 4
 
-int vp9_post_proc_frame(struct VP9Common *cm,
-                        YV12_BUFFER_CONFIG *dest, vp9_ppflags_t *flags);
+int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
+                        vp9_ppflags_t *flags);
 
 void vp9_denoise(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst, int q,
                  uint8_t *limits);

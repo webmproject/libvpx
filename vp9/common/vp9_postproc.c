@@ -35,17 +35,13 @@ static const uint8_t last_q_thresh = 170;
 extern const int16_t vpx_rv[];
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static const int16_t kernel5[] = {
-  1, 1, 4, 1, 1
-};
+static const int16_t kernel5[] = { 1, 1, 4, 1, 1 };
 
 void vp9_highbd_post_proc_down_and_across_c(const uint16_t *src_ptr,
                                             uint16_t *dst_ptr,
                                             int src_pixels_per_line,
-                                            int dst_pixels_per_line,
-                                            int rows,
-                                            int cols,
-                                            int flimit) {
+                                            int dst_pixels_per_line, int rows,
+                                            int cols, int flimit) {
   uint16_t const *p_src;
   uint16_t *p_dst;
   int row, col, i, v, kernel;
@@ -62,8 +58,7 @@ void vp9_highbd_post_proc_down_and_across_c(const uint16_t *src_ptr,
       v = p_src[col];
 
       for (i = -2; i <= 2; i++) {
-        if (abs(v - p_src[col + i * pitch]) > flimit)
-          goto down_skip_convolve;
+        if (abs(v - p_src[col + i * pitch]) > flimit) goto down_skip_convolve;
 
         kernel += kernel5[2 + i] * p_src[col + i * pitch];
       }
@@ -78,8 +73,7 @@ void vp9_highbd_post_proc_down_and_across_c(const uint16_t *src_ptr,
     p_src = dst_ptr;
     p_dst = dst_ptr;
 
-    for (i = 0; i < 8; i++)
-      d[i] = p_src[i];
+    for (i = 0; i < 8; i++) d[i] = p_src[i];
 
     for (col = 0; col < cols; col++) {
       kernel = 4;
@@ -88,8 +82,7 @@ void vp9_highbd_post_proc_down_and_across_c(const uint16_t *src_ptr,
       d[col & 7] = v;
 
       for (i = -2; i <= 2; i++) {
-        if (abs(v - p_src[col + i]) > flimit)
-          goto across_skip_convolve;
+        if (abs(v - p_src[col + i]) > flimit) goto across_skip_convolve;
 
         kernel += kernel5[2 + i] * p_src[col + i];
       }
@@ -97,14 +90,12 @@ void vp9_highbd_post_proc_down_and_across_c(const uint16_t *src_ptr,
       d[col & 7] = (kernel >> 3);
 
     across_skip_convolve:
-      if (col >= 2)
-        p_dst[col - 2] = d[(col - 2) & 7];
+      if (col >= 2) p_dst[col - 2] = d[(col - 2) & 7];
     }
 
     /* handle the last two pixels */
     p_dst[col - 2] = d[(col - 2) & 7];
     p_dst[col - 1] = d[(col - 1) & 7];
-
 
     /* next row */
     src_ptr += pitch;
@@ -121,21 +112,20 @@ static int q2mbl(int x) {
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void vp9_highbd_mbpost_proc_across_ip_c(uint16_t *src, int pitch,
-                                        int rows, int cols, int flimit) {
+void vp9_highbd_mbpost_proc_across_ip_c(uint16_t *src, int pitch, int rows,
+                                        int cols, int flimit) {
   int r, c, i;
 
   uint16_t *s = src;
   uint16_t d[16];
 
-
   for (r = 0; r < rows; r++) {
     int sumsq = 0;
-    int sum   = 0;
+    int sum = 0;
 
     for (i = -8; i <= 6; i++) {
       sumsq += s[i] * s[i];
-      sum   += s[i];
+      sum += s[i];
       d[i + 8] = 0;
     }
 
@@ -143,7 +133,7 @@ void vp9_highbd_mbpost_proc_across_ip_c(uint16_t *src, int pitch,
       int x = s[c + 7] - s[c - 8];
       int y = s[c + 7] + s[c - 8];
 
-      sum  += x;
+      sum += x;
       sumsq += x * y;
 
       d[c & 15] = s[c];
@@ -160,10 +150,9 @@ void vp9_highbd_mbpost_proc_across_ip_c(uint16_t *src, int pitch,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-
 #if CONFIG_VP9_HIGHBITDEPTH
-void vp9_highbd_mbpost_proc_down_c(uint16_t *dst, int pitch,
-                                   int rows, int cols, int flimit) {
+void vp9_highbd_mbpost_proc_down_c(uint16_t *dst, int pitch, int rows, int cols,
+                                   int flimit) {
   int r, c, i;
   const int16_t *rv3 = &vpx_rv[63 & rand()];  // NOLINT
 
@@ -180,7 +169,7 @@ void vp9_highbd_mbpost_proc_down_c(uint16_t *dst, int pitch,
     }
 
     for (r = 0; r < rows + 8; r++) {
-      sumsq += s[7 * pitch] * s[ 7 * pitch] - s[-8 * pitch] * s[-8 * pitch];
+      sumsq += s[7 * pitch] * s[7 * pitch] - s[-8 * pitch] * s[-8 * pitch];
       sum += s[7 * pitch] - s[-8 * pitch];
       d[r & 15] = s[0];
 
@@ -195,42 +184,37 @@ void vp9_highbd_mbpost_proc_down_c(uint16_t *dst, int pitch,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-static void deblock_and_de_macro_block(YV12_BUFFER_CONFIG   *source,
-                                       YV12_BUFFER_CONFIG   *post,
-                                       int                   q,
-                                       int                   low_var_thresh,
-                                       int                   flag,
-                                       uint8_t              *limits) {
-  (void) low_var_thresh;
-  (void) flag;
+static void deblock_and_de_macro_block(YV12_BUFFER_CONFIG *source,
+                                       YV12_BUFFER_CONFIG *post, int q,
+                                       int low_var_thresh, int flag,
+                                       uint8_t *limits) {
+  (void)low_var_thresh;
+  (void)flag;
 #if CONFIG_VP9_HIGHBITDEPTH
   if (source->flags & YV12_FLAG_HIGHBITDEPTH) {
     double level = 6.0e-05 * q * q * q - .0067 * q * q + .306 * q + .0065;
     int ppl = (int)(level + .5);
-    vp9_highbd_post_proc_down_and_across(CONVERT_TO_SHORTPTR(source->y_buffer),
-                                         CONVERT_TO_SHORTPTR(post->y_buffer),
-                                         source->y_stride, post->y_stride,
-                                         source->y_height, source->y_width,
-                                         ppl);
+    vp9_highbd_post_proc_down_and_across(
+        CONVERT_TO_SHORTPTR(source->y_buffer),
+        CONVERT_TO_SHORTPTR(post->y_buffer), source->y_stride, post->y_stride,
+        source->y_height, source->y_width, ppl);
 
     vp9_highbd_mbpost_proc_across_ip(CONVERT_TO_SHORTPTR(post->y_buffer),
                                      post->y_stride, post->y_height,
                                      post->y_width, q2mbl(q));
 
     vp9_highbd_mbpost_proc_down(CONVERT_TO_SHORTPTR(post->y_buffer),
-                                post->y_stride, post->y_height,
-                                post->y_width, q2mbl(q));
+                                post->y_stride, post->y_height, post->y_width,
+                                q2mbl(q));
 
-    vp9_highbd_post_proc_down_and_across(CONVERT_TO_SHORTPTR(source->u_buffer),
-                                         CONVERT_TO_SHORTPTR(post->u_buffer),
-                                         source->uv_stride, post->uv_stride,
-                                         source->uv_height, source->uv_width,
-                                         ppl);
-    vp9_highbd_post_proc_down_and_across(CONVERT_TO_SHORTPTR(source->v_buffer),
-                                         CONVERT_TO_SHORTPTR(post->v_buffer),
-                                         source->uv_stride, post->uv_stride,
-                                         source->uv_height, source->uv_width,
-                                         ppl);
+    vp9_highbd_post_proc_down_and_across(
+        CONVERT_TO_SHORTPTR(source->u_buffer),
+        CONVERT_TO_SHORTPTR(post->u_buffer), source->uv_stride, post->uv_stride,
+        source->uv_height, source->uv_width, ppl);
+    vp9_highbd_post_proc_down_and_across(
+        CONVERT_TO_SHORTPTR(source->v_buffer),
+        CONVERT_TO_SHORTPTR(post->v_buffer), source->uv_stride, post->uv_stride,
+        source->uv_height, source->uv_width, ppl);
   } else {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     vp9_deblock(source, post, q, limits);
@@ -243,26 +227,28 @@ static void deblock_and_de_macro_block(YV12_BUFFER_CONFIG   *source,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 }
 
-void vp9_deblock(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
-                 int q, uint8_t *limits) {
-  const int ppl = (int)(6.0e-05 * q * q * q - 0.0067 * q * q + 0.306 * q
-                        + 0.0065 + 0.5);
+void vp9_deblock(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst, int q,
+                 uint8_t *limits) {
+  const int ppl =
+      (int)(6.0e-05 * q * q * q - 0.0067 * q * q + 0.306 * q + 0.0065 + 0.5);
 #if CONFIG_VP9_HIGHBITDEPTH
   if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
     int i;
-    const uint8_t * const srcs[3] =
-        {src->y_buffer, src->u_buffer, src->v_buffer};
-    const int src_strides[3] = {src->y_stride, src->uv_stride, src->uv_stride};
-    const int src_widths[3] = {src->y_width, src->uv_width, src->uv_width};
-    const int src_heights[3] = {src->y_height, src->uv_height, src->uv_height};
+    const uint8_t *const srcs[3] = { src->y_buffer, src->u_buffer,
+                                     src->v_buffer };
+    const int src_strides[3] = { src->y_stride, src->uv_stride,
+                                 src->uv_stride };
+    const int src_widths[3] = { src->y_width, src->uv_width, src->uv_width };
+    const int src_heights[3] = { src->y_height, src->uv_height,
+                                 src->uv_height };
 
-    uint8_t * const dsts[3] = {dst->y_buffer, dst->u_buffer, dst->v_buffer};
-    const int dst_strides[3] = {dst->y_stride, dst->uv_stride, dst->uv_stride};
+    uint8_t *const dsts[3] = { dst->y_buffer, dst->u_buffer, dst->v_buffer };
+    const int dst_strides[3] = { dst->y_stride, dst->uv_stride,
+                                 dst->uv_stride };
     for (i = 0; i < MAX_MB_PLANE; ++i) {
-      vp9_highbd_post_proc_down_and_across(CONVERT_TO_SHORTPTR(srcs[i]),
-                                           CONVERT_TO_SHORTPTR(dsts[i]),
-                                           src_strides[i], dst_strides[i],
-                                           src_heights[i], src_widths[i], ppl);
+      vp9_highbd_post_proc_down_and_across(
+          CONVERT_TO_SHORTPTR(srcs[i]), CONVERT_TO_SHORTPTR(dsts[i]),
+          src_strides[i], dst_strides[i], src_heights[i], src_widths[i], ppl);
     }
   } else {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -270,7 +256,7 @@ void vp9_deblock(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
     const int mb_rows = src->y_height / 16;
     const int mb_cols = src->y_width / 16;
 
-    memset(limits, (unsigned char) ppl, 16 * mb_cols);
+    memset(limits, (unsigned char)ppl, 16 * mb_cols);
 
     for (mbr = 0; mbr < mb_rows; mbr++) {
       vpx_post_proc_down_and_across_mb_row(
@@ -291,8 +277,8 @@ void vp9_deblock(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 }
 
-void vp9_denoise(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
-                 int q, uint8_t *limits) {
+void vp9_denoise(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst, int q,
+                 uint8_t *limits) {
   vp9_deblock(src, dst, q, limits);
 }
 
@@ -307,15 +293,14 @@ static void swap_mi_and_prev_mi(VP9_COMMON *cm) {
   cm->postproc_state.prev_mi = cm->postproc_state.prev_mip + cm->mi_stride + 1;
 }
 
-int vp9_post_proc_frame(struct VP9Common *cm,
-                        YV12_BUFFER_CONFIG *dest, vp9_ppflags_t *ppflags) {
+int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
+                        vp9_ppflags_t *ppflags) {
   const int q = VPXMIN(105, cm->lf.filter_level * 2);
   const int flags = ppflags->post_proc_flag;
   YV12_BUFFER_CONFIG *const ppbuf = &cm->post_proc_buffer;
   struct postproc_state *const ppstate = &cm->postproc_state;
 
-  if (!cm->frame_to_show)
-    return -1;
+  if (!cm->frame_to_show) return -1;
 
   if (!flags) {
     *dest = *cm->frame_to_show;
@@ -374,8 +359,8 @@ int vp9_post_proc_frame(struct VP9Common *cm,
 
   if (flags & (VP9D_DEMACROBLOCK | VP9D_DEBLOCK)) {
     if (!cm->postproc_state.limits) {
-      cm->postproc_state.limits = vpx_calloc(
-          cm->width, sizeof(*cm->postproc_state.limits));
+      cm->postproc_state.limits =
+          vpx_calloc(cm->width, sizeof(*cm->postproc_state.limits));
     }
   }
 
@@ -383,8 +368,7 @@ int vp9_post_proc_frame(struct VP9Common *cm,
     if (!cm->postproc_state.generated_noise) {
       cm->postproc_state.generated_noise = vpx_calloc(
           cm->width + 256, sizeof(*cm->postproc_state.generated_noise));
-      if (!cm->postproc_state.generated_noise)
-        return 1;
+      if (!cm->postproc_state.generated_noise) return 1;
     }
   }
 
@@ -401,8 +385,8 @@ int vp9_post_proc_frame(struct VP9Common *cm,
     }
     if ((flags & VP9D_DEMACROBLOCK) && cm->post_proc_buffer_int.buffer_alloc) {
       deblock_and_de_macro_block(&cm->post_proc_buffer_int, ppbuf,
-                                 q + (ppflags->deblocking_level - 5) * 10,
-                                 1, 0, cm->postproc_state.limits);
+                                 q + (ppflags->deblocking_level - 5) * 10, 1, 0,
+                                 cm->postproc_state.limits);
     } else if (flags & VP9D_DEBLOCK) {
       vp9_deblock(&cm->post_proc_buffer_int, ppbuf, q,
                   cm->postproc_state.limits);
@@ -423,13 +407,12 @@ int vp9_post_proc_frame(struct VP9Common *cm,
   ppstate->last_frame_valid = 1;
   if (flags & VP9D_ADDNOISE) {
     const int noise_level = ppflags->noise_level;
-    if (ppstate->last_q != q ||
-        ppstate->last_noise != noise_level) {
+    if (ppstate->last_q != q || ppstate->last_noise != noise_level) {
       double sigma;
       vpx_clear_system_state();
       sigma = noise_level + .5 + .6 * q / 63.0;
-      ppstate->clamp = vpx_setup_noise(sigma, ppstate->generated_noise,
-                                       cm->width + 256);
+      ppstate->clamp =
+          vpx_setup_noise(sigma, ppstate->generated_noise, cm->width + 256);
       ppstate->last_q = q;
       ppstate->last_noise = noise_level;
     }
@@ -446,8 +429,7 @@ int vp9_post_proc_frame(struct VP9Common *cm,
   dest->uv_width = dest->y_width >> cm->subsampling_x;
   dest->uv_height = dest->y_height >> cm->subsampling_y;
 
-  if (flags & VP9D_MFQE)
-    swap_mi_and_prev_mi(cm);
+  if (flags & VP9D_MFQE) swap_mi_and_prev_mi(cm);
   return 0;
 }
 #endif  // CONFIG_VP9_POSTPROC

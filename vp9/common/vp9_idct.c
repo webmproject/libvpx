@@ -20,10 +20,10 @@
 void vp9_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride,
                          int tx_type) {
   const transform_2d IHT_4[] = {
-    { idct4_c, idct4_c  },  // DCT_DCT  = 0
-    { iadst4_c, idct4_c  },   // ADST_DCT = 1
-    { idct4_c, iadst4_c },    // DCT_ADST = 2
-    { iadst4_c, iadst4_c }      // ADST_ADST = 3
+    { idct4_c, idct4_c },   // DCT_DCT  = 0
+    { iadst4_c, idct4_c },  // ADST_DCT = 1
+    { idct4_c, iadst4_c },  // DCT_ADST = 2
+    { iadst4_c, iadst4_c }  // ADST_ADST = 3
   };
 
   int i, j;
@@ -34,14 +34,13 @@ void vp9_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride,
   // inverse transform row vectors
   for (i = 0; i < 4; ++i) {
     IHT_4[tx_type].rows(input, outptr);
-    input  += 4;
+    input += 4;
     outptr += 4;
   }
 
   // inverse transform column vectors
   for (i = 0; i < 4; ++i) {
-    for (j = 0; j < 4; ++j)
-      temp_in[j] = out[j * 4 + i];
+    for (j = 0; j < 4; ++j) temp_in[j] = out[j * 4 + i];
     IHT_4[tx_type].cols(temp_in, temp_out);
     for (j = 0; j < 4; ++j) {
       dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
@@ -51,10 +50,10 @@ void vp9_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride,
 }
 
 static const transform_2d IHT_8[] = {
-  { idct8_c,  idct8_c  },  // DCT_DCT  = 0
-  { iadst8_c, idct8_c  },  // ADST_DCT = 1
-  { idct8_c,  iadst8_c },  // DCT_ADST = 2
-  { iadst8_c, iadst8_c }   // ADST_ADST = 3
+  { idct8_c, idct8_c },   // DCT_DCT  = 0
+  { iadst8_c, idct8_c },  // ADST_DCT = 1
+  { idct8_c, iadst8_c },  // DCT_ADST = 2
+  { iadst8_c, iadst8_c }  // ADST_ADST = 3
 };
 
 void vp9_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest, int stride,
@@ -74,8 +73,7 @@ void vp9_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest, int stride,
 
   // inverse transform column vectors
   for (i = 0; i < 8; ++i) {
-    for (j = 0; j < 8; ++j)
-      temp_in[j] = out[j * 8 + i];
+    for (j = 0; j < 8; ++j) temp_in[j] = out[j * 8 + i];
     ht.cols(temp_in, temp_out);
     for (j = 0; j < 8; ++j) {
       dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
@@ -85,10 +83,10 @@ void vp9_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest, int stride,
 }
 
 static const transform_2d IHT_16[] = {
-  { idct16_c,  idct16_c  },  // DCT_DCT  = 0
-  { iadst16_c, idct16_c  },  // ADST_DCT = 1
-  { idct16_c,  iadst16_c },  // DCT_ADST = 2
-  { iadst16_c, iadst16_c }   // ADST_ADST = 3
+  { idct16_c, idct16_c },   // DCT_DCT  = 0
+  { iadst16_c, idct16_c },  // ADST_DCT = 1
+  { idct16_c, iadst16_c },  // DCT_ADST = 2
+  { iadst16_c, iadst16_c }  // ADST_ADST = 3
 };
 
 void vp9_iht16x16_256_add_c(const tran_low_t *input, uint8_t *dest, int stride,
@@ -108,8 +106,7 @@ void vp9_iht16x16_256_add_c(const tran_low_t *input, uint8_t *dest, int stride,
 
   // Columns
   for (i = 0; i < 16; ++i) {
-    for (j = 0; j < 16; ++j)
-      temp_in[j] = out[j * 16 + i];
+    for (j = 0; j < 16; ++j) temp_in[j] = out[j * 16 + i];
     ht.cols(temp_in, temp_out);
     for (j = 0; j < 16; ++j) {
       dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
@@ -126,7 +123,6 @@ void vp9_idct4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
   else
     vpx_idct4x4_1_add(input, dest, stride);
 }
-
 
 void vp9_iwht4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
                      int eob) {
@@ -158,8 +154,7 @@ void vp9_idct16x16_add(const tran_low_t *input, uint8_t *dest, int stride,
                        int eob) {
   /* The calculation can be simplified if there are not many non-zero dct
    * coefficients. Use eobs to separate different cases. */
-  if (eob == 1)
-    /* DC only DCT coefficient. */
+  if (eob == 1) /* DC only DCT coefficient. */
     vpx_idct16x16_1_add(input, dest, stride);
   else if (eob <= 10)
     vpx_idct16x16_10_add(input, dest, stride);
@@ -212,10 +207,10 @@ void vp9_iht16x16_add(TX_TYPE tx_type, const tran_low_t *input, uint8_t *dest,
 void vp9_highbd_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
                                 int stride, int tx_type, int bd) {
   const highbd_transform_2d IHT_4[] = {
-    { vpx_highbd_idct4_c, vpx_highbd_idct4_c  },    // DCT_DCT  = 0
-    { vpx_highbd_iadst4_c, vpx_highbd_idct4_c },    // ADST_DCT = 1
-    { vpx_highbd_idct4_c, vpx_highbd_iadst4_c },    // DCT_ADST = 2
-    { vpx_highbd_iadst4_c, vpx_highbd_iadst4_c }    // ADST_ADST = 3
+    { vpx_highbd_idct4_c, vpx_highbd_idct4_c },   // DCT_DCT  = 0
+    { vpx_highbd_iadst4_c, vpx_highbd_idct4_c },  // ADST_DCT = 1
+    { vpx_highbd_idct4_c, vpx_highbd_iadst4_c },  // DCT_ADST = 2
+    { vpx_highbd_iadst4_c, vpx_highbd_iadst4_c }  // ADST_ADST = 3
   };
   uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
 
@@ -227,14 +222,13 @@ void vp9_highbd_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
   // Inverse transform row vectors.
   for (i = 0; i < 4; ++i) {
     IHT_4[tx_type].rows(input, outptr, bd);
-    input  += 4;
+    input += 4;
     outptr += 4;
   }
 
   // Inverse transform column vectors.
   for (i = 0; i < 4; ++i) {
-    for (j = 0; j < 4; ++j)
-      temp_in[j] = out[j * 4 + i];
+    for (j = 0; j < 4; ++j) temp_in[j] = out[j * 4 + i];
     IHT_4[tx_type].cols(temp_in, temp_out, bd);
     for (j = 0; j < 4; ++j) {
       dest[j * stride + i] = highbd_clip_pixel_add(
@@ -244,10 +238,10 @@ void vp9_highbd_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
 }
 
 static const highbd_transform_2d HIGH_IHT_8[] = {
-  { vpx_highbd_idct8_c,  vpx_highbd_idct8_c  },  // DCT_DCT  = 0
-  { vpx_highbd_iadst8_c, vpx_highbd_idct8_c  },  // ADST_DCT = 1
-  { vpx_highbd_idct8_c,  vpx_highbd_iadst8_c },  // DCT_ADST = 2
-  { vpx_highbd_iadst8_c, vpx_highbd_iadst8_c }   // ADST_ADST = 3
+  { vpx_highbd_idct8_c, vpx_highbd_idct8_c },   // DCT_DCT  = 0
+  { vpx_highbd_iadst8_c, vpx_highbd_idct8_c },  // ADST_DCT = 1
+  { vpx_highbd_idct8_c, vpx_highbd_iadst8_c },  // DCT_ADST = 2
+  { vpx_highbd_iadst8_c, vpx_highbd_iadst8_c }  // ADST_ADST = 3
 };
 
 void vp9_highbd_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest8,
@@ -268,8 +262,7 @@ void vp9_highbd_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest8,
 
   // Inverse transform column vectors.
   for (i = 0; i < 8; ++i) {
-    for (j = 0; j < 8; ++j)
-      temp_in[j] = out[j * 8 + i];
+    for (j = 0; j < 8; ++j) temp_in[j] = out[j * 8 + i];
     ht.cols(temp_in, temp_out, bd);
     for (j = 0; j < 8; ++j) {
       dest[j * stride + i] = highbd_clip_pixel_add(
@@ -279,10 +272,10 @@ void vp9_highbd_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest8,
 }
 
 static const highbd_transform_2d HIGH_IHT_16[] = {
-  { vpx_highbd_idct16_c,  vpx_highbd_idct16_c  },  // DCT_DCT  = 0
-  { vpx_highbd_iadst16_c, vpx_highbd_idct16_c  },  // ADST_DCT = 1
-  { vpx_highbd_idct16_c,  vpx_highbd_iadst16_c },  // DCT_ADST = 2
-  { vpx_highbd_iadst16_c, vpx_highbd_iadst16_c }   // ADST_ADST = 3
+  { vpx_highbd_idct16_c, vpx_highbd_idct16_c },   // DCT_DCT  = 0
+  { vpx_highbd_iadst16_c, vpx_highbd_idct16_c },  // ADST_DCT = 1
+  { vpx_highbd_idct16_c, vpx_highbd_iadst16_c },  // DCT_ADST = 2
+  { vpx_highbd_iadst16_c, vpx_highbd_iadst16_c }  // ADST_ADST = 3
 };
 
 void vp9_highbd_iht16x16_256_add_c(const tran_low_t *input, uint8_t *dest8,
@@ -303,8 +296,7 @@ void vp9_highbd_iht16x16_256_add_c(const tran_low_t *input, uint8_t *dest8,
 
   // Columns
   for (i = 0; i < 16; ++i) {
-    for (j = 0; j < 16; ++j)
-      temp_in[j] = out[j * 16 + i];
+    for (j = 0; j < 16; ++j) temp_in[j] = out[j * 16 + i];
     ht.cols(temp_in, temp_out, bd);
     for (j = 0; j < 16; ++j) {
       dest[j * stride + i] = highbd_clip_pixel_add(
@@ -321,7 +313,6 @@ void vp9_highbd_idct4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
   else
     vpx_highbd_idct4x4_1_add(input, dest, stride, bd);
 }
-
 
 void vp9_highbd_iwht4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
                             int eob, int bd) {
@@ -395,7 +386,7 @@ void vp9_highbd_iht8x8_add(TX_TYPE tx_type, const tran_low_t *input,
 }
 
 void vp9_highbd_iht16x16_add(TX_TYPE tx_type, const tran_low_t *input,
-                           uint8_t *dest, int stride, int eob, int bd) {
+                             uint8_t *dest, int stride, int eob, int bd) {
   if (tx_type == DCT_DCT) {
     vp9_highbd_idct16x16_add(input, dest, stride, eob, bd);
   } else {
