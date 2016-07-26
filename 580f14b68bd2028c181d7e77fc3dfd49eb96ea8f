@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eff279a6_579226a3",
+        "filename": "vpx_ports/arm_cpudetect.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-26T22:53:39Z",
+      "side": 1,
+      "message": "this one could be better, probably with {}s added, but it\u0027s not that bad",
+      "revId": "580f14b68bd2028c181d7e77fc3dfd49eb96ea8f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eff279a6_b7a6ea05",
+        "filename": "vpx_ports/mem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-07-26T22:53:39Z",
+      "side": 1,
+      "message": "this one is a bit of a bug (no whitespace between the operators)",
+      "revId": "580f14b68bd2028c181d7e77fc3dfd49eb96ea8f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
