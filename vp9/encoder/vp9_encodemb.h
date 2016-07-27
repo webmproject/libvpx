@@ -25,8 +25,8 @@ struct encode_b_args {
   ENTROPY_CONTEXT *tl;
   int8_t *skip;
 };
-int vp9_optimize_b(MACROBLOCK *mb, int plane, int block,
-                   TX_SIZE tx_size, int ctx);
+int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
+                   int ctx);
 void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize);
 void vp9_encode_sby_pass1(MACROBLOCK *x, BLOCK_SIZE bsize);
 void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block, int row, int col,
@@ -39,8 +39,7 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block, int row, int col,
 void vp9_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 
 void vp9_encode_block_intra(int plane, int block, int row, int col,
-                            BLOCK_SIZE plane_bsize,
-                            TX_SIZE tx_size, void *arg);
+                            BLOCK_SIZE plane_bsize, TX_SIZE tx_size, void *arg);
 
 void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane,
                                   int enable_optimize_b);
