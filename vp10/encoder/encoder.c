@@ -285,7 +285,18 @@ static void setup_frame(VP10_COMP *cpi) {
   if (frame_is_intra_only(cm) || cm->error_resilient_mode) {
     vp10_setup_past_independence(cm);
   } else {
-    cm->frame_context_idx = cpi->refresh_alt_ref_frame;
+    if (cpi->refresh_alt_ref_frame)
+      cm->frame_context_idx = ARF_FRAME;
+    else if (cpi->rc.is_src_frame_alt_ref)
+      cm->frame_context_idx = OVERLAY_FRAME;
+    else if (cpi->refresh_golden_frame)
+      cm->frame_context_idx = GLD_FRAME;
+#if CONFIG_EXT_REFS
+    else if (cpi->refresh_bwd_ref_frame)
+      cm->frame_context_idx = BRF_FRAME;
+#endif
+    else
+      cm->frame_context_idx = REGULAR_FRAME;
   }
 
   if (cm->frame_type == KEY_FRAME) {

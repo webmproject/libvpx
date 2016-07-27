@@ -47,7 +47,12 @@ extern "C" {
 // normal reference pool.
 #define FRAME_BUFFERS (REF_FRAMES + 7)
 
+#if CONFIG_EXT_REFS
+#define FRAME_CONTEXTS_LOG2 3
+#else
 #define FRAME_CONTEXTS_LOG2 2
+#endif
+
 #define FRAME_CONTEXTS (1 << FRAME_CONTEXTS_LOG2)
 
 #define NUM_PING_PONG_BUFFERS 2
