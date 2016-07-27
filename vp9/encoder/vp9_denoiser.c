@@ -575,10 +575,10 @@ int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
 
 void vp9_denoiser_free(VP9_DENOISER *denoiser) {
   int i;
-  denoiser->frame_buffer_initialized = 0;
   if (denoiser == NULL) {
     return;
   }
+  denoiser->frame_buffer_initialized = 0;
   for (i = 0; i < MAX_REF_FRAMES; ++i) {
     vpx_free_frame_buffer(&denoiser->running_avg_y[i]);
   }
