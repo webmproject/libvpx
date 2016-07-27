@@ -320,14 +320,7 @@ EOF
   print <<EOF;
 #if HAVE_DSPR2
 void vpx_dsputil_static_init();
-#if CONFIG_VP8
-void dsputil_static_init();
-#endif
-
 vpx_dsputil_static_init();
-#if CONFIG_VP8
-dsputil_static_init();
-#endif
 #endif
 }
 #endif

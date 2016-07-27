@@ -168,12 +168,6 @@ endif
 define rtcd_dep_template
 rtcd_dep_template_SRCS := $(addprefix $(LOCAL_PATH)/, $(LOCAL_SRC_FILES))
 rtcd_dep_template_SRCS := $$(rtcd_dep_template_SRCS:.neon=)
-ifeq ($(CONFIG_VP8), yes)
-$$(rtcd_dep_template_SRCS): vp8_rtcd.h
-endif
-ifeq ($(CONFIG_VP9), yes)
-$$(rtcd_dep_template_SRCS): vp9_rtcd.h
-endif
 ifeq ($(CONFIG_VP10), yes)
 $$(rtcd_dep_template_SRCS): vp10_rtcd.h
 endif

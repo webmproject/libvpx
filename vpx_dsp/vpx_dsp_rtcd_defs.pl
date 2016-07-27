@@ -680,7 +680,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
 #
 # Inverse transform
-if ((vpx_config("CONFIG_VP9") eq "yes") || (vpx_config("CONFIG_VP10") eq "yes")) {
+if (vpx_config("CONFIG_VP10") eq "yes") {
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   # Note as optimized versions of these functions are added we need to add a check to ensure
   # that when CONFIG_EMULATE_HARDWARE is on, it defaults to the C versions only.
@@ -915,7 +915,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     specialize qw/vpx_iwht4x4_16_add msa sse2/;
   }  # CONFIG_EMULATE_HARDWARE
 }  # CONFIG_VP9_HIGHBITDEPTH
-}  # CONFIG_VP9 || CONFIG_VP10
+}  # CONFIG_VP10
 
 #
 # Quantization

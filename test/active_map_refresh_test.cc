@@ -126,9 +126,6 @@ TEST_P(ActiveMapRefreshTest, Test) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
-VP9_INSTANTIATE_TEST_CASE(ActiveMapRefreshTest,
-                          ::testing::Values(::libvpx_test::kRealTime),
-                          ::testing::Range(5, 6));
 #if CONFIG_VP10
 VP10_INSTANTIATE_TEST_CASE(ActiveMapRefreshTest,
                            ::testing::Values(::libvpx_test::kRealTime),

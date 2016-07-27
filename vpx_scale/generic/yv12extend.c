@@ -154,7 +154,7 @@ void vp8_yv12_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf) {
                uv_border + ybf->uv_width - ybf->uv_crop_width);
 }
 
-#if CONFIG_VP9 || CONFIG_VP10
+#if CONFIG_VP10
 static void extend_frame(YV12_BUFFER_CONFIG *const ybf, int ext_size) {
   const int c_w = ybf->uv_crop_width;
   const int c_h = ybf->uv_crop_height;
@@ -230,7 +230,7 @@ void vpx_extend_frame_borders_y_c(YV12_BUFFER_CONFIG *ybf) {
                ext_size + ybf->y_height - ybf->y_crop_height,
                ext_size + ybf->y_width - ybf->y_crop_width);
 }
-#endif  // CONFIG_VP9 || CONFIG_VP10
+#endif  // CONFIG_VP10
 
 #if CONFIG_VP9_HIGHBITDEPTH
 static void memcpy_short_addr(uint8_t *dst8, const uint8_t *src8, int num) {

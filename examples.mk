@@ -246,13 +246,9 @@ endif
 # We should not link to math library (libm) on RVCT
 # when building for bare-metal targets
 ifeq ($(CONFIG_OS_SUPPORT), yes)
-CODEC_EXTRA_LIBS-$(CONFIG_VP8)         += m
-CODEC_EXTRA_LIBS-$(CONFIG_VP9)         += m
 CODEC_EXTRA_LIBS-$(CONFIG_VP10)        += m
 else
     ifeq ($(CONFIG_GCC), yes)
-    CODEC_EXTRA_LIBS-$(CONFIG_VP8)         += m
-    CODEC_EXTRA_LIBS-$(CONFIG_VP9)         += m
     CODEC_EXTRA_LIBS-$(CONFIG_VP10)        += m
     endif
 endif
@@ -270,10 +266,8 @@ ifeq ($(HAVE_ALT_TREE_LAYOUT),yes)
     INC_PATH-yes := $(SRC_PATH_BARE)/../include
 else
     LIB_PATH-yes                     += $(if $(BUILD_PFX),$(BUILD_PFX),.)
-    INC_PATH-$(CONFIG_VP8_DECODER)   += $(SRC_PATH_BARE)/vp8
-    INC_PATH-$(CONFIG_VP8_ENCODER)   += $(SRC_PATH_BARE)/vp8
-    INC_PATH-$(CONFIG_VP9_DECODER)   += $(SRC_PATH_BARE)/vp9
-    INC_PATH-$(CONFIG_VP9_ENCODER)   += $(SRC_PATH_BARE)/vp9
+    INC_PATH-$(CONFIG_VP10_DECODER)   += $(SRC_PATH_BARE)/vp10
+    INC_PATH-$(CONFIG_VP10_ENCODER)   += $(SRC_PATH_BARE)/vp10
 endif
 INC_PATH-$(CONFIG_LIBYUV) += $(SRC_PATH_BARE)/third_party/libyuv/include
 LIB_PATH := $(call enabled,LIB_PATH)

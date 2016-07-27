@@ -14,11 +14,14 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
+#include "./vp10_rtcd.h"
 #include "./vpx_dsp_rtcd.h"
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
+#include "vp10/common/blockd.h"
+#include "vp10/common/scan.h"
 #include "vpx/vpx_integer.h"
 
 using libvpx_test::ACMRandom;
@@ -112,7 +115,7 @@ TEST_P(PartialIDctTest, RunQuantCheck) {
       // quantization with maximum allowed step sizes
       test_coef_block1[0] = (output_ref_block[0] / 1336) * 1336;
       for (int j = 1; j < last_nonzero_; ++j)
-        test_coef_block1[vp9_default_scan_orders[tx_size_].scan[j]]
+        test_coef_block1[vp10_default_scan_orders[tx_size_].scan[j]]
                          = (output_ref_block[j] / 1828) * 1828;
     }
 
@@ -174,7 +177,7 @@ TEST_P(PartialIDctTest, ResultsMatch) {
         max_energy_leftover = 0;
         coef = 0;
       }
-      test_coef_block1[vp9_default_scan_orders[tx_size_].scan[j]] = coef;
+      test_coef_block1[vp10_default_scan_orders[tx_size_].scan[j]] = coef;
     }
 
     memcpy(test_coef_block2, test_coef_block1,
