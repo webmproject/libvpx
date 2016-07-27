@@ -57,12 +57,10 @@ static void vp9_dec_setup_mi(VP9_COMMON *cm) {
 
 static int vp9_dec_alloc_mi(VP9_COMMON *cm, int mi_size) {
   cm->mip = vpx_calloc(mi_size, sizeof(*cm->mip));
-  if (!cm->mip)
-    return 1;
+  if (!cm->mip) return 1;
   cm->mi_alloc_size = mi_size;
-  cm->mi_grid_base = (MODE_INFO **)vpx_calloc(mi_size, sizeof(MODE_INFO*));
-  if (!cm->mi_grid_base)
-    return 1;
+  cm->mi_grid_base = (MODE_INFO **)vpx_calloc(mi_size, sizeof(MODE_INFO *));
+  if (!cm->mi_grid_base) return 1;
   return 0;
 }
 
@@ -77,8 +75,7 @@ VP9Decoder *vp9_decoder_create(BufferPool *const pool) {
   VP9Decoder *volatile const pbi = vpx_memalign(32, sizeof(*pbi));
   VP9_COMMON *volatile const cm = pbi ? &pbi->common : NULL;
 
-  if (!cm)
-    return NULL;
+  if (!cm) return NULL;
 
   vp9_zero(*pbi);
 
@@ -90,11 +87,10 @@ VP9Decoder *vp9_decoder_create(BufferPool *const pool) {
 
   cm->error.setjmp = 1;
 
-  CHECK_MEM_ERROR(cm, cm->fc,
-                  (FRAME_CONTEXT *)vpx_calloc(1, sizeof(*cm->fc)));
-  CHECK_MEM_ERROR(cm, cm->frame_contexts,
-                  (FRAME_CONTEXT *)vpx_calloc(FRAME_CONTEXTS,
-                  sizeof(*cm->frame_contexts)));
+  CHECK_MEM_ERROR(cm, cm->fc, (FRAME_CONTEXT *)vpx_calloc(1, sizeof(*cm->fc)));
+  CHECK_MEM_ERROR(
+      cm, cm->frame_contexts,
+      (FRAME_CONTEXT *)vpx_calloc(FRAME_CONTEXTS, sizeof(*cm->frame_contexts)));
 
   pbi->need_resync = 1;
   once(initialize_dec);
@@ -126,8 +122,7 @@ VP9Decoder *vp9_decoder_create(BufferPool *const pool) {
 void vp9_decoder_remove(VP9Decoder *pbi) {
   int i;
 
-  if (!pbi)
-    return;
+  if (!pbi) return;
 
   vpx_get_worker_interface()->end(&pbi->lf_worker);
   vpx_free(pbi->lf_worker.data1);
@@ -149,8 +144,8 @@ void vp9_decoder_remove(VP9Decoder *pbi) {
 
 static int equal_dimensions(const YV12_BUFFER_CONFIG *a,
                             const YV12_BUFFER_CONFIG *b) {
-    return a->y_height == b->y_height && a->y_width == b->y_width &&
-           a->uv_height == b->uv_height && a->uv_width == b->uv_width;
+  return a->y_height == b->y_height && a->y_width == b->y_width &&
+         a->uv_height == b->uv_height && a->uv_width == b->uv_width;
 }
 
 vpx_codec_err_t vp9_copy_reference_dec(VP9Decoder *pbi,
@@ -176,13 +171,11 @@ vpx_codec_err_t vp9_copy_reference_dec(VP9Decoder *pbi,
     else
       vp8_yv12_copy_frame(cfg, sd);
   } else {
-    vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
-                       "Invalid reference frame");
+    vpx_internal_error(&cm->error, VPX_CODEC_ERROR, "Invalid reference frame");
   }
 
   return cm->error.error_code;
 }
-
 
 vpx_codec_err_t vp9_set_reference_dec(VP9_COMMON *cm,
                                       VP9_REFFRAME ref_frame_flag,
@@ -206,8 +199,7 @@ vpx_codec_err_t vp9_set_reference_dec(VP9_COMMON *cm,
   } else if (ref_frame_flag == VP9_ALT_FLAG) {
     idx = cm->ref_frame_map[2];
   } else {
-    vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
-                       "Invalid reference frame");
+    vpx_internal_error(&cm->error, VPX_CODEC_ERROR, "Invalid reference frame");
     return cm->error.error_code;
   }
 
@@ -273,8 +265,8 @@ static void swap_frame_buffers(VP9Decoder *pbi) {
     cm->frame_refs[ref_index].idx = -1;
 }
 
-int vp9_receive_compressed_data(VP9Decoder *pbi,
-                                size_t size, const uint8_t **psource) {
+int vp9_receive_compressed_data(VP9Decoder *pbi, size_t size,
+                                const uint8_t **psource) {
   VP9_COMMON *volatile const cm = &pbi->common;
   BufferPool *volatile const pool = cm->buffer_pool;
   RefCntBuffer *volatile const frame_bufs = cm->buffer_pool->frame_bufs;
@@ -301,8 +293,8 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
 
   // Check if the previous frame was a frame without any references to it.
   // Release frame buffer if not decoding in frame parallel mode.
-  if (!pbi->frame_parallel_decode && cm->new_fb_idx >= 0
-      && frame_bufs[cm->new_fb_idx].ref_count == 0)
+  if (!pbi->frame_parallel_decode && cm->new_fb_idx >= 0 &&
+      frame_bufs[cm->new_fb_idx].ref_count == 0)
     pool->release_fb_cb(pool->cb_priv,
                         &frame_bufs[cm->new_fb_idx].raw_frame_buffer);
   // Find a free frame buffer. Return error if can not find any.
@@ -329,7 +321,6 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
   } else {
     pbi->cur_buf = &frame_bufs[cm->new_fb_idx];
   }
-
 
   if (setjmp(cm->error.jmp)) {
     const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
@@ -425,14 +416,12 @@ int vp9_get_raw_frame(VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
   (void)*flags;
 #endif
 
-  if (pbi->ready_for_new_data == 1)
-    return ret;
+  if (pbi->ready_for_new_data == 1) return ret;
 
   pbi->ready_for_new_data = 1;
 
   /* no raw frame to show!!! */
-  if (!cm->show_frame)
-    return ret;
+  if (!cm->show_frame) return ret;
 
   pbi->ready_for_new_data = 1;
 
@@ -451,8 +440,7 @@ int vp9_get_raw_frame(VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
   return ret;
 }
 
-vpx_codec_err_t vp9_parse_superframe_index(const uint8_t *data,
-                                           size_t data_sz,
+vpx_codec_err_t vp9_parse_superframe_index(const uint8_t *data, size_t data_sz,
                                            uint32_t sizes[8], int *count,
                                            vpx_decrypt_cb decrypt_cb,
                                            void *decrypt_state) {
@@ -475,18 +463,16 @@ vpx_codec_err_t vp9_parse_superframe_index(const uint8_t *data,
 
     // This chunk is marked as having a superframe index but doesn't have
     // enough data for it, thus it's an invalid superframe index.
-    if (data_sz < index_sz)
-      return VPX_CODEC_CORRUPT_FRAME;
+    if (data_sz < index_sz) return VPX_CODEC_CORRUPT_FRAME;
 
     {
-      const uint8_t marker2 = read_marker(decrypt_cb, decrypt_state,
-                                          data + data_sz - index_sz);
+      const uint8_t marker2 =
+          read_marker(decrypt_cb, decrypt_state, data + data_sz - index_sz);
 
       // This chunk is marked as having a superframe index but doesn't have
       // the matching marker byte at the front of the index therefore it's an
       // invalid chunk.
-      if (marker != marker2)
-        return VPX_CODEC_CORRUPT_FRAME;
+      if (marker != marker2) return VPX_CODEC_CORRUPT_FRAME;
     }
 
     {
@@ -505,8 +491,7 @@ vpx_codec_err_t vp9_parse_superframe_index(const uint8_t *data,
       for (i = 0; i < frames; ++i) {
         uint32_t this_sz = 0;
 
-        for (j = 0; j < mag; ++j)
-          this_sz |= ((uint32_t)(*x++)) << (j * 8);
+        for (j = 0; j < mag; ++j) this_sz |= ((uint32_t)(*x++)) << (j * 8);
         sizes[i] = this_sz;
       }
       *count = frames;

@@ -20,25 +20,22 @@
 
 #include "vp9/decoder/vp9_detokenize.h"
 
-#define EOB_CONTEXT_NODE            0
-#define ZERO_CONTEXT_NODE           1
-#define ONE_CONTEXT_NODE            2
+#define EOB_CONTEXT_NODE 0
+#define ZERO_CONTEXT_NODE 1
+#define ONE_CONTEXT_NODE 2
 
-#define INCREMENT_COUNT(token)                              \
-  do {                                                      \
-     if (counts)                                            \
-       ++coef_counts[band][ctx][token];                     \
+#define INCREMENT_COUNT(token)                   \
+  do {                                           \
+    if (counts) ++coef_counts[band][ctx][token]; \
   } while (0)
 
 static INLINE int read_coeff(const vpx_prob *probs, int n, vpx_reader *r) {
   int i, val = 0;
-  for (i = 0; i < n; ++i)
-    val = (val << 1) | vpx_read(r, probs[i]);
+  for (i = 0; i < n; ++i) val = (val << 1) | vpx_read(r, probs[i]);
   return val;
 }
 
-static int decode_coefs(const MACROBLOCKD *xd,
-                        PLANE_TYPE type,
+static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
                         tran_low_t *dqcoeff, TX_SIZE tx_size, const int16_t *dq,
                         int ctx, const int16_t *scan, const int16_t *nb,
                         vpx_reader *r) {
@@ -47,11 +44,11 @@ static int decode_coefs(const MACROBLOCKD *xd,
   const FRAME_CONTEXT *const fc = xd->fc;
   const int ref = is_inter_block(xd->mi[0]);
   int band, c = 0;
-  const vpx_prob (*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
+  const vpx_prob(*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       fc->coef_probs[tx_size][type][ref];
   const vpx_prob *prob;
-  unsigned int (*coef_counts)[COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1];
-  unsigned int (*eob_branch_count)[COEFF_CONTEXTS];
+  unsigned int(*coef_counts)[COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1];
+  unsigned int(*eob_branch_count)[COEFF_CONTEXTS];
   uint8_t token_cache[32 * 32];
   const uint8_t *band_translate = get_band_translate(tx_size);
   const int dq_shift = (tx_size == TX_32X32);
@@ -59,16 +56,16 @@ static int decode_coefs(const MACROBLOCKD *xd,
   int16_t dqv = dq[0];
   const uint8_t *const cat6_prob =
 #if CONFIG_VP9_HIGHBITDEPTH
-      (xd->bd == VPX_BITS_12) ? vp9_cat6_prob_high12 :
-      (xd->bd == VPX_BITS_10) ? vp9_cat6_prob_high12 + 2 :
+      (xd->bd == VPX_BITS_12)
+          ? vp9_cat6_prob_high12
+          : (xd->bd == VPX_BITS_10) ? vp9_cat6_prob_high12 + 2 :
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-      vp9_cat6_prob;
+                                    vp9_cat6_prob;
   const int cat6_bits =
 #if CONFIG_VP9_HIGHBITDEPTH
-      (xd->bd == VPX_BITS_12) ? 18 :
-      (xd->bd == VPX_BITS_10) ? 16 :
+      (xd->bd == VPX_BITS_12) ? 18 : (xd->bd == VPX_BITS_10) ? 16 :
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-      14;
+                                                             14;
 
   if (counts) {
     coef_counts = counts->coef[tx_size][type][ref];
@@ -79,8 +76,7 @@ static int decode_coefs(const MACROBLOCKD *xd,
     int val = -1;
     band = *band_translate++;
     prob = coef_probs[band][ctx];
-    if (counts)
-      ++eob_branch_count[band][ctx];
+    if (counts) ++eob_branch_count[band][ctx];
     if (!vpx_read(r, prob[EOB_CONTEXT_NODE])) {
       INCREMENT_COUNT(EOB_MODEL_TOKEN);
       break;
@@ -91,8 +87,7 @@ static int decode_coefs(const MACROBLOCKD *xd,
       dqv = dq[1];
       token_cache[scan[c]] = 0;
       ++c;
-      if (c >= max_eob)
-        return c;  // zero tokens at the end (no eob token)
+      if (c >= max_eob) return c;  // zero tokens at the end (no eob token)
       ctx = get_coef_context(nb, token_cache, c);
       band = *band_translate++;
       prob = coef_probs[band][ctx];
@@ -109,9 +104,7 @@ static int decode_coefs(const MACROBLOCKD *xd,
       switch (token) {
         case TWO_TOKEN:
         case THREE_TOKEN:
-        case FOUR_TOKEN:
-          val = token;
-          break;
+        case FOUR_TOKEN: val = token; break;
         case CATEGORY1_TOKEN:
           val = CAT1_MIN_VAL + read_coeff(vp9_cat1_prob, 1, r);
           break;
@@ -135,8 +128,7 @@ static int decode_coefs(const MACROBLOCKD *xd,
     v = (val * dqv) >> dq_shift;
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
 #if CONFIG_VP9_HIGHBITDEPTH
-    dqcoeff[scan[c]] = highbd_check_range((vpx_read_bit(r) ? -v : v),
-                                          xd->bd);
+    dqcoeff[scan[c]] = highbd_check_range((vpx_read_bit(r) ? -v : v), xd->bd);
 #else
     dqcoeff[scan[c]] = check_range(vpx_read_bit(r) ? -v : v);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -178,7 +170,7 @@ int vp9_decode_block_tokens(MACROBLOCKD *xd, int plane, const scan_order *sc,
 
   switch (tx_size) {
     case TX_4X4:
-      ctx  = a[0] != 0;
+      ctx = a[0] != 0;
       ctx += l[0] != 0;
       eob = decode_coefs(xd, get_plane_type(plane), pd->dqcoeff, tx_size,
                          dequant, ctx, sc->scan, sc->neighbors, r);
@@ -186,7 +178,7 @@ int vp9_decode_block_tokens(MACROBLOCKD *xd, int plane, const scan_order *sc,
       break;
     case TX_8X8:
       get_ctx_shift(xd, &ctx_shift_a, &ctx_shift_l, x, y, 1 << TX_8X8);
-      ctx  = !!*(const uint16_t *)a;
+      ctx = !!*(const uint16_t *)a;
       ctx += !!*(const uint16_t *)l;
       eob = decode_coefs(xd, get_plane_type(plane), pd->dqcoeff, tx_size,
                          dequant, ctx, sc->scan, sc->neighbors, r);
@@ -195,7 +187,7 @@ int vp9_decode_block_tokens(MACROBLOCKD *xd, int plane, const scan_order *sc,
       break;
     case TX_16X16:
       get_ctx_shift(xd, &ctx_shift_a, &ctx_shift_l, x, y, 1 << TX_16X16);
-      ctx  = !!*(const uint32_t *)a;
+      ctx = !!*(const uint32_t *)a;
       ctx += !!*(const uint32_t *)l;
       eob = decode_coefs(xd, get_plane_type(plane), pd->dqcoeff, tx_size,
                          dequant, ctx, sc->scan, sc->neighbors, r);
@@ -207,7 +199,7 @@ int vp9_decode_block_tokens(MACROBLOCKD *xd, int plane, const scan_order *sc,
       // NOTE: casting to uint64_t here is safe because the default memory
       // alignment is at least 8 bytes and the TX_32X32 is aligned on 8 byte
       // boundaries.
-      ctx  = !!*(const uint64_t *)a;
+      ctx = !!*(const uint64_t *)a;
       ctx += !!*(const uint64_t *)l;
       eob = decode_coefs(xd, get_plane_type(plane), pd->dqcoeff, tx_size,
                          dequant, ctx, sc->scan, sc->neighbors, r);
