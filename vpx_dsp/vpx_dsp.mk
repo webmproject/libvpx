@@ -335,6 +335,9 @@ DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_subpel_variance_impl_sse2.asm
 endif  # CONFIG_VP9_HIGHBITDEPTH
 endif  # CONFIG_ENCODERS || CONFIG_POSTPROC || CONFIG_VP9_POSTPROC
 
+# Neon utilities
+DSP_SRCS-$(HAVE_NEON) += arm/transpose_neon.h
+
 DSP_SRCS-no += $(DSP_SRCS_REMOVE-yes)
 
 DSP_SRCS-yes += vpx_dsp_rtcd.c
