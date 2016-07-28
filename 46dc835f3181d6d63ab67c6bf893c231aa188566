@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "4f39c5b7_294c0d98",
+        "filename": "configure",
+        "patchSetId": 5
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-28T23:32:50Z",
+      "side": 1,
+      "message": "Let\u0027s further discuss this flag as it may just stay within ext-refs.",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8fdd7d60_a0be60c7",
         "filename": "vp10/decoder/decodeframe.c",
         "patchSetId": 5
