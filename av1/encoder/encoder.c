@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+ * Copyright (c) 2016, Alliance for Open Media. All rights reserved
  *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree. An additional intellectual property rights grant can be found
- *  in the file PATENTS.  All contributing project authors may
- *  be found in the AUTHORS file in the root of the source tree.
+ * This source code is subject to the terms of the BSD 2 Clause License and
+ * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+ * was not distributed with this source code in the LICENSE file, you can
+ * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * Media Patent License 1.0 was not distributed with this source code in the
+ * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 
 #include <limits.h>
@@ -416,8 +417,6 @@ static void dealloc_compressor_data(AV1_COMP *cpi) {
   // Delete sementation map
   aom_free(cpi->segmentation_map);
   cpi->segmentation_map = NULL;
-  aom_free(cpi->coding_context.last_frame_seg_map_copy);
-  cpi->coding_context.last_frame_seg_map_copy = NULL;
 
 #if CONFIG_REF_MV
   for (i = 0; i < NMV_CONTEXTS; ++i) {
@@ -531,9 +530,6 @@ static void save_coding_context(AV1_COMP *cpi) {
   memcpy(cc->nmvcosts_hp[1], cpi->nmvcosts_hp[1],
          MV_VALS * sizeof(*cpi->nmvcosts_hp[1]));
 
-  memcpy(cpi->coding_context.last_frame_seg_map_copy, cm->last_frame_seg_map,
-         (cm->mi_rows * cm->mi_cols));
-
   av1_copy(cc->last_ref_lf_deltas, cm->lf.last_ref_deltas);
   av1_copy(cc->last_mode_lf_deltas, cm->lf.last_mode_deltas);
 
@@ -571,9 +567,6 @@ static void restore_coding_context(AV1_COMP *cpi) {
          MV_VALS * sizeof(*cc->nmvcosts_hp[0]));
   memcpy(cpi->nmvcosts_hp[1], cc->nmvcosts_hp[1],
          MV_VALS * sizeof(*cc->nmvcosts_hp[1]));
-
-  memcpy(cm->last_frame_seg_map, cpi->coding_context.last_frame_seg_map_copy,
-         (cm->mi_rows * cm->mi_cols));
 
   av1_copy(cm->lf.last_ref_deltas, cc->last_ref_lf_deltas);
   av1_copy(cm->lf.last_mode_deltas, cc->last_mode_lf_deltas);
@@ -1894,12 +1887,6 @@ static void realloc_segmentation_maps(AV1_COMP *cpi) {
   // Create a map used to mark inactive areas.
   aom_free(cpi->active_map.map);
   CHECK_MEM_ERROR(cm, cpi->active_map.map,
-                  aom_calloc(cm->mi_rows * cm->mi_cols, 1));
-
-  // And a place holder structure is the coding context
-  // for use if we want to save and restore it
-  aom_free(cpi->coding_context.last_frame_seg_map_copy);
-  CHECK_MEM_ERROR(cm, cpi->coding_context.last_frame_seg_map_copy,
                   aom_calloc(cm->mi_rows * cm->mi_cols, 1));
 }
 
