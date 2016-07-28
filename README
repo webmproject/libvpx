@@ -127,6 +127,21 @@ VP8/VP9 TEST VECTORS:
   $ ./configure --enable-unit-tests
   $ LIBVPX_TEST_DATA_PATH=../libvpx-test-data make testdata
 
+CODE STYLE:
+  The coding style used by this project is enforced with clang-format using the
+  configuration contained in the .clang-format file in the root of the
+  repository.
+
+  Before pushing changes for review you can format your code with:
+  # Apply clang-format to modified .c, .h and .cc files
+  $ clang-format -i --style=file \
+    $(git diff --name-only --diff-filter=ACMR '*.[hc]' '*.cc')
+
+  Check the .clang-format file for the version used to generate it if there is
+  any difference between your local formatting and the review system.
+
+  See also: http://clang.llvm.org/docs/ClangFormat.html
+
 SUPPORT
   This library is an open source project supported by its community. Please
   please email webm-discuss@webmproject.org for help.
