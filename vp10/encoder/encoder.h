@@ -76,6 +76,21 @@ typedef struct {
 } CODING_CONTEXT;
 
 typedef enum {
+  // regular inter frame
+  REGULAR_FRAME = 0,
+  // alternate reference frame
+  ARF_FRAME = 1,
+  // overlay frame
+  OVERLAY_FRAME = 2,
+  // golden frame
+  GLD_FRAME = 3,
+#if CONFIG_EXT_REFS
+  // backward reference frame
+  BRF_FRAME = 4,
+#endif
+} FRAME_CONTEXT_INDEX;
+
+typedef enum {
   // encode_breakout is disabled.
   ENCODE_BREAKOUT_DISABLED = 0,
   // encode_breakout is enabled.
