@@ -16,6 +16,24 @@
       "revId": "49737fe20f92bd74c5150218d40aabe6724f1318",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8fdd7d60_b7dd83da",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-07-28T18:31:26Z",
+      "side": 1,
+      "message": "There is no chance to take, though. The 4 garbage values are unused. The only place this could cause issues is if for some reason it\u0027s running in a heavily protected memory environment and accessing those values causes a fault, but that would be an instant crasher and we could easily fix it then.",
+      "parentUuid": "8fdd7d60_3a64ddbb",
+      "revId": "49737fe20f92bd74c5150218d40aabe6724f1318",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
