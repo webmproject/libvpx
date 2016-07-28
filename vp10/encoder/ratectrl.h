@@ -34,9 +34,9 @@ typedef enum {
   INTER_LOW = 1,
   INTER_HIGH = 2,
   GF_ARF_LOW = 3,
-  GF_ARF_STD = 5,
-  KF_STD = 6,
-  RATE_FACTOR_LEVELS = 7
+  GF_ARF_STD = 4,
+  KF_STD = 5,
+  RATE_FACTOR_LEVELS = 6
 } RATE_FACTOR_LEVEL;
 #else
 typedef enum {

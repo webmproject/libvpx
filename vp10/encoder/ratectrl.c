@@ -955,12 +955,12 @@ int vp10_frame_type_qdelta(const VP10_COMP *cpi, int rf_level, int q) {
     1.00,  // INTER_NORMAL
 #if CONFIG_EXT_REFS
     0.80,  // INTER_LOW
-    1.25,  // INTER_HIGH
+    1.50,  // INTER_HIGH
 #else
     1.00,  // INTER_HIGH
 #endif  // CONFIG_EXT_REFS
     1.50,  // GF_ARF_LOW
-    1.75,  // GF_ARF_STD
+    2.00,  // GF_ARF_STD
     2.00,  // KF_STD
   };
   static const FRAME_TYPE frame_type[RATE_FACTOR_LEVELS] =
