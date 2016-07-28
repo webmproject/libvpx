@@ -1521,44 +1521,47 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
                               const uint8_t *ref, int ref_stride,
                               uint8_t *dst, int dst_stride,
                               int col_off, int row_off, int plane) {
+  const BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
+  const struct macroblockd_plane *const pd = &xd->plane[plane];
   const int txw = num_4x4_blocks_wide_txsize_lookup[tx_size];
+  const int txh = num_4x4_blocks_high_txsize_lookup[tx_size];
   const int have_top = row_off || xd->up_available;
   const int have_left = col_off || xd->left_available;
   const int x = col_off * 4;
   const int y = row_off * 4;
-  const int bw = VPXMAX(2, 1 << bwl_in);
-  const int bh = VPXMAX(2, 1 << bhl_in);
+  const int bw = pd->subsampling_x ? 1 << bwl_in : VPXMAX(2, 1 << bwl_in);
+  const int bh = pd->subsampling_y ? 1 << bhl_in : VPXMAX(2, 1 << bhl_in);
   const int mi_row = -xd->mb_to_top_edge >> (3 + MI_SIZE_LOG2);
   const int mi_col = -xd->mb_to_left_edge >> (3 + MI_SIZE_LOG2);
-  const BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
-  const struct macroblockd_plane *const pd = &xd->plane[plane];
+  const int wpx = 4 * bw;
+  const int hpx = 4 * bh;
+  const int txwpx = 4 * txw;
+  const int txhpx = 4 * txh;
+  // Distance between the right edge of this prediction block to
+  // the frame right edge
+  const int xr = (xd->mb_to_right_edge >> (3 + pd->subsampling_x)) +
+      (wpx - x - txwpx);
+  // Distance between the bottom edge of this prediction block to
+  // the frame bottom edge
+  const int yd = (xd->mb_to_bottom_edge >> (3 + pd->subsampling_y)) +
+      (hpx - y - txhpx);
   const int right_available =
-      mi_col + (1 << mi_width_log2_lookup[bsize]) < xd->tile.mi_col_end;
+      (mi_col + ((col_off + txw) >> (1 - pd->subsampling_x))) <
+      xd->tile.mi_col_end;
 #if CONFIG_EXT_PARTITION_TYPES
   const PARTITION_TYPE partition = xd->mi[0]->mbmi.partition;
 #endif
   const int have_right = vp10_has_right(bsize, mi_row, mi_col,
-                                          right_available,
+                                        right_available,
 #if CONFIG_EXT_PARTITION_TYPES
-                                          partition,
+                                        partition,
 #endif
-                                          tx_size, row_off, col_off,
-                                          pd->subsampling_x);
+                                        tx_size, row_off, col_off,
+                                        pd->subsampling_x);
   const int have_bottom = vp10_has_bottom(bsize, mi_row, mi_col,
-                                          xd->mb_to_bottom_edge > 0,
+                                          yd > 0,
                                           tx_size, row_off, col_off,
                                           pd->subsampling_y);
-  const int wpx = 4 * bw;
-  const int hpx = 4 * bh;
-  const int txpx = 4 * txw;
-  // Distance between the right edge of this prediction block to
-  // the frame right edge
-  const int xr = (xd->mb_to_right_edge >> (3 + pd->subsampling_x)) +
-      (wpx - x - txpx);
-  // Distance between the bottom edge of this prediction block to
-  // the frame bottom edge
-  const int yd = (xd->mb_to_bottom_edge >> (3 + pd->subsampling_y)) +
-      (hpx - y - txpx);
 
   if (xd->mi[0]->mbmi.palette_mode_info.palette_size[plane != 0] > 0) {
     const int bs = 4 * num_4x4_blocks_wide_txsize_lookup[tx_size];
@@ -1600,20 +1603,20 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     build_intra_predictors_high(xd, ref, ref_stride, dst, dst_stride, mode,
                                 tx_size,
-                                have_top ? VPXMIN(txpx, xr + txpx) : 0,
-                                have_top && have_right ? VPXMIN(txpx, xr) : 0,
-                                have_left ? VPXMIN(txpx, yd + txpx) : 0,
-                                have_bottom && have_left ? VPXMIN(txpx, yd) : 0,
-                                plane);
+                                have_top ? VPXMIN(txwpx, xr + txwpx) : 0,
+                                have_top && have_right ? VPXMIN(txwpx, xr) : 0,
+                                have_left ? VPXMIN(txhpx, yd + txhpx) : 0,
+                                have_bottom && have_left ?
+                                  VPXMIN(txhpx, yd) : 0, plane);
     return;
   }
 #endif
   build_intra_predictors(xd, ref, ref_stride, dst, dst_stride, mode,
                          tx_size,
-                         have_top ? VPXMIN(txpx, xr + txpx) : 0,
-                         have_top && have_right ? VPXMIN(txpx, xr) : 0,
-                         have_left ? VPXMIN(txpx, yd + txpx) : 0,
-                         have_bottom && have_left ? VPXMIN(txpx, yd) : 0,
+                         have_top ? VPXMIN(txwpx, xr + txwpx) : 0,
+                         have_top && have_right ? VPXMIN(txwpx, xr) : 0,
+                         have_left ? VPXMIN(txhpx, yd + txhpx) : 0,
+                         have_bottom && have_left ? VPXMIN(txhpx, yd) : 0,
                          plane);
 }
 
