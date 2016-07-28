@@ -231,7 +231,7 @@ unsigned int vpx_variance32x32_sse2(const uint8_t *src, int src_stride,
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 32, 32, sse, &sum,
                 vpx_get16x16var_sse2, 16);
-  return *sse - (((int64_t)sum * sum) >> 10);
+  return *sse - (unsigned int)(((int64_t)sum * sum) >> 10);
 }
 
 unsigned int vpx_variance32x16_sse2(const uint8_t *src, int src_stride,
@@ -240,7 +240,7 @@ unsigned int vpx_variance32x16_sse2(const uint8_t *src, int src_stride,
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 32, 16, sse, &sum,
                 vpx_get16x16var_sse2, 16);
-  return *sse - (((int64_t)sum * sum) >> 9);
+  return *sse - (unsigned int)(((int64_t)sum * sum) >> 9);
 }
 
 unsigned int vpx_variance16x32_sse2(const uint8_t *src, int src_stride,
@@ -249,7 +249,7 @@ unsigned int vpx_variance16x32_sse2(const uint8_t *src, int src_stride,
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 16, 32, sse, &sum,
                 vpx_get16x16var_sse2, 16);
-  return *sse - (((int64_t)sum * sum) >> 9);
+  return *sse - (unsigned int)(((int64_t)sum * sum) >> 9);
 }
 
 unsigned int vpx_variance64x64_sse2(const uint8_t *src, int src_stride,
@@ -258,7 +258,7 @@ unsigned int vpx_variance64x64_sse2(const uint8_t *src, int src_stride,
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 64, 64, sse, &sum,
                 vpx_get16x16var_sse2, 16);
-  return *sse - (((int64_t)sum * sum) >> 12);
+  return *sse - (unsigned int)(((int64_t)sum * sum) >> 12);
 }
 
 unsigned int vpx_variance64x32_sse2(const uint8_t *src, int src_stride,
@@ -267,7 +267,7 @@ unsigned int vpx_variance64x32_sse2(const uint8_t *src, int src_stride,
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 64, 32, sse, &sum,
                 vpx_get16x16var_sse2, 16);
-  return *sse - (((int64_t)sum * sum) >> 11);
+  return *sse - (unsigned int)(((int64_t)sum * sum) >> 11);
 }
 
 unsigned int vpx_variance32x64_sse2(const uint8_t *src, int src_stride,
@@ -276,7 +276,7 @@ unsigned int vpx_variance32x64_sse2(const uint8_t *src, int src_stride,
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 32, 64, sse, &sum,
                 vpx_get16x16var_sse2, 16);
-  return *sse - (((int64_t)sum * sum) >> 11);
+  return *sse - (unsigned int)(((int64_t)sum * sum) >> 11);
 }
 
 unsigned int vpx_mse8x8_sse2(const uint8_t *src, int src_stride,
@@ -353,7 +353,7 @@ DECLS(ssse3, ssse3);
       }                                                                        \
     }                                                                          \
     *sse_ptr = sse;                                                            \
-    return sse - (cast_prod(cast se * se) >> (wlog2 + hlog2));                 \
+    return sse - (unsigned int)(cast_prod(cast se * se) >> (wlog2 + hlog2));   \
   }
 
 #define FNS(opt1, opt2)                              \
@@ -424,7 +424,7 @@ DECLS(ssse3, ssse3);
       }                                                                        \
     }                                                                          \
     *sseptr = sse;                                                             \
-    return sse - (cast_prod(cast se * se) >> (wlog2 + hlog2));                 \
+    return sse - (unsigned int)(cast_prod(cast se * se) >> (wlog2 + hlog2));   \
   }
 
 #define FNS(opt1, opt2)                              \
