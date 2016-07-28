@@ -108,18 +108,6 @@ ifeq ($(CONFIG_WEBM_IO),yes)
 endif
 vpxenc.GUID                  = 548DEC74-7A15-4B2B-AFC3-AA102E7C25C1
 vpxenc.DESCRIPTION           = Full featured encoder
-ifeq ($(CONFIG_SPATIAL_SVC),yes)
-  EXAMPLES-$(CONFIG_VP9_ENCODER)      += vp9_spatial_svc_encoder.c
-  vp9_spatial_svc_encoder.SRCS        += args.c args.h
-  vp9_spatial_svc_encoder.SRCS        += ivfenc.c ivfenc.h
-  vp9_spatial_svc_encoder.SRCS        += tools_common.c tools_common.h
-  vp9_spatial_svc_encoder.SRCS        += video_common.h
-  vp9_spatial_svc_encoder.SRCS        += video_writer.h video_writer.c
-  vp9_spatial_svc_encoder.SRCS        += vpx_ports/msvc.h
-  vp9_spatial_svc_encoder.SRCS        += vpxstats.c vpxstats.h
-  vp9_spatial_svc_encoder.GUID        = 4A38598D-627D-4505-9C7B-D4020C84100D
-  vp9_spatial_svc_encoder.DESCRIPTION = VP9 Spatial SVC Encoder
-endif
 
 ifneq ($(CONFIG_SHARED),yes)
 EXAMPLES-$(CONFIG_VP9_ENCODER)    += resize_util.c
@@ -172,14 +160,14 @@ simple_encoder.SRCS             += video_writer.h video_writer.c
 simple_encoder.SRCS             += vpx_ports/msvc.h
 simple_encoder.GUID              = 4607D299-8A71-4D2C-9B1D-071899B6FBFD
 simple_encoder.DESCRIPTION       = Simplified encoder loop
-EXAMPLES-$(CONFIG_VP9_ENCODER)  += vp9_lossless_encoder.c
-vp9_lossless_encoder.SRCS       += ivfenc.h ivfenc.c
-vp9_lossless_encoder.SRCS       += tools_common.h tools_common.c
-vp9_lossless_encoder.SRCS       += video_common.h
-vp9_lossless_encoder.SRCS       += video_writer.h video_writer.c
-vp9_lossless_encoder.SRCS       += vpx_ports/msvc.h
-vp9_lossless_encoder.GUID        = B63C7C88-5348-46DC-A5A6-CC151EF93366
-vp9_lossless_encoder.DESCRIPTION = Simplified lossless VP9 encoder
+EXAMPLES-$(CONFIG_VP10_ENCODER) += lossless_encoder.c
+lossless_encoder.SRCS           += ivfenc.h ivfenc.c
+lossless_encoder.SRCS           += tools_common.h tools_common.c
+lossless_encoder.SRCS           += video_common.h
+lossless_encoder.SRCS           += video_writer.h video_writer.c
+lossless_encoder.SRCS           += vpx_ports/msvc.h
+lossless_encoder.GUID            = B63C7C88-5348-46DC-A5A6-CC151EF93366
+lossless_encoder.DESCRIPTION     = Simplified lossless VP9 encoder
 EXAMPLES-$(CONFIG_ENCODERS)     += twopass_encoder.c
 twopass_encoder.SRCS            += ivfenc.h ivfenc.c
 twopass_encoder.SRCS            += tools_common.h tools_common.c
@@ -206,17 +194,9 @@ set_maps.SRCS                      += video_writer.h video_writer.c
 set_maps.SRCS                      += vpx_ports/msvc.h
 set_maps.GUID                       = ECB2D24D-98B8-4015-A465-A4AF3DCC145F
 set_maps.DESCRIPTION                = Set active and ROI maps
-EXAMPLES-$(CONFIG_VP8_ENCODER)     += vp8cx_set_ref.c
-vp8cx_set_ref.SRCS                 += ivfenc.h ivfenc.c
-vp8cx_set_ref.SRCS                 += tools_common.h tools_common.c
-vp8cx_set_ref.SRCS                 += video_common.h
-vp8cx_set_ref.SRCS                 += video_writer.h video_writer.c
-vp8cx_set_ref.SRCS                 += vpx_ports/msvc.h
-vp8cx_set_ref.GUID                  = C5E31F7F-96F6-48BD-BD3E-10EBF6E8057A
-vp8cx_set_ref.DESCRIPTION           = VP8 set encoder reference frame
 
-# If vp9 is enabled, $(CONFIG_VP9_ENCODER) is yes, otherwise, it is blank.
-ifneq (,$(filter yes,$(CONFIG_VP9_ENCODER) $(CONFIG_VP10_ENCODER)))
+
+ifeq ($(CONFIG_VP10_ENCODER), yes)
 ifeq ($(CONFIG_DECODERS),yes)
 EXAMPLES-yes                       += vpxcx_set_ref.c
 vpxcx_set_ref.SRCS                 += ivfenc.h ivfenc.c
@@ -228,18 +208,6 @@ vpxcx_set_ref.DESCRIPTION           = VP9/VP10 set encoder reference frame
 endif
 endif
 
-ifeq ($(CONFIG_MULTI_RES_ENCODING),yes)
-ifeq ($(CONFIG_LIBYUV),yes)
-EXAMPLES-$(CONFIG_VP8_ENCODER)          += vp8_multi_resolution_encoder.c
-vp8_multi_resolution_encoder.SRCS       += ivfenc.h ivfenc.c
-vp8_multi_resolution_encoder.SRCS       += tools_common.h tools_common.c
-vp8_multi_resolution_encoder.SRCS       += video_writer.h video_writer.c
-vp8_multi_resolution_encoder.SRCS       += vpx_ports/msvc.h
-vp8_multi_resolution_encoder.SRCS       += $(LIBYUV_SRCS)
-vp8_multi_resolution_encoder.GUID        = 04f8738e-63c8-423b-90fa-7c2703a374de
-vp8_multi_resolution_encoder.DESCRIPTION = VP8 Multiple-resolution Encoding
-endif
-endif
 
 # Handle extra library flags depending on codec configuration
 
