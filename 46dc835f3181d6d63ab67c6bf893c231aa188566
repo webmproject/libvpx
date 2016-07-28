@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8fdd7d60_a0be60c7",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3807,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-28T22:07:19Z",
+      "side": 1,
+      "message": "Suggest not to insert this empty line so that the decoder stays untouched.",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8fdd7d60_80a484b7",
+        "filename": "vp10/encoder/bitstream.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-28T22:07:19Z",
+      "side": 1,
+      "message": "Suggest to remove the parentheses.",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8fdd7d60_608ab817",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-28T22:07:19Z",
+      "side": 1,
+      "message": "DUAL does not seem to reflect well the use of multiple alt-refs.",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6f6cc981_caaf2395",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3076,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-28T22:07:19Z",
+      "side": 1,
+      "message": "Suggest to change the variable name to sth like arf_index",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ef5fd9c9_69d2c15a",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3551,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-28T22:07:19Z",
+      "side": 1,
+      "message": "Here you may use a variable name like \"arf_update_idx\" or something alike",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ef5fd9c9_09cf8dad",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3570,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-28T22:07:19Z",
+      "side": 1,
+      "message": "Ditto",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8fdd7d60_20ab9085",
+        "filename": "vp10/encoder/encoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-28T22:07:19Z",
+      "side": 1,
+      "message": "Please put this change under the experiment of ext-refs so as to keep the baseline unchanged.\n\nAn alternative approach is to have a separate patch just to change the baseline, to use REF_FRAMES+1 here instead of MAX_REF_FRAMES.",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ef5fd9c9_6c8f2f1e",
+        "filename": "vp10/encoder/firstpass.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-28T22:07:19Z",
+      "side": 1,
+      "message": "Whenever the value of FRAME_UPDATE_TYPES changes, please make the appropriate change in the file of encoder/rd.c as well:\n\nstatic const int rd_frame_type_factor[FRAME_UPDATE_TYPES] \u003d {\n}",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
