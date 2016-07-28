@@ -715,6 +715,7 @@ typedef struct vpx_svc_parameters {
   int min_quantizers[VPX_MAX_LAYERS];     /**< Min Q for each layer */
   int scaling_factor_num[VPX_MAX_LAYERS]; /**< Scaling factor-numerator */
   int scaling_factor_den[VPX_MAX_LAYERS]; /**< Scaling factor-denominator */
+  int speed_per_layer[VPX_MAX_LAYERS];    /**< Speed setting for each sl */
   int temporal_layering_mode;             /**< Temporal layering mode */
 } vpx_svc_extra_cfg_t;
 

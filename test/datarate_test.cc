@@ -795,7 +795,9 @@ TEST_P(DatarateTestVP9Large, DenoiserOffOn) {
 class DatarateOnePassCbrSvc : public ::libvpx_test::EncoderTest,
     public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
  public:
-  DatarateOnePassCbrSvc() : EncoderTest(GET_PARAM(0)) {}
+  DatarateOnePassCbrSvc() : EncoderTest(GET_PARAM(0)) {
+    memset(&svc_params_, 0, sizeof(svc_params_));
+  }
   virtual ~DatarateOnePassCbrSvc() {}
  protected:
   virtual void SetUp() {
@@ -823,6 +825,10 @@ class DatarateOnePassCbrSvc : public ::libvpx_test::EncoderTest,
       for (i = 0; i < VPX_MAX_LAYERS; ++i) {
         svc_params_.max_quantizers[i] = 63;
         svc_params_.min_quantizers[i] = 0;
+      }
+      svc_params_.speed_per_layer[0] = 5;
+      for (i = 1; i < VPX_SS_MAX_LAYERS; ++i) {
+        svc_params_.speed_per_layer[i] = 7;
       }
       encoder->Control(VP9E_SET_SVC, 1);
       encoder->Control(VP9E_SET_SVC_PARAMETERS, &svc_params_);

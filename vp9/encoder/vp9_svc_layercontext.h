@@ -46,6 +46,7 @@ typedef struct {
   signed char *map;
   uint8_t *last_coded_q_map;
   uint8_t *consec_zero_mv;
+  uint8_t speed;
 } LAYER_CONTEXT;
 
 typedef struct {
