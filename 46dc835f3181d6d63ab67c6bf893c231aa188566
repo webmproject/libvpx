@@ -121,6 +121,108 @@
     },
     {
       "key": {
+        "uuid": "ef5fd9c9_8c8ceb84",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1749,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-28T23:31:55Z",
+      "side": 1,
+      "message": "Suggest to follow the C/C++ convention to have i start with 0:\n\nfor (i \u003d 0; i \u003c cpi-\u003eext_arfs; ++i)",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_097829d3",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1753,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-28T23:31:55Z",
+      "side": 1,
+      "message": "Suggest to use (int) for the cast",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_893a59ef",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1935,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-28T23:31:55Z",
+      "side": 1,
+      "message": "Ditto",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_a93f1dde",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2171,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-28T23:31:55Z",
+      "side": 1,
+      "message": "It does not seem we need to define a subroutine of get_number_of_extra_arfs as this subroutine has been called only once and the number of lines in the subroutine is not that long.",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ef5fd9c9_2c429745",
+        "filename": "vp10/encoder/firstpass.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-28T23:31:55Z",
+      "side": 1,
+      "message": "May remove one \"extra\" from the comment",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ef5fd9c9_2c57f7ff",
+        "filename": "vp10/encoder/firstpass.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-28T23:31:55Z",
+      "side": 1,
+      "message": "Better use the term INTNL_OVERLAY_UPDATE instead of INTL_OVERLAY_UPDATE",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ef5fd9c9_6c8f2f1e",
         "filename": "vp10/encoder/firstpass.h",
         "patchSetId": 5
@@ -132,6 +234,40 @@
       "writtenOn": "2016-07-28T22:07:19Z",
       "side": 1,
       "message": "Whenever the value of FRAME_UPDATE_TYPES changes, please make the appropriate change in the file of encoder/rd.c as well:\n\nstatic const int rd_frame_type_factor[FRAME_UPDATE_TYPES] \u003d {\n}",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ef5fd9c9_ec89df85",
+        "filename": "vp10/encoder/firstpass.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-28T23:31:55Z",
+      "side": 1,
+      "message": "Ditto",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_e93915fa",
+        "filename": "vp10/encoder/ratectrl.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1254,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-28T23:31:55Z",
+      "side": 1,
+      "message": "Suggest to use \"is_intnl_overlay\"",
       "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
