@@ -850,7 +850,7 @@ INSTANTIATE_TEST_CASE_P(C, PartialTrans16x16Test,
                                                      VPX_BITS_8)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-#if HAVE_NEON_ASM && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#if HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     NEON, Trans16x16DCT,
     ::testing::Values(make_tuple(&vpx_fdct16x16_c, &vpx_idct16x16_256_add_neon,

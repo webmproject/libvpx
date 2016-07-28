@@ -11,71 +11,8 @@
 #include <arm_neon.h>
 
 #include "./vpx_config.h"
+#include "vpx_dsp/arm/transpose_neon.h"
 #include "vpx_dsp/txfm_common.h"
-
-static INLINE void TRANSPOSE8X8(int16x8_t *q8s16, int16x8_t *q9s16,
-                                int16x8_t *q10s16, int16x8_t *q11s16,
-                                int16x8_t *q12s16, int16x8_t *q13s16,
-                                int16x8_t *q14s16, int16x8_t *q15s16) {
-  int16x4_t d16s16, d17s16, d18s16, d19s16, d20s16, d21s16, d22s16, d23s16;
-  int16x4_t d24s16, d25s16, d26s16, d27s16, d28s16, d29s16, d30s16, d31s16;
-  int32x4x2_t q0x2s32, q1x2s32, q2x2s32, q3x2s32;
-  int16x8x2_t q0x2s16, q1x2s16, q2x2s16, q3x2s16;
-
-  d16s16 = vget_low_s16(*q8s16);
-  d17s16 = vget_high_s16(*q8s16);
-  d18s16 = vget_low_s16(*q9s16);
-  d19s16 = vget_high_s16(*q9s16);
-  d20s16 = vget_low_s16(*q10s16);
-  d21s16 = vget_high_s16(*q10s16);
-  d22s16 = vget_low_s16(*q11s16);
-  d23s16 = vget_high_s16(*q11s16);
-  d24s16 = vget_low_s16(*q12s16);
-  d25s16 = vget_high_s16(*q12s16);
-  d26s16 = vget_low_s16(*q13s16);
-  d27s16 = vget_high_s16(*q13s16);
-  d28s16 = vget_low_s16(*q14s16);
-  d29s16 = vget_high_s16(*q14s16);
-  d30s16 = vget_low_s16(*q15s16);
-  d31s16 = vget_high_s16(*q15s16);
-
-  *q8s16 = vcombine_s16(d16s16, d24s16);   // vswp d17, d24
-  *q9s16 = vcombine_s16(d18s16, d26s16);   // vswp d19, d26
-  *q10s16 = vcombine_s16(d20s16, d28s16);  // vswp d21, d28
-  *q11s16 = vcombine_s16(d22s16, d30s16);  // vswp d23, d30
-  *q12s16 = vcombine_s16(d17s16, d25s16);
-  *q13s16 = vcombine_s16(d19s16, d27s16);
-  *q14s16 = vcombine_s16(d21s16, d29s16);
-  *q15s16 = vcombine_s16(d23s16, d31s16);
-
-  q0x2s32 =
-      vtrnq_s32(vreinterpretq_s32_s16(*q8s16), vreinterpretq_s32_s16(*q10s16));
-  q1x2s32 =
-      vtrnq_s32(vreinterpretq_s32_s16(*q9s16), vreinterpretq_s32_s16(*q11s16));
-  q2x2s32 =
-      vtrnq_s32(vreinterpretq_s32_s16(*q12s16), vreinterpretq_s32_s16(*q14s16));
-  q3x2s32 =
-      vtrnq_s32(vreinterpretq_s32_s16(*q13s16), vreinterpretq_s32_s16(*q15s16));
-
-  q0x2s16 = vtrnq_s16(vreinterpretq_s16_s32(q0x2s32.val[0]),   // q8
-                      vreinterpretq_s16_s32(q1x2s32.val[0]));  // q9
-  q1x2s16 = vtrnq_s16(vreinterpretq_s16_s32(q0x2s32.val[1]),   // q10
-                      vreinterpretq_s16_s32(q1x2s32.val[1]));  // q11
-  q2x2s16 = vtrnq_s16(vreinterpretq_s16_s32(q2x2s32.val[0]),   // q12
-                      vreinterpretq_s16_s32(q3x2s32.val[0]));  // q13
-  q3x2s16 = vtrnq_s16(vreinterpretq_s16_s32(q2x2s32.val[1]),   // q14
-                      vreinterpretq_s16_s32(q3x2s32.val[1]));  // q15
-
-  *q8s16 = q0x2s16.val[0];
-  *q9s16 = q0x2s16.val[1];
-  *q10s16 = q1x2s16.val[0];
-  *q11s16 = q1x2s16.val[1];
-  *q12s16 = q2x2s16.val[0];
-  *q13s16 = q2x2s16.val[1];
-  *q14s16 = q3x2s16.val[0];
-  *q15s16 = q3x2s16.val[1];
-  return;
-}
 
 void vpx_idct16x16_256_add_neon_pass1(int16_t *in, int16_t *out,
                                       int output_stride) {
@@ -115,8 +52,8 @@ void vpx_idct16x16_256_add_neon_pass1(int16_t *in, int16_t *out,
   q0x2s16 = vld2q_s16(in);
   q15s16 = q0x2s16.val[0];
 
-  TRANSPOSE8X8(&q8s16, &q9s16, &q10s16, &q11s16, &q12s16, &q13s16, &q14s16,
-               &q15s16);
+  transpose_s16_8x8(&q8s16, &q9s16, &q10s16, &q11s16, &q12s16, &q13s16, &q14s16,
+                    &q15s16);
 
   d16s16 = vget_low_s16(q8s16);
   d17s16 = vget_high_s16(q8s16);
@@ -356,8 +293,8 @@ void vpx_idct16x16_256_add_neon_pass2(int16_t *src, int16_t *out,
   q0x2s16 = vld2q_s16(src);
   q15s16 = q0x2s16.val[0];
 
-  TRANSPOSE8X8(&q8s16, &q9s16, &q10s16, &q11s16, &q12s16, &q13s16, &q14s16,
-               &q15s16);
+  transpose_s16_8x8(&q8s16, &q9s16, &q10s16, &q11s16, &q12s16, &q13s16, &q14s16,
+                    &q15s16);
 
   d16s16 = vget_low_s16(q8s16);
   d17s16 = vget_high_s16(q8s16);
@@ -898,8 +835,8 @@ void vpx_idct16x16_10_add_neon_pass1(int16_t *in, int16_t *out,
   q0x2s16 = vld2q_s16(in);
   q15s16 = q0x2s16.val[0];
 
-  TRANSPOSE8X8(&q8s16, &q9s16, &q10s16, &q11s16, &q12s16, &q13s16, &q14s16,
-               &q15s16);
+  transpose_s16_8x8(&q8s16, &q9s16, &q10s16, &q11s16, &q12s16, &q13s16, &q14s16,
+                    &q15s16);
 
   // stage 3
   q0s16 = vdupq_n_s16(cospi_28_64 * 2);
@@ -1041,8 +978,8 @@ void vpx_idct16x16_10_add_neon_pass2(int16_t *src, int16_t *out,
   q0x2s16 = vld2q_s16(src);
   q15s16 = q0x2s16.val[0];
 
-  TRANSPOSE8X8(&q8s16, &q9s16, &q10s16, &q11s16, &q12s16, &q13s16, &q14s16,
-               &q15s16);
+  transpose_s16_8x8(&q8s16, &q9s16, &q10s16, &q11s16, &q12s16, &q13s16, &q14s16,
+                    &q15s16);
 
   // stage 3
   q6s16 = vdupq_n_s16(cospi_30_64 * 2);
