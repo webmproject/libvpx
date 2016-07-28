@@ -506,13 +506,13 @@ static unsigned pixel_sse(const VP9_COMP *const cpi, const MACROBLOCKD *xd,
 }
 
 // Compute the squares sum squares on all visible 4x4s in the transform block.
-static unsigned sum_squares_visible(const MACROBLOCKD *xd,
-                                    const struct macroblockd_plane *const pd,
-                                    const int16_t *diff, const int diff_stride,
-                                    int blk_row, int blk_col,
-                                    const BLOCK_SIZE plane_bsize,
-                                    const BLOCK_SIZE tx_bsize) {
-  unsigned int sse = 0;
+static int64_t sum_squares_visible(const MACROBLOCKD *xd,
+                                   const struct macroblockd_plane *const pd,
+                                   const int16_t *diff, const int diff_stride,
+                                   int blk_row, int blk_col,
+                                   const BLOCK_SIZE plane_bsize,
+                                   const BLOCK_SIZE tx_bsize) {
+  int64_t sse;
   const int plane_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
   const int plane_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
   const int tx_4x4_w = num_4x4_blocks_wide_lookup[tx_bsize];
@@ -523,10 +523,9 @@ static unsigned sum_squares_visible(const MACROBLOCKD *xd,
                                              pd->subsampling_y, blk_row);
   if (tx_bsize == BLOCK_4X4 ||
       (b4x4s_to_right_edge >= tx_4x4_w && b4x4s_to_bottom_edge >= tx_4x4_h)) {
-    sse = vpx_sum_squares_2d_i16(diff, diff_stride, tx_bsize);
+    sse = (int64_t)vpx_sum_squares_2d_i16(diff, diff_stride, tx_bsize);
   } else {
     int r, c;
-    unsigned this_sse = 0;
     int max_r = VPXMIN(b4x4s_to_bottom_edge, tx_4x4_h);
     int max_c = VPXMIN(b4x4s_to_right_edge, tx_4x4_w);
     sse = 0;
@@ -534,8 +533,7 @@ static unsigned sum_squares_visible(const MACROBLOCKD *xd,
     for (r = 0; r < max_r; ++r) {
       // Skip visiting the sub blocks that are wholly within the UMV.
       for (c = 0; c < max_c; ++c) {
-        this_sse = vpx_sum_squares_2d_i16(diff, diff_stride, BLOCK_4X4);
-        sse += this_sse;
+        sse += (int64_t)vpx_sum_squares_2d_i16(diff, diff_stride, BLOCK_4X4);
       }
     }
   }
