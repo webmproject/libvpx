@@ -691,7 +691,7 @@ static inline int get_dy(int angle) {
   if (angle > 90 && angle < 180) {
       return dr_intra_derivative[angle - 90];
     } else if (angle > 180 && angle < 270) {
-      return -dr_intra_derivative[270 -angle];
+      return -dr_intra_derivative[270 - angle];
     } else {
     // In this case, we are not really going to use dy. We may return any value.
     return 1;
