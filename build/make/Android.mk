@@ -29,11 +29,6 @@
 # include $(CLEAR_VARS)
 # include jni/libvpx/build/make/Android.mk
 #
-# There are currently two TARGET_ARCH_ABI targets for ARM.
-# armeabi and armeabi-v7a.  armeabi-v7a is selected by creating an
-# Application.mk in the jni directory that contains:
-# APP_ABI := armeabi-v7a
-#
 # By default libvpx will detect at runtime the existance of NEON extension.
 # For this we import the 'cpufeatures' module from the NDK sources.
 # libvpx can also be configured without this runtime detection method.
@@ -42,9 +37,6 @@
 #     --disable-neon-asm
 # will remove any NEON dependency.
 
-# To change to building armeabi, run ./libvpx/configure again, but with
-# --target=armv6-android-gcc and modify the Application.mk file to
-# set APP_ABI := armeabi
 #
 # Running ndk-build will build libvpx and include it in your project.
 #
@@ -58,9 +50,6 @@ ASM_CNV_PATH := $(LOCAL_PATH)/$(ASM_CNV_PATH_LOCAL)
 # build. Also set any architecture-specific flags.
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
   include $(CONFIG_DIR)libs-armv7-android-gcc.mk
-  LOCAL_ARM_MODE := arm
-else ifeq  ($(TARGET_ARCH_ABI),armeabi)
-  include $(CONFIG_DIR)libs-armv6-android-gcc.mk
   LOCAL_ARM_MODE := arm
 else ifeq  ($(TARGET_ARCH_ABI),arm64-v8a)
   include $(CONFIG_DIR)libs-armv8-android-gcc.mk

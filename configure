@@ -99,9 +99,6 @@ EOF
 # alphabetically by architecture, generic-gnu last.
 all_platforms="${all_platforms} arm64-darwin-gcc"
 all_platforms="${all_platforms} arm64-linux-gcc"
-all_platforms="${all_platforms} armv6-linux-rvct"
-all_platforms="${all_platforms} armv6-linux-gcc"
-all_platforms="${all_platforms} armv6-none-rvct"
 all_platforms="${all_platforms} armv7-android-gcc"   #neon Cortex-A8
 all_platforms="${all_platforms} armv7-darwin-gcc"    #neon Cortex-A8
 all_platforms="${all_platforms} armv7-linux-rvct"    #neon Cortex-A8
@@ -236,8 +233,6 @@ ARCH_EXT_LIST_X86="
     avx2
 "
 ARCH_EXT_LIST="
-    edsp
-    media
     neon
     neon_asm
 

@@ -10,8 +10,9 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "vpx_ports/arm.h"
+
 #include "./vpx_config.h"
+#include "vpx_ports/arm.h"
 
 #ifdef WINAPI_FAMILY
 #include <winapifamily.h>
@@ -49,9 +50,6 @@ int arm_cpu_caps(void) {
     return flags;
   }
   mask = arm_cpu_env_mask();
-#if HAVE_MEDIA
-  flags |= HAS_MEDIA;
-#endif /* HAVE_MEDIA */
 #if HAVE_NEON || HAVE_NEON_ASM
   flags |= HAS_NEON;
 #endif /* HAVE_NEON  || HAVE_NEON_ASM */
@@ -75,28 +73,18 @@ int arm_cpu_caps(void) {
  *  instructions via their assembled hex code.
  * All of these instructions should be essentially nops.
  */
-#if HAVE_MEDIA
-  if (mask & HAS_MEDIA) __try {
-      /*SHADD8 r3,r3,r3*/
-      __emit(0xE6333F93);
-      flags |= HAS_MEDIA;
+#if HAVE_NEON || HAVE_NEON_ASM
+  if (mask & HAS_NEON) {
+    __try {
+      /*VORR q0,q0,q0*/
+      __emit(0xF2200150);
+      flags |= HAS_NEON;
     } __except (GetExceptionCode() == EXCEPTION_ILLEGAL_INSTRUCTION) {
       /*Ignore exception.*/
     }
-}
-#endif /* HAVE_MEDIA */
-#if HAVE_NEON || HAVE_NEON_ASM
-if (mask & HAS_NEON) {
-  __try {
-    /*VORR q0,q0,q0*/
-    __emit(0xF2200150);
-    flags |= HAS_NEON;
-  } __except (GetExceptionCode() == EXCEPTION_ILLEGAL_INSTRUCTION) {
-    /*Ignore exception.*/
   }
-}
 #endif /* HAVE_NEON || HAVE_NEON_ASM */
-return flags & mask;
+  return flags & mask;
 }
 
 #elif defined(__ANDROID__) /* end _MSC_VER */
@@ -112,9 +100,6 @@ int arm_cpu_caps(void) {
   mask = arm_cpu_env_mask();
   features = android_getCpuFeatures();
 
-#if HAVE_MEDIA
-  flags |= HAS_MEDIA;
-#endif /* HAVE_MEDIA */
 #if HAVE_NEON || HAVE_NEON_ASM
   if (features & ANDROID_CPU_ARM_FEATURE_NEON) flags |= HAS_NEON;
 #endif /* HAVE_NEON || HAVE_NEON_ASM */
@@ -153,15 +138,6 @@ int arm_cpu_caps(void) {
         }
       }
 #endif /* HAVE_NEON || HAVE_NEON_ASM */
-#if HAVE_MEDIA
-      if (memcmp(buf, "CPU architecture:", 17) == 0) {
-        int version;
-        version = atoi(buf + 17);
-        if (version >= 6) {
-          flags |= HAS_MEDIA;
-        }
-      }
-#endif /* HAVE_MEDIA */
     }
     fclose(fin);
   }

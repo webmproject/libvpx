@@ -123,30 +123,8 @@ ifeq ($(CONFIG_POSTPROC),yes)
 VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/mfqe_msa.c
 endif
 
-# common (c)
-VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/filter_arm.c
-VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/loopfilter_arm.c
-VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/dequantize_arm.c
-
-# common (media)
-VP8_COMMON_SRCS-$(HAVE_MEDIA)  += common/arm/bilinearfilter_arm.c
-VP8_COMMON_SRCS-$(HAVE_MEDIA)  += common/arm/bilinearfilter_arm.h
-VP8_COMMON_SRCS-$(HAVE_MEDIA)  += common/arm/armv6/bilinearfilter_v6$(ASM)
-VP8_COMMON_SRCS-$(HAVE_MEDIA)  += common/arm/armv6/copymem8x4_v6$(ASM)
-VP8_COMMON_SRCS-$(HAVE_MEDIA)  += common/arm/armv6/copymem8x8_v6$(ASM)
-VP8_COMMON_SRCS-$(HAVE_MEDIA)  += common/arm/armv6/copymem16x16_v6$(ASM)
-VP8_COMMON_SRCS-$(HAVE_MEDIA)  += common/arm/armv6/dc_only_idct_add_v6$(ASM)
-VP8_COMMON_SRCS-$(HAVE_MEDIA)  += common/arm/armv6/iwalsh_v6$(ASM)
-VP8_COMMON_SRCS-$(HAVE_MEDIA)  += common/arm/armv6/filter_v6$(ASM)
-VP8_COMMON_SRCS-$(HAVE_MEDIA)  += common/arm/armv6/idct_v6$(ASM)
-VP8_COMMON_SRCS-$(HAVE_MEDIA)  += common/arm/armv6/loopfilter_v6$(ASM)
-VP8_COMMON_SRCS-$(HAVE_MEDIA)  += common/arm/armv6/simpleloopfilter_v6$(ASM)
-VP8_COMMON_SRCS-$(HAVE_MEDIA)  += common/arm/armv6/sixtappredict8x4_v6$(ASM)
-VP8_COMMON_SRCS-$(HAVE_MEDIA)  += common/arm/armv6/dequant_idct_v6$(ASM)
-VP8_COMMON_SRCS-$(HAVE_MEDIA)  += common/arm/armv6/dequantize_v6$(ASM)
-VP8_COMMON_SRCS-$(HAVE_MEDIA)  += common/arm/armv6/idct_blk_v6.c
-
 # common (neon intrinsics)
+VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/loopfilter_arm.c
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/bilinearpredict_neon.c
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/copymem_neon.c
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/dc_only_idct_add_neon.c

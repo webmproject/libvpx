@@ -640,13 +640,6 @@ INSTANTIATE_TEST_CASE_P(C, SADx4Test, ::testing::ValuesIn(x4d_c_tests));
 
 //------------------------------------------------------------------------------
 // ARM functions
-#if HAVE_MEDIA
-const SadMxNParam media_tests[] = {
-  SadMxNParam(16, 16, &vpx_sad16x16_media),
-};
-INSTANTIATE_TEST_CASE_P(MEDIA, SADTest, ::testing::ValuesIn(media_tests));
-#endif  // HAVE_MEDIA
-
 #if HAVE_NEON
 const SadMxNParam neon_tests[] = {
   SadMxNParam(64, 64, &vpx_sad64x64_neon),
