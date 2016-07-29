@@ -58,7 +58,12 @@ typedef struct {
 // simplistic pthread emulation layer
 
 // _beginthreadex requires __stdcall
+#if defined(__GNUC__) && \
+    (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2))
+#define THREADFN __attribute__((force_align_arg_pointer)) unsigned int __stdcall
+#else
 #define THREADFN unsigned int __stdcall
+#endif
 #define THREAD_RETURN(val) (unsigned int)((DWORD_PTR)val)
 
 #if _WIN32_WINNT >= 0x0501  // Windows XP or greater

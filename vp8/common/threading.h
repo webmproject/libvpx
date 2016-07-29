@@ -24,7 +24,13 @@ extern "C" {
 /* Win32 */
 #include <process.h>
 #include <windows.h>
+#if defined(__GNUC__) && \
+    (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2))
+#define THREAD_FUNCTION \
+  __attribute__((force_align_arg_pointer)) unsigned int __stdcall
+#else
 #define THREAD_FUNCTION unsigned int __stdcall
+#endif
 #define THREAD_FUNCTION_RETURN DWORD
 #define THREAD_SPECIFIC_INDEX DWORD
 #define pthread_t HANDLE
