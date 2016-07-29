@@ -8572,16 +8572,16 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
   int single_skippable[MB_MODE_COUNT][MAX_REF_FRAMES];
   static const int flag_list[REFS_PER_FRAME + 1] = {
     0,
-    VP9_LAST_FLAG,
+    VPX_LAST_FLAG,
 #if CONFIG_EXT_REFS
-    VP9_LAST2_FLAG,
-    VP9_LAST3_FLAG,
+    VPX_LAST2_FLAG,
+    VPX_LAST3_FLAG,
 #endif  // CONFIG_EXT_REFS
-    VP9_GOLD_FLAG,
+    VPX_GOLD_FLAG,
 #if CONFIG_EXT_REFS
-    VP9_BWD_FLAG,
+    VPX_BWD_FLAG,
 #endif  // CONFIG_EXT_REFS
-    VP9_ALT_FLAG
+    VPX_ALT_FLAG
   };
   int64_t best_rd = best_rd_so_far;
   int best_rate_y = INT_MAX, best_rate_uv = INT_MAX;
@@ -10307,16 +10307,16 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
   struct buf_2d yv12_mb[MAX_REF_FRAMES][MAX_MB_PLANE];
   static const int flag_list[REFS_PER_FRAME + 1] = {
     0,
-    VP9_LAST_FLAG,
+    VPX_LAST_FLAG,
 #if CONFIG_EXT_REFS
-    VP9_LAST2_FLAG,
-    VP9_LAST3_FLAG,
+    VPX_LAST2_FLAG,
+    VPX_LAST3_FLAG,
 #endif  // CONFIG_EXT_REFS
-    VP9_GOLD_FLAG,
+    VPX_GOLD_FLAG,
 #if CONFIG_EXT_REFS
-    VP9_BWD_FLAG,
+    VPX_BWD_FLAG,
 #endif  // CONFIG_EXT_REFS
-    VP9_ALT_FLAG
+    VPX_ALT_FLAG
   };
   int64_t best_rd = best_rd_so_far;
   int64_t best_yrd = best_rd_so_far;  // FIXME(rbultje) more precise

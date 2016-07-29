@@ -208,20 +208,20 @@ typedef enum {
 #endif  // CONFIG_EXT_TX
 
 typedef enum {
-  VP9_LAST_FLAG = 1 << 0,
+  VPX_LAST_FLAG = 1 << 0,
 #if CONFIG_EXT_REFS
-  VP9_LAST2_FLAG = 1 << 1,
-  VP9_LAST3_FLAG = 1 << 2,
-  VP9_GOLD_FLAG = 1 << 3,
-  VP9_BWD_FLAG = 1 << 4,
-  VP9_ALT_FLAG = 1 << 5,
-  VP9_REFFRAME_ALL = (1 << 6) - 1
+  VPX_LAST2_FLAG = 1 << 1,
+  VPX_LAST3_FLAG = 1 << 2,
+  VPX_GOLD_FLAG = 1 << 3,
+  VPX_BWD_FLAG = 1 << 4,
+  VPX_ALT_FLAG = 1 << 5,
+  VPX_REFFRAME_ALL = (1 << 6) - 1
 #else
-  VP9_GOLD_FLAG = 1 << 1,
-  VP9_ALT_FLAG = 1 << 2,
-  VP9_REFFRAME_ALL = (1 << 3) - 1
+  VPX_GOLD_FLAG = 1 << 1,
+  VPX_ALT_FLAG = 1 << 2,
+  VPX_REFFRAME_ALL = (1 << 3) - 1
 #endif  // CONFIG_EXT_REFS
-} VP9_REFFRAME;
+} VPX_REFFRAME;
 
 typedef enum {
   PLANE_TYPE_Y  = 0,

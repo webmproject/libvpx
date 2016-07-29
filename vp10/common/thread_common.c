@@ -34,7 +34,7 @@ static INLINE void mutex_lock(pthread_mutex_t *const mutex) {
 }
 #endif  // CONFIG_MULTITHREAD
 
-static INLINE void sync_read(VP9LfSync *const lf_sync, int r, int c) {
+static INLINE void sync_read(VP10LfSync *const lf_sync, int r, int c) {
 #if CONFIG_MULTITHREAD
   const int nsync = lf_sync->sync_range;
 
@@ -54,7 +54,7 @@ static INLINE void sync_read(VP9LfSync *const lf_sync, int r, int c) {
 #endif  // CONFIG_MULTITHREAD
 }
 
-static INLINE void sync_write(VP9LfSync *const lf_sync, int r, int c,
+static INLINE void sync_write(VP10LfSync *const lf_sync, int r, int c,
                               const int sb_cols) {
 #if CONFIG_MULTITHREAD
   const int nsync = lf_sync->sync_range;
@@ -92,7 +92,7 @@ void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
                              VP10_COMMON *const cm,
                              struct macroblockd_plane planes[MAX_MB_PLANE],
                              int start, int stop, int y_only,
-                             VP9LfSync *const lf_sync) {
+                             VP10LfSync *const lf_sync) {
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
   const int sb_cols = mi_cols_aligned_to_sb(cm) >> cm->mib_size_log2;
   int mi_row, mi_col;
@@ -159,7 +159,7 @@ void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
 }
 
 // Row-based multi-threaded loopfilter hook
-static int loop_filter_row_worker(VP9LfSync *const lf_sync,
+static int loop_filter_row_worker(VP10LfSync *const lf_sync,
                                   LFWorkerData *const lf_data) {
   thread_loop_filter_rows(lf_data->frame_buffer, lf_data->cm, lf_data->planes,
                           lf_data->start, lf_data->stop, lf_data->y_only,
@@ -172,7 +172,7 @@ static void loop_filter_rows_mt(YV12_BUFFER_CONFIG *frame,
                                 struct macroblockd_plane planes[MAX_MB_PLANE],
                                 int start, int stop, int y_only,
                                 VPxWorker *workers, int nworkers,
-                                VP9LfSync *lf_sync) {
+                                VP10LfSync *lf_sync) {
   const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
   // Number of superblock rows and cols
   const int sb_rows = mi_rows_aligned_to_sb(cm) >> cm->mib_size_log2;
@@ -239,7 +239,7 @@ void vp10_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
                               int frame_filter_level,
                               int y_only, int partial_frame,
                               VPxWorker *workers, int num_workers,
-                              VP9LfSync *lf_sync) {
+                              VP10LfSync *lf_sync) {
   int start_mi_row, end_mi_row, mi_rows_to_filter;
 
   if (!frame_filter_level) return;
@@ -273,7 +273,7 @@ static INLINE int get_sync_range(int width) {
 }
 
 // Allocate memory for lf row synchronization
-void vp10_loop_filter_alloc(VP9LfSync *lf_sync, VP10_COMMON *cm, int rows,
+void vp10_loop_filter_alloc(VP10LfSync *lf_sync, VP10_COMMON *cm, int rows,
                            int width, int num_workers) {
   lf_sync->rows = rows;
 #if CONFIG_MULTITHREAD
@@ -310,7 +310,7 @@ void vp10_loop_filter_alloc(VP9LfSync *lf_sync, VP10_COMMON *cm, int rows,
 }
 
 // Deallocate lf synchronization related mutex and data
-void vp10_loop_filter_dealloc(VP9LfSync *lf_sync) {
+void vp10_loop_filter_dealloc(VP10LfSync *lf_sync) {
   if (lf_sync != NULL) {
 #if CONFIG_MULTITHREAD
     int i;

@@ -80,7 +80,7 @@ typedef struct VP10Decoder {
 
   TileBufferDec tile_buffers[MAX_TILE_ROWS][MAX_TILE_COLS];
 
-  VP9LfSync lf_row_sync;
+  VP10LfSync lf_row_sync;
 
   vpx_decrypt_cb decrypt_cb;
   void *decrypt_state;
@@ -105,11 +105,11 @@ int vp10_get_raw_frame(struct VP10Decoder *pbi, YV12_BUFFER_CONFIG *sd);
 int vp10_get_frame_to_show(struct VP10Decoder *pbi, YV12_BUFFER_CONFIG *frame);
 
 vpx_codec_err_t vp10_copy_reference_dec(struct VP10Decoder *pbi,
-                                       VP9_REFFRAME ref_frame_flag,
+                                       VPX_REFFRAME ref_frame_flag,
                                        YV12_BUFFER_CONFIG *sd);
 
 vpx_codec_err_t vp10_set_reference_dec(VP10_COMMON *cm,
-                                      VP9_REFFRAME ref_frame_flag,
+                                      VPX_REFFRAME ref_frame_flag,
                                       YV12_BUFFER_CONFIG *sd);
 
 static INLINE uint8_t read_marker(vpx_decrypt_cb decrypt_cb,

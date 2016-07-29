@@ -606,7 +606,7 @@ typedef struct VP10_COMP {
   int num_workers;
   VPxWorker *workers;
   struct EncWorkerData *tile_thr_data;
-  VP9LfSync lf_row_sync;
+  VP10LfSync lf_row_sync;
 #if CONFIG_ENTROPY
   SUBFRAME_STATS subframe_stats;
   // TODO(yaowu): minimize the size of count buffers
@@ -652,10 +652,10 @@ int vp10_use_as_reference(VP10_COMP *cpi, int ref_frame_flags);
 
 void vp10_update_reference(VP10_COMP *cpi, int ref_frame_flags);
 
-int vp10_copy_reference_enc(VP10_COMP *cpi, VP9_REFFRAME ref_frame_flag,
+int vp10_copy_reference_enc(VP10_COMP *cpi, VPX_REFFRAME ref_frame_flag,
                            YV12_BUFFER_CONFIG *sd);
 
-int vp10_set_reference_enc(VP10_COMP *cpi, VP9_REFFRAME ref_frame_flag,
+int vp10_set_reference_enc(VP10_COMP *cpi, VPX_REFFRAME ref_frame_flag,
                           YV12_BUFFER_CONFIG *sd);
 
 int vp10_update_entropy(VP10_COMP *cpi, int update);

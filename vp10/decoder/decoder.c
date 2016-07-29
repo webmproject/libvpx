@@ -158,7 +158,7 @@ static int equal_dimensions(const YV12_BUFFER_CONFIG *a,
 }
 
 vpx_codec_err_t vp10_copy_reference_dec(VP10Decoder *pbi,
-                                       VP9_REFFRAME ref_frame_flag,
+                                       VPX_REFFRAME ref_frame_flag,
                                        YV12_BUFFER_CONFIG *sd) {
   VP10_COMMON *cm = &pbi->common;
 
@@ -167,7 +167,7 @@ vpx_codec_err_t vp10_copy_reference_dec(VP10Decoder *pbi,
    * vpxenc --test-decode functionality working, and will be replaced in a
    * later commit that adds VP9-specific controls for this functionality.
    */
-  if (ref_frame_flag == VP9_LAST_FLAG) {
+  if (ref_frame_flag == VPX_LAST_FLAG) {
     const YV12_BUFFER_CONFIG *const cfg = get_ref_frame(cm, 0);
     if (cfg == NULL) {
       vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
@@ -178,7 +178,7 @@ vpx_codec_err_t vp10_copy_reference_dec(VP10Decoder *pbi,
       vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                          "Incorrect buffer dimensions");
     else
-      vp8_yv12_copy_frame(cfg, sd);
+      vpx_yv12_copy_frame(cfg, sd);
   } else {
     vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                        "Invalid reference frame");
@@ -189,7 +189,7 @@ vpx_codec_err_t vp10_copy_reference_dec(VP10Decoder *pbi,
 
 
 vpx_codec_err_t vp10_set_reference_dec(VP10_COMMON *cm,
-                                      VP9_REFFRAME ref_frame_flag,
+                                      VPX_REFFRAME ref_frame_flag,
                                       YV12_BUFFER_CONFIG *sd) {
   int idx;
   YV12_BUFFER_CONFIG *ref_buf = NULL;
@@ -215,23 +215,23 @@ vpx_codec_err_t vp10_set_reference_dec(VP10_COMMON *cm,
 
   // TODO(zoeliu): To revisit following code and reconsider what assumption we
   // may take on the reference frame buffer virtual indexes
-  if (ref_frame_flag == VP9_LAST_FLAG) {
+  if (ref_frame_flag == VPX_LAST_FLAG) {
     idx = cm->ref_frame_map[0];
 #if CONFIG_EXT_REFS
-  } else if (ref_frame_flag == VP9_LAST2_FLAG) {
+  } else if (ref_frame_flag == VPX_LAST2_FLAG) {
     idx = cm->ref_frame_map[1];
-  } else if (ref_frame_flag == VP9_LAST3_FLAG) {
+  } else if (ref_frame_flag == VPX_LAST3_FLAG) {
     idx = cm->ref_frame_map[2];
-  } else if (ref_frame_flag == VP9_GOLD_FLAG) {
+  } else if (ref_frame_flag == VPX_GOLD_FLAG) {
     idx = cm->ref_frame_map[3];
-  } else if (ref_frame_flag == VP9_BWD_FLAG) {
+  } else if (ref_frame_flag == VPX_BWD_FLAG) {
     idx = cm->ref_frame_map[4];
-  } else if (ref_frame_flag == VP9_ALT_FLAG) {
+  } else if (ref_frame_flag == VPX_ALT_FLAG) {
     idx = cm->ref_frame_map[5];
 #else
-  } else if (ref_frame_flag == VP9_GOLD_FLAG) {
+  } else if (ref_frame_flag == VPX_GOLD_FLAG) {
     idx = cm->ref_frame_map[1];
-  } else if (ref_frame_flag == VP9_ALT_FLAG) {
+  } else if (ref_frame_flag == VPX_ALT_FLAG) {
     idx = cm->ref_frame_map[2];
 #endif  // CONFIG_EXT_REFS
   } else {
@@ -254,7 +254,7 @@ vpx_codec_err_t vp10_set_reference_dec(VP10_COMMON *cm,
                        "Incorrect buffer dimensions");
   } else {
     // Overwrite the reference frame buffer.
-    vp8_yv12_copy_frame(sd, ref_buf);
+    vpx_yv12_copy_frame(sd, ref_buf);
   }
 
   return cm->error.error_code;

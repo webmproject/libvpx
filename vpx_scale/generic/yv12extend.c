@@ -101,7 +101,7 @@ static void extend_plane_high(uint8_t *const src8, int src_stride,
 }
 #endif
 
-void vp8_yv12_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf) {
+void vpx_yv12_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf) {
   const int uv_border = ybf->border / 2;
 
   assert(ybf->border % 2 == 0);
@@ -243,7 +243,7 @@ static void memcpy_short_addr(uint8_t *dst8, const uint8_t *src8, int num) {
 // Copies the source image into the destination image and updates the
 // destination's UMV borders.
 // Note: The frames are assumed to be identical in size.
-void vp8_yv12_copy_frame_c(const YV12_BUFFER_CONFIG *src_ybc,
+void vpx_yv12_copy_frame_c(const YV12_BUFFER_CONFIG *src_ybc,
                            YV12_BUFFER_CONFIG *dst_ybc) {
   int row;
   const uint8_t *src = src_ybc->y_buffer;
@@ -284,7 +284,7 @@ void vp8_yv12_copy_frame_c(const YV12_BUFFER_CONFIG *src_ybc,
       dst += dst_ybc->uv_stride;
     }
 
-    vp8_yv12_extend_frame_borders_c(dst_ybc);
+    vpx_yv12_extend_frame_borders_c(dst_ybc);
     return;
   } else {
     assert(!(dst_ybc->flags & YV12_FLAG_HIGHBITDEPTH));
@@ -315,7 +315,7 @@ void vp8_yv12_copy_frame_c(const YV12_BUFFER_CONFIG *src_ybc,
     dst += dst_ybc->uv_stride;
   }
 
-  vp8_yv12_extend_frame_borders_c(dst_ybc);
+  vpx_yv12_extend_frame_borders_c(dst_ybc);
 }
 
 void vpx_yv12_copy_y_c(const YV12_BUFFER_CONFIG *src_ybc,

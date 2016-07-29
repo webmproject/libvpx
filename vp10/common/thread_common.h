@@ -22,7 +22,7 @@ struct VP10Common;
 struct FRAME_COUNTS;
 
 // Loopfilter row synchronization
-typedef struct VP9LfSyncData {
+typedef struct VP10LfSyncData {
 #if CONFIG_MULTITHREAD
   pthread_mutex_t *mutex_;
   pthread_cond_t *cond_;
@@ -37,14 +37,14 @@ typedef struct VP9LfSyncData {
   // Row-based parallel loopfilter data
   LFWorkerData *lfdata;
   int num_workers;
-} VP9LfSync;
+} VP10LfSync;
 
 // Allocate memory for loopfilter row synchronization.
-void vp10_loop_filter_alloc(VP9LfSync *lf_sync, struct VP10Common *cm, int rows,
+void vp10_loop_filter_alloc(VP10LfSync *lf_sync, struct VP10Common *cm, int rows,
                            int width, int num_workers);
 
 // Deallocate loopfilter synchronization related mutex and data.
-void vp10_loop_filter_dealloc(VP9LfSync *lf_sync);
+void vp10_loop_filter_dealloc(VP10LfSync *lf_sync);
 
 // Multi-threaded loopfilter that uses the tile threads.
 void vp10_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
@@ -53,7 +53,7 @@ void vp10_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
                               int frame_filter_level,
                               int y_only, int partial_frame,
                               VPxWorker *workers, int num_workers,
-                              VP9LfSync *lf_sync);
+                              VP10LfSync *lf_sync);
 
 void vp10_accumulate_frame_counts(struct VP10Common *cm,
                                  struct FRAME_COUNTS *counts);

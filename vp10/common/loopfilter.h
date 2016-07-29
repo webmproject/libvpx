@@ -91,7 +91,7 @@ typedef struct {
 /* assorted loopfilter functions which get used elsewhere */
 struct VP10Common;
 struct macroblockd;
-struct VP9LfSyncData;
+struct VP10LfSyncData;
 
 // This function sets up the bit masks for the entire 64x64 region represented
 // by mi_row, mi_col.
