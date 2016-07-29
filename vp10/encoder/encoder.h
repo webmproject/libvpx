@@ -17,11 +17,9 @@
 #include "vpx/vp8cx.h"
 
 #include "vp10/common/alloccommon.h"
-#include "vp10/common/ppflags.h"
 #include "vp10/common/entropymode.h"
 #include "vp10/common/thread_common.h"
 #include "vp10/common/onyxc_int.h"
-
 #include "vp10/encoder/aq_cyclicrefresh.h"
 #if CONFIG_ANS
 #include "vp10/encoder/buf_ans.h"
@@ -38,10 +36,6 @@
 #include "vp10/encoder/speed_features.h"
 #include "vp10/encoder/tokenize.h"
 #include "vp10/encoder/variance_tree.h"
-
-#if CONFIG_VP9_TEMPORAL_DENOISING
-#include "vp10/encoder/denoiser.h"
-#endif
 
 #if CONFIG_INTERNAL_STATS
 #include "vpx_dsp/ssim.h"
@@ -586,10 +580,6 @@ typedef struct VP10_COMP {
 
   TileBufferEnc tile_buffers[MAX_TILE_ROWS][MAX_TILE_COLS];
 
-#if CONFIG_VP9_TEMPORAL_DENOISING
-  VP9_DENOISER denoiser;
-#endif
-
   int resize_pending;
   int resize_state;
   int resize_scale_num;
@@ -654,8 +644,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
                             size_t *size, uint8_t *dest,
                             int64_t *time_stamp, int64_t *time_end, int flush);
 
-int vp10_get_preview_raw_frame(VP10_COMP *cpi, YV12_BUFFER_CONFIG *dest,
-                              vp10_ppflags_t *flags);
+int vp10_get_preview_raw_frame(VP10_COMP *cpi, YV12_BUFFER_CONFIG *dest);
 
 int vp10_get_last_show_frame(VP10_COMP *cpi, YV12_BUFFER_CONFIG *frame);
 

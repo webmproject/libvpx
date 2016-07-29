@@ -26,9 +26,6 @@
 #include "vp10/common/alloccommon.h"
 #include "vp10/common/loopfilter.h"
 #include "vp10/common/onyxc_int.h"
-#if CONFIG_VP9_POSTPROC
-#include "vp10/common/postproc.h"
-#endif
 #include "vp10/common/quant_common.h"
 #include "vp10/common/reconinter.h"
 #include "vp10/common/reconintra.h"
@@ -468,14 +465,9 @@ int vp10_receive_compressed_data(VP10Decoder *pbi,
   return retcode;
 }
 
-int vp10_get_raw_frame(VP10Decoder *pbi, YV12_BUFFER_CONFIG *sd,
-                      vp10_ppflags_t *flags) {
+int vp10_get_raw_frame(VP10Decoder *pbi, YV12_BUFFER_CONFIG *sd) {
   VP10_COMMON *const cm = &pbi->common;
   int ret = -1;
-#if !CONFIG_VP9_POSTPROC
-  (void)*flags;
-#endif
-
   if (pbi->ready_for_new_data == 1)
     return ret;
 
@@ -486,18 +478,8 @@ int vp10_get_raw_frame(VP10Decoder *pbi, YV12_BUFFER_CONFIG *sd,
     return ret;
 
   pbi->ready_for_new_data = 1;
-
-#if CONFIG_VP9_POSTPROC
-  if (!cm->show_existing_frame) {
-    ret = vp10_post_proc_frame(cm, sd, flags);
-  } else {
-    *sd = *cm->frame_to_show;
-    ret = 0;
-  }
-#else
   *sd = *cm->frame_to_show;
   ret = 0;
-#endif /*!CONFIG_POSTPROC*/
   vpx_clear_system_state();
   return ret;
 }

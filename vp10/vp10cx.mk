@@ -28,8 +28,6 @@ VP10_CX_SRCS-yes += encoder/cost.c
 VP10_CX_SRCS-yes += encoder/dct.c
 VP10_CX_SRCS-yes += encoder/hybrid_fwd_txfm.c
 VP10_CX_SRCS-yes += encoder/hybrid_fwd_txfm.h
-VP10_CX_SRCS-$(CONFIG_VP9_TEMPORAL_DENOISING) += encoder/denoiser.c
-VP10_CX_SRCS-$(CONFIG_VP9_TEMPORAL_DENOISING) += encoder/denoiser.h
 VP10_CX_SRCS-yes += encoder/encodeframe.c
 VP10_CX_SRCS-yes += encoder/encodeframe.h
 VP10_CX_SRCS-yes += encoder/encodemb.c
@@ -88,10 +86,6 @@ VP10_CX_SRCS-yes += encoder/aq_complexity.c
 VP10_CX_SRCS-yes += encoder/aq_complexity.h
 VP10_CX_SRCS-yes += encoder/skin_detection.c
 VP10_CX_SRCS-yes += encoder/skin_detection.h
-ifeq ($(CONFIG_VP9_POSTPROC),yes)
-VP10_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/postproc.h
-VP10_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/postproc.c
-endif
 VP10_CX_SRCS-yes += encoder/temporal_filter.c
 VP10_CX_SRCS-yes += encoder/temporal_filter.h
 VP10_CX_SRCS-yes += encoder/mbgraph.c
@@ -118,9 +112,6 @@ VP10_CX_SRCS-$(HAVE_SSE4_1) += common/x86/highbd_inv_txfm_sse4.c
 VP10_CX_SRCS-$(HAVE_SSE4_1) += encoder/x86/vp10_highbd_quantize_sse4.c
 endif
 
-ifeq ($(CONFIG_VP9_TEMPORAL_DENOISING),yes)
-VP10_CX_SRCS-$(HAVE_SSE2) += encoder/x86/denoiser_sse2.c
-endif
 ifeq ($(CONFIG_EXT_INTER),yes)
 VP10_CX_SRCS-yes += encoder/wedge_utils.c
 VP10_CX_SRCS-$(HAVE_SSE2) += encoder/x86/wedge_utils_sse2.c

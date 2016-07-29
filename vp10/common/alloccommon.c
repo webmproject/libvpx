@@ -87,15 +87,6 @@ void vp10_free_restoration_buffers(VP10_COMMON *cm) {
 }
 #endif  // CONFIG_LOOP_RESTORATION
 
-void vp10_free_postproc_buffers(VP10_COMMON *cm) {
-#if CONFIG_VP9_POSTPROC
-  vpx_free_frame_buffer(&cm->post_proc_buffer);
-  vpx_free_frame_buffer(&cm->post_proc_buffer_int);
-#else
-  (void)cm;
-#endif
-}
-
 void vp10_free_context_buffers(VP10_COMMON *cm) {
   int i;
   cm->free_mi(cm);

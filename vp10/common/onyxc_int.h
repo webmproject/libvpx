@@ -26,10 +26,6 @@
 #include "vp10/common/tile_common.h"
 #include "vp10/common/restoration.h"
 
-#if CONFIG_VP9_POSTPROC
-#include "vp10/common/postproc.h"
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -171,10 +167,6 @@ typedef struct VP10Common {
 
   int new_fb_idx;
 
-#if CONFIG_VP9_POSTPROC
-  YV12_BUFFER_CONFIG post_proc_buffer;
-  YV12_BUFFER_CONFIG post_proc_buffer_int;
-#endif
 #if CONFIG_LOOP_RESTORATION
   YV12_BUFFER_CONFIG tmp_loop_buf;
 #endif  // CONFIG_LOOP_RESTORATION
@@ -316,10 +308,6 @@ typedef struct VP10Common {
   // VPX_BITS_8 in profile 0 or 1, VPX_BITS_10 or VPX_BITS_12 in profile 2 or 3.
   vpx_bit_depth_t bit_depth;
   vpx_bit_depth_t dequant_bit_depth;  // bit_depth of current dequantizer
-
-#if CONFIG_VP9_POSTPROC
-  struct postproc_state  postproc_state;
-#endif
 
   int error_resilient_mode;
 

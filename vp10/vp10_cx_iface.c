@@ -1186,34 +1186,16 @@ static vpx_codec_err_t ctrl_get_new_frame_image(vpx_codec_alg_priv_t *ctx,
 
 static vpx_codec_err_t ctrl_set_previewpp(vpx_codec_alg_priv_t *ctx,
                                           va_list args) {
-#if CONFIG_VP9_POSTPROC
-  vp8_postproc_cfg_t *config = va_arg(args, vp8_postproc_cfg_t *);
-  if (config != NULL) {
-    ctx->preview_ppcfg = *config;
-    return VPX_CODEC_OK;
-  } else {
-    return VPX_CODEC_INVALID_PARAM;
-  }
-#else
   (void)ctx;
   (void)args;
   return VPX_CODEC_INCAPABLE;
-#endif
 }
 
 
 static vpx_image_t *encoder_get_preview(vpx_codec_alg_priv_t *ctx) {
   YV12_BUFFER_CONFIG sd;
-  vp10_ppflags_t flags;
-  vp10_zero(flags);
 
-  if (ctx->preview_ppcfg.post_proc_flag) {
-    flags.post_proc_flag   = ctx->preview_ppcfg.post_proc_flag;
-    flags.deblocking_level = ctx->preview_ppcfg.deblocking_level;
-    flags.noise_level      = ctx->preview_ppcfg.noise_level;
-  }
-
-  if (vp10_get_preview_raw_frame(ctx->cpi, &sd, &flags) == 0) {
+  if (vp10_get_preview_raw_frame(ctx->cpi, &sd) == 0) {
     yuvconfig2image(&ctx->preview_img, &sd, NULL);
     return &ctx->preview_img;
   } else {
