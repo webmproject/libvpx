@@ -57,6 +57,7 @@ typedef struct vp9_token_state {
   int16_t       token;
   tran_low_t    qc;
   tran_low_t    dqc;
+  uint8_t       best_index;
 } vp9_token_state;
 
 static const int plane_rd_mult[REF_TYPES][PLANE_TYPES] ={ {10, 6}, {8, 5}, };
@@ -87,7 +88,6 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block,
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int ref = is_inter_block(xd->mi[0]);
   vp9_token_state tokens[1025][2];
-  unsigned best_index[1025][2];
   uint8_t token_cache[1024];
   const tran_low_t *const coeff = BLOCK_OFFSET(mb->plane[plane].coeff, block);
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
@@ -172,7 +172,7 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block,
       tokens[i][0].token = t0;
       tokens[i][0].qc = x;
       tokens[i][0].dqc = dqcoeff[rc];
-      best_index[i][0] = best;
+      tokens[i][0].best_index = best;
 
       /* Evaluate the second possibility for this state. */
       rate0 = tokens[next][0].rate;
@@ -190,7 +190,6 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block,
         x -= 2 * sz + 1;
       } else {
         tokens[i][1] = tokens[i][0];
-        best_index[i][1] = best_index[i][0];
         next = i;
         continue;
       }
@@ -261,7 +260,7 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block,
         tokens[i][1].dqc = 0;
       }
 
-      best_index[i][1] = best;
+      tokens[i][1].best_index = best;
       /* Finally, make this the new head of the trellis. */
       next = i;
     } else {
@@ -283,7 +282,7 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block,
             mb->token_costs[tx_size][type][ref][band][1][pt][t1];
         tokens[next][1].token = ZERO_TOKEN;
       }
-      best_index[i][0] = best_index[i][1] = 0;
+      tokens[i][0].best_index = tokens[i][1].best_index = 0;
       /* Don't update next, because we didn't add a new node. */
     }
   }
@@ -309,7 +308,7 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block,
     qcoeff[rc] = x;
     dqcoeff[rc] = tokens[i][best].dqc;
     next = tokens[i][best].next;
-    best = best_index[i][best];
+    best = tokens[i][best].best_index;
   }
   final_eob++;
 
