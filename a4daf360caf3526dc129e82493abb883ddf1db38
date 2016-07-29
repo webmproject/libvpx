@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f4533225_66380ef7",
+        "filename": "vp10/common/reconintra.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1138583
+      },
+      "writtenOn": "2016-07-29T20:24:40Z",
+      "side": 1,
+      "message": "Your changes look fine to me.\n\nHowever, as an additional suggestion, I wonder if it would help to make this test more precise?\n\nFor example, something like:\n if (mi_row \u003d\u003d 0 \u0026\u0026 y \u003d\u003d 0 \u0026\u0026 (x + step \u003e\u003d w) \u0026\u0026 !right_available)\n\nAt the moment I believe we are ignoring the top-right samples in a lot of cases when they actually contain valid data.\n\nThis is only a suggestion, I have not done any experiments to confirm that it works or would actually improve the coding quality, and perhaps the increased complexity of the test means this is not a useful improvement?",
+      "revId": "a4daf360caf3526dc129e82493abb883ddf1db38",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
