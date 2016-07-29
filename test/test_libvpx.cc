@@ -16,12 +16,6 @@
 #include "vpx_ports/x86.h"
 #endif
 extern "C" {
-#if CONFIG_VP8
-extern void vp8_rtcd();
-#endif  // CONFIG_VP8
-#if CONFIG_VP9
-extern void vp9_rtcd();
-#endif  // CONFIG_VP9
 #if CONFIG_VP10
 extern void vp10_rtcd();
 #endif  // CONFIG_VP10
@@ -66,12 +60,6 @@ int main(int argc, char **argv) {
 // Shared library builds don't support whitebox tests
 // that exercise internal symbols.
 
-#if CONFIG_VP8
-  vp8_rtcd();
-#endif  // CONFIG_VP8
-#if CONFIG_VP9
-  vp9_rtcd();
-#endif  // CONFIG_VP9
 #if CONFIG_VP10
   vp10_rtcd();
 #endif  // CONFIG_VP10

@@ -92,10 +92,6 @@ TEST_P(ActiveMapTestLarge, Test) {
   DoTest();
 }
 
-VP9_INSTANTIATE_TEST_CASE(ActiveMapTest,
-                          ::testing::Values(::libvpx_test::kRealTime),
-                          ::testing::Range(0, 9));
-
 VP10_INSTANTIATE_TEST_CASE(ActiveMapTestLarge,
                            ::testing::Values(::libvpx_test::kRealTime),
                            ::testing::Range(0, 5));

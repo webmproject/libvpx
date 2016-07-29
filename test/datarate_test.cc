@@ -1145,12 +1145,13 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SpatialLayers4threads) {
   EXPECT_EQ(static_cast<unsigned int>(0), GetMismatchFrames());
 }
 
-VP8_INSTANTIATE_TEST_CASE(DatarateTestLarge, ALL_TEST_MODES);
-VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9Large,
+VP10_INSTANTIATE_TEST_CASE(DatarateTestVP9Large,
                           ::testing::Values(::libvpx_test::kOnePassGood,
                                             ::libvpx_test::kRealTime),
-                          ::testing::Range(2, 9));
-VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvc,
-                          ::testing::Values(::libvpx_test::kRealTime),
                           ::testing::Range(5, 9));
+/* VP10 does not support multiple layers yet.
+VP10_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvc,
+                           ::testing::Values(::libvpx_test::kRealTime),
+                           ::testing::Range(5, 8));
+                           */
 }  // namespace

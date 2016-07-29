@@ -121,10 +121,6 @@ TEST_P(SuperframeTest, TestSuperframeIndexIsOptional) {
 #endif  // CONFIG_EXT_REFS
 }
 
-VP9_INSTANTIATE_TEST_CASE(SuperframeTest, ::testing::Combine(
-    ::testing::Values(::libvpx_test::kTwoPassGood),
-    ::testing::Values(0), ::testing::Values(0), ::testing::Values(0)));
-
 // The superframe index is currently mandatory with ANS due to the decoder
 // starting at the end of the buffer.
 #if CONFIG_EXT_TILE

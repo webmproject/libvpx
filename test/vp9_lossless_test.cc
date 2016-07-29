@@ -123,10 +123,6 @@ TEST_P(LosslessTest, TestLossLessEncodingCtrl) {
   EXPECT_GE(psnr_lossless, kMaxPsnr);
 }
 
-VP9_INSTANTIATE_TEST_CASE(LosslessTest,
-                          ::testing::Values(::libvpx_test::kRealTime,
-                                            ::libvpx_test::kOnePassGood,
-                                            ::libvpx_test::kTwoPassGood));
 
 VP10_INSTANTIATE_TEST_CASE(LosslessTest,
                            ::testing::Values(::libvpx_test::kOnePassGood,

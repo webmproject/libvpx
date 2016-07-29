@@ -18,8 +18,6 @@
 #include "test/util.h"
 #if CONFIG_VP10
 #include "vp10/common/blockd.h"
-#elif CONFIG_VP9
-#include "vp9/common/vp9_blockd.h"
 #endif
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"

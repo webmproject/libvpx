@@ -132,10 +132,6 @@ TEST_P(TileIndependenceTestLarge, MD5Match) {
   DoTest();
 }
 
-VP9_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Values(0, 1),
-                                                ::testing::Values(0));
-VP9_INSTANTIATE_TEST_CASE(TileIndependenceTestLarge, ::testing::Values(0, 1),
-                                                     ::testing::Values(0));
 
 #if CONFIG_EXT_TILE
 VP10_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Values(1, 2, 32),

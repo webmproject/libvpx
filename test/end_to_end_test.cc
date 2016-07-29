@@ -201,11 +201,6 @@ TEST_P(EndToEndTestLarge, EndtoEndPSNRTest) {
   delete(video);
 }
 
-VP9_INSTANTIATE_TEST_CASE(
-    EndToEndTestLarge,
-    ::testing::ValuesIn(kEncodingModeVectors),
-    ::testing::ValuesIn(kTestVectors),
-    ::testing::ValuesIn(kCpuUsedVectors));
 
 VP10_INSTANTIATE_TEST_CASE(
     EndToEndTestLarge,

@@ -14,12 +14,14 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
+#include "./vp10_rtcd.h"
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
+#include "vp10/common/entropy.h"
 #include "vpx/vpx_codec.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_ports/mem.h"
