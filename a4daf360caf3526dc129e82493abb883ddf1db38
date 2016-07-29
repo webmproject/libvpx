@@ -34,6 +34,24 @@
       "revId": "a4daf360caf3526dc129e82493abb883ddf1db38",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f4533225_c648e289",
+        "filename": "vp10/common/reconintra.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1138583
+      },
+      "writtenOn": "2016-07-29T21:41:15Z",
+      "side": 1,
+      "message": "Ah, I am sorry - you are quite right.  I had missed that your patch also changes the calculation of right_available from being based on the width of the containing block to being based on the width of the transform block.\n\nI am now happy that this addresses both of the issues I raised in the bug report, many thanks :)",
+      "parentUuid": "4f39c5b7_030722e9",
+      "revId": "a4daf360caf3526dc129e82493abb883ddf1db38",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
