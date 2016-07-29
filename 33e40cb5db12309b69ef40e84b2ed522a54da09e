@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8fdd7d60_cb563538",
+        "filename": "test/acm_random.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-07-29T00:40:12Z",
+      "side": 1,
+      "message": "Probably don\u0027t need the whitespace between the one liners, but don\u0027t feel too strongly.",
+      "revId": "33e40cb5db12309b69ef40e84b2ed522a54da09e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8fdd7d60_4e593392",
+        "filename": "test/byte_alignment_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-07-29T00:40:12Z",
+      "side": 1,
+      "message": "AllowShortIfStatementsOnASingleLine: true is making a lot of noise, and not sure if one way is better or the other. I prefer false, though.",
+      "revId": "33e40cb5db12309b69ef40e84b2ed522a54da09e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ef5fd9c9_e92471cb",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-07-29T00:40:12Z",
+      "side": 1,
+      "message": "The more I see these the more I realize I very much prefer \u0027AllowShortIfStatementsOnASingleLine: false\u0027... otoh, I\u0027ll get over it eventually. \n\nMy main problem is subjective: I never write them this way because it does not feel right (but it doesn\u0027t feel right _because_ I never write them this way... etc etc).",
+      "revId": "33e40cb5db12309b69ef40e84b2ed522a54da09e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ef5fd9c9_c9a975e3",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 631,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-07-29T00:40:12Z",
+      "side": 1,
+      "message": "This and the instances below look odd (\u0027\u003c\u003c j;\u0027 getting its own line). Not sure if there\u0027s a flag controlling it. Looking over the list from libwebm I don\u0027t see anything obvious.",
+      "revId": "33e40cb5db12309b69ef40e84b2ed522a54da09e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ef5fd9c9_49dfc530",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-07-29T00:40:12Z",
+      "side": 1,
+      "message": "I prefer \u0027AllowShortLoopsOnASingleLine: false\u0027, but for the same faulty reasoning as the ifs.",
+      "revId": "33e40cb5db12309b69ef40e84b2ed522a54da09e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_09a1093f",
+        "filename": "test/decode_api_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-07-29T00:40:12Z",
+      "side": 1,
+      "message": "I don\u0027t like this... I think the option is AllowShortCaseLabelsOnASingleLine; OK with turning it off?",
+      "revId": "33e40cb5db12309b69ef40e84b2ed522a54da09e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_c930d1f1",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-07-29T00:40:12Z",
+      "side": 1,
+      "message": "yeah, AllowShortCaseLabelsOnASingleLine sucks imo",
+      "revId": "33e40cb5db12309b69ef40e84b2ed522a54da09e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_a90d5d42",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-07-29T00:40:12Z",
+      "side": 1,
+      "message": "this looks weird/detached * sucks/fine with staying the way things were always supposed to be/just sayin\u0027",
+      "revId": "33e40cb5db12309b69ef40e84b2ed522a54da09e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_2905edbd",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-07-29T00:40:12Z",
+      "side": 1,
+      "message": "could collapse the vertical whitespace here... I don\u0027t think the blank line between each small test here is really helping with readability.",
+      "revId": "33e40cb5db12309b69ef40e84b2ed522a54da09e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_ec8cc32c",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-07-29T00:40:12Z",
+      "side": 1,
+      "message": "odd that n and layers are const... (not looking for a change, just bugging me)",
+      "revId": "33e40cb5db12309b69ef40e84b2ed522a54da09e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_ac556b55",
+        "filename": "test/vp8_boolcoder_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-07-29T00:40:12Z",
+      "side": 1,
+      "message": "odd comment; just mentioning it.",
+      "revId": "33e40cb5db12309b69ef40e84b2ed522a54da09e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
