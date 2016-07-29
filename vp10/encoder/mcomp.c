@@ -351,7 +351,7 @@ static unsigned int setup_center_error(const MACROBLOCKD *xd,
                                        unsigned int *sse1,
                                        int *distortion) {
   unsigned int besterr;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (second_pred != NULL) {
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       DECLARE_ALIGNED(16, uint16_t, comp_pred16[MAX_SB_SQUARE]);
@@ -380,7 +380,7 @@ static unsigned int setup_center_error(const MACROBLOCKD *xd,
   }
   *distortion = besterr;
   besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
   return besterr;
 }
 
@@ -680,7 +680,7 @@ static int upsampled_pref_error(const MACROBLOCKD *xd,
                                 const uint8_t *second_pred,
                                 int w, int h, unsigned int *sse) {
   unsigned int besterr;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     DECLARE_ALIGNED(16, uint16_t, pred16[MAX_SB_SQUARE]);
     if (second_pred != NULL)
@@ -696,7 +696,7 @@ static int upsampled_pref_error(const MACROBLOCKD *xd,
 #else
     DECLARE_ALIGNED(16, uint8_t, pred[MAX_SB_SQUARE]);
     (void) xd;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
     if (second_pred != NULL)
       vpx_comp_avg_upsampled_pred(pred, second_pred, w, h, y,
                                   y_stride);
@@ -704,7 +704,7 @@ static int upsampled_pref_error(const MACROBLOCKD *xd,
       vpx_upsampled_pred(pred, w, h, y, y_stride);
 
     besterr = vfp->vf(pred, w, src, src_stride, sse);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   }
 #endif
 return besterr;
@@ -1818,7 +1818,7 @@ unsigned int vp10_int_pro_motion_estimation(const VP10_COMP *cpi, MACROBLOCK *x,
     vp10_setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL);
   }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   {
     unsigned int this_sad;
     tmp_mv->row = 0;
@@ -2632,7 +2632,7 @@ static int upsampled_masked_pref_error(const MACROBLOCKD *xd,
                                        const uint8_t *const y, int y_stride,
                                        int w, int h, unsigned int *sse) {
   unsigned int besterr;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     DECLARE_ALIGNED(16, uint16_t, pred16[MAX_SB_SQUARE]);
     vpx_highbd_upsampled_pred(pred16, w, h, y, y_stride);
@@ -2644,12 +2644,12 @@ static int upsampled_masked_pref_error(const MACROBLOCKD *xd,
 #else
     DECLARE_ALIGNED(16, uint8_t, pred[MAX_SB_SQUARE]);
     (void) xd;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
     vpx_upsampled_pred(pred, w, h, y, y_stride);
 
     besterr = vfp->mvf(pred, w, src, src_stride,
                        mask, mask_stride, sse);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   }
 #endif
   return besterr;
@@ -3178,7 +3178,7 @@ static int upsampled_obmc_pref_error(const MACROBLOCKD *xd,
                                      const uint8_t *const y, int y_stride,
                                      int w, int h, unsigned int *sse) {
   unsigned int besterr;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     DECLARE_ALIGNED(16, uint16_t, pred16[MAX_SB_SQUARE]);
     vpx_highbd_upsampled_pred(pred16, w, h, y, y_stride);
@@ -3189,11 +3189,11 @@ static int upsampled_obmc_pref_error(const MACROBLOCKD *xd,
 #else
     DECLARE_ALIGNED(16, uint8_t, pred[MAX_SB_SQUARE]);
     (void) xd;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
     vpx_upsampled_pred(pred, w, h, y, y_stride);
 
     besterr = vfp->ovf(pred, w, wsrc, mask, sse);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   }
 #endif
   return besterr;

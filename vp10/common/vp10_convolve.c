@@ -182,7 +182,7 @@ void vp10_convolve(const uint8_t *src, int src_stride, uint8_t *dst,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_convolve_horiz_c(const uint16_t *src, int src_stride,
                                   uint16_t *dst, int dst_stride, int w, int h,
                                   const InterpFilterParams filter_params,
@@ -355,4 +355,4 @@ void vp10_highbd_convolve(const uint8_t *src8, int src_stride, uint8_t *dst8,
                               subpel_y_q4, y_step_q4, ref_idx, bd);
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH

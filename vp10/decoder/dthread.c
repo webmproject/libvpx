@@ -156,7 +156,7 @@ void vp10_frameworker_copy_context(VPxWorker *const dst_worker,
   vp10_frameworker_unlock_stats(src_worker);
 
   dst_cm->bit_depth = src_cm->bit_depth;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   dst_cm->use_highbitdepth = src_cm->use_highbitdepth;
 #endif
 #if CONFIG_EXT_REFS

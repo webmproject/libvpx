@@ -49,11 +49,11 @@
 #include "vp10/encoder/segmentation.h"
 #include "vp10/encoder/tokenize.h"
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 # define IF_HBD(...) __VA_ARGS__
 #else
 # define IF_HBD(...)
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 static void encode_superblock(VP10_COMP *cpi, ThreadData * td,
                               TOKENEXTRA **t, int output_enabled,
@@ -120,7 +120,7 @@ static const uint8_t VP10_VAR_OFFS[MAX_SB_SIZE] = {
 #endif  // CONFIG_EXT_PARTITION
 };
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static const uint16_t VP10_HIGH_VAR_OFFS_8[MAX_SB_SIZE] = {
     128, 128, 128, 128, 128, 128, 128, 128,
     128, 128, 128, 128, 128, 128, 128, 128,
@@ -183,7 +183,7 @@ static const uint16_t VP10_HIGH_VAR_OFFS_12[MAX_SB_SIZE] = {
     128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16
 #endif  // CONFIG_EXT_PARTITION
 };
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 unsigned int vp10_get_sby_perpixel_variance(VP10_COMP *cpi,
                                            const struct buf_2d *ref,
@@ -194,7 +194,7 @@ unsigned int vp10_get_sby_perpixel_variance(VP10_COMP *cpi,
   return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 unsigned int vp10_high_get_sby_perpixel_variance(
     VP10_COMP *cpi, const struct buf_2d *ref, BLOCK_SIZE bs, int bd) {
   unsigned int var, sse;
@@ -218,7 +218,7 @@ unsigned int vp10_high_get_sby_perpixel_variance(
   }
   return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 static unsigned int get_sby_perpixel_diff_variance(VP10_COMP *cpi,
                                                    const struct buf_2d *ref,
@@ -609,7 +609,7 @@ void vp10_set_variance_partition_thresholds(VP10_COMP *cpi, int q) {
 // Compute the minmax over the 8x8 subblocks.
 static int compute_minmax_8x8(const uint8_t *src, int src_stride,
                               const uint8_t *ref, int ref_stride,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                               int highbd,
 #endif
                               int pixels_wide,
@@ -626,7 +626,7 @@ static int compute_minmax_8x8(const uint8_t *src, int src_stride,
     if (x8_idx < pixels_wide && y8_idx < pixels_high) {
       const int src_offset = y8_idx * src_stride + x8_idx;
       const int ref_offset = y8_idx * ref_stride + x8_idx;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       if (highbd) {
         vpx_highbd_minmax_8x8(src + src_offset, src_stride,
                               ref + ref_offset, ref_stride,
@@ -650,7 +650,7 @@ static int compute_minmax_8x8(const uint8_t *src, int src_stride,
   return (minmax_max - minmax_min);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static INLINE int avg_4x4(const uint8_t *const src, const int stride,
                           const int highbd) {
   if (highbd) {
@@ -665,7 +665,7 @@ static INLINE int avg_4x4(const uint8_t *const src, const int stride) {
 }
 #endif
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static INLINE int avg_8x8(const uint8_t *const src, const int stride,
                           const int highbd) {
   if (highbd) {
@@ -681,7 +681,7 @@ static INLINE int avg_8x8(const uint8_t *const src, const int stride) {
 #endif
 
 static void init_variance_tree(VAR_TREE *const vt,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                                const int highbd,
 #endif
                                BLOCK_SIZE bsize,
@@ -703,42 +703,42 @@ static void init_variance_tree(VAR_TREE *const vt,
   vt->width = width;
   vt->height = height;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   vt->highbd = highbd;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   if (bsize > leaf_size) {
     const BLOCK_SIZE subsize = get_subsize(bsize, PARTITION_SPLIT);
     const int px = num_4x4_blocks_wide_lookup[subsize] * 4;
 
     init_variance_tree(vt->split[0],
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                        highbd,
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
                        subsize, leaf_size,
                        VPXMIN(px, width), VPXMIN(px, height),
                        src, src_stride,
                        ref, ref_stride);
     init_variance_tree(vt->split[1],
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                        highbd,
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
                        subsize, leaf_size,
                        width - px, VPXMIN(px, height),
                        src + px, src_stride,
                        ref + px, ref_stride);
     init_variance_tree(vt->split[2],
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                        highbd,
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
                        subsize, leaf_size,
                        VPXMIN(px, width), height - px,
                        src + px * src_stride, src_stride,
                        ref + px * ref_stride, ref_stride);
     init_variance_tree(vt->split[3],
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                        highbd,
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
                        subsize, leaf_size,
                        width - px, height - px,
                        src + px * src_stride + px, src_stride,
@@ -834,7 +834,7 @@ static int check_split(VP10_COMP *const cpi,
       // force split to 8x8 block for this 16x16 block.
       int minmax = compute_minmax_8x8(vt->src, vt->src_stride,
                                       vt->ref, vt->ref_stride,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                                       vt->highbd,
 #endif
                                       vt->width, vt->height);
@@ -1009,7 +1009,7 @@ static void choose_partitioning(VP10_COMP *const cpi,
   } else {
     ref = VP10_VAR_OFFS;
     ref_stride = 0;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       switch (xd->bd) {
         case 10:
@@ -1024,13 +1024,13 @@ static void choose_partitioning(VP10_COMP *const cpi,
           break;
       }
     }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
   }
 
   init_variance_tree(vt,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                      xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH,
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
                      cm->sb_size,
                      (is_key_frame || low_res) ? BLOCK_4X4 : BLOCK_8X8,
                      pixels_wide, pixels_high,
@@ -1748,7 +1748,7 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
   // Set to zero to make sure we do not use the previous encoded frame stats
   mbmi->skip = 0;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     x->source_variance =
         vp10_high_get_sby_perpixel_variance(cpi, &x->plane[0].src,
@@ -1760,7 +1760,7 @@ static void rd_pick_sb_modes(VP10_COMP *cpi,
 #else
   x->source_variance =
     vp10_get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   // Save rdmult before it might be changed, so it can be restored later.
   orig_rdmult = x->rdmult;
@@ -5111,13 +5111,13 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
 
 #if CONFIG_OBMC
     if (mbmi->motion_variation == OBMC_CAUSAL) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       DECLARE_ALIGNED(16, uint8_t, tmp_buf1[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
       DECLARE_ALIGNED(16, uint8_t, tmp_buf2[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
 #else
       DECLARE_ALIGNED(16, uint8_t, tmp_buf1[MAX_MB_PLANE * MAX_SB_SQUARE]);
       DECLARE_ALIGNED(16, uint8_t, tmp_buf2[MAX_MB_PLANE * MAX_SB_SQUARE]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
       uint8_t *dst_buf1[MAX_MB_PLANE], *dst_buf2[MAX_MB_PLANE];
       int dst_stride1[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
       int dst_stride2[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
@@ -5128,7 +5128,7 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
 
       assert(mbmi->sb_type >= BLOCK_8X8);
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         int len = sizeof(uint16_t);
         dst_buf1[0] = CONVERT_TO_BYTEPTR(tmp_buf1);
@@ -5138,16 +5138,16 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td,
         dst_buf2[1] = CONVERT_TO_BYTEPTR(tmp_buf2 + MAX_SB_SQUARE * len);
         dst_buf2[2] = CONVERT_TO_BYTEPTR(tmp_buf2 + MAX_SB_SQUARE * 2 * len);
       } else {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
       dst_buf1[0] = tmp_buf1;
       dst_buf1[1] = tmp_buf1 + MAX_SB_SQUARE;
       dst_buf1[2] = tmp_buf1 + MAX_SB_SQUARE * 2;
       dst_buf2[0] = tmp_buf2;
       dst_buf2[1] = tmp_buf2 + MAX_SB_SQUARE;
       dst_buf2[2] = tmp_buf2 + MAX_SB_SQUARE * 2;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
       vp10_build_prediction_by_above_preds(cm, xd, mi_row, mi_col, dst_buf1,
                                            dst_width1, dst_height1,
                                            dst_stride1);
@@ -5631,7 +5631,7 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     int len = sizeof(uint16_t);
     dst_buf1[0] = CONVERT_TO_BYTEPTR(tmp_buf1);
@@ -5644,7 +5644,7 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
     dst_buf3[1] = CONVERT_TO_BYTEPTR(tmp_buf3 + MAX_TX_SQUARE * len);
     dst_buf3[2] = CONVERT_TO_BYTEPTR(tmp_buf3 + 2 * MAX_TX_SQUARE * len);
   } else {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
     dst_buf1[0] = tmp_buf1;
     dst_buf1[1] = tmp_buf1 + MAX_TX_SQUARE;
     dst_buf1[2] = tmp_buf1 + 2 * MAX_TX_SQUARE;
@@ -5654,9 +5654,9 @@ static void predict_sb_complex(VP10_COMP *cpi, ThreadData *td,
     dst_buf3[0] = tmp_buf3;
     dst_buf3[1] = tmp_buf3 + MAX_TX_SQUARE;
     dst_buf3[2] = tmp_buf3 + 2 * MAX_TX_SQUARE;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   if (output_enabled && bsize < top_bsize)
     cm->counts.partition[ctx][partition]++;

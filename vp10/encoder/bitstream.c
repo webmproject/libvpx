@@ -614,7 +614,7 @@ static void pack_mb_tokens(vp10_writer *w,
     const struct vp10_token *const a = &vp10_coef_encodings[t];
     int v = a->value;
     int n = a->len;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     const vp10_extra_bit *b;
     if (bit_depth == VPX_BITS_12)
       b = &vp10_extra_bits_high12[t];
@@ -625,7 +625,7 @@ static void pack_mb_tokens(vp10_writer *w,
 #else
     const vp10_extra_bit *const b = &vp10_extra_bits[t];
     (void) bit_depth;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
     /* skip one or two nodes */
     if (p->skip_eob_node)
@@ -700,7 +700,7 @@ static void pack_mb_tokens(struct BufAnsCoder *ans,
 
   while (p < stop && p->token != EOSB_TOKEN) {
     const int t = p->token;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     const vp10_extra_bit *b;
     if (bit_depth == VPX_BITS_12)
       b = &vp10_extra_bits_high12[t];
@@ -711,7 +711,7 @@ static void pack_mb_tokens(struct BufAnsCoder *ans,
 #else
     const vp10_extra_bit *const b = &vp10_extra_bits[t];
     (void)bit_depth;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
     /* skip one or two nodes */
     if (!p->skip_eob_node)

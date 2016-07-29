@@ -782,7 +782,7 @@ void vp10_fdct32x32_1_c(const int16_t *input, tran_low_t *output, int stride) {
   output[1] = 0;
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_fdct4x4_c(const int16_t *input, tran_low_t *output,
                           int stride) {
   vp10_fdct4x4_c(input, output, stride);
@@ -822,4 +822,4 @@ void vp10_highbd_fdct32x32_1_c(const int16_t *input,
     tran_low_t *out, int stride) {
   vp10_fdct32x32_1_c(input, out, stride);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH

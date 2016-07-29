@@ -75,12 +75,12 @@ double vpx_calc_fastssim(const YV12_BUFFER_CONFIG *source,
                          double *ssim_y, double *ssim_u,
                          double *ssim_v, uint32_t bd, uint32_t in_bd);
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 double vpx_highbd_calc_ssim(const YV12_BUFFER_CONFIG *source,
                             const YV12_BUFFER_CONFIG *dest,
                             double *weight,
                             uint32_t bd, uint32_t in_bd);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 #ifdef __cplusplus
 }  // extern "C"

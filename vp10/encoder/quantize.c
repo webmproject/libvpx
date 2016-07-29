@@ -485,7 +485,7 @@ void vp10_quantize_dc_facade(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_quantize_fp_facade(
     const tran_low_t *coeff_ptr, intptr_t n_coeffs, const MACROBLOCK_PLANE *p,
     tran_low_t *qcoeff_ptr, const MACROBLOCKD_PLANE *pd,
@@ -927,7 +927,7 @@ void highbd_quantize_dc_32x32_fp_nuq(const tran_low_t *coeff_ptr,
   *eob_ptr = eob + 1;
 }
 #endif  // CONFIG_NEW_QUANT
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 void vp10_quantize_fp_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                        int skip_block,
@@ -969,7 +969,7 @@ void vp10_quantize_fp_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
   *eob_ptr = eob + 1;
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_quantize_fp_c(const tran_low_t *coeff_ptr,
                               intptr_t count,
                               int skip_block,
@@ -1016,7 +1016,7 @@ void vp10_highbd_quantize_fp_c(const tran_low_t *coeff_ptr,
   *eob_ptr = eob + 1;
 }
 
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 // TODO(jingning) Refactor this file and combine functions with similar
 // operations.
@@ -1060,7 +1060,7 @@ void vp10_quantize_fp_32x32_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
   *eob_ptr = eob + 1;
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                               int skip_block, const int16_t *zbin_ptr,
                               const int16_t *round_ptr,
@@ -1129,7 +1129,7 @@ void vp10_highbd_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 }
 #endif
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_quantize_dc(const tran_low_t *coeff_ptr,
                             int n_coeffs, int skip_block,
                             const int16_t *round_ptr, const int16_t quant,
@@ -1169,7 +1169,7 @@ static void invert_quant(int16_t *quant, int16_t *shift, int d) {
 
 static int get_qzbin_factor(int q, vpx_bit_depth_t bit_depth) {
   const int quant = vp10_dc_quant(q, 0, bit_depth);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   switch (bit_depth) {
     case VPX_BITS_8:
       return q == 0 ? 64 : (quant < 148 ? 84 : 80);

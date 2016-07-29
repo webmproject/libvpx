@@ -34,7 +34,7 @@ Advanced options:
   ${toggle_codec_srcs}            in/exclude codec library source code
   ${toggle_debug_libs}            in/exclude debug version of libraries
   ${toggle_static_msvcrt}         use static MSVCRT (VS builds only)
-  ${toggle_vp9_highbitdepth}      use high bit depth (10/12) profiles
+  ${toggle_vpx_highbitdepth}      use VPX high bit depth (10/12) profiles
   ${toggle_better_hw_compatibility}
                                   enable encoder to produce streams with better
                                   hardware decoder compatibility
@@ -324,7 +324,7 @@ CONFIG_LIST="
     temporal_denoising
     vp9_temporal_denoising
     coefficient_range_checking
-    vp9_highbitdepth
+    vpx_highbitdepth
     better_hw_compatibility
     experimental
     size_limit
@@ -384,7 +384,7 @@ CMDLINE_SELECT="
     vp9_temporal_denoising
     coefficient_range_checking
     better_hw_compatibility
-    vp9_highbitdepth
+    vpx_highbitdepth
     experimental
 "
 

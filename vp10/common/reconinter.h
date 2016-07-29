@@ -82,7 +82,7 @@ static INLINE void inter_predictor(const uint8_t *src, int src_stride,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static INLINE void highbd_inter_predictor(const uint8_t *src, int src_stride,
                                           uint8_t *dst, int dst_stride,
                                           const int subpel_x,
@@ -146,7 +146,7 @@ static INLINE void highbd_inter_predictor(const uint8_t *src, int src_stride,
                          bd);
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 #if CONFIG_EXT_INTER
 // Set to one to use larger codebooks
@@ -249,13 +249,13 @@ static INLINE void vp10_make_inter_predictor(
     int xs, int ys,
     const MACROBLOCKD *xd) {
   (void) xd;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
     highbd_inter_predictor(src, src_stride, dst, dst_stride,
                            subpel_x, subpel_y, sf, w, h, ref,
                            interp_filter, xs, ys, xd->bd);
   else
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
     inter_predictor(src, src_stride, dst, dst_stride,
                     subpel_x, subpel_y, sf, w, h, ref,
                     interp_filter, xs, ys);
@@ -416,7 +416,7 @@ void vp10_build_inter_predictor(const uint8_t *src, int src_stride,
                                enum mv_precision precision,
                                int x, int y);
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_build_inter_predictor(const uint8_t *src, int src_stride,
                                       uint8_t *dst, int dst_stride,
                                       const MV *mv_q3,

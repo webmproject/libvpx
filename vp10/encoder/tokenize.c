@@ -147,7 +147,7 @@ const int vp10_cat6_high_cost[64] = {
     10304, 12467, 12943, 15106, 7244,  9407,  9883,  12046, 10304, 12467, 12943,
     15106, 10822, 12985, 13461, 15624, 13882, 16045, 16521, 18684};
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 const int vp10_cat6_high10_high_cost[256] = {
     94,    2257,  2733,  4896,  3154,  5317,  5793,  7956,  3672,  5835,  6311,
     8474,  6732,  8895,  9371,  11534, 3672,  5835,  6311,  8474,  6732,  8895,
@@ -270,7 +270,7 @@ const int vp10_cat6_high12_high_cost[1024] = {
     35068};
 #endif
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static const vpx_tree_index cat1_high10[2] = {0, 0};
 static const vpx_tree_index cat2_high10[4] = {2, 2, 0, 0};
 static const vpx_tree_index cat3_high10[6] = {2, 2, 4, 4, 0, 0};
@@ -304,7 +304,7 @@ const vp10_extra_bit vp10_extra_bits[ENTROPY_TOKENS] = {
   {0, 0, 0, 0, zero_cost}                               // EOB_TOKEN
 };
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 const vp10_extra_bit vp10_extra_bits_high10[ENTROPY_TOKENS] = {
   {0, 0, 0, 0, zero_cost},                                            // ZERO
   {0, 0, 0, 1, sign_cost},                                            // ONE

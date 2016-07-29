@@ -35,14 +35,14 @@ void vp10_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   const int bw = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (x->e_mbd.cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     vpx_highbd_subtract_block(bh, bw, p->src_diff, bw, p->src.buf,
                               p->src.stride, pd->dst.buf, pd->dst.stride,
                               x->e_mbd.bd);
     return;
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
   vpx_subtract_block(bh, bw, p->src_diff, bw, p->src.buf, p->src.stride,
                      pd->dst.buf, pd->dst.stride);
 }
@@ -105,7 +105,7 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
   int best, band = (eob < default_eob) ?
       band_translate[eob] : band_translate[eob - 1];
   int pt, i, final_eob;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   const int *cat6_high_cost = vp10_get_high_cost_table(xd->bd);
 #else
   const int *cat6_high_cost = vp10_get_high_cost_table(8);
@@ -172,11 +172,11 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
       }
 
       dx = (dqcoeff[rc] - coeff[rc]) * (1 << shift);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         dx >>= xd->bd - 8;
       }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
       d2 = (int64_t)dx * dx;
       tokens[i][0].rate += (best ? rate1 : rate0);
       tokens[i][0].error = d2 + (best ? error1 : error0);
@@ -271,13 +271,13 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
       dx = vp10_dequant_coeff_nuq(
           x, dequant_ptr[rc != 0],
           dequant_val[band_translate[i]]) - (coeff[rc] << shift);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         dx >>= xd->bd - 8;
       }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 #else   // CONFIG_NEW_QUANT
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         dx -= ((dequant_ptr[rc != 0] >> (xd->bd - 8)) + sz) ^ sz;
       } else {
@@ -285,7 +285,7 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
       }
 #else
       dx -= (dequant_ptr[rc != 0] + sz) ^ sz;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 #endif  // CONFIG_NEW_QUANT
       d2 = (int64_t)dx * dx;
 
@@ -382,7 +382,7 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
   return final_eob;
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 typedef enum QUANT_FUNC {
   QUANT_FUNC_LOWBD = 0,
   QUANT_FUNC_HIGHBD = 1,
@@ -444,7 +444,7 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
   src_diff = &p->src_diff[4 * (blk_row * diff_stride + blk_col)];
 
   qparam.log_scale = get_tx_scale(xd, tx_type, tx_size);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   fwd_txfm_param.bd = xd->bd;
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     highbd_fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
@@ -459,7 +459,7 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
     }
     return;
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
   if (xform_quant_idx != VP10_XFORM_QUANT_SKIP_QUANT) {
@@ -505,7 +505,7 @@ void vp10_xform_quant_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
 
 // TODO(sarahparker) add all of these new quant quantize functions
 // to quant_func_list, just trying to get this expr to work for now
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   fwd_txfm_param.bd = xd->bd;
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     highbd_fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
@@ -529,7 +529,7 @@ void vp10_xform_quant_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
     }
     return;
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
   if (tx_size == TX_32X32) {
@@ -581,7 +581,7 @@ void vp10_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
 
 // TODO(sarahparker) add all of these new quant quantize functions
 // to quant_func_list, just trying to get this expr to work for now
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   fwd_txfm_param.bd = xd->bd;
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     highbd_fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
@@ -606,7 +606,7 @@ void vp10_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
     }
     return;
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
   if (tx_size == TX_32X32) {
@@ -658,7 +658,7 @@ void vp10_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
 
 // TODO(sarahparker) add all of these new quant quantize functions
 // to quant_func_list, just trying to get this expr to work for now
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   fwd_txfm_param.bd = xd->bd;
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     highbd_fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
@@ -679,7 +679,7 @@ void vp10_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
     }
     return;
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
   if (tx_size == TX_32X32) {
@@ -726,7 +726,7 @@ void vp10_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
 
 // TODO(sarahparker) add all of these new quant quantize functions
 // to quant_func_list, just trying to get this expr to work for now
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   fwd_txfm_param.bd = xd->bd;
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     highbd_fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
@@ -746,7 +746,7 @@ void vp10_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
     }
     return;
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
   if (tx_size == TX_32X32) {
@@ -840,13 +840,13 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
   inv_txfm_param.eob = p->eobs[block];
   inv_txfm_param.lossless = xd->lossless[xd->mi[0]->mbmi.segment_id];
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     inv_txfm_param.bd = xd->bd;
     highbd_inv_txfm_add(dqcoeff, dst, pd->dst.stride, &inv_txfm_param);
     return;
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
   inv_txfm_add(dqcoeff, dst, pd->dst.stride, &inv_txfm_param);
 }
 
@@ -930,7 +930,7 @@ static void encode_block_pass1(int plane, int block, int blk_row, int blk_col,
 #endif  // CONFIG_NEW_QUANT
 
   if (p->eobs[block] > 0) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       if (xd->lossless[xd->mi[0]->mbmi.segment_id]) {
         vp10_highbd_iwht4x4_add(dqcoeff, dst, pd->dst.stride,
@@ -941,7 +941,7 @@ static void encode_block_pass1(int plane, int block, int blk_row, int blk_col,
       }
       return;
     }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
     if (xd->lossless[xd->mi[0]->mbmi.segment_id]) {
       vp10_iwht4x4_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
     } else {
@@ -1073,7 +1073,7 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
   mode = plane == 0 ? get_y_mode(xd->mi[0], block) : mbmi->uv_mode;
   vp10_predict_intra_block(xd, bwl, bhl, tx_size, mode, dst, dst_stride, dst,
                            dst_stride, blk_col, blk_row, plane);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     vpx_highbd_subtract_block(tx1d_height, tx1d_width, src_diff, diff_stride,
                               src, src_stride, dst, dst_stride, xd->bd);
@@ -1084,7 +1084,7 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
 #else
   vpx_subtract_block(tx1d_height, tx1d_width, src_diff, diff_stride, src,
                      src_stride, dst, dst_stride);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   a = &args->ta[blk_col];
   l = &args->tl[blk_row];
@@ -1115,7 +1115,7 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
     inv_txfm_param.tx_size = tx_size;
     inv_txfm_param.eob = *eob;
     inv_txfm_param.lossless = xd->lossless[mbmi->segment_id];
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     inv_txfm_param.bd = xd->bd;
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       highbd_inv_txfm_add(dqcoeff, dst, dst_stride, &inv_txfm_param);
@@ -1124,7 +1124,7 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
     }
 #else
     inv_txfm_add(dqcoeff, dst, dst_stride, &inv_txfm_param);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
     *(args->skip) = 0;
   }

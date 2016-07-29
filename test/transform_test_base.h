@@ -52,7 +52,7 @@ class TransformTestBase {
         (vpx_memalign(16, sizeof(uint8_t) * num_coeffs_));
     uint8_t *src = reinterpret_cast<uint8_t *>
         (vpx_memalign(16, sizeof(uint8_t) * num_coeffs_));
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     uint16_t *dst16 = reinterpret_cast<uint16_t *>
         (vpx_memalign(16, sizeof(uint16_t) * num_coeffs_));
     uint16_t *src16 = reinterpret_cast<uint16_t *>
@@ -66,7 +66,7 @@ class TransformTestBase {
           src[j] = rnd.Rand8();
           dst[j] = rnd.Rand8();
           test_input_block[j] = src[j] - dst[j];
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
         } else {
           src16[j] = rnd.Rand16() & mask_;
           dst16[j] = rnd.Rand16() & mask_;
@@ -79,7 +79,7 @@ class TransformTestBase {
                                           test_temp_block, pitch_));
       if (bit_depth_ == VPX_BITS_8) {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(test_temp_block, dst, pitch_));
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       } else {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(test_temp_block,
                                             CONVERT_TO_BYTEPTR(dst16), pitch_));
@@ -87,7 +87,7 @@ class TransformTestBase {
       }
 
       for (int j = 0; j < num_coeffs_; ++j) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
         const uint32_t diff =
             bit_depth_ == VPX_BITS_8 ? dst[j] - src[j] : dst16[j] - src16[j];
 #else
@@ -113,7 +113,7 @@ class TransformTestBase {
     vpx_free(test_temp_block);
     vpx_free(dst);
     vpx_free(src);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     vpx_free(dst16);
     vpx_free(src16);
 #endif
@@ -205,7 +205,7 @@ class TransformTestBase {
     uint8_t *src = reinterpret_cast<uint8_t *>
         (vpx_memalign(16, sizeof(uint8_t) * num_coeffs_));
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     uint16_t *dst16 = reinterpret_cast<uint16_t *>
         (vpx_memalign(16, sizeof(uint16_t) * num_coeffs_));
     uint16_t *src16 = reinterpret_cast<uint16_t *>
@@ -219,7 +219,7 @@ class TransformTestBase {
           src[j] = rnd.Rand8();
           dst[j] = rnd.Rand8();
           in[j] = src[j] - dst[j];
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
         } else {
           src16[j] = rnd.Rand16() & mask_;
           dst16[j] = rnd.Rand16() & mask_;
@@ -232,7 +232,7 @@ class TransformTestBase {
 
       if (bit_depth_ == VPX_BITS_8) {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, pitch_));
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       } else {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, CONVERT_TO_BYTEPTR(dst16),
                                             pitch_));
@@ -240,7 +240,7 @@ class TransformTestBase {
       }
 
       for (int j = 0; j < num_coeffs_; ++j) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
         const uint32_t diff =
             bit_depth_ == VPX_BITS_8 ? dst[j] - src[j] : dst16[j] - src16[j];
 #else
@@ -256,7 +256,7 @@ class TransformTestBase {
     vpx_free(coeff);
     vpx_free(dst);
     vpx_free(src);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     vpx_free(src16);
     vpx_free(dst16);
 #endif

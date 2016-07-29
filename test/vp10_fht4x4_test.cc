@@ -34,7 +34,7 @@ void fht4x4_ref(const int16_t *in, tran_low_t *out, int stride,
   vp10_fht4x4_c(in, out, stride, tx_type);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 typedef void (*IhighbdHtFunc)(const tran_low_t *in, uint8_t *out, int stride,
                               int tx_type, int bd);
 typedef void (*HBDFhtFunc)(const int16_t *input, int32_t *output, int stride,
@@ -48,7 +48,7 @@ void highbe_fht4x4_ref(const int16_t *in, int32_t *out, int stride,
                        int tx_type, int bd) {
   vp10_fwd_txfm2d_4x4_c(in, out, stride, tx_type, bd);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 class VP10Trans4x4HT
     : public libvpx_test::TransformTestBase,
@@ -85,7 +85,7 @@ TEST_P(VP10Trans4x4HT, CoeffCheck) {
   RunCoeffCheck();
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 class VP10HighbdTrans4x4HT : public ::testing::TestWithParam<HighbdHt4x4Param> {
  public:
   virtual ~VP10HighbdTrans4x4HT() {}
@@ -154,7 +154,7 @@ void VP10HighbdTrans4x4HT::RunBitexactCheck() {
 TEST_P(VP10HighbdTrans4x4HT, HighbdCoeffCheck) {
   RunBitexactCheck();
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 using std::tr1::make_tuple;
 
@@ -198,7 +198,7 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::ValuesIn(kArrayHt4x4Param_sse2));
 #endif  // HAVE_SSE2
 
-#if HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
+#if HAVE_SSE4_1 && CONFIG_VPX_HIGHBITDEPTH
 const HighbdHt4x4Param kArrayHighbdHt4x4Param[] = {
          make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 0, 10),
          make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 0, 12),
@@ -226,6 +226,6 @@ INSTANTIATE_TEST_CASE_P(
     SSE4_1, VP10HighbdTrans4x4HT,
       ::testing::ValuesIn(kArrayHighbdHt4x4Param));
 
-#endif  // HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
+#endif  // HAVE_SSE4_1 && CONFIG_VPX_HIGHBITDEPTH
 
 }  // namespace

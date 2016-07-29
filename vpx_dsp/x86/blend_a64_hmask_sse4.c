@@ -26,7 +26,7 @@ void vpx_blend_a64_hmask_sse4_1(
                             mask, 0, h, w, 0, 0);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vpx_highbd_blend_a64_hmask_sse4_1(
     uint8_t *dst_8, uint32_t dst_stride,
     const uint8_t *src0_8, uint32_t src0_stride,
@@ -38,4 +38,4 @@ void vpx_highbd_blend_a64_hmask_sse4_1(
                                    src1_8, src1_stride,
                                    mask, 0, h, w, 0, 0, bd);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH

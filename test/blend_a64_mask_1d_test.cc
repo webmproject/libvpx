@@ -218,7 +218,7 @@ INSTANTIATE_TEST_CASE_P(
       TestFuncs(blend_a64_vmask_ref, vpx_blend_a64_vmask_sse4_1)));
 #endif  // HAVE_SSE4_1
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 //////////////////////////////////////////////////////////////////////////////
 // High bit-depth version
 //////////////////////////////////////////////////////////////////////////////
@@ -363,5 +363,5 @@ INSTANTIATE_TEST_CASE_P(
                    vpx_highbd_blend_a64_vmask_sse4_1)));
 #endif  // HAVE_SSE4_1
 
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 }  // namespace

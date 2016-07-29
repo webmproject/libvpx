@@ -22,7 +22,7 @@
 int get_tx_scale(const MACROBLOCKD *const xd, const TX_TYPE tx_type,
                  const TX_SIZE tx_size) {
   (void) tx_type;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     return tx_size == TX_32X32;
   }
@@ -72,7 +72,7 @@ static void ihalfright32_c(const tran_low_t *input, tran_low_t *output) {
   // Note overall scaling factor is 4 times orthogonal
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static void highbd_iidtx4_c(const tran_low_t *input, tran_low_t *output,
                             int bd) {
   int i;
@@ -120,7 +120,7 @@ static void highbd_ihalfright32_c(const tran_low_t *input, tran_low_t *output,
   vpx_highbd_idct16_c(inputhalf, output + 16, bd);
   // Note overall scaling factor is 4 times orthogonal
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 // Inverse identity transform and add.
 static void inv_idtx_add_c(const tran_low_t *input, uint8_t *dest, int stride,
@@ -183,7 +183,7 @@ static void maybe_flip_strides(uint8_t **dst, int *dstride,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void highbd_idst4_c(const tran_low_t *input, tran_low_t *output, int bd) {
   tran_low_t step[4];
   tran_high_t temp1, temp2;
@@ -483,7 +483,7 @@ static void maybe_flip_strides16(uint16_t **dst, int *dstride,
       break;
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 #endif  // CONFIG_EXT_TX
 
 void vp10_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride,
@@ -1073,7 +1073,7 @@ void vp10_inv_txfm_add_32x32(const tran_low_t *input, uint8_t *dest,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
                                 int stride, int tx_type, int bd) {
   static const highbd_transform_2d HIGH_IHT_4[] = {
@@ -1689,7 +1689,7 @@ void vp10_highbd_inv_txfm_add_32x32(const tran_low_t *input, uint8_t *dest,
       break;
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 void inv_txfm_add(const tran_low_t *input, uint8_t *dest, int stride,
                   INV_TXFM_PARAM *inv_txfm_param) {
@@ -1729,7 +1729,7 @@ void inv_txfm_add(const tran_low_t *input, uint8_t *dest, int stride,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void highbd_inv_txfm_add(const tran_low_t *input, uint8_t *dest, int stride,
                          INV_TXFM_PARAM *inv_txfm_param) {
   const TX_TYPE tx_type = inv_txfm_param->tx_type;
@@ -1768,4 +1768,4 @@ void highbd_inv_txfm_add(const tran_low_t *input, uint8_t *dest, int stride,
       break;
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH

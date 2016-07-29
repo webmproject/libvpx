@@ -15,7 +15,7 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vpx_highbd_quantize_b_sse2(const tran_low_t *coeff_ptr,
                                 intptr_t count,
                                 int skip_block,

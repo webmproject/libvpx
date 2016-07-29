@@ -35,7 +35,7 @@ static void od_bin_fdct8x8(tran_low_t *y, int ystride, const int16_t *x,
     for (j = 0; j< 8; j++)
       *(y + ystride*i + j) = (*(y + ystride*i + j) + 4) >> 3;
 }
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static void hbd_od_bin_fdct8x8(tran_low_t *y, int ystride, const int16_t *x,
                            int xstride) {
   int i, j;
@@ -213,7 +213,7 @@ static double calc_psnrhvs(const unsigned char *src, int _systride,
         s_gvar = (s_vars[0] + s_vars[1] + s_vars[2] + s_vars[3]) / s_gvar;
       if (d_gvar > 0)
         d_gvar = (d_vars[0] + d_vars[1] + d_vars[2] + d_vars[3]) / d_gvar;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       if (bit_depth == 10 || bit_depth == 12) {
         hbd_od_bin_fdct8x8(dct_s_coef, 8, dct_s, 8);
         hbd_od_bin_fdct8x8(dct_d_coef, 8, dct_d, 8);

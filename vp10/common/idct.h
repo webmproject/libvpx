@@ -30,7 +30,7 @@ typedef struct INV_TXFM_PARAM {
   TX_SIZE tx_size;
   int eob;
   int lossless;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   int bd;
 #endif
 } INV_TXFM_PARAM;
@@ -41,13 +41,13 @@ typedef struct {
   transform_1d cols, rows;  // vertical and horizontal
 } transform_2d;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 typedef void (*highbd_transform_1d)(const tran_low_t*, tran_low_t*, int bd);
 
 typedef struct {
   highbd_transform_1d cols, rows;  // vertical and horizontal
 } highbd_transform_2d;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 #define MAX_TX_SCALE 1
 int get_tx_scale(const MACROBLOCKD *const xd, const TX_TYPE tx_type,
@@ -80,7 +80,7 @@ void vp10_inv_txfm_add_32x32(const tran_low_t *input, uint8_t *dest,
                              int stride, int eob, TX_TYPE tx_type);
 void inv_txfm_add(const tran_low_t *input, uint8_t *dest, int stride,
                   INV_TXFM_PARAM *inv_txfm_param);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_iwht4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
                             int eob, int bd);
 void vp10_highbd_idct4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
@@ -110,7 +110,7 @@ void vp10_highbd_inv_txfm_add_32x32(const tran_low_t *input, uint8_t *dest,
                                     TX_TYPE tx_type);
 void highbd_inv_txfm_add(const tran_low_t *input, uint8_t *dest, int stride,
                          INV_TXFM_PARAM *inv_txfm_param);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 #ifdef __cplusplus
 }  // extern "C"
 #endif

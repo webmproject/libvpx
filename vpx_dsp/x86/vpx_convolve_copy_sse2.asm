@@ -336,7 +336,7 @@ cglobal convolve_%1, 4, 7, 4+AUX_XMM_REGS, src, src_stride, \
 INIT_XMM sse2
 convolve_fn copy
 convolve_fn avg
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
 convolve_fn copy, highbd
 convolve_fn avg, highbd
 %endif

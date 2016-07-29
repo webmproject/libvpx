@@ -231,7 +231,7 @@ INSTANTIATE_TEST_CASE_P(
                    &vpx_idct4x4_1_add_c,
                    TX_4X4, 1)));
 
-#if HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#if HAVE_NEON && !CONFIG_VPX_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     NEON, PartialIDctTest,
     ::testing::Values(
@@ -259,9 +259,9 @@ INSTANTIATE_TEST_CASE_P(
                    &vpx_idct4x4_16_add_c,
                    &vpx_idct4x4_1_add_neon,
                    TX_4X4, 1)));
-#endif  // HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#endif  // HAVE_NEON && !CONFIG_VPX_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
-#if HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#if HAVE_SSE2 && !CONFIG_VPX_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     SSE2, PartialIDctTest,
     ::testing::Values(
@@ -296,7 +296,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif
 
 #if HAVE_SSSE3 && ARCH_X86_64 && \
-    !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+    !CONFIG_VPX_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     SSSE3_64, PartialIDctTest,
     ::testing::Values(
@@ -306,7 +306,7 @@ INSTANTIATE_TEST_CASE_P(
                    TX_8X8, 12)));
 #endif
 
-#if HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#if HAVE_MSA && !CONFIG_VPX_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     MSA, PartialIDctTest,
     ::testing::Values(
@@ -338,6 +338,6 @@ INSTANTIATE_TEST_CASE_P(
                    &vpx_idct4x4_16_add_c,
                    &vpx_idct4x4_1_add_msa,
                    TX_4X4, 1)));
-#endif  // HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#endif  // HAVE_MSA && !CONFIG_VPX_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
 }  // namespace

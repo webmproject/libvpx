@@ -27,7 +27,7 @@ using libvpx_test::Inv_Txfm2d_Func;
 
 namespace {
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 // VP10InvTxfm2dParam argument list:
 // tx_type_, tx_size_, max_error_, max_avg_error_
 typedef std::tr1::tuple<TX_TYPE, TX_SIZE, int, double> VP10InvTxfm2dParam;
@@ -153,6 +153,6 @@ INSTANTIATE_TEST_CASE_P(
     C, VP10InvTxfm2d,
     ::testing::ValuesIn(vp10_inv_txfm2d_param));
 
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 }  // namespace

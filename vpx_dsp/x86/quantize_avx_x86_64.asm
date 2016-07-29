@@ -41,7 +41,7 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   mova                            m0, [zbinq]              ; m0 = zbin
 
   ; Get DC and first 15 AC coeffs - in this special case, that is all.
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   ; coeff stored as 32bit numbers but we process them as 16 bit numbers
   mova                            m9, [coeffq]
   packssdw                        m9, [coeffq+16]          ; m9 = c[i]
@@ -73,7 +73,7 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   ptest                          m14, m14
   jnz .single_nonzero
 
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   mova                       [r1   ], ymm5
   mova                       [r1+32], ymm5
   mova                       [r2   ], ymm5
@@ -121,7 +121,7 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   pand                            m8, m7
   pand                           m13, m12
 
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   ; Store 16bit numbers as 32bit numbers in array pointed to by qcoeff
   pcmpgtw                         m6, m5, m8
   punpckhwd                       m6, m8, m6
@@ -142,7 +142,7 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   punpckhqdq                      m3, m3
   pmullw                         m13, m3                   ; dqc[i] = qc[i] * q
 
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   ; Store 16bit numbers as 32bit numbers in array pointed to by qcoeff
   pcmpgtw                         m6, m5, m8
   punpckhwd                       m6, m8, m6
@@ -226,7 +226,7 @@ DEFINE_ARGS coeff, ncoeff, skip, zbin, round, quant, shift, \
 
   DEFINE_ARGS coeff, ncoeff, d1, qcoeff, dqcoeff, iscan, d2, d3, d4, d5, eob
 
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   lea                         coeffq, [  coeffq+ncoeffq*4]
   lea                        qcoeffq, [ qcoeffq+ncoeffq*4]
   lea                       dqcoeffq, [dqcoeffq+ncoeffq*4]
@@ -239,7 +239,7 @@ DEFINE_ARGS coeff, ncoeff, skip, zbin, round, quant, shift, \
   neg                        ncoeffq
 
   ; get DC and first 15 AC coeffs
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   ; coeff stored as 32bit numbers & require 16bit numbers
   mova                            m9, [coeffq+ncoeffq*4+ 0]
   packssdw                        m9, [coeffq+ncoeffq*4+16]
@@ -261,7 +261,7 @@ DEFINE_ARGS coeff, ncoeff, skip, zbin, round, quant, shift, \
   ptest                          m14, m14
   jnz .first_nonzero
 
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   mova        [qcoeffq+ncoeffq*4   ], ymm5
   mova        [qcoeffq+ncoeffq*4+32], ymm5
   mova       [dqcoeffq+ncoeffq*4   ], ymm5
@@ -299,7 +299,7 @@ DEFINE_ARGS coeff, ncoeff, skip, zbin, round, quant, shift, \
   pand                            m8, m7
   pand                           m13, m12
 
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   ; store 16bit numbers as 32bit numbers in array pointed to by qcoeff
   pcmpgtw                         m6, m5, m8
   punpckhwd                       m6, m8, m6
@@ -330,7 +330,7 @@ DEFINE_ARGS coeff, ncoeff, skip, zbin, round, quant, shift, \
   psignw                         m13, m10
 %endif
 
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   ; store 16bit numbers as 32bit numbers in array pointed to by qcoeff
   pcmpgtw                         m6, m5, m8
   punpckhwd                       m6, m8, m6
@@ -360,7 +360,7 @@ DEFINE_ARGS coeff, ncoeff, skip, zbin, round, quant, shift, \
 
 .ac_only_loop:
 
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   ; pack coeff from 32bit to 16bit array
   mova                            m9, [coeffq+ncoeffq*4+ 0]
   packssdw                        m9, [coeffq+ncoeffq*4+16]
@@ -382,7 +382,7 @@ DEFINE_ARGS coeff, ncoeff, skip, zbin, round, quant, shift, \
   ptest                          m14, m14
   jnz .rest_nonzero
 
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   mova        [qcoeffq+ncoeffq*4+ 0], ymm5
   mova        [qcoeffq+ncoeffq*4+32], ymm5
   mova       [dqcoeffq+ncoeffq*4+ 0], ymm5
@@ -421,7 +421,7 @@ DEFINE_ARGS coeff, ncoeff, skip, zbin, round, quant, shift, \
   pand                           m14, m7
   pand                           m13, m12
 
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   ; store 16bit numbers as 32bit numbers in array pointed to by qcoeff
   pcmpgtw                         m6, m5, m14
   punpckhwd                       m6, m14, m6
@@ -451,7 +451,7 @@ DEFINE_ARGS coeff, ncoeff, skip, zbin, round, quant, shift, \
   psignw                         m13, m10
 %endif
 
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   ; store 16bit numbers as 32bit numbers in array pointed to by qcoeff
   pcmpgtw                         m6, m5, m14
   punpckhwd                       m6, m14, m6
@@ -507,7 +507,7 @@ DEFINE_ARGS coeff, ncoeff, skip, zbin, round, quant, shift, \
 
 DEFINE_ARGS dqcoeff, ncoeff, qcoeff, eob
 
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   lea                       dqcoeffq, [dqcoeffq+ncoeffq*4]
   lea                        qcoeffq, [ qcoeffq+ncoeffq*4]
 %else
@@ -519,7 +519,7 @@ DEFINE_ARGS dqcoeff, ncoeff, qcoeff, eob
   pxor                            m7, m7
 
 .blank_loop:
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   mova       [dqcoeffq+ncoeffq*4+ 0], ymm7
   mova       [dqcoeffq+ncoeffq*4+32], ymm7
   mova        [qcoeffq+ncoeffq*4+ 0], ymm7

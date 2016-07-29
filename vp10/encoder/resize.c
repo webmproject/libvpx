@@ -15,9 +15,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 #include "vpx_dsp/vpx_dsp_common.h"
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 #include "vpx_ports/mem.h"
 #include "vp10/common/common.h"
 #include "vp10/encoder/resize.h"
@@ -537,7 +537,7 @@ void vp10_resize_plane(const uint8_t *const input,
   free(arrbuf2);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static void highbd_interpolate(const uint16_t *const input, int inlength,
                                uint16_t *output, int outlength, int bd) {
   const int64_t delta =
@@ -830,7 +830,7 @@ void vp10_highbd_resize_plane(const uint8_t *const input,
   free(arrbuf);
   free(arrbuf2);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 void vp10_resize_frame420(const uint8_t *const y,
                          int y_stride,
@@ -878,7 +878,7 @@ void vp10_resize_frame444(const uint8_t *const y, int y_stride,
                    ov, oheight, owidth, ouv_stride);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_resize_frame420(const uint8_t *const y,
                                 int y_stride,
                                 const uint8_t *const u, const uint8_t *const v,
@@ -924,4 +924,4 @@ void vp10_highbd_resize_frame444(const uint8_t *const y, int y_stride,
   vp10_highbd_resize_plane(v, height, width, uv_stride,
                           ov, oheight, owidth, ouv_stride, bd);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH

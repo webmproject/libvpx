@@ -188,7 +188,7 @@ static void fwd_txfm_32x32(int rd_transform, const int16_t *src_diff,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static void highbd_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
                                 int diff_stride, TX_TYPE tx_type, int lossless,
                                 const int bd) {
@@ -358,7 +358,7 @@ static void highbd_fwd_txfm_32x32(int rd_transform, const int16_t *src_diff,
       break;
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 void fwd_txfm(const int16_t *src_diff, tran_low_t *coeff, int diff_stride,
               FWD_TXFM_PARAM *fwd_txfm_param) {
@@ -395,7 +395,7 @@ void fwd_txfm(const int16_t *src_diff, tran_low_t *coeff, int diff_stride,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void highbd_fwd_txfm(const int16_t *src_diff, tran_low_t *coeff,
                      int diff_stride, FWD_TXFM_PARAM *fwd_txfm_param) {
   const int fwd_txfm_opt = fwd_txfm_param->fwd_txfm_opt;
@@ -436,4 +436,4 @@ void highbd_fwd_txfm(const int16_t *src_diff, tran_low_t *coeff,
       break;
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH

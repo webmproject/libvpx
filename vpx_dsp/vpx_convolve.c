@@ -340,7 +340,7 @@ void vpx_scaled_avg_2d_c(const uint8_t *src, ptrdiff_t src_stride,
                       filter_y, y_step_q4, w, h);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static void highbd_convolve_horiz(const uint8_t *src8, ptrdiff_t src_stride,
                                   uint8_t *dst8, ptrdiff_t dst_stride,
                                   const InterpKernel *x_filters,

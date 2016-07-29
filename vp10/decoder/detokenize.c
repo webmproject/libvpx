@@ -85,7 +85,7 @@ static int decode_coefs(const MACROBLOCKD *xd,
     eob_branch_count = counts->eob_branch[tx_size_ctx][type][ref];
   }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->bd > VPX_BITS_8) {
     if (xd->bd == VPX_BITS_10) {
       cat1_prob = vp10_cat1_prob_high10;
@@ -183,7 +183,7 @@ static int decode_coefs(const MACROBLOCKD *xd,
         case CATEGORY6_TOKEN: {
           const int skip_bits = TX_SIZES - 1 - tx_size;
           const uint8_t *cat6p = cat6_prob + skip_bits;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
           switch (xd->bd) {
             case VPX_BITS_8:
               val = CAT6_MIN_VAL + read_coeff(cat6p, 14 - skip_bits, r);
@@ -213,12 +213,12 @@ static int decode_coefs(const MACROBLOCKD *xd,
 #endif  // CONFIG_NEW_QUANT
 
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     dqcoeff[scan[c]] = highbd_check_range((vp10_read_bit(r) ? -v : v),
                                           xd->bd);
 #else
     dqcoeff[scan[c]] = check_range(vp10_read_bit(r) ? -v : v);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 #else
     dqcoeff[scan[c]] = vp10_read_bit(r) ? -v : v;
 #endif  // CONFIG_COEFFICIENT_RANGE_CHECKING
@@ -286,7 +286,7 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
     eob_branch_count = counts->eob_branch[tx_size_ctx][type][ref];
   }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->bd > VPX_BITS_8) {
     if (xd->bd == VPX_BITS_10) {
       cat1_prob = vp10_cat1_prob_high10;
@@ -370,7 +370,7 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
         case CATEGORY6_TOKEN: {
           const int skip_bits = TX_SIZES - 1 - tx_size;
           const uint8_t *cat6p = cat6_prob + skip_bits;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
           switch (xd->bd) {
             case VPX_BITS_8:
               val = CAT6_MIN_VAL + read_coeff(cat6p, 14 - skip_bits, ans);
@@ -398,12 +398,12 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
 #endif  // CONFIG_NEW_QUANT
 
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       dqcoeff[scan[c]] =
           highbd_check_range((uabs_read_bit(ans) ? -v : v), xd->bd);
 #else
       dqcoeff[scan[c]] = check_range(uabs_read_bit(ans) ? -v : v);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 #else
       dqcoeff[scan[c]] = uabs_read_bit(ans) ? -v : v;
 #endif  // CONFIG_COEFFICIENT_RANGE_CHECKING

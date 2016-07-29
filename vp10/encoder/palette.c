@@ -165,7 +165,7 @@ int vp10_count_colors(const uint8_t *src, int stride, int rows, int cols) {
   return n;
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 int vp10_count_colors_highbd(const uint8_t *src8, int stride, int rows,
                              int cols, int bit_depth) {
   int n = 0, r, c, i;
@@ -190,6 +190,6 @@ int vp10_count_colors_highbd(const uint8_t *src8, int stride, int rows,
 
   return n;
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 

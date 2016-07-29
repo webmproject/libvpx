@@ -41,7 +41,7 @@ static INLINE tran_high_t dct_const_round_shift(tran_high_t input) {
   return rv;
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static INLINE tran_high_t highbd_check_range(tran_high_t input,
                                              int bd) {
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
@@ -64,7 +64,7 @@ static INLINE tran_high_t highbd_dct_const_round_shift(tran_high_t input) {
   tran_high_t rv = ROUND_POWER_OF_TWO(input, DCT_CONST_BITS);
   return rv;
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 #if CONFIG_EMULATE_HARDWARE
 // When CONFIG_EMULATE_HARDWARE is 1 the transform performs a
@@ -85,18 +85,18 @@ static INLINE tran_high_t highbd_dct_const_round_shift(tran_high_t input) {
 // bd of x uses trans_low with 8+x bits, need to remove 24-x bits
 
 #define WRAPLOW(x) ((((int32_t)check_range(x)) << 16) >> 16)
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 #define HIGHBD_WRAPLOW(x, bd) \
         ((((int32_t)highbd_check_range((x), bd)) << (24 - bd)) >> (24 - bd))
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 #else   // CONFIG_EMULATE_HARDWARE
 
 #define WRAPLOW(x) ((int32_t)check_range(x))
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 #define HIGHBD_WRAPLOW(x, bd) \
         ((int32_t)highbd_check_range((x), bd))
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 #endif  // CONFIG_EMULATE_HARDWARE
 
@@ -108,7 +108,7 @@ void vp10_iadst4_c(const tran_low_t *input, tran_low_t *output);
 void vp10_iadst8_c(const tran_low_t *input, tran_low_t *output);
 void vp10_iadst16_c(const tran_low_t *input, tran_low_t *output);
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_idct4_c(const tran_low_t *input, tran_low_t *output, int bd);
 void vp10_highbd_idct8_c(const tran_low_t *input, tran_low_t *output, int bd);
 void vp10_highbd_idct16_c(const tran_low_t *input, tran_low_t *output, int bd);

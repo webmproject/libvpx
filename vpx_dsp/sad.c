@@ -151,7 +151,7 @@ sadMxNxK(4, 4, 3)
 sadMxNxK(4, 4, 8)
 sadMxNx4D(4, 4)
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static INLINE unsigned int highbd_sad(const uint8_t *a8, int a_stride,
                                       const uint8_t *b8, int b_stride,
                                       int width, int height) {
@@ -306,7 +306,7 @@ highbd_sadMxNxK(4, 4, 3)
 highbd_sadMxNxK(4, 4, 8)
 highbd_sadMxNx4D(4, 4)
 
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 #if CONFIG_VP10 && CONFIG_EXT_INTER
 static INLINE unsigned int masked_sad(const uint8_t *a, int a_stride,
@@ -355,7 +355,7 @@ MASKSADMxN(8, 4)
 MASKSADMxN(4, 8)
 MASKSADMxN(4, 4)
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static INLINE unsigned int highbd_masked_sad(const uint8_t *a8, int a_stride,
                                              const uint8_t *b8, int b_stride,
                                              const uint8_t *m, int m_stride,
@@ -407,7 +407,7 @@ HIGHBD_MASKSADMXN(8, 8)
 HIGHBD_MASKSADMXN(8, 4)
 HIGHBD_MASKSADMXN(4, 8)
 HIGHBD_MASKSADMXN(4, 4)
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 #endif  // CONFIG_VP10 && CONFIG_EXT_INTER
 
 #if CONFIG_VP10 && CONFIG_OBMC
@@ -459,7 +459,7 @@ OBMCSADMxN(8, 4)
 OBMCSADMxN(4, 8)
 OBMCSADMxN(4, 4)
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static INLINE unsigned int highbd_obmc_sad(const uint8_t *pre8, int pre_stride,
                                            const int32_t *wsrc,
                                            const int32_t *mask,
@@ -506,5 +506,5 @@ HIGHBD_OBMCSADMXN(8, 8)
 HIGHBD_OBMCSADMXN(8, 4)
 HIGHBD_OBMCSADMXN(4, 8)
 HIGHBD_OBMCSADMXN(4, 4)
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 #endif  // CONFIG_VP10 && CONFIG_OBMC

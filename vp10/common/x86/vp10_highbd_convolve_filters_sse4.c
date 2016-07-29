@@ -10,7 +10,7 @@
 #include "./vpx_config.h"
 #include "vp10/common/filter.h"
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 #if CONFIG_EXT_INTERP
 DECLARE_ALIGNED(16, const int16_t,
   sub_pel_filters_10sharp_highbd_ver_signal_dir[15][6][8]) = {
@@ -137,7 +137,7 @@ DECLARE_ALIGNED(16, const int16_t,
 };
 #endif
 #endif
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 #if CONFIG_EXT_INTERP
 DECLARE_ALIGNED(16, const int16_t,
   sub_pel_filters_12sharp_highbd_ver_signal_dir[15][6][8]) = {
@@ -264,7 +264,7 @@ DECLARE_ALIGNED(16, const int16_t,
 };
 #endif
 #endif
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 #if USE_TEMPORALFILTER_12TAP
 DECLARE_ALIGNED(16, const int16_t,
   sub_pel_filters_temporalfilter_12_highbd_ver_signal_dir[15][6][8]) = {

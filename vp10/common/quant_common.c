@@ -199,7 +199,7 @@ static const int16_t dc_qlookup[QINDEX_RANGE] = {
   1022, 1058, 1098, 1139, 1184, 1232, 1282, 1336,
 };
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static const int16_t dc_qlookup_10[QINDEX_RANGE] = {
   4,     9,    10,    13,    15,    17,    20,    22,
   25,    28,    31,    34,    37,    40,    43,    47,
@@ -306,7 +306,7 @@ static const int16_t ac_qlookup[QINDEX_RANGE] = {
   1597, 1628, 1660, 1692, 1725, 1759, 1793, 1828,
 };
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static const int16_t ac_qlookup_10[QINDEX_RANGE] = {
   4,     9,    11,    13,    16,    18,    21,    24,
   27,    30,    33,    37,    40,    44,    48,    51,
@@ -379,7 +379,7 @@ static const int16_t ac_qlookup_12[QINDEX_RANGE] = {
 #endif
 
 int16_t vp10_dc_quant(int qindex, int delta, vpx_bit_depth_t bit_depth) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   switch (bit_depth) {
     case VPX_BITS_8:
       return dc_qlookup[clamp(qindex + delta, 0, MAXQ)];
@@ -398,7 +398,7 @@ int16_t vp10_dc_quant(int qindex, int delta, vpx_bit_depth_t bit_depth) {
 }
 
 int16_t vp10_ac_quant(int qindex, int delta, vpx_bit_depth_t bit_depth) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   switch (bit_depth) {
     case VPX_BITS_8:
       return ac_qlookup[clamp(qindex + delta, 0, MAXQ)];

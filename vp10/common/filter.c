@@ -343,7 +343,7 @@ SubpelFilterCoeffs vp10_get_subpel_filter_ver_signal_dir(
   return NULL;
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 HbdSubpelFilterCoeffs vp10_hbd_get_subpel_filter_ver_signal_dir(
     const InterpFilterParams p, int index) {
 #if CONFIG_EXT_INTERP && HAVE_SSE4_1

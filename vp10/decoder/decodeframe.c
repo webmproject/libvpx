@@ -234,16 +234,16 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane,
     inv_txfm_param.eob = eob;
     inv_txfm_param.lossless = xd->lossless[xd->mi[0]->mbmi.segment_id];
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       inv_txfm_param.bd = xd->bd;
       highbd_inv_txfm_add(dqcoeff, dst, stride, &inv_txfm_param);
     } else {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
       inv_txfm_add(dqcoeff, dst, stride, &inv_txfm_param);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
     if (eob == 1) {
       dqcoeff[0] = 0;
@@ -755,7 +755,7 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
   int dst_stride2[3] = {MAX_TX_SIZE, MAX_TX_SIZE, MAX_TX_SIZE};
   int dst_stride3[3] = {MAX_TX_SIZE, MAX_TX_SIZE, MAX_TX_SIZE};
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     int len = sizeof(uint16_t);
     dst_buf1[0] = CONVERT_TO_BYTEPTR(tmp_buf1);
@@ -778,7 +778,7 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
     dst_buf3[0] = tmp_buf3;
     dst_buf3[1] = tmp_buf3 + MAX_TX_SQUARE;
     dst_buf3[2] = tmp_buf3 + 2 * MAX_TX_SQUARE;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   }
 #endif
 
@@ -1348,7 +1348,7 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                                    VPXMAX(bsize, BLOCK_8X8));
 #if CONFIG_OBMC
     if (mbmi->motion_variation == OBMC_CAUSAL) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       DECLARE_ALIGNED(16, uint8_t,
                       tmp_buf1[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
       DECLARE_ALIGNED(16, uint8_t,
@@ -1358,7 +1358,7 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                       tmp_buf1[MAX_MB_PLANE * MAX_SB_SQUARE]);
       DECLARE_ALIGNED(16, uint8_t,
                       tmp_buf2[MAX_MB_PLANE * MAX_SB_SQUARE]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
       uint8_t *dst_buf1[MAX_MB_PLANE], *dst_buf2[MAX_MB_PLANE];
       int dst_width1[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
       int dst_width2[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
@@ -1368,7 +1368,7 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
       int dst_stride2[MAX_MB_PLANE] = {MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE};
 
       assert(mbmi->sb_type >= BLOCK_8X8);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         int len = sizeof(uint16_t);
         dst_buf1[0] = CONVERT_TO_BYTEPTR(tmp_buf1);
@@ -1378,16 +1378,16 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
         dst_buf2[1] = CONVERT_TO_BYTEPTR(tmp_buf2 + MAX_SB_SQUARE * len);
         dst_buf2[2] = CONVERT_TO_BYTEPTR(tmp_buf2 + MAX_SB_SQUARE * 2 * len);
       } else {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
         dst_buf1[0] = tmp_buf1;
         dst_buf1[1] = tmp_buf1 + MAX_SB_SQUARE;
         dst_buf1[2] = tmp_buf1 + MAX_SB_SQUARE * 2;
         dst_buf2[0] = tmp_buf2;
         dst_buf2[1] = tmp_buf2 + MAX_SB_SQUARE;
         dst_buf2[2] = tmp_buf2 + MAX_SB_SQUARE * 2;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
       vp10_build_prediction_by_above_preds(cm, xd, mi_row, mi_col,
                                            dst_buf1, dst_width1,
                                            dst_height1, dst_stride1);
@@ -2211,7 +2211,7 @@ static void setup_frame_size(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   if (vpx_realloc_frame_buffer(
           get_frame_new_buffer(cm), cm->width, cm->height,
           cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
           cm->use_highbitdepth,
 #endif
           VPX_DEC_BORDER_IN_PIXELS,
@@ -2298,7 +2298,7 @@ static void setup_frame_size_with_refs(VP10_COMMON *cm,
   if (vpx_realloc_frame_buffer(
           get_frame_new_buffer(cm), cm->width, cm->height,
           cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
           cm->use_highbitdepth,
 #endif
           VPX_DEC_BORDER_IN_PIXELS,
@@ -3084,12 +3084,12 @@ static void read_bitdepth_colorspace_sampling(
     VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   if (cm->profile >= PROFILE_2) {
     cm->bit_depth = vpx_rb_read_bit(rb) ? VPX_BITS_12 : VPX_BITS_10;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     cm->use_highbitdepth = 1;
 #endif
   } else {
     cm->bit_depth = VPX_BITS_8;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     cm->use_highbitdepth = 0;
 #endif
   }
@@ -3149,7 +3149,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
                          "Invalid frame marker");
 
   cm->profile = vp10_read_profile(rb);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (cm->profile >= MAX_PROFILES)
     vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                        "Unsupported bitstream profile");
@@ -3272,7 +3272,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
 
       for (i = 0; i < INTER_REFS_PER_FRAME; ++i) {
         RefBuffer *const ref_buf = &cm->frame_refs[i];
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
         vp10_setup_scale_factors_for_frame(&ref_buf->sf,
                                           ref_buf->buf->y_crop_width,
                                           ref_buf->buf->y_crop_height,
@@ -3287,7 +3287,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
       }
     }
   }
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   get_frame_new_buffer(cm)->bit_depth = cm->bit_depth;
 #endif
   get_frame_new_buffer(cm)->color_space = cm->color_space;
@@ -3352,7 +3352,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   setup_restoration(cm, rb);
 #endif  // CONFIG_LOOP_RESTORATION
   setup_quantization(cm, rb);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   xd->bd = (int)cm->bit_depth;
 #endif
 

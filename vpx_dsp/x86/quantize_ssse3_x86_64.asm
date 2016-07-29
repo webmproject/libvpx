@@ -53,7 +53,7 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
 %endif
   pxor                            m5, m5                   ; m5 = dedicated zero
   DEFINE_ARGS coeff, ncoeff, d1, qcoeff, dqcoeff, iscan, d2, d3, d4, d5, eob
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   lea                         coeffq, [  coeffq+ncoeffq*4]
   lea                        qcoeffq, [ qcoeffq+ncoeffq*4]
   lea                       dqcoeffq, [dqcoeffq+ncoeffq*4]
@@ -66,7 +66,7 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   neg                        ncoeffq
 
   ; get DC and first 15 AC coeffs
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   ; coeff stored as 32bit numbers & require 16bit numbers
   mova                            m9, [  coeffq+ncoeffq*4+ 0]
   packssdw                        m9, [  coeffq+ncoeffq*4+16]
@@ -96,7 +96,7 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   psignw                         m13, m10                  ; m13 = reinsert sign
   pand                            m8, m7
   pand                           m13, m12
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   ; store 16bit numbers as 32bit numbers in array pointed to by qcoeff
   mova                           m11, m8
   mova                            m6, m8
@@ -131,7 +131,7 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   psignw                          m8, m9
   psignw                         m13, m10
 %endif
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   ; store 16bit numbers as 32bit numbers in array pointed to by qcoeff
   mova                            m11, m8
   mova                            m6, m8
@@ -166,7 +166,7 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   jz .accumulate_eob
 
 .ac_only_loop:
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   ; pack coeff from 32bit to 16bit array
   mova                            m9, [  coeffq+ncoeffq*4+ 0]
   packssdw                        m9, [  coeffq+ncoeffq*4+16]
@@ -198,7 +198,7 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   psignw                         m13, m10                  ; m13 = reinsert sign
   pand                           m14, m7
   pand                           m13, m12
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   ; store 16bit numbers as 32bit numbers in array pointed to by qcoeff
   pxor                           m11, m11
   mova                           m11, m14
@@ -233,7 +233,7 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   psignw                         m14, m9
   psignw                         m13, m10
 %endif
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   ; store 16bit numbers as 32bit numbers in array pointed to by qcoeff
   mova                           m11, m14
   mova                            m6, m14
@@ -271,7 +271,7 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
 %ifidn %1, b_32x32
   jmp .accumulate_eob
 .skip_iter:
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   mova        [qcoeffq+ncoeffq*4+ 0], m5
   mova        [qcoeffq+ncoeffq*4+16], m5
   mova        [qcoeffq+ncoeffq*4+32], m5
@@ -310,7 +310,7 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   mov                             r2, qcoeffmp
   mov                             r3, eobmp
   DEFINE_ARGS dqcoeff, ncoeff, qcoeff, eob
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   lea                       dqcoeffq, [dqcoeffq+ncoeffq*4]
   lea                        qcoeffq, [ qcoeffq+ncoeffq*4]
 %else
@@ -320,7 +320,7 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   neg                        ncoeffq
   pxor                            m7, m7
 .blank_loop:
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   mova       [dqcoeffq+ncoeffq*4+ 0], m7
   mova       [dqcoeffq+ncoeffq*4+16], m7
   mova       [dqcoeffq+ncoeffq*4+32], m7

@@ -29,7 +29,7 @@ const double kPsnrThreshold[][5] = {
 // VP10 HBD average PSNR is slightly lower than VP9.
 // We make two cases here to enable the testing and
 // guard picture quality.
-#if CONFIG_VP10_ENCODER && CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VP10_ENCODER && CONFIG_VPX_HIGHBITDEPTH
   { 36.0, 37.0, 37.0, 37.0, 37.0 },
   { 31.0, 36.0, 36.0, 36.0, 36.0 },
   { 31.0, 35.0, 35.0, 35.0, 35.0 },
@@ -47,7 +47,7 @@ const double kPsnrThreshold[][5] = {
   { 31.0, 32.0, 32.0, 32.0, 32.0 },
   { 30.0, 31.0, 31.0, 31.0, 31.0 },
   { 29.0, 30.0, 30.0, 30.0, 30.0 },
-#endif  // CONFIG_VP9_HIGHBITDEPTH && CONFIG_VP10_ENCODER
+#endif  // CONFIG_VPX_HIGHBITDEPTH && CONFIG_VP10_ENCODER
 };
 
 typedef struct {
@@ -63,7 +63,7 @@ const TestVideoParam kTestVectors[] = {
   {"park_joy_90p_8_422.y4m", 8, VPX_IMG_FMT_I422, VPX_BITS_8, 1},
   {"park_joy_90p_8_444.y4m", 8, VPX_IMG_FMT_I444, VPX_BITS_8, 1},
   {"park_joy_90p_8_440.yuv", 8, VPX_IMG_FMT_I440, VPX_BITS_8, 1},
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   {"park_joy_90p_10_420.y4m", 10, VPX_IMG_FMT_I42016, VPX_BITS_10, 2},
   {"park_joy_90p_10_422.y4m", 10, VPX_IMG_FMT_I42216, VPX_BITS_10, 3},
   {"park_joy_90p_10_444.y4m", 10, VPX_IMG_FMT_I44416, VPX_BITS_10, 3},
@@ -72,7 +72,7 @@ const TestVideoParam kTestVectors[] = {
   {"park_joy_90p_12_422.y4m", 12, VPX_IMG_FMT_I42216, VPX_BITS_12, 3},
   {"park_joy_90p_12_444.y4m", 12, VPX_IMG_FMT_I44416, VPX_BITS_12, 3},
   {"park_joy_90p_12_440.yuv", 12, VPX_IMG_FMT_I44016, VPX_BITS_12, 3},
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 };
 
 // Encoding modes tested

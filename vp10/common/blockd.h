@@ -160,11 +160,11 @@ typedef struct {
   // Number of base colors for Y (0) and UV (1)
   uint8_t palette_size[2];
   // Value of base colors for Y, U, and V
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   uint16_t palette_colors[3 * PALETTE_MAX_SIZE];
 #else
   uint8_t palette_colors[3 * PALETTE_MAX_SIZE];
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
   // Only used by encoder to store the color index of the top left pixel.
   // TODO(huisu): move this to encoder
   uint8_t palette_first_color_idx[2];
@@ -379,7 +379,7 @@ typedef struct macroblockd {
   uint8_t is_sec_rect;
 #endif
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   /* Bit depth: 8, 10, 12 */
   int bd;
 #endif

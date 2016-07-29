@@ -320,7 +320,7 @@ static unsigned int get_prediction_error(BLOCK_SIZE bsize,
   return sse;
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static vpx_variance_fn_t highbd_get_block_variance_fn(BLOCK_SIZE bsize,
                                                       int bd) {
   switch (bd) {
@@ -372,7 +372,7 @@ static unsigned int highbd_get_prediction_error(BLOCK_SIZE bsize,
   fn(src->buf, src->stride, ref->buf, ref->stride, &sse);
   return sse;
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 // Refine the motion search range according to the frame dimension
 // for first pass test.
@@ -404,11 +404,11 @@ static void first_pass_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
 
   // Override the default variance function to use MSE.
   v_fn_ptr.vf = get_block_variance_fn(bsize);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     v_fn_ptr.vf = highbd_get_block_variance_fn(bsize, xd->bd);
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   // Center the initial step/diamond search on best mv.
   tmp_err = cpi->diamond_search_sad(x, &cpi->ss_cfg, &ref_mv_full, &tmp_mv,
@@ -640,7 +640,7 @@ void vp10_first_pass(VP10_COMP *cpi, const struct lookahead_entry *source) {
         image_data_start_row = mb_row;
       }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       if (cm->use_highbitdepth) {
         switch (cm->bit_depth) {
           case VPX_BITS_8:
@@ -657,7 +657,7 @@ void vp10_first_pass(VP10_COMP *cpi, const struct lookahead_entry *source) {
             return;
         }
       }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
       vpx_clear_system_state();
       log_intra = log(this_error + 1.0);
@@ -666,7 +666,7 @@ void vp10_first_pass(VP10_COMP *cpi, const struct lookahead_entry *source) {
       else
         intra_factor += 1.0;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       if (cm->use_highbitdepth)
         level_sample = CONVERT_TO_SHORTPTR(x->plane[0].src.buf)[0];
       else
@@ -711,7 +711,7 @@ void vp10_first_pass(VP10_COMP *cpi, const struct lookahead_entry *source) {
         struct buf_2d unscaled_last_source_buf_2d;
 
         xd->plane[0].pre[0].buf = first_ref_buf->y_buffer + recon_yoffset;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
         if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
           motion_error = highbd_get_prediction_error(
               bsize, &x->plane[0].src, &xd->plane[0].pre[0], xd->bd);
@@ -722,7 +722,7 @@ void vp10_first_pass(VP10_COMP *cpi, const struct lookahead_entry *source) {
 #else
         motion_error = get_prediction_error(
             bsize, &x->plane[0].src, &xd->plane[0].pre[0]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
         // Compute the motion error of the 0,0 motion using the last source
         // frame as the reference. Skip the further motion search on
@@ -731,7 +731,7 @@ void vp10_first_pass(VP10_COMP *cpi, const struct lookahead_entry *source) {
             cpi->unscaled_last_source->y_buffer + recon_yoffset;
         unscaled_last_source_buf_2d.stride =
             cpi->unscaled_last_source->y_stride;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
         if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
           raw_motion_error = highbd_get_prediction_error(
               bsize, &x->plane[0].src, &unscaled_last_source_buf_2d, xd->bd);
@@ -742,7 +742,7 @@ void vp10_first_pass(VP10_COMP *cpi, const struct lookahead_entry *source) {
 #else
         raw_motion_error = get_prediction_error(
             bsize, &x->plane[0].src, &unscaled_last_source_buf_2d);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
         // TODO(pengchong): Replace the hard-coded threshold
         if (raw_motion_error > 25) {
@@ -768,7 +768,7 @@ void vp10_first_pass(VP10_COMP *cpi, const struct lookahead_entry *source) {
             int gf_motion_error;
 
             xd->plane[0].pre[0].buf = gld_yv12->y_buffer + recon_yoffset;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
             if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
               gf_motion_error = highbd_get_prediction_error(
                   bsize, &x->plane[0].src, &xd->plane[0].pre[0], xd->bd);
@@ -779,7 +779,7 @@ void vp10_first_pass(VP10_COMP *cpi, const struct lookahead_entry *source) {
 #else
             gf_motion_error = get_prediction_error(
                 bsize, &x->plane[0].src, &xd->plane[0].pre[0]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
             first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv,
                                      &gf_motion_error);

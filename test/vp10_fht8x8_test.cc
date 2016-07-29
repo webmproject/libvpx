@@ -35,7 +35,7 @@ void fht8x8_ref(const int16_t *in, tran_low_t *out, int stride,
   vp10_fht8x8_c(in, out, stride, tx_type);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 typedef void (*IHbdHtFunc)(const tran_low_t *in, uint8_t *out, int stride,
                            int tx_type, int bd);
 typedef void (*HbdHtFunc)(const int16_t *input, int32_t *output, int stride,
@@ -47,7 +47,7 @@ void highbd_fht8x8_ref(const int16_t *in, int32_t *out, int stride,
                        int tx_type, int bd) {
   vp10_fwd_txfm2d_8x8_c(in, out, stride, tx_type, bd);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 class VP10Trans8x8HT
     : public libvpx_test::TransformTestBase,
@@ -84,7 +84,7 @@ TEST_P(VP10Trans8x8HT, CoeffCheck) {
   RunCoeffCheck();
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 class VP10HighbdTrans8x8HT : public ::testing::TestWithParam<HighbdHt8x8Param> {
  public:
   virtual ~VP10HighbdTrans8x8HT() {}
@@ -154,7 +154,7 @@ void VP10HighbdTrans8x8HT::RunBitexactCheck() {
 TEST_P(VP10HighbdTrans8x8HT, HighbdCoeffCheck) {
   RunBitexactCheck();
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 using std::tr1::make_tuple;
 
@@ -198,7 +198,7 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::ValuesIn(kArrayHt8x8Param_sse2));
 #endif  // HAVE_SSE2
 
-#if HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
+#if HAVE_SSE4_1 && CONFIG_VPX_HIGHBITDEPTH
 const HighbdHt8x8Param kArrayHBDHt8x8Param_sse4_1[] = {
     make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 0, 10),
     make_tuple(&vp10_fwd_txfm2d_8x8_sse4_1, 0, 12),
@@ -224,6 +224,6 @@ const HighbdHt8x8Param kArrayHBDHt8x8Param_sse4_1[] = {
 INSTANTIATE_TEST_CASE_P(
     SSE4_1, VP10HighbdTrans8x8HT,
     ::testing::ValuesIn(kArrayHBDHt8x8Param_sse4_1));
-#endif  // HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
+#endif  // HAVE_SSE4_1 && CONFIG_VPX_HIGHBITDEPTH
 
 }  // namespace

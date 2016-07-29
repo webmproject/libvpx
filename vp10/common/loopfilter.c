@@ -407,7 +407,7 @@ static void filter_selectively_vert_row2(int subsampling_factor,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static void highbd_filter_selectively_vert_row2(int subsampling_factor,
                                                 uint16_t *s, int pitch,
                                                 unsigned int mask_16x16_l,
@@ -505,7 +505,7 @@ static void highbd_filter_selectively_vert_row2(int subsampling_factor,
     mask_4x4_int_1 >>= 1;
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 static void filter_selectively_horiz(uint8_t *s, int pitch,
                                      unsigned int mask_16x16,
@@ -603,7 +603,7 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static void highbd_filter_selectively_horiz(uint16_t *s, int pitch,
                                             unsigned int mask_16x16,
                                             unsigned int mask_8x8,
@@ -707,7 +707,7 @@ static void highbd_filter_selectively_horiz(uint16_t *s, int pitch,
     mask_4x4_int >>= count;
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 // This function ors into the current lfm structure, where to do loop
 // filters for the specific mi we are looking at. It uses information
@@ -1178,7 +1178,7 @@ static void filter_selectively_vert(uint8_t *s, int pitch,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static void highbd_filter_selectively_vert(uint16_t *s, int pitch,
                                            unsigned int mask_16x16,
                                            unsigned int mask_8x8,
@@ -1215,7 +1215,7 @@ static void highbd_filter_selectively_vert(uint16_t *s, int pitch,
     mask_4x4_int >>= 1;
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 void vp10_filter_block_plane_non420(VP10_COMMON *cm,
                                     struct macroblockd_plane *plane,
@@ -1363,7 +1363,7 @@ void vp10_filter_block_plane_non420(VP10_COMMON *cm,
 
     // Disable filtering on the leftmost column
     border_mask = ~(mi_col == 0);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     if (cm->use_highbitdepth) {
       highbd_filter_selectively_vert(
           CONVERT_TO_SHORTPTR(dst->buf),
@@ -1389,7 +1389,7 @@ void vp10_filter_block_plane_non420(VP10_COMMON *cm,
                             mask_4x4_c & border_mask,
                             mask_4x4_int[r],
                             &cm->lf_info, &lfl[r][0]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
     dst->buf += MI_SIZE * dst->stride;
     mib += row_step * cm->mi_stride;
   }
@@ -1413,7 +1413,7 @@ void vp10_filter_block_plane_non420(VP10_COMMON *cm,
       mask_8x8_r = mask_8x8[r];
       mask_4x4_r = mask_4x4[r];
     }
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     if (cm->use_highbitdepth) {
       highbd_filter_selectively_horiz(
           CONVERT_TO_SHORTPTR(dst->buf),
@@ -1439,7 +1439,7 @@ void vp10_filter_block_plane_non420(VP10_COMMON *cm,
                              mask_4x4_r,
                              mask_4x4_int_r,
                              &cm->lf_info, &lfl[r][0]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
     dst->buf += MI_SIZE * dst->stride;
   }
 }
@@ -1466,7 +1466,7 @@ void vp10_filter_block_plane_ss00(VP10_COMMON *const cm,
     unsigned int mask_4x4_int_l = mask_4x4_int & 0xffff;
 
 // Disable filtering on the leftmost column.
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     if (cm->use_highbitdepth) {
       highbd_filter_selectively_vert_row2(
           plane->subsampling_x, CONVERT_TO_SHORTPTR(dst->buf), dst->stride,
@@ -1483,7 +1483,7 @@ void vp10_filter_block_plane_ss00(VP10_COMMON *const cm,
         plane->subsampling_x, dst->buf, dst->stride, mask_16x16_l, mask_8x8_l,
         mask_4x4_l, mask_4x4_int_l, &cm->lf_info,
         &lfm->lfl_y[r][0]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
     dst->buf += 2 * MI_SIZE * dst->stride;
     mask_16x16 >>= 2 * MI_SIZE;
     mask_8x8 >>= 2 * MI_SIZE;
@@ -1513,7 +1513,7 @@ void vp10_filter_block_plane_ss00(VP10_COMMON *const cm,
       mask_4x4_r = mask_4x4 & 0xff;
     }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     if (cm->use_highbitdepth) {
       highbd_filter_selectively_horiz(
           CONVERT_TO_SHORTPTR(dst->buf), dst->stride, mask_16x16_r, mask_8x8_r,
@@ -1529,7 +1529,7 @@ void vp10_filter_block_plane_ss00(VP10_COMMON *const cm,
     filter_selectively_horiz(dst->buf, dst->stride, mask_16x16_r, mask_8x8_r,
                              mask_4x4_r, mask_4x4_int & 0xff, &cm->lf_info,
                              &lfm->lfl_y[r][0]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
     dst->buf += MI_SIZE * dst->stride;
     mask_16x16 >>= MI_SIZE;
@@ -1569,7 +1569,7 @@ void vp10_filter_block_plane_ss11(VP10_COMMON *const cm,
       unsigned int mask_4x4_int_l = mask_4x4_int & 0xff;
 
 // Disable filtering on the leftmost column.
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       if (cm->use_highbitdepth) {
         highbd_filter_selectively_vert_row2(
             plane->subsampling_x, CONVERT_TO_SHORTPTR(dst->buf), dst->stride,
@@ -1586,7 +1586,7 @@ void vp10_filter_block_plane_ss11(VP10_COMMON *const cm,
           plane->subsampling_x, dst->buf, dst->stride,
           mask_16x16_l, mask_8x8_l, mask_4x4_l, mask_4x4_int_l, &cm->lf_info,
           &lfm->lfl_uv[r >> 1][0]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
       dst->buf += 2 * MI_SIZE * dst->stride;
       mask_16x16 >>= MI_SIZE;
@@ -1621,7 +1621,7 @@ void vp10_filter_block_plane_ss11(VP10_COMMON *const cm,
       mask_4x4_r = mask_4x4 & 0xf;
     }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     if (cm->use_highbitdepth) {
       highbd_filter_selectively_horiz(CONVERT_TO_SHORTPTR(dst->buf),
                                       dst->stride, mask_16x16_r, mask_8x8_r,
@@ -1637,7 +1637,7 @@ void vp10_filter_block_plane_ss11(VP10_COMMON *const cm,
     filter_selectively_horiz(dst->buf, dst->stride, mask_16x16_r, mask_8x8_r,
                              mask_4x4_r, mask_4x4_int_r, &cm->lf_info,
                              &lfm->lfl_uv[r >> 1][0]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
     dst->buf += MI_SIZE * dst->stride;
     mask_16x16 >>= MI_SIZE / 2;

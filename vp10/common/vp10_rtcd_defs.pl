@@ -43,7 +43,7 @@ specialize qw/vp10_convolve_horiz ssse3/;
 add_proto qw/void vp10_convolve_vert/, "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int w, int h, const InterpFilterParams fp, const int subpel_x_q4, int x_step_q4, int avg";
 specialize qw/vp10_convolve_vert ssse3/;
 
-if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+if (vpx_config("CONFIG_VPX_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vp10_highbd_convolve_horiz/, "const uint16_t *src, int src_stride, uint16_t *dst, int dst_stride, int w, int h, const InterpFilterParams fp, const int subpel_x_q4, int x_step_q4, int avg, int bd";
   specialize qw/vp10_highbd_convolve_horiz sse4_1/;
   add_proto qw/void vp10_highbd_convolve_vert/, "const uint16_t *src, int src_stride, uint16_t *dst, int dst_stride, int w, int h, const InterpFilterParams fp, const int subpel_x_q4, int x_step_q4, int avg, int bd";
@@ -53,7 +53,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 #
 # dct
 #
-if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+if (vpx_config("CONFIG_VPX_HIGHBITDEPTH") eq "yes") {
   # Note as optimized versions of these functions are added we need to add a check to ensure
   # that when CONFIG_EMULATE_HARDWARE is on, it defaults to the C versions only.
   if (vpx_config("CONFIG_EMULATE_HARDWARE") eq "yes") {
@@ -299,7 +299,7 @@ if (vpx_config("CONFIG_NEW_QUANT") eq "yes") {
 }
 
 # High bitdepth functions
-if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+if (vpx_config("CONFIG_VPX_HIGHBITDEPTH") eq "yes") {
   #
   # Sub Pixel Filters
   #
@@ -355,7 +355,7 @@ if (vpx_config("CONFIG_VP10_ENCODER") eq "yes") {
 
 # ENCODEMB INVOKE
 
-if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+if (vpx_config("CONFIG_VPX_HIGHBITDEPTH") eq "yes") {
 # the transform coefficients are held in 32-bit
 # values, so the assembler code for  vp10_block_error can no longer be used.
   add_proto qw/int64_t vp10_block_error/, "const tran_low_t *coeff, const tran_low_t *dqcoeff, intptr_t block_size, int64_t *ssz";
@@ -388,7 +388,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
 # fdct functions
 
-if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+if (vpx_config("CONFIG_VPX_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vp10_fht4x4/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
   specialize qw/vp10_fht4x4 sse2/;
 
@@ -442,7 +442,7 @@ add_proto qw/void vp10_fwd_idtx/, "const int16_t *src_diff, tran_low_t *coeff, i
   specialize qw/vp10_fwd_idtx/;
 
 # Inverse transform
-if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+if (vpx_config("CONFIG_VPX_HIGHBITDEPTH") eq "yes") {
   # Note as optimized versions of these functions are added we need to add a check to ensure
   # that when CONFIG_EMULATE_HARDWARE is on, it defaults to the C versions only.
   add_proto qw/void vp10_idct4x4_1_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
@@ -621,9 +621,9 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     add_proto qw/void vp10_iwht4x4_16_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
     specialize qw/vp10_iwht4x4_16_add/;
   }  # CONFIG_EMULATE_HARDWARE
-}  # CONFIG_VP9_HIGHBITDEPTH
+}  # CONFIG_VPX_HIGHBITDEPTH
 
-if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+if (vpx_config("CONFIG_VPX_HIGHBITDEPTH") eq "yes") {
   #fwd txfm
   add_proto qw/void vp10_fwd_txfm2d_4x4/, "const int16_t *input, int32_t *output, int stride, int tx_type, int bd";
   specialize qw/vp10_fwd_txfm2d_4x4 sse4_1/;
@@ -666,7 +666,7 @@ specialize qw/vp10_full_range_search/;
 add_proto qw/void vp10_temporal_filter_apply/, "uint8_t *frame1, unsigned int stride, uint8_t *frame2, unsigned int block_width, unsigned int block_height, int strength, int filter_weight, unsigned int *accumulator, uint16_t *count";
 specialize qw/vp10_temporal_filter_apply sse2 msa/;
 
-if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+if (vpx_config("CONFIG_VPX_HIGHBITDEPTH") eq "yes") {
 
   # ENCODEMB INVOKE
   if (vpx_config("CONFIG_NEW_QUANT") eq "yes") {

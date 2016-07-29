@@ -36,7 +36,7 @@ static int64_t try_restoration_frame(const YV12_BUFFER_CONFIG *sd,
   int64_t filt_err;
   vp10_loop_restoration_frame(cm->frame_to_show, cm,
                               rsi, 1, partial_frame);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (cm->use_highbitdepth) {
     filt_err = vpx_highbd_get_y_sse(sd, cm->frame_to_show);
   } else {
@@ -44,7 +44,7 @@ static int64_t try_restoration_frame(const YV12_BUFFER_CONFIG *sd,
   }
 #else
   filt_err = vpx_get_y_sse(sd, cm->frame_to_show);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
   // Re-instate the unfiltered frame
   vpx_yv12_copy_y(&cpi->last_frame_db, cm->frame_to_show);
@@ -237,7 +237,7 @@ static void compute_stats(uint8_t *dgd, uint8_t *src, int width, int height,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static double find_average_highbd(uint16_t *src,
                                   int width, int height, int stride) {
   uint64_t sum = 0;
@@ -283,7 +283,7 @@ static void compute_stats_highbd(
     }
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 // Solves Ax = b, where x and b are column vectors
 static int linsolve(int n, double *A, int stride, double *b, double *x) {
@@ -542,12 +542,12 @@ static int search_wiener_filter(const YV12_BUFFER_CONFIG *src,
   cost_norestore = RDCOST_DBL(x->rdmult, x->rddiv,
                               (bits << (VP9_PROB_COST_SHIFT - 4)), err);
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (cm->use_highbitdepth)
     compute_stats_highbd(dgd->y_buffer, src->y_buffer, width, height,
                          dgd_stride, src_stride, M, H);
   else
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
     compute_stats(dgd->y_buffer, src->y_buffer, width, height,
                   dgd_stride, src_stride, M, H);
 
@@ -612,7 +612,7 @@ void vp10_pick_filter_restoration(
     const int q = vp10_ac_quant(cm->base_qindex, 0, cm->bit_depth);
     // These values were determined by linear fitting the result of the
     // searched level, filt_guess = q * 0.316206 + 3.87252
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     int filt_guess;
     switch (cm->bit_depth) {
       case VPX_BITS_8:
@@ -631,7 +631,7 @@ void vp10_pick_filter_restoration(
     }
 #else
     int filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 1015158, 18);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
     if (cm->frame_type == KEY_FRAME)
       filt_guess -= 4;
     lf->filter_level = clamp(filt_guess, min_filter_level, max_filter_level);

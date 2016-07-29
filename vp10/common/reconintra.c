@@ -14,9 +14,9 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_ports/system_state.h"
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 #include "vpx_dsp/vpx_dsp_common.h"
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 #include "vpx_ports/vpx_once.h"
@@ -336,13 +336,13 @@ typedef void (*intra_pred_fn)(uint8_t *dst, ptrdiff_t stride,
 static intra_pred_fn pred[INTRA_MODES][TX_SIZES];
 static intra_pred_fn dc_pred[2][2][TX_SIZES];
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 typedef void (*intra_high_pred_fn)(uint16_t *dst, ptrdiff_t stride,
                                    const uint16_t *above, const uint16_t *left,
                                    int bd);
 static intra_high_pred_fn pred_high[INTRA_MODES][4];
 static intra_high_pred_fn dc_pred_high[2][2][4];
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 static void vp10_init_intra_predictors_internal(void) {
 #define INIT_NO_4X4(p, type) \
@@ -369,7 +369,7 @@ static void vp10_init_intra_predictors_internal(void) {
   INIT_ALL_SIZES(dc_pred[1][0], dc_left);
   INIT_ALL_SIZES(dc_pred[1][1], dc);
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   INIT_ALL_SIZES(pred_high[V_PRED], highbd_v);
   INIT_ALL_SIZES(pred_high[H_PRED], highbd_h);
   INIT_ALL_SIZES(pred_high[D207_PRED], highbd_d207e);
@@ -384,7 +384,7 @@ static void vp10_init_intra_predictors_internal(void) {
   INIT_ALL_SIZES(dc_pred_high[0][1], highbd_dc_top);
   INIT_ALL_SIZES(dc_pred_high[1][0], highbd_dc_left);
   INIT_ALL_SIZES(dc_pred_high[1][1], highbd_dc);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 #undef intra_pred_allsizes
 }
@@ -873,7 +873,7 @@ static void (*filter_intra_predictors[EXT_INTRA_MODES])(uint8_t *dst,
         tm_filter_predictor,
 };
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static int highbd_intra_subpel_interp(int base, int shift, const uint16_t *ref,
                                       int ref_start_idx, int ref_end_idx,
                                       INTRA_FILTER filter_type) {
@@ -1168,10 +1168,10 @@ static void (*highbd_filter_intra_predictors[EXT_INTRA_MODES])(uint16_t *dst,
         highbd_d153_filter_predictor, highbd_d207_filter_predictor,
         highbd_d63_filter_predictor, highbd_tm_filter_predictor,
 };
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 #endif  // CONFIG_EXT_INTRA
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static void build_intra_predictors_high(const MACROBLOCKD *xd,
                                         const uint8_t *ref8,
                                         int ref_stride,
@@ -1347,7 +1347,7 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
                              xd->bd);
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
                                    int ref_stride, uint8_t *dst, int dst_stride,
@@ -1568,17 +1568,17 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
     const int stride = 4 * (1 << bwl_in);
     int r, c;
     uint8_t *map = NULL;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     uint16_t *palette = xd->mi[0]->mbmi.palette_mode_info.palette_colors +
         plane * PALETTE_MAX_SIZE;
 #else
     uint8_t *palette = xd->mi[0]->mbmi.palette_mode_info.palette_colors +
         plane * PALETTE_MAX_SIZE;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
     map = xd->plane[plane != 0].color_index_map;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       uint16_t *dst16 = CONVERT_TO_SHORTPTR(dst);
       for (r = 0; r < bs; ++r)
@@ -1595,11 +1595,11 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
     for (r = 0; r < bs; ++r)
       for (c = 0; c < bs; ++c)
         dst[r * dst_stride + c] = palette[map[(r + y) * stride + c + x]];
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
     return;
   }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     build_intra_predictors_high(xd, ref, ref_stride, dst, dst_stride, mode,
                                 tx_size,

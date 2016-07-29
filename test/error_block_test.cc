@@ -27,7 +27,7 @@
 using libvpx_test::ACMRandom;
 
 namespace {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 const int kNumIterations = 1000;
 
 typedef int64_t (*ErrorBlockFunc)(const tran_low_t *coeff,
@@ -171,5 +171,5 @@ INSTANTIATE_TEST_CASE_P(
                    &vp10_highbd_block_error_c, VPX_BITS_8)));
 #endif  // HAVE_SSE2
 
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 }  // namespace

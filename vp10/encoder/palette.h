@@ -23,10 +23,10 @@ void vp10_calc_indices(const float *data, const float *centroids,
 int vp10_k_means(const float *data, float *centroids, uint8_t *indices,
                  uint8_t *pre_indices, int n, int k, int dim, int max_itr);
 int vp10_count_colors(const uint8_t *src, int stride, int rows, int cols);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 int vp10_count_colors_highbd(const uint8_t *src8, int stride, int rows,
                              int cols, int bit_depth);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 #ifdef __cplusplus
 }  // extern "C"

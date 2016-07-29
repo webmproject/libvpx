@@ -135,7 +135,7 @@ TEST_P(VP10HighbdInvHTNxN, InvTransResultCheck) {
 
 using std::tr1::make_tuple;
 
-#if HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
+#if HAVE_SSE4_1 && CONFIG_VPX_HIGHBITDEPTH
 #define PARAM_LIST_4X4 &vp10_fwd_txfm2d_4x4_c, \
              &vp10_inv_txfm2d_add_4x4_sse4_1,  \
              &vp10_inv_txfm2d_add_4x4_c, 16
@@ -217,6 +217,6 @@ const IHbdHtParam kArrayIhtParam[] = {
 INSTANTIATE_TEST_CASE_P(
     SSE4_1, VP10HighbdInvHTNxN,
     ::testing::ValuesIn(kArrayIhtParam));
-#endif  // HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
+#endif  // HAVE_SSE4_1 && CONFIG_VPX_HIGHBITDEPTH
 
 }  // namespace

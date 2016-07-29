@@ -268,7 +268,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
       ERROR("rc_twopass_stats_in missing EOS stats packet");
   }
 
-#if !CONFIG_VP9_HIGHBITDEPTH
+#if !CONFIG_VPX_HIGHBITDEPTH
   if (cfg->g_profile > (unsigned int)PROFILE_1) {
     ERROR("Profile > 1 not supported in this build configuration");
   }
@@ -769,7 +769,7 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
 
     if (res == VPX_CODEC_OK) {
       set_encoder_config(&priv->oxcf, &priv->cfg, &priv->extra_cfg);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       priv->oxcf.use_highbitdepth =
           (ctx->init_flags & VPX_CODEC_USE_HIGHBITDEPTH) ? 1 : 0;
 #endif
@@ -1436,7 +1436,7 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
 CODEC_INTERFACE(vpx_codec_vp10_cx) = {
   "WebM Project VP10 Encoder" VERSION_STRING,
   VPX_CODEC_INTERNAL_ABI_VERSION,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   VPX_CODEC_CAP_HIGHBITDEPTH |
 #endif
   VPX_CODEC_CAP_ENCODER | VPX_CODEC_CAP_PSNR,  // vpx_codec_caps_t

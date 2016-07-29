@@ -1264,7 +1264,7 @@ void vpx_idct32x32_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vpx_highbd_iwht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
                                  int stride, int bd) {
   /* 4-point reversible, orthonormal inverse Walsh-Hadamard in 3.5 adds,
@@ -2515,4 +2515,4 @@ void vpx_highbd_idct32x32_1_add_c(const tran_low_t *input, uint8_t *dest8,
     dest += stride;
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH

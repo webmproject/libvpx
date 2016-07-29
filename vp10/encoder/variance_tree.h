@@ -50,9 +50,9 @@ typedef struct VAR_TREE {
   int ref_stride;
   int width;
   int height;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   int highbd;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 } VAR_TREE;
 
 void vp10_setup_var_tree(struct VP10Common *cm, struct ThreadData *td);

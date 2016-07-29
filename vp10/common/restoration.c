@@ -76,13 +76,13 @@ typedef void (*restore_func_type)(
     int stride, RestorationInternal *rst,
     uint8_t *tmpdata8, int tmpstride);
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 typedef void (*restore_func_highbd_type)(
     uint8_t *data8, int width, int height,
     int stride, RestorationInternal *rst,
     uint8_t *tmpdata8, int tmpstride,
     int bit_depth);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 static INLINE RestorationParamsType vp10_restoration_level_to_params(
     int index, int kf) {
@@ -270,7 +270,7 @@ static void loop_wiener_filter(uint8_t *data, int width, int height,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static void loop_bilateral_filter_highbd(
     uint8_t *data8, int width, int height,
     int stride, RestorationInternal *rst,
@@ -374,7 +374,7 @@ static void loop_wiener_filter_highbd(uint8_t *data8, int width, int height,
     tmpdata_p += tmpstride;
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 void vp10_loop_restoration_rows(YV12_BUFFER_CONFIG *frame,
                                 VP10_COMMON *cm,
@@ -391,11 +391,11 @@ void vp10_loop_restoration_rows(YV12_BUFFER_CONFIG *frame,
   restore_func_type restore_func =
       cm->rst_internal.restoration_type == RESTORE_BILATERAL ?
       loop_bilateral_filter : loop_wiener_filter;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   restore_func_highbd_type restore_func_highbd =
       cm->rst_internal.restoration_type == RESTORE_BILATERAL ?
       loop_bilateral_filter_highbd : loop_wiener_filter_highbd;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
   YV12_BUFFER_CONFIG *tmp_buf;
 
   yend = VPXMIN(yend, cm->height);
@@ -403,7 +403,7 @@ void vp10_loop_restoration_rows(YV12_BUFFER_CONFIG *frame,
 
   if (vpx_realloc_frame_buffer(&cm->tmp_loop_buf, cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
                                VPX_DEC_BORDER_IN_PIXELS, cm->byte_alignment,
@@ -413,7 +413,7 @@ void vp10_loop_restoration_rows(YV12_BUFFER_CONFIG *frame,
 
   tmp_buf = &cm->tmp_loop_buf;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (cm->use_highbitdepth)
     restore_func_highbd(
         frame->y_buffer + ystart * ystride,
@@ -421,14 +421,14 @@ void vp10_loop_restoration_rows(YV12_BUFFER_CONFIG *frame,
         tmp_buf->y_buffer + ystart * tmp_buf->y_stride,
         tmp_buf->y_stride, cm->bit_depth);
   else
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
     restore_func(
         frame->y_buffer + ystart * ystride,
         ywidth, yend - ystart, ystride, &cm->rst_internal,
         tmp_buf->y_buffer + ystart * tmp_buf->y_stride,
         tmp_buf->y_stride);
   if (!y_only) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     if (cm->use_highbitdepth) {
       restore_func_highbd(
           frame->u_buffer + uvstart * uvstride,
@@ -441,7 +441,7 @@ void vp10_loop_restoration_rows(YV12_BUFFER_CONFIG *frame,
           tmp_buf->v_buffer + uvstart * tmp_buf->uv_stride,
           tmp_buf->uv_stride, cm->bit_depth);
     } else {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
       restore_func(
           frame->u_buffer + uvstart * uvstride,
           uvwidth, uvend - uvstart, uvstride, &cm->rst_internal,
@@ -452,9 +452,9 @@ void vp10_loop_restoration_rows(YV12_BUFFER_CONFIG *frame,
           uvwidth, uvend - uvstart, uvstride, &cm->rst_internal,
           tmp_buf->v_buffer + uvstart * tmp_buf->uv_stride,
           tmp_buf->uv_stride);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
   }
 }
 

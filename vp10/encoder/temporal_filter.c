@@ -70,7 +70,7 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
     mv_precision_uv = MV_PRECISION_Q3;
   }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     vp10_highbd_build_inter_predictor(y_mb_ptr, stride,
                                      &pred[0], 16,
@@ -100,7 +100,7 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                                      mv_precision_uv, x, y, xd->bd);
     return;
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
   vp10_build_inter_predictor(y_mb_ptr, stride,
                              &pred[0], 16,
                              &mv,
@@ -201,7 +201,7 @@ void vp10_temporal_filter_apply_c(uint8_t *frame1,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_temporal_filter_apply_c(uint8_t *frame1_8,
                                          unsigned int stride,
                                          uint8_t *frame2_8,
@@ -270,7 +270,7 @@ void vp10_highbd_temporal_filter_apply_c(uint8_t *frame1_8,
     byte += stride - block_width;
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 static int temporal_filter_find_matching_mb_c(VP10_COMP *cpi,
                                               uint8_t *arf_frame_buf,
@@ -355,7 +355,7 @@ static void temporal_filter_iterate_c(VP10_COMP *cpi,
   MACROBLOCKD *mbd = &cpi->td.mb.e_mbd;
   YV12_BUFFER_CONFIG *f = frames[alt_ref_index];
   uint8_t *dst1, *dst2;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   DECLARE_ALIGNED(16, uint16_t,  predictor16[16 * 16 * 3]);
   DECLARE_ALIGNED(16, uint8_t,  predictor8[16 * 16 * 3]);
   uint8_t *predictor;
@@ -368,7 +368,7 @@ static void temporal_filter_iterate_c(VP10_COMP *cpi,
   // Save input state
   uint8_t* input_buffer[MAX_MB_PLANE];
   int i;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (mbd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     predictor = CONVERT_TO_BYTEPTR(predictor16);
   } else {
@@ -445,7 +445,7 @@ static void temporal_filter_iterate_c(VP10_COMP *cpi,
               predictor, scale,
               mb_col * 16, mb_row * 16);
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
           if (mbd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
             int adj_strength = strength + 2 * (mbd->bd - 8);
             // Apply the filter (YUV)
@@ -498,11 +498,11 @@ static void temporal_filter_iterate_c(VP10_COMP *cpi,
                                     mb_uv_width, mb_uv_height, strength,
                                     filter_weight, accumulator + 512,
                                     count + 512);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
         }
       }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
       if (mbd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         uint16_t *dst1_16;
         uint16_t *dst2_16;
@@ -643,7 +643,7 @@ static void temporal_filter_iterate_c(VP10_COMP *cpi,
         }
         byte += stride - mb_uv_width;
       }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
       mb_y_offset += 16;
       mb_uv_offset += mb_uv_width;
     }
@@ -755,7 +755,7 @@ void vp10_temporal_filter(VP10_COMP *cpi, int distance) {
     // Setup scaling factors. Scaling on each of the arnr frames is not
     // supported.
     // ARF is produced at the native frame size and resized when coded.
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
     vp10_setup_scale_factors_for_frame(&sf,
                                       frames[0]->y_crop_width,
                                       frames[0]->y_crop_height,
@@ -768,7 +768,7 @@ void vp10_temporal_filter(VP10_COMP *cpi, int distance) {
                                       frames[0]->y_crop_height,
                                       frames[0]->y_crop_width,
                                       frames[0]->y_crop_height);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
   }
 
   temporal_filter_iterate_c(cpi, frames, frames_to_blur,

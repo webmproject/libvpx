@@ -248,7 +248,7 @@ typedef struct VP10EncoderConfig {
 
   vpx_tune_metric tuning;
   vpx_tune_content content;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   int use_highbitdepth;
 #endif
   vpx_color_space_t color_space;

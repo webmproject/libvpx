@@ -196,7 +196,7 @@ TEST(VP10ConvolveTest, vp10_convolve_avg) {
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 TEST(VP10ConvolveTest, vp10_highbd_convolve) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
 #if CONFIG_DUAL_FILTER
@@ -329,7 +329,7 @@ TEST(VP10ConvolveTest, vp10_highbd_convolve_avg) {
     }
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 #define CONVOLVE_SPEED_TEST 0
 #if CONVOLVE_SPEED_TEST

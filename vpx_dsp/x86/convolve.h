@@ -125,7 +125,7 @@ void vpx_convolve8_##avg##opt(const uint8_t *src, ptrdiff_t src_stride, \
   } \
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 
 typedef void highbd_filter8_1dfunction (
   const uint16_t *src_ptr,
@@ -283,6 +283,6 @@ void vpx_highbd_convolve8_##avg##opt(const uint8_t *src, ptrdiff_t src_stride, \
                                   h, bd); \
   } \
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 #endif  // VPX_DSP_X86_CONVOLVE_H_

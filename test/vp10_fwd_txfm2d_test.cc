@@ -26,7 +26,7 @@ using libvpx_test::Fwd_Txfm2d_Func;
 using libvpx_test::TYPE_TXFM;
 
 namespace {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 // tx_type_, tx_size_, max_error_, max_avg_error_
 typedef std::tr1::tuple<TX_TYPE, TX_SIZE, double, double> VP10FwdTxfm2dParam;
 
@@ -177,5 +177,5 @@ INSTANTIATE_TEST_CASE_P(
     C, VP10FwdTxfm2d,
     ::testing::ValuesIn(vp10_fwd_txfm2d_param_c));
 
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 }  // namespace

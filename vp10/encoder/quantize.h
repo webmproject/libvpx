@@ -141,7 +141,7 @@ void quantize_dc_32x32_fp_nuq(const tran_low_t *coeff_ptr,
                               uint16_t *eob_ptr);
 #endif  // CONFIG_NEW_QUANT
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_quantize_fp_facade(
     const tran_low_t *coeff_ptr, intptr_t n_coeffs, const MACROBLOCK_PLANE *p,
     tran_low_t *qcoeff_ptr, const MACROBLOCKD_PLANE *pd,
@@ -213,7 +213,7 @@ void highbd_quantize_dc_32x32_fp_nuq(const tran_low_t *coeff_ptr,
                                      uint16_t *eob_ptr);
 
 #endif  // CONFIG_NEW_QUANT
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -45,14 +45,14 @@ static INLINE int64_t hsum_epi64_si64(__m128i v_q) {
 #endif
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static INLINE int64_t hsum_epi32_si64(__m128i v_d) {
   const __m128i v_sign_d =  _mm_cmplt_epi32(v_d, _mm_setzero_si128());
   const __m128i v_0_q = _mm_unpacklo_epi32(v_d, v_sign_d);
   const __m128i v_1_q = _mm_unpackhi_epi32(v_d, v_sign_d);
   return hsum_epi64_si64(_mm_add_epi64(v_0_q, v_1_q));
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 static INLINE uint32_t calc_masked_variance(__m128i v_sum_d, __m128i v_sse_q,
                                             uint32_t* sse,
@@ -326,7 +326,7 @@ unsigned int vpx_masked_variance4x##H##_ssse3(                            \
 MASKED_VAR4XH(4)
 MASKED_VAR4XH(8)
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 
 // Main calculation for n*8 wide blocks
 static INLINE void highbd_masked_variance64_ssse3(
@@ -1379,7 +1379,7 @@ MASK_SUBPIX_VAR_LARGE(128, 64)
 MASK_SUBPIX_VAR_LARGE(128, 128)
 #endif  // CONFIG_EXT_PARTITION
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 typedef uint32_t (*highbd_calc_masked_var_t)(__m128i v_sum_d, __m128i v_sse_q,
                                              uint32_t *sse,
                                              const int w, const int h);

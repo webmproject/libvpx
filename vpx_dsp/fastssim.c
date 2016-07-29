@@ -24,7 +24,7 @@ typedef struct fs_ctx fs_ctx;
 
 #define SSIM_C1 (255 * 255 * 0.01 * 0.01)
 #define SSIM_C2 (255 * 255 * 0.03 * 0.03)
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 #define SSIM_C1_10 (1023 * 1023 * 0.01 * 0.01)
 #define SSIM_C1_12 (4095 * 4095 * 0.01 * 0.01)
 #define SSIM_C2_10 (1023 * 1023 * 0.03 * 0.03)
@@ -199,7 +199,7 @@ static void fs_apply_luminance(fs_ctx *_ctx, int _l, int bit_depth) {
   int i;
   int j;
   double ssim_c1 = SSIM_C1;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (bit_depth == 10)
     ssim_c1 = SSIM_C1_10;
   if (bit_depth == 12)
@@ -339,7 +339,7 @@ static void fs_calc_structure(fs_ctx *_ctx, int _l, int bit_depth) {
   int i;
   int j;
   double ssim_c2 = SSIM_C2;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   if (bit_depth == 10)
     ssim_c2 = SSIM_C2_10;
   if (bit_depth == 12)

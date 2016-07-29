@@ -74,7 +74,7 @@ VP10_COMMON_SRCS-yes += common/vp10_inv_txfm2d.c
 VP10_COMMON_SRCS-yes += common/vp10_inv_txfm2d_cfg.h
 VP10_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/vp10_convolve_ssse3.c
 VP10_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/vp10_convolve_filters_ssse3.c
-ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
+ifeq ($(CONFIG_VPX_HIGHBITDEPTH),yes)
 VP10_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/vp10_highbd_convolve_sse4.c
 VP10_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/vp10_highbd_convolve_filters_sse4.c
 endif
@@ -90,7 +90,7 @@ VP10_COMMON_SRCS-yes += common/warped_motion.h
 VP10_COMMON_SRCS-yes += common/warped_motion.c
 endif
 
-ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
+ifneq ($(CONFIG_VPX_HIGHBITDEPTH),yes)
 VP10_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/itrans4_dspr2.c
 VP10_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/itrans8_dspr2.c
 VP10_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/itrans16_dspr2.c
@@ -109,11 +109,11 @@ VP10_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/vp10_txfm1d_sse4.h
 VP10_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/vp10_fwd_txfm1d_sse4.c
 VP10_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/vp10_fwd_txfm2d_sse4.c
 
-ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
+ifeq ($(CONFIG_VPX_HIGHBITDEPTH),yes)
 VP10_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/highbd_txfm_utility_sse4.h
 endif
 
-ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
+ifneq ($(CONFIG_VPX_HIGHBITDEPTH),yes)
 VP10_COMMON_SRCS-$(HAVE_NEON) += common/arm/neon/iht4x4_add_neon.c
 VP10_COMMON_SRCS-$(HAVE_NEON) += common/arm/neon/iht8x8_add_neon.c
 endif

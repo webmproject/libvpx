@@ -158,7 +158,7 @@ OBMCVARWXH(4, 4)
 // High bit-depth
 ////////////////////////////////////////////////////////////////////////////////
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static INLINE void hbd_obmc_variance_w4(const uint8_t *pre8,
                                         const int pre_stride,
                                         const int32_t *wsrc,
@@ -376,4 +376,4 @@ HBD_OBMCVARWXH(8, 8)
 HBD_OBMCVARWXH(8, 4)
 HBD_OBMCVARWXH(4, 8)
 HBD_OBMCVARWXH(4, 4)
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH

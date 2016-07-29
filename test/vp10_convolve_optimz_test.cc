@@ -24,7 +24,7 @@ using libvpx_test::ACMRandom;
 typedef void (*conv_filter_t)(const uint8_t*, int, uint8_t*, int,
                               int, int, const InterpFilterParams,
                               const int, int, int);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 typedef void (*hbd_conv_filter_t)(const uint16_t*, int, uint16_t*, int,
                                   int, int, const InterpFilterParams,
                                   const int, int, int, int);
@@ -36,7 +36,7 @@ typedef void (*hbd_conv_filter_t)(const uint16_t*, int, uint16_t*, int,
 typedef tuple<int, int> BlockDimension;
 typedef tuple<conv_filter_t, conv_filter_t, BlockDimension, INTERP_FILTER,
               int, int> ConvParams;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 // Test parameter list:
 //  <convolve_horiz_func, convolve_vert_func,
 //  <width, height>, filter_params, subpel_x_q4, avg, bit_dpeth>
@@ -242,7 +242,7 @@ INSTANTIATE_TEST_CASE_P(
          ::testing::ValuesIn(kAvg)));
 #endif  // HAVE_SSSE3 && CONFIG_EXT_INTERP
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 typedef ::testing::TestWithParam<HbdConvParams> TestWithHbdConvParams;
 class VP10HbdConvolveOptimzTest : public TestWithHbdConvParams {
  public:
@@ -403,5 +403,5 @@ INSTANTIATE_TEST_CASE_P(
          ::testing::ValuesIn(kAvg),
          ::testing::ValuesIn(kBitdepth)));
 #endif  // HAVE_SSE4_1 && CONFIG_EXT_INTERP
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 }  // namespace

@@ -193,7 +193,7 @@ void vpx_minmax_8x8_c(const uint8_t *src, int src_stride,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 unsigned int vpx_highbd_avg_8x8_c(const uint8_t *src, int stride) {
   int i, j;
   int sum = 0;
@@ -229,6 +229,6 @@ void vpx_highbd_minmax_8x8_c(const uint8_t *s8, int p, const uint8_t *d8,
     }
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 

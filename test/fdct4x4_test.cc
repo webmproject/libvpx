@@ -54,7 +54,7 @@ void fwht4x4_ref(const int16_t *in, tran_low_t *out, int stride,
   vp10_fwht4x4_c(in, out, stride);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void idct4x4_10(const tran_low_t *in, uint8_t *out, int stride) {
   vpx_highbd_idct4x4_16_add_c(in, out, stride, 10);
 }
@@ -88,7 +88,7 @@ void idct4x4_12_sse2(const tran_low_t *in, uint8_t *out, int stride) {
   vpx_highbd_idct4x4_16_add_sse2(in, out, stride, 12);
 }
 #endif  // HAVE_SSE2
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 
 class Trans4x4DCT
@@ -231,7 +231,7 @@ TEST_P(Trans4x4WHT, InvAccuracyCheck) {
 }
 using std::tr1::make_tuple;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
     C, Trans4x4DCT,
     ::testing::Values(
@@ -243,9 +243,9 @@ INSTANTIATE_TEST_CASE_P(
     C, Trans4x4DCT,
     ::testing::Values(
          make_tuple(&vpx_fdct4x4_c, &vpx_idct4x4_16_add_c, 0, VPX_BITS_8, 16)));
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
     C, Trans4x4HT,
     ::testing::Values(
@@ -269,9 +269,9 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp10_fht4x4_c, &vp10_iht4x4_16_add_c, 1, VPX_BITS_8, 16),
         make_tuple(&vp10_fht4x4_c, &vp10_iht4x4_16_add_c, 2, VPX_BITS_8, 16),
         make_tuple(&vp10_fht4x4_c, &vp10_iht4x4_16_add_c, 3, VPX_BITS_8, 16)));
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
     C, Trans4x4WHT,
     ::testing::Values(
@@ -283,17 +283,17 @@ INSTANTIATE_TEST_CASE_P(
     C, Trans4x4WHT,
     ::testing::Values(
         make_tuple(&vp10_fwht4x4_c, &vpx_iwht4x4_16_add_c, 0, VPX_BITS_8, 16)));
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
-#if HAVE_NEON_ASM && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#if HAVE_NEON_ASM && !CONFIG_VPX_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     NEON, Trans4x4DCT,
     ::testing::Values(
         make_tuple(&vpx_fdct4x4_c,
                    &vpx_idct4x4_16_add_neon, 0, VPX_BITS_8, 16)));
-#endif  // HAVE_NEON_ASM && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#endif  // HAVE_NEON_ASM && !CONFIG_VPX_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
-#if HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#if HAVE_NEON && !CONFIG_VPX_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     NEON, Trans4x4HT,
     ::testing::Values(
@@ -305,7 +305,7 @@ INSTANTIATE_TEST_CASE_P(
                    2, VPX_BITS_8, 16),
         make_tuple(&vp10_fht4x4_c, &vp10_iht4x4_16_add_neon,
                    3, VPX_BITS_8, 16)));
-#endif  // HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#endif  // HAVE_NEON && !CONFIG_VPX_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
 #if HAVE_SSE2 && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
@@ -317,7 +317,7 @@ INSTANTIATE_TEST_CASE_P(
                    0, VPX_BITS_8, 16)));
 #endif
 
-#if HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#if HAVE_SSE2 && !CONFIG_VPX_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans4x4DCT,
     ::testing::Values(
@@ -334,9 +334,9 @@ INSTANTIATE_TEST_CASE_P(
                    VPX_BITS_8, 16),
         make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 3,
                    VPX_BITS_8, 16)));
-#endif  // HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#endif  // HAVE_SSE2 && !CONFIG_VPX_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
-#if HAVE_SSE2 && CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#if HAVE_SSE2 && CONFIG_VPX_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans4x4DCT,
     ::testing::Values(
@@ -362,9 +362,9 @@ INSTANTIATE_TEST_CASE_P(
                    2, VPX_BITS_8, 16),
         make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_c,
                    3, VPX_BITS_8, 16)));
-#endif  // HAVE_SSE2 && CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#endif  // HAVE_SSE2 && CONFIG_VPX_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
-#if HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#if HAVE_MSA && !CONFIG_VPX_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     MSA, Trans4x4DCT,
     ::testing::Values(
@@ -381,5 +381,5 @@ INSTANTIATE_TEST_CASE_P(
                    VPX_BITS_8, 16),
         make_tuple(&vp10_fht4x4_msa, &vp10_iht4x4_16_add_msa, 3,
                    VPX_BITS_8, 16)));
-#endif  // HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#endif  // HAVE_MSA && !CONFIG_VPX_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 }  // namespace

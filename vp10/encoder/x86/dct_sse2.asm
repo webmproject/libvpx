@@ -62,7 +62,7 @@ cglobal fwht4x4, 3, 4, 8, input, output, stride
   psllw           m0,        2
   psllw           m1,        2
 
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   ; sign extension
   mova            m2,             m0
   mova            m3,             m1

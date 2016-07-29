@@ -147,7 +147,7 @@ void vpx_blend_a64_vmask_sse4_1(
                  mask, h, w);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 //////////////////////////////////////////////////////////////////////////////
 // Implementation - No sub-sampling
 //////////////////////////////////////////////////////////////////////////////
@@ -290,4 +290,4 @@ void vpx_highbd_blend_a64_vmask_sse4_1(
                                   mask, h, w);
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH

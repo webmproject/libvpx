@@ -17,7 +17,7 @@ void vp10_convolve(const uint8_t *src, int src_stride,
                    const int subpel_x, int xstep,
                    const int subpel_y, int ystep, int avg);
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_convolve(const uint8_t *src, int src_stride,
                    uint8_t *dst, int dst_stride,
                    int w, int h,
@@ -29,7 +29,7 @@ void vp10_highbd_convolve(const uint8_t *src, int src_stride,
                    const int subpel_x, int xstep,
                    const int subpel_y, int ystep,
                    int avg, int bd);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 #ifdef __cplusplus
 }  // extern "C"

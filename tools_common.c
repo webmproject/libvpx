@@ -271,7 +271,7 @@ double sse_to_psnr(double samples, double peak, double sse) {
 }
 
 // TODO(debargha): Consolidate the functions below into a separate file.
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static void highbd_img_upshift(vpx_image_t *dst, vpx_image_t *src,
                                int input_shift) {
   // Note the offset is 1 less than half.
@@ -484,4 +484,4 @@ void vpx_img_downshift(vpx_image_t *dst, vpx_image_t *src,
     lowbd_img_downshift(dst, src, down_shift);
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH

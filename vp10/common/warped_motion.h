@@ -67,7 +67,7 @@ void vp10_warp_plane(WarpedMotionParams *wm,
                      int p_width, int p_height, int p_stride,
                      int subsampling_col, int subsampling_row,
                      int x_scale, int y_scale);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 void vp10_highbd_warp_plane(WarpedMotionParams *wm,
                             uint8_t *ref,
                             int width, int height, int stride,
@@ -77,5 +77,5 @@ void vp10_highbd_warp_plane(WarpedMotionParams *wm,
                             int subsampling_col, int subsampling_row,
                             int x_scale, int y_scale,
                             int bd);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 #endif  // VP10_COMMON_WARPED_MOTION_H

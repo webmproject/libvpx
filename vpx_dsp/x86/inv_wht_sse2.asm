@@ -82,7 +82,7 @@ SECTION .text
 
 INIT_XMM sse2
 cglobal iwht4x4_16_add, 3, 3, 7, input, output, stride
-%if CONFIG_VP9_HIGHBITDEPTH
+%if CONFIG_VPX_HIGHBITDEPTH
   mova            m0,        [inputq +  0]
   packssdw        m0,        [inputq + 16]
   mova            m1,        [inputq + 32]

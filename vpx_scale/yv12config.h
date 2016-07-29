@@ -78,7 +78,7 @@ int vpx_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf);
 
 int vpx_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                            int width, int height, int ss_x, int ss_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                            int use_highbitdepth,
 #endif
                            int border, int byte_alignment);
@@ -92,7 +92,7 @@ int vpx_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
 // on failure.
 int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                              int width, int height, int ss_x, int ss_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
                              int use_highbitdepth,
 #endif
                              int border,

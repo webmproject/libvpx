@@ -225,7 +225,7 @@ static INLINE unsigned int masked_sad4xh_ssse3(const uint8_t *a_ptr,
   return (_mm_cvtsi128_si32(res) + 31) >> 6;
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static INLINE __m128i highbd_width4_load_2rows(const uint16_t *ptr,
                                                int stride) {
   __m128i temp1 = _mm_loadl_epi64((const __m128i*)ptr);
@@ -374,4 +374,4 @@ static INLINE unsigned int highbd_masked_sad4xh_ssse3(const uint8_t *a8_ptr,
   // sad = (sad + 31) >> 6;
   return (_mm_cvtsi128_si32(res) + 31) >> 6;
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH

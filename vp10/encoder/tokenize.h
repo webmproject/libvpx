@@ -22,7 +22,7 @@ extern "C" {
 
 #define EOSB_TOKEN 127     // Not signalled, encoder only
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
   typedef int32_t EXTRABIT;
 #else
   typedef int16_t EXTRABIT;
@@ -92,7 +92,7 @@ static INLINE int vp10_get_cost(int16_t token, EXTRABIT extrabits,
       + cat6_high_table[extrabits >> 9];
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_VPX_HIGHBITDEPTH
 static INLINE const int* vp10_get_high_cost_table(int bit_depth) {
   return bit_depth == 8 ? vp10_cat6_high_cost
       : (bit_depth == 10 ? vp10_cat6_high10_high_cost :
@@ -103,7 +103,7 @@ static INLINE const int* vp10_get_high_cost_table(int bit_depth) {
   (void) bit_depth;
   return vp10_cat6_high_cost;
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VPX_HIGHBITDEPTH
 
 static INLINE void vp10_get_token_extra(int v, int16_t *token, EXTRABIT *extra) {
   if (v >= CAT6_MIN_VAL || v <= -CAT6_MIN_VAL) {
