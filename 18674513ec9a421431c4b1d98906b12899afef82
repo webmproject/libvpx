@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4f39c5b7_b824c5ca",
+        "filename": "vp8/common/rtcd_defs.pl",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-07-29T19:33:02Z",
+      "side": 1,
+      "message": "Could potentially walk this back a touch. Delete the armv6/media targets and all functions with neon equivalents, but keep these files.",
+      "revId": "18674513ec9a421431c4b1d98906b12899afef82",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
