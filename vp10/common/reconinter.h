@@ -318,9 +318,9 @@ static INLINE MV clamp_mv_to_umv_border_sb(const MACROBLOCKD *xd,
   // If the MV points so far into the UMV border that no visible pixels
   // are used for reconstruction, the subpel part of the MV can be
   // discarded and the MV limited to 16 pixels with equivalent results.
-  const int spel_left = (VP9_INTERP_EXTEND + bw) << SUBPEL_BITS;
+  const int spel_left = (VPX_INTERP_EXTEND + bw) << SUBPEL_BITS;
   const int spel_right = spel_left - SUBPEL_SHIFTS;
-  const int spel_top = (VP9_INTERP_EXTEND + bh) << SUBPEL_BITS;
+  const int spel_top = (VPX_INTERP_EXTEND + bh) << SUBPEL_BITS;
   const int spel_bottom = spel_top - SUBPEL_SHIFTS;
   MV clamped_mv = {
     src_mv->row * (1 << (1 - ss_y)),

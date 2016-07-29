@@ -43,7 +43,7 @@
 #include "vp10/decoder/decoder.h"
 #include "vp10/decoder/dsubexp.h"
 
-#define MAX_VP9_HEADER_SIZE 80
+#define MAX_VPX_HEADER_SIZE 80
 
 static int is_compound_reference_allowed(const VP10_COMMON *cm) {
   int i;
@@ -2214,7 +2214,7 @@ static void setup_frame_size(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
 #if CONFIG_VP9_HIGHBITDEPTH
           cm->use_highbitdepth,
 #endif
-          VP9_DEC_BORDER_IN_PIXELS,
+          VPX_DEC_BORDER_IN_PIXELS,
           cm->byte_alignment,
           &pool->frame_bufs[cm->new_fb_idx].raw_frame_buffer, pool->get_fb_cb,
           pool->cb_priv)) {
@@ -2301,7 +2301,7 @@ static void setup_frame_size_with_refs(VP10_COMMON *cm,
 #if CONFIG_VP9_HIGHBITDEPTH
           cm->use_highbitdepth,
 #endif
-          VP9_DEC_BORDER_IN_PIXELS,
+          VPX_DEC_BORDER_IN_PIXELS,
           cm->byte_alignment,
           &pool->frame_bufs[cm->new_fb_idx].raw_frame_buffer, pool->get_fb_cb,
           pool->cb_priv)) {
@@ -3144,7 +3144,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   cm->is_reference_frame = 1;
 #endif  // CONFIG_EXT_REFS
 
-  if (vpx_rb_read_literal(rb, 2) != VP9_FRAME_MARKER)
+  if (vpx_rb_read_literal(rb, 2) != VPX_FRAME_MARKER)
       vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                          "Invalid frame marker");
 
@@ -3727,12 +3727,12 @@ static struct vpx_read_bit_buffer *init_read_bit_buffer(
     struct vpx_read_bit_buffer *rb,
     const uint8_t *data,
     const uint8_t *data_end,
-    uint8_t clear_data[MAX_VP9_HEADER_SIZE]) {
+    uint8_t clear_data[MAX_VPX_HEADER_SIZE]) {
   rb->bit_offset = 0;
   rb->error_handler = error_handler;
   rb->error_handler_data = &pbi->common;
   if (pbi->decrypt_cb) {
-    const int n = (int)VPXMIN(MAX_VP9_HEADER_SIZE, data_end - data);
+    const int n = (int)VPXMIN(MAX_VPX_HEADER_SIZE, data_end - data);
     pbi->decrypt_cb(pbi->decrypt_state, data, clear_data, n);
     rb->bit_buffer = clear_data;
     rb->bit_buffer_end = clear_data + n;
@@ -3772,7 +3772,7 @@ void vp10_decode_frame(VP10Decoder *pbi,
   MACROBLOCKD *const xd = &pbi->mb;
   struct vpx_read_bit_buffer rb;
   int context_updated = 0;
-  uint8_t clear_data[MAX_VP9_HEADER_SIZE];
+  uint8_t clear_data[MAX_VPX_HEADER_SIZE];
   const size_t first_partition_size = read_uncompressed_header(pbi,
       init_read_bit_buffer(pbi, &rb, data, data_end, clear_data));
   YV12_BUFFER_CONFIG *const new_fb = get_frame_new_buffer(cm);

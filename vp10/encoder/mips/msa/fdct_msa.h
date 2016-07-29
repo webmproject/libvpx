@@ -15,7 +15,7 @@
 #include "vpx_dsp/mips/txfm_macros_msa.h"
 #include "vpx_ports/mem.h"
 
-#define VP9_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,                   \
+#define VPX_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,                   \
                   out0, out1, out2, out3, out4, out5, out6, out7) {         \
   v8i16 cnst0_m, cnst1_m, cnst2_m, cnst3_m, cnst4_m;                        \
   v8i16 vec0_m, vec1_m, vec2_m, vec3_m, s0_m, s1_m;                         \
@@ -81,7 +81,7 @@
   out5 = -out5;                                                             \
 }
 
-#define VP9_FADST4(in0, in1, in2, in3, out0, out1, out2, out3) {  \
+#define VPX_FADST4(in0, in1, in2, in3, out0, out1, out2, out3) {  \
   v4i32 s0_m, s1_m, s2_m, s3_m, constant_m;                       \
   v4i32 in0_r_m, in1_r_m, in2_r_m, in3_r_m;                       \
                                                                   \

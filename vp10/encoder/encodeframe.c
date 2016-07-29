@@ -292,10 +292,10 @@ static void set_offsets_without_segment_id(VP10_COMP *cpi,
 
   // Set up limit values for MV components.
   // Mv beyond the range do not produce new/different prediction block.
-  x->mv_row_min = -(((mi_row + mi_height) * MI_SIZE) + VP9_INTERP_EXTEND);
-  x->mv_col_min = -(((mi_col + mi_width) * MI_SIZE) + VP9_INTERP_EXTEND);
-  x->mv_row_max = (cm->mi_rows - mi_row) * MI_SIZE + VP9_INTERP_EXTEND;
-  x->mv_col_max = (cm->mi_cols - mi_col) * MI_SIZE + VP9_INTERP_EXTEND;
+  x->mv_row_min = -(((mi_row + mi_height) * MI_SIZE) + VPX_INTERP_EXTEND);
+  x->mv_col_min = -(((mi_col + mi_width) * MI_SIZE) + VPX_INTERP_EXTEND);
+  x->mv_row_max = (cm->mi_rows - mi_row) * MI_SIZE + VPX_INTERP_EXTEND;
+  x->mv_col_max = (cm->mi_cols - mi_col) * MI_SIZE + VPX_INTERP_EXTEND;
 
   // Set up distance of MB to edge of frame in 1/8th pel units.
   assert(!(mi_col & (mi_width - 1)) && !(mi_row & (mi_height - 1)));
@@ -381,10 +381,10 @@ static void set_offsets_extend(VP10_COMP *cpi, ThreadData *td,
 
   // Set up limit values for MV components.
   // Mv beyond the range do not produce new/different prediction block.
-  x->mv_row_min = -(((mi_row_pred + mi_height) * MI_SIZE) + VP9_INTERP_EXTEND);
-  x->mv_col_min = -(((mi_col_pred + mi_width) * MI_SIZE) + VP9_INTERP_EXTEND);
-  x->mv_row_max = (cm->mi_rows - mi_row_pred) * MI_SIZE + VP9_INTERP_EXTEND;
-  x->mv_col_max = (cm->mi_cols - mi_col_pred) * MI_SIZE + VP9_INTERP_EXTEND;
+  x->mv_row_min = -(((mi_row_pred + mi_height) * MI_SIZE) + VPX_INTERP_EXTEND);
+  x->mv_col_min = -(((mi_col_pred + mi_width) * MI_SIZE) + VPX_INTERP_EXTEND);
+  x->mv_row_max = (cm->mi_rows - mi_row_pred) * MI_SIZE + VPX_INTERP_EXTEND;
+  x->mv_col_max = (cm->mi_cols - mi_col_pred) * MI_SIZE + VPX_INTERP_EXTEND;
 
   // Set up distance of MB to edge of frame in 1/8th pel units.
   assert(!(mi_col_pred & (mi_width - 1)) && !(mi_row_pred & (mi_height - 1)));

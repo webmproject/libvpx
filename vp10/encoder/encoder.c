@@ -742,7 +742,7 @@ static void alloc_raw_frame_buffers(VP10_COMP *cpi) {
 #if CONFIG_VP9_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
-                               VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
+                               VPX_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
                                NULL, NULL, NULL))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate altref buffer");
@@ -756,7 +756,7 @@ static void alloc_util_frame_buffers(VP10_COMP *cpi) {
 #if CONFIG_VP9_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
-                               VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
+                               VPX_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
                                NULL, NULL, NULL))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate last frame buffer");
@@ -768,7 +768,7 @@ static void alloc_util_frame_buffers(VP10_COMP *cpi) {
 #if CONFIG_VP9_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
-                               VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
+                               VPX_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
                                NULL, NULL, NULL))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate last frame deblocked buffer");
@@ -780,7 +780,7 @@ static void alloc_util_frame_buffers(VP10_COMP *cpi) {
 #if CONFIG_VP9_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
-                               VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
+                               VPX_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
                                NULL, NULL, NULL))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate scaled source buffer");
@@ -791,7 +791,7 @@ static void alloc_util_frame_buffers(VP10_COMP *cpi) {
 #if CONFIG_VP9_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
-                               VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
+                               VPX_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
                                NULL, NULL, NULL))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate scaled last source buffer");
@@ -3348,7 +3348,7 @@ static INLINE int upsample_ref_frame(VP10_COMP *cpi,
 #if CONFIG_VP9_HIGHBITDEPTH
                                    cm->use_highbitdepth,
 #endif
-                                   (VP9_ENC_BORDER_IN_PIXELS << 3),
+                                   (VPX_ENC_BORDER_IN_PIXELS << 3),
                                    cm->byte_alignment,
                                    NULL, NULL, NULL))
         vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
@@ -3790,7 +3790,7 @@ void vp10_scale_references(VP10_COMP *cpi) {
           if (vpx_realloc_frame_buffer(&new_fb_ptr->buf, cm->width, cm->height,
                                        cm->subsampling_x, cm->subsampling_y,
                                        cm->use_highbitdepth,
-                                       VP9_ENC_BORDER_IN_PIXELS,
+                                       VPX_ENC_BORDER_IN_PIXELS,
                                        cm->byte_alignment, NULL, NULL, NULL))
             vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                                "Failed to allocate frame buffer");
@@ -3816,7 +3816,7 @@ void vp10_scale_references(VP10_COMP *cpi) {
             new_fb_ptr->buf.y_crop_height != cm->height) {
           if (vpx_realloc_frame_buffer(&new_fb_ptr->buf, cm->width, cm->height,
                                        cm->subsampling_x, cm->subsampling_y,
-                                       VP9_ENC_BORDER_IN_PIXELS,
+                                       VPX_ENC_BORDER_IN_PIXELS,
                                        cm->byte_alignment, NULL, NULL, NULL))
             vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                                "Failed to allocate frame buffer");
@@ -3839,7 +3839,7 @@ void vp10_scale_references(VP10_COMP *cpi) {
 #if CONFIG_VP9_HIGHBITDEPTH
                                        cm->use_highbitdepth,
 #endif
-                                       (VP9_ENC_BORDER_IN_PIXELS << 3),
+                                       (VPX_ENC_BORDER_IN_PIXELS << 3),
                                        cm->byte_alignment,
                                        NULL, NULL, NULL))
             vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
@@ -4147,7 +4147,7 @@ static void set_frame_size(VP10_COMP *cpi) {
 #if CONFIG_VP9_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
-                               VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
+                               VPX_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
                                NULL, NULL, NULL))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffer");
@@ -5204,7 +5204,7 @@ static void setup_denoiser_buffer(VP10_COMP *cpi) {
 #if CONFIG_VP9_HIGHBITDEPTH
                             cm->use_highbitdepth,
 #endif
-                            VP9_ENC_BORDER_IN_PIXELS))
+                            VPX_ENC_BORDER_IN_PIXELS))
       vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                          "Failed to allocate denoiser");
   }

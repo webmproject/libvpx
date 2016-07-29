@@ -23,35 +23,35 @@ void vp10_fht8x8_msa(const int16_t *input, int16_t *output, int32_t stride,
 
   switch (tx_type) {
     case DCT_DCT:
-      VP9_FDCT8(in0, in1, in2, in3, in4, in5, in6, in7,
+      VPX_FDCT8(in0, in1, in2, in3, in4, in5, in6, in7,
                 in0, in1, in2, in3, in4, in5, in6, in7);
       TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7,
                          in0, in1, in2, in3, in4, in5, in6, in7);
-      VP9_FDCT8(in0, in1, in2, in3, in4, in5, in6, in7,
+      VPX_FDCT8(in0, in1, in2, in3, in4, in5, in6, in7,
                 in0, in1, in2, in3, in4, in5, in6, in7);
       break;
     case ADST_DCT:
-      VP9_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
+      VPX_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
                 in0, in1, in2, in3, in4, in5, in6, in7);
       TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7,
                          in0, in1, in2, in3, in4, in5, in6, in7);
-      VP9_FDCT8(in0, in1, in2, in3, in4, in5, in6, in7,
+      VPX_FDCT8(in0, in1, in2, in3, in4, in5, in6, in7,
                 in0, in1, in2, in3, in4, in5, in6, in7);
       break;
     case DCT_ADST:
-      VP9_FDCT8(in0, in1, in2, in3, in4, in5, in6, in7,
+      VPX_FDCT8(in0, in1, in2, in3, in4, in5, in6, in7,
                 in0, in1, in2, in3, in4, in5, in6, in7);
       TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7,
                          in0, in1, in2, in3, in4, in5, in6, in7);
-      VP9_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
+      VPX_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
                 in0, in1, in2, in3, in4, in5, in6, in7);
       break;
     case ADST_ADST:
-      VP9_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
+      VPX_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
                 in0, in1, in2, in3, in4, in5, in6, in7);
       TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7,
                          in0, in1, in2, in3, in4, in5, in6, in7);
-      VP9_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
+      VPX_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
                 in0, in1, in2, in3, in4, in5, in6, in7);
       break;
     default:

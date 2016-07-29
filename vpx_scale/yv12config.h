@@ -22,13 +22,13 @@ extern "C" {
 
 #define VP8BORDERINPIXELS           32
 #if CONFIG_EXT_PARTITION
-# define VP9INNERBORDERINPIXELS     160
+# define VPXINNERBORDERINPIXELS     160
 #else
-# define VP9INNERBORDERINPIXELS     96
+# define VPXINNERBORDERINPIXELS     96
 #endif  // CONFIG_EXT_PARTITION
-#define VP9_INTERP_EXTEND           4
-#define VP9_ENC_BORDER_IN_PIXELS    160
-#define VP9_DEC_BORDER_IN_PIXELS    160
+#define VPX_INTERP_EXTEND           4
+#define VPX_ENC_BORDER_IN_PIXELS    160
+#define VPX_DEC_BORDER_IN_PIXELS    160
 
 typedef struct yv12_buffer_config {
   int   y_width;

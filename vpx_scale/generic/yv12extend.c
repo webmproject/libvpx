@@ -202,8 +202,8 @@ void vpx_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf) {
 }
 
 void vpx_extend_frame_inner_borders_c(YV12_BUFFER_CONFIG *ybf) {
-  const int inner_bw = (ybf->border > VP9INNERBORDERINPIXELS) ?
-                       VP9INNERBORDERINPIXELS : ybf->border;
+  const int inner_bw = (ybf->border > VPXINNERBORDERINPIXELS) ?
+                       VPXINNERBORDERINPIXELS : ybf->border;
   extend_frame(ybf, inner_bw);
 }
 

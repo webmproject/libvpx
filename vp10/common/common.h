@@ -67,7 +67,7 @@ static INLINE int get_unsigned_bits(unsigned int num_values) {
 #define VP10_SYNC_CODE_1 0x83
 #define VP10_SYNC_CODE_2 0x43
 
-#define VP9_FRAME_MARKER 0x2
+#define VPX_FRAME_MARKER 0x2
 
 #ifdef __cplusplus
 }  // extern "C"
