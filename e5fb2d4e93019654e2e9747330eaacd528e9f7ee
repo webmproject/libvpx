@@ -22,6 +22,30 @@
       "revId": "e5fb2d4e93019654e2e9747330eaacd528e9f7ee",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_d2b15595",
+        "filename": "vpx_ports/mem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-07-30T03:10:26Z",
+      "side": 1,
+      "message": "...except that the original was buggy for n\u003d\u003d0.\n\nthe compiler will likely optimize this version, anyway.",
+      "parentUuid": "8fdd7d60_347ab152",
+      "range": {
+        "startLine": 43,
+        "startChar": 29,
+        "endLine": 43,
+        "endChar": 31
+      },
+      "revId": "e5fb2d4e93019654e2e9747330eaacd528e9f7ee",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
