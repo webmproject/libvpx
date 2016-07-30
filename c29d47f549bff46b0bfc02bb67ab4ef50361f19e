@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4f39c5b7_15611710",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 458,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-30T23:40:55Z",
+      "side": 1,
+      "message": "It\u0027s great you found this bug - we should fix the confusion between the 2 Macos: REF_FRAMES and MAX_REF_FRAMES, since REF_FRAMES is in fact larger",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_35661b28",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2566,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-30T23:40:55Z",
+      "side": 1,
+      "message": "Better not to include this one into this patch",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_55638f16",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 3107,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-30T23:40:55Z",
+      "side": 1,
+      "message": "The intent of this line does not seem right",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_757093db",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 3556,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-30T23:40:55Z",
+      "side": 1,
+      "message": "Maybe we could put the update on the LAST_FRAME in a different function, as whenever LAST_FRAME got updated, we need to conduct the same process to handle LAST_FRAME through LAST3_FRAME",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_d5569f37",
+        "filename": "vp10/encoder/encoder.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-30T23:40:55Z",
+      "side": 1,
+      "message": "You may put these 2 lines of comment within the experiment combo ext-refs \u0026\u0026 ext-arfs",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_f55ba35c",
+        "filename": "vp10/encoder/encoder.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 643,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-30T23:40:55Z",
+      "side": 1,
+      "message": "Let\u0027s put this in a different patch, better before this one, as it is a change to the baseline",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
