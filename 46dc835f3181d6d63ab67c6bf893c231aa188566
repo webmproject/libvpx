@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "4f39c5b7_1e4f798f",
+        "filename": "vp10/decoder/decodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3807,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-30T00:49:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8fdd7d60_a0be60c7",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8fdd7d60_80a484b7",
         "filename": "vp10/encoder/bitstream.h",
         "patchSetId": 5
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "4f39c5b7_1e0859d5",
+        "filename": "vp10/encoder/bitstream.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-30T00:49:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8fdd7d60_80a484b7",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8fdd7d60_608ab817",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 5
@@ -64,6 +100,24 @@
       "writtenOn": "2016-07-28T22:07:19Z",
       "side": 1,
       "message": "DUAL does not seem to reflect well the use of multiple alt-refs.",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_5e12d108",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-30T00:49:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8fdd7d60_608ab817",
       "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -138,6 +192,24 @@
     },
     {
       "key": {
+        "uuid": "4f39c5b7_7e28752f",
+        "filename": "vp10/encoder/encoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-30T00:49:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8fdd7d60_20ab9085",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ef5fd9c9_8c8ceb84",
         "filename": "vp10/encoder/firstpass.c",
         "patchSetId": 5
@@ -166,6 +238,24 @@
       "writtenOn": "2016-07-28T23:31:55Z",
       "side": 1,
       "message": "Suggest to use (int) for the cast",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_1ea4d9b5",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1753,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-30T00:49:42Z",
+      "side": 1,
+      "message": "The type of gf_group-\u003earf_src_offset[frame_index] is \"unsigned char\", should we use the same type in this case?",
+      "parentUuid": "4f39c5b7_097829d3",
       "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +313,24 @@
     },
     {
       "key": {
+        "uuid": "4f39c5b7_9eca8971",
+        "filename": "vp10/encoder/firstpass.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-30T00:49:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ef5fd9c9_2c429745",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ef5fd9c9_2c57f7ff",
         "filename": "vp10/encoder/firstpass.h",
         "patchSetId": 5
@@ -234,6 +342,24 @@
       "writtenOn": "2016-07-28T23:31:55Z",
       "side": 1,
       "message": "Better use the term INTNL_OVERLAY_UPDATE instead of INTL_OVERLAY_UPDATE",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_1edf7931",
+        "filename": "vp10/encoder/firstpass.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-30T00:49:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ef5fd9c9_2c57f7ff",
       "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +383,24 @@
     },
     {
       "key": {
+        "uuid": "4f39c5b7_7ed6b51b",
+        "filename": "vp10/encoder/firstpass.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-30T00:49:42Z",
+      "side": 1,
+      "message": "Thanks for helping me find this bug...",
+      "parentUuid": "ef5fd9c9_6c8f2f1e",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ef5fd9c9_ec89df85",
         "filename": "vp10/encoder/firstpass.h",
         "patchSetId": 5
@@ -274,6 +418,24 @@
     },
     {
       "key": {
+        "uuid": "4f39c5b7_5ed9f148",
+        "filename": "vp10/encoder/firstpass.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-30T00:49:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ef5fd9c9_ec89df85",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f39c5b7_e93915fa",
         "filename": "vp10/encoder/ratectrl.c",
         "patchSetId": 5
@@ -285,6 +447,24 @@
       "writtenOn": "2016-07-28T23:31:55Z",
       "side": 1,
       "message": "Suggest to use \"is_intnl_overlay\"",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_7e84f507",
+        "filename": "vp10/encoder/ratectrl.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1254,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-07-30T00:49:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4f39c5b7_e93915fa",
       "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
