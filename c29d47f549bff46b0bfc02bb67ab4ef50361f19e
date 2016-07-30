@@ -101,6 +101,91 @@
       "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_d53f7fdd",
+        "filename": "vp10/encoder/firstpass.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-30T23:46:10Z",
+      "side": 1,
+      "message": "We may need to further consider this Macro as it\u0027s related to the minimum interval length of the golden frame (gf) group",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_f5348304",
+        "filename": "vp10/encoder/firstpass.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-30T23:46:10Z",
+      "side": 1,
+      "message": "Since it in fact indicates the additional alt-refs, then may it better be named as\nINTNL_ARF_UPDATE, instead of *OVERLAY*?",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_354ffb8f",
+        "filename": "vp10/encoder/ratectrl.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1281,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-30T23:46:10Z",
+      "side": 1,
+      "message": "Ditto",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_153af7ed",
+        "filename": "vp10/encoder/ratectrl.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-30T23:46:10Z",
+      "side": 1,
+      "message": "Format better be: NOTE(weitinglin) - please always try to use LDAP",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_b53a0bef",
+        "filename": "vp10/encoder/rd.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-07-30T23:46:10Z",
+      "side": 1,
+      "message": "Why 144?",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
