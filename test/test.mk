@@ -37,8 +37,8 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += active_map_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += borders_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += cpu_speed_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += frame_size_tests.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp9_lossless_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp9_ethread_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += lossless_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += ethread_test.cc
 
 LIBVPX_TEST_SRCS-yes                   += decode_test_driver.cc
 LIBVPX_TEST_SRCS-yes                   += decode_test_driver.h
@@ -104,13 +104,13 @@ LIBVPX_TEST_SRCS-yes                   += idct8x8_test.cc
 LIBVPX_TEST_SRCS-yes                   += partial_idct_test.cc
 LIBVPX_TEST_SRCS-yes                   += superframe_test.cc
 LIBVPX_TEST_SRCS-yes                   += tile_independence_test.cc
-LIBVPX_TEST_SRCS-yes                   += vp9_boolcoder_test.cc
-#LIBVPX_TEST_SRCS-yes                   += vp9_encoder_parms_get_to_decoder.cc
+LIBVPX_TEST_SRCS-yes                   += boolcoder_test.cc
+#LIBVPX_TEST_SRCS-yes                   += encoder_parms_get_to_decoder.cc
 endif
 
 #LIBVPX_TEST_SRCS-yes                   += convolve_test.cc
 LIBVPX_TEST_SRCS-yes                   += lpf_8_test.cc
-LIBVPX_TEST_SRCS-yes                   += vp9_intrapred_test.cc
+LIBVPX_TEST_SRCS-yes                   += intrapred_test.cc
 #LIBVPX_TEST_SRCS-$(CONFIG_VP10_DECODER) += vp9_thread_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += dct16x16_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += dct32x32_test.cc
@@ -119,7 +119,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += fdct8x8_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += hadamard_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += minmax_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += variance_test.cc
-#LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp9_error_block_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += error_block_test.cc
 #LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp9_quantize_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += subtract_test.cc
 
@@ -130,9 +130,9 @@ LIBVPX_TEST_SRCS-$(CONFIG_INTERNAL_STATS) += consistency_test.cc
 endif
 
 ifeq ($(CONFIG_VP10_ENCODER)$(CONFIG_VP10_TEMPORAL_DENOISING),yesyes)
-LIBVPX_TEST_SRCS-$(HAVE_SSE2) += vp9_denoiser_sse2_test.cc
+LIBVPX_TEST_SRCS-$(HAVE_SSE2) += denoiser_sse2_test.cc
 endif
-LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp9_arf_freq_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += arf_freq_test.cc
 
 
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_inv_txfm_test.cc
