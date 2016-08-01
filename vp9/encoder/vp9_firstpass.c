@@ -668,11 +668,11 @@ static int fp_highbd_estimate_point_noise(uint8_t *src_ptr, const int stride) {
     // Update the source value with the new filtered value
     dn_val =  (sum_val + (sum_weight >> 1)) / sum_weight;
   else
-    dn_val = *src_ptr;
+    dn_val = *CONVERT_TO_SHORTPTR(src_ptr);
 
   // return the noise energy as the square of the difference between the
   // denoised and raw value.
-  dn_diff = (int)*src_ptr - (int)dn_val;
+  dn_diff = (int)(*CONVERT_TO_SHORTPTR(src_ptr)) - (int)dn_val;
   return dn_diff * dn_diff;
 }
 #endif
