@@ -41,12 +41,12 @@ void vp10_iht8x8_64_add_msa(const int16_t *input, uint8_t *dst,
       /* ADST in vertical */
       TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7,
                          in0, in1, in2, in3, in4, in5, in6, in7);
-      VP9_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
+      VPX_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
                 in0, in1, in2, in3, in4, in5, in6, in7);
       break;
     case DCT_ADST:
       /* ADST in horizontal */
-      VP9_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
+      VPX_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
                 in0, in1, in2, in3, in4, in5, in6, in7);
       /* DCT in vertical */
       TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7,
@@ -56,12 +56,12 @@ void vp10_iht8x8_64_add_msa(const int16_t *input, uint8_t *dst,
       break;
     case ADST_ADST:
       /* ADST in horizontal */
-      VP9_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
+      VPX_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
                 in0, in1, in2, in3, in4, in5, in6, in7);
       /* ADST in vertical */
       TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7,
                          in0, in1, in2, in3, in4, in5, in6, in7);
-      VP9_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
+      VPX_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
                 in0, in1, in2, in3, in4, in5, in6, in7);
       break;
     default:

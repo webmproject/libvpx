@@ -3045,7 +3045,7 @@ static void write_uncompressed_header(VP10_COMP *cpi,
   VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
 
-  vpx_wb_write_literal(wb, VP9_FRAME_MARKER, 2);
+  vpx_wb_write_literal(wb, VPX_FRAME_MARKER, 2);
 
   write_profile(cm->profile, wb);
 

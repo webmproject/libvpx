@@ -101,7 +101,7 @@ typedef unsigned int (*vpx_obmc_subpixvariance_fn_t)(const uint8_t *pred,
 #endif  // CONFIG_VP10 && CONFIG_OBMC
 
 #if CONFIG_VP10
-typedef struct vp10_variance_vtable {
+typedef struct vpx_variance_vtable {
   vpx_sad_fn_t                   sdf;
   vpx_sad_avg_fn_t               sdaf;
   vpx_variance_fn_t              vf;
@@ -120,7 +120,7 @@ typedef struct vp10_variance_vtable {
   vpx_obmc_variance_fn_t         ovf;
   vpx_obmc_subpixvariance_fn_t   osvf;
 #endif  // CONFIG_OBMC
-} vp10_variance_fn_ptr_t;
+} vpx_variance_fn_ptr_t;
 #endif  // CONFIG_VP10
 
 void vpx_highbd_var_filter_block2d_bil_first_pass(

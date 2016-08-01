@@ -406,7 +406,7 @@ void vp10_loop_restoration_rows(YV12_BUFFER_CONFIG *frame,
 #if CONFIG_VP9_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
-                               VP9_DEC_BORDER_IN_PIXELS, cm->byte_alignment,
+                               VPX_DEC_BORDER_IN_PIXELS, cm->byte_alignment,
                                NULL, NULL, NULL) < 0)
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate tmp restoration buffer");

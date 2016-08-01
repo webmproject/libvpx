@@ -203,7 +203,7 @@ static vpx_codec_err_t decoder_peek_si_internal(const uint8_t *data,
     const int frame_marker = vpx_rb_read_literal(&rb, 2);
     const BITSTREAM_PROFILE profile = vp10_read_profile(&rb);
 
-    if (frame_marker != VP9_FRAME_MARKER)
+    if (frame_marker != VPX_FRAME_MARKER)
       return VPX_CODEC_UNSUP_BITSTREAM;
 
     if (profile >= MAX_PROFILES)

@@ -29,7 +29,7 @@ extern "C" {
 #define MAX_FIRST_STEP (1 << (MAX_MVSEARCH_STEPS-1))
 // Allowed motion vector pixel distance outside image border
 // for Block_16x16
-#define BORDER_MV_PIXELS_B16 (16 + VP9_INTERP_EXTEND)
+#define BORDER_MV_PIXELS_B16 (16 + VPX_INTERP_EXTEND)
 
 // motion search site
 typedef struct search_site {
@@ -53,12 +53,12 @@ int vp10_mv_bit_cost(const MV *mv, const MV *ref,
 // Utility to compute variance + MV rate cost for a given MV
 int vp10_get_mvpred_var(const MACROBLOCK *x,
                        const MV *best_mv, const MV *center_mv,
-                       const vp10_variance_fn_ptr_t *vfp,
+                       const vpx_variance_fn_ptr_t *vfp,
                        int use_mvcost);
 int vp10_get_mvpred_av_var(const MACROBLOCK *x,
                           const MV *best_mv, const MV *center_mv,
                           const uint8_t *second_pred,
-                          const vp10_variance_fn_ptr_t *vfp,
+                          const vpx_variance_fn_ptr_t *vfp,
                           int use_mvcost);
 
 struct VP10_COMP;
@@ -69,7 +69,7 @@ int vp10_init_search_range(int size);
 int vp10_refining_search_sad(struct macroblock *x,
                              struct mv *ref_mv,
                              int sad_per_bit, int distance,
-                             const vp10_variance_fn_ptr_t *fn_ptr,
+                             const vpx_variance_fn_ptr_t *fn_ptr,
                              const struct mv *center_mv);
 
 // Runs sequence of diamond searches in smaller steps for RD.
@@ -77,7 +77,7 @@ int vp10_full_pixel_diamond(const struct VP10_COMP *cpi, MACROBLOCK *x,
                            MV *mvp_full, int step_param,
                            int sadpb, int further_steps, int do_refine,
                            int *cost_list,
-                           const vp10_variance_fn_ptr_t *fn_ptr,
+                           const vpx_variance_fn_ptr_t *fn_ptr,
                            const MV *ref_mv, MV *dst_mv);
 
 // Perform integral projection based motion estimation.
@@ -93,7 +93,7 @@ int vp10_hex_search(MACROBLOCK *x,
                     int sad_per_bit,
                     int do_init_search,
                     int *cost_list,
-                    const vp10_variance_fn_ptr_t *vfp,
+                    const vpx_variance_fn_ptr_t *vfp,
                     int use_mvcost,
                     const MV *center_mv);
 
@@ -102,7 +102,7 @@ typedef int (fractional_mv_step_fp) (
     const MV *ref_mv,
     int allow_hp,
     int error_per_bit,
-    const vp10_variance_fn_ptr_t *vfp,
+    const vpx_variance_fn_ptr_t *vfp,
     int forced_stop,  // 0 - full, 1 - qtr only, 2 - half only
     int iters_per_step,
     int *cost_list,
@@ -119,7 +119,7 @@ extern fractional_mv_step_fp vp10_find_best_sub_pixel_tree_pruned_evenmore;
 typedef int (*vp10_full_search_fn_t)(const MACROBLOCK *x,
                                      const MV *ref_mv, int sad_per_bit,
                                      int distance,
-                                     const vp10_variance_fn_ptr_t *fn_ptr,
+                                     const vpx_variance_fn_ptr_t *fn_ptr,
                                      const MV *center_mv, MV *best_mv);
 
 typedef int (*vp10_diamond_search_fn_t)(MACROBLOCK *x,
@@ -127,13 +127,13 @@ typedef int (*vp10_diamond_search_fn_t)(MACROBLOCK *x,
                                         MV *ref_mv, MV *best_mv,
                                         int search_param, int sad_per_bit,
                                         int *num00,
-                                        const vp10_variance_fn_ptr_t *fn_ptr,
+                                        const vpx_variance_fn_ptr_t *fn_ptr,
                                         const MV *center_mv);
 
 int vp10_refining_search_8p_c(MACROBLOCK *x,
                               int error_per_bit,
                               int search_range,
-                              const vp10_variance_fn_ptr_t *fn_ptr,
+                              const vpx_variance_fn_ptr_t *fn_ptr,
                               const MV *center_mv, const uint8_t *second_pred);
 
 struct VP10_COMP;
@@ -150,7 +150,7 @@ int vp10_find_best_masked_sub_pixel_tree(const MACROBLOCK *x,
                                          MV *bestmv, const MV *ref_mv,
                                          int allow_hp,
                                          int error_per_bit,
-                                         const vp10_variance_fn_ptr_t *vfp,
+                                         const vpx_variance_fn_ptr_t *vfp,
                                          int forced_stop,
                                          int iters_per_step,
                                          int *mvjcost, int *mvcost[2],
@@ -165,7 +165,7 @@ int vp10_find_best_masked_sub_pixel_tree_up(struct VP10_COMP *cpi,
                                             MV *bestmv, const MV *ref_mv,
                                             int allow_hp,
                                             int error_per_bit,
-                                            const vp10_variance_fn_ptr_t *vfp,
+                                            const vpx_variance_fn_ptr_t *vfp,
                                             int forced_stop,
                                             int iters_per_step,
                                             int *mvjcost, int *mvcost[2],
@@ -177,7 +177,7 @@ int vp10_masked_full_pixel_diamond(const struct VP10_COMP *cpi, MACROBLOCK *x,
                                    const uint8_t *mask, int mask_stride,
                                    MV *mvp_full, int step_param,
                                    int sadpb, int further_steps, int do_refine,
-                                   const vp10_variance_fn_ptr_t *fn_ptr,
+                                   const vpx_variance_fn_ptr_t *fn_ptr,
                                    const MV *ref_mv, MV *dst_mv,
                                    int is_second);
 #endif  // CONFIG_EXT_INTER
@@ -188,7 +188,7 @@ int vp10_obmc_full_pixel_diamond(const struct VP10_COMP *cpi, MACROBLOCK *x,
                                  const int32_t *mask,
                                  MV *mvp_full, int step_param,
                                  int sadpb, int further_steps, int do_refine,
-                                 const vp10_variance_fn_ptr_t *fn_ptr,
+                                 const vpx_variance_fn_ptr_t *fn_ptr,
                                  const MV *ref_mv, MV *dst_mv,
                                  int is_second);
 int vp10_find_best_obmc_sub_pixel_tree_up(struct VP10_COMP *cpi, MACROBLOCK *x,
@@ -197,7 +197,7 @@ int vp10_find_best_obmc_sub_pixel_tree_up(struct VP10_COMP *cpi, MACROBLOCK *x,
                                           int mi_row, int mi_col,
                                           MV *bestmv, const MV *ref_mv,
                                           int allow_hp, int error_per_bit,
-                                          const vp10_variance_fn_ptr_t *vfp,
+                                          const vpx_variance_fn_ptr_t *vfp,
                                           int forced_stop, int iters_per_step,
                                           int *mvjcost, int *mvcost[2],
                                           int *distortion, unsigned int *sse1,

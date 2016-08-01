@@ -384,16 +384,16 @@ static void temporal_filter_iterate_c(VP10_COMP *cpi,
     //  L/A/G reference frames that have a border of 32 (VP9ENCBORDERINPIXELS)
     // A 6/8 tap filter is used for motion search.  This requires 2 pixels
     //  before and 3 pixels after.  So the largest Y mv on a border would
-    //  then be 16 - VP9_INTERP_EXTEND. The UV blocks are half the size of the
+    //  then be 16 - VPX_INTERP_EXTEND. The UV blocks are half the size of the
     //  Y and therefore only extended by 8.  The largest mv that a UV block
-    //  can support is 8 - VP9_INTERP_EXTEND.  A UV mv is half of a Y mv.
-    //  (16 - VP9_INTERP_EXTEND) >> 1 which is greater than
-    //  8 - VP9_INTERP_EXTEND.
+    //  can support is 8 - VPX_INTERP_EXTEND.  A UV mv is half of a Y mv.
+    //  (16 - VPX_INTERP_EXTEND) >> 1 which is greater than
+    //  8 - VPX_INTERP_EXTEND.
     // To keep the mv in play for both Y and UV planes the max that it
-    //  can be on a border is therefore 16 - (2*VP9_INTERP_EXTEND+1).
-    cpi->td.mb.mv_row_min = -((mb_row * 16) + (17 - 2 * VP9_INTERP_EXTEND));
+    //  can be on a border is therefore 16 - (2*VPX_INTERP_EXTEND+1).
+    cpi->td.mb.mv_row_min = -((mb_row * 16) + (17 - 2 * VPX_INTERP_EXTEND));
     cpi->td.mb.mv_row_max = ((mb_rows - 1 - mb_row) * 16)
-                         + (17 - 2 * VP9_INTERP_EXTEND);
+                         + (17 - 2 * VPX_INTERP_EXTEND);
 
     for (mb_col = 0; mb_col < mb_cols; mb_col++) {
       int i, j, k;
@@ -402,9 +402,9 @@ static void temporal_filter_iterate_c(VP10_COMP *cpi,
       memset(accumulator, 0, 16 * 16 * 3 * sizeof(accumulator[0]));
       memset(count, 0, 16 * 16 * 3 * sizeof(count[0]));
 
-      cpi->td.mb.mv_col_min = -((mb_col * 16) + (17 - 2 * VP9_INTERP_EXTEND));
+      cpi->td.mb.mv_col_min = -((mb_col * 16) + (17 - 2 * VPX_INTERP_EXTEND));
       cpi->td.mb.mv_col_max = ((mb_cols - 1 - mb_col) * 16)
-                           + (17 - 2 * VP9_INTERP_EXTEND);
+                           + (17 - 2 * VPX_INTERP_EXTEND);
 
       for (frame = 0; frame < frame_count; frame++) {
         const int thresh_low  = 10000;

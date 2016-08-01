@@ -67,7 +67,7 @@
              in4, in5, in6, in7);                                        \
 }
 
-#define VP9_FDCT8(in0, in1, in2, in3, in4, in5, in6, in7,            \
+#define VPX_FDCT8(in0, in1, in2, in3, in4, in5, in6, in7,            \
                   out0, out1, out2, out3, out4, out5, out6, out7) {  \
   v8i16 s0_m, s1_m, s2_m, s3_m, s4_m, s5_m, s6_m;                    \
   v8i16 s7_m, x0_m, x1_m, x2_m, x3_m;                                \

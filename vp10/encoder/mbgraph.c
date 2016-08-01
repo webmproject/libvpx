@@ -30,7 +30,7 @@ static unsigned int do_16x16_motion_iteration(VP10_COMP *cpi,
   MACROBLOCK *const x = &cpi->td.mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   const MV_SPEED_FEATURES *const mv_sf = &cpi->sf.mv;
-  const vp10_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
+  const vpx_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
 
   const int tmp_col_min = x->mv_col_min;
   const int tmp_col_max = x->mv_col_max;

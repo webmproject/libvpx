@@ -63,7 +63,7 @@ void vp10_compute_skin_map(VP10_COMP *const cpi, FILE *yuv_skinmap_file) {
   memset(&skinmap, 0, sizeof(YV12_BUFFER_CONFIG));
   if (vpx_alloc_frame_buffer(&skinmap, cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
-                               VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment)) {
+                               VPX_ENC_BORDER_IN_PIXELS, cm->byte_alignment)) {
       vpx_free_frame_buffer(&skinmap);
       return;
   }
