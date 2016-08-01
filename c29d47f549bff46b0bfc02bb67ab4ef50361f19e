@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "2f2ad160_b2021d62",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 458,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-01T22:42:41Z",
+      "side": 1,
+      "message": "Better to keep this change to the experimental flags for now. Otherwise, you may file a patch before this one to ease out the confusion between REF_FRAMES and MAX_REF_FRAMES.",
+      "parentUuid": "2f2ad160_5cd9fd48",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f39c5b7_35661b28",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 7
@@ -381,6 +399,24 @@
       "side": 1,
       "message": "I followed the parameter used for overlay frames. We should investigate if we need further adjust this parameter",
       "parentUuid": "4f39c5b7_b53a0bef",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2f2ad160_f2ee55b7",
+        "filename": "vp10/encoder/rd.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-01T22:42:41Z",
+      "side": 1,
+      "message": "I would think to have the value for the ext-arfs follow that set up for alt-ref, i.e. 128",
+      "parentUuid": "4f39c5b7_75497387",
       "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
