@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "2f2ad160_5cd9fd48",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 458,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-01T18:19:11Z",
+      "side": 1,
+      "message": "Thanks! \nShould we keep this change under our flag, or merge to the baseline?",
+      "parentUuid": "4f39c5b7_15611710",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f39c5b7_35661b28",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2016-07-30T23:40:55Z",
       "side": 1,
       "message": "Better not to include this one into this patch",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2f2ad160_5c5add27",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2566,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-01T18:19:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4f39c5b7_35661b28",
       "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "2f2ad160_5c73bdaf",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 3107,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-01T18:19:11Z",
+      "side": 1,
+      "message": "character \"n\" is actually aligned with \"(\", or do you mean to indent the last two lines to align with the first line?",
+      "parentUuid": "4f39c5b7_55638f16",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f39c5b7_757093db",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 7
@@ -64,6 +118,24 @@
       "writtenOn": "2016-07-30T23:40:55Z",
       "side": 1,
       "message": "Maybe we could put the update on the LAST_FRAME in a different function, as whenever LAST_FRAME got updated, we need to conduct the same process to handle LAST_FRAME through LAST3_FRAME",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2f2ad160_7c28812f",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 3556,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-01T18:19:11Z",
+      "side": 1,
+      "message": "replaced with the function shift_last_ref_frames()",
+      "parentUuid": "4f39c5b7_757093db",
       "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "2f2ad160_378f021f",
+        "filename": "vp10/encoder/encoder.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-01T18:19:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4f39c5b7_d5569f37",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f39c5b7_f55ba35c",
         "filename": "vp10/encoder/encoder.h",
         "patchSetId": 7
@@ -98,6 +188,24 @@
       "writtenOn": "2016-07-30T23:40:55Z",
       "side": 1,
       "message": "Let\u0027s put this in a different patch, better before this one, as it is a change to the baseline",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2f2ad160_d7bf8674",
+        "filename": "vp10/encoder/encoder.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 643,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-01T18:19:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4f39c5b7_f55ba35c",
       "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "2f2ad160_d7d866ec",
+        "filename": "vp10/encoder/firstpass.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-01T18:19:11Z",
+      "side": 1,
+      "message": "It is used to compute how many extra ARFs\u0027 we can insert in a gf group, so we can have 1, 2 or 0 extra ARFs\u0027 depending on the gf group interval.",
+      "parentUuid": "4f39c5b7_d53f7fdd",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f39c5b7_f5348304",
         "filename": "vp10/encoder/firstpass.h",
         "patchSetId": 7
@@ -132,6 +258,24 @@
       "writtenOn": "2016-07-30T23:46:10Z",
       "side": 1,
       "message": "Since it in fact indicates the additional alt-refs, then may it better be named as\nINTNL_ARF_UPDATE, instead of *OVERLAY*?",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2f2ad160_f7abaa1d",
+        "filename": "vp10/encoder/firstpass.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-01T18:19:11Z",
+      "side": 1,
+      "message": "My comment is inappropriate. Updated!",
+      "parentUuid": "4f39c5b7_f5348304",
       "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "2f2ad160_971fce73",
+        "filename": "vp10/encoder/ratectrl.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1281,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-01T18:19:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4f39c5b7_354ffb8f",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f39c5b7_153af7ed",
         "filename": "vp10/encoder/ratectrl.h",
         "patchSetId": 7
@@ -172,6 +334,24 @@
     },
     {
       "key": {
+        "uuid": "2f2ad160_d734e604",
+        "filename": "vp10/encoder/ratectrl.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-01T18:19:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4f39c5b7_153af7ed",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f39c5b7_b53a0bef",
         "filename": "vp10/encoder/rd.c",
         "patchSetId": 7
@@ -183,6 +363,24 @@
       "writtenOn": "2016-07-30T23:46:10Z",
       "side": 1,
       "message": "Why 144?",
+      "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_75497387",
+        "filename": "vp10/encoder/rd.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-01T18:19:11Z",
+      "side": 1,
+      "message": "I followed the parameter used for overlay frames. We should investigate if we need further adjust this parameter",
+      "parentUuid": "4f39c5b7_b53a0bef",
       "revId": "c29d47f549bff46b0bfc02bb67ab4ef50361f19e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
