@@ -643,7 +643,7 @@ static int fp_highbd_estimate_point_noise(uint8_t *src_ptr, const int stride) {
   uint8_t *tmp_ptr;
   uint16_t *tmp_ptr16;
   uint8_t *kernal_ptr;
-  uint8_t dn_val;
+  uint16_t dn_val;
   uint16_t centre_val = *CONVERT_TO_SHORTPTR(src_ptr);
 
   kernal_ptr = fp_dn_kernal_3;
