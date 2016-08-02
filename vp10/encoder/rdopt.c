@@ -4077,7 +4077,8 @@ static int64_t rd_pick_intra_sbuv_mode(VP10_COMP *cpi, MACROBLOCK *x,
       this_rate += write_uniform_cost(2 * MAX_ANGLE_DELTAS + 1,
                                       MAX_ANGLE_DELTAS +
                                       mbmi->angle_delta[1]);
-    if (mode == DC_PRED)
+    if (mbmi->sb_type >= BLOCK_8X8 && mode == DC_PRED &&
+        ALLOW_FILTER_INTRA_MODES)
       this_rate += vp10_cost_bit(cpi->common.fc->ext_intra_probs[1], 0);
 #else
     if (!super_block_uvrd(cpi, x, &this_rate_tokenonly,
@@ -8349,25 +8350,18 @@ static void restore_uv_color_map(VP10_COMP *cpi, MACROBLOCK *x) {
 }
 
 #if CONFIG_EXT_INTRA
-static void pick_ext_intra_iframe(VP10_COMP *cpi, MACROBLOCK *x,
-                                  PICK_MODE_CONTEXT *ctx, BLOCK_SIZE bsize,
-                                  int *rate_uv_intra, int *rate_uv_tokenonly,
-                                  int64_t *dist_uv, int *skip_uv,
-                                  PREDICTION_MODE *mode_uv,
-                                  EXT_INTRA_MODE_INFO *ext_intra_mode_info_uv,
-                                  PALETTE_MODE_INFO *pmi_uv,
-                                  int8_t *uv_angle_delta,
-                                  int palette_ctx, int skip_mask,
-                                  unsigned int *ref_costs_single,
-                                  int64_t *best_rd, int64_t *best_intra_rd,
-                                  PREDICTION_MODE *best_intra_mode,
-                                  int *best_mode_index, int *best_skip2,
-                                  int *best_mode_skippable,
+static void pick_ext_intra_interframe(
+    VP10_COMP *cpi, MACROBLOCK *x, PICK_MODE_CONTEXT *ctx, BLOCK_SIZE bsize,
+    int *rate_uv_intra, int *rate_uv_tokenonly, int64_t *dist_uv, int *skip_uv,
+    PREDICTION_MODE *mode_uv, EXT_INTRA_MODE_INFO *ext_intra_mode_info_uv,
+    PALETTE_MODE_INFO *pmi_uv, int8_t *uv_angle_delta, int palette_ctx,
+    int skip_mask, unsigned int *ref_costs_single, int64_t *best_rd,
+    int64_t *best_intra_rd, PREDICTION_MODE *best_intra_mode,
+    int *best_mode_index, int *best_skip2, int *best_mode_skippable,
 #if CONFIG_SUPERTX
-                                  int *returnrate_nocoef,
+    int *returnrate_nocoef,
 #endif  // CONFIG_SUPERTX
-                                  int64_t *best_pred_rd,
-                                  MB_MODE_INFO *best_mbmode, RD_COST *rd_cost) {
+    int64_t *best_pred_rd, MB_MODE_INFO *best_mbmode, RD_COST *rd_cost) {
   VP10_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
@@ -8457,7 +8451,7 @@ static void pick_ext_intra_iframe(VP10_COMP *cpi, MACROBLOCK *x,
                                 MAX_ANGLE_DELTAS +
                                 mbmi->angle_delta[1]);
   }
-  if (ALLOW_FILTER_INTRA_MODES && mbmi->mode == DC_PRED) {
+  if (mbmi->mode == DC_PRED) {
     rate2 += vp10_cost_bit(cpi->common.fc->ext_intra_probs[1],
                            mbmi->ext_intra_mode_info.use_ext_intra_mode[1]);
     if (mbmi->ext_intra_mode_info.use_ext_intra_mode[1])
@@ -9899,19 +9893,20 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
   // TODO(huisu): ext-intra is turned off in lossless mode for now to
   // avoid a unit test failure
   if (!xd->lossless[mbmi->segment_id] &&
+      ALLOW_FILTER_INTRA_MODES &&
       mbmi->palette_mode_info.palette_size[0] == 0 && !dc_skipped &&
       best_mode_index >= 0 && (best_intra_rd >> 1)  < best_rd) {
-    pick_ext_intra_iframe(cpi, x, ctx, bsize, rate_uv_intra,
-                          rate_uv_tokenonly, dist_uv, skip_uv,
-                          mode_uv, ext_intra_mode_info_uv,
-                          pmi_uv, uv_angle_delta, palette_ctx, 0,
-                          ref_costs_single, &best_rd, &best_intra_rd,
-                          &best_intra_mode, &best_mode_index,
-                          &best_skip2, &best_mode_skippable,
+    pick_ext_intra_interframe(cpi, x, ctx, bsize, rate_uv_intra,
+                              rate_uv_tokenonly, dist_uv, skip_uv,
+                              mode_uv, ext_intra_mode_info_uv,
+                              pmi_uv, uv_angle_delta, palette_ctx, 0,
+                              ref_costs_single, &best_rd, &best_intra_rd,
+                              &best_intra_mode, &best_mode_index,
+                              &best_skip2, &best_mode_skippable,
 #if CONFIG_SUPERTX
-                          returnrate_nocoef,
+                              returnrate_nocoef,
 #endif  // CONFIG_SUPERTX
-                          best_pred_rd, &best_mbmode, rd_cost);
+                              best_pred_rd, &best_mbmode, rd_cost);
   }
 #endif  // CONFIG_EXT_INTRA
 
