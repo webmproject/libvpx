@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54d87e08_976eacfe",
+        "filename": "vp9/encoder/vp9_alt_ref_aq.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-02T21:56:28Z",
+      "side": 1,
+      "message": "drop the empty comment.\nthe linter requires a space after the semicolon",
+      "range": {
+        "startLine": 87,
+        "startChar": 7,
+        "endLine": 87,
+        "endChar": 12
+      },
+      "revId": "6c80f73a1307f087ac04d244cfa2582a315a54b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54d87e08_97846cb3",
+        "filename": "vp9/encoder/vp9_alt_ref_aq.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-02T21:56:28Z",
+      "side": 1,
+      "message": "This is a strange ordering",
+      "range": {
+        "startLine": 129,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 45
+      },
+      "revId": "6c80f73a1307f087ac04d244cfa2582a315a54b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54d87e08_7756a837",
+        "filename": "vp9/encoder/vp9_alt_ref_aq.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-02T21:56:28Z",
+      "side": 1,
+      "message": "typically this codebase doesn\u0027t include these sorts of rulers.",
+      "range": {
+        "startLine": 143,
+        "startChar": 14,
+        "endLine": 143,
+        "endChar": 51
+      },
+      "revId": "6c80f73a1307f087ac04d244cfa2582a315a54b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54d87e08_979b0c09",
+        "filename": "vp9/encoder/vp9_alt_ref_aq.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-02T21:56:28Z",
+      "side": 1,
+      "message": "Do you need to reorder these here?",
+      "range": {
+        "startLine": 206,
+        "startChar": 0,
+        "endLine": 215,
+        "endChar": 1
+      },
+      "revId": "6c80f73a1307f087ac04d244cfa2582a315a54b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54d87e08_3732600c",
+        "filename": "vp9/encoder/vp9_alt_ref_aq_private.h",
+        "patchSetId": 22
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-02T21:56:28Z",
+      "side": 1,
+      "message": "\"__\" is a namespace reserved for the compiler.",
+      "range": {
+        "startLine": 38,
+        "startChar": 6,
+        "endLine": 38,
+        "endChar": 8
+      },
+      "revId": "6c80f73a1307f087ac04d244cfa2582a315a54b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54d87e08_172e3c94",
+        "filename": "vp9/encoder/vp9_alt_ref_aq_private.h",
+        "patchSetId": 22
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-02T21:56:28Z",
+      "side": 1,
+      "message": "What\u0027s with these being all caps?",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 25
+      },
+      "revId": "6c80f73a1307f087ac04d244cfa2582a315a54b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54d87e08_b7f41024",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 22
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-02T21:56:28Z",
+      "side": 1,
+      "message": "can this get a more descriptive name?",
+      "range": {
+        "startLine": 356,
+        "startChar": 27,
+        "endLine": 356,
+        "endChar": 40
+      },
+      "revId": "6c80f73a1307f087ac04d244cfa2582a315a54b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
