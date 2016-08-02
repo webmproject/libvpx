@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f4533225_e913b1b0",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2016-08-02T08:49:23Z",
+      "side": 1,
+      "message": "I see 4 below not 3 (arf,overlay.regular and golden)\n\nI wonder though. The GF but not arf or overlay case is relatively rare. However, it seems to me not ideal to use the same context for normal inter and key. Could we separate these and have GF and arf share a context.",
+      "range": {
+        "startLine": 312,
+        "startChar": 51,
+        "endLine": 312,
+        "endChar": 56
+      },
+      "revId": "fa522e1c300ddda37660fab8868fbc68cb7fdfcf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
