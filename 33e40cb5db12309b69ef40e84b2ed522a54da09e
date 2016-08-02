@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "54d87e08_3a51e562",
+        "filename": "test/acm_random.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-02T22:49:08Z",
+      "side": 1,
+      "message": "not sure if clang-format will mess with that, probably an OK follow-up",
+      "parentUuid": "8fdd7d60_cb563538",
+      "revId": "33e40cb5db12309b69ef40e84b2ed522a54da09e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8fdd7d60_4e593392",
         "filename": "test/byte_alignment_test.cc",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "54d87e08_7aba0d88",
+        "filename": "test/byte_alignment_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-02T22:49:08Z",
+      "side": 1,
+      "message": "this has been applied to aomedia and there was some discussion around it. doesn\u0027t mean it can\u0027t be changed, but we probably want to be consistent between the projects",
+      "parentUuid": "8fdd7d60_4e593392",
+      "revId": "33e40cb5db12309b69ef40e84b2ed522a54da09e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ef5fd9c9_e92471cb",
         "filename": "test/datarate_test.cc",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2016-07-29T00:40:12Z",
       "side": 1,
       "message": "The more I see these the more I realize I very much prefer \u0027AllowShortIfStatementsOnASingleLine: false\u0027... otoh, I\u0027ll get over it eventually. \n\nMy main problem is subjective: I never write them this way because it does not feel right (but it doesn\u0027t feel right _because_ I never write them this way... etc etc).",
+      "revId": "33e40cb5db12309b69ef40e84b2ed522a54da09e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54d87e08_5adce9de",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-02T22:49:08Z",
+      "side": 1,
+      "message": "we can force them to multi-line if there was some consistency with {}s; maybe I should have applied clang-tidy first",
+      "parentUuid": "ef5fd9c9_e92471cb",
       "revId": "33e40cb5db12309b69ef40e84b2ed522a54da09e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -104,6 +158,24 @@
     },
     {
       "key": {
+        "uuid": "54d87e08_1ad661bd",
+        "filename": "test/decode_api_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-02T22:49:08Z",
+      "side": 1,
+      "message": "we\u0027re halfway through this branch now, so would probably want to mass apply that to all three branches/projects though it\u0027s a bit of noise",
+      "parentUuid": "4f39c5b7_09a1093f",
+      "revId": "33e40cb5db12309b69ef40e84b2ed522a54da09e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f39c5b7_c930d1f1",
         "filename": "test/encode_test_driver.cc",
         "patchSetId": 4
@@ -138,6 +210,24 @@
     },
     {
       "key": {
+        "uuid": "54d87e08_bae635ac",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-02T22:49:08Z",
+      "side": 1,
+      "message": "hard to force that with the preference that the * is associated with the variable",
+      "parentUuid": "4f39c5b7_a90d5d42",
+      "revId": "33e40cb5db12309b69ef40e84b2ed522a54da09e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f39c5b7_2905edbd",
         "filename": "test/fdct8x8_test.cc",
         "patchSetId": 4
@@ -149,6 +239,24 @@
       "writtenOn": "2016-07-29T00:40:12Z",
       "side": 1,
       "message": "could collapse the vertical whitespace here... I don\u0027t think the blank line between each small test here is really helping with readability.",
+      "revId": "33e40cb5db12309b69ef40e84b2ed522a54da09e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54d87e08_7a8c4de0",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-02T22:49:08Z",
+      "side": 1,
+      "message": "I agree. clang-format isn\u0027t collapsing this kind of thing it seems",
+      "parentUuid": "4f39c5b7_2905edbd",
       "revId": "33e40cb5db12309b69ef40e84b2ed522a54da09e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
