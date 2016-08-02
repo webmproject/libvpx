@@ -141,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "2f2ad160_17791e90",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3076,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-02T23:17:51Z",
+      "side": 1,
+      "message": "Since the baseline uses\narf_idx \u003d cpi-\u003ealt_fb_idx;\n\nI meant to keep \"something_idx\" uniquely associated with the virtual indices in case of confusion.",
+      "parentUuid": "6f6cc981_caaf2395",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ef5fd9c9_69d2c15a",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 5
@@ -158,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "2f2ad160_f722ca5b",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3551,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-02T23:17:51Z",
+      "side": 1,
+      "message": "Ditto",
+      "parentUuid": "ef5fd9c9_69d2c15a",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ef5fd9c9_09cf8dad",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 5
@@ -169,6 +205,24 @@
       "writtenOn": "2016-07-28T22:07:19Z",
       "side": 1,
       "message": "Ditto",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2f2ad160_17083ed5",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3570,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-02T23:17:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ef5fd9c9_09cf8dad",
       "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -227,6 +281,24 @@
     },
     {
       "key": {
+        "uuid": "4f39c5b7_a1cc89b7",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1749,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-02T23:17:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ef5fd9c9_8c8ceb84",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f39c5b7_097829d3",
         "filename": "vp10/encoder/firstpass.c",
         "patchSetId": 5
@@ -273,6 +345,24 @@
       "writtenOn": "2016-07-28T23:31:55Z",
       "side": 1,
       "message": "Ditto",
+      "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f39c5b7_9c99ac6b",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1935,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-02T23:17:51Z",
+      "side": 1,
+      "message": "Here we assign values to the extra ARFs.\nThe zero index is used by the original ARF, so \"i\" starts from one.",
+      "parentUuid": "4f39c5b7_893a59ef",
       "revId": "46dc835f3181d6d63ab67c6bf893c231aa188566",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
