@@ -150,7 +150,7 @@ static void var_filter_block2d_bil_second_pass(const uint16_t *a, uint8_t *b,
                                      uint32_t *sse) {                \
     int sum;                                                         \
     variance(a, a_stride, b, b_stride, W, H, sse, &sum);             \
-    return *sse - (((int64_t)sum * sum) / (W * H));                  \
+    return *sse - (uint32_t)(((int64_t)sum * sum) / (W * H));        \
   }
 
 #define SUBPIX_VAR(W, H)                                                \
