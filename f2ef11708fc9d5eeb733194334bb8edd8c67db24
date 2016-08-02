@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54d87e08_17d95c24",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 682,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-02T21:37:52Z",
+      "side": 1,
+      "message": "Avoid commenting out blocks of code. just delete it.",
+      "range": {
+        "startLine": 668,
+        "startChar": 0,
+        "endLine": 682,
+        "endChar": 9
+      },
+      "revId": "f2ef11708fc9d5eeb733194334bb8edd8c67db24",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
