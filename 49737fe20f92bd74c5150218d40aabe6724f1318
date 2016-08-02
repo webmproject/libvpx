@@ -34,6 +34,24 @@
       "revId": "49737fe20f92bd74c5150218d40aabe6724f1318",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54d87e08_fa7cbd4f",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-02T23:15:11Z",
+      "side": 1,
+      "message": "I mean you should make the variable [8] in all cases, but only need to clear it for the one known case for now",
+      "parentUuid": "8fdd7d60_b7dd83da",
+      "revId": "49737fe20f92bd74c5150218d40aabe6724f1318",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
