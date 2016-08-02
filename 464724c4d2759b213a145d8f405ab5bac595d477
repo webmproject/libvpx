@@ -22,6 +22,30 @@
       "revId": "464724c4d2759b213a145d8f405ab5bac595d477",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54d87e08_5a3e2975",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 8460,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-08-02T23:16:49Z",
+      "side": 0,
+      "message": "pick_ext_intra_interframe() will only be called if ALLOW_FILTER_INTRA_MODES is 1. That is why I do not check this flag inside the function.",
+      "parentUuid": "54d87e08_ba65d54a",
+      "range": {
+        "startLine": 8460,
+        "startChar": 6,
+        "endLine": 8460,
+        "endChar": 34
+      },
+      "revId": "464724c4d2759b213a145d8f405ab5bac595d477",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
