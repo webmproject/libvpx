@@ -4549,18 +4549,20 @@ static void convert_to_params(double *H, TransformationType type,
                                               (1 << GM_TRANS_PREC_BITS) + 0.5);
   model->motion_params.wmmat[0] =
       clamp(model->motion_params.wmmat[0],
-            GM_TRANS_MIN, GM_TRANS_MAX);
+            GM_TRANS_MIN, GM_TRANS_MAX) *
+            GM_TRANS_DECODE_FACTOR;
   model->motion_params.wmmat[1] =
       clamp(model->motion_params.wmmat[1],
-            GM_TRANS_MIN, GM_TRANS_MAX);
+            GM_TRANS_MIN, GM_TRANS_MAX) *
+            GM_TRANS_DECODE_FACTOR;
 
   for (i = 2; i < n_params; ++i) {
     model->motion_params.wmmat[i] =
         (int) floor(H[i] *
-                    (1 << GM_ALPHA_PREC_BITS) + 0.5) -
-                    (!(i & 1) * (1 << GM_ALPHA_PREC_BITS));
+                    (1 << GM_ALPHA_PREC_BITS) + 0.5);
     model->motion_params.wmmat[i] = clamp(model->motion_params.wmmat[i],
-                                          GM_ALPHA_MIN, GM_ALPHA_MAX);
+                                          GM_ALPHA_MIN, GM_ALPHA_MAX) *
+                                          GM_ALPHA_DECODE_FACTOR;
     alpha_present |= (model->motion_params.wmmat[i] != 0);
   }
 
@@ -4579,6 +4581,7 @@ static void convert_model_to_params(double *H, TransformationType type,
   if (type > HOMOGRAPHY)
       convert_to_params(H, type, model);
   model->gmtype = get_gmtype(model);
+  model->motion_params.wmtype = gm_to_trans_type(model->gmtype);
 }
 #endif  // CONFIG_GLOBAL_MOTION
 
@@ -4610,7 +4613,7 @@ static void encode_frame_internal(VP10_COMP *cpi) {
     int frame;
     double H[9] = {0, 0, 0, 0, 0, 0, 0, 0, 1};
     for (frame = LAST_FRAME; frame <= ALTREF_FRAME; ++frame)
-      convert_model_to_params(H, ROTZOOM, &cm->global_motion[frame]);
+      convert_model_to_params(H, AFFINE, &cm->global_motion[frame]);
   }
 #endif  // CONFIG_GLOBAL_MOTION
 

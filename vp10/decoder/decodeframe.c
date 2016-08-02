@@ -3473,6 +3473,7 @@ static void read_global_motion_params(Global_Motion_Params *params,
       params->motion_params.wmmat[5] =
           vp10_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
           GM_ALPHA_DECODE_FACTOR;
+      // fallthrough intended
     case GLOBAL_ROTZOOM:
       params->motion_params.wmmat[2] =
           (vp10_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
@@ -3480,6 +3481,7 @@ static void read_global_motion_params(Global_Motion_Params *params,
       params->motion_params.wmmat[3] =
           vp10_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
           GM_ALPHA_DECODE_FACTOR;
+      // fallthrough intended
     case GLOBAL_TRANSLATION:
       params->motion_params.wmmat[0] =
           vp10_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
