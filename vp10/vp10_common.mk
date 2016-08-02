@@ -118,6 +118,11 @@ VP10_COMMON_SRCS-$(HAVE_NEON) += common/arm/neon/iht4x4_add_neon.c
 VP10_COMMON_SRCS-$(HAVE_NEON) += common/arm/neon/iht8x8_add_neon.c
 endif
 
+ifeq ($(CONFIG_EXT_INTRA),yes)
+VP10_COMMON_SRCS-yes += common/intra_filters.h
+VP10_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/reconintra_sse4.c
+endif
+
 VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp10_inv_txfm_sse2.c
 VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp10_inv_txfm_sse2.h
 

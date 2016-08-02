@@ -149,6 +149,10 @@ LIBVPX_TEST_SRCS-$(HAVE_SSSE3) += masked_sad_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_wedge_utils_test.cc
 endif
 
+ifeq ($(CONFIG_EXT_INTRA),yes)
+LIBVPX_TEST_SRCS-$(HAVE_SSE4_1) += reconintra_predictors_test.cc
+endif
+
 ifeq ($(CONFIG_OBMC),yes)
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += obmc_sad_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += obmc_variance_test.cc

@@ -10,6 +10,7 @@
 
 #include <math.h>
 
+#include "./vp10_rtcd.h"
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_ports/system_state.h"
@@ -20,7 +21,9 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 #include "vpx_ports/vpx_once.h"
-
+#if CONFIG_EXT_INTRA
+#include "vp10/common/intra_filters.h"
+#endif
 #include "vp10/common/reconintra.h"
 #include "vp10/common/onyxc_int.h"
 
@@ -390,7 +393,6 @@ static void vp10_init_intra_predictors_internal(void) {
 }
 
 #if CONFIG_EXT_INTRA
-#define FILTER_INTRA_PREC_BITS 10
 
 static const uint8_t ext_intra_extend_modes[FILTER_INTRA_MODES] = {
   NEED_LEFT | NEED_ABOVE,      // FILTER_DC
@@ -719,57 +721,6 @@ static void dr_predictor(uint8_t *dst, ptrdiff_t stride, TX_SIZE tx_size,
   }
 }
 
-static int filter_intra_taps_4[TX_SIZES][INTRA_MODES][4] = {
-    {
-        {735, 881, -537, -54},
-        {1005, 519, -488, -11},
-        {383, 990, -343, -6},
-        {442, 805, -542, 319},
-        {658, 616, -133, -116},
-        {875, 442, -141, -151},
-        {386, 741, -23, -80},
-        {390, 1027, -446, 51},
-        {679, 606, -523, 262},
-        {903, 922, -778, -23},
-    },
-    {
-        {648, 803, -444, 16},
-        {972, 620, -576, 7},
-        {561, 967, -499, -5},
-        {585, 762, -468, 144},
-        {596, 619, -182, -9},
-        {895, 459, -176, -153},
-        {557, 722, -126, -129},
-        {601, 839, -523, 105},
-        {562, 709, -499, 251},
-        {803, 872, -695, 43},
-    },
-    {
-        {423, 728, -347, 111},
-        {963, 685, -665, 23},
-        {281, 1024, -480, 216},
-        {640, 596, -437, 78},
-        {429, 669, -259, 99},
-        {740, 646, -415, 23},
-        {568, 771, -346, 40},
-        {404, 833, -486, 209},
-        {398, 712, -423, 307},
-        {939, 935, -887, 17},
-    },
-    {
-        {477, 737, -393, 150},
-        {881, 630, -546, 67},
-        {506, 984, -443, -20},
-        {114, 459, -270, 528},
-        {433, 528, 14, 3},
-        {837, 470, -301, -30},
-        {181, 777, 89, -107},
-        {-29, 716, -232, 259},
-        {589, 646, -495, 255},
-        {740, 884, -728, 77},
-    },
-};
-
 static void filter_intra_predictors_4tap(uint8_t *dst, ptrdiff_t stride, int bs,
                                          const uint8_t *above,
                                          const uint8_t *left,
@@ -815,63 +766,94 @@ static void filter_intra_predictors_4tap(uint8_t *dst, ptrdiff_t stride, int bs,
   }
 }
 
-static void dc_filter_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
-                               const uint8_t *above, const uint8_t *left) {
+void vp10_dc_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                                const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, DC_PRED);
 }
 
-static void v_filter_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
+void vp10_v_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
                                const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, V_PRED);
 }
 
-static void h_filter_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
+void vp10_h_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
                                const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, H_PRED);
 }
 
-static void d45_filter_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
+void vp10_d45_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
                                  const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, D45_PRED);
 }
 
-static void d135_filter_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
+void vp10_d135_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
                                   const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, D135_PRED);
 }
 
-static void d117_filter_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
+void vp10_d117_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
                                   const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, D117_PRED);
 }
 
-static void d153_filter_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
+void vp10_d153_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
                                   const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, D153_PRED);
 }
 
-static void d207_filter_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
+void vp10_d207_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
                                   const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, D207_PRED);
 }
 
-static void d63_filter_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
+void vp10_d63_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
                                  const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, D63_PRED);
 }
 
-static void tm_filter_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
+void vp10_tm_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
                                 const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, TM_PRED);
 }
 
-static void (*filter_intra_predictors[EXT_INTRA_MODES])(uint8_t *dst,
-    ptrdiff_t stride, int bs, const uint8_t *above, const uint8_t *left) = {
-        dc_filter_predictor, v_filter_predictor, h_filter_predictor,
-        d45_filter_predictor, d135_filter_predictor, d117_filter_predictor,
-        d153_filter_predictor, d207_filter_predictor, d63_filter_predictor,
-        tm_filter_predictor,
-};
+static void filter_intra_predictors(int mode, uint8_t *dst,
+                                    ptrdiff_t stride, int bs,
+                                    const uint8_t *above, const uint8_t *left) {
+  switch (mode) {
+    case DC_PRED:
+      vp10_dc_filter_predictor(dst, stride, bs, above, left);
+      break;
+    case V_PRED:
+      vp10_v_filter_predictor(dst, stride, bs, above, left);
+      break;
+    case H_PRED:
+      vp10_h_filter_predictor(dst, stride, bs, above, left);
+      break;
+    case D45_PRED:
+        vp10_d45_filter_predictor(dst, stride, bs, above, left);
+      break;
+    case D135_PRED:
+      vp10_d135_filter_predictor(dst, stride, bs, above, left);
+      break;
+    case D117_PRED:
+      vp10_d117_filter_predictor(dst, stride, bs, above, left);
+      break;
+    case D153_PRED:
+        vp10_d153_filter_predictor(dst, stride, bs, above, left);
+      break;
+    case D207_PRED:
+      vp10_d207_filter_predictor(dst, stride, bs, above, left);
+      break;
+    case D63_PRED:
+      vp10_d63_filter_predictor(dst, stride, bs, above, left);
+      break;
+    case TM_PRED:
+      vp10_tm_filter_predictor(dst, stride, bs, above, left);
+      break;
+    default:
+      assert(0);
+  }
+}
 
 #if CONFIG_VP9_HIGHBITDEPTH
 static int highbd_intra_subpel_interp(int base, int shift, const uint16_t *ref,
@@ -1491,8 +1473,8 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
 
 #if CONFIG_EXT_INTRA
   if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
-    filter_intra_predictors[ext_intra_mode](dst, dst_stride, bs,
-        const_above_row, left_col);
+    filter_intra_predictors(ext_intra_mode, dst, dst_stride, bs,
+                            const_above_row, left_col);
     return;
   }
 
