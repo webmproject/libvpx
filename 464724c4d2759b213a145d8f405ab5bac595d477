@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54d87e08_ba65d54a",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 8460,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-08-02T22:42:47Z",
+      "side": 0,
+      "message": "This should stay. When filter intra modes are not allowed, we should not count the rate overhead.",
+      "range": {
+        "startLine": 8460,
+        "startChar": 6,
+        "endLine": 8460,
+        "endChar": 34
+      },
+      "revId": "464724c4d2759b213a145d8f405ab5bac595d477",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
