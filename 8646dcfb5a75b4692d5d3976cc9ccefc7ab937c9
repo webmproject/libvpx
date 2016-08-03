@@ -1,0 +1,211 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "148e0681_6fe731dc",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-03T23:08:49Z",
+      "side": 1,
+      "message": "The tests in lpf_8_test.cc are only run when HAVE_NEON_ASM is defined. That should be updated.",
+      "range": {
+        "startLine": 10,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 32
+      },
+      "revId": "8646dcfb5a75b4692d5d3976cc9ccefc7ab937c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "148e0681_ef048170",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-03T23:08:49Z",
+      "side": 1,
+      "message": "the lpf_8_test.cc name seems to be wrong. The 16 functions are there as well",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 26
+      },
+      "revId": "8646dcfb5a75b4692d5d3976cc9ccefc7ab937c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "148e0681_2f660956",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-03T23:08:49Z",
+      "side": 1,
+      "message": "Capitalize Should",
+      "range": {
+        "startLine": 14,
+        "startChar": 3,
+        "endLine": 14,
+        "endChar": 9
+      },
+      "revId": "8646dcfb5a75b4692d5d3976cc9ccefc7ab937c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "148e0681_0fea2574",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-03T23:08:49Z",
+      "side": 1,
+      "message": "Because the function is \u0027static\u0027 and in the _neon file, you don\u0027t need to add _neon to the function name.",
+      "range": {
+        "startLine": 15,
+        "startChar": 24,
+        "endLine": 15,
+        "endChar": 40
+      },
+      "revId": "8646dcfb5a75b4692d5d3976cc9ccefc7ab937c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "148e0681_6f1171a8",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-03T23:08:49Z",
+      "side": 1,
+      "message": "INLINE is defined in vpx_config.h, so please include it.",
+      "range": {
+        "startLine": 15,
+        "startChar": 7,
+        "endLine": 15,
+        "endChar": 13
+      },
+      "revId": "8646dcfb5a75b4692d5d3976cc9ccefc7ab937c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "148e0681_4f5fcd77",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-03T23:08:49Z",
+      "side": 1,
+      "message": "Since all the values in the function are vectors (no scalar \u0027limit\u0027 to mix it up with) you don\u0027t need to add _u8x8 to the end of each one.",
+      "range": {
+        "startLine": 16,
+        "startChar": 14,
+        "endLine": 16,
+        "endChar": 24
+      },
+      "revId": "8646dcfb5a75b4692d5d3976cc9ccefc7ab937c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "148e0681_af50b95f",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-03T23:08:49Z",
+      "side": 1,
+      "message": "Capitalize Is",
+      "range": {
+        "startLine": 24,
+        "startChar": 5,
+        "endLine": 24,
+        "endChar": 7
+      },
+      "revId": "8646dcfb5a75b4692d5d3976cc9ccefc7ab937c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "148e0681_8fbe1578",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-03T23:08:49Z",
+      "side": 1,
+      "message": "Where is \u0027mask4\u0027?",
+      "range": {
+        "startLine": 48,
+        "startChar": 24,
+        "endLine": 48,
+        "endChar": 39
+      },
+      "revId": "8646dcfb5a75b4692d5d3976cc9ccefc7ab937c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "148e0681_6f7df148",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 582,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-03T23:08:49Z",
+      "side": 1,
+      "message": "Why not replace the assembly? It simply calls the function twice, same as you do here. See loopfilter_neon.c. You could also implement the 8_dual functions.",
+      "range": {
+        "startLine": 582,
+        "startChar": 5,
+        "endLine": 582,
+        "endChar": 34
+      },
+      "revId": "8646dcfb5a75b4692d5d3976cc9ccefc7ab937c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
