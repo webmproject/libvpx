@@ -52,6 +52,41 @@
       "revId": "49737fe20f92bd74c5150218d40aabe6724f1318",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4e61afd_22c80a7c",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-03T19:49:52Z",
+      "side": 1,
+      "message": "I still don\u0027t understand what the benefit of making it [8] all the time is.",
+      "parentUuid": "54d87e08_fa7cbd4f",
+      "revId": "49737fe20f92bd74c5150218d40aabe6724f1318",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4e61afd_42cd168b",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-03T19:49:52Z",
+      "side": 1,
+      "message": "should say \u002732 bits\u0027 not \u002732 bytes\u0027\n\nwoops",
+      "revId": "49737fe20f92bd74c5150218d40aabe6724f1318",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
