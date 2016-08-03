@@ -69,6 +69,24 @@
       "revId": "9095d66af08df1b6f2ac4f90ce3e691a65bf91f0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "94f676e4_432fc63c",
+        "filename": "vpx_dsp/arm/transpose_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-03T22:35:18Z",
+      "side": 1,
+      "message": "\u003e I used the same format as the vtrn* neon functions. A little\n \u003e concerned about namespace clashing if they ever added vtrnq_64,\n \u003e thought about prefixing it.\n \u003e \n\na vpx_ prefix would make sense",
+      "parentUuid": "b4e61afd_8533a8f6",
+      "revId": "9095d66af08df1b6f2ac4f90ce3e691a65bf91f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
