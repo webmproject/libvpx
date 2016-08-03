@@ -28,8 +28,6 @@ extern "C" {
 #define ANS_METHOD_UABS 0
 #define ANS_METHOD_RANS 1
 
-struct aom_internal_error_info *error;
-
 struct buffered_ans_symbol {
   unsigned int method : 1;  // one of ANS_METHOD_UABS or ANS_METHOD_RANS
   // TODO(aconverse): Should be possible to write this in terms of start for ABS

@@ -24,3 +24,7 @@ int aom_daala_reader_init(daala_reader *r, const uint8_t *buffer, int size) {
 const uint8_t *aom_daala_reader_find_end(daala_reader *r) {
   return r->buffer_end;
 }
+
+ptrdiff_t aom_daala_reader_tell(const daala_reader *r) {
+  return od_ec_dec_tell(&r->ec);
+}

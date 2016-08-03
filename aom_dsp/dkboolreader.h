@@ -45,6 +45,7 @@ struct aom_dk_reader {
   BD_VALUE value;
   unsigned int range;
   int count;
+  const uint8_t *buffer_start;
   const uint8_t *buffer_end;
   const uint8_t *buffer;
   aom_decrypt_cb decrypt_cb;
@@ -59,6 +60,13 @@ int aom_dk_reader_init(struct aom_dk_reader *r, const uint8_t *buffer,
 void aom_dk_reader_fill(struct aom_dk_reader *r);
 
 const uint8_t *aom_dk_reader_find_end(struct aom_dk_reader *r);
+
+static INLINE ptrdiff_t aom_dk_reader_tell(const struct aom_dk_reader *r) {
+  const size_t bits_read = (r->buffer - r->buffer_start) * CHAR_BIT;
+  const int count =
+      (r->count < LOTS_OF_BITS) ? r->count : r->count - LOTS_OF_BITS;
+  return bits_read + BD_VALUE_SIZE - (count + CHAR_BIT);
+}
 
 static INLINE int aom_dk_reader_has_error(struct aom_dk_reader *r) {
   // Check if we have reached the end of the buffer.
