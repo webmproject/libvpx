@@ -127,6 +127,24 @@
     },
     {
       "key": {
+        "uuid": "148e0681_2f85a904",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-03T23:16:13Z",
+      "side": 1,
+      "message": "True. It loads 4 extra bytes of garbage. It\u0027s not exactly a random location - it\u0027s whatever 4 bytes are after the existing allocation. But only in the case of neon and the extra values are not used. I don\u0027t think the common case should be forced to 8 because there is one outlier.\n\nAnd if another memory test does find it, it\u0027ll need to be updated because the memset only happens for ASan.",
+      "parentUuid": "148e0681_4f658d1a",
+      "revId": "49737fe20f92bd74c5150218d40aabe6724f1318",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b4e61afd_42cd168b",
         "filename": "vp8/common/reconintra4x4.c",
         "patchSetId": 3
