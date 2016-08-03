@@ -1949,9 +1949,7 @@ static int rd_pick_palette_intra_sby(VP10_COMP *cpi, MACROBLOCK *x,
       pmi->palette_size[0] = k;
 
       vp10_calc_indices(data, centroids, indices, rows * cols, k, 1);
-      for (r = 0; r < rows; ++r)
-        for (c = 0; c < cols; ++c)
-          color_map[r * cols + c] = indices[r * cols + c];
+      memcpy(color_map, indices, rows * cols * sizeof(*color_map));
 
       super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion,
                       &s, NULL, bsize, *best_rd);
@@ -3825,9 +3823,7 @@ static void rd_pick_palette_intra_sbuv(VP10_COMP *cpi, MACROBLOCK *x,
                 clip_pixel((int)lroundf(centroids[j * 2 + i - 1]));
         }
       }
-      for (r = 0; r < rows; ++r)
-        for (c = 0; c < cols; ++c)
-          color_map[r * cols + c] = indices[r * cols + c];
+      memcpy(color_map, indices, rows * cols * sizeof(*color_map));
 
       super_block_uvrd(cpi, x, &this_rate_tokenonly,
                        &this_distortion, &s, &this_sse, bsize, *best_rd);
@@ -8343,10 +8339,7 @@ static void restore_uv_color_map(VP10_COMP *cpi, MACROBLOCK *x) {
 
   vp10_calc_indices(data, centroids, indices, rows * cols,
                     pmi->palette_size[1], 2);
-
-  for (r = 0; r < rows; ++r)
-    for (c = 0; c < cols; ++c)
-      color_map[r * cols + c] = indices[r * cols + c];
+  memcpy(color_map, indices, rows * cols * sizeof(*color_map));
 }
 
 #if CONFIG_EXT_INTRA
