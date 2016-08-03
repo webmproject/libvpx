@@ -17,9 +17,6 @@
 #include "vp10/common/alloccommon.h"
 #include "vp10/common/filter.h"
 #include "vp10/common/idct.h"
-#if CONFIG_VP9_POSTPROC
-#include "vp10/common/postproc.h"
-#endif
 #include "vp10/common/reconinter.h"
 #include "vp10/common/reconintra.h"
 #include "vp10/common/tile_common.h"
@@ -458,9 +455,6 @@ static void dealloc_compressor_data(VP10_COMP *cpi) {
     vpx_free_frame_buffer(&cpi->upsampled_ref_bufs[i].buf);
 
   vp10_free_ref_frame_buffers(cm->buffer_pool);
-#if CONFIG_VP9_POSTPROC
-  vp10_free_postproc_buffers(cm);
-#endif  // CONFIG_VP9_POSTPROC
 #if CONFIG_LOOP_RESTORATION
   vp10_free_restoration_buffers(cm);
 #endif  // CONFIG_LOOP_RESTORATION
@@ -2542,11 +2536,6 @@ VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
   cpi->td.mb.nmvsadcost_hp[1] = &cpi->nmvsadcosts_hp[1][MV_MAX];
   cal_nmvsadcosts_hp(cpi->td.mb.nmvsadcost_hp);
 
-#if CONFIG_VP9_TEMPORAL_DENOISING
-#ifdef OUTPUT_YUV_DENOISED
-  yuv_denoised_file = fopen("denoised.yuv", "ab");
-#endif
-#endif
 #ifdef OUTPUT_YUV_SKINMAP
   yuv_skinmap_file = fopen("skinmap.yuv", "ab");
 #endif
@@ -2880,10 +2869,6 @@ void vp10_remove_compressor(VP10_COMP *cpi) {
 #endif
   }
 
-#if CONFIG_VP9_TEMPORAL_DENOISING
-  vp10_denoiser_free(&(cpi->denoiser));
-#endif
-
   for (t = 0; t < cpi->num_workers; ++t) {
     VPxWorker *const worker = &cpi->workers[t];
     EncWorkerData *const thread_data = &cpi->tile_thr_data[t];
@@ -2923,16 +2908,8 @@ void vp10_remove_compressor(VP10_COMP *cpi) {
 
   vp10_remove_common(cm);
   vp10_free_ref_frame_buffers(cm->buffer_pool);
-#if CONFIG_VP9_POSTPROC
-  vp10_free_postproc_buffers(cm);
-#endif
   vpx_free(cpi);
 
-#if CONFIG_VP9_TEMPORAL_DENOISING
-#ifdef OUTPUT_YUV_DENOISED
-  fclose(yuv_denoised_file);
-#endif
-#endif
 #ifdef OUTPUT_YUV_SKINMAP
   fclose(yuv_skinmap_file);
 #endif
@@ -3667,20 +3644,6 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
     // Dump out all reference frame images.
     dump_ref_frame_images(cpi);
 #endif   // DUMP_REF_FRAME_IMAGES
-
-#if CONFIG_VP9_TEMPORAL_DENOISING
-  if (cpi->oxcf.noise_sensitivity > 0) {
-    vp10_denoiser_update_frame_info(&cpi->denoiser,
-                                   *cpi->Source,
-                                   cpi->common.frame_type,
-                                   cpi->refresh_last_frame,
-#if CONFIG_EXT_REFS
-                                   cpi->refresh_bwd_ref_frame,
-#endif  // CONFIG_EXT_REFS
-                                   cpi->refresh_alt_ref_frame,
-                                   cpi->refresh_golden_frame);
-  }
-#endif
 }
 
 static void loopfilter_frame(VP10_COMP *cpi, VP10_COMMON *cm) {
@@ -4056,31 +4019,6 @@ static void set_size_dependent_vars(VP10_COMP *cpi, int *q,
   // lagged coding, and if the relevant speed feature flag is set.
   if (oxcf->pass == 2 && cpi->sf.static_segmentation)
     configure_static_seg_features(cpi);
-
-#if CONFIG_VP9_POSTPROC
-  if (oxcf->noise_sensitivity > 0) {
-    int l = 0;
-    switch (oxcf->noise_sensitivity) {
-      case 1:
-        l = 20;
-        break;
-      case 2:
-        l = 40;
-        break;
-      case 3:
-        l = 60;
-        break;
-      case 4:
-      case 5:
-        l = 100;
-        break;
-      case 6:
-        l = 150;
-        break;
-    }
-    vp10_denoise(cpi->Source, cpi->Source, l);
-  }
-#endif  // CONFIG_VP9_POSTPROC
 }
 
 static void init_motion_estimation(VP10_COMP *cpi) {
@@ -4965,15 +4903,6 @@ static void encode_frame_to_data_rate(VP10_COMP *cpi,
     encode_with_recode_loop(cpi, size, dest);
   }
 
-#if CONFIG_VP9_TEMPORAL_DENOISING
-#ifdef OUTPUT_YUV_DENOISED
-  if (oxcf->noise_sensitivity > 0) {
-    vp10_write_yuv_frame_420(&cpi->denoiser.running_avg_y[INTRA_FRAME],
-                            yuv_denoised_file);
-  }
-#endif  // OUTPUT_YUV_DENOISED
-#endif  // CONFIG_VP9_TEMPORAL_DENOISING
-
 #ifdef OUTPUT_YUV_SKINMAP
   if (cpi->common.current_video_frame > 1) {
     vp10_compute_skin_map(cpi, yuv_skinmap_file);
@@ -5194,23 +5123,6 @@ static void check_initial_width(VP10_COMP *cpi,
   }
 }
 
-#if CONFIG_VP9_TEMPORAL_DENOISING
-static void setup_denoiser_buffer(VP10_COMP *cpi) {
-  VP10_COMMON *const cm = &cpi->common;
-  if (cpi->oxcf.noise_sensitivity > 0 &&
-      !cpi->denoiser.frame_buffer_initialized) {
-    if (vp10_denoiser_alloc(&cpi->denoiser, cm->width, cm->height,
-                            cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
-                            cm->use_highbitdepth,
-#endif
-                            VPX_ENC_BORDER_IN_PIXELS))
-      vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
-                         "Failed to allocate denoiser");
-  }
-}
-#endif
-
 int vp10_receive_raw_frame(VP10_COMP *cpi, unsigned int frame_flags,
                           YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
                           int64_t end_time) {
@@ -5229,9 +5141,6 @@ int vp10_receive_raw_frame(VP10_COMP *cpi, unsigned int frame_flags,
   check_initial_width(cpi, subsampling_x, subsampling_y);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-#if CONFIG_VP9_TEMPORAL_DENOISING
-  setup_denoiser_buffer(cpi);
-#endif
   vpx_usec_timer_start(&timer);
 
   if (vp10_lookahead_push(cpi->lookahead, sd, time_stamp, end_time,
@@ -5777,20 +5686,12 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
   return 0;
 }
 
-int vp10_get_preview_raw_frame(VP10_COMP *cpi, YV12_BUFFER_CONFIG *dest,
-                              vp10_ppflags_t *flags) {
+int vp10_get_preview_raw_frame(VP10_COMP *cpi, YV12_BUFFER_CONFIG *dest) {
   VP10_COMMON *cm = &cpi->common;
-#if !CONFIG_VP9_POSTPROC
-  (void)flags;
-#endif
-
   if (!cm->show_frame) {
     return -1;
   } else {
     int ret;
-#if CONFIG_VP9_POSTPROC
-    ret = vp10_post_proc_frame(cm, dest, flags);
-#else
     if (cm->frame_to_show) {
       *dest = *cm->frame_to_show;
       dest->y_width = cm->width;
@@ -5801,7 +5702,6 @@ int vp10_get_preview_raw_frame(VP10_COMP *cpi, YV12_BUFFER_CONFIG *dest,
     } else {
       ret = -1;
     }
-#endif  // !CONFIG_VP9_POSTPROC
     vpx_clear_system_state();
     return ret;
   }
@@ -5846,10 +5746,6 @@ int vp10_set_size_literal(VP10_COMP *cpi, unsigned int width,
 #else
   check_initial_width(cpi, 1, 1);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-
-#if CONFIG_VP9_TEMPORAL_DENOISING
-  setup_denoiser_buffer(cpi);
-#endif
 
   if (width) {
     cm->width = width;

@@ -35,29 +35,6 @@ if ($opts{arch} eq "x86_64") {
 }
 
 #
-# post proc
-#
-if (vpx_config("CONFIG_VP9_POSTPROC") eq "yes") {
-add_proto qw/void vp10_mbpost_proc_down/, "uint8_t *dst, int pitch, int rows, int cols, int flimit";
-specialize qw/vp10_mbpost_proc_down sse2/;
-$vp10_mbpost_proc_down_sse2=vp10_mbpost_proc_down_xmm;
-
-add_proto qw/void vp10_mbpost_proc_across_ip/, "uint8_t *src, int pitch, int rows, int cols, int flimit";
-specialize qw/vp10_mbpost_proc_across_ip sse2/;
-$vp10_mbpost_proc_across_ip_sse2=vp10_mbpost_proc_across_ip_xmm;
-
-add_proto qw/void vp10_post_proc_down_and_across/, "const uint8_t *src_ptr, uint8_t *dst_ptr, int src_pixels_per_line, int dst_pixels_per_line, int rows, int cols, int flimit";
-specialize qw/vp10_post_proc_down_and_across sse2/;
-$vp10_post_proc_down_and_across_sse2=vp10_post_proc_down_and_across_xmm;
-
-add_proto qw/void vp10_filter_by_weight16x16/, "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int src_weight";
-specialize qw/vp10_filter_by_weight16x16 sse2 msa/;
-
-add_proto qw/void vp10_filter_by_weight8x8/, "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int src_weight";
-specialize qw/vp10_filter_by_weight8x8 sse2 msa/;
-}
-
-#
 # 10/12-tap convolution filters
 #
 add_proto qw/void vp10_convolve_horiz/, "const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride, int w, int h, const InterpFilterParams fp, const int subpel_x_q4, int x_step_q4, int avg";
@@ -351,20 +328,6 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vp10_highbd_convolve8_avg_vert/, "$sse2_x86_64";
 
   #
-  # post proc
-  #
-  if (vpx_config("CONFIG_VP9_POSTPROC") eq "yes") {
-    add_proto qw/void vp10_highbd_mbpost_proc_down/, "uint16_t *dst, int pitch, int rows, int cols, int flimit";
-    specialize qw/vp10_highbd_mbpost_proc_down/;
-
-    add_proto qw/void vp10_highbd_mbpost_proc_across_ip/, "uint16_t *src, int pitch, int rows, int cols, int flimit";
-    specialize qw/vp10_highbd_mbpost_proc_across_ip/;
-
-    add_proto qw/void vp10_highbd_post_proc_down_and_across/, "const uint16_t *src_ptr, uint16_t *dst_ptr, int src_pixels_per_line, int dst_pixels_per_line, int rows, int cols, int flimit";
-    specialize qw/vp10_highbd_post_proc_down_and_across/;
-  }
-
-  #
   # dct
   #
   # Note as optimized versions of these functions are added we need to add a check to ensure
@@ -391,14 +354,6 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 if (vpx_config("CONFIG_VP10_ENCODER") eq "yes") {
 
 # ENCODEMB INVOKE
-
-#
-# Denoiser
-#
-if (vpx_config("CONFIG_VP9_TEMPORAL_DENOISING") eq "yes") {
-  add_proto qw/int vp10_denoiser_filter/, "const uint8_t *sig, int sig_stride, const uint8_t *mc_avg, int mc_avg_stride, uint8_t *avg, int avg_stride, int increase_denoising, BLOCK_SIZE bs, int motion_magnitude";
-  specialize qw/vp10_denoiser_filter sse2/;
-}
 
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 # the transform coefficients are held in 32-bit

@@ -11,7 +11,6 @@
 VP10_COMMON_SRCS-yes += vp10_common.mk
 VP10_COMMON_SRCS-yes += vp10_iface_common.h
 VP10_COMMON_SRCS-yes += common/ans.h
-VP10_COMMON_SRCS-yes += common/ppflags.h
 VP10_COMMON_SRCS-yes += common/alloccommon.c
 VP10_COMMON_SRCS-yes += common/blockd.c
 VP10_COMMON_SRCS-yes += common/debugmodes.c
@@ -86,17 +85,8 @@ VP10_COMMON_SRCS-yes += common/vp10_convolve.h
 VP10_COMMON_SRCS-$(CONFIG_ANS) += common/ans.h
 VP10_COMMON_SRCS-$(CONFIG_ANS) += common/divide.h
 VP10_COMMON_SRCS-$(CONFIG_ANS) += common/divide.c
-
-VP10_COMMON_SRCS-$(CONFIG_VP9_POSTPROC) += common/postproc.h
-VP10_COMMON_SRCS-$(CONFIG_VP9_POSTPROC) += common/postproc.c
 VP10_COMMON_SRCS-$(CONFIG_LOOP_RESTORATION) += common/restoration.h
 VP10_COMMON_SRCS-$(CONFIG_LOOP_RESTORATION) += common/restoration.c
-VP10_COMMON_SRCS-$(CONFIG_VP9_POSTPROC) += common/mfqe.h
-VP10_COMMON_SRCS-$(CONFIG_VP9_POSTPROC) += common/mfqe.c
-ifeq ($(CONFIG_VP9_POSTPROC),yes)
-VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/mfqe_sse2.asm
-VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/postproc_sse2.asm
-endif
 ifeq (yes,$(filter yes,$(CONFIG_GLOBAL_MOTION) $(CONFIG_WARPED_MOTION)))
 VP10_COMMON_SRCS-yes += common/warped_motion.h
 VP10_COMMON_SRCS-yes += common/warped_motion.c
@@ -112,10 +102,6 @@ endif
 VP10_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/idct4x4_msa.c
 VP10_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/idct8x8_msa.c
 VP10_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/idct16x16_msa.c
-
-ifeq ($(CONFIG_VP9_POSTPROC),yes)
-VP10_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/mfqe_msa.c
-endif
 
 VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/idct_intrin_sse2.c
 VP10_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp10_fwd_txfm_sse2.c
