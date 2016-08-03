@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4e61afd_423d16e5",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3210,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-08-03T19:12:50Z",
+      "side": 1,
+      "message": "remove the semi-colon for consistency (with the comment in the decoding function)",
+      "revId": "9d5db064b69a785995d11bab253e63a24faf151f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4e61afd_e245426f",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3219,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-08-03T19:12:50Z",
+      "side": 1,
+      "message": "Ditto",
+      "revId": "9d5db064b69a785995d11bab253e63a24faf151f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
