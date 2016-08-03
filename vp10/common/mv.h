@@ -50,31 +50,34 @@ typedef struct mv32 {
 //
 // The ABS parameters are used to create an upper and lower bound
 // for each parameter. In other words, after a parameter is integerized
-// it is clamped between -(1 << ABS_XXX_BITS) and (1 << ABS_XXX_BITS)
+// it is clamped between -(1 << ABS_XXX_BITS) and (1 << ABS_XXX_BITS).
 //
-// XXX_PREC_DIFF and XXX_DECODE_FACTOR are computed once here to
-// prevent repetetive computation on the decoder side. These are
+// XXX_PREC_DIFF, XXX_ENCODE_FACTOR and XXX_DECODE_FACTOR
+// are computed once here to prevent repetitive
+// computation on the decoder side. These are
 // to allow the global motion parameters to be encoded in a lower
 // precision than the warped model precision. This means that they
 // need to be changed to warped precision when they are decoded.
 //
 // XX_MIN, XX_MAX are also computed to avoid repeated computation
 
-#define GM_TRANS_PREC_BITS        3
-#define GM_TRANS_PREC_DIFF        (WARPEDMODEL_PREC_BITS - GM_TRANS_PREC_BITS)
-#define GM_TRANS_DECODE_FACTOR    (1 << GM_TRANS_PREC_DIFF)
+#define GM_TRANS_PREC_BITS      5
+#define GM_TRANS_PREC_DIFF      (WARPEDMODEL_PREC_BITS - GM_TRANS_PREC_BITS)
+#define GM_TRANS_DECODE_FACTOR  (1 << GM_TRANS_PREC_DIFF)
+#define GM_TRANS_ENCODE_FACTOR  (1 / (GM_TRANS_DECODE_FACTOR))
 
-#define GM_ALPHA_PREC_BITS        5
-#define GM_ALPHA_PREC_DIFF        (WARPEDMODEL_PREC_BITS - GM_ALPHA_PREC_BITS)
-#define GM_ALPHA_DECODE_FACTOR    (1 << GM_ALPHA_PREC_DIFF)
+#define GM_ALPHA_PREC_BITS      5
+#define GM_ALPHA_PREC_DIFF      (WARPEDMODEL_PREC_BITS - GM_ALPHA_PREC_BITS)
+#define GM_ALPHA_DECODE_FACTOR  (1 << GM_ALPHA_PREC_DIFF)
+#define GM_ALPHA_ENCODE_FACTOR  (1 / (GM_ALPHA_DECODE_FACTOR))
 
-#define GM_ABS_ALPHA_BITS         5
-#define GM_ABS_TRANS_BITS         5
+#define GM_ABS_ALPHA_BITS       8
+#define GM_ABS_TRANS_BITS       8
 
-#define GM_TRANS_MAX              (1 << GM_ABS_TRANS_BITS)
-#define GM_ALPHA_MAX              (1 << GM_ABS_ALPHA_BITS)
-#define GM_TRANS_MIN              -GM_TRANS_MAX
-#define GM_ALPHA_MIN              -GM_ALPHA_MAX
+#define GM_TRANS_MAX            (1 << GM_ABS_TRANS_BITS)
+#define GM_ALPHA_MAX            (1 << GM_ABS_ALPHA_BITS)
+#define GM_TRANS_MIN            -GM_TRANS_MAX
+#define GM_ALPHA_MIN            -GM_ALPHA_MAX
 
 typedef enum {
   GLOBAL_ZERO = 0,
