@@ -105,6 +105,24 @@
       "revId": "9095d66af08df1b6f2ac4f90ce3e691a65bf91f0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "148e0681_8f4e153e",
+        "filename": "vpx_dsp/arm/transpose_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-03T23:05:44Z",
+      "side": 1,
+      "message": "I suppose, though I\u0027d prefer some kind of internal prefix in things coming from a header. To a reader it\u0027s not clear if the function is contained as a static in the module or is coming as an inline from a header and is open to name clashes as well.",
+      "parentUuid": "741e62f5_1a9c9dff",
+      "revId": "9095d66af08df1b6f2ac4f90ce3e691a65bf91f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
