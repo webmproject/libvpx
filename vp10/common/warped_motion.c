@@ -666,27 +666,3 @@ void vp10_highbd_warp_plane(WarpedMotionParams *wm,
   }
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-
-void vp10_integerize_model(double *H, TransformationType wmtype,
-                           WarpedMotionParams *wm) {
-  wm->wmtype = wmtype;
-  switch (wmtype) {
-    case HOMOGRAPHY:
-      assert(fabs(H[8] - 1.0) < 1e-12);
-      wm->wmmat[7] = rint(H[7] * (1 << WARPEDMODEL_ROW3HOMO_PREC_BITS));
-      wm->wmmat[6] = rint(H[6] * (1 << WARPEDMODEL_ROW3HOMO_PREC_BITS));
-    case AFFINE:
-      wm->wmmat[5] = rint(H[5] * (1 << WARPEDMODEL_PREC_BITS));
-      wm->wmmat[4] = rint(H[4] * (1 << WARPEDMODEL_PREC_BITS));
-    case ROTZOOM:
-      wm->wmmat[3] = rint(H[3] * (1 << WARPEDMODEL_PREC_BITS));
-      wm->wmmat[2] = rint(H[2] * (1 << WARPEDMODEL_PREC_BITS));
-    case TRANSLATION:
-      wm->wmmat[1] = rint(H[1] * (1 << WARPEDMODEL_PREC_BITS));
-      wm->wmmat[0] = rint(H[0] * (1 << WARPEDMODEL_PREC_BITS));
-      break;
-    default:
-      assert(0);
-  };
-  return;
-}
