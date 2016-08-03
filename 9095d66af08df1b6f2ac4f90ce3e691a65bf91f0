@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54d87e08_a0f7e427",
+        "filename": "vpx_dsp/arm/transpose_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-03T03:54:15Z",
+      "side": 1,
+      "message": "s16_8x8 might be a bit more in line with the typed names in neon.",
+      "revId": "9095d66af08df1b6f2ac4f90ce3e691a65bf91f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54d87e08_c0f46825",
+        "filename": "vpx_dsp/arm/transpose_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-03T03:54:15Z",
+      "side": 1,
+      "message": "what about a helper something like:\n   vtrn_s64(in0, in1, out1, out2)\nthen you could pair the highs and lows:\n   vtrn_s64(c0, c2, a0, a4)",
+      "revId": "9095d66af08df1b6f2ac4f90ce3e691a65bf91f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
