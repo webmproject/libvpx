@@ -2227,6 +2227,9 @@ void vp10_change_config(struct VP10_COMP *cpi, const VP10EncoderConfig *oxcf) {
 #if CONFIG_VP9_HIGHBITDEPTH
   cpi->td.mb.e_mbd.bd = (int)cm->bit_depth;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_GLOBAL_MOTION
+  cpi->td.mb.e_mbd.global_motion = cm->global_motion;
+#endif  // CONFIG_GLOBAL_MOTION
 
   if ((oxcf->pass == 0) && (oxcf->rc_mode == VPX_Q)) {
     rc->baseline_gf_interval = FIXED_GF_INTERVAL;

@@ -494,14 +494,14 @@ static uint8_t warp_interpolate(uint8_t *ref, int x, int y,
   }
 }
 
-void vp10_warp_plane(WarpedMotionParams *wm,
-                     uint8_t *ref,
-                     int width, int height, int stride,
-                     uint8_t *pred,
-                     int p_col, int p_row,
-                     int p_width, int p_height, int p_stride,
-                     int subsampling_x, int subsampling_y,
-                     int x_scale, int y_scale) {
+static void warp_plane(WarpedMotionParams *wm,
+                       uint8_t *ref,
+                       int width, int height, int stride,
+                       uint8_t *pred,
+                       int p_col, int p_row,
+                       int p_width, int p_height, int p_stride,
+                       int subsampling_x, int subsampling_y,
+                       int x_scale, int y_scale) {
   int i, j;
   projectPointsType projectPoints = get_projectPointsType(wm->wmtype);
   if (projectPoints == NULL)
@@ -509,6 +509,8 @@ void vp10_warp_plane(WarpedMotionParams *wm,
   for (i = p_row; i < p_row + p_height; ++i) {
     for (j = p_col; j < p_col + p_width; ++j) {
       int in[2], out[2];
+      in[0] = j;
+      in[1] = i;
       projectPoints(wm->wmmat, in, out, 1, 2, 2, subsampling_x, subsampling_y);
       out[0] = ROUND_POWER_OF_TWO_SIGNED(out[0] * x_scale, 4);
       out[1] = ROUND_POWER_OF_TWO_SIGNED(out[1] * y_scale, 4);
@@ -638,15 +640,15 @@ static uint16_t highbd_warp_interpolate(uint16_t *ref,
   }
 }
 
-void vp10_highbd_warp_plane(WarpedMotionParams *wm,
-                            uint8_t *ref8,
-                            int width, int height, int stride,
-                            uint8_t *pred8,
-                            int p_col, int p_row,
-                            int p_width, int p_height, int p_stride,
-                            int subsampling_x, int subsampling_y,
-                            int x_scale, int y_scale,
-                            int bd) {
+static void highbd_warp_plane(WarpedMotionParams *wm,
+                              uint8_t *ref8,
+                              int width, int height, int stride,
+                              uint8_t *pred8,
+                              int p_col, int p_row,
+                              int p_width, int p_height, int p_stride,
+                              int subsampling_x, int subsampling_y,
+                              int x_scale, int y_scale,
+                              int bd) {
   int i, j;
   projectPointsType projectPoints = get_projectPointsType(wm->wmtype);
   uint16_t *pred = CONVERT_TO_SHORTPTR(pred8);
@@ -656,6 +658,8 @@ void vp10_highbd_warp_plane(WarpedMotionParams *wm,
   for (i = p_row; i < p_row + p_height; ++i) {
     for (j = p_col; j < p_col + p_width; ++j) {
       int in[2], out[2];
+      in[0] = j;
+      in[1] = i;
       projectPoints(wm->wmmat, in, out, 1, 2, 2, subsampling_x, subsampling_y);
       out[0] = ROUND_POWER_OF_TWO_SIGNED(out[0] * x_scale, 4);
       out[1] = ROUND_POWER_OF_TWO_SIGNED(out[1] * y_scale, 4);
@@ -666,3 +670,30 @@ void vp10_highbd_warp_plane(WarpedMotionParams *wm,
   }
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
+void vp10_warp_plane(WarpedMotionParams *wm,
+#if CONFIG_VP9_HIGHBITDEPTH
+                     int use_hbd, int bd,
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+                     uint8_t *ref,
+                     int width, int height, int stride,
+                     uint8_t *pred,
+                     int p_col, int p_row,
+                     int p_width, int p_height, int p_stride,
+                     int subsampling_x, int subsampling_y,
+                     int x_scale, int y_scale) {
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (use_hbd)
+    highbd_warp_plane(wm, ref, width, height, stride,
+                      pred, p_col, p_row,
+                      p_width, p_height, p_stride,
+                      subsampling_x, subsampling_y,
+                      x_scale, y_scale, bd);
+  else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+    warp_plane(wm, ref, width, height, stride,
+               pred, p_col, p_row,
+               p_width, p_height, p_stride,
+               subsampling_x, subsampling_y,
+               x_scale, y_scale);
+}

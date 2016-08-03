@@ -23,6 +23,9 @@
 #if CONFIG_OBMC
 #include "vp10/common/onyxc_int.h"
 #endif  // CONFIG_OBMC
+#if CONFIG_GLOBAL_MOTION
+#include "vp10/common/warped_motion.h"
+#endif  // CONFIG_GLOBAL_MOTION
 
 #if CONFIG_EXT_INTER
 
@@ -704,7 +707,21 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane,
 #endif  // CONFIG_OBMC
   const int is_compound = has_second_ref(&mi->mbmi);
   int ref;
+#if CONFIG_GLOBAL_MOTION
+  Global_Motion_Params *gm[2];
+  int is_global[2];
+  for (ref = 0; ref < 1 + is_compound; ++ref) {
+    gm[ref] = &xd->global_motion[mi->mbmi.ref_frame[ref]];
+    is_global[ref] = (get_y_mode(mi, block) == ZEROMV &&
+                      get_gmtype(gm[ref]) > GLOBAL_ZERO);
+  }
+  // TODO(sarahparker) remove these once gm works with all experiments
+  (void) gm;
+  (void) is_global;
+#endif  // CONFIG_GLOBAL_MOTION
 
+// TODO(sarahparker) enable the use of DUAL_FILTER in warped motion functions
+// in order to allow GLOBAL_MOTION and DUAL_FILTER to work together
 #if CONFIG_DUAL_FILTER
   if (mi->mbmi.sb_type < BLOCK_8X8 && plane > 0) {
     // block size in log2
@@ -838,6 +855,19 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane,
 #endif  // CONFIG_SUPERTX
           xd);
     else
+#else  // CONFIG_EXT_INTER
+#if CONFIG_GLOBAL_MOTION
+    if (is_global[ref])
+      vp10_warp_plane(&(gm[ref]->motion_params),
+#if CONFIG_VP9_HIGHBITDEPTH
+                      xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH, xd->bd,
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+                      pre_buf->buf0, pre_buf->width, pre_buf->height,
+                      pre_buf->stride, dst, (mi_x >> pd->subsampling_x) + x,
+                      (mi_y >> pd->subsampling_y) + y, w, h, dst_buf->stride,
+                      pd->subsampling_x, pd->subsampling_y, xs, ys);
+    else
+#endif  // CONFIG_GLOBAL_MOTION
 #endif  // CONFIG_EXT_INTER
       vp10_make_inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
                                 subpel_x, subpel_y, sf, w, h, ref,
