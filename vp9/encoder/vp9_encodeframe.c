@@ -846,7 +846,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     // that the temporal reference frame will always be of type LAST_FRAME.
     // TODO(marpan): If that assumption is broken, we need to revisit this code.
     MODE_INFO *mi = xd->mi[0];
-    const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
+    YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
 
     const YV12_BUFFER_CONFIG *yv12_g = NULL;
     unsigned int y_sad_g, y_sad_thr;
@@ -871,9 +871,18 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
       y_sad_g = UINT_MAX;
     }
 
-    vp9_setup_pre_planes(xd, 0, yv12, mi_row, mi_col,
-                         &cm->frame_refs[LAST_FRAME - 1].sf);
-    mi->ref_frame[0] = LAST_FRAME;
+    if (cpi->oxcf.lag_in_frames > 0 && cpi->oxcf.rc_mode == VPX_VBR &&
+        cpi->rc.is_src_frame_alt_ref) {
+      yv12 = get_ref_frame_buffer(cpi, ALTREF_FRAME);
+      vp9_setup_pre_planes(xd, 0, yv12, mi_row, mi_col,
+                           &cm->frame_refs[ALTREF_FRAME - 1].sf);
+      mi->ref_frame[0] = ALTREF_FRAME;
+      y_sad_g = UINT_MAX;
+    } else {
+      vp9_setup_pre_planes(xd, 0, yv12, mi_row, mi_col,
+                           &cm->frame_refs[LAST_FRAME - 1].sf);
+      mi->ref_frame[0] = LAST_FRAME;
+    }
     mi->ref_frame[1] = NONE;
     mi->sb_type = BLOCK_64X64;
     mi->mv[0].as_int = 0;
@@ -1863,7 +1872,7 @@ static void update_state_rt(VP9_COMP *cpi, ThreadData *td,
     }
   }
 
-  if (cm->use_prev_frame_mvs ||
+  if (cm->use_prev_frame_mvs || !cm->error_resilient_mode ||
       (cpi->svc.use_base_mv && cpi->svc.number_spatial_layers > 1 &&
        cpi->svc.spatial_layer_id != cpi->svc.number_spatial_layers - 1)) {
     MV_REF *const frame_mvs =
@@ -4048,6 +4057,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     vp9_zero(x->zcoeff_blk);
 
     if (cm->frame_type != KEY_FRAME && cpi->rc.frames_since_golden == 0 &&
+        !(cpi->oxcf.lag_in_frames > 0 && cpi->oxcf.rc_mode == VPX_VBR) &&
         !cpi->use_svc)
       cpi->ref_frame_flags &= (~VP9_GOLD_FLAG);
 

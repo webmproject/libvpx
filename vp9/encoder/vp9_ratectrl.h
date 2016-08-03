@@ -160,6 +160,7 @@ typedef struct {
   uint64_t avg_source_sad[MAX_LAG_BUFFERS];
   uint64_t prev_avg_source_sad_lag;
   int high_source_sad_lagindex;
+  int alt_ref_gf_group;
   int high_source_sad;
   int count_last_scene_change;
   int avg_frame_low_motion;
