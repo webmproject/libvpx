@@ -87,6 +87,24 @@
       "revId": "9095d66af08df1b6f2ac4f90ce3e691a65bf91f0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "741e62f5_1a9c9dff",
+        "filename": "vpx_dsp/arm/transpose_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-03T22:42:35Z",
+      "side": 1,
+      "message": "but the vpx_ prefix implies greater visibility within the project to me. since it\u0027s a static function it seems weird.",
+      "parentUuid": "94f676e4_432fc63c",
+      "revId": "9095d66af08df1b6f2ac4f90ce3e691a65bf91f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
