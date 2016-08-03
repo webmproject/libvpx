@@ -1580,7 +1580,7 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
             VPXMIN(15, (3 * rc->baseline_gf_interval) >> 1);
       } else if (rc->avg_frame_low_motion < 20) {
         // Decrease gf interval for high motion case.
-        rc->baseline_gf_interval = VPXMAX(5, rc->baseline_gf_interval >> 1);
+        rc->baseline_gf_interval = VPXMAX(6, rc->baseline_gf_interval >> 1);
       }
       // Adjust boost and af_ratio based on avg_frame_low_motion, which varies
       // between 0 and 100 (stationary, 100% zero/small motion).
@@ -2185,10 +2185,9 @@ void adjust_gf_boost_lag_one_pass_vbr(VP9_COMP *cpi, uint64_t avg_sad_current) {
           VPXMIN(15, (3 * rc->baseline_gf_interval) >> 1);
     } else if (high_content) {
       rc->gfu_boost = DEFAULT_GF_BOOST >> 1;
-      if (rate_err > 3.0)
-        rc->baseline_gf_interval = VPXMAX(10, rc->baseline_gf_interval >> 1);
-      else
-        rc->baseline_gf_interval = VPXMAX(5, rc->baseline_gf_interval >> 1);
+      rc->baseline_gf_interval = (rate_err > 3.0) ?
+          VPXMAX(10, rc->baseline_gf_interval >> 1) :
+          VPXMAX(6, rc->baseline_gf_interval >> 1);
     }
     // Check for constraining gf_interval for up-coming scene/content changes,
     // or for up-coming key frame, whichever is closer.
@@ -2196,8 +2195,7 @@ void adjust_gf_boost_lag_one_pass_vbr(VP9_COMP *cpi, uint64_t avg_sad_current) {
     if (rc->high_source_sad_lagindex > 0 &&
         frame_constraint > rc->high_source_sad_lagindex)
       frame_constraint = rc->high_source_sad_lagindex;
-    if (steady_sad_lagindex > 0 && steady_sad_lagindex > 2 &&
-        frame_constraint > steady_sad_lagindex)
+    if (steady_sad_lagindex > 3 && frame_constraint > steady_sad_lagindex)
       frame_constraint = steady_sad_lagindex;
     adjust_gfint_frame_constraint(cpi, frame_constraint);
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
