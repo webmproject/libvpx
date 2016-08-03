@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "148e0681_0fb1c5f3",
+        "filename": "vpx_dsp/arm/transpose_neon.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-03T23:15:53Z",
+      "side": 1,
+      "message": "these should be INLINE in a header otherwise some configurations will report unused functions",
+      "revId": "8ea8ccb0f49e5535b98ea7e3ed203d8e7509d44a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "94f676e4_0312ee03",
         "filename": "vpx_dsp/arm/transpose_neon.h",
         "patchSetId": 5
@@ -31,6 +48,23 @@
       "side": 1,
       "message": "I tried that but didn\u0027t like the way it looked. This matches the style of the other vtrn* functions and generated the same assembly.",
       "parentUuid": "94f676e4_0312ee03",
+      "revId": "8ea8ccb0f49e5535b98ea7e3ed203d8e7509d44a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "148e0681_6f8bb11d",
+        "filename": "vpx_dsp/arm/transpose_neon.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-03T23:15:53Z",
+      "side": 1,
+      "message": "I won\u0027t block on this, but in general I\u0027d prefer more compact code rather than trying to match the semantics of the builtin calls",
       "revId": "8ea8ccb0f49e5535b98ea7e3ed203d8e7509d44a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
