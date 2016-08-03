@@ -75,7 +75,7 @@ struct vpx_codec_alg_priv {
   // BufferPool that holds all reference frames. Shared by all the FrameWorkers.
   BufferPool              *buffer_pool;
 
-  // External frame buffer info to save for VP9 common.
+  // External frame buffer info to save for VP10 common.
   void *ext_priv;  // Private data associated with the external frame buffers.
   vpx_get_frame_buffer_cb_fn_t get_ext_fb_cb;
   vpx_release_frame_buffer_cb_fn_t release_ext_fb_cb;

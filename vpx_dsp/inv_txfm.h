@@ -68,7 +68,7 @@ static INLINE tran_high_t highbd_dct_const_round_shift(tran_high_t input) {
 #if CONFIG_EMULATE_HARDWARE
 // When CONFIG_EMULATE_HARDWARE is 1 the transform performs a
 // non-normative method to handle overflows. A stream that causes
-// overflows  in the inverse transform is considered invalid in VP9,
+// overflows  in the inverse transform is considered invalid,
 // and a hardware implementer is free to choose any reasonable
 // method to handle overflows. However to aid in hardware
 // verification they can use a specific implementation of the

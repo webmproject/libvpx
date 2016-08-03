@@ -52,16 +52,6 @@ DSP_SRCS-$(HAVE_SSE)  += x86/highbd_intrapred_sse2.asm
 DSP_SRCS-$(HAVE_SSE2) += x86/highbd_intrapred_sse2.asm
 endif  # CONFIG_VP9_HIGHBITDEPTH
 
-ifneq ($(filter yes,$(CONFIG_POSTPROC) $(CONFIG_VP9_POSTPROC)),)
-DSP_SRCS-yes += add_noise.c
-DSP_SRCS-yes += deblock.c
-DSP_SRCS-yes += postproc.h
-DSP_SRCS-$(HAVE_MSA) += mips/add_noise_msa.c
-DSP_SRCS-$(HAVE_MSA) += mips/deblock_msa.c
-DSP_SRCS-$(HAVE_SSE2) += x86/add_noise_sse2.asm
-DSP_SRCS-$(HAVE_SSE2) += x86/deblock_sse2.asm
-endif # CONFIG_POSTPROC
-
 DSP_SRCS-$(HAVE_NEON_ASM) += arm/intrapred_neon_asm$(ASM)
 DSP_SRCS-$(HAVE_NEON) += arm/intrapred_neon.c
 DSP_SRCS-$(HAVE_MSA) += mips/intrapred_msa.c
@@ -201,7 +191,7 @@ DSP_SRCS-$(HAVE_NEON)   += arm/fwd_txfm_neon.c
 DSP_SRCS-$(HAVE_MSA)    += mips/fwd_txfm_msa.h
 DSP_SRCS-$(HAVE_MSA)    += mips/fwd_txfm_msa.c
 DSP_SRCS-$(HAVE_MSA)    += mips/fwd_dct32x32_msa.c
-endif  # CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
+endif  # CONFIG_VP10_ENCODER
 
 # inverse transform
 ifeq ($(CONFIG_VP10), yes)
@@ -255,7 +245,7 @@ endif  # CONFIG_VP9_HIGHBITDEPTH
 endif  # CONFIG_VP10
 
 # quantization
-ifneq ($(filter yes, $(CONFIG_VP9_ENCODER) $(CONFIG_VP10_ENCODER)),)
+ifneq ($(filter yes,$(CONFIG_VP10_ENCODER)),)
 DSP_SRCS-yes            += quantize.c
 DSP_SRCS-yes            += quantize.h
 
@@ -283,7 +273,7 @@ ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_SSE2)  += x86/highbd_subtract_sse2.c
 endif
 
-endif  # CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
+endif  # CONFIG_VP10_ENCODER
 
 ifeq ($(CONFIG_VP10_ENCODER),yes)
 DSP_SRCS-yes            += sum_squares.c
@@ -333,7 +323,7 @@ endif  # CONFIG_VP9_HIGHBITDEPTH
 
 endif  # CONFIG_ENCODERS
 
-ifneq ($(filter yes,$(CONFIG_ENCODERS) $(CONFIG_POSTPROC) $(CONFIG_VP9_POSTPROC)),)
+ifneq ($(filter yes,$(CONFIG_ENCODERS)),)
 DSP_SRCS-yes            += variance.c
 DSP_SRCS-yes            += variance.h
 
@@ -369,7 +359,7 @@ DSP_SRCS-$(HAVE_SSE4_1) += x86/highbd_variance_sse4.c
 DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_variance_impl_sse2.asm
 DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_subpel_variance_impl_sse2.asm
 endif  # CONFIG_VP9_HIGHBITDEPTH
-endif  # CONFIG_ENCODERS || CONFIG_POSTPROC || CONFIG_VP9_POSTPROC
+endif  # CONFIG_ENCODERS
 
 DSP_SRCS-no += $(DSP_SRCS_REMOVE-yes)
 

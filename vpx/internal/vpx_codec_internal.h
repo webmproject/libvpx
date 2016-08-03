@@ -240,7 +240,7 @@ typedef vpx_image_t *(*vpx_codec_get_frame_fn_t)(vpx_codec_alg_priv_t *ctx,
  *
  * \note
  * When decoding VP9, the application may be required to pass in at least
- * #VP9_MAXIMUM_REF_BUFFERS + #VPX_MAXIMUM_WORK_BUFFERS external frame
+ * #VPX_MAXIMUM_WORK_BUFFERS external frame
  * buffers.
  */
 typedef vpx_codec_err_t (*vpx_codec_set_fb_fn_t)(

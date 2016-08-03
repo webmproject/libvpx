@@ -39,11 +39,6 @@ class AltRefForcedKeyTestLarge
       encoder->Control(VP8E_SET_CPUUSED, cpu_used_);
       encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
       // override test default for tile columns if necessary.
-#if CONFIG_VP9_ENCODER
-      if (GET_PARAM(0) == &libvpx_test::kVP9) {
-        encoder->Control(VP9E_SET_TILE_COLUMNS, 6);
-      }
-#endif
 #if CONFIG_VP10_ENCODER
       if (GET_PARAM(0) == &libvpx_test::kVP10) {
         encoder->Control(VP9E_SET_TILE_COLUMNS, 6);

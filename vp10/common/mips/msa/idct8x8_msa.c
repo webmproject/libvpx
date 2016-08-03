@@ -26,17 +26,17 @@ void vp10_iht8x8_64_add_msa(const int16_t *input, uint8_t *dst,
   switch (tx_type) {
     case DCT_DCT:
       /* DCT in horizontal */
-      VP9_IDCT8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7,
+      VPX_IDCT8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7,
                      in0, in1, in2, in3, in4, in5, in6, in7);
       /* DCT in vertical */
       TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7,
                          in0, in1, in2, in3, in4, in5, in6, in7);
-      VP9_IDCT8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7,
+      VPX_IDCT8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7,
                      in0, in1, in2, in3, in4, in5, in6, in7);
       break;
     case ADST_DCT:
       /* DCT in horizontal */
-      VP9_IDCT8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7,
+      VPX_IDCT8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7,
                      in0, in1, in2, in3, in4, in5, in6, in7);
       /* ADST in vertical */
       TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7,
@@ -51,7 +51,7 @@ void vp10_iht8x8_64_add_msa(const int16_t *input, uint8_t *dst,
       /* DCT in vertical */
       TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7,
                          in0, in1, in2, in3, in4, in5, in6, in7);
-      VP9_IDCT8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7,
+      VPX_IDCT8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7,
                      in0, in1, in2, in3, in4, in5, in6, in7);
       break;
     case ADST_ADST:
@@ -74,7 +74,7 @@ void vp10_iht8x8_64_add_msa(const int16_t *input, uint8_t *dst,
   SRARI_H4_SH(in4, in5, in6, in7, 5);
 
   /* add block and store 8x8 */
-  VP9_ADDBLK_ST8x4_UB(dst, dst_stride, in0, in1, in2, in3);
+  VPX_ADDBLK_ST8x4_UB(dst, dst_stride, in0, in1, in2, in3);
   dst += (4 * dst_stride);
-  VP9_ADDBLK_ST8x4_UB(dst, dst_stride, in4, in5, in6, in7);
+  VPX_ADDBLK_ST8x4_UB(dst, dst_stride, in4, in5, in6, in7);
 }

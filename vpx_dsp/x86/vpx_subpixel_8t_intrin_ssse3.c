@@ -912,7 +912,7 @@ void vpx_scaled_2d_ssse3(const uint8_t *src, ptrdiff_t src_stride,
                    filters_y, y0_q4, y_step_q4, w, h);
 }
 
-// void vp9_convolve8_ssse3(const uint8_t *src, ptrdiff_t src_stride,
+// void vpx_convolve8_ssse3(const uint8_t *src, ptrdiff_t src_stride,
 //                          uint8_t *dst, ptrdiff_t dst_stride,
 //                          const int16_t *filter_x, int x_step_q4,
 //                          const int16_t *filter_y, int y_step_q4,

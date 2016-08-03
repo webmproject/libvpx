@@ -29,7 +29,7 @@
   HADD_SW_S32(vec_w_m);                                               \
 })
 
-#define VP9_FDCT4(in0, in1, in2, in3, out0, out1, out2, out3) {     \
+#define VPX_FDCT4(in0, in1, in2, in3, out0, out1, out2, out3) {     \
   v8i16 cnst0_m, cnst1_m, cnst2_m, cnst3_m;                         \
   v8i16 vec0_m, vec1_m, vec2_m, vec3_m;                             \
   v4i32 vec4_m, vec5_m, vec6_m, vec7_m;                             \

@@ -596,7 +596,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 #
 # Forward transform
 #
-if ((vpx_config("CONFIG_VP9_ENCODER") eq "yes") || (vpx_config("CONFIG_VP10_ENCODER") eq "yes")) {
+if ((vpx_config("CONFIG_VP10_ENCODER") eq "yes")) {
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vpx_fdct4x4/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vpx_fdct4x4 sse2/;
@@ -676,7 +676,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vpx_fdct32x32_1/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vpx_fdct32x32_1 sse2 msa/;
 }  # CONFIG_VP9_HIGHBITDEPTH
-}  # CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
+}  # CONFIG_VP10_ENCODER
 
 #
 # Inverse transform
@@ -920,7 +920,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 #
 # Quantization
 #
-if ((vpx_config("CONFIG_VP9_ENCODER") eq "yes") || (vpx_config("CONFIG_VP10_ENCODER") eq "yes")) {
+if ((vpx_config("CONFIG_VP10_ENCODER") eq "yes")) {
   add_proto qw/void vpx_quantize_b/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
   specialize qw/vpx_quantize_b sse2/, "$ssse3_x86_64", "$avx_x86_64";
 
@@ -934,7 +934,7 @@ if ((vpx_config("CONFIG_VP9_ENCODER") eq "yes") || (vpx_config("CONFIG_VP10_ENCO
     add_proto qw/void vpx_highbd_quantize_b_32x32/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
     specialize qw/vpx_highbd_quantize_b_32x32 sse2/;
   }  # CONFIG_VP9_HIGHBITDEPTH
-}  # CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
+}  # CONFIG_VP10_ENCODER
 
 if (vpx_config("CONFIG_VP10") eq "yes") {
   #
@@ -1020,7 +1020,7 @@ specialize qw/vpx_sad4x4 neon msa sse2/;
 #
 # Avg
 #
-if ((vpx_config("CONFIG_VP9_ENCODER") eq "yes") || (vpx_config("CONFIG_VP10_ENCODER") eq "yes")) {
+if ((vpx_config("CONFIG_VP10_ENCODER") eq "yes")) {
   #
   # Avg
   #
@@ -1064,7 +1064,7 @@ if ((vpx_config("CONFIG_VP9_ENCODER") eq "yes") || (vpx_config("CONFIG_VP10_ENCO
 
   add_proto qw/int vpx_vector_var/, "const int16_t *ref, const int16_t *src, const int bwl";
   specialize qw/vpx_vector_var neon sse2/;
-}  # CONFIG_VP9_ENCODER || CONFIG_VP10_ENCODER
+}  # CONFIG_VP10_ENCODER
 
 #
 # Single block SAD / Single block Avg SAD
@@ -1267,7 +1267,7 @@ if (vpx_config("CONFIG_INTERNAL_STATS") eq "yes") {
 }
 }  # CONFIG_ENCODERS
 
-if (vpx_config("CONFIG_ENCODERS") eq "yes" || vpx_config("CONFIG_POSTPROC") eq "yes" || vpx_config("CONFIG_VP9_POSTPROC") eq "yes") {
+if (vpx_config("CONFIG_ENCODERS") eq "yes") {
 
 #
 # Variance
@@ -1911,26 +1911,6 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
 }  # CONFIG_VP9_HIGHBITDEPTH
 
-#
-# Post Processing
-#
-if (vpx_config("CONFIG_POSTPROC") eq "yes" || vpx_config("CONFIG_VP9_POSTPROC") eq "yes") {
-    add_proto qw/void vpx_plane_add_noise/, "uint8_t *Start, char *noise, char blackclamp[16], char whiteclamp[16], char bothclamp[16], unsigned int Width, unsigned int Height, int Pitch";
-    specialize qw/vpx_plane_add_noise sse2 msa/;
-
-    add_proto qw/void vpx_mbpost_proc_down/, "unsigned char *dst, int pitch, int rows, int cols,int flimit";
-    specialize qw/vpx_mbpost_proc_down sse2 msa/;
-    $vpx_mbpost_proc_down_sse2=vpx_mbpost_proc_down_xmm;
-
-    add_proto qw/void vpx_mbpost_proc_across_ip/, "unsigned char *dst, int pitch, int rows, int cols,int flimit";
-    specialize qw/vpx_mbpost_proc_across_ip sse2 msa/;
-    $vpx_mbpost_proc_across_ip_sse2=vpx_mbpost_proc_across_ip_xmm;
-
-    add_proto qw/void vpx_post_proc_down_and_across_mb_row/, "unsigned char *src, unsigned char *dst, int src_pitch, int dst_pitch, int cols, unsigned char *flimits, int size";
-    specialize qw/vpx_post_proc_down_and_across_mb_row sse2 msa/;
-
-}
-
-}  # CONFIG_ENCODERS || CONFIG_POSTPROC || CONFIG_VP9_POSTPROC
+}  # CONFIG_ENCODERS
 
 1;

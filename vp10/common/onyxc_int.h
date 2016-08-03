@@ -228,7 +228,7 @@ typedef struct VP10Common {
   MODE_INFO *mi;  /* Corresponds to upper left visible macroblock */
 
   // TODO(agrange): Move prev_mi into encoder structure.
-  // prev_mip and prev_mi will only be allocated in VP9 encoder.
+  // prev_mip and prev_mi will only be allocated in encoder.
   MODE_INFO *prev_mip; /* MODE_INFO array 'mip' from last decoded frame */
   MODE_INFO *prev_mi;  /* 'mi' from last frame (points into prev_mip) */
 
@@ -487,7 +487,7 @@ static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
   xd->left_available  = (mi_col > tile->mi_col_start);
   if (xd->up_available) {
     xd->above_mi = xd->mi[-xd->mi_stride];
-    // above_mi may be NULL in VP9 encoder's first pass.
+    // above_mi may be NULL in encoder's first pass.
     xd->above_mbmi = xd->above_mi ? &xd->above_mi->mbmi : NULL;
   } else {
     xd->above_mi = NULL;
@@ -496,7 +496,7 @@ static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
 
   if (xd->left_available) {
     xd->left_mi = xd->mi[-1];
-    // left_mi may be NULL in VP9 encoder's first pass.
+    // left_mi may be NULL in encoder's first pass.
     xd->left_mbmi = xd->left_mi ? &xd->left_mi->mbmi : NULL;
   } else {
     xd->left_mi = NULL;

@@ -82,7 +82,7 @@
   out5 = -out5;                                                         \
 }
 
-#define VP9_SET_COSPI_PAIR(c0_h, c1_h) ({  \
+#define VPX_SET_COSPI_PAIR(c0_h, c1_h) ({  \
   v8i16 out0_m, r0_m, r1_m;                \
                                            \
   r0_m = __msa_fill_h(c0_h);               \
@@ -92,7 +92,7 @@
   out0_m;                                  \
 })
 
-#define VP9_ADDBLK_ST8x4_UB(dst, dst_stride, in0, in1, in2, in3) {  \
+#define VPX_ADDBLK_ST8x4_UB(dst, dst_stride, in0, in1, in2, in3) {  \
   uint8_t *dst_m = (uint8_t *) (dst);                               \
   v16u8 dst0_m, dst1_m, dst2_m, dst3_m;                             \
   v16i8 tmp0_m, tmp1_m;                                             \
@@ -109,18 +109,18 @@
   ST8x4_UB(tmp0_m, tmp1_m, dst_m, dst_stride);                      \
 }
 
-#define VP9_IDCT4x4(in0, in1, in2, in3, out0, out1, out2, out3) {   \
+#define VPX_IDCT4x4(in0, in1, in2, in3, out0, out1, out2, out3) {   \
   v8i16 c0_m, c1_m, c2_m, c3_m;                                     \
   v8i16 step0_m, step1_m;                                           \
   v4i32 tmp0_m, tmp1_m, tmp2_m, tmp3_m;                             \
                                                                     \
-  c0_m = VP9_SET_COSPI_PAIR(cospi_16_64, cospi_16_64);              \
-  c1_m = VP9_SET_COSPI_PAIR(cospi_16_64, -cospi_16_64);             \
+  c0_m = VPX_SET_COSPI_PAIR(cospi_16_64, cospi_16_64);              \
+  c1_m = VPX_SET_COSPI_PAIR(cospi_16_64, -cospi_16_64);             \
   step0_m = __msa_ilvr_h(in2, in0);                                 \
   DOTP_SH2_SW(step0_m, step0_m, c0_m, c1_m, tmp0_m, tmp1_m);        \
                                                                     \
-  c2_m = VP9_SET_COSPI_PAIR(cospi_24_64, -cospi_8_64);              \
-  c3_m = VP9_SET_COSPI_PAIR(cospi_8_64, cospi_24_64);               \
+  c2_m = VPX_SET_COSPI_PAIR(cospi_24_64, -cospi_8_64);              \
+  c3_m = VPX_SET_COSPI_PAIR(cospi_8_64, cospi_24_64);               \
   step1_m = __msa_ilvr_h(in3, in1);                                 \
   DOTP_SH2_SW(step1_m, step1_m, c2_m, c3_m, tmp2_m, tmp3_m);        \
   SRARI_W4_SW(tmp0_m, tmp1_m, tmp2_m, tmp3_m, DCT_CONST_BITS);      \
@@ -210,7 +210,7 @@
 }
 
 /* idct 8x8 macro */
-#define VP9_IDCT8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7,               \
+#define VPX_IDCT8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7,               \
                        out0, out1, out2, out3, out4, out5, out6, out7) {     \
   v8i16 tp0_m, tp1_m, tp2_m, tp3_m, tp4_m, tp5_m, tp6_m, tp7_m;              \
   v8i16 k0_m, k1_m, k2_m, k3_m, res0_m, res1_m, res2_m, res3_m;              \
@@ -234,8 +234,8 @@
   tp4_m = in1 + in3;                                                         \
   PCKEV_H2_SH(tmp1_m, tmp0_m, tmp3_m, tmp2_m, tp5_m, tp6_m);                 \
   tp7_m = in7 + in5;                                                         \
-  k2_m = VP9_SET_COSPI_PAIR(cospi_24_64, -cospi_8_64);                       \
-  k3_m = VP9_SET_COSPI_PAIR(cospi_8_64, cospi_24_64);                        \
+  k2_m = VPX_SET_COSPI_PAIR(cospi_24_64, -cospi_8_64);                       \
+  k3_m = VPX_SET_COSPI_PAIR(cospi_8_64, cospi_24_64);                        \
   VP9_MADD(in0, in4, in2, in6, k1_m, k0_m, k2_m, k3_m,                       \
            in0, in4, in2, in6);                                              \
   BUTTERFLY_4(in0, in4, in2, in6, tp0_m, tp1_m, tp2_m, tp3_m);               \
@@ -340,40 +340,40 @@
   v8i16 k0_m, k1_m, k2_m, k3_m;                                     \
                                                                     \
   /* stage 1 */                                                     \
-  k0_m = VP9_SET_COSPI_PAIR(cospi_1_64, cospi_31_64);               \
-  k1_m = VP9_SET_COSPI_PAIR(cospi_31_64, -cospi_1_64);              \
-  k2_m = VP9_SET_COSPI_PAIR(cospi_17_64, cospi_15_64);              \
-  k3_m = VP9_SET_COSPI_PAIR(cospi_15_64, -cospi_17_64);             \
+  k0_m = VPX_SET_COSPI_PAIR(cospi_1_64, cospi_31_64);               \
+  k1_m = VPX_SET_COSPI_PAIR(cospi_31_64, -cospi_1_64);              \
+  k2_m = VPX_SET_COSPI_PAIR(cospi_17_64, cospi_15_64);              \
+  k3_m = VPX_SET_COSPI_PAIR(cospi_15_64, -cospi_17_64);             \
   MADD_BF(r15, r0, r7, r8, k0_m, k1_m, k2_m, k3_m,                  \
           g0_m, g1_m, g2_m, g3_m);                                  \
-  k0_m = VP9_SET_COSPI_PAIR(cospi_5_64, cospi_27_64);               \
-  k1_m = VP9_SET_COSPI_PAIR(cospi_27_64, -cospi_5_64);              \
-  k2_m = VP9_SET_COSPI_PAIR(cospi_21_64, cospi_11_64);              \
-  k3_m = VP9_SET_COSPI_PAIR(cospi_11_64, -cospi_21_64);             \
+  k0_m = VPX_SET_COSPI_PAIR(cospi_5_64, cospi_27_64);               \
+  k1_m = VPX_SET_COSPI_PAIR(cospi_27_64, -cospi_5_64);              \
+  k2_m = VPX_SET_COSPI_PAIR(cospi_21_64, cospi_11_64);              \
+  k3_m = VPX_SET_COSPI_PAIR(cospi_11_64, -cospi_21_64);             \
   MADD_BF(r13, r2, r5, r10, k0_m, k1_m, k2_m, k3_m,                 \
           g4_m, g5_m, g6_m, g7_m);                                  \
-  k0_m = VP9_SET_COSPI_PAIR(cospi_9_64, cospi_23_64);               \
-  k1_m = VP9_SET_COSPI_PAIR(cospi_23_64, -cospi_9_64);              \
-  k2_m = VP9_SET_COSPI_PAIR(cospi_25_64, cospi_7_64);               \
-  k3_m = VP9_SET_COSPI_PAIR(cospi_7_64, -cospi_25_64);              \
+  k0_m = VPX_SET_COSPI_PAIR(cospi_9_64, cospi_23_64);               \
+  k1_m = VPX_SET_COSPI_PAIR(cospi_23_64, -cospi_9_64);              \
+  k2_m = VPX_SET_COSPI_PAIR(cospi_25_64, cospi_7_64);               \
+  k3_m = VPX_SET_COSPI_PAIR(cospi_7_64, -cospi_25_64);              \
   MADD_BF(r11, r4, r3, r12, k0_m, k1_m, k2_m, k3_m,                 \
           g8_m, g9_m, g10_m, g11_m);                                \
-  k0_m = VP9_SET_COSPI_PAIR(cospi_13_64, cospi_19_64);              \
-  k1_m = VP9_SET_COSPI_PAIR(cospi_19_64, -cospi_13_64);             \
-  k2_m = VP9_SET_COSPI_PAIR(cospi_29_64, cospi_3_64);               \
-  k3_m = VP9_SET_COSPI_PAIR(cospi_3_64, -cospi_29_64);              \
+  k0_m = VPX_SET_COSPI_PAIR(cospi_13_64, cospi_19_64);              \
+  k1_m = VPX_SET_COSPI_PAIR(cospi_19_64, -cospi_13_64);             \
+  k2_m = VPX_SET_COSPI_PAIR(cospi_29_64, cospi_3_64);               \
+  k3_m = VPX_SET_COSPI_PAIR(cospi_3_64, -cospi_29_64);              \
   MADD_BF(r9, r6, r1, r14, k0_m, k1_m, k2_m, k3_m,                  \
           g12_m, g13_m, g14_m, g15_m);                              \
                                                                     \
   /* stage 2 */                                                     \
-  k0_m = VP9_SET_COSPI_PAIR(cospi_4_64, cospi_28_64);               \
-  k1_m = VP9_SET_COSPI_PAIR(cospi_28_64, -cospi_4_64);              \
-  k2_m = VP9_SET_COSPI_PAIR(-cospi_28_64, cospi_4_64);              \
+  k0_m = VPX_SET_COSPI_PAIR(cospi_4_64, cospi_28_64);               \
+  k1_m = VPX_SET_COSPI_PAIR(cospi_28_64, -cospi_4_64);              \
+  k2_m = VPX_SET_COSPI_PAIR(-cospi_28_64, cospi_4_64);              \
   MADD_BF(g1_m, g3_m, g9_m, g11_m, k0_m, k1_m, k2_m, k0_m,          \
           h0_m, h1_m, h2_m, h3_m);                                  \
-  k0_m = VP9_SET_COSPI_PAIR(cospi_12_64, cospi_20_64);              \
-  k1_m = VP9_SET_COSPI_PAIR(-cospi_20_64, cospi_12_64);             \
-  k2_m = VP9_SET_COSPI_PAIR(cospi_20_64, -cospi_12_64);             \
+  k0_m = VPX_SET_COSPI_PAIR(cospi_12_64, cospi_20_64);              \
+  k1_m = VPX_SET_COSPI_PAIR(-cospi_20_64, cospi_12_64);             \
+  k2_m = VPX_SET_COSPI_PAIR(cospi_20_64, -cospi_12_64);             \
   MADD_BF(g7_m, g5_m, g15_m, g13_m, k0_m, k1_m, k2_m, k0_m,         \
           h4_m, h5_m, h6_m, h7_m);                                  \
   BUTTERFLY_4(h0_m, h2_m, h6_m, h4_m, out8, out9, out11, out10);    \
@@ -382,19 +382,19 @@
                                                                     \
   /* stage 3 */                                                     \
   BUTTERFLY_4(h8_m, h9_m, h11_m, h10_m, out0, out1, h11_m, h10_m);  \
-  k0_m = VP9_SET_COSPI_PAIR(cospi_8_64, cospi_24_64);               \
-  k1_m = VP9_SET_COSPI_PAIR(cospi_24_64, -cospi_8_64);              \
-  k2_m = VP9_SET_COSPI_PAIR(-cospi_24_64, cospi_8_64);              \
+  k0_m = VPX_SET_COSPI_PAIR(cospi_8_64, cospi_24_64);               \
+  k1_m = VPX_SET_COSPI_PAIR(cospi_24_64, -cospi_8_64);              \
+  k2_m = VPX_SET_COSPI_PAIR(-cospi_24_64, cospi_8_64);              \
   MADD_BF(h0_m, h2_m, h4_m, h6_m, k0_m, k1_m, k2_m, k0_m,           \
           out4, out6, out5, out7);                                  \
   MADD_BF(h1_m, h3_m, h5_m, h7_m, k0_m, k1_m, k2_m, k0_m,           \
           out12, out14, out13, out15);                              \
                                                                     \
   /* stage 4 */                                                     \
-  k0_m = VP9_SET_COSPI_PAIR(cospi_16_64, cospi_16_64);              \
-  k1_m = VP9_SET_COSPI_PAIR(-cospi_16_64, -cospi_16_64);            \
-  k2_m = VP9_SET_COSPI_PAIR(cospi_16_64, -cospi_16_64);             \
-  k3_m = VP9_SET_COSPI_PAIR(-cospi_16_64, cospi_16_64);             \
+  k0_m = VPX_SET_COSPI_PAIR(cospi_16_64, cospi_16_64);              \
+  k1_m = VPX_SET_COSPI_PAIR(-cospi_16_64, -cospi_16_64);            \
+  k2_m = VPX_SET_COSPI_PAIR(cospi_16_64, -cospi_16_64);             \
+  k3_m = VPX_SET_COSPI_PAIR(-cospi_16_64, cospi_16_64);             \
   MADD_SHORT(h10_m, h11_m, k1_m, k2_m, out2, out3);                 \
   MADD_SHORT(out6, out7, k0_m, k3_m, out6, out7);                   \
   MADD_SHORT(out10, out11, k0_m, k3_m, out10, out11);               \

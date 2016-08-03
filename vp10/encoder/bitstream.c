@@ -541,7 +541,6 @@ static void update_ext_tx_probs(VP10_COMMON *cm, vp10_writer *w) {
     }
   }
   savings = 0;
-  do_update = 0;
   for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
     savings += prob_diff_update_savings(
         vp10_ext_tx_tree, cm->fc->inter_ext_tx_prob[i],

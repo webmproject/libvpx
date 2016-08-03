@@ -173,27 +173,15 @@ vpx_tool_available() {
 }
 
 # Echoes yes to stdout when vpx_config_option_enabled() reports yes for
-# CONFIG_VP8_DECODER.
-vp8_decode_available() {
-  [ "$(vpx_config_option_enabled CONFIG_VP8_DECODER)" = "yes" ] && echo yes
+# CONFIG_VP10_DECODER.
+vp10_decode_available() {
+  [ "$(vpx_config_option_enabled CONFIG_VP10_DECODER)" = "yes" ] && echo yes
 }
 
 # Echoes yes to stdout when vpx_config_option_enabled() reports yes for
-# CONFIG_VP8_ENCODER.
-vp8_encode_available() {
-  [ "$(vpx_config_option_enabled CONFIG_VP8_ENCODER)" = "yes" ] && echo yes
-}
-
-# Echoes yes to stdout when vpx_config_option_enabled() reports yes for
-# CONFIG_VP9_DECODER.
-vp9_decode_available() {
-  [ "$(vpx_config_option_enabled CONFIG_VP9_DECODER)" = "yes" ] && echo yes
-}
-
-# Echoes yes to stdout when vpx_config_option_enabled() reports yes for
-# CONFIG_VP9_ENCODER.
-vp9_encode_available() {
-  [ "$(vpx_config_option_enabled CONFIG_VP9_ENCODER)" = "yes" ] && echo yes
+# CONFIG_VP10_ENCODER.
+vp10_encode_available() {
+  [ "$(vpx_config_option_enabled CONFIG_VP10_ENCODER)" = "yes" ] && echo yes
 }
 
 # Echoes yes to stdout when vpx_config_option_enabled() reports yes for
