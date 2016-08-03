@@ -2,6 +2,57 @@
   "comments": [
     {
       "key": {
+        "uuid": "b4e61afd_3fe6631c",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 3453,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-03T18:29:52Z",
+      "side": 1,
+      "message": "This may be put in a different patch and get submitted / merged first, since it\u0027s a code refactoring of the ext-refs experiment.",
+      "revId": "07ae1218219821211898e3ee38c46b6adbc44b96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4e61afd_7fc2ab52",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 4845,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-03T18:29:52Z",
+      "side": 1,
+      "message": "The indent of this line does not seem correct - always two spaces. \n\nAlso, please put a comment here to address why we should single out \"ALTREF_FRAME\" to handle it differently here.",
+      "revId": "07ae1218219821211898e3ee38c46b6adbc44b96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4e61afd_dfb01ff2",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 5191,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-03T18:29:52Z",
+      "side": 1,
+      "message": "Please remove the extra empty lines.",
+      "revId": "07ae1218219821211898e3ee38c46b6adbc44b96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b4e61afd_3f8ca3df",
         "filename": "vp10/encoder/firstpass.c",
         "patchSetId": 8
