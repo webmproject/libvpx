@@ -30,7 +30,7 @@ static INLINE int16_t signed_char_clamp_high(int t, int bd) {
 }
 #endif
 
-// should we apply any filter at all: 11111111 yes, 00000000 no
+// Should we apply any filter at all: 11111111 yes, 00000000 no
 static INLINE int8_t filter_mask(uint8_t limit, uint8_t blimit, uint8_t p3,
                                  uint8_t p2, uint8_t p1, uint8_t p0, uint8_t q0,
                                  uint8_t q1, uint8_t q2, uint8_t q3) {
@@ -68,7 +68,7 @@ static INLINE int8_t flat_mask5(uint8_t thresh, uint8_t p4, uint8_t p3,
   return ~mask;
 }
 
-// is there high edge variance internal edge: 11111111 yes, 00000000 no
+// Is there high edge variance internal edge: 11111111 yes, 00000000 no
 static INLINE int8_t hev_mask(uint8_t thresh, uint8_t p1, uint8_t p0,
                               uint8_t q0, uint8_t q1) {
   int8_t hev = 0;

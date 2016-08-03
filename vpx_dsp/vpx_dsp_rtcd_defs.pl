@@ -505,12 +505,10 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 # Loopfilter
 #
 add_proto qw/void vpx_lpf_vertical_16/, "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh";
-specialize qw/vpx_lpf_vertical_16 sse2 neon_asm dspr2 msa/;
-$vpx_lpf_vertical_16_neon_asm=vpx_lpf_vertical_16_neon;
+specialize qw/vpx_lpf_vertical_16 sse2 neon dspr2 msa/;
 
 add_proto qw/void vpx_lpf_vertical_16_dual/, "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh";
-specialize qw/vpx_lpf_vertical_16_dual sse2 neon_asm dspr2 msa/;
-$vpx_lpf_vertical_16_dual_neon_asm=vpx_lpf_vertical_16_dual_neon;
+specialize qw/vpx_lpf_vertical_16_dual sse2 neon dspr2 msa/;
 
 add_proto qw/void vpx_lpf_vertical_8/, "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh";
 specialize qw/vpx_lpf_vertical_8 sse2 neon dspr2 msa/;
@@ -526,12 +524,10 @@ add_proto qw/void vpx_lpf_vertical_4_dual/, "uint8_t *s, int pitch, const uint8_
 specialize qw/vpx_lpf_vertical_4_dual sse2 neon dspr2 msa/;
 
 add_proto qw/void vpx_lpf_horizontal_edge_8/, "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh";
-specialize qw/vpx_lpf_horizontal_edge_8 sse2 avx2 neon_asm dspr2 msa/;
-$vpx_lpf_horizontal_edge_8_neon_asm=vpx_lpf_horizontal_edge_8_neon;
+specialize qw/vpx_lpf_horizontal_edge_8 sse2 avx2 neon dspr2 msa/;
 
 add_proto qw/void vpx_lpf_horizontal_edge_16/, "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh";
-specialize qw/vpx_lpf_horizontal_edge_16 sse2 avx2 neon_asm dspr2 msa/;
-$vpx_lpf_horizontal_edge_16_neon_asm=vpx_lpf_horizontal_edge_16_neon;
+specialize qw/vpx_lpf_horizontal_edge_16 sse2 avx2 neon dspr2 msa/;
 
 add_proto qw/void vpx_lpf_horizontal_8/, "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh";
 specialize qw/vpx_lpf_horizontal_8 sse2 neon dspr2 msa/;

@@ -144,6 +144,7 @@ DSP_SRCS-yes  += arm/loopfilter_8_neon$(ASM)
 DSP_SRCS-yes  += arm/loopfilter_4_neon$(ASM)
 else
 ifeq ($(HAVE_NEON),yes)
+DSP_SRCS-yes   += arm/loopfilter_mb_neon.c
 DSP_SRCS-yes   += arm/loopfilter_16_neon.c
 DSP_SRCS-yes   += arm/loopfilter_8_neon.c
 DSP_SRCS-yes   += arm/loopfilter_4_neon.c

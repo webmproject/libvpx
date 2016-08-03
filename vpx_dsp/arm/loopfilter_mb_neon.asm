@@ -11,6 +11,7 @@
     EXPORT  |vpx_lpf_horizontal_edge_8_neon|
     EXPORT  |vpx_lpf_horizontal_edge_16_neon|
     EXPORT  |vpx_lpf_vertical_16_neon|
+    EXPORT  |vpx_lpf_vertical_16_dual_neon|
     ARM
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
@@ -146,20 +147,21 @@ h_next
     b mb_lpf_horizontal_edge
     ENDP        ; |vpx_lpf_horizontal_edge_16_neon|
 
-; void vpx_lpf_vertical_16_neon(uint8_t *s, int p,
-;                               const uint8_t *blimit,
-;                               const uint8_t *limit,
-;                               const uint8_t *thresh)
+; void mb_lpf_vertical_edge_w(uint8_t *s, int p, const uint8_t *blimit,
+;                             const uint8_t *limit, const uint8_t *thresh,
+;                             int count) {
 ; r0    uint8_t *s,
 ; r1    int p, /* pitch */
 ; r2    const uint8_t *blimit,
 ; r3    const uint8_t *limit,
 ; sp    const uint8_t *thresh,
-|vpx_lpf_vertical_16_neon| PROC
+; r12   int count
+|mb_lpf_vertical_edge_w| PROC
     push        {r4-r8, lr}
     vpush       {d8-d15}
     ldr         r4, [sp, #88]              ; load thresh
 
+v_count
     vld1.8      {d16[]}, [r2]              ; load *blimit
     vld1.8      {d17[]}, [r3]              ; load *limit
     vld1.8      {d18[]}, [r4]              ; load *thresh
@@ -212,20 +214,21 @@ h_next
 
     ; flat && mask were not set for any of the channels. Just store the values
     ; from filter.
-    sub         r8, r0, #2
+    sub         r0, #2
 
     vswp        d23, d25
 
-    vst4.8      {d23[0], d24[0], d25[0], d26[0]}, [r8], r1
-    vst4.8      {d23[1], d24[1], d25[1], d26[1]}, [r8], r1
-    vst4.8      {d23[2], d24[2], d25[2], d26[2]}, [r8], r1
-    vst4.8      {d23[3], d24[3], d25[3], d26[3]}, [r8], r1
-    vst4.8      {d23[4], d24[4], d25[4], d26[4]}, [r8], r1
-    vst4.8      {d23[5], d24[5], d25[5], d26[5]}, [r8], r1
-    vst4.8      {d23[6], d24[6], d25[6], d26[6]}, [r8], r1
-    vst4.8      {d23[7], d24[7], d25[7], d26[7]}, [r8], r1
+    vst4.8      {d23[0], d24[0], d25[0], d26[0]}, [r0], r1
+    vst4.8      {d23[1], d24[1], d25[1], d26[1]}, [r0], r1
+    vst4.8      {d23[2], d24[2], d25[2], d26[2]}, [r0], r1
+    vst4.8      {d23[3], d24[3], d25[3], d26[3]}, [r0], r1
+    vst4.8      {d23[4], d24[4], d25[4], d26[4]}, [r0], r1
+    vst4.8      {d23[5], d24[5], d25[5], d26[5]}, [r0], r1
+    vst4.8      {d23[6], d24[6], d25[6], d26[6]}, [r0], r1
+    vst4.8      {d23[7], d24[7], d25[7], d26[7]}, [r0], r1
+    add         r0, #2
 
-    b           v_end
+    b           v_next
 
 v_mbfilter
     tst         r7, #2
@@ -252,7 +255,7 @@ v_mbfilter
     vst3.8      {d18[7], d19[7], d20[7]}, [r8], r1
     vst3.8      {d21[7], d22[7], d23[7]}, [r0], r1
 
-    b           v_end
+    b           v_next
 
 v_wide_mbfilter
     sub         r8, r0, #8
@@ -304,11 +307,39 @@ v_wide_mbfilter
     vst1.8      {d19}, [r8@64], r1
     vst1.8      {d15}, [r0@64], r1
 
-v_end
+v_next
+    subs        r12, #1
+    bne         v_count
+
     vpop        {d8-d15}
     pop         {r4-r8, pc}
 
+    ENDP        ; |mb_lpf_vertical_edge_w|
+
+; void vpx_lpf_vertical_16_neon(uint8_t *s, int p, const uint8_t *blimit,
+;                               const uint8_t *limit, const uint8_t *thresh)
+; r0    uint8_t *s,
+; r1    int p, /* pitch */
+; r2    const uint8_t *blimit,
+; r3    const uint8_t *limit,
+; sp    const uint8_t *thresh
+|vpx_lpf_vertical_16_neon| PROC
+    mov r12, #1
+    b mb_lpf_vertical_edge_w
     ENDP        ; |vpx_lpf_vertical_16_neon|
+
+; void vpx_lpf_vertical_16_dual_neon(uint8_t *s, int p, const uint8_t *blimit,
+;                                    const uint8_t *limit,
+;                                    const uint8_t *thresh)
+; r0    uint8_t *s,
+; r1    int p, /* pitch */
+; r2    const uint8_t *blimit,
+; r3    const uint8_t *limit,
+; sp    const uint8_t *thresh
+|vpx_lpf_vertical_16_dual_neon| PROC
+    mov r12, #2
+    b mb_lpf_vertical_edge_w
+    ENDP        ; |vpx_lpf_vertical_16_dual_neon|
 
 ; void vpx_wide_mbfilter_neon();
 ; This is a helper function for the loopfilters. The invidual functions do the

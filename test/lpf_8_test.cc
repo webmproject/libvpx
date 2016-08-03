@@ -520,9 +520,6 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     NEON, Loop8Test6Param,
     ::testing::Values(
-// Using #if inside the macro is unsupported on MSVS but the tests are not
-// currently built for MSVS with ARM and NEON.
-#if HAVE_NEON_ASM
         make_tuple(&vpx_lpf_horizontal_edge_8_neon,
                    &vpx_lpf_horizontal_edge_8_c, 8),
         make_tuple(&vpx_lpf_horizontal_edge_16_neon,
@@ -530,13 +527,14 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vpx_lpf_vertical_16_neon, &vpx_lpf_vertical_16_c, 8),
         make_tuple(&vpx_lpf_vertical_16_dual_neon, &vpx_lpf_vertical_16_dual_c,
                    8),
-#endif  // HAVE_NEON_ASM
         make_tuple(&vpx_lpf_horizontal_8_neon, &vpx_lpf_horizontal_8_c, 8),
         make_tuple(&vpx_lpf_vertical_8_neon, &vpx_lpf_vertical_8_c, 8),
         make_tuple(&vpx_lpf_horizontal_4_neon, &vpx_lpf_horizontal_4_c, 8),
         make_tuple(&vpx_lpf_vertical_4_neon, &vpx_lpf_vertical_4_c, 8)));
 INSTANTIATE_TEST_CASE_P(NEON, Loop8Test9Param,
                         ::testing::Values(
+// Using #if inside the macro is unsupported on MSVS but the tests are not
+// currently built for MSVS with ARM and NEON.
 #if HAVE_NEON_ASM
                             make_tuple(&vpx_lpf_horizontal_8_dual_neon,
                                        &vpx_lpf_horizontal_8_dual_c, 8),
