@@ -145,6 +145,24 @@
     },
     {
       "key": {
+        "uuid": "148e0681_d2ffe255",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-03T23:24:27Z",
+      "side": 1,
+      "message": "then at least break this in two and leave it at [8] for NEON in all cases with a note",
+      "parentUuid": "148e0681_2f85a904",
+      "revId": "49737fe20f92bd74c5150218d40aabe6724f1318",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b4e61afd_42cd168b",
         "filename": "vp8/common/reconintra4x4.c",
         "patchSetId": 3
