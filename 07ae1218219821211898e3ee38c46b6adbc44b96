@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4e61afd_3f8ca3df",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1753,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-03T18:04:40Z",
+      "side": 1,
+      "message": "One pair of parentheses could be removed, as we do calculations of \"/\" followed by \"*\".",
+      "revId": "07ae1218219821211898e3ee38c46b6adbc44b96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4e61afd_df849fb4",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1757,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-03T18:04:40Z",
+      "side": 1,
+      "message": "Should we put a \"TODO\" here, since some decision needs to be finalized here.",
+      "revId": "07ae1218219821211898e3ee38c46b6adbc44b96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4e61afd_3f0f433e",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1837,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-03T18:04:40Z",
+      "side": 1,
+      "message": "As is_sg_bipred_enabled has been initialized as is_bipred_enabled, should it here be as follows:\n\nis_sg_bipred_enabled \u0026\u003d (subgroup_interval[which_arf] \u003e rc-\u003ebipred_group_interval);",
+      "revId": "07ae1218219821211898e3ee38c46b6adbc44b96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4e61afd_bf1d1368",
+        "filename": "vp10/encoder/firstpass.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-03T18:04:40Z",
+      "side": 1,
+      "message": "ALT_REF -\u003e ALT_REF\u0027s",
+      "revId": "07ae1218219821211898e3ee38c46b6adbc44b96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
