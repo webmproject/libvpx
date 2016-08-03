@@ -91,8 +91,7 @@ static INLINE void fwd_txfm2d_c(const int16_t *input, int32_t *output,
 }
 
 void vp10_fwd_txfm2d_4x4_c(const int16_t *input, int32_t *output,
-                           const int stride, int tx_type,
-                           const int bd) {
+                           int stride, int tx_type, int bd) {
   int32_t txfm_buf[4 * 4];
   TXFM_2D_FLIP_CFG cfg = vp10_get_fwd_txfm_cfg(tx_type, TX_4X4);
   (void)bd;
@@ -100,8 +99,7 @@ void vp10_fwd_txfm2d_4x4_c(const int16_t *input, int32_t *output,
 }
 
 void vp10_fwd_txfm2d_8x8_c(const int16_t *input, int32_t *output,
-                           const int stride, int tx_type,
-                           const int bd) {
+                           int stride, int tx_type, int bd) {
   int32_t txfm_buf[8 * 8];
   TXFM_2D_FLIP_CFG cfg = vp10_get_fwd_txfm_cfg(tx_type, TX_8X8);
   (void)bd;
@@ -109,8 +107,7 @@ void vp10_fwd_txfm2d_8x8_c(const int16_t *input, int32_t *output,
 }
 
 void vp10_fwd_txfm2d_16x16_c(const int16_t *input, int32_t *output,
-                             const int stride, int tx_type,
-                             const int bd) {
+                             int stride, int tx_type, int bd) {
   int32_t txfm_buf[16 * 16];
   TXFM_2D_FLIP_CFG cfg = vp10_get_fwd_txfm_cfg(tx_type, TX_16X16);
   (void)bd;
@@ -118,8 +115,7 @@ void vp10_fwd_txfm2d_16x16_c(const int16_t *input, int32_t *output,
 }
 
 void vp10_fwd_txfm2d_32x32_c(const int16_t *input, int32_t *output,
-                             const int stride, int tx_type,
-                             const int bd) {
+                             int stride, int tx_type, int bd) {
   int32_t txfm_buf[32 * 32];
   TXFM_2D_FLIP_CFG cfg = vp10_get_fwd_txfm_cfg(tx_type, TX_32X32);
   (void)bd;
@@ -127,8 +123,7 @@ void vp10_fwd_txfm2d_32x32_c(const int16_t *input, int32_t *output,
 }
 
 void vp10_fwd_txfm2d_64x64_c(const int16_t *input, int32_t *output,
-                             const int stride, int tx_type,
-                             const int bd) {
+                             int stride, int tx_type, int bd) {
   int32_t txfm_buf[64 * 64];
   TXFM_2D_FLIP_CFG cfg = vp10_get_fwd_txfm_64x64_cfg(tx_type);
   (void)bd;

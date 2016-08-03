@@ -90,8 +90,7 @@ static INLINE void fwd_txfm2d_sse4_1(const int16_t *input, int32_t *output,
 }
 
 void vp10_fwd_txfm2d_32x32_sse4_1(const int16_t *input, int32_t *output,
-                                  const int stride, int tx_type,
-                                  const int bd) {
+                                  int stride, int tx_type, int bd) {
   int32_t txfm_buf[1024];
   TXFM_2D_FLIP_CFG cfg = vp10_get_fwd_txfm_cfg(tx_type, TX_32X32);
   (void)bd;
@@ -99,8 +98,7 @@ void vp10_fwd_txfm2d_32x32_sse4_1(const int16_t *input, int32_t *output,
 }
 
 void vp10_fwd_txfm2d_64x64_sse4_1(const int16_t *input, int32_t *output,
-                                  const int stride, int tx_type,
-                                  const int bd) {
+                                  int stride, int tx_type, int bd) {
   int32_t txfm_buf[4096];
   TXFM_2D_FLIP_CFG cfg = vp10_get_fwd_txfm_64x64_cfg(tx_type);
   (void)bd;
