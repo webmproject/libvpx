@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "b4e61afd_42ba7687",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 4845,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-03T21:15:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b4e61afd_7fc2ab52",
+      "revId": "07ae1218219821211898e3ee38c46b6adbc44b96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b4e61afd_dfb01ff2",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 8
@@ -47,6 +65,24 @@
       "writtenOn": "2016-08-03T18:29:52Z",
       "side": 1,
       "message": "Please remove the extra empty lines.",
+      "revId": "07ae1218219821211898e3ee38c46b6adbc44b96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4e61afd_82c47e0e",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 5191,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-03T21:15:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b4e61afd_dfb01ff2",
       "revId": "07ae1218219821211898e3ee38c46b6adbc44b96",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "b4e61afd_1fb36703",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1753,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-03T21:15:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b4e61afd_3f8ca3df",
+      "revId": "07ae1218219821211898e3ee38c46b6adbc44b96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b4e61afd_df849fb4",
         "filename": "vp10/encoder/firstpass.c",
         "patchSetId": 8
@@ -81,6 +135,24 @@
       "writtenOn": "2016-08-03T18:04:40Z",
       "side": 1,
       "message": "Should we put a \"TODO\" here, since some decision needs to be finalized here.",
+      "revId": "07ae1218219821211898e3ee38c46b6adbc44b96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4e61afd_1f9a876b",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1757,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-03T21:15:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b4e61afd_df849fb4",
       "revId": "07ae1218219821211898e3ee38c46b6adbc44b96",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "b4e61afd_7ff0ebca",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1837,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-03T21:15:57Z",
+      "side": 1,
+      "message": "Bi-prediction might be disabled in the first sub-group but enabled in the subsequent sub-groups.\nI should change this into \nis_sg_bipred_enabled \u003d is_bipred_enabled \u0026\u0026(subgroup_interval[which_arf] \u003e rc-\u003ebipred_group_interval);\nas this flag should be set to one only if is_bipred_enabled is one.",
+      "parentUuid": "b4e61afd_3f0f433e",
+      "revId": "07ae1218219821211898e3ee38c46b6adbc44b96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b4e61afd_bf1d1368",
         "filename": "vp10/encoder/firstpass.h",
         "patchSetId": 8
@@ -115,6 +205,24 @@
       "writtenOn": "2016-08-03T18:04:40Z",
       "side": 1,
       "message": "ALT_REF -\u003e ALT_REF\u0027s",
+      "revId": "07ae1218219821211898e3ee38c46b6adbc44b96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4e61afd_62fa1267",
+        "filename": "vp10/encoder/firstpass.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-03T21:15:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b4e61afd_bf1d1368",
       "revId": "07ae1218219821211898e3ee38c46b6adbc44b96",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
