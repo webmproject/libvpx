@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4e61afd_e287020d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-03T20:02:47Z",
+      "side": 1,
+      "message": "minimum.\n\nAlso, a brief explanation of why this increase was done will be helpful.",
+      "range": {
+        "startLine": 9,
+        "startChar": 12,
+        "endLine": 9,
+        "endChar": 19
+      },
+      "revId": "e05675d24b4afc5c9fd080698f3965ea31bba70c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4e61afd_6294d23c",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1583,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-03T20:02:47Z",
+      "side": 1,
+      "message": "Optional suggestion (for a separate patch maybe): These magic numbers should be consts ideally.",
+      "range": {
+        "startLine": 1583,
+        "startChar": 42,
+        "endLine": 1583,
+        "endChar": 43
+      },
+      "revId": "e05675d24b4afc5c9fd080698f3965ea31bba70c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4e61afd_429fd65a",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2191,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-03T20:02:47Z",
+      "side": 1,
+      "message": "You could write these lines as:\nrc-\u003ebaseline_gf_interval \u003d (rate_err \u003e 3.0) ? VPXMAX(10, rc-\u003ebaseline_gf_interval \u003e\u003e 1) : VPXMAX(6, rc-\u003ebaseline_gf_interval \u003e\u003e 1);",
+      "range": {
+        "startLine": 2188,
+        "startChar": 0,
+        "endLine": 2191,
+        "endChar": 76
+      },
+      "revId": "e05675d24b4afc5c9fd080698f3965ea31bba70c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4e61afd_02aeae96",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2199,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-03T20:02:47Z",
+      "side": 1,
+      "message": "Do you need the \"\u003e 0\" condition given \"\u003e 3\" is already present?",
+      "range": {
+        "startLine": 2199,
+        "startChar": 8,
+        "endLine": 2199,
+        "endChar": 31
+      },
+      "revId": "e05675d24b4afc5c9fd080698f3965ea31bba70c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
