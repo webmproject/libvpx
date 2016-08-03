@@ -233,6 +233,14 @@ static int av1_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
   const int w = AOMMAX(num_4x4_blocks_wide_lookup[bsize] >> ss_x, 1);
   const int step = 1 << txsz;
 
+  // TODO(bshacklett, huisu): Currently the RD loop traverses 4X8 blocks in
+  // inverted N order while in the bitstream the subblocks are stored in Z
+  // order. This discrepancy makes this function incorrect when considering 4X8
+  // blocks in the RD loop, so we disable the extended right edge for these
+  // blocks. The correct solution is to change the bitstream to store these
+  // blocks in inverted N order, and then update this function appropriately.
+  if (bsize == BLOCK_4X8 && y == 1) return 0;
+
   if (!right_available) {
     return 0;
   } else {
