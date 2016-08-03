@@ -25,7 +25,7 @@
     (void*)(((size_t)(addr) + ((align) - 1)) & (size_t)-(align))
 
 int
-vp8_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf) {
+vpx_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf) {
   if (ybf) {
     // If libvpx is using frame buffer callbacks then buffer_alloc_sz must
     // not be set.
@@ -44,7 +44,7 @@ vp8_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf) {
   return 0;
 }
 
-int vp8_yv12_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
+int vpx_yv12_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                                   int width, int height, int border) {
   if (ybf) {
     int aligned_width = (width + 15) & ~15;
@@ -105,11 +105,11 @@ int vp8_yv12_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
   return -2;
 }
 
-int vp8_yv12_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
+int vpx_yv12_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                                 int width, int height, int border) {
   if (ybf) {
-    vp8_yv12_de_alloc_frame_buffer(ybf);
-    return vp8_yv12_realloc_frame_buffer(ybf, width, height, border);
+    vpx_yv12_de_alloc_frame_buffer(ybf);
+    return vpx_yv12_realloc_frame_buffer(ybf, width, height, border);
   }
   return -2;
 }

@@ -874,7 +874,7 @@ static vpx_codec_err_t ctrl_copy_reference(vpx_codec_alg_priv_t *ctx,
     FrameWorkerData *const frame_worker_data = (FrameWorkerData *)worker->data1;
     image2yuvconfig(&frame->img, &sd);
     return vp10_copy_reference_dec(frame_worker_data->pbi,
-                                  (VP9_REFFRAME)frame->frame_type, &sd);
+                                  (VPX_REFFRAME)frame->frame_type, &sd);
   } else {
     return VPX_CODEC_INVALID_PARAM;
   }
