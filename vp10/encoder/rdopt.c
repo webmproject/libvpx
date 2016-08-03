@@ -4258,16 +4258,15 @@ static int cost_mv_ref(const VP10_COMP *cpi, PREDICTION_MODE mode,
 #endif
 }
 
-static int set_and_cost_bmi_mvs(VP10_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
-                                int i,
-                                PREDICTION_MODE mode, int_mv this_mv[2],
-                                int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES],
-                                int_mv seg_mvs[MAX_REF_FRAMES],
+static int set_and_cost_bmi_mvs(
+    VP10_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd, int i,
+    PREDICTION_MODE mode, int_mv this_mv[2],
+    int_mv frame_mv[MB_MODE_COUNT][TOTAL_REFS_PER_FRAME],
+    int_mv seg_mvs[TOTAL_REFS_PER_FRAME],
 #if CONFIG_EXT_INTER
-                                int_mv compound_seg_newmvs[2],
+    int_mv compound_seg_newmvs[2],
 #endif  // CONFIG_EXT_INTER
-                                int_mv *best_ref_mv[2], const int *mvjcost,
-                                int *mvcost[2]) {
+    int_mv *best_ref_mv[2], const int *mvjcost, int *mvcost[2]) {
   MODE_INFO *const mic = xd->mi[0];
   const MB_MODE_INFO *const mbmi = &mic->mbmi;
   const MB_MODE_INFO_EXT *const mbmi_ext = x->mbmi_ext;
@@ -4610,11 +4609,11 @@ static INLINE void mi_buf_restore(MACROBLOCK *x, struct buf_2d orig_src,
 // Check if NEARESTMV/NEARMV/ZEROMV is the cheapest way encode zero motion.
 // TODO(aconverse): Find out if this is still productive then clean up or remove
 static int check_best_zero_mv(
-    const VP10_COMP *cpi, const int16_t mode_context[MAX_REF_FRAMES],
+    const VP10_COMP *cpi, const int16_t mode_context[TOTAL_REFS_PER_FRAME],
 #if CONFIG_REF_MV && CONFIG_EXT_INTER
-    const int16_t compound_mode_context[MAX_REF_FRAMES],
+    const int16_t compound_mode_context[TOTAL_REFS_PER_FRAME],
 #endif  // CONFIG_REF_MV && CONFIG_EXT_INTER
-    int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES], int this_mode,
+    int_mv frame_mv[MB_MODE_COUNT][TOTAL_REFS_PER_FRAME], int this_mode,
     const MV_REFERENCE_FRAME ref_frames[2],
     const BLOCK_SIZE bsize, int block) {
 
@@ -4724,7 +4723,7 @@ static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_EXT_INTER
                                 int_mv* ref_mv_sub8x8[2],
 #endif
-                                int_mv single_newmv[MAX_REF_FRAMES],
+                                int_mv single_newmv[TOTAL_REFS_PER_FRAME],
                                 int *rate_mv,
                                 const int block) {
   const VP10_COMMON *const cm = &cpi->common;
@@ -4974,22 +4973,18 @@ static void joint_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
   }
 }
 
-static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
-                                        int_mv *best_ref_mv,
-                                        int_mv *second_best_ref_mv,
-                                        int64_t best_rd, int *returntotrate,
-                                        int *returnyrate,
-                                        int64_t *returndistortion,
-                                        int *skippable, int64_t *psse,
-                                        int mvthresh,
+static int64_t rd_pick_best_sub8x8_mode(
+    VP10_COMP *cpi, MACROBLOCK *x,
+    int_mv *best_ref_mv, int_mv *second_best_ref_mv,
+    int64_t best_rd, int *returntotrate, int *returnyrate,
+    int64_t *returndistortion, int *skippable, int64_t *psse, int mvthresh,
 #if CONFIG_EXT_INTER
-                                        int_mv seg_mvs[4][2][MAX_REF_FRAMES],
-                                        int_mv compound_seg_newmvs[4][2],
+    int_mv seg_mvs[4][2][TOTAL_REFS_PER_FRAME],
+    int_mv compound_seg_newmvs[4][2],
 #else
-                                        int_mv seg_mvs[4][MAX_REF_FRAMES],
+    int_mv seg_mvs[4][TOTAL_REFS_PER_FRAME],
 #endif  // CONFIG_EXT_INTER
-                                        BEST_SEG_INFO *bsi_buf, int filter_idx,
-                                        int mi_row, int mi_col) {
+    BEST_SEG_INFO *bsi_buf, int filter_idx, int mi_row, int mi_col) {
   BEST_SEG_INFO *bsi = bsi_buf + filter_idx;
 #if CONFIG_REF_MV
   int_mv tmp_ref_mv[2];
@@ -5060,7 +5055,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP10_COMP *cpi, MACROBLOCK *x,
       // TODO(jingning,rbultje): rewrite the rate-distortion optimization
       // loop for 4x4/4x8/8x4 block coding. to be replaced with new rd loop
       int_mv mode_mv[MB_MODE_COUNT][2];
-      int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
+      int_mv frame_mv[MB_MODE_COUNT][TOTAL_REFS_PER_FRAME];
       PREDICTION_MODE mode_selected = ZEROMV;
       int64_t best_rd = INT64_MAX;
       const int i = idy * 2 + idx;
@@ -5794,8 +5789,9 @@ static void estimate_ref_frame_costs(const VP10_COMMON *cm,
   int seg_ref_active = segfeature_active(&cm->seg, segment_id,
                                          SEG_LVL_REF_FRAME);
   if (seg_ref_active) {
-    memset(ref_costs_single, 0, MAX_REF_FRAMES * sizeof(*ref_costs_single));
-    memset(ref_costs_comp,   0, MAX_REF_FRAMES * sizeof(*ref_costs_comp));
+    memset(ref_costs_single, 0,
+           TOTAL_REFS_PER_FRAME * sizeof(*ref_costs_single));
+    memset(ref_costs_comp,   0, TOTAL_REFS_PER_FRAME * sizeof(*ref_costs_comp));
     *comp_mode_p = 128;
   } else {
     vpx_prob intra_inter_p = vp10_get_intra_inter_prob(cm, xd);
@@ -5947,9 +5943,9 @@ static void setup_buffer_inter(
     MV_REFERENCE_FRAME ref_frame,
     BLOCK_SIZE block_size,
     int mi_row, int mi_col,
-    int_mv frame_nearest_mv[MAX_REF_FRAMES],
-    int_mv frame_near_mv[MAX_REF_FRAMES],
-    struct buf_2d yv12_mb[MAX_REF_FRAMES][MAX_MB_PLANE]) {
+    int_mv frame_nearest_mv[TOTAL_REFS_PER_FRAME],
+    int_mv frame_near_mv[TOTAL_REFS_PER_FRAME],
+    struct buf_2d yv12_mb[TOTAL_REFS_PER_FRAME][MAX_MB_PLANE]) {
   const VP10_COMMON *cm = &cpi->common;
   const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref_frame);
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -6528,7 +6524,7 @@ static void do_masked_motion_search_indexed(VP10_COMP *cpi, MACROBLOCK *x,
 static int discount_newmv_test(const VP10_COMP *cpi,
                                int this_mode,
                                int_mv this_mv,
-                               int_mv (*mode_mv)[MAX_REF_FRAMES],
+                               int_mv (*mode_mv)[TOTAL_REFS_PER_FRAME],
                                int ref_frame) {
   return (!cpi->rc.is_src_frame_alt_ref &&
           (this_mode == NEWMV) &&
@@ -6608,14 +6604,10 @@ static int estimate_wedge_sign(const VP10_COMP *cpi,
 #endif  // CONFIG_EXT_INTER
 
 #if !CONFIG_DUAL_FILTER
-static INTERP_FILTER predict_interp_filter(const VP10_COMP *cpi,
-                                           const MACROBLOCK *x,
-                                           const BLOCK_SIZE bsize,
-                                           const int mi_row,
-                                           const int mi_col,
-                                           INTERP_FILTER
-                                           (*single_filter)[MAX_REF_FRAMES]
-                                           ) {
+static INTERP_FILTER predict_interp_filter(
+    const VP10_COMP *cpi, const MACROBLOCK *x, const BLOCK_SIZE bsize,
+    const int mi_row, const int mi_col,
+    INTERP_FILTER (*single_filter)[TOTAL_REFS_PER_FRAME]) {
   INTERP_FILTER best_filter = SWITCHABLE;
   const VP10_COMMON *cm = &cpi->common;
   const MACROBLOCKD *xd = &x->e_mbd;
@@ -6918,33 +6910,27 @@ static int64_t pick_interintra_wedge(const VP10_COMP *const cpi,
 }
 #endif  // CONFIG_EXT_INTER
 
-static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
-                                 BLOCK_SIZE bsize,
-                                 int *rate2, int64_t *distortion,
-                                 int *skippable,
-                                 int *rate_y, int *rate_uv,
-                                 int *disable_skip,
-                                 int_mv (*mode_mv)[MAX_REF_FRAMES],
-                                 int mi_row, int mi_col,
+static int64_t handle_inter_mode(
+    VP10_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize, int *rate2,
+    int64_t *distortion, int *skippable, int *rate_y, int *rate_uv,
+    int *disable_skip, int_mv (*mode_mv)[TOTAL_REFS_PER_FRAME],
+    int mi_row, int mi_col,
 #if CONFIG_OBMC
-                                 uint8_t *dst_buf1[3], int dst_stride1[3],
-                                 uint8_t *dst_buf2[3], int dst_stride2[3],
-                                 const int32_t *const wsrc,
-                                 const int32_t *const mask2d,
+    uint8_t *dst_buf1[3], int dst_stride1[3],
+    uint8_t *dst_buf2[3], int dst_stride2[3],
+    const int32_t *const wsrc, const int32_t *const mask2d,
 #endif  // CONFIG_OBMC
 #if CONFIG_EXT_INTER
-                                 int_mv single_newmvs[2][MAX_REF_FRAMES],
-                                 int single_newmvs_rate[2][MAX_REF_FRAMES],
-                                 int *compmode_interintra_cost,
-                                 int *compmode_wedge_cost,
-                                 int64_t (*const modelled_rd)[MAX_REF_FRAMES],
+    int_mv single_newmvs[2][TOTAL_REFS_PER_FRAME],
+    int single_newmvs_rate[2][TOTAL_REFS_PER_FRAME],
+    int *compmode_interintra_cost, int *compmode_wedge_cost,
+    int64_t (*const modelled_rd)[TOTAL_REFS_PER_FRAME],
 #else
-                                 int_mv single_newmv[MAX_REF_FRAMES],
+    int_mv single_newmv[TOTAL_REFS_PER_FRAME],
 #endif  // CONFIG_EXT_INTER
-                                 INTERP_FILTER (*single_filter)[MAX_REF_FRAMES],
-                                 int (*single_skippable)[MAX_REF_FRAMES],
-                                 int64_t *psse,
-                                 const int64_t ref_best_rd) {
+    INTERP_FILTER (*single_filter)[TOTAL_REFS_PER_FRAME],
+    int (*single_skippable)[TOTAL_REFS_PER_FRAME],
+    int64_t *psse, const int64_t ref_best_rd) {
   VP10_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
@@ -6960,7 +6946,7 @@ static int64_t handle_inter_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_EXT_INTER
   const int bw = 4 * num_4x4_blocks_wide_lookup[bsize];
   int mv_idx = (this_mode == NEWFROMNEARMV) ? 1 : 0;
-  int_mv single_newmv[MAX_REF_FRAMES];
+  int_mv single_newmv[TOTAL_REFS_PER_FRAME];
   const unsigned int *const interintra_mode_cost =
     cpi->interintra_mode_cost[size_group_lookup[bsize]];
   const int is_comp_interintra_pred = (mbmi->ref_frame[1] == INTRA_FRAME);
@@ -8553,18 +8539,18 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
   MV_REFERENCE_FRAME ref_frame, second_ref_frame;
   unsigned char segment_id = mbmi->segment_id;
   int comp_pred, i, k;
-  int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
-  struct buf_2d yv12_mb[MAX_REF_FRAMES][MAX_MB_PLANE];
+  int_mv frame_mv[MB_MODE_COUNT][TOTAL_REFS_PER_FRAME];
+  struct buf_2d yv12_mb[TOTAL_REFS_PER_FRAME][MAX_MB_PLANE];
 #if CONFIG_EXT_INTER
-  int_mv single_newmvs[2][MAX_REF_FRAMES] = { { { 0 } },  { { 0 } } };
-  int single_newmvs_rate[2][MAX_REF_FRAMES] = { { 0 }, { 0 } };
-  int64_t modelled_rd[MB_MODE_COUNT][MAX_REF_FRAMES];
+  int_mv single_newmvs[2][TOTAL_REFS_PER_FRAME] = { { { 0 } },  { { 0 } } };
+  int single_newmvs_rate[2][TOTAL_REFS_PER_FRAME] = { { 0 }, { 0 } };
+  int64_t modelled_rd[MB_MODE_COUNT][TOTAL_REFS_PER_FRAME];
 #else
-  int_mv single_newmv[MAX_REF_FRAMES] = { { 0 } };
+  int_mv single_newmv[TOTAL_REFS_PER_FRAME] = { { 0 } };
 #endif  // CONFIG_EXT_INTER
-  INTERP_FILTER single_inter_filter[MB_MODE_COUNT][MAX_REF_FRAMES];
-  int single_skippable[MB_MODE_COUNT][MAX_REF_FRAMES];
-  static const int flag_list[REFS_PER_FRAME + 1] = {
+  INTERP_FILTER single_inter_filter[MB_MODE_COUNT][TOTAL_REFS_PER_FRAME];
+  int single_skippable[MB_MODE_COUNT][TOTAL_REFS_PER_FRAME];
+  static const int flag_list[TOTAL_REFS_PER_FRAME] = {
     0,
     VPX_LAST_FLAG,
 #if CONFIG_EXT_REFS
@@ -8584,7 +8570,8 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
   MB_MODE_INFO best_mbmode;
   int best_mode_skippable = 0;
   int midx, best_mode_index = -1;
-  unsigned int ref_costs_single[MAX_REF_FRAMES], ref_costs_comp[MAX_REF_FRAMES];
+  unsigned int ref_costs_single[TOTAL_REFS_PER_FRAME];
+  unsigned int ref_costs_comp[TOTAL_REFS_PER_FRAME];
   vpx_prob comp_mode_p;
   int64_t best_intra_rd = INT64_MAX;
   unsigned int best_pred_sse = UINT_MAX;
@@ -8608,11 +8595,11 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
   int best_skip2 = 0;
   uint8_t ref_frame_skip_mask[2] = { 0 };
 #if CONFIG_EXT_INTER
-  uint32_t mode_skip_mask[MAX_REF_FRAMES] = { 0 };
+  uint32_t mode_skip_mask[TOTAL_REFS_PER_FRAME] = { 0 };
   MV_REFERENCE_FRAME best_single_inter_ref = LAST_FRAME;
   int64_t best_single_inter_rd = INT64_MAX;
 #else
-  uint16_t mode_skip_mask[MAX_REF_FRAMES] = { 0 };
+  uint16_t mode_skip_mask[TOTAL_REFS_PER_FRAME] = { 0 };
 #endif  // CONFIG_EXT_INTER
   int mode_skip_start = sf->mode_skip_start + 1;
   const int *const rd_threshes = rd_opt->threshes[segment_id][bsize];
@@ -8688,10 +8675,10 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
     best_pred_rd[i] = INT64_MAX;
   for (i = 0; i < TX_SIZES; i++)
     rate_uv_intra[i] = INT_MAX;
-  for (i = 0; i < MAX_REF_FRAMES; ++i)
+  for (i = 0; i < TOTAL_REFS_PER_FRAME; ++i)
     x->pred_sse[i] = INT_MAX;
   for (i = 0; i < MB_MODE_COUNT; ++i) {
-    for (k = 0; k < MAX_REF_FRAMES; ++k) {
+    for (k = 0; k < TOTAL_REFS_PER_FRAME; ++k) {
       single_inter_filter[i][k] = SWITCHABLE;
       single_skippable[i][k] = 0;
     }
@@ -8882,7 +8869,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
 #if CONFIG_EXT_INTER
   for (i = 0 ; i < MB_MODE_COUNT ; ++i)
-    for (ref_frame = 0; ref_frame < MAX_REF_FRAMES; ++ref_frame)
+    for (ref_frame = 0; ref_frame < TOTAL_REFS_PER_FRAME; ++ref_frame)
       modelled_rd[i][ref_frame] = INT64_MAX;
 #endif  // CONFIG_EXT_INTER
 
@@ -8965,7 +8952,7 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 #endif  // CONFIG_EXT_REFS
           break;
         case NONE:
-        case MAX_REF_FRAMES:
+        case TOTAL_REFS_PER_FRAME:
           assert(0 && "Invalid Reference frame");
           break;
       }
@@ -9373,20 +9360,20 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
 
           if (!mv_check_bounds(x, &cur_mv.as_mv)) {
             INTERP_FILTER dummy_single_inter_filter[MB_MODE_COUNT]
-                                                   [MAX_REF_FRAMES] =
+                                                   [TOTAL_REFS_PER_FRAME] =
                                           { { 0 } };
-            int dummy_single_skippable[MB_MODE_COUNT][MAX_REF_FRAMES] =
+            int dummy_single_skippable[MB_MODE_COUNT][TOTAL_REFS_PER_FRAME] =
                                           { { 0 } };
             int dummy_disable_skip = 0;
 #if CONFIG_EXT_INTER
-            int_mv dummy_single_newmvs[2][MAX_REF_FRAMES] =
+            int_mv dummy_single_newmvs[2][TOTAL_REFS_PER_FRAME] =
                                           { { { 0 } },  { { 0 } } };
-            int dummy_single_newmvs_rate[2][MAX_REF_FRAMES] =
+            int dummy_single_newmvs_rate[2][TOTAL_REFS_PER_FRAME] =
                                           { { 0 }, { 0 } };
             int dummy_compmode_interintra_cost = 0;
             int dummy_compmode_wedge_cost = 0;
 #else
-            int_mv dummy_single_newmv[MAX_REF_FRAMES] = { { 0 } };
+            int_mv dummy_single_newmv[TOTAL_REFS_PER_FRAME] = { { 0 } };
 #endif
 
             frame_mv[NEARMV][ref_frame] = cur_mv;
@@ -10159,7 +10146,8 @@ void vp10_rd_pick_inter_mode_sb_seg_skip(VP10_COMP *cpi,
   const int comp_pred = 0;
   int i;
   int64_t best_pred_diff[REFERENCE_MODES];
-  unsigned int ref_costs_single[MAX_REF_FRAMES], ref_costs_comp[MAX_REF_FRAMES];
+  unsigned int ref_costs_single[TOTAL_REFS_PER_FRAME];
+  unsigned int ref_costs_comp[TOTAL_REFS_PER_FRAME];
   vpx_prob comp_mode_p;
   INTERP_FILTER best_filter = SWITCHABLE;
   int64_t this_rd = INT64_MAX;
@@ -10169,9 +10157,9 @@ void vp10_rd_pick_inter_mode_sb_seg_skip(VP10_COMP *cpi,
   estimate_ref_frame_costs(cm, xd, segment_id, ref_costs_single, ref_costs_comp,
                            &comp_mode_p);
 
-  for (i = 0; i < MAX_REF_FRAMES; ++i)
+  for (i = 0; i < TOTAL_REFS_PER_FRAME; ++i)
     x->pred_sse[i] = INT_MAX;
-  for (i = LAST_FRAME; i < MAX_REF_FRAMES; ++i)
+  for (i = LAST_FRAME; i < TOTAL_REFS_PER_FRAME; ++i)
     x->pred_mv_sad[i] = INT_MAX;
 
   rd_cost->rate = INT_MAX;
@@ -10298,9 +10286,9 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
   MV_REFERENCE_FRAME ref_frame, second_ref_frame;
   unsigned char segment_id = mbmi->segment_id;
   int comp_pred, i;
-  int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
-  struct buf_2d yv12_mb[MAX_REF_FRAMES][MAX_MB_PLANE];
-  static const int flag_list[REFS_PER_FRAME + 1] = {
+  int_mv frame_mv[MB_MODE_COUNT][TOTAL_REFS_PER_FRAME];
+  struct buf_2d yv12_mb[TOTAL_REFS_PER_FRAME][MAX_MB_PLANE];
+  static const int flag_list[TOTAL_REFS_PER_FRAME] = {
     0,
     VPX_LAST_FLAG,
 #if CONFIG_EXT_REFS
@@ -10319,7 +10307,8 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
   int64_t best_pred_rd[REFERENCE_MODES];
   MB_MODE_INFO best_mbmode;
   int ref_index, best_ref_index = 0;
-  unsigned int ref_costs_single[MAX_REF_FRAMES], ref_costs_comp[MAX_REF_FRAMES];
+  unsigned int ref_costs_single[TOTAL_REFS_PER_FRAME];
+  unsigned int ref_costs_comp[TOTAL_REFS_PER_FRAME];
   vpx_prob comp_mode_p;
 #if CONFIG_DUAL_FILTER
   INTERP_FILTER tmp_best_filter[4] = { 0 };
@@ -10333,9 +10322,9 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
   const int intra_cost_penalty = vp10_get_intra_cost_penalty(
     cm->base_qindex, cm->y_dc_delta_q, cm->bit_depth);
 #if CONFIG_EXT_INTER
-  int_mv seg_mvs[4][2][MAX_REF_FRAMES];
+  int_mv seg_mvs[4][2][TOTAL_REFS_PER_FRAME];
 #else
-  int_mv seg_mvs[4][MAX_REF_FRAMES];
+  int_mv seg_mvs[4][TOTAL_REFS_PER_FRAME];
 #endif  // CONFIG_EXT_INTER
   b_mode_info best_bmodes[4];
   int best_skip2 = 0;
@@ -10366,10 +10355,10 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
     int k;
 
     for (k = 0; k < 2; k++)
-      for (j = 0; j < MAX_REF_FRAMES; j++)
+      for (j = 0; j < TOTAL_REFS_PER_FRAME; j++)
         seg_mvs[i][k][j].as_int = INVALID_MV;
 #else
-    for (j = 0; j < MAX_REF_FRAMES; j++)
+    for (j = 0; j < TOTAL_REFS_PER_FRAME; j++)
       seg_mvs[i][j].as_int = INVALID_MV;
 #endif  // CONFIG_EXT_INTER
   }
@@ -10493,7 +10482,7 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
 #endif  // CONFIG_EXT_REFS
             break;
           case NONE:
-          case MAX_REF_FRAMES:
+          case TOTAL_REFS_PER_FRAME:
             assert(0 && "Invalid Reference frame");
             break;
         }

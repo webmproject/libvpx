@@ -30,8 +30,6 @@
 extern "C" {
 #endif
 
-#define REFS_PER_FRAME (ALTREF_FRAME - LAST_FRAME + 1)
-
 #define REF_FRAMES_LOG2 3
 #define REF_FRAMES (1 << REF_FRAMES_LOG2)
 
@@ -162,8 +160,8 @@ typedef struct VP10Common {
   // TODO(jkoleszar): could expand active_ref_idx to 4, with 0 as intra, and
   // roll new_fb_idx into it.
 
-  // Each frame can reference REFS_PER_FRAME buffers
-  RefBuffer frame_refs[REFS_PER_FRAME];
+  // Each Inter frame can reference INTER_REFS_PER_FRAME buffers
+  RefBuffer frame_refs[INTER_REFS_PER_FRAME];
 
   int new_fb_idx;
 
@@ -268,7 +266,7 @@ typedef struct VP10Common {
   // a frame decode
   REFRESH_FRAME_CONTEXT_MODE refresh_frame_context;
 
-  int ref_frame_sign_bias[MAX_REF_FRAMES];    /* Two state 0, 1 */
+  int ref_frame_sign_bias[TOTAL_REFS_PER_FRAME];    /* Two state 0, 1 */
 
   struct loopfilter lf;
   struct segmentation seg;
@@ -344,7 +342,7 @@ typedef struct VP10Common {
   // each keyframe and not used afterwards
   vpx_prob kf_y_prob[INTRA_MODES][INTRA_MODES][INTRA_MODES - 1];
 #if CONFIG_GLOBAL_MOTION
-  Global_Motion_Params global_motion[MAX_REF_FRAMES];
+  Global_Motion_Params global_motion[TOTAL_REFS_PER_FRAME];
 #endif
 
   BLOCK_SIZE sb_size;   // Size of the superblock used for this frame

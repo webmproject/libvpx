@@ -451,7 +451,7 @@ static void dealloc_compressor_data(VP10_COMP *cpi) {
   cpi->active_map.map = NULL;
 
   // Free up-sampled reference buffers.
-  for (i = 0; i < MAX_REF_FRAMES; i++)
+  for (i = 0; i < (REF_FRAMES + 1); i++)
     vpx_free_frame_buffer(&cpi->upsampled_ref_bufs[i].buf);
 
   vp10_free_ref_frame_buffers(cm->buffer_pool);
@@ -2377,7 +2377,7 @@ static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
 static INLINE void init_upsampled_ref_frame_bufs(VP10_COMP *cpi) {
   int i;
 
-  for (i = 0; i < MAX_REF_FRAMES; ++i) {
+  for (i = 0; i < (REF_FRAMES + 1); ++i) {
     cpi->upsampled_ref_bufs[i].ref_count = 0;
     cpi->upsampled_ref_idx[i] = INVALID_IDX;
   }
@@ -2953,7 +2953,7 @@ static void generate_psnr_packet(VP10_COMP *cpi) {
 }
 
 int vp10_use_as_reference(VP10_COMP *cpi, int ref_frame_flags) {
-  if (ref_frame_flags > ((1 << REFS_PER_FRAME) - 1))
+  if (ref_frame_flags > ((1 << INTER_REFS_PER_FRAME) - 1))
     return -1;
 
   cpi->ref_frame_flags = ref_frame_flags;
@@ -3297,7 +3297,7 @@ static int recode_loop_test(VP10_COMP *cpi,
 static INLINE int get_free_upsampled_ref_buf(EncRefCntBuffer *ubufs) {
   int i;
 
-  for (i = 0; i < MAX_REF_FRAMES; i++) {
+  for (i = 0; i < (REF_FRAMES + 1); i++) {
     if (!ubufs[i].ref_count) {
       return i;
     }
@@ -3710,7 +3710,7 @@ static INLINE void alloc_frame_mvs(VP10_COMMON *const cm,
 void vp10_scale_references(VP10_COMP *cpi) {
   VP10_COMMON *cm = &cpi->common;
   MV_REFERENCE_FRAME ref_frame;
-  const VPX_REFFRAME ref_mask[REFS_PER_FRAME] = {
+  const VPX_REFFRAME ref_mask[INTER_REFS_PER_FRAME] = {
     VPX_LAST_FLAG,
 #if CONFIG_EXT_REFS
     VPX_LAST2_FLAG,
@@ -3835,7 +3835,7 @@ static void release_scaled_references(VP10_COMP *cpi) {
   if (cpi->oxcf.pass == 0) {
     // Only release scaled references under certain conditions:
     // if reference will be updated, or if scaled reference has same resolution.
-    int refresh[REFS_PER_FRAME];
+    int refresh[INTER_REFS_PER_FRAME];
     refresh[0] = (cpi->refresh_last_frame) ? 1 : 0;
 #if CONFIG_EXT_REFS
     refresh[1] = refresh[2] = 0;
@@ -3860,7 +3860,7 @@ static void release_scaled_references(VP10_COMP *cpi) {
       }
     }
   } else {
-    for (i = 0; i < MAX_REF_FRAMES; ++i) {
+    for (i = 0; i < TOTAL_REFS_PER_FRAME; ++i) {
       const int idx = cpi->scaled_ref_idx[i];
       RefCntBuffer *const buf = idx != INVALID_IDX ?
           &cm->buffer_pool->frame_bufs[idx] : NULL;
@@ -4669,7 +4669,7 @@ static void set_arf_sign_bias(VP10_COMP *cpi) {
 
 static int setup_interp_filter_search_mask(VP10_COMP *cpi) {
   INTERP_FILTER ifilter;
-  int ref_total[MAX_REF_FRAMES] = {0};
+  int ref_total[TOTAL_REFS_PER_FRAME] = {0};
   MV_REFERENCE_FRAME ref;
   int mask = 0;
   if (cpi->common.last_frame_type == KEY_FRAME ||
@@ -5642,7 +5642,7 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
   }
 
   if (cpi->oxcf.pass != 0 || frame_is_intra_only(cm) == 1) {
-    for (i = 0; i < MAX_REF_FRAMES; ++i)
+    for (i = 0; i < TOTAL_REFS_PER_FRAME; ++i)
       cpi->scaled_ref_idx[i] = INVALID_IDX;
   }
 

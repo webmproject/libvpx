@@ -301,7 +301,7 @@ static void swap_frame_buffers(VP10Decoder *pbi) {
   }
 
   // Invalidate these references until the next frame starts.
-  for (ref_index = 0; ref_index < REFS_PER_FRAME; ref_index++) {
+  for (ref_index = 0; ref_index < INTER_REFS_PER_FRAME; ref_index++) {
     cm->frame_refs[ref_index].idx = INVALID_IDX;
     cm->frame_refs[ref_index].buf = NULL;
   }

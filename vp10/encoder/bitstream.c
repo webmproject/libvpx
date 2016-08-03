@@ -2473,7 +2473,7 @@ static void encode_loopfilter(VP10_COMMON *cm,
   if (lf->mode_ref_delta_enabled) {
     vpx_wb_write_bit(wb, lf->mode_ref_delta_update);
     if (lf->mode_ref_delta_update) {
-      for (i = 0; i < MAX_REF_FRAMES; i++) {
+      for (i = 0; i < TOTAL_REFS_PER_FRAME; i++) {
         const int delta = lf->ref_deltas[i];
         const int changed = delta != lf->last_ref_deltas[i];
         vpx_wb_write_bit(wb, changed);

@@ -300,7 +300,7 @@ void vp10_loop_filter_frame_init(VP10_COMMON *cm, int default_filt_lvl) {
       const int intra_lvl = lvl_seg + lf->ref_deltas[INTRA_FRAME] * scale;
       lfi->lvl[seg_id][INTRA_FRAME][0] = clamp(intra_lvl, 0, MAX_LOOP_FILTER);
 
-      for (ref = LAST_FRAME; ref < MAX_REF_FRAMES; ++ref) {
+      for (ref = LAST_FRAME; ref < TOTAL_REFS_PER_FRAME; ++ref) {
         for (mode = 0; mode < MAX_MODE_LF_DELTAS; ++mode) {
           const int inter_lvl = lvl_seg + lf->ref_deltas[ref] * scale
                                         + lf->mode_deltas[mode] * scale;
