@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "b4e61afd_05e158c4",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-03T20:17:15Z",
+      "side": 1,
+      "message": "code moves around, so this should be allocating the space it requires. you\u0027re also limiting this to one stack sanitizer meaning you\u0027ll have to respond to other reports; setting the size is just a bit more proactive.",
+      "parentUuid": "b4e61afd_22c80a7c",
+      "revId": "49737fe20f92bd74c5150218d40aabe6724f1318",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b4e61afd_42cd168b",
         "filename": "vp8/common/reconintra4x4.c",
         "patchSetId": 3
