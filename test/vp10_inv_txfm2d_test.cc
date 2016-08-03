@@ -30,7 +30,7 @@ namespace {
 #if CONFIG_VP9_HIGHBITDEPTH
 // VP10InvTxfm2dParam argument list:
 // tx_type_, tx_size_, max_error_, max_avg_error_
-typedef std::tr1::tuple<TX_TYPE, TX_SIZE, double, double> VP10InvTxfm2dParam;
+typedef std::tr1::tuple<TX_TYPE, TX_SIZE, int, double> VP10InvTxfm2dParam;
 
 class VP10InvTxfm2d : public ::testing::TestWithParam<VP10InvTxfm2dParam> {
  public:
