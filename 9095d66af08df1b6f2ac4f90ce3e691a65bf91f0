@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "b4e61afd_e52aac82",
+        "filename": "vpx_dsp/arm/transpose_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-03T20:55:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "54d87e08_a0f7e427",
+      "revId": "9095d66af08df1b6f2ac4f90ce3e691a65bf91f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54d87e08_c0f46825",
         "filename": "vpx_dsp/arm/transpose_neon.h",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-08-03T03:54:15Z",
       "side": 1,
       "message": "what about a helper something like:\n   vtrn_s64(in0, in1, out1, out2)\nthen you could pair the highs and lows:\n   vtrn_s64(c0, c2, a0, a4)",
+      "revId": "9095d66af08df1b6f2ac4f90ce3e691a65bf91f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4e61afd_8533a8f6",
+        "filename": "vpx_dsp/arm/transpose_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-03T20:55:35Z",
+      "side": 1,
+      "message": "I used the same format as the vtrn* neon functions. A little concerned about namespace clashing if they ever added vtrnq_64, thought about prefixing it.\n\nIt generates the exact same assembly.",
+      "parentUuid": "54d87e08_c0f46825",
       "revId": "9095d66af08df1b6f2ac4f90ce3e691a65bf91f0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
