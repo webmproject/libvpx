@@ -123,6 +123,24 @@
       "revId": "9095d66af08df1b6f2ac4f90ce3e691a65bf91f0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "148e0681_32998e10",
+        "filename": "vpx_dsp/arm/transpose_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-03T23:33:50Z",
+      "side": 1,
+      "message": "Used vpx_. If everything in the directory gets renamed dsp_ it\u0027ll get changed then.",
+      "parentUuid": "148e0681_8f4e153e",
+      "revId": "9095d66af08df1b6f2ac4f90ce3e691a65bf91f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
