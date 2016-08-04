@@ -81,14 +81,14 @@ TEST_P(LosslessTest, TestLossLessEncoding) {
 
   // intentionally changed the dimension for better testing coverage
   libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                     timebase.den, timebase.num, 0, 10);
+                                     timebase.den, timebase.num, 0, 5);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   const double psnr_lossless = GetMinPsnr();
   EXPECT_GE(psnr_lossless, kMaxPsnr);
 }
 
 TEST_P(LosslessTest, TestLossLessEncoding444) {
-  libvpx_test::Y4mVideoSource video("rush_hour_444.y4m", 0, 10);
+  libvpx_test::Y4mVideoSource video("rush_hour_444.y4m", 0, 5);
 
   cfg_.g_profile = 1;
   cfg_.g_timebase = video.timebase();
@@ -117,7 +117,7 @@ TEST_P(LosslessTest, TestLossLessEncodingCtrl) {
   init_flags_ = VPX_CODEC_USE_PSNR;
 
   libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                     timebase.den, timebase.num, 0, 10);
+                                     timebase.den, timebase.num, 0, 5);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   const double psnr_lossless = GetMinPsnr();
   EXPECT_GE(psnr_lossless, kMaxPsnr);
