@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "34514af5_90e1942e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-04T22:01:52Z",
+      "side": 1,
+      "message": "maybe \u0027remove duplicates/duplication ...\u0027",
+      "revId": "9bd242de90f16395cb5fb00fa218d29c25ab3848",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "34514af5_705a7026",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-04T22:01:52Z",
+      "side": 1,
+      "message": "static is redundant in an anonymous namespace",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 6
+      },
+      "revId": "9bd242de90f16395cb5fb00fa218d29c25ab3848",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "34514af5_b063f8ea",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-04T22:01:52Z",
+      "side": 1,
+      "message": "how about a typedef for this",
+      "revId": "9bd242de90f16395cb5fb00fa218d29c25ab3848",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "34514af5_f084a06e",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-04T22:01:52Z",
+      "side": 1,
+      "message": "you can make this a for loop and scope int j to it and the one below",
+      "revId": "9bd242de90f16395cb5fb00fa218d29c25ab3848",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
