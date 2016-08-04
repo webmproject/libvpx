@@ -68,7 +68,8 @@ void vp9_iht16x16_256_add_dspr2(const int16_t *input, uint8_t *dest, int pitch,
         for (j = 0; j < 16; ++j) temp_in[j * 16 + i] = out[i * 16 + j];
 
       idct16_cols_add_blk_dspr2(temp_in, dest, pitch);
-    } break;
+      break;
+    }
     case ADST_ADST:  // ADST in both directions
     {
       int16_t temp_in[16];
@@ -89,7 +90,8 @@ void vp9_iht16x16_256_add_dspr2(const int16_t *input, uint8_t *dest, int pitch,
           dest[j * pitch + i] = clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 6) +
                                            dest[j * pitch + i]);
       }
-    } break;
+      break;
+    }
     default: printf("vp9_short_iht16x16_add_dspr2 : Invalid tx_type\n"); break;
   }
 }

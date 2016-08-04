@@ -1424,7 +1424,8 @@ void vpx_convolve_copy_dspr2(const uint8_t *src, ptrdiff_t src_stride,
         src += src_stride;
         dst += dst_stride;
       }
-    } break;
+      break;
+    }
     case 8: {
       uint32_t tp1, tp2;
 
@@ -1446,7 +1447,8 @@ void vpx_convolve_copy_dspr2(const uint8_t *src, ptrdiff_t src_stride,
         src += src_stride;
         dst += dst_stride;
       }
-    } break;
+      break;
+    }
     case 16: {
       uint32_t tp1, tp2, tp3, tp4;
 
@@ -1474,7 +1476,8 @@ void vpx_convolve_copy_dspr2(const uint8_t *src, ptrdiff_t src_stride,
         src += src_stride;
         dst += dst_stride;
       }
-    } break;
+      break;
+    }
     case 32: {
       uint32_t tp1, tp2, tp3, tp4;
       uint32_t tp5, tp6, tp7, tp8;
@@ -1512,7 +1515,8 @@ void vpx_convolve_copy_dspr2(const uint8_t *src, ptrdiff_t src_stride,
         src += src_stride;
         dst += dst_stride;
       }
-    } break;
+      break;
+    }
     case 64: {
       uint32_t tp1, tp2, tp3, tp4;
       uint32_t tp5, tp6, tp7, tp8;
@@ -1573,7 +1577,8 @@ void vpx_convolve_copy_dspr2(const uint8_t *src, ptrdiff_t src_stride,
         src += src_stride;
         dst += dst_stride;
       }
-    } break;
+      break;
+    }
     default:
       for (y = h; y--;) {
         for (x = 0; x < w; ++x) {
