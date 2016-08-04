@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "148e0681_b8da3ddf",
+        "filename": "README",
+        "patchSetId": 2
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-04T02:28:44Z",
+      "side": 1,
+      "message": "Do you need to specify --style\u003dfile? I\u0027ve been running \u0027clang-format file \u003e temp; mv temp file\u0027 and Jenkins seems to like that. The -i option is nice though. Saves the temp copy.",
+      "revId": "15f29ef0922c6584dea69ac75367edb2f6934bb3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
