@@ -33,7 +33,7 @@
  *  SPECIAL NOTES : None.
  *
  ****************************************************************************/
-void vp8_horizontal_line_5_4_scale_c(const unsigned char *source,
+void vpx_horizontal_line_5_4_scale_c(const unsigned char *source,
                                      unsigned int source_width,
                                      unsigned char *dest,
                                      unsigned int dest_width) {
@@ -64,7 +64,7 @@ void vp8_horizontal_line_5_4_scale_c(const unsigned char *source,
 
 
 
-void vp8_vertical_band_5_4_scale_c(unsigned char *source,
+void vpx_vertical_band_5_4_scale_c(unsigned char *source,
                                    unsigned int src_pitch,
                                    unsigned char *dest,
                                    unsigned int dest_pitch,
@@ -96,7 +96,7 @@ void vp8_vertical_band_5_4_scale_c(unsigned char *source,
 
 /*7***************************************************************************
  *
- *  ROUTINE       : vp8_horizontal_line_3_5_scale_c
+ *  ROUTINE       : vpx_horizontal_line_3_5_scale_c
  *
  *  INPUTS        : const unsigned char *source : Pointer to source data.
  *                  unsigned int source_width    : Stride of source.
@@ -114,7 +114,7 @@ void vp8_vertical_band_5_4_scale_c(unsigned char *source,
  *
  *
  ****************************************************************************/
-void vp8_horizontal_line_5_3_scale_c(const unsigned char *source,
+void vpx_horizontal_line_5_3_scale_c(const unsigned char *source,
                                      unsigned int source_width,
                                      unsigned char *dest,
                                      unsigned int dest_width) {
@@ -142,7 +142,7 @@ void vp8_horizontal_line_5_3_scale_c(const unsigned char *source,
 
 }
 
-void vp8_vertical_band_5_3_scale_c(unsigned char *source,
+void vpx_vertical_band_5_3_scale_c(unsigned char *source,
                                    unsigned int src_pitch,
                                    unsigned char *dest,
                                    unsigned int dest_pitch,
@@ -172,7 +172,7 @@ void vp8_vertical_band_5_3_scale_c(unsigned char *source,
 
 /****************************************************************************
  *
- *  ROUTINE       : vp8_horizontal_line_1_2_scale_c
+ *  ROUTINE       : vpx_horizontal_line_1_2_scale_c
  *
  *  INPUTS        : const unsigned char *source : Pointer to source data.
  *                  unsigned int source_width    : Stride of source.
@@ -189,7 +189,7 @@ void vp8_vertical_band_5_3_scale_c(unsigned char *source,
  *  SPECIAL NOTES : None.
  *
  ****************************************************************************/
-void vp8_horizontal_line_2_1_scale_c(const unsigned char *source,
+void vpx_horizontal_line_2_1_scale_c(const unsigned char *source,
                                      unsigned int source_width,
                                      unsigned char *dest,
                                      unsigned int dest_width) {
@@ -208,7 +208,7 @@ void vp8_horizontal_line_2_1_scale_c(const unsigned char *source,
   }
 }
 
-void vp8_vertical_band_2_1_scale_c(unsigned char *source,
+void vpx_vertical_band_2_1_scale_c(unsigned char *source,
                                    unsigned int src_pitch,
                                    unsigned char *dest,
                                    unsigned int dest_pitch,
@@ -218,7 +218,7 @@ void vp8_vertical_band_2_1_scale_c(unsigned char *source,
   memcpy(dest, source, dest_width);
 }
 
-void vp8_vertical_band_2_1_scale_i_c(unsigned char *source,
+void vpx_vertical_band_2_1_scale_i_c(unsigned char *source,
                                      unsigned int src_pitch,
                                      unsigned char *dest,
                                      unsigned int dest_pitch,

@@ -28,24 +28,6 @@ extern "C" {
 /* Include controls common to both the encoder and decoder */
 #include "./vp8.h"
 
-/*!\name Algorithm interface for VP8
- *
- * This interface provides the capability to decode VP8 streams.
- * @{
- */
-extern vpx_codec_iface_t  vpx_codec_vp8_dx_algo;
-extern vpx_codec_iface_t *vpx_codec_vp8_dx(void);
-/*!@} - end algorithm interface member group*/
-
-/*!\name Algorithm interface for VP9
- *
- * This interface provides the capability to decode VP9 streams.
- * @{
- */
-extern vpx_codec_iface_t  vpx_codec_vp9_dx_algo;
-extern vpx_codec_iface_t *vpx_codec_vp9_dx(void);
-/*!@} - end algorithm interface member group*/
-
 /*!\name Algorithm interface for VP10
  *
  * This interface provides the capability to decode VP10 streams.

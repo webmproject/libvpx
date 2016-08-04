@@ -37,7 +37,7 @@ struct vp10_extracfg {
   unsigned int                arnr_strength;
   unsigned int                min_gf_interval;
   unsigned int                max_gf_interval;
-  vp8e_tuning                 tuning;
+  vpx_tune_metric             tuning;
   unsigned int                cq_level;  // constrained quality level
   unsigned int                rc_max_intra_bitrate_pct;
   unsigned int                rc_max_inter_bitrate_pct;
@@ -47,7 +47,7 @@ struct vp10_extracfg {
   AQ_MODE                     aq_mode;
   unsigned int                frame_periodic_boost;
   vpx_bit_depth_t             bit_depth;
-  vp9e_tune_content           content;
+  vpx_tune_content            content;
   vpx_color_space_t           color_space;
   int                         color_range;
   int                         render_width;
@@ -75,7 +75,7 @@ static struct vp10_extracfg default_extra_cfg = {
   5,                            // arnr_strength
   0,                            // min_gf_interval; 0 -> default decision
   0,                            // max_gf_interval; 0 -> default decision
-  VP8_TUNE_PSNR,                // tuning
+  VPX_TUNE_PSNR,                // tuning
   10,                           // cq_level
   0,                            // rc_max_intra_bitrate_pct
   0,                            // rc_max_inter_bitrate_pct
@@ -85,7 +85,7 @@ static struct vp10_extracfg default_extra_cfg = {
   NO_AQ,                        // aq_mode
   0,                            // frame_periodic_delta_q
   VPX_BITS_8,                   // Bit depth
-  VP9E_CONTENT_DEFAULT,         // content
+  VPX_CONTENT_DEFAULT,          // content
   VPX_CS_UNKNOWN,               // color space
   0,                            // color range
   0,                            // render width
@@ -241,10 +241,10 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK(cfg, g_bit_depth, VPX_BITS_8, VPX_BITS_12);
   RANGE_CHECK(cfg, g_input_bit_depth, 8, 12);
   RANGE_CHECK(extra_cfg, content,
-              VP9E_CONTENT_DEFAULT, VP9E_CONTENT_INVALID - 1);
+              VPX_CONTENT_DEFAULT, VPX_CONTENT_INVALID - 1);
 
   // TODO(yaowu): remove this when ssim tuning is implemented for vp9
-  if (extra_cfg->tuning == VP8_TUNE_SSIM)
+  if (extra_cfg->tuning == VPX_TUNE_SSIM)
       ERROR("Option --tune=ssim is not currently supported in VP9.");
 
   if (cfg->g_pass == VPX_RC_LAST_PASS) {

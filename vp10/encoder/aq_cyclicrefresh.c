@@ -416,7 +416,7 @@ static void cyclic_refresh_update_map(VP10_COMP *const cpi) {
     int mi_row = sb_row_index * cm->mib_size;
     int mi_col = sb_col_index * cm->mib_size;
     int qindex_thresh =
-        cpi->oxcf.content == VP9E_CONTENT_SCREEN
+        cpi->oxcf.content == VPX_CONTENT_SCREEN
             ? vp10_get_qindex(&cm->seg, CR_SEGMENT_ID_BOOST2, cm->base_qindex)
             : 0;
     assert(mi_row >= 0 && mi_row < cm->mi_rows);

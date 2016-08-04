@@ -339,8 +339,8 @@ static const arg_def_t arnr_strength = ARG_DEF(
 static const arg_def_t arnr_type = ARG_DEF(
     NULL, "arnr-type", 1, "AltRef type");
 static const struct arg_enum_list tuning_enum[] = {
-  {"psnr", VP8_TUNE_PSNR},
-  {"ssim", VP8_TUNE_SSIM},
+  {"psnr", VPX_TUNE_PSNR},
+  {"ssim", VPX_TUNE_SSIM},
   {NULL, 0}
 };
 static const arg_def_t tune_ssim = ARG_DEF_ENUM(
@@ -414,8 +414,8 @@ static const arg_def_t inbitdeptharg = ARG_DEF(
 #endif
 
 static const struct arg_enum_list tune_content_enum[] = {
-  {"default", VP9E_CONTENT_DEFAULT},
-  {"screen", VP9E_CONTENT_SCREEN},
+  {"default", VPX_CONTENT_DEFAULT},
+  {"screen", VPX_CONTENT_SCREEN},
   {NULL, 0}
 };
 

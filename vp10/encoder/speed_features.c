@@ -271,7 +271,7 @@ static void set_rt_speed_feature_framesize_dependent(VP10_COMP *cpi,
 }
 
 static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
-                                 int speed, vp9e_tune_content content) {
+                                 int speed, vpx_tune_content content) {
   VP10_COMMON *const cm = &cpi->common;
   const int is_keyframe = cm->frame_type == KEY_FRAME;
   const int frames_since_key = is_keyframe ? 0 : cpi->rc.frames_since_key;
@@ -398,7 +398,7 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf,
 
     if (!is_keyframe) {
       int i;
-      if (content == VP9E_CONTENT_SCREEN) {
+      if (content == VPX_CONTENT_SCREEN) {
         for (i = 0; i < BLOCK_SIZES; ++i)
           sf->intra_y_mode_bsize_mask[i] = INTRA_DC_TM_H_V;
       } else {
