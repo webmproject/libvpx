@@ -16,6 +16,24 @@
       "revId": "476e8fc8558592f5535ec2bcdfc6798d35f65f12",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "746662d2_bdd3eb04",
+        "filename": "vpx_ports/arm_cpudetect.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-04T19:46:57Z",
+      "side": 0,
+      "message": "\u003e Ah, the neon could probably use this style which removes an extra\n \u003e brace, but it looks fine the way it is too.\n\nI\u0027d prefer to add {}s not remove them",
+      "parentUuid": "746662d2_3d8efb24",
+      "revId": "476e8fc8558592f5535ec2bcdfc6798d35f65f12",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
