@@ -1,6 +1,7 @@
 ---
 Language:        Cpp
 # BasedOnStyle:  Google
+# Generated with clang-format 3.7.1
 AccessModifierOffset: -1
 AlignAfterOpenBracket: true
 AlignConsecutiveAssignments: false
@@ -28,7 +29,7 @@ ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
 Cpp11BracedListStyle: false
-DerivePointerAlignment: true
+DerivePointerAlignment: false
 DisableFormat:   false
 ExperimentalAutoDetectBinPacking: false
 ForEachMacros:   [ foreach, Q_FOREACH, BOOST_FOREACH ]
