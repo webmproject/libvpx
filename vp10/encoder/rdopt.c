@@ -1921,21 +1921,13 @@ static int rd_pick_palette_intra_sby(VP10_COMP *cpi, MACROBLOCK *x,
         centroids[i] = roundf(centroids[i]);
       // remove duplicates
       i = 1;
-      k = n;
-      while (i < k) {
-        if (centroids[i] == centroids[i - 1]) {
-          j = i;
-          while (j < k - 1) {
-            assert((j + 1) < PALETTE_MAX_SIZE);
-            assert(j > 0);
-            centroids[j] = centroids[j + 1];
-            ++j;
-          }
-          --k;
-        } else {
+      for (j = 1; j < n; ++j) {
+        if (centroids[j] != centroids[j - 1]) {  // found a new unique centroid
+          centroids[i] = centroids[j];
           ++i;
         }
       }
+      k = i;  // number of unique centroids
 
 #if CONFIG_VP9_HIGHBITDEPTH
       if (cpi->common.use_highbitdepth)
