@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "746662d2_3d8efb24",
+        "filename": "vpx_ports/arm_cpudetect.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-04T19:36:08Z",
+      "side": 0,
+      "message": "Ah, the neon could probably use this style which removes an extra brace, but it looks fine the way it is too.",
+      "revId": "476e8fc8558592f5535ec2bcdfc6798d35f65f12",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
