@@ -60,7 +60,6 @@
     \if decoder
     Currently defined decoder features include:
     - \ref usage_cb
-    - \ref usage_postproc
     \endif
 
     \section usage_init Initialization

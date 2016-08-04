@@ -34,7 +34,7 @@ Advanced options:
   ${toggle_codec_srcs}            in/exclude codec library source code
   ${toggle_debug_libs}            in/exclude debug version of libraries
   ${toggle_static_msvcrt}         use static MSVCRT (VS builds only)
-  ${toggle_vp9_highbitdepth}      use VP9 high bit depth (10/12) profiles
+  ${toggle_vp9_highbitdepth}      use high bit depth (10/12) profiles
   ${toggle_better_hw_compatibility}
                                   enable encoder to produce streams with better
                                   hardware decoder compatibility

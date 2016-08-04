@@ -18,7 +18,7 @@ int vp10_alloc_internal_frame_buffers(InternalFrameBufferList *list) {
   vp10_free_internal_frame_buffers(list);
 
   list->num_internal_frame_buffers =
-      VP9_MAXIMUM_REF_BUFFERS + VPX_MAXIMUM_WORK_BUFFERS;
+      VPX_MAXIMUM_REF_BUFFERS + VPX_MAXIMUM_WORK_BUFFERS;
   list->int_fb =
       (InternalFrameBuffer *)vpx_calloc(list->num_internal_frame_buffers,
                                         sizeof(*list->int_fb));

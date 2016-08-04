@@ -9,10 +9,10 @@
  */
 
 
-// VP9/VP10 Set Reference Frame
+// VP10 Set Reference Frame
 // ============================
 //
-// This is an example demonstrating how to overwrite the VP9/VP10 encoder's
+// This is an example demonstrating how to overwrite the VP10 encoder's
 // internal reference frame. In the sample we set the last frame to the
 // current frame. This technique could be used to bounce between two cameras.
 //
@@ -334,7 +334,7 @@ int main(int argc, char **argv) {
     die("Unsupported codec.");
 
   update_frame_num = atoi(argv[6]);
-  // In VP9, the reference buffers (cm->buffer_pool->frame_bufs[i].buf) are
+  // In VP10, the reference buffers (cm->buffer_pool->frame_bufs[i].buf) are
   // allocated while calling vpx_codec_encode(), thus, setting reference for
   // 1st frame isn't supported.
   if (update_frame_num <= 1)

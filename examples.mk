@@ -109,10 +109,6 @@ endif
 vpxenc.GUID                  = 548DEC74-7A15-4B2B-AFC3-AA102E7C25C1
 vpxenc.DESCRIPTION           = Full featured encoder
 
-ifneq ($(CONFIG_SHARED),yes)
-EXAMPLES-$(CONFIG_VP9_ENCODER)    += resize_util.c
-endif
-
 EXAMPLES-$(CONFIG_ENCODERS)          += vpx_temporal_svc_encoder.c
 vpx_temporal_svc_encoder.SRCS        += ivfenc.c ivfenc.h
 vpx_temporal_svc_encoder.SRCS        += tools_common.c tools_common.h
@@ -131,16 +127,6 @@ simple_decoder.SRCS                += vpx_ports/mem_ops.h
 simple_decoder.SRCS                += vpx_ports/mem_ops_aligned.h
 simple_decoder.SRCS                += vpx_ports/msvc.h
 simple_decoder.DESCRIPTION          = Simplified decoder loop
-EXAMPLES-$(CONFIG_DECODERS)        += postproc.c
-postproc.SRCS                      += ivfdec.h ivfdec.c
-postproc.SRCS                      += tools_common.h tools_common.c
-postproc.SRCS                      += video_common.h
-postproc.SRCS                      += video_reader.h video_reader.c
-postproc.SRCS                      += vpx_ports/mem_ops.h
-postproc.SRCS                      += vpx_ports/mem_ops_aligned.h
-postproc.SRCS                      += vpx_ports/msvc.h
-postproc.GUID                       = 65E33355-F35E-4088-884D-3FD4905881D7
-postproc.DESCRIPTION                = Decoder postprocessor control
 EXAMPLES-$(CONFIG_DECODERS)        += decode_to_md5.c
 decode_to_md5.SRCS                 += md5_utils.h md5_utils.c
 decode_to_md5.SRCS                 += ivfdec.h ivfdec.c
@@ -167,7 +153,7 @@ lossless_encoder.SRCS           += video_common.h
 lossless_encoder.SRCS           += video_writer.h video_writer.c
 lossless_encoder.SRCS           += vpx_ports/msvc.h
 lossless_encoder.GUID            = B63C7C88-5348-46DC-A5A6-CC151EF93366
-lossless_encoder.DESCRIPTION     = Simplified lossless VP9 encoder
+lossless_encoder.DESCRIPTION     = Simplified lossless encoder
 EXAMPLES-$(CONFIG_ENCODERS)     += twopass_encoder.c
 twopass_encoder.SRCS            += ivfenc.h ivfenc.c
 twopass_encoder.SRCS            += tools_common.h tools_common.c
@@ -204,7 +190,7 @@ vpxcx_set_ref.SRCS                 += tools_common.h tools_common.c
 vpxcx_set_ref.SRCS                 += video_common.h
 vpxcx_set_ref.SRCS                 += video_writer.h video_writer.c
 vpxcx_set_ref.GUID                  = 65D7F14A-2EE6-4293-B958-AB5107A03B55
-vpxcx_set_ref.DESCRIPTION           = VP9/VP10 set encoder reference frame
+vpxcx_set_ref.DESCRIPTION           = VP10 set encoder reference frame
 endif
 endif
 

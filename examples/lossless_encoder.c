@@ -21,7 +21,7 @@
 static const char *exec_name;
 
 void usage_exit(void) {
-  fprintf(stderr, "vp9_lossless_encoder: Example demonstrating VP9 lossless "
+  fprintf(stderr, "lossless_encoder: Example demonstrating lossless "
                   "encoding feature. Supports raw input only.\n");
   fprintf(stderr, "Usage: %s <width> <height> <infile> <outfile>\n", exec_name);
   exit(EXIT_FAILURE);

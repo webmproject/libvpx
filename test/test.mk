@@ -5,8 +5,6 @@ LIBVPX_TEST_SRCS-yes += md5_helper.h
 LIBVPX_TEST_SRCS-yes += register_state_check.h
 LIBVPX_TEST_SRCS-yes += test.mk
 LIBVPX_TEST_SRCS-yes += test_libvpx.cc
-LIBVPX_TEST_SRCS-yes += test_vectors.cc
-LIBVPX_TEST_SRCS-yes += test_vectors.h
 LIBVPX_TEST_SRCS-yes += util.h
 LIBVPX_TEST_SRCS-yes += video_source.h
 LIBVPX_TEST_SRCS-yes += transform_test_base.h
@@ -65,7 +63,6 @@ LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += webm_video_source.h
 endif
 
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += decode_api_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += test_vector_test.cc
 
 # Currently we only support decoder perf tests for vp9. Also they read from WebM
 # files, so WebM IO is required.
@@ -80,7 +77,7 @@ LIBVPX_TEST_SRCS-yes += encode_perf_test.cc
 endif
 
 ## Multi-codec / unconditional black box tests.
-ifeq ($(findstring yes,$(CONFIG_VP9_ENCODER)$(CONFIG_VP10_ENCODER)),yes)
+ifeq ($(findstring yes,$(CONFIG_VP10_ENCODER)),yes)
 LIBVPX_TEST_SRCS-yes += active_map_refresh_test.cc
 LIBVPX_TEST_SRCS-yes += active_map_test.cc
 LIBVPX_TEST_SRCS-yes += end_to_end_test.cc
@@ -125,8 +122,6 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP10_ENCODER) += subtract_test.cc
 
 ifeq ($(CONFIG_VP10_ENCODER),yes)
 LIBVPX_TEST_SRCS-$(CONFIG_SPATIAL_SVC) += svc_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_INTERNAL_STATS) += blockiness_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_INTERNAL_STATS) += consistency_test.cc
 endif
 
 ifeq ($(CONFIG_VP10_ENCODER)$(CONFIG_VP10_TEMPORAL_DENOISING),yesyes)

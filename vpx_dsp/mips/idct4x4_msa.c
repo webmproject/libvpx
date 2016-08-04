@@ -75,10 +75,10 @@ void vpx_idct4x4_16_add_msa(const int16_t *input, uint8_t *dst,
   LD4x4_SH(input, in0, in1, in2, in3);
   /* rows */
   TRANSPOSE4x4_SH_SH(in0, in1, in2, in3, in0, in1, in2, in3);
-  VP9_IDCT4x4(in0, in1, in2, in3, in0, in1, in2, in3);
+  VPX_IDCT4x4(in0, in1, in2, in3, in0, in1, in2, in3);
   /* columns */
   TRANSPOSE4x4_SH_SH(in0, in1, in2, in3, in0, in1, in2, in3);
-  VP9_IDCT4x4(in0, in1, in2, in3, in0, in1, in2, in3);
+  VPX_IDCT4x4(in0, in1, in2, in3, in0, in1, in2, in3);
   /* rounding (add 2^3, divide by 2^4) */
   SRARI_H4_SH(in0, in1, in2, in3, 4);
   ADDBLK_ST4x4_UB(in0, in1, in2, in3, dst, dst_stride);

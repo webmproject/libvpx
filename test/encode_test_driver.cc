@@ -35,15 +35,6 @@ void Encoder::InitEncoder(VideoSource *video) {
                              init_flags_);
     ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
 
-#if CONFIG_VP9_ENCODER
-    if (CodecInterface() == &vpx_codec_vp9_cx_algo) {
-      // Default to 1 tile column for VP9.
-      const int log2_tile_columns = 0;
-      res = vpx_codec_control_(&encoder_, VP9E_SET_TILE_COLUMNS,
-                               log2_tile_columns);
-      ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
-    } else
-#endif
 #if CONFIG_VP10_ENCODER
     if (CodecInterface() == &vpx_codec_vp10_cx_algo) {
       // Default to 1 tile column for VP10. With CONFIG_EXT_TILE, the
@@ -57,12 +48,6 @@ void Encoder::InitEncoder(VideoSource *video) {
     } else
 #endif
     {
-#if CONFIG_VP8_ENCODER
-      if (CodecInterface() == &vpx_codec_vp8_cx_algo) {
-        ASSERT_EQ(&vpx_codec_vp8_cx_algo, CodecInterface())
-            << "Unknown Codec Interface";
-      }
-#endif
     }
   }
 }

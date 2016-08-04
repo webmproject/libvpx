@@ -559,11 +559,11 @@ static void idct8x32_column_butterfly_addblk(int16_t *tmp_eve_buf,
 
   ADD4(loc0, vec3, loc1, vec2, loc2, vec1, loc3, vec0, m0, m4, m2, m6);
   SRARI_H4_SH(m0, m2, m4, m6, 6);
-  VP9_ADDBLK_ST8x4_UB(dst, (4 * dst_stride), m0, m2, m4, m6);
+  VPX_ADDBLK_ST8x4_UB(dst, (4 * dst_stride), m0, m2, m4, m6);
 
   SUB4(loc0, vec3, loc1, vec2, loc2, vec1, loc3, vec0, m6, m2, m4, m0);
   SRARI_H4_SH(m0, m2, m4, m6, 6);
-  VP9_ADDBLK_ST8x4_UB((dst + 19 * dst_stride), (4 * dst_stride),
+  VPX_ADDBLK_ST8x4_UB((dst + 19 * dst_stride), (4 * dst_stride),
                       m0, m2, m4, m6);
 
   /* Load 8 & Store 8 */
@@ -578,12 +578,12 @@ static void idct8x32_column_butterfly_addblk(int16_t *tmp_eve_buf,
 
   ADD4(loc0, vec3, loc1, vec2, loc2, vec1, loc3, vec0, m1, m5, m3, m7);
   SRARI_H4_SH(m1, m3, m5, m7, 6);
-  VP9_ADDBLK_ST8x4_UB((dst + 2 * dst_stride), (4 * dst_stride),
+  VPX_ADDBLK_ST8x4_UB((dst + 2 * dst_stride), (4 * dst_stride),
                       m1, m3, m5, m7);
 
   SUB4(loc0, vec3, loc1, vec2, loc2, vec1, loc3, vec0, m7, m3, m5, m1);
   SRARI_H4_SH(m1, m3, m5, m7, 6);
-  VP9_ADDBLK_ST8x4_UB((dst + 17 * dst_stride), (4 * dst_stride),
+  VPX_ADDBLK_ST8x4_UB((dst + 17 * dst_stride), (4 * dst_stride),
                       m1, m3, m5, m7);
 
   /* Load 8 & Store 8 */
@@ -598,12 +598,12 @@ static void idct8x32_column_butterfly_addblk(int16_t *tmp_eve_buf,
 
   ADD4(loc0, vec3, loc1, vec2, loc2, vec1, loc3, vec0, n0, n4, n2, n6);
   SRARI_H4_SH(n0, n2, n4, n6, 6);
-  VP9_ADDBLK_ST8x4_UB((dst + 1 * dst_stride), (4 * dst_stride),
+  VPX_ADDBLK_ST8x4_UB((dst + 1 * dst_stride), (4 * dst_stride),
                       n0, n2, n4, n6);
 
   SUB4(loc0, vec3, loc1, vec2, loc2, vec1, loc3, vec0, n6, n2, n4, n0);
   SRARI_H4_SH(n0, n2, n4, n6, 6);
-  VP9_ADDBLK_ST8x4_UB((dst + 18 * dst_stride), (4 * dst_stride),
+  VPX_ADDBLK_ST8x4_UB((dst + 18 * dst_stride), (4 * dst_stride),
                       n0, n2, n4, n6);
 
   /* Load 8 & Store 8 */
@@ -618,12 +618,12 @@ static void idct8x32_column_butterfly_addblk(int16_t *tmp_eve_buf,
 
   ADD4(loc0, vec3, loc1, vec2, loc2, vec1, loc3, vec0, n1, n5, n3, n7);
   SRARI_H4_SH(n1, n3, n5, n7, 6);
-  VP9_ADDBLK_ST8x4_UB((dst + 3 * dst_stride), (4 * dst_stride),
+  VPX_ADDBLK_ST8x4_UB((dst + 3 * dst_stride), (4 * dst_stride),
                       n1, n3, n5, n7);
 
   SUB4(loc0, vec3, loc1, vec2, loc2, vec1, loc3, vec0, n7, n3, n5, n1);
   SRARI_H4_SH(n1, n3, n5, n7, 6);
-  VP9_ADDBLK_ST8x4_UB((dst + 16 * dst_stride), (4 * dst_stride),
+  VPX_ADDBLK_ST8x4_UB((dst + 16 * dst_stride), (4 * dst_stride),
                       n1, n3, n5, n7);
 }
 
