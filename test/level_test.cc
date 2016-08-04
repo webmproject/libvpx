@@ -19,12 +19,9 @@ class LevelTest
       public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
  protected:
   LevelTest()
-     : EncoderTest(GET_PARAM(0)),
-       encoding_mode_(GET_PARAM(1)),
-       cpu_used_(GET_PARAM(2)),
-       min_gf_internal_(24),
-       target_level_(0),
-       level_(0) {}
+      : EncoderTest(GET_PARAM(0)), encoding_mode_(GET_PARAM(1)),
+        cpu_used_(GET_PARAM(2)), min_gf_internal_(24), target_level_(0),
+        level_(0) {}
   virtual ~LevelTest() {}
 
   virtual void SetUp() {

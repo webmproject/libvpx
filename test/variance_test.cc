@@ -57,8 +57,7 @@ static void RoundHighBitDepth(int bit_depth, int64_t *se, uint64_t *sse) {
       *se = (*se + 2) >> 2;
       break;
     case VPX_BITS_8:
-    default:
-      break;
+    default: break;
   }
 }
 
@@ -74,10 +73,9 @@ static unsigned int mb_ss_ref(const int16_t *src) {
  *  Our codebase calculates the "diff" value in the variance algorithm by
  *  (src - ref).
  */
-static uint32_t variance_ref(const uint8_t *src, const uint8_t *ref,
-                             int l2w, int l2h, int src_stride,
-                             int ref_stride, uint32_t *sse_ptr,
-                             bool use_high_bit_depth_,
+static uint32_t variance_ref(const uint8_t *src, const uint8_t *ref, int l2w,
+                             int l2h, int src_stride, int ref_stride,
+                             uint32_t *sse_ptr, bool use_high_bit_depth_,
                              vpx_bit_depth_t bit_depth) {
   int64_t se = 0;
   uint64_t sse = 0;
@@ -87,8 +85,7 @@ static uint32_t variance_ref(const uint8_t *src, const uint8_t *ref,
     for (int x = 0; x < w; x++) {
       int diff;
       if (!use_high_bit_depth_) {
-        diff = src[y * src_stride + x] -
-               ref[y * ref_stride + x];
+        diff = src[y * src_stride + x] - ref[y * ref_stride + x];
         se += diff;
         sse += diff * diff;
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -103,9 +100,8 @@ static uint32_t variance_ref(const uint8_t *src, const uint8_t *ref,
   }
   RoundHighBitDepth(bit_depth, &se, &sse);
   *sse_ptr = static_cast<uint32_t>(sse);
-  return static_cast<uint32_t>(sse -
-                               ((static_cast<int64_t>(se) * se) >>
-                                (l2w + l2h)));
+  return static_cast<uint32_t>(
+      sse - ((static_cast<int64_t>(se) * se) >> (l2w + l2h)));
 }
 
 /* The subpel reference functions differ from the codec version in one aspect:
@@ -116,8 +112,7 @@ static uint32_t variance_ref(const uint8_t *src, const uint8_t *ref,
  */
 static uint32_t subpel_variance_ref(const uint8_t *ref, const uint8_t *src,
                                     int l2w, int l2h, int xoff, int yoff,
-                                    uint32_t *sse_ptr,
-                                    bool use_high_bit_depth_,
+                                    uint32_t *sse_ptr, bool use_high_bit_depth_,
                                     vpx_bit_depth_t bit_depth) {
   int64_t se = 0;
   uint64_t sse = 0;
@@ -161,16 +156,13 @@ static uint32_t subpel_variance_ref(const uint8_t *ref, const uint8_t *src,
   }
   RoundHighBitDepth(bit_depth, &se, &sse);
   *sse_ptr = static_cast<uint32_t>(sse);
-  return static_cast<uint32_t>(sse -
-                               ((static_cast<int64_t>(se) * se) >>
-                                (l2w + l2h)));
+  return static_cast<uint32_t>(
+      sse - ((static_cast<int64_t>(se) * se) >> (l2w + l2h)));
 }
 
-static uint32_t subpel_avg_variance_ref(const uint8_t *ref,
-                                        const uint8_t *src,
-                                        const uint8_t *second_pred,
-                                        int l2w, int l2h,
-                                        int xoff, int yoff,
+static uint32_t subpel_avg_variance_ref(const uint8_t *ref, const uint8_t *src,
+                                        const uint8_t *second_pred, int l2w,
+                                        int l2h, int xoff, int yoff,
                                         uint32_t *sse_ptr,
                                         bool use_high_bit_depth,
                                         vpx_bit_depth_t bit_depth) {
@@ -218,9 +210,8 @@ static uint32_t subpel_avg_variance_ref(const uint8_t *ref,
   }
   RoundHighBitDepth(bit_depth, &se, &sse);
   *sse_ptr = static_cast<uint32_t>(sse);
-  return static_cast<uint32_t>(sse -
-                               ((static_cast<int64_t>(se) * se) >>
-                                (l2w + l2h)));
+  return static_cast<uint32_t>(
+      sse - ((static_cast<int64_t>(se) * se) >> (l2w + l2h)));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -229,9 +220,7 @@ class SumOfSquaresTest : public ::testing::TestWithParam<SumOfSquaresFunction> {
  public:
   SumOfSquaresTest() : func_(GetParam()) {}
 
-  virtual ~SumOfSquaresTest() {
-    libvpx_test::ClearSystemState();
-  }
+  virtual ~SumOfSquaresTest() { libvpx_test::ClearSystemState(); }
 
  protected:
   void ConstTest();
@@ -272,10 +261,10 @@ void SumOfSquaresTest::RefTest() {
 // some testing context.
 // Can be used for MSE, SSE, Variance, etc.
 
-template<typename Func>
+template <typename Func>
 struct TestParams {
-  TestParams(int log2w = 0, int log2h = 0,
-             Func function = NULL, int bit_depth_value = 0)
+  TestParams(int log2w = 0, int log2h = 0, Func function = NULL,
+             int bit_depth_value = 0)
       : log2width(log2w), log2height(log2h), func(function) {
     use_high_bit_depth = (bit_depth_value > 0);
     if (use_high_bit_depth) {
@@ -298,17 +287,17 @@ struct TestParams {
   uint32_t mask;
 };
 
-template<typename Func>
+template <typename Func>
 std::ostream &operator<<(std::ostream &os, const TestParams<Func> &p) {
   return os << "log2width/height:" << p.log2width << "/" << p.log2height
-            << " function:" << reinterpret_cast<const void*>(p.func)
+            << " function:" << reinterpret_cast<const void *>(p.func)
             << " bit-depth:" << p.bit_depth;
 }
 
 // Main class for testing a function type
-template<typename FunctionType>
-class MainTestClass :
-    public ::testing::TestWithParam<TestParams<FunctionType> > {
+template <typename FunctionType>
+class MainTestClass
+    : public ::testing::TestWithParam<TestParams<FunctionType> > {
  public:
   virtual void SetUp() {
     params_ = this->GetParam();
@@ -316,7 +305,7 @@ class MainTestClass :
     rnd_.Reset(ACMRandom::DeterministicSeed());
     const size_t unit =
         use_high_bit_depth() ? sizeof(uint16_t) : sizeof(uint8_t);
-    src_ = reinterpret_cast<uint8_t*>(vpx_memalign(16, block_size() * unit));
+    src_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size() * unit));
     ref_ = new uint8_t[block_size() * unit];
     ASSERT_TRUE(src_ != NULL);
     ASSERT_TRUE(ref_ != NULL);
@@ -333,8 +322,8 @@ class MainTestClass :
 #if CONFIG_VP9_HIGHBITDEPTH
     if (use_high_bit_depth()) {
       // TODO(skal): remove!
-      src_ = reinterpret_cast<uint8_t*>(CONVERT_TO_SHORTPTR(src_));
-      ref_ = reinterpret_cast<uint8_t*>(CONVERT_TO_SHORTPTR(ref_));
+      src_ = reinterpret_cast<uint8_t *>(CONVERT_TO_SHORTPTR(src_));
+      ref_ = reinterpret_cast<uint8_t *>(CONVERT_TO_SHORTPTR(ref_));
     }
 #endif
 
@@ -380,20 +369,20 @@ class MainTestClass :
 ////////////////////////////////////////////////////////////////////////////////
 // Tests related to variance.
 
-template<typename VarianceFunctionType>
+template <typename VarianceFunctionType>
 void MainTestClass<VarianceFunctionType>::ZeroTest() {
   for (int i = 0; i <= 255; ++i) {
     if (!use_high_bit_depth()) {
       memset(src_, i, block_size());
     } else {
-      uint16_t* const src16 = CONVERT_TO_SHORTPTR(src_);
+      uint16_t *const src16 = CONVERT_TO_SHORTPTR(src_);
       for (int k = 0; k < block_size(); ++k) src16[k] = i << byte_shift();
     }
     for (int j = 0; j <= 255; ++j) {
       if (!use_high_bit_depth()) {
         memset(ref_, j, block_size());
       } else {
-        uint16_t* const ref16 = CONVERT_TO_SHORTPTR(ref_);
+        uint16_t *const ref16 = CONVERT_TO_SHORTPTR(ref_);
         for (int k = 0; k < block_size(); ++k) ref16[k] = j << byte_shift();
       }
       unsigned int sse, var;
@@ -404,7 +393,7 @@ void MainTestClass<VarianceFunctionType>::ZeroTest() {
   }
 }
 
-template<typename VarianceFunctionType>
+template <typename VarianceFunctionType>
 void MainTestClass<VarianceFunctionType>::RefTest() {
   for (int i = 0; i < 10; ++i) {
     for (int j = 0; j < block_size(); j++) {
@@ -422,15 +411,15 @@ void MainTestClass<VarianceFunctionType>::RefTest() {
     const int stride = width();
     ASM_REGISTER_STATE_CHECK(
         var1 = params_.func(src_, stride, ref_, stride, &sse1));
-    var2 = variance_ref(src_, ref_, params_.log2width, params_.log2height,
-                        stride, stride, &sse2,
-                        use_high_bit_depth(), params_.bit_depth);
+    var2 =
+        variance_ref(src_, ref_, params_.log2width, params_.log2height, stride,
+                     stride, &sse2, use_high_bit_depth(), params_.bit_depth);
     EXPECT_EQ(sse1, sse2) << "Error at test index: " << i;
     EXPECT_EQ(var1, var2) << "Error at test index: " << i;
   }
 }
 
-template<typename VarianceFunctionType>
+template <typename VarianceFunctionType>
 void MainTestClass<VarianceFunctionType>::RefStrideTest() {
   for (int i = 0; i < 10; ++i) {
     const int ref_stride = (i & 1) * width();
@@ -453,16 +442,15 @@ void MainTestClass<VarianceFunctionType>::RefStrideTest() {
 
     ASM_REGISTER_STATE_CHECK(
         var1 = params_.func(src_, src_stride, ref_, ref_stride, &sse1));
-    var2 = variance_ref(src_, ref_,
-                        params_.log2width, params_.log2height,
-                        src_stride, ref_stride, &sse2,
-                        use_high_bit_depth(), params_.bit_depth);
+    var2 = variance_ref(src_, ref_, params_.log2width, params_.log2height,
+                        src_stride, ref_stride, &sse2, use_high_bit_depth(),
+                        params_.bit_depth);
     EXPECT_EQ(sse1, sse2) << "Error at test index: " << i;
     EXPECT_EQ(var1, var2) << "Error at test index: " << i;
   }
 }
 
-template<typename VarianceFunctionType>
+template <typename VarianceFunctionType>
 void MainTestClass<VarianceFunctionType>::OneQuarterTest() {
   const int half = block_size() / 2;
   if (!use_high_bit_depth()) {
@@ -486,7 +474,7 @@ void MainTestClass<VarianceFunctionType>::OneQuarterTest() {
 ////////////////////////////////////////////////////////////////////////////////
 // Tests related to MSE / SSE.
 
-template<typename FunctionType>
+template <typename FunctionType>
 void MainTestClass<FunctionType>::RefTestMse() {
   for (int i = 0; i < 10; ++i) {
     for (int j = 0; j < block_size(); ++j) {
@@ -496,13 +484,13 @@ void MainTestClass<FunctionType>::RefTestMse() {
     unsigned int sse1, sse2;
     const int stride = width();
     ASM_REGISTER_STATE_CHECK(params_.func(src_, stride, ref_, stride, &sse1));
-    variance_ref(src_, ref_, params_.log2width, params_.log2height,
-                 stride, stride, &sse2, false, VPX_BITS_8);
+    variance_ref(src_, ref_, params_.log2width, params_.log2height, stride,
+                 stride, &sse2, false, VPX_BITS_8);
     EXPECT_EQ(sse1, sse2);
   }
 }
 
-template<typename FunctionType>
+template <typename FunctionType>
 void MainTestClass<FunctionType>::RefTestSse() {
   for (int i = 0; i < 10; ++i) {
     for (int j = 0; j < block_size(); ++j) {
@@ -513,13 +501,13 @@ void MainTestClass<FunctionType>::RefTestSse() {
     unsigned int var1;
     const int stride = width();
     ASM_REGISTER_STATE_CHECK(var1 = params_.func(src_, stride, ref_, stride));
-    variance_ref(src_, ref_, params_.log2width, params_.log2height,
-                 stride, stride, &sse2, false, VPX_BITS_8);
+    variance_ref(src_, ref_, params_.log2width, params_.log2height, stride,
+                 stride, &sse2, false, VPX_BITS_8);
     EXPECT_EQ(var1, sse2);
   }
 }
 
-template<typename FunctionType>
+template <typename FunctionType>
 void MainTestClass<FunctionType>::MaxTestMse() {
   memset(src_, 255, block_size());
   memset(ref_, 0, block_size());
@@ -529,7 +517,7 @@ void MainTestClass<FunctionType>::MaxTestMse() {
   EXPECT_EQ(expected, sse);
 }
 
-template<typename FunctionType>
+template <typename FunctionType>
 void MainTestClass<FunctionType>::MaxTestSse() {
   memset(src_, 255, block_size());
   memset(ref_, 0, block_size());
@@ -545,27 +533,27 @@ using ::std::tr1::get;
 using ::std::tr1::make_tuple;
 using ::std::tr1::tuple;
 
-template<typename SubpelVarianceFunctionType>
+template <typename SubpelVarianceFunctionType>
 class SubpelVarianceTest
-    : public ::testing::TestWithParam<tuple<int, int,
-                                            SubpelVarianceFunctionType, int> > {
+    : public ::testing::TestWithParam<
+          tuple<int, int, SubpelVarianceFunctionType, int> > {
  public:
   virtual void SetUp() {
-    const tuple<int, int, SubpelVarianceFunctionType, int>& params =
+    const tuple<int, int, SubpelVarianceFunctionType, int> &params =
         this->GetParam();
-    log2width_  = get<0>(params);
+    log2width_ = get<0>(params);
     width_ = 1 << log2width_;
     log2height_ = get<1>(params);
     height_ = 1 << log2height_;
     subpel_variance_ = get<2>(params);
     if (get<3>(params)) {
-      bit_depth_ = (vpx_bit_depth_t) get<3>(params);
+      bit_depth_ = (vpx_bit_depth_t)get<3>(params);
       use_high_bit_depth_ = true;
     } else {
       bit_depth_ = VPX_BITS_8;
       use_high_bit_depth_ = false;
     }
-    mask_ = (1 << bit_depth_)-1;
+    mask_ = (1 << bit_depth_) - 1;
 
     rnd_.Reset(ACMRandom::DeterministicSeed());
     block_size_ = width_ * height_;
@@ -575,14 +563,12 @@ class SubpelVarianceTest
       ref_ = new uint8_t[block_size_ + width_ + height_ + 1];
 #if CONFIG_VP9_HIGHBITDEPTH
     } else {
-      src_ = CONVERT_TO_BYTEPTR(
-          reinterpret_cast<uint16_t *>(
-              vpx_memalign(16, block_size_*sizeof(uint16_t))));
-      sec_ = CONVERT_TO_BYTEPTR(
-          reinterpret_cast<uint16_t *>(
-              vpx_memalign(16, block_size_*sizeof(uint16_t))));
-      ref_ = CONVERT_TO_BYTEPTR(
-          new uint16_t[block_size_ + width_ + height_ + 1]);
+      src_ = CONVERT_TO_BYTEPTR(reinterpret_cast<uint16_t *>(
+          vpx_memalign(16, block_size_ * sizeof(uint16_t))));
+      sec_ = CONVERT_TO_BYTEPTR(reinterpret_cast<uint16_t *>(
+          vpx_memalign(16, block_size_ * sizeof(uint16_t))));
+      ref_ =
+          CONVERT_TO_BYTEPTR(new uint16_t[block_size_ + width_ + height_ + 1]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     }
     ASSERT_TRUE(src_ != NULL);
@@ -617,11 +603,11 @@ class SubpelVarianceTest
   vpx_bit_depth_t bit_depth_;
   int width_, log2width_;
   int height_, log2height_;
-  int block_size_,  mask_;
+  int block_size_, mask_;
   SubpelVarianceFunctionType subpel_variance_;
 };
 
-template<typename SubpelVarianceFunctionType>
+template <typename SubpelVarianceFunctionType>
 void SubpelVarianceTest<SubpelVarianceFunctionType>::RefTest() {
   for (int x = 0; x < 8; ++x) {
     for (int y = 0; y < 8; ++y) {
@@ -644,20 +630,18 @@ void SubpelVarianceTest<SubpelVarianceFunctionType>::RefTest() {
       }
       unsigned int sse1, sse2;
       unsigned int var1;
-      ASM_REGISTER_STATE_CHECK(var1 = subpel_variance_(ref_, width_ + 1, x, y,
-                                                       src_, width_, &sse1));
-      const unsigned int var2 = subpel_variance_ref(ref_, src_,
-                                                    log2width_, log2height_,
-                                                    x, y, &sse2,
-                                                    use_high_bit_depth_,
-                                                    bit_depth_);
+      ASM_REGISTER_STATE_CHECK(
+          var1 = subpel_variance_(ref_, width_ + 1, x, y, src_, width_, &sse1));
+      const unsigned int var2 =
+          subpel_variance_ref(ref_, src_, log2width_, log2height_, x, y, &sse2,
+                              use_high_bit_depth_, bit_depth_);
       EXPECT_EQ(sse1, sse2) << "at position " << x << ", " << y;
       EXPECT_EQ(var1, var2) << "at position " << x << ", " << y;
     }
   }
 }
 
-template<typename SubpelVarianceFunctionType>
+template <typename SubpelVarianceFunctionType>
 void SubpelVarianceTest<SubpelVarianceFunctionType>::ExtremeRefTest() {
   // Compare against reference.
   // Src: Set the first half of values to 0, the second half to the maximum.
@@ -684,15 +668,15 @@ void SubpelVarianceTest<SubpelVarianceFunctionType>::ExtremeRefTest() {
       ASM_REGISTER_STATE_CHECK(
           var1 = subpel_variance_(ref_, width_ + 1, x, y, src_, width_, &sse1));
       const unsigned int var2 =
-          subpel_variance_ref(ref_, src_, log2width_, log2height_,
-                              x, y, &sse2, use_high_bit_depth_, bit_depth_);
+          subpel_variance_ref(ref_, src_, log2width_, log2height_, x, y, &sse2,
+                              use_high_bit_depth_, bit_depth_);
       EXPECT_EQ(sse1, sse2) << "for xoffset " << x << " and yoffset " << y;
       EXPECT_EQ(var1, var2) << "for xoffset " << x << " and yoffset " << y;
     }
   }
 }
 
-template<>
+template <>
 void SubpelVarianceTest<SubpixAvgVarMxNFunc>::RefTest() {
   for (int x = 0; x < 8; ++x) {
     for (int y = 0; y < 8; ++y) {
@@ -717,13 +701,11 @@ void SubpelVarianceTest<SubpixAvgVarMxNFunc>::RefTest() {
       }
       uint32_t sse1, sse2;
       uint32_t var1, var2;
-      ASM_REGISTER_STATE_CHECK(
-          var1 = subpel_variance_(ref_, width_ + 1, x, y,
-                                  src_, width_, &sse1, sec_));
-      var2 = subpel_avg_variance_ref(ref_, src_, sec_,
-                                     log2width_, log2height_,
-                                     x, y, &sse2,
-                                     use_high_bit_depth_,
+      ASM_REGISTER_STATE_CHECK(var1 =
+                                   subpel_variance_(ref_, width_ + 1, x, y,
+                                                    src_, width_, &sse1, sec_));
+      var2 = subpel_avg_variance_ref(ref_, src_, sec_, log2width_, log2height_,
+                                     x, y, &sse2, use_high_bit_depth_,
                                      static_cast<vpx_bit_depth_t>(bit_depth_));
       EXPECT_EQ(sse1, sse2) << "at position " << x << ", " << y;
       EXPECT_EQ(var1, var2) << "at position " << x << ", " << y;
@@ -756,14 +738,15 @@ INSTANTIATE_TEST_CASE_P(C, SumOfSquaresTest,
 
 typedef TestParams<Get4x4SseFunc> SseParams;
 INSTANTIATE_TEST_CASE_P(C, VpxSseTest,
-    ::testing::Values(SseParams(2, 2, &vpx_get4x4sse_cs_c)));
+                        ::testing::Values(SseParams(2, 2,
+                                                    &vpx_get4x4sse_cs_c)));
 
 typedef TestParams<VarianceMxNFunc> MseParams;
 INSTANTIATE_TEST_CASE_P(C, VpxMseTest,
-    ::testing::Values(MseParams(4, 4, &vpx_mse16x16_c),
-                      MseParams(4, 3, &vpx_mse16x8_c),
-                      MseParams(3, 4, &vpx_mse8x16_c),
-                      MseParams(3, 3, &vpx_mse8x8_c)));
+                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_c),
+                                          MseParams(4, 3, &vpx_mse16x8_c),
+                                          MseParams(3, 4, &vpx_mse8x16_c),
+                                          MseParams(3, 3, &vpx_mse8x8_c)));
 
 typedef TestParams<VarianceMxNFunc> VarianceParams;
 INSTANTIATE_TEST_CASE_P(
@@ -818,8 +801,7 @@ INSTANTIATE_TEST_CASE_P(
 typedef MainTestClass<VarianceMxNFunc> VpxHBDMseTest;
 typedef MainTestClass<VarianceMxNFunc> VpxHBDVarianceTest;
 typedef SubpelVarianceTest<SubpixVarMxNFunc> VpxHBDSubpelVarianceTest;
-typedef SubpelVarianceTest<SubpixAvgVarMxNFunc>
-    VpxHBDSubpelAvgVarianceTest;
+typedef SubpelVarianceTest<SubpixAvgVarMxNFunc> VpxHBDSubpelAvgVarianceTest;
 
 TEST_P(VpxHBDMseTest, RefMse) { RefTestMse(); }
 TEST_P(VpxHBDMseTest, MaxMse) { MaxTestMse(); }
@@ -982,10 +964,10 @@ INSTANTIATE_TEST_CASE_P(SSE2, SumOfSquaresTest,
                         ::testing::Values(vpx_get_mb_ss_sse2));
 
 INSTANTIATE_TEST_CASE_P(SSE2, VpxMseTest,
-    ::testing::Values(MseParams(4, 4, &vpx_mse16x16_sse2),
-                      MseParams(4, 3, &vpx_mse16x8_sse2),
-                      MseParams(3, 4, &vpx_mse8x16_sse2),
-                      MseParams(3, 3, &vpx_mse8x8_sse2)));
+                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_sse2),
+                                          MseParams(4, 3, &vpx_mse16x8_sse2),
+                                          MseParams(3, 4, &vpx_mse8x16_sse2),
+                                          MseParams(3, 3, &vpx_mse8x8_sse2)));
 
 INSTANTIATE_TEST_CASE_P(
     SSE2, VpxVarianceTest,
@@ -1055,37 +1037,38 @@ INSTANTIATE_TEST_CASE_P(
 */
 
 INSTANTIATE_TEST_CASE_P(
-    SSE2, VpxHBDVarianceTest, ::testing::Values(
-      VarianceParams(6, 6, &vpx_highbd_12_variance64x64_sse2, 12),
-      VarianceParams(6, 5, &vpx_highbd_12_variance64x32_sse2, 12),
-      VarianceParams(5, 6, &vpx_highbd_12_variance32x64_sse2, 12),
-      VarianceParams(5, 5, &vpx_highbd_12_variance32x32_sse2, 12),
-      VarianceParams(5, 4, &vpx_highbd_12_variance32x16_sse2, 12),
-      VarianceParams(4, 5, &vpx_highbd_12_variance16x32_sse2, 12),
-      VarianceParams(4, 4, &vpx_highbd_12_variance16x16_sse2, 12),
-      VarianceParams(4, 3, &vpx_highbd_12_variance16x8_sse2, 12),
-      VarianceParams(3, 4, &vpx_highbd_12_variance8x16_sse2, 12),
-      VarianceParams(3, 3, &vpx_highbd_12_variance8x8_sse2, 12),
-      VarianceParams(6, 6, &vpx_highbd_10_variance64x64_sse2, 10),
-      VarianceParams(6, 5, &vpx_highbd_10_variance64x32_sse2, 10),
-      VarianceParams(5, 6, &vpx_highbd_10_variance32x64_sse2, 10),
-      VarianceParams(5, 5, &vpx_highbd_10_variance32x32_sse2, 10),
-      VarianceParams(5, 4, &vpx_highbd_10_variance32x16_sse2, 10),
-      VarianceParams(4, 5, &vpx_highbd_10_variance16x32_sse2, 10),
-      VarianceParams(4, 4, &vpx_highbd_10_variance16x16_sse2, 10),
-      VarianceParams(4, 3, &vpx_highbd_10_variance16x8_sse2, 10),
-      VarianceParams(3, 4, &vpx_highbd_10_variance8x16_sse2, 10),
-      VarianceParams(3, 3, &vpx_highbd_10_variance8x8_sse2, 10),
-      VarianceParams(6, 6, &vpx_highbd_8_variance64x64_sse2, 8),
-      VarianceParams(6, 5, &vpx_highbd_8_variance64x32_sse2, 8),
-      VarianceParams(5, 6, &vpx_highbd_8_variance32x64_sse2, 8),
-      VarianceParams(5, 5, &vpx_highbd_8_variance32x32_sse2, 8),
-      VarianceParams(5, 4, &vpx_highbd_8_variance32x16_sse2, 8),
-      VarianceParams(4, 5, &vpx_highbd_8_variance16x32_sse2, 8),
-      VarianceParams(4, 4, &vpx_highbd_8_variance16x16_sse2, 8),
-      VarianceParams(4, 3, &vpx_highbd_8_variance16x8_sse2, 8),
-      VarianceParams(3, 4, &vpx_highbd_8_variance8x16_sse2, 8),
-      VarianceParams(3, 3, &vpx_highbd_8_variance8x8_sse2, 8)));
+    SSE2, VpxHBDVarianceTest,
+    ::testing::Values(
+        VarianceParams(6, 6, &vpx_highbd_12_variance64x64_sse2, 12),
+        VarianceParams(6, 5, &vpx_highbd_12_variance64x32_sse2, 12),
+        VarianceParams(5, 6, &vpx_highbd_12_variance32x64_sse2, 12),
+        VarianceParams(5, 5, &vpx_highbd_12_variance32x32_sse2, 12),
+        VarianceParams(5, 4, &vpx_highbd_12_variance32x16_sse2, 12),
+        VarianceParams(4, 5, &vpx_highbd_12_variance16x32_sse2, 12),
+        VarianceParams(4, 4, &vpx_highbd_12_variance16x16_sse2, 12),
+        VarianceParams(4, 3, &vpx_highbd_12_variance16x8_sse2, 12),
+        VarianceParams(3, 4, &vpx_highbd_12_variance8x16_sse2, 12),
+        VarianceParams(3, 3, &vpx_highbd_12_variance8x8_sse2, 12),
+        VarianceParams(6, 6, &vpx_highbd_10_variance64x64_sse2, 10),
+        VarianceParams(6, 5, &vpx_highbd_10_variance64x32_sse2, 10),
+        VarianceParams(5, 6, &vpx_highbd_10_variance32x64_sse2, 10),
+        VarianceParams(5, 5, &vpx_highbd_10_variance32x32_sse2, 10),
+        VarianceParams(5, 4, &vpx_highbd_10_variance32x16_sse2, 10),
+        VarianceParams(4, 5, &vpx_highbd_10_variance16x32_sse2, 10),
+        VarianceParams(4, 4, &vpx_highbd_10_variance16x16_sse2, 10),
+        VarianceParams(4, 3, &vpx_highbd_10_variance16x8_sse2, 10),
+        VarianceParams(3, 4, &vpx_highbd_10_variance8x16_sse2, 10),
+        VarianceParams(3, 3, &vpx_highbd_10_variance8x8_sse2, 10),
+        VarianceParams(6, 6, &vpx_highbd_8_variance64x64_sse2, 8),
+        VarianceParams(6, 5, &vpx_highbd_8_variance64x32_sse2, 8),
+        VarianceParams(5, 6, &vpx_highbd_8_variance32x64_sse2, 8),
+        VarianceParams(5, 5, &vpx_highbd_8_variance32x32_sse2, 8),
+        VarianceParams(5, 4, &vpx_highbd_8_variance32x16_sse2, 8),
+        VarianceParams(4, 5, &vpx_highbd_8_variance16x32_sse2, 8),
+        VarianceParams(4, 4, &vpx_highbd_8_variance16x16_sse2, 8),
+        VarianceParams(4, 3, &vpx_highbd_8_variance16x8_sse2, 8),
+        VarianceParams(3, 4, &vpx_highbd_8_variance8x16_sse2, 8),
+        VarianceParams(3, 3, &vpx_highbd_8_variance8x8_sse2, 8)));
 
 INSTANTIATE_TEST_CASE_P(
     SSE2, VpxHBDSubpelVarianceTest,
@@ -1200,7 +1183,7 @@ INSTANTIATE_TEST_CASE_P(
 
 #if HAVE_AVX2
 INSTANTIATE_TEST_CASE_P(AVX2, VpxMseTest,
-    ::testing::Values(MseParams(4, 4, &vpx_mse16x16_avx2)));
+                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_avx2)));
 
 INSTANTIATE_TEST_CASE_P(
     AVX2, VpxVarianceTest,
@@ -1224,7 +1207,8 @@ INSTANTIATE_TEST_CASE_P(
 
 #if HAVE_MEDIA
 INSTANTIATE_TEST_CASE_P(MEDIA, VpxMseTest,
-    ::testing::Values(MseParams(4, 4, &vpx_mse16x16_media)));
+                        ::testing::Values(MseParams(4, 4,
+                                                    &vpx_mse16x16_media)));
 
 INSTANTIATE_TEST_CASE_P(
     MEDIA, VpxVarianceTest,
@@ -1239,10 +1223,11 @@ INSTANTIATE_TEST_CASE_P(
 
 #if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(NEON, VpxSseTest,
-    ::testing::Values(SseParams(2, 2, &vpx_get4x4sse_cs_neon)));
+                        ::testing::Values(SseParams(2, 2,
+                                                    &vpx_get4x4sse_cs_neon)));
 
 INSTANTIATE_TEST_CASE_P(NEON, VpxMseTest,
-    ::testing::Values(MseParams(4, 4, &vpx_mse16x16_neon)));
+                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_neon)));
 
 INSTANTIATE_TEST_CASE_P(
     NEON, VpxVarianceTest,
@@ -1268,13 +1253,14 @@ INSTANTIATE_TEST_CASE_P(MSA, SumOfSquaresTest,
                         ::testing::Values(vpx_get_mb_ss_msa));
 
 INSTANTIATE_TEST_CASE_P(MSA, VpxSseTest,
-    ::testing::Values(SseParams(2, 2, &vpx_get4x4sse_cs_msa)));
+                        ::testing::Values(SseParams(2, 2,
+                                                    &vpx_get4x4sse_cs_msa)));
 
 INSTANTIATE_TEST_CASE_P(MSA, VpxMseTest,
-    ::testing::Values(MseParams(4, 4, &vpx_mse16x16_msa),
-                      MseParams(4, 3, &vpx_mse16x8_msa),
-                      MseParams(3, 4, &vpx_mse8x16_msa),
-                      MseParams(3, 3, &vpx_mse8x8_msa)));
+                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_msa),
+                                          MseParams(4, 3, &vpx_mse16x8_msa),
+                                          MseParams(3, 4, &vpx_mse8x16_msa),
+                                          MseParams(3, 3, &vpx_mse8x8_msa)));
 
 INSTANTIATE_TEST_CASE_P(
     MSA, VpxVarianceTest,

@@ -95,11 +95,12 @@ TEST(VP8FdctTest, SignBiasCheck) {
 
   bool bias_acceptable = true;
   for (int j = 0; j < 16; ++j)
-    bias_acceptable = bias_acceptable &&
-    (abs(count_sign_block[j][0] - count_sign_block[j][1]) < 10000);
+    bias_acceptable =
+        bias_acceptable &&
+        (abs(count_sign_block[j][0] - count_sign_block[j][1]) < 10000);
 
   EXPECT_EQ(true, bias_acceptable)
-    << "Error: 4x4 FDCT has a sign bias > 1% for input range [-255, 255]";
+      << "Error: 4x4 FDCT has a sign bias > 1% for input range [-255, 255]";
 
   memset(count_sign_block, 0, sizeof(count_sign_block));
 
@@ -120,11 +121,12 @@ TEST(VP8FdctTest, SignBiasCheck) {
 
   bias_acceptable = true;
   for (int j = 0; j < 16; ++j)
-    bias_acceptable = bias_acceptable &&
-    (abs(count_sign_block[j][0] - count_sign_block[j][1]) < 100000);
+    bias_acceptable =
+        bias_acceptable &&
+        (abs(count_sign_block[j][0] - count_sign_block[j][1]) < 100000);
 
   EXPECT_EQ(true, bias_acceptable)
-    << "Error: 4x4 FDCT has a sign bias > 10% for input range [-15, 15]";
+      << "Error: 4x4 FDCT has a sign bias > 10% for input range [-15, 15]";
 };
 
 TEST(VP8FdctTest, RoundTripErrorCheck) {
@@ -148,17 +150,16 @@ TEST(VP8FdctTest, RoundTripErrorCheck) {
     for (int j = 0; j < 16; ++j) {
       const int diff = test_input_block[j] - test_output_block[j];
       const int error = diff * diff;
-      if (max_error < error)
-        max_error = error;
+      if (max_error < error) max_error = error;
       total_error += error;
     }
   }
 
-  EXPECT_GE(1, max_error )
-    << "Error: FDCT/IDCT has an individual roundtrip error > 1";
+  EXPECT_GE(1, max_error)
+      << "Error: FDCT/IDCT has an individual roundtrip error > 1";
 
   EXPECT_GE(count_test_block, total_error)
-    << "Error: FDCT/IDCT has average roundtrip error > 1 per block";
+      << "Error: FDCT/IDCT has average roundtrip error > 1 per block";
 };
 
 }  // namespace

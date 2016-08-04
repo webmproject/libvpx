@@ -28,43 +28,36 @@
 
 namespace {
 
-enum DecodeMode {
-  kSerialMode,
-  kFrameParallelMode
-};
+enum DecodeMode { kSerialMode, kFrameParallelMode };
 
 const int kDecodeMode = 0;
 const int kThreads = 1;
 const int kFileName = 2;
 
-typedef std::tr1::tuple<int, int, const char*> DecodeParam;
+typedef std::tr1::tuple<int, int, const char *> DecodeParam;
 
 class TestVectorTest : public ::libvpx_test::DecoderTest,
-    public ::libvpx_test::CodecTestWithParam<DecodeParam> {
+                       public ::libvpx_test::CodecTestWithParam<DecodeParam> {
  protected:
-  TestVectorTest()
-      : DecoderTest(GET_PARAM(0)),
-        md5_file_(NULL) {
+  TestVectorTest() : DecoderTest(GET_PARAM(0)), md5_file_(NULL) {
 #if CONFIG_VP9_DECODER
-    resize_clips_.insert(
-      ::libvpx_test::kVP9TestVectorsResize,
-      ::libvpx_test::kVP9TestVectorsResize +
-          ::libvpx_test::kNumVP9TestVectorsResize);
+    resize_clips_.insert(::libvpx_test::kVP9TestVectorsResize,
+                         ::libvpx_test::kVP9TestVectorsResize +
+                             ::libvpx_test::kNumVP9TestVectorsResize);
 #endif
   }
 
   virtual ~TestVectorTest() {
-    if (md5_file_)
-      fclose(md5_file_);
+    if (md5_file_) fclose(md5_file_);
   }
 
-  void OpenMD5File(const std::string& md5_file_name_) {
+  void OpenMD5File(const std::string &md5_file_name_) {
     md5_file_ = libvpx_test::OpenTestDataFile(md5_file_name_);
     ASSERT_TRUE(md5_file_ != NULL) << "Md5 file open failed. Filename: "
-        << md5_file_name_;
+                                   << md5_file_name_;
   }
 
-  virtual void DecompressedFrameHook(const vpx_image_t& img,
+  virtual void DecompressedFrameHook(const vpx_image_t &img,
                                      const unsigned int frame_number) {
     ASSERT_TRUE(md5_file_ != NULL);
     char expected_md5[33];
@@ -121,8 +114,8 @@ TEST_P(TestVectorTest, MD5Match) {
   cfg.threads = threads;
 
   snprintf(str, sizeof(str) / sizeof(str[0]) - 1,
-           "file: %s  mode: %s threads: %d",
-           filename.c_str(), mode == 0 ? "Serial" : "Parallel", threads);
+           "file: %s  mode: %s threads: %d", filename.c_str(),
+           mode == 0 ? "Serial" : "Parallel", threads);
   SCOPED_TRACE(str);
 
   // Open compressed video file.
@@ -183,8 +176,8 @@ INSTANTIATE_TEST_CASE_P(
         ::testing::Values(
             static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP9)),
         ::testing::Combine(
-            ::testing::Values(1),        // Frame Parallel mode.
-            ::testing::Range(2, 9),      // With 2 ~ 8 threads.
+            ::testing::Values(1),    // Frame Parallel mode.
+            ::testing::Range(2, 9),  // With 2 ~ 8 threads.
             ::testing::ValuesIn(libvpx_test::kVP9TestVectors,
                                 libvpx_test::kVP9TestVectors +
                                     libvpx_test::kNumVP9TestVectors))));

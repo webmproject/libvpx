@@ -22,15 +22,12 @@ static const int kNoiseSize = 3072;
 
 // TODO(jimbankoski): make width and height integers not unsigned.
 typedef void (*AddNoiseFunc)(uint8_t *start, const int8_t *noise,
-                             int blackclamp, int whiteclamp,
-                             int width, int height, int pitch);
+                             int blackclamp, int whiteclamp, int width,
+                             int height, int pitch);
 
-class AddNoiseTest
-    : public ::testing::TestWithParam<AddNoiseFunc> {
+class AddNoiseTest : public ::testing::TestWithParam<AddNoiseFunc> {
  public:
-  virtual void TearDown() {
-    libvpx_test::ClearSystemState();
-  }
+  virtual void TearDown() { libvpx_test::ClearSystemState(); }
   virtual ~AddNoiseTest() {}
 };
 
@@ -43,18 +40,18 @@ double stddev6(char a, char b, char c, char d, char e, char f) {
 }
 
 TEST_P(AddNoiseTest, CheckNoiseAdded) {
-  const int width  = 64;
+  const int width = 64;
   const int height = 64;
   const int image_size = width * height;
   int8_t noise[kNoiseSize];
   const int clamp = vpx_setup_noise(4.4, noise, kNoiseSize);
-  uint8_t *const s = reinterpret_cast<uint8_t *>(vpx_calloc(image_size,
-                                                            sizeof(*s)));
+  uint8_t *const s =
+      reinterpret_cast<uint8_t *>(vpx_calloc(image_size, sizeof(*s)));
   ASSERT_TRUE(s != NULL);
   memset(s, 99, image_size * sizeof(*s));
 
-  ASM_REGISTER_STATE_CHECK(GetParam()(s, noise, clamp, clamp,
-                                      width, height, width));
+  ASM_REGISTER_STATE_CHECK(
+      GetParam()(s, noise, clamp, clamp, width, height, width));
 
   // Check to make sure we don't end up having either the same or no added
   // noise either vertically or horizontally.
@@ -72,8 +69,8 @@ TEST_P(AddNoiseTest, CheckNoiseAdded) {
   // Initialize pixels in the image to 255 and check for roll over.
   memset(s, 255, image_size);
 
-  ASM_REGISTER_STATE_CHECK(GetParam()(s, noise, clamp, clamp,
-                           width, height, width));
+  ASM_REGISTER_STATE_CHECK(
+      GetParam()(s, noise, clamp, clamp, width, height, width));
 
   // Check to make sure don't roll over.
   for (int i = 0; i < image_size; ++i) {
@@ -83,8 +80,8 @@ TEST_P(AddNoiseTest, CheckNoiseAdded) {
   // Initialize pixels in the image to 0 and check for roll under.
   memset(s, 0, image_size);
 
-  ASM_REGISTER_STATE_CHECK(GetParam()(s, noise, clamp, clamp,
-                           width, height, width));
+  ASM_REGISTER_STATE_CHECK(
+      GetParam()(s, noise, clamp, clamp, width, height, width));
 
   // Check to make sure don't roll under.
   for (int i = 0; i < image_size; ++i) {
@@ -95,7 +92,7 @@ TEST_P(AddNoiseTest, CheckNoiseAdded) {
 }
 
 TEST_P(AddNoiseTest, CheckCvsAssembly) {
-  const int width  = 64;
+  const int width = 64;
   const int height = 64;
   const int image_size = width * height;
   int8_t noise[kNoiseSize];

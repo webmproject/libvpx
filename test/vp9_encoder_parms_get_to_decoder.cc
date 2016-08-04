@@ -29,7 +29,7 @@ struct EncodePerfTestVideo {
 };
 
 const EncodePerfTestVideo kVP9EncodePerfTestVectors[] = {
-  {"niklas_1280_720_30.y4m", 1280, 720, 600, 10},
+  { "niklas_1280_720_30.y4m", 1280, 720, 600, 10 },
 };
 
 struct EncodeParameters {
@@ -45,10 +45,10 @@ struct EncodeParameters {
 };
 
 const EncodeParameters kVP9EncodeParameterSet[] = {
-  {0, 0, 0, 1, 0, VPX_CR_STUDIO_RANGE, VPX_CS_BT_601, { 0, 0 }},
-  {0, 0, 0, 0, 0, VPX_CR_FULL_RANGE, VPX_CS_BT_709, { 0, 0 }},
-  {0, 0, 1, 0, 0, VPX_CR_FULL_RANGE, VPX_CS_BT_2020, { 0, 0 }},
-  {0, 2, 0, 0, 1, VPX_CR_STUDIO_RANGE, VPX_CS_UNKNOWN, { 640, 480 }},
+  { 0, 0, 0, 1, 0, VPX_CR_STUDIO_RANGE, VPX_CS_BT_601, { 0, 0 } },
+  { 0, 0, 0, 0, 0, VPX_CR_FULL_RANGE, VPX_CS_BT_709, { 0, 0 } },
+  { 0, 0, 1, 0, 0, VPX_CR_FULL_RANGE, VPX_CS_BT_2020, { 0, 0 } },
+  { 0, 2, 0, 0, 1, VPX_CR_STUDIO_RANGE, VPX_CS_UNKNOWN, { 640, 480 } },
   // TODO(JBB): Test profiles (requires more work).
 };
 
