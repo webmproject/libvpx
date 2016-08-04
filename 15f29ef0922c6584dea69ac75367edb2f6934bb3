@@ -16,6 +16,24 @@
       "revId": "15f29ef0922c6584dea69ac75367edb2f6934bb3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "148e0681_982df998",
+        "filename": "README",
+        "patchSetId": 2
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-04T03:03:27Z",
+      "side": 1,
+      "message": "best to be explicit in the example. I\u0027ve run into configs that ignore the local .clang-format unless you force it",
+      "parentUuid": "148e0681_b8da3ddf",
+      "revId": "15f29ef0922c6584dea69ac75367edb2f6934bb3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
