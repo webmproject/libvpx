@@ -1914,18 +1914,7 @@ static int rd_pick_palette_intra_sby(VP10_COMP *cpi, MACROBLOCK *x,
       for (i = 0; i < n; ++i)
         centroids[i] = lb + (2 * i + 1) * (ub - lb) / n / 2;
       vp10_k_means(data, centroids, color_map, rows * cols, n, 1, max_itr);
-      vp10_insertion_sort(centroids, n);
-      for (i = 0; i < n; ++i)
-        centroids[i] = roundf(centroids[i]);
-      // remove duplicates
-      i = 1;
-      for (j = 1; j < n; ++j) {
-        if (centroids[j] != centroids[j - 1]) {  // found a new unique centroid
-          centroids[i] = centroids[j];
-          ++i;
-        }
-      }
-      k = i;  // number of unique centroids
+      k = vp10_remove_duplicates(centroids, n);
 
 #if CONFIG_VP9_HIGHBITDEPTH
       if (cpi->common.use_highbitdepth)

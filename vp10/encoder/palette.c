@@ -9,6 +9,7 @@
  */
 
 #include <math.h>
+#include <stdlib.h>
 #include "vp10/encoder/palette.h"
 
 static float calc_dist(const float *p1, const float *p2, int dim) {
@@ -117,26 +118,27 @@ void vp10_k_means(const float *data, float *centroids, uint8_t *indices, int n,
   }
 }
 
-void vp10_insertion_sort(float *data, int n) {
-  int i, j, k;
-  float val;
+static int float_comparer(const void *a, const void *b) {
+  const float fa = *(const float *)a;
+  const float fb = *(const float *)b;
+  return (fa > fb) - (fb < fa);
+}
 
-  if (n <= 1)
-    return;
-
-  for (i = 1; i < n; ++i) {
-    val = data[i];
-    j = 0;
-    while (val > data[j] && j < i)
-      ++j;
-
-    if (j == i)
-      continue;
-
-    for (k = i; k > j; --k)
-      data[k] = data[k - 1];
-    data[j] = val;
+int vp10_remove_duplicates(float *centroids, int num_centroids) {
+  int num_unique;  // number of unique centroids
+  int i;
+  qsort(centroids, num_centroids, sizeof(*centroids), float_comparer);
+  for (i = 0; i < num_centroids; ++i) {
+    centroids[i] = roundf(centroids[i]);
   }
+  // Remove duplicates.
+  num_unique = 1;
+  for (i = 1; i < num_centroids; ++i) {
+    if (centroids[i] != centroids[i - 1]) {  // found a new unique centroid
+      centroids[num_unique++] = centroids[i];
+    }
+  }
+  return num_unique;
 }
 
 int vp10_count_colors(const uint8_t *src, int stride, int rows, int cols) {

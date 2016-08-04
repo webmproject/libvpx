@@ -17,11 +17,15 @@
 extern "C" {
 #endif
 
-void vp10_insertion_sort(float *data, int n);
 void vp10_calc_indices(const float *data, const float *centroids,
                        uint8_t *indices, int n, int k, int dim);
 void vp10_k_means(const float *data, float *centroids, uint8_t *indices, int n,
                   int k, int dim, int max_itr);
+
+// Given a list of centroids, returns the unique number of centroids 'k', and
+// puts these unique centroids in first 'k' indices of 'centroids' array.
+int vp10_remove_duplicates(float *centroids, int num_centroids);
+
 int vp10_count_colors(const uint8_t *src, int stride, int rows, int cols);
 #if CONFIG_VP9_HIGHBITDEPTH
 int vp10_count_colors_highbd(const uint8_t *src8, int stride, int rows,
