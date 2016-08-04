@@ -246,8 +246,8 @@ typedef struct VP10EncoderConfig {
   vpx_fixed_buf_t firstpass_mb_stats_in;
 #endif
 
-  vp8e_tuning tuning;
-  vp9e_tune_content content;
+  vpx_tune_metric tuning;
+  vpx_tune_content content;
 #if CONFIG_VP9_HIGHBITDEPTH
   int use_highbitdepth;
 #endif

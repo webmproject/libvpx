@@ -27,27 +27,9 @@
 extern "C" {
 #endif
 
-/*!\name Algorithm interface for VP8
- *
- * This interface provides the capability to encode raw VP8 streams.
- * @{
- */
-extern vpx_codec_iface_t  vpx_codec_vp8_cx_algo;
-extern vpx_codec_iface_t *vpx_codec_vp8_cx(void);
-/*!@} - end algorithm interface member group*/
-
-/*!\name Algorithm interface for VP9
- *
- * This interface provides the capability to encode raw VP9 streams.
- * @{
- */
-extern vpx_codec_iface_t  vpx_codec_vp9_cx_algo;
-extern vpx_codec_iface_t *vpx_codec_vp9_cx(void);
-/*!@} - end algorithm interface member group*/
-
 /*!\name Algorithm interface for VP10
  *
- * This interface provides the capability to encode raw VP9 streams.
+ * This interface provides the capability to encode raw VP10 streams.
  * @{
  */
 extern vpx_codec_iface_t  vpx_codec_vp10_cx_algo;
@@ -474,8 +456,8 @@ enum vp8e_enc_control_id {
 
   /*!\brief Codec control function to set content type.
    * \note Valid parameter range:
-   *              VP9E_CONTENT_DEFAULT = Regular video content (Default)
-   *              VP9E_CONTENT_SCREEN  = Screen capture content
+   *              VPX_CONTENT_DEFAULT = Regular video content (Default)
+   *              VPX_CONTENT_SCREEN  = Screen capture content
    *
    * Supported in codecs: VP9
    */
@@ -692,10 +674,10 @@ typedef enum {
 
 /*!brief VP9 encoder content type */
 typedef enum {
-  VP9E_CONTENT_DEFAULT,
-  VP9E_CONTENT_SCREEN,
-  VP9E_CONTENT_INVALID
-} vp9e_tune_content;
+  VPX_CONTENT_DEFAULT,
+  VPX_CONTENT_SCREEN,
+  VPX_CONTENT_INVALID
+} vpx_tune_content;
 
 /*!\brief VP8 model tuning parameters
  *
@@ -703,9 +685,9 @@ typedef enum {
  *
  */
 typedef enum {
-  VP8_TUNE_PSNR,
-  VP8_TUNE_SSIM
-} vp8e_tuning;
+  VPX_TUNE_PSNR,
+  VPX_TUNE_SSIM
+} vpx_tune_metric;
 
 /*!\brief  vp9 svc layer parameters
  *
@@ -789,7 +771,7 @@ VPX_CTRL_USE_TYPE(VP8E_SET_ARNR_STRENGTH,     unsigned int)
 #define VPX_CTRL_VP8E_SET_ARNR_STRENGTH
 VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_SET_ARNR_TYPE,     unsigned int)
 #define VPX_CTRL_VP8E_SET_ARNR_TYPE
-VPX_CTRL_USE_TYPE(VP8E_SET_TUNING,             int) /* vp8e_tuning */
+VPX_CTRL_USE_TYPE(VP8E_SET_TUNING,             int) /* vpx_tune_metric */
 #define VPX_CTRL_VP8E_SET_TUNING
 VPX_CTRL_USE_TYPE(VP8E_SET_CQ_LEVEL,      unsigned int)
 #define VPX_CTRL_VP8E_SET_CQ_LEVEL
@@ -832,7 +814,7 @@ VPX_CTRL_USE_TYPE(VP9E_SET_FRAME_PERIODIC_BOOST, unsigned int)
 VPX_CTRL_USE_TYPE(VP9E_SET_NOISE_SENSITIVITY,  unsigned int)
 #define VPX_CTRL_VP9E_SET_NOISE_SENSITIVITY
 
-VPX_CTRL_USE_TYPE(VP9E_SET_TUNE_CONTENT, int) /* vp9e_tune_content */
+VPX_CTRL_USE_TYPE(VP9E_SET_TUNE_CONTENT, int) /* vpx_tune_content */
 #define VPX_CTRL_VP9E_SET_TUNE_CONTENT
 
 VPX_CTRL_USE_TYPE(VP9E_SET_COLOR_SPACE, int)

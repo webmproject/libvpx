@@ -289,15 +289,15 @@ void Scale2D
   switch (hratio * 10 / hscale) {
     case 8:
       /* 4-5 Scale in Width direction */
-      horiz_line_scale = vp8_horizontal_line_5_4_scale;
+      horiz_line_scale = vpx_horizontal_line_5_4_scale;
       break;
     case 6:
       /* 3-5 Scale in Width direction */
-      horiz_line_scale = vp8_horizontal_line_5_3_scale;
+      horiz_line_scale = vpx_horizontal_line_5_3_scale;
       break;
     case 5:
       /* 1-2 Scale in Width direction */
-      horiz_line_scale = vp8_horizontal_line_2_1_scale;
+      horiz_line_scale = vpx_horizontal_line_2_1_scale;
       break;
     default:
       /* The ratio is not acceptable now */
@@ -309,13 +309,13 @@ void Scale2D
   switch (vratio * 10 / vscale) {
     case 8:
       /* 4-5 Scale in vertical direction */
-      vert_band_scale     = vp8_vertical_band_5_4_scale;
+      vert_band_scale     = vpx_vertical_band_5_4_scale;
       source_band_height  = 5;
       dest_band_height    = 4;
       break;
     case 6:
       /* 3-5 Scale in vertical direction */
-      vert_band_scale     = vp8_vertical_band_5_3_scale;
+      vert_band_scale     = vpx_vertical_band_5_3_scale;
       source_band_height  = 5;
       dest_band_height    = 3;
       break;
@@ -324,12 +324,12 @@ void Scale2D
 
       if (interlaced) {
         /* if the content is interlaced, point sampling is used */
-        vert_band_scale     = vp8_vertical_band_2_1_scale;
+        vert_band_scale     = vpx_vertical_band_2_1_scale;
       } else {
 
         interpolation = 1;
         /* if the content is progressive, interplo */
-        vert_band_scale     = vp8_vertical_band_2_1_scale_i;
+        vert_band_scale     = vpx_vertical_band_2_1_scale_i;
 
       }
 

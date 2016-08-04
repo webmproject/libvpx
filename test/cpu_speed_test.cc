@@ -27,7 +27,7 @@ class CpuSpeedTest
         encoding_mode_(GET_PARAM(1)),
         set_cpu_used_(GET_PARAM(2)),
         min_psnr_(kMaxPSNR),
-        tune_content_(VP9E_CONTENT_DEFAULT) {}
+        tune_content_(VPX_CONTENT_DEFAULT) {}
   virtual ~CpuSpeedTest() {}
 
   virtual void SetUp() {
@@ -114,7 +114,7 @@ TEST_P(CpuSpeedTest, TestTuneScreen) {
   cfg_.rc_target_bitrate = 2000;
   cfg_.rc_max_quantizer = 63;
   cfg_.rc_min_quantizer = 0;
-  tune_content_ = VP9E_CONTENT_SCREEN;
+  tune_content_ = VPX_CONTENT_SCREEN;
 
   init_flags_ = VPX_CODEC_USE_PSNR;
 

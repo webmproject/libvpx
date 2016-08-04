@@ -143,9 +143,9 @@ class EndToEndTestLarge
       encoder->Control(VP8E_SET_CPUUSED, cpu_used_);
       // Test screen coding tools at cpu_used = 1 && encoding mode is two-pass.
       if (cpu_used_ == 1 && encoding_mode_ == ::libvpx_test::kTwoPassGood)
-        encoder->Control(VP9E_SET_TUNE_CONTENT, VP9E_CONTENT_SCREEN);
+        encoder->Control(VP9E_SET_TUNE_CONTENT, VPX_CONTENT_SCREEN);
       else
-        encoder->Control(VP9E_SET_TUNE_CONTENT, VP9E_CONTENT_DEFAULT);
+        encoder->Control(VP9E_SET_TUNE_CONTENT, VPX_CONTENT_DEFAULT);
       if (encoding_mode_ != ::libvpx_test::kRealTime) {
         encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
         encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);

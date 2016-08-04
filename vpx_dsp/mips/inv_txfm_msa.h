@@ -132,7 +132,7 @@
               out0, out1, out2, out3);                              \
 }
 
-#define VP9_IADST4x4(in0, in1, in2, in3, out0, out1, out2, out3) {  \
+#define VPX_IADST4x4(in0, in1, in2, in3, out0, out1, out2, out3) {  \
   v8i16 res0_m, res1_m, c0_m, c1_m;                                 \
   v8i16 k1_m, k2_m, k3_m, k4_m;                                     \
   v8i16 zero_m = { 0 };                                             \
