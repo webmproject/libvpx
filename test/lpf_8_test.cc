@@ -35,16 +35,22 @@ const int kNumCoeffs = 1024;
 const int number_of_iterations = 10000;
 
 #if CONFIG_VP9_HIGHBITDEPTH
-typedef void (*loop_op_t)(uint16_t *s, int p, const uint8_t *blimit,
+typedef uint16_t Pixel;
+#define PIXEL_WIDTH 16
+
+typedef void (*loop_op_t)(Pixel *s, int p, const uint8_t *blimit,
                           const uint8_t *limit, const uint8_t *thresh, int bd);
-typedef void (*dual_loop_op_t)(uint16_t *s, int p, const uint8_t *blimit0,
+typedef void (*dual_loop_op_t)(Pixel *s, int p, const uint8_t *blimit0,
                                const uint8_t *limit0, const uint8_t *thresh0,
                                const uint8_t *blimit1, const uint8_t *limit1,
                                const uint8_t *thresh1, int bd);
 #else
-typedef void (*loop_op_t)(uint8_t *s, int p, const uint8_t *blimit,
+typedef uint8_t Pixel;
+#define PIXEL_WIDTH 8
+
+typedef void (*loop_op_t)(Pixel *s, int p, const uint8_t *blimit,
                           const uint8_t *limit, const uint8_t *thresh);
-typedef void (*dual_loop_op_t)(uint8_t *s, int p, const uint8_t *blimit0,
+typedef void (*dual_loop_op_t)(Pixel *s, int p, const uint8_t *blimit0,
                                const uint8_t *limit0, const uint8_t *thresh0,
                                const uint8_t *blimit1, const uint8_t *limit1,
                                const uint8_t *thresh1);
@@ -52,6 +58,61 @@ typedef void (*dual_loop_op_t)(uint8_t *s, int p, const uint8_t *blimit0,
 
 typedef std::tr1::tuple<loop_op_t, loop_op_t, int> loop8_param_t;
 typedef std::tr1::tuple<dual_loop_op_t, dual_loop_op_t, int> dualloop8_param_t;
+
+void InitInput(Pixel *s, Pixel *ref_s, ACMRandom *rnd, const uint8_t limit,
+               const int mask, const int32_t p, const int i) {
+  uint16_t tmp_s[kNumCoeffs];
+
+  for (int j = 0; j < kNumCoeffs;) {
+    const uint8_t val = rnd->Rand8();
+    if (val & 0x80) {  // 50% chance to choose a new value.
+      tmp_s[j] = rnd->Rand16();
+      j++;
+    } else {  // 50% chance to repeat previous value in row X times.
+      int k = 0;
+      while (k++ < ((val & 0x1f) + 1) && j < kNumCoeffs) {
+        if (j < 1) {
+          tmp_s[j] = rnd->Rand16();
+        } else if (val & 0x20) {  // Increment by a value within the limit.
+          tmp_s[j] = tmp_s[j - 1] + (limit - 1);
+        } else {  // Decrement by a value within the limit.
+          tmp_s[j] = tmp_s[j - 1] - (limit - 1);
+        }
+        j++;
+      }
+    }
+  }
+
+  for (int j = 0; j < kNumCoeffs;) {
+    const uint8_t val = rnd->Rand8();
+    if (val & 0x80) {
+      j++;
+    } else {  // 50% chance to repeat previous value in column X times.
+      int k = 0;
+      while (k++ < ((val & 0x1f) + 1) && j < kNumCoeffs) {
+        if (j < 1) {
+          tmp_s[j] = rnd->Rand16();
+        } else if (val & 0x20) {  // Increment by a value within the limit.
+          tmp_s[(j % 32) * 32 + j / 32] =
+              tmp_s[((j - 1) % 32) * 32 + (j - 1) / 32] + (limit - 1);
+        } else {  // Decrement by a value within the limit.
+          tmp_s[(j % 32) * 32 + j / 32] =
+              tmp_s[((j - 1) % 32) * 32 + (j - 1) / 32] - (limit - 1);
+        }
+        j++;
+      }
+    }
+  }
+
+  for (int j = 0; j < kNumCoeffs; j++) {
+    if (i % 2) {
+      s[j] = tmp_s[j] & mask;
+    } else {
+      s[j] = tmp_s[p * (j % p) + j / p] & mask;
+    }
+    ref_s[j] = s[j];
+  }
+}
 
 class Loop8Test6Param : public ::testing::TestWithParam<loop8_param_t> {
  public:
@@ -94,14 +155,9 @@ class Loop8Test9Param : public ::testing::TestWithParam<dualloop8_param_t> {
 TEST_P(Loop8Test6Param, OperationCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = number_of_iterations;
-#if CONFIG_VP9_HIGHBITDEPTH
-  const int32_t bd = bit_depth_;
-  DECLARE_ALIGNED(16, uint16_t, s[kNumCoeffs]);
-  DECLARE_ALIGNED(16, uint16_t, ref_s[kNumCoeffs]);
-#else
-  DECLARE_ALIGNED(8, uint8_t, s[kNumCoeffs]);
-  DECLARE_ALIGNED(8, uint8_t, ref_s[kNumCoeffs]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+  const int32_t p = kNumCoeffs / 32;
+  DECLARE_ALIGNED(PIXEL_WIDTH, Pixel, s[kNumCoeffs]);
+  DECLARE_ALIGNED(PIXEL_WIDTH, Pixel, ref_s[kNumCoeffs]);
   int err_count_total = 0;
   int first_failure = -1;
   for (int i = 0; i < count_test_block; ++i) {
@@ -118,62 +174,11 @@ TEST_P(Loop8Test6Param, OperationCheck) {
     DECLARE_ALIGNED(16, const uint8_t,
                     thresh[16]) = { tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
                                     tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp };
-    int32_t p = kNumCoeffs / 32;
-    uint16_t tmp_s[kNumCoeffs];
-    int j = 0;
-    while (j < kNumCoeffs) {
-      uint8_t val = rnd.Rand8();
-      if (val & 0x80) {  // 50% chance to choose a new value.
-        tmp_s[j] = rnd.Rand16();
-        j++;
-      } else {  // 50% chance to repeat previous value in row X times.
-        int k = 0;
-        while (k++ < ((val & 0x1f) + 1) && j < kNumCoeffs) {
-          if (j < 1) {
-            tmp_s[j] = rnd.Rand16();
-          } else if (val & 0x20) {  // Increment by a value within the limit.
-            tmp_s[j] = tmp_s[j - 1] + (*limit - 1);
-          } else {  // Decrement by a value within the limit.
-            tmp_s[j] = tmp_s[j - 1] - (*limit - 1);
-          }
-          j++;
-        }
-      }
-    }
-
-    for (j = 0; j < kNumCoeffs;) {
-      const uint8_t val = rnd.Rand8();
-      if (val & 0x80) {
-        j++;
-      } else {  // 50% chance to repeat previous value in column X times.
-        int k = 0;
-        while (k++ < ((val & 0x1f) + 1) && j < kNumCoeffs) {
-          if (j < 1) {
-            tmp_s[j] = rnd.Rand16();
-          } else if (val & 0x20) {  // Increment by a value within the limit.
-            tmp_s[(j % 32) * 32 + j / 32] =
-                tmp_s[((j - 1) % 32) * 32 + (j - 1) / 32] + (*limit - 1);
-          } else {  // Decrement by a value within the limit.
-            tmp_s[(j % 32) * 32 + j / 32] =
-                tmp_s[((j - 1) % 32) * 32 + (j - 1) / 32] - (*limit - 1);
-          }
-          j++;
-        }
-      }
-    }
-
-    for (j = 0; j < kNumCoeffs; j++) {
-      if (i % 2) {
-        s[j] = tmp_s[j] & mask_;
-      } else {
-        s[j] = tmp_s[p * (j % p) + j / p] & mask_;
-      }
-      ref_s[j] = s[j];
-    }
+    InitInput(s, ref_s, &rnd, *limit, mask_, p, i);
 #if CONFIG_VP9_HIGHBITDEPTH
-    ref_loopfilter_op_(ref_s + 8 + p * 8, p, blimit, limit, thresh, bd);
+    ref_loopfilter_op_(ref_s + 8 + p * 8, p, blimit, limit, thresh, bit_depth_);
     ASM_REGISTER_STATE_CHECK(
-        loopfilter_op_(s + 8 + p * 8, p, blimit, limit, thresh, bd));
+        loopfilter_op_(s + 8 + p * 8, p, blimit, limit, thresh, bit_depth_));
 #else
     ref_loopfilter_op_(ref_s + 8 + p * 8, p, blimit, limit, thresh);
     ASM_REGISTER_STATE_CHECK(
@@ -197,14 +202,8 @@ TEST_P(Loop8Test6Param, OperationCheck) {
 TEST_P(Loop8Test6Param, ValueCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = number_of_iterations;
-#if CONFIG_VP9_HIGHBITDEPTH
-  const int32_t bd = bit_depth_;
-  DECLARE_ALIGNED(16, uint16_t, s[kNumCoeffs]);
-  DECLARE_ALIGNED(16, uint16_t, ref_s[kNumCoeffs]);
-#else
-  DECLARE_ALIGNED(8, uint8_t, s[kNumCoeffs]);
-  DECLARE_ALIGNED(8, uint8_t, ref_s[kNumCoeffs]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+  DECLARE_ALIGNED(PIXEL_WIDTH, Pixel, s[kNumCoeffs]);
+  DECLARE_ALIGNED(PIXEL_WIDTH, Pixel, ref_s[kNumCoeffs]);
   int err_count_total = 0;
   int first_failure = -1;
 
@@ -240,9 +239,9 @@ TEST_P(Loop8Test6Param, ValueCheck) {
       ref_s[j] = s[j];
     }
 #if CONFIG_VP9_HIGHBITDEPTH
-    ref_loopfilter_op_(ref_s + 8 + p * 8, p, blimit, limit, thresh, bd);
+    ref_loopfilter_op_(ref_s + 8 + p * 8, p, blimit, limit, thresh, bit_depth_);
     ASM_REGISTER_STATE_CHECK(
-        loopfilter_op_(s + 8 + p * 8, p, blimit, limit, thresh, bd));
+        loopfilter_op_(s + 8 + p * 8, p, blimit, limit, thresh, bit_depth_));
 #else
     ref_loopfilter_op_(ref_s + 8 + p * 8, p, blimit, limit, thresh);
     ASM_REGISTER_STATE_CHECK(
@@ -266,14 +265,8 @@ TEST_P(Loop8Test6Param, ValueCheck) {
 TEST_P(Loop8Test9Param, OperationCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = number_of_iterations;
-#if CONFIG_VP9_HIGHBITDEPTH
-  const int32_t bd = bit_depth_;
-  DECLARE_ALIGNED(16, uint16_t, s[kNumCoeffs]);
-  DECLARE_ALIGNED(16, uint16_t, ref_s[kNumCoeffs]);
-#else
-  DECLARE_ALIGNED(8, uint8_t, s[kNumCoeffs]);
-  DECLARE_ALIGNED(8, uint8_t, ref_s[kNumCoeffs]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+  DECLARE_ALIGNED(PIXEL_WIDTH, Pixel, s[kNumCoeffs]);
+  DECLARE_ALIGNED(PIXEL_WIDTH, Pixel, ref_s[kNumCoeffs]);
   int err_count_total = 0;
   int first_failure = -1;
   for (int i = 0; i < count_test_block; ++i) {
@@ -303,70 +296,21 @@ TEST_P(Loop8Test9Param, OperationCheck) {
                     thresh1[16]) = { tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
                                      tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp };
     int32_t p = kNumCoeffs / 32;
-    uint16_t tmp_s[kNumCoeffs];
-    int j = 0;
     const uint8_t limit = *limit0 < *limit1 ? *limit0 : *limit1;
-    while (j < kNumCoeffs) {
-      uint8_t val = rnd.Rand8();
-      if (val & 0x80) {  // 50% chance to choose a new value.
-        tmp_s[j] = rnd.Rand16();
-        j++;
-      } else {  // 50% chance to repeat previous value in row X times.
-        int k = 0;
-        while (k++ < ((val & 0x1f) + 1) && j < kNumCoeffs) {
-          if (j < 1) {
-            tmp_s[j] = rnd.Rand16();
-          } else if (val & 0x20) {  // Increment by a value within the limit.
-            tmp_s[j] = tmp_s[j - 1] + (limit - 1);
-          } else {  // Decrement by a value within the limit.
-            tmp_s[j] = tmp_s[j - 1] - (limit - 1);
-          }
-          j++;
-        }
-      }
-    }
-
-    for (j = 0; j < kNumCoeffs;) {
-      const uint8_t val = rnd.Rand8();
-      if (val & 0x80) {
-        j++;
-      } else {  // 50% chance to repeat previous value in column X times.
-        int k = 0;
-        while (k++ < ((val & 0x1f) + 1) && j < kNumCoeffs) {
-          if (j < 1) {
-            tmp_s[j] = rnd.Rand16();
-          } else if (val & 0x20) {  // Increment by a value within the limit.
-            tmp_s[(j % 32) * 32 + j / 32] =
-                tmp_s[((j - 1) % 32) * 32 + (j - 1) / 32] + (limit - 1);
-          } else {  // Decrement by a value within the limit.
-            tmp_s[(j % 32) * 32 + j / 32] =
-                tmp_s[((j - 1) % 32) * 32 + (j - 1) / 32] - (limit - 1);
-          }
-          j++;
-        }
-      }
-    }
-
-    for (j = 0; j < kNumCoeffs; j++) {
-      if (i % 2) {
-        s[j] = tmp_s[j] & mask_;
-      } else {
-        s[j] = tmp_s[p * (j % p) + j / p] & mask_;
-      }
-      ref_s[j] = s[j];
-    }
+    InitInput(s, ref_s, &rnd, limit, mask_, p, i);
 #if CONFIG_VP9_HIGHBITDEPTH
     ref_loopfilter_op_(ref_s + 8 + p * 8, p, blimit0, limit0, thresh0, blimit1,
-                       limit1, thresh1, bd);
+                       limit1, thresh1, bit_depth_);
     ASM_REGISTER_STATE_CHECK(loopfilter_op_(s + 8 + p * 8, p, blimit0, limit0,
                                             thresh0, blimit1, limit1, thresh1,
-                                            bd));
+                                            bit_depth_));
 #else
     ref_loopfilter_op_(ref_s + 8 + p * 8, p, blimit0, limit0, thresh0, blimit1,
                        limit1, thresh1);
     ASM_REGISTER_STATE_CHECK(loopfilter_op_(s + 8 + p * 8, p, blimit0, limit0,
                                             thresh0, blimit1, limit1, thresh1));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
     for (int j = 0; j < kNumCoeffs; ++j) {
       err_count += ref_s[j] != s[j];
     }
@@ -384,13 +328,8 @@ TEST_P(Loop8Test9Param, OperationCheck) {
 TEST_P(Loop8Test9Param, ValueCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = number_of_iterations;
-#if CONFIG_VP9_HIGHBITDEPTH
-  DECLARE_ALIGNED(16, uint16_t, s[kNumCoeffs]);
-  DECLARE_ALIGNED(16, uint16_t, ref_s[kNumCoeffs]);
-#else
-  DECLARE_ALIGNED(8, uint8_t, s[kNumCoeffs]);
-  DECLARE_ALIGNED(8, uint8_t, ref_s[kNumCoeffs]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+  DECLARE_ALIGNED(PIXEL_WIDTH, Pixel, s[kNumCoeffs]);
+  DECLARE_ALIGNED(PIXEL_WIDTH, Pixel, ref_s[kNumCoeffs]);
   int err_count_total = 0;
   int first_failure = -1;
   for (int i = 0; i < count_test_block; ++i) {
@@ -425,18 +364,18 @@ TEST_P(Loop8Test9Param, ValueCheck) {
       ref_s[j] = s[j];
     }
 #if CONFIG_VP9_HIGHBITDEPTH
-    const int32_t bd = bit_depth_;
     ref_loopfilter_op_(ref_s + 8 + p * 8, p, blimit0, limit0, thresh0, blimit1,
-                       limit1, thresh1, bd);
+                       limit1, thresh1, bit_depth_);
     ASM_REGISTER_STATE_CHECK(loopfilter_op_(s + 8 + p * 8, p, blimit0, limit0,
                                             thresh0, blimit1, limit1, thresh1,
-                                            bd));
+                                            bit_depth_));
 #else
     ref_loopfilter_op_(ref_s + 8 + p * 8, p, blimit0, limit0, thresh0, blimit1,
                        limit1, thresh1);
     ASM_REGISTER_STATE_CHECK(loopfilter_op_(s + 8 + p * 8, p, blimit0, limit0,
                                             thresh0, blimit1, limit1, thresh1));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
     for (int j = 0; j < kNumCoeffs; ++j) {
       err_count += ref_s[j] != s[j];
     }
