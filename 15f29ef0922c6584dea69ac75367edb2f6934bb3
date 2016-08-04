@@ -52,6 +52,24 @@
       "revId": "15f29ef0922c6584dea69ac75367edb2f6934bb3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "746662d2_9a0c6d42",
+        "filename": "README",
+        "patchSetId": 2
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-04T18:50:18Z",
+      "side": 1,
+      "message": "That\u0027s right, but I didn\u0027t want to get into describing that setup. I\u0027m also suspicious that in some cases some formatting might be missed / incorrect due to it operating on the hunks in the patch rather than the whole file.",
+      "parentUuid": "148e0681_838b4e1c",
+      "revId": "15f29ef0922c6584dea69ac75367edb2f6934bb3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
