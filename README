@@ -49,9 +49,6 @@ COMPILING THE APPLICATIONS/LIBRARIES:
 
     arm64-darwin-gcc
     arm64-linux-gcc
-    armv6-linux-rvct
-    armv6-linux-gcc
-    armv6-none-rvct
     armv7-android-gcc
     armv7-darwin-gcc
     armv7-linux-rvct

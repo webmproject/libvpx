@@ -1205,22 +1205,6 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(5, 5, &vpx_sub_pixel_avg_variance32x32_avx2, 0)));
 #endif  // HAVE_AVX2
 
-#if HAVE_MEDIA
-INSTANTIATE_TEST_CASE_P(MEDIA, VpxMseTest,
-                        ::testing::Values(MseParams(4, 4,
-                                                    &vpx_mse16x16_media)));
-
-INSTANTIATE_TEST_CASE_P(
-    MEDIA, VpxVarianceTest,
-    ::testing::Values(VarianceParams(4, 4, &vpx_variance16x16_media),
-                      VarianceParams(3, 3, &vpx_variance8x8_media)));
-
-INSTANTIATE_TEST_CASE_P(
-    MEDIA, VpxSubpelVarianceTest,
-    ::testing::Values(make_tuple(4, 4, &vpx_sub_pixel_variance16x16_media, 0),
-                      make_tuple(3, 3, &vpx_sub_pixel_variance8x8_media, 0)));
-#endif  // HAVE_MEDIA
-
 #if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(NEON, VpxSseTest,
                         ::testing::Values(SseParams(2, 2,

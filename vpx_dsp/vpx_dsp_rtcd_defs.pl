@@ -960,7 +960,7 @@ add_proto qw/unsigned int vpx_sad16x32/, "const uint8_t *src_ptr, int src_stride
 specialize qw/vpx_sad16x32 msa sse2/;
 
 add_proto qw/unsigned int vpx_sad16x16/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
-specialize qw/vpx_sad16x16 media neon msa sse2/;
+specialize qw/vpx_sad16x16 neon msa sse2/;
 
 add_proto qw/unsigned int vpx_sad16x8/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
 specialize qw/vpx_sad16x8 neon msa sse2/;
@@ -1387,7 +1387,7 @@ add_proto qw/unsigned int vpx_variance16x32/, "const uint8_t *src_ptr, int sourc
   specialize qw/vpx_variance16x32 sse2 msa/;
 
 add_proto qw/unsigned int vpx_variance16x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-  specialize qw/vpx_variance16x16 sse2 avx2 media neon msa/;
+  specialize qw/vpx_variance16x16 sse2 avx2 neon msa/;
 
 add_proto qw/unsigned int vpx_variance16x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
   specialize qw/vpx_variance16x8 sse2 neon msa/;
@@ -1396,7 +1396,7 @@ add_proto qw/unsigned int vpx_variance8x16/, "const uint8_t *src_ptr, int source
   specialize qw/vpx_variance8x16 sse2 neon msa/;
 
 add_proto qw/unsigned int vpx_variance8x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-  specialize qw/vpx_variance8x8 sse2 media neon msa/;
+  specialize qw/vpx_variance8x8 sse2 neon msa/;
 
 add_proto qw/unsigned int vpx_variance8x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
   specialize qw/vpx_variance8x4 sse2 msa/;
@@ -1417,7 +1417,7 @@ add_proto qw/void vpx_get8x8var/, "const uint8_t *src_ptr, int source_stride, co
   specialize qw/vpx_get8x8var sse2 neon msa/;
 
 add_proto qw/unsigned int vpx_mse16x16/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
-  specialize qw/vpx_mse16x16 sse2 avx2 media neon msa/;
+  specialize qw/vpx_mse16x16 sse2 avx2 neon msa/;
 
 add_proto qw/unsigned int vpx_mse16x8/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
   specialize qw/vpx_mse16x8 sse2 msa/;
@@ -1458,7 +1458,7 @@ add_proto qw/uint32_t vpx_sub_pixel_variance16x32/, "const uint8_t *src_ptr, int
   specialize qw/vpx_sub_pixel_variance16x32 msa sse2 ssse3/;
 
 add_proto qw/uint32_t vpx_sub_pixel_variance16x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse";
-  specialize qw/vpx_sub_pixel_variance16x16 media neon msa sse2 ssse3/;
+  specialize qw/vpx_sub_pixel_variance16x16 neon msa sse2 ssse3/;
 
 add_proto qw/uint32_t vpx_sub_pixel_variance16x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse";
   specialize qw/vpx_sub_pixel_variance16x8 msa sse2 ssse3/;
@@ -1467,7 +1467,7 @@ add_proto qw/uint32_t vpx_sub_pixel_variance8x16/, "const uint8_t *src_ptr, int 
   specialize qw/vpx_sub_pixel_variance8x16 msa sse2 ssse3/;
 
 add_proto qw/uint32_t vpx_sub_pixel_variance8x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse";
-  specialize qw/vpx_sub_pixel_variance8x8 media neon msa sse2 ssse3/;
+  specialize qw/vpx_sub_pixel_variance8x8 neon msa sse2 ssse3/;
 
 add_proto qw/uint32_t vpx_sub_pixel_variance8x4/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse";
   specialize qw/vpx_sub_pixel_variance8x4 msa sse2 ssse3/;
@@ -1520,14 +1520,19 @@ add_proto qw/uint32_t vpx_sub_pixel_avg_variance4x4/, "const uint8_t *src_ptr, i
 #
 # Specialty Subpixel
 #
+# TODO(johannkoenig): Add neon implementations of
+#  vpx_variance_halfpixvar16x16_h
+#  vpx_variance_halfpixvar16x16_v
+#  vpx_variance_halfpixvar16x16_hv
+# https://bugs.chromium.org/p/webm/issues/detail?id=1273
 add_proto qw/uint32_t vpx_variance_halfpixvar16x16_h/, "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, uint32_t *sse";
-  specialize qw/vpx_variance_halfpixvar16x16_h sse2 media/;
+  specialize qw/vpx_variance_halfpixvar16x16_h sse2/;
 
 add_proto qw/uint32_t vpx_variance_halfpixvar16x16_v/, "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, uint32_t *sse";
-  specialize qw/vpx_variance_halfpixvar16x16_v sse2 media/;
+  specialize qw/vpx_variance_halfpixvar16x16_v sse2/;
 
 add_proto qw/uint32_t vpx_variance_halfpixvar16x16_hv/, "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, uint32_t *sse";
-  specialize qw/vpx_variance_halfpixvar16x16_hv sse2 media/;
+  specialize qw/vpx_variance_halfpixvar16x16_hv sse2/;
 
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/unsigned int vpx_highbd_12_variance64x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
