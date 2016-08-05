@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9974efbe_4795dede",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-05T21:58:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "148e0681_6fe731dc",
+      "range": {
+        "startLine": 10,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 32
+      },
+      "revId": "8646dcfb5a75b4692d5d3976cc9ccefc7ab937c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "148e0681_ef048170",
         "filename": "/COMMIT_MSG",
         "patchSetId": 4
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "9974efbe_a78392aa",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-05T21:58:33Z",
+      "side": 1,
+      "message": "Will rename this file in a separate change, since there is another change on it now.\n \u003e the lpf_8_test.cc name seems to be wrong. The 16 functions are\n \u003e there as well",
+      "parentUuid": "148e0681_ef048170",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 26
+      },
+      "revId": "8646dcfb5a75b4692d5d3976cc9ccefc7ab937c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "148e0681_2f660956",
         "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
         "patchSetId": 4
@@ -59,6 +107,30 @@
       "writtenOn": "2016-08-03T23:08:49Z",
       "side": 1,
       "message": "Capitalize Should",
+      "range": {
+        "startLine": 14,
+        "startChar": 3,
+        "endLine": 14,
+        "endChar": 9
+      },
+      "revId": "8646dcfb5a75b4692d5d3976cc9ccefc7ab937c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_c7800ea0",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-05T21:58:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "148e0681_2f660956",
       "range": {
         "startLine": 14,
         "startChar": 3,
@@ -117,6 +189,54 @@
     },
     {
       "key": {
+        "uuid": "9974efbe_87b45683",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-05T21:58:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "148e0681_6f1171a8",
+      "range": {
+        "startLine": 15,
+        "startChar": 7,
+        "endLine": 15,
+        "endChar": 13
+      },
+      "revId": "8646dcfb5a75b4692d5d3976cc9ccefc7ab937c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_67afba31",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-05T21:58:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "148e0681_0fea2574",
+      "range": {
+        "startLine": 15,
+        "startChar": 24,
+        "endLine": 15,
+        "endChar": 40
+      },
+      "revId": "8646dcfb5a75b4692d5d3976cc9ccefc7ab937c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "148e0681_4f5fcd77",
         "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
         "patchSetId": 4
@@ -128,6 +248,30 @@
       "writtenOn": "2016-08-03T23:08:49Z",
       "side": 1,
       "message": "Since all the values in the function are vectors (no scalar \u0027limit\u0027 to mix it up with) you don\u0027t need to add _u8x8 to the end of each one.",
+      "range": {
+        "startLine": 16,
+        "startChar": 14,
+        "endLine": 16,
+        "endChar": 24
+      },
+      "revId": "8646dcfb5a75b4692d5d3976cc9ccefc7ab937c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_27a9c229",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-05T21:58:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "148e0681_4f5fcd77",
       "range": {
         "startLine": 16,
         "startChar": 14,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "9974efbe_47ae3e33",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-05T21:58:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "148e0681_af50b95f",
+      "range": {
+        "startLine": 24,
+        "startChar": 5,
+        "endLine": 24,
+        "endChar": 7
+      },
+      "revId": "8646dcfb5a75b4692d5d3976cc9ccefc7ab937c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "148e0681_8fbe1578",
         "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
         "patchSetId": 4
@@ -186,6 +354,30 @@
     },
     {
       "key": {
+        "uuid": "9974efbe_47315e06",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-05T21:58:33Z",
+      "side": 1,
+      "message": "Inside flat_mask() to share intermediate data. I\u0027m adding comment there.\n \u003e Where is \u0027mask4\u0027?",
+      "parentUuid": "148e0681_8fbe1578",
+      "range": {
+        "startLine": 48,
+        "startChar": 24,
+        "endLine": 48,
+        "endChar": 39
+      },
+      "revId": "8646dcfb5a75b4692d5d3976cc9ccefc7ab937c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "148e0681_6f7df148",
         "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
         "patchSetId": 4
@@ -197,6 +389,30 @@
       "writtenOn": "2016-08-03T23:08:49Z",
       "side": 1,
       "message": "Why not replace the assembly? It simply calls the function twice, same as you do here. See loopfilter_neon.c. You could also implement the 8_dual functions.",
+      "range": {
+        "startLine": 582,
+        "startChar": 5,
+        "endLine": 582,
+        "endChar": 34
+      },
+      "revId": "8646dcfb5a75b4692d5d3976cc9ccefc7ab937c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_470abe2a",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 582,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-05T21:58:33Z",
+      "side": 1,
+      "message": "Implemented vpx_lpf_vertical_16_dual_neon() for asm. Will do 8_dual functions in future change.\n \u003e Why not replace the assembly? It simply calls the function twice,\n \u003e same as you do here. See loopfilter_neon.c. You could also\n \u003e implement the 8_dual functions.",
+      "parentUuid": "148e0681_6f7df148",
       "range": {
         "startLine": 582,
         "startChar": 5,
