@@ -1,0 +1,118 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9974efbe_d9b8f3c3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-05T18:39:18Z",
+      "side": 1,
+      "message": "Some more description/context please: e.g. what kind of debugging does the tool help with?",
+      "revId": "6efd2d81d21b467c3391e0a8a44c1e44b54d724a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_59f70390",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-05T18:39:18Z",
+      "side": 1,
+      "message": "alphabetical order",
+      "revId": "6efd2d81d21b467c3391e0a8a44c1e44b54d724a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_f6f05ecb",
+        "filename": "vpx_dsp/bitreader.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-05T18:39:18Z",
+      "side": 1,
+      "message": "const int",
+      "range": {
+        "startLine": 116,
+        "startChar": 4,
+        "endLine": 116,
+        "endChar": 7
+      },
+      "revId": "6efd2d81d21b467c3391e0a8a44c1e44b54d724a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_96880a1f",
+        "filename": "vpx_util/debug_util.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-05T18:39:18Z",
+      "side": 1,
+      "message": "Just create a #define instead, so that you can use it for the array sizes above.",
+      "range": {
+        "startLine": 7,
+        "startChar": 28,
+        "endLine": 7,
+        "endChar": 35
+      },
+      "revId": "6efd2d81d21b467c3391e0a8a44c1e44b54d724a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_1695da38",
+        "filename": "vpx_util/debug_util.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-05T18:39:18Z",
+      "side": 1,
+      "message": "Need to wrap the file. Beginning with:\n#ifndef VPX_UTIL_DEBUG_UTIL_H_\n#define VPX_UTIL_DEBUG_UTIL_H_\n\nAnd ending with:\n#endif  // VPX_UTIL_DEBUG_UTIL_H_",
+      "revId": "6efd2d81d21b467c3391e0a8a44c1e44b54d724a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_f68b7e19",
+        "filename": "vpx_util/debug_util.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-05T18:39:18Z",
+      "side": 1,
+      "message": "A short description of what how this utility helps with debugging would be nice.",
+      "revId": "6efd2d81d21b467c3391e0a8a44c1e44b54d724a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
