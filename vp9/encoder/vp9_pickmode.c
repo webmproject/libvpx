@@ -203,9 +203,12 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
       !(RDCOST(x->rdmult, x->rddiv, (*rate_mv + rate_mode), 0) > best_rd_sofar);
 
   if (rv) {
+    const int subpel_force_stop = use_base_mv && cpi->sf.base_mv_aggressive
+                                      ? 2
+                                      : cpi->sf.mv.subpel_force_stop;
     cpi->find_fractional_mv_step(
         x, &tmp_mv->as_mv, &ref_mv, cpi->common.allow_high_precision_mv,
-        x->errorperbit, &cpi->fn_ptr[bsize], cpi->sf.mv.subpel_force_stop,
+        x->errorperbit, &cpi->fn_ptr[bsize], subpel_force_stop,
         cpi->sf.mv.subpel_iters_per_step, cond_cost_list(cpi, cost_list),
         x->nmvjointcost, x->mvcost, &dis, &x->pred_sse[ref], NULL, 0, 0);
     *rate_mv = vp9_mv_bit_cost(&tmp_mv->as_mv, &ref_mv, x->nmvjointcost,
@@ -1602,10 +1605,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
             x->nmvjointcost, x->mvcost, &dis, &x->pred_sse[ref_frame], NULL, 0,
             0);
       } else if (svc->use_base_mv && svc->spatial_layer_id) {
-        if (frame_mv[NEWMV][ref_frame].as_int != INVALID_MV &&
-            frame_mv[NEWMV][ref_frame].as_int != 0) {
+        if (frame_mv[NEWMV][ref_frame].as_int != INVALID_MV) {
           const int pre_stride = xd->plane[0].pre[0].stride;
           int base_mv_sad = INT_MAX;
+          const float base_mv_bias = sf->base_mv_aggressive ? 1.5 : 1.0;
           const uint8_t *const pre_buf =
               xd->plane[0].pre[0].buf +
               (frame_mv[NEWMV][ref_frame].as_mv.row >> 3) * pre_stride +
@@ -1613,9 +1616,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
           base_mv_sad = cpi->fn_ptr[bsize].sdf(
               x->plane[0].src.buf, x->plane[0].src.stride, pre_buf, pre_stride);
 
-          // TODO(wonkap): make the decision to use base layer mv on RD;
-          // not just SAD.
-          if (base_mv_sad < x->pred_mv_sad[ref_frame]) {
+          if (base_mv_sad < base_mv_bias * x->pred_mv_sad[ref_frame]) {
             // Base layer mv is good.
             if (!combined_motion_search(cpi, x, bsize, mi_row, mi_col,
                                         &frame_mv[NEWMV][ref_frame], &rate_mv,
