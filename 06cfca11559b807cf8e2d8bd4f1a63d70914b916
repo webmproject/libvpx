@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "34514af5_99fa9fde",
+        "filename": "test/idct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-05T05:46:20Z",
+      "side": 1,
+      "message": "seems to be applied inconsistently here and in other for loops containing a single EXPECT/ASSERT",
+      "revId": "06cfca11559b807cf8e2d8bd4f1a63d70914b916",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
