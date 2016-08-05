@@ -112,6 +112,7 @@ endif
 
 #LIBAOM_TEST_SRCS-yes                   += convolve_test.cc
 LIBAOM_TEST_SRCS-yes                   += lpf_8_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_CLPF)        += clpf_test.cc
 LIBAOM_TEST_SRCS-yes                   += intrapred_test.cc
 #LIBAOM_TEST_SRCS-$(CONFIG_AV1_DECODER) += av1_thread_test.cc
 LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += dct16x16_test.cc

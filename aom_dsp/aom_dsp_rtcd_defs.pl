@@ -586,6 +586,15 @@ specialize qw/aom_lpf_horizontal_4 sse2 neon dspr2 msa/;
 add_proto qw/void aom_lpf_horizontal_4_dual/, "uint8_t *s, int pitch, const uint8_t *blimit0, const uint8_t *limit0, const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1, const uint8_t *thresh1";
 specialize qw/aom_lpf_horizontal_4_dual sse2 neon dspr2 msa/;
 
+if (aom_config("CONFIG_CLPF") eq "yes") {
+  add_proto qw/void aom_clpf_block/, "const uint8_t *src, uint8_t *dst, int stride, int x0, int y0, int sizex, int sizey, int width, int height, unsigned int strength";
+  specialize qw/aom_clpf_block sse2 ssse3 sse4_1 neon/;
+  add_proto qw/void aom_clpf_detect/, "const uint8_t *rec, const uint8_t *org, int rstride, int ostride, int x0, int y0, int width, int height, int *sum0, int *sum1, unsigned int strength";
+  specialize qw/aom_clpf_detect sse2 ssse3 sse4_1 neon/;
+  add_proto qw/void aom_clpf_detect_multi/, "const uint8_t *rec, const uint8_t *org, int rstride, int ostride, int x0, int y0, int width, int height, int *sum";
+  specialize qw/aom_clpf_detect_multi sse2 ssse3 sse4_1 neon/;
+}
+
 if (aom_config("CONFIG_AOM_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void aom_highbd_lpf_vertical_16/, "uint16_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int bd";
   specialize qw/aom_highbd_lpf_vertical_16 sse2/;

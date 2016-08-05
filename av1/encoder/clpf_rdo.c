@@ -10,24 +10,25 @@
  */
 
 #include "av1/common/clpf.h"
+#include "./aom_dsp_rtcd.h"
 #include "aom/aom_integer.h"
 #include "av1/common/quant_common.h"
 
 // Calculate the error of a filtered and unfiltered block
-static void detect_clpf(const uint8_t *rec, const uint8_t *org, int x0, int y0,
-                        int width, int height, int so, int stride, int *sum0,
-                        int *sum1, unsigned int strength) {
+void aom_clpf_detect_c(const uint8_t *rec, const uint8_t *org, int rstride,
+                       int ostride, int x0, int y0, int width, int height,
+                       int *sum0, int *sum1, unsigned int strength) {
   int x, y;
   for (y = y0; y < y0 + 8; y++) {
     for (x = x0; x < x0 + 8; x++) {
-      int O = org[y * so + x];
-      int X = rec[y * stride + x];
-      int A = rec[AOMMAX(0, y - 1) * stride + x];
-      int B = rec[y * stride + AOMMAX(0, x - 2)];
-      int C = rec[y * stride + AOMMAX(0, x - 1)];
-      int D = rec[y * stride + AOMMIN(width - 1, x + 1)];
-      int E = rec[y * stride + AOMMIN(width - 1, x + 2)];
-      int F = rec[AOMMIN(height - 1, y + 1) * stride + x];
+      int O = org[y * ostride + x];
+      int X = rec[y * rstride + x];
+      int A = rec[AOMMAX(0, y - 1) * rstride + x];
+      int B = rec[y * rstride + AOMMAX(0, x - 2)];
+      int C = rec[y * rstride + AOMMAX(0, x - 1)];
+      int D = rec[y * rstride + AOMMIN(width - 1, x + 1)];
+      int E = rec[y * rstride + AOMMIN(width - 1, x + 2)];
+      int F = rec[AOMMIN(height - 1, y + 1) * rstride + x];
       int delta = av1_clpf_sample(X, A, B, C, D, E, F, strength);
       int Y = X + delta;
       *sum0 += (O - X) * (O - X);
@@ -36,21 +37,21 @@ static void detect_clpf(const uint8_t *rec, const uint8_t *org, int x0, int y0,
   }
 }
 
-static void detect_multi_clpf(const uint8_t *rec, const uint8_t *org, int x0,
-                              int y0, int width, int height, int so, int stride,
-                              int *sum) {
+void aom_clpf_detect_multi_c(const uint8_t *rec, const uint8_t *org,
+                             int rstride, int ostride, int x0, int y0,
+                             int width, int height, int *sum) {
   int x, y;
 
   for (y = y0; y < y0 + 8; y++) {
     for (x = x0; x < x0 + 8; x++) {
-      int O = org[y * so + x];
-      int X = rec[y * stride + x];
-      int A = rec[AOMMAX(0, y - 1) * stride + x];
-      int B = rec[y * stride + AOMMAX(0, x - 2)];
-      int C = rec[y * stride + AOMMAX(0, x - 1)];
-      int D = rec[y * stride + AOMMIN(width - 1, x + 1)];
-      int E = rec[y * stride + AOMMIN(width - 1, x + 2)];
-      int F = rec[AOMMIN(height - 1, y + 1) * stride + x];
+      int O = org[y * ostride + x];
+      int X = rec[y * rstride + x];
+      int A = rec[AOMMAX(0, y - 1) * rstride + x];
+      int B = rec[y * rstride + AOMMAX(0, x - 2)];
+      int C = rec[y * rstride + AOMMAX(0, x - 1)];
+      int D = rec[y * rstride + AOMMIN(width - 1, x + 1)];
+      int E = rec[y * rstride + AOMMIN(width - 1, x + 2)];
+      int F = rec[AOMMIN(height - 1, y + 1) * rstride + x];
       int delta1 = av1_clpf_sample(X, A, B, C, D, E, F, 1);
       int delta2 = av1_clpf_sample(X, A, B, C, D, E, F, 2);
       int delta3 = av1_clpf_sample(X, A, B, C, D, E, F, 4);
@@ -77,9 +78,9 @@ int av1_clpf_decision(int k, int l, const YV12_BUFFER_CONFIG *rec,
       const int bs = MAX_MIB_SIZE;
       if (!cm->mi_grid_visible[ypos / bs * cm->mi_stride + xpos / bs]
                ->mbmi.skip)
-        detect_clpf(rec->y_buffer, org->y_buffer, xpos, ypos, rec->y_crop_width,
-                    rec->y_crop_height, org->y_stride, rec->y_stride, &sum0,
-                    &sum1, strength);
+        aom_clpf_detect(rec->y_buffer, org->y_buffer, rec->y_stride,
+                        org->y_stride, xpos, ypos, rec->y_crop_width,
+                        rec->y_crop_height, &sum0, &sum1, strength);
     }
   }
   *res = sum1 < sum0;
@@ -144,9 +145,9 @@ static int clpf_rdo(int y, int x, const YV12_BUFFER_CONFIG *rec,
       if (!cm->mi_grid_visible[ypos / MAX_MIB_SIZE * cm->mi_stride +
                                xpos / MAX_MIB_SIZE]
                ->mbmi.skip) {
-        detect_multi_clpf(rec->y_buffer, org->y_buffer, xpos, ypos,
-                          rec->y_crop_width, rec->y_crop_height, org->y_stride,
-                          rec->y_stride, sum);
+        aom_clpf_detect_multi(rec->y_buffer, org->y_buffer, rec->y_stride,
+                              org->y_stride, xpos, ypos, rec->y_crop_width,
+                              rec->y_crop_height, sum);
         filtered = 1;
       }
     }
