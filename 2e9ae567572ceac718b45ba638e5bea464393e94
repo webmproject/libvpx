@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9974efbe_f61cde6a",
+        "filename": "vpx_dsp/bitreader.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-08-05T17:58:32Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "34514af5_39e7f3dc",
+      "revId": "2e9ae567572ceac718b45ba638e5bea464393e94",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "34514af5_79e17bc4",
         "filename": "vpx_dsp/bitreader.h",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-08-05T01:55:01Z",
       "side": 1,
       "message": "just assert the condition in the if ()",
+      "revId": "2e9ae567572ceac718b45ba638e5bea464393e94",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_563592dd",
+        "filename": "vpx_dsp/bitreader.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-08-05T17:58:32Z",
+      "side": 1,
+      "message": "I wish to provide more info before assertion.",
+      "parentUuid": "34514af5_79e17bc4",
       "revId": "2e9ae567572ceac718b45ba638e5bea464393e94",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
