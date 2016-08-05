@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "9974efbe_bccde5b6",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-08-05T21:22:41Z",
+      "side": 1,
+      "message": "Yup\nvpx_util is after vpx_dsp",
+      "parentUuid": "9974efbe_59f70390",
+      "revId": "6efd2d81d21b467c3391e0a8a44c1e44b54d724a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9974efbe_f6f05ecb",
         "filename": "vpx_dsp/bitreader.h",
         "patchSetId": 4
@@ -47,6 +65,30 @@
       "writtenOn": "2016-08-05T18:39:18Z",
       "side": 1,
       "message": "const int",
+      "range": {
+        "startLine": 116,
+        "startChar": 4,
+        "endLine": 116,
+        "endChar": 7
+      },
+      "revId": "6efd2d81d21b467c3391e0a8a44c1e44b54d724a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_1c4e593f",
+        "filename": "vpx_dsp/bitreader.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-08-05T21:22:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9974efbe_f6f05ecb",
       "range": {
         "startLine": 116,
         "startChar": 4,
@@ -82,6 +124,30 @@
     },
     {
       "key": {
+        "uuid": "9974efbe_bcac059e",
+        "filename": "vpx_util/debug_util.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-08-05T21:22:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9974efbe_96880a1f",
+      "range": {
+        "startLine": 7,
+        "startChar": 28,
+        "endLine": 7,
+        "endChar": 35
+      },
+      "revId": "6efd2d81d21b467c3391e0a8a44c1e44b54d724a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9974efbe_1695da38",
         "filename": "vpx_util/debug_util.h",
         "patchSetId": 4
@@ -99,6 +165,24 @@
     },
     {
       "key": {
+        "uuid": "9974efbe_5cb29100",
+        "filename": "vpx_util/debug_util.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-08-05T21:22:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9974efbe_1695da38",
+      "revId": "6efd2d81d21b467c3391e0a8a44c1e44b54d724a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9974efbe_f68b7e19",
         "filename": "vpx_util/debug_util.h",
         "patchSetId": 4
@@ -110,6 +194,24 @@
       "writtenOn": "2016-08-05T18:39:18Z",
       "side": 1,
       "message": "A short description of what how this utility helps with debugging would be nice.",
+      "revId": "6efd2d81d21b467c3391e0a8a44c1e44b54d724a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_7cb74def",
+        "filename": "vpx_util/debug_util.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-08-05T21:22:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9974efbe_f68b7e19",
       "revId": "6efd2d81d21b467c3391e0a8a44c1e44b54d724a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
