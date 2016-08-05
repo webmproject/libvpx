@@ -3504,7 +3504,7 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
                  &cm->ref_frame_map[arf_idx], cm->new_fb_idx);
       if (use_upsampled_ref)
         uref_cnt_fb(cpi->upsampled_ref_bufs,
-                    &cpi->upsampled_ref_idx[cpi->alt_fb_idx], new_uidx);
+                    &cpi->upsampled_ref_idx[arf_idx], new_uidx);
 
       memcpy(cpi->interp_filter_selected[ALTREF_FRAME],
              cpi->interp_filter_selected[0],
