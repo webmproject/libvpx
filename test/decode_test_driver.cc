@@ -97,8 +97,9 @@ void DecoderTest::RunLoop(CompressedVideoSource *video,
     const vpx_image_t *img = NULL;
 
     // Get decompressed data
-    while ((img = dec_iter.Next()))
+    while ((img = dec_iter.Next())) {
       DecompressedFrameHook(*img, video->frame_number());
+    }
   }
   delete decoder;
 }

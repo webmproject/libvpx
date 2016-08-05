@@ -100,10 +100,11 @@ class BlockinessTestBase : public ::testing::Test {
   void FillCheckerboard(uint8_t *data, int stride) {
     for (int h = 0; h < height_; h += 4) {
       for (int w = 0; w < width_; w += 4) {
-        if (((h / 4) ^ (w / 4)) & 1)
+        if (((h / 4) ^ (w / 4)) & 1) {
           FillConstant(data + h * stride + w, stride, 255, 4, 4);
-        else
+        } else {
           FillConstant(data + h * stride + w, stride, 0, 4, 4);
+        }
       }
     }
   }

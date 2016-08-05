@@ -346,17 +346,19 @@ class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
   virtual void SetUp() {
     UUT_ = GET_PARAM(2);
 #if CONFIG_VP9_HIGHBITDEPTH
-    if (UUT_->use_highbd_ != 0)
+    if (UUT_->use_highbd_ != 0) {
       mask_ = (1 << UUT_->use_highbd_) - 1;
-    else
+    } else {
       mask_ = 255;
+    }
 #endif
     /* Set up guard blocks for an inner block centered in the outer block */
     for (int i = 0; i < kOutputBufferSize; ++i) {
-      if (IsIndexInBorder(i))
+      if (IsIndexInBorder(i)) {
         output_[i] = 255;
-      else
+      } else {
         output_[i] = 0;
+      }
     }
 
     ::libvpx_test::ACMRandom prng;
@@ -535,11 +537,12 @@ TEST_P(ConvolveTest, Copy) {
 
   CheckGuardBlocks();
 
-  for (int y = 0; y < Height(); ++y)
+  for (int y = 0; y < Height(); ++y) {
     for (int x = 0; x < Width(); ++x)
       ASSERT_EQ(lookup(out, y * kOutputStride + x),
                 lookup(in, y * kInputStride + x))
           << "(" << x << "," << y << ")";
+  }
 }
 
 TEST_P(ConvolveTest, Avg) {
@@ -553,13 +556,14 @@ TEST_P(ConvolveTest, Avg) {
 
   CheckGuardBlocks();
 
-  for (int y = 0; y < Height(); ++y)
+  for (int y = 0; y < Height(); ++y) {
     for (int x = 0; x < Width(); ++x)
       ASSERT_EQ(lookup(out, y * kOutputStride + x),
                 ROUND_POWER_OF_TWO(lookup(in, y * kInputStride + x) +
                                        lookup(out_ref, y * kOutputStride + x),
                                    1))
           << "(" << x << "," << y << ")";
+  }
 }
 
 TEST_P(ConvolveTest, CopyHoriz) {
@@ -574,11 +578,12 @@ TEST_P(ConvolveTest, CopyHoriz) {
 
   CheckGuardBlocks();
 
-  for (int y = 0; y < Height(); ++y)
+  for (int y = 0; y < Height(); ++y) {
     for (int x = 0; x < Width(); ++x)
       ASSERT_EQ(lookup(out, y * kOutputStride + x),
                 lookup(in, y * kInputStride + x))
           << "(" << x << "," << y << ")";
+  }
 }
 
 TEST_P(ConvolveTest, CopyVert) {
@@ -593,11 +598,12 @@ TEST_P(ConvolveTest, CopyVert) {
 
   CheckGuardBlocks();
 
-  for (int y = 0; y < Height(); ++y)
+  for (int y = 0; y < Height(); ++y) {
     for (int x = 0; x < Width(); ++x)
       ASSERT_EQ(lookup(out, y * kOutputStride + x),
                 lookup(in, y * kInputStride + x))
           << "(" << x << "," << y << ")";
+  }
 }
 
 TEST_P(ConvolveTest, Copy2D) {
@@ -612,11 +618,12 @@ TEST_P(ConvolveTest, Copy2D) {
 
   CheckGuardBlocks();
 
-  for (int y = 0; y < Height(); ++y)
+  for (int y = 0; y < Height(); ++y) {
     for (int x = 0; x < Width(); ++x)
       ASSERT_EQ(lookup(out, y * kOutputStride + x),
                 lookup(in, y * kInputStride + x))
           << "(" << x << "," << y << ")";
+  }
 }
 
 const int kNumFilterBanks = 4;
@@ -690,13 +697,14 @@ TEST_P(ConvolveTest, MatchesReferenceSubpixelFilter) {
 
         CheckGuardBlocks();
 
-        for (int y = 0; y < Height(); ++y)
+        for (int y = 0; y < Height(); ++y) {
           for (int x = 0; x < Width(); ++x)
             ASSERT_EQ(lookup(ref, y * kOutputStride + x),
                       lookup(out, y * kOutputStride + x))
                 << "mismatch at (" << x << "," << y << "), "
                 << "filters (" << filter_bank << "," << filter_x << ","
                 << filter_y << ")";
+        }
       }
     }
   }
@@ -767,13 +775,14 @@ TEST_P(ConvolveTest, MatchesReferenceAveragingSubpixelFilter) {
 
         CheckGuardBlocks();
 
-        for (int y = 0; y < Height(); ++y)
+        for (int y = 0; y < Height(); ++y) {
           for (int x = 0; x < Width(); ++x)
             ASSERT_EQ(lookup(ref, y * kOutputStride + x),
                       lookup(out, y * kOutputStride + x))
                 << "mismatch at (" << x << "," << y << "), "
                 << "filters (" << filter_bank << "," << filter_x << ","
                 << filter_y << ")";
+        }
       }
     }
   }
@@ -828,10 +837,11 @@ TEST_P(ConvolveTest, FilterExtremes) {
 #endif
           if (axis) seed_val++;
         }
-        if (axis)
+        if (axis) {
           seed_val -= 8;
-        else
+        } else {
           seed_val++;
+        }
       }
       if (axis) seed_val += 8;
 
@@ -860,13 +870,14 @@ TEST_P(ConvolveTest, FilterExtremes) {
                   in, kInputStride, out, kOutputStride, kInvalidFilter, 0,
                   kInvalidFilter, 0, Width(), Height()));
 
-            for (int y = 0; y < Height(); ++y)
+            for (int y = 0; y < Height(); ++y) {
               for (int x = 0; x < Width(); ++x)
                 ASSERT_EQ(lookup(ref, y * kOutputStride + x),
                           lookup(out, y * kOutputStride + x))
                     << "mismatch at (" << x << "," << y << "), "
                     << "filters (" << filter_bank << "," << filter_x << ","
                     << filter_y << ")";
+            }
           }
         }
       }

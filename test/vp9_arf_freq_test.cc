@@ -68,10 +68,11 @@ const int kMinArfVectors[] = {
 
 int is_extension_y4m(const char *filename) {
   const char *dot = strrchr(filename, '.');
-  if (!dot || dot == filename)
+  if (!dot || dot == filename) {
     return 0;
-  else
+  } else {
     return !strcmp(dot, ".y4m");
+  }
 }
 
 class ArfFreqTest
@@ -161,13 +162,14 @@ class ArfFreqTest
   int GetMinVisibleRun() const { return min_run_; }
 
   int GetMinArfDistanceRequested() const {
-    if (min_arf_requested_)
+    if (min_arf_requested_) {
       return min_arf_requested_;
-    else
+    } else {
       return vp9_rc_get_default_min_gf_interval(
           test_video_param_.width, test_video_param_.height,
           (double)test_video_param_.framerate_num /
               test_video_param_.framerate_den);
+    }
   }
 
   TestVideoParam test_video_param_;

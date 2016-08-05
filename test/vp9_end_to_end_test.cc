@@ -67,10 +67,11 @@ const int kCpuUsedVectors[] = { 1, 2, 3, 5, 6 };
 
 int is_extension_y4m(const char *filename) {
   const char *dot = strrchr(filename, '.');
-  if (!dot || dot == filename)
+  if (!dot || dot == filename) {
     return 0;
-  else
+  } else {
     return !strcmp(dot, ".y4m");
+  }
 }
 
 class EndToEndTestLarge

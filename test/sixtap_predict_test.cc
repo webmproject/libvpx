@@ -146,10 +146,11 @@ TEST_P(SixtapPredictTest, TestWithPresetData) {
   ASM_REGISTER_STATE_CHECK(sixtap_predict_(&src[kSrcStride * 2 + 2 + 1],
                                            kSrcStride, 2, 2, dst_, kDstStride));
 
-  for (int i = 0; i < height_; ++i)
+  for (int i = 0; i < height_; ++i) {
     for (int j = 0; j < width_; ++j)
       ASSERT_EQ(expected_dst[i * kDstStride + j], dst_[i * kDstStride + j])
           << "i==" << (i * width_ + j);
+  }
 }
 
 using libvpx_test::ACMRandom;
@@ -172,10 +173,11 @@ TEST_P(SixtapPredictTest, TestWithRandomData) {
                                                kSrcStride, xoffset, yoffset,
                                                dst_, kDstStride));
 
-      for (int i = 0; i < height_; ++i)
+      for (int i = 0; i < height_; ++i) {
         for (int j = 0; j < width_; ++j)
           ASSERT_EQ(dst_c_[i * kDstStride + j], dst_[i * kDstStride + j])
               << "i==" << (i * width_ + j);
+      }
     }
   }
 }

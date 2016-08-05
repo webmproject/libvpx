@@ -52,10 +52,11 @@ void Encoder::InitEncoder(VideoSource *video) {
 }
 
 void Encoder::EncodeFrame(VideoSource *video, const unsigned long frame_flags) {
-  if (video->img())
+  if (video->img()) {
     EncodeFrameInternal(*video, frame_flags);
-  else
+  } else {
     Flush();
+  }
 
   // Handle twopass stats
   CxDataIterator iter = GetCxData();
@@ -115,10 +116,11 @@ void EncoderTest::SetMode(TestMode mode) {
     default: ASSERT_TRUE(false) << "Unexpected mode " << mode;
   }
 
-  if (mode == kTwoPassGood || mode == kTwoPassBest)
+  if (mode == kTwoPassGood || mode == kTwoPassBest) {
     passes_ = 2;
-  else
+  } else {
     passes_ = 1;
+  }
 }
 // The function should return "true" most of the time, therefore no early
 // break-out is implemented within the match checking process.
@@ -129,23 +131,26 @@ static bool compare_img(const vpx_image_t *img1, const vpx_image_t *img2) {
   const unsigned int width_y = img1->d_w;
   const unsigned int height_y = img1->d_h;
   unsigned int i;
-  for (i = 0; i < height_y; ++i)
+  for (i = 0; i < height_y; ++i) {
     match = (memcmp(img1->planes[VPX_PLANE_Y] + i * img1->stride[VPX_PLANE_Y],
                     img2->planes[VPX_PLANE_Y] + i * img2->stride[VPX_PLANE_Y],
                     width_y) == 0) &&
             match;
+  }
   const unsigned int width_uv = (img1->d_w + 1) >> 1;
   const unsigned int height_uv = (img1->d_h + 1) >> 1;
-  for (i = 0; i < height_uv; ++i)
+  for (i = 0; i < height_uv; ++i) {
     match = (memcmp(img1->planes[VPX_PLANE_U] + i * img1->stride[VPX_PLANE_U],
                     img2->planes[VPX_PLANE_U] + i * img2->stride[VPX_PLANE_U],
                     width_uv) == 0) &&
             match;
-  for (i = 0; i < height_uv; ++i)
+  }
+  for (i = 0; i < height_uv; ++i) {
     match = (memcmp(img1->planes[VPX_PLANE_V] + i * img1->stride[VPX_PLANE_V],
                     img2->planes[VPX_PLANE_V] + i * img2->stride[VPX_PLANE_V],
                     width_uv) == 0) &&
             match;
+  }
   return match;
 }
 
@@ -163,12 +168,13 @@ void EncoderTest::RunLoop(VideoSource *video) {
   for (unsigned int pass = 0; pass < passes_; pass++) {
     last_pts_ = 0;
 
-    if (passes_ == 1)
+    if (passes_ == 1) {
       cfg_.g_pass = VPX_RC_ONE_PASS;
-    else if (pass == 0)
+    } else if (pass == 0) {
       cfg_.g_pass = VPX_RC_FIRST_PASS;
-    else
+    } else {
       cfg_.g_pass = VPX_RC_LAST_PASS;
+    }
 
     BeginPassHook(pass);
     testing::internal::scoped_ptr<Encoder> encoder(
@@ -182,8 +188,9 @@ void EncoderTest::RunLoop(VideoSource *video) {
     unsigned long dec_init_flags = 0;  // NOLINT
     // Use fragment decoder if encoder outputs partitions.
     // NOTE: fragment decoder and partition encoder are only supported by VP8.
-    if (init_flags_ & VPX_CODEC_USE_OUTPUT_PARTITION)
+    if (init_flags_ & VPX_CODEC_USE_OUTPUT_PARTITION) {
       dec_init_flags |= VPX_CODEC_USE_INPUT_FRAGMENTS;
+    }
     testing::internal::scoped_ptr<Decoder> decoder(
         codec_->CreateDecoder(dec_cfg, dec_init_flags, 0));
     bool again;

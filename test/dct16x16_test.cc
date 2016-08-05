@@ -386,8 +386,9 @@ class Trans16x16TestBase {
 
     for (int i = 0; i < count_test_block; ++i) {
       // Initialize a test block with input range [-mask_, mask_].
-      for (int j = 0; j < kNumCoeffs; ++j)
+      for (int j = 0; j < kNumCoeffs; ++j) {
         input_block[j] = (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
+      }
 
       fwd_txfm_ref(input_block, output_ref_block, pitch_, tx_type_);
       ASM_REGISTER_STATE_CHECK(RunFwdTxfm(input_block, output_block, pitch_));
@@ -447,10 +448,12 @@ class Trans16x16TestBase {
       for (int j = 0; j < kNumCoeffs; ++j) {
         input_extreme_block[j] = rnd.Rand8() % 2 ? mask_ : -mask_;
       }
-      if (i == 0)
+      if (i == 0) {
         for (int j = 0; j < kNumCoeffs; ++j) input_extreme_block[j] = mask_;
-      if (i == 1)
+      }
+      if (i == 1) {
         for (int j = 0; j < kNumCoeffs; ++j) input_extreme_block[j] = -mask_;
+      }
 
       fwd_txfm_ref(input_extreme_block, output_ref_block, pitch_, tx_type_);
 
@@ -464,8 +467,9 @@ class Trans16x16TestBase {
 
       // quantization with maximum allowed step sizes
       output_ref_block[0] = (output_ref_block[0] / dc_thred) * dc_thred;
-      for (int j = 1; j < kNumCoeffs; ++j)
+      for (int j = 1; j < kNumCoeffs; ++j) {
         output_ref_block[j] = (output_ref_block[j] / ac_thred) * ac_thred;
+      }
       if (bit_depth_ == VPX_BITS_8) {
         inv_txfm_ref(output_ref_block, ref, pitch_, tx_type_);
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(output_ref_block, dst, pitch_));
@@ -518,8 +522,9 @@ class Trans16x16TestBase {
       }
 
       reference_16x16_dct_2d(in, out_r);
-      for (int j = 0; j < kNumCoeffs; ++j)
+      for (int j = 0; j < kNumCoeffs; ++j) {
         coeff[j] = static_cast<tran_low_t>(round(out_r[j]));
+      }
 
       if (bit_depth_ == VPX_BITS_8) {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, 16));

@@ -45,8 +45,9 @@ class YUVVideoSource : public VideoSource {
     input_file_ = OpenTestDataFile(file_name_);
     ASSERT_TRUE(input_file_ != NULL) << "Input file open failed. Filename: "
                                      << file_name_;
-    if (start_)
+    if (start_) {
       fseek(input_file_, static_cast<unsigned>(raw_size_) * start_, SEEK_SET);
+    }
 
     frame_ = start_;
     FillFrame();
