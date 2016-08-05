@@ -50,7 +50,7 @@ string DecodeFileWithPause(const string &filename, int num_threads,
   cfg.threads = num_threads;
   vpx_codec_flags_t flags = 0;
   flags |= VPX_CODEC_USE_FRAME_THREADING;
-  libvpx_test::VP9Decoder decoder(cfg, flags, 0);
+  libvpx_test::VP9Decoder decoder(cfg, flags);
 
   libvpx_test::MD5 md5;
   video.Begin();
@@ -136,7 +136,7 @@ string DecodeFile(const string &filename, int num_threads,
   vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
   cfg.threads = num_threads;
   const vpx_codec_flags_t flags = VPX_CODEC_USE_FRAME_THREADING;
-  libvpx_test::VP9Decoder decoder(cfg, flags, 0);
+  libvpx_test::VP9Decoder decoder(cfg, flags);
 
   libvpx_test::MD5 md5;
   video.Begin();
