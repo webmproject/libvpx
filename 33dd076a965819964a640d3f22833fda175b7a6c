@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9974efbe_391b2775",
+        "filename": "vp10/common/reconintra.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-08-05T20:44:33Z",
+      "side": 1,
+      "message": "Put config check \"#if CONFIG_EXT_INTRA\" here",
+      "revId": "33dd076a965819964a640d3f22833fda175b7a6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_b91c1778",
+        "filename": "vp10/common/vp10_rtcd_defs.pl",
+        "patchSetId": 2
+      },
+      "lineNbr": 754,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-08-05T20:44:33Z",
+      "side": 1,
+      "message": "Do not put them here, since it is a recon function, not an encoder function. Move them to the place right before \"# High bitdepth functions\"",
+      "revId": "33dd076a965819964a640d3f22833fda175b7a6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_79119f54",
+        "filename": "vp10/vp10_common.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-08-05T20:44:33Z",
+      "side": 1,
+      "message": "move it under ifeq($(CONFIG_EXT_INTRA,YES))",
+      "revId": "33dd076a965819964a640d3f22833fda175b7a6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
