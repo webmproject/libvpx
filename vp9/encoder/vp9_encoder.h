@@ -602,7 +602,7 @@ void vp9_change_config(VP9_COMP *cpi, const VP9EncoderConfig *oxcf);
 
 // receive a frames worth of data. caller can assume that a copy of this
 // frame is made and not just a copy of the pointer..
-int vp9_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
+int vp9_receive_raw_frame(VP9_COMP *cpi, vpx_enc_frame_flags_t frame_flags,
                           YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
                           int64_t end_time_stamp);
 
