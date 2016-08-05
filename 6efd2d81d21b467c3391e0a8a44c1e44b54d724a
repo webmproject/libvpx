@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "9974efbe_e71f4a5d",
+        "filename": "vp10/encoder/bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-05T22:05:35Z",
+      "side": 1,
+      "message": "I meant that \"vpx_util\" should be after \"vpx_ports\" below.",
+      "parentUuid": "9974efbe_bccde5b6",
+      "revId": "6efd2d81d21b467c3391e0a8a44c1e44b54d724a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9974efbe_f6f05ecb",
         "filename": "vpx_dsp/bitreader.h",
         "patchSetId": 4
