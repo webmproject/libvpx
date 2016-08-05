@@ -22,7 +22,7 @@ typedef struct {
       int_mv mv;
       PREDICTION_MODE mode;
     } m;
-  } ref[MAX_REF_FRAMES];
+  } ref[TOTAL_REFS_PER_FRAME];
 } MBGRAPH_MB_STATS;
 
 typedef struct {

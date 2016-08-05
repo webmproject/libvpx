@@ -46,8 +46,8 @@ struct loopfilter {
 
   // 0 = Intra, Last, Last2+Last3(CONFIG_EXT_REFS),
   // GF, BRF(CONFIG_EXT_REFS), ARF
-  signed char ref_deltas[MAX_REF_FRAMES];
-  signed char last_ref_deltas[MAX_REF_FRAMES];
+  signed char ref_deltas[TOTAL_REFS_PER_FRAME];
+  signed char last_ref_deltas[TOTAL_REFS_PER_FRAME];
 
   // 0 = ZERO_MV, MV
   signed char mode_deltas[MAX_MODE_LF_DELTAS];
@@ -64,7 +64,7 @@ typedef struct {
 
 typedef struct {
   loop_filter_thresh lfthr[MAX_LOOP_FILTER + 1];
-  uint8_t lvl[MAX_SEGMENTS][MAX_REF_FRAMES][MAX_MODE_LF_DELTAS];
+  uint8_t lvl[MAX_SEGMENTS][TOTAL_REFS_PER_FRAME][MAX_MODE_LF_DELTAS];
 } loop_filter_info_n;
 
 // This structure holds bit masks for all 8x8 blocks in a 64x64 region.

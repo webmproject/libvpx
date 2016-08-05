@@ -49,7 +49,7 @@ static int is_compound_reference_allowed(const VP10_COMMON *cm) {
   int i;
   if (frame_is_intra_only(cm))
     return 0;
-  for (i = 1; i < REFS_PER_FRAME; ++i)
+  for (i = 1; i < INTER_REFS_PER_FRAME; ++i)
     if (cm->ref_frame_sign_bias[i + 1] != cm->ref_frame_sign_bias[1])
       return 1;
 
@@ -2066,7 +2066,7 @@ static void setup_loopfilter(VP10_COMMON *cm,
     if (lf->mode_ref_delta_update) {
       int i;
 
-      for (i = 0; i < MAX_REF_FRAMES; i++)
+      for (i = 0; i < TOTAL_REFS_PER_FRAME; i++)
         if (vpx_rb_read_bit(rb))
           lf->ref_deltas[i] = vpx_rb_read_inv_signed_literal(rb, 6);
 
@@ -2247,7 +2247,7 @@ static void setup_frame_size_with_refs(VP10_COMMON *cm,
   int found = 0, i;
   int has_valid_ref_frame = 0;
   BufferPool *const pool = cm->buffer_pool;
-  for (i = 0; i < REFS_PER_FRAME; ++i) {
+  for (i = 0; i < INTER_REFS_PER_FRAME; ++i) {
     if (vpx_rb_read_bit(rb)) {
       YV12_BUFFER_CONFIG *const buf = cm->frame_refs[i].buf;
       width = buf->y_crop_width;
@@ -2270,7 +2270,7 @@ static void setup_frame_size_with_refs(VP10_COMMON *cm,
 
   // Check to make sure at least one of frames that this frame references
   // has valid dimensions.
-  for (i = 0; i < REFS_PER_FRAME; ++i) {
+  for (i = 0; i < INTER_REFS_PER_FRAME; ++i) {
     RefBuffer *const ref_frame = &cm->frame_refs[i];
     has_valid_ref_frame |= valid_ref_frame_size(ref_frame->buf->y_crop_width,
                                                 ref_frame->buf->y_crop_height,
@@ -2279,7 +2279,7 @@ static void setup_frame_size_with_refs(VP10_COMMON *cm,
   if (!has_valid_ref_frame)
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                        "Referenced frame has invalid size");
-  for (i = 0; i < REFS_PER_FRAME; ++i) {
+  for (i = 0; i < INTER_REFS_PER_FRAME; ++i) {
     RefBuffer *const ref_frame = &cm->frame_refs[i];
     if (!valid_ref_frame_img_fmt(
             ref_frame->buf->bit_depth,
@@ -3199,7 +3199,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
     read_bitdepth_colorspace_sampling(cm, rb);
     pbi->refresh_frame_flags = (1 << REF_FRAMES) - 1;
 
-    for (i = 0; i < REFS_PER_FRAME; ++i) {
+    for (i = 0; i < INTER_REFS_PER_FRAME; ++i) {
       cm->frame_refs[i].idx = INVALID_IDX;
       cm->frame_refs[i].buf = NULL;
     }
@@ -3256,7 +3256,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
       }
 #endif  // CONFIG_EXT_REFS
 
-      for (i = 0; i < REFS_PER_FRAME; ++i) {
+      for (i = 0; i < INTER_REFS_PER_FRAME; ++i) {
         const int ref = vpx_rb_read_literal(rb, REF_FRAMES_LOG2);
         const int idx = cm->ref_frame_map[ref];
         RefBuffer *const ref_frame = &cm->frame_refs[i];
@@ -3270,7 +3270,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
       cm->allow_high_precision_mv = vpx_rb_read_bit(rb);
       cm->interp_filter = read_interp_filter(rb);
 
-      for (i = 0; i < REFS_PER_FRAME; ++i) {
+      for (i = 0; i < INTER_REFS_PER_FRAME; ++i) {
         RefBuffer *const ref_buf = &cm->frame_refs[i];
 #if CONFIG_VP9_HIGHBITDEPTH
         vp10_setup_scale_factors_for_frame(&ref_buf->sf,

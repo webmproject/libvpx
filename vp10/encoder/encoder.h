@@ -62,7 +62,7 @@ typedef struct {
   unsigned char *last_frame_seg_map_copy;
 
   // 0 = Intra, Last, GF, ARF
-  signed char last_ref_lf_deltas[MAX_REF_FRAMES];
+  signed char last_ref_lf_deltas[TOTAL_REFS_PER_FRAME];
   // 0 = ZERO_MV, MV
   signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];
 
@@ -360,13 +360,16 @@ typedef struct VP10_COMP {
   YV12_BUFFER_CONFIG scaled_last_source;
 
   // Up-sampled reference buffers
-  EncRefCntBuffer upsampled_ref_bufs[MAX_REF_FRAMES];
-  int upsampled_ref_idx[MAX_REF_FRAMES];
+  // NOTE(zoeliu): It is needed to allocate sufficient space to the up-sampled
+  // reference buffers, which should include the up-sampled version of all the
+  // possibly stored references plus the currently coded frame itself.
+  EncRefCntBuffer upsampled_ref_bufs[REF_FRAMES + 1];
+  int upsampled_ref_idx[REF_FRAMES + 1];
 
   // For a still frame, this flag is set to 1 to skip partition search.
   int partition_search_skippable_frame;
 
-  int scaled_ref_idx[MAX_REF_FRAMES];
+  int scaled_ref_idx[TOTAL_REFS_PER_FRAME];
 #if CONFIG_EXT_REFS
   int lst_fb_idxes[LAST_REF_FRAMES];
 #else
@@ -424,7 +427,10 @@ typedef struct VP10_COMP {
   RATE_CONTROL rc;
   double framerate;
 
-  int interp_filter_selected[MAX_REF_FRAMES][SWITCHABLE];
+  // NOTE(zoeliu): Any inter frame allows maximum of REF_FRAMES inter
+  // references; Plus the currently coded frame itself, it is needed to allocate
+  // sufficient space to the size of the maximum possible number of frames.
+  int interp_filter_selected[REF_FRAMES + 1][SWITCHABLE];
 
   struct vpx_codec_pkt_list  *output_pkt_list;
 
@@ -622,7 +628,7 @@ typedef struct VP10_COMP {
   int is_arf_filter_off;
 #endif  // CONFIG_EXT_REFS
 #if CONFIG_GLOBAL_MOTION
-  int global_motion_used[MAX_REF_FRAMES];
+  int global_motion_used[TOTAL_REFS_PER_FRAME];
 #endif
 } VP10_COMP;
 

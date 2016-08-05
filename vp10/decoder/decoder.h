@@ -155,13 +155,13 @@ static INLINE int dec_is_ref_frame_buf(VP10Decoder *const pbi,
                                        RefCntBuffer *frame_buf) {
   VP10_COMMON *const cm = &pbi->common;
   int i;
-  for (i = 0; i < REFS_PER_FRAME; ++i) {
+  for (i = 0; i < INTER_REFS_PER_FRAME; ++i) {
     RefBuffer *const ref_frame = &cm->frame_refs[i];
     if (ref_frame->idx == INVALID_IDX) continue;
     if (frame_buf == &cm->buffer_pool->frame_bufs[ref_frame->idx])
       break;
   }
-  return (i < REFS_PER_FRAME);
+  return (i < INTER_REFS_PER_FRAME);
 }
 #endif  // CONFIG_EXT_REFS
 
