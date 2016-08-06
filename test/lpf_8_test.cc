@@ -126,8 +126,7 @@ TEST_P(Loop8Test6Param, OperationCheck) {
       if (val & 0x80) {  // 50% chance to choose a new value.
         tmp_s[j] = rnd.Rand16();
         j++;
-      } else if (val & 0x40) {
-        // 25% chance to repeat previous value in row X times.
+      } else {  // 50% chance to repeat previous value in row X times.
         int k = 0;
         while (k++ < ((val & 0x1f) + 1) && j < kNumCoeffs) {
           if (j < 1) {
@@ -139,7 +138,14 @@ TEST_P(Loop8Test6Param, OperationCheck) {
           }
           j++;
         }
-      } else {  // 25% chance to repeat previous value in column X times.
+      }
+    }
+
+    for (j = 0; j < kNumCoeffs;) {
+      const uint8_t val = rnd.Rand8();
+      if (val & 0x80) {
+        j++;
+      } else {  // 50% chance to repeat previous value in column X times.
         int k = 0;
         while (k++ < ((val & 0x1f) + 1) && j < kNumCoeffs) {
           if (j < 1) {
@@ -155,6 +161,7 @@ TEST_P(Loop8Test6Param, OperationCheck) {
         }
       }
     }
+
     for (j = 0; j < kNumCoeffs; j++) {
       if (i % 2) {
         s[j] = tmp_s[j] & mask_;
@@ -304,8 +311,7 @@ TEST_P(Loop8Test9Param, OperationCheck) {
       if (val & 0x80) {  // 50% chance to choose a new value.
         tmp_s[j] = rnd.Rand16();
         j++;
-      } else if (val & 0x40) {
-        // 25% chance to repeat previous value in row X times.
+      } else {  // 50% chance to repeat previous value in row X times.
         int k = 0;
         while (k++ < ((val & 0x1f) + 1) && j < kNumCoeffs) {
           if (j < 1) {
@@ -317,7 +323,14 @@ TEST_P(Loop8Test9Param, OperationCheck) {
           }
           j++;
         }
-      } else {  // 25% chance to repeat previous value in column X times.
+      }
+    }
+
+    for (j = 0; j < kNumCoeffs;) {
+      const uint8_t val = rnd.Rand8();
+      if (val & 0x80) {
+        j++;
+      } else {  // 50% chance to repeat previous value in column X times.
         int k = 0;
         while (k++ < ((val & 0x1f) + 1) && j < kNumCoeffs) {
           if (j < 1) {
@@ -333,6 +346,7 @@ TEST_P(Loop8Test9Param, OperationCheck) {
         }
       }
     }
+
     for (j = 0; j < kNumCoeffs; j++) {
       if (i % 2) {
         s[j] = tmp_s[j] & mask_;
