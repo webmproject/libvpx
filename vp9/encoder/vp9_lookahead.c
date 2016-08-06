@@ -87,7 +87,7 @@ int vp9_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG *src,
 #if CONFIG_VP9_HIGHBITDEPTH
                        int use_highbitdepth,
 #endif
-                       unsigned int flags) {
+                       vpx_enc_frame_flags_t flags) {
   struct lookahead_entry *buf;
 #if USE_PARTIAL_COPY
   int row, col, active_end;

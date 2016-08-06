@@ -185,7 +185,7 @@ void EncoderTest::RunLoop(VideoSource *video) {
     if (init_flags_ & VPX_CODEC_USE_OUTPUT_PARTITION)
       dec_init_flags |= VPX_CODEC_USE_INPUT_FRAGMENTS;
     testing::internal::scoped_ptr<Decoder> decoder(
-        codec_->CreateDecoder(dec_cfg, dec_init_flags, 0));
+        codec_->CreateDecoder(dec_cfg, dec_init_flags));
     bool again;
     for (again = true; again; video->Next()) {
       again = (video->img() != NULL);

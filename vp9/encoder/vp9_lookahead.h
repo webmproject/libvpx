@@ -12,11 +12,11 @@
 #define VP9_ENCODER_VP9_LOOKAHEAD_H_
 
 #include "vpx_scale/yv12config.h"
+#include "vpx/vpx_encoder.h"
 #include "vpx/vpx_integer.h"
 
 #if CONFIG_SPATIAL_SVC
 #include "vpx/vp8cx.h"
-#include "vpx/vpx_encoder.h"
 #endif
 
 #ifdef __cplusplus
@@ -29,7 +29,7 @@ struct lookahead_entry {
   YV12_BUFFER_CONFIG img;
   int64_t ts_start;
   int64_t ts_end;
-  unsigned int flags;
+  vpx_enc_frame_flags_t flags;
 };
 
 // The max of past frames we want to keep in the queue.
@@ -81,7 +81,7 @@ int vp9_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG *src,
 #if CONFIG_VP9_HIGHBITDEPTH
                        int use_highbitdepth,
 #endif
-                       unsigned int flags);
+                       vpx_enc_frame_flags_t flags);
 
 /**\brief Get the next source buffer to encode
  *

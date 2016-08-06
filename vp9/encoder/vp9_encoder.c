@@ -4051,7 +4051,7 @@ static void check_initial_width(VP9_COMP *cpi,
   }
 }
 
-int vp9_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
+int vp9_receive_raw_frame(VP9_COMP *cpi, vpx_enc_frame_flags_t frame_flags,
                           YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
                           int64_t end_time) {
   VP9_COMMON *const cm = &cpi->common;

@@ -89,7 +89,7 @@ int file_is_webm(struct WebmInputContext *webm_ctx,
     const mkvparser::Track *const track = tracks->GetTrackByIndex(i);
     if (track->GetType() == mkvparser::Track::kVideo) {
       video_track = static_cast<const mkvparser::VideoTrack *>(track);
-      webm_ctx->video_track_index = track->GetNumber();
+      webm_ctx->video_track_index = static_cast<int>(track->GetNumber());
       break;
     }
   }
