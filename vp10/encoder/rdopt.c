@@ -2763,6 +2763,7 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
   uint16_t filter_intra_mode_skip_mask = (1 << FILTER_INTRA_MODES) - 1;
   const int src_stride = x->plane[0].src.stride;
   const uint8_t *src = x->plane[0].src.buf;
+  int beat_best_rd = 0;
 #endif  // CONFIG_EXT_INTRA
   TX_TYPE best_tx_type = DCT_DCT;
   int *bmode_costs;
@@ -2872,9 +2873,13 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
         this_rate +=
             cpi->intra_filter_cost[intra_filter_ctx][mic->mbmi.intra_filter];
     }
-    filter_intra_mode_skip_mask ^= (1 << mic->mbmi.mode);
 #endif  // CONFIG_EXT_INTRA
     this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
+#if CONFIG_EXT_INTRA
+    if (best_rd == INT64_MAX || this_rd < (best_rd + (best_rd >> 4))) {
+      filter_intra_mode_skip_mask ^= (1 << mic->mbmi.mode);
+    }
+#endif  // CONFIG_EXT_INTRA
 
     if (this_rd < best_rd) {
       mode_selected   = mic->mbmi.mode;
@@ -2883,6 +2888,7 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_EXT_INTRA
       best_angle_delta = mic->mbmi.angle_delta[0];
       best_filter     = mic->mbmi.intra_filter;
+      beat_best_rd    = 1;
 #endif  // CONFIG_EXT_INTRA
       best_tx_type    = mic->mbmi.tx_type;
       *rate           = this_rate;
@@ -2899,7 +2905,7 @@ static int64_t rd_pick_intra_sby_mode(VP10_COMP *cpi, MACROBLOCK *x,
                               &best_rd);
 
 #if CONFIG_EXT_INTRA
-  if (ALLOW_FILTER_INTRA_MODES) {
+  if (ALLOW_FILTER_INTRA_MODES && beat_best_rd) {
     if (rd_pick_ext_intra_sby(cpi, x, rate, rate_tokenonly, distortion,
                               skippable, bsize, bmode_costs[DC_PRED],
                               &best_rd, filter_intra_mode_skip_mask)) {
@@ -9867,7 +9873,8 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi,
   if (!xd->lossless[mbmi->segment_id] &&
       ALLOW_FILTER_INTRA_MODES &&
       mbmi->palette_mode_info.palette_size[0] == 0 && !dc_skipped &&
-      best_mode_index >= 0 && (best_intra_rd >> 1)  < best_rd) {
+      best_mode_index >= 0 &&
+      best_intra_rd < (best_rd + (best_rd >> 3))) {
     pick_ext_intra_interframe(cpi, x, ctx, bsize, rate_uv_intra,
                               rate_uv_tokenonly, dist_uv, skip_uv,
                               mode_uv, ext_intra_mode_info_uv,
