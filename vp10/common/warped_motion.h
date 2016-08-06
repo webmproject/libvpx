@@ -54,11 +54,6 @@ typedef struct {
   int wmmat[8];  // For homography wmmat[9] is assumed to be 1
 } WarpedMotionParams;
 
-// Integerize model into the WarpedMotionParams structure
-void vp10_integerize_model(double *H,
-                           TransformationType wmtype,
-                           WarpedMotionParams *wm);
-
 void vp10_warp_plane(WarpedMotionParams *wm,
                      uint8_t *ref,
                      int width, int height, int stride,
