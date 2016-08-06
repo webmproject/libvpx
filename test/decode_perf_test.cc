@@ -28,7 +28,6 @@ namespace {
 #define VIDEO_NAME 0
 #define THREADS 1
 
-const int kMaxPsnr = 100;
 const double kUsecsInSec = 1000000.0;
 const char kNewEncodeOutputFile[] = "new_encode.ivf";
 
@@ -176,7 +175,7 @@ class VP9NewEncodeDecodePerfTest
               pkt->data.frame.sz);
   }
 
-  virtual bool DoDecode() { return false; }
+  virtual bool DoDecode() const { return false; }
 
   void set_speed(unsigned int speed) { speed_ = speed; }
 
