@@ -66,7 +66,6 @@ ifeq ($(CONFIG_VP10_ENCODER),yes)
   CODEC_EXPORTS-yes += $(addprefix $(VP10_PREFIX),$(VP10_CX_EXPORTS))
   CODEC_SRCS-yes += $(VP10_PREFIX)vp10cx.mk vpx/vp8.h vpx/vp8cx.h
   INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8cx.h
-  INSTALL-LIBS-$(CONFIG_SPATIAL_SVC) += include/vpx/svc_context.h
   INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP10_PREFIX)/%
   CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8cx.h
   CODEC_DOC_SECTIONS += vp9 vp9_encoder
@@ -127,9 +126,6 @@ INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += third_party/x86inc/x86inc.asm
 endif
 CODEC_EXPORTS-yes += vpx/exports_com
 CODEC_EXPORTS-$(CONFIG_ENCODERS) += vpx/exports_enc
-ifeq ($(CONFIG_SPATIAL_SVC),yes)
-CODEC_EXPORTS-$(CONFIG_ENCODERS) += vpx/exports_spatial_svc
-endif
 CODEC_EXPORTS-$(CONFIG_DECODERS) += vpx/exports_dec
 
 INSTALL-LIBS-yes += include/vpx/vpx_codec.h
@@ -265,7 +261,7 @@ libvpx.def: $(call enabled,CODEC_EXPORTS)
 	$(qexec)echo LIBRARY $(LIBVPX_SO:.dll=) INITINSTANCE TERMINSTANCE > $@
 	$(qexec)echo "DATA MULTIPLE NONSHARED" >> $@
 	$(qexec)echo "EXPORTS" >> $@
-	$(qexec)awk '!/vpx_svc_*/ {print "_"$$2}' $^ >>$@
+	$(qexec)awk '{print "_"$$2}' $^ >>$@
 CLEAN-OBJS += libvpx.def
 
 libvpx_dll.a: $(LIBVPX_SO)

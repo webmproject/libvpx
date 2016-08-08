@@ -301,17 +301,6 @@ enum vp8e_enc_control_id {
    */
   VP9E_SET_GF_CBR_BOOST_PCT,
 
-  /*!\brief Codec control function to set the temporal layer id.
-   *
-   * For temporal scalability: this control allows the application to set the
-   * layer id for each frame to be encoded. Note that this control must be set
-   * for every frame prior to encoding. The usage of this control function
-   * supersedes the internal temporal pattern counter, which is now deprecated.
-   *
-   * Supported in codecs: VP8
-   */
-  VP8E_SET_TEMPORAL_LAYER_ID,
-
   /*!\brief Codec control function to set encoder screen content mode.
    *
    * 0: off, 1: On, 2: On with more aggressive rate control.
@@ -428,32 +417,6 @@ enum vp8e_enc_control_id {
    */
   VP9E_SET_NOISE_SENSITIVITY,
 
-  /*!\brief Codec control function to turn on/off SVC in encoder.
-   * \note Return value is VPX_CODEC_INVALID_PARAM if the encoder does not
-   *       support SVC in its current encoding mode
-   *  0: off, 1: on
-   *
-   * Supported in codecs: VP9
-   */
-  VP9E_SET_SVC,
-
-  /*!\brief Codec control function to set parameters for SVC.
-   * \note Parameters contain min_q, max_q, scaling factor for each of the
-   *       SVC layers.
-   *
-   * Supported in codecs: VP9
-   */
-  VP9E_SET_SVC_PARAMETERS,
-
-  /*!\brief Codec control function to set svc layer for spatial and temporal.
-   * \note Valid ranges: 0..#vpx_codec_enc_cfg::ss_number_layers for spatial
-   *                     layer and 0..#vpx_codec_enc_cfg::ts_number_layers for
-   *                     temporal layer.
-   *
-   * Supported in codecs: VP9
-   */
-  VP9E_SET_SVC_LAYER_ID,
-
   /*!\brief Codec control function to set content type.
    * \note Valid parameter range:
    *              VPX_CONTENT_DEFAULT = Regular video content (Default)
@@ -462,22 +425,6 @@ enum vp8e_enc_control_id {
    * Supported in codecs: VP9
    */
   VP9E_SET_TUNE_CONTENT,
-
-  /*!\brief Codec control function to get svc layer ID.
-   * \note The layer ID returned is for the data packet from the registered
-   *       callback function.
-   *
-   * Supported in codecs: VP9
-   */
-  VP9E_GET_SVC_LAYER_ID,
-
-  /*!\brief Codec control function to register callback to get per layer packet.
-   * \note Parameter for this control function is a structure with a callback
-   *       function and a pointer to private data used by the callback.
-   *
-   * Supported in codecs: VP9
-   */
-  VP9E_REGISTER_CX_CALLBACK,
 
   /*!\brief Codec control function to set color space info.
    * \note Valid ranges: 0..7, default is "UNKNOWN".
@@ -493,17 +440,6 @@ enum vp8e_enc_control_id {
    * Supported in codecs: VP9
    */
   VP9E_SET_COLOR_SPACE,
-
-  /*!\brief Codec control function to set temporal layering mode.
-   * \note Valid ranges: 0..3, default is "0" (VP9E_TEMPORAL_LAYERING_MODE_NOLAYERING).
-   *                     0 = VP9E_TEMPORAL_LAYERING_MODE_NOLAYERING
-   *                     1 = VP9E_TEMPORAL_LAYERING_MODE_BYPASS
-   *                     2 = VP9E_TEMPORAL_LAYERING_MODE_0101
-   *                     3 = VP9E_TEMPORAL_LAYERING_MODE_0212
-   *
-   * Supported in codecs: VP9
-   */
-  VP9E_SET_TEMPORAL_LAYERING_MODE,
 
   /*!\brief Codec control function to set minimum interval between GF/ARF frames
    *
@@ -535,14 +471,6 @@ enum vp8e_enc_control_id {
    * Supported in codecs: VP9
    */
   VP9E_SET_COLOR_RANGE,
-
-  /*!\brief Codec control function to set the frame flags and buffer indices
-   * for spatial layers. The frame flags and buffer indices are set using the
-   * struct #vpx_svc_ref_frame_config defined below.
-   *
-   * Supported in codecs: VP9
-  */
-  VP9E_SET_SVC_REF_FRAME_CONFIG,
 
   /*!\brief Codec control function to set intended rendering image size.
    *
@@ -587,33 +515,6 @@ typedef enum vpx_scaling_mode_1d {
   VP8E_THREEFIVE   = 2,
   VP8E_ONETWO      = 3
 } VPX_SCALING_MODE;
-
-/*!\brief Temporal layering mode enum for VP9 SVC.
- *
- * This set of macros define the different temporal layering modes.
- * Supported codecs: VP9 (in SVC mode)
- *
- */
-typedef enum vp9e_temporal_layering_mode {
-  /*!\brief No temporal layering.
-   * Used when only spatial layering is used.
-   */
-  VP9E_TEMPORAL_LAYERING_MODE_NOLAYERING   = 0,
-
-  /*!\brief Bypass mode.
-   * Used when application needs to control temporal layering.
-   * This will only work when the number of spatial layers equals 1.
-   */
-  VP9E_TEMPORAL_LAYERING_MODE_BYPASS       = 1,
-
-  /*!\brief 0-1-0-1... temporal layering scheme with two temporal layers.
-   */
-  VP9E_TEMPORAL_LAYERING_MODE_0101         = 2,
-
-  /*!\brief 0-2-1-2... temporal layering scheme with three temporal layers.
-   */
-  VP9E_TEMPORAL_LAYERING_MODE_0212         = 3
-} VP9E_TEMPORAL_LAYERING_MODE;
 
 /*!\brief  vpx region of interest map
  *
@@ -689,33 +590,6 @@ typedef enum {
   VPX_TUNE_SSIM
 } vpx_tune_metric;
 
-/*!\brief  vp9 svc layer parameters
- *
- * This defines the spatial and temporal layer id numbers for svc encoding.
- * This is used with the #VP9E_SET_SVC_LAYER_ID control to set the spatial and
- * temporal layer id for the current frame.
- *
- */
-typedef struct vpx_svc_layer_id {
-  int spatial_layer_id;       /**< Spatial layer id number. */
-  int temporal_layer_id;      /**< Temporal layer id number. */
-} vpx_svc_layer_id_t;
-
-/*!\brief  vp9 svc frame flag parameters.
- *
- * This defines the frame flags and buffer indices for each spatial layer for
- * svc encoding.
- * This is used with the #VP9E_SET_SVC_REF_FRAME_CONFIG control to set frame
- * flags and buffer indices for each spatial layer for the current (super)frame.
- *
- */
-typedef struct vpx_svc_ref_frame_config {
-  int frame_flags[VPX_TS_MAX_LAYERS];  /**< Frame flags. */
-  int lst_fb_idx[VPX_TS_MAX_LAYERS];  /**< Last buffer index. */
-  int gld_fb_idx[VPX_TS_MAX_LAYERS];  /**< Golden buffer index. */
-  int alt_fb_idx[VPX_TS_MAX_LAYERS];  /**< Altref buffer index. */
-} vpx_svc_ref_frame_config_t;
-
 /*!\cond */
 /*!\brief VP8 encoder control function parameter type
  *
@@ -728,23 +602,12 @@ VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_USE_REFERENCE, int)
 #define VPX_CTRL_VP8E_USE_REFERENCE
 VPX_CTRL_USE_TYPE(VP8E_SET_FRAME_FLAGS,        int)
 #define VPX_CTRL_VP8E_SET_FRAME_FLAGS
-VPX_CTRL_USE_TYPE(VP8E_SET_TEMPORAL_LAYER_ID,  int)
-#define VPX_CTRL_VP8E_SET_TEMPORAL_LAYER_ID
 VPX_CTRL_USE_TYPE(VP8E_SET_ROI_MAP,            vpx_roi_map_t *)
 #define VPX_CTRL_VP8E_SET_ROI_MAP
 VPX_CTRL_USE_TYPE(VP8E_SET_ACTIVEMAP,          vpx_active_map_t *)
 #define VPX_CTRL_VP8E_SET_ACTIVEMAP
 VPX_CTRL_USE_TYPE(VP8E_SET_SCALEMODE,          vpx_scaling_mode_t *)
 #define VPX_CTRL_VP8E_SET_SCALEMODE
-
-VPX_CTRL_USE_TYPE(VP9E_SET_SVC,                int)
-#define VPX_CTRL_VP9E_SET_SVC
-VPX_CTRL_USE_TYPE(VP9E_SET_SVC_PARAMETERS,     void *)
-#define VPX_CTRL_VP9E_SET_SVC_PARAMETERS
-VPX_CTRL_USE_TYPE(VP9E_REGISTER_CX_CALLBACK,   void *)
-#define VPX_CTRL_VP9E_REGISTER_CX_CALLBACK
-VPX_CTRL_USE_TYPE(VP9E_SET_SVC_LAYER_ID,       vpx_svc_layer_id_t *)
-#define VPX_CTRL_VP9E_SET_SVC_LAYER_ID
 
 VPX_CTRL_USE_TYPE(VP8E_SET_CPUUSED,            int)
 #define VPX_CTRL_VP8E_SET_CPUUSED
@@ -785,8 +648,6 @@ VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER,     int *)
 #define VPX_CTRL_VP8E_GET_LAST_QUANTIZER
 VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER_64,  int *)
 #define VPX_CTRL_VP8E_GET_LAST_QUANTIZER_64
-VPX_CTRL_USE_TYPE(VP9E_GET_SVC_LAYER_ID,  vpx_svc_layer_id_t *)
-#define VPX_CTRL_VP9E_GET_SVC_LAYER_ID
 
 VPX_CTRL_USE_TYPE(VP8E_SET_MAX_INTRA_BITRATE_PCT, unsigned int)
 #define VPX_CTRL_VP8E_SET_MAX_INTRA_BITRATE_PCT
@@ -831,9 +692,6 @@ VPX_CTRL_USE_TYPE(VP9E_GET_ACTIVEMAP, vpx_active_map_t *)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_COLOR_RANGE, int)
 #define VPX_CTRL_VP9E_SET_COLOR_RANGE
-
-VPX_CTRL_USE_TYPE(VP9E_SET_SVC_REF_FRAME_CONFIG, vpx_svc_ref_frame_config_t *)
-#define VPX_CTRL_VP9E_SET_SVC_REF_FRAME_CONFIG
 
 /*!\brief
  *

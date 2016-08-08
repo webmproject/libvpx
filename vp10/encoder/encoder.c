@@ -43,7 +43,6 @@
 #include "vp10/encoder/rd.h"
 #include "vp10/encoder/resize.h"
 #include "vp10/encoder/segmentation.h"
-#include "vp10/encoder/skin_detection.h"
 #include "vp10/encoder/speed_features.h"
 #include "vp10/encoder/temporal_filter.h"
 

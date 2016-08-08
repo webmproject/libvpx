@@ -31,29 +31,6 @@ extern "C" {
 
 #include "./vpx_codec.h"
 
-  /*! Temporal Scalability: Maximum length of the sequence defining frame
-   * layer membership
-   */
-#define VPX_TS_MAX_PERIODICITY 16
-
-  /*! Temporal Scalability: Maximum number of coding layers */
-#define VPX_TS_MAX_LAYERS       5
-
-  /*!\deprecated Use #VPX_TS_MAX_PERIODICITY instead. */
-#define MAX_PERIODICITY VPX_TS_MAX_PERIODICITY
-
-/*! Temporal+Spatial Scalability: Maximum number of coding layers */
-#define VPX_MAX_LAYERS  12  // 3 temporal + 4 spatial layers are allowed.
-
-/*!\deprecated Use #VPX_MAX_LAYERS instead. */
-#define MAX_LAYERS    VPX_MAX_LAYERS  // 3 temporal + 4 spatial layers allowed.
-
-/*! Spatial Scalability: Maximum number of coding layers */
-#define VPX_SS_MAX_LAYERS       5
-
-/*! Spatial Scalability: Default number of coding layers */
-#define VPX_SS_DEFAULT_LAYERS       1
-
   /*!\brief Current ABI version number
    *
    * \internal
@@ -164,12 +141,6 @@ extern "C" {
     VPX_CODEC_STATS_PKT,       /**< Two-pass statistics for this frame */
     VPX_CODEC_FPMB_STATS_PKT,  /**< first pass mb statistics for this frame */
     VPX_CODEC_PSNR_PKT,        /**< PSNR statistics for this frame */
-    // Spatial SVC is still experimental and may be removed before the next ABI
-    // bump.
-#if VPX_ENCODER_ABI_VERSION > (5 + VPX_CODEC_ABI_VERSION)
-    VPX_CODEC_SPATIAL_SVC_LAYER_SIZES, /**< Sizes for each layer in this frame*/
-    VPX_CODEC_SPATIAL_SVC_LAYER_PSNR, /**< PSNR for each layer in this frame*/
-#endif
     VPX_CODEC_CUSTOM_PKT = 256 /**< Algorithm extensions  */
   };
 
@@ -206,12 +177,6 @@ extern "C" {
         double       psnr[4];     /**< PSNR, total/y/u/v */
       } psnr;                       /**< data for PSNR packet */
       vpx_fixed_buf_t raw;     /**< data for arbitrary packets */
-      // Spatial SVC is still experimental and may be removed before the next
-      // ABI bump.
-#if VPX_ENCODER_ABI_VERSION > (5 + VPX_CODEC_ABI_VERSION)
-      size_t layer_sizes[VPX_SS_MAX_LAYERS];
-      struct vpx_psnr_pkt layer_psnr[VPX_SS_MAX_LAYERS];
-#endif
 
       /* This packet size is fixed to allow codecs to extend this
        * interface without having to manage storage for raw packets,
@@ -221,23 +186,6 @@ extern "C" {
       char pad[128 - sizeof(enum vpx_codec_cx_pkt_kind)]; /**< fixed sz */
     } data; /**< packet data */
   } vpx_codec_cx_pkt_t; /**< alias for struct vpx_codec_cx_pkt */
-
-
-  /*!\brief Encoder return output buffer callback
-   *
-   * This callback function, when registered, returns with packets when each
-   * spatial layer is encoded.
-   */
-  // putting the definitions here for now. (agrange: find if there
-  // is a better place for this)
-  typedef void (* vpx_codec_enc_output_cx_pkt_cb_fn_t)(vpx_codec_cx_pkt_t *pkt,
-                                                       void *user_data);
-
-  /*!\brief Callback function pointer / user data pair storage */
-  typedef struct vpx_codec_enc_output_cx_cb_pair {
-    vpx_codec_enc_output_cx_pkt_cb_fn_t output_cx_pkt; /**< Callback function */
-    void                            *user_priv; /**< Pointer to private data */
-  } vpx_codec_priv_output_cx_pkt_cb_pair_t;
 
   /*!\brief Rational Number
    *
@@ -670,99 +618,7 @@ extern "C" {
      * equal to kf_max_dist for a fixed interval.
      */
     unsigned int           kf_max_dist;
-
-    /*
-     * Spatial scalability settings (ss)
-     */
-
-    /*!\brief Number of spatial coding layers.
-     *
-     * This value specifies the number of spatial coding layers to be used.
-     */
-    unsigned int           ss_number_layers;
-
-    /*!\brief Enable auto alt reference flags for each spatial layer.
-     *
-     * These values specify if auto alt reference frame is enabled for each
-     * spatial layer.
-     */
-    int                    ss_enable_auto_alt_ref[VPX_SS_MAX_LAYERS];
-
-    /*!\brief Target bitrate for each spatial layer.
-     *
-     * These values specify the target coding bitrate to be used for each
-     * spatial layer.
-     */
-    unsigned int           ss_target_bitrate[VPX_SS_MAX_LAYERS];
-
-    /*!\brief Number of temporal coding layers.
-     *
-     * This value specifies the number of temporal layers to be used.
-     */
-    unsigned int           ts_number_layers;
-
-    /*!\brief Target bitrate for each temporal layer.
-     *
-     * These values specify the target coding bitrate to be used for each
-     * temporal layer.
-     */
-    unsigned int           ts_target_bitrate[VPX_TS_MAX_LAYERS];
-
-    /*!\brief Frame rate decimation factor for each temporal layer.
-     *
-     * These values specify the frame rate decimation factors to apply
-     * to each temporal layer.
-     */
-    unsigned int           ts_rate_decimator[VPX_TS_MAX_LAYERS];
-
-    /*!\brief Length of the sequence defining frame temporal layer membership.
-     *
-     * This value specifies the length of the sequence that defines the
-     * membership of frames to temporal layers. For example, if the
-     * ts_periodicity = 8, then the frames are assigned to coding layers with a
-     * repeated sequence of length 8.
-    */
-    unsigned int           ts_periodicity;
-
-    /*!\brief Template defining the membership of frames to temporal layers.
-     *
-     * This array defines the membership of frames to temporal coding layers.
-     * For a 2-layer encoding that assigns even numbered frames to one temporal
-     * layer (0) and odd numbered frames to a second temporal layer (1) with
-     * ts_periodicity=8, then ts_layer_id = (0,1,0,1,0,1,0,1).
-    */
-    unsigned int           ts_layer_id[VPX_TS_MAX_PERIODICITY];
-
-    /*!\brief Target bitrate for each spatial/temporal layer.
-     *
-     * These values specify the target coding bitrate to be used for each
-     * spatial/temporal layer.
-     *
-     */
-    unsigned int           layer_target_bitrate[VPX_MAX_LAYERS];
-
-    /*!\brief Temporal layering mode indicating which temporal layering scheme to use.
-     *
-     * The value (refer to VP9E_TEMPORAL_LAYERING_MODE) specifies the
-     * temporal layering mode to use.
-     *
-     */
-    int                    temporal_layering_mode;
   } vpx_codec_enc_cfg_t; /**< alias for struct vpx_codec_enc_cfg */
-
-  /*!\brief  vp9 svc extra configure parameters
-   *
-   * This defines max/min quantizers and scale factors for each layer
-   *
-   */
-  typedef struct vpx_svc_parameters {
-    int max_quantizers[VPX_MAX_LAYERS]; /**< Max Q for each layer */
-    int min_quantizers[VPX_MAX_LAYERS]; /**< Min Q for each layer */
-    int scaling_factor_num[VPX_MAX_LAYERS]; /**< Scaling factor-numerator */
-    int scaling_factor_den[VPX_MAX_LAYERS]; /**< Scaling factor-denominator */
-    int temporal_layering_mode; /**< Temporal layering mode */
-  } vpx_svc_extra_cfg_t;
-
 
   /*!\brief Initialize an encoder instance
    *
