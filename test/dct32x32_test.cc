@@ -37,8 +37,9 @@ void reference_32x32_dct_1d(const double in[32], double out[32]) {
   const double kInvSqrt2 = 0.707106781186547524400844362104;
   for (int k = 0; k < 32; k++) {
     out[k] = 0.0;
-    for (int n = 0; n < 32; n++)
+    for (int n = 0; n < 32; n++) {
       out[k] += in[n] * cos(kPi * (2 * n + 1) * k / 64.0);
+    }
     if (k == 0) out[k] = out[k] * kInvSqrt2;
   }
 }
@@ -174,8 +175,9 @@ TEST_P(Trans32x32Test, CoeffCheck) {
   DECLARE_ALIGNED(16, tran_low_t, output_block[kNumCoeffs]);
 
   for (int i = 0; i < count_test_block; ++i) {
-    for (int j = 0; j < kNumCoeffs; ++j)
+    for (int j = 0; j < kNumCoeffs; ++j) {
       input_block[j] = (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
+    }
 
     const int stride = 32;
     vpx_fdct32x32_c(input_block, output_ref_block, stride);
@@ -266,8 +268,9 @@ TEST_P(Trans32x32Test, InverseAccuracy) {
     }
 
     reference_32x32_dct_2d(in, out_r);
-    for (int j = 0; j < kNumCoeffs; ++j)
+    for (int j = 0; j < kNumCoeffs; ++j) {
       coeff[j] = static_cast<tran_low_t>(round(out_r[j]));
+    }
     if (bit_depth_ == VPX_BITS_8) {
       ASM_REGISTER_STATE_CHECK(inv_txfm_(coeff, dst, 32));
 #if CONFIG_VP9_HIGHBITDEPTH

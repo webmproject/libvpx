@@ -28,7 +28,6 @@ namespace {
 #define VIDEO_NAME 0
 #define THREADS 1
 
-const int kMaxPsnr = 100;
 const double kUsecsInSec = 1000000.0;
 const char kNewEncodeOutputFile[] = "new_encode.ivf";
 
@@ -154,8 +153,9 @@ class VP9NewEncodeDecodePerfTest
 
   virtual void EndPassHook() {
     if (outfile_ != NULL) {
-      if (!fseek(outfile_, 0, SEEK_SET))
+      if (!fseek(outfile_, 0, SEEK_SET)) {
         ivf_write_file_header(outfile_, &cfg_, VP9_FOURCC, out_frames_);
+      }
       fclose(outfile_);
       outfile_ = NULL;
     }
@@ -165,8 +165,9 @@ class VP9NewEncodeDecodePerfTest
     ++out_frames_;
 
     // Write initial file header if first frame.
-    if (pkt->data.frame.pts == 0)
+    if (pkt->data.frame.pts == 0) {
       ivf_write_file_header(outfile_, &cfg_, VP9_FOURCC, out_frames_);
+    }
 
     // Write frame header and data.
     ivf_write_frame_header(outfile_, out_frames_, pkt->data.frame.sz);
@@ -174,7 +175,7 @@ class VP9NewEncodeDecodePerfTest
               pkt->data.frame.sz);
   }
 
-  virtual bool DoDecode() { return false; }
+  virtual bool DoDecode() const { return false; }
 
   void set_speed(unsigned int speed) { speed_ = speed; }
 

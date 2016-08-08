@@ -87,8 +87,9 @@ class VpxEncoderParmsGetToDecoder
       encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);
       encoder->Control(VP8E_SET_ARNR_STRENGTH, 5);
       encoder->Control(VP8E_SET_ARNR_TYPE, 3);
-      if (encode_parms.render_size[0] > 0 && encode_parms.render_size[1] > 0)
+      if (encode_parms.render_size[0] > 0 && encode_parms.render_size[1] > 0) {
         encoder->Control(VP9E_SET_RENDER_SIZE, encode_parms.render_size);
+      }
     }
   }
 

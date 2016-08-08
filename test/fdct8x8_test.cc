@@ -51,8 +51,9 @@ void reference_8x8_dct_1d(const double in[8], double out[8]) {
   const double kInvSqrt2 = 0.707106781186547524400844362104;
   for (int k = 0; k < 8; k++) {
     out[k] = 0.0;
-    for (int n = 0; n < 8; n++)
+    for (int n = 0; n < 8; n++) {
       out[k] += in[n] * cos(kPi * (2 * n + 1) * k / 16.0);
+    }
     if (k == 0) out[k] = out[k] * kInvSqrt2;
   }
 }
@@ -149,17 +150,19 @@ class FwdTrans8x8TestBase {
 
     for (int i = 0; i < count_test_block; ++i) {
       // Initialize a test block with input range [-255, 255].
-      for (int j = 0; j < 64; ++j)
+      for (int j = 0; j < 64; ++j) {
         test_input_block[j] = ((rnd.Rand16() >> (16 - bit_depth_)) & mask_) -
                               ((rnd.Rand16() >> (16 - bit_depth_)) & mask_);
+      }
       ASM_REGISTER_STATE_CHECK(
           RunFwdTxfm(test_input_block, test_output_block, pitch_));
 
       for (int j = 0; j < 64; ++j) {
-        if (test_output_block[j] < 0)
+        if (test_output_block[j] < 0) {
           ++count_sign_block[j][0];
-        else if (test_output_block[j] > 0)
+        } else if (test_output_block[j] > 0) {
           ++count_sign_block[j][1];
+        }
       }
     }
 
@@ -178,17 +181,19 @@ class FwdTrans8x8TestBase {
 
     for (int i = 0; i < count_test_block; ++i) {
       // Initialize a test block with input range [-mask_ / 16, mask_ / 16].
-      for (int j = 0; j < 64; ++j)
+      for (int j = 0; j < 64; ++j) {
         test_input_block[j] =
             ((rnd.Rand16() & mask_) >> 4) - ((rnd.Rand16() & mask_) >> 4);
+      }
       ASM_REGISTER_STATE_CHECK(
           RunFwdTxfm(test_input_block, test_output_block, pitch_));
 
       for (int j = 0; j < 64; ++j) {
-        if (test_output_block[j] < 0)
+        if (test_output_block[j] < 0) {
           ++count_sign_block[j][0];
-        else if (test_output_block[j] > 0)
+        } else if (test_output_block[j] > 0) {
           ++count_sign_block[j][1];
+        }
       }
     }
 
@@ -399,8 +404,9 @@ class FwdTrans8x8TestBase {
       }
 
       reference_8x8_dct_2d(in, out_r);
-      for (int j = 0; j < kNumCoeffs; ++j)
+      for (int j = 0; j < kNumCoeffs; ++j) {
         coeff[j] = static_cast<tran_low_t>(round(out_r[j]));
+      }
 
       if (bit_depth_ == VPX_BITS_8) {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, pitch_));
@@ -436,13 +442,15 @@ class FwdTrans8x8TestBase {
       double out_r[kNumCoeffs];
 
       // Initialize a test block with input range [-mask_, mask_].
-      for (int j = 0; j < kNumCoeffs; ++j)
+      for (int j = 0; j < kNumCoeffs; ++j) {
         in[j] = rnd.Rand8() % 2 == 0 ? mask_ : -mask_;
+      }
 
       RunFwdTxfm(in, coeff, pitch_);
       reference_8x8_dct_2d(in, out_r);
-      for (int j = 0; j < kNumCoeffs; ++j)
+      for (int j = 0; j < kNumCoeffs; ++j) {
         coeff_r[j] = static_cast<tran_low_t>(round(out_r[j]));
+      }
 
       for (int j = 0; j < kNumCoeffs; ++j) {
         const int32_t diff = coeff[j] - coeff_r[j];

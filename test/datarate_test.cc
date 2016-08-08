@@ -46,8 +46,9 @@ class DatarateTestLarge
 
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
-    if (video->frame() == 0)
+    if (video->frame() == 0) {
       encoder->Control(VP8E_SET_NOISE_SENSITIVITY, denoiser_on_);
+    }
 
     if (denoiser_offon_test_) {
       ASSERT_GT(denoiser_offon_period_, 0)
@@ -476,10 +477,11 @@ TEST_P(DatarateTestVP9Large, BasicRateTargetingVBRLagNonZero) {
   cfg_.rc_end_usage = VPX_VBR;
   // For non-zero lag, rate control will work (be within bounds) for
   // real-time mode.
-  if (deadline_ == VPX_DL_REALTIME)
+  if (deadline_ == VPX_DL_REALTIME) {
     cfg_.g_lag_in_frames = 15;
-  else
+  } else {
     cfg_.g_lag_in_frames = 0;
+  }
 
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 300);

@@ -218,10 +218,11 @@ class RandomVideoSource : public DummyVideoSource {
   // than holding previous frames to encourage keyframes to be thrown.
   virtual void FillFrame() {
     if (img_) {
-      if (frame_ % 30 < 15)
+      if (frame_ % 30 < 15) {
         for (size_t i = 0; i < raw_sz_; ++i) img_->img_data[i] = rnd_.Rand8();
-      else
+      } else {
         memset(img_->img_data, 0, raw_sz_);
+      }
     }
   }
 

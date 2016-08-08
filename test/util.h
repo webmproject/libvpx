@@ -28,12 +28,13 @@ inline double compute_psnr(const vpx_image_t *img1, const vpx_image_t *img2) {
   unsigned int i, j;
 
   int64_t sqrerr = 0;
-  for (i = 0; i < height_y; ++i)
+  for (i = 0; i < height_y; ++i) {
     for (j = 0; j < width_y; ++j) {
       int64_t d = img1->planes[VPX_PLANE_Y][i * img1->stride[VPX_PLANE_Y] + j] -
                   img2->planes[VPX_PLANE_Y][i * img2->stride[VPX_PLANE_Y] + j];
       sqrerr += d * d;
     }
+  }
   double mse = static_cast<double>(sqrerr) / (width_y * height_y);
   double psnr = 100.0;
   if (mse > 0.0) {

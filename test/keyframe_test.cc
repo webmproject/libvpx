@@ -35,10 +35,12 @@ class KeyframeTest
 
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
-    if (kf_do_force_kf_)
+    if (kf_do_force_kf_) {
       frame_flags_ = (video->frame() % 3) ? 0 : VPX_EFLAG_FORCE_KF;
-    if (set_cpu_used_ && video->frame() == 1)
+    }
+    if (set_cpu_used_ && video->frame() == 1) {
       encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
+    }
   }
 
   virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {

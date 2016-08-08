@@ -105,7 +105,7 @@ class VP9EncodePerfTest
   }
 
   // for performance reasons don't decode
-  virtual bool DoDecode() { return 0; }
+  virtual bool DoDecode() const { return false; }
 
   double min_psnr() const { return min_psnr_; }
 
@@ -126,11 +126,12 @@ TEST_P(VP9EncodePerfTest, PerfTest) {
     for (size_t j = 0; j < NELEMENTS(kEncodePerfTestSpeeds); ++j) {
       for (size_t k = 0; k < NELEMENTS(kEncodePerfTestThreads); ++k) {
         if (kVP9EncodePerfTestVectors[i].width < 512 &&
-            kEncodePerfTestThreads[k] > 1)
+            kEncodePerfTestThreads[k] > 1) {
           continue;
-        else if (kVP9EncodePerfTestVectors[i].width < 1024 &&
-                 kEncodePerfTestThreads[k] > 2)
+        } else if (kVP9EncodePerfTestVectors[i].width < 1024 &&
+                   kEncodePerfTestThreads[k] > 2) {
           continue;
+        }
 
         set_threads(kEncodePerfTestThreads[k]);
         SetUp();

@@ -100,9 +100,10 @@ TEST_P(PartialIDctTest, RunQuantCheck) {
 
       // quantization with maximum allowed step sizes
       test_coef_block1[0] = (output_ref_block[0] / 1336) * 1336;
-      for (int j = 1; j < last_nonzero_; ++j)
+      for (int j = 1; j < last_nonzero_; ++j) {
         test_coef_block1[vp9_default_scan_orders[tx_size_].scan[j]] =
             (output_ref_block[j] / 1828) * 1828;
+      }
     }
 
     ASM_REGISTER_STATE_CHECK(full_itxfm_(test_coef_block1, dst1, size));
