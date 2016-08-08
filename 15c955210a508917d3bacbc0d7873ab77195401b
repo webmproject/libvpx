@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9974efbe_d5e74fa9",
+        "filename": "vp9/common/vp9_matx.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-08T19:13:39Z",
+      "side": 1,
+      "message": "drop these comments and wrap this however the formatter wants.",
+      "range": {
+        "startLine": 34,
+        "startChar": 36,
+        "endLine": 34,
+        "endChar": 40
+      },
+      "revId": "15c955210a508917d3bacbc0d7873ab77195401b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_75867bc3",
+        "filename": "vp9/common/vp9_matx.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-08T19:13:39Z",
+      "side": 1,
+      "message": "Typically we use assert(0 \u0026\u0026 \"quoted string\");",
+      "range": {
+        "startLine": 72,
+        "startChar": 20,
+        "endLine": 72,
+        "endChar": 52
+      },
+      "revId": "15c955210a508917d3bacbc0d7873ab77195401b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_55957fde",
+        "filename": "vp9/common/vp9_matx.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-08T19:13:39Z",
+      "side": 1,
+      "message": "Drop the empty comments and let the formatter pack these if it wants to.",
+      "range": {
+        "startLine": 45,
+        "startChar": 41,
+        "endLine": 45,
+        "endChar": 45
+      },
+      "revId": "15c955210a508917d3bacbc0d7873ab77195401b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
