@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9974efbe_9581d7f9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-08T19:03:12Z",
+      "side": 1,
+      "message": "add BUG\u003dwebm:\u003cbug #\u003e",
+      "revId": "114676e2f5933b964148899d11c66824c7191656",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_f55dab7e",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-08T19:03:12Z",
+      "side": 1,
+      "message": "p1s might be enough to disambiguate here",
+      "range": {
+        "startLine": 94,
+        "startChar": 19,
+        "endLine": 94,
+        "endChar": 27
+      },
+      "revId": "114676e2f5933b964148899d11c66824c7191656",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_b5673353",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-08T19:03:12Z",
+      "side": 1,
+      "message": "this is fairly common, maybe a flip_sign() / flip_sign_back() if embedding the const there doesn\u0027t change the assembly",
+      "range": {
+        "startLine": 97,
+        "startChar": 30,
+        "endLine": 97,
+        "endChar": 74
+      },
+      "revId": "114676e2f5933b964148899d11c66824c7191656",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_55c33f06",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-08T19:03:12Z",
+      "side": 1,
+      "message": "you could break the application to something like apply_filter7/15, might be reusable",
+      "revId": "114676e2f5933b964148899d11c66824c7191656",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
