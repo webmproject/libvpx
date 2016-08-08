@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9974efbe_75dd1bd9",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 37
+      },
+      "lineNbr": 4433,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-08T19:05:28Z",
+      "side": 1,
+      "message": "Don\u0027t add commented out code fragments",
+      "range": {
+        "startLine": 4433,
+        "startChar": 8,
+        "endLine": 4433,
+        "endChar": 76
+      },
+      "revId": "ad6fba5b216c42fb7bdcf5ec3a2a508f593dc406",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_d5ce6f29",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 37
+      },
+      "lineNbr": 4441,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-08T19:05:28Z",
+      "side": 1,
+      "message": "same",
+      "range": {
+        "startLine": 4441,
+        "startChar": 56,
+        "endLine": 4441,
+        "endChar": 78
+      },
+      "revId": "ad6fba5b216c42fb7bdcf5ec3a2a508f593dc406",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
