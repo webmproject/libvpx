@@ -403,7 +403,8 @@ typedef struct SPEED_FEATURES {
 
   // This feature controls the tolerence vs target used in deciding whether to
   // recode a frame. It has no meaning if recode is disabled.
-  int recode_tolerance;
+  int recode_tolerance_low;
+  int recode_tolerance_high;
 
   // This variable controls the maximum block size where intra blocks can be
   // used in inter frames.
