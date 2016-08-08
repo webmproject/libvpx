@@ -184,6 +184,7 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const struct segmentation *const seg = &cm->seg;
+  MvLimits *const mv_limits = &x->mv_limits;
 
   set_skip_context(xd, mi_row, mi_col);
 
@@ -196,10 +197,10 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
 
   // Set up limit values for MV components.
   // Mv beyond the range do not produce new/different prediction block.
-  x->mv_row_min = -(((mi_row + mi_height) * MI_SIZE) + VP9_INTERP_EXTEND);
-  x->mv_col_min = -(((mi_col + mi_width) * MI_SIZE) + VP9_INTERP_EXTEND);
-  x->mv_row_max = (cm->mi_rows - mi_row) * MI_SIZE + VP9_INTERP_EXTEND;
-  x->mv_col_max = (cm->mi_cols - mi_col) * MI_SIZE + VP9_INTERP_EXTEND;
+  mv_limits->row_min = -(((mi_row + mi_height) * MI_SIZE) + VP9_INTERP_EXTEND);
+  mv_limits->col_min = -(((mi_col + mi_width) * MI_SIZE) + VP9_INTERP_EXTEND);
+  mv_limits->row_max = (cm->mi_rows - mi_row) * MI_SIZE + VP9_INTERP_EXTEND;
+  mv_limits->col_max = (cm->mi_cols - mi_col) * MI_SIZE + VP9_INTERP_EXTEND;
 
   // Set up distance of MB to edge of frame in 1/8th pel units.
   assert(!(mi_col & (mi_width - 1)) && !(mi_row & (mi_height - 1)));
