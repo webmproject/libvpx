@@ -298,6 +298,30 @@ if (vpx_config("CONFIG_NEW_QUANT") eq "yes") {
   specialize qw/quantize_32x32_fp_nuq/;
 }
 
+# EXT_INTRA predictor functions
+if (vpx_config("CONFIG_EXT_INTRA") eq "yes") {
+  add_proto qw/void vp10_dc_filter_predictor/, "uint8_t *dst, ptrdiff_t stride, int bs, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp10_dc_filter_predictor sse4_1/;
+  add_proto qw/void vp10_v_filter_predictor/, "uint8_t *dst, ptrdiff_t stride, int bs, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp10_v_filter_predictor sse4_1/;
+  add_proto qw/void vp10_h_filter_predictor/, "uint8_t *dst, ptrdiff_t stride, int bs, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp10_h_filter_predictor sse4_1/;
+  add_proto qw/void vp10_d45_filter_predictor/, "uint8_t *dst, ptrdiff_t stride, int bs, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp10_d45_filter_predictor sse4_1/;
+  add_proto qw/void vp10_d135_filter_predictor/, "uint8_t *dst, ptrdiff_t stride, int bs, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp10_d135_filter_predictor sse4_1/;
+  add_proto qw/void vp10_d117_filter_predictor/, "uint8_t *dst, ptrdiff_t stride, int bs, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp10_d117_filter_predictor sse4_1/;
+  add_proto qw/void vp10_d153_filter_predictor/, "uint8_t *dst, ptrdiff_t stride, int bs, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp10_d153_filter_predictor sse4_1/;
+  add_proto qw/void vp10_d207_filter_predictor/, "uint8_t *dst, ptrdiff_t stride, int bs, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp10_d207_filter_predictor sse4_1/;
+  add_proto qw/void vp10_d63_filter_predictor/, "uint8_t *dst, ptrdiff_t stride, int bs, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp10_d63_filter_predictor sse4_1/;
+  add_proto qw/void vp10_tm_filter_predictor/, "uint8_t *dst, ptrdiff_t stride, int bs, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp10_tm_filter_predictor sse4_1/;
+}
+
 # High bitdepth functions
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   #
