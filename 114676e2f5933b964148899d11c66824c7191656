@@ -42,6 +42,30 @@
     },
     {
       "key": {
+        "uuid": "9974efbe_f5f04b64",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-08T19:10:11Z",
+      "side": 1,
+      "message": "the code from ARM used the style above, but that\u0027s the part of the code I\u0027d like to see revisited to give more concise / meaningful names to variables",
+      "parentUuid": "9974efbe_f55dab7e",
+      "range": {
+        "startLine": 94,
+        "startChar": 19,
+        "endLine": 94,
+        "endChar": 27
+      },
+      "revId": "114676e2f5933b964148899d11c66824c7191656",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9974efbe_b5673353",
         "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
         "patchSetId": 5
