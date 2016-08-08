@@ -16,6 +16,24 @@
       "revId": "3391b057909ae35765420a41c22719159f2cc316",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9974efbe_f27941d6",
+        "filename": "vp10/common/intra_filters.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-08-08T17:58:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9974efbe_52c35506",
+      "revId": "3391b057909ae35765420a41c22719159f2cc316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
