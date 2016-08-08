@@ -41,7 +41,8 @@ void vp9_360aq_frame_setup(VP9_COMP *cpi) {
   struct segmentation *seg = &cm->seg;
   int i;
 
-  if (frame_is_intra_only(cm) || cm->error_resilient_mode) {
+  if (frame_is_intra_only(cm) || cpi->force_update_segmentation ||
+      cm->error_resilient_mode) {
     vp9_enable_segmentation(seg);
     vp9_clearall_segfeatures(seg);
 

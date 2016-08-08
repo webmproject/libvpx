@@ -49,7 +49,7 @@ void vp9_vaq_frame_setup(VP9_COMP *cpi) {
   int i;
 
   if (frame_is_intra_only(cm) || cm->error_resilient_mode ||
-      cpi->refresh_alt_ref_frame ||
+      cpi->refresh_alt_ref_frame || cpi->force_update_segmentation ||
       (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref)) {
     vp9_enable_segmentation(seg);
     vp9_clearall_segfeatures(seg);

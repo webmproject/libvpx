@@ -52,7 +52,7 @@ void vp9_setup_in_frame_q_adj(VP9_COMP *cpi) {
   vpx_clear_system_state();
 
   if (frame_is_intra_only(cm) || cm->error_resilient_mode ||
-      cpi->refresh_alt_ref_frame ||
+      cpi->refresh_alt_ref_frame || cpi->force_update_segmentation ||
       (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref)) {
     int segment;
     const int aq_strength = get_aq_c_strength(cm->base_qindex, cm->bit_depth);
