@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9974efbe_75af5b31",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 480,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-08T19:17:33Z",
+      "side": 1,
+      "message": "Can you add a description here. Looking at the usage it seems to force segment_id to be recalculated for each mode info. Is that accurate.",
+      "range": {
+        "startLine": 480,
+        "startChar": 0,
+        "endLine": 480,
+        "endChar": 36
+      },
+      "revId": "831db449c3bd3355d9e2c3e73cc352e7775ec674",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
