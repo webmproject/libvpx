@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "19a47fca_df26fbd3",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1996,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-09T16:14:12Z",
+      "side": 1,
+      "message": "You can rewrite as:\ntarget_frame_size \u003d (i \u003d\u003d (normal_frames - 1)) ? last_frame_bits : (i \u003d\u003d mid_frame_idx) ? normal_frame_bits + last_frame_reduction : normal_frame_bits;",
+      "range": {
+        "startLine": 1991,
+        "startChar": 4,
+        "endLine": 1996,
+        "endChar": 44
+      },
+      "revId": "a9734486e851917f22d97d582eb6274cea48a900",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
