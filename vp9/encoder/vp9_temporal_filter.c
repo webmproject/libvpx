@@ -316,8 +316,9 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
     //  8 - VP9_INTERP_EXTEND.
     // To keep the mv in play for both Y and UV planes the max that it
     //  can be on a border is therefore 16 - (2*VP9_INTERP_EXTEND+1).
-    cpi->td.mb.mv_row_min = -((mb_row * 16) + (17 - 2 * VP9_INTERP_EXTEND));
-    cpi->td.mb.mv_row_max =
+    cpi->td.mb.mv_limits.row_min =
+        -((mb_row * 16) + (17 - 2 * VP9_INTERP_EXTEND));
+    cpi->td.mb.mv_limits.row_max =
         ((mb_rows - 1 - mb_row) * 16) + (17 - 2 * VP9_INTERP_EXTEND);
 
     for (mb_col = 0; mb_col < mb_cols; mb_col++) {
@@ -327,8 +328,9 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
       memset(accumulator, 0, 16 * 16 * 3 * sizeof(accumulator[0]));
       memset(count, 0, 16 * 16 * 3 * sizeof(count[0]));
 
-      cpi->td.mb.mv_col_min = -((mb_col * 16) + (17 - 2 * VP9_INTERP_EXTEND));
-      cpi->td.mb.mv_col_max =
+      cpi->td.mb.mv_limits.col_min =
+          -((mb_col * 16) + (17 - 2 * VP9_INTERP_EXTEND));
+      cpi->td.mb.mv_limits.col_max =
           ((mb_cols - 1 - mb_col) * 16) + (17 - 2 * VP9_INTERP_EXTEND);
 
       for (frame = 0; frame < frame_count; frame++) {

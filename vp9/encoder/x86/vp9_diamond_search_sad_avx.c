@@ -75,9 +75,9 @@ int vp9_diamond_search_sad_avx(const MACROBLOCK *x,
                                MV *best_mv, int search_param, int sad_per_bit,
                                int *num00, const vp9_variance_fn_ptr_t *fn_ptr,
                                const MV *center_mv) {
-  const int_mv maxmv = pack_int_mv(x->mv_row_max, x->mv_col_max);
+  const int_mv maxmv = pack_int_mv(x->mv_limits.row_max, x->mv_limits.col_max);
   const __m128i v_max_mv_w = _mm_set1_epi32(maxmv.as_int);
-  const int_mv minmv = pack_int_mv(x->mv_row_min, x->mv_col_min);
+  const int_mv minmv = pack_int_mv(x->mv_limits.row_min, x->mv_limits.col_min);
   const __m128i v_min_mv_w = _mm_set1_epi32(minmv.as_int);
 
   const __m128i v_spb_d = _mm_set1_epi32(sad_per_bit);

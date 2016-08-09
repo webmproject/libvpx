@@ -155,10 +155,7 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   MV center_mv;
   uint32_t dis;
   int rate_mode;
-  const int tmp_col_min = x->mv_col_min;
-  const int tmp_col_max = x->mv_col_max;
-  const int tmp_row_min = x->mv_row_min;
-  const int tmp_row_max = x->mv_row_max;
+  const MvLimits tmp_mv_limits = x->mv_limits;
   int rv = 0;
   int cost_list[5];
   const YV12_BUFFER_CONFIG *scaled_ref_frame =
@@ -171,7 +168,7 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < MAX_MB_PLANE; i++) backup_yv12[i] = xd->plane[i].pre[0];
     vp9_setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL);
   }
-  vp9_set_mv_search_range(x, &ref_mv);
+  vp9_set_mv_search_range(&x->mv_limits, &ref_mv);
 
   assert(x->mv_best_ref_index[ref] <= 2);
   if (x->mv_best_ref_index[ref] < 2)
@@ -191,10 +188,7 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                         cond_cost_list(cpi, cost_list), &center_mv,
                         &tmp_mv->as_mv, INT_MAX, 0);
 
-  x->mv_col_min = tmp_col_min;
-  x->mv_col_max = tmp_col_max;
-  x->mv_row_min = tmp_row_min;
-  x->mv_row_max = tmp_row_max;
+  x->mv_limits = tmp_mv_limits;
 
   // calculate the bit cost on motion vector
   mvp_full.row = tmp_mv->as_mv.row * 8;
@@ -2182,10 +2176,7 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x, int mi_row,
             MV mvp_full;
             MV tmp_mv;
             int cost_list[5];
-            const int tmp_col_min = x->mv_col_min;
-            const int tmp_col_max = x->mv_col_max;
-            const int tmp_row_min = x->mv_row_min;
-            const int tmp_row_max = x->mv_row_max;
+            const MvLimits tmp_mv_limits = x->mv_limits;
             uint32_t dummy_dist;
 
             if (i == 0) {
@@ -2196,17 +2187,15 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x, int mi_row,
               mvp_full.col = xd->mi[0]->bmi[0].as_mv[0].as_mv.col >> 3;
             }
 
-            vp9_set_mv_search_range(x, &mbmi_ext->ref_mvs[0]->as_mv);
+            vp9_set_mv_search_range(&x->mv_limits,
+                                    &mbmi_ext->ref_mvs[0]->as_mv);
 
             vp9_full_pixel_search(cpi, x, bsize, &mvp_full, step_param,
                                   x->sadperbit4, cond_cost_list(cpi, cost_list),
                                   &mbmi_ext->ref_mvs[ref_frame][0].as_mv,
                                   &tmp_mv, INT_MAX, 0);
 
-            x->mv_col_min = tmp_col_min;
-            x->mv_col_max = tmp_col_max;
-            x->mv_row_min = tmp_row_min;
-            x->mv_row_max = tmp_row_max;
+            x->mv_limits = tmp_mv_limits;
 
             // calculate the bit cost on motion vector
             mvp_full.row = tmp_mv.row * 8;
