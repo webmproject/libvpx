@@ -1874,9 +1874,8 @@ static void get_arf_buffer_indices(unsigned char *arf_buffer_indices) {
 }
 
 static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
-                                   double group_error, int gf_arf_bits) {
+                                   int gf_arf_bits) {
   RATE_CONTROL *const rc = &cpi->rc;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   TWO_PASS *const twopass = &cpi->twopass;
   GF_GROUP *const gf_group = &twopass->gf_group;
   FIRSTPASS_STATS frame_stats;
@@ -1886,14 +1885,16 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   int key_frame;
   const int max_bits = frame_max_bits(&cpi->rc, &cpi->oxcf);
   int64_t total_group_bits = gf_group_bits;
-  double modified_err = 0.0;
-  double err_fraction;
   int mid_boost_bits = 0;
   int mid_frame_idx;
   unsigned char arf_buffer_indices[MAX_ACTIVE_ARFS];
   int alt_frame_index = frame_index;
   int has_temporal_layers =
       is_two_pass_svc(cpi) && cpi->svc.number_temporal_layers > 1;
+  int normal_frames;
+  int normal_frame_bits;
+  int last_frame_bits;
+  int last_frame_reduction;
 
   // Only encode alt reference frame in temporal base layer.
   if (has_temporal_layers) alt_frame_index = cpi->svc.number_temporal_layers;
@@ -1958,11 +1959,28 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
     }
   }
 
+  // Note index of the first normal inter frame int eh group (not gf kf arf)
+  gf_group->first_inter_index = frame_index;
+
   // Define middle frame
   mid_frame_idx = frame_index + (rc->baseline_gf_interval >> 1) - 1;
 
+  normal_frames = (rc->baseline_gf_interval - rc->source_alt_ref_pending);
+
+  // The last frame in the group is used less as a predictor so reduce
+  // its allocation a little.
+  if (normal_frames > 1) {
+    normal_frame_bits = total_group_bits / normal_frames;
+    last_frame_reduction = normal_frame_bits / 16;
+    last_frame_bits = normal_frame_bits - last_frame_reduction;
+  } else {
+    normal_frame_bits = total_group_bits;
+    last_frame_bits = normal_frame_bits;
+    last_frame_reduction = 0;
+  }
+
   // Allocate bits to the other frames in the group.
-  for (i = 0; i < rc->baseline_gf_interval - rc->source_alt_ref_pending; ++i) {
+  for (i = 0; i < normal_frames; ++i) {
     int arf_idx = 0;
     if (EOF == input_stats(twopass, &frame_stats)) break;
 
@@ -1970,14 +1988,11 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
       ++frame_index;
     }
 
-    modified_err = calculate_modified_err(cpi, twopass, oxcf, &frame_stats);
-
-    if (group_error > 0)
-      err_fraction = modified_err / DOUBLE_DIVIDE_CHECK(group_error);
-    else
-      err_fraction = 0.0;
-
-    target_frame_size = (int)((double)total_group_bits * err_fraction);
+    target_frame_size = (i == (normal_frames - 1))
+                            ? last_frame_bits
+                            : (i == mid_frame_idx)
+                                  ? normal_frame_bits + last_frame_reduction
+                                  : normal_frame_bits;
 
     if (rc->source_alt_ref_pending && cpi->multi_arf_enabled) {
       mid_boost_bits += (target_frame_size >> 4);
@@ -2080,7 +2095,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int active_max_gf_interval;
   int active_min_gf_interval;
   int64_t gf_group_bits;
-  double gf_group_error_left;
   int gf_arf_bits;
   const int is_key_frame = frame_is_intra_only(cm);
   const int arf_active_or_kf = is_key_frame || rc->source_alt_ref_active;
@@ -2314,22 +2328,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Adjust KF group bits and error remaining.
   twopass->kf_group_error_left -= (int64_t)gf_group_err;
 
-  // If this is an arf update we want to remove the score for the overlay
-  // frame at the end which will usually be very cheap to code.
-  // The overlay frame has already, in effect, been coded so we want to spread
-  // the remaining bits among the other frames.
-  // For normal GFs remove the score for the GF itself unless this is
-  // also a key frame in which case it has already been accounted for.
-  if (rc->source_alt_ref_pending) {
-    gf_group_error_left = gf_group_err - mod_frame_err;
-  } else if (is_key_frame == 0) {
-    gf_group_error_left = gf_group_err - gf_first_frame_err;
-  } else {
-    gf_group_error_left = gf_group_err;
-  }
-
   // Allocate bits to each of the frames in the GF group.
-  allocate_gf_group_bits(cpi, gf_group_bits, gf_group_error_left, gf_arf_bits);
+  allocate_gf_group_bits(cpi, gf_group_bits, gf_arf_bits);
 
   // Reset the file position.
   reset_fpf_position(twopass, start_pos);
