@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "79849b24_ca35a342",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1243,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-08-09T18:42:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "19a47fca_22f6f02c",
+      "revId": "af6a311df376b7c05083b248685b0d7c0953f278",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "19a47fca_bf2e9790",
         "filename": "vp10/encoder/encodeframe.c",
         "patchSetId": 3
@@ -30,6 +48,30 @@
       "writtenOn": "2016-08-09T16:24:49Z",
       "side": 1,
       "message": "This common block should be refactored into a function like \"void update_global_motion_use(PREDICTION_MODE mode, const MV_REFERENCE_FRAME *ref_frame, int *global_motion_used)\"",
+      "range": {
+        "startLine": 1252,
+        "startChar": 0,
+        "endLine": 1256,
+        "endChar": 13
+      },
+      "revId": "af6a311df376b7c05083b248685b0d7c0953f278",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "79849b24_ea326757",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1256,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-08-09T18:42:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "19a47fca_bf2e9790",
       "range": {
         "startLine": 1252,
         "startChar": 0,
