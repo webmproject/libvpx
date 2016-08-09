@@ -39,6 +39,9 @@
 #if CONFIG_SUPERTX
 #include "vp10/encoder/cost.h"
 #endif
+#if CONFIG_GLOBAL_MOTION
+#include "vp10/encoder/global_motion.h"
+#endif
 #include "vp10/encoder/encodeframe.h"
 #include "vp10/encoder/encodemb.h"
 #include "vp10/encoder/encodemv.h"
@@ -1084,6 +1087,17 @@ static void update_filter_type_count(FRAME_COUNTS *counts,
   }
 }
 #endif
+#if CONFIG_GLOBAL_MOTION
+static void update_global_motion_used(PREDICTION_MODE mode,
+                                      const MB_MODE_INFO *mbmi,
+                                      VP10_COMP *cpi) {
+  if (mode == ZEROMV) {
+    ++cpi->global_motion_used[mbmi->ref_frame[0]];
+    if (has_second_ref(mbmi))
+      ++cpi->global_motion_used[mbmi->ref_frame[1]];
+  }
+}
+#endif  // CONFIG_GLOBAL_MOTION
 
 static void update_state(VP10_COMP *cpi, ThreadData *td,
                          PICK_MODE_CONTEXT *ctx,
@@ -1231,6 +1245,21 @@ static void update_state(VP10_COMP *cpi, ThreadData *td,
   if (!frame_is_intra_only(cm)) {
     if (is_inter_block(mbmi)) {
       vp10_update_mv_count(td);
+#if CONFIG_GLOBAL_MOTION
+      if (bsize >= BLOCK_8X8) {
+        update_global_motion_used(mbmi->mode, mbmi, cpi);
+      } else {
+        const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
+        const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
+        int idx, idy;
+        for (idy = 0; idy < 2; idy += num_4x4_h) {
+          for (idx = 0; idx < 2; idx += num_4x4_w) {
+            const int j = idy * 2 + idx;
+            update_global_motion_used(mi->bmi[j].as_mode, mbmi, cpi);
+          }
+        }
+      }
+#endif  // CONFIG_GLOBAL_MOTION
       if (cm->interp_filter == SWITCHABLE
 #if CONFIG_EXT_INTERP
           && vp10_is_interp_needed(xd)
@@ -4538,6 +4567,7 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 
 #if CONFIG_GLOBAL_MOTION
 #define MIN_TRANS_THRESH 8
+#define GLOBAL_MOTION_MODEL  ROTZOOM
 static void convert_to_params(double *H, TransformationType type,
                               Global_Motion_Params *model) {
   int i;
@@ -4610,10 +4640,19 @@ static void encode_frame_internal(VP10_COMP *cpi) {
   vpx_clear_system_state();
   vp10_zero(cpi->global_motion_used);
   if (cpi->common.frame_type == INTER_FRAME && cpi->Source) {
+    YV12_BUFFER_CONFIG *ref_buf;
     int frame;
     double H[9] = {0, 0, 0, 0, 0, 0, 0, 0, 1};
-    for (frame = LAST_FRAME; frame <= ALTREF_FRAME; ++frame)
-      convert_model_to_params(H, AFFINE, &cm->global_motion[frame]);
+    for (frame = LAST_FRAME; frame <= ALTREF_FRAME; ++frame) {
+      ref_buf = get_ref_frame_buffer(cpi, frame);
+      if (ref_buf) {
+        if (compute_global_motion_feature_based(
+                cpi, GLOBAL_MOTION_MODEL, cpi->Source, ref_buf,
+                0.5, H))
+          convert_model_to_params(H, GLOBAL_MOTION_MODEL,
+                                  &cm->global_motion[frame]);
+      }
+    }
   }
 #endif  // CONFIG_GLOBAL_MOTION
 
