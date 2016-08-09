@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "19a47fca_22f6f02c",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1243,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-08-09T17:38:34Z",
+      "side": 1,
+      "message": "I agree with the comment below. Probably we can have such a function in encodeframe.c, with cpi, mode, ref_frame as the input. Then call it here and below",
+      "revId": "af6a311df376b7c05083b248685b0d7c0953f278",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "19a47fca_bf2e9790",
         "filename": "vp10/encoder/encodeframe.c",
         "patchSetId": 3
