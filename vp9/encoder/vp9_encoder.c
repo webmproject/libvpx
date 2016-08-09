@@ -2394,6 +2394,17 @@ static int big_rate_miss(VP9_COMP *cpi, int high_limit, int low_limit) {
          (rc->projected_frame_size < (low_limit / 2));
 }
 
+// test in two pass for the first
+static int two_pass_first_group_inter(VP9_COMP *cpi) {
+  TWO_PASS *const twopass = &cpi->twopass;
+  GF_GROUP *const gf_group = &twopass->gf_group;
+  if ((cpi->oxcf.pass == 2) &&
+      (gf_group->index == gf_group->first_inter_index))
+    return 1;
+  else
+    return 0;
+}
+
 // Function to test for conditions that indicate we should loop
 // back and recode a frame.
 static int recode_loop_test(VP9_COMP *cpi, int high_limit, int low_limit, int q,
@@ -2406,7 +2417,8 @@ static int recode_loop_test(VP9_COMP *cpi, int high_limit, int low_limit, int q,
   if ((rc->projected_frame_size >= rc->max_frame_bandwidth) ||
       big_rate_miss(cpi, high_limit, low_limit) ||
       (cpi->sf.recode_loop == ALLOW_RECODE) ||
-      (frame_is_kfgfarf && (cpi->sf.recode_loop == ALLOW_RECODE_KFARFGF))) {
+      ((frame_is_kfgfarf || two_pass_first_group_inter(cpi)) &&
+       (cpi->sf.recode_loop == ALLOW_RECODE_KFARFGF))) {
     if (frame_is_kfgfarf && (oxcf->resize_mode == RESIZE_DYNAMIC) &&
         scale_down(cpi, q)) {
       // Code this group at a lower resolution.
