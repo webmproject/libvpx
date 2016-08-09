@@ -22,15 +22,15 @@ extern "C" {
 #define FILTER_BITS 7
 #define FILTER_WEIGHT 128
 
-typedef unsigned int(*vpx_sad_fn_t)(const uint8_t *a, int a_stride,
-                                    const uint8_t *b, int b_stride);
+typedef unsigned int (*vpx_sad_fn_t)(const uint8_t *a, int a_stride,
+                                     const uint8_t *b, int b_stride);
 
-typedef unsigned int(*vpx_sad_avg_fn_t)(const uint8_t *a, int a_stride,
-                                        const uint8_t *b, int b_stride,
-                                        const uint8_t *second_pred);
+typedef unsigned int (*vpx_sad_avg_fn_t)(const uint8_t *a, int a_stride,
+                                         const uint8_t *b, int b_stride,
+                                         const uint8_t *second_pred);
 
-typedef void (*vp8_copy32xn_fn_t)(const uint8_t *a, int a_stride,
-                                  uint8_t *b, int b_stride, int n);
+typedef void (*vp8_copy32xn_fn_t)(const uint8_t *a, int a_stride, uint8_t *b,
+                                  int b_stride, int n);
 
 typedef void (*vpx_sad_multi_fn_t)(const uint8_t *a, int a_stride,
                                    const uint8_t *b, int b_stride,
@@ -38,8 +38,7 @@ typedef void (*vpx_sad_multi_fn_t)(const uint8_t *a, int a_stride,
 
 typedef void (*vpx_sad_multi_d_fn_t)(const uint8_t *a, int a_stride,
                                      const uint8_t *const b_array[],
-                                     int b_stride,
-                                     unsigned int *sad_array);
+                                     int b_stride, unsigned int *sad_array);
 
 typedef unsigned int (*vpx_variance_fn_t)(const uint8_t *a, int a_stride,
                                           const uint8_t *b, int b_stride,
@@ -50,95 +49,71 @@ typedef unsigned int (*vpx_subpixvariance_fn_t)(const uint8_t *a, int a_stride,
                                                 const uint8_t *b, int b_stride,
                                                 unsigned int *sse);
 
-typedef unsigned int (*vpx_subp_avg_variance_fn_t)(const uint8_t *a,
-                                                   int a_stride,
-                                                   int xoffset, int yoffset,
-                                                   const uint8_t *b,
-                                                   int b_stride,
-                                                   unsigned int *sse,
-                                                   const uint8_t *second_pred);
+typedef unsigned int (*vpx_subp_avg_variance_fn_t)(
+    const uint8_t *a, int a_stride, int xoffset, int yoffset, const uint8_t *b,
+    int b_stride, unsigned int *sse, const uint8_t *second_pred);
 
 #if CONFIG_VP10 && CONFIG_EXT_INTER
-typedef unsigned int(*vpx_masked_sad_fn_t)(const uint8_t *src,
-                                           int src_stride,
-                                           const uint8_t *ref,
-                                           int ref_stride,
-                                           const uint8_t *msk_ptr,
-                                           int msk_stride);
-typedef unsigned int (*vpx_masked_variance_fn_t)(const uint8_t *src,
-                                                 int src_stride,
-                                                 const uint8_t *ref,
-                                                 int ref_stride,
-                                                 const uint8_t *msk,
-                                                 int msk_stride,
-                                                 unsigned int *sse);
-typedef unsigned int (*vpx_masked_subpixvariance_fn_t)(const uint8_t *src,
-                                                       int src_stride,
-                                                       int xoffset, int yoffset,
-                                                       const uint8_t *ref,
-                                                       int ref_stride,
-                                                       const uint8_t *msk,
-                                                       int msk_stride,
-                                                       unsigned int *sse);
+typedef unsigned int (*vpx_masked_sad_fn_t)(const uint8_t *src, int src_stride,
+                                            const uint8_t *ref, int ref_stride,
+                                            const uint8_t *msk_ptr,
+                                            int msk_stride);
+typedef unsigned int (*vpx_masked_variance_fn_t)(
+    const uint8_t *src, int src_stride, const uint8_t *ref, int ref_stride,
+    const uint8_t *msk, int msk_stride, unsigned int *sse);
+typedef unsigned int (*vpx_masked_subpixvariance_fn_t)(
+    const uint8_t *src, int src_stride, int xoffset, int yoffset,
+    const uint8_t *ref, int ref_stride, const uint8_t *msk, int msk_stride,
+    unsigned int *sse);
 #endif  // CONFIG_VP10 && CONFIG_EXT_INTER
 
 #if CONFIG_VP10 && CONFIG_OBMC
-typedef unsigned int(*vpx_obmc_sad_fn_t)(const uint8_t *pred,
-                                         int pred_stride,
-                                         const int32_t *wsrc,
-                                         const int32_t *msk);
+typedef unsigned int (*vpx_obmc_sad_fn_t)(const uint8_t *pred, int pred_stride,
+                                          const int32_t *wsrc,
+                                          const int32_t *msk);
 typedef unsigned int (*vpx_obmc_variance_fn_t)(const uint8_t *pred,
                                                int pred_stride,
                                                const int32_t *wsrc,
                                                const int32_t *msk,
                                                unsigned int *sse);
-typedef unsigned int (*vpx_obmc_subpixvariance_fn_t)(const uint8_t *pred,
-                                                     int pred_stride,
-                                                     int xoffset, int yoffset,
-                                                     const int32_t *wsrc,
-                                                     const int32_t *msk,
-                                                     unsigned int *sse);
+typedef unsigned int (*vpx_obmc_subpixvariance_fn_t)(
+    const uint8_t *pred, int pred_stride, int xoffset, int yoffset,
+    const int32_t *wsrc, const int32_t *msk, unsigned int *sse);
 #endif  // CONFIG_VP10 && CONFIG_OBMC
 
 #if CONFIG_VP10
 typedef struct vpx_variance_vtable {
-  vpx_sad_fn_t                   sdf;
-  vpx_sad_avg_fn_t               sdaf;
-  vpx_variance_fn_t              vf;
-  vpx_subpixvariance_fn_t        svf;
-  vpx_subp_avg_variance_fn_t     svaf;
-  vpx_sad_multi_fn_t             sdx3f;
-  vpx_sad_multi_fn_t             sdx8f;
-  vpx_sad_multi_d_fn_t           sdx4df;
+  vpx_sad_fn_t sdf;
+  vpx_sad_avg_fn_t sdaf;
+  vpx_variance_fn_t vf;
+  vpx_subpixvariance_fn_t svf;
+  vpx_subp_avg_variance_fn_t svaf;
+  vpx_sad_multi_fn_t sdx3f;
+  vpx_sad_multi_fn_t sdx8f;
+  vpx_sad_multi_d_fn_t sdx4df;
 #if CONFIG_EXT_INTER
-  vpx_masked_sad_fn_t            msdf;
-  vpx_masked_variance_fn_t       mvf;
+  vpx_masked_sad_fn_t msdf;
+  vpx_masked_variance_fn_t mvf;
   vpx_masked_subpixvariance_fn_t msvf;
 #endif  // CONFIG_EXT_INTER
 #if CONFIG_OBMC
-  vpx_obmc_sad_fn_t              osdf;
-  vpx_obmc_variance_fn_t         ovf;
-  vpx_obmc_subpixvariance_fn_t   osvf;
+  vpx_obmc_sad_fn_t osdf;
+  vpx_obmc_variance_fn_t ovf;
+  vpx_obmc_subpixvariance_fn_t osvf;
 #endif  // CONFIG_OBMC
 } vpx_variance_fn_ptr_t;
 #endif  // CONFIG_VP10
 
 void vpx_highbd_var_filter_block2d_bil_first_pass(
-    const uint8_t *src_ptr8,
-    uint16_t *output_ptr,
-    unsigned int src_pixels_per_line,
-    int pixel_step,
-    unsigned int output_height,
-    unsigned int output_width,
+    const uint8_t *src_ptr8, uint16_t *output_ptr,
+    unsigned int src_pixels_per_line, int pixel_step,
+    unsigned int output_height, unsigned int output_width,
     const uint8_t *filter);
 
 void vpx_highbd_var_filter_block2d_bil_second_pass(
-    const uint16_t *src_ptr,
-    uint16_t *output_ptr,
-    unsigned int src_pixels_per_line,
-    unsigned int pixel_step,
-    unsigned int output_height,
-    unsigned int output_width,
+    const uint16_t *src_ptr, uint16_t *output_ptr,
+    unsigned int src_pixels_per_line, unsigned int pixel_step,
+    unsigned int output_height, unsigned int output_width,
     const uint8_t *filter);
 
 #ifdef __cplusplus

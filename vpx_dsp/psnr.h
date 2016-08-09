@@ -11,7 +11,6 @@
 #ifndef VPX_DSP_PSNR_H_
 #define VPX_DSP_PSNR_H_
 
-
 #include "vpx_scale/yv12config.h"
 
 #define MAX_PSNR 100.0
@@ -37,25 +36,20 @@ typedef struct {
 * \param[in]    sse           Sum of squared errors
 */
 double vpx_sse_to_psnr(double samples, double peak, double sse);
-int64_t vpx_get_y_sse(const YV12_BUFFER_CONFIG *a,
-                      const YV12_BUFFER_CONFIG *b);
+int64_t vpx_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b);
 #if CONFIG_VP9_HIGHBITDEPTH
 int64_t vpx_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
                              const YV12_BUFFER_CONFIG *b);
 void vpx_calc_highbd_psnr(const YV12_BUFFER_CONFIG *a,
-                      const YV12_BUFFER_CONFIG *b,
-                      PSNR_STATS *psnr,
-                      unsigned int bit_depth,
-                      unsigned int in_bit_depth);
+                          const YV12_BUFFER_CONFIG *b, PSNR_STATS *psnr,
+                          unsigned int bit_depth, unsigned int in_bit_depth);
 #endif
-void vpx_calc_psnr(const YV12_BUFFER_CONFIG *a,
-               const YV12_BUFFER_CONFIG *b,
-               PSNR_STATS *psnr);
+void vpx_calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
+                   PSNR_STATS *psnr);
 
 double vpx_psnrhvs(const YV12_BUFFER_CONFIG *source,
-                   const YV12_BUFFER_CONFIG *dest,
-                   double *phvs_y, double *phvs_u,
-                   double *phvs_v, uint32_t bd, uint32_t in_bd);
+                   const YV12_BUFFER_CONFIG *dest, double *phvs_y,
+                   double *phvs_u, double *phvs_v, uint32_t bd, uint32_t in_bd);
 
 #ifdef __cplusplus
 }  // extern "C"

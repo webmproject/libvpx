@@ -26,11 +26,10 @@
 // Implementation - No sub-sampling
 //////////////////////////////////////////////////////////////////////////////
 
-static void blend_a64_vmask_w4_sse4_1(
-    uint8_t *dst, uint32_t dst_stride,
-    const uint8_t *src0, uint32_t src0_stride,
-    const uint8_t *src1, uint32_t src1_stride,
-    const uint8_t *mask, int h, int w) {
+static void blend_a64_vmask_w4_sse4_1(uint8_t *dst, uint32_t dst_stride,
+                                      const uint8_t *src0, uint32_t src0_stride,
+                                      const uint8_t *src1, uint32_t src1_stride,
+                                      const uint8_t *mask, int h, int w) {
   const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
 
   (void)w;
@@ -52,11 +51,10 @@ static void blend_a64_vmask_w4_sse4_1(
   } while (--h);
 }
 
-static void blend_a64_vmask_w8_sse4_1(
-    uint8_t *dst, uint32_t dst_stride,
-    const uint8_t *src0, uint32_t src0_stride,
-    const uint8_t *src1, uint32_t src1_stride,
-    const uint8_t *mask, int h, int w) {
+static void blend_a64_vmask_w8_sse4_1(uint8_t *dst, uint32_t dst_stride,
+                                      const uint8_t *src0, uint32_t src0_stride,
+                                      const uint8_t *src1, uint32_t src1_stride,
+                                      const uint8_t *mask, int h, int w) {
   const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
 
   (void)w;
@@ -78,11 +76,12 @@ static void blend_a64_vmask_w8_sse4_1(
   } while (--h);
 }
 
-static void blend_a64_vmask_w16n_sse4_1(
-    uint8_t *dst, uint32_t dst_stride,
-    const uint8_t *src0, uint32_t src0_stride,
-    const uint8_t *src1, uint32_t src1_stride,
-    const uint8_t *mask, int h, int w) {
+static void blend_a64_vmask_w16n_sse4_1(uint8_t *dst, uint32_t dst_stride,
+                                        const uint8_t *src0,
+                                        uint32_t src0_stride,
+                                        const uint8_t *src1,
+                                        uint32_t src1_stride,
+                                        const uint8_t *mask, int h, int w) {
   const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
 
   do {
@@ -90,10 +89,9 @@ static void blend_a64_vmask_w16n_sse4_1(
     const __m128i v_m0_w = _mm_set1_epi16(*mask);
     const __m128i v_m1_w = _mm_sub_epi16(v_maxval_w, v_m0_w);
     for (c = 0; c < w; c += 16) {
-      const __m128i v_resl_w = blend_8(src0 + c, src1 + c,
-                                       v_m0_w, v_m1_w);
-      const __m128i v_resh_w = blend_8(src0 + c + 8, src1 + c + 8,
-                                       v_m0_w, v_m1_w);
+      const __m128i v_resl_w = blend_8(src0 + c, src1 + c, v_m0_w, v_m1_w);
+      const __m128i v_resh_w =
+          blend_8(src0 + c + 8, src1 + c + 8, v_m0_w, v_m1_w);
 
       const __m128i v_res_b = _mm_packus_epi16(v_resl_w, v_resh_w);
 
@@ -110,15 +108,14 @@ static void blend_a64_vmask_w16n_sse4_1(
 // Dispatch
 //////////////////////////////////////////////////////////////////////////////
 
-void vpx_blend_a64_vmask_sse4_1(
-    uint8_t *dst, uint32_t dst_stride,
-    const uint8_t *src0, uint32_t src0_stride,
-    const uint8_t *src1, uint32_t src1_stride,
-    const uint8_t *mask, int h, int w) {
-  typedef  void (*blend_fn)(uint8_t *dst, uint32_t dst_stride,
-                            const uint8_t *src0, uint32_t src0_stride,
-                            const uint8_t *src1, uint32_t src1_stride,
-                            const uint8_t *mask, int h, int w);
+void vpx_blend_a64_vmask_sse4_1(uint8_t *dst, uint32_t dst_stride,
+                                const uint8_t *src0, uint32_t src0_stride,
+                                const uint8_t *src1, uint32_t src1_stride,
+                                const uint8_t *mask, int h, int w) {
+  typedef void (*blend_fn)(uint8_t *dst, uint32_t dst_stride,
+                           const uint8_t *src0, uint32_t src0_stride,
+                           const uint8_t *src1, uint32_t src1_stride,
+                           const uint8_t *mask, int h, int w);
 
   // Dimension: width_index
   static const blend_fn blend[9] = {
@@ -141,10 +138,8 @@ void vpx_blend_a64_vmask_sse4_1(
   assert(IS_POWER_OF_TWO(h));
   assert(IS_POWER_OF_TWO(w));
 
-  blend[w & 0xf](dst, dst_stride,
-                 src0, src0_stride,
-                 src1, src1_stride,
-                 mask, h, w);
+  blend[w & 0xf](dst, dst_stride, src0, src0_stride, src1, src1_stride, mask, h,
+                 w);
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -153,9 +148,8 @@ void vpx_blend_a64_vmask_sse4_1(
 //////////////////////////////////////////////////////////////////////////////
 
 static INLINE void blend_a64_vmask_bn_w4_sse4_1(
-    uint16_t *dst, uint32_t dst_stride,
-    const uint16_t *src0, uint32_t src0_stride,
-    const uint16_t *src1, uint32_t src1_stride,
+    uint16_t *dst, uint32_t dst_stride, const uint16_t *src0,
+    uint32_t src0_stride, const uint16_t *src1, uint32_t src1_stride,
     const uint8_t *mask, int h, blend_unit_fn blend) {
   const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
 
@@ -174,32 +168,31 @@ static INLINE void blend_a64_vmask_bn_w4_sse4_1(
   } while (--h);
 }
 
-static void blend_a64_vmask_b10_w4_sse4_1(
-    uint16_t *dst, uint32_t dst_stride,
-    const uint16_t *src0, uint32_t src0_stride,
-    const uint16_t *src1, uint32_t src1_stride,
-    const uint8_t *mask, int h, int w) {
+static void blend_a64_vmask_b10_w4_sse4_1(uint16_t *dst, uint32_t dst_stride,
+                                          const uint16_t *src0,
+                                          uint32_t src0_stride,
+                                          const uint16_t *src1,
+                                          uint32_t src1_stride,
+                                          const uint8_t *mask, int h, int w) {
   (void)w;
   blend_a64_vmask_bn_w4_sse4_1(dst, dst_stride, src0, src0_stride, src1,
-                               src1_stride, mask, h,
-                               blend_4_b10);
+                               src1_stride, mask, h, blend_4_b10);
 }
 
-static void blend_a64_vmask_b12_w4_sse4_1(
-    uint16_t *dst, uint32_t dst_stride,
-    const uint16_t *src0, uint32_t src0_stride,
-    const uint16_t *src1, uint32_t src1_stride,
-    const uint8_t *mask, int h, int w) {
+static void blend_a64_vmask_b12_w4_sse4_1(uint16_t *dst, uint32_t dst_stride,
+                                          const uint16_t *src0,
+                                          uint32_t src0_stride,
+                                          const uint16_t *src1,
+                                          uint32_t src1_stride,
+                                          const uint8_t *mask, int h, int w) {
   (void)w;
   blend_a64_vmask_bn_w4_sse4_1(dst, dst_stride, src0, src0_stride, src1,
-                               src1_stride, mask, h,
-                               blend_4_b12);
+                               src1_stride, mask, h, blend_4_b12);
 }
 
 static INLINE void blend_a64_vmask_bn_w8n_sse4_1(
-    uint16_t *dst, uint32_t dst_stride,
-    const uint16_t *src0, uint32_t src0_stride,
-    const uint16_t *src1, uint32_t src1_stride,
+    uint16_t *dst, uint32_t dst_stride, const uint16_t *src0,
+    uint32_t src0_stride, const uint16_t *src1, uint32_t src1_stride,
     const uint8_t *mask, int h, int w, blend_unit_fn blend) {
   const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
 
@@ -219,24 +212,24 @@ static INLINE void blend_a64_vmask_bn_w8n_sse4_1(
   } while (--h);
 }
 
-static void blend_a64_vmask_b10_w8n_sse4_1(
-    uint16_t *dst, uint32_t dst_stride,
-    const uint16_t *src0, uint32_t src0_stride,
-    const uint16_t *src1, uint32_t src1_stride,
-    const uint8_t *mask, int h, int w) {
+static void blend_a64_vmask_b10_w8n_sse4_1(uint16_t *dst, uint32_t dst_stride,
+                                           const uint16_t *src0,
+                                           uint32_t src0_stride,
+                                           const uint16_t *src1,
+                                           uint32_t src1_stride,
+                                           const uint8_t *mask, int h, int w) {
   blend_a64_vmask_bn_w8n_sse4_1(dst, dst_stride, src0, src0_stride, src1,
-                                src1_stride, mask, h, w,
-                                blend_8_b10);
+                                src1_stride, mask, h, w, blend_8_b10);
 }
 
-static void blend_a64_vmask_b12_w8n_sse4_1(
-    uint16_t *dst, uint32_t dst_stride,
-    const uint16_t *src0, uint32_t src0_stride,
-    const uint16_t *src1, uint32_t src1_stride,
-    const uint8_t *mask, int h, int w) {
+static void blend_a64_vmask_b12_w8n_sse4_1(uint16_t *dst, uint32_t dst_stride,
+                                           const uint16_t *src0,
+                                           uint32_t src0_stride,
+                                           const uint16_t *src1,
+                                           uint32_t src1_stride,
+                                           const uint8_t *mask, int h, int w) {
   blend_a64_vmask_bn_w8n_sse4_1(dst, dst_stride, src0, src0_stride, src1,
-                                src1_stride, mask, h, w,
-                                blend_8_b12);
+                                src1_stride, mask, h, w, blend_8_b12);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -244,23 +237,25 @@ static void blend_a64_vmask_b12_w8n_sse4_1(
 //////////////////////////////////////////////////////////////////////////////
 
 void vpx_highbd_blend_a64_vmask_sse4_1(
-    uint8_t *dst_8, uint32_t dst_stride,
-    const uint8_t *src0_8, uint32_t src0_stride,
-    const uint8_t *src1_8, uint32_t src1_stride,
+    uint8_t *dst_8, uint32_t dst_stride, const uint8_t *src0_8,
+    uint32_t src0_stride, const uint8_t *src1_8, uint32_t src1_stride,
     const uint8_t *mask, int h, int w, int bd) {
-  typedef  void (*blend_fn)(uint16_t *dst, uint32_t dst_stride,
-                            const uint16_t *src0, uint32_t src0_stride,
-                            const uint16_t *src1, uint32_t src1_stride,
-                            const uint8_t *mask, int h, int w);
+  typedef void (*blend_fn)(uint16_t *dst, uint32_t dst_stride,
+                           const uint16_t *src0, uint32_t src0_stride,
+                           const uint16_t *src1, uint32_t src1_stride,
+                           const uint8_t *mask, int h, int w);
 
   // Dimensions are: bd_index X width_index
   static const blend_fn blend[2][2] = {
-    {     // bd == 8 or 10
-      blend_a64_vmask_b10_w8n_sse4_1,  // w % 8 == 0
-      blend_a64_vmask_b10_w4_sse4_1,   // w == 4
-    }, {  // bd == 12
-      blend_a64_vmask_b12_w8n_sse4_1,  // w % 8 == 0
-      blend_a64_vmask_b12_w4_sse4_1,   // w == 4
+    {
+        // bd == 8 or 10
+        blend_a64_vmask_b10_w8n_sse4_1,  // w % 8 == 0
+        blend_a64_vmask_b10_w4_sse4_1,   // w == 4
+    },
+    {
+        // bd == 12
+        blend_a64_vmask_b12_w8n_sse4_1,  // w % 8 == 0
+        blend_a64_vmask_b12_w4_sse4_1,   // w == 4
     }
   };
 
@@ -275,19 +270,15 @@ void vpx_highbd_blend_a64_vmask_sse4_1(
   assert(bd == 8 || bd == 10 || bd == 12);
 
   if (UNLIKELY((h | w) & 3)) {  // if (w <= 2 || h <= 2)
-    vpx_highbd_blend_a64_vmask_c(dst_8, dst_stride,
-                                 src0_8, src0_stride,
-                                 src1_8, src1_stride,
-                                 mask, h, w, bd);
+    vpx_highbd_blend_a64_vmask_c(dst_8, dst_stride, src0_8, src0_stride, src1_8,
+                                 src1_stride, mask, h, w, bd);
   } else {
     uint16_t *const dst = CONVERT_TO_SHORTPTR(dst_8);
     const uint16_t *const src0 = CONVERT_TO_SHORTPTR(src0_8);
     const uint16_t *const src1 = CONVERT_TO_SHORTPTR(src1_8);
 
-    blend[bd == 12][(w >> 2) & 1](dst, dst_stride,
-                                  src0, src0_stride,
-                                  src1, src1_stride,
-                                  mask, h, w);
+    blend[bd == 12][(w >> 2) & 1](dst, dst_stride, src0, src0_stride, src1,
+                                  src1_stride, mask, h, w);
   }
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH

@@ -65,10 +65,8 @@ static INLINE void variance4x4_64_sse4_1(const uint8_t *a8, int a_stride,
   *sum = (int64_t)_mm_extract_epi32(y0, 0);
 }
 
-uint32_t vpx_highbd_8_variance4x4_sse4_1(const uint8_t *a,
-                                         int a_stride,
-                                         const uint8_t *b,
-                                         int b_stride,
+uint32_t vpx_highbd_8_variance4x4_sse4_1(const uint8_t *a, int a_stride,
+                                         const uint8_t *b, int b_stride,
                                          uint32_t *sse) {
   int64_t sum;
   uint64_t local_sse;
@@ -79,10 +77,8 @@ uint32_t vpx_highbd_8_variance4x4_sse4_1(const uint8_t *a,
   return *sse - (uint32_t)((sum * sum) >> 4);
 }
 
-uint32_t vpx_highbd_10_variance4x4_sse4_1(const uint8_t *a,
-                                          int a_stride,
-                                          const uint8_t *b,
-                                          int b_stride,
+uint32_t vpx_highbd_10_variance4x4_sse4_1(const uint8_t *a, int a_stride,
+                                          const uint8_t *b, int b_stride,
                                           uint32_t *sse) {
   int64_t sum;
   uint64_t local_sse;
@@ -94,10 +90,8 @@ uint32_t vpx_highbd_10_variance4x4_sse4_1(const uint8_t *a,
   return *sse - (uint32_t)((sum * sum) >> 4);
 }
 
-uint32_t vpx_highbd_12_variance4x4_sse4_1(const uint8_t *a,
-                                          int a_stride,
-                                          const uint8_t *b,
-                                          int b_stride,
+uint32_t vpx_highbd_12_variance4x4_sse4_1(const uint8_t *a, int a_stride,
+                                          const uint8_t *b, int b_stride,
                                           uint32_t *sse) {
   int64_t sum;
   uint64_t local_sse;
@@ -111,136 +105,108 @@ uint32_t vpx_highbd_12_variance4x4_sse4_1(const uint8_t *a,
 
 // Sub-pixel
 uint32_t vpx_highbd_8_sub_pixel_variance4x4_sse4_1(
-    const uint8_t *src, int  src_stride,
-    int xoffset, int  yoffset,
-    const uint8_t *dst, int dst_stride,
-    uint32_t *sse) {
-
+    const uint8_t *src, int src_stride, int xoffset, int yoffset,
+    const uint8_t *dst, int dst_stride, uint32_t *sse) {
   uint16_t fdata3[(4 + 1) * 4];
   uint16_t temp2[4 * 4];
 
   vpx_highbd_var_filter_block2d_bil_first_pass(
-      src, fdata3, src_stride, 1, 4 + 1,
-      4, bilinear_filters_2t[xoffset]);
-  vpx_highbd_var_filter_block2d_bil_second_pass(
-      fdata3, temp2, 4, 4, 4, 4,
-      bilinear_filters_2t[yoffset]);
+      src, fdata3, src_stride, 1, 4 + 1, 4, bilinear_filters_2t[xoffset]);
+  vpx_highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, 4, 4, 4, 4,
+                                                bilinear_filters_2t[yoffset]);
 
-  return vpx_highbd_8_variance4x4(CONVERT_TO_BYTEPTR(temp2),
-                                  4, dst, dst_stride, sse);
+  return vpx_highbd_8_variance4x4(CONVERT_TO_BYTEPTR(temp2), 4, dst, dst_stride,
+                                  sse);
 }
 
 uint32_t vpx_highbd_10_sub_pixel_variance4x4_sse4_1(
-    const uint8_t *src, int  src_stride,
-    int xoffset, int  yoffset,
-    const uint8_t *dst, int dst_stride,
-    uint32_t *sse) {
+    const uint8_t *src, int src_stride, int xoffset, int yoffset,
+    const uint8_t *dst, int dst_stride, uint32_t *sse) {
   uint16_t fdata3[(4 + 1) * 4];
   uint16_t temp2[4 * 4];
 
   vpx_highbd_var_filter_block2d_bil_first_pass(
-      src, fdata3, src_stride, 1, 4 + 1,
-      4, bilinear_filters_2t[xoffset]);
-  vpx_highbd_var_filter_block2d_bil_second_pass(
-      fdata3, temp2, 4, 4, 4, 4,
-      bilinear_filters_2t[yoffset]);
+      src, fdata3, src_stride, 1, 4 + 1, 4, bilinear_filters_2t[xoffset]);
+  vpx_highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, 4, 4, 4, 4,
+                                                bilinear_filters_2t[yoffset]);
 
-  return vpx_highbd_10_variance4x4(CONVERT_TO_BYTEPTR(temp2),
-                                   4, dst, dst_stride, sse);
+  return vpx_highbd_10_variance4x4(CONVERT_TO_BYTEPTR(temp2), 4, dst,
+                                   dst_stride, sse);
 }
 
 uint32_t vpx_highbd_12_sub_pixel_variance4x4_sse4_1(
-    const uint8_t *src, int  src_stride,
-    int xoffset, int  yoffset,
-    const uint8_t *dst, int dst_stride,
-    uint32_t *sse) {
+    const uint8_t *src, int src_stride, int xoffset, int yoffset,
+    const uint8_t *dst, int dst_stride, uint32_t *sse) {
   uint16_t fdata3[(4 + 1) * 4];
   uint16_t temp2[4 * 4];
 
   vpx_highbd_var_filter_block2d_bil_first_pass(
-      src, fdata3, src_stride, 1, 4 + 1,
-      4, bilinear_filters_2t[xoffset]);
-  vpx_highbd_var_filter_block2d_bil_second_pass(
-      fdata3, temp2, 4, 4, 4, 4,
-      bilinear_filters_2t[yoffset]);
+      src, fdata3, src_stride, 1, 4 + 1, 4, bilinear_filters_2t[xoffset]);
+  vpx_highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, 4, 4, 4, 4,
+                                                bilinear_filters_2t[yoffset]);
 
-  return vpx_highbd_12_variance4x4(CONVERT_TO_BYTEPTR(temp2),
-                                   4, dst, dst_stride, sse);
+  return vpx_highbd_12_variance4x4(CONVERT_TO_BYTEPTR(temp2), 4, dst,
+                                   dst_stride, sse);
 }
 
 // Sub-pixel average
 
 uint32_t vpx_highbd_8_sub_pixel_avg_variance4x4_sse4_1(
-    const uint8_t *src, int  src_stride,
-    int xoffset, int  yoffset,
-    const uint8_t *dst, int dst_stride,
-    uint32_t *sse,
+    const uint8_t *src, int src_stride, int xoffset, int yoffset,
+    const uint8_t *dst, int dst_stride, uint32_t *sse,
     const uint8_t *second_pred) {
-
   uint16_t fdata3[(4 + 1) * 4];
   uint16_t temp2[4 * 4];
   DECLARE_ALIGNED(16, uint16_t, temp3[4 * 4]);
 
   vpx_highbd_var_filter_block2d_bil_first_pass(
-      src, fdata3, src_stride, 1, 4 + 1,
-      4, bilinear_filters_2t[xoffset]);
-  vpx_highbd_var_filter_block2d_bil_second_pass(
-      fdata3, temp2, 4, 4, 4, 4,
-      bilinear_filters_2t[yoffset]);
+      src, fdata3, src_stride, 1, 4 + 1, 4, bilinear_filters_2t[xoffset]);
+  vpx_highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, 4, 4, 4, 4,
+                                                bilinear_filters_2t[yoffset]);
 
-  vpx_highbd_comp_avg_pred(temp3, second_pred, 4, 4,
-                           CONVERT_TO_BYTEPTR(temp2), 4);
+  vpx_highbd_comp_avg_pred(temp3, second_pred, 4, 4, CONVERT_TO_BYTEPTR(temp2),
+                           4);
 
-  return vpx_highbd_8_variance4x4(CONVERT_TO_BYTEPTR(temp3),
-                                  4, dst, dst_stride, sse);
+  return vpx_highbd_8_variance4x4(CONVERT_TO_BYTEPTR(temp3), 4, dst, dst_stride,
+                                  sse);
 }
 
 uint32_t vpx_highbd_10_sub_pixel_avg_variance4x4_sse4_1(
-    const uint8_t *src, int  src_stride,
-    int xoffset, int  yoffset,
-    const uint8_t *dst, int dst_stride,
-    uint32_t *sse,
+    const uint8_t *src, int src_stride, int xoffset, int yoffset,
+    const uint8_t *dst, int dst_stride, uint32_t *sse,
     const uint8_t *second_pred) {
-
   uint16_t fdata3[(4 + 1) * 4];
   uint16_t temp2[4 * 4];
   DECLARE_ALIGNED(16, uint16_t, temp3[4 * 4]);
 
   vpx_highbd_var_filter_block2d_bil_first_pass(
-      src, fdata3, src_stride, 1, 4 + 1,
-      4, bilinear_filters_2t[xoffset]);
-  vpx_highbd_var_filter_block2d_bil_second_pass(
-      fdata3, temp2, 4, 4, 4, 4,
-      bilinear_filters_2t[yoffset]);
+      src, fdata3, src_stride, 1, 4 + 1, 4, bilinear_filters_2t[xoffset]);
+  vpx_highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, 4, 4, 4, 4,
+                                                bilinear_filters_2t[yoffset]);
 
-  vpx_highbd_comp_avg_pred(temp3, second_pred, 4, 4,
-                           CONVERT_TO_BYTEPTR(temp2), 4);
+  vpx_highbd_comp_avg_pred(temp3, second_pred, 4, 4, CONVERT_TO_BYTEPTR(temp2),
+                           4);
 
-  return vpx_highbd_10_variance4x4(CONVERT_TO_BYTEPTR(temp3),
-                                   4, dst, dst_stride, sse);
+  return vpx_highbd_10_variance4x4(CONVERT_TO_BYTEPTR(temp3), 4, dst,
+                                   dst_stride, sse);
 }
 
 uint32_t vpx_highbd_12_sub_pixel_avg_variance4x4_sse4_1(
-    const uint8_t *src, int  src_stride,
-    int xoffset, int  yoffset,
-    const uint8_t *dst, int dst_stride,
-    uint32_t *sse,
+    const uint8_t *src, int src_stride, int xoffset, int yoffset,
+    const uint8_t *dst, int dst_stride, uint32_t *sse,
     const uint8_t *second_pred) {
-
   uint16_t fdata3[(4 + 1) * 4];
   uint16_t temp2[4 * 4];
   DECLARE_ALIGNED(16, uint16_t, temp3[4 * 4]);
 
   vpx_highbd_var_filter_block2d_bil_first_pass(
-      src, fdata3, src_stride, 1, 4 + 1,
-      4, bilinear_filters_2t[xoffset]);
-  vpx_highbd_var_filter_block2d_bil_second_pass(
-      fdata3, temp2, 4, 4, 4, 4,
-      bilinear_filters_2t[yoffset]);
+      src, fdata3, src_stride, 1, 4 + 1, 4, bilinear_filters_2t[xoffset]);
+  vpx_highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, 4, 4, 4, 4,
+                                                bilinear_filters_2t[yoffset]);
 
-  vpx_highbd_comp_avg_pred(temp3, second_pred, 4, 4,
-                           CONVERT_TO_BYTEPTR(temp2), 4);
+  vpx_highbd_comp_avg_pred(temp3, second_pred, 4, 4, CONVERT_TO_BYTEPTR(temp2),
+                           4);
 
-  return vpx_highbd_12_variance4x4(CONVERT_TO_BYTEPTR(temp3),
-                                   4, dst, dst_stride, sse);
+  return vpx_highbd_12_variance4x4(CONVERT_TO_BYTEPTR(temp3), 4, dst,
+                                   dst_stride, sse);
 }

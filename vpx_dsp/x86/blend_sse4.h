@@ -99,8 +99,8 @@ static INLINE __m128i blend_4_b12(const uint16_t *src0, const uint16_t *src1,
   const __m128i v_sum_d = _mm_madd_epi16(v_s01_w, v_m01_w);
 
   // Scale
-  const __m128i v_ssum_d = _mm_srli_epi32(v_sum_d,
-                                          VPX_BLEND_A64_ROUND_BITS - 1);
+  const __m128i v_ssum_d =
+      _mm_srli_epi32(v_sum_d, VPX_BLEND_A64_ROUND_BITS - 1);
 
   // Pack
   const __m128i v_pssum_d = _mm_packs_epi32(v_ssum_d, v_ssum_d);
@@ -127,10 +127,10 @@ static INLINE __m128i blend_8_b12(const uint16_t *src0, const uint16_t *src1,
   const __m128i v_sumh_d = _mm_madd_epi16(v_s01h_w, v_m01h_w);
 
   // Scale
-  const __m128i v_ssuml_d = _mm_srli_epi32(v_suml_d,
-                                           VPX_BLEND_A64_ROUND_BITS - 1);
-  const __m128i v_ssumh_d = _mm_srli_epi32(v_sumh_d,
-                                           VPX_BLEND_A64_ROUND_BITS - 1);
+  const __m128i v_ssuml_d =
+      _mm_srli_epi32(v_suml_d, VPX_BLEND_A64_ROUND_BITS - 1);
+  const __m128i v_ssumh_d =
+      _mm_srli_epi32(v_sumh_d, VPX_BLEND_A64_ROUND_BITS - 1);
 
   // Pack
   const __m128i v_pssum_d = _mm_packs_epi32(v_ssuml_d, v_ssumh_d);

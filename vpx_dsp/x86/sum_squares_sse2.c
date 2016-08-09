@@ -18,10 +18,14 @@
 
 static uint64_t vpx_sum_squares_2d_i16_4x4_sse2(const int16_t *src,
                                                 int stride) {
-  const __m128i v_val_0_w = _mm_loadl_epi64((const __m128i*)(src+0*stride));
-  const __m128i v_val_1_w = _mm_loadl_epi64((const __m128i*)(src+1*stride));
-  const __m128i v_val_2_w = _mm_loadl_epi64((const __m128i*)(src+2*stride));
-  const __m128i v_val_3_w = _mm_loadl_epi64((const __m128i*)(src+3*stride));
+  const __m128i v_val_0_w =
+      _mm_loadl_epi64((const __m128i *)(src + 0 * stride));
+  const __m128i v_val_1_w =
+      _mm_loadl_epi64((const __m128i *)(src + 1 * stride));
+  const __m128i v_val_2_w =
+      _mm_loadl_epi64((const __m128i *)(src + 2 * stride));
+  const __m128i v_val_3_w =
+      _mm_loadl_epi64((const __m128i *)(src + 3 * stride));
 
   const __m128i v_sq_0_d = _mm_madd_epi16(v_val_0_w, v_val_0_w);
   const __m128i v_sq_1_d = _mm_madd_epi16(v_val_1_w, v_val_1_w);
@@ -32,8 +36,8 @@ static uint64_t vpx_sum_squares_2d_i16_4x4_sse2(const int16_t *src,
   const __m128i v_sum_23_d = _mm_add_epi32(v_sq_2_d, v_sq_3_d);
   const __m128i v_sum_0123_d = _mm_add_epi32(v_sum_01_d, v_sum_23_d);
 
-  const __m128i v_sum_d = _mm_add_epi32(v_sum_0123_d,
-                                        _mm_srli_epi64(v_sum_0123_d, 32));
+  const __m128i v_sum_d =
+      _mm_add_epi32(v_sum_0123_d, _mm_srli_epi64(v_sum_0123_d, 32));
 
   return (uint64_t)_mm_cvtsi128_si32(v_sum_d);
 }
@@ -44,9 +48,8 @@ static uint64_t vpx_sum_squares_2d_i16_4x4_sse2(const int16_t *src,
 // maintenance instructions in the common case of 4x4.
 __attribute__((noinline))
 #endif
-static uint64_t vpx_sum_squares_2d_i16_nxn_sse2(const int16_t *src,
-                                                int stride,
-                                                int size) {
+static uint64_t
+vpx_sum_squares_2d_i16_nxn_sse2(const int16_t *src, int stride, int size) {
   int r, c;
 
   const __m128i v_zext_mask_q = _mm_set_epi32(0, 0xffffffff, 0, 0xffffffff);
@@ -56,16 +59,24 @@ static uint64_t vpx_sum_squares_2d_i16_nxn_sse2(const int16_t *src,
     __m128i v_acc_d = _mm_setzero_si128();
 
     for (c = 0; c < size; c += 8) {
-      const int16_t *b = src+c;
+      const int16_t *b = src + c;
 
-      const __m128i v_val_0_w = _mm_load_si128((const __m128i*)(b+0*stride));
-      const __m128i v_val_1_w = _mm_load_si128((const __m128i*)(b+1*stride));
-      const __m128i v_val_2_w = _mm_load_si128((const __m128i*)(b+2*stride));
-      const __m128i v_val_3_w = _mm_load_si128((const __m128i*)(b+3*stride));
-      const __m128i v_val_4_w = _mm_load_si128((const __m128i*)(b+4*stride));
-      const __m128i v_val_5_w = _mm_load_si128((const __m128i*)(b+5*stride));
-      const __m128i v_val_6_w = _mm_load_si128((const __m128i*)(b+6*stride));
-      const __m128i v_val_7_w = _mm_load_si128((const __m128i*)(b+7*stride));
+      const __m128i v_val_0_w =
+          _mm_load_si128((const __m128i *)(b + 0 * stride));
+      const __m128i v_val_1_w =
+          _mm_load_si128((const __m128i *)(b + 1 * stride));
+      const __m128i v_val_2_w =
+          _mm_load_si128((const __m128i *)(b + 2 * stride));
+      const __m128i v_val_3_w =
+          _mm_load_si128((const __m128i *)(b + 3 * stride));
+      const __m128i v_val_4_w =
+          _mm_load_si128((const __m128i *)(b + 4 * stride));
+      const __m128i v_val_5_w =
+          _mm_load_si128((const __m128i *)(b + 5 * stride));
+      const __m128i v_val_6_w =
+          _mm_load_si128((const __m128i *)(b + 6 * stride));
+      const __m128i v_val_7_w =
+          _mm_load_si128((const __m128i *)(b + 7 * stride));
 
       const __m128i v_sq_0_d = _mm_madd_epi16(v_val_0_w, v_val_0_w);
       const __m128i v_sq_1_d = _mm_madd_epi16(v_val_1_w, v_val_1_w);
@@ -91,7 +102,7 @@ static uint64_t vpx_sum_squares_2d_i16_nxn_sse2(const int16_t *src,
     v_acc_q = _mm_add_epi64(v_acc_q, _mm_and_si128(v_acc_d, v_zext_mask_q));
     v_acc_q = _mm_add_epi64(v_acc_q, _mm_srli_epi64(v_acc_d, 32));
 
-    src += 8*stride;
+    src += 8 * stride;
   }
 
   v_acc_q = _mm_add_epi64(v_acc_q, _mm_srli_si128(v_acc_q, 8));
@@ -101,21 +112,20 @@ static uint64_t vpx_sum_squares_2d_i16_nxn_sse2(const int16_t *src,
 #else
   {
     uint64_t tmp;
-    _mm_storel_epi64((__m128i*)&tmp, v_acc_q);
+    _mm_storel_epi64((__m128i *)&tmp, v_acc_q);
     return tmp;
   }
 #endif
 }
 
-uint64_t vpx_sum_squares_2d_i16_sse2(const int16_t *src, int stride,
-                                     int size) {
+uint64_t vpx_sum_squares_2d_i16_sse2(const int16_t *src, int stride, int size) {
   // 4 elements per row only requires half an XMM register, so this
   // must be a special case, but also note that over 75% of all calls
   // are with size == 4, so it is also the common case.
   if (LIKELY(size == 4)) {
     return vpx_sum_squares_2d_i16_4x4_sse2(src, stride);
   } else {
-  // Generic case
+    // Generic case
     return vpx_sum_squares_2d_i16_nxn_sse2(src, stride, size);
   }
 }
@@ -176,7 +186,7 @@ static uint64_t vpx_sum_squares_i16_64n_sse2(const int16_t *src, uint32_t n) {
 #else
   {
     uint64_t tmp;
-    _mm_storel_epi64((__m128i*)&tmp, v_acc0_q);
+    _mm_storel_epi64((__m128i *)&tmp, v_acc0_q);
     return tmp;
   }
 #endif
@@ -186,7 +196,7 @@ uint64_t vpx_sum_squares_i16_sse2(const int16_t *src, uint32_t n) {
   if (n % 64 == 0) {
     return vpx_sum_squares_i16_64n_sse2(src, n);
   } else if (n > 64) {
-    int k = n & ~(64-1);
+    int k = n & ~(64 - 1);
     return vpx_sum_squares_i16_64n_sse2(src, k) +
            vpx_sum_squares_i16_c(src + k, n - k);
   } else {

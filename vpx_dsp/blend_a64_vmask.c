@@ -17,11 +17,10 @@
 
 #include "./vpx_dsp_rtcd.h"
 
-void vpx_blend_a64_vmask_c(
-    uint8_t *dst, uint32_t dst_stride,
-    const uint8_t *src0, uint32_t src0_stride,
-    const uint8_t *src1, uint32_t src1_stride,
-    const uint8_t *mask, int h, int w) {
+void vpx_blend_a64_vmask_c(uint8_t *dst, uint32_t dst_stride,
+                           const uint8_t *src0, uint32_t src0_stride,
+                           const uint8_t *src1, uint32_t src1_stride,
+                           const uint8_t *mask, int h, int w) {
   int i, j;
 
   assert(IMPLIES(src0 == dst, src0_stride == dst_stride));
@@ -35,19 +34,17 @@ void vpx_blend_a64_vmask_c(
   for (i = 0; i < h; ++i) {
     const int m = mask[i];
     for (j = 0; j < w; ++j) {
-      dst[i * dst_stride + j] = VPX_BLEND_A64(m,
-                                              src0[i * src0_stride + j],
+      dst[i * dst_stride + j] = VPX_BLEND_A64(m, src0[i * src0_stride + j],
                                               src1[i * src1_stride + j]);
     }
   }
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void vpx_highbd_blend_a64_vmask_c(
-    uint8_t *dst_8, uint32_t dst_stride,
-    const uint8_t *src0_8, uint32_t src0_stride,
-    const uint8_t *src1_8, uint32_t src1_stride,
-    const uint8_t *mask, int h, int w, int bd) {
+void vpx_highbd_blend_a64_vmask_c(uint8_t *dst_8, uint32_t dst_stride,
+                                  const uint8_t *src0_8, uint32_t src0_stride,
+                                  const uint8_t *src1_8, uint32_t src1_stride,
+                                  const uint8_t *mask, int h, int w, int bd) {
   int i, j;
   uint16_t *dst = CONVERT_TO_SHORTPTR(dst_8);
   const uint16_t *src0 = CONVERT_TO_SHORTPTR(src0_8);
@@ -66,8 +63,7 @@ void vpx_highbd_blend_a64_vmask_c(
   for (i = 0; i < h; ++i) {
     const int m = mask[i];
     for (j = 0; j < w; ++j) {
-      dst[i * dst_stride + j] = VPX_BLEND_A64(m,
-                                              src0[i * src0_stride + j],
+      dst[i * dst_stride + j] = VPX_BLEND_A64(m, src0[i * src0_stride + j],
                                               src1[i * src1_stride + j]);
     }
   }

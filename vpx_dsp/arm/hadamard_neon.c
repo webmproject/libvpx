@@ -12,9 +12,8 @@
 
 #include "./vpx_dsp_rtcd.h"
 
-static void hadamard8x8_one_pass(int16x8_t *a0, int16x8_t *a1,
-                                 int16x8_t *a2, int16x8_t *a3,
-                                 int16x8_t *a4, int16x8_t *a5,
+static void hadamard8x8_one_pass(int16x8_t *a0, int16x8_t *a1, int16x8_t *a2,
+                                 int16x8_t *a3, int16x8_t *a4, int16x8_t *a5,
                                  int16x8_t *a6, int16x8_t *a7) {
   const int16x8_t b0 = vaddq_s16(*a0, *a1);
   const int16x8_t b1 = vsubq_s16(*a0, *a1);
@@ -47,9 +46,8 @@ static void hadamard8x8_one_pass(int16x8_t *a0, int16x8_t *a1,
 // TODO(johannkoenig): Make a transpose library and dedup with idct. Consider
 // reversing transpose order which may make it easier for the compiler to
 // reconcile the vtrn.64 moves.
-static void transpose8x8(int16x8_t *a0, int16x8_t *a1,
-                         int16x8_t *a2, int16x8_t *a3,
-                         int16x8_t *a4, int16x8_t *a5,
+static void transpose8x8(int16x8_t *a0, int16x8_t *a1, int16x8_t *a2,
+                         int16x8_t *a3, int16x8_t *a4, int16x8_t *a5,
                          int16x8_t *a6, int16x8_t *a7) {
   // Swap 64 bit elements. Goes from:
   // a0: 00 01 02 03 04 05 06 07
@@ -91,14 +89,14 @@ static void transpose8x8(int16x8_t *a0, int16x8_t *a1,
   // a1657_hi:
   // 12 13 28 29 44 45 60 61
   // 14 15 30 31 46 47 62 63
-  const int32x4x2_t a0246_lo = vtrnq_s32(vreinterpretq_s32_s16(a04_lo),
-                                         vreinterpretq_s32_s16(a26_lo));
-  const int32x4x2_t a1357_lo = vtrnq_s32(vreinterpretq_s32_s16(a15_lo),
-                                         vreinterpretq_s32_s16(a37_lo));
-  const int32x4x2_t a0246_hi = vtrnq_s32(vreinterpretq_s32_s16(a04_hi),
-                                         vreinterpretq_s32_s16(a26_hi));
-  const int32x4x2_t a1357_hi = vtrnq_s32(vreinterpretq_s32_s16(a15_hi),
-                                         vreinterpretq_s32_s16(a37_hi));
+  const int32x4x2_t a0246_lo =
+      vtrnq_s32(vreinterpretq_s32_s16(a04_lo), vreinterpretq_s32_s16(a26_lo));
+  const int32x4x2_t a1357_lo =
+      vtrnq_s32(vreinterpretq_s32_s16(a15_lo), vreinterpretq_s32_s16(a37_lo));
+  const int32x4x2_t a0246_hi =
+      vtrnq_s32(vreinterpretq_s32_s16(a04_hi), vreinterpretq_s32_s16(a26_hi));
+  const int32x4x2_t a1357_hi =
+      vtrnq_s32(vreinterpretq_s32_s16(a15_hi), vreinterpretq_s32_s16(a37_hi));
 
   // Swap 16 bit elements resulting in:
   // b0:
