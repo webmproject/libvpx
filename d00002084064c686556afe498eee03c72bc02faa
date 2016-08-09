@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9924ef48_f6b3fe98",
+        "filename": "vp10/encoder/palette.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-08-09T22:52:40Z",
+      "side": 1,
+      "message": "We tried to avoid large stack memory allocation. I\u0027m not quite sure why, maybe Alex could give us some comments on it.",
+      "range": {
+        "startLine": 96,
+        "startChar": 2,
+        "endLine": 96,
+        "endChar": 37
+      },
+      "revId": "d00002084064c686556afe498eee03c72bc02faa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
