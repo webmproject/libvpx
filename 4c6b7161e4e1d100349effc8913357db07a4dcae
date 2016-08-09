@@ -16,6 +16,24 @@
       "revId": "4c6b7161e4e1d100349effc8913357db07a4dcae",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "79849b24_4add3367",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-09T19:35:50Z",
+      "side": 1,
+      "message": "\u003e you should be able to apply the mask with vand, no?\n\nNo. VBSL (Bitwise Select) selects each bit for the destination from the first operand if the\ncorresponding bit of the destination is 1, or from the second operand if the corresponding bit of\nthe destination is 0. It needs several extra instructions to do so if using vand.",
+      "parentUuid": "79849b24_ca29238f",
+      "revId": "4c6b7161e4e1d100349effc8913357db07a4dcae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
