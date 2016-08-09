@@ -29,10 +29,6 @@ vpx_set_ref() {
   local codec="$1"
   local encoder="${LIBVPX_BIN_PATH}/vpxcx_set_ref${VPX_TEST_EXE_SUFFIX}"
 
-  if [ "$codec" = "vp8" ]; then
-    encoder="${LIBVPX_BIN_PATH}/vp8cx_set_ref${VPX_TEST_EXE_SUFFIX}"
-  fi
-
   local output_file="${VPX_TEST_OUTPUT_DIR}/${codec}cx_set_ref_${codec}.ivf"
   local ref_frame_num=90
 
@@ -54,24 +50,12 @@ vpx_set_ref() {
   [ -e "${output_file}" ] || return 1
 }
 
-cx_set_ref_vp8() {
-  if [ "$(vp8_encode_available)" = "yes" ]; then
-    vpx_set_ref vp8 || return 1
-  fi
-}
-
-cx_set_ref_vp9() {
-  if [ "$(vp9_encode_available)" = "yes" ]; then
-    vpx_set_ref vp9 || return 1
-  fi
-}
-
 cx_set_ref_vp10() {
   if [ "$(vp10_encode_available)" = "yes" ]; then
     vpx_set_ref vp10 || return 1
   fi
 }
 
-cx_set_ref_tests="cx_set_ref_vp8 cx_set_ref_vp9 cx_set_ref_vp10"
+cx_set_ref_tests="cx_set_ref_vp10"
 
 run_tests cx_set_ref_verify_environment "${cx_set_ref_tests}"
