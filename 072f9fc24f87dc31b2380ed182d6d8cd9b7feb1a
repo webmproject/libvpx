@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "19a47fca_02a52ca0",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-09T17:18:52Z",
+      "side": 1,
+      "message": "\u003e this is supposed to be a compile-time constant, you might just be\n \u003e getting lucky with the inlining; try a configure with\n \u003e --disable-optimizations\n\nDone. There is no variable narrowing shift instruction, so I split it to 2 functions: filter_tap7() and filter_tap15() without \"int shift\" as a parameter.",
+      "parentUuid": "9974efbe_85c3e405",
+      "range": {
+        "startLine": 86,
+        "startChar": 51,
+        "endLine": 86,
+        "endChar": 56
+      },
+      "revId": "072f9fc24f87dc31b2380ed182d6d8cd9b7feb1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9974efbe_e583b8a9",
         "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2016-08-09T01:32:21Z",
       "side": 1,
       "message": "mark what you can const",
+      "range": {
+        "startLine": 90,
+        "startChar": 38,
+        "endLine": 90,
+        "endChar": 47
+      },
+      "revId": "072f9fc24f87dc31b2380ed182d6d8cd9b7feb1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19a47fca_c29e244c",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-09T17:18:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9974efbe_e583b8a9",
       "range": {
         "startLine": 90,
         "startChar": 38,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "19a47fca_e21c88ce",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-09T17:18:52Z",
+      "side": 1,
+      "message": "\u003e I\u0027d prefer not to duplicate the size of the vector in the name. the\n \u003e prototype here is visible an all of the intrinsics encode the size\n \u003e of the types in there name\n\nWill do in a separate patch.",
+      "parentUuid": "9974efbe_058114a1",
+      "range": {
+        "startLine": 91,
+        "startChar": 50,
+        "endLine": 91,
+        "endChar": 55
+      },
+      "revId": "072f9fc24f87dc31b2380ed182d6d8cd9b7feb1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9974efbe_45770ce3",
         "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
         "patchSetId": 7
@@ -82,6 +154,24 @@
       "writtenOn": "2016-08-09T01:32:21Z",
       "side": 1,
       "message": "I wonder how the compiler is handling register allocation here. you could hold a few of the results in intermediates before doing the final combine",
+      "revId": "072f9fc24f87dc31b2380ed182d6d8cd9b7feb1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19a47fca_42b334e6",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-09T17:18:52Z",
+      "side": 1,
+      "message": "\u003e I wonder how the compiler is handling register allocation here. you\n \u003e could hold a few of the results in intermediates before doing the\n \u003e final combine\n\nI tuned before and reusing intermediates such as \"2*p3+p2+p1+p0+q0\" slowed down a little bit. (gcc (Ubuntu 4.8.4-2ubuntu1~14.04.3) 4.8.4)",
+      "parentUuid": "9974efbe_45770ce3",
       "revId": "072f9fc24f87dc31b2380ed182d6d8cd9b7feb1a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -105,6 +195,24 @@
     },
     {
       "key": {
+        "uuid": "19a47fca_a28a0010",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-09T17:18:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9974efbe_059a7403",
+      "revId": "072f9fc24f87dc31b2380ed182d6d8cd9b7feb1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9974efbe_056b54ee",
         "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
         "patchSetId": 7
@@ -116,6 +224,24 @@
       "writtenOn": "2016-08-09T01:32:21Z",
       "side": 1,
       "message": "if it doesn\u0027t make a difference in the generated code, offsets by constant * p would be a bit more readable.",
+      "revId": "072f9fc24f87dc31b2380ed182d6d8cd9b7feb1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19a47fca_1f86a312",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 402,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-09T17:18:52Z",
+      "side": 1,
+      "message": "\u003e if it doesn\u0027t make a difference in the generated code, offsets by\n \u003e constant * p would be a bit more readable.\n\nI tried\n        vst1q_u8(d,         o0);\n        vst1q_u8(d + 1 * p, o1);\n        vst1q_u8(d + 2 * p, o2);\n        vst1q_u8(d + 3 * p, o3);\n        vst1q_u8(d + 4 * p, o4);\n        vst1q_u8(d + 5 * p, o5);\n        vst1q_u8(d + 6 * p, o6);\n        vst1q_u8(d + 7 * p, o7);\n        d +\u003d 8 * p;\nand the compiler generated 23 more instructions.",
+      "parentUuid": "9974efbe_056b54ee",
       "revId": "072f9fc24f87dc31b2380ed182d6d8cd9b7feb1a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
