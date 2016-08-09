@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9924ef48_f61a1e21",
+        "filename": "vpx_dsp/bitreader.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-09T23:55:07Z",
+      "side": 1,
+      "message": "merge this and the line above",
+      "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_560af2d1",
+        "filename": "vpx_dsp/bitreader.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-09T23:55:07Z",
+      "side": 1,
+      "message": "// CONFIG_BITSTREAM_DEBUG",
+      "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_d6dfe238",
+        "filename": "vpx_util/debug_util.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-09T23:55:07Z",
+      "side": 1,
+      "message": "trailing \u0027;\u0027",
+      "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_d6b122fc",
+        "filename": "vpx_util/debug_util.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-09T23:55:07Z",
+      "side": 1,
+      "message": "how about \u0027..._set_skip_write(int skip)\u0027?",
+      "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_d9a4f3a6",
+        "filename": "vpx_util/debug_util.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-09T23:55:07Z",
+      "side": 1,
+      "message": "do you need the \u0027_prev\u0027 or are you expecting each to be cleared through an encode/decode pass? wouldn\u0027t the use of push/pop handle this?",
+      "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_56dd1234",
+        "filename": "vpx_util/debug_util.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-09T23:55:07Z",
+      "side": 1,
+      "message": "// CONFIG_BITSTREAM_DEBUG",
+      "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_5633d2a7",
+        "filename": "vpx_util/debug_util.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-09T23:55:07Z",
+      "side": 1,
+      "message": "this is unused here",
+      "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_36117600",
+        "filename": "vpx_util/debug_util.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-09T23:55:07Z",
+      "side": 1,
+      "message": "long lines",
+      "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_76304e9a",
+        "filename": "vpx_util/debug_util.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-09T23:55:07Z",
+      "side": 1,
+      "message": "should be \u0027int bitstream_queue_get_write(void);\u0027",
+      "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_162d5a41",
+        "filename": "vpx_util/debug_util.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-09T23:55:07Z",
+      "side": 1,
+      "message": "\u0027*\u0027 is associated with the variable in this project",
+      "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_362ad62a",
+        "filename": "vpx_util/debug_util.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-09T23:55:07Z",
+      "side": 1,
+      "message": "// CONFIG_BITSTREAM_DEBUG",
+      "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
