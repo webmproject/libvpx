@@ -982,7 +982,7 @@ void vp10_highbd_quantize_fp_c(const tran_low_t *coeff_ptr,
                               const int16_t *dequant_ptr,
                               uint16_t *eob_ptr,
                               const int16_t *scan,
-                              const int16_t *iscan, const int log_scale) {
+                              const int16_t *iscan, int log_scale) {
   int i;
   int eob = -1;
   const int scale = 1 << log_scale;
@@ -1069,7 +1069,7 @@ void vp10_highbd_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                               tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                               const int16_t *dequant_ptr,
                               uint16_t *eob_ptr, const int16_t *scan,
-                              const int16_t *iscan, const int log_scale) {
+                              const int16_t *iscan, int log_scale) {
   int i, non_zero_count = (int)n_coeffs, eob = -1;
   int zbins[2] = {zbin_ptr[0], zbin_ptr[1]};
   int round[2] = {round_ptr[0], round_ptr[1]};
