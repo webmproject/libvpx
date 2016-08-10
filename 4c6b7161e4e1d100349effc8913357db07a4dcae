@@ -34,6 +34,24 @@
       "revId": "4c6b7161e4e1d100349effc8913357db07a4dcae",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_5cebf1a8",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-10T01:35:39Z",
+      "side": 1,
+      "message": "as it\u0027s built now that\u0027s true. I was expecting this to have a much higher latency; in webp we join the hev \u0026 regular mask along with the above delta, then use that to later construct the complex loopfilter mask. we can then use both to mask the source. I\u0027ll take a closer look.",
+      "parentUuid": "79849b24_4add3367",
+      "revId": "4c6b7161e4e1d100349effc8913357db07a4dcae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
