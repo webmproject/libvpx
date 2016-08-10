@@ -3616,11 +3616,11 @@ static void rd_pick_palette_intra_sbuv(
 #if CONFIG_VP9_HIGHBITDEPTH
           if (cpi->common.use_highbitdepth)
             pmi->palette_colors[i * PALETTE_MAX_SIZE + j] = clip_pixel_highbd(
-                (int)lroundf(centroids[j * 2 + i - 1]), cpi->common.bit_depth);
+                (int)centroids[j * 2 + i - 1], cpi->common.bit_depth);
           else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
             pmi->palette_colors[i * PALETTE_MAX_SIZE + j] =
-                clip_pixel((int)lroundf(centroids[j * 2 + i - 1]));
+                clip_pixel((int)centroids[j * 2 + i - 1]);
         }
       }
 
