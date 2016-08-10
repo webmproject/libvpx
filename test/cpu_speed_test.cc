@@ -65,13 +65,19 @@ class CpuSpeedTest
       min_psnr_ = pkt->data.psnr.psnr[0];
   }
 
+  void TestQ0();
+  void TestScreencastQ0();
+  void TestTuneScreen();
+  void TestEncodeHighBitrate();
+  void TestLowBitrate();
+
   ::libvpx_test::TestMode encoding_mode_;
   int set_cpu_used_;
   double min_psnr_;
   int tune_content_;
 };
 
-TEST_P(CpuSpeedTest, TestQ0) {
+void CpuSpeedTest::TestQ0() {
   // Validate that this non multiple of 64 wide clip encodes and decodes
   // without a mismatch when passing in a very low max q.  This pushes
   // the encoder to producing lots of big partitions which will likely
@@ -91,7 +97,7 @@ TEST_P(CpuSpeedTest, TestQ0) {
   EXPECT_GE(min_psnr_, kMaxPSNR);
 }
 
-TEST_P(CpuSpeedTest, TestScreencastQ0) {
+void CpuSpeedTest::TestScreencastQ0() {
   ::libvpx_test::Y4mVideoSource video("screendata.y4m", 0, 10);
   cfg_.g_timebase = video.timebase();
   cfg_.rc_2pass_vbr_minsection_pct = 5;
@@ -106,7 +112,7 @@ TEST_P(CpuSpeedTest, TestScreencastQ0) {
   EXPECT_GE(min_psnr_, kMaxPSNR);
 }
 
-TEST_P(CpuSpeedTest, TestTuneScreen) {
+void CpuSpeedTest::TestTuneScreen() {
   ::libvpx_test::Y4mVideoSource video("screendata.y4m", 0, 10);
   cfg_.g_timebase = video.timebase();
   cfg_.rc_2pass_vbr_minsection_pct = 5;
@@ -121,7 +127,7 @@ TEST_P(CpuSpeedTest, TestTuneScreen) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
-TEST_P(CpuSpeedTest, TestEncodeHighBitrate) {
+void CpuSpeedTest::TestEncodeHighBitrate() {
   // Validate that this non multiple of 64 wide clip encodes and decodes
   // without a mismatch when passing in a very low max q.  This pushes
   // the encoder to producing lots of big partitions which will likely
@@ -138,7 +144,7 @@ TEST_P(CpuSpeedTest, TestEncodeHighBitrate) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
-TEST_P(CpuSpeedTest, TestLowBitrate) {
+void CpuSpeedTest::TestLowBitrate() {
   // Validate that this clip encodes and decodes without a mismatch
   // when passing in a very high min q.  This pushes the encoder to producing
   // lots of small partitions which might will test the other condition.
@@ -153,8 +159,26 @@ TEST_P(CpuSpeedTest, TestLowBitrate) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
+TEST_P(CpuSpeedTest, TestQ0) { TestQ0(); }
+TEST_P(CpuSpeedTest, TestScreencastQ0) { TestScreencastQ0(); }
+TEST_P(CpuSpeedTest, TestTuneScreen) { TestTuneScreen(); }
+TEST_P(CpuSpeedTest, TestEncodeHighBitrate) { TestEncodeHighBitrate(); }
+TEST_P(CpuSpeedTest, TestLowBitrate) { TestLowBitrate(); }
+
+class CpuSpeedTestLarge : public CpuSpeedTest {};
+
+TEST_P(CpuSpeedTestLarge, TestQ0) { TestQ0(); }
+TEST_P(CpuSpeedTestLarge, TestScreencastQ0) { TestScreencastQ0(); }
+TEST_P(CpuSpeedTestLarge, TestTuneScreen) { TestTuneScreen(); }
+TEST_P(CpuSpeedTestLarge, TestEncodeHighBitrate) { TestEncodeHighBitrate(); }
+TEST_P(CpuSpeedTestLarge, TestLowBitrate) { TestLowBitrate(); }
+
 VP10_INSTANTIATE_TEST_CASE(
     CpuSpeedTest,
     ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood),
-    ::testing::Range(0, 3));
+    ::testing::Range(1, 3));
+VP10_INSTANTIATE_TEST_CASE(
+    CpuSpeedTestLarge,
+    ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood),
+    ::testing::Range(0, 1));
 }  // namespace
