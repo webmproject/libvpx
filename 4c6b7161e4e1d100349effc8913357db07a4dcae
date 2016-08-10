@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9924ef48_6deb99a9",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-10T18:12:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9924ef48_e77b4a21",
+      "revId": "4c6b7161e4e1d100349effc8913357db07a4dcae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "79849b24_ca29238f",
         "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
         "patchSetId": 9
@@ -72,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "9924ef48_4de25dcc",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-10T18:12:07Z",
+      "side": 1,
+      "message": "I looked webp version. Its lpf is different that it calculates p+delta or q-delta, so the mask can be applied (vand) to delta first and then vadd or vsub. In vpx, it\u0027s a 7-tap or 15-tap filter which has no delta, and applying mask would be more expensive using vand.",
+      "parentUuid": "9924ef48_5cebf1a8",
+      "revId": "4c6b7161e4e1d100349effc8913357db07a4dcae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9924ef48_878db628",
         "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
         "patchSetId": 9
@@ -83,6 +119,24 @@
       "writtenOn": "2016-08-10T06:09:13Z",
       "side": 1,
       "message": "align these",
+      "revId": "4c6b7161e4e1d100349effc8913357db07a4dcae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_6d2cf9ff",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-10T18:12:07Z",
+      "side": 1,
+      "message": "Tried, but failed in style clang-format check. Then reverted back.",
+      "parentUuid": "9924ef48_878db628",
       "revId": "4c6b7161e4e1d100349effc8913357db07a4dcae",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -106,6 +160,24 @@
     },
     {
       "key": {
+        "uuid": "9924ef48_2d36014e",
+        "filename": "vpx_dsp/arm/transpose_neon.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-10T18:12:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9924ef48_67b97ac5",
+      "revId": "4c6b7161e4e1d100349effc8913357db07a4dcae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9924ef48_27b382e7",
         "filename": "vpx_dsp/arm/transpose_neon.h",
         "patchSetId": 9
@@ -117,6 +189,24 @@
       "writtenOn": "2016-08-10T06:09:13Z",
       "side": 1,
       "message": "no need to encode the size in the name",
+      "revId": "4c6b7161e4e1d100349effc8913357db07a4dcae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_4d333d5d",
+        "filename": "vpx_dsp/arm/transpose_neon.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-10T18:12:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9924ef48_27b382e7",
       "revId": "4c6b7161e4e1d100349effc8913357db07a4dcae",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
