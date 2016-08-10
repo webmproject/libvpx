@@ -69,6 +69,30 @@
       "revId": "d00002084064c686556afe498eee03c72bc02faa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_fca99d7b",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1937,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-10T01:30:41Z",
+      "side": 1,
+      "message": "Oh, I see that rounding is already in the deduplication, nevermind.\n\nI think the palette module handling all the rounding and type conversion internally is a \"would be nice\" (but I\u0027m not suggesting it be required in this refactoring.)",
+      "parentUuid": "9924ef48_d9e2b331",
+      "range": {
+        "startLine": 1937,
+        "startChar": 45,
+        "endLine": 1937,
+        "endChar": 65
+      },
+      "revId": "d00002084064c686556afe498eee03c72bc02faa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
