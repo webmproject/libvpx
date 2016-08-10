@@ -509,7 +509,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   // best quality defaults
   sf->frame_parameter_update = 1;
   sf->mv.search_method = NSTEP;
-  sf->recode_loop = ALLOW_RECODE;
+  sf->recode_loop = ALLOW_RECODE_KFARFGF;
   sf->mv.subpel_search_method = SUBPEL_TREE;
   sf->mv.subpel_iters_per_step = 2;
   sf->mv.subpel_force_stop = 0;
