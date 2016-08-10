@@ -22,6 +22,30 @@
       "revId": "080df835c1aa129018b13cbffc31876a1e0c6755",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_ad8a1169",
+        "filename": "vp10/encoder/palette.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-10T19:26:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9924ef48_76612e0f",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 19
+      },
+      "revId": "080df835c1aa129018b13cbffc31876a1e0c6755",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
