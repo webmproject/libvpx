@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "9924ef48_2d43614d",
+        "filename": "vp10/encoder/palette.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-10T18:56:31Z",
+      "side": 1,
+      "message": "Ah, my mistake then.\n\nAs talked to Hui offline, though, the rest of my comments above still apply. So, there is no clear downside to keeping this array on stack (4096 bytes fixed size array), and at the same time, there are some upsides to it (array local to where it is used, memory for the array used only during the invocation of this function).\n\n@Alex: I\u0027ll go ahead with this patch, as agreed with Hui. We can revisit this when you are back from vacation if needed.",
+      "parentUuid": "9924ef48_22d7f016",
+      "range": {
+        "startLine": 96,
+        "startChar": 2,
+        "endLine": 96,
+        "endChar": 37
+      },
+      "revId": "d00002084064c686556afe498eee03c72bc02faa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9924ef48_d9e2b331",
         "filename": "vp10/encoder/rdopt.c",
         "patchSetId": 1
