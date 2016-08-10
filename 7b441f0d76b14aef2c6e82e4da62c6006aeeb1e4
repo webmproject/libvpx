@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9924ef48_22eb7078",
+        "filename": "vpx_dsp/bitreader.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-10T16:58:18Z",
+      "side": 1,
+      "message": "This include can probably be wrapped inside \"#if CONFIG_BITSTREAM_DEBUG ... #endif\"",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 18
+      },
+      "revId": "7b441f0d76b14aef2c6e82e4da62c6006aeeb1e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
