@@ -40,7 +40,6 @@ typedef struct {
   tran_low_t *dqcoeff[MAX_MB_PLANE][3];
   uint16_t *eobs[MAX_MB_PLANE][3];
 
-  int is_coded;
   int num_4x4_blk;
   int skip;
   int pred_pixel_ready;

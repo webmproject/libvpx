@@ -1646,7 +1646,6 @@ static void rd_pick_sb_modes(AV1_COMP *cpi, TileDataEnc *tile_data,
   for (i = 0; i < 2; ++i) pd[i].color_index_map = ctx->color_index_map[i];
 #endif  // CONFIG_PALETTE
 
-  ctx->is_coded = 0;
   ctx->skippable = 0;
   ctx->pred_pixel_ready = 0;
 
@@ -5018,7 +5017,6 @@ static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
 
-  ctx->is_coded = 1;
   x->use_lp32x32fdct = cpi->sf.use_lp32x32fdct;
 
   if (!is_inter_block(mbmi)) {
