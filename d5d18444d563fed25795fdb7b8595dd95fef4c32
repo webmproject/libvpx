@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9924ef48_7c44ada3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-10T02:01:44Z",
+      "side": 1,
+      "message": "best to give some idea of where you\u0027re doing this and give a bit more detail on what type you\u0027re normalizing to",
+      "revId": "d5d18444d563fed25795fdb7b8595dd95fef4c32",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_3c3e350c",
+        "filename": "vp10/encoder/rd.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 402,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-10T02:01:44Z",
+      "side": 1,
+      "message": "you can leave some of this to clang-format if you want to keep the noise down here",
+      "revId": "d5d18444d563fed25795fdb7b8595dd95fef4c32",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
