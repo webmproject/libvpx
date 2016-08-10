@@ -4407,6 +4407,7 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 
 #if CONFIG_GLOBAL_MOTION
 #define MIN_TRANS_THRESH 8
+#define GLOBAL_MOTION_ADVANTAGE_THRESH 0.60
 #define GLOBAL_MOTION_MODEL ROTZOOM
 static void convert_to_params(double *H, TransformationType type,
                               Global_Motion_Params *model) {
@@ -4472,20 +4473,36 @@ static void encode_frame_internal(VP10_COMP *cpi) {
   rdc->ex_search_count = 0;  // Exhaustive mesh search hits.
 
 #if CONFIG_GLOBAL_MOTION
-  // TODO(sarahparker) this is a placeholder for gm computation
   vpx_clear_system_state();
   vp10_zero(cpi->global_motion_used);
   if (cpi->common.frame_type == INTER_FRAME && cpi->Source) {
     YV12_BUFFER_CONFIG *ref_buf;
     int frame;
-    double H[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 1 };
+    double H[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     for (frame = LAST_FRAME; frame <= ALTREF_FRAME; ++frame) {
       ref_buf = get_ref_frame_buffer(cpi, frame);
       if (ref_buf) {
-        if (compute_global_motion_feature_based(cpi, GLOBAL_MOTION_MODEL,
-                                                cpi->Source, ref_buf, 0.5, H))
+        if (compute_global_motion_feature_based(GLOBAL_MOTION_MODEL,
+                                                cpi->Source, ref_buf, H)) {
           convert_model_to_params(H, GLOBAL_MOTION_MODEL,
                                   &cm->global_motion[frame]);
+          if (get_gmtype(&cm->global_motion[frame]) > GLOBAL_ZERO) {
+            // compute the advantage of using gm parameters over 0 motion
+            double erroradvantage = vp10_warp_erroradv(
+                &cm->global_motion[frame].motion_params,
+#if CONFIG_VP9_HIGHBITDEPTH
+                xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH, xd->bd,
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+                ref_buf->y_buffer, ref_buf->y_width, ref_buf->y_height,
+                ref_buf->y_stride, cpi->Source->y_buffer, 0, 0,
+                cpi->Source->y_width, cpi->Source->y_height,
+                cpi->Source->y_stride, 0, 0, 16, 16);
+            if (erroradvantage > GLOBAL_MOTION_ADVANTAGE_THRESH)
+              // Not enough advantage in using a global model. Make 0.
+              memset(&cm->global_motion[frame], 0,
+                     sizeof(cm->global_motion[frame]));
+          }
+        }
       }
     }
   }

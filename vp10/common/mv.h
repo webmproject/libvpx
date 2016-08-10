@@ -52,7 +52,7 @@ typedef struct mv32 {
 // for each parameter. In other words, after a parameter is integerized
 // it is clamped between -(1 << ABS_XXX_BITS) and (1 << ABS_XXX_BITS).
 //
-// XXX_PREC_DIFF, XXX_ENCODE_FACTOR and XXX_DECODE_FACTOR
+// XXX_PREC_DIFF and XXX_DECODE_FACTOR
 // are computed once here to prevent repetitive
 // computation on the decoder side. These are
 // to allow the global motion parameters to be encoded in a lower
@@ -64,12 +64,10 @@ typedef struct mv32 {
 #define GM_TRANS_PREC_BITS 5
 #define GM_TRANS_PREC_DIFF (WARPEDMODEL_PREC_BITS - GM_TRANS_PREC_BITS)
 #define GM_TRANS_DECODE_FACTOR (1 << GM_TRANS_PREC_DIFF)
-#define GM_TRANS_ENCODE_FACTOR (1 / (GM_TRANS_DECODE_FACTOR))
 
 #define GM_ALPHA_PREC_BITS 5
 #define GM_ALPHA_PREC_DIFF (WARPEDMODEL_PREC_BITS - GM_ALPHA_PREC_BITS)
 #define GM_ALPHA_DECODE_FACTOR (1 << GM_ALPHA_PREC_DIFF)
-#define GM_ALPHA_ENCODE_FACTOR (1 / (GM_ALPHA_DECODE_FACTOR))
 
 #define GM_ABS_ALPHA_BITS 8
 #define GM_ABS_TRANS_BITS 8

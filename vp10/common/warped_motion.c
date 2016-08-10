@@ -16,32 +16,7 @@
 
 #include "vp10/common/warped_motion.h"
 
-typedef void (*projectPointsType)(int *mat, int *points, int *proj, const int n,
-                                  const int stride_points,
-                                  const int stride_proj,
-                                  const int subsampling_x,
-                                  const int subsampling_y);
-
-static void projectPointsHomography(int *mat, int *points, int *proj,
-                                    const int n, const int stride_points,
-                                    const int stride_proj,
-                                    const int subsampling_x,
-                                    const int subsampling_y);
-static void projectPointsAffine(int *mat, int *points, int *proj, const int n,
-                                const int stride_points, const int stride_proj,
-                                const int subsampling_x,
-                                const int subsampling_y);
-static void projectPointsRotZoom(int *mat, int *points, int *proj, const int n,
-                                 const int stride_points, const int stride_proj,
-                                 const int subsampling_x,
-                                 const int subsampling_y);
-static void projectPointsTranslation(int *mat, int *points, int *proj,
-                                     const int n, const int stride_points,
-                                     const int stride_proj,
-                                     const int subsampling_x,
-                                     const int subsampling_y);
-
-static projectPointsType get_projectPointsType(TransformationType type) {
+static ProjectPointsType get_project_points_type(TransformationType type) {
   switch (type) {
     case HOMOGRAPHY: return projectPointsHomography;
     case AFFINE: return projectPointsAffine;
@@ -51,11 +26,10 @@ static projectPointsType get_projectPointsType(TransformationType type) {
   }
 }
 
-static void projectPointsTranslation(int *mat, int *points, int *proj,
-                                     const int n, const int stride_points,
-                                     const int stride_proj,
-                                     const int subsampling_x,
-                                     const int subsampling_y) {
+void projectPointsTranslation(int *mat, int *points, int *proj, const int n,
+                              const int stride_points, const int stride_proj,
+                              const int subsampling_x,
+                              const int subsampling_y) {
   int i;
   for (i = 0; i < n; ++i) {
     const int x = *(points++), y = *(points++);
@@ -105,10 +79,9 @@ void projectPointsRotZoom(int *mat, int *points, int *proj, const int n,
   }
 }
 
-static void projectPointsAffine(int *mat, int *points, int *proj, const int n,
-                                const int stride_points, const int stride_proj,
-                                const int subsampling_x,
-                                const int subsampling_y) {
+void projectPointsAffine(int *mat, int *points, int *proj, const int n,
+                         const int stride_points, const int stride_proj,
+                         const int subsampling_x, const int subsampling_y) {
   int i;
   for (i = 0; i < n; ++i) {
     const int x = *(points++), y = *(points++);
@@ -133,11 +106,9 @@ static void projectPointsAffine(int *mat, int *points, int *proj, const int n,
   }
 }
 
-static void projectPointsHomography(int *mat, int *points, int *proj,
-                                    const int n, const int stride_points,
-                                    const int stride_proj,
-                                    const int subsampling_x,
-                                    const int subsampling_y) {
+void projectPointsHomography(int *mat, int *points, int *proj, const int n,
+                             const int stride_points, const int stride_proj,
+                             const int subsampling_x, const int subsampling_y) {
   int i;
   int64_t x, y, Z;
   int64_t xp, yp;
@@ -382,28 +353,6 @@ static uint8_t warp_interpolate(uint8_t *ref, int x, int y, int width,
   }
 }
 
-static void warp_plane(WarpedMotionParams *wm, uint8_t *ref, int width,
-                       int height, int stride, uint8_t *pred, int p_col,
-                       int p_row, int p_width, int p_height, int p_stride,
-                       int subsampling_x, int subsampling_y, int x_scale,
-                       int y_scale) {
-  int i, j;
-  projectPointsType projectPoints = get_projectPointsType(wm->wmtype);
-  if (projectPoints == NULL) return;
-  for (i = p_row; i < p_row + p_height; ++i) {
-    for (j = p_col; j < p_col + p_width; ++j) {
-      int in[2], out[2];
-      in[0] = j;
-      in[1] = i;
-      projectPoints(wm->wmmat, in, out, 1, 2, 2, subsampling_x, subsampling_y);
-      out[0] = ROUND_POWER_OF_TWO_SIGNED(out[0] * x_scale, 4);
-      out[1] = ROUND_POWER_OF_TWO_SIGNED(out[1] * y_scale, 4);
-      pred[(j - p_col) + (i - p_row) * p_stride] =
-          warp_interpolate(ref, out[0], out[1], width, height, stride);
-    }
-  }
-}
-
 #if CONFIG_VP9_HIGHBITDEPTH
 static INLINE void highbd_get_subcolumn(int taps, uint16_t *ref, int32_t *col,
                                         int stride, int x, int y_start) {
@@ -517,6 +466,38 @@ static uint16_t highbd_warp_interpolate(uint16_t *ref, int x, int y, int width,
   }
 }
 
+static double highbd_warp_erroradv(WarpedMotionParams *wm, uint8_t *ref8,
+                                   int width, int height, int stride,
+                                   uint8_t *dst8, int p_col, int p_row,
+                                   int p_width, int p_height, int p_stride,
+                                   int subsampling_x, int subsampling_y,
+                                   int x_scale, int y_scale, int bd) {
+  int i, j;
+  ProjectPointsType projectpoints = get_project_points_type(wm->wmtype);
+  uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
+  uint16_t *ref = CONVERT_TO_SHORTPTR(ref8);
+  int gm_err = 0, no_gm_err = 0;
+  int gm_sumerr = 0, no_gm_sumerr = 0;
+  for (i = p_row; i < p_row + p_height; ++i) {
+    for (j = p_col; j < p_col + p_width; ++j) {
+      int in[2], out[2];
+      in[0] = j;
+      in[1] = i;
+      projectpoints(wm->wmmat, in, out, 1, 2, 2, subsampling_x, subsampling_y);
+      out[0] = ROUND_POWER_OF_TWO_SIGNED(out[0] * x_scale, 4);
+      out[1] = ROUND_POWER_OF_TWO_SIGNED(out[1] * y_scale, 4);
+      gm_err = dst[(j - p_col) + (i - p_row) * p_stride] -
+               highbd_warp_interpolate(ref, out[0], out[1], width, height,
+                                       stride, bd);
+      no_gm_err = dst[(j - p_col) + (i - p_row) * p_stride] -
+                  ref[(j - p_col) + (i - p_row) * stride];
+      gm_sumerr += gm_err * gm_err;
+      no_gm_sumerr += no_gm_err * no_gm_err;
+    }
+  }
+  return (double)gm_sumerr / no_gm_sumerr;
+}
+
 static void highbd_warp_plane(WarpedMotionParams *wm, uint8_t *ref8, int width,
                               int height, int stride, uint8_t *pred8, int p_col,
                               int p_row, int p_width, int p_height,
@@ -524,16 +505,16 @@ static void highbd_warp_plane(WarpedMotionParams *wm, uint8_t *ref8, int width,
                               int subsampling_y, int x_scale, int y_scale,
                               int bd) {
   int i, j;
-  projectPointsType projectPoints = get_projectPointsType(wm->wmtype);
+  ProjectPointsType projectpoints = get_project_points_type(wm->wmtype);
   uint16_t *pred = CONVERT_TO_SHORTPTR(pred8);
   uint16_t *ref = CONVERT_TO_SHORTPTR(ref8);
-  if (projectPoints == NULL) return;
+  if (projectpoints == NULL) return;
   for (i = p_row; i < p_row + p_height; ++i) {
     for (j = p_col; j < p_col + p_width; ++j) {
       int in[2], out[2];
       in[0] = j;
       in[1] = i;
-      projectPoints(wm->wmmat, in, out, 1, 2, 2, subsampling_x, subsampling_y);
+      projectpoints(wm->wmmat, in, out, 1, 2, 2, subsampling_x, subsampling_y);
       out[0] = ROUND_POWER_OF_TWO_SIGNED(out[0] * x_scale, 4);
       out[1] = ROUND_POWER_OF_TWO_SIGNED(out[1] * y_scale, 4);
       pred[(j - p_col) + (i - p_row) * p_stride] = highbd_warp_interpolate(
@@ -542,6 +523,76 @@ static void highbd_warp_plane(WarpedMotionParams *wm, uint8_t *ref8, int width,
   }
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
+static double warp_erroradv(WarpedMotionParams *wm, uint8_t *ref, int width,
+                            int height, int stride, uint8_t *dst, int p_col,
+                            int p_row, int p_width, int p_height, int p_stride,
+                            int subsampling_x, int subsampling_y, int x_scale,
+                            int y_scale) {
+  int gm_err = 0, no_gm_err = 0;
+  int gm_sumerr = 0, no_gm_sumerr = 0;
+  int i, j;
+  ProjectPointsType projectpoints = get_project_points_type(wm->wmtype);
+  for (i = p_row; i < p_row + p_height; ++i) {
+    for (j = p_col; j < p_col + p_width; ++j) {
+      int in[2], out[2];
+      in[0] = j;
+      in[1] = i;
+      projectpoints(wm->wmmat, in, out, 1, 2, 2, subsampling_x, subsampling_y);
+      out[0] = ROUND_POWER_OF_TWO_SIGNED(out[0] * x_scale, 4);
+      out[1] = ROUND_POWER_OF_TWO_SIGNED(out[1] * y_scale, 4);
+      gm_err = dst[(j - p_col) + (i - p_row) * p_stride] -
+               warp_interpolate(ref, out[0], out[1], width, height, stride);
+      no_gm_err = dst[(j - p_col) + (i - p_row) * p_stride] -
+                  ref[(j - p_col) + (i - p_row) * stride];
+      gm_sumerr += gm_err * gm_err;
+      no_gm_sumerr += no_gm_err * no_gm_err;
+    }
+  }
+  return (double)gm_sumerr / no_gm_sumerr;
+}
+
+static void warp_plane(WarpedMotionParams *wm, uint8_t *ref, int width,
+                       int height, int stride, uint8_t *pred, int p_col,
+                       int p_row, int p_width, int p_height, int p_stride,
+                       int subsampling_x, int subsampling_y, int x_scale,
+                       int y_scale) {
+  int i, j;
+  ProjectPointsType projectpoints = get_project_points_type(wm->wmtype);
+  if (projectpoints == NULL) return;
+  for (i = p_row; i < p_row + p_height; ++i) {
+    for (j = p_col; j < p_col + p_width; ++j) {
+      int in[2], out[2];
+      in[0] = j;
+      in[1] = i;
+      projectpoints(wm->wmmat, in, out, 1, 2, 2, subsampling_x, subsampling_y);
+      out[0] = ROUND_POWER_OF_TWO_SIGNED(out[0] * x_scale, 4);
+      out[1] = ROUND_POWER_OF_TWO_SIGNED(out[1] * y_scale, 4);
+      pred[(j - p_col) + (i - p_row) * p_stride] =
+          warp_interpolate(ref, out[0], out[1], width, height, stride);
+    }
+  }
+}
+
+double vp10_warp_erroradv(WarpedMotionParams *wm,
+#if CONFIG_VP9_HIGHBITDEPTH
+                          int use_hbd, int bd,
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+                          uint8_t *ref, int width, int height, int stride,
+                          uint8_t *dst, int p_col, int p_row, int p_width,
+                          int p_height, int p_stride, int subsampling_x,
+                          int subsampling_y, int x_scale, int y_scale) {
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (use_hbd)
+    return highbd_warp_erroradv(
+        wm, ref, width, height, stride, dst, p_col, p_row, p_width, p_height,
+        p_stride, subsampling_x, subsampling_y, x_scale, y_scale, bd);
+  else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+    return warp_erroradv(wm, ref, width, height, stride, dst, p_col, p_row,
+                         p_width, p_height, p_stride, subsampling_x,
+                         subsampling_y, x_scale, y_scale);
+}
 
 void vp10_warp_plane(WarpedMotionParams *wm,
 #if CONFIG_VP9_HIGHBITDEPTH

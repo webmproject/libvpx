@@ -17,11 +17,11 @@
 extern "C" {
 #endif
 
-int compute_global_motion_feature_based(struct VP10_COMP *cpi,
-                                        TransformationType type,
+// compute global motion parameters between two frames
+int compute_global_motion_feature_based(TransformationType type,
                                         YV12_BUFFER_CONFIG *frm,
                                         YV12_BUFFER_CONFIG *ref,
-                                        double inlier_prob, double *H);
+                                        double *params);
 #ifdef __cplusplus
 }  // extern "C"
 #endif

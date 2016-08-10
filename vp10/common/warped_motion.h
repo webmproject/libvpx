@@ -37,6 +37,24 @@
 
 #define WARPEDDIFF_PREC_BITS (WARPEDMODEL_PREC_BITS - WARPEDPIXEL_PREC_BITS)
 
+typedef void (*ProjectPointsType)(int *mat, int *points, int *proj, const int n,
+                                  const int stride_points,
+                                  const int stride_proj,
+                                  const int subsampling_x,
+                                  const int subsampling_y);
+void projectPointsHomography(int *mat, int *points, int *proj, const int n,
+                             const int stride_points, const int stride_proj,
+                             const int subsampling_x, const int subsampling_y);
+void projectPointsAffine(int *mat, int *points, int *proj, const int n,
+                         const int stride_points, const int stride_proj,
+                         const int subsampling_x, const int subsampling_y);
+void projectPointsRotZoom(int *mat, int *points, int *proj, const int n,
+                          const int stride_points, const int stride_proj,
+                          const int subsampling_x, const int subsampling_y);
+void projectPointsTranslation(int *mat, int *points, int *proj, const int n,
+                              const int stride_points, const int stride_proj,
+                              const int subsampling_x, const int subsampling_y);
+
 typedef enum {
   UNKNOWN_TRANSFORM = -1,
   HOMOGRAPHY,   // homography, 8-parameter
@@ -53,6 +71,15 @@ typedef struct {
   TransformationType wmtype;
   int wmmat[8];  // For homography wmmat[9] is assumed to be 1
 } WarpedMotionParams;
+
+double vp10_warp_erroradv(WarpedMotionParams *wm,
+#if CONFIG_VP9_HIGHBITDEPTH
+                          int use_hbd, int bd,
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+                          uint8_t *ref, int width, int height, int stride,
+                          uint8_t *dst, int p_col, int p_row, int p_width,
+                          int p_height, int p_stride, int subsampling_x,
+                          int subsampling_y, int x_scale, int y_scale);
 
 void vp10_warp_plane(WarpedMotionParams *wm,
 #if CONFIG_VP9_HIGHBITDEPTH
