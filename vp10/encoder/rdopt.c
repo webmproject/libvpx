@@ -792,7 +792,7 @@ static void model_rd_from_sse(const VP10_COMP *const cpi,
                               const MACROBLOCKD *const xd,
                               BLOCK_SIZE bsize,
                               int plane,
-                              uint64_t sse,
+                              int64_t sse,
                               int *rate,
                               int64_t *dist) {
   const struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -809,7 +809,8 @@ static void model_rd_from_sse(const VP10_COMP *const cpi,
     int quantizer = (pd->dequant[1] >> dequant_shift);
 
     if (quantizer < 120)
-      *rate = (square_error * (280 - quantizer)) >> (16 - VP9_PROB_COST_SHIFT);
+      *rate = (int)((square_error * (280 - quantizer)) >>
+                    (16 - VP9_PROB_COST_SHIFT));
     else
       *rate = 0;
     *dist = (square_error * quantizer) >> 8;
@@ -4475,7 +4476,8 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi,
   k = i;
   for (idy = 0; idy < height / 4; idy += num_4x4_h) {
     for (idx = 0; idx < width / 4; idx += num_4x4_w) {
-      int64_t dist, ssz, rd, rd1, rd2, block;
+      int64_t dist, ssz, rd, rd1, rd2;
+      int block;
       int coeff_ctx;
       k += (idy * 2 + idx);
       if (tx_size == TX_4X4)

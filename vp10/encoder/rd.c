@@ -558,9 +558,9 @@ static void model_rd_norm(int xsq_q10, int *r_q10, int *d_q10) {
   *d_q10 = (dist_tab_q10[xq] * b_q10 + dist_tab_q10[xq + 1] * a_q10) >> 10;
 }
 
-void vp10_model_rd_from_var_lapndz(unsigned int var, unsigned int n_log2,
-                                  unsigned int qstep, int *rate,
-                                  int64_t *dist) {
+void vp10_model_rd_from_var_lapndz(int64_t var, unsigned int n_log2,
+                                   unsigned int qstep, int *rate,
+                                   int64_t *dist) {
   // This function models the rate and distortion for a Laplacian
   // source with given variance when quantized with a uniform quantizer
   // with given stepsize. The closed form expressions are in:

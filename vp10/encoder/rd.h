@@ -394,21 +394,21 @@ void vp10_initialize_rd_consts(struct VP10_COMP *cpi);
 void vp10_initialize_me_consts(const struct VP10_COMP *cpi,
                                MACROBLOCK *x, int qindex);
 
-void vp10_model_rd_from_var_lapndz(unsigned int var, unsigned int n,
-                                  unsigned int qstep, int *rate,
-                                  int64_t *dist);
+void vp10_model_rd_from_var_lapndz(int64_t var, unsigned int n,
+                                   unsigned int qstep, int *rate,
+                                   int64_t *dist);
 
 int vp10_get_switchable_rate(const struct VP10_COMP *cpi,
-                            const MACROBLOCKD *const xd);
+                             const MACROBLOCKD *const xd);
 
 int vp10_raster_block_offset(BLOCK_SIZE plane_bsize,
-                            int raster_block, int stride);
+                             int raster_block, int stride);
 
 int16_t* vp10_raster_block_offset_int16(BLOCK_SIZE plane_bsize,
-                                       int raster_block, int16_t *base);
+                                        int raster_block, int16_t *base);
 
 YV12_BUFFER_CONFIG *vp10_get_scaled_ref_frame(const struct VP10_COMP *cpi,
-                                             int ref_frame);
+                                              int ref_frame);
 
 void vp10_init_me_luts(void);
 
@@ -417,9 +417,9 @@ void vp10_set_mvcost(MACROBLOCK *x, MV_REFERENCE_FRAME ref_frame);
 #endif
 
 void vp10_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
-                              const struct macroblockd_plane *pd,
-                              ENTROPY_CONTEXT t_above[2 * MAX_MIB_SIZE],
-                              ENTROPY_CONTEXT t_left[2 * MAX_MIB_SIZE]);
+                               const struct macroblockd_plane *pd,
+                               ENTROPY_CONTEXT t_above[2 * MAX_MIB_SIZE],
+                               ENTROPY_CONTEXT t_left[2 * MAX_MIB_SIZE]);
 
 void vp10_set_rd_speed_thresholds(struct VP10_COMP *cpi);
 
@@ -441,8 +441,8 @@ static INLINE int rd_less_than_thresh(int64_t best_rd, int thresh,
 }
 
 void vp10_mv_pred(struct VP10_COMP *cpi, MACROBLOCK *x,
-                 uint8_t *ref_y_buffer, int ref_y_stride,
-                 int ref_frame, BLOCK_SIZE block_size);
+                  uint8_t *ref_y_buffer, int ref_y_stride,
+                  int ref_frame, BLOCK_SIZE block_size);
 
 static INLINE void set_error_per_bit(MACROBLOCK *x, int rdmult) {
   x->errorperbit = rdmult >> RD_EPB_SHIFT;
@@ -450,14 +450,14 @@ static INLINE void set_error_per_bit(MACROBLOCK *x, int rdmult) {
 }
 
 void vp10_setup_pred_block(const MACROBLOCKD *xd,
-                          struct buf_2d dst[MAX_MB_PLANE],
-                          const YV12_BUFFER_CONFIG *src,
-                          int mi_row, int mi_col,
-                          const struct scale_factors *scale,
-                          const struct scale_factors *scale_uv);
+                           struct buf_2d dst[MAX_MB_PLANE],
+                           const YV12_BUFFER_CONFIG *src,
+                           int mi_row, int mi_col,
+                           const struct scale_factors *scale,
+                           const struct scale_factors *scale_uv);
 
 int vp10_get_intra_cost_penalty(int qindex, int qdelta,
-                               vpx_bit_depth_t bit_depth);
+                                vpx_bit_depth_t bit_depth);
 
 #ifdef __cplusplus
 }  // extern "C"
