@@ -138,7 +138,7 @@ INSTANTIATE_TEST_CASE_P(C, Y4mVideoSourceTest,
 
 class Y4mVideoWriteTest : public Y4mVideoSourceTest {
  protected:
-  Y4mVideoWriteTest() {}
+  Y4mVideoWriteTest() : tmpfile_(NULL) {}
 
   virtual ~Y4mVideoWriteTest() {
     delete tmpfile_;

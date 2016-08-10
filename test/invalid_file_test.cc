@@ -84,23 +84,24 @@ class InvalidFileTest : public ::libvpx_test::DecoderTest,
 
   void RunTest() {
     const DecodeParam input = GET_PARAM(1);
-    libvpx_test::CompressedVideoSource *video = NULL;
     vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
     cfg.threads = input.threads;
     const std::string filename = input.filename;
 
     // Open compressed video file.
+    testing::internal::scoped_ptr<libvpx_test::CompressedVideoSource> video;
     if (filename.substr(filename.length() - 3, 3) == "ivf") {
-      video = new libvpx_test::IVFVideoSource(filename);
+      video.reset(new libvpx_test::IVFVideoSource(filename));
     } else if (filename.substr(filename.length() - 4, 4) == "webm") {
 #if CONFIG_WEBM_IO
-      video = new libvpx_test::WebMVideoSource(filename);
+      video.reset(new libvpx_test::WebMVideoSource(filename));
 #else
       fprintf(stderr, "WebM IO is disabled, skipping test vector %s\n",
               filename.c_str());
       return;
 #endif
     }
+    ASSERT_TRUE(video.get() != NULL);
     video->Init();
 
     // Construct result file name. The file holds a list of expected integer
@@ -110,8 +111,7 @@ class InvalidFileTest : public ::libvpx_test::DecoderTest,
     OpenResFile(res_filename);
 
     // Decode frame, and check the md5 matching.
-    ASSERT_NO_FATAL_FAILURE(RunLoop(video, cfg));
-    delete video;
+    ASSERT_NO_FATAL_FAILURE(RunLoop(video.get(), cfg));
   }
 
  private:

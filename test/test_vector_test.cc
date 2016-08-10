@@ -94,7 +94,6 @@ TEST_P(TestVectorTest, MD5Match) {
   const std::string filename = std::tr1::get<kFileName>(input);
   const int threads = std::tr1::get<kThreads>(input);
   const int mode = std::tr1::get<kDecodeMode>(input);
-  libvpx_test::CompressedVideoSource *video = NULL;
   vpx_codec_flags_t flags = 0;
   vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
   char str[256];
@@ -119,17 +118,19 @@ TEST_P(TestVectorTest, MD5Match) {
   SCOPED_TRACE(str);
 
   // Open compressed video file.
+  testing::internal::scoped_ptr<libvpx_test::CompressedVideoSource> video;
   if (filename.substr(filename.length() - 3, 3) == "ivf") {
-    video = new libvpx_test::IVFVideoSource(filename);
+    video.reset(new libvpx_test::IVFVideoSource(filename));
   } else if (filename.substr(filename.length() - 4, 4) == "webm") {
 #if CONFIG_WEBM_IO
-    video = new libvpx_test::WebMVideoSource(filename);
+    video.reset(new libvpx_test::WebMVideoSource(filename));
 #else
     fprintf(stderr, "WebM IO is disabled, skipping test vector %s\n",
             filename.c_str());
     return;
 #endif
   }
+  ASSERT_TRUE(video.get() != NULL);
   video->Init();
 
   // Construct md5 file name.
@@ -141,8 +142,7 @@ TEST_P(TestVectorTest, MD5Match) {
   set_flags(flags);
 
   // Decode frame, and check the md5 matching.
-  ASSERT_NO_FATAL_FAILURE(RunLoop(video, cfg));
-  delete video;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(video.get(), cfg));
 }
 
 // Test VP8 decode in serial mode with single thread.

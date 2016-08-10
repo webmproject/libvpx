@@ -350,7 +350,6 @@ class ExternalFrameBufferTest : public ::testing::Test {
 // Otherwise, the test failed.
 TEST_P(ExternalFrameBufferMD5Test, ExtFBMD5Match) {
   const std::string filename = GET_PARAM(kVideoNameParam);
-  libvpx_test::CompressedVideoSource *video = NULL;
 
   // Number of buffers equals #VP9_MAXIMUM_REF_BUFFERS +
   // #VPX_MAXIMUM_WORK_BUFFERS + four jitter buffers.
@@ -365,18 +364,19 @@ TEST_P(ExternalFrameBufferMD5Test, ExtFBMD5Match) {
 #endif
 
   // Open compressed video file.
+  testing::internal::scoped_ptr<libvpx_test::CompressedVideoSource> video;
   if (filename.substr(filename.length() - 3, 3) == "ivf") {
-    video = new libvpx_test::IVFVideoSource(filename);
+    video.reset(new libvpx_test::IVFVideoSource(filename));
   } else {
 #if CONFIG_WEBM_IO
-    video = new libvpx_test::WebMVideoSource(filename);
+    video.reset(new libvpx_test::WebMVideoSource(filename));
 #else
     fprintf(stderr, "WebM IO is disabled, skipping test vector %s\n",
             filename.c_str());
     return;
 #endif
   }
-  ASSERT_TRUE(video != NULL);
+  ASSERT_TRUE(video.get() != NULL);
   video->Init();
 
   // Construct md5 file name.
@@ -384,8 +384,7 @@ TEST_P(ExternalFrameBufferMD5Test, ExtFBMD5Match) {
   OpenMD5File(md5_filename);
 
   // Decode frame, and check the md5 matching.
-  ASSERT_NO_FATAL_FAILURE(RunLoop(video));
-  delete video;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(video.get()));
 }
 
 #if CONFIG_WEBM_IO

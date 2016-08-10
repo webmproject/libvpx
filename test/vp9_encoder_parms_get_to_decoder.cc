@@ -140,12 +140,11 @@ class VpxEncoderParmsGetToDecoder
 TEST_P(VpxEncoderParmsGetToDecoder, BitstreamParms) {
   init_flags_ = VPX_CODEC_USE_PSNR;
 
-  libvpx_test::VideoSource *const video =
-      new libvpx_test::Y4mVideoSource(test_video_.name, 0, test_video_.frames);
-  ASSERT_TRUE(video != NULL);
+  testing::internal::scoped_ptr<libvpx_test::VideoSource> video(
+      new libvpx_test::Y4mVideoSource(test_video_.name, 0, test_video_.frames));
+  ASSERT_TRUE(video.get() != NULL);
 
-  ASSERT_NO_FATAL_FAILURE(RunLoop(video));
-  delete video;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(video.get()));
 }
 
 VP9_INSTANTIATE_TEST_CASE(VpxEncoderParmsGetToDecoder,
