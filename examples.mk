@@ -109,14 +109,6 @@ endif
 vpxenc.GUID                  = 548DEC74-7A15-4B2B-AFC3-AA102E7C25C1
 vpxenc.DESCRIPTION           = Full featured encoder
 
-EXAMPLES-$(CONFIG_ENCODERS)          += vpx_temporal_svc_encoder.c
-vpx_temporal_svc_encoder.SRCS        += ivfenc.c ivfenc.h
-vpx_temporal_svc_encoder.SRCS        += tools_common.c tools_common.h
-vpx_temporal_svc_encoder.SRCS        += video_common.h
-vpx_temporal_svc_encoder.SRCS        += video_writer.h video_writer.c
-vpx_temporal_svc_encoder.SRCS        += vpx_ports/msvc.h
-vpx_temporal_svc_encoder.GUID        = B18C08F2-A439-4502-A78E-849BE3D60947
-vpx_temporal_svc_encoder.DESCRIPTION = Temporal SVC Encoder
 EXAMPLES-$(CONFIG_DECODERS)        += simple_decoder.c
 simple_decoder.GUID                 = D3BBF1E9-2427-450D-BBFF-B2843C1D44CC
 simple_decoder.SRCS                += ivfdec.h ivfdec.c

@@ -110,7 +110,6 @@ struct vpx_codec_alg_priv {
   vp8_postproc_cfg_t      preview_ppcfg;
   vpx_codec_pkt_list_decl(256) pkt_list;
   unsigned int            fixed_kf_cntr;
-  vpx_codec_priv_output_cx_pkt_cb_pair_t output_cx_pkt_cb;
   // BufferPool that holds all reference frames.
   BufferPool              *buffer_pool;
 };
@@ -192,10 +191,6 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
     RANGE_CHECK(cfg, rc_scaled_height, 0, cfg->g_h);
   }
 
-  // Spatial/temporal scalability are not yet supported in VP10.
-  // Only accept the default value for range checking.
-  RANGE_CHECK(cfg, ss_number_layers, 1, 1);
-  RANGE_CHECK(cfg, ts_number_layers, 1, 1);
   // VP9 does not support a lower bound on the keyframe interval in
   // automatic keyframe placement mode.
   if (cfg->kf_mode != VPX_KF_DISABLED &&
@@ -1054,22 +1049,6 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
           cx_data += size;
           cx_data_sz -= size;
 
-          if (ctx->output_cx_pkt_cb.output_cx_pkt) {
-            pkt.kind = VPX_CODEC_CX_FRAME_PKT;
-            pkt.data.frame.pts = ticks_to_timebase_units(timebase,
-                                                         dst_time_stamp);
-            pkt.data.frame.duration =
-               (unsigned long)ticks_to_timebase_units(timebase,
-                   dst_end_time_stamp - dst_time_stamp);
-            pkt.data.frame.flags = get_frame_pkt_flags(cpi, lib_flags);
-            pkt.data.frame.buf = ctx->pending_cx_data;
-            pkt.data.frame.sz  = size;
-            ctx->pending_cx_data = NULL;
-            ctx->pending_cx_data_sz = 0;
-            ctx->pending_frame_count = 0;
-            ctx->output_cx_pkt_cb.output_cx_pkt(
-                &pkt, ctx->output_cx_pkt_cb.user_priv);
-          }
           continue;
         }
 
@@ -1084,9 +1063,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
         if (ctx->pending_cx_data) {
           ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
           ctx->pending_cx_data_sz += size;
-          // write the superframe only for the case when
-          if (!ctx->output_cx_pkt_cb.output_cx_pkt)
-            size += write_superframe_index(ctx);
+          size += write_superframe_index(ctx);
           pkt.data.frame.buf = ctx->pending_cx_data;
           pkt.data.frame.sz  = ctx->pending_cx_data_sz;
           ctx->pending_cx_data = NULL;
@@ -1098,11 +1075,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
         }
         pkt.data.frame.partition_id = -1;
 
-        if(ctx->output_cx_pkt_cb.output_cx_pkt)
-          ctx->output_cx_pkt_cb.output_cx_pkt(&pkt,
-                                              ctx->output_cx_pkt_cb.user_priv);
-        else
-          vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
+        vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
 
         cx_data += size;
         cx_data_sz -= size;
@@ -1265,16 +1238,6 @@ static vpx_codec_err_t ctrl_set_scale_mode(vpx_codec_alg_priv_t *ctx,
   }
 }
 
-static vpx_codec_err_t ctrl_register_cx_callback(vpx_codec_alg_priv_t *ctx,
-                                                 va_list args) {
-  vpx_codec_priv_output_cx_pkt_cb_pair_t *cbp =
-      (vpx_codec_priv_output_cx_pkt_cb_pair_t *)va_arg(args, void *);
-  ctx->output_cx_pkt_cb.output_cx_pkt = cbp->output_cx_pkt;
-  ctx->output_cx_pkt_cb.user_priv = cbp->user_priv;
-
-  return VPX_CODEC_OK;
-}
-
 static vpx_codec_err_t ctrl_set_tune_content(vpx_codec_alg_priv_t *ctx,
                                              va_list args) {
   struct vp10_extracfg extra_cfg = ctx->extra_cfg;
@@ -1343,7 +1306,6 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP9E_SET_FRAME_PARALLEL_DECODING,  ctrl_set_frame_parallel_decoding_mode},
   {VP9E_SET_AQ_MODE,                  ctrl_set_aq_mode},
   {VP9E_SET_FRAME_PERIODIC_BOOST,     ctrl_set_frame_periodic_boost},
-  {VP9E_REGISTER_CX_CALLBACK,         ctrl_register_cx_callback},
   {VP9E_SET_TUNE_CONTENT,             ctrl_set_tune_content},
   {VP9E_SET_COLOR_SPACE,              ctrl_set_color_space},
   {VP9E_SET_COLOR_RANGE,              ctrl_set_color_range},
@@ -1412,20 +1374,6 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
       VPX_KF_AUTO,        // g_kfmode
       0,                  // kf_min_dist
       9999,               // kf_max_dist
-
-      // TODO(yunqingwang): Spatial/temporal scalability are not supported
-      // in VP10. The following 10 parameters are not used, which should
-      // be removed later.
-      1,                      // ss_number_layers
-      {0},
-      {0},                    // ss_target_bitrate
-      1,                      // ts_number_layers
-      {0},                    // ts_target_bitrate
-      {0},                    // ts_rate_decimator
-      0,                      // ts_periodicity
-      {0},                    // ts_layer_id
-      {0},                  // layer_taget_bitrate
-      0                     // temporal_layering_mode
     }
   },
 };
