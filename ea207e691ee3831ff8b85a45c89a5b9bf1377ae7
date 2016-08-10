@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9924ef48_f96e8f32",
+        "filename": "vpx_dsp/bitreader.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-08-10T00:53:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9924ef48_f61a1e21",
+      "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9924ef48_560af2d1",
         "filename": "vpx_dsp/bitreader.h",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2016-08-09T23:55:07Z",
       "side": 1,
       "message": "// CONFIG_BITSTREAM_DEBUG",
+      "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_9973db19",
+        "filename": "vpx_dsp/bitreader.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-08-10T00:53:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9924ef48_560af2d1",
       "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "9924ef48_59c8e31f",
+        "filename": "vpx_util/debug_util.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-08-10T00:53:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9924ef48_d6dfe238",
+      "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9924ef48_d6b122fc",
         "filename": "vpx_util/debug_util.c",
         "patchSetId": 8
@@ -64,6 +118,24 @@
       "writtenOn": "2016-08-09T23:55:07Z",
       "side": 1,
       "message": "how about \u0027..._set_skip_write(int skip)\u0027?",
+      "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_b9c25701",
+        "filename": "vpx_util/debug_util.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-08-10T00:53:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9924ef48_d6b122fc",
       "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "9924ef48_f98a0fc3",
+        "filename": "vpx_util/debug_util.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-08-10T00:53:49Z",
+      "side": 1,
+      "message": "I need this because on encoder side, one frame may be encoded multiple times to achieve desired bit rate. Only the data encoded at last time will be sent to decoder. Therefore we need bitstream_queue_record_write() and bitstream_queue_reset_write() to handle this situation.",
+      "parentUuid": "9924ef48_d9a4f3a6",
+      "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9924ef48_56dd1234",
         "filename": "vpx_util/debug_util.c",
         "patchSetId": 8
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "9924ef48_19d26bce",
+        "filename": "vpx_util/debug_util.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-08-10T00:53:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9924ef48_56dd1234",
+      "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9924ef48_5633d2a7",
         "filename": "vpx_util/debug_util.h",
         "patchSetId": 8
@@ -115,6 +223,24 @@
       "writtenOn": "2016-08-09T23:55:07Z",
       "side": 1,
       "message": "this is unused here",
+      "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_795b5f8a",
+        "filename": "vpx_util/debug_util.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-08-10T00:53:49Z",
+      "side": 1,
+      "message": "It\u0027s needed because bitreader.h will use this header and print out error message.",
+      "parentUuid": "9924ef48_5633d2a7",
       "revId": "ea207e691ee3831ff8b85a45c89a5b9bf1377ae7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
