@@ -32,6 +32,20 @@ typedef void (*Predictor)(uint8_t *dst, ptrdiff_t stride, int bs,
 typedef tuple<Predictor, Predictor, int> PredFuncMode;
 typedef tuple<PredFuncMode, int> PredParams;
 
+#if CONFIG_VP9_HIGHBITDEPTH
+typedef void (*HbdPredictor)(uint16_t *dst, ptrdiff_t stride, int bs,
+                             const uint16_t *above, const uint16_t *left,
+                             int bd);
+
+// Note:
+//  Test parameter list:
+//  Reference predictor, optimized predictor, prediction mode, block size,
+//  bit depth
+//
+typedef tuple<HbdPredictor, HbdPredictor, int> HbdPredFuncMode;
+typedef tuple<HbdPredFuncMode, int, int> HbdPredParams;
+#endif
+
 const int MaxBlkSize = 32;
 
 // By default, disable speed test
@@ -136,6 +150,105 @@ class VP10IntraPredOptimzTest : public ::testing::TestWithParam<PredParams> {
   uint8_t *predRef_;
 };
 
+#if CONFIG_VP9_HIGHBITDEPTH
+class VP10HbdIntraPredOptimzTest :
+      public ::testing::TestWithParam<HbdPredParams> {
+ public:
+  virtual ~VP10HbdIntraPredOptimzTest() {}
+  virtual void SetUp() {
+    HbdPredFuncMode funcMode = GET_PARAM(0);
+    predFuncRef_ = std::tr1::get<0>(funcMode);
+    predFunc_ = std::tr1::get<1>(funcMode);
+    mode_ = std::tr1::get<2>(funcMode);
+    blockSize_ = GET_PARAM(1);
+    bd_ = GET_PARAM(2);
+
+    alloc_ = (uint16_t *)malloc((3 * MaxBlkSize + 2) * sizeof(alloc_[0]));
+    predRef_ =
+        (uint16_t *)malloc(MaxBlkSize * MaxBlkSize * sizeof(predRef_[0]));
+    pred_ = (uint16_t *)malloc(MaxBlkSize * MaxBlkSize * sizeof(pred_[0]));
+  }
+
+  virtual void TearDown() {
+    delete[] alloc_;
+    delete[] predRef_;
+    delete[] pred_;
+    libvpx_test::ClearSystemState();
+  }
+
+ protected:
+  void RunTest() const {
+    int tstIndex = 0;
+    int stride = blockSize_;
+    uint16_t *left = alloc_;
+    uint16_t *above = alloc_ + MaxBlkSize + 1;
+    while (tstIndex < MaxTestNum) {
+      PrepareBuffer();
+      predFuncRef_(predRef_, stride, blockSize_, &above[1], left, bd_);
+      ASM_REGISTER_STATE_CHECK(
+          predFunc_(pred_, stride, blockSize_, &above[1], left, bd_));
+      DiffPred(tstIndex);
+      tstIndex += 1;
+    }
+  }
+
+  void RunSpeedTestC() const {
+    int tstIndex = 0;
+    int stride = blockSize_;
+    uint16_t *left = alloc_;
+    uint16_t *above = alloc_ + MaxBlkSize + 1;
+    PrepareBuffer();
+    while (tstIndex < MaxTestNum) {
+      predFuncRef_(predRef_, stride, blockSize_, &above[1], left, bd_);
+      tstIndex += 1;
+    }
+  }
+
+  void RunSpeedTestSSE() const {
+    int tstIndex = 0;
+    int stride = blockSize_;
+    uint16_t *left = alloc_;
+    uint16_t *above = alloc_ + MaxBlkSize + 1;
+    PrepareBuffer();
+    while (tstIndex < MaxTestNum) {
+      predFunc_(predRef_, stride, blockSize_, &above[1], left, bd_);
+      tstIndex += 1;
+    }
+  }
+
+ private:
+  void PrepareBuffer() const {
+    ACMRandom rnd(ACMRandom::DeterministicSeed());
+    int i = 0;
+    while (i < (3 * MaxBlkSize + 2)) {
+      alloc_[i] = rnd.Rand16() & ((1 << bd_) - 1);
+      i += 1;
+    }
+  }
+
+  void DiffPred(int testNum) const {
+    int i = 0;
+    while (i < blockSize_ * blockSize_) {
+      EXPECT_EQ(predRef_[i], pred_[i])
+          << "Error at position: " << i << " "
+          << "Block size: " << blockSize_ << " "
+          << "Bit depth: " << bd_ << " "
+          << "Test number: " << testNum;
+      i += 1;
+    }
+  }
+
+  HbdPredictor predFunc_;
+  HbdPredictor predFuncRef_;
+  int mode_;
+  int blockSize_;
+  int bd_;
+  uint16_t *alloc_;
+  uint16_t *pred_;
+  uint16_t *predRef_;
+};
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 TEST_P(VP10IntraPredOptimzTest, BitExactCheck) {
   RunTest();
 }
@@ -149,6 +262,22 @@ TEST_P(VP10IntraPredOptimzTest, SpeedCheckSSE) {
   RunSpeedTestSSE();
 }
 #endif
+
+#if CONFIG_VP9_HIGHBITDEPTH
+TEST_P(VP10HbdIntraPredOptimzTest, BitExactCheck) {
+  RunTest();
+}
+
+#if PREDICTORS_SPEED_TEST
+TEST_P(VP10HbdIntraPredOptimzTest, SpeedCheckC) {
+  RunSpeedTestC();
+}
+
+TEST_P(VP10HbdIntraPredOptimzTest, SpeedCheckSSE) {
+  RunSpeedTestSSE();
+}
+#endif  // PREDICTORS_SPEED_TEST
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 using std::tr1::make_tuple;
 
@@ -182,5 +311,39 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Combine(
          ::testing::ValuesIn(kPredFuncMdArray),
          ::testing::ValuesIn(kBlkSize)));
+
+#if CONFIG_VP9_HIGHBITDEPTH
+const HbdPredFuncMode kHbdPredFuncMdArray[] = {
+  make_tuple(vp10_highbd_dc_filter_predictor_c,
+             vp10_highbd_dc_filter_predictor_sse4_1, DC_PRED),
+  make_tuple(vp10_highbd_v_filter_predictor_c,
+             vp10_highbd_v_filter_predictor_sse4_1, V_PRED),
+  make_tuple(vp10_highbd_h_filter_predictor_c,
+             vp10_highbd_h_filter_predictor_sse4_1, H_PRED),
+  make_tuple(vp10_highbd_d45_filter_predictor_c,
+             vp10_highbd_d45_filter_predictor_sse4_1, D45_PRED),
+  make_tuple(vp10_highbd_d135_filter_predictor_c,
+             vp10_highbd_d135_filter_predictor_sse4_1, D135_PRED),
+  make_tuple(vp10_highbd_d117_filter_predictor_c,
+             vp10_highbd_d117_filter_predictor_sse4_1, D117_PRED),
+  make_tuple(vp10_highbd_d153_filter_predictor_c,
+             vp10_highbd_d153_filter_predictor_sse4_1, D153_PRED),
+  make_tuple(vp10_highbd_d207_filter_predictor_c,
+             vp10_highbd_d207_filter_predictor_sse4_1, D207_PRED),
+  make_tuple(vp10_highbd_d63_filter_predictor_c,
+             vp10_highbd_d63_filter_predictor_sse4_1, D63_PRED),
+  make_tuple(vp10_highbd_tm_filter_predictor_c,
+             vp10_highbd_tm_filter_predictor_sse4_1, TM_PRED),
+};
+
+const int kBd[] = {10, 12};
+
+INSTANTIATE_TEST_CASE_P(
+    SSE4_1, VP10HbdIntraPredOptimzTest,
+    ::testing::Combine(
+         ::testing::ValuesIn(kHbdPredFuncMdArray),
+         ::testing::ValuesIn(kBlkSize),
+         ::testing::ValuesIn(kBd)));
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 }  // namespace

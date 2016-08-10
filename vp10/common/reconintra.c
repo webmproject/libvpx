@@ -1071,85 +1071,115 @@ static void highbd_filter_intra_predictors_4tap(uint16_t *dst, ptrdiff_t stride,
   }
 }
 
-static void highbd_dc_filter_predictor(uint16_t *dst, ptrdiff_t stride,
+void vp10_highbd_dc_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
                                        int bs, const uint16_t *above,
                                        const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, DC_PRED,
                                       bd);
 }
 
-static void highbd_v_filter_predictor(uint16_t *dst, ptrdiff_t stride,
+void vp10_highbd_v_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
                                       int bs, const uint16_t *above,
                                       const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, V_PRED,
                                       bd);
 }
 
-static void highbd_h_filter_predictor(uint16_t *dst, ptrdiff_t stride,
+void vp10_highbd_h_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
                                       int bs, const uint16_t *above,
                                       const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, H_PRED,
                                       bd);
 }
 
-static void highbd_d45_filter_predictor(uint16_t *dst, ptrdiff_t stride,
+void vp10_highbd_d45_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
                                         int bs, const uint16_t *above,
                                         const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, D45_PRED,
                                       bd);
 }
 
-static void highbd_d135_filter_predictor(uint16_t *dst, ptrdiff_t stride,
+void vp10_highbd_d135_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
                                          int bs, const uint16_t *above,
                                          const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, D135_PRED,
                                       bd);
 }
 
-static void highbd_d117_filter_predictor(uint16_t *dst, ptrdiff_t stride,
+void vp10_highbd_d117_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
                                          int bs, const uint16_t *above,
                                          const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, D117_PRED,
                                       bd);
 }
 
-static void highbd_d153_filter_predictor(uint16_t *dst, ptrdiff_t stride,
+void vp10_highbd_d153_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
                                          int bs, const uint16_t *above,
                                          const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, D153_PRED,
                                       bd);
 }
 
-static void highbd_d207_filter_predictor(uint16_t *dst, ptrdiff_t stride,
+void vp10_highbd_d207_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
                                          int bs, const uint16_t *above,
                                          const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, D207_PRED,
                                       bd);
 }
 
-static void highbd_d63_filter_predictor(uint16_t *dst, ptrdiff_t stride,
+void vp10_highbd_d63_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
                                         int bs, const uint16_t *above,
                                         const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, D63_PRED,
                                       bd);
 }
 
-static void highbd_tm_filter_predictor(uint16_t *dst, ptrdiff_t stride,
+void vp10_highbd_tm_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
                                        int bs, const uint16_t *above,
                                        const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, TM_PRED,
                                       bd);
 }
 
-static void (*highbd_filter_intra_predictors[EXT_INTRA_MODES])(uint16_t *dst,
-    ptrdiff_t stride, int bs, const uint16_t *above, const uint16_t *left,
-    int bd) = {
-        highbd_dc_filter_predictor, highbd_v_filter_predictor,
-        highbd_h_filter_predictor, highbd_d45_filter_predictor,
-        highbd_d135_filter_predictor, highbd_d117_filter_predictor,
-        highbd_d153_filter_predictor, highbd_d207_filter_predictor,
-        highbd_d63_filter_predictor, highbd_tm_filter_predictor,
-};
+static void highbd_filter_intra_predictors(int mode, uint16_t *dst,
+                                           ptrdiff_t stride, int bs,
+                                           const uint16_t *above,
+                                           const uint16_t *left, int bd) {
+  switch (mode) {
+    case DC_PRED:
+      vp10_highbd_dc_filter_predictor(dst, stride, bs, above, left, bd);
+      break;
+    case V_PRED:
+      vp10_highbd_v_filter_predictor(dst, stride, bs, above, left, bd);
+      break;
+    case H_PRED:
+      vp10_highbd_h_filter_predictor(dst, stride, bs, above, left, bd);
+      break;
+    case D45_PRED:
+        vp10_highbd_d45_filter_predictor(dst, stride, bs, above, left, bd);
+      break;
+    case D135_PRED:
+      vp10_highbd_d135_filter_predictor(dst, stride, bs, above, left, bd);
+      break;
+    case D117_PRED:
+      vp10_highbd_d117_filter_predictor(dst, stride, bs, above, left, bd);
+      break;
+    case D153_PRED:
+        vp10_highbd_d153_filter_predictor(dst, stride, bs, above, left, bd);
+      break;
+    case D207_PRED:
+      vp10_highbd_d207_filter_predictor(dst, stride, bs, above, left, bd);
+      break;
+    case D63_PRED:
+      vp10_highbd_d63_filter_predictor(dst, stride, bs, above, left, bd);
+      break;
+    case TM_PRED:
+      vp10_highbd_tm_filter_predictor(dst, stride, bs, above, left, bd);
+      break;
+    default:
+      assert(0);
+  }
+}
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_EXT_INTRA
 
@@ -1303,7 +1333,7 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
 
 #if CONFIG_EXT_INTRA
   if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
-    highbd_filter_intra_predictors[ext_intra_mode](dst, dst_stride, bs,
+    highbd_filter_intra_predictors(ext_intra_mode, dst, dst_stride, bs,
         const_above_row, left_col, xd->bd);
     return;
   }

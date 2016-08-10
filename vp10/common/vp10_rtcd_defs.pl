@@ -320,6 +320,29 @@ if (vpx_config("CONFIG_EXT_INTRA") eq "yes") {
   specialize qw/vp10_d63_filter_predictor sse4_1/;
   add_proto qw/void vp10_tm_filter_predictor/, "uint8_t *dst, ptrdiff_t stride, int bs, const uint8_t *above, const uint8_t *left";
   specialize qw/vp10_tm_filter_predictor sse4_1/;
+  # High bitdepth functions
+  if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+    add_proto qw/void vp10_highbd_dc_filter_predictor/, "uint16_t *dst, ptrdiff_t stride, int bs, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp10_highbd_dc_filter_predictor sse4_1/;
+    add_proto qw/void vp10_highbd_v_filter_predictor/, "uint16_t *dst, ptrdiff_t stride, int bs, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp10_highbd_v_filter_predictor sse4_1/;
+    add_proto qw/void vp10_highbd_h_filter_predictor/, "uint16_t *dst, ptrdiff_t stride, int bs, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp10_highbd_h_filter_predictor sse4_1/;
+    add_proto qw/void vp10_highbd_d45_filter_predictor/, "uint16_t *dst, ptrdiff_t stride, int bs, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp10_highbd_d45_filter_predictor sse4_1/;
+    add_proto qw/void vp10_highbd_d135_filter_predictor/, "uint16_t *dst, ptrdiff_t stride, int bs, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp10_highbd_d135_filter_predictor sse4_1/;
+    add_proto qw/void vp10_highbd_d117_filter_predictor/, "uint16_t *dst, ptrdiff_t stride, int bs, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp10_highbd_d117_filter_predictor sse4_1/;
+    add_proto qw/void vp10_highbd_d153_filter_predictor/, "uint16_t *dst, ptrdiff_t stride, int bs, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp10_highbd_d153_filter_predictor sse4_1/;
+    add_proto qw/void vp10_highbd_d207_filter_predictor/, "uint16_t *dst, ptrdiff_t stride, int bs, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp10_highbd_d207_filter_predictor sse4_1/;
+    add_proto qw/void vp10_highbd_d63_filter_predictor/, "uint16_t *dst, ptrdiff_t stride, int bs, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp10_highbd_d63_filter_predictor sse4_1/;
+    add_proto qw/void vp10_highbd_tm_filter_predictor/, "uint16_t *dst, ptrdiff_t stride, int bs, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp10_highbd_tm_filter_predictor sse4_1/;
+  }
 }
 
 # High bitdepth functions
