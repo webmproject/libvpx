@@ -22,6 +22,53 @@
       "revId": "d00002084064c686556afe498eee03c72bc02faa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_59a543fb",
+        "filename": "vp10/encoder/palette.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-10T00:54:15Z",
+      "side": 1,
+      "message": "There are a few reasons to avoid large stack allocations: \n1) https://www.securecoding.cert.org/confluence/display/c/MEM05-C.+Avoid+large+stack+allocations\n2) See also https://docs.google.com/presentation/d/1o4Yx-H5Cp1G8Aa4rrDiuXrJcnyfOVta-d-9gGrbUPvw/edit#slide\u003did.g12eccb359c_0_127\n\nThat said, we aren\u0027t making concrete step towards eliminating big stack frames globally, and more seem to be creeping in since most people dob\u0027t seem to police this.",
+      "parentUuid": "9924ef48_f6b3fe98",
+      "range": {
+        "startLine": 96,
+        "startChar": 2,
+        "endLine": 96,
+        "endChar": 37
+      },
+      "revId": "d00002084064c686556afe498eee03c72bc02faa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9924ef48_d9e2b331",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1937,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-10T00:54:15Z",
+      "side": 1,
+      "message": "current 39.9 -\u003e 40\nproposed 39.9 -\u003e 39\n\nAlso calc_dist() in pallette.c assumes the centroid rounding is matches that of roundf().\n\nPerhaps all rounding should be done in palette.c.\n\nThe description says avoid rounding twice. Is there anther round I\u0027m missing here? Can we assert that these are already rounded()?",
+      "range": {
+        "startLine": 1937,
+        "startChar": 45,
+        "endLine": 1937,
+        "endChar": 65
+      },
+      "revId": "d00002084064c686556afe498eee03c72bc02faa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
