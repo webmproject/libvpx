@@ -119,7 +119,7 @@ void vp10_highbd_quantize_fp_sse4_1(const tran_low_t *coeff_ptr,
                                     uint16_t *eob_ptr,
                                     const int16_t *scan,
                                     const int16_t *iscan,
-                                    const int log_scale) {
+                                    int log_scale) {
   __m128i coeff[2], qcoeff[2], dequant[2], qparam[3], coeff_sign;
   __m128i eob = _mm_setzero_si128();
   const tran_low_t *src = coeff_ptr;
