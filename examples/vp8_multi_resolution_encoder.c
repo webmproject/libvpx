@@ -508,7 +508,7 @@ int main(int argc, char **argv) {
 
   /* Set NOISE_SENSITIVITY to do TEMPORAL_DENOISING */
   /* Enable denoising for the highest-resolution encoder. */
-  if (vpx_codec_control(&codec[0], VP8E_SET_NOISE_SENSITIVITY, 1))
+  if (vpx_codec_control(&codec[0], VP8E_SET_NOISE_SENSITIVITY, 4))
     die_codec(&codec[0], "Failed to set noise_sensitivity");
   for (i = 1; i < NUM_ENCODERS; i++) {
     if (vpx_codec_control(&codec[i], VP8E_SET_NOISE_SENSITIVITY, 0))
