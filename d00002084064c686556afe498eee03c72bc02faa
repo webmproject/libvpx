@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "9924ef48_22d7f016",
+        "filename": "vp10/encoder/palette.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-08-10T17:55:35Z",
+      "side": 1,
+      "message": "pre_indices[] was part of struct PALETTE_BUFFER in MACROBLOCK, which was allocated by malloc when creating encoder.",
+      "parentUuid": "9924ef48_624728aa",
+      "range": {
+        "startLine": 96,
+        "startChar": 2,
+        "endLine": 96,
+        "endChar": 37
+      },
+      "revId": "d00002084064c686556afe498eee03c72bc02faa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9924ef48_d9e2b331",
         "filename": "vp10/encoder/rdopt.c",
         "patchSetId": 1
