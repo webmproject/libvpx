@@ -13,10 +13,9 @@
 
 static float calc_dist(const float *p1, const float *p2, int dim) {
   float dist = 0;
-  int i = 0;
-
+  int i;
   for (i = 0; i < dim; ++i) {
-    float diff = p1[i] - roundf(p2[i]);
+    const float diff = p1[i] - roundf(p2[i]);
     dist += diff * diff;
   }
   return dist;
@@ -25,13 +24,12 @@ static float calc_dist(const float *p1, const float *p2, int dim) {
 void vp10_calc_indices(const float *data, const float *centroids,
                        uint8_t *indices, int n, int k, int dim) {
   int i, j;
-  float min_dist, this_dist;
-
   for (i = 0; i < n; ++i) {
-    min_dist = calc_dist(data + i * dim, centroids, dim);
+    float min_dist = calc_dist(data + i * dim, centroids, dim);
     indices[i] = 0;
     for (j = 1; j < k; ++j) {
-      this_dist = calc_dist(data + i * dim, centroids + j * dim, dim);
+      const float this_dist =
+          calc_dist(data + i * dim, centroids + j * dim, dim);
       if (this_dist < min_dist) {
         min_dist = this_dist;
         indices[i] = j;
@@ -90,17 +88,21 @@ static float calc_total_dist(const float *data, const float *centroids,
   return dist;
 }
 
-int vp10_k_means(const float *data, float *centroids, uint8_t *indices,
-                 uint8_t *pre_indices, int n, int k, int dim, int max_itr) {
-  int i = 0;
-  float pre_dist, this_dist;
+void vp10_k_means(const float *data, float *centroids, uint8_t *indices, int n,
+                  int k, int dim, int max_itr) {
+  int i;
+  float this_dist;
   float pre_centroids[2 * PALETTE_MAX_SIZE];
+  uint8_t pre_indices[MAX_SB_SQUARE];
 
   vp10_calc_indices(data, centroids, indices, n, k, dim);
-  pre_dist = calc_total_dist(data, centroids, indices, n, k, dim);
-  memcpy(pre_centroids, centroids, sizeof(pre_centroids[0]) * k * dim);
-  memcpy(pre_indices, indices, sizeof(pre_indices[0]) * n);
-  while (i < max_itr) {
+  this_dist = calc_total_dist(data, centroids, indices, n, k, dim);
+
+  for (i = 0; i < max_itr; ++i) {
+    const float pre_dist = this_dist;
+    memcpy(pre_centroids, centroids, sizeof(pre_centroids[0]) * k * dim);
+    memcpy(pre_indices, indices, sizeof(pre_indices[0]) * n);
+
     calc_centroids(data, centroids, indices, n, k, dim);
     vp10_calc_indices(data, centroids, indices, n, k, dim);
     this_dist = calc_total_dist(data, centroids, indices, n, k, dim);
@@ -112,14 +114,7 @@ int vp10_k_means(const float *data, float *centroids, uint8_t *indices,
     }
     if (!memcmp(centroids, pre_centroids, sizeof(pre_centroids[0]) * k * dim))
       break;
-
-    memcpy(pre_centroids, centroids, sizeof(pre_centroids[0]) * k * dim);
-    memcpy(pre_indices, indices, sizeof(pre_indices[0]) * n);
-    pre_dist = this_dist;
-    ++i;
   }
-
-  return i;
 }
 
 void vp10_insertion_sort(float *data, int n) {

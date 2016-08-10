@@ -1860,8 +1860,6 @@ static int rd_pick_palette_intra_sby(VP10_COMP *cpi, MACROBLOCK *x,
     int color_ctx, color_idx = 0;
     int color_order[PALETTE_MAX_SIZE];
     float *const data = x->palette_buffer->kmeans_data_buf;
-    uint8_t *const indices = x->palette_buffer->kmeans_indices_buf;
-    uint8_t *const pre_indices = x->palette_buffer->kmeans_pre_indices_buf;
     float centroids[PALETTE_MAX_SIZE];
     uint8_t *const color_map = xd->plane[0].color_index_map;
     float lb, ub, val;
@@ -1915,8 +1913,7 @@ static int rd_pick_palette_intra_sby(VP10_COMP *cpi, MACROBLOCK *x,
         n >= 2; --n) {
       for (i = 0; i < n; ++i)
         centroids[i] = lb + (2 * i + 1) * (ub - lb) / n / 2;
-      vp10_k_means(data, centroids, indices, pre_indices, rows * cols,
-                   n, 1, max_itr);
+      vp10_k_means(data, centroids, color_map, rows * cols, n, 1, max_itr);
       vp10_insertion_sort(centroids, n);
       for (i = 0; i < n; ++i)
         centroids[i] = roundf(centroids[i]);
@@ -1933,16 +1930,15 @@ static int rd_pick_palette_intra_sby(VP10_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_VP9_HIGHBITDEPTH
       if (cpi->common.use_highbitdepth)
         for (i = 0; i < k; ++i)
-          pmi->palette_colors[i] = clip_pixel_highbd((int)lroundf(centroids[i]),
-                                                     cpi->common.bit_depth);
+          pmi->palette_colors[i] =
+              clip_pixel_highbd((int)centroids[i], cpi->common.bit_depth);
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
         for (i = 0; i < k; ++i)
-          pmi->palette_colors[i] = clip_pixel((int)lroundf(centroids[i]));
+          pmi->palette_colors[i] = clip_pixel((int)centroids[i]);
       pmi->palette_size[0] = k;
 
-      vp10_calc_indices(data, centroids, indices, rows * cols, k, 1);
-      memcpy(color_map, indices, rows * cols * sizeof(*color_map));
+      vp10_calc_indices(data, centroids, color_map, rows * cols, k, 1);
 
       super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion,
                       &s, NULL, bsize, *best_rd);
@@ -3743,8 +3739,6 @@ static void rd_pick_palette_intra_sbuv(VP10_COMP *cpi, MACROBLOCK *x,
     float lb_u, ub_u, val_u;
     float lb_v, ub_v, val_v;
     float *const data = x->palette_buffer->kmeans_data_buf;
-    uint8_t *const indices = x->palette_buffer->kmeans_indices_buf;
-    uint8_t *const pre_indices = x->palette_buffer->kmeans_pre_indices_buf;
     float centroids[2 * PALETTE_MAX_SIZE];
     uint8_t *const color_map = xd->plane[1].color_index_map;
     PALETTE_MODE_INFO *const pmi = &mbmi->palette_mode_info;
@@ -3806,8 +3800,7 @@ static void rd_pick_palette_intra_sbuv(VP10_COMP *cpi, MACROBLOCK *x,
         centroids[i * 2 + 1] =
             lb_v + (2 * i + 1) * (ub_v - lb_v) / n / 2;;
       }
-      r = vp10_k_means(data, centroids, indices, pre_indices, rows * cols, n,
-                       2, max_itr);
+      vp10_k_means(data, centroids, color_map, rows * cols, n, 2, max_itr);
       pmi->palette_size[1] = n;
       for (i = 1; i < 3; ++i) {
         for (j = 0; j < n; ++j) {
@@ -3822,7 +3815,6 @@ static void rd_pick_palette_intra_sbuv(VP10_COMP *cpi, MACROBLOCK *x,
                 clip_pixel((int)lroundf(centroids[j * 2 + i - 1]));
         }
       }
-      memcpy(color_map, indices, rows * cols * sizeof(*color_map));
 
       super_block_uvrd(cpi, x, &this_rate_tokenonly,
                        &this_distortion, &s, &this_sse, bsize, *best_rd);
@@ -3854,7 +3846,7 @@ static void rd_pick_palette_intra_sbuv(VP10_COMP *cpi, MACROBLOCK *x,
       if (this_rd < *best_rd) {
         *best_rd = this_rd;
         *palette_mode_info = *pmi;
-        memcpy(best_palette_color_map, xd->plane[1].color_index_map,
+        memcpy(best_palette_color_map, color_map,
                rows * cols * sizeof(best_palette_color_map[0]));
         *mode_selected = DC_PRED;
         *rate = this_rate;
@@ -8287,7 +8279,6 @@ static void restore_uv_color_map(VP10_COMP *cpi, MACROBLOCK *x) {
   const uint8_t *const src_u = x->plane[1].src.buf;
   const uint8_t *const src_v = x->plane[2].src.buf;
   float *const data = x->palette_buffer->kmeans_data_buf;
-  uint8_t *const indices = x->palette_buffer->kmeans_indices_buf;
   float centroids[2 * PALETTE_MAX_SIZE];
   uint8_t *const color_map = xd->plane[1].color_index_map;
   int r, c;
@@ -8323,9 +8314,8 @@ static void restore_uv_color_map(VP10_COMP *cpi, MACROBLOCK *x) {
     }
   }
 
-  vp10_calc_indices(data, centroids, indices, rows * cols,
+  vp10_calc_indices(data, centroids, color_map, rows * cols,
                     pmi->palette_size[1], 2);
-  memcpy(color_map, indices, rows * cols * sizeof(*color_map));
 }
 
 #if CONFIG_EXT_INTRA
