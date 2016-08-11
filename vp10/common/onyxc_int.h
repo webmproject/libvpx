@@ -661,6 +661,12 @@ static INLINE void set_txfm_ctx(TXFM_CONTEXT *txfm_ctx, TX_SIZE tx_size,
   for (i = 0; i < len; ++i) txfm_ctx[i] = tx_size;
 }
 
+static INLINE void set_txfm_ctxs(TX_SIZE tx_size, int n8_w, int n8_h,
+                                 const MACROBLOCKD *xd) {
+  set_txfm_ctx(xd->above_txfm_context, txsize_horz_map[tx_size], n8_w);
+  set_txfm_ctx(xd->left_txfm_context, txsize_vert_map[tx_size], n8_h);
+}
+
 static INLINE void txfm_partition_update(TXFM_CONTEXT *above_ctx,
                                          TXFM_CONTEXT *left_ctx,
                                          TX_SIZE tx_size) {

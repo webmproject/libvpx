@@ -368,6 +368,36 @@ static const TX_SIZE max_txsize_rect_lookup[BLOCK_SIZES] = {
 #endif  // CONFIG_EXT_TX
 /* clang-format on */
 
+static const TX_SIZE txsize_horz_map[TX_SIZES_ALL] = {
+  TX_4X4,    // TX_4X4
+  TX_8X8,    // TX_8X8
+  TX_16X16,  // TX_16X16
+  TX_32X32,  // TX_32X32
+#if CONFIG_EXT_TX
+  TX_4X4,    // TX_4X8
+  TX_8X8,    // TX_8X4
+  TX_8X8,    // TX_8X16
+  TX_16X16,  // TX_16X8
+  TX_16X16,  // TX_16X32
+  TX_32X32   // TX_32X16
+#endif       // CONFIG_EXT_TX
+};
+
+static const TX_SIZE txsize_vert_map[TX_SIZES_ALL] = {
+  TX_4X4,    // TX_4X4
+  TX_8X8,    // TX_8X8
+  TX_16X16,  // TX_16X16
+  TX_32X32,  // TX_32X32
+#if CONFIG_EXT_TX
+  TX_8X8,    // TX_4X8
+  TX_4X4,    // TX_8X4
+  TX_16X16,  // TX_8X16
+  TX_8X8,    // TX_16X8
+  TX_32X32,  // TX_16X32
+  TX_16X16   // TX_32X16
+#endif       // CONFIG_EXT_TX
+};
+
 static const BLOCK_SIZE txsize_to_bsize[TX_SIZES_ALL] = {
   BLOCK_4X4,    // TX_4X4
   BLOCK_8X8,    // TX_8X8
