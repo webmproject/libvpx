@@ -273,6 +273,7 @@ EXPERIMENT_LIST="
     warped_motion
     entropy
     bidir_pred
+    bitstream_debug
 "
 CONFIG_LIST="
     dependency_tracking

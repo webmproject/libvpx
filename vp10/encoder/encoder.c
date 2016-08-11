@@ -59,6 +59,7 @@
 #include "vpx_ports/system_state.h"
 #include "vpx_ports/vpx_timer.h"
 #include "vpx_scale/vpx_scale.h"
+#include "vpx_util/debug_util.h"
 
 #define AM_SEGMENT_ID_INACTIVE 7
 #define AM_SEGMENT_ID_ACTIVE 0
@@ -5418,6 +5419,12 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
   int brf_src_index;
 #endif  // CONFIG_EXT_REFS
   int i;
+
+#if CONFIG_BITSTREAM_DEBUG
+  assert(cpi->oxcf.max_threads == 0 &&
+         "bitstream debug tool does not support multithreading");
+  bitstream_queue_record_write();
+#endif
 
   vpx_usec_timer_start(&cmptimer);
 

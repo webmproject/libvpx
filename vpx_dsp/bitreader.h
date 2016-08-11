@@ -11,14 +11,21 @@
 #ifndef VPX_DSP_BITREADER_H_
 #define VPX_DSP_BITREADER_H_
 
-#include <stddef.h>
 #include <limits.h>
+#include <stddef.h>
 
 #include "./vpx_config.h"
+
+#if CONFIG_BITSTREAM_DEBUG
+#include <assert.h>
+#include <stdio.h>
+#endif  // CONFIG_BITSTREAM_DEBUG
+
 #include "vpx_ports/mem.h"
 #include "vpx/vp8dx.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/prob.h"
+#include "vpx_util/debug_util.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -103,6 +110,22 @@ static INLINE int vpx_read(vpx_reader *r, int prob) {
   r->count = count;
   r->range = range;
 
+#if CONFIG_BITSTREAM_DEBUG
+  {
+    int ref_bit, ref_prob;
+    const int queue_r = bitstream_queue_get_read();
+    bitstream_queue_pop(&ref_bit, &ref_prob);
+    if (prob != ref_prob) {
+      fprintf(stderr, "prob error, prob %d ref_prob %d queue_r %d\n", prob,
+              ref_prob, queue_r);
+      assert(0);
+    }
+    if ((int)bit != ref_bit) {
+      fprintf(stderr, "bit error, bit %d ref_bit %d\n", bit, ref_bit);
+      assert(0);
+    }
+  }
+#endif  // CONFIG_BITSTREAM_DEBUG
   return bit;
 }
 
