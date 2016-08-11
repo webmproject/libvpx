@@ -25,6 +25,9 @@
 #include "vpx_util/vpx_thread.h"
 
 #include "vp10/common/alloccommon.h"
+#if CONFIG_CLPF
+#include "vp10/common/clpf.h"
+#endif
 #include "vp10/common/common.h"
 #include "vp10/common/entropy.h"
 #include "vp10/common/entropymode.h"
@@ -1942,6 +1945,12 @@ static void setup_loopfilter(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   }
 }
 
+#if CONFIG_CLPF
+static void setup_clpf(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
+  cm->clpf = vpx_rb_read_literal(rb, 1);
+}
+#endif
+
 static INLINE int read_delta_q(struct vpx_read_bit_buffer *rb) {
   return vpx_rb_read_bit(rb) ? vpx_rb_read_inv_signed_literal(rb, 6) : 0;
 }
@@ -1953,16 +1962,34 @@ static void setup_quantization(VP10_COMMON *const cm,
   cm->uv_dc_delta_q = read_delta_q(rb);
   cm->uv_ac_delta_q = read_delta_q(rb);
   cm->dequant_bit_depth = cm->bit_depth;
+#if CONFIG_AOM_QM
+  cm->using_qmatrix = vpx_rb_read_bit(rb);
+  if (cm->using_qmatrix) {
+    cm->min_qmlevel = vpx_rb_read_literal(rb, QM_LEVEL_BITS);
+    cm->max_qmlevel = vpx_rb_read_literal(rb, QM_LEVEL_BITS);
+  } else {
+    cm->min_qmlevel = 0;
+    cm->max_qmlevel = 0;
+  }
+#endif
 }
 
 static void setup_segmentation_dequant(VP10_COMMON *const cm) {
-// Build y/uv dequant values based on segmentation.
+  // Build y/uv dequant values based on segmentation.
+  int i = 0;
+#if CONFIG_AOM_QM
+  int lossless;
+  int j = 0;
+  int qmlevel;
+  int using_qm = cm->using_qmatrix;
+  int minqm = cm->min_qmlevel;
+  int maxqm = cm->max_qmlevel;
+#endif
 #if CONFIG_NEW_QUANT
   int b;
   int dq;
 #endif  //  CONFIG_NEW_QUANT
   if (cm->seg.enabled) {
-    int i;
     for (i = 0; i < MAX_SEGMENTS; ++i) {
       const int qindex = vp10_get_qindex(&cm->seg, i, cm->base_qindex);
       cm->y_dequant[i][0] =
@@ -1972,6 +1999,21 @@ static void setup_segmentation_dequant(VP10_COMMON *const cm) {
           vp10_dc_quant(qindex, cm->uv_dc_delta_q, cm->bit_depth);
       cm->uv_dequant[i][1] =
           vp10_ac_quant(qindex, cm->uv_ac_delta_q, cm->bit_depth);
+#if CONFIG_AOM_QM
+      lossless = qindex == 0 && cm->y_dc_delta_q == 0 &&
+                 cm->uv_dc_delta_q == 0 && cm->uv_ac_delta_q == 0;
+      // NB: depends on base index so there is only 1 set per frame
+      // No quant weighting when lossless or signalled not using QM
+      qmlevel = (lossless || using_qm == 0)
+                    ? NUM_QM_LEVELS - 1
+                    : aom_get_qmlevel(cm->base_qindex, minqm, maxqm);
+      for (j = 0; j < TX_SIZES; ++j) {
+        cm->y_iqmatrix[i][1][j] = aom_iqmatrix(cm, qmlevel, 0, j, 1);
+        cm->y_iqmatrix[i][0][j] = aom_iqmatrix(cm, qmlevel, 0, j, 0);
+        cm->uv_iqmatrix[i][1][j] = aom_iqmatrix(cm, qmlevel, 1, j, 1);
+        cm->uv_iqmatrix[i][0][j] = aom_iqmatrix(cm, qmlevel, 1, j, 0);
+      }
+#endif  // CONFIG_AOM_QM
 #if CONFIG_NEW_QUANT
       for (dq = 0; dq < QUANT_PROFILES; dq++) {
         for (b = 0; b < COEF_BANDS; ++b) {
@@ -1994,6 +2036,20 @@ static void setup_segmentation_dequant(VP10_COMMON *const cm) {
         vp10_dc_quant(qindex, cm->uv_dc_delta_q, cm->bit_depth);
     cm->uv_dequant[0][1] =
         vp10_ac_quant(qindex, cm->uv_ac_delta_q, cm->bit_depth);
+#if CONFIG_AOM_QM
+    lossless = qindex == 0 && cm->y_dc_delta_q == 0 && cm->uv_dc_delta_q == 0 &&
+               cm->uv_ac_delta_q == 0;
+    // No quant weighting when lossless or signalled not using QM
+    qmlevel = (lossless || using_qm == 0)
+                  ? NUM_QM_LEVELS - 1
+                  : aom_get_qmlevel(cm->base_qindex, minqm, maxqm);
+    for (j = 0; j < TX_SIZES; ++j) {
+      cm->y_iqmatrix[i][1][j] = aom_iqmatrix(cm, qmlevel, 0, j, 1);
+      cm->y_iqmatrix[i][0][j] = aom_iqmatrix(cm, qmlevel, 0, j, 0);
+      cm->uv_iqmatrix[i][1][j] = aom_iqmatrix(cm, qmlevel, 1, j, 1);
+      cm->uv_iqmatrix[i][0][j] = aom_iqmatrix(cm, qmlevel, 1, j, 0);
+    }
+#endif
 #if CONFIG_NEW_QUANT
     for (dq = 0; dq < QUANT_PROFILES; dq++) {
       for (b = 0; b < COEF_BANDS; ++b) {
@@ -2646,6 +2702,10 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi, const uint8_t *data,
     winterface->execute(&pbi->lf_worker);
   }
 #endif  // CONFIG_VAR_TX
+#if CONFIG_CLPF
+  if (cm->clpf && !cm->skip_loop_filter)
+    vp10_clpf_frame(&pbi->cur_buf->buf, cm, &pbi->mb);
+#endif
 
   if (cm->frame_parallel_decode)
     vp10_frameworker_broadcast(pbi->cur_buf, INT_MAX);
@@ -3179,6 +3239,9 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
 #endif  // CONFIG_EXT_PARTITION
 
   setup_loopfilter(cm, rb);
+#if CONFIG_CLPF
+  setup_clpf(cm, rb);
+#endif
 #if CONFIG_LOOP_RESTORATION
   setup_restoration(cm, rb);
 #endif  // CONFIG_LOOP_RESTORATION

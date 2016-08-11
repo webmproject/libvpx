@@ -15,6 +15,9 @@
 #include "./vpx_config.h"
 
 #include "vp10/common/alloccommon.h"
+#if CONFIG_CLPF
+#include "vp10/common/clpf.h"
+#endif
 #include "vp10/common/filter.h"
 #include "vp10/common/idct.h"
 #include "vp10/common/reconinter.h"
@@ -2435,6 +2438,9 @@ VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
    * vp10_init_quantizer() for every frame.
    */
   vp10_init_quantizer(cpi);
+#if CONFIG_AOM_QM
+  aom_qm_init(cm);
+#endif
 
   vp10_loop_filter_init(cm);
 #if CONFIG_LOOP_RESTORATION
@@ -3337,6 +3343,65 @@ static void loopfilter_frame(VP10_COMP *cpi, VP10_COMMON *cm) {
       vp10_loop_filter_frame(cm->frame_to_show, cm, xd, lf->filter_level, 0, 0);
 #endif
   }
+
+#if CONFIG_CLPF
+  cm->clpf = 0;
+  if (!is_lossless_requested(&cpi->oxcf)) {
+    // Test CLPF
+    int i, hq = 1;
+    uint64_t before, after;
+    // TODO(yaowu): investigate per-segment CLPF decision and
+    // an optimal threshold, use 80 for now.
+    for (i = 0; i < MAX_SEGMENTS; i++)
+      hq &= vp10_get_qindex(&cm->seg, i, cm->base_qindex) < 80;
+
+    if (!hq) {  // Don't try filter if the entire image is nearly losslessly
+                // encoded
+#if CLPF_FILTER_ALL_PLANES
+      vpx_yv12_copy_frame(cm->frame_to_show, &cpi->last_frame_uf);
+      before =
+          get_sse(cpi->Source->y_buffer, cpi->Source->y_stride,
+                  cm->frame_to_show->y_buffer, cm->frame_to_show->y_stride,
+                  cpi->Source->y_crop_width, cpi->Source->y_crop_height) +
+          get_sse(cpi->Source->u_buffer, cpi->Source->uv_stride,
+                  cm->frame_to_show->u_buffer, cm->frame_to_show->uv_stride,
+                  cpi->Source->uv_crop_width, cpi->Source->uv_crop_height) +
+          get_sse(cpi->Source->v_buffer, cpi->Source->uv_stride,
+                  cm->frame_to_show->v_buffer, cm->frame_to_show->uv_stride,
+                  cpi->Source->uv_crop_width, cpi->Source->uv_crop_height);
+      vp10_clpf_frame(cm->frame_to_show, cm, xd);
+      after = get_sse(cpi->Source->y_buffer, cpi->Source->y_stride,
+                      cm->frame_to_show->y_buffer, cm->frame_to_show->y_stride,
+                      cpi->Source->y_crop_width, cpi->Source->y_crop_height) +
+              get_sse(cpi->Source->u_buffer, cpi->Source->uv_stride,
+                      cm->frame_to_show->u_buffer, cm->frame_to_show->uv_stride,
+                      cpi->Source->uv_crop_width, cpi->Source->uv_crop_height) +
+              get_sse(cpi->Source->v_buffer, cpi->Source->uv_stride,
+                      cm->frame_to_show->v_buffer, cm->frame_to_show->uv_stride,
+                      cpi->Source->uv_crop_width, cpi->Source->uv_crop_height);
+#else
+      vpx_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
+      before = get_sse(cpi->Source->y_buffer, cpi->Source->y_stride,
+                       cm->frame_to_show->y_buffer, cm->frame_to_show->y_stride,
+                       cpi->Source->y_crop_width, cpi->Source->y_crop_height);
+      vp10_clpf_frame(cm->frame_to_show, cm, xd);
+      after = get_sse(cpi->Source->y_buffer, cpi->Source->y_stride,
+                      cm->frame_to_show->y_buffer, cm->frame_to_show->y_stride,
+                      cpi->Source->y_crop_width, cpi->Source->y_crop_height);
+#endif
+      if (before < after) {
+// No improvement, restore original
+#if CLPF_FILTER_ALL_PLANES
+        vpx_yv12_copy_frame(&cpi->last_frame_uf, cm->frame_to_show);
+#else
+        vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
+#endif
+      } else {
+        cm->clpf = 1;
+      }
+    }
+  }
+#endif
 #if CONFIG_LOOP_RESTORATION
   if (cm->rst_info.restoration_type != RESTORE_NONE) {
     vp10_loop_restoration_init(&cm->rst_internal, &cm->rst_info,
@@ -5258,6 +5323,12 @@ int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
     for (i = 0; i < TOTAL_REFS_PER_FRAME; ++i)
       cpi->scaled_ref_idx[i] = INVALID_IDX;
   }
+
+#if CONFIG_AOM_QM
+  cm->using_qmatrix = cpi->oxcf.using_qm;
+  cm->min_qmlevel = cpi->oxcf.qm_minlevel;
+  cm->max_qmlevel = cpi->oxcf.qm_maxlevel;
+#endif
 
   if (oxcf->pass == 1) {
     cpi->td.mb.e_mbd.lossless[0] = is_lossless_requested(oxcf);

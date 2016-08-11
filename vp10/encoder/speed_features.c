@@ -619,7 +619,12 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
         vp10_find_best_sub_pixel_tree_pruned_evenmore;
   }
 
+#if !CONFIG_AOM_QM
   x->optimize = sf->optimize_coefficients == 1 && oxcf->pass != 1;
+#else
+  // FIXME: trellis not very efficient for quantisation matrices
+  x->optimize = 0;
+#endif
 
   x->min_partition_size = sf->default_min_partition_size;
   x->max_partition_size = sf->default_max_partition_size;

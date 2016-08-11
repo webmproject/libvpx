@@ -89,6 +89,8 @@ ifeq (yes,$(filter yes,$(CONFIG_GLOBAL_MOTION) $(CONFIG_WARPED_MOTION)))
 VP10_COMMON_SRCS-yes += common/warped_motion.h
 VP10_COMMON_SRCS-yes += common/warped_motion.c
 endif
+VP10_COMMON_SRCS-yes += common/clpf.c
+VP10_COMMON_SRCS-yes += common/clpf.h
 
 ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 VP10_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/itrans4_dspr2.c

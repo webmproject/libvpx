@@ -12,6 +12,7 @@
 #define VP10_ENCODER_QUANTIZE_H_
 
 #include "./vpx_config.h"
+#include "vp10/common/quant_common.h"
 #include "vp10/common/scan.h"
 #include "vp10/encoder/block.h"
 

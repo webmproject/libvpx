@@ -88,6 +88,11 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
       get_scan(tx_size, tx_type, is_inter_block(&xd->mi[0]->mbmi));
   const int16_t *const scan = so->scan;
   const int16_t *const nb = so->neighbors;
+#if CONFIG_AOM_QM
+  int seg_id = xd->mi[0]->mbmi.segment_id;
+  int is_intra = !is_inter_block(&xd->mi[0]->mbmi);
+  const qm_val_t *iqmatrix = pd->seg_iqmatrix[seg_id][is_intra][tx_size];
+#endif
   const int shift = get_tx_scale(xd, tx_type, tx_size);
 #if CONFIG_NEW_QUANT
   int dq = get_dq_profile_from_ctx(ctx);
@@ -142,6 +147,9 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
     int base_bits, dx;
     int64_t d2;
     const int rc = scan[i];
+#if CONFIG_AOM_QM
+    int iwt = iqmatrix[rc];
+#endif
     int x = qcoeff[rc];
     next_shortcut = shortcut;
 
@@ -200,10 +208,18 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
                     (vp10_dequant_abscoeff_nuq(abs(x) - 1, dequant_ptr[rc != 0],
                                                dequant_val[band_translate[i]]) <
                      (abs(coeff[rc]) << shift)));
-#else   // CONFIG_NEW_QUANT
+#else  // CONFIG_NEW_QUANT
+#if CONFIG_AOM_QM
+        if ((abs(x) * dequant_ptr[rc != 0] * iwt >
+             ((abs(coeff[rc]) << shift) << AOM_QM_BITS)) &&
+            (abs(x) * dequant_ptr[rc != 0] * iwt <
+             (((abs(coeff[rc]) << shift) + dequant_ptr[rc != 0])
+              << AOM_QM_BITS)))
+#else
         if ((abs(x) * dequant_ptr[rc != 0] > (abs(coeff[rc]) << shift)) &&
             (abs(x) * dequant_ptr[rc != 0] <
              (abs(coeff[rc]) << shift) + dequant_ptr[rc != 0]))
+#endif  // CONFIG_AOM_QM
           shortcut = 1;
         else
           shortcut = 0;
@@ -366,6 +382,11 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
   for (i = next; i < eob; i = next) {
     const int x = tokens[i][best].qc;
     const int rc = scan[i];
+#if CONFIG_AOM_QM
+    const int iwt = iqmatrix[rc];
+    const int dequant =
+        (dequant_ptr[rc != 0] * iwt + (1 << (AOM_QM_BITS - 1))) >> AOM_QM_BITS;
+#endif
 
     if (x) final_eob = i;
     qcoeff[rc] = x;
@@ -430,6 +451,12 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   uint16_t *const eob = &p->eobs[block];
   const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
+#if CONFIG_AOM_QM
+  int seg_id = xd->mi[0]->mbmi.segment_id;
+  int is_intra = !is_inter_block(&xd->mi[0]->mbmi);
+  const qm_val_t *qmatrix = pd->seg_qmatrix[seg_id][is_intra][tx_size];
+  const qm_val_t *iqmatrix = pd->seg_iqmatrix[seg_id][is_intra][tx_size];
+#endif
   const int16_t *src_diff;
   const int tx2d_size = get_tx2d_size(tx_size);
 
@@ -452,7 +479,12 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
     if (xform_quant_idx != VP10_XFORM_QUANT_SKIP_QUANT) {
       if (LIKELY(!x->skip_block)) {
         quant_func_list[xform_quant_idx][QUANT_FUNC_HIGHBD](
-            coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob, scan_order, &qparam);
+            coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob, scan_order, &qparam
+#if CONFIG_AOM_QM
+            ,
+            qmatrix, iqmatrix
+#endif  // CONFIG_AOM_QM
+            );
       } else {
         vp10_quantize_skip(tx2d_size, qcoeff, dqcoeff, eob);
       }
@@ -465,7 +497,12 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
   if (xform_quant_idx != VP10_XFORM_QUANT_SKIP_QUANT) {
     if (LIKELY(!x->skip_block)) {
       quant_func_list[xform_quant_idx][QUANT_FUNC_LOWBD](
-          coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob, scan_order, &qparam);
+          coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob, scan_order, &qparam
+#if CONFIG_AOM_QM
+          ,
+          qmatrix, iqmatrix
+#endif  // CONFIG_AOM_QM
+          );
     } else {
       vp10_quantize_skip(tx2d_size, qcoeff, dqcoeff, eob);
     }

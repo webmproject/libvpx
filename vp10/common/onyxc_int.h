@@ -144,6 +144,9 @@ typedef struct VP10Common {
   // Marks if we need to use 16bit frame buffers (1: yes, 0: no).
   int use_highbitdepth;
 #endif
+#if CONFIG_CLPF
+  int clpf;
+#endif
 
   YV12_BUFFER_CONFIG *frame_to_show;
   RefCntBuffer *prev_frame;
@@ -214,6 +217,23 @@ typedef struct VP10Common {
   int uv_ac_delta_q;
   int16_t y_dequant[MAX_SEGMENTS][2];
   int16_t uv_dequant[MAX_SEGMENTS][2];
+
+#if CONFIG_AOM_QM
+  // Global quant matrix tables
+  qm_val_t *giqmatrix[NUM_QM_LEVELS][2][2][TX_SIZES];
+  qm_val_t *gqmatrix[NUM_QM_LEVELS][2][2][TX_SIZES];
+
+  // Local quant matrix tables for each frame
+  qm_val_t *y_iqmatrix[MAX_SEGMENTS][2][TX_SIZES];
+  qm_val_t *uv_iqmatrix[MAX_SEGMENTS][2][TX_SIZES];
+  // Encoder
+  qm_val_t *y_qmatrix[MAX_SEGMENTS][2][TX_SIZES];
+  qm_val_t *uv_qmatrix[MAX_SEGMENTS][2][TX_SIZES];
+
+  int using_qmatrix;
+  int min_qmlevel;
+  int max_qmlevel;
+#endif
 #if CONFIG_NEW_QUANT
   dequant_val_type_nuq y_dequant_nuq[MAX_SEGMENTS][QUANT_PROFILES][COEF_BANDS];
   dequant_val_type_nuq uv_dequant_nuq[MAX_SEGMENTS][QUANT_PROFILES][COEF_BANDS];
@@ -430,12 +450,20 @@ static INLINE void vp10_init_macroblockd(VP10_COMMON *cm, MACROBLOCKD *xd,
     xd->above_context[i] = cm->above_context[i];
     if (xd->plane[i].plane_type == PLANE_TYPE_Y) {
       memcpy(xd->plane[i].seg_dequant, cm->y_dequant, sizeof(cm->y_dequant));
+#if CONFIG_AOM_QM
+      memcpy(xd->plane[i].seg_iqmatrix, cm->y_iqmatrix, sizeof(cm->y_iqmatrix));
+#endif
+
 #if CONFIG_NEW_QUANT
       memcpy(xd->plane[i].seg_dequant_nuq, cm->y_dequant_nuq,
              sizeof(cm->y_dequant_nuq));
 #endif
     } else {
       memcpy(xd->plane[i].seg_dequant, cm->uv_dequant, sizeof(cm->uv_dequant));
+#if CONFIG_AOM_QM
+      memcpy(xd->plane[i].seg_iqmatrix, cm->uv_iqmatrix,
+             sizeof(cm->uv_iqmatrix));
+#endif
 #if CONFIG_NEW_QUANT
       memcpy(xd->plane[i].seg_dequant_nuq, cm->uv_dequant_nuq,
              sizeof(cm->uv_dequant_nuq));

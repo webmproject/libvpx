@@ -1561,7 +1561,12 @@ void vp10_fdct8x8_quant_c(const int16_t *input, int stride,
                           const int16_t *quant_shift_ptr,
                           tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                           const int16_t *dequant_ptr, uint16_t *eob_ptr,
-                          const int16_t *scan, const int16_t *iscan) {
+                          const int16_t *scan, const int16_t *iscan
+#if CONFIG_AOM_QM
+                          ,
+                          const qm_val_t *qm_ptr, const qm_val_t *iqm_ptr
+#endif
+                          ) {
   int eob = -1;
 
   int i, j;
@@ -1647,16 +1652,29 @@ void vp10_fdct8x8_quant_c(const int16_t *input, int stride,
     for (i = 0; i < n_coeffs; i++) {
       const int rc = scan[i];
       const int coeff = coeff_ptr[rc];
+#if CONFIG_AOM_QM
+      const qm_val_t wt = qm_ptr[rc];
+      const qm_val_t iwt = iqm_ptr[rc];
+      const int dequant =
+          (dequant_ptr[rc != 0] * iwt + (1 << (AOM_QM_BITS - 1))) >>
+          AOM_QM_BITS;
+#endif
       const int coeff_sign = (coeff >> 31);
       const int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
 
-      int tmp = clamp(abs_coeff + round_ptr[rc != 0], INT16_MIN, INT16_MAX);
-      tmp = (tmp * quant_ptr[rc != 0]) >> 16;
-
-      qcoeff_ptr[rc] = (tmp ^ coeff_sign) - coeff_sign;
+      int64_t tmp = clamp(abs_coeff + round_ptr[rc != 0], INT16_MIN, INT16_MAX);
+      int tmp32;
+#if CONFIG_AOM_QM
+      tmp32 = (tmp * quant_ptr[rc != 0] * wt) >> (16 + AOM_QM_BITS);
+      qcoeff_ptr[rc] = (tmp32 ^ coeff_sign) - coeff_sign;
+      dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant;
+#else
+      tmp32 = (tmp * quant_ptr[rc != 0]) >> 16;
+      qcoeff_ptr[rc] = (tmp32 ^ coeff_sign) - coeff_sign;
       dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr[rc != 0];
+#endif
 
-      if (tmp) eob = i;
+      if (tmp32) eob = i;
     }
   }
   *eob_ptr = eob + 1;

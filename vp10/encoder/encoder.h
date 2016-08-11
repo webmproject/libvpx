@@ -193,6 +193,11 @@ typedef struct VP10EncoderConfig {
   int best_allowed_q;
   int cq_level;
   AQ_MODE aq_mode;  // Adaptive Quantization mode
+#if CONFIG_AOM_QM
+  int using_qm;
+  int qm_minlevel;
+  int qm_maxlevel;
+#endif
 
   // Internal frame size scaling.
   RESIZE_TYPE resize_mode;

@@ -43,6 +43,13 @@ static INLINE int read_coeff(const vpx_prob *probs, int n, vp10_reader *r) {
   return val;
 }
 
+#if CONFIG_AOM_QM
+static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
+                        tran_low_t *dqcoeff, TX_SIZE tx_size, TX_TYPE tx_type,
+                        const int16_t *dq, int ctx, const int16_t *scan,
+                        const int16_t *nb, vp10_reader *r,
+                        const qm_val_t *iqm[2][TX_SIZES])
+#else
 static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
                         tran_low_t *dqcoeff, TX_SIZE tx_size, TX_TYPE tx_type,
                         const int16_t *dq,
@@ -50,11 +57,16 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
                         dequant_val_type_nuq *dq_val,
 #endif  // CONFIG_NEW_QUANT
                         int ctx, const int16_t *scan, const int16_t *nb,
-                        vp10_reader *r) {
+                        vp10_reader *r)
+#endif
+{
   FRAME_COUNTS *counts = xd->counts;
   const int max_eob = get_tx2d_size(tx_size);
   const FRAME_CONTEXT *const fc = xd->fc;
   const int ref = is_inter_block(&xd->mi[0]->mbmi);
+#if CONFIG_AOM_QM
+  const qm_val_t *iqmatrix = iqm[!ref][tx_size];
+#endif
   int band, c = 0;
   const int tx_size_ctx = txsize_sqr_map[tx_size];
   const vpx_prob(*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
@@ -197,9 +209,14 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
       }
     }
 #if CONFIG_NEW_QUANT
+
     v = vp10_dequant_abscoeff_nuq(val, dqv, dqv_val);
     v = dq_shift ? ROUND_POWER_OF_TWO(v, dq_shift) : v;
 #else
+#if CONFIG_AOM_QM
+    dqv = ((iqmatrix[scan[c]] * (int)dqv) + (1 << (AOM_QM_BITS - 1))) >>
+          AOM_QM_BITS;
+#endif
     v = (val * dqv) >> dq_shift;
 #endif  // CONFIG_NEW_QUANT
 
@@ -489,12 +506,18 @@ int vp10_decode_block_tokens(MACROBLOCKD *const xd, int plane,
 #endif  //  CONFIG_NEW_QUANT
 
 #if !CONFIG_ANS
+#if CONFIG_AOM_QM
+  const int eob =
+      decode_coefs(xd, pd->plane_type, pd->dqcoeff, tx_size, tx_type, dequant,
+                   ctx, sc->scan, sc->neighbors, r, pd->seg_iqmatrix[seg_id]);
+#else
   const int eob =
       decode_coefs(xd, pd->plane_type, pd->dqcoeff, tx_size, tx_type, dequant,
 #if CONFIG_NEW_QUANT
                    pd->seg_dequant_nuq[seg_id][dq],
 #endif  // CONFIG_NEW_QUANT
                    ctx, sc->scan, sc->neighbors, r);
+#endif  // CONFIG_AOM_QM
 #else
   const int eob = decode_coefs_ans(xd, pd->plane_type, pd->dqcoeff, tx_size,
                                    tx_type, dequant,

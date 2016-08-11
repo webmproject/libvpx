@@ -366,6 +366,15 @@ static const arg_def_t tile_rows =
             "Number of tile rows to use, log2 (set to 0 while threads > 1)");
 static const arg_def_t lossless =
     ARG_DEF(NULL, "lossless", 1, "Lossless mode (0: false (default), 1: true)");
+#if CONFIG_AOM_QM
+static const arg_def_t enable_qm =
+    ARG_DEF(NULL, "enable_qm", 1,
+            "Enable quantisation matrices (0: false (default), 1: true)");
+static const arg_def_t qm_min = ARG_DEF(
+    NULL, "qm_min", 1, "Min quant matrix flatness (0..15), default is 8");
+static const arg_def_t qm_max = ARG_DEF(
+    NULL, "qm_max", 1, "Max quant matrix flatness (0..15), default is 16");
+#endif
 static const arg_def_t frame_parallel_decoding = ARG_DEF(
     NULL, "frame-parallel", 1, "Enable frame parallel decodability features");
 static const arg_def_t aq_mode = ARG_DEF(

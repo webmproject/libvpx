@@ -20,6 +20,9 @@
 #include "vpx_ports/system_state.h"
 #include "vpx_util/debug_util.h"
 
+#if CONFIG_CLPF
+#include "vp10/common/clpf.h"
+#endif
 #include "vp10/common/entropy.h"
 #include "vp10/common/entropymode.h"
 #include "vp10/common/entropymv.h"
@@ -2437,6 +2440,13 @@ static void encode_loopfilter(VP10_COMMON *cm,
   }
 }
 
+#if CONFIG_CLPF
+static void encode_clpf(const VP10_COMMON *cm,
+                        struct vpx_write_bit_buffer *wb) {
+  vpx_wb_write_literal(wb, cm->clpf, 1);
+}
+#endif
+
 static void write_delta_q(struct vpx_write_bit_buffer *wb, int delta_q) {
   if (delta_q != 0) {
     vpx_wb_write_bit(wb, 1);
@@ -2452,6 +2462,13 @@ static void encode_quantization(const VP10_COMMON *const cm,
   write_delta_q(wb, cm->y_dc_delta_q);
   write_delta_q(wb, cm->uv_dc_delta_q);
   write_delta_q(wb, cm->uv_ac_delta_q);
+#if CONFIG_AOM_QM
+  vpx_wb_write_bit(wb, cm->using_qmatrix);
+  if (cm->using_qmatrix) {
+    vpx_wb_write_literal(wb, cm->min_qmlevel, QM_LEVEL_BITS);
+    vpx_wb_write_literal(wb, cm->max_qmlevel, QM_LEVEL_BITS);
+  }
+#endif
 }
 
 static void encode_segmentation(VP10_COMMON *cm, MACROBLOCKD *xd,
@@ -3083,6 +3100,9 @@ static void write_uncompressed_header(VP10_COMP *cpi,
 #endif  // CONFIG_EXT_PARTITION
 
   encode_loopfilter(cm, wb);
+#if CONFIG_CLPF
+  encode_clpf(cm, wb);
+#endif
 #if CONFIG_LOOP_RESTORATION
   encode_restoration(cm, wb);
 #endif  // CONFIG_LOOP_RESTORATION

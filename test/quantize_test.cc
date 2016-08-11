@@ -26,6 +26,7 @@
 #include "vpx_mem/vpx_mem.h"
 
 namespace {
+#if !CONFIG_AOM_QM
 
 const int kNumBlocks = 25;
 const int kNumBlockEntries = 16;
@@ -199,4 +200,5 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp8_fast_quantize_b_msa, &vp8_fast_quantize_b_c),
         make_tuple(&vp8_regular_quantize_b_msa, &vp8_regular_quantize_b_c)));
 #endif  // HAVE_MSA
+#endif  // CONFIG_AOM_QM
 }  // namespace
