@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VPX_PORTS_MEM_H_
 #define VPX_PORTS_MEM_H_
 
@@ -16,12 +15,12 @@
 #include "vpx/vpx_integer.h"
 
 #if (defined(__GNUC__) && __GNUC__) || defined(__SUNPRO_C)
-#define DECLARE_ALIGNED(n,typ,val)  typ val __attribute__ ((aligned (n)))
+#define DECLARE_ALIGNED(n, typ, val) typ val __attribute__((aligned(n)))
 #elif defined(_MSC_VER)
-#define DECLARE_ALIGNED(n,typ,val)  __declspec(align(n)) typ val
+#define DECLARE_ALIGNED(n, typ, val) __declspec(align(n)) typ val
 #else
 #warning No alignment directives known for this compiler.
-#define DECLARE_ALIGNED(n,typ,val)  typ val
+#define DECLARE_ALIGNED(n, typ, val) typ val
 #endif
 
 /* Indicates that the usage of the specified variable has been audited to assure
@@ -29,7 +28,7 @@
  * warnings on gcc.
  */
 #if defined(__GNUC__) && __GNUC__
-#define UNINITIALIZED_IS_SAFE(x) x=x
+#define UNINITIALIZED_IS_SAFE(x) x = x
 #else
 #define UNINITIALIZED_IS_SAFE(x) x
 #endif
@@ -39,20 +38,19 @@
 #endif
 
 /* Shift down with rounding for use when n >= 0, value >= 0 */
-#define ROUND_POWER_OF_TWO(value, n) \
-    (((value) + (((1 << (n)) >> 1))) >> (n))
+#define ROUND_POWER_OF_TWO(value, n) (((value) + (((1 << (n)) >> 1))) >> (n))
 
 /* Shift down with rounding for signed integers, for use when n >= 0 */
-#define ROUND_POWER_OF_TWO_SIGNED(value, n) \
-    (((value) < 0) ? -ROUND_POWER_OF_TWO(-(value), (n)) \
-                   : ROUND_POWER_OF_TWO((value), (n)))
+#define ROUND_POWER_OF_TWO_SIGNED(value, n)           \
+  (((value) < 0) ? -ROUND_POWER_OF_TWO(-(value), (n)) \
+                 : ROUND_POWER_OF_TWO((value), (n)))
 
 #define ALIGN_POWER_OF_TWO(value, n) \
-    (((value) + ((1 << (n)) - 1)) & ~((1 << (n)) - 1))
+  (((value) + ((1 << (n)) - 1)) & ~((1 << (n)) - 1))
 
-#define CONVERT_TO_SHORTPTR(x) ((uint16_t*)(((uintptr_t)(x)) << 1))
+#define CONVERT_TO_SHORTPTR(x) ((uint16_t *)(((uintptr_t)(x)) << 1))
 #if CONFIG_VP9_HIGHBITDEPTH
-#define CONVERT_TO_BYTEPTR(x) ((uint8_t*)(((uintptr_t)(x)) >> 1))
+#define CONVERT_TO_BYTEPTR(x) ((uint8_t *)(((uintptr_t)(x)) >> 1))
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #endif  // VPX_PORTS_MEM_H_
