@@ -47,8 +47,7 @@ static void add_warning(const char *warning_string,
   new_node->warning_string = warning_string;
   new_node->next_warning = NULL;
 
-  while (*node != NULL)
-    node = &(*node)->next_warning;
+  while (*node != NULL) node = &(*node)->next_warning;
 
   *node = new_node;
 }
@@ -78,9 +77,7 @@ static void check_quantizer(int min_q, int max_q,
 }
 
 static void check_lag_in_frames_realtime_deadline(
-    int lag_in_frames,
-    int deadline,
-    struct WarningList *warning_list) {
+    int lag_in_frames, int deadline, struct WarningList *warning_list) {
   if (deadline == VPX_DL_REALTIME && lag_in_frames != 0)
     add_warning(lag_in_frames_with_realtime, warning_list);
 }
@@ -90,26 +87,21 @@ void check_encoder_config(int disable_prompt,
                           const struct vpx_codec_enc_cfg *stream_config) {
   int num_warnings = 0;
   struct WarningListNode *warning = NULL;
-  struct WarningList warning_list = {0};
+  struct WarningList warning_list = { 0 };
 
   check_quantizer(stream_config->rc_min_quantizer,
-                  stream_config->rc_max_quantizer,
-                  &warning_list);
+                  stream_config->rc_max_quantizer, &warning_list);
   check_lag_in_frames_realtime_deadline(stream_config->g_lag_in_frames,
-                                        global_config->deadline,
-                                        &warning_list);
+                                        global_config->deadline, &warning_list);
   /* Count and print warnings. */
-  for (warning = warning_list.warning_node;
-       warning != NULL;
-       warning = warning->next_warning,
-       ++num_warnings) {
+  for (warning = warning_list.warning_node; warning != NULL;
+       warning = warning->next_warning, ++num_warnings) {
     warn(warning->warning_string);
   }
 
   free_warning_list(&warning_list);
 
   if (num_warnings) {
-    if (!disable_prompt && !continue_prompt(num_warnings))
-      exit(EXIT_FAILURE);
+    if (!disable_prompt && !continue_prompt(num_warnings)) exit(EXIT_FAILURE);
   }
 }

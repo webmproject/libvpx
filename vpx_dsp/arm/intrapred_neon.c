@@ -18,9 +18,8 @@
 // DC 4x4
 
 // 'do_above' and 'do_left' facilitate branch removal when inlined.
-static INLINE void dc_4x4(uint8_t *dst, ptrdiff_t stride,
-                          const uint8_t *above, const uint8_t *left,
-                          int do_above, int do_left) {
+static INLINE void dc_4x4(uint8_t *dst, ptrdiff_t stride, const uint8_t *above,
+                          const uint8_t *left, int do_above, int do_left) {
   uint16x8_t sum_top;
   uint16x8_t sum_left;
   uint8x8_t dc0;
@@ -33,7 +32,7 @@ static INLINE void dc_4x4(uint8_t *dst, ptrdiff_t stride,
   }
 
   if (do_left) {
-    const uint8x8_t L = vld1_u8(left);  // left border
+    const uint8x8_t L = vld1_u8(left);   // left border
     const uint16x4_t p0 = vpaddl_u8(L);  // cascading summation of the left
     const uint16x4_t p1 = vpadd_u16(p0, p0);
     sum_left = vcombine_u16(p1, p1);
@@ -54,7 +53,7 @@ static INLINE void dc_4x4(uint8_t *dst, ptrdiff_t stride,
     const uint8x8_t dc = vdup_lane_u8(dc0, 0);
     int i;
     for (i = 0; i < 4; ++i) {
-      vst1_lane_u32((uint32_t*)(dst + i * stride), vreinterpret_u32_u8(dc), 0);
+      vst1_lane_u32((uint32_t *)(dst + i * stride), vreinterpret_u32_u8(dc), 0);
     }
   }
 }
@@ -87,9 +86,8 @@ void vpx_dc_128_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
 // DC 8x8
 
 // 'do_above' and 'do_left' facilitate branch removal when inlined.
-static INLINE void dc_8x8(uint8_t *dst, ptrdiff_t stride,
-                          const uint8_t *above, const uint8_t *left,
-                          int do_above, int do_left) {
+static INLINE void dc_8x8(uint8_t *dst, ptrdiff_t stride, const uint8_t *above,
+                          const uint8_t *left, int do_above, int do_left) {
   uint16x8_t sum_top;
   uint16x8_t sum_left;
   uint8x8_t dc0;
@@ -103,7 +101,7 @@ static INLINE void dc_8x8(uint8_t *dst, ptrdiff_t stride,
   }
 
   if (do_left) {
-    const uint8x8_t L = vld1_u8(left);  // left border
+    const uint8x8_t L = vld1_u8(left);   // left border
     const uint16x4_t p0 = vpaddl_u8(L);  // cascading summation of the left
     const uint16x4_t p1 = vpadd_u16(p0, p0);
     const uint16x4_t p2 = vpadd_u16(p1, p1);
@@ -125,7 +123,7 @@ static INLINE void dc_8x8(uint8_t *dst, ptrdiff_t stride,
     const uint8x8_t dc = vdup_lane_u8(dc0, 0);
     int i;
     for (i = 0; i < 8; ++i) {
-      vst1_u32((uint32_t*)(dst + i * stride), vreinterpret_u32_u8(dc));
+      vst1_u32((uint32_t *)(dst + i * stride), vreinterpret_u32_u8(dc));
     }
   }
 }
@@ -167,7 +165,7 @@ static INLINE void dc_16x16(uint8_t *dst, ptrdiff_t stride,
 
   if (do_above) {
     const uint8x16_t A = vld1q_u8(above);  // top row
-    const uint16x8_t p0 = vpaddlq_u8(A);  // cascading summation of the top
+    const uint16x8_t p0 = vpaddlq_u8(A);   // cascading summation of the top
     const uint16x4_t p1 = vadd_u16(vget_low_u16(p0), vget_high_u16(p0));
     const uint16x4_t p2 = vpadd_u16(p1, p1);
     const uint16x4_t p3 = vpadd_u16(p2, p2);
@@ -425,8 +423,7 @@ void vpx_v_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
   (void)left;
 
   d0u8 = vld1_u8(above);
-  for (i = 0; i < 8; i++, dst += stride)
-    vst1_u8(dst, d0u8);
+  for (i = 0; i < 8; i++, dst += stride) vst1_u8(dst, d0u8);
 }
 
 void vpx_v_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
@@ -436,8 +433,7 @@ void vpx_v_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
   (void)left;
 
   q0u8 = vld1q_u8(above);
-  for (i = 0; i < 16; i++, dst += stride)
-    vst1q_u8(dst, q0u8);
+  for (i = 0; i < 16; i++, dst += stride) vst1q_u8(dst, q0u8);
 }
 
 void vpx_v_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
@@ -608,8 +604,8 @@ void vpx_tm_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
   q3u16 = vsubl_u8(vreinterpret_u8_u32(d2u32), d0u8);
   for (i = 0; i < 4; i++, dst += stride) {
     q1u16 = vdupq_n_u16((uint16_t)left[i]);
-    q1s16 = vaddq_s16(vreinterpretq_s16_u16(q1u16),
-                      vreinterpretq_s16_u16(q3u16));
+    q1s16 =
+        vaddq_s16(vreinterpretq_s16_u16(q1u16), vreinterpretq_s16_u16(q3u16));
     d0u8 = vqmovun_s16(q1s16);
     vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d0u8), 0);
   }
@@ -631,26 +627,26 @@ void vpx_tm_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
   d20u16 = vget_low_u16(q10u16);
   for (j = 0; j < 2; j++, d20u16 = vget_high_u16(q10u16)) {
     q0u16 = vdupq_lane_u16(d20u16, 0);
-    q0s16 = vaddq_s16(vreinterpretq_s16_u16(q3u16),
-                      vreinterpretq_s16_u16(q0u16));
+    q0s16 =
+        vaddq_s16(vreinterpretq_s16_u16(q3u16), vreinterpretq_s16_u16(q0u16));
     d0u8 = vqmovun_s16(q0s16);
     vst1_u64((uint64_t *)dst, vreinterpret_u64_u8(d0u8));
     dst += stride;
     q0u16 = vdupq_lane_u16(d20u16, 1);
-    q0s16 = vaddq_s16(vreinterpretq_s16_u16(q3u16),
-                      vreinterpretq_s16_u16(q0u16));
+    q0s16 =
+        vaddq_s16(vreinterpretq_s16_u16(q3u16), vreinterpretq_s16_u16(q0u16));
     d0u8 = vqmovun_s16(q0s16);
     vst1_u64((uint64_t *)dst, vreinterpret_u64_u8(d0u8));
     dst += stride;
     q0u16 = vdupq_lane_u16(d20u16, 2);
-    q0s16 = vaddq_s16(vreinterpretq_s16_u16(q3u16),
-                      vreinterpretq_s16_u16(q0u16));
+    q0s16 =
+        vaddq_s16(vreinterpretq_s16_u16(q3u16), vreinterpretq_s16_u16(q0u16));
     d0u8 = vqmovun_s16(q0s16);
     vst1_u64((uint64_t *)dst, vreinterpret_u64_u8(d0u8));
     dst += stride;
     q0u16 = vdupq_lane_u16(d20u16, 3);
-    q0s16 = vaddq_s16(vreinterpretq_s16_u16(q3u16),
-                      vreinterpretq_s16_u16(q0u16));
+    q0s16 =
+        vaddq_s16(vreinterpretq_s16_u16(q3u16), vreinterpretq_s16_u16(q0u16));
     d0u8 = vqmovun_s16(q0s16);
     vst1_u64((uint64_t *)dst, vreinterpret_u64_u8(d0u8));
     dst += stride;
@@ -677,14 +673,14 @@ void vpx_tm_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
     for (j = 0; j < 2; j++, d20u16 = vget_high_u16(q10u16)) {
       q0u16 = vdupq_lane_u16(d20u16, 0);
       q8u16 = vdupq_lane_u16(d20u16, 1);
-      q1s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                        vreinterpretq_s16_u16(q2u16));
-      q0s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                        vreinterpretq_s16_u16(q3u16));
-      q11s16 = vaddq_s16(vreinterpretq_s16_u16(q8u16),
-                         vreinterpretq_s16_u16(q2u16));
-      q8s16 = vaddq_s16(vreinterpretq_s16_u16(q8u16),
-                        vreinterpretq_s16_u16(q3u16));
+      q1s16 =
+          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q2u16));
+      q0s16 =
+          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q3u16));
+      q11s16 =
+          vaddq_s16(vreinterpretq_s16_u16(q8u16), vreinterpretq_s16_u16(q2u16));
+      q8s16 =
+          vaddq_s16(vreinterpretq_s16_u16(q8u16), vreinterpretq_s16_u16(q3u16));
       d2u8 = vqmovun_s16(q1s16);
       d3u8 = vqmovun_s16(q0s16);
       d22u8 = vqmovun_s16(q11s16);
@@ -698,14 +694,14 @@ void vpx_tm_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
 
       q0u16 = vdupq_lane_u16(d20u16, 2);
       q8u16 = vdupq_lane_u16(d20u16, 3);
-      q1s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                        vreinterpretq_s16_u16(q2u16));
-      q0s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                        vreinterpretq_s16_u16(q3u16));
-      q11s16 = vaddq_s16(vreinterpretq_s16_u16(q8u16),
-                         vreinterpretq_s16_u16(q2u16));
-      q8s16 = vaddq_s16(vreinterpretq_s16_u16(q8u16),
-                        vreinterpretq_s16_u16(q3u16));
+      q1s16 =
+          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q2u16));
+      q0s16 =
+          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q3u16));
+      q11s16 =
+          vaddq_s16(vreinterpretq_s16_u16(q8u16), vreinterpretq_s16_u16(q2u16));
+      q8s16 =
+          vaddq_s16(vreinterpretq_s16_u16(q8u16), vreinterpretq_s16_u16(q3u16));
       d2u8 = vqmovun_s16(q1s16);
       d3u8 = vqmovun_s16(q0s16);
       d22u8 = vqmovun_s16(q11s16);
@@ -742,10 +738,10 @@ void vpx_tm_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
     d6u16 = vget_low_u16(q3u16);
     for (j = 0; j < 2; j++, d6u16 = vget_high_u16(q3u16)) {
       q0u16 = vdupq_lane_u16(d6u16, 0);
-      q12s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                         vreinterpretq_s16_u16(q8u16));
-      q13s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                         vreinterpretq_s16_u16(q9u16));
+      q12s16 =
+          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q8u16));
+      q13s16 =
+          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q9u16));
       q14s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
                          vreinterpretq_s16_u16(q10u16));
       q15s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
@@ -761,10 +757,10 @@ void vpx_tm_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
       dst += stride;
 
       q0u16 = vdupq_lane_u16(d6u16, 1);
-      q12s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                         vreinterpretq_s16_u16(q8u16));
-      q13s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                         vreinterpretq_s16_u16(q9u16));
+      q12s16 =
+          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q8u16));
+      q13s16 =
+          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q9u16));
       q14s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
                          vreinterpretq_s16_u16(q10u16));
       q15s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
@@ -780,10 +776,10 @@ void vpx_tm_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
       dst += stride;
 
       q0u16 = vdupq_lane_u16(d6u16, 2);
-      q12s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                         vreinterpretq_s16_u16(q8u16));
-      q13s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                         vreinterpretq_s16_u16(q9u16));
+      q12s16 =
+          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q8u16));
+      q13s16 =
+          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q9u16));
       q14s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
                          vreinterpretq_s16_u16(q10u16));
       q15s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
@@ -799,10 +795,10 @@ void vpx_tm_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
       dst += stride;
 
       q0u16 = vdupq_lane_u16(d6u16, 3);
-      q12s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                         vreinterpretq_s16_u16(q8u16));
-      q13s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                         vreinterpretq_s16_u16(q9u16));
+      q12s16 =
+          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q8u16));
+      q13s16 =
+          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q9u16));
       q14s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
                          vreinterpretq_s16_u16(q10u16));
       q15s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),

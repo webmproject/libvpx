@@ -15,10 +15,10 @@
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 
-typedef void (*SubtractWxHFuncType)(
-    int16_t *diff, ptrdiff_t diff_stride,
-    const uint16_t *src, ptrdiff_t src_stride,
-    const uint16_t *pred, ptrdiff_t pred_stride);
+typedef void (*SubtractWxHFuncType)(int16_t *diff, ptrdiff_t diff_stride,
+                                    const uint16_t *src, ptrdiff_t src_stride,
+                                    const uint16_t *pred,
+                                    ptrdiff_t pred_stride);
 
 static void subtract_4x4(int16_t *diff, ptrdiff_t diff_stride,
                          const uint16_t *src, ptrdiff_t src_stride,
@@ -26,17 +26,17 @@ static void subtract_4x4(int16_t *diff, ptrdiff_t diff_stride,
   __m128i u0, u1, u2, u3;
   __m128i v0, v1, v2, v3;
   __m128i x0, x1, x2, x3;
-  int64_t *store_diff = (int64_t *) (diff + 0 * diff_stride);
+  int64_t *store_diff = (int64_t *)(diff + 0 * diff_stride);
 
-  u0 = _mm_loadu_si128((__m128i const *) (src + 0 * src_stride));
-  u1 = _mm_loadu_si128((__m128i const *) (src + 1 * src_stride));
-  u2 = _mm_loadu_si128((__m128i const *) (src + 2 * src_stride));
-  u3 = _mm_loadu_si128((__m128i const *) (src + 3 * src_stride));
+  u0 = _mm_loadu_si128((__m128i const *)(src + 0 * src_stride));
+  u1 = _mm_loadu_si128((__m128i const *)(src + 1 * src_stride));
+  u2 = _mm_loadu_si128((__m128i const *)(src + 2 * src_stride));
+  u3 = _mm_loadu_si128((__m128i const *)(src + 3 * src_stride));
 
-  v0 = _mm_loadu_si128((__m128i const *) (pred + 0 * pred_stride));
-  v1 = _mm_loadu_si128((__m128i const *) (pred + 1 * pred_stride));
-  v2 = _mm_loadu_si128((__m128i const *) (pred + 2 * pred_stride));
-  v3 = _mm_loadu_si128((__m128i const *) (pred + 3 * pred_stride));
+  v0 = _mm_loadu_si128((__m128i const *)(pred + 0 * pred_stride));
+  v1 = _mm_loadu_si128((__m128i const *)(pred + 1 * pred_stride));
+  v2 = _mm_loadu_si128((__m128i const *)(pred + 2 * pred_stride));
+  v3 = _mm_loadu_si128((__m128i const *)(pred + 3 * pred_stride));
 
   x0 = _mm_sub_epi16(u0, v0);
   x1 = _mm_sub_epi16(u1, v1);
@@ -44,11 +44,11 @@ static void subtract_4x4(int16_t *diff, ptrdiff_t diff_stride,
   x3 = _mm_sub_epi16(u3, v3);
 
   _mm_storel_epi64((__m128i *)store_diff, x0);
-  store_diff = (int64_t *) (diff + 1 * diff_stride);
+  store_diff = (int64_t *)(diff + 1 * diff_stride);
   _mm_storel_epi64((__m128i *)store_diff, x1);
-  store_diff = (int64_t *) (diff + 2 * diff_stride);
+  store_diff = (int64_t *)(diff + 2 * diff_stride);
   _mm_storel_epi64((__m128i *)store_diff, x2);
-  store_diff = (int64_t *) (diff + 3 * diff_stride);
+  store_diff = (int64_t *)(diff + 3 * diff_stride);
   _mm_storel_epi64((__m128i *)store_diff, x3);
 }
 
@@ -58,25 +58,25 @@ static void subtract_4x8(int16_t *diff, ptrdiff_t diff_stride,
   __m128i u0, u1, u2, u3, u4, u5, u6, u7;
   __m128i v0, v1, v2, v3, v4, v5, v6, v7;
   __m128i x0, x1, x2, x3, x4, x5, x6, x7;
-  int64_t *store_diff = (int64_t *) (diff + 0 * diff_stride);
+  int64_t *store_diff = (int64_t *)(diff + 0 * diff_stride);
 
-  u0 = _mm_loadu_si128((__m128i const *) (src + 0 * src_stride));
-  u1 = _mm_loadu_si128((__m128i const *) (src + 1 * src_stride));
-  u2 = _mm_loadu_si128((__m128i const *) (src + 2 * src_stride));
-  u3 = _mm_loadu_si128((__m128i const *) (src + 3 * src_stride));
-  u4 = _mm_loadu_si128((__m128i const *) (src + 4 * src_stride));
-  u5 = _mm_loadu_si128((__m128i const *) (src + 5 * src_stride));
-  u6 = _mm_loadu_si128((__m128i const *) (src + 6 * src_stride));
-  u7 = _mm_loadu_si128((__m128i const *) (src + 7 * src_stride));
+  u0 = _mm_loadu_si128((__m128i const *)(src + 0 * src_stride));
+  u1 = _mm_loadu_si128((__m128i const *)(src + 1 * src_stride));
+  u2 = _mm_loadu_si128((__m128i const *)(src + 2 * src_stride));
+  u3 = _mm_loadu_si128((__m128i const *)(src + 3 * src_stride));
+  u4 = _mm_loadu_si128((__m128i const *)(src + 4 * src_stride));
+  u5 = _mm_loadu_si128((__m128i const *)(src + 5 * src_stride));
+  u6 = _mm_loadu_si128((__m128i const *)(src + 6 * src_stride));
+  u7 = _mm_loadu_si128((__m128i const *)(src + 7 * src_stride));
 
-  v0 = _mm_loadu_si128((__m128i const *) (pred + 0 * pred_stride));
-  v1 = _mm_loadu_si128((__m128i const *) (pred + 1 * pred_stride));
-  v2 = _mm_loadu_si128((__m128i const *) (pred + 2 * pred_stride));
-  v3 = _mm_loadu_si128((__m128i const *) (pred + 3 * pred_stride));
-  v4 = _mm_loadu_si128((__m128i const *) (pred + 4 * pred_stride));
-  v5 = _mm_loadu_si128((__m128i const *) (pred + 5 * pred_stride));
-  v6 = _mm_loadu_si128((__m128i const *) (pred + 6 * pred_stride));
-  v7 = _mm_loadu_si128((__m128i const *) (pred + 7 * pred_stride));
+  v0 = _mm_loadu_si128((__m128i const *)(pred + 0 * pred_stride));
+  v1 = _mm_loadu_si128((__m128i const *)(pred + 1 * pred_stride));
+  v2 = _mm_loadu_si128((__m128i const *)(pred + 2 * pred_stride));
+  v3 = _mm_loadu_si128((__m128i const *)(pred + 3 * pred_stride));
+  v4 = _mm_loadu_si128((__m128i const *)(pred + 4 * pred_stride));
+  v5 = _mm_loadu_si128((__m128i const *)(pred + 5 * pred_stride));
+  v6 = _mm_loadu_si128((__m128i const *)(pred + 6 * pred_stride));
+  v7 = _mm_loadu_si128((__m128i const *)(pred + 7 * pred_stride));
 
   x0 = _mm_sub_epi16(u0, v0);
   x1 = _mm_sub_epi16(u1, v1);
@@ -88,19 +88,19 @@ static void subtract_4x8(int16_t *diff, ptrdiff_t diff_stride,
   x7 = _mm_sub_epi16(u7, v7);
 
   _mm_storel_epi64((__m128i *)store_diff, x0);
-  store_diff = (int64_t *) (diff + 1 * diff_stride);
+  store_diff = (int64_t *)(diff + 1 * diff_stride);
   _mm_storel_epi64((__m128i *)store_diff, x1);
-  store_diff = (int64_t *) (diff + 2 * diff_stride);
+  store_diff = (int64_t *)(diff + 2 * diff_stride);
   _mm_storel_epi64((__m128i *)store_diff, x2);
-  store_diff = (int64_t *) (diff + 3 * diff_stride);
+  store_diff = (int64_t *)(diff + 3 * diff_stride);
   _mm_storel_epi64((__m128i *)store_diff, x3);
-  store_diff = (int64_t *) (diff + 4 * diff_stride);
+  store_diff = (int64_t *)(diff + 4 * diff_stride);
   _mm_storel_epi64((__m128i *)store_diff, x4);
-  store_diff = (int64_t *) (diff + 5 * diff_stride);
+  store_diff = (int64_t *)(diff + 5 * diff_stride);
   _mm_storel_epi64((__m128i *)store_diff, x5);
-  store_diff = (int64_t *) (diff + 6 * diff_stride);
+  store_diff = (int64_t *)(diff + 6 * diff_stride);
   _mm_storel_epi64((__m128i *)store_diff, x6);
-  store_diff = (int64_t *) (diff + 7 * diff_stride);
+  store_diff = (int64_t *)(diff + 7 * diff_stride);
   _mm_storel_epi64((__m128i *)store_diff, x7);
 }
 
@@ -111,25 +111,25 @@ static void subtract_8x4(int16_t *diff, ptrdiff_t diff_stride,
   __m128i v0, v1, v2, v3;
   __m128i x0, x1, x2, x3;
 
-  u0 = _mm_loadu_si128((__m128i const *) (src + 0 * src_stride));
-  u1 = _mm_loadu_si128((__m128i const *) (src + 1 * src_stride));
-  u2 = _mm_loadu_si128((__m128i const *) (src + 2 * src_stride));
-  u3 = _mm_loadu_si128((__m128i const *) (src + 3 * src_stride));
+  u0 = _mm_loadu_si128((__m128i const *)(src + 0 * src_stride));
+  u1 = _mm_loadu_si128((__m128i const *)(src + 1 * src_stride));
+  u2 = _mm_loadu_si128((__m128i const *)(src + 2 * src_stride));
+  u3 = _mm_loadu_si128((__m128i const *)(src + 3 * src_stride));
 
-  v0 = _mm_loadu_si128((__m128i const *) (pred + 0 * pred_stride));
-  v1 = _mm_loadu_si128((__m128i const *) (pred + 1 * pred_stride));
-  v2 = _mm_loadu_si128((__m128i const *) (pred + 2 * pred_stride));
-  v3 = _mm_loadu_si128((__m128i const *) (pred + 3 * pred_stride));
+  v0 = _mm_loadu_si128((__m128i const *)(pred + 0 * pred_stride));
+  v1 = _mm_loadu_si128((__m128i const *)(pred + 1 * pred_stride));
+  v2 = _mm_loadu_si128((__m128i const *)(pred + 2 * pred_stride));
+  v3 = _mm_loadu_si128((__m128i const *)(pred + 3 * pred_stride));
 
   x0 = _mm_sub_epi16(u0, v0);
   x1 = _mm_sub_epi16(u1, v1);
   x2 = _mm_sub_epi16(u2, v2);
   x3 = _mm_sub_epi16(u3, v3);
 
-  _mm_storeu_si128((__m128i *) (diff + 0 * diff_stride), x0);
-  _mm_storeu_si128((__m128i *) (diff + 1 * diff_stride), x1);
-  _mm_storeu_si128((__m128i *) (diff + 2 * diff_stride), x2);
-  _mm_storeu_si128((__m128i *) (diff + 3 * diff_stride), x3);
+  _mm_storeu_si128((__m128i *)(diff + 0 * diff_stride), x0);
+  _mm_storeu_si128((__m128i *)(diff + 1 * diff_stride), x1);
+  _mm_storeu_si128((__m128i *)(diff + 2 * diff_stride), x2);
+  _mm_storeu_si128((__m128i *)(diff + 3 * diff_stride), x3);
 }
 
 static void subtract_8x8(int16_t *diff, ptrdiff_t diff_stride,
@@ -139,23 +139,23 @@ static void subtract_8x8(int16_t *diff, ptrdiff_t diff_stride,
   __m128i v0, v1, v2, v3, v4, v5, v6, v7;
   __m128i x0, x1, x2, x3, x4, x5, x6, x7;
 
-  u0 = _mm_loadu_si128((__m128i const *) (src + 0 * src_stride));
-  u1 = _mm_loadu_si128((__m128i const *) (src + 1 * src_stride));
-  u2 = _mm_loadu_si128((__m128i const *) (src + 2 * src_stride));
-  u3 = _mm_loadu_si128((__m128i const *) (src + 3 * src_stride));
-  u4 = _mm_loadu_si128((__m128i const *) (src + 4 * src_stride));
-  u5 = _mm_loadu_si128((__m128i const *) (src + 5 * src_stride));
-  u6 = _mm_loadu_si128((__m128i const *) (src + 6 * src_stride));
-  u7 = _mm_loadu_si128((__m128i const *) (src + 7 * src_stride));
+  u0 = _mm_loadu_si128((__m128i const *)(src + 0 * src_stride));
+  u1 = _mm_loadu_si128((__m128i const *)(src + 1 * src_stride));
+  u2 = _mm_loadu_si128((__m128i const *)(src + 2 * src_stride));
+  u3 = _mm_loadu_si128((__m128i const *)(src + 3 * src_stride));
+  u4 = _mm_loadu_si128((__m128i const *)(src + 4 * src_stride));
+  u5 = _mm_loadu_si128((__m128i const *)(src + 5 * src_stride));
+  u6 = _mm_loadu_si128((__m128i const *)(src + 6 * src_stride));
+  u7 = _mm_loadu_si128((__m128i const *)(src + 7 * src_stride));
 
-  v0 = _mm_loadu_si128((__m128i const *) (pred + 0 * pred_stride));
-  v1 = _mm_loadu_si128((__m128i const *) (pred + 1 * pred_stride));
-  v2 = _mm_loadu_si128((__m128i const *) (pred + 2 * pred_stride));
-  v3 = _mm_loadu_si128((__m128i const *) (pred + 3 * pred_stride));
-  v4 = _mm_loadu_si128((__m128i const *) (pred + 4 * pred_stride));
-  v5 = _mm_loadu_si128((__m128i const *) (pred + 5 * pred_stride));
-  v6 = _mm_loadu_si128((__m128i const *) (pred + 6 * pred_stride));
-  v7 = _mm_loadu_si128((__m128i const *) (pred + 7 * pred_stride));
+  v0 = _mm_loadu_si128((__m128i const *)(pred + 0 * pred_stride));
+  v1 = _mm_loadu_si128((__m128i const *)(pred + 1 * pred_stride));
+  v2 = _mm_loadu_si128((__m128i const *)(pred + 2 * pred_stride));
+  v3 = _mm_loadu_si128((__m128i const *)(pred + 3 * pred_stride));
+  v4 = _mm_loadu_si128((__m128i const *)(pred + 4 * pred_stride));
+  v5 = _mm_loadu_si128((__m128i const *)(pred + 5 * pred_stride));
+  v6 = _mm_loadu_si128((__m128i const *)(pred + 6 * pred_stride));
+  v7 = _mm_loadu_si128((__m128i const *)(pred + 7 * pred_stride));
 
   x0 = _mm_sub_epi16(u0, v0);
   x1 = _mm_sub_epi16(u1, v1);
@@ -166,14 +166,14 @@ static void subtract_8x8(int16_t *diff, ptrdiff_t diff_stride,
   x6 = _mm_sub_epi16(u6, v6);
   x7 = _mm_sub_epi16(u7, v7);
 
-  _mm_storeu_si128((__m128i *) (diff + 0 * diff_stride), x0);
-  _mm_storeu_si128((__m128i *) (diff + 1 * diff_stride), x1);
-  _mm_storeu_si128((__m128i *) (diff + 2 * diff_stride), x2);
-  _mm_storeu_si128((__m128i *) (diff + 3 * diff_stride), x3);
-  _mm_storeu_si128((__m128i *) (diff + 4 * diff_stride), x4);
-  _mm_storeu_si128((__m128i *) (diff + 5 * diff_stride), x5);
-  _mm_storeu_si128((__m128i *) (diff + 6 * diff_stride), x6);
-  _mm_storeu_si128((__m128i *) (diff + 7 * diff_stride), x7);
+  _mm_storeu_si128((__m128i *)(diff + 0 * diff_stride), x0);
+  _mm_storeu_si128((__m128i *)(diff + 1 * diff_stride), x1);
+  _mm_storeu_si128((__m128i *)(diff + 2 * diff_stride), x2);
+  _mm_storeu_si128((__m128i *)(diff + 3 * diff_stride), x3);
+  _mm_storeu_si128((__m128i *)(diff + 4 * diff_stride), x4);
+  _mm_storeu_si128((__m128i *)(diff + 5 * diff_stride), x5);
+  _mm_storeu_si128((__m128i *)(diff + 6 * diff_stride), x6);
+  _mm_storeu_si128((__m128i *)(diff + 7 * diff_stride), x7);
 }
 
 static void subtract_8x16(int16_t *diff, ptrdiff_t diff_stride,
@@ -349,17 +349,14 @@ static SubtractWxHFuncType getSubtractFunc(int rows, int cols) {
   return ret_func_ptr;
 }
 
-void vpx_highbd_subtract_block_sse2(
-    int rows, int cols,
-    int16_t *diff, ptrdiff_t diff_stride,
-    const uint8_t *src8, ptrdiff_t src_stride,
-    const uint8_t *pred8,
-    ptrdiff_t pred_stride,
-    int bd) {
+void vpx_highbd_subtract_block_sse2(int rows, int cols, int16_t *diff,
+                                    ptrdiff_t diff_stride, const uint8_t *src8,
+                                    ptrdiff_t src_stride, const uint8_t *pred8,
+                                    ptrdiff_t pred_stride, int bd) {
   uint16_t *src = CONVERT_TO_SHORTPTR(src8);
   uint16_t *pred = CONVERT_TO_SHORTPTR(pred8);
   SubtractWxHFuncType func;
-  (void) bd;
+  (void)bd;
 
   func = getSubtractFunc(rows, cols);
   func(diff, diff_stride, src, src_stride, pred, pred_stride);

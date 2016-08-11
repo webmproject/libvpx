@@ -24,8 +24,8 @@
 void vpx_blend_a64_mask_c(uint8_t *dst, uint32_t dst_stride,
                           const uint8_t *src0, uint32_t src0_stride,
                           const uint8_t *src1, uint32_t src1_stride,
-                          const uint8_t *mask, uint32_t mask_stride,
-                          int h, int w, int subh, int subw) {
+                          const uint8_t *mask, uint32_t mask_stride, int h,
+                          int w, int subh, int subw) {
   int i, j;
 
   assert(IMPLIES(src0 == dst, src0_stride == dst_stride));
@@ -40,22 +40,20 @@ void vpx_blend_a64_mask_c(uint8_t *dst, uint32_t dst_stride,
     for (i = 0; i < h; ++i) {
       for (j = 0; j < w; ++j) {
         const int m = mask[i * mask_stride + j];
-        dst[i * dst_stride + j] = VPX_BLEND_A64(m,
-                                                src0[i * src0_stride + j],
+        dst[i * dst_stride + j] = VPX_BLEND_A64(m, src0[i * src0_stride + j],
                                                 src1[i * src1_stride + j]);
       }
     }
   } else if (subw == 1 && subh == 1) {
     for (i = 0; i < h; ++i) {
       for (j = 0; j < w; ++j) {
-        const int m =
-            ROUND_POWER_OF_TWO(mask[(2 * i) * mask_stride + (2 * j)] +
-                               mask[(2 * i + 1) * mask_stride + (2 * j)] +
-                               mask[(2 * i) * mask_stride + (2 * j + 1)] +
-                               mask[(2 * i + 1) * mask_stride + (2 * j + 1)],
-                               2);
-        dst[i * dst_stride + j] = VPX_BLEND_A64(m,
-                                                src0[i * src0_stride + j],
+        const int m = ROUND_POWER_OF_TWO(
+            mask[(2 * i) * mask_stride + (2 * j)] +
+                mask[(2 * i + 1) * mask_stride + (2 * j)] +
+                mask[(2 * i) * mask_stride + (2 * j + 1)] +
+                mask[(2 * i + 1) * mask_stride + (2 * j + 1)],
+            2);
+        dst[i * dst_stride + j] = VPX_BLEND_A64(m, src0[i * src0_stride + j],
                                                 src1[i * src1_stride + j]);
       }
     }
@@ -64,8 +62,7 @@ void vpx_blend_a64_mask_c(uint8_t *dst, uint32_t dst_stride,
       for (j = 0; j < w; ++j) {
         const int m = VPX_BLEND_AVG(mask[i * mask_stride + (2 * j)],
                                     mask[i * mask_stride + (2 * j + 1)]);
-        dst[i * dst_stride + j] = VPX_BLEND_A64(m,
-                                                src0[i * src0_stride + j],
+        dst[i * dst_stride + j] = VPX_BLEND_A64(m, src0[i * src0_stride + j],
                                                 src1[i * src1_stride + j]);
       }
     }
@@ -74,8 +71,7 @@ void vpx_blend_a64_mask_c(uint8_t *dst, uint32_t dst_stride,
       for (j = 0; j < w; ++j) {
         const int m = VPX_BLEND_AVG(mask[(2 * i) * mask_stride + j],
                                     mask[(2 * i + 1) * mask_stride + j]);
-        dst[i * dst_stride + j] = VPX_BLEND_A64(m,
-                                                src0[i * src0_stride + j],
+        dst[i * dst_stride + j] = VPX_BLEND_A64(m, src0[i * src0_stride + j],
                                                 src1[i * src1_stride + j]);
       }
     }
@@ -107,22 +103,20 @@ void vpx_highbd_blend_a64_mask_c(uint8_t *dst_8, uint32_t dst_stride,
     for (i = 0; i < h; ++i) {
       for (j = 0; j < w; ++j) {
         const int m = mask[i * mask_stride + j];
-        dst[i * dst_stride + j] = VPX_BLEND_A64(m,
-                                                src0[i * src0_stride + j],
+        dst[i * dst_stride + j] = VPX_BLEND_A64(m, src0[i * src0_stride + j],
                                                 src1[i * src1_stride + j]);
       }
     }
   } else if (subw == 1 && subh == 1) {
     for (i = 0; i < h; ++i) {
       for (j = 0; j < w; ++j) {
-        const int m =
-            ROUND_POWER_OF_TWO(mask[(2 * i) * mask_stride + (2 * j)] +
-                               mask[(2 * i + 1) * mask_stride + (2 * j)] +
-                               mask[(2 * i) * mask_stride + (2 * j + 1)] +
-                               mask[(2 * i + 1) * mask_stride + (2 * j + 1)],
-                               2);
-        dst[i * dst_stride + j] = VPX_BLEND_A64(m,
-                                                src0[i * src0_stride + j],
+        const int m = ROUND_POWER_OF_TWO(
+            mask[(2 * i) * mask_stride + (2 * j)] +
+                mask[(2 * i + 1) * mask_stride + (2 * j)] +
+                mask[(2 * i) * mask_stride + (2 * j + 1)] +
+                mask[(2 * i + 1) * mask_stride + (2 * j + 1)],
+            2);
+        dst[i * dst_stride + j] = VPX_BLEND_A64(m, src0[i * src0_stride + j],
                                                 src1[i * src1_stride + j]);
       }
     }
@@ -131,8 +125,7 @@ void vpx_highbd_blend_a64_mask_c(uint8_t *dst_8, uint32_t dst_stride,
       for (j = 0; j < w; ++j) {
         const int m = VPX_BLEND_AVG(mask[i * mask_stride + (2 * j)],
                                     mask[i * mask_stride + (2 * j + 1)]);
-        dst[i * dst_stride + j] = VPX_BLEND_A64(m,
-                                                src0[i * src0_stride + j],
+        dst[i * dst_stride + j] = VPX_BLEND_A64(m, src0[i * src0_stride + j],
                                                 src1[i * src1_stride + j]);
       }
     }
@@ -141,8 +134,7 @@ void vpx_highbd_blend_a64_mask_c(uint8_t *dst_8, uint32_t dst_stride,
       for (j = 0; j < w; ++j) {
         const int m = VPX_BLEND_AVG(mask[(2 * i) * mask_stride + j],
                                     mask[(2 * i + 1) * mask_stride + j]);
-        dst[i * dst_stride + j] = VPX_BLEND_A64(m,
-                                                src0[i * src0_stride + j],
+        dst[i * dst_stride + j] = VPX_BLEND_A64(m, src0[i * src0_stride + j],
                                                 src1[i * src1_stride + j]);
       }
     }

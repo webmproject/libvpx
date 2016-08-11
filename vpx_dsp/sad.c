@@ -17,15 +17,13 @@
 #include "vpx_ports/mem.h"
 
 /* Sum the difference between every corresponding element of the buffers. */
-static INLINE unsigned int sad(const uint8_t *a, int a_stride,
-                               const uint8_t *b, int b_stride,
-                               int width, int height) {
+static INLINE unsigned int sad(const uint8_t *a, int a_stride, const uint8_t *b,
+                               int b_stride, int width, int height) {
   int y, x;
   unsigned int sad = 0;
 
   for (y = 0; y < height; y++) {
-    for (x = 0; x < width; x++)
-      sad += abs(a[x] - b[x]);
+    for (x = 0; x < width; x++) sad += abs(a[x] - b[x]);
 
     a += a_stride;
     b += b_stride;
@@ -33,40 +31,43 @@ static INLINE unsigned int sad(const uint8_t *a, int a_stride,
   return sad;
 }
 
-#define sadMxN(m, n) \
-unsigned int vpx_sad##m##x##n##_c(const uint8_t *src, int src_stride, \
-                                  const uint8_t *ref, int ref_stride) { \
-  return sad(src, src_stride, ref, ref_stride, m, n); \
-} \
-unsigned int vpx_sad##m##x##n##_avg_c(const uint8_t *src, int src_stride, \
-                                      const uint8_t *ref, int ref_stride, \
-                                      const uint8_t *second_pred) { \
-  uint8_t comp_pred[m * n]; \
-  vpx_comp_avg_pred_c(comp_pred, second_pred, m, n, ref, ref_stride); \
-  return sad(src, src_stride, comp_pred, m, m, n); \
-}
+#define sadMxN(m, n)                                                        \
+  unsigned int vpx_sad##m##x##n##_c(const uint8_t *src, int src_stride,     \
+                                    const uint8_t *ref, int ref_stride) {   \
+    return sad(src, src_stride, ref, ref_stride, m, n);                     \
+  }                                                                         \
+  unsigned int vpx_sad##m##x##n##_avg_c(const uint8_t *src, int src_stride, \
+                                        const uint8_t *ref, int ref_stride, \
+                                        const uint8_t *second_pred) {       \
+    uint8_t comp_pred[m * n];                                               \
+    vpx_comp_avg_pred_c(comp_pred, second_pred, m, n, ref, ref_stride);     \
+    return sad(src, src_stride, comp_pred, m, m, n);                        \
+  }
 
 // depending on call sites, pass **ref_array to avoid & in subsequent call and
 // de-dup with 4D below.
-#define sadMxNxK(m, n, k) \
-void vpx_sad##m##x##n##x##k##_c(const uint8_t *src, int src_stride, \
-                                const uint8_t *ref_array, int ref_stride, \
-                                uint32_t *sad_array) { \
-  int i; \
-  for (i = 0; i < k; ++i) \
-    sad_array[i] = vpx_sad##m##x##n##_c(src, src_stride, &ref_array[i], ref_stride); \
-}
+#define sadMxNxK(m, n, k)                                                   \
+  void vpx_sad##m##x##n##x##k##_c(const uint8_t *src, int src_stride,       \
+                                  const uint8_t *ref_array, int ref_stride, \
+                                  uint32_t *sad_array) {                    \
+    int i;                                                                  \
+    for (i = 0; i < k; ++i)                                                 \
+      sad_array[i] =                                                        \
+          vpx_sad##m##x##n##_c(src, src_stride, &ref_array[i], ref_stride); \
+  }
 
 // This appears to be equivalent to the above when k == 4 and refs is const
-#define sadMxNx4D(m, n) \
-void vpx_sad##m##x##n##x4d_c(const uint8_t *src, int src_stride, \
-                             const uint8_t *const ref_array[], int ref_stride, \
-                             uint32_t *sad_array) { \
-  int i; \
-  for (i = 0; i < 4; ++i) \
-    sad_array[i] = vpx_sad##m##x##n##_c(src, src_stride, ref_array[i], ref_stride); \
-}
+#define sadMxNx4D(m, n)                                                    \
+  void vpx_sad##m##x##n##x4d_c(const uint8_t *src, int src_stride,         \
+                               const uint8_t *const ref_array[],           \
+                               int ref_stride, uint32_t *sad_array) {      \
+    int i;                                                                 \
+    for (i = 0; i < 4; ++i)                                                \
+      sad_array[i] =                                                       \
+          vpx_sad##m##x##n##_c(src, src_stride, ref_array[i], ref_stride); \
+  }
 
+/* clang-format off */
 #if CONFIG_VP10 && CONFIG_EXT_PARTITION
 // 128x128
 sadMxN(128, 128)
@@ -150,18 +151,18 @@ sadMxN(4, 4)
 sadMxNxK(4, 4, 3)
 sadMxNxK(4, 4, 8)
 sadMxNx4D(4, 4)
+/* clang-format on */
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static INLINE unsigned int highbd_sad(const uint8_t *a8, int a_stride,
-                                      const uint8_t *b8, int b_stride,
-                                      int width, int height) {
+        static INLINE
+    unsigned int highbd_sad(const uint8_t *a8, int a_stride, const uint8_t *b8,
+                            int b_stride, int width, int height) {
   int y, x;
   unsigned int sad = 0;
   const uint16_t *a = CONVERT_TO_SHORTPTR(a8);
   const uint16_t *b = CONVERT_TO_SHORTPTR(b8);
   for (y = 0; y < height; y++) {
-    for (x = 0; x < width; x++)
-      sad += abs(a[x] - b[x]);
+    for (x = 0; x < width; x++) sad += abs(a[x] - b[x]);
 
     a += a_stride;
     b += b_stride;
@@ -176,8 +177,7 @@ static INLINE unsigned int highbd_sadb(const uint8_t *a8, int a_stride,
   unsigned int sad = 0;
   const uint16_t *a = CONVERT_TO_SHORTPTR(a8);
   for (y = 0; y < height; y++) {
-    for (x = 0; x < width; x++)
-      sad += abs(a[x] - b[x]);
+    for (x = 0; x < width; x++) sad += abs(a[x] - b[x]);
 
     a += a_stride;
     b += b_stride;
@@ -185,43 +185,43 @@ static INLINE unsigned int highbd_sadb(const uint8_t *a8, int a_stride,
   return sad;
 }
 
-#define highbd_sadMxN(m, n) \
-unsigned int vpx_highbd_sad##m##x##n##_c(const uint8_t *src, int src_stride, \
-                                         const uint8_t *ref, int ref_stride) { \
-  return highbd_sad(src, src_stride, ref, ref_stride, m, n); \
-} \
-unsigned int vpx_highbd_sad##m##x##n##_avg_c(const uint8_t *src, \
-                                             int src_stride, \
-                                             const uint8_t *ref, \
-                                             int ref_stride, \
-                                             const uint8_t *second_pred) { \
-  uint16_t comp_pred[m * n]; \
-  vpx_highbd_comp_avg_pred_c(comp_pred, second_pred, m, n, ref, ref_stride); \
-  return highbd_sadb(src, src_stride, comp_pred, m, m, n); \
-}
+#define highbd_sadMxN(m, n)                                                    \
+  unsigned int vpx_highbd_sad##m##x##n##_c(const uint8_t *src, int src_stride, \
+                                           const uint8_t *ref,                 \
+                                           int ref_stride) {                   \
+    return highbd_sad(src, src_stride, ref, ref_stride, m, n);                 \
+  }                                                                            \
+  unsigned int vpx_highbd_sad##m##x##n##_avg_c(                                \
+      const uint8_t *src, int src_stride, const uint8_t *ref, int ref_stride,  \
+      const uint8_t *second_pred) {                                            \
+    uint16_t comp_pred[m * n];                                                 \
+    vpx_highbd_comp_avg_pred_c(comp_pred, second_pred, m, n, ref, ref_stride); \
+    return highbd_sadb(src, src_stride, comp_pred, m, m, n);                   \
+  }
 
-#define highbd_sadMxNxK(m, n, k) \
-void vpx_highbd_sad##m##x##n##x##k##_c(const uint8_t *src, int src_stride, \
-                                       const uint8_t *ref_array, int ref_stride, \
-                                       uint32_t *sad_array) { \
-  int i; \
-  for (i = 0; i < k; ++i) { \
-    sad_array[i] = vpx_highbd_sad##m##x##n##_c(src, src_stride, &ref_array[i], \
-                                               ref_stride); \
-  } \
-}
+#define highbd_sadMxNxK(m, n, k)                                             \
+  void vpx_highbd_sad##m##x##n##x##k##_c(                                    \
+      const uint8_t *src, int src_stride, const uint8_t *ref_array,          \
+      int ref_stride, uint32_t *sad_array) {                                 \
+    int i;                                                                   \
+    for (i = 0; i < k; ++i) {                                                \
+      sad_array[i] = vpx_highbd_sad##m##x##n##_c(src, src_stride,            \
+                                                 &ref_array[i], ref_stride); \
+    }                                                                        \
+  }
 
-#define highbd_sadMxNx4D(m, n) \
-void vpx_highbd_sad##m##x##n##x4d_c(const uint8_t *src, int src_stride, \
-                                    const uint8_t *const ref_array[], \
-                                    int ref_stride, uint32_t *sad_array) { \
-  int i; \
-  for (i = 0; i < 4; ++i) { \
-    sad_array[i] = vpx_highbd_sad##m##x##n##_c(src, src_stride, ref_array[i], \
-                                               ref_stride); \
-  } \
-}
+#define highbd_sadMxNx4D(m, n)                                               \
+  void vpx_highbd_sad##m##x##n##x4d_c(const uint8_t *src, int src_stride,    \
+                                      const uint8_t *const ref_array[],      \
+                                      int ref_stride, uint32_t *sad_array) { \
+    int i;                                                                   \
+    for (i = 0; i < 4; ++i) {                                                \
+      sad_array[i] = vpx_highbd_sad##m##x##n##_c(src, src_stride,            \
+                                                 ref_array[i], ref_stride);  \
+    }                                                                        \
+  }
 
+/* clang-format off */
 #if CONFIG_VP10 && CONFIG_EXT_PARTITION
 // 128x128
 highbd_sadMxN(128, 128)
@@ -305,20 +305,19 @@ highbd_sadMxN(4, 4)
 highbd_sadMxNxK(4, 4, 3)
 highbd_sadMxNxK(4, 4, 8)
 highbd_sadMxNx4D(4, 4)
-
+/* clang-format on */
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if CONFIG_VP10 && CONFIG_EXT_INTER
-static INLINE unsigned int masked_sad(const uint8_t *a, int a_stride,
-                                      const uint8_t *b, int b_stride,
-                                      const uint8_t *m, int m_stride,
-                                      int width, int height) {
+            static INLINE
+    unsigned int masked_sad(const uint8_t *a, int a_stride, const uint8_t *b,
+                            int b_stride, const uint8_t *m, int m_stride,
+                            int width, int height) {
   int y, x;
   unsigned int sad = 0;
 
   for (y = 0; y < height; y++) {
-    for (x = 0; x < width; x++)
-      sad += m[x] * abs(a[x] - b[x]);
+    for (x = 0; x < width; x++) sad += m[x] * abs(a[x] - b[x]);
 
     a += a_stride;
     b += b_stride;
@@ -329,13 +328,15 @@ static INLINE unsigned int masked_sad(const uint8_t *a, int a_stride,
   return sad;
 }
 
-#define MASKSADMxN(m, n) \
-unsigned int vpx_masked_sad##m##x##n##_c(const uint8_t *src, int src_stride, \
-                                         const uint8_t *ref, int ref_stride, \
-                                         const uint8_t *msk, int msk_stride) { \
-  return masked_sad(src, src_stride, ref, ref_stride, msk, msk_stride, m, n); \
-}
+#define MASKSADMxN(m, n)                                                      \
+  unsigned int vpx_masked_sad##m##x##n##_c(                                   \
+      const uint8_t *src, int src_stride, const uint8_t *ref, int ref_stride, \
+      const uint8_t *msk, int msk_stride) {                                   \
+    return masked_sad(src, src_stride, ref, ref_stride, msk, msk_stride, m,   \
+                      n);                                                     \
+  }
 
+/* clang-format off */
 #if CONFIG_EXT_PARTITION
 MASKSADMxN(128, 128)
 MASKSADMxN(128, 64)
@@ -354,20 +355,21 @@ MASKSADMxN(8, 8)
 MASKSADMxN(8, 4)
 MASKSADMxN(4, 8)
 MASKSADMxN(4, 4)
+/* clang-format on */
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static INLINE unsigned int highbd_masked_sad(const uint8_t *a8, int a_stride,
-                                             const uint8_t *b8, int b_stride,
-                                             const uint8_t *m, int m_stride,
-                                             int width, int height) {
+                    static INLINE
+    unsigned int highbd_masked_sad(const uint8_t *a8, int a_stride,
+                                   const uint8_t *b8, int b_stride,
+                                   const uint8_t *m, int m_stride, int width,
+                                   int height) {
   int y, x;
   unsigned int sad = 0;
   const uint16_t *a = CONVERT_TO_SHORTPTR(a8);
   const uint16_t *b = CONVERT_TO_SHORTPTR(b8);
 
   for (y = 0; y < height; y++) {
-    for (x = 0; x < width; x++)
-      sad += m[x] * abs(a[x] - b[x]);
+    for (x = 0; x < width; x++) sad += m[x] * abs(a[x] - b[x]);
 
     a += a_stride;
     b += b_stride;
@@ -378,16 +380,13 @@ static INLINE unsigned int highbd_masked_sad(const uint8_t *a8, int a_stride,
   return sad;
 }
 
-#define HIGHBD_MASKSADMXN(m, n) \
-unsigned int vpx_highbd_masked_sad##m##x##n##_c(const uint8_t *src, \
-                                                int src_stride, \
-                                                const uint8_t *ref, \
-                                                int ref_stride, \
-                                                const uint8_t *msk, \
-                                                int msk_stride) { \
-  return highbd_masked_sad(src, src_stride, ref, ref_stride, \
-                           msk, msk_stride, m, n); \
-}
+#define HIGHBD_MASKSADMXN(m, n)                                               \
+  unsigned int vpx_highbd_masked_sad##m##x##n##_c(                            \
+      const uint8_t *src, int src_stride, const uint8_t *ref, int ref_stride, \
+      const uint8_t *msk, int msk_stride) {                                   \
+    return highbd_masked_sad(src, src_stride, ref, ref_stride, msk,           \
+                             msk_stride, m, n);                               \
+  }
 
 #if CONFIG_EXT_PARTITION
 HIGHBD_MASKSADMXN(128, 128)
@@ -415,8 +414,7 @@ HIGHBD_MASKSADMXN(4, 4)
 // wsrc: target weighted prediction (has been *4096 to keep precision)
 // mask: 2d weights (scaled by 4096)
 static INLINE unsigned int obmc_sad(const uint8_t *pre, int pre_stride,
-                                    const int32_t *wsrc,
-                                    const int32_t *mask,
+                                    const int32_t *wsrc, const int32_t *mask,
                                     int width, int height) {
   int y, x;
   unsigned int sad = 0;
@@ -433,13 +431,14 @@ static INLINE unsigned int obmc_sad(const uint8_t *pre, int pre_stride,
   return sad;
 }
 
-#define OBMCSADMxN(m, n)                                                      \
-unsigned int vpx_obmc_sad##m##x##n##_c(const uint8_t *ref, int ref_stride,    \
-                                       const int32_t *wsrc,                   \
-                                       const int32_t *mask) {                 \
-  return obmc_sad(ref, ref_stride, wsrc, mask, m, n);                         \
-}
+#define OBMCSADMxN(m, n)                                                     \
+  unsigned int vpx_obmc_sad##m##x##n##_c(const uint8_t *ref, int ref_stride, \
+                                         const int32_t *wsrc,                \
+                                         const int32_t *mask) {              \
+    return obmc_sad(ref, ref_stride, wsrc, mask, m, n);                      \
+  }
 
+/* clang-format off */
 #if CONFIG_EXT_PARTITION
 OBMCSADMxN(128, 128)
 OBMCSADMxN(128, 64)
@@ -458,12 +457,13 @@ OBMCSADMxN(8, 8)
 OBMCSADMxN(8, 4)
 OBMCSADMxN(4, 8)
 OBMCSADMxN(4, 4)
+/* clang-format on */
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static INLINE unsigned int highbd_obmc_sad(const uint8_t *pre8, int pre_stride,
-                                           const int32_t *wsrc,
-                                           const int32_t *mask,
-                                           int width, int height) {
+                    static INLINE
+    unsigned int highbd_obmc_sad(const uint8_t *pre8, int pre_stride,
+                                 const int32_t *wsrc, const int32_t *mask,
+                                 int width, int height) {
   int y, x;
   unsigned int sad = 0;
   const uint16_t *pre = CONVERT_TO_SHORTPTR(pre8);
@@ -480,14 +480,14 @@ static INLINE unsigned int highbd_obmc_sad(const uint8_t *pre8, int pre_stride,
   return sad;
 }
 
-#define HIGHBD_OBMCSADMXN(m, n)                                               \
-unsigned int vpx_highbd_obmc_sad##m##x##n##_c(const uint8_t *ref,             \
-                                              int ref_stride,                 \
-                                              const int32_t *wsrc,            \
-                                              const int32_t *mask) {          \
-  return highbd_obmc_sad(ref, ref_stride, wsrc, mask, m, n);                  \
-}
+#define HIGHBD_OBMCSADMXN(m, n)                                \
+  unsigned int vpx_highbd_obmc_sad##m##x##n##_c(               \
+      const uint8_t *ref, int ref_stride, const int32_t *wsrc, \
+      const int32_t *mask) {                                   \
+    return highbd_obmc_sad(ref, ref_stride, wsrc, mask, m, n); \
+  }
 
+/* clang-format off */
 #if CONFIG_EXT_PARTITION
 HIGHBD_OBMCSADMXN(128, 128)
 HIGHBD_OBMCSADMXN(128, 64)
@@ -506,5 +506,6 @@ HIGHBD_OBMCSADMXN(8, 8)
 HIGHBD_OBMCSADMXN(8, 4)
 HIGHBD_OBMCSADMXN(4, 8)
 HIGHBD_OBMCSADMXN(4, 4)
+/* clang-format on */
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_VP10 && CONFIG_OBMC

@@ -30,16 +30,16 @@ extern "C" {
 // --Require an additional SUBPEL_TAPS rows for the 8-tap filter tails.
 // --((64 - 1) * 32 + 15) >> 4 + 8 = 135.
 #if CONFIG_VP10 && CONFIG_EXT_PARTITION
-# define MAX_EXT_SIZE 263
+#define MAX_EXT_SIZE 263
 #else
-# define MAX_EXT_SIZE 135
+#define MAX_EXT_SIZE 135
 #endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
 
 typedef void (*convolve_fn_t)(const uint8_t *src, ptrdiff_t src_stride,
                               uint8_t *dst, ptrdiff_t dst_stride,
                               const int16_t *filter_x, int x_step_q4,
-                              const int16_t *filter_y, int y_step_q4,
-                              int w, int h);
+                              const int16_t *filter_y, int y_step_q4, int w,
+                              int h);
 
 #if CONFIG_VP9_HIGHBITDEPTH
 typedef void (*highbd_convolve_fn_t)(const uint8_t *src, ptrdiff_t src_stride,

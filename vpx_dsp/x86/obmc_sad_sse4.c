@@ -22,10 +22,8 @@
 // 8 bit
 ////////////////////////////////////////////////////////////////////////////////
 
-static INLINE unsigned int obmc_sad_w4(const uint8_t *pre,
-                                       const int pre_stride,
-                                       const int32_t *wsrc,
-                                       const int32_t *mask,
+static INLINE unsigned int obmc_sad_w4(const uint8_t *pre, const int pre_stride,
+                                       const int32_t *wsrc, const int32_t *mask,
                                        const int height) {
   const int pre_step = pre_stride - 4;
   int n = 0;
@@ -62,8 +60,7 @@ static INLINE unsigned int obmc_sad_w4(const uint8_t *pre,
 static INLINE unsigned int obmc_sad_w8n(const uint8_t *pre,
                                         const int pre_stride,
                                         const int32_t *wsrc,
-                                        const int32_t *mask,
-                                        const int width,
+                                        const int32_t *mask, const int width,
                                         const int height) {
   const int pre_step = pre_stride - width;
   int n = 0;
@@ -109,17 +106,16 @@ static INLINE unsigned int obmc_sad_w8n(const uint8_t *pre,
   return xx_hsum_epi32_si32(v_sad_d);
 }
 
-#define OBMCSADWXH(w, h)                                                      \
-unsigned int vpx_obmc_sad##w##x##h##_sse4_1(const uint8_t *pre,               \
-                                            int pre_stride,                   \
-                                            const int32_t *wsrc,              \
-                                            const int32_t *msk) {             \
-  if (w == 4) {                                                               \
-    return obmc_sad_w4(pre, pre_stride, wsrc, msk, h);                        \
-  } else {                                                                    \
-    return obmc_sad_w8n(pre, pre_stride, wsrc, msk, w, h);                    \
-  }                                                                           \
-}
+#define OBMCSADWXH(w, h)                                       \
+  unsigned int vpx_obmc_sad##w##x##h##_sse4_1(                 \
+      const uint8_t *pre, int pre_stride, const int32_t *wsrc, \
+      const int32_t *msk) {                                    \
+    if (w == 4) {                                              \
+      return obmc_sad_w4(pre, pre_stride, wsrc, msk, h);       \
+    } else {                                                   \
+      return obmc_sad_w8n(pre, pre_stride, wsrc, msk, w, h);   \
+    }                                                          \
+  }
 
 #if CONFIG_EXT_PARTITION
 OBMCSADWXH(128, 128)
@@ -187,8 +183,7 @@ static INLINE unsigned int hbd_obmc_sad_w8n(const uint8_t *pre8,
                                             const int pre_stride,
                                             const int32_t *wsrc,
                                             const int32_t *mask,
-                                            const int width,
-                                            const int height) {
+                                            const int width, const int height) {
   const uint16_t *pre = CONVERT_TO_SHORTPTR(pre8);
   const int pre_step = pre_stride - width;
   int n = 0;
@@ -234,17 +229,16 @@ static INLINE unsigned int hbd_obmc_sad_w8n(const uint8_t *pre8,
   return xx_hsum_epi32_si32(v_sad_d);
 }
 
-#define HBD_OBMCSADWXH(w, h)                                                  \
-unsigned int vpx_highbd_obmc_sad##w##x##h##_sse4_1(const uint8_t *pre,        \
-                                                   int pre_stride,            \
-                                                   const int32_t *wsrc,       \
-                                                   const int32_t *mask) {     \
-  if (w == 4) {                                                               \
-    return hbd_obmc_sad_w4(pre, pre_stride, wsrc, mask, h);                   \
-  } else {                                                                    \
-    return hbd_obmc_sad_w8n(pre, pre_stride, wsrc, mask, w, h);               \
-  }                                                                           \
-}
+#define HBD_OBMCSADWXH(w, h)                                      \
+  unsigned int vpx_highbd_obmc_sad##w##x##h##_sse4_1(             \
+      const uint8_t *pre, int pre_stride, const int32_t *wsrc,    \
+      const int32_t *mask) {                                      \
+    if (w == 4) {                                                 \
+      return hbd_obmc_sad_w4(pre, pre_stride, wsrc, mask, h);     \
+    } else {                                                      \
+      return hbd_obmc_sad_w8n(pre, pre_stride, wsrc, mask, w, h); \
+    }                                                             \
+  }
 
 #if CONFIG_EXT_PARTITION
 HBD_OBMCSADWXH(128, 128)

@@ -17,16 +17,14 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_ports/mem.h"
 
-void vpx_plane_add_noise_c(uint8_t *start, char *noise,
-                           char blackclamp[16],
-                           char whiteclamp[16],
-                           char bothclamp[16],
+void vpx_plane_add_noise_c(uint8_t *start, char *noise, char blackclamp[16],
+                           char whiteclamp[16], char bothclamp[16],
                            unsigned int width, unsigned int height, int pitch) {
   unsigned int i, j;
 
   for (i = 0; i < height; ++i) {
     uint8_t *pos = start + i * pitch;
-    char  *ref = (char *)(noise + (rand() & 0xff));  // NOLINT
+    char *ref = (char *)(noise + (rand() & 0xff));  // NOLINT
 
     for (j = 0; j < width; ++j) {
       int v = pos[j];
@@ -51,7 +49,7 @@ int vpx_setup_noise(double sigma, int size, char *noise) {
 
   // set up a 256 entry lookup that matches gaussian distribution
   for (i = -32; i < 32; ++i) {
-    const int a_i = (int) (0.5 + 256 * gaussian(sigma, 0, i));
+    const int a_i = (int)(0.5 + 256 * gaussian(sigma, 0, i));
     if (a_i) {
       for (j = 0; j < a_i; ++j) {
         char_dist[next + j] = (char)i;

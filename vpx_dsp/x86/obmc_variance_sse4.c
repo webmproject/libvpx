@@ -23,12 +23,9 @@
 // 8 bit
 ////////////////////////////////////////////////////////////////////////////////
 
-static INLINE void obmc_variance_w4(const uint8_t *pre,
-                                    const int pre_stride,
-                                    const int32_t *wsrc,
-                                    const int32_t *mask,
-                                    unsigned int *const sse,
-                                    int *const sum,
+static INLINE void obmc_variance_w4(const uint8_t *pre, const int pre_stride,
+                                    const int32_t *wsrc, const int32_t *mask,
+                                    unsigned int *const sse, int *const sum,
                                     const int h) {
   const int pre_step = pre_stride - 4;
   int n = 0;
@@ -65,14 +62,10 @@ static INLINE void obmc_variance_w4(const uint8_t *pre,
   *sse = xx_hsum_epi32_si32(v_sse_d);
 }
 
-static INLINE void obmc_variance_w8n(const uint8_t *pre,
-                                     const int pre_stride,
-                                     const int32_t *wsrc,
-                                     const int32_t *mask,
-                                     unsigned int *const sse,
-                                     int *const sum,
-                                     const int w,
-                                     const int h) {
+static INLINE void obmc_variance_w8n(const uint8_t *pre, const int pre_stride,
+                                     const int32_t *wsrc, const int32_t *mask,
+                                     unsigned int *const sse, int *const sum,
+                                     const int w, const int h) {
   const int pre_step = pre_stride - w;
   int n = 0;
   __m128i v_sum_d = _mm_setzero_si128();
@@ -120,20 +113,18 @@ static INLINE void obmc_variance_w8n(const uint8_t *pre,
   *sse = xx_hsum_epi32_si32(v_sse_d);
 }
 
-#define OBMCVARWXH(W, H)                                                      \
-unsigned int vpx_obmc_variance##W##x##H##_sse4_1(const uint8_t *pre,          \
-                                                 int pre_stride,              \
-                                                 const int32_t *wsrc,         \
-                                                 const int32_t *mask,         \
-                                                 unsigned int *sse) {         \
-  int sum;                                                                    \
-  if (W == 4) {                                                               \
-    obmc_variance_w4(pre, pre_stride, wsrc, mask, sse, &sum, H);              \
-  } else {                                                                    \
-    obmc_variance_w8n(pre, pre_stride, wsrc, mask, sse, &sum, W, H);          \
-  }                                                                           \
-  return *sse - (((int64_t)sum * sum) / (W * H));                             \
-}
+#define OBMCVARWXH(W, H)                                               \
+  unsigned int vpx_obmc_variance##W##x##H##_sse4_1(                    \
+      const uint8_t *pre, int pre_stride, const int32_t *wsrc,         \
+      const int32_t *mask, unsigned int *sse) {                        \
+    int sum;                                                           \
+    if (W == 4) {                                                      \
+      obmc_variance_w4(pre, pre_stride, wsrc, mask, sse, &sum, H);     \
+    } else {                                                           \
+      obmc_variance_w8n(pre, pre_stride, wsrc, mask, sse, &sum, W, H); \
+    }                                                                  \
+    return *sse - (((int64_t)sum * sum) / (W * H));                    \
+  }
 
 #if CONFIG_EXT_PARTITION
 OBMCVARWXH(128, 128)
@@ -159,13 +150,9 @@ OBMCVARWXH(4, 4)
 ////////////////////////////////////////////////////////////////////////////////
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static INLINE void hbd_obmc_variance_w4(const uint8_t *pre8,
-                                        const int pre_stride,
-                                        const int32_t *wsrc,
-                                        const int32_t *mask,
-                                        uint64_t *const sse,
-                                        int64_t *const sum,
-                                        const int h) {
+static INLINE void hbd_obmc_variance_w4(
+    const uint8_t *pre8, const int pre_stride, const int32_t *wsrc,
+    const int32_t *mask, uint64_t *const sse, int64_t *const sum, const int h) {
   const uint16_t *pre = CONVERT_TO_SHORTPTR(pre8);
   const int pre_step = pre_stride - 4;
   int n = 0;
@@ -202,14 +189,10 @@ static INLINE void hbd_obmc_variance_w4(const uint8_t *pre8,
   *sse = xx_hsum_epi32_si32(v_sse_d);
 }
 
-static INLINE void hbd_obmc_variance_w8n(const uint8_t *pre8,
-                                         const int pre_stride,
-                                         const int32_t *wsrc,
-                                         const int32_t *mask,
-                                         uint64_t *const sse,
-                                         int64_t *const sum,
-                                         const int w,
-                                         const int h) {
+static INLINE void hbd_obmc_variance_w8n(
+    const uint8_t *pre8, const int pre_stride, const int32_t *wsrc,
+    const int32_t *mask, uint64_t *const sse, int64_t *const sum, const int w,
+    const int h) {
   const uint16_t *pre = CONVERT_TO_SHORTPTR(pre8);
   const int pre_step = pre_stride - w;
   int n = 0;
@@ -260,8 +243,7 @@ static INLINE void hbd_obmc_variance_w8n(const uint8_t *pre8,
 
 static INLINE void highbd_obmc_variance(const uint8_t *pre8, int pre_stride,
                                         const int32_t *wsrc,
-                                        const int32_t *mask,
-                                        int w, int h,
+                                        const int32_t *mask, int w, int h,
                                         unsigned int *sse, int *sum) {
   int64_t sum64 = 0;
   uint64_t sse64 = 0;
@@ -276,8 +258,7 @@ static INLINE void highbd_obmc_variance(const uint8_t *pre8, int pre_stride,
 
 static INLINE void highbd_10_obmc_variance(const uint8_t *pre8, int pre_stride,
                                            const int32_t *wsrc,
-                                           const int32_t *mask,
-                                           int w, int h,
+                                           const int32_t *mask, int w, int h,
                                            unsigned int *sse, int *sum) {
   int64_t sum64 = 0;
   uint64_t sse64 = 0;
@@ -292,15 +273,14 @@ static INLINE void highbd_10_obmc_variance(const uint8_t *pre8, int pre_stride,
 
 static INLINE void highbd_12_obmc_variance(const uint8_t *pre8, int pre_stride,
                                            const int32_t *wsrc,
-                                           const int32_t *mask,
-                                           int w, int h,
+                                           const int32_t *mask, int w, int h,
                                            unsigned int *sse, int *sum) {
   int64_t sum64 = 0;
   uint64_t sse64 = 0;
   if (w == 128) {
     do {
-      hbd_obmc_variance_w8n(pre8, pre_stride, wsrc, mask,
-                            &sse64, &sum64, 128, 32);
+      hbd_obmc_variance_w8n(pre8, pre_stride, wsrc, mask, &sse64, &sum64, 128,
+                            32);
       pre8 += 32 * pre_stride;
       wsrc += 32 * 128;
       mask += 32 * 128;
@@ -308,8 +288,8 @@ static INLINE void highbd_12_obmc_variance(const uint8_t *pre8, int pre_stride,
     } while (h > 0);
   } else if (w == 64 && h >= 128) {
     do {
-      hbd_obmc_variance_w8n(pre8, pre_stride, wsrc, mask,
-                            &sse64, &sum64, 64, 64);
+      hbd_obmc_variance_w8n(pre8, pre_stride, wsrc, mask, &sse64, &sum64, 64,
+                            64);
       pre8 += 64 * pre_stride;
       wsrc += 64 * 64;
       mask += 64 * 64;
@@ -324,39 +304,30 @@ static INLINE void highbd_12_obmc_variance(const uint8_t *pre8, int pre_stride,
   *sse = (unsigned int)ROUND_POWER_OF_TWO(sse64, 8);
 }
 
-#define HBD_OBMCVARWXH(W, H)                                                  \
-unsigned int vpx_highbd_obmc_variance##W##x##H##_sse4_1(                      \
-    const uint8_t *pre,                                                       \
-    int pre_stride,                                                           \
-    const int32_t *wsrc,                                                      \
-    const int32_t *mask,                                                      \
-    unsigned int *sse) {                                                      \
-  int sum;                                                                    \
-  highbd_obmc_variance(pre, pre_stride, wsrc, mask, W, H, sse, &sum);         \
-  return *sse - (((int64_t)sum * sum) / (W * H));                             \
-}                                                                             \
-                                                                              \
-unsigned int vpx_highbd_10_obmc_variance##W##x##H##_sse4_1(                   \
-    const uint8_t *pre,                                                       \
-    int pre_stride,                                                           \
-    const int32_t *wsrc,                                                      \
-    const int32_t *mask,                                                      \
-    unsigned int *sse) {                                                      \
-  int sum;                                                                    \
-  highbd_10_obmc_variance(pre, pre_stride, wsrc, mask, W, H, sse, &sum);      \
-  return *sse - (((int64_t)sum * sum) / (W * H));                             \
-}                                                                             \
-                                                                              \
-unsigned int vpx_highbd_12_obmc_variance##W##x##H##_sse4_1(                   \
-    const uint8_t *pre,                                                       \
-    int pre_stride,                                                           \
-    const int32_t *wsrc,                                                      \
-    const int32_t *mask,                                                      \
-    unsigned int *sse) {                                                      \
-  int sum;                                                                    \
-  highbd_12_obmc_variance(pre, pre_stride, wsrc, mask, W, H, sse, &sum);      \
-  return *sse - (((int64_t)sum * sum) / (W * H));                             \
-}
+#define HBD_OBMCVARWXH(W, H)                                               \
+  unsigned int vpx_highbd_obmc_variance##W##x##H##_sse4_1(                 \
+      const uint8_t *pre, int pre_stride, const int32_t *wsrc,             \
+      const int32_t *mask, unsigned int *sse) {                            \
+    int sum;                                                               \
+    highbd_obmc_variance(pre, pre_stride, wsrc, mask, W, H, sse, &sum);    \
+    return *sse - (((int64_t)sum * sum) / (W * H));                        \
+  }                                                                        \
+                                                                           \
+  unsigned int vpx_highbd_10_obmc_variance##W##x##H##_sse4_1(              \
+      const uint8_t *pre, int pre_stride, const int32_t *wsrc,             \
+      const int32_t *mask, unsigned int *sse) {                            \
+    int sum;                                                               \
+    highbd_10_obmc_variance(pre, pre_stride, wsrc, mask, W, H, sse, &sum); \
+    return *sse - (((int64_t)sum * sum) / (W * H));                        \
+  }                                                                        \
+                                                                           \
+  unsigned int vpx_highbd_12_obmc_variance##W##x##H##_sse4_1(              \
+      const uint8_t *pre, int pre_stride, const int32_t *wsrc,             \
+      const int32_t *mask, unsigned int *sse) {                            \
+    int sum;                                                               \
+    highbd_12_obmc_variance(pre, pre_stride, wsrc, mask, W, H, sse, &sum); \
+    return *sse - (((int64_t)sum * sum) / (W * H));                        \
+  }
 
 #if CONFIG_EXT_PARTITION
 HBD_OBMCVARWXH(128, 128)
