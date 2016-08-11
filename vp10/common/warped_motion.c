@@ -562,3 +562,30 @@ void vp10_warp_plane(WarpedMotionParams *wm,
                p_height, p_stride, subsampling_x, subsampling_y, x_scale,
                y_scale);
 }
+
+void vp10_integerize_model(const double *model, TransformationType wmtype,
+                           WarpedMotionParams *wm) {
+  wm->wmtype = wmtype;
+  switch (wmtype) {
+    case HOMOGRAPHY:
+      assert(fabs(model[8] - 1.0) < 1e-12);
+      wm->wmmat[7] =
+          (int)lrint(model[7] * (1 << WARPEDMODEL_ROW3HOMO_PREC_BITS));
+      wm->wmmat[6] =
+          (int)lrint(model[6] * (1 << WARPEDMODEL_ROW3HOMO_PREC_BITS));
+    /* fallthrough intended */
+    case AFFINE:
+      wm->wmmat[5] = (int)lrint(model[5] * (1 << WARPEDMODEL_PREC_BITS));
+      wm->wmmat[4] = (int)lrint(model[4] * (1 << WARPEDMODEL_PREC_BITS));
+    /* fallthrough intended */
+    case ROTZOOM:
+      wm->wmmat[3] = (int)lrint(model[3] * (1 << WARPEDMODEL_PREC_BITS));
+      wm->wmmat[2] = (int)lrint(model[2] * (1 << WARPEDMODEL_PREC_BITS));
+    /* fallthrough intended */
+    case TRANSLATION:
+      wm->wmmat[1] = (int)lrint(model[1] * (1 << WARPEDMODEL_PREC_BITS));
+      wm->wmmat[0] = (int)lrint(model[0] * (1 << WARPEDMODEL_PREC_BITS));
+      break;
+    default: assert(0 && "Invalid TransformationType");
+  }
+}
