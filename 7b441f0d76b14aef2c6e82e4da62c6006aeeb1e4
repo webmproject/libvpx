@@ -22,6 +22,30 @@
       "revId": "7b441f0d76b14aef2c6e82e4da62c6006aeeb1e4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3eef6971_4064ceb3",
+        "filename": "vpx_dsp/bitreader.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-08-11T00:30:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9924ef48_22eb7078",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 18
+      },
+      "revId": "7b441f0d76b14aef2c6e82e4da62c6006aeeb1e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
