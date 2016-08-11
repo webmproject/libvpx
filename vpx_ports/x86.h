@@ -102,10 +102,17 @@ typedef enum {
   } while (0)
 #endif
 #else
-#define cpuid(func, func2, a, b, c, d)                              \
-  __asm mov eax, func __asm mov ecx, func2 __asm cpuid __asm mov a, \
-      eax __asm mov b, ebx __asm mov c, ecx __asm mov d, edx
+/* clang-format off */
+#define cpuid(func, func2, a, b, c, d) \
+  __asm mov eax, func                  \
+  __asm mov ecx, func2                 \
+  __asm cpuid                          \
+  __asm mov a, eax                     \
+  __asm mov b, ebx                     \
+  __asm mov c, ecx                     \
+  __asm mov d, edx
 #endif
+/* clang-format on */
 #endif /* end others */
 
 // NaCl has no support for xgetbv or the raw opcode.
