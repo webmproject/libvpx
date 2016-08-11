@@ -143,6 +143,24 @@
     },
     {
       "key": {
+        "uuid": "3eef6971_a667324b",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-11T07:20:20Z",
+      "side": 1,
+      "message": "OK I forgot about that step, seems like a bug, but it\u0027s all right. You could work around it by splitting across op* and oq*.",
+      "parentUuid": "9924ef48_6d2cf9ff",
+      "revId": "4c6b7161e4e1d100349effc8913357db07a4dcae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9924ef48_67b97ac5",
         "filename": "vpx_dsp/arm/transpose_neon.h",
         "patchSetId": 9
