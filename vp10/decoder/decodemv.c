@@ -306,10 +306,17 @@ static TX_SIZE read_tx_size_inter(VP10_COMMON *cm, MACROBLOCKD *xd,
     if (allow_select && tx_mode == TX_MODE_SELECT) {
       return read_selected_tx_size(cm, xd, max_tx_size, r);
     } else {
-      return VPXMIN(max_tx_size, tx_mode_to_biggest_tx_size[tx_mode]);
+      TX_SIZE tx_size =
+          VPXMIN(max_tx_size, tx_mode_to_biggest_tx_size[tx_mode]);
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+      if (txsize_sqr_map[max_txsize_rect_lookup[bsize]] <= tx_size)
+        tx_size = max_txsize_rect_lookup[bsize];
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
+      return tx_size;
     }
   } else {
 #if CONFIG_EXT_TX && CONFIG_RECT_TX && !CONFIG_VAR_TX
+    assert(IMPLIES(tx_mode == ONLY_4X4, bsize == BLOCK_4X4));
     return max_txsize_rect_lookup[bsize];
 #else
     return TX_4X4;

@@ -332,7 +332,7 @@ static int prob_diff_update_savings(const vpx_tree_index *tree,
 }
 
 #if CONFIG_VAR_TX
-static void write_tx_size_inter(const VP10_COMMON *cm, const MACROBLOCKD *xd,
+static void write_tx_size_vartx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                                 const MB_MODE_INFO *mbmi, TX_SIZE tx_size,
                                 int blk_row, int blk_col, vp10_writer *w) {
   const int tx_row = blk_row >> 1;
@@ -368,7 +368,7 @@ static void write_tx_size_inter(const VP10_COMMON *cm, const MACROBLOCKD *xd,
     for (i = 0; i < 4; ++i) {
       int offsetr = blk_row + ((i >> 1) << bsl);
       int offsetc = blk_col + ((i & 0x01) << bsl);
-      write_tx_size_inter(cm, xd, mbmi, tx_size - 1, offsetr, offsetc, w);
+      write_tx_size_vartx(cm, xd, mbmi, tx_size - 1, offsetr, offsetc, w);
     }
   }
 }
@@ -608,7 +608,7 @@ static void pack_mb_tokens(vp10_writer *w, const TOKENEXTRA **tp,
   const TOKENEXTRA *p = *tp;
 #if CONFIG_VAR_TX
   int count = 0;
-  const int seg_eob = 16 << (tx << 1);
+  const int seg_eob = get_tx2d_size(tx);
 #endif
 
   while (p < stop && p->token != EOSB_TOKEN) {
@@ -652,7 +652,9 @@ static void pack_mb_tokens(vp10_writer *w, const TOKENEXTRA **tp,
 
     if (b->base_val) {
       const int e = p->extra, l = b->len;
-      int skip_bits = (b->base_val == CAT6_MIN_VAL) ? TX_SIZES - 1 - tx : 0;
+      int skip_bits = (b->base_val == CAT6_MIN_VAL)
+                          ? TX_SIZES - 1 - txsize_sqr_up_map[tx]
+                          : 0;
 
       if (l) {
         const unsigned char *pb = b->prob;
@@ -725,7 +727,9 @@ static void pack_mb_tokens(struct BufAnsCoder *ans, const TOKENEXTRA **tp,
 
       if (b->base_val) {
         const int e = p->extra, l = b->len;
-        int skip_bits = (b->base_val == CAT6_MIN_VAL) ? TX_SIZES - 1 - tx : 0;
+        int skip_bits = (b->base_val == CAT6_MIN_VAL)
+                            ? TX_SIZES - 1 - txsize_sqr_up_map[tx]
+                            : 0;
 
         if (l) {
           const unsigned char *pb = b->prob;
@@ -771,10 +775,7 @@ static void pack_txb_tokens(vp10_writer *w, const TOKENEXTRA **tp,
   const BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
   const int tx_row = blk_row >> (1 - pd->subsampling_y);
   const int tx_col = blk_col >> (1 - pd->subsampling_x);
-  const TX_SIZE plane_tx_size =
-      plane ? get_uv_tx_size_impl(mbmi->inter_tx_size[tx_row][tx_col], bsize, 0,
-                                  0)
-            : mbmi->inter_tx_size[tx_row][tx_col];
+  TX_SIZE plane_tx_size;
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
 
@@ -784,6 +785,10 @@ static void pack_txb_tokens(vp10_writer *w, const TOKENEXTRA **tp,
     max_blocks_wide += xd->mb_to_right_edge >> (5 + pd->subsampling_x);
 
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
+
+  plane_tx_size = plane ? get_uv_tx_size_impl(
+                              mbmi->inter_tx_size[tx_row][tx_col], bsize, 0, 0)
+                        : mbmi->inter_tx_size[tx_row][tx_col];
 
   if (tx_size == plane_tx_size) {
     pack_mb_tokens(w, tp, tok_end, bit_depth, tx_size);
@@ -1111,7 +1116,7 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
       int idx, idy;
       for (idy = 0; idy < height; idy += bs)
         for (idx = 0; idx < width; idx += bs)
-          write_tx_size_inter(cm, xd, mbmi, max_tx_size, idy, idx, w);
+          write_tx_size_vartx(cm, xd, mbmi, max_tx_size, idy, idx, w);
     } else {
       set_txfm_ctx(xd->left_txfm_context, mbmi->tx_size, xd->n8_h);
       set_txfm_ctx(xd->above_txfm_context, mbmi->tx_size, xd->n8_w);

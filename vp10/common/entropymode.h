@@ -172,6 +172,7 @@ typedef struct FRAME_COUNTS {
   unsigned int comp_ref[REF_CONTEXTS][COMP_REFS - 1][2];
 #endif  // CONFIG_EXT_REFS
   unsigned int tx_size_totals[TX_SIZES];
+  unsigned int tx_size_implied[TX_SIZES][TX_SIZES];
   unsigned int tx_size[TX_SIZES - 1][TX_SIZE_CONTEXTS][TX_SIZES];
 #if CONFIG_VAR_TX
   unsigned int txfm_partition[TXFM_PARTITION_CONTEXTS][2];
