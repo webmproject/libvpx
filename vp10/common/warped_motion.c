@@ -62,17 +62,17 @@ static void projectPointsTranslation(int *mat, int *points, int *proj,
     if (subsampling_x)
       *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
           ((x << (WARPEDMODEL_PREC_BITS + 1)) + mat[0]),
-          WARPEDPIXEL_PREC_BITS + 1);
+          WARPEDDIFF_PREC_BITS + 1);
     else
       *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
-          ((x << WARPEDMODEL_PREC_BITS)) + mat[0], WARPEDPIXEL_PREC_BITS);
+          ((x << WARPEDMODEL_PREC_BITS)) + mat[0], WARPEDDIFF_PREC_BITS);
     if (subsampling_y)
       *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
           ((y << (WARPEDMODEL_PREC_BITS + 1)) + mat[1]),
-          WARPEDPIXEL_PREC_BITS + 1);
+          WARPEDDIFF_PREC_BITS + 1);
     else
       *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
-          ((y << WARPEDMODEL_PREC_BITS)) + mat[1], WARPEDPIXEL_PREC_BITS);
+          ((y << WARPEDMODEL_PREC_BITS)) + mat[1], WARPEDDIFF_PREC_BITS);
     points += stride_points - 2;
     proj += stride_proj - 2;
   }
