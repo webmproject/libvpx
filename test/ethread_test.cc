@@ -23,10 +23,8 @@ class VPxEncoderThreadTest
       public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
  protected:
   VPxEncoderThreadTest()
-      : EncoderTest(GET_PARAM(0)),
-        encoder_initialized_(false),
-        encoding_mode_(GET_PARAM(1)),
-        set_cpu_used_(GET_PARAM(2)) {
+      : EncoderTest(GET_PARAM(0)), encoder_initialized_(false),
+        encoding_mode_(GET_PARAM(1)), set_cpu_used_(GET_PARAM(2)) {
     init_flags_ = VPX_CODEC_USE_PSNR;
     vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
     cfg.w = 1280;
@@ -43,9 +41,7 @@ class VPxEncoderThreadTest
     md5_dec_.clear();
     md5_enc_.clear();
   }
-  virtual ~VPxEncoderThreadTest() {
-    delete decoder_;
-  }
+  virtual ~VPxEncoderThreadTest() { delete decoder_; }
 
   virtual void SetUp() {
     InitializeConfig();
@@ -104,12 +100,12 @@ class VPxEncoderThreadTest
     size_enc_.push_back(pkt->data.frame.sz);
 
     ::libvpx_test::MD5 md5_enc;
-    md5_enc.Add(reinterpret_cast<uint8_t*>(pkt->data.frame.buf),
+    md5_enc.Add(reinterpret_cast<uint8_t *>(pkt->data.frame.buf),
                 pkt->data.frame.sz);
     md5_enc_.push_back(md5_enc.Get());
 
     const vpx_codec_err_t res = decoder_->DecodeFrame(
-        reinterpret_cast<uint8_t*>(pkt->data.frame.buf), pkt->data.frame.sz);
+        reinterpret_cast<uint8_t *>(pkt->data.frame.buf), pkt->data.frame.sz);
     if (res != VPX_CODEC_OK) {
       abort_ = true;
       ASSERT_EQ(VPX_CODEC_OK, res);
@@ -169,24 +165,19 @@ class VPxEncoderThreadTest
   std::vector<std::string> md5_dec_;
 };
 
-TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
-  DoTest();
-}
+TEST_P(VPxEncoderThreadTest, EncoderResultTest) { DoTest(); }
 
 class VPxEncoderThreadTestLarge : public VPxEncoderThreadTest {};
 
-TEST_P(VPxEncoderThreadTestLarge, EncoderResultTest) {
-  DoTest();
-}
+TEST_P(VPxEncoderThreadTestLarge, EncoderResultTest) { DoTest(); }
 
+VP10_INSTANTIATE_TEST_CASE(VPxEncoderThreadTest,
+                           ::testing::Values(::libvpx_test::kTwoPassGood,
+                                             ::libvpx_test::kOnePassGood),
+                           ::testing::Range(3, 9));
 
-VP10_INSTANTIATE_TEST_CASE(
-    VPxEncoderThreadTest,
-    ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood),
-    ::testing::Range(3, 9));
-
-VP10_INSTANTIATE_TEST_CASE(
-    VPxEncoderThreadTestLarge,
-    ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood),
-    ::testing::Range(1, 3));
+VP10_INSTANTIATE_TEST_CASE(VPxEncoderThreadTestLarge,
+                           ::testing::Values(::libvpx_test::kTwoPassGood,
+                                             ::libvpx_test::kOnePassGood),
+                           ::testing::Range(1, 3));
 }  // namespace

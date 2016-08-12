@@ -31,14 +31,13 @@ void Encoder::InitEncoder(VideoSource *video) {
     cfg_.g_timebase = video->timebase();
     cfg_.rc_twopass_stats_in = stats_->buf();
 
-    res = vpx_codec_enc_init(&encoder_, CodecInterface(), &cfg_,
-                             init_flags_);
+    res = vpx_codec_enc_init(&encoder_, CodecInterface(), &cfg_, init_flags_);
     ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
 
 #if CONFIG_VP10_ENCODER
     if (CodecInterface() == &vpx_codec_vp10_cx_algo) {
-      // Default to 1 tile column for VP10. With CONFIG_EXT_TILE, the
-      // default is already the largest possible tile size
+// Default to 1 tile column for VP10. With CONFIG_EXT_TILE, the
+// default is already the largest possible tile size
 #if !CONFIG_EXT_TILE
       const int log2_tile_columns = 0;
       res = vpx_codec_control_(&encoder_, VP9E_SET_TILE_COLUMNS,
@@ -62,8 +61,7 @@ void Encoder::EncodeFrame(VideoSource *video, const unsigned long frame_flags) {
   CxDataIterator iter = GetCxData();
 
   while (const vpx_codec_cx_pkt_t *pkt = iter.Next()) {
-    if (pkt->kind != VPX_CODEC_STATS_PKT)
-      continue;
+    if (pkt->kind != VPX_CODEC_STATS_PKT) continue;
 
     stats_->Append(*pkt);
   }
@@ -83,15 +81,15 @@ void Encoder::EncodeFrameInternal(const VideoSource &video,
   }
 
   // Encode the frame
-  API_REGISTER_STATE_CHECK(
-      res = vpx_codec_encode(&encoder_, img, video.pts(), video.duration(),
-                             frame_flags, deadline_));
+  API_REGISTER_STATE_CHECK(res = vpx_codec_encode(&encoder_, img, video.pts(),
+                                                  video.duration(), frame_flags,
+                                                  deadline_));
   ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
 }
 
 void Encoder::Flush() {
-  const vpx_codec_err_t res = vpx_codec_encode(&encoder_, NULL, 0, 0, 0,
-                                               deadline_);
+  const vpx_codec_err_t res =
+      vpx_codec_encode(&encoder_, NULL, 0, 0, 0, deadline_);
   if (!encoder_.priv)
     ASSERT_EQ(VPX_CODEC_ERROR, res) << EncoderError();
   else
@@ -106,22 +104,15 @@ void EncoderTest::InitializeConfig() {
 
 void EncoderTest::SetMode(TestMode mode) {
   switch (mode) {
-    case kRealTime:
-      deadline_ = VPX_DL_REALTIME;
-      break;
+    case kRealTime: deadline_ = VPX_DL_REALTIME; break;
 
     case kOnePassGood:
-    case kTwoPassGood:
-      deadline_ = VPX_DL_GOOD_QUALITY;
-      break;
+    case kTwoPassGood: deadline_ = VPX_DL_GOOD_QUALITY; break;
 
     case kOnePassBest:
-    case kTwoPassBest:
-      deadline_ = VPX_DL_BEST_QUALITY;
-      break;
+    case kTwoPassBest: deadline_ = VPX_DL_BEST_QUALITY; break;
 
-    default:
-      ASSERT_TRUE(false) << "Unexpected mode " << mode;
+    default: ASSERT_TRUE(false) << "Unexpected mode " << mode;
   }
 
   if (mode == kTwoPassGood || mode == kTwoPassBest)
@@ -132,10 +123,8 @@ void EncoderTest::SetMode(TestMode mode) {
 
 static bool compare_plane(const uint8_t *const buf1, const int stride1,
                           const uint8_t *const buf2, const int stride2,
-                          const int w, const int h,
-                          int *const mismatch_row,
-                          int *const mismatch_col,
-                          int *const mismatch_pix1,
+                          const int w, const int h, int *const mismatch_row,
+                          int *const mismatch_col, int *const mismatch_pix1,
                           int *const mismatch_pix2) {
   int r, c;
 
@@ -145,14 +134,10 @@ static bool compare_plane(const uint8_t *const buf1, const int stride1,
       const int pix2 = buf2[r * stride2 + c];
 
       if (pix1 != pix2) {
-        if (mismatch_row != NULL)
-          *mismatch_row = r;
-        if (mismatch_col != NULL)
-          *mismatch_col = c;
-        if (mismatch_pix1 != NULL)
-          *mismatch_pix1 = pix1;
-        if (mismatch_pix2 != NULL)
-          *mismatch_pix2 = pix2;
+        if (mismatch_row != NULL) *mismatch_row = r;
+        if (mismatch_col != NULL) *mismatch_col = c;
+        if (mismatch_pix1 != NULL) *mismatch_pix1 = pix1;
+        if (mismatch_pix2 != NULL) *mismatch_pix2 = pix2;
         return false;
       }
     }
@@ -163,86 +148,67 @@ static bool compare_plane(const uint8_t *const buf1, const int stride1,
 
 // The function should return "true" most of the time, therefore no early
 // break-out is implemented within the match checking process.
-static bool compare_img(const vpx_image_t *img1,
-                        const vpx_image_t *img2,
-                        int *const mismatch_row,
-                        int *const mismatch_col,
-                        int *const mismatch_plane,
-                        int *const mismatch_pix1,
+static bool compare_img(const vpx_image_t *img1, const vpx_image_t *img2,
+                        int *const mismatch_row, int *const mismatch_col,
+                        int *const mismatch_plane, int *const mismatch_pix1,
                         int *const mismatch_pix2) {
-
   const unsigned int w_y = img1->d_w;
   const unsigned int h_y = img1->d_h;
   const unsigned int w_uv = ROUND_POWER_OF_TWO(w_y, img1->x_chroma_shift);
   const unsigned int h_uv = ROUND_POWER_OF_TWO(h_y, img1->y_chroma_shift);
 
-  if (img1->fmt != img2->fmt
-      || img1->cs != img2->cs
-      || img1->d_w != img2->d_w
-      || img1->d_h != img2->d_h) {
-    if (mismatch_row != NULL)
-      *mismatch_row = -1;
-    if (mismatch_col != NULL)
-      *mismatch_col = -1;
+  if (img1->fmt != img2->fmt || img1->cs != img2->cs ||
+      img1->d_w != img2->d_w || img1->d_h != img2->d_h) {
+    if (mismatch_row != NULL) *mismatch_row = -1;
+    if (mismatch_col != NULL) *mismatch_col = -1;
     return false;
   }
 
-  if (!compare_plane(img1->planes[VPX_PLANE_Y],  img1->stride[VPX_PLANE_Y],
-                     img2->planes[VPX_PLANE_Y],  img2->stride[VPX_PLANE_Y],
-                     w_y, h_y,
-                     mismatch_row, mismatch_col,
-                     mismatch_pix1, mismatch_pix2)) {
-    if (mismatch_plane != NULL)
-      *mismatch_plane = VPX_PLANE_Y;
+  if (!compare_plane(img1->planes[VPX_PLANE_Y], img1->stride[VPX_PLANE_Y],
+                     img2->planes[VPX_PLANE_Y], img2->stride[VPX_PLANE_Y], w_y,
+                     h_y, mismatch_row, mismatch_col, mismatch_pix1,
+                     mismatch_pix2)) {
+    if (mismatch_plane != NULL) *mismatch_plane = VPX_PLANE_Y;
     return false;
   }
 
-  if (!compare_plane(img1->planes[VPX_PLANE_U],  img1->stride[VPX_PLANE_U],
-                     img2->planes[VPX_PLANE_U],  img2->stride[VPX_PLANE_U],
-                     w_uv, h_uv,
-                     mismatch_row, mismatch_col,
-                     mismatch_pix1, mismatch_pix2)) {
-    if (mismatch_plane != NULL)
-      *mismatch_plane = VPX_PLANE_U;
+  if (!compare_plane(img1->planes[VPX_PLANE_U], img1->stride[VPX_PLANE_U],
+                     img2->planes[VPX_PLANE_U], img2->stride[VPX_PLANE_U], w_uv,
+                     h_uv, mismatch_row, mismatch_col, mismatch_pix1,
+                     mismatch_pix2)) {
+    if (mismatch_plane != NULL) *mismatch_plane = VPX_PLANE_U;
     return false;
   }
 
-  if (!compare_plane(img1->planes[VPX_PLANE_V],  img1->stride[VPX_PLANE_V],
-                     img2->planes[VPX_PLANE_V],  img2->stride[VPX_PLANE_V],
-                     w_uv, h_uv,
-                     mismatch_row, mismatch_col,
-                     mismatch_pix1, mismatch_pix2)) {
-    if (mismatch_plane != NULL)
-      *mismatch_plane = VPX_PLANE_U;
+  if (!compare_plane(img1->planes[VPX_PLANE_V], img1->stride[VPX_PLANE_V],
+                     img2->planes[VPX_PLANE_V], img2->stride[VPX_PLANE_V], w_uv,
+                     h_uv, mismatch_row, mismatch_col, mismatch_pix1,
+                     mismatch_pix2)) {
+    if (mismatch_plane != NULL) *mismatch_plane = VPX_PLANE_U;
     return false;
   }
 
   return true;
 }
 
-void EncoderTest::MismatchHook(const vpx_image_t* img_enc,
-                               const vpx_image_t* img_dec) {
+void EncoderTest::MismatchHook(const vpx_image_t *img_enc,
+                               const vpx_image_t *img_dec) {
   int mismatch_row = 0;
   int mismatch_col = 0;
   int mismatch_plane = 0;
   int mismatch_pix_enc = 0;
   int mismatch_pix_dec = 0;
 
-  ASSERT_FALSE(compare_img(img_enc, img_dec,
-                           &mismatch_row, &mismatch_col,
-                           &mismatch_plane,
-                           &mismatch_pix_enc,
+  ASSERT_FALSE(compare_img(img_enc, img_dec, &mismatch_row, &mismatch_col,
+                           &mismatch_plane, &mismatch_pix_enc,
                            &mismatch_pix_dec));
 
-  GTEST_FAIL()
-    << "Encode/Decode mismatch found:"
-    << std::endl
-    << "  pixel value enc/dec: "  << mismatch_pix_enc << "/" << mismatch_pix_dec
-    << std::endl
-    << "                plane: " << mismatch_plane
-    << std::endl
-    << "              row/col: " << mismatch_row << "/" << mismatch_col
-    << std::endl;
+  GTEST_FAIL() << "Encode/Decode mismatch found:" << std::endl
+               << "  pixel value enc/dec: " << mismatch_pix_enc << "/"
+               << mismatch_pix_dec << std::endl
+               << "                plane: " << mismatch_plane << std::endl
+               << "              row/col: " << mismatch_row << "/"
+               << mismatch_col << std::endl;
 }
 
 void EncoderTest::RunLoop(VideoSource *video) {
@@ -306,10 +272,9 @@ void EncoderTest::RunLoop(VideoSource *video) {
             has_cxdata = true;
             if (decoder.get() != NULL && DoDecode()) {
               vpx_codec_err_t res_dec = decoder->DecodeFrame(
-                  (const uint8_t*)pkt->data.frame.buf, pkt->data.frame.sz);
+                  (const uint8_t *)pkt->data.frame.buf, pkt->data.frame.sz);
 
-              if (!HandleDecodeResult(res_dec, *video, decoder.get()))
-                break;
+              if (!HandleDecodeResult(res_dec, *video, decoder.get())) break;
 
               has_dxdata = true;
             }
@@ -318,20 +283,16 @@ void EncoderTest::RunLoop(VideoSource *video) {
             FramePktHook(pkt);
             break;
 
-          case VPX_CODEC_PSNR_PKT:
-            PSNRPktHook(pkt);
-            break;
+          case VPX_CODEC_PSNR_PKT: PSNRPktHook(pkt); break;
 
-          default:
-            break;
+          default: break;
         }
       }
 
       // Flush the decoder when there are no more fragments.
       if ((init_flags_ & VPX_CODEC_USE_OUTPUT_PARTITION) && has_dxdata) {
         const vpx_codec_err_t res_dec = decoder->DecodeFrame(NULL, 0);
-        if (!HandleDecodeResult(res_dec, *video, decoder.get()))
-          break;
+        if (!HandleDecodeResult(res_dec, *video, decoder.get())) break;
       }
 
       if (has_dxdata && has_cxdata) {
@@ -339,23 +300,20 @@ void EncoderTest::RunLoop(VideoSource *video) {
         DxDataIterator dec_iter = decoder->GetDxData();
         const vpx_image_t *img_dec = dec_iter.Next();
         if (img_enc && img_dec) {
-          const bool res = compare_img(img_enc, img_dec,
-                                       NULL, NULL, NULL, NULL, NULL);
+          const bool res =
+              compare_img(img_enc, img_dec, NULL, NULL, NULL, NULL, NULL);
           if (!res) {  // Mismatch
             MismatchHook(img_enc, img_dec);
           }
         }
-        if (img_dec)
-          DecompressedFrameHook(*img_dec, video->pts());
+        if (img_dec) DecompressedFrameHook(*img_dec, video->pts());
       }
-      if (!Continue())
-        break;
+      if (!Continue()) break;
     }
 
     EndPassHook();
 
-    if (!Continue())
-      break;
+    if (!Continue()) break;
   }
 }
 

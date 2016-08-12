@@ -22,9 +22,8 @@ const char kVP10Name[] = "WebM Project VP10";
 
 vpx_codec_err_t Decoder::PeekStream(const uint8_t *cxdata, size_t size,
                                     vpx_codec_stream_info_t *stream_info) {
-  return vpx_codec_peek_stream_info(CodecInterface(),
-                                    cxdata, static_cast<unsigned int>(size),
-                                    stream_info);
+  return vpx_codec_peek_stream_info(
+      CodecInterface(), cxdata, static_cast<unsigned int>(size), stream_info);
 }
 
 vpx_codec_err_t Decoder::DecodeFrame(const uint8_t *cxdata, size_t size) {
@@ -36,9 +35,8 @@ vpx_codec_err_t Decoder::DecodeFrame(const uint8_t *cxdata, size_t size,
   vpx_codec_err_t res_dec;
   InitOnce();
   API_REGISTER_STATE_CHECK(
-      res_dec = vpx_codec_decode(&decoder_,
-                                 cxdata, static_cast<unsigned int>(size),
-                                 user_priv, 0));
+      res_dec = vpx_codec_decode(
+          &decoder_, cxdata, static_cast<unsigned int>(size), user_priv, 0));
   return res_dec;
 }
 
@@ -73,7 +71,7 @@ void DecoderTest::HandlePeekResult(Decoder *const decoder,
 
 void DecoderTest::RunLoop(CompressedVideoSource *video,
                           const vpx_codec_dec_cfg_t &dec_cfg) {
-  Decoder* const decoder = codec_->CreateDecoder(dec_cfg, flags_, 0);
+  Decoder *const decoder = codec_->CreateDecoder(dec_cfg, flags_, 0);
   ASSERT_TRUE(decoder != NULL);
   bool end_of_file = false;
 
@@ -86,16 +84,14 @@ void DecoderTest::RunLoop(CompressedVideoSource *video,
     stream_info.sz = sizeof(stream_info);
 
     if (video->cxdata() != NULL) {
-      const vpx_codec_err_t res_peek = decoder->PeekStream(video->cxdata(),
-                                                           video->frame_size(),
-                                                           &stream_info);
+      const vpx_codec_err_t res_peek = decoder->PeekStream(
+          video->cxdata(), video->frame_size(), &stream_info);
       HandlePeekResult(decoder, video, res_peek);
       ASSERT_FALSE(::testing::Test::HasFailure());
 
-      vpx_codec_err_t res_dec = decoder->DecodeFrame(video->cxdata(),
-                                                     video->frame_size());
-      if (!HandleDecodeResult(res_dec, *video, decoder))
-        break;
+      vpx_codec_err_t res_dec =
+          decoder->DecodeFrame(video->cxdata(), video->frame_size());
+      if (!HandleDecodeResult(res_dec, *video, decoder)) break;
     } else {
       // Signal end of the file to the decoder.
       const vpx_codec_err_t res_dec = decoder->DecodeFrame(NULL, 0);
@@ -122,8 +118,6 @@ void DecoderTest::set_cfg(const vpx_codec_dec_cfg_t &dec_cfg) {
   memcpy(&cfg_, &dec_cfg, sizeof(cfg_));
 }
 
-void DecoderTest::set_flags(const vpx_codec_flags_t flags) {
-  flags_ = flags;
-}
+void DecoderTest::set_flags(const vpx_codec_flags_t flags) { flags_ = flags; }
 
 }  // namespace libvpx_test

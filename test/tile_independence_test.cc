@@ -20,16 +20,13 @@
 #include "vpx_mem/vpx_mem.h"
 
 namespace {
-class TileIndependenceTest : public ::libvpx_test::EncoderTest,
-                             public ::libvpx_test::CodecTestWith2Params<int,
-                                                                        int> {
+class TileIndependenceTest
+    : public ::libvpx_test::EncoderTest,
+      public ::libvpx_test::CodecTestWith2Params<int, int> {
  protected:
   TileIndependenceTest()
-      : EncoderTest(GET_PARAM(0)),
-        md5_fw_order_(),
-        md5_inv_order_(),
-        n_tile_cols_(GET_PARAM(1)),
-        n_tile_rows_(GET_PARAM(2)) {
+      : EncoderTest(GET_PARAM(0)), md5_fw_order_(), md5_inv_order_(),
+        n_tile_cols_(GET_PARAM(1)), n_tile_rows_(GET_PARAM(2)) {
     init_flags_ = VPX_CODEC_USE_PSNR;
     vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
     cfg.w = 704;
@@ -76,7 +73,7 @@ class TileIndependenceTest : public ::libvpx_test::EncoderTest,
   void UpdateMD5(::libvpx_test::Decoder *dec, const vpx_codec_cx_pkt_t *pkt,
                  ::libvpx_test::MD5 *md5) {
     const vpx_codec_err_t res = dec->DecodeFrame(
-        reinterpret_cast<uint8_t*>(pkt->data.frame.buf), pkt->data.frame.sz);
+        reinterpret_cast<uint8_t *>(pkt->data.frame.buf), pkt->data.frame.sz);
     if (res != VPX_CODEC_OK) {
       abort_ = true;
       ASSERT_EQ(VPX_CODEC_OK, res);
@@ -117,9 +114,7 @@ class TileIndependenceTest : public ::libvpx_test::EncoderTest,
 // run an encode with 2 or 4 tiles, and do the decode both in normal and
 // inverted tile ordering. Ensure that the MD5 of the output in both cases
 // is identical. If so, tiles are considered independent and the test passes.
-TEST_P(TileIndependenceTest, MD5Match) {
-  DoTest();
-}
+TEST_P(TileIndependenceTest, MD5Match) { DoTest(); }
 
 class TileIndependenceTestLarge : public TileIndependenceTest {
   virtual void SetCpuUsed(libvpx_test::Encoder *encoder) {
@@ -128,22 +123,18 @@ class TileIndependenceTestLarge : public TileIndependenceTest {
   }
 };
 
-TEST_P(TileIndependenceTestLarge, MD5Match) {
-  DoTest();
-}
-
+TEST_P(TileIndependenceTestLarge, MD5Match) { DoTest(); }
 
 #if CONFIG_EXT_TILE
 VP10_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Values(1, 2, 32),
-                                                 ::testing::Values(1, 2, 32));
+                           ::testing::Values(1, 2, 32));
 VP10_INSTANTIATE_TEST_CASE(TileIndependenceTestLarge,
                            ::testing::Values(1, 2, 32),
                            ::testing::Values(1, 2, 32));
 #else
 VP10_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Values(0, 1),
-                                                 ::testing::Values(0, 1));
-VP10_INSTANTIATE_TEST_CASE(TileIndependenceTestLarge,
-                           ::testing::Values(0, 1),
+                           ::testing::Values(0, 1));
+VP10_INSTANTIATE_TEST_CASE(TileIndependenceTestLarge, ::testing::Values(0, 1),
                            ::testing::Values(0, 1));
 #endif  // CONFIG_EXT_TILE
 }  // namespace

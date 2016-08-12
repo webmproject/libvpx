@@ -25,7 +25,7 @@ TEST(DecodeAPI, InvalidParams) {
     &vpx_codec_vp10_dx_algo,
 #endif
   };
-  uint8_t buf[1] = {0};
+  uint8_t buf[1] = { 0 };
   vpx_codec_ctx_t dec;
 
   EXPECT_EQ(VPX_CODEC_INVALID_PARAM, vpx_codec_dec_init(NULL, NULL, NULL, 0));
@@ -48,8 +48,7 @@ TEST(DecodeAPI, InvalidParams) {
               vpx_codec_decode(&dec, buf, NELEMENTS(buf), NULL, 0));
     EXPECT_EQ(VPX_CODEC_INVALID_PARAM,
               vpx_codec_decode(&dec, NULL, NELEMENTS(buf), NULL, 0));
-    EXPECT_EQ(VPX_CODEC_INVALID_PARAM,
-              vpx_codec_decode(&dec, buf, 0, NULL, 0));
+    EXPECT_EQ(VPX_CODEC_INVALID_PARAM, vpx_codec_decode(&dec, buf, 0, NULL, 0));
 
     EXPECT_EQ(VPX_CODEC_OK, vpx_codec_destroy(&dec));
   }

@@ -29,8 +29,7 @@ using std::tr1::tuple;
 using libvpx_test::FhtFunc;
 typedef tuple<FhtFunc, IhtFunc, int, vpx_bit_depth_t, int> Ht4x4Param;
 
-void fht4x4_ref(const int16_t *in, tran_low_t *out, int stride,
-                int tx_type) {
+void fht4x4_ref(const int16_t *in, tran_low_t *out, int stride, int tx_type) {
   vp10_fht4x4_c(in, out, stride, tx_type);
 }
 
@@ -44,23 +43,22 @@ typedef void (*HBDFhtFunc)(const int16_t *input, int32_t *output, int stride,
 // <Target optimized function, tx_type, bit depth>
 typedef tuple<HBDFhtFunc, int, int> HighbdHt4x4Param;
 
-void highbe_fht4x4_ref(const int16_t *in, int32_t *out, int stride,
-                       int tx_type, int bd) {
+void highbe_fht4x4_ref(const int16_t *in, int32_t *out, int stride, int tx_type,
+                       int bd) {
   vp10_fwd_txfm2d_4x4_c(in, out, stride, tx_type, bd);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-class VP10Trans4x4HT
-    : public libvpx_test::TransformTestBase,
-      public ::testing::TestWithParam<Ht4x4Param> {
+class VP10Trans4x4HT : public libvpx_test::TransformTestBase,
+                       public ::testing::TestWithParam<Ht4x4Param> {
  public:
   virtual ~VP10Trans4x4HT() {}
 
   virtual void SetUp() {
     fwd_txfm_ = GET_PARAM(0);
     inv_txfm_ = GET_PARAM(1);
-    tx_type_  = GET_PARAM(2);
-    pitch_    = 4;
+    tx_type_ = GET_PARAM(2);
+    pitch_ = 4;
     fwd_txfm_ref = fht4x4_ref;
     bit_depth_ = GET_PARAM(3);
     mask_ = (1 << bit_depth_) - 1;
@@ -81,9 +79,7 @@ class VP10Trans4x4HT
   IhtFunc inv_txfm_;
 };
 
-TEST_P(VP10Trans4x4HT, CoeffCheck) {
-  RunCoeffCheck();
-}
+TEST_P(VP10Trans4x4HT, CoeffCheck) { RunCoeffCheck(); }
 
 #if CONFIG_VP9_HIGHBITDEPTH
 class VP10HighbdTrans4x4HT : public ::testing::TestWithParam<HighbdHt4x4Param> {
@@ -93,7 +89,7 @@ class VP10HighbdTrans4x4HT : public ::testing::TestWithParam<HighbdHt4x4Param> {
   virtual void SetUp() {
     fwd_txfm_ = GET_PARAM(0);
     fwd_txfm_ref_ = highbe_fht4x4_ref;
-    tx_type_  = GET_PARAM(1);
+    tx_type_ = GET_PARAM(1);
     bit_depth_ = GET_PARAM(2);
     mask_ = (1 << bit_depth_) - 1;
     num_coeffs_ = 16;
@@ -145,86 +141,66 @@ void VP10HighbdTrans4x4HT::RunBitexactCheck() {
 
     for (j = 0; j < num_coeffs; ++j) {
       EXPECT_EQ(output_[j], output_ref_[j])
-          << "Not bit-exact result at index: " << j
-          << " at test block: " << i;
+          << "Not bit-exact result at index: " << j << " at test block: " << i;
     }
   }
 }
 
-TEST_P(VP10HighbdTrans4x4HT, HighbdCoeffCheck) {
-  RunBitexactCheck();
-}
+TEST_P(VP10HighbdTrans4x4HT, HighbdCoeffCheck) { RunBitexactCheck(); }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 using std::tr1::make_tuple;
 
 #if HAVE_SSE2
 const Ht4x4Param kArrayHt4x4Param_sse2[] = {
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 0,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 1,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 2,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 3,
-                 VPX_BITS_8, 16),
+  make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 0, VPX_BITS_8, 16),
+  make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 1, VPX_BITS_8, 16),
+  make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 2, VPX_BITS_8, 16),
+  make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 3, VPX_BITS_8, 16),
 #if CONFIG_EXT_TX
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 4,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 5,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 6,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 7,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 8,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 10,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 11,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 12,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 13,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 14,
-                 VPX_BITS_8, 16),
-      make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 15,
-                 VPX_BITS_8, 16)
+  make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 4, VPX_BITS_8, 16),
+  make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 5, VPX_BITS_8, 16),
+  make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 6, VPX_BITS_8, 16),
+  make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 7, VPX_BITS_8, 16),
+  make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 8, VPX_BITS_8, 16),
+  make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 10, VPX_BITS_8, 16),
+  make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 11, VPX_BITS_8, 16),
+  make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 12, VPX_BITS_8, 16),
+  make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 13, VPX_BITS_8, 16),
+  make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 14, VPX_BITS_8, 16),
+  make_tuple(&vp10_fht4x4_sse2, &vp10_iht4x4_16_add_sse2, 15, VPX_BITS_8, 16)
 #endif  // CONFIG_EXT_TX
 };
-INSTANTIATE_TEST_CASE_P(
-    SSE2, VP10Trans4x4HT,
-    ::testing::ValuesIn(kArrayHt4x4Param_sse2));
+INSTANTIATE_TEST_CASE_P(SSE2, VP10Trans4x4HT,
+                        ::testing::ValuesIn(kArrayHt4x4Param_sse2));
 #endif  // HAVE_SSE2
 
 #if HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
 const HighbdHt4x4Param kArrayHighbdHt4x4Param[] = {
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 0, 10),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 0, 12),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 1, 10),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 1, 12),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 2, 10),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 2, 12),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 3, 10),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 3, 12),
+  make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 0, 10),
+  make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 0, 12),
+  make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 1, 10),
+  make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 1, 12),
+  make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 2, 10),
+  make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 2, 12),
+  make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 3, 10),
+  make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 3, 12),
 #if CONFIG_EXT_TX
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 4, 10),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 4, 12),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 5, 10),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 5, 12),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 6, 10),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 6, 12),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 7, 10),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 7, 12),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 8, 10),
-         make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 8, 12),
+  make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 4, 10),
+  make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 4, 12),
+  make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 5, 10),
+  make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 5, 12),
+  make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 6, 10),
+  make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 6, 12),
+  make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 7, 10),
+  make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 7, 12),
+  make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 8, 10),
+  make_tuple(&vp10_fwd_txfm2d_4x4_sse4_1, 8, 12),
 #endif  // CONFIG_EXT_TX
 };
 
-INSTANTIATE_TEST_CASE_P(
-    SSE4_1, VP10HighbdTrans4x4HT,
-      ::testing::ValuesIn(kArrayHighbdHt4x4Param));
+INSTANTIATE_TEST_CASE_P(SSE4_1, VP10HighbdTrans4x4HT,
+                        ::testing::ValuesIn(kArrayHighbdHt4x4Param));
 
 #endif  // HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
 

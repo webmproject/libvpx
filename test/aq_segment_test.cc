@@ -49,8 +49,8 @@ class AqSegmentTest
     cfg_.rc_buf_optimal_sz = 500;
     cfg_.rc_buf_sz = 1000;
     cfg_.rc_target_bitrate = 300;
-    ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv",
-                                         352, 288, 30, 1, 0, 15);
+    ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352,
+                                         288, 30, 1, 0, 15);
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   }
 
@@ -60,36 +60,23 @@ class AqSegmentTest
 
 // Validate that this AQ segmentation mode (AQ=1, variance_ap)
 // encodes and decodes without a mismatch.
-TEST_P(AqSegmentTest, TestNoMisMatchAQ1) {
-  DoTest(1);
-}
+TEST_P(AqSegmentTest, TestNoMisMatchAQ1) { DoTest(1); }
 
 // Validate that this AQ segmentation mode (AQ=2, complexity_aq)
 // encodes and decodes without a mismatch.
-TEST_P(AqSegmentTest, TestNoMisMatchAQ2) {
-  DoTest(2);
-}
+TEST_P(AqSegmentTest, TestNoMisMatchAQ2) { DoTest(2); }
 
 // Validate that this AQ segmentation mode (AQ=3, cyclic_refresh_aq)
 // encodes and decodes without a mismatch.
-TEST_P(AqSegmentTest, TestNoMisMatchAQ3) {
-  DoTest(3);
-}
+TEST_P(AqSegmentTest, TestNoMisMatchAQ3) { DoTest(3); }
 
 class AqSegmentTestLarge : public AqSegmentTest {};
 
-TEST_P(AqSegmentTestLarge, TestNoMisMatchAQ1) {
-  DoTest(1);
-}
+TEST_P(AqSegmentTestLarge, TestNoMisMatchAQ1) { DoTest(1); }
 
-TEST_P(AqSegmentTestLarge, TestNoMisMatchAQ2) {
-  DoTest(2);
-}
+TEST_P(AqSegmentTestLarge, TestNoMisMatchAQ2) { DoTest(2); }
 
-TEST_P(AqSegmentTestLarge, TestNoMisMatchAQ3) {
-  DoTest(3);
-}
-
+TEST_P(AqSegmentTestLarge, TestNoMisMatchAQ3) { DoTest(3); }
 
 VP10_INSTANTIATE_TEST_CASE(AqSegmentTest,
                            ::testing::Values(::libvpx_test::kRealTime,

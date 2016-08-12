@@ -19,16 +19,13 @@ namespace {
 const int kMaxErrorFrames = 12;
 const int kMaxDroppableFrames = 12;
 
-class ErrorResilienceTestLarge : public ::libvpx_test::EncoderTest,
-    public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
+class ErrorResilienceTestLarge
+    : public ::libvpx_test::EncoderTest,
+      public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
  protected:
   ErrorResilienceTestLarge()
-      : EncoderTest(GET_PARAM(0)),
-        psnr_(0.0),
-        nframes_(0),
-        mismatch_psnr_(0.0),
-        mismatch_nframes_(0),
-        encoding_mode_(GET_PARAM(1)) {
+      : EncoderTest(GET_PARAM(0)), psnr_(0.0), nframes_(0), mismatch_psnr_(0.0),
+        mismatch_nframes_(0), encoding_mode_(GET_PARAM(1)) {
     Reset();
   }
 
@@ -59,17 +56,15 @@ class ErrorResilienceTestLarge : public ::libvpx_test::EncoderTest,
 
   virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder * /*encoder*/) {
-    frame_flags_ &= ~(VP8_EFLAG_NO_UPD_LAST |
-                      VP8_EFLAG_NO_UPD_GF |
-                      VP8_EFLAG_NO_UPD_ARF);
+    frame_flags_ &=
+        ~(VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF);
     if (droppable_nframes_ > 0 &&
         (cfg_.g_pass == VPX_RC_LAST_PASS || cfg_.g_pass == VPX_RC_ONE_PASS)) {
       for (unsigned int i = 0; i < droppable_nframes_; ++i) {
         if (droppable_frames_[i] == video->frame()) {
-          std::cout << "Encoding droppable frame: "
-                    << droppable_frames_[i] << "\n";
-          frame_flags_ |= (VP8_EFLAG_NO_UPD_LAST |
-                           VP8_EFLAG_NO_UPD_GF |
+          std::cout << "Encoding droppable frame: " << droppable_frames_[i]
+                    << "\n";
+          frame_flags_ |= (VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF |
                            VP8_EFLAG_NO_UPD_ARF);
           return;
         }
@@ -78,14 +73,12 @@ class ErrorResilienceTestLarge : public ::libvpx_test::EncoderTest,
   }
 
   double GetAveragePsnr() const {
-    if (nframes_)
-      return psnr_ / nframes_;
+    if (nframes_) return psnr_ / nframes_;
     return 0.0;
   }
 
   double GetAverageMismatchPsnr() const {
-    if (mismatch_nframes_)
-      return mismatch_psnr_ / mismatch_nframes_;
+    if (mismatch_nframes_) return mismatch_psnr_ / mismatch_nframes_;
     return 0.0;
   }
 
@@ -103,8 +96,7 @@ class ErrorResilienceTestLarge : public ::libvpx_test::EncoderTest,
     return 1;
   }
 
-  virtual void MismatchHook(const vpx_image_t *img1,
-                            const vpx_image_t *img2) {
+  virtual void MismatchHook(const vpx_image_t *img1, const vpx_image_t *img2) {
     double mismatch_psnr = compute_psnr(img1, img2);
     mismatch_psnr_ += mismatch_psnr;
     ++mismatch_nframes_;
@@ -132,13 +124,9 @@ class ErrorResilienceTestLarge : public ::libvpx_test::EncoderTest,
       droppable_frames_[i] = list[i];
   }
 
-  unsigned int GetMismatchFrames() {
-    return mismatch_nframes_;
-  }
+  unsigned int GetMismatchFrames() { return mismatch_nframes_; }
 
-  void SetPatternSwitch(int frame_switch) {
-     pattern_switch_ = frame_switch;
-   }
+  void SetPatternSwitch(int frame_switch) { pattern_switch_ = frame_switch; }
 
  private:
   double psnr_;
@@ -209,15 +197,14 @@ TEST_P(ErrorResilienceTestLarge, DropFramesWithoutRecovery) {
   // In addition to isolated loss/drop, add a long consecutive series
   // (of size 9) of dropped frames.
   unsigned int num_droppable_frames = 11;
-  unsigned int droppable_frame_list[] = {5, 16, 22, 23, 24, 25, 26, 27, 28,
-                                         29, 30};
+  unsigned int droppable_frame_list[] = { 5,  16, 22, 23, 24, 25,
+                                          26, 27, 28, 29, 30 };
   SetDroppableFrames(num_droppable_frames, droppable_frame_list);
   SetErrorFrames(num_droppable_frames, droppable_frame_list);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   // Test that no mismatches have been found
-  std::cout << "             Mismatch frames: "
-            << GetMismatchFrames() << "\n";
-  EXPECT_EQ(GetMismatchFrames(), (unsigned int) 0);
+  std::cout << "             Mismatch frames: " << GetMismatchFrames() << "\n";
+  EXPECT_EQ(GetMismatchFrames(), (unsigned int)0);
 
   // Reset previously set of error/droppable frames.
   Reset();

@@ -13,12 +13,9 @@
 
 namespace libvpx_test {
 
-int get_txfm1d_size(TX_SIZE tx_size) {
-  return 1 << (tx_size + 2);
-}
+int get_txfm1d_size(TX_SIZE tx_size) { return 1 << (tx_size + 2); }
 
-void get_txfm1d_type(TX_TYPE txfm2d_type, TYPE_TXFM* type0,
-                     TYPE_TXFM* type1) {
+void get_txfm1d_type(TX_TYPE txfm2d_type, TYPE_TXFM *type0, TYPE_TXFM *type1) {
   switch (txfm2d_type) {
     case DCT_DCT:
       *type0 = TYPE_DCT;
@@ -68,7 +65,7 @@ void get_txfm1d_type(TX_TYPE txfm2d_type, TYPE_TXFM* type0,
 
 double invSqrt2 = 1 / pow(2, 0.5);
 
-void reference_dct_1d(const double* in, double* out, int size) {
+void reference_dct_1d(const double *in, double *out, int size) {
   for (int k = 0; k < size; ++k) {
     out[k] = 0;
     for (int n = 0; n < size; ++n) {
@@ -78,7 +75,7 @@ void reference_dct_1d(const double* in, double* out, int size) {
   }
 }
 
-void reference_adst_1d(const double* in, double* out, int size) {
+void reference_adst_1d(const double *in, double *out, int size) {
   for (int k = 0; k < size; ++k) {
     out[k] = 0;
     for (int n = 0; n < size; ++n) {
@@ -87,16 +84,16 @@ void reference_adst_1d(const double* in, double* out, int size) {
   }
 }
 
-void reference_hybrid_1d(double* in, double* out, int size, int type) {
+void reference_hybrid_1d(double *in, double *out, int size, int type) {
   if (type == TYPE_DCT)
     reference_dct_1d(in, out, size);
   else
     reference_adst_1d(in, out, size);
 }
 
-void reference_hybrid_2d(double* in, double* out, int size,
-                         int type0, int type1) {
-  double* tempOut = new double[size * size];
+void reference_hybrid_2d(double *in, double *out, int size, int type0,
+                         int type1) {
+  double *tempOut = new double[size * size];
 
   for (int r = 0; r < size; r++) {
     // out ->tempOut
@@ -123,7 +120,7 @@ void reference_hybrid_2d(double* in, double* out, int size,
   delete[] tempOut;
 }
 
-template<typename Type>
+template <typename Type>
 void fliplr(Type *dest, int stride, int length) {
   int i, j;
   for (i = 0; i < length; ++i) {
@@ -135,7 +132,7 @@ void fliplr(Type *dest, int stride, int length) {
   }
 }
 
-template<typename Type>
+template <typename Type>
 void flipud(Type *dest, int stride, int length) {
   int i, j;
   for (j = 0; j < length; ++j) {
@@ -147,7 +144,7 @@ void flipud(Type *dest, int stride, int length) {
   }
 }
 
-template<typename Type>
+template <typename Type>
 void fliplrud(Type *dest, int stride, int length) {
   int i, j;
   for (i = 0; i < length / 2; ++i) {

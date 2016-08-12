@@ -151,7 +151,10 @@ bool check_vpxbool(const PvVec &pv_vec, uint8_t *buf) {
 // TODO(aconverse): replace this with a more representative distribution from
 // the codec.
 const rans_sym rans_sym_tab[] = {
-    {16 * 4, 0 * 4}, {100 * 4, 16 * 4}, {70 * 4, 116 *4}, {70 * 4, 186 *4},
+  { 16 * 4, 0 * 4 },
+  { 100 * 4, 16 * 4 },
+  { 70 * 4, 116 * 4 },
+  { 70 * 4, 186 * 4 },
 };
 const int kDistinctSyms = sizeof(rans_sym_tab) / sizeof(rans_sym_tab[0]);
 
@@ -172,8 +175,7 @@ std::vector<int> ans_encode_build_vals(const rans_sym *tab, int iters) {
   return ret;
 }
 
-void rans_build_dec_tab(const struct rans_sym sym_tab[],
-                        rans_dec_lut dec_tab) {
+void rans_build_dec_tab(const struct rans_sym sym_tab[], rans_dec_lut dec_tab) {
   dec_tab[0] = 0;
   for (int i = 1; dec_tab[i - 1] < rans_precision; ++i) {
     dec_tab[i] = dec_tab[i - 1] + sym_tab[i - 1].prob;

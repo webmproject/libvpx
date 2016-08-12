@@ -34,8 +34,7 @@ class VP10ExtTileTest
       public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
  protected:
   VP10ExtTileTest()
-      : EncoderTest(GET_PARAM(0)),
-        encoding_mode_(GET_PARAM(1)),
+      : EncoderTest(GET_PARAM(0)), encoding_mode_(GET_PARAM(1)),
         set_cpu_used_(GET_PARAM(2)) {
     init_flags_ = VPX_CODEC_USE_PSNR;
     vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
@@ -70,7 +69,7 @@ class VP10ExtTileTest
     cfg_.rc_min_quantizer = 0;
   }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource * video,
+  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
     if (video->frame() == 0) {
       // Encode setting
@@ -88,8 +87,8 @@ class VP10ExtTileTest
     }
 
     if (video->frame() == 1) {
-      frame_flags_ = VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF |
-          VP8_EFLAG_NO_UPD_ARF;
+      frame_flags_ =
+          VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF;
     }
   }
 
@@ -97,8 +96,7 @@ class VP10ExtTileTest
                                      vpx_codec_pts_t pts) {
     // Skip 1 already decoded frame to be consistent with the decoder in this
     // test.
-    if (pts == (vpx_codec_pts_t)kSkip)
-      return;
+    if (pts == (vpx_codec_pts_t)kSkip) return;
 
     // Calculate MD5 as the reference.
     ::libvpx_test::MD5 md5_res;
@@ -108,8 +106,7 @@ class VP10ExtTileTest
 
   virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
     // Skip decoding 1 frame.
-    if (pkt->data.frame.pts == (vpx_codec_pts_t)kSkip)
-      return;
+    if (pkt->data.frame.pts == (vpx_codec_pts_t)kSkip) return;
 
     bool IsLastFrame = (pkt->data.frame.pts == (vpx_codec_pts_t)(kLimit - 1));
 
@@ -126,7 +123,7 @@ class VP10ExtTileTest
         }
 
         const vpx_codec_err_t res = decoder_->DecodeFrame(
-            reinterpret_cast<uint8_t*>(pkt->data.frame.buf),
+            reinterpret_cast<uint8_t *>(pkt->data.frame.buf),
             pkt->data.frame.sz);
         if (res != VPX_CODEC_OK) {
           abort_ = true;
@@ -151,15 +148,14 @@ class VP10ExtTileTest
 
           for (int tr = 0; tr < tile_height; ++tr) {
             memcpy(tile_img_.planes[plane] +
-                   tile_img_.stride[plane] * (r * tile_height + tr) +
-                   c * tile_width,
+                       tile_img_.stride[plane] * (r * tile_height + tr) +
+                       c * tile_width,
                    img->planes[plane] + img->stride[plane] * tr, tile_width);
           }
         }
       }
 
-      if (!IsLastFrame)
-        break;
+      if (!IsLastFrame) break;
     }
 
     if (IsLastFrame) {
@@ -178,8 +174,8 @@ class VP10ExtTileTest
 };
 
 TEST_P(VP10ExtTileTest, DecoderResultTest) {
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv",
-                                       kImgWidth, kImgHeight, 30, 1, 0, kLimit);
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", kImgWidth,
+                                       kImgHeight, 30, 1, 0, kLimit);
   cfg_.rc_target_bitrate = 500;
   cfg_.g_error_resilient = VPX_ERROR_RESILIENT_DEFAULT;
   cfg_.g_lag_in_frames = 0;
@@ -195,7 +191,6 @@ TEST_P(VP10ExtTileTest, DecoderResultTest) {
 
 VP10_INSTANTIATE_TEST_CASE(
     // Now only test 2-pass mode.
-    VP10ExtTileTest,
-    ::testing::Values(::libvpx_test::kTwoPassGood),
+    VP10ExtTileTest, ::testing::Values(::libvpx_test::kTwoPassGood),
     ::testing::Range(0, 4));
 }  // namespace

@@ -32,20 +32,18 @@ const int kNumIterations = 1000;
 
 typedef int64_t (*ErrorBlockFunc)(const tran_low_t *coeff,
                                   const tran_low_t *dqcoeff,
-                                  intptr_t block_size,
-                                  int64_t *ssz, int bps);
+                                  intptr_t block_size, int64_t *ssz, int bps);
 
 typedef std::tr1::tuple<ErrorBlockFunc, ErrorBlockFunc, vpx_bit_depth_t>
-                        ErrorBlockParam;
+    ErrorBlockParam;
 
-class ErrorBlockTest
-  : public ::testing::TestWithParam<ErrorBlockParam> {
+class ErrorBlockTest : public ::testing::TestWithParam<ErrorBlockParam> {
  public:
   virtual ~ErrorBlockTest() {}
   virtual void SetUp() {
-    error_block_op_     = GET_PARAM(0);
+    error_block_op_ = GET_PARAM(0);
     ref_error_block_op_ = GET_PARAM(1);
-    bit_depth_  = GET_PARAM(2);
+    bit_depth_ = GET_PARAM(2);
   }
 
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
@@ -76,18 +74,18 @@ TEST_P(ErrorBlockTest, OperationCheck) {
       // can be used for optimization, so generate test input precisely.
       if (rnd(2)) {
         // Positive number
-        coeff[j]   = rnd(1 << msb);
+        coeff[j] = rnd(1 << msb);
         dqcoeff[j] = rnd(1 << msb);
       } else {
         // Negative number
-        coeff[j]   = -rnd(1 << msb);
+        coeff[j] = -rnd(1 << msb);
         dqcoeff[j] = -rnd(1 << msb);
       }
     }
-    ref_ret = ref_error_block_op_(coeff, dqcoeff, block_size, &ref_ssz,
-                                  bit_depth_);
-    ASM_REGISTER_STATE_CHECK(ret = error_block_op_(coeff, dqcoeff, block_size,
-                                                   &ssz, bit_depth_));
+    ref_ret =
+        ref_error_block_op_(coeff, dqcoeff, block_size, &ref_ssz, bit_depth_);
+    ASM_REGISTER_STATE_CHECK(
+        ret = error_block_op_(coeff, dqcoeff, block_size, &ssz, bit_depth_));
     err_count += (ref_ret != ret) | (ref_ssz != ssz);
     if (err_count && !err_count_total) {
       first_failure = i;
@@ -117,35 +115,35 @@ TEST_P(ErrorBlockTest, ExtremeValues) {
     int k = (i / 9) % 9;
 
     // Change the maximum coeff value, to test different bit boundaries
-    if ( k == 8 && (i % 9) == 0 ) {
+    if (k == 8 && (i % 9) == 0) {
       max_val >>= 1;
     }
     block_size = 16 << (i % 9);  // All block sizes from 4x4, 8x4 ..64x64
     for (int j = 0; j < block_size; j++) {
       if (k < 4) {
         // Test at positive maximum values
-        coeff[j]   = k % 2 ? max_val : 0;
+        coeff[j] = k % 2 ? max_val : 0;
         dqcoeff[j] = (k >> 1) % 2 ? max_val : 0;
       } else if (k < 8) {
         // Test at negative maximum values
-        coeff[j]   = k % 2 ? -max_val : 0;
+        coeff[j] = k % 2 ? -max_val : 0;
         dqcoeff[j] = (k >> 1) % 2 ? -max_val : 0;
       } else {
         if (rnd(2)) {
           // Positive number
-          coeff[j]   = rnd(1 << 14);
+          coeff[j] = rnd(1 << 14);
           dqcoeff[j] = rnd(1 << 14);
         } else {
           // Negative number
-          coeff[j]   = -rnd(1 << 14);
+          coeff[j] = -rnd(1 << 14);
           dqcoeff[j] = -rnd(1 << 14);
         }
       }
     }
-    ref_ret = ref_error_block_op_(coeff, dqcoeff, block_size, &ref_ssz,
-                                  bit_depth_);
-    ASM_REGISTER_STATE_CHECK(ret = error_block_op_(coeff, dqcoeff, block_size,
-                                                   &ssz, bit_depth_));
+    ref_ret =
+        ref_error_block_op_(coeff, dqcoeff, block_size, &ref_ssz, bit_depth_);
+    ASM_REGISTER_STATE_CHECK(
+        ret = error_block_op_(coeff, dqcoeff, block_size, &ssz, bit_depth_));
     err_count += (ref_ret != ret) | (ref_ssz != ssz);
     if (err_count && !err_count_total) {
       first_failure = i;
@@ -162,13 +160,12 @@ using std::tr1::make_tuple;
 
 INSTANTIATE_TEST_CASE_P(
     SSE2, ErrorBlockTest,
-    ::testing::Values(
-        make_tuple(&vp10_highbd_block_error_sse2,
-                   &vp10_highbd_block_error_c, VPX_BITS_10),
-        make_tuple(&vp10_highbd_block_error_sse2,
-                   &vp10_highbd_block_error_c, VPX_BITS_12),
-        make_tuple(&vp10_highbd_block_error_sse2,
-                   &vp10_highbd_block_error_c, VPX_BITS_8)));
+    ::testing::Values(make_tuple(&vp10_highbd_block_error_sse2,
+                                 &vp10_highbd_block_error_c, VPX_BITS_10),
+                      make_tuple(&vp10_highbd_block_error_sse2,
+                                 &vp10_highbd_block_error_c, VPX_BITS_12),
+                      make_tuple(&vp10_highbd_block_error_sse2,
+                                 &vp10_highbd_block_error_c, VPX_BITS_8)));
 #endif  // HAVE_SSE2
 
 #endif  // CONFIG_VP9_HIGHBITDEPTH

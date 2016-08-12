@@ -19,11 +19,8 @@ class AltRefForcedKeyTestLarge
       public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
  protected:
   AltRefForcedKeyTestLarge()
-      : EncoderTest(GET_PARAM(0)),
-        encoding_mode_(GET_PARAM(1)),
-        cpu_used_(GET_PARAM(2)),
-        forced_kf_frame_num_(1),
-        frame_num_(0) {}
+      : EncoderTest(GET_PARAM(0)), encoding_mode_(GET_PARAM(1)),
+        cpu_used_(GET_PARAM(2)), forced_kf_frame_num_(1), frame_num_(0) {}
   virtual ~AltRefForcedKeyTestLarge() {}
 
   virtual void SetUp() {
@@ -38,8 +35,8 @@ class AltRefForcedKeyTestLarge
     if (video->frame() == 0) {
       encoder->Control(VP8E_SET_CPUUSED, cpu_used_);
       encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
-      // override test default for tile columns if necessary.
 #if CONFIG_VP10_ENCODER
+      // override test default for tile columns if necessary.
       if (GET_PARAM(0) == &libvpx_test::kVP10) {
         encoder->Control(VP9E_SET_TILE_COLUMNS, 6);
       }
@@ -91,9 +88,8 @@ TEST_P(AltRefForcedKeyTestLarge, ForcedFrameIsKey) {
   }
 }
 
-VP10_INSTANTIATE_TEST_CASE(
-    AltRefForcedKeyTestLarge,
-    ::testing::Values(::libvpx_test::kOnePassGood),
-    ::testing::Range(0, 9));
+VP10_INSTANTIATE_TEST_CASE(AltRefForcedKeyTestLarge,
+                           ::testing::Values(::libvpx_test::kOnePassGood),
+                           ::testing::Range(0, 9));
 
 }  // namespace

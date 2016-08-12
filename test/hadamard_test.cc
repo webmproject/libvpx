@@ -80,8 +80,8 @@ void reference_hadamard16x16(const int16_t *a, int a_stride, int16_t *b) {
     const int16_t b3 = (a2 - a3) >> 1;
 
     /* Store a 16 bit value. */
-    b[  0] = b0 + b2;
-    b[ 64] = b1 + b3;
+    b[0] = b0 + b2;
+    b[64] = b1 + b3;
     b[128] = b0 - b2;
     b[192] = b1 - b3;
 

@@ -51,14 +51,14 @@ class TransTestBase {
 
  protected:
   void RunInvAccuracyCheck() {
-    tran_low_t *input  = new tran_low_t[txfm_size_];
+    tran_low_t *input = new tran_low_t[txfm_size_];
     tran_low_t *output = new tran_low_t[txfm_size_];
-    double *ref_input  = new double[txfm_size_];
+    double *ref_input = new double[txfm_size_];
     double *ref_output = new double[txfm_size_];
 
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int count_test_block = 5000;
-    for (int ti =  0; ti < count_test_block; ++ti) {
+    for (int ti = 0; ti < count_test_block; ++ti) {
       for (int ni = 0; ni < txfm_size_; ++ni) {
         input[ni] = rnd.Rand8() - rnd.Rand8();
         ref_input[ni] = static_cast<double>(input[ni]);
@@ -87,9 +87,8 @@ class TransTestBase {
 };
 
 typedef std::tr1::tuple<IdctFunc, IdctFuncRef, int, int> IdctParam;
-class Vp10InvTxfm
-    : public TransTestBase,
-      public ::testing::TestWithParam<IdctParam> {
+class Vp10InvTxfm : public TransTestBase,
+                    public ::testing::TestWithParam<IdctParam> {
  public:
   virtual void SetUp() {
     fwd_txfm_ = GET_PARAM(0);
@@ -100,25 +99,19 @@ class Vp10InvTxfm
   virtual void TearDown() {}
 };
 
-TEST_P(Vp10InvTxfm, RunInvAccuracyCheck) {
-  RunInvAccuracyCheck();
-}
+TEST_P(Vp10InvTxfm, RunInvAccuracyCheck) { RunInvAccuracyCheck(); }
 
 INSTANTIATE_TEST_CASE_P(
     C, Vp10InvTxfm,
-    ::testing::Values(
-        IdctParam(&vp10_idct4_c, &reference_idct_1d, 4, 1),
-        IdctParam(&vp10_idct8_c, &reference_idct_1d, 8, 2),
-        IdctParam(&vp10_idct16_c, &reference_idct_1d, 16, 4),
-        IdctParam(&vp10_idct32_c, &reference_idct_1d, 32, 6))
-);
+    ::testing::Values(IdctParam(&vp10_idct4_c, &reference_idct_1d, 4, 1),
+                      IdctParam(&vp10_idct8_c, &reference_idct_1d, 8, 2),
+                      IdctParam(&vp10_idct16_c, &reference_idct_1d, 16, 4),
+                      IdctParam(&vp10_idct32_c, &reference_idct_1d, 32, 6)));
 
 typedef void (*FwdTxfmFunc)(const int16_t *in, tran_low_t *out, int stride);
 typedef void (*InvTxfmFunc)(const tran_low_t *in, uint8_t *out, int stride);
-typedef std::tr1::tuple<FwdTxfmFunc,
-                        InvTxfmFunc,
-                        InvTxfmFunc,
-                        TX_SIZE, int> PartialInvTxfmParam;
+typedef std::tr1::tuple<FwdTxfmFunc, InvTxfmFunc, InvTxfmFunc, TX_SIZE, int>
+    PartialInvTxfmParam;
 const int kMaxNumCoeffs = 1024;
 class Vp10PartialIDctTest
     : public ::testing::TestWithParam<PartialInvTxfmParam> {
@@ -128,7 +121,7 @@ class Vp10PartialIDctTest
     ftxfm_ = GET_PARAM(0);
     full_itxfm_ = GET_PARAM(1);
     partial_itxfm_ = GET_PARAM(2);
-    tx_size_  = GET_PARAM(3);
+    tx_size_ = GET_PARAM(3);
     last_nonzero_ = GET_PARAM(4);
   }
 
@@ -146,21 +139,11 @@ TEST_P(Vp10PartialIDctTest, RunQuantCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   int size;
   switch (tx_size_) {
-    case TX_4X4:
-      size = 4;
-      break;
-    case TX_8X8:
-      size = 8;
-      break;
-    case TX_16X16:
-      size = 16;
-      break;
-    case TX_32X32:
-      size = 32;
-      break;
-    default:
-      FAIL() << "Wrong Size!";
-      break;
+    case TX_4X4: size = 4; break;
+    case TX_8X8: size = 8; break;
+    case TX_16X16: size = 16; break;
+    case TX_32X32: size = 32; break;
+    default: FAIL() << "Wrong Size!"; break;
   }
   DECLARE_ALIGNED(16, tran_low_t, test_coef_block1[kMaxNumCoeffs]);
   DECLARE_ALIGNED(16, tran_low_t, test_coef_block2[kMaxNumCoeffs]);
@@ -186,11 +169,9 @@ TEST_P(Vp10PartialIDctTest, RunQuantCheck) {
     for (int i = 0; i < count_test_block; ++i) {
       // Initialize a test block with input range [-255, 255].
       if (i == 0) {
-        for (int j = 0; j < block_size; ++j)
-          input_extreme_block[j] = 255;
+        for (int j = 0; j < block_size; ++j) input_extreme_block[j] = 255;
       } else if (i == 1) {
-        for (int j = 0; j < block_size; ++j)
-          input_extreme_block[j] = -255;
+        for (int j = 0; j < block_size; ++j) input_extreme_block[j] = -255;
       } else {
         for (int j = 0; j < block_size; ++j) {
           input_extreme_block[j] = rnd.Rand8() % 2 ? 255 : -255;
@@ -202,8 +183,8 @@ TEST_P(Vp10PartialIDctTest, RunQuantCheck) {
       // quantization with maximum allowed step sizes
       test_coef_block1[0] = (output_ref_block[0] / 1336) * 1336;
       for (int j = 1; j < last_nonzero_; ++j)
-        test_coef_block1[get_scan(tx_size_, DCT_DCT, 0)->scan[j]]
-                         = (output_ref_block[j] / 1828) * 1828;
+        test_coef_block1[get_scan(tx_size_, DCT_DCT, 0)->scan[j]] =
+            (output_ref_block[j] / 1828) * 1828;
     }
 
     ASM_REGISTER_STATE_CHECK(full_itxfm_(test_coef_block1, dst1, size));
@@ -212,8 +193,7 @@ TEST_P(Vp10PartialIDctTest, RunQuantCheck) {
     for (int j = 0; j < block_size; ++j) {
       const int diff = dst1[j] - dst2[j];
       const int error = diff * diff;
-      if (max_error < error)
-        max_error = error;
+      if (max_error < error) max_error = error;
     }
   }
 
@@ -225,21 +205,11 @@ TEST_P(Vp10PartialIDctTest, ResultsMatch) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   int size;
   switch (tx_size_) {
-    case TX_4X4:
-      size = 4;
-      break;
-    case TX_8X8:
-      size = 8;
-      break;
-    case TX_16X16:
-      size = 16;
-      break;
-    case TX_32X32:
-      size = 32;
-      break;
-    default:
-      FAIL() << "Wrong Size!";
-      break;
+    case TX_4X4: size = 4; break;
+    case TX_8X8: size = 8; break;
+    case TX_16X16: size = 16; break;
+    case TX_32X32: size = 32; break;
+    default: FAIL() << "Wrong Size!"; break;
   }
   DECLARE_ALIGNED(16, tran_low_t, test_coef_block1[kMaxNumCoeffs]);
   DECLARE_ALIGNED(16, tran_low_t, test_coef_block2[kMaxNumCoeffs]);
@@ -276,8 +246,7 @@ TEST_P(Vp10PartialIDctTest, ResultsMatch) {
     for (int j = 0; j < block_size; ++j) {
       const int diff = dst1[j] - dst2[j];
       const int error = diff * diff;
-      if (max_error < error)
-        max_error = error;
+      if (max_error < error) max_error = error;
     }
   }
 
@@ -288,33 +257,18 @@ using std::tr1::make_tuple;
 
 INSTANTIATE_TEST_CASE_P(
     C, Vp10PartialIDctTest,
-    ::testing::Values(
-        make_tuple(&vp10_fdct32x32_c,
-                   &vp10_idct32x32_1024_add_c,
-                   &vp10_idct32x32_34_add_c,
-                   TX_32X32, 34),
-        make_tuple(&vp10_fdct32x32_c,
-                   &vp10_idct32x32_1024_add_c,
-                   &vp10_idct32x32_1_add_c,
-                   TX_32X32, 1),
-        make_tuple(&vp10_fdct16x16_c,
-                   &vp10_idct16x16_256_add_c,
-                   &vp10_idct16x16_10_add_c,
-                   TX_16X16, 10),
-        make_tuple(&vp10_fdct16x16_c,
-                   &vp10_idct16x16_256_add_c,
-                   &vp10_idct16x16_1_add_c,
-                   TX_16X16, 1),
-        make_tuple(&vp10_fdct8x8_c,
-                   &vp10_idct8x8_64_add_c,
-                   &vp10_idct8x8_12_add_c,
-                   TX_8X8, 12),
-        make_tuple(&vp10_fdct8x8_c,
-                   &vp10_idct8x8_64_add_c,
-                   &vp10_idct8x8_1_add_c,
-                   TX_8X8, 1),
-        make_tuple(&vp10_fdct4x4_c,
-                   &vp10_idct4x4_16_add_c,
-                   &vp10_idct4x4_1_add_c,
-                   TX_4X4, 1)));
+    ::testing::Values(make_tuple(&vp10_fdct32x32_c, &vp10_idct32x32_1024_add_c,
+                                 &vp10_idct32x32_34_add_c, TX_32X32, 34),
+                      make_tuple(&vp10_fdct32x32_c, &vp10_idct32x32_1024_add_c,
+                                 &vp10_idct32x32_1_add_c, TX_32X32, 1),
+                      make_tuple(&vp10_fdct16x16_c, &vp10_idct16x16_256_add_c,
+                                 &vp10_idct16x16_10_add_c, TX_16X16, 10),
+                      make_tuple(&vp10_fdct16x16_c, &vp10_idct16x16_256_add_c,
+                                 &vp10_idct16x16_1_add_c, TX_16X16, 1),
+                      make_tuple(&vp10_fdct8x8_c, &vp10_idct8x8_64_add_c,
+                                 &vp10_idct8x8_12_add_c, TX_8X8, 12),
+                      make_tuple(&vp10_fdct8x8_c, &vp10_idct8x8_64_add_c,
+                                 &vp10_idct8x8_1_add_c, TX_8X8, 1),
+                      make_tuple(&vp10_fdct4x4_c, &vp10_idct4x4_16_add_c,
+                                 &vp10_idct4x4_1_add_c, TX_4X4, 1)));
 }  // namespace

@@ -118,35 +118,32 @@ void VP10HighbdInvHTNxN::RunBitexactCheck() {
 
     txfm_ref_(input_, coeffs_, stride, tx_type_, bit_depth_);
     inv_txfm_ref_(coeffs_, output_ref_, stride, tx_type_, bit_depth_);
-    ASM_REGISTER_STATE_CHECK(inv_txfm_(coeffs_, output_, stride, tx_type_,
-                                       bit_depth_));
+    ASM_REGISTER_STATE_CHECK(
+        inv_txfm_(coeffs_, output_, stride, tx_type_, bit_depth_));
 
     for (int j = 0; j < num_coeffs_; ++j) {
       EXPECT_EQ(output_ref_[j], output_[j])
-          << "Not bit-exact result at index: " << j
-          << " At test block: " << i;
+          << "Not bit-exact result at index: " << j << " At test block: " << i;
     }
   }
 }
 
-TEST_P(VP10HighbdInvHTNxN, InvTransResultCheck) {
-  RunBitexactCheck();
-}
+TEST_P(VP10HighbdInvHTNxN, InvTransResultCheck) { RunBitexactCheck(); }
 
 using std::tr1::make_tuple;
 
 #if HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
-#define PARAM_LIST_4X4 &vp10_fwd_txfm2d_4x4_c, \
-             &vp10_inv_txfm2d_add_4x4_sse4_1,  \
-             &vp10_inv_txfm2d_add_4x4_c, 16
+#define PARAM_LIST_4X4                                     \
+  &vp10_fwd_txfm2d_4x4_c, &vp10_inv_txfm2d_add_4x4_sse4_1, \
+      &vp10_inv_txfm2d_add_4x4_c, 16
 
-#define PARAM_LIST_8X8 &vp10_fwd_txfm2d_8x8_c, \
-             &vp10_inv_txfm2d_add_8x8_sse4_1,  \
-             &vp10_inv_txfm2d_add_8x8_c, 64
+#define PARAM_LIST_8X8                                     \
+  &vp10_fwd_txfm2d_8x8_c, &vp10_inv_txfm2d_add_8x8_sse4_1, \
+      &vp10_inv_txfm2d_add_8x8_c, 64
 
-#define PARAM_LIST_16X16 &vp10_fwd_txfm2d_16x16_c, \
-             &vp10_inv_txfm2d_add_16x16_sse4_1,    \
-             &vp10_inv_txfm2d_add_16x16_c, 256
+#define PARAM_LIST_16X16                                       \
+  &vp10_fwd_txfm2d_16x16_c, &vp10_inv_txfm2d_add_16x16_sse4_1, \
+      &vp10_inv_txfm2d_add_16x16_c, 256
 
 const IHbdHtParam kArrayIhtParam[] = {
   // 16x16
@@ -214,9 +211,8 @@ const IHbdHtParam kArrayIhtParam[] = {
 #endif
 };
 
-INSTANTIATE_TEST_CASE_P(
-    SSE4_1, VP10HighbdInvHTNxN,
-    ::testing::ValuesIn(kArrayIhtParam));
+INSTANTIATE_TEST_CASE_P(SSE4_1, VP10HighbdInvHTNxN,
+                        ::testing::ValuesIn(kArrayIhtParam));
 #endif  // HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
 
 }  // namespace

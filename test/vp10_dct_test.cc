@@ -32,8 +32,7 @@ void reference_dct_1d(const double *in, double *out, int size) {
     for (int n = 0; n < size; ++n) {
       out[k] += in[n] * cos(PI * (2 * n + 1) * k / (2 * size));
     }
-    if (k == 0)
-      out[k] = out[k] * kInvSqrt2;
+    if (k == 0) out[k] = out[k] * kInvSqrt2;
   }
 }
 
@@ -48,14 +47,14 @@ class TransTestBase {
 
  protected:
   void RunFwdAccuracyCheck() {
-    tran_low_t *input  = new tran_low_t[txfm_size_];
+    tran_low_t *input = new tran_low_t[txfm_size_];
     tran_low_t *output = new tran_low_t[txfm_size_];
-    double *ref_input  = new double[txfm_size_];
+    double *ref_input = new double[txfm_size_];
     double *ref_output = new double[txfm_size_];
 
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int count_test_block = 5000;
-    for (int ti =  0; ti < count_test_block; ++ti) {
+    for (int ti = 0; ti < count_test_block; ++ti) {
       for (int ni = 0; ni < txfm_size_; ++ni) {
         input[ni] = rnd.Rand8() - rnd.Rand8();
         ref_input[ni] = static_cast<double>(input[ni]);
@@ -84,9 +83,8 @@ class TransTestBase {
 };
 
 typedef std::tr1::tuple<FdctFunc, FdctFuncRef, int, int> FdctParam;
-class Vp10FwdTxfm
-    : public TransTestBase,
-      public ::testing::TestWithParam<FdctParam> {
+class Vp10FwdTxfm : public TransTestBase,
+                    public ::testing::TestWithParam<FdctParam> {
  public:
   virtual void SetUp() {
     fwd_txfm_ = GET_PARAM(0);
@@ -97,14 +95,11 @@ class Vp10FwdTxfm
   virtual void TearDown() {}
 };
 
-TEST_P(Vp10FwdTxfm, RunFwdAccuracyCheck) {
-  RunFwdAccuracyCheck();
-}
+TEST_P(Vp10FwdTxfm, RunFwdAccuracyCheck) { RunFwdAccuracyCheck(); }
 
 INSTANTIATE_TEST_CASE_P(
     C, Vp10FwdTxfm,
-    ::testing::Values(
-        FdctParam(&fdct4, &reference_dct_1d, 4, 1),
-        FdctParam(&fdct8, &reference_dct_1d, 8, 1),
-        FdctParam(&fdct16, &reference_dct_1d, 16, 2)));
+    ::testing::Values(FdctParam(&fdct4, &reference_dct_1d, 4, 1),
+                      FdctParam(&fdct8, &reference_dct_1d, 8, 1),
+                      FdctParam(&fdct16, &reference_dct_1d, 16, 2)));
 }  // namespace

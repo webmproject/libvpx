@@ -24,12 +24,9 @@ typedef void (*AddNoiseFunc)(unsigned char *start, char *noise,
                              char bothclamp[16], unsigned int width,
                              unsigned int height, int pitch);
 
-class AddNoiseTest
-    : public ::testing::TestWithParam<AddNoiseFunc> {
+class AddNoiseTest : public ::testing::TestWithParam<AddNoiseFunc> {
  public:
-  virtual void TearDown() {
-    libvpx_test::ClearSystemState();
-  }
+  virtual void TearDown() { libvpx_test::ClearSystemState(); }
   virtual ~AddNoiseTest() {}
 };
 
@@ -45,7 +42,7 @@ TEST_P(AddNoiseTest, CheckNoiseAdded) {
   DECLARE_ALIGNED(16, char, blackclamp[16]);
   DECLARE_ALIGNED(16, char, whiteclamp[16]);
   DECLARE_ALIGNED(16, char, bothclamp[16]);
-  const int width  = 64;
+  const int width = 64;
   const int height = 64;
   const int image_size = width * height;
   char noise[3072];
@@ -105,7 +102,7 @@ TEST_P(AddNoiseTest, CheckCvsAssembly) {
   DECLARE_ALIGNED(16, char, blackclamp[16]);
   DECLARE_ALIGNED(16, char, whiteclamp[16]);
   DECLARE_ALIGNED(16, char, bothclamp[16]);
-  const int width  = 64;
+  const int width = 64;
   const int height = 64;
   const int image_size = width * height;
   char noise[3072];
@@ -128,9 +125,8 @@ TEST_P(AddNoiseTest, CheckCvsAssembly) {
   ASM_REGISTER_STATE_CHECK(GetParam()(s, noise, blackclamp, whiteclamp,
                                       bothclamp, width, height, width));
   srand(0);
-  ASM_REGISTER_STATE_CHECK(vpx_plane_add_noise_c(d, noise, blackclamp,
-                                                 whiteclamp, bothclamp,
-                                                 width, height, width));
+  ASM_REGISTER_STATE_CHECK(vpx_plane_add_noise_c(
+      d, noise, blackclamp, whiteclamp, bothclamp, width, height, width));
 
   for (int i = 0; i < image_size; ++i) {
     EXPECT_EQ(static_cast<int>(s[i]), static_cast<int>(d[i])) << "i = " << i;
