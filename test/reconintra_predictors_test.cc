@@ -67,10 +67,9 @@ class VP10IntraPredOptimzTest : public ::testing::TestWithParam<PredParams> {
     mode_ = std::tr1::get<2>(funcMode);
     blockSize_ = GET_PARAM(1);
 
-    alloc_ = (uint8_t *)malloc((3 * MaxBlkSize + 2) * sizeof(alloc_[0]));
-    predRef_ =
-        (uint8_t *)malloc(MaxBlkSize * MaxBlkSize * sizeof(predRef_[0]));
-    pred_ = (uint8_t *)malloc(MaxBlkSize * MaxBlkSize * sizeof(pred_[0]));
+    alloc_ = new uint8_t[3 * MaxBlkSize + 2];
+    predRef_ = new uint8_t[MaxBlkSize * MaxBlkSize];
+    pred_ = new uint8_t[MaxBlkSize * MaxBlkSize];
   }
 
   virtual void TearDown() {
@@ -163,10 +162,9 @@ class VP10HbdIntraPredOptimzTest :
     blockSize_ = GET_PARAM(1);
     bd_ = GET_PARAM(2);
 
-    alloc_ = (uint16_t *)malloc((3 * MaxBlkSize + 2) * sizeof(alloc_[0]));
-    predRef_ =
-        (uint16_t *)malloc(MaxBlkSize * MaxBlkSize * sizeof(predRef_[0]));
-    pred_ = (uint16_t *)malloc(MaxBlkSize * MaxBlkSize * sizeof(pred_[0]));
+    alloc_ = new uint16_t[3 * MaxBlkSize + 2];
+    predRef_ = new uint16_t[MaxBlkSize * MaxBlkSize];
+    pred_ = new uint16_t[MaxBlkSize * MaxBlkSize];
   }
 
   virtual void TearDown() {
