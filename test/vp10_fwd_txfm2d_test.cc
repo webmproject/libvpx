@@ -53,13 +53,13 @@ class VP10FwdTxfm2d : public ::testing::TestWithParam<VP10FwdTxfm2dParam> {
     txfm2d_size_ = txfm1d_size_ * txfm1d_size_;
     get_txfm1d_type(tx_type_, &type0_, &type1_);
     input_ = reinterpret_cast<int16_t *>(
-        vpx_memalign(16, sizeof(int16_t) * txfm2d_size_));
+        vpx_memalign(16, sizeof(input_[0]) * txfm2d_size_));
     output_ = reinterpret_cast<int32_t *>(
-        vpx_memalign(16, sizeof(int32_t) * txfm2d_size_));
+        vpx_memalign(16, sizeof(output_[0]) * txfm2d_size_));
     ref_input_ = reinterpret_cast<double *>(
-        vpx_memalign(16, sizeof(double) * txfm2d_size_));
+        vpx_memalign(16, sizeof(ref_input_[0]) * txfm2d_size_));
     ref_output_ = reinterpret_cast<double *>(
-        vpx_memalign(16, sizeof(double) * txfm2d_size_));
+        vpx_memalign(16, sizeof(ref_output_[0]) * txfm2d_size_));
   }
 
   void RunFwdAccuracyCheck() {
