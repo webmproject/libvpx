@@ -2347,8 +2347,6 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
     vp9_setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL);
   }
 
-  vp9_set_mv_search_range(&x->mv_limits, &ref_mv);
-
   // Work out the size of the first step in the mv step search.
   // 0 here is maximum length first step. 1 is VPXMAX >> 1 etc.
   if (cpi->sf.mv.auto_mv_step_size && cm->show_frame) {
@@ -2395,6 +2393,10 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
       }
     }
   }
+
+  // Note: MV limits are modified here. Always restore the original values
+  // after full-pixel motion search.
+  vp9_set_mv_search_range(&x->mv_limits, &ref_mv);
 
   mvp_full = pred_mv[x->mv_best_ref_index[ref]];
 
