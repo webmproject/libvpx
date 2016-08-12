@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3eef6971_3469088c",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-12T05:45:01Z",
+      "side": 1,
+      "message": "not sure why this tree has a mix of _neon_asm.asm and _neon.asm/c. given they\u0027re mutually exclusive I think sharing the same basename is fine, like the rest of the loopfilter files already do",
+      "revId": "3f73b97806ad87c2e9722dca47b0ef63658a40df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
