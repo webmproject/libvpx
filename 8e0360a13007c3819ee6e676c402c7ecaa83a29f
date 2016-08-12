@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bee6f9fc_02cf8eb1",
+        "filename": "test/reconintra_predictors_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-12T17:39:59Z",
+      "side": 1,
+      "message": "try to avoid adding any more new code that uses this naming style, it\u0027s against this project\u0027s convention:\n\nhttps://google.github.io/styleguide/cppguide.html#Variable_Names",
+      "range": {
+        "startLine": 160,
+        "startChar": 4,
+        "endLine": 160,
+        "endChar": 16
+      },
+      "revId": "8e0360a13007c3819ee6e676c402c7ecaa83a29f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bee6f9fc_4248b635",
+        "filename": "test/reconintra_predictors_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-12T17:39:59Z",
+      "side": 1,
+      "message": "you should just use new here especially because you\u0027re mixing with delete below, which is a bad idea.",
+      "range": {
+        "startLine": 166,
+        "startChar": 25,
+        "endLine": 166,
+        "endChar": 31
+      },
+      "revId": "8e0360a13007c3819ee6e676c402c7ecaa83a29f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bee6f9fc_42e9960c",
+        "filename": "vp10/common/x86/reconintra_sse4.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 597,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-12T17:39:59Z",
+      "side": 1,
+      "message": "in c-code this project is using lower case + \u0027_\u0027 naming",
+      "range": {
+        "startLine": 597,
+        "startChar": 18,
+        "endLine": 597,
+        "endChar": 40
+      },
+      "revId": "8e0360a13007c3819ee6e676c402c7ecaa83a29f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bee6f9fc_a2d7ba4b",
+        "filename": "vp10/common/x86/reconintra_sse4.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 649,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-12T17:39:59Z",
+      "side": 1,
+      "message": "this alignment is off, but with the clang-format change coming it should become less of an issue that reviewers should notice",
+      "revId": "8e0360a13007c3819ee6e676c402c7ecaa83a29f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
