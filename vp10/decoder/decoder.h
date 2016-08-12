@@ -52,7 +52,7 @@ typedef struct TileBufferDec {
   size_t size;
   const uint8_t *raw_data_end;  // The end of the raw tile buffer in the
                                 // bit stream.
-  int col;  // only used with multi-threaded decoding
+  int col;                      // only used with multi-threaded decoding
 } TileBufferDec;
 
 typedef struct VP10Decoder {
@@ -66,9 +66,9 @@ typedef struct VP10Decoder {
 
   // TODO(hkuang): Combine this with cur_buf in macroblockd as they are
   // the same.
-  RefCntBuffer *cur_buf;   //  Current decoding frame buffer.
+  RefCntBuffer *cur_buf;  //  Current decoding frame buffer.
 
-  VPxWorker *frame_worker_owner;   // frame_worker that owns this pbi.
+  VPxWorker *frame_worker_owner;  // frame_worker that owns this pbi.
   VPxWorker lf_worker;
   VPxWorker *tile_workers;
   TileWorkerData *tile_worker_data;
@@ -87,7 +87,7 @@ typedef struct VP10Decoder {
 
   int max_threads;
   int inv_tile_order;
-  int need_resync;  // wait for key/intra-only frame.
+  int need_resync;   // wait for key/intra-only frame.
   int hold_ref_buf;  // hold the reference buffer.
 
   int tile_size_bytes;
@@ -97,24 +97,23 @@ typedef struct VP10Decoder {
 #endif  // CONFIG_EXT_TILE
 } VP10Decoder;
 
-int vp10_receive_compressed_data(struct VP10Decoder *pbi,
-                                size_t size, const uint8_t **dest);
+int vp10_receive_compressed_data(struct VP10Decoder *pbi, size_t size,
+                                 const uint8_t **dest);
 
 int vp10_get_raw_frame(struct VP10Decoder *pbi, YV12_BUFFER_CONFIG *sd);
 
 int vp10_get_frame_to_show(struct VP10Decoder *pbi, YV12_BUFFER_CONFIG *frame);
 
 vpx_codec_err_t vp10_copy_reference_dec(struct VP10Decoder *pbi,
+                                        VPX_REFFRAME ref_frame_flag,
+                                        YV12_BUFFER_CONFIG *sd);
+
+vpx_codec_err_t vp10_set_reference_dec(VP10_COMMON *cm,
                                        VPX_REFFRAME ref_frame_flag,
                                        YV12_BUFFER_CONFIG *sd);
 
-vpx_codec_err_t vp10_set_reference_dec(VP10_COMMON *cm,
-                                      VPX_REFFRAME ref_frame_flag,
-                                      YV12_BUFFER_CONFIG *sd);
-
 static INLINE uint8_t read_marker(vpx_decrypt_cb decrypt_cb,
-                                  void *decrypt_state,
-                                  const uint8_t *data) {
+                                  void *decrypt_state, const uint8_t *data) {
   if (decrypt_cb) {
     uint8_t marker;
     decrypt_cb(decrypt_state, data, &marker, 1);
@@ -125,11 +124,10 @@ static INLINE uint8_t read_marker(vpx_decrypt_cb decrypt_cb,
 
 // This function is exposed for use in tests, as well as the inlined function
 // "read_marker".
-vpx_codec_err_t vp10_parse_superframe_index(const uint8_t *data,
-                                           size_t data_sz,
-                                           uint32_t sizes[8], int *count,
-                                           vpx_decrypt_cb decrypt_cb,
-                                           void *decrypt_state);
+vpx_codec_err_t vp10_parse_superframe_index(const uint8_t *data, size_t data_sz,
+                                            uint32_t sizes[8], int *count,
+                                            vpx_decrypt_cb decrypt_cb,
+                                            void *decrypt_state);
 
 struct VP10Decoder *vp10_decoder_create(BufferPool *const pool);
 
@@ -158,8 +156,7 @@ static INLINE int dec_is_ref_frame_buf(VP10Decoder *const pbi,
   for (i = 0; i < INTER_REFS_PER_FRAME; ++i) {
     RefBuffer *const ref_frame = &cm->frame_refs[i];
     if (ref_frame->idx == INVALID_IDX) continue;
-    if (frame_buf == &cm->buffer_pool->frame_bufs[ref_frame->idx])
-      break;
+    if (frame_buf == &cm->buffer_pool->frame_bufs[ref_frame->idx]) break;
   }
   return (i < INTER_REFS_PER_FRAME);
 }

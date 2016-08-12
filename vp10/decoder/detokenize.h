@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP10_DECODER_DETOKENIZE_H_
 #define VP10_DECODER_DETOKENIZE_H_
 
@@ -22,11 +21,9 @@ extern "C" {
 
 void vp10_decode_palette_tokens(MACROBLOCKD *const xd, int plane,
                                 vp10_reader *r);
-int vp10_decode_block_tokens(MACROBLOCKD *const xd,
-                             int plane, const scan_order *sc,
-                             int x, int y,
-                             TX_SIZE tx_size,
-                             TX_TYPE tx_type,
+int vp10_decode_block_tokens(MACROBLOCKD *const xd, int plane,
+                             const scan_order *sc, int x, int y,
+                             TX_SIZE tx_size, TX_TYPE tx_type,
 #if CONFIG_ANS
                              struct AnsDecoder *const r,
 #else

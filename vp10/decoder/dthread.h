@@ -57,7 +57,7 @@ void vp10_frameworker_signal_stats(VPxWorker *const worker);
 // start decoding next frame. So need to check whether worker is still decoding
 // ref_buf.
 void vp10_frameworker_wait(VPxWorker *const worker, RefCntBuffer *const ref_buf,
-                          int row);
+                           int row);
 
 // FrameWorker broadcasts its decoding progress so other workers that are
 // waiting on it can resume decoding.
@@ -65,10 +65,10 @@ void vp10_frameworker_broadcast(RefCntBuffer *const buf, int row);
 
 // Copy necessary decoding context from src worker to dst worker.
 void vp10_frameworker_copy_context(VPxWorker *const dst_worker,
-                                  VPxWorker *const src_worker);
+                                   VPxWorker *const src_worker);
 
 #ifdef __cplusplus
-}    // extern "C"
+}  // extern "C"
 #endif
 
 #endif  // VP10_DECODER_DTHREAD_H_
