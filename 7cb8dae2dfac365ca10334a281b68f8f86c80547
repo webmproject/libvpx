@@ -34,6 +34,24 @@
       "revId": "7cb8dae2dfac365ca10334a281b68f8f86c80547",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bee6f9fc_05cf98b1",
+        "filename": "vpx_dsp/x86/variance_impl_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-12T18:53:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bee6f9fc_857f2872",
+      "revId": "7cb8dae2dfac365ca10334a281b68f8f86c80547",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
