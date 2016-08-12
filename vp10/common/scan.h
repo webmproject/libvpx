@@ -35,7 +35,8 @@ extern const scan_order vp10_intra_scan_orders[TX_SIZES][TX_TYPES];
 static INLINE int get_coef_context(const int16_t *neighbors,
                                    const uint8_t *token_cache, int c) {
   return (1 + token_cache[neighbors[MAX_NEIGHBORS * c + 0]] +
-          token_cache[neighbors[MAX_NEIGHBORS * c + 1]]) >> 1;
+          token_cache[neighbors[MAX_NEIGHBORS * c + 1]]) >>
+         1;
 }
 
 static INLINE const scan_order *get_intra_scan(TX_SIZE tx_size,
@@ -52,15 +53,13 @@ static INLINE const scan_order *get_inter_scan(TX_SIZE tx_size,
 }
 #endif  // CONFIG_EXT_TX
 
-static INLINE const scan_order *get_scan(TX_SIZE tx_size,
-                                         TX_TYPE tx_type,
+static INLINE const scan_order *get_scan(TX_SIZE tx_size, TX_TYPE tx_type,
                                          int is_inter) {
 #if CONFIG_EXT_TX
-  return
-      is_inter ? &vp10_inter_scan_orders[tx_size][tx_type] :
-                 &vp10_intra_scan_orders[tx_size][tx_type];
+  return is_inter ? &vp10_inter_scan_orders[tx_size][tx_type]
+                  : &vp10_intra_scan_orders[tx_size][tx_type];
 #else
-  (void) is_inter;
+  (void)is_inter;
   return &vp10_intra_scan_orders[tx_size][tx_type];
 #endif  // CONFIG_EXT_TX
 }

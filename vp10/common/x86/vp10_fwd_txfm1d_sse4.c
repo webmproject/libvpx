@@ -1,10 +1,10 @@
 #include "vp10/common/x86/vp10_txfm1d_sse4.h"
 
-void vp10_fdct4_new_sse4_1(const __m128i* input, __m128i* output,
-                           const int8_t* cos_bit, const int8_t* stage_range) {
+void vp10_fdct4_new_sse4_1(const __m128i *input, __m128i *output,
+                           const int8_t *cos_bit, const int8_t *stage_range) {
   const int txfm_size = 4;
   const int num_per_128 = 4;
-  const int32_t* cospi;
+  const int32_t *cospi;
   __m128i buf0[4];
   __m128i buf1[4];
   int col_num = txfm_size / num_per_128;
@@ -53,11 +53,11 @@ void vp10_fdct4_new_sse4_1(const __m128i* input, __m128i* output,
   }
 }
 
-void vp10_fdct8_new_sse4_1(const __m128i* input, __m128i* output,
-                           const int8_t* cos_bit, const int8_t* stage_range) {
+void vp10_fdct8_new_sse4_1(const __m128i *input, __m128i *output,
+                           const int8_t *cos_bit, const int8_t *stage_range) {
   const int txfm_size = 8;
   const int num_per_128 = 4;
-  const int32_t* cospi;
+  const int32_t *cospi;
   __m128i buf0[8];
   __m128i buf1[8];
   int col_num = txfm_size / num_per_128;
@@ -152,11 +152,11 @@ void vp10_fdct8_new_sse4_1(const __m128i* input, __m128i* output,
   }
 }
 
-void vp10_fdct16_new_sse4_1(const __m128i* input, __m128i* output,
-                            const int8_t* cos_bit, const int8_t* stage_range) {
+void vp10_fdct16_new_sse4_1(const __m128i *input, __m128i *output,
+                            const int8_t *cos_bit, const int8_t *stage_range) {
   const int txfm_size = 16;
   const int num_per_128 = 4;
-  const int32_t* cospi;
+  const int32_t *cospi;
   __m128i buf0[16];
   __m128i buf1[16];
   int col_num = txfm_size / num_per_128;
@@ -349,11 +349,11 @@ void vp10_fdct16_new_sse4_1(const __m128i* input, __m128i* output,
   }
 }
 
-void vp10_fdct32_new_sse4_1(const __m128i* input, __m128i* output,
-                            const int8_t* cos_bit, const int8_t* stage_range) {
+void vp10_fdct32_new_sse4_1(const __m128i *input, __m128i *output,
+                            const int8_t *cos_bit, const int8_t *stage_range) {
   const int txfm_size = 32;
   const int num_per_128 = 4;
-  const int32_t* cospi;
+  const int32_t *cospi;
   __m128i buf0[32];
   __m128i buf1[32];
   int col_num = txfm_size / num_per_128;
@@ -764,11 +764,11 @@ void vp10_fdct32_new_sse4_1(const __m128i* input, __m128i* output,
   }
 }
 
-void vp10_fadst4_new_sse4_1(const __m128i* input, __m128i* output,
-                            const int8_t* cos_bit, const int8_t* stage_range) {
+void vp10_fadst4_new_sse4_1(const __m128i *input, __m128i *output,
+                            const int8_t *cos_bit, const int8_t *stage_range) {
   const int txfm_size = 4;
   const int num_per_128 = 4;
-  const int32_t* cospi;
+  const int32_t *cospi;
   __m128i buf0[4];
   __m128i buf1[4];
   int col_num = txfm_size / num_per_128;
@@ -835,11 +835,11 @@ void vp10_fadst4_new_sse4_1(const __m128i* input, __m128i* output,
   }
 }
 
-void vp10_fadst8_new_sse4_1(const __m128i* input, __m128i* output,
-                            const int8_t* cos_bit, const int8_t* stage_range) {
+void vp10_fadst8_new_sse4_1(const __m128i *input, __m128i *output,
+                            const int8_t *cos_bit, const int8_t *stage_range) {
   const int txfm_size = 8;
   const int num_per_128 = 4;
-  const int32_t* cospi;
+  const int32_t *cospi;
   __m128i buf0[8];
   __m128i buf1[8];
   int col_num = txfm_size / num_per_128;
@@ -960,11 +960,11 @@ void vp10_fadst8_new_sse4_1(const __m128i* input, __m128i* output,
   }
 }
 
-void vp10_fadst16_new_sse4_1(const __m128i* input, __m128i* output,
-                             const int8_t* cos_bit, const int8_t* stage_range) {
+void vp10_fadst16_new_sse4_1(const __m128i *input, __m128i *output,
+                             const int8_t *cos_bit, const int8_t *stage_range) {
   const int txfm_size = 16;
   const int num_per_128 = 4;
-  const int32_t* cospi;
+  const int32_t *cospi;
   __m128i buf0[16];
   __m128i buf1[16];
   int col_num = txfm_size / num_per_128;
@@ -1199,11 +1199,11 @@ void vp10_fadst16_new_sse4_1(const __m128i* input, __m128i* output,
   }
 }
 
-void vp10_fadst32_new_sse4_1(const __m128i* input, __m128i* output,
-                             const int8_t* cos_bit, const int8_t* stage_range) {
+void vp10_fadst32_new_sse4_1(const __m128i *input, __m128i *output,
+                             const int8_t *cos_bit, const int8_t *stage_range) {
   const int txfm_size = 32;
   const int num_per_128 = 4;
-  const int32_t* cospi;
+  const int32_t *cospi;
   __m128i buf0[32];
   __m128i buf1[32];
   int col_num = txfm_size / num_per_128;
@@ -1688,11 +1688,11 @@ void vp10_fadst32_new_sse4_1(const __m128i* input, __m128i* output,
   }
 }
 
-void vp10_fdct64_new_sse4_1(const __m128i* input, __m128i* output,
-                            const int8_t* cos_bit, const int8_t* stage_range) {
+void vp10_fdct64_new_sse4_1(const __m128i *input, __m128i *output,
+                            const int8_t *cos_bit, const int8_t *stage_range) {
   const int txfm_size = 64;
   const int num_per_128 = 4;
-  const int32_t* cospi;
+  const int32_t *cospi;
   __m128i buf0[64];
   __m128i buf1[64];
   int col_num = txfm_size / num_per_128;

@@ -29,8 +29,7 @@ static INLINE void mutex_lock(pthread_mutex_t *const mutex) {
     }
   }
 
-  if (!locked)
-    pthread_mutex_lock(mutex);
+  if (!locked) pthread_mutex_lock(mutex);
 }
 #endif  // CONFIG_MULTITHREAD
 
@@ -64,8 +63,7 @@ static INLINE void sync_write(VP10LfSync *const lf_sync, int r, int c,
 
   if (c < sb_cols - 1) {
     cur = c;
-    if (c % nsync)
-      sig = 0;
+    if (c % nsync) sig = 0;
   } else {
     cur = sb_cols + nsync;
   }
@@ -87,12 +85,10 @@ static INLINE void sync_write(VP10LfSync *const lf_sync, int r, int c,
 }
 
 // Implement row loopfiltering for each thread.
-static INLINE
-void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
-                             VP10_COMMON *const cm,
-                             struct macroblockd_plane planes[MAX_MB_PLANE],
-                             int start, int stop, int y_only,
-                             VP10LfSync *const lf_sync) {
+static INLINE void thread_loop_filter_rows(
+    const YV12_BUFFER_CONFIG *const frame_buffer, VP10_COMMON *const cm,
+    struct macroblockd_plane planes[MAX_MB_PLANE], int start, int stop,
+    int y_only, VP10LfSync *const lf_sync) {
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
   const int sb_cols = mi_cols_aligned_to_sb(cm) >> cm->mib_size_log2;
   int mi_row, mi_col;
@@ -110,8 +106,9 @@ void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
 #endif  // !CONFIG_EXT_PARTITION_TYPES
 
 #if CONFIG_EXT_PARTITION
-  printf("STOPPING: This code has not been modified to work with the "
-         "extended coding unit size experiment");
+  printf(
+      "STOPPING: This code has not been modified to work with the "
+      "extended coding unit size experiment");
   exit(EXIT_FAILURE);
 #endif  // CONFIG_EXT_PARTITION
 
@@ -130,12 +127,11 @@ void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
 
 #if CONFIG_EXT_PARTITION_TYPES
       for (plane = 0; plane < num_planes; ++plane)
-        vp10_filter_block_plane_non420(cm, &planes[plane], mi + mi_col,
-                                       mi_row, mi_col);
+        vp10_filter_block_plane_non420(cm, &planes[plane], mi + mi_col, mi_row,
+                                       mi_col);
 #else
       // TODO(JBB): Make setup_mask work for non 420.
-      vp10_setup_mask(cm, mi_row, mi_col, mi + mi_col, cm->mi_stride,
-                     &lfm);
+      vp10_setup_mask(cm, mi_row, mi_col, mi + mi_col, cm->mi_stride, &lfm);
 
       vp10_filter_block_plane_ss00(cm, &planes[0], mi_row, &lfm);
       for (plane = 1; plane < num_planes; ++plane) {
@@ -148,7 +144,7 @@ void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
             break;
           case LF_PATH_SLOW:
             vp10_filter_block_plane_non420(cm, &planes[plane], mi + mi_col,
-                                          mi_row, mi_col);
+                                           mi_row, mi_col);
             break;
         }
       }
@@ -167,8 +163,7 @@ static int loop_filter_row_worker(VP10LfSync *const lf_sync,
   return 1;
 }
 
-static void loop_filter_rows_mt(YV12_BUFFER_CONFIG *frame,
-                                VP10_COMMON *cm,
+static void loop_filter_rows_mt(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
                                 struct macroblockd_plane planes[MAX_MB_PLANE],
                                 int start, int stop, int y_only,
                                 VPxWorker *workers, int nworkers,
@@ -183,9 +178,10 @@ static void loop_filter_rows_mt(YV12_BUFFER_CONFIG *frame,
   int i;
 
 #if CONFIG_EXT_PARTITION
-      printf("STOPPING: This code has not been modified to work with the "
-             "extended coding unit size experiment");
-      exit(EXIT_FAILURE);
+  printf(
+      "STOPPING: This code has not been modified to work with the "
+      "extended coding unit size experiment");
+  exit(EXIT_FAILURE);
 #endif  // CONFIG_EXT_PARTITION
 
   if (!lf_sync->sync_range || sb_rows != lf_sync->rows ||
@@ -233,13 +229,11 @@ static void loop_filter_rows_mt(YV12_BUFFER_CONFIG *frame,
   }
 }
 
-void vp10_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
-                              VP10_COMMON *cm,
-                              struct macroblockd_plane planes[MAX_MB_PLANE],
-                              int frame_filter_level,
-                              int y_only, int partial_frame,
-                              VPxWorker *workers, int num_workers,
-                              VP10LfSync *lf_sync) {
+void vp10_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
+                               struct macroblockd_plane planes[MAX_MB_PLANE],
+                               int frame_filter_level, int y_only,
+                               int partial_frame, VPxWorker *workers,
+                               int num_workers, VP10LfSync *lf_sync) {
   int start_mi_row, end_mi_row, mi_rows_to_filter;
 
   if (!frame_filter_level) return;
@@ -254,8 +248,8 @@ void vp10_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
   end_mi_row = start_mi_row + mi_rows_to_filter;
   vp10_loop_filter_frame_init(cm, frame_filter_level);
 
-  loop_filter_rows_mt(frame, cm, planes, start_mi_row, end_mi_row,
-                      y_only, workers, num_workers, lf_sync);
+  loop_filter_rows_mt(frame, cm, planes, start_mi_row, end_mi_row, y_only,
+                      workers, num_workers, lf_sync);
 }
 
 // Set up nsync by width.
@@ -274,7 +268,7 @@ static INLINE int get_sync_range(int width) {
 
 // Allocate memory for lf row synchronization
 void vp10_loop_filter_alloc(VP10LfSync *lf_sync, VP10_COMMON *cm, int rows,
-                           int width, int num_workers) {
+                            int width, int num_workers) {
   lf_sync->rows = rows;
 #if CONFIG_MULTITHREAD
   {
@@ -339,12 +333,11 @@ void vp10_loop_filter_dealloc(VP10LfSync *lf_sync) {
 // Accumulate frame counts. FRAME_COUNTS consist solely of 'unsigned int'
 // members, so we treat it as an array, and sum over the whole length.
 void vp10_accumulate_frame_counts(VP10_COMMON *cm, FRAME_COUNTS *counts) {
-  unsigned int *const acc = (unsigned int*)&cm->counts;
-  const unsigned int *const cnt = (unsigned int*)counts;
+  unsigned int *const acc = (unsigned int *)&cm->counts;
+  const unsigned int *const cnt = (unsigned int *)counts;
 
-  const unsigned int n_counts = sizeof(FRAME_COUNTS)/sizeof(unsigned int);
+  const unsigned int n_counts = sizeof(FRAME_COUNTS) / sizeof(unsigned int);
   unsigned int i;
 
-  for (i = 0; i < n_counts; i++)
-    acc[i] += cnt[i];
+  for (i = 0; i < n_counts; i++) acc[i] += cnt[i];
 }

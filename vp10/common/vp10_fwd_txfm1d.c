@@ -15,8 +15,8 @@
   {                                                                       \
     int i, j;                                                             \
     for (i = 0; i < size; ++i) {                                          \
-        int buf_bit = get_max_bit(abs(buf[i])) + 1;                       \
-        if (buf_bit > bit) {                                              \
+      int buf_bit = get_max_bit(abs(buf[i])) + 1;                         \
+      if (buf_bit > bit) {                                                \
         printf("======== %s overflow ========\n", __func__);              \
         printf("stage: %d node: %d\n", stage, i);                         \
         printf("bit: %d buf_bit: %d buf[i]: %d\n", bit, buf_bit, buf[i]); \
@@ -32,11 +32,11 @@
 #else
 #define range_check(stage, input, buf, size, bit) \
   {                                               \
-    (void)stage;                                  \
-    (void)input;                                  \
-    (void)buf;                                    \
-    (void)size;                                   \
-    (void)bit;                                    \
+    (void) stage;                                 \
+    (void) input;                                 \
+    (void) buf;                                   \
+    (void) size;                                  \
+    (void) bit;                                   \
   }
 #endif
 

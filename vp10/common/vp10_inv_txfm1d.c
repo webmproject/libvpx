@@ -32,11 +32,11 @@
 #else
 #define range_check(stage, input, buf, size, bit) \
   {                                               \
-    (void)stage;                                  \
-    (void)input;                                  \
-    (void)buf;                                    \
-    (void)size;                                   \
-    (void)bit;                                    \
+    (void) stage;                                 \
+    (void) input;                                 \
+    (void) buf;                                   \
+    (void) size;                                  \
+    (void) bit;                                   \
   }
 #endif
 

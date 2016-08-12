@@ -16,8 +16,8 @@
 #include "vp10/common/vp10_inv_txfm.h"
 
 void vp10_iwht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
-/* 4-point reversible, orthonormal inverse Walsh-Hadamard in 3.5 adds,
-   0.5 shifts per pixel. */
+  /* 4-point reversible, orthonormal inverse Walsh-Hadamard in 3.5 adds,
+     0.5 shifts per pixel. */
   int i;
   tran_low_t output[16];
   tran_high_t a1, b1, c1, d1, e1;
@@ -67,8 +67,7 @@ void vp10_iwht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   }
 }
 
-void vp10_iwht4x4_1_add_c(const tran_low_t *in,
-                          uint8_t *dest,
+void vp10_iwht4x4_1_add_c(const tran_low_t *in, uint8_t *dest,
                           int dest_stride) {
   int i;
   tran_high_t a1, e1;
@@ -130,8 +129,7 @@ void vp10_idct4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
 
   // Columns
   for (i = 0; i < 4; ++i) {
-    for (j = 0; j < 4; ++j)
-      temp_in[j] = out[j * 4 + i];
+    for (j = 0; j < 4; ++j) temp_in[j] = out[j * 4 + i];
     vp10_idct4_c(temp_in, temp_out);
     for (j = 0; j < 4; ++j) {
       dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
@@ -141,7 +139,7 @@ void vp10_idct4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
 }
 
 void vp10_idct4x4_1_add_c(const tran_low_t *input, uint8_t *dest,
-                         int dest_stride) {
+                          int dest_stride) {
   int i;
   tran_high_t a1;
   tran_low_t out = WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64));
@@ -226,8 +224,7 @@ void vp10_idct8x8_64_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
 
   // Then transform columns
   for (i = 0; i < 8; ++i) {
-    for (j = 0; j < 8; ++j)
-      temp_in[j] = out[j * 8 + i];
+    for (j = 0; j < 8; ++j) temp_in[j] = out[j * 8 + i];
     vp10_idct8_c(temp_in, temp_out);
     for (j = 0; j < 8; ++j) {
       dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
@@ -243,8 +240,7 @@ void vp10_idct8x8_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   out = WRAPLOW(dct_const_round_shift(out * cospi_16_64));
   a1 = ROUND_POWER_OF_TWO(out, 5);
   for (j = 0; j < 8; ++j) {
-    for (i = 0; i < 8; ++i)
-      dest[i] = clip_pixel_add(dest[i], a1);
+    for (i = 0; i < 8; ++i) dest[i] = clip_pixel_add(dest[i], a1);
     dest += stride;
   }
 }
@@ -299,20 +295,20 @@ void vp10_iadst8_c(const tran_low_t *input, tran_low_t *output) {
   tran_high_t x7 = input[6];
 
   if (!(x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7)) {
-    output[0] = output[1] = output[2] = output[3] = output[4]
-              = output[5] = output[6] = output[7] = 0;
+    output[0] = output[1] = output[2] = output[3] = output[4] = output[5] =
+        output[6] = output[7] = 0;
     return;
   }
 
   // stage 1
-  s0 = (int)(cospi_2_64  * x0 + cospi_30_64 * x1);
-  s1 = (int)(cospi_30_64 * x0 - cospi_2_64  * x1);
+  s0 = (int)(cospi_2_64 * x0 + cospi_30_64 * x1);
+  s1 = (int)(cospi_30_64 * x0 - cospi_2_64 * x1);
   s2 = (int)(cospi_10_64 * x2 + cospi_22_64 * x3);
   s3 = (int)(cospi_22_64 * x2 - cospi_10_64 * x3);
   s4 = (int)(cospi_18_64 * x4 + cospi_14_64 * x5);
   s5 = (int)(cospi_14_64 * x4 - cospi_18_64 * x5);
-  s6 = (int)(cospi_26_64 * x6 + cospi_6_64  * x7);
-  s7 = (int)(cospi_6_64  * x6 - cospi_26_64 * x7);
+  s6 = (int)(cospi_26_64 * x6 + cospi_6_64 * x7);
+  s7 = (int)(cospi_6_64 * x6 - cospi_26_64 * x7);
 
   x0 = WRAPLOW(dct_const_round_shift(s0 + s4));
   x1 = WRAPLOW(dct_const_round_shift(s1 + s5));
@@ -379,8 +375,7 @@ void vp10_idct8x8_12_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
 
   // Then transform columns
   for (i = 0; i < 8; ++i) {
-    for (j = 0; j < 8; ++j)
-      temp_in[j] = out[j * 8 + i];
+    for (j = 0; j < 8; ++j) temp_in[j] = out[j * 8 + i];
     vp10_idct8_c(temp_in, temp_out);
     for (j = 0; j < 8; ++j) {
       dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
@@ -394,22 +389,22 @@ void vp10_idct16_c(const tran_low_t *input, tran_low_t *output) {
   tran_high_t temp1, temp2;
 
   // stage 1
-  step1[0] = input[0/2];
-  step1[1] = input[16/2];
-  step1[2] = input[8/2];
-  step1[3] = input[24/2];
-  step1[4] = input[4/2];
-  step1[5] = input[20/2];
-  step1[6] = input[12/2];
-  step1[7] = input[28/2];
-  step1[8] = input[2/2];
-  step1[9] = input[18/2];
-  step1[10] = input[10/2];
-  step1[11] = input[26/2];
-  step1[12] = input[6/2];
-  step1[13] = input[22/2];
-  step1[14] = input[14/2];
-  step1[15] = input[30/2];
+  step1[0] = input[0 / 2];
+  step1[1] = input[16 / 2];
+  step1[2] = input[8 / 2];
+  step1[3] = input[24 / 2];
+  step1[4] = input[4 / 2];
+  step1[5] = input[20 / 2];
+  step1[6] = input[12 / 2];
+  step1[7] = input[28 / 2];
+  step1[8] = input[2 / 2];
+  step1[9] = input[18 / 2];
+  step1[10] = input[10 / 2];
+  step1[11] = input[26 / 2];
+  step1[12] = input[6 / 2];
+  step1[13] = input[22 / 2];
+  step1[14] = input[14 / 2];
+  step1[15] = input[30 / 2];
 
   // stage 2
   step2[0] = step1[0];
@@ -555,7 +550,7 @@ void vp10_idct16_c(const tran_low_t *input, tran_low_t *output) {
 }
 
 void vp10_idct16x16_256_add_c(const tran_low_t *input, uint8_t *dest,
-                             int stride) {
+                              int stride) {
   tran_low_t out[16 * 16];
   tran_low_t *outptr = out;
   int i, j;
@@ -570,8 +565,7 @@ void vp10_idct16x16_256_add_c(const tran_low_t *input, uint8_t *dest,
 
   // Then transform columns
   for (i = 0; i < 16; ++i) {
-    for (j = 0; j < 16; ++j)
-      temp_in[j] = out[j * 16 + i];
+    for (j = 0; j < 16; ++j) temp_in[j] = out[j * 16 + i];
     vp10_idct16_c(temp_in, temp_out);
     for (j = 0; j < 16; ++j) {
       dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
@@ -601,21 +595,20 @@ void vp10_iadst16_c(const tran_low_t *input, tran_low_t *output) {
   tran_high_t x14 = input[1];
   tran_high_t x15 = input[14];
 
-  if (!(x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7 | x8
-           | x9 | x10 | x11 | x12 | x13 | x14 | x15)) {
-    output[0] = output[1] = output[2] = output[3] = output[4]
-              = output[5] = output[6] = output[7] = output[8]
-              = output[9] = output[10] = output[11] = output[12]
-              = output[13] = output[14] = output[15] = 0;
+  if (!(x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7 | x8 | x9 | x10 | x11 | x12 |
+        x13 | x14 | x15)) {
+    output[0] = output[1] = output[2] = output[3] = output[4] = output[5] =
+        output[6] = output[7] = output[8] = output[9] = output[10] =
+            output[11] = output[12] = output[13] = output[14] = output[15] = 0;
     return;
   }
 
   // stage 1
-  s0 = x0 * cospi_1_64  + x1 * cospi_31_64;
+  s0 = x0 * cospi_1_64 + x1 * cospi_31_64;
   s1 = x0 * cospi_31_64 - x1 * cospi_1_64;
-  s2 = x2 * cospi_5_64  + x3 * cospi_27_64;
+  s2 = x2 * cospi_5_64 + x3 * cospi_27_64;
   s3 = x2 * cospi_27_64 - x3 * cospi_5_64;
-  s4 = x4 * cospi_9_64  + x5 * cospi_23_64;
+  s4 = x4 * cospi_9_64 + x5 * cospi_23_64;
   s5 = x4 * cospi_23_64 - x5 * cospi_9_64;
   s6 = x6 * cospi_13_64 + x7 * cospi_19_64;
   s7 = x6 * cospi_19_64 - x7 * cospi_13_64;
@@ -624,9 +617,9 @@ void vp10_iadst16_c(const tran_low_t *input, tran_low_t *output) {
   s10 = x10 * cospi_21_64 + x11 * cospi_11_64;
   s11 = x10 * cospi_11_64 - x11 * cospi_21_64;
   s12 = x12 * cospi_25_64 + x13 * cospi_7_64;
-  s13 = x12 * cospi_7_64  - x13 * cospi_25_64;
+  s13 = x12 * cospi_7_64 - x13 * cospi_25_64;
   s14 = x14 * cospi_29_64 + x15 * cospi_3_64;
-  s15 = x14 * cospi_3_64  - x15 * cospi_29_64;
+  s15 = x14 * cospi_3_64 - x15 * cospi_29_64;
 
   x0 = WRAPLOW(dct_const_round_shift(s0 + s8));
   x1 = WRAPLOW(dct_const_round_shift(s1 + s9));
@@ -654,14 +647,14 @@ void vp10_iadst16_c(const tran_low_t *input, tran_low_t *output) {
   s5 = x5;
   s6 = x6;
   s7 = x7;
-  s8 =    x8 * cospi_4_64   + x9 * cospi_28_64;
-  s9 =    x8 * cospi_28_64  - x9 * cospi_4_64;
-  s10 =   x10 * cospi_20_64 + x11 * cospi_12_64;
-  s11 =   x10 * cospi_12_64 - x11 * cospi_20_64;
-  s12 = - x12 * cospi_28_64 + x13 * cospi_4_64;
-  s13 =   x12 * cospi_4_64  + x13 * cospi_28_64;
-  s14 = - x14 * cospi_12_64 + x15 * cospi_20_64;
-  s15 =   x14 * cospi_20_64 + x15 * cospi_12_64;
+  s8 = x8 * cospi_4_64 + x9 * cospi_28_64;
+  s9 = x8 * cospi_28_64 - x9 * cospi_4_64;
+  s10 = x10 * cospi_20_64 + x11 * cospi_12_64;
+  s11 = x10 * cospi_12_64 - x11 * cospi_20_64;
+  s12 = -x12 * cospi_28_64 + x13 * cospi_4_64;
+  s13 = x12 * cospi_4_64 + x13 * cospi_28_64;
+  s14 = -x14 * cospi_12_64 + x15 * cospi_20_64;
+  s15 = x14 * cospi_20_64 + x15 * cospi_12_64;
 
   x0 = WRAPLOW(s0 + s4);
   x1 = WRAPLOW(s1 + s5);
@@ -685,18 +678,18 @@ void vp10_iadst16_c(const tran_low_t *input, tran_low_t *output) {
   s1 = x1;
   s2 = x2;
   s3 = x3;
-  s4 = x4 * cospi_8_64  + x5 * cospi_24_64;
+  s4 = x4 * cospi_8_64 + x5 * cospi_24_64;
   s5 = x4 * cospi_24_64 - x5 * cospi_8_64;
-  s6 = - x6 * cospi_24_64 + x7 * cospi_8_64;
-  s7 =   x6 * cospi_8_64  + x7 * cospi_24_64;
+  s6 = -x6 * cospi_24_64 + x7 * cospi_8_64;
+  s7 = x6 * cospi_8_64 + x7 * cospi_24_64;
   s8 = x8;
   s9 = x9;
   s10 = x10;
   s11 = x11;
-  s12 = x12 * cospi_8_64  + x13 * cospi_24_64;
+  s12 = x12 * cospi_8_64 + x13 * cospi_24_64;
   s13 = x12 * cospi_24_64 - x13 * cospi_8_64;
-  s14 = - x14 * cospi_24_64 + x15 * cospi_8_64;
-  s15 =   x14 * cospi_8_64  + x15 * cospi_24_64;
+  s14 = -x14 * cospi_24_64 + x15 * cospi_8_64;
+  s15 = x14 * cospi_8_64 + x15 * cospi_24_64;
 
   x0 = WRAPLOW(s0 + s2);
   x1 = WRAPLOW(s1 + s3);
@@ -716,13 +709,13 @@ void vp10_iadst16_c(const tran_low_t *input, tran_low_t *output) {
   x15 = WRAPLOW(dct_const_round_shift(s13 - s15));
 
   // stage 4
-  s2 = (- cospi_16_64) * (x2 + x3);
+  s2 = (-cospi_16_64) * (x2 + x3);
   s3 = cospi_16_64 * (x2 - x3);
   s6 = cospi_16_64 * (x6 + x7);
-  s7 = cospi_16_64 * (- x6 + x7);
+  s7 = cospi_16_64 * (-x6 + x7);
   s10 = cospi_16_64 * (x10 + x11);
-  s11 = cospi_16_64 * (- x10 + x11);
-  s14 = (- cospi_16_64) * (x14 + x15);
+  s11 = cospi_16_64 * (-x10 + x11);
+  s14 = (-cospi_16_64) * (x14 + x15);
   s15 = cospi_16_64 * (x14 - x15);
 
   x2 = WRAPLOW(dct_const_round_shift(s2));
@@ -753,7 +746,7 @@ void vp10_iadst16_c(const tran_low_t *input, tran_low_t *output) {
 }
 
 void vp10_idct16x16_10_add_c(const tran_low_t *input, uint8_t *dest,
-                            int stride) {
+                             int stride) {
   tran_low_t out[16 * 16] = { 0 };
   tran_low_t *outptr = out;
   int i, j;
@@ -769,19 +762,16 @@ void vp10_idct16x16_10_add_c(const tran_low_t *input, uint8_t *dest,
 
   // Then transform columns
   for (i = 0; i < 16; ++i) {
-    for (j = 0; j < 16; ++j)
-      temp_in[j] = out[j*16 + i];
+    for (j = 0; j < 16; ++j) temp_in[j] = out[j * 16 + i];
     vp10_idct16_c(temp_in, temp_out);
     for (j = 0; j < 16; ++j) {
-      dest[j * stride + i] = clip_pixel_add(
-          dest[j * stride + i],
-          ROUND_POWER_OF_TWO(temp_out[j], 6));
+      dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                            ROUND_POWER_OF_TWO(temp_out[j], 6));
     }
   }
 }
 
-void vp10_idct16x16_1_add_c(const tran_low_t *input,
-                            uint8_t *dest,
+void vp10_idct16x16_1_add_c(const tran_low_t *input, uint8_t *dest,
                             int stride) {
   int i, j;
   tran_high_t a1;
@@ -789,8 +779,7 @@ void vp10_idct16x16_1_add_c(const tran_low_t *input,
   out = WRAPLOW(dct_const_round_shift(out * cospi_16_64));
   a1 = ROUND_POWER_OF_TWO(out, 6);
   for (j = 0; j < 16; ++j) {
-    for (i = 0; i < 16; ++i)
-      dest[i] = clip_pixel_add(dest[i], a1);
+    for (i = 0; i < 16; ++i) dest[i] = clip_pixel_add(dest[i], a1);
     dest += stride;
   }
 }
@@ -1163,7 +1152,7 @@ void vp10_idct32_c(const tran_low_t *input, tran_low_t *output) {
 }
 
 void vp10_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest,
-                              int stride) {
+                               int stride) {
   tran_low_t out[32 * 32];
   tran_low_t *outptr = out;
   int i, j;
@@ -1172,8 +1161,7 @@ void vp10_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest,
   // Rows
   for (i = 0; i < 32; ++i) {
     int16_t zero_coeff[16];
-    for (j = 0; j < 16; ++j)
-      zero_coeff[j] = input[2 * j] | input[2 * j + 1];
+    for (j = 0; j < 16; ++j) zero_coeff[j] = input[2 * j] | input[2 * j + 1];
     for (j = 0; j < 8; ++j)
       zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
     for (j = 0; j < 4; ++j)
@@ -1191,8 +1179,7 @@ void vp10_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest,
 
   // Columns
   for (i = 0; i < 32; ++i) {
-    for (j = 0; j < 32; ++j)
-      temp_in[j] = out[j * 32 + i];
+    for (j = 0; j < 32; ++j) temp_in[j] = out[j * 32 + i];
     vp10_idct32_c(temp_in, temp_out);
     for (j = 0; j < 32; ++j) {
       dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
@@ -1202,8 +1189,8 @@ void vp10_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest,
 }
 
 void vp10_idct32x32_34_add_c(const tran_low_t *input, uint8_t *dest,
-                            int stride) {
-  tran_low_t out[32 * 32] = {0};
+                             int stride) {
+  tran_low_t out[32 * 32] = { 0 };
   tran_low_t *outptr = out;
   int i, j;
   tran_low_t temp_in[32], temp_out[32];
@@ -1218,19 +1205,16 @@ void vp10_idct32x32_34_add_c(const tran_low_t *input, uint8_t *dest,
 
   // Columns
   for (i = 0; i < 32; ++i) {
-    for (j = 0; j < 32; ++j)
-      temp_in[j] = out[j * 32 + i];
+    for (j = 0; j < 32; ++j) temp_in[j] = out[j * 32 + i];
     vp10_idct32_c(temp_in, temp_out);
     for (j = 0; j < 32; ++j) {
-      dest[j * stride + i] = clip_pixel_add(
-          dest[j * stride + i],
-          ROUND_POWER_OF_TWO(temp_out[j], 6));
+      dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                            ROUND_POWER_OF_TWO(temp_out[j], 6));
     }
   }
 }
 
-void vp10_idct32x32_1_add_c(const tran_low_t *input,
-                            uint8_t *dest,
+void vp10_idct32x32_1_add_c(const tran_low_t *input, uint8_t *dest,
                             int stride) {
   int i, j;
   tran_high_t a1;
@@ -1240,15 +1224,14 @@ void vp10_idct32x32_1_add_c(const tran_low_t *input,
   a1 = ROUND_POWER_OF_TWO(out, 6);
 
   for (j = 0; j < 32; ++j) {
-    for (i = 0; i < 32; ++i)
-      dest[i] = clip_pixel_add(dest[i], a1);
+    for (i = 0; i < 32; ++i) dest[i] = clip_pixel_add(dest[i], a1);
     dest += stride;
   }
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void vp10_highbd_iwht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
-                                 int stride, int bd) {
+                                  int stride, int bd) {
   /* 4-point reversible, orthonormal inverse Walsh-Hadamard in 3.5 adds,
      0.5 shifts per pixel. */
   int i;
@@ -1291,28 +1274,28 @@ void vp10_highbd_iwht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
     c1 = e1 - c1;
     a1 -= b1;
     d1 += c1;
-    dest[stride * 0] = highbd_clip_pixel_add(dest[stride * 0],
-                                             HIGHBD_WRAPLOW(a1, bd), bd);
-    dest[stride * 1] = highbd_clip_pixel_add(dest[stride * 1],
-                                             HIGHBD_WRAPLOW(b1, bd), bd);
-    dest[stride * 2] = highbd_clip_pixel_add(dest[stride * 2],
-                                             HIGHBD_WRAPLOW(c1, bd), bd);
-    dest[stride * 3] = highbd_clip_pixel_add(dest[stride * 3],
-                                             HIGHBD_WRAPLOW(d1, bd), bd);
+    dest[stride * 0] =
+        highbd_clip_pixel_add(dest[stride * 0], HIGHBD_WRAPLOW(a1, bd), bd);
+    dest[stride * 1] =
+        highbd_clip_pixel_add(dest[stride * 1], HIGHBD_WRAPLOW(b1, bd), bd);
+    dest[stride * 2] =
+        highbd_clip_pixel_add(dest[stride * 2], HIGHBD_WRAPLOW(c1, bd), bd);
+    dest[stride * 3] =
+        highbd_clip_pixel_add(dest[stride * 3], HIGHBD_WRAPLOW(d1, bd), bd);
     ip++;
     dest++;
   }
 }
 
 void vp10_highbd_iwht4x4_1_add_c(const tran_low_t *in, uint8_t *dest8,
-                                int dest_stride, int bd) {
+                                 int dest_stride, int bd) {
   int i;
   tran_high_t a1, e1;
   tran_low_t tmp[4];
   const tran_low_t *ip = in;
   tran_low_t *op = tmp;
   uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
-  (void) bd;
+  (void)bd;
 
   a1 = ip[0] >> UNIT_QUANT_SHIFT;
   e1 = a1 >> 1;
@@ -1324,14 +1307,14 @@ void vp10_highbd_iwht4x4_1_add_c(const tran_low_t *in, uint8_t *dest8,
   for (i = 0; i < 4; i++) {
     e1 = ip[0] >> 1;
     a1 = ip[0] - e1;
-    dest[dest_stride * 0] = highbd_clip_pixel_add(
-        dest[dest_stride * 0], a1, bd);
-    dest[dest_stride * 1] = highbd_clip_pixel_add(
-        dest[dest_stride * 1], e1, bd);
-    dest[dest_stride * 2] = highbd_clip_pixel_add(
-        dest[dest_stride * 2], e1, bd);
-    dest[dest_stride * 3] = highbd_clip_pixel_add(
-        dest[dest_stride * 3], e1, bd);
+    dest[dest_stride * 0] =
+        highbd_clip_pixel_add(dest[dest_stride * 0], a1, bd);
+    dest[dest_stride * 1] =
+        highbd_clip_pixel_add(dest[dest_stride * 1], e1, bd);
+    dest[dest_stride * 2] =
+        highbd_clip_pixel_add(dest[dest_stride * 2], e1, bd);
+    dest[dest_stride * 3] =
+        highbd_clip_pixel_add(dest[dest_stride * 3], e1, bd);
     ip++;
     dest++;
   }
@@ -1340,7 +1323,7 @@ void vp10_highbd_iwht4x4_1_add_c(const tran_low_t *in, uint8_t *dest8,
 void vp10_highbd_idct4_c(const tran_low_t *input, tran_low_t *output, int bd) {
   tran_low_t step[4];
   tran_high_t temp1, temp2;
-  (void) bd;
+  (void)bd;
   // stage 1
   temp1 = (input[0] + input[2]) * cospi_16_64;
   temp2 = (input[0] - input[2]) * cospi_16_64;
@@ -1359,7 +1342,7 @@ void vp10_highbd_idct4_c(const tran_low_t *input, tran_low_t *output, int bd) {
 }
 
 void vp10_highbd_idct4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
-                                 int stride, int bd) {
+                                  int stride, int bd) {
   tran_low_t out[4 * 4];
   tran_low_t *outptr = out;
   int i, j;
@@ -1375,8 +1358,7 @@ void vp10_highbd_idct4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
 
   // Columns
   for (i = 0; i < 4; ++i) {
-    for (j = 0; j < 4; ++j)
-      temp_in[j] = out[j * 4 + i];
+    for (j = 0; j < 4; ++j) temp_in[j] = out[j * 4 + i];
     vp10_highbd_idct4_c(temp_in, temp_out, bd);
     for (j = 0; j < 4; ++j) {
       dest[j * stride + i] = highbd_clip_pixel_add(
@@ -1386,11 +1368,11 @@ void vp10_highbd_idct4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
 }
 
 void vp10_highbd_idct4x4_1_add_c(const tran_low_t *input, uint8_t *dest8,
-                                int dest_stride, int bd) {
+                                 int dest_stride, int bd) {
   int i;
   tran_high_t a1;
-  tran_low_t out = HIGHBD_WRAPLOW(
-      highbd_dct_const_round_shift(input[0] * cospi_16_64), bd);
+  tran_low_t out =
+      HIGHBD_WRAPLOW(highbd_dct_const_round_shift(input[0] * cospi_16_64), bd);
   uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
 
   out = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(out * cospi_16_64), bd);
@@ -1451,7 +1433,7 @@ void vp10_highbd_idct8_c(const tran_low_t *input, tran_low_t *output, int bd) {
 }
 
 void vp10_highbd_idct8x8_64_add_c(const tran_low_t *input, uint8_t *dest8,
-                                 int stride, int bd) {
+                                  int stride, int bd) {
   tran_low_t out[8 * 8];
   tran_low_t *outptr = out;
   int i, j;
@@ -1467,8 +1449,7 @@ void vp10_highbd_idct8x8_64_add_c(const tran_low_t *input, uint8_t *dest8,
 
   // Then transform columns.
   for (i = 0; i < 8; ++i) {
-    for (j = 0; j < 8; ++j)
-      temp_in[j] = out[j * 8 + i];
+    for (j = 0; j < 8; ++j) temp_in[j] = out[j * 8 + i];
     vp10_highbd_idct8_c(temp_in, temp_out, bd);
     for (j = 0; j < 8; ++j) {
       dest[j * stride + i] = highbd_clip_pixel_add(
@@ -1478,17 +1459,16 @@ void vp10_highbd_idct8x8_64_add_c(const tran_low_t *input, uint8_t *dest8,
 }
 
 void vp10_highbd_idct8x8_1_add_c(const tran_low_t *input, uint8_t *dest8,
-                                int stride, int bd) {
+                                 int stride, int bd) {
   int i, j;
   tran_high_t a1;
-  tran_low_t out = HIGHBD_WRAPLOW(
-      highbd_dct_const_round_shift(input[0] * cospi_16_64), bd);
+  tran_low_t out =
+      HIGHBD_WRAPLOW(highbd_dct_const_round_shift(input[0] * cospi_16_64), bd);
   uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
   out = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(out * cospi_16_64), bd);
   a1 = ROUND_POWER_OF_TWO(out, 5);
   for (j = 0; j < 8; ++j) {
-    for (i = 0; i < 8; ++i)
-      dest[i] = highbd_clip_pixel_add(dest[i], a1, bd);
+    for (i = 0; i < 8; ++i) dest[i] = highbd_clip_pixel_add(dest[i], a1, bd);
     dest += stride;
   }
 }
@@ -1500,7 +1480,7 @@ void vp10_highbd_iadst4_c(const tran_low_t *input, tran_low_t *output, int bd) {
   tran_low_t x1 = input[1];
   tran_low_t x2 = input[2];
   tran_low_t x3 = input[3];
-  (void) bd;
+  (void)bd;
 
   if (!(x0 | x1 | x2 | x3)) {
     memset(output, 0, 4 * sizeof(*output));
@@ -1542,7 +1522,7 @@ void vp10_highbd_iadst8_c(const tran_low_t *input, tran_low_t *output, int bd) {
   tran_low_t x5 = input[4];
   tran_low_t x6 = input[1];
   tran_low_t x7 = input[6];
-  (void) bd;
+  (void)bd;
 
   if (!(x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7)) {
     memset(output, 0, 8 * sizeof(*output));
@@ -1550,14 +1530,14 @@ void vp10_highbd_iadst8_c(const tran_low_t *input, tran_low_t *output, int bd) {
   }
 
   // stage 1
-  s0 = cospi_2_64  * x0 + cospi_30_64 * x1;
-  s1 = cospi_30_64 * x0 - cospi_2_64  * x1;
+  s0 = cospi_2_64 * x0 + cospi_30_64 * x1;
+  s1 = cospi_30_64 * x0 - cospi_2_64 * x1;
   s2 = cospi_10_64 * x2 + cospi_22_64 * x3;
   s3 = cospi_22_64 * x2 - cospi_10_64 * x3;
   s4 = cospi_18_64 * x4 + cospi_14_64 * x5;
   s5 = cospi_14_64 * x4 - cospi_18_64 * x5;
-  s6 = cospi_26_64 * x6 + cospi_6_64  * x7;
-  s7 = cospi_6_64  * x6 - cospi_26_64 * x7;
+  s6 = cospi_26_64 * x6 + cospi_6_64 * x7;
+  s7 = cospi_6_64 * x6 - cospi_26_64 * x7;
 
   x0 = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(s0 + s4), bd);
   x1 = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(s1 + s5), bd);
@@ -1573,10 +1553,10 @@ void vp10_highbd_iadst8_c(const tran_low_t *input, tran_low_t *output, int bd) {
   s1 = x1;
   s2 = x2;
   s3 = x3;
-  s4 =  cospi_8_64  * x4 + cospi_24_64 * x5;
-  s5 =  cospi_24_64 * x4 - cospi_8_64  * x5;
-  s6 = -cospi_24_64 * x6 + cospi_8_64  * x7;
-  s7 =  cospi_8_64  * x6 + cospi_24_64 * x7;
+  s4 = cospi_8_64 * x4 + cospi_24_64 * x5;
+  s5 = cospi_24_64 * x4 - cospi_8_64 * x5;
+  s6 = -cospi_24_64 * x6 + cospi_8_64 * x7;
+  s7 = cospi_8_64 * x6 + cospi_24_64 * x7;
 
   x0 = HIGHBD_WRAPLOW(s0 + s2, bd);
   x1 = HIGHBD_WRAPLOW(s1 + s3, bd);
@@ -1609,7 +1589,7 @@ void vp10_highbd_iadst8_c(const tran_low_t *input, tran_low_t *output, int bd) {
 }
 
 void vp10_highbd_idct8x8_10_add_c(const tran_low_t *input, uint8_t *dest8,
-                                 int stride, int bd) {
+                                  int stride, int bd) {
   tran_low_t out[8 * 8] = { 0 };
   tran_low_t *outptr = out;
   int i, j;
@@ -1625,8 +1605,7 @@ void vp10_highbd_idct8x8_10_add_c(const tran_low_t *input, uint8_t *dest8,
   }
   // Then transform columns.
   for (i = 0; i < 8; ++i) {
-    for (j = 0; j < 8; ++j)
-      temp_in[j] = out[j * 8 + i];
+    for (j = 0; j < 8; ++j) temp_in[j] = out[j * 8 + i];
     vp10_highbd_idct8_c(temp_in, temp_out, bd);
     for (j = 0; j < 8; ++j) {
       dest[j * stride + i] = highbd_clip_pixel_add(
@@ -1638,25 +1617,25 @@ void vp10_highbd_idct8x8_10_add_c(const tran_low_t *input, uint8_t *dest8,
 void vp10_highbd_idct16_c(const tran_low_t *input, tran_low_t *output, int bd) {
   tran_low_t step1[16], step2[16];
   tran_high_t temp1, temp2;
-  (void) bd;
+  (void)bd;
 
   // stage 1
-  step1[0] = input[0/2];
-  step1[1] = input[16/2];
-  step1[2] = input[8/2];
-  step1[3] = input[24/2];
-  step1[4] = input[4/2];
-  step1[5] = input[20/2];
-  step1[6] = input[12/2];
-  step1[7] = input[28/2];
-  step1[8] = input[2/2];
-  step1[9] = input[18/2];
-  step1[10] = input[10/2];
-  step1[11] = input[26/2];
-  step1[12] = input[6/2];
-  step1[13] = input[22/2];
-  step1[14] = input[14/2];
-  step1[15] = input[30/2];
+  step1[0] = input[0 / 2];
+  step1[1] = input[16 / 2];
+  step1[2] = input[8 / 2];
+  step1[3] = input[24 / 2];
+  step1[4] = input[4 / 2];
+  step1[5] = input[20 / 2];
+  step1[6] = input[12 / 2];
+  step1[7] = input[28 / 2];
+  step1[8] = input[2 / 2];
+  step1[9] = input[18 / 2];
+  step1[10] = input[10 / 2];
+  step1[11] = input[26 / 2];
+  step1[12] = input[6 / 2];
+  step1[13] = input[22 / 2];
+  step1[14] = input[14 / 2];
+  step1[15] = input[30 / 2];
 
   // stage 2
   step2[0] = step1[0];
@@ -1802,7 +1781,7 @@ void vp10_highbd_idct16_c(const tran_low_t *input, tran_low_t *output, int bd) {
 }
 
 void vp10_highbd_idct16x16_256_add_c(const tran_low_t *input, uint8_t *dest8,
-                                    int stride, int bd) {
+                                     int stride, int bd) {
   tran_low_t out[16 * 16];
   tran_low_t *outptr = out;
   int i, j;
@@ -1818,20 +1797,16 @@ void vp10_highbd_idct16x16_256_add_c(const tran_low_t *input, uint8_t *dest8,
 
   // Then transform columns.
   for (i = 0; i < 16; ++i) {
-    for (j = 0; j < 16; ++j)
-      temp_in[j] = out[j * 16 + i];
+    for (j = 0; j < 16; ++j) temp_in[j] = out[j * 16 + i];
     vp10_highbd_idct16_c(temp_in, temp_out, bd);
     for (j = 0; j < 16; ++j) {
       dest[j * stride + i] = highbd_clip_pixel_add(
-          dest[j * stride + i],
-          ROUND_POWER_OF_TWO(temp_out[j], 6),
-          bd);
+          dest[j * stride + i], ROUND_POWER_OF_TWO(temp_out[j], 6), bd);
     }
   }
 }
 
-void vp10_highbd_iadst16_c(const tran_low_t *input,
-                           tran_low_t *output,
+void vp10_highbd_iadst16_c(const tran_low_t *input, tran_low_t *output,
                            int bd) {
   tran_high_t s0, s1, s2, s3, s4, s5, s6, s7, s8;
   tran_high_t s9, s10, s11, s12, s13, s14, s15;
@@ -1852,20 +1827,20 @@ void vp10_highbd_iadst16_c(const tran_low_t *input,
   tran_low_t x13 = input[12];
   tran_low_t x14 = input[1];
   tran_low_t x15 = input[14];
-  (void) bd;
+  (void)bd;
 
-  if (!(x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7 | x8
-           | x9 | x10 | x11 | x12 | x13 | x14 | x15)) {
+  if (!(x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7 | x8 | x9 | x10 | x11 | x12 |
+        x13 | x14 | x15)) {
     memset(output, 0, 16 * sizeof(*output));
     return;
   }
 
   // stage 1
-  s0 = x0 * cospi_1_64  + x1 * cospi_31_64;
+  s0 = x0 * cospi_1_64 + x1 * cospi_31_64;
   s1 = x0 * cospi_31_64 - x1 * cospi_1_64;
-  s2 = x2 * cospi_5_64  + x3 * cospi_27_64;
+  s2 = x2 * cospi_5_64 + x3 * cospi_27_64;
   s3 = x2 * cospi_27_64 - x3 * cospi_5_64;
-  s4 = x4 * cospi_9_64  + x5 * cospi_23_64;
+  s4 = x4 * cospi_9_64 + x5 * cospi_23_64;
   s5 = x4 * cospi_23_64 - x5 * cospi_9_64;
   s6 = x6 * cospi_13_64 + x7 * cospi_19_64;
   s7 = x6 * cospi_19_64 - x7 * cospi_13_64;
@@ -1874,9 +1849,9 @@ void vp10_highbd_iadst16_c(const tran_low_t *input,
   s10 = x10 * cospi_21_64 + x11 * cospi_11_64;
   s11 = x10 * cospi_11_64 - x11 * cospi_21_64;
   s12 = x12 * cospi_25_64 + x13 * cospi_7_64;
-  s13 = x12 * cospi_7_64  - x13 * cospi_25_64;
+  s13 = x12 * cospi_7_64 - x13 * cospi_25_64;
   s14 = x14 * cospi_29_64 + x15 * cospi_3_64;
-  s15 = x14 * cospi_3_64  - x15 * cospi_29_64;
+  s15 = x14 * cospi_3_64 - x15 * cospi_29_64;
 
   x0 = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(s0 + s8), bd);
   x1 = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(s1 + s9), bd);
@@ -1886,8 +1861,8 @@ void vp10_highbd_iadst16_c(const tran_low_t *input,
   x5 = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(s5 + s13), bd);
   x6 = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(s6 + s14), bd);
   x7 = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(s7 + s15), bd);
-  x8  = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(s0 - s8), bd);
-  x9  = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(s1 - s9), bd);
+  x8 = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(s0 - s8), bd);
+  x9 = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(s1 - s9), bd);
   x10 = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(s2 - s10), bd);
   x11 = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(s3 - s11), bd);
   x12 = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(s4 - s12), bd);
@@ -1966,13 +1941,13 @@ void vp10_highbd_iadst16_c(const tran_low_t *input,
   x15 = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(s13 - s15), bd);
 
   // stage 4
-  s2 = (- cospi_16_64) * (x2 + x3);
+  s2 = (-cospi_16_64) * (x2 + x3);
   s3 = cospi_16_64 * (x2 - x3);
   s6 = cospi_16_64 * (x6 + x7);
   s7 = cospi_16_64 * (-x6 + x7);
   s10 = cospi_16_64 * (x10 + x11);
   s11 = cospi_16_64 * (-x10 + x11);
-  s14 = (- cospi_16_64) * (x14 + x15);
+  s14 = (-cospi_16_64) * (x14 + x15);
   s15 = cospi_16_64 * (x14 - x15);
 
   x2 = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(s2), bd);
@@ -2003,7 +1978,7 @@ void vp10_highbd_iadst16_c(const tran_low_t *input,
 }
 
 void vp10_highbd_idct16x16_10_add_c(const tran_low_t *input, uint8_t *dest8,
-                                   int stride, int bd) {
+                                    int stride, int bd) {
   tran_low_t out[16 * 16] = { 0 };
   tran_low_t *outptr = out;
   int i, j;
@@ -2020,8 +1995,7 @@ void vp10_highbd_idct16x16_10_add_c(const tran_low_t *input, uint8_t *dest8,
 
   // Then transform columns.
   for (i = 0; i < 16; ++i) {
-    for (j = 0; j < 16; ++j)
-      temp_in[j] = out[j*16 + i];
+    for (j = 0; j < 16; ++j) temp_in[j] = out[j * 16 + i];
     vp10_highbd_idct16_c(temp_in, temp_out, bd);
     for (j = 0; j < 16; ++j) {
       dest[j * stride + i] = highbd_clip_pixel_add(
@@ -2031,27 +2005,26 @@ void vp10_highbd_idct16x16_10_add_c(const tran_low_t *input, uint8_t *dest8,
 }
 
 void vp10_highbd_idct16x16_1_add_c(const tran_low_t *input, uint8_t *dest8,
-                                  int stride, int bd) {
+                                   int stride, int bd) {
   int i, j;
   tran_high_t a1;
-  tran_low_t out = HIGHBD_WRAPLOW(
-      highbd_dct_const_round_shift(input[0] * cospi_16_64), bd);
+  tran_low_t out =
+      HIGHBD_WRAPLOW(highbd_dct_const_round_shift(input[0] * cospi_16_64), bd);
   uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
 
   out = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(out * cospi_16_64), bd);
   a1 = ROUND_POWER_OF_TWO(out, 6);
   for (j = 0; j < 16; ++j) {
-    for (i = 0; i < 16; ++i)
-      dest[i] = highbd_clip_pixel_add(dest[i], a1, bd);
+    for (i = 0; i < 16; ++i) dest[i] = highbd_clip_pixel_add(dest[i], a1, bd);
     dest += stride;
   }
 }
 
-static void highbd_idct32_c(const tran_low_t *input,
-                            tran_low_t *output, int bd) {
+static void highbd_idct32_c(const tran_low_t *input, tran_low_t *output,
+                            int bd) {
   tran_low_t step1[32], step2[32];
   tran_high_t temp1, temp2;
-  (void) bd;
+  (void)bd;
 
   // stage 1
   step1[0] = input[0];
@@ -2417,7 +2390,7 @@ static void highbd_idct32_c(const tran_low_t *input,
 }
 
 void vp10_highbd_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest8,
-                                     int stride, int bd) {
+                                      int stride, int bd) {
   tran_low_t out[32 * 32];
   tran_low_t *outptr = out;
   int i, j;
@@ -2427,8 +2400,7 @@ void vp10_highbd_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest8,
   // Rows
   for (i = 0; i < 32; ++i) {
     tran_low_t zero_coeff[16];
-    for (j = 0; j < 16; ++j)
-      zero_coeff[j] = input[2 * j] | input[2 * j + 1];
+    for (j = 0; j < 16; ++j) zero_coeff[j] = input[2 * j] | input[2 * j + 1];
     for (j = 0; j < 8; ++j)
       zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
     for (j = 0; j < 4; ++j)
@@ -2446,8 +2418,7 @@ void vp10_highbd_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest8,
 
   // Columns
   for (i = 0; i < 32; ++i) {
-    for (j = 0; j < 32; ++j)
-      temp_in[j] = out[j * 32 + i];
+    for (j = 0; j < 32; ++j) temp_in[j] = out[j * 32 + i];
     highbd_idct32_c(temp_in, temp_out, bd);
     for (j = 0; j < 32; ++j) {
       dest[j * stride + i] = highbd_clip_pixel_add(
@@ -2457,8 +2428,8 @@ void vp10_highbd_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest8,
 }
 
 void vp10_highbd_idct32x32_34_add_c(const tran_low_t *input, uint8_t *dest8,
-                                   int stride, int bd) {
-  tran_low_t out[32 * 32] = {0};
+                                    int stride, int bd) {
+  tran_low_t out[32 * 32] = { 0 };
   tran_low_t *outptr = out;
   int i, j;
   tran_low_t temp_in[32], temp_out[32];
@@ -2473,8 +2444,7 @@ void vp10_highbd_idct32x32_34_add_c(const tran_low_t *input, uint8_t *dest8,
   }
   // Columns
   for (i = 0; i < 32; ++i) {
-    for (j = 0; j < 32; ++j)
-      temp_in[j] = out[j * 32 + i];
+    for (j = 0; j < 32; ++j) temp_in[j] = out[j * 32 + i];
     highbd_idct32_c(temp_in, temp_out, bd);
     for (j = 0; j < 32; ++j) {
       dest[j * stride + i] = highbd_clip_pixel_add(
@@ -2484,19 +2454,18 @@ void vp10_highbd_idct32x32_34_add_c(const tran_low_t *input, uint8_t *dest8,
 }
 
 void vp10_highbd_idct32x32_1_add_c(const tran_low_t *input, uint8_t *dest8,
-                                  int stride, int bd) {
+                                   int stride, int bd) {
   int i, j;
   int a1;
   uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
 
-  tran_low_t out = HIGHBD_WRAPLOW(
-      highbd_dct_const_round_shift(input[0] * cospi_16_64), bd);
+  tran_low_t out =
+      HIGHBD_WRAPLOW(highbd_dct_const_round_shift(input[0] * cospi_16_64), bd);
   out = HIGHBD_WRAPLOW(highbd_dct_const_round_shift(out * cospi_16_64), bd);
   a1 = ROUND_POWER_OF_TWO(out, 6);
 
   for (j = 0; j < 32; ++j) {
-    for (i = 0; i < 32; ++i)
-      dest[i] = highbd_clip_pixel_add(dest[i], a1, bd);
+    for (i = 0; i < 32; ++i) dest[i] = highbd_clip_pixel_add(dest[i], a1, bd);
     dest += stride;
   }
 }

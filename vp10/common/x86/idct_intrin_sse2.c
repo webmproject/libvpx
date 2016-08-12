@@ -39,19 +39,21 @@ static INLINE void fliplr_16x8(__m128i in[16]) {
   fliplr_8x8(&in[8]);
 }
 
-#define FLIPLR_16x16(in0, in1) do {             \
-  __m128i *tmp;                                 \
-  fliplr_16x8(in0);                             \
-  fliplr_16x8(in1);                             \
-  tmp = (in0);                                  \
-  (in0) = (in1);                                \
-  (in1) = tmp;                                  \
-} while (0)
+#define FLIPLR_16x16(in0, in1) \
+  do {                         \
+    __m128i *tmp;              \
+    fliplr_16x8(in0);          \
+    fliplr_16x8(in1);          \
+    tmp = (in0);               \
+    (in0) = (in1);             \
+    (in1) = tmp;               \
+  } while (0)
 
-#define FLIPUD_PTR(dest, stride, size) do {     \
-    (dest) = (dest) + ((size) - 1) * (stride);  \
-    (stride) = - (stride);                      \
-} while (0)
+#define FLIPUD_PTR(dest, stride, size)       \
+  do {                                       \
+    (dest) = (dest) + ((size)-1) * (stride); \
+    (stride) = -(stride);                    \
+  } while (0)
 #endif
 
 void vp10_iht4x4_16_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
@@ -108,9 +110,7 @@ void vp10_iht4x4_16_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
       FLIPUD_PTR(dest, stride, 4);
       break;
 #endif  // CONFIG_EXT_TX
-    default:
-      assert(0);
-      break;
+    default: assert(0); break;
   }
 
   // Final round and shift
@@ -208,9 +208,7 @@ void vp10_iht8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
       FLIPUD_PTR(dest, stride, 8);
       break;
 #endif  // CONFIG_EXT_TX
-    default:
-      assert(0);
-      break;
+    default: assert(0); break;
   }
 
   // Final rounding and shift
@@ -297,9 +295,7 @@ void vp10_iht16x16_256_add_sse2(const tran_low_t *input, uint8_t *dest,
       FLIPUD_PTR(dest, stride, 16);
       break;
 #endif  // CONFIG_EXT_TX
-    default:
-      assert(0);
-      break;
+    default: assert(0); break;
   }
 
   write_buffer_8x16(dest, in0, stride);

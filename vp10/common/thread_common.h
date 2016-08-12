@@ -40,23 +40,21 @@ typedef struct VP10LfSyncData {
 } VP10LfSync;
 
 // Allocate memory for loopfilter row synchronization.
-void vp10_loop_filter_alloc(VP10LfSync *lf_sync, struct VP10Common *cm, int rows,
-                           int width, int num_workers);
+void vp10_loop_filter_alloc(VP10LfSync *lf_sync, struct VP10Common *cm,
+                            int rows, int width, int num_workers);
 
 // Deallocate loopfilter synchronization related mutex and data.
 void vp10_loop_filter_dealloc(VP10LfSync *lf_sync);
 
 // Multi-threaded loopfilter that uses the tile threads.
-void vp10_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
-                              struct VP10Common *cm,
-                              struct macroblockd_plane planes[MAX_MB_PLANE],
-                              int frame_filter_level,
-                              int y_only, int partial_frame,
-                              VPxWorker *workers, int num_workers,
-                              VP10LfSync *lf_sync);
+void vp10_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame, struct VP10Common *cm,
+                               struct macroblockd_plane planes[MAX_MB_PLANE],
+                               int frame_filter_level, int y_only,
+                               int partial_frame, VPxWorker *workers,
+                               int num_workers, VP10LfSync *lf_sync);
 
 void vp10_accumulate_frame_counts(struct VP10Common *cm,
-                                 struct FRAME_COUNTS *counts);
+                                  struct FRAME_COUNTS *counts);
 
 #ifdef __cplusplus
 }  // extern "C"

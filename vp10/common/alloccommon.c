@@ -35,8 +35,7 @@ static int alloc_seg_map(VP10_COMMON *cm, int seg_map_size) {
 
   for (i = 0; i < NUM_PING_PONG_BUFFERS; ++i) {
     cm->seg_map_array[i] = (uint8_t *)vpx_calloc(seg_map_size, 1);
-    if (cm->seg_map_array[i] == NULL)
-      return 1;
+    if (cm->seg_map_array[i] == NULL) return 1;
   }
   cm->seg_map_alloc_size = seg_map_size;
 
@@ -91,7 +90,7 @@ void vp10_free_context_buffers(VP10_COMMON *cm) {
   int i;
   cm->free_mi(cm);
   free_seg_map(cm);
-  for (i = 0 ; i < MAX_MB_PLANE ; i++) {
+  for (i = 0; i < MAX_MB_PLANE; i++) {
     vpx_free(cm->above_context[i]);
     cm->above_context[i] = NULL;
   }
@@ -110,15 +109,13 @@ int vp10_alloc_context_buffers(VP10_COMMON *cm, int width, int height) {
   new_mi_size = cm->mi_stride * calc_mi_size(cm->mi_rows);
   if (cm->mi_alloc_size < new_mi_size) {
     cm->free_mi(cm);
-    if (cm->alloc_mi(cm, new_mi_size))
-      goto fail;
+    if (cm->alloc_mi(cm, new_mi_size)) goto fail;
   }
 
   if (cm->seg_map_alloc_size < cm->mi_rows * cm->mi_cols) {
     // Create the segmentation map structure and set to 0.
     free_seg_map(cm);
-    if (alloc_seg_map(cm, cm->mi_rows * cm->mi_cols))
-      goto fail;
+    if (alloc_seg_map(cm, cm->mi_rows * cm->mi_cols)) goto fail;
   }
 
   if (cm->above_context_alloc_cols < cm->mi_cols) {
@@ -129,7 +126,7 @@ int vp10_alloc_context_buffers(VP10_COMMON *cm, int width, int height) {
         ALIGN_POWER_OF_TWO(cm->mi_cols, MAX_MIB_SIZE_LOG2);
     int i;
 
-    for (i = 0 ; i < MAX_MB_PLANE ; i++) {
+    for (i = 0; i < MAX_MB_PLANE; i++) {
       vpx_free(cm->above_context[i]);
       cm->above_context[i] = (ENTROPY_CONTEXT *)vpx_calloc(
           2 * aligned_mi_cols, sizeof(*cm->above_context[0]));
@@ -153,7 +150,7 @@ int vp10_alloc_context_buffers(VP10_COMMON *cm, int width, int height) {
 
   return 0;
 
- fail:
+fail:
   vp10_free_context_buffers(cm);
   return 1;
 }

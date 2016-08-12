@@ -23,9 +23,8 @@ void vp10_convolve_horiz_c(const uint8_t *src, int src_stride, uint8_t *dst,
     int x_q4 = subpel_x_q4;
     for (x = 0; x < w; ++x) {
       const uint8_t *const src_x = &src[x_q4 >> SUBPEL_BITS];
-      const int16_t *x_filter =
-          vp10_get_interp_filter_subpel_kernel(
-              filter_params, x_q4 & SUBPEL_MASK);
+      const int16_t *x_filter = vp10_get_interp_filter_subpel_kernel(
+          filter_params, x_q4 & SUBPEL_MASK);
       int k, sum = 0;
       for (k = 0; k < filter_size; ++k) sum += src_x[k] * x_filter[k];
       if (avg) {
@@ -53,9 +52,8 @@ void vp10_convolve_vert_c(const uint8_t *src, int src_stride, uint8_t *dst,
     int y_q4 = subpel_y_q4;
     for (y = 0; y < h; ++y) {
       const uint8_t *const src_y = &src[(y_q4 >> SUBPEL_BITS) * src_stride];
-      const int16_t *y_filter =
-          vp10_get_interp_filter_subpel_kernel(
-              filter_params, y_q4 & SUBPEL_MASK);
+      const int16_t *y_filter = vp10_get_interp_filter_subpel_kernel(
+          filter_params, y_q4 & SUBPEL_MASK);
       int k, sum = 0;
       for (k = 0; k < filter_size; ++k)
         sum += src_y[k * src_stride] * y_filter[k];
@@ -102,8 +100,8 @@ void vp10_convolve(const uint8_t *src, int src_stride, uint8_t *dst,
 #else
                    const INTERP_FILTER interp_filter,
 #endif
-                   const int subpel_x_q4, int x_step_q4,
-                   const int subpel_y_q4, int y_step_q4, int ref_idx) {
+                   const int subpel_x_q4, int x_step_q4, const int subpel_y_q4,
+                   int y_step_q4, int ref_idx) {
   int ignore_horiz = x_step_q4 == 16 && subpel_x_q4 == 0;
   int ignore_vert = y_step_q4 == 16 && subpel_y_q4 == 0;
 
@@ -177,8 +175,8 @@ void vp10_convolve(const uint8_t *src, int src_stride, uint8_t *dst,
     assert(filter_params.taps <= MAX_FILTER_TAP);
 
     vp10_convolve_vert(temp + temp_stride * (filter_size / 2 - 1), temp_stride,
-                       dst, dst_stride, w, h, filter_params,
-                       subpel_y_q4, y_step_q4, ref_idx);
+                       dst, dst_stride, w, h, filter_params, subpel_y_q4,
+                       y_step_q4, ref_idx);
   }
 }
 
@@ -195,9 +193,8 @@ void vp10_highbd_convolve_horiz_c(const uint16_t *src, int src_stride,
     int x_q4 = subpel_x_q4;
     for (x = 0; x < w; ++x) {
       const uint16_t *const src_x = &src[x_q4 >> SUBPEL_BITS];
-      const int16_t *x_filter =
-          vp10_get_interp_filter_subpel_kernel(
-              filter_params, x_q4 & SUBPEL_MASK);
+      const int16_t *x_filter = vp10_get_interp_filter_subpel_kernel(
+          filter_params, x_q4 & SUBPEL_MASK);
       int k, sum = 0;
       for (k = 0; k < filter_size; ++k) sum += src_x[k] * x_filter[k];
       if (avg)
@@ -227,9 +224,8 @@ void vp10_highbd_convolve_vert_c(const uint16_t *src, int src_stride,
     int y_q4 = subpel_y_q4;
     for (y = 0; y < h; ++y) {
       const uint16_t *const src_y = &src[(y_q4 >> SUBPEL_BITS) * src_stride];
-      const int16_t *y_filter =
-          vp10_get_interp_filter_subpel_kernel(
-              filter_params, y_q4 & SUBPEL_MASK);
+      const int16_t *y_filter = vp10_get_interp_filter_subpel_kernel(
+          filter_params, y_q4 & SUBPEL_MASK);
       int k, sum = 0;
       for (k = 0; k < filter_size; ++k)
         sum += src_y[k * src_stride] * y_filter[k];
@@ -339,10 +335,9 @@ void vp10_highbd_convolve(const uint8_t *src8, int src_stride, uint8_t *dst8,
     int intermediate_height =
         (((h - 1) * y_step_q4 + subpel_y_q4) >> SUBPEL_BITS) + filter_size;
 
-    vp10_highbd_convolve_horiz(src - src_stride * (filter_size / 2 - 1),
-                               src_stride, temp, temp_stride, w,
-                               intermediate_height, filter_params, subpel_x_q4,
-                               x_step_q4, 0, bd);
+    vp10_highbd_convolve_horiz(
+        src - src_stride * (filter_size / 2 - 1), src_stride, temp, temp_stride,
+        w, intermediate_height, filter_params, subpel_x_q4, x_step_q4, 0, bd);
 
 #if CONFIG_DUAL_FILTER
     filter_params = filter_params_y;

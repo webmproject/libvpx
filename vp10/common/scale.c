@@ -22,7 +22,7 @@ static INLINE int scaled_y(int val, const struct scale_factors *sf) {
 }
 
 static int unscaled_value(int val, const struct scale_factors *sf) {
-  (void) sf;
+  (void)sf;
   return val;
 }
 
@@ -37,24 +37,20 @@ static int get_fixed_point_scale_factor(int other_size, int this_size) {
 MV32 vp10_scale_mv(const MV *mv, int x, int y, const struct scale_factors *sf) {
   const int x_off_q4 = scaled_x(x << SUBPEL_BITS, sf) & SUBPEL_MASK;
   const int y_off_q4 = scaled_y(y << SUBPEL_BITS, sf) & SUBPEL_MASK;
-  const MV32 res = {
-    scaled_y(mv->row, sf) + y_off_q4,
-    scaled_x(mv->col, sf) + x_off_q4
-  };
+  const MV32 res = { scaled_y(mv->row, sf) + y_off_q4,
+                     scaled_x(mv->col, sf) + x_off_q4 };
   return res;
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void vp10_setup_scale_factors_for_frame(struct scale_factors *sf,
-                                        int other_w, int other_h,
-                                        int this_w, int this_h,
+void vp10_setup_scale_factors_for_frame(struct scale_factors *sf, int other_w,
+                                        int other_h, int this_w, int this_h,
                                         int use_highbd) {
 #else
-void vp10_setup_scale_factors_for_frame(struct scale_factors *sf,
-                                        int other_w, int other_h,
-                                        int this_w, int this_h) {
+void vp10_setup_scale_factors_for_frame(struct scale_factors *sf, int other_w,
+                                        int other_h, int this_w, int this_h) {
 #endif
-    if (!valid_ref_frame_size(other_w, other_h, this_w, this_h)) {
+  if (!valid_ref_frame_size(other_w, other_h, this_w, this_h)) {
     sf->x_scale_fp = REF_INVALID_SCALE;
     sf->y_scale_fp = REF_INVALID_SCALE;
     return;
@@ -73,12 +69,12 @@ void vp10_setup_scale_factors_for_frame(struct scale_factors *sf,
     sf->scale_value_y = unscaled_value;
   }
 
-  // TODO(agrange): Investigate the best choice of functions to use here
-  // for EIGHTTAP_SMOOTH. Since it is not interpolating, need to choose what
-  // to do at full-pel offsets. The current selection, where the filter is
-  // applied in one direction only, and not at all for 0,0, seems to give the
-  // best quality, but it may be worth trying an additional mode that does
-  // do the filtering on full-pel.
+// TODO(agrange): Investigate the best choice of functions to use here
+// for EIGHTTAP_SMOOTH. Since it is not interpolating, need to choose what
+// to do at full-pel offsets. The current selection, where the filter is
+// applied in one direction only, and not at all for 0,0, seems to give the
+// best quality, but it may be worth trying an additional mode that does
+// do the filtering on full-pel.
 #if CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
   sf->predict_ni[0][0][0] = vpx_convolve8_c;
   sf->predict_ni[0][0][1] = vpx_convolve8_avg_c;

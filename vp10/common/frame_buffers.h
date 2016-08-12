@@ -40,7 +40,7 @@ void vp10_free_internal_frame_buffers(InternalFrameBufferList *list);
 // |min_size| is the minimum size in bytes needed to decode the next frame.
 // |fb| pointer to the frame buffer.
 int vp10_get_frame_buffer(void *cb_priv, size_t min_size,
-                         vpx_codec_frame_buffer_t *fb);
+                          vpx_codec_frame_buffer_t *fb);
 
 // Callback used by libvpx when there are no references to the frame buffer.
 // |cb_priv| is not used. |fb| pointer to the frame buffer.

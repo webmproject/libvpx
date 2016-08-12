@@ -22,32 +22,32 @@
 #include "vpx_dsp/vpx_dsp_common.h"
 
 // Bits of precision used for the model
-#define WARPEDMODEL_PREC_BITS    8
-#define WARPEDMODEL_ROW3HOMO_PREC_BITS    12
+#define WARPEDMODEL_PREC_BITS 8
+#define WARPEDMODEL_ROW3HOMO_PREC_BITS 12
 
 // Bits of subpel precision for warped interpolation
-#define WARPEDPIXEL_PREC_BITS    6
-#define WARPEDPIXEL_PREC_SHIFTS  (1 << WARPEDPIXEL_PREC_BITS)
+#define WARPEDPIXEL_PREC_BITS 6
+#define WARPEDPIXEL_PREC_SHIFTS (1 << WARPEDPIXEL_PREC_BITS)
 
 // Taps for ntap filter
-#define WARPEDPIXEL_FILTER_TAPS  6
+#define WARPEDPIXEL_FILTER_TAPS 6
 
 // Precision of filter taps
-#define WARPEDPIXEL_FILTER_BITS  7
+#define WARPEDPIXEL_FILTER_BITS 7
 
-#define WARPEDDIFF_PREC_BITS  (WARPEDMODEL_PREC_BITS - WARPEDPIXEL_PREC_BITS)
+#define WARPEDDIFF_PREC_BITS (WARPEDMODEL_PREC_BITS - WARPEDPIXEL_PREC_BITS)
 
 typedef enum {
   UNKNOWN_TRANSFORM = -1,
-  HOMOGRAPHY,      // homography, 8-parameter
-  AFFINE,          // affine, 6-parameter
-  ROTZOOM,         // simplified affine with rotation and zoom only, 4-parameter
-  TRANSLATION,     // translational motion 2-parameter
+  HOMOGRAPHY,   // homography, 8-parameter
+  AFFINE,       // affine, 6-parameter
+  ROTZOOM,      // simplified affine with rotation and zoom only, 4-parameter
+  TRANSLATION,  // translational motion 2-parameter
   TRANS_TYPES
 } TransformationType;
 
 // number of parameters used by each transformation in TransformationTypes
-static const int n_trans_model_params[TRANS_TYPES] = {9, 6, 4, 2};
+static const int n_trans_model_params[TRANS_TYPES] = { 9, 6, 4, 2 };
 
 typedef struct {
   TransformationType wmtype;
@@ -58,11 +58,8 @@ void vp10_warp_plane(WarpedMotionParams *wm,
 #if CONFIG_VP9_HIGHBITDEPTH
                      int use_hbd, int bd,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-                     uint8_t *ref,
-                     int width, int height, int stride,
-                     uint8_t *pred,
-                     int p_col, int p_row,
-                     int p_width, int p_height, int p_stride,
-                     int subsampling_x, int subsampling_y,
-                     int x_scale, int y_scale);
+                     uint8_t *ref, int width, int height, int stride,
+                     uint8_t *pred, int p_col, int p_row, int p_width,
+                     int p_height, int p_stride, int subsampling_x,
+                     int subsampling_y, int x_scale, int y_scale);
 #endif  // VP10_COMMON_WARPED_MOTION_H

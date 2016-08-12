@@ -9,7 +9,7 @@
  */
 
 #include <assert.h>
-#include <smmintrin.h>  /* SSE4.1 */
+#include <smmintrin.h> /* SSE4.1 */
 
 #include "./vp10_rtcd.h"
 #include "./vpx_config.h"
@@ -300,8 +300,7 @@ void vp10_inv_txfm2d_add_4x4_sse4_1(const int32_t *coeff, uint16_t *output,
       write_buffer_4x4(in, output, stride, 0, 1, -cfg->shift[1], bd);
       break;
 #endif  // CONFIG_EXT_TX
-    default:
-      assert(0);
+    default: assert(0);
   }
 }
 
@@ -620,15 +619,15 @@ static void iadst8x8_sse4_1(__m128i *in, __m128i *out, int bit) {
   }
 }
 
-static void round_shift_8x8(__m128i *in , int shift) {
+static void round_shift_8x8(__m128i *in, int shift) {
   round_shift_4x4(&in[0], shift);
   round_shift_4x4(&in[4], shift);
   round_shift_4x4(&in[8], shift);
   round_shift_4x4(&in[12], shift);
 }
 
-static __m128i get_recon_8x8(const __m128i pred, __m128i res_lo,
-                             __m128i res_hi, int fliplr, int bd) {
+static __m128i get_recon_8x8(const __m128i pred, __m128i res_lo, __m128i res_hi,
+                             int fliplr, int bd) {
   __m128i x0, x1;
   const __m128i zero = _mm_setzero_si128();
 
@@ -785,8 +784,7 @@ void vp10_inv_txfm2d_add_8x8_sse4_1(const int32_t *coeff, uint16_t *output,
       write_buffer_8x8(in, output, stride, 0, 1, -cfg->shift[1], bd);
       break;
 #endif  // CONFIG_EXT_TX
-    default:
-      assert(0);
+    default: assert(0);
   }
 }
 
@@ -1395,7 +1393,6 @@ void vp10_inv_txfm2d_add_16x16_sse4_1(const int32_t *coeff, uint16_t *output,
       write_buffer_16x16(in, output, stride, 0, 1, -cfg->shift[1], bd);
       break;
 #endif
-    default:
-      assert(0);
+    default: assert(0);
   }
 }

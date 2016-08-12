@@ -23,8 +23,8 @@ extern "C" {
 #define REF_INVALID_SCALE -1
 
 struct scale_factors {
-  int x_scale_fp;   // horizontal fixed point scale factor
-  int y_scale_fp;   // vertical fixed point scale factor
+  int x_scale_fp;  // horizontal fixed point scale factor
+  int y_scale_fp;  // vertical fixed point scale factor
   int x_step_q4;
   int y_step_q4;
 
@@ -34,28 +34,26 @@ struct scale_factors {
   convolve_fn_t predict[2][2][2];  // horiz, vert, avg
 #if CONFIG_VP9_HIGHBITDEPTH
   highbd_convolve_fn_t highbd_predict[2][2][2];  // horiz, vert, avg
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif                                           // CONFIG_VP9_HIGHBITDEPTH
 
 // Functions for non-interpolating filters (those that filter zero offsets)
 #if CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
   convolve_fn_t predict_ni[2][2][2];  // horiz, vert, avg
 #if CONFIG_VP9_HIGHBITDEPTH
   highbd_convolve_fn_t highbd_predict_ni[2][2][2];  // horiz, vert, avg
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif                                              // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
 };
 
 MV32 vp10_scale_mv(const MV *mv, int x, int y, const struct scale_factors *sf);
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void vp10_setup_scale_factors_for_frame(struct scale_factors *sf,
-                                       int other_w, int other_h,
-                                       int this_w, int this_h,
-                                       int use_high);
+void vp10_setup_scale_factors_for_frame(struct scale_factors *sf, int other_w,
+                                        int other_h, int this_w, int this_h,
+                                        int use_high);
 #else
-void vp10_setup_scale_factors_for_frame(struct scale_factors *sf,
-                                       int other_w, int other_h,
-                                       int this_w, int this_h);
+void vp10_setup_scale_factors_for_frame(struct scale_factors *sf, int other_w,
+                                        int other_h, int this_w, int this_h);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 static INLINE int vp10_is_valid_scale(const struct scale_factors *sf) {
@@ -69,11 +67,9 @@ static INLINE int vp10_is_scaled(const struct scale_factors *sf) {
 }
 
 static INLINE int valid_ref_frame_size(int ref_width, int ref_height,
-                                      int this_width, int this_height) {
-  return 2 * this_width >= ref_width &&
-         2 * this_height >= ref_height &&
-         this_width <= 16 * ref_width &&
-         this_height <= 16 * ref_height;
+                                       int this_width, int this_height) {
+  return 2 * this_width >= ref_width && 2 * this_height >= ref_height &&
+         this_width <= 16 * ref_width && this_height <= 16 * ref_height;
 }
 
 #ifdef __cplusplus

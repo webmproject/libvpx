@@ -52,100 +52,75 @@ static const uint8_t orders_128x128[1] = { 0 };
 static const uint8_t orders_128x64[2] = { 0, 1 };
 static const uint8_t orders_64x128[2] = { 0, 1 };
 static const uint8_t orders_64x64[4] = {
-  0, 1,
-  2, 3,
+  0, 1, 2, 3,
 };
 static const uint8_t orders_64x32[8] = {
-  0, 2,
-  1, 3,
-  4, 6,
-  5, 7,
+  0, 2, 1, 3, 4, 6, 5, 7,
 };
 static const uint8_t orders_32x64[8] = {
-  0, 1, 2, 3,
-  4, 5, 6, 7,
+  0, 1, 2, 3, 4, 5, 6, 7,
 };
 static const uint8_t orders_32x32[16] = {
-  0,   1,  4,  5,
-  2,   3,  6,  7,
-  8,   9, 12, 13,
-  10, 11, 14, 15,
+  0, 1, 4, 5, 2, 3, 6, 7, 8, 9, 12, 13, 10, 11, 14, 15,
 };
 static const uint8_t orders_32x16[32] = {
-  0,   2,  8, 10,
-  1,   3,  9, 11,
-  4,   6, 12, 14,
-  5,   7, 13, 15,
-  16, 18, 24, 26,
-  17, 19, 25, 27,
-  20, 22, 28, 30,
-  21, 23, 29, 31,
+  0,  2,  8,  10, 1,  3,  9,  11, 4,  6,  12, 14, 5,  7,  13, 15,
+  16, 18, 24, 26, 17, 19, 25, 27, 20, 22, 28, 30, 21, 23, 29, 31,
 };
 static const uint8_t orders_16x32[32] = {
-  0,   1,  2,  3,  8,  9, 10, 11,
-  4,   5,  6,  7, 12, 13, 14, 15,
-  16, 17, 18, 19, 24, 25, 26, 27,
-  20, 21, 22, 23, 28, 29, 30, 31,
+  0,  1,  2,  3,  8,  9,  10, 11, 4,  5,  6,  7,  12, 13, 14, 15,
+  16, 17, 18, 19, 24, 25, 26, 27, 20, 21, 22, 23, 28, 29, 30, 31,
 };
 static const uint8_t orders_16x16[64] = {
-  0,   1,  4,  5, 16, 17, 20, 21,
-  2,   3,  6,  7, 18, 19, 22, 23,
-  8,   9, 12, 13, 24, 25, 28, 29,
-  10, 11, 14, 15, 26, 27, 30, 31,
-  32, 33, 36, 37, 48, 49, 52, 53,
-  34, 35, 38, 39, 50, 51, 54, 55,
-  40, 41, 44, 45, 56, 57, 60, 61,
-  42, 43, 46, 47, 58, 59, 62, 63,
+  0,  1,  4,  5,  16, 17, 20, 21, 2,  3,  6,  7,  18, 19, 22, 23,
+  8,  9,  12, 13, 24, 25, 28, 29, 10, 11, 14, 15, 26, 27, 30, 31,
+  32, 33, 36, 37, 48, 49, 52, 53, 34, 35, 38, 39, 50, 51, 54, 55,
+  40, 41, 44, 45, 56, 57, 60, 61, 42, 43, 46, 47, 58, 59, 62, 63,
 };
 
 #if CONFIG_EXT_PARTITION
 static const uint8_t orders_16x8[128] = {
-  0,   2,  8, 10,  32,  34,  40,  42,
-  1,   3,  9, 11,  33,  35,  41,  43,
-  4,   6, 12, 14,  36,  38,  44,  46,
-  5,   7, 13, 15,  37,  39,  45,  47,
-  16, 18, 24, 26,  48,  50,  56,  58,
-  17, 19, 25, 27,  49,  51,  57,  59,
-  20, 22, 28, 30,  52,  54,  60,  62,
-  21, 23, 29, 31,  53,  55,  61,  63,
-  64, 66, 72, 74,  96,  98, 104, 106,
-  65, 67, 73, 75,  97,  99, 105, 107,
-  68, 70, 76, 78, 100, 102, 108, 110,
-  69, 71, 77, 79, 101, 103, 109, 111,
-  80, 82, 88, 90, 112, 114, 120, 122,
-  81, 83, 89, 91, 113, 115, 121, 123,
-  84, 86, 92, 94, 116, 118, 124, 126,
-  85, 87, 93, 95, 117, 119, 125, 127,
+  0,  2,  8,  10, 32,  34,  40,  42,  1,  3,  9,  11, 33,  35,  41,  43,
+  4,  6,  12, 14, 36,  38,  44,  46,  5,  7,  13, 15, 37,  39,  45,  47,
+  16, 18, 24, 26, 48,  50,  56,  58,  17, 19, 25, 27, 49,  51,  57,  59,
+  20, 22, 28, 30, 52,  54,  60,  62,  21, 23, 29, 31, 53,  55,  61,  63,
+  64, 66, 72, 74, 96,  98,  104, 106, 65, 67, 73, 75, 97,  99,  105, 107,
+  68, 70, 76, 78, 100, 102, 108, 110, 69, 71, 77, 79, 101, 103, 109, 111,
+  80, 82, 88, 90, 112, 114, 120, 122, 81, 83, 89, 91, 113, 115, 121, 123,
+  84, 86, 92, 94, 116, 118, 124, 126, 85, 87, 93, 95, 117, 119, 125, 127,
 };
 static const uint8_t orders_8x16[128] = {
-  0,   1,  2,  3,  8,  9, 10, 11,  32,  33,  34,  35,  40,  41,  42,  43,
-  4,   5,  6,  7, 12, 13, 14, 15,  36,  37,  38,  39,  44,  45,  46,  47,
-  16, 17, 18, 19, 24, 25, 26, 27,  48,  49,  50,  51,  56,  57,  58,  59,
-  20, 21, 22, 23, 28, 29, 30, 31,  52,  53,  54,  55,  60,  61,  62,  63,
-  64, 65, 66, 67, 72, 73, 74, 75,  96,  97,  98,  99, 104, 105, 106, 107,
+  0,  1,  2,  3,  8,  9,  10, 11, 32,  33,  34,  35,  40,  41,  42,  43,
+  4,  5,  6,  7,  12, 13, 14, 15, 36,  37,  38,  39,  44,  45,  46,  47,
+  16, 17, 18, 19, 24, 25, 26, 27, 48,  49,  50,  51,  56,  57,  58,  59,
+  20, 21, 22, 23, 28, 29, 30, 31, 52,  53,  54,  55,  60,  61,  62,  63,
+  64, 65, 66, 67, 72, 73, 74, 75, 96,  97,  98,  99,  104, 105, 106, 107,
   68, 69, 70, 71, 76, 77, 78, 79, 100, 101, 102, 103, 108, 109, 110, 111,
   80, 81, 82, 83, 88, 89, 90, 91, 112, 113, 114, 115, 120, 121, 122, 123,
   84, 85, 86, 87, 92, 93, 94, 95, 116, 117, 118, 119, 124, 125, 126, 127,
 };
 static const uint8_t orders_8x8[256] = {
-0,     1,   4,   5,  16,  17,  20,  21,  64,  65,  68,  69,  80,  81,  84,  85,
-2,     3,   6,   7,  18,  19,  22,  23,  66,  67,  70,  71,  82,  83,  86,  87,
-8,     9,  12,  13,  24,  25,  28,  29,  72,  73,  76,  77,  88,  89,  92,  93,
-10,   11,  14,  15,  26,  27,  30,  31,  74,  75,  78,  79,  90,  91,  94,  95,
-32,   33,  36,  37,  48,  49,  52,  53,  96,  97, 100, 101, 112, 113, 116, 117,
-34,   35,  38,  39,  50,  51,  54,  55,  98,  99, 102, 103, 114, 115, 118, 119,
-40,   41,  44,  45,  56,  57,  60,  61, 104, 105, 108, 109, 120, 121, 124, 125,
-42,   43,  46,  47,  58,  59,  62,  63, 106, 107, 110, 111, 122, 123, 126, 127,
-128, 129, 132, 133, 144, 145, 148, 149, 192, 193, 196, 197, 208, 209, 212, 213,
-130, 131, 134, 135, 146, 147, 150, 151, 194, 195, 198, 199, 210, 211, 214, 215,
-136, 137, 140, 141, 152, 153, 156, 157, 200, 201, 204, 205, 216, 217, 220, 221,
-138, 139, 142, 143, 154, 155, 158, 159, 202, 203, 206, 207, 218, 219, 222, 223,
-160, 161, 164, 165, 176, 177, 180, 181, 224, 225, 228, 229, 240, 241, 244, 245,
-162, 163, 166, 167, 178, 179, 182, 183, 226, 227, 230, 231, 242, 243, 246, 247,
-168, 169, 172, 173, 184, 185, 188, 189, 232, 233, 236, 237, 248, 249, 252, 253,
-170, 171, 174, 175, 186, 187, 190, 191, 234, 235, 238, 239, 250, 251, 254, 255,
+  0,   1,   4,   5,   16,  17,  20,  21,  64,  65,  68,  69,  80,  81,  84,
+  85,  2,   3,   6,   7,   18,  19,  22,  23,  66,  67,  70,  71,  82,  83,
+  86,  87,  8,   9,   12,  13,  24,  25,  28,  29,  72,  73,  76,  77,  88,
+  89,  92,  93,  10,  11,  14,  15,  26,  27,  30,  31,  74,  75,  78,  79,
+  90,  91,  94,  95,  32,  33,  36,  37,  48,  49,  52,  53,  96,  97,  100,
+  101, 112, 113, 116, 117, 34,  35,  38,  39,  50,  51,  54,  55,  98,  99,
+  102, 103, 114, 115, 118, 119, 40,  41,  44,  45,  56,  57,  60,  61,  104,
+  105, 108, 109, 120, 121, 124, 125, 42,  43,  46,  47,  58,  59,  62,  63,
+  106, 107, 110, 111, 122, 123, 126, 127, 128, 129, 132, 133, 144, 145, 148,
+  149, 192, 193, 196, 197, 208, 209, 212, 213, 130, 131, 134, 135, 146, 147,
+  150, 151, 194, 195, 198, 199, 210, 211, 214, 215, 136, 137, 140, 141, 152,
+  153, 156, 157, 200, 201, 204, 205, 216, 217, 220, 221, 138, 139, 142, 143,
+  154, 155, 158, 159, 202, 203, 206, 207, 218, 219, 222, 223, 160, 161, 164,
+  165, 176, 177, 180, 181, 224, 225, 228, 229, 240, 241, 244, 245, 162, 163,
+  166, 167, 178, 179, 182, 183, 226, 227, 230, 231, 242, 243, 246, 247, 168,
+  169, 172, 173, 184, 185, 188, 189, 232, 233, 236, 237, 248, 249, 252, 253,
+  170, 171, 174, 175, 186, 187, 190, 191, 234, 235, 238, 239, 250, 251, 254,
+  255,
 };
 
+/* clang-format off */
 static const uint8_t *const orders[BLOCK_SIZES] = {
   //                              4X4
                                   orders_8x8,
@@ -160,7 +135,9 @@ static const uint8_t *const orders[BLOCK_SIZES] = {
   // 64x128,      128x64,         128x128
   orders_64x128,  orders_128x64,  orders_128x128
 };
+/* clang-format on */
 #else
+/* clang-format off */
 static const uint8_t *const orders[BLOCK_SIZES] = {
   //                              4X4
                                   orders_16x16,
@@ -173,48 +150,45 @@ static const uint8_t *const orders[BLOCK_SIZES] = {
   // 32X64,       64X32,          64X64
   orders_64x128,  orders_128x64,  orders_128x128
 };
+/* clang-format on */
 #endif  // CONFIG_EXT_PARTITION
 
 #if CONFIG_EXT_PARTITION_TYPES
 static const uint8_t orders_verta_64x64[4] = {
-  0, 2,
-  1, 2,
+  0, 2, 1, 2,
 };
 static const uint8_t orders_verta_32x32[16] = {
-  0,   2,  4,  6,
-  1,   2,  5,  6,
-  8,  10, 12, 14,
-  9,  10, 13, 14,
+  0, 2, 4, 6, 1, 2, 5, 6, 8, 10, 12, 14, 9, 10, 13, 14,
 };
 static const uint8_t orders_verta_16x16[64] = {
-  0,   2,  4,  6, 16, 18, 20, 22,
-  1,   2,  5,  6, 17, 18, 21, 22,
-  8,  10, 12, 14, 24, 26, 28, 30,
-  9,  10, 13, 14, 25, 26, 29, 30,
-  32, 34, 36, 38, 48, 50, 52, 54,
-  33, 34, 37, 38, 49, 50, 53, 54,
-  40, 42, 44, 46, 56, 58, 60, 62,
-  41, 42, 45, 46, 57, 58, 61, 62,
+  0,  2,  4,  6,  16, 18, 20, 22, 1,  2,  5,  6,  17, 18, 21, 22,
+  8,  10, 12, 14, 24, 26, 28, 30, 9,  10, 13, 14, 25, 26, 29, 30,
+  32, 34, 36, 38, 48, 50, 52, 54, 33, 34, 37, 38, 49, 50, 53, 54,
+  40, 42, 44, 46, 56, 58, 60, 62, 41, 42, 45, 46, 57, 58, 61, 62,
 };
 #if CONFIG_EXT_PARTITION
 static const uint8_t orders_verta_8x8[256] = {
-0,     2,   4,   6,  16,  18,  20,  22,  64,  66,  68,  70,  80,  82,  84,  86,
-1,     2,   5,   6,  17,  18,  21,  22,  65,  66,  69,  70,  81,  82,  85,  86,
-8,    10,  12,  14,  24,  26,  28,  30,  72,  74,  76,  78,  88,  90,  92,  94,
-9,    10,  13,  14,  25,  26,  29,  30,  73,  74,  77,  78,  89,  90,  93,  94,
-32,   34,  36,  38,  48,  50,  52,  54,  96,  98, 100, 102, 112, 114, 116, 118,
-33,   34,  37,  38,  49,  50,  53,  54,  97,  98, 101, 102, 113, 114, 117, 118,
-40,   42,  44,  46,  56,  58,  60,  62, 104, 106, 108, 110, 120, 122, 124, 126,
-41,   42,  45,  46,  57,  58,  61,  62, 105, 106, 109, 110, 121, 122, 125, 126,
-128, 130, 132, 134, 144, 146, 148, 150, 192, 194, 196, 198, 208, 210, 212, 214,
-129, 130, 133, 134, 145, 146, 149, 150, 193, 194, 197, 198, 209, 210, 213, 214,
-136, 138, 140, 142, 152, 154, 156, 158, 200, 202, 204, 206, 216, 218, 220, 222,
-137, 138, 141, 142, 153, 154, 157, 158, 201, 202, 205, 206, 217, 218, 221, 222,
-160, 162, 164, 166, 176, 178, 180, 182, 224, 226, 228, 230, 240, 242, 244, 246,
-161, 162, 165, 166, 177, 178, 181, 182, 225, 226, 229, 230, 241, 242, 245, 246,
-168, 170, 172, 174, 184, 186, 188, 190, 232, 234, 236, 238, 248, 250, 252, 254,
-169, 170, 173, 174, 185, 186, 189, 190, 233, 234, 237, 238, 249, 250, 253, 254,
+  0,   2,   4,   6,   16,  18,  20,  22,  64,  66,  68,  70,  80,  82,  84,
+  86,  1,   2,   5,   6,   17,  18,  21,  22,  65,  66,  69,  70,  81,  82,
+  85,  86,  8,   10,  12,  14,  24,  26,  28,  30,  72,  74,  76,  78,  88,
+  90,  92,  94,  9,   10,  13,  14,  25,  26,  29,  30,  73,  74,  77,  78,
+  89,  90,  93,  94,  32,  34,  36,  38,  48,  50,  52,  54,  96,  98,  100,
+  102, 112, 114, 116, 118, 33,  34,  37,  38,  49,  50,  53,  54,  97,  98,
+  101, 102, 113, 114, 117, 118, 40,  42,  44,  46,  56,  58,  60,  62,  104,
+  106, 108, 110, 120, 122, 124, 126, 41,  42,  45,  46,  57,  58,  61,  62,
+  105, 106, 109, 110, 121, 122, 125, 126, 128, 130, 132, 134, 144, 146, 148,
+  150, 192, 194, 196, 198, 208, 210, 212, 214, 129, 130, 133, 134, 145, 146,
+  149, 150, 193, 194, 197, 198, 209, 210, 213, 214, 136, 138, 140, 142, 152,
+  154, 156, 158, 200, 202, 204, 206, 216, 218, 220, 222, 137, 138, 141, 142,
+  153, 154, 157, 158, 201, 202, 205, 206, 217, 218, 221, 222, 160, 162, 164,
+  166, 176, 178, 180, 182, 224, 226, 228, 230, 240, 242, 244, 246, 161, 162,
+  165, 166, 177, 178, 181, 182, 225, 226, 229, 230, 241, 242, 245, 246, 168,
+  170, 172, 174, 184, 186, 188, 190, 232, 234, 236, 238, 248, 250, 252, 254,
+  169, 170, 173, 174, 185, 186, 189, 190, 233, 234, 237, 238, 249, 250, 253,
+  254,
 };
+
+/* clang-format off */
 static const uint8_t *const orders_verta[BLOCK_SIZES] = {
   //                                  4X4
                                       orders_verta_8x8,
@@ -229,7 +203,9 @@ static const uint8_t *const orders_verta[BLOCK_SIZES] = {
   // 64x128,        128x64,           128x128
   orders_64x128,    orders_128x64,    orders_128x128
 };
+/* clang-format on */
 #else
+/* clang-format off */
 static const uint8_t *const orders_verta[BLOCK_SIZES] = {
   //                                      4X4
                                           orders_verta_16x16,
@@ -242,6 +218,7 @@ static const uint8_t *const orders_verta[BLOCK_SIZES] = {
   // 32X64,           64X32,              64X64
   orders_64x128,      orders_128x64,      orders_128x128
 };
+/* clang-format on */
 #endif  // CONFIG_EXT_PARTITION
 #endif  // CONFIG_EXT_PARTITION_TYPES
 
@@ -259,8 +236,7 @@ static int vp10_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
     return 0;
   } else {
     // Handle block size 4x8 and 4x4
-    if (ss_x == 0 && num_4x4_blocks_wide_lookup[bsize] < 2 && x == 0)
-      return 1;
+    if (ss_x == 0 && num_4x4_blocks_wide_lookup[bsize] < 2 && x == 0) return 1;
 
     if (y == 0) {
       const int hl = mi_height_log2_lookup[bsize];
@@ -271,21 +247,18 @@ static int vp10_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
         order = orders_verta[bsize];
       else
 #endif  // CONFIG_EXT_PARTITION_TYPES
-      order = orders[bsize];
+        order = orders[bsize];
 
-      if (x + step < w)
-        return 1;
+      if (x + step < w) return 1;
 
       mi_row = (mi_row & MAX_MIB_MASK) >> hl;
       mi_col = (mi_col & MAX_MIB_MASK) >> wl;
 
       // If top row of coding unit
-      if (mi_row == 0)
-        return 1;
+      if (mi_row == 0) return 1;
 
       // If rightmost column of coding unit
-      if (((mi_col + 1) << wl) >= MAX_MIB_SIZE)
-        return 0;
+      if (((mi_col + 1) << wl) >= MAX_MIB_SIZE) return 0;
 
       my_order = order[((mi_row + 0) << (MAX_MIB_SIZE_LOG2 - wl)) + mi_col + 0];
       tr_order = order[((mi_row - 1) << (MAX_MIB_SIZE_LOG2 - wl)) + mi_col + 1];
@@ -298,8 +271,8 @@ static int vp10_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
 }
 
 static int vp10_has_bottom(BLOCK_SIZE bsize, int mi_row, int mi_col,
-                           int bottom_available, TX_SIZE txsz,
-                           int y, int x, int ss_y) {
+                           int bottom_available, TX_SIZE txsz, int y, int x,
+                           int ss_y) {
   if (!bottom_available || x != 0) {
     return 0;
   } else {
@@ -311,11 +284,9 @@ static int vp10_has_bottom(BLOCK_SIZE bsize, int mi_row, int mi_col,
     int my_order, bl_order;
 
     // Handle block size 8x4 and 4x4
-    if (ss_y == 0 && num_4x4_blocks_high_lookup[bsize] < 2 && y == 0)
-      return 1;
+    if (ss_y == 0 && num_4x4_blocks_high_lookup[bsize] < 2 && y == 0) return 1;
 
-    if (y + step < h)
-      return 1;
+    if (y + step < h) return 1;
 
     mi_row = (mi_row & MAX_MIB_MASK) >> hl;
     mi_col = (mi_col & MAX_MIB_MASK) >> wl;
@@ -323,8 +294,7 @@ static int vp10_has_bottom(BLOCK_SIZE bsize, int mi_row, int mi_col,
     if (mi_col == 0)
       return (mi_row << (hl + !ss_y)) + y + step < (MAX_MIB_SIZE << !ss_y);
 
-    if (((mi_row + 1) << hl) >= MAX_MIB_SIZE)
-      return 0;
+    if (((mi_row + 1) << hl) >= MAX_MIB_SIZE) return 0;
 
     my_order = order[((mi_row + 0) << (MAX_MIB_SIZE_LOG2 - wl)) + mi_col + 0];
     bl_order = order[((mi_row + 1) << (MAX_MIB_SIZE_LOG2 - wl)) + mi_col - 1];
@@ -348,12 +318,12 @@ static intra_high_pred_fn dc_pred_high[2][2][4];
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 static void vp10_init_intra_predictors_internal(void) {
-#define INIT_NO_4X4(p, type) \
-  p[TX_8X8] = vpx_##type##_predictor_8x8; \
+#define INIT_NO_4X4(p, type)                  \
+  p[TX_8X8] = vpx_##type##_predictor_8x8;     \
   p[TX_16X16] = vpx_##type##_predictor_16x16; \
   p[TX_32X32] = vpx_##type##_predictor_32x32
 
-#define INIT_ALL_SIZES(p, type) \
+#define INIT_ALL_SIZES(p, type)           \
   p[TX_4X4] = vpx_##type##_predictor_4x4; \
   INIT_NO_4X4(p, type)
 
@@ -395,16 +365,16 @@ static void vp10_init_intra_predictors_internal(void) {
 #if CONFIG_EXT_INTRA
 
 static const uint8_t ext_intra_extend_modes[FILTER_INTRA_MODES] = {
-  NEED_LEFT | NEED_ABOVE,      // FILTER_DC
-  NEED_LEFT | NEED_ABOVE,      // FILTER_V
-  NEED_LEFT | NEED_ABOVE,      // FILTER_H
-  NEED_LEFT | NEED_ABOVE,      // FILTER_D45
-  NEED_LEFT | NEED_ABOVE,      // FILTER_D135
-  NEED_LEFT | NEED_ABOVE,      // FILTER_D117
-  NEED_LEFT | NEED_ABOVE,      // FILTER_D153
-  NEED_LEFT | NEED_ABOVE,      // FILTER_D207
-  NEED_LEFT | NEED_ABOVE,      // FILTER_D63
-  NEED_LEFT | NEED_ABOVE,      // FILTER_TM
+  NEED_LEFT | NEED_ABOVE,  // FILTER_DC
+  NEED_LEFT | NEED_ABOVE,  // FILTER_V
+  NEED_LEFT | NEED_ABOVE,  // FILTER_H
+  NEED_LEFT | NEED_ABOVE,  // FILTER_D45
+  NEED_LEFT | NEED_ABOVE,  // FILTER_D135
+  NEED_LEFT | NEED_ABOVE,  // FILTER_D117
+  NEED_LEFT | NEED_ABOVE,  // FILTER_D153
+  NEED_LEFT | NEED_ABOVE,  // FILTER_D207
+  NEED_LEFT | NEED_ABOVE,  // FILTER_D63
+  NEED_LEFT | NEED_ABOVE,  // FILTER_TM
 };
 
 static int intra_subpel_interp(int base, int shift, const uint8_t *ref,
@@ -438,8 +408,8 @@ static int intra_subpel_interp(int base, int shift, const uint8_t *ref,
 
 // Directional prediction, zone 1: 0 < angle < 90
 static void dr_prediction_z1(uint8_t *dst, ptrdiff_t stride, int bs,
-                             const uint8_t *above, const uint8_t *left,
-                             int dx, int dy, INTRA_FILTER filter_type) {
+                             const uint8_t *above, const uint8_t *left, int dx,
+                             int dy, INTRA_FILTER filter_type) {
   int r, c, x, base, shift, val;
 
   (void)left;
@@ -492,12 +462,12 @@ static void dr_prediction_z1(uint8_t *dst, ptrdiff_t stride, int bs,
         if (!flags[shift]) {
           const int16_t *filter = vp10_intra_filter_kernels[filter_type][shift];
           vpx_convolve8_horiz(src + pad_size, 2 * bs, buf[shift], 2 * bs,
-                              filter, 16,
-                              NULL, 16, 2 * bs, 2 * bs < 16 ? 2 : 1);
+                              filter, 16, NULL, 16, 2 * bs,
+                              2 * bs < 16 ? 2 : 1);
           flags[shift] = 1;
         }
         memcpy(dst, shift == 0 ? src + pad_size + base : &buf[shift][base],
-            len * sizeof(dst[0]));
+               len * sizeof(dst[0]));
       }
 
       if (len < bs)
@@ -535,8 +505,8 @@ static void dr_prediction_z1(uint8_t *dst, ptrdiff_t stride, int bs,
 
 // Directional prediction, zone 2: 90 < angle < 180
 static void dr_prediction_z2(uint8_t *dst, ptrdiff_t stride, int bs,
-                             const uint8_t *above, const uint8_t *left,
-                             int dx, int dy, INTRA_FILTER filter_type) {
+                             const uint8_t *above, const uint8_t *left, int dx,
+                             int dy, INTRA_FILTER filter_type) {
   int r, c, x, y, shift1, shift2, val, base1, base2;
 
   assert(dx > 0);
@@ -549,14 +519,14 @@ static void dr_prediction_z2(uint8_t *dst, ptrdiff_t stride, int bs,
     for (c = 0; c < bs; ++c, ++base1, y -= dy) {
       if (base1 >= -1) {
         shift1 = x & 0xFF;
-        val = intra_subpel_interp(base1, shift1, above, -1, bs - 1,
-                                  filter_type);
+        val =
+            intra_subpel_interp(base1, shift1, above, -1, bs - 1, filter_type);
       } else {
         base2 = y >> 8;
         if (base2 >= 0) {
           shift2 = y & 0xFF;
-          val = intra_subpel_interp(base2, shift2, left, 0, bs - 1,
-                                    filter_type);
+          val =
+              intra_subpel_interp(base2, shift2, left, 0, bs - 1, filter_type);
         } else {
           val = left[0];
         }
@@ -568,8 +538,8 @@ static void dr_prediction_z2(uint8_t *dst, ptrdiff_t stride, int bs,
 
 // Directional prediction, zone 3: 180 < angle < 270
 static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
-                             const uint8_t *above, const uint8_t *left,
-                             int dx, int dy, INTRA_FILTER filter_type) {
+                             const uint8_t *above, const uint8_t *left, int dx,
+                             int dy, INTRA_FILTER filter_type) {
   int r, c, y, base, shift, val;
 
   (void)above;
@@ -586,10 +556,8 @@ static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
     uint8_t flags[SUBPEL_SHIFTS];
 
     memset(flags, 0, SUBPEL_SHIFTS * sizeof(flags[0]));
-    for (i = 0; i < pad_size; ++i)
-      src[4 * i] = left[0];
-    for (i = 0; i < 2 * bs; ++i)
-      src[4 * (i + pad_size)] = left[i];
+    for (i = 0; i < pad_size; ++i) src[4 * i] = left[0];
+    for (i = 0; i < 2 * bs; ++i) src[4 * (i + pad_size)] = left[i];
     for (i = 0; i < pad_size; ++i)
       src[4 * (i + 2 * bs + pad_size)] = left[2 * bs - 1];
     flags[0] = 1;
@@ -606,7 +574,7 @@ static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
 
       if (len <= 0) {
         for (r = 0; r < bs; ++r) {
-          dst[r * stride + c] = left[ 2 * bs - 1];
+          dst[r * stride + c] = left[2 * bs - 1];
         }
         continue;
       }
@@ -623,9 +591,8 @@ static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
       } else {
         if (!flags[shift]) {
           const int16_t *filter = vp10_intra_filter_kernels[filter_type][shift];
-          vpx_convolve8_vert(src + 4 * pad_size, 4,
-                             buf[0] + 4 * shift, 4 * SUBPEL_SHIFTS, NULL, 16,
-                             filter, 16,
+          vpx_convolve8_vert(src + 4 * pad_size, 4, buf[0] + 4 * shift,
+                             4 * SUBPEL_SHIFTS, NULL, 16, filter, 16,
                              2 * bs < 16 ? 4 : 4, 2 * bs);
           flags[shift] = 1;
         }
@@ -643,7 +610,7 @@ static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
 
       if (len < bs) {
         for (r = len; r < bs; ++r) {
-          dst[r * stride + c] = left[ 2 * bs - 1];
+          dst[r * stride + c] = left[2 * bs - 1];
         }
       }
     }
@@ -662,8 +629,7 @@ static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
         val = ROUND_POWER_OF_TWO(val, 8);
         dst[r * stride + c] = clip_pixel(val);
       } else {
-        for (; r < bs; ++r)
-          dst[r * stride + c] = left[2 * bs - 1];
+        for (; r < bs; ++r) dst[r * stride + c] = left[2 * bs - 1];
         break;
       }
     }
@@ -691,10 +657,10 @@ static inline int get_dx(int angle) {
 // If angle > 180 && angle < 270, dy = -((int)(256 * t));
 static inline int get_dy(int angle) {
   if (angle > 90 && angle < 180) {
-      return dr_intra_derivative[angle - 90];
-    } else if (angle > 180 && angle < 270) {
-      return -dr_intra_derivative[270 - angle];
-    } else {
+    return dr_intra_derivative[angle - 90];
+  } else if (angle > 180 && angle < 270) {
+    return -dr_intra_derivative[270 - angle];
+  } else {
     // In this case, we are not really going to use dy. We may return any value.
     return 1;
   }
@@ -723,13 +689,13 @@ static void dr_predictor(uint8_t *dst, ptrdiff_t stride, TX_SIZE tx_size,
 
 static void filter_intra_predictors_4tap(uint8_t *dst, ptrdiff_t stride, int bs,
                                          const uint8_t *above,
-                                         const uint8_t *left,
-                                         int mode) {
+                                         const uint8_t *left, int mode) {
   int k, r, c;
   int pred[33][65];
   int mean, ipred;
-  const TX_SIZE tx_size = (bs == 32) ? TX_32X32 :
-      ((bs == 16) ? TX_16X16 : ((bs == 8) ? TX_8X8 : (TX_4X4)));
+  const TX_SIZE tx_size =
+      (bs == 32) ? TX_32X32
+                 : ((bs == 16) ? TX_16X16 : ((bs == 8) ? TX_8X8 : (TX_4X4)));
   const int c0 = filter_intra_taps_4[tx_size][mode][0];
   const int c1 = filter_intra_taps_4[tx_size][mode][1];
   const int c2 = filter_intra_taps_4[tx_size][mode][2];
@@ -744,16 +710,14 @@ static void filter_intra_predictors_4tap(uint8_t *dst, ptrdiff_t stride, int bs,
   }
   mean = (mean + bs) / (2 * bs);
 
-  for (r = 0; r < bs; ++r)
-    pred[r + 1][0] = (int)left[r] - mean;
+  for (r = 0; r < bs; ++r) pred[r + 1][0] = (int)left[r] - mean;
 
-  for (c = 0; c < 2 * bs + 1; ++c)
-    pred[0][c] = (int)above[c - 1] - mean;
+  for (c = 0; c < 2 * bs + 1; ++c) pred[0][c] = (int)above[c - 1] - mean;
 
   for (r = 1; r < bs + 1; ++r)
     for (c = 1; c < 2 * bs + 1 - r; ++c) {
       ipred = c0 * pred[r - 1][c] + c1 * pred[r][c - 1] +
-          c2 * pred[r - 1][c - 1] + c3 * pred[r - 1][c + 1];
+              c2 * pred[r - 1][c - 1] + c3 * pred[r - 1][c + 1];
       pred[r][c] = ROUND_POWER_OF_TWO_SIGNED(ipred, FILTER_INTRA_PREC_BITS);
     }
 
@@ -816,21 +780,15 @@ void vp10_tm_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
   filter_intra_predictors_4tap(dst, stride, bs, above, left, TM_PRED);
 }
 
-static void filter_intra_predictors(int mode, uint8_t *dst,
-                                    ptrdiff_t stride, int bs,
-                                    const uint8_t *above, const uint8_t *left) {
+static void filter_intra_predictors(int mode, uint8_t *dst, ptrdiff_t stride,
+                                    int bs, const uint8_t *above,
+                                    const uint8_t *left) {
   switch (mode) {
-    case DC_PRED:
-      vp10_dc_filter_predictor(dst, stride, bs, above, left);
-      break;
-    case V_PRED:
-      vp10_v_filter_predictor(dst, stride, bs, above, left);
-      break;
-    case H_PRED:
-      vp10_h_filter_predictor(dst, stride, bs, above, left);
-      break;
+    case DC_PRED: vp10_dc_filter_predictor(dst, stride, bs, above, left); break;
+    case V_PRED: vp10_v_filter_predictor(dst, stride, bs, above, left); break;
+    case H_PRED: vp10_h_filter_predictor(dst, stride, bs, above, left); break;
     case D45_PRED:
-        vp10_d45_filter_predictor(dst, stride, bs, above, left);
+      vp10_d45_filter_predictor(dst, stride, bs, above, left);
       break;
     case D135_PRED:
       vp10_d135_filter_predictor(dst, stride, bs, above, left);
@@ -839,7 +797,7 @@ static void filter_intra_predictors(int mode, uint8_t *dst,
       vp10_d117_filter_predictor(dst, stride, bs, above, left);
       break;
     case D153_PRED:
-        vp10_d153_filter_predictor(dst, stride, bs, above, left);
+      vp10_d153_filter_predictor(dst, stride, bs, above, left);
       break;
     case D207_PRED:
       vp10_d207_filter_predictor(dst, stride, bs, above, left);
@@ -847,11 +805,8 @@ static void filter_intra_predictors(int mode, uint8_t *dst,
     case D63_PRED:
       vp10_d63_filter_predictor(dst, stride, bs, above, left);
       break;
-    case TM_PRED:
-      vp10_tm_filter_predictor(dst, stride, bs, above, left);
-      break;
-    default:
-      assert(0);
+    case TM_PRED: vp10_tm_filter_predictor(dst, stride, bs, above, left); break;
+    default: assert(0);
   }
 }
 
@@ -939,7 +894,7 @@ static void highbd_dr_prediction_z2(uint16_t *dst, ptrdiff_t stride, int bs,
         y = (r << 8) - x * dy;
         base = y >> 8;
         if (base >= 0) {
-          shift = y - (base  << 8);
+          shift = y - (base << 8);
           val = highbd_intra_subpel_interp(base, shift, left, 0, bs - 1,
                                            filter_type);
         } else {
@@ -982,24 +937,24 @@ static void highbd_dr_prediction_z3(uint16_t *dst, ptrdiff_t stride, int bs,
   }
 }
 
-static INLINE void highbd_v_predictor(uint16_t *dst, ptrdiff_t stride,
-                                      int bs, const uint16_t *above,
+static INLINE void highbd_v_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
+                                      const uint16_t *above,
                                       const uint16_t *left, int bd) {
   int r;
-  (void) left;
-  (void) bd;
+  (void)left;
+  (void)bd;
   for (r = 0; r < bs; r++) {
     memcpy(dst, above, bs * sizeof(uint16_t));
     dst += stride;
   }
 }
 
-static INLINE void highbd_h_predictor(uint16_t *dst, ptrdiff_t stride,
-                                      int bs, const uint16_t *above,
+static INLINE void highbd_h_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
+                                      const uint16_t *above,
                                       const uint16_t *left, int bd) {
   int r;
-  (void) above;
-  (void) bd;
+  (void)above;
+  (void)bd;
   for (r = 0; r < bs; r++) {
     vpx_memset16(dst, left[r], bs);
     dst += stride;
@@ -1033,8 +988,9 @@ static void highbd_filter_intra_predictors_4tap(uint16_t *dst, ptrdiff_t stride,
   int k, r, c;
   int pred[33][65];
   int mean, ipred;
-  const TX_SIZE tx_size = (bs == 32) ? TX_32X32 :
-      ((bs == 16) ? TX_16X16 : ((bs == 8) ? TX_8X8 : (TX_4X4)));
+  const TX_SIZE tx_size =
+      (bs == 32) ? TX_32X32
+                 : ((bs == 16) ? TX_16X16 : ((bs == 8) ? TX_8X8 : (TX_4X4)));
   const int c0 = filter_intra_taps_4[tx_size][mode][0];
   const int c1 = filter_intra_taps_4[tx_size][mode][1];
   const int c2 = filter_intra_taps_4[tx_size][mode][2];
@@ -1049,16 +1005,14 @@ static void highbd_filter_intra_predictors_4tap(uint16_t *dst, ptrdiff_t stride,
   }
   mean = (mean + bs) / (2 * bs);
 
-  for (r = 0; r < bs; ++r)
-    pred[r + 1][0] = (int)left[r] - mean;
+  for (r = 0; r < bs; ++r) pred[r + 1][0] = (int)left[r] - mean;
 
-  for (c = 0; c < 2 * bs + 1; ++c)
-    pred[0][c] = (int)above[c - 1] - mean;
+  for (c = 0; c < 2 * bs + 1; ++c) pred[0][c] = (int)above[c - 1] - mean;
 
   for (r = 1; r < bs + 1; ++r)
     for (c = 1; c < 2 * bs + 1 - r; ++c) {
       ipred = c0 * pred[r - 1][c] + c1 * pred[r][c - 1] +
-          c2 * pred[r - 1][c - 1] + c3 * pred[r - 1][c + 1];
+              c2 * pred[r - 1][c - 1] + c3 * pred[r - 1][c + 1];
       pred[r][c] = ROUND_POWER_OF_TWO_SIGNED(ipred, FILTER_INTRA_PREC_BITS);
     }
 
@@ -1071,29 +1025,27 @@ static void highbd_filter_intra_predictors_4tap(uint16_t *dst, ptrdiff_t stride,
   }
 }
 
-void vp10_highbd_dc_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
-                                       int bs, const uint16_t *above,
+void vp10_highbd_dc_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
+                                       const uint16_t *above,
                                        const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, DC_PRED,
                                       bd);
 }
 
-void vp10_highbd_v_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
-                                      int bs, const uint16_t *above,
+void vp10_highbd_v_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
+                                      const uint16_t *above,
                                       const uint16_t *left, int bd) {
-  highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, V_PRED,
-                                      bd);
+  highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, V_PRED, bd);
 }
 
-void vp10_highbd_h_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
-                                      int bs, const uint16_t *above,
+void vp10_highbd_h_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
+                                      const uint16_t *above,
                                       const uint16_t *left, int bd) {
-  highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, H_PRED,
-                                      bd);
+  highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, H_PRED, bd);
 }
 
-void vp10_highbd_d45_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
-                                        int bs, const uint16_t *above,
+void vp10_highbd_d45_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
+                                        const uint16_t *above,
                                         const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, D45_PRED,
                                       bd);
@@ -1127,15 +1079,15 @@ void vp10_highbd_d207_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
                                       bd);
 }
 
-void vp10_highbd_d63_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
-                                        int bs, const uint16_t *above,
+void vp10_highbd_d63_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
+                                        const uint16_t *above,
                                         const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, D63_PRED,
                                       bd);
 }
 
-void vp10_highbd_tm_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
-                                       int bs, const uint16_t *above,
+void vp10_highbd_tm_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
+                                       const uint16_t *above,
                                        const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, TM_PRED,
                                       bd);
@@ -1156,7 +1108,7 @@ static void highbd_filter_intra_predictors(int mode, uint16_t *dst,
       vp10_highbd_h_filter_predictor(dst, stride, bs, above, left, bd);
       break;
     case D45_PRED:
-        vp10_highbd_d45_filter_predictor(dst, stride, bs, above, left, bd);
+      vp10_highbd_d45_filter_predictor(dst, stride, bs, above, left, bd);
       break;
     case D135_PRED:
       vp10_highbd_d135_filter_predictor(dst, stride, bs, above, left, bd);
@@ -1165,7 +1117,7 @@ static void highbd_filter_intra_predictors(int mode, uint16_t *dst,
       vp10_highbd_d117_filter_predictor(dst, stride, bs, above, left, bd);
       break;
     case D153_PRED:
-        vp10_highbd_d153_filter_predictor(dst, stride, bs, above, left, bd);
+      vp10_highbd_d153_filter_predictor(dst, stride, bs, above, left, bd);
       break;
     case D207_PRED:
       vp10_highbd_d207_filter_predictor(dst, stride, bs, above, left, bd);
@@ -1176,24 +1128,17 @@ static void highbd_filter_intra_predictors(int mode, uint16_t *dst,
     case TM_PRED:
       vp10_highbd_tm_filter_predictor(dst, stride, bs, above, left, bd);
       break;
-    default:
-      assert(0);
+    default: assert(0);
   }
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_EXT_INTRA
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static void build_intra_predictors_high(const MACROBLOCKD *xd,
-                                        const uint8_t *ref8,
-                                        int ref_stride,
-                                        uint8_t *dst8,
-                                        int dst_stride,
-                                        PREDICTION_MODE mode,
-                                        TX_SIZE tx_size,
-                                        int n_top_px, int n_topright_px,
-                                        int n_left_px, int n_bottomleft_px,
-                                        int plane) {
+static void build_intra_predictors_high(
+    const MACROBLOCKD *xd, const uint8_t *ref8, int ref_stride, uint8_t *dst8,
+    int dst_stride, PREDICTION_MODE mode, TX_SIZE tx_size, int n_top_px,
+    int n_topright_px, int n_left_px, int n_bottomleft_px, int plane) {
   int i;
   uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
   uint16_t *ref = CONVERT_TO_SHORTPTR(ref8);
@@ -1206,11 +1151,11 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   int need_above = extend_modes[mode] & NEED_ABOVE;
   const uint16_t *above_ref = ref - ref_stride;
   int base = 128 << (xd->bd - 8);
-  // 127 127 127 .. 127 127 127 127 127 127
-  // 129  A   B  ..  Y   Z
-  // 129  C   D  ..  W   X
-  // 129  E   F  ..  U   V
-  // 129  G   H  ..  S   T   T   T   T   T
+// 127 127 127 .. 127 127 127 127 127 127
+// 129  A   B  ..  Y   Z
+// 129  C   D  ..  W   X
+// 129  E   F  ..  U   V
+// 129  G   H  ..  S   T   T   T   T   T
 
 #if CONFIG_EXT_INTRA
   const EXT_INTRA_MODE_INFO *ext_intra_mode_info =
@@ -1222,7 +1167,7 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   if (mode != DC_PRED && mode != TM_PRED &&
       xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
     p_angle = mode_to_angle_map[mode] +
-        xd->mi[0]->mbmi.angle_delta[plane != 0] * ANGLE_STEP;
+              xd->mi[0]->mbmi.angle_delta[plane != 0] * ANGLE_STEP;
     if (p_angle <= 90)
       need_above = 1, need_left = 0;
     else if (p_angle < 180)
@@ -1239,7 +1184,7 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   }
 #endif  // CONFIG_EXT_INTRA
 
-  (void) plane;
+  (void)plane;
   assert(n_top_px >= 0);
   assert(n_topright_px >= 0);
   assert(n_left_px >= 0);
@@ -1260,10 +1205,10 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
 #if CONFIG_EXT_INTRA
     int need_bottom;
     if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
-        need_bottom = 0;
+      need_bottom = 0;
     } else if (mode != DC_PRED && mode != TM_PRED &&
-        xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
-        need_bottom = p_angle > 180;
+               xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
+      need_bottom = p_angle > 180;
     } else {
       need_bottom = !!(extend_modes[mode] & NEED_BOTTOMLEFT);
     }
@@ -1272,8 +1217,7 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
 #endif  // CONFIG_EXT_INTRA
     i = 0;
     if (n_left_px > 0) {
-      for (; i < n_left_px; i++)
-        left_col[i] = ref[i * ref_stride - 1];
+      for (; i < n_left_px; i++) left_col[i] = ref[i * ref_stride - 1];
       if (need_bottom && n_bottomleft_px > 0) {
         assert(i == bs);
         for (; i < bs + n_bottomleft_px; i++)
@@ -1293,7 +1237,7 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
     if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
       need_right = 1;
     } else if (mode != DC_PRED && mode != TM_PRED &&
-        xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
+               xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
       need_right = p_angle < 90;
     } else {
       need_right = !!(extend_modes[mode] & NEED_ABOVERIGHT);
@@ -1320,21 +1264,21 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   if (ext_intra_mode_info->use_ext_intra_mode[plane != 0] ||
       (extend_modes[mode] & NEED_ABOVELEFT) ||
       (mode != DC_PRED && mode != TM_PRED &&
-        xd->mi[0]->mbmi.sb_type >= BLOCK_8X8)) {
-    above_row[-1] = n_top_px > 0 ?
-        (n_left_px > 0 ? above_ref[-1] : base + 1) : base - 1;
+       xd->mi[0]->mbmi.sb_type >= BLOCK_8X8)) {
+    above_row[-1] =
+        n_top_px > 0 ? (n_left_px > 0 ? above_ref[-1] : base + 1) : base - 1;
   }
 #else
   if ((extend_modes[mode] & NEED_ABOVELEFT)) {
-    above_row[-1] = n_top_px > 0 ?
-        (n_left_px > 0 ? above_ref[-1] : base + 1) : base - 1;
+    above_row[-1] =
+        n_top_px > 0 ? (n_left_px > 0 ? above_ref[-1] : base + 1) : base - 1;
   }
 #endif  // CONFIG_EXT_INTRA
 
 #if CONFIG_EXT_INTRA
   if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
     highbd_filter_intra_predictors(ext_intra_mode, dst, dst_stride, bs,
-        const_above_row, left_col, xd->bd);
+                                   const_above_row, left_col, xd->bd);
     return;
   }
 
@@ -1343,17 +1287,16 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
     INTRA_FILTER filter = INTRA_FILTER_LINEAR;
     if (plane == 0 && vp10_is_intra_filter_switchable(p_angle))
       filter = xd->mi[0]->mbmi.intra_filter;
-    highbd_dr_predictor(dst, dst_stride, bs, const_above_row, left_col,
-                        p_angle, xd->bd, filter);
+    highbd_dr_predictor(dst, dst_stride, bs, const_above_row, left_col, p_angle,
+                        xd->bd, filter);
     return;
   }
 #endif  // CONFIG_EXT_INTRA
 
   // predict
   if (mode == DC_PRED) {
-    dc_pred_high[n_left_px > 0][n_top_px > 0][tx_size](dst, dst_stride,
-                                                       const_above_row,
-                                                       left_col, xd->bd);
+    dc_pred_high[n_left_px > 0][n_top_px > 0][tx_size](
+        dst, dst_stride, const_above_row, left_col, xd->bd);
   } else {
     pred_high[mode][tx_size](dst, dst_stride, const_above_row, left_col,
                              xd->bd);
@@ -1386,7 +1329,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
   if (mode != DC_PRED && mode != TM_PRED &&
       xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
     p_angle = mode_to_angle_map[mode] +
-        xd->mi[0]->mbmi.angle_delta[plane != 0] * ANGLE_STEP;
+              xd->mi[0]->mbmi.angle_delta[plane != 0] * ANGLE_STEP;
     if (p_angle <= 90)
       need_above = 1, need_left = 0;
     else if (p_angle < 180)
@@ -1410,8 +1353,8 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
   // 129  G   H  ..  S   T   T   T   T   T
   // ..
 
-  (void) xd;
-  (void) plane;
+  (void)xd;
+  (void)plane;
   assert(n_top_px >= 0);
   assert(n_topright_px >= 0);
   assert(n_left_px >= 0);
@@ -1434,7 +1377,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
     if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
       need_bottom = 0;
     } else if (mode != DC_PRED && mode != TM_PRED &&
-        xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
+               xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
       need_bottom = p_angle > 180;
     } else {
       need_bottom = !!(extend_modes[mode] & NEED_BOTTOMLEFT);
@@ -1444,8 +1387,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
 #endif  // CONFIG_EXT_INTRA
     i = 0;
     if (n_left_px > 0) {
-      for (; i < n_left_px; i++)
-        left_col[i] = ref[i * ref_stride - 1];
+      for (; i < n_left_px; i++) left_col[i] = ref[i * ref_stride - 1];
       if (need_bottom && n_bottomleft_px > 0) {
         assert(i == bs);
         for (; i < bs + n_bottomleft_px; i++)
@@ -1465,7 +1407,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
     if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
       need_right = 1;
     } else if (mode != DC_PRED && mode != TM_PRED &&
-        xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
+               xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
       need_right = p_angle < 90;
     } else {
       need_right = !!(extend_modes[mode] & NEED_ABOVERIGHT);
@@ -1492,7 +1434,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
   if (ext_intra_mode_info->use_ext_intra_mode[plane != 0] ||
       (extend_modes[mode] & NEED_ABOVELEFT) ||
       (mode != DC_PRED && mode != TM_PRED &&
-          xd->mi[0]->mbmi.sb_type >= BLOCK_8X8)) {
+       xd->mi[0]->mbmi.sb_type >= BLOCK_8X8)) {
     above_row[-1] = n_top_px > 0 ? (n_left_px > 0 ? above_ref[-1] : 129) : 127;
   }
 #else
@@ -1530,9 +1472,9 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
 
 void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
                               TX_SIZE tx_size, PREDICTION_MODE mode,
-                              const uint8_t *ref, int ref_stride,
-                              uint8_t *dst, int dst_stride,
-                              int col_off, int row_off, int plane) {
+                              const uint8_t *ref, int ref_stride, uint8_t *dst,
+                              int dst_stride, int col_off, int row_off,
+                              int plane) {
   const BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   const struct macroblockd_plane *const pd = &xd->plane[plane];
   const int txw = num_4x4_blocks_wide_txsize_lookup[tx_size];
@@ -1551,29 +1493,27 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
   const int txhpx = 4 * txh;
   // Distance between the right edge of this prediction block to
   // the frame right edge
-  const int xr = (xd->mb_to_right_edge >> (3 + pd->subsampling_x)) +
-      (wpx - x - txwpx);
+  const int xr =
+      (xd->mb_to_right_edge >> (3 + pd->subsampling_x)) + (wpx - x - txwpx);
   // Distance between the bottom edge of this prediction block to
   // the frame bottom edge
-  const int yd = (xd->mb_to_bottom_edge >> (3 + pd->subsampling_y)) +
-      (hpx - y - txhpx);
+  const int yd =
+      (xd->mb_to_bottom_edge >> (3 + pd->subsampling_y)) + (hpx - y - txhpx);
   const int right_available =
       (mi_col + ((col_off + txw) >> (1 - pd->subsampling_x))) <
       xd->tile.mi_col_end;
 #if CONFIG_EXT_PARTITION_TYPES
   const PARTITION_TYPE partition = xd->mi[0]->mbmi.partition;
 #endif
-  const int have_right = vp10_has_right(bsize, mi_row, mi_col,
-                                        right_available,
+  const int have_right =
+      vp10_has_right(bsize, mi_row, mi_col, right_available,
 #if CONFIG_EXT_PARTITION_TYPES
-                                        partition,
+                     partition,
 #endif
-                                        tx_size, row_off, col_off,
-                                        pd->subsampling_x);
-  const int have_bottom = vp10_has_bottom(bsize, mi_row, mi_col,
-                                          yd > 0,
-                                          tx_size, row_off, col_off,
-                                          pd->subsampling_y);
+                     tx_size, row_off, col_off, pd->subsampling_x);
+  const int have_bottom =
+      vp10_has_bottom(bsize, mi_row, mi_col, yd > 0, tx_size, row_off, col_off,
+                      pd->subsampling_y);
 
   if (xd->mi[0]->mbmi.palette_mode_info.palette_size[plane != 0] > 0) {
     const int bs = 4 * num_4x4_blocks_wide_txsize_lookup[tx_size];
@@ -1582,10 +1522,10 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
     uint8_t *map = NULL;
 #if CONFIG_VP9_HIGHBITDEPTH
     uint16_t *palette = xd->mi[0]->mbmi.palette_mode_info.palette_colors +
-        plane * PALETTE_MAX_SIZE;
+                        plane * PALETTE_MAX_SIZE;
 #else
     uint8_t *palette = xd->mi[0]->mbmi.palette_mode_info.palette_colors +
-        plane * PALETTE_MAX_SIZE;
+                       plane * PALETTE_MAX_SIZE;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
     map = xd->plane[plane != 0].color_index_map;
@@ -1595,8 +1535,7 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
       uint16_t *dst16 = CONVERT_TO_SHORTPTR(dst);
       for (r = 0; r < bs; ++r)
         for (c = 0; c < bs; ++c)
-          dst16[r * dst_stride + c] =
-              palette[map[(r + y) * stride + c + x]];
+          dst16[r * dst_stride + c] = palette[map[(r + y) * stride + c + x]];
     } else {
       for (r = 0; r < bs; ++r)
         for (c = 0; c < bs; ++c)
@@ -1613,18 +1552,16 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    build_intra_predictors_high(xd, ref, ref_stride, dst, dst_stride, mode,
-                                tx_size,
-                                have_top ? VPXMIN(txwpx, xr + txwpx) : 0,
-                                have_top && have_right ? VPXMIN(txwpx, xr) : 0,
-                                have_left ? VPXMIN(txhpx, yd + txhpx) : 0,
-                                have_bottom && have_left ?
-                                  VPXMIN(txhpx, yd) : 0, plane);
+    build_intra_predictors_high(
+        xd, ref, ref_stride, dst, dst_stride, mode, tx_size,
+        have_top ? VPXMIN(txwpx, xr + txwpx) : 0,
+        have_top && have_right ? VPXMIN(txwpx, xr) : 0,
+        have_left ? VPXMIN(txhpx, yd + txhpx) : 0,
+        have_bottom && have_left ? VPXMIN(txhpx, yd) : 0, plane);
     return;
   }
 #endif
-  build_intra_predictors(xd, ref, ref_stride, dst, dst_stride, mode,
-                         tx_size,
+  build_intra_predictors(xd, ref, ref_stride, dst, dst_stride, mode, tx_size,
                          have_top ? VPXMIN(txwpx, xr + txwpx) : 0,
                          have_top && have_right ? VPXMIN(txwpx, xr) : 0,
                          have_left ? VPXMIN(txhpx, yd + txhpx) : 0,

@@ -14,59 +14,57 @@
 #include "vpx_dsp/mips/inv_txfm_msa.h"
 
 void vp10_iht8x8_64_add_msa(const int16_t *input, uint8_t *dst,
-                           int32_t dst_stride, int32_t tx_type) {
+                            int32_t dst_stride, int32_t tx_type) {
   v8i16 in0, in1, in2, in3, in4, in5, in6, in7;
 
   /* load vector elements of 8x8 block */
   LD_SH8(input, 8, in0, in1, in2, in3, in4, in5, in6, in7);
 
-  TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7,
-                     in0, in1, in2, in3, in4, in5, in6, in7);
+  TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2, in3,
+                     in4, in5, in6, in7);
 
   switch (tx_type) {
     case DCT_DCT:
       /* DCT in horizontal */
-      VPX_IDCT8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7,
-                     in0, in1, in2, in3, in4, in5, in6, in7);
+      VPX_IDCT8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2, in3,
+                     in4, in5, in6, in7);
       /* DCT in vertical */
-      TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7,
-                         in0, in1, in2, in3, in4, in5, in6, in7);
-      VPX_IDCT8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7,
-                     in0, in1, in2, in3, in4, in5, in6, in7);
+      TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2,
+                         in3, in4, in5, in6, in7);
+      VPX_IDCT8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2, in3,
+                     in4, in5, in6, in7);
       break;
     case ADST_DCT:
       /* DCT in horizontal */
-      VPX_IDCT8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7,
-                     in0, in1, in2, in3, in4, in5, in6, in7);
+      VPX_IDCT8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2, in3,
+                     in4, in5, in6, in7);
       /* ADST in vertical */
-      TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7,
-                         in0, in1, in2, in3, in4, in5, in6, in7);
-      VPX_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
-                in0, in1, in2, in3, in4, in5, in6, in7);
+      TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2,
+                         in3, in4, in5, in6, in7);
+      VPX_ADST8(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2, in3, in4,
+                in5, in6, in7);
       break;
     case DCT_ADST:
       /* ADST in horizontal */
-      VPX_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
-                in0, in1, in2, in3, in4, in5, in6, in7);
+      VPX_ADST8(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2, in3, in4,
+                in5, in6, in7);
       /* DCT in vertical */
-      TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7,
-                         in0, in1, in2, in3, in4, in5, in6, in7);
-      VPX_IDCT8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7,
-                     in0, in1, in2, in3, in4, in5, in6, in7);
+      TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2,
+                         in3, in4, in5, in6, in7);
+      VPX_IDCT8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2, in3,
+                     in4, in5, in6, in7);
       break;
     case ADST_ADST:
       /* ADST in horizontal */
-      VPX_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
-                in0, in1, in2, in3, in4, in5, in6, in7);
+      VPX_ADST8(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2, in3, in4,
+                in5, in6, in7);
       /* ADST in vertical */
-      TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7,
-                         in0, in1, in2, in3, in4, in5, in6, in7);
-      VPX_ADST8(in0, in1, in2, in3, in4, in5, in6, in7,
-                in0, in1, in2, in3, in4, in5, in6, in7);
+      TRANSPOSE8x8_SH_SH(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2,
+                         in3, in4, in5, in6, in7);
+      VPX_ADST8(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2, in3, in4,
+                in5, in6, in7);
       break;
-    default:
-      assert(0);
-      break;
+    default: assert(0); break;
   }
 
   /* final rounding (add 2^4, divide by 2^5) and shift */

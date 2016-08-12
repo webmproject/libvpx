@@ -15,11 +15,10 @@
 #define COMPANDED_MVREF_THRESH 8
 
 const vpx_tree_index vp10_mv_joint_tree[TREE_SIZE(MV_JOINTS)] = {
-  -MV_JOINT_ZERO, 2,
-  -MV_JOINT_HNZVZ, 4,
-  -MV_JOINT_HZVNZ, -MV_JOINT_HNZVNZ
+  -MV_JOINT_ZERO, 2, -MV_JOINT_HNZVZ, 4, -MV_JOINT_HZVNZ, -MV_JOINT_HNZVNZ
 };
 
+/* clang-format off */
 const vpx_tree_index vp10_mv_class_tree[TREE_SIZE(MV_CLASSES)] = {
   -MV_CLASS_0, 2,
   -MV_CLASS_1, 4,
@@ -32,104 +31,97 @@ const vpx_tree_index vp10_mv_class_tree[TREE_SIZE(MV_CLASSES)] = {
   -MV_CLASS_7, -MV_CLASS_8,
   -MV_CLASS_9, -MV_CLASS_10,
 };
+/* clang-format on */
 
 const vpx_tree_index vp10_mv_class0_tree[TREE_SIZE(CLASS0_SIZE)] = {
   -0, -1,
 };
 
-const vpx_tree_index vp10_mv_fp_tree[TREE_SIZE(MV_FP_SIZE)] = {
-  -0, 2,
-  -1, 4,
-  -2, -3
-};
+const vpx_tree_index vp10_mv_fp_tree[TREE_SIZE(MV_FP_SIZE)] = { -0, 2,  -1,
+                                                                4,  -2, -3 };
 
 static const nmv_context default_nmv_context = {
 #if CONFIG_REF_MV
-  {1, 64, 96},
+  { 1, 64, 96 },
   128,
 #else
-  {32, 64, 96},
+  { 32, 64, 96 },
 #endif
-  {
-    { // Vertical component
-      128,                                                  // sign
-      {224, 144, 192, 168, 192, 176, 192, 198, 198, 245},   // class
-      {216},                                                // class0
-      {136, 140, 148, 160, 176, 192, 224, 234, 234, 240},   // bits
-      {{128, 128, 64}, {96, 112, 64}},                      // class0_fp
-      {64, 96, 64},                                         // fp
-      160,                                                  // class0_hp bit
-      128,                                                  // hp
+  { {
+        // Vertical component
+        128,                                                   // sign
+        { 224, 144, 192, 168, 192, 176, 192, 198, 198, 245 },  // class
+        { 216 },                                               // class0
+        { 136, 140, 148, 160, 176, 192, 224, 234, 234, 240 },  // bits
+        { { 128, 128, 64 }, { 96, 112, 64 } },                 // class0_fp
+        { 64, 96, 64 },                                        // fp
+        160,                                                   // class0_hp bit
+        128,                                                   // hp
     },
-    { // Horizontal component
-      128,                                                  // sign
-      {216, 128, 176, 160, 176, 176, 192, 198, 198, 208},   // class
-      {208},                                                // class0
-      {136, 140, 148, 160, 176, 192, 224, 234, 234, 240},   // bits
-      {{128, 128, 64}, {96, 112, 64}},                      // class0_fp
-      {64, 96, 64},                                         // fp
-      160,                                                  // class0_hp bit
-      128,                                                  // hp
-    }
-  },
+    {
+        // Horizontal component
+        128,                                                   // sign
+        { 216, 128, 176, 160, 176, 176, 192, 198, 198, 208 },  // class
+        { 208 },                                               // class0
+        { 136, 140, 148, 160, 176, 192, 224, 234, 234, 240 },  // bits
+        { { 128, 128, 64 }, { 96, 112, 64 } },                 // class0_fp
+        { 64, 96, 64 },                                        // fp
+        160,                                                   // class0_hp bit
+        128,                                                   // hp
+    } },
 };
 
 static const uint8_t log_in_base_2[] = {
-  0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
-  4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-  5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6,
-  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-  6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10
+  0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+  4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+  5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8,
+  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10
 };
 
 #if CONFIG_GLOBAL_MOTION
-const vpx_tree_index vp10_global_motion_types_tree
-          [TREE_SIZE(GLOBAL_MOTION_TYPES)] = {
-          -GLOBAL_ZERO, 2,
-          -GLOBAL_TRANSLATION, 4,
-          -GLOBAL_ROTZOOM, -GLOBAL_AFFINE
-};
+const vpx_tree_index
+    vp10_global_motion_types_tree[TREE_SIZE(GLOBAL_MOTION_TYPES)] = {
+      -GLOBAL_ZERO, 2, -GLOBAL_TRANSLATION, 4, -GLOBAL_ROTZOOM, -GLOBAL_AFFINE
+    };
 
-static const vpx_prob default_global_motion_types_prob
-                 [GLOBAL_MOTION_TYPES - 1] = {224, 128, 128};
+static const vpx_prob default_global_motion_types_prob[GLOBAL_MOTION_TYPES -
+                                                       1] = { 224, 128, 128 };
 #endif  // CONFIG_GLOBAL_MOTION
 
 static INLINE int mv_class_base(MV_CLASS_TYPE c) {
@@ -137,48 +129,45 @@ static INLINE int mv_class_base(MV_CLASS_TYPE c) {
 }
 
 MV_CLASS_TYPE vp10_get_mv_class(int z, int *offset) {
-  const MV_CLASS_TYPE c = (z >= CLASS0_SIZE * 4096) ?
-      MV_CLASS_10 : (MV_CLASS_TYPE)log_in_base_2[z >> 3];
-  if (offset)
-    *offset = z - mv_class_base(c);
+  const MV_CLASS_TYPE c = (z >= CLASS0_SIZE * 4096)
+                              ? MV_CLASS_10
+                              : (MV_CLASS_TYPE)log_in_base_2[z >> 3];
+  if (offset) *offset = z - mv_class_base(c);
   return c;
 }
 
 // TODO(jingning): This idle function is intentionally left as is for
 // experimental purpose.
 int vp10_use_mv_hp(const MV *ref) {
-  (void) ref;
+  (void)ref;
   return 1;
 }
 
-static void inc_mv_component(int v, nmv_component_counts *comp_counts,
-                             int incr, int usehp) {
+static void inc_mv_component(int v, nmv_component_counts *comp_counts, int incr,
+                             int usehp) {
   int s, z, c, o, d, e, f;
-  assert(v != 0);            /* should not be zero */
+  assert(v != 0); /* should not be zero */
   s = v < 0;
   comp_counts->sign[s] += incr;
-  z = (s ? -v : v) - 1;       /* magnitude - 1 */
+  z = (s ? -v : v) - 1; /* magnitude - 1 */
 
   c = vp10_get_mv_class(z, &o);
   comp_counts->classes[c] += incr;
 
-  d = (o >> 3);               /* int mv data */
-  f = (o >> 1) & 3;           /* fractional pel mv data */
-  e = (o & 1);                /* high precision mv data */
+  d = (o >> 3);     /* int mv data */
+  f = (o >> 1) & 3; /* fractional pel mv data */
+  e = (o & 1);      /* high precision mv data */
 
   if (c == MV_CLASS_0) {
     comp_counts->class0[d] += incr;
     comp_counts->class0_fp[d][f] += incr;
-    if (usehp)
-      comp_counts->class0_hp[e] += incr;
+    if (usehp) comp_counts->class0_hp[e] += incr;
   } else {
     int i;
     int b = c + CLASS0_BITS - 1;  // number of bits
-    for (i = 0; i < b; ++i)
-      comp_counts->bits[i][((d >> i) & 1)] += incr;
+    for (i = 0; i < b; ++i) comp_counts->bits[i][((d >> i) & 1)] += incr;
     comp_counts->fp[f] += incr;
-    if (usehp)
-      comp_counts->hp[e] += incr;
+    if (usehp) comp_counts->hp[e] += incr;
   }
 }
 
@@ -188,8 +177,7 @@ void vp10_inc_mv(const MV *mv, nmv_context_counts *counts, const int usehp) {
 
 #if CONFIG_REF_MV
     ++counts->zero_rmv[j == MV_JOINT_ZERO];
-    if (j == MV_JOINT_ZERO)
-      return;
+    if (j == MV_JOINT_ZERO) return;
 #endif
     ++counts->joints[j];
 
@@ -238,8 +226,8 @@ void vp10_adapt_mv_probs(VP10_COMMON *cm, int allow_hp) {
       vpx_tree_merge_probs(vp10_mv_fp_tree, pre_comp->fp, c->fp, comp->fp);
 
       if (allow_hp) {
-        comp->class0_hp = vp10_mode_mv_merge_probs(pre_comp->class0_hp,
-                                                   c->class0_hp);
+        comp->class0_hp =
+            vp10_mode_mv_merge_probs(pre_comp->class0_hp, c->class0_hp);
         comp->hp = vp10_mode_mv_merge_probs(pre_comp->hp, c->hp);
       }
     }
@@ -273,8 +261,8 @@ void vp10_adapt_mv_probs(VP10_COMMON *cm, int allow_hp) {
     vpx_tree_merge_probs(vp10_mv_fp_tree, pre_comp->fp, c->fp, comp->fp);
 
     if (allow_hp) {
-      comp->class0_hp = vp10_mode_mv_merge_probs(
-          pre_comp->class0_hp, c->class0_hp);
+      comp->class0_hp =
+          vp10_mode_mv_merge_probs(pre_comp->class0_hp, c->class0_hp);
       comp->hp = vp10_mode_mv_merge_probs(pre_comp->hp, c->hp);
     }
   }
@@ -284,8 +272,7 @@ void vp10_adapt_mv_probs(VP10_COMMON *cm, int allow_hp) {
 void vp10_init_mv_probs(VP10_COMMON *cm) {
 #if CONFIG_REF_MV
   int i;
-  for (i = 0; i < NMV_CONTEXTS; ++i)
-    cm->fc->nmvc[i] = default_nmv_context;
+  for (i = 0; i < NMV_CONTEXTS; ++i) cm->fc->nmvc[i] = default_nmv_context;
 #else
   cm->fc->nmvc = default_nmv_context;
 #endif

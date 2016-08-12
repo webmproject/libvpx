@@ -85,7 +85,7 @@ static INLINE void AddPixelsLarge(const uint8_t *above, const uint8_t *left,
 }
 
 static INLINE int GetMeanValue16x16(const uint8_t *above, const uint8_t *left,
-                             __m128i *params) {
+                                    __m128i *params) {
   const __m128i zero = _mm_setzero_si128();
   __m128i sum_vector, u;
   uint16_t sum_value;
@@ -132,24 +132,15 @@ static INLINE int GetMeanValue32x32(const uint8_t *above, const uint8_t *left,
 //  params[4] : mean value, 4 int32_t repetition
 //
 static INLINE int CalcRefPixelsMeanValue(const uint8_t *above,
-                                         const uint8_t *left,
-                                         int bs, __m128i *params) {
+                                         const uint8_t *left, int bs,
+                                         __m128i *params) {
   int meanValue = 0;
   switch (bs) {
-    case 4:
-      meanValue = GetMeanValue4x4(above, left, params);
-      break;
-    case 8:
-      meanValue = GetMeanValue8x8(above, left, params);
-      break;
-    case 16:
-      meanValue = GetMeanValue16x16(above, left, params);
-      break;
-    case 32:
-      meanValue = GetMeanValue32x32(above, left, params);
-      break;
-    default:
-      assert(0);
+    case 4: meanValue = GetMeanValue4x4(above, left, params); break;
+    case 8: meanValue = GetMeanValue8x8(above, left, params); break;
+    case 16: meanValue = GetMeanValue16x16(above, left, params); break;
+    case 32: meanValue = GetMeanValue32x32(above, left, params); break;
+    default: assert(0);
   }
   return meanValue;
 }
@@ -158,8 +149,9 @@ static INLINE int CalcRefPixelsMeanValue(const uint8_t *above,
 //  params[0-3] : 4-tap filter coefficients (int32_t per coefficient)
 //
 static INLINE void GetIntraFilterParams(int bs, int mode, __m128i *params) {
-  const TX_SIZE tx_size = (bs == 32) ? TX_32X32 :
-      ((bs == 16) ? TX_16X16 : ((bs == 8) ? TX_8X8 : (TX_4X4)));
+  const TX_SIZE tx_size =
+      (bs == 32) ? TX_32X32
+                 : ((bs == 16) ? TX_16X16 : ((bs == 8) ? TX_8X8 : (TX_4X4)));
   // c0
   params[0] = _mm_set_epi32(filter_intra_taps_4[tx_size][mode][0],
                             filter_intra_taps_4[tx_size][mode][0],
@@ -321,20 +313,11 @@ static void SavePred32x32(int *pred, const __m128i *mean, uint8_t *dst,
 static void SavePrediction(int *pred, const __m128i *mean, int bs, uint8_t *dst,
                            ptrdiff_t stride) {
   switch (bs) {
-    case 4:
-      SavePred4x4(pred, mean, dst, stride);
-      break;
-    case 8:
-      SavePred8x8(pred, mean, dst, stride);
-      break;
-    case 16:
-      SavePred16x16(pred, mean, dst, stride);
-      break;
-    case 32:
-      SavePred32x32(pred, mean, dst, stride);
-      break;
-    default:
-      assert(0);
+    case 4: SavePred4x4(pred, mean, dst, stride); break;
+    case 8: SavePred8x8(pred, mean, dst, stride); break;
+    case 16: SavePred16x16(pred, mean, dst, stride); break;
+    case 32: SavePred32x32(pred, mean, dst, stride); break;
+    default: assert(0);
   }
 }
 
@@ -452,7 +435,8 @@ static void ProduceOnePixels(__m128i *p, const __m128i *prm, int *pred,
 }
 
 static ProducePixelsFunc prodPixelsFuncTab[4] = {
-  ProduceOnePixels, ProduceTwoPixels, ProduceThreePixels, ProduceFourPixels};
+  ProduceOnePixels, ProduceTwoPixels, ProduceThreePixels, ProduceFourPixels
+};
 
 static void ProducePixels(int *pred, const __m128i *prm, int remain) {
   __m128i p[3];
@@ -646,7 +630,7 @@ static INLINE int HighbdGetMeanValue8x8(const uint16_t *above,
 //  Process 16 pixels above and left, 10-bit depth
 //  Add to the last 8 pixels sum
 static INLINE void AddPixels10bit(const uint16_t *above, const uint16_t *left,
-                           __m128i *sum) {
+                                  __m128i *sum) {
   __m128i a = _mm_loadu_si128((const __m128i *)above);
   __m128i l = _mm_loadu_si128((const __m128i *)left);
   sum[0] = _mm_add_epi16(a, l);
@@ -660,7 +644,7 @@ static INLINE void AddPixels10bit(const uint16_t *above, const uint16_t *left,
 //  Process 16 pixels above and left, 12-bit depth
 //  Add to the last 8 pixels sum
 static INLINE void AddPixels12bit(const uint16_t *above, const uint16_t *left,
-                           __m128i *sum) {
+                                  __m128i *sum) {
   __m128i a = _mm_loadu_si128((const __m128i *)above);
   __m128i l = _mm_loadu_si128((const __m128i *)left);
   const __m128i zero = _mm_setzero_si128();
@@ -762,20 +746,15 @@ static INLINE int HighbdCalcRefPixelsMeanValue(const uint16_t *above,
                                                const int bd, __m128i *params) {
   int meanValue = 0;
   switch (bs) {
-    case 4:
-      meanValue = HighbdGetMeanValue4x4(above, left, bd, params);
-      break;
-    case 8:
-      meanValue = HighbdGetMeanValue8x8(above, left, bd, params);
-      break;
+    case 4: meanValue = HighbdGetMeanValue4x4(above, left, bd, params); break;
+    case 8: meanValue = HighbdGetMeanValue8x8(above, left, bd, params); break;
     case 16:
       meanValue = HighbdGetMeanValue16x16(above, left, bd, params);
       break;
     case 32:
       meanValue = HighbdGetMeanValue32x32(above, left, bd, params);
       break;
-    default:
-      assert(0);
+    default: assert(0);
   }
   return meanValue;
 }
@@ -784,10 +763,9 @@ static INLINE int HighbdCalcRefPixelsMeanValue(const uint16_t *above,
 //  At column index c, the remaining pixels are R = 2 * bs + 1 - r - c
 //  the number of pixels to produce is R - 2 = 2 * bs - r - c - 1
 static void HighbdGeneratePrediction(const uint16_t *above,
-                                     const uint16_t *left,
-                                     const int bs, const int bd,
-                                     const __m128i *prm, int meanValue,
-                                     uint16_t *dst,
+                                     const uint16_t *left, const int bs,
+                                     const int bd, const __m128i *prm,
+                                     int meanValue, uint16_t *dst,
                                      ptrdiff_t stride) {
   int pred[33][65];
   int r, c, colBound;

@@ -61,23 +61,23 @@ typedef struct mv32 {
 //
 // XX_MIN, XX_MAX are also computed to avoid repeated computation
 
-#define GM_TRANS_PREC_BITS      5
-#define GM_TRANS_PREC_DIFF      (WARPEDMODEL_PREC_BITS - GM_TRANS_PREC_BITS)
-#define GM_TRANS_DECODE_FACTOR  (1 << GM_TRANS_PREC_DIFF)
-#define GM_TRANS_ENCODE_FACTOR  (1 / (GM_TRANS_DECODE_FACTOR))
+#define GM_TRANS_PREC_BITS 5
+#define GM_TRANS_PREC_DIFF (WARPEDMODEL_PREC_BITS - GM_TRANS_PREC_BITS)
+#define GM_TRANS_DECODE_FACTOR (1 << GM_TRANS_PREC_DIFF)
+#define GM_TRANS_ENCODE_FACTOR (1 / (GM_TRANS_DECODE_FACTOR))
 
-#define GM_ALPHA_PREC_BITS      5
-#define GM_ALPHA_PREC_DIFF      (WARPEDMODEL_PREC_BITS - GM_ALPHA_PREC_BITS)
-#define GM_ALPHA_DECODE_FACTOR  (1 << GM_ALPHA_PREC_DIFF)
-#define GM_ALPHA_ENCODE_FACTOR  (1 / (GM_ALPHA_DECODE_FACTOR))
+#define GM_ALPHA_PREC_BITS 5
+#define GM_ALPHA_PREC_DIFF (WARPEDMODEL_PREC_BITS - GM_ALPHA_PREC_BITS)
+#define GM_ALPHA_DECODE_FACTOR (1 << GM_ALPHA_PREC_DIFF)
+#define GM_ALPHA_ENCODE_FACTOR (1 / (GM_ALPHA_DECODE_FACTOR))
 
-#define GM_ABS_ALPHA_BITS       8
-#define GM_ABS_TRANS_BITS       8
+#define GM_ABS_ALPHA_BITS 8
+#define GM_ABS_TRANS_BITS 8
 
-#define GM_TRANS_MAX            (1 << GM_ABS_TRANS_BITS)
-#define GM_ALPHA_MAX            (1 << GM_ABS_ALPHA_BITS)
-#define GM_TRANS_MIN            -GM_TRANS_MAX
-#define GM_ALPHA_MIN            -GM_ALPHA_MAX
+#define GM_TRANS_MAX (1 << GM_ABS_TRANS_BITS)
+#define GM_ALPHA_MAX (1 << GM_ABS_ALPHA_BITS)
+#define GM_TRANS_MIN -GM_TRANS_MAX
+#define GM_ALPHA_MIN -GM_ALPHA_MAX
 
 typedef enum {
   GLOBAL_ZERO = 0,
@@ -94,20 +94,11 @@ typedef struct {
 
 static INLINE TransformationType gm_to_trans_type(GLOBAL_MOTION_TYPE gmtype) {
   switch (gmtype) {
-    case GLOBAL_ZERO:
-      return UNKNOWN_TRANSFORM;
-      break;
-    case GLOBAL_TRANSLATION:
-      return TRANSLATION;
-      break;
-    case GLOBAL_ROTZOOM:
-      return ROTZOOM;
-      break;
-    case GLOBAL_AFFINE:
-      return AFFINE;
-      break;
-    default:
-      assert(0);
+    case GLOBAL_ZERO: return UNKNOWN_TRANSFORM; break;
+    case GLOBAL_TRANSLATION: return TRANSLATION; break;
+    case GLOBAL_ROTZOOM: return ROTZOOM; break;
+    case GLOBAL_AFFINE: return AFFINE; break;
+    default: assert(0);
   }
   return UNKNOWN_TRANSFORM;
 }
@@ -115,8 +106,9 @@ static INLINE TransformationType gm_to_trans_type(GLOBAL_MOTION_TYPE gmtype) {
 static INLINE GLOBAL_MOTION_TYPE get_gmtype(const Global_Motion_Params *gm) {
   if (gm->motion_params.wmmat[4] == 0 && gm->motion_params.wmmat[5] == 0) {
     if (gm->motion_params.wmmat[2] == 0 && gm->motion_params.wmmat[3] == 0) {
-      return ((gm->motion_params.wmmat[0] | gm->motion_params.wmmat[1]) ?
-              GLOBAL_TRANSLATION : GLOBAL_ZERO);
+      return ((gm->motion_params.wmmat[0] | gm->motion_params.wmmat[1])
+                  ? GLOBAL_TRANSLATION
+                  : GLOBAL_ZERO);
     } else {
       return GLOBAL_ROTZOOM;
     }
@@ -140,11 +132,11 @@ static INLINE int is_zero_mv(const MV *mv) {
 }
 
 static INLINE int is_equal_mv(const MV *a, const MV *b) {
-  return  *((const uint32_t *)a) == *((const uint32_t *)b);
+  return *((const uint32_t *)a) == *((const uint32_t *)b);
 }
 
-static INLINE void clamp_mv(MV *mv, int min_col, int max_col,
-                            int min_row, int max_row) {
+static INLINE void clamp_mv(MV *mv, int min_col, int max_col, int min_row,
+                            int max_row) {
   mv->col = clamp(mv->col, min_col, max_col);
   mv->row = clamp(mv->row, min_row, max_row);
 }

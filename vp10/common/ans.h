@@ -23,20 +23,18 @@
 #if ANS_DIVIDE_BY_MULTIPLY
 #include "vp10/common/divide.h"
 #define ANS_DIVREM(quotient, remainder, dividend, divisor) \
-  do { \
-    quotient = fastdiv(dividend, divisor); \
-    remainder = dividend - quotient * divisor; \
+  do {                                                     \
+    quotient = fastdiv(dividend, divisor);                 \
+    remainder = dividend - quotient * divisor;             \
   } while (0)
-#define ANS_DIV(dividend, divisor) \
-  fastdiv(dividend, divisor)
+#define ANS_DIV(dividend, divisor) fastdiv(dividend, divisor)
 #else
 #define ANS_DIVREM(quotient, remainder, dividend, divisor) \
-  do { \
-    quotient = dividend / divisor; \
-    remainder = dividend % divisor; \
+  do {                                                     \
+    quotient = dividend / divisor;                         \
+    remainder = dividend % divisor;                        \
   } while (0)
-#define ANS_DIV(dividend, divisor) \
-    ((dividend) / (divisor))
+#define ANS_DIV(dividend, divisor) ((dividend) / (divisor))
 #endif
 
 #ifdef __cplusplus
@@ -245,8 +243,7 @@ static INLINE int uabs_read_literal(struct AnsDecoder *ans, int bits) {
 
   // TODO(aconverse): Investigate ways to read/write literals faster,
   // e.g. 8-bit chunks.
-  for (bit = bits - 1; bit >= 0; bit--)
-    literal |= uabs_read_bit(ans) << bit;
+  for (bit = bits - 1; bit >= 0; bit--) literal |= uabs_read_bit(ans) << bit;
 
   return literal;
 }
@@ -257,8 +254,7 @@ static INLINE int uabs_read_tree(struct AnsDecoder *ans,
                                  const AnsP8 *probs) {
   vpx_tree_index i = 0;
 
-  while ((i = tree[i + uabs_read(ans, probs[i >> 1])]) > 0)
-    continue;
+  while ((i = tree[i + uabs_read(ans, probs[i >> 1])]) > 0) continue;
 
   return -i;
 }
@@ -288,8 +284,7 @@ static INLINE void rans_build_cdf_from_pdf(const AnsP10 token_probs[],
   assert(cdf_tab[i - 1] == rans_precision);
 }
 
-static INLINE int ans_find_largest(const AnsP10 *const pdf_tab,
-                                   int num_syms) {
+static INLINE int ans_find_largest(const AnsP10 *const pdf_tab, int num_syms) {
   int largest_idx = -1;
   int largest_p = -1;
   int i;
@@ -365,8 +360,7 @@ static INLINE void fetch_sym(struct rans_dec_sym *out, const rans_dec_lut cdf,
   out->cum_prob = (AnsP10)cdf[i - 1];
 }
 
-static INLINE int rans_read(struct AnsDecoder *ans,
-                            const rans_dec_lut tab) {
+static INLINE int rans_read(struct AnsDecoder *ans, const rans_dec_lut tab) {
   unsigned rem;
   unsigned quo;
   struct rans_dec_sym sym;
@@ -381,8 +375,7 @@ static INLINE int rans_read(struct AnsDecoder *ans,
 }
 
 static INLINE int ans_read_init(struct AnsDecoder *const ans,
-                                const uint8_t *const buf,
-                                int offset) {
+                                const uint8_t *const buf, int offset) {
   unsigned x;
   if (offset < 1) return 1;
   ans->buf = buf;
@@ -403,8 +396,7 @@ static INLINE int ans_read_init(struct AnsDecoder *const ans,
     return 1;
   }
   ans->state += l_base;
-  if (ans->state >= l_base * io_base)
-    return 1;
+  if (ans->state >= l_base * io_base) return 1;
   return 0;
 }
 

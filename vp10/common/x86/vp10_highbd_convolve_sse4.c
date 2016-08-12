@@ -14,15 +14,14 @@
 #include "./vp10_rtcd.h"
 #include "vp10/common/filter.h"
 
-typedef void (*TransposeSave)(const int width, int pixelsNum,
-                              uint32_t *src, int src_stride,
-                              uint16_t *dst, int dst_stride,
+typedef void (*TransposeSave)(const int width, int pixelsNum, uint32_t *src,
+                              int src_stride, uint16_t *dst, int dst_stride,
                               int bd);
 
 // pixelsNum 0: write all 4 pixels
 //           1/2/3: residual pixels 1/2/3
-static void writePixel(__m128i *u, int width, int pixelsNum,
-                       uint16_t *dst, int dst_stride) {
+static void writePixel(__m128i *u, int width, int pixelsNum, uint16_t *dst,
+                       int dst_stride) {
   if (2 == width) {
     if (0 == pixelsNum) {
       *(int *)dst = _mm_cvtsi128_si32(u[0]);
@@ -112,18 +111,15 @@ static void transClipPixel(uint32_t *src, int src_stride, __m128i *u, int bd) {
 
 // pixelsNum = 0     : all 4 rows of pixels will be saved.
 // pixelsNum = 1/2/3 : residual 1/2/4 rows of pixels will be saved.
-void trans_save_4x4(const int width, int pixelsNum,
-                    uint32_t *src, int src_stride,
-                    uint16_t *dst, int dst_stride,
-                    int bd) {
+void trans_save_4x4(const int width, int pixelsNum, uint32_t *src,
+                    int src_stride, uint16_t *dst, int dst_stride, int bd) {
   __m128i u[4];
   transClipPixel(src, src_stride, u, bd);
   writePixel(u, width, pixelsNum, dst, dst_stride);
 }
 
-void trans_accum_save_4x4(const int width, int pixelsNum,
-                          uint32_t *src, int src_stride,
-                          uint16_t *dst, int dst_stride,
+void trans_accum_save_4x4(const int width, int pixelsNum, uint32_t *src,
+                          int src_stride, uint16_t *dst, int dst_stride,
                           int bd) {
   __m128i u[4], v[4];
   const __m128i ones = _mm_set1_epi16(1);
@@ -153,8 +149,7 @@ void trans_accum_save_4x4(const int width, int pixelsNum,
   writePixel(u, width, pixelsNum, dst, dst_stride);
 }
 
-static TransposeSave transSaveTab[2] = {
-  trans_save_4x4, trans_accum_save_4x4};
+static TransposeSave transSaveTab[2] = { trans_save_4x4, trans_accum_save_4x4 };
 
 static INLINE void transpose_pair(__m128i *in, __m128i *out) {
   __m128i x0, x1;
@@ -178,8 +173,8 @@ static INLINE void transpose_pair(__m128i *in, __m128i *out) {
   out[5] = _mm_unpackhi_epi64(x0, x1);
 }
 
-static void highbd_filter_horiz(const uint16_t *src, int src_stride,
-                                __m128i *f, int tapsNum, uint32_t *buf) {
+static void highbd_filter_horiz(const uint16_t *src, int src_stride, __m128i *f,
+                                int tapsNum, uint32_t *buf) {
   __m128i u[8], v[6];
 
   if (tapsNum == 10) {
@@ -218,8 +213,8 @@ static void highbd_filter_horiz(const uint16_t *src, int src_stride,
 }
 
 void vp10_highbd_convolve_horiz_sse4_1(const uint16_t *src, int src_stride,
-                                       uint16_t *dst, int dst_stride,
-                                       int w, int h,
+                                       uint16_t *dst, int dst_stride, int w,
+                                       int h,
                                        const InterpFilterParams filter_params,
                                        const int subpel_x_q4, int x_step_q4,
                                        int avg, int bd) {
@@ -239,8 +234,8 @@ void vp10_highbd_convolve_horiz_sse4_1(const uint16_t *src, int src_stride,
     return;
   }
 
-  vCoeffs = vp10_hbd_get_subpel_filter_ver_signal_dir(
-      filter_params, subpel_x_q4 - 1);
+  vCoeffs =
+      vp10_hbd_get_subpel_filter_ver_signal_dir(filter_params, subpel_x_q4 - 1);
   if (!vCoeffs) {
     vp10_highbd_convolve_horiz_c(src, src_stride, dst, dst_stride, w, h,
                                  filter_params, subpel_x_q4, x_step_q4, avg,
@@ -276,8 +271,7 @@ void vp10_highbd_convolve_horiz_sse4_1(const uint16_t *src, int src_stride,
     blkHeight--;
   }
 
-  if (blkResidu == 0)
-    return;
+  if (blkResidu == 0) return;
 
   for (col = 0; col < w; col += 4) {
     for (i = 0; i < 4; ++i) {
@@ -318,7 +312,7 @@ static void write2pixelsAccum(__m128i *u, int bd, uint16_t *dst) {
   *(uint32_t *)dst = _mm_cvtsi128_si32(v);
 }
 
-WritePixels write2pixelsTab[2] = {write2pixelsOnly, write2pixelsAccum};
+WritePixels write2pixelsTab[2] = { write2pixelsOnly, write2pixelsAccum };
 
 static void write4pixelsOnly(__m128i *u, int bd, uint16_t *dst) {
   highbdRndingPacks(u);
@@ -339,7 +333,7 @@ static void write4pixelsAccum(__m128i *u, int bd, uint16_t *dst) {
   _mm_storel_epi64((__m128i *)dst, v);
 }
 
-WritePixels write4pixelsTab[2] = {write4pixelsOnly, write4pixelsAccum};
+WritePixels write4pixelsTab[2] = { write4pixelsOnly, write4pixelsAccum };
 
 static void filter_vert_horiz_parallel(const uint16_t *src, int src_stride,
                                        const __m128i *f, int taps,
@@ -388,9 +382,8 @@ static void filter_vert_horiz_parallel(const uint16_t *src, int src_stride,
 }
 
 static void highbd_filter_vert_compute_large(const uint16_t *src,
-                                             int src_stride,
-                                             const __m128i *f, int taps,
-                                             int w, int h,
+                                             int src_stride, const __m128i *f,
+                                             int taps, int w, int h,
                                              uint16_t *dst, int dst_stride,
                                              int avg, int bd) {
   int col;
@@ -402,8 +395,8 @@ static void highbd_filter_vert_compute_large(const uint16_t *src,
 
   do {
     for (col = 0; col < w; col += step) {
-      filter_vert_horiz_parallel(src_ptr, src_stride, f, taps,
-                                 dst_ptr, write4pixels, bd);
+      filter_vert_horiz_parallel(src_ptr, src_stride, f, taps, dst_ptr,
+                                 write4pixels, bd);
       src_ptr += step;
       dst_ptr += step;
     }
@@ -414,9 +407,8 @@ static void highbd_filter_vert_compute_large(const uint16_t *src,
 }
 
 static void highbd_filter_vert_compute_small(const uint16_t *src,
-                                             int src_stride,
-                                             const __m128i *f, int taps,
-                                             int w, int h,
+                                             int src_stride, const __m128i *f,
+                                             int taps, int w, int h,
                                              uint16_t *dst, int dst_stride,
                                              int avg, int bd) {
   int rowIndex = 0;
@@ -424,8 +416,7 @@ static void highbd_filter_vert_compute_small(const uint16_t *src,
   (void)w;
 
   do {
-    filter_vert_horiz_parallel(src, src_stride, f, taps, dst, write2pixels,
-                               bd);
+    filter_vert_horiz_parallel(src, src_stride, f, taps, dst, write2pixels, bd);
     rowIndex++;
     src += src_stride;
     dst += dst_stride;
@@ -433,8 +424,8 @@ static void highbd_filter_vert_compute_small(const uint16_t *src,
 }
 
 void vp10_highbd_convolve_vert_sse4_1(const uint16_t *src, int src_stride,
-                                      uint16_t *dst, int dst_stride,
-                                      int w, int h,
+                                      uint16_t *dst, int dst_stride, int w,
+                                      int h,
                                       const InterpFilterParams filter_params,
                                       const int subpel_y_q4, int y_step_q4,
                                       int avg, int bd) {
@@ -444,17 +435,15 @@ void vp10_highbd_convolve_vert_sse4_1(const uint16_t *src, int src_stride,
 
   if (0 == subpel_y_q4 || 16 != y_step_q4) {
     vp10_highbd_convolve_vert_c(src, src_stride, dst, dst_stride, w, h,
-                                filter_params, subpel_y_q4, y_step_q4, avg,
-                                bd);
+                                filter_params, subpel_y_q4, y_step_q4, avg, bd);
     return;
   }
 
-  vCoeffs = vp10_hbd_get_subpel_filter_ver_signal_dir(
-      filter_params, subpel_y_q4 - 1);
+  vCoeffs =
+      vp10_hbd_get_subpel_filter_ver_signal_dir(filter_params, subpel_y_q4 - 1);
   if (!vCoeffs) {
     vp10_highbd_convolve_vert_c(src, src_stride, dst, dst_stride, w, h,
-                                filter_params, subpel_y_q4, y_step_q4, avg,
-                                bd);
+                                filter_params, subpel_y_q4, y_step_q4, avg, bd);
     return;
   }
 
@@ -468,10 +457,10 @@ void vp10_highbd_convolve_vert_sse4_1(const uint16_t *src, int src_stride,
   src -= src_stride * ((tapsNum >> 1) - 1);
 
   if (w > 2) {
-    highbd_filter_vert_compute_large(src, src_stride, verf, tapsNum, w, h,
-                                     dst, dst_stride, avg, bd);
+    highbd_filter_vert_compute_large(src, src_stride, verf, tapsNum, w, h, dst,
+                                     dst_stride, avg, bd);
   } else {
-    highbd_filter_vert_compute_small(src, src_stride, verf, tapsNum, w, h,
-                                     dst, dst_stride, avg, bd);
+    highbd_filter_vert_compute_small(src, src_stride, verf, tapsNum, w, h, dst,
+                                     dst_stride, avg, bd);
   }
 }
