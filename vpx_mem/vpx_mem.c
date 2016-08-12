@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #include "vpx_mem.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,8 +16,7 @@
 #include "vpx/vpx_integer.h"
 
 void *vpx_memalign(size_t align, size_t size) {
-  void *addr,
-       * x = NULL;
+  void *addr, *x = NULL;
 
   addr = malloc(size + align - 1 + ADDRESS_STORAGE_SIZE);
 
@@ -31,24 +29,20 @@ void *vpx_memalign(size_t align, size_t size) {
   return x;
 }
 
-void *vpx_malloc(size_t size) {
-  return vpx_memalign(DEFAULT_ALIGNMENT, size);
-}
+void *vpx_malloc(size_t size) { return vpx_memalign(DEFAULT_ALIGNMENT, size); }
 
 void *vpx_calloc(size_t num, size_t size) {
   void *x;
 
   x = vpx_memalign(DEFAULT_ALIGNMENT, num * size);
 
-  if (x)
-    memset(x, 0, num * size);
+  if (x) memset(x, 0, num * size);
 
   return x;
 }
 
 void *vpx_realloc(void *memblk, size_t size) {
-  void *addr,
-       * new_addr = NULL;
+  void *addr, *new_addr = NULL;
   int align = DEFAULT_ALIGNMENT;
 
   /*
@@ -64,16 +58,17 @@ void *vpx_realloc(void *memblk, size_t size) {
   else if (!size)
     vpx_free(memblk);
   else {
-    addr   = (void *)(((size_t *)memblk)[-1]);
+    addr = (void *)(((size_t *)memblk)[-1]);
     memblk = NULL;
 
     new_addr = realloc(addr, size + align + ADDRESS_STORAGE_SIZE);
 
     if (new_addr) {
       addr = new_addr;
-      new_addr = (void *)(((size_t)
-                           ((unsigned char *)new_addr + ADDRESS_STORAGE_SIZE) + (align - 1)) &
-                          (size_t) - align);
+      new_addr =
+          (void *)(((size_t)((unsigned char *)new_addr + ADDRESS_STORAGE_SIZE) +
+                    (align - 1)) &
+                   (size_t)-align);
       /* save the actual malloc address */
       ((size_t *)new_addr)[-1] = (size_t)addr;
     }
@@ -93,8 +88,7 @@ void vpx_free(void *memblk) {
 void *vpx_memset16(void *dest, int val, size_t length) {
   size_t i;
   uint16_t *dest16 = (uint16_t *)dest;
-  for (i = 0; i < length; i++)
-    *dest16++ = val;
+  for (i = 0; i < length; i++) *dest16++ = val;
   return dest;
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH

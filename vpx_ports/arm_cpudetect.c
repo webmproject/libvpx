@@ -76,27 +76,28 @@ int arm_cpu_caps(void) {
  * All of these instructions should be essentially nops.
  */
 #if HAVE_MEDIA
-  if (mask & HAS_MEDIA) __try {
+  if (mask & HAS_MEDIA) {
+    __try {
       /*SHADD8 r3,r3,r3*/
       __emit(0xE6333F93);
       flags |= HAS_MEDIA;
     } __except (GetExceptionCode() == EXCEPTION_ILLEGAL_INSTRUCTION) {
       /*Ignore exception.*/
     }
-}
+  }
 #endif /* HAVE_MEDIA */
 #if HAVE_NEON || HAVE_NEON_ASM
-if (mask & HAS_NEON) {
-  __try {
-    /*VORR q0,q0,q0*/
-    __emit(0xF2200150);
-    flags |= HAS_NEON;
-  } __except (GetExceptionCode() == EXCEPTION_ILLEGAL_INSTRUCTION) {
-    /*Ignore exception.*/
+  if (mask & HAS_NEON) {
+    __try {
+      /*VORR q0,q0,q0*/
+      __emit(0xF2200150);
+      flags |= HAS_NEON;
+    } __except (GetExceptionCode() == EXCEPTION_ILLEGAL_INSTRUCTION) {
+      /*Ignore exception.*/
+    }
   }
-}
 #endif /* HAVE_NEON || HAVE_NEON_ASM */
-return flags & mask;
+  return flags & mask;
 }
 
 #elif defined(__ANDROID__) /* end _MSC_VER */
