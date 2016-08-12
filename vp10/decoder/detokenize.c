@@ -19,34 +19,31 @@
 
 #include "vp10/decoder/detokenize.h"
 
-#define EOB_CONTEXT_NODE            0
-#define ZERO_CONTEXT_NODE           1
-#define ONE_CONTEXT_NODE            2
-#define LOW_VAL_CONTEXT_NODE        0
-#define TWO_CONTEXT_NODE            1
-#define THREE_CONTEXT_NODE          2
-#define HIGH_LOW_CONTEXT_NODE       3
-#define CAT_ONE_CONTEXT_NODE        4
-#define CAT_THREEFOUR_CONTEXT_NODE  5
-#define CAT_THREE_CONTEXT_NODE      6
-#define CAT_FIVE_CONTEXT_NODE       7
+#define EOB_CONTEXT_NODE 0
+#define ZERO_CONTEXT_NODE 1
+#define ONE_CONTEXT_NODE 2
+#define LOW_VAL_CONTEXT_NODE 0
+#define TWO_CONTEXT_NODE 1
+#define THREE_CONTEXT_NODE 2
+#define HIGH_LOW_CONTEXT_NODE 3
+#define CAT_ONE_CONTEXT_NODE 4
+#define CAT_THREEFOUR_CONTEXT_NODE 5
+#define CAT_THREE_CONTEXT_NODE 6
+#define CAT_FIVE_CONTEXT_NODE 7
 
-#define INCREMENT_COUNT(token)                              \
-  do {                                                      \
-     if (counts)                                            \
-       ++coef_counts[band][ctx][token];                     \
+#define INCREMENT_COUNT(token)                   \
+  do {                                           \
+    if (counts) ++coef_counts[band][ctx][token]; \
   } while (0)
 
 #if !CONFIG_ANS
 static INLINE int read_coeff(const vpx_prob *probs, int n, vp10_reader *r) {
   int i, val = 0;
-  for (i = 0; i < n; ++i)
-    val = (val << 1) | vp10_read(r, probs[i]);
+  for (i = 0; i < n; ++i) val = (val << 1) | vp10_read(r, probs[i]);
   return val;
 }
 
-static int decode_coefs(const MACROBLOCKD *xd,
-                        PLANE_TYPE type,
+static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
                         tran_low_t *dqcoeff, TX_SIZE tx_size, TX_TYPE tx_type,
                         const int16_t *dq,
 #if CONFIG_NEW_QUANT
@@ -60,11 +57,11 @@ static int decode_coefs(const MACROBLOCKD *xd,
   const int ref = is_inter_block(&xd->mi[0]->mbmi);
   int band, c = 0;
   const int tx_size_ctx = txsize_sqr_map[tx_size];
-  const vpx_prob (*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
+  const vpx_prob(*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       fc->coef_probs[tx_size_ctx][type][ref];
   const vpx_prob *prob;
-  unsigned int (*coef_counts)[COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1];
-  unsigned int (*eob_branch_count)[COEFF_CONTEXTS];
+  unsigned int(*coef_counts)[COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1];
+  unsigned int(*eob_branch_count)[COEFF_CONTEXTS];
   uint8_t token_cache[MAX_TX_SQUARE];
   const uint8_t *band_translate = get_band_translate(tx_size);
   int dq_shift;
@@ -125,8 +122,7 @@ static int decode_coefs(const MACROBLOCKD *xd,
     int val = -1;
     band = *band_translate++;
     prob = coef_probs[band][ctx];
-    if (counts)
-      ++eob_branch_count[band][ctx];
+    if (counts) ++eob_branch_count[band][ctx];
     if (!vp10_read(r, prob[EOB_CONTEXT_NODE])) {
       INCREMENT_COUNT(EOB_MODEL_TOKEN);
       break;
@@ -141,8 +137,7 @@ static int decode_coefs(const MACROBLOCKD *xd,
       dqv = dq[1];
       token_cache[scan[c]] = 0;
       ++c;
-      if (c >= max_eob)
-        return c;  // zero tokens at the end (no eob token)
+      if (c >= max_eob) return c;  // zero tokens at the end (no eob token)
       ctx = get_coef_context(nb, token_cache, c);
       band = *band_translate++;
       prob = coef_probs[band][ctx];
@@ -158,13 +153,11 @@ static int decode_coefs(const MACROBLOCKD *xd,
     } else {
       INCREMENT_COUNT(TWO_TOKEN);
       token = vp10_read_tree(r, vp10_coef_con_tree,
-                            vp10_pareto8_full[prob[PIVOT_NODE] - 1]);
+                             vp10_pareto8_full[prob[PIVOT_NODE] - 1]);
       switch (token) {
         case TWO_TOKEN:
         case THREE_TOKEN:
-        case FOUR_TOKEN:
-          val = token;
-          break;
+        case FOUR_TOKEN: val = token; break;
         case CATEGORY1_TOKEN:
           val = CAT1_MIN_VAL + read_coeff(cat1_prob, 1, r);
           break;
@@ -194,9 +187,7 @@ static int decode_coefs(const MACROBLOCKD *xd,
             case VPX_BITS_12:
               val = CAT6_MIN_VAL + read_coeff(cat6p, 18 - skip_bits, r);
               break;
-            default:
-              assert(0);
-              return -1;
+            default: assert(0); return -1;
           }
 #else
           val = CAT6_MIN_VAL + read_coeff(cat6p, 14 - skip_bits, r);
@@ -214,8 +205,7 @@ static int decode_coefs(const MACROBLOCKD *xd,
 
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
 #if CONFIG_VP9_HIGHBITDEPTH
-    dqcoeff[scan[c]] = highbd_check_range((vp10_read_bit(r) ? -v : v),
-                                          xd->bd);
+    dqcoeff[scan[c]] = highbd_check_range((vp10_read_bit(r) ? -v : v), xd->bd);
 #else
     dqcoeff[scan[c]] = check_range(vp10_read_bit(r) ? -v : v);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -234,16 +224,13 @@ static int decode_coefs(const MACROBLOCKD *xd,
 static INLINE int read_coeff(const vpx_prob *const probs, int n,
                              struct AnsDecoder *const ans) {
   int i, val = 0;
-  for (i = 0; i < n; ++i)
-    val = (val << 1) | uabs_read(ans, probs[i]);
+  for (i = 0; i < n; ++i) val = (val << 1) | uabs_read(ans, probs[i]);
   return val;
 }
 
-static int decode_coefs_ans(const MACROBLOCKD *const xd,
-                            PLANE_TYPE type,
+static int decode_coefs_ans(const MACROBLOCKD *const xd, PLANE_TYPE type,
                             tran_low_t *dqcoeff, TX_SIZE tx_size,
-                            TX_TYPE tx_type,
-                            const int16_t *dq,
+                            TX_TYPE tx_type, const int16_t *dq,
 #if CONFIG_NEW_QUANT
                             dequant_val_type_nuq *dq_val,
 #endif  // CONFIG_NEW_QUANT
@@ -256,14 +243,14 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
   int band, c = 0;
   int skip_eob = 0;
   const int tx_size_ctx = txsize_sqr_map[tx_size];
-  const vpx_prob (*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
+  const vpx_prob(*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       fc->coef_probs[tx_size_ctx][type][ref];
   const rans_dec_lut(*coef_cdfs)[COEFF_CONTEXTS] =
       fc->coef_cdfs[tx_size_ctx][type][ref];
   const vpx_prob *prob;
   const rans_dec_lut *cdf;
-  unsigned int (*coef_counts)[COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1];
-  unsigned int (*eob_branch_count)[COEFF_CONTEXTS];
+  unsigned int(*coef_counts)[COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1];
+  unsigned int(*eob_branch_count)[COEFF_CONTEXTS];
   uint8_t token_cache[MAX_TX_SQUARE];
   const uint8_t *band_translate = get_band_translate(tx_size);
   int dq_shift;
@@ -325,8 +312,7 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
     band = *band_translate++;
     prob = coef_probs[band][ctx];
     if (!skip_eob) {
-      if (counts)
-        ++eob_branch_count[band][ctx];
+      if (counts) ++eob_branch_count[band][ctx];
       if (!uabs_read(ans, prob[EOB_CONTEXT_NODE])) {
         INCREMENT_COUNT(EOB_MODEL_TOKEN);
         break;
@@ -349,9 +335,7 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
         case ONE_TOKEN:
         case TWO_TOKEN:
         case THREE_TOKEN:
-        case FOUR_TOKEN:
-          val = token;
-          break;
+        case FOUR_TOKEN: val = token; break;
         case CATEGORY1_TOKEN:
           val = CAT1_MIN_VAL + read_coeff(cat1_prob, 1, ans);
           break;
@@ -381,9 +365,7 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
             case VPX_BITS_12:
               val = CAT6_MIN_VAL + read_coeff(cat6p, 18 - skip_bits, ans);
               break;
-            default:
-              assert(0);
-              return -1;
+            default: assert(0); return -1;
           }
 #else
           val = CAT6_MIN_VAL + read_coeff(cat6p, 14 - skip_bits, ans);
@@ -391,10 +373,10 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
         } break;
       }
 #if CONFIG_NEW_QUANT
-    v = vp10_dequant_abscoeff_nuq(val, dqv, dqv_val);
-    v = dq_shift ? ROUND_POWER_OF_TWO(v, dq_shift) : v;
+      v = vp10_dequant_abscoeff_nuq(val, dqv, dqv_val);
+      v = dq_shift ? ROUND_POWER_OF_TWO(v, dq_shift) : v;
 #else
-    v = (val * dqv) >> dq_shift;
+      v = (val * dqv) >> dq_shift;
 #endif  // CONFIG_NEW_QUANT
 
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
@@ -419,12 +401,12 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd,
 }
 #endif  // !CONFIG_ANS
 
-// TODO(slavarnway): Decode version of vp10_set_context.  Modify vp10_set_context
+// TODO(slavarnway): Decode version of vp10_set_context.  Modify
+// vp10_set_context
 // after testing is complete, then delete this version.
-static
-void dec_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
-                      TX_SIZE tx_size, int has_eob,
-                      int aoff, int loff) {
+static void dec_set_contexts(const MACROBLOCKD *xd,
+                             struct macroblockd_plane *pd, TX_SIZE tx_size,
+                             int has_eob, int aoff, int loff) {
   ENTROPY_CONTEXT *const a = pd->above_context + aoff;
   ENTROPY_CONTEXT *const l = pd->left_context + loff;
   const int tx_w_in_blocks = num_4x4_blocks_wide_txsize_lookup[tx_size];
@@ -433,16 +415,14 @@ void dec_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
   // above
   if (has_eob && xd->mb_to_right_edge < 0) {
     int i;
-    const int blocks_wide = pd->n4_w +
-                            (xd->mb_to_right_edge >> (5 + pd->subsampling_x));
+    const int blocks_wide =
+        pd->n4_w + (xd->mb_to_right_edge >> (5 + pd->subsampling_x));
     int above_contexts = tx_w_in_blocks;
     if (above_contexts + aoff > blocks_wide)
       above_contexts = blocks_wide - aoff;
 
-    for (i = 0; i < above_contexts; ++i)
-      a[i] = has_eob;
-    for (i = above_contexts; i < tx_w_in_blocks; ++i)
-      a[i] = 0;
+    for (i = 0; i < above_contexts; ++i) a[i] = has_eob;
+    for (i = above_contexts; i < tx_w_in_blocks; ++i) a[i] = 0;
   } else {
     memset(a, has_eob, sizeof(ENTROPY_CONTEXT) * tx_w_in_blocks);
   }
@@ -450,16 +430,13 @@ void dec_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
   // left
   if (has_eob && xd->mb_to_bottom_edge < 0) {
     int i;
-    const int blocks_high = pd->n4_h +
-                            (xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
+    const int blocks_high =
+        pd->n4_h + (xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
     int left_contexts = tx_h_in_blocks;
-    if (left_contexts + loff > blocks_high)
-      left_contexts = blocks_high - loff;
+    if (left_contexts + loff > blocks_high) left_contexts = blocks_high - loff;
 
-    for (i = 0; i < left_contexts; ++i)
-      l[i] = has_eob;
-    for (i = left_contexts; i < tx_h_in_blocks; ++i)
-      l[i] = 0;
+    for (i = 0; i < left_contexts; ++i) l[i] = has_eob;
+    for (i = left_contexts; i < tx_h_in_blocks; ++i) l[i] = 0;
   } else {
     memset(l, has_eob, sizeof(ENTROPY_CONTEXT) * tx_h_in_blocks);
   }
@@ -471,34 +448,32 @@ void vp10_decode_palette_tokens(MACROBLOCKD *const xd, int plane,
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
   const int rows = (4 * num_4x4_blocks_high_lookup[bsize]) >>
-      (xd->plane[plane != 0].subsampling_y);
+                   (xd->plane[plane != 0].subsampling_y);
   const int cols = (4 * num_4x4_blocks_wide_lookup[bsize]) >>
-      (xd->plane[plane != 0].subsampling_x);
+                   (xd->plane[plane != 0].subsampling_x);
   int color_idx, color_ctx, color_order[PALETTE_MAX_SIZE];
   int n = mbmi->palette_mode_info.palette_size[plane != 0];
   int i, j;
   uint8_t *color_map = xd->plane[plane != 0].color_index_map;
-  const vpx_prob (* const prob)[PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1] =
-      plane ? vp10_default_palette_uv_color_prob :
-          vp10_default_palette_y_color_prob;
+  const vpx_prob (*const prob)[PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1] =
+      plane ? vp10_default_palette_uv_color_prob
+            : vp10_default_palette_y_color_prob;
 
   for (i = 0; i < rows; ++i) {
     for (j = (i == 0 ? 1 : 0); j < cols; ++j) {
-      color_ctx = vp10_get_palette_color_context(color_map, cols, i, j, n,
-                                                 color_order);
+      color_ctx =
+          vp10_get_palette_color_context(color_map, cols, i, j, n, color_order);
       color_idx = vp10_read_tree(r, vp10_palette_color_tree[n - 2],
-                                prob[n - 2][color_ctx]);
+                                 prob[n - 2][color_ctx]);
       assert(color_idx >= 0 && color_idx < n);
       color_map[i * cols + j] = color_order[color_idx];
     }
   }
 }
 
-int vp10_decode_block_tokens(MACROBLOCKD *const xd,
-                             int plane, const scan_order *sc,
-                             int x, int y,
-                             TX_SIZE tx_size,
-                             TX_TYPE tx_type,
+int vp10_decode_block_tokens(MACROBLOCKD *const xd, int plane,
+                             const scan_order *sc, int x, int y,
+                             TX_SIZE tx_size, TX_TYPE tx_type,
 #if CONFIG_ANS
                              struct AnsDecoder *const r,
 #else
@@ -507,24 +482,22 @@ int vp10_decode_block_tokens(MACROBLOCKD *const xd,
                              int seg_id) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int16_t *const dequant = pd->seg_dequant[seg_id];
-  const int ctx = get_entropy_context(tx_size, pd->above_context + x,
-                                               pd->left_context + y);
+  const int ctx =
+      get_entropy_context(tx_size, pd->above_context + x, pd->left_context + y);
 #if CONFIG_NEW_QUANT
   int dq = get_dq_profile_from_ctx(ctx);
 #endif  //  CONFIG_NEW_QUANT
 
 #if !CONFIG_ANS
-  const int eob = decode_coefs(xd, pd->plane_type,
-                               pd->dqcoeff, tx_size, tx_type,
-                               dequant,
+  const int eob =
+      decode_coefs(xd, pd->plane_type, pd->dqcoeff, tx_size, tx_type, dequant,
 #if CONFIG_NEW_QUANT
-                               pd->seg_dequant_nuq[seg_id][dq],
+                   pd->seg_dequant_nuq[seg_id][dq],
 #endif  // CONFIG_NEW_QUANT
-                               ctx, sc->scan, sc->neighbors, r);
+                   ctx, sc->scan, sc->neighbors, r);
 #else
-  const int eob = decode_coefs_ans(xd, pd->plane_type,
-                                   pd->dqcoeff, tx_size, tx_type,
-                                   dequant,
+  const int eob = decode_coefs_ans(xd, pd->plane_type, pd->dqcoeff, tx_size,
+                                   tx_type, dequant,
 #if CONFIG_NEW_QUANT
                                    pd->seg_dequant_nuq[seg_id][dq],
 #endif  // CONFIG_NEW_QUANT

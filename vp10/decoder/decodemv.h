@@ -24,8 +24,8 @@ void vp10_read_mode_info(VP10Decoder *const pbi, MACROBLOCKD *xd,
                          int supertx_enabled,
 #endif
 
-                         int mi_row, int mi_col, vp10_reader *r,
-                         int x_mis, int y_mis);
+                         int mi_row, int mi_col, vp10_reader *r, int x_mis,
+                         int y_mis);
 
 #ifdef __cplusplus
 }  // extern "C"

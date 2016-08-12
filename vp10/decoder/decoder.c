@@ -58,12 +58,10 @@ static void vp10_dec_setup_mi(VP10_COMMON *cm) {
 
 static int vp10_dec_alloc_mi(VP10_COMMON *cm, int mi_size) {
   cm->mip = vpx_calloc(mi_size, sizeof(*cm->mip));
-  if (!cm->mip)
-    return 1;
+  if (!cm->mip) return 1;
   cm->mi_alloc_size = mi_size;
-  cm->mi_grid_base = (MODE_INFO **)vpx_calloc(mi_size, sizeof(MODE_INFO*));
-  if (!cm->mi_grid_base)
-    return 1;
+  cm->mi_grid_base = (MODE_INFO **)vpx_calloc(mi_size, sizeof(MODE_INFO *));
+  if (!cm->mi_grid_base) return 1;
   return 0;
 }
 
@@ -78,8 +76,7 @@ VP10Decoder *vp10_decoder_create(BufferPool *const pool) {
   VP10Decoder *volatile const pbi = vpx_memalign(32, sizeof(*pbi));
   VP10_COMMON *volatile const cm = pbi ? &pbi->common : NULL;
 
-  if (!cm)
-    return NULL;
+  if (!cm) return NULL;
 
   vp10_zero(*pbi);
 
@@ -91,11 +88,10 @@ VP10Decoder *vp10_decoder_create(BufferPool *const pool) {
 
   cm->error.setjmp = 1;
 
-  CHECK_MEM_ERROR(cm, cm->fc,
-                  (FRAME_CONTEXT *)vpx_calloc(1, sizeof(*cm->fc)));
-  CHECK_MEM_ERROR(cm, cm->frame_contexts,
-                  (FRAME_CONTEXT *)vpx_calloc(FRAME_CONTEXTS,
-                  sizeof(*cm->frame_contexts)));
+  CHECK_MEM_ERROR(cm, cm->fc, (FRAME_CONTEXT *)vpx_calloc(1, sizeof(*cm->fc)));
+  CHECK_MEM_ERROR(
+      cm, cm->frame_contexts,
+      (FRAME_CONTEXT *)vpx_calloc(FRAME_CONTEXTS, sizeof(*cm->frame_contexts)));
 
   pbi->need_resync = 1;
   once(initialize_dec);
@@ -130,8 +126,7 @@ VP10Decoder *vp10_decoder_create(BufferPool *const pool) {
 void vp10_decoder_remove(VP10Decoder *pbi) {
   int i;
 
-  if (!pbi)
-    return;
+  if (!pbi) return;
 
   vpx_get_worker_interface()->end(&pbi->lf_worker);
   vpx_free(pbi->lf_worker.data1);
@@ -153,13 +148,13 @@ void vp10_decoder_remove(VP10Decoder *pbi) {
 
 static int equal_dimensions(const YV12_BUFFER_CONFIG *a,
                             const YV12_BUFFER_CONFIG *b) {
-    return a->y_height == b->y_height && a->y_width == b->y_width &&
-           a->uv_height == b->uv_height && a->uv_width == b->uv_width;
+  return a->y_height == b->y_height && a->y_width == b->y_width &&
+         a->uv_height == b->uv_height && a->uv_width == b->uv_width;
 }
 
 vpx_codec_err_t vp10_copy_reference_dec(VP10Decoder *pbi,
-                                       VPX_REFFRAME ref_frame_flag,
-                                       YV12_BUFFER_CONFIG *sd) {
+                                        VPX_REFFRAME ref_frame_flag,
+                                        YV12_BUFFER_CONFIG *sd) {
   VP10_COMMON *cm = &pbi->common;
 
   /* TODO(jkoleszar): The decoder doesn't have any real knowledge of what the
@@ -180,17 +175,15 @@ vpx_codec_err_t vp10_copy_reference_dec(VP10Decoder *pbi,
     else
       vpx_yv12_copy_frame(cfg, sd);
   } else {
-    vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
-                       "Invalid reference frame");
+    vpx_internal_error(&cm->error, VPX_CODEC_ERROR, "Invalid reference frame");
   }
 
   return cm->error.error_code;
 }
 
-
 vpx_codec_err_t vp10_set_reference_dec(VP10_COMMON *cm,
-                                      VPX_REFFRAME ref_frame_flag,
-                                      YV12_BUFFER_CONFIG *sd) {
+                                       VPX_REFFRAME ref_frame_flag,
+                                       YV12_BUFFER_CONFIG *sd) {
   int idx;
   YV12_BUFFER_CONFIG *ref_buf = NULL;
 
@@ -235,8 +228,7 @@ vpx_codec_err_t vp10_set_reference_dec(VP10_COMMON *cm,
     idx = cm->ref_frame_map[2];
 #endif  // CONFIG_EXT_REFS
   } else {
-    vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
-                       "Invalid reference frame");
+    vpx_internal_error(&cm->error, VPX_CODEC_ERROR, "Invalid reference frame");
     return cm->error.error_code;
   }
 
@@ -275,8 +267,7 @@ static void swap_frame_buffers(VP10Decoder *pbi) {
 
     // Release the reference frame holding in the reference map for the decoding
     // of the next frame.
-    if (mask & 1)
-      decrease_ref_count(old_idx, frame_bufs, pool);
+    if (mask & 1) decrease_ref_count(old_idx, frame_bufs, pool);
     cm->ref_frame_map[ref_index] = cm->next_ref_frame_map[ref_index];
     ++ref_index;
   }
@@ -307,8 +298,8 @@ static void swap_frame_buffers(VP10Decoder *pbi) {
   }
 }
 
-int vp10_receive_compressed_data(VP10Decoder *pbi,
-                                size_t size, const uint8_t **psource) {
+int vp10_receive_compressed_data(VP10Decoder *pbi, size_t size,
+                                 const uint8_t **psource) {
   VP10_COMMON *volatile const cm = &pbi->common;
   BufferPool *volatile const pool = cm->buffer_pool;
   RefCntBuffer *volatile const frame_bufs = cm->buffer_pool->frame_bufs;
@@ -338,15 +329,14 @@ int vp10_receive_compressed_data(VP10Decoder *pbi,
 
   // Check if the previous frame was a frame without any references to it.
   // Release frame buffer if not decoding in frame parallel mode.
-  if (!cm->frame_parallel_decode && cm->new_fb_idx >= 0
-      && frame_bufs[cm->new_fb_idx].ref_count == 0)
+  if (!cm->frame_parallel_decode && cm->new_fb_idx >= 0 &&
+      frame_bufs[cm->new_fb_idx].ref_count == 0)
     pool->release_fb_cb(pool->cb_priv,
                         &frame_bufs[cm->new_fb_idx].raw_frame_buffer);
 
   // Find a free frame buffer. Return error if can not find any.
   cm->new_fb_idx = get_free_fb(cm);
-  if (cm->new_fb_idx == INVALID_IDX)
-    return VPX_CODEC_MEM_ERROR;
+  if (cm->new_fb_idx == INVALID_IDX) return VPX_CODEC_MEM_ERROR;
 
   // Assign a MV array to the frame buffer.
   cm->cur_frame = &pool->frame_bufs[cm->new_fb_idx];
@@ -388,10 +378,9 @@ int vp10_receive_compressed_data(VP10Decoder *pbi,
         // Current thread releases the holding of reference frame.
         decrease_ref_count(old_idx, frame_bufs, pool);
 
-       // Release the reference frame holding in the reference map for the
-       // decoding of the next frame.
-       if (mask & 1)
-          decrease_ref_count(old_idx, frame_bufs, pool);
+        // Release the reference frame holding in the reference map for the
+        // decoding of the next frame.
+        if (mask & 1) decrease_ref_count(old_idx, frame_bufs, pool);
         ++ref_index;
       }
 
@@ -468,14 +457,12 @@ int vp10_receive_compressed_data(VP10Decoder *pbi,
 int vp10_get_raw_frame(VP10Decoder *pbi, YV12_BUFFER_CONFIG *sd) {
   VP10_COMMON *const cm = &pbi->common;
   int ret = -1;
-  if (pbi->ready_for_new_data == 1)
-    return ret;
+  if (pbi->ready_for_new_data == 1) return ret;
 
   pbi->ready_for_new_data = 1;
 
   /* no raw frame to show!!! */
-  if (!cm->show_frame)
-    return ret;
+  if (!cm->show_frame) return ret;
 
   pbi->ready_for_new_data = 1;
   *sd = *cm->frame_to_show;
@@ -484,22 +471,19 @@ int vp10_get_raw_frame(VP10Decoder *pbi, YV12_BUFFER_CONFIG *sd) {
   return ret;
 }
 
-int vp10_get_frame_to_show(VP10Decoder *pbi,
-                           YV12_BUFFER_CONFIG *frame) {
+int vp10_get_frame_to_show(VP10Decoder *pbi, YV12_BUFFER_CONFIG *frame) {
   VP10_COMMON *const cm = &pbi->common;
 
-  if (!cm->show_frame || !cm->frame_to_show)
-    return -1;
+  if (!cm->show_frame || !cm->frame_to_show) return -1;
 
   *frame = *cm->frame_to_show;
   return 0;
 }
 
-vpx_codec_err_t vp10_parse_superframe_index(const uint8_t *data,
-                                           size_t data_sz,
-                                           uint32_t sizes[8], int *count,
-                                           vpx_decrypt_cb decrypt_cb,
-                                           void *decrypt_state) {
+vpx_codec_err_t vp10_parse_superframe_index(const uint8_t *data, size_t data_sz,
+                                            uint32_t sizes[8], int *count,
+                                            vpx_decrypt_cb decrypt_cb,
+                                            void *decrypt_state) {
   // A chunk ending with a byte matching 0xc0 is an invalid chunk unless
   // it is a super frame index. If the last byte of real video compression
   // data is 0xc0 the encoder must add a 0 byte. If we have the marker but
@@ -520,18 +504,16 @@ vpx_codec_err_t vp10_parse_superframe_index(const uint8_t *data,
 
     // This chunk is marked as having a superframe index but doesn't have
     // enough data for it, thus it's an invalid superframe index.
-    if (data_sz < index_sz)
-      return VPX_CODEC_CORRUPT_FRAME;
+    if (data_sz < index_sz) return VPX_CODEC_CORRUPT_FRAME;
 
     {
-      const uint8_t marker2 = read_marker(decrypt_cb, decrypt_state,
-                                          data + data_sz - index_sz);
+      const uint8_t marker2 =
+          read_marker(decrypt_cb, decrypt_state, data + data_sz - index_sz);
 
       // This chunk is marked as having a superframe index but doesn't have
       // the matching marker byte at the front of the index therefore it's an
       // invalid chunk.
-      if (marker != marker2)
-        return VPX_CODEC_CORRUPT_FRAME;
+      if (marker != marker2) return VPX_CODEC_CORRUPT_FRAME;
     }
 
     {
@@ -550,8 +532,7 @@ vpx_codec_err_t vp10_parse_superframe_index(const uint8_t *data,
       for (i = 0; i < frames - 1; ++i) {
         uint32_t this_sz = 0;
 
-        for (j = 0; j < mag; ++j)
-          this_sz |= (*x++) << (j * 8);
+        for (j = 0; j < mag; ++j) this_sz |= (*x++) << (j * 8);
         this_sz += 1;
         sizes[i] = this_sz;
         frame_sz_sum += this_sz;
