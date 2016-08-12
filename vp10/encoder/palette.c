@@ -68,20 +68,19 @@ static void calc_centroids(const float *data, float *centroids,
   for (i = 0; i < k; ++i) {
     if (count[i] == 0) {
       memcpy(centroids + i * dim, data + (lcg_rand16(&rand_state) % n) * dim,
-                 sizeof(centroids[0]) * dim);
+             sizeof(centroids[0]) * dim);
     } else {
       const float norm = 1.0f / count[i];
-      for (j = 0; j < dim; ++j)
-        centroids[i * dim + j] *= norm;
+      for (j = 0; j < dim; ++j) centroids[i * dim + j] *= norm;
     }
   }
 }
 
 static float calc_total_dist(const float *data, const float *centroids,
-                              const uint8_t *indices, int n, int k, int dim) {
+                             const uint8_t *indices, int n, int k, int dim) {
   float dist = 0;
   int i;
-  (void) k;
+  (void)k;
 
   for (i = 0; i < n; ++i)
     dist += calc_dist(data + i * dim, centroids + indices[i] * dim, dim);
@@ -188,5 +187,3 @@ int vp10_count_colors_highbd(const uint8_t *src8, int stride, int rows,
   return n;
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-
-

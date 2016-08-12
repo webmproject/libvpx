@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #include "./vp10_rtcd.h"
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
@@ -48,27 +47,27 @@ void vp10_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
 }
 
 typedef struct vp10_token_state {
-  int           rate;
-  int64_t       error;
-  int           next;
-  int16_t       token;
-  tran_low_t    qc;
-  tran_low_t    dqc;
+  int rate;
+  int64_t error;
+  int next;
+  int16_t token;
+  tran_low_t qc;
+  tran_low_t dqc;
 } vp10_token_state;
 
 // These numbers are empirically obtained.
 static const int plane_rd_mult[REF_TYPES][PLANE_TYPES] = {
-    {10, 6}, {8, 5},
+  { 10, 6 }, { 8, 5 },
 };
 
-#define UPDATE_RD_COST()\
-{\
-  rd_cost0 = RDCOST(rdmult, rddiv, rate0, error0);\
-  rd_cost1 = RDCOST(rdmult, rddiv, rate1, error1);\
-}
+#define UPDATE_RD_COST()                             \
+  {                                                  \
+    rd_cost0 = RDCOST(rdmult, rddiv, rate0, error0); \
+    rd_cost1 = RDCOST(rdmult, rddiv, rate1, error1); \
+  }
 
-int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
-                    TX_SIZE tx_size, int ctx) {
+int vp10_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
+                    int ctx) {
   MACROBLOCKD *const xd = &mb->e_mbd;
   struct macroblock_plane *const p = &mb->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -82,13 +81,13 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
   const int eob = p->eobs[block];
   const PLANE_TYPE type = pd->plane_type;
   const int default_eob = get_tx2d_size(tx_size);
-  const int16_t* const dequant_ptr = pd->dequant;
-  const uint8_t* const band_translate = get_band_translate(tx_size);
+  const int16_t *const dequant_ptr = pd->dequant;
+  const uint8_t *const band_translate = get_band_translate(tx_size);
   TX_TYPE tx_type = get_tx_type(type, xd, block, tx_size);
-  const scan_order* const so =
+  const scan_order *const so =
       get_scan(tx_size, tx_type, is_inter_block(&xd->mi[0]->mbmi));
-  const int16_t* const scan = so->scan;
-  const int16_t* const nb = so->neighbors;
+  const int16_t *const scan = so->scan;
+  const int16_t *const nb = so->neighbors;
   const int shift = get_tx_scale(xd, tx_type, tx_size);
 #if CONFIG_NEW_QUANT
   int dq = get_dq_profile_from_ctx(ctx);
@@ -103,16 +102,16 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
   int rate0, rate1;
   int64_t error0, error1;
   int16_t t0, t1;
-  int best, band = (eob < default_eob) ?
-      band_translate[eob] : band_translate[eob - 1];
+  int best, band = (eob < default_eob) ? band_translate[eob]
+                                       : band_translate[eob - 1];
   int pt, i, final_eob;
 #if CONFIG_VP9_HIGHBITDEPTH
   const int *cat6_high_cost = vp10_get_high_cost_table(xd->bd);
 #else
   const int *cat6_high_cost = vp10_get_high_cost_table(8);
 #endif
-  unsigned int (*token_costs)[2][COEFF_CONTEXTS][ENTROPY_TOKENS] =
-                   mb->token_costs[txsize_sqr_map[tx_size]][type][ref];
+  unsigned int(*token_costs)[2][COEFF_CONTEXTS][ENTROPY_TOKENS] =
+      mb->token_costs[txsize_sqr_map[tx_size]][type][ref];
   const uint16_t *band_counts = &band_count_table[tx_size][band];
   uint16_t band_left = eob - band_cum_count_table[tx_size][band] + 1;
   int shortcut = 0;
@@ -195,21 +194,20 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
         shortcut = 0;
       } else {
 #if CONFIG_NEW_QUANT
-        shortcut = (
-            (vp10_dequant_abscoeff_nuq(
-                abs(x), dequant_ptr[rc != 0],
-                dequant_val[band_translate[i]]) > (abs(coeff[rc]) << shift)) &&
-            (vp10_dequant_abscoeff_nuq(
-                abs(x) - 1, dequant_ptr[rc != 0],
-                dequant_val[band_translate[i]]) < (abs(coeff[rc]) << shift)));
+        shortcut = ((vp10_dequant_abscoeff_nuq(abs(x), dequant_ptr[rc != 0],
+                                               dequant_val[band_translate[i]]) >
+                     (abs(coeff[rc]) << shift)) &&
+                    (vp10_dequant_abscoeff_nuq(abs(x) - 1, dequant_ptr[rc != 0],
+                                               dequant_val[band_translate[i]]) <
+                     (abs(coeff[rc]) << shift)));
 #else   // CONFIG_NEW_QUANT
         if ((abs(x) * dequant_ptr[rc != 0] > (abs(coeff[rc]) << shift)) &&
-            (abs(x) * dequant_ptr[rc != 0] < (abs(coeff[rc]) << shift) +
-              dequant_ptr[rc != 0]))
+            (abs(x) * dequant_ptr[rc != 0] <
+             (abs(coeff[rc]) << shift) + dequant_ptr[rc != 0]))
           shortcut = 1;
         else
           shortcut = 0;
-#endif   // CONFIG_NEW_QUANT
+#endif  // CONFIG_NEW_QUANT
       }
 
       if (shortcut) {
@@ -269,9 +267,9 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
       }
 
 #if CONFIG_NEW_QUANT
-      dx = vp10_dequant_coeff_nuq(
-          x, dequant_ptr[rc != 0],
-          dequant_val[band_translate[i]]) - (coeff[rc] << shift);
+      dx = vp10_dequant_coeff_nuq(x, dequant_ptr[rc != 0],
+                                  dequant_val[band_translate[i]]) -
+           (coeff[rc] << shift);
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         dx >>= xd->bd - 8;
@@ -300,18 +298,16 @@ int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
 #if CONFIG_NEW_QUANT
         tokens[i][1].dqc = vp10_dequant_abscoeff_nuq(
             abs(x), dequant_ptr[rc != 0], dequant_val[band_translate[i]]);
-        tokens[i][1].dqc = shift ?
-            ROUND_POWER_OF_TWO(tokens[i][1].dqc, shift) : tokens[i][1].dqc;
-        if (sz)
-          tokens[i][1].dqc = -tokens[i][1].dqc;
+        tokens[i][1].dqc = shift ? ROUND_POWER_OF_TWO(tokens[i][1].dqc, shift)
+                                 : tokens[i][1].dqc;
+        if (sz) tokens[i][1].dqc = -tokens[i][1].dqc;
 #else
         tran_low_t offset = dq_step[rc != 0];
         // The 32x32 transform coefficient uses half quantization step size.
         // Account for the rounding difference in the dequantized coefficeint
         // value when the quantization index is dropped from an even number
         // to an odd number.
-        if (shift & x)
-          offset += (dequant_ptr[rc != 0] & 0x01);
+        if (shift & x) offset += (dequant_ptr[rc != 0] & 0x01);
 
         if (sz == 0)
           tokens[i][1].dqc = dqcoeff[rc] - offset;
@@ -394,10 +390,11 @@ typedef enum QUANT_FUNC {
 
 static VP10_QUANT_FACADE
     quant_func_list[VP10_XFORM_QUANT_LAST][QUANT_FUNC_LAST] = {
-        {vp10_quantize_fp_facade, vp10_highbd_quantize_fp_facade},
-        {vp10_quantize_b_facade, vp10_highbd_quantize_b_facade},
-        {vp10_quantize_dc_facade, vp10_highbd_quantize_dc_facade},
-        {NULL, NULL}};
+      { vp10_quantize_fp_facade, vp10_highbd_quantize_fp_facade },
+      { vp10_quantize_b_facade, vp10_highbd_quantize_b_facade },
+      { vp10_quantize_dc_facade, vp10_highbd_quantize_dc_facade },
+      { NULL, NULL }
+    };
 
 #else
 typedef enum QUANT_FUNC {
@@ -407,15 +404,16 @@ typedef enum QUANT_FUNC {
 
 static VP10_QUANT_FACADE
     quant_func_list[VP10_XFORM_QUANT_LAST][QUANT_FUNC_LAST] = {
-        {vp10_quantize_fp_facade},
-        {vp10_quantize_b_facade},
-        {vp10_quantize_dc_facade},
-        {NULL}};
+      { vp10_quantize_fp_facade },
+      { vp10_quantize_b_facade },
+      { vp10_quantize_dc_facade },
+      { NULL }
+    };
 #endif
 
 static FWD_TXFM_OPT fwd_txfm_opt_list[VP10_XFORM_QUANT_LAST] = {
-    FWD_TXFM_OPT_NORMAL, FWD_TXFM_OPT_NORMAL, FWD_TXFM_OPT_DC,
-    FWD_TXFM_OPT_NORMAL};
+  FWD_TXFM_OPT_NORMAL, FWD_TXFM_OPT_NORMAL, FWD_TXFM_OPT_DC, FWD_TXFM_OPT_NORMAL
+};
 
 void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
                       int blk_col, BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
@@ -454,8 +452,7 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
     if (xform_quant_idx != VP10_XFORM_QUANT_SKIP_QUANT) {
       if (LIKELY(!x->skip_block)) {
         quant_func_list[xform_quant_idx][QUANT_FUNC_HIGHBD](
-            coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob,
-            scan_order, &qparam);
+            coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob, scan_order, &qparam);
       } else {
         vp10_quantize_skip(tx2d_size, qcoeff, dqcoeff, eob);
       }
@@ -468,8 +465,7 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
   if (xform_quant_idx != VP10_XFORM_QUANT_SKIP_QUANT) {
     if (LIKELY(!x->skip_block)) {
       quant_func_list[xform_quant_idx][QUANT_FUNC_LOWBD](
-          coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob,
-          scan_order, &qparam);
+          coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob, scan_order, &qparam);
     } else {
       vp10_quantize_skip(tx2d_size, qcoeff, dqcoeff, eob);
     }
@@ -478,8 +474,8 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
 
 #if CONFIG_NEW_QUANT
 void vp10_xform_quant_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
-                          int blk_col, BLOCK_SIZE plane_bsize,
-                          TX_SIZE tx_size, int ctx) {
+                          int blk_col, BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
+                          int ctx) {
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -494,7 +490,7 @@ void vp10_xform_quant_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
   uint16_t *const eob = &p->eobs[block];
   const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   const int16_t *src_diff;
-  const uint8_t* band = get_band_translate(tx_size);
+  const uint8_t *band = get_band_translate(tx_size);
 
   FWD_TXFM_PARAM fwd_txfm_param;
 
@@ -513,22 +509,18 @@ void vp10_xform_quant_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     highbd_fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
     if (tx_size == TX_32X32) {
-      highbd_quantize_32x32_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
-                                p->quant, p->quant_shift, pd->dequant,
-                                (const cuml_bins_type_nuq *)
-                                p->cuml_bins_nuq[dq],
-                                (const dequant_val_type_nuq *)
-                                pd->dequant_val_nuq[dq],
-                                qcoeff, dqcoeff, eob,
-                                scan_order->scan, band);
+      highbd_quantize_32x32_nuq(
+          coeff, get_tx2d_size(tx_size), x->skip_block, p->quant,
+          p->quant_shift, pd->dequant,
+          (const cuml_bins_type_nuq *)p->cuml_bins_nuq[dq],
+          (const dequant_val_type_nuq *)pd->dequant_val_nuq[dq], qcoeff,
+          dqcoeff, eob, scan_order->scan, band);
     } else {
       highbd_quantize_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
                           p->quant, p->quant_shift, pd->dequant,
                           (const cuml_bins_type_nuq *)p->cuml_bins_nuq[dq],
-                          (const dequant_val_type_nuq *)
-                          pd->dequant_val_nuq[dq],
-                          qcoeff, dqcoeff, eob,
-                          scan_order->scan, band);
+                          (const dequant_val_type_nuq *)pd->dequant_val_nuq[dq],
+                          qcoeff, dqcoeff, eob, scan_order->scan, band);
     }
     return;
   }
@@ -536,20 +528,17 @@ void vp10_xform_quant_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
 
   fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
   if (tx_size == TX_32X32) {
-    quantize_32x32_nuq(coeff, 1024, x->skip_block,
-                       p->quant, p->quant_shift, pd->dequant,
+    quantize_32x32_nuq(coeff, 1024, x->skip_block, p->quant, p->quant_shift,
+                       pd->dequant,
                        (const cuml_bins_type_nuq *)p->cuml_bins_nuq[dq],
-                       (const dequant_val_type_nuq *)
-                       pd->dequant_val_nuq[dq],
-                       qcoeff, dqcoeff, eob,
-                       scan_order->scan, band);
+                       (const dequant_val_type_nuq *)pd->dequant_val_nuq[dq],
+                       qcoeff, dqcoeff, eob, scan_order->scan, band);
   } else {
-    quantize_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
-                 p->quant, p->quant_shift, pd->dequant,
+    quantize_nuq(coeff, get_tx2d_size(tx_size), x->skip_block, p->quant,
+                 p->quant_shift, pd->dequant,
                  (const cuml_bins_type_nuq *)p->cuml_bins_nuq[dq],
-                 (const dequant_val_type_nuq *)pd->dequant_val_nuq[dq],
-                 qcoeff, dqcoeff, eob,
-                 scan_order->scan, band);
+                 (const dequant_val_type_nuq *)pd->dequant_val_nuq[dq], qcoeff,
+                 dqcoeff, eob, scan_order->scan, band);
   }
 }
 
@@ -570,7 +559,7 @@ void vp10_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
   uint16_t *const eob = &p->eobs[block];
   const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   const int16_t *src_diff;
-  const uint8_t* band = get_band_translate(tx_size);
+  const uint8_t *band = get_band_translate(tx_size);
 
   FWD_TXFM_PARAM fwd_txfm_param;
 
@@ -589,23 +578,17 @@ void vp10_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     highbd_fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
     if (tx_size == TX_32X32) {
-      highbd_quantize_32x32_fp_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
-                                   p->quant_fp, pd->dequant,
-                                   (const cuml_bins_type_nuq *)
-                                   p->cuml_bins_nuq[dq],
-                                   (const dequant_val_type_nuq *)
-                                   pd->dequant_val_nuq[dq],
-                                   qcoeff, dqcoeff, eob,
-                                   scan_order->scan, band);
+      highbd_quantize_32x32_fp_nuq(
+          coeff, get_tx2d_size(tx_size), x->skip_block, p->quant_fp,
+          pd->dequant, (const cuml_bins_type_nuq *)p->cuml_bins_nuq[dq],
+          (const dequant_val_type_nuq *)pd->dequant_val_nuq[dq], qcoeff,
+          dqcoeff, eob, scan_order->scan, band);
     } else {
-      highbd_quantize_fp_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
-                             p->quant_fp, pd->dequant,
-                             (const cuml_bins_type_nuq *)
-                             p->cuml_bins_nuq[dq],
-                             (const dequant_val_type_nuq *)
-                             pd->dequant_val_nuq[dq],
-                             qcoeff, dqcoeff, eob,
-                             scan_order->scan, band);
+      highbd_quantize_fp_nuq(
+          coeff, get_tx2d_size(tx_size), x->skip_block, p->quant_fp,
+          pd->dequant, (const cuml_bins_type_nuq *)p->cuml_bins_nuq[dq],
+          (const dequant_val_type_nuq *)pd->dequant_val_nuq[dq], qcoeff,
+          dqcoeff, eob, scan_order->scan, band);
     }
     return;
   }
@@ -615,21 +598,15 @@ void vp10_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
   if (tx_size == TX_32X32) {
     quantize_32x32_fp_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
                           p->quant_fp, pd->dequant,
-                          (const cuml_bins_type_nuq *)
-                          p->cuml_bins_nuq[dq],
-                          (const dequant_val_type_nuq *)
-                          pd->dequant_val_nuq[dq],
-                          qcoeff, dqcoeff, eob,
-                          scan_order->scan, band);
+                          (const cuml_bins_type_nuq *)p->cuml_bins_nuq[dq],
+                          (const dequant_val_type_nuq *)pd->dequant_val_nuq[dq],
+                          qcoeff, dqcoeff, eob, scan_order->scan, band);
   } else {
-    quantize_fp_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
-                    p->quant_fp, pd->dequant,
-                    (const cuml_bins_type_nuq *)
-                    p->cuml_bins_nuq[dq],
-                    (const dequant_val_type_nuq *)
-                    pd->dequant_val_nuq[dq],
-                    qcoeff, dqcoeff, eob,
-                    scan_order->scan, band);
+    quantize_fp_nuq(coeff, get_tx2d_size(tx_size), x->skip_block, p->quant_fp,
+                    pd->dequant,
+                    (const cuml_bins_type_nuq *)p->cuml_bins_nuq[dq],
+                    (const dequant_val_type_nuq *)pd->dequant_val_nuq[dq],
+                    qcoeff, dqcoeff, eob, scan_order->scan, band);
   }
 }
 
@@ -666,19 +643,15 @@ void vp10_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     highbd_fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
     if (tx_size == TX_32X32) {
-      highbd_quantize_dc_32x32_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
-                                   p->quant[0], p->quant_shift[0],
-                                   pd->dequant[0],
-                                   p->cuml_bins_nuq[dq][0],
-                                   pd->dequant_val_nuq[dq][0],
-                                   qcoeff, dqcoeff, eob);
+      highbd_quantize_dc_32x32_nuq(
+          coeff, get_tx2d_size(tx_size), x->skip_block, p->quant[0],
+          p->quant_shift[0], pd->dequant[0], p->cuml_bins_nuq[dq][0],
+          pd->dequant_val_nuq[dq][0], qcoeff, dqcoeff, eob);
     } else {
       highbd_quantize_dc_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
-                             p->quant[0], p->quant_shift[0],
-                             pd->dequant[0],
+                             p->quant[0], p->quant_shift[0], pd->dequant[0],
                              p->cuml_bins_nuq[dq][0],
-                             pd->dequant_val_nuq[dq][0],
-                             qcoeff, dqcoeff, eob);
+                             pd->dequant_val_nuq[dq][0], qcoeff, dqcoeff, eob);
     }
     return;
   }
@@ -688,15 +661,12 @@ void vp10_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
   if (tx_size == TX_32X32) {
     quantize_dc_32x32_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
                           p->quant[0], p->quant_shift[0], pd->dequant[0],
-                          p->cuml_bins_nuq[dq][0],
-                          pd->dequant_val_nuq[dq][0],
+                          p->cuml_bins_nuq[dq][0], pd->dequant_val_nuq[dq][0],
                           qcoeff, dqcoeff, eob);
   } else {
-    quantize_dc_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
-                    p->quant[0], p->quant_shift[0], pd->dequant[0],
-                    p->cuml_bins_nuq[dq][0],
-                    pd->dequant_val_nuq[dq][0],
-                    qcoeff, dqcoeff, eob);
+    quantize_dc_nuq(coeff, get_tx2d_size(tx_size), x->skip_block, p->quant[0],
+                    p->quant_shift[0], pd->dequant[0], p->cuml_bins_nuq[dq][0],
+                    pd->dequant_val_nuq[dq][0], qcoeff, dqcoeff, eob);
   }
 }
 
@@ -734,18 +704,15 @@ void vp10_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     highbd_fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
     if (tx_size == TX_32X32) {
-      highbd_quantize_dc_32x32_fp_nuq(coeff, get_tx2d_size(tx_size),
-                                      x->skip_block,
-                                      p->quant_fp[0], pd->dequant[0],
-                                      p->cuml_bins_nuq[dq][0],
-                                      pd->dequant_val_nuq[dq][0],
-                                      qcoeff, dqcoeff, eob);
+      highbd_quantize_dc_32x32_fp_nuq(
+          coeff, get_tx2d_size(tx_size), x->skip_block, p->quant_fp[0],
+          pd->dequant[0], p->cuml_bins_nuq[dq][0], pd->dequant_val_nuq[dq][0],
+          qcoeff, dqcoeff, eob);
     } else {
-      highbd_quantize_dc_fp_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
-                                p->quant_fp[0], pd->dequant[0],
-                                p->cuml_bins_nuq[dq][0],
-                                pd->dequant_val_nuq[dq][0],
-                                qcoeff, dqcoeff, eob);
+      highbd_quantize_dc_fp_nuq(
+          coeff, get_tx2d_size(tx_size), x->skip_block, p->quant_fp[0],
+          pd->dequant[0], p->cuml_bins_nuq[dq][0], pd->dequant_val_nuq[dq][0],
+          qcoeff, dqcoeff, eob);
     }
     return;
   }
@@ -756,21 +723,17 @@ void vp10_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
     quantize_dc_32x32_fp_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
                              p->quant_fp[0], pd->dequant[0],
                              p->cuml_bins_nuq[dq][0],
-                             pd->dequant_val_nuq[dq][0],
-                             qcoeff, dqcoeff, eob);
+                             pd->dequant_val_nuq[dq][0], qcoeff, dqcoeff, eob);
   } else {
     quantize_dc_fp_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
-                       p->quant_fp[0], pd->dequant[0],
-                       p->cuml_bins_nuq[dq][0],
-                       pd->dequant_val_nuq[dq][0],
-                       qcoeff, dqcoeff, eob);
+                       p->quant_fp[0], pd->dequant[0], p->cuml_bins_nuq[dq][0],
+                       pd->dequant_val_nuq[dq][0], qcoeff, dqcoeff, eob);
   }
 }
 #endif  // CONFIG_NEW_QUANT
 
 static void encode_block(int plane, int block, int blk_row, int blk_col,
-                         BLOCK_SIZE plane_bsize,
-                         TX_SIZE tx_size, void *arg) {
+                         BLOCK_SIZE plane_bsize, TX_SIZE tx_size, void *arg) {
   struct encode_b_args *const args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -806,8 +769,8 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
     vp10_xform_quant_fp_nuq(x, plane, block, blk_row, blk_col, plane_bsize,
                             tx_size, ctx);
 #else
-    vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize,
-                     tx_size, VP10_XFORM_QUANT_FP);
+    vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
+                     VP10_XFORM_QUANT_FP);
 #endif  // CONFIG_NEW_QUANT
   }
 #if CONFIG_VAR_TX
@@ -831,11 +794,9 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
   }
 #endif
 
-  if (p->eobs[block])
-    *(args->skip) = 0;
+  if (p->eobs[block]) *(args->skip) = 0;
 
-  if (p->eobs[block] == 0)
-    return;
+  if (p->eobs[block] == 0) return;
 
   // inverse transform parameters
   inv_txfm_param.tx_type = get_tx_type(pd->plane_type, xd, block, tx_size);
@@ -865,9 +826,10 @@ static void encode_block_inter(int plane, int block, int blk_row, int blk_col,
   const struct macroblockd_plane *const pd = &xd->plane[plane];
   const int tx_row = blk_row >> (1 - pd->subsampling_y);
   const int tx_col = blk_col >> (1 - pd->subsampling_x);
-  const TX_SIZE plane_tx_size = plane ?
-      get_uv_tx_size_impl(mbmi->inter_tx_size[tx_row][tx_col], bsize, 0, 0) :
-      mbmi->inter_tx_size[tx_row][tx_col];
+  const TX_SIZE plane_tx_size =
+      plane ? get_uv_tx_size_impl(mbmi->inter_tx_size[tx_row][tx_col], bsize, 0,
+                                  0)
+            : mbmi->inter_tx_size[tx_row][tx_col];
 
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
@@ -877,12 +839,10 @@ static void encode_block_inter(int plane, int block, int blk_row, int blk_col,
   if (xd->mb_to_right_edge < 0)
     max_blocks_wide += xd->mb_to_right_edge >> (5 + pd->subsampling_x);
 
-  if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide)
-    return;
+  if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
 
   if (tx_size == plane_tx_size) {
-    encode_block(plane, block, blk_row, blk_col, plane_bsize,
-                 tx_size, arg);
+    encode_block(plane, block, blk_row, blk_col, plane_bsize, tx_size, arg);
   } else {
     int bsl = b_width_log2_lookup[bsize];
     int i;
@@ -899,19 +859,18 @@ static void encode_block_inter(int plane, int block, int blk_row, int blk_col,
       const int offsetc = blk_col + ((i & 0x01) << bsl);
       int step = num_4x4_blocks_txsize_lookup[tx_size - 1];
 
-      if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide)
-        continue;
+      if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide) continue;
 
-      encode_block_inter(plane, block + i * step, offsetr, offsetc,
-                         plane_bsize, tx_size - 1, arg);
+      encode_block_inter(plane, block + i * step, offsetr, offsetc, plane_bsize,
+                         tx_size - 1, arg);
     }
   }
 }
 #endif
 
 static void encode_block_pass1(int plane, int block, int blk_row, int blk_col,
-                               BLOCK_SIZE plane_bsize,
-                               TX_SIZE tx_size, void *arg) {
+                               BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
+                               void *arg) {
   MACROBLOCK *const x = (MACROBLOCK *)arg;
   MACROBLOCKD *const xd = &x->e_mbd;
   struct macroblock_plane *const p = &x->plane[plane];
@@ -928,19 +887,19 @@ static void encode_block_pass1(int plane, int block, int blk_row, int blk_col,
   vp10_xform_quant_fp_nuq(x, plane, block, blk_row, blk_col, plane_bsize,
                           tx_size, ctx);
 #else
-  vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize,
-                   tx_size, VP10_XFORM_QUANT_B);
+  vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
+                   VP10_XFORM_QUANT_B);
 #endif  // CONFIG_NEW_QUANT
 
   if (p->eobs[block] > 0) {
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       if (xd->lossless[xd->mi[0]->mbmi.segment_id]) {
-        vp10_highbd_iwht4x4_add(dqcoeff, dst, pd->dst.stride,
-                                p->eobs[block], xd->bd);
+        vp10_highbd_iwht4x4_add(dqcoeff, dst, pd->dst.stride, p->eobs[block],
+                                xd->bd);
       } else {
-        vp10_highbd_idct4x4_add(dqcoeff, dst, pd->dst.stride,
-                                p->eobs[block], xd->bd);
+        vp10_highbd_idct4x4_add(dqcoeff, dst, pd->dst.stride, p->eobs[block],
+                                xd->bd);
       }
       return;
     }
@@ -963,13 +922,12 @@ void vp10_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
   MACROBLOCKD *const xd = &x->e_mbd;
   struct optimize_ctx ctx;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
-  struct encode_b_args arg = {x, &ctx, &mbmi->skip, NULL, NULL, 1};
+  struct encode_b_args arg = { x, &ctx, &mbmi->skip, NULL, NULL, 1 };
   int plane;
 
   mbmi->skip = 1;
 
-  if (x->skip)
-    return;
+  if (x->skip) return;
 
   for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
 #if CONFIG_VAR_TX
@@ -986,7 +944,7 @@ void vp10_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
     int step = num_4x4_blocks_txsize_lookup[max_tx_size];
     vp10_get_entropy_contexts(bsize, TX_4X4, pd, ctx.ta[plane], ctx.tl[plane]);
 #else
-    const struct macroblockd_plane* const pd = &xd->plane[plane];
+    const struct macroblockd_plane *const pd = &xd->plane[plane];
     const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
     vp10_get_entropy_contexts(bsize, tx_size, pd, ctx.ta[plane], ctx.tl[plane]);
 #endif
@@ -997,8 +955,8 @@ void vp10_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
 #if CONFIG_VAR_TX
     for (idy = 0; idy < mi_height; idy += bh) {
       for (idx = 0; idx < mi_width; idx += bh) {
-        encode_block_inter(plane, block, idy, idx, plane_bsize,
-                           max_tx_size, &arg);
+        encode_block_inter(plane, block, idy, idx, plane_bsize, max_tx_size,
+                           &arg);
         block += step;
       }
     }
@@ -1014,23 +972,21 @@ void vp10_encode_sb_supertx(MACROBLOCK *x, BLOCK_SIZE bsize) {
   MACROBLOCKD *const xd = &x->e_mbd;
   struct optimize_ctx ctx;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
-  struct encode_b_args arg = {x, &ctx, &mbmi->skip, NULL, NULL, 1};
+  struct encode_b_args arg = { x, &ctx, &mbmi->skip, NULL, NULL, 1 };
   int plane;
 
   mbmi->skip = 1;
-  if (x->skip)
-    return;
+  if (x->skip) return;
 
   for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
-    const struct macroblockd_plane* const pd = &xd->plane[plane];
+    const struct macroblockd_plane *const pd = &xd->plane[plane];
 #if CONFIG_VAR_TX
     const TX_SIZE tx_size = TX_4X4;
 #else
     const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
 #endif
     vp10_subtract_plane(x, bsize, plane);
-    vp10_get_entropy_contexts(bsize, tx_size, pd,
-                              ctx.ta[plane], ctx.tl[plane]);
+    vp10_get_entropy_contexts(bsize, tx_size, pd, ctx.ta[plane], ctx.tl[plane]);
     arg.ta = ctx.ta[plane];
     arg.tl = ctx.tl[plane];
     vp10_foreach_transformed_block_in_plane(xd, bsize, plane, encode_block,
@@ -1040,9 +996,9 @@ void vp10_encode_sb_supertx(MACROBLOCK *x, BLOCK_SIZE bsize) {
 #endif  // CONFIG_SUPERTX
 
 void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
-                             BLOCK_SIZE plane_bsize,
-                             TX_SIZE tx_size, void *arg) {
-  struct encode_b_args* const args = arg;
+                             BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
+                             void *arg) {
+  struct encode_b_args *const args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
@@ -1097,7 +1053,7 @@ void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
 #if CONFIG_NEW_QUANT
     vp10_xform_quant_fp_nuq(x, plane, block, blk_row, blk_col, plane_bsize,
                             tx_size, ctx);
-#else  // CONFIG_NEW_QUANT
+#else   // CONFIG_NEW_QUANT
     vp10_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
                      VP10_XFORM_QUANT_FP);
 #endif  // CONFIG_NEW_QUANT
@@ -1139,12 +1095,12 @@ void vp10_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane,
   ENTROPY_CONTEXT ta[2 * MAX_MIB_SIZE];
   ENTROPY_CONTEXT tl[2 * MAX_MIB_SIZE];
 
-  struct encode_b_args arg = {x, NULL, &xd->mi[0]->mbmi.skip,
-                              ta, tl, enable_optimize_b};
+  struct encode_b_args arg = { x,  NULL, &xd->mi[0]->mbmi.skip,
+                               ta, tl,   enable_optimize_b };
   if (enable_optimize_b) {
-    const struct macroblockd_plane* const pd = &xd->plane[plane];
-    const TX_SIZE tx_size = plane ? get_uv_tx_size(&xd->mi[0]->mbmi, pd) :
-        xd->mi[0]->mbmi.tx_size;
+    const struct macroblockd_plane *const pd = &xd->plane[plane];
+    const TX_SIZE tx_size =
+        plane ? get_uv_tx_size(&xd->mi[0]->mbmi, pd) : xd->mi[0]->mbmi.tx_size;
     vp10_get_entropy_contexts(bsize, tx_size, pd, ta, tl);
   }
   vp10_foreach_transformed_block_in_plane(xd, bsize, plane,

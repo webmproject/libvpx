@@ -43,7 +43,7 @@ typedef struct {
 // Length of the bi-predictive frame group (BFG)
 // NOTE: Currently each BFG contains one backward ref (BWF) frame plus a certain
 //       number of bi-predictive frames.
-#define BFG_INTERVAL          2
+#define BFG_INTERVAL 2
 #endif  // CONFIG_EXT_REFS
 
 #define VLOW_MOTION_THRESHOLD 950
@@ -80,9 +80,9 @@ typedef enum {
   ARF_UPDATE = 3,
   OVERLAY_UPDATE = 4,
 #if CONFIG_EXT_REFS
-  BRF_UPDATE = 5,  // Backward Reference Frame
+  BRF_UPDATE = 5,          // Backward Reference Frame
   LAST_BIPRED_UPDATE = 6,  // Last Bi-predictive Frame
-  BIPRED_UPDATE = 7,  // Bi-predictive Frame, but not the last one
+  BIPRED_UPDATE = 7,       // Bi-predictive Frame, but not the last one
   FRAME_UPDATE_TYPES = 8
 #else
   FRAME_UPDATE_TYPES = 5
@@ -173,9 +173,8 @@ void vp10_twopass_postencode_update(struct VP10_COMP *cpi);
 
 void vp10_init_subsampling(struct VP10_COMP *cpi);
 
-void vp10_calculate_coded_size(struct VP10_COMP *cpi,
-                          int *scaled_frame_width,
-                          int *scaled_frame_height);
+void vp10_calculate_coded_size(struct VP10_COMP *cpi, int *scaled_frame_width,
+                               int *scaled_frame_height);
 
 #ifdef __cplusplus
 }  // extern "C"

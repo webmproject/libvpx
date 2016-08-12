@@ -94,10 +94,10 @@ typedef enum {
 } ENCODE_BREAKOUT_TYPE;
 
 typedef enum {
-  NORMAL      = 0,
-  FOURFIVE    = 1,
-  THREEFIVE   = 2,
-  ONETWO      = 3
+  NORMAL = 0,
+  FOURFIVE = 1,
+  THREEFIVE = 2,
+  ONETWO = 3
 } VPX_SCALING;
 
 typedef enum {
@@ -117,7 +117,7 @@ typedef enum {
 } MODE;
 
 typedef enum {
-  FRAMEFLAGS_KEY    = 1 << 0,
+  FRAMEFLAGS_KEY = 1 << 0,
   FRAMEFLAGS_GOLDEN = 1 << 1,
 #if CONFIG_EXT_REFS
   FRAMEFLAGS_BWDREF = 1 << 2,
@@ -144,14 +144,14 @@ typedef enum {
 typedef struct VP10EncoderConfig {
   BITSTREAM_PROFILE profile;
   vpx_bit_depth_t bit_depth;     // Codec bit-depth.
-  int width;  // width of data passed to the compressor
-  int height;  // height of data passed to the compressor
+  int width;                     // width of data passed to the compressor
+  int height;                    // height of data passed to the compressor
   unsigned int input_bit_depth;  // Input bit depth.
-  double init_framerate;  // set to passed in framerate
-  int64_t target_bandwidth;  // bandwidth to be used in bits per second
+  double init_framerate;         // set to passed in framerate
+  int64_t target_bandwidth;      // bandwidth to be used in bits per second
 
   int noise_sensitivity;  // pre processing blur: recommendation 0
-  int sharpness;  // sharpening output: recommendation 0:
+  int sharpness;          // sharpening output: recommendation 0:
   int speed;
   // maximum allowed bitrate for any intra frame in % of bitrate target.
   unsigned int rc_max_intra_bitrate_pct;
@@ -203,7 +203,7 @@ typedef struct VP10EncoderConfig {
   int frame_periodic_boost;
 
   // two pass datarate control
-  int two_pass_vbrbias;        // two pass datarate control tweaks
+  int two_pass_vbrbias;  // two pass datarate control tweaks
   int two_pass_vbrmin_section;
   int two_pass_vbrmax_section;
   // END DATARATE CONTROL OPTIONS
@@ -212,7 +212,7 @@ typedef struct VP10EncoderConfig {
   int enable_auto_arf;
 #if CONFIG_EXT_REFS
   int enable_auto_brf;  // (b)ackward (r)ef (f)rame
-#endif  // CONFIG_EXT_REFS
+#endif                  // CONFIG_EXT_REFS
 
   int encode_breakout;  // early breakout : for video conf recommend 800
 
@@ -300,15 +300,10 @@ typedef struct ActiveMap {
   unsigned char *map;
 } ActiveMap;
 
-typedef enum {
-  Y,
-  U,
-  V,
-  ALL
-} STAT_TYPE;
+typedef enum { Y, U, V, ALL } STAT_TYPE;
 
 typedef struct IMAGE_STAT {
-  double stat[ALL+1];
+  double stat[ALL + 1];
   double worst;
 } ImageStat;
 
@@ -319,13 +314,10 @@ typedef struct {
 
 #if CONFIG_ENTROPY
 typedef struct SUBFRAME_STATS {
-  vp10_coeff_probs_model
-  coef_probs_buf[COEF_PROBS_BUFS][TX_SIZES][PLANE_TYPES];
-  vp10_coeff_count
-  coef_counts_buf[COEF_PROBS_BUFS][TX_SIZES][PLANE_TYPES];
-  unsigned int
-  eob_counts_buf[COEF_PROBS_BUFS]
-                [TX_SIZES][PLANE_TYPES][REF_TYPES][COEF_BANDS][COEFF_CONTEXTS];
+  vp10_coeff_probs_model coef_probs_buf[COEF_PROBS_BUFS][TX_SIZES][PLANE_TYPES];
+  vp10_coeff_count coef_counts_buf[COEF_PROBS_BUFS][TX_SIZES][PLANE_TYPES];
+  unsigned int eob_counts_buf[COEF_PROBS_BUFS][TX_SIZES][PLANE_TYPES][REF_TYPES]
+                             [COEF_BANDS][COEFF_CONTEXTS];
   vp10_coeff_probs_model enc_starting_coef_probs[TX_SIZES][PLANE_TYPES];
 } SUBFRAME_STATS;
 #endif  // CONFIG_ENTROPY
@@ -349,8 +341,8 @@ typedef struct VP10_COMP {
 #endif  // CONFIG_NEW_QUANT
   VP10_COMMON common;
   VP10EncoderConfig oxcf;
-  struct lookahead_ctx    *lookahead;
-  struct lookahead_entry  *alt_ref_source;
+  struct lookahead_ctx *lookahead;
+  struct lookahead_entry *alt_ref_source;
 
   YV12_BUFFER_CONFIG *Source;
   YV12_BUFFER_CONFIG *Last_Source;  // NULL for first frame and alt_ref frames
@@ -378,7 +370,7 @@ typedef struct VP10_COMP {
   int gld_fb_idx;
 #if CONFIG_EXT_REFS
   int bwd_fb_idx;  // BWD_REF_FRAME
-#endif  // CONFIG_EXT_REFS
+#endif             // CONFIG_EXT_REFS
   int alt_fb_idx;
 
   int last_show_frame_buf_idx;  // last show frame buffer index
@@ -432,11 +424,11 @@ typedef struct VP10_COMP {
   // sufficient space to the size of the maximum possible number of frames.
   int interp_filter_selected[REF_FRAMES + 1][SWITCHABLE];
 
-  struct vpx_codec_pkt_list  *output_pkt_list;
+  struct vpx_codec_pkt_list *output_pkt_list;
 
   MBGRAPH_FRAME_STATS mbgraph_stats[MAX_LAG_BUFFERS];
-  int mbgraph_n_frames;             // number of frames filled in the above
-  int static_mb_pct;                // % forced skip mbs by segmentation
+  int mbgraph_n_frames;  // number of frames filled in the above
+  int static_mb_pct;     // % forced skip mbs by segmentation
   int ref_frame_flags;
 
   SPEED_FEATURES sf;
@@ -456,7 +448,7 @@ typedef struct VP10_COMP {
   uint8_t *segmentation_map;
 
   // segment threashold for encode breakout
-  int  segment_encode_breakout[MAX_SEGMENTS];
+  int segment_encode_breakout[MAX_SEGMENTS];
 
   CYCLIC_REFRESH *cyclic_refresh;
   ActiveMap active_map;
@@ -481,7 +473,7 @@ typedef struct VP10_COMP {
 #if CONFIG_INTERNAL_STATS
   unsigned int mode_chosen_counts[MAX_MODES];
 
-  int    count;
+  int count;
   uint64_t total_sq_error;
   uint64_t total_samples;
   ImageStat psnr;
@@ -489,7 +481,7 @@ typedef struct VP10_COMP {
   double total_blockiness;
   double worst_blockiness;
 
-  int    bytes;
+  int bytes;
   double summed_quality;
   double summed_weights;
   unsigned int tot_recode_hits;
@@ -540,8 +532,8 @@ typedef struct VP10_COMP {
 
   unsigned int inter_mode_cost[INTER_MODE_CONTEXTS][INTER_MODES];
 #if CONFIG_EXT_INTER
-  unsigned int inter_compound_mode_cost[INTER_MODE_CONTEXTS]
-                                       [INTER_COMPOUND_MODES];
+  unsigned int
+      inter_compound_mode_cost[INTER_MODE_CONTEXTS][INTER_COMPOUND_MODES];
   unsigned int interintra_mode_cost[BLOCK_SIZE_GROUPS][INTERINTRA_MODES];
 #endif  // CONFIG_EXT_INTER
 #if CONFIG_OBMC || CONFIG_WARPED_MOTION
@@ -557,15 +549,15 @@ typedef struct VP10_COMP {
 #endif
   int palette_y_size_cost[PALETTE_BLOCK_SIZES][PALETTE_SIZES];
   int palette_uv_size_cost[PALETTE_BLOCK_SIZES][PALETTE_SIZES];
-  int palette_y_color_cost[PALETTE_MAX_SIZE - 1][PALETTE_COLOR_CONTEXTS]
-                                                 [PALETTE_COLORS];
-  int palette_uv_color_cost[PALETTE_MAX_SIZE - 1][PALETTE_COLOR_CONTEXTS]
-                                                  [PALETTE_COLORS];
+  int palette_y_color_cost[PALETTE_MAX_SIZE -
+                           1][PALETTE_COLOR_CONTEXTS][PALETTE_COLORS];
+  int palette_uv_color_cost[PALETTE_MAX_SIZE -
+                            1][PALETTE_COLOR_CONTEXTS][PALETTE_COLORS];
   int tx_size_cost[TX_SIZES - 1][TX_SIZE_CONTEXTS][TX_SIZES];
 #if CONFIG_EXT_TX
   int inter_tx_type_costs[EXT_TX_SETS_INTER][EXT_TX_SIZES][TX_TYPES];
   int intra_tx_type_costs[EXT_TX_SETS_INTRA][EXT_TX_SIZES][INTRA_MODES]
-                                                          [TX_TYPES];
+                         [TX_TYPES];
 #else
   int intra_tx_type_costs[EXT_TX_SIZES][TX_TYPES][TX_TYPES];
   int inter_tx_type_costs[EXT_TX_SIZES][TX_TYPES];
@@ -635,20 +627,20 @@ typedef struct VP10_COMP {
 void vp10_initialize_enc(void);
 
 struct VP10_COMP *vp10_create_compressor(VP10EncoderConfig *oxcf,
-                                       BufferPool *const pool);
+                                         BufferPool *const pool);
 void vp10_remove_compressor(VP10_COMP *cpi);
 
 void vp10_change_config(VP10_COMP *cpi, const VP10EncoderConfig *oxcf);
 
-  // receive a frames worth of data. caller can assume that a copy of this
-  // frame is made and not just a copy of the pointer..
+// receive a frames worth of data. caller can assume that a copy of this
+// frame is made and not just a copy of the pointer..
 int vp10_receive_raw_frame(VP10_COMP *cpi, unsigned int frame_flags,
-                          YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
-                          int64_t end_time_stamp);
+                           YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
+                           int64_t end_time_stamp);
 
 int vp10_get_compressed_data(VP10_COMP *cpi, unsigned int *frame_flags,
-                            size_t *size, uint8_t *dest,
-                            int64_t *time_stamp, int64_t *time_end, int flush);
+                             size_t *size, uint8_t *dest, int64_t *time_stamp,
+                             int64_t *time_end, int flush);
 
 int vp10_get_preview_raw_frame(VP10_COMP *cpi, YV12_BUFFER_CONFIG *dest);
 
@@ -659,10 +651,10 @@ int vp10_use_as_reference(VP10_COMP *cpi, int ref_frame_flags);
 void vp10_update_reference(VP10_COMP *cpi, int ref_frame_flags);
 
 int vp10_copy_reference_enc(VP10_COMP *cpi, VPX_REFFRAME ref_frame_flag,
-                           YV12_BUFFER_CONFIG *sd);
+                            YV12_BUFFER_CONFIG *sd);
 
 int vp10_set_reference_enc(VP10_COMP *cpi, VPX_REFFRAME ref_frame_flag,
-                          YV12_BUFFER_CONFIG *sd);
+                           YV12_BUFFER_CONFIG *sd);
 
 int vp10_update_entropy(VP10_COMP *cpi, int update);
 
@@ -670,11 +662,11 @@ int vp10_set_active_map(VP10_COMP *cpi, unsigned char *map, int rows, int cols);
 
 int vp10_get_active_map(VP10_COMP *cpi, unsigned char *map, int rows, int cols);
 
-int vp10_set_internal_size(VP10_COMP *cpi,
-                          VPX_SCALING horiz_mode, VPX_SCALING vert_mode);
+int vp10_set_internal_size(VP10_COMP *cpi, VPX_SCALING horiz_mode,
+                           VPX_SCALING vert_mode);
 
 int vp10_set_size_literal(VP10_COMP *cpi, unsigned int width,
-                         unsigned int height);
+                          unsigned int height);
 
 int vp10_get_quantizer(struct VP10_COMP *cpi);
 
@@ -682,8 +674,7 @@ void vp10_full_to_model_counts(vp10_coeff_count_model *model_count,
                                vp10_coeff_count *full_count);
 
 static INLINE int frame_is_kf_gf_arf(const VP10_COMP *cpi) {
-  return frame_is_intra_only(&cpi->common) ||
-         cpi->refresh_alt_ref_frame ||
+  return frame_is_intra_only(&cpi->common) || cpi->refresh_alt_ref_frame ||
          (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref);
 }
 
@@ -693,8 +684,7 @@ static INLINE int get_ref_frame_map_idx(const VP10_COMP *cpi,
   if (ref_frame >= LAST_FRAME && ref_frame <= LAST3_FRAME)
     return cpi->lst_fb_idxes[ref_frame - 1];
 #else
-  if (ref_frame == LAST_FRAME)
-    return cpi->lst_fb_idx;
+  if (ref_frame == LAST_FRAME) return cpi->lst_fb_idx;
 #endif  // CONFIG_EXT_REFS
   else if (ref_frame == GOLDEN_FRAME)
     return cpi->gld_fb_idx;
@@ -717,8 +707,8 @@ static INLINE YV12_BUFFER_CONFIG *get_ref_frame_buffer(
     VP10_COMP *cpi, MV_REFERENCE_FRAME ref_frame) {
   VP10_COMMON *const cm = &cpi->common;
   const int buf_idx = get_ref_frame_buf_idx(cpi, ref_frame);
-  return
-      buf_idx != INVALID_IDX ? &cm->buffer_pool->frame_bufs[buf_idx].buf : NULL;
+  return buf_idx != INVALID_IDX ? &cm->buffer_pool->frame_bufs[buf_idx].buf
+                                : NULL;
 }
 
 static INLINE const YV12_BUFFER_CONFIG *get_upsampled_ref(
@@ -770,12 +760,12 @@ void vp10_update_reference_frames(VP10_COMP *cpi);
 void vp10_set_high_precision_mv(VP10_COMP *cpi, int allow_high_precision_mv);
 
 YV12_BUFFER_CONFIG *vp10_scale_if_required_fast(VP10_COMMON *cm,
-                                               YV12_BUFFER_CONFIG *unscaled,
-                                               YV12_BUFFER_CONFIG *scaled);
+                                                YV12_BUFFER_CONFIG *unscaled,
+                                                YV12_BUFFER_CONFIG *scaled);
 
 YV12_BUFFER_CONFIG *vp10_scale_if_required(VP10_COMMON *cm,
-                                          YV12_BUFFER_CONFIG *unscaled,
-                                          YV12_BUFFER_CONFIG *scaled);
+                                           YV12_BUFFER_CONFIG *unscaled,
+                                           YV12_BUFFER_CONFIG *scaled);
 
 void vp10_apply_encoding_flags(VP10_COMP *cpi, vpx_enc_frame_flags_t flags);
 
@@ -797,10 +787,10 @@ static INLINE int is_bwdref_enabled(const VP10_COMP *const cpi) {
 static INLINE void set_ref_ptrs(VP10_COMMON *cm, MACROBLOCKD *xd,
                                 MV_REFERENCE_FRAME ref0,
                                 MV_REFERENCE_FRAME ref1) {
-  xd->block_refs[0] = &cm->frame_refs[ref0 >= LAST_FRAME ? ref0 - LAST_FRAME
-                                                         : 0];
-  xd->block_refs[1] = &cm->frame_refs[ref1 >= LAST_FRAME ? ref1 - LAST_FRAME
-                                                         : 0];
+  xd->block_refs[0] =
+      &cm->frame_refs[ref0 >= LAST_FRAME ? ref0 - LAST_FRAME : 0];
+  xd->block_refs[1] =
+      &cm->frame_refs[ref1 >= LAST_FRAME ? ref1 - LAST_FRAME : 0];
 }
 
 static INLINE int get_chessboard_index(const int frame_index) {

@@ -12,10 +12,7 @@
 #include "vp10/encoder/encoder.h"
 
 static const BLOCK_SIZE square[MAX_SB_SIZE_LOG2 - 2] = {
-  BLOCK_8X8,
-  BLOCK_16X16,
-  BLOCK_32X32,
-  BLOCK_64X64,
+  BLOCK_8X8,     BLOCK_16X16, BLOCK_32X32, BLOCK_64X64,
 #if CONFIG_EXT_PARTITION
   BLOCK_128X128,
 #endif  // CONFIG_EXT_PARTITION
@@ -36,8 +33,7 @@ static void alloc_mode_context(VP10_COMMON *cm, int num_4x4_blk,
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
 #if CONFIG_VAR_TX
-    CHECK_MEM_ERROR(cm, ctx->blk_skip[i],
-                    vpx_calloc(num_blk, sizeof(uint8_t)));
+    CHECK_MEM_ERROR(cm, ctx->blk_skip[i], vpx_calloc(num_blk, sizeof(uint8_t)));
 #endif
     for (k = 0; k < 3; ++k) {
       CHECK_MEM_ERROR(cm, ctx->coeff[i][k],
@@ -48,18 +44,18 @@ static void alloc_mode_context(VP10_COMMON *cm, int num_4x4_blk,
                       vpx_memalign(32, num_pix * sizeof(*ctx->dqcoeff[i][k])));
       CHECK_MEM_ERROR(cm, ctx->eobs[i][k],
                       vpx_memalign(32, num_blk * sizeof(*ctx->eobs[i][k])));
-      ctx->coeff_pbuf[i][k]   = ctx->coeff[i][k];
-      ctx->qcoeff_pbuf[i][k]  = ctx->qcoeff[i][k];
+      ctx->coeff_pbuf[i][k] = ctx->coeff[i][k];
+      ctx->qcoeff_pbuf[i][k] = ctx->qcoeff[i][k];
       ctx->dqcoeff_pbuf[i][k] = ctx->dqcoeff[i][k];
-      ctx->eobs_pbuf[i][k]    = ctx->eobs[i][k];
+      ctx->eobs_pbuf[i][k] = ctx->eobs[i][k];
     }
   }
 
   if (cm->allow_screen_content_tools) {
-    for (i = 0;  i < 2; ++i) {
-      CHECK_MEM_ERROR(cm, ctx->color_index_map[i],
-                    vpx_memalign(32,
-                                 num_pix * sizeof(*ctx->color_index_map[i])));
+    for (i = 0; i < 2; ++i) {
+      CHECK_MEM_ERROR(
+          cm, ctx->color_index_map[i],
+          vpx_memalign(32, num_pix * sizeof(*ctx->color_index_map[i])));
     }
   }
 }
@@ -93,29 +89,35 @@ static void alloc_tree_contexts(VP10_COMMON *cm, PC_TREE *tree,
                                 int num_4x4_blk) {
 #if CONFIG_EXT_PARTITION_TYPES
   alloc_mode_context(cm, num_4x4_blk, PARTITION_NONE, &tree->none);
-  alloc_mode_context(cm, num_4x4_blk/2, PARTITION_HORZ, &tree->horizontal[0]);
-  alloc_mode_context(cm, num_4x4_blk/2, PARTITION_VERT, &tree->vertical[0]);
-  alloc_mode_context(cm, num_4x4_blk/2, PARTITION_VERT, &tree->horizontal[1]);
-  alloc_mode_context(cm, num_4x4_blk/2, PARTITION_VERT, &tree->vertical[1]);
+  alloc_mode_context(cm, num_4x4_blk / 2, PARTITION_HORZ, &tree->horizontal[0]);
+  alloc_mode_context(cm, num_4x4_blk / 2, PARTITION_VERT, &tree->vertical[0]);
+  alloc_mode_context(cm, num_4x4_blk / 2, PARTITION_VERT, &tree->horizontal[1]);
+  alloc_mode_context(cm, num_4x4_blk / 2, PARTITION_VERT, &tree->vertical[1]);
 
-  alloc_mode_context(cm, num_4x4_blk/4, PARTITION_HORZ_A,
+  alloc_mode_context(cm, num_4x4_blk / 4, PARTITION_HORZ_A,
                      &tree->horizontala[0]);
-  alloc_mode_context(cm, num_4x4_blk/4, PARTITION_HORZ_A,
+  alloc_mode_context(cm, num_4x4_blk / 4, PARTITION_HORZ_A,
                      &tree->horizontala[1]);
-  alloc_mode_context(cm, num_4x4_blk/2, PARTITION_HORZ_A,
+  alloc_mode_context(cm, num_4x4_blk / 2, PARTITION_HORZ_A,
                      &tree->horizontala[2]);
-  alloc_mode_context(cm, num_4x4_blk/2, PARTITION_HORZ_B,
+  alloc_mode_context(cm, num_4x4_blk / 2, PARTITION_HORZ_B,
                      &tree->horizontalb[0]);
-  alloc_mode_context(cm, num_4x4_blk/4, PARTITION_HORZ_B,
+  alloc_mode_context(cm, num_4x4_blk / 4, PARTITION_HORZ_B,
                      &tree->horizontalb[1]);
-  alloc_mode_context(cm, num_4x4_blk/4, PARTITION_HORZ_B,
+  alloc_mode_context(cm, num_4x4_blk / 4, PARTITION_HORZ_B,
                      &tree->horizontalb[2]);
-  alloc_mode_context(cm, num_4x4_blk/4, PARTITION_VERT_A, &tree->verticala[0]);
-  alloc_mode_context(cm, num_4x4_blk/4, PARTITION_VERT_A, &tree->verticala[1]);
-  alloc_mode_context(cm, num_4x4_blk/2, PARTITION_VERT_A, &tree->verticala[2]);
-  alloc_mode_context(cm, num_4x4_blk/2, PARTITION_VERT_B, &tree->verticalb[0]);
-  alloc_mode_context(cm, num_4x4_blk/4, PARTITION_VERT_B, &tree->verticalb[1]);
-  alloc_mode_context(cm, num_4x4_blk/4, PARTITION_VERT_B, &tree->verticalb[2]);
+  alloc_mode_context(cm, num_4x4_blk / 4, PARTITION_VERT_A,
+                     &tree->verticala[0]);
+  alloc_mode_context(cm, num_4x4_blk / 4, PARTITION_VERT_A,
+                     &tree->verticala[1]);
+  alloc_mode_context(cm, num_4x4_blk / 2, PARTITION_VERT_A,
+                     &tree->verticala[2]);
+  alloc_mode_context(cm, num_4x4_blk / 2, PARTITION_VERT_B,
+                     &tree->verticalb[0]);
+  alloc_mode_context(cm, num_4x4_blk / 4, PARTITION_VERT_B,
+                     &tree->verticalb[1]);
+  alloc_mode_context(cm, num_4x4_blk / 4, PARTITION_VERT_B,
+                     &tree->verticalb[2]);
 #ifdef CONFIG_SUPERTX
   alloc_mode_context(cm, num_4x4_blk, PARTITION_HORZ,
                      &tree->horizontal_supertx);
@@ -132,8 +134,8 @@ static void alloc_tree_contexts(VP10_COMMON *cm, PC_TREE *tree,
 #endif  // CONFIG_SUPERTX
 #else
   alloc_mode_context(cm, num_4x4_blk, &tree->none);
-  alloc_mode_context(cm, num_4x4_blk/2, &tree->horizontal[0]);
-  alloc_mode_context(cm, num_4x4_blk/2, &tree->vertical[0]);
+  alloc_mode_context(cm, num_4x4_blk / 2, &tree->horizontal[0]);
+  alloc_mode_context(cm, num_4x4_blk / 2, &tree->vertical[0]);
 #ifdef CONFIG_SUPERTX
   alloc_mode_context(cm, num_4x4_blk, &tree->horizontal_supertx);
   alloc_mode_context(cm, num_4x4_blk, &tree->vertical_supertx);
@@ -141,8 +143,8 @@ static void alloc_tree_contexts(VP10_COMMON *cm, PC_TREE *tree,
 #endif
 
   if (num_4x4_blk > 4) {
-    alloc_mode_context(cm, num_4x4_blk/2, &tree->horizontal[1]);
-    alloc_mode_context(cm, num_4x4_blk/2, &tree->vertical[1]);
+    alloc_mode_context(cm, num_4x4_blk / 2, &tree->horizontal[1]);
+    alloc_mode_context(cm, num_4x4_blk / 2, &tree->vertical[1]);
   } else {
     memset(&tree->horizontal[1], 0, sizeof(tree->horizontal[1]));
     memset(&tree->vertical[1], 0, sizeof(tree->vertical[1]));
@@ -198,11 +200,11 @@ void vp10_setup_pc_tree(VP10_COMMON *cm, ThreadData *td) {
   int nodes;
 
   vpx_free(td->leaf_tree);
-  CHECK_MEM_ERROR(cm, td->leaf_tree, vpx_calloc(leaf_nodes,
-                                                sizeof(*td->leaf_tree)));
+  CHECK_MEM_ERROR(cm, td->leaf_tree,
+                  vpx_calloc(leaf_nodes, sizeof(*td->leaf_tree)));
   vpx_free(td->pc_tree);
-  CHECK_MEM_ERROR(cm, td->pc_tree, vpx_calloc(tree_nodes,
-                                              sizeof(*td->pc_tree)));
+  CHECK_MEM_ERROR(cm, td->pc_tree,
+                  vpx_calloc(tree_nodes, sizeof(*td->pc_tree)));
 
   this_pc = &td->pc_tree[0];
   this_leaf = &td->leaf_tree[0];
@@ -223,8 +225,7 @@ void vp10_setup_pc_tree(VP10_COMMON *cm, ThreadData *td) {
     tree->block_size = square[0];
     alloc_tree_contexts(cm, tree, 4);
     tree->leaf_split[0] = this_leaf++;
-    for (j = 1; j < 4; j++)
-      tree->leaf_split[j] = tree->leaf_split[0];
+    for (j = 1; j < 4; j++) tree->leaf_split[j] = tree->leaf_split[0];
   }
 
   // Each node has 4 leaf nodes, fill each block_size level of the tree
@@ -234,8 +235,7 @@ void vp10_setup_pc_tree(VP10_COMMON *cm, ThreadData *td) {
       PC_TREE *const tree = &td->pc_tree[pc_tree_index];
       alloc_tree_contexts(cm, tree, 4 << (2 * square_index));
       tree->block_size = square[square_index];
-      for (j = 0; j < 4; j++)
-        tree->split[j] = this_pc++;
+      for (j = 0; j < 4; j++) tree->split[j] = this_pc++;
       ++pc_tree_index;
     }
     ++square_index;
@@ -247,7 +247,7 @@ void vp10_setup_pc_tree(VP10_COMMON *cm, ThreadData *td) {
   td->pc_root[i]->none.best_mode_index = 2;
   // Set up the root nodes for the rest of the possible superblock sizes
   while (--i >= 0) {
-    td->pc_root[i] = td->pc_root[i+1]->split[0];
+    td->pc_root[i] = td->pc_root[i + 1]->split[0];
     td->pc_root[i]->none.best_mode_index = 2;
   }
 }
@@ -263,12 +263,10 @@ void vp10_free_pc_tree(ThreadData *td) {
   int i;
 
   // Set up all 4x4 mode contexts
-  for (i = 0; i < leaf_nodes; ++i)
-    free_mode_context(&td->leaf_tree[i]);
+  for (i = 0; i < leaf_nodes; ++i) free_mode_context(&td->leaf_tree[i]);
 
   // Sets up all the leaf nodes in the tree.
-  for (i = 0; i < tree_nodes; ++i)
-    free_tree_contexts(&td->pc_tree[i]);
+  for (i = 0; i < tree_nodes; ++i) free_tree_contexts(&td->pc_tree[i]);
 
   vpx_free(td->pc_tree);
   td->pc_tree = NULL;

@@ -26,8 +26,8 @@
 extern "C" {
 #endif
 
-#define RDDIV_BITS          7
-#define RD_EPB_SHIFT        6
+#define RDDIV_BITS 7
+#define RD_EPB_SHIFT 6
 
 #define RDCOST(RM, DM, R, D) \
   (ROUND_POWER_OF_TWO(((int64_t)R) * (RM), VP9_PROB_COST_SHIFT) + (D << DM))
@@ -36,10 +36,10 @@ extern "C" {
   (((((double)(R)) * (RM)) / (double)(1 << VP9_PROB_COST_SHIFT)) + \
    ((double)(D) * (1 << (DM))))
 
-#define QIDX_SKIP_THRESH     115
+#define QIDX_SKIP_THRESH 115
 
-#define MV_COST_WEIGHT      108
-#define MV_COST_WEIGHT_SUB  120
+#define MV_COST_WEIGHT 108
+#define MV_COST_WEIGHT_SUB 120
 
 #define INVALID_MV 0x80008000
 
@@ -62,13 +62,13 @@ extern "C" {
 #endif  // CONFIG_EXT_REFS
 
 #if CONFIG_EXT_REFS
-#define MAX_REFS  15
+#define MAX_REFS 15
 #else
-#define MAX_REFS  6
+#define MAX_REFS 6
 #endif  // CONFIG_EXT_REFS
 
 #define RD_THRESH_MAX_FACT 64
-#define RD_THRESH_INC      1
+#define RD_THRESH_INC 1
 
 // This enumerator type needs to be kept aligned with the mode order in
 // const MODE_DEFINITION vp10_mode_order[MAX_MODES] used in the rd code.
@@ -391,8 +391,8 @@ int vp10_compute_rd_mult(const struct VP10_COMP *cpi, int qindex);
 
 void vp10_initialize_rd_consts(struct VP10_COMP *cpi);
 
-void vp10_initialize_me_consts(const struct VP10_COMP *cpi,
-                               MACROBLOCK *x, int qindex);
+void vp10_initialize_me_consts(const struct VP10_COMP *cpi, MACROBLOCK *x,
+                               int qindex);
 
 void vp10_model_rd_from_var_lapndz(int64_t var, unsigned int n,
                                    unsigned int qstep, int *rate,
@@ -401,10 +401,10 @@ void vp10_model_rd_from_var_lapndz(int64_t var, unsigned int n,
 int vp10_get_switchable_rate(const struct VP10_COMP *cpi,
                              const MACROBLOCKD *const xd);
 
-int vp10_raster_block_offset(BLOCK_SIZE plane_bsize,
-                             int raster_block, int stride);
+int vp10_raster_block_offset(BLOCK_SIZE plane_bsize, int raster_block,
+                             int stride);
 
-int16_t* vp10_raster_block_offset_int16(BLOCK_SIZE plane_bsize,
+int16_t *vp10_raster_block_offset_int16(BLOCK_SIZE plane_bsize,
                                         int raster_block, int16_t *base);
 
 YV12_BUFFER_CONFIG *vp10_get_scaled_ref_frame(const struct VP10_COMP *cpi,
@@ -437,12 +437,11 @@ void vp10_fill_token_costs(vp10_coeff_cost *c,
 
 static INLINE int rd_less_than_thresh(int64_t best_rd, int thresh,
                                       int thresh_fact) {
-    return best_rd < ((int64_t)thresh * thresh_fact >> 5) || thresh == INT_MAX;
+  return best_rd < ((int64_t)thresh * thresh_fact >> 5) || thresh == INT_MAX;
 }
 
-void vp10_mv_pred(struct VP10_COMP *cpi, MACROBLOCK *x,
-                  uint8_t *ref_y_buffer, int ref_y_stride,
-                  int ref_frame, BLOCK_SIZE block_size);
+void vp10_mv_pred(struct VP10_COMP *cpi, MACROBLOCK *x, uint8_t *ref_y_buffer,
+                  int ref_y_stride, int ref_frame, BLOCK_SIZE block_size);
 
 static INLINE void set_error_per_bit(MACROBLOCK *x, int rdmult) {
   x->errorperbit = rdmult >> RD_EPB_SHIFT;
@@ -451,9 +450,8 @@ static INLINE void set_error_per_bit(MACROBLOCK *x, int rdmult) {
 
 void vp10_setup_pred_block(const MACROBLOCKD *xd,
                            struct buf_2d dst[MAX_MB_PLANE],
-                           const YV12_BUFFER_CONFIG *src,
-                           int mi_row, int mi_col,
-                           const struct scale_factors *scale,
+                           const YV12_BUFFER_CONFIG *src, int mi_row,
+                           int mi_col, const struct scale_factors *scale,
                            const struct scale_factors *scale_uv);
 
 int vp10_get_intra_cost_penalty(int qindex, int qdelta,

@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP10_ENCODER_GLOBAL_MOTION_H_
 #define VP10_ENCODER_GLOBAL_MOTION_H_
 
@@ -27,4 +26,3 @@ int compute_global_motion_feature_based(struct VP10_COMP *cpi,
 }  // extern "C"
 #endif
 #endif  // VP10_ENCODER_GLOBAL_MOTION_H_
-

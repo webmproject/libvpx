@@ -18,7 +18,7 @@
 
 #include "vp10/common/reconinter.h"
 
-#define MAX_MASK_VALUE  (1 << WEDGE_WEIGHT_BITS)
+#define MAX_MASK_VALUE (1 << WEDGE_WEIGHT_BITS)
 
 /**
  * Computes SSE of a compound predictor constructed from 2 fundamental
@@ -48,17 +48,15 @@
  * holds for 8 bit input, and on real input, it should hold practically always,
  * as residuals are expected to be small.
  */
-uint64_t vp10_wedge_sse_from_residuals_c(const int16_t *r1,
-                                         const int16_t *d,
-                                         const uint8_t *m,
-                                         int N) {
+uint64_t vp10_wedge_sse_from_residuals_c(const int16_t *r1, const int16_t *d,
+                                         const uint8_t *m, int N) {
   uint64_t csse = 0;
   int i;
   assert(N % 64 == 0);
-  for (i = 0 ; i < N ; i++) {
-    int32_t t = MAX_MASK_VALUE*r1[i] + m[i]*d[i];
+  for (i = 0; i < N; i++) {
+    int32_t t = MAX_MASK_VALUE * r1[i] + m[i] * d[i];
     t = clamp(t, INT16_MIN, INT16_MAX);
-    csse += t*t;
+    csse += t * t;
   }
   return ROUND_POWER_OF_TWO(csse, 2 * WEDGE_WEIGHT_BITS);
 }
@@ -94,9 +92,7 @@ uint64_t vp10_wedge_sse_from_residuals_c(const int16_t *r1,
  *  Note that for efficiency, ds is stored on 16 bits. Real input residuals
  *  being small, this should not cause a noticeable issue.
  */
-int vp10_wedge_sign_from_residuals_c(const int16_t *ds,
-                                     const uint8_t *m,
-                                     int N,
+int vp10_wedge_sign_from_residuals_c(const int16_t *ds, const uint8_t *m, int N,
                                      int64_t limit) {
   int64_t acc = 0;
 
@@ -121,15 +117,12 @@ int vp10_wedge_sign_from_residuals_c(const int16_t *ds,
  *
  * The result is saturated to signed 16 bits.
  */
-void vp10_wedge_compute_delta_squares_c(int16_t *d,
-                                        const int16_t *a,
-                                        const int16_t *b,
-                                        int N) {
+void vp10_wedge_compute_delta_squares_c(int16_t *d, const int16_t *a,
+                                        const int16_t *b, int N) {
   int i;
 
   assert(N % 64 == 0);
 
-  for (i = 0 ; i < N ; i++)
-    d[i] = clamp(a[i]*a[i] - b[i]*b[i], INT16_MIN, INT16_MAX);
+  for (i = 0; i < N; i++)
+    d[i] = clamp(a[i] * a[i] - b[i] * b[i], INT16_MIN, INT16_MAX);
 }
-

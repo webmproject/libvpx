@@ -22,21 +22,20 @@
 
 #define ENERGY_MIN (-4)
 #define ENERGY_MAX (1)
-#define ENERGY_SPAN (ENERGY_MAX - ENERGY_MIN +  1)
-#define ENERGY_IN_BOUNDS(energy)\
+#define ENERGY_SPAN (ENERGY_MAX - ENERGY_MIN + 1)
+#define ENERGY_IN_BOUNDS(energy) \
   assert((energy) >= ENERGY_MIN && (energy) <= ENERGY_MAX)
 
-static const double rate_ratio[MAX_SEGMENTS] =
-  {2.5, 2.0, 1.5, 1.0, 0.75, 1.0, 1.0, 1.0};
-static const int segment_id[ENERGY_SPAN] = {0, 1, 1, 2, 3, 4};
+static const double rate_ratio[MAX_SEGMENTS] = { 2.5,  2.0, 1.5, 1.0,
+                                                 0.75, 1.0, 1.0, 1.0 };
+static const int segment_id[ENERGY_SPAN] = { 0, 1, 1, 2, 3, 4 };
 
-#define SEGMENT_ID(i) segment_id[(i) - ENERGY_MIN]
+#define SEGMENT_ID(i) segment_id[(i)-ENERGY_MIN]
 
-DECLARE_ALIGNED(16, static const uint8_t,
-                vp10_all_zeros[MAX_SB_SIZE]) = {0};
+DECLARE_ALIGNED(16, static const uint8_t, vp10_all_zeros[MAX_SB_SIZE]) = { 0 };
 #if CONFIG_VP9_HIGHBITDEPTH
 DECLARE_ALIGNED(16, static const uint16_t,
-                vp10_highbd_all_zeros[MAX_SB_SIZE]) = {0};
+                vp10_highbd_all_zeros[MAX_SB_SIZE]) = { 0 };
 #endif
 
 unsigned int vp10_vaq_segment_id(int energy) {
@@ -64,7 +63,7 @@ void vp10_vaq_frame_setup(VP10_COMP *cpi) {
     for (i = 0; i < MAX_SEGMENTS; ++i) {
       int qindex_delta =
           vp10_compute_qdelta_by_rate(&cpi->rc, cm->frame_type, cm->base_qindex,
-                                     rate_ratio[i], cm->bit_depth);
+                                      rate_ratio[i], cm->bit_depth);
 
       // We don't allow qindex 0 in a segment if the base value is not 0.
       // Q index 0 (lossless) implies 4x4 encoding only and in AQ mode a segment
@@ -88,9 +87,9 @@ void vp10_vaq_frame_setup(VP10_COMP *cpi) {
 /* TODO(agrange, paulwilkins): The block_variance calls the unoptimized versions
  * of variance() and highbd_8_variance(). It should not.
  */
-static void aq_variance(const uint8_t *a, int  a_stride,
-                        const uint8_t *b, int  b_stride,
-                        int  w, int  h, unsigned int *sse, int *sum) {
+static void aq_variance(const uint8_t *a, int a_stride, const uint8_t *b,
+                        int b_stride, int w, int h, unsigned int *sse,
+                        int *sum) {
   int i, j;
 
   *sum = 0;
@@ -109,9 +108,9 @@ static void aq_variance(const uint8_t *a, int  a_stride,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static void aq_highbd_variance64(const uint8_t *a8, int  a_stride,
-                                 const uint8_t *b8, int  b_stride,
-                                 int w, int h, uint64_t *sse, uint64_t *sum) {
+static void aq_highbd_variance64(const uint8_t *a8, int a_stride,
+                                 const uint8_t *b8, int b_stride, int w, int h,
+                                 uint64_t *sse, uint64_t *sum) {
   int i, j;
 
   uint16_t *a = CONVERT_TO_SHORTPTR(a8);
@@ -130,9 +129,9 @@ static void aq_highbd_variance64(const uint8_t *a8, int  a_stride,
   }
 }
 
-static void aq_highbd_8_variance(const uint8_t *a8, int  a_stride,
-                                 const uint8_t *b8, int  b_stride,
-                                 int w, int h, unsigned int *sse, int *sum) {
+static void aq_highbd_8_variance(const uint8_t *a8, int a_stride,
+                                 const uint8_t *b8, int b_stride, int w, int h,
+                                 unsigned int *sse, int *sum) {
   uint64_t sse_long = 0;
   uint64_t sum_long = 0;
   aq_highbd_variance64(a8, a_stride, b8, b_stride, w, h, &sse_long, &sum_long);
@@ -145,10 +144,10 @@ static unsigned int block_variance(VP10_COMP *cpi, MACROBLOCK *x,
                                    BLOCK_SIZE bs) {
   MACROBLOCKD *xd = &x->e_mbd;
   unsigned int var, sse;
-  int right_overflow = (xd->mb_to_right_edge < 0) ?
-      ((-xd->mb_to_right_edge) >> 3) : 0;
-  int bottom_overflow = (xd->mb_to_bottom_edge < 0) ?
-      ((-xd->mb_to_bottom_edge) >> 3) : 0;
+  int right_overflow =
+      (xd->mb_to_right_edge < 0) ? ((-xd->mb_to_right_edge) >> 3) : 0;
+  int bottom_overflow =
+      (xd->mb_to_bottom_edge < 0) ? ((-xd->mb_to_bottom_edge) >> 3) : 0;
 
   if (right_overflow || bottom_overflow) {
     const int bw = 8 * num_8x8_blocks_wide_lookup[bs] - right_overflow;
@@ -162,30 +161,27 @@ static unsigned int block_variance(VP10_COMP *cpi, MACROBLOCK *x,
       sse >>= 2 * (xd->bd - 8);
       avg >>= (xd->bd - 8);
     } else {
-      aq_variance(x->plane[0].src.buf, x->plane[0].src.stride,
-                  vp10_all_zeros, 0, bw, bh, &sse, &avg);
+      aq_variance(x->plane[0].src.buf, x->plane[0].src.stride, vp10_all_zeros,
+                  0, bw, bh, &sse, &avg);
     }
 #else
-    aq_variance(x->plane[0].src.buf, x->plane[0].src.stride,
-                vp10_all_zeros, 0, bw, bh, &sse, &avg);
+    aq_variance(x->plane[0].src.buf, x->plane[0].src.stride, vp10_all_zeros, 0,
+                bw, bh, &sse, &avg);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     var = sse - (((int64_t)avg * avg) / (bw * bh));
     return (256 * var) / (bw * bh);
   } else {
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf,
-                               x->plane[0].src.stride,
-                               CONVERT_TO_BYTEPTR(vp10_highbd_all_zeros),
-                               0, &sse);
+      var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf, x->plane[0].src.stride,
+                               CONVERT_TO_BYTEPTR(vp10_highbd_all_zeros), 0,
+                               &sse);
     } else {
-      var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf,
-                               x->plane[0].src.stride,
+      var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf, x->plane[0].src.stride,
                                vp10_all_zeros, 0, &sse);
     }
 #else
-    var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf,
-                             x->plane[0].src.stride,
+    var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf, x->plane[0].src.stride,
                              vp10_all_zeros, 0, &sse);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     return (256 * var) >> num_pels_log2_lookup[bs];
@@ -204,7 +200,7 @@ int vp10_block_energy(VP10_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs) {
   double energy_midpoint;
   vpx_clear_system_state();
   energy_midpoint =
-    (cpi->oxcf.pass == 2) ? cpi->twopass.mb_av_energy : DEFAULT_E_MIDPOINT;
+      (cpi->oxcf.pass == 2) ? cpi->twopass.mb_av_energy : DEFAULT_E_MIDPOINT;
   energy = vp10_log_block_var(cpi, x, bs) - energy_midpoint;
   return clamp((int)round(energy), ENERGY_MIN, ENERGY_MAX);
 }

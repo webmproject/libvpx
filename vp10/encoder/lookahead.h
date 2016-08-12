@@ -21,10 +21,10 @@ extern "C" {
 #define MAX_LAG_BUFFERS 25
 
 struct lookahead_entry {
-  YV12_BUFFER_CONFIG  img;
-  int64_t             ts_start;
-  int64_t             ts_end;
-  unsigned int        flags;
+  YV12_BUFFER_CONFIG img;
+  int64_t ts_start;
+  int64_t ts_end;
+  unsigned int flags;
 };
 
 // The max of past frames we want to keep in the queue.
@@ -44,19 +44,17 @@ struct lookahead_ctx {
  * may be done when buffers are enqueued.
  */
 struct lookahead_ctx *vp10_lookahead_init(unsigned int width,
-                                         unsigned int height,
-                                         unsigned int subsampling_x,
-                                         unsigned int subsampling_y,
+                                          unsigned int height,
+                                          unsigned int subsampling_x,
+                                          unsigned int subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
-                                         int use_highbitdepth,
+                                          int use_highbitdepth,
 #endif
-                                         unsigned int depth);
-
+                                          unsigned int depth);
 
 /**\brief Destroys the lookahead stage
  */
 void vp10_lookahead_destroy(struct lookahead_ctx *ctx);
-
 
 /**\brief Enqueue a source buffer
  *
@@ -74,12 +72,11 @@ void vp10_lookahead_destroy(struct lookahead_ctx *ctx);
  * \param[in] active_map  Map that specifies which macroblock is active
  */
 int vp10_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG *src,
-                       int64_t ts_start, int64_t ts_end,
+                        int64_t ts_start, int64_t ts_end,
 #if CONFIG_VP9_HIGHBITDEPTH
-                       int use_highbitdepth,
+                        int use_highbitdepth,
 #endif
-                       unsigned int flags);
-
+                        unsigned int flags);
 
 /**\brief Get the next source buffer to encode
  *
@@ -92,8 +89,7 @@ int vp10_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG *src,
  * \retval NULL, if drain not set and queue not of the configured depth
  */
 struct lookahead_entry *vp10_lookahead_pop(struct lookahead_ctx *ctx,
-                                          int drain);
-
+                                           int drain);
 
 /**\brief Get a future source buffer to encode
  *
@@ -103,8 +99,7 @@ struct lookahead_entry *vp10_lookahead_pop(struct lookahead_ctx *ctx,
  * \retval NULL, if no buffer exists at the specified index
  */
 struct lookahead_entry *vp10_lookahead_peek(struct lookahead_ctx *ctx,
-                                           int index);
-
+                                            int index);
 
 /**\brief Get the number of frames currently in the lookahead queue
  *

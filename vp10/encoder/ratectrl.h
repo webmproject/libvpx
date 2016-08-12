@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP10_ENCODER_RATECTRL_H_
 #define VP10_ENCODER_RATECTRL_H_
 
@@ -22,11 +21,11 @@ extern "C" {
 #endif
 
 // Bits Per MB at different Q (Multiplied by 512)
-#define BPER_MB_NORMBITS    9
+#define BPER_MB_NORMBITS 9
 
-#define MIN_GF_INTERVAL     4
-#define MAX_GF_INTERVAL     16
-#define FIXED_GF_INTERVAL   8    // Used in some testing modes only
+#define MIN_GF_INTERVAL 4
+#define MAX_GF_INTERVAL 16
+#define FIXED_GF_INTERVAL 8  // Used in some testing modes only
 
 #if CONFIG_EXT_REFS
 typedef enum {
@@ -61,25 +60,25 @@ typedef enum {
 // e.g. 24 => 16/24 = 2/3 of native size. The restriction to 1/16th is
 // intended to match the capabilities of the normative scaling filters,
 // giving precedence to the up-scaling accuracy.
-static const int frame_scale_factor[FRAME_SCALE_STEPS] = {16, 24};
+static const int frame_scale_factor[FRAME_SCALE_STEPS] = { 16, 24 };
 
 // Multiplier of the target rate to be used as threshold for triggering scaling.
-static const double rate_thresh_mult[FRAME_SCALE_STEPS] = {1.0, 2.0};
+static const double rate_thresh_mult[FRAME_SCALE_STEPS] = { 1.0, 2.0 };
 
 // Scale dependent Rate Correction Factor multipliers. Compensates for the
 // greater number of bits per pixel generated in down-scaled frames.
-static const double rcf_mult[FRAME_SCALE_STEPS] = {1.0, 2.0};
+static const double rcf_mult[FRAME_SCALE_STEPS] = { 1.0, 2.0 };
 
 typedef struct {
   // Rate targetting variables
-  int base_frame_target;           // A baseline frame target before adjustment
-                                   // for previous under or over shoot.
-  int this_frame_target;           // Actual frame target after rc adjustment.
+  int base_frame_target;  // A baseline frame target before adjustment
+                          // for previous under or over shoot.
+  int this_frame_target;  // Actual frame target after rc adjustment.
   int projected_frame_size;
   int sb64_target_rate;
-  int last_q[FRAME_TYPES];         // Separate values for Intra/Inter
-  int last_boosted_qindex;         // Last boosted GF/KF/ARF q
-  int last_kf_qindex;              // Q index of the last key frame coded.
+  int last_q[FRAME_TYPES];  // Separate values for Intra/Inter
+  int last_boosted_qindex;  // Last boosted GF/KF/ARF q
+  int last_kf_qindex;       // Q index of the last key frame coded.
 
   int gfu_boost;
   int last_boost;
@@ -172,17 +171,18 @@ struct VP10_COMP;
 struct VP10EncoderConfig;
 
 void vp10_rc_init(const struct VP10EncoderConfig *oxcf, int pass,
-                 RATE_CONTROL *rc);
+                  RATE_CONTROL *rc);
 
 int vp10_estimate_bits_at_q(FRAME_TYPE frame_kind, int q, int mbs,
-                           double correction_factor,
-                           vpx_bit_depth_t bit_depth);
+                            double correction_factor,
+                            vpx_bit_depth_t bit_depth);
 
 double vp10_convert_qindex_to_q(int qindex, vpx_bit_depth_t bit_depth);
 
 void vp10_rc_init_minq_luts(void);
 
-int vp10_rc_get_default_min_gf_interval(int width, int height, double framerate);
+int vp10_rc_get_default_min_gf_interval(int width, int height,
+                                        double framerate);
 // Note vp10_rc_get_default_max_gf_interval() requires the min_gf_interval to
 // be passed in to ensure that the max_gf_interval returned is at least as bis
 // as that.
@@ -230,28 +230,27 @@ int vp10_rc_drop_frame(struct VP10_COMP *cpi);
 
 // Computes frame size bounds.
 void vp10_rc_compute_frame_size_bounds(const struct VP10_COMP *cpi,
-                                      int this_frame_target,
-                                      int *frame_under_shoot_limit,
-                                      int *frame_over_shoot_limit);
+                                       int this_frame_target,
+                                       int *frame_under_shoot_limit,
+                                       int *frame_over_shoot_limit);
 
 // Picks q and q bounds given the target for bits
-int vp10_rc_pick_q_and_bounds(const struct VP10_COMP *cpi,
-                             int *bottom_index,
-                             int *top_index);
+int vp10_rc_pick_q_and_bounds(const struct VP10_COMP *cpi, int *bottom_index,
+                              int *top_index);
 
 // Estimates q to achieve a target bits per frame
 int vp10_rc_regulate_q(const struct VP10_COMP *cpi, int target_bits_per_frame,
-                      int active_best_quality, int active_worst_quality);
+                       int active_best_quality, int active_worst_quality);
 
 // Estimates bits per mb for a given qindex and correction factor.
 int vp10_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,
-                       double correction_factor, vpx_bit_depth_t bit_depth);
+                        double correction_factor, vpx_bit_depth_t bit_depth);
 
 // Clamping utilities for bitrate targets for iframes and pframes.
 int vp10_rc_clamp_iframe_target_size(const struct VP10_COMP *const cpi,
-                                    int target);
+                                     int target);
 int vp10_rc_clamp_pframe_target_size(const struct VP10_COMP *const cpi,
-                                    int target);
+                                     int target);
 // Utility to set frame_target into the RATE_CONTROL structure
 // This function is called only from the vp10_rc_get_..._params() functions.
 void vp10_rc_set_frame_target(struct VP10_COMP *cpi, int target);
@@ -259,20 +258,20 @@ void vp10_rc_set_frame_target(struct VP10_COMP *cpi, int target);
 // Computes a q delta (in "q index" terms) to get from a starting q value
 // to a target q value
 int vp10_compute_qdelta(const RATE_CONTROL *rc, double qstart, double qtarget,
-                       vpx_bit_depth_t bit_depth);
+                        vpx_bit_depth_t bit_depth);
 
 // Computes a q delta (in "q index" terms) to get from a starting q value
 // to a value that should equate to the given rate ratio.
 int vp10_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
-                               int qindex, double rate_target_ratio,
-                               vpx_bit_depth_t bit_depth);
+                                int qindex, double rate_target_ratio,
+                                vpx_bit_depth_t bit_depth);
 
 int vp10_frame_type_qdelta(const struct VP10_COMP *cpi, int rf_level, int q);
 
 void vp10_rc_update_framerate(struct VP10_COMP *cpi);
 
 void vp10_rc_set_gf_interval_range(const struct VP10_COMP *const cpi,
-                                  RATE_CONTROL *const rc);
+                                   RATE_CONTROL *const rc);
 
 void vp10_set_target_rate(struct VP10_COMP *cpi);
 

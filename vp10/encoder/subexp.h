@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP10_ENCODER_SUBEXP_H_
 #define VP10_ENCODER_SUBEXP_H_
 
@@ -20,34 +19,28 @@ extern "C" {
 
 struct vp10_writer;
 
-void vp10_write_prob_diff_update(struct vp10_writer *w,
-                                vpx_prob newp, vpx_prob oldp);
+void vp10_write_prob_diff_update(struct vp10_writer *w, vpx_prob newp,
+                                 vpx_prob oldp);
 
 void vp10_cond_prob_diff_update(struct vp10_writer *w, vpx_prob *oldp,
-                               const unsigned int ct[2]);
+                                const unsigned int ct[2]);
 
-int vp10_prob_diff_update_savings_search(const unsigned int *ct,
-                                        vpx_prob oldp, vpx_prob *bestp,
-                                        vpx_prob upd);
-
+int vp10_prob_diff_update_savings_search(const unsigned int *ct, vpx_prob oldp,
+                                         vpx_prob *bestp, vpx_prob upd);
 
 int vp10_prob_diff_update_savings_search_model(const unsigned int *ct,
-                                              const vpx_prob *oldp,
-                                              vpx_prob *bestp,
-                                              vpx_prob upd,
-                                              int stepsize);
+                                               const vpx_prob *oldp,
+                                               vpx_prob *bestp, vpx_prob upd,
+                                               int stepsize);
 int vp10_cond_prob_diff_update_savings(vpx_prob *oldp,
                                        const unsigned int ct[2]);
 
 #if CONFIG_ENTROPY
-int vp10_prob_update_search_subframe(unsigned int ct[][2],
-                                     vpx_prob oldp, vpx_prob *bestp,
-                                     vpx_prob upd, int n);
-int vp10_prob_update_search_model_subframe(unsigned int ct[ENTROPY_NODES]
-                                                          [COEF_PROBS_BUFS][2],
-                                           const vpx_prob *oldp,
-                                           vpx_prob *bestp, vpx_prob upd,
-                                           int stepsize, int n);
+int vp10_prob_update_search_subframe(unsigned int ct[][2], vpx_prob oldp,
+                                     vpx_prob *bestp, vpx_prob upd, int n);
+int vp10_prob_update_search_model_subframe(
+    unsigned int ct[ENTROPY_NODES][COEF_PROBS_BUFS][2], const vpx_prob *oldp,
+    vpx_prob *bestp, vpx_prob upd, int stepsize, int n);
 #endif  // CONFIG_ENTROPY
 
 //
@@ -56,7 +49,7 @@ int vp10_prob_update_search_model_subframe(unsigned int ct[ENTROPY_NODES]
 // indicate 0 or non-zero, mag_bits bits are used to indicate magnitide
 // and 1 more bit for the sign if non-zero.
 void vp10_write_primitive_symmetric(vp10_writer *w, int word,
-                                   unsigned int mag_bits);
+                                    unsigned int mag_bits);
 #ifdef __cplusplus
 }  // extern "C"
 #endif

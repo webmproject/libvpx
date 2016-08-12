@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP10_ENCODER_ENCODEMV_H_
 #define VP10_ENCODER_ENCODEMV_H_
 
@@ -23,14 +22,14 @@ void vp10_entropy_mv_init(void);
 void vp10_write_nmv_probs(VP10_COMMON *cm, int usehp, vp10_writer *w,
                           nmv_context_counts *const counts);
 
-void vp10_encode_mv(VP10_COMP *cpi, vp10_writer* w, const MV* mv, const MV* ref,
+void vp10_encode_mv(VP10_COMP *cpi, vp10_writer *w, const MV *mv, const MV *ref,
 #if CONFIG_REF_MV
                     int is_compound,
 #endif
-                    const nmv_context* mvctx, int usehp);
+                    const nmv_context *mvctx, int usehp);
 
 void vp10_build_nmv_cost_table(int *mvjoint, int *mvcost[2],
-                              const nmv_context* mvctx, int usehp);
+                               const nmv_context *mvctx, int usehp);
 
 void vp10_update_mv_count(ThreadData *td);
 
