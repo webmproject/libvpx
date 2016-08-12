@@ -21,21 +21,20 @@ namespace {
 using std::tr1::tuple;
 using libvpx_test::ACMRandom;
 
-typedef void (*conv_filter_t)(const uint8_t*, int, uint8_t*, int,
-                              int, int, const InterpFilterParams,
-                              const int, int, int);
+typedef void (*conv_filter_t)(const uint8_t *, int, uint8_t *, int, int, int,
+                              const InterpFilterParams, const int, int, int);
 #if CONFIG_VP9_HIGHBITDEPTH
-typedef void (*hbd_conv_filter_t)(const uint16_t*, int, uint16_t*, int,
-                                  int, int, const InterpFilterParams,
-                                  const int, int, int, int);
+typedef void (*hbd_conv_filter_t)(const uint16_t *, int, uint16_t *, int, int,
+                                  int, const InterpFilterParams, const int, int,
+                                  int, int);
 #endif
 
 // Test parameter list:
 //  <convolve_horiz_func, convolve_vert_func,
 //  <width, height>, filter_params, subpel_x_q4, avg>
 typedef tuple<int, int> BlockDimension;
-typedef tuple<conv_filter_t, conv_filter_t, BlockDimension, INTERP_FILTER,
-              int, int> ConvParams;
+typedef tuple<conv_filter_t, conv_filter_t, BlockDimension, INTERP_FILTER, int,
+              int> ConvParams;
 #if CONFIG_VP9_HIGHBITDEPTH
 // Test parameter list:
 //  <convolve_horiz_func, convolve_vert_func,
@@ -136,10 +135,11 @@ void VP10ConvolveOptimzTest::DiffFilterBuffer() {
   for (r = 0; r < height_; ++r) {
     for (c = 0; c < width_; ++c) {
       EXPECT_EQ((uint8_t)dst_ref_ptr[c], (uint8_t)dst_ptr[c])
-      << "Error at row: " << r << " col: " << c << " "
-      << "w = " << width_ << " " << "h = " << height_ << " "
-      << "filter group index = " << filter_ << " "
-      << "filter index = " << subpel_;
+          << "Error at row: " << r << " col: " << c << " "
+          << "w = " << width_ << " "
+          << "h = " << height_ << " "
+          << "filter group index = " << filter_ << " "
+          << "filter index = " << subpel_;
     }
     dst_ptr += stride;
     dst_ref_ptr += stride;
@@ -154,8 +154,8 @@ void VP10ConvolveOptimzTest::RunHorizFilterBitExactCheck() {
   vp10_convolve_horiz_c(src_ref_, stride, dst_ref_, stride, width_, height_,
                         filter_params, subpel_, x_step_q4, avg_);
 
-  conv_horiz_(src_, stride, dst_, stride, width_, height_,
-              filter_params, subpel_, x_step_q4, avg_);
+  conv_horiz_(src_, stride, dst_, stride, width_, height_, filter_params,
+              subpel_, x_step_q4, avg_);
 
   DiffFilterBuffer();
 
@@ -170,9 +170,8 @@ void VP10ConvolveOptimzTest::RunHorizFilterBitExactCheck() {
                         intermediate_height, filter_params, subpel_, x_step_q4,
                         avg_);
 
-  conv_horiz_(src_, stride, dst_, stride, width_,
-              intermediate_height, filter_params, subpel_, x_step_q4,
-              avg_);
+  conv_horiz_(src_, stride, dst_, stride, width_, intermediate_height,
+              filter_params, subpel_, x_step_q4, avg_);
 
   DiffFilterBuffer();
 }
@@ -185,8 +184,8 @@ void VP10ConvolveOptimzTest::RunVertFilterBitExactCheck() {
   vp10_convolve_vert_c(src_ref_, stride, dst_ref_, stride, width_, height_,
                        filter_params, subpel_, x_step_q4, avg_);
 
-  conv_vert_(src_, stride, dst_, stride, width_, height_,
-             filter_params, subpel_, x_step_q4, avg_);
+  conv_vert_(src_, stride, dst_, stride, width_, height_, filter_params,
+             subpel_, x_step_q4, avg_);
 
   DiffFilterBuffer();
 }
@@ -202,44 +201,31 @@ using std::tr1::make_tuple;
 
 #if (HAVE_SSSE3 || HAVE_SSE4_1) && CONFIG_EXT_INTERP
 const BlockDimension kBlockDim[] = {
-  make_tuple(2, 2),
-  make_tuple(2, 4),
-  make_tuple(4, 4),
-  make_tuple(4, 8),
-  make_tuple(8, 4),
-  make_tuple(8, 8),
-  make_tuple(8, 16),
-  make_tuple(16, 8),
-  make_tuple(16, 16),
-  make_tuple(16, 32),
-  make_tuple(32, 16),
-  make_tuple(32, 32),
-  make_tuple(32, 64),
-  make_tuple(64, 32),
-  make_tuple(64, 64),
-  make_tuple(64, 128),
-  make_tuple(128, 64),
-  make_tuple(128, 128),
+  make_tuple(2, 2),    make_tuple(2, 4),    make_tuple(4, 4),
+  make_tuple(4, 8),    make_tuple(8, 4),    make_tuple(8, 8),
+  make_tuple(8, 16),   make_tuple(16, 8),   make_tuple(16, 16),
+  make_tuple(16, 32),  make_tuple(32, 16),  make_tuple(32, 32),
+  make_tuple(32, 64),  make_tuple(64, 32),  make_tuple(64, 64),
+  make_tuple(64, 128), make_tuple(128, 64), make_tuple(128, 128),
 };
 
 // 10/12-tap filters
-const INTERP_FILTER kFilter[] = {6, 4, 2};
+const INTERP_FILTER kFilter[] = { 6, 4, 2 };
 
-const int kSubpelQ4[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+const int kSubpelQ4[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 
-const int kAvg[] = {0, 1};
+const int kAvg[] = { 0, 1 };
 #endif
 
 #if HAVE_SSSE3 && CONFIG_EXT_INTERP
 INSTANTIATE_TEST_CASE_P(
     SSSE3, VP10ConvolveOptimzTest,
-    ::testing::Combine(
-         ::testing::Values(vp10_convolve_horiz_ssse3),
-         ::testing::Values(vp10_convolve_vert_ssse3),
-         ::testing::ValuesIn(kBlockDim),
-         ::testing::ValuesIn(kFilter),
-         ::testing::ValuesIn(kSubpelQ4),
-         ::testing::ValuesIn(kAvg)));
+    ::testing::Combine(::testing::Values(vp10_convolve_horiz_ssse3),
+                       ::testing::Values(vp10_convolve_vert_ssse3),
+                       ::testing::ValuesIn(kBlockDim),
+                       ::testing::ValuesIn(kFilter),
+                       ::testing::ValuesIn(kSubpelQ4),
+                       ::testing::ValuesIn(kAvg)));
 #endif  // HAVE_SSSE3 && CONFIG_EXT_INTERP
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -324,11 +310,12 @@ void VP10HbdConvolveOptimzTest::DiffFilterBuffer() {
   for (r = 0; r < height_; ++r) {
     for (c = 0; c < width_; ++c) {
       EXPECT_EQ((uint16_t)dst_ref_ptr[c], (uint16_t)dst_ptr[c])
-      << "Error at row: " << r << " col: " << c << " "
-      << "w = " << width_ << " " << "h = " << height_ << " "
-      << "filter group index = " << filter_ << " "
-      << "filter index = " << subpel_ << " "
-      << "bit depth = " << bit_depth_;
+          << "Error at row: " << r << " col: " << c << " "
+          << "w = " << width_ << " "
+          << "h = " << height_ << " "
+          << "filter group index = " << filter_ << " "
+          << "filter index = " << subpel_ << " "
+          << "bit depth = " << bit_depth_;
     }
     dst_ptr += stride;
     dst_ref_ptr += stride;
@@ -340,12 +327,12 @@ void VP10HbdConvolveOptimzTest::RunHorizFilterBitExactCheck() {
 
   InterpFilterParams filter_params = vp10_get_interp_filter_params(filter_);
 
-  vp10_highbd_convolve_horiz_c(src_, stride, dst_ref_, stride, width_,
-                               height_, filter_params, subpel_, x_step_q4,
-                               avg_, bit_depth_);
+  vp10_highbd_convolve_horiz_c(src_, stride, dst_ref_, stride, width_, height_,
+                               filter_params, subpel_, x_step_q4, avg_,
+                               bit_depth_);
 
-  conv_horiz_(src_, stride, dst_, stride, width_, height_,
-              filter_params, subpel_, x_step_q4, avg_, bit_depth_);
+  conv_horiz_(src_, stride, dst_, stride, width_, height_, filter_params,
+              subpel_, x_step_q4, avg_, bit_depth_);
 
   DiffFilterBuffer();
 
@@ -375,8 +362,8 @@ void VP10HbdConvolveOptimzTest::RunVertFilterBitExactCheck() {
                               filter_params, subpel_, x_step_q4, avg_,
                               bit_depth_);
 
-  conv_vert_(src_, stride, dst_, stride, width_, height_,
-             filter_params, subpel_, x_step_q4, avg_, bit_depth_);
+  conv_vert_(src_, stride, dst_, stride, width_, height_, filter_params,
+             subpel_, x_step_q4, avg_, bit_depth_);
 
   DiffFilterBuffer();
 }
@@ -390,18 +377,17 @@ TEST_P(VP10HbdConvolveOptimzTest, VertBitExactCheck) {
 
 #if HAVE_SSE4_1 && CONFIG_EXT_INTERP
 
-const int kBitdepth[] = {10, 12};
+const int kBitdepth[] = { 10, 12 };
 
 INSTANTIATE_TEST_CASE_P(
     SSE4_1, VP10HbdConvolveOptimzTest,
-    ::testing::Combine(
-         ::testing::Values(vp10_highbd_convolve_horiz_sse4_1),
-         ::testing::Values(vp10_highbd_convolve_vert_sse4_1),
-         ::testing::ValuesIn(kBlockDim),
-         ::testing::ValuesIn(kFilter),
-         ::testing::ValuesIn(kSubpelQ4),
-         ::testing::ValuesIn(kAvg),
-         ::testing::ValuesIn(kBitdepth)));
+    ::testing::Combine(::testing::Values(vp10_highbd_convolve_horiz_sse4_1),
+                       ::testing::Values(vp10_highbd_convolve_vert_sse4_1),
+                       ::testing::ValuesIn(kBlockDim),
+                       ::testing::ValuesIn(kFilter),
+                       ::testing::ValuesIn(kSubpelQ4),
+                       ::testing::ValuesIn(kAvg),
+                       ::testing::ValuesIn(kBitdepth)));
 #endif  // HAVE_SSE4_1 && CONFIG_EXT_INTERP
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 }  // namespace

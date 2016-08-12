@@ -41,10 +41,10 @@ TEST_P(ObmcSadTest, RandomValues) {
   DECLARE_ALIGNED(32, int32_t, wsrc[MAX_SB_SQUARE]);
   DECLARE_ALIGNED(32, int32_t, mask[MAX_SB_SQUARE]);
 
-  for (int iter = 0 ; iter < kIterations && !HasFatalFailure() ; ++iter) {
+  for (int iter = 0; iter < kIterations && !HasFatalFailure(); ++iter) {
     const int pre_stride = rng_(MAX_SB_SIZE + 1);
 
-    for (int i = 0 ; i < MAX_SB_SQUARE ; ++i) {
+    for (int i = 0; i < MAX_SB_SQUARE; ++i) {
       pre[i] = rng_.Rand8();
       wsrc[i] = rng_.Rand8() * rng_(kMaskMax * kMaskMax + 1);
       mask[i] = rng_(kMaskMax * kMaskMax + 1);
@@ -53,7 +53,7 @@ TEST_P(ObmcSadTest, RandomValues) {
     const unsigned int ref_res = params_.ref_func(pre, pre_stride, wsrc, mask);
     unsigned int tst_res;
     ASM_REGISTER_STATE_CHECK(tst_res =
-        params_.tst_func(pre, pre_stride, wsrc, mask));
+                                 params_.tst_func(pre, pre_stride, wsrc, mask));
 
     ASSERT_EQ(ref_res, tst_res);
   }
@@ -64,10 +64,10 @@ TEST_P(ObmcSadTest, ExtremeValues) {
   DECLARE_ALIGNED(32, int32_t, wsrc[MAX_SB_SQUARE]);
   DECLARE_ALIGNED(32, int32_t, mask[MAX_SB_SQUARE]);
 
-  for (int iter = 0 ; iter < MAX_SB_SIZE && !HasFatalFailure() ; ++iter) {
+  for (int iter = 0; iter < MAX_SB_SIZE && !HasFatalFailure(); ++iter) {
     const int pre_stride = iter;
 
-    for (int i = 0 ; i < MAX_SB_SQUARE ; ++i) {
+    for (int i = 0; i < MAX_SB_SQUARE; ++i) {
       pre[i] = UINT8_MAX;
       wsrc[i] = UINT8_MAX * kMaskMax * kMaskMax;
       mask[i] = kMaskMax * kMaskMax;
@@ -76,7 +76,7 @@ TEST_P(ObmcSadTest, ExtremeValues) {
     const unsigned int ref_res = params_.ref_func(pre, pre_stride, wsrc, mask);
     unsigned int tst_res;
     ASM_REGISTER_STATE_CHECK(tst_res =
-        params_.tst_func(pre, pre_stride, wsrc, mask));
+                                 params_.tst_func(pre, pre_stride, wsrc, mask));
 
     ASSERT_EQ(ref_res, tst_res);
   }
@@ -120,20 +120,21 @@ TEST_P(ObmcSadHBDTest, RandomValues) {
   DECLARE_ALIGNED(32, int32_t, wsrc[MAX_SB_SQUARE]);
   DECLARE_ALIGNED(32, int32_t, mask[MAX_SB_SQUARE]);
 
-  for (int iter = 0 ; iter < kIterations && !HasFatalFailure() ; ++iter) {
+  for (int iter = 0; iter < kIterations && !HasFatalFailure(); ++iter) {
     const int pre_stride = rng_(MAX_SB_SIZE + 1);
 
-    for (int i = 0 ; i < MAX_SB_SQUARE ; ++i) {
-      pre[i] = rng_(1<<12);
-      wsrc[i] = rng_(1<<12) * rng_(kMaskMax * kMaskMax + 1);
+    for (int i = 0; i < MAX_SB_SQUARE; ++i) {
+      pre[i] = rng_(1 << 12);
+      wsrc[i] = rng_(1 << 12) * rng_(kMaskMax * kMaskMax + 1);
       mask[i] = rng_(kMaskMax * kMaskMax + 1);
     }
 
     const unsigned int ref_res =
         params_.ref_func(CONVERT_TO_BYTEPTR(pre), pre_stride, wsrc, mask);
     unsigned int tst_res;
-    ASM_REGISTER_STATE_CHECK(tst_res =
-        params_.tst_func(CONVERT_TO_BYTEPTR(pre), pre_stride, wsrc, mask));
+    ASM_REGISTER_STATE_CHECK(
+        tst_res =
+            params_.tst_func(CONVERT_TO_BYTEPTR(pre), pre_stride, wsrc, mask));
 
     ASSERT_EQ(ref_res, tst_res);
   }
@@ -144,10 +145,10 @@ TEST_P(ObmcSadHBDTest, ExtremeValues) {
   DECLARE_ALIGNED(32, int32_t, wsrc[MAX_SB_SQUARE]);
   DECLARE_ALIGNED(32, int32_t, mask[MAX_SB_SQUARE]);
 
-  for (int iter = 0 ; iter < MAX_SB_SIZE && !HasFatalFailure() ; ++iter) {
+  for (int iter = 0; iter < MAX_SB_SIZE && !HasFatalFailure(); ++iter) {
     const int pre_stride = iter;
 
-    for (int i = 0 ; i < MAX_SB_SQUARE ; ++i) {
+    for (int i = 0; i < MAX_SB_SQUARE; ++i) {
       pre[i] = (1 << 12) - 1;
       wsrc[i] = ((1 << 12) - 1) * kMaskMax * kMaskMax;
       mask[i] = kMaskMax * kMaskMax;
@@ -156,8 +157,9 @@ TEST_P(ObmcSadHBDTest, ExtremeValues) {
     const unsigned int ref_res =
         params_.ref_func(CONVERT_TO_BYTEPTR(pre), pre_stride, wsrc, mask);
     unsigned int tst_res;
-    ASM_REGISTER_STATE_CHECK(tst_res =
-        params_.tst_func(CONVERT_TO_BYTEPTR(pre), pre_stride, wsrc, mask));
+    ASM_REGISTER_STATE_CHECK(
+        tst_res =
+            params_.tst_func(CONVERT_TO_BYTEPTR(pre), pre_stride, wsrc, mask));
 
     ASSERT_EQ(ref_res, tst_res);
   }

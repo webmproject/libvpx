@@ -14,7 +14,6 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx/vpx_codec.h"
 
-
 namespace libvpx_test {
 
 //  Note:
@@ -44,19 +43,19 @@ class TransformTestBase {
     int64_t total_error = 0;
     const int count_test_block = 10000;
 
-    int16_t *test_input_block = reinterpret_cast<int16_t *>
-        (vpx_memalign(16, sizeof(int16_t) * num_coeffs_));
-    tran_low_t *test_temp_block = reinterpret_cast<tran_low_t *>
-        (vpx_memalign(16, sizeof(tran_low_t) * num_coeffs_));
-    uint8_t *dst = reinterpret_cast<uint8_t *>
-        (vpx_memalign(16, sizeof(uint8_t) * num_coeffs_));
-    uint8_t *src = reinterpret_cast<uint8_t *>
-        (vpx_memalign(16, sizeof(uint8_t) * num_coeffs_));
+    int16_t *test_input_block = reinterpret_cast<int16_t *>(
+        vpx_memalign(16, sizeof(int16_t) * num_coeffs_));
+    tran_low_t *test_temp_block = reinterpret_cast<tran_low_t *>(
+        vpx_memalign(16, sizeof(tran_low_t) * num_coeffs_));
+    uint8_t *dst = reinterpret_cast<uint8_t *>(
+        vpx_memalign(16, sizeof(uint8_t) * num_coeffs_));
+    uint8_t *src = reinterpret_cast<uint8_t *>(
+        vpx_memalign(16, sizeof(uint8_t) * num_coeffs_));
 #if CONFIG_VP9_HIGHBITDEPTH
-    uint16_t *dst16 = reinterpret_cast<uint16_t *>
-        (vpx_memalign(16, sizeof(uint16_t) * num_coeffs_));
-    uint16_t *src16 = reinterpret_cast<uint16_t *>
-        (vpx_memalign(16, sizeof(uint16_t) * num_coeffs_));
+    uint16_t *dst16 = reinterpret_cast<uint16_t *>(
+        vpx_memalign(16, sizeof(uint16_t) * num_coeffs_));
+    uint16_t *src16 = reinterpret_cast<uint16_t *>(
+        vpx_memalign(16, sizeof(uint16_t) * num_coeffs_));
 #endif
 
     for (int i = 0; i < count_test_block; ++i) {
@@ -75,14 +74,14 @@ class TransformTestBase {
         }
       }
 
-      ASM_REGISTER_STATE_CHECK(RunFwdTxfm(test_input_block,
-                                          test_temp_block, pitch_));
+      ASM_REGISTER_STATE_CHECK(
+          RunFwdTxfm(test_input_block, test_temp_block, pitch_));
       if (bit_depth_ == VPX_BITS_8) {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(test_temp_block, dst, pitch_));
 #if CONFIG_VP9_HIGHBITDEPTH
       } else {
-        ASM_REGISTER_STATE_CHECK(RunInvTxfm(test_temp_block,
-                                            CONVERT_TO_BYTEPTR(dst16), pitch_));
+        ASM_REGISTER_STATE_CHECK(
+            RunInvTxfm(test_temp_block, CONVERT_TO_BYTEPTR(dst16), pitch_));
 #endif
       }
 
@@ -95,15 +94,13 @@ class TransformTestBase {
         const uint32_t diff = dst[j] - src[j];
 #endif
         const uint32_t error = diff * diff;
-        if (max_error < error)
-          max_error = error;
+        if (max_error < error) max_error = error;
         total_error += error;
       }
     }
 
     EXPECT_GE(static_cast<uint32_t>(limit), max_error)
-        << "Error: 4x4 FHT/IHT has an individual round trip error > "
-        << limit;
+        << "Error: 4x4 FHT/IHT has an individual round trip error > " << limit;
 
     EXPECT_GE(count_test_block * limit, total_error)
         << "Error: 4x4 FHT/IHT has average round trip error > " << limit
@@ -123,12 +120,12 @@ class TransformTestBase {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int count_test_block = 5000;
 
-    int16_t *input_block = reinterpret_cast<int16_t *>
-        (vpx_memalign(16, sizeof(int16_t) * num_coeffs_));
-    tran_low_t *output_ref_block = reinterpret_cast<tran_low_t *>
-        (vpx_memalign(16, sizeof(tran_low_t) * num_coeffs_));
-    tran_low_t *output_block = reinterpret_cast<tran_low_t *>
-        (vpx_memalign(16, sizeof(tran_low_t) * num_coeffs_));
+    int16_t *input_block = reinterpret_cast<int16_t *>(
+        vpx_memalign(16, sizeof(int16_t) * num_coeffs_));
+    tran_low_t *output_ref_block = reinterpret_cast<tran_low_t *>(
+        vpx_memalign(16, sizeof(tran_low_t) * num_coeffs_));
+    tran_low_t *output_block = reinterpret_cast<tran_low_t *>(
+        vpx_memalign(16, sizeof(tran_low_t) * num_coeffs_));
 
     for (int i = 0; i < count_test_block; ++i) {
       // Initialize a test block with input range [-mask_, mask_].
@@ -154,12 +151,12 @@ class TransformTestBase {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int count_test_block = 5000;
 
-    int16_t *input_extreme_block = reinterpret_cast<int16_t *>
-        (vpx_memalign(16, sizeof(int16_t) * num_coeffs_));
-    tran_low_t *output_ref_block = reinterpret_cast<tran_low_t *>
-        (vpx_memalign(16, sizeof(tran_low_t) * num_coeffs_));
-    tran_low_t *output_block = reinterpret_cast<tran_low_t *>
-        (vpx_memalign(16, sizeof(tran_low_t) * num_coeffs_));
+    int16_t *input_extreme_block = reinterpret_cast<int16_t *>(
+        vpx_memalign(16, sizeof(int16_t) * num_coeffs_));
+    tran_low_t *output_ref_block = reinterpret_cast<tran_low_t *>(
+        vpx_memalign(16, sizeof(tran_low_t) * num_coeffs_));
+    tran_low_t *output_block = reinterpret_cast<tran_low_t *>(
+        vpx_memalign(16, sizeof(tran_low_t) * num_coeffs_));
 
     for (int i = 0; i < count_test_block; ++i) {
       // Initialize a test block with input range [-mask_, mask_].
@@ -167,16 +164,14 @@ class TransformTestBase {
         input_extreme_block[j] = rnd.Rand8() % 2 ? mask_ : -mask_;
       }
       if (i == 0) {
-        for (int j = 0; j < num_coeffs_; ++j)
-          input_extreme_block[j] = mask_;
+        for (int j = 0; j < num_coeffs_; ++j) input_extreme_block[j] = mask_;
       } else if (i == 1) {
-        for (int j = 0; j < num_coeffs_; ++j)
-          input_extreme_block[j] = -mask_;
+        for (int j = 0; j < num_coeffs_; ++j) input_extreme_block[j] = -mask_;
       }
 
       fwd_txfm_ref(input_extreme_block, output_ref_block, pitch_, tx_type_);
-      ASM_REGISTER_STATE_CHECK(RunFwdTxfm(input_extreme_block,
-                                          output_block, pitch_));
+      ASM_REGISTER_STATE_CHECK(
+          RunFwdTxfm(input_extreme_block, output_block, pitch_));
 
       int row_length = FindRowLength();
       // The minimum quant value is 4.
@@ -196,20 +191,20 @@ class TransformTestBase {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int count_test_block = 1000;
 
-    int16_t *in = reinterpret_cast<int16_t *>
-        (vpx_memalign(16, sizeof(int16_t) * num_coeffs_));
-    tran_low_t *coeff = reinterpret_cast<tran_low_t *>
-        (vpx_memalign(16, sizeof(tran_low_t) * num_coeffs_));
-    uint8_t *dst = reinterpret_cast<uint8_t *>
-        (vpx_memalign(16, sizeof(uint8_t) * num_coeffs_));
-    uint8_t *src = reinterpret_cast<uint8_t *>
-        (vpx_memalign(16, sizeof(uint8_t) * num_coeffs_));
+    int16_t *in = reinterpret_cast<int16_t *>(
+        vpx_memalign(16, sizeof(int16_t) * num_coeffs_));
+    tran_low_t *coeff = reinterpret_cast<tran_low_t *>(
+        vpx_memalign(16, sizeof(tran_low_t) * num_coeffs_));
+    uint8_t *dst = reinterpret_cast<uint8_t *>(
+        vpx_memalign(16, sizeof(uint8_t) * num_coeffs_));
+    uint8_t *src = reinterpret_cast<uint8_t *>(
+        vpx_memalign(16, sizeof(uint8_t) * num_coeffs_));
 
 #if CONFIG_VP9_HIGHBITDEPTH
-    uint16_t *dst16 = reinterpret_cast<uint16_t *>
-        (vpx_memalign(16, sizeof(uint16_t) * num_coeffs_));
-    uint16_t *src16 = reinterpret_cast<uint16_t *>
-        (vpx_memalign(16, sizeof(uint16_t) * num_coeffs_));
+    uint16_t *dst16 = reinterpret_cast<uint16_t *>(
+        vpx_memalign(16, sizeof(uint16_t) * num_coeffs_));
+    uint16_t *src16 = reinterpret_cast<uint16_t *>(
+        vpx_memalign(16, sizeof(uint16_t) * num_coeffs_));
 #endif
 
     for (int i = 0; i < count_test_block; ++i) {
@@ -234,8 +229,8 @@ class TransformTestBase {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, pitch_));
 #if CONFIG_VP9_HIGHBITDEPTH
       } else {
-        ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, CONVERT_TO_BYTEPTR(dst16),
-                                            pitch_));
+        ASM_REGISTER_STATE_CHECK(
+            RunInvTxfm(coeff, CONVERT_TO_BYTEPTR(dst16), pitch_));
 #endif
       }
 
@@ -248,8 +243,7 @@ class TransformTestBase {
 #endif
         const uint32_t error = diff * diff;
         EXPECT_GE(static_cast<uint32_t>(limit), error)
-            << "Error: 4x4 IDCT has error " << error
-            << " at index " << j;
+            << "Error: 4x4 IDCT has error " << error << " at index " << j;
       }
     }
     vpx_free(in);

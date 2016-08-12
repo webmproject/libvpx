@@ -44,18 +44,18 @@ TEST_P(ObmcVarianceTest, RandomValues) {
   DECLARE_ALIGNED(32, int32_t, wsrc[MAX_SB_SQUARE]);
   DECLARE_ALIGNED(32, int32_t, mask[MAX_SB_SQUARE]);
 
-  for (int iter = 0 ; iter < kIterations && !HasFatalFailure() ; ++iter) {
+  for (int iter = 0; iter < kIterations && !HasFatalFailure(); ++iter) {
     const int pre_stride = this->rng_(MAX_SB_SIZE + 1);
 
-    for (int i = 0 ; i < MAX_SB_SQUARE ; ++i) {
+    for (int i = 0; i < MAX_SB_SQUARE; ++i) {
       pre[i] = this->rng_.Rand8();
       wsrc[i] = this->rng_.Rand8() * this->rng_(kMaskMax * kMaskMax + 1);
       mask[i] = this->rng_(kMaskMax * kMaskMax + 1);
     }
 
     unsigned int ref_sse, tst_sse;
-    const unsigned int ref_res = params_.ref_func(pre, pre_stride, wsrc, mask,
-                                                  &ref_sse);
+    const unsigned int ref_res =
+        params_.ref_func(pre, pre_stride, wsrc, mask, &ref_sse);
     unsigned int tst_res;
     ASM_REGISTER_STATE_CHECK(
         tst_res = params_.tst_func(pre, pre_stride, wsrc, mask, &tst_sse));
@@ -70,18 +70,18 @@ TEST_P(ObmcVarianceTest, ExtremeValues) {
   DECLARE_ALIGNED(32, int32_t, wsrc[MAX_SB_SQUARE]);
   DECLARE_ALIGNED(32, int32_t, mask[MAX_SB_SQUARE]);
 
-  for (int iter = 0 ; iter < MAX_SB_SIZE && !HasFatalFailure() ; ++iter) {
+  for (int iter = 0; iter < MAX_SB_SIZE && !HasFatalFailure(); ++iter) {
     const int pre_stride = iter;
 
-    for (int i = 0 ; i < MAX_SB_SQUARE ; ++i) {
+    for (int i = 0; i < MAX_SB_SQUARE; ++i) {
       pre[i] = UINT8_MAX;
       wsrc[i] = UINT8_MAX * kMaskMax * kMaskMax;
       mask[i] = kMaskMax * kMaskMax;
     }
 
     unsigned int ref_sse, tst_sse;
-    const unsigned int ref_res = params_.ref_func(pre, pre_stride, wsrc, mask,
-                                                  &ref_sse);
+    const unsigned int ref_res =
+        params_.ref_func(pre, pre_stride, wsrc, mask, &ref_sse);
     unsigned int tst_res;
     ASM_REGISTER_STATE_CHECK(
         tst_res = params_.tst_func(pre, pre_stride, wsrc, mask, &tst_sse));
@@ -129,10 +129,10 @@ TEST_P(ObmcVarianceHBDTest, RandomValues) {
   DECLARE_ALIGNED(32, int32_t, wsrc[MAX_SB_SQUARE]);
   DECLARE_ALIGNED(32, int32_t, mask[MAX_SB_SQUARE]);
 
-  for (int iter = 0 ; iter < kIterations && !HasFatalFailure() ; ++iter) {
+  for (int iter = 0; iter < kIterations && !HasFatalFailure(); ++iter) {
     const int pre_stride = this->rng_(MAX_SB_SIZE + 1);
 
-    for (int i = 0 ; i < MAX_SB_SQUARE ; ++i) {
+    for (int i = 0; i < MAX_SB_SQUARE; ++i) {
       pre[i] = this->rng_(1 << params_.bit_depth);
       wsrc[i] = this->rng_(1 << params_.bit_depth) *
                 this->rng_(kMaskMax * kMaskMax + 1);
@@ -140,13 +140,12 @@ TEST_P(ObmcVarianceHBDTest, RandomValues) {
     }
 
     unsigned int ref_sse, tst_sse;
-    const unsigned int ref_res = params_.ref_func(CONVERT_TO_BYTEPTR(pre),
-                                                  pre_stride,
-                                                  wsrc, mask, &ref_sse);
+    const unsigned int ref_res = params_.ref_func(
+        CONVERT_TO_BYTEPTR(pre), pre_stride, wsrc, mask, &ref_sse);
     unsigned int tst_res;
-    ASM_REGISTER_STATE_CHECK(
-        tst_res = params_.tst_func(CONVERT_TO_BYTEPTR(pre),
-                                   pre_stride, wsrc, mask, &tst_sse));
+    ASM_REGISTER_STATE_CHECK(tst_res = params_.tst_func(CONVERT_TO_BYTEPTR(pre),
+                                                        pre_stride, wsrc, mask,
+                                                        &tst_sse));
 
     ASSERT_EQ(ref_res, tst_res);
     ASSERT_EQ(ref_sse, tst_sse);
@@ -158,23 +157,22 @@ TEST_P(ObmcVarianceHBDTest, ExtremeValues) {
   DECLARE_ALIGNED(32, int32_t, wsrc[MAX_SB_SQUARE]);
   DECLARE_ALIGNED(32, int32_t, mask[MAX_SB_SQUARE]);
 
-  for (int iter = 0 ; iter < MAX_SB_SIZE && !HasFatalFailure() ; ++iter) {
+  for (int iter = 0; iter < MAX_SB_SIZE && !HasFatalFailure(); ++iter) {
     const int pre_stride = iter;
 
-    for (int i = 0 ; i < MAX_SB_SQUARE ; ++i) {
+    for (int i = 0; i < MAX_SB_SQUARE; ++i) {
       pre[i] = (1 << params_.bit_depth) - 1;
       wsrc[i] = ((1 << params_.bit_depth) - 1) * kMaskMax * kMaskMax;
       mask[i] = kMaskMax * kMaskMax;
     }
 
     unsigned int ref_sse, tst_sse;
-    const unsigned int ref_res = params_.ref_func(CONVERT_TO_BYTEPTR(pre),
-                                                  pre_stride,
-                                                  wsrc, mask, &ref_sse);
+    const unsigned int ref_res = params_.ref_func(
+        CONVERT_TO_BYTEPTR(pre), pre_stride, wsrc, mask, &ref_sse);
     unsigned int tst_res;
-    ASM_REGISTER_STATE_CHECK(
-        tst_res = params_.tst_func(CONVERT_TO_BYTEPTR(pre), pre_stride,
-                                   wsrc, mask, &tst_sse));
+    ASM_REGISTER_STATE_CHECK(tst_res = params_.tst_func(CONVERT_TO_BYTEPTR(pre),
+                                                        pre_stride, wsrc, mask,
+                                                        &tst_sse));
 
     ASSERT_EQ(ref_res, tst_res);
     ASSERT_EQ(ref_sse, tst_sse);
@@ -205,18 +203,18 @@ ObmcVarianceHBDTest::ParamType sse4_functions_hbd[] = {
             vpx_highbd_obmc_variance16x32_sse4_1, 8),
   TestFuncs(vpx_highbd_obmc_variance16x16_c,
             vpx_highbd_obmc_variance16x16_sse4_1, 8),
-  TestFuncs(vpx_highbd_obmc_variance16x8_c,
-            vpx_highbd_obmc_variance16x8_sse4_1, 8),
-  TestFuncs(vpx_highbd_obmc_variance8x16_c,
-            vpx_highbd_obmc_variance8x16_sse4_1, 8),
-  TestFuncs(vpx_highbd_obmc_variance8x8_c,
-            vpx_highbd_obmc_variance8x8_sse4_1, 8),
-  TestFuncs(vpx_highbd_obmc_variance8x4_c,
-            vpx_highbd_obmc_variance8x4_sse4_1, 8),
-  TestFuncs(vpx_highbd_obmc_variance4x8_c,
-            vpx_highbd_obmc_variance4x8_sse4_1, 8),
-  TestFuncs(vpx_highbd_obmc_variance4x4_c,
-            vpx_highbd_obmc_variance4x4_sse4_1, 8),
+  TestFuncs(vpx_highbd_obmc_variance16x8_c, vpx_highbd_obmc_variance16x8_sse4_1,
+            8),
+  TestFuncs(vpx_highbd_obmc_variance8x16_c, vpx_highbd_obmc_variance8x16_sse4_1,
+            8),
+  TestFuncs(vpx_highbd_obmc_variance8x8_c, vpx_highbd_obmc_variance8x8_sse4_1,
+            8),
+  TestFuncs(vpx_highbd_obmc_variance8x4_c, vpx_highbd_obmc_variance8x4_sse4_1,
+            8),
+  TestFuncs(vpx_highbd_obmc_variance4x8_c, vpx_highbd_obmc_variance4x8_sse4_1,
+            8),
+  TestFuncs(vpx_highbd_obmc_variance4x4_c, vpx_highbd_obmc_variance4x4_sse4_1,
+            8),
 #if CONFIG_EXT_PARTITION
   TestFuncs(vpx_highbd_10_obmc_variance128x128_c,
             vpx_highbd_10_obmc_variance128x128_sse4_1, 10),

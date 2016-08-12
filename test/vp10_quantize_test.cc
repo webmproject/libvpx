@@ -21,20 +21,17 @@
 
 namespace {
 
-typedef void (*QuantizeFpFunc)(const tran_low_t *coeff_ptr, intptr_t count,
-                               int skip_block, const int16_t *zbin_ptr,
-                               const int16_t *round_ptr,
-                               const int16_t *quant_ptr,
-                               const int16_t *quant_shift_ptr,
-                               tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
-                               const int16_t *dequant_ptr, uint16_t *eob_ptr,
-                               const int16_t *scan, const int16_t *iscan,
-                               const int log_scale);
+typedef void (*QuantizeFpFunc)(
+    const tran_low_t *coeff_ptr, intptr_t count, int skip_block,
+    const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr,
+    const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr,
+    tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr,
+    const int16_t *scan, const int16_t *iscan, const int log_scale);
 
 struct QuantizeFuncParams {
   QuantizeFuncParams(QuantizeFpFunc qF = NULL, QuantizeFpFunc qRefF = NULL,
-                     int count = 16) : qFunc(qF), qFuncRef(qRefF),
-                                       coeffCount(count) {}
+                     int count = 16)
+      : qFunc(qF), qFuncRef(qRefF), coeffCount(count) {}
   QuantizeFpFunc qFunc;
   QuantizeFpFunc qFuncRef;
   int coeffCount;
@@ -90,28 +87,25 @@ class VP10QuantizeTest : public ::testing::TestWithParam<QuantizeFuncParams> {
         round_ptr[j] = (abs(rnd(roundFactorRange)) * dequant_ptr[j]) >> 7;
       }
 
-      quanFuncRef(coeff_ptr, count, skip_block, zbin_ptr,
-                  round_ptr, quant_ptr, quant_shift_ptr,
-                  ref_qcoeff_ptr, ref_dqcoeff_ptr, dequant_ptr,
-                  &ref_eob, scanOrder.scan, scanOrder.iscan,
-                  log_scale);
+      quanFuncRef(coeff_ptr, count, skip_block, zbin_ptr, round_ptr, quant_ptr,
+                  quant_shift_ptr, ref_qcoeff_ptr, ref_dqcoeff_ptr, dequant_ptr,
+                  &ref_eob, scanOrder.scan, scanOrder.iscan, log_scale);
 
-      ASM_REGISTER_STATE_CHECK(quanFunc(coeff_ptr, count, skip_block, zbin_ptr,
-                                        round_ptr, quant_ptr, quant_shift_ptr,
-                                        qcoeff_ptr, dqcoeff_ptr, dequant_ptr,
-                                        &eob, scanOrder.scan, scanOrder.iscan,
-                                        log_scale));
+      ASM_REGISTER_STATE_CHECK(
+          quanFunc(coeff_ptr, count, skip_block, zbin_ptr, round_ptr, quant_ptr,
+                   quant_shift_ptr, qcoeff_ptr, dqcoeff_ptr, dequant_ptr, &eob,
+                   scanOrder.scan, scanOrder.iscan, log_scale));
 
       for (int j = 0; j < count; ++j) {
-        err_count += (ref_qcoeff_ptr[j]  != qcoeff_ptr[j]) |
-            (ref_dqcoeff_ptr[j] != dqcoeff_ptr[j]);
-        EXPECT_EQ(ref_qcoeff_ptr[j], qcoeff_ptr[j])
-            << "qcoeff error: i = " << i << " j = " << j << "\n";
+        err_count += (ref_qcoeff_ptr[j] != qcoeff_ptr[j]) |
+                     (ref_dqcoeff_ptr[j] != dqcoeff_ptr[j]);
+        EXPECT_EQ(ref_qcoeff_ptr[j], qcoeff_ptr[j]) << "qcoeff error: i = " << i
+                                                    << " j = " << j << "\n";
         EXPECT_EQ(ref_dqcoeff_ptr[j], dqcoeff_ptr[j])
             << "dqcoeff error: i = " << i << " j = " << j << "\n";
       }
-      EXPECT_EQ(ref_eob, eob)
-          << "eob error: " << "i = " << i << "\n";
+      EXPECT_EQ(ref_eob, eob) << "eob error: "
+                              << "i = " << i << "\n";
       err_count += (ref_eob != eob);
       if (err_count && !err_count_total) {
         first_failure = i;
@@ -164,29 +158,22 @@ class VP10QuantizeTest : public ::testing::TestWithParam<QuantizeFuncParams> {
         round_ptr[j] = (abs(rnd(roundFactorRange)) * dequant_ptr[j]) >> 7;
       }
 
-      quanFuncRef(coeff_ptr, count, skip_block, zbin_ptr,
-                  round_ptr, quant_ptr, quant_shift_ptr,
-                  ref_qcoeff_ptr, ref_dqcoeff_ptr, dequant_ptr,
-                  &ref_eob, scanOrder.scan, scanOrder.iscan,
-                  log_scale);
+      quanFuncRef(coeff_ptr, count, skip_block, zbin_ptr, round_ptr, quant_ptr,
+                  quant_shift_ptr, ref_qcoeff_ptr, ref_dqcoeff_ptr, dequant_ptr,
+                  &ref_eob, scanOrder.scan, scanOrder.iscan, log_scale);
 
-      ASM_REGISTER_STATE_CHECK(quanFunc(coeff_ptr, count, skip_block, zbin_ptr,
-                                        round_ptr, quant_ptr, quant_shift_ptr,
-                                        qcoeff_ptr, dqcoeff_ptr, dequant_ptr,
-                                        &eob, scanOrder.scan, scanOrder.iscan,
-                                        log_scale));
-      EXPECT_EQ(ref_eob, eob)
-          << "eob error: " << "i = " << i << "\n";
+      ASM_REGISTER_STATE_CHECK(
+          quanFunc(coeff_ptr, count, skip_block, zbin_ptr, round_ptr, quant_ptr,
+                   quant_shift_ptr, qcoeff_ptr, dqcoeff_ptr, dequant_ptr, &eob,
+                   scanOrder.scan, scanOrder.iscan, log_scale));
+      EXPECT_EQ(ref_eob, eob) << "eob error: "
+                              << "i = " << i << "\n";
     }
   }
 
-  virtual void SetUp() {
-    params_ = GetParam();
-  }
+  virtual void SetUp() { params_ = GetParam(); }
 
-  virtual void TearDown() {
-    libvpx_test::ClearSystemState();
-  }
+  virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
   virtual ~VP10QuantizeTest() {}
 
@@ -208,12 +195,8 @@ class VP10QuantizeTest : public ::testing::TestWithParam<QuantizeFuncParams> {
   QuantizeFuncParams params_;
 };
 
-TEST_P(VP10QuantizeTest, BitExactCheck) {
-  RunQuantizeTest();
-}
-TEST_P(VP10QuantizeTest, EobVerify) {
-  RunEobTest();
-}
+TEST_P(VP10QuantizeTest, BitExactCheck) { RunQuantizeTest(); }
+TEST_P(VP10QuantizeTest, EobVerify) { RunEobTest(); }
 
 #if HAVE_SSE4_1
 INSTANTIATE_TEST_CASE_P(

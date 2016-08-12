@@ -132,10 +132,9 @@ class VP10IntraPredOptimzTest : public ::testing::TestWithParam<PredParams> {
   void DiffPred(int testNum) const {
     int i = 0;
     while (i < blockSize_ * blockSize_) {
-      EXPECT_EQ(predRef_[i], pred_[i])
-          << "Error at position: " << i << " "
-          << "Block size: " << blockSize_ << " "
-          << "Test number: " << testNum;
+      EXPECT_EQ(predRef_[i], pred_[i]) << "Error at position: " << i << " "
+                                       << "Block size: " << blockSize_ << " "
+                                       << "Test number: " << testNum;
       i += 1;
     }
   }
@@ -150,8 +149,8 @@ class VP10IntraPredOptimzTest : public ::testing::TestWithParam<PredParams> {
 };
 
 #if CONFIG_VP9_HIGHBITDEPTH
-class VP10HbdIntraPredOptimzTest :
-      public ::testing::TestWithParam<HbdPredParams> {
+class VP10HbdIntraPredOptimzTest
+    : public ::testing::TestWithParam<HbdPredParams> {
  public:
   virtual ~VP10HbdIntraPredOptimzTest() {}
   virtual void SetUp() {
@@ -227,11 +226,10 @@ class VP10HbdIntraPredOptimzTest :
   void DiffPred(int testNum) const {
     int i = 0;
     while (i < blockSize_ * blockSize_) {
-      EXPECT_EQ(predRef_[i], pred_[i])
-          << "Error at position: " << i << " "
-          << "Block size: " << blockSize_ << " "
-          << "Bit depth: " << bd_ << " "
-          << "Test number: " << testNum;
+      EXPECT_EQ(predRef_[i], pred_[i]) << "Error at position: " << i << " "
+                                       << "Block size: " << blockSize_ << " "
+                                       << "Bit depth: " << bd_ << " "
+                                       << "Test number: " << testNum;
       i += 1;
     }
   }
@@ -247,33 +245,21 @@ class VP10HbdIntraPredOptimzTest :
 };
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-TEST_P(VP10IntraPredOptimzTest, BitExactCheck) {
-  RunTest();
-}
+TEST_P(VP10IntraPredOptimzTest, BitExactCheck) { RunTest(); }
 
 #if PREDICTORS_SPEED_TEST
-TEST_P(VP10IntraPredOptimzTest, SpeedCheckC) {
-  RunSpeedTestC();
-}
+TEST_P(VP10IntraPredOptimzTest, SpeedCheckC) { RunSpeedTestC(); }
 
-TEST_P(VP10IntraPredOptimzTest, SpeedCheckSSE) {
-  RunSpeedTestSSE();
-}
+TEST_P(VP10IntraPredOptimzTest, SpeedCheckSSE) { RunSpeedTestSSE(); }
 #endif
 
 #if CONFIG_VP9_HIGHBITDEPTH
-TEST_P(VP10HbdIntraPredOptimzTest, BitExactCheck) {
-  RunTest();
-}
+TEST_P(VP10HbdIntraPredOptimzTest, BitExactCheck) { RunTest(); }
 
 #if PREDICTORS_SPEED_TEST
-TEST_P(VP10HbdIntraPredOptimzTest, SpeedCheckC) {
-  RunSpeedTestC();
-}
+TEST_P(VP10HbdIntraPredOptimzTest, SpeedCheckC) { RunSpeedTestC(); }
 
-TEST_P(VP10HbdIntraPredOptimzTest, SpeedCheckSSE) {
-  RunSpeedTestSSE();
-}
+TEST_P(VP10HbdIntraPredOptimzTest, SpeedCheckSSE) { RunSpeedTestSSE(); }
 #endif  // PREDICTORS_SPEED_TEST
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
@@ -282,10 +268,8 @@ using std::tr1::make_tuple;
 const PredFuncMode kPredFuncMdArray[] = {
   make_tuple(vp10_dc_filter_predictor_c, vp10_dc_filter_predictor_sse4_1,
              DC_PRED),
-  make_tuple(vp10_v_filter_predictor_c, vp10_v_filter_predictor_sse4_1,
-             V_PRED),
-  make_tuple(vp10_h_filter_predictor_c, vp10_h_filter_predictor_sse4_1,
-             H_PRED),
+  make_tuple(vp10_v_filter_predictor_c, vp10_v_filter_predictor_sse4_1, V_PRED),
+  make_tuple(vp10_h_filter_predictor_c, vp10_h_filter_predictor_sse4_1, H_PRED),
   make_tuple(vp10_d45_filter_predictor_c, vp10_d45_filter_predictor_sse4_1,
              D45_PRED),
   make_tuple(vp10_d135_filter_predictor_c, vp10_d135_filter_predictor_sse4_1,
@@ -302,13 +286,12 @@ const PredFuncMode kPredFuncMdArray[] = {
              TM_PRED),
 };
 
-const int kBlkSize[] = {4, 8, 16, 32};
+const int kBlkSize[] = { 4, 8, 16, 32 };
 
 INSTANTIATE_TEST_CASE_P(
     SSE4_1, VP10IntraPredOptimzTest,
-    ::testing::Combine(
-         ::testing::ValuesIn(kPredFuncMdArray),
-         ::testing::ValuesIn(kBlkSize)));
+    ::testing::Combine(::testing::ValuesIn(kPredFuncMdArray),
+                       ::testing::ValuesIn(kBlkSize)));
 
 #if CONFIG_VP9_HIGHBITDEPTH
 const HbdPredFuncMode kHbdPredFuncMdArray[] = {
@@ -334,14 +317,13 @@ const HbdPredFuncMode kHbdPredFuncMdArray[] = {
              vp10_highbd_tm_filter_predictor_sse4_1, TM_PRED),
 };
 
-const int kBd[] = {10, 12};
+const int kBd[] = { 10, 12 };
 
 INSTANTIATE_TEST_CASE_P(
     SSE4_1, VP10HbdIntraPredOptimzTest,
-    ::testing::Combine(
-         ::testing::ValuesIn(kHbdPredFuncMdArray),
-         ::testing::ValuesIn(kBlkSize),
-         ::testing::ValuesIn(kBd)));
+    ::testing::Combine(::testing::ValuesIn(kHbdPredFuncMdArray),
+                       ::testing::ValuesIn(kBlkSize),
+                       ::testing::ValuesIn(kBd)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 }  // namespace

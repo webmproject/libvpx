@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #include <string.h>
 #include <limits.h>
 #include <stdio.h>
@@ -25,23 +24,17 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 
-typedef unsigned int (*SadMxNFunc)(const uint8_t *src_ptr,
-                                   int src_stride,
-                                   const uint8_t *ref_ptr,
-                                   int ref_stride);
+typedef unsigned int (*SadMxNFunc)(const uint8_t *src_ptr, int src_stride,
+                                   const uint8_t *ref_ptr, int ref_stride);
 typedef std::tr1::tuple<int, int, SadMxNFunc, int> SadMxNParam;
 
-typedef uint32_t (*SadMxNAvgFunc)(const uint8_t *src_ptr,
-                                  int src_stride,
-                                  const uint8_t *ref_ptr,
-                                  int ref_stride,
+typedef uint32_t (*SadMxNAvgFunc)(const uint8_t *src_ptr, int src_stride,
+                                  const uint8_t *ref_ptr, int ref_stride,
                                   const uint8_t *second_pred);
 typedef std::tr1::tuple<int, int, SadMxNAvgFunc, int> SadMxNAvgParam;
 
-typedef void (*SadMxNx4Func)(const uint8_t *src_ptr,
-                             int src_stride,
-                             const uint8_t *const ref_ptr[],
-                             int ref_stride,
+typedef void (*SadMxNx4Func)(const uint8_t *src_ptr, int src_stride,
+                             const uint8_t *const ref_ptr[], int ref_stride,
                              uint32_t *sad_array);
 typedef std::tr1::tuple<int, int, SadMxNx4Func, int> SadMxNx4Param;
 
@@ -50,22 +43,22 @@ using libvpx_test::ACMRandom;
 namespace {
 class SADTestBase : public ::testing::Test {
  public:
-  SADTestBase(int width, int height, int bit_depth) :
-      width_(width), height_(height), bd_(bit_depth) {}
+  SADTestBase(int width, int height, int bit_depth)
+      : width_(width), height_(height), bd_(bit_depth) {}
 
   static void SetUpTestCase() {
-    source_data8_ = reinterpret_cast<uint8_t*>(
+    source_data8_ = reinterpret_cast<uint8_t *>(
         vpx_memalign(kDataAlignment, kDataBlockSize));
-    reference_data8_ = reinterpret_cast<uint8_t*>(
+    reference_data8_ = reinterpret_cast<uint8_t *>(
         vpx_memalign(kDataAlignment, kDataBufferSize));
-    second_pred8_ = reinterpret_cast<uint8_t*>(
-        vpx_memalign(kDataAlignment, 128*128));
-    source_data16_ = reinterpret_cast<uint16_t*>(
-        vpx_memalign(kDataAlignment, kDataBlockSize*sizeof(uint16_t)));
-    reference_data16_ = reinterpret_cast<uint16_t*>(
-        vpx_memalign(kDataAlignment, kDataBufferSize*sizeof(uint16_t)));
-    second_pred16_ = reinterpret_cast<uint16_t*>(
-        vpx_memalign(kDataAlignment, 128*128*sizeof(uint16_t)));
+    second_pred8_ =
+        reinterpret_cast<uint8_t *>(vpx_memalign(kDataAlignment, 128 * 128));
+    source_data16_ = reinterpret_cast<uint16_t *>(
+        vpx_memalign(kDataAlignment, kDataBlockSize * sizeof(uint16_t)));
+    reference_data16_ = reinterpret_cast<uint16_t *>(
+        vpx_memalign(kDataAlignment, kDataBufferSize * sizeof(uint16_t)));
+    second_pred16_ = reinterpret_cast<uint16_t *>(
+        vpx_memalign(kDataAlignment, 128 * 128 * sizeof(uint16_t)));
   }
 
   static void TearDownTestCase() {
@@ -83,9 +76,7 @@ class SADTestBase : public ::testing::Test {
     second_pred16_ = NULL;
   }
 
-  virtual void TearDown() {
-    libvpx_test::ClearSystemState();
-  }
+  virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
  protected:
   // Handle up to 4 128x128 blocks, with stride up to 256
@@ -128,12 +119,12 @@ class SADTestBase : public ::testing::Test {
   // difference between two pixels in the same relative location; accumulate.
   unsigned int ReferenceSAD(int block_idx) {
     unsigned int sad = 0;
-      const uint8_t *const reference8 = GetReference(block_idx);
-      const uint8_t *const source8 = source_data_;
+    const uint8_t *const reference8 = GetReference(block_idx);
+    const uint8_t *const source8 = source_data_;
 #if CONFIG_VP9_HIGHBITDEPTH
-      const uint16_t *const reference16 =
-          CONVERT_TO_SHORTPTR(GetReference(block_idx));
-      const uint16_t *const source16 = CONVERT_TO_SHORTPTR(source_data_);
+    const uint16_t *const reference16 =
+        CONVERT_TO_SHORTPTR(GetReference(block_idx));
+    const uint16_t *const source16 = CONVERT_TO_SHORTPTR(source_data_);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     for (int h = 0; h < height_; ++h) {
       for (int w = 0; w < width_; ++w) {
@@ -169,13 +160,13 @@ class SADTestBase : public ::testing::Test {
       for (int w = 0; w < width_; ++w) {
         if (!use_high_bit_depth_) {
           const int tmp = second_pred8[h * width_ + w] +
-              reference8[h * reference_stride_ + w];
+                          reference8[h * reference_stride_ + w];
           const uint8_t comp_pred = ROUND_POWER_OF_TWO(tmp, 1);
           sad += abs(source8[h * source_stride_ + w] - comp_pred);
 #if CONFIG_VP9_HIGHBITDEPTH
         } else {
           const int tmp = second_pred16[h * width_ + w] +
-              reference16[h * reference_stride_ + w];
+                          reference16[h * reference_stride_ + w];
           const uint16_t comp_pred = ROUND_POWER_OF_TWO(tmp, 1);
           sad += abs(source16[h * source_stride_ + w] - comp_pred);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -239,20 +230,18 @@ class SADTestBase : public ::testing::Test {
   ACMRandom rnd_;
 };
 
-class SADx4Test
-    : public SADTestBase,
-      public ::testing::WithParamInterface<SadMxNx4Param> {
+class SADx4Test : public SADTestBase,
+                  public ::testing::WithParamInterface<SadMxNx4Param> {
  public:
   SADx4Test() : SADTestBase(GET_PARAM(0), GET_PARAM(1), GET_PARAM(3)) {}
 
  protected:
   void SADs(unsigned int *results) {
-    const uint8_t *references[] = {GetReference(0), GetReference(1),
-                                   GetReference(2), GetReference(3)};
+    const uint8_t *references[] = { GetReference(0), GetReference(1),
+                                    GetReference(2), GetReference(3) };
 
-    ASM_REGISTER_STATE_CHECK(GET_PARAM(2)(source_data_, source_stride_,
-                                          references, reference_stride_,
-                                          results));
+    ASM_REGISTER_STATE_CHECK(GET_PARAM(2)(
+        source_data_, source_stride_, references, reference_stride_, results));
   }
 
   void CheckSADs() {
@@ -267,9 +256,8 @@ class SADx4Test
   }
 };
 
-class SADTest
-    : public SADTestBase,
-      public ::testing::WithParamInterface<SadMxNParam> {
+class SADTest : public SADTestBase,
+                public ::testing::WithParamInterface<SadMxNParam> {
  public:
   SADTest() : SADTestBase(GET_PARAM(0), GET_PARAM(1), GET_PARAM(3)) {}
 
@@ -291,9 +279,8 @@ class SADTest
   }
 };
 
-class SADavgTest
-    : public SADTestBase,
-      public ::testing::WithParamInterface<SadMxNAvgParam> {
+class SADavgTest : public SADTestBase,
+                   public ::testing::WithParamInterface<SadMxNAvgParam> {
  public:
   SADavgTest() : SADTestBase(GET_PARAM(0), GET_PARAM(1), GET_PARAM(3)) {}
 
@@ -469,7 +456,7 @@ TEST_P(SADx4Test, ShortSrc) {
 }
 
 TEST_P(SADx4Test, SrcAlignedByWidth) {
-  uint8_t * tmp_source_data = source_data_;
+  uint8_t *tmp_source_data = source_data_;
   source_data_ += width_;
   FillRandom(source_data_, source_stride_);
   FillRandom(GetReference(0), reference_stride_);

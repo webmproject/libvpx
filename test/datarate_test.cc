@@ -18,8 +18,9 @@
 
 namespace {
 
-class DatarateTestLarge : public ::libvpx_test::EncoderTest,
-    public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
+class DatarateTestLarge
+    : public ::libvpx_test::EncoderTest,
+      public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
  public:
   DatarateTestLarge() : EncoderTest(GET_PARAM(0)) {}
 
@@ -49,8 +50,7 @@ class DatarateTestLarge : public ::libvpx_test::EncoderTest,
 
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
-    if (video->frame() == 0)
-      encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
+    if (video->frame() == 0) encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
 
     if (denoiser_offon_test_) {
       ASSERT_GT(denoiser_offon_period_, 0)
@@ -74,8 +74,7 @@ class DatarateTestLarge : public ::libvpx_test::EncoderTest,
 
     if (duration > 1) {
       // If first drop not set and we have a drop set it to this time.
-      if (!first_drop_)
-        first_drop_ = last_pts_ + 1;
+      if (!first_drop_) first_drop_ = last_pts_ + 1;
       // Update the number of frame drops.
       num_drops_ += static_cast<int>(duration - 1);
       // Update counter for total number of frames (#frames input to encoder).
@@ -89,7 +88,7 @@ class DatarateTestLarge : public ::libvpx_test::EncoderTest,
 
     // Buffer should not go negative.
     ASSERT_GE(bits_in_buffer_model_, 0) << "Buffer Underrun at frame "
-        << pkt->data.frame.pts;
+                                        << pkt->data.frame.pts;
 
     const size_t frame_size_in_bits = pkt->data.frame.sz * 8;
 
@@ -194,7 +193,7 @@ TEST_P(DatarateTestLarge, BasicRateTargeting444) {
     ASSERT_LE(static_cast<double>(cfg_.rc_target_bitrate),
               effective_datarate_ * 1.15)
         << " The datarate for the file missed the target!"
-        << cfg_.rc_target_bitrate << " "<< effective_datarate_;
+        << cfg_.rc_target_bitrate << " " << effective_datarate_;
   }
 }
 

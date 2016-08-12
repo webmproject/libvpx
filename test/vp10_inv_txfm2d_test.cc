@@ -43,12 +43,12 @@ class VP10InvTxfm2d : public ::testing::TestWithParam<VP10InvTxfm2dParam> {
     txfm2d_size_ = txfm1d_size_ * txfm1d_size_;
     count_ = 500;
 
-    input_ = reinterpret_cast<int16_t *>
-        (vpx_memalign(16, sizeof(int16_t) * txfm2d_size_));
-    ref_input_ = reinterpret_cast<uint16_t *>
-        (vpx_memalign(16, sizeof(uint16_t) * txfm2d_size_));
-    output_ = reinterpret_cast<int32_t *>
-        (vpx_memalign(16, sizeof(int32_t) * txfm2d_size_));
+    input_ = reinterpret_cast<int16_t *>(
+        vpx_memalign(16, sizeof(int16_t) * txfm2d_size_));
+    ref_input_ = reinterpret_cast<uint16_t *>(
+        vpx_memalign(16, sizeof(uint16_t) * txfm2d_size_));
+    output_ = reinterpret_cast<int32_t *>(
+        vpx_memalign(16, sizeof(int32_t) * txfm2d_size_));
   }
 
   void RunRoundtripCheck() {
@@ -101,9 +101,9 @@ class VP10InvTxfm2d : public ::testing::TestWithParam<VP10InvTxfm2dParam> {
   TX_SIZE tx_size_;
   int txfm1d_size_;
   int txfm2d_size_;
-  int16_t* input_;
-  uint16_t* ref_input_;
-  int32_t* output_;
+  int16_t *input_;
+  uint16_t *ref_input_;
+  int32_t *output_;
 };
 
 TEST_P(VP10InvTxfm2d, RunRoundtripCheck) { RunRoundtripCheck(); }
@@ -149,9 +149,8 @@ const VP10InvTxfm2dParam vp10_inv_txfm2d_param[] = {
   VP10InvTxfm2dParam(ADST_ADST, TX_32X32, 4, 0.4)
 };
 
-INSTANTIATE_TEST_CASE_P(
-    C, VP10InvTxfm2d,
-    ::testing::ValuesIn(vp10_inv_txfm2d_param));
+INSTANTIATE_TEST_CASE_P(C, VP10InvTxfm2d,
+                        ::testing::ValuesIn(vp10_inv_txfm2d_param));
 
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 

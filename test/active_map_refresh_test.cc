@@ -17,8 +17,8 @@
 namespace {
 
 // Check if any pixel in a 16x16 macroblock varies between frames.
-int CheckMb(const vpx_image_t &current, const vpx_image_t &previous,
-            int mb_r, int mb_c) {
+int CheckMb(const vpx_image_t &current, const vpx_image_t &previous, int mb_r,
+            int mb_c) {
   for (int plane = 0; plane < 3; plane++) {
     int r = 16 * mb_r;
     int c0 = 16 * mb_c;

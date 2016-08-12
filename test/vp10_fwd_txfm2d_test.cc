@@ -52,14 +52,14 @@ class VP10FwdTxfm2d : public ::testing::TestWithParam<VP10FwdTxfm2dParam> {
     txfm1d_size_ = libvpx_test::get_txfm1d_size(tx_size_);
     txfm2d_size_ = txfm1d_size_ * txfm1d_size_;
     get_txfm1d_type(tx_type_, &type0_, &type1_);
-    input_ = reinterpret_cast<int16_t *>
-       (vpx_memalign(16, sizeof(int16_t) * txfm2d_size_));
-    output_ = reinterpret_cast<int32_t *>
-        (vpx_memalign(16, sizeof(int32_t) * txfm2d_size_));
-    ref_input_ = reinterpret_cast<double *>
-        (vpx_memalign(16, sizeof(double) * txfm2d_size_));
-    ref_output_ = reinterpret_cast<double *>
-        (vpx_memalign(16, sizeof(double) * txfm2d_size_));
+    input_ = reinterpret_cast<int16_t *>(
+        vpx_memalign(16, sizeof(int16_t) * txfm2d_size_));
+    output_ = reinterpret_cast<int32_t *>(
+        vpx_memalign(16, sizeof(int32_t) * txfm2d_size_));
+    ref_input_ = reinterpret_cast<double *>(
+        vpx_memalign(16, sizeof(double) * txfm2d_size_));
+    ref_output_ = reinterpret_cast<double *>(
+        vpx_memalign(16, sizeof(double) * txfm2d_size_));
   }
 
   void RunFwdAccuracyCheck() {
@@ -82,8 +82,8 @@ class VP10FwdTxfm2d : public ::testing::TestWithParam<VP10FwdTxfm2dParam> {
       else if (ud_flip_)
         libvpx_test::flipud(ref_input_, txfm1d_size_, txfm1d_size_);
 
-      reference_hybrid_2d(ref_input_, ref_output_, txfm1d_size_,
-                          type0_, type1_);
+      reference_hybrid_2d(ref_input_, ref_output_, txfm1d_size_, type0_,
+                          type1_);
 
       for (int ni = 0; ni < txfm2d_size_; ++ni) {
         ref_output_[ni] = round(ref_output_[ni] * amplify_factor_);
@@ -121,61 +121,58 @@ class VP10FwdTxfm2d : public ::testing::TestWithParam<VP10FwdTxfm2dParam> {
   Fwd_Txfm2d_Func fwd_txfm_;
   TYPE_TXFM type0_;
   TYPE_TXFM type1_;
-  int16_t* input_;
-  int32_t* output_;
-  double* ref_input_;
-  double* ref_output_;
+  int16_t *input_;
+  int32_t *output_;
+  double *ref_input_;
+  double *ref_output_;
   int ud_flip_;  // flip upside down
   int lr_flip_;  // flip left to right
 };
 
-TEST_P(VP10FwdTxfm2d, RunFwdAccuracyCheck) {
-  RunFwdAccuracyCheck();
-}
+TEST_P(VP10FwdTxfm2d, RunFwdAccuracyCheck) { RunFwdAccuracyCheck(); }
 const VP10FwdTxfm2dParam vp10_fwd_txfm2d_param_c[] = {
 #if CONFIG_EXT_TX
-  VP10FwdTxfm2dParam(FLIPADST_DCT,  TX_4X4, 2, 0.2),
-  VP10FwdTxfm2dParam(DCT_FLIPADST,  TX_4X4, 2, 0.2),
+  VP10FwdTxfm2dParam(FLIPADST_DCT, TX_4X4, 2, 0.2),
+  VP10FwdTxfm2dParam(DCT_FLIPADST, TX_4X4, 2, 0.2),
   VP10FwdTxfm2dParam(FLIPADST_FLIPADST, TX_4X4, 2, 0.2),
   VP10FwdTxfm2dParam(ADST_FLIPADST, TX_4X4, 2, 0.2),
   VP10FwdTxfm2dParam(FLIPADST_ADST, TX_4X4, 2, 0.2),
-  VP10FwdTxfm2dParam(FLIPADST_DCT,  TX_8X8, 5, 0.6),
-  VP10FwdTxfm2dParam(DCT_FLIPADST,  TX_8X8, 5, 0.6),
+  VP10FwdTxfm2dParam(FLIPADST_DCT, TX_8X8, 5, 0.6),
+  VP10FwdTxfm2dParam(DCT_FLIPADST, TX_8X8, 5, 0.6),
   VP10FwdTxfm2dParam(FLIPADST_FLIPADST, TX_8X8, 5, 0.6),
   VP10FwdTxfm2dParam(ADST_FLIPADST, TX_8X8, 5, 0.6),
   VP10FwdTxfm2dParam(FLIPADST_ADST, TX_8X8, 5, 0.6),
-  VP10FwdTxfm2dParam(FLIPADST_DCT,  TX_16X16, 11, 1.5),
-  VP10FwdTxfm2dParam(DCT_FLIPADST,  TX_16X16, 11, 1.5),
+  VP10FwdTxfm2dParam(FLIPADST_DCT, TX_16X16, 11, 1.5),
+  VP10FwdTxfm2dParam(DCT_FLIPADST, TX_16X16, 11, 1.5),
   VP10FwdTxfm2dParam(FLIPADST_FLIPADST, TX_16X16, 11, 1.5),
   VP10FwdTxfm2dParam(ADST_FLIPADST, TX_16X16, 11, 1.5),
   VP10FwdTxfm2dParam(FLIPADST_ADST, TX_16X16, 11, 1.5),
-  VP10FwdTxfm2dParam(FLIPADST_DCT,  TX_32X32, 70, 7),
-  VP10FwdTxfm2dParam(DCT_FLIPADST,  TX_32X32, 70, 7),
+  VP10FwdTxfm2dParam(FLIPADST_DCT, TX_32X32, 70, 7),
+  VP10FwdTxfm2dParam(DCT_FLIPADST, TX_32X32, 70, 7),
   VP10FwdTxfm2dParam(FLIPADST_FLIPADST, TX_32X32, 70, 7),
   VP10FwdTxfm2dParam(ADST_FLIPADST, TX_32X32, 70, 7),
   VP10FwdTxfm2dParam(FLIPADST_ADST, TX_32X32, 70, 7),
 #endif
-  VP10FwdTxfm2dParam(DCT_DCT,   TX_4X4, 2, 0.2),
-  VP10FwdTxfm2dParam(ADST_DCT,  TX_4X4, 2, 0.2),
-  VP10FwdTxfm2dParam(DCT_ADST,  TX_4X4, 2, 0.2),
+  VP10FwdTxfm2dParam(DCT_DCT, TX_4X4, 2, 0.2),
+  VP10FwdTxfm2dParam(ADST_DCT, TX_4X4, 2, 0.2),
+  VP10FwdTxfm2dParam(DCT_ADST, TX_4X4, 2, 0.2),
   VP10FwdTxfm2dParam(ADST_ADST, TX_4X4, 2, 0.2),
-  VP10FwdTxfm2dParam(DCT_DCT,   TX_8X8, 5, 0.6),
-  VP10FwdTxfm2dParam(ADST_DCT,  TX_8X8, 5, 0.6),
-  VP10FwdTxfm2dParam(DCT_ADST,  TX_8X8, 5, 0.6),
+  VP10FwdTxfm2dParam(DCT_DCT, TX_8X8, 5, 0.6),
+  VP10FwdTxfm2dParam(ADST_DCT, TX_8X8, 5, 0.6),
+  VP10FwdTxfm2dParam(DCT_ADST, TX_8X8, 5, 0.6),
   VP10FwdTxfm2dParam(ADST_ADST, TX_8X8, 5, 0.6),
-  VP10FwdTxfm2dParam(DCT_DCT,   TX_16X16, 11, 1.5),
-  VP10FwdTxfm2dParam(ADST_DCT,  TX_16X16, 11, 1.5),
-  VP10FwdTxfm2dParam(DCT_ADST,  TX_16X16, 11, 1.5),
+  VP10FwdTxfm2dParam(DCT_DCT, TX_16X16, 11, 1.5),
+  VP10FwdTxfm2dParam(ADST_DCT, TX_16X16, 11, 1.5),
+  VP10FwdTxfm2dParam(DCT_ADST, TX_16X16, 11, 1.5),
   VP10FwdTxfm2dParam(ADST_ADST, TX_16X16, 11, 1.5),
-  VP10FwdTxfm2dParam(DCT_DCT,   TX_32X32, 70, 7),
-  VP10FwdTxfm2dParam(ADST_DCT,  TX_32X32, 70, 7),
-  VP10FwdTxfm2dParam(DCT_ADST,  TX_32X32, 70, 7),
+  VP10FwdTxfm2dParam(DCT_DCT, TX_32X32, 70, 7),
+  VP10FwdTxfm2dParam(ADST_DCT, TX_32X32, 70, 7),
+  VP10FwdTxfm2dParam(DCT_ADST, TX_32X32, 70, 7),
   VP10FwdTxfm2dParam(ADST_ADST, TX_32X32, 70, 7)
 };
 
-INSTANTIATE_TEST_CASE_P(
-    C, VP10FwdTxfm2d,
-    ::testing::ValuesIn(vp10_fwd_txfm2d_param_c));
+INSTANTIATE_TEST_CASE_P(C, VP10FwdTxfm2d,
+                        ::testing::ValuesIn(vp10_fwd_txfm2d_param_c));
 
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 }  // namespace

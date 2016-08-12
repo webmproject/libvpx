@@ -34,13 +34,10 @@ static const int16_t kInt13Max = (1 << 12) - 1;
 typedef uint64_t (*SSI16Func)(const int16_t *src, int stride, int size);
 typedef libvpx_test::FuncParam<SSI16Func> TestFuncs;
 
-class SumSquaresTest :
-    public ::testing::TestWithParam<TestFuncs> {
+class SumSquaresTest : public ::testing::TestWithParam<TestFuncs> {
  public:
   virtual ~SumSquaresTest() {}
-  virtual void SetUp() {
-    params_ = this->GetParam();
-  }
+  virtual void SetUp() { params_ = this->GetParam(); }
 
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
@@ -50,23 +47,23 @@ class SumSquaresTest :
 
 TEST_P(SumSquaresTest, OperationCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED(16, int16_t, src[256*256]);
+  DECLARE_ALIGNED(16, int16_t, src[256 * 256]);
 
   int failed = 0;
 
-  const int msb = 11;   // Up to 12 bit input
-  const int limit = 1 << (msb+1);
+  const int msb = 11;  // Up to 12 bit input
+  const int limit = 1 << (msb + 1);
 
   for (int k = 0; k < kNumIterations; k++) {
-    int size = 4 << rnd(6);     // Up to 128x128
-    int stride = 4 << rnd(7);   // Up to 256 stride
-    while (stride < size) {     // Make sure it's valid
+    int size = 4 << rnd(6);    // Up to 128x128
+    int stride = 4 << rnd(7);  // Up to 256 stride
+    while (stride < size) {    // Make sure it's valid
       stride = 4 << rnd(7);
     }
 
-    for (int ii = 0 ; ii < size; ii++) {
+    for (int ii = 0; ii < size; ii++) {
       for (int jj = 0; jj < size; jj++) {
-        src[ii*stride+jj] = rnd(2) ? rnd(limit) : -rnd(limit);
+        src[ii * stride + jj] = rnd(2) ? rnd(limit) : -rnd(limit);
       }
     }
 
@@ -77,32 +74,32 @@ TEST_P(SumSquaresTest, OperationCheck) {
     if (!failed) {
       failed = res_ref != res_tst;
       EXPECT_EQ(res_ref, res_tst)
-        << "Error: Sum Squares Test"
-        << " C output does not match optimized output.";
+          << "Error: Sum Squares Test"
+          << " C output does not match optimized output.";
     }
   }
 }
 
 TEST_P(SumSquaresTest, ExtremeValues) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED(16, int16_t, src[256*256]);
+  DECLARE_ALIGNED(16, int16_t, src[256 * 256]);
 
   int failed = 0;
 
-  const int msb = 11;   // Up to 12 bit input
-  const int limit = 1 << (msb+1);
+  const int msb = 11;  // Up to 12 bit input
+  const int limit = 1 << (msb + 1);
 
   for (int k = 0; k < kNumIterations; k++) {
-    int size = 4 << rnd(6);     // Up to 128x128
-    int stride = 4 << rnd(7);   // Up to 256 stride
-    while (stride < size) {     // Make sure it's valid
+    int size = 4 << rnd(6);    // Up to 128x128
+    int stride = 4 << rnd(7);  // Up to 256 stride
+    while (stride < size) {    // Make sure it's valid
       stride = 4 << rnd(7);
     }
 
-    int val = rnd(2) ? limit-1 : -(limit-1);
-    for (int ii = 0 ; ii < size; ii++) {
+    int val = rnd(2) ? limit - 1 : -(limit - 1);
+    for (int ii = 0; ii < size; ii++) {
       for (int jj = 0; jj < size; jj++) {
-        src[ii*stride+jj] = val;
+        src[ii * stride + jj] = val;
       }
     }
 
@@ -113,8 +110,8 @@ TEST_P(SumSquaresTest, ExtremeValues) {
     if (!failed) {
       failed = res_ref != res_tst;
       EXPECT_EQ(res_ref, res_tst)
-        << "Error: Sum Squares Test"
-        << " C output does not match optimized output.";
+          << "Error: Sum Squares Test"
+          << " C output does not match optimized output.";
     }
   }
 }
@@ -123,8 +120,8 @@ TEST_P(SumSquaresTest, ExtremeValues) {
 
 INSTANTIATE_TEST_CASE_P(
     SSE2, SumSquaresTest,
-    ::testing::Values(
-        TestFuncs(&vpx_sum_squares_2d_i16_c, &vpx_sum_squares_2d_i16_sse2)));
+    ::testing::Values(TestFuncs(&vpx_sum_squares_2d_i16_c,
+                                &vpx_sum_squares_2d_i16_sse2)));
 
 #endif  // HAVE_SSE2
 
@@ -144,8 +141,8 @@ class SumSquares1DTest : public FunctionEquivalenceTest<F1D> {
 TEST_P(SumSquares1DTest, RandomValues) {
   DECLARE_ALIGNED(16, int16_t, src[kMaxSize * kMaxSize]);
 
-  for (int iter = 0 ; iter < kIterations && !HasFatalFailure(); ++iter) {
-    for (int i = 0 ; i < kMaxSize * kMaxSize ; ++i)
+  for (int iter = 0; iter < kIterations && !HasFatalFailure(); ++iter) {
+    for (int i = 0; i < kMaxSize * kMaxSize; ++i)
       src[i] = rng_(kInt13Max * 2 + 1) - kInt13Max;
 
     const int N = rng_(2) ? rng_(kMaxSize * kMaxSize + 1 - kMaxSize) + kMaxSize
@@ -162,13 +159,11 @@ TEST_P(SumSquares1DTest, RandomValues) {
 TEST_P(SumSquares1DTest, ExtremeValues) {
   DECLARE_ALIGNED(16, int16_t, src[kMaxSize * kMaxSize]);
 
-  for (int iter = 0 ; iter < kIterations && !HasFatalFailure(); ++iter) {
+  for (int iter = 0; iter < kIterations && !HasFatalFailure(); ++iter) {
     if (rng_(2)) {
-      for (int i = 0 ; i < kMaxSize * kMaxSize ; ++i)
-        src[i] = kInt13Max;
+      for (int i = 0; i < kMaxSize * kMaxSize; ++i) src[i] = kInt13Max;
     } else {
-      for (int i = 0 ; i < kMaxSize * kMaxSize ; ++i)
-        src[i] = -kInt13Max;
+      for (int i = 0; i < kMaxSize * kMaxSize; ++i) src[i] = -kInt13Max;
     }
 
     const int N = rng_(2) ? rng_(kMaxSize * kMaxSize + 1 - kMaxSize) + kMaxSize
@@ -183,10 +178,9 @@ TEST_P(SumSquares1DTest, ExtremeValues) {
 }
 
 #if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(
-    SSE2, SumSquares1DTest,
-    ::testing::Values(
-        TestFuncs1D(vpx_sum_squares_i16_c, vpx_sum_squares_i16_sse2)));
+INSTANTIATE_TEST_CASE_P(SSE2, SumSquares1DTest,
+                        ::testing::Values(TestFuncs1D(
+                            vpx_sum_squares_i16_c, vpx_sum_squares_i16_sse2)));
 
 #endif  // HAVE_SSE2
 }  // namespace

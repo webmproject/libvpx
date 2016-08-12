@@ -21,15 +21,13 @@ namespace {
 
 const int kMaxPsnr = 100;
 
-class LosslessTestLarge : public ::libvpx_test::EncoderTest,
-    public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
+class LosslessTestLarge
+    : public ::libvpx_test::EncoderTest,
+      public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
  protected:
   LosslessTestLarge()
-      : EncoderTest(GET_PARAM(0)),
-        psnr_(kMaxPsnr),
-        nframes_(0),
-        encoding_mode_(GET_PARAM(1)) {
-  }
+      : EncoderTest(GET_PARAM(0)), psnr_(kMaxPsnr), nframes_(0),
+        encoding_mode_(GET_PARAM(1)) {}
 
   virtual ~LosslessTestLarge() {}
 
@@ -55,13 +53,10 @@ class LosslessTestLarge : public ::libvpx_test::EncoderTest,
   }
 
   virtual void PSNRPktHook(const vpx_codec_cx_pkt_t *pkt) {
-    if (pkt->data.psnr.psnr[0] < psnr_)
-      psnr_= pkt->data.psnr.psnr[0];
+    if (pkt->data.psnr.psnr[0] < psnr_) psnr_ = pkt->data.psnr.psnr[0];
   }
 
-  double GetMinPsnr() const {
-      return psnr_;
-  }
+  double GetMinPsnr() const { return psnr_; }
 
  private:
   double psnr_;
@@ -122,7 +117,6 @@ TEST_P(LosslessTestLarge, TestLossLessEncodingCtrl) {
   const double psnr_lossless = GetMinPsnr();
   EXPECT_GE(psnr_lossless, kMaxPsnr);
 }
-
 
 VP10_INSTANTIATE_TEST_CASE(LosslessTestLarge,
                            ::testing::Values(::libvpx_test::kOnePassGood,

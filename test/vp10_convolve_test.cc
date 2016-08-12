@@ -21,10 +21,8 @@ void setup_convolve() {
 TEST(VP10ConvolveTest, vp10_convolve8) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
 #if CONFIG_DUAL_FILTER
-  INTERP_FILTER interp_filter[4] = {
-      EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
-      EIGHTTAP_REGULAR, EIGHTTAP_REGULAR
-  };
+  INTERP_FILTER interp_filter[4] = { EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
+                                     EIGHTTAP_REGULAR, EIGHTTAP_REGULAR };
   InterpFilterParams filter_params =
       vp10_get_interp_filter_params(interp_filter[0]);
 #else
@@ -36,8 +34,8 @@ TEST(VP10ConvolveTest, vp10_convolve8) {
   int filter_center = filter_size / 2 - 1;
   uint8_t src[12 * 12];
   int src_stride = filter_size;
-  uint8_t dst[1] = {0};
-  uint8_t dst1[1] = {0};
+  uint8_t dst[1] = { 0 };
+  uint8_t dst1[1] = { 0 };
   int dst_stride = 1;
   int x_step_q4 = 16;
   int y_step_q4 = 16;
@@ -58,9 +56,9 @@ TEST(VP10ConvolveTest, vp10_convolve8) {
                 dst, dst_stride, w, h, interp_filter, subpel_x_q4, x_step_q4,
                 subpel_y_q4, y_step_q4, avg);
 
-  const int16_t* x_filter =
+  const int16_t *x_filter =
       vp10_get_interp_filter_subpel_kernel(filter_params, subpel_x_q4);
-  const int16_t* y_filter =
+  const int16_t *y_filter =
       vp10_get_interp_filter_subpel_kernel(filter_params, subpel_y_q4);
 
   vpx_convolve8_c(src + src_stride * filter_center + filter_center, src_stride,
@@ -70,10 +68,8 @@ TEST(VP10ConvolveTest, vp10_convolve8) {
 TEST(VP10ConvolveTest, vp10_convolve) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
 #if CONFIG_DUAL_FILTER
-  INTERP_FILTER interp_filter[4] = {
-      EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
-      EIGHTTAP_REGULAR, EIGHTTAP_REGULAR
-  };
+  INTERP_FILTER interp_filter[4] = { EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
+                                     EIGHTTAP_REGULAR, EIGHTTAP_REGULAR };
   InterpFilterParams filter_params =
       vp10_get_interp_filter_params(interp_filter[0]);
 #else
@@ -85,7 +81,7 @@ TEST(VP10ConvolveTest, vp10_convolve) {
   int filter_center = filter_size / 2 - 1;
   uint8_t src[12 * 12];
   int src_stride = filter_size;
-  uint8_t dst[1] = {0};
+  uint8_t dst[1] = { 0 };
   int dst_stride = 1;
   int x_step_q4 = 16;
   int y_step_q4 = 16;
@@ -108,9 +104,9 @@ TEST(VP10ConvolveTest, vp10_convolve) {
                     src_stride, dst, dst_stride, w, h, interp_filter,
                     subpel_x_q4, x_step_q4, subpel_y_q4, y_step_q4, avg);
 
-      const int16_t* x_filter =
+      const int16_t *x_filter =
           vp10_get_interp_filter_subpel_kernel(filter_params, subpel_x_q4);
-      const int16_t* y_filter =
+      const int16_t *y_filter =
           vp10_get_interp_filter_subpel_kernel(filter_params, subpel_y_q4);
 
       int temp[12];
@@ -132,10 +128,8 @@ TEST(VP10ConvolveTest, vp10_convolve) {
 TEST(VP10ConvolveTest, vp10_convolve_avg) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
 #if CONFIG_DUAL_FILTER
-  INTERP_FILTER interp_filter[4] = {
-      EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
-      EIGHTTAP_REGULAR, EIGHTTAP_REGULAR
-  };
+  INTERP_FILTER interp_filter[4] = { EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
+                                     EIGHTTAP_REGULAR, EIGHTTAP_REGULAR };
   InterpFilterParams filter_params =
       vp10_get_interp_filter_params(interp_filter[0]);
 #else
@@ -148,9 +142,9 @@ TEST(VP10ConvolveTest, vp10_convolve_avg) {
   uint8_t src0[12 * 12];
   uint8_t src1[12 * 12];
   int src_stride = filter_size;
-  uint8_t dst0[1] = {0};
-  uint8_t dst1[1] = {0};
-  uint8_t dst[1] = {0};
+  uint8_t dst0[1] = { 0 };
+  uint8_t dst1[1] = { 0 };
+  uint8_t dst[1] = { 0 };
   int dst_stride = 1;
   int x_step_q4 = 16;
   int y_step_q4 = 16;
@@ -200,10 +194,8 @@ TEST(VP10ConvolveTest, vp10_convolve_avg) {
 TEST(VP10ConvolveTest, vp10_highbd_convolve) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
 #if CONFIG_DUAL_FILTER
-  INTERP_FILTER interp_filter[4] = {
-      EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
-      EIGHTTAP_REGULAR, EIGHTTAP_REGULAR
-  };
+  INTERP_FILTER interp_filter[4] = { EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
+                                     EIGHTTAP_REGULAR, EIGHTTAP_REGULAR };
   InterpFilterParams filter_params =
       vp10_get_interp_filter_params(interp_filter[0]);
 #else
@@ -215,7 +207,7 @@ TEST(VP10ConvolveTest, vp10_highbd_convolve) {
   int filter_center = filter_size / 2 - 1;
   uint16_t src[12 * 12];
   int src_stride = filter_size;
-  uint16_t dst[1] = {0};
+  uint16_t dst[1] = { 0 };
   int dst_stride = 1;
   int x_step_q4 = 16;
   int y_step_q4 = 16;
@@ -238,9 +230,9 @@ TEST(VP10ConvolveTest, vp10_highbd_convolve) {
           src_stride, CONVERT_TO_BYTEPTR(dst), dst_stride, w, h, interp_filter,
           subpel_x_q4, x_step_q4, subpel_y_q4, y_step_q4, avg, bd);
 
-      const int16_t* x_filter =
+      const int16_t *x_filter =
           vp10_get_interp_filter_subpel_kernel(filter_params, subpel_x_q4);
-      const int16_t* y_filter =
+      const int16_t *y_filter =
           vp10_get_interp_filter_subpel_kernel(filter_params, subpel_y_q4);
 
       int temp[12];
@@ -263,10 +255,8 @@ TEST(VP10ConvolveTest, vp10_highbd_convolve) {
 TEST(VP10ConvolveTest, vp10_highbd_convolve_avg) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
 #if CONFIG_DUAL_FILTER
-  INTERP_FILTER interp_filter[4] = {
-      EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
-      EIGHTTAP_REGULAR, EIGHTTAP_REGULAR
-  };
+  INTERP_FILTER interp_filter[4] = { EIGHTTAP_REGULAR, EIGHTTAP_REGULAR,
+                                     EIGHTTAP_REGULAR, EIGHTTAP_REGULAR };
   InterpFilterParams filter_params =
       vp10_get_interp_filter_params(interp_filter[0]);
 #else
@@ -279,9 +269,9 @@ TEST(VP10ConvolveTest, vp10_highbd_convolve_avg) {
   uint16_t src0[12 * 12];
   uint16_t src1[12 * 12];
   int src_stride = filter_size;
-  uint16_t dst0[1] = {0};
-  uint16_t dst1[1] = {0};
-  uint16_t dst[1] = {0};
+  uint16_t dst0[1] = { 0 };
+  uint16_t dst1[1] = { 0 };
+  uint16_t dst[1] = { 0 };
   int dst_stride = 1;
   int x_step_q4 = 16;
   int y_step_q4 = 16;
@@ -342,9 +332,9 @@ TEST(VP10ConvolveTest, vp10_highbd_convolve_avg) {
     ptrdiff_t filter_size = filter_params.tap;                               \
     int filter_center = filter_size / 2 - 1;                                 \
     DECLARE_ALIGNED(16, uint16_t,                                            \
-                    src[(frame_size + 7) * (frame_size + 7)]) = {0};         \
+                    src[(frame_size + 7) * (frame_size + 7)]) = { 0 };       \
     int src_stride = frame_size + 7;                                         \
-    DECLARE_ALIGNED(16, uint16_t, dst[frame_size * frame_size]) = {0};       \
+    DECLARE_ALIGNED(16, uint16_t, dst[frame_size * frame_size]) = { 0 };     \
     int dst_stride = frame_size;                                             \
     int x_step_q4 = 16;                                                      \
     int y_step_q4 = 16;                                                      \
@@ -355,9 +345,9 @@ TEST(VP10ConvolveTest, vp10_highbd_convolve_avg) {
     int w = block_size;                                                      \
     int h = block_size;                                                      \
                                                                              \
-    const int16_t* filter_x =                                                \
+    const int16_t *filter_x =                                                \
         vp10_get_interp_filter_kernel(filter_params, subpel_x_q4);           \
-    const int16_t* filter_y =                                                \
+    const int16_t *filter_y =                                                \
         vp10_get_interp_filter_kernel(filter_params, subpel_y_q4);           \
                                                                              \
     for (int i = 0; i < src_stride * src_stride; i++) {                      \
@@ -406,9 +396,9 @@ TEST(VP10ConvolveTest, vp10_highbd_convolve_avg) {
     int w = block_size;                                                     \
     int h = block_size;                                                     \
                                                                             \
-    const int16_t* filter_x =                                               \
+    const int16_t *filter_x =                                               \
         vp10_get_interp_filter_kernel(filter_params, subpel_x_q4);          \
-    const int16_t* filter_y =                                               \
+    const int16_t *filter_y =                                               \
         vp10_get_interp_filter_kernel(filter_params, subpel_y_q4);          \
                                                                             \
     for (int i = 0; i < src_stride * src_stride; i++) {                     \

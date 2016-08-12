@@ -48,18 +48,14 @@ class FunctionEquivalenceTest : public ::testing::TestWithParam<FuncParam<T> > {
 
   virtual ~FunctionEquivalenceTest() {}
 
-  virtual void SetUp() {
-    params_ = this->GetParam();
-  }
+  virtual void SetUp() { params_ = this->GetParam(); }
 
-  virtual void TearDown() {
-    libvpx_test::ClearSystemState();
-  }
+  virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
  protected:
   ACMRandom rng_;
   FuncParam<T> params_;
 };
 
-}   // namespace libvpx_test
+}  // namespace libvpx_test
 #endif  // TEST_FUNCTION_EQUIVALENCE_TEST_H_
