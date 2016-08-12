@@ -27,7 +27,7 @@ extern "C" {
 
 #define SIMD_WIDTH 16
 
-#define MAX_MODE_LF_DELTAS      2
+#define MAX_MODE_LF_DELTAS 2
 
 enum lf_path {
   LF_PATH_420,
@@ -95,37 +95,32 @@ struct VP10LfSyncData;
 
 // This function sets up the bit masks for the entire 64x64 region represented
 // by mi_row, mi_col.
-void vp10_setup_mask(struct VP10Common *const cm,
-                    const int mi_row, const int mi_col,
-                    MODE_INFO **mi_8x8, const int mode_info_stride,
-                    LOOP_FILTER_MASK *lfm);
+void vp10_setup_mask(struct VP10Common *const cm, const int mi_row,
+                     const int mi_col, MODE_INFO **mi_8x8,
+                     const int mode_info_stride, LOOP_FILTER_MASK *lfm);
 
 void vp10_filter_block_plane_ss00(struct VP10Common *const cm,
-                                 struct macroblockd_plane *const plane,
-                                 int mi_row,
-                                 LOOP_FILTER_MASK *lfm);
+                                  struct macroblockd_plane *const plane,
+                                  int mi_row, LOOP_FILTER_MASK *lfm);
 
 void vp10_filter_block_plane_ss11(struct VP10Common *const cm,
-                                 struct macroblockd_plane *const plane,
-                                 int mi_row,
-                                 LOOP_FILTER_MASK *lfm);
+                                  struct macroblockd_plane *const plane,
+                                  int mi_row, LOOP_FILTER_MASK *lfm);
 
 void vp10_filter_block_plane_non420(struct VP10Common *cm,
-                                   struct macroblockd_plane *plane,
-                                   MODE_INFO **mi_8x8,
-                                   int mi_row, int mi_col);
+                                    struct macroblockd_plane *plane,
+                                    MODE_INFO **mi_8x8, int mi_row, int mi_col);
 
 void vp10_loop_filter_init(struct VP10Common *cm);
 
 // Update the loop filter for the current frame.
-// This should be called before vp10_loop_filter_rows(), vp10_loop_filter_frame()
+// This should be called before vp10_loop_filter_rows(),
+// vp10_loop_filter_frame()
 // calls this function directly.
 void vp10_loop_filter_frame_init(struct VP10Common *cm, int default_filt_lvl);
 
-void vp10_loop_filter_frame(YV12_BUFFER_CONFIG *frame,
-                            struct VP10Common *cm,
-                            struct macroblockd *mbd,
-                            int filter_level,
+void vp10_loop_filter_frame(YV12_BUFFER_CONFIG *frame, struct VP10Common *cm,
+                            struct macroblockd *mbd, int filter_level,
                             int y_only, int partial_frame);
 
 // Apply the loop filter to [start, stop) macro block rows in frame_buffer.

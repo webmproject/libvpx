@@ -16,61 +16,50 @@
 
 static INLINE TxfmFunc inv_txfm_type_to_func(TXFM_TYPE txfm_type) {
   switch (txfm_type) {
-    case TXFM_TYPE_DCT4:
-      return vp10_idct4_new;
-    case TXFM_TYPE_DCT8:
-      return vp10_idct8_new;
-    case TXFM_TYPE_DCT16:
-      return vp10_idct16_new;
-    case TXFM_TYPE_DCT32:
-      return vp10_idct32_new;
-    case TXFM_TYPE_DCT64:
-      return vp10_idct64_new;
-    case TXFM_TYPE_ADST4:
-      return vp10_iadst4_new;
-    case TXFM_TYPE_ADST8:
-      return vp10_iadst8_new;
-    case TXFM_TYPE_ADST16:
-      return vp10_iadst16_new;
-    case TXFM_TYPE_ADST32:
-      return vp10_iadst32_new;
-    default:
-      assert(0);
-      return NULL;
+    case TXFM_TYPE_DCT4: return vp10_idct4_new;
+    case TXFM_TYPE_DCT8: return vp10_idct8_new;
+    case TXFM_TYPE_DCT16: return vp10_idct16_new;
+    case TXFM_TYPE_DCT32: return vp10_idct32_new;
+    case TXFM_TYPE_DCT64: return vp10_idct64_new;
+    case TXFM_TYPE_ADST4: return vp10_iadst4_new;
+    case TXFM_TYPE_ADST8: return vp10_iadst8_new;
+    case TXFM_TYPE_ADST16: return vp10_iadst16_new;
+    case TXFM_TYPE_ADST32: return vp10_iadst32_new;
+    default: assert(0); return NULL;
   }
 }
 
 #if CONFIG_EXT_TX
-static const TXFM_2D_CFG* inv_txfm_cfg_ls[FLIPADST_ADST + 1][TX_SIZES] = {
-    {&inv_txfm_2d_cfg_dct_dct_4  , &inv_txfm_2d_cfg_dct_dct_8,
-     &inv_txfm_2d_cfg_dct_dct_16  , &inv_txfm_2d_cfg_dct_dct_32},
-    {&inv_txfm_2d_cfg_adst_dct_4 , &inv_txfm_2d_cfg_adst_dct_8,
-     &inv_txfm_2d_cfg_adst_dct_16 , &inv_txfm_2d_cfg_adst_dct_32},
-    {&inv_txfm_2d_cfg_dct_adst_4 , &inv_txfm_2d_cfg_dct_adst_8,
-     &inv_txfm_2d_cfg_dct_adst_16 , &inv_txfm_2d_cfg_dct_adst_32},
-    {&inv_txfm_2d_cfg_adst_adst_4, &inv_txfm_2d_cfg_adst_adst_8,
-     &inv_txfm_2d_cfg_adst_adst_16, &inv_txfm_2d_cfg_adst_adst_32},
-    {&inv_txfm_2d_cfg_adst_dct_4 , &inv_txfm_2d_cfg_adst_dct_8,
-     &inv_txfm_2d_cfg_adst_dct_16 , &inv_txfm_2d_cfg_adst_dct_32},
-    {&inv_txfm_2d_cfg_dct_adst_4 , &inv_txfm_2d_cfg_dct_adst_8,
-     &inv_txfm_2d_cfg_dct_adst_16 , &inv_txfm_2d_cfg_dct_adst_32},
-    {&inv_txfm_2d_cfg_adst_adst_4, &inv_txfm_2d_cfg_adst_adst_8,
-     &inv_txfm_2d_cfg_adst_adst_16, &inv_txfm_2d_cfg_adst_adst_32},
-    {&inv_txfm_2d_cfg_adst_adst_4, &inv_txfm_2d_cfg_adst_adst_8,
-     &inv_txfm_2d_cfg_adst_adst_16, &inv_txfm_2d_cfg_adst_adst_32},
-    {&inv_txfm_2d_cfg_adst_adst_4, &inv_txfm_2d_cfg_adst_adst_8,
-     &inv_txfm_2d_cfg_adst_adst_16, &inv_txfm_2d_cfg_adst_adst_32},
+static const TXFM_2D_CFG *inv_txfm_cfg_ls[FLIPADST_ADST + 1][TX_SIZES] = {
+  { &inv_txfm_2d_cfg_dct_dct_4, &inv_txfm_2d_cfg_dct_dct_8,
+    &inv_txfm_2d_cfg_dct_dct_16, &inv_txfm_2d_cfg_dct_dct_32 },
+  { &inv_txfm_2d_cfg_adst_dct_4, &inv_txfm_2d_cfg_adst_dct_8,
+    &inv_txfm_2d_cfg_adst_dct_16, &inv_txfm_2d_cfg_adst_dct_32 },
+  { &inv_txfm_2d_cfg_dct_adst_4, &inv_txfm_2d_cfg_dct_adst_8,
+    &inv_txfm_2d_cfg_dct_adst_16, &inv_txfm_2d_cfg_dct_adst_32 },
+  { &inv_txfm_2d_cfg_adst_adst_4, &inv_txfm_2d_cfg_adst_adst_8,
+    &inv_txfm_2d_cfg_adst_adst_16, &inv_txfm_2d_cfg_adst_adst_32 },
+  { &inv_txfm_2d_cfg_adst_dct_4, &inv_txfm_2d_cfg_adst_dct_8,
+    &inv_txfm_2d_cfg_adst_dct_16, &inv_txfm_2d_cfg_adst_dct_32 },
+  { &inv_txfm_2d_cfg_dct_adst_4, &inv_txfm_2d_cfg_dct_adst_8,
+    &inv_txfm_2d_cfg_dct_adst_16, &inv_txfm_2d_cfg_dct_adst_32 },
+  { &inv_txfm_2d_cfg_adst_adst_4, &inv_txfm_2d_cfg_adst_adst_8,
+    &inv_txfm_2d_cfg_adst_adst_16, &inv_txfm_2d_cfg_adst_adst_32 },
+  { &inv_txfm_2d_cfg_adst_adst_4, &inv_txfm_2d_cfg_adst_adst_8,
+    &inv_txfm_2d_cfg_adst_adst_16, &inv_txfm_2d_cfg_adst_adst_32 },
+  { &inv_txfm_2d_cfg_adst_adst_4, &inv_txfm_2d_cfg_adst_adst_8,
+    &inv_txfm_2d_cfg_adst_adst_16, &inv_txfm_2d_cfg_adst_adst_32 },
 };
 #else
-static const TXFM_2D_CFG* inv_txfm_cfg_ls[TX_TYPES][TX_SIZES] = {
-    {&inv_txfm_2d_cfg_dct_dct_4  , &inv_txfm_2d_cfg_dct_dct_8,
-      &inv_txfm_2d_cfg_dct_dct_16  , &inv_txfm_2d_cfg_dct_dct_32},
-    {&inv_txfm_2d_cfg_adst_dct_4 , &inv_txfm_2d_cfg_adst_dct_8,
-      &inv_txfm_2d_cfg_adst_dct_16 , &inv_txfm_2d_cfg_adst_dct_32},
-    {&inv_txfm_2d_cfg_dct_adst_4 , &inv_txfm_2d_cfg_dct_adst_8,
-      &inv_txfm_2d_cfg_dct_adst_16 , &inv_txfm_2d_cfg_dct_adst_32},
-    {&inv_txfm_2d_cfg_adst_adst_4, &inv_txfm_2d_cfg_adst_adst_8,
-      &inv_txfm_2d_cfg_adst_adst_16, &inv_txfm_2d_cfg_adst_adst_32},
+static const TXFM_2D_CFG *inv_txfm_cfg_ls[TX_TYPES][TX_SIZES] = {
+  { &inv_txfm_2d_cfg_dct_dct_4, &inv_txfm_2d_cfg_dct_dct_8,
+    &inv_txfm_2d_cfg_dct_dct_16, &inv_txfm_2d_cfg_dct_dct_32 },
+  { &inv_txfm_2d_cfg_adst_dct_4, &inv_txfm_2d_cfg_adst_dct_8,
+    &inv_txfm_2d_cfg_adst_dct_16, &inv_txfm_2d_cfg_adst_dct_32 },
+  { &inv_txfm_2d_cfg_dct_adst_4, &inv_txfm_2d_cfg_dct_adst_8,
+    &inv_txfm_2d_cfg_dct_adst_16, &inv_txfm_2d_cfg_dct_adst_32 },
+  { &inv_txfm_2d_cfg_adst_adst_4, &inv_txfm_2d_cfg_adst_adst_8,
+    &inv_txfm_2d_cfg_adst_adst_16, &inv_txfm_2d_cfg_adst_adst_32 },
 };
 #endif
 
@@ -82,14 +71,13 @@ TXFM_2D_FLIP_CFG vp10_get_inv_txfm_cfg(int tx_type, int tx_size) {
 }
 
 TXFM_2D_FLIP_CFG vp10_get_inv_txfm_64x64_cfg(int tx_type) {
-  TXFM_2D_FLIP_CFG cfg = {0, 0, NULL};
+  TXFM_2D_FLIP_CFG cfg = { 0, 0, NULL };
   switch (tx_type) {
     case DCT_DCT:
       cfg.cfg = &inv_txfm_2d_cfg_dct_dct_64;
       set_flip_cfg(tx_type, &cfg);
       break;
-    default:
-      assert(0);
+    default: assert(0);
   }
   return cfg;
 }
@@ -125,8 +113,7 @@ static INLINE void inv_txfm2d_add_c(const int32_t *input, int16_t *output,
   // Columns
   for (c = 0; c < txfm_size; ++c) {
     if (cfg->lr_flip == 0) {
-      for (r = 0; r < txfm_size; ++r)
-        temp_in[r] = buf[r * txfm_size + c];
+      for (r = 0; r < txfm_size; ++r) temp_in[r] = buf[r * txfm_size + c];
     } else {
       // flip left right
       for (r = 0; r < txfm_size; ++r)
@@ -135,8 +122,7 @@ static INLINE void inv_txfm2d_add_c(const int32_t *input, int16_t *output,
     txfm_func_col(temp_in, temp_out, cos_bit_col, stage_range_col);
     round_shift_array(temp_out, txfm_size, -shift[1]);
     if (cfg->ud_flip == 0) {
-      for (r = 0; r < txfm_size; ++r)
-        output[r * stride + c] += temp_out[r];
+      for (r = 0; r < txfm_size; ++r) output[r * stride + c] += temp_out[r];
     } else {
       // flip upside down
       for (r = 0; r < txfm_size; ++r)
@@ -146,8 +132,7 @@ static INLINE void inv_txfm2d_add_c(const int32_t *input, int16_t *output,
 }
 
 void vp10_inv_txfm2d_add_4x4_c(const int32_t *input, uint16_t *output,
-                               int stride, int tx_type,
-                               int bd) {
+                               int stride, int tx_type, int bd) {
   int txfm_buf[4 * 4 + 4 + 4];
   // output contains the prediction signal which is always positive and smaller
   // than (1 << bd) - 1
@@ -159,8 +144,7 @@ void vp10_inv_txfm2d_add_4x4_c(const int32_t *input, uint16_t *output,
 }
 
 void vp10_inv_txfm2d_add_8x8_c(const int32_t *input, uint16_t *output,
-                               int stride, int tx_type,
-                               int bd) {
+                               int stride, int tx_type, int bd) {
   int txfm_buf[8 * 8 + 8 + 8];
   // output contains the prediction signal which is always positive and smaller
   // than (1 << bd) - 1
@@ -172,8 +156,7 @@ void vp10_inv_txfm2d_add_8x8_c(const int32_t *input, uint16_t *output,
 }
 
 void vp10_inv_txfm2d_add_16x16_c(const int32_t *input, uint16_t *output,
-                                 int stride, int tx_type,
-                                 int bd) {
+                                 int stride, int tx_type, int bd) {
   int txfm_buf[16 * 16 + 16 + 16];
   // output contains the prediction signal which is always positive and smaller
   // than (1 << bd) - 1
@@ -185,8 +168,7 @@ void vp10_inv_txfm2d_add_16x16_c(const int32_t *input, uint16_t *output,
 }
 
 void vp10_inv_txfm2d_add_32x32_c(const int32_t *input, uint16_t *output,
-                                 int stride, int tx_type,
-                                 int bd) {
+                                 int stride, int tx_type, int bd) {
   int txfm_buf[32 * 32 + 32 + 32];
   // output contains the prediction signal which is always positive and smaller
   // than (1 << bd) - 1
@@ -198,8 +180,7 @@ void vp10_inv_txfm2d_add_32x32_c(const int32_t *input, uint16_t *output,
 }
 
 void vp10_inv_txfm2d_add_64x64_c(const int32_t *input, uint16_t *output,
-                                 int stride, int tx_type,
-                                 int bd) {
+                                 int stride, int tx_type, int bd) {
   int txfm_buf[64 * 64 + 64 + 64];
   // output contains the prediction signal which is always positive and smaller
   // than (1 << bd) - 1

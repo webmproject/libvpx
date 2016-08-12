@@ -14,7 +14,7 @@
 #include "vpx_dsp/mips/inv_txfm_msa.h"
 
 void vp10_iht16x16_256_add_msa(const int16_t *input, uint8_t *dst,
-                              int32_t dst_stride, int32_t tx_type) {
+                               int32_t dst_stride, int32_t tx_type) {
   int32_t i;
   DECLARE_ALIGNED(32, int16_t, out[16 * 16]);
   int16_t *out_ptr = &out[0];
@@ -74,8 +74,6 @@ void vp10_iht16x16_256_add_msa(const int16_t *input, uint8_t *dst,
                                           (dst + (i << 3)), dst_stride);
       }
       break;
-    default:
-      assert(0);
-      break;
+    default: assert(0); break;
   }
 }

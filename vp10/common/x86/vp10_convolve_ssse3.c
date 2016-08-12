@@ -14,7 +14,7 @@
 #include "./vp10_rtcd.h"
 #include "vp10/common/filter.h"
 
-#define WIDTH_BOUND  (16)
+#define WIDTH_BOUND (16)
 #define HEIGHT_BOUND (16)
 
 static INLINE void transpose_4x8(const __m128i *in, __m128i *out) {
@@ -65,8 +65,8 @@ static INLINE void accumulate_store_2_pixel(const __m128i *x, uint8_t *dst) {
   *(uint16_t *)dst = (uint16_t)temp;
 }
 
-static store_pixel_t store2pixelTab[2] = {
-  store_2_pixel_only, accumulate_store_2_pixel};
+static store_pixel_t store2pixelTab[2] = { store_2_pixel_only,
+                                           accumulate_store_2_pixel };
 
 static INLINE void store_4_pixel_only(const __m128i *x, uint8_t *dst) {
   __m128i u = _mm_packus_epi16(*x, *x);
@@ -78,12 +78,11 @@ static INLINE void accumulate_store_4_pixel(const __m128i *x, uint8_t *dst) {
   *(int *)dst = _mm_cvtsi128_si32(y);
 }
 
-static store_pixel_t store4pixelTab[2] = {
-  store_4_pixel_only, accumulate_store_4_pixel};
+static store_pixel_t store4pixelTab[2] = { store_4_pixel_only,
+                                           accumulate_store_4_pixel };
 
-static void horiz_w4_ssse3(const uint8_t *src, const __m128i *f,
-                           int tapsNum, store_pixel_t store_func,
-                           uint8_t *dst) {
+static void horiz_w4_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
+                           store_pixel_t store_func, uint8_t *dst) {
   __m128i sumPairRow[4];
   __m128i sumPairCol[8];
   __m128i pixel;
@@ -163,14 +162,10 @@ static void horiz_w128_ssse3(const uint8_t *src, const __m128i *f, int tapsNum,
   horiz_w64_ssse3(src, f, tapsNum, store, buf);
 }
 
-static void (*horizTab[6])(const uint8_t *, const __m128i *, int,
-                           store_pixel_t, uint8_t *) = {
-  horiz_w4_ssse3,
-  horiz_w8_ssse3,
-  horiz_w16_ssse3,
-  horiz_w32_ssse3,
-  horiz_w64_ssse3,
-  horiz_w128_ssse3,
+static void (*horizTab[6])(const uint8_t *, const __m128i *, int, store_pixel_t,
+                           uint8_t *) = {
+  horiz_w4_ssse3,  horiz_w8_ssse3,  horiz_w16_ssse3,
+  horiz_w32_ssse3, horiz_w64_ssse3, horiz_w128_ssse3,
 };
 
 static void filter_horiz_ssse3(const uint8_t *src, __m128i *f, int tapsNum,
@@ -179,26 +174,13 @@ static void filter_horiz_ssse3(const uint8_t *src, __m128i *f, int tapsNum,
     // Note:
     // For width=2 and 4, store function must be different
     case 2:
-    case 4:
-      horizTab[0](src, f, tapsNum, store, dst);
-      break;
-    case 8:
-      horizTab[1](src, f, tapsNum, store, dst);
-      break;
-    case 16:
-      horizTab[2](src, f, tapsNum, store, dst);
-      break;
-    case 32:
-      horizTab[3](src, f, tapsNum, store, dst);
-      break;
-    case 64:
-      horizTab[4](src, f, tapsNum, store, dst);
-      break;
-    case 128:
-      horizTab[5](src, f, tapsNum, store, dst);
-      break;
-    default:
-      assert(0);
+    case 4: horizTab[0](src, f, tapsNum, store, dst); break;
+    case 8: horizTab[1](src, f, tapsNum, store, dst); break;
+    case 16: horizTab[2](src, f, tapsNum, store, dst); break;
+    case 32: horizTab[3](src, f, tapsNum, store, dst); break;
+    case 64: horizTab[4](src, f, tapsNum, store, dst); break;
+    case 128: horizTab[5](src, f, tapsNum, store, dst); break;
+    default: assert(0);
   }
 }
 
@@ -207,8 +189,7 @@ typedef void (*transpose_to_dst_t)(const uint16_t *src, int src_stride,
                                    uint8_t *dst, int dst_stride);
 
 static INLINE void transpose8x8_direct_to_dst(const uint16_t *src,
-                                              int src_stride,
-                                              uint8_t *dst,
+                                              int src_stride, uint8_t *dst,
                                               int dst_stride) {
   const __m128i k_256 = _mm_set1_epi16(1 << 8);
   __m128i v0, v1, v2, v3;
@@ -256,19 +237,18 @@ static INLINE void transpose8x8_direct_to_dst(const uint16_t *src,
   u6 = _mm_srli_si128(u2, 8);
   u7 = _mm_srli_si128(u3, 8);
 
-  _mm_storel_epi64((__m128i*)dst, u0);
-  _mm_storel_epi64((__m128i*)(dst + dst_stride * 1), u4);
-  _mm_storel_epi64((__m128i*)(dst + dst_stride * 2), u1);
-  _mm_storel_epi64((__m128i*)(dst + dst_stride * 3), u5);
-  _mm_storel_epi64((__m128i*)(dst + dst_stride * 4), u2);
-  _mm_storel_epi64((__m128i*)(dst + dst_stride * 5), u6);
-  _mm_storel_epi64((__m128i*)(dst + dst_stride * 6), u3);
-  _mm_storel_epi64((__m128i*)(dst + dst_stride * 7), u7);
+  _mm_storel_epi64((__m128i *)dst, u0);
+  _mm_storel_epi64((__m128i *)(dst + dst_stride * 1), u4);
+  _mm_storel_epi64((__m128i *)(dst + dst_stride * 2), u1);
+  _mm_storel_epi64((__m128i *)(dst + dst_stride * 3), u5);
+  _mm_storel_epi64((__m128i *)(dst + dst_stride * 4), u2);
+  _mm_storel_epi64((__m128i *)(dst + dst_stride * 5), u6);
+  _mm_storel_epi64((__m128i *)(dst + dst_stride * 6), u3);
+  _mm_storel_epi64((__m128i *)(dst + dst_stride * 7), u7);
 }
 
 static INLINE void transpose8x8_accumu_to_dst(const uint16_t *src,
-                                              int src_stride,
-                                              uint8_t *dst,
+                                              int src_stride, uint8_t *dst,
                                               int dst_stride) {
   const __m128i k_256 = _mm_set1_epi16(1 << 8);
   const __m128i zero = _mm_setzero_si128();
@@ -382,19 +362,18 @@ static INLINE void transpose8x8_accumu_to_dst(const uint16_t *src,
   u6 = _mm_srli_si128(u2, 8);
   u7 = _mm_srli_si128(u3, 8);
 
-  _mm_storel_epi64((__m128i*)dst, u0);
-  _mm_storel_epi64((__m128i*)(dst + dst_stride * 1), u4);
-  _mm_storel_epi64((__m128i*)(dst + dst_stride * 2), u1);
-  _mm_storel_epi64((__m128i*)(dst + dst_stride * 3), u5);
-  _mm_storel_epi64((__m128i*)(dst + dst_stride * 4), u2);
-  _mm_storel_epi64((__m128i*)(dst + dst_stride * 5), u6);
-  _mm_storel_epi64((__m128i*)(dst + dst_stride * 6), u3);
-  _mm_storel_epi64((__m128i*)(dst + dst_stride * 7), u7);
+  _mm_storel_epi64((__m128i *)dst, u0);
+  _mm_storel_epi64((__m128i *)(dst + dst_stride * 1), u4);
+  _mm_storel_epi64((__m128i *)(dst + dst_stride * 2), u1);
+  _mm_storel_epi64((__m128i *)(dst + dst_stride * 3), u5);
+  _mm_storel_epi64((__m128i *)(dst + dst_stride * 4), u2);
+  _mm_storel_epi64((__m128i *)(dst + dst_stride * 5), u6);
+  _mm_storel_epi64((__m128i *)(dst + dst_stride * 6), u3);
+  _mm_storel_epi64((__m128i *)(dst + dst_stride * 7), u7);
 }
 
-static transpose_to_dst_t trans8x8Tab[2] = {
-  transpose8x8_direct_to_dst, transpose8x8_accumu_to_dst
-};
+static transpose_to_dst_t trans8x8Tab[2] = { transpose8x8_direct_to_dst,
+                                             transpose8x8_accumu_to_dst };
 
 static INLINE void transpose_8x16(const __m128i *in, __m128i *out) {
   __m128i t0, t1, t2, t3, u0, u1;
@@ -476,8 +455,7 @@ static void filter_horiz_v8p_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
 
 // Vertical 4-pixel parallel
 static INLINE void transpose4x4_direct_to_dst(const uint16_t *src,
-                                              int src_stride,
-                                              uint8_t *dst,
+                                              int src_stride, uint8_t *dst,
                                               int dst_stride) {
   const __m128i k_256 = _mm_set1_epi16(1 << 8);
   __m128i v0, v1, v2, v3;
@@ -509,8 +487,7 @@ static INLINE void transpose4x4_direct_to_dst(const uint16_t *src,
 }
 
 static INLINE void transpose4x4_accumu_to_dst(const uint16_t *src,
-                                              int src_stride,
-                                              uint8_t *dst,
+                                              int src_stride, uint8_t *dst,
                                               int dst_stride) {
   const __m128i k_256 = _mm_set1_epi16(1 << 8);
   const __m128i zero = _mm_setzero_si128();
@@ -571,9 +548,8 @@ static INLINE void transpose4x4_accumu_to_dst(const uint16_t *src,
   *(int *)(dst + dst_stride * 3) = _mm_cvtsi128_si32(u3);
 }
 
-static transpose_to_dst_t trans4x4Tab[2] = {
-  transpose4x4_direct_to_dst, transpose4x4_accumu_to_dst
-};
+static transpose_to_dst_t trans4x4Tab[2] = { transpose4x4_direct_to_dst,
+                                             transpose4x4_accumu_to_dst };
 
 static void filter_horiz_v4p_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
                                    __m128i *f, int tapsNum, uint16_t *buf) {
@@ -597,7 +573,7 @@ static void filter_horiz_v4p_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
   // 20 21 30 31 22 23 32 33 24 25 34 35 26 27 36 37
   tr0_1 = _mm_unpacklo_epi16(C, D);
   // 00 01 10 11 20 21 30 31 02 03 12 13 22 23 32 33
-  s1s0  = _mm_unpacklo_epi32(tr0_0, tr0_1);
+  s1s0 = _mm_unpacklo_epi32(tr0_0, tr0_1);
   // 04 05 14 15 24 25 34 35 06 07 16 17 26 27 36 37
   s5s4 = _mm_unpackhi_epi32(tr0_0, tr0_1);
   // 02 03 12 13 22 23 32 33
@@ -607,7 +583,7 @@ static void filter_horiz_v4p_ssse3(const uint8_t *src_ptr, ptrdiff_t src_pitch,
 
   tr0_0 = _mm_unpackhi_epi16(A, B);
   tr0_1 = _mm_unpackhi_epi16(C, D);
-  s9s8  = _mm_unpacklo_epi32(tr0_0, tr0_1);
+  s9s8 = _mm_unpacklo_epi32(tr0_0, tr0_1);
   sbsa = _mm_srli_si128(s9s8, 8);
 
   // multiply 2 adjacent elements with the filter and add the result
@@ -659,10 +635,9 @@ void vp10_convolve_horiz_ssse3(const uint8_t *src, int src_stride, uint8_t *dst,
     return;
   }
 
-  hCoeffs = vp10_get_subpel_filter_signal_dir(
-      filter_params, subpel_x_q4 - 1);
-  vCoeffs = vp10_get_subpel_filter_ver_signal_dir(
-      filter_params, subpel_x_q4 - 1);
+  hCoeffs = vp10_get_subpel_filter_signal_dir(filter_params, subpel_x_q4 - 1);
+  vCoeffs =
+      vp10_get_subpel_filter_ver_signal_dir(filter_params, subpel_x_q4 - 1);
 
   if (!hCoeffs || !vCoeffs) {
     vp10_convolve_horiz_c(src, src_stride, dst, dst_stride, w, h, filter_params,
@@ -755,8 +730,8 @@ static INLINE void accumulate_store_8_pixel(const __m128i *x, uint8_t *dst) {
   _mm_storel_epi64((__m128i *)dst, y);
 }
 
-static store_pixel_t store8pixelTab[2] = {
-  store_8_pixel_only, accumulate_store_8_pixel};
+static store_pixel_t store8pixelTab[2] = { store_8_pixel_only,
+                                           accumulate_store_8_pixel };
 
 static __m128i filter_vert_ssse3(const uint8_t *src, int src_stride,
                                  int tapsNum, __m128i *f) {
@@ -869,8 +844,8 @@ void vp10_convolve_vert_ssse3(const uint8_t *src, int src_stride, uint8_t *dst,
     return;
   }
 
-  vCoeffs = vp10_get_subpel_filter_ver_signal_dir(
-      filter_params, subpel_y_q4 - 1);
+  vCoeffs =
+      vp10_get_subpel_filter_ver_signal_dir(filter_params, subpel_y_q4 - 1);
 
   if (!vCoeffs) {
     vp10_convolve_vert_c(src, src_stride, dst, dst_stride, w, h, filter_params,
@@ -889,14 +864,14 @@ void vp10_convolve_vert_ssse3(const uint8_t *src, int src_stride, uint8_t *dst,
   src_ptr = src;
 
   if (w > 4) {
-    filter_vert_compute_large(src_ptr, src_stride, verf, tapsNum, store8p,
-                              w, h, dst_ptr, dst_stride);
+    filter_vert_compute_large(src_ptr, src_stride, verf, tapsNum, store8p, w, h,
+                              dst_ptr, dst_stride);
   } else if (4 == w) {
-    filter_vert_compute_small(src_ptr, src_stride, verf, tapsNum, store4p,
-                              h, dst_ptr, dst_stride);
+    filter_vert_compute_small(src_ptr, src_stride, verf, tapsNum, store4p, h,
+                              dst_ptr, dst_stride);
   } else if (2 == w) {
-    filter_vert_compute_small(src_ptr, src_stride, verf, tapsNum, store2p,
-                              h, dst_ptr, dst_stride);
+    filter_vert_compute_small(src_ptr, src_stride, verf, tapsNum, store2p, h,
+                              dst_ptr, dst_stride);
   } else {
     assert(0);
   }

@@ -28,35 +28,16 @@ typedef void (*TxfmFuncSSE2)(const __m128i *input, __m128i *output,
 
 static INLINE TxfmFuncSSE2 fwd_txfm_type_to_func(TXFM_TYPE txfm_type) {
   switch (txfm_type) {
-    case TXFM_TYPE_DCT4:
-      return vp10_fdct4_new_sse4_1;
-      break;
-    case TXFM_TYPE_DCT8:
-      return vp10_fdct8_new_sse4_1;
-      break;
-    case TXFM_TYPE_DCT16:
-      return vp10_fdct16_new_sse4_1;
-      break;
-    case TXFM_TYPE_DCT32:
-      return vp10_fdct32_new_sse4_1;
-      break;
-    case TXFM_TYPE_DCT64:
-      return vp10_fdct64_new_sse4_1;
-      break;
-    case TXFM_TYPE_ADST4:
-      return vp10_fadst4_new_sse4_1;
-      break;
-    case TXFM_TYPE_ADST8:
-      return vp10_fadst8_new_sse4_1;
-      break;
-    case TXFM_TYPE_ADST16:
-      return vp10_fadst16_new_sse4_1;
-      break;
-    case TXFM_TYPE_ADST32:
-      return vp10_fadst32_new_sse4_1;
-      break;
-    default:
-      assert(0);
+    case TXFM_TYPE_DCT4: return vp10_fdct4_new_sse4_1; break;
+    case TXFM_TYPE_DCT8: return vp10_fdct8_new_sse4_1; break;
+    case TXFM_TYPE_DCT16: return vp10_fdct16_new_sse4_1; break;
+    case TXFM_TYPE_DCT32: return vp10_fdct32_new_sse4_1; break;
+    case TXFM_TYPE_DCT64: return vp10_fdct64_new_sse4_1; break;
+    case TXFM_TYPE_ADST4: return vp10_fadst4_new_sse4_1; break;
+    case TXFM_TYPE_ADST8: return vp10_fadst8_new_sse4_1; break;
+    case TXFM_TYPE_ADST16: return vp10_fadst16_new_sse4_1; break;
+    case TXFM_TYPE_ADST32: return vp10_fadst32_new_sse4_1; break;
+    default: assert(0);
   }
   return NULL;
 }

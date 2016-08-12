@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP10_COMMON_ENTROPYMV_H_
 #define VP10_COMMON_ENTROPYMV_H_
 
@@ -32,12 +31,12 @@ int vp10_use_mv_hp(const MV *ref);
 #define MV_UPDATE_PROB 252
 
 /* Symbols for coding which components are zero jointly */
-#define MV_JOINTS     4
+#define MV_JOINTS 4
 typedef enum {
-  MV_JOINT_ZERO = 0,             /* Zero vector */
-  MV_JOINT_HNZVZ = 1,            /* Vert zero, hor nonzero */
-  MV_JOINT_HZVNZ = 2,            /* Hor zero, vert nonzero */
-  MV_JOINT_HNZVNZ = 3,           /* Both components nonzero */
+  MV_JOINT_ZERO = 0,   /* Zero vector */
+  MV_JOINT_HNZVZ = 1,  /* Vert zero, hor nonzero */
+  MV_JOINT_HZVNZ = 2,  /* Hor zero, vert nonzero */
+  MV_JOINT_HNZVNZ = 3, /* Both components nonzero */
 } MV_JOINT_TYPE;
 
 static INLINE int mv_joint_vertical(MV_JOINT_TYPE type) {
@@ -49,33 +48,33 @@ static INLINE int mv_joint_horizontal(MV_JOINT_TYPE type) {
 }
 
 /* Symbols for coding magnitude class of nonzero components */
-#define MV_CLASSES     11
+#define MV_CLASSES 11
 typedef enum {
-  MV_CLASS_0 = 0,      /* (0, 2]     integer pel */
-  MV_CLASS_1 = 1,      /* (2, 4]     integer pel */
-  MV_CLASS_2 = 2,      /* (4, 8]     integer pel */
-  MV_CLASS_3 = 3,      /* (8, 16]    integer pel */
-  MV_CLASS_4 = 4,      /* (16, 32]   integer pel */
-  MV_CLASS_5 = 5,      /* (32, 64]   integer pel */
-  MV_CLASS_6 = 6,      /* (64, 128]  integer pel */
-  MV_CLASS_7 = 7,      /* (128, 256] integer pel */
-  MV_CLASS_8 = 8,      /* (256, 512] integer pel */
-  MV_CLASS_9 = 9,      /* (512, 1024] integer pel */
-  MV_CLASS_10 = 10,    /* (1024,2048] integer pel */
+  MV_CLASS_0 = 0,   /* (0, 2]     integer pel */
+  MV_CLASS_1 = 1,   /* (2, 4]     integer pel */
+  MV_CLASS_2 = 2,   /* (4, 8]     integer pel */
+  MV_CLASS_3 = 3,   /* (8, 16]    integer pel */
+  MV_CLASS_4 = 4,   /* (16, 32]   integer pel */
+  MV_CLASS_5 = 5,   /* (32, 64]   integer pel */
+  MV_CLASS_6 = 6,   /* (64, 128]  integer pel */
+  MV_CLASS_7 = 7,   /* (128, 256] integer pel */
+  MV_CLASS_8 = 8,   /* (256, 512] integer pel */
+  MV_CLASS_9 = 9,   /* (512, 1024] integer pel */
+  MV_CLASS_10 = 10, /* (1024,2048] integer pel */
 } MV_CLASS_TYPE;
 
-#define CLASS0_BITS    1  /* bits at integer precision for class 0 */
-#define CLASS0_SIZE    (1 << CLASS0_BITS)
+#define CLASS0_BITS 1 /* bits at integer precision for class 0 */
+#define CLASS0_SIZE (1 << CLASS0_BITS)
 #define MV_OFFSET_BITS (MV_CLASSES + CLASS0_BITS - 2)
 #define MV_FP_SIZE 4
 
-#define MV_MAX_BITS    (MV_CLASSES + CLASS0_BITS + 2)
-#define MV_MAX         ((1 << MV_MAX_BITS) - 1)
-#define MV_VALS        ((MV_MAX << 1) + 1)
+#define MV_MAX_BITS (MV_CLASSES + CLASS0_BITS + 2)
+#define MV_MAX ((1 << MV_MAX_BITS) - 1)
+#define MV_VALS ((MV_MAX << 1) + 1)
 
 #define MV_IN_USE_BITS 14
-#define MV_UPP   ((1 << MV_IN_USE_BITS) - 1)
-#define MV_LOW   (-(1 << MV_IN_USE_BITS))
+#define MV_UPP ((1 << MV_IN_USE_BITS) - 1)
+#define MV_LOW (-(1 << MV_IN_USE_BITS))
 
 extern const vpx_tree_index vp10_mv_joint_tree[];
 extern const vpx_tree_index vp10_mv_class_tree[];
@@ -133,8 +132,8 @@ typedef struct {
 void vp10_inc_mv(const MV *mv, nmv_context_counts *mvctx, const int usehp);
 
 #if CONFIG_GLOBAL_MOTION
-extern const vpx_tree_index vp10_global_motion_types_tree
-                             [TREE_SIZE(GLOBAL_MOTION_TYPES)];
+extern const vpx_tree_index
+    vp10_global_motion_types_tree[TREE_SIZE(GLOBAL_MOTION_TYPES)];
 #endif  // CONFIG_GLOBAL_MOTION
 
 #ifdef __cplusplus

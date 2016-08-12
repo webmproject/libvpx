@@ -8,48 +8,48 @@
 extern "C" {
 #endif
 
-void vp10_fdct4_new_sse4_1(const __m128i* input, __m128i* output,
-                           const int8_t* cos_bit, const int8_t* stage_range);
-void vp10_fdct8_new_sse4_1(const __m128i* input, __m128i* output,
-                           const int8_t* cos_bit, const int8_t* stage_range);
-void vp10_fdct16_new_sse4_1(const __m128i* input, __m128i* output,
-                            const int8_t* cos_bit, const int8_t* stage_range);
-void vp10_fdct32_new_sse4_1(const __m128i* input, __m128i* output,
-                            const int8_t* cos_bit, const int8_t* stage_range);
-void vp10_fdct64_new_sse4_1(const __m128i* input, __m128i* output,
-                            const int8_t* cos_bit, const int8_t* stage_range);
+void vp10_fdct4_new_sse4_1(const __m128i *input, __m128i *output,
+                           const int8_t *cos_bit, const int8_t *stage_range);
+void vp10_fdct8_new_sse4_1(const __m128i *input, __m128i *output,
+                           const int8_t *cos_bit, const int8_t *stage_range);
+void vp10_fdct16_new_sse4_1(const __m128i *input, __m128i *output,
+                            const int8_t *cos_bit, const int8_t *stage_range);
+void vp10_fdct32_new_sse4_1(const __m128i *input, __m128i *output,
+                            const int8_t *cos_bit, const int8_t *stage_range);
+void vp10_fdct64_new_sse4_1(const __m128i *input, __m128i *output,
+                            const int8_t *cos_bit, const int8_t *stage_range);
 
-void vp10_fadst4_new_sse4_1(const __m128i* input, __m128i* output,
-                            const int8_t* cos_bit, const int8_t* stage_range);
-void vp10_fadst8_new_sse4_1(const __m128i* input, __m128i* output,
-                            const int8_t* cos_bit, const int8_t* stage_range);
-void vp10_fadst16_new_sse4_1(const __m128i* input, __m128i* output,
-                             const int8_t* cos_bit, const int8_t* stage_range);
-void vp10_fadst32_new_sse4_1(const __m128i* input, __m128i* output,
-                             const int8_t* cos_bit, const int8_t* stage_range);
+void vp10_fadst4_new_sse4_1(const __m128i *input, __m128i *output,
+                            const int8_t *cos_bit, const int8_t *stage_range);
+void vp10_fadst8_new_sse4_1(const __m128i *input, __m128i *output,
+                            const int8_t *cos_bit, const int8_t *stage_range);
+void vp10_fadst16_new_sse4_1(const __m128i *input, __m128i *output,
+                             const int8_t *cos_bit, const int8_t *stage_range);
+void vp10_fadst32_new_sse4_1(const __m128i *input, __m128i *output,
+                             const int8_t *cos_bit, const int8_t *stage_range);
 
-void vp10_idct4_new_sse4_1(const __m128i* input, __m128i* output,
-                           const int8_t* cos_bit, const int8_t* stage_range);
-void vp10_idct8_new_sse4_1(const __m128i* input, __m128i* output,
-                           const int8_t* cos_bit, const int8_t* stage_range);
-void vp10_idct16_new_sse4_1(const __m128i* input, __m128i* output,
-                            const int8_t* cos_bit, const int8_t* stage_range);
-void vp10_idct32_new_sse4_1(const __m128i* input, __m128i* output,
-                            const int8_t* cos_bit, const int8_t* stage_range);
-void vp10_idct64_new_sse4_1(const __m128i* input, __m128i* output,
-                            const int8_t* cos_bit, const int8_t* stage_range);
+void vp10_idct4_new_sse4_1(const __m128i *input, __m128i *output,
+                           const int8_t *cos_bit, const int8_t *stage_range);
+void vp10_idct8_new_sse4_1(const __m128i *input, __m128i *output,
+                           const int8_t *cos_bit, const int8_t *stage_range);
+void vp10_idct16_new_sse4_1(const __m128i *input, __m128i *output,
+                            const int8_t *cos_bit, const int8_t *stage_range);
+void vp10_idct32_new_sse4_1(const __m128i *input, __m128i *output,
+                            const int8_t *cos_bit, const int8_t *stage_range);
+void vp10_idct64_new_sse4_1(const __m128i *input, __m128i *output,
+                            const int8_t *cos_bit, const int8_t *stage_range);
 
-void vp10_iadst4_new_sse4_1(const __m128i* input, __m128i* output,
-                            const int8_t* cos_bit, const int8_t* stage_range);
-void vp10_iadst8_new_sse4_1(const __m128i* input, __m128i* output,
-                            const int8_t* cos_bit, const int8_t* stage_range);
-void vp10_iadst16_new_sse4_1(const __m128i* input, __m128i* output,
-                             const int8_t* cos_bit, const int8_t* stage_range);
-void vp10_iadst32_new_sse4_1(const __m128i* input, __m128i* output,
-                             const int8_t* cos_bit, const int8_t* stage_range);
+void vp10_iadst4_new_sse4_1(const __m128i *input, __m128i *output,
+                            const int8_t *cos_bit, const int8_t *stage_range);
+void vp10_iadst8_new_sse4_1(const __m128i *input, __m128i *output,
+                            const int8_t *cos_bit, const int8_t *stage_range);
+void vp10_iadst16_new_sse4_1(const __m128i *input, __m128i *output,
+                             const int8_t *cos_bit, const int8_t *stage_range);
+void vp10_iadst32_new_sse4_1(const __m128i *input, __m128i *output,
+                             const int8_t *cos_bit, const int8_t *stage_range);
 
-static INLINE void transpose_32_4x4(int stride, const __m128i* input,
-                                    __m128i* output) {
+static INLINE void transpose_32_4x4(int stride, const __m128i *input,
+                                    __m128i *output) {
   __m128i temp0 = _mm_unpacklo_epi32(input[0 * stride], input[2 * stride]);
   __m128i temp1 = _mm_unpackhi_epi32(input[0 * stride], input[2 * stride]);
   __m128i temp2 = _mm_unpacklo_epi32(input[1 * stride], input[3 * stride]);
@@ -65,8 +65,8 @@ static INLINE void transpose_32_4x4(int stride, const __m128i* input,
 // each 4x4 blocks can be represent by 4 vertical __m128i
 // we first transpose each 4x4 block internally
 // than transpose the grid
-static INLINE void transpose_32(int txfm_size, const __m128i* input,
-                                __m128i* output) {
+static INLINE void transpose_32(int txfm_size, const __m128i *input,
+                                __m128i *output) {
   const int num_per_128 = 4;
   const int row_size = txfm_size;
   const int col_size = txfm_size / num_per_128;

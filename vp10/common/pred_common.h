@@ -20,8 +20,8 @@ extern "C" {
 #endif
 
 static INLINE int get_segment_id(const VP10_COMMON *cm,
-                                 const uint8_t *segment_ids,
-                                 BLOCK_SIZE bsize, int mi_row, int mi_col) {
+                                 const uint8_t *segment_ids, BLOCK_SIZE bsize,
+                                 int mi_row, int mi_col) {
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
   const int bw = num_8x8_blocks_wide_lookup[bsize];
   const int bh = num_8x8_blocks_high_lookup[bsize];
@@ -41,8 +41,8 @@ static INLINE int get_segment_id(const VP10_COMMON *cm,
 static INLINE int vp10_get_pred_context_seg_id(const MACROBLOCKD *xd) {
   const MODE_INFO *const above_mi = xd->above_mi;
   const MODE_INFO *const left_mi = xd->left_mi;
-  const int above_sip = (above_mi != NULL) ?
-                        above_mi->mbmi.seg_id_predicted : 0;
+  const int above_sip =
+      (above_mi != NULL) ? above_mi->mbmi.seg_id_predicted : 0;
   const int left_sip = (left_mi != NULL) ? left_mi->mbmi.seg_id_predicted : 0;
 
   return above_sip + left_sip;
@@ -62,7 +62,7 @@ static INLINE int vp10_get_skip_context(const MACROBLOCKD *xd) {
 }
 
 static INLINE vpx_prob vp10_get_skip_prob(const VP10_COMMON *cm,
-                                         const MACROBLOCKD *xd) {
+                                          const MACROBLOCKD *xd) {
   return cm->fc->skip_probs[vp10_get_skip_context(xd)];
 }
 
@@ -79,7 +79,7 @@ int vp10_get_pred_context_intra_interp(const MACROBLOCKD *xd);
 int vp10_get_intra_inter_context(const MACROBLOCKD *xd);
 
 static INLINE vpx_prob vp10_get_intra_inter_prob(const VP10_COMMON *cm,
-                                                const MACROBLOCKD *xd) {
+                                                 const MACROBLOCKD *xd) {
   return cm->fc->intra_inter_prob[vp10_get_intra_inter_context(xd)];
 }
 
@@ -92,7 +92,7 @@ static INLINE vpx_prob vp10_get_reference_mode_prob(const VP10_COMMON *cm,
 }
 
 int vp10_get_pred_context_comp_ref_p(const VP10_COMMON *cm,
-                                    const MACROBLOCKD *xd);
+                                     const MACROBLOCKD *xd);
 
 static INLINE vpx_prob vp10_get_pred_prob_comp_ref_p(const VP10_COMMON *cm,
                                                      const MACROBLOCKD *xd) {
@@ -105,7 +105,7 @@ int vp10_get_pred_context_comp_ref_p1(const VP10_COMMON *cm,
                                       const MACROBLOCKD *xd);
 
 static INLINE vpx_prob vp10_get_pred_prob_comp_ref_p1(const VP10_COMMON *cm,
-                                                     const MACROBLOCKD *xd) {
+                                                      const MACROBLOCKD *xd) {
   const int pred_context = vp10_get_pred_context_comp_ref_p1(cm, xd);
   return cm->fc->comp_ref_prob[pred_context][1];
 }
@@ -114,7 +114,7 @@ int vp10_get_pred_context_comp_ref_p2(const VP10_COMMON *cm,
                                       const MACROBLOCKD *xd);
 
 static INLINE vpx_prob vp10_get_pred_prob_comp_ref_p2(const VP10_COMMON *cm,
-                                                     const MACROBLOCKD *xd) {
+                                                      const MACROBLOCKD *xd) {
   const int pred_context = vp10_get_pred_context_comp_ref_p2(cm, xd);
   return cm->fc->comp_ref_prob[pred_context][2];
 }
@@ -177,16 +177,16 @@ static INLINE int get_tx_size_context(const MACROBLOCKD *xd) {
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
   const int has_above = xd->up_available;
   const int has_left = xd->left_available;
-  int above_ctx = (has_above && !above_mbmi->skip) ?
-      (int)txsize_sqr_map[above_mbmi->tx_size] : max_tx_size;
-  int left_ctx = (has_left && !left_mbmi->skip) ?
-      (int)txsize_sqr_map[left_mbmi->tx_size] : max_tx_size;
+  int above_ctx = (has_above && !above_mbmi->skip)
+                      ? (int)txsize_sqr_map[above_mbmi->tx_size]
+                      : max_tx_size;
+  int left_ctx = (has_left && !left_mbmi->skip)
+                     ? (int)txsize_sqr_map[left_mbmi->tx_size]
+                     : max_tx_size;
   assert(xd->mi[0]->mbmi.sb_type >= BLOCK_8X8);
-  if (!has_left)
-    left_ctx = above_ctx;
+  if (!has_left) left_ctx = above_ctx;
 
-  if (!has_above)
-    above_ctx = left_ctx;
+  if (!has_above) above_ctx = left_ctx;
 
   return (above_ctx + left_ctx) > max_tx_size;
 }
@@ -209,8 +209,7 @@ static void update_tx_counts(VP10_COMMON *cm, MACROBLOCKD *xd,
   if (xd->mb_to_right_edge < 0)
     max_blocks_wide += xd->mb_to_right_edge >> (5 + pd->subsampling_x);
 
-  if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide)
-    return;
+  if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
 
   if (tx_size == plane_tx_size) {
     ++xd->counts->tx_size[max_tx_size - TX_8X8][ctx][tx_size];
@@ -226,16 +225,14 @@ static void update_tx_counts(VP10_COMMON *cm, MACROBLOCKD *xd,
       const int offsetr = blk_row + ((i >> 1) << bsl);
       const int offsetc = blk_col + ((i & 0x01) << bsl);
 
-      if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide)
-        continue;
-      update_tx_counts(cm, xd, mbmi, plane_bsize,
-                       tx_size - 1, offsetr, offsetc, max_tx_size, ctx);
+      if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide) continue;
+      update_tx_counts(cm, xd, mbmi, plane_bsize, tx_size - 1, offsetr, offsetc,
+                       max_tx_size, ctx);
     }
   }
 }
 
-static INLINE void inter_block_tx_count_update(VP10_COMMON *cm,
-                                               MACROBLOCKD *xd,
+static INLINE void inter_block_tx_count_update(VP10_COMMON *cm, MACROBLOCKD *xd,
                                                MB_MODE_INFO *mbmi,
                                                BLOCK_SIZE plane_bsize,
                                                int ctx) {

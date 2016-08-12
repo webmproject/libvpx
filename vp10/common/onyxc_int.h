@@ -52,10 +52,10 @@ extern "C" {
 #define NUM_PING_PONG_BUFFERS 2
 
 typedef enum {
-  SINGLE_REFERENCE      = 0,
-  COMPOUND_REFERENCE    = 1,
+  SINGLE_REFERENCE = 0,
+  COMPOUND_REFERENCE = 1,
   REFERENCE_MODE_SELECT = 2,
-  REFERENCE_MODES       = 3,
+  REFERENCE_MODES = 3,
 } REFERENCE_MODE;
 
 typedef enum {
@@ -104,9 +104,9 @@ typedef struct {
 } RefCntBuffer;
 
 typedef struct BufferPool {
-  // Protect BufferPool from being accessed by several FrameWorkers at
-  // the same time during frame parallel decode.
-  // TODO(hkuang): Try to use atomic variable instead of locking the whole pool.
+// Protect BufferPool from being accessed by several FrameWorkers at
+// the same time during frame parallel decode.
+// TODO(hkuang): Try to use atomic variable instead of locking the whole pool.
 #if CONFIG_MULTITHREAD
   pthread_mutex_t pool_mutex;
 #endif
@@ -124,7 +124,7 @@ typedef struct BufferPool {
 } BufferPool;
 
 typedef struct VP10Common {
-  struct vpx_internal_error_info  error;
+  struct vpx_internal_error_info error;
   vpx_color_space_t color_space;
   int color_range;
   int width;
@@ -169,7 +169,7 @@ typedef struct VP10Common {
   YV12_BUFFER_CONFIG tmp_loop_buf;
 #endif  // CONFIG_LOOP_RESTORATION
 
-  FRAME_TYPE last_frame_type;  /* last frame's frame type for motion search.*/
+  FRAME_TYPE last_frame_type; /* last frame's frame type for motion search.*/
 #if CONFIG_EXT_REFS
   // frame type of the frame before last frame
   FRAME_TYPE last2_frame_type;
@@ -266,14 +266,14 @@ typedef struct VP10Common {
   // a frame decode
   REFRESH_FRAME_CONTEXT_MODE refresh_frame_context;
 
-  int ref_frame_sign_bias[TOTAL_REFS_PER_FRAME];    /* Two state 0, 1 */
+  int ref_frame_sign_bias[TOTAL_REFS_PER_FRAME]; /* Two state 0, 1 */
 
   struct loopfilter lf;
   struct segmentation seg;
 
   int frame_parallel_decode;  // frame-based threading.
 
-  // Context probabilities for reference frame prediction
+// Context probabilities for reference frame prediction
 #if CONFIG_EXT_REFS
   MV_REFERENCE_FRAME comp_fwd_ref[FWD_REFS];
   MV_REFERENCE_FRAME comp_bwd_ref[BWD_REFS];
@@ -283,9 +283,9 @@ typedef struct VP10Common {
 #endif  // CONFIG_EXT_REFS
   REFERENCE_MODE reference_mode;
 
-  FRAME_CONTEXT *fc;  /* this frame entropy */
-  FRAME_CONTEXT *frame_contexts;   // FRAME_CONTEXTS
-  unsigned int  frame_context_idx; /* Context to use/update */
+  FRAME_CONTEXT *fc;              /* this frame entropy */
+  FRAME_CONTEXT *frame_contexts;  // FRAME_CONTEXTS
+  unsigned int frame_context_idx; /* Context to use/update */
   FRAME_COUNTS counts;
 
 #if CONFIG_ENTROPY
@@ -345,9 +345,9 @@ typedef struct VP10Common {
   Global_Motion_Params global_motion[TOTAL_REFS_PER_FRAME];
 #endif
 
-  BLOCK_SIZE sb_size;   // Size of the superblock used for this frame
-  int mib_size;         // Size of the superblock in units of MI blocks
-  int mib_size_log2;    // Log 2 of above.
+  BLOCK_SIZE sb_size;  // Size of the superblock used for this frame
+  int mib_size;        // Size of the superblock in units of MI blocks
+  int mib_size_log2;   // Log 2 of above.
 } VP10_COMMON;
 
 // TODO(hkuang): Don't need to lock the whole pool after implementing atomic
@@ -369,10 +369,8 @@ static void unlock_buffer_pool(BufferPool *const pool) {
 }
 
 static INLINE YV12_BUFFER_CONFIG *get_ref_frame(VP10_COMMON *cm, int index) {
-  if (index < 0 || index >= REF_FRAMES)
-    return NULL;
-  if (cm->ref_frame_map[index] < 0)
-    return NULL;
+  if (index < 0 || index >= REF_FRAMES) return NULL;
+  if (cm->ref_frame_map[index] < 0) return NULL;
   assert(cm->ref_frame_map[index] < FRAME_BUFFERS);
   return &cm->buffer_pool->frame_bufs[cm->ref_frame_map[index]].buf;
 }
@@ -388,8 +386,7 @@ static INLINE int get_free_fb(VP10_COMMON *cm) {
 
   lock_buffer_pool(cm->buffer_pool);
   for (i = 0; i < FRAME_BUFFERS; ++i)
-    if (frame_bufs[i].ref_count == 0)
-      break;
+    if (frame_bufs[i].ref_count == 0) break;
 
   if (i != FRAME_BUFFERS) {
     frame_bufs[i].ref_count = 1;
@@ -426,7 +423,7 @@ static INLINE int frame_is_intra_only(const VP10_COMMON *const cm) {
 }
 
 static INLINE void vp10_init_macroblockd(VP10_COMMON *cm, MACROBLOCKD *xd,
-                                        tran_low_t *dqcoeff) {
+                                         tran_low_t *dqcoeff) {
   int i;
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     xd->plane[i].dqcoeff = dqcoeff;
@@ -472,17 +469,16 @@ static INLINE int calc_mi_size(int len) {
 }
 
 static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
-                                  int mi_row, int bh,
-                                  int mi_col, int bw,
+                                  int mi_row, int bh, int mi_col, int bw,
                                   int mi_rows, int mi_cols) {
-  xd->mb_to_top_edge    = -((mi_row * MI_SIZE) * 8);
+  xd->mb_to_top_edge = -((mi_row * MI_SIZE) * 8);
   xd->mb_to_bottom_edge = ((mi_rows - bh - mi_row) * MI_SIZE) * 8;
-  xd->mb_to_left_edge   = -((mi_col * MI_SIZE) * 8);
-  xd->mb_to_right_edge  = ((mi_cols - bw - mi_col) * MI_SIZE) * 8;
+  xd->mb_to_left_edge = -((mi_col * MI_SIZE) * 8);
+  xd->mb_to_right_edge = ((mi_cols - bw - mi_col) * MI_SIZE) * 8;
 
   // Are edges available for intra prediction?
-  xd->up_available    = (mi_row > tile->mi_row_start);
-  xd->left_available  = (mi_col > tile->mi_col_start);
+  xd->up_available = (mi_row > tile->mi_row_start);
+  xd->left_available = (mi_col > tile->mi_col_start);
   if (xd->up_available) {
     xd->above_mi = xd->mi[-xd->mi_stride];
     // above_mi may be NULL in encoder's first pass.
@@ -506,12 +502,10 @@ static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
 #if CONFIG_REF_MV
   xd->is_sec_rect = 0;
   if (xd->n8_w < xd->n8_h)
-    if (mi_col & (xd->n8_h - 1))
-      xd->is_sec_rect = 1;
+    if (mi_col & (xd->n8_h - 1)) xd->is_sec_rect = 1;
 
   if (xd->n8_w > xd->n8_h)
-    if (mi_row & (xd->n8_w - 1))
-      xd->is_sec_rect = 1;
+    if (mi_row & (xd->n8_w - 1)) xd->is_sec_rect = 1;
 #endif
 }
 
@@ -525,13 +519,12 @@ static INLINE const vpx_prob *get_y_mode_probs(const VP10_COMMON *cm,
   return cm->kf_y_prob[above][left];
 }
 
-static INLINE void update_partition_context(MACROBLOCKD *xd,
-                                            int mi_row, int mi_col,
-                                            BLOCK_SIZE subsize,
+static INLINE void update_partition_context(MACROBLOCKD *xd, int mi_row,
+                                            int mi_col, BLOCK_SIZE subsize,
                                             BLOCK_SIZE bsize) {
   PARTITION_CONTEXT *const above_ctx = xd->above_seg_context + mi_col;
   PARTITION_CONTEXT *const left_ctx =
-    xd->left_seg_context + (mi_row & MAX_MIB_MASK);
+      xd->left_seg_context + (mi_row & MAX_MIB_MASK);
 
 #if CONFIG_EXT_PARTITION_TYPES
   const int bw = num_8x8_blocks_wide_lookup[bsize];
@@ -551,9 +544,8 @@ static INLINE void update_partition_context(MACROBLOCKD *xd,
 }
 
 #if CONFIG_EXT_PARTITION_TYPES
-static INLINE void update_ext_partition_context(MACROBLOCKD *xd,
-                                                int mi_row, int mi_col,
-                                                BLOCK_SIZE subsize,
+static INLINE void update_ext_partition_context(MACROBLOCKD *xd, int mi_row,
+                                                int mi_col, BLOCK_SIZE subsize,
                                                 BLOCK_SIZE bsize,
                                                 PARTITION_TYPE partition) {
   if (bsize >= BLOCK_8X8) {
@@ -561,8 +553,7 @@ static INLINE void update_ext_partition_context(MACROBLOCKD *xd,
     BLOCK_SIZE bsize2 = get_subsize(bsize, PARTITION_SPLIT);
     switch (partition) {
       case PARTITION_SPLIT:
-        if (bsize != BLOCK_8X8)
-          break;
+        if (bsize != BLOCK_8X8) break;
       case PARTITION_NONE:
       case PARTITION_HORZ:
       case PARTITION_VERT:
@@ -584,21 +575,19 @@ static INLINE void update_ext_partition_context(MACROBLOCKD *xd,
         update_partition_context(xd, mi_row, mi_col, subsize, subsize);
         update_partition_context(xd, mi_row, mi_col + hbs, bsize2, subsize);
         break;
-      default:
-        assert(0 && "Invalid partition type");
+      default: assert(0 && "Invalid partition type");
     }
   }
 }
 #endif  // CONFIG_EXT_PARTITION_TYPES
 
-static INLINE int partition_plane_context(const MACROBLOCKD *xd,
-                                          int mi_row, int mi_col,
-                                          BLOCK_SIZE bsize) {
+static INLINE int partition_plane_context(const MACROBLOCKD *xd, int mi_row,
+                                          int mi_col, BLOCK_SIZE bsize) {
   const PARTITION_CONTEXT *above_ctx = xd->above_seg_context + mi_col;
   const PARTITION_CONTEXT *left_ctx =
-    xd->left_seg_context + (mi_row & MAX_MIB_MASK);
+      xd->left_seg_context + (mi_row & MAX_MIB_MASK);
   const int bsl = mi_width_log2_lookup[bsize];
-  int above = (*above_ctx >> bsl) & 1 , left = (*left_ctx >> bsl) & 1;
+  int above = (*above_ctx >> bsl) & 1, left = (*left_ctx >> bsl) & 1;
 
   assert(b_width_log2_lookup[bsize] == b_height_log2_lookup[bsize]);
   assert(bsl >= 0);
@@ -607,7 +596,7 @@ static INLINE int partition_plane_context(const MACROBLOCKD *xd,
 }
 
 static INLINE void vp10_zero_above_context(VP10_COMMON *const cm,
-                             int mi_col_start, int mi_col_end) {
+                                           int mi_col_start, int mi_col_end) {
   const int width = mi_col_end - mi_col_start;
 
   const int offset_y = 2 * mi_col_start;
@@ -635,12 +624,10 @@ static INLINE void vp10_zero_left_context(MACROBLOCKD *const xd) {
 }
 
 #if CONFIG_VAR_TX
-static INLINE void set_txfm_ctx(TXFM_CONTEXT *txfm_ctx,
-                                TX_SIZE tx_size,
+static INLINE void set_txfm_ctx(TXFM_CONTEXT *txfm_ctx, TX_SIZE tx_size,
                                 int len) {
   int i;
-  for (i = 0; i < len; ++i)
-    txfm_ctx[i] = tx_size;
+  for (i = 0; i < len; ++i) txfm_ctx[i] = tx_size;
 }
 
 static INLINE void txfm_partition_update(TXFM_CONTEXT *above_ctx,
@@ -665,8 +652,7 @@ static INLINE int txfm_partition_context(TXFM_CONTEXT *above_ctx,
 #endif
 
 static INLINE PARTITION_TYPE get_partition(const VP10_COMMON *const cm,
-                                           const int mi_row,
-                                           const int mi_col,
+                                           const int mi_row, const int mi_col,
                                            const BLOCK_SIZE bsize) {
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols) {
     return PARTITION_INVALID;
@@ -683,10 +669,8 @@ static INLINE PARTITION_TYPE get_partition(const VP10_COMMON *const cm,
 
     assert(cm->mi_grid_visible[offset] == &cm->mi[offset]);
 
-    if (partition != PARTITION_NONE &&
-        bsize > BLOCK_8X8 &&
-        mi_row + hbs < cm->mi_rows &&
-        mi_col + hbs < cm->mi_cols) {
+    if (partition != PARTITION_NONE && bsize > BLOCK_8X8 &&
+        mi_row + hbs < cm->mi_rows && mi_col + hbs < cm->mi_cols) {
       const BLOCK_SIZE h = get_subsize(bsize, PARTITION_HORZ_A);
       const BLOCK_SIZE v = get_subsize(bsize, PARTITION_VERT_A);
       const MB_MODE_INFO *const mbmi_right = &mi[hbs]->mbmi;

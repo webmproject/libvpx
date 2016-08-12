@@ -16,26 +16,25 @@
 #include "vpx_dsp/vpx_filter.h"
 #include "vpx_ports/mem.h"
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define EIGHTTAP_REGULAR    0
-#define EIGHTTAP_SMOOTH     1
-#define MULTITAP_SHARP      2
+#define EIGHTTAP_REGULAR 0
+#define EIGHTTAP_SMOOTH 1
+#define MULTITAP_SHARP 2
 
 #if CONFIG_EXT_INTERP
-#define EIGHTTAP_SMOOTH2    3
-#define MULTITAP_SHARP2     4
+#define EIGHTTAP_SMOOTH2 3
+#define MULTITAP_SHARP2 4
 
-#define MAX_SUBPEL_TAPS    12
+#define MAX_SUBPEL_TAPS 12
 
-#define SUPPORT_NONINTERPOLATING_FILTERS 0  /* turn it on for experimentation */
-#define SWITCHABLE_FILTERS  5 /* Number of switchable filters */
+#define SUPPORT_NONINTERPOLATING_FILTERS 0 /* turn on for experimentation */
+#define SWITCHABLE_FILTERS 5               /* Number of switchable filters */
 #else
-#define SWITCHABLE_FILTERS  3 /* Number of switchable filters */
-#endif  // CONFIG_EXT_INTERP
+#define SWITCHABLE_FILTERS 3 /* Number of switchable filters */
+#endif                       // CONFIG_EXT_INTERP
 
 #define USE_TEMPORALFILTER_12TAP 1
 #if USE_TEMPORALFILTER_12TAP
@@ -45,12 +44,12 @@ extern "C" {
 // The codec can operate in four possible inter prediction filter mode:
 // 8-tap, 8-tap-smooth, 8-tap-sharp, and switching between the three.
 
-#define BILINEAR            (SWITCHABLE_FILTERS)
-#define SWITCHABLE          (SWITCHABLE_FILTERS + 1)  /* the last one */
+#define BILINEAR (SWITCHABLE_FILTERS)
+#define SWITCHABLE (SWITCHABLE_FILTERS + 1) /* the last one */
 #if CONFIG_DUAL_FILTER
 #define SWITCHABLE_FILTER_CONTEXTS ((SWITCHABLE_FILTERS + 1) * 4)
-#define INTER_FILTER_COMP_OFFSET   (SWITCHABLE_FILTERS + 1)
-#define INTER_FILTER_DIR_OFFSET    ((SWITCHABLE_FILTERS + 1) * 2)
+#define INTER_FILTER_COMP_OFFSET (SWITCHABLE_FILTERS + 1)
+#define INTER_FILTER_DIR_OFFSET ((SWITCHABLE_FILTERS + 1) * 2)
 #else
 #define SWITCHABLE_FILTER_CONTEXTS (SWITCHABLE_FILTERS + 1)
 #endif
@@ -70,7 +69,7 @@ extern const InterpKernel *vp10_intra_filter_kernels[INTRA_FILTERS];
 #endif  // CONFIG_EXT_INTRA
 
 typedef struct InterpFilterParams {
-  const int16_t* filter_ptr;
+  const int16_t *filter_ptr;
   uint16_t taps;
   uint16_t subpel_shifts;
 } InterpFilterParams;
@@ -78,10 +77,9 @@ typedef struct InterpFilterParams {
 InterpFilterParams vp10_get_interp_filter_params(
     const INTERP_FILTER interp_filter);
 
-const int16_t *vp10_get_interp_filter_kernel(
-    const INTERP_FILTER interp_filter);
+const int16_t *vp10_get_interp_filter_kernel(const INTERP_FILTER interp_filter);
 
-static INLINE const int16_t* vp10_get_interp_filter_subpel_kernel(
+static INLINE const int16_t *vp10_get_interp_filter_subpel_kernel(
     const InterpFilterParams filter_params, const int subpel) {
   return filter_params.filter_ptr + filter_params.taps * subpel;
 }
@@ -96,8 +94,8 @@ static INLINE int vp10_is_interpolating_filter(
 extern const int8_t sub_pel_filters_temporalfilter_12_signal_dir[15][2][16];
 extern const int8_t sub_pel_filters_temporalfilter_12_ver_signal_dir[15][6][16];
 #if CONFIG_VP9_HIGHBITDEPTH
-extern const
-int16_t sub_pel_filters_temporalfilter_12_highbd_ver_signal_dir[15][6][8];
+extern const int16_t
+    sub_pel_filters_temporalfilter_12_highbd_ver_signal_dir[15][6][8];
 #endif
 #endif
 
@@ -117,8 +115,8 @@ typedef const int8_t (*SubpelFilterCoeffs)[16];
 typedef const int16_t (*HbdSubpelFilterCoeffs)[8];
 #endif
 
-SubpelFilterCoeffs vp10_get_subpel_filter_signal_dir(
-    const InterpFilterParams p, int index);
+SubpelFilterCoeffs vp10_get_subpel_filter_signal_dir(const InterpFilterParams p,
+                                                     int index);
 
 SubpelFilterCoeffs vp10_get_subpel_filter_ver_signal_dir(
     const InterpFilterParams p, int index);

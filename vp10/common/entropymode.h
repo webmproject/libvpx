@@ -25,9 +25,9 @@ extern "C" {
 
 #define TX_SIZE_CONTEXTS 2
 
-#define INTER_OFFSET(mode) ((mode) - NEARESTMV)
+#define INTER_OFFSET(mode) ((mode)-NEARESTMV)
 #if CONFIG_EXT_INTER
-#define INTER_COMPOUND_OFFSET(mode) ((mode) - NEAREST_NEARESTMV)
+#define INTER_COMPOUND_OFFSET(mode) ((mode)-NEAREST_NEARESTMV)
 #endif  // CONFIG_EXT_INTER
 
 #define PALETTE_COLOR_CONTEXTS 16
@@ -56,8 +56,9 @@ typedef struct frame_contexts {
 #if CONFIG_ANS
   coeff_cdf_model coef_cdfs[TX_SIZES][PLANE_TYPES];
 #endif
-  vpx_prob switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
-                                 [SWITCHABLE_FILTERS - 1];
+  vpx_prob
+      switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS -
+                                                         1];
 
 #if CONFIG_REF_MV
   vpx_prob newmv_prob[NEWMV_MODE_CONTEXTS];
@@ -72,8 +73,8 @@ typedef struct frame_contexts {
 
   vpx_prob inter_mode_probs[INTER_MODE_CONTEXTS][INTER_MODES - 1];
 #if CONFIG_EXT_INTER
-  vpx_prob inter_compound_mode_probs[INTER_MODE_CONTEXTS]
-                                    [INTER_COMPOUND_MODES - 1];
+  vpx_prob
+      inter_compound_mode_probs[INTER_MODE_CONTEXTS][INTER_COMPOUND_MODES - 1];
   vpx_prob interintra_prob[BLOCK_SIZE_GROUPS];
   vpx_prob interintra_mode_prob[BLOCK_SIZE_GROUPS][INTERINTRA_MODES - 1];
   vpx_prob wedge_interintra_prob[BLOCK_SIZES];
@@ -84,12 +85,12 @@ typedef struct frame_contexts {
 #endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
   vpx_prob intra_inter_prob[INTRA_INTER_CONTEXTS];
   vpx_prob comp_inter_prob[COMP_INTER_CONTEXTS];
-  vpx_prob single_ref_prob[REF_CONTEXTS][SINGLE_REFS-1];
+  vpx_prob single_ref_prob[REF_CONTEXTS][SINGLE_REFS - 1];
 #if CONFIG_EXT_REFS
-  vpx_prob comp_ref_prob[REF_CONTEXTS][FWD_REFS-1];
-  vpx_prob comp_bwdref_prob[REF_CONTEXTS][BWD_REFS-1];
+  vpx_prob comp_ref_prob[REF_CONTEXTS][FWD_REFS - 1];
+  vpx_prob comp_bwdref_prob[REF_CONTEXTS][BWD_REFS - 1];
 #else
-  vpx_prob comp_ref_prob[REF_CONTEXTS][COMP_REFS-1];
+  vpx_prob comp_ref_prob[REF_CONTEXTS][COMP_REFS - 1];
 #endif  // CONFIG_EXT_REFS
   vpx_prob tx_size_probs[TX_SIZES - 1][TX_SIZE_CONTEXTS][TX_SIZES - 1];
 #if CONFIG_VAR_TX
@@ -104,8 +105,9 @@ typedef struct frame_contexts {
   int initialized;
 #if CONFIG_EXT_TX
   vpx_prob inter_ext_tx_prob[EXT_TX_SETS_INTER][EXT_TX_SIZES][TX_TYPES - 1];
-  vpx_prob intra_ext_tx_prob[EXT_TX_SETS_INTRA][EXT_TX_SIZES][INTRA_MODES]
-                            [TX_TYPES - 1];
+  vpx_prob
+      intra_ext_tx_prob[EXT_TX_SETS_INTRA][EXT_TX_SIZES][INTRA_MODES][TX_TYPES -
+                                                                      1];
 #else
   vpx_prob intra_ext_tx_prob[EXT_TX_SIZES][TX_TYPES][TX_TYPES - 1];
   vpx_prob inter_ext_tx_prob[EXT_TX_SIZES][TX_TYPES - 1];
@@ -135,10 +137,10 @@ typedef struct FRAME_COUNTS {
   unsigned int partition[PARTITION_CONTEXTS][PARTITION_TYPES];
 #endif
   vp10_coeff_count_model coef[TX_SIZES][PLANE_TYPES];
-  unsigned int eob_branch[TX_SIZES][PLANE_TYPES][REF_TYPES]
-                         [COEF_BANDS][COEFF_CONTEXTS];
-  unsigned int switchable_interp[SWITCHABLE_FILTER_CONTEXTS]
-                                [SWITCHABLE_FILTERS];
+  unsigned int
+      eob_branch[TX_SIZES][PLANE_TYPES][REF_TYPES][COEF_BANDS][COEFF_CONTEXTS];
+  unsigned int
+      switchable_interp[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];
 #if CONFIG_REF_MV
   unsigned int newmv_mode[NEWMV_MODE_CONTEXTS][2];
   unsigned int zeromv_mode[ZEROMV_MODE_CONTEXTS][2];
@@ -162,12 +164,12 @@ typedef struct FRAME_COUNTS {
 #endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
   unsigned int intra_inter[INTRA_INTER_CONTEXTS][2];
   unsigned int comp_inter[COMP_INTER_CONTEXTS][2];
-  unsigned int single_ref[REF_CONTEXTS][SINGLE_REFS-1][2];
+  unsigned int single_ref[REF_CONTEXTS][SINGLE_REFS - 1][2];
 #if CONFIG_EXT_REFS
-  unsigned int comp_ref[REF_CONTEXTS][FWD_REFS-1][2];
-  unsigned int comp_bwdref[REF_CONTEXTS][BWD_REFS-1][2];
+  unsigned int comp_ref[REF_CONTEXTS][FWD_REFS - 1][2];
+  unsigned int comp_bwdref[REF_CONTEXTS][BWD_REFS - 1][2];
 #else
-  unsigned int comp_ref[REF_CONTEXTS][COMP_REFS-1][2];
+  unsigned int comp_ref[REF_CONTEXTS][COMP_REFS - 1][2];
 #endif  // CONFIG_EXT_REFS
   unsigned int tx_size_totals[TX_SIZES];
   unsigned int tx_size[TX_SIZES - 1][TX_SIZE_CONTEXTS][TX_SIZES];
@@ -182,8 +184,8 @@ typedef struct FRAME_COUNTS {
 #endif
 #if CONFIG_EXT_TX
   unsigned int inter_ext_tx[EXT_TX_SETS_INTER][EXT_TX_SIZES][TX_TYPES];
-  unsigned int intra_ext_tx[EXT_TX_SETS_INTRA][EXT_TX_SIZES][INTRA_MODES]
-                           [TX_TYPES];
+  unsigned int
+      intra_ext_tx[EXT_TX_SETS_INTRA][EXT_TX_SIZES][INTRA_MODES][TX_TYPES];
 #else
   unsigned int intra_ext_tx[EXT_TX_SIZES][TX_TYPES][TX_TYPES];
   unsigned int inter_ext_tx[EXT_TX_SIZES][TX_TYPES];
@@ -199,40 +201,40 @@ typedef struct FRAME_COUNTS {
 #endif  // CONFIG_EXT_INTRA
 } FRAME_COUNTS;
 
-extern const vpx_prob vp10_kf_y_mode_prob[INTRA_MODES][INTRA_MODES]
-                                        [INTRA_MODES - 1];
 extern const vpx_prob
-vp10_default_palette_y_mode_prob[PALETTE_BLOCK_SIZES][PALETTE_Y_MODE_CONTEXTS];
+    vp10_kf_y_mode_prob[INTRA_MODES][INTRA_MODES][INTRA_MODES - 1];
+extern const vpx_prob vp10_default_palette_y_mode_prob[PALETTE_BLOCK_SIZES]
+                                                      [PALETTE_Y_MODE_CONTEXTS];
 extern const vpx_prob vp10_default_palette_uv_mode_prob[2];
 extern const vpx_prob
-vp10_default_palette_y_size_prob[PALETTE_BLOCK_SIZES][PALETTE_SIZES - 1];
+    vp10_default_palette_y_size_prob[PALETTE_BLOCK_SIZES][PALETTE_SIZES - 1];
 extern const vpx_prob
-vp10_default_palette_uv_size_prob[PALETTE_BLOCK_SIZES][PALETTE_SIZES - 1];
+    vp10_default_palette_uv_size_prob[PALETTE_BLOCK_SIZES][PALETTE_SIZES - 1];
 extern const vpx_prob vp10_default_palette_y_color_prob
-[PALETTE_MAX_SIZE - 1][PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1];
+    [PALETTE_MAX_SIZE - 1][PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1];
 extern const vpx_prob vp10_default_palette_uv_color_prob
-[PALETTE_MAX_SIZE - 1][PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1];
+    [PALETTE_MAX_SIZE - 1][PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1];
 
 extern const vpx_tree_index vp10_intra_mode_tree[TREE_SIZE(INTRA_MODES)];
 extern const vpx_tree_index vp10_inter_mode_tree[TREE_SIZE(INTER_MODES)];
 #if CONFIG_EXT_INTER
-extern const vpx_tree_index vp10_interintra_mode_tree
-                            [TREE_SIZE(INTERINTRA_MODES)];
-extern const vpx_tree_index vp10_inter_compound_mode_tree
-                            [TREE_SIZE(INTER_COMPOUND_MODES)];
+extern const vpx_tree_index
+    vp10_interintra_mode_tree[TREE_SIZE(INTERINTRA_MODES)];
+extern const vpx_tree_index
+    vp10_inter_compound_mode_tree[TREE_SIZE(INTER_COMPOUND_MODES)];
 #endif  // CONFIG_EXT_INTER
 extern const vpx_tree_index vp10_partition_tree[TREE_SIZE(PARTITION_TYPES)];
 #if CONFIG_EXT_PARTITION_TYPES
-extern const vpx_tree_index vp10_ext_partition_tree
-                                [TREE_SIZE(EXT_PARTITION_TYPES)];
+extern const vpx_tree_index
+    vp10_ext_partition_tree[TREE_SIZE(EXT_PARTITION_TYPES)];
 #endif
-extern const vpx_tree_index vp10_switchable_interp_tree
-                                [TREE_SIZE(SWITCHABLE_FILTERS)];
+extern const vpx_tree_index
+    vp10_switchable_interp_tree[TREE_SIZE(SWITCHABLE_FILTERS)];
 extern const vpx_tree_index vp10_palette_size_tree[TREE_SIZE(PALETTE_SIZES)];
 extern const vpx_tree_index
-vp10_palette_color_tree[PALETTE_MAX_SIZE - 1][TREE_SIZE(PALETTE_COLORS)];
+    vp10_palette_color_tree[PALETTE_MAX_SIZE - 1][TREE_SIZE(PALETTE_COLORS)];
 extern const vpx_tree_index
-vp10_tx_size_tree[TX_SIZES - 1][TREE_SIZE(TX_SIZES)];
+    vp10_tx_size_tree[TX_SIZES - 1][TREE_SIZE(TX_SIZES)];
 #if CONFIG_EXT_INTRA
 extern const vpx_tree_index vp10_intra_filter_tree[TREE_SIZE(INTRA_FILTERS)];
 #endif  // CONFIG_EXT_INTRA
@@ -242,8 +244,7 @@ extern const vpx_tree_index
 extern const vpx_tree_index
     vp10_ext_tx_intra_tree[EXT_TX_SETS_INTRA][TREE_SIZE(TX_TYPES)];
 #else
-extern const vpx_tree_index
-    vp10_ext_tx_tree[TREE_SIZE(TX_TYPES)];
+extern const vpx_tree_index vp10_ext_tx_tree[TREE_SIZE(TX_TYPES)];
 #endif  // CONFIG_EXT_TX
 #if CONFIG_OBMC || CONFIG_WARPED_MOTION
 extern const vpx_tree_index vp10_motvar_tree[TREE_SIZE(MOTION_VARIATIONS)];
@@ -263,8 +264,8 @@ static INLINE int vp10_ceil_log2(int n) {
   return i;
 }
 
-int vp10_get_palette_color_context(const uint8_t *color_map, int cols,
-                                   int r, int c, int n, int *color_order);
+int vp10_get_palette_color_context(const uint8_t *color_map, int cols, int r,
+                                   int c, int n, int *color_order);
 
 #ifdef __cplusplus
 }  // extern "C"

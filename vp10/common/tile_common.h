@@ -24,14 +24,14 @@ typedef struct TileInfo {
 
 // initializes 'tile->mi_(row|col)_(start|end)' for (row, col) based on
 // 'cm->log2_tile_(rows|cols)' & 'cm->mi_(rows|cols)'
-void vp10_tile_init(TileInfo *tile, const struct VP10Common *cm,
-                   int row, int col);
+void vp10_tile_init(TileInfo *tile, const struct VP10Common *cm, int row,
+                    int col);
 
 void vp10_tile_set_row(TileInfo *tile, const struct VP10Common *cm, int row);
 void vp10_tile_set_col(TileInfo *tile, const struct VP10Common *cm, int col);
 
-void vp10_get_tile_n_bits(const int mi_cols,
-                          int *min_log2_tile_cols, int *max_log2_tile_cols);
+void vp10_get_tile_n_bits(const int mi_cols, int *min_log2_tile_cols,
+                          int *max_log2_tile_cols);
 
 #ifdef __cplusplus
 }  // extern "C"
