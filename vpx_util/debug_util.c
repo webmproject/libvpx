@@ -33,7 +33,7 @@ int bitstream_queue_get_write(void) { return queue_w; }
 
 int bitstream_queue_get_read(void) { return queue_r; }
 
-void bitstream_queue_pop(int* result, int* prob) {
+void bitstream_queue_pop(int *result, int *prob) {
   if (!skip_r) {
     if (queue_w == queue_r) {
       printf("buffer underflow queue_w %d queue_r %d\n", queue_w, queue_r);
