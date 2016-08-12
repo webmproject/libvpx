@@ -452,12 +452,12 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     highbd_fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
     if (xform_quant_idx != VP10_XFORM_QUANT_SKIP_QUANT) {
-      if (x->skip_block) {
-        vp10_quantize_skip(tx2d_size, qcoeff, dqcoeff, eob);
-      } else {
+      if (LIKELY(!x->skip_block)) {
         quant_func_list[xform_quant_idx][QUANT_FUNC_HIGHBD](
             coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob,
             scan_order, &qparam);
+      } else {
+        vp10_quantize_skip(tx2d_size, qcoeff, dqcoeff, eob);
       }
     }
     return;
@@ -466,12 +466,12 @@ void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
 
   fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
   if (xform_quant_idx != VP10_XFORM_QUANT_SKIP_QUANT) {
-    if (x->skip_block) {
-      vp10_quantize_skip(tx2d_size, qcoeff, dqcoeff, eob);
-    } else {
+    if (LIKELY(!x->skip_block)) {
       quant_func_list[xform_quant_idx][QUANT_FUNC_LOWBD](
           coeff, tx2d_size, p, qcoeff, pd, dqcoeff, eob,
           scan_order, &qparam);
+    } else {
+      vp10_quantize_skip(tx2d_size, qcoeff, dqcoeff, eob);
     }
   }
 }
