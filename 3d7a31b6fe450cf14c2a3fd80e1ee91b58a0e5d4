@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ec93547_8e045bb5",
+        "filename": "vp10/common/warped_motion.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 701,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-12T00:11:50Z",
+      "side": 1,
+      "message": "variables are typically lower with \u0027_\u0027 except for kConstants:\n\nhttps://google.github.io/styleguide/cppguide.html#Variable_Names\n\nthat param can be const too",
+      "revId": "3d7a31b6fe450cf14c2a3fd80e1ee91b58a0e5d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ec93547_4ee75313",
+        "filename": "vp10/common/warped_motion.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 707,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-12T00:11:50Z",
+      "side": 1,
+      "message": "this returns a long, you\u0027ll want to cast to the desired type to avoid conversion warnings with certain toolchains",
+      "revId": "3d7a31b6fe450cf14c2a3fd80e1ee91b58a0e5d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ec93547_2ecd278c",
+        "filename": "vp10/common/warped_motion.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 722,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-12T00:11:50Z",
+      "side": 1,
+      "message": "if the type passed is an enum and all cases are covered you can leave off the default, as you\u0027d then get a warning should a new value be added:\n\nhttps://google.github.io/styleguide/cppguide.html#Loops_and_Switch_Statements",
+      "revId": "3d7a31b6fe450cf14c2a3fd80e1ee91b58a0e5d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ec93547_cea82389",
+        "filename": "vp10/common/warped_motion.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-12T00:11:50Z",
+      "side": 1,
+      "message": "try to list prototypes in the order they appear in the c-file",
+      "revId": "3d7a31b6fe450cf14c2a3fd80e1ee91b58a0e5d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ec93547_6ea1ef9b",
+        "filename": "vp10/common/warped_motion.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-12T00:11:50Z",
+      "side": 1,
+      "message": "join this and the line above",
+      "revId": "3d7a31b6fe450cf14c2a3fd80e1ee91b58a0e5d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
