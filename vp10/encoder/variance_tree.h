@@ -63,8 +63,10 @@ static INLINE void fill_variance(int64_t s2, int64_t s, int c, var *v) {
   v->sum_square_error = s2;
   v->sum_error = s;
   v->log2_count = c;
-  v->variance = (int)(256 * (v->sum_square_error -
-      ((v->sum_error * v->sum_error) >> v->log2_count)) >> v->log2_count);
+  v->variance =
+      (int)(256 * (v->sum_square_error -
+                   ((v->sum_error * v->sum_error) >> v->log2_count)) >>
+            v->log2_count);
 }
 
 static INLINE void sum_2_variances(const var *a, const var *b, var *r) {
@@ -74,20 +76,15 @@ static INLINE void sum_2_variances(const var *a, const var *b, var *r) {
 }
 
 static INLINE void fill_variance_node(VAR_TREE *vt) {
-  sum_2_variances(&vt->split[0]->variances.none,
-                  &vt->split[1]->variances.none,
+  sum_2_variances(&vt->split[0]->variances.none, &vt->split[1]->variances.none,
                   &vt->variances.horz[0]);
-  sum_2_variances(&vt->split[2]->variances.none,
-                  &vt->split[3]->variances.none,
+  sum_2_variances(&vt->split[2]->variances.none, &vt->split[3]->variances.none,
                   &vt->variances.horz[1]);
-  sum_2_variances(&vt->split[0]->variances.none,
-                  &vt->split[2]->variances.none,
+  sum_2_variances(&vt->split[0]->variances.none, &vt->split[2]->variances.none,
                   &vt->variances.vert[0]);
-  sum_2_variances(&vt->split[1]->variances.none,
-                  &vt->split[3]->variances.none,
+  sum_2_variances(&vt->split[1]->variances.none, &vt->split[3]->variances.none,
                   &vt->variances.vert[1]);
-  sum_2_variances(&vt->variances.vert[0],
-                  &vt->variances.vert[1],
+  sum_2_variances(&vt->variances.vert[0], &vt->variances.vert[1],
                   &vt->variances.none);
 }
 

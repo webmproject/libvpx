@@ -18,28 +18,24 @@ extern "C" {
 #endif
 
 enum {
-  INTRA_ALL       = (1 << DC_PRED) |
-                    (1 << V_PRED) | (1 << H_PRED) |
-                    (1 << D45_PRED) | (1 << D135_PRED) |
-                    (1 << D117_PRED) | (1 << D153_PRED) |
-                    (1 << D207_PRED) | (1 << D63_PRED) |
-                    (1 << TM_PRED),
-  INTRA_DC        = (1 << DC_PRED),
-  INTRA_DC_TM     = (1 << DC_PRED) | (1 << TM_PRED),
-  INTRA_DC_H_V    = (1 << DC_PRED) | (1 << V_PRED) | (1 << H_PRED),
-  INTRA_DC_TM_H_V = (1 << DC_PRED) | (1 << TM_PRED) | (1 << V_PRED) |
-                    (1 << H_PRED)
+  INTRA_ALL = (1 << DC_PRED) | (1 << V_PRED) | (1 << H_PRED) | (1 << D45_PRED) |
+              (1 << D135_PRED) | (1 << D117_PRED) | (1 << D153_PRED) |
+              (1 << D207_PRED) | (1 << D63_PRED) | (1 << TM_PRED),
+  INTRA_DC = (1 << DC_PRED),
+  INTRA_DC_TM = (1 << DC_PRED) | (1 << TM_PRED),
+  INTRA_DC_H_V = (1 << DC_PRED) | (1 << V_PRED) | (1 << H_PRED),
+  INTRA_DC_TM_H_V =
+      (1 << DC_PRED) | (1 << TM_PRED) | (1 << V_PRED) | (1 << H_PRED)
 };
 
 #if CONFIG_EXT_INTER
 enum {
-  INTER_ALL =
-      (1 << NEARESTMV) | (1 << NEARMV) | (1 << ZEROMV) |
-      (1 << NEWMV) | (1 << NEWFROMNEARMV) |
-      (1 << NEAREST_NEARESTMV) | (1 << NEAR_NEARMV) | (1 << NEAREST_NEARMV) |
-      (1 << NEAR_NEARESTMV) | (1 << NEW_NEWMV) | (1 << NEAREST_NEWMV) |
-      (1 << NEAR_NEWMV) | (1 << NEW_NEARMV) | (1 << NEW_NEARESTMV) |
-      (1 << ZERO_ZEROMV),
+  INTER_ALL = (1 << NEARESTMV) | (1 << NEARMV) | (1 << ZEROMV) | (1 << NEWMV) |
+              (1 << NEWFROMNEARMV) | (1 << NEAREST_NEARESTMV) |
+              (1 << NEAR_NEARMV) | (1 << NEAREST_NEARMV) |
+              (1 << NEAR_NEARESTMV) | (1 << NEW_NEWMV) | (1 << NEAREST_NEWMV) |
+              (1 << NEAR_NEWMV) | (1 << NEW_NEARMV) | (1 << NEW_NEARESTMV) |
+              (1 << ZERO_ZEROMV),
   INTER_NEAREST = (1 << NEARESTMV) | (1 << NEAREST_NEARESTMV) |
                   (1 << NEAREST_NEARMV) | (1 << NEAR_NEARESTMV) |
                   (1 << NEW_NEARESTMV) | (1 << NEAREST_NEWMV),
@@ -55,20 +51,17 @@ enum {
   INTER_NEAREST_NEW_ZERO =
       (1 << NEARESTMV) | (1 << ZEROMV) | (1 << NEWMV) | (1 << NEWFROMNEARMV) |
       (1 << NEAREST_NEARESTMV) | (1 << ZERO_ZEROMV) | (1 << NEW_NEWMV) |
-      (1 << NEAREST_NEARMV) | (1 << NEAR_NEARESTMV) |
-      (1 << NEW_NEARESTMV) | (1 << NEAREST_NEWMV) |
-      (1 << NEW_NEARMV) | (1 << NEAR_NEWMV),
+      (1 << NEAREST_NEARMV) | (1 << NEAR_NEARESTMV) | (1 << NEW_NEARESTMV) |
+      (1 << NEAREST_NEWMV) | (1 << NEW_NEARMV) | (1 << NEAR_NEWMV),
   INTER_NEAREST_NEAR_NEW =
       (1 << NEARESTMV) | (1 << NEARMV) | (1 << NEWMV) | (1 << NEWFROMNEARMV) |
-      (1 << NEAREST_NEARESTMV) | (1 << NEW_NEWMV) |
-      (1 << NEAREST_NEARMV) | (1 << NEAR_NEARESTMV) |
-      (1 << NEW_NEARESTMV) | (1 << NEAREST_NEWMV) |
+      (1 << NEAREST_NEARESTMV) | (1 << NEW_NEWMV) | (1 << NEAREST_NEARMV) |
+      (1 << NEAR_NEARESTMV) | (1 << NEW_NEARESTMV) | (1 << NEAREST_NEWMV) |
       (1 << NEW_NEARMV) | (1 << NEAR_NEWMV) | (1 << NEAR_NEARMV),
   INTER_NEAREST_NEAR_ZERO =
       (1 << NEARESTMV) | (1 << NEARMV) | (1 << ZEROMV) |
-      (1 << NEAREST_NEARESTMV) | (1 << ZERO_ZEROMV) |
-      (1 << NEAREST_NEARMV) | (1 << NEAR_NEARESTMV) |
-      (1 << NEAREST_NEWMV) | (1 << NEW_NEARESTMV) |
+      (1 << NEAREST_NEARESTMV) | (1 << ZERO_ZEROMV) | (1 << NEAREST_NEARMV) |
+      (1 << NEAR_NEARESTMV) | (1 << NEAREST_NEWMV) | (1 << NEW_NEARESTMV) |
       (1 << NEW_NEARMV) | (1 << NEAR_NEWMV) | (1 << NEAR_NEARMV),
 };
 #else
@@ -84,20 +77,15 @@ enum {
 #endif  // CONFIG_EXT_INTER
 
 enum {
-  DISABLE_ALL_INTER_SPLIT   = (1 << THR_COMP_GA) |
-                              (1 << THR_COMP_LA) |
-                              (1 << THR_ALTR) |
-                              (1 << THR_GOLD) |
-                              (1 << THR_LAST),
+  DISABLE_ALL_INTER_SPLIT = (1 << THR_COMP_GA) | (1 << THR_COMP_LA) |
+                            (1 << THR_ALTR) | (1 << THR_GOLD) | (1 << THR_LAST),
 
-  DISABLE_ALL_SPLIT         = (1 << THR_INTRA) | DISABLE_ALL_INTER_SPLIT,
+  DISABLE_ALL_SPLIT = (1 << THR_INTRA) | DISABLE_ALL_INTER_SPLIT,
 
-  DISABLE_COMPOUND_SPLIT    = (1 << THR_COMP_GA) | (1 << THR_COMP_LA),
+  DISABLE_COMPOUND_SPLIT = (1 << THR_COMP_GA) | (1 << THR_COMP_LA),
 
-  LAST_AND_INTRA_SPLIT_ONLY = (1 << THR_COMP_GA) |
-                              (1 << THR_COMP_LA) |
-                              (1 << THR_ALTR) |
-                              (1 << THR_GOLD)
+  LAST_AND_INTRA_SPLIT_ONLY = (1 << THR_COMP_GA) | (1 << THR_COMP_LA) |
+                              (1 << THR_ALTR) | (1 << THR_GOLD)
 };
 
 typedef enum {

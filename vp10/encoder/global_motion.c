@@ -24,11 +24,11 @@ int compute_global_motion_feature_based(struct VP10_COMP *cpi,
                                         YV12_BUFFER_CONFIG *frm,
                                         YV12_BUFFER_CONFIG *ref,
                                         double inlier_prob, double *H) {
-  (void) cpi;
-  (void) type;
-  (void) frm;
-  (void) ref;
-  (void) inlier_prob;
-  (void) H;
+  (void)cpi;
+  (void)type;
+  (void)frm;
+  (void)ref;
+  (void)inlier_prob;
+  (void)H;
   return 0;
 }

@@ -27,10 +27,10 @@ extern "C" {
 #define ANS_METHOD_RANS 1
 
 struct buffered_ans_symbol {
-  uint8_t method;    // one of ANS_METHOD_UABS or ANS_METHOD_RANS
+  uint8_t method;  // one of ANS_METHOD_UABS or ANS_METHOD_RANS
   // TODO(aconverse): Should be possible to write this interms of start for ABS
   AnsP10 val_start;  // Boolean value for ABS, start in symbol cycle for Rans
-  AnsP10 prob;  // Probability of this symbol
+  AnsP10 prob;       // Probability of this symbol
 };
 
 struct BufAnsCoder {
@@ -51,8 +51,8 @@ static INLINE void buf_ans_write_reset(struct BufAnsCoder *const c) {
   c->offset = 0;
 }
 
-static INLINE void buf_uabs_write(struct BufAnsCoder *const c,
-                                  uint8_t val, AnsP8 prob) {
+static INLINE void buf_uabs_write(struct BufAnsCoder *const c, uint8_t val,
+                                  AnsP8 prob) {
   assert(c->offset <= c->size);
   if (c->offset == c->size) {
     vp10_buf_ans_grow(c);
@@ -95,8 +95,8 @@ static INLINE void buf_uabs_write_bit(struct BufAnsCoder *c, int bit) {
   buf_uabs_write(c, bit, 128);
 }
 
-static INLINE void buf_uabs_write_literal(struct BufAnsCoder *c,
-                                          int literal, int bits) {
+static INLINE void buf_uabs_write_literal(struct BufAnsCoder *c, int literal,
+                                          int bits) {
   int bit;
 
   assert(bits < 31);

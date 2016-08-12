@@ -45,14 +45,13 @@ void vp10_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize);
 void vp10_encode_sb_supertx(MACROBLOCK *x, BLOCK_SIZE bsize);
 #endif  // CONFIG_SUPERTX
 void vp10_encode_sby_pass1(MACROBLOCK *x, BLOCK_SIZE bsize);
-void vp10_xform_quant(MACROBLOCK *x, int plane, int block,
-                      int blk_row, int blk_col,
-                      BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
+void vp10_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
+                      int blk_col, BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
                       VP10_XFORM_QUANT xform_quant_idx);
 #if CONFIG_NEW_QUANT
 void vp10_xform_quant_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
-                          int blk_col, BLOCK_SIZE plane_bsize,
-                          TX_SIZE tx_size, int ctx);
+                          int blk_col, BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
+                          int ctx);
 void vp10_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
                              int blk_col, BLOCK_SIZE plane_bsize,
                              TX_SIZE tx_size, int ctx);
@@ -65,14 +64,14 @@ void vp10_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
                                 int ctx);
 #endif
 
-int vp10_optimize_b(MACROBLOCK *mb, int plane, int block,
-                    TX_SIZE tx_size, int ctx);
+int vp10_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
+                    int ctx);
 
 void vp10_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 
 void vp10_encode_block_intra(int plane, int block, int blk_row, int blk_col,
-                             BLOCK_SIZE plane_bsize,
-                             TX_SIZE tx_size, void *arg);
+                             BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
+                             void *arg);
 
 void vp10_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane,
                                    int enable_optimize_b);

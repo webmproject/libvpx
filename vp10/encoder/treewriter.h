@@ -26,19 +26,19 @@ extern "C" {
 #endif
 
 void vp10_tree_probs_from_distribution(vpx_tree tree,
-                                      unsigned int branch_ct[ /* n - 1 */ ][2],
-                                      const unsigned int num_events[ /* n */ ]);
+                                       unsigned int branch_ct[/* n - 1 */][2],
+                                       const unsigned int num_events[/* n */]);
 
 struct vp10_token {
   int value;
   int len;
 };
 
-void vp10_tokens_from_tree(struct vp10_token*, const vpx_tree_index *);
+void vp10_tokens_from_tree(struct vp10_token *, const vpx_tree_index *);
 
 static INLINE void vp10_write_tree(tree_writer *w, const vpx_tree_index *tree,
-                                  const vpx_prob *probs, int bits, int len,
-                                  vpx_tree_index i) {
+                                   const vpx_prob *probs, int bits, int len,
+                                   vpx_tree_index i) {
   do {
     const int bit = (bits >> --len) & 1;
     tree_bit_write(w, bit, probs[i >> 1]);
@@ -47,8 +47,8 @@ static INLINE void vp10_write_tree(tree_writer *w, const vpx_tree_index *tree,
 }
 
 static INLINE void vp10_write_token(tree_writer *w, const vpx_tree_index *tree,
-                                   const vpx_prob *probs,
-                                   const struct vp10_token *token) {
+                                    const vpx_prob *probs,
+                                    const struct vp10_token *token) {
   vp10_write_tree(w, tree, probs, token->value, token->len, 0);
 }
 

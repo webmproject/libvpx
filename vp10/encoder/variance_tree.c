@@ -11,8 +11,6 @@
 #include "vp10/encoder/variance_tree.h"
 #include "vp10/encoder/encoder.h"
 
-
-
 void vp10_setup_var_tree(struct VP10Common *cm, ThreadData *td) {
   int i, j;
 #if CONFIG_EXT_PARTITION
@@ -27,8 +25,8 @@ void vp10_setup_var_tree(struct VP10Common *cm, ThreadData *td) {
   int nodes;
 
   vpx_free(td->var_tree);
-  CHECK_MEM_ERROR(cm, td->var_tree, vpx_calloc(tree_nodes,
-                                              sizeof(*td->var_tree)));
+  CHECK_MEM_ERROR(cm, td->var_tree,
+                  vpx_calloc(tree_nodes, sizeof(*td->var_tree)));
 
   this_var = &td->var_tree[0];
 
@@ -43,8 +41,7 @@ void vp10_setup_var_tree(struct VP10Common *cm, ThreadData *td) {
   for (nodes = leaf_nodes >> 2; nodes > 0; nodes >>= 2) {
     for (i = 0; i < nodes; ++i, ++index) {
       VAR_TREE *const node = &td->var_tree[index];
-      for (j = 0; j < 4; j++)
-        node->split[j] = this_var++;
+      for (j = 0; j < 4; j++) node->split[j] = this_var++;
     }
   }
 
@@ -53,7 +50,7 @@ void vp10_setup_var_tree(struct VP10Common *cm, ThreadData *td) {
   td->var_root[i] = &td->var_tree[tree_nodes - 1];
   // Set up the root nodes for the rest of the possible superblock sizes
   while (--i >= 0) {
-    td->var_root[i] = td->var_root[i+1]->split[0];
+    td->var_root[i] = td->var_root[i + 1]->split[0];
   }
 }
 

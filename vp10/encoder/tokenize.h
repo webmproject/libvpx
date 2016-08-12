@@ -20,14 +20,13 @@
 extern "C" {
 #endif
 
-#define EOSB_TOKEN 127     // Not signalled, encoder only
+#define EOSB_TOKEN 127  // Not signalled, encoder only
 
 #if CONFIG_VP9_HIGHBITDEPTH
-  typedef int32_t EXTRABIT;
+typedef int32_t EXTRABIT;
 #else
-  typedef int16_t EXTRABIT;
+typedef int16_t EXTRABIT;
 #endif
-
 
 typedef struct {
   int16_t token;
@@ -62,11 +61,10 @@ void vp10_tokenize_sb_inter(struct VP10_COMP *cpi, struct ThreadData *td,
                             BLOCK_SIZE bsize);
 #endif
 
-void vp10_tokenize_palette_sb(struct ThreadData *const td,
-                              BLOCK_SIZE bsize, int plane,
-                              TOKENEXTRA **t);
+void vp10_tokenize_palette_sb(struct ThreadData *const td, BLOCK_SIZE bsize,
+                              int plane, TOKENEXTRA **t);
 void vp10_tokenize_sb(struct VP10_COMP *cpi, struct ThreadData *td,
-                     TOKENEXTRA **t, int dry_run, BLOCK_SIZE bsize);
+                      TOKENEXTRA **t, int dry_run, BLOCK_SIZE bsize);
 #if CONFIG_SUPERTX
 void vp10_tokenize_sb_supertx(struct VP10_COMP *cpi, struct ThreadData *td,
                               TOKENEXTRA **t, int dry_run, BLOCK_SIZE bsize);
@@ -85,27 +83,28 @@ extern const int vp10_cat6_high_cost[64];
 extern const int vp10_cat6_high10_high_cost[256];
 extern const int vp10_cat6_high12_high_cost[1024];
 static INLINE int vp10_get_cost(int16_t token, EXTRABIT extrabits,
-                               const int *cat6_high_table) {
+                                const int *cat6_high_table) {
   if (token != CATEGORY6_TOKEN)
     return vp10_extra_bits[token].cost[extrabits >> 1];
-  return vp10_cat6_low_cost[(extrabits >> 1) & 0xff]
-      + cat6_high_table[extrabits >> 9];
+  return vp10_cat6_low_cost[(extrabits >> 1) & 0xff] +
+         cat6_high_table[extrabits >> 9];
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static INLINE const int* vp10_get_high_cost_table(int bit_depth) {
+static INLINE const int *vp10_get_high_cost_table(int bit_depth) {
   return bit_depth == 8 ? vp10_cat6_high_cost
-      : (bit_depth == 10 ? vp10_cat6_high10_high_cost :
-         vp10_cat6_high12_high_cost);
+                        : (bit_depth == 10 ? vp10_cat6_high10_high_cost
+                                           : vp10_cat6_high12_high_cost);
 }
 #else
-static INLINE const int* vp10_get_high_cost_table(int bit_depth) {
-  (void) bit_depth;
+static INLINE const int *vp10_get_high_cost_table(int bit_depth) {
+  (void)bit_depth;
   return vp10_cat6_high_cost;
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-static INLINE void vp10_get_token_extra(int v, int16_t *token, EXTRABIT *extra) {
+static INLINE void vp10_get_token_extra(int v, int16_t *token,
+                                        EXTRABIT *extra) {
   if (v >= CAT6_MIN_VAL || v <= -CAT6_MIN_VAL) {
     *token = CATEGORY6_TOKEN;
     if (v >= CAT6_MIN_VAL)
@@ -118,19 +117,18 @@ static INLINE void vp10_get_token_extra(int v, int16_t *token, EXTRABIT *extra) 
   *extra = vp10_dct_cat_lt_10_value_tokens[v].extra;
 }
 static INLINE int16_t vp10_get_token(int v) {
-  if (v >= CAT6_MIN_VAL || v <= -CAT6_MIN_VAL)
-    return 10;
+  if (v >= CAT6_MIN_VAL || v <= -CAT6_MIN_VAL) return 10;
   return vp10_dct_cat_lt_10_value_tokens[v].token;
 }
 
 static INLINE int vp10_get_token_cost(int v, int16_t *token,
-                                          const int *cat6_high_table) {
+                                      const int *cat6_high_table) {
   if (v >= CAT6_MIN_VAL || v <= -CAT6_MIN_VAL) {
     EXTRABIT extrabits;
     *token = CATEGORY6_TOKEN;
     extrabits = abs(v) - CAT6_MIN_VAL;
-    return vp10_cat6_low_cost[extrabits & 0xff]
-        + cat6_high_table[extrabits >> 8];
+    return vp10_cat6_low_cost[extrabits & 0xff] +
+           cat6_high_table[extrabits >> 8];
   }
   *token = vp10_dct_cat_lt_10_value_tokens[v].token;
   return vp10_dct_cat_lt_10_value_cost[v];

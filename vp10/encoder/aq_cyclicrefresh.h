@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef VP10_ENCODER_AQ_CYCLICREFRESH_H_
 #define VP10_ENCODER_AQ_CYCLICREFRESH_H_
 
@@ -20,9 +19,9 @@ extern "C" {
 
 // The segment ids used in cyclic refresh: from base (no boost) to increasing
 // boost (higher delta-qp).
-#define CR_SEGMENT_ID_BASE    0
-#define CR_SEGMENT_ID_BOOST1  1
-#define CR_SEGMENT_ID_BOOST2  2
+#define CR_SEGMENT_ID_BASE 0
+#define CR_SEGMENT_ID_BOOST1 1
+#define CR_SEGMENT_ID_BOOST2 2
 
 // Maximum rate target ratio for setting segment delta-qp.
 #define CR_MAX_RATE_TARGET_RATIO 4.0
@@ -39,20 +38,20 @@ void vp10_cyclic_refresh_free(CYCLIC_REFRESH *cr);
 // Estimate the bits, incorporating the delta-q from segment 1, after encoding
 // the frame.
 int vp10_cyclic_refresh_estimate_bits_at_q(const struct VP10_COMP *cpi,
-                                          double correction_factor);
+                                           double correction_factor);
 
 // Estimate the bits per mb, for a given q = i and a corresponding delta-q
 // (for segment 1), prior to encoding the frame.
 int vp10_cyclic_refresh_rc_bits_per_mb(const struct VP10_COMP *cpi, int i,
-                                      double correction_factor);
+                                       double correction_factor);
 
 // Prior to coding a given prediction block, of size bsize at (mi_row, mi_col),
 // check if we should reset the segment_id, and update the cyclic_refresh map
 // and segmentation map.
 void vp10_cyclic_refresh_update_segment(struct VP10_COMP *const cpi,
-                                       MB_MODE_INFO *const mbmi,
-                                       int mi_row, int mi_col, BLOCK_SIZE bsize,
-                                       int64_t rate, int64_t dist, int skip);
+                                        MB_MODE_INFO *const mbmi, int mi_row,
+                                        int mi_col, BLOCK_SIZE bsize,
+                                        int64_t rate, int64_t dist, int skip);
 
 // Update the segmentation map, and related quantities: cyclic refresh map,
 // refresh sb_index, and target number of blocks to be refreshed.
