@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5e233d3a_3f494f8c",
+        "filename": "vp10/encoder/quantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1082,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-13T03:01:25Z",
+      "side": 1,
+      "message": "these casts are likely unnecessary now that the type has been corrected",
+      "revId": "e34e7ba7cb84f68f57a28b152cf5564ab7557fa8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
