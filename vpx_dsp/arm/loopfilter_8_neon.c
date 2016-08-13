@@ -311,6 +311,14 @@ void vpx_lpf_horizontal_8_neon(uint8_t *src, int pitch, const uint8_t *blimit,
   return;
 }
 
+void vpx_lpf_horizontal_8_dual_neon(
+    uint8_t *s, int p /* pitch */, const uint8_t *blimit0,
+    const uint8_t *limit0, const uint8_t *thresh0, const uint8_t *blimit1,
+    const uint8_t *limit1, const uint8_t *thresh1) {
+  vpx_lpf_horizontal_8_neon(s, p, blimit0, limit0, thresh0);
+  vpx_lpf_horizontal_8_neon(s + 8, p, blimit1, limit1, thresh1);
+}
+
 void vpx_lpf_vertical_8_neon(uint8_t *src, int pitch, const uint8_t *blimit,
                              const uint8_t *limit, const uint8_t *thresh) {
   int i;
@@ -426,4 +434,12 @@ void vpx_lpf_vertical_8_neon(uint8_t *src, int pitch, const uint8_t *blimit,
     vst2_lane_u8(s, d2Result, 7);
   }
   return;
+}
+
+void vpx_lpf_vertical_8_dual_neon(uint8_t *s, int p, const uint8_t *blimit0,
+                                  const uint8_t *limit0, const uint8_t *thresh0,
+                                  const uint8_t *blimit1, const uint8_t *limit1,
+                                  const uint8_t *thresh1) {
+  vpx_lpf_vertical_8_neon(s, p, blimit0, limit0, thresh0);
+  vpx_lpf_vertical_8_neon(s + 8 * p, p, blimit1, limit1, thresh1);
 }
