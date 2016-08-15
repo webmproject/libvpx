@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "be6fd9aa_d7ddde6f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 9
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-15T18:35:13Z",
+      "side": 1,
+      "message": "you could mention aom somewhere",
+      "revId": "be6111f4f2885ce0c8e4024e6dee9673d9e8195b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5e233d3a_9cdd0971",
         "filename": "vp10/encoder/encodemb.c",
         "patchSetId": 9
