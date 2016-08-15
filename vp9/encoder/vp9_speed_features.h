@@ -453,6 +453,11 @@ typedef struct SPEED_FEATURES {
   // INTRA for bsize >= 32x32 and vert/horz INTRA for bsize 16x16, 16x32 and
   // 32x16.
   int short_circuit_low_temp_var;
+  // Limits the rd-threshold update for early exit for the newmv-last mode,
+  // for non-rd mode.
+  int limit_newmv_early_exit;
+  // Adds a bias against golden reference, for non-rd mode.
+  int bias_golden;
 } SPEED_FEATURES;
 
 struct VP9_COMP;
