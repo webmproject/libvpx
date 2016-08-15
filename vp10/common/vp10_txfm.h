@@ -95,7 +95,7 @@ static INLINE int32_t half_btf(int32_t w0, int32_t in0, int32_t w1, int32_t in1,
     printf(
         "%s overflow result_32: %d result_64: %lld w0: %d in0: %d w1: %d in1: "
         "%d\n",
-        __func__, result_32, (long long int)result_64, w0, in0, w1, in1);
+        __func__, result_32, ((long long int)result_64), w0, in0, w1, in1);
     assert(0 && "half_btf overflow");
   }
 #endif

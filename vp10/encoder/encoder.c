@@ -18,6 +18,9 @@
 #if CONFIG_CLPF
 #include "vp10/common/clpf.h"
 #endif
+#if CONFIG_DERING
+#include "vp10/common/dering.h"
+#endif  // CONFIG_DERING
 #include "vp10/common/filter.h"
 #include "vp10/common/idct.h"
 #include "vp10/common/reconinter.h"
@@ -382,7 +385,6 @@ void vp10_initialize_enc(void) {
     vp10_init_me_luts();
     vp10_rc_init_minq_luts();
     vp10_entropy_mv_init();
-    vp10_temporal_filter_init();
     vp10_encode_token_init();
 #if CONFIG_EXT_INTER
     vp10_init_wedge_masks();
@@ -3343,6 +3345,15 @@ static void loopfilter_frame(VP10_COMP *cpi, VP10_COMMON *cm) {
       vp10_loop_filter_frame(cm->frame_to_show, cm, xd, lf->filter_level, 0, 0);
 #endif
   }
+#if CONFIG_DERING
+  if (is_lossless_requested(&cpi->oxcf)) {
+    cm->dering_level = 0;
+  } else {
+    cm->dering_level = vp10_dering_search(cm->frame_to_show, cpi->Source, cm,
+                                          xd);
+    vp10_dering_frame(cm->frame_to_show, cm, xd, cm->dering_level);
+  }
+#endif  // CONFIG_DERING
 
 #if CONFIG_CLPF
   cm->clpf = 0;

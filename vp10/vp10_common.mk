@@ -91,6 +91,14 @@ VP10_COMMON_SRCS-yes += common/warped_motion.c
 endif
 VP10_COMMON_SRCS-yes += common/clpf.c
 VP10_COMMON_SRCS-yes += common/clpf.h
+ifeq ($(CONFIG_DERING),yes)
+VP10_COMMON_SRCS-yes += common/od_dering.c
+VP10_COMMON_SRCS-yes += common/od_dering.h
+VP10_COMMON_SRCS-yes += common/dering.c
+VP10_COMMON_SRCS-yes += common/dering.h
+endif
+VP10_COMMON_SRCS-yes += common/odintrin.c
+VP10_COMMON_SRCS-yes += common/odintrin.h
 
 ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 VP10_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/itrans4_dspr2.c

@@ -14,6 +14,7 @@
 #include "./vp10_rtcd.h"
 #include "./vpx_dsp_rtcd.h"
 #include "./vpx_scale_rtcd.h"
+#include "./vpx_config.h"
 
 #include "vpx_dsp/bitreader_buffer.h"
 #include "vp10/decoder/bitreader.h"
@@ -29,6 +30,9 @@
 #include "vp10/common/clpf.h"
 #endif
 #include "vp10/common/common.h"
+#if CONFIG_DERING
+#include "vp10/common/dering.h"
+#endif  // CONFIG_DERING
 #include "vp10/common/entropy.h"
 #include "vp10/common/entropymode.h"
 #include "vp10/common/idct.h"
@@ -1776,6 +1780,16 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
   if (bsize >= BLOCK_8X8 &&
       (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT))
     dec_update_partition_context(xd, mi_row, mi_col, subsize, num_8x8_wh);
+#if DERING_REFINEMENT
+  if (bsize == BLOCK_64X64) {
+    if (cm->dering_level != 0 && !sb_all_skip(cm, mi_row, mi_col)) {
+      cm->mi_grid_visible[mi_row*cm->mi_stride + mi_col]->mbmi.dering_gain =
+          vpx_read_literal(r, DERING_REFINEMENT_BITS);
+    } else {
+      cm->mi_grid_visible[mi_row*cm->mi_stride + mi_col]->mbmi.dering_gain = 0;
+    }
+  }
+#endif  // DERGING_REFINEMENT
 #endif  // CONFIG_EXT_PARTITION_TYPES
 }
 
@@ -1950,6 +1964,12 @@ static void setup_clpf(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   cm->clpf = vpx_rb_read_literal(rb, 1);
 }
 #endif
+
+#if CONFIG_DERING
+static void setup_dering(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
+  cm->dering_level = vpx_rb_read_literal(rb,  DERING_LEVEL_BITS);
+}
+#endif  // CONFIG_DERING
 
 static INLINE int read_delta_q(struct vpx_read_bit_buffer *rb) {
   return vpx_rb_read_bit(rb) ? vpx_rb_read_inv_signed_literal(rb, 6) : 0;
@@ -2706,6 +2726,11 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi, const uint8_t *data,
   if (cm->clpf && !cm->skip_loop_filter)
     vp10_clpf_frame(&pbi->cur_buf->buf, cm, &pbi->mb);
 #endif
+#if CONFIG_DERING
+  if (cm->dering_level && !cm->skip_loop_filter) {
+    vp10_dering_frame(&pbi->cur_buf->buf, cm, &pbi->mb, cm->dering_level);
+  }
+#endif  // CONFIG_DERING
 
   if (cm->frame_parallel_decode)
     vp10_frameworker_broadcast(pbi->cur_buf, INT_MAX);
@@ -3241,6 +3266,9 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   setup_loopfilter(cm, rb);
 #if CONFIG_CLPF
   setup_clpf(cm, rb);
+#endif
+#if CONFIG_DERING
+  setup_dering(cm, rb);
 #endif
 #if CONFIG_LOOP_RESTORATION
   setup_restoration(cm, rb);

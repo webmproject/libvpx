@@ -368,6 +368,9 @@ typedef struct VP10Common {
   BLOCK_SIZE sb_size;  // Size of the superblock used for this frame
   int mib_size;        // Size of the superblock in units of MI blocks
   int mib_size_log2;   // Log 2 of above.
+#if CONFIG_DERING
+  int dering_level;
+#endif
 } VP10_COMMON;
 
 // TODO(hkuang): Don't need to lock the whole pool after implementing atomic

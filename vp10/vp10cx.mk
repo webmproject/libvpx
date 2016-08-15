@@ -90,7 +90,9 @@ VP10_CX_SRCS-yes += encoder/temporal_filter.c
 VP10_CX_SRCS-yes += encoder/temporal_filter.h
 VP10_CX_SRCS-yes += encoder/mbgraph.c
 VP10_CX_SRCS-yes += encoder/mbgraph.h
-
+ifeq ($(CONFIG_DERING),yes)
+VP10_CX_SRCS-yes += encoder/pickdering.c
+endif
 VP10_CX_SRCS-$(HAVE_SSE2) += encoder/x86/temporal_filter_apply_sse2.asm
 VP10_CX_SRCS-$(HAVE_SSE2) += encoder/x86/quantize_sse2.c
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)

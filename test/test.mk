@@ -102,6 +102,7 @@ LIBVPX_TEST_SRCS-yes                   += partial_idct_test.cc
 LIBVPX_TEST_SRCS-yes                   += superframe_test.cc
 LIBVPX_TEST_SRCS-yes                   += tile_independence_test.cc
 LIBVPX_TEST_SRCS-yes                   += boolcoder_test.cc
+LIBVPX_TEST_SRCS-yes                   += divu_small_test.cc
 #LIBVPX_TEST_SRCS-yes                   += encoder_parms_get_to_decoder.cc
 endif
 

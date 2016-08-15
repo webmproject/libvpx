@@ -239,6 +239,8 @@ typedef struct {
   int dq_off_index;
   int send_dq_bit;
 #endif  // CONFIG_NEW_QUANT
+  /* deringing gain *per-superblock* */
+  int8_t dering_gain;
 } MB_MODE_INFO;
 
 typedef struct MODE_INFO {
