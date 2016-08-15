@@ -85,6 +85,7 @@ typedef enum {
 
 typedef struct {
   unsigned char index;
+  unsigned char first_inter_index;
   RATE_FACTOR_LEVEL rf_level[(MAX_LAG_BUFFERS * 2) + 1];
   FRAME_UPDATE_TYPE update_type[(MAX_LAG_BUFFERS * 2) + 1];
   unsigned char arf_src_offset[(MAX_LAG_BUFFERS * 2) + 1];
