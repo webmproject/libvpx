@@ -17,7 +17,7 @@
     for (i = 0; i < size; ++i) {                                          \
       int buf_bit = get_max_bit(abs(buf[i])) + 1;                         \
       if (buf_bit > bit) {                                                \
-        printf("======== %s overflow ========\n", __func__);              \
+        printf("======== %s %d overflow ========\n", __FILE__, __LINE__); \
         printf("stage: %d node: %d\n", stage, i);                         \
         printf("bit: %d buf_bit: %d buf[i]: %d\n", bit, buf_bit, buf[i]); \
         printf("input:\n");                                               \

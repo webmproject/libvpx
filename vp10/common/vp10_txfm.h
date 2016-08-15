@@ -10,9 +10,9 @@
 #ifndef VP10_TXFM_H_
 #define VP10_TXFM_H_
 
-#include <stdio.h>
-#include <math.h>
 #include <assert.h>
+#include <math.h>
+#include <stdio.h>
 
 #include "vp10/common/enums.h"
 #include "vpx/vpx_integer.h"
@@ -92,10 +92,10 @@ static INLINE int32_t half_btf(int32_t w0, int32_t in0, int32_t w1, int32_t in1,
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
   int64_t result_64 = (int64_t)w0 * (int64_t)in0 + (int64_t)w1 * (int64_t)in1;
   if (result_32 != result_64) {
-    printf(
-        "%s overflow result_32: %d result_64: %lld w0: %d in0: %d w1: %d in1: "
-        "%d\n",
-        __func__, result_32, ((long long int)result_64), w0, in0, w1, in1);
+    printf("%s %d overflow result_32: %d result_64: %" PRId64
+           " w0: %d in0: %d w1: %d in1: "
+           "%d\n",
+           __FILE__, __LINE__, result_32, result_64, w0, in0, w1, in1);
     assert(0 && "half_btf overflow");
   }
 #endif
