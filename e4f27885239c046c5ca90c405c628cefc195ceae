@@ -1,0 +1,152 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9b74e7be_73d4601c",
+        "filename": "configure",
+        "patchSetId": 10
+      },
+      "lineNbr": 332,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-15T23:56:12Z",
+      "side": 1,
+      "message": "this should be an experiment too",
+      "revId": "e4f27885239c046c5ca90c405c628cefc195ceae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b74e7be_33cee888",
+        "filename": "vp10/common/clpf.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-15T23:56:12Z",
+      "side": 1,
+      "message": "this could have been done before submitting to aom",
+      "revId": "e4f27885239c046c5ca90c405c628cefc195ceae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b74e7be_f3df1032",
+        "filename": "vp10/common/clpf.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-15T23:56:12Z",
+      "side": 1,
+      "message": "// VP10_COMMON_CLPF_H_",
+      "revId": "e4f27885239c046c5ca90c405c628cefc195ceae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b74e7be_93dc9c3f",
+        "filename": "vp10/common/quant_common.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-15T23:56:12Z",
+      "side": 1,
+      "message": "could be sorted",
+      "revId": "e4f27885239c046c5ca90c405c628cefc195ceae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b74e7be_73b9c0dd",
+        "filename": "vp10/common/quant_common.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-15T23:56:12Z",
+      "side": 1,
+      "message": "we should try to avoid new types with _t that namespace is reserved for POSIX",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 8
+      },
+      "revId": "e4f27885239c046c5ca90c405c628cefc195ceae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b74e7be_53b4c4e8",
+        "filename": "vp10/common/quant_common.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-15T23:56:12Z",
+      "side": 1,
+      "message": "// CONFIG_AOM_QM\nhere and elsewhere",
+      "revId": "e4f27885239c046c5ca90c405c628cefc195ceae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b74e7be_13972c49",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-15T23:56:12Z",
+      "side": 1,
+      "message": "public headers should never depend on vpx_config.h; that was a mistake the spatial svc code was allowed to make",
+      "revId": "e4f27885239c046c5ca90c405c628cefc195ceae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b74e7be_539da466",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-15T23:56:12Z",
+      "side": 1,
+      "message": "we generally prefer american english spellings",
+      "range": {
+        "startLine": 318,
+        "startChar": 50,
+        "endLine": 318,
+        "endChar": 62
+      },
+      "revId": "e4f27885239c046c5ca90c405c628cefc195ceae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
