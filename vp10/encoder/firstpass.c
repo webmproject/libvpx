@@ -1725,8 +1725,9 @@ static void allocate_gf_group_bits(VP10_COMP *cpi, int64_t gf_group_bits,
       bipred_frame_index++;
       // Check whether the next bi-predictive frame group would entirely be
       // included within the current golden frame group.
+      // In addition, we need to avoid coding a BRF right before an ARF.
       if (bipred_frame_index == 1 &&
-          (i + 1 + cur_brf_src_offset) >=
+          (i + 2 + cur_brf_src_offset) >=
               (rc->baseline_gf_interval - rc->source_alt_ref_pending)) {
         bipred_group_end = 1;
       }
