@@ -22,6 +22,30 @@
       "revId": "70a971376fdff7f4e0729c0a95a19b406f51d8d1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db273fb0_b02756b5",
+        "filename": "vp10/encoder/palette.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-15T21:19:20Z",
+      "side": 1,
+      "message": "IIUC, both calc_centroids() and vp10_calc_indices() methods call calc_dist(), which rounds-off the centroid before calculating the distance.\nSo, would it make a difference if centroids are rounded off in calc_centroids() itself?\n\nThe benefits:\n- No rounding needed on every call to calc_dist() for every (data point,centroid) pair.\n- All rounding in one place, instead of being in two different places.\n\nThoughts?",
+      "parentUuid": "db273fb0_f0315e55",
+      "range": {
+        "startLine": 120,
+        "startChar": 5,
+        "endLine": 120,
+        "endChar": 68
+      },
+      "revId": "70a971376fdff7f4e0729c0a95a19b406f51d8d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
