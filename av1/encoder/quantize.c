@@ -1219,7 +1219,15 @@ void av1_init_plane_quantizers(const AV1_COMP *cpi, MACROBLOCK *x,
   const AV1_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   const QUANTS *const quants = &cpi->quants;
+
+#if CONFIG_DELTA_Q
+  int current_q_index = cpi->oxcf.aq_mode == DELTA_AQ
+                            ? cm->base_qindex + xd->delta_qindex
+                            : cm->base_qindex;
+  const int qindex = av1_get_qindex(&cm->seg, segment_id, current_q_index);
+#else
   const int qindex = av1_get_qindex(&cm->seg, segment_id, cm->base_qindex);
+#endif
   const int rdmult = av1_compute_rd_mult(cpi, qindex + cm->y_dc_delta_q);
   int i;
 #if CONFIG_AOM_QM

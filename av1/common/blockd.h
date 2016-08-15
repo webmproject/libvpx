@@ -246,6 +246,9 @@ typedef struct {
 #endif  // CONFIG_NEW_QUANT
   /* deringing gain *per-superblock* */
   int8_t dering_gain;
+#if CONFIG_DELTA_Q
+  int current_q_index;
+#endif
 } MB_MODE_INFO;
 
 typedef struct MODE_INFO {
@@ -401,6 +404,11 @@ typedef struct macroblockd {
 #if CONFIG_GLOBAL_MOTION
   Global_Motion_Params *global_motion;
 #endif  // CONFIG_GLOBAL_MOTION
+#if CONFIG_DELTA_Q
+  int prev_qindex;
+  int delta_qindex;
+  int current_qindex;
+#endif
 } MACROBLOCKD;
 
 static INLINE BLOCK_SIZE get_subsize(BLOCK_SIZE bsize,

@@ -133,6 +133,9 @@ typedef enum {
   VARIANCE_AQ = 1,
   COMPLEXITY_AQ = 2,
   CYCLIC_REFRESH_AQ = 3,
+#if CONFIG_DELTA_Q
+  DELTA_AQ = 4,
+#endif
   AQ_MODE_COUNT  // This should always be the last member of the enum
 } AQ_MODE;
 

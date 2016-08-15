@@ -1209,6 +1209,26 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
   }
 #endif  // CONFIG_SUPERTX
 
+#if CONFIG_DELTA_Q
+  if (cm->delta_q_present_flag) {
+    int i;
+    for (i = 0; i < MAX_SEGMENTS; i++) {
+      xd->plane[0].seg_dequant[i][0] =
+          av1_dc_quant(xd->current_qindex, cm->y_dc_delta_q, cm->bit_depth);
+      xd->plane[0].seg_dequant[i][1] =
+          av1_ac_quant(xd->current_qindex, 0, cm->bit_depth);
+      xd->plane[1].seg_dequant[i][0] =
+          av1_dc_quant(xd->current_qindex, cm->uv_dc_delta_q, cm->bit_depth);
+      xd->plane[1].seg_dequant[i][1] =
+          av1_ac_quant(xd->current_qindex, cm->uv_ac_delta_q, cm->bit_depth);
+      xd->plane[2].seg_dequant[i][0] =
+          av1_dc_quant(xd->current_qindex, cm->uv_dc_delta_q, cm->bit_depth);
+      xd->plane[2].seg_dequant[i][1] =
+          av1_ac_quant(xd->current_qindex, cm->uv_ac_delta_q, cm->bit_depth);
+    }
+  }
+#endif
+
   if (mbmi->skip) {
     dec_reset_skip_context(xd);
   }
@@ -3484,6 +3504,27 @@ static size_t read_uncompressed_header(AV1Decoder *pbi,
 #endif  // CONFIG_ENTROPY
 
   setup_segmentation(cm, rb);
+
+#if CONFIG_DELTA_Q
+  {
+    struct segmentation *const seg = &cm->seg;
+    int segment_quantizer_active = 0;
+    for (i = 0; i < MAX_SEGMENTS; i++) {
+      if (segfeature_active(seg, i, SEG_LVL_ALT_Q)) {
+        segment_quantizer_active = 1;
+      }
+    }
+
+    if (segment_quantizer_active == 0) {
+      cm->delta_q_present_flag = aom_rb_read_bit(rb);
+    } else {
+      cm->delta_q_present_flag = 0;
+    }
+    if (cm->delta_q_present_flag) {
+      xd->prev_qindex = cm->base_qindex;
+    }
+  }
+#endif
 
   for (i = 0; i < MAX_SEGMENTS; ++i) {
     const int qindex = cm->seg.enabled

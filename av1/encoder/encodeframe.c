@@ -1114,8 +1114,13 @@ static void update_state(const AV1_COMP *const cpi, ThreadData *td,
         xd->mi[x_idx + y * mis] = mi_addr;
       }
 
+#if CONFIG_DELTA_Q
+  if (cpi->oxcf.aq_mode > NO_AQ && cpi->oxcf.aq_mode < DELTA_AQ)
+    av1_init_plane_quantizers(cpi, x);
+#else
   if (cpi->oxcf.aq_mode)
     av1_init_plane_quantizers(cpi, x, xd->mi[0]->mbmi.segment_id);
+#endif
 
   if (is_inter_block(mbmi) && mbmi->sb_type < BLOCK_8X8) {
     mbmi->mv[0].as_int = mi->bmi[3].as_mv[0].as_int;
@@ -4187,6 +4192,22 @@ static void encode_rd_sb_row(AV1_COMP *cpi, ThreadData *td,
       int segment_id = get_segment_id(cm, map, cm->sb_size, mi_row, mi_col);
       seg_skip = segfeature_active(seg, segment_id, SEG_LVL_SKIP);
     }
+
+#if CONFIG_DELTA_Q
+    if (cpi->oxcf.aq_mode == DELTA_AQ) {
+      int sb_row = mi_row >> 3;
+      int sb_col = mi_col >> 3;
+      int sb_stride = (cm->width + MAX_SB_SIZE - 1) >> MAX_SB_SIZE_LOG2;
+      int index = ((sb_row * sb_stride + sb_col + 8) & 31) - 16;
+      int offset_qindex = index < 0 ? -index - 8 : index - 8;
+      int current_qindex = clamp(cm->base_qindex + offset_qindex, 1, 255);
+      xd->delta_qindex = current_qindex - cm->base_qindex;
+      set_offsets(cpi, tile_info, x, mi_row, mi_col, BLOCK_64X64);
+      xd->mi[0]->mbmi.current_q_index = current_qindex;
+      xd->mi[0]->mbmi.segment_id = 0;
+      av1_init_plane_quantizers(cpi, x);
+    }
+#endif
 
     x->source_variance = UINT_MAX;
     if (sf->partition_search_type == FIXED_PARTITION || seg_skip) {
