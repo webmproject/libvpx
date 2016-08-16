@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9b74e7be_d917935c",
+        "filename": "vpx_dsp/arm/loopfilter_8_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-16T05:45:40Z",
+      "side": 1,
+      "message": "it\u0027d be nice later to change instances of this to just use \u0027pitch\u0027 or \u0027stride\u0027 in the code",
+      "range": {
+        "startLine": 78,
+        "startChar": 14,
+        "endLine": 78,
+        "endChar": 28
+      },
+      "revId": "690f55d6f19950bec5d6c8a8f0768aecd3c4ed2c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b74e7be_99211bb3",
+        "filename": "vpx_dsp/arm/loopfilter_8_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-16T05:45:40Z",
+      "side": 1,
+      "message": "you might relocate these to each \u0027b\u0027 if you want to keep them at all",
+      "revId": "690f55d6f19950bec5d6c8a8f0768aecd3c4ed2c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b74e7be_f914cf59",
+        "filename": "vpx_dsp/arm/loopfilter_8_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-16T05:45:40Z",
+      "side": 1,
+      "message": "this line can go",
+      "revId": "690f55d6f19950bec5d6c8a8f0768aecd3c4ed2c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
