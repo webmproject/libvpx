@@ -16,6 +16,24 @@
       "revId": "e34e7ba7cb84f68f57a28b152cf5564ab7557fa8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b74e7be_39f00791",
+        "filename": "vp10/encoder/quantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1082,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-08-16T02:27:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5e233d3a_3f494f8c",
+      "revId": "e34e7ba7cb84f68f57a28b152cf5564ab7557fa8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
