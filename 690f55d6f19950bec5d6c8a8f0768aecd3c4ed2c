@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9b74e7be_1c9179a2",
+        "filename": "vpx_dsp/arm/loopfilter_8_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-16T15:56:46Z",
+      "side": 1,
+      "message": "\u003e it\u0027d be nice later to change instances of this to just use \u0027pitch\u0027\n \u003e or \u0027stride\u0027 in the code\n\nWill do with C/X86 code later.",
+      "parentUuid": "9b74e7be_d917935c",
+      "range": {
+        "startLine": 78,
+        "startChar": 14,
+        "endLine": 78,
+        "endChar": 28
+      },
+      "revId": "690f55d6f19950bec5d6c8a8f0768aecd3c4ed2c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b74e7be_99211bb3",
         "filename": "vpx_dsp/arm/loopfilter_8_neon.asm",
         "patchSetId": 3
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "9b74e7be_3c96b59b",
+        "filename": "vpx_dsp/arm/loopfilter_8_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-16T15:56:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b74e7be_99211bb3",
+      "revId": "690f55d6f19950bec5d6c8a8f0768aecd3c4ed2c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b74e7be_f914cf59",
         "filename": "vpx_dsp/arm/loopfilter_8_neon.asm",
         "patchSetId": 3
@@ -53,6 +95,24 @@
       "writtenOn": "2016-08-16T05:45:40Z",
       "side": 1,
       "message": "this line can go",
+      "revId": "690f55d6f19950bec5d6c8a8f0768aecd3c4ed2c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b74e7be_dcaa21c6",
+        "filename": "vpx_dsp/arm/loopfilter_8_neon.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-16T15:56:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b74e7be_f914cf59",
       "revId": "690f55d6f19950bec5d6c8a8f0768aecd3c4ed2c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
