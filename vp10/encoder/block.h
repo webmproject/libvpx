@@ -42,7 +42,7 @@ typedef struct macroblock_plane {
   const int16_t *zbin;
   const int16_t *round;
 #if CONFIG_NEW_QUANT
-  cuml_bins_type_nuq *cuml_bins_nuq[QUANT_PROFILES];
+  const cuml_bins_type_nuq *cuml_bins_nuq[QUANT_PROFILES];
 #endif  // CONFIG_NEW_QUANT
 
   int64_t quant_thred[2];
