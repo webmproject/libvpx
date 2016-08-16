@@ -938,6 +938,7 @@ static INLINE int is_mv_valid(const MV *mv) {
 
 static INLINE int assign_mv(AV1_COMMON *cm, MACROBLOCKD *xd,
                             PREDICTION_MODE mode,
+                            MV_REFERENCE_FRAME ref_frame[2],
 #if CONFIG_REF_MV
                             int block,
 #endif
@@ -952,6 +953,7 @@ static INLINE int assign_mv(AV1_COMMON *cm, MACROBLOCKD *xd,
   int_mv *pred_mv =
       (bsize >= BLOCK_8X8) ? mbmi->pred_mv : xd->mi[0]->bmi[block].pred_mv_s8;
 #endif
+  (void)ref_frame;
 
   switch (mode) {
 #if CONFIG_EXT_INTER
@@ -1006,8 +1008,16 @@ static INLINE int assign_mv(AV1_COMMON *cm, MACROBLOCKD *xd,
       break;
     }
     case ZEROMV: {
+#if CONFIG_GLOBAL_MOTION
+      mv[0].as_int =
+          cm->global_motion[ref_frame[0]].motion_params.wmmat[0].as_int;
+      if (is_compound)
+        mv[1].as_int =
+            cm->global_motion[ref_frame[1]].motion_params.wmmat[0].as_int;
+#else
       mv[0].as_int = 0;
       if (is_compound) mv[1].as_int = 0;
+#endif  // CONFIG_GLOBAL_MOTION
 
 #if CONFIG_REF_MV
       pred_mv[0].as_int = 0;
@@ -1428,7 +1438,7 @@ static void read_inter_block_mode_info(AV1Decoder *const pbi,
         (void)ref_mv_s8;
 #endif
 
-        if (!assign_mv(cm, xd, b_mode,
+        if (!assign_mv(cm, xd, b_mode, mbmi->ref_frame,
 #if CONFIG_REF_MV
                        j,
 #endif
@@ -1480,7 +1490,7 @@ static void read_inter_block_mode_info(AV1Decoder *const pbi,
     }
 
     xd->corrupted |=
-        !assign_mv(cm, xd, mbmi->mode,
+        !assign_mv(cm, xd, mbmi->mode, mbmi->ref_frame,
 #if CONFIG_REF_MV
                    0,
 #endif

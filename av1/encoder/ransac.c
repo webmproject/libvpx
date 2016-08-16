@@ -469,7 +469,8 @@ int ransac_(double *matched_points, int npoints, int *number_of_inliers,
     }
 
     av1_integerize_model(H, type, &wm);
-    projectpoints(wm.wmmat, corners1_int, image1_coord, npoints, 2, 2, 0, 0);
+    projectpoints((int16_t *)wm.wmmat, corners1_int, image1_coord, npoints, 2,
+                  2, 0, 0);
 
     for (i = 0; i < npoints; ++i) {
       double dx =
@@ -610,12 +611,12 @@ static void denormalizeAffine(double *H, double *T1, double *T2) {
   Ha[6] = Ha[7] = 0;
   Ha[8] = 1;
   denormalizeHomography(Ha, T1, T2);
-  H[0] = Ha[2];
-  H[1] = Ha[5];
-  H[2] = Ha[0];
-  H[3] = Ha[1];
-  H[4] = Ha[3];
-  H[5] = Ha[4];
+  H[0] = Ha[5];
+  H[1] = Ha[2];
+  H[2] = Ha[1];
+  H[3] = Ha[0];
+  H[4] = Ha[4];
+  H[5] = Ha[3];
 }
 
 static void denormalizeRotZoom(double *H, double *T1, double *T2) {
@@ -629,10 +630,10 @@ static void denormalizeRotZoom(double *H, double *T1, double *T2) {
   Ha[6] = Ha[7] = 0;
   Ha[8] = 1;
   denormalizeHomography(Ha, T1, T2);
-  H[0] = Ha[2];
-  H[1] = Ha[5];
-  H[2] = Ha[0];
-  H[3] = Ha[1];
+  H[0] = Ha[5];
+  H[1] = Ha[2];
+  H[2] = Ha[1];
+  H[3] = Ha[0];
 }
 
 static void denormalizeTranslation(double *H, double *T1, double *T2) {
@@ -646,8 +647,8 @@ static void denormalizeTranslation(double *H, double *T1, double *T2) {
   Ha[6] = Ha[7] = 0;
   Ha[8] = 1;
   denormalizeHomography(Ha, T1, T2);
-  H[0] = Ha[2];
-  H[1] = Ha[5];
+  H[0] = Ha[5];
+  H[1] = Ha[2];
 }
 
 static int is_collinear3(double *p1, double *p2, double *p3) {

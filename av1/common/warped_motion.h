@@ -20,6 +20,7 @@
 #include "./aom_config.h"
 #include "aom_ports/mem.h"
 #include "aom_dsp/aom_dsp_common.h"
+#include "av1/common/mv.h"
 
 // Bits of precision used for the model
 #define WARPEDMODEL_PREC_BITS 8
@@ -37,49 +38,36 @@
 
 #define WARPEDDIFF_PREC_BITS (WARPEDMODEL_PREC_BITS - WARPEDPIXEL_PREC_BITS)
 
-typedef void (*ProjectPointsType)(int *mat, int *points, int *proj, const int n,
-                                  const int stride_points,
+typedef void (*ProjectPointsType)(int16_t *mat, int *points, int *proj,
+                                  const int n, const int stride_points,
                                   const int stride_proj,
                                   const int subsampling_x,
                                   const int subsampling_y);
-void projectPointsHomography(int *mat, int *points, int *proj, const int n,
+
+void projectPointsHomography(int16_t *mat, int *points, int *proj, const int n,
                              const int stride_points, const int stride_proj,
                              const int subsampling_x, const int subsampling_y);
-void projectPointsAffine(int *mat, int *points, int *proj, const int n,
+
+void projectPointsAffine(int16_t *mat, int *points, int *proj, const int n,
                          const int stride_points, const int stride_proj,
                          const int subsampling_x, const int subsampling_y);
-void projectPointsRotZoom(int *mat, int *points, int *proj, const int n,
+
+void projectPointsRotZoom(int16_t *mat, int *points, int *proj, const int n,
                           const int stride_points, const int stride_proj,
                           const int subsampling_x, const int subsampling_y);
-void projectPointsTranslation(int *mat, int *points, int *proj, const int n,
+
+void projectPointsTranslation(int16_t *mat, int *points, int *proj, const int n,
                               const int stride_points, const int stride_proj,
                               const int subsampling_x, const int subsampling_y);
 
-typedef enum {
-  UNKNOWN_TRANSFORM = -1,
-  HOMOGRAPHY,   // homography, 8-parameter
-  AFFINE,       // affine, 6-parameter
-  ROTZOOM,      // simplified affine with rotation and zoom only, 4-parameter
-  TRANSLATION,  // translational motion 2-parameter
-  TRANS_TYPES
-} TransformationType;
-
-// number of parameters used by each transformation in TransformationTypes
-static const int n_trans_model_params[TRANS_TYPES] = { 9, 6, 4, 2 };
-
-typedef struct {
-  TransformationType wmtype;
-  int wmmat[8];  // For homography wmmat[9] is assumed to be 1
-} WarpedMotionParams;
-
 double av1_warp_erroradv(WarpedMotionParams *wm,
-#if CONFIG_AOM_HIGHBITDEPTH
-                         int use_hbd, int bd,
-#endif  // CONFIG_AOM_HIGHBITDEPTH
-                         uint8_t *ref, int width, int height, int stride,
-                         uint8_t *dst, int p_col, int p_row, int p_width,
-                         int p_height, int p_stride, int subsampling_x,
-                         int subsampling_y, int x_scale, int y_scale);
+#if CONFIG_VP9_HIGHBITDEPTH
+                          int use_hbd, int bd,
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+                          uint8_t *ref, int width, int height, int stride,
+                          uint8_t *dst, int p_col, int p_row, int p_width,
+                          int p_height, int p_stride, int subsampling_x,
+                          int subsampling_y, int x_scale, int y_scale);
 
 void av1_warp_plane(WarpedMotionParams *wm,
 #if CONFIG_AOM_HIGHBITDEPTH

@@ -3195,29 +3195,29 @@ static void write_global_motion_params(Global_Motion_Params *params,
   switch (gmtype) {
     case GLOBAL_ZERO: break;
     case GLOBAL_AFFINE:
-      av1_write_primitive_symmetric(
-          w, params->motion_params.wmmat[4] >> GM_ALPHA_PREC_DIFF,
-          GM_ABS_ALPHA_BITS);
-      av1_write_primitive_symmetric(
-          w, (params->motion_params.wmmat[5] >> GM_ALPHA_PREC_DIFF) -
+      aom_write_primitive_symmetric(
+          w, (params->motion_params.wmmat[2].as_mv.row >> GM_ALPHA_PREC_DIFF) -
                  (1 << GM_ALPHA_PREC_BITS),
+          GM_ABS_ALPHA_BITS);
+      aom_write_primitive_symmetric(
+          w, (params->motion_params.wmmat[2].as_mv.col >> GM_ALPHA_PREC_DIFF),
           GM_ABS_ALPHA_BITS);
     // fallthrough intended
     case GLOBAL_ROTZOOM:
       aom_write_primitive_symmetric(
-          w, (params->motion_params.wmmat[2] >> GM_ALPHA_PREC_DIFF) -
-                 (1 << GM_ALPHA_PREC_BITS),
+          w, (params->motion_params.wmmat[1].as_mv.row >> GM_ALPHA_PREC_DIFF),
           GM_ABS_ALPHA_BITS);
       aom_write_primitive_symmetric(
-          w, params->motion_params.wmmat[3] >> GM_ALPHA_PREC_DIFF,
+          w, (params->motion_params.wmmat[1].as_mv.col >> GM_ALPHA_PREC_DIFF) -
+                 (1 << GM_ALPHA_PREC_BITS),
           GM_ABS_ALPHA_BITS);
     // fallthrough intended
     case GLOBAL_TRANSLATION:
       aom_write_primitive_symmetric(
-          w, params->motion_params.wmmat[0] >> GM_TRANS_PREC_DIFF,
+          w, (params->motion_params.wmmat[0].as_mv.row >> GM_TRANS_PREC_DIFF),
           GM_ABS_TRANS_BITS);
       aom_write_primitive_symmetric(
-          w, params->motion_params.wmmat[1] >> GM_TRANS_PREC_DIFF,
+          w, (params->motion_params.wmmat[0].as_mv.col >> GM_TRANS_PREC_DIFF),
           GM_ABS_TRANS_BITS);
       break;
     default: assert(0);
@@ -3233,6 +3233,14 @@ static void write_global_motion(AV1_COMP *cpi, aom_writer *w) {
     }
     write_global_motion_params(&cm->global_motion[frame],
                                cm->fc->global_motion_types_prob, w);
+    /*
+          printf("Enc Ref %d [%d] (used %d): %d %d %d %d\n",
+                 frame, cm->current_video_frame, cpi->global_motion_used[frame],
+                 cm->global_motion[frame].motion_params.wmmat[0].as_mv.row,
+                 cm->global_motion[frame].motion_params.wmmat[0].as_mv.col,
+                 cm->global_motion[frame].motion_params.wmmat[1].as_mv.row,
+                 cm->global_motion[frame].motion_params.wmmat[1].as_mv.col);
+    */
   }
 }
 #endif

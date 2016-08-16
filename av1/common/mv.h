@@ -13,9 +13,6 @@
 
 #include "av1/common/common.h"
 #include "aom_dsp/aom_filter.h"
-#if CONFIG_GLOBAL_MOTION
-#include "av1/common/warped_motion.h"
-#endif  // CONFIG_GLOBAL_MOTION
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,6 +32,41 @@ typedef struct mv32 {
   int32_t row;
   int32_t col;
 } MV32;
+
+#if CONFIG_GLOBAL_MOTION || CONFIG_WARPED_MOTION
+// Bits of precision used for the model
+#define WARPEDMODEL_PREC_BITS 8
+#define WARPEDMODEL_ROW3HOMO_PREC_BITS 12
+
+// Bits of subpel precision for warped interpolation
+#define WARPEDPIXEL_PREC_BITS 6
+#define WARPEDPIXEL_PREC_SHIFTS (1 << WARPEDPIXEL_PREC_BITS)
+
+// Taps for ntap filter
+#define WARPEDPIXEL_FILTER_TAPS 6
+
+// Precision of filter taps
+#define WARPEDPIXEL_FILTER_BITS 7
+
+#define WARPEDDIFF_PREC_BITS (WARPEDMODEL_PREC_BITS - WARPEDPIXEL_PREC_BITS)
+
+typedef enum {
+  UNKNOWN_TRANSFORM = -1,
+  HOMOGRAPHY,   // homography, 8-parameter
+  AFFINE,       // affine, 6-parameter
+  ROTZOOM,      // simplified affine with rotation and zoom only, 4-parameter
+  TRANSLATION,  // translational motion 2-parameter
+  TRANS_TYPES
+} TransformationType;
+
+// number of parameters used by each transformation in TransformationTypes
+static const int n_trans_model_params[TRANS_TYPES] = { 9, 6, 4, 2 };
+
+typedef struct {
+  TransformationType wmtype;
+  int_mv wmmat[4];  // For homography wmmat[9] is assumed to be 1
+} WarpedMotionParams;
+#endif  // CONFIG_GLOBAL_MOTION || CONFIG_WARPED_MOTION
 
 #if CONFIG_GLOBAL_MOTION
 // ALPHA here refers to parameters a and b in rotzoom model:
@@ -61,16 +93,16 @@ typedef struct mv32 {
 //
 // XX_MIN, XX_MAX are also computed to avoid repeated computation
 
-#define GM_TRANS_PREC_BITS 5
+#define GM_TRANS_PREC_BITS 8
 #define GM_TRANS_PREC_DIFF (WARPEDMODEL_PREC_BITS - GM_TRANS_PREC_BITS)
 #define GM_TRANS_DECODE_FACTOR (1 << GM_TRANS_PREC_DIFF)
 
-#define GM_ALPHA_PREC_BITS 5
+#define GM_ALPHA_PREC_BITS 8
 #define GM_ALPHA_PREC_DIFF (WARPEDMODEL_PREC_BITS - GM_ALPHA_PREC_BITS)
 #define GM_ALPHA_DECODE_FACTOR (1 << GM_ALPHA_PREC_DIFF)
 
-#define GM_ABS_ALPHA_BITS 8
-#define GM_ABS_TRANS_BITS 8
+#define GM_ABS_ALPHA_BITS 18
+#define GM_ABS_TRANS_BITS 18
 
 #define GM_TRANS_MAX (1 << GM_ABS_TRANS_BITS)
 #define GM_ALPHA_MAX (1 << GM_ABS_ALPHA_BITS)
@@ -102,11 +134,10 @@ static INLINE TransformationType gm_to_trans_type(GLOBAL_MOTION_TYPE gmtype) {
 }
 
 static INLINE GLOBAL_MOTION_TYPE get_gmtype(const Global_Motion_Params *gm) {
-  if (gm->motion_params.wmmat[4] == 0 && gm->motion_params.wmmat[5] == 0) {
-    if (gm->motion_params.wmmat[2] == 0 && gm->motion_params.wmmat[3] == 0) {
-      return ((gm->motion_params.wmmat[0] | gm->motion_params.wmmat[1])
-                  ? GLOBAL_TRANSLATION
-                  : GLOBAL_ZERO);
+  if (!gm->motion_params.wmmat[2].as_int) {
+    if (!gm->motion_params.wmmat[1].as_int) {
+      return (gm->motion_params.wmmat[0].as_int ? GLOBAL_TRANSLATION
+                                                : GLOBAL_ZERO);
     } else {
       return GLOBAL_ROTZOOM;
     }
