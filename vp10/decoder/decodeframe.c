@@ -3387,11 +3387,11 @@ static void read_global_motion_params(Global_Motion_Params *params,
     case GLOBAL_AFFINE:
       params->motion_params.wmmat[4] =
           (vp10_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
-           GM_ALPHA_DECODE_FACTOR) +
-          (1 << WARPEDMODEL_PREC_BITS);
+           GM_ALPHA_DECODE_FACTOR);
       params->motion_params.wmmat[5] =
           vp10_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
-          GM_ALPHA_DECODE_FACTOR;
+          GM_ALPHA_DECODE_FACTOR +
+          (1 << WARPEDMODEL_PREC_BITS);
     // fallthrough intended
     case GLOBAL_ROTZOOM:
       params->motion_params.wmmat[2] =
