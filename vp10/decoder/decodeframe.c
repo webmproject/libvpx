@@ -3462,7 +3462,7 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
   for (k = 0; k < SKIP_CONTEXTS; ++k)
     vp10_diff_update_prob(&r, &fc->skip_probs[k]);
 
-  if (cm->seg.enabled) {
+  if (cm->seg.enabled && cm->seg.update_map) {
     if (cm->seg.temporal_update) {
       for (k = 0; k < PREDICTION_PROBS; k++)
         vp10_diff_update_prob(&r, &cm->fc->seg.pred_probs[k]);

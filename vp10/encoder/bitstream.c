@@ -2543,9 +2543,9 @@ static void encode_segmentation(VP10_COMMON *cm, MACROBLOCKD *xd,
 static void update_seg_probs(VP10_COMP *cpi, vp10_writer *w) {
   VP10_COMMON *cm = &cpi->common;
 
-  if (!cpi->common.seg.enabled) return;
+  if (!cm->seg.enabled || !cm->seg.update_map) return;
 
-  if (cpi->common.seg.temporal_update) {
+  if (cm->seg.temporal_update) {
     int i;
 
     for (i = 0; i < PREDICTION_PROBS; i++)
