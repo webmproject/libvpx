@@ -18,17 +18,15 @@ using libvpx_test::input_base;
 namespace {
 const int txfm_type_num = 2;
 const int txfm_size_num = 5;
-const int txfm_size_ls[5] = { 4, 8, 16, 32, 64 };
+const int txfm_size_ls[5] = { 4, 8, 16, 32 };
 
 const TxfmFunc fwd_txfm_func_ls[2][5] = {
-  { vp10_fdct4_new, vp10_fdct8_new, vp10_fdct16_new, vp10_fdct32_new,
-    vp10_fdct64_new },
+  { vp10_fdct4_new, vp10_fdct8_new, vp10_fdct16_new, vp10_fdct32_new, NULL },
   { vp10_fadst4_new, vp10_fadst8_new, vp10_fadst16_new, vp10_fadst32_new, NULL }
 };
 
 const TxfmFunc inv_txfm_func_ls[2][5] = {
-  { vp10_idct4_new, vp10_idct8_new, vp10_idct16_new, vp10_idct32_new,
-    vp10_idct64_new },
+  { vp10_idct4_new, vp10_idct8_new, vp10_idct16_new, vp10_idct32_new, NULL },
   { vp10_iadst4_new, vp10_iadst8_new, vp10_iadst16_new, vp10_iadst32_new, NULL }
 };
 
