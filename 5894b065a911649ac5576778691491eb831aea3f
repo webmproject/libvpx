@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bbe60bfd_9fef7716",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 33
+      },
+      "lineNbr": 1285,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-08-17T00:20:01Z",
+      "side": 1,
+      "message": "if qdelta \u003d 0, then return should be \u003d 1?\nif so, can check for that case and exit.",
+      "revId": "5894b065a911649ac5576778691491eb831aea3f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
