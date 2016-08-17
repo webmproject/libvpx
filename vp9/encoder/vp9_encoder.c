@@ -2399,10 +2399,11 @@ static int two_pass_first_group_inter(VP9_COMP *cpi) {
   TWO_PASS *const twopass = &cpi->twopass;
   GF_GROUP *const gf_group = &twopass->gf_group;
   if ((cpi->oxcf.pass == 2) &&
-      (gf_group->index == gf_group->first_inter_index))
+      (gf_group->index == gf_group->first_inter_index)) {
     return 1;
-  else
+  } else {
     return 0;
+  }
 }
 
 // Function to test for conditions that indicate we should loop
