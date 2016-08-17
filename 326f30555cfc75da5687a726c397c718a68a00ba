@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bbe60bfd_1f9d2768",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 33
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-08-17T00:22:26Z",
+      "side": 1,
+      "message": "you mean: \"enables options that controls the  delta-quantization\" ?",
+      "range": {
+        "startLine": 398,
+        "startChar": 5,
+        "endLine": 398,
+        "endChar": 53
+      },
+      "revId": "326f30555cfc75da5687a726c397c718a68a00ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bbe60bfd_9f90574e",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 33
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-08-17T00:22:26Z",
+      "side": 1,
+      "message": "you mean: \"Minus one enables the option that determines the quantization step automatically\"?",
+      "revId": "326f30555cfc75da5687a726c397c718a68a00ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
