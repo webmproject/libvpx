@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bbe60bfd_bfdfd332",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 30
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-08-17T00:18:49Z",
+      "side": 1,
+      "message": "should these new code (lines 299 - 325) be only if alt_ref_qp is used? maybe put in separate function",
+      "revId": "824dda94a453caf22c627f31fce96b6fc9167370",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bbe60bfd_3f8583b6",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 30
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-08-17T00:18:49Z",
+      "side": 1,
+      "message": "add comment explaining filter_weight_lower_thresh and this bitrate condition.",
+      "revId": "824dda94a453caf22c627f31fce96b6fc9167370",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bbe60bfd_df965fe7",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 30
+      },
+      "lineNbr": 598,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-08-17T00:18:49Z",
+      "side": 1,
+      "message": "better to put all this seg_map code into separate function,\nunder condition that alt_ref_qp is used?",
+      "range": {
+        "startLine": 598,
+        "startChar": 12,
+        "endLine": 598,
+        "endChar": 24
+      },
+      "revId": "824dda94a453caf22c627f31fce96b6fc9167370",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
