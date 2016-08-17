@@ -1972,11 +1972,11 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   // The last frame in the group is used less as a predictor so reduce
   // its allocation a little.
   if (normal_frames > 1) {
-    normal_frame_bits = total_group_bits / normal_frames;
+    normal_frame_bits = (int)(total_group_bits / normal_frames);
     last_frame_reduction = normal_frame_bits / 16;
     last_frame_bits = normal_frame_bits - last_frame_reduction;
   } else {
-    normal_frame_bits = total_group_bits;
+    normal_frame_bits = (int)total_group_bits;
     last_frame_bits = normal_frame_bits;
     last_frame_reduction = 0;
   }
