@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5bdd0f9f_29d98d80",
+        "filename": "vp10/common/blockd.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 539,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-08-18T16:21:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b794741_ff00a7d7",
+      "range": {
+        "startLine": 539,
+        "startChar": 11,
+        "endLine": 539,
+        "endChar": 12
+      },
+      "revId": "38d77aa0c9a7fe957beb9237e65f08c6629d45fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b794741_9f32c3a2",
         "filename": "vp10/common/common_data.h",
         "patchSetId": 4
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "5bdd0f9f_69d38560",
+        "filename": "vp10/common/common_data.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-08-18T16:21:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b794741_9f32c3a2",
+      "range": {
+        "startLine": 409,
+        "startChar": 0,
+        "endLine": 409,
+        "endChar": 35
+      },
+      "revId": "38d77aa0c9a7fe957beb9237e65f08c6629d45fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b794741_7ff7d7c0",
         "filename": "vp10/encoder/encodeframe.c",
         "patchSetId": 4
@@ -59,6 +107,30 @@
       "writtenOn": "2016-08-18T15:59:42Z",
       "side": 1,
       "message": "You can rewrite as:\nconst TX_SIZE tx_size \u003d is_inter_block(\u0026mi-\u003embmi) ? xd-\u003elossless[mbmi-\u003esegment_id] ? TX_4X4 : tx_size_from_tx_mode(bsize, cm-\u003etx_mode, 1) : (bsize \u003e\u003d BLOCK_8X8) ? mbmi-\u003etx_size : TX_4X4;",
+      "range": {
+        "startLine": 5043,
+        "startChar": 0,
+        "endLine": 5050,
+        "endChar": 7
+      },
+      "revId": "38d77aa0c9a7fe957beb9237e65f08c6629d45fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5bdd0f9f_09d64950",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 5050,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-08-18T16:21:09Z",
+      "side": 1,
+      "message": "No, this is too complex to use an expression.",
+      "parentUuid": "9b794741_7ff7d7c0",
       "range": {
         "startLine": 5043,
         "startChar": 0,
