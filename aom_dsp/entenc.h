@@ -101,8 +101,9 @@ OD_WARN_UNUSED_RESULT unsigned char *od_ec_enc_done(od_ec_enc *enc,
                                                     uint32_t *nbytes)
     OD_ARG_NONNULL(1) OD_ARG_NONNULL(2);
 
-OD_WARN_UNUSED_RESULT int od_ec_enc_tell(od_ec_enc *enc) OD_ARG_NONNULL(1);
-OD_WARN_UNUSED_RESULT uint32_t od_ec_enc_tell_frac(od_ec_enc *enc)
+OD_WARN_UNUSED_RESULT int od_ec_enc_tell(const od_ec_enc *enc)
+    OD_ARG_NONNULL(1);
+OD_WARN_UNUSED_RESULT uint32_t od_ec_enc_tell_frac(const od_ec_enc *enc)
     OD_ARG_NONNULL(1);
 
 void od_ec_enc_checkpoint(od_ec_enc *dst, const od_ec_enc *src);
