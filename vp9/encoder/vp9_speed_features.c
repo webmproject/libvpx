@@ -445,6 +445,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed,
       // Enable short circuit for low temporal variance.
       sf->short_circuit_low_temp_var = 1;
     }
+    if (cpi->use_svc) sf->base_mv_aggressive = 1;
   }
 
   if (speed >= 7) {
@@ -457,6 +458,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed,
       sf->mv.fullpel_search_step_param = 6;
     }
   }
+
   if (speed >= 8) {
     sf->adaptive_rd_thresh = 4;
     sf->mv.subpel_force_stop = (content == VP9E_CONTENT_SCREEN) ? 3 : 2;
@@ -587,6 +589,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->short_circuit_low_temp_var = 0;
   sf->limit_newmv_early_exit = 0;
   sf->bias_golden = 0;
+  sf->base_mv_aggressive = 0;
 
   // Some speed-up features even for best quality as minimal impact on quality.
   sf->adaptive_rd_thresh = 1;
