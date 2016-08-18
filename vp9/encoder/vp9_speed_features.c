@@ -426,6 +426,11 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed,
     if (content == VP9E_CONTENT_SCREEN) {
       sf->short_circuit_flat_blocks = 1;
     }
+    if (cpi->oxcf.rc_mode == VPX_CBR &&
+        cpi->oxcf.content != VP9E_CONTENT_SCREEN && !cpi->use_svc) {
+      sf->limit_newmv_early_exit = 1;
+      sf->bias_golden = 1;
+    }
   }
 
   if (speed >= 6) {
@@ -467,6 +472,8 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed,
       // More aggressive short circuit for speed 8.
       sf->short_circuit_low_temp_var = 2;
     }
+    sf->limit_newmv_early_exit = 0;
+    sf->bias_golden = 0;
   }
 }
 
@@ -578,6 +585,8 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->simple_model_rd_from_var = 0;
   sf->short_circuit_flat_blocks = 0;
   sf->short_circuit_low_temp_var = 0;
+  sf->limit_newmv_early_exit = 0;
+  sf->bias_golden = 0;
 
   // Some speed-up features even for best quality as minimal impact on quality.
   sf->adaptive_rd_thresh = 1;
