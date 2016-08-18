@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9b794741_5a6a29e8",
+        "filename": "vp10/encoder/bitstream.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-18T20:44:40Z",
+      "side": 1,
+      "message": "I would suggest the naming of the new variable to the consistent with that of the old one, e.g.\nrc.is_internal_overlay is suggested to be renamed to rc.is_src_frame_internal_arf or rc.is_src_frame_ext_arf",
+      "revId": "ca7261637cdcb6387a0b064fd08b85e74be6882f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
