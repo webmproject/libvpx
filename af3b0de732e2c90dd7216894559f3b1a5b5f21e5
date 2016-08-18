@@ -16,6 +16,24 @@
       "revId": "af3b0de732e2c90dd7216894559f3b1a5b5f21e5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b794741_9a83b101",
+        "filename": "build/make/ads2gas_apple.pl",
+        "patchSetId": 1
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-18T16:09:51Z",
+      "side": 0,
+      "message": "So it turns out I wasn\u0027t very careful and this is a decidedly wrong thing to do. When the constant is #0, it changes it to #8 (and doens\u0027t change the s16 to i16, like I thought it did)\n\nThis is because ARM gives incorrect constant ranges for this function. The assembly claims the range is 0-8:\nhttp://infocenter.arm.com/help/index.jsp?topic\u003d/com.arm.doc.dui0489i/CIHHJJEG.html\nbut the intrinsics only accept 1-8:\nhttp://infocenter.arm.com/help/index.jsp?topic\u003d/com.arm.doc.dui0472m/chr1360928374486.html\n\nThe closest to an official position is this bug:\nhttps://gcc.gnu.org/bugzilla/show_bug.cgi?id\u003d53124\n\ngcc automatically rewrites #0 to the equivalent vqmovun.\n\nAndroid needed to update their code as well:\nhttps://github.com/temasek/android_external_libavc/commit/ab3f8123964d11f2b19fb7c3d030b216873a2398\n\nSo the correct fix for this would have been to move to vqmovun. The -chromium flag never rewrote anything but the #0 form (although we didn\u0027t use any other form)",
+      "parentUuid": "9b794741_514c5475",
+      "revId": "af3b0de732e2c90dd7216894559f3b1a5b5f21e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
