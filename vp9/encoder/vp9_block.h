@@ -71,6 +71,8 @@ struct macroblock {
   int skip_recode;
   int skip_optimize;
   int q_index;
+  int block_qcoeff_opt;
+  int block_tx_domain;
 
   // The equivalent error at the current rdmult of one whole bit (not one
   // bitcost unit).

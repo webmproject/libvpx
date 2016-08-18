@@ -137,6 +137,9 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
   }
 }
 
+static double tx_dom_thresholds[6] = { 99.0, 14.0, 12.0, 8.0, 4.0, 0.0 };
+static double qopt_thresholds[6] = { 99.0, 12.0, 10.0, 4.0, 2.0, 0.0 };
+
 static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
                                    SPEED_FEATURES *sf, int speed) {
   const int boosted = frame_is_boosted(cpi);
@@ -151,14 +154,24 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
   sf->use_square_only_threshold = BLOCK_16X16;
 
   if (speed >= 1) {
-    if ((cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) ||
-        vp9_internal_image_edge(cpi)) {
-      sf->use_square_partition_only = !frame_is_boosted(cpi);
+    if (cpi->oxcf.pass == 2) {
+      TWO_PASS *const twopass = &cpi->twopass;
+      if ((twopass->fr_content_type == FC_GRAPHICS_ANIMATION) ||
+          vp9_internal_image_edge(cpi)) {
+        sf->use_square_partition_only = !frame_is_boosted(cpi);
+      } else {
+        sf->use_square_partition_only = !frame_is_intra_only(cm);
+      }
     } else {
       sf->use_square_partition_only = !frame_is_intra_only(cm);
     }
-    sf->use_square_only_threshold = BLOCK_4X4;
 
+    sf->allow_txfm_domain_distortion = 1;
+    sf->tx_domain_thresh = tx_dom_thresholds[(speed < 6) ? speed : 5];
+    sf->allow_quant_coeff_opt = sf->optimize_coefficients;
+    sf->quant_opt_thresh = qopt_thresholds[(speed < 6) ? speed : 5];
+
+    sf->use_square_only_threshold = BLOCK_4X4;
     sf->less_rectangular_check = 1;
 
     sf->use_rd_breakout = 1;
@@ -174,8 +187,6 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC_H_V;
     sf->intra_y_mode_mask[TX_16X16] = INTRA_DC_H_V;
     sf->intra_uv_mode_mask[TX_16X16] = INTRA_DC_H_V;
-    sf->txfm_domain_distortion = 1;
-    sf->quant_coeff_opt = 0;
   }
 
   if (speed >= 2) {
@@ -294,8 +305,10 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed,
   sf->exhaustive_searches_thresh = INT_MAX;
 
   if (speed >= 1) {
-    sf->txfm_domain_distortion = 1;
-    sf->quant_coeff_opt = 0;
+    sf->allow_txfm_domain_distortion = 1;
+    sf->tx_domain_thresh = 0.0;
+    sf->allow_quant_coeff_opt = 0;
+    sf->quant_opt_thresh = 0.0;
     sf->use_square_partition_only = !frame_is_intra_only(cm);
     sf->less_rectangular_check = 1;
     sf->tx_size_search_method =
@@ -566,8 +579,10 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->disable_filter_search_var_thresh = 0;
   sf->adaptive_interp_filter_search = 0;
   sf->allow_partition_search_skip = 0;
-  sf->txfm_domain_distortion = 0;
-  sf->quant_coeff_opt = sf->optimize_coefficients;
+  sf->allow_txfm_domain_distortion = 0;
+  sf->tx_domain_thresh = 99.0;
+  sf->allow_quant_coeff_opt = sf->optimize_coefficients;
+  sf->quant_opt_thresh = 99.0;
 
   for (i = 0; i < TX_SIZES; i++) {
     sf->intra_y_mode_mask[i] = INTRA_ALL;

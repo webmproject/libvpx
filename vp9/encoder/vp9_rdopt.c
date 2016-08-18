@@ -535,7 +535,7 @@ static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane,
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
 
-  if (cpi->sf.txfm_domain_distortion) {
+  if (x->block_tx_domain) {
     const int ss_txfrm_size = tx_size << 1;
     int64_t this_sse;
     const int shift = tx_size == TX_32X32 ? 0 : 2;
@@ -663,11 +663,11 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
   if (args->exit_early) return;
 
   if (!is_inter_block(mi)) {
-    struct encode_b_args intra_arg = { x, args->cpi->sf.quant_coeff_opt,
-                                       args->t_above, args->t_left, &mi->skip };
+    struct encode_b_args intra_arg = { x, x->block_qcoeff_opt, args->t_above,
+                                       args->t_left, &mi->skip };
     vp9_encode_block_intra(plane, block, blk_row, blk_col, plane_bsize, tx_size,
                            &intra_arg);
-    if (args->cpi->sf.txfm_domain_distortion) {
+    if (x->block_tx_domain) {
       dist_block(args->cpi, x, plane, plane_bsize, block, blk_row, blk_col,
                  tx_size, &dist, &sse);
     } else {
@@ -697,7 +697,7 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
         SKIP_TXFM_NONE) {
       // full forward transform and quantization
       vp9_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size);
-      if (args->cpi->sf.quant_coeff_opt)
+      if (x->block_qcoeff_opt)
         vp9_optimize_b(x, plane, block, tx_size, coeff_ctx);
       dist_block(args->cpi, x, plane, plane_bsize, block, blk_row, blk_col,
                  tx_size, &dist, &sse);
@@ -731,7 +731,7 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
   } else {
     // full forward transform and quantization
     vp9_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size);
-    if (args->cpi->sf.quant_coeff_opt)
+    if (x->block_qcoeff_opt)
       vp9_optimize_b(x, plane, block, tx_size, coeff_ctx);
     dist_block(args->cpi, x, plane, plane_bsize, block, blk_row, blk_col,
                tx_size, &dist, &sse);
