@@ -625,9 +625,7 @@ static void get_entropy_contexts_plane(
         t_left[i] = !!*(const uint32_t *)&left[i];
       break;
 #endif  // CONFIG_EXT_TX
-    default:
-      assert(0 && "Invalid transform size.");
-      break;
+    default: assert(0 && "Invalid transform size."); break;
   }
 }
 

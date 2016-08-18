@@ -1253,18 +1253,18 @@ static const transform_2d FHT_8x4[] = {
 };
 
 static const transform_2d FHT_8x16[] = {
-  { fdct16,  fdct8  },  // DCT_DCT
-  { fadst16, fdct8  },  // ADST_DCT
-  { fdct16,  fadst8 },  // DCT_ADST
+  { fdct16, fdct8 },    // DCT_DCT
+  { fadst16, fdct8 },   // ADST_DCT
+  { fdct16, fadst8 },   // DCT_ADST
   { fadst16, fadst8 },  // ADST_ADST
-  { fadst16, fdct8  },  // FLIPADST_DCT
-  { fdct16,  fadst8 },  // DCT_FLIPADST
+  { fadst16, fdct8 },   // FLIPADST_DCT
+  { fdct16, fadst8 },   // DCT_FLIPADST
   { fadst16, fadst8 },  // FLIPADST_FLIPADST
   { fadst16, fadst8 },  // ADST_FLIPADST
   { fadst16, fadst8 },  // FLIPADST_ADST
   { fidtx16, fidtx8 },  // IDTX
-  { fdct16,  fidtx8 },  // V_DCT
-  { fidtx16, fdct8  },  // H_DCT
+  { fdct16, fidtx8 },   // V_DCT
+  { fidtx16, fdct8 },   // H_DCT
   { fadst16, fidtx8 },  // V_ADST
   { fidtx16, fadst8 },  // H_ADST
   { fadst16, fidtx8 },  // V_FLIPADST
@@ -1272,18 +1272,18 @@ static const transform_2d FHT_8x16[] = {
 };
 
 static const transform_2d FHT_16x8[] = {
-  { fdct8,  fdct16  },  // DCT_DCT
-  { fadst8, fdct16  },  // ADST_DCT
-  { fdct8,  fadst16 },  // DCT_ADST
+  { fdct8, fdct16 },    // DCT_DCT
+  { fadst8, fdct16 },   // ADST_DCT
+  { fdct8, fadst16 },   // DCT_ADST
   { fadst8, fadst16 },  // ADST_ADST
-  { fadst8, fdct16  },  // FLIPADST_DCT
-  { fdct8,  fadst16 },  // DCT_FLIPADST
+  { fadst8, fdct16 },   // FLIPADST_DCT
+  { fdct8, fadst16 },   // DCT_FLIPADST
   { fadst8, fadst16 },  // FLIPADST_FLIPADST
   { fadst8, fadst16 },  // ADST_FLIPADST
   { fadst8, fadst16 },  // FLIPADST_ADST
   { fidtx8, fidtx16 },  // IDTX
-  { fdct8,  fidtx16 },  // V_DCT
-  { fidtx8, fdct16  },  // H_DCT
+  { fdct8, fidtx16 },   // V_DCT
+  { fidtx8, fdct16 },   // H_DCT
   { fadst8, fidtx16 },  // V_ADST
   { fidtx8, fadst16 },  // H_ADST
   { fadst8, fidtx16 },  // V_FLIPADST
@@ -1291,40 +1291,40 @@ static const transform_2d FHT_16x8[] = {
 };
 
 static const transform_2d FHT_16x32[] = {
-  { fdct32,       fdct16  },    // DCT_DCT
-  { fhalfright32, fdct16  },    // ADST_DCT
-  { fdct32,       fadst16 },    // DCT_ADST
-  { fhalfright32, fadst16 },    // ADST_ADST
-  { fhalfright32, fdct16  },    // FLIPADST_DCT
-  { fdct32,       fadst16 },    // DCT_FLIPADST
-  { fhalfright32, fadst16 },    // FLIPADST_FLIPADST
-  { fhalfright32, fadst16 },    // ADST_FLIPADST
-  { fhalfright32, fadst16 },    // FLIPADST_ADST
-  { fidtx32,      fidtx16 },    // IDTX
-  { fdct32,       fidtx16 },    // V_DCT
-  { fidtx32,      fdct16  },    // H_DCT
-  { fhalfright32, fidtx16 },    // V_ADST
-  { fidtx32,      fadst16 },    // H_ADST
-  { fhalfright32, fidtx16 },    // V_FLIPADST
-  { fidtx32,      fadst16 },    // H_FLIPADST
+  { fdct32, fdct16 },         // DCT_DCT
+  { fhalfright32, fdct16 },   // ADST_DCT
+  { fdct32, fadst16 },        // DCT_ADST
+  { fhalfright32, fadst16 },  // ADST_ADST
+  { fhalfright32, fdct16 },   // FLIPADST_DCT
+  { fdct32, fadst16 },        // DCT_FLIPADST
+  { fhalfright32, fadst16 },  // FLIPADST_FLIPADST
+  { fhalfright32, fadst16 },  // ADST_FLIPADST
+  { fhalfright32, fadst16 },  // FLIPADST_ADST
+  { fidtx32, fidtx16 },       // IDTX
+  { fdct32, fidtx16 },        // V_DCT
+  { fidtx32, fdct16 },        // H_DCT
+  { fhalfright32, fidtx16 },  // V_ADST
+  { fidtx32, fadst16 },       // H_ADST
+  { fhalfright32, fidtx16 },  // V_FLIPADST
+  { fidtx32, fadst16 },       // H_FLIPADST
 };
 
 static const transform_2d FHT_32x16[] = {
-  { fdct16,  fdct32       },  // DCT_DCT
-  { fadst16, fdct32       },  // ADST_DCT
-  { fdct16,  fhalfright32 },  // DCT_ADST
+  { fdct16, fdct32 },         // DCT_DCT
+  { fadst16, fdct32 },        // ADST_DCT
+  { fdct16, fhalfright32 },   // DCT_ADST
   { fadst16, fhalfright32 },  // ADST_ADST
-  { fadst16, fdct32       },  // FLIPADST_DCT
-  { fdct16,  fhalfright32 },  // DCT_FLIPADST
+  { fadst16, fdct32 },        // FLIPADST_DCT
+  { fdct16, fhalfright32 },   // DCT_FLIPADST
   { fadst16, fhalfright32 },  // FLIPADST_FLIPADST
   { fadst16, fhalfright32 },  // ADST_FLIPADST
   { fadst16, fhalfright32 },  // FLIPADST_ADST
-  { fidtx16, fidtx32      },  // IDTX
-  { fdct16,  fidtx32      },  // V_DCT
-  { fidtx16, fdct32       },  // H_DCT
-  { fadst16, fidtx32      },  // V_ADST
+  { fidtx16, fidtx32 },       // IDTX
+  { fdct16, fidtx32 },        // V_DCT
+  { fidtx16, fdct32 },        // H_DCT
+  { fadst16, fidtx32 },       // V_ADST
   { fidtx16, fhalfright32 },  // H_ADST
-  { fadst16, fidtx32      },  // V_FLIPADST
+  { fadst16, fidtx32 },       // V_FLIPADST
   { fidtx16, fhalfright32 },  // H_FLIPADST
 };
 #endif  // CONFIG_EXT_TX
@@ -1376,11 +1376,10 @@ void vp10_fht4x8_c(const int16_t *input, tran_low_t *output, int stride,
   // Columns
   for (i = 0; i < n; ++i) {
     for (j = 0; j < n2; ++j)
-      temp_in[j] = (tran_low_t)fdct_round_shift(
-          input[j * stride + i] * 8 * Sqrt2);
+      temp_in[j] =
+          (tran_low_t)fdct_round_shift(input[j * stride + i] * 8 * Sqrt2);
     ht.cols(temp_in, temp_out);
-    for (j = 0; j < n2; ++j)
-      out[j * n + i] = temp_out[j];
+    for (j = 0; j < n2; ++j) out[j * n + i] = temp_out[j];
   }
 
   // Rows
@@ -1406,11 +1405,10 @@ void vp10_fht8x4_c(const int16_t *input, tran_low_t *output, int stride,
   // Columns
   for (i = 0; i < n2; ++i) {
     for (j = 0; j < n; ++j)
-      temp_in[j] = (tran_low_t)fdct_round_shift(
-          input[j * stride + i] * 8 * Sqrt2);
+      temp_in[j] =
+          (tran_low_t)fdct_round_shift(input[j * stride + i] * 8 * Sqrt2);
     ht.cols(temp_in, temp_out);
-    for (j = 0; j < n; ++j)
-      out[j * n2 + i] = temp_out[j];
+    for (j = 0; j < n; ++j) out[j * n2 + i] = temp_out[j];
   }
 
   // Rows
@@ -1422,8 +1420,8 @@ void vp10_fht8x4_c(const int16_t *input, tran_low_t *output, int stride,
   // Note: overall scale factor of transform is 8 times unitary
 }
 
-void vp10_fht8x16_c(const int16_t *input, tran_low_t *output,
-                    int stride, int tx_type) {
+void vp10_fht8x16_c(const int16_t *input, tran_low_t *output, int stride,
+                    int tx_type) {
   const int n = 8;
   const int n2 = 16;
   tran_low_t out[16 * 8];
@@ -1436,26 +1434,23 @@ void vp10_fht8x16_c(const int16_t *input, tran_low_t *output,
   // Columns
   for (i = 0; i < n; ++i) {
     for (j = 0; j < n2; ++j)
-      temp_in[j] = (tran_low_t)fdct_round_shift(
-          input[j * stride + i] * 4 * Sqrt2);
+      temp_in[j] =
+          (tran_low_t)fdct_round_shift(input[j * stride + i] * 4 * Sqrt2);
     ht.cols(temp_in, temp_out);
-    for (j = 0; j < n2; ++j)
-      out[j * n + i] = temp_out[j];
+    for (j = 0; j < n2; ++j) out[j * n + i] = temp_out[j];
   }
 
   // Rows
   for (i = 0; i < n2; ++i) {
-    for (j = 0; j < n; ++j)
-      temp_in[j] = out[j + i * n];
+    for (j = 0; j < n; ++j) temp_in[j] = out[j + i * n];
     ht.rows(temp_in, temp_out);
-    for (j = 0; j < n; ++j)
-      output[j + i * n] = (temp_out[j] + 1) >> 1;
+    for (j = 0; j < n; ++j) output[j + i * n] = (temp_out[j] + 1) >> 1;
   }
   // Note: overall scale factor of transform is 8 times unitary
 }
 
-void vp10_fht16x8_c(const int16_t *input, tran_low_t *output,
-                   int stride, int tx_type) {
+void vp10_fht16x8_c(const int16_t *input, tran_low_t *output, int stride,
+                    int tx_type) {
   const int n = 8;
   const int n2 = 16;
   tran_low_t out[16 * 8];
@@ -1468,26 +1463,23 @@ void vp10_fht16x8_c(const int16_t *input, tran_low_t *output,
   // Columns
   for (i = 0; i < n2; ++i) {
     for (j = 0; j < n; ++j)
-      temp_in[j] = (tran_low_t)fdct_round_shift(
-          input[j * stride + i] * 4 * Sqrt2);
+      temp_in[j] =
+          (tran_low_t)fdct_round_shift(input[j * stride + i] * 4 * Sqrt2);
     ht.cols(temp_in, temp_out);
-    for (j = 0; j < n; ++j)
-      out[j * n2 + i] = temp_out[j];
+    for (j = 0; j < n; ++j) out[j * n2 + i] = temp_out[j];
   }
 
   // Rows
   for (i = 0; i < n; ++i) {
-    for (j = 0; j < n2; ++j)
-      temp_in[j] = out[j + i * n2];
+    for (j = 0; j < n2; ++j) temp_in[j] = out[j + i * n2];
     ht.rows(temp_in, temp_out);
-    for (j = 0; j < n2; ++j)
-      output[j + i * n2] = (temp_out[j] + 1) >> 1;
+    for (j = 0; j < n2; ++j) output[j + i * n2] = (temp_out[j] + 1) >> 1;
   }
   // Note: overall scale factor of transform is 8 times unitary
 }
 
-void vp10_fht16x32_c(const int16_t *input, tran_low_t *output,
-                     int stride, int tx_type) {
+void vp10_fht16x32_c(const int16_t *input, tran_low_t *output, int stride,
+                     int tx_type) {
   const int n = 16;
   const int n2 = 32;
   tran_low_t out[32 * 16];
@@ -1500,17 +1492,14 @@ void vp10_fht16x32_c(const int16_t *input, tran_low_t *output,
   // Columns
   for (i = 0; i < n; ++i) {
     for (j = 0; j < n2; ++j)
-      temp_in[j] = (tran_low_t)fdct_round_shift(
-          input[j * stride + i] * Sqrt2);
+      temp_in[j] = (tran_low_t)fdct_round_shift(input[j * stride + i] * Sqrt2);
     ht.cols(temp_in, temp_out);
-    for (j = 0; j < n2; ++j)
-      out[j * n + i] = temp_out[j];
+    for (j = 0; j < n2; ++j) out[j * n + i] = temp_out[j];
   }
 
   // Rows
   for (i = 0; i < n2; ++i) {
-    for (j = 0; j < n; ++j)
-      temp_in[j] = out[j + i * n];
+    for (j = 0; j < n; ++j) temp_in[j] = out[j + i * n];
     ht.rows(temp_in, temp_out);
     for (j = 0; j < n; ++j)
       output[j + i * n] =
@@ -1519,8 +1508,8 @@ void vp10_fht16x32_c(const int16_t *input, tran_low_t *output,
   // Note: overall scale factor of transform is 4 times unitary
 }
 
-void vp10_fht32x16_c(const int16_t *input, tran_low_t *output,
-                   int stride, int tx_type) {
+void vp10_fht32x16_c(const int16_t *input, tran_low_t *output, int stride,
+                     int tx_type) {
   const int n = 16;
   const int n2 = 32;
   tran_low_t out[32 * 16];
@@ -1533,17 +1522,14 @@ void vp10_fht32x16_c(const int16_t *input, tran_low_t *output,
   // Columns
   for (i = 0; i < n2; ++i) {
     for (j = 0; j < n; ++j)
-      temp_in[j] = (tran_low_t)fdct_round_shift(
-          input[j * stride + i] * Sqrt2);
+      temp_in[j] = (tran_low_t)fdct_round_shift(input[j * stride + i] * Sqrt2);
     ht.cols(temp_in, temp_out);
-    for (j = 0; j < n; ++j)
-      out[j * n2 + i] = temp_out[j];
+    for (j = 0; j < n; ++j) out[j * n2 + i] = temp_out[j];
   }
 
   // Rows
   for (i = 0; i < n; ++i) {
-    for (j = 0; j < n2; ++j)
-      temp_in[j] = out[j + i * n2];
+    for (j = 0; j < n2; ++j) temp_in[j] = out[j + i * n2];
     ht.rows(temp_in, temp_out);
     for (j = 0; j < n2; ++j)
       output[j + i * n2] =
@@ -1807,23 +1793,23 @@ void vp10_highbd_fht4x4_c(const int16_t *input, tran_low_t *output, int stride,
 }
 
 #if CONFIG_EXT_TX
-void vp10_highbd_fht4x8_c(const int16_t *input, tran_low_t *output,
-                          int stride, int tx_type) {
+void vp10_highbd_fht4x8_c(const int16_t *input, tran_low_t *output, int stride,
+                          int tx_type) {
   vp10_fht4x8_c(input, output, stride, tx_type);
 }
 
-void vp10_highbd_fht8x4_c(const int16_t *input, tran_low_t *output,
-                          int stride, int tx_type) {
+void vp10_highbd_fht8x4_c(const int16_t *input, tran_low_t *output, int stride,
+                          int tx_type) {
   vp10_fht8x4_c(input, output, stride, tx_type);
 }
 
-void vp10_highbd_fht8x16_c(const int16_t *input, tran_low_t *output,
-                           int stride, int tx_type) {
+void vp10_highbd_fht8x16_c(const int16_t *input, tran_low_t *output, int stride,
+                           int tx_type) {
   vp10_fht8x16_c(input, output, stride, tx_type);
 }
 
-void vp10_highbd_fht16x8_c(const int16_t *input, tran_low_t *output,
-                           int stride, int tx_type) {
+void vp10_highbd_fht16x8_c(const int16_t *input, tran_low_t *output, int stride,
+                           int tx_type) {
   vp10_fht16x8_c(input, output, stride, tx_type);
 }
 

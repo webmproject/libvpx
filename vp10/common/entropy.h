@@ -168,8 +168,7 @@ static INLINE const uint8_t *get_band_translate(TX_SIZE tx_size) {
   switch (tx_size) {
     case TX_4X4: return vp10_coefband_trans_4x4;
 #if CONFIG_EXT_TX
-    case TX_4X8:
-      return vp10_coefband_trans_4x8_8x4;
+    case TX_4X8: return vp10_coefband_trans_4x8_8x4;
 #endif  // CONFIG_EXT_TX
     default: return vp10_coefband_trans_8x8plus;
   }
@@ -230,19 +229,19 @@ static INLINE int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
       break;
     case TX_8X16:
       above_ec = !!*(const uint16_t *)a;
-      left_ec  = !!*(const uint32_t *)l;
+      left_ec = !!*(const uint32_t *)l;
       break;
     case TX_16X8:
       above_ec = !!*(const uint32_t *)a;
-      left_ec  = !!*(const uint16_t *)l;
+      left_ec = !!*(const uint16_t *)l;
       break;
     case TX_16X32:
       above_ec = !!*(const uint32_t *)a;
-      left_ec  = !!*(const uint64_t *)l;
+      left_ec = !!*(const uint64_t *)l;
       break;
     case TX_32X16:
       above_ec = !!*(const uint64_t *)a;
-      left_ec  = !!*(const uint32_t *)l;
+      left_ec = !!*(const uint32_t *)l;
       break;
 #endif  // CONFIG_EXT_TX
     case TX_8X8:
