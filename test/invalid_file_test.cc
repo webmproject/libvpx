@@ -128,6 +128,12 @@ const DecodeParam kVP9InvalidFileTests[] = {
   { 1, "invalid-vp90-03-v3.webm" },
   { 1, "invalid-vp90-2-00-quantizer-11.webm.ivf.s52984_r01-05_b6-.ivf" },
   { 1, "invalid-vp90-2-00-quantizer-11.webm.ivf.s52984_r01-05_b6-z.ivf" },
+// This file will cause a large allocation which is expected to fail in 32-bit
+// environments. Test x86 for coverage purposes as the allocation failure will
+// be in platform agnostic code.
+#if ARCH_X86
+  { 1, "invalid-vp90-2-00-quantizer-63.ivf.kf_65527x61446.ivf" },
+#endif
   { 1, "invalid-vp90-2-12-droppable_1.ivf.s3676_r01-05_b6-.ivf" },
   { 1, "invalid-vp90-2-05-resize.ivf.s59293_r01-05_b6-.ivf" },
   { 1, "invalid-vp90-2-09-subpixel-00.ivf.s20492_r01-05_b6-.v2.ivf" },
