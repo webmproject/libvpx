@@ -328,6 +328,7 @@ INSTANTIATE_TEST_CASE_P(MSA, Trans4x4DCT,
                         ::testing::Values(make_tuple(&vpx_fdct4x4_msa,
                                                      &vpx_idct4x4_16_add_msa, 0,
                                                      VPX_BITS_8, 16)));
+#if !CONFIG_EXT_TX
 INSTANTIATE_TEST_CASE_P(
     MSA, Trans4x4HT,
     ::testing::Values(make_tuple(&vp10_fht4x4_msa, &vp10_iht4x4_16_add_msa, 0,
@@ -338,5 +339,6 @@ INSTANTIATE_TEST_CASE_P(
                                  VPX_BITS_8, 16),
                       make_tuple(&vp10_fht4x4_msa, &vp10_iht4x4_16_add_msa, 3,
                                  VPX_BITS_8, 16)));
+#endif  // !CONFIG_EXT_TX
 #endif  // HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 }  // namespace

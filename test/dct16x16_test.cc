@@ -921,6 +921,7 @@ INSTANTIATE_TEST_CASE_P(MSA, Trans16x16DCT,
                         ::testing::Values(make_tuple(&vpx_fdct16x16_msa,
                                                      &vpx_idct16x16_256_add_msa,
                                                      0, VPX_BITS_8)));
+#if !CONFIG_EXT_TX
 INSTANTIATE_TEST_CASE_P(
     MSA, Trans16x16HT,
     ::testing::Values(make_tuple(&vp10_fht16x16_msa, &vp10_iht16x16_256_add_msa,
@@ -931,6 +932,7 @@ INSTANTIATE_TEST_CASE_P(
                                  2, VPX_BITS_8),
                       make_tuple(&vp10_fht16x16_msa, &vp10_iht16x16_256_add_msa,
                                  3, VPX_BITS_8)));
+#endif  // !CONFIG_EXT_TX
 INSTANTIATE_TEST_CASE_P(MSA, PartialTrans16x16Test,
                         ::testing::Values(make_tuple(&vpx_fdct16x16_1_msa,
                                                      VPX_BITS_8)));
