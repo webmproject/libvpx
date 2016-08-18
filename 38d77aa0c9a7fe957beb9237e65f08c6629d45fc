@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9b794741_ff00a7d7",
+        "filename": "vp10/common/blockd.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 539,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-18T15:59:42Z",
+      "side": 1,
+      "message": "Remove the \"!\"",
+      "range": {
+        "startLine": 539,
+        "startChar": 11,
+        "endLine": 539,
+        "endChar": 12
+      },
+      "revId": "38d77aa0c9a7fe957beb9237e65f08c6629d45fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b794741_9f32c3a2",
+        "filename": "vp10/common/common_data.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-18T15:59:42Z",
+      "side": 1,
+      "message": "If it\u0027s the same, I wonder if just \"#define inter_tx_size_cat_lookup intra_tx_size_cat_lookup\" would work.",
+      "range": {
+        "startLine": 409,
+        "startChar": 0,
+        "endLine": 409,
+        "endChar": 35
+      },
+      "revId": "38d77aa0c9a7fe957beb9237e65f08c6629d45fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b794741_7ff7d7c0",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 5050,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-18T15:59:42Z",
+      "side": 1,
+      "message": "You can rewrite as:\nconst TX_SIZE tx_size \u003d is_inter_block(\u0026mi-\u003embmi) ? xd-\u003elossless[mbmi-\u003esegment_id] ? TX_4X4 : tx_size_from_tx_mode(bsize, cm-\u003etx_mode, 1) : (bsize \u003e\u003d BLOCK_8X8) ? mbmi-\u003etx_size : TX_4X4;",
+      "range": {
+        "startLine": 5043,
+        "startChar": 0,
+        "endLine": 5050,
+        "endChar": 7
+      },
+      "revId": "38d77aa0c9a7fe957beb9237e65f08c6629d45fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b794741_dfce0b8a",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1356,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-18T15:59:42Z",
+      "side": 1,
+      "message": "Use \"else if\"",
+      "range": {
+        "startLine": 1355,
+        "startChar": 6,
+        "endLine": 1356,
+        "endChar": 8
+      },
+      "revId": "38d77aa0c9a7fe957beb9237e65f08c6629d45fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
