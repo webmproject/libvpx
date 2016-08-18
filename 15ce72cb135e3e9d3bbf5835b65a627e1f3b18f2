@@ -1,0 +1,276 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9b794741_f46be91c",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 4293,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-18T20:44:40Z",
+      "side": 1,
+      "message": "We may need to put a comment here to address why we do not need to check cpi-\u003erefresh_golden_frame",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b794741_b44ec1c6",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 2746,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-18T20:44:40Z",
+      "side": 1,
+      "message": "The line intent here does not seem correct",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b794741_14b7959d",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 2765,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-18T20:44:40Z",
+      "side": 1,
+      "message": "Do we need to have the reset here?",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b794741_34d091ca",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 3095,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-18T20:44:40Z",
+      "side": 1,
+      "message": "\"the\"-\u003e\"The\"",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b794741_54cd1d2d",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 3096,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-18T20:44:40Z",
+      "side": 1,
+      "message": "start -\u003e starts",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b794741_34e97178",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 3277,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-18T20:44:40Z",
+      "side": 1,
+      "message": "bwd_ref_fram -\u003ebwd_ref_frame",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b794741_f47f69ba",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 3278,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-18T20:44:40Z",
+      "side": 1,
+      "message": "Please put a little more detailed comment to address ALT0, ALT1, and ALT2",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b794741_b47561fc",
+        "filename": "vp10/encoder/encoder.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 627,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-18T20:44:40Z",
+      "side": 1,
+      "message": "Maybe rename extra_arfs to num_extra_arfs?",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b794741_349731e5",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1603,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-18T20:44:40Z",
+      "side": 1,
+      "message": "Let\u0027s try to find a better name for acc",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b794741_f423e9bd",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1692,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-18T20:44:40Z",
+      "side": 1,
+      "message": "Maybe we put the above specification on the subgroup intervals in a separate function?",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b794741_d40b4d2e",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1709,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-18T20:44:40Z",
+      "side": 1,
+      "message": "Let\u0027s use \"acc_interval +\u003d\" here",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b794741_f409a932",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1853,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-18T20:44:40Z",
+      "side": 1,
+      "message": "reset -\u003e Reset",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b794741_145d5526",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 2637,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-18T20:44:40Z",
+      "side": 1,
+      "message": "This is great!",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b794741_1486b57a",
+        "filename": "vp10/encoder/ratectrl.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 922,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-18T20:44:40Z",
+      "side": 1,
+      "message": "Let\u0027s make this change under the experiment of \"ext-refs\"",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b794741_5453dd16",
+        "filename": "vp10/encoder/ratectrl.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-18T20:44:40Z",
+      "side": 1,
+      "message": "Should we remove above commented code?",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b794741_b4b7a13a",
+        "filename": "vp10/encoder/temporal_filter.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 635,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-18T20:44:40Z",
+      "side": 1,
+      "message": "Please put a comment here that we enforce the filtering strength on the extra altrefs to be zero",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
