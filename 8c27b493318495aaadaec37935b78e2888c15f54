@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9b794741_8a183ed4",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 439,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-18T21:59:44Z",
+      "side": 1,
+      "message": "it\u0027s probably only worth writing this if global motion is enabled too. log_echo might be a better choice to include the warning in config.log too.",
+      "revId": "8c27b493318495aaadaec37935b78e2888c15f54",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
