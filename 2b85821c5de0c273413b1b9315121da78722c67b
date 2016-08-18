@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7b3493be_2aeddf1c",
+        "filename": "configure",
+        "patchSetId": 2
+      },
+      "lineNbr": 439,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-08-18T23:02:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7b3493be_6a7197d9",
+      "revId": "2b85821c5de0c273413b1b9315121da78722c67b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7b3493be_6a4a7781",
         "filename": "configure",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-08-18T22:46:56Z",
       "side": 1,
       "message": "you can add a second call to force a new line. you\u0027ll end up with extra indent here",
+      "revId": "2b85821c5de0c273413b1b9315121da78722c67b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b3493be_4afa13d8",
+        "filename": "configure",
+        "patchSetId": 2
+      },
+      "lineNbr": 440,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-08-18T23:02:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7b3493be_6a4a7781",
       "revId": "2b85821c5de0c273413b1b9315121da78722c67b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
