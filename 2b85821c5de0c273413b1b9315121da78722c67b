@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7b3493be_6a7197d9",
+        "filename": "configure",
+        "patchSetId": 2
+      },
+      "lineNbr": 439,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-18T22:46:56Z",
+      "side": 1,
+      "message": "break this line",
+      "revId": "2b85821c5de0c273413b1b9315121da78722c67b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b3493be_6a4a7781",
+        "filename": "configure",
+        "patchSetId": 2
+      },
+      "lineNbr": 440,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-18T22:46:56Z",
+      "side": 1,
+      "message": "you can add a second call to force a new line. you\u0027ll end up with extra indent here",
+      "revId": "2b85821c5de0c273413b1b9315121da78722c67b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
