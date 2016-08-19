@@ -138,12 +138,12 @@ typedef uint8_t TX_SIZE;
 #define TX_SIZES ((TX_SIZE)4)
 
 #if CONFIG_EXT_TX
-#define TX_4X8     ((TX_SIZE)4)      // 4x8 transform
-#define TX_8X4     ((TX_SIZE)5)      // 8x4 transform
-#define TX_8X16    ((TX_SIZE)6)      // 8x16 transform
-#define TX_16X8    ((TX_SIZE)7)      // 16x8 transform
-#define TX_16X32   ((TX_SIZE)8)      // 16x32 transform
-#define TX_32X16   ((TX_SIZE)9)      // 32x16 transform
+#define TX_4X8 ((TX_SIZE)4)         // 4x8 transform
+#define TX_8X4 ((TX_SIZE)5)         // 8x4 transform
+#define TX_8X16 ((TX_SIZE)6)        // 8x16 transform
+#define TX_16X8 ((TX_SIZE)7)        // 16x8 transform
+#define TX_16X32 ((TX_SIZE)8)       // 16x32 transform
+#define TX_32X16 ((TX_SIZE)9)       // 32x16 transform
 #define TX_SIZES_ALL ((TX_SIZE)10)  // Includes rectangular transforms
 #else
 #define TX_SIZES_ALL ((TX_SIZE)4)

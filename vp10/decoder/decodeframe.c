@@ -1783,10 +1783,11 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 #if DERING_REFINEMENT
   if (bsize == BLOCK_64X64) {
     if (cm->dering_level != 0 && !sb_all_skip(cm, mi_row, mi_col)) {
-      cm->mi_grid_visible[mi_row*cm->mi_stride + mi_col]->mbmi.dering_gain =
+      cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col]->mbmi.dering_gain =
           vpx_read_literal(r, DERING_REFINEMENT_BITS);
     } else {
-      cm->mi_grid_visible[mi_row*cm->mi_stride + mi_col]->mbmi.dering_gain = 0;
+      cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col]->mbmi.dering_gain =
+          0;
     }
   }
 #endif  // DERGING_REFINEMENT
@@ -1967,7 +1968,7 @@ static void setup_clpf(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
 
 #if CONFIG_DERING
 static void setup_dering(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
-  cm->dering_level = vpx_rb_read_literal(rb,  DERING_LEVEL_BITS);
+  cm->dering_level = vpx_rb_read_literal(rb, DERING_LEVEL_BITS);
 }
 #endif  // CONFIG_DERING
 
@@ -3390,7 +3391,7 @@ static void read_global_motion_params(Global_Motion_Params *params,
            GM_ALPHA_DECODE_FACTOR);
       params->motion_params.wmmat[5] =
           vp10_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
-          GM_ALPHA_DECODE_FACTOR +
+              GM_ALPHA_DECODE_FACTOR +
           (1 << WARPEDMODEL_PREC_BITS);
     // fallthrough intended
     case GLOBAL_ROTZOOM:

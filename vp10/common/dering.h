@@ -24,8 +24,7 @@ void vp10_dering_frame(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
                        MACROBLOCKD *xd, int global_level);
 
 int vp10_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
-                      VP10_COMMON *cm,
-                      MACROBLOCKD *xd);
+                       VP10_COMMON *cm, MACROBLOCKD *xd);
 
 #ifdef __cplusplus
 }  // extern "C"
