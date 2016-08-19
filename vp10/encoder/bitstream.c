@@ -2650,6 +2650,7 @@ static void write_tile_info(const VP10_COMMON *const cm,
   if (cm->log2_tile_rows != 0) vpx_wb_write_bit(wb, cm->log2_tile_rows != 1);
 #endif  // CONFIG_EXT_TILE
 }
+
 static int get_refresh_mask(VP10_COMP *cpi) {
   int refresh_mask = 0;
 
@@ -2664,8 +2665,12 @@ static int get_refresh_mask(VP10_COMP *cpi) {
   //     LAST3_FRAME.
   refresh_mask |=
       (cpi->refresh_last_frame << cpi->lst_fb_idxes[LAST_REF_FRAMES - 1]);
-
-  refresh_mask |= (cpi->refresh_bwd_ref_frame << cpi->bwd_fb_idx);
+  if (cpi->rc.is_bwd_ref_frame && cpi->num_extra_arfs) {
+    // We have swapped the virtual indices
+    refresh_mask |= (cpi->refresh_bwd_ref_frame << cpi->arf_map[0]);
+  } else {
+    refresh_mask |= (cpi->refresh_bwd_ref_frame << cpi->bwd_fb_idx);
+  }
 #else
   refresh_mask |= (cpi->refresh_last_frame << cpi->lst_fb_idx);
 #endif  // CONFIG_EXT_REFS
@@ -2684,10 +2689,15 @@ static int get_refresh_mask(VP10_COMP *cpi) {
     return refresh_mask | (cpi->refresh_golden_frame << cpi->alt_fb_idx);
   } else {
     int arf_idx = cpi->alt_fb_idx;
+#if CONFIG_EXT_REFS
+    const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
+    arf_idx = cpi->arf_map[gf_group->arf_update_idx[gf_group->index]];
+#else
     if ((cpi->oxcf.pass == 2) && cpi->multi_arf_allowed) {
       const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
       arf_idx = gf_group->arf_update_idx[gf_group->index];
     }
+#endif  // CONFIG_EXT_REFS
     return refresh_mask | (cpi->refresh_golden_frame << cpi->gld_fb_idx) |
            (cpi->refresh_alt_ref_frame << arf_idx);
   }

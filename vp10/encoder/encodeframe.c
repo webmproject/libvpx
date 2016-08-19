@@ -4289,7 +4289,13 @@ static void reset_skip_tx_size(VP10_COMMON *cm, TX_SIZE max_tx_size) {
 static MV_REFERENCE_FRAME get_frame_type(const VP10_COMP *cpi) {
   if (frame_is_intra_only(&cpi->common))
     return INTRA_FRAME;
+#if CONFIG_EXT_REFS
+  // We will not update the golden frame with an internal overlay frame
+  else if ((cpi->rc.is_src_frame_alt_ref && cpi->refresh_golden_frame) ||
+      cpi->rc.is_src_frame_ext_arf)
+#else
   else if (cpi->rc.is_src_frame_alt_ref && cpi->refresh_golden_frame)
+#endif
     return ALTREF_FRAME;
   else if (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)
     return GOLDEN_FRAME;
