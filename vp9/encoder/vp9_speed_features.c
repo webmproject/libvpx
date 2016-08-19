@@ -91,6 +91,16 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
       sf->partition_search_breakout_rate_thr = 100;
     }
     sf->rd_auto_partition_min_limit = set_partition_min_limit(cm);
+
+    // Use a set of speed features for 4k videos.
+    if (VPXMIN(cm->width, cm->height) >= 2160) {
+      sf->use_square_partition_only = 1;
+      sf->intra_y_mode_mask[TX_32X32] = INTRA_DC;
+      sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC;
+      sf->alt_ref_search_fp = 1;
+      sf->cb_pred_filter_search = 1;
+      sf->adaptive_interp_filter_search = 1;
+    }
   }
 
   if (speed >= 3) {
