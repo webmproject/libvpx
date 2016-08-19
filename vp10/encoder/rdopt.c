@@ -6588,8 +6588,8 @@ static int64_t handle_inter_mode(
       !is_comp_interintra_pred &&
 #endif  // CONFIG_EXT_INTER
       is_motvar_allowed(mbmi);
-  int rate2_nocoeff, best_rate2 = INT_MAX, best_skippable, best_xskip,
-                     best_disable_skip = 0;
+  int rate2_nocoeff = 0, best_rate2 = INT_MAX, best_skippable, best_xskip,
+      best_disable_skip = 0;
   int best_rate_y, best_rate_uv;
 #if CONFIG_VAR_TX
   uint8_t best_blk_skip[MAX_MB_PLANE][MAX_MIB_SIZE * MAX_MIB_SIZE * 4];
@@ -7402,8 +7402,7 @@ static int64_t handle_inter_mode(
   for (mbmi->motion_variation = SIMPLE_TRANSLATION;
        mbmi->motion_variation < (allow_motvar ? MOTION_VARIATIONS : 1);
        mbmi->motion_variation++) {
-    int64_t tmp_rd, tmp_dist;
-    int tmp_rate;
+    int64_t tmp_rd;
 #if CONFIG_EXT_INTER
     int tmp_rate2 = mbmi->motion_variation != SIMPLE_TRANSLATION
                         ? rate2_bmc_nocoeff
@@ -7426,6 +7425,8 @@ static int64_t handle_inter_mode(
 #endif  // CONFIG_EXT_INTERP
 
 #if CONFIG_OBMC
+    int tmp_rate;
+    int64_t tmp_dist;
     if (mbmi->motion_variation == OBMC_CAUSAL) {
 #if CONFIG_EXT_INTER
       *mbmi = best_bmc_mbmi;
