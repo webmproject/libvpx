@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c8ccd355_2c7e93dd",
+        "filename": "vp10/encoder/pickrst.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-08-19T21:10:31Z",
+      "side": 1,
+      "message": "remove the blank line",
+      "revId": "37b9378180df69aba90114139f3f1eccef23ae63",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08fd0b27_1eb4e2c8",
+        "filename": "vp10/encoder/pickrst.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-08-19T21:10:31Z",
+      "side": 1,
+      "message": "As far as I understand, bilateral_level[] should be initialized to all -1 before we update the best level in the above code block. Just to make sure, can you point out where the initialization or anything with the similar functionality is done?",
+      "revId": "37b9378180df69aba90114139f3f1eccef23ae63",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
