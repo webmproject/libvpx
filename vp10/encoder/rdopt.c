@@ -1721,142 +1721,144 @@ static int rd_pick_palette_intra_sby(
     int dc_mode_cost, PALETTE_MODE_INFO *palette_mode_info,
     uint8_t *best_palette_color_map, TX_SIZE *best_tx, TX_TYPE *best_tx_type,
     PREDICTION_MODE *mode_selected, int64_t *best_rd) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  MODE_INFO *const mic = xd->mi[0];
-  const int rows = 4 * num_4x4_blocks_high_lookup[bsize];
-  const int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
-  int this_rate, this_rate_tokenonly, s, colors, n;
   int rate_overhead = 0;
-  int64_t this_distortion, this_rd;
-  const int src_stride = x->plane[0].src.stride;
-  const uint8_t *const src = x->plane[0].src.buf;
+  if (cpi->common.allow_screen_content_tools) {
+    MACROBLOCKD *const xd = &x->e_mbd;
+    MODE_INFO *const mic = xd->mi[0];
+    const int rows = 4 * num_4x4_blocks_high_lookup[bsize];
+    const int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
+    int this_rate, this_rate_tokenonly, s, colors, n;
+    int64_t this_distortion, this_rd;
+    const int src_stride = x->plane[0].src.stride;
+    const uint8_t *const src = x->plane[0].src.buf;
 
 #if CONFIG_VP9_HIGHBITDEPTH
-  if (cpi->common.use_highbitdepth)
-    colors = vp10_count_colors_highbd(src, src_stride, rows, cols,
-                                      cpi->common.bit_depth);
-  else
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-    colors = vp10_count_colors(src, src_stride, rows, cols);
-  palette_mode_info->palette_size[0] = 0;
-#if CONFIG_EXT_INTRA
-  mic->mbmi.ext_intra_mode_info.use_ext_intra_mode[0] = 0;
-#endif  // CONFIG_EXT_INTRA
-
-  if (colors > 1 && colors <= 64 && cpi->common.allow_screen_content_tools) {
-    int r, c, i, j, k;
-    const int max_itr = 50;
-    int color_ctx, color_idx = 0;
-    int color_order[PALETTE_MAX_SIZE];
-    float *const data = x->palette_buffer->kmeans_data_buf;
-    float centroids[PALETTE_MAX_SIZE];
-    uint8_t *const color_map = xd->plane[0].color_index_map;
-    float lb, ub, val;
-    MB_MODE_INFO *const mbmi = &mic->mbmi;
-    PALETTE_MODE_INFO *const pmi = &mbmi->palette_mode_info;
-#if CONFIG_VP9_HIGHBITDEPTH
-    uint16_t *src16 = CONVERT_TO_SHORTPTR(src);
     if (cpi->common.use_highbitdepth)
-      lb = ub = src16[0];
+      colors = vp10_count_colors_highbd(src, src_stride, rows, cols,
+                                        cpi->common.bit_depth);
     else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-      lb = ub = src[0];
-
-#if CONFIG_VP9_HIGHBITDEPTH
-    if (cpi->common.use_highbitdepth) {
-      for (r = 0; r < rows; ++r) {
-        for (c = 0; c < cols; ++c) {
-          val = src16[r * src_stride + c];
-          data[r * cols + c] = val;
-          if (val < lb)
-            lb = val;
-          else if (val > ub)
-            ub = val;
-        }
-      }
-    } else {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-      for (r = 0; r < rows; ++r) {
-        for (c = 0; c < cols; ++c) {
-          val = src[r * src_stride + c];
-          data[r * cols + c] = val;
-          if (val < lb)
-            lb = val;
-          else if (val > ub)
-            ub = val;
-        }
-      }
-#if CONFIG_VP9_HIGHBITDEPTH
-    }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-    mbmi->mode = DC_PRED;
+      colors = vp10_count_colors(src, src_stride, rows, cols);
+    palette_mode_info->palette_size[0] = 0;
 #if CONFIG_EXT_INTRA
-    mbmi->ext_intra_mode_info.use_ext_intra_mode[0] = 0;
+    mic->mbmi.ext_intra_mode_info.use_ext_intra_mode[0] = 0;
 #endif  // CONFIG_EXT_INTRA
 
-    if (rows * cols > PALETTE_MAX_BLOCK_SIZE) return 0;
-
-    for (n = colors > PALETTE_MAX_SIZE ? PALETTE_MAX_SIZE : colors; n >= 2;
-         --n) {
-      for (i = 0; i < n; ++i)
-        centroids[i] = lb + (2 * i + 1) * (ub - lb) / n / 2;
-      vp10_k_means(data, centroids, color_map, rows * cols, n, 1, max_itr);
-      k = vp10_remove_duplicates(centroids, n);
-
+    if (colors > 1 && colors <= 64) {
+      int r, c, i, j, k;
+      const int max_itr = 50;
+      int color_ctx, color_idx = 0;
+      int color_order[PALETTE_MAX_SIZE];
+      float *const data = x->palette_buffer->kmeans_data_buf;
+      float centroids[PALETTE_MAX_SIZE];
+      uint8_t *const color_map = xd->plane[0].color_index_map;
+      float lb, ub, val;
+      MB_MODE_INFO *const mbmi = &mic->mbmi;
+      PALETTE_MODE_INFO *const pmi = &mbmi->palette_mode_info;
 #if CONFIG_VP9_HIGHBITDEPTH
+      uint16_t *src16 = CONVERT_TO_SHORTPTR(src);
       if (cpi->common.use_highbitdepth)
-        for (i = 0; i < k; ++i)
-          pmi->palette_colors[i] =
-              clip_pixel_highbd((int)centroids[i], cpi->common.bit_depth);
+        lb = ub = src16[0];
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-        for (i = 0; i < k; ++i)
-          pmi->palette_colors[i] = clip_pixel((int)centroids[i]);
-      pmi->palette_size[0] = k;
+        lb = ub = src[0];
 
-      vp10_calc_indices(data, centroids, color_map, rows * cols, k, 1);
-
-      super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion, &s, NULL,
-                      bsize, *best_rd);
-      if (this_rate_tokenonly == INT_MAX) continue;
-
-      this_rate =
-          this_rate_tokenonly + dc_mode_cost +
-          cpi->common.bit_depth * k * vp10_cost_bit(128, 0) +
-          cpi->palette_y_size_cost[bsize - BLOCK_8X8][k - 2] +
-          write_uniform_cost(k, color_map[0]) +
-          vp10_cost_bit(
-              vp10_default_palette_y_mode_prob[bsize - BLOCK_8X8][palette_ctx],
-              1);
-      for (i = 0; i < rows; ++i) {
-        for (j = (i == 0 ? 1 : 0); j < cols; ++j) {
-          color_ctx = vp10_get_palette_color_context(color_map, cols, i, j, k,
-                                                     color_order);
-          for (r = 0; r < k; ++r)
-            if (color_map[i * cols + j] == color_order[r]) {
-              color_idx = r;
-              break;
-            }
-          assert(color_idx >= 0 && color_idx < k);
-          this_rate += cpi->palette_y_color_cost[k - 2][color_ctx][color_idx];
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (cpi->common.use_highbitdepth) {
+        for (r = 0; r < rows; ++r) {
+          for (c = 0; c < cols; ++c) {
+            val = src16[r * src_stride + c];
+            data[r * cols + c] = val;
+            if (val < lb)
+              lb = val;
+            else if (val > ub)
+              ub = val;
+          }
         }
+      } else {
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+        for (r = 0; r < rows; ++r) {
+          for (c = 0; c < cols; ++c) {
+            val = src[r * src_stride + c];
+            data[r * cols + c] = val;
+            if (val < lb)
+              lb = val;
+            else if (val > ub)
+              ub = val;
+          }
+        }
+#if CONFIG_VP9_HIGHBITDEPTH
       }
-      this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
-      if (this_rd < *best_rd) {
-        *best_rd = this_rd;
-        *palette_mode_info = *pmi;
-        memcpy(best_palette_color_map, color_map,
-               rows * cols * sizeof(color_map[0]));
-        *mode_selected = DC_PRED;
-        *best_tx = mbmi->tx_size;
-        *best_tx_type = mbmi->tx_type;
-        rate_overhead = this_rate - this_rate_tokenonly;
+      mbmi->mode = DC_PRED;
+#if CONFIG_EXT_INTRA
+      mbmi->ext_intra_mode_info.use_ext_intra_mode[0] = 0;
+#endif  // CONFIG_EXT_INTRA
+
+      if (rows * cols > PALETTE_MAX_BLOCK_SIZE) return 0;
+
+      for (n = colors > PALETTE_MAX_SIZE ? PALETTE_MAX_SIZE : colors; n >= 2;
+           --n) {
+        for (i = 0; i < n; ++i)
+          centroids[i] = lb + (2 * i + 1) * (ub - lb) / n / 2;
+        vp10_k_means(data, centroids, color_map, rows * cols, n, 1, max_itr);
+        k = vp10_remove_duplicates(centroids, n);
+
+#if CONFIG_VP9_HIGHBITDEPTH
+        if (cpi->common.use_highbitdepth)
+          for (i = 0; i < k; ++i)
+            pmi->palette_colors[i] =
+                clip_pixel_highbd((int)centroids[i], cpi->common.bit_depth);
+        else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+          for (i = 0; i < k; ++i)
+            pmi->palette_colors[i] = clip_pixel((int)centroids[i]);
+        pmi->palette_size[0] = k;
+
+        vp10_calc_indices(data, centroids, color_map, rows * cols, k, 1);
+
+        super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion, &s,
+                        NULL, bsize, *best_rd);
+        if (this_rate_tokenonly == INT_MAX) continue;
+
+        this_rate =
+            this_rate_tokenonly + dc_mode_cost +
+            cpi->common.bit_depth * k * vp10_cost_bit(128, 0) +
+            cpi->palette_y_size_cost[bsize - BLOCK_8X8][k - 2] +
+            write_uniform_cost(k, color_map[0]) +
+            vp10_cost_bit(
+                vp10_default_palette_y_mode_prob[bsize -
+                                                 BLOCK_8X8][palette_ctx],
+                1);
+        for (i = 0; i < rows; ++i) {
+          for (j = (i == 0 ? 1 : 0); j < cols; ++j) {
+            color_ctx = vp10_get_palette_color_context(color_map, cols, i, j, k,
+                                                       color_order);
+            for (r = 0; r < k; ++r)
+              if (color_map[i * cols + j] == color_order[r]) {
+                color_idx = r;
+                break;
+              }
+            assert(color_idx >= 0 && color_idx < k);
+            this_rate += cpi->palette_y_color_cost[k - 2][color_ctx][color_idx];
+          }
+        }
+        this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
+
+        if (this_rd < *best_rd) {
+          *best_rd = this_rd;
+          *palette_mode_info = *pmi;
+          memcpy(best_palette_color_map, color_map,
+                 rows * cols * sizeof(color_map[0]));
+          *mode_selected = DC_PRED;
+          *best_tx = mbmi->tx_size;
+          *best_tx_type = mbmi->tx_type;
+          rate_overhead = this_rate - this_rate_tokenonly;
+        }
       }
     }
   }
-
   return rate_overhead;
 }
 
