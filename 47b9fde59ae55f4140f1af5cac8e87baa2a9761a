@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "48b2a3c6_08d5c7eb",
+        "filename": "vp10/common/entropymode.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-08-19T08:03:30Z",
+      "side": 1,
+      "message": "Does this really need to be 2D? This is not an entropy count (at least right now), and is only used by the encoder to decide whether to allow downgrading of tx_mode right? In that case there is no need for the \u0027category\u0027 index.",
+      "range": {
+        "startLine": 175,
+        "startChar": 0,
+        "endLine": 175,
+        "endChar": 51
+      },
+      "revId": "47b9fde59ae55f4140f1af5cac8e87baa2a9761a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48b2a3c6_28da0b1d",
+        "filename": "vp10/decoder/decodemv.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-08-19T08:03:30Z",
+      "side": 1,
+      "message": "assert(IMPLIES(tx_mode \u003d\u003d ONLY_4X4, bsize \u003d\u003d BLOCK_4X4)) ???",
+      "range": {
+        "startLine": 319,
+        "startChar": 0,
+        "endLine": 319,
+        "endChar": 41
+      },
+      "revId": "47b9fde59ae55f4140f1af5cac8e87baa2a9761a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48b2a3c6_e8bb93b0",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 4696,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-08-19T08:03:30Z",
+      "side": 1,
+      "message": "Make tx_size_implied 1D and drop first index?",
+      "range": {
+        "startLine": 4687,
+        "startChar": 0,
+        "endLine": 4696,
+        "endChar": 57
+      },
+      "revId": "47b9fde59ae55f4140f1af5cac8e87baa2a9761a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48b2a3c6_88ad3781",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 5043,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-08-19T08:03:30Z",
+      "side": 1,
+      "message": "This is only for blocks 8X8 of larger, so this should make no difference in this patch (my dependent patch that add support for larger rectangles does this, but it is morre involved (see the dependence of tx_size_cat on is_inter)). I think we should leave this out from this patch and use the version in the dependent patch.",
+      "range": {
+        "startLine": 5035,
+        "startChar": 0,
+        "endLine": 5043,
+        "endChar": 12
+      },
+      "revId": "47b9fde59ae55f4140f1af5cac8e87baa2a9761a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48b2a3c6_a8aa7b64",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 5048,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-08-19T08:03:30Z",
+      "side": 1,
+      "message": "Make tx_size_implied 1D and drop this? \"cat\" is a misnomer here somewhat.",
+      "range": {
+        "startLine": 5048,
+        "startChar": 18,
+        "endLine": 5048,
+        "endChar": 29
+      },
+      "revId": "47b9fde59ae55f4140f1af5cac8e87baa2a9761a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
