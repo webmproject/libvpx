@@ -16,7 +16,7 @@ static float calc_dist(const float *p1, const float *p2, int dim) {
   float dist = 0;
   int i;
   for (i = 0; i < dim; ++i) {
-    const float diff = p1[i] - roundf(p2[i]);
+    const float diff = p1[i] - p2[i];
     dist += diff * diff;
   }
   return dist;
@@ -74,6 +74,11 @@ static void calc_centroids(const float *data, float *centroids,
       for (j = 0; j < dim; ++j) centroids[i * dim + j] *= norm;
     }
   }
+
+  // Round to nearest integers.
+  for (i = 0; i < k * dim; ++i) {
+    centroids[i] = roundf(centroids[i]);
+  }
 }
 
 static float calc_total_dist(const float *data, const float *centroids,
@@ -127,9 +132,6 @@ int vp10_remove_duplicates(float *centroids, int num_centroids) {
   int num_unique;  // number of unique centroids
   int i;
   qsort(centroids, num_centroids, sizeof(*centroids), float_comparer);
-  for (i = 0; i < num_centroids; ++i) {
-    centroids[i] = roundf(centroids[i]);
-  }
   // Remove duplicates.
   num_unique = 1;
   for (i = 1; i < num_centroids; ++i) {
