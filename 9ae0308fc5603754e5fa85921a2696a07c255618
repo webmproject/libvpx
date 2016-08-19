@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "08fd0b27_93cb4e55",
+        "filename": "vp9/encoder/vp9_alt_ref_aq.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-19T17:56:08Z",
+      "side": 1,
+      "message": "I think this is the decision favored by the autoformatter currently.",
+      "parentUuid": "08fd0b27_cd1135ad",
+      "revId": "9ae0308fc5603754e5fa85921a2696a07c255618",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "08fd0b27_2d553953",
         "filename": "vp9/encoder/vp9_alt_ref_aq.c",
         "patchSetId": 17
