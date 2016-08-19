@@ -151,6 +151,8 @@ int vp10_alloc_context_buffers(VP10_COMMON *cm, int width, int height) {
   return 0;
 
 fail:
+  // clear the mi_* values to force a realloc on resync
+  vp10_set_mb_mi(cm, 0, 0);
   vp10_free_context_buffers(cm);
   return 1;
 }
