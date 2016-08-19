@@ -68,7 +68,7 @@ struct tree_node {
   int len;
   int l;
   int r;
-  uint16_t pdf;
+  aom_cdf_prob pdf;
 };
 
 /* Compute the probability of this node in Q23 */
@@ -96,7 +96,8 @@ static int tree_node_cmp(tree_node a, tree_node b) {
 /* Given a Q15 probability for symbol subtree rooted at tree[n], this function
     computes the probability of each symbol (defined as a node that has no
     children). */
-static uint16_t tree_node_compute_probs(tree_node *tree, int n, uint16_t pdf) {
+static aom_cdf_prob tree_node_compute_probs(tree_node *tree, int n,
+                                            aom_cdf_prob pdf) {
   if (tree[n].l == 0) {
     /* This prevents probability computations in Q15 that underflow from
         producing a symbol that has zero probability. */
@@ -106,15 +107,15 @@ static uint16_t tree_node_compute_probs(tree_node *tree, int n, uint16_t pdf) {
   } else {
     /* We process the smaller probability first,  */
     if (tree[n].prob < 128) {
-      uint16_t lp;
-      uint16_t rp;
+      aom_cdf_prob lp;
+      aom_cdf_prob rp;
       lp = (((uint32_t)pdf) * tree[n].prob + 128) >> 8;
       lp = tree_node_compute_probs(tree, tree[n].l, lp);
       rp = tree_node_compute_probs(tree, tree[n].r, lp > pdf ? 0 : pdf - lp);
       return lp + rp;
     } else {
-      uint16_t rp;
-      uint16_t lp;
+      aom_cdf_prob rp;
+      aom_cdf_prob lp;
       rp = (((uint32_t)pdf) * (256 - tree[n].prob) + 128) >> 8;
       rp = tree_node_compute_probs(tree, tree[n].r, rp);
       lp = tree_node_compute_probs(tree, tree[n].l, rp > pdf ? 0 : pdf - rp);
@@ -123,8 +124,9 @@ static uint16_t tree_node_compute_probs(tree_node *tree, int n, uint16_t pdf) {
   }
 }
 
-static int tree_node_extract(tree_node *tree, int n, int symb, uint16_t *pdf,
-                             aom_tree_index *index, int *path, int *len) {
+static int tree_node_extract(tree_node *tree, int n, int symb,
+                             aom_cdf_prob *pdf, aom_tree_index *index,
+                             int *path, int *len) {
   if (tree[n].l == 0) {
     pdf[symb] = tree[n].pdf;
     if (index != NULL) index[symb] = tree[n].index;
@@ -138,7 +140,7 @@ static int tree_node_extract(tree_node *tree, int n, int symb, uint16_t *pdf,
 }
 
 int tree_to_cdf(const aom_tree_index *tree, const aom_prob *probs,
-                aom_tree_index root, uint16_t *cdf, aom_tree_index *index,
+                aom_tree_index root, aom_cdf_prob *cdf, aom_tree_index *index,
                 int *path, int *len) {
   tree_node symb[2 * 16 - 1];
   int nodes;

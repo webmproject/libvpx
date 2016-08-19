@@ -55,9 +55,6 @@ typedef struct frame_contexts {
 #else
   aom_prob partition_prob[PARTITION_CONTEXTS][PARTITION_TYPES - 1];
 #endif
-#if CONFIG_DAALA_EC
-  uint16_t partition_cdf[PARTITION_CONTEXTS][PARTITION_TYPES];
-#endif
   av1_coeff_probs_model coef_probs[TX_SIZES][PLANE_TYPES];
 #if CONFIG_ANS || CONFIG_DAALA_EC
   coeff_cdf_model coef_cdfs[TX_SIZES][PLANE_TYPES];
@@ -135,10 +132,11 @@ typedef struct frame_contexts {
   aom_prob switchable_restore_prob[RESTORE_SWITCHABLE_TYPES - 1];
 #endif  // CONFIG_LOOP_RESTORATION
 #if CONFIG_DAALA_EC
-  uint16_t switchable_interp_cdf[SWITCHABLE_FILTER_CONTEXTS]
-                                [SWITCHABLE_FILTERS];
-  uint16_t intra_ext_tx_cdf[EXT_TX_SIZES][TX_TYPES][TX_TYPES];
-  uint16_t inter_ext_tx_cdf[EXT_TX_SIZES][TX_TYPES];
+  aom_cdf_prob partition_cdf[PARTITION_CONTEXTS][PARTITION_TYPES];
+  aom_cdf_prob
+      switchable_interp_cdf[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];
+  aom_cdf_prob intra_ext_tx_cdf[EXT_TX_SIZES][TX_TYPES][TX_TYPES];
+  aom_cdf_prob inter_ext_tx_cdf[EXT_TX_SIZES][TX_TYPES];
 #endif
 } FRAME_CONTEXT;
 

@@ -98,11 +98,11 @@ void aom_tree_merge_probs(const aom_tree_index *tree, const aom_prob *pre_probs,
 
 #if CONFIG_DAALA_EC
 int tree_to_cdf(const aom_tree_index *tree, const aom_prob *probs,
-                aom_tree_index root, uint16_t *cdf, aom_tree_index *ind,
+                aom_tree_index root, aom_cdf_prob *cdf, aom_tree_index *ind,
                 int *pth, int *len);
 
 static INLINE void av1_tree_to_cdf(const aom_tree_index *tree,
-                                   const aom_prob *probs, uint16_t *cdf) {
+                                   const aom_prob *probs, aom_cdf_prob *cdf) {
   aom_tree_index index[16];
   int path[16];
   int dist[16];

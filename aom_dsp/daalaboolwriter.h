@@ -46,7 +46,7 @@ static INLINE void daala_write_tree_bits(daala_writer *w,
   aom_tree_index root;
   root = i;
   do {
-    uint16_t cdf[16];
+    aom_cdf_prob cdf[16];
     aom_tree_index index[16];
     int path[16];
     int dist[16];
@@ -79,7 +79,7 @@ static INLINE void daala_write_tree_bits(daala_writer *w,
 }
 
 static INLINE void daala_write_symbol(daala_writer *w, int symb,
-                                      const uint16_t *cdf, int nsymbs) {
+                                      const aom_cdf_prob *cdf, int nsymbs) {
   od_ec_encode_cdf_q15(&w->ec, symb, cdf, nsymbs);
 }
 

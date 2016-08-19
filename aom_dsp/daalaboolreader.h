@@ -52,7 +52,7 @@ static INLINE int daala_read_tree_bits(daala_reader *r,
                                        const aom_prob *probs) {
   aom_tree_index i = 0;
   do {
-    uint16_t cdf[16];
+    aom_cdf_prob cdf[16];
     aom_tree_index index[16];
     int path[16];
     int dist[16];
@@ -66,7 +66,7 @@ static INLINE int daala_read_tree_bits(daala_reader *r,
   return -i;
 }
 
-static INLINE int daala_read_symbol(daala_reader *r, const uint16_t *cdf,
+static INLINE int daala_read_symbol(daala_reader *r, const aom_cdf_prob *cdf,
                                     int nsymbs) {
   return od_ec_decode_cdf_q15(&r->ec, cdf, nsymbs, "aom");
 }
