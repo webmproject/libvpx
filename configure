@@ -283,6 +283,7 @@ EXPERIMENT_LIST="
     alt_intra
     palette
     daala_ec
+    cb4x4
 "
 CONFIG_LIST="
     dependency_tracking
