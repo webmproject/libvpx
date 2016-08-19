@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "08fd0b27_32391884",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 3893,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-08-19T17:11:56Z",
+      "side": 1,
+      "message": "move this code (line 3893 - 3912) to separate function?",
+      "revId": "c35f5d7431feed2a6e4f9d42e16ecd3207e91d5f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08fd0b27_eda4f1fc",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 47
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-08-19T17:11:56Z",
+      "side": 1,
+      "message": "remove extra line",
+      "revId": "c35f5d7431feed2a6e4f9d42e16ecd3207e91d5f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
