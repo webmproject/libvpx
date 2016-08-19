@@ -1608,7 +1608,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
         if (frame_mv[NEWMV][ref_frame].as_int != INVALID_MV) {
           const int pre_stride = xd->plane[0].pre[0].stride;
           int base_mv_sad = INT_MAX;
-          const float base_mv_bias = sf->base_mv_aggressive ? 1.5 : 1.0;
+          const float base_mv_bias = sf->base_mv_aggressive ? 1.5f : 1.0f;
           const uint8_t *const pre_buf =
               xd->plane[0].pre[0].buf +
               (frame_mv[NEWMV][ref_frame].as_mv.row >> 3) * pre_stride +
@@ -1616,7 +1616,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
           base_mv_sad = cpi->fn_ptr[bsize].sdf(
               x->plane[0].src.buf, x->plane[0].src.stride, pre_buf, pre_stride);
 
-          if (base_mv_sad < base_mv_bias * x->pred_mv_sad[ref_frame]) {
+          if (base_mv_sad < (int)(base_mv_bias * x->pred_mv_sad[ref_frame])) {
             // Base layer mv is good.
             if (!combined_motion_search(cpi, x, bsize, mi_row, mi_col,
                                         &frame_mv[NEWMV][ref_frame], &rate_mv,
