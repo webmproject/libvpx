@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7b3493be_0ad9fb7f",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 4293,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-19T01:05:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b794741_f46be91c",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b794741_b44ec1c6",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 19
@@ -30,6 +48,24 @@
       "writtenOn": "2016-08-18T20:44:40Z",
       "side": 1,
       "message": "The line intent here does not seem correct",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b3493be_6aafd78b",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 2746,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-19T01:05:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b794741_b44ec1c6",
       "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "08fd0b27_3e8d69df",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 2765,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-19T01:05:55Z",
+      "side": 1,
+      "message": "This value will be reset in configure_buffer_updates. But, it will have problems when \nshow_existing_internal_overlay followed by show_existing other type of frame, since configure_buffer_updates will be skipped in showing existing other type of frame.\n\nHowever, this special case does not exist in any current setting.",
+      "parentUuid": "9b794741_14b7959d",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b794741_34d091ca",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 19
@@ -64,6 +118,24 @@
       "writtenOn": "2016-08-18T20:44:40Z",
       "side": 1,
       "message": "\"the\"-\u003e\"The\"",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08fd0b27_de19e57e",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 3095,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-19T01:05:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b794741_34d091ca",
       "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "08fd0b27_1ee50d31",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 3096,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-19T01:05:55Z",
+      "side": 1,
+      "message": "I thought in this case, \"statistics\" is used as plural?",
+      "parentUuid": "9b794741_54cd1d2d",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b794741_34e97178",
         "filename": "vp10/encoder/encoder.c",
         "patchSetId": 19
@@ -98,6 +188,24 @@
       "writtenOn": "2016-08-18T20:44:40Z",
       "side": 1,
       "message": "bwd_ref_fram -\u003ebwd_ref_frame",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08fd0b27_de0325be",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 3277,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-19T01:05:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b794741_34e97178",
       "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "08fd0b27_feaa6180",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 3278,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-19T01:05:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b794741_f47f69ba",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b794741_b47561fc",
         "filename": "vp10/encoder/encoder.h",
         "patchSetId": 19
@@ -132,6 +258,24 @@
       "writtenOn": "2016-08-18T20:44:40Z",
       "side": 1,
       "message": "Maybe rename extra_arfs to num_extra_arfs?",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08fd0b27_5ea395a7",
+        "filename": "vp10/encoder/encoder.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 627,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-19T01:05:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b794741_b47561fc",
       "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "08fd0b27_e1b080d6",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1603,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-19T01:05:55Z",
+      "side": 1,
+      "message": "It is used only four times, so I name it in it\u0027s full name \"accumulative_subgroup_interval\" in case of any confusion.",
+      "parentUuid": "9b794741_349731e5",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b794741_f423e9bd",
         "filename": "vp10/encoder/firstpass.c",
         "patchSetId": 19
@@ -166,6 +328,24 @@
       "writtenOn": "2016-08-18T20:44:40Z",
       "side": 1,
       "message": "Maybe we put the above specification on the subgroup intervals in a separate function?",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08fd0b27_61dd90dd",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1692,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-19T01:05:55Z",
+      "side": 1,
+      "message": "Should we refactor this? It is used only once.",
+      "parentUuid": "9b794741_f423e9bd",
       "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "08fd0b27_a1aa7864",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1709,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-19T01:05:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b794741_d40b4d2e",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b794741_f409a932",
         "filename": "vp10/encoder/firstpass.c",
         "patchSetId": 19
@@ -200,6 +398,24 @@
       "writtenOn": "2016-08-18T20:44:40Z",
       "side": 1,
       "message": "reset -\u003e Reset",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08fd0b27_61f7d08a",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1853,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-19T01:05:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b794741_f409a932",
       "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "08fd0b27_e15f6079",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 2637,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-19T01:05:55Z",
+      "side": 1,
+      "message": "Update the comment to direct readers to the function vp10_update_reference_frame where the indices are swapped back.",
+      "parentUuid": "9b794741_145d5526",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b794741_1486b57a",
         "filename": "vp10/encoder/ratectrl.c",
         "patchSetId": 19
@@ -234,6 +468,24 @@
       "writtenOn": "2016-08-18T20:44:40Z",
       "side": 1,
       "message": "Let\u0027s make this change under the experiment of \"ext-refs\"",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08fd0b27_41d294cd",
+        "filename": "vp10/encoder/ratectrl.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 922,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-19T01:05:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b794741_1486b57a",
       "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "08fd0b27_418df4dd",
+        "filename": "vp10/encoder/ratectrl.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-19T01:05:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b794741_5453dd16",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b794741_b4b7a13a",
         "filename": "vp10/encoder/temporal_filter.c",
         "patchSetId": 19
@@ -268,6 +538,24 @@
       "writtenOn": "2016-08-18T20:44:40Z",
       "side": 1,
       "message": "Please put a comment here that we enforce the filtering strength on the extra altrefs to be zero",
+      "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08fd0b27_e1652018",
+        "filename": "vp10/encoder/temporal_filter.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 635,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-19T01:05:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b794741_b4b7a13a",
       "revId": "15ce72cb135e3e9d3bbf5835b65a627e1f3b18f2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
