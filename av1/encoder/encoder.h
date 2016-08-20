@@ -86,15 +86,6 @@ typedef enum {
 } FRAME_CONTEXT_INDEX;
 
 typedef enum {
-  // encode_breakout is disabled.
-  ENCODE_BREAKOUT_DISABLED = 0,
-  // encode_breakout is enabled.
-  ENCODE_BREAKOUT_ENABLED = 1,
-  // encode_breakout is enabled with small max_thresh limit.
-  ENCODE_BREAKOUT_LIMITED = 2
-} ENCODE_BREAKOUT_TYPE;
-
-typedef enum {
   NORMAL = 0,
   FOURFIVE = 1,
   THREEFIVE = 2,
@@ -222,8 +213,6 @@ typedef struct AV1EncoderConfig {
 #if CONFIG_EXT_REFS
   int enable_auto_brf;  // (b)ackward (r)ef (f)rame
 #endif                  // CONFIG_EXT_REFS
-
-  int encode_breakout;  // early breakout : for video conf recommend 800
 
   /* Bitfield defining the error resiliency features to enable.
    * Can provide decodable frames after losses in previous
@@ -449,17 +438,7 @@ typedef struct AV1_COMP {
 
   int allow_comp_inter_inter;
 
-  // Default value is 1. From first pass stats, encode_breakout may be disabled.
-  ENCODE_BREAKOUT_TYPE allow_encode_breakout;
-
-  // Get threshold from external input. A suggested threshold is 800 for HD
-  // clips, and 300 for < HD clips.
-  int encode_breakout;
-
   uint8_t *segmentation_map;
-
-  // segment threashold for encode breakout
-  int segment_encode_breakout[MAX_SEGMENTS];
 
   CYCLIC_REFRESH *cyclic_refresh;
   ActiveMap active_map;

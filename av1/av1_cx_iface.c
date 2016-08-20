@@ -425,7 +425,6 @@ static aom_codec_err_t set_encoder_config(
   oxcf->key_freq = cfg->kf_max_dist;
 
   oxcf->speed = abs(extra_cfg->cpu_used);
-  oxcf->encode_breakout = extra_cfg->static_thresh;
   oxcf->enable_auto_arf = extra_cfg->enable_auto_alt_ref;
 #if CONFIG_EXT_REFS
   oxcf->enable_auto_brf = extra_cfg->enable_auto_bwd_ref;
@@ -505,7 +504,6 @@ static aom_codec_err_t set_encoder_config(
   printf("lag_in_frames: %d\n", oxcf->lag_in_frames);
   printf("enable_auto_arf: %d\n", oxcf->enable_auto_arf);
   printf("Version: %d\n", oxcf->Version);
-  printf("encode_breakout: %d\n", oxcf->encode_breakout);
   printf("error resilient: %d\n", oxcf->error_resilient_mode);
   printf("frame parallel detokenization: %d\n",
          oxcf->frame_parallel_decoding_mode);

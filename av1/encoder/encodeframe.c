@@ -324,11 +324,8 @@ static void set_offsets(const AV1_COMP *const cpi, const TileInfo *const tile,
       mbmi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
     }
     av1_init_plane_quantizers(cpi, x, mbmi->segment_id);
-
-    x->encode_breakout = cpi->segment_encode_breakout[mbmi->segment_id];
   } else {
     mbmi->segment_id = 0;
-    x->encode_breakout = cpi->encode_breakout;
   }
 
 #if CONFIG_SUPERTX
@@ -404,7 +401,6 @@ static void set_segment_id_supertx(const AV1_COMP *const cpi,
 
   if (!seg->enabled) {
     seg_id_supertx = 0;
-    x->encode_breakout = cpi->encode_breakout;
   } else {
     // Find the minimum segment_id
     for (r = 0; r < mih; r++)
@@ -415,7 +411,6 @@ static void set_segment_id_supertx(const AV1_COMP *const cpi,
 
     // Initialize plane quantisers
     av1_init_plane_quantizers(cpi, x, seg_id_supertx);
-    x->encode_breakout = cpi->segment_encode_breakout[seg_id_supertx];
   }
 
   // Assign the the segment_id back to segment_id_supertx
@@ -1688,7 +1683,6 @@ static void rd_pick_sb_modes(const AV1_COMP *const cpi, TileDataEnc *tile_data,
       mbmi->segment_id = av1_vaq_segment_id(energy);
       // Re-initialise quantiser
       av1_init_plane_quantizers(cpi, x, mbmi->segment_id);
-      x->encode_breakout = cpi->segment_encode_breakout[mbmi->segment_id];
     }
     x->rdmult = set_segment_rdmult(cpi, x, mbmi->segment_id);
   } else if (aq_mode == COMPLEXITY_AQ) {

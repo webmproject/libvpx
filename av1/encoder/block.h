@@ -157,8 +157,6 @@ struct macroblock {
 
   int skip;
 
-  int encode_breakout;
-
   // note that token_costs is the cost when eob node is skipped
   av1_coeff_cost token_costs[TX_SIZES];
 

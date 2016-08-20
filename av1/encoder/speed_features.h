@@ -443,10 +443,6 @@ typedef struct SPEED_FEATURES {
   // time mode speed 6.
   int reuse_inter_pred_sby;
 
-  // This variable sets the encode_breakout threshold. Currently, it is only
-  // enabled in real time mode.
-  int encode_breakout_thresh;
-
   // default interp filter choice
   InterpFilter default_interp_filter;
 
