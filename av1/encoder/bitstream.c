@@ -807,8 +807,13 @@ static void pack_txb_tokens(aom_writer *w, const TOKENEXTRA **tp,
 static void write_segment_id(aom_writer *w, const struct segmentation *seg,
                              const struct segmentation_probs *segp,
                              int segment_id) {
-  if (seg->enabled && seg->update_map)
+  if (seg->enabled && seg->update_map) {
+#if CONFIG_DAALA_EC
+    aom_write_symbol(w, segment_id, segp->tree_cdf, MAX_SEGMENTS);
+#else
     aom_write_tree(w, av1_segment_tree, segp->tree_probs, segment_id, 3, 0);
+#endif
+  }
 }
 
 // This function encodes the reference frame
@@ -2739,6 +2744,10 @@ static void update_seg_probs(AV1_COMP *cpi, aom_writer *w) {
     prob_diff_update(av1_segment_tree, cm->fc->seg.tree_probs,
                      cm->counts.seg.tree_total, MAX_SEGMENTS, w);
   }
+#if CONFIG_DAALA_EC
+  av1_tree_to_cdf(av1_segment_tree, cm->fc->seg.tree_probs,
+                  cm->fc->seg.tree_cdf);
+#endif
 }
 
 static void write_txfm_mode(TX_MODE mode, struct aom_write_bit_buffer *wb) {

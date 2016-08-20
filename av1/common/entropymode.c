@@ -1325,9 +1325,14 @@ static const aom_prob default_supertx_prob[PARTITION_SUPERTX_CONTEXTS]
 #endif  // CONFIG_SUPERTX
 
 // FIXME(someone) need real defaults here
-static const struct segmentation_probs default_seg_probs = {
-  { 128, 128, 128, 128, 128, 128, 128 }, { 128, 128, 128 },
+static const aom_prob default_segment_tree_probs[SEG_TREE_PROBS] = {
+  128, 128, 128, 128, 128, 128, 128
 };
+// clang-format off
+static const aom_prob default_segment_pred_probs[PREDICTION_PROBS] = {
+  128, 128, 128
+};
+// clang-format on
 
 static void init_mode_probs(FRAME_CONTEXT *fc) {
   av1_copy(fc->uv_mode_prob, default_uv_probs);
@@ -1372,8 +1377,8 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
 #if CONFIG_SUPERTX
   av1_copy(fc->supertx_prob, default_supertx_prob);
 #endif  // CONFIG_SUPERTX
-  av1_copy(fc->seg.tree_probs, default_seg_probs.tree_probs);
-  av1_copy(fc->seg.pred_probs, default_seg_probs.pred_probs);
+  av1_copy(fc->seg.tree_probs, default_segment_tree_probs);
+  av1_copy(fc->seg.pred_probs, default_segment_pred_probs);
 #if CONFIG_EXT_INTRA
   av1_copy(fc->ext_intra_probs, default_ext_intra_probs);
   av1_copy(fc->intra_filter_probs, default_intra_filter_probs);
@@ -1392,6 +1397,7 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
                      fc->inter_ext_tx_cdf, EXT_TX_SIZES);
   av1_tree_to_cdf_1D(av1_partition_tree, fc->partition_prob, fc->partition_cdf,
                      PARTITION_CONTEXTS);
+  av1_tree_to_cdf(av1_segment_tree, fc->seg.tree_probs, fc->seg.tree_cdf);
 #endif
 }
 

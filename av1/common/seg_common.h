@@ -48,6 +48,9 @@ struct segmentation {
 
 struct segmentation_probs {
   aom_prob tree_probs[SEG_TREE_PROBS];
+#if CONFIG_DAALA_EC
+  aom_cdf_prob tree_cdf[MAX_SEGMENTS];
+#endif
   aom_prob pred_probs[PREDICTION_PROBS];
 };
 
