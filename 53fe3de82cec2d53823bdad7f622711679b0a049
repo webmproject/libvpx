@@ -46,6 +46,30 @@
       "revId": "53fe3de82cec2d53823bdad7f622711679b0a049",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "68bbe7d1_1f560b63",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2569,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-08-22T23:23:59Z",
+      "side": 1,
+      "message": "All right, so I moved the #if #endif around to stop clang-format acting weird.",
+      "parentUuid": "c8ccd355_a196043b",
+      "range": {
+        "startLine": 2569,
+        "startChar": 78,
+        "endLine": 2569,
+        "endChar": 79
+      },
+      "revId": "53fe3de82cec2d53823bdad7f622711679b0a049",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
