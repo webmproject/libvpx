@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "68bbe7d1_7f3627fd",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2581,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-22T23:47:18Z",
+      "side": 1,
+      "message": "What about the FRAME as LF_UPDATE right before the farthest ALT (ALT0)? After the following swapping, the BWDREF and the ALTREF should be identical, and then we should disable one of the two reference flags in get_ref_frame_flags() in encoder/encoder.c, so that we may either skip the checking on BWDREF or the checking on ALTREF to save the encoding time - should we?",
+      "revId": "b03de87ad102ccb69121f18d5ecbf0b5b40ad772",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "68bbe7d1_3f13cf6a",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2633,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-22T23:47:18Z",
+      "side": 1,
+      "message": "uses -\u003e use",
+      "revId": "b03de87ad102ccb69121f18d5ecbf0b5b40ad772",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
