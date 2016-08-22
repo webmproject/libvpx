@@ -920,7 +920,7 @@ int vp10_frame_type_qdelta(const VP10_COMP *cpi, int rf_level, int q) {
 #else
     1.00,  // INTER_HIGH
     1.50,  // GF_ARF_LOW
-#endif  // CONFIG_EXT_REFS
+#endif     // CONFIG_EXT_REFS
     2.00,  // GF_ARF_STD
     2.00,  // KF_STD
   };

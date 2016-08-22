@@ -631,10 +631,10 @@ void vp10_temporal_filter(VP10_COMP *cpi, int distance) {
 
   // Apply context specific adjustments to the arnr filter parameters.
   adjust_arnr_filter(cpi, distance, rc->gfu_boost, &frames_to_blur, &strength);
-  // TODO(weitinglin): Currently, we enforce the filtering strength on
-  //                   extra ARFs' to be zeros. We should investigate in which
-  //                   case it is more beneficial to use non-zero strength
-  //                   filtering.
+// TODO(weitinglin): Currently, we enforce the filtering strength on
+//                   extra ARFs' to be zeros. We should investigate in which
+//                   case it is more beneficial to use non-zero strength
+//                   filtering.
 #if CONFIG_EXT_REFS
   if (gf_group->rf_level[gf_group->index] == GF_ARF_LOW) {
     strength = 0;

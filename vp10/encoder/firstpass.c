@@ -1595,11 +1595,11 @@ static void allocate_gf_group_bits(VP10_COMP *cpi, int64_t gf_group_bits,
           (rc->baseline_gf_interval - rc->source_alt_ref_pending);
   int bipred_group_end = 0;
   int bipred_frame_index = 0;
-  int arf_pos[MAX_EXT_ARFS+1];
-  const unsigned char ext_arf_interval = (unsigned char)
-      (rc->baseline_gf_interval / (cpi->num_extra_arfs + 1) - 1);
+  int arf_pos[MAX_EXT_ARFS + 1];
+  const unsigned char ext_arf_interval =
+      (unsigned char)(rc->baseline_gf_interval / (cpi->num_extra_arfs + 1) - 1);
   int which_arf = cpi->num_extra_arfs;
-  int subgroup_interval[MAX_EXT_ARFS+1];
+  int subgroup_interval[MAX_EXT_ARFS + 1];
   int ext_arf_boost[MAX_EXT_ARFS];
   int is_sg_bipred_enabled = is_bipred_enabled;
   int accumulative_subgroup_interval = 0;
@@ -1684,15 +1684,16 @@ static void allocate_gf_group_bits(VP10_COMP *cpi, int64_t gf_group_bits,
     // We index ALTREF's as: KEY ----- ALT2 ----- ALT1 ----- ALT0
     // but code them in the following order:
     // KEY-ALT0-ALT2 ----- OVERLAY2-ALT1 ----- OVERLAY1 ----- OVERLAY0
-    arf_pos[0] = frame_index + cpi->num_extra_arfs +
-                 gf_group->arf_src_offset[1] + 1;
+    arf_pos[0] =
+        frame_index + cpi->num_extra_arfs + gf_group->arf_src_offset[1] + 1;
     for (i = 0; i < cpi->num_extra_arfs; ++i) {
-      arf_pos[i + 1] = frame_index +
-                       (cpi->num_extra_arfs - i)*(ext_arf_interval + 2);
+      arf_pos[i + 1] =
+          frame_index + (cpi->num_extra_arfs - i) * (ext_arf_interval + 2);
       subgroup_interval[i] = arf_pos[i] - arf_pos[i + 1] - (i == 0 ? 1 : 2);
     }
     subgroup_interval[cpi->num_extra_arfs] = arf_pos[cpi->num_extra_arfs] -
-        frame_index - (cpi->num_extra_arfs == 0 ? 1 : 2);
+                                             frame_index -
+                                             (cpi->num_extra_arfs == 0 ? 1 : 2);
 #endif  // CONFIG_EXT_REFS
 
     ++frame_index;
@@ -1766,7 +1767,8 @@ static void allocate_gf_group_bits(VP10_COMP *cpi, int64_t gf_group_bits,
     // If we are going to have ARFs, check if we can have BWDREF in this
     // subgroup.
     if (rc->source_alt_ref_pending) {
-      is_sg_bipred_enabled =  is_bipred_enabled &&
+      is_sg_bipred_enabled =
+          is_bipred_enabled &&
           (subgroup_interval[which_arf] > rc->bipred_group_interval);
     }
     // NOTE: BIDIR_PRED is only enabled when the length of the bi-predictive
@@ -1801,7 +1803,7 @@ static void allocate_gf_group_bits(VP10_COMP *cpi, int64_t gf_group_bits,
       // In addition, we need to avoid coding a BRF right before an ARF.
       if (bipred_frame_index == 1 &&
           (i + 2 + cur_brf_src_offset) >= accumulative_subgroup_interval) {
-          bipred_group_end = 1;
+        bipred_group_end = 1;
       }
     } else {
 #endif  // CONFIG_EXT_REFS
@@ -1857,10 +1859,10 @@ static void allocate_gf_group_bits(VP10_COMP *cpi, int64_t gf_group_bits,
 #endif
   }
 
-  // Note:
-  // We need to configure the frame at the end of the sequence + 1 that will be
-  // the start frame for the next group. Otherwise prior to the call to
-  // vp10_rc_get_second_pass_params() the data will be undefined.
+// Note:
+// We need to configure the frame at the end of the sequence + 1 that will be
+// the start frame for the next group. Otherwise prior to the call to
+// vp10_rc_get_second_pass_params() the data will be undefined.
 #if CONFIG_EXT_REFS
   gf_group->arf_update_idx[frame_index] = 0;
   gf_group->arf_ref_idx[frame_index] = 0;
@@ -2109,9 +2111,8 @@ static void define_gf_group(VP10_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
 #if CONFIG_EXT_REFS
   // Compute how many extra alt_refs we can have
-  cpi->num_extra_arfs =
-      get_number_of_extra_arfs(rc->baseline_gf_interval,
-                               rc->source_alt_ref_pending);
+  cpi->num_extra_arfs = get_number_of_extra_arfs(rc->baseline_gf_interval,
+                                                 rc->source_alt_ref_pending);
   // Currently at maximum two extra ARFs' are allowed
   assert(cpi->num_extra_arfs <= 2);
 #endif
@@ -2566,29 +2567,29 @@ static void configure_buffer_updates(VP10_COMP *cpi) {
 
   switch (twopass->gf_group.update_type[twopass->gf_group.index]) {
     case KF_UPDATE:
-      cpi->refresh_last_frame = 1;
-      cpi->refresh_golden_frame = 1;
 #if CONFIG_EXT_REFS
       cpi->refresh_bwd_ref_frame = 1;
 #endif  // CONFIG_EXT_REFS
+      cpi->refresh_last_frame = 1;
+      cpi->refresh_golden_frame = 1;
       cpi->refresh_alt_ref_frame = 1;
       break;
 
     case LF_UPDATE:
-      cpi->refresh_last_frame = 1;
-      cpi->refresh_golden_frame = 0;
 #if CONFIG_EXT_REFS
       cpi->refresh_bwd_ref_frame = 0;
 #endif  // CONFIG_EXT_REFS
+      cpi->refresh_last_frame = 1;
+      cpi->refresh_golden_frame = 0;
       cpi->refresh_alt_ref_frame = 0;
       break;
 
     case GF_UPDATE:
-      cpi->refresh_last_frame = 1;
-      cpi->refresh_golden_frame = 1;
 #if CONFIG_EXT_REFS
       cpi->refresh_bwd_ref_frame = 0;
 #endif  // CONFIG_EXT_REFS
+      cpi->refresh_last_frame = 1;
+      cpi->refresh_golden_frame = 1;
       cpi->refresh_alt_ref_frame = 0;
       break;
 
@@ -2603,11 +2604,11 @@ static void configure_buffer_updates(VP10_COMP *cpi) {
       break;
 
     case ARF_UPDATE:
-      cpi->refresh_last_frame = 0;
-      cpi->refresh_golden_frame = 0;
 #if CONFIG_EXT_REFS
       cpi->refresh_bwd_ref_frame = 1;
 #endif  // CONFIG_EXT_REFS
+      cpi->refresh_last_frame = 0;
+      cpi->refresh_golden_frame = 0;
       cpi->refresh_alt_ref_frame = 1;
       break;
 
