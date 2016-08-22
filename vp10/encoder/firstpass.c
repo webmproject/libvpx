@@ -2578,7 +2578,18 @@ static void configure_buffer_updates(VP10_COMP *cpi) {
       cpi->refresh_last_frame = 1;
       cpi->refresh_golden_frame = 0;
 #if CONFIG_EXT_REFS
-      cpi->refresh_bwd_ref_frame = 0;
+      // If we have extra ALT_REFs, we can use the farthest ALT (ALT0) as
+      // the BWD_REF.
+      if (cpi->num_extra_arfs) {
+        int tmp = cpi->bwd_fb_idx;
+
+        cpi->rc.is_bwd_ref_frame = 1;
+        cpi->bwd_fb_idx = cpi->alt_fb_idx;
+        cpi->alt_fb_idx = cpi->arf_map[0];;
+        cpi->arf_map[0] = tmp;
+      } else {
+        cpi->rc.is_bwd_ref_frame = 0;
+      }
 #endif  // CONFIG_EXT_REFS
       cpi->refresh_alt_ref_frame = 0;
       break;
@@ -2619,12 +2630,13 @@ static void configure_buffer_updates(VP10_COMP *cpi) {
       cpi->refresh_alt_ref_frame = 0;
       cpi->rc.is_bwd_ref_frame = 1;
       if (cpi->num_extra_arfs) {
-        // Allow BRF uses the farthest ALT_REF (ALT0) as BWD_REF by swapping
+        // Allow BRF use the farthest ALT_REF (ALT0) as BWD_REF by swapping
         // the virtual indices.
         // NOTE: The indices will be swapped back after this frame is encoded
         //       (in vp10_update_reference_frames()).
         int tmp = cpi->bwd_fb_idx;
-        cpi->bwd_fb_idx = cpi->arf_map[0];
+        cpi->bwd_fb_idx = cpi->alt_fb_idx;
+        cpi->alt_fb_idx = cpi->arf_map[0];
         cpi->arf_map[0] = tmp;
       }
       break;

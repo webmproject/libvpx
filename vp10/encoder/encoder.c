@@ -3260,7 +3260,8 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
         // NOTE: The ALT_REFs' are indexed reversely, and ALT0 refers to the
         //       farthest ALT_REF from the first frame in the gf group.
         int tmp = cpi->arf_map[0];
-        cpi->arf_map[0] = cpi->bwd_fb_idx;
+        cpi->arf_map[0] = cpi->alt_fb_idx;
+        cpi->alt_fb_idx = cpi->bwd_fb_idx;
         cpi->bwd_fb_idx = tmp;
       }
       ref_cnt_fb(pool->frame_bufs, &cm->ref_frame_map[cpi->bwd_fb_idx],
@@ -3309,7 +3310,14 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
     //      v                v                v
     // lst_fb_idxes[2], lst_fb_idxes[0], lst_fb_idxes[1]
     int ref_frame;
-
+    if (cpi->rc.is_bwd_ref_frame && cpi->num_extra_arfs) {
+      // We have swapped the virtual indices to use ALT0 as BWD_REF
+      // and we need to swap them back.
+      int tmp = cpi->arf_map[0];
+      cpi->arf_map[0] = cpi->alt_fb_idx;
+      cpi->alt_fb_idx = cpi->bwd_fb_idx;
+      cpi->bwd_fb_idx = tmp;
+    }
     if (cm->frame_type == KEY_FRAME) {
       for (ref_frame = 0; ref_frame < LAST_REF_FRAMES; ++ref_frame) {
         ref_cnt_fb(pool->frame_bufs,
