@@ -4392,6 +4392,13 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size,
   /* build the bitstream */
   vp8_pack_bitstream(cpi, dest, dest_end, size);
 
+#if CONFIG_MULTITHREAD
+  /* wait for the lpf thread done */
+  if (cpi->b_multi_threaded) {
+    sem_wait(&cpi->h_event_end_lpf);
+  }
+#endif
+
   /* Move storing frame_type out of the above loop since it is also
    * needed in motion search besides loopfilter */
   cm->last_frame_type = cm->frame_type;
@@ -5227,13 +5234,6 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
 #endif
 
   cpi->common.error.setjmp = 0;
-
-#if CONFIG_MULTITHREAD
-  /* wait for the lpf thread done */
-  if (cpi->b_multi_threaded) {
-    sem_wait(&cpi->h_event_end_lpf);
-  }
-#endif
 
   return 0;
 }
