@@ -20,8 +20,8 @@ const int kMaxErrorFrames = 12;
 const int kMaxDroppableFrames = 12;
 
 class ErrorResilienceTestLarge
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWithParam<libaom_test::TestMode> {
  protected:
   ErrorResilienceTestLarge()
       : EncoderTest(GET_PARAM(0)), psnr_(0.0), nframes_(0), mismatch_psnr_(0.0),
@@ -54,8 +54,8 @@ class ErrorResilienceTestLarge
     nframes_++;
   }
 
-  virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
-                                  ::libvpx_test::Encoder * /*encoder*/) {
+  virtual void PreEncodeFrameHook(libaom_test::VideoSource *video,
+                                  ::libaom_test::Encoder * /*encoder*/) {
     frame_flags_ &=
         ~(VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF);
     if (droppable_nframes_ > 0 &&
@@ -101,7 +101,7 @@ class ErrorResilienceTestLarge
     mismatch_psnr_ += mismatch_psnr;
     ++mismatch_nframes_;
     // std::cout << "Mismatch frame psnr: " << mismatch_psnr << "\n";
-    ::libvpx_test::EncoderTest::MismatchHook(img1, img2);
+    ::libaom_test::EncoderTest::MismatchHook(img1, img2);
   }
 
   void SetErrorFrames(int num, unsigned int *list) {
@@ -138,7 +138,7 @@ class ErrorResilienceTestLarge
   unsigned int mismatch_nframes_;
   unsigned int error_frames_[kMaxErrorFrames];
   unsigned int droppable_frames_[kMaxDroppableFrames];
-  libvpx_test::TestMode encoding_mode_;
+  libaom_test::TestMode encoding_mode_;
 };
 
 TEST_P(ErrorResilienceTestLarge, OnVersusOff) {
@@ -149,7 +149,7 @@ TEST_P(ErrorResilienceTestLarge, OnVersusOff) {
 
   init_flags_ = VPX_CODEC_USE_PSNR;
 
-  libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+  libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                      timebase.den, timebase.num, 0, 30);
 
   // Error resilient mode OFF.
@@ -186,7 +186,7 @@ TEST_P(ErrorResilienceTestLarge, DropFramesWithoutRecovery) {
 
   init_flags_ = VPX_CODEC_USE_PSNR;
 
-  libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+  libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                      timebase.den, timebase.num, 0, 40);
 
   // Error resilient mode ON.

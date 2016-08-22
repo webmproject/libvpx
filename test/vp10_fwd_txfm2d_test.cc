@@ -15,15 +15,15 @@
 #include "test/acm_random.h"
 #include "test/util.h"
 #include "test/vp10_txfm_test.h"
-#include "vp10/common/vp10_txfm.h"
+#include "av1/common/vp10_txfm.h"
 #include "./vp10_rtcd.h"
 
-using libvpx_test::ACMRandom;
-using libvpx_test::input_base;
-using libvpx_test::bd;
-using libvpx_test::compute_avg_abs_error;
-using libvpx_test::Fwd_Txfm2d_Func;
-using libvpx_test::TYPE_TXFM;
+using libaom_test::ACMRandom;
+using libaom_test::input_base;
+using libaom_test::bd;
+using libaom_test::compute_avg_abs_error;
+using libaom_test::Fwd_Txfm2d_Func;
+using libaom_test::TYPE_TXFM;
 
 namespace {
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -48,8 +48,8 @@ class VP10FwdTxfm2d : public ::testing::TestWithParam<VP10FwdTxfm2dParam> {
     amplify_factor_ =
         amplify_bit >= 0 ? (1 << amplify_bit) : (1.0 / (1 << -amplify_bit));
 
-    fwd_txfm_ = libvpx_test::fwd_txfm_func_ls[tx_size_];
-    txfm1d_size_ = libvpx_test::get_txfm1d_size(tx_size_);
+    fwd_txfm_ = libaom_test::fwd_txfm_func_ls[tx_size_];
+    txfm1d_size_ = libaom_test::get_txfm1d_size(tx_size_);
     txfm2d_size_ = txfm1d_size_ * txfm1d_size_;
     get_txfm1d_type(tx_type_, &type0_, &type1_);
     input_ = reinterpret_cast<int16_t *>(
@@ -76,11 +76,11 @@ class VP10FwdTxfm2d : public ::testing::TestWithParam<VP10FwdTxfm2dParam> {
       fwd_txfm_(input_, output_, txfm1d_size_, tx_type_, bd);
 
       if (lr_flip_ && ud_flip_)
-        libvpx_test::fliplrud(ref_input_, txfm1d_size_, txfm1d_size_);
+        libaom_test::fliplrud(ref_input_, txfm1d_size_, txfm1d_size_);
       else if (lr_flip_)
-        libvpx_test::fliplr(ref_input_, txfm1d_size_, txfm1d_size_);
+        libaom_test::fliplr(ref_input_, txfm1d_size_, txfm1d_size_);
       else if (ud_flip_)
-        libvpx_test::flipud(ref_input_, txfm1d_size_, txfm1d_size_);
+        libaom_test::flipud(ref_input_, txfm1d_size_, txfm1d_size_);
 
       reference_hybrid_2d(ref_input_, ref_output_, txfm1d_size_, type0_,
                           type1_);

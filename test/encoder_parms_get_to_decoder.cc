@@ -14,7 +14,7 @@
 #include "test/encode_test_driver.h"
 #include "test/util.h"
 #include "test/y4m_video_source.h"
-#include "vp10/vp10_dx_iface.c"
+#include "av1/vp10_dx_iface.c"
 
 namespace {
 
@@ -53,8 +53,8 @@ const EncodeParameters kVP9EncodeParameterSet[] = {
 };
 
 class VpxEncoderParmsGetToDecoder
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWith2Params<EncodeParameters,
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWith2Params<EncodeParameters,
                                                  EncodePerfTestVideo> {
  protected:
   VpxEncoderParmsGetToDecoder()
@@ -64,7 +64,7 @@ class VpxEncoderParmsGetToDecoder
 
   virtual void SetUp() {
     InitializeConfig();
-    SetMode(::libvpx_test::kTwoPassGood);
+    SetMode(::libaom_test::kTwoPassGood);
     cfg_.g_lag_in_frames = 25;
     cfg_.g_error_resilient = encode_parms.error_resilient;
     dec_cfg_.threads = 4;
@@ -72,8 +72,8 @@ class VpxEncoderParmsGetToDecoder
     cfg_.rc_target_bitrate = test_video_.bitrate;
   }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
-                                  ::libvpx_test::Encoder *encoder) {
+  virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
+                                  ::libaom_test::Encoder *encoder) {
     if (video->frame() == 1) {
       encoder->Control(VP9E_SET_COLOR_SPACE, encode_parms.cs);
       encoder->Control(VP9E_SET_COLOR_RANGE, encode_parms.color_range);
@@ -93,8 +93,8 @@ class VpxEncoderParmsGetToDecoder
   }
 
   virtual bool HandleDecodeResult(const vpx_codec_err_t res_dec,
-                                  const libvpx_test::VideoSource & /*video*/,
-                                  libvpx_test::Decoder *decoder) {
+                                  const libaom_test::VideoSource & /*video*/,
+                                  libaom_test::Decoder *decoder) {
     vpx_codec_ctx_t *const vp9_decoder = decoder->GetDecoder();
     vpx_codec_alg_priv_t *const priv =
         reinterpret_cast<vpx_codec_alg_priv_t *>(vp9_decoder->priv);
@@ -135,8 +135,8 @@ class VpxEncoderParmsGetToDecoder
 TEST_P(VpxEncoderParmsGetToDecoder, BitstreamParms) {
   init_flags_ = VPX_CODEC_USE_PSNR;
 
-  libvpx_test::VideoSource *const video =
-      new libvpx_test::Y4mVideoSource(test_video_.name, 0, test_video_.frames);
+  libaom_test::VideoSource *const video =
+      new libaom_test::Y4mVideoSource(test_video_.name, 0, test_video_.frames);
   ASSERT_TRUE(video != NULL);
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(video));

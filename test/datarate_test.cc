@@ -14,13 +14,13 @@
 #include "test/i420_video_source.h"
 #include "test/util.h"
 #include "test/y4m_video_source.h"
-#include "vpx/vpx_codec.h"
+#include "aom/vpx_codec.h"
 
 namespace {
 
 class DatarateTestLarge
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWith2Params<libaom_test::TestMode, int> {
  public:
   DatarateTestLarge() : EncoderTest(GET_PARAM(0)) {}
 
@@ -48,8 +48,8 @@ class DatarateTestLarge
     denoiser_offon_period_ = -1;
   }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
-                                  ::libvpx_test::Encoder *encoder) {
+  virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
+                                  ::libaom_test::Encoder *encoder) {
     if (video->frame() == 0) encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
 
     if (denoiser_offon_test_) {
@@ -131,7 +131,7 @@ TEST_P(DatarateTestLarge, BasicRateTargetingVBR) {
   cfg_.rc_end_usage = VPX_VBR;
   cfg_.g_lag_in_frames = 0;
 
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+  ::libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 300);
   for (int i = 400; i <= 800; i += 400) {
     cfg_.rc_target_bitrate = i;
@@ -155,7 +155,7 @@ TEST_P(DatarateTestLarge, BasicRateTargeting) {
   cfg_.rc_end_usage = VPX_CBR;
   cfg_.g_lag_in_frames = 0;
 
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+  ::libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 140);
   for (int i = 150; i < 800; i += 200) {
     cfg_.rc_target_bitrate = i;
@@ -170,7 +170,7 @@ TEST_P(DatarateTestLarge, BasicRateTargeting) {
 
 // Check basic rate targeting for CBR.
 TEST_P(DatarateTestLarge, BasicRateTargeting444) {
-  ::libvpx_test::Y4mVideoSource video("rush_hour_444.y4m", 0, 140);
+  ::libaom_test::Y4mVideoSource video("rush_hour_444.y4m", 0, 140);
 
   cfg_.g_profile = 1;
   cfg_.g_timebase = video.timebase();
@@ -217,7 +217,7 @@ TEST_P(DatarateTestLarge, ChangingDropFrameThresh) {
   // interval (128).
   cfg_.kf_max_dist = 9999;
 
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+  ::libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 140);
 
   const int kDropFrameThreshTestStep = 30;
@@ -245,7 +245,7 @@ TEST_P(DatarateTestLarge, ChangingDropFrameThresh) {
 }
 
 VP10_INSTANTIATE_TEST_CASE(DatarateTestLarge,
-                           ::testing::Values(::libvpx_test::kOnePassGood,
-                                             ::libvpx_test::kRealTime),
+                           ::testing::Values(::libaom_test::kOnePassGood,
+                                             ::libaom_test::kRealTime),
                            ::testing::Range(2, 9));
 }  // namespace

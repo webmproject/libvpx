@@ -20,11 +20,11 @@
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
-#include "vp10/common/entropy.h"
-#include "vp10/common/loopfilter.h"
-#include "vpx/vpx_integer.h"
+#include "av1/common/entropy.h"
+#include "av1/common/loopfilter.h"
+#include "aom/vpx_integer.h"
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 namespace {
 // Horizontally and Vertically need 32x32: 8  Coeffs preceeding filtered section
@@ -63,7 +63,7 @@ class Loop8Test6Param : public ::testing::TestWithParam<loop8_param_t> {
     mask_ = (1 << bit_depth_) - 1;
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   int bit_depth_;
@@ -82,7 +82,7 @@ class Loop8Test9Param : public ::testing::TestWithParam<dualloop8_param_t> {
     mask_ = (1 << bit_depth_) - 1;
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   int bit_depth_;

@@ -15,7 +15,7 @@
 #include "test/register_state_check.h"
 #include "test/video_source.h"
 
-namespace libvpx_test {
+namespace libaom_test {
 
 const char kVP8Name[] = "WebM Project VP8";
 const char kVP10Name[] = "WebM Project VP10";
@@ -120,4 +120,4 @@ void DecoderTest::set_cfg(const vpx_codec_dec_cfg_t &dec_cfg) {
 
 void DecoderTest::set_flags(const vpx_codec_flags_t flags) { flags_ = flags; }
 
-}  // namespace libvpx_test
+}  // namespace libaom_test

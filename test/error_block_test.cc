@@ -20,11 +20,11 @@
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
-#include "vp10/common/entropy.h"
-#include "vpx/vpx_codec.h"
-#include "vpx/vpx_integer.h"
+#include "av1/common/entropy.h"
+#include "aom/vpx_codec.h"
+#include "aom/vpx_integer.h"
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 namespace {
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -46,7 +46,7 @@ class ErrorBlockTest : public ::testing::TestWithParam<ErrorBlockParam> {
     bit_depth_ = GET_PARAM(2);
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   vpx_bit_depth_t bit_depth_;

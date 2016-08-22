@@ -15,7 +15,7 @@
 #include <string>
 #include "test/video_source.h"
 
-namespace libvpx_test {
+namespace libaom_test {
 const unsigned int kCodeBufferSize = 256 * 1024;
 const unsigned int kIvfFileHdrSize = 32;
 const unsigned int kIvfFrameHdrSize = 12;
@@ -40,7 +40,7 @@ class IVFVideoSource : public CompressedVideoSource {
 
   virtual void Init() {
     // Allocate a buffer for read in the compressed video frame.
-    compressed_frame_buf_ = new uint8_t[libvpx_test::kCodeBufferSize];
+    compressed_frame_buf_ = new uint8_t[libaom_test::kCodeBufferSize];
     ASSERT_TRUE(compressed_frame_buf_ != NULL)
         << "Allocate frame buffer failed";
   }
@@ -101,6 +101,6 @@ class IVFVideoSource : public CompressedVideoSource {
   bool end_of_file_;
 };
 
-}  // namespace libvpx_test
+}  // namespace libaom_test
 
 #endif  // TEST_IVF_VIDEO_SOURCE_H_

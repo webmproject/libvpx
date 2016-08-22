@@ -16,15 +16,15 @@
 
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
-#include "vpx_ports/mem.h"
+#include "aom_ports/mem.h"
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
 #include "test/function_equivalence_test.h"
 
-using libvpx_test::ACMRandom;
-using libvpx_test::FunctionEquivalenceTest;
+using libaom_test::ACMRandom;
+using libaom_test::FunctionEquivalenceTest;
 
 namespace {
 const int kNumIterations = 10000;
@@ -32,14 +32,14 @@ const int kNumIterations = 10000;
 static const int16_t kInt13Max = (1 << 12) - 1;
 
 typedef uint64_t (*SSI16Func)(const int16_t *src, int stride, int size);
-typedef libvpx_test::FuncParam<SSI16Func> TestFuncs;
+typedef libaom_test::FuncParam<SSI16Func> TestFuncs;
 
 class SumSquaresTest : public ::testing::TestWithParam<TestFuncs> {
  public:
   virtual ~SumSquaresTest() {}
   virtual void SetUp() { params_ = this->GetParam(); }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   TestFuncs params_;
@@ -130,7 +130,7 @@ INSTANTIATE_TEST_CASE_P(
 //////////////////////////////////////////////////////////////////////////////
 
 typedef uint64_t (*F1D)(const int16_t *src, uint32_t N);
-typedef libvpx_test::FuncParam<F1D> TestFuncs1D;
+typedef libaom_test::FuncParam<F1D> TestFuncs1D;
 
 class SumSquares1DTest : public FunctionEquivalenceTest<F1D> {
  protected:

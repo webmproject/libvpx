@@ -18,10 +18,10 @@
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
-#include "vpx_dsp/vpx_dsp_common.h"
-#include "vpx_dsp/vpx_filter.h"
-#include "vpx_mem/vpx_mem.h"
-#include "vpx_ports/mem.h"
+#include "aom_dsp/vpx_dsp_common.h"
+#include "aom_dsp/vpx_filter.h"
+#include "aom_mem/vpx_mem.h"
+#include "aom_ports/mem.h"
 
 namespace {
 
@@ -311,7 +311,7 @@ class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
 #endif
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
   static void TearDownTestCase() {
     vpx_free(input_ - 1);
@@ -369,7 +369,7 @@ class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
         output_[i] = 0;
     }
 
-    ::libvpx_test::ACMRandom prng;
+    ::libaom_test::ACMRandom prng;
     for (int i = 0; i < kInputBufferSize; ++i) {
       if (i & 1) {
         input_[i] = 255;
@@ -729,7 +729,7 @@ TEST_P(ConvolveTest, MatchesReferenceAveragingSubpixelFilter) {
 #endif
 
   // Populate ref and out with some random data
-  ::libvpx_test::ACMRandom prng;
+  ::libaom_test::ACMRandom prng;
   for (int y = 0; y < Height(); ++y) {
     for (int x = 0; x < Width(); ++x) {
       uint16_t r;
@@ -806,7 +806,7 @@ TEST_P(ConvolveTest, FilterExtremes) {
 #endif
 
   // Populate ref and out with some random data
-  ::libvpx_test::ACMRandom prng;
+  ::libaom_test::ACMRandom prng;
   for (int y = 0; y < Height(); ++y) {
     for (int x = 0; x < Width(); ++x) {
       uint16_t r;

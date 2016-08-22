@@ -15,8 +15,8 @@
 namespace {
 
 class AltRefForcedKeyTestLarge
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWith2Params<libaom_test::TestMode, int> {
  protected:
   AltRefForcedKeyTestLarge()
       : EncoderTest(GET_PARAM(0)), encoding_mode_(GET_PARAM(1)),
@@ -30,14 +30,14 @@ class AltRefForcedKeyTestLarge
     cfg_.g_threads = 0;
   }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
-                                  ::libvpx_test::Encoder *encoder) {
+  virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
+                                  ::libaom_test::Encoder *encoder) {
     if (video->frame() == 0) {
       encoder->Control(VP8E_SET_CPUUSED, cpu_used_);
       encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
 #if CONFIG_VP10_ENCODER
       // override test default for tile columns if necessary.
-      if (GET_PARAM(0) == &libvpx_test::kVP10) {
+      if (GET_PARAM(0) == &libaom_test::kVP10) {
         encoder->Control(VP9E_SET_TILE_COLUMNS, 6);
       }
 #endif
@@ -54,7 +54,7 @@ class AltRefForcedKeyTestLarge
     ++frame_num_;
   }
 
-  ::libvpx_test::TestMode encoding_mode_;
+  ::libaom_test::TestMode encoding_mode_;
   int cpu_used_;
   unsigned int forced_kf_frame_num_;
   unsigned int frame_num_;
@@ -68,7 +68,7 @@ TEST_P(AltRefForcedKeyTestLarge, Frame1IsKey) {
   for (int i = 0; lag_values[i] != -1; ++i) {
     frame_num_ = 0;
     cfg_.g_lag_in_frames = lag_values[i];
-    libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+    libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        timebase.den, timebase.num, 0, 30);
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   }
@@ -82,14 +82,14 @@ TEST_P(AltRefForcedKeyTestLarge, ForcedFrameIsKey) {
     frame_num_ = 0;
     forced_kf_frame_num_ = lag_values[i] - 1;
     cfg_.g_lag_in_frames = lag_values[i];
-    libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+    libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        timebase.den, timebase.num, 0, 30);
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   }
 }
 
 VP10_INSTANTIATE_TEST_CASE(AltRefForcedKeyTestLarge,
-                           ::testing::Values(::libvpx_test::kOnePassGood),
+                           ::testing::Values(::libaom_test::kOnePassGood),
                            ::testing::Range(0, 9));
 
 }  // namespace

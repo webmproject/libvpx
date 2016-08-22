@@ -15,14 +15,14 @@
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
-#include "vp10/common/enums.h"
-#include "vpx_dsp/vpx_dsp_common.h"
-#include "vpx_ports/mem.h"
+#include "av1/common/enums.h"
+#include "aom_dsp/vpx_dsp_common.h"
+#include "aom_ports/mem.h"
 
 namespace {
 
 using std::tr1::tuple;
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 typedef void (*HbdHtFunc)(const int16_t *input, int32_t *output, int stride,
                           int tx_type, int bd);
@@ -56,7 +56,7 @@ class VP10HighbdInvHTNxN : public ::testing::TestWithParam<IHbdHtParam> {
 
     // Note:
     // Inverse transform input buffer is 32-byte aligned
-    // Refer to <root>/vp10/encoder/context_tree.c, function,
+    // Refer to <root>/av1/encoder/context_tree.c, function,
     // void alloc_mode_context().
     coeffs_ = reinterpret_cast<int32_t *>(
         vpx_memalign(32, sizeof(coeffs_[0]) * num_coeffs_));
@@ -71,7 +71,7 @@ class VP10HighbdInvHTNxN : public ::testing::TestWithParam<IHbdHtParam> {
     vpx_free(coeffs_);
     vpx_free(output_);
     vpx_free(output_ref_);
-    libvpx_test::ClearSystemState();
+    libaom_test::ClearSystemState();
   }
 
  protected:

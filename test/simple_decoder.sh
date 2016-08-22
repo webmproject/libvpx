@@ -8,7 +8,7 @@
 ##  in the file PATENTS.  All contributing project authors may
 ##  be found in the AUTHORS file in the root of the source tree.
 ##
-##  This file tests the libvpx simple_decoder example code. To add new tests to
+##  This file tests the libaom simple_decoder example code. To add new tests to
 ##  this file, do the following:
 ##    1. Write a shell function (this is your test).
 ##    2. Add the function to simple_decoder_tests (on a new line).
@@ -27,7 +27,7 @@ simple_decoder_verify_environment() {
 # Runs simple_decoder using $1 as input file. $2 is the codec name, and is used
 # solely to name the output file.
 simple_decoder() {
-  local decoder="${LIBVPX_BIN_PATH}/simple_decoder${VPX_TEST_EXE_SUFFIX}"
+  local decoder="${LIBAOM_BIN_PATH}/simple_decoder${VPX_TEST_EXE_SUFFIX}"
   local input_file="$1"
   local codec="$2"
   local output_file="${VPX_TEST_OUTPUT_DIR}/simple_decoder_${codec}.raw"

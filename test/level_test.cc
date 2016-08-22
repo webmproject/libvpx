@@ -15,8 +15,8 @@
 
 namespace {
 class LevelTest
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWith2Params<libaom_test::TestMode, int> {
  protected:
   LevelTest()
       : EncoderTest(GET_PARAM(0)), encoding_mode_(GET_PARAM(1)),
@@ -27,7 +27,7 @@ class LevelTest
   virtual void SetUp() {
     InitializeConfig();
     SetMode(encoding_mode_);
-    if (encoding_mode_ != ::libvpx_test::kRealTime) {
+    if (encoding_mode_ != ::libaom_test::kRealTime) {
       cfg_.g_lag_in_frames = 25;
       cfg_.rc_end_usage = VPX_VBR;
     } else {
@@ -41,13 +41,13 @@ class LevelTest
     cfg_.rc_min_quantizer = 0;
   }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
-                                  ::libvpx_test::Encoder *encoder) {
+  virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
+                                  ::libaom_test::Encoder *encoder) {
     if (video->frame() == 0) {
       encoder->Control(VP8E_SET_CPUUSED, cpu_used_);
       encoder->Control(VP9E_SET_TARGET_LEVEL, target_level_);
       encoder->Control(VP9E_SET_MIN_GF_INTERVAL, min_gf_internal_);
-      if (encoding_mode_ != ::libvpx_test::kRealTime) {
+      if (encoding_mode_ != ::libaom_test::kRealTime) {
         encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
         encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);
         encoder->Control(VP8E_SET_ARNR_STRENGTH, 5);
@@ -59,7 +59,7 @@ class LevelTest
     ASSERT_GE(level_, 0);
   }
 
-  ::libvpx_test::TestMode encoding_mode_;
+  ::libaom_test::TestMode encoding_mode_;
   int cpu_used_;
   int min_gf_internal_;
   int target_level_;
@@ -68,7 +68,7 @@ class LevelTest
 
 // Test for keeping level stats only
 TEST_P(LevelTest, TestTargetLevel0) {
-  ::libvpx_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
+  ::libaom_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
                                        40);
   target_level_ = 0;
   min_gf_internal_ = 4;
@@ -82,14 +82,14 @@ TEST_P(LevelTest, TestTargetLevel0) {
 
 // Test for level control being turned off
 TEST_P(LevelTest, TestTargetLevel255) {
-  ::libvpx_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
+  ::libaom_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
                                        30);
   target_level_ = 255;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
 TEST_P(LevelTest, TestTargetLevelApi) {
-  ::libvpx_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0, 1);
+  ::libaom_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0, 1);
   static const vpx_codec_iface_t *codec = &vpx_codec_vp9_cx_algo;
   vpx_codec_ctx_t enc;
   vpx_codec_enc_cfg_t cfg;
@@ -110,7 +110,7 @@ TEST_P(LevelTest, TestTargetLevelApi) {
 }
 
 VP9_INSTANTIATE_TEST_CASE(LevelTest,
-                          ::testing::Values(::libvpx_test::kTwoPassGood,
-                                            ::libvpx_test::kOnePassGood),
+                          ::testing::Values(::libaom_test::kTwoPassGood,
+                                            ::libaom_test::kOnePassGood),
                           ::testing::Range(0, 9));
 }  // namespace

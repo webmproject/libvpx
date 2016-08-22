@@ -19,15 +19,15 @@
 
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
-#include "vpx/vpx_integer.h"
+#include "aom/vpx_integer.h"
 
 #include "./vp10_rtcd.h"
 
-#include "vp10/common/enums.h"
+#include "av1/common/enums.h"
 
-#include "vpx_dsp/blend.h"
+#include "aom_dsp/blend.h"
 
-using libvpx_test::FunctionEquivalenceTest;
+using libaom_test::FunctionEquivalenceTest;
 
 namespace {
 
@@ -117,7 +117,7 @@ class BlendA64Mask1DTest : public FunctionEquivalenceTest<F> {
 typedef void (*F8B)(uint8_t *dst, uint32_t dst_stride, const uint8_t *src0,
                     uint32_t src0_stride, const uint8_t *src1,
                     uint32_t src1_stride, const uint8_t *mask, int h, int w);
-typedef libvpx_test::FuncParam<F8B> TestFuncs;
+typedef libaom_test::FuncParam<F8B> TestFuncs;
 
 class BlendA64Mask1DTest8B : public BlendA64Mask1DTest<F8B, uint8_t> {
  protected:
@@ -216,7 +216,7 @@ typedef void (*FHBD)(uint8_t *dst, uint32_t dst_stride, const uint8_t *src0,
                      uint32_t src0_stride, const uint8_t *src1,
                      uint32_t src1_stride, const uint8_t *mask, int h, int w,
                      int bd);
-typedef libvpx_test::FuncParam<FHBD> TestFuncsHBD;
+typedef libaom_test::FuncParam<FHBD> TestFuncsHBD;
 
 class BlendA64Mask1DTestHBD : public BlendA64Mask1DTest<FHBD, uint16_t> {
  protected:

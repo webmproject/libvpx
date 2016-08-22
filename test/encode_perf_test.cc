@@ -16,7 +16,7 @@
 #include "test/i420_video_source.h"
 #include "test/util.h"
 #include "test/y4m_video_source.h"
-#include "vpx_ports/vpx_timer.h"
+#include "aom_ports/vpx_timer.h"
 
 namespace {
 
@@ -54,8 +54,8 @@ const int kEncodePerfTestThreads[] = { 1, 2, 4 };
 #define NELEMENTS(x) (sizeof((x)) / sizeof((x)[0]))
 
 class VP9EncodePerfTest
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWithParam<libaom_test::TestMode> {
  protected:
   VP9EncodePerfTest()
       : EncoderTest(GET_PARAM(0)), min_psnr_(kMaxPsnr), nframes_(0),
@@ -82,8 +82,8 @@ class VP9EncodePerfTest
     cfg_.g_threads = threads_;
   }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
-                                  ::libvpx_test::Encoder *encoder) {
+  virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
+                                  ::libaom_test::Encoder *encoder) {
     if (video->frame() == 0) {
       const int log2_tile_columns = 3;
       encoder->Control(VP8E_SET_CPUUSED, speed_);
@@ -116,7 +116,7 @@ class VP9EncodePerfTest
  private:
   double min_psnr_;
   unsigned int nframes_;
-  libvpx_test::TestMode encoding_mode_;
+  libaom_test::TestMode encoding_mode_;
   unsigned speed_;
   unsigned int threads_;
 };
@@ -143,7 +143,7 @@ TEST_P(VP9EncodePerfTest, PerfTest) {
 
         const unsigned frames = kVP9EncodePerfTestVectors[i].frames;
         const char *video_name = kVP9EncodePerfTestVectors[i].name;
-        libvpx_test::I420VideoSource video(
+        libaom_test::I420VideoSource video(
             video_name, kVP9EncodePerfTestVectors[i].width,
             kVP9EncodePerfTestVectors[i].height, timebase.den, timebase.num, 0,
             kVP9EncodePerfTestVectors[i].frames);
@@ -183,5 +183,5 @@ TEST_P(VP9EncodePerfTest, PerfTest) {
 }
 
 VP10_INSTANTIATE_TEST_CASE(VP9EncodePerfTest,
-                           ::testing::Values(::libvpx_test::kRealTime));
+                           ::testing::Values(::libaom_test::kRealTime));
 }  // namespace

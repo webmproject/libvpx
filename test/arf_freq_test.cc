@@ -15,7 +15,7 @@
 #include "test/util.h"
 #include "test/y4m_video_source.h"
 #include "test/yuv_video_source.h"
-#include "vp10/encoder/ratectrl.h"
+#include "av1/encoder/ratectrl.h"
 
 namespace {
 
@@ -38,7 +38,7 @@ typedef struct {
 } TestVideoParam;
 
 typedef struct {
-  libvpx_test::TestMode mode;
+  libaom_test::TestMode mode;
   int cpu_used;
 } TestEncodeParam;
 
@@ -55,9 +55,9 @@ const TestVideoParam kTestVectors[] = {
 };
 
 const TestEncodeParam kEncodeVectors[] = {
-  { ::libvpx_test::kOnePassGood, 2 }, { ::libvpx_test::kOnePassGood, 5 },
-  { ::libvpx_test::kTwoPassGood, 1 }, { ::libvpx_test::kTwoPassGood, 2 },
-  { ::libvpx_test::kTwoPassGood, 5 }, { ::libvpx_test::kRealTime, 5 },
+  { ::libaom_test::kOnePassGood, 2 }, { ::libaom_test::kOnePassGood, 5 },
+  { ::libaom_test::kTwoPassGood, 1 }, { ::libaom_test::kTwoPassGood, 2 },
+  { ::libaom_test::kTwoPassGood, 5 }, { ::libaom_test::kRealTime, 5 },
 };
 
 const int kMinArfVectors[] = {
@@ -75,8 +75,8 @@ int is_extension_y4m(const char *filename) {
 }
 
 class ArfFreqTestLarge
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWith3Params<TestVideoParam,
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWith3Params<TestVideoParam,
                                                  TestEncodeParam, int> {
  protected:
   ArfFreqTestLarge()
@@ -88,7 +88,7 @@ class ArfFreqTestLarge
   virtual void SetUp() {
     InitializeConfig();
     SetMode(test_encode_param_.mode);
-    if (test_encode_param_.mode != ::libvpx_test::kRealTime) {
+    if (test_encode_param_.mode != ::libaom_test::kRealTime) {
       cfg_.g_lag_in_frames = 25;
       cfg_.rc_end_usage = VPX_VBR;
     } else {
@@ -142,14 +142,14 @@ class ArfFreqTestLarge
     }
   }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
-                                  ::libvpx_test::Encoder *encoder) {
+  virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
+                                  ::libaom_test::Encoder *encoder) {
     if (video->frame() == 0) {
       encoder->Control(VP9E_SET_FRAME_PARALLEL_DECODING, 1);
       encoder->Control(VP9E_SET_TILE_COLUMNS, 4);
       encoder->Control(VP8E_SET_CPUUSED, test_encode_param_.cpu_used);
       encoder->Control(VP9E_SET_MIN_GF_INTERVAL, min_arf_requested_);
-      if (test_encode_param_.mode != ::libvpx_test::kRealTime) {
+      if (test_encode_param_.mode != ::libaom_test::kRealTime) {
         encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
         encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);
         encoder->Control(VP8E_SET_ARNR_STRENGTH, 5);
@@ -188,12 +188,12 @@ TEST_P(ArfFreqTestLarge, MinArfFreqTest) {
   init_flags_ = VPX_CODEC_USE_PSNR;
   if (cfg_.g_bit_depth > 8) init_flags_ |= VPX_CODEC_USE_HIGHBITDEPTH;
 
-  testing::internal::scoped_ptr<libvpx_test::VideoSource> video;
+  testing::internal::scoped_ptr<libaom_test::VideoSource> video;
   if (is_extension_y4m(test_video_param_.filename)) {
-    video.reset(new libvpx_test::Y4mVideoSource(test_video_param_.filename, 0,
+    video.reset(new libaom_test::Y4mVideoSource(test_video_param_.filename, 0,
                                                 kFrames));
   } else {
-    video.reset(new libvpx_test::YUVVideoSource(
+    video.reset(new libaom_test::YUVVideoSource(
         test_video_param_.filename, test_video_param_.fmt,
         test_video_param_.width, test_video_param_.height,
         test_video_param_.framerate_num, test_video_param_.framerate_den, 0,
@@ -219,8 +219,8 @@ TEST_P(ArfFreqTestLarge, MinArfFreqTest) {
 INSTANTIATE_TEST_CASE_P(
     DISABLED_VP10, ArfFreqTestLarge,
     ::testing::Combine(
-        ::testing::Values(static_cast<const libvpx_test::CodecFactory *>(
-            &libvpx_test::kVP10)),
+        ::testing::Values(static_cast<const libaom_test::CodecFactory *>(
+            &libaom_test::kVP10)),
         ::testing::ValuesIn(kTestVectors), ::testing::ValuesIn(kEncodeVectors),
         ::testing::ValuesIn(kMinArfVectors)));
 #endif  // CONFIG_VP10_ENCODER

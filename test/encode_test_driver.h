@@ -17,11 +17,11 @@
 
 #include "./vpx_config.h"
 #if CONFIG_VP10_ENCODER
-#include "vpx/vp8cx.h"
+#include "aom/vp8cx.h"
 #endif
-#include "vpx/vpx_encoder.h"
+#include "aom/vpx_encoder.h"
 
-namespace libvpx_test {
+namespace libaom_test {
 
 class CodecFactory;
 class VideoSource;
@@ -34,18 +34,18 @@ enum TestMode {
   kTwoPassBest
 };
 #define ALL_TEST_MODES                                                        \
-  ::testing::Values(::libvpx_test::kRealTime, ::libvpx_test::kOnePassGood,    \
-                    ::libvpx_test::kOnePassBest, ::libvpx_test::kTwoPassGood, \
-                    ::libvpx_test::kTwoPassBest)
+  ::testing::Values(::libaom_test::kRealTime, ::libaom_test::kOnePassGood,    \
+                    ::libaom_test::kOnePassBest, ::libaom_test::kTwoPassGood, \
+                    ::libaom_test::kTwoPassBest)
 
 #define ONE_PASS_TEST_MODES                                                \
-  ::testing::Values(::libvpx_test::kRealTime, ::libvpx_test::kOnePassGood, \
-                    ::libvpx_test::kOnePassBest)
+  ::testing::Values(::libaom_test::kRealTime, ::libaom_test::kOnePassGood, \
+                    ::libaom_test::kOnePassBest)
 
 #define TWO_PASS_TEST_MODES \
-  ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kTwoPassBest)
+  ::testing::Values(::libaom_test::kTwoPassGood, ::libaom_test::kTwoPassBest)
 
-// Provides an object to handle the libvpx get_cx_data() iteration pattern
+// Provides an object to handle the libaom get_cx_data() iteration pattern
 class CxDataIterator {
  public:
   explicit CxDataIterator(vpx_codec_ctx_t *encoder)
@@ -60,7 +60,7 @@ class CxDataIterator {
   vpx_codec_iter_t iter_;
 };
 
-// Implements an in-memory store for libvpx twopass statistics
+// Implements an in-memory store for libaom twopass statistics
 class TwopassStatsStore {
  public:
   void Append(const vpx_codec_cx_pkt_t &pkt) {
@@ -250,6 +250,6 @@ class EncoderTest {
   vpx_codec_pts_t last_pts_;
 };
 
-}  // namespace libvpx_test
+}  // namespace libaom_test
 
 #endif  // TEST_ENCODE_TEST_DRIVER_H_

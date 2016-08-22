@@ -14,7 +14,7 @@
 #include <stdlib.h>
 
 #include "tools_common.h"
-#include "vpx/vpx_encoder.h"
+#include "aom/vpx_encoder.h"
 
 #ifdef __cplusplus
 extern "C" {

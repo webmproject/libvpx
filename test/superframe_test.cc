@@ -21,12 +21,12 @@ const int kSuperframeSyntax = 1;
 const int kTileCols = 2;
 const int kTileRows = 3;
 
-typedef std::tr1::tuple<libvpx_test::TestMode, int, int, int>
+typedef std::tr1::tuple<libaom_test::TestMode, int, int, int>
     SuperframeTestParam;
 
 class SuperframeTest
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWithParam<SuperframeTestParam> {
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWithParam<SuperframeTestParam> {
  protected:
   SuperframeTest()
       : EncoderTest(GET_PARAM(0)), modified_buf_(NULL), last_sf_pts_(0) {}
@@ -35,7 +35,7 @@ class SuperframeTest
   virtual void SetUp() {
     InitializeConfig();
     const SuperframeTestParam input = GET_PARAM(1);
-    const libvpx_test::TestMode mode = std::tr1::get<kTestMode>(input);
+    const libaom_test::TestMode mode = std::tr1::get<kTestMode>(input);
     const int syntax = std::tr1::get<kSuperframeSyntax>(input);
     SetMode(mode);
     sf_count_ = 0;
@@ -47,8 +47,8 @@ class SuperframeTest
 
   virtual void TearDown() { delete[] modified_buf_; }
 
-  virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
-                                  libvpx_test::Encoder *encoder) {
+  virtual void PreEncodeFrameHook(libaom_test::VideoSource *video,
+                                  libaom_test::Encoder *encoder) {
     if (video->frame() == 1) {
       encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
       encoder->Control(VP8E_SET_CPUUSED, 2);
@@ -104,7 +104,7 @@ TEST_P(SuperframeTest, TestSuperframeIndexIsOptional) {
   sf_count_max_ = 0;  // early exit on successful test.
   cfg_.g_lag_in_frames = 25;
 
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+  ::libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 40);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 #if CONFIG_EXT_REFS
@@ -128,7 +128,7 @@ const int tile_col_values[] = { 1, 2, 32 };
 const int tile_row_values[] = { 1, 2, 32 };
 VP10_INSTANTIATE_TEST_CASE(
     SuperframeTest,
-    ::testing::Combine(::testing::Values(::libvpx_test::kTwoPassGood),
+    ::testing::Combine(::testing::Values(::libaom_test::kTwoPassGood),
                        ::testing::Values(1),
                        ::testing::ValuesIn(tile_col_values),
                        ::testing::ValuesIn(tile_row_values)));
@@ -136,7 +136,7 @@ VP10_INSTANTIATE_TEST_CASE(
 #if !CONFIG_ANS
 VP10_INSTANTIATE_TEST_CASE(
     SuperframeTest,
-    ::testing::Combine(::testing::Values(::libvpx_test::kTwoPassGood),
+    ::testing::Combine(::testing::Values(::libaom_test::kTwoPassGood),
                        ::testing::Values(1), ::testing::Values(0),
                        ::testing::Values(0)));
 #endif  // !CONFIG_ANS

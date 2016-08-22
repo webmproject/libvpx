@@ -15,11 +15,11 @@
 
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
-#include "vpx/vpx_integer.h"
+#include "aom/vpx_integer.h"
 
 #define MAX_SB_SQUARE (MAX_SB_SIZE * MAX_SB_SIZE)
 
-using libvpx_test::FunctionEquivalenceTest;
+using libaom_test::FunctionEquivalenceTest;
 
 namespace {
 
@@ -28,7 +28,7 @@ static const int kMaskMax = 64;
 
 typedef unsigned int (*ObmcSadF)(const uint8_t *pre, int pre_stride,
                                  const int32_t *wsrc, const int32_t *mask);
-typedef libvpx_test::FuncParam<ObmcSadF> TestFuncs;
+typedef libaom_test::FuncParam<ObmcSadF> TestFuncs;
 
 ////////////////////////////////////////////////////////////////////////////////
 // 8 bit

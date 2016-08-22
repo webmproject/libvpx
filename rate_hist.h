@@ -11,7 +11,7 @@
 #ifndef RATE_HIST_H_
 #define RATE_HIST_H_
 
-#include "vpx/vpx_encoder.h"
+#include "aom/vpx_encoder.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -20,12 +20,12 @@
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
-#include "vp10/common/blockd.h"
-#include "vp10/common/scan.h"
-#include "vpx/vpx_integer.h"
-#include "vp10/common/vp10_inv_txfm.h"
+#include "av1/common/blockd.h"
+#include "av1/common/scan.h"
+#include "aom/vpx_integer.h"
+#include "av1/common/vp10_inv_txfm.h"
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 namespace {
 const double kInvSqrt2 = 0.707106781186547524400844362104;
@@ -125,7 +125,7 @@ class Vp10PartialIDctTest
     last_nonzero_ = GET_PARAM(4);
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   int last_nonzero_;

@@ -22,8 +22,8 @@
 #include "vp8/encoder/block.h"
 #include "vp8/encoder/onyx_int.h"
 #include "vp8/encoder/quantize.h"
-#include "vpx/vpx_integer.h"
-#include "vpx_mem/vpx_mem.h"
+#include "aom/vpx_integer.h"
+#include "aom_mem/vpx_mem.h"
 
 namespace {
 #if !CONFIG_AOM_QM
@@ -35,7 +35,7 @@ typedef void (*VP8Quantize)(BLOCK *b, BLOCKD *d);
 
 typedef std::tr1::tuple<VP8Quantize, VP8Quantize> VP8QuantizeParam;
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 using std::tr1::make_tuple;
 
 // Create and populate a VP8_COMP instance which has a complete set of
@@ -47,7 +47,7 @@ class QuantizeTestBase {
     vp8_comp_ = NULL;
     vpx_free(macroblockd_dst_);
     macroblockd_dst_ = NULL;
-    libvpx_test::ClearSystemState();
+    libaom_test::ClearSystemState();
   }
 
  protected:

@@ -20,8 +20,8 @@ const int kVideoSourceHeight = 240;
 const int kFramesToEncode = 2;
 
 class RealtimeTest
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWithParam<libaom_test::TestMode> {
  protected:
   RealtimeTest() : EncoderTest(GET_PARAM(0)), frame_packets_(0) {}
   virtual ~RealtimeTest() {}
@@ -29,7 +29,7 @@ class RealtimeTest
   virtual void SetUp() {
     InitializeConfig();
     cfg_.g_lag_in_frames = 0;
-    SetMode(::libvpx_test::kRealTime);
+    SetMode(::libaom_test::kRealTime);
   }
 
   virtual void BeginPassHook(unsigned int /*pass*/) {
@@ -48,7 +48,7 @@ class RealtimeTest
 };
 
 TEST_P(RealtimeTest, RealtimeFirstPassProducesFrames) {
-  ::libvpx_test::RandomVideoSource video;
+  ::libaom_test::RandomVideoSource video;
   video.SetSize(kVideoSourceWidth, kVideoSourceHeight);
   video.set_limit(kFramesToEncode);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
@@ -56,8 +56,8 @@ TEST_P(RealtimeTest, RealtimeFirstPassProducesFrames) {
 }
 
 VP8_INSTANTIATE_TEST_CASE(RealtimeTest,
-                          ::testing::Values(::libvpx_test::kRealTime));
+                          ::testing::Values(::libaom_test::kRealTime));
 VP9_INSTANTIATE_TEST_CASE(RealtimeTest,
-                          ::testing::Values(::libvpx_test::kRealTime));
+                          ::testing::Values(::libaom_test::kRealTime));
 
 }  // namespace

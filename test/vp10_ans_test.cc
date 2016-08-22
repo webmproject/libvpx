@@ -20,17 +20,17 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "test/acm_random.h"
-#include "vp10/common/ans.h"
-#include "vp10/encoder/treewriter.h"
-#include "vpx_dsp/bitreader.h"
-#include "vpx_dsp/bitwriter.h"
+#include "av1/common/ans.h"
+#include "av1/encoder/treewriter.h"
+#include "aom_dsp/bitreader.h"
+#include "aom_dsp/bitwriter.h"
 
 namespace {
 typedef std::vector<std::pair<uint8_t, bool> > PvVec;
 
 PvVec abs_encode_build_vals(int iters) {
   PvVec ret;
-  libvpx_test::ACMRandom gen(0x30317076);
+  libaom_test::ACMRandom gen(0x30317076);
   double entropy = 0;
   for (int i = 0; i < iters; ++i) {
     uint8_t p;
@@ -167,7 +167,7 @@ std::vector<int> ans_encode_build_vals(const rans_sym *tab, int iters) {
   }
   assert(p_to_sym.size() == rans_precision);
   std::vector<int> ret;
-  libvpx_test::ACMRandom gen(18543637);
+  libaom_test::ACMRandom gen(18543637);
   for (int i = 0; i < iters; ++i) {
     int sym = p_to_sym[gen.Rand8() * 4];
     ret.push_back(sym);

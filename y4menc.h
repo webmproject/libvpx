@@ -13,7 +13,7 @@
 
 #include "./tools_common.h"
 
-#include "vpx/vpx_decoder.h"
+#include "aom/vpx_decoder.h"
 
 #ifdef __cplusplus
 extern "C" {

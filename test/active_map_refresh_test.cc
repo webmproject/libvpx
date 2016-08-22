@@ -57,8 +57,8 @@ void GenerateMap(int mb_rows, int mb_cols, const vpx_image_t &current,
 const int kAqModeCyclicRefresh = 3;
 
 class ActiveMapRefreshTest
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWith2Params<libaom_test::TestMode, int> {
  protected:
   ActiveMapRefreshTest() : EncoderTest(GET_PARAM(0)) {}
   virtual ~ActiveMapRefreshTest() {}
@@ -69,10 +69,10 @@ class ActiveMapRefreshTest
     cpu_used_ = GET_PARAM(2);
   }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
-                                  ::libvpx_test::Encoder *encoder) {
-    ::libvpx_test::Y4mVideoSource *y4m_video =
-        static_cast<libvpx_test::Y4mVideoSource *>(video);
+  virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
+                                  ::libaom_test::Encoder *encoder) {
+    ::libaom_test::Y4mVideoSource *y4m_video =
+        static_cast<libaom_test::Y4mVideoSource *>(video);
     if (video->frame() == 1) {
       encoder->Control(VP8E_SET_CPUUSED, cpu_used_);
       encoder->Control(VP9E_SET_AQ_MODE, kAqModeCyclicRefresh);
@@ -99,7 +99,7 @@ class ActiveMapRefreshTest
   }
 
   int cpu_used_;
-  ::libvpx_test::Y4mVideoSource *y4m_holder_;
+  ::libaom_test::Y4mVideoSource *y4m_holder_;
 };
 
 TEST_P(ActiveMapRefreshTest, Test) {
@@ -114,12 +114,12 @@ TEST_P(ActiveMapRefreshTest, Test) {
   cfg_.kf_max_dist = 90000;
 
 #if CONFIG_VP10
-  const int nframes = codec_ == &libvpx_test::kVP10 ? 10 : 30;
+  const int nframes = codec_ == &libaom_test::kVP10 ? 10 : 30;
 #else
   const int nframes = 30;
 #endif  // CONFIG_VP10
-  ::libvpx_test::Y4mVideoSource video("desktop_credits.y4m", 0, nframes);
-  ::libvpx_test::Y4mVideoSource video_holder("desktop_credits.y4m", 0, nframes);
+  ::libaom_test::Y4mVideoSource video("desktop_credits.y4m", 0, nframes);
+  ::libaom_test::Y4mVideoSource video_holder("desktop_credits.y4m", 0, nframes);
   video_holder.Begin();
   y4m_holder_ = &video_holder;
 
@@ -128,7 +128,7 @@ TEST_P(ActiveMapRefreshTest, Test) {
 
 #if CONFIG_VP10
 VP10_INSTANTIATE_TEST_CASE(ActiveMapRefreshTest,
-                           ::testing::Values(::libvpx_test::kRealTime),
+                           ::testing::Values(::libaom_test::kRealTime),
                            ::testing::Range(5, 6));
 #endif  // CONFIG_VP10
 }  // namespace

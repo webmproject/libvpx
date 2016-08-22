@@ -31,7 +31,7 @@ vpxenc_verify_environment() {
     fi
   fi
   if [ -z "$(vpx_tool_path vpxenc)" ]; then
-    elog "vpxenc not found. It must exist in LIBVPX_BIN_PATH or its parent."
+    elog "vpxenc not found. It must exist in LIBAOM_BIN_PATH or its parent."
     return 1
   fi
 }
@@ -91,7 +91,7 @@ vpxenc_rt_params() {
 }
 
 # Wrapper function for running vpxenc with pipe input. Requires that
-# LIBVPX_BIN_PATH points to the directory containing vpxenc. $1 is used as the
+# LIBAOM_BIN_PATH points to the directory containing vpxenc. $1 is used as the
 # input file path and shifted away. All remaining parameters are passed through
 # to vpxenc.
 vpxenc_pipe() {
@@ -103,7 +103,7 @@ vpxenc_pipe() {
     "$@" ${devnull}
 }
 
-# Wrapper function for running vpxenc. Requires that LIBVPX_BIN_PATH points to
+# Wrapper function for running vpxenc. Requires that LIBAOM_BIN_PATH points to
 # the directory containing vpxenc. $1 one is used as the input file path and
 # shifted away. All remaining parameters are passed through to vpxenc.
 vpxenc() {

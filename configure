@@ -189,7 +189,7 @@ if [ ${doxy_major:-0} -ge 1 ]; then
 fi
 
 # disable codecs when their source directory does not exist
-[ -d "${source_path}/vp10" ] || disable_codec vp10
+[ -d "${source_path}/av1" ] || disable_codec vp10
 
 # install everything except the sources, by default. sources will have
 # to be enabled when doing dist builds, since that's no longer a common
@@ -584,7 +584,7 @@ EOF
     check_header pthread.h
     check_header unistd.h # for sysconf(3) and friends.
 
-    check_header vpx/vpx_integer.h -I${source_path} && enable_feature vpx_ports
+    check_header aom/vpx_integer.h -I${source_path} && enable_feature vpx_ports
 }
 
 process_toolchain() {
@@ -606,7 +606,7 @@ process_toolchain() {
         check_add_cflags -Wunused-variable
         case ${CC} in
           *clang*)
-              # libvpx and/or clang have issues with aliasing:
+              # libaom and/or clang have issues with aliasing:
               # https://code.google.com/p/webm/issues/detail?id=603
               # work around them until they are fixed
               check_add_cflags -fno-strict-aliasing
@@ -748,7 +748,7 @@ CONFIGURE_ARGS="$@"
 process "$@"
 print_webm_license ${BUILD_PFX}vpx_config.c "/*" " */"
 cat <<EOF >> ${BUILD_PFX}vpx_config.c
-#include "vpx/vpx_codec.h"
+#include "aom/vpx_codec.h"
 static const char* const cfg = "$CONFIGURE_ARGS";
 const char *vpx_codec_build_config(void) {return cfg;}
 EOF

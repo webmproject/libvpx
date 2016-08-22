@@ -13,7 +13,7 @@
 #include <limits.h>
 #include "args.h"
 
-#include "vpx_ports/msvc.h"
+#include "aom_ports/msvc.h"
 
 #if defined(__GNUC__) && __GNUC__
 extern void die(const char *fmt, ...) __attribute__((noreturn));

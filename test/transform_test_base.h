@@ -11,14 +11,14 @@
 #define TEST_TRANSFORM_TEST_BASE_H_
 
 #include "./vpx_config.h"
-#include "vpx_mem/vpx_mem.h"
-#include "vpx/vpx_codec.h"
+#include "aom_mem/vpx_mem.h"
+#include "aom/vpx_codec.h"
 
-namespace libvpx_test {
+namespace libaom_test {
 
 //  Note:
 //   Same constant are defined in vp9/common/vp9_entropy.h and
-//   vp10/common/entropy.h.  Goal is to make this base class
+//   av1/common/entropy.h.  Goal is to make this base class
 //   to use for future codec transform testing.  But including
 //   either of them would lead to compiling error when we do
 //   unit test for another codec. Suggest to move the definition
@@ -280,6 +280,6 @@ class TransformTestBase {
   }
 };
 
-}  // namespace libvpx_test
+}  // namespace libaom_test
 
 #endif  // TEST_TRANSFORM_TEST_BASE_H_

@@ -21,11 +21,11 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "test/acm_random.h"
-#include "vp10/common/enums.h"
-#include "vp10/common/vp10_txfm.h"
+#include "av1/common/enums.h"
+#include "av1/common/vp10_txfm.h"
 #include "./vp10_rtcd.h"
 
-namespace libvpx_test {
+namespace libaom_test {
 typedef enum {
   TYPE_DCT = 0,
   TYPE_ADST,
@@ -87,5 +87,5 @@ static const Inv_Txfm2d_Func inv_txfm_func_ls[TX_SIZES] = {
 };
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-}  // namespace libvpx_test
+}  // namespace libaom_test
 #endif  // VP10_TXFM_TEST_H_

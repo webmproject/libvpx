@@ -15,7 +15,7 @@
 #include "test/video_source.h"
 #include "./y4minput.h"
 
-namespace libvpx_test {
+namespace libaom_test {
 
 // This class extends VideoSource to allow parsing of raw yv12
 // so that we can do actual file encodes.
@@ -117,6 +117,6 @@ class Y4mVideoSource : public VideoSource {
   y4m_input y4m_;
 };
 
-}  // namespace libvpx_test
+}  // namespace libaom_test
 
 #endif  // TEST_Y4M_VIDEO_SOURCE_H_

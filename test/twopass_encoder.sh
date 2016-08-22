@@ -8,7 +8,7 @@
 ##  in the file PATENTS.  All contributing project authors may
 ##  be found in the AUTHORS file in the root of the source tree.
 ##
-##  This file tests the libvpx twopass_encoder example. To add new tests to this
+##  This file tests the libaom twopass_encoder example. To add new tests to this
 ##  file, do the following:
 ##    1. Write a shell function (this is your test).
 ##    2. Add the function to twopass_encoder_tests (on a new line).
@@ -26,7 +26,7 @@ twopass_encoder_verify_environment() {
 # Runs twopass_encoder using the codec specified by $1 with a frame limit of
 # 100.
 twopass_encoder() {
-  local encoder="${LIBVPX_BIN_PATH}/twopass_encoder${VPX_TEST_EXE_SUFFIX}"
+  local encoder="${LIBAOM_BIN_PATH}/twopass_encoder${VPX_TEST_EXE_SUFFIX}"
   local codec="$1"
   local output_file="${VPX_TEST_OUTPUT_DIR}/twopass_encoder_${codec}.ivf"
 

@@ -16,14 +16,14 @@
 #include "test/acm_random.h"
 #include "test/util.h"
 #include "test/vp10_txfm_test.h"
-#include "vp10/common/vp10_inv_txfm2d_cfg.h"
+#include "av1/common/vp10_inv_txfm2d_cfg.h"
 
-using libvpx_test::ACMRandom;
-using libvpx_test::input_base;
-using libvpx_test::bd;
-using libvpx_test::compute_avg_abs_error;
-using libvpx_test::Fwd_Txfm2d_Func;
-using libvpx_test::Inv_Txfm2d_Func;
+using libaom_test::ACMRandom;
+using libaom_test::input_base;
+using libaom_test::bd;
+using libaom_test::compute_avg_abs_error;
+using libaom_test::Fwd_Txfm2d_Func;
+using libaom_test::Inv_Txfm2d_Func;
 
 namespace {
 
@@ -39,7 +39,7 @@ class VP10InvTxfm2d : public ::testing::TestWithParam<VP10InvTxfm2dParam> {
     tx_size_ = GET_PARAM(1);
     max_error_ = GET_PARAM(2);
     max_avg_error_ = GET_PARAM(3);
-    txfm1d_size_ = libvpx_test::get_txfm1d_size(tx_size_);
+    txfm1d_size_ = libaom_test::get_txfm1d_size(tx_size_);
     txfm2d_size_ = txfm1d_size_ * txfm1d_size_;
     count_ = 500;
 
@@ -53,9 +53,9 @@ class VP10InvTxfm2d : public ::testing::TestWithParam<VP10InvTxfm2dParam> {
 
   void RunRoundtripCheck() {
     const Fwd_Txfm2d_Func fwd_txfm_func =
-        libvpx_test::fwd_txfm_func_ls[tx_size_];
+        libaom_test::fwd_txfm_func_ls[tx_size_];
     const Inv_Txfm2d_Func inv_txfm_func =
-        libvpx_test::inv_txfm_func_ls[tx_size_];
+        libaom_test::inv_txfm_func_ls[tx_size_];
     double avg_abs_error = 0;
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     for (int ci = 0; ci < count_; ci++) {

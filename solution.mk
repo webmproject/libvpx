@@ -8,7 +8,7 @@
 ##  be found in the AUTHORS file in the root of the source tree.
 ##
 
-# libvpx reverse dependencies (targets that depend on libvpx)
+# libaom reverse dependencies (targets that depend on libaom)
 VPX_NONDEPS=$(addsuffix .$(VCPROJ_SFX),vpx gtest)
 VPX_RDEPS=$(foreach vcp,\
               $(filter-out $(VPX_NONDEPS),$^), --dep=$(vcp:.$(VCPROJ_SFX)=):vpx)

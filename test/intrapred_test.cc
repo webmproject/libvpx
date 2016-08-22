@@ -18,13 +18,13 @@
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
-#include "vp10/common/blockd.h"
-#include "vp10/common/pred_common.h"
-#include "vpx_mem/vpx_mem.h"
+#include "av1/common/blockd.h"
+#include "av1/common/pred_common.h"
+#include "aom_mem/vpx_mem.h"
 
 namespace {
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 const int count_test_block = 100000;
 

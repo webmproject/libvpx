@@ -14,14 +14,14 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "./vpx_dsp_rtcd.h"
-#include "vpx/vpx_integer.h"
+#include "aom/vpx_integer.h"
 
 #include "test/acm_random.h"
 #include "test/register_state_check.h"
 
 namespace {
 
-using ::libvpx_test::ACMRandom;
+using ::libaom_test::ACMRandom;
 
 typedef void (*MinMaxFunc)(const uint8_t *a, int a_stride, const uint8_t *b,
                            int b_stride, int *min, int *max);

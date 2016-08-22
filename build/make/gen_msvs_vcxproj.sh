@@ -299,7 +299,7 @@ generate_vcxproj() {
             tag_content AppContainerApplication true
             # The application type can be one of "Windows Store",
             # "Windows Phone" or "Windows Phone Silverlight". The
-            # actual value doesn't matter from the libvpx point of view,
+            # actual value doesn't matter from the libaom point of view,
             # since a static library built for one works on the others.
             # The PlatformToolset field needs to be set in sync with this;
             # for Windows Store and Windows Phone Silverlight it should be

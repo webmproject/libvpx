@@ -17,10 +17,10 @@
 #include "test/register_state_check.h"
 #include "test/util.h"
 #if CONFIG_VP10
-#include "vp10/common/blockd.h"
+#include "av1/common/blockd.h"
 #endif
-#include "vpx_mem/vpx_mem.h"
-#include "vpx_ports/mem.h"
+#include "aom_mem/vpx_mem.h"
+#include "aom_ports/mem.h"
 
 #define USE_SPEED_TEST (0)
 
@@ -33,10 +33,10 @@ namespace {
 
 class VP9SubtractBlockTest : public ::testing::TestWithParam<SubtractFunc> {
  public:
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 };
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 TEST_P(VP9SubtractBlockTest, SimpleSubtract) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());

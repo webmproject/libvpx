@@ -68,9 +68,9 @@ const TestVideoParam kTestVectors[] = {
 };
 
 // Encoding modes tested
-const libvpx_test::TestMode kEncodingModeVectors[] = {
-  ::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood,
-  ::libvpx_test::kRealTime,
+const libaom_test::TestMode kEncodingModeVectors[] = {
+  ::libaom_test::kTwoPassGood, ::libaom_test::kOnePassGood,
+  ::libaom_test::kRealTime,
 };
 
 // Speed settings tested
@@ -85,8 +85,8 @@ int is_extension_y4m(const char *filename) {
 }
 
 class EndToEndTestLarge
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWith3Params<libvpx_test::TestMode,
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWith3Params<libaom_test::TestMode,
                                                  TestVideoParam, int> {
  protected:
   EndToEndTestLarge()
@@ -99,7 +99,7 @@ class EndToEndTestLarge
   virtual void SetUp() {
     InitializeConfig();
     SetMode(encoding_mode_);
-    if (encoding_mode_ != ::libvpx_test::kRealTime) {
+    if (encoding_mode_ != ::libaom_test::kRealTime) {
       cfg_.g_lag_in_frames = 5;
       cfg_.rc_end_usage = VPX_VBR;
     } else {
@@ -122,18 +122,18 @@ class EndToEndTestLarge
     nframes_++;
   }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
-                                  ::libvpx_test::Encoder *encoder) {
+  virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
+                                  ::libaom_test::Encoder *encoder) {
     if (video->frame() == 1) {
       encoder->Control(VP9E_SET_FRAME_PARALLEL_DECODING, 1);
       encoder->Control(VP9E_SET_TILE_COLUMNS, 4);
       encoder->Control(VP8E_SET_CPUUSED, cpu_used_);
       // Test screen coding tools at cpu_used = 1 && encoding mode is two-pass.
-      if (cpu_used_ == 1 && encoding_mode_ == ::libvpx_test::kTwoPassGood)
+      if (cpu_used_ == 1 && encoding_mode_ == ::libaom_test::kTwoPassGood)
         encoder->Control(VP9E_SET_TUNE_CONTENT, VPX_CONTENT_SCREEN);
       else
         encoder->Control(VP9E_SET_TUNE_CONTENT, VPX_CONTENT_DEFAULT);
-      if (encoding_mode_ != ::libvpx_test::kRealTime) {
+      if (encoding_mode_ != ::libaom_test::kRealTime) {
         encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
         encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);
         encoder->Control(VP8E_SET_ARNR_STRENGTH, 5);
@@ -157,7 +157,7 @@ class EndToEndTestLarge
  private:
   double psnr_;
   unsigned int nframes_;
-  libvpx_test::TestMode encoding_mode_;
+  libaom_test::TestMode encoding_mode_;
 };
 
 TEST_P(EndToEndTestLarge, EndtoEndPSNRTest) {
@@ -169,12 +169,12 @@ TEST_P(EndToEndTestLarge, EndtoEndPSNRTest) {
   init_flags_ = VPX_CODEC_USE_PSNR;
   if (cfg_.g_bit_depth > 8) init_flags_ |= VPX_CODEC_USE_HIGHBITDEPTH;
 
-  libvpx_test::VideoSource *video;
+  libaom_test::VideoSource *video;
   if (is_extension_y4m(test_video_param_.filename)) {
     video =
-        new libvpx_test::Y4mVideoSource(test_video_param_.filename, 0, kFrames);
+        new libaom_test::Y4mVideoSource(test_video_param_.filename, 0, kFrames);
   } else {
-    video = new libvpx_test::YUVVideoSource(test_video_param_.filename,
+    video = new libaom_test::YUVVideoSource(test_video_param_.filename,
                                             test_video_param_.fmt, kWidth,
                                             kHeight, kFramerate, 1, 0, kFrames);
   }

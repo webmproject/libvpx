@@ -20,9 +20,9 @@
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
-#include "vpx/vpx_codec.h"
-#include "vpx_mem/vpx_mem.h"
-#include "vpx_ports/mem.h"
+#include "aom/vpx_codec.h"
+#include "aom_mem/vpx_mem.h"
+#include "aom_ports/mem.h"
 
 typedef unsigned int (*SadMxNFunc)(const uint8_t *src_ptr, int src_stride,
                                    const uint8_t *ref_ptr, int ref_stride);
@@ -38,7 +38,7 @@ typedef void (*SadMxNx4Func)(const uint8_t *src_ptr, int src_stride,
                              uint32_t *sad_array);
 typedef std::tr1::tuple<int, int, SadMxNx4Func, int> SadMxNx4Param;
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 namespace {
 class SADTestBase : public ::testing::Test {
@@ -76,7 +76,7 @@ class SADTestBase : public ::testing::Test {
     second_pred16_ = NULL;
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   // Handle up to 4 128x128 blocks, with stride up to 256

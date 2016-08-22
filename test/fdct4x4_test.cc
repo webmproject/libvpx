@@ -21,19 +21,19 @@
 #include "test/register_state_check.h"
 #include "test/transform_test_base.h"
 #include "test/util.h"
-#include "vp10/common/entropy.h"
-#include "vpx/vpx_codec.h"
-#include "vpx/vpx_integer.h"
-#include "vpx_ports/mem.h"
+#include "av1/common/entropy.h"
+#include "aom/vpx_codec.h"
+#include "aom/vpx_integer.h"
+#include "aom_ports/mem.h"
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 namespace {
 typedef void (*FdctFunc)(const int16_t *in, tran_low_t *out, int stride);
 typedef void (*IdctFunc)(const tran_low_t *in, uint8_t *out, int stride);
 typedef void (*IhtFunc)(const tran_low_t *in, uint8_t *out, int stride,
                         int tx_type);
-using libvpx_test::FhtFunc;
+using libaom_test::FhtFunc;
 
 typedef std::tr1::tuple<FdctFunc, IdctFunc, int, vpx_bit_depth_t, int>
     Dct4x4Param;
@@ -89,7 +89,7 @@ void idct4x4_12_sse2(const tran_low_t *in, uint8_t *out, int stride) {
 #endif  // HAVE_SSE2
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-class Trans4x4DCT : public libvpx_test::TransformTestBase,
+class Trans4x4DCT : public libaom_test::TransformTestBase,
                     public ::testing::TestWithParam<Dct4x4Param> {
  public:
   virtual ~Trans4x4DCT() {}
@@ -104,7 +104,7 @@ class Trans4x4DCT : public libvpx_test::TransformTestBase,
     mask_ = (1 << bit_depth_) - 1;
     num_coeffs_ = GET_PARAM(4);
   }
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   void RunFwdTxfm(const int16_t *in, tran_low_t *out, int stride) {
@@ -126,7 +126,7 @@ TEST_P(Trans4x4DCT, MemCheck) { RunMemCheck(); }
 
 TEST_P(Trans4x4DCT, InvAccuracyCheck) { RunInvAccuracyCheck(1); }
 
-class Trans4x4HT : public libvpx_test::TransformTestBase,
+class Trans4x4HT : public libaom_test::TransformTestBase,
                    public ::testing::TestWithParam<Ht4x4Param> {
  public:
   virtual ~Trans4x4HT() {}
@@ -141,7 +141,7 @@ class Trans4x4HT : public libvpx_test::TransformTestBase,
     mask_ = (1 << bit_depth_) - 1;
     num_coeffs_ = GET_PARAM(4);
   }
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   void RunFwdTxfm(const int16_t *in, tran_low_t *out, int stride) {
@@ -164,7 +164,7 @@ TEST_P(Trans4x4HT, MemCheck) { RunMemCheck(); }
 
 TEST_P(Trans4x4HT, InvAccuracyCheck) { RunInvAccuracyCheck(1); }
 
-class Trans4x4WHT : public libvpx_test::TransformTestBase,
+class Trans4x4WHT : public libaom_test::TransformTestBase,
                     public ::testing::TestWithParam<Dct4x4Param> {
  public:
   virtual ~Trans4x4WHT() {}
@@ -179,7 +179,7 @@ class Trans4x4WHT : public libvpx_test::TransformTestBase,
     mask_ = (1 << bit_depth_) - 1;
     num_coeffs_ = GET_PARAM(4);
   }
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   void RunFwdTxfm(const int16_t *in, tran_low_t *out, int stride) {

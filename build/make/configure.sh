@@ -3,7 +3,7 @@
 ##  configure.sh
 ##
 ##  This script is sourced by the main configure script and contains
-##  utility functions and other common bits that aren't strictly libvpx
+##  utility functions and other common bits that aren't strictly libaom
 ##  related.
 ##
 ##  This build system is based in part on the FFmpeg configure script.

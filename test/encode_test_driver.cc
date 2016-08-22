@@ -13,14 +13,14 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "./vpx_config.h"
-#include "vpx_ports/mem.h"
+#include "aom_ports/mem.h"
 #include "test/codec_factory.h"
 #include "test/decode_test_driver.h"
 #include "test/encode_test_driver.h"
 #include "test/register_state_check.h"
 #include "test/video_source.h"
 
-namespace libvpx_test {
+namespace libaom_test {
 void Encoder::InitEncoder(VideoSource *video) {
   vpx_codec_err_t res;
   const vpx_image_t *img = video->img();
@@ -317,4 +317,4 @@ void EncoderTest::RunLoop(VideoSource *video) {
   }
 }
 
-}  // namespace libvpx_test
+}  // namespace libaom_test

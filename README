@@ -33,13 +33,13 @@ COMPILING THE APPLICATIONS/LIBRARIES:
 
     $ mkdir build
     $ cd build
-    $ ../libvpx/configure <options>
+    $ ../libaom/configure <options>
     $ make
 
   3. Configuration options
   The 'configure' script supports a number of options. The --help option can be
   used to get a list of supported options:
-    $ ../libvpx/configure --help
+    $ ../libaom/configure --help
 
   4. Cross development
   For cross development, the most notable option is the --target option. The
@@ -108,7 +108,7 @@ COMPILING THE APPLICATIONS/LIBRARIES:
   toolchain, the following command could be used (note, POSIX SH syntax, adapt
   to your shell as necessary):
 
-    $ CROSS=mipsel-linux-uclibc- ../libvpx/configure
+    $ CROSS=mipsel-linux-uclibc- ../libaom/configure
 
   In addition, the executables to be invoked can be overridden by specifying the
   environment variables: CC, AR, LD, AS, STRIP, NM. Additional flags can be
@@ -125,7 +125,7 @@ VP8/VP9 TEST VECTORS:
   LIBVPX_TEST_DATA_PATH environment variable can be used.
 
   $ ./configure --enable-unit-tests
-  $ LIBVPX_TEST_DATA_PATH=../libvpx-test-data make testdata
+  $ LIBVPX_TEST_DATA_PATH=../-test-data make testdata
 
 CODE STYLE:
   The coding style used by this project is enforced with clang-format using the

@@ -8,7 +8,7 @@
 ##  in the file PATENTS.  All contributing project authors may
 ##  be found in the AUTHORS file in the root of the source tree.
 ##
-##  This file runs all of the tests for the libvpx examples.
+##  This file runs all of the tests for the libaom examples.
 ##
 . $(dirname $0)/tools_common.sh
 

@@ -20,12 +20,12 @@
 
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
-#include "vpx/vpx_codec.h"
-#include "vpx/vpx_integer.h"
-#include "vpx_dsp/vpx_filter.h"
-#include "vpx_mem/vpx_mem.h"
+#include "aom/vpx_codec.h"
+#include "aom/vpx_integer.h"
+#include "aom_dsp/vpx_filter.h"
+#include "aom_mem/vpx_mem.h"
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 namespace {
 const int number_of_iterations = 500;
@@ -47,7 +47,7 @@ class MaskedVarianceTest
     ref_func_ = GET_PARAM(1);
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   MaskedVarianceFunc opt_func_;
@@ -142,7 +142,7 @@ class MaskedSubPixelVarianceTest
     ref_func_ = GET_PARAM(1);
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   MaskedSubPixelVarianceFunc opt_func_;
@@ -262,7 +262,7 @@ class HighbdMaskedVarianceTest
     bit_depth_ = GET_PARAM(2);
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   MaskedVarianceFunc opt_func_;
@@ -361,7 +361,7 @@ class HighbdMaskedSubPixelVarianceTest
     bit_depth_ = GET_PARAM(2);
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   MaskedSubPixelVarianceFunc opt_func_;

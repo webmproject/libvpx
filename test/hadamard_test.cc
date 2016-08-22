@@ -19,7 +19,7 @@
 
 namespace {
 
-using ::libvpx_test::ACMRandom;
+using ::libaom_test::ACMRandom;
 
 typedef void (*HadamardFunc)(const int16_t *a, int a_stride, int16_t *b);
 

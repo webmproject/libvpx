@@ -11,8 +11,8 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "./vpx_config.h"
-#include "vpx/vp8cx.h"
-#include "vpx/vpx_encoder.h"
+#include "aom/vp8cx.h"
+#include "aom/vpx_encoder.h"
 
 namespace {
 

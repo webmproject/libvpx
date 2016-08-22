@@ -46,8 +46,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "vpx/vp8cx.h"
-#include "vpx/vpx_encoder.h"
+#include "aom/vp8cx.h"
+#include "aom/vpx_encoder.h"
 
 #include "../tools_common.h"
 #include "../video_writer.h"

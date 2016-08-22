@@ -30,8 +30,8 @@ const int kImgWidth = 704;
 const int kImgHeight = 576;
 
 class VP10ExtTileTest
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWith2Params<libaom_test::TestMode, int> {
  protected:
   VP10ExtTileTest()
       : EncoderTest(GET_PARAM(0)), encoding_mode_(GET_PARAM(1)),
@@ -69,8 +69,8 @@ class VP10ExtTileTest
     cfg_.rc_min_quantizer = 0;
   }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
-                                  ::libvpx_test::Encoder *encoder) {
+  virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
+                                  ::libaom_test::Encoder *encoder) {
     if (video->frame() == 0) {
       // Encode setting
       encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
@@ -99,7 +99,7 @@ class VP10ExtTileTest
     if (pts == (vpx_codec_pts_t)kSkip) return;
 
     // Calculate MD5 as the reference.
-    ::libvpx_test::MD5 md5_res;
+    ::libaom_test::MD5 md5_res;
     md5_res.Add(&img);
     md5_.push_back(md5_res.Get());
   }
@@ -133,7 +133,7 @@ class VP10ExtTileTest
 
         if (!IsLastFrame) {
           if (img) {
-            ::libvpx_test::MD5 md5_res;
+            ::libaom_test::MD5 md5_res;
             md5_res.Add(img);
             tile_md5_.push_back(md5_res.Get());
           }
@@ -159,22 +159,22 @@ class VP10ExtTileTest
     }
 
     if (IsLastFrame) {
-      ::libvpx_test::MD5 md5_res;
+      ::libaom_test::MD5 md5_res;
       md5_res.Add(&tile_img_);
       tile_md5_.push_back(md5_res.Get());
     }
   }
 
-  ::libvpx_test::TestMode encoding_mode_;
+  ::libaom_test::TestMode encoding_mode_;
   int set_cpu_used_;
-  ::libvpx_test::Decoder *decoder_;
+  ::libaom_test::Decoder *decoder_;
   vpx_image_t tile_img_;
   std::vector<std::string> md5_;
   std::vector<std::string> tile_md5_;
 };
 
 TEST_P(VP10ExtTileTest, DecoderResultTest) {
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", kImgWidth,
+  ::libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", kImgWidth,
                                        kImgHeight, 30, 1, 0, kLimit);
   cfg_.rc_target_bitrate = 500;
   cfg_.g_error_resilient = VPX_ERROR_RESILIENT_DEFAULT;
@@ -191,6 +191,6 @@ TEST_P(VP10ExtTileTest, DecoderResultTest) {
 
 VP10_INSTANTIATE_TEST_CASE(
     // Now only test 2-pass mode.
-    VP10ExtTileTest, ::testing::Values(::libvpx_test::kTwoPassGood),
+    VP10ExtTileTest, ::testing::Values(::libaom_test::kTwoPassGood),
     ::testing::Range(0, 4));
 }  // namespace

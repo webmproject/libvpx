@@ -12,7 +12,7 @@
 
 #include "./ivfenc.h"
 #include "./video_writer.h"
-#include "vpx/vpx_encoder.h"
+#include "aom/vpx_encoder.h"
 
 struct VpxVideoWriterStruct {
   VpxVideoInfo info;

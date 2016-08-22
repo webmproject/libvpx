@@ -18,10 +18,10 @@
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
-#include "vpx/vpx_codec.h"
-#include "vpx/vpx_integer.h"
-#include "vpx_mem/vpx_mem.h"
-#include "vpx_ports/mem.h"
+#include "aom/vpx_codec.h"
+#include "aom/vpx_integer.h"
+#include "aom_mem/vpx_mem.h"
+#include "aom_ports/mem.h"
 
 namespace {
 
@@ -41,7 +41,7 @@ typedef unsigned int (*Get4x4SseFunc)(const uint8_t *a, int a_stride,
                                       const uint8_t *b, int b_stride);
 typedef unsigned int (*SumOfSquaresFunction)(const int16_t *src);
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 // Truncate high bit depth results by downshifting (with rounding) by:
 // 2 * (bit_depth - 8) for sse
@@ -220,7 +220,7 @@ class SumOfSquaresTest : public ::testing::TestWithParam<SumOfSquaresFunction> {
  public:
   SumOfSquaresTest() : func_(GetParam()) {}
 
-  virtual ~SumOfSquaresTest() { libvpx_test::ClearSystemState(); }
+  virtual ~SumOfSquaresTest() { libaom_test::ClearSystemState(); }
 
  protected:
   void ConstTest();
@@ -331,7 +331,7 @@ class MainTestClass
     delete[] ref_;
     src_ = NULL;
     ref_ = NULL;
-    libvpx_test::ClearSystemState();
+    libaom_test::ClearSystemState();
   }
 
  protected:
@@ -588,7 +588,7 @@ class SubpelVarianceTest
       vpx_free(CONVERT_TO_SHORTPTR(sec_));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     }
-    libvpx_test::ClearSystemState();
+    libaom_test::ClearSystemState();
   }
 
  protected:

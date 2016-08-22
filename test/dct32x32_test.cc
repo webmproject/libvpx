@@ -21,13 +21,13 @@
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
-#include "vp10/common/entropy.h"
-#include "vpx/vpx_codec.h"
-#include "vpx/vpx_integer.h"
-#include "vpx_ports/mem.h"
-#include "vpx_ports/msvc.h"  // for round()
+#include "av1/common/entropy.h"
+#include "aom/vpx_codec.h"
+#include "aom/vpx_integer.h"
+#include "aom_ports/mem.h"
+#include "aom_ports/msvc.h"  // for round()
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 namespace {
 
@@ -90,7 +90,7 @@ class Trans32x32Test : public ::testing::TestWithParam<Trans32x32Param> {
     mask_ = (1 << bit_depth_) - 1;
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   int version_;
@@ -299,7 +299,7 @@ class PartialTrans32x32Test
     bit_depth_ = GET_PARAM(1);
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   vpx_bit_depth_t bit_depth_;

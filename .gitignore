@@ -45,8 +45,8 @@
 /ivfdec.dox
 /ivfenc
 /ivfenc.dox
-/libvpx.so*
-/libvpx.ver
+/libaom.so*
+/libaom.ver
 /samples.dox
 /test_intra_pred_speed
 /test_libvpx

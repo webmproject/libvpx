@@ -12,9 +12,9 @@
 #include "test/register_state_check.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "./vpx_dsp_rtcd.h"
-#include "vpx/vpx_integer.h"
-#include "vpx_dsp/postproc.h"
-#include "vpx_mem/vpx_mem.h"
+#include "aom/vpx_integer.h"
+#include "aom_dsp/postproc.h"
+#include "aom_mem/vpx_mem.h"
 
 namespace {
 
@@ -26,7 +26,7 @@ typedef void (*AddNoiseFunc)(unsigned char *start, char *noise,
 
 class AddNoiseTest : public ::testing::TestWithParam<AddNoiseFunc> {
  public:
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
   virtual ~AddNoiseTest() {}
 };
 

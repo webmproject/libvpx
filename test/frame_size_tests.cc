@@ -13,27 +13,27 @@
 
 namespace {
 
-class VP9FrameSizeTestsLarge : public ::libvpx_test::EncoderTest,
+class VP9FrameSizeTestsLarge : public ::libaom_test::EncoderTest,
                                public ::testing::Test {
  protected:
   VP9FrameSizeTestsLarge()
-      : EncoderTest(&::libvpx_test::kVP10), expected_res_(VPX_CODEC_OK) {}
+      : EncoderTest(&::libaom_test::kVP10), expected_res_(VPX_CODEC_OK) {}
   virtual ~VP9FrameSizeTestsLarge() {}
 
   virtual void SetUp() {
     InitializeConfig();
-    SetMode(::libvpx_test::kRealTime);
+    SetMode(::libaom_test::kRealTime);
   }
 
   virtual bool HandleDecodeResult(const vpx_codec_err_t res_dec,
-                                  const libvpx_test::VideoSource & /*video*/,
-                                  libvpx_test::Decoder *decoder) {
+                                  const libaom_test::VideoSource & /*video*/,
+                                  libaom_test::Decoder *decoder) {
     EXPECT_EQ(expected_res_, res_dec) << decoder->DecodeError();
     return !::testing::Test::HasFailure();
   }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
-                                  ::libvpx_test::Encoder *encoder) {
+  virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
+                                  ::libaom_test::Encoder *encoder) {
     if (video->frame() == 1) {
       encoder->Control(VP8E_SET_CPUUSED, 7);
       encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
@@ -47,7 +47,7 @@ class VP9FrameSizeTestsLarge : public ::libvpx_test::EncoderTest,
 };
 
 TEST_F(VP9FrameSizeTestsLarge, TestInvalidSizes) {
-  ::libvpx_test::RandomVideoSource video;
+  ::libaom_test::RandomVideoSource video;
 
 #if CONFIG_SIZE_LIMIT
   video.SetSize(DECODE_WIDTH_LIMIT + 16, DECODE_HEIGHT_LIMIT + 16);
@@ -58,7 +58,7 @@ TEST_F(VP9FrameSizeTestsLarge, TestInvalidSizes) {
 }
 
 TEST_F(VP9FrameSizeTestsLarge, ValidSizes) {
-  ::libvpx_test::RandomVideoSource video;
+  ::libaom_test::RandomVideoSource video;
 
 #if CONFIG_SIZE_LIMIT
   video.SetSize(DECODE_WIDTH_LIMIT, DECODE_HEIGHT_LIMIT);
@@ -85,7 +85,7 @@ TEST_F(VP9FrameSizeTestsLarge, ValidSizes) {
 }
 
 TEST_F(VP9FrameSizeTestsLarge, OneByOneVideo) {
-  ::libvpx_test::RandomVideoSource video;
+  ::libaom_test::RandomVideoSource video;
 
   video.SetSize(1, 1);
   video.set_limit(2);

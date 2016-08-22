@@ -18,7 +18,7 @@
 #include "../webmdec.h"
 #include "test/video_source.h"
 
-namespace libvpx_test {
+namespace libaom_test {
 
 // This class extends VideoSource to allow parsing of WebM files,
 // so that we can do actual file decodes.
@@ -88,6 +88,6 @@ class WebMVideoSource : public CompressedVideoSource {
   bool end_of_file_;
 };
 
-}  // namespace libvpx_test
+}  // namespace libaom_test
 
 #endif  // TEST_WEBM_VIDEO_SOURCE_H_

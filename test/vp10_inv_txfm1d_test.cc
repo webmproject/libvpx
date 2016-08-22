@@ -9,11 +9,11 @@
  */
 
 #include "test/vp10_txfm_test.h"
-#include "vp10/common/vp10_fwd_txfm1d.h"
-#include "vp10/common/vp10_inv_txfm1d.h"
+#include "av1/common/vp10_fwd_txfm1d.h"
+#include "av1/common/vp10_inv_txfm1d.h"
 
-using libvpx_test::ACMRandom;
-using libvpx_test::input_base;
+using libaom_test::ACMRandom;
+using libaom_test::input_base;
 
 namespace {
 const int txfm_type_num = 2;

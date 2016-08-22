@@ -23,9 +23,9 @@
 #include "third_party/libyuv/include/libyuv/scale.h"
 #endif
 
-#include "vpx/vpx_encoder.h"
+#include "aom/vpx_encoder.h"
 #if CONFIG_DECODERS
-#include "vpx/vpx_decoder.h"
+#include "aom/vpx_decoder.h"
 #endif
 
 #include "./args.h"
@@ -33,15 +33,15 @@
 #include "./tools_common.h"
 
 #if CONFIG_VP10_ENCODER
-#include "vpx/vp8cx.h"
+#include "aom/vp8cx.h"
 #endif
 #if CONFIG_VP10_DECODER
-#include "vpx/vp8dx.h"
+#include "aom/vp8dx.h"
 #endif
 
-#include "vpx/vpx_integer.h"
-#include "vpx_ports/mem_ops.h"
-#include "vpx_ports/vpx_timer.h"
+#include "aom/vpx_integer.h"
+#include "aom_ports/mem_ops.h"
+#include "aom_ports/vpx_timer.h"
 #include "./rate_hist.h"
 #include "./vpxstats.h"
 #include "./warnings.h"
@@ -432,11 +432,6 @@ static const struct arg_enum_list tune_content_enum[] = {
 
 static const arg_def_t tune_content = ARG_DEF_ENUM(
     NULL, "tune-content", 1, "Tune content type", tune_content_enum);
-
-static const arg_def_t target_level = ARG_DEF(
-    NULL, "target-level", 1,
-    "Target level (255: off (default); 0: only keep level stats; 10: level 1.0;"
-    " 11: level 1.1; ... 62: level 6.2)");
 #endif
 
 #if CONFIG_VP10_ENCODER

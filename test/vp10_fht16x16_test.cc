@@ -18,15 +18,15 @@
 #include "test/register_state_check.h"
 #include "test/transform_test_base.h"
 #include "test/util.h"
-#include "vpx_ports/mem.h"
+#include "aom_ports/mem.h"
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 namespace {
 typedef void (*IhtFunc)(const tran_low_t *in, uint8_t *out, int stride,
                         int tx_type);
 using std::tr1::tuple;
-using libvpx_test::FhtFunc;
+using libaom_test::FhtFunc;
 typedef tuple<FhtFunc, IhtFunc, int, vpx_bit_depth_t, int> Ht16x16Param;
 
 void fht16x16_ref(const int16_t *in, tran_low_t *out, int stride, int tx_type) {
@@ -48,7 +48,7 @@ void highbd_fht16x16_ref(const int16_t *in, int32_t *out, int stride,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-class VP10Trans16x16HT : public libvpx_test::TransformTestBase,
+class VP10Trans16x16HT : public libaom_test::TransformTestBase,
                          public ::testing::TestWithParam<Ht16x16Param> {
  public:
   virtual ~VP10Trans16x16HT() {}
@@ -63,7 +63,7 @@ class VP10Trans16x16HT : public libvpx_test::TransformTestBase,
     mask_ = (1 << bit_depth_) - 1;
     num_coeffs_ = GET_PARAM(4);
   }
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   void RunFwdTxfm(const int16_t *in, tran_low_t *out, int stride) {
@@ -106,7 +106,7 @@ class VP10HighbdTrans16x16HT
     vpx_free(input_);
     vpx_free(output_);
     vpx_free(output_ref_);
-    libvpx_test::ClearSystemState();
+    libaom_test::ClearSystemState();
   }
 
  protected:

@@ -13,7 +13,7 @@
 
 #include "./vpx_config.h"
 #if ARCH_X86 || ARCH_X86_64
-#include "vpx_ports/x86.h"
+#include "aom_ports/x86.h"
 #endif
 extern "C" {
 #if CONFIG_VP10

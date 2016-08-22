@@ -19,8 +19,8 @@
 
 namespace {
 class VPxEncoderThreadTest
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWith2Params<libaom_test::TestMode, int> {
  protected:
   VPxEncoderThreadTest()
       : EncoderTest(GET_PARAM(0)), encoder_initialized_(false),
@@ -47,7 +47,7 @@ class VPxEncoderThreadTest
     InitializeConfig();
     SetMode(encoding_mode_);
 
-    if (encoding_mode_ != ::libvpx_test::kRealTime) {
+    if (encoding_mode_ != ::libaom_test::kRealTime) {
       cfg_.g_lag_in_frames = 3;
       cfg_.rc_end_usage = VPX_VBR;
       cfg_.rc_2pass_vbr_minsection_pct = 5;
@@ -65,12 +65,12 @@ class VPxEncoderThreadTest
     encoder_initialized_ = false;
   }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource * /*video*/,
-                                  ::libvpx_test::Encoder *encoder) {
+  virtual void PreEncodeFrameHook(::libaom_test::VideoSource * /*video*/,
+                                  ::libaom_test::Encoder *encoder) {
     if (!encoder_initialized_) {
 #if CONFIG_VP10 && CONFIG_EXT_TILE
       encoder->Control(VP9E_SET_TILE_COLUMNS, 1);
-      if (codec_ == &libvpx_test::kVP10) {
+      if (codec_ == &libaom_test::kVP10) {
         // TODO(geza): Start using multiple tile rows when the multi-threaded
         // encoder can handle them
         encoder->Control(VP9E_SET_TILE_ROWS, 32);
@@ -83,7 +83,7 @@ class VPxEncoderThreadTest
       encoder->Control(VP9E_SET_TILE_ROWS, 0);
 #endif  // CONFIG_VP10 && CONFIG_EXT_TILE
       encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
-      if (encoding_mode_ != ::libvpx_test::kRealTime) {
+      if (encoding_mode_ != ::libaom_test::kRealTime) {
         encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
         encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);
         encoder->Control(VP8E_SET_ARNR_STRENGTH, 5);
@@ -99,7 +99,7 @@ class VPxEncoderThreadTest
   virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
     size_enc_.push_back(pkt->data.frame.sz);
 
-    ::libvpx_test::MD5 md5_enc;
+    ::libaom_test::MD5 md5_enc;
     md5_enc.Add(reinterpret_cast<uint8_t *>(pkt->data.frame.buf),
                 pkt->data.frame.sz);
     md5_enc_.push_back(md5_enc.Get());
@@ -113,14 +113,14 @@ class VPxEncoderThreadTest
     const vpx_image_t *img = decoder_->GetDxData().Next();
 
     if (img) {
-      ::libvpx_test::MD5 md5_res;
+      ::libaom_test::MD5 md5_res;
       md5_res.Add(img);
       md5_dec_.push_back(md5_res.Get());
     }
   }
 
   void DoTest() {
-    ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 15, 18);
+    ::libaom_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 15, 18);
     cfg_.rc_target_bitrate = 1000;
 
     // Encode using single thread.
@@ -157,9 +157,9 @@ class VPxEncoderThreadTest
   }
 
   bool encoder_initialized_;
-  ::libvpx_test::TestMode encoding_mode_;
+  ::libaom_test::TestMode encoding_mode_;
   int set_cpu_used_;
-  ::libvpx_test::Decoder *decoder_;
+  ::libaom_test::Decoder *decoder_;
   std::vector<size_t> size_enc_;
   std::vector<std::string> md5_enc_;
   std::vector<std::string> md5_dec_;
@@ -172,12 +172,12 @@ class VPxEncoderThreadTestLarge : public VPxEncoderThreadTest {};
 TEST_P(VPxEncoderThreadTestLarge, EncoderResultTest) { DoTest(); }
 
 VP10_INSTANTIATE_TEST_CASE(VPxEncoderThreadTest,
-                           ::testing::Values(::libvpx_test::kTwoPassGood,
-                                             ::libvpx_test::kOnePassGood),
+                           ::testing::Values(::libaom_test::kTwoPassGood,
+                                             ::libaom_test::kOnePassGood),
                            ::testing::Range(3, 9));
 
 VP10_INSTANTIATE_TEST_CASE(VPxEncoderThreadTestLarge,
-                           ::testing::Values(::libvpx_test::kTwoPassGood,
-                                             ::libvpx_test::kOnePassGood),
+                           ::testing::Values(::libaom_test::kTwoPassGood,
+                                             ::libaom_test::kOnePassGood),
                            ::testing::Range(1, 3));
 }  // namespace

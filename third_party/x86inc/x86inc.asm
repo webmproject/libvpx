@@ -82,7 +82,7 @@
      %define FORMAT_MACHO 1
 %endif
 
-; Set PREFIX for libvpx builds.
+; Set PREFIX for libaom builds.
 %if FORMAT_ELF
     %undef PREFIX
 %elif WIN64
@@ -100,7 +100,7 @@
 ; In some instances macho32 tables get misaligned when using .rodata.
 ; When looking at the disassembly it appears that the offset is either
 ; correct or consistently off by 90. Placing them in the .text section
-; works around the issue. It appears to be specific to the way libvpx
+; works around the issue. It appears to be specific to the way libaom
 ; handles the tables.
 %macro SECTION_RODATA 0-1 16
     %ifidn __OUTPUT_FORMAT__,macho32
@@ -113,7 +113,7 @@
     %endif
 %endmacro
 
-; PIC macros are copied from vpx_ports/x86_abi_support.asm. The "define PIC"
+; PIC macros are copied from aom_ports/x86_abi_support.asm. The "define PIC"
 ; from original code is added in for 64bit.
 %ifidn __OUTPUT_FORMAT__,elf32
 %define ABI_IS_32BIT 1
@@ -790,7 +790,7 @@ BRANCH_INSTR jz, je, jnz, jne, jl, jle, jnl, jnle, jg, jge, jng, jnge, ja, jae, 
     annotate_function_size
     %if %1
         %xdefine %%FUNCTION_PREFIX private_prefix
-        ; libvpx explicitly sets visibility in shared object builds. Avoid
+        ; libaom explicitly sets visibility in shared object builds. Avoid
         ; setting visibility to hidden as it may break builds that split
         ; sources on e.g., directory boundaries.
         %ifdef CHROMIUM

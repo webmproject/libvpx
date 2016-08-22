@@ -27,7 +27,7 @@ FRAMEWORK_DIR="VPX.framework"
 FRAMEWORK_LIB="VPX.framework/VPX"
 HEADER_DIR="${FRAMEWORK_DIR}/Headers/vpx"
 SCRIPT_DIR=$(dirname "$0")
-LIBVPX_SOURCE_DIR=$(cd ${SCRIPT_DIR}/../..; pwd)
+LIBAOM_SOURCE_DIR=$(cd ${SCRIPT_DIR}/../..; pwd)
 LIPO=$(xcrun -sdk iphoneos${SDK} -find lipo)
 ORIG_PWD="$(pwd)"
 ARM_TARGETS="arm64-darwin-gcc
@@ -40,7 +40,7 @@ OSX_TARGETS="x86-darwin15-gcc
 TARGETS="${ARM_TARGETS} ${SIM_TARGETS}"
 
 # Configures for the target specified by $1, and invokes make with the dist
-# target using $DIST_DIR as the distribution output directory.
+# target using $ as the distribution output directory.
 build_target() {
   local target="$1"
   local old_pwd="$(pwd)"
@@ -57,7 +57,7 @@ build_target() {
 
   mkdir "${target}"
   cd "${target}"
-  eval "${LIBVPX_SOURCE_DIR}/configure" --target="${target}" \
+  eval "${LIBAOM_SOURCE_DIR}/configure" --target="${target}" \
     ${CONFIGURE_ARGS} ${EXTRA_CONFIGURE_ARGS} ${target_specific_flags} \
     ${devnull}
   export DIST_DIR
@@ -125,7 +125,7 @@ create_vpx_framework_config_shim() {
     preproc_symbol=$(target_to_preproc_symbol "${target}")
     printf " ${preproc_symbol}\n" >> "${config_file}"
     printf "#define VPX_FRAMEWORK_TARGET \"${target}\"\n" >> "${config_file}"
-    printf "#include \"VPX/vpx/${target}/vpx_config.h\"\n" >> "${config_file}"
+    printf "#include \"VPX/aom/${target}/vpx_config.h\"\n" >> "${config_file}"
     printf "#elif defined" >> "${config_file}"
     mkdir "${HEADER_DIR}/${target}"
     cp -p "${BUILD_ROOT}/${target}/vpx_config.h" "${HEADER_DIR}/${target}"
@@ -147,7 +147,7 @@ verify_framework_targets() {
   for target; do
     cpu="${target%%-*}"
     if [ "${cpu}" = "x86" ]; then
-      # lipo -info outputs i386 for libvpx x86 targets.
+      # lipo -info outputs i386 for libaom x86 targets.
       cpu="i386"
     fi
     requested_cpus="${requested_cpus}${cpu} "
@@ -201,14 +201,14 @@ build_framework() {
     else
       local suffix="a"
     fi
-    lib_list="${lib_list} ${target_dist_dir}/lib/libvpx.${suffix}"
+    lib_list="${lib_list} ${target_dist_dir}/lib/libaom.${suffix}"
   done
 
   cd "${ORIG_PWD}"
 
-  # The basic libvpx API includes are all the same; just grab the most recent
+  # The basic libaom API includes are all the same; just grab the most recent
   # set.
-  cp -p "${target_dist_dir}"/include/vpx/* "${HEADER_DIR}"
+  cp -p "${target_dist_dir}"/include/aom/* "${HEADER_DIR}"
 
   # Build the fat library.
   ${LIPO} -create ${lib_list} -output ${FRAMEWORK_DIR}/VPX
@@ -270,7 +270,7 @@ cat << EOF
   Usage: ${0##*/} [arguments]
     --help: Display this message and exit.
     --enable-shared: Build a dynamic framework for use on iOS 8 or later.
-    --extra-configure-args <args>: Extra args to pass when configuring libvpx.
+    --extra-configure-args <args>: Extra args to pass when configuring libaom.
     --macosx: Uses darwin15 targets instead of iphonesimulator targets for x86
               and x86_64. Allows linking to framework when builds target MacOSX
               instead of iOS.
@@ -342,7 +342,7 @@ if [ "${ENABLE_SHARED}" = "yes" ]; then
   CONFIGURE_ARGS="--enable-shared ${CONFIGURE_ARGS}"
 fi
 
-FULLVERSION=$("${SCRIPT_DIR}"/version.sh --bare "${LIBVPX_SOURCE_DIR}")
+FULLVERSION=$("${SCRIPT_DIR}"/version.sh --bare "${LIBAOM_SOURCE_DIR}")
 VERSION=$(echo "${FULLVERSION}" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
 
 if [ "$ENABLE_SHARED" = "yes" ]; then
@@ -362,7 +362,7 @@ cat << EOF
   FRAMEWORK_DIR=${FRAMEWORK_DIR}
   FRAMEWORK_LIB=${FRAMEWORK_LIB}
   HEADER_DIR=${HEADER_DIR}
-  LIBVPX_SOURCE_DIR=${LIBVPX_SOURCE_DIR}
+  LIBAOM_SOURCE_DIR=${LIBAOM_SOURCE_DIR}
   LIPO=${LIPO}
   MAKEFLAGS=${MAKEFLAGS}
   ORIG_PWD=${ORIG_PWD}

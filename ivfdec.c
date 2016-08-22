@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "vpx_ports/mem_ops.h"
+#include "aom_ports/mem_ops.h"
 
 #include "./ivfdec.h"
 

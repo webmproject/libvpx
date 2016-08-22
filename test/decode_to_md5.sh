@@ -8,7 +8,7 @@
 ##  in the file PATENTS.  All contributing project authors may
 ##  be found in the AUTHORS file in the root of the source tree.
 ##
-##  This file tests the libvpx decode_to_md5 example. To add new tests to this
+##  This file tests the libaom decode_to_md5 example. To add new tests to this
 ##  file, do the following:
 ##    1. Write a shell function (this is your test).
 ##    2. Add the function to decode_to_md5_tests (on a new line).
@@ -28,7 +28,7 @@ decode_to_md5_verify_environment() {
 # interpreted as codec name and used solely to name the output file. $3 is the
 # expected md5 sum: It must match that of the final frame.
 decode_to_md5() {
-  local decoder="${LIBVPX_BIN_PATH}/decode_to_md5${VPX_TEST_EXE_SUFFIX}"
+  local decoder="${LIBAOM_BIN_PATH}/decode_to_md5${VPX_TEST_EXE_SUFFIX}"
   local input_file="$1"
   local codec="$2"
   local expected_md5="$3"

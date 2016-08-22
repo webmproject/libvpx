@@ -15,9 +15,9 @@
 #include <string>
 
 #include "test/video_source.h"
-#include "vpx/vpx_image.h"
+#include "aom/vpx_image.h"
 
-namespace libvpx_test {
+namespace libaom_test {
 
 // This class extends VideoSource to allow parsing of raw YUV
 // formats of various color sampling and bit-depths so that we can
@@ -119,6 +119,6 @@ class YUVVideoSource : public VideoSource {
   int framerate_denominator_;
 };
 
-}  // namespace libvpx_test
+}  // namespace libaom_test
 
 #endif  // TEST_YUV_VIDEO_SOURCE_H_

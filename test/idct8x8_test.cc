@@ -16,10 +16,10 @@
 
 #include "./vpx_dsp_rtcd.h"
 #include "test/acm_random.h"
-#include "vpx/vpx_integer.h"
-#include "vpx_ports/msvc.h"  // for round()
+#include "aom/vpx_integer.h"
+#include "aom_ports/msvc.h"  // for round()
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 namespace {
 

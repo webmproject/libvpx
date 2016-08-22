@@ -11,18 +11,18 @@
 #define TEST_CODEC_FACTORY_H_
 
 #include "./vpx_config.h"
-#include "vpx/vpx_decoder.h"
-#include "vpx/vpx_encoder.h"
+#include "aom/vpx_decoder.h"
+#include "aom/vpx_encoder.h"
 #if CONFIG_VP10_ENCODER
-#include "vpx/vp8cx.h"
+#include "aom/vp8cx.h"
 #endif
 #if CONFIG_VP10_DECODER
-#include "vpx/vp8dx.h"
+#include "aom/vp8dx.h"
 #endif
 
 #include "test/decode_test_driver.h"
 #include "test/encode_test_driver.h"
-namespace libvpx_test {
+namespace libaom_test {
 
 const int kCodecFactoryParam = 0;
 
@@ -56,17 +56,17 @@ class CodecFactory {
 template <class T1>
 class CodecTestWithParam
     : public ::testing::TestWithParam<
-          std::tr1::tuple<const libvpx_test::CodecFactory *, T1> > {};
+          std::tr1::tuple<const libaom_test::CodecFactory *, T1> > {};
 
 template <class T1, class T2>
 class CodecTestWith2Params
     : public ::testing::TestWithParam<
-          std::tr1::tuple<const libvpx_test::CodecFactory *, T1, T2> > {};
+          std::tr1::tuple<const libaom_test::CodecFactory *, T1, T2> > {};
 
 template <class T1, class T2, class T3>
 class CodecTestWith3Params
     : public ::testing::TestWithParam<
-          std::tr1::tuple<const libvpx_test::CodecFactory *, T1, T2, T3> > {};
+          std::tr1::tuple<const libaom_test::CodecFactory *, T1, T2, T3> > {};
 
 /*
  * VP10 Codec Definitions
@@ -147,18 +147,18 @@ class VP10CodecFactory : public CodecFactory {
   }
 };
 
-const libvpx_test::VP10CodecFactory kVP10;
+const libaom_test::VP10CodecFactory kVP10;
 
 #define VP10_INSTANTIATE_TEST_CASE(test, ...)                               \
   INSTANTIATE_TEST_CASE_P(                                                  \
       VP10, test,                                                           \
       ::testing::Combine(                                                   \
-          ::testing::Values(static_cast<const libvpx_test::CodecFactory *>( \
-              &libvpx_test::kVP10)),                                        \
+          ::testing::Values(static_cast<const libaom_test::CodecFactory *>( \
+              &libaom_test::kVP10)),                                        \
           __VA_ARGS__))
 #else
 #define VP10_INSTANTIATE_TEST_CASE(test, ...)
 #endif  // CONFIG_VP10
 
-}  // namespace libvpx_test
+}  // namespace libaom_test
 #endif  // TEST_CODEC_FACTORY_H_

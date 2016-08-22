@@ -20,14 +20,14 @@
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
-#include "vp10/common/entropy.h"
-#include "vp10/common/scan.h"
-#include "vpx/vpx_codec.h"
-#include "vpx/vpx_integer.h"
-#include "vpx_ports/mem.h"
-#include "vpx_ports/msvc.h"  // for round()
+#include "av1/common/entropy.h"
+#include "av1/common/scan.h"
+#include "aom/vpx_codec.h"
+#include "aom/vpx_integer.h"
+#include "aom_ports/mem.h"
+#include "aom_ports/msvc.h"  // for round()
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 namespace {
 
@@ -632,7 +632,7 @@ class Trans16x16DCT : public Trans16x16TestBase,
     inv_txfm_ref = idct16x16_ref;
 #endif
   }
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   void RunFwdTxfm(int16_t *in, tran_low_t *out, int stride) {
@@ -684,7 +684,7 @@ class Trans16x16HT : public Trans16x16TestBase,
     inv_txfm_ref = iht16x16_ref;
 #endif
   }
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   void RunFwdTxfm(int16_t *in, tran_low_t *out, int stride) {
@@ -723,7 +723,7 @@ class InvTrans16x16DCT : public Trans16x16TestBase,
     pitch_ = 16;
     mask_ = (1 << bit_depth_) - 1;
   }
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   void RunFwdTxfm(int16_t *in, tran_low_t *out, int stride) {}
@@ -749,7 +749,7 @@ class PartialTrans16x16Test : public ::testing::TestWithParam<
     bit_depth_ = GET_PARAM(1);
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   vpx_bit_depth_t bit_depth_;

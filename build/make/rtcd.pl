@@ -250,7 +250,7 @@ sub x86() {
   common_top;
   print <<EOF;
 #ifdef RTCD_C
-#include "vpx_ports/x86.h"
+#include "aom_ports/x86.h"
 static void setup_rtcd_internal(void)
 {
     int flags = x86_simd_caps();
@@ -285,7 +285,7 @@ sub arm() {
 #include "vpx_config.h"
 
 #ifdef RTCD_C
-#include "vpx_ports/arm.h"
+#include "aom_ports/arm.h"
 static void setup_rtcd_internal(void)
 {
     int flags = arm_cpu_caps();

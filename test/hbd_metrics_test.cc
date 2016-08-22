@@ -16,13 +16,13 @@
 #include "test/acm_random.h"
 #include "test/util.h"
 #include "./vpx_config.h"
-#include "vpx_dsp/psnr.h"
-#include "vpx_dsp/ssim.h"
-#include "vpx_ports/mem.h"
-#include "vpx_ports/msvc.h"
-#include "vpx_scale/yv12config.h"
+#include "aom_dsp/psnr.h"
+#include "aom_dsp/ssim.h"
+#include "aom_ports/mem.h"
+#include "aom_ports/msvc.h"
+#include "aom_scale/yv12config.h"
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 namespace {
 

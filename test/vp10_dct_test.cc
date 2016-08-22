@@ -16,13 +16,13 @@
 #include "test/acm_random.h"
 #include "test/util.h"
 #include "./vpx_config.h"
-#include "vpx_ports/msvc.h"
+#include "aom_ports/msvc.h"
 
 #undef CONFIG_COEFFICIENT_RANGE_CHECKING
 #define CONFIG_COEFFICIENT_RANGE_CHECKING 1
-#include "vp10/encoder/dct.c"
+#include "av1/encoder/dct.c"
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 namespace {
 void reference_dct_1d(const double *in, double *out, int size) {

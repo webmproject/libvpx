@@ -15,9 +15,9 @@
 #include "./vpx_dsp_rtcd.h"
 #include "./vp10_rtcd.h"
 
-#include "vpx_dsp/vpx_dsp_common.h"
+#include "aom_dsp/vpx_dsp_common.h"
 
-#include "vp10/common/enums.h"
+#include "av1/common/enums.h"
 
 #include "test/acm_random.h"
 #include "test/function_equivalence_test.h"
@@ -26,8 +26,8 @@
 #define WEDGE_WEIGHT_BITS 6
 #define MAX_MASK_VALUE (1 << (WEDGE_WEIGHT_BITS))
 
-using libvpx_test::ACMRandom;
-using libvpx_test::FunctionEquivalenceTest;
+using libaom_test::ACMRandom;
+using libaom_test::FunctionEquivalenceTest;
 
 namespace {
 
@@ -158,7 +158,7 @@ TEST_F(WedgeUtilsSSEFuncTest, ResidualBlendingMethod) {
 
 typedef uint64_t (*FSSE)(const int16_t *r1, const int16_t *d, const uint8_t *m,
                          int N);
-typedef libvpx_test::FuncParam<FSSE> TestFuncsFSSE;
+typedef libaom_test::FuncParam<FSSE> TestFuncsFSSE;
 
 class WedgeUtilsSSEOptTest : public FunctionEquivalenceTest<FSSE> {
  protected:
@@ -230,7 +230,7 @@ INSTANTIATE_TEST_CASE_P(
 //////////////////////////////////////////////////////////////////////////////
 
 typedef int (*FSign)(const int16_t *ds, const uint8_t *m, int N, int64_t limit);
-typedef libvpx_test::FuncParam<FSign> TestFuncsFSign;
+typedef libaom_test::FuncParam<FSign> TestFuncsFSign;
 
 class WedgeUtilsSignOptTest : public FunctionEquivalenceTest<FSign> {
  protected:
@@ -339,7 +339,7 @@ INSTANTIATE_TEST_CASE_P(
 //////////////////////////////////////////////////////////////////////////////
 
 typedef void (*FDS)(int16_t *d, const int16_t *a, const int16_t *b, int N);
-typedef libvpx_test::FuncParam<FDS> TestFuncsFDS;
+typedef libaom_test::FuncParam<FDS> TestFuncsFDS;
 
 class WedgeUtilsDeltaSquaresOptTest : public FunctionEquivalenceTest<FDS> {
  protected:

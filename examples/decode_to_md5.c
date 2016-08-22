@@ -33,8 +33,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "vpx/vp8dx.h"
-#include "vpx/vpx_decoder.h"
+#include "aom/vp8dx.h"
+#include "aom/vpx_decoder.h"
 
 #include "../md5_utils.h"
 #include "../tools_common.h"

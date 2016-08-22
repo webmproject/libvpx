@@ -18,13 +18,13 @@
 #include "test/register_state_check.h"
 #include "test/util.h"
 
-#include "vpx_scale/yv12config.h"
-#include "vpx/vpx_integer.h"
-#include "vp10/common/reconinter.h"
-#include "vp10/encoder/context_tree.h"
-#include "vp10/encoder/denoiser.h"
+#include "aom_scale/yv12config.h"
+#include "aom/vpx_integer.h"
+#include "av1/common/reconinter.h"
+#include "av1/encoder/context_tree.h"
+#include "av1/encoder/denoiser.h"
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 namespace {
 
@@ -35,7 +35,7 @@ class VP9DenoiserTest : public ::testing::TestWithParam<BLOCK_SIZE> {
 
   virtual void SetUp() { bs_ = GetParam(); }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   BLOCK_SIZE bs_;

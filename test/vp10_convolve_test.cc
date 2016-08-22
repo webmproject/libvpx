@@ -3,12 +3,12 @@
 #include "./vp10_rtcd.h"
 #include "./vpx_dsp_rtcd.h"
 #include "test/acm_random.h"
-#include "vp10/common/filter.h"
-#include "vp10/common/vp10_convolve.h"
-#include "vpx_dsp/vpx_dsp_common.h"
-#include "vpx_ports/mem.h"
+#include "av1/common/filter.h"
+#include "av1/common/vp10_convolve.h"
+#include "aom_dsp/vpx_dsp_common.h"
+#include "aom_ports/mem.h"
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 namespace {
 void setup_convolve() {

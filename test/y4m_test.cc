@@ -74,7 +74,7 @@ static void write_image_file(const vpx_image_t *img, FILE *file) {
 }
 
 class Y4mVideoSourceTest : public ::testing::TestWithParam<Y4mTestParam>,
-                           public ::libvpx_test::Y4mVideoSource {
+                           public ::libaom_test::Y4mVideoSource {
  protected:
   Y4mVideoSourceTest() : Y4mVideoSource("", 0, 0) {}
 
@@ -117,7 +117,7 @@ class Y4mVideoSourceTest : public ::testing::TestWithParam<Y4mTestParam>,
   // Checks MD5 of the raw frame data
   void Md5Check(const string &expected_md5) {
     ASSERT_TRUE(input_file_ != NULL);
-    libvpx_test::MD5 md5;
+    libaom_test::MD5 md5;
     for (unsigned int i = start_; i < limit_; i++) {
       md5.Add(img());
       Next();
@@ -158,7 +158,7 @@ class Y4mVideoWriteTest : public Y4mVideoSourceTest {
     ASSERT_TRUE(input_file_ != NULL);
     char buf[Y4M_BUFFER_SIZE] = { 0 };
     const struct VpxRational framerate = { y4m_.fps_n, y4m_.fps_d };
-    tmpfile_ = new libvpx_test::TempOutFile;
+    tmpfile_ = new libaom_test::TempOutFile;
     ASSERT_TRUE(tmpfile_->file() != NULL);
     y4m_write_file_header(buf, sizeof(buf), kWidth, kHeight, &framerate,
                           y4m_.vpx_fmt, y4m_.bit_depth);
@@ -176,7 +176,7 @@ class Y4mVideoWriteTest : public Y4mVideoSourceTest {
     Y4mVideoSourceTest::Init(file_name, limit);
     WriteY4mAndReadBack();
   }
-  libvpx_test::TempOutFile *tmpfile_;
+  libaom_test::TempOutFile *tmpfile_;
 };
 
 TEST_P(Y4mVideoWriteTest, WriteTest) {

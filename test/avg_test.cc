@@ -21,9 +21,9 @@
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
-#include "vpx_mem/vpx_mem.h"
+#include "aom_mem/vpx_mem.h"
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 namespace {
 class AverageTestBase : public ::testing::Test {
@@ -40,7 +40,7 @@ class AverageTestBase : public ::testing::Test {
     source_data_ = NULL;
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   // Handle blocks up to 4 blocks 64x64 with stride up to 128
@@ -199,7 +199,7 @@ class SatdTest : public ::testing::Test,
   }
 
   virtual void TearDown() {
-    libvpx_test::ClearSystemState();
+    libaom_test::ClearSystemState();
     vpx_free(src_);
   }
 

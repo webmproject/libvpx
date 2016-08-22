@@ -17,7 +17,7 @@
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
-#include "vp10/common/scan.h"
+#include "av1/common/scan.h"
 
 namespace {
 
@@ -37,7 +37,7 @@ struct QuantizeFuncParams {
   int coeffCount;
 };
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 const int numTests = 1000;
 const int maxSize = 1024;
@@ -173,7 +173,7 @@ class VP10QuantizeTest : public ::testing::TestWithParam<QuantizeFuncParams> {
 
   virtual void SetUp() { params_ = GetParam(); }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
   virtual ~VP10QuantizeTest() {}
 

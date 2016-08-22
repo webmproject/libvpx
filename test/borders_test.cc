@@ -18,8 +18,8 @@
 namespace {
 
 class BordersTest
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWithParam<libaom_test::TestMode> {
  protected:
   BordersTest() : EncoderTest(GET_PARAM(0)) {}
   virtual ~BordersTest() {}
@@ -29,8 +29,8 @@ class BordersTest
     SetMode(GET_PARAM(1));
   }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
-                                  ::libvpx_test::Encoder *encoder) {
+  virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
+                                  ::libaom_test::Encoder *encoder) {
     if (video->frame() == 1) {
       encoder->Control(VP8E_SET_CPUUSED, 1);
       encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
@@ -57,7 +57,7 @@ TEST_P(BordersTest, TestEncodeHighBitrate) {
   cfg_.rc_target_bitrate = 2000;
   cfg_.rc_max_quantizer = 10;
 
-  ::libvpx_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
+  ::libaom_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
                                        40);
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
@@ -73,12 +73,12 @@ TEST_P(BordersTest, TestLowBitrate) {
   cfg_.rc_target_bitrate = 200;
   cfg_.rc_min_quantizer = 40;
 
-  ::libvpx_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
+  ::libaom_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
                                        40);
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
 VP10_INSTANTIATE_TEST_CASE(BordersTest,
-                           ::testing::Values(::libvpx_test::kTwoPassGood));
+                           ::testing::Values(::libaom_test::kTwoPassGood));
 }  // namespace

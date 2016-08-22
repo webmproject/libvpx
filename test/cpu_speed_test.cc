@@ -19,8 +19,8 @@ namespace {
 const int kMaxPSNR = 100;
 
 class CpuSpeedTest
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWith2Params<libaom_test::TestMode, int> {
  protected:
   CpuSpeedTest()
       : EncoderTest(GET_PARAM(0)), encoding_mode_(GET_PARAM(1)),
@@ -31,7 +31,7 @@ class CpuSpeedTest
   virtual void SetUp() {
     InitializeConfig();
     SetMode(encoding_mode_);
-    if (encoding_mode_ != ::libvpx_test::kRealTime) {
+    if (encoding_mode_ != ::libaom_test::kRealTime) {
       cfg_.g_lag_in_frames = 25;
       cfg_.rc_end_usage = VPX_VBR;
     } else {
@@ -42,12 +42,12 @@ class CpuSpeedTest
 
   virtual void BeginPassHook(unsigned int /*pass*/) { min_psnr_ = kMaxPSNR; }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
-                                  ::libvpx_test::Encoder *encoder) {
+  virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
+                                  ::libaom_test::Encoder *encoder) {
     if (video->frame() == 1) {
       encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
       encoder->Control(VP9E_SET_TUNE_CONTENT, tune_content_);
-      if (encoding_mode_ != ::libvpx_test::kRealTime) {
+      if (encoding_mode_ != ::libaom_test::kRealTime) {
         encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
         encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);
         encoder->Control(VP8E_SET_ARNR_STRENGTH, 5);
@@ -66,7 +66,7 @@ class CpuSpeedTest
   void TestEncodeHighBitrate();
   void TestLowBitrate();
 
-  ::libvpx_test::TestMode encoding_mode_;
+  ::libaom_test::TestMode encoding_mode_;
   int set_cpu_used_;
   double min_psnr_;
   int tune_content_;
@@ -83,7 +83,7 @@ void CpuSpeedTest::TestQ0() {
   cfg_.rc_max_quantizer = 0;
   cfg_.rc_min_quantizer = 0;
 
-  ::libvpx_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
+  ::libaom_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
                                        10);
 
   init_flags_ = VPX_CODEC_USE_PSNR;
@@ -93,7 +93,7 @@ void CpuSpeedTest::TestQ0() {
 }
 
 void CpuSpeedTest::TestScreencastQ0() {
-  ::libvpx_test::Y4mVideoSource video("screendata.y4m", 0, 10);
+  ::libaom_test::Y4mVideoSource video("screendata.y4m", 0, 10);
   cfg_.g_timebase = video.timebase();
   cfg_.rc_2pass_vbr_minsection_pct = 5;
   cfg_.rc_2pass_vbr_maxsection_pct = 2000;
@@ -108,7 +108,7 @@ void CpuSpeedTest::TestScreencastQ0() {
 }
 
 void CpuSpeedTest::TestTuneScreen() {
-  ::libvpx_test::Y4mVideoSource video("screendata.y4m", 0, 10);
+  ::libaom_test::Y4mVideoSource video("screendata.y4m", 0, 10);
   cfg_.g_timebase = video.timebase();
   cfg_.rc_2pass_vbr_minsection_pct = 5;
   cfg_.rc_2pass_vbr_minsection_pct = 2000;
@@ -133,7 +133,7 @@ void CpuSpeedTest::TestEncodeHighBitrate() {
   cfg_.rc_max_quantizer = 10;
   cfg_.rc_min_quantizer = 0;
 
-  ::libvpx_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
+  ::libaom_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
                                        10);
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
@@ -148,7 +148,7 @@ void CpuSpeedTest::TestLowBitrate() {
   cfg_.rc_target_bitrate = 200;
   cfg_.rc_min_quantizer = 40;
 
-  ::libvpx_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
+  ::libaom_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
                                        10);
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
@@ -169,11 +169,11 @@ TEST_P(CpuSpeedTestLarge, TestEncodeHighBitrate) { TestEncodeHighBitrate(); }
 TEST_P(CpuSpeedTestLarge, TestLowBitrate) { TestLowBitrate(); }
 
 VP10_INSTANTIATE_TEST_CASE(CpuSpeedTest,
-                           ::testing::Values(::libvpx_test::kTwoPassGood,
-                                             ::libvpx_test::kOnePassGood),
+                           ::testing::Values(::libaom_test::kTwoPassGood,
+                                             ::libaom_test::kOnePassGood),
                            ::testing::Range(1, 3));
 VP10_INSTANTIATE_TEST_CASE(CpuSpeedTestLarge,
-                           ::testing::Values(::libvpx_test::kTwoPassGood,
-                                             ::libvpx_test::kOnePassGood),
+                           ::testing::Values(::libaom_test::kTwoPassGood,
+                                             ::libaom_test::kOnePassGood),
                            ::testing::Range(0, 1));
 }  // namespace

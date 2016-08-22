@@ -8,7 +8,7 @@
 
 """Standalone script which parses a gtest log for json.
 
-Json is returned returns as an array.  This script is used by the libvpx
+Json is returned returns as an array.  This script is used by the libaom
 waterfall to gather json results mixed in with gtest logs.  This is
 dubious software engineering.
 """

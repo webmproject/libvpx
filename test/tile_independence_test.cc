@@ -17,12 +17,12 @@
 #include "test/i420_video_source.h"
 #include "test/util.h"
 #include "test/md5_helper.h"
-#include "vpx_mem/vpx_mem.h"
+#include "aom_mem/vpx_mem.h"
 
 namespace {
 class TileIndependenceTest
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWith2Params<int, int> {
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWith2Params<int, int> {
  protected:
   TileIndependenceTest()
       : EncoderTest(GET_PARAM(0)), md5_fw_order_(), md5_inv_order_(),
@@ -53,11 +53,11 @@ class TileIndependenceTest
 
   virtual void SetUp() {
     InitializeConfig();
-    SetMode(libvpx_test::kTwoPassGood);
+    SetMode(libaom_test::kTwoPassGood);
   }
 
-  virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
-                                  libvpx_test::Encoder *encoder) {
+  virtual void PreEncodeFrameHook(libaom_test::VideoSource *video,
+                                  libaom_test::Encoder *encoder) {
     if (video->frame() == 1) {
       encoder->Control(VP9E_SET_TILE_COLUMNS, n_tile_cols_);
       encoder->Control(VP9E_SET_TILE_ROWS, n_tile_rows_);
@@ -65,13 +65,13 @@ class TileIndependenceTest
     }
   }
 
-  virtual void SetCpuUsed(libvpx_test::Encoder *encoder) {
+  virtual void SetCpuUsed(libaom_test::Encoder *encoder) {
     static const int kCpuUsed = 3;
     encoder->Control(VP8E_SET_CPUUSED, kCpuUsed);
   }
 
-  void UpdateMD5(::libvpx_test::Decoder *dec, const vpx_codec_cx_pkt_t *pkt,
-                 ::libvpx_test::MD5 *md5) {
+  void UpdateMD5(::libaom_test::Decoder *dec, const vpx_codec_cx_pkt_t *pkt,
+                 ::libaom_test::MD5 *md5) {
     const vpx_codec_err_t res = dec->DecodeFrame(
         reinterpret_cast<uint8_t *>(pkt->data.frame.buf), pkt->data.frame.sz);
     if (res != VPX_CODEC_OK) {
@@ -94,7 +94,7 @@ class TileIndependenceTest
     cfg_.g_lag_in_frames = 12;
     cfg_.rc_end_usage = VPX_VBR;
 
-    libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 704, 576,
+    libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 704, 576,
                                        timebase.den, timebase.num, 0, 5);
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
@@ -103,8 +103,8 @@ class TileIndependenceTest
     ASSERT_STREQ(md5_fw_str, md5_inv_str);
   }
 
-  ::libvpx_test::MD5 md5_fw_order_, md5_inv_order_;
-  ::libvpx_test::Decoder *fw_dec_, *inv_dec_;
+  ::libaom_test::MD5 md5_fw_order_, md5_inv_order_;
+  ::libaom_test::Decoder *fw_dec_, *inv_dec_;
 
  private:
   int n_tile_cols_;
@@ -117,7 +117,7 @@ class TileIndependenceTest
 TEST_P(TileIndependenceTest, MD5Match) { DoTest(); }
 
 class TileIndependenceTestLarge : public TileIndependenceTest {
-  virtual void SetCpuUsed(libvpx_test::Encoder *encoder) {
+  virtual void SetCpuUsed(libaom_test::Encoder *encoder) {
     static const int kCpuUsed = 0;
     encoder->Control(VP8E_SET_CPUUSED, kCpuUsed);
   }

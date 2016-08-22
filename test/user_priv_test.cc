@@ -22,13 +22,13 @@
 #if CONFIG_WEBM_IO
 #include "test/webm_video_source.h"
 #endif
-#include "vpx_mem/vpx_mem.h"
-#include "vpx/vp8.h"
+#include "aom_mem/vpx_mem.h"
+#include "aom/vp8.h"
 
 namespace {
 
 using std::string;
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 #if CONFIG_WEBM_IO
 
@@ -44,13 +44,13 @@ void CheckUserPrivateData(void *user_priv, int *target) {
 // should match.
 string DecodeFile(const string &filename) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  libvpx_test::WebMVideoSource video(filename);
+  libaom_test::WebMVideoSource video(filename);
   video.Init();
 
   vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
-  libvpx_test::VP9Decoder decoder(cfg, 0);
+  libaom_test::VP9Decoder decoder(cfg, 0);
 
-  libvpx_test::MD5 md5;
+  libaom_test::MD5 md5;
   int frame_num = 0;
   for (video.Begin(); !::testing::Test::HasFailure() && video.cxdata();
        video.Next()) {
@@ -62,7 +62,7 @@ string DecodeFile(const string &filename) {
       EXPECT_EQ(VPX_CODEC_OK, res) << decoder.DecodeError();
       break;
     }
-    libvpx_test::DxDataIterator dec_iter = decoder.GetDxData();
+    libaom_test::DxDataIterator dec_iter = decoder.GetDxData();
     const vpx_image_t *img = NULL;
 
     // Get decompressed data.

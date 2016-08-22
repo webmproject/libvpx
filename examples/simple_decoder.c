@@ -32,7 +32,7 @@
 //
 // Initializing The Codec
 // ----------------------
-// The libvpx decoder is initialized by the call to vpx_codec_dec_init().
+// The libaom decoder is initialized by the call to vpx_codec_dec_init().
 // Determining the codec interface to use is handled by VpxVideoReader and the
 // functions prefixed with vpx_video_reader_. Discussion of those functions is
 // beyond the scope of this example, but the main gist is to open the input file
@@ -79,7 +79,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "vpx/vpx_decoder.h"
+#include "aom/vpx_decoder.h"
 
 #include "../tools_common.h"
 #include "../video_reader.h"

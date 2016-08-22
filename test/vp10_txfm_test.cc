@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include "test/vp10_txfm_test.h"
 
-namespace libvpx_test {
+namespace libaom_test {
 
 int get_txfm1d_size(TX_SIZE tx_size) { return 1 << (tx_size + 2); }
 
@@ -160,4 +160,4 @@ template void fliplr<double>(double *dest, int stride, int length);
 template void flipud<double>(double *dest, int stride, int length);
 template void fliplrud<double>(double *dest, int stride, int length);
 
-}  // namespace libvpx_test
+}  // namespace libaom_test

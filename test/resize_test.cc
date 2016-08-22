@@ -243,7 +243,7 @@ void ScaleForFrameNumber(unsigned int frame, unsigned int initial_w,
   *h = initial_h;
 }
 
-class ResizingVideoSource : public ::libvpx_test::DummyVideoSource {
+class ResizingVideoSource : public ::libaom_test::DummyVideoSource {
  public:
   ResizingVideoSource() {
     SetSize(kInitialWidth, kInitialHeight);
@@ -265,8 +265,8 @@ class ResizingVideoSource : public ::libvpx_test::DummyVideoSource {
 };
 
 class ResizeTest
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWithParam<libaom_test::TestMode> {
  protected:
   ResizeTest() : EncoderTest(GET_PARAM(0)) {}
 
@@ -336,8 +336,8 @@ class ResizeInternalTest : public ResizeTest {
 #endif
   }
 
-  virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
-                                  libvpx_test::Encoder *encoder) {
+  virtual void PreEncodeFrameHook(libaom_test::VideoSource *video,
+                                  libaom_test::Encoder *encoder) {
     if (change_config_) {
       int new_q = 60;
       if (video->frame() == 0) {
@@ -389,7 +389,7 @@ class ResizeInternalTest : public ResizeTest {
 };
 
 TEST_P(ResizeInternalTest, TestInternalResizeWorks) {
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+  ::libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 10);
   init_flags_ = VPX_CODEC_USE_PSNR;
   change_config_ = false;
@@ -418,7 +418,7 @@ TEST_P(ResizeInternalTest, TestInternalResizeWorks) {
 }
 
 TEST_P(ResizeInternalTest, TestInternalResizeChangeConfig) {
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+  ::libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 10);
   cfg_.g_w = 352;
   cfg_.g_h = 288;
@@ -427,14 +427,14 @@ TEST_P(ResizeInternalTest, TestInternalResizeChangeConfig) {
 }
 
 class ResizeRealtimeTest
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWith2Params<libaom_test::TestMode, int> {
  protected:
   ResizeRealtimeTest() : EncoderTest(GET_PARAM(0)) {}
   virtual ~ResizeRealtimeTest() {}
 
-  virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
-                                  libvpx_test::Encoder *encoder) {
+  virtual void PreEncodeFrameHook(libaom_test::VideoSource *video,
+                                  libaom_test::Encoder *encoder) {
     if (video->frame() == 0) {
       encoder->Control(VP9E_SET_AQ_MODE, 3);
       encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
@@ -525,7 +525,7 @@ TEST_P(ResizeRealtimeTest, TestExternalResizeWorks) {
 // Run at low bitrate, with resize_allowed = 1, and verify that we get
 // one resize down event.
 TEST_P(ResizeRealtimeTest, TestInternalResizeDown) {
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+  ::libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 299);
   DefaultConfig();
   cfg_.g_w = 352;
@@ -563,7 +563,7 @@ TEST_P(ResizeRealtimeTest, TestInternalResizeDown) {
 // Start at low target bitrate, raise the bitrate in the middle of the clip,
 // scaling-up should occur after bitrate changed.
 TEST_P(ResizeRealtimeTest, TestInternalResizeDownUpChangeBitRate) {
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+  ::libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 359);
   DefaultConfig();
   cfg_.g_w = 352;
@@ -641,8 +641,8 @@ class ResizeCspTest : public ResizeTest {
 #endif
   }
 
-  virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
-                                  libvpx_test::Encoder *encoder) {
+  virtual void PreEncodeFrameHook(libaom_test::VideoSource *video,
+                                  libaom_test::Encoder *encoder) {
     if (CspForFrameNumber(video->frame()) != VPX_IMG_FMT_I420 &&
         cfg_.g_profile != 1) {
       cfg_.g_profile = 1;
@@ -680,7 +680,7 @@ class ResizeCspTest : public ResizeTest {
 #endif
 };
 
-class ResizingCspVideoSource : public ::libvpx_test::DummyVideoSource {
+class ResizingCspVideoSource : public ::libaom_test::DummyVideoSource {
  public:
   ResizingCspVideoSource() {
     SetSize(kInitialWidth, kInitialHeight);
@@ -706,12 +706,12 @@ TEST_P(ResizeCspTest, TestResizeCspWorks) {
 }
 
 VP10_INSTANTIATE_TEST_CASE(ResizeTest,
-                           ::testing::Values(::libvpx_test::kRealTime));
+                           ::testing::Values(::libaom_test::kRealTime));
 VP10_INSTANTIATE_TEST_CASE(ResizeInternalTest,
-                           ::testing::Values(::libvpx_test::kOnePassBest));
+                           ::testing::Values(::libaom_test::kOnePassBest));
 VP10_INSTANTIATE_TEST_CASE(ResizeRealtimeTest,
-                           ::testing::Values(::libvpx_test::kRealTime),
+                           ::testing::Values(::libaom_test::kRealTime),
                            ::testing::Range(5, 9));
 VP10_INSTANTIATE_TEST_CASE(ResizeCspTest,
-                           ::testing::Values(::libvpx_test::kRealTime));
+                           ::testing::Values(::libaom_test::kRealTime));
 }  // namespace

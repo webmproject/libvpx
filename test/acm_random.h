@@ -13,9 +13,9 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-#include "vpx/vpx_integer.h"
+#include "aom/vpx_integer.h"
 
-namespace libvpx_test {
+namespace libaom_test {
 
 class ACMRandom {
  public:
@@ -65,6 +65,6 @@ class ACMRandom {
   testing::internal::Random random_;
 };
 
-}  // namespace libvpx_test
+}  // namespace libaom_test
 
 #endif  // TEST_ACM_RANDOM_H_

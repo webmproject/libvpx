@@ -8,7 +8,7 @@
 ##  in the file PATENTS.  All contributing project authors may
 ##  be found in the AUTHORS file in the root of the source tree.
 ##
-##  This file tests the libvpx cx_set_ref example. To add new tests to this
+##  This file tests the libaom cx_set_ref example. To add new tests to this
 ##  file, do the following:
 ##    1. Write a shell function (this is your test).
 ##    2. Add the function to cx_set_ref_tests (on a new line).
@@ -27,7 +27,7 @@ cx_set_ref_verify_environment() {
 # $1 is the codec name.
 vpx_set_ref() {
   local codec="$1"
-  local encoder="${LIBVPX_BIN_PATH}/vpxcx_set_ref${VPX_TEST_EXE_SUFFIX}"
+  local encoder="${LIBAOM_BIN_PATH}/vpxcx_set_ref${VPX_TEST_EXE_SUFFIX}"
 
   local output_file="${VPX_TEST_OUTPUT_DIR}/${codec}cx_set_ref_${codec}.ivf"
   local ref_frame_num=90

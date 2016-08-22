@@ -17,11 +17,11 @@
 #include "./tools_common.h"
 
 #if CONFIG_VP10_ENCODER
-#include "vpx/vp8cx.h"
+#include "aom/vp8cx.h"
 #endif
 
 #if CONFIG_VP10_DECODER
-#include "vpx/vp8dx.h"
+#include "aom/vp8dx.h"
 #endif
 
 #if defined(_WIN32) || defined(__OS2__)

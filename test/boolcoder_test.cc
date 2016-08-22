@@ -15,11 +15,11 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "test/acm_random.h"
-#include "vpx/vpx_integer.h"
-#include "vpx_dsp/bitreader.h"
-#include "vpx_dsp/bitwriter.h"
+#include "aom/vpx_integer.h"
+#include "aom_dsp/bitreader.h"
+#include "aom_dsp/bitwriter.h"
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 namespace {
 const int num_tests = 10;

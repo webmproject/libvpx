@@ -20,9 +20,9 @@
 
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
-#include "vpx/vpx_integer.h"
+#include "aom/vpx_integer.h"
 
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 namespace {
 const int number_of_iterations = 500;
@@ -40,7 +40,7 @@ class MaskedSADTest : public ::testing::TestWithParam<MaskedSADParam> {
     ref_maskedSAD_op_ = GET_PARAM(1);
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   MaskedSADFunc maskedSAD_op_;
@@ -97,7 +97,7 @@ class HighbdMaskedSADTest
     ref_maskedSAD_op_ = GET_PARAM(1);
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
  protected:
   HighbdMaskedSADFunc maskedSAD_op_;

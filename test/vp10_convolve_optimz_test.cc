@@ -19,7 +19,7 @@
 namespace {
 
 using std::tr1::tuple;
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 typedef void (*conv_filter_t)(const uint8_t *, int, uint8_t *, int, int, int,
                               const InterpFilterParams, const int, int, int);
@@ -79,7 +79,7 @@ class VP10ConvolveOptimzTest : public ::testing::TestWithParam<ConvParams> {
 
   virtual void TearDown() {
     delete[] alloc_;
-    libvpx_test::ClearSystemState();
+    libaom_test::ClearSystemState();
   }
 
  protected:
@@ -255,7 +255,7 @@ class VP10HbdConvolveOptimzTest : public TestWithHbdConvParams {
 
   virtual void TearDown() {
     delete[] alloc_;
-    libvpx_test::ClearSystemState();
+    libaom_test::ClearSystemState();
   }
 
  protected:

@@ -17,7 +17,7 @@
 #include "test/md5_helper.h"
 #include "test/util.h"
 #include "test/webm_video_source.h"
-#include "vpx_ports/vpx_timer.h"
+#include "aom_ports/vpx_timer.h"
 #include "./ivfenc.h"
 #include "./vpx_version.h"
 
@@ -76,12 +76,12 @@ TEST_P(DecodePerfTest, PerfTest) {
   const char *const video_name = GET_PARAM(VIDEO_NAME);
   const unsigned threads = GET_PARAM(THREADS);
 
-  libvpx_test::WebMVideoSource video(video_name);
+  libaom_test::WebMVideoSource video(video_name);
   video.Init();
 
   vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
   cfg.threads = threads;
-  libvpx_test::VP9Decoder decoder(cfg, 0);
+  libaom_test::VP9Decoder decoder(cfg, 0);
 
   vpx_usec_timer t;
   vpx_usec_timer_start(&t);
@@ -110,8 +110,8 @@ INSTANTIATE_TEST_CASE_P(VP9, DecodePerfTest,
                         ::testing::ValuesIn(kVP9DecodePerfVectors));
 
 class VP9NewEncodeDecodePerfTest
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWithParam<libaom_test::TestMode> {
  protected:
   VP9NewEncodeDecodePerfTest()
       : EncoderTest(GET_PARAM(0)), encoding_mode_(GET_PARAM(1)), speed_(0),
@@ -136,8 +136,8 @@ class VP9NewEncodeDecodePerfTest
     cfg_.rc_end_usage = VPX_VBR;
   }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
-                                  ::libvpx_test::Encoder *encoder) {
+  virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
+                                  ::libaom_test::Encoder *encoder) {
     if (video->frame() == 1) {
       encoder->Control(VP8E_SET_CPUUSED, speed_);
       encoder->Control(VP9E_SET_FRAME_PARALLEL_DECODING, 1);
@@ -179,7 +179,7 @@ class VP9NewEncodeDecodePerfTest
   void set_speed(unsigned int speed) { speed_ = speed; }
 
  private:
-  libvpx_test::TestMode encoding_mode_;
+  libaom_test::TestMode encoding_mode_;
   uint32_t speed_;
   FILE *outfile_;
   uint32_t out_frames_;
@@ -213,7 +213,7 @@ TEST_P(VP9NewEncodeDecodePerfTest, PerfTest) {
   init_flags_ = VPX_CODEC_USE_PSNR;
 
   const char *video_name = kVP9EncodePerfTestVectors[i].name;
-  libvpx_test::I420VideoSource video(
+  libaom_test::I420VideoSource video(
       video_name, kVP9EncodePerfTestVectors[i].width,
       kVP9EncodePerfTestVectors[i].height, timebase.den, timebase.num, 0,
       kVP9EncodePerfTestVectors[i].frames);
@@ -223,12 +223,12 @@ TEST_P(VP9NewEncodeDecodePerfTest, PerfTest) {
 
   const uint32_t threads = 4;
 
-  libvpx_test::IVFVideoSource decode_video(kNewEncodeOutputFile);
+  libaom_test::IVFVideoSource decode_video(kNewEncodeOutputFile);
   decode_video.Init();
 
   vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
   cfg.threads = threads;
-  libvpx_test::VP9Decoder decoder(cfg, 0);
+  libaom_test::VP9Decoder decoder(cfg, 0);
 
   vpx_usec_timer t;
   vpx_usec_timer_start(&t);
@@ -256,5 +256,5 @@ TEST_P(VP9NewEncodeDecodePerfTest, PerfTest) {
 }
 
 VP10_INSTANTIATE_TEST_CASE(VP9NewEncodeDecodePerfTest,
-                           ::testing::Values(::libvpx_test::kTwoPassGood));
+                           ::testing::Values(::libaom_test::kTwoPassGood));
 }  // namespace

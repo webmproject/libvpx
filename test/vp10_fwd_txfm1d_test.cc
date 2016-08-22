@@ -8,15 +8,15 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vp10/common/vp10_fwd_txfm1d.h"
+#include "av1/common/vp10_fwd_txfm1d.h"
 #include "test/vp10_txfm_test.h"
 
-using libvpx_test::ACMRandom;
-using libvpx_test::input_base;
-using libvpx_test::reference_hybrid_1d;
-using libvpx_test::TYPE_TXFM;
-using libvpx_test::TYPE_DCT;
-using libvpx_test::TYPE_ADST;
+using libaom_test::ACMRandom;
+using libaom_test::input_base;
+using libaom_test::reference_hybrid_1d;
+using libaom_test::TYPE_TXFM;
+using libaom_test::TYPE_DCT;
+using libaom_test::TYPE_ADST;
 
 namespace {
 const int txfm_type_num = 2;

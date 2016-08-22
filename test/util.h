@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "third_party/googletest/src/include/gtest/gtest.h"
-#include "vpx/vpx_image.h"
+#include "aom/vpx_image.h"
 
 // Macros
 #define GET_PARAM(k) std::tr1::get<k>(GetParam())

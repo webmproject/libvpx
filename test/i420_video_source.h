@@ -15,7 +15,7 @@
 
 #include "test/yuv_video_source.h"
 
-namespace libvpx_test {
+namespace libaom_test {
 
 // This class extends VideoSource to allow parsing of raw yv12
 // so that we can do actual file encodes.
@@ -28,6 +28,6 @@ class I420VideoSource : public YUVVideoSource {
                        rate_numerator, rate_denominator, start, limit) {}
 };
 
-}  // namespace libvpx_test
+}  // namespace libaom_test
 
 #endif  // TEST_I420_VIDEO_SOURCE_H_

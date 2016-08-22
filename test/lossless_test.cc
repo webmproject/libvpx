@@ -22,8 +22,8 @@ namespace {
 const int kMaxPsnr = 100;
 
 class LosslessTestLarge
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
+    : public ::libaom_test::EncoderTest,
+      public ::libaom_test::CodecTestWithParam<libaom_test::TestMode> {
  protected:
   LosslessTestLarge()
       : EncoderTest(GET_PARAM(0)), psnr_(kMaxPsnr), nframes_(0),
@@ -36,8 +36,8 @@ class LosslessTestLarge
     SetMode(encoding_mode_);
   }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
-                                  ::libvpx_test::Encoder *encoder) {
+  virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
+                                  ::libaom_test::Encoder *encoder) {
     if (video->frame() == 1) {
       // Only call Control if quantizer > 0 to verify that using quantizer
       // alone will activate lossless
@@ -61,7 +61,7 @@ class LosslessTestLarge
  private:
   double psnr_;
   unsigned int nframes_;
-  libvpx_test::TestMode encoding_mode_;
+  libaom_test::TestMode encoding_mode_;
 };
 
 TEST_P(LosslessTestLarge, TestLossLessEncoding) {
@@ -75,7 +75,7 @@ TEST_P(LosslessTestLarge, TestLossLessEncoding) {
   init_flags_ = VPX_CODEC_USE_PSNR;
 
   // intentionally changed the dimension for better testing coverage
-  libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+  libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                      timebase.den, timebase.num, 0, 5);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   const double psnr_lossless = GetMinPsnr();
@@ -83,7 +83,7 @@ TEST_P(LosslessTestLarge, TestLossLessEncoding) {
 }
 
 TEST_P(LosslessTestLarge, TestLossLessEncoding444) {
-  libvpx_test::Y4mVideoSource video("rush_hour_444.y4m", 0, 5);
+  libaom_test::Y4mVideoSource video("rush_hour_444.y4m", 0, 5);
 
   cfg_.g_profile = 1;
   cfg_.g_timebase = video.timebase();
@@ -111,7 +111,7 @@ TEST_P(LosslessTestLarge, TestLossLessEncodingCtrl) {
 
   init_flags_ = VPX_CODEC_USE_PSNR;
 
-  libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+  libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                      timebase.den, timebase.num, 0, 5);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   const double psnr_lossless = GetMinPsnr();
@@ -119,6 +119,6 @@ TEST_P(LosslessTestLarge, TestLossLessEncodingCtrl) {
 }
 
 VP10_INSTANTIATE_TEST_CASE(LosslessTestLarge,
-                           ::testing::Values(::libvpx_test::kOnePassGood,
-                                             ::libvpx_test::kTwoPassGood));
+                           ::testing::Values(::libaom_test::kOnePassGood,
+                                             ::libaom_test::kTwoPassGood));
 }  // namespace

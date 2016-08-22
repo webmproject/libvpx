@@ -14,7 +14,7 @@
 
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
-#include "vpx/vpx_integer.h"
+#include "aom/vpx_integer.h"
 
 typedef void (*IdctFunc)(int16_t *input, unsigned char *pred_ptr,
                          int pred_stride, unsigned char *dst_ptr,
@@ -31,7 +31,7 @@ class IDCTTest : public ::testing::TestWithParam<IdctFunc> {
     for (i = 0; i < 256; i++) output[i] = ((i & 0xF) < 4 && (i < 64)) ? 0 : -1;
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
 
   IdctFunc UUT;
   int16_t input[16];

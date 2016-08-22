@@ -8,7 +8,7 @@
 ##  in the file PATENTS.  All contributing project authors may
 ##  be found in the AUTHORS file in the root of the source tree.
 ##
-##  This file tests the libvpx set_maps example. To add new tests to this file,
+##  This file tests the libaom set_maps example. To add new tests to this file,
 ##  do the following:
 ##    1. Write a shell function (this is your test).
 ##    2. Add the function to set_maps_tests (on a new line).
@@ -16,14 +16,14 @@
 . $(dirname $0)/tools_common.sh
 
 # Environment check: $YUV_RAW_INPUT is required, and set_maps must exist in
-# $LIBVPX_BIN_PATH.
+# $LIBAOM_BIN_PATH.
 set_maps_verify_environment() {
   if [ ! -e "${YUV_RAW_INPUT}" ]; then
     echo "Libvpx test data must exist in LIBVPX_TEST_DATA_PATH."
     return 1
   fi
   if [ -z "$(vpx_tool_path set_maps)" ]; then
-    elog "set_maps not found. It must exist in LIBVPX_BIN_PATH or its parent."
+    elog "set_maps not found. It must exist in LIBAOM_BIN_PATH or its parent."
     return 1
   fi
 }

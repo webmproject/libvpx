@@ -15,12 +15,12 @@
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
-#include "vp10/common/enums.h"
+#include "av1/common/enums.h"
 
 namespace {
 
 using std::tr1::tuple;
-using libvpx_test::ACMRandom;
+using libaom_test::ACMRandom;
 
 typedef void (*Predictor)(uint8_t *dst, ptrdiff_t stride, int bs,
                           const uint8_t *above, const uint8_t *left);
@@ -76,7 +76,7 @@ class VP10IntraPredOptimzTest : public ::testing::TestWithParam<PredParams> {
     delete[] alloc_;
     delete[] predRef_;
     delete[] pred_;
-    libvpx_test::ClearSystemState();
+    libaom_test::ClearSystemState();
   }
 
  protected:
@@ -170,7 +170,7 @@ class VP10HbdIntraPredOptimzTest
     delete[] alloc_;
     delete[] predRef_;
     delete[] pred_;
-    libvpx_test::ClearSystemState();
+    libaom_test::ClearSystemState();
   }
 
  protected:

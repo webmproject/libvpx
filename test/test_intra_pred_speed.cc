@@ -18,9 +18,9 @@
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
 #include "test/md5_helper.h"
-#include "vpx/vpx_integer.h"
-#include "vpx_ports/mem.h"
-#include "vpx_ports/vpx_timer.h"
+#include "aom/vpx_integer.h"
+#include "aom_ports/mem.h"
+#include "aom_ports/vpx_timer.h"
 
 // -----------------------------------------------------------------------------
 
@@ -40,7 +40,7 @@ void TestIntraPred(const char name[], VpxPredFunc const *pred_funcs,
                    const char *const pred_func_names[], int num_funcs,
                    const char *const signatures[], int block_size,
                    int num_pixels_per_test) {
-  libvpx_test::ACMRandom rnd(libvpx_test::ACMRandom::DeterministicSeed());
+  libaom_test::ACMRandom rnd(libaom_test::ACMRandom::DeterministicSeed());
   const int kBPS = 32;
   const int kTotalPixels = 32 * kBPS;
   DECLARE_ALIGNED(16, uint8_t, src[kTotalPixels]);
@@ -67,11 +67,11 @@ void TestIntraPred(const char name[], VpxPredFunc const *pred_funcs,
     for (int num_tests = 0; num_tests < kNumTests; ++num_tests) {
       pred_funcs[k](src, kBPS, above, left);
     }
-    libvpx_test::ClearSystemState();
+    libaom_test::ClearSystemState();
     vpx_usec_timer_mark(&timer);
     const int elapsed_time =
         static_cast<int>(vpx_usec_timer_elapsed(&timer) / 1000);
-    libvpx_test::MD5 md5;
+    libaom_test::MD5 md5;
     md5.Add(src, sizeof(src));
     printf("Mode %s[%12s]: %5d ms     MD5: %s\n", name, pred_func_names[k],
            elapsed_time, md5.Get());

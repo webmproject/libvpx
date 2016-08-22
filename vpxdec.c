@@ -24,12 +24,12 @@
 #include "./args.h"
 #include "./ivfdec.h"
 
-#include "vpx/vpx_decoder.h"
-#include "vpx_ports/mem_ops.h"
-#include "vpx_ports/vpx_timer.h"
+#include "aom/vpx_decoder.h"
+#include "aom_ports/mem_ops.h"
+#include "aom_ports/vpx_timer.h"
 
 #if CONFIG_VP10_DECODER
-#include "vpx/vp8dx.h"
+#include "aom/vp8dx.h"
 #endif
 
 #include "./md5_utils.h"
@@ -344,7 +344,7 @@ struct ExternalFrameBufferList {
   struct ExternalFrameBuffer *ext_fb;
 };
 
-// Callback used by libvpx to request an external frame buffer. |cb_priv|
+// Callback used by libaom to request an external frame buffer. |cb_priv|
 // Application private data passed into the set function. |min_size| is the
 // minimum size in bytes needed to decode the next frame. |fb| pointer to the
 // frame buffer.
@@ -379,7 +379,7 @@ static int get_vp9_frame_buffer(void *cb_priv, size_t min_size,
   return 0;
 }
 
-// Callback used by libvpx when there are no references to the frame buffer.
+// Callback used by libaom when there are no references to the frame buffer.
 // |cb_priv| user private data passed into the set function. |fb| pointer
 // to the frame buffer.
 static int release_vp9_frame_buffer(void *cb_priv,
