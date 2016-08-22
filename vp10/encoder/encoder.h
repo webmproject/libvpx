@@ -81,6 +81,8 @@ typedef enum {
 #if CONFIG_EXT_REFS
   // backward reference frame
   BRF_FRAME = 4,
+  // extra alternate reference frame
+  EXT_ARF_FRAME = 5
 #endif
 } FRAME_CONTEXT_INDEX;
 
