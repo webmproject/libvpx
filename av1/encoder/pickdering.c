@@ -118,7 +118,6 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
       }
     }
   }
-#if DERING_REFINEMENT
   best_level = 0;
   /* Search for the best global level one value at a time. */
   for (global_level = 2; global_level < MAX_DERING_LEVEL; global_level++) {
@@ -161,12 +160,6 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
           ->mbmi.dering_gain = best_gi;
     }
   }
-#else
-    best_level = 0;
-    for (level = 0; level < MAX_DERING_LEVEL; level++) {
-      if (tot_mse[level] < tot_mse[best_level]) best_level = level;
-    }
-#endif
   aom_free(src);
   aom_free(ref_coeff);
   aom_free(bskip);
