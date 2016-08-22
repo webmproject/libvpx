@@ -92,8 +92,8 @@ static INLINE void aom_write_symbol(aom_writer *w, int symb,
   struct rans_sym s;
   (void)nsymbs;
   assert(cdf);
-  s.cum_prob = cdf[symb];
-  s.prob = cdf[symb + 1] - s.cum_prob;
+  s.cum_prob = symb > 0 ? cdf[symb - 1] : 0;
+  s.prob = cdf[symb] - s.cum_prob;
   buf_rans_write(w, &s);
 #else
   (void)w;

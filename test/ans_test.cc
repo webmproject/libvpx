@@ -98,9 +98,9 @@ std::vector<int> ans_encode_build_vals(const rans_sym *tab, int iters) {
 }
 
 void rans_build_dec_tab(const struct rans_sym sym_tab[], rans_lut dec_tab) {
-  dec_tab[0] = 0;
-  for (int i = 1; dec_tab[i - 1] < RANS_PRECISION; ++i) {
-    dec_tab[i] = dec_tab[i - 1] + sym_tab[i - 1].prob;
+  unsigned int sum = 0;
+  for (int i = 0; sum < RANS_PRECISION; ++i) {
+    dec_tab[i] = sum += sym_tab[i].prob;
   }
 }
 

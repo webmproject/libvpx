@@ -36,8 +36,7 @@ typedef uint16_t AnsP10;
 #define IO_BASE 256
 // Range I = { L_BASE, L_BASE + 1, ..., L_BASE * IO_BASE - 1 }
 
-// This is now just a boring cdf. It starts with an explicit zero.
-// TODO(aconverse): Remove starting zero.
+// This is now just a boring cdf.
 typedef uint16_t rans_lut[16];
 
 void aom_rans_build_cdf_from_pdf(const AnsP10 token_probs[], rans_lut cdf_tab);

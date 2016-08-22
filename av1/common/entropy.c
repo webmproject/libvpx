@@ -2801,6 +2801,14 @@ void av1_model_to_full_probs(const aom_prob *model, aom_prob *full) {
 }
 
 #if CONFIG_ANS
+static void build_token_cdfs(const aom_prob *pdf_model, rans_lut cdf) {
+  int i, sum = 0;
+  assert(pdf_model[2] != 0);
+  for (i = 0; i < ENTROPY_TOKENS - 2; ++i) {
+    cdf[i] = sum += av1_pareto8_token_probs[pdf_model[2] - 1][i];
+  }
+}
+
 void av1_coef_pareto_cdfs(FRAME_CONTEXT *fc) {
   TX_SIZE t;
   int i, j, k, l;
@@ -2809,11 +2817,8 @@ void av1_coef_pareto_cdfs(FRAME_CONTEXT *fc) {
       for (j = 0; j < REF_TYPES; ++j)
         for (k = 0; k < COEF_BANDS; ++k)
           for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
-            const aom_prob *const tree_probs = fc->coef_probs[t][i][j][k][l];
-            aom_prob pivot = tree_probs[PIVOT_NODE];
-            assert(pivot != 0);
-            aom_rans_build_cdf_from_pdf(av1_pareto8_token_probs[pivot - 1],
-                                        fc->coef_cdfs[t][i][j][k][l]);
+            build_token_cdfs(fc->coef_probs[t][i][j][k][l],
+                             fc->coef_cdfs[t][i][j][k][l]);
           }
 }
 #endif  // CONFIG_ANS
