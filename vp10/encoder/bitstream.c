@@ -1118,14 +1118,11 @@ static void pack_inter_mode_mvs(VP10_COMP *cpi, const MODE_INFO *mi,
         for (idx = 0; idx < width; idx += bs)
           write_tx_size_vartx(cm, xd, mbmi, max_tx_size, idy, idx, w);
     } else {
-      set_txfm_ctx(xd->left_txfm_context, mbmi->tx_size, xd->n8_h);
-      set_txfm_ctx(xd->above_txfm_context, mbmi->tx_size, xd->n8_w);
-
+      set_txfm_ctxs(mbmi->tx_size, xd->n8_w, xd->n8_h, xd);
       write_selected_tx_size(cm, xd, w);
     }
   } else {
-    set_txfm_ctx(xd->left_txfm_context, mbmi->tx_size, xd->n8_h);
-    set_txfm_ctx(xd->above_txfm_context, mbmi->tx_size, xd->n8_w);
+    set_txfm_ctxs(mbmi->tx_size, xd->n8_w, xd->n8_h, xd);
 #else
     write_selected_tx_size(cm, xd, w);
 #endif
@@ -1640,8 +1637,14 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
       const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
       const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
       int row, col;
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+      TX_SIZE tx_size =
+          plane ? get_uv_tx_size(mbmi, &xd->plane[plane]) : mbmi->tx_size;
 
+      if (is_inter_block(mbmi) && tx_size < TX_SIZES) {
+#else
       if (is_inter_block(mbmi)) {
+#endif
         const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
         const BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
         int bw = num_4x4_blocks_wide_lookup[txb_size];
@@ -1659,8 +1662,9 @@ static void write_modes_b(VP10_COMP *cpi, const TileInfo *const tile,
                            : m->mbmi.tx_size;
         BLOCK_SIZE txb_size = txsize_to_bsize[tx];
         int bw = num_4x4_blocks_wide_lookup[txb_size];
+        int bh = num_4x4_blocks_high_lookup[txb_size];
 
-        for (row = 0; row < num_4x4_h; row += bw)
+        for (row = 0; row < num_4x4_h; row += bh)
           for (col = 0; col < num_4x4_w; col += bw)
             pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
       }

@@ -1252,12 +1252,23 @@ void vp10_filter_block_plane_non420(VP10_COMMON *cm,
                                       sb_type, ss_x, ss_y)
                 : mbmi->inter_tx_size[blk_row][blk_col];
 
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+      tx_size_r =
+          VPXMIN(txsize_horz_map[tx_size], cm->above_txfm_context[mi_col + c]);
+      tx_size_c = VPXMIN(txsize_vert_map[tx_size],
+                         cm->left_txfm_context[(mi_row + r) & MAX_MIB_MASK]);
+
+      cm->above_txfm_context[mi_col + c] = txsize_horz_map[tx_size];
+      cm->left_txfm_context[(mi_row + r) & MAX_MIB_MASK] =
+          txsize_vert_map[tx_size];
+#else
       tx_size_r = VPXMIN(tx_size, cm->above_txfm_context[mi_col + c]);
       tx_size_c =
           VPXMIN(tx_size, cm->left_txfm_context[(mi_row + r) & MAX_MIB_MASK]);
 
       cm->above_txfm_context[mi_col + c] = tx_size;
       cm->left_txfm_context[(mi_row + r) & MAX_MIB_MASK] = tx_size;
+#endif
 #endif
 
       // Build masks based on the transform size of each block

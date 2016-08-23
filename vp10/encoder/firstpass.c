@@ -2584,7 +2584,7 @@ static void configure_buffer_updates(VP10_COMP *cpi) {
 
         cpi->rc.is_bwd_ref_frame = 1;
         cpi->bwd_fb_idx = cpi->alt_fb_idx;
-        cpi->alt_fb_idx = cpi->arf_map[0];;
+        cpi->alt_fb_idx = cpi->arf_map[0];
         cpi->arf_map[0] = tmp;
       } else {
         cpi->rc.is_bwd_ref_frame = 0;

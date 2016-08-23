@@ -2229,8 +2229,7 @@ static void encode_sb(VP10_COMP *cpi, ThreadData *td,
         update_partition_context(xd, mi_row, mi_col, subsize, bsize);
 #endif
 #if CONFIG_VAR_TX
-      set_txfm_ctx(xd->left_txfm_context, supertx_size, xd->n8_h);
-      set_txfm_ctx(xd->above_txfm_context, supertx_size, mi_height);
+      set_txfm_ctxs(supertx_size, mi_width, mi_height, xd);
 #endif  // CONFIG_VAR_TX
       return;
     } else {
@@ -5027,8 +5026,13 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
 
     vp10_encode_sb(x, VPXMAX(bsize, BLOCK_8X8));
 #if CONFIG_VAR_TX
-    vp10_tokenize_sb_inter(cpi, td, t, !output_enabled, mi_row, mi_col,
-                           VPXMAX(bsize, BLOCK_8X8));
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+    if (mbmi->tx_size >= TX_SIZES)
+      vp10_tokenize_sb(cpi, td, t, !output_enabled, VPXMAX(bsize, BLOCK_8X8));
+    else
+#endif
+      vp10_tokenize_sb_inter(cpi, td, t, !output_enabled, mi_row, mi_col,
+                             VPXMAX(bsize, BLOCK_8X8));
 #else
     vp10_tokenize_sb(cpi, td, t, !output_enabled, VPXMAX(bsize, BLOCK_8X8));
 #endif
@@ -5108,13 +5112,22 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
     TX_SIZE tx_size;
     // The new intra coding scheme requires no change of transform size
     if (is_inter_block(mbmi))
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+    {
       tx_size = VPXMIN(tx_mode_to_biggest_tx_size[cm->tx_mode],
                        max_txsize_lookup[bsize]);
+      if (txsize_sqr_map[max_txsize_rect_lookup[bsize]] <= tx_size)
+        tx_size = max_txsize_rect_lookup[bsize];
+      if (xd->lossless[mbmi->segment_id]) tx_size = TX_4X4;
+    }
+#else
+      tx_size = VPXMIN(tx_mode_to_biggest_tx_size[cm->tx_mode],
+                       max_txsize_lookup[bsize]);
+#endif
     else
       tx_size = (bsize >= BLOCK_8X8) ? mbmi->tx_size : TX_4X4;
     mbmi->tx_size = tx_size;
-    set_txfm_ctx(xd->left_txfm_context, tx_size, xd->n8_h);
-    set_txfm_ctx(xd->above_txfm_context, tx_size, xd->n8_w);
+    set_txfm_ctxs(tx_size, xd->n8_w, xd->n8_h, xd);
   }
 #endif
 }

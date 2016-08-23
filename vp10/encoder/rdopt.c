@@ -4219,13 +4219,13 @@ static int64_t encode_inter_mb_segment(VP10_COMP *cpi, MACROBLOCK *x,
   const int num_4x4_w = num_4x4_blocks_wide_txsize_lookup[tx_size];
   const int num_4x4_h = num_4x4_blocks_high_txsize_lookup[tx_size];
 
-#if CONFIG_EXT_TX && CONFIG_RECT_TX && !CONFIG_VAR_TX
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
   assert(IMPLIES(xd->lossless[mi->mbmi.segment_id], tx_size == TX_4X4));
   assert(IMPLIES(!xd->lossless[mi->mbmi.segment_id],
                  tx_size == max_txsize_rect_lookup[mi->mbmi.sb_type]));
 #else
   assert(tx_size == TX_4X4);
-#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX && !CONFIG_VAR_TX
+#endif
   assert(tx_type == DCT_DCT);
 
   vp10_build_inter_predictor_sub8x8(xd, 0, i, ir, ic, mi_row, mi_col);
@@ -4745,12 +4745,12 @@ static int64_t rd_pick_best_sub8x8_mode(
   const int has_second_rf = has_second_ref(mbmi);
   const int inter_mode_mask = cpi->sf.inter_mode_mask[bsize];
   MB_MODE_INFO_EXT *const mbmi_ext = x->mbmi_ext;
-#if CONFIG_EXT_TX && CONFIG_RECT_TX && !CONFIG_VAR_TX
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
   mbmi->tx_size =
       xd->lossless[mbmi->segment_id] ? TX_4X4 : max_txsize_rect_lookup[bsize];
 #else
   mbmi->tx_size = TX_4X4;
-#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX && !CONFIG_VAR_TX
+#endif
 
   vp10_zero(*bsi);
 
@@ -10511,6 +10511,10 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
 
   // macroblock modes
   *mbmi = best_mbmode;
+#if CONFIG_VAR_TX && CONFIG_EXT_TX && CONFIG_RECT_TX
+  mbmi->inter_tx_size[0][0] = mbmi->tx_size;
+#endif
+
   x->skip |= best_skip2;
   if (!is_inter_block(&best_mbmode)) {
     for (i = 0; i < 4; i++) xd->mi[0]->bmi[i].as_mode = best_bmodes[i].as_mode;

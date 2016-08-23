@@ -980,6 +980,9 @@ void vp10_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
     int idx, idy;
     int block = 0;
     int step = num_4x4_blocks_txsize_lookup[max_tx_size];
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+    const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
+#endif
     vp10_get_entropy_contexts(bsize, TX_4X4, pd, ctx.ta[plane], ctx.tl[plane]);
 #else
     const struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -991,13 +994,22 @@ void vp10_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
     arg.tl = ctx.tl[plane];
 
 #if CONFIG_VAR_TX
-    for (idy = 0; idy < mi_height; idy += bh) {
-      for (idx = 0; idx < mi_width; idx += bh) {
-        encode_block_inter(plane, block, idy, idx, plane_bsize, max_tx_size,
-                           &arg);
-        block += step;
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+    if (tx_size >= TX_SIZES) {
+      vp10_foreach_transformed_block_in_plane(xd, bsize, plane, encode_block,
+                                              &arg);
+    } else {
+#endif
+      for (idy = 0; idy < mi_height; idy += bh) {
+        for (idx = 0; idx < mi_width; idx += bh) {
+          encode_block_inter(plane, block, idy, idx, plane_bsize, max_tx_size,
+                             &arg);
+          block += step;
+        }
       }
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
     }
+#endif
 #else
     vp10_foreach_transformed_block_in_plane(xd, bsize, plane, encode_block,
                                             &arg);
