@@ -100,6 +100,7 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
       sf->alt_ref_search_fp = 1;
       sf->cb_pred_filter_search = 1;
       sf->adaptive_interp_filter_search = 1;
+      sf->disable_split_mask = DISABLE_ALL_SPLIT;
     }
   }
 
