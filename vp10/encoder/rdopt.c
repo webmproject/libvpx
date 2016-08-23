@@ -3302,11 +3302,7 @@ static void tx_block_rd(const VP10_COMP *cpi, MACROBLOCK *x, int blk_row,
   BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
   const int tx_row = blk_row >> (1 - pd->subsampling_y);
   const int tx_col = blk_col >> (1 - pd->subsampling_x);
-  const TX_SIZE plane_tx_size =
-      plane ? get_uv_tx_size_impl(mbmi->inter_tx_size[tx_row][tx_col], bsize, 0,
-                                  0)
-            : mbmi->inter_tx_size[tx_row][tx_col];
-
+  TX_SIZE plane_tx_size;
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
 
@@ -3320,6 +3316,10 @@ static void tx_block_rd(const VP10_COMP *cpi, MACROBLOCK *x, int blk_row,
     max_blocks_wide += xd->mb_to_right_edge >> (5 + pd->subsampling_x);
 
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
+
+  plane_tx_size = plane ? get_uv_tx_size_impl(
+                              mbmi->inter_tx_size[tx_row][tx_col], bsize, 0, 0)
+                        : mbmi->inter_tx_size[tx_row][tx_col];
 
   if (tx_size == plane_tx_size) {
     int coeff_ctx, i;

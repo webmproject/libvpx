@@ -5025,28 +5025,34 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
   if (output_enabled) {
     if (cm->tx_mode == TX_MODE_SELECT && mbmi->sb_type >= BLOCK_8X8 &&
         !(is_inter_block(mbmi) && (mbmi->skip || seg_skip))) {
+      const int ctx = get_tx_size_context(xd);
+      const int tx_size_cat = max_txsize_lookup[bsize] - TX_8X8;
 #if CONFIG_VAR_TX
       if (is_inter_block(mbmi))
         tx_partition_count_update(cm, xd, bsize, mi_row, mi_col, td->counts);
 #endif
-      ++td->counts->tx_size[max_txsize_lookup[bsize] -
-                            TX_8X8][get_tx_size_context(xd)][mbmi->tx_size];
+      ++td->counts->tx_size[tx_size_cat][ctx][mbmi->tx_size];
     } else {
       int x, y;
       TX_SIZE tx_size;
       // The new intra coding scheme requires no change of transform size
-      if (is_inter_block(&mi->mbmi))
+      if (is_inter_block(&mi->mbmi)) {
         tx_size = VPXMIN(tx_mode_to_biggest_tx_size[cm->tx_mode],
                          max_txsize_lookup[bsize]);
-      else
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+        if (txsize_sqr_map[max_txsize_rect_lookup[bsize]] <= tx_size)
+          tx_size = max_txsize_rect_lookup[bsize];
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
+      } else {
         tx_size = (bsize >= BLOCK_8X8) ? mbmi->tx_size : TX_4X4;
+      }
 
       for (y = 0; y < mi_height; y++)
         for (x = 0; x < mi_width; x++)
           if (mi_col + x < cm->mi_cols && mi_row + y < cm->mi_rows)
             mi_8x8[mis * y + x]->mbmi.tx_size = tx_size;
     }
-    ++td->counts->tx_size_totals[mbmi->tx_size];
+    ++td->counts->tx_size_totals[txsize_sqr_map[mbmi->tx_size]];
     ++td->counts->tx_size_totals[get_uv_tx_size(mbmi, &xd->plane[1])];
 #if CONFIG_EXT_TX
     if (get_ext_tx_types(mbmi->tx_size, bsize, is_inter_block(mbmi)) > 1 &&

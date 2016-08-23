@@ -186,7 +186,7 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
           val = CAT5_MIN_VAL + read_coeff(cat5_prob, 5, r);
           break;
         case CATEGORY6_TOKEN: {
-          const int skip_bits = TX_SIZES - 1 - tx_size;
+          const int skip_bits = TX_SIZES - 1 - txsize_sqr_up_map[tx_size];
           const uint8_t *cat6p = cat6_prob + skip_bits;
 #if CONFIG_VP9_HIGHBITDEPTH
           switch (xd->bd) {
@@ -369,7 +369,7 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd, PLANE_TYPE type,
           val = CAT5_MIN_VAL + read_coeff(cat5_prob, 5, ans);
           break;
         case CATEGORY6_TOKEN: {
-          const int skip_bits = TX_SIZES - 1 - tx_size;
+          const int skip_bits = TX_SIZES - 1 - txsize_sqr_up_map[tx_size];
           const uint8_t *cat6p = cat6_prob + skip_bits;
 #if CONFIG_VP9_HIGHBITDEPTH
           switch (xd->bd) {
