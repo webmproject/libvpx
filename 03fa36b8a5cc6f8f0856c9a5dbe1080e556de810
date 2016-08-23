@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "683a0757_b0c58667",
+        "filename": "test/alt_ref_aq_segment_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-23T23:29:46Z",
+      "side": 1,
+      "message": "Typically we CamelCase these names",
+      "range": {
+        "startLine": 51,
+        "startChar": 28,
+        "endLine": 51,
+        "endChar": 51
+      },
+      "revId": "03fa36b8a5cc6f8f0856c9a5dbe1080e556de810",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "683a0757_70ab7e86",
+        "filename": "test/alt_ref_aq_segment_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-23T23:29:46Z",
+      "side": 1,
+      "message": "I\u0027m not sure AQ mode 3 actually gets used in the proposed configurations",
+      "range": {
+        "startLine": 112,
+        "startChar": 18,
+        "endLine": 112,
+        "endChar": 39
+      },
+      "revId": "03fa36b8a5cc6f8f0856c9a5dbe1080e556de810",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
