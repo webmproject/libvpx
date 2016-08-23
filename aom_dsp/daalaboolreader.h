@@ -33,10 +33,10 @@ ptrdiff_t aom_daala_reader_tell(const daala_reader *r);
 
 static INLINE int aom_daala_read(daala_reader *r, int prob) {
   if (prob == 128) {
-    return od_ec_dec_bits(&r->ec, 1, "aom_bits");
+    return od_ec_dec_bits(&r->ec, 1);
   } else {
     int p = ((prob << 15) + (256 - prob)) >> 8;
-    return od_ec_decode_bool_q15(&r->ec, p, "aom");
+    return od_ec_decode_bool_q15(&r->ec, p);
   }
 }
 
@@ -60,7 +60,7 @@ static INLINE int daala_read_tree_bits(daala_reader *r,
     int nsymbs;
     int symb;
     nsymbs = tree_to_cdf(tree, probs, i, cdf, index, path, dist);
-    symb = od_ec_decode_cdf_q15(&r->ec, cdf, nsymbs, "aom");
+    symb = od_ec_decode_cdf_q15(&r->ec, cdf, nsymbs);
     OD_ASSERT(symb >= 0 && symb < nsymbs);
     i = index[symb];
   } while (i > 0);
@@ -69,7 +69,7 @@ static INLINE int daala_read_tree_bits(daala_reader *r,
 
 static INLINE int daala_read_symbol(daala_reader *r, const aom_cdf_prob *cdf,
                                     int nsymbs) {
-  return od_ec_decode_cdf_q15(&r->ec, cdf, nsymbs, "aom");
+  return od_ec_decode_cdf_q15(&r->ec, cdf, nsymbs);
 }
 
 #ifdef __cplusplus
