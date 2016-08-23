@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "68bbe7d1_1f944b91",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2581,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-23T00:02:13Z",
+      "side": 1,
+      "message": "We will only check if BWDREF is the same as ALTREF in get_ref_frame_flags(). Therefore, whenever they are identical, BWDREF will be disabled.",
+      "parentUuid": "68bbe7d1_7f3627fd",
+      "revId": "b03de87ad102ccb69121f18d5ecbf0b5b40ad772",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "68bbe7d1_3f13cf6a",
         "filename": "vp10/encoder/firstpass.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-08-22T23:47:18Z",
       "side": 1,
       "message": "uses -\u003e use",
+      "revId": "b03de87ad102ccb69121f18d5ecbf0b5b40ad772",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "68bbe7d1_3f990fca",
+        "filename": "vp10/encoder/firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2633,
+      "author": {
+        "id": 1157749
+      },
+      "writtenOn": "2016-08-23T00:02:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "68bbe7d1_3f13cf6a",
       "revId": "b03de87ad102ccb69121f18d5ecbf0b5b40ad772",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
