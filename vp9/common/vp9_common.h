@@ -56,12 +56,12 @@ static INLINE int get_unsigned_bits(unsigned int num_values) {
                          __LINE__);                                         \
   } while (0)
 #else
-#define CHECK_MEM_ERROR(cm, lval, expr)                   \
-  do {                                                    \
-    lval = (expr);                                        \
-    if (!lval)                                            \
-      vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR, \
-                         "Failed to allocate " #lval);    \
+#define CHECK_MEM_ERROR(cm, lval, expr)                     \
+  do {                                                      \
+    lval = (expr);                                          \
+    if (!lval)                                              \
+      vpx_internal_error(&(cm)->error, VPX_CODEC_MEM_ERROR, \
+                         "Failed to allocate " #lval);      \
   } while (0)
 #endif
 
