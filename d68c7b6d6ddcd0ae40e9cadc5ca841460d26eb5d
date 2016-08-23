@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "683a0757_95ff14fe",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1719,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-23T22:03:38Z",
+      "side": 1,
+      "message": "Good observation Alex! I didn\u0027t notice that because this function was still checking for \"cpi-\u003ecommon.allow_screen_content_tools\" condition at #1746 (on the left).\n\nSending you a patch with an assert() instead of if():\nhttps://chromium-review.googlesource.com/374486\n\nThanks!",
+      "parentUuid": "683a0757_55950cd5",
+      "range": {
+        "startLine": 1719,
+        "startChar": 11,
+        "endLine": 1719,
+        "endChar": 36
+      },
+      "revId": "d68c7b6d6ddcd0ae40e9cadc5ca841460d26eb5d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "683a0757_f5546033",
         "filename": "vp10/encoder/rdopt.c",
         "patchSetId": 3
