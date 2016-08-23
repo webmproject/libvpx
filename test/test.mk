@@ -35,7 +35,6 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += keyframe_test.cc
 
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += byte_alignment_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += external_frame_buffer_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += invalid_file_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += user_priv_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += vp9_frame_parallel_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += active_map_refresh_test.cc
@@ -86,6 +85,11 @@ endif
 # encode perf tests are vp9 only
 ifeq ($(CONFIG_ENCODE_PERF_TESTS)$(CONFIG_VP9_ENCODER), yesyes)
 LIBVPX_TEST_SRCS-yes += encode_perf_test.cc
+endif
+
+## Multi-codec blackbox tests.
+ifeq ($(findstring yes,$(CONFIG_VP8_DECODER)$(CONFIG_VP9_DECODER)), yes)
+LIBVPX_TEST_SRCS-yes += invalid_file_test.cc
 endif
 
 ##
