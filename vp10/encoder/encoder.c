@@ -3162,14 +3162,14 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
     // We need to modify the mapping accordingly
     cpi->arf_map[0] = cpi->alt_fb_idx;
 #endif
-    // TODO(zoeliu): Do we need to copy cpi->interp_filter_selected[0] over to
-    // cpi->interp_filter_selected[GOLDEN_FRAME]?
+// TODO(zoeliu): Do we need to copy cpi->interp_filter_selected[0] over to
+// cpi->interp_filter_selected[GOLDEN_FRAME]?
 #if CONFIG_EXT_REFS
   } else if (cpi->rc.is_last_bipred_frame) {
     // Refresh the LAST_FRAME with the BWDREF_FRAME and retire the LAST3_FRAME
     // by updating the virtual indices. Note that the frame BWDREF_FRAME points
     // to now should be retired, and it should not be used before refreshed.
-    int tmp = cpi->lst_fb_idxes[LAST_REF_FRAMES-1];
+    int tmp = cpi->lst_fb_idxes[LAST_REF_FRAMES - 1];
 
     shift_last_ref_frames(cpi);
 
@@ -3180,7 +3180,7 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
              sizeof(cpi->interp_filter_selected[BWDREF_FRAME]));
     }
     cpi->bwd_fb_idx = tmp;
-#endif     // CONFIG_EXT_REFS
+#endif  // CONFIG_EXT_REFS
 #if CONFIG_EXT_REFS
   } else if (cpi->rc.is_src_frame_ext_arf && cm->show_existing_frame) {
     // Deal with the special case for showing existing internal ALTREF_FRAME
@@ -3188,7 +3188,7 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
     // by updating the virtual indices.
     const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
     int which_arf = gf_group->arf_ref_idx[gf_group->index];
-    int tmp = cpi->lst_fb_idxes[LAST_REF_FRAMES-1];
+    int tmp = cpi->lst_fb_idxes[LAST_REF_FRAMES - 1];
 
     shift_last_ref_frames(cpi);
 
@@ -3200,7 +3200,7 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
     cpi->alt_fb_idx = tmp;
     // We need to modify the mapping accordingly
     cpi->arf_map[which_arf] = cpi->alt_fb_idx;
-#endif  // CONFIG_EXT_REFS
+#endif     // CONFIG_EXT_REFS
   } else { /* For non key/golden frames */
     if (cpi->refresh_alt_ref_frame) {
       int arf_idx = cpi->alt_fb_idx;
@@ -3334,7 +3334,7 @@ void vp10_update_reference_frames(VP10_COMP *cpi) {
             &cpi->upsampled_ref_idx[cpi->lst_fb_idxes[LAST_REF_FRAMES - 1]],
             new_uidx);
 
-      tmp = cpi->lst_fb_idxes[LAST_REF_FRAMES-1];
+      tmp = cpi->lst_fb_idxes[LAST_REF_FRAMES - 1];
 
       shift_last_ref_frames(cpi);
 
@@ -4334,7 +4334,7 @@ static int get_ref_frame_flags(const VP10_COMP *cpi) {
 #if CONFIG_EXT_REFS
   // Disable the use of BWDREF_FRAME for non-bipredictive frames.
   if (!(cpi->rc.is_bipred_frame || cpi->rc.is_last_bipred_frame ||
-      (cpi->rc.is_bwd_ref_frame && cpi->num_extra_arfs)))
+        (cpi->rc.is_bwd_ref_frame && cpi->num_extra_arfs)))
     flags &= ~VPX_BWD_FLAG;
 #endif  // CONFIG_EXT_REFS
 
@@ -4415,7 +4415,7 @@ static void set_arf_sign_bias(VP10_COMP *cpi) {
   // The arf_sign_bias will be one for internal ARFs'
   arf_sign_bias = cpi->rc.source_alt_ref_active &&
                   (!cpi->refresh_alt_ref_frame ||
-                  (gf_group->rf_level[gf_group->index] == GF_ARF_LOW));
+                   (gf_group->rf_level[gf_group->index] == GF_ARF_LOW));
 #else
   if ((cpi->oxcf.pass == 2) && cpi->multi_arf_allowed) {
     const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
@@ -4458,8 +4458,8 @@ static int setup_interp_filter_search_mask(VP10_COMP *cpi) {
     ref_total[ref] += cpi->interp_filter_selected[arf_idx][ifilter];
 #else
   for (ref = LAST_FRAME; ref <= ALTREF_FRAME; ++ref)
-      for (ifilter = EIGHTTAP_REGULAR; ifilter < SWITCHABLE_FILTERS; ++ifilter)
-        ref_total[ref] += cpi->interp_filter_selected[ref][ifilter];
+    for (ifilter = EIGHTTAP_REGULAR; ifilter < SWITCHABLE_FILTERS; ++ifilter)
+      ref_total[ref] += cpi->interp_filter_selected[ref][ifilter];
 #endif
 
   for (ifilter = EIGHTTAP_REGULAR; ifilter < SWITCHABLE_FILTERS; ++ifilter) {
@@ -4483,7 +4483,7 @@ static int setup_interp_filter_search_mask(VP10_COMP *cpi) {
 #endif  // CONFIG_EXT_REFS
         (ref_total[ALTREF_FRAME] == 0 ||
          cpi->interp_filter_selected[arf_idx][ifilter] * 50 <
-         ref_total[ALTREF_FRAME]))
+             ref_total[ALTREF_FRAME]))
       mask |= 1 << ifilter;
   }
   return mask;
@@ -5049,9 +5049,9 @@ static void check_src_altref(VP10_COMP *cpi,
     const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
     rc->is_src_frame_alt_ref =
 #if CONFIG_EXT_REFS
-      (gf_group->update_type[gf_group->index] == INTNL_OVERLAY_UPDATE) ||
+        (gf_group->update_type[gf_group->index] == INTNL_OVERLAY_UPDATE) ||
 #endif
-      (gf_group->update_type[gf_group->index] == OVERLAY_UPDATE);
+        (gf_group->update_type[gf_group->index] == OVERLAY_UPDATE);
   } else {
     rc->is_src_frame_alt_ref =
         cpi->alt_ref_source && (source == cpi->alt_ref_source);

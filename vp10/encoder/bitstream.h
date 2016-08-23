@@ -24,8 +24,8 @@ void vp10_encode_token_init(void);
 static INLINE int vp10_preserve_existing_gf(VP10_COMP *cpi) {
 #if CONFIG_EXT_REFS
   // Do not swap gf and arf indices for internal overlay frames
-  return !cpi->multi_arf_allowed &&
-         cpi->rc.is_src_frame_alt_ref && !cpi->rc.is_src_frame_ext_arf;
+  return !cpi->multi_arf_allowed && cpi->rc.is_src_frame_alt_ref &&
+         !cpi->rc.is_src_frame_ext_arf;
 #else
   return !cpi->multi_arf_allowed && cpi->refresh_golden_frame &&
          cpi->rc.is_src_frame_alt_ref;

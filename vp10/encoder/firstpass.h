@@ -43,12 +43,12 @@ typedef struct {
 // Length of the bi-predictive frame group (BFG)
 // NOTE: Currently each BFG contains one backward ref (BWF) frame plus a certain
 //       number of bi-predictive frames.
-#define BFG_INTERVAL          2
+#define BFG_INTERVAL 2
 // The maximum number of extra ALT_REF's
 // NOTE: This number cannot be greater than 2 or the reference frame buffer will
 //       overflow.
-#define MAX_EXT_ARFS          2
-#define MIN_EXT_ARF_INTERVAL  4
+#define MAX_EXT_ARFS 2
+#define MIN_EXT_ARF_INTERVAL 4
 #endif  // CONFIG_EXT_REFS
 
 #define VLOW_MOTION_THRESHOLD 950
@@ -185,8 +185,11 @@ void vp10_calculate_coded_size(struct VP10_COMP *cpi, int *scaled_frame_width,
 #if CONFIG_EXT_REFS
 static inline int get_number_of_extra_arfs(int interval, int arf_pending) {
   if (arf_pending && MAX_EXT_ARFS > 0)
-    return interval >= MIN_EXT_ARF_INTERVAL*(MAX_EXT_ARFS+1) ? MAX_EXT_ARFS :
-           interval >= MIN_EXT_ARF_INTERVAL*MAX_EXT_ARFS ? MAX_EXT_ARFS - 1 : 0;
+    return interval >= MIN_EXT_ARF_INTERVAL * (MAX_EXT_ARFS + 1)
+               ? MAX_EXT_ARFS
+               : interval >= MIN_EXT_ARF_INTERVAL * MAX_EXT_ARFS
+                     ? MAX_EXT_ARFS - 1
+                     : 0;
   else
     return 0;
 }
