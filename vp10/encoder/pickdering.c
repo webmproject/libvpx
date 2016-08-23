@@ -64,7 +64,7 @@ int vp10_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
   stride = bsize[0] * cm->mi_cols;
   for (r = 0; r < bsize[0] * cm->mi_rows; ++r) {
     for (c = 0; c < bsize[0] * cm->mi_cols; ++c) {
-#if CONFIG_VPX_HIGHBITDEPTH
+#if CONFIG_VP9_HIGHBITDEPTH
       if (cm->use_highbitdepth) {
         src[r * stride + c] = CONVERT_TO_SHORTPTR(
             xd->plane[0].dst.buf)[r * xd->plane[0].dst.stride + c];
@@ -75,7 +75,7 @@ int vp10_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
         src[r * stride + c] =
             xd->plane[0].dst.buf[r * xd->plane[0].dst.stride + c];
         ref_coeff[r * stride + c] = ref->y_buffer[r * ref->y_stride + c];
-#if CONFIG_VPX_HIGHBITDEPTH
+#if CONFIG_VP9_HIGHBITDEPTH
       }
 #endif
     }
