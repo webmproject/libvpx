@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "683a0757_55950cd5",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1719,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-23T21:43:57Z",
+      "side": 1,
+      "message": "Isn\u0027t this function only called when cpi-\u003ecommon.allow_screen_content_tools is nonzero?",
+      "range": {
+        "startLine": 1719,
+        "startChar": 11,
+        "endLine": 1719,
+        "endChar": 36
+      },
+      "revId": "d68c7b6d6ddcd0ae40e9cadc5ca841460d26eb5d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "683a0757_f5546033",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2743,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-23T21:43:57Z",
+      "side": 1,
+      "message": "callsite 1",
+      "range": {
+        "startLine": 2743,
+        "startChar": 4,
+        "endLine": 2743,
+        "endChar": 29
+      },
+      "revId": "d68c7b6d6ddcd0ae40e9cadc5ca841460d26eb5d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "683a0757_155a245f",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 9283,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-23T21:43:57Z",
+      "side": 1,
+      "message": "callsite 2",
+      "range": {
+        "startLine": 9283,
+        "startChar": 20,
+        "endLine": 9283,
+        "endChar": 45
+      },
+      "revId": "d68c7b6d6ddcd0ae40e9cadc5ca841460d26eb5d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
