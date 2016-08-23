@@ -1651,11 +1651,11 @@ void vp10_fdct8x8_quant_c(const int16_t *input, int stride,
       int64_t tmp = clamp(abs_coeff + round_ptr[rc != 0], INT16_MIN, INT16_MAX);
       int tmp32;
 #if CONFIG_AOM_QM
-      tmp32 = (tmp * quant_ptr[rc != 0] * wt) >> (16 + AOM_QM_BITS);
+      tmp32 = (int)((tmp * quant_ptr[rc != 0] * wt) >> (16 + AOM_QM_BITS));
       qcoeff_ptr[rc] = (tmp32 ^ coeff_sign) - coeff_sign;
       dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant;
 #else
-      tmp32 = (tmp * quant_ptr[rc != 0]) >> 16;
+      tmp32 = (int)((tmp * quant_ptr[rc != 0]) >> 16);
       qcoeff_ptr[rc] = (tmp32 ^ coeff_sign) - coeff_sign;
       dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr[rc != 0];
 #endif

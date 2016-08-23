@@ -791,11 +791,11 @@ void vp10_quantize_fp_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
       int64_t tmp = clamp(abs_coeff + round_ptr[rc != 0], INT16_MIN, INT16_MAX);
       int tmp32;
 #if CONFIG_AOM_QM
-      tmp32 = (tmp * wt * quant_ptr[rc != 0]) >> (16 + AOM_QM_BITS);
+      tmp32 = (int)((tmp * wt * quant_ptr[rc != 0]) >> (16 + AOM_QM_BITS));
       qcoeff_ptr[rc] = (tmp32 ^ coeff_sign) - coeff_sign;
       dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant;
 #else
-      tmp32 = (tmp * quant_ptr[rc != 0]) >> 16;
+      tmp32 = (int)((tmp * quant_ptr[rc != 0]) >> 16);
       qcoeff_ptr[rc] = (tmp32 ^ coeff_sign) - coeff_sign;
       dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr[rc != 0];
 #endif
