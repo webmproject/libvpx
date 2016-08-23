@@ -172,7 +172,6 @@ typedef struct FRAME_COUNTS {
   unsigned int comp_ref[REF_CONTEXTS][COMP_REFS - 1][2];
 #endif  // CONFIG_EXT_REFS
   unsigned int tx_size_totals[TX_SIZES];
-  unsigned int tx_size_implied[TX_SIZES][TX_SIZES];
   unsigned int tx_size[TX_SIZES - 1][TX_SIZE_CONTEXTS][TX_SIZES];
 #if CONFIG_VAR_TX
   unsigned int txfm_partition[TXFM_PARTITION_CONTEXTS][2];
@@ -184,6 +183,9 @@ typedef struct FRAME_COUNTS {
   nmv_context_counts mv;
 #endif
 #if CONFIG_EXT_TX
+#if CONFIG_RECT_TX
+  unsigned int tx_size_implied[TX_SIZES][TX_SIZES];
+#endif  // CONFIG_RECT_TX
   unsigned int inter_ext_tx[EXT_TX_SETS_INTER][EXT_TX_SIZES][TX_TYPES];
   unsigned int
       intra_ext_tx[EXT_TX_SETS_INTRA][EXT_TX_SIZES][INTRA_MODES][TX_TYPES];

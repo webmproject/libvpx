@@ -4279,7 +4279,7 @@ static void reset_skip_tx_size(VP10_COMMON *cm, TX_SIZE max_tx_size) {
 
   for (mi_row = 0; mi_row < cm->mi_rows; ++mi_row, mi_ptr += mis) {
     for (mi_col = 0; mi_col < cm->mi_cols; ++mi_col) {
-      if (mi_ptr[mi_col]->mbmi.tx_size > max_tx_size)
+      if (txsize_sqr_up_map[mi_ptr[mi_col]->mbmi.tx_size] > max_tx_size)
         mi_ptr[mi_col]->mbmi.tx_size = max_tx_size;
     }
   }
@@ -4688,6 +4688,18 @@ void vp10_encode_frame(VP10_COMP *cpi) {
         count16x16_lp += counts->tx_size[2][i][TX_16X16];
         count32x32 += counts->tx_size[2][i][TX_32X32];
       }
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+      count4x4 += counts->tx_size_implied[0][TX_4X4];
+      count4x4 += counts->tx_size_implied[1][TX_4X4];
+      count4x4 += counts->tx_size_implied[2][TX_4X4];
+      count4x4 += counts->tx_size_implied[3][TX_4X4];
+      count8x8_lp += counts->tx_size_implied[2][TX_8X8];
+      count8x8_lp += counts->tx_size_implied[3][TX_8X8];
+      count8x8_8x8p += counts->tx_size_implied[1][TX_8X8];
+      count16x16_lp += counts->tx_size_implied[3][TX_16X16];
+      count16x16_16x16p += counts->tx_size_implied[2][TX_16X16];
+      count32x32 += counts->tx_size_implied[3][TX_32X32];
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
       if (count4x4 == 0 && count16x16_lp == 0 && count16x16_16x16p == 0 &&
 #if CONFIG_SUPERTX
           cm->counts.supertx_size[TX_16X16] == 0 &&
@@ -5031,7 +5043,7 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
       if (is_inter_block(mbmi))
         tx_partition_count_update(cm, xd, bsize, mi_row, mi_col, td->counts);
 #endif
-      ++td->counts->tx_size[tx_size_cat][ctx][mbmi->tx_size];
+      ++td->counts->tx_size[tx_size_cat][ctx][txsize_sqr_up_map[mbmi->tx_size]];
     } else {
       int x, y;
       TX_SIZE tx_size;
@@ -5042,6 +5054,11 @@ static void encode_superblock(VP10_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
         if (txsize_sqr_map[max_txsize_rect_lookup[bsize]] <= tx_size)
           tx_size = max_txsize_rect_lookup[bsize];
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
+        if (xd->lossless[mbmi->segment_id]) tx_size = TX_4X4;
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+        ++td->counts->tx_size_implied[max_txsize_lookup[bsize]]
+                                     [txsize_sqr_up_map[mbmi->tx_size]];
 #endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
       } else {
         tx_size = (bsize >= BLOCK_8X8) ? mbmi->tx_size : TX_4X4;
