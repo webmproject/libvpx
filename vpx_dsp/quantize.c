@@ -40,7 +40,7 @@ void vpx_quantize_dc(const tran_low_t *coeff_ptr, int n_coeffs, int skip_block,
   *eob_ptr = eob + 1;
 }
 
-#if CONFIG_VPX_HIGHBITDEPTH
+#if CONFIG_VP9_HIGHBITDEPTH
 void vpx_highbd_quantize_dc(const tran_low_t *coeff_ptr, int n_coeffs,
                             int skip_block, const int16_t *round_ptr,
                             const int16_t quant, tran_low_t *qcoeff_ptr,
@@ -99,7 +99,7 @@ void vpx_quantize_dc_32x32(const tran_low_t *coeff_ptr, int skip_block,
   *eob_ptr = eob + 1;
 }
 
-#if CONFIG_VPX_HIGHBITDEPTH
+#if CONFIG_VP9_HIGHBITDEPTH
 void vpx_highbd_quantize_dc_32x32(const tran_low_t *coeff_ptr, int skip_block,
                                   const int16_t *round_ptr, const int16_t quant,
                                   tran_low_t *qcoeff_ptr,
@@ -192,7 +192,7 @@ void vpx_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
   *eob_ptr = eob + 1;
 }
 
-#if CONFIG_VPX_HIGHBITDEPTH
+#if CONFIG_VP9_HIGHBITDEPTH
 void vpx_highbd_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                              int skip_block, const int16_t *zbin_ptr,
                              const int16_t *round_ptr, const int16_t *quant_ptr,
@@ -316,7 +316,7 @@ void vpx_quantize_b_32x32_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
   *eob_ptr = eob + 1;
 }
 
-#if CONFIG_VPX_HIGHBITDEPTH
+#if CONFIG_VP9_HIGHBITDEPTH
 void vpx_highbd_quantize_b_32x32_c(
     const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block,
     const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr,
