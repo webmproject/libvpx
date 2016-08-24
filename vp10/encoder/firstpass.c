@@ -526,10 +526,10 @@ void vp10_first_pass(VP10_COMP *cpi, const struct lookahead_entry *source) {
   vp10_frame_init_quantizer(cpi);
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
-    p[i].coeff = ctx->coeff_pbuf[i][1];
-    p[i].qcoeff = ctx->qcoeff_pbuf[i][1];
-    pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][1];
-    p[i].eobs = ctx->eobs_pbuf[i][1];
+    p[i].coeff = ctx->coeff[i][1];
+    p[i].qcoeff = ctx->qcoeff[i][1];
+    pd[i].dqcoeff = ctx->dqcoeff[i][1];
+    p[i].eobs = ctx->eobs[i][1];
   }
 
   vp10_init_mv_probs(cm);

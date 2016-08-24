@@ -1098,17 +1098,17 @@ static void update_state(VP10_COMP *cpi, ThreadData *td, PICK_MODE_CONTEXT *ctx,
 
   max_plane = is_inter_block(mbmi) ? MAX_MB_PLANE : 1;
   for (i = 0; i < max_plane; ++i) {
-    p[i].coeff = ctx->coeff_pbuf[i][1];
-    p[i].qcoeff = ctx->qcoeff_pbuf[i][1];
-    pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][1];
-    p[i].eobs = ctx->eobs_pbuf[i][1];
+    p[i].coeff = ctx->coeff[i][1];
+    p[i].qcoeff = ctx->qcoeff[i][1];
+    pd[i].dqcoeff = ctx->dqcoeff[i][1];
+    p[i].eobs = ctx->eobs[i][1];
   }
 
   for (i = max_plane; i < MAX_MB_PLANE; ++i) {
-    p[i].coeff = ctx->coeff_pbuf[i][2];
-    p[i].qcoeff = ctx->qcoeff_pbuf[i][2];
-    pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][2];
-    p[i].eobs = ctx->eobs_pbuf[i][2];
+    p[i].coeff = ctx->coeff[i][2];
+    p[i].qcoeff = ctx->qcoeff[i][2];
+    pd[i].dqcoeff = ctx->dqcoeff[i][2];
+    p[i].eobs = ctx->eobs[i][2];
   }
 
   for (i = 0; i < 2; ++i) pd[i].color_index_map = ctx->color_index_map[i];
@@ -1475,10 +1475,10 @@ static void update_state_sb_supertx(VP10_COMP *cpi, ThreadData *td,
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     if (pmc != NULL) {
-      p[i].coeff = pmc->coeff_pbuf[i][1];
-      p[i].qcoeff = pmc->qcoeff_pbuf[i][1];
-      pd[i].dqcoeff = pmc->dqcoeff_pbuf[i][1];
-      p[i].eobs = pmc->eobs_pbuf[i][1];
+      p[i].coeff = pmc->coeff[i][1];
+      p[i].qcoeff = pmc->qcoeff[i][1];
+      pd[i].dqcoeff = pmc->dqcoeff[i][1];
+      p[i].eobs = pmc->eobs[i][1];
     } else {
       // These should never be used
       p[i].coeff = NULL;
@@ -1642,10 +1642,10 @@ static void rd_pick_sb_modes(VP10_COMP *cpi, TileDataEnc *tile_data,
 #endif
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
-    p[i].coeff = ctx->coeff_pbuf[i][0];
-    p[i].qcoeff = ctx->qcoeff_pbuf[i][0];
-    pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][0];
-    p[i].eobs = ctx->eobs_pbuf[i][0];
+    p[i].coeff = ctx->coeff[i][0];
+    p[i].qcoeff = ctx->qcoeff[i][0];
+    pd[i].dqcoeff = ctx->dqcoeff[i][0];
+    p[i].eobs = ctx->eobs[i][0];
   }
 
   for (i = 0; i < 2; ++i) pd[i].color_index_map = ctx->color_index_map[i];
