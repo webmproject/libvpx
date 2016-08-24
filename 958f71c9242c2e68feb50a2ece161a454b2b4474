@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c8fa13f2_9f3ef76c",
+        "filename": "vpx_mem/vpx_mem.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-08-24T19:34:57Z",
+      "side": 1,
+      "message": "Note that you this \"-1\" is mistakenly NOT used in realloc() below.\nOn aom side I had fixed this in https://aomedia-review.googlesource.com/#/c/1990/\n\nAlso, to make future merging of libvpx and aomedia repo easier, it might be better to cherry-pick the aomedia side patches (https://aomedia-review.googlesource.com/#/c/1981/ and https://aomedia-review.googlesource.com/#/c/1990/) to libvpx first, and apply this patch on top of it.",
+      "range": {
+        "startLine": 85,
+        "startChar": 31,
+        "endLine": 85,
+        "endChar": 34
+      },
+      "revId": "958f71c9242c2e68feb50a2ece161a454b2b4474",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
