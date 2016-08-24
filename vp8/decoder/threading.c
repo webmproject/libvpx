@@ -609,8 +609,13 @@ void vp8_decoder_create_threads(VP8D_COMP *pbi) {
     CALLOC_ARRAY_ALIGNED(pbi->mb_row_di, pbi->decoding_thread_count, 32);
     CALLOC_ARRAY(pbi->de_thread_data, pbi->decoding_thread_count);
 
+    if (sem_init(&pbi->h_event_end_decoding, 0, 0)) {
+      vpx_internal_error(&pbi->common.error, VPX_CODEC_MEM_ERROR,
+                         "Failed to initialize semaphore");
+    }
+
     for (ithread = 0; ithread < pbi->decoding_thread_count; ++ithread) {
-      sem_init(&pbi->h_event_start_decoding[ithread], 0, 0);
+      if (sem_init(&pbi->h_event_start_decoding[ithread], 0, 0)) break;
 
       vp8_setup_block_dptrs(&pbi->mb_row_di[ithread].mbd);
 
@@ -618,13 +623,23 @@ void vp8_decoder_create_threads(VP8D_COMP *pbi) {
       pbi->de_thread_data[ithread].ptr1 = (void *)pbi;
       pbi->de_thread_data[ithread].ptr2 = (void *)&pbi->mb_row_di[ithread];
 
-      pthread_create(&pbi->h_decoding_thread[ithread], 0, thread_decoding_proc,
-                     (&pbi->de_thread_data[ithread]));
+      if (pthread_create(&pbi->h_decoding_thread[ithread], 0,
+                         thread_decoding_proc, &pbi->de_thread_data[ithread])) {
+        sem_destroy(&pbi->h_event_start_decoding[ithread]);
+        break;
+      }
     }
 
-    sem_init(&pbi->h_event_end_decoding, 0, 0);
-
-    pbi->allocated_decoding_thread_count = pbi->decoding_thread_count;
+    pbi->allocated_decoding_thread_count = ithread;
+    if (pbi->allocated_decoding_thread_count != pbi->decoding_thread_count) {
+      /* the remainder of cleanup cases will be handled in
+       * vp8_decoder_remove_threads(). */
+      if (pbi->allocated_decoding_thread_count == 0) {
+        sem_destroy(&pbi->h_event_end_decoding);
+      }
+      vpx_internal_error(&pbi->common.error, VPX_CODEC_MEM_ERROR,
+                         "Failed to create threads");
+    }
   }
 }
 
@@ -770,7 +785,9 @@ void vp8_decoder_remove_threads(VP8D_COMP *pbi) {
       sem_destroy(&pbi->h_event_start_decoding[i]);
     }
 
-    sem_destroy(&pbi->h_event_end_decoding);
+    if (pbi->allocated_decoding_thread_count) {
+      sem_destroy(&pbi->h_event_end_decoding);
+    }
 
     vpx_free(pbi->h_decoding_thread);
     pbi->h_decoding_thread = NULL;
