@@ -256,6 +256,36 @@ TEST_P(DatarateTestLarge, ChangingDropFrameThresh) {
   }
 }
 
+// Disabled for tsan, see:
+// https://bugs.chromium.org/p/webm/issues/detail?id=1049
+#if defined(__has_feature)
+#if __has_feature(thread_sanitizer)
+#define BUILDING_WITH_TSAN
+#endif
+#endif
+#ifndef BUILDING_WITH_TSAN
+TEST_P(DatarateTestLarge, DropFramesMultiThreads) {
+  denoiser_on_ = 0;
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_dropframe_thresh = 30;
+  cfg_.rc_max_quantizer = 56;
+  cfg_.rc_end_usage = VPX_CBR;
+  // Encode using multiple threads.
+  cfg_.g_threads = 2;
+
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 140);
+  cfg_.rc_target_bitrate = 200;
+  ResetModel();
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_GE(cfg_.rc_target_bitrate, effective_datarate_ * 0.95)
+      << " The datarate for the file exceeds the target!";
+
+  ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.3)
+      << " The datarate for the file missed the target!";
+}
+#endif
+
 class DatarateTestVP9Large
     : public ::libvpx_test::EncoderTest,
       public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
@@ -518,6 +548,30 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting) {
     ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.15)
         << " The datarate for the file is greater than target by too much!";
   }
+}
+
+// Check basic rate targeting for CBR mode, with 2 threads and dropped frames.
+TEST_P(DatarateTestVP9Large, BasicRateTargetingDropFramesMultiThreads) {
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_dropframe_thresh = 30;
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 63;
+  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.g_lag_in_frames = 0;
+  // Encode using multiple threads.
+  cfg_.g_threads = 2;
+
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 140);
+  cfg_.rc_target_bitrate = 200;
+  ResetModel();
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.85)
+      << " The datarate for the file is lower than target by too much!";
+  ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.15)
+      << " The datarate for the file is greater than target by too much!";
 }
 
 // Check basic rate targeting for CBR.
