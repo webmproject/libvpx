@@ -342,7 +342,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
     }
 
     res = vp8_create_decoder_instances(&ctx->yv12_frame_buffers, &oxcf);
-    ctx->decoder_init = 1;
+    if (res == VPX_CODEC_OK) ctx->decoder_init = 1;
   }
 
   /* Set these even if already initialized.  The caller may have changed the

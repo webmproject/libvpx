@@ -444,10 +444,17 @@ int vp8_create_decoder_instances(struct frame_buffers *fb, VP8D_CONFIG *oxcf) {
     if (!fb->pbi[0]) return VPX_CODEC_ERROR;
 
 #if CONFIG_MULTITHREAD
-    /* enable row-based threading only when use_frame_threads
-     * is disabled */
+    if (setjmp(fb->pbi[0]->common.error.jmp)) {
+      vp8_remove_decoder_instances(fb);
+      memset(fb->pbi, 0, sizeof(fb->pbi) / sizeof(fb->pbi[0]));
+      vp8_clear_system_state();
+      return VPX_CODEC_ERROR;
+    }
+
+    fb->pbi[0]->common.error.setjmp = 1;
     fb->pbi[0]->max_threads = oxcf->max_threads;
     vp8_decoder_create_threads(fb->pbi[0]);
+    fb->pbi[0]->common.error.setjmp = 0;
 #endif
   } else {
     /* TODO : create frame threads and decoder instances for each
