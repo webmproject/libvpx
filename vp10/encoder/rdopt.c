@@ -9029,6 +9029,9 @@ void vp10_rd_pick_inter_mode_sb(VP10_COMP *cpi, TileDataEnc *tile_data,
     // to the rolling cost variable.
     if (comp_pred) {
       rate2 += ref_costs_comp[ref_frame];
+#if CONFIG_EXT_REFS
+      rate2 += ref_costs_comp[second_ref_frame];
+#endif  // CONFIG_EXT_REFS
     } else {
       rate2 += ref_costs_single[ref_frame];
     }
@@ -10382,6 +10385,9 @@ void vp10_rd_pick_inter_mode_sub8x8(struct VP10_COMP *cpi,
     // to the rolling cost variable.
     if (second_ref_frame > INTRA_FRAME) {
       rate2 += ref_costs_comp[ref_frame];
+#if CONFIG_EXT_REFS
+      rate2 += ref_costs_comp[second_ref_frame];
+#endif  // CONFIG_EXT_REFS
     } else {
       rate2 += ref_costs_single[ref_frame];
     }
