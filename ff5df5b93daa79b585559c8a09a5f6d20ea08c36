@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0877cb47_ae02f763",
+        "filename": "test/alt_ref_aq_segment_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-24T01:13:03Z",
+      "side": 1,
+      "message": "I mentioned these comments in the body last time, maybe it got lost...\nuse VPX_VBR for these",
+      "range": {
+        "startLine": 54,
+        "startChar": 22,
+        "endLine": 54,
+        "endChar": 29
+      },
+      "revId": "ff5df5b93daa79b585559c8a09a5f6d20ea08c36",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0877cb47_4e1833d3",
+        "filename": "test/alt_ref_aq_segment_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-24T01:13:03Z",
+      "side": 1,
+      "message": "Do kOnePassGood and kTwoPassGood here",
+      "range": {
+        "startLine": 154,
+        "startChar": 44,
+        "endLine": 155,
+        "endChar": 71
+      },
+      "revId": "ff5df5b93daa79b585559c8a09a5f6d20ea08c36",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0877cb47_6e15ef97",
+        "filename": "test/alt_ref_aq_segment_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-24T01:13:03Z",
+      "side": 1,
+      "message": "Try Range(2, 5)",
+      "range": {
+        "startLine": 156,
+        "startChar": 43,
+        "endLine": 156,
+        "endChar": 47
+      },
+      "revId": "ff5df5b93daa79b585559c8a09a5f6d20ea08c36",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
