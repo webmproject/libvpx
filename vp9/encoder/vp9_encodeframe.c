@@ -701,8 +701,7 @@ static int skin_sb_split(VP9_COMP *cpi, MACROBLOCK *x, const int low_res,
 #endif
 
 static void set_low_temp_var_flag(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
-                                  v64x64 *vt, int force_split[],
-                                  int64_t thresholds[],
+                                  v64x64 *vt, int64_t thresholds[],
                                   MV_REFERENCE_FRAME ref_frame_partition,
                                   int mi_col, int mi_row) {
   int i, j;
@@ -718,9 +717,9 @@ static void set_low_temp_var_flag(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
         xd->mi[0]->mv[0].as_mv.col > -mv_thr &&
         xd->mi[0]->mv[0].as_mv.row < mv_thr &&
         xd->mi[0]->mv[0].as_mv.row > -mv_thr))) {
-    if (xd->mi[0]->sb_type == BLOCK_64X64 &&
-        (vt->part_variances).none.variance < (thresholds[0] >> 1)) {
-      x->variance_low[0] = 1;
+    if (xd->mi[0]->sb_type == BLOCK_64X64) {
+      if ((vt->part_variances).none.variance < (thresholds[0] >> 1))
+        x->variance_low[0] = 1;
     } else if (xd->mi[0]->sb_type == BLOCK_64X32) {
       for (i = 0; i < 2; i++) {
         if (vt->part_variances.horz[i].variance < (thresholds[0] >> 2))
@@ -733,14 +732,19 @@ static void set_low_temp_var_flag(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
       }
     } else {
       for (i = 0; i < 4; i++) {
-        if (!force_split[i + 1]) {
-          // 32x32
+        const int idx[4][2] = { { 0, 0 }, { 0, 4 }, { 4, 0 }, { 4, 4 } };
+        const int idx_str =
+            cm->mi_stride * (mi_row + idx[i][0]) + mi_col + idx[i][1];
+        MODE_INFO **this_mi = cm->mi_grid_visible + idx_str;
+
+        if (cm->mi_cols <= mi_col + idx[i][1] ||
+            cm->mi_rows <= mi_row + idx[i][0])
+          continue;
+
+        if ((*this_mi)->sb_type == BLOCK_32X32) {
           if (vt->split[i].part_variances.none.variance < (thresholds[1] >> 1))
             x->variance_low[i + 5] = 1;
         } else if (cpi->sf.short_circuit_low_temp_var == 2) {
-          int idx[4] = { 0, 4, xd->mi_stride << 2, (xd->mi_stride << 2) + 4 };
-          const int idx_str = cm->mi_stride * mi_row + mi_col + idx[i];
-          MODE_INFO **this_mi = cm->mi_grid_visible + idx_str;
           // For 32x16 and 16x32 blocks, the flag is set on each 16x16 block
           // inside.
           if ((*this_mi)->sb_type == BLOCK_16X16 ||
@@ -1096,8 +1100,8 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   }
 
   if (cpi->sf.short_circuit_low_temp_var) {
-    set_low_temp_var_flag(cpi, x, xd, &vt, force_split, thresholds,
-                          ref_frame_partition, mi_col, mi_row);
+    set_low_temp_var_flag(cpi, x, xd, &vt, thresholds, ref_frame_partition,
+                          mi_col, mi_row);
   }
 
   chroma_check(cpi, x, bsize, y_sad, is_key_frame);
