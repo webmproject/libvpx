@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8af9fab_7eda4d75",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1461,
+      "author": {
+        "id": 1138583
+      },
+      "writtenOn": "2016-08-24T14:17:28Z",
+      "side": 1,
+      "message": "Should this use continue instead of break?\n\nI am not sure I really understand what is going on here, but at first sight it looks like this break will stop us ever testing non-rectangular transforms?",
+      "revId": "f30e66d4573df3b41f3dfdba05849ff931d84d09",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
