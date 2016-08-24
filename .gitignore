@@ -29,6 +29,7 @@
 /examples/decode_with_drops
 /examples/decode_with_partial_drops
 /examples/example_xma
+/examples/lossless_encoder
 /examples/postproc
 /examples/resize_util
 /examples/set_maps
@@ -36,8 +37,7 @@
 /examples/simple_encoder
 /examples/twopass_encoder
 /examples/vp8_multi_resolution_encoder
-/examples/vp8cx_set_ref
-/examples/vp9_lossless_encoder
+/examples/vp[8x]cx_set_ref
 /examples/vp9_spatial_scalable_encoder
 /examples/vpx_temporal_scalable_patterns
 /examples/vpx_temporal_svc_encoder
@@ -52,6 +52,7 @@
 /test_libvpx
 /vp8_api1_migration.dox
 /vp[89x]_rtcd.h
+/vp10_rtcd.h
 /vpx.pc
 /vpx_config.c
 /vpx_config.h
