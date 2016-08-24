@@ -229,7 +229,7 @@ INTRA_PRED_TEST(SSSE3, TestIntraPred8, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 #if HAVE_DSPR2
 INTRA_PRED_TEST(DSPR2, TestIntraPred8, vpx_dc_predictor_8x8_dspr2, NULL, NULL,
                 NULL, NULL, vpx_h_predictor_8x8_dspr2, NULL, NULL, NULL, NULL,
-                NULL, NULL, vpx_tm_predictor_8x8_c)
+                NULL, NULL, vpx_tm_predictor_8x8_dspr2)
 #endif  // HAVE_DSPR2
 
 #if HAVE_NEON
