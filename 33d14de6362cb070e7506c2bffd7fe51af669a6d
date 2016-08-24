@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c8fa13f2_7c769969",
+        "filename": "vp10/encoder/encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-08-24T18:10:58Z",
+      "side": 1,
+      "message": "Maybe we should have a better way to check on whether an ALTREF is an ext-arf or is a distant altref, instead of using the rf_level as the checking criteria. But that is certainly not for this patch.",
+      "revId": "33d14de6362cb070e7506c2bffd7fe51af669a6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
