@@ -401,6 +401,9 @@ static const arg_def_t aq_mode = ARG_DEF(
     NULL, "aq-mode", 1,
     "Adaptive quantization mode (0: off (default), 1: variance 2: complexity, "
     "3: cyclic refresh, 4: equator360)");
+static const arg_def_t alt_ref_aq = ARG_DEF(NULL, "alt-ref-aq", 1,
+                                            "Special adaptive quantization for "
+                                            "the alternate reference frames.");
 static const arg_def_t frame_periodic_boost =
     ARG_DEF(NULL, "frame-boost", 1,
             "Enable frame periodic boost (0: off (default), 1: on)");
@@ -477,6 +480,7 @@ static const arg_def_t *vp9_args[] = { &cpu_used_vp9,
                                        &lossless,
                                        &frame_parallel_decoding,
                                        &aq_mode,
+                                       &alt_ref_aq,
                                        &frame_periodic_boost,
                                        &noise_sens,
                                        &tune_content,
@@ -506,6 +510,7 @@ static const int vp9_arg_ctrl_map[] = { VP8E_SET_CPUUSED,
                                         VP9E_SET_LOSSLESS,
                                         VP9E_SET_FRAME_PARALLEL_DECODING,
                                         VP9E_SET_AQ_MODE,
+                                        VP9E_SET_ALT_REF_AQ,
                                         VP9E_SET_FRAME_PERIODIC_BOOST,
                                         VP9E_SET_NOISE_SENSITIVITY,
                                         VP9E_SET_TUNE_CONTENT,
