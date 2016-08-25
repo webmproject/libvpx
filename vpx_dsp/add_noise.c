@@ -43,7 +43,7 @@ static double gaussian(double sigma, double mu, double x) {
 }
 
 int vpx_setup_noise(double sigma, int8_t *noise, int size) {
-  char char_dist[256];
+  int8_t char_dist[256];
   int next = 0, i, j;
 
   // set up a 256 entry lookup that matches gaussian distribution
@@ -51,7 +51,7 @@ int vpx_setup_noise(double sigma, int8_t *noise, int size) {
     const int a_i = (int)(0.5 + 256 * gaussian(sigma, 0, i));
     if (a_i) {
       for (j = 0; j < a_i; ++j) {
-        char_dist[next + j] = (char)i;
+        char_dist[next + j] = (int8_t)i;
       }
       next = next + j;
     }
