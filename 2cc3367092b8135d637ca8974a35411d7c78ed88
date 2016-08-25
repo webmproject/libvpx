@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "05c7b62d_b1cada17",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-25T18:05:54Z",
+      "side": 1,
+      "message": "Grouped in a separate patch 3.",
+      "parentUuid": "e5f9c23d_60ec6c1f",
+      "revId": "2cc3367092b8135d637ca8974a35411d7c78ed88",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e5f9c23d_005488cd",
         "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "05c7b62d_71b55291",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-25T18:05:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e5f9c23d_005488cd",
+      "revId": "2cc3367092b8135d637ca8974a35411d7c78ed88",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e5f9c23d_00db6877",
         "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2016-08-25T06:03:44Z",
       "side": 1,
       "message": "you might be able to add some store_NxM inlines to compact some of the shared code",
+      "revId": "2cc3367092b8135d637ca8974a35411d7c78ed88",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05c7b62d_d1c3e607",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-25T18:05:54Z",
+      "side": 1,
+      "message": "Created store_result() and store_result_16_samples().",
+      "parentUuid": "e5f9c23d_00db6877",
       "revId": "2cc3367092b8135d637ca8974a35411d7c78ed88",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
