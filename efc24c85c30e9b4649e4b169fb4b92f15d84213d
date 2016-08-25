@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c54afe97_624f923e",
+        "filename": "vp9/encoder/vp9_alt_ref_aq.c",
+        "patchSetId": 38
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-25T22:33:24Z",
+      "side": 1,
+      "message": "Don\u0027t add a line here",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 0
+      },
+      "revId": "efc24c85c30e9b4649e4b169fb4b92f15d84213d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c54afe97_42e7f63d",
+        "filename": "vp9/encoder/vp9_alt_ref_aq.c",
+        "patchSetId": 38
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-25T22:33:24Z",
+      "side": 1,
+      "message": "These can be combined",
+      "range": {
+        "startLine": 217,
+        "startChar": 27,
+        "endLine": 219,
+        "endChar": 62
+      },
+      "revId": "efc24c85c30e9b4649e4b169fb4b92f15d84213d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c54afe97_e25a82f6",
+        "filename": "vp9/encoder/vp9_alt_ref_aq.c",
+        "patchSetId": 38
+      },
+      "lineNbr": 413,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-25T22:33:24Z",
+      "side": 1,
+      "message": "Is it necessary to have two variables here?",
+      "range": {
+        "startLine": 412,
+        "startChar": 0,
+        "endLine": 413,
+        "endChar": 26
+      },
+      "revId": "efc24c85c30e9b4649e4b169fb4b92f15d84213d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c54afe97_c2dae671",
+        "filename": "vp9/encoder/vp9_alt_ref_aq.c",
+        "patchSetId": 38
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-25T22:33:24Z",
+      "side": 1,
+      "message": "This looks misleading, put the loop body in braces or add a blank line",
+      "range": {
+        "startLine": 416,
+        "startChar": 0,
+        "endLine": 417,
+        "endChar": 57
+      },
+      "revId": "efc24c85c30e9b4649e4b169fb4b92f15d84213d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c54afe97_c2f786be",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 38
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-25T22:33:24Z",
+      "side": 1,
+      "message": "This is from upresing the map, right? Are you just leaving the other 3/4s blank?",
+      "range": {
+        "startLine": 409,
+        "startChar": 26,
+        "endLine": 409,
+        "endChar": 65
+      },
+      "revId": "efc24c85c30e9b4649e4b169fb4b92f15d84213d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
