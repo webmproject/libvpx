@@ -2602,7 +2602,7 @@ static void encode_clpf(const AV1_COMMON *cm, struct aom_write_bit_buffer *wb) {
       // 50% probability, so a more efficient coding is possible.
       aom_wb_write_literal(wb, cm->clpf_numblocks, av1_clpf_maxbits(cm));
       for (i = 0; i < cm->clpf_numblocks; i++) {
-        aom_wb_write_literal(wb, cm->clpf_blocks[i], 1);
+        aom_wb_write_literal(wb, cm->clpf_blocks ? cm->clpf_blocks[i] : 0, 1);
       }
     }
   }
