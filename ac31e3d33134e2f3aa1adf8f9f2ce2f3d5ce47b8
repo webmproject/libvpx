@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c54afe97_dfdd9f08",
+        "filename": "vp10/common/warped_motion.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-08-25T21:08:27Z",
+      "side": 1,
+      "message": "Maybe keep a consistent naming style, either get_project_points_type, or GetProjectPointsType.\n(See \"Function Name\" in https://engdoc.corp.google.com/eng/doc/devguide/cpp/styleguide.shtml?cl\u003dhead#General_Naming_Rules)",
+      "revId": "ac31e3d33134e2f3aa1adf8f9f2ce2f3d5ce47b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c54afe97_dfc47f40",
+        "filename": "vp10/encoder/global_motion.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-08-25T21:08:27Z",
+      "side": 1,
+      "message": "Maybe keep a consistent naming style, either get_ransac_type, or GetRansacType.\n(See \"Function Name\" in https://engdoc.corp.google.com/eng/doc/devguide/cpp/styleguide.shtml?cl\u003dhead#General_Naming_Rules)",
+      "revId": "ac31e3d33134e2f3aa1adf8f9f2ce2f3d5ce47b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05c7b62d_548284b2",
+        "filename": "vp10/encoder/global_motion.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-08-25T21:08:27Z",
+      "side": 1,
+      "message": "Is it possible to use memcpy()? Also, is it necessary to make a copy, since things in matched_points will just be copied to corner1 and corner2 in ransac_()",
+      "revId": "ac31e3d33134e2f3aa1adf8f9f2ce2f3d5ce47b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c54afe97_9c18457a",
+        "filename": "vp10/encoder/global_motion.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-08-25T21:08:27Z",
+      "side": 1,
+      "message": "Is it necessary? inlier_map will be freed right after this function is called in computer_global_motion_feature_based()",
+      "revId": "ac31e3d33134e2f3aa1adf8f9f2ce2f3d5ce47b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c54afe97_7ce1f925",
+        "filename": "vp10/encoder/ransac.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-08-25T21:08:27Z",
+      "side": 1,
+      "message": "Remove unused code",
+      "revId": "ac31e3d33134e2f3aa1adf8f9f2ce2f3d5ce47b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
