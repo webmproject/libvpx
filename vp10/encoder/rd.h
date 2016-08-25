@@ -30,10 +30,10 @@ extern "C" {
 #define RD_EPB_SHIFT 6
 
 #define RDCOST(RM, DM, R, D) \
-  (ROUND_POWER_OF_TWO(((int64_t)R) * (RM), VP9_PROB_COST_SHIFT) + (D << DM))
+  (ROUND_POWER_OF_TWO(((int64_t)R) * (RM), VP10_PROB_COST_SHIFT) + (D << DM))
 
-#define RDCOST_DBL(RM, DM, R, D)                                   \
-  (((((double)(R)) * (RM)) / (double)(1 << VP9_PROB_COST_SHIFT)) + \
+#define RDCOST_DBL(RM, DM, R, D)                                    \
+  (((((double)(R)) * (RM)) / (double)(1 << VP10_PROB_COST_SHIFT)) + \
    ((double)(D) * (1 << (DM))))
 
 #define QIDX_SKIP_THRESH 115

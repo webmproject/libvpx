@@ -15,7 +15,7 @@
 #endif  // CONFIG_ANS
 #include "vp10/common/entropy.h"
 
-/* round(-log2(i/256.) * (1 << VP9_PROB_COST_SHIFT))
+/* round(-log2(i/256.) * (1 << VP10_PROB_COST_SHIFT))
    Begins with a bogus entry for simpler addressing. */
 const uint16_t vp10_prob_cost[256] = {
   4096, 4096, 3584, 3284, 3072, 2907, 2772, 2659, 2560, 2473, 2395, 2325, 2260,
@@ -41,7 +41,7 @@ const uint16_t vp10_prob_cost[256] = {
 };
 
 #if CONFIG_ANS
-// round(-log2(i/1024.) * (1 << VP9_PROB_COST_SHIFT))
+// round(-log2(i/1024.) * (1 << VP10_PROB_COST_SHIFT))
 static const uint16_t vp10_prob_cost10[1024] = {
   5120, 5120, 4608, 4308, 4096, 3931, 3796, 3683, 3584, 3497, 3419, 3349, 3284,
   3225, 3171, 3120, 3072, 3027, 2985, 2945, 2907, 2871, 2837, 2804, 2772, 2742,

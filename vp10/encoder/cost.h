@@ -24,7 +24,7 @@ extern "C" {
 extern const uint16_t vp10_prob_cost[256];
 
 // The factor to scale from cost in bits to cost in vp10_prob_cost units.
-#define VP9_PROB_COST_SHIFT 9
+#define VP10_PROB_COST_SHIFT 9
 
 #define vp10_cost_zero(prob) (vp10_prob_cost[prob])
 
@@ -34,7 +34,7 @@ extern const uint16_t vp10_prob_cost[256];
 
 // Cost of coding an n bit literal, using 128 (i.e. 50%) probability
 // for each bit.
-#define vp10_cost_literal(n) ((n) * (1 << VP9_PROB_COST_SHIFT))
+#define vp10_cost_literal(n) ((n) * (1 << VP10_PROB_COST_SHIFT))
 
 static INLINE unsigned int cost_branch256(const unsigned int ct[2],
                                           vpx_prob p) {

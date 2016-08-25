@@ -73,8 +73,8 @@ static int search_bilateral_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
   rsi.restoration_type = RESTORE_NONE;
   err = try_restoration_frame(sd, cpi, &rsi, partial_frame);
   bits = 0;
-  best_cost =
-      RDCOST_DBL(x->rdmult, x->rddiv, (bits << (VP9_PROB_COST_SHIFT - 4)), err);
+  best_cost = RDCOST_DBL(x->rdmult, x->rddiv,
+                         (bits << (VP10_PROB_COST_SHIFT - 4)), err);
   for (i = 0; i < restoration_levels; ++i) {
     rsi.restoration_type = RESTORE_BILATERAL;
     rsi.restoration_level = i;
@@ -83,7 +83,7 @@ static int search_bilateral_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
     // when RDCOST is used.  However below we just scale both in the correct
     // ratios appropriately but not exactly by these values.
     bits = restoration_level_bits;
-    cost = RDCOST_DBL(x->rdmult, x->rddiv, (bits << (VP9_PROB_COST_SHIFT - 4)),
+    cost = RDCOST_DBL(x->rdmult, x->rddiv, (bits << (VP10_PROB_COST_SHIFT - 4)),
                       err);
     if (cost < best_cost) {
       restoration_best = i;
@@ -524,8 +524,8 @@ static int search_wiener_filter(const YV12_BUFFER_CONFIG *src, VP10_COMP *cpi,
   rsi.restoration_type = RESTORE_NONE;
   err = try_restoration_frame(src, cpi, &rsi, partial_frame);
   bits = 0;
-  cost_norestore =
-      RDCOST_DBL(x->rdmult, x->rddiv, (bits << (VP9_PROB_COST_SHIFT - 4)), err);
+  cost_norestore = RDCOST_DBL(x->rdmult, x->rddiv,
+                              (bits << (VP10_PROB_COST_SHIFT - 4)), err);
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (cm->use_highbitdepth)
@@ -561,8 +561,8 @@ static int search_wiener_filter(const YV12_BUFFER_CONFIG *src, VP10_COMP *cpi,
   memcpy(rsi.hfilter, hfilter, sizeof(rsi.hfilter));
   err = try_restoration_frame(src, cpi, &rsi, partial_frame);
   bits = WIENER_FILT_BITS;
-  cost_wiener =
-      RDCOST_DBL(x->rdmult, x->rddiv, (bits << (VP9_PROB_COST_SHIFT - 4)), err);
+  cost_wiener = RDCOST_DBL(x->rdmult, x->rddiv,
+                           (bits << (VP10_PROB_COST_SHIFT - 4)), err);
 
   vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
 
