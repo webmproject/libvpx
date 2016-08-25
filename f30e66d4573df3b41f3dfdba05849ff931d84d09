@@ -16,6 +16,24 @@
       "revId": "f30e66d4573df3b41f3dfdba05849ff931d84d09",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e8c8b7e8_6ee6e3ab",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1461,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-08-25T01:26:26Z",
+      "side": 1,
+      "message": "I think this one is fine. Rectangular candidates are already tested in the segment above.",
+      "parentUuid": "a8af9fab_7eda4d75",
+      "revId": "f30e66d4573df3b41f3dfdba05849ff931d84d09",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
