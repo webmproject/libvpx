@@ -754,7 +754,7 @@ static void model_rd_from_sse(const VP10_COMP *const cpi,
 
     if (quantizer < 120)
       *rate = (int)((square_error * (280 - quantizer)) >>
-                    (16 - VP9_PROB_COST_SHIFT));
+                    (16 - VP10_PROB_COST_SHIFT));
     else
       *rate = 0;
     *dist = (square_error * quantizer) >> 8;
