@@ -126,6 +126,9 @@ AV1Decoder *av1_decoder_create(BufferPool *const pool) {
 #if CONFIG_LOOP_RESTORATION
   av1_loop_restoration_precal();
 #endif  // CONFIG_LOOP_RESTORATION
+#if CONFIG_ACCOUNTING
+  aom_accounting_init(&pbi->accounting);
+#endif
 
   cm->error.setjmp = 0;
 
@@ -153,6 +156,10 @@ void av1_decoder_remove(AV1Decoder *pbi) {
   if (pbi->num_tile_workers > 0) {
     av1_loop_filter_dealloc(&pbi->lf_row_sync);
   }
+
+#if CONFIG_ACCOUNTING
+  aom_accounting_clear(&pbi->accounting);
+#endif
 
   aom_free(pbi);
 }

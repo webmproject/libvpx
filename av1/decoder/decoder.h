@@ -22,6 +22,9 @@
 #include "av1/common/thread_common.h"
 #include "av1/common/onyxc_int.h"
 #include "av1/decoder/dthread.h"
+#if CONFIG_ACCOUNTING
+#include "av1/common/accounting.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -100,6 +103,10 @@ typedef struct AV1Decoder {
   int tile_col_size_bytes;
   int dec_tile_row, dec_tile_col;
 #endif  // CONFIG_EXT_TILE
+#if CONFIG_ACCOUNTING
+  Accounting accounting;
+#endif
+
 } AV1Decoder;
 
 int av1_receive_compressed_data(struct AV1Decoder *pbi, size_t size,

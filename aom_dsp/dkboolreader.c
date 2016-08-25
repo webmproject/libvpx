@@ -36,6 +36,9 @@ int aom_dk_reader_init(struct aom_dk_reader *r, const uint8_t *buffer,
     r->decrypt_cb = decrypt_cb;
     r->decrypt_state = decrypt_state;
     aom_dk_reader_fill(r);
+#if CONFIG_ACCOUNTING
+    r->accounting = NULL;
+#endif
     return aom_dk_read_bit(r) != 0;  // marker bit
   }
 }

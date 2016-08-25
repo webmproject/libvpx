@@ -26,6 +26,9 @@
 #include "aom/aomdx.h"
 #include "aom/aom_integer.h"
 #include "aom_dsp/prob.h"
+#if CONFIG_ACCOUNTING
+#include "av1/common/accounting.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,6 +54,9 @@ struct aom_dk_reader {
   aom_decrypt_cb decrypt_cb;
   void *decrypt_state;
   uint8_t clear_buffer[sizeof(BD_VALUE) + 1];
+#if CONFIG_ACCOUNTING
+  Accounting *accounting;
+#endif
 };
 
 int aom_dk_reader_init(struct aom_dk_reader *r, const uint8_t *buffer,

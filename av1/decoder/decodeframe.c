@@ -54,6 +54,7 @@
 #include "av1/decoder/dsubexp.h"
 
 #define MAX_AV1_HEADER_SIZE 80
+#define ACCT_STR __func__
 
 static int is_compound_reference_allowed(const AV1_COMMON *cm) {
   int i;
@@ -109,7 +110,7 @@ static void read_switchable_interp_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   int i, j;
   for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; ++j) {
     for (i = 0; i < SWITCHABLE_FILTERS - 1; ++i)
-      av1_diff_update_prob(r, &fc->switchable_interp_prob[j][i]);
+      av1_diff_update_prob(r, &fc->switchable_interp_prob[j][i], ACCT_STR);
 #if CONFIG_DAALA_EC
     av1_tree_to_cdf(av1_switchable_interp_tree, fc->switchable_interp_prob[j],
                     fc->switchable_interp_cdf[j]);
@@ -121,31 +122,31 @@ static void read_inter_mode_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   int i;
 #if CONFIG_REF_MV
   for (i = 0; i < NEWMV_MODE_CONTEXTS; ++i)
-    av1_diff_update_prob(r, &fc->newmv_prob[i]);
+    av1_diff_update_prob(r, &fc->newmv_prob[i], ACCT_STR);
   for (i = 0; i < ZEROMV_MODE_CONTEXTS; ++i)
-    av1_diff_update_prob(r, &fc->zeromv_prob[i]);
+    av1_diff_update_prob(r, &fc->zeromv_prob[i], ACCT_STR);
   for (i = 0; i < REFMV_MODE_CONTEXTS; ++i)
-    av1_diff_update_prob(r, &fc->refmv_prob[i]);
+    av1_diff_update_prob(r, &fc->refmv_prob[i], ACCT_STR);
   for (i = 0; i < DRL_MODE_CONTEXTS; ++i)
-    av1_diff_update_prob(r, &fc->drl_prob[i]);
+    av1_diff_update_prob(r, &fc->drl_prob[i], ACCT_STR);
 #if CONFIG_EXT_INTER
-  av1_diff_update_prob(r, &fc->new2mv_prob);
+  av1_diff_update_prob(r, &fc->new2mv_prob, ACCT_STR);
 #endif  // CONFIG_EXT_INTER
 #else
   int j;
   for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
     for (j = 0; j < INTER_MODES - 1; ++j)
-      av1_diff_update_prob(r, &fc->inter_mode_probs[i][j]);
+      av1_diff_update_prob(r, &fc->inter_mode_probs[i][j], ACCT_STR);
 #endif
 }
 
 #if CONFIG_EXT_INTER
 static void read_inter_compound_mode_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   int i, j;
-  if (aom_read(r, GROUP_DIFF_UPDATE_PROB)) {
+  if (aom_read(r, GROUP_DIFF_UPDATE_PROB, ACCT_STR)) {
     for (j = 0; j < INTER_MODE_CONTEXTS; ++j) {
       for (i = 0; i < INTER_COMPOUND_MODES - 1; ++i) {
-        av1_diff_update_prob(r, &fc->inter_compound_mode_probs[j][i]);
+        av1_diff_update_prob(r, &fc->inter_compound_mode_probs[j][i], ACCT_STR);
       }
     }
   }
@@ -169,12 +170,12 @@ static void read_frame_reference_mode_probs(AV1_COMMON *cm, aom_reader *r) {
 
   if (cm->reference_mode == REFERENCE_MODE_SELECT)
     for (i = 0; i < COMP_INTER_CONTEXTS; ++i)
-      av1_diff_update_prob(r, &fc->comp_inter_prob[i]);
+      av1_diff_update_prob(r, &fc->comp_inter_prob[i], ACCT_STR);
 
   if (cm->reference_mode != COMPOUND_REFERENCE) {
     for (i = 0; i < REF_CONTEXTS; ++i) {
       for (j = 0; j < (SINGLE_REFS - 1); ++j) {
-        av1_diff_update_prob(r, &fc->single_ref_prob[i][j]);
+        av1_diff_update_prob(r, &fc->single_ref_prob[i][j], ACCT_STR);
       }
     }
   }
@@ -183,12 +184,12 @@ static void read_frame_reference_mode_probs(AV1_COMMON *cm, aom_reader *r) {
     for (i = 0; i < REF_CONTEXTS; ++i) {
 #if CONFIG_EXT_REFS
       for (j = 0; j < (FWD_REFS - 1); ++j)
-        av1_diff_update_prob(r, &fc->comp_ref_prob[i][j]);
+        av1_diff_update_prob(r, &fc->comp_ref_prob[i][j], ACCT_STR);
       for (j = 0; j < (BWD_REFS - 1); ++j)
-        av1_diff_update_prob(r, &fc->comp_bwdref_prob[i][j]);
+        av1_diff_update_prob(r, &fc->comp_bwdref_prob[i][j], ACCT_STR);
 #else
       for (j = 0; j < (COMP_REFS - 1); ++j)
-        av1_diff_update_prob(r, &fc->comp_ref_prob[i][j]);
+        av1_diff_update_prob(r, &fc->comp_ref_prob[i][j], ACCT_STR);
 #endif  // CONFIG_EXT_REFS
     }
   }
@@ -196,7 +197,7 @@ static void read_frame_reference_mode_probs(AV1_COMMON *cm, aom_reader *r) {
 
 static void update_mv_probs(aom_prob *p, int n, aom_reader *r) {
   int i;
-  for (i = 0; i < n; ++i) av1_diff_update_prob(r, &p[i]);
+  for (i = 0; i < n; ++i) av1_diff_update_prob(r, &p[i], ACCT_STR);
 }
 
 static void read_mv_probs(nmv_context *ctx, int allow_hp, aom_reader *r) {
@@ -1170,7 +1171,9 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
   const int bh = 1 << (bhl - 1);
   const int x_mis = AOMMIN(bw, cm->mi_cols - mi_col);
   const int y_mis = AOMMIN(bh, cm->mi_rows - mi_row);
-
+#if CONFIG_ACCOUNTING
+  aom_accounting_set_context(&pbi->accounting, mi_col, mi_row);
+#endif
 #if CONFIG_SUPERTX
   MB_MODE_INFO *mbmi;
   if (supertx_enabled) {
@@ -1415,21 +1418,22 @@ static PARTITION_TYPE read_partition(AV1_COMMON *cm, MACROBLOCKD *xd,
   if (has_rows && has_cols)
 #if CONFIG_EXT_PARTITION_TYPES
     if (bsize <= BLOCK_8X8)
-      p = (PARTITION_TYPE)aom_read_tree(r, av1_partition_tree, probs);
+      p = (PARTITION_TYPE)aom_read_tree(r, av1_partition_tree, probs, ACCT_STR);
     else
-      p = (PARTITION_TYPE)aom_read_tree(r, av1_ext_partition_tree, probs);
+      p = (PARTITION_TYPE)aom_read_tree(r, av1_ext_partition_tree, probs,
+                                        ACCT_STR);
 #else
 #if CONFIG_DAALA_EC
     p = (PARTITION_TYPE)aom_read_tree_cdf(r, cm->fc->partition_cdf[ctx],
-                                          PARTITION_TYPES);
+                                          PARTITION_TYPES, ACCT_STR);
 #else
-    p = (PARTITION_TYPE)aom_read_tree(r, av1_partition_tree, probs);
+    p = (PARTITION_TYPE)aom_read_tree(r, av1_partition_tree, probs, ACCT_STR);
 #endif
 #endif  // CONFIG_EXT_PARTITION_TYPES
   else if (!has_rows && has_cols)
-    p = aom_read(r, probs[1]) ? PARTITION_SPLIT : PARTITION_HORZ;
+    p = aom_read(r, probs[1], ACCT_STR) ? PARTITION_SPLIT : PARTITION_HORZ;
   else if (has_rows && !has_cols)
-    p = aom_read(r, probs[2]) ? PARTITION_SPLIT : PARTITION_VERT;
+    p = aom_read(r, probs[2], ACCT_STR) ? PARTITION_SPLIT : PARTITION_VERT;
   else
     p = PARTITION_SPLIT;
 
@@ -1445,7 +1449,7 @@ static int read_skip(AV1_COMMON *cm, const MACROBLOCKD *xd, int segment_id,
     return 1;
   } else {
     const int ctx = av1_get_skip_context(xd);
-    const int skip = aom_read(r, cm->fc->skip_probs[ctx]);
+    const int skip = aom_read(r, cm->fc->skip_probs[ctx], ACCT_STR);
     FRAME_COUNTS *counts = xd->counts;
     if (counts) ++counts->skip[ctx][skip];
     return skip;
@@ -1507,8 +1511,8 @@ static void decode_partition(AV1Decoder *const pbi, MACROBLOCKD *const xd,
   if (!frame_is_intra_only(cm) && partition != PARTITION_NONE &&
       bsize <= MAX_SUPERTX_BLOCK_SIZE && !supertx_enabled && !xd->lossless[0]) {
     const int supertx_context = partition_supertx_context_lookup[partition];
-    supertx_enabled =
-        aom_read(r, cm->fc->supertx_prob[supertx_context][supertx_size]);
+    supertx_enabled = aom_read(
+        r, cm->fc->supertx_prob[supertx_context][supertx_size], ACCT_STR);
     if (xd->counts)
       xd->counts->supertx[supertx_context][supertx_size][supertx_enabled]++;
 #if CONFIG_VAR_TX
@@ -1710,14 +1714,16 @@ static void decode_partition(AV1Decoder *const pbi, MACROBLOCKD *const xd,
         int eset = get_ext_tx_set(supertx_size, bsize, 1);
         if (eset > 0) {
           txfm = aom_read_tree(r, av1_ext_tx_inter_tree[eset],
-                               cm->fc->inter_ext_tx_prob[eset][supertx_size]);
+                               cm->fc->inter_ext_tx_prob[eset][supertx_size],
+                               ACCT_STR);
           if (xd->counts) ++xd->counts->inter_ext_tx[eset][supertx_size][txfm];
         }
       }
 #else
       if (supertx_size < TX_32X32) {
         txfm = aom_read_tree(r, av1_ext_tx_tree,
-                             cm->fc->inter_ext_tx_prob[supertx_size]);
+                             cm->fc->inter_ext_tx_prob[supertx_size],
+                             ACCT_STR);
         if (xd->counts) ++xd->counts->inter_ext_tx[supertx_size][txfm];
       }
 #endif  // CONFIG_EXT_TX
@@ -1809,10 +1815,10 @@ static void decode_partition(AV1Decoder *const pbi, MACROBLOCKD *const xd,
 
     if (!((mi_row * MI_SIZE) & 127) && !((mi_col * MI_SIZE) & 127) &&
         cm->clpf_size == CLPF_128X128) {
-      cm->clpf_blocks[tl] = aom_read_literal(r, 1);
+      cm->clpf_blocks[tl] = aom_read_literal(r, 1, ACCT_STR);
     } else if (cm->clpf_size == CLPF_64X64 &&
                !clpf_all_skip(cm, mi_col, mi_row, 64 / MI_SIZE)) {
-      cm->clpf_blocks[tl] = aom_read_literal(r, 1);
+      cm->clpf_blocks[tl] = aom_read_literal(r, 1, ACCT_STR);
     } else if (cm->clpf_size == CLPF_32X32) {
       const int tr = tl + 1;
       const int bl = tl + cm->clpf_stride;
@@ -1821,19 +1827,19 @@ static void decode_partition(AV1Decoder *const pbi, MACROBLOCKD *const xd,
 
       // Up to four bits per SB
       if (!clpf_all_skip(cm, mi_col, mi_row, size))
-        cm->clpf_blocks[tl] = aom_read_literal(r, 1);
+        cm->clpf_blocks[tl] = aom_read_literal(r, 1, ACCT_STR);
 
       if (mi_col + size < cm->mi_cols &&
           !clpf_all_skip(cm, mi_col + size, mi_row, size))
-        cm->clpf_blocks[tr] = aom_read_literal(r, 1);
+        cm->clpf_blocks[tr] = aom_read_literal(r, 1, ACCT_STR);
 
       if (mi_row + size < cm->mi_rows &&
           !clpf_all_skip(cm, mi_col, mi_row + size, size))
-        cm->clpf_blocks[bl] = aom_read_literal(r, 1);
+        cm->clpf_blocks[bl] = aom_read_literal(r, 1, ACCT_STR);
 
       if (mi_col + size < cm->mi_cols && mi_row + size < cm->mi_rows &&
           !clpf_all_skip(cm, mi_col + size, mi_row + size, size))
-        cm->clpf_blocks[br] = aom_read_literal(r, 1);
+        cm->clpf_blocks[br] = aom_read_literal(r, 1, ACCT_STR);
     }
   }
 #endif
@@ -1894,13 +1900,13 @@ static void read_coef_probs_common(av1_coeff_probs_model *coef_probs,
                                    aom_reader *r) {
   int i, j, k, l, m;
 
-  if (aom_read_bit(r))
+  if (aom_read_bit(r, ACCT_STR))
     for (i = 0; i < PLANE_TYPES; ++i)
       for (j = 0; j < REF_TYPES; ++j)
         for (k = 0; k < COEF_BANDS; ++k)
           for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l)
             for (m = 0; m < UNCONSTRAINED_NODES; ++m)
-              av1_diff_update_prob(r, &coef_probs[i][j][k][l][m]);
+              av1_diff_update_prob(r, &coef_probs[i][j][k][l][m], ACCT_STR);
 }
 
 static void read_coef_probs(FRAME_CONTEXT *fc, TX_MODE tx_mode, aom_reader *r) {
@@ -1990,38 +1996,39 @@ static void decode_restoration(AV1_COMMON *cm, aom_reader *rb) {
           rsi->wiener_info, sizeof(*rsi->wiener_info) * ntiles);
       assert(rsi->wiener_info != NULL);
       for (i = 0; i < ntiles; ++i) {
-        rsi->restoration_type[i] = aom_read_tree(
-            rb, av1_switchable_restore_tree, cm->fc->switchable_restore_prob);
+        rsi->restoration_type[i] =
+            aom_read_tree(rb, av1_switchable_restore_tree,
+                          cm->fc->switchable_restore_prob, ACCT_STR);
         if (rsi->restoration_type[i] == RESTORE_WIENER) {
           rsi->wiener_info[i].level = 1;
           rsi->wiener_info[i].vfilter[0] =
-              aom_read_literal(rb, WIENER_FILT_TAP0_BITS) +
+              aom_read_literal(rb, WIENER_FILT_TAP0_BITS, ACCT_STR) +
               WIENER_FILT_TAP0_MINV;
           rsi->wiener_info[i].vfilter[1] =
-              aom_read_literal(rb, WIENER_FILT_TAP1_BITS) +
+              aom_read_literal(rb, WIENER_FILT_TAP1_BITS, ACCT_STR) +
               WIENER_FILT_TAP1_MINV;
           rsi->wiener_info[i].vfilter[2] =
-              aom_read_literal(rb, WIENER_FILT_TAP2_BITS) +
+              aom_read_literal(rb, WIENER_FILT_TAP2_BITS, ACCT_STR) +
               WIENER_FILT_TAP2_MINV;
           rsi->wiener_info[i].hfilter[0] =
-              aom_read_literal(rb, WIENER_FILT_TAP0_BITS) +
+              aom_read_literal(rb, WIENER_FILT_TAP0_BITS, ACCT_STR) +
               WIENER_FILT_TAP0_MINV;
           rsi->wiener_info[i].hfilter[1] =
-              aom_read_literal(rb, WIENER_FILT_TAP1_BITS) +
+              aom_read_literal(rb, WIENER_FILT_TAP1_BITS, ACCT_STR) +
               WIENER_FILT_TAP1_MINV;
           rsi->wiener_info[i].hfilter[2] =
-              aom_read_literal(rb, WIENER_FILT_TAP2_BITS) +
+              aom_read_literal(rb, WIENER_FILT_TAP2_BITS, ACCT_STR) +
               WIENER_FILT_TAP2_MINV;
         } else if (rsi->restoration_type[i] == RESTORE_BILATERAL) {
           int s;
           for (s = 0; s < BILATERAL_SUBTILES; ++s) {
 #if BILATERAL_SUBTILES == 0
             rsi->bilateral_info[i].level[s] =
-                aom_read_literal(rb, av1_bilateral_level_bits(cm));
+                aom_read_literal(rb, av1_bilateral_level_bits(cm), ACCT_STR);
 #else
-            if (aom_read(rb, RESTORE_NONE_BILATERAL_PROB)) {
+            if (aom_read(rb, RESTORE_NONE_BILATERAL_PROB, ACCT_STR)) {
               rsi->bilateral_info[i].level[s] =
-                  aom_read_literal(rb, av1_bilateral_level_bits(cm));
+                  aom_read_literal(rb, av1_bilateral_level_bits(cm), ACCT_STR);
             } else {
               rsi->bilateral_info[i].level[s] = -1;
             }
@@ -2034,26 +2041,26 @@ static void decode_restoration(AV1_COMMON *cm, aom_reader *rb) {
           rsi->wiener_info, sizeof(*rsi->wiener_info) * ntiles);
       assert(rsi->wiener_info != NULL);
       for (i = 0; i < ntiles; ++i) {
-        if (aom_read(rb, RESTORE_NONE_WIENER_PROB)) {
+        if (aom_read(rb, RESTORE_NONE_WIENER_PROB, ACCT_STR)) {
           rsi->wiener_info[i].level = 1;
           rsi->restoration_type[i] = RESTORE_WIENER;
           rsi->wiener_info[i].vfilter[0] =
-              aom_read_literal(rb, WIENER_FILT_TAP0_BITS) +
+              aom_read_literal(rb, WIENER_FILT_TAP0_BITS, ACCT_STR) +
               WIENER_FILT_TAP0_MINV;
           rsi->wiener_info[i].vfilter[1] =
-              aom_read_literal(rb, WIENER_FILT_TAP1_BITS) +
+              aom_read_literal(rb, WIENER_FILT_TAP1_BITS, ACCT_STR) +
               WIENER_FILT_TAP1_MINV;
           rsi->wiener_info[i].vfilter[2] =
-              aom_read_literal(rb, WIENER_FILT_TAP2_BITS) +
+              aom_read_literal(rb, WIENER_FILT_TAP2_BITS, ACCT_STR) +
               WIENER_FILT_TAP2_MINV;
           rsi->wiener_info[i].hfilter[0] =
-              aom_read_literal(rb, WIENER_FILT_TAP0_BITS) +
+              aom_read_literal(rb, WIENER_FILT_TAP0_BITS, ACCT_STR) +
               WIENER_FILT_TAP0_MINV;
           rsi->wiener_info[i].hfilter[1] =
-              aom_read_literal(rb, WIENER_FILT_TAP1_BITS) +
+              aom_read_literal(rb, WIENER_FILT_TAP1_BITS, ACCT_STR) +
               WIENER_FILT_TAP1_MINV;
           rsi->wiener_info[i].hfilter[2] =
-              aom_read_literal(rb, WIENER_FILT_TAP2_BITS) +
+              aom_read_literal(rb, WIENER_FILT_TAP2_BITS, ACCT_STR) +
               WIENER_FILT_TAP2_MINV;
         } else {
           rsi->wiener_info[i].level = 0;
@@ -2068,9 +2075,9 @@ static void decode_restoration(AV1_COMMON *cm, aom_reader *rb) {
         int s;
         rsi->restoration_type[i] = RESTORE_BILATERAL;
         for (s = 0; s < BILATERAL_SUBTILES; ++s) {
-          if (aom_read(rb, RESTORE_NONE_BILATERAL_PROB)) {
+          if (aom_read(rb, RESTORE_NONE_BILATERAL_PROB, ACCT_STR)) {
             rsi->bilateral_info[i].level[s] =
-                aom_read_literal(rb, av1_bilateral_level_bits(cm));
+                aom_read_literal(rb, av1_bilateral_level_bits(cm), ACCT_STR);
           } else {
             rsi->bilateral_info[i].level[s] = -1;
           }
@@ -2773,7 +2780,9 @@ static const uint8_t *decode_tiles(AV1Decoder *pbi, const uint8_t *data,
                     aom_memalign(32, n_tiles * (sizeof(*pbi->tile_data))));
     pbi->allocated_tiles = n_tiles;
   }
-
+#if CONFIG_ACCOUNTING
+  aom_accounting_reset(&pbi->accounting);
+#endif
   // Load all tile information into tile_data.
   for (tile_row = tile_rows_start; tile_row < tile_rows_end; ++tile_row) {
     for (tile_col = tile_cols_start; tile_col < tile_cols_end; ++tile_col) {
@@ -2796,6 +2805,9 @@ static const uint8_t *decode_tiles(AV1Decoder *pbi, const uint8_t *data,
       setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
                           &td->bit_reader, pbi->decrypt_cb, pbi->decrypt_state);
 #endif
+#if CONFIG_ACCOUNTING
+      tile_data->bit_reader.accounting = &pbi->accounting;
+#endif
       av1_init_macroblockd(cm, &td->xd, td->dqcoeff);
 #if CONFIG_PALETTE
       td->xd.plane[0].color_index_map = td->color_index_map[0];
@@ -2814,6 +2826,10 @@ static const uint8_t *decode_tiles(AV1Decoder *pbi, const uint8_t *data,
     for (tile_col = tile_cols_start; tile_col < tile_cols_end; ++tile_col) {
       const int col = inv_col_order ? tile_cols - 1 - tile_col : tile_col;
       TileData *const td = pbi->tile_data + tile_cols * row + col;
+#if CONFIG_ACCOUNTING
+      tile_data->bit_reader.accounting->last_tell_frac =
+          aom_reader_tell_frac(&tile_data->bit_reader);
+#endif
 
       av1_tile_set_col(&tile_info, cm, col);
 
@@ -3497,22 +3513,23 @@ static void read_ext_tx_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   int i, j, k;
   int s;
   for (s = 1; s < EXT_TX_SETS_INTER; ++s) {
-    if (aom_read(r, GROUP_DIFF_UPDATE_PROB)) {
+    if (aom_read(r, GROUP_DIFF_UPDATE_PROB, ACCT_STR)) {
       for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
         if (!use_inter_ext_tx_for_txsize[s][i]) continue;
         for (j = 0; j < num_ext_tx_set_inter[s] - 1; ++j)
-          av1_diff_update_prob(r, &fc->inter_ext_tx_prob[s][i][j]);
+          av1_diff_update_prob(r, &fc->inter_ext_tx_prob[s][i][j], ACCT_STR);
       }
     }
   }
 
   for (s = 1; s < EXT_TX_SETS_INTRA; ++s) {
-    if (aom_read(r, GROUP_DIFF_UPDATE_PROB)) {
+    if (aom_read(r, GROUP_DIFF_UPDATE_PROB, ACCT_STR)) {
       for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
         if (!use_intra_ext_tx_for_txsize[s][i]) continue;
         for (j = 0; j < INTRA_MODES; ++j)
           for (k = 0; k < num_ext_tx_set_intra[s] - 1; ++k)
-            av1_diff_update_prob(r, &fc->intra_ext_tx_prob[s][i][j][k]);
+            av1_diff_update_prob(r, &fc->intra_ext_tx_prob[s][i][j][k],
+                                 ACCT_STR);
       }
     }
   }
@@ -3522,11 +3539,11 @@ static void read_ext_tx_probs(FRAME_CONTEXT *fc, aom_reader *r) {
 
 static void read_ext_tx_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   int i, j, k;
-  if (aom_read(r, GROUP_DIFF_UPDATE_PROB)) {
+  if (aom_read(r, GROUP_DIFF_UPDATE_PROB, ACCT_STR)) {
     for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
       for (j = 0; j < TX_TYPES; ++j) {
         for (k = 0; k < TX_TYPES - 1; ++k)
-          av1_diff_update_prob(r, &fc->intra_ext_tx_prob[i][j][k]);
+          av1_diff_update_prob(r, &fc->intra_ext_tx_prob[i][j][k], ACCT_STR);
 #if CONFIG_DAALA_EC
         av1_tree_to_cdf(av1_ext_tx_tree, fc->intra_ext_tx_prob[i][j],
                         fc->intra_ext_tx_cdf[i][j]);
@@ -3534,10 +3551,10 @@ static void read_ext_tx_probs(FRAME_CONTEXT *fc, aom_reader *r) {
       }
     }
   }
-  if (aom_read(r, GROUP_DIFF_UPDATE_PROB)) {
+  if (aom_read(r, GROUP_DIFF_UPDATE_PROB, ACCT_STR)) {
     for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
       for (k = 0; k < TX_TYPES - 1; ++k)
-        av1_diff_update_prob(r, &fc->inter_ext_tx_prob[i][k]);
+        av1_diff_update_prob(r, &fc->inter_ext_tx_prob[i][k], ACCT_STR);
 #if CONFIG_DAALA_EC
       av1_tree_to_cdf(av1_ext_tx_tree, fc->inter_ext_tx_prob[i],
                       fc->inter_ext_tx_cdf[i]);
@@ -3550,10 +3567,10 @@ static void read_ext_tx_probs(FRAME_CONTEXT *fc, aom_reader *r) {
 #if CONFIG_SUPERTX
 static void read_supertx_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   int i, j;
-  if (aom_read(r, GROUP_DIFF_UPDATE_PROB)) {
+  if (aom_read(r, GROUP_DIFF_UPDATE_PROB, ACCT_STR)) {
     for (i = 0; i < PARTITION_SUPERTX_CONTEXTS; ++i) {
       for (j = 1; j < TX_SIZES; ++j) {
-        av1_diff_update_prob(r, &fc->supertx_prob[i][j]);
+        av1_diff_update_prob(r, &fc->supertx_prob[i][j], ACCT_STR);
       }
     }
   }
@@ -3564,7 +3581,7 @@ static void read_supertx_probs(FRAME_CONTEXT *fc, aom_reader *r) {
 static void read_global_motion_params(Global_Motion_Params *params,
                                       aom_prob *probs, aom_reader *r) {
   GLOBAL_MOTION_TYPE gmtype =
-      aom_read_tree(r, av1_global_motion_types_tree, probs);
+      aom_read_tree(r, av1_global_motion_types_tree, probs, ACCT_STR);
   params->gmtype = gmtype;
   params->motion_params.wmtype = gm_to_trans_type(gmtype);
   switch (gmtype) {
@@ -3646,32 +3663,32 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
     for (i = 0; i < TX_SIZES - 1; ++i)
       for (j = 0; j < TX_SIZE_CONTEXTS; ++j)
         for (k = 0; k < i + 1; ++k)
-          av1_diff_update_prob(&r, &fc->tx_size_probs[i][j][k]);
+          av1_diff_update_prob(&r, &fc->tx_size_probs[i][j][k], ACCT_STR);
   }
 
   read_coef_probs(fc, cm->tx_mode, &r);
 
 #if CONFIG_VAR_TX
   for (k = 0; k < TXFM_PARTITION_CONTEXTS; ++k)
-    av1_diff_update_prob(&r, &fc->txfm_partition_prob[k]);
+    av1_diff_update_prob(&r, &fc->txfm_partition_prob[k], ACCT_STR);
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
   if (cm->tx_mode == TX_MODE_SELECT) {
     for (i = 1; i < TX_SIZES - 1; ++i)
-      av1_diff_update_prob(&r, &fc->rect_tx_prob[i]);
+      av1_diff_update_prob(&r, &fc->rect_tx_prob[i], ACCT_STR);
   }
 #endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
 #endif
 
   for (k = 0; k < SKIP_CONTEXTS; ++k)
-    av1_diff_update_prob(&r, &fc->skip_probs[k]);
+    av1_diff_update_prob(&r, &fc->skip_probs[k], ACCT_STR);
 
   if (cm->seg.enabled && cm->seg.update_map) {
     if (cm->seg.temporal_update) {
       for (k = 0; k < PREDICTION_PROBS; k++)
-        av1_diff_update_prob(&r, &cm->fc->seg.pred_probs[k]);
+        av1_diff_update_prob(&r, &cm->fc->seg.pred_probs[k], ACCT_STR);
     }
     for (k = 0; k < MAX_SEGMENTS - 1; k++)
-      av1_diff_update_prob(&r, &cm->fc->seg.tree_probs[k]);
+      av1_diff_update_prob(&r, &cm->fc->seg.tree_probs[k], ACCT_STR);
 #if CONFIG_DAALA_EC
     av1_tree_to_cdf(av1_segment_tree, cm->fc->seg.tree_probs,
                     cm->fc->seg.tree_cdf);
@@ -3680,18 +3697,18 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
 
   for (j = 0; j < INTRA_MODES; j++)
     for (i = 0; i < INTRA_MODES - 1; ++i)
-      av1_diff_update_prob(&r, &fc->uv_mode_prob[j][i]);
+      av1_diff_update_prob(&r, &fc->uv_mode_prob[j][i], ACCT_STR);
 
 #if CONFIG_EXT_PARTITION_TYPES
   for (i = 0; i < PARTITION_TYPES - 1; ++i)
-    av1_diff_update_prob(&r, &fc->partition_prob[0][i]);
+    av1_diff_update_prob(&r, &fc->partition_prob[0][i], ACCT_STR);
   for (j = 1; j < PARTITION_CONTEXTS; ++j)
     for (i = 0; i < EXT_PARTITION_TYPES - 1; ++i)
-      av1_diff_update_prob(&r, &fc->partition_prob[j][i]);
+      av1_diff_update_prob(&r, &fc->partition_prob[j][i], ACCT_STR);
 #else
   for (j = 0; j < PARTITION_CONTEXTS; ++j) {
     for (i = 0; i < PARTITION_TYPES - 1; ++i)
-      av1_diff_update_prob(&r, &fc->partition_prob[j][i]);
+      av1_diff_update_prob(&r, &fc->partition_prob[j][i], ACCT_STR);
 #if CONFIG_DAALA_EC
     av1_tree_to_cdf(av1_partition_tree, fc->partition_prob[j],
                     fc->partition_cdf[j]);
@@ -3702,7 +3719,7 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
 #if CONFIG_EXT_INTRA
   for (i = 0; i < INTRA_FILTERS + 1; ++i)
     for (j = 0; j < INTRA_FILTERS - 1; ++j)
-      av1_diff_update_prob(&r, &fc->intra_filter_probs[i][j]);
+      av1_diff_update_prob(&r, &fc->intra_filter_probs[i][j], ACCT_STR);
 #endif  // CONFIG_EXT_INTRA
 
   if (frame_is_intra_only(cm)) {
@@ -3710,7 +3727,7 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
     for (k = 0; k < INTRA_MODES; k++)
       for (j = 0; j < INTRA_MODES; j++)
         for (i = 0; i < INTRA_MODES - 1; ++i)
-          av1_diff_update_prob(&r, &cm->kf_y_prob[k][j][i]);
+          av1_diff_update_prob(&r, &cm->kf_y_prob[k][j][i], ACCT_STR);
   } else {
 #if !CONFIG_REF_MV
     nmv_context *const nmvc = &fc->nmvc;
@@ -3723,23 +3740,23 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
     if (cm->reference_mode != COMPOUND_REFERENCE) {
       for (i = 0; i < BLOCK_SIZE_GROUPS; i++) {
         if (is_interintra_allowed_bsize_group(i)) {
-          av1_diff_update_prob(&r, &fc->interintra_prob[i]);
+          av1_diff_update_prob(&r, &fc->interintra_prob[i], ACCT_STR);
         }
       }
       for (i = 0; i < BLOCK_SIZE_GROUPS; i++) {
         for (j = 0; j < INTERINTRA_MODES - 1; j++)
-          av1_diff_update_prob(&r, &fc->interintra_mode_prob[i][j]);
+          av1_diff_update_prob(&r, &fc->interintra_mode_prob[i][j], ACCT_STR);
       }
       for (i = 0; i < BLOCK_SIZES; i++) {
         if (is_interintra_allowed_bsize(i) && is_interintra_wedge_used(i)) {
-          av1_diff_update_prob(&r, &fc->wedge_interintra_prob[i]);
+          av1_diff_update_prob(&r, &fc->wedge_interintra_prob[i], ACCT_STR);
         }
       }
     }
     if (cm->reference_mode != SINGLE_REFERENCE) {
       for (i = 0; i < BLOCK_SIZES; i++) {
         if (is_interinter_wedge_used(i)) {
-          av1_diff_update_prob(&r, &fc->wedge_interinter_prob[i]);
+          av1_diff_update_prob(&r, &fc->wedge_interinter_prob[i], ACCT_STR);
         }
       }
     }
@@ -3748,14 +3765,14 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
 #if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
     for (i = BLOCK_8X8; i < BLOCK_SIZES; ++i) {
       for (j = 0; j < MOTION_MODES - 1; ++j)
-        av1_diff_update_prob(&r, &fc->motion_mode_prob[i][j]);
+        av1_diff_update_prob(&r, &fc->motion_mode_prob[i][j], ACCT_STR);
     }
 #endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
 
     if (cm->interp_filter == SWITCHABLE) read_switchable_interp_probs(fc, &r);
 
     for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
-      av1_diff_update_prob(&r, &fc->intra_inter_prob[i]);
+      av1_diff_update_prob(&r, &fc->intra_inter_prob[i], ACCT_STR);
 
     if (cm->reference_mode != SINGLE_REFERENCE)
       setup_compound_reference_mode(cm);
@@ -3764,7 +3781,7 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
 
     for (j = 0; j < BLOCK_SIZE_GROUPS; j++)
       for (i = 0; i < INTRA_MODES - 1; ++i)
-        av1_diff_update_prob(&r, &fc->y_mode_prob[j][i]);
+        av1_diff_update_prob(&r, &fc->y_mode_prob[j][i], ACCT_STR);
 
 #if CONFIG_REF_MV
     for (i = 0; i < NMV_CONTEXTS; ++i)

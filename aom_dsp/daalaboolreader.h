@@ -12,8 +12,12 @@
 #ifndef AOM_DSP_DAALABOOLREADER_H_
 #define AOM_DSP_DAALABOOLREADER_H_
 
+#include "aom/aom_integer.h"
 #include "aom_dsp/entdec.h"
 #include "aom_dsp/prob.h"
+#if CONFIG_ACCOUNTING
+#include "av1/common/accounting.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,6 +27,9 @@ struct daala_reader {
   const uint8_t *buffer;
   const uint8_t *buffer_end;
   od_ec_dec ec;
+#if CONFIG_ACCOUNTING
+  Accounting *accounting;
+#endif
 };
 
 typedef struct daala_reader daala_reader;

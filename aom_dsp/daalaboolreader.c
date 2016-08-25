@@ -18,6 +18,9 @@ int aom_daala_reader_init(daala_reader *r, const uint8_t *buffer, int size) {
   r->buffer_end = buffer + size;
   r->buffer = buffer;
   od_ec_dec_init(&r->ec, buffer, size - 1);
+#if CONFIG_ACCOUNTING
+  r->accounting = NULL;
+#endif
   return 0;
 }
 
