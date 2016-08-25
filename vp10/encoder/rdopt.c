@@ -4978,6 +4978,10 @@ static int64_t rd_pick_best_sub8x8_mode(
           MV mvp_full;
           int max_mv;
           int cost_list[5];
+          int tmp_col_min = x->mv_col_min;
+          int tmp_col_max = x->mv_col_max;
+          int tmp_row_min = x->mv_row_min;
+          int tmp_row_max = x->mv_row_max;
 
           /* Is the best so far sufficiently good that we cant justify doing
            * and new motion search. */
@@ -5040,6 +5044,11 @@ static int64_t rd_pick_best_sub8x8_mode(
               cpi, x, bsize, &mvp_full, step_param, sadpb,
               cpi->sf.mv.subpel_search_method != SUBPEL_TREE ? cost_list : NULL,
               &bsi->ref_mv[0]->as_mv, INT_MAX, 1);
+
+          x->mv_col_min = tmp_col_min;
+          x->mv_col_max = tmp_col_max;
+          x->mv_row_min = tmp_row_min;
+          x->mv_row_max = tmp_row_max;
 
           if (bestsme < INT_MAX) {
             int distortion;
@@ -5722,8 +5731,6 @@ static void single_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
     vp10_setup_pre_planes(xd, ref_idx, scaled_ref_frame, mi_row, mi_col, NULL);
   }
 
-  vp10_set_mv_search_range(x, &ref_mv);
-
   // Work out the size of the first step in the mv step search.
   // 0 here is maximum length first step. 1 is VPXMAX >> 1 etc.
   if (cpi->sf.mv.auto_mv_step_size && cm->show_frame) {
@@ -5770,6 +5777,8 @@ static void single_motion_search(VP10_COMP *cpi, MACROBLOCK *x,
       }
     }
   }
+
+  vp10_set_mv_search_range(x, &ref_mv);
 
   mvp_full = pred_mv[x->mv_best_ref_index[ref]];
 
@@ -5918,8 +5927,6 @@ static void single_motion_search_obmc(VP10_COMP *cpi, MACROBLOCK *x,
     vp10_setup_pre_planes(xd, ref_idx, scaled_ref_frame, mi_row, mi_col, NULL);
   }
 
-  vp10_set_mv_search_range(x, &ref_mv);
-
   // Work out the size of the first step in the mv step search.
   // 0 here is maximum length first step. 1 is VPXMAX >> 1 etc.
   if (cpi->sf.mv.auto_mv_step_size && cm->show_frame) {
@@ -5966,6 +5973,8 @@ static void single_motion_search_obmc(VP10_COMP *cpi, MACROBLOCK *x,
       }
     }
   }
+
+  vp10_set_mv_search_range(x, &ref_mv);
 
   mvp_full = pred_mv.as_mv;
   mvp_full.col >>= 3;
