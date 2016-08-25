@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e5f9c23d_60ec6c1f",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-25T06:03:44Z",
+      "side": 1,
+      "message": "I\u0027d group the like utilities together for visual reference",
+      "revId": "2cc3367092b8135d637ca8974a35411d7c78ed88",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e5f9c23d_005488cd",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-25T06:03:44Z",
+      "side": 1,
+      "message": "can you break this out and leave the next 2 lines for this and the next function? it\u0027s a shame that they only differ by the shift",
+      "revId": "2cc3367092b8135d637ca8974a35411d7c78ed88",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e5f9c23d_00db6877",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-25T06:03:44Z",
+      "side": 1,
+      "message": "you might be able to add some store_NxM inlines to compact some of the shared code",
+      "revId": "2cc3367092b8135d637ca8974a35411d7c78ed88",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
