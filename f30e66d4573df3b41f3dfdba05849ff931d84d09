@@ -34,6 +34,24 @@
       "revId": "f30e66d4573df3b41f3dfdba05849ff931d84d09",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a546ea69_63080230",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1461,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-08-25T11:14:45Z",
+      "side": 1,
+      "message": "This is a bit of a hack to not evaluate any other transforms if we forced a rectangular transform due to tx_select above (in which case botht start_tx and end_tx are set to the same rectangular transform), so this one should be fine.",
+      "parentUuid": "e8c8b7e8_6ee6e3ab",
+      "revId": "f30e66d4573df3b41f3dfdba05849ff931d84d09",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
