@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "c54afe97_7fd3abd1",
+        "filename": "vp10/common/warped_motion.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-08-25T22:32:22Z",
+      "side": 1,
+      "message": "Changing the type to ProjectPointsType to comply with type naming conventions, function got get_project_points_type and all projectPoints variables to projectpoints.",
+      "parentUuid": "c54afe97_dfdd9f08",
+      "revId": "ac31e3d33134e2f3aa1adf8f9f2ce2f3d5ce47b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c54afe97_dfc47f40",
         "filename": "vp10/encoder/global_motion.c",
         "patchSetId": 21
@@ -30,6 +48,24 @@
       "writtenOn": "2016-08-25T21:08:27Z",
       "side": 1,
       "message": "Maybe keep a consistent naming style, either get_ransac_type, or GetRansacType.\n(See \"Function Name\" in https://engdoc.corp.google.com/eng/doc/devguide/cpp/styleguide.shtml?cl\u003dhead#General_Naming_Rules)",
+      "revId": "ac31e3d33134e2f3aa1adf8f9f2ce2f3d5ce47b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c54afe97_1f0d473f",
+        "filename": "vp10/encoder/global_motion.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-08-25T22:32:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c54afe97_dfc47f40",
       "revId": "ac31e3d33134e2f3aa1adf8f9f2ce2f3d5ce47b8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "c54afe97_82c0de4f",
+        "filename": "vp10/encoder/global_motion.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-08-25T22:32:22Z",
+      "side": 1,
+      "message": "Yes, thank you :)",
+      "parentUuid": "05c7b62d_548284b2",
+      "revId": "ac31e3d33134e2f3aa1adf8f9f2ce2f3d5ce47b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c54afe97_9c18457a",
         "filename": "vp10/encoder/global_motion.c",
         "patchSetId": 21
@@ -64,6 +118,24 @@
       "writtenOn": "2016-08-25T21:08:27Z",
       "side": 1,
       "message": "Is it necessary? inlier_map will be freed right after this function is called in computer_global_motion_feature_based()",
+      "revId": "ac31e3d33134e2f3aa1adf8f9f2ce2f3d5ce47b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c54afe97_5f9eaf60",
+        "filename": "vp10/encoder/global_motion.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-08-25T22:32:22Z",
+      "side": 1,
+      "message": "Sorry this was being used for an error computation which I didn\u0027t add because I was trying to reduce the amount of unused code. I will add it back in a followup because it could be useful for improving the model.",
+      "parentUuid": "c54afe97_9c18457a",
       "revId": "ac31e3d33134e2f3aa1adf8f9f2ce2f3d5ce47b8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
