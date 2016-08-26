@@ -95,27 +95,30 @@ void vp9_alt_ref_aq_set_nsegments(struct ALT_REF_AQ *self, int nsegments);
  * \param    self    Instance of the class
  * \param    cpi     Encoder context
  */
-void vp9_alt_ref_aq_setup_mode(struct ALT_REF_AQ *self, struct VP9_COMP *cpi);
+void vp9_alt_ref_aq_setup_mode(struct ALT_REF_AQ *const self,
+                               struct VP9_COMP *const cpi);
 
 /*!\brief Set up LOOKAHEAD_AQ segmentation map and delta quantizers
  *
  * \param    self    Instance of the class
  * \param    cpi     Encoder context
  */
-void vp9_alt_ref_aq_setup_map(struct ALT_REF_AQ *self, struct VP9_COMP *cpi);
+void vp9_alt_ref_aq_setup_map(struct ALT_REF_AQ *const self,
+                              struct VP9_COMP *const cpi);
 
 /*!\brief Restore main segmentation map mode and reset the class variables
  *
  * \param    self    Instance of the class
  * \param    cpi     Encoder context
  */
-void vp9_alt_ref_aq_unset_all(struct ALT_REF_AQ *self, struct VP9_COMP *cpi);
+void vp9_alt_ref_aq_unset_all(struct ALT_REF_AQ *const self,
+                              struct VP9_COMP *const cpi);
 
 /*!\brief Destructor
  *
  * \param    self    Instance of the class
  */
-void vp9_alt_ref_aq_destroy(struct ALT_REF_AQ *self);
+void vp9_alt_ref_aq_destroy(struct ALT_REF_AQ *const self);
 
 #ifdef __cplusplus
 }  // extern "C"
