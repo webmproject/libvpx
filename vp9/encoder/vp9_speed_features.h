@@ -67,8 +67,10 @@ typedef enum {
   ALLOW_RECODE_KFMAXBW = 1,
   // Allow recode only for KF/ARF/GF frames.
   ALLOW_RECODE_KFARFGF = 2,
+  // Allow recode for ARF/GF/KF and first normal frame in each group.
+  ALLOW_RECODE_FIRST = 3,
   // Allow recode for all frames based on bitrate constraints.
-  ALLOW_RECODE = 3,
+  ALLOW_RECODE = 4,
 } RECODE_LOOP_TYPE;
 
 typedef enum {

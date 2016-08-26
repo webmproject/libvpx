@@ -170,7 +170,6 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->mode_skip_start = 10;
     sf->adaptive_pred_interp_filter = 1;
 
-    sf->recode_loop = ALLOW_RECODE_KFARFGF;
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
     sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC_H_V;
     sf->intra_y_mode_mask[TX_16X16] = INTRA_DC_H_V;
@@ -180,6 +179,7 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
   }
 
   if (speed >= 2) {
+    sf->recode_loop = ALLOW_RECODE_KFARFGF;
     sf->tx_size_search_method =
         frame_is_boosted(cpi) ? USE_FULL_RD : USE_LARGESTALL;
 
@@ -529,7 +529,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   // best quality defaults
   sf->frame_parameter_update = 1;
   sf->mv.search_method = NSTEP;
-  sf->recode_loop = ALLOW_RECODE_KFARFGF;
+  sf->recode_loop = ALLOW_RECODE_FIRST;
   sf->mv.subpel_search_method = SUBPEL_TREE;
   sf->mv.subpel_iters_per_step = 2;
   sf->mv.subpel_force_stop = 0;

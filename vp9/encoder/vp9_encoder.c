@@ -2425,8 +2425,9 @@ static int recode_loop_test(VP9_COMP *cpi, int high_limit, int low_limit, int q,
   if ((rc->projected_frame_size >= rc->max_frame_bandwidth) ||
       big_rate_miss(cpi, high_limit, low_limit) ||
       (cpi->sf.recode_loop == ALLOW_RECODE) ||
-      ((frame_is_kfgfarf || two_pass_first_group_inter(cpi)) &&
-       (cpi->sf.recode_loop == ALLOW_RECODE_KFARFGF))) {
+      (two_pass_first_group_inter(cpi) &&
+       (cpi->sf.recode_loop == ALLOW_RECODE_FIRST)) ||
+      (frame_is_kfgfarf && (cpi->sf.recode_loop >= ALLOW_RECODE_KFARFGF))) {
     if (frame_is_kfgfarf && (oxcf->resize_mode == RESIZE_DYNAMIC) &&
         scale_down(cpi, q)) {
       // Code this group at a lower resolution.
