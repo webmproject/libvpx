@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "05d6d636_3ce739a9",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-08-26T22:28:44Z",
+      "side": 1,
+      "message": "x86_pause_hint should be in for loop!",
+      "range": {
+        "startLine": 206,
+        "startChar": 7,
+        "endLine": 206,
+        "endChar": 21
+      },
+      "revId": "b728f5ad52f42a68ca5f28003f15563c62f886ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05d6d636_1cfa3d0c",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-08-26T22:28:44Z",
+      "side": 1,
+      "message": "pause hint probably should go!",
+      "range": {
+        "startLine": 237,
+        "startChar": 4,
+        "endLine": 237,
+        "endChar": 18
+      },
+      "revId": "b728f5ad52f42a68ca5f28003f15563c62f886ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
