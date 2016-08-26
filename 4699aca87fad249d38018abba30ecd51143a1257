@@ -22,6 +22,30 @@
       "revId": "4699aca87fad249d38018abba30ecd51143a1257",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c54afe97_b1a562fa",
+        "filename": "vpx_mem/vpx_mem.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-26T06:33:24Z",
+      "side": 1,
+      "message": "the num * size we\u0027re passing might overflow, that was the source of the comment in the commit message. to make a 64-bit upgrade useful at that level, however, we\u0027d have to audit the call sites as simply making the parameters 64-bit won\u0027t fix calculations that overflow within the call itself. in libwebp we added (num, size) for malloc because we audited the callers.",
+      "parentUuid": "05c7b62d_cebd83a7",
+      "range": {
+        "startLine": 72,
+        "startChar": 7,
+        "endLine": 72,
+        "endChar": 35
+      },
+      "revId": "4699aca87fad249d38018abba30ecd51143a1257",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
