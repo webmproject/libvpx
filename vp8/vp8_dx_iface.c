@@ -177,7 +177,7 @@ static vpx_codec_err_t vp8_peek_si_internal(const uint8_t *data,
       si->h = (clear[8] | (clear[9] << 8)) & 0x3fff;
 
       /*printf("w=%d, h=%d\n", si->w, si->h);*/
-      if (!(si->h | si->w)) res = VPX_CODEC_UNSUP_BITSTREAM;
+      if (!(si->h && si->w)) res = VPX_CODEC_CORRUPT_FRAME;
     } else {
       res = VPX_CODEC_UNSUP_BITSTREAM;
     }
@@ -368,6 +368,10 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
 
         if (setjmp(pbi->common.error.jmp)) {
           pbi->common.error.setjmp = 0;
+          /* on failure clear the cached resolution to ensure a full
+           * reallocation is attempted on resync. */
+          ctx->si.w = 0;
+          ctx->si.h = 0;
           vp8_clear_system_state();
           /* same return value as used in vp8dx_receive_compressed_data */
           return -1;
