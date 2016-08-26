@@ -58,9 +58,6 @@ typedef struct variance_vtable {
   vpx_sad_fn_t sdf;
   vpx_variance_fn_t vf;
   vpx_subpixvariance_fn_t svf;
-  vpx_variance_fn_t svf_halfpix_h;
-  vpx_variance_fn_t svf_halfpix_v;
-  vpx_variance_fn_t svf_halfpix_hv;
   vpx_sad_multi_fn_t sdx3f;
   vpx_sad_multi_fn_t sdx8f;
   vpx_sad_multi_d_fn_t sdx4df;

@@ -49,24 +49,6 @@ uint32_t vpx_get_mb_ss_c(const int16_t *a) {
   return sum;
 }
 
-uint32_t vpx_variance_halfpixvar16x16_h_c(const uint8_t *a, int a_stride,
-                                          const uint8_t *b, int b_stride,
-                                          uint32_t *sse) {
-  return vpx_sub_pixel_variance16x16_c(a, a_stride, 4, 0, b, b_stride, sse);
-}
-
-uint32_t vpx_variance_halfpixvar16x16_v_c(const uint8_t *a, int a_stride,
-                                          const uint8_t *b, int b_stride,
-                                          uint32_t *sse) {
-  return vpx_sub_pixel_variance16x16_c(a, a_stride, 0, 4, b, b_stride, sse);
-}
-
-uint32_t vpx_variance_halfpixvar16x16_hv_c(const uint8_t *a, int a_stride,
-                                           const uint8_t *b, int b_stride,
-                                           uint32_t *sse) {
-  return vpx_sub_pixel_variance16x16_c(a, a_stride, 4, 4, b, b_stride, sse);
-}
-
 static void variance(const uint8_t *a, int a_stride, const uint8_t *b,
                      int b_stride, int w, int h, uint32_t *sse, int *sum) {
   int i, j;

@@ -409,7 +409,8 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   /* go left then right and check error */
   this_mv.as_mv.row = startmv.as_mv.row;
   this_mv.as_mv.col = ((startmv.as_mv.col - 8) | 4);
-  thismse = vfp->svf_halfpix_h(y - 1, y_stride, z, b->src_stride, &sse);
+  /* "halfpix" horizontal variance */
+  thismse = vfp->svf(y - 1, y_stride, 4, 0, z, b->src_stride, &sse);
   left = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
 
   if (left < bestmse) {
@@ -420,7 +421,8 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   }
 
   this_mv.as_mv.col += 8;
-  thismse = vfp->svf_halfpix_h(y, y_stride, z, b->src_stride, &sse);
+  /* "halfpix" horizontal variance */
+  thismse = vfp->svf(y, y_stride, 4, 0, z, b->src_stride, &sse);
   right = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
 
   if (right < bestmse) {
@@ -433,7 +435,8 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   /* go up then down and check error */
   this_mv.as_mv.col = startmv.as_mv.col;
   this_mv.as_mv.row = ((startmv.as_mv.row - 8) | 4);
-  thismse = vfp->svf_halfpix_v(y - y_stride, y_stride, z, b->src_stride, &sse);
+  /* "halfpix" vertical variance */
+  thismse = vfp->svf(y - y_stride, y_stride, 0, 4, z, b->src_stride, &sse);
   up = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
 
   if (up < bestmse) {
@@ -444,7 +447,8 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   }
 
   this_mv.as_mv.row += 8;
-  thismse = vfp->svf_halfpix_v(y, y_stride, z, b->src_stride, &sse);
+  /* "halfpix" vertical variance */
+  thismse = vfp->svf(y, y_stride, 0, 4, z, b->src_stride, &sse);
   down = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
 
   if (down < bestmse) {
@@ -462,25 +466,28 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     case 0:
       this_mv.as_mv.col = (this_mv.as_mv.col - 8) | 4;
       this_mv.as_mv.row = (this_mv.as_mv.row - 8) | 4;
-      thismse = vfp->svf_halfpix_hv(y - 1 - y_stride, y_stride, z,
-                                    b->src_stride, &sse);
+      /* "halfpix" horizontal/vertical variance */
+      thismse =
+          vfp->svf(y - 1 - y_stride, y_stride, 4, 4, z, b->src_stride, &sse);
       break;
     case 1:
       this_mv.as_mv.col += 4;
       this_mv.as_mv.row = (this_mv.as_mv.row - 8) | 4;
-      thismse =
-          vfp->svf_halfpix_hv(y - y_stride, y_stride, z, b->src_stride, &sse);
+      /* "halfpix" horizontal/vertical variance */
+      thismse = vfp->svf(y - y_stride, y_stride, 4, 4, z, b->src_stride, &sse);
       break;
     case 2:
       this_mv.as_mv.col = (this_mv.as_mv.col - 8) | 4;
       this_mv.as_mv.row += 4;
-      thismse = vfp->svf_halfpix_hv(y - 1, y_stride, z, b->src_stride, &sse);
+      /* "halfpix" horizontal/vertical variance */
+      thismse = vfp->svf(y - 1, y_stride, 4, 4, z, b->src_stride, &sse);
       break;
     case 3:
     default:
       this_mv.as_mv.col += 4;
       this_mv.as_mv.row += 4;
-      thismse = vfp->svf_halfpix_hv(y, y_stride, z, b->src_stride, &sse);
+      /* "halfpix" horizontal/vertical variance */
+      thismse = vfp->svf(y, y_stride, 4, 4, z, b->src_stride, &sse);
       break;
   }
 
@@ -698,7 +705,8 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   /* go left then right and check error */
   this_mv.as_mv.row = startmv.as_mv.row;
   this_mv.as_mv.col = ((startmv.as_mv.col - 8) | 4);
-  thismse = vfp->svf_halfpix_h(y - 1, y_stride, z, b->src_stride, &sse);
+  /* "halfpix" horizontal variance */
+  thismse = vfp->svf(y - 1, y_stride, 4, 0, z, b->src_stride, &sse);
   left = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
 
   if (left < bestmse) {
@@ -709,7 +717,8 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   }
 
   this_mv.as_mv.col += 8;
-  thismse = vfp->svf_halfpix_h(y, y_stride, z, b->src_stride, &sse);
+  /* "halfpix" horizontal variance */
+  thismse = vfp->svf(y, y_stride, 4, 0, z, b->src_stride, &sse);
   right = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
 
   if (right < bestmse) {
@@ -722,7 +731,8 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   /* go up then down and check error */
   this_mv.as_mv.col = startmv.as_mv.col;
   this_mv.as_mv.row = ((startmv.as_mv.row - 8) | 4);
-  thismse = vfp->svf_halfpix_v(y - y_stride, y_stride, z, b->src_stride, &sse);
+  /* "halfpix" vertical variance */
+  thismse = vfp->svf(y - y_stride, y_stride, 0, 4, z, b->src_stride, &sse);
   up = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
 
   if (up < bestmse) {
@@ -733,7 +743,8 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   }
 
   this_mv.as_mv.row += 8;
-  thismse = vfp->svf_halfpix_v(y, y_stride, z, b->src_stride, &sse);
+  /* "halfpix" vertical variance */
+  thismse = vfp->svf(y, y_stride, 0, 4, z, b->src_stride, &sse);
   down = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
 
   if (down < bestmse) {
@@ -751,25 +762,28 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     case 0:
       this_mv.as_mv.col = (this_mv.as_mv.col - 8) | 4;
       this_mv.as_mv.row = (this_mv.as_mv.row - 8) | 4;
-      thismse = vfp->svf_halfpix_hv(y - 1 - y_stride, y_stride, z,
-                                    b->src_stride, &sse);
+      /* "halfpix" horizontal/vertical variance */
+      thismse =
+          vfp->svf(y - 1 - y_stride, y_stride, 4, 4, z, b->src_stride, &sse);
       break;
     case 1:
       this_mv.as_mv.col += 4;
       this_mv.as_mv.row = (this_mv.as_mv.row - 8) | 4;
-      thismse =
-          vfp->svf_halfpix_hv(y - y_stride, y_stride, z, b->src_stride, &sse);
+      /* "halfpix" horizontal/vertical variance */
+      thismse = vfp->svf(y - y_stride, y_stride, 4, 4, z, b->src_stride, &sse);
       break;
     case 2:
       this_mv.as_mv.col = (this_mv.as_mv.col - 8) | 4;
       this_mv.as_mv.row += 4;
-      thismse = vfp->svf_halfpix_hv(y - 1, y_stride, z, b->src_stride, &sse);
+      /* "halfpix" horizontal/vertical variance */
+      thismse = vfp->svf(y - 1, y_stride, 4, 4, z, b->src_stride, &sse);
       break;
     case 3:
     default:
       this_mv.as_mv.col += 4;
       this_mv.as_mv.row += 4;
-      thismse = vfp->svf_halfpix_hv(y, y_stride, z, b->src_stride, &sse);
+      /* "halfpix" horizontal/vertical variance */
+      thismse = vfp->svf(y, y_stride, 4, 4, z, b->src_stride, &sse);
       break;
   }
 
