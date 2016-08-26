@@ -81,7 +81,6 @@ VP9_CX_SRCS-yes += encoder/vp9_aq_cyclicrefresh.c
 VP9_CX_SRCS-yes += encoder/vp9_aq_cyclicrefresh.h
 VP9_CX_SRCS-yes += encoder/vp9_aq_complexity.c
 VP9_CX_SRCS-yes += encoder/vp9_aq_complexity.h
-VP9_CX_SRCS-yes += encoder/vp9_alt_ref_aq_private.h
 VP9_CX_SRCS-yes += encoder/vp9_alt_ref_aq.h
 VP9_CX_SRCS-yes += encoder/vp9_alt_ref_aq.c
 VP9_CX_SRCS-yes += encoder/vp9_skin_detection.c

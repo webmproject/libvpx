@@ -9,9 +9,11 @@
  */
 
 #include "vp9/encoder/vp9_encoder.h"
-
-#include "vp9/encoder/vp9_alt_ref_aq_private.h"
 #include "vp9/encoder/vp9_alt_ref_aq.h"
+
+struct ALT_REF_AQ {
+  int dummy;
+};
 
 struct ALT_REF_AQ *vp9_alt_ref_aq_create() {
   return (struct ALT_REF_AQ *)vpx_malloc(sizeof(struct ALT_REF_AQ));
