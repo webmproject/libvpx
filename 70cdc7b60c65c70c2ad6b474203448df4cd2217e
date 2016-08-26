@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "05d6d636_fcc9c15c",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3303,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-08-26T21:26:48Z",
+      "side": 1,
+      "message": "It looks like you are just disabling cyclic refresh in all circumstances. Is it getting turned back on somewhere else?",
+      "range": {
+        "startLine": 3302,
+        "startChar": 0,
+        "endLine": 3303,
+        "endChar": 49
+      },
+      "revId": "70cdc7b60c65c70c2ad6b474203448df4cd2217e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
