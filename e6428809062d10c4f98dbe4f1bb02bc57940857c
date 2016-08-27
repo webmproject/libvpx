@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "05d6d636_a503286a",
+        "filename": "vp9/encoder/vp9_alt_ref_aq.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-27T17:42:43Z",
+      "side": 1,
+      "message": "this should have a dummy element; visual studio will warn about an empty struct.",
+      "revId": "e6428809062d10c4f98dbe4f1bb02bc57940857c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
