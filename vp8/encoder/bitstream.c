@@ -338,18 +338,14 @@ static void pack_mb_row_tokens(VP8_COMP *cpi, vp8_writer *w) {
 
 static void write_mv_ref(vp8_writer *w, MB_PREDICTION_MODE m,
                          const vp8_prob *p) {
-#if CONFIG_DEBUG
   assert(NEARESTMV <= m && m <= SPLITMV);
-#endif
   vp8_write_token(w, vp8_mv_ref_tree, p,
                   vp8_mv_ref_encoding_array + (m - NEARESTMV));
 }
 
 static void write_sub_mv_ref(vp8_writer *w, B_PREDICTION_MODE m,
                              const vp8_prob *p) {
-#if CONFIG_DEBUG
   assert(LEFT4X4 <= m && m <= NEW4X4);
-#endif
   vp8_write_token(w, vp8_sub_mv_ref_tree, p,
                   vp8_sub_mv_ref_encoding_array + (m - LEFT4X4));
 }

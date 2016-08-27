@@ -8,12 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#if CONFIG_DEBUG
 #include <assert.h>
-#endif
 #include <stdio.h>
 
-#include "treecoder.h"
+#include "vp8/common/treecoder.h"
 
 static void tree2tok(struct vp8_token_struct *const p, vp8_tree t, int i, int v,
                      int L) {
@@ -48,9 +46,7 @@ static void branch_counts(int n, /* n = size of alphabet */
   const int tree_len = n - 1;
   int t = 0;
 
-#if CONFIG_DEBUG
   assert(tree_len);
-#endif
 
   do {
     branch_ct[t][0] = branch_ct[t][1] = 0;
@@ -68,17 +64,13 @@ static void branch_counts(int n, /* n = size of alphabet */
     do {
       const int b = (enc >> --L) & 1;
       const int j = i >> 1;
-#if CONFIG_DEBUG
       assert(j < tree_len && 0 <= L);
-#endif
 
       branch_ct[j][b] += ct;
       i = tree[i + b];
     } while (i > 0);
 
-#if CONFIG_DEBUG
     assert(!L);
-#endif
   } while (++t < n);
 }
 
@@ -97,9 +89,7 @@ void vp8_tree_probs_from_distribution(int n, /* n = size of alphabet */
     const unsigned int *const c = branch_ct[t];
     const unsigned int tot = c[0] + c[1];
 
-#if CONFIG_DEBUG
     assert(tot < (1 << 24)); /* no overflow below */
-#endif
 
     if (tot) {
       const unsigned int p = ((c[0] * Pfac) + (rd ? tot >> 1 : 0)) / tot;
