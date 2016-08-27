@@ -99,6 +99,24 @@
       "revId": "ca29fbd4cacb5b1391e3a31016d4906b3d0573a4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05d6d636_2596f8e4",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 615,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-27T21:48:23Z",
+      "side": 1,
+      "message": "this is consistent with the rest of the file currently, we can revisit this after any other changes are done",
+      "parentUuid": "05d6d636_0a40ab0f",
+      "revId": "ca29fbd4cacb5b1391e3a31016d4906b3d0573a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
