@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "05d6d636_1fa0efe4",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-27T00:01:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "05d6d636_3c297932",
+      "range": {
+        "startLine": 171,
+        "startChar": 37,
+        "endLine": 171,
+        "endChar": 47
+      },
+      "revId": "ca29fbd4cacb5b1391e3a31016d4906b3d0573a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "05d6d636_dfcef762",
         "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
         "patchSetId": 3
@@ -36,6 +60,24 @@
       "writtenOn": "2016-08-26T23:07:41Z",
       "side": 1,
       "message": "you can use vst1q_lane_u64. somewhere it was mentioned that stores should be preferred over gets",
+      "revId": "ca29fbd4cacb5b1391e3a31016d4906b3d0573a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05d6d636_bfe0db23",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 615,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-27T00:01:47Z",
+      "side": 1,
+      "message": "A couple of weeks ago, I read an ARM tech article said that store (NEON) and load (ARM) has no help in solving the long cycle penalties of data transfer from NEON register to ARM register. But I couldn\u0027t find the article today.",
+      "parentUuid": "05d6d636_dfcef762",
       "revId": "ca29fbd4cacb5b1391e3a31016d4906b3d0573a4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
