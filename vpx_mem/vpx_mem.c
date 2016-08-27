@@ -59,7 +59,7 @@ void *vpx_memalign(size_t align, size_t size) {
 
   addr = malloc((size_t)aligned_size);
   if (addr) {
-    x = align_addr((unsigned char *)addr + ADDRESS_STORAGE_SIZE, (int)align);
+    x = align_addr((unsigned char *)addr + ADDRESS_STORAGE_SIZE, align);
     set_actual_malloc_address(x, addr);
   }
   return x;
