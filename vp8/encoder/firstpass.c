@@ -33,7 +33,7 @@
 #include "encodemv.h"
 #include "encodeframe.h"
 
-/* #define OUTPUT_FPF 1 */
+#define OUTPUT_FPF 0
 
 extern void vp8cx_frame_init_quantizer(VP8_COMP *cpi);
 
