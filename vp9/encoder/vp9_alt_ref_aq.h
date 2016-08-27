@@ -84,7 +84,7 @@ int vp9_alt_ref_aq_disable_if(const struct ALT_REF_AQ *self,
  * \param    self        Instance of the class
  * \param    nsegments   Maximum number of segments
  */
-void vp9_alt_ref_aq_set_nsegments(struct ALT_REF_AQ *self, int nsegments);
+void vp9_alt_ref_aq_set_nsegments(struct ALT_REF_AQ *const self, int nsegments);
 
 /*!\brief Set up LOOKAHEAD_AQ segmentation mode
  *
