@@ -606,12 +606,7 @@ process_toolchain() {
         check_add_cflags -Wuninitialized
         check_add_cflags -Wunused-variable
         case ${CC} in
-          *clang*)
-              # libaom and/or clang have issues with aliasing:
-              # https://code.google.com/p/webm/issues/detail?id=603
-              # work around them until they are fixed
-              check_add_cflags -fno-strict-aliasing
-          ;;
+          *clang*) ;;
           *) check_add_cflags -Wunused-but-set-variable ;;
         esac
         if enabled mips || [ -z "${INLINE}" ]; then
