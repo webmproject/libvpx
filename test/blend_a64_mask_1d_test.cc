@@ -93,16 +93,16 @@ class BlendA64Mask1DTest : public FunctionEquivalenceTest<F> {
 
   T dst_ref_[kBufSize];
   T dst_tst_[kBufSize];
-  size_t dst_stride_;
-  size_t dst_offset_;
+  uint32_t dst_stride_;
+  uint32_t dst_offset_;
 
   T src0_[kBufSize];
-  size_t src0_stride_;
-  size_t src0_offset_;
+  uint32_t src0_stride_;
+  uint32_t src0_offset_;
 
   T src1_[kBufSize];
-  size_t src1_stride_;
-  size_t src1_offset_;
+  uint32_t src1_stride_;
+  uint32_t src1_offset_;
 
   uint8_t mask_[kMaxMaskSize];
 
