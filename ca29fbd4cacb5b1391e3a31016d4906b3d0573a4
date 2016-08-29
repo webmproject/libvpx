@@ -117,6 +117,24 @@
       "revId": "ca29fbd4cacb5b1391e3a31016d4906b3d0573a4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05d6d636_2b1009a7",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 615,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-08-29T16:10:57Z",
+      "side": 1,
+      "message": "69452 saved cycles by changing from (memory \u003d\u003d\u003e ARM register \u003d\u003d\u003e NEON register) to (memory \u003d\u003d\u003e NEON register).\n69467 saved cycles by changing from (NEON register \u003d\u003d\u003e ARM register \u003d\u003d\u003e memory) to (NEON register \u003d\u003d\u003e memory).\n\nHere we finally need (NEON register \u003d\u003d\u003e ARM register) without memory involved.",
+      "parentUuid": "05d6d636_0a40ab0f",
+      "revId": "ca29fbd4cacb5b1391e3a31016d4906b3d0573a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
