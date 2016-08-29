@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "05d6d636_599c4704",
+        "filename": "vp10/common/restoration.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-08-29T19:48:07Z",
+      "side": 1,
+      "message": "does not handle sub-sampling correctly,",
+      "revId": "46d705d6edb55fa8d562713f0e553dfbfae8715f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
