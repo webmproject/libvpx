@@ -418,8 +418,9 @@ static const TX_TYPE intra_mode_to_tx_type_context[INTRA_MODES] = {
 
 #if CONFIG_SUPERTX
 static INLINE int supertx_enabled(const MB_MODE_INFO *mbmi) {
-  return (int)mbmi->tx_size > VPXMIN(b_width_log2_lookup[mbmi->sb_type],
-                                     b_height_log2_lookup[mbmi->sb_type]);
+  return (int)txsize_sqr_map[mbmi->tx_size] >
+         VPXMIN(b_width_log2_lookup[mbmi->sb_type],
+                b_height_log2_lookup[mbmi->sb_type]);
 }
 #endif  // CONFIG_SUPERTX
 
@@ -733,8 +734,8 @@ static INLINE TX_SIZE get_uv_tx_size(const MB_MODE_INFO *mbmi,
                                      const struct macroblockd_plane *pd) {
 #if CONFIG_SUPERTX
   if (supertx_enabled(mbmi))
-    return uvsupertx_size_lookup[mbmi->tx_size][pd->subsampling_x]
-                                [pd->subsampling_y];
+    return uvsupertx_size_lookup[txsize_sqr_map[mbmi->tx_size]]
+                                [pd->subsampling_x][pd->subsampling_y];
 #endif  // CONFIG_SUPERTX
   return get_uv_tx_size_impl(mbmi->tx_size, mbmi->sb_type, pd->subsampling_x,
                              pd->subsampling_y);
