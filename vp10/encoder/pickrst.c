@@ -24,9 +24,9 @@
 #include "vp10/common/quant_common.h"
 
 #include "vp10/encoder/encoder.h"
-#include "vp10/encoder/quantize.h"
 #include "vp10/encoder/picklpf.h"
 #include "vp10/encoder/pickrst.h"
+#include "vp10/encoder/quantize.h"
 
 static int64_t try_restoration_frame(const YV12_BUFFER_CONFIG *sd,
                                      VP10_COMP *const cpi, RestorationInfo *rsi,
@@ -51,17 +51,18 @@ static int64_t try_restoration_frame(const YV12_BUFFER_CONFIG *sd,
 
 static int search_bilateral_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
                                   int filter_level, int partial_frame,
-                                  double *best_cost_ret) {
+                                  int *bilateral_level, double *best_cost_ret) {
   VP10_COMMON *const cm = &cpi->common;
-  int i, restoration_best;
+  int i, j, tile_idx;
   int64_t err;
-  double best_cost;
-  double cost;
-  const int restoration_level_bits = vp10_restoration_level_bits(&cpi->common);
-  const int restoration_levels = 1 << restoration_level_bits;
-  MACROBLOCK *x = &cpi->td.mb;
   int bits;
+  double cost, best_cost, cost_norestore, cost_bilateral;
+  const int bilateral_level_bits = vp10_bilateral_level_bits(&cpi->common);
+  const int bilateral_levels = 1 << bilateral_level_bits;
+  MACROBLOCK *x = &cpi->td.mb;
   RestorationInfo rsi;
+  const int ntiles =
+      vp10_get_restoration_ntiles(BILATERAL_TILESIZE, cm->width, cm->height);
 
   //  Make a copy of the unfiltered / processed recon buffer
   vpx_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
@@ -69,60 +70,102 @@ static int search_bilateral_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
                          1, partial_frame);
   vpx_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_db);
 
-  restoration_best = -1;
+  // RD cost associated with no restoration
   rsi.restoration_type = RESTORE_NONE;
   err = try_restoration_frame(sd, cpi, &rsi, partial_frame);
   bits = 0;
-  best_cost = RDCOST_DBL(x->rdmult, x->rddiv,
-                         (bits << (VP10_PROB_COST_SHIFT - 4)), err);
-  for (i = 0; i < restoration_levels; ++i) {
-    rsi.restoration_type = RESTORE_BILATERAL;
-    rsi.restoration_level = i;
-    err = try_restoration_frame(sd, cpi, &rsi, partial_frame);
-    // Normally the rate is rate in bits * 256 and dist is sum sq err * 64
-    // when RDCOST is used.  However below we just scale both in the correct
-    // ratios appropriately but not exactly by these values.
-    bits = restoration_level_bits;
-    cost = RDCOST_DBL(x->rdmult, x->rddiv, (bits << (VP10_PROB_COST_SHIFT - 4)),
-                      err);
-    if (cost < best_cost) {
-      restoration_best = i;
-      best_cost = cost;
+  cost_norestore = RDCOST_DBL(x->rdmult, x->rddiv,
+                              (bits << (VP10_PROB_COST_SHIFT - 4)), err);
+  best_cost = cost_norestore;
+
+  // RD cost associated with bilateral filtering
+  rsi.restoration_type = RESTORE_BILATERAL;
+  rsi.bilateral_level =
+      (int *)vpx_malloc(sizeof(*rsi.bilateral_level) * ntiles);
+  assert(rsi.bilateral_level != NULL);
+
+  for (j = 0; j < ntiles; ++j) bilateral_level[j] = -1;
+
+  // Find best filter for each tile
+  for (tile_idx = 0; tile_idx < ntiles; ++tile_idx) {
+    for (j = 0; j < ntiles; ++j) rsi.bilateral_level[j] = -1;
+    best_cost = cost_norestore;
+    for (i = 0; i < bilateral_levels; ++i) {
+      rsi.bilateral_level[tile_idx] = i;
+      err = try_restoration_frame(sd, cpi, &rsi, partial_frame);
+      bits = bilateral_level_bits + 1;
+      // Normally the rate is rate in bits * 256 and dist is sum sq err * 64
+      // when RDCOST is used.  However below we just scale both in the correct
+      // ratios appropriately but not exactly by these values.
+      cost = RDCOST_DBL(x->rdmult, x->rddiv,
+                        (bits << (VP10_PROB_COST_SHIFT - 4)), err);
+      if (cost < best_cost) {
+        bilateral_level[tile_idx] = i;
+        best_cost = cost;
+      }
     }
   }
-  if (best_cost_ret) *best_cost_ret = best_cost;
+  // Find cost for combined configuration
+  bits = 0;
+  for (j = 0; j < ntiles; ++j) {
+    rsi.bilateral_level[j] = bilateral_level[j];
+    if (rsi.bilateral_level[j] >= 0) {
+      bits += (bilateral_level_bits + 1);
+    } else {
+      bits += 1;
+    }
+  }
+  err = try_restoration_frame(sd, cpi, &rsi, partial_frame);
+  cost_bilateral = RDCOST_DBL(x->rdmult, x->rddiv,
+                              (bits << (VP10_PROB_COST_SHIFT - 4)), err);
+
+  vpx_free(rsi.bilateral_level);
+
   vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
-  return restoration_best;
+  if (cost_bilateral < cost_norestore) {
+    if (best_cost_ret) *best_cost_ret = cost_bilateral;
+    return 1;
+  } else {
+    if (best_cost_ret) *best_cost_ret = cost_norestore;
+    return 0;
+  }
 }
 
 static int search_filter_bilateral_level(const YV12_BUFFER_CONFIG *sd,
                                          VP10_COMP *cpi, int partial_frame,
-                                         int *restoration_level,
+                                         int *filter_best, int *bilateral_level,
                                          double *best_cost_ret) {
   const VP10_COMMON *const cm = &cpi->common;
   const struct loopfilter *const lf = &cm->lf;
   const int min_filter_level = 0;
   const int max_filter_level = vp10_get_max_filter_level(cpi);
   int filt_direction = 0;
-  int filt_best, restoration_best;
+  int filt_best;
   double best_err;
-  int i;
-  int bilateral_lev;
+  int i, j;
+  int *tmp_level;
+  int bilateral_success[MAX_LOOP_FILTER + 1];
+
+  const int ntiles =
+      vp10_get_restoration_ntiles(BILATERAL_TILESIZE, cm->width, cm->height);
 
   // Start the search at the previous frame filter level unless it is now out of
   // range.
   int filt_mid = clamp(lf->filter_level, min_filter_level, max_filter_level);
   int filter_step = filt_mid < 16 ? 4 : filt_mid / 4;
   double ss_err[MAX_LOOP_FILTER + 1];
-
   // Set each entry to -1
   for (i = 0; i <= MAX_LOOP_FILTER; ++i) ss_err[i] = -1.0;
 
-  bilateral_lev =
-      search_bilateral_level(sd, cpi, filt_mid, partial_frame, &best_err);
+  tmp_level = (int *)vpx_malloc(sizeof(*tmp_level) * ntiles);
+
+  bilateral_success[filt_mid] = search_bilateral_level(
+      sd, cpi, filt_mid, partial_frame, tmp_level, &best_err);
   filt_best = filt_mid;
-  restoration_best = bilateral_lev;
   ss_err[filt_mid] = best_err;
+  for (j = 0; j < ntiles; ++j) {
+    bilateral_level[j] = tmp_level[j];
+  }
 
   while (filter_step > 0) {
     const int filt_high = VPXMIN(filt_mid + filter_step, max_filter_level);
@@ -140,8 +183,8 @@ static int search_filter_bilateral_level(const YV12_BUFFER_CONFIG *sd,
     if (filt_direction <= 0 && filt_low != filt_mid) {
       // Get Low filter error score
       if (ss_err[filt_low] < 0) {
-        bilateral_lev = search_bilateral_level(sd, cpi, filt_low, partial_frame,
-                                               &ss_err[filt_low]);
+        bilateral_success[filt_low] = search_bilateral_level(
+            sd, cpi, filt_low, partial_frame, tmp_level, &ss_err[filt_low]);
       }
       // If value is close to the best so far then bias towards a lower loop
       // filter value.
@@ -151,22 +194,26 @@ static int search_filter_bilateral_level(const YV12_BUFFER_CONFIG *sd,
           best_err = ss_err[filt_low];
         }
         filt_best = filt_low;
-        restoration_best = bilateral_lev;
+        for (j = 0; j < ntiles; ++j) {
+          bilateral_level[j] = tmp_level[j];
+        }
       }
     }
 
     // Now look at filt_high
     if (filt_direction >= 0 && filt_high != filt_mid) {
       if (ss_err[filt_high] < 0) {
-        bilateral_lev = search_bilateral_level(
-            sd, cpi, filt_high, partial_frame, &ss_err[filt_high]);
+        bilateral_success[filt_high] = search_bilateral_level(
+            sd, cpi, filt_high, partial_frame, tmp_level, &ss_err[filt_high]);
       }
       // If value is significantly better than previous best, bias added against
       // raising filter value
       if (ss_err[filt_high] < (best_err - bias)) {
         best_err = ss_err[filt_high];
         filt_best = filt_high;
-        restoration_best = bilateral_lev;
+        for (j = 0; j < ntiles; ++j) {
+          bilateral_level[j] = tmp_level[j];
+        }
       }
     }
 
@@ -180,35 +227,40 @@ static int search_filter_bilateral_level(const YV12_BUFFER_CONFIG *sd,
     }
   }
 
+  vpx_free(tmp_level);
+
   // Update best error
   best_err = ss_err[filt_best];
 
-  *restoration_level = restoration_best;
   if (best_cost_ret) *best_cost_ret = best_err;
-  return filt_best;
+  if (filter_best) *filter_best = filt_best;
+
+  return bilateral_success[filt_best];
 }
 
-static double find_average(uint8_t *src, int width, int height, int stride) {
+static double find_average(uint8_t *src, int h_start, int h_end, int v_start,
+                           int v_end, int stride) {
   uint64_t sum = 0;
   double avg = 0;
   int i, j;
-  for (i = 0; i < height; i++)
-    for (j = 0; j < width; j++) sum += src[i * stride + j];
-  avg = (double)sum / (height * width);
+  for (i = v_start; i < v_end; i++)
+    for (j = h_start; j < h_end; j++) sum += src[i * stride + j];
+  avg = (double)sum / ((v_end - v_start) * (h_end - h_start));
   return avg;
 }
 
-static void compute_stats(uint8_t *dgd, uint8_t *src, int width, int height,
-                          int dgd_stride, int src_stride, double *M,
-                          double *H) {
+static void compute_stats(uint8_t *dgd, uint8_t *src, int h_start, int h_end,
+                          int v_start, int v_end, int dgd_stride,
+                          int src_stride, double *M, double *H) {
   int i, j, k, l;
   double Y[RESTORATION_WIN2];
-  const double avg = find_average(dgd, width, height, dgd_stride);
+  const double avg =
+      find_average(dgd, h_start, h_end, v_start, v_end, dgd_stride);
 
   memset(M, 0, sizeof(*M) * RESTORATION_WIN2);
   memset(H, 0, sizeof(*H) * RESTORATION_WIN2 * RESTORATION_WIN2);
-  for (i = RESTORATION_HALFWIN; i < height - RESTORATION_HALFWIN; i++) {
-    for (j = RESTORATION_HALFWIN; j < width - RESTORATION_HALFWIN; j++) {
+  for (i = v_start; i < v_end; i++) {
+    for (j = h_start; j < h_end; j++) {
       const double X = (double)src[i * src_stride + j] - avg;
       int idx = 0;
       for (k = -RESTORATION_HALFWIN; k <= RESTORATION_HALFWIN; k++) {
@@ -231,30 +283,32 @@ static void compute_stats(uint8_t *dgd, uint8_t *src, int width, int height,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static double find_average_highbd(uint16_t *src, int width, int height,
-                                  int stride) {
+static double find_average_highbd(uint16_t *src, int h_start, int h_end,
+                                  int v_start, int v_end, int stride) {
   uint64_t sum = 0;
   double avg = 0;
   int i, j;
-  for (i = 0; i < height; i++)
-    for (j = 0; j < width; j++) sum += src[i * stride + j];
-  avg = (double)sum / (height * width);
+  for (i = v_start; i < v_end; i++)
+    for (j = h_start; j < h_end; j++) sum += src[i * stride + j];
+  avg = (double)sum / ((v_end - v_start) * (h_end - h_start));
   return avg;
 }
 
-static void compute_stats_highbd(uint8_t *dgd8, uint8_t *src8, int width,
-                                 int height, int dgd_stride, int src_stride,
-                                 double *M, double *H) {
+static void compute_stats_highbd(uint8_t *dgd8, uint8_t *src8, int h_start,
+                                 int h_end, int v_start, int v_end,
+                                 int dgd_stride, int src_stride, double *M,
+                                 double *H) {
   int i, j, k, l;
   double Y[RESTORATION_WIN2];
   uint16_t *src = CONVERT_TO_SHORTPTR(src8);
   uint16_t *dgd = CONVERT_TO_SHORTPTR(dgd8);
-  const double avg = find_average_highbd(dgd, width, height, dgd_stride);
+  const double avg =
+      find_average_highbd(dgd, h_start, h_end, v_start, v_end, dgd_stride);
 
   memset(M, 0, sizeof(*M) * RESTORATION_WIN2);
   memset(H, 0, sizeof(*H) * RESTORATION_WIN2 * RESTORATION_WIN2);
-  for (i = RESTORATION_HALFWIN; i < height - RESTORATION_HALFWIN; i++) {
-    for (j = RESTORATION_HALFWIN; j < width - RESTORATION_HALFWIN; j++) {
+  for (i = v_start; i < v_end; i++) {
+    for (j = h_start; j < h_end; j++) {
       const double X = (double)src[i * src_stride + j] - avg;
       int idx = 0;
       for (k = -RESTORATION_HALFWIN; k <= RESTORATION_HALFWIN; k++) {
@@ -492,8 +546,9 @@ static void quantize_sym_filter(double *f, int *fi) {
 
 static int search_wiener_filter(const YV12_BUFFER_CONFIG *src, VP10_COMP *cpi,
                                 int filter_level, int partial_frame,
-                                int *vfilter, int *hfilter,
-                                double *best_cost_ret) {
+                                int (*vfilter)[RESTORATION_HALFWIN],
+                                int (*hfilter)[RESTORATION_HALFWIN],
+                                int *process_tile, double *best_cost_ret) {
   VP10_COMMON *const cm = &cpi->common;
   RestorationInfo rsi;
   int64_t err;
@@ -509,11 +564,20 @@ static int search_wiener_filter(const YV12_BUFFER_CONFIG *src, VP10_COMP *cpi,
   const int src_stride = src->y_stride;
   const int dgd_stride = dgd->y_stride;
   double score;
+  int tile_idx, htile_idx, vtile_idx, tile_width, tile_height, nhtiles, nvtiles;
+  int h_start, h_end, v_start, v_end;
+  int i, j;
+
+  const int tilesize = WIENER_TILESIZE;
+  const int ntiles = vp10_get_restoration_ntiles(tilesize, width, height);
 
   assert(width == dgd->y_crop_width);
   assert(height == dgd->y_crop_height);
   assert(width == src->y_crop_width);
   assert(height == src->y_crop_height);
+
+  vp10_get_restoration_tile_size(tilesize, width, height, &tile_width,
+                                 &tile_height, &nhtiles, &nvtiles);
 
   //  Make a copy of the unfiltered / processed recon buffer
   vpx_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
@@ -527,45 +591,91 @@ static int search_wiener_filter(const YV12_BUFFER_CONFIG *src, VP10_COMP *cpi,
   cost_norestore = RDCOST_DBL(x->rdmult, x->rddiv,
                               (bits << (VP10_PROB_COST_SHIFT - 4)), err);
 
-#if CONFIG_VP9_HIGHBITDEPTH
-  if (cm->use_highbitdepth)
-    compute_stats_highbd(dgd->y_buffer, src->y_buffer, width, height,
-                         dgd_stride, src_stride, M, H);
-  else
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-    compute_stats(dgd->y_buffer, src->y_buffer, width, height, dgd_stride,
-                  src_stride, M, H);
-
-  if (!wiener_decompose_sep_sym(M, H, vfilterd, hfilterd)) {
-    *best_cost_ret = DBL_MAX;
-    return 0;
-  }
-  quantize_sym_filter(vfilterd, vfilter);
-  quantize_sym_filter(hfilterd, hfilter);
-
-  // Filter score computes the value of the function x'*A*x - x'*b for the
-  // learned filter and compares it against identity filer. If there is no
-  // reduction in the function, the filter is reverted back to identity
-  score = compute_score(M, H, vfilter, hfilter);
-  if (score > 0.0) {
-    int i;
-    for (i = 0; i < RESTORATION_HALFWIN; ++i) vfilter[i] = hfilter[i] = 0;
-    rsi.restoration_type = RESTORE_NONE;
-    if (best_cost_ret) *best_cost_ret = cost_norestore;
-    vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
-    return 0;
-  }
-
   rsi.restoration_type = RESTORE_WIENER;
-  memcpy(rsi.vfilter, vfilter, sizeof(rsi.vfilter));
-  memcpy(rsi.hfilter, hfilter, sizeof(rsi.hfilter));
+  rsi.vfilter =
+      (int(*)[RESTORATION_HALFWIN])vpx_malloc(sizeof(*rsi.vfilter) * ntiles);
+  assert(rsi.vfilter != NULL);
+  rsi.hfilter =
+      (int(*)[RESTORATION_HALFWIN])vpx_malloc(sizeof(*rsi.hfilter) * ntiles);
+  assert(rsi.hfilter != NULL);
+  rsi.wiener_level = (int *)vpx_malloc(sizeof(*rsi.wiener_level) * ntiles);
+  assert(rsi.wiener_level != NULL);
+
+  // Compute best Wiener filters for each tile
+  for (tile_idx = 0; tile_idx < ntiles; ++tile_idx) {
+    htile_idx = tile_idx % nhtiles;
+    vtile_idx = tile_idx / nhtiles;
+    h_start =
+        htile_idx * tile_width + ((htile_idx > 0) ? 0 : RESTORATION_HALFWIN);
+    h_end = (htile_idx < nhtiles - 1) ? ((htile_idx + 1) * tile_width)
+                                      : (width - RESTORATION_HALFWIN);
+    v_start =
+        vtile_idx * tile_height + ((vtile_idx > 0) ? 0 : RESTORATION_HALFWIN);
+    v_end = (vtile_idx < nvtiles - 1) ? ((vtile_idx + 1) * tile_height)
+                                      : (height - RESTORATION_HALFWIN);
+
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (cm->use_highbitdepth)
+      compute_stats_highbd(dgd->y_buffer, src->y_buffer, h_start, h_end,
+                           v_start, v_end, dgd_stride, src_stride, M, H);
+    else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+      compute_stats(dgd->y_buffer, src->y_buffer, h_start, h_end, v_start,
+                    v_end, dgd_stride, src_stride, M, H);
+
+    if (!wiener_decompose_sep_sym(M, H, vfilterd, hfilterd)) {
+      for (i = 0; i < RESTORATION_HALFWIN; ++i)
+        rsi.vfilter[tile_idx][i] = rsi.hfilter[tile_idx][i] = 0;
+      process_tile[tile_idx] = 0;
+      continue;
+    }
+    quantize_sym_filter(vfilterd, rsi.vfilter[tile_idx]);
+    quantize_sym_filter(hfilterd, rsi.hfilter[tile_idx]);
+    process_tile[tile_idx] = 1;
+
+    // Filter score computes the value of the function x'*A*x - x'*b for the
+    // learned filter and compares it against identity filer. If there is no
+    // reduction in the function, the filter is reverted back to identity
+    score = compute_score(M, H, rsi.vfilter[tile_idx], rsi.hfilter[tile_idx]);
+    if (score > 0.0) {
+      for (i = 0; i < RESTORATION_HALFWIN; ++i)
+        rsi.vfilter[tile_idx][i] = rsi.hfilter[tile_idx][i] = 0;
+      process_tile[tile_idx] = 0;
+      continue;
+    }
+
+    for (j = 0; j < ntiles; ++j) rsi.wiener_level[j] = 0;
+    rsi.wiener_level[tile_idx] = 1;
+
+    err = try_restoration_frame(src, cpi, &rsi, partial_frame);
+    bits = 1 + WIENER_FILT_BITS;
+    cost_wiener = RDCOST_DBL(x->rdmult, x->rddiv,
+                             (bits << (VP10_PROB_COST_SHIFT - 4)), err);
+    if (cost_wiener >= cost_norestore) process_tile[tile_idx] = 0;
+  }
+  // Cost for Wiener filtering
+  bits = 0;
+  for (tile_idx = 0; tile_idx < ntiles; ++tile_idx) {
+    bits += (process_tile[tile_idx] ? (WIENER_FILT_BITS + 1) : 1);
+    rsi.wiener_level[tile_idx] = process_tile[tile_idx];
+  }
   err = try_restoration_frame(src, cpi, &rsi, partial_frame);
-  bits = WIENER_FILT_BITS;
   cost_wiener = RDCOST_DBL(x->rdmult, x->rddiv,
                            (bits << (VP10_PROB_COST_SHIFT - 4)), err);
 
-  vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
+  for (tile_idx = 0; tile_idx < ntiles; ++tile_idx) {
+    if (process_tile[tile_idx] == 0) continue;
+    for (i = 0; i < RESTORATION_HALFWIN; ++i) {
+      vfilter[tile_idx][i] = rsi.vfilter[tile_idx][i];
+      hfilter[tile_idx][i] = rsi.hfilter[tile_idx][i];
+    }
+  }
 
+  vpx_free(rsi.vfilter);
+  vpx_free(rsi.hfilter);
+  vpx_free(rsi.wiener_level);
+
+  vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
   if (cost_wiener < cost_norestore) {
     if (best_cost_ret) *best_cost_ret = cost_wiener;
     return 1;
@@ -580,9 +690,29 @@ void vp10_pick_filter_restoration(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
   VP10_COMMON *const cm = &cpi->common;
   struct loopfilter *const lf = &cm->lf;
   int wiener_success = 0;
+  int bilateral_success = 0;
   double cost_bilateral = DBL_MAX;
   double cost_wiener = DBL_MAX;
   double cost_norestore = DBL_MAX;
+  int ntiles;
+
+  ntiles =
+      vp10_get_restoration_ntiles(BILATERAL_TILESIZE, cm->width, cm->height);
+  cm->rst_info.bilateral_level =
+      (int *)vpx_realloc(cm->rst_info.bilateral_level,
+                         sizeof(*cm->rst_info.bilateral_level) * ntiles);
+  assert(cm->rst_info.bilateral_level != NULL);
+
+  ntiles = vp10_get_restoration_ntiles(WIENER_TILESIZE, cm->width, cm->height);
+  cm->rst_info.wiener_level = (int *)vpx_realloc(
+      cm->rst_info.wiener_level, sizeof(*cm->rst_info.wiener_level) * ntiles);
+  assert(cm->rst_info.wiener_level != NULL);
+  cm->rst_info.vfilter = (int(*)[RESTORATION_HALFWIN])vpx_realloc(
+      cm->rst_info.vfilter, sizeof(*cm->rst_info.vfilter) * ntiles);
+  assert(cm->rst_info.vfilter != NULL);
+  cm->rst_info.hfilter = (int(*)[RESTORATION_HALFWIN])vpx_realloc(
+      cm->rst_info.hfilter, sizeof(*cm->rst_info.hfilter) * ntiles);
+  assert(cm->rst_info.hfilter != NULL);
 
   lf->sharpness_level = cm->frame_type == KEY_FRAME ? 0 : cpi->oxcf.sharpness;
 
@@ -618,14 +748,15 @@ void vp10_pick_filter_restoration(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     if (cm->frame_type == KEY_FRAME) filt_guess -= 4;
     lf->filter_level = clamp(filt_guess, min_filter_level, max_filter_level);
-    cm->rst_info.restoration_level = search_bilateral_level(
+    bilateral_success = search_bilateral_level(
         sd, cpi, lf->filter_level, method == LPF_PICK_FROM_SUBIMAGE,
-        &cost_bilateral);
+        cm->rst_info.bilateral_level, &cost_bilateral);
     wiener_success = search_wiener_filter(
         sd, cpi, lf->filter_level, method == LPF_PICK_FROM_SUBIMAGE,
-        cm->rst_info.vfilter, cm->rst_info.hfilter, &cost_wiener);
+        cm->rst_info.vfilter, cm->rst_info.hfilter, cm->rst_info.wiener_level,
+        &cost_wiener);
     if (cost_bilateral < cost_wiener) {
-      if (cm->rst_info.restoration_level != -1)
+      if (bilateral_success)
         cm->rst_info.restoration_type = RESTORE_BILATERAL;
       else
         cm->rst_info.restoration_type = RESTORE_NONE;
@@ -637,17 +768,18 @@ void vp10_pick_filter_restoration(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
     }
   } else {
     int blf_filter_level = -1;
-    blf_filter_level = search_filter_bilateral_level(
-        sd, cpi, method == LPF_PICK_FROM_SUBIMAGE,
-        &cm->rst_info.restoration_level, &cost_bilateral);
+    bilateral_success = search_filter_bilateral_level(
+        sd, cpi, method == LPF_PICK_FROM_SUBIMAGE, &blf_filter_level,
+        cm->rst_info.bilateral_level, &cost_bilateral);
     lf->filter_level = vp10_search_filter_level(
         sd, cpi, method == LPF_PICK_FROM_SUBIMAGE, &cost_norestore);
     wiener_success = search_wiener_filter(
         sd, cpi, lf->filter_level, method == LPF_PICK_FROM_SUBIMAGE,
-        cm->rst_info.vfilter, cm->rst_info.hfilter, &cost_wiener);
+        cm->rst_info.vfilter, cm->rst_info.hfilter, cm->rst_info.wiener_level,
+        &cost_wiener);
     if (cost_bilateral < cost_wiener) {
       lf->filter_level = blf_filter_level;
-      if (cm->rst_info.restoration_level != -1)
+      if (bilateral_success)
         cm->rst_info.restoration_type = RESTORE_BILATERAL;
       else
         cm->rst_info.restoration_type = RESTORE_NONE;
@@ -658,7 +790,19 @@ void vp10_pick_filter_restoration(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
         cm->rst_info.restoration_type = RESTORE_NONE;
     }
     // printf("[%d] Costs %g %g (%d) %g (%d)\n", cm->rst_info.restoration_type,
-    //         cost_norestore, cost_bilateral, lf->filter_level, cost_wiener,
-    //         wiener_success);
+    //        cost_norestore, cost_bilateral, lf->filter_level, cost_wiener,
+    //        wiener_success);
+  }
+  if (cm->rst_info.restoration_type != RESTORE_BILATERAL) {
+    vpx_free(cm->rst_info.bilateral_level);
+    cm->rst_info.bilateral_level = NULL;
+  }
+  if (cm->rst_info.restoration_type != RESTORE_WIENER) {
+    vpx_free(cm->rst_info.vfilter);
+    cm->rst_info.vfilter = NULL;
+    vpx_free(cm->rst_info.hfilter);
+    cm->rst_info.hfilter = NULL;
+    vpx_free(cm->rst_info.wiener_level);
+    cm->rst_info.wiener_level = NULL;
   }
 }

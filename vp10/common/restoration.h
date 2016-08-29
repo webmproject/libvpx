@@ -11,8 +11,8 @@
 #ifndef VP10_COMMON_RESTORATION_H_
 #define VP10_COMMON_RESTORATION_H_
 
-#include "vpx_ports/mem.h"
 #include "./vpx_config.h"
+#include "vpx_ports/mem.h"
 
 #include "vp10/common/blockd.h"
 
@@ -20,11 +20,15 @@
 extern "C" {
 #endif
 
-#define RESTORATION_LEVEL_BITS_KF 4
-#define RESTORATION_LEVELS_KF (1 << RESTORATION_LEVEL_BITS_KF)
-#define RESTORATION_LEVEL_BITS 3
-#define RESTORATION_LEVELS (1 << RESTORATION_LEVEL_BITS)
-#define DEF_RESTORATION_LEVEL 2
+#define BILATERAL_LEVEL_BITS_KF 4
+#define BILATERAL_LEVELS_KF (1 << BILATERAL_LEVEL_BITS_KF)
+#define BILATERAL_LEVEL_BITS 3
+#define BILATERAL_LEVELS (1 << BILATERAL_LEVEL_BITS)
+// #define DEF_BILATERAL_LEVEL     2
+
+#define RESTORATION_TILESIZES 3
+#define BILATERAL_TILESIZE 0
+#define WIENER_TILESIZE 2
 
 #define RESTORATION_HALFWIN 3
 #define RESTORATION_HALFWIN1 (RESTORATION_HALFWIN + 1)
@@ -34,9 +38,9 @@ extern "C" {
 #define RESTORATION_FILT_BITS 7
 #define RESTORATION_FILT_STEP (1 << RESTORATION_FILT_BITS)
 
-#define WIENER_FILT_TAP0_MINV -5
+#define WIENER_FILT_TAP0_MINV (-5)
 #define WIENER_FILT_TAP1_MINV (-23)
-#define WIENER_FILT_TAP2_MINV -20
+#define WIENER_FILT_TAP2_MINV (-16)
 
 #define WIENER_FILT_TAP0_BITS 4
 #define WIENER_FILT_TAP1_BITS 5
@@ -60,20 +64,37 @@ typedef enum {
 
 typedef struct {
   RestorationType restoration_type;
-  int restoration_level;
-  int vfilter[RESTORATION_HALFWIN], hfilter[RESTORATION_HALFWIN];
+  // Bilateral filter
+  int *bilateral_level;
+  // Wiener filter
+  int *wiener_level;
+  int (*vfilter)[RESTORATION_HALFWIN], (*hfilter)[RESTORATION_HALFWIN];
 } RestorationInfo;
 
 typedef struct {
   RestorationType restoration_type;
-  uint8_t *wx_lut[RESTORATION_WIN];
-  uint8_t *wr_lut;
-  int vfilter[RESTORATION_WIN], hfilter[RESTORATION_WIN];
+  int subsampling_x;
+  int subsampling_y;
+  int tilesize_index;
+  int ntiles;
+  int tile_width, tile_height;
+  int nhtiles, nvtiles;
+  // Bilateral filter
+  int *bilateral_level;
+  uint8_t (**wx_lut)[RESTORATION_WIN];
+  uint8_t **wr_lut;
+  // Wiener filter
+  int *wiener_level;
+  int (*vfilter)[RESTORATION_WIN], (*hfilter)[RESTORATION_WIN];
 } RestorationInternal;
 
-int vp10_restoration_level_bits(const struct VP10Common *const cm);
+int vp10_bilateral_level_bits(const struct VP10Common *const cm);
+int vp10_get_restoration_ntiles(int tilesize, int width, int height);
+void vp10_get_restoration_tile_size(int tilesize, int width, int height,
+                                    int *tile_width, int *tile_height,
+                                    int *nhtiles, int *nvtiles);
 void vp10_loop_restoration_init(RestorationInternal *rst, RestorationInfo *rsi,
-                                int kf);
+                                int kf, int width, int height);
 void vp10_loop_restoration_frame(YV12_BUFFER_CONFIG *frame,
                                  struct VP10Common *cm, RestorationInfo *rsi,
                                  int y_only, int partial_frame);
