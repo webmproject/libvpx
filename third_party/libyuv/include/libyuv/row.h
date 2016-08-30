@@ -373,8 +373,11 @@ extern "C" {
 #endif
 
 #if defined(_MSC_VER) && !defined(__CLR_VER) && !defined(__clang__)
+#if defined(VISUALC_HAS_AVX2)
+#define SIMD_ALIGNED(var) __declspec(align(32)) var
+#else
 #define SIMD_ALIGNED(var) __declspec(align(16)) var
-#define SIMD_ALIGNED32(var) __declspec(align(32)) var
+#endif
 typedef __declspec(align(16)) int16 vec16[8];
 typedef __declspec(align(16)) int32 vec32[4];
 typedef __declspec(align(16)) int8 vec8[16];
@@ -389,8 +392,11 @@ typedef __declspec(align(32)) uint32 ulvec32[8];
 typedef __declspec(align(32)) uint8 ulvec8[32];
 #elif !defined(__pnacl__) && (defined(__GNUC__) || defined(__clang__))
 // Caveat GCC 4.2 to 4.7 have a known issue using vectors with const.
+#if defined(CLANG_HAS_AVX2) || defined(GCC_HAS_AVX2)
+#define SIMD_ALIGNED(var) var __attribute__((aligned(32)))
+#else
 #define SIMD_ALIGNED(var) var __attribute__((aligned(16)))
-#define SIMD_ALIGNED32(var) var __attribute__((aligned(32)))
+#endif
 typedef int16 __attribute__((vector_size(16))) vec16;
 typedef int32 __attribute__((vector_size(16))) vec32;
 typedef int8 __attribute__((vector_size(16))) vec8;
@@ -405,7 +411,6 @@ typedef uint32 __attribute__((vector_size(32))) ulvec32;
 typedef uint8 __attribute__((vector_size(32))) ulvec8;
 #else
 #define SIMD_ALIGNED(var) var
-#define SIMD_ALIGNED32(var) var
 typedef int16 vec16[8];
 typedef int32 vec32[4];
 typedef int8 vec8[16];
@@ -461,14 +466,14 @@ struct YuvConstants {
 #endif
 
 // Conversion matrix for YUV to RGB
-extern const struct YuvConstants kYuvI601Constants;  // BT.601
-extern const struct YuvConstants kYuvJPEGConstants;  // JPeg color space
-extern const struct YuvConstants kYuvH709Constants;  // BT.709
+extern const struct YuvConstants SIMD_ALIGNED(kYuvI601Constants);  // BT.601
+extern const struct YuvConstants SIMD_ALIGNED(kYuvJPEGConstants);  // JPeg
+extern const struct YuvConstants SIMD_ALIGNED(kYuvH709Constants);  // BT.709
 
 // Conversion matrix for YVU to BGR
-extern const struct YuvConstants kYvuI601Constants;  // BT.601
-extern const struct YuvConstants kYvuJPEGConstants;  // JPeg color space
-extern const struct YuvConstants kYvuH709Constants;  // BT.709
+extern const struct YuvConstants SIMD_ALIGNED(kYvuI601Constants);  // BT.601
+extern const struct YuvConstants SIMD_ALIGNED(kYvuJPEGConstants);  // JPeg
+extern const struct YuvConstants SIMD_ALIGNED(kYvuH709Constants);  // BT.709
 
 #if defined(__APPLE__) || defined(__x86_64__) || defined(__llvm__)
 #define OMITFP

@@ -1,6 +1,6 @@
 Name: libyuv
-URL: http://code.google.com/p/libyuv/
-Version: c244a3e9
+URL: https://chromium.googlesource.com/libyuv/libyuv
+Version: de944ed8c74909ea6fbd743a22efe1e55e851b83
 License: BSD
 License File: LICENSE
 
