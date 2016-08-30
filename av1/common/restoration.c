@@ -10,12 +10,12 @@
 
 #include <math.h>
 
-#include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_config.h"
+#include "./aom_dsp_rtcd.h"
 #include "av1/common/onyxc_int.h"
 #include "av1/common/restoration.h"
-#include "aom_dsp/vpx_dsp_common.h"
-#include "aom_mem/vpx_mem.h"
+#include "aom_dsp/aom_dsp_common.h"
+#include "aom_mem/aom_mem.h"
 #include "aom_ports/mem.h"
 
 #define BILATERAL_PARAM_PRECISION 16
@@ -55,15 +55,15 @@ static BilateralParamsType
 typedef void (*restore_func_type)(uint8_t *data8, int width, int height,
                                   int stride, RestorationInternal *rst,
                                   uint8_t *tmpdata8, int tmpstride);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 typedef void (*restore_func_highbd_type)(uint8_t *data8, int width, int height,
                                          int stride, RestorationInternal *rst,
                                          uint8_t *tmpdata8, int tmpstride,
                                          int bit_depth);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
-static INLINE BilateralParamsType vp10_bilateral_level_to_params(int index,
-                                                                 int kf) {
+static INLINE BilateralParamsType av1_bilateral_level_to_params(int index,
+                                                                int kf) {
   return kf ? bilateral_level_to_params_arr_kf[index]
             : bilateral_level_to_params_arr[index];
 }
@@ -77,31 +77,31 @@ static TileParams restoration_tile_sizes[RESTORATION_TILESIZES] = {
   { 64, 64 }, { 128, 128 }, { 256, 256 }
 };
 
-void vp10_get_restoration_tile_size(int tilesize, int width, int height,
-                                    int *tile_width, int *tile_height,
-                                    int *nhtiles, int *nvtiles) {
+void av1_get_restoration_tile_size(int tilesize, int width, int height,
+                                   int *tile_width, int *tile_height,
+                                   int *nhtiles, int *nvtiles) {
   *tile_width = (tilesize < 0)
                     ? width
-                    : VPXMIN(restoration_tile_sizes[tilesize].width, width);
+                    : AOMMIN(restoration_tile_sizes[tilesize].width, width);
   *tile_height = (tilesize < 0)
                      ? height
-                     : VPXMIN(restoration_tile_sizes[tilesize].height, height);
+                     : AOMMIN(restoration_tile_sizes[tilesize].height, height);
   *nhtiles = (width + (*tile_width >> 1)) / *tile_width;
   *nvtiles = (height + (*tile_height >> 1)) / *tile_height;
 }
 
-int vp10_get_restoration_ntiles(int tilesize, int width, int height) {
+int av1_get_restoration_ntiles(int tilesize, int width, int height) {
   int nhtiles, nvtiles;
   int tile_width, tile_height;
-  vp10_get_restoration_tile_size(tilesize, width, height, &tile_width,
-                                 &tile_height, &nhtiles, &nvtiles);
+  av1_get_restoration_tile_size(tilesize, width, height, &tile_width,
+                                &tile_height, &nhtiles, &nvtiles);
   return (nhtiles * nvtiles);
 }
 
-void vp10_loop_restoration_precal() {
+void av1_loop_restoration_precal() {
   int i;
   for (i = 0; i < BILATERAL_LEVELS_KF; i++) {
-    const BilateralParamsType param = vp10_bilateral_level_to_params(i, 1);
+    const BilateralParamsType param = av1_bilateral_level_to_params(i, 1);
     const int sigma_x = param.sigma_x;
     const int sigma_y = param.sigma_y;
     const int sigma_r = param.sigma_r;
@@ -129,7 +129,7 @@ void vp10_loop_restoration_precal() {
     }
   }
   for (i = 0; i < BILATERAL_LEVELS; i++) {
-    const BilateralParamsType param = vp10_bilateral_level_to_params(i, 0);
+    const BilateralParamsType param = av1_bilateral_level_to_params(i, 0);
     const int sigma_x = param.sigma_x;
     const int sigma_y = param.sigma_y;
     const int sigma_r = param.sigma_r;
@@ -159,13 +159,13 @@ void vp10_loop_restoration_precal() {
   }
 }
 
-int vp10_bilateral_level_bits(const VP10_COMMON *const cm) {
+int av1_bilateral_level_bits(const AV1_COMMON *const cm) {
   return cm->frame_type == KEY_FRAME ? BILATERAL_LEVEL_BITS_KF
                                      : BILATERAL_LEVEL_BITS;
 }
 
-void vp10_loop_restoration_init(RestorationInternal *rst, RestorationInfo *rsi,
-                                int kf, int width, int height) {
+void av1_loop_restoration_init(RestorationInternal *rst, RestorationInfo *rsi,
+                               int kf, int width, int height) {
   int i, tile_idx;
   rst->restoration_type = rsi->restoration_type;
   rst->subsampling_x = 0;
@@ -173,10 +173,10 @@ void vp10_loop_restoration_init(RestorationInternal *rst, RestorationInfo *rsi,
   if (rsi->restoration_type == RESTORE_BILATERAL) {
     rst->tilesize_index = BILATERAL_TILESIZE;
     rst->ntiles =
-        vp10_get_restoration_ntiles(rst->tilesize_index, width, height);
-    vp10_get_restoration_tile_size(rst->tilesize_index, width, height,
-                                   &rst->tile_width, &rst->tile_height,
-                                   &rst->nhtiles, &rst->nvtiles);
+        av1_get_restoration_ntiles(rst->tilesize_index, width, height);
+    av1_get_restoration_tile_size(rst->tilesize_index, width, height,
+                                  &rst->tile_width, &rst->tile_height,
+                                  &rst->nhtiles, &rst->nvtiles);
     rst->bilateral_level = rsi->bilateral_level;
     rst->wr_lut = (uint8_t **)malloc(sizeof(*rst->wr_lut) * rst->ntiles);
     assert(rst->wr_lut != NULL);
@@ -195,10 +195,10 @@ void vp10_loop_restoration_init(RestorationInternal *rst, RestorationInfo *rsi,
   } else if (rsi->restoration_type == RESTORE_WIENER) {
     rst->tilesize_index = WIENER_TILESIZE;
     rst->ntiles =
-        vp10_get_restoration_ntiles(rst->tilesize_index, width, height);
-    vp10_get_restoration_tile_size(rst->tilesize_index, width, height,
-                                   &rst->tile_width, &rst->tile_height,
-                                   &rst->nhtiles, &rst->nvtiles);
+        av1_get_restoration_ntiles(rst->tilesize_index, width, height);
+    av1_get_restoration_tile_size(rst->tilesize_index, width, height,
+                                  &rst->tile_width, &rst->tile_height,
+                                  &rst->nhtiles, &rst->nvtiles);
     rst->wiener_level = rsi->wiener_level;
     rst->vfilter =
         (int(*)[RESTORATION_WIN])malloc(sizeof(*rst->vfilter) * rst->ntiles);
@@ -373,7 +373,7 @@ static void loop_wiener_filter(uint8_t *data, int width, int height, int stride,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 static void loop_bilateral_filter_highbd(uint8_t *data8, int width, int height,
                                          int stride, RestorationInternal *rst,
                                          uint8_t *tmpdata8, int tmpstride,
@@ -530,10 +530,10 @@ static void loop_wiener_filter_highbd(uint8_t *data8, int width, int height,
     }
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
-void vp10_loop_restoration_rows(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
-                                int start_mi_row, int end_mi_row, int y_only) {
+void av1_loop_restoration_rows(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
+                               int start_mi_row, int end_mi_row, int y_only) {
   const int ywidth = frame->y_crop_width;
   const int ystride = frame->y_stride;
   const int uvwidth = frame->uv_crop_width;
@@ -546,35 +546,35 @@ void vp10_loop_restoration_rows(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
       cm->rst_internal.restoration_type == RESTORE_BILATERAL
           ? loop_bilateral_filter
           : loop_wiener_filter;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   restore_func_highbd_type restore_func_highbd =
       cm->rst_internal.restoration_type == RESTORE_BILATERAL
           ? loop_bilateral_filter_highbd
           : loop_wiener_filter_highbd;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
   YV12_BUFFER_CONFIG tmp_buf;
   memset(&tmp_buf, 0, sizeof(YV12_BUFFER_CONFIG));
 
-  yend = VPXMIN(yend, cm->height);
-  uvend = VPXMIN(uvend, cm->subsampling_y ? (cm->height + 1) >> 1 : cm->height);
+  yend = AOMMIN(yend, cm->height);
+  uvend = AOMMIN(uvend, cm->subsampling_y ? (cm->height + 1) >> 1 : cm->height);
 
-  if (vpx_realloc_frame_buffer(
+  if (aom_realloc_frame_buffer(
           &tmp_buf, cm->width, cm->height, cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
           cm->use_highbitdepth,
 #endif
-          VPX_DEC_BORDER_IN_PIXELS, cm->byte_alignment, NULL, NULL, NULL) < 0)
-    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+          AOM_DEC_BORDER_IN_PIXELS, cm->byte_alignment, NULL, NULL, NULL) < 0)
+    aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,
                        "Failed to allocate tmp restoration buffer");
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   if (cm->use_highbitdepth)
     restore_func_highbd(frame->y_buffer + ystart * ystride, ywidth,
                         yend - ystart, ystride, &cm->rst_internal,
                         tmp_buf.y_buffer + ystart * tmp_buf.y_stride,
                         tmp_buf.y_stride, cm->bit_depth);
   else
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
     restore_func(frame->y_buffer + ystart * ystride, ywidth, yend - ystart,
                  ystride, &cm->rst_internal,
                  tmp_buf.y_buffer + ystart * tmp_buf.y_stride,
@@ -582,7 +582,7 @@ void vp10_loop_restoration_rows(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
   if (!y_only) {
     cm->rst_internal.subsampling_x = cm->subsampling_x;
     cm->rst_internal.subsampling_y = cm->subsampling_y;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
     if (cm->use_highbitdepth) {
       restore_func_highbd(frame->u_buffer + uvstart * uvstride, uvwidth,
                           uvend - uvstart, uvstride, &cm->rst_internal,
@@ -593,7 +593,7 @@ void vp10_loop_restoration_rows(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
                           tmp_buf.v_buffer + uvstart * tmp_buf.uv_stride,
                           tmp_buf.uv_stride, cm->bit_depth);
     } else {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
       restore_func(frame->u_buffer + uvstart * uvstride, uvwidth,
                    uvend - uvstart, uvstride, &cm->rst_internal,
                    tmp_buf.u_buffer + uvstart * tmp_buf.uv_stride,
@@ -602,11 +602,11 @@ void vp10_loop_restoration_rows(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
                    uvend - uvstart, uvstride, &cm->rst_internal,
                    tmp_buf.v_buffer + uvstart * tmp_buf.uv_stride,
                    tmp_buf.uv_stride);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
     }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
   }
-  vpx_free_frame_buffer(&tmp_buf);
+  aom_free_frame_buffer(&tmp_buf);
   if (cm->rst_internal.restoration_type == RESTORE_BILATERAL) {
     free(cm->rst_internal.wr_lut);
     cm->rst_internal.wr_lut = NULL;
@@ -621,9 +621,9 @@ void vp10_loop_restoration_rows(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
   }
 }
 
-void vp10_loop_restoration_frame(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
-                                 RestorationInfo *rsi, int y_only,
-                                 int partial_frame) {
+void av1_loop_restoration_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
+                                RestorationInfo *rsi, int y_only,
+                                int partial_frame) {
   int start_mi_row, end_mi_row, mi_rows_to_filter;
   if (rsi->restoration_type != RESTORE_NONE) {
     start_mi_row = 0;
@@ -631,12 +631,12 @@ void vp10_loop_restoration_frame(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
     if (partial_frame && cm->mi_rows > 8) {
       start_mi_row = cm->mi_rows >> 1;
       start_mi_row &= 0xfffffff8;
-      mi_rows_to_filter = VPXMAX(cm->mi_rows / 8, 8);
+      mi_rows_to_filter = AOMMAX(cm->mi_rows / 8, 8);
     }
     end_mi_row = start_mi_row + mi_rows_to_filter;
-    vp10_loop_restoration_init(&cm->rst_internal, rsi,
-                               cm->frame_type == KEY_FRAME, cm->width,
-                               cm->height);
-    vp10_loop_restoration_rows(frame, cm, start_mi_row, end_mi_row, y_only);
+    av1_loop_restoration_init(&cm->rst_internal, rsi,
+                              cm->frame_type == KEY_FRAME, cm->width,
+                              cm->height);
+    av1_loop_restoration_rows(frame, cm, start_mi_row, end_mi_row, y_only);
   }
 }

@@ -11,14 +11,14 @@
 #include <limits.h>
 #include <stdlib.h>
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 #include "./bitwriter_buffer.h"
 
-size_t vpx_wb_bytes_written(const struct vpx_write_bit_buffer *wb) {
+size_t aom_wb_bytes_written(const struct aom_write_bit_buffer *wb) {
   return wb->bit_offset / CHAR_BIT + (wb->bit_offset % CHAR_BIT > 0);
 }
 
-void vpx_wb_write_bit(struct vpx_write_bit_buffer *wb, int bit) {
+void aom_wb_write_bit(struct aom_write_bit_buffer *wb, int bit) {
   const int off = (int)wb->bit_offset;
   const int p = off / CHAR_BIT;
   const int q = CHAR_BIT - 1 - off % CHAR_BIT;
@@ -31,12 +31,12 @@ void vpx_wb_write_bit(struct vpx_write_bit_buffer *wb, int bit) {
   wb->bit_offset = off + 1;
 }
 
-void vpx_wb_write_literal(struct vpx_write_bit_buffer *wb, int data, int bits) {
+void aom_wb_write_literal(struct aom_write_bit_buffer *wb, int data, int bits) {
   int bit;
-  for (bit = bits - 1; bit >= 0; bit--) vpx_wb_write_bit(wb, (data >> bit) & 1);
+  for (bit = bits - 1; bit >= 0; bit--) aom_wb_write_bit(wb, (data >> bit) & 1);
 }
 
-void vpx_wb_write_inv_signed_literal(struct vpx_write_bit_buffer *wb, int data,
+void aom_wb_write_inv_signed_literal(struct aom_write_bit_buffer *wb, int data,
                                      int bits) {
-  vpx_wb_write_literal(wb, data, bits + 1);
+  aom_wb_write_literal(wb, data, bits + 1);
 }

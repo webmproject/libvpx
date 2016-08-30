@@ -13,8 +13,8 @@
 #include "av1/common/enums.h"
 #include "av1/encoder/mips/msa/fdct_msa.h"
 
-void vp10_fwht4x4_msa(const int16_t *input, int16_t *output,
-                      int32_t src_stride) {
+void av1_fwht4x4_msa(const int16_t *input, int16_t *output,
+                     int32_t src_stride) {
   v8i16 in0, in1, in2, in3, in4;
 
   LD_SH4(input, src_stride, in0, in1, in2, in3);
@@ -45,8 +45,8 @@ void vp10_fwht4x4_msa(const int16_t *input, int16_t *output,
   ST4x2_UB(in2, output + 12, 4);
 }
 
-void vp10_fht4x4_msa(const int16_t *input, int16_t *output, int32_t stride,
-                     int32_t tx_type) {
+void av1_fht4x4_msa(const int16_t *input, int16_t *output, int32_t stride,
+                    int32_t tx_type) {
   v8i16 in0, in1, in2, in3;
 
   LD_SH4(input, stride, in0, in1, in2, in3);
@@ -67,24 +67,24 @@ void vp10_fht4x4_msa(const int16_t *input, int16_t *output, int32_t stride,
 
   switch (tx_type) {
     case DCT_DCT:
-      VPX_FDCT4(in0, in1, in2, in3, in0, in1, in2, in3);
+      AOM_FDCT4(in0, in1, in2, in3, in0, in1, in2, in3);
       TRANSPOSE4x4_SH_SH(in0, in1, in2, in3, in0, in1, in2, in3);
-      VPX_FDCT4(in0, in1, in2, in3, in0, in1, in2, in3);
+      AOM_FDCT4(in0, in1, in2, in3, in0, in1, in2, in3);
       break;
     case ADST_DCT:
-      VPX_FADST4(in0, in1, in2, in3, in0, in1, in2, in3);
+      AOM_FADST4(in0, in1, in2, in3, in0, in1, in2, in3);
       TRANSPOSE4x4_SH_SH(in0, in1, in2, in3, in0, in1, in2, in3);
-      VPX_FDCT4(in0, in1, in2, in3, in0, in1, in2, in3);
+      AOM_FDCT4(in0, in1, in2, in3, in0, in1, in2, in3);
       break;
     case DCT_ADST:
-      VPX_FDCT4(in0, in1, in2, in3, in0, in1, in2, in3);
+      AOM_FDCT4(in0, in1, in2, in3, in0, in1, in2, in3);
       TRANSPOSE4x4_SH_SH(in0, in1, in2, in3, in0, in1, in2, in3);
-      VPX_FADST4(in0, in1, in2, in3, in0, in1, in2, in3);
+      AOM_FADST4(in0, in1, in2, in3, in0, in1, in2, in3);
       break;
     case ADST_ADST:
-      VPX_FADST4(in0, in1, in2, in3, in0, in1, in2, in3);
+      AOM_FADST4(in0, in1, in2, in3, in0, in1, in2, in3);
       TRANSPOSE4x4_SH_SH(in0, in1, in2, in3, in0, in1, in2, in3);
-      VPX_FADST4(in0, in1, in2, in3, in0, in1, in2, in3);
+      AOM_FADST4(in0, in1, in2, in3, in0, in1, in2, in3);
       break;
     default: assert(0); break;
   }

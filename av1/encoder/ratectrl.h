@@ -8,11 +8,11 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_ENCODER_RATECTRL_H_
-#define VP10_ENCODER_RATECTRL_H_
+#ifndef AV1_ENCODER_RATECTRL_H_
+#define AV1_ENCODER_RATECTRL_H_
 
-#include "aom/vpx_codec.h"
-#include "aom/vpx_integer.h"
+#include "aom/aom_codec.h"
+#include "aom/aom_integer.h"
 
 #include "av1/common/blockd.h"
 
@@ -168,118 +168,116 @@ typedef struct {
   int rf_level_maxq[RATE_FACTOR_LEVELS];
 } RATE_CONTROL;
 
-struct VP10_COMP;
-struct VP10EncoderConfig;
+struct AV1_COMP;
+struct AV1EncoderConfig;
 
-void vp10_rc_init(const struct VP10EncoderConfig *oxcf, int pass,
-                  RATE_CONTROL *rc);
+void av1_rc_init(const struct AV1EncoderConfig *oxcf, int pass,
+                 RATE_CONTROL *rc);
 
-int vp10_estimate_bits_at_q(FRAME_TYPE frame_kind, int q, int mbs,
-                            double correction_factor,
-                            vpx_bit_depth_t bit_depth);
+int av1_estimate_bits_at_q(FRAME_TYPE frame_kind, int q, int mbs,
+                           double correction_factor, aom_bit_depth_t bit_depth);
 
-double vp10_convert_qindex_to_q(int qindex, vpx_bit_depth_t bit_depth);
+double av1_convert_qindex_to_q(int qindex, aom_bit_depth_t bit_depth);
 
-void vp10_rc_init_minq_luts(void);
+void av1_rc_init_minq_luts(void);
 
-int vp10_rc_get_default_min_gf_interval(int width, int height,
-                                        double framerate);
-// Note vp10_rc_get_default_max_gf_interval() requires the min_gf_interval to
+int av1_rc_get_default_min_gf_interval(int width, int height, double framerate);
+// Note av1_rc_get_default_max_gf_interval() requires the min_gf_interval to
 // be passed in to ensure that the max_gf_interval returned is at least as bis
 // as that.
-int vp10_rc_get_default_max_gf_interval(double framerate, int min_frame_rate);
+int av1_rc_get_default_max_gf_interval(double framerate, int min_frame_rate);
 
 // Generally at the high level, the following flow is expected
 // to be enforced for rate control:
 // First call per frame, one of:
-//   vp10_rc_get_one_pass_vbr_params()
-//   vp10_rc_get_one_pass_cbr_params()
-//   vp10_rc_get_first_pass_params()
-//   vp10_rc_get_second_pass_params()
+//   av1_rc_get_one_pass_vbr_params()
+//   av1_rc_get_one_pass_cbr_params()
+//   av1_rc_get_first_pass_params()
+//   av1_rc_get_second_pass_params()
 // depending on the usage to set the rate control encode parameters desired.
 //
 // Then, call encode_frame_to_data_rate() to perform the
 // actual encode. This function will in turn call encode_frame()
 // one or more times, followed by one of:
-//   vp10_rc_postencode_update()
-//   vp10_rc_postencode_update_drop_frame()
+//   av1_rc_postencode_update()
+//   av1_rc_postencode_update_drop_frame()
 //
 // The majority of rate control parameters are only expected
-// to be set in the vp10_rc_get_..._params() functions and
-// updated during the vp10_rc_postencode_update...() functions.
-// The only exceptions are vp10_rc_drop_frame() and
-// vp10_rc_update_rate_correction_factors() functions.
+// to be set in the av1_rc_get_..._params() functions and
+// updated during the av1_rc_postencode_update...() functions.
+// The only exceptions are av1_rc_drop_frame() and
+// av1_rc_update_rate_correction_factors() functions.
 
 // Functions to set parameters for encoding before the actual
 // encode_frame_to_data_rate() function.
-void vp10_rc_get_one_pass_vbr_params(struct VP10_COMP *cpi);
-void vp10_rc_get_one_pass_cbr_params(struct VP10_COMP *cpi);
+void av1_rc_get_one_pass_vbr_params(struct AV1_COMP *cpi);
+void av1_rc_get_one_pass_cbr_params(struct AV1_COMP *cpi);
 
 // Post encode update of the rate control parameters based
 // on bytes used
-void vp10_rc_postencode_update(struct VP10_COMP *cpi, uint64_t bytes_used);
+void av1_rc_postencode_update(struct AV1_COMP *cpi, uint64_t bytes_used);
 // Post encode update of the rate control parameters for dropped frames
-void vp10_rc_postencode_update_drop_frame(struct VP10_COMP *cpi);
+void av1_rc_postencode_update_drop_frame(struct AV1_COMP *cpi);
 
 // Updates rate correction factors
 // Changes only the rate correction factors in the rate control structure.
-void vp10_rc_update_rate_correction_factors(struct VP10_COMP *cpi);
+void av1_rc_update_rate_correction_factors(struct AV1_COMP *cpi);
 
 // Decide if we should drop this frame: For 1-pass CBR.
 // Changes only the decimation count in the rate control structure
-int vp10_rc_drop_frame(struct VP10_COMP *cpi);
+int av1_rc_drop_frame(struct AV1_COMP *cpi);
 
 // Computes frame size bounds.
-void vp10_rc_compute_frame_size_bounds(const struct VP10_COMP *cpi,
-                                       int this_frame_target,
-                                       int *frame_under_shoot_limit,
-                                       int *frame_over_shoot_limit);
+void av1_rc_compute_frame_size_bounds(const struct AV1_COMP *cpi,
+                                      int this_frame_target,
+                                      int *frame_under_shoot_limit,
+                                      int *frame_over_shoot_limit);
 
 // Picks q and q bounds given the target for bits
-int vp10_rc_pick_q_and_bounds(const struct VP10_COMP *cpi, int *bottom_index,
-                              int *top_index);
+int av1_rc_pick_q_and_bounds(const struct AV1_COMP *cpi, int *bottom_index,
+                             int *top_index);
 
 // Estimates q to achieve a target bits per frame
-int vp10_rc_regulate_q(const struct VP10_COMP *cpi, int target_bits_per_frame,
-                       int active_best_quality, int active_worst_quality);
+int av1_rc_regulate_q(const struct AV1_COMP *cpi, int target_bits_per_frame,
+                      int active_best_quality, int active_worst_quality);
 
 // Estimates bits per mb for a given qindex and correction factor.
-int vp10_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,
-                        double correction_factor, vpx_bit_depth_t bit_depth);
+int av1_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,
+                       double correction_factor, aom_bit_depth_t bit_depth);
 
 // Clamping utilities for bitrate targets for iframes and pframes.
-int vp10_rc_clamp_iframe_target_size(const struct VP10_COMP *const cpi,
-                                     int target);
-int vp10_rc_clamp_pframe_target_size(const struct VP10_COMP *const cpi,
-                                     int target);
+int av1_rc_clamp_iframe_target_size(const struct AV1_COMP *const cpi,
+                                    int target);
+int av1_rc_clamp_pframe_target_size(const struct AV1_COMP *const cpi,
+                                    int target);
 // Utility to set frame_target into the RATE_CONTROL structure
-// This function is called only from the vp10_rc_get_..._params() functions.
-void vp10_rc_set_frame_target(struct VP10_COMP *cpi, int target);
+// This function is called only from the av1_rc_get_..._params() functions.
+void av1_rc_set_frame_target(struct AV1_COMP *cpi, int target);
 
 // Computes a q delta (in "q index" terms) to get from a starting q value
 // to a target q value
-int vp10_compute_qdelta(const RATE_CONTROL *rc, double qstart, double qtarget,
-                        vpx_bit_depth_t bit_depth);
+int av1_compute_qdelta(const RATE_CONTROL *rc, double qstart, double qtarget,
+                       aom_bit_depth_t bit_depth);
 
 // Computes a q delta (in "q index" terms) to get from a starting q value
 // to a value that should equate to the given rate ratio.
-int vp10_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
-                                int qindex, double rate_target_ratio,
-                                vpx_bit_depth_t bit_depth);
+int av1_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
+                               int qindex, double rate_target_ratio,
+                               aom_bit_depth_t bit_depth);
 
-int vp10_frame_type_qdelta(const struct VP10_COMP *cpi, int rf_level, int q);
+int av1_frame_type_qdelta(const struct AV1_COMP *cpi, int rf_level, int q);
 
-void vp10_rc_update_framerate(struct VP10_COMP *cpi);
+void av1_rc_update_framerate(struct AV1_COMP *cpi);
 
-void vp10_rc_set_gf_interval_range(const struct VP10_COMP *const cpi,
-                                   RATE_CONTROL *const rc);
+void av1_rc_set_gf_interval_range(const struct AV1_COMP *const cpi,
+                                  RATE_CONTROL *const rc);
 
-void vp10_set_target_rate(struct VP10_COMP *cpi);
+void av1_set_target_rate(struct AV1_COMP *cpi);
 
-int vp10_resize_one_pass_cbr(struct VP10_COMP *cpi);
+int av1_resize_one_pass_cbr(struct AV1_COMP *cpi);
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
 
-#endif  // VP10_ENCODER_RATECTRL_H_
+#endif  // AV1_ENCODER_RATECTRL_H_

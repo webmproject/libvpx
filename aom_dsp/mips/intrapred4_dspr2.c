@@ -11,7 +11,7 @@
 #include "aom_dsp/mips/common_dspr2.h"
 
 #if HAVE_DSPR2
-void vpx_h_predictor_4x4_dspr2(uint8_t *dst, ptrdiff_t stride,
+void aom_h_predictor_4x4_dspr2(uint8_t *dst, ptrdiff_t stride,
                                const uint8_t *above, const uint8_t *left) {
   int32_t tmp1, tmp2, tmp3, tmp4;
 
@@ -37,7 +37,7 @@ void vpx_h_predictor_4x4_dspr2(uint8_t *dst, ptrdiff_t stride,
       : [left] "r"(left), [dst] "r"(dst), [stride] "r"(stride));
 }
 
-void vpx_dc_predictor_4x4_dspr2(uint8_t *dst, ptrdiff_t stride,
+void aom_dc_predictor_4x4_dspr2(uint8_t *dst, ptrdiff_t stride,
                                 const uint8_t *above, const uint8_t *left) {
   int32_t expected_dc;
   int32_t average;
@@ -78,7 +78,7 @@ void vpx_dc_predictor_4x4_dspr2(uint8_t *dst, ptrdiff_t stride,
         [stride] "r"(stride));
 }
 
-void vpx_tm_predictor_4x4_dspr2(uint8_t *dst, ptrdiff_t stride,
+void aom_tm_predictor_4x4_dspr2(uint8_t *dst, ptrdiff_t stride,
                                 const uint8_t *above, const uint8_t *left) {
   int32_t abovel, abover;
   int32_t left0, left1, left2, left3;
@@ -86,7 +86,7 @@ void vpx_tm_predictor_4x4_dspr2(uint8_t *dst, ptrdiff_t stride,
   int32_t resl;
   int32_t resr;
   int32_t top_left;
-  uint8_t *cm = vpx_ff_cropTbl;
+  uint8_t *cm = aom_ff_cropTbl;
 
   __asm__ __volatile__(
       "ulw             %[resl],       (%[above])                         \n\t"

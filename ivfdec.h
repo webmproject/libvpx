@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-int file_is_ivf(struct VpxInputContext *input);
+int file_is_ivf(struct AvxInputContext *input);
 
 int ivf_read_frame(FILE *infile, uint8_t **buffer, size_t *bytes_read,
                    size_t *buffer_size);

@@ -32,9 +32,9 @@ class AqSegmentTest
   virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
                                   ::libaom_test::Encoder *encoder) {
     if (video->frame() == 1) {
-      encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
-      encoder->Control(VP9E_SET_AQ_MODE, aq_mode_);
-      encoder->Control(VP8E_SET_MAX_INTRA_BITRATE_PCT, 100);
+      encoder->Control(AOME_SET_CPUUSED, set_cpu_used_);
+      encoder->Control(AV1E_SET_AQ_MODE, aq_mode_);
+      encoder->Control(AOME_SET_MAX_INTRA_BITRATE_PCT, 100);
     }
   }
 
@@ -43,7 +43,7 @@ class AqSegmentTest
     cfg_.kf_max_dist = 12;
     cfg_.rc_min_quantizer = 8;
     cfg_.rc_max_quantizer = 56;
-    cfg_.rc_end_usage = VPX_CBR;
+    cfg_.rc_end_usage = AOM_CBR;
     cfg_.g_lag_in_frames = 6;
     cfg_.rc_buf_initial_sz = 500;
     cfg_.rc_buf_optimal_sz = 500;
@@ -78,12 +78,12 @@ TEST_P(AqSegmentTestLarge, TestNoMisMatchAQ2) { DoTest(2); }
 
 TEST_P(AqSegmentTestLarge, TestNoMisMatchAQ3) { DoTest(3); }
 
-VP10_INSTANTIATE_TEST_CASE(AqSegmentTest,
-                           ::testing::Values(::libaom_test::kRealTime,
-                                             ::libaom_test::kOnePassGood),
-                           ::testing::Range(5, 9));
-VP10_INSTANTIATE_TEST_CASE(AqSegmentTestLarge,
-                           ::testing::Values(::libaom_test::kRealTime,
-                                             ::libaom_test::kOnePassGood),
-                           ::testing::Range(3, 5));
+AV1_INSTANTIATE_TEST_CASE(AqSegmentTest,
+                          ::testing::Values(::libaom_test::kRealTime,
+                                            ::libaom_test::kOnePassGood),
+                          ::testing::Range(5, 9));
+AV1_INSTANTIATE_TEST_CASE(AqSegmentTestLarge,
+                          ::testing::Values(::libaom_test::kRealTime,
+                                            ::libaom_test::kOnePassGood),
+                          ::testing::Range(3, 5));
 }  // namespace

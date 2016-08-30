@@ -8,13 +8,13 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_X86_SYNONYS_H_
-#define VPX_DSP_X86_SYNONYS_H_
+#ifndef AOM_DSP_X86_SYNONYS_H_
+#define AOM_DSP_X86_SYNONYS_H_
 
 #include <immintrin.h>
 
-#include "./vpx_config.h"
-#include "aom/vpx_integer.h"
+#include "./aom_config.h"
+#include "aom/aom_integer.h"
 
 /**
  * Various reusable shorthands for x86 SIMD intrinsics.
@@ -108,4 +108,4 @@ static INLINE int64_t xx_hsum_epi32_si64(__m128i v_d) {
 }
 #endif  // __SSSE3__
 
-#endif  // VPX_DSP_X86_SYNONYS_H_
+#endif  // AOM_DSP_X86_SYNONYS_H_

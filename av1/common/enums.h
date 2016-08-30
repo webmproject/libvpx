@@ -8,11 +8,11 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_COMMON_ENUMS_H_
-#define VP10_COMMON_ENUMS_H_
+#ifndef AV1_COMMON_ENUMS_H_
+#define AV1_COMMON_ENUMS_H_
 
-#include "./vpx_config.h"
-#include "aom/vpx_integer.h"
+#include "./aom_config.h"
+#include "aom/aom_integer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -211,20 +211,20 @@ typedef enum {
 #endif                  // CONFIG_EXT_TX
 
 typedef enum {
-  VPX_LAST_FLAG = 1 << 0,
+  AOM_LAST_FLAG = 1 << 0,
 #if CONFIG_EXT_REFS
-  VPX_LAST2_FLAG = 1 << 1,
-  VPX_LAST3_FLAG = 1 << 2,
-  VPX_GOLD_FLAG = 1 << 3,
-  VPX_BWD_FLAG = 1 << 4,
-  VPX_ALT_FLAG = 1 << 5,
-  VPX_REFFRAME_ALL = (1 << 6) - 1
+  AOM_LAST2_FLAG = 1 << 1,
+  AOM_LAST3_FLAG = 1 << 2,
+  AOM_GOLD_FLAG = 1 << 3,
+  AOM_BWD_FLAG = 1 << 4,
+  AOM_ALT_FLAG = 1 << 5,
+  AOM_REFFRAME_ALL = (1 << 6) - 1
 #else
-  VPX_GOLD_FLAG = 1 << 1,
-  VPX_ALT_FLAG = 1 << 2,
-  VPX_REFFRAME_ALL = (1 << 3) - 1
+  AOM_GOLD_FLAG = 1 << 1,
+  AOM_ALT_FLAG = 1 << 2,
+  AOM_REFFRAME_ALL = (1 << 3) - 1
 #endif  // CONFIG_EXT_REFS
-} VPX_REFFRAME;
+} AOM_REFFRAME;
 
 typedef enum { PLANE_TYPE_Y = 0, PLANE_TYPE_UV = 1, PLANE_TYPES } PLANE_TYPE;
 
@@ -435,4 +435,4 @@ typedef TX_SIZE TXFM_CONTEXT;
 }  // extern "C"
 #endif
 
-#endif  // VP10_COMMON_ENUMS_H_
+#endif  // AV1_COMMON_ENUMS_H_

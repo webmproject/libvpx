@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_ENCODER_SPEED_FEATURES_H_
-#define VP10_ENCODER_SPEED_FEATURES_H_
+#ifndef AV1_ENCODER_SPEED_FEATURES_H_
+#define AV1_ENCODER_SPEED_FEATURES_H_
 
 #include "av1/common/enums.h"
 
@@ -471,7 +471,7 @@ typedef struct SPEED_FEATURES {
   // Allow skipping partition search for still image frame
   int allow_partition_search_skip;
 
-  // Fast approximation of vp10_model_rd_from_var_lapndz
+  // Fast approximation of av1_model_rd_from_var_lapndz
   int simple_model_rd_from_var;
 
   // Do sub-pixel search in up-sampled reference frames
@@ -482,13 +482,13 @@ typedef struct SPEED_FEATURES {
   int use_transform_domain_distortion;
 } SPEED_FEATURES;
 
-struct VP10_COMP;
+struct AV1_COMP;
 
-void vp10_set_speed_features_framesize_independent(struct VP10_COMP *cpi);
-void vp10_set_speed_features_framesize_dependent(struct VP10_COMP *cpi);
+void av1_set_speed_features_framesize_independent(struct AV1_COMP *cpi);
+void av1_set_speed_features_framesize_dependent(struct AV1_COMP *cpi);
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
 
-#endif  // VP10_ENCODER_SPEED_FEATURES_H_
+#endif  // AV1_ENCODER_SPEED_FEATURES_H_

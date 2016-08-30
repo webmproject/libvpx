@@ -10,11 +10,11 @@
 
 #include <assert.h>
 
-#include "aom/vpx_integer.h"
+#include "aom/aom_integer.h"
 
 #include "aom_ports/mem.h"
 
-#include "aom_dsp/vpx_dsp_common.h"
+#include "aom_dsp/aom_dsp_common.h"
 
 #include "av1/common/reconinter.h"
 
@@ -48,8 +48,8 @@
  * holds for 8 bit input, and on real input, it should hold practically always,
  * as residuals are expected to be small.
  */
-uint64_t vp10_wedge_sse_from_residuals_c(const int16_t *r1, const int16_t *d,
-                                         const uint8_t *m, int N) {
+uint64_t av1_wedge_sse_from_residuals_c(const int16_t *r1, const int16_t *d,
+                                        const uint8_t *m, int N) {
   uint64_t csse = 0;
   int i;
   assert(N % 64 == 0);
@@ -92,8 +92,8 @@ uint64_t vp10_wedge_sse_from_residuals_c(const int16_t *r1, const int16_t *d,
  *  Note that for efficiency, ds is stored on 16 bits. Real input residuals
  *  being small, this should not cause a noticeable issue.
  */
-int vp10_wedge_sign_from_residuals_c(const int16_t *ds, const uint8_t *m, int N,
-                                     int64_t limit) {
+int av1_wedge_sign_from_residuals_c(const int16_t *ds, const uint8_t *m, int N,
+                                    int64_t limit) {
   int64_t acc = 0;
 
   assert(N % 64 == 0);
@@ -117,8 +117,8 @@ int vp10_wedge_sign_from_residuals_c(const int16_t *ds, const uint8_t *m, int N,
  *
  * The result is saturated to signed 16 bits.
  */
-void vp10_wedge_compute_delta_squares_c(int16_t *d, const int16_t *a,
-                                        const int16_t *b, int N) {
+void av1_wedge_compute_delta_squares_c(int16_t *d, const int16_t *a,
+                                       const int16_t *b, int N) {
   int i;
 
   assert(N % 64 == 0);

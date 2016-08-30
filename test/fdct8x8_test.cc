@@ -14,16 +14,16 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-#include "./vp10_rtcd.h"
-#include "./vpx_dsp_rtcd.h"
+#include "./av1_rtcd.h"
+#include "./aom_dsp_rtcd.h"
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
 #include "av1/common/entropy.h"
 #include "av1/common/scan.h"
-#include "aom/vpx_codec.h"
-#include "aom/vpx_integer.h"
+#include "aom/aom_codec.h"
+#include "aom/aom_integer.h"
 #include "aom_ports/mem.h"
 
 using libaom_test::ACMRandom;
@@ -43,9 +43,9 @@ typedef void (*FhtFunc)(const int16_t *in, tran_low_t *out, int stride,
 typedef void (*IhtFunc)(const tran_low_t *in, uint8_t *out, int stride,
                         int tx_type);
 
-typedef std::tr1::tuple<FdctFunc, IdctFunc, int, vpx_bit_depth_t> Dct8x8Param;
-typedef std::tr1::tuple<FhtFunc, IhtFunc, int, vpx_bit_depth_t> Ht8x8Param;
-typedef std::tr1::tuple<IdctFunc, IdctFunc, int, vpx_bit_depth_t> Idct8x8Param;
+typedef std::tr1::tuple<FdctFunc, IdctFunc, int, aom_bit_depth_t> Dct8x8Param;
+typedef std::tr1::tuple<FhtFunc, IhtFunc, int, aom_bit_depth_t> Ht8x8Param;
+typedef std::tr1::tuple<IdctFunc, IdctFunc, int, aom_bit_depth_t> Idct8x8Param;
 
 void reference_8x8_dct_1d(const double in[8], double out[8]) {
   const double kInvSqrt2 = 0.707106781186547524400844362104;
@@ -78,57 +78,57 @@ void reference_8x8_dct_2d(const int16_t input[kNumCoeffs],
 
 void fdct8x8_ref(const int16_t *in, tran_low_t *out, int stride,
                  int /*tx_type*/) {
-  vpx_fdct8x8_c(in, out, stride);
+  aom_fdct8x8_c(in, out, stride);
 }
 
 void fht8x8_ref(const int16_t *in, tran_low_t *out, int stride, int tx_type) {
-  vp10_fht8x8_c(in, out, stride, tx_type);
+  av1_fht8x8_c(in, out, stride, tx_type);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 void idct8x8_10(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct8x8_64_add_c(in, out, stride, 10);
+  aom_highbd_idct8x8_64_add_c(in, out, stride, 10);
 }
 
 void idct8x8_12(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct8x8_64_add_c(in, out, stride, 12);
+  aom_highbd_idct8x8_64_add_c(in, out, stride, 12);
 }
 
 void iht8x8_10(const tran_low_t *in, uint8_t *out, int stride, int tx_type) {
-  vp10_highbd_iht8x8_64_add_c(in, out, stride, tx_type, 10);
+  av1_highbd_iht8x8_64_add_c(in, out, stride, tx_type, 10);
 }
 
 void iht8x8_12(const tran_low_t *in, uint8_t *out, int stride, int tx_type) {
-  vp10_highbd_iht8x8_64_add_c(in, out, stride, tx_type, 12);
+  av1_highbd_iht8x8_64_add_c(in, out, stride, tx_type, 12);
 }
 
 #if HAVE_SSE2
 
 void idct8x8_10_add_10_c(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct8x8_10_add_c(in, out, stride, 10);
+  aom_highbd_idct8x8_10_add_c(in, out, stride, 10);
 }
 
 void idct8x8_10_add_12_c(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct8x8_10_add_c(in, out, stride, 12);
+  aom_highbd_idct8x8_10_add_c(in, out, stride, 12);
 }
 
 void idct8x8_10_add_10_sse2(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct8x8_10_add_sse2(in, out, stride, 10);
+  aom_highbd_idct8x8_10_add_sse2(in, out, stride, 10);
 }
 
 void idct8x8_10_add_12_sse2(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct8x8_10_add_sse2(in, out, stride, 12);
+  aom_highbd_idct8x8_10_add_sse2(in, out, stride, 12);
 }
 
 void idct8x8_64_add_10_sse2(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct8x8_64_add_sse2(in, out, stride, 10);
+  aom_highbd_idct8x8_64_add_sse2(in, out, stride, 10);
 }
 
 void idct8x8_64_add_12_sse2(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct8x8_64_add_sse2(in, out, stride, 12);
+  aom_highbd_idct8x8_64_add_sse2(in, out, stride, 12);
 }
 #endif  // HAVE_SSE2
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
 class FwdTrans8x8TestBase {
  public:
@@ -213,7 +213,7 @@ class FwdTrans8x8TestBase {
     DECLARE_ALIGNED(16, tran_low_t, test_temp_block[64]);
     DECLARE_ALIGNED(16, uint8_t, dst[64]);
     DECLARE_ALIGNED(16, uint8_t, src[64]);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
     DECLARE_ALIGNED(16, uint16_t, dst16[64]);
     DECLARE_ALIGNED(16, uint16_t, src16[64]);
 #endif
@@ -221,11 +221,11 @@ class FwdTrans8x8TestBase {
     for (int i = 0; i < count_test_block; ++i) {
       // Initialize a test block with input range [-mask_, mask_].
       for (int j = 0; j < 64; ++j) {
-        if (bit_depth_ == VPX_BITS_8) {
+        if (bit_depth_ == AOM_BITS_8) {
           src[j] = rnd.Rand8();
           dst[j] = rnd.Rand8();
           test_input_block[j] = src[j] - dst[j];
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
         } else {
           src16[j] = rnd.Rand16() & mask_;
           dst16[j] = rnd.Rand16() & mask_;
@@ -247,9 +247,9 @@ class FwdTrans8x8TestBase {
           test_temp_block[j] *= 4;
         }
       }
-      if (bit_depth_ == VPX_BITS_8) {
+      if (bit_depth_ == AOM_BITS_8) {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(test_temp_block, dst, pitch_));
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       } else {
         ASM_REGISTER_STATE_CHECK(
             RunInvTxfm(test_temp_block, CONVERT_TO_BYTEPTR(dst16), pitch_));
@@ -257,9 +257,9 @@ class FwdTrans8x8TestBase {
       }
 
       for (int j = 0; j < 64; ++j) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
         const int diff =
-            bit_depth_ == VPX_BITS_8 ? dst[j] - src[j] : dst16[j] - src16[j];
+            bit_depth_ == AOM_BITS_8 ? dst[j] - src[j] : dst16[j] - src16[j];
 #else
         const int diff = dst[j] - src[j];
 #endif
@@ -289,7 +289,7 @@ class FwdTrans8x8TestBase {
     DECLARE_ALIGNED(16, tran_low_t, ref_temp_block[64]);
     DECLARE_ALIGNED(16, uint8_t, dst[64]);
     DECLARE_ALIGNED(16, uint8_t, src[64]);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
     DECLARE_ALIGNED(16, uint16_t, dst16[64]);
     DECLARE_ALIGNED(16, uint16_t, src16[64]);
 #endif
@@ -297,7 +297,7 @@ class FwdTrans8x8TestBase {
     for (int i = 0; i < count_test_block; ++i) {
       // Initialize a test block with input range [-mask_, mask_].
       for (int j = 0; j < 64; ++j) {
-        if (bit_depth_ == VPX_BITS_8) {
+        if (bit_depth_ == AOM_BITS_8) {
           if (i == 0) {
             src[j] = 255;
             dst[j] = 0;
@@ -309,7 +309,7 @@ class FwdTrans8x8TestBase {
             dst[j] = rnd.Rand8() % 2 ? 255 : 0;
           }
           test_input_block[j] = src[j] - dst[j];
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
         } else {
           if (i == 0) {
             src16[j] = mask_;
@@ -330,9 +330,9 @@ class FwdTrans8x8TestBase {
           RunFwdTxfm(test_input_block, test_temp_block, pitch_));
       ASM_REGISTER_STATE_CHECK(
           fwd_txfm_ref(test_input_block, ref_temp_block, pitch_, tx_type_));
-      if (bit_depth_ == VPX_BITS_8) {
+      if (bit_depth_ == AOM_BITS_8) {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(test_temp_block, dst, pitch_));
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       } else {
         ASM_REGISTER_STATE_CHECK(
             RunInvTxfm(test_temp_block, CONVERT_TO_BYTEPTR(dst16), pitch_));
@@ -340,9 +340,9 @@ class FwdTrans8x8TestBase {
       }
 
       for (int j = 0; j < 64; ++j) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
         const int diff =
-            bit_depth_ == VPX_BITS_8 ? dst[j] - src[j] : dst16[j] - src16[j];
+            bit_depth_ == AOM_BITS_8 ? dst[j] - src[j] : dst16[j] - src16[j];
 #else
         const int diff = dst[j] - src[j];
 #endif
@@ -375,7 +375,7 @@ class FwdTrans8x8TestBase {
     DECLARE_ALIGNED(16, tran_low_t, coeff[kNumCoeffs]);
     DECLARE_ALIGNED(16, uint8_t, dst[kNumCoeffs]);
     DECLARE_ALIGNED(16, uint8_t, src[kNumCoeffs]);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
     DECLARE_ALIGNED(16, uint16_t, src16[kNumCoeffs]);
     DECLARE_ALIGNED(16, uint16_t, dst16[kNumCoeffs]);
 #endif
@@ -385,11 +385,11 @@ class FwdTrans8x8TestBase {
 
       // Initialize a test block with input range [-255, 255].
       for (int j = 0; j < kNumCoeffs; ++j) {
-        if (bit_depth_ == VPX_BITS_8) {
+        if (bit_depth_ == AOM_BITS_8) {
           src[j] = rnd.Rand8() % 2 ? 255 : 0;
           dst[j] = src[j] > 0 ? 0 : 255;
           in[j] = src[j] - dst[j];
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
         } else {
           src16[j] = rnd.Rand8() % 2 ? mask_ : 0;
           dst16[j] = src16[j] > 0 ? 0 : mask_;
@@ -402,9 +402,9 @@ class FwdTrans8x8TestBase {
       for (int j = 0; j < kNumCoeffs; ++j)
         coeff[j] = static_cast<tran_low_t>(round(out_r[j]));
 
-      if (bit_depth_ == VPX_BITS_8) {
+      if (bit_depth_ == AOM_BITS_8) {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, pitch_));
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       } else {
         ASM_REGISTER_STATE_CHECK(
             RunInvTxfm(coeff, CONVERT_TO_BYTEPTR(dst16), pitch_));
@@ -412,9 +412,9 @@ class FwdTrans8x8TestBase {
       }
 
       for (int j = 0; j < kNumCoeffs; ++j) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
         const int diff =
-            bit_depth_ == VPX_BITS_8 ? dst[j] - src[j] : dst16[j] - src16[j];
+            bit_depth_ == AOM_BITS_8 ? dst[j] - src[j] : dst16[j] - src16[j];
 #else
         const int diff = dst[j] - src[j];
 #endif
@@ -460,11 +460,11 @@ class FwdTrans8x8TestBase {
     DECLARE_ALIGNED(16, tran_low_t, coeff[kNumCoeffs]);
     DECLARE_ALIGNED(16, uint8_t, dst[kNumCoeffs]);
     DECLARE_ALIGNED(16, uint8_t, ref[kNumCoeffs]);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
     DECLARE_ALIGNED(16, uint16_t, dst16[kNumCoeffs]);
     DECLARE_ALIGNED(16, uint16_t, ref16[kNumCoeffs]);
 #endif
-    const int16_t *scan = vp10_default_scan_orders[TX_8X8].scan;
+    const int16_t *scan = av1_default_scan_orders[TX_8X8].scan;
 
     for (int i = 0; i < count_test_block; ++i) {
       for (int j = 0; j < kNumCoeffs; ++j) {
@@ -474,20 +474,20 @@ class FwdTrans8x8TestBase {
         } else {
           coeff[scan[j]] = 0;
         }
-        if (bit_depth_ == VPX_BITS_8) {
+        if (bit_depth_ == AOM_BITS_8) {
           dst[j] = 0;
           ref[j] = 0;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
         } else {
           dst16[j] = 0;
           ref16[j] = 0;
 #endif
         }
       }
-      if (bit_depth_ == VPX_BITS_8) {
+      if (bit_depth_ == AOM_BITS_8) {
         ref_txfm(coeff, ref, pitch_);
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, pitch_));
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       } else {
         ref_txfm(coeff, CONVERT_TO_BYTEPTR(ref16), pitch_);
         ASM_REGISTER_STATE_CHECK(
@@ -496,9 +496,9 @@ class FwdTrans8x8TestBase {
       }
 
       for (int j = 0; j < kNumCoeffs; ++j) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
         const int diff =
-            bit_depth_ == VPX_BITS_8 ? dst[j] - ref[j] : dst16[j] - ref16[j];
+            bit_depth_ == AOM_BITS_8 ? dst[j] - ref[j] : dst16[j] - ref16[j];
 #else
         const int diff = dst[j] - ref[j];
 #endif
@@ -511,7 +511,7 @@ class FwdTrans8x8TestBase {
   int pitch_;
   int tx_type_;
   FhtFunc fwd_txfm_ref;
-  vpx_bit_depth_t bit_depth_;
+  aom_bit_depth_t bit_depth_;
   int mask_;
 };
 
@@ -622,99 +622,98 @@ TEST_P(InvTrans8x8DCT, CompareReference) {
 
 using std::tr1::make_tuple;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
     C, FwdTrans8x8DCT,
     ::testing::Values(
-        make_tuple(&vpx_fdct8x8_c, &vpx_idct8x8_64_add_c, 0, VPX_BITS_8),
-        make_tuple(&vpx_highbd_fdct8x8_c, &idct8x8_10, 0, VPX_BITS_10),
-        make_tuple(&vpx_highbd_fdct8x8_c, &idct8x8_12, 0, VPX_BITS_12)));
+        make_tuple(&aom_fdct8x8_c, &aom_idct8x8_64_add_c, 0, AOM_BITS_8),
+        make_tuple(&aom_highbd_fdct8x8_c, &idct8x8_10, 0, AOM_BITS_10),
+        make_tuple(&aom_highbd_fdct8x8_c, &idct8x8_12, 0, AOM_BITS_12)));
 #else
 INSTANTIATE_TEST_CASE_P(C, FwdTrans8x8DCT,
-                        ::testing::Values(make_tuple(&vpx_fdct8x8_c,
-                                                     &vpx_idct8x8_64_add_c, 0,
-                                                     VPX_BITS_8)));
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+                        ::testing::Values(make_tuple(&aom_fdct8x8_c,
+                                                     &aom_idct8x8_64_add_c, 0,
+                                                     AOM_BITS_8)));
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
     C, FwdTrans8x8HT,
     ::testing::Values(
-        make_tuple(&vp10_fht8x8_c, &vp10_iht8x8_64_add_c, 0, VPX_BITS_8),
-        make_tuple(&vp10_highbd_fht8x8_c, &iht8x8_10, 0, VPX_BITS_10),
-        make_tuple(&vp10_highbd_fht8x8_c, &iht8x8_10, 1, VPX_BITS_10),
-        make_tuple(&vp10_highbd_fht8x8_c, &iht8x8_10, 2, VPX_BITS_10),
-        make_tuple(&vp10_highbd_fht8x8_c, &iht8x8_10, 3, VPX_BITS_10),
-        make_tuple(&vp10_highbd_fht8x8_c, &iht8x8_12, 0, VPX_BITS_12),
-        make_tuple(&vp10_highbd_fht8x8_c, &iht8x8_12, 1, VPX_BITS_12),
-        make_tuple(&vp10_highbd_fht8x8_c, &iht8x8_12, 2, VPX_BITS_12),
-        make_tuple(&vp10_highbd_fht8x8_c, &iht8x8_12, 3, VPX_BITS_12),
-        make_tuple(&vp10_fht8x8_c, &vp10_iht8x8_64_add_c, 1, VPX_BITS_8),
-        make_tuple(&vp10_fht8x8_c, &vp10_iht8x8_64_add_c, 2, VPX_BITS_8),
-        make_tuple(&vp10_fht8x8_c, &vp10_iht8x8_64_add_c, 3, VPX_BITS_8)));
+        make_tuple(&av1_fht8x8_c, &av1_iht8x8_64_add_c, 0, AOM_BITS_8),
+        make_tuple(&av1_highbd_fht8x8_c, &iht8x8_10, 0, AOM_BITS_10),
+        make_tuple(&av1_highbd_fht8x8_c, &iht8x8_10, 1, AOM_BITS_10),
+        make_tuple(&av1_highbd_fht8x8_c, &iht8x8_10, 2, AOM_BITS_10),
+        make_tuple(&av1_highbd_fht8x8_c, &iht8x8_10, 3, AOM_BITS_10),
+        make_tuple(&av1_highbd_fht8x8_c, &iht8x8_12, 0, AOM_BITS_12),
+        make_tuple(&av1_highbd_fht8x8_c, &iht8x8_12, 1, AOM_BITS_12),
+        make_tuple(&av1_highbd_fht8x8_c, &iht8x8_12, 2, AOM_BITS_12),
+        make_tuple(&av1_highbd_fht8x8_c, &iht8x8_12, 3, AOM_BITS_12),
+        make_tuple(&av1_fht8x8_c, &av1_iht8x8_64_add_c, 1, AOM_BITS_8),
+        make_tuple(&av1_fht8x8_c, &av1_iht8x8_64_add_c, 2, AOM_BITS_8),
+        make_tuple(&av1_fht8x8_c, &av1_iht8x8_64_add_c, 3, AOM_BITS_8)));
 #else
 INSTANTIATE_TEST_CASE_P(
     C, FwdTrans8x8HT,
     ::testing::Values(
-        make_tuple(&vp10_fht8x8_c, &vp10_iht8x8_64_add_c, 0, VPX_BITS_8),
-        make_tuple(&vp10_fht8x8_c, &vp10_iht8x8_64_add_c, 1, VPX_BITS_8),
-        make_tuple(&vp10_fht8x8_c, &vp10_iht8x8_64_add_c, 2, VPX_BITS_8),
-        make_tuple(&vp10_fht8x8_c, &vp10_iht8x8_64_add_c, 3, VPX_BITS_8)));
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+        make_tuple(&av1_fht8x8_c, &av1_iht8x8_64_add_c, 0, AOM_BITS_8),
+        make_tuple(&av1_fht8x8_c, &av1_iht8x8_64_add_c, 1, AOM_BITS_8),
+        make_tuple(&av1_fht8x8_c, &av1_iht8x8_64_add_c, 2, AOM_BITS_8),
+        make_tuple(&av1_fht8x8_c, &av1_iht8x8_64_add_c, 3, AOM_BITS_8)));
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
-#if HAVE_NEON_ASM && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#if HAVE_NEON_ASM && !CONFIG_AOM_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(NEON, FwdTrans8x8DCT,
-                        ::testing::Values(make_tuple(&vpx_fdct8x8_neon,
-                                                     &vpx_idct8x8_64_add_neon,
-                                                     0, VPX_BITS_8)));
-#endif  // HAVE_NEON_ASM && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+                        ::testing::Values(make_tuple(&aom_fdct8x8_neon,
+                                                     &aom_idct8x8_64_add_neon,
+                                                     0, AOM_BITS_8)));
+#endif  // HAVE_NEON_ASM && !CONFIG_AOM_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
-#if HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#if HAVE_NEON && !CONFIG_AOM_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     NEON, FwdTrans8x8HT,
     ::testing::Values(
-        make_tuple(&vp10_fht8x8_c, &vp10_iht8x8_64_add_neon, 0, VPX_BITS_8),
-        make_tuple(&vp10_fht8x8_c, &vp10_iht8x8_64_add_neon, 1, VPX_BITS_8),
-        make_tuple(&vp10_fht8x8_c, &vp10_iht8x8_64_add_neon, 2, VPX_BITS_8),
-        make_tuple(&vp10_fht8x8_c, &vp10_iht8x8_64_add_neon, 3, VPX_BITS_8)));
-#endif  // HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+        make_tuple(&av1_fht8x8_c, &av1_iht8x8_64_add_neon, 0, AOM_BITS_8),
+        make_tuple(&av1_fht8x8_c, &av1_iht8x8_64_add_neon, 1, AOM_BITS_8),
+        make_tuple(&av1_fht8x8_c, &av1_iht8x8_64_add_neon, 2, AOM_BITS_8),
+        make_tuple(&av1_fht8x8_c, &av1_iht8x8_64_add_neon, 3, AOM_BITS_8)));
+#endif  // HAVE_NEON && !CONFIG_AOM_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
-#if HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#if HAVE_SSE2 && !CONFIG_AOM_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(SSE2, FwdTrans8x8DCT,
-                        ::testing::Values(make_tuple(&vpx_fdct8x8_sse2,
-                                                     &vpx_idct8x8_64_add_sse2,
-                                                     0, VPX_BITS_8)));
+                        ::testing::Values(make_tuple(&aom_fdct8x8_sse2,
+                                                     &aom_idct8x8_64_add_sse2,
+                                                     0, AOM_BITS_8)));
 INSTANTIATE_TEST_CASE_P(
     SSE2, FwdTrans8x8HT,
     ::testing::Values(
-        make_tuple(&vp10_fht8x8_sse2, &vp10_iht8x8_64_add_sse2, 0, VPX_BITS_8),
-        make_tuple(&vp10_fht8x8_sse2, &vp10_iht8x8_64_add_sse2, 1, VPX_BITS_8),
-        make_tuple(&vp10_fht8x8_sse2, &vp10_iht8x8_64_add_sse2, 2, VPX_BITS_8),
-        make_tuple(&vp10_fht8x8_sse2, &vp10_iht8x8_64_add_sse2, 3,
-                   VPX_BITS_8)));
-#endif  // HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+        make_tuple(&av1_fht8x8_sse2, &av1_iht8x8_64_add_sse2, 0, AOM_BITS_8),
+        make_tuple(&av1_fht8x8_sse2, &av1_iht8x8_64_add_sse2, 1, AOM_BITS_8),
+        make_tuple(&av1_fht8x8_sse2, &av1_iht8x8_64_add_sse2, 2, AOM_BITS_8),
+        make_tuple(&av1_fht8x8_sse2, &av1_iht8x8_64_add_sse2, 3, AOM_BITS_8)));
+#endif  // HAVE_SSE2 && !CONFIG_AOM_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
-#if HAVE_SSE2 && CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#if HAVE_SSE2 && CONFIG_AOM_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     SSE2, FwdTrans8x8DCT,
-    ::testing::Values(make_tuple(&vpx_fdct8x8_sse2, &vpx_idct8x8_64_add_c, 0,
-                                 VPX_BITS_8),
-                      make_tuple(&vpx_highbd_fdct8x8_c, &idct8x8_64_add_10_sse2,
-                                 12, VPX_BITS_10),
-                      make_tuple(&vpx_highbd_fdct8x8_sse2,
-                                 &idct8x8_64_add_10_sse2, 12, VPX_BITS_10),
-                      make_tuple(&vpx_highbd_fdct8x8_c, &idct8x8_64_add_12_sse2,
-                                 12, VPX_BITS_12),
-                      make_tuple(&vpx_highbd_fdct8x8_sse2,
-                                 &idct8x8_64_add_12_sse2, 12, VPX_BITS_12)));
+    ::testing::Values(make_tuple(&aom_fdct8x8_sse2, &aom_idct8x8_64_add_c, 0,
+                                 AOM_BITS_8),
+                      make_tuple(&aom_highbd_fdct8x8_c, &idct8x8_64_add_10_sse2,
+                                 12, AOM_BITS_10),
+                      make_tuple(&aom_highbd_fdct8x8_sse2,
+                                 &idct8x8_64_add_10_sse2, 12, AOM_BITS_10),
+                      make_tuple(&aom_highbd_fdct8x8_c, &idct8x8_64_add_12_sse2,
+                                 12, AOM_BITS_12),
+                      make_tuple(&aom_highbd_fdct8x8_sse2,
+                                 &idct8x8_64_add_12_sse2, 12, AOM_BITS_12)));
 
 INSTANTIATE_TEST_CASE_P(
     SSE2, FwdTrans8x8HT,
     ::testing::Values(
-        make_tuple(&vp10_fht8x8_sse2, &vp10_iht8x8_64_add_c, 0, VPX_BITS_8),
-        make_tuple(&vp10_fht8x8_sse2, &vp10_iht8x8_64_add_c, 1, VPX_BITS_8),
-        make_tuple(&vp10_fht8x8_sse2, &vp10_iht8x8_64_add_c, 2, VPX_BITS_8),
-        make_tuple(&vp10_fht8x8_sse2, &vp10_iht8x8_64_add_c, 3, VPX_BITS_8)));
+        make_tuple(&av1_fht8x8_sse2, &av1_iht8x8_64_add_c, 0, AOM_BITS_8),
+        make_tuple(&av1_fht8x8_sse2, &av1_iht8x8_64_add_c, 1, AOM_BITS_8),
+        make_tuple(&av1_fht8x8_sse2, &av1_iht8x8_64_add_c, 2, AOM_BITS_8),
+        make_tuple(&av1_fht8x8_sse2, &av1_iht8x8_64_add_c, 3, AOM_BITS_8)));
 
 // Optimizations take effect at a threshold of 6201, so we use a value close to
 // that to test both branches.
@@ -722,34 +721,34 @@ INSTANTIATE_TEST_CASE_P(
     SSE2, InvTrans8x8DCT,
     ::testing::Values(
         make_tuple(&idct8x8_10_add_10_c, &idct8x8_10_add_10_sse2, 6225,
-                   VPX_BITS_10),
-        make_tuple(&idct8x8_10, &idct8x8_64_add_10_sse2, 6225, VPX_BITS_10),
+                   AOM_BITS_10),
+        make_tuple(&idct8x8_10, &idct8x8_64_add_10_sse2, 6225, AOM_BITS_10),
         make_tuple(&idct8x8_10_add_12_c, &idct8x8_10_add_12_sse2, 6225,
-                   VPX_BITS_12),
-        make_tuple(&idct8x8_12, &idct8x8_64_add_12_sse2, 6225, VPX_BITS_12)));
-#endif  // HAVE_SSE2 && CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+                   AOM_BITS_12),
+        make_tuple(&idct8x8_12, &idct8x8_64_add_12_sse2, 6225, AOM_BITS_12)));
+#endif  // HAVE_SSE2 && CONFIG_AOM_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
-#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_VP9_HIGHBITDEPTH && \
+#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_AOM_HIGHBITDEPTH && \
     !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(SSSE3, FwdTrans8x8DCT,
-                        ::testing::Values(make_tuple(&vpx_fdct8x8_ssse3,
-                                                     &vpx_idct8x8_64_add_ssse3,
-                                                     0, VPX_BITS_8)));
+                        ::testing::Values(make_tuple(&aom_fdct8x8_ssse3,
+                                                     &aom_idct8x8_64_add_ssse3,
+                                                     0, AOM_BITS_8)));
 #endif
 
-#if HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#if HAVE_MSA && !CONFIG_AOM_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(MSA, FwdTrans8x8DCT,
-                        ::testing::Values(make_tuple(&vpx_fdct8x8_msa,
-                                                     &vpx_idct8x8_64_add_msa, 0,
-                                                     VPX_BITS_8)));
+                        ::testing::Values(make_tuple(&aom_fdct8x8_msa,
+                                                     &aom_idct8x8_64_add_msa, 0,
+                                                     AOM_BITS_8)));
 #if !CONFIG_EXT_TX
 INSTANTIATE_TEST_CASE_P(
     MSA, FwdTrans8x8HT,
     ::testing::Values(
-        make_tuple(&vp10_fht8x8_msa, &vp10_iht8x8_64_add_msa, 0, VPX_BITS_8),
-        make_tuple(&vp10_fht8x8_msa, &vp10_iht8x8_64_add_msa, 1, VPX_BITS_8),
-        make_tuple(&vp10_fht8x8_msa, &vp10_iht8x8_64_add_msa, 2, VPX_BITS_8),
-        make_tuple(&vp10_fht8x8_msa, &vp10_iht8x8_64_add_msa, 3, VPX_BITS_8)));
+        make_tuple(&av1_fht8x8_msa, &av1_iht8x8_64_add_msa, 0, AOM_BITS_8),
+        make_tuple(&av1_fht8x8_msa, &av1_iht8x8_64_add_msa, 1, AOM_BITS_8),
+        make_tuple(&av1_fht8x8_msa, &av1_iht8x8_64_add_msa, 2, AOM_BITS_8),
+        make_tuple(&av1_fht8x8_msa, &av1_iht8x8_64_add_msa, 3, AOM_BITS_8)));
 #endif  // !CONFIG_EXT_TX
-#endif  // HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#endif  // HAVE_MSA && !CONFIG_AOM_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 }  // namespace

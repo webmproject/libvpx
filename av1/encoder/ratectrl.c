@@ -15,8 +15,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "aom_dsp/vpx_dsp_common.h"
-#include "aom_mem/vpx_mem.h"
+#include "aom_dsp/aom_dsp_common.h"
+#include "aom_mem/aom_mem.h"
 #include "aom_ports/mem.h"
 #include "aom_ports/system_state.h"
 
@@ -42,17 +42,17 @@
 #define MAX_BPB_FACTOR 50
 
 #define FRAME_OVERHEAD_BITS 200
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 #define ASSIGN_MINQ_TABLE(bit_depth, name)                   \
   do {                                                       \
     switch (bit_depth) {                                     \
-      case VPX_BITS_8: name = name##_8; break;               \
-      case VPX_BITS_10: name = name##_10; break;             \
-      case VPX_BITS_12: name = name##_12; break;             \
+      case AOM_BITS_8: name = name##_8; break;               \
+      case AOM_BITS_10: name = name##_10; break;             \
+      case AOM_BITS_12: name = name##_12; break;             \
       default:                                               \
         assert(0 &&                                          \
-               "bit_depth should be VPX_BITS_8, VPX_BITS_10" \
-               " or VPX_BITS_12");                           \
+               "bit_depth should be AOM_BITS_8, AOM_BITS_10" \
+               " or AOM_BITS_12");                           \
         name = NULL;                                         \
     }                                                        \
   } while (0)
@@ -72,7 +72,7 @@ static int arfgf_high_motion_minq_8[QINDEX_RANGE];
 static int inter_minq_8[QINDEX_RANGE];
 static int rtc_minq_8[QINDEX_RANGE];
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 static int kf_low_motion_minq_10[QINDEX_RANGE];
 static int kf_high_motion_minq_10[QINDEX_RANGE];
 static int arfgf_low_motion_minq_10[QINDEX_RANGE];
@@ -97,16 +97,16 @@ static int kf_low = 400;
 // The formulae were derived from computing a 3rd order polynomial best
 // fit to the original data (after plotting real maxq vs minq (not q index))
 static int get_minq_index(double maxq, double x3, double x2, double x1,
-                          vpx_bit_depth_t bit_depth) {
+                          aom_bit_depth_t bit_depth) {
   int i;
-  const double minqtarget = VPXMIN(((x3 * maxq + x2) * maxq + x1) * maxq, maxq);
+  const double minqtarget = AOMMIN(((x3 * maxq + x2) * maxq + x1) * maxq, maxq);
 
   // Special case handling to deal with the step from q2.0
   // down to lossless mode represented by q 1.0.
   if (minqtarget <= 2.0) return 0;
 
   for (i = 0; i < QINDEX_RANGE; i++) {
-    if (minqtarget <= vp10_convert_qindex_to_q(i, bit_depth)) return i;
+    if (minqtarget <= av1_convert_qindex_to_q(i, bit_depth)) return i;
   }
 
   return QINDEX_RANGE - 1;
@@ -114,10 +114,10 @@ static int get_minq_index(double maxq, double x3, double x2, double x1,
 
 static void init_minq_luts(int *kf_low_m, int *kf_high_m, int *arfgf_low,
                            int *arfgf_high, int *inter, int *rtc,
-                           vpx_bit_depth_t bit_depth) {
+                           aom_bit_depth_t bit_depth) {
   int i;
   for (i = 0; i < QINDEX_RANGE; i++) {
-    const double maxq = vp10_convert_qindex_to_q(i, bit_depth);
+    const double maxq = av1_convert_qindex_to_q(i, bit_depth);
     kf_low_m[i] = get_minq_index(maxq, 0.000001, -0.0004, 0.150, bit_depth);
     kf_high_m[i] = get_minq_index(maxq, 0.0000021, -0.00125, 0.55, bit_depth);
     arfgf_low[i] = get_minq_index(maxq, 0.0000015, -0.0009, 0.30, bit_depth);
@@ -127,42 +127,42 @@ static void init_minq_luts(int *kf_low_m, int *kf_high_m, int *arfgf_low,
   }
 }
 
-void vp10_rc_init_minq_luts(void) {
+void av1_rc_init_minq_luts(void) {
   init_minq_luts(kf_low_motion_minq_8, kf_high_motion_minq_8,
                  arfgf_low_motion_minq_8, arfgf_high_motion_minq_8,
-                 inter_minq_8, rtc_minq_8, VPX_BITS_8);
-#if CONFIG_VP9_HIGHBITDEPTH
+                 inter_minq_8, rtc_minq_8, AOM_BITS_8);
+#if CONFIG_AOM_HIGHBITDEPTH
   init_minq_luts(kf_low_motion_minq_10, kf_high_motion_minq_10,
                  arfgf_low_motion_minq_10, arfgf_high_motion_minq_10,
-                 inter_minq_10, rtc_minq_10, VPX_BITS_10);
+                 inter_minq_10, rtc_minq_10, AOM_BITS_10);
   init_minq_luts(kf_low_motion_minq_12, kf_high_motion_minq_12,
                  arfgf_low_motion_minq_12, arfgf_high_motion_minq_12,
-                 inter_minq_12, rtc_minq_12, VPX_BITS_12);
+                 inter_minq_12, rtc_minq_12, AOM_BITS_12);
 #endif
 }
 
 // These functions use formulaic calculations to make playing with the
 // quantizer tables easier. If necessary they can be replaced by lookup
 // tables if and when things settle down in the experimental bitstream
-double vp10_convert_qindex_to_q(int qindex, vpx_bit_depth_t bit_depth) {
+double av1_convert_qindex_to_q(int qindex, aom_bit_depth_t bit_depth) {
 // Convert the index to a real Q value (scaled down to match old Q values)
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   switch (bit_depth) {
-    case VPX_BITS_8: return vp10_ac_quant(qindex, 0, bit_depth) / 4.0;
-    case VPX_BITS_10: return vp10_ac_quant(qindex, 0, bit_depth) / 16.0;
-    case VPX_BITS_12: return vp10_ac_quant(qindex, 0, bit_depth) / 64.0;
+    case AOM_BITS_8: return av1_ac_quant(qindex, 0, bit_depth) / 4.0;
+    case AOM_BITS_10: return av1_ac_quant(qindex, 0, bit_depth) / 16.0;
+    case AOM_BITS_12: return av1_ac_quant(qindex, 0, bit_depth) / 64.0;
     default:
-      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+      assert(0 && "bit_depth should be AOM_BITS_8, AOM_BITS_10 or AOM_BITS_12");
       return -1.0;
   }
 #else
-  return vp10_ac_quant(qindex, 0, bit_depth) / 4.0;
+  return av1_ac_quant(qindex, 0, bit_depth) / 4.0;
 #endif
 }
 
-int vp10_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,
-                        double correction_factor, vpx_bit_depth_t bit_depth) {
-  const double q = vp10_convert_qindex_to_q(qindex, bit_depth);
+int av1_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,
+                       double correction_factor, aom_bit_depth_t bit_depth) {
+  const double q = av1_convert_qindex_to_q(qindex, bit_depth);
   int enumerator = frame_type == KEY_FRAME ? 2700000 : 1800000;
 
   assert(correction_factor <= MAX_BPB_FACTOR &&
@@ -173,20 +173,20 @@ int vp10_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,
   return (int)(enumerator * correction_factor / q);
 }
 
-int vp10_estimate_bits_at_q(FRAME_TYPE frame_type, int q, int mbs,
-                            double correction_factor,
-                            vpx_bit_depth_t bit_depth) {
+int av1_estimate_bits_at_q(FRAME_TYPE frame_type, int q, int mbs,
+                           double correction_factor,
+                           aom_bit_depth_t bit_depth) {
   const int bpm =
-      (int)(vp10_rc_bits_per_mb(frame_type, q, correction_factor, bit_depth));
-  return VPXMAX(FRAME_OVERHEAD_BITS,
+      (int)(av1_rc_bits_per_mb(frame_type, q, correction_factor, bit_depth));
+  return AOMMAX(FRAME_OVERHEAD_BITS,
                 (int)((uint64_t)bpm * mbs) >> BPER_MB_NORMBITS);
 }
 
-int vp10_rc_clamp_pframe_target_size(const VP10_COMP *const cpi, int target) {
+int av1_rc_clamp_pframe_target_size(const AV1_COMP *const cpi, int target) {
   const RATE_CONTROL *rc = &cpi->rc;
-  const VP10EncoderConfig *oxcf = &cpi->oxcf;
+  const AV1EncoderConfig *oxcf = &cpi->oxcf;
   const int min_frame_target =
-      VPXMAX(rc->min_frame_bandwidth, rc->avg_frame_bandwidth >> 5);
+      AOMMAX(rc->min_frame_bandwidth, rc->avg_frame_bandwidth >> 5);
 // Clip the frame target to the minimum setup value.
 #if CONFIG_EXT_REFS
   if (cpi->rc.is_src_frame_alt_ref) {
@@ -207,27 +207,27 @@ int vp10_rc_clamp_pframe_target_size(const VP10_COMP *const cpi, int target) {
   if (oxcf->rc_max_inter_bitrate_pct) {
     const int max_rate =
         rc->avg_frame_bandwidth * oxcf->rc_max_inter_bitrate_pct / 100;
-    target = VPXMIN(target, max_rate);
+    target = AOMMIN(target, max_rate);
   }
 
   return target;
 }
 
-int vp10_rc_clamp_iframe_target_size(const VP10_COMP *const cpi, int target) {
+int av1_rc_clamp_iframe_target_size(const AV1_COMP *const cpi, int target) {
   const RATE_CONTROL *rc = &cpi->rc;
-  const VP10EncoderConfig *oxcf = &cpi->oxcf;
+  const AV1EncoderConfig *oxcf = &cpi->oxcf;
   if (oxcf->rc_max_intra_bitrate_pct) {
     const int max_rate =
         rc->avg_frame_bandwidth * oxcf->rc_max_intra_bitrate_pct / 100;
-    target = VPXMIN(target, max_rate);
+    target = AOMMIN(target, max_rate);
   }
   if (target > rc->max_frame_bandwidth) target = rc->max_frame_bandwidth;
   return target;
 }
 
 // Update the buffer level: leaky bucket model.
-static void update_buffer_level(VP10_COMP *cpi, int encoded_frame_size) {
-  const VP10_COMMON *const cm = &cpi->common;
+static void update_buffer_level(AV1_COMP *cpi, int encoded_frame_size) {
+  const AV1_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
 
 // Non-viewable frames are a special case and are treated as pure overhead.
@@ -243,12 +243,12 @@ static void update_buffer_level(VP10_COMP *cpi, int encoded_frame_size) {
     rc->bits_off_target += rc->avg_frame_bandwidth - encoded_frame_size;
 
   // Clip the buffer level to the maximum specified buffer size.
-  rc->bits_off_target = VPXMIN(rc->bits_off_target, rc->maximum_buffer_size);
+  rc->bits_off_target = AOMMIN(rc->bits_off_target, rc->maximum_buffer_size);
   rc->buffer_level = rc->bits_off_target;
 }
 
-int vp10_rc_get_default_min_gf_interval(int width, int height,
-                                        double framerate) {
+int av1_rc_get_default_min_gf_interval(int width, int height,
+                                       double framerate) {
   // Assume we do not need any constraint lower than 4K 20 fps
   static const double factor_safe = 3840 * 2160 * 20.0;
   const double factor = width * height * framerate;
@@ -258,7 +258,7 @@ int vp10_rc_get_default_min_gf_interval(int width, int height,
   if (factor <= factor_safe)
     return default_interval;
   else
-    return VPXMAX(default_interval,
+    return AOMMAX(default_interval,
                   (int)(MIN_GF_INTERVAL * factor / factor_safe + 0.5));
   // Note this logic makes:
   // 4K24: 5
@@ -266,16 +266,16 @@ int vp10_rc_get_default_min_gf_interval(int width, int height,
   // 4K60: 12
 }
 
-int vp10_rc_get_default_max_gf_interval(double framerate, int min_gf_interval) {
-  int interval = VPXMIN(MAX_GF_INTERVAL, (int)(framerate * 0.75));
+int av1_rc_get_default_max_gf_interval(double framerate, int min_gf_interval) {
+  int interval = AOMMIN(MAX_GF_INTERVAL, (int)(framerate * 0.75));
   interval += (interval & 0x01);  // Round to even value
-  return VPXMAX(interval, min_gf_interval);
+  return AOMMAX(interval, min_gf_interval);
 }
 
-void vp10_rc_init(const VP10EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
+void av1_rc_init(const AV1EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   int i;
 
-  if (pass == 0 && oxcf->rc_mode == VPX_CBR) {
+  if (pass == 0 && oxcf->rc_mode == AOM_CBR) {
     rc->avg_frame_qindex[KEY_FRAME] = oxcf->worst_allowed_q;
     rc->avg_frame_qindex[INTER_FRAME] = oxcf->worst_allowed_q;
   } else {
@@ -312,7 +312,7 @@ void vp10_rc_init(const VP10EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->ni_frames = 0;
 
   rc->tot_q = 0.0;
-  rc->avg_q = vp10_convert_qindex_to_q(oxcf->worst_allowed_q, oxcf->bit_depth);
+  rc->avg_q = av1_convert_qindex_to_q(oxcf->worst_allowed_q, oxcf->bit_depth);
 
   for (i = 0; i < RATE_FACTOR_LEVELS; ++i) {
     rc->rate_correction_factors[i] = 1.0;
@@ -321,16 +321,16 @@ void vp10_rc_init(const VP10EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->min_gf_interval = oxcf->min_gf_interval;
   rc->max_gf_interval = oxcf->max_gf_interval;
   if (rc->min_gf_interval == 0)
-    rc->min_gf_interval = vp10_rc_get_default_min_gf_interval(
+    rc->min_gf_interval = av1_rc_get_default_min_gf_interval(
         oxcf->width, oxcf->height, oxcf->init_framerate);
   if (rc->max_gf_interval == 0)
-    rc->max_gf_interval = vp10_rc_get_default_max_gf_interval(
+    rc->max_gf_interval = av1_rc_get_default_max_gf_interval(
         oxcf->init_framerate, rc->min_gf_interval);
   rc->baseline_gf_interval = (rc->min_gf_interval + rc->max_gf_interval) / 2;
 }
 
-int vp10_rc_drop_frame(VP10_COMP *cpi) {
-  const VP10EncoderConfig *oxcf = &cpi->oxcf;
+int av1_rc_drop_frame(AV1_COMP *cpi) {
+  const AV1EncoderConfig *oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
 
   if (!oxcf->drop_frames_water_mark) {
@@ -365,7 +365,7 @@ int vp10_rc_drop_frame(VP10_COMP *cpi) {
   }
 }
 
-static double get_rate_correction_factor(const VP10_COMP *cpi) {
+static double get_rate_correction_factor(const AV1_COMP *cpi) {
   const RATE_CONTROL *const rc = &cpi->rc;
   double rcf;
 
@@ -378,7 +378,7 @@ static double get_rate_correction_factor(const VP10_COMP *cpi) {
   } else {
     if ((cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame) &&
         !rc->is_src_frame_alt_ref &&
-        (cpi->oxcf.rc_mode != VPX_CBR || cpi->oxcf.gf_cbr_boost_pct > 20))
+        (cpi->oxcf.rc_mode != AOM_CBR || cpi->oxcf.gf_cbr_boost_pct > 20))
       rcf = rc->rate_correction_factors[GF_ARF_STD];
     else
       rcf = rc->rate_correction_factors[INTER_NORMAL];
@@ -387,7 +387,7 @@ static double get_rate_correction_factor(const VP10_COMP *cpi) {
   return fclamp(rcf, MIN_BPB_FACTOR, MAX_BPB_FACTOR);
 }
 
-static void set_rate_correction_factor(VP10_COMP *cpi, double factor) {
+static void set_rate_correction_factor(AV1_COMP *cpi, double factor) {
   RATE_CONTROL *const rc = &cpi->rc;
 
   // Normalize RCF to account for the size-dependent scaling factor.
@@ -404,15 +404,15 @@ static void set_rate_correction_factor(VP10_COMP *cpi, double factor) {
   } else {
     if ((cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame) &&
         !rc->is_src_frame_alt_ref &&
-        (cpi->oxcf.rc_mode != VPX_CBR || cpi->oxcf.gf_cbr_boost_pct > 20))
+        (cpi->oxcf.rc_mode != AOM_CBR || cpi->oxcf.gf_cbr_boost_pct > 20))
       rc->rate_correction_factors[GF_ARF_STD] = factor;
     else
       rc->rate_correction_factors[INTER_NORMAL] = factor;
   }
 }
 
-void vp10_rc_update_rate_correction_factors(VP10_COMP *cpi) {
-  const VP10_COMMON *const cm = &cpi->common;
+void av1_rc_update_rate_correction_factors(AV1_COMP *cpi) {
+  const AV1_COMMON *const cm = &cpi->common;
   int correction_factor = 100;
   double rate_correction_factor = get_rate_correction_factor(cpi);
   double adjustment_limit;
@@ -423,18 +423,18 @@ void vp10_rc_update_rate_correction_factors(VP10_COMP *cpi) {
   if (cpi->rc.is_src_frame_alt_ref) return;
 
   // Clear down mmx registers to allow floating point in what follows
-  vpx_clear_system_state();
+  aom_clear_system_state();
 
   // Work out how big we would have expected the frame to be at this Q given
   // the current correction factor.
   // Stay in double to avoid int overflow when values are large
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cpi->common.seg.enabled) {
     projected_size_based_on_q =
-        vp10_cyclic_refresh_estimate_bits_at_q(cpi, rate_correction_factor);
+        av1_cyclic_refresh_estimate_bits_at_q(cpi, rate_correction_factor);
   } else {
     projected_size_based_on_q =
-        vp10_estimate_bits_at_q(cpi->common.frame_type, cm->base_qindex,
-                                cm->MBs, rate_correction_factor, cm->bit_depth);
+        av1_estimate_bits_at_q(cpi->common.frame_type, cm->base_qindex, cm->MBs,
+                               rate_correction_factor, cm->bit_depth);
   }
   // Work out a size correction factor.
   if (projected_size_based_on_q > FRAME_OVERHEAD_BITS)
@@ -444,7 +444,7 @@ void vp10_rc_update_rate_correction_factors(VP10_COMP *cpi) {
   // More heavily damped adjustment used if we have been oscillating either side
   // of target.
   adjustment_limit =
-      0.25 + 0.5 * VPXMIN(1, fabs(log10(0.01 * correction_factor)));
+      0.25 + 0.5 * AOMMIN(1, fabs(log10(0.01 * correction_factor)));
 
   cpi->rc.q_2_frame = cpi->rc.q_1_frame;
   cpi->rc.q_1_frame = cm->base_qindex;
@@ -478,9 +478,9 @@ void vp10_rc_update_rate_correction_factors(VP10_COMP *cpi) {
   set_rate_correction_factor(cpi, rate_correction_factor);
 }
 
-int vp10_rc_regulate_q(const VP10_COMP *cpi, int target_bits_per_frame,
-                       int active_best_quality, int active_worst_quality) {
-  const VP10_COMMON *const cm = &cpi->common;
+int av1_rc_regulate_q(const AV1_COMP *cpi, int target_bits_per_frame,
+                      int active_best_quality, int active_worst_quality) {
+  const AV1_COMMON *const cm = &cpi->common;
   int q = active_worst_quality;
   int last_error = INT_MAX;
   int i, target_bits_per_mb, bits_per_mb_at_this_q;
@@ -496,9 +496,9 @@ int vp10_rc_regulate_q(const VP10_COMP *cpi, int target_bits_per_frame,
   do {
     if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled) {
       bits_per_mb_at_this_q =
-          (int)vp10_cyclic_refresh_rc_bits_per_mb(cpi, i, correction_factor);
+          (int)av1_cyclic_refresh_rc_bits_per_mb(cpi, i, correction_factor);
     } else {
-      bits_per_mb_at_this_q = (int)vp10_rc_bits_per_mb(
+      bits_per_mb_at_this_q = (int)av1_rc_bits_per_mb(
           cm->frame_type, i, correction_factor, cm->bit_depth);
     }
 
@@ -516,11 +516,11 @@ int vp10_rc_regulate_q(const VP10_COMP *cpi, int target_bits_per_frame,
 
   // In CBR mode, this makes sure q is between oscillating Qs to prevent
   // resonance.
-  if (cpi->oxcf.rc_mode == VPX_CBR &&
+  if (cpi->oxcf.rc_mode == AOM_CBR &&
       (cpi->rc.rc_1_frame * cpi->rc.rc_2_frame == -1) &&
       cpi->rc.q_1_frame != cpi->rc.q_2_frame) {
-    q = clamp(q, VPXMIN(cpi->rc.q_1_frame, cpi->rc.q_2_frame),
-              VPXMAX(cpi->rc.q_1_frame, cpi->rc.q_2_frame));
+    q = clamp(q, AOMMIN(cpi->rc.q_1_frame, cpi->rc.q_2_frame),
+              AOMMAX(cpi->rc.q_1_frame, cpi->rc.q_2_frame));
   }
   return q;
 }
@@ -541,7 +541,7 @@ static int get_active_quality(int q, int gfu_boost, int low, int high,
 }
 
 static int get_kf_active_quality(const RATE_CONTROL *const rc, int q,
-                                 vpx_bit_depth_t bit_depth) {
+                                 aom_bit_depth_t bit_depth) {
   int *kf_low_motion_minq;
   int *kf_high_motion_minq;
   ASSIGN_MINQ_TABLE(bit_depth, kf_low_motion_minq);
@@ -551,7 +551,7 @@ static int get_kf_active_quality(const RATE_CONTROL *const rc, int q,
 }
 
 static int get_gf_active_quality(const RATE_CONTROL *const rc, int q,
-                                 vpx_bit_depth_t bit_depth) {
+                                 aom_bit_depth_t bit_depth) {
   int *arfgf_low_motion_minq;
   int *arfgf_high_motion_minq;
   ASSIGN_MINQ_TABLE(bit_depth, arfgf_low_motion_minq);
@@ -560,7 +560,7 @@ static int get_gf_active_quality(const RATE_CONTROL *const rc, int q,
                             arfgf_low_motion_minq, arfgf_high_motion_minq);
 }
 
-static int calc_active_worst_quality_one_pass_vbr(const VP10_COMP *cpi) {
+static int calc_active_worst_quality_one_pass_vbr(const AV1_COMP *cpi) {
   const RATE_CONTROL *const rc = &cpi->rc;
   const unsigned int curr_frame = cpi->common.current_video_frame;
   int active_worst_quality;
@@ -578,17 +578,17 @@ static int calc_active_worst_quality_one_pass_vbr(const VP10_COMP *cpi) {
                                              : rc->last_q[INTER_FRAME] * 2;
     }
   }
-  return VPXMIN(active_worst_quality, rc->worst_quality);
+  return AOMMIN(active_worst_quality, rc->worst_quality);
 }
 
 // Adjust active_worst_quality level based on buffer level.
-static int calc_active_worst_quality_one_pass_cbr(const VP10_COMP *cpi) {
+static int calc_active_worst_quality_one_pass_cbr(const AV1_COMP *cpi) {
   // Adjust active_worst_quality: If buffer is above the optimal/target level,
   // bring active_worst_quality down depending on fullness of buffer.
   // If buffer is below the optimal level, let the active_worst_quality go from
   // ambient Q (at buffer = optimal level) to worst_quality level
   // (at buffer = critical level).
-  const VP10_COMMON *const cm = &cpi->common;
+  const AV1_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *rc = &cpi->rc;
   // Buffer level below which we push active_worst to worst_quality.
   int64_t critical_level = rc->optimal_buffer_level >> 3;
@@ -603,10 +603,10 @@ static int calc_active_worst_quality_one_pass_cbr(const VP10_COMP *cpi) {
   // So for first few frames following key, the qp of that key frame is weighted
   // into the active_worst_quality setting.
   ambient_qp = (cm->current_video_frame < 5)
-                   ? VPXMIN(rc->avg_frame_qindex[INTER_FRAME],
+                   ? AOMMIN(rc->avg_frame_qindex[INTER_FRAME],
                             rc->avg_frame_qindex[KEY_FRAME])
                    : rc->avg_frame_qindex[INTER_FRAME];
-  active_worst_quality = VPXMIN(rc->worst_quality, ambient_qp * 5 / 4);
+  active_worst_quality = AOMMIN(rc->worst_quality, ambient_qp * 5 / 4);
   if (rc->buffer_level > rc->optimal_buffer_level) {
     // Adjust down.
     // Maximum limit for down adjustment, ~30%.
@@ -637,10 +637,10 @@ static int calc_active_worst_quality_one_pass_cbr(const VP10_COMP *cpi) {
   return active_worst_quality;
 }
 
-static int rc_pick_q_and_bounds_one_pass_cbr(const VP10_COMP *cpi,
+static int rc_pick_q_and_bounds_one_pass_cbr(const AV1_COMP *cpi,
                                              int *bottom_index,
                                              int *top_index) {
-  const VP10_COMMON *const cm = &cpi->common;
+  const AV1_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
   int active_best_quality;
   int active_worst_quality = calc_active_worst_quality_one_pass_cbr(cpi);
@@ -655,10 +655,10 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP10_COMP *cpi,
     // based on the ambient Q to reduce the risk of popping.
     if (rc->this_key_frame_forced) {
       int qindex = rc->last_boosted_qindex;
-      double last_boosted_q = vp10_convert_qindex_to_q(qindex, cm->bit_depth);
-      int delta_qindex = vp10_compute_qdelta(
+      double last_boosted_q = av1_convert_qindex_to_q(qindex, cm->bit_depth);
+      int delta_qindex = av1_compute_qdelta(
           rc, last_boosted_q, (last_boosted_q * 0.75), cm->bit_depth);
-      active_best_quality = VPXMAX(qindex + delta_qindex, rc->best_quality);
+      active_best_quality = AOMMAX(qindex + delta_qindex, rc->best_quality);
     } else if (cm->current_video_frame > 0) {
       // not first frame of one pass and kf_boost is set
       double q_adj_factor = 1.0;
@@ -674,9 +674,9 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP10_COMP *cpi,
 
       // Convert the adjustment factor to a qindex delta
       // on active_best_quality.
-      q_val = vp10_convert_qindex_to_q(active_best_quality, cm->bit_depth);
+      q_val = av1_convert_qindex_to_q(active_best_quality, cm->bit_depth);
       active_best_quality +=
-          vp10_compute_qdelta(rc, q_val, q_val * q_adj_factor, cm->bit_depth);
+          av1_compute_qdelta(rc, q_val, q_val * q_adj_factor, cm->bit_depth);
     }
   } else if (!rc->is_src_frame_alt_ref &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
@@ -718,19 +718,19 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP10_COMP *cpi,
   if (cm->frame_type == KEY_FRAME && !rc->this_key_frame_forced &&
       !(cm->current_video_frame == 0)) {
     int qdelta = 0;
-    vpx_clear_system_state();
-    qdelta = vp10_compute_qdelta_by_rate(
+    aom_clear_system_state();
+    qdelta = av1_compute_qdelta_by_rate(
         &cpi->rc, cm->frame_type, active_worst_quality, 2.0, cm->bit_depth);
     *top_index = active_worst_quality + qdelta;
-    *top_index = VPXMAX(*top_index, *bottom_index);
+    *top_index = AOMMAX(*top_index, *bottom_index);
   }
 
   // Special case code to try and match quality with forced key frames
   if (cm->frame_type == KEY_FRAME && rc->this_key_frame_forced) {
     q = rc->last_boosted_qindex;
   } else {
-    q = vp10_rc_regulate_q(cpi, rc->this_frame_target, active_best_quality,
-                           active_worst_quality);
+    q = av1_rc_regulate_q(cpi, rc->this_frame_target, active_best_quality,
+                          active_worst_quality);
     if (q > *top_index) {
       // Special case when we are targeting the max allowed rate
       if (rc->this_frame_target >= rc->max_frame_bandwidth)
@@ -748,10 +748,10 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP10_COMP *cpi,
 }
 
 static int get_active_cq_level(const RATE_CONTROL *rc,
-                               const VP10EncoderConfig *const oxcf) {
+                               const AV1EncoderConfig *const oxcf) {
   static const double cq_adjust_threshold = 0.1;
   int active_cq_level = oxcf->cq_level;
-  if (oxcf->rc_mode == VPX_CQ && rc->total_target_bits > 0) {
+  if (oxcf->rc_mode == AOM_CQ && rc->total_target_bits > 0) {
     const double x = (double)rc->total_actual_bits / rc->total_target_bits;
     if (x < cq_adjust_threshold) {
       active_cq_level = (int)(active_cq_level * x / cq_adjust_threshold);
@@ -760,12 +760,12 @@ static int get_active_cq_level(const RATE_CONTROL *rc,
   return active_cq_level;
 }
 
-static int rc_pick_q_and_bounds_one_pass_vbr(const VP10_COMP *cpi,
+static int rc_pick_q_and_bounds_one_pass_vbr(const AV1_COMP *cpi,
                                              int *bottom_index,
                                              int *top_index) {
-  const VP10_COMMON *const cm = &cpi->common;
+  const AV1_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
-  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
+  const AV1EncoderConfig *const oxcf = &cpi->oxcf;
   const int cq_level = get_active_cq_level(rc, oxcf);
   int active_best_quality;
   int active_worst_quality = calc_active_worst_quality_one_pass_vbr(cpi);
@@ -774,17 +774,17 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP10_COMP *cpi,
   ASSIGN_MINQ_TABLE(cm->bit_depth, inter_minq);
 
   if (frame_is_intra_only(cm)) {
-    if (oxcf->rc_mode == VPX_Q) {
+    if (oxcf->rc_mode == AOM_Q) {
       int qindex = cq_level;
-      double q = vp10_convert_qindex_to_q(qindex, cm->bit_depth);
-      int delta_qindex = vp10_compute_qdelta(rc, q, q * 0.25, cm->bit_depth);
-      active_best_quality = VPXMAX(qindex + delta_qindex, rc->best_quality);
+      double q = av1_convert_qindex_to_q(qindex, cm->bit_depth);
+      int delta_qindex = av1_compute_qdelta(rc, q, q * 0.25, cm->bit_depth);
+      active_best_quality = AOMMAX(qindex + delta_qindex, rc->best_quality);
     } else if (rc->this_key_frame_forced) {
       int qindex = rc->last_boosted_qindex;
-      double last_boosted_q = vp10_convert_qindex_to_q(qindex, cm->bit_depth);
-      int delta_qindex = vp10_compute_qdelta(
+      double last_boosted_q = av1_convert_qindex_to_q(qindex, cm->bit_depth);
+      int delta_qindex = av1_compute_qdelta(
           rc, last_boosted_q, last_boosted_q * 0.75, cm->bit_depth);
-      active_best_quality = VPXMAX(qindex + delta_qindex, rc->best_quality);
+      active_best_quality = AOMMAX(qindex + delta_qindex, rc->best_quality);
     } else {
       // not first frame of one pass and kf_boost is set
       double q_adj_factor = 1.0;
@@ -800,9 +800,9 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP10_COMP *cpi,
 
       // Convert the adjustment factor to a qindex delta
       // on active_best_quality.
-      q_val = vp10_convert_qindex_to_q(active_best_quality, cm->bit_depth);
+      q_val = av1_convert_qindex_to_q(active_best_quality, cm->bit_depth);
       active_best_quality +=
-          vp10_compute_qdelta(rc, q_val, q_val * q_adj_factor, cm->bit_depth);
+          av1_compute_qdelta(rc, q_val, q_val * q_adj_factor, cm->bit_depth);
     }
   } else if (!rc->is_src_frame_alt_ref &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
@@ -816,7 +816,7 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP10_COMP *cpi,
       q = rc->avg_frame_qindex[KEY_FRAME];
     }
     // For constrained quality dont allow Q less than the cq level
-    if (oxcf->rc_mode == VPX_CQ) {
+    if (oxcf->rc_mode == AOM_CQ) {
       if (q < cq_level) q = cq_level;
 
       active_best_quality = get_gf_active_quality(rc, q, cm->bit_depth);
@@ -824,28 +824,28 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP10_COMP *cpi,
       // Constrained quality use slightly lower active best.
       active_best_quality = active_best_quality * 15 / 16;
 
-    } else if (oxcf->rc_mode == VPX_Q) {
+    } else if (oxcf->rc_mode == AOM_Q) {
       int qindex = cq_level;
-      double q = vp10_convert_qindex_to_q(qindex, cm->bit_depth);
+      double q = av1_convert_qindex_to_q(qindex, cm->bit_depth);
       int delta_qindex;
       if (cpi->refresh_alt_ref_frame)
-        delta_qindex = vp10_compute_qdelta(rc, q, q * 0.40, cm->bit_depth);
+        delta_qindex = av1_compute_qdelta(rc, q, q * 0.40, cm->bit_depth);
       else
-        delta_qindex = vp10_compute_qdelta(rc, q, q * 0.50, cm->bit_depth);
-      active_best_quality = VPXMAX(qindex + delta_qindex, rc->best_quality);
+        delta_qindex = av1_compute_qdelta(rc, q, q * 0.50, cm->bit_depth);
+      active_best_quality = AOMMAX(qindex + delta_qindex, rc->best_quality);
     } else {
       active_best_quality = get_gf_active_quality(rc, q, cm->bit_depth);
     }
   } else {
-    if (oxcf->rc_mode == VPX_Q) {
+    if (oxcf->rc_mode == AOM_Q) {
       int qindex = cq_level;
-      double q = vp10_convert_qindex_to_q(qindex, cm->bit_depth);
+      double q = av1_convert_qindex_to_q(qindex, cm->bit_depth);
       double delta_rate[FIXED_GF_INTERVAL] = { 0.50, 1.0, 0.85, 1.0,
                                                0.70, 1.0, 0.85, 1.0 };
-      int delta_qindex = vp10_compute_qdelta(
+      int delta_qindex = av1_compute_qdelta(
           rc, q, q * delta_rate[cm->current_video_frame % FIXED_GF_INTERVAL],
           cm->bit_depth);
-      active_best_quality = VPXMAX(qindex + delta_qindex, rc->best_quality);
+      active_best_quality = AOMMAX(qindex + delta_qindex, rc->best_quality);
     } else {
       // Use the lower of active_worst_quality and recent/average Q.
       if (cm->current_video_frame > 1)
@@ -854,7 +854,7 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP10_COMP *cpi,
         active_best_quality = inter_minq[rc->avg_frame_qindex[KEY_FRAME]];
       // For the constrained quality mode we don't want
       // q to fall below the cq level.
-      if ((oxcf->rc_mode == VPX_CQ) && (active_best_quality < cq_level)) {
+      if ((oxcf->rc_mode == AOM_CQ) && (active_best_quality < cq_level)) {
         active_best_quality = cq_level;
       }
     }
@@ -872,28 +872,28 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP10_COMP *cpi,
   // Limit Q range for the adaptive loop.
   {
     int qdelta = 0;
-    vpx_clear_system_state();
+    aom_clear_system_state();
     if (cm->frame_type == KEY_FRAME && !rc->this_key_frame_forced &&
         !(cm->current_video_frame == 0)) {
-      qdelta = vp10_compute_qdelta_by_rate(
+      qdelta = av1_compute_qdelta_by_rate(
           &cpi->rc, cm->frame_type, active_worst_quality, 2.0, cm->bit_depth);
     } else if (!rc->is_src_frame_alt_ref &&
                (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
-      qdelta = vp10_compute_qdelta_by_rate(
+      qdelta = av1_compute_qdelta_by_rate(
           &cpi->rc, cm->frame_type, active_worst_quality, 1.75, cm->bit_depth);
     }
     *top_index = active_worst_quality + qdelta;
-    *top_index = VPXMAX(*top_index, *bottom_index);
+    *top_index = AOMMAX(*top_index, *bottom_index);
   }
 
-  if (oxcf->rc_mode == VPX_Q) {
+  if (oxcf->rc_mode == AOM_Q) {
     q = active_best_quality;
     // Special case code to try and match quality with forced key frames
   } else if ((cm->frame_type == KEY_FRAME) && rc->this_key_frame_forced) {
     q = rc->last_boosted_qindex;
   } else {
-    q = vp10_rc_regulate_q(cpi, rc->this_frame_target, active_best_quality,
-                           active_worst_quality);
+    q = av1_rc_regulate_q(cpi, rc->this_frame_target, active_best_quality,
+                          active_worst_quality);
     if (q > *top_index) {
       // Special case when we are targeting the max allowed rate
       if (rc->this_frame_target >= rc->max_frame_bandwidth)
@@ -910,7 +910,7 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP10_COMP *cpi,
   return q;
 }
 
-int vp10_frame_type_qdelta(const VP10_COMP *cpi, int rf_level, int q) {
+int av1_frame_type_qdelta(const AV1_COMP *cpi, int rf_level, int q) {
   static const double rate_factor_deltas[RATE_FACTOR_LEVELS] = {
     1.00,  // INTER_NORMAL
 #if CONFIG_EXT_REFS
@@ -931,19 +931,19 @@ int vp10_frame_type_qdelta(const VP10_COMP *cpi, int rf_level, int q) {
 #else
       { INTER_FRAME, INTER_FRAME, INTER_FRAME, INTER_FRAME, KEY_FRAME };
 #endif  // CONFIG_EXT_REFS
-  const VP10_COMMON *const cm = &cpi->common;
+  const AV1_COMMON *const cm = &cpi->common;
   int qdelta =
-      vp10_compute_qdelta_by_rate(&cpi->rc, frame_type[rf_level], q,
-                                  rate_factor_deltas[rf_level], cm->bit_depth);
+      av1_compute_qdelta_by_rate(&cpi->rc, frame_type[rf_level], q,
+                                 rate_factor_deltas[rf_level], cm->bit_depth);
   return qdelta;
 }
 
 #define STATIC_MOTION_THRESH 95
-static int rc_pick_q_and_bounds_two_pass(const VP10_COMP *cpi,
-                                         int *bottom_index, int *top_index) {
-  const VP10_COMMON *const cm = &cpi->common;
+static int rc_pick_q_and_bounds_two_pass(const AV1_COMP *cpi, int *bottom_index,
+                                         int *top_index) {
+  const AV1_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
-  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
+  const AV1EncoderConfig *const oxcf = &cpi->oxcf;
   const GF_GROUP *gf_group = &cpi->twopass.gf_group;
   const int cq_level = get_active_cq_level(rc, oxcf);
   int active_best_quality;
@@ -962,19 +962,19 @@ static int rc_pick_q_and_bounds_two_pass(const VP10_COMP *cpi,
       int qindex;
 
       if (cpi->twopass.last_kfgroup_zeromotion_pct >= STATIC_MOTION_THRESH) {
-        qindex = VPXMIN(rc->last_kf_qindex, rc->last_boosted_qindex);
+        qindex = AOMMIN(rc->last_kf_qindex, rc->last_boosted_qindex);
         active_best_quality = qindex;
-        last_boosted_q = vp10_convert_qindex_to_q(qindex, cm->bit_depth);
-        delta_qindex = vp10_compute_qdelta(
-            rc, last_boosted_q, last_boosted_q * 1.25, cm->bit_depth);
+        last_boosted_q = av1_convert_qindex_to_q(qindex, cm->bit_depth);
+        delta_qindex = av1_compute_qdelta(rc, last_boosted_q,
+                                          last_boosted_q * 1.25, cm->bit_depth);
         active_worst_quality =
-            VPXMIN(qindex + delta_qindex, active_worst_quality);
+            AOMMIN(qindex + delta_qindex, active_worst_quality);
       } else {
         qindex = rc->last_boosted_qindex;
-        last_boosted_q = vp10_convert_qindex_to_q(qindex, cm->bit_depth);
-        delta_qindex = vp10_compute_qdelta(
-            rc, last_boosted_q, last_boosted_q * 0.75, cm->bit_depth);
-        active_best_quality = VPXMAX(qindex + delta_qindex, rc->best_quality);
+        last_boosted_q = av1_convert_qindex_to_q(qindex, cm->bit_depth);
+        delta_qindex = av1_compute_qdelta(rc, last_boosted_q,
+                                          last_boosted_q * 0.75, cm->bit_depth);
+        active_best_quality = AOMMAX(qindex + delta_qindex, rc->best_quality);
       }
     } else {
       // Not forced keyframe.
@@ -995,9 +995,9 @@ static int rc_pick_q_and_bounds_two_pass(const VP10_COMP *cpi,
 
       // Convert the adjustment factor to a qindex delta
       // on active_best_quality.
-      q_val = vp10_convert_qindex_to_q(active_best_quality, cm->bit_depth);
+      q_val = av1_convert_qindex_to_q(active_best_quality, cm->bit_depth);
       active_best_quality +=
-          vp10_compute_qdelta(rc, q_val, q_val * q_adj_factor, cm->bit_depth);
+          av1_compute_qdelta(rc, q_val, q_val * q_adj_factor, cm->bit_depth);
     }
   } else if (!rc->is_src_frame_alt_ref &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
@@ -1011,7 +1011,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP10_COMP *cpi,
       q = active_worst_quality;
     }
     // For constrained quality dont allow Q less than the cq level
-    if (oxcf->rc_mode == VPX_CQ) {
+    if (oxcf->rc_mode == AOM_CQ) {
       if (q < cq_level) q = cq_level;
 
       active_best_quality = get_gf_active_quality(rc, q, cm->bit_depth);
@@ -1019,13 +1019,13 @@ static int rc_pick_q_and_bounds_two_pass(const VP10_COMP *cpi,
       // Constrained quality use slightly lower active best.
       active_best_quality = active_best_quality * 15 / 16;
 
-    } else if (oxcf->rc_mode == VPX_Q) {
+    } else if (oxcf->rc_mode == AOM_Q) {
       if (!cpi->refresh_alt_ref_frame) {
         active_best_quality = cq_level;
       } else {
         active_best_quality = get_gf_active_quality(rc, q, cm->bit_depth);
 
-        // Modify best quality for second level arfs. For mode VPX_Q this
+        // Modify best quality for second level arfs. For mode AOM_Q this
         // becomes the baseline frame q.
         if (gf_group->rf_level[gf_group->index] == GF_ARF_LOW)
           active_best_quality = (active_best_quality + cq_level + 1) / 2;
@@ -1034,14 +1034,14 @@ static int rc_pick_q_and_bounds_two_pass(const VP10_COMP *cpi,
       active_best_quality = get_gf_active_quality(rc, q, cm->bit_depth);
     }
   } else {
-    if (oxcf->rc_mode == VPX_Q) {
+    if (oxcf->rc_mode == AOM_Q) {
       active_best_quality = cq_level;
     } else {
       active_best_quality = inter_minq[active_worst_quality];
 
       // For the constrained quality mode we don't want
       // q to fall below the cq level.
-      if ((oxcf->rc_mode == VPX_CQ) && (active_best_quality < cq_level)) {
+      if ((oxcf->rc_mode == AOM_CQ) && (active_best_quality < cq_level)) {
         active_best_quality = cq_level;
       }
     }
@@ -1049,7 +1049,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP10_COMP *cpi,
 
   // Extension to max or min Q if undershoot or overshoot is outside
   // the permitted range.
-  if ((cpi->oxcf.rc_mode != VPX_Q) &&
+  if ((cpi->oxcf.rc_mode != AOM_Q) &&
       (cpi->twopass.gf_zeromotion_pct < VLOW_MOTION_THRESHOLD)) {
     if (frame_is_intra_only(cm) ||
         (!rc->is_src_frame_alt_ref &&
@@ -1064,22 +1064,22 @@ static int rc_pick_q_and_bounds_two_pass(const VP10_COMP *cpi,
     }
   }
 
-  vpx_clear_system_state();
+  aom_clear_system_state();
   // Static forced key frames Q restrictions dealt with elsewhere.
   if (!(frame_is_intra_only(cm)) || !rc->this_key_frame_forced ||
       (cpi->twopass.last_kfgroup_zeromotion_pct < STATIC_MOTION_THRESH)) {
-    int qdelta = vp10_frame_type_qdelta(
-        cpi, gf_group->rf_level[gf_group->index], active_worst_quality);
+    int qdelta = av1_frame_type_qdelta(cpi, gf_group->rf_level[gf_group->index],
+                                       active_worst_quality);
     active_worst_quality =
-        VPXMAX(active_worst_quality + qdelta, active_best_quality);
+        AOMMAX(active_worst_quality + qdelta, active_best_quality);
   }
 
   // Modify active_best_quality for downscaled normal frames.
   if (rc->frame_size_selector != UNSCALED && !frame_is_kf_gf_arf(cpi)) {
-    int qdelta = vp10_compute_qdelta_by_rate(
+    int qdelta = av1_compute_qdelta_by_rate(
         rc, cm->frame_type, active_best_quality, 2.0, cm->bit_depth);
     active_best_quality =
-        VPXMAX(active_best_quality + qdelta, rc->best_quality);
+        AOMMAX(active_best_quality + qdelta, rc->best_quality);
   }
 
   active_best_quality =
@@ -1087,19 +1087,19 @@ static int rc_pick_q_and_bounds_two_pass(const VP10_COMP *cpi,
   active_worst_quality =
       clamp(active_worst_quality, active_best_quality, rc->worst_quality);
 
-  if (oxcf->rc_mode == VPX_Q) {
+  if (oxcf->rc_mode == AOM_Q) {
     q = active_best_quality;
     // Special case code to try and match quality with forced key frames.
   } else if (frame_is_intra_only(cm) && rc->this_key_frame_forced) {
     // If static since last kf use better of last boosted and last kf q.
     if (cpi->twopass.last_kfgroup_zeromotion_pct >= STATIC_MOTION_THRESH) {
-      q = VPXMIN(rc->last_kf_qindex, rc->last_boosted_qindex);
+      q = AOMMIN(rc->last_kf_qindex, rc->last_boosted_qindex);
     } else {
       q = rc->last_boosted_qindex;
     }
   } else {
-    q = vp10_rc_regulate_q(cpi, rc->this_frame_target, active_best_quality,
-                           active_worst_quality);
+    q = av1_rc_regulate_q(cpi, rc->this_frame_target, active_best_quality,
+                          active_worst_quality);
     if (q > active_worst_quality) {
       // Special case when we are targeting the max allowed rate.
       if (rc->this_frame_target >= rc->max_frame_bandwidth)
@@ -1120,11 +1120,11 @@ static int rc_pick_q_and_bounds_two_pass(const VP10_COMP *cpi,
   return q;
 }
 
-int vp10_rc_pick_q_and_bounds(const VP10_COMP *cpi, int *bottom_index,
-                              int *top_index) {
+int av1_rc_pick_q_and_bounds(const AV1_COMP *cpi, int *bottom_index,
+                             int *top_index) {
   int q;
   if (cpi->oxcf.pass == 0) {
-    if (cpi->oxcf.rc_mode == VPX_CBR)
+    if (cpi->oxcf.rc_mode == AOM_CBR)
       q = rc_pick_q_and_bounds_one_pass_cbr(cpi, bottom_index, top_index);
     else
       q = rc_pick_q_and_bounds_one_pass_vbr(cpi, bottom_index, top_index);
@@ -1135,24 +1135,24 @@ int vp10_rc_pick_q_and_bounds(const VP10_COMP *cpi, int *bottom_index,
   return q;
 }
 
-void vp10_rc_compute_frame_size_bounds(const VP10_COMP *cpi, int frame_target,
-                                       int *frame_under_shoot_limit,
-                                       int *frame_over_shoot_limit) {
-  if (cpi->oxcf.rc_mode == VPX_Q) {
+void av1_rc_compute_frame_size_bounds(const AV1_COMP *cpi, int frame_target,
+                                      int *frame_under_shoot_limit,
+                                      int *frame_over_shoot_limit) {
+  if (cpi->oxcf.rc_mode == AOM_Q) {
     *frame_under_shoot_limit = 0;
     *frame_over_shoot_limit = INT_MAX;
   } else {
     // For very small rate targets where the fractional adjustment
     // may be tiny make sure there is at least a minimum range.
     const int tolerance = (cpi->sf.recode_tolerance * frame_target) / 100;
-    *frame_under_shoot_limit = VPXMAX(frame_target - tolerance - 200, 0);
+    *frame_under_shoot_limit = AOMMAX(frame_target - tolerance - 200, 0);
     *frame_over_shoot_limit =
-        VPXMIN(frame_target + tolerance + 200, cpi->rc.max_frame_bandwidth);
+        AOMMIN(frame_target + tolerance + 200, cpi->rc.max_frame_bandwidth);
   }
 }
 
-void vp10_rc_set_frame_target(VP10_COMP *cpi, int target) {
-  const VP10_COMMON *const cm = &cpi->common;
+void av1_rc_set_frame_target(AV1_COMP *cpi, int target) {
+  const AV1_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
 
   rc->this_frame_target = target;
@@ -1168,7 +1168,7 @@ void vp10_rc_set_frame_target(VP10_COMP *cpi, int target) {
       ((int64_t)rc->this_frame_target * 64 * 64) / (cm->width * cm->height);
 }
 
-static void update_alt_ref_frame_stats(VP10_COMP *cpi) {
+static void update_alt_ref_frame_stats(AV1_COMP *cpi) {
   // this frame refreshes means next frames don't unless specified by user
   RATE_CONTROL *const rc = &cpi->rc;
   rc->frames_since_golden = 0;
@@ -1180,7 +1180,7 @@ static void update_alt_ref_frame_stats(VP10_COMP *cpi) {
   rc->source_alt_ref_active = 1;
 }
 
-static void update_golden_frame_stats(VP10_COMP *cpi) {
+static void update_golden_frame_stats(AV1_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
 
 #if CONFIG_EXT_REFS
@@ -1221,21 +1221,21 @@ static void update_golden_frame_stats(VP10_COMP *cpi) {
   }
 }
 
-void vp10_rc_postencode_update(VP10_COMP *cpi, uint64_t bytes_used) {
-  const VP10_COMMON *const cm = &cpi->common;
-  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
+void av1_rc_postencode_update(AV1_COMP *cpi, uint64_t bytes_used) {
+  const AV1_COMMON *const cm = &cpi->common;
+  const AV1EncoderConfig *const oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
   const int qindex = cm->base_qindex;
 
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled) {
-    vp10_cyclic_refresh_postencode(cpi);
+    av1_cyclic_refresh_postencode(cpi);
   }
 
   // Update rate control heuristics
   rc->projected_frame_size = (int)(bytes_used << 3);
 
   // Post encode loop adjustment of Q prediction.
-  vp10_rc_update_rate_correction_factors(cpi);
+  av1_rc_update_rate_correction_factors(cpi);
 
   // Keep a record of last Q and ambient average Q.
   if (cm->frame_type == KEY_FRAME) {
@@ -1249,7 +1249,7 @@ void vp10_rc_postencode_update(VP10_COMP *cpi, uint64_t bytes_used) {
       rc->avg_frame_qindex[INTER_FRAME] =
           ROUND_POWER_OF_TWO(3 * rc->avg_frame_qindex[INTER_FRAME] + qindex, 2);
       rc->ni_frames++;
-      rc->tot_q += vp10_convert_qindex_to_q(qindex, cm->bit_depth);
+      rc->tot_q += av1_convert_qindex_to_q(qindex, cm->bit_depth);
       rc->avg_q = rc->tot_q / rc->ni_frames;
       // Calculate the average Q for normal inter frames (not key or GFU
       // frames).
@@ -1324,7 +1324,7 @@ void vp10_rc_postencode_update(VP10_COMP *cpi, uint64_t bytes_used) {
   }
 }
 
-void vp10_rc_postencode_update_drop_frame(VP10_COMP *cpi) {
+void av1_rc_postencode_update_drop_frame(AV1_COMP *cpi) {
   // Update buffer level with zero size, update frame counters, and return.
   update_buffer_level(cpi, 0);
   cpi->rc.frames_since_key++;
@@ -1336,7 +1336,7 @@ void vp10_rc_postencode_update_drop_frame(VP10_COMP *cpi) {
 // Use this macro to turn on/off use of alt-refs in one-pass mode.
 #define USE_ALTREF_FOR_ONE_PASS 1
 
-static int calc_pframe_target_size_one_pass_vbr(const VP10_COMP *const cpi) {
+static int calc_pframe_target_size_one_pass_vbr(const AV1_COMP *const cpi) {
   static const int af_ratio = 10;
   const RATE_CONTROL *const rc = &cpi->rc;
   int target;
@@ -1351,18 +1351,18 @@ static int calc_pframe_target_size_one_pass_vbr(const VP10_COMP *const cpi) {
 #else
   target = rc->avg_frame_bandwidth;
 #endif
-  return vp10_rc_clamp_pframe_target_size(cpi, target);
+  return av1_rc_clamp_pframe_target_size(cpi, target);
 }
 
-static int calc_iframe_target_size_one_pass_vbr(const VP10_COMP *const cpi) {
+static int calc_iframe_target_size_one_pass_vbr(const AV1_COMP *const cpi) {
   static const int kf_ratio = 25;
   const RATE_CONTROL *rc = &cpi->rc;
   const int target = rc->avg_frame_bandwidth * kf_ratio;
-  return vp10_rc_clamp_iframe_target_size(cpi, target);
+  return av1_rc_clamp_iframe_target_size(cpi, target);
 }
 
-void vp10_rc_get_one_pass_vbr_params(VP10_COMP *cpi) {
-  VP10_COMMON *const cm = &cpi->common;
+void av1_rc_get_one_pass_vbr_params(AV1_COMP *cpi) {
+  AV1_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   int target;
   // TODO(yaowu): replace the "auto_key && 0" below with proper decision logic.
@@ -1396,16 +1396,16 @@ void vp10_rc_get_one_pass_vbr_params(VP10_COMP *cpi) {
     target = calc_iframe_target_size_one_pass_vbr(cpi);
   else
     target = calc_pframe_target_size_one_pass_vbr(cpi);
-  vp10_rc_set_frame_target(cpi, target);
+  av1_rc_set_frame_target(cpi, target);
 }
 
-static int calc_pframe_target_size_one_pass_cbr(const VP10_COMP *cpi) {
-  const VP10EncoderConfig *oxcf = &cpi->oxcf;
+static int calc_pframe_target_size_one_pass_cbr(const AV1_COMP *cpi) {
+  const AV1EncoderConfig *oxcf = &cpi->oxcf;
   const RATE_CONTROL *rc = &cpi->rc;
   const int64_t diff = rc->optimal_buffer_level - rc->buffer_level;
   const int64_t one_pct_bits = 1 + rc->optimal_buffer_level / 100;
   int min_frame_target =
-      VPXMAX(rc->avg_frame_bandwidth >> 4, FRAME_OVERHEAD_BITS);
+      AOMMAX(rc->avg_frame_bandwidth >> 4, FRAME_OVERHEAD_BITS);
   int target;
 
   if (oxcf->gf_cbr_boost_pct) {
@@ -1422,23 +1422,23 @@ static int calc_pframe_target_size_one_pass_cbr(const VP10_COMP *cpi) {
 
   if (diff > 0) {
     // Lower the target bandwidth for this frame.
-    const int pct_low = (int)VPXMIN(diff / one_pct_bits, oxcf->under_shoot_pct);
+    const int pct_low = (int)AOMMIN(diff / one_pct_bits, oxcf->under_shoot_pct);
     target -= (target * pct_low) / 200;
   } else if (diff < 0) {
     // Increase the target bandwidth for this frame.
     const int pct_high =
-        (int)VPXMIN(-diff / one_pct_bits, oxcf->over_shoot_pct);
+        (int)AOMMIN(-diff / one_pct_bits, oxcf->over_shoot_pct);
     target += (target * pct_high) / 200;
   }
   if (oxcf->rc_max_inter_bitrate_pct) {
     const int max_rate =
         rc->avg_frame_bandwidth * oxcf->rc_max_inter_bitrate_pct / 100;
-    target = VPXMIN(target, max_rate);
+    target = AOMMIN(target, max_rate);
   }
-  return VPXMAX(min_frame_target, target);
+  return AOMMAX(min_frame_target, target);
 }
 
-static int calc_iframe_target_size_one_pass_cbr(const VP10_COMP *cpi) {
+static int calc_iframe_target_size_one_pass_cbr(const AV1_COMP *cpi) {
   const RATE_CONTROL *rc = &cpi->rc;
   int target;
   if (cpi->common.current_video_frame == 0) {
@@ -1449,17 +1449,17 @@ static int calc_iframe_target_size_one_pass_cbr(const VP10_COMP *cpi) {
     int kf_boost = 32;
     double framerate = cpi->framerate;
 
-    kf_boost = VPXMAX(kf_boost, (int)(2 * framerate - 16));
+    kf_boost = AOMMAX(kf_boost, (int)(2 * framerate - 16));
     if (rc->frames_since_key < framerate / 2) {
       kf_boost = (int)(kf_boost * rc->frames_since_key / (framerate / 2));
     }
     target = ((16 + kf_boost) * rc->avg_frame_bandwidth) >> 4;
   }
-  return vp10_rc_clamp_iframe_target_size(cpi, target);
+  return av1_rc_clamp_iframe_target_size(cpi, target);
 }
 
-void vp10_rc_get_one_pass_cbr_params(VP10_COMP *cpi) {
-  VP10_COMMON *const cm = &cpi->common;
+void av1_rc_get_one_pass_cbr_params(AV1_COMP *cpi) {
+  AV1_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   int target;
   // TODO(yaowu): replace the "auto_key && 0" below with proper decision logic.
@@ -1476,7 +1476,7 @@ void vp10_rc_get_one_pass_cbr_params(VP10_COMP *cpi) {
   }
   if (rc->frames_till_gf_update_due == 0) {
     if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
-      vp10_cyclic_refresh_set_golden_update(cpi);
+      av1_cyclic_refresh_set_golden_update(cpi);
     else
       rc->baseline_gf_interval =
           (rc->min_gf_interval + rc->max_gf_interval) / 2;
@@ -1491,22 +1491,22 @@ void vp10_rc_get_one_pass_cbr_params(VP10_COMP *cpi) {
   // Any update/change of global cyclic refresh parameters (amount/delta-qp)
   // should be done here, before the frame qp is selected.
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
-    vp10_cyclic_refresh_update_parameters(cpi);
+    av1_cyclic_refresh_update_parameters(cpi);
 
   if (cm->frame_type == KEY_FRAME)
     target = calc_iframe_target_size_one_pass_cbr(cpi);
   else
     target = calc_pframe_target_size_one_pass_cbr(cpi);
 
-  vp10_rc_set_frame_target(cpi, target);
+  av1_rc_set_frame_target(cpi, target);
   if (cpi->oxcf.resize_mode == RESIZE_DYNAMIC)
-    cpi->resize_pending = vp10_resize_one_pass_cbr(cpi);
+    cpi->resize_pending = av1_resize_one_pass_cbr(cpi);
   else
     cpi->resize_pending = 0;
 }
 
-int vp10_compute_qdelta(const RATE_CONTROL *rc, double qstart, double qtarget,
-                        vpx_bit_depth_t bit_depth) {
+int av1_compute_qdelta(const RATE_CONTROL *rc, double qstart, double qtarget,
+                       aom_bit_depth_t bit_depth) {
   int start_index = rc->worst_quality;
   int target_index = rc->worst_quality;
   int i;
@@ -1514,34 +1514,34 @@ int vp10_compute_qdelta(const RATE_CONTROL *rc, double qstart, double qtarget,
   // Convert the average q value to an index.
   for (i = rc->best_quality; i < rc->worst_quality; ++i) {
     start_index = i;
-    if (vp10_convert_qindex_to_q(i, bit_depth) >= qstart) break;
+    if (av1_convert_qindex_to_q(i, bit_depth) >= qstart) break;
   }
 
   // Convert the q target to an index
   for (i = rc->best_quality; i < rc->worst_quality; ++i) {
     target_index = i;
-    if (vp10_convert_qindex_to_q(i, bit_depth) >= qtarget) break;
+    if (av1_convert_qindex_to_q(i, bit_depth) >= qtarget) break;
   }
 
   return target_index - start_index;
 }
 
-int vp10_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
-                                int qindex, double rate_target_ratio,
-                                vpx_bit_depth_t bit_depth) {
+int av1_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
+                               int qindex, double rate_target_ratio,
+                               aom_bit_depth_t bit_depth) {
   int target_index = rc->worst_quality;
   int i;
 
   // Look up the current projected bits per block for the base index
   const int base_bits_per_mb =
-      vp10_rc_bits_per_mb(frame_type, qindex, 1.0, bit_depth);
+      av1_rc_bits_per_mb(frame_type, qindex, 1.0, bit_depth);
 
   // Find the target bits per mb based on the base value and given ratio.
   const int target_bits_per_mb = (int)(rate_target_ratio * base_bits_per_mb);
 
   // Convert the q target to an index
   for (i = rc->best_quality; i < rc->worst_quality; ++i) {
-    if (vp10_rc_bits_per_mb(frame_type, i, 1.0, bit_depth) <=
+    if (av1_rc_bits_per_mb(frame_type, i, 1.0, bit_depth) <=
         target_bits_per_mb) {
       target_index = i;
       break;
@@ -1550,12 +1550,12 @@ int vp10_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
   return target_index - qindex;
 }
 
-void vp10_rc_set_gf_interval_range(const VP10_COMP *const cpi,
-                                   RATE_CONTROL *const rc) {
-  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
+void av1_rc_set_gf_interval_range(const AV1_COMP *const cpi,
+                                  RATE_CONTROL *const rc) {
+  const AV1EncoderConfig *const oxcf = &cpi->oxcf;
 
   // Special case code for 1 pass fixed Q mode tests
-  if ((oxcf->pass == 0) && (oxcf->rc_mode == VPX_Q)) {
+  if ((oxcf->pass == 0) && (oxcf->rc_mode == AOM_Q)) {
     rc->max_gf_interval = FIXED_GF_INTERVAL;
     rc->min_gf_interval = FIXED_GF_INTERVAL;
     rc->static_scene_max_gf_interval = FIXED_GF_INTERVAL;
@@ -1564,10 +1564,10 @@ void vp10_rc_set_gf_interval_range(const VP10_COMP *const cpi,
     rc->max_gf_interval = oxcf->max_gf_interval;
     rc->min_gf_interval = oxcf->min_gf_interval;
     if (rc->min_gf_interval == 0)
-      rc->min_gf_interval = vp10_rc_get_default_min_gf_interval(
+      rc->min_gf_interval = av1_rc_get_default_min_gf_interval(
           oxcf->width, oxcf->height, cpi->framerate);
     if (rc->max_gf_interval == 0)
-      rc->max_gf_interval = vp10_rc_get_default_max_gf_interval(
+      rc->max_gf_interval = av1_rc_get_default_max_gf_interval(
           cpi->framerate, rc->min_gf_interval);
 
     // Extended interval for genuinely static scenes
@@ -1582,13 +1582,13 @@ void vp10_rc_set_gf_interval_range(const VP10_COMP *const cpi,
       rc->max_gf_interval = rc->static_scene_max_gf_interval;
 
     // Clamp min to max
-    rc->min_gf_interval = VPXMIN(rc->min_gf_interval, rc->max_gf_interval);
+    rc->min_gf_interval = AOMMIN(rc->min_gf_interval, rc->max_gf_interval);
   }
 }
 
-void vp10_rc_update_framerate(VP10_COMP *cpi) {
-  const VP10_COMMON *const cm = &cpi->common;
-  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
+void av1_rc_update_framerate(AV1_COMP *cpi) {
+  const AV1_COMMON *const cm = &cpi->common;
+  const AV1EncoderConfig *const oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
   int vbr_max_bits;
 
@@ -1597,7 +1597,7 @@ void vp10_rc_update_framerate(VP10_COMP *cpi) {
       (int)(rc->avg_frame_bandwidth * oxcf->two_pass_vbrmin_section / 100);
 
   rc->min_frame_bandwidth =
-      VPXMAX(rc->min_frame_bandwidth, FRAME_OVERHEAD_BITS);
+      AOMMAX(rc->min_frame_bandwidth, FRAME_OVERHEAD_BITS);
 
   // A maximum bitrate for a frame is defined.
   // The baseline for this aligns with HW implementations that
@@ -1610,14 +1610,14 @@ void vp10_rc_update_framerate(VP10_COMP *cpi) {
       (int)(((int64_t)rc->avg_frame_bandwidth * oxcf->two_pass_vbrmax_section) /
             100);
   rc->max_frame_bandwidth =
-      VPXMAX(VPXMAX((cm->MBs * MAX_MB_RATE), MAXRATE_1080P), vbr_max_bits);
+      AOMMAX(AOMMAX((cm->MBs * MAX_MB_RATE), MAXRATE_1080P), vbr_max_bits);
 
-  vp10_rc_set_gf_interval_range(cpi, rc);
+  av1_rc_set_gf_interval_range(cpi, rc);
 }
 
 #define VBR_PCT_ADJUSTMENT_LIMIT 50
 // For VBR...adjustment to the frame target based on error from previous frames
-static void vbr_rate_correction(VP10_COMP *cpi, int *this_frame_target) {
+static void vbr_rate_correction(AV1_COMP *cpi, int *this_frame_target) {
   RATE_CONTROL *const rc = &cpi->rc;
   int64_t vbr_bits_off_target = rc->vbr_bits_off_target;
   int max_delta;
@@ -1648,31 +1648,31 @@ static void vbr_rate_correction(VP10_COMP *cpi, int *this_frame_target) {
   // Dont do it for kf,arf,gf or overlay frames.
   if (!frame_is_kf_gf_arf(cpi) && !rc->is_src_frame_alt_ref &&
       rc->vbr_bits_off_target_fast) {
-    int one_frame_bits = VPXMAX(rc->avg_frame_bandwidth, *this_frame_target);
+    int one_frame_bits = AOMMAX(rc->avg_frame_bandwidth, *this_frame_target);
     int fast_extra_bits;
-    fast_extra_bits = (int)VPXMIN(rc->vbr_bits_off_target_fast, one_frame_bits);
-    fast_extra_bits = (int)VPXMIN(
+    fast_extra_bits = (int)AOMMIN(rc->vbr_bits_off_target_fast, one_frame_bits);
+    fast_extra_bits = (int)AOMMIN(
         fast_extra_bits,
-        VPXMAX(one_frame_bits / 8, rc->vbr_bits_off_target_fast / 8));
+        AOMMAX(one_frame_bits / 8, rc->vbr_bits_off_target_fast / 8));
     *this_frame_target += (int)fast_extra_bits;
     rc->vbr_bits_off_target_fast -= fast_extra_bits;
   }
 }
 
-void vp10_set_target_rate(VP10_COMP *cpi) {
+void av1_set_target_rate(AV1_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   int target_rate = rc->base_frame_target;
 
   // Correction to rate target based on prior over or under shoot.
-  if (cpi->oxcf.rc_mode == VPX_VBR || cpi->oxcf.rc_mode == VPX_CQ)
+  if (cpi->oxcf.rc_mode == AOM_VBR || cpi->oxcf.rc_mode == AOM_CQ)
     vbr_rate_correction(cpi, &target_rate);
-  vp10_rc_set_frame_target(cpi, target_rate);
+  av1_rc_set_frame_target(cpi, target_rate);
 }
 
 // Check if we should resize, based on average QP from past x frames.
 // Only allow for resize at most one scale down for now, scaling factor is 2.
-int vp10_resize_one_pass_cbr(VP10_COMP *cpi) {
-  const VP10_COMMON *const cm = &cpi->common;
+int av1_resize_one_pass_cbr(AV1_COMP *cpi) {
+  const AV1_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   int resize_now = 0;
   cpi->resize_scale_num = 1;
@@ -1731,15 +1731,15 @@ int vp10_resize_one_pass_cbr(VP10_COMP *cpi) {
     rc->this_frame_target = calc_pframe_target_size_one_pass_cbr(cpi);
     // Reset cyclic refresh parameters.
     if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled)
-      vp10_cyclic_refresh_reset_resize(cpi);
+      av1_cyclic_refresh_reset_resize(cpi);
     // Get the projected qindex, based on the scaled target frame size (scaled
-    // so target_bits_per_mb in vp10_rc_regulate_q will be correct target).
+    // so target_bits_per_mb in av1_rc_regulate_q will be correct target).
     target_bits_per_frame = (resize_now == 1)
                                 ? rc->this_frame_target * tot_scale_change
                                 : rc->this_frame_target / tot_scale_change;
     active_worst_quality = calc_active_worst_quality_one_pass_cbr(cpi);
-    qindex = vp10_rc_regulate_q(cpi, target_bits_per_frame, rc->best_quality,
-                                active_worst_quality);
+    qindex = av1_rc_regulate_q(cpi, target_bits_per_frame, rc->best_quality,
+                               active_worst_quality);
     // If resize is down, check if projected q index is close to worst_quality,
     // and if so, reduce the rate correction factor (since likely can afford
     // lower q for resized frame).

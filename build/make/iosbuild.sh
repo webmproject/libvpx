@@ -9,10 +9,10 @@
 ##  be found in the AUTHORS file in the root of the source tree.
 ##
 ##
-## This script generates 'VPX.framework'. An iOS app can encode and decode VPx
-## video by including 'VPX.framework'.
+## This script generates 'AOM.framework'. An iOS app can encode and decode AVx
+## video by including 'AOM.framework'.
 ##
-## Run iosbuild.sh to create 'VPX.framework' in the current directory.
+## Run iosbuild.sh to create 'AOM.framework' in the current directory.
 ##
 set -e
 devnull='> /dev/null 2>&1'
@@ -23,9 +23,9 @@ CONFIGURE_ARGS="--disable-docs
                 --disable-libyuv
                 --disable-unit-tests"
 DIST_DIR="_dist"
-FRAMEWORK_DIR="VPX.framework"
-FRAMEWORK_LIB="VPX.framework/VPX"
-HEADER_DIR="${FRAMEWORK_DIR}/Headers/vpx"
+FRAMEWORK_DIR="AOM.framework"
+FRAMEWORK_LIB="AOM.framework/AOM"
+HEADER_DIR="${FRAMEWORK_DIR}/Headers/aom"
 SCRIPT_DIR=$(dirname "$0")
 LIBAOM_SOURCE_DIR=$(cd ${SCRIPT_DIR}/../..; pwd)
 LIPO=$(xcrun -sdk iphoneos${SDK} -find lipo)
@@ -93,15 +93,15 @@ target_to_preproc_symbol() {
   esac
 }
 
-# Create a vpx_config.h shim that, based on preprocessor settings for the
-# current target CPU, includes the real vpx_config.h for the current target.
+# Create a aom_config.h shim that, based on preprocessor settings for the
+# current target CPU, includes the real aom_config.h for the current target.
 # $1 is the list of targets.
-create_vpx_framework_config_shim() {
+create_aom_framework_config_shim() {
   local targets="$1"
-  local config_file="${HEADER_DIR}/vpx_config.h"
+  local config_file="${HEADER_DIR}/aom_config.h"
   local preproc_symbol=""
   local target=""
-  local include_guard="VPX_FRAMEWORK_HEADERS_VPX_VPX_CONFIG_H_"
+  local include_guard="AOM_FRAMEWORK_HEADERS_AOM_AOM_CONFIG_H_"
 
   local file_header="/*
  *  Copyright (c) $(date +%Y) The WebM project authors. All Rights Reserved.
@@ -124,11 +124,11 @@ create_vpx_framework_config_shim() {
   for target in ${targets}; do
     preproc_symbol=$(target_to_preproc_symbol "${target}")
     printf " ${preproc_symbol}\n" >> "${config_file}"
-    printf "#define VPX_FRAMEWORK_TARGET \"${target}\"\n" >> "${config_file}"
-    printf "#include \"VPX/aom/${target}/vpx_config.h\"\n" >> "${config_file}"
+    printf "#define AOM_FRAMEWORK_TARGET \"${target}\"\n" >> "${config_file}"
+    printf "#include \"AOM/aom/${target}/aom_config.h\"\n" >> "${config_file}"
     printf "#elif defined" >> "${config_file}"
     mkdir "${HEADER_DIR}/${target}"
-    cp -p "${BUILD_ROOT}/${target}/vpx_config.h" "${HEADER_DIR}/${target}"
+    cp -p "${BUILD_ROOT}/${target}/aom_config.h" "${HEADER_DIR}/${target}"
   done
 
   # Consume the last line of output from the loop: We don't want it.
@@ -177,7 +177,7 @@ verify_framework_targets() {
 }
 
 # Configures and builds each target specified by $1, and then builds
-# VPX.framework.
+# AOM.framework.
 build_framework() {
   local lib_list=""
   local targets="$1"
@@ -211,18 +211,18 @@ build_framework() {
   cp -p "${target_dist_dir}"/include/aom/* "${HEADER_DIR}"
 
   # Build the fat library.
-  ${LIPO} -create ${lib_list} -output ${FRAMEWORK_DIR}/VPX
+  ${LIPO} -create ${lib_list} -output ${FRAMEWORK_DIR}/AOM
 
-  # Create the vpx_config.h shim that allows usage of vpx_config.h from
-  # within VPX.framework.
-  create_vpx_framework_config_shim "${targets}"
+  # Create the aom_config.h shim that allows usage of aom_config.h from
+  # within AOM.framework.
+  create_aom_framework_config_shim "${targets}"
 
-  # Copy in vpx_version.h.
-  cp -p "${BUILD_ROOT}/${target}/vpx_version.h" "${HEADER_DIR}"
+  # Copy in aom_version.h.
+  cp -p "${BUILD_ROOT}/${target}/aom_version.h" "${HEADER_DIR}"
 
   if [ "${ENABLE_SHARED}" = "yes" ]; then
     # Adjust the dylib's name so dynamic linking in apps works as expected.
-    install_name_tool -id '@rpath/VPX.framework/VPX' ${FRAMEWORK_DIR}/VPX
+    install_name_tool -id '@rpath/AOM.framework/AOM' ${FRAMEWORK_DIR}/AOM
 
     # Copy in Info.plist.
     cat "${SCRIPT_DIR}/ios-Info.plist" \
@@ -232,7 +232,7 @@ build_framework() {
       > "${FRAMEWORK_DIR}/Info.plist"
   fi
 
-  # Confirm VPX.framework/VPX contains the targets requested.
+  # Confirm AOM.framework/AOM contains the targets requested.
   verify_framework_targets ${targets}
 
   vlog "Created fat library ${FRAMEWORK_LIB} containing:"

@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_DECODER_DSUBEXP_H_
-#define VP10_DECODER_DSUBEXP_H_
+#ifndef AV1_DECODER_DSUBEXP_H_
+#define AV1_DECODER_DSUBEXP_H_
 
 #include "av1/decoder/bitreader.h"
 
@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-void vp10_diff_update_prob(vp10_reader *r, vpx_prob *p);
+void av1_diff_update_prob(aom_reader *r, aom_prob *p);
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -27,5 +27,5 @@ void vp10_diff_update_prob(vp10_reader *r, vpx_prob *p);
 // 2 * 2^mag_bits + 1, symmetric around 0, where one bit is used to
 // indicate 0 or non-zero, mag_bits bits are used to indicate magnitide
 // and 1 more bit for the sign if non-zero.
-int vp10_read_primitive_symmetric(vp10_reader *r, unsigned int mag_bits);
-#endif  // VP10_DECODER_DSUBEXP_H_
+int aom_read_primitive_symmetric(aom_reader *r, unsigned int mag_bits);
+#endif  // AV1_DECODER_DSUBEXP_H_

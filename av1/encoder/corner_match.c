@@ -13,7 +13,7 @@
 #include <memory.h>
 #include <math.h>
 
-#include "vp10/encoder/corner_match.h"
+#include "av1/encoder/corner_match.h"
 
 #define MATCH_SZ 15
 #define MATCH_SZ_BY2 ((MATCH_SZ - 1) / 2)

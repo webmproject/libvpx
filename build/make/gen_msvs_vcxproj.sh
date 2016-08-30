@@ -83,8 +83,8 @@ generate_filter() {
                              -e 's/^[\./]\+//g' -e 's,[:/ ],_,g')
 
                 if ([ "$pat" == "asm" ] || [ "$pat" == "s" ]) && $asm_use_custom_step; then
-                    # Avoid object file name collisions, i.e. vpx_config.c and
-                    # vpx_config.asm produce the same object file without
+                    # Avoid object file name collisions, i.e. aom_config.c and
+                    # aom_config.asm produce the same object file without
                     # this additional suffix.
                     objf=${objf%.obj}_asm.obj
                     open_tag CustomBuild \
@@ -392,7 +392,7 @@ generate_vcxproj() {
         for config in Debug Release; do
             open_tag ItemDefinitionGroup \
                 Condition="'\$(Configuration)|\$(Platform)'=='$config|$plat'"
-            if [ "$name" == "vpx" ]; then
+            if [ "$name" == "aom" ]; then
                 hostplat=$plat
                 if [ "$hostplat" == "ARM" ]; then
                     hostplat=Win32

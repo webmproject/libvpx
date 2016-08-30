@@ -353,7 +353,7 @@ static uint8_t warp_interpolate(uint8_t *ref, int x, int y, int width,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 static INLINE void highbd_get_subcolumn(int taps, uint16_t *ref, int32_t *col,
                                         int stride, int x, int y_start) {
   int i;
@@ -522,7 +522,7 @@ static void highbd_warp_plane(WarpedMotionParams *wm, uint8_t *ref8, int width,
     }
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
 static double warp_erroradv(WarpedMotionParams *wm, uint8_t *ref, int width,
                             int height, int stride, uint8_t *dst, int p_col,
@@ -574,48 +574,48 @@ static void warp_plane(WarpedMotionParams *wm, uint8_t *ref, int width,
   }
 }
 
-double vp10_warp_erroradv(WarpedMotionParams *wm,
-#if CONFIG_VP9_HIGHBITDEPTH
-                          int use_hbd, int bd,
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-                          uint8_t *ref, int width, int height, int stride,
-                          uint8_t *dst, int p_col, int p_row, int p_width,
-                          int p_height, int p_stride, int subsampling_x,
-                          int subsampling_y, int x_scale, int y_scale) {
-#if CONFIG_VP9_HIGHBITDEPTH
+double av1_warp_erroradv(WarpedMotionParams *wm,
+#if CONFIG_AOM_HIGHBITDEPTH
+                         int use_hbd, int bd,
+#endif  // CONFIG_AOM_HIGHBITDEPTH
+                         uint8_t *ref, int width, int height, int stride,
+                         uint8_t *dst, int p_col, int p_row, int p_width,
+                         int p_height, int p_stride, int subsampling_x,
+                         int subsampling_y, int x_scale, int y_scale) {
+#if CONFIG_AOM_HIGHBITDEPTH
   if (use_hbd)
     return highbd_warp_erroradv(
         wm, ref, width, height, stride, dst, p_col, p_row, p_width, p_height,
         p_stride, subsampling_x, subsampling_y, x_scale, y_scale, bd);
   else
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
     return warp_erroradv(wm, ref, width, height, stride, dst, p_col, p_row,
                          p_width, p_height, p_stride, subsampling_x,
                          subsampling_y, x_scale, y_scale);
 }
 
-void vp10_warp_plane(WarpedMotionParams *wm,
-#if CONFIG_VP9_HIGHBITDEPTH
-                     int use_hbd, int bd,
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-                     uint8_t *ref, int width, int height, int stride,
-                     uint8_t *pred, int p_col, int p_row, int p_width,
-                     int p_height, int p_stride, int subsampling_x,
-                     int subsampling_y, int x_scale, int y_scale) {
-#if CONFIG_VP9_HIGHBITDEPTH
+void av1_warp_plane(WarpedMotionParams *wm,
+#if CONFIG_AOM_HIGHBITDEPTH
+                    int use_hbd, int bd,
+#endif  // CONFIG_AOM_HIGHBITDEPTH
+                    uint8_t *ref, int width, int height, int stride,
+                    uint8_t *pred, int p_col, int p_row, int p_width,
+                    int p_height, int p_stride, int subsampling_x,
+                    int subsampling_y, int x_scale, int y_scale) {
+#if CONFIG_AOM_HIGHBITDEPTH
   if (use_hbd)
     highbd_warp_plane(wm, ref, width, height, stride, pred, p_col, p_row,
                       p_width, p_height, p_stride, subsampling_x, subsampling_y,
                       x_scale, y_scale, bd);
   else
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
     warp_plane(wm, ref, width, height, stride, pred, p_col, p_row, p_width,
                p_height, p_stride, subsampling_x, subsampling_y, x_scale,
                y_scale);
 }
 
-void vp10_integerize_model(const double *model, TransformationType wmtype,
-                           WarpedMotionParams *wm) {
+void av1_integerize_model(const double *model, TransformationType wmtype,
+                          WarpedMotionParams *wm) {
   wm->wmtype = wmtype;
   switch (wmtype) {
     case HOMOGRAPHY:

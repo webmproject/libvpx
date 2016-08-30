@@ -8,11 +8,11 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_PORTS_MSVC_H_
-#define VPX_PORTS_MSVC_H_
+#ifndef AOM_PORTS_MSVC_H_
+#define AOM_PORTS_MSVC_H_
 #ifdef _MSC_VER
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 
 #if _MSC_VER < 1900  // VS2015 provides snprintf
 #define snprintf _snprintf
@@ -43,4 +43,4 @@ static INLINE long lroundf(float x) {
 #endif  // _MSC_VER < 1800
 
 #endif  // _MSC_VER
-#endif  // VPX_PORTS_MSVC_H_
+#endif  // AOM_PORTS_MSVC_H_

@@ -8,8 +8,8 @@
 *  be found in the AUTHORS file in the root of the source tree.
 */
 
-#ifndef VPX_DSP_PSNR_H_
-#define VPX_DSP_PSNR_H_
+#ifndef AOM_DSP_PSNR_H_
+#define AOM_DSP_PSNR_H_
 
 #include "aom_scale/yv12config.h"
 
@@ -25,7 +25,7 @@ typedef struct {
   uint32_t samples[4];  // total/y/u/v
 } PSNR_STATS;
 
-// TODO(dkovalev) change vpx_sse_to_psnr signature: double -> int64_t
+// TODO(dkovalev) change aom_sse_to_psnr signature: double -> int64_t
 
 /*!\brief Converts SSE to PSNR
 *
@@ -35,29 +35,29 @@ typedef struct {
 * \param[in]    peak          Max sample value
 * \param[in]    sse           Sum of squared errors
 */
-double vpx_sse_to_psnr(double samples, double peak, double sse);
-int64_t vpx_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b);
-int64_t vpx_get_u_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b);
-int64_t vpx_get_v_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b);
-#if CONFIG_VP9_HIGHBITDEPTH
-int64_t vpx_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
+double aom_sse_to_psnr(double samples, double peak, double sse);
+int64_t aom_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b);
+int64_t aom_get_u_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b);
+int64_t aom_get_v_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b);
+#if CONFIG_AOM_HIGHBITDEPTH
+int64_t aom_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
                              const YV12_BUFFER_CONFIG *b);
-int64_t vpx_highbd_get_u_sse(const YV12_BUFFER_CONFIG *a,
+int64_t v_highbd_get_u_sse(const YV12_BUFFER_CONFIG *a,
+                           const YV12_BUFFER_CONFIG *b);
+int64_t aom_highbd_get_v_sse(const YV12_BUFFER_CONFIG *a,
                              const YV12_BUFFER_CONFIG *b);
-int64_t vpx_highbd_get_v_sse(const YV12_BUFFER_CONFIG *a,
-                             const YV12_BUFFER_CONFIG *b);
-void vpx_calc_highbd_psnr(const YV12_BUFFER_CONFIG *a,
+void aom_calc_highbd_psnr(const YV12_BUFFER_CONFIG *a,
                           const YV12_BUFFER_CONFIG *b, PSNR_STATS *psnr,
                           unsigned int bit_depth, unsigned int in_bit_depth);
 #endif
-void vpx_calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
+void aom_calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
                    PSNR_STATS *psnr);
 
-double vpx_psnrhvs(const YV12_BUFFER_CONFIG *source,
+double aom_psnrhvs(const YV12_BUFFER_CONFIG *source,
                    const YV12_BUFFER_CONFIG *dest, double *phvs_y,
                    double *phvs_u, double *phvs_v, uint32_t bd, uint32_t in_bd);
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
-#endif  // VPX_DSP_PSNR_H_
+#endif  // AOM_DSP_PSNR_H_

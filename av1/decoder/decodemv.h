@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_DECODER_DECODEMV_H_
-#define VP10_DECODER_DECODEMV_H_
+#ifndef AV1_DECODER_DECODEMV_H_
+#define AV1_DECODER_DECODEMV_H_
 
 #include "av1/decoder/bitreader.h"
 
@@ -19,16 +19,16 @@
 extern "C" {
 #endif
 
-void vp10_read_mode_info(VP10Decoder *const pbi, MACROBLOCKD *xd,
+void av1_read_mode_info(AV1Decoder *const pbi, MACROBLOCKD *xd,
 #if CONFIG_SUPERTX
-                         int supertx_enabled,
+                        int supertx_enabled,
 #endif
 
-                         int mi_row, int mi_col, vp10_reader *r, int x_mis,
-                         int y_mis);
+                        int mi_row, int mi_col, aom_reader *r, int x_mis,
+                        int y_mis);
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
 
-#endif  // VP10_DECODER_DECODEMV_H_
+#endif  // AV1_DECODER_DECODEMV_H_

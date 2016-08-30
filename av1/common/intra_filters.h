@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_COMMON_INTRA_FILTERS_H_
-#define VP10_COMMON_INTRA_FILTERS_H_
+#ifndef AV1_COMMON_INTRA_FILTERS_H_
+#define AV1_COMMON_INTRA_FILTERS_H_
 
 #define FILTER_INTRA_PREC_BITS (10)
 
@@ -64,4 +64,4 @@ static int filter_intra_taps_4[TX_SIZES][INTRA_MODES][4] = {
   },
 };
 
-#endif  // VP10_COMMON_INTRA_FILTERS_H_
+#endif  // AV1_COMMON_INTRA_FILTERS_H_

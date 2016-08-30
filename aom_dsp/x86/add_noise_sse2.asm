@@ -11,14 +11,14 @@
 
 %include "aom_ports/x86_abi_support.asm"
 
-;void vpx_plane_add_noise_sse2(unsigned char *start, unsigned char *noise,
+;void aom_plane_add_noise_sse2(unsigned char *start, unsigned char *noise,
 ;                              unsigned char blackclamp[16],
 ;                              unsigned char whiteclamp[16],
 ;                              unsigned char bothclamp[16],
 ;                              unsigned int width, unsigned int height,
 ;                              int pitch)
-global sym(vpx_plane_add_noise_sse2) PRIVATE
-sym(vpx_plane_add_noise_sse2):
+global sym(aom_plane_add_noise_sse2) PRIVATE
+sym(aom_plane_add_noise_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 8

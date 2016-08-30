@@ -10,16 +10,16 @@
 
 #include <stdlib.h>
 
-#include "./vpx_dsp_rtcd.h"
-#include "aom/vpx_integer.h"
+#include "./aom_dsp_rtcd.h"
+#include "aom/aom_integer.h"
 #include "aom_dsp/mips/common_dspr2.h"
 #include "aom_dsp/mips/loopfilter_filters_dspr2.h"
 #include "aom_dsp/mips/loopfilter_macros_dspr2.h"
 #include "aom_dsp/mips/loopfilter_masks_dspr2.h"
-#include "aom_mem/vpx_mem.h"
+#include "aom_mem/aom_mem.h"
 
 #if HAVE_DSPR2
-void vpx_lpf_vertical_16_dspr2(uint8_t *s, int pitch, const uint8_t *blimit,
+void aom_lpf_vertical_16_dspr2(uint8_t *s, int pitch, const uint8_t *blimit,
                                const uint8_t *limit, const uint8_t *thresh) {
   uint8_t i;
   uint32_t mask, hev, flat, flat2;

@@ -10,7 +10,7 @@
 
 #include <emmintrin.h>  // SSE2
 
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_dsp_rtcd.h"
 #include "aom_ports/mem.h"
 #include "aom_ports/emmintrin_compat.h"
 
@@ -48,7 +48,7 @@ static INLINE __m128i signed_char_clamp_bd_sse2(__m128i value, int bd) {
 
 // TODO(debargha, peter): Break up large functions into smaller ones
 // in this file.
-void vpx_highbd_lpf_horizontal_edge_8_sse2(uint16_t *s, int p,
+void aom_highbd_lpf_horizontal_edge_8_sse2(uint16_t *s, int p,
                                            const uint8_t *_blimit,
                                            const uint8_t *_limit,
                                            const uint8_t *_thresh, int bd) {
@@ -475,15 +475,15 @@ void vpx_highbd_lpf_horizontal_edge_8_sse2(uint16_t *s, int p,
   _mm_store_si128((__m128i *)(s - 0 * p), q0);
 }
 
-void vpx_highbd_lpf_horizontal_edge_16_sse2(uint16_t *s, int p,
+void aom_highbd_lpf_horizontal_edge_16_sse2(uint16_t *s, int p,
                                             const uint8_t *_blimit,
                                             const uint8_t *_limit,
                                             const uint8_t *_thresh, int bd) {
-  vpx_highbd_lpf_horizontal_edge_8_sse2(s, p, _blimit, _limit, _thresh, bd);
-  vpx_highbd_lpf_horizontal_edge_8_sse2(s + 8, p, _blimit, _limit, _thresh, bd);
+  aom_highbd_lpf_horizontal_edge_8_sse2(s, p, _blimit, _limit, _thresh, bd);
+  aom_highbd_lpf_horizontal_edge_8_sse2(s + 8, p, _blimit, _limit, _thresh, bd);
 }
 
-void vpx_highbd_lpf_horizontal_8_sse2(uint16_t *s, int p,
+void aom_highbd_lpf_horizontal_8_sse2(uint16_t *s, int p,
                                       const uint8_t *_blimit,
                                       const uint8_t *_limit,
                                       const uint8_t *_thresh, int bd) {
@@ -640,7 +640,7 @@ void vpx_highbd_lpf_horizontal_8_sse2(uint16_t *s, int p,
   filt = _mm_adds_epi16(filt, work_a);
   filt = _mm_adds_epi16(filt, work_a);
   filt = _mm_adds_epi16(filt, work_a);
-  // (vpx_filter + 3 * (qs0 - ps0)) & mask
+  // (aom_filter + 3 * (qs0 - ps0)) & mask
   filt = signed_char_clamp_bd_sse2(filt, bd);
   filt = _mm_and_si128(filt, mask);
 
@@ -709,15 +709,15 @@ void vpx_highbd_lpf_horizontal_8_sse2(uint16_t *s, int p,
   _mm_store_si128((__m128i *)(s + 2 * p), q2);
 }
 
-void vpx_highbd_lpf_horizontal_8_dual_sse2(
+void aom_highbd_lpf_horizontal_8_dual_sse2(
     uint16_t *s, int p, const uint8_t *_blimit0, const uint8_t *_limit0,
     const uint8_t *_thresh0, const uint8_t *_blimit1, const uint8_t *_limit1,
     const uint8_t *_thresh1, int bd) {
-  vpx_highbd_lpf_horizontal_8_sse2(s, p, _blimit0, _limit0, _thresh0, bd);
-  vpx_highbd_lpf_horizontal_8_sse2(s + 8, p, _blimit1, _limit1, _thresh1, bd);
+  aom_highbd_lpf_horizontal_8_sse2(s, p, _blimit0, _limit0, _thresh0, bd);
+  aom_highbd_lpf_horizontal_8_sse2(s + 8, p, _blimit1, _limit1, _thresh1, bd);
 }
 
-void vpx_highbd_lpf_horizontal_4_sse2(uint16_t *s, int p,
+void aom_highbd_lpf_horizontal_4_sse2(uint16_t *s, int p,
                                       const uint8_t *_blimit,
                                       const uint8_t *_limit,
                                       const uint8_t *_thresh, int bd) {
@@ -834,7 +834,7 @@ void vpx_highbd_lpf_horizontal_4_sse2(uint16_t *s, int p,
   filt = _mm_adds_epi16(filt, work_a);
   filt = signed_char_clamp_bd_sse2(_mm_adds_epi16(filt, work_a), bd);
 
-  // (vpx_filter + 3 * (qs0 - ps0)) & mask
+  // (aom_filter + 3 * (qs0 - ps0)) & mask
   filt = _mm_and_si128(filt, mask);
 
   filter1 = signed_char_clamp_bd_sse2(_mm_adds_epi16(filt, t4), bd);
@@ -879,12 +879,12 @@ void vpx_highbd_lpf_horizontal_4_sse2(uint16_t *s, int p,
   _mm_storeu_si128((__m128i *)(s + 1 * p), q1);
 }
 
-void vpx_highbd_lpf_horizontal_4_dual_sse2(
+void aom_highbd_lpf_horizontal_4_dual_sse2(
     uint16_t *s, int p, const uint8_t *_blimit0, const uint8_t *_limit0,
     const uint8_t *_thresh0, const uint8_t *_blimit1, const uint8_t *_limit1,
     const uint8_t *_thresh1, int bd) {
-  vpx_highbd_lpf_horizontal_4_sse2(s, p, _blimit0, _limit0, _thresh0, bd);
-  vpx_highbd_lpf_horizontal_4_sse2(s + 8, p, _blimit1, _limit1, _thresh1, bd);
+  aom_highbd_lpf_horizontal_4_sse2(s, p, _blimit0, _limit0, _thresh0, bd);
+  aom_highbd_lpf_horizontal_4_sse2(s + 8, p, _blimit1, _limit1, _thresh1, bd);
 }
 
 static INLINE void highbd_transpose(uint16_t *src[], int in_p, uint16_t *dst[],
@@ -999,7 +999,7 @@ static INLINE void highbd_transpose8x16(uint16_t *in0, uint16_t *in1, int in_p,
   highbd_transpose(src1, in_p, dest1, out_p, 1);
 }
 
-void vpx_highbd_lpf_vertical_4_sse2(uint16_t *s, int p, const uint8_t *blimit,
+void aom_highbd_lpf_vertical_4_sse2(uint16_t *s, int p, const uint8_t *blimit,
                                     const uint8_t *limit, const uint8_t *thresh,
                                     int bd) {
   DECLARE_ALIGNED(16, uint16_t, t_dst[8 * 8]);
@@ -1013,7 +1013,7 @@ void vpx_highbd_lpf_vertical_4_sse2(uint16_t *s, int p, const uint8_t *blimit,
   highbd_transpose(src, p, dst, 8, 1);
 
   // Loop filtering
-  vpx_highbd_lpf_horizontal_4_sse2(t_dst + 4 * 8, 8, blimit, limit, thresh, bd);
+  aom_highbd_lpf_horizontal_4_sse2(t_dst + 4 * 8, 8, blimit, limit, thresh, bd);
 
   src[0] = t_dst;
   dst[0] = s - 4;
@@ -1022,7 +1022,7 @@ void vpx_highbd_lpf_vertical_4_sse2(uint16_t *s, int p, const uint8_t *blimit,
   highbd_transpose(src, 8, dst, p, 1);
 }
 
-void vpx_highbd_lpf_vertical_4_dual_sse2(
+void aom_highbd_lpf_vertical_4_dual_sse2(
     uint16_t *s, int p, const uint8_t *blimit0, const uint8_t *limit0,
     const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1,
     const uint8_t *thresh1, int bd) {
@@ -1034,7 +1034,7 @@ void vpx_highbd_lpf_vertical_4_dual_sse2(
   highbd_transpose8x16(s - 4, s - 4 + p * 8, p, t_dst, 16);
 
   // Loop filtering
-  vpx_highbd_lpf_horizontal_4_dual_sse2(t_dst + 4 * 16, 16, blimit0, limit0,
+  aom_highbd_lpf_horizontal_4_dual_sse2(t_dst + 4 * 16, 16, blimit0, limit0,
                                         thresh0, blimit1, limit1, thresh1, bd);
   src[0] = t_dst;
   src[1] = t_dst + 8;
@@ -1045,7 +1045,7 @@ void vpx_highbd_lpf_vertical_4_dual_sse2(
   highbd_transpose(src, 16, dst, p, 2);
 }
 
-void vpx_highbd_lpf_vertical_8_sse2(uint16_t *s, int p, const uint8_t *blimit,
+void aom_highbd_lpf_vertical_8_sse2(uint16_t *s, int p, const uint8_t *blimit,
                                     const uint8_t *limit, const uint8_t *thresh,
                                     int bd) {
   DECLARE_ALIGNED(16, uint16_t, t_dst[8 * 8]);
@@ -1059,7 +1059,7 @@ void vpx_highbd_lpf_vertical_8_sse2(uint16_t *s, int p, const uint8_t *blimit,
   highbd_transpose(src, p, dst, 8, 1);
 
   // Loop filtering
-  vpx_highbd_lpf_horizontal_8_sse2(t_dst + 4 * 8, 8, blimit, limit, thresh, bd);
+  aom_highbd_lpf_horizontal_8_sse2(t_dst + 4 * 8, 8, blimit, limit, thresh, bd);
 
   src[0] = t_dst;
   dst[0] = s - 4;
@@ -1068,7 +1068,7 @@ void vpx_highbd_lpf_vertical_8_sse2(uint16_t *s, int p, const uint8_t *blimit,
   highbd_transpose(src, 8, dst, p, 1);
 }
 
-void vpx_highbd_lpf_vertical_8_dual_sse2(
+void aom_highbd_lpf_vertical_8_dual_sse2(
     uint16_t *s, int p, const uint8_t *blimit0, const uint8_t *limit0,
     const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1,
     const uint8_t *thresh1, int bd) {
@@ -1080,7 +1080,7 @@ void vpx_highbd_lpf_vertical_8_dual_sse2(
   highbd_transpose8x16(s - 4, s - 4 + p * 8, p, t_dst, 16);
 
   // Loop filtering
-  vpx_highbd_lpf_horizontal_8_dual_sse2(t_dst + 4 * 16, 16, blimit0, limit0,
+  aom_highbd_lpf_horizontal_8_dual_sse2(t_dst + 4 * 16, 16, blimit0, limit0,
                                         thresh0, blimit1, limit1, thresh1, bd);
   src[0] = t_dst;
   src[1] = t_dst + 8;
@@ -1092,7 +1092,7 @@ void vpx_highbd_lpf_vertical_8_dual_sse2(
   highbd_transpose(src, 16, dst, p, 2);
 }
 
-void vpx_highbd_lpf_vertical_16_sse2(uint16_t *s, int p, const uint8_t *blimit,
+void aom_highbd_lpf_vertical_16_sse2(uint16_t *s, int p, const uint8_t *blimit,
                                      const uint8_t *limit,
                                      const uint8_t *thresh, int bd) {
   DECLARE_ALIGNED(16, uint16_t, t_dst[8 * 16]);
@@ -1108,7 +1108,7 @@ void vpx_highbd_lpf_vertical_16_sse2(uint16_t *s, int p, const uint8_t *blimit,
   highbd_transpose(src, p, dst, 8, 2);
 
   // Loop filtering
-  vpx_highbd_lpf_horizontal_edge_8_sse2(t_dst + 8 * 8, 8, blimit, limit, thresh,
+  aom_highbd_lpf_horizontal_edge_8_sse2(t_dst + 8 * 8, 8, blimit, limit, thresh,
                                         bd);
   src[0] = t_dst;
   src[1] = t_dst + 8 * 8;
@@ -1119,7 +1119,7 @@ void vpx_highbd_lpf_vertical_16_sse2(uint16_t *s, int p, const uint8_t *blimit,
   highbd_transpose(src, 8, dst, p, 2);
 }
 
-void vpx_highbd_lpf_vertical_16_dual_sse2(uint16_t *s, int p,
+void aom_highbd_lpf_vertical_16_dual_sse2(uint16_t *s, int p,
                                           const uint8_t *blimit,
                                           const uint8_t *limit,
                                           const uint8_t *thresh, int bd) {
@@ -1130,7 +1130,7 @@ void vpx_highbd_lpf_vertical_16_dual_sse2(uint16_t *s, int p,
   highbd_transpose8x16(s, s + 8 * p, p, t_dst + 8 * 16, 16);
 
   //  Loop filtering
-  vpx_highbd_lpf_horizontal_edge_16_sse2(t_dst + 8 * 16, 16, blimit, limit,
+  aom_highbd_lpf_horizontal_edge_16_sse2(t_dst + 8 * 16, 16, blimit, limit,
                                          thresh, bd);
 
   //  Transpose back

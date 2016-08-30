@@ -11,10 +11,10 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_dsp_rtcd.h"
 #include "aom_dsp/mips/convolve_common_dspr2.h"
-#include "aom_dsp/vpx_dsp_common.h"
-#include "aom_dsp/vpx_filter.h"
+#include "aom_dsp/aom_dsp_common.h"
+#include "aom_dsp/aom_filter.h"
 #include "aom_ports/mem.h"
 
 #if HAVE_DSPR2
@@ -25,7 +25,7 @@ static void convolve_vert_4_dspr2(const uint8_t *src, int32_t src_stride,
   int32_t x, y;
   const uint8_t *src_ptr;
   uint8_t *dst_ptr;
-  uint8_t *cm = vpx_ff_cropTbl;
+  uint8_t *cm = aom_ff_cropTbl;
   uint32_t vector4a = 64;
   uint32_t load1, load2, load3, load4;
   uint32_t p1, p2;
@@ -173,7 +173,7 @@ static void convolve_vert_64_dspr2(const uint8_t *src, int32_t src_stride,
   int32_t x, y;
   const uint8_t *src_ptr;
   uint8_t *dst_ptr;
-  uint8_t *cm = vpx_ff_cropTbl;
+  uint8_t *cm = aom_ff_cropTbl;
   uint32_t vector4a = 64;
   uint32_t load1, load2, load3, load4;
   uint32_t p1, p2;
@@ -316,7 +316,7 @@ static void convolve_vert_64_dspr2(const uint8_t *src, int32_t src_stride,
   }
 }
 
-void vpx_convolve8_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
+void aom_convolve8_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                               uint8_t *dst, ptrdiff_t dst_stride,
                               const int16_t *filter_x, int x_step_q4,
                               const int16_t *filter_y, int y_step_q4, int w,
@@ -325,7 +325,7 @@ void vpx_convolve8_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
   assert(((const int32_t *)filter_y)[1] != 0x800000);
 
   if (((const int32_t *)filter_y)[0] == 0) {
-    vpx_convolve2_vert_dspr2(src, src_stride, dst, dst_stride, filter_x,
+    aom_convolve2_vert_dspr2(src, src_stride, dst, dst_stride, filter_x,
                              x_step_q4, filter_y, y_step_q4, w, h);
   } else {
     uint32_t pos = 38;
@@ -349,7 +349,7 @@ void vpx_convolve8_vert_dspr2(const uint8_t *src, ptrdiff_t src_stride,
         convolve_vert_64_dspr2(src, src_stride, dst, dst_stride, filter_y, h);
         break;
       default:
-        vpx_convolve8_vert_c(src, src_stride, dst, dst_stride, filter_x,
+        aom_convolve8_vert_c(src, src_stride, dst, dst_stride, filter_x,
                              x_step_q4, filter_y, y_step_q4, w, h);
         break;
     }

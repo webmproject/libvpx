@@ -1,6 +1,6 @@
 /*! \page usage_encode Encoding
 
-    The vpx_codec_encode() function is at the core of the encode loop. It
+    The aom_codec_encode() function is at the core of the encode loop. It
     processes raw images passed by the application, producing packets of
     compressed data. The <code>deadline</code> parameter controls the amount
     of time in microseconds the encoder should spend working on the frame. For

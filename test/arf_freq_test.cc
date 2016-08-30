@@ -32,8 +32,8 @@ typedef struct {
   unsigned int framerate_num;
   unsigned int framerate_den;
   unsigned int input_bit_depth;
-  vpx_img_fmt fmt;
-  vpx_bit_depth_t bit_depth;
+  aom_img_fmt fmt;
+  aom_bit_depth_t bit_depth;
   unsigned int profile;
 } TestVideoParam;
 
@@ -44,14 +44,14 @@ typedef struct {
 
 const TestVideoParam kTestVectors[] = {
   // artificially increase framerate to trigger default check
-  { "hantro_collage_w352h288.yuv", 352, 288, 5000, 1, 8, VPX_IMG_FMT_I420,
-    VPX_BITS_8, 0 },
-  { "hantro_collage_w352h288.yuv", 352, 288, 30, 1, 8, VPX_IMG_FMT_I420,
-    VPX_BITS_8, 0 },
-  { "rush_hour_444.y4m", 352, 288, 30, 1, 8, VPX_IMG_FMT_I444, VPX_BITS_8, 1 },
-#if CONFIG_VP9_HIGHBITDEPTH
+  { "hantro_collage_w352h288.yuv", 352, 288, 5000, 1, 8, AOM_IMG_FMT_I420,
+    AOM_BITS_8, 0 },
+  { "hantro_collage_w352h288.yuv", 352, 288, 30, 1, 8, AOM_IMG_FMT_I420,
+    AOM_BITS_8, 0 },
+  { "rush_hour_444.y4m", 352, 288, 30, 1, 8, AOM_IMG_FMT_I444, AOM_BITS_8, 1 },
+#if CONFIG_AOM_HIGHBITDEPTH
 // Add list of profile 2/3 test videos here ...
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 };
 
 const TestEncodeParam kEncodeVectors[] = {
@@ -62,7 +62,7 @@ const TestEncodeParam kEncodeVectors[] = {
 
 const int kMinArfVectors[] = {
   // NOTE: 0 refers to the default built-in logic in:
-  //       vp9_rc_get_default_min_gf_interval(...)
+  //       av1_rc_get_default_min_gf_interval(...)
   0, 4, 8, 12, 15
 };
 
@@ -90,10 +90,10 @@ class ArfFreqTestLarge
     SetMode(test_encode_param_.mode);
     if (test_encode_param_.mode != ::libaom_test::kRealTime) {
       cfg_.g_lag_in_frames = 25;
-      cfg_.rc_end_usage = VPX_VBR;
+      cfg_.rc_end_usage = AOM_VBR;
     } else {
       cfg_.g_lag_in_frames = 0;
-      cfg_.rc_end_usage = VPX_CBR;
+      cfg_.rc_end_usage = AOM_CBR;
       cfg_.rc_buf_sz = 1000;
       cfg_.rc_buf_initial_sz = 500;
       cfg_.rc_buf_optimal_sz = 600;
@@ -106,7 +106,7 @@ class ArfFreqTestLarge
     run_of_visible_frames_ = 0;
   }
 
-  int GetNumFramesInPkt(const vpx_codec_cx_pkt_t *pkt) {
+  int GetNumFramesInPkt(const aom_codec_cx_pkt_t *pkt) {
     const uint8_t *buffer = reinterpret_cast<uint8_t *>(pkt->data.frame.buf);
     const uint8_t marker = buffer[pkt->data.frame.sz - 1];
     const int mag = ((marker >> 3) & 3) + 1;
@@ -123,8 +123,8 @@ class ArfFreqTestLarge
     return frames;
   }
 
-  virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
-    if (pkt->kind != VPX_CODEC_CX_FRAME_PKT) return;
+  virtual void FramePktHook(const aom_codec_cx_pkt_t *pkt) {
+    if (pkt->kind != AOM_CODEC_CX_FRAME_PKT) return;
     const int frames = GetNumFramesInPkt(pkt);
     if (frames == 1) {
       run_of_visible_frames_++;
@@ -145,15 +145,15 @@ class ArfFreqTestLarge
   virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
                                   ::libaom_test::Encoder *encoder) {
     if (video->frame() == 0) {
-      encoder->Control(VP9E_SET_FRAME_PARALLEL_DECODING, 1);
-      encoder->Control(VP9E_SET_TILE_COLUMNS, 4);
-      encoder->Control(VP8E_SET_CPUUSED, test_encode_param_.cpu_used);
-      encoder->Control(VP9E_SET_MIN_GF_INTERVAL, min_arf_requested_);
+      encoder->Control(AV1E_SET_FRAME_PARALLEL_DECODING, 1);
+      encoder->Control(AV1E_SET_TILE_COLUMNS, 4);
+      encoder->Control(AOME_SET_CPUUSED, test_encode_param_.cpu_used);
+      encoder->Control(AV1E_SET_MIN_GF_INTERVAL, min_arf_requested_);
       if (test_encode_param_.mode != ::libaom_test::kRealTime) {
-        encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
-        encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);
-        encoder->Control(VP8E_SET_ARNR_STRENGTH, 5);
-        encoder->Control(VP8E_SET_ARNR_TYPE, 3);
+        encoder->Control(AOME_SET_ENABLEAUTOALTREF, 1);
+        encoder->Control(AOME_SET_ARNR_MAXFRAMES, 7);
+        encoder->Control(AOME_SET_ARNR_STRENGTH, 5);
+        encoder->Control(AOME_SET_ARNR_TYPE, 3);
       }
     }
   }
@@ -164,7 +164,7 @@ class ArfFreqTestLarge
     if (min_arf_requested_)
       return min_arf_requested_;
     else
-      return vp10_rc_get_default_min_gf_interval(
+      return av1_rc_get_default_min_gf_interval(
           test_video_param_.width, test_video_param_.height,
           (double)test_video_param_.framerate_num /
               test_video_param_.framerate_den);
@@ -185,8 +185,8 @@ TEST_P(ArfFreqTestLarge, MinArfFreqTest) {
   cfg_.g_profile = test_video_param_.profile;
   cfg_.g_input_bit_depth = test_video_param_.input_bit_depth;
   cfg_.g_bit_depth = test_video_param_.bit_depth;
-  init_flags_ = VPX_CODEC_USE_PSNR;
-  if (cfg_.g_bit_depth > 8) init_flags_ |= VPX_CODEC_USE_HIGHBITDEPTH;
+  init_flags_ = AOM_CODEC_USE_PSNR;
+  if (cfg_.g_bit_depth > 8) init_flags_ |= AOM_CODEC_USE_HIGHBITDEPTH;
 
   testing::internal::scoped_ptr<libaom_test::VideoSource> video;
   if (is_extension_y4m(test_video_param_.filename)) {
@@ -209,24 +209,24 @@ TEST_P(ArfFreqTestLarge, MinArfFreqTest) {
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH || CONFIG_EXT_REFS
-#if CONFIG_VP10_ENCODER
+#if CONFIG_AOM_HIGHBITDEPTH || CONFIG_EXT_REFS
+#if CONFIG_AV1_ENCODER
 // TODO(angiebird): 25-29 fail in high bitdepth mode.
 // TODO(zoeliu): This ArfFreqTest does not work with BWDREF_FRAME, as
 // BWDREF_FRAME is also a non-show frame, and the minimum run between two
 // consecutive BWDREF_FRAME's may vary between 1 and any arbitrary positive
 // number as long as it does not exceed the gf_group interval.
 INSTANTIATE_TEST_CASE_P(
-    DISABLED_VP10, ArfFreqTestLarge,
+    DISABLED_AV1, ArfFreqTestLarge,
     ::testing::Combine(
-        ::testing::Values(static_cast<const libaom_test::CodecFactory *>(
-            &libaom_test::kVP10)),
+        ::testing::Values(
+            static_cast<const libaom_test::CodecFactory *>(&libaom_test::kAV1)),
         ::testing::ValuesIn(kTestVectors), ::testing::ValuesIn(kEncodeVectors),
         ::testing::ValuesIn(kMinArfVectors)));
-#endif  // CONFIG_VP10_ENCODER
+#endif  // CONFIG_AV1_ENCODER
 #else
-VP10_INSTANTIATE_TEST_CASE(ArfFreqTestLarge, ::testing::ValuesIn(kTestVectors),
-                           ::testing::ValuesIn(kEncodeVectors),
-                           ::testing::ValuesIn(kMinArfVectors));
-#endif  // CONFIG_VP9_HIGHBITDEPTH || CONFIG_EXT_REFS
+AV1_INSTANTIATE_TEST_CASE(ArfFreqTestLarge, ::testing::ValuesIn(kTestVectors),
+                          ::testing::ValuesIn(kEncodeVectors),
+                          ::testing::ValuesIn(kMinArfVectors));
+#endif  // CONFIG_AOM_HIGHBITDEPTH || CONFIG_EXT_REFS
 }  // namespace

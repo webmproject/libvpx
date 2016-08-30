@@ -8,12 +8,12 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_INV_TXFM_H_
-#define VPX_DSP_INV_TXFM_H_
+#ifndef AOM_DSP_INV_TXFM_H_
+#define AOM_DSP_INV_TXFM_H_
 
 #include <assert.h>
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 #include "aom_dsp/txfm_common.h"
 #include "aom_ports/mem.h"
 
@@ -23,9 +23,9 @@ extern "C" {
 
 static INLINE tran_high_t check_range(tran_high_t input) {
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
-  // For valid VP9 input streams, intermediate stage coefficients should always
+  // For valid AV1 input streams, intermediate stage coefficients should always
   // stay within the range of a signed 16 bit integer. Coefficients can go out
-  // of this range for invalid/corrupt VP9 streams. However, strictly checking
+  // of this range for invalid/corrupt AV1 streams. However, strictly checking
   // this range for every intermediate coefficient can burdensome for a decoder,
   // therefore the following assertion is only enabled when configured with
   // --enable-coefficient-range-checking.
@@ -40,10 +40,10 @@ static INLINE tran_high_t dct_const_round_shift(tran_high_t input) {
   return rv;
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 static INLINE tran_high_t highbd_check_range(tran_high_t input, int bd) {
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
-  // For valid highbitdepth VP9 streams, intermediate stage coefficients will
+  // For valid highbitdepth AV1 streams, intermediate stage coefficients will
   // stay within the ranges:
   // - 8 bit: signed 16 bit integer
   // - 10 bit: signed 18 bit integer
@@ -62,7 +62,7 @@ static INLINE tran_high_t highbd_dct_const_round_shift(tran_high_t input) {
   tran_high_t rv = ROUND_POWER_OF_TWO(input, DCT_CONST_BITS);
   return rv;
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
 #if CONFIG_EMULATE_HARDWARE
 // When CONFIG_EMULATE_HARDWARE is 1 the transform performs a
@@ -83,17 +83,17 @@ static INLINE tran_high_t highbd_dct_const_round_shift(tran_high_t input) {
 // bd of x uses trans_low with 8+x bits, need to remove 24-x bits
 
 #define WRAPLOW(x) ((((int32_t)check_range(x)) << 16) >> 16)
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 #define HIGHBD_WRAPLOW(x, bd) \
   ((((int32_t)highbd_check_range((x), bd)) << (24 - bd)) >> (24 - bd))
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
 #else  // CONFIG_EMULATE_HARDWARE
 
 #define WRAPLOW(x) ((int32_t)check_range(x))
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 #define HIGHBD_WRAPLOW(x, bd) ((int32_t)highbd_check_range((x), bd))
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 #endif  // CONFIG_EMULATE_HARDWARE
 
 void idct4_c(const tran_low_t *input, tran_low_t *output);
@@ -104,15 +104,15 @@ void iadst4_c(const tran_low_t *input, tran_low_t *output);
 void iadst8_c(const tran_low_t *input, tran_low_t *output);
 void iadst16_c(const tran_low_t *input, tran_low_t *output);
 
-#if CONFIG_VP9_HIGHBITDEPTH
-void vpx_highbd_idct4_c(const tran_low_t *input, tran_low_t *output, int bd);
-void vpx_highbd_idct8_c(const tran_low_t *input, tran_low_t *output, int bd);
-void vpx_highbd_idct16_c(const tran_low_t *input, tran_low_t *output, int bd);
-void vpx_highbd_idct32_c(const tran_low_t *input, tran_low_t *output, int bd);
+#if CONFIG_AOM_HIGHBITDEPTH
+void aom_highbd_idct4_c(const tran_low_t *input, tran_low_t *output, int bd);
+void aom_highbd_idct8_c(const tran_low_t *input, tran_low_t *output, int bd);
+void aom_highbd_idct16_c(const tran_low_t *input, tran_low_t *output, int bd);
+void aom_highbd_idct32_c(const tran_low_t *input, tran_low_t *output, int bd);
 
-void vpx_highbd_iadst4_c(const tran_low_t *input, tran_low_t *output, int bd);
-void vpx_highbd_iadst8_c(const tran_low_t *input, tran_low_t *output, int bd);
-void vpx_highbd_iadst16_c(const tran_low_t *input, tran_low_t *output, int bd);
+void aom_highbd_iadst4_c(const tran_low_t *input, tran_low_t *output, int bd);
+void aom_highbd_iadst8_c(const tran_low_t *input, tran_low_t *output, int bd);
+void aom_highbd_iadst16_c(const tran_low_t *input, tran_low_t *output, int bd);
 
 static INLINE uint16_t highbd_clip_pixel_add(uint16_t dest, tran_high_t trans,
                                              int bd) {
@@ -129,4 +129,4 @@ static INLINE uint8_t clip_pixel_add(uint8_t dest, tran_high_t trans) {
 }  // extern "C"
 #endif
 
-#endif  // VPX_DSP_INV_TXFM_H_
+#endif  // AOM_DSP_INV_TXFM_H_

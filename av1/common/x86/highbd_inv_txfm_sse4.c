@@ -11,9 +11,9 @@
 #include <assert.h>
 #include <smmintrin.h> /* SSE4.1 */
 
-#include "./vp10_rtcd.h"
-#include "./vpx_config.h"
-#include "av1/common/vp10_inv_txfm2d_cfg.h"
+#include "./av1_rtcd.h"
+#include "./aom_config.h"
+#include "av1/common/av1_inv_txfm2d_cfg.h"
 #include "av1/common/x86/highbd_txfm_utility_sse4.h"
 
 static INLINE void load_buffer_4x4(const int32_t *coeff, __m128i *in) {
@@ -229,8 +229,8 @@ static void write_buffer_4x4(__m128i *in, uint16_t *output, int stride,
   _mm_storel_epi64((__m128i *)(output + 3 * stride), v3);
 }
 
-void vp10_inv_txfm2d_add_4x4_sse4_1(const int32_t *coeff, uint16_t *output,
-                                    int stride, int tx_type, int bd) {
+void av1_inv_txfm2d_add_4x4_sse4_1(const int32_t *coeff, uint16_t *output,
+                                   int stride, int tx_type, int bd) {
   __m128i in[4];
   const TXFM_2D_CFG *cfg = NULL;
 
@@ -695,8 +695,8 @@ static void write_buffer_8x8(__m128i *in, uint16_t *output, int stride,
   _mm_store_si128((__m128i *)(output + 7 * stride), u7);
 }
 
-void vp10_inv_txfm2d_add_8x8_sse4_1(const int32_t *coeff, uint16_t *output,
-                                    int stride, int tx_type, int bd) {
+void av1_inv_txfm2d_add_8x8_sse4_1(const int32_t *coeff, uint16_t *output,
+                                   int stride, int tx_type, int bd) {
   __m128i in[16], out[16];
   const TXFM_2D_CFG *cfg = NULL;
 
@@ -1295,8 +1295,8 @@ static void round_shift_16x16(__m128i *in, int shift) {
   round_shift_8x8(&in[48], shift);
 }
 
-void vp10_inv_txfm2d_add_16x16_sse4_1(const int32_t *coeff, uint16_t *output,
-                                      int stride, int tx_type, int bd) {
+void av1_inv_txfm2d_add_16x16_sse4_1(const int32_t *coeff, uint16_t *output,
+                                     int stride, int tx_type, int bd) {
   __m128i in[64], out[64];
   const TXFM_2D_CFG *cfg = NULL;
 

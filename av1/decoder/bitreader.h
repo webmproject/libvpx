@@ -11,28 +11,28 @@
 /* The purpose of this header is to provide compile time pluggable bit reader
  * implementations with a common interface. */
 
-#ifndef VPX10_DECODER_BITREADER_H_
-#define VPX10_DECODER_BITREADER_H_
+#ifndef AOM10_DECODER_BITREADER_H_
+#define AOM10_DECODER_BITREADER_H_
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 
 #if CONFIG_ANS
 #include "av1/common/ans.h"
-#include "aom/vp8dx.h"  // for vp10_decrypt_cb
-#define vp10_reader struct AnsDecoder
-#define vp10_reader_has_error ans_reader_has_error
-#define vp10_read uabs_read
-#define vp10_read_bit uabs_read_bit
-#define vp10_read_literal uabs_read_literal
-#define vp10_read_tree uabs_read_tree
+#include "aom/aomdx.h"  // for av1_decrypt_cb
+#define aom_reader struct AnsDecoder
+#define aom_reader_has_error ans_reader_has_error
+#define aom_read uabs_read
+#define aom_read_bit uabs_read_bit
+#define aom_read_literal uabs_read_literal
+#define aom_read_tree uabs_read_tree
 #else
 #include "aom_dsp/bitreader.h"
-#define vp10_reader vpx_reader
-#define vp10_reader_has_error vpx_reader_has_error
-#define vp10_read vpx_read
-#define vp10_read_bit vpx_read_bit
-#define vp10_read_literal vpx_read_literal
-#define vp10_read_tree vpx_read_tree
+#define aom_reader aom_reader
+#define aom_reader_has_error aom_reader_has_error
+#define aom_read aom_read
+#define aom_read_bit aom_read_bit
+#define aom_read_literal aom_read_literal
+#define aom_read_tree aom_read_tree
 #endif
 
-#endif  // VPX10_DECODER_BITREADER_H_
+#endif  // AOM10_DECODER_BITREADER_H_

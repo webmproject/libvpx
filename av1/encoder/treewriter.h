@@ -8,37 +8,37 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_ENCODER_TREEWRITER_H_
-#define VP10_ENCODER_TREEWRITER_H_
+#ifndef AV1_ENCODER_TREEWRITER_H_
+#define AV1_ENCODER_TREEWRITER_H_
 
-#ifdef VP10_FORCE_VPXBOOL_TREEWRITER
+#ifdef AV1_FORCE_AOMBOOL_TREEWRITER
 #include "aom_dsp/bitwriter.h"
-#define tree_writer vpx_writer
-#define tree_bit_write vpx_write
+#define tree_writer aom_writer
+#define tree_bit_write aom_write
 #else
 #include "av1/encoder/bitwriter.h"
-#define tree_writer vp10_writer
-#define tree_bit_write vp10_write
+#define tree_writer aom_writer
+#define tree_bit_write aom_write
 #endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void vp10_tree_probs_from_distribution(vpx_tree tree,
-                                       unsigned int branch_ct[/* n - 1 */][2],
-                                       const unsigned int num_events[/* n */]);
+void av1_tree_probs_from_distribution(aom_tree tree,
+                                      unsigned int branch_ct[/* n - 1 */][2],
+                                      const unsigned int num_events[/* n */]);
 
-struct vp10_token {
+struct av1_token {
   int value;
   int len;
 };
 
-void vp10_tokens_from_tree(struct vp10_token *, const vpx_tree_index *);
+void av1_tokens_from_tree(struct av1_token *, const aom_tree_index *);
 
-static INLINE void vp10_write_tree(tree_writer *w, const vpx_tree_index *tree,
-                                   const vpx_prob *probs, int bits, int len,
-                                   vpx_tree_index i) {
+static INLINE void av1_write_tree(tree_writer *w, const aom_tree_index *tree,
+                                  const aom_prob *probs, int bits, int len,
+                                  aom_tree_index i) {
   do {
     const int bit = (bits >> --len) & 1;
     tree_bit_write(w, bit, probs[i >> 1]);
@@ -46,10 +46,10 @@ static INLINE void vp10_write_tree(tree_writer *w, const vpx_tree_index *tree,
   } while (len);
 }
 
-static INLINE void vp10_write_token(tree_writer *w, const vpx_tree_index *tree,
-                                    const vpx_prob *probs,
-                                    const struct vp10_token *token) {
-  vp10_write_tree(w, tree, probs, token->value, token->len, 0);
+static INLINE void av1_write_token(tree_writer *w, const aom_tree_index *tree,
+                                   const aom_prob *probs,
+                                   const struct av1_token *token) {
+  av1_write_tree(w, tree, probs, token->value, token->len, 0);
 }
 
 #undef tree_writer
@@ -58,4 +58,4 @@ static INLINE void vp10_write_token(tree_writer *w, const vpx_tree_index *tree,
 }  // extern "C"
 #endif
 
-#endif  // VP10_ENCODER_TREEWRITER_H_
+#endif  // AV1_ENCODER_TREEWRITER_H_

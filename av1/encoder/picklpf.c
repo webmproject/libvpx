@@ -11,11 +11,11 @@
 #include <assert.h>
 #include <limits.h>
 
-#include "./vpx_scale_rtcd.h"
+#include "./aom_scale_rtcd.h"
 
 #include "aom_dsp/psnr.h"
-#include "aom_dsp/vpx_dsp_common.h"
-#include "aom_mem/vpx_mem.h"
+#include "aom_dsp/aom_dsp_common.h"
+#include "aom_mem/aom_mem.h"
 #include "aom_ports/mem.h"
 
 #include "av1/common/loopfilter.h"
@@ -26,7 +26,7 @@
 #include "av1/encoder/picklpf.h"
 #include "av1/encoder/quantize.h"
 
-int vp10_get_max_filter_level(const VP10_COMP *cpi) {
+int av1_get_max_filter_level(const AV1_COMP *cpi) {
   if (cpi->oxcf.pass == 2) {
     return cpi->twopass.section_intra_rating > 8 ? MAX_LOOP_FILTER * 3 / 4
                                                  : MAX_LOOP_FILTER;
@@ -36,46 +36,46 @@ int vp10_get_max_filter_level(const VP10_COMP *cpi) {
 }
 
 static int64_t try_filter_frame(const YV12_BUFFER_CONFIG *sd,
-                                VP10_COMP *const cpi, int filt_level,
+                                AV1_COMP *const cpi, int filt_level,
                                 int partial_frame) {
-  VP10_COMMON *const cm = &cpi->common;
+  AV1_COMMON *const cm = &cpi->common;
   int64_t filt_err;
 
 #if CONFIG_VAR_TX || CONFIG_EXT_PARTITION
-  vp10_loop_filter_frame(cm->frame_to_show, cm, &cpi->td.mb.e_mbd, filt_level,
-                         1, partial_frame);
+  av1_loop_filter_frame(cm->frame_to_show, cm, &cpi->td.mb.e_mbd, filt_level, 1,
+                        partial_frame);
 #else
   if (cpi->num_workers > 1)
-    vp10_loop_filter_frame_mt(cm->frame_to_show, cm, cpi->td.mb.e_mbd.plane,
-                              filt_level, 1, partial_frame, cpi->workers,
-                              cpi->num_workers, &cpi->lf_row_sync);
+    av1_loop_filter_frame_mt(cm->frame_to_show, cm, cpi->td.mb.e_mbd.plane,
+                             filt_level, 1, partial_frame, cpi->workers,
+                             cpi->num_workers, &cpi->lf_row_sync);
   else
-    vp10_loop_filter_frame(cm->frame_to_show, cm, &cpi->td.mb.e_mbd, filt_level,
-                           1, partial_frame);
+    av1_loop_filter_frame(cm->frame_to_show, cm, &cpi->td.mb.e_mbd, filt_level,
+                          1, partial_frame);
 #endif
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   if (cm->use_highbitdepth) {
-    filt_err = vpx_highbd_get_y_sse(sd, cm->frame_to_show);
+    filt_err = aom_highbd_get_y_sse(sd, cm->frame_to_show);
   } else {
-    filt_err = vpx_get_y_sse(sd, cm->frame_to_show);
+    filt_err = aom_get_y_sse(sd, cm->frame_to_show);
   }
 #else
-  filt_err = vpx_get_y_sse(sd, cm->frame_to_show);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+  filt_err = aom_get_y_sse(sd, cm->frame_to_show);
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
   // Re-instate the unfiltered frame
-  vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
+  aom_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
 
   return filt_err;
 }
 
-int vp10_search_filter_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
-                             int partial_frame, double *best_cost_ret) {
-  const VP10_COMMON *const cm = &cpi->common;
+int av1_search_filter_level(const YV12_BUFFER_CONFIG *sd, AV1_COMP *cpi,
+                            int partial_frame, double *best_cost_ret) {
+  const AV1_COMMON *const cm = &cpi->common;
   const struct loopfilter *const lf = &cm->lf;
   const int min_filter_level = 0;
-  const int max_filter_level = vp10_get_max_filter_level(cpi);
+  const int max_filter_level = av1_get_max_filter_level(cpi);
   int filt_direction = 0;
   int64_t best_err;
   int filt_best;
@@ -92,15 +92,15 @@ int vp10_search_filter_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
   memset(ss_err, 0xFF, sizeof(ss_err));
 
   //  Make a copy of the unfiltered / processed recon buffer
-  vpx_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
+  aom_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
 
   best_err = try_filter_frame(sd, cpi, filt_mid, partial_frame);
   filt_best = filt_mid;
   ss_err[filt_mid] = best_err;
 
   while (filter_step > 0) {
-    const int filt_high = VPXMIN(filt_mid + filter_step, max_filter_level);
-    const int filt_low = VPXMAX(filt_mid - filter_step, min_filter_level);
+    const int filt_high = AOMMIN(filt_mid + filter_step, max_filter_level);
+    const int filt_low = AOMMAX(filt_mid - filter_step, min_filter_level);
 
     // Bias against raising loop filter in favor of lowering it.
     int64_t bias = (best_err >> (15 - (filt_mid / 8))) * filter_step;
@@ -159,9 +159,9 @@ int vp10_search_filter_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
 }
 
 #if !CONFIG_LOOP_RESTORATION
-void vp10_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
-                            LPF_PICK_METHOD method) {
-  VP10_COMMON *const cm = &cpi->common;
+void av1_pick_filter_level(const YV12_BUFFER_CONFIG *sd, AV1_COMP *cpi,
+                           LPF_PICK_METHOD method) {
+  AV1_COMMON *const cm = &cpi->common;
   struct loopfilter *const lf = &cm->lf;
 
   lf->sharpness_level = cm->frame_type == KEY_FRAME ? 0 : cpi->oxcf.sharpness;
@@ -170,35 +170,35 @@ void vp10_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
     lf->filter_level = 0;
   } else if (method >= LPF_PICK_FROM_Q) {
     const int min_filter_level = 0;
-    const int max_filter_level = vp10_get_max_filter_level(cpi);
-    const int q = vp10_ac_quant(cm->base_qindex, 0, cm->bit_depth);
+    const int max_filter_level = av1_get_max_filter_level(cpi);
+    const int q = av1_ac_quant(cm->base_qindex, 0, cm->bit_depth);
 // These values were determined by linear fitting the result of the
 // searched level, filt_guess = q * 0.316206 + 3.87252
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
     int filt_guess;
     switch (cm->bit_depth) {
-      case VPX_BITS_8:
+      case AOM_BITS_8:
         filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 1015158, 18);
         break;
-      case VPX_BITS_10:
+      case AOM_BITS_10:
         filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 4060632, 20);
         break;
-      case VPX_BITS_12:
+      case AOM_BITS_12:
         filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 16242526, 22);
         break;
       default:
         assert(0 &&
-               "bit_depth should be VPX_BITS_8, VPX_BITS_10 "
-               "or VPX_BITS_12");
+               "bit_depth should be AOM_BITS_8, AOM_BITS_10 "
+               "or AOM_BITS_12");
         return;
     }
 #else
     int filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 1015158, 18);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
     if (cm->frame_type == KEY_FRAME) filt_guess -= 4;
     lf->filter_level = clamp(filt_guess, min_filter_level, max_filter_level);
   } else {
-    lf->filter_level = vp10_search_filter_level(
+    lf->filter_level = av1_search_filter_level(
         sd, cpi, method == LPF_PICK_FROM_SUBIMAGE, NULL);
   }
 

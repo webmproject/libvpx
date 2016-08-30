@@ -8,7 +8,7 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-%define private_prefix vpx
+%define private_prefix aom
 
 %include "third_party/x86inc/x86inc.asm"
 

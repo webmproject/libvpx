@@ -11,10 +11,10 @@
 #include <arm_neon.h>
 #include <assert.h>
 
-#include "./vp10_rtcd.h"
+#include "./av1_rtcd.h"
 
-int64_t vp10_block_error_fp_neon(const int16_t *coeff, const int16_t *dqcoeff,
-                                 int block_size) {
+int64_t av1_block_error_fp_neon(const int16_t *coeff, const int16_t *dqcoeff,
+                                int block_size) {
   int64x2_t error = vdupq_n_s64(0);
 
   assert(block_size >= 8);

@@ -14,14 +14,14 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-#include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_config.h"
+#include "./aom_dsp_rtcd.h"
 
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
-#include "aom_mem/vpx_mem.h"
+#include "aom_mem/aom_mem.h"
 
 using libaom_test::ACMRandom;
 
@@ -32,11 +32,11 @@ class AverageTestBase : public ::testing::Test {
 
   static void SetUpTestCase() {
     source_data_ = reinterpret_cast<uint8_t *>(
-        vpx_memalign(kDataAlignment, kDataBlockSize));
+        aom_memalign(kDataAlignment, kDataBlockSize));
   }
 
   static void TearDownTestCase() {
-    vpx_free(source_data_);
+    aom_free(source_data_);
     source_data_ = NULL;
   }
 
@@ -131,15 +131,15 @@ class IntProRowTest : public AverageTestBase,
  protected:
   virtual void SetUp() {
     hbuf_asm_ = reinterpret_cast<int16_t *>(
-        vpx_memalign(kDataAlignment, sizeof(*hbuf_asm_) * 16));
+        aom_memalign(kDataAlignment, sizeof(*hbuf_asm_) * 16));
     hbuf_c_ = reinterpret_cast<int16_t *>(
-        vpx_memalign(kDataAlignment, sizeof(*hbuf_c_) * 16));
+        aom_memalign(kDataAlignment, sizeof(*hbuf_c_) * 16));
   }
 
   virtual void TearDown() {
-    vpx_free(hbuf_c_);
+    aom_free(hbuf_c_);
     hbuf_c_ = NULL;
-    vpx_free(hbuf_asm_);
+    aom_free(hbuf_asm_);
     hbuf_asm_ = NULL;
   }
 
@@ -194,13 +194,13 @@ class SatdTest : public ::testing::Test,
     satd_func_ = GET_PARAM(1);
     rnd_.Reset(ACMRandom::DeterministicSeed());
     src_ = reinterpret_cast<int16_t *>(
-        vpx_memalign(16, sizeof(*src_) * satd_size_));
+        aom_memalign(16, sizeof(*src_) * satd_size_));
     ASSERT_TRUE(src_ != NULL);
   }
 
   virtual void TearDown() {
     libaom_test::ClearSystemState();
-    vpx_free(src_);
+    aom_free(src_);
   }
 
   void FillConstant(const int16_t val) {
@@ -309,86 +309,86 @@ using std::tr1::make_tuple;
 
 INSTANTIATE_TEST_CASE_P(
     C, AverageTest,
-    ::testing::Values(make_tuple(16, 16, 1, 8, &vpx_avg_8x8_c),
-                      make_tuple(16, 16, 1, 4, &vpx_avg_4x4_c)));
+    ::testing::Values(make_tuple(16, 16, 1, 8, &aom_avg_8x8_c),
+                      make_tuple(16, 16, 1, 4, &aom_avg_4x4_c)));
 
 INSTANTIATE_TEST_CASE_P(C, SatdTest,
-                        ::testing::Values(make_tuple(16, &vpx_satd_c),
-                                          make_tuple(64, &vpx_satd_c),
-                                          make_tuple(256, &vpx_satd_c),
-                                          make_tuple(1024, &vpx_satd_c)));
+                        ::testing::Values(make_tuple(16, &aom_satd_c),
+                                          make_tuple(64, &aom_satd_c),
+                                          make_tuple(256, &aom_satd_c),
+                                          make_tuple(1024, &aom_satd_c)));
 
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
     SSE2, AverageTest,
-    ::testing::Values(make_tuple(16, 16, 0, 8, &vpx_avg_8x8_sse2),
-                      make_tuple(16, 16, 5, 8, &vpx_avg_8x8_sse2),
-                      make_tuple(32, 32, 15, 8, &vpx_avg_8x8_sse2),
-                      make_tuple(16, 16, 0, 4, &vpx_avg_4x4_sse2),
-                      make_tuple(16, 16, 5, 4, &vpx_avg_4x4_sse2),
-                      make_tuple(32, 32, 15, 4, &vpx_avg_4x4_sse2)));
+    ::testing::Values(make_tuple(16, 16, 0, 8, &aom_avg_8x8_sse2),
+                      make_tuple(16, 16, 5, 8, &aom_avg_8x8_sse2),
+                      make_tuple(32, 32, 15, 8, &aom_avg_8x8_sse2),
+                      make_tuple(16, 16, 0, 4, &aom_avg_4x4_sse2),
+                      make_tuple(16, 16, 5, 4, &aom_avg_4x4_sse2),
+                      make_tuple(32, 32, 15, 4, &aom_avg_4x4_sse2)));
 
 INSTANTIATE_TEST_CASE_P(
     SSE2, IntProRowTest,
-    ::testing::Values(make_tuple(16, &vpx_int_pro_row_sse2, &vpx_int_pro_row_c),
-                      make_tuple(32, &vpx_int_pro_row_sse2, &vpx_int_pro_row_c),
-                      make_tuple(64, &vpx_int_pro_row_sse2,
-                                 &vpx_int_pro_row_c)));
+    ::testing::Values(make_tuple(16, &aom_int_pro_row_sse2, &aom_int_pro_row_c),
+                      make_tuple(32, &aom_int_pro_row_sse2, &aom_int_pro_row_c),
+                      make_tuple(64, &aom_int_pro_row_sse2,
+                                 &aom_int_pro_row_c)));
 
 INSTANTIATE_TEST_CASE_P(
     SSE2, IntProColTest,
-    ::testing::Values(make_tuple(16, &vpx_int_pro_col_sse2, &vpx_int_pro_col_c),
-                      make_tuple(32, &vpx_int_pro_col_sse2, &vpx_int_pro_col_c),
-                      make_tuple(64, &vpx_int_pro_col_sse2,
-                                 &vpx_int_pro_col_c)));
+    ::testing::Values(make_tuple(16, &aom_int_pro_col_sse2, &aom_int_pro_col_c),
+                      make_tuple(32, &aom_int_pro_col_sse2, &aom_int_pro_col_c),
+                      make_tuple(64, &aom_int_pro_col_sse2,
+                                 &aom_int_pro_col_c)));
 
 INSTANTIATE_TEST_CASE_P(SSE2, SatdTest,
-                        ::testing::Values(make_tuple(16, &vpx_satd_sse2),
-                                          make_tuple(64, &vpx_satd_sse2),
-                                          make_tuple(256, &vpx_satd_sse2),
-                                          make_tuple(1024, &vpx_satd_sse2)));
+                        ::testing::Values(make_tuple(16, &aom_satd_sse2),
+                                          make_tuple(64, &aom_satd_sse2),
+                                          make_tuple(256, &aom_satd_sse2),
+                                          make_tuple(1024, &aom_satd_sse2)));
 #endif
 
 #if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(
     NEON, AverageTest,
-    ::testing::Values(make_tuple(16, 16, 0, 8, &vpx_avg_8x8_neon),
-                      make_tuple(16, 16, 5, 8, &vpx_avg_8x8_neon),
-                      make_tuple(32, 32, 15, 8, &vpx_avg_8x8_neon),
-                      make_tuple(16, 16, 0, 4, &vpx_avg_4x4_neon),
-                      make_tuple(16, 16, 5, 4, &vpx_avg_4x4_neon),
-                      make_tuple(32, 32, 15, 4, &vpx_avg_4x4_neon)));
+    ::testing::Values(make_tuple(16, 16, 0, 8, &aom_avg_8x8_neon),
+                      make_tuple(16, 16, 5, 8, &aom_avg_8x8_neon),
+                      make_tuple(32, 32, 15, 8, &aom_avg_8x8_neon),
+                      make_tuple(16, 16, 0, 4, &aom_avg_4x4_neon),
+                      make_tuple(16, 16, 5, 4, &aom_avg_4x4_neon),
+                      make_tuple(32, 32, 15, 4, &aom_avg_4x4_neon)));
 
 INSTANTIATE_TEST_CASE_P(
     NEON, IntProRowTest,
-    ::testing::Values(make_tuple(16, &vpx_int_pro_row_neon, &vpx_int_pro_row_c),
-                      make_tuple(32, &vpx_int_pro_row_neon, &vpx_int_pro_row_c),
-                      make_tuple(64, &vpx_int_pro_row_neon,
-                                 &vpx_int_pro_row_c)));
+    ::testing::Values(make_tuple(16, &aom_int_pro_row_neon, &aom_int_pro_row_c),
+                      make_tuple(32, &aom_int_pro_row_neon, &aom_int_pro_row_c),
+                      make_tuple(64, &aom_int_pro_row_neon,
+                                 &aom_int_pro_row_c)));
 
 INSTANTIATE_TEST_CASE_P(
     NEON, IntProColTest,
-    ::testing::Values(make_tuple(16, &vpx_int_pro_col_neon, &vpx_int_pro_col_c),
-                      make_tuple(32, &vpx_int_pro_col_neon, &vpx_int_pro_col_c),
-                      make_tuple(64, &vpx_int_pro_col_neon,
-                                 &vpx_int_pro_col_c)));
+    ::testing::Values(make_tuple(16, &aom_int_pro_col_neon, &aom_int_pro_col_c),
+                      make_tuple(32, &aom_int_pro_col_neon, &aom_int_pro_col_c),
+                      make_tuple(64, &aom_int_pro_col_neon,
+                                 &aom_int_pro_col_c)));
 
 INSTANTIATE_TEST_CASE_P(NEON, SatdTest,
-                        ::testing::Values(make_tuple(16, &vpx_satd_neon),
-                                          make_tuple(64, &vpx_satd_neon),
-                                          make_tuple(256, &vpx_satd_neon),
-                                          make_tuple(1024, &vpx_satd_neon)));
+                        ::testing::Values(make_tuple(16, &aom_satd_neon),
+                                          make_tuple(64, &aom_satd_neon),
+                                          make_tuple(256, &aom_satd_neon),
+                                          make_tuple(1024, &aom_satd_neon)));
 #endif
 
 #if HAVE_MSA
 INSTANTIATE_TEST_CASE_P(
     MSA, AverageTest,
-    ::testing::Values(make_tuple(16, 16, 0, 8, &vpx_avg_8x8_msa),
-                      make_tuple(16, 16, 5, 8, &vpx_avg_8x8_msa),
-                      make_tuple(32, 32, 15, 8, &vpx_avg_8x8_msa),
-                      make_tuple(16, 16, 0, 4, &vpx_avg_4x4_msa),
-                      make_tuple(16, 16, 5, 4, &vpx_avg_4x4_msa),
-                      make_tuple(32, 32, 15, 4, &vpx_avg_4x4_msa)));
+    ::testing::Values(make_tuple(16, 16, 0, 8, &aom_avg_8x8_msa),
+                      make_tuple(16, 16, 5, 8, &aom_avg_8x8_msa),
+                      make_tuple(32, 32, 15, 8, &aom_avg_8x8_msa),
+                      make_tuple(16, 16, 0, 4, &aom_avg_4x4_msa),
+                      make_tuple(16, 16, 5, 4, &aom_avg_4x4_msa),
+                      make_tuple(32, 32, 15, 4, &aom_avg_4x4_msa)));
 #endif
 
 }  // namespace

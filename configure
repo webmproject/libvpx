@@ -34,14 +34,14 @@ Advanced options:
   ${toggle_codec_srcs}            in/exclude codec library source code
   ${toggle_debug_libs}            in/exclude debug version of libraries
   ${toggle_static_msvcrt}         use static MSVCRT (VS builds only)
-  ${toggle_vp9_highbitdepth}      use high bit depth (10/12) profiles
+  ${toggle_aom_highbitdepth}      use high bit depth (10/12) profiles
   ${toggle_better_hw_compatibility}
                                   enable encoder to produce streams with better
                                   hardware decoder compatibility
-  ${toggle_vp10}                  VP10 codec support
+  ${toggle_av1}                  AV1 codec support
   ${toggle_internal_stats}        output of encoder internal stats for debug, if supported (encoders)
   ${toggle_postproc}              postprocessing
-  ${toggle_vp9_postproc}          vp9 specific postprocessing
+  ${toggle_av1_postproc}          av1 specific postprocessing
   ${toggle_multithread}           multithreaded encoding and decoding
   ${toggle_spatial_resampling}    spatial sampling (scaling) support
   ${toggle_realtime_only}         enable this option while building for real-time encoding
@@ -57,8 +57,8 @@ Advanced options:
   ${toggle_postproc_visualizer}   macro block / block level visualizers
   ${toggle_multi_res_encoding}    enable multiple-resolution encoding
   ${toggle_temporal_denoising}    enable temporal denoising and disable the spatial denoiser
-  ${toggle_vp9_temporal_denoising}
-                                  enable vp9 temporal denoising
+  ${toggle_av1_temporal_denoising}
+                                  enable av1 temporal denoising
   ${toggle_webm_io}               enable input from and output to WebM container
   ${toggle_libyuv}                enable libyuv
 
@@ -170,7 +170,7 @@ fi
 
 if [ "`cd \"${source_path}\" && pwd`" != "`pwd`" ]; then
   # test to see if source_path already configured
-  if [ -f "${source_path}/vpx_config.h" ]; then
+  if [ -f "${source_path}/aom_config.h" ]; then
     die "source directory already configured; run 'make distclean' there first"
   fi
 fi
@@ -189,7 +189,7 @@ if [ ${doxy_major:-0} -ge 1 ]; then
 fi
 
 # disable codecs when their source directory does not exist
-[ -d "${source_path}/av1" ] || disable_codec vp10
+[ -d "${source_path}/av1" ] || disable_codec av1
 
 # install everything except the sources, by default. sources will have
 # to be enabled when doing dist builds, since that's no longer a common
@@ -207,11 +207,11 @@ enable_feature os_support
 enable_feature temporal_denoising
 
 CODECS="
-    vp10_encoder
-    vp10_decoder
+    av1_encoder
+    av1_decoder
 "
 CODEC_FAMILIES="
-    vp10
+    av1
 "
 
 ARCH_LIST="
@@ -245,7 +245,7 @@ ARCH_EXT_LIST="
 "
 HAVE_LIST="
     ${ARCH_EXT_LIST}
-    vpx_ports
+    aom_ports
     pthread_h
     unistd_h
 "
@@ -300,7 +300,7 @@ CONFIG_LIST="
     dc_recon
     runtime_cpu_detect
     postproc
-    vp9_postproc
+    av1_postproc
     multithread
     internal_stats
     ${CODECS}
@@ -324,9 +324,9 @@ CONFIG_LIST="
     encode_perf_tests
     multi_res_encoding
     temporal_denoising
-    vp9_temporal_denoising
+    av1_temporal_denoising
     coefficient_range_checking
-    vp9_highbitdepth
+    aom_highbitdepth
     better_hw_compatibility
     experimental
     size_limit
@@ -363,7 +363,7 @@ CMDLINE_SELECT="
     dequant_tokens
     dc_recon
     postproc
-    vp9_postproc
+    av1_postproc
     multithread
     internal_stats
     ${CODECS}
@@ -384,10 +384,10 @@ CMDLINE_SELECT="
     encode_perf_tests
     multi_res_encoding
     temporal_denoising
-    vp9_temporal_denoising
+    av1_temporal_denoising
     coefficient_range_checking
     better_hw_compatibility
-    vp9_highbitdepth
+    aom_highbitdepth
     experimental
     aom_qm
 "
@@ -445,12 +445,12 @@ post_process_cmdline() {
 
 process_targets() {
     enabled child || write_common_config_banner
-    write_common_target_config_h ${BUILD_PFX}vpx_config.h
+    write_common_target_config_h ${BUILD_PFX}aom_config.h
     write_common_config_targets
 
     # Calculate the default distribution name, based on the enabled features
     cf=""
-    DIST_DIR=vpx
+    DIST_DIR=aom
     for cf in $CODEC_FAMILIES; do
         if enabled ${cf}_encoder && enabled ${cf}_decoder; then
             DIST_DIR="${DIST_DIR}-${cf}"
@@ -462,7 +462,7 @@ process_targets() {
     done
     enabled debug_libs && DIST_DIR="${DIST_DIR}-debug"
     enabled codec_srcs && DIST_DIR="${DIST_DIR}-src"
-    ! enabled postproc && ! enabled vp9_postproc && DIST_DIR="${DIST_DIR}-nopost"
+    ! enabled postproc && ! enabled av1_postproc && DIST_DIR="${DIST_DIR}-nopost"
     ! enabled multithread && DIST_DIR="${DIST_DIR}-nomt"
     ! enabled install_docs && DIST_DIR="${DIST_DIR}-nodocs"
     DIST_DIR="${DIST_DIR}-${tgt_isa}-${tgt_os}"
@@ -510,7 +510,7 @@ EOF
 
         if enabled $tgt; then
             echo "Creating makefiles for ${toolchain} ${tgt}"
-            write_common_target_config_mk $tgt_fn ${BUILD_PFX}vpx_config.h
+            write_common_target_config_mk $tgt_fn ${BUILD_PFX}aom_config.h
             #write_${tgt}_config
         fi
     done
@@ -584,7 +584,7 @@ EOF
     check_header pthread.h
     check_header unistd.h # for sysconf(3) and friends.
 
-    check_header aom/vpx_integer.h -I${source_path} && enable_feature vpx_ports
+    check_header aom/aom_integer.h -I${source_path} && enable_feature aom_ports
 }
 
 process_toolchain() {
@@ -654,10 +654,6 @@ process_toolchain() {
     if enabled mips; then
         enable_feature dequant_tokens
         enable_feature dc_recon
-    fi
-
-    if enabled internal_stats; then
-        enable_feature vp9_postproc
     fi
 
     # Enable the postbuild target if building for visual studio.
@@ -746,9 +742,9 @@ EOF
 ##
 CONFIGURE_ARGS="$@"
 process "$@"
-print_webm_license ${BUILD_PFX}vpx_config.c "/*" " */"
-cat <<EOF >> ${BUILD_PFX}vpx_config.c
-#include "aom/vpx_codec.h"
+print_webm_license ${BUILD_PFX}aom_config.c "/*" " */"
+cat <<EOF >> ${BUILD_PFX}aom_config.c
+#include "aom/aom_codec.h"
 static const char* const cfg = "$CONFIGURE_ARGS";
-const char *vpx_codec_build_config(void) {return cfg;}
+const char *aom_codec_build_config(void) {return cfg;}
 EOF

@@ -13,14 +13,14 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-#include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_config.h"
+#include "./aom_dsp_rtcd.h"
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
-#include "aom/vpx_codec.h"
-#include "aom/vpx_integer.h"
-#include "aom_mem/vpx_mem.h"
+#include "aom/aom_codec.h"
+#include "aom/aom_integer.h"
+#include "aom_mem/aom_mem.h"
 #include "aom_ports/mem.h"
 
 namespace {
@@ -48,15 +48,15 @@ using libaom_test::ACMRandom;
 // (bit_depth - 8) for se
 static void RoundHighBitDepth(int bit_depth, int64_t *se, uint64_t *sse) {
   switch (bit_depth) {
-    case VPX_BITS_12:
+    case AOM_BITS_12:
       *sse = (*sse + 128) >> 8;
       *se = (*se + 8) >> 4;
       break;
-    case VPX_BITS_10:
+    case AOM_BITS_10:
       *sse = (*sse + 8) >> 4;
       *se = (*se + 2) >> 2;
       break;
-    case VPX_BITS_8:
+    case AOM_BITS_8:
     default: break;
   }
 }
@@ -76,7 +76,7 @@ static unsigned int mb_ss_ref(const int16_t *src) {
 static uint32_t variance_ref(const uint8_t *src, const uint8_t *ref, int l2w,
                              int l2h, int src_stride, int ref_stride,
                              uint32_t *sse_ptr, bool use_high_bit_depth_,
-                             vpx_bit_depth_t bit_depth) {
+                             aom_bit_depth_t bit_depth) {
   int64_t se = 0;
   uint64_t sse = 0;
   const int w = 1 << l2w;
@@ -88,13 +88,13 @@ static uint32_t variance_ref(const uint8_t *src, const uint8_t *ref, int l2w,
         diff = src[y * src_stride + x] - ref[y * ref_stride + x];
         se += diff;
         sse += diff * diff;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       } else {
         diff = CONVERT_TO_SHORTPTR(src)[y * src_stride + x] -
                CONVERT_TO_SHORTPTR(ref)[y * ref_stride + x];
         se += diff;
         sse += diff * diff;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
       }
     }
   }
@@ -113,7 +113,7 @@ static uint32_t variance_ref(const uint8_t *src, const uint8_t *ref, int l2w,
 static uint32_t subpel_variance_ref(const uint8_t *ref, const uint8_t *src,
                                     int l2w, int l2h, int xoff, int yoff,
                                     uint32_t *sse_ptr, bool use_high_bit_depth_,
-                                    vpx_bit_depth_t bit_depth) {
+                                    aom_bit_depth_t bit_depth) {
   int64_t se = 0;
   uint64_t sse = 0;
   const int w = 1 << l2w;
@@ -136,7 +136,7 @@ static uint32_t subpel_variance_ref(const uint8_t *ref, const uint8_t *src,
         const int diff = r - src[w * y + x];
         se += diff;
         sse += diff * diff;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       } else {
         uint16_t *ref16 = CONVERT_TO_SHORTPTR(ref);
         uint16_t *src16 = CONVERT_TO_SHORTPTR(src);
@@ -150,7 +150,7 @@ static uint32_t subpel_variance_ref(const uint8_t *ref, const uint8_t *src,
         const int diff = r - src16[w * y + x];
         se += diff;
         sse += diff * diff;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
       }
     }
   }
@@ -165,7 +165,7 @@ static uint32_t subpel_avg_variance_ref(const uint8_t *ref, const uint8_t *src,
                                         int l2h, int xoff, int yoff,
                                         uint32_t *sse_ptr,
                                         bool use_high_bit_depth,
-                                        vpx_bit_depth_t bit_depth) {
+                                        aom_bit_depth_t bit_depth) {
   int64_t se = 0;
   uint64_t sse = 0;
   const int w = 1 << l2w;
@@ -189,7 +189,7 @@ static uint32_t subpel_avg_variance_ref(const uint8_t *ref, const uint8_t *src,
             ((r + second_pred[w * y + x] + 1) >> 1) - src[w * y + x];
         se += diff;
         sse += diff * diff;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       } else {
         const uint16_t *ref16 = CONVERT_TO_SHORTPTR(ref);
         const uint16_t *src16 = CONVERT_TO_SHORTPTR(src);
@@ -204,7 +204,7 @@ static uint32_t subpel_avg_variance_ref(const uint8_t *ref, const uint8_t *src,
         const int diff = ((r + sec16[w * y + x] + 1) >> 1) - src16[w * y + x];
         se += diff;
         sse += diff * diff;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
       }
     }
   }
@@ -268,9 +268,9 @@ struct TestParams {
       : log2width(log2w), log2height(log2h), func(function) {
     use_high_bit_depth = (bit_depth_value > 0);
     if (use_high_bit_depth) {
-      bit_depth = static_cast<vpx_bit_depth_t>(bit_depth_value);
+      bit_depth = static_cast<aom_bit_depth_t>(bit_depth_value);
     } else {
-      bit_depth = VPX_BITS_8;
+      bit_depth = AOM_BITS_8;
     }
     width = 1 << log2width;
     height = 1 << log2height;
@@ -282,7 +282,7 @@ struct TestParams {
   int width, height;
   int block_size;
   Func func;
-  vpx_bit_depth_t bit_depth;
+  aom_bit_depth_t bit_depth;
   bool use_high_bit_depth;
   uint32_t mask;
 };
@@ -305,11 +305,11 @@ class MainTestClass
     rnd_.Reset(ACMRandom::DeterministicSeed());
     const size_t unit =
         use_high_bit_depth() ? sizeof(uint16_t) : sizeof(uint8_t);
-    src_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size() * unit));
+    src_ = reinterpret_cast<uint8_t *>(aom_memalign(16, block_size() * unit));
     ref_ = new uint8_t[block_size() * unit];
     ASSERT_TRUE(src_ != NULL);
     ASSERT_TRUE(ref_ != NULL);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
     if (use_high_bit_depth()) {
       // TODO(skal): remove!
       src_ = CONVERT_TO_BYTEPTR(src_);
@@ -319,7 +319,7 @@ class MainTestClass
   }
 
   virtual void TearDown() {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
     if (use_high_bit_depth()) {
       // TODO(skal): remove!
       src_ = reinterpret_cast<uint8_t *>(CONVERT_TO_SHORTPTR(src_));
@@ -327,7 +327,7 @@ class MainTestClass
     }
 #endif
 
-    vpx_free(src_);
+    aom_free(src_);
     delete[] ref_;
     src_ = NULL;
     ref_ = NULL;
@@ -400,11 +400,11 @@ void MainTestClass<VarianceFunctionType>::RefTest() {
       if (!use_high_bit_depth()) {
         src_[j] = rnd_.Rand8();
         ref_[j] = rnd_.Rand8();
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       } else {
         CONVERT_TO_SHORTPTR(src_)[j] = rnd_.Rand16() & mask();
         CONVERT_TO_SHORTPTR(ref_)[j] = rnd_.Rand16() & mask();
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
       }
     }
     unsigned int sse1, sse2, var1, var2;
@@ -430,11 +430,11 @@ void MainTestClass<VarianceFunctionType>::RefStrideTest() {
       if (!use_high_bit_depth()) {
         src_[src_ind] = rnd_.Rand8();
         ref_[ref_ind] = rnd_.Rand8();
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       } else {
         CONVERT_TO_SHORTPTR(src_)[src_ind] = rnd_.Rand16() & mask();
         CONVERT_TO_SHORTPTR(ref_)[ref_ind] = rnd_.Rand16() & mask();
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
       }
     }
     unsigned int sse1, sse2;
@@ -457,12 +457,12 @@ void MainTestClass<VarianceFunctionType>::OneQuarterTest() {
     memset(src_, 255, block_size());
     memset(ref_, 255, half);
     memset(ref_ + half, 0, half);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   } else {
-    vpx_memset16(CONVERT_TO_SHORTPTR(src_), 255 << byte_shift(), block_size());
-    vpx_memset16(CONVERT_TO_SHORTPTR(ref_), 255 << byte_shift(), half);
-    vpx_memset16(CONVERT_TO_SHORTPTR(ref_) + half, 0, half);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+    aom_memset16(CONVERT_TO_SHORTPTR(src_), 255 << byte_shift(), block_size());
+    aom_memset16(CONVERT_TO_SHORTPTR(ref_), 255 << byte_shift(), half);
+    aom_memset16(CONVERT_TO_SHORTPTR(ref_) + half, 0, half);
+#endif  // CONFIG_AOM_HIGHBITDEPTH
   }
   unsigned int sse, var, expected;
   ASM_REGISTER_STATE_CHECK(
@@ -485,7 +485,7 @@ void MainTestClass<FunctionType>::RefTestMse() {
     const int stride = width();
     ASM_REGISTER_STATE_CHECK(params_.func(src_, stride, ref_, stride, &sse1));
     variance_ref(src_, ref_, params_.log2width, params_.log2height, stride,
-                 stride, &sse2, false, VPX_BITS_8);
+                 stride, &sse2, false, AOM_BITS_8);
     EXPECT_EQ(sse1, sse2);
   }
 }
@@ -502,7 +502,7 @@ void MainTestClass<FunctionType>::RefTestSse() {
     const int stride = width();
     ASM_REGISTER_STATE_CHECK(var1 = params_.func(src_, stride, ref_, stride));
     variance_ref(src_, ref_, params_.log2width, params_.log2height, stride,
-                 stride, &sse2, false, VPX_BITS_8);
+                 stride, &sse2, false, AOM_BITS_8);
     EXPECT_EQ(var1, sse2);
   }
 }
@@ -547,10 +547,10 @@ class SubpelVarianceTest
     height_ = 1 << log2height_;
     subpel_variance_ = get<2>(params);
     if (get<3>(params)) {
-      bit_depth_ = (vpx_bit_depth_t)get<3>(params);
+      bit_depth_ = (aom_bit_depth_t)get<3>(params);
       use_high_bit_depth_ = true;
     } else {
-      bit_depth_ = VPX_BITS_8;
+      bit_depth_ = AOM_BITS_8;
       use_high_bit_depth_ = false;
     }
     mask_ = (1 << bit_depth_) - 1;
@@ -558,18 +558,18 @@ class SubpelVarianceTest
     rnd_.Reset(ACMRandom::DeterministicSeed());
     block_size_ = width_ * height_;
     if (!use_high_bit_depth_) {
-      src_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size_));
-      sec_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size_));
+      src_ = reinterpret_cast<uint8_t *>(aom_memalign(16, block_size_));
+      sec_ = reinterpret_cast<uint8_t *>(aom_memalign(16, block_size_));
       ref_ = new uint8_t[block_size_ + width_ + height_ + 1];
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
     } else {
       src_ = CONVERT_TO_BYTEPTR(reinterpret_cast<uint16_t *>(
-          vpx_memalign(16, block_size_ * sizeof(uint16_t))));
+          aom_memalign(16, block_size_ * sizeof(uint16_t))));
       sec_ = CONVERT_TO_BYTEPTR(reinterpret_cast<uint16_t *>(
-          vpx_memalign(16, block_size_ * sizeof(uint16_t))));
+          aom_memalign(16, block_size_ * sizeof(uint16_t))));
       ref_ =
           CONVERT_TO_BYTEPTR(new uint16_t[block_size_ + width_ + height_ + 1]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
     }
     ASSERT_TRUE(src_ != NULL);
     ASSERT_TRUE(sec_ != NULL);
@@ -578,15 +578,15 @@ class SubpelVarianceTest
 
   virtual void TearDown() {
     if (!use_high_bit_depth_) {
-      vpx_free(src_);
+      aom_free(src_);
       delete[] ref_;
-      vpx_free(sec_);
-#if CONFIG_VP9_HIGHBITDEPTH
+      aom_free(sec_);
+#if CONFIG_AOM_HIGHBITDEPTH
     } else {
-      vpx_free(CONVERT_TO_SHORTPTR(src_));
+      aom_free(CONVERT_TO_SHORTPTR(src_));
       delete[] CONVERT_TO_SHORTPTR(ref_);
-      vpx_free(CONVERT_TO_SHORTPTR(sec_));
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+      aom_free(CONVERT_TO_SHORTPTR(sec_));
+#endif  // CONFIG_AOM_HIGHBITDEPTH
     }
     libaom_test::ClearSystemState();
   }
@@ -600,7 +600,7 @@ class SubpelVarianceTest
   uint8_t *ref_;
   uint8_t *sec_;
   bool use_high_bit_depth_;
-  vpx_bit_depth_t bit_depth_;
+  aom_bit_depth_t bit_depth_;
   int width_, log2width_;
   int height_, log2height_;
   int block_size_, mask_;
@@ -618,7 +618,7 @@ void SubpelVarianceTest<SubpelVarianceFunctionType>::RefTest() {
         for (int j = 0; j < block_size_ + width_ + height_ + 1; j++) {
           ref_[j] = rnd_.Rand8();
         }
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       } else {
         for (int j = 0; j < block_size_; j++) {
           CONVERT_TO_SHORTPTR(src_)[j] = rnd_.Rand16() & mask_;
@@ -626,7 +626,7 @@ void SubpelVarianceTest<SubpelVarianceFunctionType>::RefTest() {
         for (int j = 0; j < block_size_ + width_ + height_ + 1; j++) {
           CONVERT_TO_SHORTPTR(ref_)[j] = rnd_.Rand16() & mask_;
         }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
       }
       unsigned int sse1, sse2;
       unsigned int var1;
@@ -654,14 +654,14 @@ void SubpelVarianceTest<SubpelVarianceFunctionType>::ExtremeRefTest() {
         memset(src_ + half, 255, half);
         memset(ref_, 255, half);
         memset(ref_ + half, 0, half + width_ + height_ + 1);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       } else {
-        vpx_memset16(CONVERT_TO_SHORTPTR(src_), mask_, half);
-        vpx_memset16(CONVERT_TO_SHORTPTR(src_) + half, 0, half);
-        vpx_memset16(CONVERT_TO_SHORTPTR(ref_), 0, half);
-        vpx_memset16(CONVERT_TO_SHORTPTR(ref_) + half, mask_,
+        aom_memset16(CONVERT_TO_SHORTPTR(src_), mask_, half);
+        aom_memset16(CONVERT_TO_SHORTPTR(src_) + half, 0, half);
+        aom_memset16(CONVERT_TO_SHORTPTR(ref_), 0, half);
+        aom_memset16(CONVERT_TO_SHORTPTR(ref_) + half, mask_,
                      half + width_ + height_ + 1);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
       }
       unsigned int sse1, sse2;
       unsigned int var1;
@@ -688,7 +688,7 @@ void SubpelVarianceTest<SubpixAvgVarMxNFunc>::RefTest() {
         for (int j = 0; j < block_size_ + width_ + height_ + 1; j++) {
           ref_[j] = rnd_.Rand8();
         }
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       } else {
         for (int j = 0; j < block_size_; j++) {
           CONVERT_TO_SHORTPTR(src_)[j] = rnd_.Rand16() & mask_;
@@ -697,7 +697,7 @@ void SubpelVarianceTest<SubpixAvgVarMxNFunc>::RefTest() {
         for (int j = 0; j < block_size_ + width_ + height_ + 1; j++) {
           CONVERT_TO_SHORTPTR(ref_)[j] = rnd_.Rand16() & mask_;
         }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
       }
       uint32_t sse1, sse2;
       uint32_t var1, var2;
@@ -706,682 +706,682 @@ void SubpelVarianceTest<SubpixAvgVarMxNFunc>::RefTest() {
                                                     src_, width_, &sse1, sec_));
       var2 = subpel_avg_variance_ref(ref_, src_, sec_, log2width_, log2height_,
                                      x, y, &sse2, use_high_bit_depth_,
-                                     static_cast<vpx_bit_depth_t>(bit_depth_));
+                                     static_cast<aom_bit_depth_t>(bit_depth_));
       EXPECT_EQ(sse1, sse2) << "at position " << x << ", " << y;
       EXPECT_EQ(var1, var2) << "at position " << x << ", " << y;
     }
   }
 }
 
-typedef MainTestClass<Get4x4SseFunc> VpxSseTest;
-typedef MainTestClass<VarianceMxNFunc> VpxMseTest;
-typedef MainTestClass<VarianceMxNFunc> VpxVarianceTest;
-typedef SubpelVarianceTest<SubpixVarMxNFunc> VpxSubpelVarianceTest;
-typedef SubpelVarianceTest<SubpixAvgVarMxNFunc> VpxSubpelAvgVarianceTest;
+typedef MainTestClass<Get4x4SseFunc> AvxSseTest;
+typedef MainTestClass<VarianceMxNFunc> AvxMseTest;
+typedef MainTestClass<VarianceMxNFunc> AvxVarianceTest;
+typedef SubpelVarianceTest<SubpixVarMxNFunc> AvxSubpelVarianceTest;
+typedef SubpelVarianceTest<SubpixAvgVarMxNFunc> AvxSubpelAvgVarianceTest;
 
-TEST_P(VpxSseTest, RefSse) { RefTestSse(); }
-TEST_P(VpxSseTest, MaxSse) { MaxTestSse(); }
-TEST_P(VpxMseTest, RefMse) { RefTestMse(); }
-TEST_P(VpxMseTest, MaxMse) { MaxTestMse(); }
-TEST_P(VpxVarianceTest, Zero) { ZeroTest(); }
-TEST_P(VpxVarianceTest, Ref) { RefTest(); }
-TEST_P(VpxVarianceTest, RefStride) { RefStrideTest(); }
-TEST_P(VpxVarianceTest, OneQuarter) { OneQuarterTest(); }
+TEST_P(AvxSseTest, RefSse) { RefTestSse(); }
+TEST_P(AvxSseTest, MaxSse) { MaxTestSse(); }
+TEST_P(AvxMseTest, RefMse) { RefTestMse(); }
+TEST_P(AvxMseTest, MaxMse) { MaxTestMse(); }
+TEST_P(AvxVarianceTest, Zero) { ZeroTest(); }
+TEST_P(AvxVarianceTest, Ref) { RefTest(); }
+TEST_P(AvxVarianceTest, RefStride) { RefStrideTest(); }
+TEST_P(AvxVarianceTest, OneQuarter) { OneQuarterTest(); }
 TEST_P(SumOfSquaresTest, Const) { ConstTest(); }
 TEST_P(SumOfSquaresTest, Ref) { RefTest(); }
-TEST_P(VpxSubpelVarianceTest, Ref) { RefTest(); }
-TEST_P(VpxSubpelVarianceTest, ExtremeRef) { ExtremeRefTest(); }
-TEST_P(VpxSubpelAvgVarianceTest, Ref) { RefTest(); }
+TEST_P(AvxSubpelVarianceTest, Ref) { RefTest(); }
+TEST_P(AvxSubpelVarianceTest, ExtremeRef) { ExtremeRefTest(); }
+TEST_P(AvxSubpelAvgVarianceTest, Ref) { RefTest(); }
 
 INSTANTIATE_TEST_CASE_P(C, SumOfSquaresTest,
-                        ::testing::Values(vpx_get_mb_ss_c));
+                        ::testing::Values(aom_get_mb_ss_c));
 
 typedef TestParams<Get4x4SseFunc> SseParams;
-INSTANTIATE_TEST_CASE_P(C, VpxSseTest,
+INSTANTIATE_TEST_CASE_P(C, AvxSseTest,
                         ::testing::Values(SseParams(2, 2,
-                                                    &vpx_get4x4sse_cs_c)));
+                                                    &aom_get4x4sse_cs_c)));
 
 typedef TestParams<VarianceMxNFunc> MseParams;
-INSTANTIATE_TEST_CASE_P(C, VpxMseTest,
-                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_c),
-                                          MseParams(4, 3, &vpx_mse16x8_c),
-                                          MseParams(3, 4, &vpx_mse8x16_c),
-                                          MseParams(3, 3, &vpx_mse8x8_c)));
+INSTANTIATE_TEST_CASE_P(C, AvxMseTest,
+                        ::testing::Values(MseParams(4, 4, &aom_mse16x16_c),
+                                          MseParams(4, 3, &aom_mse16x8_c),
+                                          MseParams(3, 4, &aom_mse8x16_c),
+                                          MseParams(3, 3, &aom_mse8x8_c)));
 
 typedef TestParams<VarianceMxNFunc> VarianceParams;
 INSTANTIATE_TEST_CASE_P(
-    C, VpxVarianceTest,
-    ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_c),
-                      VarianceParams(6, 5, &vpx_variance64x32_c),
-                      VarianceParams(5, 6, &vpx_variance32x64_c),
-                      VarianceParams(5, 5, &vpx_variance32x32_c),
-                      VarianceParams(5, 4, &vpx_variance32x16_c),
-                      VarianceParams(4, 5, &vpx_variance16x32_c),
-                      VarianceParams(4, 4, &vpx_variance16x16_c),
-                      VarianceParams(4, 3, &vpx_variance16x8_c),
-                      VarianceParams(3, 4, &vpx_variance8x16_c),
-                      VarianceParams(3, 3, &vpx_variance8x8_c),
-                      VarianceParams(3, 2, &vpx_variance8x4_c),
-                      VarianceParams(2, 3, &vpx_variance4x8_c),
-                      VarianceParams(2, 2, &vpx_variance4x4_c)));
+    C, AvxVarianceTest,
+    ::testing::Values(VarianceParams(6, 6, &aom_variance64x64_c),
+                      VarianceParams(6, 5, &aom_variance64x32_c),
+                      VarianceParams(5, 6, &aom_variance32x64_c),
+                      VarianceParams(5, 5, &aom_variance32x32_c),
+                      VarianceParams(5, 4, &aom_variance32x16_c),
+                      VarianceParams(4, 5, &aom_variance16x32_c),
+                      VarianceParams(4, 4, &aom_variance16x16_c),
+                      VarianceParams(4, 3, &aom_variance16x8_c),
+                      VarianceParams(3, 4, &aom_variance8x16_c),
+                      VarianceParams(3, 3, &aom_variance8x8_c),
+                      VarianceParams(3, 2, &aom_variance8x4_c),
+                      VarianceParams(2, 3, &aom_variance4x8_c),
+                      VarianceParams(2, 2, &aom_variance4x4_c)));
 
 INSTANTIATE_TEST_CASE_P(
-    C, VpxSubpelVarianceTest,
-    ::testing::Values(make_tuple(6, 6, &vpx_sub_pixel_variance64x64_c, 0),
-                      make_tuple(6, 5, &vpx_sub_pixel_variance64x32_c, 0),
-                      make_tuple(5, 6, &vpx_sub_pixel_variance32x64_c, 0),
-                      make_tuple(5, 5, &vpx_sub_pixel_variance32x32_c, 0),
-                      make_tuple(5, 4, &vpx_sub_pixel_variance32x16_c, 0),
-                      make_tuple(4, 5, &vpx_sub_pixel_variance16x32_c, 0),
-                      make_tuple(4, 4, &vpx_sub_pixel_variance16x16_c, 0),
-                      make_tuple(4, 3, &vpx_sub_pixel_variance16x8_c, 0),
-                      make_tuple(3, 4, &vpx_sub_pixel_variance8x16_c, 0),
-                      make_tuple(3, 3, &vpx_sub_pixel_variance8x8_c, 0),
-                      make_tuple(3, 2, &vpx_sub_pixel_variance8x4_c, 0),
-                      make_tuple(2, 3, &vpx_sub_pixel_variance4x8_c, 0),
-                      make_tuple(2, 2, &vpx_sub_pixel_variance4x4_c, 0)));
+    C, AvxSubpelVarianceTest,
+    ::testing::Values(make_tuple(6, 6, &aom_sub_pixel_variance64x64_c, 0),
+                      make_tuple(6, 5, &aom_sub_pixel_variance64x32_c, 0),
+                      make_tuple(5, 6, &aom_sub_pixel_variance32x64_c, 0),
+                      make_tuple(5, 5, &aom_sub_pixel_variance32x32_c, 0),
+                      make_tuple(5, 4, &aom_sub_pixel_variance32x16_c, 0),
+                      make_tuple(4, 5, &aom_sub_pixel_variance16x32_c, 0),
+                      make_tuple(4, 4, &aom_sub_pixel_variance16x16_c, 0),
+                      make_tuple(4, 3, &aom_sub_pixel_variance16x8_c, 0),
+                      make_tuple(3, 4, &aom_sub_pixel_variance8x16_c, 0),
+                      make_tuple(3, 3, &aom_sub_pixel_variance8x8_c, 0),
+                      make_tuple(3, 2, &aom_sub_pixel_variance8x4_c, 0),
+                      make_tuple(2, 3, &aom_sub_pixel_variance4x8_c, 0),
+                      make_tuple(2, 2, &aom_sub_pixel_variance4x4_c, 0)));
 
 INSTANTIATE_TEST_CASE_P(
-    C, VpxSubpelAvgVarianceTest,
-    ::testing::Values(make_tuple(6, 6, &vpx_sub_pixel_avg_variance64x64_c, 0),
-                      make_tuple(6, 5, &vpx_sub_pixel_avg_variance64x32_c, 0),
-                      make_tuple(5, 6, &vpx_sub_pixel_avg_variance32x64_c, 0),
-                      make_tuple(5, 5, &vpx_sub_pixel_avg_variance32x32_c, 0),
-                      make_tuple(5, 4, &vpx_sub_pixel_avg_variance32x16_c, 0),
-                      make_tuple(4, 5, &vpx_sub_pixel_avg_variance16x32_c, 0),
-                      make_tuple(4, 4, &vpx_sub_pixel_avg_variance16x16_c, 0),
-                      make_tuple(4, 3, &vpx_sub_pixel_avg_variance16x8_c, 0),
-                      make_tuple(3, 4, &vpx_sub_pixel_avg_variance8x16_c, 0),
-                      make_tuple(3, 3, &vpx_sub_pixel_avg_variance8x8_c, 0),
-                      make_tuple(3, 2, &vpx_sub_pixel_avg_variance8x4_c, 0),
-                      make_tuple(2, 3, &vpx_sub_pixel_avg_variance4x8_c, 0),
-                      make_tuple(2, 2, &vpx_sub_pixel_avg_variance4x4_c, 0)));
+    C, AvxSubpelAvgVarianceTest,
+    ::testing::Values(make_tuple(6, 6, &aom_sub_pixel_avg_variance64x64_c, 0),
+                      make_tuple(6, 5, &aom_sub_pixel_avg_variance64x32_c, 0),
+                      make_tuple(5, 6, &aom_sub_pixel_avg_variance32x64_c, 0),
+                      make_tuple(5, 5, &aom_sub_pixel_avg_variance32x32_c, 0),
+                      make_tuple(5, 4, &aom_sub_pixel_avg_variance32x16_c, 0),
+                      make_tuple(4, 5, &aom_sub_pixel_avg_variance16x32_c, 0),
+                      make_tuple(4, 4, &aom_sub_pixel_avg_variance16x16_c, 0),
+                      make_tuple(4, 3, &aom_sub_pixel_avg_variance16x8_c, 0),
+                      make_tuple(3, 4, &aom_sub_pixel_avg_variance8x16_c, 0),
+                      make_tuple(3, 3, &aom_sub_pixel_avg_variance8x8_c, 0),
+                      make_tuple(3, 2, &aom_sub_pixel_avg_variance8x4_c, 0),
+                      make_tuple(2, 3, &aom_sub_pixel_avg_variance4x8_c, 0),
+                      make_tuple(2, 2, &aom_sub_pixel_avg_variance4x4_c, 0)));
 
-#if CONFIG_VP9_HIGHBITDEPTH
-typedef MainTestClass<VarianceMxNFunc> VpxHBDMseTest;
-typedef MainTestClass<VarianceMxNFunc> VpxHBDVarianceTest;
-typedef SubpelVarianceTest<SubpixVarMxNFunc> VpxHBDSubpelVarianceTest;
-typedef SubpelVarianceTest<SubpixAvgVarMxNFunc> VpxHBDSubpelAvgVarianceTest;
+#if CONFIG_AOM_HIGHBITDEPTH
+typedef MainTestClass<VarianceMxNFunc> AvxHBDMseTest;
+typedef MainTestClass<VarianceMxNFunc> AvxHBDVarianceTest;
+typedef SubpelVarianceTest<SubpixVarMxNFunc> AvxHBDSubpelVarianceTest;
+typedef SubpelVarianceTest<SubpixAvgVarMxNFunc> AvxHBDSubpelAvgVarianceTest;
 
-TEST_P(VpxHBDMseTest, RefMse) { RefTestMse(); }
-TEST_P(VpxHBDMseTest, MaxMse) { MaxTestMse(); }
-TEST_P(VpxHBDVarianceTest, Zero) { ZeroTest(); }
-TEST_P(VpxHBDVarianceTest, Ref) { RefTest(); }
-TEST_P(VpxHBDVarianceTest, RefStride) { RefStrideTest(); }
-TEST_P(VpxHBDVarianceTest, OneQuarter) { OneQuarterTest(); }
-TEST_P(VpxHBDSubpelVarianceTest, Ref) { RefTest(); }
-TEST_P(VpxHBDSubpelVarianceTest, ExtremeRef) { ExtremeRefTest(); }
-TEST_P(VpxHBDSubpelAvgVarianceTest, Ref) { RefTest(); }
+TEST_P(AvxHBDMseTest, RefMse) { RefTestMse(); }
+TEST_P(AvxHBDMseTest, MaxMse) { MaxTestMse(); }
+TEST_P(AvxHBDVarianceTest, Zero) { ZeroTest(); }
+TEST_P(AvxHBDVarianceTest, Ref) { RefTest(); }
+TEST_P(AvxHBDVarianceTest, RefStride) { RefStrideTest(); }
+TEST_P(AvxHBDVarianceTest, OneQuarter) { OneQuarterTest(); }
+TEST_P(AvxHBDSubpelVarianceTest, Ref) { RefTest(); }
+TEST_P(AvxHBDSubpelVarianceTest, ExtremeRef) { ExtremeRefTest(); }
+TEST_P(AvxHBDSubpelAvgVarianceTest, Ref) { RefTest(); }
 
 /* TODO(debargha): This test does not support the highbd version
 INSTANTIATE_TEST_CASE_P(
-    C, VpxHBDMseTest,
-    ::testing::Values(make_tuple(4, 4, &vpx_highbd_12_mse16x16_c),
-                      make_tuple(4, 4, &vpx_highbd_12_mse16x8_c),
-                      make_tuple(4, 4, &vpx_highbd_12_mse8x16_c),
-                      make_tuple(4, 4, &vpx_highbd_12_mse8x8_c),
-                      make_tuple(4, 4, &vpx_highbd_10_mse16x16_c),
-                      make_tuple(4, 4, &vpx_highbd_10_mse16x8_c),
-                      make_tuple(4, 4, &vpx_highbd_10_mse8x16_c),
-                      make_tuple(4, 4, &vpx_highbd_10_mse8x8_c),
-                      make_tuple(4, 4, &vpx_highbd_8_mse16x16_c),
-                      make_tuple(4, 4, &vpx_highbd_8_mse16x8_c),
-                      make_tuple(4, 4, &vpx_highbd_8_mse8x16_c),
-                      make_tuple(4, 4, &vpx_highbd_8_mse8x8_c)));
+    C, AvxHBDMseTest,
+    ::testing::Values(make_tuple(4, 4, &aom_highbd_12_mse16x16_c),
+                      make_tuple(4, 4, &aom_highbd_12_mse16x8_c),
+                      make_tuple(4, 4, &aom_highbd_12_mse8x16_c),
+                      make_tuple(4, 4, &aom_highbd_12_mse8x8_c),
+                      make_tuple(4, 4, &aom_highbd_10_mse16x16_c),
+                      make_tuple(4, 4, &aom_highbd_10_mse16x8_c),
+                      make_tuple(4, 4, &aom_highbd_10_mse8x16_c),
+                      make_tuple(4, 4, &aom_highbd_10_mse8x8_c),
+                      make_tuple(4, 4, &aom_highbd_8_mse16x16_c),
+                      make_tuple(4, 4, &aom_highbd_8_mse16x8_c),
+                      make_tuple(4, 4, &aom_highbd_8_mse8x16_c),
+                      make_tuple(4, 4, &aom_highbd_8_mse8x8_c)));
 */
 
 const VarianceParams kArrayHBDVariance_c[] = {
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-  VarianceParams(7, 7, &vpx_highbd_12_variance128x128_c, 12),
-  VarianceParams(7, 6, &vpx_highbd_12_variance128x64_c, 12),
-  VarianceParams(6, 7, &vpx_highbd_12_variance64x128_c, 12),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-  VarianceParams(6, 6, &vpx_highbd_12_variance64x64_c, 12),
-  VarianceParams(6, 5, &vpx_highbd_12_variance64x32_c, 12),
-  VarianceParams(5, 6, &vpx_highbd_12_variance32x64_c, 12),
-  VarianceParams(5, 5, &vpx_highbd_12_variance32x32_c, 12),
-  VarianceParams(5, 4, &vpx_highbd_12_variance32x16_c, 12),
-  VarianceParams(4, 5, &vpx_highbd_12_variance16x32_c, 12),
-  VarianceParams(4, 4, &vpx_highbd_12_variance16x16_c, 12),
-  VarianceParams(4, 3, &vpx_highbd_12_variance16x8_c, 12),
-  VarianceParams(3, 4, &vpx_highbd_12_variance8x16_c, 12),
-  VarianceParams(3, 3, &vpx_highbd_12_variance8x8_c, 12),
-  VarianceParams(3, 2, &vpx_highbd_12_variance8x4_c, 12),
-  VarianceParams(2, 3, &vpx_highbd_12_variance4x8_c, 12),
-  VarianceParams(2, 2, &vpx_highbd_12_variance4x4_c, 12),
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-  VarianceParams(7, 7, &vpx_highbd_10_variance128x128_c, 10),
-  VarianceParams(7, 6, &vpx_highbd_10_variance128x64_c, 10),
-  VarianceParams(6, 7, &vpx_highbd_10_variance64x128_c, 10),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-  VarianceParams(6, 6, &vpx_highbd_10_variance64x64_c, 10),
-  VarianceParams(6, 5, &vpx_highbd_10_variance64x32_c, 10),
-  VarianceParams(5, 6, &vpx_highbd_10_variance32x64_c, 10),
-  VarianceParams(5, 5, &vpx_highbd_10_variance32x32_c, 10),
-  VarianceParams(5, 4, &vpx_highbd_10_variance32x16_c, 10),
-  VarianceParams(4, 5, &vpx_highbd_10_variance16x32_c, 10),
-  VarianceParams(4, 4, &vpx_highbd_10_variance16x16_c, 10),
-  VarianceParams(4, 3, &vpx_highbd_10_variance16x8_c, 10),
-  VarianceParams(3, 4, &vpx_highbd_10_variance8x16_c, 10),
-  VarianceParams(3, 3, &vpx_highbd_10_variance8x8_c, 10),
-  VarianceParams(3, 2, &vpx_highbd_10_variance8x4_c, 10),
-  VarianceParams(2, 3, &vpx_highbd_10_variance4x8_c, 10),
-  VarianceParams(2, 2, &vpx_highbd_10_variance4x4_c, 10),
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-  VarianceParams(7, 7, &vpx_highbd_8_variance128x128_c, 8),
-  VarianceParams(7, 6, &vpx_highbd_8_variance128x64_c, 8),
-  VarianceParams(6, 7, &vpx_highbd_8_variance64x128_c, 8),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-  VarianceParams(6, 6, &vpx_highbd_8_variance64x64_c, 8),
-  VarianceParams(6, 5, &vpx_highbd_8_variance64x32_c, 8),
-  VarianceParams(5, 6, &vpx_highbd_8_variance32x64_c, 8),
-  VarianceParams(5, 5, &vpx_highbd_8_variance32x32_c, 8),
-  VarianceParams(5, 4, &vpx_highbd_8_variance32x16_c, 8),
-  VarianceParams(4, 5, &vpx_highbd_8_variance16x32_c, 8),
-  VarianceParams(4, 4, &vpx_highbd_8_variance16x16_c, 8),
-  VarianceParams(4, 3, &vpx_highbd_8_variance16x8_c, 8),
-  VarianceParams(3, 4, &vpx_highbd_8_variance8x16_c, 8),
-  VarianceParams(3, 3, &vpx_highbd_8_variance8x8_c, 8),
-  VarianceParams(3, 2, &vpx_highbd_8_variance8x4_c, 8),
-  VarianceParams(2, 3, &vpx_highbd_8_variance4x8_c, 8),
-  VarianceParams(2, 2, &vpx_highbd_8_variance4x4_c, 8)
+#if CONFIG_AV1 && CONFIG_EXT_PARTITION
+  VarianceParams(7, 7, &aom_highbd_12_variance128x128_c, 12),
+  VarianceParams(7, 6, &aom_highbd_12_variance128x64_c, 12),
+  VarianceParams(6, 7, &aom_highbd_12_variance64x128_c, 12),
+#endif  // CONFIG_AV1 && CONFIG_EXT_PARTITION
+  VarianceParams(6, 6, &aom_highbd_12_variance64x64_c, 12),
+  VarianceParams(6, 5, &aom_highbd_12_variance64x32_c, 12),
+  VarianceParams(5, 6, &aom_highbd_12_variance32x64_c, 12),
+  VarianceParams(5, 5, &aom_highbd_12_variance32x32_c, 12),
+  VarianceParams(5, 4, &aom_highbd_12_variance32x16_c, 12),
+  VarianceParams(4, 5, &aom_highbd_12_variance16x32_c, 12),
+  VarianceParams(4, 4, &aom_highbd_12_variance16x16_c, 12),
+  VarianceParams(4, 3, &aom_highbd_12_variance16x8_c, 12),
+  VarianceParams(3, 4, &aom_highbd_12_variance8x16_c, 12),
+  VarianceParams(3, 3, &aom_highbd_12_variance8x8_c, 12),
+  VarianceParams(3, 2, &aom_highbd_12_variance8x4_c, 12),
+  VarianceParams(2, 3, &aom_highbd_12_variance4x8_c, 12),
+  VarianceParams(2, 2, &aom_highbd_12_variance4x4_c, 12),
+#if CONFIG_AV1 && CONFIG_EXT_PARTITION
+  VarianceParams(7, 7, &aom_highbd_10_variance128x128_c, 10),
+  VarianceParams(7, 6, &aom_highbd_10_variance128x64_c, 10),
+  VarianceParams(6, 7, &aom_highbd_10_variance64x128_c, 10),
+#endif  // CONFIG_AV1 && CONFIG_EXT_PARTITION
+  VarianceParams(6, 6, &aom_highbd_10_variance64x64_c, 10),
+  VarianceParams(6, 5, &aom_highbd_10_variance64x32_c, 10),
+  VarianceParams(5, 6, &aom_highbd_10_variance32x64_c, 10),
+  VarianceParams(5, 5, &aom_highbd_10_variance32x32_c, 10),
+  VarianceParams(5, 4, &aom_highbd_10_variance32x16_c, 10),
+  VarianceParams(4, 5, &aom_highbd_10_variance16x32_c, 10),
+  VarianceParams(4, 4, &aom_highbd_10_variance16x16_c, 10),
+  VarianceParams(4, 3, &aom_highbd_10_variance16x8_c, 10),
+  VarianceParams(3, 4, &aom_highbd_10_variance8x16_c, 10),
+  VarianceParams(3, 3, &aom_highbd_10_variance8x8_c, 10),
+  VarianceParams(3, 2, &aom_highbd_10_variance8x4_c, 10),
+  VarianceParams(2, 3, &aom_highbd_10_variance4x8_c, 10),
+  VarianceParams(2, 2, &aom_highbd_10_variance4x4_c, 10),
+#if CONFIG_AV1 && CONFIG_EXT_PARTITION
+  VarianceParams(7, 7, &aom_highbd_8_variance128x128_c, 8),
+  VarianceParams(7, 6, &aom_highbd_8_variance128x64_c, 8),
+  VarianceParams(6, 7, &aom_highbd_8_variance64x128_c, 8),
+#endif  // CONFIG_AV1 && CONFIG_EXT_PARTITION
+  VarianceParams(6, 6, &aom_highbd_8_variance64x64_c, 8),
+  VarianceParams(6, 5, &aom_highbd_8_variance64x32_c, 8),
+  VarianceParams(5, 6, &aom_highbd_8_variance32x64_c, 8),
+  VarianceParams(5, 5, &aom_highbd_8_variance32x32_c, 8),
+  VarianceParams(5, 4, &aom_highbd_8_variance32x16_c, 8),
+  VarianceParams(4, 5, &aom_highbd_8_variance16x32_c, 8),
+  VarianceParams(4, 4, &aom_highbd_8_variance16x16_c, 8),
+  VarianceParams(4, 3, &aom_highbd_8_variance16x8_c, 8),
+  VarianceParams(3, 4, &aom_highbd_8_variance8x16_c, 8),
+  VarianceParams(3, 3, &aom_highbd_8_variance8x8_c, 8),
+  VarianceParams(3, 2, &aom_highbd_8_variance8x4_c, 8),
+  VarianceParams(2, 3, &aom_highbd_8_variance4x8_c, 8),
+  VarianceParams(2, 2, &aom_highbd_8_variance4x4_c, 8)
 };
-INSTANTIATE_TEST_CASE_P(C, VpxHBDVarianceTest,
+INSTANTIATE_TEST_CASE_P(C, AvxHBDVarianceTest,
                         ::testing::ValuesIn(kArrayHBDVariance_c));
 
-#if HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
+#if HAVE_SSE4_1 && CONFIG_AOM_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
-    SSE4_1, VpxHBDVarianceTest,
+    SSE4_1, AvxHBDVarianceTest,
     ::testing::Values(
-        VarianceParams(2, 2, &vpx_highbd_8_variance4x4_sse4_1, 8),
-        VarianceParams(2, 2, &vpx_highbd_10_variance4x4_sse4_1, 10),
-        VarianceParams(2, 2, &vpx_highbd_12_variance4x4_sse4_1, 12)));
-#endif  // HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
+        VarianceParams(2, 2, &aom_highbd_8_variance4x4_sse4_1, 8),
+        VarianceParams(2, 2, &aom_highbd_10_variance4x4_sse4_1, 10),
+        VarianceParams(2, 2, &aom_highbd_12_variance4x4_sse4_1, 12)));
+#endif  // HAVE_SSE4_1 && CONFIG_AOM_HIGHBITDEPTH
 
-const VpxHBDSubpelVarianceTest::ParamType kArrayHBDSubpelVariance_c[] = {
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-  make_tuple(7, 7, &vpx_highbd_8_sub_pixel_variance128x128_c, 8),
-  make_tuple(7, 6, &vpx_highbd_8_sub_pixel_variance128x64_c, 8),
-  make_tuple(6, 7, &vpx_highbd_8_sub_pixel_variance64x128_c, 8),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-  make_tuple(6, 6, &vpx_highbd_8_sub_pixel_variance64x64_c, 8),
-  make_tuple(6, 5, &vpx_highbd_8_sub_pixel_variance64x32_c, 8),
-  make_tuple(5, 6, &vpx_highbd_8_sub_pixel_variance32x64_c, 8),
-  make_tuple(5, 5, &vpx_highbd_8_sub_pixel_variance32x32_c, 8),
-  make_tuple(5, 4, &vpx_highbd_8_sub_pixel_variance32x16_c, 8),
-  make_tuple(4, 5, &vpx_highbd_8_sub_pixel_variance16x32_c, 8),
-  make_tuple(4, 4, &vpx_highbd_8_sub_pixel_variance16x16_c, 8),
-  make_tuple(4, 3, &vpx_highbd_8_sub_pixel_variance16x8_c, 8),
-  make_tuple(3, 4, &vpx_highbd_8_sub_pixel_variance8x16_c, 8),
-  make_tuple(3, 3, &vpx_highbd_8_sub_pixel_variance8x8_c, 8),
-  make_tuple(3, 2, &vpx_highbd_8_sub_pixel_variance8x4_c, 8),
-  make_tuple(2, 3, &vpx_highbd_8_sub_pixel_variance4x8_c, 8),
-  make_tuple(2, 2, &vpx_highbd_8_sub_pixel_variance4x4_c, 8),
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-  make_tuple(7, 7, &vpx_highbd_10_sub_pixel_variance128x128_c, 10),
-  make_tuple(7, 6, &vpx_highbd_10_sub_pixel_variance128x64_c, 10),
-  make_tuple(6, 7, &vpx_highbd_10_sub_pixel_variance64x128_c, 10),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-  make_tuple(6, 6, &vpx_highbd_10_sub_pixel_variance64x64_c, 10),
-  make_tuple(6, 5, &vpx_highbd_10_sub_pixel_variance64x32_c, 10),
-  make_tuple(5, 6, &vpx_highbd_10_sub_pixel_variance32x64_c, 10),
-  make_tuple(5, 5, &vpx_highbd_10_sub_pixel_variance32x32_c, 10),
-  make_tuple(5, 4, &vpx_highbd_10_sub_pixel_variance32x16_c, 10),
-  make_tuple(4, 5, &vpx_highbd_10_sub_pixel_variance16x32_c, 10),
-  make_tuple(4, 4, &vpx_highbd_10_sub_pixel_variance16x16_c, 10),
-  make_tuple(4, 3, &vpx_highbd_10_sub_pixel_variance16x8_c, 10),
-  make_tuple(3, 4, &vpx_highbd_10_sub_pixel_variance8x16_c, 10),
-  make_tuple(3, 3, &vpx_highbd_10_sub_pixel_variance8x8_c, 10),
-  make_tuple(3, 2, &vpx_highbd_10_sub_pixel_variance8x4_c, 10),
-  make_tuple(2, 3, &vpx_highbd_10_sub_pixel_variance4x8_c, 10),
-  make_tuple(2, 2, &vpx_highbd_10_sub_pixel_variance4x4_c, 10),
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-  make_tuple(7, 7, &vpx_highbd_12_sub_pixel_variance128x128_c, 12),
-  make_tuple(7, 6, &vpx_highbd_12_sub_pixel_variance128x64_c, 12),
-  make_tuple(6, 7, &vpx_highbd_12_sub_pixel_variance64x128_c, 12),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-  make_tuple(6, 6, &vpx_highbd_12_sub_pixel_variance64x64_c, 12),
-  make_tuple(6, 5, &vpx_highbd_12_sub_pixel_variance64x32_c, 12),
-  make_tuple(5, 6, &vpx_highbd_12_sub_pixel_variance32x64_c, 12),
-  make_tuple(5, 5, &vpx_highbd_12_sub_pixel_variance32x32_c, 12),
-  make_tuple(5, 4, &vpx_highbd_12_sub_pixel_variance32x16_c, 12),
-  make_tuple(4, 5, &vpx_highbd_12_sub_pixel_variance16x32_c, 12),
-  make_tuple(4, 4, &vpx_highbd_12_sub_pixel_variance16x16_c, 12),
-  make_tuple(4, 3, &vpx_highbd_12_sub_pixel_variance16x8_c, 12),
-  make_tuple(3, 4, &vpx_highbd_12_sub_pixel_variance8x16_c, 12),
-  make_tuple(3, 3, &vpx_highbd_12_sub_pixel_variance8x8_c, 12),
-  make_tuple(3, 2, &vpx_highbd_12_sub_pixel_variance8x4_c, 12),
-  make_tuple(2, 3, &vpx_highbd_12_sub_pixel_variance4x8_c, 12),
-  make_tuple(2, 2, &vpx_highbd_12_sub_pixel_variance4x4_c, 12),
+const AvxHBDSubpelVarianceTest::ParamType kArrayHBDSubpelVariance_c[] = {
+#if CONFIG_AV1 && CONFIG_EXT_PARTITION
+  make_tuple(7, 7, &aom_highbd_8_sub_pixel_variance128x128_c, 8),
+  make_tuple(7, 6, &aom_highbd_8_sub_pixel_variance128x64_c, 8),
+  make_tuple(6, 7, &aom_highbd_8_sub_pixel_variance64x128_c, 8),
+#endif  // CONFIG_AV1 && CONFIG_EXT_PARTITION
+  make_tuple(6, 6, &aom_highbd_8_sub_pixel_variance64x64_c, 8),
+  make_tuple(6, 5, &aom_highbd_8_sub_pixel_variance64x32_c, 8),
+  make_tuple(5, 6, &aom_highbd_8_sub_pixel_variance32x64_c, 8),
+  make_tuple(5, 5, &aom_highbd_8_sub_pixel_variance32x32_c, 8),
+  make_tuple(5, 4, &aom_highbd_8_sub_pixel_variance32x16_c, 8),
+  make_tuple(4, 5, &aom_highbd_8_sub_pixel_variance16x32_c, 8),
+  make_tuple(4, 4, &aom_highbd_8_sub_pixel_variance16x16_c, 8),
+  make_tuple(4, 3, &aom_highbd_8_sub_pixel_variance16x8_c, 8),
+  make_tuple(3, 4, &aom_highbd_8_sub_pixel_variance8x16_c, 8),
+  make_tuple(3, 3, &aom_highbd_8_sub_pixel_variance8x8_c, 8),
+  make_tuple(3, 2, &aom_highbd_8_sub_pixel_variance8x4_c, 8),
+  make_tuple(2, 3, &aom_highbd_8_sub_pixel_variance4x8_c, 8),
+  make_tuple(2, 2, &aom_highbd_8_sub_pixel_variance4x4_c, 8),
+#if CONFIG_AV1 && CONFIG_EXT_PARTITION
+  make_tuple(7, 7, &aom_highbd_10_sub_pixel_variance128x128_c, 10),
+  make_tuple(7, 6, &aom_highbd_10_sub_pixel_variance128x64_c, 10),
+  make_tuple(6, 7, &aom_highbd_10_sub_pixel_variance64x128_c, 10),
+#endif  // CONFIG_AV1 && CONFIG_EXT_PARTITION
+  make_tuple(6, 6, &aom_highbd_10_sub_pixel_variance64x64_c, 10),
+  make_tuple(6, 5, &aom_highbd_10_sub_pixel_variance64x32_c, 10),
+  make_tuple(5, 6, &aom_highbd_10_sub_pixel_variance32x64_c, 10),
+  make_tuple(5, 5, &aom_highbd_10_sub_pixel_variance32x32_c, 10),
+  make_tuple(5, 4, &aom_highbd_10_sub_pixel_variance32x16_c, 10),
+  make_tuple(4, 5, &aom_highbd_10_sub_pixel_variance16x32_c, 10),
+  make_tuple(4, 4, &aom_highbd_10_sub_pixel_variance16x16_c, 10),
+  make_tuple(4, 3, &aom_highbd_10_sub_pixel_variance16x8_c, 10),
+  make_tuple(3, 4, &aom_highbd_10_sub_pixel_variance8x16_c, 10),
+  make_tuple(3, 3, &aom_highbd_10_sub_pixel_variance8x8_c, 10),
+  make_tuple(3, 2, &aom_highbd_10_sub_pixel_variance8x4_c, 10),
+  make_tuple(2, 3, &aom_highbd_10_sub_pixel_variance4x8_c, 10),
+  make_tuple(2, 2, &aom_highbd_10_sub_pixel_variance4x4_c, 10),
+#if CONFIG_AV1 && CONFIG_EXT_PARTITION
+  make_tuple(7, 7, &aom_highbd_12_sub_pixel_variance128x128_c, 12),
+  make_tuple(7, 6, &aom_highbd_12_sub_pixel_variance128x64_c, 12),
+  make_tuple(6, 7, &aom_highbd_12_sub_pixel_variance64x128_c, 12),
+#endif  // CONFIG_AV1 && CONFIG_EXT_PARTITION
+  make_tuple(6, 6, &aom_highbd_12_sub_pixel_variance64x64_c, 12),
+  make_tuple(6, 5, &aom_highbd_12_sub_pixel_variance64x32_c, 12),
+  make_tuple(5, 6, &aom_highbd_12_sub_pixel_variance32x64_c, 12),
+  make_tuple(5, 5, &aom_highbd_12_sub_pixel_variance32x32_c, 12),
+  make_tuple(5, 4, &aom_highbd_12_sub_pixel_variance32x16_c, 12),
+  make_tuple(4, 5, &aom_highbd_12_sub_pixel_variance16x32_c, 12),
+  make_tuple(4, 4, &aom_highbd_12_sub_pixel_variance16x16_c, 12),
+  make_tuple(4, 3, &aom_highbd_12_sub_pixel_variance16x8_c, 12),
+  make_tuple(3, 4, &aom_highbd_12_sub_pixel_variance8x16_c, 12),
+  make_tuple(3, 3, &aom_highbd_12_sub_pixel_variance8x8_c, 12),
+  make_tuple(3, 2, &aom_highbd_12_sub_pixel_variance8x4_c, 12),
+  make_tuple(2, 3, &aom_highbd_12_sub_pixel_variance4x8_c, 12),
+  make_tuple(2, 2, &aom_highbd_12_sub_pixel_variance4x4_c, 12),
 };
-INSTANTIATE_TEST_CASE_P(C, VpxHBDSubpelVarianceTest,
+INSTANTIATE_TEST_CASE_P(C, AvxHBDSubpelVarianceTest,
                         ::testing::ValuesIn(kArrayHBDSubpelVariance_c));
 
-const VpxHBDSubpelAvgVarianceTest::ParamType kArrayHBDSubpelAvgVariance_c[] = {
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-  make_tuple(7, 7, &vpx_highbd_8_sub_pixel_avg_variance128x128_c, 8),
-  make_tuple(7, 6, &vpx_highbd_8_sub_pixel_avg_variance128x64_c, 8),
-  make_tuple(6, 7, &vpx_highbd_8_sub_pixel_avg_variance64x128_c, 8),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-  make_tuple(6, 6, &vpx_highbd_8_sub_pixel_avg_variance64x64_c, 8),
-  make_tuple(6, 5, &vpx_highbd_8_sub_pixel_avg_variance64x32_c, 8),
-  make_tuple(5, 6, &vpx_highbd_8_sub_pixel_avg_variance32x64_c, 8),
-  make_tuple(5, 5, &vpx_highbd_8_sub_pixel_avg_variance32x32_c, 8),
-  make_tuple(5, 4, &vpx_highbd_8_sub_pixel_avg_variance32x16_c, 8),
-  make_tuple(4, 5, &vpx_highbd_8_sub_pixel_avg_variance16x32_c, 8),
-  make_tuple(4, 4, &vpx_highbd_8_sub_pixel_avg_variance16x16_c, 8),
-  make_tuple(4, 3, &vpx_highbd_8_sub_pixel_avg_variance16x8_c, 8),
-  make_tuple(3, 4, &vpx_highbd_8_sub_pixel_avg_variance8x16_c, 8),
-  make_tuple(3, 3, &vpx_highbd_8_sub_pixel_avg_variance8x8_c, 8),
-  make_tuple(3, 2, &vpx_highbd_8_sub_pixel_avg_variance8x4_c, 8),
-  make_tuple(2, 3, &vpx_highbd_8_sub_pixel_avg_variance4x8_c, 8),
-  make_tuple(2, 2, &vpx_highbd_8_sub_pixel_avg_variance4x4_c, 8),
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-  make_tuple(7, 7, &vpx_highbd_10_sub_pixel_avg_variance128x128_c, 10),
-  make_tuple(7, 6, &vpx_highbd_10_sub_pixel_avg_variance128x64_c, 10),
-  make_tuple(6, 7, &vpx_highbd_10_sub_pixel_avg_variance64x128_c, 10),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-  make_tuple(6, 6, &vpx_highbd_10_sub_pixel_avg_variance64x64_c, 10),
-  make_tuple(6, 5, &vpx_highbd_10_sub_pixel_avg_variance64x32_c, 10),
-  make_tuple(5, 6, &vpx_highbd_10_sub_pixel_avg_variance32x64_c, 10),
-  make_tuple(5, 5, &vpx_highbd_10_sub_pixel_avg_variance32x32_c, 10),
-  make_tuple(5, 4, &vpx_highbd_10_sub_pixel_avg_variance32x16_c, 10),
-  make_tuple(4, 5, &vpx_highbd_10_sub_pixel_avg_variance16x32_c, 10),
-  make_tuple(4, 4, &vpx_highbd_10_sub_pixel_avg_variance16x16_c, 10),
-  make_tuple(4, 3, &vpx_highbd_10_sub_pixel_avg_variance16x8_c, 10),
-  make_tuple(3, 4, &vpx_highbd_10_sub_pixel_avg_variance8x16_c, 10),
-  make_tuple(3, 3, &vpx_highbd_10_sub_pixel_avg_variance8x8_c, 10),
-  make_tuple(3, 2, &vpx_highbd_10_sub_pixel_avg_variance8x4_c, 10),
-  make_tuple(2, 3, &vpx_highbd_10_sub_pixel_avg_variance4x8_c, 10),
-  make_tuple(2, 2, &vpx_highbd_10_sub_pixel_avg_variance4x4_c, 10),
-#if CONFIG_VP10 && CONFIG_EXT_PARTITION
-  make_tuple(7, 7, &vpx_highbd_12_sub_pixel_avg_variance128x128_c, 12),
-  make_tuple(7, 6, &vpx_highbd_12_sub_pixel_avg_variance128x64_c, 12),
-  make_tuple(6, 7, &vpx_highbd_12_sub_pixel_avg_variance64x128_c, 12),
-#endif  // CONFIG_VP10 && CONFIG_EXT_PARTITION
-  make_tuple(6, 6, &vpx_highbd_12_sub_pixel_avg_variance64x64_c, 12),
-  make_tuple(6, 5, &vpx_highbd_12_sub_pixel_avg_variance64x32_c, 12),
-  make_tuple(5, 6, &vpx_highbd_12_sub_pixel_avg_variance32x64_c, 12),
-  make_tuple(5, 5, &vpx_highbd_12_sub_pixel_avg_variance32x32_c, 12),
-  make_tuple(5, 4, &vpx_highbd_12_sub_pixel_avg_variance32x16_c, 12),
-  make_tuple(4, 5, &vpx_highbd_12_sub_pixel_avg_variance16x32_c, 12),
-  make_tuple(4, 4, &vpx_highbd_12_sub_pixel_avg_variance16x16_c, 12),
-  make_tuple(4, 3, &vpx_highbd_12_sub_pixel_avg_variance16x8_c, 12),
-  make_tuple(3, 4, &vpx_highbd_12_sub_pixel_avg_variance8x16_c, 12),
-  make_tuple(3, 3, &vpx_highbd_12_sub_pixel_avg_variance8x8_c, 12),
-  make_tuple(3, 2, &vpx_highbd_12_sub_pixel_avg_variance8x4_c, 12),
-  make_tuple(2, 3, &vpx_highbd_12_sub_pixel_avg_variance4x8_c, 12),
-  make_tuple(2, 2, &vpx_highbd_12_sub_pixel_avg_variance4x4_c, 12)
+const AvxHBDSubpelAvgVarianceTest::ParamType kArrayHBDSubpelAvgVariance_c[] = {
+#if CONFIG_AV1 && CONFIG_EXT_PARTITION
+  make_tuple(7, 7, &aom_highbd_8_sub_pixel_avg_variance128x128_c, 8),
+  make_tuple(7, 6, &aom_highbd_8_sub_pixel_avg_variance128x64_c, 8),
+  make_tuple(6, 7, &aom_highbd_8_sub_pixel_avg_variance64x128_c, 8),
+#endif  // CONFIG_AV1 && CONFIG_EXT_PARTITION
+  make_tuple(6, 6, &aom_highbd_8_sub_pixel_avg_variance64x64_c, 8),
+  make_tuple(6, 5, &aom_highbd_8_sub_pixel_avg_variance64x32_c, 8),
+  make_tuple(5, 6, &aom_highbd_8_sub_pixel_avg_variance32x64_c, 8),
+  make_tuple(5, 5, &aom_highbd_8_sub_pixel_avg_variance32x32_c, 8),
+  make_tuple(5, 4, &aom_highbd_8_sub_pixel_avg_variance32x16_c, 8),
+  make_tuple(4, 5, &aom_highbd_8_sub_pixel_avg_variance16x32_c, 8),
+  make_tuple(4, 4, &aom_highbd_8_sub_pixel_avg_variance16x16_c, 8),
+  make_tuple(4, 3, &aom_highbd_8_sub_pixel_avg_variance16x8_c, 8),
+  make_tuple(3, 4, &aom_highbd_8_sub_pixel_avg_variance8x16_c, 8),
+  make_tuple(3, 3, &aom_highbd_8_sub_pixel_avg_variance8x8_c, 8),
+  make_tuple(3, 2, &aom_highbd_8_sub_pixel_avg_variance8x4_c, 8),
+  make_tuple(2, 3, &aom_highbd_8_sub_pixel_avg_variance4x8_c, 8),
+  make_tuple(2, 2, &aom_highbd_8_sub_pixel_avg_variance4x4_c, 8),
+#if CONFIG_AV1 && CONFIG_EXT_PARTITION
+  make_tuple(7, 7, &aom_highbd_10_sub_pixel_avg_variance128x128_c, 10),
+  make_tuple(7, 6, &aom_highbd_10_sub_pixel_avg_variance128x64_c, 10),
+  make_tuple(6, 7, &aom_highbd_10_sub_pixel_avg_variance64x128_c, 10),
+#endif  // CONFIG_AV1 && CONFIG_EXT_PARTITION
+  make_tuple(6, 6, &aom_highbd_10_sub_pixel_avg_variance64x64_c, 10),
+  make_tuple(6, 5, &aom_highbd_10_sub_pixel_avg_variance64x32_c, 10),
+  make_tuple(5, 6, &aom_highbd_10_sub_pixel_avg_variance32x64_c, 10),
+  make_tuple(5, 5, &aom_highbd_10_sub_pixel_avg_variance32x32_c, 10),
+  make_tuple(5, 4, &aom_highbd_10_sub_pixel_avg_variance32x16_c, 10),
+  make_tuple(4, 5, &aom_highbd_10_sub_pixel_avg_variance16x32_c, 10),
+  make_tuple(4, 4, &aom_highbd_10_sub_pixel_avg_variance16x16_c, 10),
+  make_tuple(4, 3, &aom_highbd_10_sub_pixel_avg_variance16x8_c, 10),
+  make_tuple(3, 4, &aom_highbd_10_sub_pixel_avg_variance8x16_c, 10),
+  make_tuple(3, 3, &aom_highbd_10_sub_pixel_avg_variance8x8_c, 10),
+  make_tuple(3, 2, &aom_highbd_10_sub_pixel_avg_variance8x4_c, 10),
+  make_tuple(2, 3, &aom_highbd_10_sub_pixel_avg_variance4x8_c, 10),
+  make_tuple(2, 2, &aom_highbd_10_sub_pixel_avg_variance4x4_c, 10),
+#if CONFIG_AV1 && CONFIG_EXT_PARTITION
+  make_tuple(7, 7, &aom_highbd_12_sub_pixel_avg_variance128x128_c, 12),
+  make_tuple(7, 6, &aom_highbd_12_sub_pixel_avg_variance128x64_c, 12),
+  make_tuple(6, 7, &aom_highbd_12_sub_pixel_avg_variance64x128_c, 12),
+#endif  // CONFIG_AV1 && CONFIG_EXT_PARTITION
+  make_tuple(6, 6, &aom_highbd_12_sub_pixel_avg_variance64x64_c, 12),
+  make_tuple(6, 5, &aom_highbd_12_sub_pixel_avg_variance64x32_c, 12),
+  make_tuple(5, 6, &aom_highbd_12_sub_pixel_avg_variance32x64_c, 12),
+  make_tuple(5, 5, &aom_highbd_12_sub_pixel_avg_variance32x32_c, 12),
+  make_tuple(5, 4, &aom_highbd_12_sub_pixel_avg_variance32x16_c, 12),
+  make_tuple(4, 5, &aom_highbd_12_sub_pixel_avg_variance16x32_c, 12),
+  make_tuple(4, 4, &aom_highbd_12_sub_pixel_avg_variance16x16_c, 12),
+  make_tuple(4, 3, &aom_highbd_12_sub_pixel_avg_variance16x8_c, 12),
+  make_tuple(3, 4, &aom_highbd_12_sub_pixel_avg_variance8x16_c, 12),
+  make_tuple(3, 3, &aom_highbd_12_sub_pixel_avg_variance8x8_c, 12),
+  make_tuple(3, 2, &aom_highbd_12_sub_pixel_avg_variance8x4_c, 12),
+  make_tuple(2, 3, &aom_highbd_12_sub_pixel_avg_variance4x8_c, 12),
+  make_tuple(2, 2, &aom_highbd_12_sub_pixel_avg_variance4x4_c, 12)
 };
-INSTANTIATE_TEST_CASE_P(C, VpxHBDSubpelAvgVarianceTest,
+INSTANTIATE_TEST_CASE_P(C, AvxHBDSubpelAvgVarianceTest,
                         ::testing::ValuesIn(kArrayHBDSubpelAvgVariance_c));
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(SSE2, SumOfSquaresTest,
-                        ::testing::Values(vpx_get_mb_ss_sse2));
+                        ::testing::Values(aom_get_mb_ss_sse2));
 
-INSTANTIATE_TEST_CASE_P(SSE2, VpxMseTest,
-                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_sse2),
-                                          MseParams(4, 3, &vpx_mse16x8_sse2),
-                                          MseParams(3, 4, &vpx_mse8x16_sse2),
-                                          MseParams(3, 3, &vpx_mse8x8_sse2)));
-
-INSTANTIATE_TEST_CASE_P(
-    SSE2, VpxVarianceTest,
-    ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_sse2),
-                      VarianceParams(6, 5, &vpx_variance64x32_sse2),
-                      VarianceParams(5, 6, &vpx_variance32x64_sse2),
-                      VarianceParams(5, 5, &vpx_variance32x32_sse2),
-                      VarianceParams(5, 4, &vpx_variance32x16_sse2),
-                      VarianceParams(4, 5, &vpx_variance16x32_sse2),
-                      VarianceParams(4, 4, &vpx_variance16x16_sse2),
-                      VarianceParams(4, 3, &vpx_variance16x8_sse2),
-                      VarianceParams(3, 4, &vpx_variance8x16_sse2),
-                      VarianceParams(3, 3, &vpx_variance8x8_sse2),
-                      VarianceParams(3, 2, &vpx_variance8x4_sse2),
-                      VarianceParams(2, 3, &vpx_variance4x8_sse2),
-                      VarianceParams(2, 2, &vpx_variance4x4_sse2)));
+INSTANTIATE_TEST_CASE_P(SSE2, AvxMseTest,
+                        ::testing::Values(MseParams(4, 4, &aom_mse16x16_sse2),
+                                          MseParams(4, 3, &aom_mse16x8_sse2),
+                                          MseParams(3, 4, &aom_mse8x16_sse2),
+                                          MseParams(3, 3, &aom_mse8x8_sse2)));
 
 INSTANTIATE_TEST_CASE_P(
-    SSE2, VpxSubpelVarianceTest,
-    ::testing::Values(make_tuple(6, 6, &vpx_sub_pixel_variance64x64_sse2, 0),
-                      make_tuple(6, 5, &vpx_sub_pixel_variance64x32_sse2, 0),
-                      make_tuple(5, 6, &vpx_sub_pixel_variance32x64_sse2, 0),
-                      make_tuple(5, 5, &vpx_sub_pixel_variance32x32_sse2, 0),
-                      make_tuple(5, 4, &vpx_sub_pixel_variance32x16_sse2, 0),
-                      make_tuple(4, 5, &vpx_sub_pixel_variance16x32_sse2, 0),
-                      make_tuple(4, 4, &vpx_sub_pixel_variance16x16_sse2, 0),
-                      make_tuple(4, 3, &vpx_sub_pixel_variance16x8_sse2, 0),
-                      make_tuple(3, 4, &vpx_sub_pixel_variance8x16_sse2, 0),
-                      make_tuple(3, 3, &vpx_sub_pixel_variance8x8_sse2, 0),
-                      make_tuple(3, 2, &vpx_sub_pixel_variance8x4_sse2, 0),
-                      make_tuple(2, 3, &vpx_sub_pixel_variance4x8_sse2, 0),
-                      make_tuple(2, 2, &vpx_sub_pixel_variance4x4_sse2, 0)));
+    SSE2, AvxVarianceTest,
+    ::testing::Values(VarianceParams(6, 6, &aom_variance64x64_sse2),
+                      VarianceParams(6, 5, &aom_variance64x32_sse2),
+                      VarianceParams(5, 6, &aom_variance32x64_sse2),
+                      VarianceParams(5, 5, &aom_variance32x32_sse2),
+                      VarianceParams(5, 4, &aom_variance32x16_sse2),
+                      VarianceParams(4, 5, &aom_variance16x32_sse2),
+                      VarianceParams(4, 4, &aom_variance16x16_sse2),
+                      VarianceParams(4, 3, &aom_variance16x8_sse2),
+                      VarianceParams(3, 4, &aom_variance8x16_sse2),
+                      VarianceParams(3, 3, &aom_variance8x8_sse2),
+                      VarianceParams(3, 2, &aom_variance8x4_sse2),
+                      VarianceParams(2, 3, &aom_variance4x8_sse2),
+                      VarianceParams(2, 2, &aom_variance4x4_sse2)));
 
 INSTANTIATE_TEST_CASE_P(
-    SSE2, VpxSubpelAvgVarianceTest,
+    SSE2, AvxSubpelVarianceTest,
+    ::testing::Values(make_tuple(6, 6, &aom_sub_pixel_variance64x64_sse2, 0),
+                      make_tuple(6, 5, &aom_sub_pixel_variance64x32_sse2, 0),
+                      make_tuple(5, 6, &aom_sub_pixel_variance32x64_sse2, 0),
+                      make_tuple(5, 5, &aom_sub_pixel_variance32x32_sse2, 0),
+                      make_tuple(5, 4, &aom_sub_pixel_variance32x16_sse2, 0),
+                      make_tuple(4, 5, &aom_sub_pixel_variance16x32_sse2, 0),
+                      make_tuple(4, 4, &aom_sub_pixel_variance16x16_sse2, 0),
+                      make_tuple(4, 3, &aom_sub_pixel_variance16x8_sse2, 0),
+                      make_tuple(3, 4, &aom_sub_pixel_variance8x16_sse2, 0),
+                      make_tuple(3, 3, &aom_sub_pixel_variance8x8_sse2, 0),
+                      make_tuple(3, 2, &aom_sub_pixel_variance8x4_sse2, 0),
+                      make_tuple(2, 3, &aom_sub_pixel_variance4x8_sse2, 0),
+                      make_tuple(2, 2, &aom_sub_pixel_variance4x4_sse2, 0)));
+
+INSTANTIATE_TEST_CASE_P(
+    SSE2, AvxSubpelAvgVarianceTest,
     ::testing::Values(
-        make_tuple(6, 6, &vpx_sub_pixel_avg_variance64x64_sse2, 0),
-        make_tuple(6, 5, &vpx_sub_pixel_avg_variance64x32_sse2, 0),
-        make_tuple(5, 6, &vpx_sub_pixel_avg_variance32x64_sse2, 0),
-        make_tuple(5, 5, &vpx_sub_pixel_avg_variance32x32_sse2, 0),
-        make_tuple(5, 4, &vpx_sub_pixel_avg_variance32x16_sse2, 0),
-        make_tuple(4, 5, &vpx_sub_pixel_avg_variance16x32_sse2, 0),
-        make_tuple(4, 4, &vpx_sub_pixel_avg_variance16x16_sse2, 0),
-        make_tuple(4, 3, &vpx_sub_pixel_avg_variance16x8_sse2, 0),
-        make_tuple(3, 4, &vpx_sub_pixel_avg_variance8x16_sse2, 0),
-        make_tuple(3, 3, &vpx_sub_pixel_avg_variance8x8_sse2, 0),
-        make_tuple(3, 2, &vpx_sub_pixel_avg_variance8x4_sse2, 0),
-        make_tuple(2, 3, &vpx_sub_pixel_avg_variance4x8_sse2, 0),
-        make_tuple(2, 2, &vpx_sub_pixel_avg_variance4x4_sse2, 0)));
+        make_tuple(6, 6, &aom_sub_pixel_avg_variance64x64_sse2, 0),
+        make_tuple(6, 5, &aom_sub_pixel_avg_variance64x32_sse2, 0),
+        make_tuple(5, 6, &aom_sub_pixel_avg_variance32x64_sse2, 0),
+        make_tuple(5, 5, &aom_sub_pixel_avg_variance32x32_sse2, 0),
+        make_tuple(5, 4, &aom_sub_pixel_avg_variance32x16_sse2, 0),
+        make_tuple(4, 5, &aom_sub_pixel_avg_variance16x32_sse2, 0),
+        make_tuple(4, 4, &aom_sub_pixel_avg_variance16x16_sse2, 0),
+        make_tuple(4, 3, &aom_sub_pixel_avg_variance16x8_sse2, 0),
+        make_tuple(3, 4, &aom_sub_pixel_avg_variance8x16_sse2, 0),
+        make_tuple(3, 3, &aom_sub_pixel_avg_variance8x8_sse2, 0),
+        make_tuple(3, 2, &aom_sub_pixel_avg_variance8x4_sse2, 0),
+        make_tuple(2, 3, &aom_sub_pixel_avg_variance4x8_sse2, 0),
+        make_tuple(2, 2, &aom_sub_pixel_avg_variance4x4_sse2, 0)));
 
-#if HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
+#if HAVE_SSE4_1 && CONFIG_AOM_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
-    SSE4_1, VpxSubpelVarianceTest,
+    SSE4_1, AvxSubpelVarianceTest,
     ::testing::Values(
-        make_tuple(2, 2, &vpx_highbd_8_sub_pixel_variance4x4_sse4_1, 8),
-        make_tuple(2, 2, &vpx_highbd_10_sub_pixel_variance4x4_sse4_1, 10),
-        make_tuple(2, 2, &vpx_highbd_12_sub_pixel_variance4x4_sse4_1, 12)));
+        make_tuple(2, 2, &aom_highbd_8_sub_pixel_variance4x4_sse4_1, 8),
+        make_tuple(2, 2, &aom_highbd_10_sub_pixel_variance4x4_sse4_1, 10),
+        make_tuple(2, 2, &aom_highbd_12_sub_pixel_variance4x4_sse4_1, 12)));
 
 INSTANTIATE_TEST_CASE_P(
-    SSE4_1, VpxSubpelAvgVarianceTest,
+    SSE4_1, AvxSubpelAvgVarianceTest,
     ::testing::Values(
-        make_tuple(2, 2, &vpx_highbd_8_sub_pixel_avg_variance4x4_sse4_1, 8),
-        make_tuple(2, 2, &vpx_highbd_10_sub_pixel_avg_variance4x4_sse4_1, 10),
-        make_tuple(2, 2, &vpx_highbd_12_sub_pixel_avg_variance4x4_sse4_1, 12)));
-#endif  // HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
+        make_tuple(2, 2, &aom_highbd_8_sub_pixel_avg_variance4x4_sse4_1, 8),
+        make_tuple(2, 2, &aom_highbd_10_sub_pixel_avg_variance4x4_sse4_1, 10),
+        make_tuple(2, 2, &aom_highbd_12_sub_pixel_avg_variance4x4_sse4_1, 12)));
+#endif  // HAVE_SSE4_1 && CONFIG_AOM_HIGHBITDEPTH
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 /* TODO(debargha): This test does not support the highbd version
 INSTANTIATE_TEST_CASE_P(
-    SSE2, VpxHBDMseTest,
-    ::testing::Values(MseParams(4, 4, &vpx_highbd_12_mse16x16_sse2),
-                      MseParams(4, 3, &vpx_highbd_12_mse16x8_sse2),
-                      MseParams(3, 4, &vpx_highbd_12_mse8x16_sse2),
-                      MseParams(3, 3, &vpx_highbd_12_mse8x8_sse2),
-                      MseParams(4, 4, &vpx_highbd_10_mse16x16_sse2),
-                      MseParams(4, 3, &vpx_highbd_10_mse16x8_sse2),
-                      MseParams(3, 4, &vpx_highbd_10_mse8x16_sse2),
-                      MseParams(3, 3, &vpx_highbd_10_mse8x8_sse2),
-                      MseParams(4, 4, &vpx_highbd_8_mse16x16_sse2),
-                      MseParams(4, 3, &vpx_highbd_8_mse16x8_sse2),
-                      MseParams(3, 4, &vpx_highbd_8_mse8x16_sse2),
-                      MseParams(3, 3, &vpx_highbd_8_mse8x8_sse2)));
+    SSE2, AvxHBDMseTest,
+    ::testing::Values(MseParams(4, 4, &aom_highbd_12_mse16x16_sse2),
+                      MseParams(4, 3, &aom_highbd_12_mse16x8_sse2),
+                      MseParams(3, 4, &aom_highbd_12_mse8x16_sse2),
+                      MseParams(3, 3, &aom_highbd_12_mse8x8_sse2),
+                      MseParams(4, 4, &aom_highbd_10_mse16x16_sse2),
+                      MseParams(4, 3, &aom_highbd_10_mse16x8_sse2),
+                      MseParams(3, 4, &aom_highbd_10_mse8x16_sse2),
+                      MseParams(3, 3, &aom_highbd_10_mse8x8_sse2),
+                      MseParams(4, 4, &aom_highbd_8_mse16x16_sse2),
+                      MseParams(4, 3, &aom_highbd_8_mse16x8_sse2),
+                      MseParams(3, 4, &aom_highbd_8_mse8x16_sse2),
+                      MseParams(3, 3, &aom_highbd_8_mse8x8_sse2)));
 */
 
 INSTANTIATE_TEST_CASE_P(
-    SSE2, VpxHBDVarianceTest,
+    SSE2, AvxHBDVarianceTest,
     ::testing::Values(
-        VarianceParams(6, 6, &vpx_highbd_12_variance64x64_sse2, 12),
-        VarianceParams(6, 5, &vpx_highbd_12_variance64x32_sse2, 12),
-        VarianceParams(5, 6, &vpx_highbd_12_variance32x64_sse2, 12),
-        VarianceParams(5, 5, &vpx_highbd_12_variance32x32_sse2, 12),
-        VarianceParams(5, 4, &vpx_highbd_12_variance32x16_sse2, 12),
-        VarianceParams(4, 5, &vpx_highbd_12_variance16x32_sse2, 12),
-        VarianceParams(4, 4, &vpx_highbd_12_variance16x16_sse2, 12),
-        VarianceParams(4, 3, &vpx_highbd_12_variance16x8_sse2, 12),
-        VarianceParams(3, 4, &vpx_highbd_12_variance8x16_sse2, 12),
-        VarianceParams(3, 3, &vpx_highbd_12_variance8x8_sse2, 12),
-        VarianceParams(6, 6, &vpx_highbd_10_variance64x64_sse2, 10),
-        VarianceParams(6, 5, &vpx_highbd_10_variance64x32_sse2, 10),
-        VarianceParams(5, 6, &vpx_highbd_10_variance32x64_sse2, 10),
-        VarianceParams(5, 5, &vpx_highbd_10_variance32x32_sse2, 10),
-        VarianceParams(5, 4, &vpx_highbd_10_variance32x16_sse2, 10),
-        VarianceParams(4, 5, &vpx_highbd_10_variance16x32_sse2, 10),
-        VarianceParams(4, 4, &vpx_highbd_10_variance16x16_sse2, 10),
-        VarianceParams(4, 3, &vpx_highbd_10_variance16x8_sse2, 10),
-        VarianceParams(3, 4, &vpx_highbd_10_variance8x16_sse2, 10),
-        VarianceParams(3, 3, &vpx_highbd_10_variance8x8_sse2, 10),
-        VarianceParams(6, 6, &vpx_highbd_8_variance64x64_sse2, 8),
-        VarianceParams(6, 5, &vpx_highbd_8_variance64x32_sse2, 8),
-        VarianceParams(5, 6, &vpx_highbd_8_variance32x64_sse2, 8),
-        VarianceParams(5, 5, &vpx_highbd_8_variance32x32_sse2, 8),
-        VarianceParams(5, 4, &vpx_highbd_8_variance32x16_sse2, 8),
-        VarianceParams(4, 5, &vpx_highbd_8_variance16x32_sse2, 8),
-        VarianceParams(4, 4, &vpx_highbd_8_variance16x16_sse2, 8),
-        VarianceParams(4, 3, &vpx_highbd_8_variance16x8_sse2, 8),
-        VarianceParams(3, 4, &vpx_highbd_8_variance8x16_sse2, 8),
-        VarianceParams(3, 3, &vpx_highbd_8_variance8x8_sse2, 8)));
+        VarianceParams(6, 6, &aom_highbd_12_variance64x64_sse2, 12),
+        VarianceParams(6, 5, &aom_highbd_12_variance64x32_sse2, 12),
+        VarianceParams(5, 6, &aom_highbd_12_variance32x64_sse2, 12),
+        VarianceParams(5, 5, &aom_highbd_12_variance32x32_sse2, 12),
+        VarianceParams(5, 4, &aom_highbd_12_variance32x16_sse2, 12),
+        VarianceParams(4, 5, &aom_highbd_12_variance16x32_sse2, 12),
+        VarianceParams(4, 4, &aom_highbd_12_variance16x16_sse2, 12),
+        VarianceParams(4, 3, &aom_highbd_12_variance16x8_sse2, 12),
+        VarianceParams(3, 4, &aom_highbd_12_variance8x16_sse2, 12),
+        VarianceParams(3, 3, &aom_highbd_12_variance8x8_sse2, 12),
+        VarianceParams(6, 6, &aom_highbd_10_variance64x64_sse2, 10),
+        VarianceParams(6, 5, &aom_highbd_10_variance64x32_sse2, 10),
+        VarianceParams(5, 6, &aom_highbd_10_variance32x64_sse2, 10),
+        VarianceParams(5, 5, &aom_highbd_10_variance32x32_sse2, 10),
+        VarianceParams(5, 4, &aom_highbd_10_variance32x16_sse2, 10),
+        VarianceParams(4, 5, &aom_highbd_10_variance16x32_sse2, 10),
+        VarianceParams(4, 4, &aom_highbd_10_variance16x16_sse2, 10),
+        VarianceParams(4, 3, &aom_highbd_10_variance16x8_sse2, 10),
+        VarianceParams(3, 4, &aom_highbd_10_variance8x16_sse2, 10),
+        VarianceParams(3, 3, &aom_highbd_10_variance8x8_sse2, 10),
+        VarianceParams(6, 6, &aom_highbd_8_variance64x64_sse2, 8),
+        VarianceParams(6, 5, &aom_highbd_8_variance64x32_sse2, 8),
+        VarianceParams(5, 6, &aom_highbd_8_variance32x64_sse2, 8),
+        VarianceParams(5, 5, &aom_highbd_8_variance32x32_sse2, 8),
+        VarianceParams(5, 4, &aom_highbd_8_variance32x16_sse2, 8),
+        VarianceParams(4, 5, &aom_highbd_8_variance16x32_sse2, 8),
+        VarianceParams(4, 4, &aom_highbd_8_variance16x16_sse2, 8),
+        VarianceParams(4, 3, &aom_highbd_8_variance16x8_sse2, 8),
+        VarianceParams(3, 4, &aom_highbd_8_variance8x16_sse2, 8),
+        VarianceParams(3, 3, &aom_highbd_8_variance8x8_sse2, 8)));
 
 INSTANTIATE_TEST_CASE_P(
-    SSE2, VpxHBDSubpelVarianceTest,
+    SSE2, AvxHBDSubpelVarianceTest,
     ::testing::Values(
-        make_tuple(6, 6, &vpx_highbd_12_sub_pixel_variance64x64_sse2, 12),
-        make_tuple(6, 5, &vpx_highbd_12_sub_pixel_variance64x32_sse2, 12),
-        make_tuple(5, 6, &vpx_highbd_12_sub_pixel_variance32x64_sse2, 12),
-        make_tuple(5, 5, &vpx_highbd_12_sub_pixel_variance32x32_sse2, 12),
-        make_tuple(5, 4, &vpx_highbd_12_sub_pixel_variance32x16_sse2, 12),
-        make_tuple(4, 5, &vpx_highbd_12_sub_pixel_variance16x32_sse2, 12),
-        make_tuple(4, 4, &vpx_highbd_12_sub_pixel_variance16x16_sse2, 12),
-        make_tuple(4, 3, &vpx_highbd_12_sub_pixel_variance16x8_sse2, 12),
-        make_tuple(3, 4, &vpx_highbd_12_sub_pixel_variance8x16_sse2, 12),
-        make_tuple(3, 3, &vpx_highbd_12_sub_pixel_variance8x8_sse2, 12),
-        make_tuple(3, 2, &vpx_highbd_12_sub_pixel_variance8x4_sse2, 12),
-        make_tuple(6, 6, &vpx_highbd_10_sub_pixel_variance64x64_sse2, 10),
-        make_tuple(6, 5, &vpx_highbd_10_sub_pixel_variance64x32_sse2, 10),
-        make_tuple(5, 6, &vpx_highbd_10_sub_pixel_variance32x64_sse2, 10),
-        make_tuple(5, 5, &vpx_highbd_10_sub_pixel_variance32x32_sse2, 10),
-        make_tuple(5, 4, &vpx_highbd_10_sub_pixel_variance32x16_sse2, 10),
-        make_tuple(4, 5, &vpx_highbd_10_sub_pixel_variance16x32_sse2, 10),
-        make_tuple(4, 4, &vpx_highbd_10_sub_pixel_variance16x16_sse2, 10),
-        make_tuple(4, 3, &vpx_highbd_10_sub_pixel_variance16x8_sse2, 10),
-        make_tuple(3, 4, &vpx_highbd_10_sub_pixel_variance8x16_sse2, 10),
-        make_tuple(3, 3, &vpx_highbd_10_sub_pixel_variance8x8_sse2, 10),
-        make_tuple(3, 2, &vpx_highbd_10_sub_pixel_variance8x4_sse2, 10),
-        make_tuple(6, 6, &vpx_highbd_8_sub_pixel_variance64x64_sse2, 8),
-        make_tuple(6, 5, &vpx_highbd_8_sub_pixel_variance64x32_sse2, 8),
-        make_tuple(5, 6, &vpx_highbd_8_sub_pixel_variance32x64_sse2, 8),
-        make_tuple(5, 5, &vpx_highbd_8_sub_pixel_variance32x32_sse2, 8),
-        make_tuple(5, 4, &vpx_highbd_8_sub_pixel_variance32x16_sse2, 8),
-        make_tuple(4, 5, &vpx_highbd_8_sub_pixel_variance16x32_sse2, 8),
-        make_tuple(4, 4, &vpx_highbd_8_sub_pixel_variance16x16_sse2, 8),
-        make_tuple(4, 3, &vpx_highbd_8_sub_pixel_variance16x8_sse2, 8),
-        make_tuple(3, 4, &vpx_highbd_8_sub_pixel_variance8x16_sse2, 8),
-        make_tuple(3, 3, &vpx_highbd_8_sub_pixel_variance8x8_sse2, 8),
-        make_tuple(3, 2, &vpx_highbd_8_sub_pixel_variance8x4_sse2, 8)));
+        make_tuple(6, 6, &aom_highbd_12_sub_pixel_variance64x64_sse2, 12),
+        make_tuple(6, 5, &aom_highbd_12_sub_pixel_variance64x32_sse2, 12),
+        make_tuple(5, 6, &aom_highbd_12_sub_pixel_variance32x64_sse2, 12),
+        make_tuple(5, 5, &aom_highbd_12_sub_pixel_variance32x32_sse2, 12),
+        make_tuple(5, 4, &aom_highbd_12_sub_pixel_variance32x16_sse2, 12),
+        make_tuple(4, 5, &aom_highbd_12_sub_pixel_variance16x32_sse2, 12),
+        make_tuple(4, 4, &aom_highbd_12_sub_pixel_variance16x16_sse2, 12),
+        make_tuple(4, 3, &aom_highbd_12_sub_pixel_variance16x8_sse2, 12),
+        make_tuple(3, 4, &aom_highbd_12_sub_pixel_variance8x16_sse2, 12),
+        make_tuple(3, 3, &aom_highbd_12_sub_pixel_variance8x8_sse2, 12),
+        make_tuple(3, 2, &aom_highbd_12_sub_pixel_variance8x4_sse2, 12),
+        make_tuple(6, 6, &aom_highbd_10_sub_pixel_variance64x64_sse2, 10),
+        make_tuple(6, 5, &aom_highbd_10_sub_pixel_variance64x32_sse2, 10),
+        make_tuple(5, 6, &aom_highbd_10_sub_pixel_variance32x64_sse2, 10),
+        make_tuple(5, 5, &aom_highbd_10_sub_pixel_variance32x32_sse2, 10),
+        make_tuple(5, 4, &aom_highbd_10_sub_pixel_variance32x16_sse2, 10),
+        make_tuple(4, 5, &aom_highbd_10_sub_pixel_variance16x32_sse2, 10),
+        make_tuple(4, 4, &aom_highbd_10_sub_pixel_variance16x16_sse2, 10),
+        make_tuple(4, 3, &aom_highbd_10_sub_pixel_variance16x8_sse2, 10),
+        make_tuple(3, 4, &aom_highbd_10_sub_pixel_variance8x16_sse2, 10),
+        make_tuple(3, 3, &aom_highbd_10_sub_pixel_variance8x8_sse2, 10),
+        make_tuple(3, 2, &aom_highbd_10_sub_pixel_variance8x4_sse2, 10),
+        make_tuple(6, 6, &aom_highbd_8_sub_pixel_variance64x64_sse2, 8),
+        make_tuple(6, 5, &aom_highbd_8_sub_pixel_variance64x32_sse2, 8),
+        make_tuple(5, 6, &aom_highbd_8_sub_pixel_variance32x64_sse2, 8),
+        make_tuple(5, 5, &aom_highbd_8_sub_pixel_variance32x32_sse2, 8),
+        make_tuple(5, 4, &aom_highbd_8_sub_pixel_variance32x16_sse2, 8),
+        make_tuple(4, 5, &aom_highbd_8_sub_pixel_variance16x32_sse2, 8),
+        make_tuple(4, 4, &aom_highbd_8_sub_pixel_variance16x16_sse2, 8),
+        make_tuple(4, 3, &aom_highbd_8_sub_pixel_variance16x8_sse2, 8),
+        make_tuple(3, 4, &aom_highbd_8_sub_pixel_variance8x16_sse2, 8),
+        make_tuple(3, 3, &aom_highbd_8_sub_pixel_variance8x8_sse2, 8),
+        make_tuple(3, 2, &aom_highbd_8_sub_pixel_variance8x4_sse2, 8)));
 
 INSTANTIATE_TEST_CASE_P(
-    SSE2, VpxHBDSubpelAvgVarianceTest,
+    SSE2, AvxHBDSubpelAvgVarianceTest,
     ::testing::Values(
-        make_tuple(6, 6, &vpx_highbd_12_sub_pixel_avg_variance64x64_sse2, 12),
-        make_tuple(6, 5, &vpx_highbd_12_sub_pixel_avg_variance64x32_sse2, 12),
-        make_tuple(5, 6, &vpx_highbd_12_sub_pixel_avg_variance32x64_sse2, 12),
-        make_tuple(5, 5, &vpx_highbd_12_sub_pixel_avg_variance32x32_sse2, 12),
-        make_tuple(5, 4, &vpx_highbd_12_sub_pixel_avg_variance32x16_sse2, 12),
-        make_tuple(4, 5, &vpx_highbd_12_sub_pixel_avg_variance16x32_sse2, 12),
-        make_tuple(4, 4, &vpx_highbd_12_sub_pixel_avg_variance16x16_sse2, 12),
-        make_tuple(4, 3, &vpx_highbd_12_sub_pixel_avg_variance16x8_sse2, 12),
-        make_tuple(3, 4, &vpx_highbd_12_sub_pixel_avg_variance8x16_sse2, 12),
-        make_tuple(3, 3, &vpx_highbd_12_sub_pixel_avg_variance8x8_sse2, 12),
-        make_tuple(3, 2, &vpx_highbd_12_sub_pixel_avg_variance8x4_sse2, 12),
-        make_tuple(6, 6, &vpx_highbd_10_sub_pixel_avg_variance64x64_sse2, 10),
-        make_tuple(6, 5, &vpx_highbd_10_sub_pixel_avg_variance64x32_sse2, 10),
-        make_tuple(5, 6, &vpx_highbd_10_sub_pixel_avg_variance32x64_sse2, 10),
-        make_tuple(5, 5, &vpx_highbd_10_sub_pixel_avg_variance32x32_sse2, 10),
-        make_tuple(5, 4, &vpx_highbd_10_sub_pixel_avg_variance32x16_sse2, 10),
-        make_tuple(4, 5, &vpx_highbd_10_sub_pixel_avg_variance16x32_sse2, 10),
-        make_tuple(4, 4, &vpx_highbd_10_sub_pixel_avg_variance16x16_sse2, 10),
-        make_tuple(4, 3, &vpx_highbd_10_sub_pixel_avg_variance16x8_sse2, 10),
-        make_tuple(3, 4, &vpx_highbd_10_sub_pixel_avg_variance8x16_sse2, 10),
-        make_tuple(3, 3, &vpx_highbd_10_sub_pixel_avg_variance8x8_sse2, 10),
-        make_tuple(3, 2, &vpx_highbd_10_sub_pixel_avg_variance8x4_sse2, 10),
-        make_tuple(6, 6, &vpx_highbd_8_sub_pixel_avg_variance64x64_sse2, 8),
-        make_tuple(6, 5, &vpx_highbd_8_sub_pixel_avg_variance64x32_sse2, 8),
-        make_tuple(5, 6, &vpx_highbd_8_sub_pixel_avg_variance32x64_sse2, 8),
-        make_tuple(5, 5, &vpx_highbd_8_sub_pixel_avg_variance32x32_sse2, 8),
-        make_tuple(5, 4, &vpx_highbd_8_sub_pixel_avg_variance32x16_sse2, 8),
-        make_tuple(4, 5, &vpx_highbd_8_sub_pixel_avg_variance16x32_sse2, 8),
-        make_tuple(4, 4, &vpx_highbd_8_sub_pixel_avg_variance16x16_sse2, 8),
-        make_tuple(4, 3, &vpx_highbd_8_sub_pixel_avg_variance16x8_sse2, 8),
-        make_tuple(3, 4, &vpx_highbd_8_sub_pixel_avg_variance8x16_sse2, 8),
-        make_tuple(3, 3, &vpx_highbd_8_sub_pixel_avg_variance8x8_sse2, 8),
-        make_tuple(3, 2, &vpx_highbd_8_sub_pixel_avg_variance8x4_sse2, 8)));
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+        make_tuple(6, 6, &aom_highbd_12_sub_pixel_avg_variance64x64_sse2, 12),
+        make_tuple(6, 5, &aom_highbd_12_sub_pixel_avg_variance64x32_sse2, 12),
+        make_tuple(5, 6, &aom_highbd_12_sub_pixel_avg_variance32x64_sse2, 12),
+        make_tuple(5, 5, &aom_highbd_12_sub_pixel_avg_variance32x32_sse2, 12),
+        make_tuple(5, 4, &aom_highbd_12_sub_pixel_avg_variance32x16_sse2, 12),
+        make_tuple(4, 5, &aom_highbd_12_sub_pixel_avg_variance16x32_sse2, 12),
+        make_tuple(4, 4, &aom_highbd_12_sub_pixel_avg_variance16x16_sse2, 12),
+        make_tuple(4, 3, &aom_highbd_12_sub_pixel_avg_variance16x8_sse2, 12),
+        make_tuple(3, 4, &aom_highbd_12_sub_pixel_avg_variance8x16_sse2, 12),
+        make_tuple(3, 3, &aom_highbd_12_sub_pixel_avg_variance8x8_sse2, 12),
+        make_tuple(3, 2, &aom_highbd_12_sub_pixel_avg_variance8x4_sse2, 12),
+        make_tuple(6, 6, &aom_highbd_10_sub_pixel_avg_variance64x64_sse2, 10),
+        make_tuple(6, 5, &aom_highbd_10_sub_pixel_avg_variance64x32_sse2, 10),
+        make_tuple(5, 6, &aom_highbd_10_sub_pixel_avg_variance32x64_sse2, 10),
+        make_tuple(5, 5, &aom_highbd_10_sub_pixel_avg_variance32x32_sse2, 10),
+        make_tuple(5, 4, &aom_highbd_10_sub_pixel_avg_variance32x16_sse2, 10),
+        make_tuple(4, 5, &aom_highbd_10_sub_pixel_avg_variance16x32_sse2, 10),
+        make_tuple(4, 4, &aom_highbd_10_sub_pixel_avg_variance16x16_sse2, 10),
+        make_tuple(4, 3, &aom_highbd_10_sub_pixel_avg_variance16x8_sse2, 10),
+        make_tuple(3, 4, &aom_highbd_10_sub_pixel_avg_variance8x16_sse2, 10),
+        make_tuple(3, 3, &aom_highbd_10_sub_pixel_avg_variance8x8_sse2, 10),
+        make_tuple(3, 2, &aom_highbd_10_sub_pixel_avg_variance8x4_sse2, 10),
+        make_tuple(6, 6, &aom_highbd_8_sub_pixel_avg_variance64x64_sse2, 8),
+        make_tuple(6, 5, &aom_highbd_8_sub_pixel_avg_variance64x32_sse2, 8),
+        make_tuple(5, 6, &aom_highbd_8_sub_pixel_avg_variance32x64_sse2, 8),
+        make_tuple(5, 5, &aom_highbd_8_sub_pixel_avg_variance32x32_sse2, 8),
+        make_tuple(5, 4, &aom_highbd_8_sub_pixel_avg_variance32x16_sse2, 8),
+        make_tuple(4, 5, &aom_highbd_8_sub_pixel_avg_variance16x32_sse2, 8),
+        make_tuple(4, 4, &aom_highbd_8_sub_pixel_avg_variance16x16_sse2, 8),
+        make_tuple(4, 3, &aom_highbd_8_sub_pixel_avg_variance16x8_sse2, 8),
+        make_tuple(3, 4, &aom_highbd_8_sub_pixel_avg_variance8x16_sse2, 8),
+        make_tuple(3, 3, &aom_highbd_8_sub_pixel_avg_variance8x8_sse2, 8),
+        make_tuple(3, 2, &aom_highbd_8_sub_pixel_avg_variance8x4_sse2, 8)));
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 #endif  // HAVE_SSE2
 
 #if HAVE_SSSE3
 INSTANTIATE_TEST_CASE_P(
-    SSSE3, VpxSubpelVarianceTest,
-    ::testing::Values(make_tuple(6, 6, &vpx_sub_pixel_variance64x64_ssse3, 0),
-                      make_tuple(6, 5, &vpx_sub_pixel_variance64x32_ssse3, 0),
-                      make_tuple(5, 6, &vpx_sub_pixel_variance32x64_ssse3, 0),
-                      make_tuple(5, 5, &vpx_sub_pixel_variance32x32_ssse3, 0),
-                      make_tuple(5, 4, &vpx_sub_pixel_variance32x16_ssse3, 0),
-                      make_tuple(4, 5, &vpx_sub_pixel_variance16x32_ssse3, 0),
-                      make_tuple(4, 4, &vpx_sub_pixel_variance16x16_ssse3, 0),
-                      make_tuple(4, 3, &vpx_sub_pixel_variance16x8_ssse3, 0),
-                      make_tuple(3, 4, &vpx_sub_pixel_variance8x16_ssse3, 0),
-                      make_tuple(3, 3, &vpx_sub_pixel_variance8x8_ssse3, 0),
-                      make_tuple(3, 2, &vpx_sub_pixel_variance8x4_ssse3, 0),
-                      make_tuple(2, 3, &vpx_sub_pixel_variance4x8_ssse3, 0),
-                      make_tuple(2, 2, &vpx_sub_pixel_variance4x4_ssse3, 0)));
+    SSSE3, AvxSubpelVarianceTest,
+    ::testing::Values(make_tuple(6, 6, &aom_sub_pixel_variance64x64_ssse3, 0),
+                      make_tuple(6, 5, &aom_sub_pixel_variance64x32_ssse3, 0),
+                      make_tuple(5, 6, &aom_sub_pixel_variance32x64_ssse3, 0),
+                      make_tuple(5, 5, &aom_sub_pixel_variance32x32_ssse3, 0),
+                      make_tuple(5, 4, &aom_sub_pixel_variance32x16_ssse3, 0),
+                      make_tuple(4, 5, &aom_sub_pixel_variance16x32_ssse3, 0),
+                      make_tuple(4, 4, &aom_sub_pixel_variance16x16_ssse3, 0),
+                      make_tuple(4, 3, &aom_sub_pixel_variance16x8_ssse3, 0),
+                      make_tuple(3, 4, &aom_sub_pixel_variance8x16_ssse3, 0),
+                      make_tuple(3, 3, &aom_sub_pixel_variance8x8_ssse3, 0),
+                      make_tuple(3, 2, &aom_sub_pixel_variance8x4_ssse3, 0),
+                      make_tuple(2, 3, &aom_sub_pixel_variance4x8_ssse3, 0),
+                      make_tuple(2, 2, &aom_sub_pixel_variance4x4_ssse3, 0)));
 
 INSTANTIATE_TEST_CASE_P(
-    SSSE3, VpxSubpelAvgVarianceTest,
+    SSSE3, AvxSubpelAvgVarianceTest,
     ::testing::Values(
-        make_tuple(6, 6, &vpx_sub_pixel_avg_variance64x64_ssse3, 0),
-        make_tuple(6, 5, &vpx_sub_pixel_avg_variance64x32_ssse3, 0),
-        make_tuple(5, 6, &vpx_sub_pixel_avg_variance32x64_ssse3, 0),
-        make_tuple(5, 5, &vpx_sub_pixel_avg_variance32x32_ssse3, 0),
-        make_tuple(5, 4, &vpx_sub_pixel_avg_variance32x16_ssse3, 0),
-        make_tuple(4, 5, &vpx_sub_pixel_avg_variance16x32_ssse3, 0),
-        make_tuple(4, 4, &vpx_sub_pixel_avg_variance16x16_ssse3, 0),
-        make_tuple(4, 3, &vpx_sub_pixel_avg_variance16x8_ssse3, 0),
-        make_tuple(3, 4, &vpx_sub_pixel_avg_variance8x16_ssse3, 0),
-        make_tuple(3, 3, &vpx_sub_pixel_avg_variance8x8_ssse3, 0),
-        make_tuple(3, 2, &vpx_sub_pixel_avg_variance8x4_ssse3, 0),
-        make_tuple(2, 3, &vpx_sub_pixel_avg_variance4x8_ssse3, 0),
-        make_tuple(2, 2, &vpx_sub_pixel_avg_variance4x4_ssse3, 0)));
+        make_tuple(6, 6, &aom_sub_pixel_avg_variance64x64_ssse3, 0),
+        make_tuple(6, 5, &aom_sub_pixel_avg_variance64x32_ssse3, 0),
+        make_tuple(5, 6, &aom_sub_pixel_avg_variance32x64_ssse3, 0),
+        make_tuple(5, 5, &aom_sub_pixel_avg_variance32x32_ssse3, 0),
+        make_tuple(5, 4, &aom_sub_pixel_avg_variance32x16_ssse3, 0),
+        make_tuple(4, 5, &aom_sub_pixel_avg_variance16x32_ssse3, 0),
+        make_tuple(4, 4, &aom_sub_pixel_avg_variance16x16_ssse3, 0),
+        make_tuple(4, 3, &aom_sub_pixel_avg_variance16x8_ssse3, 0),
+        make_tuple(3, 4, &aom_sub_pixel_avg_variance8x16_ssse3, 0),
+        make_tuple(3, 3, &aom_sub_pixel_avg_variance8x8_ssse3, 0),
+        make_tuple(3, 2, &aom_sub_pixel_avg_variance8x4_ssse3, 0),
+        make_tuple(2, 3, &aom_sub_pixel_avg_variance4x8_ssse3, 0),
+        make_tuple(2, 2, &aom_sub_pixel_avg_variance4x4_ssse3, 0)));
 #endif  // HAVE_SSSE3
 
 #if HAVE_AVX2
-INSTANTIATE_TEST_CASE_P(AVX2, VpxMseTest,
-                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_avx2)));
+INSTANTIATE_TEST_CASE_P(AVX2, AvxMseTest,
+                        ::testing::Values(MseParams(4, 4, &aom_mse16x16_avx2)));
 
 INSTANTIATE_TEST_CASE_P(
-    AVX2, VpxVarianceTest,
-    ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_avx2),
-                      VarianceParams(6, 5, &vpx_variance64x32_avx2),
-                      VarianceParams(5, 5, &vpx_variance32x32_avx2),
-                      VarianceParams(5, 4, &vpx_variance32x16_avx2),
-                      VarianceParams(4, 4, &vpx_variance16x16_avx2)));
+    AVX2, AvxVarianceTest,
+    ::testing::Values(VarianceParams(6, 6, &aom_variance64x64_avx2),
+                      VarianceParams(6, 5, &aom_variance64x32_avx2),
+                      VarianceParams(5, 5, &aom_variance32x32_avx2),
+                      VarianceParams(5, 4, &aom_variance32x16_avx2),
+                      VarianceParams(4, 4, &aom_variance16x16_avx2)));
 
 INSTANTIATE_TEST_CASE_P(
-    AVX2, VpxSubpelVarianceTest,
-    ::testing::Values(make_tuple(6, 6, &vpx_sub_pixel_variance64x64_avx2, 0),
-                      make_tuple(5, 5, &vpx_sub_pixel_variance32x32_avx2, 0)));
+    AVX2, AvxSubpelVarianceTest,
+    ::testing::Values(make_tuple(6, 6, &aom_sub_pixel_variance64x64_avx2, 0),
+                      make_tuple(5, 5, &aom_sub_pixel_variance32x32_avx2, 0)));
 
 INSTANTIATE_TEST_CASE_P(
-    AVX2, VpxSubpelAvgVarianceTest,
+    AVX2, AvxSubpelAvgVarianceTest,
     ::testing::Values(
-        make_tuple(6, 6, &vpx_sub_pixel_avg_variance64x64_avx2, 0),
-        make_tuple(5, 5, &vpx_sub_pixel_avg_variance32x32_avx2, 0)));
+        make_tuple(6, 6, &aom_sub_pixel_avg_variance64x64_avx2, 0),
+        make_tuple(5, 5, &aom_sub_pixel_avg_variance32x32_avx2, 0)));
 #endif  // HAVE_AVX2
 
 #if HAVE_MEDIA
-INSTANTIATE_TEST_CASE_P(MEDIA, VpxMseTest,
+INSTANTIATE_TEST_CASE_P(MEDIA, AvxMseTest,
                         ::testing::Values(MseParams(4, 4,
-                                                    &vpx_mse16x16_media)));
+                                                    &aom_mse16x16_media)));
 
 INSTANTIATE_TEST_CASE_P(
-    MEDIA, VpxVarianceTest,
-    ::testing::Values(VarianceParams(4, 4, &vpx_variance16x16_media),
-                      VarianceParams(3, 3, &vpx_variance8x8_media)));
+    MEDIA, AvxVarianceTest,
+    ::testing::Values(VarianceParams(4, 4, &aom_variance16x16_media),
+                      VarianceParams(3, 3, &aom_variance8x8_media)));
 
 INSTANTIATE_TEST_CASE_P(
-    MEDIA, VpxSubpelVarianceTest,
-    ::testing::Values(make_tuple(4, 4, &vpx_sub_pixel_variance16x16_media, 0),
-                      make_tuple(3, 3, &vpx_sub_pixel_variance8x8_media, 0)));
+    MEDIA, AvxSubpelVarianceTest,
+    ::testing::Values(make_tuple(4, 4, &aom_sub_pixel_variance16x16_media, 0),
+                      make_tuple(3, 3, &aom_sub_pixel_variance8x8_media, 0)));
 #endif  // HAVE_MEDIA
 
 #if HAVE_NEON
-INSTANTIATE_TEST_CASE_P(NEON, VpxSseTest,
+INSTANTIATE_TEST_CASE_P(NEON, AvxSseTest,
                         ::testing::Values(SseParams(2, 2,
-                                                    &vpx_get4x4sse_cs_neon)));
+                                                    &aom_get4x4sse_cs_neon)));
 
-INSTANTIATE_TEST_CASE_P(NEON, VpxMseTest,
-                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_neon)));
-
-INSTANTIATE_TEST_CASE_P(
-    NEON, VpxVarianceTest,
-    ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_neon),
-                      VarianceParams(6, 5, &vpx_variance64x32_neon),
-                      VarianceParams(5, 6, &vpx_variance32x64_neon),
-                      VarianceParams(5, 5, &vpx_variance32x32_neon),
-                      VarianceParams(4, 4, &vpx_variance16x16_neon),
-                      VarianceParams(4, 3, &vpx_variance16x8_neon),
-                      VarianceParams(3, 4, &vpx_variance8x16_neon),
-                      VarianceParams(3, 3, &vpx_variance8x8_neon)));
+INSTANTIATE_TEST_CASE_P(NEON, AvxMseTest,
+                        ::testing::Values(MseParams(4, 4, &aom_mse16x16_neon)));
 
 INSTANTIATE_TEST_CASE_P(
-    NEON, VpxSubpelVarianceTest,
-    ::testing::Values(make_tuple(6, 6, &vpx_sub_pixel_variance64x64_neon, 0),
-                      make_tuple(5, 5, &vpx_sub_pixel_variance32x32_neon, 0),
-                      make_tuple(4, 4, &vpx_sub_pixel_variance16x16_neon, 0),
-                      make_tuple(3, 3, &vpx_sub_pixel_variance8x8_neon, 0)));
+    NEON, AvxVarianceTest,
+    ::testing::Values(VarianceParams(6, 6, &aom_variance64x64_neon),
+                      VarianceParams(6, 5, &aom_variance64x32_neon),
+                      VarianceParams(5, 6, &aom_variance32x64_neon),
+                      VarianceParams(5, 5, &aom_variance32x32_neon),
+                      VarianceParams(4, 4, &aom_variance16x16_neon),
+                      VarianceParams(4, 3, &aom_variance16x8_neon),
+                      VarianceParams(3, 4, &aom_variance8x16_neon),
+                      VarianceParams(3, 3, &aom_variance8x8_neon)));
+
+INSTANTIATE_TEST_CASE_P(
+    NEON, AvxSubpelVarianceTest,
+    ::testing::Values(make_tuple(6, 6, &aom_sub_pixel_variance64x64_neon, 0),
+                      make_tuple(5, 5, &aom_sub_pixel_variance32x32_neon, 0),
+                      make_tuple(4, 4, &aom_sub_pixel_variance16x16_neon, 0),
+                      make_tuple(3, 3, &aom_sub_pixel_variance8x8_neon, 0)));
 #endif  // HAVE_NEON
 
 #if HAVE_MSA
 INSTANTIATE_TEST_CASE_P(MSA, SumOfSquaresTest,
-                        ::testing::Values(vpx_get_mb_ss_msa));
+                        ::testing::Values(aom_get_mb_ss_msa));
 
-INSTANTIATE_TEST_CASE_P(MSA, VpxSseTest,
+INSTANTIATE_TEST_CASE_P(MSA, AvxSseTest,
                         ::testing::Values(SseParams(2, 2,
-                                                    &vpx_get4x4sse_cs_msa)));
+                                                    &aom_get4x4sse_cs_msa)));
 
-INSTANTIATE_TEST_CASE_P(MSA, VpxMseTest,
-                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_msa),
-                                          MseParams(4, 3, &vpx_mse16x8_msa),
-                                          MseParams(3, 4, &vpx_mse8x16_msa),
-                                          MseParams(3, 3, &vpx_mse8x8_msa)));
-
-INSTANTIATE_TEST_CASE_P(
-    MSA, VpxVarianceTest,
-    ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_msa),
-                      VarianceParams(6, 5, &vpx_variance64x32_msa),
-                      VarianceParams(5, 6, &vpx_variance32x64_msa),
-                      VarianceParams(5, 5, &vpx_variance32x32_msa),
-                      VarianceParams(5, 4, &vpx_variance32x16_msa),
-                      VarianceParams(4, 5, &vpx_variance16x32_msa),
-                      VarianceParams(4, 4, &vpx_variance16x16_msa),
-                      VarianceParams(4, 3, &vpx_variance16x8_msa),
-                      VarianceParams(3, 4, &vpx_variance8x16_msa),
-                      VarianceParams(3, 3, &vpx_variance8x8_msa),
-                      VarianceParams(3, 2, &vpx_variance8x4_msa),
-                      VarianceParams(2, 3, &vpx_variance4x8_msa),
-                      VarianceParams(2, 2, &vpx_variance4x4_msa)));
+INSTANTIATE_TEST_CASE_P(MSA, AvxMseTest,
+                        ::testing::Values(MseParams(4, 4, &aom_mse16x16_msa),
+                                          MseParams(4, 3, &aom_mse16x8_msa),
+                                          MseParams(3, 4, &aom_mse8x16_msa),
+                                          MseParams(3, 3, &aom_mse8x8_msa)));
 
 INSTANTIATE_TEST_CASE_P(
-    MSA, VpxSubpelVarianceTest,
-    ::testing::Values(make_tuple(2, 2, &vpx_sub_pixel_variance4x4_msa, 0),
-                      make_tuple(2, 3, &vpx_sub_pixel_variance4x8_msa, 0),
-                      make_tuple(3, 2, &vpx_sub_pixel_variance8x4_msa, 0),
-                      make_tuple(3, 3, &vpx_sub_pixel_variance8x8_msa, 0),
-                      make_tuple(3, 4, &vpx_sub_pixel_variance8x16_msa, 0),
-                      make_tuple(4, 3, &vpx_sub_pixel_variance16x8_msa, 0),
-                      make_tuple(4, 4, &vpx_sub_pixel_variance16x16_msa, 0),
-                      make_tuple(4, 5, &vpx_sub_pixel_variance16x32_msa, 0),
-                      make_tuple(5, 4, &vpx_sub_pixel_variance32x16_msa, 0),
-                      make_tuple(5, 5, &vpx_sub_pixel_variance32x32_msa, 0),
-                      make_tuple(5, 6, &vpx_sub_pixel_variance32x64_msa, 0),
-                      make_tuple(6, 5, &vpx_sub_pixel_variance64x32_msa, 0),
-                      make_tuple(6, 6, &vpx_sub_pixel_variance64x64_msa, 0)));
+    MSA, AvxVarianceTest,
+    ::testing::Values(VarianceParams(6, 6, &aom_variance64x64_msa),
+                      VarianceParams(6, 5, &aom_variance64x32_msa),
+                      VarianceParams(5, 6, &aom_variance32x64_msa),
+                      VarianceParams(5, 5, &aom_variance32x32_msa),
+                      VarianceParams(5, 4, &aom_variance32x16_msa),
+                      VarianceParams(4, 5, &aom_variance16x32_msa),
+                      VarianceParams(4, 4, &aom_variance16x16_msa),
+                      VarianceParams(4, 3, &aom_variance16x8_msa),
+                      VarianceParams(3, 4, &aom_variance8x16_msa),
+                      VarianceParams(3, 3, &aom_variance8x8_msa),
+                      VarianceParams(3, 2, &aom_variance8x4_msa),
+                      VarianceParams(2, 3, &aom_variance4x8_msa),
+                      VarianceParams(2, 2, &aom_variance4x4_msa)));
 
 INSTANTIATE_TEST_CASE_P(
-    MSA, VpxSubpelAvgVarianceTest,
-    ::testing::Values(make_tuple(6, 6, &vpx_sub_pixel_avg_variance64x64_msa, 0),
-                      make_tuple(6, 5, &vpx_sub_pixel_avg_variance64x32_msa, 0),
-                      make_tuple(5, 6, &vpx_sub_pixel_avg_variance32x64_msa, 0),
-                      make_tuple(5, 5, &vpx_sub_pixel_avg_variance32x32_msa, 0),
-                      make_tuple(5, 4, &vpx_sub_pixel_avg_variance32x16_msa, 0),
-                      make_tuple(4, 5, &vpx_sub_pixel_avg_variance16x32_msa, 0),
-                      make_tuple(4, 4, &vpx_sub_pixel_avg_variance16x16_msa, 0),
-                      make_tuple(4, 3, &vpx_sub_pixel_avg_variance16x8_msa, 0),
-                      make_tuple(3, 4, &vpx_sub_pixel_avg_variance8x16_msa, 0),
-                      make_tuple(3, 3, &vpx_sub_pixel_avg_variance8x8_msa, 0),
-                      make_tuple(3, 2, &vpx_sub_pixel_avg_variance8x4_msa, 0),
-                      make_tuple(2, 3, &vpx_sub_pixel_avg_variance4x8_msa, 0),
-                      make_tuple(2, 2, &vpx_sub_pixel_avg_variance4x4_msa, 0)));
+    MSA, AvxSubpelVarianceTest,
+    ::testing::Values(make_tuple(2, 2, &aom_sub_pixel_variance4x4_msa, 0),
+                      make_tuple(2, 3, &aom_sub_pixel_variance4x8_msa, 0),
+                      make_tuple(3, 2, &aom_sub_pixel_variance8x4_msa, 0),
+                      make_tuple(3, 3, &aom_sub_pixel_variance8x8_msa, 0),
+                      make_tuple(3, 4, &aom_sub_pixel_variance8x16_msa, 0),
+                      make_tuple(4, 3, &aom_sub_pixel_variance16x8_msa, 0),
+                      make_tuple(4, 4, &aom_sub_pixel_variance16x16_msa, 0),
+                      make_tuple(4, 5, &aom_sub_pixel_variance16x32_msa, 0),
+                      make_tuple(5, 4, &aom_sub_pixel_variance32x16_msa, 0),
+                      make_tuple(5, 5, &aom_sub_pixel_variance32x32_msa, 0),
+                      make_tuple(5, 6, &aom_sub_pixel_variance32x64_msa, 0),
+                      make_tuple(6, 5, &aom_sub_pixel_variance64x32_msa, 0),
+                      make_tuple(6, 6, &aom_sub_pixel_variance64x64_msa, 0)));
+
+INSTANTIATE_TEST_CASE_P(
+    MSA, AvxSubpelAvgVarianceTest,
+    ::testing::Values(make_tuple(6, 6, &aom_sub_pixel_avg_variance64x64_msa, 0),
+                      make_tuple(6, 5, &aom_sub_pixel_avg_variance64x32_msa, 0),
+                      make_tuple(5, 6, &aom_sub_pixel_avg_variance32x64_msa, 0),
+                      make_tuple(5, 5, &aom_sub_pixel_avg_variance32x32_msa, 0),
+                      make_tuple(5, 4, &aom_sub_pixel_avg_variance32x16_msa, 0),
+                      make_tuple(4, 5, &aom_sub_pixel_avg_variance16x32_msa, 0),
+                      make_tuple(4, 4, &aom_sub_pixel_avg_variance16x16_msa, 0),
+                      make_tuple(4, 3, &aom_sub_pixel_avg_variance16x8_msa, 0),
+                      make_tuple(3, 4, &aom_sub_pixel_avg_variance8x16_msa, 0),
+                      make_tuple(3, 3, &aom_sub_pixel_avg_variance8x8_msa, 0),
+                      make_tuple(3, 2, &aom_sub_pixel_avg_variance8x4_msa, 0),
+                      make_tuple(2, 3, &aom_sub_pixel_avg_variance4x8_msa, 0),
+                      make_tuple(2, 2, &aom_sub_pixel_avg_variance4x4_msa, 0)));
 #endif  // HAVE_MSA
 }  // namespace

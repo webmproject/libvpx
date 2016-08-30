@@ -16,10 +16,10 @@
 . $(dirname $0)/tools_common.sh
 
 # Environment check: Make sure input is available:
-#   $VP8_IVF_FILE and $VP9_IVF_FILE are required.
+#   $VP8_IVF_FILE and $AV1_IVF_FILE are required.
 decode_to_md5_verify_environment() {
-  if [ ! -e "${VP8_IVF_FILE}" ] || [ ! -e "${VP9_IVF_FILE}" ]; then
-    echo "Libvpx test data must exist in LIBVPX_TEST_DATA_PATH."
+  if [ ! -e "${VP8_IVF_FILE}" ] || [ ! -e "${AV1_IVF_FILE}" ]; then
+    echo "Libaom test data must exist in LIBVPX_TEST_DATA_PATH."
     return 1
   fi
 }
@@ -28,18 +28,18 @@ decode_to_md5_verify_environment() {
 # interpreted as codec name and used solely to name the output file. $3 is the
 # expected md5 sum: It must match that of the final frame.
 decode_to_md5() {
-  local decoder="${LIBAOM_BIN_PATH}/decode_to_md5${VPX_TEST_EXE_SUFFIX}"
+  local decoder="${LIBAOM_BIN_PATH}/decode_to_md5${AOM_TEST_EXE_SUFFIX}"
   local input_file="$1"
   local codec="$2"
   local expected_md5="$3"
-  local output_file="${VPX_TEST_OUTPUT_DIR}/decode_to_md5_${codec}"
+  local output_file="${AOM_TEST_OUTPUT_DIR}/decode_to_md5_${codec}"
 
   if [ ! -x "${decoder}" ]; then
     elog "${decoder} does not exist or is not executable."
     return 1
   fi
 
-  eval "${VPX_TEST_PREFIX}" "${decoder}" "${input_file}" "${output_file}" \
+  eval "${AOM_TEST_PREFIX}" "${decoder}" "${input_file}" "${output_file}" \
       ${devnull}
 
   [ -e "${output_file}" ] || return 1
@@ -58,16 +58,16 @@ decode_to_md5_vp8() {
   fi
 }
 
-decode_to_md5_vp9() {
+decode_to_md5_av1() {
   # expected MD5 sum for the last frame.
   local expected_md5="2952c0eae93f3dadd1aa84c50d3fd6d2"
 
-  if [ "$(vp9_decode_available)" = "yes" ]; then
-    decode_to_md5 "${VP9_IVF_FILE}" "vp9" "${expected_md5}"
+  if [ "$(av1_decode_available)" = "yes" ]; then
+    decode_to_md5 "${AV1_IVF_FILE}" "av1" "${expected_md5}"
   fi
 }
 
 decode_to_md5_tests="decode_to_md5_vp8
-                     decode_to_md5_vp9"
+                     decode_to_md5_av1"
 
 run_tests decode_to_md5_verify_environment "${decode_to_md5_tests}"

@@ -9,7 +9,7 @@
 ;
 
 
-    EXPORT  |vpx_sad16x16_media|
+    EXPORT  |aom_sad16x16_media|
 
     ARM
     REQUIRE8
@@ -21,7 +21,7 @@
 ; r1    int  src_stride
 ; r2    const unsigned char *ref_ptr
 ; r3    int  ref_stride
-|vpx_sad16x16_media| PROC
+|aom_sad16x16_media| PROC
     stmfd   sp!, {r4-r12, lr}
 
     pld     [r0, r1, lsl #0]

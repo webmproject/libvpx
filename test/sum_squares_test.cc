@@ -14,8 +14,8 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-#include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_config.h"
+#include "./aom_dsp_rtcd.h"
 #include "aom_ports/mem.h"
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
@@ -120,8 +120,8 @@ TEST_P(SumSquaresTest, ExtremeValues) {
 
 INSTANTIATE_TEST_CASE_P(
     SSE2, SumSquaresTest,
-    ::testing::Values(TestFuncs(&vpx_sum_squares_2d_i16_c,
-                                &vpx_sum_squares_2d_i16_sse2)));
+    ::testing::Values(TestFuncs(&aom_sum_squares_2d_i16_c,
+                                &aom_sum_squares_2d_i16_sse2)));
 
 #endif  // HAVE_SSE2
 
@@ -180,7 +180,7 @@ TEST_P(SumSquares1DTest, ExtremeValues) {
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(SSE2, SumSquares1DTest,
                         ::testing::Values(TestFuncs1D(
-                            vpx_sum_squares_i16_c, vpx_sum_squares_i16_sse2)));
+                            aom_sum_squares_i16_c, aom_sum_squares_i16_sse2)));
 
 #endif  // HAVE_SSE2
 }  // namespace

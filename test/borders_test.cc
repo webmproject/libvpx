@@ -32,16 +32,16 @@ class BordersTest
   virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
                                   ::libaom_test::Encoder *encoder) {
     if (video->frame() == 1) {
-      encoder->Control(VP8E_SET_CPUUSED, 1);
-      encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
-      encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);
-      encoder->Control(VP8E_SET_ARNR_STRENGTH, 5);
-      encoder->Control(VP8E_SET_ARNR_TYPE, 3);
+      encoder->Control(AOME_SET_CPUUSED, 1);
+      encoder->Control(AOME_SET_ENABLEAUTOALTREF, 1);
+      encoder->Control(AOME_SET_ARNR_MAXFRAMES, 7);
+      encoder->Control(AOME_SET_ARNR_STRENGTH, 5);
+      encoder->Control(AOME_SET_ARNR_TYPE, 3);
     }
   }
 
-  virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
-    if (pkt->data.frame.flags & VPX_FRAME_IS_KEY) {
+  virtual void FramePktHook(const aom_codec_cx_pkt_t *pkt) {
+    if (pkt->data.frame.flags & AOM_FRAME_IS_KEY) {
     }
   }
 };
@@ -79,6 +79,6 @@ TEST_P(BordersTest, TestLowBitrate) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
-VP10_INSTANTIATE_TEST_CASE(BordersTest,
-                           ::testing::Values(::libaom_test::kTwoPassGood));
+AV1_INSTANTIATE_TEST_CASE(BordersTest,
+                          ::testing::Values(::libaom_test::kTwoPassGood));
 }  // namespace

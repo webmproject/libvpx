@@ -10,8 +10,8 @@
 
 #include <emmintrin.h>  // SSE2
 
-#include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_config.h"
+#include "./aom_dsp_rtcd.h"
 
 #include "aom_ports/mem.h"
 
@@ -19,7 +19,7 @@ typedef void (*getNxMvar_fn_t)(const unsigned char *src, int src_stride,
                                const unsigned char *ref, int ref_stride,
                                unsigned int *sse, int *sum);
 
-unsigned int vpx_get_mb_ss_sse2(const int16_t *src) {
+unsigned int aom_get_mb_ss_sse2(const int16_t *src) {
   __m128i vsum = _mm_setzero_si128();
   int i;
 
@@ -65,7 +65,7 @@ static void get4x4var_sse2(const uint8_t *src, int src_stride,
   *sse = _mm_cvtsi128_si32(vsum);
 }
 
-void vpx_get8x8var_sse2(const uint8_t *src, int src_stride, const uint8_t *ref,
+void aom_get8x8var_sse2(const uint8_t *src, int src_stride, const uint8_t *ref,
                         int ref_stride, unsigned int *sse, int *sum) {
   const __m128i zero = _mm_setzero_si128();
   __m128i vsum = _mm_setzero_si128();
@@ -103,7 +103,7 @@ void vpx_get8x8var_sse2(const uint8_t *src, int src_stride, const uint8_t *ref,
   *sse = _mm_cvtsi128_si32(vsse);
 }
 
-void vpx_get16x16var_sse2(const uint8_t *src, int src_stride,
+void aom_get16x16var_sse2(const uint8_t *src, int src_stride,
                           const uint8_t *ref, int ref_stride, unsigned int *sse,
                           int *sum) {
   const __m128i zero = _mm_setzero_si128();
@@ -165,7 +165,7 @@ static void variance_sse2(const unsigned char *src, int src_stride,
   }
 }
 
-unsigned int vpx_variance4x4_sse2(const unsigned char *src, int src_stride,
+unsigned int aom_variance4x4_sse2(const unsigned char *src, int src_stride,
                                   const unsigned char *ref, int ref_stride,
                                   unsigned int *sse) {
   int sum;
@@ -173,7 +173,7 @@ unsigned int vpx_variance4x4_sse2(const unsigned char *src, int src_stride,
   return *sse - ((sum * sum) >> 4);
 }
 
-unsigned int vpx_variance8x4_sse2(const uint8_t *src, int src_stride,
+unsigned int aom_variance8x4_sse2(const uint8_t *src, int src_stride,
                                   const uint8_t *ref, int ref_stride,
                                   unsigned int *sse) {
   int sum;
@@ -182,7 +182,7 @@ unsigned int vpx_variance8x4_sse2(const uint8_t *src, int src_stride,
   return *sse - ((sum * sum) >> 5);
 }
 
-unsigned int vpx_variance4x8_sse2(const uint8_t *src, int src_stride,
+unsigned int aom_variance4x8_sse2(const uint8_t *src, int src_stride,
                                   const uint8_t *ref, int ref_stride,
                                   unsigned int *sse) {
   int sum;
@@ -191,126 +191,126 @@ unsigned int vpx_variance4x8_sse2(const uint8_t *src, int src_stride,
   return *sse - ((sum * sum) >> 5);
 }
 
-unsigned int vpx_variance8x8_sse2(const unsigned char *src, int src_stride,
+unsigned int aom_variance8x8_sse2(const unsigned char *src, int src_stride,
                                   const unsigned char *ref, int ref_stride,
                                   unsigned int *sse) {
   int sum;
-  vpx_get8x8var_sse2(src, src_stride, ref, ref_stride, sse, &sum);
+  aom_get8x8var_sse2(src, src_stride, ref, ref_stride, sse, &sum);
   return *sse - ((sum * sum) >> 6);
 }
 
-unsigned int vpx_variance16x8_sse2(const unsigned char *src, int src_stride,
+unsigned int aom_variance16x8_sse2(const unsigned char *src, int src_stride,
                                    const unsigned char *ref, int ref_stride,
                                    unsigned int *sse) {
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 16, 8, sse, &sum,
-                vpx_get8x8var_sse2, 8);
+                aom_get8x8var_sse2, 8);
   return *sse - ((sum * sum) >> 7);
 }
 
-unsigned int vpx_variance8x16_sse2(const unsigned char *src, int src_stride,
+unsigned int aom_variance8x16_sse2(const unsigned char *src, int src_stride,
                                    const unsigned char *ref, int ref_stride,
                                    unsigned int *sse) {
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 8, 16, sse, &sum,
-                vpx_get8x8var_sse2, 8);
+                aom_get8x8var_sse2, 8);
   return *sse - ((sum * sum) >> 7);
 }
 
-unsigned int vpx_variance16x16_sse2(const unsigned char *src, int src_stride,
+unsigned int aom_variance16x16_sse2(const unsigned char *src, int src_stride,
                                     const unsigned char *ref, int ref_stride,
                                     unsigned int *sse) {
   int sum;
-  vpx_get16x16var_sse2(src, src_stride, ref, ref_stride, sse, &sum);
+  aom_get16x16var_sse2(src, src_stride, ref, ref_stride, sse, &sum);
   return *sse - (((uint32_t)((int64_t)sum * sum)) >> 8);
 }
 
-unsigned int vpx_variance32x32_sse2(const uint8_t *src, int src_stride,
+unsigned int aom_variance32x32_sse2(const uint8_t *src, int src_stride,
                                     const uint8_t *ref, int ref_stride,
                                     unsigned int *sse) {
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 32, 32, sse, &sum,
-                vpx_get16x16var_sse2, 16);
+                aom_get16x16var_sse2, 16);
   return *sse - (((int64_t)sum * sum) >> 10);
 }
 
-unsigned int vpx_variance32x16_sse2(const uint8_t *src, int src_stride,
+unsigned int aom_variance32x16_sse2(const uint8_t *src, int src_stride,
                                     const uint8_t *ref, int ref_stride,
                                     unsigned int *sse) {
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 32, 16, sse, &sum,
-                vpx_get16x16var_sse2, 16);
+                aom_get16x16var_sse2, 16);
   return *sse - (((int64_t)sum * sum) >> 9);
 }
 
-unsigned int vpx_variance16x32_sse2(const uint8_t *src, int src_stride,
+unsigned int aom_variance16x32_sse2(const uint8_t *src, int src_stride,
                                     const uint8_t *ref, int ref_stride,
                                     unsigned int *sse) {
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 16, 32, sse, &sum,
-                vpx_get16x16var_sse2, 16);
+                aom_get16x16var_sse2, 16);
   return *sse - (((int64_t)sum * sum) >> 9);
 }
 
-unsigned int vpx_variance64x64_sse2(const uint8_t *src, int src_stride,
+unsigned int aom_variance64x64_sse2(const uint8_t *src, int src_stride,
                                     const uint8_t *ref, int ref_stride,
                                     unsigned int *sse) {
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 64, 64, sse, &sum,
-                vpx_get16x16var_sse2, 16);
+                aom_get16x16var_sse2, 16);
   return *sse - (((int64_t)sum * sum) >> 12);
 }
 
-unsigned int vpx_variance64x32_sse2(const uint8_t *src, int src_stride,
+unsigned int aom_variance64x32_sse2(const uint8_t *src, int src_stride,
                                     const uint8_t *ref, int ref_stride,
                                     unsigned int *sse) {
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 64, 32, sse, &sum,
-                vpx_get16x16var_sse2, 16);
+                aom_get16x16var_sse2, 16);
   return *sse - (((int64_t)sum * sum) >> 11);
 }
 
-unsigned int vpx_variance32x64_sse2(const uint8_t *src, int src_stride,
+unsigned int aom_variance32x64_sse2(const uint8_t *src, int src_stride,
                                     const uint8_t *ref, int ref_stride,
                                     unsigned int *sse) {
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 32, 64, sse, &sum,
-                vpx_get16x16var_sse2, 16);
+                aom_get16x16var_sse2, 16);
   return *sse - (((int64_t)sum * sum) >> 11);
 }
 
-unsigned int vpx_mse8x8_sse2(const uint8_t *src, int src_stride,
+unsigned int aom_mse8x8_sse2(const uint8_t *src, int src_stride,
                              const uint8_t *ref, int ref_stride,
                              unsigned int *sse) {
-  vpx_variance8x8_sse2(src, src_stride, ref, ref_stride, sse);
+  aom_variance8x8_sse2(src, src_stride, ref, ref_stride, sse);
   return *sse;
 }
 
-unsigned int vpx_mse8x16_sse2(const uint8_t *src, int src_stride,
+unsigned int aom_mse8x16_sse2(const uint8_t *src, int src_stride,
                               const uint8_t *ref, int ref_stride,
                               unsigned int *sse) {
-  vpx_variance8x16_sse2(src, src_stride, ref, ref_stride, sse);
+  aom_variance8x16_sse2(src, src_stride, ref, ref_stride, sse);
   return *sse;
 }
 
-unsigned int vpx_mse16x8_sse2(const uint8_t *src, int src_stride,
+unsigned int aom_mse16x8_sse2(const uint8_t *src, int src_stride,
                               const uint8_t *ref, int ref_stride,
                               unsigned int *sse) {
-  vpx_variance16x8_sse2(src, src_stride, ref, ref_stride, sse);
+  aom_variance16x8_sse2(src, src_stride, ref, ref_stride, sse);
   return *sse;
 }
 
-unsigned int vpx_mse16x16_sse2(const uint8_t *src, int src_stride,
+unsigned int aom_mse16x16_sse2(const uint8_t *src, int src_stride,
                                const uint8_t *ref, int ref_stride,
                                unsigned int *sse) {
-  vpx_variance16x16_sse2(src, src_stride, ref, ref_stride, sse);
+  aom_variance16x16_sse2(src, src_stride, ref, ref_stride, sse);
   return *sse;
 }
 
 // The 2 unused parameters are place holders for PIC enabled build.
 // These definitions are for functions defined in subpel_variance.asm
 #define DECL(w, opt)                                                           \
-  int vpx_sub_pixel_variance##w##xh_##opt(                                     \
+  int aom_sub_pixel_variance##w##xh_##opt(                                     \
       const uint8_t *src, ptrdiff_t src_stride, int x_offset, int y_offset,    \
       const uint8_t *dst, ptrdiff_t dst_stride, int height, unsigned int *sse, \
       void *unused0, void *unused)
@@ -325,27 +325,27 @@ DECLS(ssse3, ssse3);
 #undef DECL
 
 #define FN(w, h, wf, wlog2, hlog2, opt, cast_prod, cast)                       \
-  unsigned int vpx_sub_pixel_variance##w##x##h##_##opt(                        \
+  unsigned int aom_sub_pixel_variance##w##x##h##_##opt(                        \
       const uint8_t *src, int src_stride, int x_offset, int y_offset,          \
       const uint8_t *dst, int dst_stride, unsigned int *sse_ptr) {             \
     unsigned int sse;                                                          \
-    int se = vpx_sub_pixel_variance##wf##xh_##opt(src, src_stride, x_offset,   \
+    int se = aom_sub_pixel_variance##wf##xh_##opt(src, src_stride, x_offset,   \
                                                   y_offset, dst, dst_stride,   \
                                                   h, &sse, NULL, NULL);        \
     if (w > wf) {                                                              \
       unsigned int sse2;                                                       \
-      int se2 = vpx_sub_pixel_variance##wf##xh_##opt(                          \
+      int se2 = aom_sub_pixel_variance##wf##xh_##opt(                          \
           src + 16, src_stride, x_offset, y_offset, dst + 16, dst_stride, h,   \
           &sse2, NULL, NULL);                                                  \
       se += se2;                                                               \
       sse += sse2;                                                             \
       if (w > wf * 2) {                                                        \
-        se2 = vpx_sub_pixel_variance##wf##xh_##opt(                            \
+        se2 = aom_sub_pixel_variance##wf##xh_##opt(                            \
             src + 32, src_stride, x_offset, y_offset, dst + 32, dst_stride, h, \
             &sse2, NULL, NULL);                                                \
         se += se2;                                                             \
         sse += sse2;                                                           \
-        se2 = vpx_sub_pixel_variance##wf##xh_##opt(                            \
+        se2 = aom_sub_pixel_variance##wf##xh_##opt(                            \
             src + 48, src_stride, x_offset, y_offset, dst + 48, dst_stride, h, \
             &sse2, NULL, NULL);                                                \
         se += se2;                                                             \
@@ -379,7 +379,7 @@ FNS(ssse3, ssse3);
 
 // The 2 unused parameters are place holders for PIC enabled build.
 #define DECL(w, opt)                                                        \
-  int vpx_sub_pixel_avg_variance##w##xh_##opt(                              \
+  int aom_sub_pixel_avg_variance##w##xh_##opt(                              \
       const uint8_t *src, ptrdiff_t src_stride, int x_offset, int y_offset, \
       const uint8_t *dst, ptrdiff_t dst_stride, const uint8_t *sec,         \
       ptrdiff_t sec_stride, int height, unsigned int *sse, void *unused0,   \
@@ -395,28 +395,28 @@ DECLS(ssse3, ssse3);
 #undef DECLS
 
 #define FN(w, h, wf, wlog2, hlog2, opt, cast_prod, cast)                       \
-  unsigned int vpx_sub_pixel_avg_variance##w##x##h##_##opt(                    \
+  unsigned int aom_sub_pixel_avg_variance##w##x##h##_##opt(                    \
       const uint8_t *src, int src_stride, int x_offset, int y_offset,          \
       const uint8_t *dst, int dst_stride, unsigned int *sseptr,                \
       const uint8_t *sec) {                                                    \
     unsigned int sse;                                                          \
-    int se = vpx_sub_pixel_avg_variance##wf##xh_##opt(                         \
+    int se = aom_sub_pixel_avg_variance##wf##xh_##opt(                         \
         src, src_stride, x_offset, y_offset, dst, dst_stride, sec, w, h, &sse, \
         NULL, NULL);                                                           \
     if (w > wf) {                                                              \
       unsigned int sse2;                                                       \
-      int se2 = vpx_sub_pixel_avg_variance##wf##xh_##opt(                      \
+      int se2 = aom_sub_pixel_avg_variance##wf##xh_##opt(                      \
           src + 16, src_stride, x_offset, y_offset, dst + 16, dst_stride,      \
           sec + 16, w, h, &sse2, NULL, NULL);                                  \
       se += se2;                                                               \
       sse += sse2;                                                             \
       if (w > wf * 2) {                                                        \
-        se2 = vpx_sub_pixel_avg_variance##wf##xh_##opt(                        \
+        se2 = aom_sub_pixel_avg_variance##wf##xh_##opt(                        \
             src + 32, src_stride, x_offset, y_offset, dst + 32, dst_stride,    \
             sec + 32, w, h, &sse2, NULL, NULL);                                \
         se += se2;                                                             \
         sse += sse2;                                                           \
-        se2 = vpx_sub_pixel_avg_variance##wf##xh_##opt(                        \
+        se2 = aom_sub_pixel_avg_variance##wf##xh_##opt(                        \
             src + 48, src_stride, x_offset, y_offset, dst + 48, dst_stride,    \
             sec + 48, w, h, &sse2, NULL, NULL);                                \
         se += se2;                                                             \
@@ -448,7 +448,7 @@ FNS(ssse3, ssse3);
 #undef FNS
 #undef FN
 
-void vpx_upsampled_pred_sse2(uint8_t *comp_pred, int width, int height,
+void aom_upsampled_pred_sse2(uint8_t *comp_pred, int width, int height,
                              const uint8_t *ref, int ref_stride) {
   int i, j;
   int stride = ref_stride << 3;
@@ -536,7 +536,7 @@ void vpx_upsampled_pred_sse2(uint8_t *comp_pred, int width, int height,
   }
 }
 
-void vpx_comp_avg_upsampled_pred_sse2(uint8_t *comp_pred, const uint8_t *pred,
+void aom_comp_avg_upsampled_pred_sse2(uint8_t *comp_pred, const uint8_t *pred,
                                       int width, int height, const uint8_t *ref,
                                       int ref_stride) {
   const __m128i zero = _mm_set1_epi16(0);

@@ -8,15 +8,15 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_COMMON_DIVIDE_H_
-#define VP10_COMMON_DIVIDE_H_
+#ifndef AV1_COMMON_DIVIDE_H_
+#define AV1_COMMON_DIVIDE_H_
 // An implemntation of the divide by multiply alogrithm
 // https://gmplib.org/~tege/divcnst-pldi94.pdf
 
 #include <limits.h>
 
-#include "./vpx_config.h"
-#include "aom/vpx_integer.h"
+#include "./aom_config.h"
+#include "aom/aom_integer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,14 +27,14 @@ struct fastdiv_elem {
   unsigned shift;
 };
 
-extern const struct fastdiv_elem vp10_fastdiv_tab[256];
+extern const struct fastdiv_elem av1_fastdiv_tab[256];
 
 static INLINE unsigned fastdiv(unsigned x, int y) {
   unsigned t =
-      ((uint64_t)x * vp10_fastdiv_tab[y].mult) >> (sizeof(x) * CHAR_BIT);
-  return (t + x) >> vp10_fastdiv_tab[y].shift;
+      ((uint64_t)x * av1_fastdiv_tab[y].mult) >> (sizeof(x) * CHAR_BIT);
+  return (t + x) >> av1_fastdiv_tab[y].shift;
 }
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
-#endif  // VP10_COMMON_DIVIDE_H_
+#endif  // AV1_COMMON_DIVIDE_H_

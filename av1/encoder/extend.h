@@ -8,24 +8,24 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_ENCODER_EXTEND_H_
-#define VP10_ENCODER_EXTEND_H_
+#ifndef AV1_ENCODER_EXTEND_H_
+#define AV1_ENCODER_EXTEND_H_
 
 #include "aom_scale/yv12config.h"
-#include "aom/vpx_integer.h"
+#include "aom/aom_integer.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void vp10_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
-                                YV12_BUFFER_CONFIG *dst);
+void av1_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
+                               YV12_BUFFER_CONFIG *dst);
 
-void vp10_copy_and_extend_frame_with_rect(const YV12_BUFFER_CONFIG *src,
-                                          YV12_BUFFER_CONFIG *dst, int srcy,
-                                          int srcx, int srch, int srcw);
+void av1_copy_and_extend_frame_with_rect(const YV12_BUFFER_CONFIG *src,
+                                         YV12_BUFFER_CONFIG *dst, int srcy,
+                                         int srcx, int srch, int srcw);
 #ifdef __cplusplus
 }  // extern "C"
 #endif
 
-#endif  // VP10_ENCODER_EXTEND_H_
+#endif  // AV1_ENCODER_EXTEND_H_

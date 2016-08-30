@@ -11,16 +11,16 @@
 #include <emmintrin.h>
 #include <xmmintrin.h>
 
-#include "./vp10_rtcd.h"
-#include "aom/vpx_integer.h"
+#include "./av1_rtcd.h"
+#include "aom/aom_integer.h"
 
-void vp10_quantize_fp_sse2(const int16_t *coeff_ptr, intptr_t n_coeffs,
-                           int skip_block, const int16_t *zbin_ptr,
-                           const int16_t *round_ptr, const int16_t *quant_ptr,
-                           const int16_t *quant_shift_ptr, int16_t *qcoeff_ptr,
-                           int16_t *dqcoeff_ptr, const int16_t *dequant_ptr,
-                           uint16_t *eob_ptr, const int16_t *scan_ptr,
-                           const int16_t *iscan_ptr) {
+void av1_quantize_fp_sse2(const int16_t *coeff_ptr, intptr_t n_coeffs,
+                          int skip_block, const int16_t *zbin_ptr,
+                          const int16_t *round_ptr, const int16_t *quant_ptr,
+                          const int16_t *quant_shift_ptr, int16_t *qcoeff_ptr,
+                          int16_t *dqcoeff_ptr, const int16_t *dequant_ptr,
+                          uint16_t *eob_ptr, const int16_t *scan_ptr,
+                          const int16_t *iscan_ptr) {
   __m128i zero;
   __m128i thr;
   int16_t nzflag;

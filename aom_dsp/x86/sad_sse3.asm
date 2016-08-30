@@ -165,14 +165,14 @@
         paddw           mm7,       mm3
 %endmacro
 
-;void int vpx_sad16x16x3_sse3(
+;void int aom_sad16x16x3_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vpx_sad16x16x3_sse3) PRIVATE
-sym(vpx_sad16x16x3_sse3):
+global sym(aom_sad16x16x3_sse3) PRIVATE
+sym(aom_sad16x16x3_sse3):
 
     STACK_FRAME_CREATE_X3
 
@@ -207,14 +207,14 @@ sym(vpx_sad16x16x3_sse3):
 
     STACK_FRAME_DESTROY_X3
 
-;void int vpx_sad16x8x3_sse3(
+;void int aom_sad16x8x3_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vpx_sad16x8x3_sse3) PRIVATE
-sym(vpx_sad16x8x3_sse3):
+global sym(aom_sad16x8x3_sse3) PRIVATE
+sym(aom_sad16x8x3_sse3):
 
     STACK_FRAME_CREATE_X3
 
@@ -245,14 +245,14 @@ sym(vpx_sad16x8x3_sse3):
 
     STACK_FRAME_DESTROY_X3
 
-;void int vpx_sad8x16x3_sse3(
+;void int aom_sad8x16x3_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vpx_sad8x16x3_sse3) PRIVATE
-sym(vpx_sad8x16x3_sse3):
+global sym(aom_sad8x16x3_sse3) PRIVATE
+sym(aom_sad8x16x3_sse3):
 
     STACK_FRAME_CREATE_X3
 
@@ -274,14 +274,14 @@ sym(vpx_sad8x16x3_sse3):
 
     STACK_FRAME_DESTROY_X3
 
-;void int vpx_sad8x8x3_sse3(
+;void int aom_sad8x8x3_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vpx_sad8x8x3_sse3) PRIVATE
-sym(vpx_sad8x8x3_sse3):
+global sym(aom_sad8x8x3_sse3) PRIVATE
+sym(aom_sad8x8x3_sse3):
 
     STACK_FRAME_CREATE_X3
 
@@ -299,14 +299,14 @@ sym(vpx_sad8x8x3_sse3):
 
     STACK_FRAME_DESTROY_X3
 
-;void int vpx_sad4x4x3_sse3(
+;void int aom_sad4x4x3_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vpx_sad4x4x3_sse3) PRIVATE
-sym(vpx_sad4x4x3_sse3):
+global sym(aom_sad4x4x3_sse3) PRIVATE
+sym(aom_sad4x4x3_sse3):
 
     STACK_FRAME_CREATE_X3
 

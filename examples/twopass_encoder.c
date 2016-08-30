@@ -29,11 +29,11 @@
 // ----------------
 // Encoding a frame in two pass mode is identical to the simple encoder
 // example. To increase the quality while sacrificing encoding speed,
-// VPX_DL_BEST_QUALITY can be used in place of VPX_DL_GOOD_QUALITY.
+// AOM_DL_BEST_QUALITY can be used in place of AOM_DL_GOOD_QUALITY.
 //
 // Processing Statistics Packets
 // -----------------------------
-// Each packet of type `VPX_CODEC_CX_FRAME_PKT` contains the encoded data
+// Each packet of type `AOM_CODEC_CX_FRAME_PKT` contains the encoded data
 // for this frame. We write a IVF frame header, followed by the raw data.
 //
 //
@@ -51,7 +51,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "aom/vpx_encoder.h"
+#include "aom/aom_encoder.h"
 
 #include "../tools_common.h"
 #include "../video_writer.h"
@@ -66,21 +66,21 @@ void usage_exit(void) {
   exit(EXIT_FAILURE);
 }
 
-static int get_frame_stats(vpx_codec_ctx_t *ctx, const vpx_image_t *img,
-                           vpx_codec_pts_t pts, unsigned int duration,
-                           vpx_enc_frame_flags_t flags, unsigned int deadline,
-                           vpx_fixed_buf_t *stats) {
+static int get_frame_stats(aom_codec_ctx_t *ctx, const aom_image_t *img,
+                           aom_codec_pts_t pts, unsigned int duration,
+                           aom_enc_frame_flags_t flags, unsigned int deadline,
+                           aom_fixed_buf_t *stats) {
   int got_pkts = 0;
-  vpx_codec_iter_t iter = NULL;
-  const vpx_codec_cx_pkt_t *pkt = NULL;
-  const vpx_codec_err_t res =
-      vpx_codec_encode(ctx, img, pts, duration, flags, deadline);
-  if (res != VPX_CODEC_OK) die_codec(ctx, "Failed to get frame stats.");
+  aom_codec_iter_t iter = NULL;
+  const aom_codec_cx_pkt_t *pkt = NULL;
+  const aom_codec_err_t res =
+      aom_codec_encode(ctx, img, pts, duration, flags, deadline);
+  if (res != AOM_CODEC_OK) die_codec(ctx, "Failed to get frame stats.");
 
-  while ((pkt = vpx_codec_get_cx_data(ctx, &iter)) != NULL) {
+  while ((pkt = aom_codec_get_cx_data(ctx, &iter)) != NULL) {
     got_pkts = 1;
 
-    if (pkt->kind == VPX_CODEC_STATS_PKT) {
+    if (pkt->kind == AOM_CODEC_STATS_PKT) {
       const uint8_t *const pkt_buf = pkt->data.twopass_stats.buf;
       const size_t pkt_size = pkt->data.twopass_stats.sz;
       stats->buf = realloc(stats->buf, stats->sz + pkt_size);
@@ -92,23 +92,23 @@ static int get_frame_stats(vpx_codec_ctx_t *ctx, const vpx_image_t *img,
   return got_pkts;
 }
 
-static int encode_frame(vpx_codec_ctx_t *ctx, const vpx_image_t *img,
-                        vpx_codec_pts_t pts, unsigned int duration,
-                        vpx_enc_frame_flags_t flags, unsigned int deadline,
-                        VpxVideoWriter *writer) {
+static int encode_frame(aom_codec_ctx_t *ctx, const aom_image_t *img,
+                        aom_codec_pts_t pts, unsigned int duration,
+                        aom_enc_frame_flags_t flags, unsigned int deadline,
+                        AvxVideoWriter *writer) {
   int got_pkts = 0;
-  vpx_codec_iter_t iter = NULL;
-  const vpx_codec_cx_pkt_t *pkt = NULL;
-  const vpx_codec_err_t res =
-      vpx_codec_encode(ctx, img, pts, duration, flags, deadline);
-  if (res != VPX_CODEC_OK) die_codec(ctx, "Failed to encode frame.");
+  aom_codec_iter_t iter = NULL;
+  const aom_codec_cx_pkt_t *pkt = NULL;
+  const aom_codec_err_t res =
+      aom_codec_encode(ctx, img, pts, duration, flags, deadline);
+  if (res != AOM_CODEC_OK) die_codec(ctx, "Failed to encode frame.");
 
-  while ((pkt = vpx_codec_get_cx_data(ctx, &iter)) != NULL) {
+  while ((pkt = aom_codec_get_cx_data(ctx, &iter)) != NULL) {
     got_pkts = 1;
-    if (pkt->kind == VPX_CODEC_CX_FRAME_PKT) {
-      const int keyframe = (pkt->data.frame.flags & VPX_FRAME_IS_KEY) != 0;
+    if (pkt->kind == AOM_CODEC_CX_FRAME_PKT) {
+      const int keyframe = (pkt->data.frame.flags & AOM_FRAME_IS_KEY) != 0;
 
-      if (!vpx_video_writer_write_frame(writer, pkt->data.frame.buf,
+      if (!aom_video_writer_write_frame(writer, pkt->data.frame.buf,
                                         pkt->data.frame.sz,
                                         pkt->data.frame.pts))
         die_codec(ctx, "Failed to write compressed frame.");
@@ -120,69 +120,69 @@ static int encode_frame(vpx_codec_ctx_t *ctx, const vpx_image_t *img,
   return got_pkts;
 }
 
-static vpx_fixed_buf_t pass0(vpx_image_t *raw, FILE *infile,
-                             const VpxInterface *encoder,
-                             const vpx_codec_enc_cfg_t *cfg, int max_frames) {
-  vpx_codec_ctx_t codec;
+static aom_fixed_buf_t pass0(aom_image_t *raw, FILE *infile,
+                             const AvxInterface *encoder,
+                             const aom_codec_enc_cfg_t *cfg, int max_frames) {
+  aom_codec_ctx_t codec;
   int frame_count = 0;
-  vpx_fixed_buf_t stats = { NULL, 0 };
+  aom_fixed_buf_t stats = { NULL, 0 };
 
-  if (vpx_codec_enc_init(&codec, encoder->codec_interface(), cfg, 0))
+  if (aom_codec_enc_init(&codec, encoder->codec_interface(), cfg, 0))
     die_codec(&codec, "Failed to initialize encoder");
 
   // Calculate frame statistics.
-  while (vpx_img_read(raw, infile)) {
+  while (aom_img_read(raw, infile)) {
     ++frame_count;
-    get_frame_stats(&codec, raw, frame_count, 1, 0, VPX_DL_GOOD_QUALITY,
+    get_frame_stats(&codec, raw, frame_count, 1, 0, AOM_DL_GOOD_QUALITY,
                     &stats);
     if (max_frames > 0 && frame_count >= max_frames) break;
   }
 
   // Flush encoder.
-  while (get_frame_stats(&codec, NULL, frame_count, 1, 0, VPX_DL_GOOD_QUALITY,
+  while (get_frame_stats(&codec, NULL, frame_count, 1, 0, AOM_DL_GOOD_QUALITY,
                          &stats)) {
   }
 
   printf("Pass 0 complete. Processed %d frames.\n", frame_count);
-  if (vpx_codec_destroy(&codec)) die_codec(&codec, "Failed to destroy codec.");
+  if (aom_codec_destroy(&codec)) die_codec(&codec, "Failed to destroy codec.");
 
   return stats;
 }
 
-static void pass1(vpx_image_t *raw, FILE *infile, const char *outfile_name,
-                  const VpxInterface *encoder, const vpx_codec_enc_cfg_t *cfg,
+static void pass1(aom_image_t *raw, FILE *infile, const char *outfile_name,
+                  const AvxInterface *encoder, const aom_codec_enc_cfg_t *cfg,
                   int max_frames) {
-  VpxVideoInfo info = { encoder->fourcc,
+  AvxVideoInfo info = { encoder->fourcc,
                         cfg->g_w,
                         cfg->g_h,
                         { cfg->g_timebase.num, cfg->g_timebase.den } };
-  VpxVideoWriter *writer = NULL;
-  vpx_codec_ctx_t codec;
+  AvxVideoWriter *writer = NULL;
+  aom_codec_ctx_t codec;
   int frame_count = 0;
 
-  writer = vpx_video_writer_open(outfile_name, kContainerIVF, &info);
+  writer = aom_video_writer_open(outfile_name, kContainerIVF, &info);
   if (!writer) die("Failed to open %s for writing", outfile_name);
 
-  if (vpx_codec_enc_init(&codec, encoder->codec_interface(), cfg, 0))
+  if (aom_codec_enc_init(&codec, encoder->codec_interface(), cfg, 0))
     die_codec(&codec, "Failed to initialize encoder");
 
   // Encode frames.
-  while (vpx_img_read(raw, infile)) {
+  while (aom_img_read(raw, infile)) {
     ++frame_count;
-    encode_frame(&codec, raw, frame_count, 1, 0, VPX_DL_GOOD_QUALITY, writer);
+    encode_frame(&codec, raw, frame_count, 1, 0, AOM_DL_GOOD_QUALITY, writer);
 
     if (max_frames > 0 && frame_count >= max_frames) break;
   }
 
   // Flush encoder.
-  while (encode_frame(&codec, NULL, -1, 1, 0, VPX_DL_GOOD_QUALITY, writer)) {
+  while (encode_frame(&codec, NULL, -1, 1, 0, AOM_DL_GOOD_QUALITY, writer)) {
   }
 
   printf("\n");
 
-  if (vpx_codec_destroy(&codec)) die_codec(&codec, "Failed to destroy codec.");
+  if (aom_codec_destroy(&codec)) die_codec(&codec, "Failed to destroy codec.");
 
-  vpx_video_writer_close(writer);
+  aom_video_writer_close(writer);
 
   printf("Pass 1 complete. Processed %d frames.\n", frame_count);
 }
@@ -190,13 +190,13 @@ static void pass1(vpx_image_t *raw, FILE *infile, const char *outfile_name,
 int main(int argc, char **argv) {
   FILE *infile = NULL;
   int w, h;
-  vpx_codec_ctx_t codec;
-  vpx_codec_enc_cfg_t cfg;
-  vpx_image_t raw;
-  vpx_codec_err_t res;
-  vpx_fixed_buf_t stats;
+  aom_codec_ctx_t codec;
+  aom_codec_enc_cfg_t cfg;
+  aom_image_t raw;
+  aom_codec_err_t res;
+  aom_fixed_buf_t stats;
 
-  const VpxInterface *encoder = NULL;
+  const AvxInterface *encoder = NULL;
   const int fps = 30;       // TODO(dkovalev) add command line argument
   const int bitrate = 200;  // kbit/s TODO(dkovalev) add command line argument
   const char *const codec_arg = argv[1];
@@ -211,7 +211,7 @@ int main(int argc, char **argv) {
 
   max_frames = strtol(argv[6], NULL, 0);
 
-  encoder = get_vpx_encoder_by_name(codec_arg);
+  encoder = get_aom_encoder_by_name(codec_arg);
   if (!encoder) die("Unsupported codec.");
 
   w = strtol(width_arg, NULL, 0);
@@ -220,13 +220,13 @@ int main(int argc, char **argv) {
   if (w <= 0 || h <= 0 || (w % 2) != 0 || (h % 2) != 0)
     die("Invalid frame size: %dx%d", w, h);
 
-  if (!vpx_img_alloc(&raw, VPX_IMG_FMT_I420, w, h, 1))
+  if (!aom_img_alloc(&raw, AOM_IMG_FMT_I420, w, h, 1))
     die("Failed to allocate image", w, h);
 
-  printf("Using %s\n", vpx_codec_iface_name(encoder->codec_interface()));
+  printf("Using %s\n", aom_codec_iface_name(encoder->codec_interface()));
 
   // Configuration
-  res = vpx_codec_enc_config_default(encoder->codec_interface(), &cfg, 0);
+  res = aom_codec_enc_config_default(encoder->codec_interface(), &cfg, 0);
   if (res) die_codec(&codec, "Failed to get default codec config.");
 
   cfg.g_w = w;
@@ -239,17 +239,17 @@ int main(int argc, char **argv) {
     die("Failed to open %s for reading", infile_arg);
 
   // Pass 0
-  cfg.g_pass = VPX_RC_FIRST_PASS;
+  cfg.g_pass = AOM_RC_FIRST_PASS;
   stats = pass0(&raw, infile, encoder, &cfg, max_frames);
 
   // Pass 1
   rewind(infile);
-  cfg.g_pass = VPX_RC_LAST_PASS;
+  cfg.g_pass = AOM_RC_LAST_PASS;
   cfg.rc_twopass_stats_in = stats;
   pass1(&raw, infile, outfile_arg, encoder, &cfg, max_frames);
   free(stats.buf);
 
-  vpx_img_free(&raw);
+  aom_img_free(&raw);
   fclose(infile);
 
   return EXIT_SUCCESS;

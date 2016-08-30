@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_ENCODER_CORNER_DETECT_H_
-#define VP10_ENCODER_CORNER_DETECT_H_
+#ifndef AV1_ENCODER_CORNER_DETECT_H_
+#define AV1_ENCODER_CORNER_DETECT_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,4 +18,4 @@
 int FastCornerDetect(unsigned char *buf, int width, int height, int stride,
                      int *points, int max_points);
 
-#endif  // VP10_ENCODER_CORNER_DETECT_H
+#endif  // AV1_ENCODER_CORNER_DETECT_H

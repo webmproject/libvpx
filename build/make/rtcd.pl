@@ -59,7 +59,7 @@ close CONFIG_FILE;
 #
 # Routines for the RTCD DSL to call
 #
-sub vpx_config($) {
+sub aom_config($) {
   return (defined $config{$_[0]}) ? $config{$_[0]} : "";
 }
 
@@ -122,7 +122,7 @@ sub process_forward_decls() {
 }
 
 sub determine_indirection {
-  vpx_config("CONFIG_RUNTIME_CPU_DETECT") eq "yes" or &require(@ALL_ARCHS);
+  aom_config("CONFIG_RUNTIME_CPU_DETECT") eq "yes" or &require(@ALL_ARCHS);
   foreach my $fn (keys %ALL_FUNCS) {
     my $n = "";
     my @val = @{$ALL_FUNCS{$fn}};
@@ -282,7 +282,7 @@ sub arm() {
 
   common_top;
   print <<EOF;
-#include "vpx_config.h"
+#include "aom_config.h"
 
 #ifdef RTCD_C
 #include "aom_ports/arm.h"
@@ -308,7 +308,7 @@ sub mips() {
   common_top;
 
   print <<EOF;
-#include "vpx_config.h"
+#include "aom_config.h"
 
 #ifdef RTCD_C
 static void setup_rtcd_internal(void)
@@ -319,8 +319,8 @@ EOF
 
   print <<EOF;
 #if HAVE_DSPR2
-void vpx_dsputil_static_init();
-vpx_dsputil_static_init();
+void aom_dsputil_static_init();
+aom_dsputil_static_init();
 #endif
 }
 #endif
@@ -332,7 +332,7 @@ sub unoptimized() {
   determine_indirection "c";
   common_top;
   print <<EOF;
-#include "vpx_config.h"
+#include "aom_config.h"
 
 #ifdef RTCD_C
 static void setup_rtcd_internal(void)

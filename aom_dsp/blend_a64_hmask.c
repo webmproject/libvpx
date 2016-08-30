@@ -10,14 +10,14 @@
 
 #include <assert.h>
 
-#include "aom/vpx_integer.h"
+#include "aom/aom_integer.h"
 #include "aom_ports/mem.h"
-#include "aom_dsp/vpx_dsp_common.h"
+#include "aom_dsp/aom_dsp_common.h"
 #include "aom_dsp/blend.h"
 
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_dsp_rtcd.h"
 
-void vpx_blend_a64_hmask_c(uint8_t *dst, uint32_t dst_stride,
+void aom_blend_a64_hmask_c(uint8_t *dst, uint32_t dst_stride,
                            const uint8_t *src0, uint32_t src0_stride,
                            const uint8_t *src1, uint32_t src1_stride,
                            const uint8_t *mask, int h, int w) {
@@ -33,14 +33,14 @@ void vpx_blend_a64_hmask_c(uint8_t *dst, uint32_t dst_stride,
 
   for (i = 0; i < h; ++i) {
     for (j = 0; j < w; ++j) {
-      dst[i * dst_stride + j] = VPX_BLEND_A64(
+      dst[i * dst_stride + j] = AOM_BLEND_A64(
           mask[j], src0[i * src0_stride + j], src1[i * src1_stride + j]);
     }
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
-void vpx_highbd_blend_a64_hmask_c(uint8_t *dst_8, uint32_t dst_stride,
+#if CONFIG_AOM_HIGHBITDEPTH
+void aom_highbd_blend_a64_hmask_c(uint8_t *dst_8, uint32_t dst_stride,
                                   const uint8_t *src0_8, uint32_t src0_stride,
                                   const uint8_t *src1_8, uint32_t src1_stride,
                                   const uint8_t *mask, int h, int w, int bd) {
@@ -61,9 +61,9 @@ void vpx_highbd_blend_a64_hmask_c(uint8_t *dst_8, uint32_t dst_stride,
 
   for (i = 0; i < h; ++i) {
     for (j = 0; j < w; ++j) {
-      dst[i * dst_stride + j] = VPX_BLEND_A64(
+      dst[i * dst_stride + j] = AOM_BLEND_A64(
           mask[j], src0[i * src0_stride + j], src1[i * src1_stride + j]);
     }
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH

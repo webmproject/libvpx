@@ -10,11 +10,11 @@
 
 #include <math.h>
 #include <assert.h>
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_dsp_rtcd.h"
 #include "aom_dsp/psnr.h"
 #include "aom_scale/yv12config.h"
 
-double vpx_sse_to_psnr(double samples, double peak, double sse) {
+double aom_sse_to_psnr(double samples, double peak, double sse) {
   if (sse > 0.0) {
     const double psnr = 10.0 * log10(samples * peak * peak / sse);
     return psnr > MAX_PSNR ? MAX_PSNR : psnr;
@@ -46,7 +46,7 @@ static void encoder_variance(const uint8_t *a, int a_stride, const uint8_t *b,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 static void encoder_highbd_variance64(const uint8_t *a8, int a_stride,
                                       const uint8_t *b8, int b_stride, int w,
                                       int h, uint64_t *sse, int64_t *sum) {
@@ -78,7 +78,7 @@ static void encoder_highbd_8_variance(const uint8_t *a8, int a_stride,
   *sse = (unsigned int)sse_long;
   *sum = (int)sum_long;
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
 static int64_t get_sse(const uint8_t *a, int a_stride, const uint8_t *b,
                        int b_stride, int width, int height) {
@@ -106,7 +106,7 @@ static int64_t get_sse(const uint8_t *a, int a_stride, const uint8_t *b,
     const uint8_t *pa = a;
     const uint8_t *pb = b;
     for (x = 0; x < width / 16; ++x) {
-      vpx_mse16x16(pa, a_stride, pb, b_stride, &sse);
+      aom_mse16x16(pa, a_stride, pb, b_stride, &sse);
       total_sse += sse;
 
       pa += 16;
@@ -120,7 +120,7 @@ static int64_t get_sse(const uint8_t *a, int a_stride, const uint8_t *b,
   return total_sse;
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 static int64_t highbd_get_sse_shift(const uint8_t *a8, int a_stride,
                                     const uint8_t *b8, int b_stride, int width,
                                     int height, unsigned int input_shift) {
@@ -163,7 +163,7 @@ static int64_t highbd_get_sse(const uint8_t *a, int a_stride, const uint8_t *b,
     const uint8_t *pa = a;
     const uint8_t *pb = b;
     for (x = 0; x < width / 16; ++x) {
-      vpx_highbd_8_mse16x16(pa, a_stride, pb, b_stride, &sse);
+      aom_highbd_8_mse16x16(pa, a_stride, pb, b_stride, &sse);
       total_sse += sse;
       pa += 16;
       pb += 16;
@@ -173,9 +173,9 @@ static int64_t highbd_get_sse(const uint8_t *a, int a_stride, const uint8_t *b,
   }
   return total_sse;
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
-int64_t vpx_get_y_sse(const YV12_BUFFER_CONFIG *a,
+int64_t aom_get_y_sse(const YV12_BUFFER_CONFIG *a,
                       const YV12_BUFFER_CONFIG *b) {
   assert(a->y_crop_width == b->y_crop_width);
   assert(a->y_crop_height == b->y_crop_height);
@@ -184,7 +184,7 @@ int64_t vpx_get_y_sse(const YV12_BUFFER_CONFIG *a,
                  a->y_crop_width, a->y_crop_height);
 }
 
-int64_t vpx_get_u_sse(const YV12_BUFFER_CONFIG *a,
+int64_t aom_get_u_sse(const YV12_BUFFER_CONFIG *a,
                       const YV12_BUFFER_CONFIG *b) {
   assert(a->uv_crop_width == b->uv_crop_width);
   assert(a->uv_crop_height == b->uv_crop_height);
@@ -193,7 +193,7 @@ int64_t vpx_get_u_sse(const YV12_BUFFER_CONFIG *a,
                  a->uv_crop_width, a->uv_crop_height);
 }
 
-int64_t vpx_get_v_sse(const YV12_BUFFER_CONFIG *a,
+int64_t aom_get_v_sse(const YV12_BUFFER_CONFIG *a,
                       const YV12_BUFFER_CONFIG *b) {
   assert(a->uv_crop_width == b->uv_crop_width);
   assert(a->uv_crop_height == b->uv_crop_height);
@@ -202,8 +202,8 @@ int64_t vpx_get_v_sse(const YV12_BUFFER_CONFIG *a,
                  a->uv_crop_width, a->uv_crop_height);
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
-int64_t vpx_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
+#if CONFIG_AOM_HIGHBITDEPTH
+int64_t aom_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
                              const YV12_BUFFER_CONFIG *b) {
   assert(a->y_crop_width == b->y_crop_width);
   assert(a->y_crop_height == b->y_crop_height);
@@ -214,7 +214,7 @@ int64_t vpx_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
                         a->y_crop_width, a->y_crop_height);
 }
 
-int64_t vpx_highbd_get_u_sse(const YV12_BUFFER_CONFIG *a,
+int64_t aom_highbd_get_u_sse(const YV12_BUFFER_CONFIG *a,
                              const YV12_BUFFER_CONFIG *b) {
   assert(a->uv_crop_width == b->uv_crop_width);
   assert(a->uv_crop_height == b->uv_crop_height);
@@ -225,7 +225,7 @@ int64_t vpx_highbd_get_u_sse(const YV12_BUFFER_CONFIG *a,
                         a->uv_crop_width, a->uv_crop_height);
 }
 
-int64_t vpx_highbd_get_v_sse(const YV12_BUFFER_CONFIG *a,
+int64_t aom_highbd_get_v_sse(const YV12_BUFFER_CONFIG *a,
                              const YV12_BUFFER_CONFIG *b) {
   assert(a->uv_crop_width == b->uv_crop_width);
   assert(a->uv_crop_height == b->uv_crop_height);
@@ -235,10 +235,10 @@ int64_t vpx_highbd_get_v_sse(const YV12_BUFFER_CONFIG *a,
   return highbd_get_sse(a->v_buffer, a->uv_stride, b->v_buffer, b->uv_stride,
                         a->uv_crop_width, a->uv_crop_height);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
-#if CONFIG_VP9_HIGHBITDEPTH
-void vpx_calc_highbd_psnr(const YV12_BUFFER_CONFIG *a,
+#if CONFIG_AOM_HIGHBITDEPTH
+void aom_calc_highbd_psnr(const YV12_BUFFER_CONFIG *a,
                           const YV12_BUFFER_CONFIG *b, PSNR_STATS *psnr,
                           uint32_t bit_depth, uint32_t in_bit_depth) {
   const int widths[3] = { a->y_crop_width, a->uv_crop_width, a->uv_crop_width };
@@ -272,7 +272,7 @@ void vpx_calc_highbd_psnr(const YV12_BUFFER_CONFIG *a,
     }
     psnr->sse[1 + i] = sse;
     psnr->samples[1 + i] = samples;
-    psnr->psnr[1 + i] = vpx_sse_to_psnr(samples, peak, (double)sse);
+    psnr->psnr[1 + i] = aom_sse_to_psnr(samples, peak, (double)sse);
 
     total_sse += sse;
     total_samples += samples;
@@ -281,12 +281,12 @@ void vpx_calc_highbd_psnr(const YV12_BUFFER_CONFIG *a,
   psnr->sse[0] = total_sse;
   psnr->samples[0] = total_samples;
   psnr->psnr[0] =
-      vpx_sse_to_psnr((double)total_samples, peak, (double)total_sse);
+      aom_sse_to_psnr((double)total_samples, peak, (double)total_sse);
 }
 
-#endif  // !CONFIG_VP9_HIGHBITDEPTH
+#endif  // !CONFIG_AOM_HIGHBITDEPTH
 
-void vpx_calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
+void aom_calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
                    PSNR_STATS *psnr) {
   static const double peak = 255.0;
   const int widths[3] = { a->y_crop_width, a->uv_crop_width, a->uv_crop_width };
@@ -308,7 +308,7 @@ void vpx_calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
         get_sse(a_planes[i], a_strides[i], b_planes[i], b_strides[i], w, h);
     psnr->sse[1 + i] = sse;
     psnr->samples[1 + i] = samples;
-    psnr->psnr[1 + i] = vpx_sse_to_psnr(samples, peak, (double)sse);
+    psnr->psnr[1 + i] = aom_sse_to_psnr(samples, peak, (double)sse);
 
     total_sse += sse;
     total_samples += samples;
@@ -317,5 +317,5 @@ void vpx_calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
   psnr->sse[0] = total_sse;
   psnr->samples[0] = total_samples;
   psnr->psnr[0] =
-      vpx_sse_to_psnr((double)total_samples, peak, (double)total_sse);
+      aom_sse_to_psnr((double)total_samples, peak, (double)total_sse);
 }

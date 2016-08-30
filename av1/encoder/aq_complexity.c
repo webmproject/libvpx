@@ -16,7 +16,7 @@
 #include "av1/encoder/encodeframe.h"
 #include "av1/common/seg_common.h"
 #include "av1/encoder/segmentation.h"
-#include "aom_dsp/vpx_dsp_common.h"
+#include "aom_dsp/aom_dsp_common.h"
 #include "aom_ports/system_state.h"
 
 #define AQ_C_SEGMENTS 5
@@ -40,18 +40,18 @@ static const double aq_c_var_thresholds[AQ_C_STRENGTHS][AQ_C_SEGMENTS] = {
 
 #define DEFAULT_COMPLEXITY 64
 
-static int get_aq_c_strength(int q_index, vpx_bit_depth_t bit_depth) {
+static int get_aq_c_strength(int q_index, aom_bit_depth_t bit_depth) {
   // Approximate base quatizer (truncated to int)
-  const int base_quant = vp10_ac_quant(q_index, 0, bit_depth) / 4;
+  const int base_quant = av1_ac_quant(q_index, 0, bit_depth) / 4;
   return (base_quant > 10) + (base_quant > 25);
 }
 
-void vp10_setup_in_frame_q_adj(VP10_COMP *cpi) {
-  VP10_COMMON *const cm = &cpi->common;
+void av1_setup_in_frame_q_adj(AV1_COMP *cpi) {
+  AV1_COMMON *const cm = &cpi->common;
   struct segmentation *const seg = &cm->seg;
 
   // Make SURE use of floating point in this function is safe.
-  vpx_clear_system_state();
+  aom_clear_system_state();
 
   if (frame_is_intra_only(cm) || cm->error_resilient_mode ||
       cpi->refresh_alt_ref_frame ||
@@ -62,22 +62,22 @@ void vp10_setup_in_frame_q_adj(VP10_COMP *cpi) {
     // Clear down the segment map.
     memset(cpi->segmentation_map, DEFAULT_AQ2_SEG, cm->mi_rows * cm->mi_cols);
 
-    vp10_clearall_segfeatures(seg);
+    av1_clearall_segfeatures(seg);
 
     // Segmentation only makes sense if the target bits per SB is above a
     // threshold. Below this the overheads will usually outweigh any benefit.
     if (cpi->rc.sb64_target_rate < 256) {
-      vp10_disable_segmentation(seg);
+      av1_disable_segmentation(seg);
       return;
     }
 
-    vp10_enable_segmentation(seg);
+    av1_enable_segmentation(seg);
 
     // Select delta coding method.
     seg->abs_delta = SEGMENT_DELTADATA;
 
     // Default segment "Q" feature is disabled so it defaults to the baseline Q.
-    vp10_disable_segfeature(seg, DEFAULT_AQ2_SEG, SEG_LVL_ALT_Q);
+    av1_disable_segfeature(seg, DEFAULT_AQ2_SEG, SEG_LVL_ALT_Q);
 
     // Use some of the segments for in frame Q adjustment.
     for (segment = 0; segment < AQ_C_SEGMENTS; ++segment) {
@@ -85,7 +85,7 @@ void vp10_setup_in_frame_q_adj(VP10_COMP *cpi) {
 
       if (segment == DEFAULT_AQ2_SEG) continue;
 
-      qindex_delta = vp10_compute_qdelta_by_rate(
+      qindex_delta = av1_compute_qdelta_by_rate(
           &cpi->rc, cm->frame_type, cm->base_qindex,
           aq_c_q_adj_factor[aq_strength][segment], cm->bit_depth);
 
@@ -97,8 +97,8 @@ void vp10_setup_in_frame_q_adj(VP10_COMP *cpi) {
         qindex_delta = -cm->base_qindex + 1;
       }
       if ((cm->base_qindex + qindex_delta) > 0) {
-        vp10_enable_segfeature(seg, segment, SEG_LVL_ALT_Q);
-        vp10_set_segdata(seg, segment, SEG_LVL_ALT_Q, qindex_delta);
+        av1_enable_segfeature(seg, segment, SEG_LVL_ALT_Q);
+        av1_set_segdata(seg, segment, SEG_LVL_ALT_Q, qindex_delta);
       }
     }
   }
@@ -110,13 +110,13 @@ void vp10_setup_in_frame_q_adj(VP10_COMP *cpi) {
 // Select a segment for the current block.
 // The choice of segment for a block depends on the ratio of the projected
 // bits for the block vs a target average and its spatial complexity.
-void vp10_caq_select_segment(VP10_COMP *cpi, MACROBLOCK *mb, BLOCK_SIZE bs,
-                             int mi_row, int mi_col, int projected_rate) {
-  VP10_COMMON *const cm = &cpi->common;
+void av1_caq_select_segment(AV1_COMP *cpi, MACROBLOCK *mb, BLOCK_SIZE bs,
+                            int mi_row, int mi_col, int projected_rate) {
+  AV1_COMMON *const cm = &cpi->common;
 
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
-  const int xmis = VPXMIN(cm->mi_cols - mi_col, num_8x8_blocks_wide_lookup[bs]);
-  const int ymis = VPXMIN(cm->mi_rows - mi_row, num_8x8_blocks_high_lookup[bs]);
+  const int xmis = AOMMIN(cm->mi_cols - mi_col, num_8x8_blocks_wide_lookup[bs]);
+  const int ymis = AOMMIN(cm->mi_rows - mi_row, num_8x8_blocks_high_lookup[bs]);
   int x, y;
   int i;
   unsigned char segment;
@@ -132,13 +132,13 @@ void vp10_caq_select_segment(VP10_COMP *cpi, MACROBLOCK *mb, BLOCK_SIZE bs,
     double low_var_thresh;
     const int aq_strength = get_aq_c_strength(cm->base_qindex, cm->bit_depth);
 
-    vpx_clear_system_state();
-    low_var_thresh = (cpi->oxcf.pass == 2) ? VPXMAX(cpi->twopass.mb_av_energy,
+    aom_clear_system_state();
+    low_var_thresh = (cpi->oxcf.pass == 2) ? AOMMAX(cpi->twopass.mb_av_energy,
                                                     MIN_DEFAULT_LV_THRESH)
                                            : DEFAULT_LV_THRESH;
 
-    vp10_setup_src_planes(mb, cpi->Source, mi_row, mi_col);
-    logvar = vp10_log_block_var(cpi, mb, bs);
+    av1_setup_src_planes(mb, cpi->Source, mi_row, mi_col);
+    logvar = av1_log_block_var(cpi, mb, bs);
 
     segment = AQ_C_SEGMENTS - 1;  // Just in case no break out below.
     for (i = 0; i < AQ_C_SEGMENTS; ++i) {

@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_MIPS_FWD_TXFM_MSA_H_
-#define VPX_DSP_MIPS_FWD_TXFM_MSA_H_
+#ifndef AOM_DSP_MIPS_FWD_TXFM_MSA_H_
+#define AOM_DSP_MIPS_FWD_TXFM_MSA_H_
 
 #include "aom_dsp/mips/txfm_macros_msa.h"
 #include "aom_dsp/txfm_common.h"
@@ -30,7 +30,7 @@
     HADD_SW_S32(vec_w_m);                                                      \
   })
 
-#define VPX_FDCT4(in0, in1, in2, in3, out0, out1, out2, out3)                  \
+#define AOM_FDCT4(in0, in1, in2, in3, out0, out1, out2, out3)                  \
   {                                                                            \
     v8i16 cnst0_m, cnst1_m, cnst2_m, cnst3_m;                                  \
     v8i16 vec0_m, vec1_m, vec2_m, vec3_m;                                      \
@@ -71,7 +71,7 @@
                in6, in7);                                                    \
   }
 
-#define VPX_FDCT8(in0, in1, in2, in3, in4, in5, in6, in7, out0, out1, out2,  \
+#define AOM_FDCT8(in0, in1, in2, in3, in4, in5, in6, in7, out0, out1, out2,  \
                   out3, out4, out5, out6, out7)                              \
   {                                                                          \
     v8i16 s0_m, s1_m, s2_m, s3_m, s4_m, s5_m, s6_m;                          \
@@ -377,4 +377,4 @@
 void fdct8x16_1d_column(const int16_t *input, int16_t *tmp_ptr,
                         int32_t src_stride);
 void fdct16x8_1d_row(int16_t *input, int16_t *output);
-#endif  // VPX_DSP_MIPS_FWD_TXFM_MSA_H_
+#endif  // AOM_DSP_MIPS_FWD_TXFM_MSA_H_

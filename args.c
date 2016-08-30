@@ -151,14 +151,14 @@ int arg_parse_int(const struct arg *arg) {
   return 0;
 }
 
-struct vpx_rational {
+struct aom_rational {
   int num; /**< fraction numerator */
   int den; /**< fraction denominator */
 };
-struct vpx_rational arg_parse_rational(const struct arg *arg) {
+struct aom_rational arg_parse_rational(const struct arg *arg) {
   long int rawval;
   char *endptr;
-  struct vpx_rational rat;
+  struct aom_rational rat;
 
   /* parse numerator */
   rawval = strtol(arg->val, &endptr, 10);

@@ -11,8 +11,8 @@
 #include <assert.h>
 #include <emmintrin.h>  // SSE2
 
-#include "./vp10_rtcd.h"
-#include "./vpx_dsp_rtcd.h"
+#include "./av1_rtcd.h"
+#include "./aom_dsp_rtcd.h"
 #include "aom_dsp/txfm_common.h"
 #include "aom_dsp/x86/fwd_txfm_sse2.h"
 #include "aom_dsp/x86/txfm_common_sse2.h"
@@ -200,12 +200,12 @@ static void fidtx4_sse2(__m128i *in) {
 }
 #endif  // CONFIG_EXT_TX
 
-void vp10_fht4x4_sse2(const int16_t *input, tran_low_t *output, int stride,
-                      int tx_type) {
+void av1_fht4x4_sse2(const int16_t *input, tran_low_t *output, int stride,
+                     int tx_type) {
   __m128i in[4];
 
   switch (tx_type) {
-    case DCT_DCT: vpx_fdct4x4_sse2(input, output, stride); break;
+    case DCT_DCT: aom_fdct4x4_sse2(input, output, stride); break;
     case ADST_DCT:
       load_buffer_4x4(input, in, stride, 0, 0);
       fadst4_sse2(in);
@@ -296,12 +296,14 @@ void vp10_fht4x4_sse2(const int16_t *input, tran_low_t *output, int stride,
   }
 }
 
-void vp10_fdct8x8_quant_sse2(
-    const int16_t *input, int stride, int16_t *coeff_ptr, intptr_t n_coeffs,
-    int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr,
-    const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
-    int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr, const int16_t *dequant_ptr,
-    uint16_t *eob_ptr, const int16_t *scan_ptr, const int16_t *iscan_ptr) {
+void av1_fdct8x8_quant_sse2(const int16_t *input, int stride,
+                            int16_t *coeff_ptr, intptr_t n_coeffs,
+                            int skip_block, const int16_t *zbin_ptr,
+                            const int16_t *round_ptr, const int16_t *quant_ptr,
+                            const int16_t *quant_shift_ptr, int16_t *qcoeff_ptr,
+                            int16_t *dqcoeff_ptr, const int16_t *dequant_ptr,
+                            uint16_t *eob_ptr, const int16_t *scan_ptr,
+                            const int16_t *iscan_ptr) {
   __m128i zero;
   int pass;
   // Constants
@@ -1282,12 +1284,12 @@ static void fidtx8_sse2(__m128i *in) {
 }
 #endif  // CONFIG_EXT_TX
 
-void vp10_fht8x8_sse2(const int16_t *input, tran_low_t *output, int stride,
-                      int tx_type) {
+void av1_fht8x8_sse2(const int16_t *input, tran_low_t *output, int stride,
+                     int tx_type) {
   __m128i in[8];
 
   switch (tx_type) {
-    case DCT_DCT: vpx_fdct8x8_sse2(input, output, stride); break;
+    case DCT_DCT: aom_fdct8x8_sse2(input, output, stride); break;
     case ADST_DCT:
       load_buffer_8x8(input, in, stride, 0, 0);
       fadst8_sse2(in);
@@ -2472,12 +2474,12 @@ static void fidtx16_sse2(__m128i *in0, __m128i *in1) {
 }
 #endif  // CONFIG_EXT_TX
 
-void vp10_fht16x16_sse2(const int16_t *input, tran_low_t *output, int stride,
-                        int tx_type) {
+void av1_fht16x16_sse2(const int16_t *input, tran_low_t *output, int stride,
+                       int tx_type) {
   __m128i in0[16], in1[16];
 
   switch (tx_type) {
-    case DCT_DCT: vpx_fdct16x16_sse2(input, output, stride); break;
+    case DCT_DCT: aom_fdct16x16_sse2(input, output, stride); break;
     case ADST_DCT:
       load_buffer_16x16(input, in0, in1, stride, 0, 0);
       fadst16_sse2(in0, in1);

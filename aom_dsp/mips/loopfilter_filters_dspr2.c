@@ -10,16 +10,16 @@
 
 #include <stdlib.h>
 
-#include "./vpx_dsp_rtcd.h"
-#include "aom/vpx_integer.h"
+#include "./aom_dsp_rtcd.h"
+#include "aom/aom_integer.h"
 #include "aom_dsp/mips/common_dspr2.h"
 #include "aom_dsp/mips/loopfilter_filters_dspr2.h"
 #include "aom_dsp/mips/loopfilter_macros_dspr2.h"
 #include "aom_dsp/mips/loopfilter_masks_dspr2.h"
-#include "aom_mem/vpx_mem.h"
+#include "aom_mem/aom_mem.h"
 
 #if HAVE_DSPR2
-void vpx_lpf_horizontal_4_dspr2(unsigned char *s, int pitch,
+void aom_lpf_horizontal_4_dspr2(unsigned char *s, int pitch,
                                 const uint8_t *blimit, const uint8_t *limit,
                                 const uint8_t *thresh) {
   uint8_t i;
@@ -104,7 +104,7 @@ void vpx_lpf_horizontal_4_dspr2(unsigned char *s, int pitch,
   }
 }
 
-void vpx_lpf_vertical_4_dspr2(unsigned char *s, int pitch,
+void aom_lpf_vertical_4_dspr2(unsigned char *s, int pitch,
                               const uint8_t *blimit, const uint8_t *limit,
                               const uint8_t *thresh) {
   uint8_t i;
@@ -281,46 +281,46 @@ void vpx_lpf_vertical_4_dspr2(unsigned char *s, int pitch,
   }
 }
 
-void vpx_lpf_horizontal_4_dual_dspr2(
+void aom_lpf_horizontal_4_dual_dspr2(
     uint8_t *s, int p /* pitch */, const uint8_t *blimit0,
     const uint8_t *limit0, const uint8_t *thresh0, const uint8_t *blimit1,
     const uint8_t *limit1, const uint8_t *thresh1) {
-  vpx_lpf_horizontal_4_dspr2(s, p, blimit0, limit0, thresh0);
-  vpx_lpf_horizontal_4_dspr2(s + 8, p, blimit1, limit1, thresh1);
+  aom_lpf_horizontal_4_dspr2(s, p, blimit0, limit0, thresh0);
+  aom_lpf_horizontal_4_dspr2(s + 8, p, blimit1, limit1, thresh1);
 }
 
-void vpx_lpf_horizontal_8_dual_dspr2(
+void aom_lpf_horizontal_8_dual_dspr2(
     uint8_t *s, int p /* pitch */, const uint8_t *blimit0,
     const uint8_t *limit0, const uint8_t *thresh0, const uint8_t *blimit1,
     const uint8_t *limit1, const uint8_t *thresh1) {
-  vpx_lpf_horizontal_8_dspr2(s, p, blimit0, limit0, thresh0);
-  vpx_lpf_horizontal_8_dspr2(s + 8, p, blimit1, limit1, thresh1);
+  aom_lpf_horizontal_8_dspr2(s, p, blimit0, limit0, thresh0);
+  aom_lpf_horizontal_8_dspr2(s + 8, p, blimit1, limit1, thresh1);
 }
 
-void vpx_lpf_vertical_4_dual_dspr2(uint8_t *s, int p, const uint8_t *blimit0,
+void aom_lpf_vertical_4_dual_dspr2(uint8_t *s, int p, const uint8_t *blimit0,
                                    const uint8_t *limit0,
                                    const uint8_t *thresh0,
                                    const uint8_t *blimit1,
                                    const uint8_t *limit1,
                                    const uint8_t *thresh1) {
-  vpx_lpf_vertical_4_dspr2(s, p, blimit0, limit0, thresh0);
-  vpx_lpf_vertical_4_dspr2(s + 8 * p, p, blimit1, limit1, thresh1);
+  aom_lpf_vertical_4_dspr2(s, p, blimit0, limit0, thresh0);
+  aom_lpf_vertical_4_dspr2(s + 8 * p, p, blimit1, limit1, thresh1);
 }
 
-void vpx_lpf_vertical_8_dual_dspr2(uint8_t *s, int p, const uint8_t *blimit0,
+void aom_lpf_vertical_8_dual_dspr2(uint8_t *s, int p, const uint8_t *blimit0,
                                    const uint8_t *limit0,
                                    const uint8_t *thresh0,
                                    const uint8_t *blimit1,
                                    const uint8_t *limit1,
                                    const uint8_t *thresh1) {
-  vpx_lpf_vertical_8_dspr2(s, p, blimit0, limit0, thresh0);
-  vpx_lpf_vertical_8_dspr2(s + 8 * p, p, blimit1, limit1, thresh1);
+  aom_lpf_vertical_8_dspr2(s, p, blimit0, limit0, thresh0);
+  aom_lpf_vertical_8_dspr2(s + 8 * p, p, blimit1, limit1, thresh1);
 }
 
-void vpx_lpf_vertical_16_dual_dspr2(uint8_t *s, int p, const uint8_t *blimit,
+void aom_lpf_vertical_16_dual_dspr2(uint8_t *s, int p, const uint8_t *blimit,
                                     const uint8_t *limit,
                                     const uint8_t *thresh) {
-  vpx_lpf_vertical_16_dspr2(s, p, blimit, limit, thresh);
-  vpx_lpf_vertical_16_dspr2(s + 8 * p, p, blimit, limit, thresh);
+  aom_lpf_vertical_16_dspr2(s, p, blimit, limit, thresh);
+  aom_lpf_vertical_16_dspr2(s + 8 * p, p, blimit, limit, thresh);
 }
 #endif  // #if HAVE_DSPR2

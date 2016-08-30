@@ -181,7 +181,7 @@ SECTION .text
   PROCESS_64x2x4  0, %4, %5, %4 + 64, %5 + 64, %6
 %endmacro
 
-; void vpx_sadNxNx4d_sse2(uint8_t *src,    int src_stride,
+; void aom_sadNxNx4d_sse2(uint8_t *src,    int src_stride,
 ;                         uint8_t *ref[4], int ref_stride,
 ;                         uint32_t res[4]);
 ; where NxN = 64x64, 32x32, 16x16, 16x8, 8x16, 8x8, 8x4, 4x8 and 4x4

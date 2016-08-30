@@ -8,10 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_ENCODER_GLOBAL_MOTION_H_
-#define VP10_ENCODER_GLOBAL_MOTION_H_
+#ifndef AV1_ENCODER_GLOBAL_MOTION_H_
+#define AV1_ENCODER_GLOBAL_MOTION_H_
 
-#include "aom/vpx_integer.h"
+#include "aom/aom_integer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,4 +25,4 @@ int compute_global_motion_feature_based(TransformationType type,
 #ifdef __cplusplus
 }  // extern "C"
 #endif
-#endif  // VP10_ENCODER_GLOBAL_MOTION_H_
+#endif  // AV1_ENCODER_GLOBAL_MOTION_H_

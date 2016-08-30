@@ -10,9 +10,9 @@
 
 #include <arm_neon.h>
 
-#include "./vpx_dsp_rtcd.h"
-#include "./vpx_config.h"
-#include "aom/vpx_integer.h"
+#include "./aom_dsp_rtcd.h"
+#include "./aom_config.h"
+#include "aom/aom_integer.h"
 
 static INLINE void loop_filter_neon_16(uint8x16_t qblimit,  // blimit
                                        uint8x16_t qlimit,   // limit
@@ -122,7 +122,7 @@ static INLINE void loop_filter_neon_16(uint8x16_t qblimit,  // blimit
   return;
 }
 
-void vpx_lpf_horizontal_4_dual_neon(
+void aom_lpf_horizontal_4_dual_neon(
     uint8_t *s, int p /* pitch */, const uint8_t *blimit0,
     const uint8_t *limit0, const uint8_t *thresh0, const uint8_t *blimit1,
     const uint8_t *limit1, const uint8_t *thresh1) {

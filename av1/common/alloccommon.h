@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_COMMON_ALLOCCOMMON_H_
-#define VP10_COMMON_ALLOCCOMMON_H_
+#ifndef AV1_COMMON_ALLOCCOMMON_H_
+#define AV1_COMMON_ALLOCCOMMON_H_
 
 #define INVALID_IDX -1  // Invalid buffer index.
 
@@ -17,29 +17,29 @@
 extern "C" {
 #endif
 
-struct VP10Common;
+struct AV1Common;
 struct BufferPool;
 
-void vp10_remove_common(struct VP10Common *cm);
+void av1_remove_common(struct AV1Common *cm);
 
-int vp10_alloc_context_buffers(struct VP10Common *cm, int width, int height);
-void vp10_init_context_buffers(struct VP10Common *cm);
-void vp10_free_context_buffers(struct VP10Common *cm);
+int av1_alloc_context_buffers(struct AV1Common *cm, int width, int height);
+void av1_init_context_buffers(struct AV1Common *cm);
+void av1_free_context_buffers(struct AV1Common *cm);
 
-void vp10_free_ref_frame_buffers(struct BufferPool *pool);
+void av1_free_ref_frame_buffers(struct BufferPool *pool);
 #if CONFIG_LOOP_RESTORATION
-void vp10_free_restoration_buffers(struct VP10Common *cm);
+void av1_free_restoration_buffers(struct AV1Common *cm);
 #endif  // CONFIG_LOOP_RESTORATION
 
-int vp10_alloc_state_buffers(struct VP10Common *cm, int width, int height);
-void vp10_free_state_buffers(struct VP10Common *cm);
+int av1_alloc_state_buffers(struct AV1Common *cm, int width, int height);
+void av1_free_state_buffers(struct AV1Common *cm);
 
-void vp10_set_mb_mi(struct VP10Common *cm, int width, int height);
+void av1_set_mb_mi(struct AV1Common *cm, int width, int height);
 
-void vp10_swap_current_and_last_seg_map(struct VP10Common *cm);
+void av1_swap_current_and_last_seg_map(struct AV1Common *cm);
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
 
-#endif  // VP10_COMMON_ALLOCCOMMON_H_
+#endif  // AV1_COMMON_ALLOCCOMMON_H_

@@ -13,9 +13,9 @@
 
 #include "av1/common/common.h"
 
-int64_t vp10_highbd_block_error_sse2(tran_low_t *coeff, tran_low_t *dqcoeff,
-                                     intptr_t block_size, int64_t *ssz,
-                                     int bps) {
+int64_t av1_highbd_block_error_sse2(tran_low_t *coeff, tran_low_t *dqcoeff,
+                                    intptr_t block_size, int64_t *ssz,
+                                    int bps) {
   int i, j, test;
   uint32_t temp[4];
   __m128i max, min, cmp0, cmp1, cmp2, cmp3;

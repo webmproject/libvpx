@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_BITWRITER_H_
-#define VPX_DSP_BITWRITER_H_
+#ifndef AOM_DSP_BITWRITER_H_
+#define AOM_DSP_BITWRITER_H_
 
 #include "aom_ports/mem.h"
 #include "aom_dsp/prob.h"
@@ -19,18 +19,18 @@
 extern "C" {
 #endif
 
-typedef struct vpx_writer {
+typedef struct aom_writer {
   unsigned int lowvalue;
   unsigned int range;
   int count;
   unsigned int pos;
   uint8_t *buffer;
-} vpx_writer;
+} aom_writer;
 
-void vpx_start_encode(vpx_writer *bc, uint8_t *buffer);
-void vpx_stop_encode(vpx_writer *bc);
+void aom_start_encode(aom_writer *bc, uint8_t *buffer);
+void aom_stop_encode(aom_writer *bc);
 
-static INLINE void vpx_write(vpx_writer *br, int bit, int probability) {
+static INLINE void aom_write(aom_writer *br, int bit, int probability) {
   unsigned int split;
   int count = br->count;
   unsigned int range = br->range;
@@ -50,7 +50,7 @@ static INLINE void vpx_write(vpx_writer *br, int bit, int probability) {
     range = br->range - split;
   }
 
-  shift = vpx_norm[range];
+  shift = aom_norm[range];
 
   range <<= shift;
   count += shift;
@@ -82,20 +82,20 @@ static INLINE void vpx_write(vpx_writer *br, int bit, int probability) {
   br->range = range;
 }
 
-static INLINE void vpx_write_bit(vpx_writer *w, int bit) {
-  vpx_write(w, bit, 128);  // vpx_prob_half
+static INLINE void aom_write_bit(aom_writer *w, int bit) {
+  aom_write(w, bit, 128);  // aom_prob_half
 }
 
-static INLINE void vpx_write_literal(vpx_writer *w, int data, int bits) {
+static INLINE void aom_write_literal(aom_writer *w, int data, int bits) {
   int bit;
 
-  for (bit = bits - 1; bit >= 0; bit--) vpx_write_bit(w, 1 & (data >> bit));
+  for (bit = bits - 1; bit >= 0; bit--) aom_write_bit(w, 1 & (data >> bit));
 }
 
-#define vpx_write_prob(w, v) vpx_write_literal((w), (v), 8)
+#define aom_write_prob(w, v) aom_write_literal((w), (v), 8)
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
 
-#endif  // VPX_DSP_BITWRITER_H_
+#endif  // AOM_DSP_BITWRITER_H_

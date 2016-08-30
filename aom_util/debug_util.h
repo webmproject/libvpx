@@ -8,10 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_UTIL_DEBUG_UTIL_H_
-#define VPX_UTIL_DEBUG_UTIL_H_
+#ifndef AOM_UTIL_DEBUG_UTIL_H_
+#define AOM_UTIL_DEBUG_UTIL_H_
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,4 +40,4 @@ void bitstream_queue_set_skip_read(int skip);
 }  // extern "C"
 #endif
 
-#endif  // VPX_UTIL_DEBUG_UTIL_H_
+#endif  // AOM_UTIL_DEBUG_UTIL_H_

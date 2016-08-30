@@ -403,8 +403,8 @@ static void postproc_fdct16x8_1d_row(int16_t *intermediate, int16_t *output) {
   ST_SH8(tmp4, in4, tmp5, in5, tmp6, in6, tmp7, in7, out, 16);
 }
 
-void vp10_fht16x16_msa(const int16_t *input, int16_t *output, int32_t stride,
-                       int32_t tx_type) {
+void av1_fht16x16_msa(const int16_t *input, int16_t *output, int32_t stride,
+                      int32_t tx_type) {
   DECLARE_ALIGNED(32, int16_t, tmp[256]);
   DECLARE_ALIGNED(32, int16_t, trans_buf[256]);
   DECLARE_ALIGNED(32, int16_t, tmp_buf[128]);

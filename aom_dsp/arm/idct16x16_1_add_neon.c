@@ -13,7 +13,7 @@
 #include "aom_dsp/inv_txfm.h"
 #include "aom_ports/mem.h"
 
-void vpx_idct16x16_1_add_neon(int16_t *input, uint8_t *dest, int dest_stride) {
+void aom_idct16x16_1_add_neon(int16_t *input, uint8_t *dest, int dest_stride) {
   uint8x8_t d2u8, d3u8, d30u8, d31u8;
   uint64x1_t d2u64, d3u64, d4u64, d5u64;
   uint16x8_t q0u16, q9u16, q10u16, q11u16, q12u16;

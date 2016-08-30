@@ -11,20 +11,19 @@
 #include <assert.h>
 #include <stdlib.h>  // qsort()
 
-#include "./vp10_rtcd.h"
-#include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
-#include "./vpx_scale_rtcd.h"
-#include "./vpx_config.h"
+#include "./av1_rtcd.h"
+#include "./aom_config.h"
+#include "./aom_dsp_rtcd.h"
+#include "./aom_scale_rtcd.h"
 
 #include "aom_dsp/bitreader_buffer.h"
 #include "av1/decoder/bitreader.h"
-#include "aom_dsp/vpx_dsp_common.h"
-#include "aom_mem/vpx_mem.h"
+#include "aom_dsp/aom_dsp_common.h"
+#include "aom_mem/aom_mem.h"
 #include "aom_ports/mem.h"
 #include "aom_ports/mem_ops.h"
-#include "aom_scale/vpx_scale.h"
-#include "aom_util/vpx_thread.h"
+#include "aom_scale/aom_scale.h"
+#include "aom_util/aom_thread.h"
 
 #include "av1/common/alloccommon.h"
 #if CONFIG_CLPF
@@ -51,9 +50,9 @@
 #include "av1/decoder/decoder.h"
 #include "av1/decoder/dsubexp.h"
 
-#define MAX_VPX_HEADER_SIZE 80
+#define MAX_AV1_HEADER_SIZE 80
 
-static int is_compound_reference_allowed(const VP10_COMMON *cm) {
+static int is_compound_reference_allowed(const AV1_COMMON *cm) {
   int i;
   if (frame_is_intra_only(cm)) return 0;
   for (i = 1; i < INTER_REFS_PER_FRAME; ++i)
@@ -62,7 +61,7 @@ static int is_compound_reference_allowed(const VP10_COMMON *cm) {
   return 0;
 }
 
-static void setup_compound_reference_mode(VP10_COMMON *cm) {
+static void setup_compound_reference_mode(AV1_COMMON *cm) {
 #if CONFIG_EXT_REFS
   cm->comp_fwd_ref[0] = LAST_FRAME;
   cm->comp_fwd_ref[1] = LAST2_FRAME;
@@ -94,51 +93,51 @@ static int read_is_valid(const uint8_t *start, size_t len, const uint8_t *end) {
   return len != 0 && len <= (size_t)(end - start);
 }
 
-static int decode_unsigned_max(struct vpx_read_bit_buffer *rb, int max) {
-  const int data = vpx_rb_read_literal(rb, get_unsigned_bits(max));
+static int decode_unsigned_max(struct aom_read_bit_buffer *rb, int max) {
+  const int data = aom_rb_read_literal(rb, get_unsigned_bits(max));
   return data > max ? max : data;
 }
 
-static TX_MODE read_tx_mode(struct vpx_read_bit_buffer *rb) {
-  return vpx_rb_read_bit(rb) ? TX_MODE_SELECT : vpx_rb_read_literal(rb, 2);
+static TX_MODE read_tx_mode(struct aom_read_bit_buffer *rb) {
+  return aom_rb_read_bit(rb) ? TX_MODE_SELECT : aom_rb_read_literal(rb, 2);
 }
 
-static void read_switchable_interp_probs(FRAME_CONTEXT *fc, vp10_reader *r) {
+static void read_switchable_interp_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   int i, j;
   for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; ++j)
     for (i = 0; i < SWITCHABLE_FILTERS - 1; ++i)
-      vp10_diff_update_prob(r, &fc->switchable_interp_prob[j][i]);
+      av1_diff_update_prob(r, &fc->switchable_interp_prob[j][i]);
 }
 
-static void read_inter_mode_probs(FRAME_CONTEXT *fc, vp10_reader *r) {
+static void read_inter_mode_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   int i;
 #if CONFIG_REF_MV
   for (i = 0; i < NEWMV_MODE_CONTEXTS; ++i)
-    vp10_diff_update_prob(r, &fc->newmv_prob[i]);
+    av1_diff_update_prob(r, &fc->newmv_prob[i]);
   for (i = 0; i < ZEROMV_MODE_CONTEXTS; ++i)
-    vp10_diff_update_prob(r, &fc->zeromv_prob[i]);
+    av1_diff_update_prob(r, &fc->zeromv_prob[i]);
   for (i = 0; i < REFMV_MODE_CONTEXTS; ++i)
-    vp10_diff_update_prob(r, &fc->refmv_prob[i]);
+    av1_diff_update_prob(r, &fc->refmv_prob[i]);
   for (i = 0; i < DRL_MODE_CONTEXTS; ++i)
-    vp10_diff_update_prob(r, &fc->drl_prob[i]);
+    av1_diff_update_prob(r, &fc->drl_prob[i]);
 #if CONFIG_EXT_INTER
-  vp10_diff_update_prob(r, &fc->new2mv_prob);
+  av1_diff_update_prob(r, &fc->new2mv_prob);
 #endif  // CONFIG_EXT_INTER
 #else
   int j;
   for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
     for (j = 0; j < INTER_MODES - 1; ++j)
-      vp10_diff_update_prob(r, &fc->inter_mode_probs[i][j]);
+      av1_diff_update_prob(r, &fc->inter_mode_probs[i][j]);
 #endif
 }
 
 #if CONFIG_EXT_INTER
-static void read_inter_compound_mode_probs(FRAME_CONTEXT *fc, vp10_reader *r) {
+static void read_inter_compound_mode_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   int i, j;
-  if (vp10_read(r, GROUP_DIFF_UPDATE_PROB)) {
+  if (aom_read(r, GROUP_DIFF_UPDATE_PROB)) {
     for (j = 0; j < INTER_MODE_CONTEXTS; ++j) {
       for (i = 0; i < INTER_COMPOUND_MODES - 1; ++i) {
-        vp10_diff_update_prob(r, &fc->inter_compound_mode_probs[j][i]);
+        av1_diff_update_prob(r, &fc->inter_compound_mode_probs[j][i]);
       }
     }
   }
@@ -146,28 +145,28 @@ static void read_inter_compound_mode_probs(FRAME_CONTEXT *fc, vp10_reader *r) {
 #endif  // CONFIG_EXT_INTER
 
 static REFERENCE_MODE read_frame_reference_mode(
-    const VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
+    const AV1_COMMON *cm, struct aom_read_bit_buffer *rb) {
   if (is_compound_reference_allowed(cm)) {
-    return vpx_rb_read_bit(rb)
+    return aom_rb_read_bit(rb)
                ? REFERENCE_MODE_SELECT
-               : (vpx_rb_read_bit(rb) ? COMPOUND_REFERENCE : SINGLE_REFERENCE);
+               : (aom_rb_read_bit(rb) ? COMPOUND_REFERENCE : SINGLE_REFERENCE);
   } else {
     return SINGLE_REFERENCE;
   }
 }
 
-static void read_frame_reference_mode_probs(VP10_COMMON *cm, vp10_reader *r) {
+static void read_frame_reference_mode_probs(AV1_COMMON *cm, aom_reader *r) {
   FRAME_CONTEXT *const fc = cm->fc;
   int i, j;
 
   if (cm->reference_mode == REFERENCE_MODE_SELECT)
     for (i = 0; i < COMP_INTER_CONTEXTS; ++i)
-      vp10_diff_update_prob(r, &fc->comp_inter_prob[i]);
+      av1_diff_update_prob(r, &fc->comp_inter_prob[i]);
 
   if (cm->reference_mode != COMPOUND_REFERENCE) {
     for (i = 0; i < REF_CONTEXTS; ++i) {
       for (j = 0; j < (SINGLE_REFS - 1); ++j) {
-        vp10_diff_update_prob(r, &fc->single_ref_prob[i][j]);
+        av1_diff_update_prob(r, &fc->single_ref_prob[i][j]);
       }
     }
   }
@@ -176,29 +175,29 @@ static void read_frame_reference_mode_probs(VP10_COMMON *cm, vp10_reader *r) {
     for (i = 0; i < REF_CONTEXTS; ++i) {
 #if CONFIG_EXT_REFS
       for (j = 0; j < (FWD_REFS - 1); ++j)
-        vp10_diff_update_prob(r, &fc->comp_ref_prob[i][j]);
+        av1_diff_update_prob(r, &fc->comp_ref_prob[i][j]);
       for (j = 0; j < (BWD_REFS - 1); ++j)
-        vp10_diff_update_prob(r, &fc->comp_bwdref_prob[i][j]);
+        av1_diff_update_prob(r, &fc->comp_bwdref_prob[i][j]);
 #else
       for (j = 0; j < (COMP_REFS - 1); ++j)
-        vp10_diff_update_prob(r, &fc->comp_ref_prob[i][j]);
+        av1_diff_update_prob(r, &fc->comp_ref_prob[i][j]);
 #endif  // CONFIG_EXT_REFS
     }
   }
 }
 
-static void update_mv_probs(vpx_prob *p, int n, vp10_reader *r) {
+static void update_mv_probs(aom_prob *p, int n, aom_reader *r) {
   int i;
-  for (i = 0; i < n; ++i) vp10_diff_update_prob(r, &p[i]);
+  for (i = 0; i < n; ++i) av1_diff_update_prob(r, &p[i]);
 }
 
-static void read_mv_probs(nmv_context *ctx, int allow_hp, vp10_reader *r) {
+static void read_mv_probs(nmv_context *ctx, int allow_hp, aom_reader *r) {
   int i, j;
 
   update_mv_probs(ctx->joints, MV_JOINTS - 1, r);
 
 #if CONFIG_REF_MV
-  vp10_diff_update_prob(r, &ctx->zero_rmv);
+  av1_diff_update_prob(r, &ctx->zero_rmv);
 #endif
 
   for (i = 0; i < 2; ++i) {
@@ -238,16 +237,16 @@ static void inverse_transform_block(MACROBLOCKD *xd, int plane,
     inv_txfm_param.eob = eob;
     inv_txfm_param.lossless = xd->lossless[xd->mi[0]->mbmi.segment_id];
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       inv_txfm_param.bd = xd->bd;
       highbd_inv_txfm_add(dqcoeff, dst, stride, &inv_txfm_param);
     } else {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
       inv_txfm_add(dqcoeff, dst, stride, &inv_txfm_param);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
     }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
     if (eob == 1) {
       dqcoeff[0] = 0;
@@ -272,7 +271,7 @@ static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
 #if CONFIG_ANS
                                                 struct AnsDecoder *const r,
 #else
-                                                vp10_reader *r,
+                                                aom_reader *r,
 #endif  // CONFIG_ANS
                                                 MB_MODE_INFO *const mbmi,
                                                 int plane, int row, int col,
@@ -287,22 +286,21 @@ static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
   if (mbmi->sb_type < BLOCK_8X8)
     if (plane == 0) mode = xd->mi[0]->bmi[(row << 1) + col].as_mode;
 
-  vp10_predict_intra_block(xd, pd->n4_wl, pd->n4_hl, tx_size, mode, dst,
-                           pd->dst.stride, dst, pd->dst.stride, col, row,
-                           plane);
+  av1_predict_intra_block(xd, pd->n4_wl, pd->n4_hl, tx_size, mode, dst,
+                          pd->dst.stride, dst, pd->dst.stride, col, row, plane);
 
   if (!mbmi->skip) {
     TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx, tx_size);
     const scan_order *sc = get_scan(tx_size, tx_type, 0);
-    const int eob = vp10_decode_block_tokens(xd, plane, sc, col, row, tx_size,
-                                             tx_type, r, mbmi->segment_id);
+    const int eob = av1_decode_block_tokens(xd, plane, sc, col, row, tx_size,
+                                            tx_type, r, mbmi->segment_id);
     inverse_transform_block(xd, plane, tx_type, tx_size, dst, pd->dst.stride,
                             eob);
   }
 }
 
 #if CONFIG_VAR_TX
-static void decode_reconstruct_tx(MACROBLOCKD *const xd, vp10_reader *r,
+static void decode_reconstruct_tx(MACROBLOCKD *const xd, aom_reader *r,
                                   MB_MODE_INFO *const mbmi, int plane,
                                   BLOCK_SIZE plane_bsize, int block,
                                   int blk_row, int blk_col, TX_SIZE tx_size,
@@ -330,8 +328,8 @@ static void decode_reconstruct_tx(MACROBLOCKD *const xd, vp10_reader *r,
     TX_TYPE tx_type = get_tx_type(plane_type, xd, block, plane_tx_size);
     const scan_order *sc = get_scan(plane_tx_size, tx_type, 1);
     const int eob =
-        vp10_decode_block_tokens(xd, plane, sc, blk_col, blk_row, plane_tx_size,
-                                 tx_type, r, mbmi->segment_id);
+        av1_decode_block_tokens(xd, plane, sc, blk_col, blk_row, plane_tx_size,
+                                tx_type, r, mbmi->segment_id);
     inverse_transform_block(
         xd, plane, tx_type, plane_tx_size,
         &pd->dst.buf[4 * blk_row * pd->dst.stride + 4 * blk_col],
@@ -363,7 +361,7 @@ static int reconstruct_inter_block(MACROBLOCKD *const xd,
 #if CONFIG_ANS
                                    struct AnsDecoder *const r,
 #else
-                                   vp10_reader *r,
+                                   aom_reader *r,
 #endif
                                    int segment_id, int plane, int row, int col,
                                    TX_SIZE tx_size) {
@@ -372,8 +370,8 @@ static int reconstruct_inter_block(MACROBLOCKD *const xd,
   int block_idx = (row << 1) + col;
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx, tx_size);
   const scan_order *sc = get_scan(tx_size, tx_type, 1);
-  const int eob = vp10_decode_block_tokens(xd, plane, sc, col, row, tx_size,
-                                           tx_type, r, segment_id);
+  const int eob = av1_decode_block_tokens(xd, plane, sc, col, row, tx_size,
+                                          tx_type, r, segment_id);
 
   inverse_transform_block(xd, plane, tx_type, tx_size,
                           &pd->dst.buf[4 * row * pd->dst.stride + 4 * col],
@@ -385,8 +383,8 @@ static int reconstruct_inter_block(MACROBLOCKD *const xd,
 static INLINE TX_SIZE dec_get_uv_tx_size(const MB_MODE_INFO *mbmi, int n4_wl,
                                          int n4_hl) {
   // get minimum log2 num4x4s dimension
-  const int x = VPXMIN(n4_wl, n4_hl);
-  return VPXMIN(txsize_sqr_map[mbmi->tx_size], x);
+  const int x = AOMMIN(n4_wl, n4_hl);
+  return AOMMIN(txsize_sqr_map[mbmi->tx_size], x);
 }
 
 static INLINE void dec_reset_skip_context(MACROBLOCKD *xd) {
@@ -409,7 +407,7 @@ static void set_plane_n4(MACROBLOCKD *const xd, int bw, int bh, int bwl,
   }
 }
 
-static MB_MODE_INFO *set_offsets(VP10_COMMON *const cm, MACROBLOCKD *const xd,
+static MB_MODE_INFO *set_offsets(AV1_COMMON *const cm, MACROBLOCKD *const xd,
                                  BLOCK_SIZE bsize, int mi_row, int mi_col,
                                  int bw, int bh, int x_mis, int y_mis, int bwl,
                                  int bhl) {
@@ -439,12 +437,12 @@ static MB_MODE_INFO *set_offsets(VP10_COMMON *const cm, MACROBLOCKD *const xd,
   // as they are always compared to values that are in 1/8th pel units
   set_mi_row_col(xd, tile, mi_row, bh, mi_col, bw, cm->mi_rows, cm->mi_cols);
 
-  vp10_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
+  av1_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
   return &xd->mi[0]->mbmi;
 }
 
 #if CONFIG_SUPERTX
-static MB_MODE_INFO *set_offsets_extend(VP10_COMMON *const cm,
+static MB_MODE_INFO *set_offsets_extend(AV1_COMMON *const cm,
                                         MACROBLOCKD *const xd,
                                         const TileInfo *const tile,
                                         BLOCK_SIZE bsize_pred, int mi_row_pred,
@@ -471,10 +469,9 @@ static MB_MODE_INFO *set_offsets_extend(VP10_COMMON *const cm,
   return &xd->mi[0]->mbmi;
 }
 
-static MB_MODE_INFO *set_mb_offsets(VP10_COMMON *const cm,
-                                    MACROBLOCKD *const xd, BLOCK_SIZE bsize,
-                                    int mi_row, int mi_col, int bw, int bh,
-                                    int x_mis, int y_mis) {
+static MB_MODE_INFO *set_mb_offsets(AV1_COMMON *const cm, MACROBLOCKD *const xd,
+                                    BLOCK_SIZE bsize, int mi_row, int mi_col,
+                                    int bw, int bh, int x_mis, int y_mis) {
   const int offset = mi_row * cm->mi_stride + mi_col;
   const TileInfo *const tile = &xd->tile;
   int x, y;
@@ -489,7 +486,7 @@ static MB_MODE_INFO *set_mb_offsets(VP10_COMMON *const cm,
   return &xd->mi[0]->mbmi;
 }
 
-static void set_offsets_topblock(VP10_COMMON *const cm, MACROBLOCKD *const xd,
+static void set_offsets_topblock(AV1_COMMON *const cm, MACROBLOCKD *const xd,
                                  const TileInfo *const tile, BLOCK_SIZE bsize,
                                  int mi_row, int mi_col) {
   const int bw = num_8x8_blocks_wide_lookup[bsize];
@@ -505,16 +502,16 @@ static void set_offsets_topblock(VP10_COMMON *const cm, MACROBLOCKD *const xd,
 
   set_mi_row_col(xd, tile, mi_row, bh, mi_col, bw, cm->mi_rows, cm->mi_cols);
 
-  vp10_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
+  av1_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
 }
 
-static void set_param_topblock(VP10_COMMON *const cm, MACROBLOCKD *const xd,
+static void set_param_topblock(AV1_COMMON *const cm, MACROBLOCKD *const xd,
                                BLOCK_SIZE bsize, int mi_row, int mi_col,
                                int txfm, int skip) {
   const int bw = num_8x8_blocks_wide_lookup[bsize];
   const int bh = num_8x8_blocks_high_lookup[bsize];
-  const int x_mis = VPXMIN(bw, cm->mi_cols - mi_col);
-  const int y_mis = VPXMIN(bh, cm->mi_rows - mi_row);
+  const int x_mis = AOMMIN(bw, cm->mi_cols - mi_col);
+  const int y_mis = AOMMIN(bh, cm->mi_rows - mi_row);
   const int offset = mi_row * cm->mi_stride + mi_col;
   int x, y;
 
@@ -534,21 +531,21 @@ static void set_param_topblock(VP10_COMMON *const cm, MACROBLOCKD *const xd,
 #endif
 }
 
-static void set_ref(VP10_COMMON *const cm, MACROBLOCKD *const xd, int idx,
+static void set_ref(AV1_COMMON *const cm, MACROBLOCKD *const xd, int idx,
                     int mi_row, int mi_col) {
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   RefBuffer *ref_buffer = &cm->frame_refs[mbmi->ref_frame[idx] - LAST_FRAME];
   xd->block_refs[idx] = ref_buffer;
-  if (!vp10_is_valid_scale(&ref_buffer->sf))
-    vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+  if (!av1_is_valid_scale(&ref_buffer->sf))
+    aom_internal_error(&cm->error, AOM_CODEC_UNSUP_BITSTREAM,
                        "Invalid scale factors");
-  vp10_setup_pre_planes(xd, idx, ref_buffer->buf, mi_row, mi_col,
-                        &ref_buffer->sf);
+  av1_setup_pre_planes(xd, idx, ref_buffer->buf, mi_row, mi_col,
+                       &ref_buffer->sf);
   xd->corrupted |= ref_buffer->buf->corrupted;
 }
 
 static void dec_predict_b_extend(
-    VP10Decoder *const pbi, MACROBLOCKD *const xd, const TileInfo *const tile,
+    AV1Decoder *const pbi, MACROBLOCKD *const xd, const TileInfo *const tile,
     int block, int mi_row_ori, int mi_col_ori, int mi_row_pred, int mi_col_pred,
     int mi_row_top, int mi_col_top, uint8_t *dst_buf[3], int dst_stride[3],
     BLOCK_SIZE bsize_top, BLOCK_SIZE bsize_pred, int b_sub8x8, int bextend) {
@@ -564,7 +561,7 @@ static void dec_predict_b_extend(
   const int mi_width_top = num_8x8_blocks_wide_lookup[bsize_top];
   const int mi_height_top = num_8x8_blocks_high_lookup[bsize_top];
   MB_MODE_INFO *mbmi;
-  VP10_COMMON *const cm = &pbi->common;
+  AV1_COMMON *const cm = &pbi->common;
 
   if (mi_row_pred < mi_row_top || mi_col_pred < mi_col_top ||
       mi_row_pred >= mi_row_top + mi_height_top ||
@@ -596,21 +593,21 @@ static void dec_predict_b_extend(
                          (c >> xd->plane[2].subsampling_x);
 
   if (!b_sub8x8)
-    vp10_build_inter_predictors_sb_extend(xd,
+    av1_build_inter_predictors_sb_extend(xd,
 #if CONFIG_EXT_INTER
-                                          mi_row_ori, mi_col_ori,
+                                         mi_row_ori, mi_col_ori,
 #endif  // CONFIG_EXT_INTER
-                                          mi_row_pred, mi_col_pred, bsize_pred);
+                                         mi_row_pred, mi_col_pred, bsize_pred);
   else
-    vp10_build_inter_predictors_sb_sub8x8_extend(xd,
+    av1_build_inter_predictors_sb_sub8x8_extend(xd,
 #if CONFIG_EXT_INTER
-                                                 mi_row_ori, mi_col_ori,
+                                                mi_row_ori, mi_col_ori,
 #endif  // CONFIG_EXT_INTER
-                                                 mi_row_pred, mi_col_pred,
-                                                 bsize_pred, block);
+                                                mi_row_pred, mi_col_pred,
+                                                bsize_pred, block);
 }
 
-static void dec_extend_dir(VP10Decoder *const pbi, MACROBLOCKD *const xd,
+static void dec_extend_dir(AV1Decoder *const pbi, MACROBLOCKD *const xd,
                            const TileInfo *const tile, int block,
                            BLOCK_SIZE bsize, BLOCK_SIZE top_bsize, int mi_row,
                            int mi_col, int mi_row_top, int mi_col_top,
@@ -678,7 +675,7 @@ static void dec_extend_dir(VP10Decoder *const pbi, MACROBLOCKD *const xd,
   }
 }
 
-static void dec_extend_all(VP10Decoder *const pbi, MACROBLOCKD *const xd,
+static void dec_extend_all(AV1Decoder *const pbi, MACROBLOCKD *const xd,
                            const TileInfo *const tile, int block,
                            BLOCK_SIZE bsize, BLOCK_SIZE top_bsize, int mi_row,
                            int mi_col, int mi_row_top, int mi_col_top,
@@ -701,13 +698,12 @@ static void dec_extend_all(VP10Decoder *const pbi, MACROBLOCKD *const xd,
                  mi_row_top, mi_col_top, dst_buf, dst_stride, 7);
 }
 
-static void dec_predict_sb_complex(VP10Decoder *const pbi,
-                                   MACROBLOCKD *const xd,
+static void dec_predict_sb_complex(AV1Decoder *const pbi, MACROBLOCKD *const xd,
                                    const TileInfo *const tile, int mi_row,
                                    int mi_col, int mi_row_top, int mi_col_top,
                                    BLOCK_SIZE bsize, BLOCK_SIZE top_bsize,
                                    uint8_t *dst_buf[3], int dst_stride[3]) {
-  const VP10_COMMON *const cm = &pbi->common;
+  const AV1_COMMON *const cm = &pbi->common;
   const int hbs = num_8x8_blocks_wide_lookup[bsize] / 2;
   const PARTITION_TYPE partition = get_partition(cm, mi_row, mi_col, bsize);
   const BLOCK_SIZE subsize = get_subsize(bsize, partition);
@@ -725,7 +721,7 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
   int dst_stride2[3] = { MAX_TX_SIZE, MAX_TX_SIZE, MAX_TX_SIZE };
   int dst_stride3[3] = { MAX_TX_SIZE, MAX_TX_SIZE, MAX_TX_SIZE };
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     int len = sizeof(uint16_t);
     dst_buf1[0] = CONVERT_TO_BYTEPTR(tmp_buf1);
@@ -748,7 +744,7 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
     dst_buf3[0] = tmp_buf3;
     dst_buf3[1] = tmp_buf3 + MAX_TX_SQUARE;
     dst_buf3[2] = tmp_buf3 + 2 * MAX_TX_SQUARE;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   }
 #endif
 
@@ -793,7 +789,7 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
         // weighted average to smooth the boundary
         xd->plane[0].dst.buf = dst_buf[0];
         xd->plane[0].dst.stride = dst_stride[0];
-        vp10_build_masked_inter_predictor_complex(
+        av1_build_masked_inter_predictor_complex(
             xd, dst_buf[0], dst_stride[0], dst_buf1[0], dst_stride1[0], mi_row,
             mi_col, mi_row_top, mi_col_top, bsize, top_bsize, PARTITION_HORZ,
             0);
@@ -827,7 +823,7 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
           for (i = 0; i < MAX_MB_PLANE; i++) {
             xd->plane[i].dst.buf = dst_buf[i];
             xd->plane[i].dst.stride = dst_stride[i];
-            vp10_build_masked_inter_predictor_complex(
+            av1_build_masked_inter_predictor_complex(
                 xd, dst_buf[i], dst_stride[i], dst_buf1[i], dst_stride1[i],
                 mi_row, mi_col, mi_row_top, mi_col_top, bsize, top_bsize,
                 PARTITION_HORZ, i);
@@ -856,7 +852,7 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
         // Smooth
         xd->plane[0].dst.buf = dst_buf[0];
         xd->plane[0].dst.stride = dst_stride[0];
-        vp10_build_masked_inter_predictor_complex(
+        av1_build_masked_inter_predictor_complex(
             xd, dst_buf[0], dst_stride[0], dst_buf1[0], dst_stride1[0], mi_row,
             mi_col, mi_row_top, mi_col_top, bsize, top_bsize, PARTITION_VERT,
             0);
@@ -890,7 +886,7 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
           for (i = 0; i < MAX_MB_PLANE; i++) {
             xd->plane[i].dst.buf = dst_buf[i];
             xd->plane[i].dst.stride = dst_stride[i];
-            vp10_build_masked_inter_predictor_complex(
+            av1_build_masked_inter_predictor_complex(
                 xd, dst_buf[i], dst_stride[i], dst_buf1[i], dst_stride1[i],
                 mi_row, mi_col, mi_row_top, mi_col_top, bsize, top_bsize,
                 PARTITION_VERT, i);
@@ -943,22 +939,22 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
         if (bsize == BLOCK_8X8 && i != 0)
           continue;  // Skip <4x4 chroma smoothing
         if (mi_row < cm->mi_rows && mi_col + hbs < cm->mi_cols) {
-          vp10_build_masked_inter_predictor_complex(
+          av1_build_masked_inter_predictor_complex(
               xd, dst_buf[i], dst_stride[i], dst_buf1[i], dst_stride1[i],
               mi_row, mi_col, mi_row_top, mi_col_top, bsize, top_bsize,
               PARTITION_VERT, i);
           if (mi_row + hbs < cm->mi_rows) {
-            vp10_build_masked_inter_predictor_complex(
+            av1_build_masked_inter_predictor_complex(
                 xd, dst_buf2[i], dst_stride2[i], dst_buf3[i], dst_stride3[i],
                 mi_row, mi_col, mi_row_top, mi_col_top, bsize, top_bsize,
                 PARTITION_VERT, i);
-            vp10_build_masked_inter_predictor_complex(
+            av1_build_masked_inter_predictor_complex(
                 xd, dst_buf[i], dst_stride[i], dst_buf2[i], dst_stride2[i],
                 mi_row, mi_col, mi_row_top, mi_col_top, bsize, top_bsize,
                 PARTITION_HORZ, i);
           }
         } else if (mi_row + hbs < cm->mi_rows && mi_col < cm->mi_cols) {
-          vp10_build_masked_inter_predictor_complex(
+          av1_build_masked_inter_predictor_complex(
               xd, dst_buf[i], dst_stride[i], dst_buf2[i], dst_stride2[i],
               mi_row, mi_col, mi_row_top, mi_col_top, bsize, top_bsize,
               PARTITION_HORZ, i);
@@ -993,13 +989,13 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
       for (i = 0; i < MAX_MB_PLANE; i++) {
         xd->plane[i].dst.buf = dst_buf[i];
         xd->plane[i].dst.stride = dst_stride[i];
-        vp10_build_masked_inter_predictor_complex(
+        av1_build_masked_inter_predictor_complex(
             xd, dst_buf[i], dst_stride[i], dst_buf1[i], dst_stride1[i], mi_row,
             mi_col, mi_row_top, mi_col_top, bsize, top_bsize, PARTITION_VERT,
             i);
       }
       for (i = 0; i < MAX_MB_PLANE; i++) {
-        vp10_build_masked_inter_predictor_complex(
+        av1_build_masked_inter_predictor_complex(
             xd, dst_buf[i], dst_stride[i], dst_buf2[i], dst_stride2[i], mi_row,
             mi_col, mi_row_top, mi_col_top, bsize, top_bsize, PARTITION_HORZ,
             i);
@@ -1034,13 +1030,13 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
       for (i = 0; i < MAX_MB_PLANE; i++) {
         xd->plane[i].dst.buf = dst_buf[i];
         xd->plane[i].dst.stride = dst_stride[i];
-        vp10_build_masked_inter_predictor_complex(
+        av1_build_masked_inter_predictor_complex(
             xd, dst_buf[i], dst_stride[i], dst_buf1[i], dst_stride1[i], mi_row,
             mi_col, mi_row_top, mi_col_top, bsize, top_bsize, PARTITION_HORZ,
             i);
       }
       for (i = 0; i < MAX_MB_PLANE; i++) {
-        vp10_build_masked_inter_predictor_complex(
+        av1_build_masked_inter_predictor_complex(
             xd, dst_buf[i], dst_stride[i], dst_buf2[i], dst_stride2[i], mi_row,
             mi_col, mi_row_top, mi_col_top, bsize, top_bsize, PARTITION_VERT,
             i);
@@ -1073,7 +1069,7 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
       for (i = 0; i < MAX_MB_PLANE; i++) {
         xd->plane[i].dst.buf = dst_buf1[i];
         xd->plane[i].dst.stride = dst_stride1[i];
-        vp10_build_masked_inter_predictor_complex(
+        av1_build_masked_inter_predictor_complex(
             xd, dst_buf1[i], dst_stride1[i], dst_buf2[i], dst_stride2[i],
             mi_row, mi_col, mi_row_top, mi_col_top, bsize, top_bsize,
             PARTITION_VERT, i);
@@ -1081,7 +1077,7 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
       for (i = 0; i < MAX_MB_PLANE; i++) {
         xd->plane[i].dst.buf = dst_buf[i];
         xd->plane[i].dst.stride = dst_stride[i];
-        vp10_build_masked_inter_predictor_complex(
+        av1_build_masked_inter_predictor_complex(
             xd, dst_buf[i], dst_stride[i], dst_buf1[i], dst_stride1[i], mi_row,
             mi_col, mi_row_top, mi_col_top, bsize, top_bsize, PARTITION_HORZ,
             i);
@@ -1114,7 +1110,7 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
       for (i = 0; i < MAX_MB_PLANE; i++) {
         xd->plane[i].dst.buf = dst_buf1[i];
         xd->plane[i].dst.stride = dst_stride1[i];
-        vp10_build_masked_inter_predictor_complex(
+        av1_build_masked_inter_predictor_complex(
             xd, dst_buf1[i], dst_stride1[i], dst_buf2[i], dst_stride2[i],
             mi_row, mi_col, mi_row_top, mi_col_top, bsize, top_bsize,
             PARTITION_HORZ, i);
@@ -1122,7 +1118,7 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
       for (i = 0; i < MAX_MB_PLANE; i++) {
         xd->plane[i].dst.buf = dst_buf[i];
         xd->plane[i].dst.stride = dst_stride[i];
-        vp10_build_masked_inter_predictor_complex(
+        av1_build_masked_inter_predictor_complex(
             xd, dst_buf[i], dst_stride[i], dst_buf1[i], dst_stride1[i], mi_row,
             mi_col, mi_row_top, mi_col_top, bsize, top_bsize, PARTITION_VERT,
             i);
@@ -1133,14 +1129,13 @@ static void dec_predict_sb_complex(VP10Decoder *const pbi,
   }
 }
 
-static void set_segment_id_supertx(const VP10_COMMON *const cm,
-                                   const int mi_row, const int mi_col,
-                                   const BLOCK_SIZE bsize) {
+static void set_segment_id_supertx(const AV1_COMMON *const cm, const int mi_row,
+                                   const int mi_col, const BLOCK_SIZE bsize) {
   const struct segmentation *seg = &cm->seg;
   const int miw =
-      VPXMIN(num_8x8_blocks_wide_lookup[bsize], cm->mi_cols - mi_col);
+      AOMMIN(num_8x8_blocks_wide_lookup[bsize], cm->mi_cols - mi_col);
   const int mih =
-      VPXMIN(num_8x8_blocks_high_lookup[bsize], cm->mi_rows - mi_row);
+      AOMMIN(num_8x8_blocks_high_lookup[bsize], cm->mi_rows - mi_row);
   const int mi_offset = mi_row * cm->mi_stride + mi_col;
   MODE_INFO **const mip = cm->mi_grid_visible + mi_offset;
   int r, c;
@@ -1153,7 +1148,7 @@ static void set_segment_id_supertx(const VP10_COMMON *const cm,
     for (r = 0; r < mih; r++)
       for (c = 0; c < miw; c++)
         seg_id_supertx =
-            VPXMIN(mip[r * cm->mi_stride + c]->mbmi.segment_id, seg_id_supertx);
+            AOMMIN(mip[r * cm->mi_stride + c]->mbmi.segment_id, seg_id_supertx);
     assert(0 <= seg_id_supertx && seg_id_supertx < MAX_SEGMENTS);
   }
 
@@ -1164,21 +1159,21 @@ static void set_segment_id_supertx(const VP10_COMMON *const cm,
 }
 #endif  // CONFIG_SUPERTX
 
-static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
+static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
 #if CONFIG_SUPERTX
                          int supertx_enabled,
 #endif  // CONFIG_SUPERTX
-                         int mi_row, int mi_col, vp10_reader *r,
+                         int mi_row, int mi_col, aom_reader *r,
 #if CONFIG_EXT_PARTITION_TYPES
                          PARTITION_TYPE partition,
 #endif  // CONFIG_EXT_PARTITION_TYPES
                          BLOCK_SIZE bsize, int bwl, int bhl) {
-  VP10_COMMON *const cm = &pbi->common;
+  AV1_COMMON *const cm = &pbi->common;
   const int less8x8 = bsize < BLOCK_8X8;
   const int bw = 1 << (bwl - 1);
   const int bh = 1 << (bhl - 1);
-  const int x_mis = VPXMIN(bw, cm->mi_cols - mi_col);
-  const int y_mis = VPXMIN(bh, cm->mi_rows - mi_row);
+  const int x_mis = AOMMIN(bw, cm->mi_cols - mi_col);
+  const int y_mis = AOMMIN(bh, cm->mi_rows - mi_row);
 
 #if CONFIG_SUPERTX
   MB_MODE_INFO *mbmi;
@@ -1191,22 +1186,21 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 #if CONFIG_EXT_PARTITION_TYPES
   xd->mi[0]->mbmi.partition = partition;
 #endif
-  vp10_read_mode_info(pbi, xd, supertx_enabled, mi_row, mi_col, r, x_mis,
-                      y_mis);
+  av1_read_mode_info(pbi, xd, supertx_enabled, mi_row, mi_col, r, x_mis, y_mis);
 #else
   MB_MODE_INFO *mbmi = set_offsets(cm, xd, bsize, mi_row, mi_col, bw, bh, x_mis,
                                    y_mis, bwl, bhl);
 #if CONFIG_EXT_PARTITION_TYPES
   xd->mi[0]->mbmi.partition = partition;
 #endif
-  vp10_read_mode_info(pbi, xd, mi_row, mi_col, r, x_mis, y_mis);
+  av1_read_mode_info(pbi, xd, mi_row, mi_col, r, x_mis, y_mis);
 #endif  // CONFIG_SUPERTX
 
   if (bsize >= BLOCK_8X8 && (cm->subsampling_x || cm->subsampling_y)) {
     const BLOCK_SIZE uv_subsize =
         ss_size_lookup[bsize][cm->subsampling_x][cm->subsampling_y];
     if (uv_subsize == BLOCK_INVALID)
-      vpx_internal_error(xd->error_info, VPX_CODEC_CORRUPT_FRAME,
+      aom_internal_error(xd->error_info, AOM_CODEC_CORRUPT_FRAME,
                          "Invalid block size.");
   }
 
@@ -1214,7 +1208,7 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
   mbmi->segment_id_supertx = MAX_SEGMENTS;
 
   if (supertx_enabled) {
-    xd->corrupted |= vp10_reader_has_error(r);
+    xd->corrupted |= aom_reader_has_error(r);
     return;
   }
 #endif  // CONFIG_SUPERTX
@@ -1226,7 +1220,7 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
     int plane;
     for (plane = 0; plane <= 1; ++plane) {
       if (mbmi->palette_mode_info.palette_size[plane])
-        vp10_decode_palette_tokens(xd, plane, r);
+        av1_decode_palette_tokens(xd, plane, r);
     }
     for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
       const struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -1254,17 +1248,16 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
     }
   } else {
     // Prediction
-    vp10_build_inter_predictors_sb(xd, mi_row, mi_col,
-                                   VPXMAX(bsize, BLOCK_8X8));
+    av1_build_inter_predictors_sb(xd, mi_row, mi_col, AOMMAX(bsize, BLOCK_8X8));
 #if CONFIG_OBMC
     if (mbmi->motion_variation == OBMC_CAUSAL) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       DECLARE_ALIGNED(16, uint8_t, tmp_buf1[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
       DECLARE_ALIGNED(16, uint8_t, tmp_buf2[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
 #else
       DECLARE_ALIGNED(16, uint8_t, tmp_buf1[MAX_MB_PLANE * MAX_SB_SQUARE]);
       DECLARE_ALIGNED(16, uint8_t, tmp_buf2[MAX_MB_PLANE * MAX_SB_SQUARE]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
       uint8_t *dst_buf1[MAX_MB_PLANE], *dst_buf2[MAX_MB_PLANE];
       int dst_width1[MAX_MB_PLANE] = { MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE };
       int dst_width2[MAX_MB_PLANE] = { MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE };
@@ -1274,7 +1267,7 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
       int dst_stride2[MAX_MB_PLANE] = { MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE };
 
       assert(mbmi->sb_type >= BLOCK_8X8);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         int len = sizeof(uint16_t);
         dst_buf1[0] = CONVERT_TO_BYTEPTR(tmp_buf1);
@@ -1284,25 +1277,23 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
         dst_buf2[1] = CONVERT_TO_BYTEPTR(tmp_buf2 + MAX_SB_SQUARE * len);
         dst_buf2[2] = CONVERT_TO_BYTEPTR(tmp_buf2 + MAX_SB_SQUARE * 2 * len);
       } else {
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
         dst_buf1[0] = tmp_buf1;
         dst_buf1[1] = tmp_buf1 + MAX_SB_SQUARE;
         dst_buf1[2] = tmp_buf1 + MAX_SB_SQUARE * 2;
         dst_buf2[0] = tmp_buf2;
         dst_buf2[1] = tmp_buf2 + MAX_SB_SQUARE;
         dst_buf2[2] = tmp_buf2 + MAX_SB_SQUARE * 2;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-      vp10_build_prediction_by_above_preds(cm, xd, mi_row, mi_col, dst_buf1,
-                                           dst_width1, dst_height1,
-                                           dst_stride1);
-      vp10_build_prediction_by_left_preds(cm, xd, mi_row, mi_col, dst_buf2,
-                                          dst_width2, dst_height2, dst_stride2);
-      vp10_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row,
-                            mi_col);
-      vp10_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, dst_buf1,
-                                       dst_stride1, dst_buf2, dst_stride2);
+#endif  // CONFIG_AOM_HIGHBITDEPTH
+      av1_build_prediction_by_above_preds(cm, xd, mi_row, mi_col, dst_buf1,
+                                          dst_width1, dst_height1, dst_stride1);
+      av1_build_prediction_by_left_preds(cm, xd, mi_row, mi_col, dst_buf2,
+                                         dst_width2, dst_height2, dst_stride2);
+      av1_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
+      av1_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, dst_buf1,
+                                      dst_stride1, dst_buf2, dst_stride2);
     }
 #endif  // CONFIG_OBMC
 
@@ -1319,7 +1310,7 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 #if CONFIG_VAR_TX
         // TODO(jingning): This can be simplified for decoder performance.
         const BLOCK_SIZE plane_bsize =
-            get_plane_block_size(VPXMAX(bsize, BLOCK_8X8), pd);
+            get_plane_block_size(AOMMAX(bsize, BLOCK_8X8), pd);
         const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
         int bw = num_4x4_blocks_wide_txsize_lookup[max_tx_size];
         int bh = num_4x4_blocks_high_txsize_lookup[max_tx_size];
@@ -1385,7 +1376,7 @@ static void decode_block(VP10Decoder *const pbi, MACROBLOCKD *const xd,
     }
   }
 
-  xd->corrupted |= vp10_reader_has_error(r);
+  xd->corrupted |= aom_reader_has_error(r);
 }
 
 static INLINE int dec_partition_plane_context(const MACROBLOCKD *xd, int mi_row,
@@ -1416,31 +1407,31 @@ static INLINE void dec_update_partition_context(MACROBLOCKD *xd, int mi_row,
 }
 #endif  // !CONFIG_EXT_PARTITION_TYPES
 
-static PARTITION_TYPE read_partition(VP10_COMMON *cm, MACROBLOCKD *xd,
-                                     int mi_row, int mi_col, vp10_reader *r,
+static PARTITION_TYPE read_partition(AV1_COMMON *cm, MACROBLOCKD *xd,
+                                     int mi_row, int mi_col, aom_reader *r,
                                      int has_rows, int has_cols,
 #if CONFIG_EXT_PARTITION_TYPES
                                      BLOCK_SIZE bsize,
 #endif
                                      int bsl) {
   const int ctx = dec_partition_plane_context(xd, mi_row, mi_col, bsl);
-  const vpx_prob *const probs = cm->fc->partition_prob[ctx];
+  const aom_prob *const probs = cm->fc->partition_prob[ctx];
   FRAME_COUNTS *counts = xd->counts;
   PARTITION_TYPE p;
 
   if (has_rows && has_cols)
 #if CONFIG_EXT_PARTITION_TYPES
     if (bsize <= BLOCK_8X8)
-      p = (PARTITION_TYPE)vp10_read_tree(r, vp10_partition_tree, probs);
+      p = (PARTITION_TYPE)aom_read_tree(r, av1_partition_tree, probs);
     else
-      p = (PARTITION_TYPE)vp10_read_tree(r, vp10_ext_partition_tree, probs);
+      p = (PARTITION_TYPE)aom_read_tree(r, av1_ext_partition_tree, probs);
 #else
-    p = (PARTITION_TYPE)vp10_read_tree(r, vp10_partition_tree, probs);
+    p = (PARTITION_TYPE)aom_read_tree(r, av1_partition_tree, probs);
 #endif  // CONFIG_EXT_PARTITION_TYPES
   else if (!has_rows && has_cols)
-    p = vp10_read(r, probs[1]) ? PARTITION_SPLIT : PARTITION_HORZ;
+    p = aom_read(r, probs[1]) ? PARTITION_SPLIT : PARTITION_HORZ;
   else if (has_rows && !has_cols)
-    p = vp10_read(r, probs[2]) ? PARTITION_SPLIT : PARTITION_VERT;
+    p = aom_read(r, probs[2]) ? PARTITION_SPLIT : PARTITION_VERT;
   else
     p = PARTITION_SPLIT;
 
@@ -1450,13 +1441,13 @@ static PARTITION_TYPE read_partition(VP10_COMMON *cm, MACROBLOCKD *xd,
 }
 
 #if CONFIG_SUPERTX
-static int read_skip(VP10_COMMON *cm, const MACROBLOCKD *xd, int segment_id,
-                     vp10_reader *r) {
+static int read_skip(AV1_COMMON *cm, const MACROBLOCKD *xd, int segment_id,
+                     aom_reader *r) {
   if (segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)) {
     return 1;
   } else {
-    const int ctx = vp10_get_skip_context(xd);
-    const int skip = vp10_read(r, cm->fc->skip_probs[ctx]);
+    const int ctx = av1_get_skip_context(xd);
+    const int skip = aom_read(r, cm->fc->skip_probs[ctx]);
     FRAME_COUNTS *counts = xd->counts;
     if (counts) ++counts->skip[ctx][skip];
     return skip;
@@ -1465,13 +1456,13 @@ static int read_skip(VP10_COMMON *cm, const MACROBLOCKD *xd, int segment_id,
 #endif  // CONFIG_SUPERTX
 
 // TODO(slavarnway): eliminate bsize and subsize in future commits
-static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
+static void decode_partition(AV1Decoder *const pbi, MACROBLOCKD *const xd,
 #if CONFIG_SUPERTX
                              int supertx_enabled,
 #endif
-                             int mi_row, int mi_col, vp10_reader *r,
+                             int mi_row, int mi_col, aom_reader *r,
                              BLOCK_SIZE bsize, int n4x4_l2) {
-  VP10_COMMON *const cm = &pbi->common;
+  AV1_COMMON *const cm = &pbi->common;
   const int n8x8_l2 = n4x4_l2 - 1;
   const int num_8x8_wh = 1 << n8x8_l2;
   const int hbs = num_8x8_wh >> 1;
@@ -1503,7 +1494,7 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
       bsize <= MAX_SUPERTX_BLOCK_SIZE && !supertx_enabled && !xd->lossless[0]) {
     const int supertx_context = partition_supertx_context_lookup[partition];
     supertx_enabled =
-        vp10_read(r, cm->fc->supertx_prob[supertx_context][supertx_size]);
+        aom_read(r, cm->fc->supertx_prob[supertx_context][supertx_size]);
     if (xd->counts)
       xd->counts->supertx[supertx_context][supertx_size][supertx_enabled]++;
 #if CONFIG_VAR_TX
@@ -1704,21 +1695,21 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
       if (get_ext_tx_types(supertx_size, bsize, 1) > 1) {
         int eset = get_ext_tx_set(supertx_size, bsize, 1);
         if (eset > 0) {
-          txfm = vp10_read_tree(r, vp10_ext_tx_inter_tree[eset],
-                                cm->fc->inter_ext_tx_prob[eset][supertx_size]);
+          txfm = aom_read_tree(r, av1_ext_tx_inter_tree[eset],
+                               cm->fc->inter_ext_tx_prob[eset][supertx_size]);
           if (xd->counts) ++xd->counts->inter_ext_tx[eset][supertx_size][txfm];
         }
       }
 #else
       if (supertx_size < TX_32X32) {
-        txfm = vp10_read_tree(r, vp10_ext_tx_tree,
-                              cm->fc->inter_ext_tx_prob[supertx_size]);
+        txfm = aom_read_tree(r, av1_ext_tx_tree,
+                             cm->fc->inter_ext_tx_prob[supertx_size]);
         if (xd->counts) ++xd->counts->inter_ext_tx[supertx_size][txfm];
       }
 #endif  // CONFIG_EXT_TX
     }
 
-    vp10_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
+    av1_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
     for (i = 0; i < MAX_MB_PLANE; i++) {
       dst_buf[i] = xd->plane[i].dst.buf;
       dst_stride[i] = xd->plane[i].dst.stride;
@@ -1800,7 +1791,7 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
   if (bsize == BLOCK_64X64) {
     if (cm->dering_level != 0 && !sb_all_skip(cm, mi_row, mi_col)) {
       cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col]->mbmi.dering_gain =
-          vpx_read_literal(r, DERING_REFINEMENT_BITS);
+          aom_read_literal(r, DERING_REFINEMENT_BITS);
     } else {
       cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col]->mbmi.dering_gain =
           0;
@@ -1813,26 +1804,26 @@ static void decode_partition(VP10Decoder *const pbi, MACROBLOCKD *const xd,
 #if !CONFIG_ANS
 static void setup_bool_decoder(const uint8_t *data, const uint8_t *data_end,
                                const size_t read_size,
-                               struct vpx_internal_error_info *error_info,
-                               vp10_reader *r, vpx_decrypt_cb decrypt_cb,
+                               struct aom_internal_error_info *error_info,
+                               aom_reader *r, aom_decrypt_cb decrypt_cb,
                                void *decrypt_state) {
   // Validate the calculated partition length. If the buffer
   // described by the partition can't be fully read, then restrict
   // it to the portion that can be (for EC mode) or throw an error.
   if (!read_is_valid(data, read_size, data_end))
-    vpx_internal_error(error_info, VPX_CODEC_CORRUPT_FRAME,
+    aom_internal_error(error_info, AOM_CODEC_CORRUPT_FRAME,
                        "Truncated packet or corrupt tile length");
 
-  if (vpx_reader_init(r, data, read_size, decrypt_cb, decrypt_state))
-    vpx_internal_error(error_info, VPX_CODEC_MEM_ERROR,
+  if (aom_reader_init(r, data, read_size, decrypt_cb, decrypt_state))
+    aom_internal_error(error_info, AOM_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder %d", 1);
 }
 #else
 static void setup_token_decoder(const uint8_t *data, const uint8_t *data_end,
                                 const size_t read_size,
-                                struct vpx_internal_error_info *error_info,
+                                struct aom_internal_error_info *error_info,
                                 struct AnsDecoder *const ans,
-                                vpx_decrypt_cb decrypt_cb,
+                                aom_decrypt_cb decrypt_cb,
                                 void *decrypt_state) {
   (void)decrypt_cb;
   (void)decrypt_state;
@@ -1840,104 +1831,103 @@ static void setup_token_decoder(const uint8_t *data, const uint8_t *data_end,
   // described by the partition can't be fully read, then restrict
   // it to the portion that can be (for EC mode) or throw an error.
   if (!read_is_valid(data, read_size, data_end))
-    vpx_internal_error(error_info, VPX_CODEC_CORRUPT_FRAME,
+    aom_internal_error(error_info, AOM_CODEC_CORRUPT_FRAME,
                        "Truncated packet or corrupt tile length");
 
   if (read_size > INT_MAX || ans_read_init(ans, data, (int)read_size))
-    vpx_internal_error(error_info, VPX_CODEC_MEM_ERROR,
+    aom_internal_error(error_info, AOM_CODEC_MEM_ERROR,
                        "Failed to allocate token decoder %d", 1);
 }
 #endif
 
-static void read_coef_probs_common(vp10_coeff_probs_model *coef_probs,
-                                   vp10_reader *r) {
+static void read_coef_probs_common(av1_coeff_probs_model *coef_probs,
+                                   aom_reader *r) {
   int i, j, k, l, m;
 
-  if (vp10_read_bit(r))
+  if (aom_read_bit(r))
     for (i = 0; i < PLANE_TYPES; ++i)
       for (j = 0; j < REF_TYPES; ++j)
         for (k = 0; k < COEF_BANDS; ++k)
           for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l)
             for (m = 0; m < UNCONSTRAINED_NODES; ++m)
-              vp10_diff_update_prob(r, &coef_probs[i][j][k][l][m]);
+              av1_diff_update_prob(r, &coef_probs[i][j][k][l][m]);
 }
 
-static void read_coef_probs(FRAME_CONTEXT *fc, TX_MODE tx_mode,
-                            vp10_reader *r) {
+static void read_coef_probs(FRAME_CONTEXT *fc, TX_MODE tx_mode, aom_reader *r) {
   const TX_SIZE max_tx_size = tx_mode_to_biggest_tx_size[tx_mode];
   TX_SIZE tx_size;
   for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
     read_coef_probs_common(fc->coef_probs[tx_size], r);
 #if CONFIG_ANS
-  vp10_coef_pareto_cdfs(fc);
+  av1_coef_pareto_cdfs(fc);
 #endif  // CONFIG_ANS
 }
 
-static void setup_segmentation(VP10_COMMON *const cm,
-                               struct vpx_read_bit_buffer *rb) {
+static void setup_segmentation(AV1_COMMON *const cm,
+                               struct aom_read_bit_buffer *rb) {
   struct segmentation *const seg = &cm->seg;
   int i, j;
 
   seg->update_map = 0;
   seg->update_data = 0;
 
-  seg->enabled = vpx_rb_read_bit(rb);
+  seg->enabled = aom_rb_read_bit(rb);
   if (!seg->enabled) return;
 
   // Segmentation map update
   if (frame_is_intra_only(cm) || cm->error_resilient_mode) {
     seg->update_map = 1;
   } else {
-    seg->update_map = vpx_rb_read_bit(rb);
+    seg->update_map = aom_rb_read_bit(rb);
   }
   if (seg->update_map) {
     if (frame_is_intra_only(cm) || cm->error_resilient_mode) {
       seg->temporal_update = 0;
     } else {
-      seg->temporal_update = vpx_rb_read_bit(rb);
+      seg->temporal_update = aom_rb_read_bit(rb);
     }
   }
 
   // Segmentation data update
-  seg->update_data = vpx_rb_read_bit(rb);
+  seg->update_data = aom_rb_read_bit(rb);
   if (seg->update_data) {
-    seg->abs_delta = vpx_rb_read_bit(rb);
+    seg->abs_delta = aom_rb_read_bit(rb);
 
-    vp10_clearall_segfeatures(seg);
+    av1_clearall_segfeatures(seg);
 
     for (i = 0; i < MAX_SEGMENTS; i++) {
       for (j = 0; j < SEG_LVL_MAX; j++) {
         int data = 0;
-        const int feature_enabled = vpx_rb_read_bit(rb);
+        const int feature_enabled = aom_rb_read_bit(rb);
         if (feature_enabled) {
-          vp10_enable_segfeature(seg, i, j);
-          data = decode_unsigned_max(rb, vp10_seg_feature_data_max(j));
-          if (vp10_is_segfeature_signed(j))
-            data = vpx_rb_read_bit(rb) ? -data : data;
+          av1_enable_segfeature(seg, i, j);
+          data = decode_unsigned_max(rb, av1_seg_feature_data_max(j));
+          if (av1_is_segfeature_signed(j))
+            data = aom_rb_read_bit(rb) ? -data : data;
         }
-        vp10_set_segdata(seg, i, j, data);
+        av1_set_segdata(seg, i, j, data);
       }
     }
   }
 }
 
 #if CONFIG_LOOP_RESTORATION
-static void setup_restoration(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
+static void setup_restoration(AV1_COMMON *cm, struct aom_read_bit_buffer *rb) {
   int i;
   RestorationInfo *rsi = &cm->rst_info;
   int ntiles;
-  if (vpx_rb_read_bit(rb)) {
-    if (vpx_rb_read_bit(rb)) {
+  if (aom_rb_read_bit(rb)) {
+    if (aom_rb_read_bit(rb)) {
       rsi->restoration_type = RESTORE_BILATERAL;
-      ntiles = vp10_get_restoration_ntiles(BILATERAL_TILESIZE, cm->width,
-                                           cm->height);
-      rsi->bilateral_level = (int *)vpx_realloc(
+      ntiles =
+          av1_get_restoration_ntiles(BILATERAL_TILESIZE, cm->width, cm->height);
+      rsi->bilateral_level = (int *)aom_realloc(
           rsi->bilateral_level, sizeof(*rsi->bilateral_level) * ntiles);
       assert(rsi->bilateral_level != NULL);
       for (i = 0; i < ntiles; ++i) {
-        if (vpx_rb_read_bit(rb)) {
+        if (aom_rb_read_bit(rb)) {
           rsi->bilateral_level[i] =
-              vpx_rb_read_literal(rb, vp10_bilateral_level_bits(cm));
+              aom_rb_read_literal(rb, av1_bilateral_level_bits(cm));
         } else {
           rsi->bilateral_level[i] = -1;
         }
@@ -1945,30 +1935,30 @@ static void setup_restoration(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
     } else {
       rsi->restoration_type = RESTORE_WIENER;
       ntiles =
-          vp10_get_restoration_ntiles(WIENER_TILESIZE, cm->width, cm->height);
-      rsi->wiener_level = (int *)vpx_realloc(
+          av1_get_restoration_ntiles(WIENER_TILESIZE, cm->width, cm->height);
+      rsi->wiener_level = (int *)aom_realloc(
           rsi->wiener_level, sizeof(*rsi->wiener_level) * ntiles);
       assert(rsi->wiener_level != NULL);
-      rsi->vfilter = (int(*)[RESTORATION_HALFWIN])vpx_realloc(
+      rsi->vfilter = (int(*)[RESTORATION_HALFWIN])aom_realloc(
           rsi->vfilter, sizeof(*rsi->vfilter) * ntiles);
       assert(rsi->vfilter != NULL);
-      rsi->hfilter = (int(*)[RESTORATION_HALFWIN])vpx_realloc(
+      rsi->hfilter = (int(*)[RESTORATION_HALFWIN])aom_realloc(
           rsi->hfilter, sizeof(*rsi->hfilter) * ntiles);
       assert(rsi->hfilter != NULL);
       for (i = 0; i < ntiles; ++i) {
-        rsi->wiener_level[i] = vpx_rb_read_bit(rb);
+        rsi->wiener_level[i] = aom_rb_read_bit(rb);
         if (rsi->wiener_level[i]) {
-          rsi->vfilter[i][0] = vpx_rb_read_literal(rb, WIENER_FILT_TAP0_BITS) +
+          rsi->vfilter[i][0] = aom_rb_read_literal(rb, WIENER_FILT_TAP0_BITS) +
                                WIENER_FILT_TAP0_MINV;
-          rsi->vfilter[i][1] = vpx_rb_read_literal(rb, WIENER_FILT_TAP1_BITS) +
+          rsi->vfilter[i][1] = aom_rb_read_literal(rb, WIENER_FILT_TAP1_BITS) +
                                WIENER_FILT_TAP1_MINV;
-          rsi->vfilter[i][2] = vpx_rb_read_literal(rb, WIENER_FILT_TAP2_BITS) +
+          rsi->vfilter[i][2] = aom_rb_read_literal(rb, WIENER_FILT_TAP2_BITS) +
                                WIENER_FILT_TAP2_MINV;
-          rsi->hfilter[i][0] = vpx_rb_read_literal(rb, WIENER_FILT_TAP0_BITS) +
+          rsi->hfilter[i][0] = aom_rb_read_literal(rb, WIENER_FILT_TAP0_BITS) +
                                WIENER_FILT_TAP0_MINV;
-          rsi->hfilter[i][1] = vpx_rb_read_literal(rb, WIENER_FILT_TAP1_BITS) +
+          rsi->hfilter[i][1] = aom_rb_read_literal(rb, WIENER_FILT_TAP1_BITS) +
                                WIENER_FILT_TAP1_MINV;
-          rsi->hfilter[i][2] = vpx_rb_read_literal(rb, WIENER_FILT_TAP2_BITS) +
+          rsi->hfilter[i][2] = aom_rb_read_literal(rb, WIENER_FILT_TAP2_BITS) +
                                WIENER_FILT_TAP2_MINV;
         } else {
           rsi->vfilter[i][0] = rsi->vfilter[i][1] = rsi->vfilter[i][2] = 0;
@@ -1982,60 +1972,60 @@ static void setup_restoration(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
 }
 #endif  // CONFIG_LOOP_RESTORATION
 
-static void setup_loopfilter(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
+static void setup_loopfilter(AV1_COMMON *cm, struct aom_read_bit_buffer *rb) {
   struct loopfilter *lf = &cm->lf;
-  lf->filter_level = vpx_rb_read_literal(rb, 6);
-  lf->sharpness_level = vpx_rb_read_literal(rb, 3);
+  lf->filter_level = aom_rb_read_literal(rb, 6);
+  lf->sharpness_level = aom_rb_read_literal(rb, 3);
 
   // Read in loop filter deltas applied at the MB level based on mode or ref
   // frame.
   lf->mode_ref_delta_update = 0;
 
-  lf->mode_ref_delta_enabled = vpx_rb_read_bit(rb);
+  lf->mode_ref_delta_enabled = aom_rb_read_bit(rb);
   if (lf->mode_ref_delta_enabled) {
-    lf->mode_ref_delta_update = vpx_rb_read_bit(rb);
+    lf->mode_ref_delta_update = aom_rb_read_bit(rb);
     if (lf->mode_ref_delta_update) {
       int i;
 
       for (i = 0; i < TOTAL_REFS_PER_FRAME; i++)
-        if (vpx_rb_read_bit(rb))
-          lf->ref_deltas[i] = vpx_rb_read_inv_signed_literal(rb, 6);
+        if (aom_rb_read_bit(rb))
+          lf->ref_deltas[i] = aom_rb_read_inv_signed_literal(rb, 6);
 
       for (i = 0; i < MAX_MODE_LF_DELTAS; i++)
-        if (vpx_rb_read_bit(rb))
-          lf->mode_deltas[i] = vpx_rb_read_inv_signed_literal(rb, 6);
+        if (aom_rb_read_bit(rb))
+          lf->mode_deltas[i] = aom_rb_read_inv_signed_literal(rb, 6);
     }
   }
 }
 
 #if CONFIG_CLPF
-static void setup_clpf(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
-  cm->clpf = vpx_rb_read_literal(rb, 1);
+static void setup_clpf(AV1_COMMON *cm, struct aom_read_bit_buffer *rb) {
+  cm->clpf = aom_rb_read_literal(rb, 1);
 }
 #endif
 
 #if CONFIG_DERING
-static void setup_dering(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
-  cm->dering_level = vpx_rb_read_literal(rb, DERING_LEVEL_BITS);
+static void setup_dering(AV1_COMMON *cm, struct aom_read_bit_buffer *rb) {
+  cm->dering_level = aom_rb_read_literal(rb, DERING_LEVEL_BITS);
 }
 #endif  // CONFIG_DERING
 
-static INLINE int read_delta_q(struct vpx_read_bit_buffer *rb) {
-  return vpx_rb_read_bit(rb) ? vpx_rb_read_inv_signed_literal(rb, 6) : 0;
+static INLINE int read_delta_q(struct aom_read_bit_buffer *rb) {
+  return aom_rb_read_bit(rb) ? aom_rb_read_inv_signed_literal(rb, 6) : 0;
 }
 
-static void setup_quantization(VP10_COMMON *const cm,
-                               struct vpx_read_bit_buffer *rb) {
-  cm->base_qindex = vpx_rb_read_literal(rb, QINDEX_BITS);
+static void setup_quantization(AV1_COMMON *const cm,
+                               struct aom_read_bit_buffer *rb) {
+  cm->base_qindex = aom_rb_read_literal(rb, QINDEX_BITS);
   cm->y_dc_delta_q = read_delta_q(rb);
   cm->uv_dc_delta_q = read_delta_q(rb);
   cm->uv_ac_delta_q = read_delta_q(rb);
   cm->dequant_bit_depth = cm->bit_depth;
 #if CONFIG_AOM_QM
-  cm->using_qmatrix = vpx_rb_read_bit(rb);
+  cm->using_qmatrix = aom_rb_read_bit(rb);
   if (cm->using_qmatrix) {
-    cm->min_qmlevel = vpx_rb_read_literal(rb, QM_LEVEL_BITS);
-    cm->max_qmlevel = vpx_rb_read_literal(rb, QM_LEVEL_BITS);
+    cm->min_qmlevel = aom_rb_read_literal(rb, QM_LEVEL_BITS);
+    cm->max_qmlevel = aom_rb_read_literal(rb, QM_LEVEL_BITS);
   } else {
     cm->min_qmlevel = 0;
     cm->max_qmlevel = 0;
@@ -2043,7 +2033,7 @@ static void setup_quantization(VP10_COMMON *const cm,
 #endif
 }
 
-static void setup_segmentation_dequant(VP10_COMMON *const cm) {
+static void setup_segmentation_dequant(AV1_COMMON *const cm) {
   // Build y/uv dequant values based on segmentation.
   int i = 0;
 #if CONFIG_AOM_QM
@@ -2060,14 +2050,14 @@ static void setup_segmentation_dequant(VP10_COMMON *const cm) {
 #endif  //  CONFIG_NEW_QUANT
   if (cm->seg.enabled) {
     for (i = 0; i < MAX_SEGMENTS; ++i) {
-      const int qindex = vp10_get_qindex(&cm->seg, i, cm->base_qindex);
+      const int qindex = av1_get_qindex(&cm->seg, i, cm->base_qindex);
       cm->y_dequant[i][0] =
-          vp10_dc_quant(qindex, cm->y_dc_delta_q, cm->bit_depth);
-      cm->y_dequant[i][1] = vp10_ac_quant(qindex, 0, cm->bit_depth);
+          av1_dc_quant(qindex, cm->y_dc_delta_q, cm->bit_depth);
+      cm->y_dequant[i][1] = av1_ac_quant(qindex, 0, cm->bit_depth);
       cm->uv_dequant[i][0] =
-          vp10_dc_quant(qindex, cm->uv_dc_delta_q, cm->bit_depth);
+          av1_dc_quant(qindex, cm->uv_dc_delta_q, cm->bit_depth);
       cm->uv_dequant[i][1] =
-          vp10_ac_quant(qindex, cm->uv_ac_delta_q, cm->bit_depth);
+          av1_ac_quant(qindex, cm->uv_ac_delta_q, cm->bit_depth);
 #if CONFIG_AOM_QM
       lossless = qindex == 0 && cm->y_dc_delta_q == 0 &&
                  cm->uv_dc_delta_q == 0 && cm->uv_ac_delta_q == 0;
@@ -2086,10 +2076,10 @@ static void setup_segmentation_dequant(VP10_COMMON *const cm) {
 #if CONFIG_NEW_QUANT
       for (dq = 0; dq < QUANT_PROFILES; dq++) {
         for (b = 0; b < COEF_BANDS; ++b) {
-          vp10_get_dequant_val_nuq(cm->y_dequant[i][b != 0], qindex, b,
-                                   cm->y_dequant_nuq[i][dq][b], NULL, dq);
-          vp10_get_dequant_val_nuq(cm->uv_dequant[i][b != 0], qindex, b,
-                                   cm->uv_dequant_nuq[i][dq][b], NULL, dq);
+          av1_get_dequant_val_nuq(cm->y_dequant[i][b != 0], qindex, b,
+                                  cm->y_dequant_nuq[i][dq][b], NULL, dq);
+          av1_get_dequant_val_nuq(cm->uv_dequant[i][b != 0], qindex, b,
+                                  cm->uv_dequant_nuq[i][dq][b], NULL, dq);
         }
       }
 #endif  //  CONFIG_NEW_QUANT
@@ -2098,13 +2088,12 @@ static void setup_segmentation_dequant(VP10_COMMON *const cm) {
     const int qindex = cm->base_qindex;
     // When segmentation is disabled, only the first value is used.  The
     // remaining are don't cares.
-    cm->y_dequant[0][0] =
-        vp10_dc_quant(qindex, cm->y_dc_delta_q, cm->bit_depth);
-    cm->y_dequant[0][1] = vp10_ac_quant(qindex, 0, cm->bit_depth);
+    cm->y_dequant[0][0] = av1_dc_quant(qindex, cm->y_dc_delta_q, cm->bit_depth);
+    cm->y_dequant[0][1] = av1_ac_quant(qindex, 0, cm->bit_depth);
     cm->uv_dequant[0][0] =
-        vp10_dc_quant(qindex, cm->uv_dc_delta_q, cm->bit_depth);
+        av1_dc_quant(qindex, cm->uv_dc_delta_q, cm->bit_depth);
     cm->uv_dequant[0][1] =
-        vp10_ac_quant(qindex, cm->uv_ac_delta_q, cm->bit_depth);
+        av1_ac_quant(qindex, cm->uv_ac_delta_q, cm->bit_depth);
 #if CONFIG_AOM_QM
     lossless = qindex == 0 && cm->y_dc_delta_q == 0 && cm->uv_dc_delta_q == 0 &&
                cm->uv_ac_delta_q == 0;
@@ -2122,41 +2111,41 @@ static void setup_segmentation_dequant(VP10_COMMON *const cm) {
 #if CONFIG_NEW_QUANT
     for (dq = 0; dq < QUANT_PROFILES; dq++) {
       for (b = 0; b < COEF_BANDS; ++b) {
-        vp10_get_dequant_val_nuq(cm->y_dequant[0][b != 0], qindex, b,
-                                 cm->y_dequant_nuq[0][dq][b], NULL, dq);
-        vp10_get_dequant_val_nuq(cm->uv_dequant[0][b != 0], qindex, b,
-                                 cm->uv_dequant_nuq[0][dq][b], NULL, dq);
+        av1_get_dequant_val_nuq(cm->y_dequant[0][b != 0], qindex, b,
+                                cm->y_dequant_nuq[0][dq][b], NULL, dq);
+        av1_get_dequant_val_nuq(cm->uv_dequant[0][b != 0], qindex, b,
+                                cm->uv_dequant_nuq[0][dq][b], NULL, dq);
       }
     }
 #endif  //  CONFIG_NEW_QUANT
   }
 }
 
-static INTERP_FILTER read_interp_filter(struct vpx_read_bit_buffer *rb) {
-  return vpx_rb_read_bit(rb) ? SWITCHABLE
-                             : vpx_rb_read_literal(rb, 2 + CONFIG_EXT_INTERP);
+static INTERP_FILTER read_interp_filter(struct aom_read_bit_buffer *rb) {
+  return aom_rb_read_bit(rb) ? SWITCHABLE
+                             : aom_rb_read_literal(rb, 2 + CONFIG_EXT_INTERP);
 }
 
-static void setup_render_size(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
+static void setup_render_size(AV1_COMMON *cm, struct aom_read_bit_buffer *rb) {
   cm->render_width = cm->width;
   cm->render_height = cm->height;
-  if (vpx_rb_read_bit(rb))
-    vp10_read_frame_size(rb, &cm->render_width, &cm->render_height);
+  if (aom_rb_read_bit(rb))
+    av1_read_frame_size(rb, &cm->render_width, &cm->render_height);
 }
 
-static void resize_mv_buffer(VP10_COMMON *cm) {
-  vpx_free(cm->cur_frame->mvs);
+static void resize_mv_buffer(AV1_COMMON *cm) {
+  aom_free(cm->cur_frame->mvs);
   cm->cur_frame->mi_rows = cm->mi_rows;
   cm->cur_frame->mi_cols = cm->mi_cols;
   CHECK_MEM_ERROR(cm, cm->cur_frame->mvs,
-                  (MV_REF *)vpx_calloc(cm->mi_rows * cm->mi_cols,
+                  (MV_REF *)aom_calloc(cm->mi_rows * cm->mi_cols,
                                        sizeof(*cm->cur_frame->mvs)));
 }
 
-static void resize_context_buffers(VP10_COMMON *cm, int width, int height) {
+static void resize_context_buffers(AV1_COMMON *cm, int width, int height) {
 #if CONFIG_SIZE_LIMIT
   if (width > DECODE_WIDTH_LIMIT || height > DECODE_HEIGHT_LIMIT)
-    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+    aom_internal_error(&cm->error, AOM_CODEC_CORRUPT_FRAME,
                        "Dimensions of %dx%d beyond allowed size of %dx%d.",
                        width, height, DECODE_WIDTH_LIMIT, DECODE_HEIGHT_LIMIT);
 #endif
@@ -2166,16 +2155,16 @@ static void resize_context_buffers(VP10_COMMON *cm, int width, int height) {
     const int new_mi_cols =
         ALIGN_POWER_OF_TWO(width, MI_SIZE_LOG2) >> MI_SIZE_LOG2;
 
-    // Allocations in vp10_alloc_context_buffers() depend on individual
+    // Allocations in av1_alloc_context_buffers() depend on individual
     // dimensions as well as the overall size.
     if (new_mi_cols > cm->mi_cols || new_mi_rows > cm->mi_rows) {
-      if (vp10_alloc_context_buffers(cm, width, height))
-        vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+      if (av1_alloc_context_buffers(cm, width, height))
+        aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,
                            "Failed to allocate context buffers");
     } else {
-      vp10_set_mb_mi(cm, width, height);
+      av1_set_mb_mi(cm, width, height);
     }
-    vp10_init_context_buffers(cm);
+    av1_init_context_buffers(cm);
     cm->width = width;
     cm->height = height;
   }
@@ -2185,25 +2174,25 @@ static void resize_context_buffers(VP10_COMMON *cm, int width, int height) {
   }
 }
 
-static void setup_frame_size(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
+static void setup_frame_size(AV1_COMMON *cm, struct aom_read_bit_buffer *rb) {
   int width, height;
   BufferPool *const pool = cm->buffer_pool;
-  vp10_read_frame_size(rb, &width, &height);
+  av1_read_frame_size(rb, &width, &height);
   resize_context_buffers(cm, width, height);
   setup_render_size(cm, rb);
 
   lock_buffer_pool(pool);
-  if (vpx_realloc_frame_buffer(
+  if (aom_realloc_frame_buffer(
           get_frame_new_buffer(cm), cm->width, cm->height, cm->subsampling_x,
           cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
           cm->use_highbitdepth,
 #endif
-          VPX_DEC_BORDER_IN_PIXELS, cm->byte_alignment,
+          AOM_DEC_BORDER_IN_PIXELS, cm->byte_alignment,
           &pool->frame_bufs[cm->new_fb_idx].raw_frame_buffer, pool->get_fb_cb,
           pool->cb_priv)) {
     unlock_buffer_pool(pool);
-    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+    aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffer");
   }
   unlock_buffer_pool(pool);
@@ -2217,22 +2206,22 @@ static void setup_frame_size(VP10_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   pool->frame_bufs[cm->new_fb_idx].buf.render_height = cm->render_height;
 }
 
-static INLINE int valid_ref_frame_img_fmt(vpx_bit_depth_t ref_bit_depth,
+static INLINE int valid_ref_frame_img_fmt(aom_bit_depth_t ref_bit_depth,
                                           int ref_xss, int ref_yss,
-                                          vpx_bit_depth_t this_bit_depth,
+                                          aom_bit_depth_t this_bit_depth,
                                           int this_xss, int this_yss) {
   return ref_bit_depth == this_bit_depth && ref_xss == this_xss &&
          ref_yss == this_yss;
 }
 
-static void setup_frame_size_with_refs(VP10_COMMON *cm,
-                                       struct vpx_read_bit_buffer *rb) {
+static void setup_frame_size_with_refs(AV1_COMMON *cm,
+                                       struct aom_read_bit_buffer *rb) {
   int width, height;
   int found = 0, i;
   int has_valid_ref_frame = 0;
   BufferPool *const pool = cm->buffer_pool;
   for (i = 0; i < INTER_REFS_PER_FRAME; ++i) {
-    if (vpx_rb_read_bit(rb)) {
+    if (aom_rb_read_bit(rb)) {
       YV12_BUFFER_CONFIG *const buf = cm->frame_refs[i].buf;
       width = buf->y_crop_width;
       height = buf->y_crop_height;
@@ -2244,12 +2233,12 @@ static void setup_frame_size_with_refs(VP10_COMMON *cm,
   }
 
   if (!found) {
-    vp10_read_frame_size(rb, &width, &height);
+    av1_read_frame_size(rb, &width, &height);
     setup_render_size(cm, rb);
   }
 
   if (width <= 0 || height <= 0)
-    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+    aom_internal_error(&cm->error, AOM_CODEC_CORRUPT_FRAME,
                        "Invalid frame size");
 
   // Check to make sure at least one of frames that this frame references
@@ -2261,7 +2250,7 @@ static void setup_frame_size_with_refs(VP10_COMMON *cm,
                              ref_frame->buf->y_crop_height, width, height);
   }
   if (!has_valid_ref_frame)
-    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+    aom_internal_error(&cm->error, AOM_CODEC_CORRUPT_FRAME,
                        "Referenced frame has invalid size");
   for (i = 0; i < INTER_REFS_PER_FRAME; ++i) {
     RefBuffer *const ref_frame = &cm->frame_refs[i];
@@ -2269,24 +2258,24 @@ static void setup_frame_size_with_refs(VP10_COMMON *cm,
                                  ref_frame->buf->subsampling_x,
                                  ref_frame->buf->subsampling_y, cm->bit_depth,
                                  cm->subsampling_x, cm->subsampling_y))
-      vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+      aom_internal_error(&cm->error, AOM_CODEC_CORRUPT_FRAME,
                          "Referenced frame has incompatible color format");
   }
 
   resize_context_buffers(cm, width, height);
 
   lock_buffer_pool(pool);
-  if (vpx_realloc_frame_buffer(
+  if (aom_realloc_frame_buffer(
           get_frame_new_buffer(cm), cm->width, cm->height, cm->subsampling_x,
           cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
           cm->use_highbitdepth,
 #endif
-          VPX_DEC_BORDER_IN_PIXELS, cm->byte_alignment,
+          AOM_DEC_BORDER_IN_PIXELS, cm->byte_alignment,
           &pool->frame_bufs[cm->new_fb_idx].raw_frame_buffer, pool->get_fb_cb,
           pool->cb_priv)) {
     unlock_buffer_pool(pool);
-    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+    aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffer");
   }
   unlock_buffer_pool(pool);
@@ -2300,27 +2289,27 @@ static void setup_frame_size_with_refs(VP10_COMMON *cm,
   pool->frame_bufs[cm->new_fb_idx].buf.render_height = cm->render_height;
 }
 
-static void read_tile_info(VP10Decoder *const pbi,
-                           struct vpx_read_bit_buffer *const rb) {
-  VP10_COMMON *const cm = &pbi->common;
+static void read_tile_info(AV1Decoder *const pbi,
+                           struct aom_read_bit_buffer *const rb) {
+  AV1_COMMON *const cm = &pbi->common;
 #if CONFIG_EXT_TILE
 // Read the tile width/height
 #if CONFIG_EXT_PARTITION
   if (cm->sb_size == BLOCK_128X128) {
-    cm->tile_width = vpx_rb_read_literal(rb, 5) + 1;
-    cm->tile_height = vpx_rb_read_literal(rb, 5) + 1;
+    cm->tile_width = aom_rb_read_literal(rb, 5) + 1;
+    cm->tile_height = aom_rb_read_literal(rb, 5) + 1;
   } else
 #endif  // CONFIG_EXT_PARTITION
   {
-    cm->tile_width = vpx_rb_read_literal(rb, 6) + 1;
-    cm->tile_height = vpx_rb_read_literal(rb, 6) + 1;
+    cm->tile_width = aom_rb_read_literal(rb, 6) + 1;
+    cm->tile_height = aom_rb_read_literal(rb, 6) + 1;
   }
 
   cm->tile_width <<= cm->mib_size_log2;
   cm->tile_height <<= cm->mib_size_log2;
 
-  cm->tile_width = VPXMIN(cm->tile_width, cm->mi_cols);
-  cm->tile_height = VPXMIN(cm->tile_height, cm->mi_rows);
+  cm->tile_width = AOMMIN(cm->tile_width, cm->mi_cols);
+  cm->tile_height = AOMMIN(cm->tile_height, cm->mi_rows);
 
   // Get the number of tiles
   cm->tile_cols = 1;
@@ -2331,25 +2320,25 @@ static void read_tile_info(VP10Decoder *const pbi,
 
   if (cm->tile_cols * cm->tile_rows > 1) {
     // Read the number of bytes used to store tile size
-    pbi->tile_col_size_bytes = vpx_rb_read_literal(rb, 2) + 1;
-    pbi->tile_size_bytes = vpx_rb_read_literal(rb, 2) + 1;
+    pbi->tile_col_size_bytes = aom_rb_read_literal(rb, 2) + 1;
+    pbi->tile_size_bytes = aom_rb_read_literal(rb, 2) + 1;
   }
 #else
   int min_log2_tile_cols, max_log2_tile_cols, max_ones;
-  vp10_get_tile_n_bits(cm->mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
+  av1_get_tile_n_bits(cm->mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
 
   // columns
   max_ones = max_log2_tile_cols - min_log2_tile_cols;
   cm->log2_tile_cols = min_log2_tile_cols;
-  while (max_ones-- && vpx_rb_read_bit(rb)) cm->log2_tile_cols++;
+  while (max_ones-- && aom_rb_read_bit(rb)) cm->log2_tile_cols++;
 
   if (cm->log2_tile_cols > 6)
-    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+    aom_internal_error(&cm->error, AOM_CODEC_CORRUPT_FRAME,
                        "Invalid number of tile columns");
 
   // rows
-  cm->log2_tile_rows = vpx_rb_read_bit(rb);
-  if (cm->log2_tile_rows) cm->log2_tile_rows += vpx_rb_read_bit(rb);
+  cm->log2_tile_rows = aom_rb_read_bit(rb);
+  if (cm->log2_tile_rows) cm->log2_tile_rows += aom_rb_read_bit(rb);
 
   cm->tile_cols = 1 << cm->log2_tile_cols;
   cm->tile_rows = 1 << cm->log2_tile_rows;
@@ -2365,7 +2354,7 @@ static void read_tile_info(VP10Decoder *const pbi,
 
   // tile size magnitude
   if (cm->tile_rows > 1 || cm->tile_cols > 1) {
-    pbi->tile_size_bytes = vpx_rb_read_literal(rb, 2) + 1;
+    pbi->tile_size_bytes = aom_rb_read_literal(rb, 2) + 1;
   }
 #endif  // CONFIG_EXT_TILE
 }
@@ -2384,8 +2373,8 @@ static int mem_get_varsize(const uint8_t *src, const int sz) {
 // Reads the next tile returning its size and adjusting '*data' accordingly
 // based on 'is_last'.
 static void get_tile_buffer(const uint8_t *const data_end,
-                            struct vpx_internal_error_info *error_info,
-                            const uint8_t **data, vpx_decrypt_cb decrypt_cb,
+                            struct aom_internal_error_info *error_info,
+                            const uint8_t **data, aom_decrypt_cb decrypt_cb,
                             void *decrypt_state,
                             TileBufferDec (*const tile_buffers)[MAX_TILE_COLS],
                             int tile_size_bytes, int col, int row) {
@@ -2395,7 +2384,7 @@ static void get_tile_buffer(const uint8_t *const data_end,
   const uint8_t *copy_data = NULL;
 
   if (!read_is_valid(*data, tile_size_bytes, data_end))
-    vpx_internal_error(error_info, VPX_CODEC_CORRUPT_FRAME,
+    aom_internal_error(error_info, AOM_CODEC_CORRUPT_FRAME,
                        "Truncated packet or corrupt tile length");
   if (decrypt_cb) {
     uint8_t be_data[4];
@@ -2421,7 +2410,7 @@ static void get_tile_buffer(const uint8_t *const data_end,
   *data += tile_size_bytes;
 
   if (size > (size_t)(data_end - *data))
-    vpx_internal_error(error_info, VPX_CODEC_CORRUPT_FRAME,
+    aom_internal_error(error_info, AOM_CODEC_CORRUPT_FRAME,
                        "Truncated packet or corrupt tile size");
 
   if (size > 0) {
@@ -2438,9 +2427,9 @@ static void get_tile_buffer(const uint8_t *const data_end,
 }
 
 static void get_tile_buffers(
-    VP10Decoder *pbi, const uint8_t *data, const uint8_t *data_end,
+    AV1Decoder *pbi, const uint8_t *data, const uint8_t *data_end,
     TileBufferDec (*const tile_buffers)[MAX_TILE_COLS]) {
-  VP10_COMMON *const cm = &pbi->common;
+  AV1_COMMON *const cm = &pbi->common;
   const int tile_cols = cm->tile_cols;
   const int tile_rows = cm->tile_rows;
   const int have_tiles = tile_cols * tile_rows > 1;
@@ -2459,11 +2448,11 @@ static void get_tile_buffers(
     const uint8_t *tile_col_data_end[MAX_TILE_COLS];
     const uint8_t *const data_start = data;
 
-    const int dec_tile_row = VPXMIN(pbi->dec_tile_row, tile_rows);
+    const int dec_tile_row = AOMMIN(pbi->dec_tile_row, tile_rows);
     const int single_row = pbi->dec_tile_row >= 0;
     const int tile_rows_start = single_row ? dec_tile_row : 0;
     const int tile_rows_end = single_row ? tile_rows_start + 1 : tile_rows;
-    const int dec_tile_col = VPXMIN(pbi->dec_tile_col, tile_cols);
+    const int dec_tile_col = AOMMIN(pbi->dec_tile_col, tile_cols);
     const int single_col = pbi->dec_tile_col >= 0;
     const int tile_cols_start = single_col ? dec_tile_col : 0;
     const int tile_cols_end = single_col ? tile_cols_start + 1 : tile_cols;
@@ -2529,14 +2518,14 @@ static void get_tile_buffers(
 // based on 'is_last'.
 static void get_tile_buffer(const uint8_t *const data_end,
                             const int tile_size_bytes, int is_last,
-                            struct vpx_internal_error_info *error_info,
-                            const uint8_t **data, vpx_decrypt_cb decrypt_cb,
+                            struct aom_internal_error_info *error_info,
+                            const uint8_t **data, aom_decrypt_cb decrypt_cb,
                             void *decrypt_state, TileBufferDec *const buf) {
   size_t size;
 
   if (!is_last) {
     if (!read_is_valid(*data, 4, data_end))
-      vpx_internal_error(error_info, VPX_CODEC_CORRUPT_FRAME,
+      aom_internal_error(error_info, AOM_CODEC_CORRUPT_FRAME,
                          "Truncated packet or corrupt tile length");
 
     if (decrypt_cb) {
@@ -2549,7 +2538,7 @@ static void get_tile_buffer(const uint8_t *const data_end,
     *data += tile_size_bytes;
 
     if (size > (size_t)(data_end - *data))
-      vpx_internal_error(error_info, VPX_CODEC_CORRUPT_FRAME,
+      aom_internal_error(error_info, AOM_CODEC_CORRUPT_FRAME,
                          "Truncated packet or corrupt tile size");
   } else {
     size = data_end - *data;
@@ -2562,9 +2551,9 @@ static void get_tile_buffer(const uint8_t *const data_end,
 }
 
 static void get_tile_buffers(
-    VP10Decoder *pbi, const uint8_t *data, const uint8_t *data_end,
+    AV1Decoder *pbi, const uint8_t *data, const uint8_t *data_end,
     TileBufferDec (*const tile_buffers)[MAX_TILE_COLS]) {
-  VP10_COMMON *const cm = &pbi->common;
+  AV1_COMMON *const cm = &pbi->common;
   int r, c;
   const int tile_cols = cm->tile_cols;
   const int tile_rows = cm->tile_rows;
@@ -2581,20 +2570,20 @@ static void get_tile_buffers(
 }
 #endif  // CONFIG_EXT_TILE
 
-static const uint8_t *decode_tiles(VP10Decoder *pbi, const uint8_t *data,
+static const uint8_t *decode_tiles(AV1Decoder *pbi, const uint8_t *data,
                                    const uint8_t *data_end) {
-  VP10_COMMON *const cm = &pbi->common;
-  const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
+  AV1_COMMON *const cm = &pbi->common;
+  const AVxWorkerInterface *const winterface = aom_get_worker_interface();
   const int tile_cols = cm->tile_cols;
   const int tile_rows = cm->tile_rows;
   const int n_tiles = tile_cols * tile_rows;
   TileBufferDec (*const tile_buffers)[MAX_TILE_COLS] = pbi->tile_buffers;
 #if CONFIG_EXT_TILE
-  const int dec_tile_row = VPXMIN(pbi->dec_tile_row, tile_rows);
+  const int dec_tile_row = AOMMIN(pbi->dec_tile_row, tile_rows);
   const int single_row = pbi->dec_tile_row >= 0;
   const int tile_rows_start = single_row ? dec_tile_row : 0;
   const int tile_rows_end = single_row ? dec_tile_row + 1 : tile_rows;
-  const int dec_tile_col = VPXMIN(pbi->dec_tile_col, tile_cols);
+  const int dec_tile_col = AOMMIN(pbi->dec_tile_col, tile_cols);
   const int single_col = pbi->dec_tile_col >= 0;
   const int tile_cols_start = single_col ? dec_tile_col : 0;
   const int tile_cols_end = single_col ? tile_cols_start + 1 : tile_cols;
@@ -2617,10 +2606,10 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi, const uint8_t *data,
   if (cm->lf.filter_level && !cm->skip_loop_filter &&
       pbi->lf_worker.data1 == NULL) {
     CHECK_MEM_ERROR(cm, pbi->lf_worker.data1,
-                    vpx_memalign(32, sizeof(LFWorkerData)));
-    pbi->lf_worker.hook = (VPxWorkerHook)vp10_loop_filter_worker;
+                    aom_memalign(32, sizeof(LFWorkerData)));
+    pbi->lf_worker.hook = (AVxWorkerHook)av1_loop_filter_worker;
     if (pbi->max_threads > 1 && !winterface->reset(&pbi->lf_worker)) {
-      vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+      aom_internal_error(&cm->error, AOM_CODEC_ERROR,
                          "Loop filter thread creation failed");
     }
   }
@@ -2629,8 +2618,8 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi, const uint8_t *data,
     LFWorkerData *const lf_data = (LFWorkerData *)pbi->lf_worker.data1;
     // Be sure to sync as we might be resuming after a failed frame decode.
     winterface->sync(&pbi->lf_worker);
-    vp10_loop_filter_data_reset(lf_data, get_frame_new_buffer(cm), cm,
-                                pbi->mb.plane);
+    av1_loop_filter_data_reset(lf_data, get_frame_new_buffer(cm), cm,
+                               pbi->mb.plane);
   }
 
   assert(tile_rows <= MAX_TILE_ROWS);
@@ -2639,9 +2628,9 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi, const uint8_t *data,
   get_tile_buffers(pbi, data, data_end, tile_buffers);
 
   if (pbi->tile_data == NULL || n_tiles != pbi->allocated_tiles) {
-    vpx_free(pbi->tile_data);
+    aom_free(pbi->tile_data);
     CHECK_MEM_ERROR(cm, pbi->tile_data,
-                    vpx_memalign(32, n_tiles * (sizeof(*pbi->tile_data))));
+                    aom_memalign(32, n_tiles * (sizeof(*pbi->tile_data))));
     pbi->allocated_tiles = n_tiles;
   }
 
@@ -2658,8 +2647,8 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi, const uint8_t *data,
           cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD
               ? &cm->counts
               : NULL;
-      vp10_zero(td->dqcoeff);
-      vp10_tile_init(&td->xd.tile, td->cm, tile_row, tile_col);
+      av1_zero(td->dqcoeff);
+      av1_tile_init(&td->xd.tile, td->cm, tile_row, tile_col);
 #if !CONFIG_ANS
       setup_bool_decoder(buf->data, data_end, buf->size, &cm->error,
                          &td->bit_reader, pbi->decrypt_cb, pbi->decrypt_state);
@@ -2667,7 +2656,7 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi, const uint8_t *data,
       setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
                           &td->bit_reader, pbi->decrypt_cb, pbi->decrypt_state);
 #endif
-      vp10_init_macroblockd(cm, &td->xd, td->dqcoeff);
+      av1_init_macroblockd(cm, &td->xd, td->dqcoeff);
       td->xd.plane[0].color_index_map = td->color_index_map[0];
       td->xd.plane[1].color_index_map = td->color_index_map[1];
     }
@@ -2678,21 +2667,21 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi, const uint8_t *data,
     int mi_row = 0;
     TileInfo tile_info;
 
-    vp10_tile_set_row(&tile_info, cm, row);
+    av1_tile_set_row(&tile_info, cm, row);
 
     for (tile_col = tile_cols_start; tile_col < tile_cols_end; ++tile_col) {
       const int col = inv_col_order ? tile_cols - 1 - tile_col : tile_col;
       TileData *const td = pbi->tile_data + tile_cols * row + col;
 
-      vp10_tile_set_col(&tile_info, cm, col);
+      av1_tile_set_col(&tile_info, cm, col);
 
-      vp10_zero_above_context(cm, tile_info.mi_col_start, tile_info.mi_col_end);
+      av1_zero_above_context(cm, tile_info.mi_col_start, tile_info.mi_col_end);
 
       for (mi_row = tile_info.mi_row_start; mi_row < tile_info.mi_row_end;
            mi_row += cm->mib_size) {
         int mi_col;
 
-        vp10_zero_left_context(&td->xd);
+        av1_zero_left_context(&td->xd);
 
         for (mi_col = tile_info.mi_col_start; mi_col < tile_info.mi_col_end;
              mi_col += cm->mib_size) {
@@ -2705,18 +2694,18 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi, const uint8_t *data,
         }
         pbi->mb.corrupted |= td->xd.corrupted;
         if (pbi->mb.corrupted)
-          vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+          aom_internal_error(&cm->error, AOM_CODEC_CORRUPT_FRAME,
                              "Failed to decode tile data");
 #if CONFIG_ENTROPY
         if (cm->do_subframe_update &&
             cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
           if ((mi_row + MI_SIZE) %
                       (MI_SIZE *
-                       VPXMAX(cm->mi_rows / MI_SIZE / COEF_PROBS_BUFS, 1)) ==
+                       AOMMAX(cm->mi_rows / MI_SIZE / COEF_PROBS_BUFS, 1)) ==
                   0 &&
               mi_row + MI_SIZE < cm->mi_rows &&
               cm->coef_probs_update_idx < COEF_PROBS_BUFS - 1) {
-            vp10_partial_adapt_probs(cm, mi_row, mi_col);
+            av1_partial_adapt_probs(cm, mi_row, mi_col);
             ++cm->coef_probs_update_idx;
           }
         }
@@ -2730,7 +2719,7 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi, const uint8_t *data,
     // Loopfilter one tile row.
     if (cm->lf.filter_level && !cm->skip_loop_filter) {
       LFWorkerData *const lf_data = (LFWorkerData *)pbi->lf_worker.data1;
-      const int lf_start = VPXMAX(0, tile_info.mi_row_start - cm->mib_size);
+      const int lf_start = AOMMAX(0, tile_info.mi_row_start - cm->mib_size);
       const int lf_end = tile_info.mi_row_end - cm->mib_size;
 
       // Delay the loopfilter if the first tile row is only
@@ -2753,14 +2742,14 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi, const uint8_t *data,
     // After loopfiltering, the last 7 row pixels in each superblock row may
     // still be changed by the longest loopfilter of the next superblock row.
     if (cm->frame_parallel_decode)
-      vp10_frameworker_broadcast(pbi->cur_buf, mi_row << cm->mib_size_log2);
+      av1_frameworker_broadcast(pbi->cur_buf, mi_row << cm->mib_size_log2);
 #endif  // !CONFIG_VAR_TX
   }
 
 #if CONFIG_VAR_TX
   // Loopfilter the whole frame.
-  vp10_loop_filter_frame(get_frame_new_buffer(cm), cm, &pbi->mb,
-                         cm->lf.filter_level, 0, 0);
+  av1_loop_filter_frame(get_frame_new_buffer(cm), cm, &pbi->mb,
+                        cm->lf.filter_level, 0, 0);
 #else
   // Loopfilter remaining rows in the frame.
   if (cm->lf.filter_level && !cm->skip_loop_filter) {
@@ -2773,16 +2762,16 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi, const uint8_t *data,
 #endif  // CONFIG_VAR_TX
 #if CONFIG_CLPF
   if (cm->clpf && !cm->skip_loop_filter)
-    vp10_clpf_frame(&pbi->cur_buf->buf, cm, &pbi->mb);
+    av1_clpf_frame(&pbi->cur_buf->buf, cm, &pbi->mb);
 #endif
 #if CONFIG_DERING
   if (cm->dering_level && !cm->skip_loop_filter) {
-    vp10_dering_frame(&pbi->cur_buf->buf, cm, &pbi->mb, cm->dering_level);
+    av1_dering_frame(&pbi->cur_buf->buf, cm, &pbi->mb, cm->dering_level);
   }
 #endif  // CONFIG_DERING
 
   if (cm->frame_parallel_decode)
-    vp10_frameworker_broadcast(pbi->cur_buf, INT_MAX);
+    av1_frameworker_broadcast(pbi->cur_buf, INT_MAX);
 
 #if CONFIG_EXT_TILE
   if (n_tiles == 1) {
@@ -2790,7 +2779,7 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi, const uint8_t *data,
     return data_end;
 #else
     // Find the end of the single tile buffer
-    return vpx_reader_find_end(&pbi->tile_data->bit_reader);
+    return aom_reader_find_end(&pbi->tile_data->bit_reader);
 #endif  // CONFIG_ANS
   } else {
     // Return the end of the last tile buffer
@@ -2803,7 +2792,7 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi, const uint8_t *data,
   {
     // Get last tile data.
     TileData *const td = pbi->tile_data + tile_cols * tile_rows - 1;
-    return vpx_reader_find_end(&td->bit_reader);
+    return aom_reader_find_end(&td->bit_reader);
   }
 #endif  // CONFIG_ANS
 #endif  // CONFIG_EXT_TILE
@@ -2811,8 +2800,8 @@ static const uint8_t *decode_tiles(VP10Decoder *pbi, const uint8_t *data,
 
 static int tile_worker_hook(TileWorkerData *const tile_data,
                             const TileInfo *const tile) {
-  VP10Decoder *const pbi = tile_data->pbi;
-  const VP10_COMMON *const cm = &pbi->common;
+  AV1Decoder *const pbi = tile_data->pbi;
+  const AV1_COMMON *const cm = &pbi->common;
   int mi_row, mi_col;
 
   if (setjmp(tile_data->error_info.jmp)) {
@@ -2824,11 +2813,11 @@ static int tile_worker_hook(TileWorkerData *const tile_data,
   tile_data->error_info.setjmp = 1;
   tile_data->xd.error_info = &tile_data->error_info;
 
-  vp10_zero_above_context(&pbi->common, tile->mi_col_start, tile->mi_col_end);
+  av1_zero_above_context(&pbi->common, tile->mi_col_start, tile->mi_col_end);
 
   for (mi_row = tile->mi_row_start; mi_row < tile->mi_row_end;
        mi_row += cm->mib_size) {
-    vp10_zero_left_context(&tile_data->xd);
+    av1_zero_left_context(&tile_data->xd);
 
     for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
          mi_col += cm->mib_size) {
@@ -2850,20 +2839,20 @@ static int compare_tile_buffers(const void *a, const void *b) {
   return (int)(buf2->size - buf1->size);
 }
 
-static const uint8_t *decode_tiles_mt(VP10Decoder *pbi, const uint8_t *data,
+static const uint8_t *decode_tiles_mt(AV1Decoder *pbi, const uint8_t *data,
                                       const uint8_t *data_end) {
-  VP10_COMMON *const cm = &pbi->common;
-  const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
+  AV1_COMMON *const cm = &pbi->common;
+  const AVxWorkerInterface *const winterface = aom_get_worker_interface();
   const int tile_cols = cm->tile_cols;
   const int tile_rows = cm->tile_rows;
-  const int num_workers = VPXMIN(pbi->max_threads & ~1, tile_cols);
+  const int num_workers = AOMMIN(pbi->max_threads & ~1, tile_cols);
   TileBufferDec (*const tile_buffers)[MAX_TILE_COLS] = pbi->tile_buffers;
 #if CONFIG_EXT_TILE
-  const int dec_tile_row = VPXMIN(pbi->dec_tile_row, tile_rows);
+  const int dec_tile_row = AOMMIN(pbi->dec_tile_row, tile_rows);
   const int single_row = pbi->dec_tile_row >= 0;
   const int tile_rows_start = single_row ? dec_tile_row : 0;
   const int tile_rows_end = single_row ? dec_tile_row + 1 : tile_rows;
-  const int dec_tile_col = VPXMIN(pbi->dec_tile_col, tile_cols);
+  const int dec_tile_col = AOMMIN(pbi->dec_tile_col, tile_cols);
   const int single_col = pbi->dec_tile_col >= 0;
   const int tile_cols_start = single_col ? dec_tile_col : 0;
   const int tile_cols_end = single_col ? tile_cols_start + 1 : tile_cols;
@@ -2895,22 +2884,22 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi, const uint8_t *data,
   if (pbi->num_tile_workers == 0) {
     const int num_threads = pbi->max_threads & ~1;
     CHECK_MEM_ERROR(cm, pbi->tile_workers,
-                    vpx_malloc(num_threads * sizeof(*pbi->tile_workers)));
+                    aom_malloc(num_threads * sizeof(*pbi->tile_workers)));
     // Ensure tile data offsets will be properly aligned. This may fail on
     // platforms without DECLARE_ALIGNED().
     assert((sizeof(*pbi->tile_worker_data) % 16) == 0);
     CHECK_MEM_ERROR(
         cm, pbi->tile_worker_data,
-        vpx_memalign(32, num_threads * sizeof(*pbi->tile_worker_data)));
+        aom_memalign(32, num_threads * sizeof(*pbi->tile_worker_data)));
     CHECK_MEM_ERROR(cm, pbi->tile_worker_info,
-                    vpx_malloc(num_threads * sizeof(*pbi->tile_worker_info)));
+                    aom_malloc(num_threads * sizeof(*pbi->tile_worker_info)));
     for (i = 0; i < num_threads; ++i) {
-      VPxWorker *const worker = &pbi->tile_workers[i];
+      AVxWorker *const worker = &pbi->tile_workers[i];
       ++pbi->num_tile_workers;
 
       winterface->init(worker);
       if (i < num_threads - 1 && !winterface->reset(worker)) {
-        vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+        aom_internal_error(&cm->error, AOM_CODEC_ERROR,
                            "Tile decoder thread creation failed");
       }
     }
@@ -2918,9 +2907,9 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi, const uint8_t *data,
 
   // Reset tile decoding hook
   for (i = 0; i < num_workers; ++i) {
-    VPxWorker *const worker = &pbi->tile_workers[i];
+    AVxWorker *const worker = &pbi->tile_workers[i];
     winterface->sync(worker);
-    worker->hook = (VPxWorkerHook)tile_worker_hook;
+    worker->hook = (AVxWorkerHook)tile_worker_hook;
     worker->data1 = &pbi->tile_worker_data[i];
     worker->data2 = &pbi->tile_worker_info[i];
   }
@@ -2929,7 +2918,7 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi, const uint8_t *data,
   if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
     for (i = 0; i < num_workers; ++i) {
       TileWorkerData *const twd = (TileWorkerData *)pbi->tile_workers[i].data1;
-      vp10_zero(twd->counts);
+      av1_zero(twd->counts);
     }
   }
 
@@ -2950,7 +2939,7 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi, const uint8_t *data,
       int group_start;
       for (group_start = tile_cols_start; group_start < tile_cols_end;
            group_start += num_workers) {
-        const int group_end = VPXMIN(group_start + num_workers, tile_cols);
+        const int group_end = AOMMIN(group_start + num_workers, tile_cols);
         const TileBufferDec largest = tile_buffers[tile_row][group_start];
         memmove(&tile_buffers[tile_row][group_start],
                 &tile_buffers[tile_row][group_start + 1],
@@ -2964,7 +2953,7 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi, const uint8_t *data,
       for (i = 0; i < num_workers && tile_col < tile_cols_end;
            ++i, ++tile_col) {
         TileBufferDec *const buf = &tile_buffers[tile_row][tile_col];
-        VPxWorker *const worker = &pbi->tile_workers[i];
+        AVxWorker *const worker = &pbi->tile_workers[i];
         TileWorkerData *const twd = (TileWorkerData *)worker->data1;
         TileInfo *const tile_info = (TileInfo *)worker->data2;
 
@@ -2975,9 +2964,9 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi, const uint8_t *data,
             cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD
                 ? &twd->counts
                 : NULL;
-        vp10_zero(twd->dqcoeff);
-        vp10_tile_init(tile_info, cm, tile_row, buf->col);
-        vp10_tile_init(&twd->xd.tile, cm, tile_row, buf->col);
+        av1_zero(twd->dqcoeff);
+        av1_tile_init(tile_info, cm, tile_row, buf->col);
+        av1_tile_init(&twd->xd.tile, cm, tile_row, buf->col);
 #if !CONFIG_ANS
         setup_bool_decoder(buf->data, data_end, buf->size, &cm->error,
                            &twd->bit_reader, pbi->decrypt_cb,
@@ -2987,7 +2976,7 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi, const uint8_t *data,
                             &twd->bit_reader, pbi->decrypt_cb,
                             pbi->decrypt_state);
 #endif  // CONFIG_ANS
-        vp10_init_macroblockd(cm, &twd->xd, twd->dqcoeff);
+        av1_init_macroblockd(cm, &twd->xd, twd->dqcoeff);
         twd->xd.plane[0].color_index_map = twd->color_index_map[0];
         twd->xd.plane[1].color_index_map = twd->color_index_map[1];
 
@@ -3007,9 +2996,9 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi, const uint8_t *data,
 
       // Sync all workers
       for (; i > 0; --i) {
-        VPxWorker *const worker = &pbi->tile_workers[i - 1];
+        AVxWorker *const worker = &pbi->tile_workers[i - 1];
         // TODO(jzern): The tile may have specific error data associated with
-        // its vpx_internal_error_info which could be propagated to the main
+        // its aom_internal_error_info which could be propagated to the main
         // info in cm. Additionally once the threads have been synced and an
         // error is detected, there's no point in continuing to decode tiles.
         pbi->mb.corrupted |= !winterface->sync(worker);
@@ -3021,7 +3010,7 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi, const uint8_t *data,
   if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
     for (i = 0; i < num_workers; ++i) {
       TileWorkerData *const twd = (TileWorkerData *)pbi->tile_workers[i].data1;
-      vp10_accumulate_frame_counts(cm, &twd->counts);
+      av1_accumulate_frame_counts(cm, &twd->counts);
     }
   }
 
@@ -3036,42 +3025,42 @@ static const uint8_t *decode_tiles_mt(VP10Decoder *pbi, const uint8_t *data,
   {
     TileWorkerData *const twd =
         (TileWorkerData *)pbi->tile_workers[final_worker].data1;
-    return vpx_reader_find_end(&twd->bit_reader);
+    return aom_reader_find_end(&twd->bit_reader);
   }
 #endif  // CONFIG_ANS
 #endif  // CONFIG_EXT_TILE
 }
 
 static void error_handler(void *data) {
-  VP10_COMMON *const cm = (VP10_COMMON *)data;
-  vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME, "Truncated packet");
+  AV1_COMMON *const cm = (AV1_COMMON *)data;
+  aom_internal_error(&cm->error, AOM_CODEC_CORRUPT_FRAME, "Truncated packet");
 }
 
-static void read_bitdepth_colorspace_sampling(VP10_COMMON *cm,
-                                              struct vpx_read_bit_buffer *rb) {
+static void read_bitdepth_colorspace_sampling(AV1_COMMON *cm,
+                                              struct aom_read_bit_buffer *rb) {
   if (cm->profile >= PROFILE_2) {
-    cm->bit_depth = vpx_rb_read_bit(rb) ? VPX_BITS_12 : VPX_BITS_10;
-#if CONFIG_VP9_HIGHBITDEPTH
+    cm->bit_depth = aom_rb_read_bit(rb) ? AOM_BITS_12 : AOM_BITS_10;
+#if CONFIG_AOM_HIGHBITDEPTH
     cm->use_highbitdepth = 1;
 #endif
   } else {
-    cm->bit_depth = VPX_BITS_8;
-#if CONFIG_VP9_HIGHBITDEPTH
+    cm->bit_depth = AOM_BITS_8;
+#if CONFIG_AOM_HIGHBITDEPTH
     cm->use_highbitdepth = 0;
 #endif
   }
-  cm->color_space = vpx_rb_read_literal(rb, 3);
-  if (cm->color_space != VPX_CS_SRGB) {
+  cm->color_space = aom_rb_read_literal(rb, 3);
+  if (cm->color_space != AOM_CS_SRGB) {
     // [16,235] (including xvycc) vs [0,255] range
-    cm->color_range = vpx_rb_read_bit(rb);
+    cm->color_range = aom_rb_read_bit(rb);
     if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
-      cm->subsampling_x = vpx_rb_read_bit(rb);
-      cm->subsampling_y = vpx_rb_read_bit(rb);
+      cm->subsampling_x = aom_rb_read_bit(rb);
+      cm->subsampling_y = aom_rb_read_bit(rb);
       if (cm->subsampling_x == 1 && cm->subsampling_y == 1)
-        vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+        aom_internal_error(&cm->error, AOM_CODEC_UNSUP_BITSTREAM,
                            "4:2:0 color not supported in profile 1 or 3");
-      if (vpx_rb_read_bit(rb))
-        vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+      if (aom_rb_read_bit(rb))
+        aom_internal_error(&cm->error, AOM_CODEC_UNSUP_BITSTREAM,
                            "Reserved bit set");
     } else {
       cm->subsampling_y = cm->subsampling_x = 1;
@@ -3081,19 +3070,19 @@ static void read_bitdepth_colorspace_sampling(VP10_COMMON *cm,
       // Note if colorspace is SRGB then 4:4:4 chroma sampling is assumed.
       // 4:2:2 or 4:4:0 chroma sampling is not allowed.
       cm->subsampling_y = cm->subsampling_x = 0;
-      if (vpx_rb_read_bit(rb))
-        vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+      if (aom_rb_read_bit(rb))
+        aom_internal_error(&cm->error, AOM_CODEC_UNSUP_BITSTREAM,
                            "Reserved bit set");
     } else {
-      vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+      aom_internal_error(&cm->error, AOM_CODEC_UNSUP_BITSTREAM,
                          "4:4:4 color not supported in profile 0 or 2");
     }
   }
 }
 
-static size_t read_uncompressed_header(VP10Decoder *pbi,
-                                       struct vpx_read_bit_buffer *rb) {
-  VP10_COMMON *const cm = &pbi->common;
+static size_t read_uncompressed_header(AV1Decoder *pbi,
+                                       struct aom_read_bit_buffer *rb) {
+  AV1_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
   BufferPool *const pool = cm->buffer_pool;
   RefCntBuffer *const frame_bufs = pool->frame_bufs;
@@ -3111,31 +3100,31 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   cm->is_reference_frame = 1;
 #endif  // CONFIG_EXT_REFS
 
-  if (vpx_rb_read_literal(rb, 2) != VPX_FRAME_MARKER)
-    vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+  if (aom_rb_read_literal(rb, 2) != AOM_FRAME_MARKER)
+    aom_internal_error(&cm->error, AOM_CODEC_UNSUP_BITSTREAM,
                        "Invalid frame marker");
 
-  cm->profile = vp10_read_profile(rb);
-#if CONFIG_VP9_HIGHBITDEPTH
+  cm->profile = av1_read_profile(rb);
+#if CONFIG_AOM_HIGHBITDEPTH
   if (cm->profile >= MAX_PROFILES)
-    vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+    aom_internal_error(&cm->error, AOM_CODEC_UNSUP_BITSTREAM,
                        "Unsupported bitstream profile");
 #else
   if (cm->profile >= PROFILE_2)
-    vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+    aom_internal_error(&cm->error, AOM_CODEC_UNSUP_BITSTREAM,
                        "Unsupported bitstream profile");
 #endif
 
-  cm->show_existing_frame = vpx_rb_read_bit(rb);
+  cm->show_existing_frame = aom_rb_read_bit(rb);
 
   if (cm->show_existing_frame) {
     // Show an existing frame directly.
-    const int frame_to_show = cm->ref_frame_map[vpx_rb_read_literal(rb, 3)];
+    const int frame_to_show = cm->ref_frame_map[aom_rb_read_literal(rb, 3)];
 
     lock_buffer_pool(pool);
     if (frame_to_show < 0 || frame_bufs[frame_to_show].ref_count < 1) {
       unlock_buffer_pool(pool);
-      vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+      aom_internal_error(&cm->error, AOM_CODEC_UNSUP_BITSTREAM,
                          "Buffer %d does not contain a decoded frame",
                          frame_to_show);
     }
@@ -3154,13 +3143,13 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
     return 0;
   }
 
-  cm->frame_type = (FRAME_TYPE)vpx_rb_read_bit(rb);
-  cm->show_frame = vpx_rb_read_bit(rb);
-  cm->error_resilient_mode = vpx_rb_read_bit(rb);
+  cm->frame_type = (FRAME_TYPE)aom_rb_read_bit(rb);
+  cm->show_frame = aom_rb_read_bit(rb);
+  cm->error_resilient_mode = aom_rb_read_bit(rb);
 
   if (cm->frame_type == KEY_FRAME) {
-    if (!vp10_read_sync_code(rb))
-      vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+    if (!av1_read_sync_code(rb))
+      aom_internal_error(&cm->error, AOM_CODEC_UNSUP_BITSTREAM,
                          "Invalid frame sync code");
 
     read_bitdepth_colorspace_sampling(cm, rb);
@@ -3177,43 +3166,43 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
       pbi->need_resync = 0;
     }
     if (frame_is_intra_only(cm))
-      cm->allow_screen_content_tools = vpx_rb_read_bit(rb);
+      cm->allow_screen_content_tools = aom_rb_read_bit(rb);
   } else {
-    cm->intra_only = cm->show_frame ? 0 : vpx_rb_read_bit(rb);
+    cm->intra_only = cm->show_frame ? 0 : aom_rb_read_bit(rb);
 
     if (cm->error_resilient_mode) {
       cm->reset_frame_context = RESET_FRAME_CONTEXT_ALL;
     } else {
       if (cm->intra_only) {
-        cm->reset_frame_context = vpx_rb_read_bit(rb)
+        cm->reset_frame_context = aom_rb_read_bit(rb)
                                       ? RESET_FRAME_CONTEXT_ALL
                                       : RESET_FRAME_CONTEXT_CURRENT;
       } else {
-        cm->reset_frame_context = vpx_rb_read_bit(rb)
+        cm->reset_frame_context = aom_rb_read_bit(rb)
                                       ? RESET_FRAME_CONTEXT_CURRENT
                                       : RESET_FRAME_CONTEXT_NONE;
         if (cm->reset_frame_context == RESET_FRAME_CONTEXT_CURRENT)
-          cm->reset_frame_context = vpx_rb_read_bit(rb)
+          cm->reset_frame_context = aom_rb_read_bit(rb)
                                         ? RESET_FRAME_CONTEXT_ALL
                                         : RESET_FRAME_CONTEXT_CURRENT;
       }
     }
 
     if (cm->intra_only) {
-      if (!vp10_read_sync_code(rb))
-        vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+      if (!av1_read_sync_code(rb))
+        aom_internal_error(&cm->error, AOM_CODEC_UNSUP_BITSTREAM,
                            "Invalid frame sync code");
 
       read_bitdepth_colorspace_sampling(cm, rb);
 
-      pbi->refresh_frame_flags = vpx_rb_read_literal(rb, REF_FRAMES);
+      pbi->refresh_frame_flags = aom_rb_read_literal(rb, REF_FRAMES);
       setup_frame_size(cm, rb);
       if (pbi->need_resync) {
         memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
         pbi->need_resync = 0;
       }
     } else if (pbi->need_resync != 1) { /* Skip if need resync */
-      pbi->refresh_frame_flags = vpx_rb_read_literal(rb, REF_FRAMES);
+      pbi->refresh_frame_flags = aom_rb_read_literal(rb, REF_FRAMES);
 
 #if CONFIG_EXT_REFS
       if (!pbi->refresh_frame_flags) {
@@ -3224,35 +3213,35 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
 #endif  // CONFIG_EXT_REFS
 
       for (i = 0; i < INTER_REFS_PER_FRAME; ++i) {
-        const int ref = vpx_rb_read_literal(rb, REF_FRAMES_LOG2);
+        const int ref = aom_rb_read_literal(rb, REF_FRAMES_LOG2);
         const int idx = cm->ref_frame_map[ref];
         RefBuffer *const ref_frame = &cm->frame_refs[i];
         ref_frame->idx = idx;
         ref_frame->buf = &frame_bufs[idx].buf;
-        cm->ref_frame_sign_bias[LAST_FRAME + i] = vpx_rb_read_bit(rb);
+        cm->ref_frame_sign_bias[LAST_FRAME + i] = aom_rb_read_bit(rb);
       }
 
       setup_frame_size_with_refs(cm, rb);
 
-      cm->allow_high_precision_mv = vpx_rb_read_bit(rb);
+      cm->allow_high_precision_mv = aom_rb_read_bit(rb);
       cm->interp_filter = read_interp_filter(rb);
 
       for (i = 0; i < INTER_REFS_PER_FRAME; ++i) {
         RefBuffer *const ref_buf = &cm->frame_refs[i];
-#if CONFIG_VP9_HIGHBITDEPTH
-        vp10_setup_scale_factors_for_frame(
+#if CONFIG_AOM_HIGHBITDEPTH
+        av1_setup_scale_factors_for_frame(
             &ref_buf->sf, ref_buf->buf->y_crop_width,
             ref_buf->buf->y_crop_height, cm->width, cm->height,
             cm->use_highbitdepth);
 #else
-        vp10_setup_scale_factors_for_frame(
+        av1_setup_scale_factors_for_frame(
             &ref_buf->sf, ref_buf->buf->y_crop_width,
             ref_buf->buf->y_crop_height, cm->width, cm->height);
 #endif
       }
     }
   }
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   get_frame_new_buffer(cm)->bit_depth = cm->bit_depth;
 #endif
   get_frame_new_buffer(cm)->color_space = cm->color_space;
@@ -3261,22 +3250,22 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   get_frame_new_buffer(cm)->render_height = cm->render_height;
 
   if (pbi->need_resync) {
-    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+    aom_internal_error(&cm->error, AOM_CODEC_CORRUPT_FRAME,
                        "Keyframe / intra-only frame required to reset decoder"
                        " state");
   }
 
   if (!cm->error_resilient_mode) {
-    cm->refresh_frame_context = vpx_rb_read_bit(rb)
+    cm->refresh_frame_context = aom_rb_read_bit(rb)
                                     ? REFRESH_FRAME_CONTEXT_FORWARD
                                     : REFRESH_FRAME_CONTEXT_BACKWARD;
   } else {
     cm->refresh_frame_context = REFRESH_FRAME_CONTEXT_FORWARD;
   }
 
-  // This flag will be overridden by the call to vp10_setup_past_independence
+  // This flag will be overridden by the call to av1_setup_past_independence
   // below, forcing the use of context 0 for those frame types.
-  cm->frame_context_idx = vpx_rb_read_literal(rb, FRAME_CONTEXTS_LOG2);
+  cm->frame_context_idx = aom_rb_read_literal(rb, FRAME_CONTEXTS_LOG2);
 
   // Generate next_ref_frame_map.
   lock_buffer_pool(pool);
@@ -3304,10 +3293,10 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   pbi->hold_ref_buf = 1;
 
   if (frame_is_intra_only(cm) || cm->error_resilient_mode)
-    vp10_setup_past_independence(cm);
+    av1_setup_past_independence(cm);
 
 #if CONFIG_EXT_PARTITION
-  set_sb_size(cm, vpx_rb_read_bit(rb) ? BLOCK_128X128 : BLOCK_64X64);
+  set_sb_size(cm, aom_rb_read_bit(rb) ? BLOCK_128X128 : BLOCK_64X64);
 #else
   set_sb_size(cm, BLOCK_64X64);
 #endif  // CONFIG_EXT_PARTITION
@@ -3323,12 +3312,12 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   setup_restoration(cm, rb);
 #endif  // CONFIG_LOOP_RESTORATION
   setup_quantization(cm, rb);
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   xd->bd = (int)cm->bit_depth;
 #endif
 
 #if CONFIG_ENTROPY
-  vp10_default_coef_probs(cm);
+  av1_default_coef_probs(cm);
   if (cm->frame_type == KEY_FRAME || cm->error_resilient_mode ||
       cm->reset_frame_context == RESET_FRAME_CONTEXT_ALL) {
     for (i = 0; i < FRAME_CONTEXTS; ++i) cm->frame_contexts[i] = *cm->fc;
@@ -3343,7 +3332,7 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
     int i;
     for (i = 0; i < MAX_SEGMENTS; ++i) {
       const int qindex = cm->seg.enabled
-                             ? vp10_get_qindex(&cm->seg, i, cm->base_qindex)
+                             ? av1_get_qindex(&cm->seg, i, cm->base_qindex)
                              : cm->base_qindex;
       xd->lossless[i] = qindex == 0 && cm->y_dc_delta_q == 0 &&
                         cm->uv_dc_delta_q == 0 && cm->uv_ac_delta_q == 0;
@@ -3356,36 +3345,36 @@ static size_t read_uncompressed_header(VP10Decoder *pbi,
   cm->reference_mode = read_frame_reference_mode(cm, rb);
 
   read_tile_info(pbi, rb);
-  sz = vpx_rb_read_literal(rb, 16);
+  sz = aom_rb_read_literal(rb, 16);
 
   if (sz == 0)
-    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+    aom_internal_error(&cm->error, AOM_CODEC_CORRUPT_FRAME,
                        "Invalid header size");
 
   return sz;
 }
 
 #if CONFIG_EXT_TX
-static void read_ext_tx_probs(FRAME_CONTEXT *fc, vp10_reader *r) {
+static void read_ext_tx_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   int i, j, k;
   int s;
   for (s = 1; s < EXT_TX_SETS_INTER; ++s) {
-    if (vp10_read(r, GROUP_DIFF_UPDATE_PROB)) {
+    if (aom_read(r, GROUP_DIFF_UPDATE_PROB)) {
       for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
         if (!use_inter_ext_tx_for_txsize[s][i]) continue;
         for (j = 0; j < num_ext_tx_set_inter[s] - 1; ++j)
-          vp10_diff_update_prob(r, &fc->inter_ext_tx_prob[s][i][j]);
+          av1_diff_update_prob(r, &fc->inter_ext_tx_prob[s][i][j]);
       }
     }
   }
 
   for (s = 1; s < EXT_TX_SETS_INTRA; ++s) {
-    if (vp10_read(r, GROUP_DIFF_UPDATE_PROB)) {
+    if (aom_read(r, GROUP_DIFF_UPDATE_PROB)) {
       for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
         if (!use_intra_ext_tx_for_txsize[s][i]) continue;
         for (j = 0; j < INTRA_MODES; ++j)
           for (k = 0; k < num_ext_tx_set_intra[s] - 1; ++k)
-            vp10_diff_update_prob(r, &fc->intra_ext_tx_prob[s][i][j][k]);
+            av1_diff_update_prob(r, &fc->intra_ext_tx_prob[s][i][j][k]);
       }
     }
   }
@@ -3393,31 +3382,31 @@ static void read_ext_tx_probs(FRAME_CONTEXT *fc, vp10_reader *r) {
 
 #else
 
-static void read_ext_tx_probs(FRAME_CONTEXT *fc, vp10_reader *r) {
+static void read_ext_tx_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   int i, j, k;
-  if (vp10_read(r, GROUP_DIFF_UPDATE_PROB)) {
+  if (aom_read(r, GROUP_DIFF_UPDATE_PROB)) {
     for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
       for (j = 0; j < TX_TYPES; ++j)
         for (k = 0; k < TX_TYPES - 1; ++k)
-          vp10_diff_update_prob(r, &fc->intra_ext_tx_prob[i][j][k]);
+          av1_diff_update_prob(r, &fc->intra_ext_tx_prob[i][j][k]);
     }
   }
-  if (vp10_read(r, GROUP_DIFF_UPDATE_PROB)) {
+  if (aom_read(r, GROUP_DIFF_UPDATE_PROB)) {
     for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
       for (k = 0; k < TX_TYPES - 1; ++k)
-        vp10_diff_update_prob(r, &fc->inter_ext_tx_prob[i][k]);
+        av1_diff_update_prob(r, &fc->inter_ext_tx_prob[i][k]);
     }
   }
 }
 #endif  // CONFIG_EXT_TX
 
 #if CONFIG_SUPERTX
-static void read_supertx_probs(FRAME_CONTEXT *fc, vp10_reader *r) {
+static void read_supertx_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   int i, j;
-  if (vp10_read(r, GROUP_DIFF_UPDATE_PROB)) {
+  if (aom_read(r, GROUP_DIFF_UPDATE_PROB)) {
     for (i = 0; i < PARTITION_SUPERTX_CONTEXTS; ++i) {
       for (j = 1; j < TX_SIZES; ++j) {
-        vp10_diff_update_prob(r, &fc->supertx_prob[i][j]);
+        av1_diff_update_prob(r, &fc->supertx_prob[i][j]);
       }
     }
   }
@@ -3426,44 +3415,44 @@ static void read_supertx_probs(FRAME_CONTEXT *fc, vp10_reader *r) {
 
 #if CONFIG_GLOBAL_MOTION
 static void read_global_motion_params(Global_Motion_Params *params,
-                                      vpx_prob *probs, vp10_reader *r) {
+                                      aom_prob *probs, aom_reader *r) {
   GLOBAL_MOTION_TYPE gmtype =
-      vp10_read_tree(r, vp10_global_motion_types_tree, probs);
+      aom_read_tree(r, av1_global_motion_types_tree, probs);
   params->gmtype = gmtype;
   params->motion_params.wmtype = gm_to_trans_type(gmtype);
   switch (gmtype) {
     case GLOBAL_ZERO: break;
     case GLOBAL_AFFINE:
       params->motion_params.wmmat[4] =
-          (vp10_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
+          (aom_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
            GM_ALPHA_DECODE_FACTOR);
       params->motion_params.wmmat[5] =
-          vp10_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
+          aom_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
               GM_ALPHA_DECODE_FACTOR +
           (1 << WARPEDMODEL_PREC_BITS);
     // fallthrough intended
     case GLOBAL_ROTZOOM:
       params->motion_params.wmmat[2] =
-          (vp10_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
+          (aom_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
            GM_ALPHA_DECODE_FACTOR) +
           (1 << WARPEDMODEL_PREC_BITS);
       params->motion_params.wmmat[3] =
-          vp10_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
+          aom_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
           GM_ALPHA_DECODE_FACTOR;
     // fallthrough intended
     case GLOBAL_TRANSLATION:
       params->motion_params.wmmat[0] =
-          vp10_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
+          aom_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
           GM_TRANS_DECODE_FACTOR;
       params->motion_params.wmmat[1] =
-          vp10_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
+          aom_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
           GM_TRANS_DECODE_FACTOR;
       break;
     default: assert(0);
   }
 }
 
-static void read_global_motion(VP10_COMMON *cm, vp10_reader *r) {
+static void read_global_motion(AV1_COMMON *cm, aom_reader *r) {
   int frame;
   memset(cm->global_motion, 0, sizeof(cm->global_motion));
   for (frame = LAST_FRAME; frame <= ALTREF_FRAME; ++frame) {
@@ -3473,24 +3462,24 @@ static void read_global_motion(VP10_COMMON *cm, vp10_reader *r) {
 }
 #endif  // CONFIG_GLOBAL_MOTION
 
-static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
+static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
                                   size_t partition_size) {
-  VP10_COMMON *const cm = &pbi->common;
+  AV1_COMMON *const cm = &pbi->common;
 #if CONFIG_SUPERTX
   MACROBLOCKD *const xd = &pbi->mb;
 #endif
   FRAME_CONTEXT *const fc = cm->fc;
-  vp10_reader r;
+  aom_reader r;
   int k, i, j;
 
 #if !CONFIG_ANS
-  if (vpx_reader_init(&r, data, partition_size, pbi->decrypt_cb,
+  if (aom_reader_init(&r, data, partition_size, pbi->decrypt_cb,
                       pbi->decrypt_state))
-    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+    aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder 0");
 #else
   if (ans_read_init(&r, data, partition_size))
-    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+    aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,
                        "Failed to allocate compressed header ANS decoder");
 #endif  // !CONFIG_ANS
 
@@ -3498,56 +3487,56 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
     for (i = 0; i < TX_SIZES - 1; ++i)
       for (j = 0; j < TX_SIZE_CONTEXTS; ++j)
         for (k = 0; k < i + 1; ++k)
-          vp10_diff_update_prob(&r, &fc->tx_size_probs[i][j][k]);
+          av1_diff_update_prob(&r, &fc->tx_size_probs[i][j][k]);
   }
 
   read_coef_probs(fc, cm->tx_mode, &r);
 
 #if CONFIG_VAR_TX
   for (k = 0; k < TXFM_PARTITION_CONTEXTS; ++k)
-    vp10_diff_update_prob(&r, &fc->txfm_partition_prob[k]);
+    av1_diff_update_prob(&r, &fc->txfm_partition_prob[k]);
 #endif
 
   for (k = 0; k < SKIP_CONTEXTS; ++k)
-    vp10_diff_update_prob(&r, &fc->skip_probs[k]);
+    av1_diff_update_prob(&r, &fc->skip_probs[k]);
 
   if (cm->seg.enabled && cm->seg.update_map) {
     if (cm->seg.temporal_update) {
       for (k = 0; k < PREDICTION_PROBS; k++)
-        vp10_diff_update_prob(&r, &cm->fc->seg.pred_probs[k]);
+        av1_diff_update_prob(&r, &cm->fc->seg.pred_probs[k]);
     }
     for (k = 0; k < MAX_SEGMENTS - 1; k++)
-      vp10_diff_update_prob(&r, &cm->fc->seg.tree_probs[k]);
+      av1_diff_update_prob(&r, &cm->fc->seg.tree_probs[k]);
   }
 
   for (j = 0; j < INTRA_MODES; j++)
     for (i = 0; i < INTRA_MODES - 1; ++i)
-      vp10_diff_update_prob(&r, &fc->uv_mode_prob[j][i]);
+      av1_diff_update_prob(&r, &fc->uv_mode_prob[j][i]);
 
 #if CONFIG_EXT_PARTITION_TYPES
   for (i = 0; i < PARTITION_TYPES - 1; ++i)
-    vp10_diff_update_prob(&r, &fc->partition_prob[0][i]);
+    av1_diff_update_prob(&r, &fc->partition_prob[0][i]);
   for (j = 1; j < PARTITION_CONTEXTS; ++j)
     for (i = 0; i < EXT_PARTITION_TYPES - 1; ++i)
-      vp10_diff_update_prob(&r, &fc->partition_prob[j][i]);
+      av1_diff_update_prob(&r, &fc->partition_prob[j][i]);
 #else
   for (j = 0; j < PARTITION_CONTEXTS; ++j)
     for (i = 0; i < PARTITION_TYPES - 1; ++i)
-      vp10_diff_update_prob(&r, &fc->partition_prob[j][i]);
+      av1_diff_update_prob(&r, &fc->partition_prob[j][i]);
 #endif  // CONFIG_EXT_PARTITION_TYPES
 
 #if CONFIG_EXT_INTRA
   for (i = 0; i < INTRA_FILTERS + 1; ++i)
     for (j = 0; j < INTRA_FILTERS - 1; ++j)
-      vp10_diff_update_prob(&r, &fc->intra_filter_probs[i][j]);
+      av1_diff_update_prob(&r, &fc->intra_filter_probs[i][j]);
 #endif  // CONFIG_EXT_INTRA
 
   if (frame_is_intra_only(cm)) {
-    vp10_copy(cm->kf_y_prob, vp10_kf_y_mode_prob);
+    av1_copy(cm->kf_y_prob, av1_kf_y_mode_prob);
     for (k = 0; k < INTRA_MODES; k++)
       for (j = 0; j < INTRA_MODES; j++)
         for (i = 0; i < INTRA_MODES - 1; ++i)
-          vp10_diff_update_prob(&r, &cm->kf_y_prob[k][j][i]);
+          av1_diff_update_prob(&r, &cm->kf_y_prob[k][j][i]);
   } else {
 #if !CONFIG_REF_MV
     nmv_context *const nmvc = &fc->nmvc;
@@ -3560,23 +3549,23 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
     if (cm->reference_mode != COMPOUND_REFERENCE) {
       for (i = 0; i < BLOCK_SIZE_GROUPS; i++) {
         if (is_interintra_allowed_bsize_group(i)) {
-          vp10_diff_update_prob(&r, &fc->interintra_prob[i]);
+          av1_diff_update_prob(&r, &fc->interintra_prob[i]);
         }
       }
       for (i = 0; i < BLOCK_SIZE_GROUPS; i++) {
         for (j = 0; j < INTERINTRA_MODES - 1; j++)
-          vp10_diff_update_prob(&r, &fc->interintra_mode_prob[i][j]);
+          av1_diff_update_prob(&r, &fc->interintra_mode_prob[i][j]);
       }
       for (i = 0; i < BLOCK_SIZES; i++) {
         if (is_interintra_allowed_bsize(i) && is_interintra_wedge_used(i)) {
-          vp10_diff_update_prob(&r, &fc->wedge_interintra_prob[i]);
+          av1_diff_update_prob(&r, &fc->wedge_interintra_prob[i]);
         }
       }
     }
     if (cm->reference_mode != SINGLE_REFERENCE) {
       for (i = 0; i < BLOCK_SIZES; i++) {
         if (is_interinter_wedge_used(i)) {
-          vp10_diff_update_prob(&r, &fc->wedge_interinter_prob[i]);
+          av1_diff_update_prob(&r, &fc->wedge_interinter_prob[i]);
         }
       }
     }
@@ -3585,14 +3574,14 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
 #if CONFIG_OBMC || CONFIG_WARPED_MOTION
     for (i = BLOCK_8X8; i < BLOCK_SIZES; ++i) {
       for (j = 0; j < MOTION_VARIATIONS - 1; ++j)
-        vp10_diff_update_prob(&r, &fc->motvar_prob[i][j]);
+        av1_diff_update_prob(&r, &fc->motvar_prob[i][j]);
     }
 #endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
 
     if (cm->interp_filter == SWITCHABLE) read_switchable_interp_probs(fc, &r);
 
     for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
-      vp10_diff_update_prob(&r, &fc->intra_inter_prob[i]);
+      av1_diff_update_prob(&r, &fc->intra_inter_prob[i]);
 
     if (cm->reference_mode != SINGLE_REFERENCE)
       setup_compound_reference_mode(cm);
@@ -3601,7 +3590,7 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
 
     for (j = 0; j < BLOCK_SIZE_GROUPS; j++)
       for (i = 0; i < INTRA_MODES - 1; ++i)
-        vp10_diff_update_prob(&r, &fc->y_mode_prob[j][i]);
+        av1_diff_update_prob(&r, &fc->y_mode_prob[j][i]);
 
 #if CONFIG_REF_MV
     for (i = 0; i < NMV_CONTEXTS; ++i)
@@ -3618,7 +3607,7 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
 #endif  // CONFIG_GLOBAL_MOTION
   }
 
-  return vp10_reader_has_error(&r);
+  return aom_reader_has_error(&r);
 }
 
 #ifdef NDEBUG
@@ -3626,9 +3615,9 @@ static int read_compressed_header(VP10Decoder *pbi, const uint8_t *data,
 #else  // !NDEBUG
 // Counts should only be incremented when frame_parallel_decoding_mode and
 // error_resilient_mode are disabled.
-static void debug_check_frame_counts(const VP10_COMMON *const cm) {
+static void debug_check_frame_counts(const AV1_COMMON *const cm) {
   FRAME_COUNTS zero_counts;
-  vp10_zero(zero_counts);
+  av1_zero(zero_counts);
   assert(cm->refresh_frame_context != REFRESH_FRAME_CONTEXT_BACKWARD ||
          cm->error_resilient_mode);
   assert(!memcmp(cm->counts.y_mode, zero_counts.y_mode,
@@ -3689,14 +3678,14 @@ static void debug_check_frame_counts(const VP10_COMMON *const cm) {
 }
 #endif  // NDEBUG
 
-static struct vpx_read_bit_buffer *init_read_bit_buffer(
-    VP10Decoder *pbi, struct vpx_read_bit_buffer *rb, const uint8_t *data,
-    const uint8_t *data_end, uint8_t clear_data[MAX_VPX_HEADER_SIZE]) {
+static struct aom_read_bit_buffer *init_read_bit_buffer(
+    AV1Decoder *pbi, struct aom_read_bit_buffer *rb, const uint8_t *data,
+    const uint8_t *data_end, uint8_t clear_data[MAX_AV1_HEADER_SIZE]) {
   rb->bit_offset = 0;
   rb->error_handler = error_handler;
   rb->error_handler_data = &pbi->common;
   if (pbi->decrypt_cb) {
-    const int n = (int)VPXMIN(MAX_VPX_HEADER_SIZE, data_end - data);
+    const int n = (int)AOMMIN(MAX_AV1_HEADER_SIZE, data_end - data);
     pbi->decrypt_cb(pbi->decrypt_state, data, clear_data, n);
     rb->bit_buffer = clear_data;
     rb->bit_buffer_end = clear_data + n;
@@ -3709,32 +3698,32 @@ static struct vpx_read_bit_buffer *init_read_bit_buffer(
 
 //------------------------------------------------------------------------------
 
-int vp10_read_sync_code(struct vpx_read_bit_buffer *const rb) {
-  return vpx_rb_read_literal(rb, 8) == VP10_SYNC_CODE_0 &&
-         vpx_rb_read_literal(rb, 8) == VP10_SYNC_CODE_1 &&
-         vpx_rb_read_literal(rb, 8) == VP10_SYNC_CODE_2;
+int av1_read_sync_code(struct aom_read_bit_buffer *const rb) {
+  return aom_rb_read_literal(rb, 8) == AV1_SYNC_CODE_0 &&
+         aom_rb_read_literal(rb, 8) == AV1_SYNC_CODE_1 &&
+         aom_rb_read_literal(rb, 8) == AV1_SYNC_CODE_2;
 }
 
-void vp10_read_frame_size(struct vpx_read_bit_buffer *rb, int *width,
-                          int *height) {
-  *width = vpx_rb_read_literal(rb, 16) + 1;
-  *height = vpx_rb_read_literal(rb, 16) + 1;
+void av1_read_frame_size(struct aom_read_bit_buffer *rb, int *width,
+                         int *height) {
+  *width = aom_rb_read_literal(rb, 16) + 1;
+  *height = aom_rb_read_literal(rb, 16) + 1;
 }
 
-BITSTREAM_PROFILE vp10_read_profile(struct vpx_read_bit_buffer *rb) {
-  int profile = vpx_rb_read_bit(rb);
-  profile |= vpx_rb_read_bit(rb) << 1;
-  if (profile > 2) profile += vpx_rb_read_bit(rb);
+BITSTREAM_PROFILE av1_read_profile(struct aom_read_bit_buffer *rb) {
+  int profile = aom_rb_read_bit(rb);
+  profile |= aom_rb_read_bit(rb) << 1;
+  if (profile > 2) profile += aom_rb_read_bit(rb);
   return (BITSTREAM_PROFILE)profile;
 }
 
-void vp10_decode_frame(VP10Decoder *pbi, const uint8_t *data,
-                       const uint8_t *data_end, const uint8_t **p_data_end) {
-  VP10_COMMON *const cm = &pbi->common;
+void av1_decode_frame(AV1Decoder *pbi, const uint8_t *data,
+                      const uint8_t *data_end, const uint8_t **p_data_end) {
+  AV1_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  struct vpx_read_bit_buffer rb;
+  struct aom_read_bit_buffer rb;
   int context_updated = 0;
-  uint8_t clear_data[MAX_VPX_HEADER_SIZE];
+  uint8_t clear_data[MAX_AV1_HEADER_SIZE];
   const size_t first_partition_size = read_uncompressed_header(
       pbi, init_read_bit_buffer(pbi, &rb, data, data_end, clear_data));
   YV12_BUFFER_CONFIG *const new_fb = get_frame_new_buffer(cm);
@@ -3747,7 +3736,7 @@ void vp10_decode_frame(VP10Decoder *pbi, const uint8_t *data,
 // showing a frame directly
 #if CONFIG_EXT_REFS
     if (cm->show_existing_frame)
-      *p_data_end = data + vpx_rb_bytes_read(&rb);
+      *p_data_end = data + aom_rb_bytes_read(&rb);
     else
 #endif  // CONFIG_EXT_REFS
       *p_data_end = data + (cm->profile <= PROFILE_2 ? 1 : 2);
@@ -3755,9 +3744,9 @@ void vp10_decode_frame(VP10Decoder *pbi, const uint8_t *data,
     return;
   }
 
-  data += vpx_rb_bytes_read(&rb);
+  data += aom_rb_bytes_read(&rb);
   if (!read_is_valid(data, first_partition_size, data_end))
-    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+    aom_internal_error(&cm->error, AOM_CODEC_CORRUPT_FRAME,
                        "Truncated packet or corrupt header length");
 
   cm->use_prev_frame_mvs =
@@ -3782,46 +3771,46 @@ void vp10_decode_frame(VP10Decoder *pbi, const uint8_t *data,
   }
 #endif  // CONFIG_EXT_REFS
 
-  vp10_setup_block_planes(xd, cm->subsampling_x, cm->subsampling_y);
+  av1_setup_block_planes(xd, cm->subsampling_x, cm->subsampling_y);
 
   *cm->fc = cm->frame_contexts[cm->frame_context_idx];
   if (!cm->fc->initialized)
-    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+    aom_internal_error(&cm->error, AOM_CODEC_CORRUPT_FRAME,
                        "Uninitialized entropy context.");
 
-  vp10_zero(cm->counts);
+  av1_zero(cm->counts);
 
   xd->corrupted = 0;
   new_fb->corrupted = read_compressed_header(pbi, data, first_partition_size);
   if (new_fb->corrupted)
-    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+    aom_internal_error(&cm->error, AOM_CODEC_CORRUPT_FRAME,
                        "Decode failed. Frame data header is corrupted.");
 
   if (cm->lf.filter_level && !cm->skip_loop_filter) {
-    vp10_loop_filter_frame_init(cm, cm->lf.filter_level);
+    av1_loop_filter_frame_init(cm, cm->lf.filter_level);
   }
 
   // If encoded in frame parallel mode, frame context is ready after decoding
   // the frame header.
   if (cm->frame_parallel_decode &&
       cm->refresh_frame_context != REFRESH_FRAME_CONTEXT_BACKWARD) {
-    VPxWorker *const worker = pbi->frame_worker_owner;
+    AVxWorker *const worker = pbi->frame_worker_owner;
     FrameWorkerData *const frame_worker_data = worker->data1;
     if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_FORWARD) {
       context_updated = 1;
       cm->frame_contexts[cm->frame_context_idx] = *cm->fc;
     }
-    vp10_frameworker_lock_stats(worker);
+    av1_frameworker_lock_stats(worker);
     pbi->cur_buf->row = -1;
     pbi->cur_buf->col = -1;
     frame_worker_data->frame_context_ready = 1;
     // Signal the main thread that context is ready.
-    vp10_frameworker_signal_stats(worker);
-    vp10_frameworker_unlock_stats(worker);
+    av1_frameworker_signal_stats(worker);
+    av1_frameworker_unlock_stats(worker);
   }
 
 #if CONFIG_ENTROPY
-  vp10_copy(cm->starting_coef_probs, cm->fc->coef_probs);
+  av1_copy(cm->starting_coef_probs, cm->fc->coef_probs);
   cm->coef_probs_update_idx = 0;
 #endif  // CONFIG_ENTROPY
 
@@ -3836,12 +3825,12 @@ void vp10_decode_frame(VP10Decoder *pbi, const uint8_t *data,
       if (!cm->skip_loop_filter) {
         // If multiple threads are used to decode tiles, then we use those
         // threads to do parallel loopfiltering.
-        vp10_loop_filter_frame_mt(new_fb, cm, pbi->mb.plane,
-                                  cm->lf.filter_level, 0, 0, pbi->tile_workers,
-                                  pbi->num_tile_workers, &pbi->lf_row_sync);
+        av1_loop_filter_frame_mt(new_fb, cm, pbi->mb.plane, cm->lf.filter_level,
+                                 0, 0, pbi->tile_workers, pbi->num_tile_workers,
+                                 &pbi->lf_row_sync);
       }
     } else {
-      vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+      aom_internal_error(&cm->error, AOM_CODEC_CORRUPT_FRAME,
                          "Decode failed. Frame data is corrupted.");
     }
   } else {
@@ -3849,10 +3838,10 @@ void vp10_decode_frame(VP10Decoder *pbi, const uint8_t *data,
   }
 #if CONFIG_LOOP_RESTORATION
   if (cm->rst_info.restoration_type != RESTORE_NONE) {
-    vp10_loop_restoration_init(&cm->rst_internal, &cm->rst_info,
-                               cm->frame_type == KEY_FRAME, cm->width,
-                               cm->height);
-    vp10_loop_restoration_rows(new_fb, cm, 0, cm->mi_rows, 0);
+    av1_loop_restoration_init(&cm->rst_internal, &cm->rst_info,
+                              cm->frame_type == KEY_FRAME, cm->width,
+                              cm->height);
+    av1_loop_restoration_rows(new_fb, cm, 0, cm->mi_rows, 0);
   }
 #endif  // CONFIG_LOOP_RESTORATION
 
@@ -3861,18 +3850,18 @@ void vp10_decode_frame(VP10Decoder *pbi, const uint8_t *data,
 #if CONFIG_ENTROPY
       cm->partial_prob_update = 0;
 #endif  // CONFIG_ENTROPY
-      vp10_adapt_coef_probs(cm);
-      vp10_adapt_intra_frame_probs(cm);
+      av1_adapt_coef_probs(cm);
+      av1_adapt_intra_frame_probs(cm);
 
       if (!frame_is_intra_only(cm)) {
-        vp10_adapt_inter_frame_probs(cm);
-        vp10_adapt_mv_probs(cm, cm->allow_high_precision_mv);
+        av1_adapt_inter_frame_probs(cm);
+        av1_adapt_mv_probs(cm, cm->allow_high_precision_mv);
       }
     } else {
       debug_check_frame_counts(cm);
     }
   } else {
-    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+    aom_internal_error(&cm->error, AOM_CODEC_CORRUPT_FRAME,
                        "Decode failed. Frame data is corrupted.");
   }
 

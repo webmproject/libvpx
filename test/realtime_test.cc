@@ -35,12 +35,12 @@ class RealtimeTest
   virtual void BeginPassHook(unsigned int /*pass*/) {
     // TODO(tomfinegan): We're changing the pass value here to make sure
     // we get frames when real time mode is combined with |g_pass| set to
-    // VPX_RC_FIRST_PASS. This is necessary because EncoderTest::RunLoop() sets
+    // AOM_RC_FIRST_PASS. This is necessary because EncoderTest::RunLoop() sets
     // the pass value based on the mode passed into EncoderTest::SetMode(),
     // which overrides the one specified in SetUp() above.
-    cfg_.g_pass = VPX_RC_FIRST_PASS;
+    cfg_.g_pass = AOM_RC_FIRST_PASS;
   }
-  virtual void FramePktHook(const vpx_codec_cx_pkt_t * /*pkt*/) {
+  virtual void FramePktHook(const aom_codec_cx_pkt_t * /*pkt*/) {
     frame_packets_++;
   }
 
@@ -55,9 +55,7 @@ TEST_P(RealtimeTest, RealtimeFirstPassProducesFrames) {
   EXPECT_EQ(kFramesToEncode, frame_packets_);
 }
 
-VP8_INSTANTIATE_TEST_CASE(RealtimeTest,
-                          ::testing::Values(::libaom_test::kRealTime));
-VP9_INSTANTIATE_TEST_CASE(RealtimeTest,
+AV1_INSTANTIATE_TEST_CASE(RealtimeTest,
                           ::testing::Values(::libaom_test::kRealTime));
 
 }  // namespace

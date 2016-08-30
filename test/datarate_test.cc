@@ -7,14 +7,14 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#include "./vpx_config.h"
+#include "./aom_config.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
 #include "test/i420_video_source.h"
 #include "test/util.h"
 #include "test/y4m_video_source.h"
-#include "aom/vpx_codec.h"
+#include "aom/aom_codec.h"
 
 namespace {
 
@@ -50,7 +50,7 @@ class DatarateTestLarge
 
   virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
                                   ::libaom_test::Encoder *encoder) {
-    if (video->frame() == 0) encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
+    if (video->frame() == 0) encoder->Control(AOME_SET_CPUUSED, set_cpu_used_);
 
     if (denoiser_offon_test_) {
       ASSERT_GT(denoiser_offon_period_, 0)
@@ -61,16 +61,16 @@ class DatarateTestLarge
       }
     }
 
-    encoder->Control(VP9E_SET_NOISE_SENSITIVITY, denoiser_on_);
+    encoder->Control(AV1E_SET_NOISE_SENSITIVITY, denoiser_on_);
 
-    const vpx_rational_t tb = video->timebase();
+    const aom_rational_t tb = video->timebase();
     timebase_ = static_cast<double>(tb.num) / tb.den;
     duration_ = 0;
   }
 
-  virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
+  virtual void FramePktHook(const aom_codec_cx_pkt_t *pkt) {
     // Time since last timestamp = duration.
-    vpx_codec_pts_t duration = pkt->data.frame.pts - last_pts_;
+    aom_codec_pts_t duration = pkt->data.frame.pts - last_pts_;
 
     if (duration > 1) {
       // If first drop not set and we have a drop set it to this time.
@@ -107,7 +107,7 @@ class DatarateTestLarge
     effective_datarate_ = (bits_total_ / 1000.0) / duration_;
   }
 
-  vpx_codec_pts_t last_pts_;
+  aom_codec_pts_t last_pts_;
   double timebase_;
   int frame_number_;      // Counter for number of non-dropped/encoded frames.
   int tot_frame_number_;  // Counter for total number of input frames.
@@ -116,7 +116,7 @@ class DatarateTestLarge
   double effective_datarate_;
   int set_cpu_used_;
   int64_t bits_in_buffer_model_;
-  vpx_codec_pts_t first_drop_;
+  aom_codec_pts_t first_drop_;
   int num_drops_;
   int denoiser_on_;
   int denoiser_offon_test_;
@@ -128,7 +128,7 @@ TEST_P(DatarateTestLarge, BasicRateTargetingVBR) {
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
   cfg_.g_error_resilient = 0;
-  cfg_.rc_end_usage = VPX_VBR;
+  cfg_.rc_end_usage = AOM_VBR;
   cfg_.g_lag_in_frames = 0;
 
   ::libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
@@ -152,7 +152,7 @@ TEST_P(DatarateTestLarge, BasicRateTargeting) {
   cfg_.rc_dropframe_thresh = 1;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
-  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.rc_end_usage = AOM_CBR;
   cfg_.g_lag_in_frames = 0;
 
   ::libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
@@ -181,7 +181,7 @@ TEST_P(DatarateTestLarge, BasicRateTargeting444) {
   cfg_.rc_dropframe_thresh = 1;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
-  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.rc_end_usage = AOM_CBR;
 
   for (int i = 250; i < 900; i += 200) {
     cfg_.rc_target_bitrate = i;
@@ -210,7 +210,7 @@ TEST_P(DatarateTestLarge, ChangingDropFrameThresh) {
   cfg_.rc_dropframe_thresh = 10;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 50;
-  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.rc_end_usage = AOM_CBR;
   cfg_.rc_target_bitrate = 200;
   cfg_.g_lag_in_frames = 0;
   // TODO(marpan): Investigate datarate target failures with a smaller keyframe
@@ -221,7 +221,7 @@ TEST_P(DatarateTestLarge, ChangingDropFrameThresh) {
                                        30, 1, 0, 140);
 
   const int kDropFrameThreshTestStep = 30;
-  vpx_codec_pts_t last_drop = 140;
+  aom_codec_pts_t last_drop = 140;
   int last_num_drops = 0;
   for (int i = 10; i < 100; i += kDropFrameThreshTestStep) {
     cfg_.rc_dropframe_thresh = i;
@@ -244,8 +244,8 @@ TEST_P(DatarateTestLarge, ChangingDropFrameThresh) {
   }
 }
 
-VP10_INSTANTIATE_TEST_CASE(DatarateTestLarge,
-                           ::testing::Values(::libaom_test::kOnePassGood,
-                                             ::libaom_test::kRealTime),
-                           ::testing::Range(2, 9));
+AV1_INSTANTIATE_TEST_CASE(DatarateTestLarge,
+                          ::testing::Values(::libaom_test::kOnePassGood,
+                                            ::libaom_test::kRealTime),
+                          ::testing::Range(2, 9));
 }  // namespace

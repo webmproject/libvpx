@@ -10,19 +10,19 @@
 #ifndef TEST_TRANSFORM_TEST_BASE_H_
 #define TEST_TRANSFORM_TEST_BASE_H_
 
-#include "./vpx_config.h"
-#include "aom_mem/vpx_mem.h"
-#include "aom/vpx_codec.h"
+#include "./aom_config.h"
+#include "aom_mem/aom_mem.h"
+#include "aom/aom_codec.h"
 
 namespace libaom_test {
 
 //  Note:
-//   Same constant are defined in vp9/common/vp9_entropy.h and
+//   Same constant are defined in av1/common/av1_entropy.h and
 //   av1/common/entropy.h.  Goal is to make this base class
 //   to use for future codec transform testing.  But including
 //   either of them would lead to compiling error when we do
 //   unit test for another codec. Suggest to move the definition
-//   to a vpx header file.
+//   to a aom header file.
 const int kDctMaxValue = 16384;
 
 typedef void (*FhtFunc)(const int16_t *in, tran_low_t *out, int stride,
@@ -44,28 +44,28 @@ class TransformTestBase {
     const int count_test_block = 10000;
 
     int16_t *test_input_block = reinterpret_cast<int16_t *>(
-        vpx_memalign(16, sizeof(int16_t) * num_coeffs_));
+        aom_memalign(16, sizeof(int16_t) * num_coeffs_));
     tran_low_t *test_temp_block = reinterpret_cast<tran_low_t *>(
-        vpx_memalign(16, sizeof(tran_low_t) * num_coeffs_));
+        aom_memalign(16, sizeof(tran_low_t) * num_coeffs_));
     uint8_t *dst = reinterpret_cast<uint8_t *>(
-        vpx_memalign(16, sizeof(uint8_t) * num_coeffs_));
+        aom_memalign(16, sizeof(uint8_t) * num_coeffs_));
     uint8_t *src = reinterpret_cast<uint8_t *>(
-        vpx_memalign(16, sizeof(uint8_t) * num_coeffs_));
-#if CONFIG_VP9_HIGHBITDEPTH
+        aom_memalign(16, sizeof(uint8_t) * num_coeffs_));
+#if CONFIG_AOM_HIGHBITDEPTH
     uint16_t *dst16 = reinterpret_cast<uint16_t *>(
-        vpx_memalign(16, sizeof(uint16_t) * num_coeffs_));
+        aom_memalign(16, sizeof(uint16_t) * num_coeffs_));
     uint16_t *src16 = reinterpret_cast<uint16_t *>(
-        vpx_memalign(16, sizeof(uint16_t) * num_coeffs_));
+        aom_memalign(16, sizeof(uint16_t) * num_coeffs_));
 #endif
 
     for (int i = 0; i < count_test_block; ++i) {
       // Initialize a test block with input range [-255, 255].
       for (int j = 0; j < num_coeffs_; ++j) {
-        if (bit_depth_ == VPX_BITS_8) {
+        if (bit_depth_ == AOM_BITS_8) {
           src[j] = rnd.Rand8();
           dst[j] = rnd.Rand8();
           test_input_block[j] = src[j] - dst[j];
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
         } else {
           src16[j] = rnd.Rand16() & mask_;
           dst16[j] = rnd.Rand16() & mask_;
@@ -76,9 +76,9 @@ class TransformTestBase {
 
       ASM_REGISTER_STATE_CHECK(
           RunFwdTxfm(test_input_block, test_temp_block, pitch_));
-      if (bit_depth_ == VPX_BITS_8) {
+      if (bit_depth_ == AOM_BITS_8) {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(test_temp_block, dst, pitch_));
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       } else {
         ASM_REGISTER_STATE_CHECK(
             RunInvTxfm(test_temp_block, CONVERT_TO_BYTEPTR(dst16), pitch_));
@@ -86,11 +86,11 @@ class TransformTestBase {
       }
 
       for (int j = 0; j < num_coeffs_; ++j) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
         const uint32_t diff =
-            bit_depth_ == VPX_BITS_8 ? dst[j] - src[j] : dst16[j] - src16[j];
+            bit_depth_ == AOM_BITS_8 ? dst[j] - src[j] : dst16[j] - src16[j];
 #else
-        ASSERT_EQ(VPX_BITS_8, bit_depth_);
+        ASSERT_EQ(AOM_BITS_8, bit_depth_);
         const uint32_t diff = dst[j] - src[j];
 #endif
         const uint32_t error = diff * diff;
@@ -106,13 +106,13 @@ class TransformTestBase {
         << "Error: 4x4 FHT/IHT has average round trip error > " << limit
         << " per block";
 
-    vpx_free(test_input_block);
-    vpx_free(test_temp_block);
-    vpx_free(dst);
-    vpx_free(src);
-#if CONFIG_VP9_HIGHBITDEPTH
-    vpx_free(dst16);
-    vpx_free(src16);
+    aom_free(test_input_block);
+    aom_free(test_temp_block);
+    aom_free(dst);
+    aom_free(src);
+#if CONFIG_AOM_HIGHBITDEPTH
+    aom_free(dst16);
+    aom_free(src16);
 #endif
   }
 
@@ -121,11 +121,11 @@ class TransformTestBase {
     const int count_test_block = 5000;
 
     int16_t *input_block = reinterpret_cast<int16_t *>(
-        vpx_memalign(16, sizeof(int16_t) * num_coeffs_));
+        aom_memalign(16, sizeof(int16_t) * num_coeffs_));
     tran_low_t *output_ref_block = reinterpret_cast<tran_low_t *>(
-        vpx_memalign(16, sizeof(tran_low_t) * num_coeffs_));
+        aom_memalign(16, sizeof(tran_low_t) * num_coeffs_));
     tran_low_t *output_block = reinterpret_cast<tran_low_t *>(
-        vpx_memalign(16, sizeof(tran_low_t) * num_coeffs_));
+        aom_memalign(16, sizeof(tran_low_t) * num_coeffs_));
 
     for (int i = 0; i < count_test_block; ++i) {
       // Initialize a test block with input range [-mask_, mask_].
@@ -142,9 +142,9 @@ class TransformTestBase {
             << " at test block: " << i;
       }
     }
-    vpx_free(input_block);
-    vpx_free(output_ref_block);
-    vpx_free(output_block);
+    aom_free(input_block);
+    aom_free(output_ref_block);
+    aom_free(output_block);
   }
 
   void RunMemCheck() {
@@ -152,11 +152,11 @@ class TransformTestBase {
     const int count_test_block = 5000;
 
     int16_t *input_extreme_block = reinterpret_cast<int16_t *>(
-        vpx_memalign(16, sizeof(int16_t) * num_coeffs_));
+        aom_memalign(16, sizeof(int16_t) * num_coeffs_));
     tran_low_t *output_ref_block = reinterpret_cast<tran_low_t *>(
-        vpx_memalign(16, sizeof(tran_low_t) * num_coeffs_));
+        aom_memalign(16, sizeof(tran_low_t) * num_coeffs_));
     tran_low_t *output_block = reinterpret_cast<tran_low_t *>(
-        vpx_memalign(16, sizeof(tran_low_t) * num_coeffs_));
+        aom_memalign(16, sizeof(tran_low_t) * num_coeffs_));
 
     for (int i = 0; i < count_test_block; ++i) {
       // Initialize a test block with input range [-mask_, mask_].
@@ -182,9 +182,9 @@ class TransformTestBase {
             << "Error: NxN FDCT has coefficient larger than N*DCT_MAX_VALUE";
       }
     }
-    vpx_free(input_extreme_block);
-    vpx_free(output_ref_block);
-    vpx_free(output_block);
+    aom_free(input_extreme_block);
+    aom_free(output_ref_block);
+    aom_free(output_block);
   }
 
   void RunInvAccuracyCheck(int limit) {
@@ -192,29 +192,29 @@ class TransformTestBase {
     const int count_test_block = 1000;
 
     int16_t *in = reinterpret_cast<int16_t *>(
-        vpx_memalign(16, sizeof(int16_t) * num_coeffs_));
+        aom_memalign(16, sizeof(int16_t) * num_coeffs_));
     tran_low_t *coeff = reinterpret_cast<tran_low_t *>(
-        vpx_memalign(16, sizeof(tran_low_t) * num_coeffs_));
+        aom_memalign(16, sizeof(tran_low_t) * num_coeffs_));
     uint8_t *dst = reinterpret_cast<uint8_t *>(
-        vpx_memalign(16, sizeof(uint8_t) * num_coeffs_));
+        aom_memalign(16, sizeof(uint8_t) * num_coeffs_));
     uint8_t *src = reinterpret_cast<uint8_t *>(
-        vpx_memalign(16, sizeof(uint8_t) * num_coeffs_));
+        aom_memalign(16, sizeof(uint8_t) * num_coeffs_));
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
     uint16_t *dst16 = reinterpret_cast<uint16_t *>(
-        vpx_memalign(16, sizeof(uint16_t) * num_coeffs_));
+        aom_memalign(16, sizeof(uint16_t) * num_coeffs_));
     uint16_t *src16 = reinterpret_cast<uint16_t *>(
-        vpx_memalign(16, sizeof(uint16_t) * num_coeffs_));
+        aom_memalign(16, sizeof(uint16_t) * num_coeffs_));
 #endif
 
     for (int i = 0; i < count_test_block; ++i) {
       // Initialize a test block with input range [-mask_, mask_].
       for (int j = 0; j < num_coeffs_; ++j) {
-        if (bit_depth_ == VPX_BITS_8) {
+        if (bit_depth_ == AOM_BITS_8) {
           src[j] = rnd.Rand8();
           dst[j] = rnd.Rand8();
           in[j] = src[j] - dst[j];
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
         } else {
           src16[j] = rnd.Rand16() & mask_;
           dst16[j] = rnd.Rand16() & mask_;
@@ -225,9 +225,9 @@ class TransformTestBase {
 
       fwd_txfm_ref(in, coeff, pitch_, tx_type_);
 
-      if (bit_depth_ == VPX_BITS_8) {
+      if (bit_depth_ == AOM_BITS_8) {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, pitch_));
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       } else {
         ASM_REGISTER_STATE_CHECK(
             RunInvTxfm(coeff, CONVERT_TO_BYTEPTR(dst16), pitch_));
@@ -235,9 +235,9 @@ class TransformTestBase {
       }
 
       for (int j = 0; j < num_coeffs_; ++j) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
         const uint32_t diff =
-            bit_depth_ == VPX_BITS_8 ? dst[j] - src[j] : dst16[j] - src16[j];
+            bit_depth_ == AOM_BITS_8 ? dst[j] - src[j] : dst16[j] - src16[j];
 #else
         const uint32_t diff = dst[j] - src[j];
 #endif
@@ -246,20 +246,20 @@ class TransformTestBase {
             << "Error: 4x4 IDCT has error " << error << " at index " << j;
       }
     }
-    vpx_free(in);
-    vpx_free(coeff);
-    vpx_free(dst);
-    vpx_free(src);
-#if CONFIG_VP9_HIGHBITDEPTH
-    vpx_free(src16);
-    vpx_free(dst16);
+    aom_free(in);
+    aom_free(coeff);
+    aom_free(dst);
+    aom_free(src);
+#if CONFIG_AOM_HIGHBITDEPTH
+    aom_free(src16);
+    aom_free(dst16);
 #endif
   }
 
   int pitch_;
   int tx_type_;
   FhtFunc fwd_txfm_ref;
-  vpx_bit_depth_t bit_depth_;
+  aom_bit_depth_t bit_depth_;
   int mask_;
   int num_coeffs_;
 

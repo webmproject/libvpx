@@ -8,11 +8,11 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_X86_TXFM_COMMON_SSE2_H_
-#define VPX_DSP_X86_TXFM_COMMON_SSE2_H_
+#ifndef AOM_DSP_X86_TXFM_COMMON_SSE2_H_
+#define AOM_DSP_X86_TXFM_COMMON_SSE2_H_
 
 #include <emmintrin.h>
-#include "aom/vpx_integer.h"
+#include "aom/aom_integer.h"
 
 #define pair_set_epi16(a, b)                                            \
   _mm_set_epi16((int16_t)(b), (int16_t)(a), (int16_t)(b), (int16_t)(a), \
@@ -33,4 +33,4 @@ static INLINE __m128i mm_reverse_epi16(const __m128i x) {
   return _mm_shuffle_epi32(b, 0x4e);
 }
 
-#endif  // VPX_DSP_X86_TXFM_COMMON_SSE2_H_
+#endif  // AOM_DSP_X86_TXFM_COMMON_SSE2_H_

@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_ENCODER_AQ_COMPLEXITY_H_
-#define VP10_ENCODER_AQ_COMPLEXITY_H_
+#ifndef AV1_ENCODER_AQ_COMPLEXITY_H_
+#define AV1_ENCODER_AQ_COMPLEXITY_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,20 +17,20 @@ extern "C" {
 
 #include "av1/common/enums.h"
 
-struct VP10_COMP;
+struct AV1_COMP;
 struct macroblock;
 
 // Select a segment for the current Block.
-void vp10_caq_select_segment(struct VP10_COMP *cpi, struct macroblock *,
-                             BLOCK_SIZE bs, int mi_row, int mi_col,
-                             int projected_rate);
+void av1_caq_select_segment(struct AV1_COMP *cpi, struct macroblock *,
+                            BLOCK_SIZE bs, int mi_row, int mi_col,
+                            int projected_rate);
 
 // This function sets up a set of segments with delta Q values around
 // the baseline frame quantizer.
-void vp10_setup_in_frame_q_adj(struct VP10_COMP *cpi);
+void av1_setup_in_frame_q_adj(struct AV1_COMP *cpi);
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
 
-#endif  // VP10_ENCODER_AQ_COMPLEXITY_H_
+#endif  // AV1_ENCODER_AQ_COMPLEXITY_H_

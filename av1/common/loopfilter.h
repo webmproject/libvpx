@@ -8,11 +8,11 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_COMMON_LOOPFILTER_H_
-#define VP10_COMMON_LOOPFILTER_H_
+#ifndef AV1_COMMON_LOOPFILTER_H_
+#define AV1_COMMON_LOOPFILTER_H_
 
 #include "aom_ports/mem.h"
-#include "./vpx_config.h"
+#include "./aom_config.h"
 
 #include "av1/common/blockd.h"
 #include "av1/common/restoration.h"
@@ -89,49 +89,49 @@ typedef struct {
 } LOOP_FILTER_MASK;
 
 /* assorted loopfilter functions which get used elsewhere */
-struct VP10Common;
+struct AV1Common;
 struct macroblockd;
-struct VP10LfSyncData;
+struct AV1LfSyncData;
 
 // This function sets up the bit masks for the entire 64x64 region represented
 // by mi_row, mi_col.
-void vp10_setup_mask(struct VP10Common *const cm, const int mi_row,
-                     const int mi_col, MODE_INFO **mi_8x8,
-                     const int mode_info_stride, LOOP_FILTER_MASK *lfm);
+void av1_setup_mask(struct AV1Common *const cm, const int mi_row,
+                    const int mi_col, MODE_INFO **mi_8x8,
+                    const int mode_info_stride, LOOP_FILTER_MASK *lfm);
 
-void vp10_filter_block_plane_ss00(struct VP10Common *const cm,
-                                  struct macroblockd_plane *const plane,
-                                  int mi_row, LOOP_FILTER_MASK *lfm);
+void av1_filter_block_plane_ss00(struct AV1Common *const cm,
+                                 struct macroblockd_plane *const plane,
+                                 int mi_row, LOOP_FILTER_MASK *lfm);
 
-void vp10_filter_block_plane_ss11(struct VP10Common *const cm,
-                                  struct macroblockd_plane *const plane,
-                                  int mi_row, LOOP_FILTER_MASK *lfm);
+void av1_filter_block_plane_ss11(struct AV1Common *const cm,
+                                 struct macroblockd_plane *const plane,
+                                 int mi_row, LOOP_FILTER_MASK *lfm);
 
-void vp10_filter_block_plane_non420(struct VP10Common *cm,
-                                    struct macroblockd_plane *plane,
-                                    MODE_INFO **mi_8x8, int mi_row, int mi_col);
+void av1_filter_block_plane_non420(struct AV1Common *cm,
+                                   struct macroblockd_plane *plane,
+                                   MODE_INFO **mi_8x8, int mi_row, int mi_col);
 
-void vp10_loop_filter_init(struct VP10Common *cm);
+void av1_loop_filter_init(struct AV1Common *cm);
 
 // Update the loop filter for the current frame.
-// This should be called before vp10_loop_filter_rows(),
-// vp10_loop_filter_frame()
+// This should be called before av1_loop_filter_rows(),
+// av1_loop_filter_frame()
 // calls this function directly.
-void vp10_loop_filter_frame_init(struct VP10Common *cm, int default_filt_lvl);
+void av1_loop_filter_frame_init(struct AV1Common *cm, int default_filt_lvl);
 
-void vp10_loop_filter_frame(YV12_BUFFER_CONFIG *frame, struct VP10Common *cm,
-                            struct macroblockd *mbd, int filter_level,
-                            int y_only, int partial_frame);
+void av1_loop_filter_frame(YV12_BUFFER_CONFIG *frame, struct AV1Common *cm,
+                           struct macroblockd *mbd, int filter_level,
+                           int y_only, int partial_frame);
 
 // Apply the loop filter to [start, stop) macro block rows in frame_buffer.
-void vp10_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer,
-                           struct VP10Common *cm,
-                           struct macroblockd_plane planes[MAX_MB_PLANE],
-                           int start, int stop, int y_only);
+void av1_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer,
+                          struct AV1Common *cm,
+                          struct macroblockd_plane planes[MAX_MB_PLANE],
+                          int start, int stop, int y_only);
 
 typedef struct LoopFilterWorkerData {
   YV12_BUFFER_CONFIG *frame_buffer;
-  struct VP10Common *cm;
+  struct AV1Common *cm;
   struct macroblockd_plane planes[MAX_MB_PLANE];
 
   int start;
@@ -139,14 +139,14 @@ typedef struct LoopFilterWorkerData {
   int y_only;
 } LFWorkerData;
 
-void vp10_loop_filter_data_reset(
+void av1_loop_filter_data_reset(
     LFWorkerData *lf_data, YV12_BUFFER_CONFIG *frame_buffer,
-    struct VP10Common *cm, const struct macroblockd_plane planes[MAX_MB_PLANE]);
+    struct AV1Common *cm, const struct macroblockd_plane planes[MAX_MB_PLANE]);
 
 // Operates on the rows described by 'lf_data'.
-int vp10_loop_filter_worker(LFWorkerData *const lf_data, void *unused);
+int av1_loop_filter_worker(LFWorkerData *const lf_data, void *unused);
 #ifdef __cplusplus
 }  // extern "C"
 #endif
 
-#endif  // VP10_COMMON_LOOPFILTER_H_
+#endif  // AV1_COMMON_LOOPFILTER_H_

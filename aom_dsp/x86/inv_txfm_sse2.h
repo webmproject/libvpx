@@ -8,12 +8,12 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_X86_INV_TXFM_SSE2_H_
-#define VPX_DSP_X86_INV_TXFM_SSE2_H_
+#ifndef AOM_DSP_X86_INV_TXFM_SSE2_H_
+#define AOM_DSP_X86_INV_TXFM_SSE2_H_
 
 #include <emmintrin.h>  // SSE2
-#include "./vpx_config.h"
-#include "aom/vpx_integer.h"
+#include "./aom_config.h"
+#include "aom/aom_integer.h"
 #include "aom_dsp/inv_txfm.h"
 #include "aom_dsp/x86/txfm_common_sse2.h"
 
@@ -93,7 +93,7 @@ static INLINE void array_transpose_16x16(__m128i *res0, __m128i *res1) {
 // Function to allow 8 bit optimisations to be used when profile 0 is used with
 // highbitdepth enabled
 static INLINE __m128i load_input_data(const tran_low_t *data) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   return octa_set_epi16(data[0], data[1], data[2], data[3], data[4], data[5],
                         data[6], data[7]);
 #else
@@ -193,4 +193,4 @@ void iadst4_sse2(__m128i *in);
 void iadst8_sse2(__m128i *in);
 void iadst16_sse2(__m128i *in0, __m128i *in1);
 
-#endif  // VPX_DSP_X86_INV_TXFM_SSE2_H_
+#endif  // AOM_DSP_X86_INV_TXFM_SSE2_H_

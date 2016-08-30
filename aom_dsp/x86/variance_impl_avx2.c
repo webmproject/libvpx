@@ -10,7 +10,7 @@
 
 #include <immintrin.h>  // AVX2
 
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_dsp_rtcd.h"
 #include "aom_ports/mem.h"
 
 /* clang-format off */
@@ -34,7 +34,7 @@ DECLARE_ALIGNED(32, static const uint8_t, bilinear_filters_avx2[512]) = {
 };
 /* clang-format on */
 
-void vpx_get16x16var_avx2(const unsigned char *src_ptr, int source_stride,
+void aom_get16x16var_avx2(const unsigned char *src_ptr, int source_stride,
                           const unsigned char *ref_ptr, int recon_stride,
                           unsigned int *SSE, int *Sum) {
   __m256i src, src_expand_low, src_expand_high, ref, ref_expand_low;
@@ -140,7 +140,7 @@ void vpx_get16x16var_avx2(const unsigned char *src_ptr, int source_stride,
   }
 }
 
-void vpx_get32x32var_avx2(const unsigned char *src_ptr, int source_stride,
+void aom_get32x32var_avx2(const unsigned char *src_ptr, int source_stride,
                           const unsigned char *ref_ptr, int recon_stride,
                           unsigned int *SSE, int *Sum) {
   __m256i src, src_expand_low, src_expand_high, ref, ref_expand_low;
@@ -297,7 +297,7 @@ void vpx_get32x32var_avx2(const unsigned char *src_ptr, int source_stride,
   sum = _mm_cvtsi128_si32(_mm256_castsi256_si128(sum_reg)) +               \
         _mm_cvtsi128_si32(_mm256_extractf128_si256(sum_reg, 1));
 
-unsigned int vpx_sub_pixel_variance32xh_avx2(const uint8_t *src, int src_stride,
+unsigned int aom_sub_pixel_variance32xh_avx2(const uint8_t *src, int src_stride,
                                              int x_offset, int y_offset,
                                              const uint8_t *dst, int dst_stride,
                                              int height, unsigned int *sse) {
@@ -484,7 +484,7 @@ unsigned int vpx_sub_pixel_variance32xh_avx2(const uint8_t *src, int src_stride,
   return sum;
 }
 
-unsigned int vpx_sub_pixel_avg_variance32xh_avx2(
+unsigned int aom_sub_pixel_avg_variance32xh_avx2(
     const uint8_t *src, int src_stride, int x_offset, int y_offset,
     const uint8_t *dst, int dst_stride, const uint8_t *sec, int sec_stride,
     int height, unsigned int *sse) {

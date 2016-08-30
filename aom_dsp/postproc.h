@@ -8,18 +8,18 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_POSTPROC_H_
-#define VPX_DSP_POSTPROC_H_
+#ifndef AOM_DSP_POSTPROC_H_
+#define AOM_DSP_POSTPROC_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 // Fills a noise buffer with gaussian noise strength determined by sigma.
-int vpx_setup_noise(double sigma, int size, char *noise);
+int aom_setup_noise(double sigma, int size, char *noise);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // VPX_DSP_POSTPROC_H_
+#endif  // AOM_DSP_POSTPROC_H_

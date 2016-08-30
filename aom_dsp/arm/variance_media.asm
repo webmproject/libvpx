@@ -9,9 +9,9 @@
 ;
 
 
-    EXPORT  |vpx_variance16x16_media|
-    EXPORT  |vpx_variance8x8_media|
-    EXPORT  |vpx_mse16x16_media|
+    EXPORT  |aom_variance16x16_media|
+    EXPORT  |aom_variance8x8_media|
+    EXPORT  |aom_mse16x16_media|
 
     ARM
     REQUIRE8
@@ -24,7 +24,7 @@
 ; r2    unsigned char *ref_ptr
 ; r3    int  recon_stride
 ; stack unsigned int *sse
-|vpx_variance16x16_media| PROC
+|aom_variance16x16_media| PROC
 
     stmfd   sp!, {r4-r12, lr}
 
@@ -157,7 +157,7 @@ loop16x16
 ; r2    unsigned char *ref_ptr
 ; r3    int  recon_stride
 ; stack unsigned int *sse
-|vpx_variance8x8_media| PROC
+|aom_variance8x8_media| PROC
 
     push    {r4-r10, lr}
 
@@ -241,10 +241,10 @@ loop8x8
 ; r3    int  recon_stride
 ; stack unsigned int *sse
 ;
-;note: Based on vpx_variance16x16_media. In this function, sum is never used.
+;note: Based on aom_variance16x16_media. In this function, sum is never used.
 ;      So, we can remove this part of calculation.
 
-|vpx_mse16x16_media| PROC
+|aom_mse16x16_media| PROC
 
     push    {r4-r9, lr}
 

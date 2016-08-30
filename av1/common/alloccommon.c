@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "./vpx_config.h"
-#include "aom_mem/vpx_mem.h"
+#include "./aom_config.h"
+#include "aom_mem/aom_mem.h"
 
 #include "av1/common/alloccommon.h"
 #include "av1/common/blockd.h"
@@ -17,7 +17,7 @@
 #include "av1/common/entropymv.h"
 #include "av1/common/onyxc_int.h"
 
-void vp10_set_mb_mi(VP10_COMMON *cm, int width, int height) {
+void av1_set_mb_mi(AV1_COMMON *cm, int width, int height) {
   const int aligned_width = ALIGN_POWER_OF_TWO(width, MI_SIZE_LOG2);
   const int aligned_height = ALIGN_POWER_OF_TWO(height, MI_SIZE_LOG2);
 
@@ -30,11 +30,11 @@ void vp10_set_mb_mi(VP10_COMMON *cm, int width, int height) {
   cm->MBs = cm->mb_rows * cm->mb_cols;
 }
 
-static int alloc_seg_map(VP10_COMMON *cm, int seg_map_size) {
+static int alloc_seg_map(AV1_COMMON *cm, int seg_map_size) {
   int i;
 
   for (i = 0; i < NUM_PING_PONG_BUFFERS; ++i) {
-    cm->seg_map_array[i] = (uint8_t *)vpx_calloc(seg_map_size, 1);
+    cm->seg_map_array[i] = (uint8_t *)aom_calloc(seg_map_size, 1);
     if (cm->seg_map_array[i] == NULL) return 1;
   }
   cm->seg_map_alloc_size = seg_map_size;
@@ -50,11 +50,11 @@ static int alloc_seg_map(VP10_COMMON *cm, int seg_map_size) {
   return 0;
 }
 
-static void free_seg_map(VP10_COMMON *cm) {
+static void free_seg_map(AV1_COMMON *cm) {
   int i;
 
   for (i = 0; i < NUM_PING_PONG_BUFFERS; ++i) {
-    vpx_free(cm->seg_map_array[i]);
+    aom_free(cm->seg_map_array[i]);
     cm->seg_map_array[i] = NULL;
   }
 
@@ -65,7 +65,7 @@ static void free_seg_map(VP10_COMMON *cm) {
   }
 }
 
-void vp10_free_ref_frame_buffers(BufferPool *pool) {
+void av1_free_ref_frame_buffers(BufferPool *pool) {
   int i;
 
   for (i = 0; i < FRAME_BUFFERS; ++i) {
@@ -74,45 +74,45 @@ void vp10_free_ref_frame_buffers(BufferPool *pool) {
       pool->release_fb_cb(pool->cb_priv, &pool->frame_bufs[i].raw_frame_buffer);
       pool->frame_bufs[i].ref_count = 0;
     }
-    vpx_free(pool->frame_bufs[i].mvs);
+    aom_free(pool->frame_bufs[i].mvs);
     pool->frame_bufs[i].mvs = NULL;
-    vpx_free_frame_buffer(&pool->frame_bufs[i].buf);
+    aom_free_frame_buffer(&pool->frame_bufs[i].buf);
   }
 }
 
 #if CONFIG_LOOP_RESTORATION
-void vp10_free_restoration_buffers(VP10_COMMON *cm) {
-  vpx_free(cm->rst_info.bilateral_level);
+void av1_free_restoration_buffers(AV1_COMMON *cm) {
+  aom_free(cm->rst_info.bilateral_level);
   cm->rst_info.bilateral_level = NULL;
-  vpx_free(cm->rst_info.vfilter);
+  aom_free(cm->rst_info.vfilter);
   cm->rst_info.vfilter = NULL;
-  vpx_free(cm->rst_info.hfilter);
+  aom_free(cm->rst_info.hfilter);
   cm->rst_info.hfilter = NULL;
-  vpx_free(cm->rst_info.wiener_level);
+  aom_free(cm->rst_info.wiener_level);
   cm->rst_info.wiener_level = NULL;
 }
 #endif  // CONFIG_LOOP_RESTORATION
 
-void vp10_free_context_buffers(VP10_COMMON *cm) {
+void av1_free_context_buffers(AV1_COMMON *cm) {
   int i;
   cm->free_mi(cm);
   free_seg_map(cm);
   for (i = 0; i < MAX_MB_PLANE; i++) {
-    vpx_free(cm->above_context[i]);
+    aom_free(cm->above_context[i]);
     cm->above_context[i] = NULL;
   }
-  vpx_free(cm->above_seg_context);
+  aom_free(cm->above_seg_context);
   cm->above_seg_context = NULL;
 #if CONFIG_VAR_TX
-  vpx_free(cm->above_txfm_context);
+  aom_free(cm->above_txfm_context);
   cm->above_txfm_context = NULL;
 #endif
 }
 
-int vp10_alloc_context_buffers(VP10_COMMON *cm, int width, int height) {
+int av1_alloc_context_buffers(AV1_COMMON *cm, int width, int height) {
   int new_mi_size;
 
-  vp10_set_mb_mi(cm, width, height);
+  av1_set_mb_mi(cm, width, height);
   new_mi_size = cm->mi_stride * calc_mi_size(cm->mi_rows);
   if (cm->mi_alloc_size < new_mi_size) {
     cm->free_mi(cm);
@@ -134,20 +134,20 @@ int vp10_alloc_context_buffers(VP10_COMMON *cm, int width, int height) {
     int i;
 
     for (i = 0; i < MAX_MB_PLANE; i++) {
-      vpx_free(cm->above_context[i]);
-      cm->above_context[i] = (ENTROPY_CONTEXT *)vpx_calloc(
+      aom_free(cm->above_context[i]);
+      cm->above_context[i] = (ENTROPY_CONTEXT *)aom_calloc(
           2 * aligned_mi_cols, sizeof(*cm->above_context[0]));
       if (!cm->above_context[i]) goto fail;
     }
 
-    vpx_free(cm->above_seg_context);
-    cm->above_seg_context = (PARTITION_CONTEXT *)vpx_calloc(
+    aom_free(cm->above_seg_context);
+    cm->above_seg_context = (PARTITION_CONTEXT *)aom_calloc(
         aligned_mi_cols, sizeof(*cm->above_seg_context));
     if (!cm->above_seg_context) goto fail;
 
 #if CONFIG_VAR_TX
-    vpx_free(cm->above_txfm_context);
-    cm->above_txfm_context = (TXFM_CONTEXT *)vpx_calloc(
+    aom_free(cm->above_txfm_context);
+    cm->above_txfm_context = (TXFM_CONTEXT *)aom_calloc(
         aligned_mi_cols, sizeof(*cm->above_txfm_context));
     if (!cm->above_txfm_context) goto fail;
 #endif
@@ -159,27 +159,27 @@ int vp10_alloc_context_buffers(VP10_COMMON *cm, int width, int height) {
 
 fail:
   // clear the mi_* values to force a realloc on resync
-  vp10_set_mb_mi(cm, 0, 0);
-  vp10_free_context_buffers(cm);
+  av1_set_mb_mi(cm, 0, 0);
+  av1_free_context_buffers(cm);
   return 1;
 }
 
-void vp10_remove_common(VP10_COMMON *cm) {
-  vp10_free_context_buffers(cm);
+void av1_remove_common(AV1_COMMON *cm) {
+  av1_free_context_buffers(cm);
 
-  vpx_free(cm->fc);
+  aom_free(cm->fc);
   cm->fc = NULL;
-  vpx_free(cm->frame_contexts);
+  aom_free(cm->frame_contexts);
   cm->frame_contexts = NULL;
 }
 
-void vp10_init_context_buffers(VP10_COMMON *cm) {
+void av1_init_context_buffers(AV1_COMMON *cm) {
   cm->setup_mi(cm);
   if (cm->last_frame_seg_map && !cm->frame_parallel_decode)
     memset(cm->last_frame_seg_map, 0, cm->mi_rows * cm->mi_cols);
 }
 
-void vp10_swap_current_and_last_seg_map(VP10_COMMON *cm) {
+void av1_swap_current_and_last_seg_map(AV1_COMMON *cm) {
   // Swap indices.
   const int tmp = cm->seg_map_idx;
   cm->seg_map_idx = cm->prev_seg_map_idx;

@@ -9,7 +9,7 @@
 ;
 
 
-    EXPORT  |vpx_variance_halfpixvar16x16_v_media|
+    EXPORT  |aom_variance_halfpixvar16x16_v_media|
 
     ARM
     REQUIRE8
@@ -22,7 +22,7 @@
 ; r2    unsigned char *ref_ptr
 ; r3    int  recon_stride
 ; stack unsigned int *sse
-|vpx_variance_halfpixvar16x16_v_media| PROC
+|aom_variance_halfpixvar16x16_v_media| PROC
 
     stmfd   sp!, {r4-r12, lr}
 

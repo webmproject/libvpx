@@ -50,7 +50,7 @@ cglobal highbd_sad%1x%2_avg, 5, ARCH_X86_64 + %3, 7, src, src_stride, \
 %endif
 %endmacro
 
-; unsigned int vpx_highbd_sad64x{16,32,64}_sse2(uint8_t *src, int src_stride,
+; unsigned int aom_highbd_sad64x{16,32,64}_sse2(uint8_t *src, int src_stride,
 ;                                    uint8_t *ref, int ref_stride);
 %macro HIGH_SAD64XN 1-2 0
   HIGH_SAD_FN 64, %1, 5, %2
@@ -157,7 +157,7 @@ HIGH_SAD64XN 64, 1 ; highbd_sad64x64_avg_sse2
 HIGH_SAD64XN 32, 1 ; highbd_sad64x32_avg_sse2
 
 
-; unsigned int vpx_highbd_sad32x{16,32,64}_sse2(uint8_t *src, int src_stride,
+; unsigned int aom_highbd_sad32x{16,32,64}_sse2(uint8_t *src, int src_stride,
 ;                                    uint8_t *ref, int ref_stride);
 %macro HIGH_SAD32XN 1-2 0
   HIGH_SAD_FN 32, %1, 5, %2
@@ -225,7 +225,7 @@ HIGH_SAD32XN 64, 1 ; highbd_sad32x64_avg_sse2
 HIGH_SAD32XN 32, 1 ; highbd_sad32x32_avg_sse2
 HIGH_SAD32XN 16, 1 ; highbd_sad32x16_avg_sse2
 
-; unsigned int vpx_highbd_sad16x{8,16,32}_sse2(uint8_t *src, int src_stride,
+; unsigned int aom_highbd_sad16x{8,16,32}_sse2(uint8_t *src, int src_stride,
 ;                                    uint8_t *ref, int ref_stride);
 %macro HIGH_SAD16XN 1-2 0
   HIGH_SAD_FN 16, %1, 5, %2
@@ -294,7 +294,7 @@ HIGH_SAD16XN 16, 1 ; highbd_sad16x16_avg_sse2
 HIGH_SAD16XN  8, 1 ; highbd_sad16x8_avg_sse2
 
 
-; unsigned int vpx_highbd_sad8x{4,8,16}_sse2(uint8_t *src, int src_stride,
+; unsigned int aom_highbd_sad8x{4,8,16}_sse2(uint8_t *src, int src_stride,
 ;                                    uint8_t *ref, int ref_stride);
 %macro HIGH_SAD8XN 1-2 0
   HIGH_SAD_FN 8, %1, 7, %2

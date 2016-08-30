@@ -146,7 +146,7 @@ static uint8_t add_ref_mv_candidate(
   return newmv_count;
 }
 
-static uint8_t scan_row_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
+static uint8_t scan_row_mbmi(const AV1_COMMON *cm, const MACROBLOCKD *xd,
                              const int mi_row, const int mi_col, int block,
                              const MV_REFERENCE_FRAME rf[2], int row_offset,
                              CANDIDATE_MV *ref_mv_stack, uint8_t *refmv_count) {
@@ -164,7 +164,7 @@ static uint8_t scan_row_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
           xd->mi[mi_pos.row * xd->mi_stride + mi_pos.col];
       const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
       const int len =
-          VPXMIN(xd->n8_w, num_8x8_blocks_wide_lookup[candidate->sb_type]);
+          AOMMIN(xd->n8_w, num_8x8_blocks_wide_lookup[candidate->sb_type]);
 
       newmv_count += add_ref_mv_candidate(
           candidate_mi, candidate, rf, refmv_count, ref_mv_stack,
@@ -178,7 +178,7 @@ static uint8_t scan_row_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   return newmv_count;
 }
 
-static uint8_t scan_col_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
+static uint8_t scan_col_mbmi(const AV1_COMMON *cm, const MACROBLOCKD *xd,
                              const int mi_row, const int mi_col, int block,
                              const MV_REFERENCE_FRAME rf[2], int col_offset,
                              CANDIDATE_MV *ref_mv_stack, uint8_t *refmv_count) {
@@ -196,7 +196,7 @@ static uint8_t scan_col_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
           xd->mi[mi_pos.row * xd->mi_stride + mi_pos.col];
       const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
       const int len =
-          VPXMIN(xd->n8_h, num_8x8_blocks_high_lookup[candidate->sb_type]);
+          AOMMIN(xd->n8_h, num_8x8_blocks_high_lookup[candidate->sb_type]);
 
       newmv_count += add_ref_mv_candidate(
           candidate_mi, candidate, rf, refmv_count, ref_mv_stack,
@@ -210,7 +210,7 @@ static uint8_t scan_col_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
   return newmv_count;
 }
 
-static uint8_t scan_blk_mbmi(const VP10_COMMON *cm, const MACROBLOCKD *xd,
+static uint8_t scan_blk_mbmi(const AV1_COMMON *cm, const MACROBLOCKD *xd,
                              const int mi_row, const int mi_col, int block,
                              const MV_REFERENCE_FRAME rf[2], int row_offset,
                              int col_offset, CANDIDATE_MV *ref_mv_stack,
@@ -288,7 +288,7 @@ static void handle_sec_rect_block(const MB_MODE_INFO *const candidate,
 
   for (rf = 0; rf < 2; ++rf) {
     if (candidate->ref_frame[rf] == ref_frame) {
-      const int list_range = VPXMIN(refmv_count, MAX_MV_REF_CANDIDATES);
+      const int list_range = AOMMIN(refmv_count, MAX_MV_REF_CANDIDATES);
 
       const int_mv pred_mv = candidate->mv[rf];
       for (idx = 0; idx < list_range; ++idx)
@@ -304,7 +304,7 @@ static void handle_sec_rect_block(const MB_MODE_INFO *const candidate,
   }
 }
 
-static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
+static void setup_ref_mv_list(const AV1_COMMON *cm, const MACROBLOCKD *xd,
                               MV_REFERENCE_FRAME ref_frame,
                               uint8_t *refmv_count, CANDIDATE_MV *ref_mv_stack,
                               int_mv *mv_ref_list, int block, int mi_row,
@@ -320,11 +320,11 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
           ? cm->prev_frame->mvs + mi_row * cm->mi_cols + mi_col
           : NULL;
 
-  int bs = VPXMAX(xd->n8_w, xd->n8_h);
+  int bs = AOMMAX(xd->n8_w, xd->n8_h);
   int has_tr = has_top_right(xd, mi_row, mi_col, bs);
 
   MV_REFERENCE_FRAME rf[2];
-  vp10_set_ref_frame(rf, ref_frame);
+  av1_set_ref_frame(rf, ref_frame);
 
   mode_context[ref_frame] = 0;
   *refmv_count = 0;
@@ -502,7 +502,7 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
                    xd->n8_h << 3, xd);
     }
   } else {
-    for (idx = 0; idx < VPXMIN(MAX_MV_REF_CANDIDATES, *refmv_count); ++idx) {
+    for (idx = 0; idx < AOMMIN(MAX_MV_REF_CANDIDATES, *refmv_count); ++idx) {
       mv_ref_list[idx].as_int = ref_mv_stack[idx].this_mv.as_int;
       clamp_mv_ref(&mv_ref_list[idx].as_mv, xd->n8_w << 3, xd->n8_h << 3, xd);
     }
@@ -512,7 +512,7 @@ static void setup_ref_mv_list(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 
 // This function searches the neighbourhood of a given MB/SB
 // to try and find candidate reference vectors.
-static void find_mv_refs_idx(const VP10_COMMON *cm, const MACROBLOCKD *xd,
+static void find_mv_refs_idx(const AV1_COMMON *cm, const MACROBLOCKD *xd,
                              MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
                              int_mv *mv_ref_list, int block, int mi_row,
                              int mi_col, find_mv_refs_sync sync,
@@ -648,10 +648,10 @@ Done:
 
 #if CONFIG_EXT_INTER
 // This function keeps a mode count for a given MB/SB
-void vp10_update_mv_context(const MACROBLOCKD *xd, MODE_INFO *mi,
-                            MV_REFERENCE_FRAME ref_frame, int_mv *mv_ref_list,
-                            int block, int mi_row, int mi_col,
-                            int16_t *mode_context) {
+void av1_update_mv_context(const MACROBLOCKD *xd, MODE_INFO *mi,
+                           MV_REFERENCE_FRAME ref_frame, int_mv *mv_ref_list,
+                           int block, int mi_row, int mi_col,
+                           int16_t *mode_context) {
   int i, refmv_count = 0;
   const POSITION *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
   int context_counter = 0;
@@ -691,26 +691,26 @@ Done:
 }
 #endif  // CONFIG_EXT_INTER
 
-void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
-                       MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
+void av1_find_mv_refs(const AV1_COMMON *cm, const MACROBLOCKD *xd,
+                      MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
 #if CONFIG_REF_MV
-                       uint8_t *ref_mv_count, CANDIDATE_MV *ref_mv_stack,
+                      uint8_t *ref_mv_count, CANDIDATE_MV *ref_mv_stack,
 #if CONFIG_EXT_INTER
-                       int16_t *compound_mode_context,
+                      int16_t *compound_mode_context,
 #endif  // CONFIG_EXT_INTER
 #endif
-                       int_mv *mv_ref_list, int mi_row, int mi_col,
-                       find_mv_refs_sync sync, void *const data,
-                       int16_t *mode_context) {
+                      int_mv *mv_ref_list, int mi_row, int mi_col,
+                      find_mv_refs_sync sync, void *const data,
+                      int16_t *mode_context) {
 #if CONFIG_REF_MV
   int idx, all_zero = 1;
 #endif
 #if CONFIG_EXT_INTER
-  vp10_update_mv_context(xd, mi, ref_frame, mv_ref_list, -1, mi_row, mi_col,
+  av1_update_mv_context(xd, mi, ref_frame, mv_ref_list, -1, mi_row, mi_col,
 #if CONFIG_REF_MV
-                         compound_mode_context);
+                        compound_mode_context);
 #else
-                         mode_context);
+                        mode_context);
 #endif  // CONFIG_REF_MV
   find_mv_refs_idx(cm, xd, mi, ref_frame, mv_ref_list, -1, mi_row, mi_col, sync,
                    data, NULL);
@@ -730,8 +730,8 @@ void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
 #endif
 }
 
-void vp10_find_best_ref_mvs(int allow_hp, int_mv *mvlist, int_mv *nearest_mv,
-                            int_mv *near_mv) {
+void av1_find_best_ref_mvs(int allow_hp, int_mv *mvlist, int_mv *nearest_mv,
+                           int_mv *near_mv) {
   int i;
   // Make sure all the candidates are properly clamped etc
   for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
@@ -741,16 +741,16 @@ void vp10_find_best_ref_mvs(int allow_hp, int_mv *mvlist, int_mv *nearest_mv,
   *near_mv = mvlist[1];
 }
 
-void vp10_append_sub8x8_mvs_for_idx(VP10_COMMON *cm, MACROBLOCKD *xd, int block,
-                                    int ref, int mi_row, int mi_col,
+void av1_append_sub8x8_mvs_for_idx(AV1_COMMON *cm, MACROBLOCKD *xd, int block,
+                                   int ref, int mi_row, int mi_col,
 #if CONFIG_REF_MV
-                                    CANDIDATE_MV *ref_mv_stack,
-                                    uint8_t *ref_mv_count,
+                                   CANDIDATE_MV *ref_mv_stack,
+                                   uint8_t *ref_mv_count,
 #endif
 #if CONFIG_EXT_INTER
-                                    int_mv *mv_list,
+                                   int_mv *mv_list,
 #endif  // CONFIG_EXT_INTER
-                                    int_mv *nearest_mv, int_mv *near_mv) {
+                                   int_mv *nearest_mv, int_mv *near_mv) {
 #if !CONFIG_EXT_INTER
   int_mv mv_list[MAX_MV_REF_CANDIDATES];
 #endif  // !CONFIG_EXT_INTER
@@ -789,7 +789,7 @@ void vp10_append_sub8x8_mvs_for_idx(VP10_COMMON *cm, MACROBLOCKD *xd, int block,
     clamp_mv_ref(&ref_mv_stack[idx].this_mv.as_mv, xd->n8_w << 3, xd->n8_h << 3,
                  xd);
 
-  for (idx = 0; idx < VPXMIN(MAX_MV_REF_CANDIDATES, *ref_mv_count); ++idx)
+  for (idx = 0; idx < AOMMIN(MAX_MV_REF_CANDIDATES, *ref_mv_count); ++idx)
     mv_list[idx].as_int = ref_mv_stack[idx].this_mv.as_int;
 #endif
 

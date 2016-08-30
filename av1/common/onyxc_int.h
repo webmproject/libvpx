@@ -8,13 +8,13 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_COMMON_ONYXC_INT_H_
-#define VP10_COMMON_ONYXC_INT_H_
+#ifndef AV1_COMMON_ONYXC_INT_H_
+#define AV1_COMMON_ONYXC_INT_H_
 
-#include "./vpx_config.h"
-#include "aom/internal/vpx_codec_internal.h"
-#include "aom_util/vpx_thread.h"
-#include "./vp10_rtcd.h"
+#include "./aom_config.h"
+#include "aom/internal/aom_codec_internal.h"
+#include "aom_util/aom_thread.h"
+#include "./av1_rtcd.h"
 #include "av1/common/alloccommon.h"
 #include "av1/common/loopfilter.h"
 #include "av1/common/entropymv.h"
@@ -87,14 +87,14 @@ typedef struct {
   MV_REF *mvs;
   int mi_rows;
   int mi_cols;
-  vpx_codec_frame_buffer_t raw_frame_buffer;
+  aom_codec_frame_buffer_t raw_frame_buffer;
   YV12_BUFFER_CONFIG buf;
 
   // The Following variables will only be used in frame parallel decode.
 
   // frame_worker_owner indicates which FrameWorker owns this buffer. NULL means
   // that no FrameWorker owns, or is decoding, this buffer.
-  VPxWorker *frame_worker_owner;
+  AVxWorker *frame_worker_owner;
 
   // row and col indicate which position frame has been decoded to in real
   // pixel unit. They are reset to -1 when decoding begins and set to INT_MAX
@@ -114,8 +114,8 @@ typedef struct BufferPool {
   // Private data associated with the frame buffer callbacks.
   void *cb_priv;
 
-  vpx_get_frame_buffer_cb_fn_t get_fb_cb;
-  vpx_release_frame_buffer_cb_fn_t release_fb_cb;
+  aom_get_frame_buffer_cb_fn_t get_fb_cb;
+  aom_release_frame_buffer_cb_fn_t release_fb_cb;
 
   RefCntBuffer frame_bufs[FRAME_BUFFERS];
 
@@ -123,9 +123,9 @@ typedef struct BufferPool {
   InternalFrameBufferList int_frame_buffers;
 } BufferPool;
 
-typedef struct VP10Common {
-  struct vpx_internal_error_info error;
-  vpx_color_space_t color_space;
+typedef struct AV1Common {
+  struct aom_internal_error_info error;
+  aom_color_space_t color_space;
   int color_range;
   int width;
   int height;
@@ -140,7 +140,7 @@ typedef struct VP10Common {
   int subsampling_x;
   int subsampling_y;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   // Marks if we need to use 16bit frame buffers (1: yes, 0: no).
   int use_highbitdepth;
 #endif
@@ -247,9 +247,9 @@ typedef struct VP10Common {
   MODE_INFO *prev_mi;  /* 'mi' from last frame (points into prev_mip) */
 
   // Separate mi functions between encoder and decoder.
-  int (*alloc_mi)(struct VP10Common *cm, int mi_size);
-  void (*free_mi)(struct VP10Common *cm);
-  void (*setup_mi)(struct VP10Common *cm);
+  int (*alloc_mi)(struct AV1Common *cm, int mi_size);
+  void (*free_mi)(struct AV1Common *cm);
+  void (*setup_mi)(struct AV1Common *cm);
 
   // Grid of pointers to 8x8 MODE_INFO structs.  Any 8x8 not in the visible
   // area will be NULL.
@@ -307,7 +307,7 @@ typedef struct VP10Common {
 #if CONFIG_ENTROPY
   // The initial probabilities for a frame, before any subframe backward update,
   // and after forward update.
-  vp10_coeff_probs_model starting_coef_probs[TX_SIZES][PLANE_TYPES];
+  av1_coeff_probs_model starting_coef_probs[TX_SIZES][PLANE_TYPES];
   // Number of subframe backward updates already done
   uint8_t coef_probs_update_idx;
   // Signal if the backward update is subframe or end-of-frame
@@ -319,9 +319,9 @@ typedef struct VP10Common {
   unsigned int current_video_frame;
   BITSTREAM_PROFILE profile;
 
-  // VPX_BITS_8 in profile 0 or 1, VPX_BITS_10 or VPX_BITS_12 in profile 2 or 3.
-  vpx_bit_depth_t bit_depth;
-  vpx_bit_depth_t dequant_bit_depth;  // bit_depth of current dequantizer
+  // AOM_BITS_8 in profile 0 or 1, AOM_BITS_10 or AOM_BITS_12 in profile 2 or 3.
+  aom_bit_depth_t bit_depth;
+  aom_bit_depth_t dequant_bit_depth;  // bit_depth of current dequantizer
 
   int error_resilient_mode;
 
@@ -336,8 +336,8 @@ typedef struct VP10Common {
 
   // Private data associated with the frame buffer callbacks.
   void *cb_priv;
-  vpx_get_frame_buffer_cb_fn_t get_fb_cb;
-  vpx_release_frame_buffer_cb_fn_t release_fb_cb;
+  aom_get_frame_buffer_cb_fn_t get_fb_cb;
+  aom_release_frame_buffer_cb_fn_t release_fb_cb;
 
   // Handles memory for the codec.
   InternalFrameBufferList int_frame_buffers;
@@ -356,7 +356,7 @@ typedef struct VP10Common {
   // scratch memory for intraonly/keyframe forward updates from default tables
   // - this is intentionally not placed in FRAME_CONTEXT since it's reset upon
   // each keyframe and not used afterwards
-  vpx_prob kf_y_prob[INTRA_MODES][INTRA_MODES][INTRA_MODES - 1];
+  aom_prob kf_y_prob[INTRA_MODES][INTRA_MODES][INTRA_MODES - 1];
 #if CONFIG_GLOBAL_MOTION
   Global_Motion_Params global_motion[TOTAL_REFS_PER_FRAME];
 #endif
@@ -367,7 +367,7 @@ typedef struct VP10Common {
 #if CONFIG_DERING
   int dering_level;
 #endif
-} VP10_COMMON;
+} AV1_COMMON;
 
 // TODO(hkuang): Don't need to lock the whole pool after implementing atomic
 // frame reference count.
@@ -387,7 +387,7 @@ static void unlock_buffer_pool(BufferPool *const pool) {
 #endif
 }
 
-static INLINE YV12_BUFFER_CONFIG *get_ref_frame(VP10_COMMON *cm, int index) {
+static INLINE YV12_BUFFER_CONFIG *get_ref_frame(AV1_COMMON *cm, int index) {
   if (index < 0 || index >= REF_FRAMES) return NULL;
   if (cm->ref_frame_map[index] < 0) return NULL;
   assert(cm->ref_frame_map[index] < FRAME_BUFFERS);
@@ -395,11 +395,11 @@ static INLINE YV12_BUFFER_CONFIG *get_ref_frame(VP10_COMMON *cm, int index) {
 }
 
 static INLINE YV12_BUFFER_CONFIG *get_frame_new_buffer(
-    const VP10_COMMON *const cm) {
+    const AV1_COMMON *const cm) {
   return &cm->buffer_pool->frame_bufs[cm->new_fb_idx].buf;
 }
 
-static INLINE int get_free_fb(VP10_COMMON *cm) {
+static INLINE int get_free_fb(AV1_COMMON *cm) {
   RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
   int i;
 
@@ -429,20 +429,20 @@ static INLINE void ref_cnt_fb(RefCntBuffer *bufs, int *idx, int new_idx) {
   bufs[new_idx].ref_count++;
 }
 
-static INLINE int mi_cols_aligned_to_sb(const VP10_COMMON *cm) {
+static INLINE int mi_cols_aligned_to_sb(const AV1_COMMON *cm) {
   return ALIGN_POWER_OF_TWO(cm->mi_cols, cm->mib_size_log2);
 }
 
-static INLINE int mi_rows_aligned_to_sb(const VP10_COMMON *cm) {
+static INLINE int mi_rows_aligned_to_sb(const AV1_COMMON *cm) {
   return ALIGN_POWER_OF_TWO(cm->mi_rows, cm->mib_size_log2);
 }
 
-static INLINE int frame_is_intra_only(const VP10_COMMON *const cm) {
+static INLINE int frame_is_intra_only(const AV1_COMMON *const cm) {
   return cm->frame_type == KEY_FRAME || cm->intra_only;
 }
 
-static INLINE void vp10_init_macroblockd(VP10_COMMON *cm, MACROBLOCKD *xd,
-                                         tran_low_t *dqcoeff) {
+static INLINE void av1_init_macroblockd(AV1_COMMON *cm, MACROBLOCKD *xd,
+                                        tran_low_t *dqcoeff) {
   int i;
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     xd->plane[i].dqcoeff = dqcoeff;
@@ -536,13 +536,13 @@ static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
 #endif
 }
 
-static INLINE const vpx_prob *get_y_mode_probs(const VP10_COMMON *cm,
+static INLINE const aom_prob *get_y_mode_probs(const AV1_COMMON *cm,
                                                const MODE_INFO *mi,
                                                const MODE_INFO *above_mi,
                                                const MODE_INFO *left_mi,
                                                int block) {
-  const PREDICTION_MODE above = vp10_above_block_mode(mi, above_mi, block);
-  const PREDICTION_MODE left = vp10_left_block_mode(mi, left_mi, block);
+  const PREDICTION_MODE above = av1_above_block_mode(mi, above_mi, block);
+  const PREDICTION_MODE left = av1_left_block_mode(mi, left_mi, block);
   return cm->kf_y_prob[above][left];
 }
 
@@ -622,8 +622,8 @@ static INLINE int partition_plane_context(const MACROBLOCKD *xd, int mi_row,
   return (left * 2 + above) + bsl * PARTITION_PLOFFSET;
 }
 
-static INLINE void vp10_zero_above_context(VP10_COMMON *const cm,
-                                           int mi_col_start, int mi_col_end) {
+static INLINE void av1_zero_above_context(AV1_COMMON *const cm,
+                                          int mi_col_start, int mi_col_end) {
   const int width = mi_col_end - mi_col_start;
 
   const int offset_y = 2 * mi_col_start;
@@ -631,22 +631,22 @@ static INLINE void vp10_zero_above_context(VP10_COMMON *const cm,
   const int offset_uv = offset_y >> cm->subsampling_x;
   const int width_uv = width_y >> cm->subsampling_x;
 
-  vp10_zero_array(cm->above_context[0] + offset_y, width_y);
-  vp10_zero_array(cm->above_context[1] + offset_uv, width_uv);
-  vp10_zero_array(cm->above_context[2] + offset_uv, width_uv);
+  av1_zero_array(cm->above_context[0] + offset_y, width_y);
+  av1_zero_array(cm->above_context[1] + offset_uv, width_uv);
+  av1_zero_array(cm->above_context[2] + offset_uv, width_uv);
 
-  vp10_zero_array(cm->above_seg_context + mi_col_start, width);
+  av1_zero_array(cm->above_seg_context + mi_col_start, width);
 
 #if CONFIG_VAR_TX
-  vp10_zero_array(cm->above_txfm_context + mi_col_start, width);
+  av1_zero_array(cm->above_txfm_context + mi_col_start, width);
 #endif  // CONFIG_VAR_TX
 }
 
-static INLINE void vp10_zero_left_context(MACROBLOCKD *const xd) {
-  vp10_zero(xd->left_context);
-  vp10_zero(xd->left_seg_context);
+static INLINE void av1_zero_left_context(MACROBLOCKD *const xd) {
+  av1_zero(xd->left_context);
+  av1_zero(xd->left_seg_context);
 #if CONFIG_VAR_TX
-  vp10_zero(xd->left_txfm_context_buffer);
+  av1_zero(xd->left_txfm_context_buffer);
 #endif
 }
 
@@ -684,7 +684,7 @@ static INLINE int txfm_partition_context(TXFM_CONTEXT *above_ctx,
 }
 #endif
 
-static INLINE PARTITION_TYPE get_partition(const VP10_COMMON *const cm,
+static INLINE PARTITION_TYPE get_partition(const AV1_COMMON *const cm,
                                            const int mi_row, const int mi_col,
                                            const BLOCK_SIZE bsize) {
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols) {
@@ -726,8 +726,7 @@ static INLINE PARTITION_TYPE get_partition(const VP10_COMMON *const cm,
   }
 }
 
-static INLINE void set_sb_size(VP10_COMMON *const cm,
-                               const BLOCK_SIZE sb_size) {
+static INLINE void set_sb_size(AV1_COMMON *const cm, const BLOCK_SIZE sb_size) {
   cm->sb_size = sb_size;
   cm->mib_size = num_8x8_blocks_wide_lookup[cm->sb_size];
   cm->mib_size_log2 = mi_width_log2_lookup[cm->sb_size];
@@ -737,4 +736,4 @@ static INLINE void set_sb_size(VP10_COMMON *const cm,
 }  // extern "C"
 #endif
 
-#endif  // VP10_COMMON_ONYXC_INT_H_
+#endif  // AV1_COMMON_ONYXC_INT_H_

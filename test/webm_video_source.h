@@ -25,25 +25,25 @@ namespace libaom_test {
 class WebMVideoSource : public CompressedVideoSource {
  public:
   explicit WebMVideoSource(const std::string &file_name)
-      : file_name_(file_name), vpx_ctx_(new VpxInputContext()),
+      : file_name_(file_name), aom_ctx_(new AvxInputContext()),
         webm_ctx_(new WebmInputContext()), buf_(NULL), buf_sz_(0), frame_(0),
         end_of_file_(false) {}
 
   virtual ~WebMVideoSource() {
-    if (vpx_ctx_->file != NULL) fclose(vpx_ctx_->file);
+    if (aom_ctx_->file != NULL) fclose(aom_ctx_->file);
     webm_free(webm_ctx_);
-    delete vpx_ctx_;
+    delete aom_ctx_;
     delete webm_ctx_;
   }
 
   virtual void Init() {}
 
   virtual void Begin() {
-    vpx_ctx_->file = OpenTestDataFile(file_name_);
-    ASSERT_TRUE(vpx_ctx_->file != NULL) << "Input file open failed. Filename: "
+    aom_ctx_->file = OpenTestDataFile(file_name_);
+    ASSERT_TRUE(aom_ctx_->file != NULL) << "Input file open failed. Filename: "
                                         << file_name_;
 
-    ASSERT_EQ(file_is_webm(webm_ctx_, vpx_ctx_), 1) << "file is not WebM";
+    ASSERT_EQ(file_is_webm(webm_ctx_, aom_ctx_), 1) << "file is not WebM";
 
     FillFrame();
   }
@@ -54,7 +54,7 @@ class WebMVideoSource : public CompressedVideoSource {
   }
 
   void FillFrame() {
-    ASSERT_TRUE(vpx_ctx_->file != NULL);
+    ASSERT_TRUE(aom_ctx_->file != NULL);
     const int status = webm_read_frame(webm_ctx_, &buf_, &buf_sz_);
     ASSERT_GE(status, 0) << "webm_read_frame failed";
     if (status == 1) {
@@ -63,7 +63,7 @@ class WebMVideoSource : public CompressedVideoSource {
   }
 
   void SeekToNextKeyFrame() {
-    ASSERT_TRUE(vpx_ctx_->file != NULL);
+    ASSERT_TRUE(aom_ctx_->file != NULL);
     do {
       const int status = webm_read_frame(webm_ctx_, &buf_, &buf_sz_);
       ASSERT_GE(status, 0) << "webm_read_frame failed";
@@ -80,7 +80,7 @@ class WebMVideoSource : public CompressedVideoSource {
 
  protected:
   std::string file_name_;
-  VpxInputContext *vpx_ctx_;
+  AvxInputContext *aom_ctx_;
   WebmInputContext *webm_ctx_;
   uint8_t *buf_;
   size_t buf_sz_;

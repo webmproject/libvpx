@@ -7,22 +7,22 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#ifndef VPX_DSP_X86_CONVOLVE_H_
-#define VPX_DSP_X86_CONVOLVE_H_
+#ifndef AOM_DSP_X86_CONVOLVE_H_
+#define AOM_DSP_X86_CONVOLVE_H_
 
 #include <assert.h>
 
-#include "./vpx_config.h"
-#include "aom/vpx_integer.h"
+#include "./aom_config.h"
+#include "aom/aom_integer.h"
 #include "aom_ports/mem.h"
-#include "aom_dsp/vpx_convolve.h"
+#include "aom_dsp/aom_convolve.h"
 
 typedef void filter8_1dfunction(const uint8_t *src_ptr, ptrdiff_t src_pitch,
                                 uint8_t *output_ptr, ptrdiff_t out_pitch,
                                 uint32_t output_height, const int16_t *filter);
 
 #define FUN_CONV_1D(name, step_q4, filter, dir, src_start, avg, opt)         \
-  void vpx_convolve8_##name##_##opt(                                         \
+  void aom_convolve8_##name##_##opt(                                         \
       const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,                \
       ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4,          \
       const int16_t *filter_y, int y_step_q4, int w, int h) {                \
@@ -30,39 +30,39 @@ typedef void filter8_1dfunction(const uint8_t *src_ptr, ptrdiff_t src_pitch,
     assert(step_q4 == 16);                                                   \
     if (filter[0] | filter[1] | filter[2]) {                                 \
       while (w >= 16) {                                                      \
-        vpx_filter_block1d16_##dir##8_##avg##opt(src_start, src_stride, dst, \
+        aom_filter_block1d16_##dir##8_##avg##opt(src_start, src_stride, dst, \
                                                  dst_stride, h, filter);     \
         src += 16;                                                           \
         dst += 16;                                                           \
         w -= 16;                                                             \
       }                                                                      \
       if (w == 8) {                                                          \
-        vpx_filter_block1d8_##dir##8_##avg##opt(src_start, src_stride, dst,  \
+        aom_filter_block1d8_##dir##8_##avg##opt(src_start, src_stride, dst,  \
                                                 dst_stride, h, filter);      \
       } else if (w == 4) {                                                   \
-        vpx_filter_block1d4_##dir##8_##avg##opt(src_start, src_stride, dst,  \
+        aom_filter_block1d4_##dir##8_##avg##opt(src_start, src_stride, dst,  \
                                                 dst_stride, h, filter);      \
       }                                                                      \
     } else {                                                                 \
       while (w >= 16) {                                                      \
-        vpx_filter_block1d16_##dir##2_##avg##opt(src, src_stride, dst,       \
+        aom_filter_block1d16_##dir##2_##avg##opt(src, src_stride, dst,       \
                                                  dst_stride, h, filter);     \
         src += 16;                                                           \
         dst += 16;                                                           \
         w -= 16;                                                             \
       }                                                                      \
       if (w == 8) {                                                          \
-        vpx_filter_block1d8_##dir##2_##avg##opt(src, src_stride, dst,        \
+        aom_filter_block1d8_##dir##2_##avg##opt(src, src_stride, dst,        \
                                                 dst_stride, h, filter);      \
       } else if (w == 4) {                                                   \
-        vpx_filter_block1d4_##dir##2_##avg##opt(src, src_stride, dst,        \
+        aom_filter_block1d4_##dir##2_##avg##opt(src, src_stride, dst,        \
                                                 dst_stride, h, filter);      \
       }                                                                      \
     }                                                                        \
   }
 
 #define FUN_CONV_2D(avg, opt)                                                \
-  void vpx_convolve8_##avg##opt(                                             \
+  void aom_convolve8_##avg##opt(                                             \
       const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,                \
       ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4,          \
       const int16_t *filter_y, int y_step_q4, int w, int h) {                \
@@ -75,24 +75,24 @@ typedef void filter8_1dfunction(const uint8_t *src_ptr, ptrdiff_t src_pitch,
     if (filter_x[0] || filter_x[1] || filter_x[2] || filter_y[0] ||          \
         filter_y[1] || filter_y[2]) {                                        \
       DECLARE_ALIGNED(16, uint8_t, fdata2[MAX_SB_SIZE * (MAX_SB_SIZE + 7)]); \
-      vpx_convolve8_horiz_##opt(src - 3 * src_stride, src_stride, fdata2,    \
+      aom_convolve8_horiz_##opt(src - 3 * src_stride, src_stride, fdata2,    \
                                 MAX_SB_SIZE, filter_x, x_step_q4, filter_y,  \
                                 y_step_q4, w, h + 7);                        \
-      vpx_convolve8_##avg##vert_##opt(fdata2 + 3 * MAX_SB_SIZE, MAX_SB_SIZE, \
+      aom_convolve8_##avg##vert_##opt(fdata2 + 3 * MAX_SB_SIZE, MAX_SB_SIZE, \
                                       dst, dst_stride, filter_x, x_step_q4,  \
                                       filter_y, y_step_q4, w, h);            \
     } else {                                                                 \
       DECLARE_ALIGNED(16, uint8_t, fdata2[MAX_SB_SIZE * (MAX_SB_SIZE + 1)]); \
-      vpx_convolve8_horiz_##opt(src, src_stride, fdata2, MAX_SB_SIZE,        \
+      aom_convolve8_horiz_##opt(src, src_stride, fdata2, MAX_SB_SIZE,        \
                                 filter_x, x_step_q4, filter_y, y_step_q4, w, \
                                 h + 1);                                      \
-      vpx_convolve8_##avg##vert_##opt(fdata2, MAX_SB_SIZE, dst, dst_stride,  \
+      aom_convolve8_##avg##vert_##opt(fdata2, MAX_SB_SIZE, dst, dst_stride,  \
                                       filter_x, x_step_q4, filter_y,         \
                                       y_step_q4, w, h);                      \
     }                                                                        \
   }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 
 typedef void highbd_filter8_1dfunction(const uint16_t *src_ptr,
                                        const ptrdiff_t src_pitch,
@@ -102,7 +102,7 @@ typedef void highbd_filter8_1dfunction(const uint16_t *src_ptr,
                                        const int16_t *filter, int bd);
 
 #define HIGH_FUN_CONV_1D(name, step_q4, filter, dir, src_start, avg, opt) \
-  void vpx_highbd_convolve8_##name##_##opt(                               \
+  void aom_highbd_convolve8_##name##_##opt(                               \
       const uint8_t *src8, ptrdiff_t src_stride, uint8_t *dst8,           \
       ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4,       \
       const int16_t *filter_y, int y_step_q4, int w, int h, int bd) {     \
@@ -111,21 +111,21 @@ typedef void highbd_filter8_1dfunction(const uint16_t *src_ptr,
       uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);                          \
       if (filter[0] | filter[1] | filter[2]) {                            \
         while (w >= 16) {                                                 \
-          vpx_highbd_filter_block1d16_##dir##8_##avg##opt(                \
+          aom_highbd_filter_block1d16_##dir##8_##avg##opt(                \
               src_start, src_stride, dst, dst_stride, h, filter, bd);     \
           src += 16;                                                      \
           dst += 16;                                                      \
           w -= 16;                                                        \
         }                                                                 \
         while (w >= 8) {                                                  \
-          vpx_highbd_filter_block1d8_##dir##8_##avg##opt(                 \
+          aom_highbd_filter_block1d8_##dir##8_##avg##opt(                 \
               src_start, src_stride, dst, dst_stride, h, filter, bd);     \
           src += 8;                                                       \
           dst += 8;                                                       \
           w -= 8;                                                         \
         }                                                                 \
         while (w >= 4) {                                                  \
-          vpx_highbd_filter_block1d4_##dir##8_##avg##opt(                 \
+          aom_highbd_filter_block1d4_##dir##8_##avg##opt(                 \
               src_start, src_stride, dst, dst_stride, h, filter, bd);     \
           src += 4;                                                       \
           dst += 4;                                                       \
@@ -133,21 +133,21 @@ typedef void highbd_filter8_1dfunction(const uint16_t *src_ptr,
         }                                                                 \
       } else {                                                            \
         while (w >= 16) {                                                 \
-          vpx_highbd_filter_block1d16_##dir##2_##avg##opt(                \
+          aom_highbd_filter_block1d16_##dir##2_##avg##opt(                \
               src, src_stride, dst, dst_stride, h, filter, bd);           \
           src += 16;                                                      \
           dst += 16;                                                      \
           w -= 16;                                                        \
         }                                                                 \
         while (w >= 8) {                                                  \
-          vpx_highbd_filter_block1d8_##dir##2_##avg##opt(                 \
+          aom_highbd_filter_block1d8_##dir##2_##avg##opt(                 \
               src, src_stride, dst, dst_stride, h, filter, bd);           \
           src += 8;                                                       \
           dst += 8;                                                       \
           w -= 8;                                                         \
         }                                                                 \
         while (w >= 4) {                                                  \
-          vpx_highbd_filter_block1d4_##dir##2_##avg##opt(                 \
+          aom_highbd_filter_block1d4_##dir##2_##avg##opt(                 \
               src, src_stride, dst, dst_stride, h, filter, bd);           \
           src += 4;                                                       \
           dst += 4;                                                       \
@@ -156,14 +156,14 @@ typedef void highbd_filter8_1dfunction(const uint16_t *src_ptr,
       }                                                                   \
     }                                                                     \
     if (w) {                                                              \
-      vpx_highbd_convolve8_##name##_c(src8, src_stride, dst8, dst_stride, \
+      aom_highbd_convolve8_##name##_c(src8, src_stride, dst8, dst_stride, \
                                       filter_x, x_step_q4, filter_y,      \
                                       y_step_q4, w, h, bd);               \
     }                                                                     \
   }
 
 #define HIGH_FUN_CONV_2D(avg, opt)                                            \
-  void vpx_highbd_convolve8_##avg##opt(                                       \
+  void aom_highbd_convolve8_##avg##opt(                                       \
       const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,                 \
       ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4,           \
       const int16_t *filter_y, int y_step_q4, int w, int h, int bd) {         \
@@ -174,29 +174,29 @@ typedef void highbd_filter8_1dfunction(const uint16_t *src_ptr,
           filter_y[0] || filter_y[1] || filter_y[2] || filter_y[3] == 128) {  \
         DECLARE_ALIGNED(16, uint16_t,                                         \
                         fdata2[MAX_SB_SIZE * (MAX_SB_SIZE + 7)]);             \
-        vpx_highbd_convolve8_horiz_##opt(src - 3 * src_stride, src_stride,    \
+        aom_highbd_convolve8_horiz_##opt(src - 3 * src_stride, src_stride,    \
                                          CONVERT_TO_BYTEPTR(fdata2),          \
                                          MAX_SB_SIZE, filter_x, x_step_q4,    \
                                          filter_y, y_step_q4, w, h + 7, bd);  \
-        vpx_highbd_convolve8_##avg##vert_##opt(                               \
+        aom_highbd_convolve8_##avg##vert_##opt(                               \
             CONVERT_TO_BYTEPTR(fdata2) + 3 * MAX_SB_SIZE, MAX_SB_SIZE, dst,   \
             dst_stride, filter_x, x_step_q4, filter_y, y_step_q4, w, h, bd);  \
       } else {                                                                \
         DECLARE_ALIGNED(16, uint16_t,                                         \
                         fdata2[MAX_SB_SIZE * (MAX_SB_SIZE + 1)]);             \
-        vpx_highbd_convolve8_horiz_##opt(                                     \
+        aom_highbd_convolve8_horiz_##opt(                                     \
             src, src_stride, CONVERT_TO_BYTEPTR(fdata2), MAX_SB_SIZE,         \
             filter_x, x_step_q4, filter_y, y_step_q4, w, h + 1, bd);          \
-        vpx_highbd_convolve8_##avg##vert_##opt(                               \
+        aom_highbd_convolve8_##avg##vert_##opt(                               \
             CONVERT_TO_BYTEPTR(fdata2), MAX_SB_SIZE, dst, dst_stride,         \
             filter_x, x_step_q4, filter_y, y_step_q4, w, h, bd);              \
       }                                                                       \
     } else {                                                                  \
-      vpx_highbd_convolve8_##avg##c(src, src_stride, dst, dst_stride,         \
+      aom_highbd_convolve8_##avg##c(src, src_stride, dst, dst_stride,         \
                                     filter_x, x_step_q4, filter_y, y_step_q4, \
                                     w, h, bd);                                \
     }                                                                         \
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
-#endif  // VPX_DSP_X86_CONVOLVE_H_
+#endif  // AOM_DSP_X86_CONVOLVE_H_

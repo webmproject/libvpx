@@ -8,17 +8,17 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_COMMON_COMMON_H_
-#define VP10_COMMON_COMMON_H_
+#ifndef AV1_COMMON_COMMON_H_
+#define AV1_COMMON_COMMON_H_
 
 /* Interface header for common constant data structures and lookup tables */
 
 #include <assert.h>
 
-#include "./vpx_config.h"
-#include "aom_dsp/vpx_dsp_common.h"
-#include "aom_mem/vpx_mem.h"
-#include "aom/vpx_integer.h"
+#include "./aom_config.h"
+#include "aom_dsp/aom_dsp_common.h"
+#include "aom_mem/aom_mem.h"
+#include "aom/aom_integer.h"
 #include "aom_ports/bitops.h"
 
 #ifdef __cplusplus
@@ -28,21 +28,21 @@ extern "C" {
 #define PI 3.141592653589793238462643383279502884
 
 // Only need this for fixed-size arrays, for structs just assign.
-#define vp10_copy(dest, src)             \
+#define av1_copy(dest, src)              \
   {                                      \
     assert(sizeof(dest) == sizeof(src)); \
     memcpy(dest, src, sizeof(src));      \
   }
 
 // Use this for variably-sized arrays.
-#define vp10_copy_array(dest, src, n)          \
+#define av1_copy_array(dest, src, n)           \
   {                                            \
     assert(sizeof(*(dest)) == sizeof(*(src))); \
     memcpy(dest, src, n * sizeof(*(src)));     \
   }
 
-#define vp10_zero(dest) memset(&(dest), 0, sizeof(dest))
-#define vp10_zero_array(dest, n) memset(dest, 0, n * sizeof(*(dest)))
+#define av1_zero(dest) memset(&(dest), 0, sizeof(dest))
+#define av1_zero_array(dest, n) memset(dest, 0, n * sizeof(*(dest)))
 
 static INLINE int get_unsigned_bits(unsigned int num_values) {
   return num_values > 0 ? get_msb(num_values) + 1 : 0;
@@ -53,7 +53,7 @@ static INLINE int get_unsigned_bits(unsigned int num_values) {
   do {                                                                      \
     lval = (expr);                                                          \
     if (!lval)                                                              \
-      vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,                   \
+      aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,                   \
                          "Failed to allocate " #lval " at %s:%d", __FILE__, \
                          __LINE__);                                         \
   } while (0)
@@ -62,19 +62,19 @@ static INLINE int get_unsigned_bits(unsigned int num_values) {
   do {                                                    \
     lval = (expr);                                        \
     if (!lval)                                            \
-      vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR, \
+      aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR, \
                          "Failed to allocate " #lval);    \
   } while (0)
 #endif
 // TODO(yaowu: validate the usage of these codes or develop new ones.)
-#define VP10_SYNC_CODE_0 0x49
-#define VP10_SYNC_CODE_1 0x83
-#define VP10_SYNC_CODE_2 0x43
+#define AV1_SYNC_CODE_0 0x49
+#define AV1_SYNC_CODE_1 0x83
+#define AV1_SYNC_CODE_2 0x43
 
-#define VPX_FRAME_MARKER 0x2
+#define AOM_FRAME_MARKER 0x2
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
 
-#endif  // VP10_COMMON_COMMON_H_
+#endif  // AV1_COMMON_COMMON_H_

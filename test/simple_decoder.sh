@@ -16,10 +16,10 @@
 . $(dirname $0)/tools_common.sh
 
 # Environment check: Make sure input is available:
-#   $VP8_IVF_FILE and $VP9_IVF_FILE are required.
+#   $AOM_IVF_FILE and $AV1_IVF_FILE are required.
 simple_decoder_verify_environment() {
-  if [ ! -e "${VP8_IVF_FILE}" ] || [ ! -e "${VP9_IVF_FILE}" ]; then
-    echo "Libvpx test data must exist in LIBVPX_TEST_DATA_PATH."
+  if [ ! -e "${AOM_IVF_FILE}" ] || [ ! -e "${AV1_IVF_FILE}" ]; then
+    echo "Libaom test data must exist in LIBVPX_TEST_DATA_PATH."
     return 1
   fi
 }
@@ -27,35 +27,35 @@ simple_decoder_verify_environment() {
 # Runs simple_decoder using $1 as input file. $2 is the codec name, and is used
 # solely to name the output file.
 simple_decoder() {
-  local decoder="${LIBAOM_BIN_PATH}/simple_decoder${VPX_TEST_EXE_SUFFIX}"
+  local decoder="${LIBAOM_BIN_PATH}/simple_decoder${AOM_TEST_EXE_SUFFIX}"
   local input_file="$1"
   local codec="$2"
-  local output_file="${VPX_TEST_OUTPUT_DIR}/simple_decoder_${codec}.raw"
+  local output_file="${AOM_TEST_OUTPUT_DIR}/simple_decoder_${codec}.raw"
 
   if [ ! -x "${decoder}" ]; then
     elog "${decoder} does not exist or is not executable."
     return 1
   fi
 
-  eval "${VPX_TEST_PREFIX}" "${decoder}" "${input_file}" "${output_file}" \
+  eval "${AOM_TEST_PREFIX}" "${decoder}" "${input_file}" "${output_file}" \
       ${devnull}
 
   [ -e "${output_file}" ] || return 1
 }
 
-simple_decoder_vp8() {
-  if [ "$(vp8_decode_available)" = "yes" ]; then
-    simple_decoder "${VP8_IVF_FILE}" vp8 || return 1
+simple_decoder_aom() {
+  if [ "$(aom_decode_available)" = "yes" ]; then
+    simple_decoder "${AOM_IVF_FILE}" aom || return 1
   fi
 }
 
-simple_decoder_vp9() {
-  if [ "$(vp9_decode_available)" = "yes" ]; then
-    simple_decoder "${VP9_IVF_FILE}" vp9 || return 1
+simple_decoder_av1() {
+  if [ "$(av1_decode_available)" = "yes" ]; then
+    simple_decoder "${AV1_IVF_FILE}" av1 || return 1
   fi
 }
 
-simple_decoder_tests="simple_decoder_vp8
-                      simple_decoder_vp9"
+simple_decoder_tests="simple_decoder_aom
+                      simple_decoder_av1"
 
 run_tests simple_decoder_verify_environment "${simple_decoder_tests}"

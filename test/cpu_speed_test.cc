@@ -25,7 +25,7 @@ class CpuSpeedTest
   CpuSpeedTest()
       : EncoderTest(GET_PARAM(0)), encoding_mode_(GET_PARAM(1)),
         set_cpu_used_(GET_PARAM(2)), min_psnr_(kMaxPSNR),
-        tune_content_(VPX_CONTENT_DEFAULT) {}
+        tune_content_(AOM_CONTENT_DEFAULT) {}
   virtual ~CpuSpeedTest() {}
 
   virtual void SetUp() {
@@ -33,10 +33,10 @@ class CpuSpeedTest
     SetMode(encoding_mode_);
     if (encoding_mode_ != ::libaom_test::kRealTime) {
       cfg_.g_lag_in_frames = 25;
-      cfg_.rc_end_usage = VPX_VBR;
+      cfg_.rc_end_usage = AOM_VBR;
     } else {
       cfg_.g_lag_in_frames = 0;
-      cfg_.rc_end_usage = VPX_CBR;
+      cfg_.rc_end_usage = AOM_CBR;
     }
   }
 
@@ -45,18 +45,18 @@ class CpuSpeedTest
   virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
                                   ::libaom_test::Encoder *encoder) {
     if (video->frame() == 1) {
-      encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
-      encoder->Control(VP9E_SET_TUNE_CONTENT, tune_content_);
+      encoder->Control(AOME_SET_CPUUSED, set_cpu_used_);
+      encoder->Control(AV1E_SET_TUNE_CONTENT, tune_content_);
       if (encoding_mode_ != ::libaom_test::kRealTime) {
-        encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
-        encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);
-        encoder->Control(VP8E_SET_ARNR_STRENGTH, 5);
-        encoder->Control(VP8E_SET_ARNR_TYPE, 3);
+        encoder->Control(AOME_SET_ENABLEAUTOALTREF, 1);
+        encoder->Control(AOME_SET_ARNR_MAXFRAMES, 7);
+        encoder->Control(AOME_SET_ARNR_STRENGTH, 5);
+        encoder->Control(AOME_SET_ARNR_TYPE, 3);
       }
     }
   }
 
-  virtual void PSNRPktHook(const vpx_codec_cx_pkt_t *pkt) {
+  virtual void PSNRPktHook(const aom_codec_cx_pkt_t *pkt) {
     if (pkt->data.psnr.psnr[0] < min_psnr_) min_psnr_ = pkt->data.psnr.psnr[0];
   }
 
@@ -86,7 +86,7 @@ void CpuSpeedTest::TestQ0() {
   ::libaom_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
                                        10);
 
-  init_flags_ = VPX_CODEC_USE_PSNR;
+  init_flags_ = AOM_CODEC_USE_PSNR;
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   EXPECT_GE(min_psnr_, kMaxPSNR);
@@ -101,7 +101,7 @@ void CpuSpeedTest::TestScreencastQ0() {
   cfg_.rc_max_quantizer = 0;
   cfg_.rc_min_quantizer = 0;
 
-  init_flags_ = VPX_CODEC_USE_PSNR;
+  init_flags_ = AOM_CODEC_USE_PSNR;
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   EXPECT_GE(min_psnr_, kMaxPSNR);
@@ -115,9 +115,9 @@ void CpuSpeedTest::TestTuneScreen() {
   cfg_.rc_target_bitrate = 2000;
   cfg_.rc_max_quantizer = 63;
   cfg_.rc_min_quantizer = 0;
-  tune_content_ = VPX_CONTENT_SCREEN;
+  tune_content_ = AOM_CONTENT_SCREEN;
 
-  init_flags_ = VPX_CODEC_USE_PSNR;
+  init_flags_ = AOM_CODEC_USE_PSNR;
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
@@ -168,12 +168,12 @@ TEST_P(CpuSpeedTestLarge, TestTuneScreen) { TestTuneScreen(); }
 TEST_P(CpuSpeedTestLarge, TestEncodeHighBitrate) { TestEncodeHighBitrate(); }
 TEST_P(CpuSpeedTestLarge, TestLowBitrate) { TestLowBitrate(); }
 
-VP10_INSTANTIATE_TEST_CASE(CpuSpeedTest,
-                           ::testing::Values(::libaom_test::kTwoPassGood,
-                                             ::libaom_test::kOnePassGood),
-                           ::testing::Range(1, 3));
-VP10_INSTANTIATE_TEST_CASE(CpuSpeedTestLarge,
-                           ::testing::Values(::libaom_test::kTwoPassGood,
-                                             ::libaom_test::kOnePassGood),
-                           ::testing::Range(0, 1));
+AV1_INSTANTIATE_TEST_CASE(CpuSpeedTest,
+                          ::testing::Values(::libaom_test::kTwoPassGood,
+                                            ::libaom_test::kOnePassGood),
+                          ::testing::Range(1, 3));
+AV1_INSTANTIATE_TEST_CASE(CpuSpeedTestLarge,
+                          ::testing::Values(::libaom_test::kTwoPassGood,
+                                            ::libaom_test::kOnePassGood),
+                          ::testing::Range(0, 1));
 }  // namespace

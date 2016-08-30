@@ -8,10 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_COMMON_SCAN_H_
-#define VP10_COMMON_SCAN_H_
+#ifndef AV1_COMMON_SCAN_H_
+#define AV1_COMMON_SCAN_H_
 
-#include "aom/vpx_integer.h"
+#include "aom/aom_integer.h"
 #include "aom_ports/mem.h"
 
 #include "av1/common/enums.h"
@@ -29,8 +29,8 @@ typedef struct {
   const int16_t *neighbors;
 } scan_order;
 
-extern const scan_order vp10_default_scan_orders[TX_SIZES];
-extern const scan_order vp10_intra_scan_orders[TX_SIZES][TX_TYPES];
+extern const scan_order av1_default_scan_orders[TX_SIZES];
+extern const scan_order av1_intra_scan_orders[TX_SIZES][TX_TYPES];
 
 static INLINE int get_coef_context(const int16_t *neighbors,
                                    const uint8_t *token_cache, int c) {
@@ -41,26 +41,26 @@ static INLINE int get_coef_context(const int16_t *neighbors,
 
 static INLINE const scan_order *get_intra_scan(TX_SIZE tx_size,
                                                TX_TYPE tx_type) {
-  return &vp10_intra_scan_orders[tx_size][tx_type];
+  return &av1_intra_scan_orders[tx_size][tx_type];
 }
 
 #if CONFIG_EXT_TX
-extern const scan_order vp10_inter_scan_orders[TX_SIZES_ALL][TX_TYPES];
+extern const scan_order av1_inter_scan_orders[TX_SIZES_ALL][TX_TYPES];
 
 static INLINE const scan_order *get_inter_scan(TX_SIZE tx_size,
                                                TX_TYPE tx_type) {
-  return &vp10_inter_scan_orders[tx_size][tx_type];
+  return &av1_inter_scan_orders[tx_size][tx_type];
 }
 #endif  // CONFIG_EXT_TX
 
 static INLINE const scan_order *get_scan(TX_SIZE tx_size, TX_TYPE tx_type,
                                          int is_inter) {
 #if CONFIG_EXT_TX
-  return is_inter ? &vp10_inter_scan_orders[tx_size][tx_type]
-                  : &vp10_intra_scan_orders[tx_size][tx_type];
+  return is_inter ? &av1_inter_scan_orders[tx_size][tx_type]
+                  : &av1_intra_scan_orders[tx_size][tx_type];
 #else
   (void)is_inter;
-  return &vp10_intra_scan_orders[tx_size][tx_type];
+  return &av1_intra_scan_orders[tx_size][tx_type];
 #endif  // CONFIG_EXT_TX
 }
 
@@ -68,4 +68,4 @@ static INLINE const scan_order *get_scan(TX_SIZE tx_size, TX_TYPE tx_type,
 }  // extern "C"
 #endif
 
-#endif  // VP10_COMMON_SCAN_H_
+#endif  // AV1_COMMON_SCAN_H_

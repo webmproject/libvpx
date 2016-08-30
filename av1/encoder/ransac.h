@@ -8,15 +8,15 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_ENCODER_RANSAC_H_
-#define VP10_ENCODER_RANSAC_H_
+#ifndef AV1_ENCODER_RANSAC_H_
+#define AV1_ENCODER_RANSAC_H_
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <memory.h>
 
-#include "vp10/common/warped_motion.h"
+#include "av1/common/warped_motion.h"
 
 typedef int (*RansacType)(double *matched_points, int npoints,
                           int *number_of_inliers, int *best_inlier_mask,
@@ -34,4 +34,4 @@ int ransacRotZoom(double *matched_points, int npoints, int *number_of_inliers,
 int ransacTranslation(double *matched_points, int npoints,
                       int *number_of_inliers, int *best_inlier_indices,
                       double *bestH);
-#endif  // VP10_ENCODER_RANSAC_H
+#endif  // AV1_ENCODER_RANSAC_H

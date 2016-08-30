@@ -8,27 +8,27 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_SCALE_YV12CONFIG_H_
-#define VPX_SCALE_YV12CONFIG_H_
+#ifndef AOM_SCALE_YV12CONFIG_H_
+#define AOM_SCALE_YV12CONFIG_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "./vpx_config.h"
-#include "aom/vpx_codec.h"
-#include "aom/vpx_frame_buffer.h"
-#include "aom/vpx_integer.h"
+#include "./aom_config.h"
+#include "aom/aom_codec.h"
+#include "aom/aom_frame_buffer.h"
+#include "aom/aom_integer.h"
 
 #define VP8BORDERINPIXELS 32
 #if CONFIG_EXT_PARTITION
-#define VPXINNERBORDERINPIXELS 160
+#define AOMINNERBORDERINPIXELS 160
 #else
-#define VPXINNERBORDERINPIXELS 96
+#define AOMINNERBORDERINPIXELS 96
 #endif  // CONFIG_EXT_PARTITION
-#define VPX_INTERP_EXTEND 4
-#define VPX_ENC_BORDER_IN_PIXELS 160
-#define VPX_DEC_BORDER_IN_PIXELS 160
+#define AOM_INTERP_EXTEND 4
+#define AOM_ENC_BORDER_IN_PIXELS 160
+#define AOM_DEC_BORDER_IN_PIXELS 160
 
 typedef struct yv12_buffer_config {
   int y_width;
@@ -59,8 +59,8 @@ typedef struct yv12_buffer_config {
   int subsampling_x;
   int subsampling_y;
   unsigned int bit_depth;
-  vpx_color_space_t color_space;
-  vpx_color_range_t color_range;
+  aom_color_space_t color_space;
+  aom_color_range_t color_range;
   int render_width;
   int render_height;
 
@@ -70,9 +70,15 @@ typedef struct yv12_buffer_config {
 
 #define YV12_FLAG_HIGHBITDEPTH 8
 
-int vpx_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height,
+int aom_yv12_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height,
+                                int border);
+int aom_yv12_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width,
+                                  int height, int border);
+int aom_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf);
+
+int aom_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height,
                            int ss_x, int ss_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
                            int use_highbitdepth,
 #endif
                            int border, int byte_alignment);
@@ -84,18 +90,18 @@ int vpx_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height,
 // to decode the current frame. If cb is NULL, libaom will allocate memory
 // internally to decode the current frame. Returns 0 on success. Returns < 0
 // on failure.
-int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height,
+int aom_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height,
                              int ss_x, int ss_y,
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
                              int use_highbitdepth,
 #endif
                              int border, int byte_alignment,
-                             vpx_codec_frame_buffer_t *fb,
-                             vpx_get_frame_buffer_cb_fn_t cb, void *cb_priv);
-int vpx_free_frame_buffer(YV12_BUFFER_CONFIG *ybf);
+                             aom_codec_frame_buffer_t *fb,
+                             aom_get_frame_buffer_cb_fn_t cb, void *cb_priv);
+int aom_free_frame_buffer(YV12_BUFFER_CONFIG *ybf);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // VPX_SCALE_YV12CONFIG_H_
+#endif  // AOM_SCALE_YV12CONFIG_H_

@@ -8,14 +8,14 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_MIPS_LOOPFILTER_MACROS_DSPR2_H_
-#define VPX_DSP_MIPS_LOOPFILTER_MACROS_DSPR2_H_
+#ifndef AOM_DSP_MIPS_LOOPFILTER_MACROS_DSPR2_H_
+#define AOM_DSP_MIPS_LOOPFILTER_MACROS_DSPR2_H_
 
 #include <stdlib.h>
 
-#include "./vpx_dsp_rtcd.h"
-#include "aom/vpx_integer.h"
-#include "aom_mem/vpx_mem.h"
+#include "./aom_dsp_rtcd.h"
+#include "aom/aom_integer.h"
+#include "aom_mem/aom_mem.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -432,4 +432,4 @@ extern "C" {
 }  // extern "C"
 #endif
 
-#endif  // VPX_DSP_MIPS_LOOPFILTER_MACROS_DSPR2_H_
+#endif  // AOM_DSP_MIPS_LOOPFILTER_MACROS_DSPR2_H_

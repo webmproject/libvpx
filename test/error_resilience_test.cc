@@ -49,7 +49,7 @@ class ErrorResilienceTestLarge
     mismatch_nframes_ = 0;
   }
 
-  virtual void PSNRPktHook(const vpx_codec_cx_pkt_t *pkt) {
+  virtual void PSNRPktHook(const aom_codec_cx_pkt_t *pkt) {
     psnr_ += pkt->data.psnr.psnr[0];
     nframes_++;
   }
@@ -57,15 +57,15 @@ class ErrorResilienceTestLarge
   virtual void PreEncodeFrameHook(libaom_test::VideoSource *video,
                                   ::libaom_test::Encoder * /*encoder*/) {
     frame_flags_ &=
-        ~(VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF);
+        ~(AOM_EFLAG_NO_UPD_LAST | AOM_EFLAG_NO_UPD_GF | AOM_EFLAG_NO_UPD_ARF);
     if (droppable_nframes_ > 0 &&
-        (cfg_.g_pass == VPX_RC_LAST_PASS || cfg_.g_pass == VPX_RC_ONE_PASS)) {
+        (cfg_.g_pass == AOM_RC_LAST_PASS || cfg_.g_pass == AOM_RC_ONE_PASS)) {
       for (unsigned int i = 0; i < droppable_nframes_; ++i) {
         if (droppable_frames_[i] == video->frame()) {
           std::cout << "Encoding droppable frame: " << droppable_frames_[i]
                     << "\n";
-          frame_flags_ |= (VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF |
-                           VP8_EFLAG_NO_UPD_ARF);
+          frame_flags_ |= (AOM_EFLAG_NO_UPD_LAST | AOM_EFLAG_NO_UPD_GF |
+                           AOM_EFLAG_NO_UPD_ARF);
           return;
         }
       }
@@ -84,7 +84,7 @@ class ErrorResilienceTestLarge
 
   virtual bool DoDecode() const {
     if (error_nframes_ > 0 &&
-        (cfg_.g_pass == VPX_RC_LAST_PASS || cfg_.g_pass == VPX_RC_ONE_PASS)) {
+        (cfg_.g_pass == AOM_RC_LAST_PASS || cfg_.g_pass == AOM_RC_ONE_PASS)) {
       for (unsigned int i = 0; i < error_nframes_; ++i) {
         if (error_frames_[i] == nframes_ - 1) {
           std::cout << "             Skipping decoding frame: "
@@ -96,7 +96,7 @@ class ErrorResilienceTestLarge
     return 1;
   }
 
-  virtual void MismatchHook(const vpx_image_t *img1, const vpx_image_t *img2) {
+  virtual void MismatchHook(const aom_image_t *img1, const aom_image_t *img2) {
     double mismatch_psnr = compute_psnr(img1, img2);
     mismatch_psnr_ += mismatch_psnr;
     ++mismatch_nframes_;
@@ -142,12 +142,12 @@ class ErrorResilienceTestLarge
 };
 
 TEST_P(ErrorResilienceTestLarge, OnVersusOff) {
-  const vpx_rational timebase = { 33333333, 1000000000 };
+  const aom_rational timebase = { 33333333, 1000000000 };
   cfg_.g_timebase = timebase;
   cfg_.rc_target_bitrate = 2000;
   cfg_.g_lag_in_frames = 10;
 
-  init_flags_ = VPX_CODEC_USE_PSNR;
+  init_flags_ = AOM_CODEC_USE_PSNR;
 
   libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                      timebase.den, timebase.num, 0, 30);
@@ -177,21 +177,21 @@ TEST_P(ErrorResilienceTestLarge, OnVersusOff) {
 // frames (i.e., frames that don't update any reference buffers).
 // Check both isolated and consecutive loss.
 TEST_P(ErrorResilienceTestLarge, DropFramesWithoutRecovery) {
-  const vpx_rational timebase = { 33333333, 1000000000 };
+  const aom_rational timebase = { 33333333, 1000000000 };
   cfg_.g_timebase = timebase;
   cfg_.rc_target_bitrate = 500;
   // FIXME(debargha): Fix this to work for any lag.
   // Currently this test only works for lag = 0
   cfg_.g_lag_in_frames = 0;
 
-  init_flags_ = VPX_CODEC_USE_PSNR;
+  init_flags_ = AOM_CODEC_USE_PSNR;
 
   libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                      timebase.den, timebase.num, 0, 40);
 
   // Error resilient mode ON.
   cfg_.g_error_resilient = 1;
-  cfg_.kf_mode = VPX_KF_DISABLED;
+  cfg_.kf_mode = AOM_KF_DISABLED;
 
   // Set an arbitrary set of error frames same as droppable frames.
   // In addition to isolated loss/drop, add a long consecutive series
@@ -231,5 +231,5 @@ TEST_P(ErrorResilienceTestLarge, DropFramesWithoutRecovery) {
 #endif
 }
 
-VP10_INSTANTIATE_TEST_CASE(ErrorResilienceTestLarge, ONE_PASS_TEST_MODES);
+AV1_INSTANTIATE_TEST_CASE(ErrorResilienceTestLarge, ONE_PASS_TEST_MODES);
 }  // namespace

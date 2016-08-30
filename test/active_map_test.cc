@@ -36,9 +36,9 @@ class ActiveMapTest
   virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
                                   ::libaom_test::Encoder *encoder) {
     if (video->frame() == 1) {
-      encoder->Control(VP8E_SET_CPUUSED, cpu_used_);
+      encoder->Control(AOME_SET_CPUUSED, cpu_used_);
     } else if (video->frame() == 3) {
-      vpx_active_map_t map = vpx_active_map_t();
+      aom_active_map_t map = aom_active_map_t();
       /* clang-format off */
       uint8_t active_map[9 * 13] = {
         1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0,
@@ -57,13 +57,13 @@ class ActiveMapTest
       ASSERT_EQ(map.cols, 13u);
       ASSERT_EQ(map.rows, 9u);
       map.active_map = active_map;
-      encoder->Control(VP8E_SET_ACTIVEMAP, &map);
+      encoder->Control(AOME_SET_ACTIVEMAP, &map);
     } else if (video->frame() == 15) {
-      vpx_active_map_t map = vpx_active_map_t();
+      aom_active_map_t map = aom_active_map_t();
       map.cols = (kWidth + 15) / 16;
       map.rows = (kHeight + 15) / 16;
       map.active_map = NULL;
-      encoder->Control(VP8E_SET_ACTIVEMAP, &map);
+      encoder->Control(AOME_SET_ACTIVEMAP, &map);
     }
   }
 
@@ -72,8 +72,8 @@ class ActiveMapTest
     cfg_.g_lag_in_frames = 0;
     cfg_.rc_target_bitrate = 400;
     cfg_.rc_resize_allowed = 0;
-    cfg_.g_pass = VPX_RC_ONE_PASS;
-    cfg_.rc_end_usage = VPX_CBR;
+    cfg_.g_pass = AOM_RC_ONE_PASS;
+    cfg_.rc_end_usage = AOM_CBR;
     cfg_.kf_max_dist = 90000;
     ::libaom_test::I420VideoSource video("hantro_odd.yuv", kWidth, kHeight, 30,
                                          1, 0, 20);
@@ -90,12 +90,12 @@ class ActiveMapTestLarge : public ActiveMapTest {};
 
 TEST_P(ActiveMapTestLarge, Test) { DoTest(); }
 
-VP10_INSTANTIATE_TEST_CASE(ActiveMapTestLarge,
-                           ::testing::Values(::libaom_test::kRealTime),
-                           ::testing::Range(0, 5));
+AV1_INSTANTIATE_TEST_CASE(ActiveMapTestLarge,
+                          ::testing::Values(::libaom_test::kRealTime),
+                          ::testing::Range(0, 5));
 
-VP10_INSTANTIATE_TEST_CASE(ActiveMapTest,
-                           ::testing::Values(::libaom_test::kRealTime),
-                           ::testing::Range(5, 9));
+AV1_INSTANTIATE_TEST_CASE(ActiveMapTest,
+                          ::testing::Values(::libaom_test::kRealTime),
+                          ::testing::Range(5, 9));
 
 }  // namespace

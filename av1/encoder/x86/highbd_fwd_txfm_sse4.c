@@ -11,10 +11,10 @@
 #include <assert.h>
 #include <smmintrin.h> /* SSE4.1 */
 
-#include "./vp10_rtcd.h"
-#include "./vpx_config.h"
-#include "av1/common/vp10_fwd_txfm2d_cfg.h"
-#include "av1/common/vp10_txfm.h"
+#include "./av1_rtcd.h"
+#include "./aom_config.h"
+#include "av1/common/av1_fwd_txfm2d_cfg.h"
+#include "av1/common/av1_txfm.h"
 #include "av1/common/x86/highbd_txfm_utility_sse4.h"
 #include "aom_dsp/txfm_common.h"
 #include "aom_dsp/x86/txfm_common_sse2.h"
@@ -121,10 +121,10 @@ static INLINE void write_buffer_4x4(__m128i *res, tran_low_t *output) {
 }
 
 // Note:
-//  We implement vp10_fwd_txfm2d_4x4(). This function is kept here since
-//  vp10_highbd_fht4x4_c() is not removed yet
-void vp10_highbd_fht4x4_sse4_1(const int16_t *input, tran_low_t *output,
-                               int stride, int tx_type) {
+//  We implement av1_fwd_txfm2d_4x4(). This function is kept here since
+//  av1_highbd_fht4x4_c() is not removed yet
+void av1_highbd_fht4x4_sse4_1(const int16_t *input, tran_low_t *output,
+                              int stride, int tx_type) {
   (void)input;
   (void)output;
   (void)stride;
@@ -206,8 +206,8 @@ static void fadst4x4_sse4_1(__m128i *in, int bit) {
   in[3] = _mm_unpackhi_epi64(v1, v3);
 }
 
-void vp10_fwd_txfm2d_4x4_sse4_1(const int16_t *input, int32_t *coeff,
-                                int input_stride, int tx_type, int bd) {
+void av1_fwd_txfm2d_4x4_sse4_1(const int16_t *input, int32_t *coeff,
+                               int input_stride, int tx_type, int bd) {
   __m128i in[4];
   const TXFM_2D_CFG *cfg = NULL;
 
@@ -927,8 +927,8 @@ static void fadst8x8_sse4_1(__m128i *in, __m128i *out, int bit) {
   out[15] = _mm_sub_epi32(kZero, u[1]);
 }
 
-void vp10_fwd_txfm2d_8x8_sse4_1(const int16_t *input, int32_t *coeff,
-                                int stride, int tx_type, int bd) {
+void av1_fwd_txfm2d_8x8_sse4_1(const int16_t *input, int32_t *coeff, int stride,
+                               int tx_type, int bd) {
   __m128i in[16], out[16];
   const TXFM_2D_CFG *cfg = NULL;
 
@@ -1791,8 +1791,8 @@ static void write_buffer_16x16(const __m128i *in, tran_low_t *output) {
   write_buffer_8x8(&in[48], output);
 }
 
-void vp10_fwd_txfm2d_16x16_sse4_1(const int16_t *input, int32_t *coeff,
-                                  int stride, int tx_type, int bd) {
+void av1_fwd_txfm2d_16x16_sse4_1(const int16_t *input, int32_t *coeff,
+                                 int stride, int tx_type, int bd) {
   __m128i in[64], out[64];
   const TXFM_2D_CFG *cfg = NULL;
 

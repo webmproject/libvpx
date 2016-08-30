@@ -9,8 +9,8 @@
 ;
 
 
-    EXPORT  |vpx_filter_block2d_bil_first_pass_media|
-    EXPORT  |vpx_filter_block2d_bil_second_pass_media|
+    EXPORT  |aom_filter_block2d_bil_first_pass_media|
+    EXPORT  |aom_filter_block2d_bil_second_pass_media|
 
     AREA    |.text|, CODE, READONLY  ; name this block of code
 
@@ -20,13 +20,13 @@
 ; r2    unsigned int    src_pitch,
 ; r3    unsigned int    height,
 ; stack unsigned int    width,
-; stack const short    *vpx_filter
+; stack const short    *aom_filter
 ;-------------------------------------
 ; The output is transposed stroed in output array to make it easy for second pass filtering.
-|vpx_filter_block2d_bil_first_pass_media| PROC
+|aom_filter_block2d_bil_first_pass_media| PROC
     stmdb   sp!, {r4 - r11, lr}
 
-    ldr     r11, [sp, #40]                  ; vpx_filter address
+    ldr     r11, [sp, #40]                  ; aom_filter address
     ldr     r4, [sp, #36]                   ; width
 
     mov     r12, r3                         ; outer-loop counter
@@ -134,7 +134,7 @@
 
     ldmia   sp!, {r4 - r11, pc}
 
-    ENDP  ; |vpx_filter_block2d_bil_first_pass_media|
+    ENDP  ; |aom_filter_block2d_bil_first_pass_media|
 
 
 ;---------------------------------
@@ -143,12 +143,12 @@
 ; r2    int             dst_pitch,
 ; r3    unsigned int    height,
 ; stack unsigned int    width,
-; stack const short    *vpx_filter
+; stack const short    *aom_filter
 ;---------------------------------
-|vpx_filter_block2d_bil_second_pass_media| PROC
+|aom_filter_block2d_bil_second_pass_media| PROC
     stmdb   sp!, {r4 - r11, lr}
 
-    ldr     r11, [sp, #40]                  ; vpx_filter address
+    ldr     r11, [sp, #40]                  ; aom_filter address
     ldr     r4, [sp, #36]                   ; width
 
     ldr     r5, [r11]                       ; load up filter coefficients
@@ -232,6 +232,6 @@
     bne     bil_height_loop_null_2nd
 
     ldmia   sp!, {r4 - r11, pc}
-    ENDP  ; |vpx_filter_block2d_second_pass_media|
+    ENDP  ; |aom_filter_block2d_second_pass_media|
 
     END

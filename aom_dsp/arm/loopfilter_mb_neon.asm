@@ -8,9 +8,9 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-    EXPORT  |vpx_lpf_horizontal_edge_8_neon|
-    EXPORT  |vpx_lpf_horizontal_edge_16_neon|
-    EXPORT  |vpx_lpf_vertical_16_neon|
+    EXPORT  |aom_lpf_horizontal_edge_8_neon|
+    EXPORT  |aom_lpf_horizontal_edge_16_neon|
+    EXPORT  |aom_lpf_vertical_16_neon|
     ARM
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
@@ -55,7 +55,7 @@ h_count
     vld1.u8     {d14}, [r8@64], r1         ; q6
     vld1.u8     {d15}, [r8@64], r1         ; q7
 
-    bl          vpx_wide_mbfilter_neon
+    bl          aom_wide_mbfilter_neon
 
     tst         r7, #1
     beq         h_mbfilter
@@ -118,7 +118,7 @@ h_next
 
     ENDP        ; |mb_lpf_horizontal_edge|
 
-; void vpx_lpf_horizontal_edge_8_neon(uint8_t *s, int pitch,
+; void aom_lpf_horizontal_edge_8_neon(uint8_t *s, int pitch,
 ;                                     const uint8_t *blimit,
 ;                                     const uint8_t *limit,
 ;                                     const uint8_t *thresh)
@@ -127,12 +127,12 @@ h_next
 ; r2    const uint8_t *blimit,
 ; r3    const uint8_t *limit,
 ; sp    const uint8_t *thresh
-|vpx_lpf_horizontal_edge_8_neon| PROC
+|aom_lpf_horizontal_edge_8_neon| PROC
     mov r12, #1
     b mb_lpf_horizontal_edge
-    ENDP        ; |vpx_lpf_horizontal_edge_8_neon|
+    ENDP        ; |aom_lpf_horizontal_edge_8_neon|
 
-; void vpx_lpf_horizontal_edge_16_neon(uint8_t *s, int pitch,
+; void aom_lpf_horizontal_edge_16_neon(uint8_t *s, int pitch,
 ;                                      const uint8_t *blimit,
 ;                                      const uint8_t *limit,
 ;                                      const uint8_t *thresh)
@@ -141,12 +141,12 @@ h_next
 ; r2    const uint8_t *blimit,
 ; r3    const uint8_t *limit,
 ; sp    const uint8_t *thresh
-|vpx_lpf_horizontal_edge_16_neon| PROC
+|aom_lpf_horizontal_edge_16_neon| PROC
     mov r12, #2
     b mb_lpf_horizontal_edge
-    ENDP        ; |vpx_lpf_horizontal_edge_16_neon|
+    ENDP        ; |aom_lpf_horizontal_edge_16_neon|
 
-; void vpx_lpf_vertical_16_neon(uint8_t *s, int p,
+; void aom_lpf_vertical_16_neon(uint8_t *s, int p,
 ;                               const uint8_t *blimit,
 ;                               const uint8_t *limit,
 ;                               const uint8_t *thresh)
@@ -155,7 +155,7 @@ h_next
 ; r2    const uint8_t *blimit,
 ; r3    const uint8_t *limit,
 ; sp    const uint8_t *thresh,
-|vpx_lpf_vertical_16_neon| PROC
+|aom_lpf_vertical_16_neon| PROC
     push        {r4-r8, lr}
     vpush       {d8-d15}
     ldr         r4, [sp, #88]              ; load thresh
@@ -205,7 +205,7 @@ h_next
     vtrn.8      d12, d13
     vtrn.8      d14, d15
 
-    bl          vpx_wide_mbfilter_neon
+    bl          aom_wide_mbfilter_neon
 
     tst         r7, #1
     beq         v_mbfilter
@@ -308,9 +308,9 @@ v_end
     vpop        {d8-d15}
     pop         {r4-r8, pc}
 
-    ENDP        ; |vpx_lpf_vertical_16_neon|
+    ENDP        ; |aom_lpf_vertical_16_neon|
 
-; void vpx_wide_mbfilter_neon();
+; void aom_wide_mbfilter_neon();
 ; This is a helper function for the loopfilters. The invidual functions do the
 ; necessary load, transpose (if necessary) and store.
 ;
@@ -334,7 +334,7 @@ v_end
 ; d13   q5
 ; d14   q6
 ; d15   q7
-|vpx_wide_mbfilter_neon| PROC
+|aom_wide_mbfilter_neon| PROC
     mov         r7, #0
 
     ; filter_mask
@@ -630,6 +630,6 @@ v_end
     vbif        d3, d14, d17               ; oq6 |= q6 & ~(f2 & f & m)
 
     bx          lr
-    ENDP        ; |vpx_wide_mbfilter_neon|
+    ENDP        ; |aom_wide_mbfilter_neon|
 
     END

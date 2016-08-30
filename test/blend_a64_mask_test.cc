@@ -17,11 +17,11 @@
 
 #include "test/function_equivalence_test.h"
 
-#include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
-#include "aom/vpx_integer.h"
+#include "./aom_config.h"
+#include "./aom_dsp_rtcd.h"
+#include "aom/aom_integer.h"
 
-#include "./vp10_rtcd.h"
+#include "./av1_rtcd.h"
 
 #include "av1/common/enums.h"
 
@@ -154,7 +154,7 @@ TEST_P(BlendA64MaskTest8B, RandomValues) {
     }
 
     for (int i = 0; i < kMaxMaskSize; ++i)
-      mask_[i] = rng_(VPX_BLEND_A64_MAX_ALPHA + 1);
+      mask_[i] = rng_(AOM_BLEND_A64_MAX_ALPHA + 1);
 
     Common();
   }
@@ -170,7 +170,7 @@ TEST_P(BlendA64MaskTest8B, ExtremeValues) {
     }
 
     for (int i = 0; i < kMaxMaskSize; ++i)
-      mask_[i] = rng_(2) + VPX_BLEND_A64_MAX_ALPHA - 1;
+      mask_[i] = rng_(2) + AOM_BLEND_A64_MAX_ALPHA - 1;
 
     Common();
   }
@@ -179,10 +179,10 @@ TEST_P(BlendA64MaskTest8B, ExtremeValues) {
 #if HAVE_SSE4_1
 INSTANTIATE_TEST_CASE_P(SSE4_1_C_COMPARE, BlendA64MaskTest8B,
                         ::testing::Values(TestFuncs(
-                            vpx_blend_a64_mask_c, vpx_blend_a64_mask_sse4_1)));
+                            aom_blend_a64_mask_c, aom_blend_a64_mask_sse4_1)));
 #endif  // HAVE_SSE4_1
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 //////////////////////////////////////////////////////////////////////////////
 // High bit-depth version
 //////////////////////////////////////////////////////////////////////////////
@@ -229,7 +229,7 @@ TEST_P(BlendA64MaskTestHBD, RandomValues) {
     }
 
     for (int i = 0; i < kMaxMaskSize; ++i)
-      mask_[i] = rng_(VPX_BLEND_A64_MAX_ALPHA + 1);
+      mask_[i] = rng_(AOM_BLEND_A64_MAX_ALPHA + 1);
 
     Common();
   }
@@ -254,7 +254,7 @@ TEST_P(BlendA64MaskTestHBD, ExtremeValues) {
     }
 
     for (int i = 0; i < kMaxMaskSize; ++i)
-      mask_[i] = rng_(2) + VPX_BLEND_A64_MAX_ALPHA - 1;
+      mask_[i] = rng_(2) + AOM_BLEND_A64_MAX_ALPHA - 1;
 
     Common();
   }
@@ -263,8 +263,8 @@ TEST_P(BlendA64MaskTestHBD, ExtremeValues) {
 #if HAVE_SSE4_1
 INSTANTIATE_TEST_CASE_P(
     SSE4_1_C_COMPARE, BlendA64MaskTestHBD,
-    ::testing::Values(TestFuncsHBD(vpx_highbd_blend_a64_mask_c,
-                                   vpx_highbd_blend_a64_mask_sse4_1)));
+    ::testing::Values(TestFuncsHBD(aom_highbd_blend_a64_mask_c,
+                                   aom_highbd_blend_a64_mask_sse4_1)));
 #endif  // HAVE_SSE4_1
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 }  // namespace

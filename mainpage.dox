@@ -1,4 +1,4 @@
-/*!\mainpage WebM Codec SDK
+/*!\mainpage AMedia Codec SDK
 
   \section main_contents Page Contents
   - \ref main_intro
@@ -6,17 +6,16 @@
   - \ref main_support
 
   \section main_intro Introduction
-  Welcome to the WebM Codec SDK. This SDK allows you to integrate your
-  applications with the VP8 and VP9 video codecs, high quality, royalty free,
-  open source codecs deployed on billions of computers and devices worldwide.
+  Welcome to the AMedia Codec SDK. This SDK allows you to integrate your
+  applications with the AOM and AV1 video codecs.
 
-  This distribution of the WebM Codec SDK includes the following support:
+  This distribution of the AOMedia Codec SDK includes the following support:
 
-  \if vp8_encoder
-  - \ref vp8_encoder
+  \if aom_encoder
+  - \ref aom_encoder
   \endif
-  \if vp8_decoder
-  - \ref vp8_decoder
+  \if aom_decoder
+  - \ref aom_decoder
   \endif
 
 
@@ -36,7 +35,7 @@
   \endif
 
   \section main_support Support Options & FAQ
-  The WebM project is an open source project supported by its community. For
+  The AOMedia project is an open source project supported by its community. For
   questions about this SDK, please mail the apps-devel@webmproject.org list.
   To contribute, see http://www.webmproject.org/code/contribute and mail
   codec-devel@webmproject.org.

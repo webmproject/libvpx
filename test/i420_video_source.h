@@ -24,7 +24,7 @@ class I420VideoSource : public YUVVideoSource {
   I420VideoSource(const std::string &file_name, unsigned int width,
                   unsigned int height, int rate_numerator, int rate_denominator,
                   unsigned int start, int limit)
-      : YUVVideoSource(file_name, VPX_IMG_FMT_I420, width, height,
+      : YUVVideoSource(file_name, AOM_IMG_FMT_I420, width, height,
                        rate_numerator, rate_denominator, start, limit) {}
 };
 

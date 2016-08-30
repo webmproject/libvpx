@@ -12,7 +12,7 @@
 
 #include <math.h>
 
-#include "aom_mem/vpx_mem.h"
+#include "aom_mem/aom_mem.h"
 
 #include "av1/common/quant_common.h"
 #include "av1/common/seg_common.h"
@@ -21,13 +21,13 @@
 #include "av1/encoder/quantize.h"
 #include "av1/encoder/rd.h"
 
-void vp10_quantize_fp_neon(const int16_t *coeff_ptr, intptr_t count,
-                           int skip_block, const int16_t *zbin_ptr,
-                           const int16_t *round_ptr, const int16_t *quant_ptr,
-                           const int16_t *quant_shift_ptr, int16_t *qcoeff_ptr,
-                           int16_t *dqcoeff_ptr, const int16_t *dequant_ptr,
-                           uint16_t *eob_ptr, const int16_t *scan,
-                           const int16_t *iscan) {
+void av1_quantize_fp_neon(const int16_t *coeff_ptr, intptr_t count,
+                          int skip_block, const int16_t *zbin_ptr,
+                          const int16_t *round_ptr, const int16_t *quant_ptr,
+                          const int16_t *quant_shift_ptr, int16_t *qcoeff_ptr,
+                          int16_t *dqcoeff_ptr, const int16_t *dequant_ptr,
+                          uint16_t *eob_ptr, const int16_t *scan,
+                          const int16_t *iscan) {
   // TODO(jingning) Decide the need of these arguments after the
   // quantization process is completed.
   (void)zbin_ptr;

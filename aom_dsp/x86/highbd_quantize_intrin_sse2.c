@@ -10,13 +10,13 @@
 
 #include <emmintrin.h>
 
-#include "./vpx_dsp_rtcd.h"
-#include "aom_dsp/vpx_dsp_common.h"
-#include "aom_mem/vpx_mem.h"
+#include "./aom_dsp_rtcd.h"
+#include "aom_dsp/aom_dsp_common.h"
+#include "aom_mem/aom_mem.h"
 #include "aom_ports/mem.h"
 
-#if CONFIG_VP9_HIGHBITDEPTH
-void vpx_highbd_quantize_b_sse2(const tran_low_t *coeff_ptr, intptr_t count,
+#if CONFIG_AOM_HIGHBITDEPTH
+void aom_highbd_quantize_b_sse2(const tran_low_t *coeff_ptr, intptr_t count,
                                 int skip_block, const int16_t *zbin_ptr,
                                 const int16_t *round_ptr,
                                 const int16_t *quant_ptr,
@@ -92,7 +92,7 @@ void vpx_highbd_quantize_b_sse2(const tran_low_t *coeff_ptr, intptr_t count,
   *eob_ptr = eob_i + 1;
 }
 
-void vpx_highbd_quantize_b_32x32_sse2(
+void aom_highbd_quantize_b_32x32_sse2(
     const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block,
     const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr,
     const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr,

@@ -8,11 +8,11 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_COMMON_MV_H_
-#define VP10_COMMON_MV_H_
+#ifndef AV1_COMMON_MV_H_
+#define AV1_COMMON_MV_H_
 
 #include "av1/common/common.h"
-#include "aom_dsp/vpx_filter.h"
+#include "aom_dsp/aom_filter.h"
 #if CONFIG_GLOBAL_MOTION
 #include "av1/common/warped_motion.h"
 #endif  // CONFIG_GLOBAL_MOTION
@@ -146,4 +146,4 @@ static INLINE int mv_has_subpel(const MV *mv) {
 }  // extern "C"
 #endif
 
-#endif  // VP10_COMMON_MV_H_
+#endif  // AV1_COMMON_MV_H_

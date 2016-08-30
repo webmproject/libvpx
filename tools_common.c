@@ -16,12 +16,12 @@
 
 #include "./tools_common.h"
 
-#if CONFIG_VP10_ENCODER
-#include "aom/vp8cx.h"
+#if CONFIG_AV1_ENCODER
+#include "aom/aomcx.h"
 #endif
 
-#if CONFIG_VP10_DECODER
-#include "aom/vp8dx.h"
+#if CONFIG_AV1_DECODER
+#include "aom/aomdx.h"
 #endif
 
 #if defined(_WIN32) || defined(__OS2__)
@@ -66,25 +66,25 @@ void fatal(const char *fmt, ...) {
 
 void warn(const char *fmt, ...) { LOG_ERROR("Warning"); }
 
-void die_codec(vpx_codec_ctx_t *ctx, const char *s) {
-  const char *detail = vpx_codec_error_detail(ctx);
+void die_codec(aom_codec_ctx_t *ctx, const char *s) {
+  const char *detail = aom_codec_error_detail(ctx);
 
-  printf("%s: %s\n", s, vpx_codec_error(ctx));
+  printf("%s: %s\n", s, aom_codec_error(ctx));
   if (detail) printf("    %s\n", detail);
   exit(EXIT_FAILURE);
 }
 
-int read_yuv_frame(struct VpxInputContext *input_ctx, vpx_image_t *yuv_frame) {
+int read_yuv_frame(struct AvxInputContext *input_ctx, aom_image_t *yuv_frame) {
   FILE *f = input_ctx->file;
   struct FileTypeDetectionBuffer *detect = &input_ctx->detect;
   int plane = 0;
   int shortread = 0;
-  const int bytespp = (yuv_frame->fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? 2 : 1;
+  const int bytespp = (yuv_frame->fmt & AOM_IMG_FMT_HIGHBITDEPTH) ? 2 : 1;
 
   for (plane = 0; plane < 3; ++plane) {
     uint8_t *ptr;
-    const int w = vpx_img_plane_width(yuv_frame, plane);
-    const int h = vpx_img_plane_height(yuv_frame, plane);
+    const int w = aom_img_plane_width(yuv_frame, plane);
+    const int h = aom_img_plane_height(yuv_frame, plane);
     int r;
 
     /* Determine the correct plane based on the image format. The for-loop
@@ -94,13 +94,13 @@ int read_yuv_frame(struct VpxInputContext *input_ctx, vpx_image_t *yuv_frame) {
     switch (plane) {
       case 1:
         ptr =
-            yuv_frame->planes[yuv_frame->fmt == VPX_IMG_FMT_YV12 ? VPX_PLANE_V
-                                                                 : VPX_PLANE_U];
+            yuv_frame->planes[yuv_frame->fmt == AOM_IMG_FMT_YV12 ? AOM_PLANE_V
+                                                                 : AOM_PLANE_U];
         break;
       case 2:
         ptr =
-            yuv_frame->planes[yuv_frame->fmt == VPX_IMG_FMT_YV12 ? VPX_PLANE_U
-                                                                 : VPX_PLANE_V];
+            yuv_frame->planes[yuv_frame->fmt == AOM_IMG_FMT_YV12 ? AOM_PLANE_U
+                                                                 : AOM_PLANE_V];
         break;
       default: ptr = yuv_frame->planes[plane];
     }
@@ -129,23 +129,23 @@ int read_yuv_frame(struct VpxInputContext *input_ctx, vpx_image_t *yuv_frame) {
 
 #if CONFIG_ENCODERS
 
-static const VpxInterface vpx_encoders[] = {
-#if CONFIG_VP10_ENCODER
-  { "vp10", VP10_FOURCC, &vpx_codec_vp10_cx },
+static const AvxInterface aom_encoders[] = {
+#if CONFIG_AV1_ENCODER
+  { "av1", AV1_FOURCC, &aom_codec_av1_cx },
 #endif
 };
 
-int get_vpx_encoder_count(void) {
-  return sizeof(vpx_encoders) / sizeof(vpx_encoders[0]);
+int get_aom_encoder_count(void) {
+  return sizeof(aom_encoders) / sizeof(aom_encoders[0]);
 }
 
-const VpxInterface *get_vpx_encoder_by_index(int i) { return &vpx_encoders[i]; }
+const AvxInterface *get_aom_encoder_by_index(int i) { return &aom_encoders[i]; }
 
-const VpxInterface *get_vpx_encoder_by_name(const char *name) {
+const AvxInterface *get_aom_encoder_by_name(const char *name) {
   int i;
 
-  for (i = 0; i < get_vpx_encoder_count(); ++i) {
-    const VpxInterface *encoder = get_vpx_encoder_by_index(i);
+  for (i = 0; i < get_aom_encoder_count(); ++i) {
+    const AvxInterface *encoder = get_aom_encoder_by_index(i);
     if (strcmp(encoder->name, name) == 0) return encoder;
   }
 
@@ -156,35 +156,35 @@ const VpxInterface *get_vpx_encoder_by_name(const char *name) {
 
 #if CONFIG_DECODERS
 
-static const VpxInterface vpx_decoders[] = {
+static const AvxInterface aom_decoders[] = {
 
-#if CONFIG_VP10_DECODER
-  { "vp10", VP10_FOURCC, &vpx_codec_vp10_dx },
+#if CONFIG_AV1_DECODER
+  { "av1", AV1_FOURCC, &aom_codec_av1_dx },
 #endif
 };
 
-int get_vpx_decoder_count(void) {
-  return sizeof(vpx_decoders) / sizeof(vpx_decoders[0]);
+int get_aom_decoder_count(void) {
+  return sizeof(aom_decoders) / sizeof(aom_decoders[0]);
 }
 
-const VpxInterface *get_vpx_decoder_by_index(int i) { return &vpx_decoders[i]; }
+const AvxInterface *get_aom_decoder_by_index(int i) { return &aom_decoders[i]; }
 
-const VpxInterface *get_vpx_decoder_by_name(const char *name) {
+const AvxInterface *get_aom_decoder_by_name(const char *name) {
   int i;
 
-  for (i = 0; i < get_vpx_decoder_count(); ++i) {
-    const VpxInterface *const decoder = get_vpx_decoder_by_index(i);
+  for (i = 0; i < get_aom_decoder_count(); ++i) {
+    const AvxInterface *const decoder = get_aom_decoder_by_index(i);
     if (strcmp(decoder->name, name) == 0) return decoder;
   }
 
   return NULL;
 }
 
-const VpxInterface *get_vpx_decoder_by_fourcc(uint32_t fourcc) {
+const AvxInterface *get_aom_decoder_by_fourcc(uint32_t fourcc) {
   int i;
 
-  for (i = 0; i < get_vpx_decoder_count(); ++i) {
-    const VpxInterface *const decoder = get_vpx_decoder_by_index(i);
+  for (i = 0; i < get_aom_decoder_count(); ++i) {
+    const AvxInterface *const decoder = get_aom_decoder_by_index(i);
     if (decoder->fourcc == fourcc) return decoder;
   }
 
@@ -193,31 +193,31 @@ const VpxInterface *get_vpx_decoder_by_fourcc(uint32_t fourcc) {
 
 #endif  // CONFIG_DECODERS
 
-// TODO(dkovalev): move this function to vpx_image.{c, h}, so it will be part
-// of vpx_image_t support
-int vpx_img_plane_width(const vpx_image_t *img, int plane) {
+// TODO(dkovalev): move this function to aom_image.{c, h}, so it will be part
+// of aom_image_t support
+int aom_img_plane_width(const aom_image_t *img, int plane) {
   if (plane > 0 && img->x_chroma_shift > 0)
     return (img->d_w + 1) >> img->x_chroma_shift;
   else
     return img->d_w;
 }
 
-int vpx_img_plane_height(const vpx_image_t *img, int plane) {
+int aom_img_plane_height(const aom_image_t *img, int plane) {
   if (plane > 0 && img->y_chroma_shift > 0)
     return (img->d_h + 1) >> img->y_chroma_shift;
   else
     return img->d_h;
 }
 
-void vpx_img_write(const vpx_image_t *img, FILE *file) {
+void aom_img_write(const aom_image_t *img, FILE *file) {
   int plane;
 
   for (plane = 0; plane < 3; ++plane) {
     const unsigned char *buf = img->planes[plane];
     const int stride = img->stride[plane];
-    const int w = vpx_img_plane_width(img, plane) *
-                  ((img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? 2 : 1);
-    const int h = vpx_img_plane_height(img, plane);
+    const int w = aom_img_plane_width(img, plane) *
+                  ((img->fmt & AOM_IMG_FMT_HIGHBITDEPTH) ? 2 : 1);
+    const int h = aom_img_plane_height(img, plane);
     int y;
 
     for (y = 0; y < h; ++y) {
@@ -227,15 +227,15 @@ void vpx_img_write(const vpx_image_t *img, FILE *file) {
   }
 }
 
-int vpx_img_read(vpx_image_t *img, FILE *file) {
+int aom_img_read(aom_image_t *img, FILE *file) {
   int plane;
 
   for (plane = 0; plane < 3; ++plane) {
     unsigned char *buf = img->planes[plane];
     const int stride = img->stride[plane];
-    const int w = vpx_img_plane_width(img, plane) *
-                  ((img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? 2 : 1);
-    const int h = vpx_img_plane_height(img, plane);
+    const int w = aom_img_plane_width(img, plane) *
+                  ((img->fmt & AOM_IMG_FMT_HIGHBITDEPTH) ? 2 : 1);
+    const int h = aom_img_plane_height(img, plane);
     int y;
 
     for (y = 0; y < h; ++y) {
@@ -260,8 +260,8 @@ double sse_to_psnr(double samples, double peak, double sse) {
 }
 
 // TODO(debargha): Consolidate the functions below into a separate file.
-#if CONFIG_VP9_HIGHBITDEPTH
-static void highbd_img_upshift(vpx_image_t *dst, vpx_image_t *src,
+#if CONFIG_AOM_HIGHBITDEPTH
+static void highbd_img_upshift(aom_image_t *dst, aom_image_t *src,
                                int input_shift) {
   // Note the offset is 1 less than half.
   const int offset = input_shift > 0 ? (1 << (input_shift - 1)) - 1 : 0;
@@ -273,10 +273,10 @@ static void highbd_img_upshift(vpx_image_t *dst, vpx_image_t *src,
     fatal("Unsupported image conversion");
   }
   switch (src->fmt) {
-    case VPX_IMG_FMT_I42016:
-    case VPX_IMG_FMT_I42216:
-    case VPX_IMG_FMT_I44416:
-    case VPX_IMG_FMT_I44016: break;
+    case AOM_IMG_FMT_I42016:
+    case AOM_IMG_FMT_I42216:
+    case AOM_IMG_FMT_I44416:
+    case AOM_IMG_FMT_I44016: break;
     default: fatal("Unsupported image conversion"); break;
   }
   for (plane = 0; plane < 3; plane++) {
@@ -297,7 +297,7 @@ static void highbd_img_upshift(vpx_image_t *dst, vpx_image_t *src,
   }
 }
 
-static void lowbd_img_upshift(vpx_image_t *dst, vpx_image_t *src,
+static void lowbd_img_upshift(aom_image_t *dst, aom_image_t *src,
                               int input_shift) {
   // Note the offset is 1 less than half.
   const int offset = input_shift > 0 ? (1 << (input_shift - 1)) - 1 : 0;
@@ -305,14 +305,14 @@ static void lowbd_img_upshift(vpx_image_t *dst, vpx_image_t *src,
   if (dst->d_w != src->d_w || dst->d_h != src->d_h ||
       dst->x_chroma_shift != src->x_chroma_shift ||
       dst->y_chroma_shift != src->y_chroma_shift ||
-      dst->fmt != src->fmt + VPX_IMG_FMT_HIGHBITDEPTH || input_shift < 0) {
+      dst->fmt != src->fmt + AOM_IMG_FMT_HIGHBITDEPTH || input_shift < 0) {
     fatal("Unsupported image conversion");
   }
   switch (src->fmt) {
-    case VPX_IMG_FMT_I420:
-    case VPX_IMG_FMT_I422:
-    case VPX_IMG_FMT_I444:
-    case VPX_IMG_FMT_I440: break;
+    case AOM_IMG_FMT_I420:
+    case AOM_IMG_FMT_I422:
+    case AOM_IMG_FMT_I444:
+    case AOM_IMG_FMT_I440: break;
     default: fatal("Unsupported image conversion"); break;
   }
   for (plane = 0; plane < 3; plane++) {
@@ -334,26 +334,26 @@ static void lowbd_img_upshift(vpx_image_t *dst, vpx_image_t *src,
   }
 }
 
-void vpx_img_upshift(vpx_image_t *dst, vpx_image_t *src, int input_shift) {
-  if (src->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+void aom_img_upshift(aom_image_t *dst, aom_image_t *src, int input_shift) {
+  if (src->fmt & AOM_IMG_FMT_HIGHBITDEPTH) {
     highbd_img_upshift(dst, src, input_shift);
   } else {
     lowbd_img_upshift(dst, src, input_shift);
   }
 }
 
-void vpx_img_truncate_16_to_8(vpx_image_t *dst, vpx_image_t *src) {
+void aom_img_truncate_16_to_8(aom_image_t *dst, aom_image_t *src) {
   int plane;
-  if (dst->fmt + VPX_IMG_FMT_HIGHBITDEPTH != src->fmt || dst->d_w != src->d_w ||
+  if (dst->fmt + AOM_IMG_FMT_HIGHBITDEPTH != src->fmt || dst->d_w != src->d_w ||
       dst->d_h != src->d_h || dst->x_chroma_shift != src->x_chroma_shift ||
       dst->y_chroma_shift != src->y_chroma_shift) {
     fatal("Unsupported image conversion");
   }
   switch (dst->fmt) {
-    case VPX_IMG_FMT_I420:
-    case VPX_IMG_FMT_I422:
-    case VPX_IMG_FMT_I444:
-    case VPX_IMG_FMT_I440: break;
+    case AOM_IMG_FMT_I420:
+    case AOM_IMG_FMT_I422:
+    case AOM_IMG_FMT_I444:
+    case AOM_IMG_FMT_I440: break;
     default: fatal("Unsupported image conversion"); break;
   }
   for (plane = 0; plane < 3; plane++) {
@@ -375,7 +375,7 @@ void vpx_img_truncate_16_to_8(vpx_image_t *dst, vpx_image_t *src) {
   }
 }
 
-static void highbd_img_downshift(vpx_image_t *dst, vpx_image_t *src,
+static void highbd_img_downshift(aom_image_t *dst, aom_image_t *src,
                                  int down_shift) {
   int plane;
   if (dst->d_w != src->d_w || dst->d_h != src->d_h ||
@@ -385,10 +385,10 @@ static void highbd_img_downshift(vpx_image_t *dst, vpx_image_t *src,
     fatal("Unsupported image conversion");
   }
   switch (src->fmt) {
-    case VPX_IMG_FMT_I42016:
-    case VPX_IMG_FMT_I42216:
-    case VPX_IMG_FMT_I44416:
-    case VPX_IMG_FMT_I44016: break;
+    case AOM_IMG_FMT_I42016:
+    case AOM_IMG_FMT_I42216:
+    case AOM_IMG_FMT_I44416:
+    case AOM_IMG_FMT_I44016: break;
     default: fatal("Unsupported image conversion"); break;
   }
   for (plane = 0; plane < 3; plane++) {
@@ -409,20 +409,20 @@ static void highbd_img_downshift(vpx_image_t *dst, vpx_image_t *src,
   }
 }
 
-static void lowbd_img_downshift(vpx_image_t *dst, vpx_image_t *src,
+static void lowbd_img_downshift(aom_image_t *dst, aom_image_t *src,
                                 int down_shift) {
   int plane;
   if (dst->d_w != src->d_w || dst->d_h != src->d_h ||
       dst->x_chroma_shift != src->x_chroma_shift ||
       dst->y_chroma_shift != src->y_chroma_shift ||
-      src->fmt != dst->fmt + VPX_IMG_FMT_HIGHBITDEPTH || down_shift < 0) {
+      src->fmt != dst->fmt + AOM_IMG_FMT_HIGHBITDEPTH || down_shift < 0) {
     fatal("Unsupported image conversion");
   }
   switch (dst->fmt) {
-    case VPX_IMG_FMT_I420:
-    case VPX_IMG_FMT_I422:
-    case VPX_IMG_FMT_I444:
-    case VPX_IMG_FMT_I440: break;
+    case AOM_IMG_FMT_I420:
+    case AOM_IMG_FMT_I422:
+    case AOM_IMG_FMT_I444:
+    case AOM_IMG_FMT_I440: break;
     default: fatal("Unsupported image conversion"); break;
   }
   for (plane = 0; plane < 3; plane++) {
@@ -444,11 +444,11 @@ static void lowbd_img_downshift(vpx_image_t *dst, vpx_image_t *src,
   }
 }
 
-void vpx_img_downshift(vpx_image_t *dst, vpx_image_t *src, int down_shift) {
-  if (dst->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+void aom_img_downshift(aom_image_t *dst, aom_image_t *src, int down_shift) {
+  if (dst->fmt & AOM_IMG_FMT_HIGHBITDEPTH) {
     highbd_img_downshift(dst, src, down_shift);
   } else {
     lowbd_img_downshift(dst, src, down_shift);
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH

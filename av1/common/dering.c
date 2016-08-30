@@ -11,8 +11,8 @@
 #include <string.h>
 #include <math.h>
 
-#include "./vpx_scale_rtcd.h"
-#include "aom/vpx_integer.h"
+#include "./aom_scale_rtcd.h"
+#include "aom/aom_integer.h"
 #include "av1/common/dering.h"
 #include "av1/common/onyxc_int.h"
 #include "av1/common/reconinter.h"
@@ -26,7 +26,7 @@ int compute_level_from_index(int global_level, int gi) {
   return clamp(level, gi, MAX_DERING_LEVEL - 1);
 }
 
-int sb_all_skip(const VP10_COMMON *const cm, int mi_row, int mi_col) {
+int sb_all_skip(const AV1_COMMON *const cm, int mi_row, int mi_col) {
   int r, c;
   int maxc, maxr;
   int skip = 1;
@@ -44,8 +44,8 @@ int sb_all_skip(const VP10_COMMON *const cm, int mi_row, int mi_col) {
   return skip;
 }
 
-void vp10_dering_frame(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
-                       MACROBLOCKD *xd, int global_level) {
+void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
+                      MACROBLOCKD *xd, int global_level) {
   int r, c;
   int sbr, sbc;
   int nhsb, nvsb;
@@ -56,21 +56,21 @@ void vp10_dering_frame(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
   int bsize[3];
   int dec[3];
   int pli;
-  int coeff_shift = VPXMAX(cm->bit_depth - 8, 0);
+  int coeff_shift = AOMMAX(cm->bit_depth - 8, 0);
   nvsb = (cm->mi_rows + MAX_MIB_SIZE - 1) / MAX_MIB_SIZE;
   nhsb = (cm->mi_cols + MAX_MIB_SIZE - 1) / MAX_MIB_SIZE;
-  bskip = vpx_malloc(sizeof(*bskip) * cm->mi_rows * cm->mi_cols);
-  vp10_setup_dst_planes(xd->plane, frame, 0, 0);
+  bskip = aom_malloc(sizeof(*bskip) * cm->mi_rows * cm->mi_cols);
+  av1_setup_dst_planes(xd->plane, frame, 0, 0);
   for (pli = 0; pli < 3; pli++) {
     dec[pli] = xd->plane[pli].subsampling_x;
     bsize[pli] = 8 >> dec[pli];
   }
   stride = bsize[0] * cm->mi_cols;
   for (pli = 0; pli < 3; pli++) {
-    src[pli] = vpx_malloc(sizeof(*src) * cm->mi_rows * cm->mi_cols * 64);
+    src[pli] = aom_malloc(sizeof(*src) * cm->mi_rows * cm->mi_cols * 64);
     for (r = 0; r < bsize[pli] * cm->mi_rows; ++r) {
       for (c = 0; c < bsize[pli] * cm->mi_cols; ++c) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
         if (cm->use_highbitdepth) {
           src[pli][r * stride + c] = CONVERT_TO_SHORTPTR(
               xd->plane[pli].dst.buf)[r * xd->plane[pli].dst.stride + c];
@@ -78,7 +78,7 @@ void vp10_dering_frame(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
 #endif
           src[pli][r * stride + c] =
               xd->plane[pli].dst.buf[r * xd->plane[pli].dst.stride + c];
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
         }
 #endif
       }
@@ -95,8 +95,8 @@ void vp10_dering_frame(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
     for (sbc = 0; sbc < nhsb; sbc++) {
       int level;
       int nhb, nvb;
-      nhb = VPXMIN(MAX_MIB_SIZE, cm->mi_cols - MAX_MIB_SIZE * sbc);
-      nvb = VPXMIN(MAX_MIB_SIZE, cm->mi_rows - MAX_MIB_SIZE * sbr);
+      nhb = AOMMIN(MAX_MIB_SIZE, cm->mi_cols - MAX_MIB_SIZE * sbc);
+      nvb = AOMMIN(MAX_MIB_SIZE, cm->mi_rows - MAX_MIB_SIZE * sbr);
       for (pli = 0; pli < 3; pli++) {
         int16_t dst[MAX_MIB_SIZE * MAX_MIB_SIZE * 8 * 8];
         int threshold;
@@ -123,7 +123,7 @@ void vp10_dering_frame(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
                   coeff_shift);
         for (r = 0; r < bsize[pli] * nvb; ++r) {
           for (c = 0; c < bsize[pli] * nhb; ++c) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
             if (cm->use_highbitdepth) {
               CONVERT_TO_SHORTPTR(xd->plane[pli].dst.buf)
               [xd->plane[pli].dst.stride *
@@ -136,7 +136,7 @@ void vp10_dering_frame(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
                                          (bsize[pli] * MAX_MIB_SIZE * sbr + r) +
                                      sbc * bsize[pli] * MAX_MIB_SIZE + c] =
                   dst[r * MAX_MIB_SIZE * bsize[pli] + c];
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
             }
 #endif
           }
@@ -145,7 +145,7 @@ void vp10_dering_frame(YV12_BUFFER_CONFIG *frame, VP10_COMMON *cm,
     }
   }
   for (pli = 0; pli < 3; pli++) {
-    vpx_free(src[pli]);
+    aom_free(src[pli]);
   }
-  vpx_free(bskip);
+  aom_free(bskip);
 }

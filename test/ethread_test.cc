@@ -18,22 +18,22 @@
 #include "test/y4m_video_source.h"
 
 namespace {
-class VPxEncoderThreadTest
+class AVxEncoderThreadTest
     : public ::libaom_test::EncoderTest,
       public ::libaom_test::CodecTestWith2Params<libaom_test::TestMode, int> {
  protected:
-  VPxEncoderThreadTest()
+  AVxEncoderThreadTest()
       : EncoderTest(GET_PARAM(0)), encoder_initialized_(false),
         encoding_mode_(GET_PARAM(1)), set_cpu_used_(GET_PARAM(2)) {
-    init_flags_ = VPX_CODEC_USE_PSNR;
-    vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
+    init_flags_ = AOM_CODEC_USE_PSNR;
+    aom_codec_dec_cfg_t cfg = aom_codec_dec_cfg_t();
     cfg.w = 1280;
     cfg.h = 720;
     decoder_ = codec_->CreateDecoder(cfg, 0);
-#if CONFIG_VP10 && CONFIG_EXT_TILE
-    if (decoder_->IsVP10()) {
-      decoder_->Control(VP10_SET_DECODE_TILE_ROW, -1);
-      decoder_->Control(VP10_SET_DECODE_TILE_COL, -1);
+#if CONFIG_AV1 && CONFIG_EXT_TILE
+    if (decoder_->IsAV1()) {
+      decoder_->Control(AV1_SET_DECODE_TILE_ROW, -1);
+      decoder_->Control(AV1_SET_DECODE_TILE_COL, -1);
     }
 #endif
 
@@ -41,7 +41,7 @@ class VPxEncoderThreadTest
     md5_dec_.clear();
     md5_enc_.clear();
   }
-  virtual ~VPxEncoderThreadTest() { delete decoder_; }
+  virtual ~AVxEncoderThreadTest() { delete decoder_; }
 
   virtual void SetUp() {
     InitializeConfig();
@@ -49,12 +49,12 @@ class VPxEncoderThreadTest
 
     if (encoding_mode_ != ::libaom_test::kRealTime) {
       cfg_.g_lag_in_frames = 3;
-      cfg_.rc_end_usage = VPX_VBR;
+      cfg_.rc_end_usage = AOM_VBR;
       cfg_.rc_2pass_vbr_minsection_pct = 5;
       cfg_.rc_2pass_vbr_maxsection_pct = 2000;
     } else {
       cfg_.g_lag_in_frames = 0;
-      cfg_.rc_end_usage = VPX_CBR;
+      cfg_.rc_end_usage = AOM_CBR;
       cfg_.g_error_resilient = 1;
     }
     cfg_.rc_max_quantizer = 56;
@@ -68,35 +68,35 @@ class VPxEncoderThreadTest
   virtual void PreEncodeFrameHook(::libaom_test::VideoSource * /*video*/,
                                   ::libaom_test::Encoder *encoder) {
     if (!encoder_initialized_) {
-#if CONFIG_VP10 && CONFIG_EXT_TILE
-      encoder->Control(VP9E_SET_TILE_COLUMNS, 1);
-      if (codec_ == &libaom_test::kVP10) {
+#if CONFIG_AV1 && CONFIG_EXT_TILE
+      encoder->Control(AV1E_SET_TILE_COLUMNS, 1);
+      if (codec_ == &libaom_test::kAV1) {
         // TODO(geza): Start using multiple tile rows when the multi-threaded
         // encoder can handle them
-        encoder->Control(VP9E_SET_TILE_ROWS, 32);
+        encoder->Control(AV1E_SET_TILE_ROWS, 32);
       } else {
-        encoder->Control(VP9E_SET_TILE_ROWS, 0);
+        encoder->Control(AV1E_SET_TILE_ROWS, 0);
       }
 #else
       // Encode 4 tile columns.
-      encoder->Control(VP9E_SET_TILE_COLUMNS, 2);
-      encoder->Control(VP9E_SET_TILE_ROWS, 0);
-#endif  // CONFIG_VP10 && CONFIG_EXT_TILE
-      encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
+      encoder->Control(AV1E_SET_TILE_COLUMNS, 2);
+      encoder->Control(AV1E_SET_TILE_ROWS, 0);
+#endif  // CONFIG_AV1 && CONFIG_EXT_TILE
+      encoder->Control(AOME_SET_CPUUSED, set_cpu_used_);
       if (encoding_mode_ != ::libaom_test::kRealTime) {
-        encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
-        encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);
-        encoder->Control(VP8E_SET_ARNR_STRENGTH, 5);
-        encoder->Control(VP8E_SET_ARNR_TYPE, 3);
+        encoder->Control(AOME_SET_ENABLEAUTOALTREF, 1);
+        encoder->Control(AOME_SET_ARNR_MAXFRAMES, 7);
+        encoder->Control(AOME_SET_ARNR_STRENGTH, 5);
+        encoder->Control(AOME_SET_ARNR_TYPE, 3);
       } else {
-        encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 0);
-        encoder->Control(VP9E_SET_AQ_MODE, 3);
+        encoder->Control(AOME_SET_ENABLEAUTOALTREF, 0);
+        encoder->Control(AV1E_SET_AQ_MODE, 3);
       }
       encoder_initialized_ = true;
     }
   }
 
-  virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
+  virtual void FramePktHook(const aom_codec_cx_pkt_t *pkt) {
     size_enc_.push_back(pkt->data.frame.sz);
 
     ::libaom_test::MD5 md5_enc;
@@ -104,13 +104,13 @@ class VPxEncoderThreadTest
                 pkt->data.frame.sz);
     md5_enc_.push_back(md5_enc.Get());
 
-    const vpx_codec_err_t res = decoder_->DecodeFrame(
+    const aom_codec_err_t res = decoder_->DecodeFrame(
         reinterpret_cast<uint8_t *>(pkt->data.frame.buf), pkt->data.frame.sz);
-    if (res != VPX_CODEC_OK) {
+    if (res != AOM_CODEC_OK) {
       abort_ = true;
-      ASSERT_EQ(VPX_CODEC_OK, res);
+      ASSERT_EQ(AOM_CODEC_OK, res);
     }
-    const vpx_image_t *img = decoder_->GetDxData().Next();
+    const aom_image_t *img = decoder_->GetDxData().Next();
 
     if (img) {
       ::libaom_test::MD5 md5_res;
@@ -125,7 +125,7 @@ class VPxEncoderThreadTest
 
     // Encode using single thread.
     cfg_.g_threads = 1;
-    init_flags_ = VPX_CODEC_USE_PSNR;
+    init_flags_ = AOM_CODEC_USE_PSNR;
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
     std::vector<size_t> single_thr_size_enc;
     std::vector<std::string> single_thr_md5_enc;
@@ -165,19 +165,19 @@ class VPxEncoderThreadTest
   std::vector<std::string> md5_dec_;
 };
 
-TEST_P(VPxEncoderThreadTest, EncoderResultTest) { DoTest(); }
+TEST_P(AVxEncoderThreadTest, EncoderResultTest) { DoTest(); }
 
-class VPxEncoderThreadTestLarge : public VPxEncoderThreadTest {};
+class AVxEncoderThreadTestLarge : public AVxEncoderThreadTest {};
 
-TEST_P(VPxEncoderThreadTestLarge, EncoderResultTest) { DoTest(); }
+TEST_P(AVxEncoderThreadTestLarge, EncoderResultTest) { DoTest(); }
 
-VP10_INSTANTIATE_TEST_CASE(VPxEncoderThreadTest,
-                           ::testing::Values(::libaom_test::kTwoPassGood,
-                                             ::libaom_test::kOnePassGood),
-                           ::testing::Range(3, 9));
+AV1_INSTANTIATE_TEST_CASE(AVxEncoderThreadTest,
+                          ::testing::Values(::libaom_test::kTwoPassGood,
+                                            ::libaom_test::kOnePassGood),
+                          ::testing::Range(3, 9));
 
-VP10_INSTANTIATE_TEST_CASE(VPxEncoderThreadTestLarge,
-                           ::testing::Values(::libaom_test::kTwoPassGood,
-                                             ::libaom_test::kOnePassGood),
-                           ::testing::Range(1, 3));
+AV1_INSTANTIATE_TEST_CASE(AVxEncoderThreadTestLarge,
+                          ::testing::Values(::libaom_test::kTwoPassGood,
+                                            ::libaom_test::kOnePassGood),
+                          ::testing::Range(1, 3));
 }  // namespace

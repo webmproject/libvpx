@@ -12,8 +12,8 @@
 #include <emmintrin.h>
 #include <stddef.h>
 
-#include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_config.h"
+#include "./aom_dsp_rtcd.h"
 
 typedef void (*SubtractWxHFuncType)(int16_t *diff, ptrdiff_t diff_stride,
                                     const uint16_t *src, ptrdiff_t src_stride,
@@ -349,7 +349,7 @@ static SubtractWxHFuncType getSubtractFunc(int rows, int cols) {
   return ret_func_ptr;
 }
 
-void vpx_highbd_subtract_block_sse2(int rows, int cols, int16_t *diff,
+void aom_highbd_subtract_block_sse2(int rows, int cols, int16_t *diff,
                                     ptrdiff_t diff_stride, const uint8_t *src8,
                                     ptrdiff_t src_stride, const uint8_t *pred8,
                                     ptrdiff_t pred_stride, int bd) {

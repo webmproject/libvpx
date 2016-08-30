@@ -11,7 +11,7 @@
 #include "aom_ports/mem.h"
 #include "aom_dsp/mips/loopfilter_msa.h"
 
-int32_t vpx_hz_lpf_t4_and_t8_16w(uint8_t *src, int32_t pitch, uint8_t *filter48,
+int32_t aom_hz_lpf_t4_and_t8_16w(uint8_t *src, int32_t pitch, uint8_t *filter48,
                                  const uint8_t *b_limit_ptr,
                                  const uint8_t *limit_ptr,
                                  const uint8_t *thresh_ptr) {
@@ -34,8 +34,8 @@ int32_t vpx_hz_lpf_t4_and_t8_16w(uint8_t *src, int32_t pitch, uint8_t *filter48,
   /* mask and hev */
   LPF_MASK_HEV(p3, p2, p1, p0, q0, q1, q2, q3, limit, b_limit, thresh, hev,
                mask, flat);
-  VPX_FLAT4(p3, p2, p0, q0, q2, q3, flat);
-  VPX_LPF_FILTER4_4W(p1, p0, q0, q1, mask, hev, p1_out, p0_out, q0_out, q1_out);
+  AOM_FLAT4(p3, p2, p0, q0, q2, q3, flat);
+  AOM_LPF_FILTER4_4W(p1, p0, q0, q1, mask, hev, p1_out, p0_out, q0_out, q1_out);
 
   if (__msa_test_bz_v(flat)) {
     ST_UB4(p1_out, p0_out, q0_out, q1_out, (src - 2 * pitch), pitch);
@@ -44,12 +44,12 @@ int32_t vpx_hz_lpf_t4_and_t8_16w(uint8_t *src, int32_t pitch, uint8_t *filter48,
   } else {
     ILVR_B8_UH(zero, p3, zero, p2, zero, p1, zero, p0, zero, q0, zero, q1, zero,
                q2, zero, q3, p3_r, p2_r, p1_r, p0_r, q0_r, q1_r, q2_r, q3_r);
-    VPX_FILTER8(p3_r, p2_r, p1_r, p0_r, q0_r, q1_r, q2_r, q3_r, p2_filt8_r,
+    AOM_FILTER8(p3_r, p2_r, p1_r, p0_r, q0_r, q1_r, q2_r, q3_r, p2_filt8_r,
                 p1_filt8_r, p0_filt8_r, q0_filt8_r, q1_filt8_r, q2_filt8_r);
 
     ILVL_B4_UH(zero, p3, zero, p2, zero, p1, zero, p0, p3_l, p2_l, p1_l, p0_l);
     ILVL_B4_UH(zero, q0, zero, q1, zero, q2, zero, q3, q0_l, q1_l, q2_l, q3_l);
-    VPX_FILTER8(p3_l, p2_l, p1_l, p0_l, q0_l, q1_l, q2_l, q3_l, p2_filt8_l,
+    AOM_FILTER8(p3_l, p2_l, p1_l, p0_l, q0_l, q1_l, q2_l, q3_l, p2_filt8_l,
                 p1_filt8_l, p0_filt8_l, q0_filt8_l, q1_filt8_l, q2_filt8_l);
 
     /* convert 16 bit output data into 8 bit */
@@ -77,7 +77,7 @@ int32_t vpx_hz_lpf_t4_and_t8_16w(uint8_t *src, int32_t pitch, uint8_t *filter48,
   }
 }
 
-void vpx_hz_lpf_t16_16w(uint8_t *src, int32_t pitch, uint8_t *filter48) {
+void aom_hz_lpf_t16_16w(uint8_t *src, int32_t pitch, uint8_t *filter48) {
   v16u8 flat, flat2, filter8;
   v16i8 zero = { 0 };
   v16u8 p7, p6, p5, p4, p3, p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7;
@@ -92,7 +92,7 @@ void vpx_hz_lpf_t16_16w(uint8_t *src, int32_t pitch, uint8_t *filter48) {
 
   LD_UB8((src - 8 * pitch), pitch, p7, p6, p5, p4, p3, p2, p1, p0);
   LD_UB8(src, pitch, q0, q1, q2, q3, q4, q5, q6, q7);
-  VPX_FLAT5(p7, p6, p5, p4, p0, q0, q4, q5, q6, q7, flat, flat2);
+  AOM_FLAT5(p7, p6, p5, p4, p0, q0, q4, q5, q6, q7, flat, flat2);
 
   if (__msa_test_bz_v(flat2)) {
     LD_UB4(filter48, 16, p2, p1, p0, q0);
@@ -403,7 +403,7 @@ void vpx_hz_lpf_t16_16w(uint8_t *src, int32_t pitch, uint8_t *filter48) {
   }
 }
 
-void vpx_lpf_horizontal_16_dual_msa(uint8_t *src, int32_t pitch,
+void aom_lpf_horizontal_16_dual_msa(uint8_t *src, int32_t pitch,
                                     const uint8_t *b_limit_ptr,
                                     const uint8_t *limit_ptr,
                                     const uint8_t *thresh_ptr, int32_t count) {
@@ -412,11 +412,11 @@ void vpx_lpf_horizontal_16_dual_msa(uint8_t *src, int32_t pitch,
 
   (void)count;
 
-  early_exit = vpx_hz_lpf_t4_and_t8_16w(src, pitch, &filter48[0], b_limit_ptr,
+  early_exit = aom_hz_lpf_t4_and_t8_16w(src, pitch, &filter48[0], b_limit_ptr,
                                         limit_ptr, thresh_ptr);
 
   if (0 == early_exit) {
-    vpx_hz_lpf_t16_16w(src, pitch, filter48);
+    aom_hz_lpf_t16_16w(src, pitch, filter48);
   }
 }
 
@@ -447,8 +447,8 @@ static void mb_lpf_horizontal_edge(uint8_t *src, int32_t pitch,
 
     LPF_MASK_HEV(p3, p2, p1, p0, q0, q1, q2, q3, limit, b_limit, thresh, hev,
                  mask, flat);
-    VPX_FLAT4(p3, p2, p0, q0, q2, q3, flat);
-    VPX_LPF_FILTER4_8W(p1, p0, q0, q1, mask, hev, p1_out, p0_out, q0_out,
+    AOM_FLAT4(p3, p2, p0, q0, q2, q3, flat);
+    AOM_LPF_FILTER4_8W(p1, p0, q0, q1, mask, hev, p1_out, p0_out, q0_out,
                        q1_out);
 
     flat = (v16u8)__msa_ilvr_d((v2i64)zero, (v2i64)flat);
@@ -464,7 +464,7 @@ static void mb_lpf_horizontal_edge(uint8_t *src, int32_t pitch,
       ILVR_B8_UH(zero, p3, zero, p2, zero, p1, zero, p0, zero, q0, zero, q1,
                  zero, q2, zero, q3, p3_r, p2_r, p1_r, p0_r, q0_r, q1_r, q2_r,
                  q3_r);
-      VPX_FILTER8(p3_r, p2_r, p1_r, p0_r, q0_r, q1_r, q2_r, q3_r, p2_filter8,
+      AOM_FILTER8(p3_r, p2_r, p1_r, p0_r, q0_r, q1_r, q2_r, q3_r, p2_filter8,
                   p1_filter8, p0_filter8, q0_filter8, q1_filter8, q2_filter8);
 
       /* convert 16 bit output data into 8 bit */
@@ -484,7 +484,7 @@ static void mb_lpf_horizontal_edge(uint8_t *src, int32_t pitch,
       LD_UB4((src - 8 * pitch), pitch, p7, p6, p5, p4);
       LD_UB4(src + (4 * pitch), pitch, q4, q5, q6, q7);
 
-      VPX_FLAT5(p7, p6, p5, p4, p0, q0, q4, q5, q6, q7, flat, flat2);
+      AOM_FLAT5(p7, p6, p5, p4, p0, q0, q4, q5, q6, q7, flat, flat2);
 
       if (__msa_test_bz_v(flat2)) {
         p2_d = __msa_copy_u_d((v2i64)p2_out, 0);
@@ -638,19 +638,19 @@ static void mb_lpf_horizontal_edge(uint8_t *src, int32_t pitch,
       }
     }
   } else {
-    vpx_lpf_horizontal_16_dual_msa(src, pitch, b_limit_ptr, limit_ptr,
+    aom_lpf_horizontal_16_dual_msa(src, pitch, b_limit_ptr, limit_ptr,
                                    thresh_ptr, count);
   }
 }
 
-void vpx_lpf_horizontal_edge_8_msa(uint8_t *src, int32_t pitch,
+void aom_lpf_horizontal_edge_8_msa(uint8_t *src, int32_t pitch,
                                    const uint8_t *b_limit_ptr,
                                    const uint8_t *limit_ptr,
                                    const uint8_t *thresh_ptr) {
   mb_lpf_horizontal_edge(src, pitch, b_limit_ptr, limit_ptr, thresh_ptr, 1);
 }
 
-void vpx_lpf_horizontal_edge_16_msa(uint8_t *src, int32_t pitch,
+void aom_lpf_horizontal_edge_16_msa(uint8_t *src, int32_t pitch,
                                     const uint8_t *b_limit_ptr,
                                     const uint8_t *limit_ptr,
                                     const uint8_t *thresh_ptr) {
@@ -752,7 +752,7 @@ static void transpose_16x16(uint8_t *input, int32_t in_pitch, uint8_t *output,
   ST_UB8(q0, q1, q2, q3, q4, q5, q6, q7, output, out_pitch);
 }
 
-int32_t vpx_vt_lpf_t4_and_t8_8w(uint8_t *src, uint8_t *filter48,
+int32_t aom_vt_lpf_t4_and_t8_8w(uint8_t *src, uint8_t *filter48,
                                 uint8_t *src_org, int32_t pitch_org,
                                 const uint8_t *b_limit_ptr,
                                 const uint8_t *limit_ptr,
@@ -776,9 +776,9 @@ int32_t vpx_vt_lpf_t4_and_t8_8w(uint8_t *src, uint8_t *filter48,
   LPF_MASK_HEV(p3, p2, p1, p0, q0, q1, q2, q3, limit, b_limit, thresh, hev,
                mask, flat);
   /* flat4 */
-  VPX_FLAT4(p3, p2, p0, q0, q2, q3, flat);
+  AOM_FLAT4(p3, p2, p0, q0, q2, q3, flat);
   /* filter4 */
-  VPX_LPF_FILTER4_8W(p1, p0, q0, q1, mask, hev, p1_out, p0_out, q0_out, q1_out);
+  AOM_LPF_FILTER4_8W(p1, p0, q0, q1, mask, hev, p1_out, p0_out, q0_out, q1_out);
 
   flat = (v16u8)__msa_ilvr_d((v2i64)zero, (v2i64)flat);
 
@@ -790,7 +790,7 @@ int32_t vpx_vt_lpf_t4_and_t8_8w(uint8_t *src, uint8_t *filter48,
   } else {
     ILVR_B8_UH(zero, p3, zero, p2, zero, p1, zero, p0, zero, q0, zero, q1, zero,
                q2, zero, q3, p3_r, p2_r, p1_r, p0_r, q0_r, q1_r, q2_r, q3_r);
-    VPX_FILTER8(p3_r, p2_r, p1_r, p0_r, q0_r, q1_r, q2_r, q3_r, p2_filt8_r,
+    AOM_FILTER8(p3_r, p2_r, p1_r, p0_r, q0_r, q1_r, q2_r, q3_r, p2_filt8_r,
                 p1_filt8_r, p0_filt8_r, q0_filt8_r, q1_filt8_r, q2_filt8_r);
 
     /* convert 16 bit output data into 8 bit */
@@ -819,7 +819,7 @@ int32_t vpx_vt_lpf_t4_and_t8_8w(uint8_t *src, uint8_t *filter48,
   }
 }
 
-int32_t vpx_vt_lpf_t16_8w(uint8_t *src, uint8_t *src_org, int32_t pitch,
+int32_t aom_vt_lpf_t16_8w(uint8_t *src, uint8_t *src_org, int32_t pitch,
                           uint8_t *filter48) {
   v16i8 zero = { 0 };
   v16u8 filter8, flat, flat2;
@@ -834,7 +834,7 @@ int32_t vpx_vt_lpf_t16_8w(uint8_t *src, uint8_t *src_org, int32_t pitch,
   LD_UB8((src - 8 * 16), 16, p7, p6, p5, p4, p3, p2, p1, p0);
   LD_UB8(src, 16, q0, q1, q2, q3, q4, q5, q6, q7);
 
-  VPX_FLAT5(p7, p6, p5, p4, p0, q0, q4, q5, q6, q7, flat, flat2);
+  AOM_FLAT5(p7, p6, p5, p4, p0, q0, q4, q5, q6, q7, flat, flat2);
 
   if (__msa_test_bz_v(flat2)) {
     v8i16 vec0, vec1, vec2, vec3, vec4;
@@ -1039,7 +1039,7 @@ int32_t vpx_vt_lpf_t16_8w(uint8_t *src, uint8_t *src_org, int32_t pitch,
   }
 }
 
-void vpx_lpf_vertical_16_msa(uint8_t *src, int32_t pitch,
+void aom_lpf_vertical_16_msa(uint8_t *src, int32_t pitch,
                              const uint8_t *b_limit_ptr,
                              const uint8_t *limit_ptr,
                              const uint8_t *thresh_ptr) {
@@ -1050,11 +1050,11 @@ void vpx_lpf_vertical_16_msa(uint8_t *src, int32_t pitch,
   transpose_16x8_to_8x16(src - 8, pitch, transposed_input, 16);
 
   early_exit =
-      vpx_vt_lpf_t4_and_t8_8w((transposed_input + 16 * 8), &filter48[0], src,
+      aom_vt_lpf_t4_and_t8_8w((transposed_input + 16 * 8), &filter48[0], src,
                               pitch, b_limit_ptr, limit_ptr, thresh_ptr);
 
   if (0 == early_exit) {
-    early_exit = vpx_vt_lpf_t16_8w((transposed_input + 16 * 8), src, pitch,
+    early_exit = aom_vt_lpf_t16_8w((transposed_input + 16 * 8), src, pitch,
                                    &filter48[0]);
 
     if (0 == early_exit) {
@@ -1063,7 +1063,7 @@ void vpx_lpf_vertical_16_msa(uint8_t *src, int32_t pitch,
   }
 }
 
-int32_t vpx_vt_lpf_t4_and_t8_16w(uint8_t *src, uint8_t *filter48,
+int32_t aom_vt_lpf_t4_and_t8_16w(uint8_t *src, uint8_t *filter48,
                                  uint8_t *src_org, int32_t pitch,
                                  const uint8_t *b_limit_ptr,
                                  const uint8_t *limit_ptr,
@@ -1089,9 +1089,9 @@ int32_t vpx_vt_lpf_t4_and_t8_16w(uint8_t *src, uint8_t *filter48,
   LPF_MASK_HEV(p3, p2, p1, p0, q0, q1, q2, q3, limit, b_limit, thresh, hev,
                mask, flat);
   /* flat4 */
-  VPX_FLAT4(p3, p2, p0, q0, q2, q3, flat);
+  AOM_FLAT4(p3, p2, p0, q0, q2, q3, flat);
   /* filter4 */
-  VPX_LPF_FILTER4_4W(p1, p0, q0, q1, mask, hev, p1_out, p0_out, q0_out, q1_out);
+  AOM_LPF_FILTER4_4W(p1, p0, q0, q1, mask, hev, p1_out, p0_out, q0_out, q1_out);
 
   if (__msa_test_bz_v(flat)) {
     ILVR_B2_SH(p0_out, p1_out, q1_out, q0_out, vec0, vec1);
@@ -1108,11 +1108,11 @@ int32_t vpx_vt_lpf_t4_and_t8_16w(uint8_t *src, uint8_t *filter48,
   } else {
     ILVR_B8_UH(zero, p3, zero, p2, zero, p1, zero, p0, zero, q0, zero, q1, zero,
                q2, zero, q3, p3_r, p2_r, p1_r, p0_r, q0_r, q1_r, q2_r, q3_r);
-    VPX_FILTER8(p3_r, p2_r, p1_r, p0_r, q0_r, q1_r, q2_r, q3_r, p2_filt8_r,
+    AOM_FILTER8(p3_r, p2_r, p1_r, p0_r, q0_r, q1_r, q2_r, q3_r, p2_filt8_r,
                 p1_filt8_r, p0_filt8_r, q0_filt8_r, q1_filt8_r, q2_filt8_r);
     ILVL_B4_UH(zero, p3, zero, p2, zero, p1, zero, p0, p3_l, p2_l, p1_l, p0_l);
     ILVL_B4_UH(zero, q0, zero, q1, zero, q2, zero, q3, q0_l, q1_l, q2_l, q3_l);
-    VPX_FILTER8(p3_l, p2_l, p1_l, p0_l, q0_l, q1_l, q2_l, q3_l, p2_filt8_l,
+    AOM_FILTER8(p3_l, p2_l, p1_l, p0_l, q0_l, q1_l, q2_l, q3_l, p2_filt8_l,
                 p1_filt8_l, p0_filt8_l, q0_filt8_l, q1_filt8_l, q2_filt8_l);
 
     /* convert 16 bit output data into 8 bit */
@@ -1140,7 +1140,7 @@ int32_t vpx_vt_lpf_t4_and_t8_16w(uint8_t *src, uint8_t *filter48,
   }
 }
 
-int32_t vpx_vt_lpf_t16_16w(uint8_t *src, uint8_t *src_org, int32_t pitch,
+int32_t aom_vt_lpf_t16_16w(uint8_t *src, uint8_t *src_org, int32_t pitch,
                            uint8_t *filter48) {
   v16u8 flat, flat2, filter8;
   v16i8 zero = { 0 };
@@ -1157,7 +1157,7 @@ int32_t vpx_vt_lpf_t16_16w(uint8_t *src, uint8_t *src_org, int32_t pitch,
   LD_UB8((src - 8 * 16), 16, p7, p6, p5, p4, p3, p2, p1, p0);
   LD_UB8(src, 16, q0, q1, q2, q3, q4, q5, q6, q7);
 
-  VPX_FLAT5(p7, p6, p5, p4, p0, q0, q4, q5, q6, q7, flat, flat2);
+  AOM_FLAT5(p7, p6, p5, p4, p0, q0, q4, q5, q6, q7, flat, flat2);
 
   if (__msa_test_bz_v(flat2)) {
     v8i16 vec0, vec1, vec2, vec3, vec4, vec5, vec6, vec7;
@@ -1461,7 +1461,7 @@ int32_t vpx_vt_lpf_t16_16w(uint8_t *src, uint8_t *src_org, int32_t pitch,
   }
 }
 
-void vpx_lpf_vertical_16_dual_msa(uint8_t *src, int32_t pitch,
+void aom_lpf_vertical_16_dual_msa(uint8_t *src, int32_t pitch,
                                   const uint8_t *b_limit_ptr,
                                   const uint8_t *limit_ptr,
                                   const uint8_t *thresh_ptr) {
@@ -1472,11 +1472,11 @@ void vpx_lpf_vertical_16_dual_msa(uint8_t *src, int32_t pitch,
   transpose_16x16((src - 8), pitch, &transposed_input[0], 16);
 
   early_exit =
-      vpx_vt_lpf_t4_and_t8_16w((transposed_input + 16 * 8), &filter48[0], src,
+      aom_vt_lpf_t4_and_t8_16w((transposed_input + 16 * 8), &filter48[0], src,
                                pitch, b_limit_ptr, limit_ptr, thresh_ptr);
 
   if (0 == early_exit) {
-    early_exit = vpx_vt_lpf_t16_16w((transposed_input + 16 * 8), src, pitch,
+    early_exit = aom_vt_lpf_t16_16w((transposed_input + 16 * 8), src, pitch,
                                     &filter48[0]);
 
     if (0 == early_exit) {

@@ -10,11 +10,11 @@
 
 #include <arm_neon.h>
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 
-#include "aom/vpx_integer.h"
+#include "aom/aom_integer.h"
 
-unsigned int vpx_sad8x16_neon(unsigned char *src_ptr, int src_stride,
+unsigned int aom_sad8x16_neon(unsigned char *src_ptr, int src_stride,
                               unsigned char *ref_ptr, int ref_stride) {
   uint8x8_t d0, d8;
   uint16x8_t q12;
@@ -45,7 +45,7 @@ unsigned int vpx_sad8x16_neon(unsigned char *src_ptr, int src_stride,
   return vget_lane_u32(d5, 0);
 }
 
-unsigned int vpx_sad4x4_neon(unsigned char *src_ptr, int src_stride,
+unsigned int aom_sad4x4_neon(unsigned char *src_ptr, int src_stride,
                              unsigned char *ref_ptr, int ref_stride) {
   uint8x8_t d0, d8;
   uint16x8_t q12;
@@ -73,7 +73,7 @@ unsigned int vpx_sad4x4_neon(unsigned char *src_ptr, int src_stride,
   return vget_lane_u32(vreinterpret_u32_u64(d3), 0);
 }
 
-unsigned int vpx_sad16x8_neon(unsigned char *src_ptr, int src_stride,
+unsigned int aom_sad16x8_neon(unsigned char *src_ptr, int src_stride,
                               unsigned char *ref_ptr, int ref_stride) {
   uint8x16_t q0, q4;
   uint16x8_t q12, q13;
@@ -127,7 +127,7 @@ static INLINE unsigned int horizontal_add_16x8(const uint16x8_t vec_16x8) {
   return vget_lane_u32(c, 0);
 }
 
-unsigned int vpx_sad64x64_neon(const uint8_t *src, int src_stride,
+unsigned int aom_sad64x64_neon(const uint8_t *src, int src_stride,
                                const uint8_t *ref, int ref_stride) {
   int i;
   uint16x8_t vec_accum_lo = vdupq_n_u16(0);
@@ -163,7 +163,7 @@ unsigned int vpx_sad64x64_neon(const uint8_t *src, int src_stride,
   return horizontal_long_add_16x8(vec_accum_lo, vec_accum_hi);
 }
 
-unsigned int vpx_sad32x32_neon(const uint8_t *src, int src_stride,
+unsigned int aom_sad32x32_neon(const uint8_t *src, int src_stride,
                                const uint8_t *ref, int ref_stride) {
   int i;
   uint16x8_t vec_accum_lo = vdupq_n_u16(0);
@@ -188,7 +188,7 @@ unsigned int vpx_sad32x32_neon(const uint8_t *src, int src_stride,
   return horizontal_add_16x8(vaddq_u16(vec_accum_lo, vec_accum_hi));
 }
 
-unsigned int vpx_sad16x16_neon(const uint8_t *src, int src_stride,
+unsigned int aom_sad16x16_neon(const uint8_t *src, int src_stride,
                                const uint8_t *ref, int ref_stride) {
   int i;
   uint16x8_t vec_accum_lo = vdupq_n_u16(0);
@@ -207,7 +207,7 @@ unsigned int vpx_sad16x16_neon(const uint8_t *src, int src_stride,
   return horizontal_add_16x8(vaddq_u16(vec_accum_lo, vec_accum_hi));
 }
 
-unsigned int vpx_sad8x8_neon(const uint8_t *src, int src_stride,
+unsigned int aom_sad8x8_neon(const uint8_t *src, int src_stride,
                              const uint8_t *ref, int ref_stride) {
   int i;
   uint16x8_t vec_accum = vdupq_n_u16(0);

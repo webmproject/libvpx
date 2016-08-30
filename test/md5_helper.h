@@ -12,14 +12,14 @@
 #define TEST_MD5_HELPER_H_
 
 #include "./md5_utils.h"
-#include "aom/vpx_decoder.h"
+#include "aom/aom_decoder.h"
 
 namespace libaom_test {
 class MD5 {
  public:
   MD5() { MD5Init(&md5_); }
 
-  void Add(const vpx_image_t *img) {
+  void Add(const aom_image_t *img) {
     for (int plane = 0; plane < 3; ++plane) {
       const uint8_t *buf = img->planes[plane];
       // Calculate the width and height to do the md5 check. For the chroma
@@ -27,7 +27,7 @@ class MD5 {
       // we are shifting by 1 (chroma_shift) we add 1 before doing the shift.
       // This works only for chroma_shift of 0 and 1.
       const int bytes_per_sample =
-          (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? 2 : 1;
+          (img->fmt & AOM_IMG_FMT_HIGHBITDEPTH) ? 2 : 1;
       const int h =
           plane ? (img->d_h + img->y_chroma_shift) >> img->y_chroma_shift
                 : img->d_h;

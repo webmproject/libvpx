@@ -10,17 +10,17 @@
 
 #include <math.h>
 
-#include "./vp10_rtcd.h"
-#include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
+#include "./av1_rtcd.h"
+#include "./aom_config.h"
+#include "./aom_dsp_rtcd.h"
 #include "aom_ports/system_state.h"
 
-#if CONFIG_VP9_HIGHBITDEPTH
-#include "aom_dsp/vpx_dsp_common.h"
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-#include "aom_mem/vpx_mem.h"
+#if CONFIG_AOM_HIGHBITDEPTH
+#include "aom_dsp/aom_dsp_common.h"
+#endif  // CONFIG_AOM_HIGHBITDEPTH
+#include "aom_mem/aom_mem.h"
 #include "aom_ports/mem.h"
-#include "aom_ports/vpx_once.h"
+#include "aom_ports/aom_once.h"
 #if CONFIG_EXT_INTRA
 #include "av1/common/intra_filters.h"
 #endif
@@ -222,14 +222,14 @@ static const uint8_t *const orders_verta[BLOCK_SIZES] = {
 #endif  // CONFIG_EXT_PARTITION
 #endif  // CONFIG_EXT_PARTITION_TYPES
 
-static int vp10_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
-                          int right_available,
+static int av1_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
+                         int right_available,
 #if CONFIG_EXT_PARTITION_TYPES
-                          PARTITION_TYPE partition,
+                         PARTITION_TYPE partition,
 #endif
-                          TX_SIZE txsz, int y, int x, int ss_x) {
+                         TX_SIZE txsz, int y, int x, int ss_x) {
   const int wl = mi_width_log2_lookup[bsize];
-  const int w = VPXMAX(num_4x4_blocks_wide_lookup[bsize] >> ss_x, 1);
+  const int w = AOMMAX(num_4x4_blocks_wide_lookup[bsize] >> ss_x, 1);
   const int step = 1 << txsz;
 
   if (!right_available) {
@@ -270,9 +270,9 @@ static int vp10_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
   }
 }
 
-static int vp10_has_bottom(BLOCK_SIZE bsize, int mi_row, int mi_col,
-                           int bottom_available, TX_SIZE txsz, int y, int x,
-                           int ss_y) {
+static int av1_has_bottom(BLOCK_SIZE bsize, int mi_row, int mi_col,
+                          int bottom_available, TX_SIZE txsz, int y, int x,
+                          int ss_y) {
   if (!bottom_available || x != 0) {
     return 0;
   } else {
@@ -309,22 +309,22 @@ typedef void (*intra_pred_fn)(uint8_t *dst, ptrdiff_t stride,
 static intra_pred_fn pred[INTRA_MODES][TX_SIZES];
 static intra_pred_fn dc_pred[2][2][TX_SIZES];
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 typedef void (*intra_high_pred_fn)(uint16_t *dst, ptrdiff_t stride,
                                    const uint16_t *above, const uint16_t *left,
                                    int bd);
 static intra_high_pred_fn pred_high[INTRA_MODES][4];
 static intra_high_pred_fn dc_pred_high[2][2][4];
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
-static void vp10_init_intra_predictors_internal(void) {
+static void av1_init_intra_predictors_internal(void) {
 #define INIT_NO_4X4(p, type)                  \
-  p[TX_8X8] = vpx_##type##_predictor_8x8;     \
-  p[TX_16X16] = vpx_##type##_predictor_16x16; \
-  p[TX_32X32] = vpx_##type##_predictor_32x32
+  p[TX_8X8] = aom_##type##_predictor_8x8;     \
+  p[TX_16X16] = aom_##type##_predictor_16x16; \
+  p[TX_32X32] = aom_##type##_predictor_32x32
 
 #define INIT_ALL_SIZES(p, type)           \
-  p[TX_4X4] = vpx_##type##_predictor_4x4; \
+  p[TX_4X4] = aom_##type##_predictor_4x4; \
   INIT_NO_4X4(p, type)
 
   INIT_ALL_SIZES(pred[V_PRED], v);
@@ -342,7 +342,7 @@ static void vp10_init_intra_predictors_internal(void) {
   INIT_ALL_SIZES(dc_pred[1][0], dc_left);
   INIT_ALL_SIZES(dc_pred[1][1], dc);
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   INIT_ALL_SIZES(pred_high[V_PRED], highbd_v);
   INIT_ALL_SIZES(pred_high[H_PRED], highbd_h);
   INIT_ALL_SIZES(pred_high[D207_PRED], highbd_d207e);
@@ -357,7 +357,7 @@ static void vp10_init_intra_predictors_internal(void) {
   INIT_ALL_SIZES(dc_pred_high[0][1], highbd_dc_top);
   INIT_ALL_SIZES(dc_pred_high[1][0], highbd_dc_left);
   INIT_ALL_SIZES(dc_pred_high[1][1], highbd_dc);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
 #undef intra_pred_allsizes
 }
@@ -388,13 +388,13 @@ static int intra_subpel_interp(int base, int shift, const uint8_t *ref,
     val = ROUND_POWER_OF_TWO(val, 8);
   } else {
     filter_idx = ROUND_POWER_OF_TWO(shift, 8 - SUBPEL_BITS);
-    filter = vp10_intra_filter_kernels[filter_type][filter_idx];
+    filter = av1_intra_filter_kernels[filter_type][filter_idx];
 
     if (filter_idx < (1 << SUBPEL_BITS)) {
       val = 0;
       for (k = 0; k < SUBPEL_TAPS; ++k) {
         idx = base + 1 - (SUBPEL_TAPS / 2) + k;
-        idx = VPXMAX(VPXMIN(idx, ref_end_idx), ref_start_idx);
+        idx = AOMMAX(AOMMIN(idx, ref_end_idx), ref_start_idx);
         val += ref[idx] * filter[k];
       }
       val = ROUND_POWER_OF_TWO(val, FILTER_BITS);
@@ -439,7 +439,7 @@ static void dr_prediction_z1(uint8_t *dst, ptrdiff_t stride, int bs,
         base += 1;
         shift = 0;
       }
-      len = VPXMIN(bs, 2 * bs - 1 - base);
+      len = AOMMIN(bs, 2 * bs - 1 - base);
       if (len <= 0) {
         int i;
         for (i = r; i < bs; ++i) {
@@ -460,8 +460,8 @@ static void dr_prediction_z1(uint8_t *dst, ptrdiff_t stride, int bs,
         }
       } else {
         if (!flags[shift]) {
-          const int16_t *filter = vp10_intra_filter_kernels[filter_type][shift];
-          vpx_convolve8_horiz(src + pad_size, 2 * bs, buf[shift], 2 * bs,
+          const int16_t *filter = av1_intra_filter_kernels[filter_type][shift];
+          aom_convolve8_horiz(src + pad_size, 2 * bs, buf[shift], 2 * bs,
                               filter, 16, NULL, 16, 2 * bs,
                               2 * bs < 16 ? 2 : 1);
           flags[shift] = 1;
@@ -570,7 +570,7 @@ static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
         base += 1;
         shift = 0;
       }
-      len = VPXMIN(bs, 2 * bs - 1 - base);
+      len = AOMMIN(bs, 2 * bs - 1 - base);
 
       if (len <= 0) {
         for (r = 0; r < bs; ++r) {
@@ -590,8 +590,8 @@ static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
         }
       } else {
         if (!flags[shift]) {
-          const int16_t *filter = vp10_intra_filter_kernels[filter_type][shift];
-          vpx_convolve8_vert(src + 4 * pad_size, 4, buf[0] + 4 * shift,
+          const int16_t *filter = av1_intra_filter_kernels[filter_type][shift];
+          aom_convolve8_vert(src + 4 * pad_size, 4, buf[0] + 4 * shift,
                              4 * SUBPEL_SHIFTS, NULL, 16, filter, 16,
                              2 * bs < 16 ? 4 : 4, 2 * bs);
           flags[shift] = 1;
@@ -730,53 +730,53 @@ static void filter_intra_predictors_4tap(uint8_t *dst, ptrdiff_t stride, int bs,
   }
 }
 
-void vp10_dc_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                                const uint8_t *above, const uint8_t *left) {
+void av1_dc_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                               const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, DC_PRED);
 }
 
-void vp10_v_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                               const uint8_t *above, const uint8_t *left) {
+void av1_v_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                              const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, V_PRED);
 }
 
-void vp10_h_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                               const uint8_t *above, const uint8_t *left) {
+void av1_h_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                              const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, H_PRED);
 }
 
-void vp10_d45_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                                 const uint8_t *above, const uint8_t *left) {
+void av1_d45_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                                const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, D45_PRED);
 }
 
-void vp10_d135_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                                  const uint8_t *above, const uint8_t *left) {
+void av1_d135_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                                 const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, D135_PRED);
 }
 
-void vp10_d117_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                                  const uint8_t *above, const uint8_t *left) {
+void av1_d117_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                                 const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, D117_PRED);
 }
 
-void vp10_d153_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                                  const uint8_t *above, const uint8_t *left) {
+void av1_d153_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                                 const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, D153_PRED);
 }
 
-void vp10_d207_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                                  const uint8_t *above, const uint8_t *left) {
+void av1_d207_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                                 const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, D207_PRED);
 }
 
-void vp10_d63_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                                 const uint8_t *above, const uint8_t *left) {
+void av1_d63_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                                const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, D63_PRED);
 }
 
-void vp10_tm_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                                const uint8_t *above, const uint8_t *left) {
+void av1_tm_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                               const uint8_t *above, const uint8_t *left) {
   filter_intra_predictors_4tap(dst, stride, bs, above, left, TM_PRED);
 }
 
@@ -784,33 +784,33 @@ static void filter_intra_predictors(int mode, uint8_t *dst, ptrdiff_t stride,
                                     int bs, const uint8_t *above,
                                     const uint8_t *left) {
   switch (mode) {
-    case DC_PRED: vp10_dc_filter_predictor(dst, stride, bs, above, left); break;
-    case V_PRED: vp10_v_filter_predictor(dst, stride, bs, above, left); break;
-    case H_PRED: vp10_h_filter_predictor(dst, stride, bs, above, left); break;
+    case DC_PRED: av1_dc_filter_predictor(dst, stride, bs, above, left); break;
+    case V_PRED: av1_v_filter_predictor(dst, stride, bs, above, left); break;
+    case H_PRED: av1_h_filter_predictor(dst, stride, bs, above, left); break;
     case D45_PRED:
-      vp10_d45_filter_predictor(dst, stride, bs, above, left);
+      av1_d45_filter_predictor(dst, stride, bs, above, left);
       break;
     case D135_PRED:
-      vp10_d135_filter_predictor(dst, stride, bs, above, left);
+      av1_d135_filter_predictor(dst, stride, bs, above, left);
       break;
     case D117_PRED:
-      vp10_d117_filter_predictor(dst, stride, bs, above, left);
+      av1_d117_filter_predictor(dst, stride, bs, above, left);
       break;
     case D153_PRED:
-      vp10_d153_filter_predictor(dst, stride, bs, above, left);
+      av1_d153_filter_predictor(dst, stride, bs, above, left);
       break;
     case D207_PRED:
-      vp10_d207_filter_predictor(dst, stride, bs, above, left);
+      av1_d207_filter_predictor(dst, stride, bs, above, left);
       break;
     case D63_PRED:
-      vp10_d63_filter_predictor(dst, stride, bs, above, left);
+      av1_d63_filter_predictor(dst, stride, bs, above, left);
       break;
-    case TM_PRED: vp10_tm_filter_predictor(dst, stride, bs, above, left); break;
+    case TM_PRED: av1_tm_filter_predictor(dst, stride, bs, above, left); break;
     default: assert(0);
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 static int highbd_intra_subpel_interp(int base, int shift, const uint16_t *ref,
                                       int ref_start_idx, int ref_end_idx,
                                       INTRA_FILTER filter_type) {
@@ -822,13 +822,13 @@ static int highbd_intra_subpel_interp(int base, int shift, const uint16_t *ref,
     val = ROUND_POWER_OF_TWO(val, 8);
   } else {
     filter_idx = ROUND_POWER_OF_TWO(shift, 8 - SUBPEL_BITS);
-    filter = vp10_intra_filter_kernels[filter_type][filter_idx];
+    filter = av1_intra_filter_kernels[filter_type][filter_idx];
 
     if (filter_idx < (1 << SUBPEL_BITS)) {
       val = 0;
       for (k = 0; k < SUBPEL_TAPS; ++k) {
         idx = base + 1 - (SUBPEL_TAPS / 2) + k;
-        idx = VPXMAX(VPXMIN(idx, ref_end_idx), ref_start_idx);
+        idx = AOMMAX(AOMMIN(idx, ref_end_idx), ref_start_idx);
         val += ref[idx] * filter[k];
       }
       val = ROUND_POWER_OF_TWO(val, FILTER_BITS);
@@ -956,7 +956,7 @@ static INLINE void highbd_h_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
   (void)above;
   (void)bd;
   for (r = 0; r < bs; r++) {
-    vpx_memset16(dst, left[r], bs);
+    aom_memset16(dst, left[r], bs);
     dst += stride;
   }
 }
@@ -1025,70 +1025,70 @@ static void highbd_filter_intra_predictors_4tap(uint16_t *dst, ptrdiff_t stride,
   }
 }
 
-void vp10_highbd_dc_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
-                                       const uint16_t *above,
-                                       const uint16_t *left, int bd) {
+void av1_highbd_dc_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
+                                      const uint16_t *above,
+                                      const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, DC_PRED,
                                       bd);
 }
 
-void vp10_highbd_v_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
-                                      const uint16_t *above,
-                                      const uint16_t *left, int bd) {
+void av1_highbd_v_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
+                                     const uint16_t *above,
+                                     const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, V_PRED, bd);
 }
 
-void vp10_highbd_h_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
-                                      const uint16_t *above,
-                                      const uint16_t *left, int bd) {
+void av1_highbd_h_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
+                                     const uint16_t *above,
+                                     const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, H_PRED, bd);
 }
 
-void vp10_highbd_d45_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
-                                        const uint16_t *above,
-                                        const uint16_t *left, int bd) {
+void av1_highbd_d45_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
+                                       const uint16_t *above,
+                                       const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, D45_PRED,
                                       bd);
 }
 
-void vp10_highbd_d135_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
-                                         int bs, const uint16_t *above,
-                                         const uint16_t *left, int bd) {
+void av1_highbd_d135_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
+                                        const uint16_t *above,
+                                        const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, D135_PRED,
                                       bd);
 }
 
-void vp10_highbd_d117_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
-                                         int bs, const uint16_t *above,
-                                         const uint16_t *left, int bd) {
+void av1_highbd_d117_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
+                                        const uint16_t *above,
+                                        const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, D117_PRED,
                                       bd);
 }
 
-void vp10_highbd_d153_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
-                                         int bs, const uint16_t *above,
-                                         const uint16_t *left, int bd) {
+void av1_highbd_d153_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
+                                        const uint16_t *above,
+                                        const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, D153_PRED,
                                       bd);
 }
 
-void vp10_highbd_d207_filter_predictor_c(uint16_t *dst, ptrdiff_t stride,
-                                         int bs, const uint16_t *above,
-                                         const uint16_t *left, int bd) {
+void av1_highbd_d207_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
+                                        const uint16_t *above,
+                                        const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, D207_PRED,
                                       bd);
 }
 
-void vp10_highbd_d63_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
-                                        const uint16_t *above,
-                                        const uint16_t *left, int bd) {
+void av1_highbd_d63_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
+                                       const uint16_t *above,
+                                       const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, D63_PRED,
                                       bd);
 }
 
-void vp10_highbd_tm_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
-                                       const uint16_t *above,
-                                       const uint16_t *left, int bd) {
+void av1_highbd_tm_filter_predictor_c(uint16_t *dst, ptrdiff_t stride, int bs,
+                                      const uint16_t *above,
+                                      const uint16_t *left, int bd) {
   highbd_filter_intra_predictors_4tap(dst, stride, bs, above, left, TM_PRED,
                                       bd);
 }
@@ -1099,42 +1099,42 @@ static void highbd_filter_intra_predictors(int mode, uint16_t *dst,
                                            const uint16_t *left, int bd) {
   switch (mode) {
     case DC_PRED:
-      vp10_highbd_dc_filter_predictor(dst, stride, bs, above, left, bd);
+      av1_highbd_dc_filter_predictor(dst, stride, bs, above, left, bd);
       break;
     case V_PRED:
-      vp10_highbd_v_filter_predictor(dst, stride, bs, above, left, bd);
+      av1_highbd_v_filter_predictor(dst, stride, bs, above, left, bd);
       break;
     case H_PRED:
-      vp10_highbd_h_filter_predictor(dst, stride, bs, above, left, bd);
+      av1_highbd_h_filter_predictor(dst, stride, bs, above, left, bd);
       break;
     case D45_PRED:
-      vp10_highbd_d45_filter_predictor(dst, stride, bs, above, left, bd);
+      av1_highbd_d45_filter_predictor(dst, stride, bs, above, left, bd);
       break;
     case D135_PRED:
-      vp10_highbd_d135_filter_predictor(dst, stride, bs, above, left, bd);
+      av1_highbd_d135_filter_predictor(dst, stride, bs, above, left, bd);
       break;
     case D117_PRED:
-      vp10_highbd_d117_filter_predictor(dst, stride, bs, above, left, bd);
+      av1_highbd_d117_filter_predictor(dst, stride, bs, above, left, bd);
       break;
     case D153_PRED:
-      vp10_highbd_d153_filter_predictor(dst, stride, bs, above, left, bd);
+      av1_highbd_d153_filter_predictor(dst, stride, bs, above, left, bd);
       break;
     case D207_PRED:
-      vp10_highbd_d207_filter_predictor(dst, stride, bs, above, left, bd);
+      av1_highbd_d207_filter_predictor(dst, stride, bs, above, left, bd);
       break;
     case D63_PRED:
-      vp10_highbd_d63_filter_predictor(dst, stride, bs, above, left, bd);
+      av1_highbd_d63_filter_predictor(dst, stride, bs, above, left, bd);
       break;
     case TM_PRED:
-      vp10_highbd_tm_filter_predictor(dst, stride, bs, above, left, bd);
+      av1_highbd_tm_filter_predictor(dst, stride, bs, above, left, bd);
       break;
     default: assert(0);
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 #endif  // CONFIG_EXT_INTRA
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 static void build_intra_predictors_high(
     const MACROBLOCKD *xd, const uint8_t *ref8, int ref_stride, uint8_t *dst8,
     int dst_stride, PREDICTION_MODE mode, TX_SIZE tx_size, int n_top_px,
@@ -1194,7 +1194,7 @@ static void build_intra_predictors_high(
     int i;
     const int val = (n_left_px == 0) ? base + 1 : base - 1;
     for (i = 0; i < bs; ++i) {
-      vpx_memset16(dst, val, bs);
+      aom_memset16(dst, val, bs);
       dst += dst_stride;
     }
     return;
@@ -1224,9 +1224,9 @@ static void build_intra_predictors_high(
           left_col[i] = ref[i * ref_stride - 1];
       }
       if (i < (bs << need_bottom))
-        vpx_memset16(&left_col[i], left_col[i - 1], (bs << need_bottom) - i);
+        aom_memset16(&left_col[i], left_col[i - 1], (bs << need_bottom) - i);
     } else {
-      vpx_memset16(left_col, base + 1, bs << need_bottom);
+      aom_memset16(left_col, base + 1, bs << need_bottom);
     }
   }
 
@@ -1254,9 +1254,9 @@ static void build_intra_predictors_high(
         i += n_topright_px;
       }
       if (i < (bs << need_right))
-        vpx_memset16(&above_row[i], above_row[i - 1], (bs << need_right) - i);
+        aom_memset16(&above_row[i], above_row[i - 1], (bs << need_right) - i);
     } else {
-      vpx_memset16(above_row, base - 1, bs << need_right);
+      aom_memset16(above_row, base - 1, bs << need_right);
     }
   }
 
@@ -1285,7 +1285,7 @@ static void build_intra_predictors_high(
   if (mode != DC_PRED && mode != TM_PRED &&
       xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
     INTRA_FILTER filter = INTRA_FILTER_LINEAR;
-    if (plane == 0 && vp10_is_intra_filter_switchable(p_angle))
+    if (plane == 0 && av1_is_intra_filter_switchable(p_angle))
       filter = xd->mi[0]->mbmi.intra_filter;
     highbd_dr_predictor(dst, dst_stride, bs, const_above_row, left_col, p_angle,
                         xd->bd, filter);
@@ -1302,7 +1302,7 @@ static void build_intra_predictors_high(
                              xd->bd);
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
 static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
                                    int ref_stride, uint8_t *dst, int dst_stride,
@@ -1453,7 +1453,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
   if (mode != DC_PRED && mode != TM_PRED &&
       xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
     INTRA_FILTER filter = INTRA_FILTER_LINEAR;
-    if (plane == 0 && vp10_is_intra_filter_switchable(p_angle))
+    if (plane == 0 && av1_is_intra_filter_switchable(p_angle))
       filter = xd->mi[0]->mbmi.intra_filter;
     dr_predictor(dst, dst_stride, tx_size, const_above_row, left_col, p_angle,
                  filter);
@@ -1470,11 +1470,11 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
   }
 }
 
-void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
-                              TX_SIZE tx_size, PREDICTION_MODE mode,
-                              const uint8_t *ref, int ref_stride, uint8_t *dst,
-                              int dst_stride, int col_off, int row_off,
-                              int plane) {
+void av1_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
+                             TX_SIZE tx_size, PREDICTION_MODE mode,
+                             const uint8_t *ref, int ref_stride, uint8_t *dst,
+                             int dst_stride, int col_off, int row_off,
+                             int plane) {
   const BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   const struct macroblockd_plane *const pd = &xd->plane[plane];
   const int txw = num_4x4_blocks_wide_txsize_lookup[tx_size];
@@ -1483,8 +1483,8 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
   const int have_left = col_off || xd->left_available;
   const int x = col_off * 4;
   const int y = row_off * 4;
-  const int bw = pd->subsampling_x ? 1 << bwl_in : VPXMAX(2, 1 << bwl_in);
-  const int bh = pd->subsampling_y ? 1 << bhl_in : VPXMAX(2, 1 << bhl_in);
+  const int bw = pd->subsampling_x ? 1 << bwl_in : AOMMAX(2, 1 << bwl_in);
+  const int bh = pd->subsampling_y ? 1 << bhl_in : AOMMAX(2, 1 << bhl_in);
   const int mi_row = -xd->mb_to_top_edge >> (3 + MI_SIZE_LOG2);
   const int mi_col = -xd->mb_to_left_edge >> (3 + MI_SIZE_LOG2);
   const int wpx = 4 * bw;
@@ -1506,31 +1506,30 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
   const PARTITION_TYPE partition = xd->mi[0]->mbmi.partition;
 #endif
   const int have_right =
-      vp10_has_right(bsize, mi_row, mi_col, right_available,
+      av1_has_right(bsize, mi_row, mi_col, right_available,
 #if CONFIG_EXT_PARTITION_TYPES
-                     partition,
+                    partition,
 #endif
-                     tx_size, row_off, col_off, pd->subsampling_x);
-  const int have_bottom =
-      vp10_has_bottom(bsize, mi_row, mi_col, yd > 0, tx_size, row_off, col_off,
-                      pd->subsampling_y);
+                    tx_size, row_off, col_off, pd->subsampling_x);
+  const int have_bottom = av1_has_bottom(bsize, mi_row, mi_col, yd > 0, tx_size,
+                                         row_off, col_off, pd->subsampling_y);
 
   if (xd->mi[0]->mbmi.palette_mode_info.palette_size[plane != 0] > 0) {
     const int bs = 4 * num_4x4_blocks_wide_txsize_lookup[tx_size];
     const int stride = 4 * (1 << bwl_in);
     int r, c;
     uint8_t *map = NULL;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
     uint16_t *palette = xd->mi[0]->mbmi.palette_mode_info.palette_colors +
                         plane * PALETTE_MAX_SIZE;
 #else
     uint8_t *palette = xd->mi[0]->mbmi.palette_mode_info.palette_colors +
                        plane * PALETTE_MAX_SIZE;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
     map = xd->plane[plane != 0].color_index_map;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       uint16_t *dst16 = CONVERT_TO_SHORTPTR(dst);
       for (r = 0; r < bs; ++r)
@@ -1546,29 +1545,29 @@ void vp10_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
     for (r = 0; r < bs; ++r)
       for (c = 0; c < bs; ++c)
         dst[r * dst_stride + c] = palette[map[(r + y) * stride + c + x]];
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
     return;
   }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     build_intra_predictors_high(
         xd, ref, ref_stride, dst, dst_stride, mode, tx_size,
-        have_top ? VPXMIN(txwpx, xr + txwpx) : 0,
-        have_top && have_right ? VPXMIN(txwpx, xr) : 0,
-        have_left ? VPXMIN(txhpx, yd + txhpx) : 0,
-        have_bottom && have_left ? VPXMIN(txhpx, yd) : 0, plane);
+        have_top ? AOMMIN(txwpx, xr + txwpx) : 0,
+        have_top && have_right ? AOMMIN(txwpx, xr) : 0,
+        have_left ? AOMMIN(txhpx, yd + txhpx) : 0,
+        have_bottom && have_left ? AOMMIN(txhpx, yd) : 0, plane);
     return;
   }
 #endif
   build_intra_predictors(xd, ref, ref_stride, dst, dst_stride, mode, tx_size,
-                         have_top ? VPXMIN(txwpx, xr + txwpx) : 0,
-                         have_top && have_right ? VPXMIN(txwpx, xr) : 0,
-                         have_left ? VPXMIN(txhpx, yd + txhpx) : 0,
-                         have_bottom && have_left ? VPXMIN(txhpx, yd) : 0,
+                         have_top ? AOMMIN(txwpx, xr + txwpx) : 0,
+                         have_top && have_right ? AOMMIN(txwpx, xr) : 0,
+                         have_left ? AOMMIN(txhpx, yd + txhpx) : 0,
+                         have_bottom && have_left ? AOMMIN(txhpx, yd) : 0,
                          plane);
 }
 
-void vp10_init_intra_predictors(void) {
-  once(vp10_init_intra_predictors_internal);
+void av1_init_intra_predictors(void) {
+  once(av1_init_intra_predictors_internal);
 }

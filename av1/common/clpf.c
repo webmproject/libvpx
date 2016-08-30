@@ -28,9 +28,9 @@ static void clpf_block(const uint8_t *src, uint8_t *dst, int sstride,
 #define BS (MI_SIZE * MAX_MIB_SIZE)
 
 // Iterate over blocks within a superblock
-static void vp10_clpf_sb(const YV12_BUFFER_CONFIG *frame_buffer,
-                         const VP10_COMMON *cm, MACROBLOCKD *xd,
-                         MODE_INFO *const *mi_8x8, int xpos, int ypos) {
+static void av1_clpf_sb(const YV12_BUFFER_CONFIG *frame_buffer,
+                        const AV1_COMMON *cm, MACROBLOCKD *xd,
+                        MODE_INFO *const *mi_8x8, int xpos, int ypos) {
   // Temporary buffer (to allow SIMD parallelism)
   uint8_t buf_unaligned[BS * BS + 15];
   uint8_t *buf = (uint8_t *)(((intptr_t)buf_unaligned + 15) & ~15);
@@ -56,7 +56,7 @@ static void vp10_clpf_sb(const YV12_BUFFER_CONFIG *frame_buffer,
           has_bottom &= y != MAX_MIB_SIZE - 1;
           has_right &= x != MAX_MIB_SIZE - 1;
 #endif
-          vp10_setup_dst_planes(xd->plane, frame_buffer, ypos + y, xpos + x);
+          av1_setup_dst_planes(xd->plane, frame_buffer, ypos + y, xpos + x);
           clpf_block(
               xd->plane[p].dst.buf, CLPF_ALLOW_PIXEL_PARALLELISM
                                         ? buf + y * MI_SIZE * BS + x * MI_SIZE
@@ -74,7 +74,7 @@ static void vp10_clpf_sb(const YV12_BUFFER_CONFIG *frame_buffer,
       for (x = 0; x < MAX_MIB_SIZE && xpos + x < cm->mi_cols; x++) {
         const MB_MODE_INFO *mbmi =
             &mi_8x8[(ypos + y) * cm->mi_stride + xpos + x]->mbmi;
-        vp10_setup_dst_planes(xd->plane, frame_buffer, ypos + y, xpos + x);
+        av1_setup_dst_planes(xd->plane, frame_buffer, ypos + y, xpos + x);
         if (!mbmi->skip) {
           int i = 0;
           for (i = 0; i<MI_SIZE>> xd->plane[p].subsampling_y; i++)
@@ -89,11 +89,11 @@ static void vp10_clpf_sb(const YV12_BUFFER_CONFIG *frame_buffer,
 }
 
 // Iterate over the superblocks of an entire frame
-void vp10_clpf_frame(const YV12_BUFFER_CONFIG *frame, const VP10_COMMON *cm,
-                     MACROBLOCKD *xd) {
+void av1_clpf_frame(const YV12_BUFFER_CONFIG *frame, const AV1_COMMON *cm,
+                    MACROBLOCKD *xd) {
   int x, y;
 
   for (y = 0; y < cm->mi_rows; y += MAX_MIB_SIZE)
     for (x = 0; x < cm->mi_cols; x += MAX_MIB_SIZE)
-      vp10_clpf_sb(frame, cm, xd, cm->mi_grid_visible, x, y);
+      av1_clpf_sb(frame, cm, xd, cm->mi_grid_visible, x, y);
 }

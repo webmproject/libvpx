@@ -10,7 +10,7 @@
 
 #include <arm_neon.h>
 
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_dsp_rtcd.h"
 
 static void hadamard8x8_one_pass(int16x8_t *a0, int16x8_t *a1, int16x8_t *a2,
                                  int16x8_t *a3, int16x8_t *a4, int16x8_t *a5,
@@ -130,7 +130,7 @@ static void transpose8x8(int16x8_t *a0, int16x8_t *a1, int16x8_t *a2,
   *a7 = b3.val[1];
 }
 
-void vpx_hadamard_8x8_neon(const int16_t *src_diff, int src_stride,
+void aom_hadamard_8x8_neon(const int16_t *src_diff, int src_stride,
                            int16_t *coeff) {
   int16x8_t a0 = vld1q_s16(src_diff);
   int16x8_t a1 = vld1q_s16(src_diff + src_stride);
@@ -159,19 +159,19 @@ void vpx_hadamard_8x8_neon(const int16_t *src_diff, int src_stride,
   vst1q_s16(coeff + 56, a7);
 }
 
-void vpx_hadamard_16x16_neon(const int16_t *src_diff, int src_stride,
+void aom_hadamard_16x16_neon(const int16_t *src_diff, int src_stride,
                              int16_t *coeff) {
   int i;
 
   /* Rearrange 16x16 to 8x32 and remove stride.
    * Top left first. */
-  vpx_hadamard_8x8_neon(src_diff + 0 + 0 * src_stride, src_stride, coeff + 0);
+  aom_hadamard_8x8_neon(src_diff + 0 + 0 * src_stride, src_stride, coeff + 0);
   /* Top right. */
-  vpx_hadamard_8x8_neon(src_diff + 8 + 0 * src_stride, src_stride, coeff + 64);
+  aom_hadamard_8x8_neon(src_diff + 8 + 0 * src_stride, src_stride, coeff + 64);
   /* Bottom left. */
-  vpx_hadamard_8x8_neon(src_diff + 0 + 8 * src_stride, src_stride, coeff + 128);
+  aom_hadamard_8x8_neon(src_diff + 0 + 8 * src_stride, src_stride, coeff + 128);
   /* Bottom right. */
-  vpx_hadamard_8x8_neon(src_diff + 8 + 8 * src_stride, src_stride, coeff + 192);
+  aom_hadamard_8x8_neon(src_diff + 8 + 8 * src_stride, src_stride, coeff + 192);
 
   for (i = 0; i < 64; i += 8) {
     const int16x8_t a0 = vld1q_s16(coeff + 0);

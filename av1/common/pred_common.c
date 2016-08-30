@@ -34,7 +34,7 @@ static INTERP_FILTER get_ref_filter_type(const MODE_INFO *mi,
   return ref_type;
 }
 
-int vp10_get_pred_context_switchable_interp(const MACROBLOCKD *xd, int dir) {
+int av1_get_pred_context_switchable_interp(const MACROBLOCKD *xd, int dir) {
   const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   const int ctx_offset =
       (mbmi->ref_frame[1] > INTRA_FRAME) * INTER_FILTER_COMP_OFFSET;
@@ -67,7 +67,7 @@ int vp10_get_pred_context_switchable_interp(const MACROBLOCKD *xd, int dir) {
   return filter_type_ctx;
 }
 #else
-int vp10_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
+int av1_get_pred_context_switchable_interp(const MACROBLOCKD *xd) {
   // Note:
   // The mode info data structure has a one element border above and to the
   // left of the entries corresponding to real macroblocks.
@@ -115,7 +115,7 @@ static INTRA_FILTER get_ref_intra_filter(const MB_MODE_INFO *ref_mbmi) {
       if (mode != DC_PRED && mode != TM_PRED) {
         int p_angle =
             mode_to_angle_map[mode] + ref_mbmi->angle_delta[0] * ANGLE_STEP;
-        if (vp10_is_intra_filter_switchable(p_angle)) {
+        if (av1_is_intra_filter_switchable(p_angle)) {
           ref_type = ref_mbmi->intra_filter;
         }
       }
@@ -124,7 +124,7 @@ static INTRA_FILTER get_ref_intra_filter(const MB_MODE_INFO *ref_mbmi) {
   return ref_type;
 }
 
-int vp10_get_pred_context_intra_interp(const MACROBLOCKD *xd) {
+int av1_get_pred_context_intra_interp(const MACROBLOCKD *xd) {
   int left_type = INTRA_FILTERS, above_type = INTRA_FILTERS;
 
   if (xd->left_available) left_type = get_ref_intra_filter(xd->left_mbmi);
@@ -149,7 +149,7 @@ int vp10_get_pred_context_intra_interp(const MACROBLOCKD *xd) {
 // 1 - intra/inter, inter/intra
 // 2 - intra/--, --/intra
 // 3 - intra/intra
-int vp10_get_intra_inter_context(const MACROBLOCKD *xd) {
+int av1_get_intra_inter_context(const MACROBLOCKD *xd) {
   const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
   const int has_above = xd->up_available;
@@ -171,8 +171,8 @@ int vp10_get_intra_inter_context(const MACROBLOCKD *xd) {
 #define CHECK_BWDREF_OR_ALTREF(ref_frame) \
   (((ref_frame) == BWDREF_FRAME) || ((ref_frame) == ALTREF_FRAME))
 
-int vp10_get_reference_mode_context(const VP10_COMMON *cm,
-                                    const MACROBLOCKD *xd) {
+int av1_get_reference_mode_context(const AV1_COMMON *cm,
+                                   const MACROBLOCKD *xd) {
   int ctx;
   const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
@@ -218,8 +218,8 @@ int vp10_get_reference_mode_context(const VP10_COMMON *cm,
 
 #else  // CONFIG_EXT_REFS
 
-int vp10_get_reference_mode_context(const VP10_COMMON *cm,
-                                    const MACROBLOCKD *xd) {
+int av1_get_reference_mode_context(const AV1_COMMON *cm,
+                                   const MACROBLOCKD *xd) {
   int ctx;
   const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
@@ -279,8 +279,8 @@ int vp10_get_reference_mode_context(const VP10_COMMON *cm,
 //
 // NOTE(zoeliu): The probability of ref_frame[0] is either
 //               GOLDEN_FRAME or LAST3_FRAME.
-int vp10_get_pred_context_comp_ref_p(const VP10_COMMON *cm,
-                                     const MACROBLOCKD *xd) {
+int av1_get_pred_context_comp_ref_p(const AV1_COMMON *cm,
+                                    const MACROBLOCKD *xd) {
   int pred_context;
   const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
@@ -379,8 +379,8 @@ int vp10_get_pred_context_comp_ref_p(const VP10_COMMON *cm,
 //
 // NOTE(zoeliu): The probability of ref_frame[0] is LAST_FRAME,
 // conditioning on it is either LAST_FRAME or LAST2_FRAME.
-int vp10_get_pred_context_comp_ref_p1(const VP10_COMMON *cm,
-                                      const MACROBLOCKD *xd) {
+int av1_get_pred_context_comp_ref_p1(const AV1_COMMON *cm,
+                                     const MACROBLOCKD *xd) {
   int pred_context;
   const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
@@ -480,8 +480,8 @@ int vp10_get_pred_context_comp_ref_p1(const VP10_COMMON *cm,
 //
 // NOTE(zoeliu): The probability of ref_frame[0] is GOLDEN_FRAME,
 // conditioning on it is either GOLDEN or LAST3.
-int vp10_get_pred_context_comp_ref_p2(const VP10_COMMON *cm,
-                                      const MACROBLOCKD *xd) {
+int av1_get_pred_context_comp_ref_p2(const AV1_COMMON *cm,
+                                     const MACROBLOCKD *xd) {
   int pred_context;
   const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
@@ -575,8 +575,8 @@ int vp10_get_pred_context_comp_ref_p2(const VP10_COMMON *cm,
 }
 
 // Returns a context number for the given MB prediction signal
-int vp10_get_pred_context_comp_bwdref_p(const VP10_COMMON *cm,
-                                        const MACROBLOCKD *xd) {
+int av1_get_pred_context_comp_bwdref_p(const AV1_COMMON *cm,
+                                       const MACROBLOCKD *xd) {
   int pred_context;
   const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
@@ -687,8 +687,8 @@ int vp10_get_pred_context_comp_bwdref_p(const VP10_COMMON *cm,
 #else  // CONFIG_EXT_REFS
 
 // Returns a context number for the given MB prediction signal
-int vp10_get_pred_context_comp_ref_p(const VP10_COMMON *cm,
-                                     const MACROBLOCKD *xd) {
+int av1_get_pred_context_comp_ref_p(const AV1_COMMON *cm,
+                                    const MACROBLOCKD *xd) {
   int pred_context;
   const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
@@ -777,7 +777,7 @@ int vp10_get_pred_context_comp_ref_p(const VP10_COMMON *cm,
 // or a BWDREF_FRAME.
 //
 // NOTE(zoeliu): The probability of ref_frame[0] is ALTREF/BWDREF.
-int vp10_get_pred_context_single_ref_p1(const MACROBLOCKD *xd) {
+int av1_get_pred_context_single_ref_p1(const MACROBLOCKD *xd) {
   int pred_context;
   const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
@@ -856,7 +856,7 @@ int vp10_get_pred_context_single_ref_p1(const MACROBLOCKD *xd) {
 //
 // NOTE(zoeliu): The probability of ref_frame[0] is ALTREF_FRAME, conditioning
 // on it is either ALTREF_FRAME/BWDREF_FRAME.
-int vp10_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
+int av1_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
   int pred_context;
   const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
@@ -950,7 +950,7 @@ int vp10_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
 //
 // NOTE(zoeliu): The probability of ref_frame[0] is LAST3/GOLDEN, conditioning
 // on it is either LAST3/GOLDEN/LAST2/LAST.
-int vp10_get_pred_context_single_ref_p3(const MACROBLOCKD *xd) {
+int av1_get_pred_context_single_ref_p3(const MACROBLOCKD *xd) {
   int pred_context;
   const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
@@ -1047,7 +1047,7 @@ int vp10_get_pred_context_single_ref_p3(const MACROBLOCKD *xd) {
 //
 // NOTE(zoeliu): The probability of ref_frame[0] is LAST2_FRAME, conditioning
 // on it is either LAST2_FRAME/LAST_FRAME.
-int vp10_get_pred_context_single_ref_p4(const MACROBLOCKD *xd) {
+int av1_get_pred_context_single_ref_p4(const MACROBLOCKD *xd) {
   int pred_context;
   const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
@@ -1139,7 +1139,7 @@ int vp10_get_pred_context_single_ref_p4(const MACROBLOCKD *xd) {
 //
 // NOTE(zoeliu): The probability of ref_frame[0] is GOLDEN_FRAME, conditioning
 // on it is either GOLDEN_FRAME/LAST3_FRAME.
-int vp10_get_pred_context_single_ref_p5(const MACROBLOCKD *xd) {
+int av1_get_pred_context_single_ref_p5(const MACROBLOCKD *xd) {
   int pred_context;
   const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
@@ -1229,7 +1229,7 @@ int vp10_get_pred_context_single_ref_p5(const MACROBLOCKD *xd) {
 
 #else  // CONFIG_EXT_REFS
 
-int vp10_get_pred_context_single_ref_p1(const MACROBLOCKD *xd) {
+int av1_get_pred_context_single_ref_p1(const MACROBLOCKD *xd) {
   int pred_context;
   const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;
@@ -1295,7 +1295,7 @@ int vp10_get_pred_context_single_ref_p1(const MACROBLOCKD *xd) {
   return pred_context;
 }
 
-int vp10_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
+int av1_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
   int pred_context;
   const MB_MODE_INFO *const above_mbmi = xd->above_mbmi;
   const MB_MODE_INFO *const left_mbmi = xd->left_mbmi;

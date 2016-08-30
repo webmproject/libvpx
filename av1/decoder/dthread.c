@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "./vpx_config.h"
-#include "aom_mem/vpx_mem.h"
+#include "./aom_config.h"
+#include "aom_mem/aom_mem.h"
 #include "av1/common/reconinter.h"
 #include "av1/decoder/dthread.h"
 #include "av1/decoder/decoder.h"
@@ -17,7 +17,7 @@
 // #define DEBUG_THREAD
 
 // TODO(hkuang): Clean up all the #ifdef in this file.
-void vp10_frameworker_lock_stats(VPxWorker *const worker) {
+void av1_frameworker_lock_stats(AVxWorker *const worker) {
 #if CONFIG_MULTITHREAD
   FrameWorkerData *const worker_data = worker->data1;
   pthread_mutex_lock(&worker_data->stats_mutex);
@@ -26,7 +26,7 @@ void vp10_frameworker_lock_stats(VPxWorker *const worker) {
 #endif
 }
 
-void vp10_frameworker_unlock_stats(VPxWorker *const worker) {
+void av1_frameworker_unlock_stats(AVxWorker *const worker) {
 #if CONFIG_MULTITHREAD
   FrameWorkerData *const worker_data = worker->data1;
   pthread_mutex_unlock(&worker_data->stats_mutex);
@@ -35,7 +35,7 @@ void vp10_frameworker_unlock_stats(VPxWorker *const worker) {
 #endif
 }
 
-void vp10_frameworker_signal_stats(VPxWorker *const worker) {
+void av1_frameworker_signal_stats(AVxWorker *const worker) {
 #if CONFIG_MULTITHREAD
   FrameWorkerData *const worker_data = worker->data1;
 
@@ -59,8 +59,8 @@ void vp10_frameworker_signal_stats(VPxWorker *const worker) {
 #endif
 
 // TODO(hkuang): Remove worker parameter as it is only used in debug code.
-void vp10_frameworker_wait(VPxWorker *const worker, RefCntBuffer *const ref_buf,
-                           int row) {
+void av1_frameworker_wait(AVxWorker *const worker, RefCntBuffer *const ref_buf,
+                          int row) {
 #if CONFIG_MULTITHREAD
   if (!ref_buf) return;
 
@@ -73,10 +73,10 @@ void vp10_frameworker_wait(VPxWorker *const worker, RefCntBuffer *const ref_buf,
   {
     // Find the worker thread that owns the reference frame. If the reference
     // frame has been fully decoded, it may not have owner.
-    VPxWorker *const ref_worker = ref_buf->frame_worker_owner;
+    AVxWorker *const ref_worker = ref_buf->frame_worker_owner;
     FrameWorkerData *const ref_worker_data =
         (FrameWorkerData *)ref_worker->data1;
-    const VP10Decoder *const pbi = ref_worker_data->pbi;
+    const AV1Decoder *const pbi = ref_worker_data->pbi;
 
 #ifdef DEBUG_THREAD
     {
@@ -87,7 +87,7 @@ void vp10_frameworker_wait(VPxWorker *const worker, RefCntBuffer *const ref_buf,
     }
 #endif
 
-    vp10_frameworker_lock_stats(ref_worker);
+    av1_frameworker_lock_stats(ref_worker);
     while (ref_buf->row < row && pbi->cur_buf == ref_buf &&
            ref_buf->buf.corrupted != 1) {
       pthread_cond_wait(&ref_worker_data->stats_cond,
@@ -96,12 +96,12 @@ void vp10_frameworker_wait(VPxWorker *const worker, RefCntBuffer *const ref_buf,
 
     if (ref_buf->buf.corrupted == 1) {
       FrameWorkerData *const worker_data = (FrameWorkerData *)worker->data1;
-      vp10_frameworker_unlock_stats(ref_worker);
-      vpx_internal_error(&worker_data->pbi->common.error,
-                         VPX_CODEC_CORRUPT_FRAME,
+      av1_frameworker_unlock_stats(ref_worker);
+      aom_internal_error(&worker_data->pbi->common.error,
+                         AOM_CODEC_CORRUPT_FRAME,
                          "Worker %p failed to decode frame", worker);
     }
-    vp10_frameworker_unlock_stats(ref_worker);
+    av1_frameworker_unlock_stats(ref_worker);
   }
 #else
   (void)worker;
@@ -111,9 +111,9 @@ void vp10_frameworker_wait(VPxWorker *const worker, RefCntBuffer *const ref_buf,
 #endif  // CONFIG_MULTITHREAD
 }
 
-void vp10_frameworker_broadcast(RefCntBuffer *const buf, int row) {
+void av1_frameworker_broadcast(RefCntBuffer *const buf, int row) {
 #if CONFIG_MULTITHREAD
-  VPxWorker *worker = buf->frame_worker_owner;
+  AVxWorker *worker = buf->frame_worker_owner;
 
 #ifdef DEBUG_THREAD
   {
@@ -123,27 +123,27 @@ void vp10_frameworker_broadcast(RefCntBuffer *const buf, int row) {
   }
 #endif
 
-  vp10_frameworker_lock_stats(worker);
+  av1_frameworker_lock_stats(worker);
   buf->row = row;
-  vp10_frameworker_signal_stats(worker);
-  vp10_frameworker_unlock_stats(worker);
+  av1_frameworker_signal_stats(worker);
+  av1_frameworker_unlock_stats(worker);
 #else
   (void)buf;
   (void)row;
 #endif  // CONFIG_MULTITHREAD
 }
 
-void vp10_frameworker_copy_context(VPxWorker *const dst_worker,
-                                   VPxWorker *const src_worker) {
+void av1_frameworker_copy_context(AVxWorker *const dst_worker,
+                                  AVxWorker *const src_worker) {
 #if CONFIG_MULTITHREAD
   FrameWorkerData *const src_worker_data = (FrameWorkerData *)src_worker->data1;
   FrameWorkerData *const dst_worker_data = (FrameWorkerData *)dst_worker->data1;
-  VP10_COMMON *const src_cm = &src_worker_data->pbi->common;
-  VP10_COMMON *const dst_cm = &dst_worker_data->pbi->common;
+  AV1_COMMON *const src_cm = &src_worker_data->pbi->common;
+  AV1_COMMON *const dst_cm = &dst_worker_data->pbi->common;
   int i;
 
   // Wait until source frame's context is ready.
-  vp10_frameworker_lock_stats(src_worker);
+  av1_frameworker_lock_stats(src_worker);
   while (!src_worker_data->frame_context_ready) {
     pthread_cond_wait(&src_worker_data->stats_cond,
                       &src_worker_data->stats_mutex);
@@ -153,10 +153,10 @@ void vp10_frameworker_copy_context(VPxWorker *const dst_worker,
                                    ? src_cm->current_frame_seg_map
                                    : src_cm->last_frame_seg_map;
   dst_worker_data->pbi->need_resync = src_worker_data->pbi->need_resync;
-  vp10_frameworker_unlock_stats(src_worker);
+  av1_frameworker_unlock_stats(src_worker);
 
   dst_cm->bit_depth = src_cm->bit_depth;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   dst_cm->use_highbitdepth = src_cm->use_highbitdepth;
 #endif
 #if CONFIG_EXT_REFS

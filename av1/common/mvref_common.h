@@ -7,8 +7,8 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#ifndef VP10_COMMON_MVREF_COMMON_H_
-#define VP10_COMMON_MVREF_COMMON_H_
+#ifndef AV1_COMMON_MVREF_COMMON_H_
+#define AV1_COMMON_MVREF_COMMON_H_
 
 #include "av1/common/onyxc_int.h"
 #include "av1/common/blockd.h"
@@ -340,7 +340,7 @@ static INLINE int is_inside(const TileInfo *const tile, int mi_col, int mi_row,
 }
 
 static INLINE void lower_mv_precision(MV *mv, int allow_hp) {
-  const int use_hp = allow_hp && vp10_use_mv_hp(mv);
+  const int use_hp = allow_hp && av1_use_mv_hp(mv);
   if (!use_hp) {
     if (mv->row & 1) mv->row += (mv->row > 0 ? -1 : 1);
     if (mv->col & 1) mv->col += (mv->col > 0 ? -1 : 1);
@@ -348,8 +348,8 @@ static INLINE void lower_mv_precision(MV *mv, int allow_hp) {
 }
 
 #if CONFIG_REF_MV
-static INLINE int vp10_nmv_ctx(const uint8_t ref_mv_count,
-                               const CANDIDATE_MV *ref_mv_stack) {
+static INLINE int av1_nmv_ctx(const uint8_t ref_mv_count,
+                              const CANDIDATE_MV *ref_mv_stack) {
 #if CONFIG_EXT_INTER
   return 0;
 #endif
@@ -365,7 +365,7 @@ static INLINE int vp10_nmv_ctx(const uint8_t ref_mv_count,
   return 0;
 }
 
-static INLINE int8_t vp10_ref_frame_type(const MV_REFERENCE_FRAME *const rf) {
+static INLINE int8_t av1_ref_frame_type(const MV_REFERENCE_FRAME *const rf) {
   if (rf[1] > INTRA_FRAME) {
     return TOTAL_REFS_PER_FRAME + FWD_RF_OFFSET(rf[0]) +
            BWD_RF_OFFSET(rf[1]) * FWD_REFS;
@@ -386,8 +386,8 @@ static MV_REFERENCE_FRAME ref_frame_map[COMP_REFS][2] = {
 #endif
 };
 
-static INLINE void vp10_set_ref_frame(MV_REFERENCE_FRAME *rf,
-                                      int8_t ref_frame_type) {
+static INLINE void av1_set_ref_frame(MV_REFERENCE_FRAME *rf,
+                                     int8_t ref_frame_type) {
   if (ref_frame_type >= TOTAL_REFS_PER_FRAME) {
     rf[0] = ref_frame_map[ref_frame_type - TOTAL_REFS_PER_FRAME][0];
     rf[1] = ref_frame_map[ref_frame_type - TOTAL_REFS_PER_FRAME][1];
@@ -399,7 +399,7 @@ static INLINE void vp10_set_ref_frame(MV_REFERENCE_FRAME *rf,
   }
 }
 
-static INLINE int16_t vp10_mode_context_analyzer(
+static INLINE int16_t av1_mode_context_analyzer(
     const int16_t *const mode_context, const MV_REFERENCE_FRAME *const rf,
     BLOCK_SIZE bsize, int block) {
   int16_t mode_ctx = 0;
@@ -420,8 +420,8 @@ static INLINE int16_t vp10_mode_context_analyzer(
     return mode_context[rf[0]];
 }
 
-static INLINE uint8_t vp10_drl_ctx(const CANDIDATE_MV *ref_mv_stack,
-                                   int ref_idx) {
+static INLINE uint8_t av1_drl_ctx(const CANDIDATE_MV *ref_mv_stack,
+                                  int ref_idx) {
   if (ref_mv_stack[ref_idx].weight >= REF_CAT_LEVEL &&
       ref_mv_stack[ref_idx + 1].weight >= REF_CAT_LEVEL) {
     if (ref_mv_stack[ref_idx].weight == ref_mv_stack[ref_idx + 1].weight)
@@ -447,45 +447,45 @@ static INLINE uint8_t vp10_drl_ctx(const CANDIDATE_MV *ref_mv_stack,
 #endif
 
 typedef void (*find_mv_refs_sync)(void *const data, int mi_row);
-void vp10_find_mv_refs(const VP10_COMMON *cm, const MACROBLOCKD *xd,
-                       MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
+void av1_find_mv_refs(const AV1_COMMON *cm, const MACROBLOCKD *xd,
+                      MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
 #if CONFIG_REF_MV
-                       uint8_t *ref_mv_count, CANDIDATE_MV *ref_mv_stack,
+                      uint8_t *ref_mv_count, CANDIDATE_MV *ref_mv_stack,
 #if CONFIG_EXT_INTER
-                       int16_t *compound_mode_context,
+                      int16_t *compound_mode_context,
 #endif  // CONFIG_EXT_INTER
 #endif
-                       int_mv *mv_ref_list, int mi_row, int mi_col,
-                       find_mv_refs_sync sync, void *const data,
-                       int16_t *mode_context);
+                      int_mv *mv_ref_list, int mi_row, int mi_col,
+                      find_mv_refs_sync sync, void *const data,
+                      int16_t *mode_context);
 
 // check a list of motion vectors by sad score using a number rows of pixels
 // above and a number cols of pixels in the left to select the one with best
 // score to use as ref motion vector
-void vp10_find_best_ref_mvs(int allow_hp, int_mv *mvlist, int_mv *nearest_mv,
-                            int_mv *near_mv);
+void av1_find_best_ref_mvs(int allow_hp, int_mv *mvlist, int_mv *nearest_mv,
+                           int_mv *near_mv);
 
-void vp10_append_sub8x8_mvs_for_idx(VP10_COMMON *cm, MACROBLOCKD *xd, int block,
-                                    int ref, int mi_row, int mi_col,
+void av1_append_sub8x8_mvs_for_idx(AV1_COMMON *cm, MACROBLOCKD *xd, int block,
+                                   int ref, int mi_row, int mi_col,
 #if CONFIG_REF_MV
-                                    CANDIDATE_MV *ref_mv_stack,
-                                    uint8_t *ref_mv_count,
+                                   CANDIDATE_MV *ref_mv_stack,
+                                   uint8_t *ref_mv_count,
 #endif
 #if CONFIG_EXT_INTER
-                                    int_mv *mv_list,
+                                   int_mv *mv_list,
 #endif  // CONFIG_EXT_INTER
-                                    int_mv *nearest_mv, int_mv *near_mv);
+                                   int_mv *nearest_mv, int_mv *near_mv);
 
 #if CONFIG_EXT_INTER
 // This function keeps a mode count for a given MB/SB
-void vp10_update_mv_context(const MACROBLOCKD *xd, MODE_INFO *mi,
-                            MV_REFERENCE_FRAME ref_frame, int_mv *mv_ref_list,
-                            int block, int mi_row, int mi_col,
-                            int16_t *mode_context);
+void av1_update_mv_context(const MACROBLOCKD *xd, MODE_INFO *mi,
+                           MV_REFERENCE_FRAME ref_frame, int_mv *mv_ref_list,
+                           int block, int mi_row, int mi_col,
+                           int16_t *mode_context);
 #endif  // CONFIG_EXT_INTER
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
 
-#endif  // VP10_COMMON_MVREF_COMMON_H_
+#endif  // AV1_COMMON_MVREF_COMMON_H_

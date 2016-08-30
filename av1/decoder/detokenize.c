@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "aom_mem/vpx_mem.h"
+#include "aom_mem/aom_mem.h"
 #include "aom_ports/mem.h"
 
 #include "av1/common/ans.h"
@@ -37,9 +37,9 @@
   } while (0)
 
 #if !CONFIG_ANS
-static INLINE int read_coeff(const vpx_prob *probs, int n, vp10_reader *r) {
+static INLINE int read_coeff(const aom_prob *probs, int n, aom_reader *r) {
   int i, val = 0;
-  for (i = 0; i < n; ++i) val = (val << 1) | vp10_read(r, probs[i]);
+  for (i = 0; i < n; ++i) val = (val << 1) | aom_read(r, probs[i]);
   return val;
 }
 
@@ -47,7 +47,7 @@ static INLINE int read_coeff(const vpx_prob *probs, int n, vp10_reader *r) {
 static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
                         tran_low_t *dqcoeff, TX_SIZE tx_size, TX_TYPE tx_type,
                         const int16_t *dq, int ctx, const int16_t *scan,
-                        const int16_t *nb, vp10_reader *r,
+                        const int16_t *nb, aom_reader *r,
                         const qm_val_t *iqm[2][TX_SIZES])
 #else
 static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
@@ -57,7 +57,7 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
                         dequant_val_type_nuq *dq_val,
 #endif  // CONFIG_NEW_QUANT
                         int ctx, const int16_t *scan, const int16_t *nb,
-                        vp10_reader *r)
+                        aom_reader *r)
 #endif
 {
   FRAME_COUNTS *counts = xd->counts;
@@ -69,9 +69,9 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
 #endif
   int band, c = 0;
   const int tx_size_ctx = txsize_sqr_map[tx_size];
-  const vpx_prob(*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
+  const aom_prob(*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       fc->coef_probs[tx_size_ctx][type][ref];
-  const vpx_prob *prob;
+  const aom_prob *prob;
   unsigned int(*coef_counts)[COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1];
   unsigned int(*eob_branch_count)[COEFF_CONTEXTS];
   uint8_t token_cache[MAX_TX_SQUARE];
@@ -94,38 +94,38 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
     eob_branch_count = counts->eob_branch[tx_size_ctx][type][ref];
   }
 
-#if CONFIG_VP9_HIGHBITDEPTH
-  if (xd->bd > VPX_BITS_8) {
-    if (xd->bd == VPX_BITS_10) {
-      cat1_prob = vp10_cat1_prob_high10;
-      cat2_prob = vp10_cat2_prob_high10;
-      cat3_prob = vp10_cat3_prob_high10;
-      cat4_prob = vp10_cat4_prob_high10;
-      cat5_prob = vp10_cat5_prob_high10;
-      cat6_prob = vp10_cat6_prob_high10;
+#if CONFIG_AOM_HIGHBITDEPTH
+  if (xd->bd > AOM_BITS_8) {
+    if (xd->bd == AOM_BITS_10) {
+      cat1_prob = av1_cat1_prob_high10;
+      cat2_prob = av1_cat2_prob_high10;
+      cat3_prob = av1_cat3_prob_high10;
+      cat4_prob = av1_cat4_prob_high10;
+      cat5_prob = av1_cat5_prob_high10;
+      cat6_prob = av1_cat6_prob_high10;
     } else {
-      cat1_prob = vp10_cat1_prob_high12;
-      cat2_prob = vp10_cat2_prob_high12;
-      cat3_prob = vp10_cat3_prob_high12;
-      cat4_prob = vp10_cat4_prob_high12;
-      cat5_prob = vp10_cat5_prob_high12;
-      cat6_prob = vp10_cat6_prob_high12;
+      cat1_prob = av1_cat1_prob_high12;
+      cat2_prob = av1_cat2_prob_high12;
+      cat3_prob = av1_cat3_prob_high12;
+      cat4_prob = av1_cat4_prob_high12;
+      cat5_prob = av1_cat5_prob_high12;
+      cat6_prob = av1_cat6_prob_high12;
     }
   } else {
-    cat1_prob = vp10_cat1_prob;
-    cat2_prob = vp10_cat2_prob;
-    cat3_prob = vp10_cat3_prob;
-    cat4_prob = vp10_cat4_prob;
-    cat5_prob = vp10_cat5_prob;
-    cat6_prob = vp10_cat6_prob;
+    cat1_prob = av1_cat1_prob;
+    cat2_prob = av1_cat2_prob;
+    cat3_prob = av1_cat3_prob;
+    cat4_prob = av1_cat4_prob;
+    cat5_prob = av1_cat5_prob;
+    cat6_prob = av1_cat6_prob;
   }
 #else
-  cat1_prob = vp10_cat1_prob;
-  cat2_prob = vp10_cat2_prob;
-  cat3_prob = vp10_cat3_prob;
-  cat4_prob = vp10_cat4_prob;
-  cat5_prob = vp10_cat5_prob;
-  cat6_prob = vp10_cat6_prob;
+  cat1_prob = av1_cat1_prob;
+  cat2_prob = av1_cat2_prob;
+  cat3_prob = av1_cat3_prob;
+  cat4_prob = av1_cat4_prob;
+  cat5_prob = av1_cat5_prob;
+  cat6_prob = av1_cat6_prob;
 #endif
 
   dq_shift = get_tx_scale(xd, tx_type, tx_size);
@@ -135,7 +135,7 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
     band = *band_translate++;
     prob = coef_probs[band][ctx];
     if (counts) ++eob_branch_count[band][ctx];
-    if (!vp10_read(r, prob[EOB_CONTEXT_NODE])) {
+    if (!aom_read(r, prob[EOB_CONTEXT_NODE])) {
       INCREMENT_COUNT(EOB_MODEL_TOKEN);
       break;
     }
@@ -144,7 +144,7 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
     dqv_val = &dq_val[band][0];
 #endif  // CONFIG_NEW_QUANT
 
-    while (!vp10_read(r, prob[ZERO_CONTEXT_NODE])) {
+    while (!aom_read(r, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
       dqv = dq[1];
       token_cache[scan[c]] = 0;
@@ -158,14 +158,14 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
 #endif  // CONFIG_NEW_QUANT
     }
 
-    if (!vp10_read(r, prob[ONE_CONTEXT_NODE])) {
+    if (!aom_read(r, prob[ONE_CONTEXT_NODE])) {
       INCREMENT_COUNT(ONE_TOKEN);
       token = ONE_TOKEN;
       val = 1;
     } else {
       INCREMENT_COUNT(TWO_TOKEN);
-      token = vp10_read_tree(r, vp10_coef_con_tree,
-                             vp10_pareto8_full[prob[PIVOT_NODE] - 1]);
+      token = aom_read_tree(r, av1_coef_con_tree,
+                            av1_pareto8_full[prob[PIVOT_NODE] - 1]);
       switch (token) {
         case TWO_TOKEN:
         case THREE_TOKEN:
@@ -188,15 +188,15 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
         case CATEGORY6_TOKEN: {
           const int skip_bits = TX_SIZES - 1 - txsize_sqr_up_map[tx_size];
           const uint8_t *cat6p = cat6_prob + skip_bits;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
           switch (xd->bd) {
-            case VPX_BITS_8:
+            case AOM_BITS_8:
               val = CAT6_MIN_VAL + read_coeff(cat6p, 14 - skip_bits, r);
               break;
-            case VPX_BITS_10:
+            case AOM_BITS_10:
               val = CAT6_MIN_VAL + read_coeff(cat6p, 16 - skip_bits, r);
               break;
-            case VPX_BITS_12:
+            case AOM_BITS_12:
               val = CAT6_MIN_VAL + read_coeff(cat6p, 18 - skip_bits, r);
               break;
             default: assert(0); return -1;
@@ -210,7 +210,7 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
     }
 #if CONFIG_NEW_QUANT
 
-    v = vp10_dequant_abscoeff_nuq(val, dqv, dqv_val);
+    v = av1_dequant_abscoeff_nuq(val, dqv, dqv_val);
     v = dq_shift ? ROUND_POWER_OF_TWO(v, dq_shift) : v;
 #else
 #if CONFIG_AOM_QM
@@ -221,15 +221,15 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
 #endif  // CONFIG_NEW_QUANT
 
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
-#if CONFIG_VP9_HIGHBITDEPTH
-    dqcoeff[scan[c]] = highbd_check_range((vp10_read_bit(r) ? -v : v), xd->bd);
+#if CONFIG_AOM_HIGHBITDEPTH
+    dqcoeff[scan[c]] = highbd_check_range((aom_read_bit(r) ? -v : v), xd->bd);
 #else
-    dqcoeff[scan[c]] = check_range(vp10_read_bit(r) ? -v : v);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+    dqcoeff[scan[c]] = check_range(aom_read_bit(r) ? -v : v);
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 #else
-    dqcoeff[scan[c]] = vp10_read_bit(r) ? -v : v;
+    dqcoeff[scan[c]] = aom_read_bit(r) ? -v : v;
 #endif  // CONFIG_COEFFICIENT_RANGE_CHECKING
-    token_cache[scan[c]] = vp10_pt_energy_class[token];
+    token_cache[scan[c]] = av1_pt_energy_class[token];
     ++c;
     ctx = get_coef_context(nb, token_cache, c);
     dqv = dq[1];
@@ -238,7 +238,7 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
   return c;
 }
 #else  // !CONFIG_ANS
-static INLINE int read_coeff(const vpx_prob *const probs, int n,
+static INLINE int read_coeff(const aom_prob *const probs, int n,
                              struct AnsDecoder *const ans) {
   int i, val = 0;
   for (i = 0; i < n; ++i) val = (val << 1) | uabs_read(ans, probs[i]);
@@ -260,11 +260,11 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd, PLANE_TYPE type,
   int band, c = 0;
   int skip_eob = 0;
   const int tx_size_ctx = txsize_sqr_map[tx_size];
-  const vpx_prob(*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
+  const aom_prob(*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       fc->coef_probs[tx_size_ctx][type][ref];
   const rans_dec_lut(*coef_cdfs)[COEFF_CONTEXTS] =
       fc->coef_cdfs[tx_size_ctx][type][ref];
-  const vpx_prob *prob;
+  const aom_prob *prob;
   const rans_dec_lut *cdf;
   unsigned int(*coef_counts)[COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1];
   unsigned int(*eob_branch_count)[COEFF_CONTEXTS];
@@ -290,38 +290,38 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd, PLANE_TYPE type,
     eob_branch_count = counts->eob_branch[tx_size_ctx][type][ref];
   }
 
-#if CONFIG_VP9_HIGHBITDEPTH
-  if (xd->bd > VPX_BITS_8) {
-    if (xd->bd == VPX_BITS_10) {
-      cat1_prob = vp10_cat1_prob_high10;
-      cat2_prob = vp10_cat2_prob_high10;
-      cat3_prob = vp10_cat3_prob_high10;
-      cat4_prob = vp10_cat4_prob_high10;
-      cat5_prob = vp10_cat5_prob_high10;
-      cat6_prob = vp10_cat6_prob_high10;
+#if CONFIG_AOM_HIGHBITDEPTH
+  if (xd->bd > AOM_BITS_8) {
+    if (xd->bd == AOM_BITS_10) {
+      cat1_prob = av1_cat1_prob_high10;
+      cat2_prob = av1_cat2_prob_high10;
+      cat3_prob = av1_cat3_prob_high10;
+      cat4_prob = av1_cat4_prob_high10;
+      cat5_prob = av1_cat5_prob_high10;
+      cat6_prob = av1_cat6_prob_high10;
     } else {
-      cat1_prob = vp10_cat1_prob_high12;
-      cat2_prob = vp10_cat2_prob_high12;
-      cat3_prob = vp10_cat3_prob_high12;
-      cat4_prob = vp10_cat4_prob_high12;
-      cat5_prob = vp10_cat5_prob_high12;
-      cat6_prob = vp10_cat6_prob_high12;
+      cat1_prob = av1_cat1_prob_high12;
+      cat2_prob = av1_cat2_prob_high12;
+      cat3_prob = av1_cat3_prob_high12;
+      cat4_prob = av1_cat4_prob_high12;
+      cat5_prob = av1_cat5_prob_high12;
+      cat6_prob = av1_cat6_prob_high12;
     }
   } else {
-    cat1_prob = vp10_cat1_prob;
-    cat2_prob = vp10_cat2_prob;
-    cat3_prob = vp10_cat3_prob;
-    cat4_prob = vp10_cat4_prob;
-    cat5_prob = vp10_cat5_prob;
-    cat6_prob = vp10_cat6_prob;
+    cat1_prob = av1_cat1_prob;
+    cat2_prob = av1_cat2_prob;
+    cat3_prob = av1_cat3_prob;
+    cat4_prob = av1_cat4_prob;
+    cat5_prob = av1_cat5_prob;
+    cat6_prob = av1_cat6_prob;
   }
 #else
-  cat1_prob = vp10_cat1_prob;
-  cat2_prob = vp10_cat2_prob;
-  cat3_prob = vp10_cat3_prob;
-  cat4_prob = vp10_cat4_prob;
-  cat5_prob = vp10_cat5_prob;
-  cat6_prob = vp10_cat6_prob;
+  cat1_prob = av1_cat1_prob;
+  cat2_prob = av1_cat2_prob;
+  cat3_prob = av1_cat3_prob;
+  cat4_prob = av1_cat4_prob;
+  cat5_prob = av1_cat5_prob;
+  cat6_prob = av1_cat6_prob;
 #endif
 
   while (c < max_eob) {
@@ -371,15 +371,15 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd, PLANE_TYPE type,
         case CATEGORY6_TOKEN: {
           const int skip_bits = TX_SIZES - 1 - txsize_sqr_up_map[tx_size];
           const uint8_t *cat6p = cat6_prob + skip_bits;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
           switch (xd->bd) {
-            case VPX_BITS_8:
+            case AOM_BITS_8:
               val = CAT6_MIN_VAL + read_coeff(cat6p, 14 - skip_bits, ans);
               break;
-            case VPX_BITS_10:
+            case AOM_BITS_10:
               val = CAT6_MIN_VAL + read_coeff(cat6p, 16 - skip_bits, ans);
               break;
-            case VPX_BITS_12:
+            case AOM_BITS_12:
               val = CAT6_MIN_VAL + read_coeff(cat6p, 18 - skip_bits, ans);
               break;
             default: assert(0); return -1;
@@ -390,23 +390,23 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd, PLANE_TYPE type,
         } break;
       }
 #if CONFIG_NEW_QUANT
-      v = vp10_dequant_abscoeff_nuq(val, dqv, dqv_val);
+      v = av1_dequant_abscoeff_nuq(val, dqv, dqv_val);
       v = dq_shift ? ROUND_POWER_OF_TWO(v, dq_shift) : v;
 #else
       v = (val * dqv) >> dq_shift;
 #endif  // CONFIG_NEW_QUANT
 
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       dqcoeff[scan[c]] =
           highbd_check_range((uabs_read_bit(ans) ? -v : v), xd->bd);
 #else
       dqcoeff[scan[c]] = check_range(uabs_read_bit(ans) ? -v : v);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 #else
       dqcoeff[scan[c]] = uabs_read_bit(ans) ? -v : v;
 #endif  // CONFIG_COEFFICIENT_RANGE_CHECKING
-      token_cache[scan[c]] = vp10_pt_energy_class[token];
+      token_cache[scan[c]] = av1_pt_energy_class[token];
       skip_eob = 0;
     }
     ++c;
@@ -418,8 +418,8 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd, PLANE_TYPE type,
 }
 #endif  // !CONFIG_ANS
 
-// TODO(slavarnway): Decode version of vp10_set_context.  Modify
-// vp10_set_context
+// TODO(slavarnway): Decode version of av1_set_context.  Modify
+// av1_set_context
 // after testing is complete, then delete this version.
 static void dec_set_contexts(const MACROBLOCKD *xd,
                              struct macroblockd_plane *pd, TX_SIZE tx_size,
@@ -459,8 +459,8 @@ static void dec_set_contexts(const MACROBLOCKD *xd,
   }
 }
 
-void vp10_decode_palette_tokens(MACROBLOCKD *const xd, int plane,
-                                vp10_reader *r) {
+void av1_decode_palette_tokens(MACROBLOCKD *const xd, int plane,
+                               aom_reader *r) {
   MODE_INFO *const mi = xd->mi[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
@@ -472,31 +472,31 @@ void vp10_decode_palette_tokens(MACROBLOCKD *const xd, int plane,
   int n = mbmi->palette_mode_info.palette_size[plane != 0];
   int i, j;
   uint8_t *color_map = xd->plane[plane != 0].color_index_map;
-  const vpx_prob (*const prob)[PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1] =
-      plane ? vp10_default_palette_uv_color_prob
-            : vp10_default_palette_y_color_prob;
+  const aom_prob (*const prob)[PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1] =
+      plane ? av1_default_palette_uv_color_prob
+            : av1_default_palette_y_color_prob;
 
   for (i = 0; i < rows; ++i) {
     for (j = (i == 0 ? 1 : 0); j < cols; ++j) {
       color_ctx =
-          vp10_get_palette_color_context(color_map, cols, i, j, n, color_order);
-      color_idx = vp10_read_tree(r, vp10_palette_color_tree[n - 2],
-                                 prob[n - 2][color_ctx]);
+          av1_get_palette_color_context(color_map, cols, i, j, n, color_order);
+      color_idx = aom_read_tree(r, av1_palette_color_tree[n - 2],
+                                prob[n - 2][color_ctx]);
       assert(color_idx >= 0 && color_idx < n);
       color_map[i * cols + j] = color_order[color_idx];
     }
   }
 }
 
-int vp10_decode_block_tokens(MACROBLOCKD *const xd, int plane,
-                             const scan_order *sc, int x, int y,
-                             TX_SIZE tx_size, TX_TYPE tx_type,
+int av1_decode_block_tokens(MACROBLOCKD *const xd, int plane,
+                            const scan_order *sc, int x, int y, TX_SIZE tx_size,
+                            TX_TYPE tx_type,
 #if CONFIG_ANS
-                             struct AnsDecoder *const r,
+                            struct AnsDecoder *const r,
 #else
-                             vp10_reader *r,
+                            aom_reader *r,
 #endif  // CONFIG_ANS
-                             int seg_id) {
+                            int seg_id) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int16_t *const dequant = pd->seg_dequant[seg_id];
   const int ctx =
@@ -528,7 +528,7 @@ int vp10_decode_block_tokens(MACROBLOCKD *const xd, int plane,
 #endif  // !CONFIG_ANS
   dec_set_contexts(xd, pd, tx_size, eob > 0, x, y);
   /*
-  vp10_set_contexts(xd, pd,
+  av1_set_contexts(xd, pd,
                     get_plane_block_size(xd->mi[0]->mbmi.sb_type, pd),
                     tx_size, eob > 0, x, y);
                     */

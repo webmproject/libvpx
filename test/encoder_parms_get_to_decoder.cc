@@ -14,7 +14,7 @@
 #include "test/encode_test_driver.h"
 #include "test/util.h"
 #include "test/y4m_video_source.h"
-#include "av1/vp10_dx_iface.c"
+#include "av1/av1_dx_iface.c"
 
 namespace {
 
@@ -28,7 +28,7 @@ struct EncodePerfTestVideo {
   int frames;
 };
 
-const EncodePerfTestVideo kVP9EncodePerfTestVectors[] = {
+const EncodePerfTestVideo kAV1EncodePerfTestVectors[] = {
   { "niklas_1280_720_30.y4m", 1280, 720, 600, 10 },
 };
 
@@ -38,29 +38,29 @@ struct EncodeParameters {
   int32_t lossless;
   int32_t error_resilient;
   int32_t frame_parallel;
-  vpx_color_range_t color_range;
-  vpx_color_space_t cs;
+  aom_color_range_t color_range;
+  aom_color_space_t cs;
   int render_size[2];
   // TODO(JBB): quantizers / bitrate
 };
 
-const EncodeParameters kVP9EncodeParameterSet[] = {
-  { 0, 0, 0, 1, 0, VPX_CR_STUDIO_RANGE, VPX_CS_BT_601, { 0, 0 } },
-  { 0, 0, 0, 0, 0, VPX_CR_FULL_RANGE, VPX_CS_BT_709, { 0, 0 } },
-  { 0, 0, 1, 0, 0, VPX_CR_FULL_RANGE, VPX_CS_BT_2020, { 0, 0 } },
-  { 0, 2, 0, 0, 1, VPX_CR_STUDIO_RANGE, VPX_CS_UNKNOWN, { 640, 480 } },
+const EncodeParameters kAV1EncodeParameterSet[] = {
+  { 0, 0, 0, 1, 0, AOM_CR_STUDIO_RANGE, AOM_CS_BT_601, { 0, 0 } },
+  { 0, 0, 0, 0, 0, AOM_CR_FULL_RANGE, AOM_CS_BT_709, { 0, 0 } },
+  { 0, 0, 1, 0, 0, AOM_CR_FULL_RANGE, AOM_CS_BT_2020, { 0, 0 } },
+  { 0, 2, 0, 0, 1, AOM_CR_STUDIO_RANGE, AOM_CS_UNKNOWN, { 640, 480 } },
   // TODO(JBB): Test profiles (requires more work).
 };
 
-class VpxEncoderParmsGetToDecoder
+class AvxEncoderParmsGetToDecoder
     : public ::libaom_test::EncoderTest,
       public ::libaom_test::CodecTestWith2Params<EncodeParameters,
                                                  EncodePerfTestVideo> {
  protected:
-  VpxEncoderParmsGetToDecoder()
+  AvxEncoderParmsGetToDecoder()
       : EncoderTest(GET_PARAM(0)), encode_parms(GET_PARAM(1)) {}
 
-  virtual ~VpxEncoderParmsGetToDecoder() {}
+  virtual ~AvxEncoderParmsGetToDecoder() {}
 
   virtual void SetUp() {
     InitializeConfig();
@@ -75,32 +75,32 @@ class VpxEncoderParmsGetToDecoder
   virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
                                   ::libaom_test::Encoder *encoder) {
     if (video->frame() == 1) {
-      encoder->Control(VP9E_SET_COLOR_SPACE, encode_parms.cs);
-      encoder->Control(VP9E_SET_COLOR_RANGE, encode_parms.color_range);
-      encoder->Control(VP9E_SET_LOSSLESS, encode_parms.lossless);
-      encoder->Control(VP9E_SET_FRAME_PARALLEL_DECODING,
+      encoder->Control(AV1E_SET_COLOR_SPACE, encode_parms.cs);
+      encoder->Control(AV1E_SET_COLOR_RANGE, encode_parms.color_range);
+      encoder->Control(AV1E_SET_LOSSLESS, encode_parms.lossless);
+      encoder->Control(AV1E_SET_FRAME_PARALLEL_DECODING,
                        encode_parms.frame_parallel);
-      encoder->Control(VP9E_SET_TILE_ROWS, encode_parms.tile_rows);
-      encoder->Control(VP9E_SET_TILE_COLUMNS, encode_parms.tile_cols);
-      encoder->Control(VP8E_SET_CPUUSED, kCpuUsed);
-      encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
-      encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);
-      encoder->Control(VP8E_SET_ARNR_STRENGTH, 5);
-      encoder->Control(VP8E_SET_ARNR_TYPE, 3);
+      encoder->Control(AV1E_SET_TILE_ROWS, encode_parms.tile_rows);
+      encoder->Control(AV1E_SET_TILE_COLUMNS, encode_parms.tile_cols);
+      encoder->Control(AOME_SET_CPUUSED, kCpuUsed);
+      encoder->Control(AOME_SET_ENABLEAUTOALTREF, 1);
+      encoder->Control(AOME_SET_ARNR_MAXFRAMES, 7);
+      encoder->Control(AOME_SET_ARNR_STRENGTH, 5);
+      encoder->Control(AOME_SET_ARNR_TYPE, 3);
       if (encode_parms.render_size[0] > 0 && encode_parms.render_size[1] > 0)
-        encoder->Control(VP9E_SET_RENDER_SIZE, encode_parms.render_size);
+        encoder->Control(AV1E_SET_RENDER_SIZE, encode_parms.render_size);
     }
   }
 
-  virtual bool HandleDecodeResult(const vpx_codec_err_t res_dec,
+  virtual bool HandleDecodeResult(const aom_codec_err_t res_dec,
                                   const libaom_test::VideoSource & /*video*/,
                                   libaom_test::Decoder *decoder) {
-    vpx_codec_ctx_t *const vp9_decoder = decoder->GetDecoder();
-    vpx_codec_alg_priv_t *const priv =
-        reinterpret_cast<vpx_codec_alg_priv_t *>(vp9_decoder->priv);
+    aom_codec_ctx_t *const av1_decoder = decoder->GetDecoder();
+    aom_codec_alg_priv_t *const priv =
+        reinterpret_cast<aom_codec_alg_priv_t *>(av1_decoder->priv);
     FrameWorkerData *const worker_data =
         reinterpret_cast<FrameWorkerData *>(priv->frame_workers[0].data1);
-    VP10_COMMON *const common = &worker_data->pbi->common;
+    AV1_COMMON *const common = &worker_data->pbi->common;
 
     if (encode_parms.lossless) {
       EXPECT_EQ(0, common->base_qindex);
@@ -122,8 +122,8 @@ class VpxEncoderParmsGetToDecoder
     EXPECT_EQ(encode_parms.tile_cols, common->log2_tile_cols);
     EXPECT_EQ(encode_parms.tile_rows, common->log2_tile_rows);
 
-    EXPECT_EQ(VPX_CODEC_OK, res_dec) << decoder->DecodeError();
-    return VPX_CODEC_OK == res_dec;
+    EXPECT_EQ(AOM_CODEC_OK, res_dec) << decoder->DecodeError();
+    return AOM_CODEC_OK == res_dec;
   }
 
   EncodePerfTestVideo test_video_;
@@ -132,8 +132,8 @@ class VpxEncoderParmsGetToDecoder
   EncodeParameters encode_parms;
 };
 
-TEST_P(VpxEncoderParmsGetToDecoder, BitstreamParms) {
-  init_flags_ = VPX_CODEC_USE_PSNR;
+TEST_P(AvxEncoderParmsGetToDecoder, BitstreamParms) {
+  init_flags_ = AOM_CODEC_USE_PSNR;
 
   libaom_test::VideoSource *const video =
       new libaom_test::Y4mVideoSource(test_video_.name, 0, test_video_.frames);
@@ -143,7 +143,7 @@ TEST_P(VpxEncoderParmsGetToDecoder, BitstreamParms) {
   delete video;
 }
 
-VP10_INSTANTIATE_TEST_CASE(VpxEncoderParmsGetToDecoder,
-                           ::testing::ValuesIn(kVP9EncodeParameterSet),
-                           ::testing::ValuesIn(kVP9EncodePerfTestVectors));
+AV1_INSTANTIATE_TEST_CASE(AvxEncoderParmsGetToDecoder,
+                          ::testing::ValuesIn(kAV1EncodeParameterSet),
+                          ::testing::ValuesIn(kAV1EncodePerfTestVectors));
 }  // namespace

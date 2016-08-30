@@ -8,16 +8,16 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-    EXPORT  |vpx_lpf_horizontal_4_neon|
-    EXPORT  |vpx_lpf_vertical_4_neon|
+    EXPORT  |aom_lpf_horizontal_4_neon|
+    EXPORT  |aom_lpf_vertical_4_neon|
     ARM
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
 
-; Currently vpx only works on iterations 8 at a time. The vp8 loop filter
+; Currently aom only works on iterations 8 at a time. The vp8 loop filter
 ; works on 16 iterations at a time.
 ;
-; void vpx_lpf_horizontal_4_neon(uint8_t *s,
+; void aom_lpf_horizontal_4_neon(uint8_t *s,
 ;                                int p /* pitch */,
 ;                                const uint8_t *blimit,
 ;                                const uint8_t *limit,
@@ -28,7 +28,7 @@
 ; r2    const uint8_t *blimit,
 ; r3    const uint8_t *limit,
 ; sp    const uint8_t *thresh,
-|vpx_lpf_horizontal_4_neon| PROC
+|aom_lpf_horizontal_4_neon| PROC
     push        {lr}
 
     vld1.8      {d0[]}, [r2]               ; duplicate *blimit
@@ -53,7 +53,7 @@
     sub         r2, r2, r1, lsl #1
     sub         r3, r3, r1, lsl #1
 
-    bl          vpx_loop_filter_neon
+    bl          aom_loop_filter_neon
 
     vst1.u8     {d4}, [r2@64], r1          ; store op1
     vst1.u8     {d5}, [r3@64], r1          ; store op0
@@ -61,12 +61,12 @@
     vst1.u8     {d7}, [r3@64], r1          ; store oq1
 
     pop         {pc}
-    ENDP        ; |vpx_lpf_horizontal_4_neon|
+    ENDP        ; |aom_lpf_horizontal_4_neon|
 
-; Currently vpx only works on iterations 8 at a time. The vp8 loop filter
+; Currently aom only works on iterations 8 at a time. The vp8 loop filter
 ; works on 16 iterations at a time.
 ;
-; void vpx_lpf_vertical_4_neon(uint8_t *s,
+; void aom_lpf_vertical_4_neon(uint8_t *s,
 ;                              int p /* pitch */,
 ;                              const uint8_t *blimit,
 ;                              const uint8_t *limit,
@@ -77,7 +77,7 @@
 ; r2    const uint8_t *blimit,
 ; r3    const uint8_t *limit,
 ; sp    const uint8_t *thresh,
-|vpx_lpf_vertical_4_neon| PROC
+|aom_lpf_vertical_4_neon| PROC
     push        {lr}
 
     vld1.8      {d0[]}, [r2]              ; duplicate *blimit
@@ -113,7 +113,7 @@
     vtrn.8      d7, d16
     vtrn.8      d17, d18
 
-    bl          vpx_loop_filter_neon
+    bl          aom_loop_filter_neon
 
     sub         r0, r0, #2
 
@@ -128,9 +128,9 @@
     vst4.8      {d4[7], d5[7], d6[7], d7[7]}, [r0]
 
     pop         {pc}
-    ENDP        ; |vpx_lpf_vertical_4_neon|
+    ENDP        ; |aom_lpf_vertical_4_neon|
 
-; void vpx_loop_filter_neon();
+; void aom_loop_filter_neon();
 ; This is a helper function for the loopfilters. The invidual functions do the
 ; necessary load, transpose (if necessary) and store. The function does not use
 ; registers d8-d15.
@@ -154,7 +154,7 @@
 ; d5    op0
 ; d6    oq0
 ; d7    oq1
-|vpx_loop_filter_neon| PROC
+|aom_loop_filter_neon| PROC
     ; filter_mask
     vabd.u8     d19, d3, d4                 ; m1 = abs(p3 - p2)
     vabd.u8     d20, d4, d5                 ; m2 = abs(p2 - p1)
@@ -244,6 +244,6 @@
     veor        d7, d20, d18                ; *oq1 = u^0x80
 
     bx          lr
-    ENDP        ; |vpx_loop_filter_neon|
+    ENDP        ; |aom_loop_filter_neon|
 
     END

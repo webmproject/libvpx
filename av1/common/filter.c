@@ -186,7 +186,7 @@ DECLARE_ALIGNED(256, static const InterpKernel,
 #endif  // CONFIG_EXT_INTERP
 
 #if CONFIG_EXT_INTRA
-const InterpKernel *vp10_intra_filter_kernels[INTRA_FILTERS] = {
+const InterpKernel *av1_intra_filter_kernels[INTRA_FILTERS] = {
   bilinear_filters,         // INTRA_FILTER_LINEAR
   sub_pel_filters_8,        // INTRA_FILTER_8TAP
   sub_pel_filters_8sharp,   // INTRA_FILTER_8TAP_SHARP
@@ -196,7 +196,7 @@ const InterpKernel *vp10_intra_filter_kernels[INTRA_FILTERS] = {
 
 #if CONFIG_EXT_INTERP
 static const InterpFilterParams
-    vp10_interp_filter_params_list[SWITCHABLE_FILTERS + 1] = {
+    av1_interp_filter_params_list[SWITCHABLE_FILTERS + 1] = {
       { (const int16_t *)sub_pel_filters_8, SUBPEL_TAPS, SUBPEL_SHIFTS },
       { (const int16_t *)sub_pel_filters_8smooth, SUBPEL_TAPS, SUBPEL_SHIFTS },
       { (const int16_t *)sub_pel_filters_10sharp, 10, SUBPEL_SHIFTS },
@@ -206,7 +206,7 @@ static const InterpFilterParams
     };
 #else
 static const InterpFilterParams
-    vp10_interp_filter_params_list[SWITCHABLE_FILTERS + 1] = {
+    av1_interp_filter_params_list[SWITCHABLE_FILTERS + 1] = {
       { (const int16_t *)sub_pel_filters_8, SUBPEL_TAPS, SUBPEL_SHIFTS },
       { (const int16_t *)sub_pel_filters_8smooth, SUBPEL_TAPS, SUBPEL_SHIFTS },
       { (const int16_t *)sub_pel_filters_8sharp, SUBPEL_TAPS, SUBPEL_SHIFTS },
@@ -215,32 +215,31 @@ static const InterpFilterParams
 #endif  // CONFIG_EXT_INTERP
 
 #if USE_TEMPORALFILTER_12TAP
-static const InterpFilterParams vp10_interp_temporalfilter_12tap = {
+static const InterpFilterParams av1_interp_temporalfilter_12tap = {
   (const int16_t *)sub_pel_filters_temporalfilter_12, 12, SUBPEL_SHIFTS
 };
 #endif  // USE_TEMPORALFILTER_12TAP
 
-InterpFilterParams vp10_get_interp_filter_params(
+InterpFilterParams av1_get_interp_filter_params(
     const INTERP_FILTER interp_filter) {
 #if USE_TEMPORALFILTER_12TAP
   if (interp_filter == TEMPORALFILTER_12TAP)
-    return vp10_interp_temporalfilter_12tap;
+    return av1_interp_temporalfilter_12tap;
 #endif  // USE_TEMPORALFILTER_12TAP
-  return vp10_interp_filter_params_list[interp_filter];
+  return av1_interp_filter_params_list[interp_filter];
 }
 
-const int16_t *vp10_get_interp_filter_kernel(
-    const INTERP_FILTER interp_filter) {
+const int16_t *av1_get_interp_filter_kernel(const INTERP_FILTER interp_filter) {
 #if USE_TEMPORALFILTER_12TAP
   if (interp_filter == TEMPORALFILTER_12TAP)
-    return vp10_interp_temporalfilter_12tap.filter_ptr;
+    return av1_interp_temporalfilter_12tap.filter_ptr;
 #endif  // USE_TEMPORALFILTER_12TAP
-  return (const int16_t *)vp10_interp_filter_params_list[interp_filter]
+  return (const int16_t *)av1_interp_filter_params_list[interp_filter]
       .filter_ptr;
 }
 
-SubpelFilterCoeffs vp10_get_subpel_filter_signal_dir(const InterpFilterParams p,
-                                                     int index) {
+SubpelFilterCoeffs av1_get_subpel_filter_signal_dir(const InterpFilterParams p,
+                                                    int index) {
 #if CONFIG_EXT_INTERP && HAVE_SSSE3
   if (p.filter_ptr == (const int16_t *)sub_pel_filters_12sharp) {
     return &sub_pel_filters_12sharp_signal_dir[index][0];
@@ -259,7 +258,7 @@ SubpelFilterCoeffs vp10_get_subpel_filter_signal_dir(const InterpFilterParams p,
   return NULL;
 }
 
-SubpelFilterCoeffs vp10_get_subpel_filter_ver_signal_dir(
+SubpelFilterCoeffs av1_get_subpel_filter_ver_signal_dir(
     const InterpFilterParams p, int index) {
 #if CONFIG_EXT_INTERP && HAVE_SSSE3
   if (p.filter_ptr == (const int16_t *)sub_pel_filters_12sharp) {
@@ -279,8 +278,8 @@ SubpelFilterCoeffs vp10_get_subpel_filter_ver_signal_dir(
   return NULL;
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
-HbdSubpelFilterCoeffs vp10_hbd_get_subpel_filter_ver_signal_dir(
+#if CONFIG_AOM_HIGHBITDEPTH
+HbdSubpelFilterCoeffs av1_hbd_get_subpel_filter_ver_signal_dir(
     const InterpFilterParams p, int index) {
 #if CONFIG_EXT_INTERP && HAVE_SSE4_1
   if (p.filter_ptr == (const int16_t *)sub_pel_filters_12sharp) {

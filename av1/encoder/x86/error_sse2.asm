@@ -8,13 +8,13 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-%define private_prefix vp10
+%define private_prefix av1
 
 %include "third_party/x86inc/x86inc.asm"
 
 SECTION .text
 
-; int64_t vp10_block_error(int16_t *coeff, int16_t *dqcoeff, intptr_t block_size,
+; int64_t av1_block_error(int16_t *coeff, int16_t *dqcoeff, intptr_t block_size,
 ;                         int64_t *ssz)
 
 INIT_XMM sse2
@@ -76,7 +76,7 @@ cglobal block_error, 3, 3, 8, uqc, dqc, size, ssz
   RET
 
 ; Compute the sum of squared difference between two int16_t vectors.
-; int64_t vp10_block_error_fp(int16_t *coeff, int16_t *dqcoeff,
+; int64_t av1_block_error_fp(int16_t *coeff, int16_t *dqcoeff,
 ;                            intptr_t block_size)
 
 INIT_XMM sse2

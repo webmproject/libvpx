@@ -10,9 +10,9 @@
 
 #include <arm_neon.h>
 
-#include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
-#include "aom/vpx_integer.h"
+#include "./aom_config.h"
+#include "./aom_dsp_rtcd.h"
+#include "aom/aom_integer.h"
 
 static INLINE unsigned int horizontal_long_add_16x8(const uint16x8_t vec_lo,
                                                     const uint16x8_t vec_hi) {
@@ -78,7 +78,7 @@ static void sad_neon_32(const uint8x16_t vec_src_00,
                              vget_high_u8(vec_ref_16));
 }
 
-void vpx_sad64x64x4d_neon(const uint8_t *src, int src_stride,
+void aom_sad64x64x4d_neon(const uint8_t *src, int src_stride,
                           const uint8_t *const ref[4], int ref_stride,
                           uint32_t *res) {
   int i;
@@ -124,7 +124,7 @@ void vpx_sad64x64x4d_neon(const uint8_t *src, int src_stride,
   res[3] = horizontal_long_add_16x8(vec_sum_ref3_lo, vec_sum_ref3_hi);
 }
 
-void vpx_sad32x32x4d_neon(const uint8_t *src, int src_stride,
+void aom_sad32x32x4d_neon(const uint8_t *src, int src_stride,
                           const uint8_t *const ref[4], int ref_stride,
                           uint32_t *res) {
   int i;
@@ -168,7 +168,7 @@ void vpx_sad32x32x4d_neon(const uint8_t *src, int src_stride,
   res[3] = horizontal_long_add_16x8(vec_sum_ref3_lo, vec_sum_ref3_hi);
 }
 
-void vpx_sad16x16x4d_neon(const uint8_t *src, int src_stride,
+void aom_sad16x16x4d_neon(const uint8_t *src, int src_stride,
                           const uint8_t *const ref[4], int ref_stride,
                           uint32_t *res) {
   int i;

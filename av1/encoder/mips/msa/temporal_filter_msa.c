@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "./vp10_rtcd.h"
+#include "./av1_rtcd.h"
 #include "aom_dsp/mips/macros_msa.h"
 
 static void temporal_filter_apply_8size_msa(uint8_t *frm1_ptr, uint32_t stride,
@@ -265,11 +265,11 @@ static void temporal_filter_apply_16size_msa(uint8_t *frm1_ptr, uint32_t stride,
   }
 }
 
-void vp10_temporal_filter_apply_msa(uint8_t *frame1_ptr, uint32_t stride,
-                                    uint8_t *frame2_ptr, uint32_t blk_w,
-                                    uint32_t blk_h, int32_t strength,
-                                    int32_t filt_wgt, uint32_t *accu,
-                                    uint16_t *cnt) {
+void av1_temporal_filter_apply_msa(uint8_t *frame1_ptr, uint32_t stride,
+                                   uint8_t *frame2_ptr, uint32_t blk_w,
+                                   uint32_t blk_h, int32_t strength,
+                                   int32_t filt_wgt, uint32_t *accu,
+                                   uint16_t *cnt) {
   if (8 == (blk_w * blk_h)) {
     temporal_filter_apply_8size_msa(frame1_ptr, stride, frame2_ptr, strength,
                                     filt_wgt, accu, cnt);
@@ -277,7 +277,7 @@ void vp10_temporal_filter_apply_msa(uint8_t *frame1_ptr, uint32_t stride,
     temporal_filter_apply_16size_msa(frame1_ptr, stride, frame2_ptr, strength,
                                      filt_wgt, accu, cnt);
   } else {
-    vp10_temporal_filter_apply_c(frame1_ptr, stride, frame2_ptr, blk_w, blk_h,
-                                 strength, filt_wgt, accu, cnt);
+    av1_temporal_filter_apply_c(frame1_ptr, stride, frame2_ptr, blk_w, blk_h,
+                                strength, filt_wgt, accu, cnt);
   }
 }

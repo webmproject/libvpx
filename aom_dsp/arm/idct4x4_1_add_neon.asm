@@ -8,21 +8,21 @@
 ;
 
 
-    EXPORT  |vpx_idct4x4_1_add_neon|
+    EXPORT  |aom_idct4x4_1_add_neon|
     ARM
     REQUIRE8
     PRESERVE8
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
 
-;void vpx_idct4x4_1_add_neon(int16_t *input, uint8_t *dest,
+;void aom_idct4x4_1_add_neon(int16_t *input, uint8_t *dest,
 ;                                  int dest_stride)
 ;
 ; r0  int16_t input
 ; r1  uint8_t *dest
 ; r2  int dest_stride)
 
-|vpx_idct4x4_1_add_neon| PROC
+|aom_idct4x4_1_add_neon| PROC
     ldrsh            r0, [r0]
 
     ; generate cospi_16_64 = 11585
@@ -63,6 +63,6 @@
     vst1.32          {d7[1]}, [r12]
 
     bx               lr
-    ENDP             ; |vpx_idct4x4_1_add_neon|
+    ENDP             ; |aom_idct4x4_1_add_neon|
 
     END

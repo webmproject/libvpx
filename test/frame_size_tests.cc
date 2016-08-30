@@ -13,19 +13,19 @@
 
 namespace {
 
-class VP9FrameSizeTestsLarge : public ::libaom_test::EncoderTest,
+class AV1FrameSizeTestsLarge : public ::libaom_test::EncoderTest,
                                public ::testing::Test {
  protected:
-  VP9FrameSizeTestsLarge()
-      : EncoderTest(&::libaom_test::kVP10), expected_res_(VPX_CODEC_OK) {}
-  virtual ~VP9FrameSizeTestsLarge() {}
+  AV1FrameSizeTestsLarge()
+      : EncoderTest(&::libaom_test::kAV1), expected_res_(AOM_CODEC_OK) {}
+  virtual ~AV1FrameSizeTestsLarge() {}
 
   virtual void SetUp() {
     InitializeConfig();
     SetMode(::libaom_test::kRealTime);
   }
 
-  virtual bool HandleDecodeResult(const vpx_codec_err_t res_dec,
+  virtual bool HandleDecodeResult(const aom_codec_err_t res_dec,
                                   const libaom_test::VideoSource & /*video*/,
                                   libaom_test::Decoder *decoder) {
     EXPECT_EQ(expected_res_, res_dec) << decoder->DecodeError();
@@ -35,35 +35,35 @@ class VP9FrameSizeTestsLarge : public ::libaom_test::EncoderTest,
   virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
                                   ::libaom_test::Encoder *encoder) {
     if (video->frame() == 1) {
-      encoder->Control(VP8E_SET_CPUUSED, 7);
-      encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
-      encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);
-      encoder->Control(VP8E_SET_ARNR_STRENGTH, 5);
-      encoder->Control(VP8E_SET_ARNR_TYPE, 3);
+      encoder->Control(AOME_SET_CPUUSED, 7);
+      encoder->Control(AOME_SET_ENABLEAUTOALTREF, 1);
+      encoder->Control(AOME_SET_ARNR_MAXFRAMES, 7);
+      encoder->Control(AOME_SET_ARNR_STRENGTH, 5);
+      encoder->Control(AOME_SET_ARNR_TYPE, 3);
     }
   }
 
   int expected_res_;
 };
 
-TEST_F(VP9FrameSizeTestsLarge, TestInvalidSizes) {
+TEST_F(AV1FrameSizeTestsLarge, TestInvalidSizes) {
   ::libaom_test::RandomVideoSource video;
 
 #if CONFIG_SIZE_LIMIT
   video.SetSize(DECODE_WIDTH_LIMIT + 16, DECODE_HEIGHT_LIMIT + 16);
   video.set_limit(2);
-  expected_res_ = VPX_CODEC_CORRUPT_FRAME;
+  expected_res_ = AOM_CODEC_CORRUPT_FRAME;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 #endif
 }
 
-TEST_F(VP9FrameSizeTestsLarge, ValidSizes) {
+TEST_F(AV1FrameSizeTestsLarge, ValidSizes) {
   ::libaom_test::RandomVideoSource video;
 
 #if CONFIG_SIZE_LIMIT
   video.SetSize(DECODE_WIDTH_LIMIT, DECODE_HEIGHT_LIMIT);
   video.set_limit(2);
-  expected_res_ = VPX_CODEC_OK;
+  expected_res_ = AOM_CODEC_OK;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 #else
 // This test produces a pretty large single frame allocation,  (roughly
@@ -79,17 +79,17 @@ TEST_F(VP9FrameSizeTestsLarge, ValidSizes) {
   video.SetSize(4096, 4096);
 #endif
   video.set_limit(2);
-  expected_res_ = VPX_CODEC_OK;
+  expected_res_ = AOM_CODEC_OK;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 #endif
 }
 
-TEST_F(VP9FrameSizeTestsLarge, OneByOneVideo) {
+TEST_F(AV1FrameSizeTestsLarge, OneByOneVideo) {
   ::libaom_test::RandomVideoSource video;
 
   video.SetSize(1, 1);
   video.set_limit(2);
-  expected_res_ = VPX_CODEC_OK;
+  expected_res_ = AOM_CODEC_OK;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 }  // namespace

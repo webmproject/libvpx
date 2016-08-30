@@ -12,15 +12,15 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-#include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_config.h"
+#include "./aom_dsp_rtcd.h"
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
 #include "av1/common/blockd.h"
 #include "av1/common/pred_common.h"
-#include "aom_mem/vpx_mem.h"
+#include "aom_mem/aom_mem.h"
 
 namespace {
 
@@ -43,7 +43,7 @@ struct IntraPredFunc {
   int bit_depth;
 };
 
-class VP9IntraPredTest : public ::testing::TestWithParam<IntraPredFunc> {
+class AV1IntraPredTest : public ::testing::TestWithParam<IntraPredFunc> {
  public:
   void RunTest(uint16_t *left_col, uint16_t *above_data, uint16_t *dst,
                uint16_t *ref_dst) {
@@ -114,7 +114,7 @@ class VP9IntraPredTest : public ::testing::TestWithParam<IntraPredFunc> {
   IntraPredFunc params_;
 };
 
-TEST_P(VP9IntraPredTest, IntraPredTests) {
+TEST_P(AV1IntraPredTest, IntraPredTests) {
   // max block size is 32
   DECLARE_ALIGNED(16, uint16_t, left_col[2 * 32]);
   DECLARE_ALIGNED(16, uint16_t, above_data[2 * 32 + 32]);
@@ -124,88 +124,88 @@ TEST_P(VP9IntraPredTest, IntraPredTests) {
 }
 
 #if HAVE_SSE2
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
-    SSE2_TO_C_8, VP9IntraPredTest,
-    ::testing::Values(IntraPredFunc(&vpx_highbd_dc_predictor_32x32_sse2,
-                                    &vpx_highbd_dc_predictor_32x32_c, 32, 8),
-                      IntraPredFunc(&vpx_highbd_tm_predictor_16x16_sse2,
-                                    &vpx_highbd_tm_predictor_16x16_c, 16, 8),
-                      IntraPredFunc(&vpx_highbd_tm_predictor_32x32_sse2,
-                                    &vpx_highbd_tm_predictor_32x32_c, 32, 8),
-                      IntraPredFunc(&vpx_highbd_dc_predictor_4x4_sse2,
-                                    &vpx_highbd_dc_predictor_4x4_c, 4, 8),
-                      IntraPredFunc(&vpx_highbd_dc_predictor_8x8_sse2,
-                                    &vpx_highbd_dc_predictor_8x8_c, 8, 8),
-                      IntraPredFunc(&vpx_highbd_dc_predictor_16x16_sse2,
-                                    &vpx_highbd_dc_predictor_16x16_c, 16, 8),
-                      IntraPredFunc(&vpx_highbd_v_predictor_4x4_sse2,
-                                    &vpx_highbd_v_predictor_4x4_c, 4, 8),
-                      IntraPredFunc(&vpx_highbd_v_predictor_8x8_sse2,
-                                    &vpx_highbd_v_predictor_8x8_c, 8, 8),
-                      IntraPredFunc(&vpx_highbd_v_predictor_16x16_sse2,
-                                    &vpx_highbd_v_predictor_16x16_c, 16, 8),
-                      IntraPredFunc(&vpx_highbd_v_predictor_32x32_sse2,
-                                    &vpx_highbd_v_predictor_32x32_c, 32, 8),
-                      IntraPredFunc(&vpx_highbd_tm_predictor_4x4_sse2,
-                                    &vpx_highbd_tm_predictor_4x4_c, 4, 8),
-                      IntraPredFunc(&vpx_highbd_tm_predictor_8x8_sse2,
-                                    &vpx_highbd_tm_predictor_8x8_c, 8, 8)));
+    SSE2_TO_C_8, AV1IntraPredTest,
+    ::testing::Values(IntraPredFunc(&aom_highbd_dc_predictor_32x32_sse2,
+                                    &aom_highbd_dc_predictor_32x32_c, 32, 8),
+                      IntraPredFunc(&aom_highbd_tm_predictor_16x16_sse2,
+                                    &aom_highbd_tm_predictor_16x16_c, 16, 8),
+                      IntraPredFunc(&aom_highbd_tm_predictor_32x32_sse2,
+                                    &aom_highbd_tm_predictor_32x32_c, 32, 8),
+                      IntraPredFunc(&aom_highbd_dc_predictor_4x4_sse2,
+                                    &aom_highbd_dc_predictor_4x4_c, 4, 8),
+                      IntraPredFunc(&aom_highbd_dc_predictor_8x8_sse2,
+                                    &aom_highbd_dc_predictor_8x8_c, 8, 8),
+                      IntraPredFunc(&aom_highbd_dc_predictor_16x16_sse2,
+                                    &aom_highbd_dc_predictor_16x16_c, 16, 8),
+                      IntraPredFunc(&aom_highbd_v_predictor_4x4_sse2,
+                                    &aom_highbd_v_predictor_4x4_c, 4, 8),
+                      IntraPredFunc(&aom_highbd_v_predictor_8x8_sse2,
+                                    &aom_highbd_v_predictor_8x8_c, 8, 8),
+                      IntraPredFunc(&aom_highbd_v_predictor_16x16_sse2,
+                                    &aom_highbd_v_predictor_16x16_c, 16, 8),
+                      IntraPredFunc(&aom_highbd_v_predictor_32x32_sse2,
+                                    &aom_highbd_v_predictor_32x32_c, 32, 8),
+                      IntraPredFunc(&aom_highbd_tm_predictor_4x4_sse2,
+                                    &aom_highbd_tm_predictor_4x4_c, 4, 8),
+                      IntraPredFunc(&aom_highbd_tm_predictor_8x8_sse2,
+                                    &aom_highbd_tm_predictor_8x8_c, 8, 8)));
 
 INSTANTIATE_TEST_CASE_P(
-    SSE2_TO_C_10, VP9IntraPredTest,
-    ::testing::Values(IntraPredFunc(&vpx_highbd_dc_predictor_32x32_sse2,
-                                    &vpx_highbd_dc_predictor_32x32_c, 32, 10),
-                      IntraPredFunc(&vpx_highbd_tm_predictor_16x16_sse2,
-                                    &vpx_highbd_tm_predictor_16x16_c, 16, 10),
-                      IntraPredFunc(&vpx_highbd_tm_predictor_32x32_sse2,
-                                    &vpx_highbd_tm_predictor_32x32_c, 32, 10),
-                      IntraPredFunc(&vpx_highbd_dc_predictor_4x4_sse2,
-                                    &vpx_highbd_dc_predictor_4x4_c, 4, 10),
-                      IntraPredFunc(&vpx_highbd_dc_predictor_8x8_sse2,
-                                    &vpx_highbd_dc_predictor_8x8_c, 8, 10),
-                      IntraPredFunc(&vpx_highbd_dc_predictor_16x16_sse2,
-                                    &vpx_highbd_dc_predictor_16x16_c, 16, 10),
-                      IntraPredFunc(&vpx_highbd_v_predictor_4x4_sse2,
-                                    &vpx_highbd_v_predictor_4x4_c, 4, 10),
-                      IntraPredFunc(&vpx_highbd_v_predictor_8x8_sse2,
-                                    &vpx_highbd_v_predictor_8x8_c, 8, 10),
-                      IntraPredFunc(&vpx_highbd_v_predictor_16x16_sse2,
-                                    &vpx_highbd_v_predictor_16x16_c, 16, 10),
-                      IntraPredFunc(&vpx_highbd_v_predictor_32x32_sse2,
-                                    &vpx_highbd_v_predictor_32x32_c, 32, 10),
-                      IntraPredFunc(&vpx_highbd_tm_predictor_4x4_sse2,
-                                    &vpx_highbd_tm_predictor_4x4_c, 4, 10),
-                      IntraPredFunc(&vpx_highbd_tm_predictor_8x8_sse2,
-                                    &vpx_highbd_tm_predictor_8x8_c, 8, 10)));
+    SSE2_TO_C_10, AV1IntraPredTest,
+    ::testing::Values(IntraPredFunc(&aom_highbd_dc_predictor_32x32_sse2,
+                                    &aom_highbd_dc_predictor_32x32_c, 32, 10),
+                      IntraPredFunc(&aom_highbd_tm_predictor_16x16_sse2,
+                                    &aom_highbd_tm_predictor_16x16_c, 16, 10),
+                      IntraPredFunc(&aom_highbd_tm_predictor_32x32_sse2,
+                                    &aom_highbd_tm_predictor_32x32_c, 32, 10),
+                      IntraPredFunc(&aom_highbd_dc_predictor_4x4_sse2,
+                                    &aom_highbd_dc_predictor_4x4_c, 4, 10),
+                      IntraPredFunc(&aom_highbd_dc_predictor_8x8_sse2,
+                                    &aom_highbd_dc_predictor_8x8_c, 8, 10),
+                      IntraPredFunc(&aom_highbd_dc_predictor_16x16_sse2,
+                                    &aom_highbd_dc_predictor_16x16_c, 16, 10),
+                      IntraPredFunc(&aom_highbd_v_predictor_4x4_sse2,
+                                    &aom_highbd_v_predictor_4x4_c, 4, 10),
+                      IntraPredFunc(&aom_highbd_v_predictor_8x8_sse2,
+                                    &aom_highbd_v_predictor_8x8_c, 8, 10),
+                      IntraPredFunc(&aom_highbd_v_predictor_16x16_sse2,
+                                    &aom_highbd_v_predictor_16x16_c, 16, 10),
+                      IntraPredFunc(&aom_highbd_v_predictor_32x32_sse2,
+                                    &aom_highbd_v_predictor_32x32_c, 32, 10),
+                      IntraPredFunc(&aom_highbd_tm_predictor_4x4_sse2,
+                                    &aom_highbd_tm_predictor_4x4_c, 4, 10),
+                      IntraPredFunc(&aom_highbd_tm_predictor_8x8_sse2,
+                                    &aom_highbd_tm_predictor_8x8_c, 8, 10)));
 
 INSTANTIATE_TEST_CASE_P(
-    SSE2_TO_C_12, VP9IntraPredTest,
-    ::testing::Values(IntraPredFunc(&vpx_highbd_dc_predictor_32x32_sse2,
-                                    &vpx_highbd_dc_predictor_32x32_c, 32, 12),
-                      IntraPredFunc(&vpx_highbd_tm_predictor_16x16_sse2,
-                                    &vpx_highbd_tm_predictor_16x16_c, 16, 12),
-                      IntraPredFunc(&vpx_highbd_tm_predictor_32x32_sse2,
-                                    &vpx_highbd_tm_predictor_32x32_c, 32, 12),
-                      IntraPredFunc(&vpx_highbd_dc_predictor_4x4_sse2,
-                                    &vpx_highbd_dc_predictor_4x4_c, 4, 12),
-                      IntraPredFunc(&vpx_highbd_dc_predictor_8x8_sse2,
-                                    &vpx_highbd_dc_predictor_8x8_c, 8, 12),
-                      IntraPredFunc(&vpx_highbd_dc_predictor_16x16_sse2,
-                                    &vpx_highbd_dc_predictor_16x16_c, 16, 12),
-                      IntraPredFunc(&vpx_highbd_v_predictor_4x4_sse2,
-                                    &vpx_highbd_v_predictor_4x4_c, 4, 12),
-                      IntraPredFunc(&vpx_highbd_v_predictor_8x8_sse2,
-                                    &vpx_highbd_v_predictor_8x8_c, 8, 12),
-                      IntraPredFunc(&vpx_highbd_v_predictor_16x16_sse2,
-                                    &vpx_highbd_v_predictor_16x16_c, 16, 12),
-                      IntraPredFunc(&vpx_highbd_v_predictor_32x32_sse2,
-                                    &vpx_highbd_v_predictor_32x32_c, 32, 12),
-                      IntraPredFunc(&vpx_highbd_tm_predictor_4x4_sse2,
-                                    &vpx_highbd_tm_predictor_4x4_c, 4, 12),
-                      IntraPredFunc(&vpx_highbd_tm_predictor_8x8_sse2,
-                                    &vpx_highbd_tm_predictor_8x8_c, 8, 12)));
+    SSE2_TO_C_12, AV1IntraPredTest,
+    ::testing::Values(IntraPredFunc(&aom_highbd_dc_predictor_32x32_sse2,
+                                    &aom_highbd_dc_predictor_32x32_c, 32, 12),
+                      IntraPredFunc(&aom_highbd_tm_predictor_16x16_sse2,
+                                    &aom_highbd_tm_predictor_16x16_c, 16, 12),
+                      IntraPredFunc(&aom_highbd_tm_predictor_32x32_sse2,
+                                    &aom_highbd_tm_predictor_32x32_c, 32, 12),
+                      IntraPredFunc(&aom_highbd_dc_predictor_4x4_sse2,
+                                    &aom_highbd_dc_predictor_4x4_c, 4, 12),
+                      IntraPredFunc(&aom_highbd_dc_predictor_8x8_sse2,
+                                    &aom_highbd_dc_predictor_8x8_c, 8, 12),
+                      IntraPredFunc(&aom_highbd_dc_predictor_16x16_sse2,
+                                    &aom_highbd_dc_predictor_16x16_c, 16, 12),
+                      IntraPredFunc(&aom_highbd_v_predictor_4x4_sse2,
+                                    &aom_highbd_v_predictor_4x4_c, 4, 12),
+                      IntraPredFunc(&aom_highbd_v_predictor_8x8_sse2,
+                                    &aom_highbd_v_predictor_8x8_c, 8, 12),
+                      IntraPredFunc(&aom_highbd_v_predictor_16x16_sse2,
+                                    &aom_highbd_v_predictor_16x16_c, 16, 12),
+                      IntraPredFunc(&aom_highbd_v_predictor_32x32_sse2,
+                                    &aom_highbd_v_predictor_32x32_c, 32, 12),
+                      IntraPredFunc(&aom_highbd_tm_predictor_4x4_sse2,
+                                    &aom_highbd_tm_predictor_4x4_c, 4, 12),
+                      IntraPredFunc(&aom_highbd_tm_predictor_8x8_sse2,
+                                    &aom_highbd_tm_predictor_8x8_c, 8, 12)));
 
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 #endif  // HAVE_SSE2
 }  // namespace

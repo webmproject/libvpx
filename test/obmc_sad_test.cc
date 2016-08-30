@@ -13,9 +13,9 @@
 #include "test/function_equivalence_test.h"
 #include "test/register_state_check.h"
 
-#include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
-#include "aom/vpx_integer.h"
+#include "./aom_config.h"
+#include "./aom_dsp_rtcd.h"
+#include "aom/aom_integer.h"
 
 #define MAX_SB_SQUARE (MAX_SB_SIZE * MAX_SB_SIZE)
 
@@ -85,23 +85,23 @@ TEST_P(ObmcSadTest, ExtremeValues) {
 #if HAVE_SSE4_1
 const ObmcSadTest::ParamType sse4_functions[] = {
 #if CONFIG_EXT_PARTITION
-  TestFuncs(vpx_obmc_sad128x128_c, vpx_obmc_sad128x128_sse4_1),
-  TestFuncs(vpx_obmc_sad128x64_c, vpx_obmc_sad128x64_sse4_1),
-  TestFuncs(vpx_obmc_sad64x128_c, vpx_obmc_sad64x128_sse4_1),
+  TestFuncs(aom_obmc_sad128x128_c, aom_obmc_sad128x128_sse4_1),
+  TestFuncs(aom_obmc_sad128x64_c, aom_obmc_sad128x64_sse4_1),
+  TestFuncs(aom_obmc_sad64x128_c, aom_obmc_sad64x128_sse4_1),
 #endif  // CONFIG_EXT_PARTITION
-  TestFuncs(vpx_obmc_sad64x64_c, vpx_obmc_sad64x64_sse4_1),
-  TestFuncs(vpx_obmc_sad64x32_c, vpx_obmc_sad64x32_sse4_1),
-  TestFuncs(vpx_obmc_sad32x64_c, vpx_obmc_sad32x64_sse4_1),
-  TestFuncs(vpx_obmc_sad32x32_c, vpx_obmc_sad32x32_sse4_1),
-  TestFuncs(vpx_obmc_sad32x16_c, vpx_obmc_sad32x16_sse4_1),
-  TestFuncs(vpx_obmc_sad16x32_c, vpx_obmc_sad16x32_sse4_1),
-  TestFuncs(vpx_obmc_sad16x16_c, vpx_obmc_sad16x16_sse4_1),
-  TestFuncs(vpx_obmc_sad16x8_c, vpx_obmc_sad16x8_sse4_1),
-  TestFuncs(vpx_obmc_sad8x16_c, vpx_obmc_sad8x16_sse4_1),
-  TestFuncs(vpx_obmc_sad8x8_c, vpx_obmc_sad8x8_sse4_1),
-  TestFuncs(vpx_obmc_sad8x4_c, vpx_obmc_sad8x4_sse4_1),
-  TestFuncs(vpx_obmc_sad4x8_c, vpx_obmc_sad4x8_sse4_1),
-  TestFuncs(vpx_obmc_sad4x4_c, vpx_obmc_sad4x4_sse4_1)
+  TestFuncs(aom_obmc_sad64x64_c, aom_obmc_sad64x64_sse4_1),
+  TestFuncs(aom_obmc_sad64x32_c, aom_obmc_sad64x32_sse4_1),
+  TestFuncs(aom_obmc_sad32x64_c, aom_obmc_sad32x64_sse4_1),
+  TestFuncs(aom_obmc_sad32x32_c, aom_obmc_sad32x32_sse4_1),
+  TestFuncs(aom_obmc_sad32x16_c, aom_obmc_sad32x16_sse4_1),
+  TestFuncs(aom_obmc_sad16x32_c, aom_obmc_sad16x32_sse4_1),
+  TestFuncs(aom_obmc_sad16x16_c, aom_obmc_sad16x16_sse4_1),
+  TestFuncs(aom_obmc_sad16x8_c, aom_obmc_sad16x8_sse4_1),
+  TestFuncs(aom_obmc_sad8x16_c, aom_obmc_sad8x16_sse4_1),
+  TestFuncs(aom_obmc_sad8x8_c, aom_obmc_sad8x8_sse4_1),
+  TestFuncs(aom_obmc_sad8x4_c, aom_obmc_sad8x4_sse4_1),
+  TestFuncs(aom_obmc_sad4x8_c, aom_obmc_sad4x8_sse4_1),
+  TestFuncs(aom_obmc_sad4x4_c, aom_obmc_sad4x4_sse4_1)
 };
 
 INSTANTIATE_TEST_CASE_P(SSE4_1_C_COMPARE, ObmcSadTest,
@@ -112,7 +112,7 @@ INSTANTIATE_TEST_CASE_P(SSE4_1_C_COMPARE, ObmcSadTest,
 // High bit-depth
 ////////////////////////////////////////////////////////////////////////////////
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 class ObmcSadHBDTest : public FunctionEquivalenceTest<ObmcSadF> {};
 
 TEST_P(ObmcSadHBDTest, RandomValues) {
@@ -168,27 +168,27 @@ TEST_P(ObmcSadHBDTest, ExtremeValues) {
 #if HAVE_SSE4_1
 ObmcSadHBDTest::ParamType sse4_functions_hbd[] = {
 #if CONFIG_EXT_PARTITION
-  TestFuncs(vpx_highbd_obmc_sad128x128_c, vpx_highbd_obmc_sad128x128_sse4_1),
-  TestFuncs(vpx_highbd_obmc_sad128x64_c, vpx_highbd_obmc_sad128x64_sse4_1),
-  TestFuncs(vpx_highbd_obmc_sad64x128_c, vpx_highbd_obmc_sad64x128_sse4_1),
+  TestFuncs(aom_highbd_obmc_sad128x128_c, aom_highbd_obmc_sad128x128_sse4_1),
+  TestFuncs(aom_highbd_obmc_sad128x64_c, aom_highbd_obmc_sad128x64_sse4_1),
+  TestFuncs(aom_highbd_obmc_sad64x128_c, aom_highbd_obmc_sad64x128_sse4_1),
 #endif  // CONFIG_EXT_PARTITION
-  TestFuncs(vpx_highbd_obmc_sad64x64_c, vpx_highbd_obmc_sad64x64_sse4_1),
-  TestFuncs(vpx_highbd_obmc_sad64x32_c, vpx_highbd_obmc_sad64x32_sse4_1),
-  TestFuncs(vpx_highbd_obmc_sad32x64_c, vpx_highbd_obmc_sad32x64_sse4_1),
-  TestFuncs(vpx_highbd_obmc_sad32x32_c, vpx_highbd_obmc_sad32x32_sse4_1),
-  TestFuncs(vpx_highbd_obmc_sad32x16_c, vpx_highbd_obmc_sad32x16_sse4_1),
-  TestFuncs(vpx_highbd_obmc_sad16x32_c, vpx_highbd_obmc_sad16x32_sse4_1),
-  TestFuncs(vpx_highbd_obmc_sad16x16_c, vpx_highbd_obmc_sad16x16_sse4_1),
-  TestFuncs(vpx_highbd_obmc_sad16x8_c, vpx_highbd_obmc_sad16x8_sse4_1),
-  TestFuncs(vpx_highbd_obmc_sad8x16_c, vpx_highbd_obmc_sad8x16_sse4_1),
-  TestFuncs(vpx_highbd_obmc_sad8x8_c, vpx_highbd_obmc_sad8x8_sse4_1),
-  TestFuncs(vpx_highbd_obmc_sad8x4_c, vpx_highbd_obmc_sad8x4_sse4_1),
-  TestFuncs(vpx_highbd_obmc_sad4x8_c, vpx_highbd_obmc_sad4x8_sse4_1),
-  TestFuncs(vpx_highbd_obmc_sad4x4_c, vpx_highbd_obmc_sad4x4_sse4_1)
+  TestFuncs(aom_highbd_obmc_sad64x64_c, aom_highbd_obmc_sad64x64_sse4_1),
+  TestFuncs(aom_highbd_obmc_sad64x32_c, aom_highbd_obmc_sad64x32_sse4_1),
+  TestFuncs(aom_highbd_obmc_sad32x64_c, aom_highbd_obmc_sad32x64_sse4_1),
+  TestFuncs(aom_highbd_obmc_sad32x32_c, aom_highbd_obmc_sad32x32_sse4_1),
+  TestFuncs(aom_highbd_obmc_sad32x16_c, aom_highbd_obmc_sad32x16_sse4_1),
+  TestFuncs(aom_highbd_obmc_sad16x32_c, aom_highbd_obmc_sad16x32_sse4_1),
+  TestFuncs(aom_highbd_obmc_sad16x16_c, aom_highbd_obmc_sad16x16_sse4_1),
+  TestFuncs(aom_highbd_obmc_sad16x8_c, aom_highbd_obmc_sad16x8_sse4_1),
+  TestFuncs(aom_highbd_obmc_sad8x16_c, aom_highbd_obmc_sad8x16_sse4_1),
+  TestFuncs(aom_highbd_obmc_sad8x8_c, aom_highbd_obmc_sad8x8_sse4_1),
+  TestFuncs(aom_highbd_obmc_sad8x4_c, aom_highbd_obmc_sad8x4_sse4_1),
+  TestFuncs(aom_highbd_obmc_sad4x8_c, aom_highbd_obmc_sad4x8_sse4_1),
+  TestFuncs(aom_highbd_obmc_sad4x4_c, aom_highbd_obmc_sad4x4_sse4_1)
 };
 
 INSTANTIATE_TEST_CASE_P(SSE4_1_C_COMPARE, ObmcSadHBDTest,
                         ::testing::ValuesIn(sse4_functions_hbd));
 #endif  // HAVE_SSE4_1
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 }  // namespace

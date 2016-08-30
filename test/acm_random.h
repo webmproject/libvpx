@@ -13,7 +13,7 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-#include "aom/vpx_integer.h"
+#include "aom/aom_integer.h"
 
 namespace libaom_test {
 

@@ -98,7 +98,7 @@ distclean: clean
 	if [ -z "$(target)" ]; then \
       rm -f Makefile; \
       rm -f config.log config.mk; \
-      rm -f vpx_config.[hc] vpx_config.asm; \
+      rm -f aom_config.[hc] aom_config.asm; \
     else \
       rm -f $(target)-$(TOOLCHAIN).mk; \
     fi
@@ -211,7 +211,7 @@ ifeq ($(HAVE_GNU_STRIP),yes)
 # Older binutils strip global symbols not needed for relocation processing
 # when given --strip-unneeded. Using nm and awk to identify globals and
 # keep them caused command line length issues under mingw and segfaults in
-# test_libvpx were observed under OS/2: simply use --strip-debug.
+# test_libaom were observed under OS/2: simply use --strip-debug.
 %.a: %_g.a
 	$(if $(quiet),@echo "    [STRIP] $@ < $<")
 	$(qexec)$(STRIP) --strip-debug \

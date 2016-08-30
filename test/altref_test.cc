@@ -26,29 +26,29 @@ class AltRefForcedKeyTestLarge
   virtual void SetUp() {
     InitializeConfig();
     SetMode(encoding_mode_);
-    cfg_.rc_end_usage = VPX_VBR;
+    cfg_.rc_end_usage = AOM_VBR;
     cfg_.g_threads = 0;
   }
 
   virtual void PreEncodeFrameHook(::libaom_test::VideoSource *video,
                                   ::libaom_test::Encoder *encoder) {
     if (video->frame() == 0) {
-      encoder->Control(VP8E_SET_CPUUSED, cpu_used_);
-      encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
-#if CONFIG_VP10_ENCODER
+      encoder->Control(AOME_SET_CPUUSED, cpu_used_);
+      encoder->Control(AOME_SET_ENABLEAUTOALTREF, 1);
+#if CONFIG_AV1_ENCODER
       // override test default for tile columns if necessary.
-      if (GET_PARAM(0) == &libaom_test::kVP10) {
-        encoder->Control(VP9E_SET_TILE_COLUMNS, 6);
+      if (GET_PARAM(0) == &libaom_test::kAV1) {
+        encoder->Control(AV1E_SET_TILE_COLUMNS, 6);
       }
 #endif
     }
     frame_flags_ =
-        (video->frame() == forced_kf_frame_num_) ? VPX_EFLAG_FORCE_KF : 0;
+        (video->frame() == forced_kf_frame_num_) ? AOM_EFLAG_FORCE_KF : 0;
   }
 
-  virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
+  virtual void FramePktHook(const aom_codec_cx_pkt_t *pkt) {
     if (frame_num_ == forced_kf_frame_num_) {
-      ASSERT_TRUE(!!(pkt->data.frame.flags & VPX_FRAME_IS_KEY))
+      ASSERT_TRUE(!!(pkt->data.frame.flags & AOM_FRAME_IS_KEY))
           << "Frame #" << frame_num_ << " isn't a keyframe!";
     }
     ++frame_num_;
@@ -61,7 +61,7 @@ class AltRefForcedKeyTestLarge
 };
 
 TEST_P(AltRefForcedKeyTestLarge, Frame1IsKey) {
-  const vpx_rational timebase = { 1, 30 };
+  const aom_rational timebase = { 1, 30 };
   const int lag_values[] = { 3, 15, 25, -1 };
 
   forced_kf_frame_num_ = 1;
@@ -75,7 +75,7 @@ TEST_P(AltRefForcedKeyTestLarge, Frame1IsKey) {
 }
 
 TEST_P(AltRefForcedKeyTestLarge, ForcedFrameIsKey) {
-  const vpx_rational timebase = { 1, 30 };
+  const aom_rational timebase = { 1, 30 };
   const int lag_values[] = { 3, 15, 25, -1 };
 
   for (int i = 0; lag_values[i] != -1; ++i) {
@@ -88,8 +88,8 @@ TEST_P(AltRefForcedKeyTestLarge, ForcedFrameIsKey) {
   }
 }
 
-VP10_INSTANTIATE_TEST_CASE(AltRefForcedKeyTestLarge,
-                           ::testing::Values(::libaom_test::kOnePassGood),
-                           ::testing::Range(0, 9));
+AV1_INSTANTIATE_TEST_CASE(AltRefForcedKeyTestLarge,
+                          ::testing::Values(::libaom_test::kOnePassGood),
+                          ::testing::Range(0, 9));
 
 }  // namespace

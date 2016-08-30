@@ -10,7 +10,7 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 #include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
 #include "test/i420_video_source.h"
@@ -42,7 +42,7 @@ class LosslessTestLarge
       // Only call Control if quantizer > 0 to verify that using quantizer
       // alone will activate lossless
       if (cfg_.rc_max_quantizer > 0 || cfg_.rc_min_quantizer > 0) {
-        encoder->Control(VP9E_SET_LOSSLESS, 1);
+        encoder->Control(AV1E_SET_LOSSLESS, 1);
       }
     }
   }
@@ -52,7 +52,7 @@ class LosslessTestLarge
     nframes_ = 0;
   }
 
-  virtual void PSNRPktHook(const vpx_codec_cx_pkt_t *pkt) {
+  virtual void PSNRPktHook(const aom_codec_cx_pkt_t *pkt) {
     if (pkt->data.psnr.psnr[0] < psnr_) psnr_ = pkt->data.psnr.psnr[0];
   }
 
@@ -65,14 +65,14 @@ class LosslessTestLarge
 };
 
 TEST_P(LosslessTestLarge, TestLossLessEncoding) {
-  const vpx_rational timebase = { 33333333, 1000000000 };
+  const aom_rational timebase = { 33333333, 1000000000 };
   cfg_.g_timebase = timebase;
   cfg_.rc_target_bitrate = 2000;
   cfg_.g_lag_in_frames = 25;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 0;
 
-  init_flags_ = VPX_CODEC_USE_PSNR;
+  init_flags_ = AOM_CODEC_USE_PSNR;
 
   // intentionally changed the dimension for better testing coverage
   libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
@@ -92,7 +92,7 @@ TEST_P(LosslessTestLarge, TestLossLessEncoding444) {
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 0;
 
-  init_flags_ = VPX_CODEC_USE_PSNR;
+  init_flags_ = AOM_CODEC_USE_PSNR;
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   const double psnr_lossless = GetMinPsnr();
@@ -100,7 +100,7 @@ TEST_P(LosslessTestLarge, TestLossLessEncoding444) {
 }
 
 TEST_P(LosslessTestLarge, TestLossLessEncodingCtrl) {
-  const vpx_rational timebase = { 33333333, 1000000000 };
+  const aom_rational timebase = { 33333333, 1000000000 };
   cfg_.g_timebase = timebase;
   cfg_.rc_target_bitrate = 2000;
   cfg_.g_lag_in_frames = 25;
@@ -109,7 +109,7 @@ TEST_P(LosslessTestLarge, TestLossLessEncodingCtrl) {
   cfg_.rc_min_quantizer = 10;
   cfg_.rc_max_quantizer = 20;
 
-  init_flags_ = VPX_CODEC_USE_PSNR;
+  init_flags_ = AOM_CODEC_USE_PSNR;
 
   libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                      timebase.den, timebase.num, 0, 5);
@@ -118,7 +118,7 @@ TEST_P(LosslessTestLarge, TestLossLessEncodingCtrl) {
   EXPECT_GE(psnr_lossless, kMaxPsnr);
 }
 
-VP10_INSTANTIATE_TEST_CASE(LosslessTestLarge,
-                           ::testing::Values(::libaom_test::kOnePassGood,
-                                             ::libaom_test::kTwoPassGood));
+AV1_INSTANTIATE_TEST_CASE(LosslessTestLarge,
+                          ::testing::Values(::libaom_test::kOnePassGood,
+                                            ::libaom_test::kTwoPassGood));
 }  // namespace

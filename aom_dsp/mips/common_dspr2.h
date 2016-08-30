@@ -8,12 +8,12 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_COMMON_MIPS_DSPR2_H_
-#define VPX_COMMON_MIPS_DSPR2_H_
+#ifndef AOM_COMMON_MIPS_DSPR2_H_
+#define AOM_COMMON_MIPS_DSPR2_H_
 
 #include <assert.h>
-#include "./vpx_config.h"
-#include "aom/vpx_integer.h"
+#include "./aom_config.h"
+#include "aom/aom_integer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,7 +21,7 @@ extern "C" {
 #if HAVE_DSPR2
 #define CROP_WIDTH 512
 
-extern uint8_t *vpx_ff_cropTbl;  // From "aom_dsp/mips/intrapred4_dspr2.c"
+extern uint8_t *aom_ff_cropTbl;  // From "aom_dsp/mips/intrapred4_dspr2.c"
 
 static INLINE void prefetch_load(const unsigned char *src) {
   __asm__ __volatile__("pref   0,  0(%[src])   \n\t" : : [src] "r"(src));
@@ -45,4 +45,4 @@ static INLINE void prefetch_store_streamed(unsigned char *dst) {
 }  // extern "C"
 #endif
 
-#endif  // VPX_COMMON_MIPS_DSPR2_H_
+#endif  // AOM_COMMON_MIPS_DSPR2_H_

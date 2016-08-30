@@ -10,7 +10,7 @@
 
 #include <arm_neon.h>
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 #include "aom_dsp/txfm_common.h"
 
 static INLINE void TRANSPOSE8X8(int16x8_t *q8s16, int16x8_t *q9s16,
@@ -228,7 +228,7 @@ static INLINE void IDCT8x8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   return;
 }
 
-void vpx_idct8x8_64_add_neon(int16_t *input, uint8_t *dest, int dest_stride) {
+void aom_idct8x8_64_add_neon(int16_t *input, uint8_t *dest, int dest_stride) {
   uint8_t *d1, *d2;
   uint8x8_t d0u8, d1u8, d2u8, d3u8;
   uint64x1_t d0u64, d1u64, d2u64, d3u64;
@@ -330,7 +330,7 @@ void vpx_idct8x8_64_add_neon(int16_t *input, uint8_t *dest, int dest_stride) {
   return;
 }
 
-void vpx_idct8x8_12_add_neon(int16_t *input, uint8_t *dest, int dest_stride) {
+void aom_idct8x8_12_add_neon(int16_t *input, uint8_t *dest, int dest_stride) {
   uint8_t *d1, *d2;
   uint8x8_t d0u8, d1u8, d2u8, d3u8;
   int16x4_t d10s16, d11s16, d12s16, d13s16, d16s16;

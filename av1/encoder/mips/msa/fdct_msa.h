@@ -8,14 +8,14 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_ENCODER_MIPS_MSA_VP10_FDCT_MSA_H_
-#define VP10_ENCODER_MIPS_MSA_VP10_FDCT_MSA_H_
+#ifndef AV1_ENCODER_MIPS_MSA_AV1_FDCT_MSA_H_
+#define AV1_ENCODER_MIPS_MSA_AV1_FDCT_MSA_H_
 
 #include "aom_dsp/mips/fwd_txfm_msa.h"
 #include "aom_dsp/mips/txfm_macros_msa.h"
 #include "aom_ports/mem.h"
 
-#define VPX_ADST8(in0, in1, in2, in3, in4, in5, in6, in7, out0, out1, out2,  \
+#define AOM_ADST8(in0, in1, in2, in3, in4, in5, in6, in7, out0, out1, out2,  \
                   out3, out4, out5, out6, out7)                              \
   {                                                                          \
     v8i16 cnst0_m, cnst1_m, cnst2_m, cnst3_m, cnst4_m;                       \
@@ -79,7 +79,7 @@
     out5 = -out5;                                                            \
   }
 
-#define VPX_FADST4(in0, in1, in2, in3, out0, out1, out2, out3)              \
+#define AOM_FADST4(in0, in1, in2, in3, out0, out1, out2, out3)              \
   {                                                                         \
     v4i32 s0_m, s1_m, s2_m, s3_m, constant_m;                               \
     v4i32 in0_r_m, in1_r_m, in2_r_m, in3_r_m;                               \
@@ -113,4 +113,4 @@
     PCKEV_H4_SH(in0_r_m, in0_r_m, in1_r_m, in1_r_m, s2_m, s2_m, s3_m, s3_m, \
                 out0, out1, out2, out3);                                    \
   }
-#endif  // VP10_ENCODER_MIPS_MSA_VP10_FDCT_MSA_H_
+#endif  // AV1_ENCODER_MIPS_MSA_AV1_FDCT_MSA_H_

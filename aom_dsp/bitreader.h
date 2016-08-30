@@ -8,13 +8,13 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_BITREADER_H_
-#define VPX_DSP_BITREADER_H_
+#ifndef AOM_DSP_BITREADER_H_
+#define AOM_DSP_BITREADER_H_
 
 #include <limits.h>
 #include <stddef.h>
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 
 #if CONFIG_BITSTREAM_DEBUG
 #include <assert.h>
@@ -22,8 +22,8 @@
 #endif  // CONFIG_BITSTREAM_DEBUG
 
 #include "aom_ports/mem.h"
-#include "aom/vp8dx.h"
-#include "aom/vpx_integer.h"
+#include "aom/aomdx.h"
+#include "aom/aom_integer.h"
 #include "aom_dsp/prob.h"
 #include "aom_util/debug_util.h"
 
@@ -47,19 +47,19 @@ typedef struct {
   int count;
   const uint8_t *buffer_end;
   const uint8_t *buffer;
-  vpx_decrypt_cb decrypt_cb;
+  aom_decrypt_cb decrypt_cb;
   void *decrypt_state;
   uint8_t clear_buffer[sizeof(BD_VALUE) + 1];
-} vpx_reader;
+} aom_reader;
 
-int vpx_reader_init(vpx_reader *r, const uint8_t *buffer, size_t size,
-                    vpx_decrypt_cb decrypt_cb, void *decrypt_state);
+int aom_reader_init(aom_reader *r, const uint8_t *buffer, size_t size,
+                    aom_decrypt_cb decrypt_cb, void *decrypt_state);
 
-void vpx_reader_fill(vpx_reader *r);
+void aom_reader_fill(aom_reader *r);
 
-const uint8_t *vpx_reader_find_end(vpx_reader *r);
+const uint8_t *aom_reader_find_end(aom_reader *r);
 
-static INLINE int vpx_reader_has_error(vpx_reader *r) {
+static INLINE int aom_reader_has_error(aom_reader *r) {
   // Check if we have reached the end of the buffer.
   //
   // Variable 'count' stores the number of bits in the 'value' buffer, minus
@@ -77,7 +77,7 @@ static INLINE int vpx_reader_has_error(vpx_reader *r) {
   return r->count > BD_VALUE_SIZE && r->count < LOTS_OF_BITS;
 }
 
-static INLINE int vpx_read(vpx_reader *r, int prob) {
+static INLINE int aom_read(aom_reader *r, int prob) {
   unsigned int bit = 0;
   BD_VALUE value;
   BD_VALUE bigsplit;
@@ -85,7 +85,7 @@ static INLINE int vpx_read(vpx_reader *r, int prob) {
   unsigned int range;
   unsigned int split = (r->range * prob + (256 - prob)) >> CHAR_BIT;
 
-  if (r->count < 0) vpx_reader_fill(r);
+  if (r->count < 0) aom_reader_fill(r);
 
   value = r->value;
   count = r->count;
@@ -101,7 +101,7 @@ static INLINE int vpx_read(vpx_reader *r, int prob) {
   }
 
   {
-    register int shift = vpx_norm[range];
+    register int shift = aom_norm[range];
     range <<= shift;
     value <<= shift;
     count -= shift;
@@ -129,23 +129,23 @@ static INLINE int vpx_read(vpx_reader *r, int prob) {
   return bit;
 }
 
-static INLINE int vpx_read_bit(vpx_reader *r) {
-  return vpx_read(r, 128);  // vpx_prob_half
+static INLINE int aom_read_bit(aom_reader *r) {
+  return aom_read(r, 128);  // aom_prob_half
 }
 
-static INLINE int vpx_read_literal(vpx_reader *r, int bits) {
+static INLINE int aom_read_literal(aom_reader *r, int bits) {
   int literal = 0, bit;
 
-  for (bit = bits - 1; bit >= 0; bit--) literal |= vpx_read_bit(r) << bit;
+  for (bit = bits - 1; bit >= 0; bit--) literal |= aom_read_bit(r) << bit;
 
   return literal;
 }
 
-static INLINE int vpx_read_tree(vpx_reader *r, const vpx_tree_index *tree,
-                                const vpx_prob *probs) {
-  vpx_tree_index i = 0;
+static INLINE int aom_read_tree(aom_reader *r, const aom_tree_index *tree,
+                                const aom_prob *probs) {
+  aom_tree_index i = 0;
 
-  while ((i = tree[i + vpx_read(r, probs[i >> 1])]) > 0) continue;
+  while ((i = tree[i + aom_read(r, probs[i >> 1])]) > 0) continue;
 
   return -i;
 }
@@ -154,4 +154,4 @@ static INLINE int vpx_read_tree(vpx_reader *r, const vpx_tree_index *tree,
 }  // extern "C"
 #endif
 
-#endif  // VPX_DSP_BITREADER_H_
+#endif  // AOM_DSP_BITREADER_H_

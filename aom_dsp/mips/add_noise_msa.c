@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include "./macros_msa.h"
 
-void vpx_plane_add_noise_msa(uint8_t *start_ptr, char *noise,
+void aom_plane_add_noise_msa(uint8_t *start_ptr, char *noise,
                              char blackclamp[16], char whiteclamp[16],
                              char bothclamp[16], uint32_t width,
                              uint32_t height, int32_t pitch) {

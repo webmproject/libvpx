@@ -11,10 +11,10 @@
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
-#include "./vpx_dsp_rtcd.h"
-#include "aom/vpx_integer.h"
+#include "./aom_dsp_rtcd.h"
+#include "aom/aom_integer.h"
 #include "aom_dsp/postproc.h"
-#include "aom_mem/vpx_mem.h"
+#include "aom_mem/aom_mem.h"
 
 namespace {
 
@@ -46,7 +46,7 @@ TEST_P(AddNoiseTest, CheckNoiseAdded) {
   const int height = 64;
   const int image_size = width * height;
   char noise[3072];
-  const int clamp = vpx_setup_noise(4.4, sizeof(noise), noise);
+  const int clamp = aom_setup_noise(4.4, sizeof(noise), noise);
 
   for (int i = 0; i < 16; i++) {
     blackclamp[i] = clamp;
@@ -54,7 +54,7 @@ TEST_P(AddNoiseTest, CheckNoiseAdded) {
     bothclamp[i] = 2 * clamp;
   }
 
-  uint8_t *const s = reinterpret_cast<uint8_t *>(vpx_calloc(image_size, 1));
+  uint8_t *const s = reinterpret_cast<uint8_t *>(aom_calloc(image_size, 1));
   memset(s, 99, image_size);
 
   ASM_REGISTER_STATE_CHECK(GetParam()(s, noise, blackclamp, whiteclamp,
@@ -95,7 +95,7 @@ TEST_P(AddNoiseTest, CheckNoiseAdded) {
     EXPECT_LT(static_cast<int>(s[i]), 255 - clamp) << "i = " << i;
   }
 
-  vpx_free(s);
+  aom_free(s);
 }
 
 TEST_P(AddNoiseTest, CheckCvsAssembly) {
@@ -107,7 +107,7 @@ TEST_P(AddNoiseTest, CheckCvsAssembly) {
   const int image_size = width * height;
   char noise[3072];
 
-  const int clamp = vpx_setup_noise(4.4, sizeof(noise), noise);
+  const int clamp = aom_setup_noise(4.4, sizeof(noise), noise);
 
   for (int i = 0; i < 16; i++) {
     blackclamp[i] = clamp;
@@ -115,8 +115,8 @@ TEST_P(AddNoiseTest, CheckCvsAssembly) {
     bothclamp[i] = 2 * clamp;
   }
 
-  uint8_t *const s = reinterpret_cast<uint8_t *>(vpx_calloc(image_size, 1));
-  uint8_t *const d = reinterpret_cast<uint8_t *>(vpx_calloc(image_size, 1));
+  uint8_t *const s = reinterpret_cast<uint8_t *>(aom_calloc(image_size, 1));
+  uint8_t *const d = reinterpret_cast<uint8_t *>(aom_calloc(image_size, 1));
 
   memset(s, 99, image_size);
   memset(d, 99, image_size);
@@ -125,27 +125,27 @@ TEST_P(AddNoiseTest, CheckCvsAssembly) {
   ASM_REGISTER_STATE_CHECK(GetParam()(s, noise, blackclamp, whiteclamp,
                                       bothclamp, width, height, width));
   srand(0);
-  ASM_REGISTER_STATE_CHECK(vpx_plane_add_noise_c(
+  ASM_REGISTER_STATE_CHECK(aom_plane_add_noise_c(
       d, noise, blackclamp, whiteclamp, bothclamp, width, height, width));
 
   for (int i = 0; i < image_size; ++i) {
     EXPECT_EQ(static_cast<int>(s[i]), static_cast<int>(d[i])) << "i = " << i;
   }
 
-  vpx_free(d);
-  vpx_free(s);
+  aom_free(d);
+  aom_free(s);
 }
 
 INSTANTIATE_TEST_CASE_P(C, AddNoiseTest,
-                        ::testing::Values(vpx_plane_add_noise_c));
+                        ::testing::Values(aom_plane_add_noise_c));
 
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(SSE2, AddNoiseTest,
-                        ::testing::Values(vpx_plane_add_noise_sse2));
+                        ::testing::Values(aom_plane_add_noise_sse2));
 #endif
 
 #if HAVE_MSA
 INSTANTIATE_TEST_CASE_P(MSA, AddNoiseTest,
-                        ::testing::Values(vpx_plane_add_noise_msa));
+                        ::testing::Values(aom_plane_add_noise_msa));
 #endif
 }  // namespace

@@ -130,8 +130,8 @@ static INLINE void get_cuml_bins_nuq(int q, int qindex, int band,
     cuml_bins[i] = ROUND_POWER_OF_TWO(cuml_knots[i] * q, 7);
 }
 
-void vp10_get_dequant_val_nuq(int q, int qindex, int band, tran_low_t *dq,
-                              tran_low_t *cuml_bins, int q_profile) {
+void av1_get_dequant_val_nuq(int q, int qindex, int band, tran_low_t *dq,
+                             tran_low_t *cuml_bins, int q_profile) {
   const uint8_t *knots = get_nuq_knots(qindex, band, q_profile);
   tran_low_t cuml_bins_[NUQ_KNOTS], *cuml_bins_ptr;
   tran_low_t doff;
@@ -150,15 +150,15 @@ void vp10_get_dequant_val_nuq(int q, int qindex, int band, tran_low_t *dq,
       cuml_bins_ptr[NUQ_KNOTS - 1] + ROUND_POWER_OF_TWO((64 - doff) * q, 7);
 }
 
-tran_low_t vp10_dequant_abscoeff_nuq(int v, int q, const tran_low_t *dq) {
+tran_low_t av1_dequant_abscoeff_nuq(int v, int q, const tran_low_t *dq) {
   if (v <= NUQ_KNOTS)
     return dq[v];
   else
     return dq[NUQ_KNOTS] + (v - NUQ_KNOTS) * q;
 }
 
-tran_low_t vp10_dequant_coeff_nuq(int v, int q, const tran_low_t *dq) {
-  tran_low_t dqmag = vp10_dequant_abscoeff_nuq(abs(v), q, dq);
+tran_low_t av1_dequant_coeff_nuq(int v, int q, const tran_low_t *dq) {
+  tran_low_t dqmag = av1_dequant_abscoeff_nuq(abs(v), q, dq);
   return (v < 0 ? -dqmag : dqmag);
 }
 #endif  // CONFIG_NEW_QUANT
@@ -185,7 +185,7 @@ static const int16_t dc_qlookup[QINDEX_RANGE] = {
   1184, 1232, 1282, 1336,
 };
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 static const int16_t dc_qlookup_10[QINDEX_RANGE] = {
   4,    9,    10,   13,   15,   17,   20,   22,   25,   28,   31,   34,   37,
   40,   43,   47,   50,   53,   57,   60,   64,   68,   71,   75,   78,   82,
@@ -260,7 +260,7 @@ static const int16_t ac_qlookup[QINDEX_RANGE] = {
   1567, 1597, 1628, 1660, 1692, 1725, 1759, 1793, 1828,
 };
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 static const int16_t ac_qlookup_10[QINDEX_RANGE] = {
   4,    9,    11,   13,   16,   18,   21,   24,   27,   30,   33,   37,   40,
   44,   48,   51,   55,   59,   63,   67,   71,   75,   79,   83,   88,   92,
@@ -312,14 +312,14 @@ static const int16_t ac_qlookup_12[QINDEX_RANGE] = {
 };
 #endif
 
-int16_t vp10_dc_quant(int qindex, int delta, vpx_bit_depth_t bit_depth) {
-#if CONFIG_VP9_HIGHBITDEPTH
+int16_t av1_dc_quant(int qindex, int delta, aom_bit_depth_t bit_depth) {
+#if CONFIG_AOM_HIGHBITDEPTH
   switch (bit_depth) {
-    case VPX_BITS_8: return dc_qlookup[clamp(qindex + delta, 0, MAXQ)];
-    case VPX_BITS_10: return dc_qlookup_10[clamp(qindex + delta, 0, MAXQ)];
-    case VPX_BITS_12: return dc_qlookup_12[clamp(qindex + delta, 0, MAXQ)];
+    case AOM_BITS_8: return dc_qlookup[clamp(qindex + delta, 0, MAXQ)];
+    case AOM_BITS_10: return dc_qlookup_10[clamp(qindex + delta, 0, MAXQ)];
+    case AOM_BITS_12: return dc_qlookup_12[clamp(qindex + delta, 0, MAXQ)];
     default:
-      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+      assert(0 && "bit_depth should be AOM_BITS_8, AOM_BITS_10 or AOM_BITS_12");
       return -1;
   }
 #else
@@ -328,14 +328,14 @@ int16_t vp10_dc_quant(int qindex, int delta, vpx_bit_depth_t bit_depth) {
 #endif
 }
 
-int16_t vp10_ac_quant(int qindex, int delta, vpx_bit_depth_t bit_depth) {
-#if CONFIG_VP9_HIGHBITDEPTH
+int16_t av1_ac_quant(int qindex, int delta, aom_bit_depth_t bit_depth) {
+#if CONFIG_AOM_HIGHBITDEPTH
   switch (bit_depth) {
-    case VPX_BITS_8: return ac_qlookup[clamp(qindex + delta, 0, MAXQ)];
-    case VPX_BITS_10: return ac_qlookup_10[clamp(qindex + delta, 0, MAXQ)];
-    case VPX_BITS_12: return ac_qlookup_12[clamp(qindex + delta, 0, MAXQ)];
+    case AOM_BITS_8: return ac_qlookup[clamp(qindex + delta, 0, MAXQ)];
+    case AOM_BITS_10: return ac_qlookup_10[clamp(qindex + delta, 0, MAXQ)];
+    case AOM_BITS_12: return ac_qlookup_12[clamp(qindex + delta, 0, MAXQ)];
     default:
-      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+      assert(0 && "bit_depth should be AOM_BITS_8, AOM_BITS_10 or AOM_BITS_12");
       return -1;
   }
 #else
@@ -344,8 +344,8 @@ int16_t vp10_ac_quant(int qindex, int delta, vpx_bit_depth_t bit_depth) {
 #endif
 }
 
-int vp10_get_qindex(const struct segmentation *seg, int segment_id,
-                    int base_qindex) {
+int av1_get_qindex(const struct segmentation *seg, int segment_id,
+                   int base_qindex) {
   if (segfeature_active(seg, segment_id, SEG_LVL_ALT_Q)) {
     const int data = get_segdata(seg, segment_id, SEG_LVL_ALT_Q);
     const int seg_qindex =
@@ -357,11 +357,11 @@ int vp10_get_qindex(const struct segmentation *seg, int segment_id,
 }
 
 #if CONFIG_AOM_QM
-qm_val_t *aom_iqmatrix(VP10_COMMON *cm, int qmlevel, int is_chroma,
+qm_val_t *aom_iqmatrix(AV1_COMMON *cm, int qmlevel, int is_chroma,
                        int log2sizem2, int is_intra) {
   return &cm->giqmatrix[qmlevel][!!is_chroma][!!is_intra][log2sizem2][0];
 }
-qm_val_t *aom_qmatrix(VP10_COMMON *cm, int qmlevel, int is_chroma,
+qm_val_t *aom_qmatrix(AV1_COMMON *cm, int qmlevel, int is_chroma,
                       int log2sizem2, int is_intra) {
   return &cm->gqmatrix[qmlevel][!!is_chroma][!!is_intra][log2sizem2][0];
 }
@@ -371,7 +371,7 @@ static uint16_t
 static uint16_t
     wt_matrix_ref[NUM_QM_LEVELS][2][2][4 * 4 + 8 * 8 + 16 * 16 + 32 * 32];
 
-void aom_qm_init(VP10_COMMON *cm) {
+void aom_qm_init(AV1_COMMON *cm) {
   int q, c, f, t, size;
   int current;
   for (q = 0; q < NUM_QM_LEVELS; ++q) {

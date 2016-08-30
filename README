@@ -1,6 +1,6 @@
 README - 23 March 2015
 
-Welcome to the WebM VP8/VP9 Codec SDK!
+Welcome to the WebM VP8/AV1 Codec SDK!
 
 COMPILING THE APPLICATIONS/LIBRARIES:
   The build system used is similar to autotools. Building generally consists of
@@ -119,7 +119,7 @@ COMPILING THE APPLICATIONS/LIBRARIES:
   This defaults to config.log. This should give a good indication of what went
   wrong. If not, contact us for support.
 
-VP8/VP9 TEST VECTORS:
+VP8/AV1 TEST VECTORS:
   The test vectors can be downloaded and verified using the build system after
   running configure. To specify an alternate directory the
   LIBVPX_TEST_DATA_PATH environment variable can be used.

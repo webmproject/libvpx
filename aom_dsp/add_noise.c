@@ -11,13 +11,13 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_config.h"
+#include "./aom_dsp_rtcd.h"
 
-#include "aom/vpx_integer.h"
+#include "aom/aom_integer.h"
 #include "aom_ports/mem.h"
 
-void vpx_plane_add_noise_c(uint8_t *start, char *noise, char blackclamp[16],
+void aom_plane_add_noise_c(uint8_t *start, char *noise, char blackclamp[16],
                            char whiteclamp[16], char bothclamp[16],
                            unsigned int width, unsigned int height, int pitch) {
   unsigned int i, j;
@@ -43,7 +43,7 @@ static double gaussian(double sigma, double mu, double x) {
          (exp(-(x - mu) * (x - mu) / (2 * sigma * sigma)));
 }
 
-int vpx_setup_noise(double sigma, int size, char *noise) {
+int aom_setup_noise(double sigma, int size, char *noise) {
   char char_dist[256];
   int next = 0, i, j;
 

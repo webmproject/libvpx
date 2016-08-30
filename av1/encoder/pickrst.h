@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_ENCODER_PICKRST_H_
-#define VP10_ENCODER_PICKRST_H_
+#ifndef AV1_ENCODER_PICKRST_H_
+#define AV1_ENCODER_PICKRST_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,13 +18,13 @@ extern "C" {
 #include "av1/encoder/encoder.h"
 
 struct yv12_buffer_config;
-struct VP10_COMP;
+struct AV1_COMP;
 
-void vp10_pick_filter_restoration(const YV12_BUFFER_CONFIG *sd, VP10_COMP *cpi,
-                                  LPF_PICK_METHOD method);
+void av1_pick_filter_restoration(const YV12_BUFFER_CONFIG *sd, AV1_COMP *cpi,
+                                 LPF_PICK_METHOD method);
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
 
-#endif  // VP10_ENCODER_PICKRST_H_
+#endif  // AV1_ENCODER_PICKRST_H_

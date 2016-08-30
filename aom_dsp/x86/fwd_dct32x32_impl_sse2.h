@@ -21,31 +21,31 @@
 #define ADD_EPI16 _mm_adds_epi16
 #define SUB_EPI16 _mm_subs_epi16
 #if FDCT32x32_HIGH_PRECISION
-void vpx_fdct32x32_rows_c(const int16_t *intermediate, tran_low_t *out) {
+void aom_fdct32x32_rows_c(const int16_t *intermediate, tran_low_t *out) {
   int i, j;
   for (i = 0; i < 32; ++i) {
     tran_high_t temp_in[32], temp_out[32];
     for (j = 0; j < 32; ++j) temp_in[j] = intermediate[j * 32 + i];
-    vpx_fdct32(temp_in, temp_out, 0);
+    aom_fdct32(temp_in, temp_out, 0);
     for (j = 0; j < 32; ++j)
       out[j + i * 32] =
           (tran_low_t)((temp_out[j] + 1 + (temp_out[j] < 0)) >> 2);
   }
 }
-#define HIGH_FDCT32x32_2D_C vpx_highbd_fdct32x32_c
-#define HIGH_FDCT32x32_2D_ROWS_C vpx_fdct32x32_rows_c
+#define HIGH_FDCT32x32_2D_C aom_highbd_fdct32x32_c
+#define HIGH_FDCT32x32_2D_ROWS_C aom_fdct32x32_rows_c
 #else
-void vpx_fdct32x32_rd_rows_c(const int16_t *intermediate, tran_low_t *out) {
+void aom_fdct32x32_rd_rows_c(const int16_t *intermediate, tran_low_t *out) {
   int i, j;
   for (i = 0; i < 32; ++i) {
     tran_high_t temp_in[32], temp_out[32];
     for (j = 0; j < 32; ++j) temp_in[j] = intermediate[j * 32 + i];
-    vpx_fdct32(temp_in, temp_out, 1);
+    aom_fdct32(temp_in, temp_out, 1);
     for (j = 0; j < 32; ++j) out[j + i * 32] = (tran_low_t)temp_out[j];
   }
 }
-#define HIGH_FDCT32x32_2D_C vpx_highbd_fdct32x32_rd_c
-#define HIGH_FDCT32x32_2D_ROWS_C vpx_fdct32x32_rd_rows_c
+#define HIGH_FDCT32x32_2D_C aom_highbd_fdct32x32_rd_c
+#define HIGH_FDCT32x32_2D_ROWS_C aom_fdct32x32_rd_rows_c
 #endif  // FDCT32x32_HIGH_PRECISION
 #else
 #define ADD_EPI16 _mm_add_epi16
@@ -3145,7 +3145,7 @@ void FDCT32x32_2D(const int16_t *input, tran_low_t *output_org, int stride) {
             tr2_6 = _mm_sub_epi16(tr2_6, tr2_6_0);
             tr2_7 = _mm_sub_epi16(tr2_7, tr2_7_0);
             //           ... and here.
-            //           PS: also change code in vp9/encoder/vp9_dct.c
+            //           PS: also change code in av1/encoder/av1_dct.c
             tr2_0 = _mm_add_epi16(tr2_0, kOne);
             tr2_1 = _mm_add_epi16(tr2_1, kOne);
             tr2_2 = _mm_add_epi16(tr2_2, kOne);

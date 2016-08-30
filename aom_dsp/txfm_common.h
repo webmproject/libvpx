@@ -8,10 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_TXFM_COMMON_H_
-#define VPX_DSP_TXFM_COMMON_H_
+#ifndef AOM_DSP_TXFM_COMMON_H_
+#define AOM_DSP_TXFM_COMMON_H_
 
-#include "aom_dsp/vpx_dsp_common.h"
+#include "aom_dsp/aom_dsp_common.h"
 
 // Constants and Macros used by all idct/dct functions
 #define DCT_CONST_BITS 14
@@ -66,4 +66,4 @@ static const tran_high_t sinpi_4_9 = 15212;
 // 16384 * sqrt(2)
 static const tran_high_t Sqrt2 = 23170;
 
-#endif  // VPX_DSP_TXFM_COMMON_H_
+#endif  // AOM_DSP_TXFM_COMMON_H_

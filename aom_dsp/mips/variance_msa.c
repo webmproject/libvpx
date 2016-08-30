@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_dsp_rtcd.h"
 #include "aom_dsp/mips/macros_msa.h"
 
 #define CALC_MSE_B(src, ref, var)                                   \
@@ -487,7 +487,7 @@ static uint32_t sse_64width_msa(const uint8_t *src_ptr, int32_t src_stride,
   return HADD_SW_S32(var);
 }
 
-uint32_t vpx_get4x4sse_cs_msa(const uint8_t *src_ptr, int32_t src_stride,
+uint32_t aom_get4x4sse_cs_msa(const uint8_t *src_ptr, int32_t src_stride,
                               const uint8_t *ref_ptr, int32_t ref_stride) {
   uint32_t err = 0;
   uint32_t src0, src1, src2, src3;
@@ -527,8 +527,8 @@ uint32_t vpx_get4x4sse_cs_msa(const uint8_t *src_ptr, int32_t src_stride,
 #define VARIANCE_64Wx32H(sse, diff) VARIANCE_LARGE_WxH(sse, diff, 11);
 #define VARIANCE_64Wx64H(sse, diff) VARIANCE_LARGE_WxH(sse, diff, 12);
 
-#define VPX_VARIANCE_WDXHT_MSA(wd, ht)                                         \
-  uint32_t vpx_variance##wd##x##ht##_msa(                                      \
+#define AOM_VARIANCE_WDXHT_MSA(wd, ht)                                         \
+  uint32_t aom_variance##wd##x##ht##_msa(                                      \
       const uint8_t *src, int32_t src_stride, const uint8_t *ref,              \
       int32_t ref_stride, uint32_t *sse) {                                     \
     int32_t diff;                                                              \
@@ -539,21 +539,21 @@ uint32_t vpx_get4x4sse_cs_msa(const uint8_t *src_ptr, int32_t src_stride,
     return VARIANCE_##wd##Wx##ht##H(*sse, diff);                               \
   }
 
-VPX_VARIANCE_WDXHT_MSA(4, 4);
-VPX_VARIANCE_WDXHT_MSA(4, 8);
+AOM_VARIANCE_WDXHT_MSA(4, 4);
+AOM_VARIANCE_WDXHT_MSA(4, 8);
 
-VPX_VARIANCE_WDXHT_MSA(8, 4)
-VPX_VARIANCE_WDXHT_MSA(8, 8)
-VPX_VARIANCE_WDXHT_MSA(8, 16)
+AOM_VARIANCE_WDXHT_MSA(8, 4)
+AOM_VARIANCE_WDXHT_MSA(8, 8)
+AOM_VARIANCE_WDXHT_MSA(8, 16)
 
-VPX_VARIANCE_WDXHT_MSA(16, 8)
-VPX_VARIANCE_WDXHT_MSA(16, 16)
-VPX_VARIANCE_WDXHT_MSA(16, 32)
+AOM_VARIANCE_WDXHT_MSA(16, 8)
+AOM_VARIANCE_WDXHT_MSA(16, 16)
+AOM_VARIANCE_WDXHT_MSA(16, 32)
 
-VPX_VARIANCE_WDXHT_MSA(32, 16)
-VPX_VARIANCE_WDXHT_MSA(32, 32)
+AOM_VARIANCE_WDXHT_MSA(32, 16)
+AOM_VARIANCE_WDXHT_MSA(32, 32)
 
-uint32_t vpx_variance32x64_msa(const uint8_t *src, int32_t src_stride,
+uint32_t aom_variance32x64_msa(const uint8_t *src, int32_t src_stride,
                                const uint8_t *ref, int32_t ref_stride,
                                uint32_t *sse) {
   int32_t diff;
@@ -563,7 +563,7 @@ uint32_t vpx_variance32x64_msa(const uint8_t *src, int32_t src_stride,
   return VARIANCE_32Wx64H(*sse, diff);
 }
 
-uint32_t vpx_variance64x32_msa(const uint8_t *src, int32_t src_stride,
+uint32_t aom_variance64x32_msa(const uint8_t *src, int32_t src_stride,
                                const uint8_t *ref, int32_t ref_stride,
                                uint32_t *sse) {
   int32_t diff;
@@ -573,7 +573,7 @@ uint32_t vpx_variance64x32_msa(const uint8_t *src, int32_t src_stride,
   return VARIANCE_64Wx32H(*sse, diff);
 }
 
-uint32_t vpx_variance64x64_msa(const uint8_t *src, int32_t src_stride,
+uint32_t aom_variance64x64_msa(const uint8_t *src, int32_t src_stride,
                                const uint8_t *ref, int32_t ref_stride,
                                uint32_t *sse) {
   int32_t diff;
@@ -583,14 +583,14 @@ uint32_t vpx_variance64x64_msa(const uint8_t *src, int32_t src_stride,
   return VARIANCE_64Wx64H(*sse, diff);
 }
 
-uint32_t vpx_mse8x8_msa(const uint8_t *src, int32_t src_stride,
+uint32_t aom_mse8x8_msa(const uint8_t *src, int32_t src_stride,
                         const uint8_t *ref, int32_t ref_stride, uint32_t *sse) {
   *sse = sse_8width_msa(src, src_stride, ref, ref_stride, 8);
 
   return *sse;
 }
 
-uint32_t vpx_mse8x16_msa(const uint8_t *src, int32_t src_stride,
+uint32_t aom_mse8x16_msa(const uint8_t *src, int32_t src_stride,
                          const uint8_t *ref, int32_t ref_stride,
                          uint32_t *sse) {
   *sse = sse_8width_msa(src, src_stride, ref, ref_stride, 16);
@@ -598,7 +598,7 @@ uint32_t vpx_mse8x16_msa(const uint8_t *src, int32_t src_stride,
   return *sse;
 }
 
-uint32_t vpx_mse16x8_msa(const uint8_t *src, int32_t src_stride,
+uint32_t aom_mse16x8_msa(const uint8_t *src, int32_t src_stride,
                          const uint8_t *ref, int32_t ref_stride,
                          uint32_t *sse) {
   *sse = sse_16width_msa(src, src_stride, ref, ref_stride, 8);
@@ -606,7 +606,7 @@ uint32_t vpx_mse16x8_msa(const uint8_t *src, int32_t src_stride,
   return *sse;
 }
 
-uint32_t vpx_mse16x16_msa(const uint8_t *src, int32_t src_stride,
+uint32_t aom_mse16x16_msa(const uint8_t *src, int32_t src_stride,
                           const uint8_t *ref, int32_t ref_stride,
                           uint32_t *sse) {
   *sse = sse_16width_msa(src, src_stride, ref, ref_stride, 16);
@@ -614,16 +614,16 @@ uint32_t vpx_mse16x16_msa(const uint8_t *src, int32_t src_stride,
   return *sse;
 }
 
-void vpx_get8x8var_msa(const uint8_t *src, int32_t src_stride,
+void aom_get8x8var_msa(const uint8_t *src, int32_t src_stride,
                        const uint8_t *ref, int32_t ref_stride, uint32_t *sse,
                        int32_t *sum) {
   *sse = sse_diff_8width_msa(src, src_stride, ref, ref_stride, 8, sum);
 }
 
-void vpx_get16x16var_msa(const uint8_t *src, int32_t src_stride,
+void aom_get16x16var_msa(const uint8_t *src, int32_t src_stride,
                          const uint8_t *ref, int32_t ref_stride, uint32_t *sse,
                          int32_t *sum) {
   *sse = sse_diff_16width_msa(src, src_stride, ref, ref_stride, 16, sum);
 }
 
-uint32_t vpx_get_mb_ss_msa(const int16_t *src) { return get_mb_ss_msa(src); }
+uint32_t aom_get_mb_ss_msa(const int16_t *src) { return get_mb_ss_msa(src); }

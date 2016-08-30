@@ -9,17 +9,17 @@
  */
 #include <stdlib.h>
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 
 #include "aom_dsp/bitreader.h"
 #include "aom_dsp/prob.h"
-#include "aom_dsp/vpx_dsp_common.h"
+#include "aom_dsp/aom_dsp_common.h"
 #include "aom_ports/mem.h"
-#include "aom_mem/vpx_mem.h"
+#include "aom_mem/aom_mem.h"
 #include "aom_util/endian_inl.h"
 
-int vpx_reader_init(vpx_reader *r, const uint8_t *buffer, size_t size,
-                    vpx_decrypt_cb decrypt_cb, void *decrypt_state) {
+int aom_reader_init(aom_reader *r, const uint8_t *buffer, size_t size,
+                    aom_decrypt_cb decrypt_cb, void *decrypt_state) {
   if (size && !buffer) {
     return 1;
   } else {
@@ -30,12 +30,12 @@ int vpx_reader_init(vpx_reader *r, const uint8_t *buffer, size_t size,
     r->range = 255;
     r->decrypt_cb = decrypt_cb;
     r->decrypt_state = decrypt_state;
-    vpx_reader_fill(r);
-    return vpx_read_bit(r) != 0;  // marker bit
+    aom_reader_fill(r);
+    return aom_read_bit(r) != 0;  // marker bit
   }
 }
 
-void vpx_reader_fill(vpx_reader *r) {
+void aom_reader_fill(aom_reader *r) {
   const uint8_t *const buffer_end = r->buffer_end;
   const uint8_t *buffer = r->buffer;
   const uint8_t *buffer_start = buffer;
@@ -46,7 +46,7 @@ void vpx_reader_fill(vpx_reader *r) {
   int shift = BD_VALUE_SIZE - CHAR_BIT - (count + CHAR_BIT);
 
   if (r->decrypt_cb) {
-    size_t n = VPXMIN(sizeof(r->clear_buffer), bytes_left);
+    size_t n = AOMMIN(sizeof(r->clear_buffer), bytes_left);
     r->decrypt_cb(r->decrypt_state, buffer, r->clear_buffer, (int)n);
     buffer = r->clear_buffer;
     buffer_start = r->clear_buffer;
@@ -90,7 +90,7 @@ void vpx_reader_fill(vpx_reader *r) {
   r->count = count;
 }
 
-const uint8_t *vpx_reader_find_end(vpx_reader *r) {
+const uint8_t *aom_reader_find_end(aom_reader *r) {
   // Find the end of the coded buffer
   while (r->count > CHAR_BIT && r->count < BD_VALUE_SIZE) {
     r->count -= CHAR_BIT;

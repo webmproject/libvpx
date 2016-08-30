@@ -10,7 +10,7 @@
 
 #include "aom_dsp/mips/loopfilter_msa.h"
 
-void vpx_lpf_horizontal_4_msa(uint8_t *src, int32_t pitch,
+void aom_lpf_horizontal_4_msa(uint8_t *src, int32_t pitch,
                               const uint8_t *b_limit_ptr,
                               const uint8_t *limit_ptr,
                               const uint8_t *thresh_ptr) {
@@ -27,7 +27,7 @@ void vpx_lpf_horizontal_4_msa(uint8_t *src, int32_t pitch,
 
   LPF_MASK_HEV(p3, p2, p1, p0, q0, q1, q2, q3, limit, b_limit, thresh, hev,
                mask, flat);
-  VPX_LPF_FILTER4_8W(p1, p0, q0, q1, mask, hev, p1_out, p0_out, q0_out, q1_out);
+  AOM_LPF_FILTER4_8W(p1, p0, q0, q1, mask, hev, p1_out, p0_out, q0_out, q1_out);
 
   p1_d = __msa_copy_u_d((v2i64)p1_out, 0);
   p0_d = __msa_copy_u_d((v2i64)p0_out, 0);
@@ -36,7 +36,7 @@ void vpx_lpf_horizontal_4_msa(uint8_t *src, int32_t pitch,
   SD4(p1_d, p0_d, q0_d, q1_d, (src - 2 * pitch), pitch);
 }
 
-void vpx_lpf_horizontal_4_dual_msa(uint8_t *src, int32_t pitch,
+void aom_lpf_horizontal_4_dual_msa(uint8_t *src, int32_t pitch,
                                    const uint8_t *b_limit0_ptr,
                                    const uint8_t *limit0_ptr,
                                    const uint8_t *thresh0_ptr,
@@ -63,12 +63,12 @@ void vpx_lpf_horizontal_4_dual_msa(uint8_t *src, int32_t pitch,
 
   LPF_MASK_HEV(p3, p2, p1, p0, q0, q1, q2, q3, limit0, b_limit0, thresh0, hev,
                mask, flat);
-  VPX_LPF_FILTER4_4W(p1, p0, q0, q1, mask, hev, p1, p0, q0, q1);
+  AOM_LPF_FILTER4_4W(p1, p0, q0, q1, mask, hev, p1, p0, q0, q1);
 
   ST_UB4(p1, p0, q0, q1, (src - 2 * pitch), pitch);
 }
 
-void vpx_lpf_vertical_4_msa(uint8_t *src, int32_t pitch,
+void aom_lpf_vertical_4_msa(uint8_t *src, int32_t pitch,
                             const uint8_t *b_limit_ptr,
                             const uint8_t *limit_ptr,
                             const uint8_t *thresh_ptr) {
@@ -86,7 +86,7 @@ void vpx_lpf_vertical_4_msa(uint8_t *src, int32_t pitch,
                      q3);
   LPF_MASK_HEV(p3, p2, p1, p0, q0, q1, q2, q3, limit, b_limit, thresh, hev,
                mask, flat);
-  VPX_LPF_FILTER4_8W(p1, p0, q0, q1, mask, hev, p1, p0, q0, q1);
+  AOM_LPF_FILTER4_8W(p1, p0, q0, q1, mask, hev, p1, p0, q0, q1);
   ILVR_B2_SH(p0, p1, q1, q0, vec0, vec1);
   ILVRL_H2_SH(vec1, vec0, vec2, vec3);
 
@@ -96,7 +96,7 @@ void vpx_lpf_vertical_4_msa(uint8_t *src, int32_t pitch,
   ST4x4_UB(vec3, vec3, 0, 1, 2, 3, src, pitch);
 }
 
-void vpx_lpf_vertical_4_dual_msa(uint8_t *src, int32_t pitch,
+void aom_lpf_vertical_4_dual_msa(uint8_t *src, int32_t pitch,
                                  const uint8_t *b_limit0_ptr,
                                  const uint8_t *limit0_ptr,
                                  const uint8_t *thresh0_ptr,
@@ -132,7 +132,7 @@ void vpx_lpf_vertical_4_dual_msa(uint8_t *src, int32_t pitch,
 
   LPF_MASK_HEV(p3, p2, p1, p0, q0, q1, q2, q3, limit0, b_limit0, thresh0, hev,
                mask, flat);
-  VPX_LPF_FILTER4_4W(p1, p0, q0, q1, mask, hev, p1, p0, q0, q1);
+  AOM_LPF_FILTER4_4W(p1, p0, q0, q1, mask, hev, p1, p0, q0, q1);
   ILVR_B2_SH(p0, p1, q1, q0, tmp0, tmp1);
   ILVRL_H2_SH(tmp1, tmp0, tmp2, tmp3);
   ILVL_B2_SH(p0, p1, q1, q0, tmp0, tmp1);

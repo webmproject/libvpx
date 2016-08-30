@@ -8,8 +8,8 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-    EXPORT  |vpx_idct8x8_64_add_neon|
-    EXPORT  |vpx_idct8x8_12_add_neon|
+    EXPORT  |aom_idct8x8_64_add_neon|
+    EXPORT  |aom_idct8x8_12_add_neon|
     ARM
     REQUIRE8
     PRESERVE8
@@ -198,13 +198,13 @@
     MEND
 
     AREA    Block, CODE, READONLY ; name this block of code
-;void vpx_idct8x8_64_add_neon(int16_t *input, uint8_t *dest, int dest_stride)
+;void aom_idct8x8_64_add_neon(int16_t *input, uint8_t *dest, int dest_stride)
 ;
 ; r0  int16_t input
 ; r1  uint8_t *dest
 ; r2  int dest_stride)
 
-|vpx_idct8x8_64_add_neon| PROC
+|aom_idct8x8_64_add_neon| PROC
     push            {r4-r9}
     vpush           {d8-d15}
     vld1.s16        {q8,q9}, [r0]!
@@ -308,15 +308,15 @@
     vpop            {d8-d15}
     pop             {r4-r9}
     bx              lr
-    ENDP  ; |vpx_idct8x8_64_add_neon|
+    ENDP  ; |aom_idct8x8_64_add_neon|
 
-;void vpx_idct8x8_12_add_neon(int16_t *input, uint8_t *dest, int dest_stride)
+;void aom_idct8x8_12_add_neon(int16_t *input, uint8_t *dest, int dest_stride)
 ;
 ; r0  int16_t input
 ; r1  uint8_t *dest
 ; r2  int dest_stride)
 
-|vpx_idct8x8_12_add_neon| PROC
+|aom_idct8x8_12_add_neon| PROC
     push            {r4-r9}
     vpush           {d8-d15}
     vld1.s16        {q8,q9}, [r0]!
@@ -514,6 +514,6 @@
     vpop            {d8-d15}
     pop             {r4-r9}
     bx              lr
-    ENDP  ; |vpx_idct8x8_12_add_neon|
+    ENDP  ; |aom_idct8x8_12_add_neon|
 
     END

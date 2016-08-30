@@ -10,7 +10,7 @@
 
 #include <arm_neon.h>
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 #include "aom_dsp/txfm_common.h"
 
 static INLINE void TRANSPOSE8X8(int16x8_t *q8s16, int16x8_t *q9s16,
@@ -77,7 +77,7 @@ static INLINE void TRANSPOSE8X8(int16x8_t *q8s16, int16x8_t *q9s16,
   return;
 }
 
-void vpx_idct16x16_256_add_neon_pass1(int16_t *in, int16_t *out,
+void aom_idct16x16_256_add_neon_pass1(int16_t *in, int16_t *out,
                                       int output_stride) {
   int16x4_t d0s16, d1s16, d2s16, d3s16;
   int16x4_t d8s16, d9s16, d10s16, d11s16, d12s16, d13s16, d14s16, d15s16;
@@ -313,7 +313,7 @@ void vpx_idct16x16_256_add_neon_pass1(int16_t *in, int16_t *out,
   return;
 }
 
-void vpx_idct16x16_256_add_neon_pass2(int16_t *src, int16_t *out,
+void aom_idct16x16_256_add_neon_pass2(int16_t *src, int16_t *out,
                                       int16_t *pass1Output, int16_t skip_adding,
                                       uint8_t *dest, int dest_stride) {
   uint8_t *d;
@@ -862,7 +862,7 @@ void vpx_idct16x16_256_add_neon_pass2(int16_t *src, int16_t *out,
   return;
 }
 
-void vpx_idct16x16_10_add_neon_pass1(int16_t *in, int16_t *out,
+void aom_idct16x16_10_add_neon_pass1(int16_t *in, int16_t *out,
                                      int output_stride) {
   int16x4_t d4s16;
   int16x4_t d8s16, d9s16, d10s16, d11s16, d12s16, d13s16, d14s16, d15s16;
@@ -998,7 +998,7 @@ void vpx_idct16x16_10_add_neon_pass1(int16_t *in, int16_t *out,
   return;
 }
 
-void vpx_idct16x16_10_add_neon_pass2(int16_t *src, int16_t *out,
+void aom_idct16x16_10_add_neon_pass2(int16_t *src, int16_t *out,
                                      int16_t *pass1Output, int16_t skip_adding,
                                      uint8_t *dest, int dest_stride) {
   int16x4_t d0s16, d1s16, d2s16, d3s16, d4s16, d5s16, d6s16, d7s16;

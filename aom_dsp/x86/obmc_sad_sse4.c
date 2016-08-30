@@ -11,11 +11,11 @@
 #include <assert.h>
 #include <immintrin.h>
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 #include "aom_ports/mem.h"
-#include "aom/vpx_integer.h"
+#include "aom/aom_integer.h"
 
-#include "aom_dsp/vpx_dsp_common.h"
+#include "aom_dsp/aom_dsp_common.h"
 #include "aom_dsp/x86/synonyms.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +107,7 @@ static INLINE unsigned int obmc_sad_w8n(const uint8_t *pre,
 }
 
 #define OBMCSADWXH(w, h)                                       \
-  unsigned int vpx_obmc_sad##w##x##h##_sse4_1(                 \
+  unsigned int aom_obmc_sad##w##x##h##_sse4_1(                 \
       const uint8_t *pre, int pre_stride, const int32_t *wsrc, \
       const int32_t *msk) {                                    \
     if (w == 4) {                                              \
@@ -140,7 +140,7 @@ OBMCSADWXH(4, 4)
 // High bit-depth
 ////////////////////////////////////////////////////////////////////////////////
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 static INLINE unsigned int hbd_obmc_sad_w4(const uint8_t *pre8,
                                            const int pre_stride,
                                            const int32_t *wsrc,
@@ -230,7 +230,7 @@ static INLINE unsigned int hbd_obmc_sad_w8n(const uint8_t *pre8,
 }
 
 #define HBD_OBMCSADWXH(w, h)                                      \
-  unsigned int vpx_highbd_obmc_sad##w##x##h##_sse4_1(             \
+  unsigned int aom_highbd_obmc_sad##w##x##h##_sse4_1(             \
       const uint8_t *pre, int pre_stride, const int32_t *wsrc,    \
       const int32_t *mask) {                                      \
     if (w == 4) {                                                 \
@@ -258,4 +258,4 @@ HBD_OBMCSADWXH(8, 8)
 HBD_OBMCSADWXH(8, 4)
 HBD_OBMCSADWXH(4, 8)
 HBD_OBMCSADWXH(4, 4)
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH

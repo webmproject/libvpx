@@ -10,18 +10,18 @@
 
 #include <assert.h>
 
-#include "aom/vpx_integer.h"
+#include "aom/aom_integer.h"
 #include "aom_ports/mem.h"
 #include "aom_dsp/blend.h"
-#include "aom_dsp/vpx_dsp_common.h"
+#include "aom_dsp/aom_dsp_common.h"
 
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_dsp_rtcd.h"
 
 // Blending with alpha mask. Mask values come from the range [0, 64],
-// as described for VPX_BLEND_A64 in aom_dsp/blned.h. src0 or src1 can
+// as described for AOM_BLEND_A64 in aom_dsp/blned.h. src0 or src1 can
 // be the same as dst, or dst can be different from both sources.
 
-void vpx_blend_a64_mask_c(uint8_t *dst, uint32_t dst_stride,
+void aom_blend_a64_mask_c(uint8_t *dst, uint32_t dst_stride,
                           const uint8_t *src0, uint32_t src0_stride,
                           const uint8_t *src1, uint32_t src1_stride,
                           const uint8_t *mask, uint32_t mask_stride, int h,
@@ -40,7 +40,7 @@ void vpx_blend_a64_mask_c(uint8_t *dst, uint32_t dst_stride,
     for (i = 0; i < h; ++i) {
       for (j = 0; j < w; ++j) {
         const int m = mask[i * mask_stride + j];
-        dst[i * dst_stride + j] = VPX_BLEND_A64(m, src0[i * src0_stride + j],
+        dst[i * dst_stride + j] = AOM_BLEND_A64(m, src0[i * src0_stride + j],
                                                 src1[i * src1_stride + j]);
       }
     }
@@ -53,33 +53,33 @@ void vpx_blend_a64_mask_c(uint8_t *dst, uint32_t dst_stride,
                 mask[(2 * i) * mask_stride + (2 * j + 1)] +
                 mask[(2 * i + 1) * mask_stride + (2 * j + 1)],
             2);
-        dst[i * dst_stride + j] = VPX_BLEND_A64(m, src0[i * src0_stride + j],
+        dst[i * dst_stride + j] = AOM_BLEND_A64(m, src0[i * src0_stride + j],
                                                 src1[i * src1_stride + j]);
       }
     }
   } else if (subw == 1 && subh == 0) {
     for (i = 0; i < h; ++i) {
       for (j = 0; j < w; ++j) {
-        const int m = VPX_BLEND_AVG(mask[i * mask_stride + (2 * j)],
+        const int m = AOM_BLEND_AVG(mask[i * mask_stride + (2 * j)],
                                     mask[i * mask_stride + (2 * j + 1)]);
-        dst[i * dst_stride + j] = VPX_BLEND_A64(m, src0[i * src0_stride + j],
+        dst[i * dst_stride + j] = AOM_BLEND_A64(m, src0[i * src0_stride + j],
                                                 src1[i * src1_stride + j]);
       }
     }
   } else {
     for (i = 0; i < h; ++i) {
       for (j = 0; j < w; ++j) {
-        const int m = VPX_BLEND_AVG(mask[(2 * i) * mask_stride + j],
+        const int m = AOM_BLEND_AVG(mask[(2 * i) * mask_stride + j],
                                     mask[(2 * i + 1) * mask_stride + j]);
-        dst[i * dst_stride + j] = VPX_BLEND_A64(m, src0[i * src0_stride + j],
+        dst[i * dst_stride + j] = AOM_BLEND_A64(m, src0[i * src0_stride + j],
                                                 src1[i * src1_stride + j]);
       }
     }
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
-void vpx_highbd_blend_a64_mask_c(uint8_t *dst_8, uint32_t dst_stride,
+#if CONFIG_AOM_HIGHBITDEPTH
+void aom_highbd_blend_a64_mask_c(uint8_t *dst_8, uint32_t dst_stride,
                                  const uint8_t *src0_8, uint32_t src0_stride,
                                  const uint8_t *src1_8, uint32_t src1_stride,
                                  const uint8_t *mask, uint32_t mask_stride,
@@ -103,7 +103,7 @@ void vpx_highbd_blend_a64_mask_c(uint8_t *dst_8, uint32_t dst_stride,
     for (i = 0; i < h; ++i) {
       for (j = 0; j < w; ++j) {
         const int m = mask[i * mask_stride + j];
-        dst[i * dst_stride + j] = VPX_BLEND_A64(m, src0[i * src0_stride + j],
+        dst[i * dst_stride + j] = AOM_BLEND_A64(m, src0[i * src0_stride + j],
                                                 src1[i * src1_stride + j]);
       }
     }
@@ -116,28 +116,28 @@ void vpx_highbd_blend_a64_mask_c(uint8_t *dst_8, uint32_t dst_stride,
                 mask[(2 * i) * mask_stride + (2 * j + 1)] +
                 mask[(2 * i + 1) * mask_stride + (2 * j + 1)],
             2);
-        dst[i * dst_stride + j] = VPX_BLEND_A64(m, src0[i * src0_stride + j],
+        dst[i * dst_stride + j] = AOM_BLEND_A64(m, src0[i * src0_stride + j],
                                                 src1[i * src1_stride + j]);
       }
     }
   } else if (subw == 1 && subh == 0) {
     for (i = 0; i < h; ++i) {
       for (j = 0; j < w; ++j) {
-        const int m = VPX_BLEND_AVG(mask[i * mask_stride + (2 * j)],
+        const int m = AOM_BLEND_AVG(mask[i * mask_stride + (2 * j)],
                                     mask[i * mask_stride + (2 * j + 1)]);
-        dst[i * dst_stride + j] = VPX_BLEND_A64(m, src0[i * src0_stride + j],
+        dst[i * dst_stride + j] = AOM_BLEND_A64(m, src0[i * src0_stride + j],
                                                 src1[i * src1_stride + j]);
       }
     }
   } else {
     for (i = 0; i < h; ++i) {
       for (j = 0; j < w; ++j) {
-        const int m = VPX_BLEND_AVG(mask[(2 * i) * mask_stride + j],
+        const int m = AOM_BLEND_AVG(mask[(2 * i) * mask_stride + j],
                                     mask[(2 * i + 1) * mask_stride + j]);
-        dst[i * dst_stride + j] = VPX_BLEND_A64(m, src0[i * src0_stride + j],
+        dst[i * dst_stride + j] = AOM_BLEND_A64(m, src0[i * src0_stride + j],
                                                 src1[i * src1_stride + j]);
       }
     }
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH

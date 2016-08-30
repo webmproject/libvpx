@@ -18,7 +18,7 @@
 # Environment check: $YUV_RAW_INPUT is required.
 resize_util_verify_environment() {
   if [ ! -e "${YUV_RAW_INPUT}" ]; then
-    echo "Libvpx test data must exist in LIBVPX_TEST_DATA_PATH."
+    echo "Libaom test data must exist in LIBVPX_TEST_DATA_PATH."
     return 1
   fi
 }
@@ -26,19 +26,19 @@ resize_util_verify_environment() {
 # Resizes $YUV_RAW_INPUT using the resize_util example. $1 is the output
 # dimensions that will be passed to resize_util.
 resize_util() {
-  local resizer="${LIBAOM_BIN_PATH}/resize_util${VPX_TEST_EXE_SUFFIX}"
-  local output_file="${VPX_TEST_OUTPUT_DIR}/resize_util.raw"
+  local resizer="${LIBAOM_BIN_PATH}/resize_util${AOM_TEST_EXE_SUFFIX}"
+  local output_file="${AOM_TEST_OUTPUT_DIR}/resize_util.raw"
   local frames_to_resize="10"
   local target_dimensions="$1"
 
   # resize_util is available only when CONFIG_SHARED is disabled.
-  if [ -z "$(vpx_config_option_enabled CONFIG_SHARED)" ]; then
+  if [ -z "$(aom_config_option_enabled CONFIG_SHARED)" ]; then
     if [ ! -x "${resizer}" ]; then
       elog "${resizer} does not exist or is not executable."
       return 1
     fi
 
-    eval "${VPX_TEST_PREFIX}" "${resizer}" "${YUV_RAW_INPUT}" \
+    eval "${AOM_TEST_PREFIX}" "${resizer}" "${YUV_RAW_INPUT}" \
         "${YUV_RAW_INPUT_WIDTH}x${YUV_RAW_INPUT_HEIGHT}" \
         "${target_dimensions}" "${output_file}" ${frames_to_resize} \
         ${devnull}

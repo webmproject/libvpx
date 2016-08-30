@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "./vp10_rtcd.h"
+#include "./av1_rtcd.h"
 #include "aom_dsp/x86/inv_txfm_sse2.h"
 #include "aom_dsp/x86/txfm_common_sse2.h"
 #include "aom_ports/mem.h"
@@ -56,8 +56,8 @@ static INLINE void fliplr_16x8(__m128i in[16]) {
   } while (0)
 #endif
 
-void vp10_iht4x4_16_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
-                             int tx_type) {
+void av1_iht4x4_16_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
+                            int tx_type) {
   __m128i in[2];
   const __m128i zero = _mm_setzero_si128();
   const __m128i eight = _mm_set1_epi16(8);
@@ -147,8 +147,8 @@ void vp10_iht4x4_16_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
   }
 }
 
-void vp10_iht8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
-                             int tx_type) {
+void av1_iht8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
+                            int tx_type) {
   __m128i in[8];
   const __m128i zero = _mm_setzero_si128();
   const __m128i final_rounding = _mm_set1_epi16(1 << 4);
@@ -240,8 +240,8 @@ void vp10_iht8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
   RECON_AND_STORE(dest + 7 * stride, in[7]);
 }
 
-void vp10_iht16x16_256_add_sse2(const tran_low_t *input, uint8_t *dest,
-                                int stride, int tx_type) {
+void av1_iht16x16_256_add_sse2(const tran_low_t *input, uint8_t *dest,
+                               int stride, int tx_type) {
   __m128i in[32];
   __m128i *in0 = &in[0];
   __m128i *in1 = &in[16];

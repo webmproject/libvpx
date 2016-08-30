@@ -15,7 +15,7 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "test/acm_random.h"
 #include "test/util.h"
-#include "./vpx_config.h"
+#include "./aom_config.h"
 #include "aom_dsp/psnr.h"
 #include "aom_dsp/ssim.h"
 #include "aom_ports/mem.h"
@@ -36,14 +36,14 @@ double compute_hbd_psnr(const YV12_BUFFER_CONFIG *source,
                         const YV12_BUFFER_CONFIG *dest, uint32_t in_bd,
                         uint32_t bd) {
   PSNR_STATS psnr;
-  vpx_calc_highbd_psnr(source, dest, &psnr, bd, in_bd);
+  aom_calc_highbd_psnr(source, dest, &psnr, bd, in_bd);
   return psnr.psnr[0];
 }
 
 double compute_psnr(const YV12_BUFFER_CONFIG *source,
                     const YV12_BUFFER_CONFIG *dest) {
   PSNR_STATS psnr;
-  vpx_calc_psnr(source, dest, &psnr);
+  aom_calc_psnr(source, dest, &psnr);
   return psnr.psnr[0];
 }
 
@@ -51,40 +51,40 @@ double compute_hbd_psnrhvs(const YV12_BUFFER_CONFIG *source,
                            const YV12_BUFFER_CONFIG *dest, uint32_t in_bd,
                            uint32_t bd) {
   double tempy, tempu, tempv;
-  return vpx_psnrhvs(source, dest, &tempy, &tempu, &tempv, bd, in_bd);
+  return aom_psnrhvs(source, dest, &tempy, &tempu, &tempv, bd, in_bd);
 }
 
 double compute_psnrhvs(const YV12_BUFFER_CONFIG *source,
                        const YV12_BUFFER_CONFIG *dest) {
   double tempy, tempu, tempv;
-  return vpx_psnrhvs(source, dest, &tempy, &tempu, &tempv, 8, 8);
+  return aom_psnrhvs(source, dest, &tempy, &tempu, &tempv, 8, 8);
 }
 
 double compute_hbd_fastssim(const YV12_BUFFER_CONFIG *source,
                             const YV12_BUFFER_CONFIG *dest, uint32_t in_bd,
                             uint32_t bd) {
   double tempy, tempu, tempv;
-  return vpx_calc_fastssim(source, dest, &tempy, &tempu, &tempv, bd, in_bd);
+  return aom_calc_fastssim(source, dest, &tempy, &tempu, &tempv, bd, in_bd);
 }
 
 double compute_fastssim(const YV12_BUFFER_CONFIG *source,
                         const YV12_BUFFER_CONFIG *dest) {
   double tempy, tempu, tempv;
-  return vpx_calc_fastssim(source, dest, &tempy, &tempu, &tempv, 8, 8);
+  return aom_calc_fastssim(source, dest, &tempy, &tempu, &tempv, 8, 8);
 }
 
-double compute_hbd_vpxssim(const YV12_BUFFER_CONFIG *source,
+double compute_hbd_aomssim(const YV12_BUFFER_CONFIG *source,
                            const YV12_BUFFER_CONFIG *dest, uint32_t in_bd,
                            uint32_t bd) {
   double ssim, weight;
-  ssim = vpx_highbd_calc_ssim(source, dest, &weight, bd, in_bd);
+  ssim = aom_highbd_calc_ssim(source, dest, &weight, bd, in_bd);
   return 100 * pow(ssim / weight, 8.0);
 }
 
-double compute_vpxssim(const YV12_BUFFER_CONFIG *source,
+double compute_aomssim(const YV12_BUFFER_CONFIG *source,
                        const YV12_BUFFER_CONFIG *dest) {
   double ssim, weight;
-  ssim = vpx_calc_ssim(source, dest, &weight);
+  ssim = aom_calc_ssim(source, dest, &weight);
   return 100 * pow(ssim / weight, 8.0);
 }
 
@@ -108,10 +108,10 @@ class HBDMetricsTestBase {
     memset(&hbd_src, 0, sizeof(hbd_src));
     memset(&hbd_dst, 0, sizeof(hbd_dst));
 
-    vpx_alloc_frame_buffer(&lbd_src, width, height, 1, 1, 0, 32, 16);
-    vpx_alloc_frame_buffer(&lbd_dst, width, height, 1, 1, 0, 32, 16);
-    vpx_alloc_frame_buffer(&hbd_src, width, height, 1, 1, 1, 32, 16);
-    vpx_alloc_frame_buffer(&hbd_dst, width, height, 1, 1, 1, 32, 16);
+    aom_alloc_frame_buffer(&lbd_src, width, height, 1, 1, 0, 32, 16);
+    aom_alloc_frame_buffer(&lbd_dst, width, height, 1, 1, 0, 32, 16);
+    aom_alloc_frame_buffer(&hbd_src, width, height, 1, 1, 1, 32, 16);
+    aom_alloc_frame_buffer(&hbd_dst, width, height, 1, 1, 1, 32, 16);
 
     memset(lbd_src.buffer_alloc, kPixFiller, lbd_src.buffer_alloc_sz);
     while (i < lbd_src.buffer_alloc_sz) {
@@ -157,10 +157,10 @@ class HBDMetricsTestBase {
     hbd_db = hbd_metric_(&hbd_src, &hbd_dst, input_bit_depth_, bit_depth_);
     EXPECT_LE(fabs(lbd_db - hbd_db), threshold_);
 
-    vpx_free_frame_buffer(&lbd_src);
-    vpx_free_frame_buffer(&lbd_dst);
-    vpx_free_frame_buffer(&hbd_src);
-    vpx_free_frame_buffer(&hbd_dst);
+    aom_free_frame_buffer(&lbd_src);
+    aom_free_frame_buffer(&lbd_dst);
+    aom_free_frame_buffer(&hbd_src);
+    aom_free_frame_buffer(&hbd_dst);
   }
 
   int input_bit_depth_;
@@ -195,14 +195,14 @@ static const double kFSsim_thresh = 0.03;
 static const double kPhvs_thresh = 0.3;
 
 INSTANTIATE_TEST_CASE_P(
-    VPXSSIM, HBDMetricsTest,
-    ::testing::Values(MetricTestTParam(&compute_vpxssim, &compute_hbd_vpxssim,
+    AOMSSIM, HBDMetricsTest,
+    ::testing::Values(MetricTestTParam(&compute_aomssim, &compute_hbd_aomssim,
                                        8, 10, kSsim_thresh),
-                      MetricTestTParam(&compute_vpxssim, &compute_hbd_vpxssim,
+                      MetricTestTParam(&compute_aomssim, &compute_hbd_aomssim,
                                        10, 10, kPhvs_thresh),
-                      MetricTestTParam(&compute_vpxssim, &compute_hbd_vpxssim,
+                      MetricTestTParam(&compute_aomssim, &compute_hbd_aomssim,
                                        8, 12, kSsim_thresh),
-                      MetricTestTParam(&compute_vpxssim, &compute_hbd_vpxssim,
+                      MetricTestTParam(&compute_aomssim, &compute_hbd_aomssim,
                                        12, 12, kPhvs_thresh)));
 INSTANTIATE_TEST_CASE_P(
     FASTSSIM, HBDMetricsTest,

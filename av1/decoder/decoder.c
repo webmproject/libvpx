@@ -12,16 +12,16 @@
 #include <limits.h>
 #include <stdio.h>
 
-#include "./vp10_rtcd.h"
-#include "./vpx_dsp_rtcd.h"
-#include "./vpx_scale_rtcd.h"
+#include "./av1_rtcd.h"
+#include "./aom_dsp_rtcd.h"
+#include "./aom_scale_rtcd.h"
 
-#include "aom_mem/vpx_mem.h"
+#include "aom_mem/aom_mem.h"
 #include "aom_ports/system_state.h"
-#include "aom_ports/vpx_once.h"
-#include "aom_ports/vpx_timer.h"
-#include "aom_scale/vpx_scale.h"
-#include "aom_util/vpx_thread.h"
+#include "aom_ports/aom_once.h"
+#include "aom_ports/aom_timer.h"
+#include "aom_scale/aom_scale.h"
+#include "aom_util/aom_thread.h"
 
 #include "av1/common/alloccommon.h"
 #include "av1/common/loopfilter.h"
@@ -38,60 +38,60 @@ static void initialize_dec(void) {
   static volatile int init_done = 0;
 
   if (!init_done) {
-    vp10_rtcd();
-    vpx_dsp_rtcd();
-    vpx_scale_rtcd();
-    vp10_init_intra_predictors();
+    av1_rtcd();
+    aom_dsp_rtcd();
+    aom_scale_rtcd();
+    av1_init_intra_predictors();
 #if CONFIG_EXT_INTER
-    vp10_init_wedge_masks();
+    av1_init_wedge_masks();
 #endif  // CONFIG_EXT_INTER
     init_done = 1;
   }
 }
 
-static void vp10_dec_setup_mi(VP10_COMMON *cm) {
+static void av1_dec_setup_mi(AV1_COMMON *cm) {
   cm->mi = cm->mip + cm->mi_stride + 1;
   cm->mi_grid_visible = cm->mi_grid_base + cm->mi_stride + 1;
   memset(cm->mi_grid_base, 0,
          cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mi_grid_base));
 }
 
-static int vp10_dec_alloc_mi(VP10_COMMON *cm, int mi_size) {
-  cm->mip = vpx_calloc(mi_size, sizeof(*cm->mip));
+static int av1_dec_alloc_mi(AV1_COMMON *cm, int mi_size) {
+  cm->mip = aom_calloc(mi_size, sizeof(*cm->mip));
   if (!cm->mip) return 1;
   cm->mi_alloc_size = mi_size;
-  cm->mi_grid_base = (MODE_INFO **)vpx_calloc(mi_size, sizeof(MODE_INFO *));
+  cm->mi_grid_base = (MODE_INFO **)aom_calloc(mi_size, sizeof(MODE_INFO *));
   if (!cm->mi_grid_base) return 1;
   return 0;
 }
 
-static void vp10_dec_free_mi(VP10_COMMON *cm) {
-  vpx_free(cm->mip);
+static void av1_dec_free_mi(AV1_COMMON *cm) {
+  aom_free(cm->mip);
   cm->mip = NULL;
-  vpx_free(cm->mi_grid_base);
+  aom_free(cm->mi_grid_base);
   cm->mi_grid_base = NULL;
 }
 
-VP10Decoder *vp10_decoder_create(BufferPool *const pool) {
-  VP10Decoder *volatile const pbi = vpx_memalign(32, sizeof(*pbi));
-  VP10_COMMON *volatile const cm = pbi ? &pbi->common : NULL;
+AV1Decoder *av1_decoder_create(BufferPool *const pool) {
+  AV1Decoder *volatile const pbi = aom_memalign(32, sizeof(*pbi));
+  AV1_COMMON *volatile const cm = pbi ? &pbi->common : NULL;
 
   if (!cm) return NULL;
 
-  vp10_zero(*pbi);
+  av1_zero(*pbi);
 
   if (setjmp(cm->error.jmp)) {
     cm->error.setjmp = 0;
-    vp10_decoder_remove(pbi);
+    av1_decoder_remove(pbi);
     return NULL;
   }
 
   cm->error.setjmp = 1;
 
-  CHECK_MEM_ERROR(cm, cm->fc, (FRAME_CONTEXT *)vpx_calloc(1, sizeof(*cm->fc)));
+  CHECK_MEM_ERROR(cm, cm->fc, (FRAME_CONTEXT *)aom_calloc(1, sizeof(*cm->fc)));
   CHECK_MEM_ERROR(
       cm, cm->frame_contexts,
-      (FRAME_CONTEXT *)vpx_calloc(FRAME_CONTEXTS, sizeof(*cm->frame_contexts)));
+      (FRAME_CONTEXT *)aom_calloc(FRAME_CONTEXTS, sizeof(*cm->frame_contexts)));
 
   pbi->need_resync = 1;
   once(initialize_dec);
@@ -104,50 +104,50 @@ VP10Decoder *vp10_decoder_create(BufferPool *const pool) {
   pbi->ready_for_new_data = 1;
   pbi->common.buffer_pool = pool;
 
-  cm->bit_depth = VPX_BITS_8;
-  cm->dequant_bit_depth = VPX_BITS_8;
+  cm->bit_depth = AOM_BITS_8;
+  cm->dequant_bit_depth = AOM_BITS_8;
 
-  cm->alloc_mi = vp10_dec_alloc_mi;
-  cm->free_mi = vp10_dec_free_mi;
-  cm->setup_mi = vp10_dec_setup_mi;
+  cm->alloc_mi = av1_dec_alloc_mi;
+  cm->free_mi = av1_dec_free_mi;
+  cm->setup_mi = av1_dec_setup_mi;
 
-  vp10_loop_filter_init(cm);
+  av1_loop_filter_init(cm);
 
 #if CONFIG_AOM_QM
   aom_qm_init(cm);
 #endif
 #if CONFIG_LOOP_RESTORATION
-  vp10_loop_restoration_precal();
+  av1_loop_restoration_precal();
 #endif  // CONFIG_LOOP_RESTORATION
 
   cm->error.setjmp = 0;
 
-  vpx_get_worker_interface()->init(&pbi->lf_worker);
+  aom_get_worker_interface()->init(&pbi->lf_worker);
 
   return pbi;
 }
 
-void vp10_decoder_remove(VP10Decoder *pbi) {
+void av1_decoder_remove(AV1Decoder *pbi) {
   int i;
 
   if (!pbi) return;
 
-  vpx_get_worker_interface()->end(&pbi->lf_worker);
-  vpx_free(pbi->lf_worker.data1);
-  vpx_free(pbi->tile_data);
+  aom_get_worker_interface()->end(&pbi->lf_worker);
+  aom_free(pbi->lf_worker.data1);
+  aom_free(pbi->tile_data);
   for (i = 0; i < pbi->num_tile_workers; ++i) {
-    VPxWorker *const worker = &pbi->tile_workers[i];
-    vpx_get_worker_interface()->end(worker);
+    AVxWorker *const worker = &pbi->tile_workers[i];
+    aom_get_worker_interface()->end(worker);
   }
-  vpx_free(pbi->tile_worker_data);
-  vpx_free(pbi->tile_worker_info);
-  vpx_free(pbi->tile_workers);
+  aom_free(pbi->tile_worker_data);
+  aom_free(pbi->tile_worker_info);
+  aom_free(pbi->tile_workers);
 
   if (pbi->num_tile_workers > 0) {
-    vp10_loop_filter_dealloc(&pbi->lf_row_sync);
+    av1_loop_filter_dealloc(&pbi->lf_row_sync);
   }
 
-  vpx_free(pbi);
+  aom_free(pbi);
 }
 
 static int equal_dimensions(const YV12_BUFFER_CONFIG *a,
@@ -156,45 +156,45 @@ static int equal_dimensions(const YV12_BUFFER_CONFIG *a,
          a->uv_height == b->uv_height && a->uv_width == b->uv_width;
 }
 
-vpx_codec_err_t vp10_copy_reference_dec(VP10Decoder *pbi,
-                                        VPX_REFFRAME ref_frame_flag,
-                                        YV12_BUFFER_CONFIG *sd) {
-  VP10_COMMON *cm = &pbi->common;
+aom_codec_err_t av1_copy_reference_dec(AV1Decoder *pbi,
+                                       AOM_REFFRAME ref_frame_flag,
+                                       YV12_BUFFER_CONFIG *sd) {
+  AV1_COMMON *cm = &pbi->common;
 
   /* TODO(jkoleszar): The decoder doesn't have any real knowledge of what the
    * encoder is using the frame buffers for. This is just a stub to keep the
-   * vpxenc --test-decode functionality working, and will be replaced in a
-   * later commit that adds VP9-specific controls for this functionality.
+   * aomenc --test-decode functionality working, and will be replaced in a
+   * later commit that adds AV1-specific controls for this functionality.
    */
-  if (ref_frame_flag == VPX_LAST_FLAG) {
+  if (ref_frame_flag == AOM_LAST_FLAG) {
     const YV12_BUFFER_CONFIG *const cfg = get_ref_frame(cm, 0);
     if (cfg == NULL) {
-      vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+      aom_internal_error(&cm->error, AOM_CODEC_ERROR,
                          "No 'last' reference frame");
-      return VPX_CODEC_ERROR;
+      return AOM_CODEC_ERROR;
     }
     if (!equal_dimensions(cfg, sd))
-      vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+      aom_internal_error(&cm->error, AOM_CODEC_ERROR,
                          "Incorrect buffer dimensions");
     else
-      vpx_yv12_copy_frame(cfg, sd);
+      aom_yv12_copy_frame(cfg, sd);
   } else {
-    vpx_internal_error(&cm->error, VPX_CODEC_ERROR, "Invalid reference frame");
+    aom_internal_error(&cm->error, AOM_CODEC_ERROR, "Invalid reference frame");
   }
 
   return cm->error.error_code;
 }
 
-vpx_codec_err_t vp10_set_reference_dec(VP10_COMMON *cm,
-                                       VPX_REFFRAME ref_frame_flag,
-                                       YV12_BUFFER_CONFIG *sd) {
+aom_codec_err_t av1_set_reference_dec(AV1_COMMON *cm,
+                                      AOM_REFFRAME ref_frame_flag,
+                                      YV12_BUFFER_CONFIG *sd) {
   int idx;
   YV12_BUFFER_CONFIG *ref_buf = NULL;
 
   // TODO(jkoleszar): The decoder doesn't have any real knowledge of what the
   // encoder is using the frame buffers for. This is just a stub to keep the
-  // vpxenc --test-decode functionality working, and will be replaced in a
-  // later commit that adds VP9-specific controls for this functionality.
+  // aomenc --test-decode functionality working, and will be replaced in a
+  // later commit that adds AV1-specific controls for this functionality.
 
   // (Yunqing) The set_reference control depends on the following setting in
   // encoder.
@@ -212,32 +212,32 @@ vpx_codec_err_t vp10_set_reference_dec(VP10_COMMON *cm,
 
   // TODO(zoeliu): To revisit following code and reconsider what assumption we
   // may take on the reference frame buffer virtual indexes
-  if (ref_frame_flag == VPX_LAST_FLAG) {
+  if (ref_frame_flag == AOM_LAST_FLAG) {
     idx = cm->ref_frame_map[0];
 #if CONFIG_EXT_REFS
-  } else if (ref_frame_flag == VPX_LAST2_FLAG) {
+  } else if (ref_frame_flag == AOM_LAST2_FLAG) {
     idx = cm->ref_frame_map[1];
-  } else if (ref_frame_flag == VPX_LAST3_FLAG) {
+  } else if (ref_frame_flag == AOM_LAST3_FLAG) {
     idx = cm->ref_frame_map[2];
-  } else if (ref_frame_flag == VPX_GOLD_FLAG) {
+  } else if (ref_frame_flag == AOM_GOLD_FLAG) {
     idx = cm->ref_frame_map[3];
-  } else if (ref_frame_flag == VPX_BWD_FLAG) {
+  } else if (ref_frame_flag == AOM_BWD_FLAG) {
     idx = cm->ref_frame_map[4];
-  } else if (ref_frame_flag == VPX_ALT_FLAG) {
+  } else if (ref_frame_flag == AOM_ALT_FLAG) {
     idx = cm->ref_frame_map[5];
 #else
-  } else if (ref_frame_flag == VPX_GOLD_FLAG) {
+  } else if (ref_frame_flag == AOM_GOLD_FLAG) {
     idx = cm->ref_frame_map[1];
-  } else if (ref_frame_flag == VPX_ALT_FLAG) {
+  } else if (ref_frame_flag == AOM_ALT_FLAG) {
     idx = cm->ref_frame_map[2];
 #endif  // CONFIG_EXT_REFS
   } else {
-    vpx_internal_error(&cm->error, VPX_CODEC_ERROR, "Invalid reference frame");
+    aom_internal_error(&cm->error, AOM_CODEC_ERROR, "Invalid reference frame");
     return cm->error.error_code;
   }
 
   if (idx < 0 || idx >= FRAME_BUFFERS) {
-    vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+    aom_internal_error(&cm->error, AOM_CODEC_ERROR,
                        "Invalid reference frame map");
     return cm->error.error_code;
   }
@@ -246,20 +246,20 @@ vpx_codec_err_t vp10_set_reference_dec(VP10_COMMON *cm,
   ref_buf = &cm->buffer_pool->frame_bufs[idx].buf;
 
   if (!equal_dimensions(ref_buf, sd)) {
-    vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+    aom_internal_error(&cm->error, AOM_CODEC_ERROR,
                        "Incorrect buffer dimensions");
   } else {
     // Overwrite the reference frame buffer.
-    vpx_yv12_copy_frame(sd, ref_buf);
+    aom_yv12_copy_frame(sd, ref_buf);
   }
 
   return cm->error.error_code;
 }
 
 /* If any buffer updating is signaled it should be done here. */
-static void swap_frame_buffers(VP10Decoder *pbi) {
+static void swap_frame_buffers(AV1Decoder *pbi) {
   int ref_index = 0, mask;
-  VP10_COMMON *const cm = &pbi->common;
+  AV1_COMMON *const cm = &pbi->common;
   BufferPool *const pool = cm->buffer_pool;
   RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
 
@@ -302,14 +302,14 @@ static void swap_frame_buffers(VP10Decoder *pbi) {
   }
 }
 
-int vp10_receive_compressed_data(VP10Decoder *pbi, size_t size,
-                                 const uint8_t **psource) {
-  VP10_COMMON *volatile const cm = &pbi->common;
+int av1_receive_compressed_data(AV1Decoder *pbi, size_t size,
+                                const uint8_t **psource) {
+  AV1_COMMON *volatile const cm = &pbi->common;
   BufferPool *volatile const pool = cm->buffer_pool;
   RefCntBuffer *volatile const frame_bufs = cm->buffer_pool->frame_bufs;
   const uint8_t *source = *psource;
   int retcode = 0;
-  cm->error.error_code = VPX_CODEC_OK;
+  cm->error.error_code = AOM_CODEC_OK;
 
   if (size == 0) {
     // This is used to signal that we are missing frames.
@@ -340,27 +340,27 @@ int vp10_receive_compressed_data(VP10Decoder *pbi, size_t size,
 
   // Find a free frame buffer. Return error if can not find any.
   cm->new_fb_idx = get_free_fb(cm);
-  if (cm->new_fb_idx == INVALID_IDX) return VPX_CODEC_MEM_ERROR;
+  if (cm->new_fb_idx == INVALID_IDX) return AOM_CODEC_MEM_ERROR;
 
   // Assign a MV array to the frame buffer.
   cm->cur_frame = &pool->frame_bufs[cm->new_fb_idx];
 
   pbi->hold_ref_buf = 0;
   if (cm->frame_parallel_decode) {
-    VPxWorker *const worker = pbi->frame_worker_owner;
-    vp10_frameworker_lock_stats(worker);
+    AVxWorker *const worker = pbi->frame_worker_owner;
+    av1_frameworker_lock_stats(worker);
     frame_bufs[cm->new_fb_idx].frame_worker_owner = worker;
     // Reset decoding progress.
     pbi->cur_buf = &frame_bufs[cm->new_fb_idx];
     pbi->cur_buf->row = -1;
     pbi->cur_buf->col = -1;
-    vp10_frameworker_unlock_stats(worker);
+    av1_frameworker_unlock_stats(worker);
   } else {
     pbi->cur_buf = &frame_bufs[cm->new_fb_idx];
   }
 
   if (setjmp(cm->error.jmp)) {
-    const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
+    const AVxWorkerInterface *const winterface = aom_get_worker_interface();
     int i;
 
     cm->error.setjmp = 0;
@@ -399,12 +399,12 @@ int vp10_receive_compressed_data(VP10Decoder *pbi, size_t size,
     decrease_ref_count(cm->new_fb_idx, frame_bufs, pool);
     unlock_buffer_pool(pool);
 
-    vpx_clear_system_state();
+    aom_clear_system_state();
     return -1;
   }
 
   cm->error.setjmp = 1;
-  vp10_decode_frame(pbi, source, source + size, psource);
+  av1_decode_frame(pbi, source, source + size, psource);
 
   swap_frame_buffers(pbi);
 
@@ -414,9 +414,9 @@ int vp10_receive_compressed_data(VP10Decoder *pbi, size_t size,
   // border.
   if (pbi->dec_tile_row == -1 && pbi->dec_tile_col == -1)
 #endif  // CONFIG_EXT_TILE
-    vpx_extend_frame_inner_borders(cm->frame_to_show);
+    aom_extend_frame_inner_borders(cm->frame_to_show);
 
-  vpx_clear_system_state();
+  aom_clear_system_state();
 
   if (!cm->show_existing_frame) {
     cm->last_show_frame = cm->show_frame;
@@ -428,24 +428,24 @@ int vp10_receive_compressed_data(VP10Decoder *pbi, size_t size,
       cm->prev_frame = cm->cur_frame;
 
     if (cm->seg.enabled && !cm->frame_parallel_decode)
-      vp10_swap_current_and_last_seg_map(cm);
+      av1_swap_current_and_last_seg_map(cm);
   }
 
   // Update progress in frame parallel decode.
   if (cm->frame_parallel_decode) {
     // Need to lock the mutex here as another thread may
     // be accessing this buffer.
-    VPxWorker *const worker = pbi->frame_worker_owner;
+    AVxWorker *const worker = pbi->frame_worker_owner;
     FrameWorkerData *const frame_worker_data = worker->data1;
-    vp10_frameworker_lock_stats(worker);
+    av1_frameworker_lock_stats(worker);
 
     if (cm->show_frame) {
       cm->current_video_frame++;
     }
     frame_worker_data->frame_decoded = 1;
     frame_worker_data->frame_context_ready = 1;
-    vp10_frameworker_signal_stats(worker);
-    vp10_frameworker_unlock_stats(worker);
+    av1_frameworker_signal_stats(worker);
+    av1_frameworker_unlock_stats(worker);
   } else {
     cm->last_width = cm->width;
     cm->last_height = cm->height;
@@ -458,8 +458,8 @@ int vp10_receive_compressed_data(VP10Decoder *pbi, size_t size,
   return retcode;
 }
 
-int vp10_get_raw_frame(VP10Decoder *pbi, YV12_BUFFER_CONFIG *sd) {
-  VP10_COMMON *const cm = &pbi->common;
+int av1_get_raw_frame(AV1Decoder *pbi, YV12_BUFFER_CONFIG *sd) {
+  AV1_COMMON *const cm = &pbi->common;
   int ret = -1;
   if (pbi->ready_for_new_data == 1) return ret;
 
@@ -471,12 +471,12 @@ int vp10_get_raw_frame(VP10Decoder *pbi, YV12_BUFFER_CONFIG *sd) {
   pbi->ready_for_new_data = 1;
   *sd = *cm->frame_to_show;
   ret = 0;
-  vpx_clear_system_state();
+  aom_clear_system_state();
   return ret;
 }
 
-int vp10_get_frame_to_show(VP10Decoder *pbi, YV12_BUFFER_CONFIG *frame) {
-  VP10_COMMON *const cm = &pbi->common;
+int av1_get_frame_to_show(AV1Decoder *pbi, YV12_BUFFER_CONFIG *frame) {
+  AV1_COMMON *const cm = &pbi->common;
 
   if (!cm->show_frame || !cm->frame_to_show) return -1;
 
@@ -484,10 +484,10 @@ int vp10_get_frame_to_show(VP10Decoder *pbi, YV12_BUFFER_CONFIG *frame) {
   return 0;
 }
 
-vpx_codec_err_t vp10_parse_superframe_index(const uint8_t *data, size_t data_sz,
-                                            uint32_t sizes[8], int *count,
-                                            vpx_decrypt_cb decrypt_cb,
-                                            void *decrypt_state) {
+aom_codec_err_t av1_parse_superframe_index(const uint8_t *data, size_t data_sz,
+                                           uint32_t sizes[8], int *count,
+                                           aom_decrypt_cb decrypt_cb,
+                                           void *decrypt_state) {
   // A chunk ending with a byte matching 0xc0 is an invalid chunk unless
   // it is a super frame index. If the last byte of real video compression
   // data is 0xc0 the encoder must add a 0 byte. If we have the marker but
@@ -508,7 +508,7 @@ vpx_codec_err_t vp10_parse_superframe_index(const uint8_t *data, size_t data_sz,
 
     // This chunk is marked as having a superframe index but doesn't have
     // enough data for it, thus it's an invalid superframe index.
-    if (data_sz < index_sz) return VPX_CODEC_CORRUPT_FRAME;
+    if (data_sz < index_sz) return AOM_CODEC_CORRUPT_FRAME;
 
     {
       const uint8_t marker2 =
@@ -517,7 +517,7 @@ vpx_codec_err_t vp10_parse_superframe_index(const uint8_t *data, size_t data_sz,
       // This chunk is marked as having a superframe index but doesn't have
       // the matching marker byte at the front of the index therefore it's an
       // invalid chunk.
-      if (marker != marker2) return VPX_CODEC_CORRUPT_FRAME;
+      if (marker != marker2) return AOM_CODEC_CORRUPT_FRAME;
     }
 
     {
@@ -545,5 +545,5 @@ vpx_codec_err_t vp10_parse_superframe_index(const uint8_t *data, size_t data_sz,
       *count = frames;
     }
   }
-  return VPX_CODEC_OK;
+  return AOM_CODEC_OK;
 }

@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_X86_FWD_TXFM_SSE2_H_
-#define VPX_DSP_X86_FWD_TXFM_SSE2_H_
+#ifndef AOM_DSP_X86_FWD_TXFM_SSE2_H_
+#define AOM_DSP_X86_FWD_TXFM_SSE2_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -244,7 +244,7 @@ static INLINE int k_check_epi32_overflow_32(
 }
 
 static INLINE void store_output(const __m128i *poutput, tran_low_t *dst_ptr) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   const __m128i zero = _mm_setzero_si128();
   const __m128i sign_bits = _mm_cmplt_epi16(*poutput, zero);
   __m128i out0 = _mm_unpacklo_epi16(*poutput, sign_bits);
@@ -253,11 +253,11 @@ static INLINE void store_output(const __m128i *poutput, tran_low_t *dst_ptr) {
   _mm_store_si128((__m128i *)(dst_ptr + 4), out1);
 #else
   _mm_store_si128((__m128i *)(dst_ptr), *poutput);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 }
 
 static INLINE void storeu_output(const __m128i *poutput, tran_low_t *dst_ptr) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   const __m128i zero = _mm_setzero_si128();
   const __m128i sign_bits = _mm_cmplt_epi16(*poutput, zero);
   __m128i out0 = _mm_unpacklo_epi16(*poutput, sign_bits);
@@ -266,7 +266,7 @@ static INLINE void storeu_output(const __m128i *poutput, tran_low_t *dst_ptr) {
   _mm_storeu_si128((__m128i *)(dst_ptr + 4), out1);
 #else
   _mm_storeu_si128((__m128i *)(dst_ptr), *poutput);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 }
 
 static INLINE __m128i mult_round_shift(const __m128i *pin0, const __m128i *pin1,
@@ -368,4 +368,4 @@ static INLINE void transpose_and_output8x8(
 }  // extern "C"
 #endif
 
-#endif  // VPX_DSP_X86_FWD_TXFM_SSE2_H_
+#endif  // AOM_DSP_X86_FWD_TXFM_SSE2_H_

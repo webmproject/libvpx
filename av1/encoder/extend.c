@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "aom_dsp/vpx_dsp_common.h"
-#include "aom_mem/vpx_mem.h"
+#include "aom_dsp/aom_dsp_common.h"
+#include "aom_mem/aom_mem.h"
 #include "aom_ports/mem.h"
 
 #include "av1/common/common.h"
@@ -56,7 +56,7 @@ static void copy_and_extend_plane(const uint8_t *src, int src_pitch,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 static void highbd_copy_and_extend_plane(const uint8_t *src8, int src_pitch,
                                          uint8_t *dst8, int dst_pitch, int w,
                                          int h, int extend_top, int extend_left,
@@ -72,9 +72,9 @@ static void highbd_copy_and_extend_plane(const uint8_t *src8, int src_pitch,
   uint16_t *dst_ptr2 = dst + w;
 
   for (i = 0; i < h; i++) {
-    vpx_memset16(dst_ptr1, src_ptr1[0], extend_left);
+    aom_memset16(dst_ptr1, src_ptr1[0], extend_left);
     memcpy(dst_ptr1 + extend_left, src_ptr1, w * sizeof(src_ptr1[0]));
-    vpx_memset16(dst_ptr2, src_ptr2[0], extend_right);
+    aom_memset16(dst_ptr2, src_ptr2[0], extend_right);
     src_ptr1 += src_pitch;
     src_ptr2 += src_pitch;
     dst_ptr1 += dst_pitch;
@@ -99,10 +99,10 @@ static void highbd_copy_and_extend_plane(const uint8_t *src8, int src_pitch,
     dst_ptr2 += dst_pitch;
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
-void vp10_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
-                                YV12_BUFFER_CONFIG *dst) {
+void av1_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
+                               YV12_BUFFER_CONFIG *dst) {
   // Extend src frame in buffer
   // Altref filtering assumes 16 pixel extension
   const int et_y = 16;
@@ -111,10 +111,10 @@ void vp10_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   // to 64x64, so the right and bottom need to be extended to 64 multiple
   // or up to 16, whichever is greater.
   const int er_y =
-      VPXMAX(src->y_width + 16, ALIGN_POWER_OF_TWO(src->y_width, 6)) -
+      AOMMAX(src->y_width + 16, ALIGN_POWER_OF_TWO(src->y_width, 6)) -
       src->y_crop_width;
   const int eb_y =
-      VPXMAX(src->y_height + 16, ALIGN_POWER_OF_TWO(src->y_height, 6)) -
+      AOMMAX(src->y_height + 16, ALIGN_POWER_OF_TWO(src->y_height, 6)) -
       src->y_crop_height;
   const int uv_width_subsampling = (src->uv_width != src->y_width);
   const int uv_height_subsampling = (src->uv_height != src->y_height);
@@ -123,7 +123,7 @@ void vp10_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   const int eb_uv = eb_y >> uv_height_subsampling;
   const int er_uv = er_y >> uv_width_subsampling;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
     highbd_copy_and_extend_plane(src->y_buffer, src->y_stride, dst->y_buffer,
                                  dst->y_stride, src->y_crop_width,
@@ -138,7 +138,7 @@ void vp10_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
         src->uv_crop_width, src->uv_crop_height, et_uv, el_uv, eb_uv, er_uv);
     return;
   }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
   copy_and_extend_plane(src->y_buffer, src->y_stride, dst->y_buffer,
                         dst->y_stride, src->y_crop_width, src->y_crop_height,
@@ -153,9 +153,9 @@ void vp10_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
                         et_uv, el_uv, eb_uv, er_uv);
 }
 
-void vp10_copy_and_extend_frame_with_rect(const YV12_BUFFER_CONFIG *src,
-                                          YV12_BUFFER_CONFIG *dst, int srcy,
-                                          int srcx, int srch, int srcw) {
+void av1_copy_and_extend_frame_with_rect(const YV12_BUFFER_CONFIG *src,
+                                         YV12_BUFFER_CONFIG *dst, int srcy,
+                                         int srcx, int srch, int srcw) {
   // If the side is not touching the bounder then don't extend.
   const int et_y = srcy ? 0 : dst->border;
   const int el_y = srcx ? 0 : dst->border;

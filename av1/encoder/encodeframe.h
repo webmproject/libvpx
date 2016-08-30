@@ -8,10 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_ENCODER_ENCODEFRAME_H_
-#define VP10_ENCODER_ENCODEFRAME_H_
+#ifndef AV1_ENCODER_ENCODEFRAME_H_
+#define AV1_ENCODER_ENCODEFRAME_H_
 
-#include "aom/vpx_integer.h"
+#include "aom/aom_integer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,7 +19,7 @@ extern "C" {
 
 struct macroblock;
 struct yv12_buffer_config;
-struct VP10_COMP;
+struct AV1_COMP;
 struct ThreadData;
 
 // Constants used in SOURCE_VAR_BASED_PARTITION
@@ -29,20 +29,20 @@ struct ThreadData;
 #define VAR_HIST_LARGE_CUT_OFF 75
 #define VAR_HIST_SMALL_CUT_OFF 45
 
-void vp10_setup_src_planes(struct macroblock *x,
-                           const struct yv12_buffer_config *src, int mi_row,
-                           int mi_col);
+void av1_setup_src_planes(struct macroblock *x,
+                          const struct yv12_buffer_config *src, int mi_row,
+                          int mi_col);
 
-void vp10_encode_frame(struct VP10_COMP *cpi);
+void av1_encode_frame(struct AV1_COMP *cpi);
 
-void vp10_init_tile_data(struct VP10_COMP *cpi);
-void vp10_encode_tile(struct VP10_COMP *cpi, struct ThreadData *td,
-                      int tile_row, int tile_col);
+void av1_init_tile_data(struct AV1_COMP *cpi);
+void av1_encode_tile(struct AV1_COMP *cpi, struct ThreadData *td, int tile_row,
+                     int tile_col);
 
-void vp10_set_variance_partition_thresholds(struct VP10_COMP *cpi, int q);
+void av1_set_variance_partition_thresholds(struct AV1_COMP *cpi, int q);
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
 
-#endif  // VP10_ENCODER_ENCODEFRAME_H_
+#endif  // AV1_ENCODER_ENCODEFRAME_H_

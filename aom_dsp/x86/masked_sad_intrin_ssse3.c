@@ -13,8 +13,8 @@
 #include <tmmintrin.h>
 
 #include "aom_ports/mem.h"
-#include "./vpx_config.h"
-#include "aom/vpx_integer.h"
+#include "./aom_config.h"
+#include "aom/aom_integer.h"
 
 static INLINE __m128i width8_load_2rows(const uint8_t *ptr, int stride) {
   __m128i temp1 = _mm_loadl_epi64((const __m128i *)ptr);
@@ -46,7 +46,7 @@ static INLINE unsigned int masked_sad4xh_ssse3(
     const uint8_t *m_ptr, int m_stride, int height);
 
 #define MASKSADMXN_SSSE3(m, n)                                                 \
-  unsigned int vpx_masked_sad##m##x##n##_ssse3(                                \
+  unsigned int aom_masked_sad##m##x##n##_ssse3(                                \
       const uint8_t *src, int src_stride, const uint8_t *ref, int ref_stride,  \
       const uint8_t *msk, int msk_stride) {                                    \
     return masked_sad_ssse3(src, src_stride, ref, ref_stride, msk, msk_stride, \
@@ -68,7 +68,7 @@ MASKSADMXN_SSSE3(16, 16)
 MASKSADMXN_SSSE3(16, 8)
 
 #define MASKSAD8XN_SSSE3(n)                                                   \
-  unsigned int vpx_masked_sad8x##n##_ssse3(                                   \
+  unsigned int aom_masked_sad8x##n##_ssse3(                                   \
       const uint8_t *src, int src_stride, const uint8_t *ref, int ref_stride, \
       const uint8_t *msk, int msk_stride) {                                   \
     return masked_sad8xh_ssse3(src, src_stride, ref, ref_stride, msk,         \
@@ -80,7 +80,7 @@ MASKSAD8XN_SSSE3(8)
 MASKSAD8XN_SSSE3(4)
 
 #define MASKSAD4XN_SSSE3(n)                                                   \
-  unsigned int vpx_masked_sad4x##n##_ssse3(                                   \
+  unsigned int aom_masked_sad4x##n##_ssse3(                                   \
       const uint8_t *src, int src_stride, const uint8_t *ref, int ref_stride, \
       const uint8_t *msk, int msk_stride) {                                   \
     return masked_sad4xh_ssse3(src, src_stride, ref, ref_stride, msk,         \
@@ -203,7 +203,7 @@ static INLINE unsigned int masked_sad4xh_ssse3(
   return (_mm_cvtsi128_si32(res) + 31) >> 6;
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 static INLINE __m128i highbd_width4_load_2rows(const uint16_t *ptr,
                                                int stride) {
   __m128i temp1 = _mm_loadl_epi64((const __m128i *)ptr);
@@ -220,7 +220,7 @@ static INLINE unsigned int highbd_masked_sad4xh_ssse3(
     const uint8_t *m_ptr, int m_stride, int height);
 
 #define HIGHBD_MASKSADMXN_SSSE3(m, n)                                         \
-  unsigned int vpx_highbd_masked_sad##m##x##n##_ssse3(                        \
+  unsigned int aom_highbd_masked_sad##m##x##n##_ssse3(                        \
       const uint8_t *src, int src_stride, const uint8_t *ref, int ref_stride, \
       const uint8_t *msk, int msk_stride) {                                   \
     return highbd_masked_sad_ssse3(src, src_stride, ref, ref_stride, msk,     \
@@ -245,7 +245,7 @@ HIGHBD_MASKSADMXN_SSSE3(8, 8)
 HIGHBD_MASKSADMXN_SSSE3(8, 4)
 
 #define HIGHBD_MASKSAD4XN_SSSE3(n)                                            \
-  unsigned int vpx_highbd_masked_sad4x##n##_ssse3(                            \
+  unsigned int aom_highbd_masked_sad4x##n##_ssse3(                            \
       const uint8_t *src, int src_stride, const uint8_t *ref, int ref_stride, \
       const uint8_t *msk, int msk_stride) {                                   \
     return highbd_masked_sad4xh_ssse3(src, src_stride, ref, ref_stride, msk,  \
@@ -330,4 +330,4 @@ static INLINE unsigned int highbd_masked_sad4xh_ssse3(
   // sad = (sad + 31) >> 6;
   return (_mm_cvtsi128_si32(res) + 31) >> 6;
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH

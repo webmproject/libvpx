@@ -10,9 +10,9 @@
 
 #include <arm_neon.h>
 
-#include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
-#include "aom/vpx_integer.h"
+#include "./aom_config.h"
+#include "./aom_dsp_rtcd.h"
+#include "aom/aom_integer.h"
 
 //------------------------------------------------------------------------------
 // DC 4x4
@@ -58,24 +58,24 @@ static INLINE void dc_4x4(uint8_t *dst, ptrdiff_t stride, const uint8_t *above,
   }
 }
 
-void vpx_dc_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_dc_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
                                const uint8_t *above, const uint8_t *left) {
   dc_4x4(dst, stride, above, left, 1, 1);
 }
 
-void vpx_dc_left_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_dc_left_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
                                     const uint8_t *above, const uint8_t *left) {
   (void)above;
   dc_4x4(dst, stride, NULL, left, 0, 1);
 }
 
-void vpx_dc_top_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_dc_top_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
                                    const uint8_t *above, const uint8_t *left) {
   (void)left;
   dc_4x4(dst, stride, above, NULL, 1, 0);
 }
 
-void vpx_dc_128_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_dc_128_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
                                    const uint8_t *above, const uint8_t *left) {
   (void)above;
   (void)left;
@@ -128,24 +128,24 @@ static INLINE void dc_8x8(uint8_t *dst, ptrdiff_t stride, const uint8_t *above,
   }
 }
 
-void vpx_dc_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_dc_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
                                const uint8_t *above, const uint8_t *left) {
   dc_8x8(dst, stride, above, left, 1, 1);
 }
 
-void vpx_dc_left_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_dc_left_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
                                     const uint8_t *above, const uint8_t *left) {
   (void)above;
   dc_8x8(dst, stride, NULL, left, 0, 1);
 }
 
-void vpx_dc_top_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_dc_top_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
                                    const uint8_t *above, const uint8_t *left) {
   (void)left;
   dc_8x8(dst, stride, above, NULL, 1, 0);
 }
 
-void vpx_dc_128_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_dc_128_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
                                    const uint8_t *above, const uint8_t *left) {
   (void)above;
   (void)left;
@@ -201,26 +201,26 @@ static INLINE void dc_16x16(uint8_t *dst, ptrdiff_t stride,
   }
 }
 
-void vpx_dc_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_dc_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
                                  const uint8_t *above, const uint8_t *left) {
   dc_16x16(dst, stride, above, left, 1, 1);
 }
 
-void vpx_dc_left_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_dc_left_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
                                       const uint8_t *above,
                                       const uint8_t *left) {
   (void)above;
   dc_16x16(dst, stride, NULL, left, 0, 1);
 }
 
-void vpx_dc_top_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_dc_top_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
                                      const uint8_t *above,
                                      const uint8_t *left) {
   (void)left;
   dc_16x16(dst, stride, above, NULL, 1, 0);
 }
 
-void vpx_dc_128_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_dc_128_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
                                      const uint8_t *above,
                                      const uint8_t *left) {
   (void)above;
@@ -284,26 +284,26 @@ static INLINE void dc_32x32(uint8_t *dst, ptrdiff_t stride,
   }
 }
 
-void vpx_dc_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_dc_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
                                  const uint8_t *above, const uint8_t *left) {
   dc_32x32(dst, stride, above, left, 1, 1);
 }
 
-void vpx_dc_left_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_dc_left_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
                                       const uint8_t *above,
                                       const uint8_t *left) {
   (void)above;
   dc_32x32(dst, stride, NULL, left, 0, 1);
 }
 
-void vpx_dc_top_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_dc_top_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
                                      const uint8_t *above,
                                      const uint8_t *left) {
   (void)left;
   dc_32x32(dst, stride, above, NULL, 1, 0);
 }
 
-void vpx_dc_128_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_dc_128_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
                                      const uint8_t *above,
                                      const uint8_t *left) {
   (void)above;
@@ -313,7 +313,7 @@ void vpx_dc_128_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
 
 // -----------------------------------------------------------------------------
 
-void vpx_d45_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_d45_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
                                 const uint8_t *above, const uint8_t *left) {
   const uint64x1_t A0 = vreinterpret_u64_u8(vld1_u8(above));  // top row
   const uint64x1_t A1 = vshr_n_u64(A0, 8);
@@ -336,7 +336,7 @@ void vpx_d45_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
   dst[3 * stride + 3] = above[7];
 }
 
-void vpx_d45_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_d45_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
                                 const uint8_t *above, const uint8_t *left) {
   static const uint8_t shuffle1[8] = { 1, 2, 3, 4, 5, 6, 7, 7 };
   static const uint8_t shuffle2[8] = { 2, 3, 4, 5, 6, 7, 7, 7 };
@@ -356,7 +356,7 @@ void vpx_d45_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
   vst1_u8(dst + i * stride, row);
 }
 
-void vpx_d45_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_d45_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
                                   const uint8_t *above, const uint8_t *left) {
   const uint8x16_t A0 = vld1q_u8(above);  // top row
   const uint8x16_t above_right = vld1q_dup_u8(above + 15);
@@ -375,7 +375,7 @@ void vpx_d45_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
 
 // -----------------------------------------------------------------------------
 
-void vpx_d135_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_d135_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
                                  const uint8_t *above, const uint8_t *left) {
   const uint8x8_t XABCD_u8 = vld1_u8(above - 1);
   const uint64x1_t XABCD = vreinterpret_u64_u8(XABCD_u8);
@@ -405,7 +405,7 @@ void vpx_d135_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
 
 #if !HAVE_NEON_ASM
 
-void vpx_v_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_v_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
                               const uint8_t *above, const uint8_t *left) {
   int i;
   uint32x2_t d0u32 = vdup_n_u32(0);
@@ -416,7 +416,7 @@ void vpx_v_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
     vst1_lane_u32((uint32_t *)dst, d0u32, 0);
 }
 
-void vpx_v_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_v_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
                               const uint8_t *above, const uint8_t *left) {
   int i;
   uint8x8_t d0u8 = vdup_n_u8(0);
@@ -426,7 +426,7 @@ void vpx_v_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
   for (i = 0; i < 8; i++, dst += stride) vst1_u8(dst, d0u8);
 }
 
-void vpx_v_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_v_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
                                 const uint8_t *above, const uint8_t *left) {
   int i;
   uint8x16_t q0u8 = vdupq_n_u8(0);
@@ -436,7 +436,7 @@ void vpx_v_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
   for (i = 0; i < 16; i++, dst += stride) vst1q_u8(dst, q0u8);
 }
 
-void vpx_v_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_v_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
                                 const uint8_t *above, const uint8_t *left) {
   int i;
   uint8x16_t q0u8 = vdupq_n_u8(0);
@@ -451,7 +451,7 @@ void vpx_v_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
   }
 }
 
-void vpx_h_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_h_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
                               const uint8_t *above, const uint8_t *left) {
   uint8x8_t d0u8 = vdup_n_u8(0);
   uint32x2_t d1u32 = vdup_n_u32(0);
@@ -472,7 +472,7 @@ void vpx_h_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
   vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d0u8), 0);
 }
 
-void vpx_h_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_h_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
                               const uint8_t *above, const uint8_t *left) {
   uint8x8_t d0u8 = vdup_n_u8(0);
   uint64x1_t d1u64 = vdup_n_u64(0);
@@ -505,7 +505,7 @@ void vpx_h_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
   vst1_u8(dst, d0u8);
 }
 
-void vpx_h_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_h_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
                                 const uint8_t *above, const uint8_t *left) {
   int j;
   uint8x8_t d2u8 = vdup_n_u8(0);
@@ -543,7 +543,7 @@ void vpx_h_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
   }
 }
 
-void vpx_h_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_h_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
                                 const uint8_t *above, const uint8_t *left) {
   int j, k;
   uint8x8_t d2u8 = vdup_n_u8(0);
@@ -591,7 +591,7 @@ void vpx_h_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
   }
 }
 
-void vpx_tm_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_tm_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
                                const uint8_t *above, const uint8_t *left) {
   int i;
   uint16x8_t q1u16, q3u16;
@@ -611,7 +611,7 @@ void vpx_tm_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
   }
 }
 
-void vpx_tm_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_tm_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
                                const uint8_t *above, const uint8_t *left) {
   int j;
   uint16x8_t q0u16, q3u16, q10u16;
@@ -653,7 +653,7 @@ void vpx_tm_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
   }
 }
 
-void vpx_tm_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_tm_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
                                  const uint8_t *above, const uint8_t *left) {
   int j, k;
   uint16x8_t q0u16, q2u16, q3u16, q8u16, q10u16;
@@ -716,7 +716,7 @@ void vpx_tm_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
   }
 }
 
-void vpx_tm_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
+void aom_tm_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
                                  const uint8_t *above, const uint8_t *left) {
   int j, k;
   uint16x8_t q0u16, q3u16, q8u16, q9u16, q10u16, q11u16;

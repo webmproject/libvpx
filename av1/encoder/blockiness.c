@@ -8,14 +8,14 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "./vp10_rtcd.h"
-#include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
+#include "./av1_rtcd.h"
+#include "./aom_config.h"
+#include "./aom_dsp_rtcd.h"
 #include "av1/common/common.h"
 #include "av1/common/filter.h"
-#include "aom/vpx_integer.h"
-#include "aom_dsp/vpx_convolve.h"
-#include "aom_dsp/vpx_filter.h"
+#include "aom/aom_integer.h"
+#include "aom_dsp/aom_convolve.h"
+#include "aom_dsp/aom_filter.h"
 #include "aom_ports/mem.h"
 #include "aom_ports/system_state.h"
 
@@ -119,12 +119,12 @@ static int blockiness_horizontal(const uint8_t *s, int sp, const uint8_t *r,
 
 // This function returns the blockiness for the entire frame currently by
 // looking at all borders in steps of 4.
-double vp10_get_blockiness(const unsigned char *img1, int img1_pitch,
-                           const unsigned char *img2, int img2_pitch, int width,
-                           int height) {
+double av1_get_blockiness(const unsigned char *img1, int img1_pitch,
+                          const unsigned char *img2, int img2_pitch, int width,
+                          int height) {
   double blockiness = 0;
   int i, j;
-  vpx_clear_system_state();
+  aom_clear_system_state();
   for (i = 0; i < height;
        i += 4, img1 += img1_pitch * 4, img2 += img2_pitch * 4) {
     for (j = 0; j < width; j += 4) {

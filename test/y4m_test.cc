@@ -12,7 +12,7 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 #include "./y4menc.h"
 #include "test/md5_helper.h"
 #include "test/util.h"
@@ -29,37 +29,37 @@ static const unsigned int kFrames = 10;
 struct Y4mTestParam {
   const char *filename;
   unsigned int bit_depth;
-  vpx_img_fmt format;
+  aom_img_fmt format;
   const char *md5raw;
 };
 
 const Y4mTestParam kY4mTestVectors[] = {
-  { "park_joy_90p_8_420.y4m", 8, VPX_IMG_FMT_I420,
+  { "park_joy_90p_8_420.y4m", 8, AOM_IMG_FMT_I420,
     "e5406275b9fc6bb3436c31d4a05c1cab" },
-  { "park_joy_90p_8_422.y4m", 8, VPX_IMG_FMT_I422,
+  { "park_joy_90p_8_422.y4m", 8, AOM_IMG_FMT_I422,
     "284a47a47133b12884ec3a14e959a0b6" },
-  { "park_joy_90p_8_444.y4m", 8, VPX_IMG_FMT_I444,
+  { "park_joy_90p_8_444.y4m", 8, AOM_IMG_FMT_I444,
     "90517ff33843d85de712fd4fe60dbed0" },
-  { "park_joy_90p_10_420.y4m", 10, VPX_IMG_FMT_I42016,
+  { "park_joy_90p_10_420.y4m", 10, AOM_IMG_FMT_I42016,
     "63f21f9f717d8b8631bd2288ee87137b" },
-  { "park_joy_90p_10_422.y4m", 10, VPX_IMG_FMT_I42216,
+  { "park_joy_90p_10_422.y4m", 10, AOM_IMG_FMT_I42216,
     "48ab51fb540aed07f7ff5af130c9b605" },
-  { "park_joy_90p_10_444.y4m", 10, VPX_IMG_FMT_I44416,
+  { "park_joy_90p_10_444.y4m", 10, AOM_IMG_FMT_I44416,
     "067bfd75aa85ff9bae91fa3e0edd1e3e" },
-  { "park_joy_90p_12_420.y4m", 12, VPX_IMG_FMT_I42016,
+  { "park_joy_90p_12_420.y4m", 12, AOM_IMG_FMT_I42016,
     "9e6d8f6508c6e55625f6b697bc461cef" },
-  { "park_joy_90p_12_422.y4m", 12, VPX_IMG_FMT_I42216,
+  { "park_joy_90p_12_422.y4m", 12, AOM_IMG_FMT_I42216,
     "b239c6b301c0b835485be349ca83a7e3" },
-  { "park_joy_90p_12_444.y4m", 12, VPX_IMG_FMT_I44416,
+  { "park_joy_90p_12_444.y4m", 12, AOM_IMG_FMT_I44416,
     "5a6481a550821dab6d0192f5c63845e9" },
 };
 
-static void write_image_file(const vpx_image_t *img, FILE *file) {
+static void write_image_file(const aom_image_t *img, FILE *file) {
   int plane, y;
   for (plane = 0; plane < 3; ++plane) {
     const unsigned char *buf = img->planes[plane];
     const int stride = img->stride[plane];
-    const int bytes_per_sample = (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? 2 : 1;
+    const int bytes_per_sample = (img->fmt & AOM_IMG_FMT_HIGHBITDEPTH) ? 2 : 1;
     const int h =
         (plane ? (img->d_h + img->y_chroma_shift) >> img->y_chroma_shift
                : img->d_h);
@@ -89,25 +89,25 @@ class Y4mVideoSourceTest : public ::testing::TestWithParam<Y4mTestParam>,
   }
 
   // Checks y4m header information
-  void HeaderChecks(unsigned int bit_depth, vpx_img_fmt_t fmt) {
+  void HeaderChecks(unsigned int bit_depth, aom_img_fmt_t fmt) {
     ASSERT_TRUE(input_file_ != NULL);
     ASSERT_EQ(y4m_.pic_w, (int)kWidth);
     ASSERT_EQ(y4m_.pic_h, (int)kHeight);
     ASSERT_EQ(img()->d_w, kWidth);
     ASSERT_EQ(img()->d_h, kHeight);
     ASSERT_EQ(y4m_.bit_depth, bit_depth);
-    ASSERT_EQ(y4m_.vpx_fmt, fmt);
-    if (fmt == VPX_IMG_FMT_I420 || fmt == VPX_IMG_FMT_I42016) {
+    ASSERT_EQ(y4m_.aom_fmt, fmt);
+    if (fmt == AOM_IMG_FMT_I420 || fmt == AOM_IMG_FMT_I42016) {
       ASSERT_EQ(y4m_.bps, (int)y4m_.bit_depth * 3 / 2);
       ASSERT_EQ(img()->x_chroma_shift, 1U);
       ASSERT_EQ(img()->y_chroma_shift, 1U);
     }
-    if (fmt == VPX_IMG_FMT_I422 || fmt == VPX_IMG_FMT_I42216) {
+    if (fmt == AOM_IMG_FMT_I422 || fmt == AOM_IMG_FMT_I42216) {
       ASSERT_EQ(y4m_.bps, (int)y4m_.bit_depth * 2);
       ASSERT_EQ(img()->x_chroma_shift, 1U);
       ASSERT_EQ(img()->y_chroma_shift, 0U);
     }
-    if (fmt == VPX_IMG_FMT_I444 || fmt == VPX_IMG_FMT_I44416) {
+    if (fmt == AOM_IMG_FMT_I444 || fmt == AOM_IMG_FMT_I44416) {
       ASSERT_EQ(y4m_.bps, (int)y4m_.bit_depth * 3);
       ASSERT_EQ(img()->x_chroma_shift, 0U);
       ASSERT_EQ(img()->y_chroma_shift, 0U);
@@ -157,11 +157,11 @@ class Y4mVideoWriteTest : public Y4mVideoSourceTest {
   void WriteY4mAndReadBack() {
     ASSERT_TRUE(input_file_ != NULL);
     char buf[Y4M_BUFFER_SIZE] = { 0 };
-    const struct VpxRational framerate = { y4m_.fps_n, y4m_.fps_d };
+    const struct AvxRational framerate = { y4m_.fps_n, y4m_.fps_d };
     tmpfile_ = new libaom_test::TempOutFile;
     ASSERT_TRUE(tmpfile_->file() != NULL);
     y4m_write_file_header(buf, sizeof(buf), kWidth, kHeight, &framerate,
-                          y4m_.vpx_fmt, y4m_.bit_depth);
+                          y4m_.aom_fmt, y4m_.bit_depth);
     fputs(buf, tmpfile_->file());
     for (unsigned int i = start_; i < limit_; i++) {
       y4m_write_frame_header(buf, sizeof(buf));

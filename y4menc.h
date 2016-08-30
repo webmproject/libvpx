@@ -13,7 +13,7 @@
 
 #include "./tools_common.h"
 
-#include "aom/vpx_decoder.h"
+#include "aom/aom_decoder.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,8 +22,8 @@ extern "C" {
 #define Y4M_BUFFER_SIZE 128
 
 int y4m_write_file_header(char *buf, size_t len, int width, int height,
-                          const struct VpxRational *framerate,
-                          vpx_img_fmt_t fmt, unsigned int bit_depth);
+                          const struct AvxRational *framerate,
+                          aom_img_fmt_t fmt, unsigned int bit_depth);
 int y4m_write_frame_header(char *buf, size_t len);
 
 #ifdef __cplusplus

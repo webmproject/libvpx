@@ -11,7 +11,7 @@
 #include "av1/encoder/variance_tree.h"
 #include "av1/encoder/encoder.h"
 
-void vp10_setup_var_tree(struct VP10Common *cm, ThreadData *td) {
+void av1_setup_var_tree(struct AV1Common *cm, ThreadData *td) {
   int i, j;
 #if CONFIG_EXT_PARTITION
   const int leaf_nodes = 1024;
@@ -24,9 +24,9 @@ void vp10_setup_var_tree(struct VP10Common *cm, ThreadData *td) {
   VAR_TREE *this_var;
   int nodes;
 
-  vpx_free(td->var_tree);
+  aom_free(td->var_tree);
   CHECK_MEM_ERROR(cm, td->var_tree,
-                  vpx_calloc(tree_nodes, sizeof(*td->var_tree)));
+                  aom_calloc(tree_nodes, sizeof(*td->var_tree)));
 
   this_var = &td->var_tree[0];
 
@@ -54,7 +54,7 @@ void vp10_setup_var_tree(struct VP10Common *cm, ThreadData *td) {
   }
 }
 
-void vp10_free_var_tree(ThreadData *td) {
-  vpx_free(td->var_tree);
+void av1_free_var_tree(ThreadData *td) {
+  aom_free(td->var_tree);
   td->var_tree = NULL;
 }

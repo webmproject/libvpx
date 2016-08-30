@@ -11,25 +11,25 @@
 /* The purpose of this header is to provide compile time pluggable bit writer
  * implementations with a common interface. */
 
-#ifndef VPX10_ENCODER_BITWRITER_H_
-#define VPX10_ENCODER_BITWRITER_H_
+#ifndef AOM10_ENCODER_BITWRITER_H_
+#define AOM10_ENCODER_BITWRITER_H_
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 #include "aom_dsp/prob.h"
 
 #if CONFIG_ANS
 typedef struct BufAnsCoder BufAnsCoder;
 #include "av1/encoder/buf_ans.h"
-#define vp10_writer BufAnsCoder
-#define vp10_write buf_uabs_write
-#define vp10_write_bit buf_uabs_write_bit
-#define vp10_write_literal buf_uabs_write_literal
+#define aom_writer BufAnsCoder
+#define aom_write buf_uabs_write
+#define aom_write_bit buf_uabs_write_bit
+#define aom_write_literal buf_uabs_write_literal
 #else
 #include "aom_dsp/bitwriter.h"
-#define vp10_writer vpx_writer
-#define vp10_write vpx_write
-#define vp10_write_bit vpx_write_bit
-#define vp10_write_literal vpx_write_literal
+#define aom_writer aom_writer
+#define aom_write aom_write
+#define aom_write_bit aom_write_bit
+#define aom_write_literal aom_write_literal
 #endif
 
-#endif  // VPX10_ENCODER_BITWRITER_H_
+#endif  // AOM10_ENCODER_BITWRITER_H_

@@ -12,7 +12,7 @@
 
 SECTION .text
 
-; void vpx_subtract_block(int rows, int cols,
+; void aom_subtract_block(int rows, int cols,
 ;                         int16_t *diff, ptrdiff_t diff_stride,
 ;                         const uint8_t *src, ptrdiff_t src_stride,
 ;                         const uint8_t *pred, ptrdiff_t pred_stride)

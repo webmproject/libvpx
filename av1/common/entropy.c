@@ -12,12 +12,12 @@
 #include "av1/common/blockd.h"
 #include "av1/common/onyxc_int.h"
 #include "av1/common/entropymode.h"
-#include "aom_mem/vpx_mem.h"
-#include "aom/vpx_integer.h"
+#include "aom_mem/aom_mem.h"
+#include "aom/aom_integer.h"
 
 // Unconstrained Node Tree
 /* clang-format off */
-const vpx_tree_index vp10_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
+const aom_tree_index av1_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
   2, 6,                                // 0 = LOW_VAL
   -TWO_TOKEN, 4,                       // 1 = TWO
   -THREE_TOKEN, -FOUR_TOKEN,           // 2 = THREE
@@ -29,30 +29,30 @@ const vpx_tree_index vp10_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
 };
 /* clang-format on */
 
-const vpx_prob vp10_cat1_prob[] = { 159 };
-const vpx_prob vp10_cat2_prob[] = { 165, 145 };
-const vpx_prob vp10_cat3_prob[] = { 173, 148, 140 };
-const vpx_prob vp10_cat4_prob[] = { 176, 155, 140, 135 };
-const vpx_prob vp10_cat5_prob[] = { 180, 157, 141, 134, 130 };
-const vpx_prob vp10_cat6_prob[] = { 254, 254, 254, 252, 249, 243, 230,
-                                    196, 177, 153, 140, 133, 130, 129 };
-#if CONFIG_VP9_HIGHBITDEPTH
-const vpx_prob vp10_cat1_prob_high10[] = { 159 };
-const vpx_prob vp10_cat2_prob_high10[] = { 165, 145 };
-const vpx_prob vp10_cat3_prob_high10[] = { 173, 148, 140 };
-const vpx_prob vp10_cat4_prob_high10[] = { 176, 155, 140, 135 };
-const vpx_prob vp10_cat5_prob_high10[] = { 180, 157, 141, 134, 130 };
-const vpx_prob vp10_cat6_prob_high10[] = {
+const aom_prob av1_cat1_prob[] = { 159 };
+const aom_prob av1_cat2_prob[] = { 165, 145 };
+const aom_prob av1_cat3_prob[] = { 173, 148, 140 };
+const aom_prob av1_cat4_prob[] = { 176, 155, 140, 135 };
+const aom_prob av1_cat5_prob[] = { 180, 157, 141, 134, 130 };
+const aom_prob av1_cat6_prob[] = { 254, 254, 254, 252, 249, 243, 230,
+                                   196, 177, 153, 140, 133, 130, 129 };
+#if CONFIG_AOM_HIGHBITDEPTH
+const aom_prob av1_cat1_prob_high10[] = { 159 };
+const aom_prob av1_cat2_prob_high10[] = { 165, 145 };
+const aom_prob av1_cat3_prob_high10[] = { 173, 148, 140 };
+const aom_prob av1_cat4_prob_high10[] = { 176, 155, 140, 135 };
+const aom_prob av1_cat5_prob_high10[] = { 180, 157, 141, 134, 130 };
+const aom_prob av1_cat6_prob_high10[] = {
   255, 255, 254, 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129
 };
-const vpx_prob vp10_cat1_prob_high12[] = { 159 };
-const vpx_prob vp10_cat2_prob_high12[] = { 165, 145 };
-const vpx_prob vp10_cat3_prob_high12[] = { 173, 148, 140 };
-const vpx_prob vp10_cat4_prob_high12[] = { 176, 155, 140, 135 };
-const vpx_prob vp10_cat5_prob_high12[] = { 180, 157, 141, 134, 130 };
-const vpx_prob vp10_cat6_prob_high12[] = { 255, 255, 255, 255, 254, 254,
-                                           254, 252, 249, 243, 230, 196,
-                                           177, 153, 140, 133, 130, 129 };
+const aom_prob av1_cat1_prob_high12[] = { 159 };
+const aom_prob av1_cat2_prob_high12[] = { 165, 145 };
+const aom_prob av1_cat3_prob_high12[] = { 173, 148, 140 };
+const aom_prob av1_cat4_prob_high12[] = { 176, 155, 140, 135 };
+const aom_prob av1_cat5_prob_high12[] = { 180, 157, 141, 134, 130 };
+const aom_prob av1_cat6_prob_high12[] = { 255, 255, 255, 255, 254, 254,
+                                          254, 252, 249, 243, 230, 196,
+                                          177, 153, 140, 133, 130, 129 };
 #endif
 
 const uint16_t band_count_table[TX_SIZES_ALL][8] = {
@@ -75,7 +75,7 @@ const uint16_t band_cum_count_table[TX_SIZES_ALL][8] = {
 #endif  // CONFIG_EXT_TX
 };
 
-const uint8_t vp10_coefband_trans_8x8plus[1024] = {
+const uint8_t av1_coefband_trans_8x8plus[1024] = {
   0, 1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5,
   // beyond MAXBAND_INDEX+1 all values are filled as 5
   5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
@@ -120,18 +120,18 @@ const uint8_t vp10_coefband_trans_8x8plus[1024] = {
 };
 
 #if CONFIG_EXT_TX
-const uint8_t vp10_coefband_trans_4x8_8x4[32] = {
+const uint8_t av1_coefband_trans_4x8_8x4[32] = {
   0, 1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4,
   4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
 };
 #endif  // CONFIG_EXT_TX
 
-const uint8_t vp10_coefband_trans_4x4[16] = {
+const uint8_t av1_coefband_trans_4x4[16] = {
   0, 1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5,
 };
 
-const uint8_t vp10_pt_energy_class[ENTROPY_TOKENS] = { 0, 1, 2, 3, 3, 4,
-                                                       4, 5, 5, 5, 5, 5 };
+const uint8_t av1_pt_energy_class[ENTROPY_TOKENS] = { 0, 1, 2, 3, 3, 4,
+                                                      4, 5, 5, 5, 5, 5 };
 
 // Model obtained from a 2-sided zero-centered distribution derived
 // from a Pareto distribution. The cdf of the distribution is:
@@ -145,9 +145,9 @@ const uint8_t vp10_pt_energy_class[ENTROPY_TOKENS] = { 0, 1, 2, 3, 3, 4,
 
 // Every odd line in this table can be generated from the even lines
 // by averaging :
-// vp10_pareto8_full[l][node] = (vp10_pareto8_full[l-1][node] +
-//                              vp10_pareto8_full[l+1][node] ) >> 1;
-const vpx_prob vp10_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES] = {
+// av1_pareto8_full[l][node] = (av1_pareto8_full[l-1][node] +
+//                              av1_pareto8_full[l+1][node] ) >> 1;
+const aom_prob av1_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES] = {
   { 3, 86, 128, 6, 86, 23, 88, 29 },
   { 6, 86, 128, 11, 87, 42, 91, 52 },
   { 9, 86, 129, 17, 88, 61, 94, 76 },
@@ -417,7 +417,7 @@ const vpx_prob vp10_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES] = {
 // beta = 8
 // Values for tokens ONE_TOKEN through CATEGORY6_TOKEN included here.
 // ZERO_TOKEN and EOB_TOKEN are coded as flags outside this coder.
-const AnsP10 vp10_pareto8_token_probs[COEFF_PROB_MODELS][ENTROPY_TOKENS - 2] = {
+const AnsP10 av1_pareto8_token_probs[COEFF_PROB_MODELS][ENTROPY_TOKENS - 2] = {
   { 4, 4, 4, 4, 8, 15, 30, 57, 103, 795 },
   { 8, 8, 8, 8, 15, 30, 57, 103, 168, 619 },
   { 12, 12, 12, 12, 23, 43, 80, 138, 205, 487 },
@@ -678,7 +678,7 @@ const AnsP10 vp10_pareto8_token_probs[COEFF_PROB_MODELS][ENTROPY_TOKENS - 2] = {
 
 /* clang-format off */
 #if CONFIG_ENTROPY
-const vp10_coeff_probs_model
+const av1_coeff_probs_model
 default_qctx_coef_probs[QCTX_BINS][TX_SIZES][PLANE_TYPES] = {
     {  // Q_Index 0
         {  // TX_SIZE 0
@@ -2450,7 +2450,7 @@ default_qctx_coef_probs[QCTX_BINS][TX_SIZES][PLANE_TYPES] = {
     },
 };
 #else
-static const vp10_coeff_probs_model default_coef_probs_4x4[PLANE_TYPES] = {
+static const av1_coeff_probs_model default_coef_probs_4x4[PLANE_TYPES] = {
   {  // Y plane
     {  // Intra
       {  // Band 0
@@ -2534,7 +2534,7 @@ static const vp10_coeff_probs_model default_coef_probs_4x4[PLANE_TYPES] = {
   }
 };
 
-static const vp10_coeff_probs_model default_coef_probs_8x8[PLANE_TYPES] = {
+static const av1_coeff_probs_model default_coef_probs_8x8[PLANE_TYPES] = {
   {  // Y plane
     {  // Intra
       {  // Band 0
@@ -2618,7 +2618,7 @@ static const vp10_coeff_probs_model default_coef_probs_8x8[PLANE_TYPES] = {
   }
 };
 
-static const vp10_coeff_probs_model default_coef_probs_16x16[PLANE_TYPES] = {
+static const av1_coeff_probs_model default_coef_probs_16x16[PLANE_TYPES] = {
   {  // Y plane
     {  // Intra
       {  // Band 0
@@ -2702,7 +2702,7 @@ static const vp10_coeff_probs_model default_coef_probs_16x16[PLANE_TYPES] = {
   }
 };
 
-static const vp10_coeff_probs_model default_coef_probs_32x32[PLANE_TYPES] = {
+static const av1_coeff_probs_model default_coef_probs_32x32[PLANE_TYPES] = {
   {  // Y plane
     {  // Intra
       {  // Band 0
@@ -2788,30 +2788,30 @@ static const vp10_coeff_probs_model default_coef_probs_32x32[PLANE_TYPES] = {
 #endif  // CONFIG_ENTROPY
 /* clang-format on */
 
-static void extend_to_full_distribution(vpx_prob *probs, vpx_prob p) {
+static void extend_to_full_distribution(aom_prob *probs, aom_prob p) {
   assert(p != 0);
-  memcpy(probs, vp10_pareto8_full[p - 1], MODEL_NODES * sizeof(vpx_prob));
+  memcpy(probs, av1_pareto8_full[p - 1], MODEL_NODES * sizeof(aom_prob));
 }
 
-void vp10_model_to_full_probs(const vpx_prob *model, vpx_prob *full) {
+void av1_model_to_full_probs(const aom_prob *model, aom_prob *full) {
   if (full != model)
-    memcpy(full, model, sizeof(vpx_prob) * UNCONSTRAINED_NODES);
+    memcpy(full, model, sizeof(aom_prob) * UNCONSTRAINED_NODES);
   extend_to_full_distribution(&full[UNCONSTRAINED_NODES], model[PIVOT_NODE]);
 }
 
 #if CONFIG_ANS
-void vp10_build_token_cdfs(const vpx_prob *pdf_model, rans_dec_lut cdf) {
+void av1_build_token_cdfs(const aom_prob *pdf_model, rans_dec_lut cdf) {
   AnsP10 pdf_tab[ENTROPY_TOKENS - 1];
   assert(pdf_model[2] != 0);
   // TODO(aconverse): Investigate making the precision of the zero and EOB tree
   // nodes 10-bits.
   rans_merge_prob8_pdf(pdf_tab, pdf_model[1],
-                       vp10_pareto8_token_probs[pdf_model[2] - 1],
+                       av1_pareto8_token_probs[pdf_model[2] - 1],
                        ENTROPY_TOKENS - 2);
   rans_build_cdf_from_pdf(pdf_tab, cdf);
 }
 
-void vp10_coef_pareto_cdfs(FRAME_CONTEXT *fc) {
+void av1_coef_pareto_cdfs(FRAME_CONTEXT *fc) {
   TX_SIZE t;
   int i, j, k, l;
   for (t = TX_4X4; t <= TX_32X32; ++t)
@@ -2819,42 +2819,42 @@ void vp10_coef_pareto_cdfs(FRAME_CONTEXT *fc) {
       for (j = 0; j < REF_TYPES; ++j)
         for (k = 0; k < COEF_BANDS; ++k)
           for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l)
-            vp10_build_token_cdfs(fc->coef_probs[t][i][j][k][l],
-                                  fc->coef_cdfs[t][i][j][k][l]);
+            av1_build_token_cdfs(fc->coef_probs[t][i][j][k][l],
+                                 fc->coef_cdfs[t][i][j][k][l]);
 }
 #endif  // CONFIG_ANS
 
-void vp10_default_coef_probs(VP10_COMMON *cm) {
+void av1_default_coef_probs(AV1_COMMON *cm) {
 #if CONFIG_ENTROPY
-  const int index = VPXMIN(
+  const int index = AOMMIN(
       ROUND_POWER_OF_TWO(cm->base_qindex, 8 - QCTX_BIN_BITS), QCTX_BINS - 1);
-  vp10_copy(cm->fc->coef_probs, default_qctx_coef_probs[index]);
+  av1_copy(cm->fc->coef_probs, default_qctx_coef_probs[index]);
 #else
-  vp10_copy(cm->fc->coef_probs[TX_4X4], default_coef_probs_4x4);
-  vp10_copy(cm->fc->coef_probs[TX_8X8], default_coef_probs_8x8);
-  vp10_copy(cm->fc->coef_probs[TX_16X16], default_coef_probs_16x16);
-  vp10_copy(cm->fc->coef_probs[TX_32X32], default_coef_probs_32x32);
+  av1_copy(cm->fc->coef_probs[TX_4X4], default_coef_probs_4x4);
+  av1_copy(cm->fc->coef_probs[TX_8X8], default_coef_probs_8x8);
+  av1_copy(cm->fc->coef_probs[TX_16X16], default_coef_probs_16x16);
+  av1_copy(cm->fc->coef_probs[TX_32X32], default_coef_probs_32x32);
 #endif  // CONFIG_ENTROPY
 #if CONFIG_ANS
-  vp10_coef_pareto_cdfs(cm->fc);
+  av1_coef_pareto_cdfs(cm->fc);
 #endif  // CONFIG_ANS
 }
 
-static void adapt_coef_probs(VP10_COMMON *cm, TX_SIZE tx_size,
+static void adapt_coef_probs(AV1_COMMON *cm, TX_SIZE tx_size,
                              unsigned int count_sat,
                              unsigned int update_factor) {
   const FRAME_CONTEXT *pre_fc = &cm->frame_contexts[cm->frame_context_idx];
-  vp10_coeff_probs_model *const probs = cm->fc->coef_probs[tx_size];
+  av1_coeff_probs_model *const probs = cm->fc->coef_probs[tx_size];
 #if CONFIG_ENTROPY
-  const vp10_coeff_probs_model *const pre_probs =
+  const av1_coeff_probs_model *const pre_probs =
       cm->partial_prob_update
-          ? (const vp10_coeff_probs_model *)cm->starting_coef_probs[tx_size]
+          ? (const av1_coeff_probs_model *)cm->starting_coef_probs[tx_size]
           : pre_fc->coef_probs[tx_size];
 #else
-  const vp10_coeff_probs_model *const pre_probs = pre_fc->coef_probs[tx_size];
+  const av1_coeff_probs_model *const pre_probs = pre_fc->coef_probs[tx_size];
 #endif  // CONFIG_ENTROPY
-  const vp10_coeff_count_model *const counts =
-      (const vp10_coeff_count_model *)cm->counts.coef[tx_size];
+  const av1_coeff_count_model *const counts =
+      (const av1_coeff_count_model *)cm->counts.coef[tx_size];
   const unsigned int(*eob_counts)[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS] =
       (const unsigned int(*)[
           REF_TYPES][COEF_BANDS][COEFF_CONTEXTS])cm->counts.eob_branch[tx_size];
@@ -2873,12 +2873,12 @@ static void adapt_coef_probs(VP10_COMMON *cm, TX_SIZE tx_size,
           };
           for (m = 0; m < UNCONSTRAINED_NODES; ++m)
             probs[i][j][k][l][m] =
-                vp10_merge_probs(pre_probs[i][j][k][l][m], branch_ct[m],
-                                 count_sat, update_factor);
+                av1_merge_probs(pre_probs[i][j][k][l][m], branch_ct[m],
+                                count_sat, update_factor);
         }
 }
 
-void vp10_adapt_coef_probs(VP10_COMMON *cm) {
+void av1_adapt_coef_probs(AV1_COMMON *cm) {
   TX_SIZE t;
   unsigned int count_sat, update_factor;
 
@@ -2905,18 +2905,18 @@ void vp10_adapt_coef_probs(VP10_COMMON *cm) {
   for (t = TX_4X4; t <= TX_32X32; t++)
     adapt_coef_probs(cm, t, count_sat, update_factor);
 #if CONFIG_ANS
-  vp10_coef_pareto_cdfs(cm->fc);
+  av1_coef_pareto_cdfs(cm->fc);
 #endif
 }
 
 #if CONFIG_ENTROPY
-void vp10_partial_adapt_probs(VP10_COMMON *cm, int mi_row, int mi_col) {
+void av1_partial_adapt_probs(AV1_COMMON *cm, int mi_row, int mi_col) {
   (void)mi_row;
   (void)mi_col;
 
   if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
     cm->partial_prob_update = 1;
-    vp10_adapt_coef_probs(cm);
+    av1_adapt_coef_probs(cm);
   }
 }
 #endif  // CONFIG_ENTROPY

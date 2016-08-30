@@ -12,7 +12,7 @@
 #include <cstdlib>
 #include <string>
 #include "third_party/googletest/src/include/gtest/gtest.h"
-#include "./vpx_config.h"
+#include "./aom_config.h"
 #include "test/acm_random.h"
 #include "test/codec_factory.h"
 #include "test/decode_test_driver.h"
@@ -22,8 +22,8 @@
 #if CONFIG_WEBM_IO
 #include "test/webm_video_source.h"
 #endif
-#include "aom_mem/vpx_mem.h"
-#include "aom/vp8.h"
+#include "aom_mem/aom_mem.h"
+#include "aom/aom.h"
 
 namespace {
 
@@ -47,23 +47,23 @@ string DecodeFile(const string &filename) {
   libaom_test::WebMVideoSource video(filename);
   video.Init();
 
-  vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
-  libaom_test::VP9Decoder decoder(cfg, 0);
+  aom_codec_dec_cfg_t cfg = aom_codec_dec_cfg_t();
+  libaom_test::AV1Decoder decoder(cfg, 0);
 
   libaom_test::MD5 md5;
   int frame_num = 0;
   for (video.Begin(); !::testing::Test::HasFailure() && video.cxdata();
        video.Next()) {
     void *user_priv = reinterpret_cast<void *>(&frame_num);
-    const vpx_codec_err_t res =
+    const aom_codec_err_t res =
         decoder.DecodeFrame(video.cxdata(), video.frame_size(),
                             (frame_num == 0) ? NULL : user_priv);
-    if (res != VPX_CODEC_OK) {
-      EXPECT_EQ(VPX_CODEC_OK, res) << decoder.DecodeError();
+    if (res != AOM_CODEC_OK) {
+      EXPECT_EQ(AOM_CODEC_OK, res) << decoder.DecodeError();
       break;
     }
     libaom_test::DxDataIterator dec_iter = decoder.GetDxData();
-    const vpx_image_t *img = NULL;
+    const aom_image_t *img = NULL;
 
     // Get decompressed data.
     while ((img = dec_iter.Next())) {
@@ -73,10 +73,10 @@ string DecodeFile(const string &filename) {
         CheckUserPrivateData(img->user_priv, &frame_num);
 
         // Also test ctrl_get_reference api.
-        struct vp9_ref_frame ref;
+        struct av1_ref_frame ref;
         // Randomly fetch a reference frame.
         ref.idx = rnd.Rand8() % 3;
-        decoder.Control(VP9_GET_REFERENCE, &ref);
+        decoder.Control(AV1_GET_REFERENCE, &ref);
 
         CheckUserPrivateData(ref.img.user_priv, NULL);
       }
@@ -92,7 +92,7 @@ TEST(UserPrivTest, VideoDecode) {
   // no tiles or frame parallel; this exercises the decoding to test the
   // user_priv.
   EXPECT_STREQ("b35a1b707b28e82be025d960aba039bc",
-               DecodeFile("vp90-2-03-size-226x226.webm").c_str());
+               DecodeFile("av10-2-03-size-226x226.webm").c_str());
 }
 
 #endif  // CONFIG_WEBM_IO

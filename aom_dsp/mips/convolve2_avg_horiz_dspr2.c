@@ -11,10 +11,10 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_dsp_rtcd.h"
 #include "aom_dsp/mips/convolve_common_dspr2.h"
-#include "aom_dsp/vpx_convolve.h"
-#include "aom_dsp/vpx_dsp_common.h"
+#include "aom_dsp/aom_convolve.h"
+#include "aom_dsp/aom_dsp_common.h"
 #include "aom_ports/mem.h"
 
 #if HAVE_DSPR2
@@ -23,7 +23,7 @@ static void convolve_bi_avg_horiz_4_dspr2(const uint8_t *src,
                                           int32_t dst_stride,
                                           const int16_t *filter_x0, int32_t h) {
   int32_t y;
-  uint8_t *cm = vpx_ff_cropTbl;
+  uint8_t *cm = aom_ff_cropTbl;
   int32_t Temp1, Temp2, Temp3, Temp4;
   uint32_t vector4a = 64;
   uint32_t tp1, tp2;
@@ -114,7 +114,7 @@ static void convolve_bi_avg_horiz_8_dspr2(const uint8_t *src,
                                           int32_t dst_stride,
                                           const int16_t *filter_x0, int32_t h) {
   int32_t y;
-  uint8_t *cm = vpx_ff_cropTbl;
+  uint8_t *cm = aom_ff_cropTbl;
   uint32_t vector4a = 64;
   int32_t Temp1, Temp2, Temp3;
   uint32_t tp1, tp2, tp3, tp4;
@@ -261,7 +261,7 @@ static void convolve_bi_avg_horiz_16_dspr2(const uint8_t *src_ptr,
   int32_t y, c;
   const uint8_t *src;
   uint8_t *dst;
-  uint8_t *cm = vpx_ff_cropTbl;
+  uint8_t *cm = aom_ff_cropTbl;
   uint32_t vector_64 = 64;
   int32_t Temp1, Temp2, Temp3;
   uint32_t qload1, qload2, qload3;
@@ -508,7 +508,7 @@ static void convolve_bi_avg_horiz_64_dspr2(const uint8_t *src_ptr,
   int32_t y, c;
   const uint8_t *src;
   uint8_t *dst;
-  uint8_t *cm = vpx_ff_cropTbl;
+  uint8_t *cm = aom_ff_cropTbl;
   uint32_t vector_64 = 64;
   int32_t Temp1, Temp2, Temp3;
   uint32_t qload1, qload2, qload3;
@@ -749,7 +749,7 @@ static void convolve_bi_avg_horiz_64_dspr2(const uint8_t *src_ptr,
   }
 }
 
-void vpx_convolve2_avg_horiz_dspr2(const uint8_t *src, ptrdiff_t src_stride,
+void aom_convolve2_avg_horiz_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                                    uint8_t *dst, ptrdiff_t dst_stride,
                                    const int16_t *filter_x, int x_step_q4,
                                    const int16_t *filter_y, int y_step_q4,
@@ -793,7 +793,7 @@ void vpx_convolve2_avg_horiz_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                                      h);
       break;
     default:
-      vpx_convolve8_avg_horiz_c(src, src_stride, dst, dst_stride, filter_x,
+      aom_convolve8_avg_horiz_c(src, src_stride, dst, dst_stride, filter_x,
                                 x_step_q4, filter_y, y_step_q4, w, h);
       break;
   }

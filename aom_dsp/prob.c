@@ -10,7 +10,7 @@
 
 #include "./prob.h"
 
-const uint8_t vpx_norm[256] = {
+const uint8_t aom_norm[256] = {
   0, 7, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
   3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -24,10 +24,10 @@ const uint8_t vpx_norm[256] = {
 };
 
 static unsigned int tree_merge_probs_impl(unsigned int i,
-                                          const vpx_tree_index *tree,
-                                          const vpx_prob *pre_probs,
+                                          const aom_tree_index *tree,
+                                          const aom_prob *pre_probs,
                                           const unsigned int *counts,
-                                          vpx_prob *probs) {
+                                          aom_prob *probs) {
   const int l = tree[i];
   const unsigned int left_count =
       (l <= 0) ? counts[-l]
@@ -41,7 +41,7 @@ static unsigned int tree_merge_probs_impl(unsigned int i,
   return left_count + right_count;
 }
 
-void vpx_tree_merge_probs(const vpx_tree_index *tree, const vpx_prob *pre_probs,
-                          const unsigned int *counts, vpx_prob *probs) {
+void aom_tree_merge_probs(const aom_tree_index *tree, const aom_prob *pre_probs,
+                          const unsigned int *counts, aom_prob *probs) {
   tree_merge_probs_impl(0, tree, pre_probs, counts, probs);
 }

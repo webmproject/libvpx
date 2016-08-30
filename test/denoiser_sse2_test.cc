@@ -19,7 +19,7 @@
 #include "test/util.h"
 
 #include "aom_scale/yv12config.h"
-#include "aom/vpx_integer.h"
+#include "aom/aom_integer.h"
 #include "av1/common/reconinter.h"
 #include "av1/encoder/context_tree.h"
 #include "av1/encoder/denoiser.h"
@@ -29,9 +29,9 @@ using libaom_test::ACMRandom;
 namespace {
 
 const int kNumPixels = 64 * 64;
-class VP9DenoiserTest : public ::testing::TestWithParam<BLOCK_SIZE> {
+class AV1DenoiserTest : public ::testing::TestWithParam<BLOCK_SIZE> {
  public:
-  virtual ~VP9DenoiserTest() {}
+  virtual ~AV1DenoiserTest() {}
 
   virtual void SetUp() { bs_ = GetParam(); }
 
@@ -41,7 +41,7 @@ class VP9DenoiserTest : public ::testing::TestWithParam<BLOCK_SIZE> {
   BLOCK_SIZE bs_;
 };
 
-TEST_P(VP9DenoiserTest, BitexactCheck) {
+TEST_P(AV1DenoiserTest, BitexactCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = 4000;
 
@@ -72,11 +72,11 @@ TEST_P(VP9DenoiserTest, BitexactCheck) {
       mc_avg_block[j] = (temp < 0) ? 0 : ((temp > 255) ? 255 : temp);
     }
 
-    ASM_REGISTER_STATE_CHECK(vp9_denoiser_filter_c(sig_block, 64, mc_avg_block,
+    ASM_REGISTER_STATE_CHECK(av1_denoiser_filter_c(sig_block, 64, mc_avg_block,
                                                    64, avg_block_c, 64, 0, bs_,
                                                    motion_magnitude_random));
 
-    ASM_REGISTER_STATE_CHECK(vp9_denoiser_filter_sse2(
+    ASM_REGISTER_STATE_CHECK(av1_denoiser_filter_sse2(
         sig_block, 64, mc_avg_block, 64, avg_block_sse2, 64, 0, bs_,
         motion_magnitude_random));
 
@@ -90,7 +90,7 @@ TEST_P(VP9DenoiserTest, BitexactCheck) {
 }
 
 // Test for all block size.
-INSTANTIATE_TEST_CASE_P(SSE2, VP9DenoiserTest,
+INSTANTIATE_TEST_CASE_P(SSE2, AV1DenoiserTest,
                         ::testing::Values(BLOCK_8X8, BLOCK_8X16, BLOCK_16X8,
                                           BLOCK_16X16, BLOCK_16X32, BLOCK_32X16,
                                           BLOCK_32X32, BLOCK_32X64, BLOCK_64X32,

@@ -14,7 +14,7 @@
 #include "av1/encoder/speed_features.h"
 #include "av1/encoder/rdopt.h"
 
-#include "aom_dsp/vpx_dsp_common.h"
+#include "aom_dsp/aom_dsp_common.h"
 
 // Mesh search patters for various speed settings
 static MESH_PATTERN best_quality_mesh_pattern[MAX_MESH_STEP] = {
@@ -37,7 +37,7 @@ static unsigned char good_quality_max_mesh_pct[MAX_MESH_SPEED + 1] = {
 
 // Intra only frames, golden frames (except alt ref overlays) and
 // alt ref frames tend to be coded at a higher than ambient quality
-static int frame_is_boosted(const VP10_COMP *cpi) {
+static int frame_is_boosted(const AV1_COMP *cpi) {
   return frame_is_kf_gf_arf(cpi);
 }
 
@@ -47,7 +47,7 @@ static int frame_is_boosted(const VP10_COMP *cpi) {
 // partly on the screen area that over which they propogate. Propogation is
 // limited by transform block size but the screen area take up by a given block
 // size will be larger for a small image format stretched to full screen.
-static BLOCK_SIZE set_partition_min_limit(VP10_COMMON *const cm) {
+static BLOCK_SIZE set_partition_min_limit(AV1_COMMON *const cm) {
   unsigned int screen_area = (cm->width * cm->height);
 
   // Select block size based on image format size.
@@ -63,13 +63,13 @@ static BLOCK_SIZE set_partition_min_limit(VP10_COMMON *const cm) {
   }
 }
 
-static void set_good_speed_feature_framesize_dependent(VP10_COMP *cpi,
+static void set_good_speed_feature_framesize_dependent(AV1_COMP *cpi,
                                                        SPEED_FEATURES *sf,
                                                        int speed) {
-  VP10_COMMON *const cm = &cpi->common;
+  AV1_COMMON *const cm = &cpi->common;
 
   if (speed >= 1) {
-    if (VPXMIN(cm->width, cm->height) >= 720) {
+    if (AOMMIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask =
           cm->show_frame ? DISABLE_ALL_SPLIT : DISABLE_ALL_INTER_SPLIT;
       sf->partition_search_breakout_dist_thr = (1 << 23);
@@ -80,7 +80,7 @@ static void set_good_speed_feature_framesize_dependent(VP10_COMP *cpi,
   }
 
   if (speed >= 2) {
-    if (VPXMIN(cm->width, cm->height) >= 720) {
+    if (AOMMIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask =
           cm->show_frame ? DISABLE_ALL_SPLIT : DISABLE_ALL_INTER_SPLIT;
       sf->adaptive_pred_interp_filter = 0;
@@ -95,7 +95,7 @@ static void set_good_speed_feature_framesize_dependent(VP10_COMP *cpi,
   }
 
   if (speed >= 3) {
-    if (VPXMIN(cm->width, cm->height) >= 720) {
+    if (AOMMIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask = DISABLE_ALL_SPLIT;
       sf->schedule_mode_search = cm->base_qindex < 220 ? 1 : 0;
       sf->partition_search_breakout_dist_thr = (1 << 25);
@@ -114,12 +114,12 @@ static void set_good_speed_feature_framesize_dependent(VP10_COMP *cpi,
   // Also if the image edge is internal to the coded area.
   if ((speed >= 1) && (cpi->oxcf.pass == 2) &&
       ((cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) ||
-       (vp10_internal_image_edge(cpi)))) {
+       (av1_internal_image_edge(cpi)))) {
     sf->disable_split_mask = DISABLE_COMPOUND_SPLIT;
   }
 
   if (speed >= 4) {
-    if (VPXMIN(cm->width, cm->height) >= 720) {
+    if (AOMMIN(cm->width, cm->height) >= 720) {
       sf->partition_search_breakout_dist_thr = (1 << 26);
     } else {
       sf->partition_search_breakout_dist_thr = (1 << 24);
@@ -128,13 +128,13 @@ static void set_good_speed_feature_framesize_dependent(VP10_COMP *cpi,
   }
 }
 
-static void set_good_speed_feature(VP10_COMP *cpi, VP10_COMMON *cm,
+static void set_good_speed_feature(AV1_COMP *cpi, AV1_COMMON *cm,
                                    SPEED_FEATURES *sf, int speed) {
   const int boosted = frame_is_boosted(cpi);
 
   if (speed >= 1) {
     if ((cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) ||
-        vp10_internal_image_edge(cpi)) {
+        av1_internal_image_edge(cpi)) {
       sf->use_square_partition_only = !frame_is_boosted(cpi);
     } else {
       sf->use_square_partition_only = !frame_is_intra_only(cm);
@@ -237,12 +237,12 @@ static void set_good_speed_feature(VP10_COMP *cpi, VP10_COMMON *cm,
   }
 }
 
-static void set_rt_speed_feature_framesize_dependent(VP10_COMP *cpi,
+static void set_rt_speed_feature_framesize_dependent(AV1_COMP *cpi,
                                                      SPEED_FEATURES *sf,
                                                      int speed) {
-  VP10_COMMON *const cm = &cpi->common;
+  AV1_COMMON *const cm = &cpi->common;
   if (speed >= 1) {
-    if (VPXMIN(cm->width, cm->height) >= 720) {
+    if (AOMMIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask =
           cm->show_frame ? DISABLE_ALL_SPLIT : DISABLE_ALL_INTER_SPLIT;
     } else {
@@ -251,7 +251,7 @@ static void set_rt_speed_feature_framesize_dependent(VP10_COMP *cpi,
   }
 
   if (speed >= 2) {
-    if (VPXMIN(cm->width, cm->height) >= 720) {
+    if (AOMMIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask =
           cm->show_frame ? DISABLE_ALL_SPLIT : DISABLE_ALL_INTER_SPLIT;
     } else {
@@ -260,7 +260,7 @@ static void set_rt_speed_feature_framesize_dependent(VP10_COMP *cpi,
   }
 
   if (speed >= 5) {
-    if (VPXMIN(cm->width, cm->height) >= 720) {
+    if (AOMMIN(cm->width, cm->height) >= 720) {
       sf->partition_search_breakout_dist_thr = (1 << 25);
     } else {
       sf->partition_search_breakout_dist_thr = (1 << 23);
@@ -269,13 +269,13 @@ static void set_rt_speed_feature_framesize_dependent(VP10_COMP *cpi,
 
   if (speed >= 7) {
     sf->encode_breakout_thresh =
-        (VPXMIN(cm->width, cm->height) >= 720) ? 800 : 300;
+        (AOMMIN(cm->width, cm->height) >= 720) ? 800 : 300;
   }
 }
 
-static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf, int speed,
-                                 vpx_tune_content content) {
-  VP10_COMMON *const cm = &cpi->common;
+static void set_rt_speed_feature(AV1_COMP *cpi, SPEED_FEATURES *sf, int speed,
+                                 aom_tune_content content) {
+  AV1_COMMON *const cm = &cpi->common;
   const int is_keyframe = cm->frame_type == KEY_FRAME;
   const int frames_since_key = is_keyframe ? 0 : cpi->rc.frames_since_key;
   sf->static_segmentation = 0;
@@ -401,7 +401,7 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf, int speed,
 
     if (!is_keyframe) {
       int i;
-      if (content == VPX_CONTENT_SCREEN) {
+      if (content == AOM_CONTENT_SCREEN) {
         for (i = 0; i < BLOCK_SIZES; ++i)
           sf->intra_y_mode_bsize_mask[i] = INTRA_DC_TM_H_V;
       } else {
@@ -435,9 +435,9 @@ static void set_rt_speed_feature(VP10_COMP *cpi, SPEED_FEATURES *sf, int speed,
   }
 }
 
-void vp10_set_speed_features_framesize_dependent(VP10_COMP *cpi) {
+void av1_set_speed_features_framesize_dependent(AV1_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
-  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
+  const AV1EncoderConfig *const oxcf = &cpi->oxcf;
   RD_OPT *const rd = &cpi->rd;
   int i;
 
@@ -464,11 +464,11 @@ void vp10_set_speed_features_framesize_dependent(VP10_COMP *cpi) {
   }
 }
 
-void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
+void av1_set_speed_features_framesize_independent(AV1_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
-  VP10_COMMON *const cm = &cpi->common;
+  AV1_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->td.mb;
-  const VP10EncoderConfig *const oxcf = &cpi->oxcf;
+  const AV1EncoderConfig *const oxcf = &cpi->oxcf;
   int i;
 
   // best quality defaults
@@ -567,8 +567,8 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
     sf->partition_search_breakout_dist_thr <<= 2 * (MAX_SB_SIZE_LOG2 - 6);
   }
 
-  cpi->full_search_sad = vp10_full_search_sad;
-  cpi->diamond_search_sad = vp10_diamond_search_sad;
+  cpi->full_search_sad = av1_full_search_sad;
+  cpi->diamond_search_sad = av1_diamond_search_sad;
 
   sf->allow_exhaustive_searches = 1;
   if (oxcf->mode == BEST) {
@@ -609,14 +609,13 @@ void vp10_set_speed_features_framesize_independent(VP10_COMP *cpi) {
   }
 
   if (sf->mv.subpel_search_method == SUBPEL_TREE) {
-    cpi->find_fractional_mv_step = vp10_find_best_sub_pixel_tree;
+    cpi->find_fractional_mv_step = av1_find_best_sub_pixel_tree;
   } else if (sf->mv.subpel_search_method == SUBPEL_TREE_PRUNED) {
-    cpi->find_fractional_mv_step = vp10_find_best_sub_pixel_tree_pruned;
+    cpi->find_fractional_mv_step = av1_find_best_sub_pixel_tree_pruned;
   } else if (sf->mv.subpel_search_method == SUBPEL_TREE_PRUNED_MORE) {
-    cpi->find_fractional_mv_step = vp10_find_best_sub_pixel_tree_pruned_more;
+    cpi->find_fractional_mv_step = av1_find_best_sub_pixel_tree_pruned_more;
   } else if (sf->mv.subpel_search_method == SUBPEL_TREE_PRUNED_EVENMORE) {
-    cpi->find_fractional_mv_step =
-        vp10_find_best_sub_pixel_tree_pruned_evenmore;
+    cpi->find_fractional_mv_step = av1_find_best_sub_pixel_tree_pruned_evenmore;
   }
 
 #if !CONFIG_AOM_QM

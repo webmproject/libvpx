@@ -14,12 +14,12 @@
 #include <stdio.h>
 #include <math.h>
 #include "third_party/googletest/src/include/gtest/gtest.h"
-#include "aom/vpx_image.h"
+#include "aom/aom_image.h"
 
 // Macros
 #define GET_PARAM(k) std::tr1::get<k>(GetParam())
 
-inline double compute_psnr(const vpx_image_t *img1, const vpx_image_t *img2) {
+inline double compute_psnr(const aom_image_t *img1, const aom_image_t *img2) {
   assert((img1->fmt == img2->fmt) && (img1->d_w == img2->d_w) &&
          (img1->d_h == img2->d_h));
 
@@ -30,8 +30,8 @@ inline double compute_psnr(const vpx_image_t *img1, const vpx_image_t *img2) {
   int64_t sqrerr = 0;
   for (i = 0; i < height_y; ++i)
     for (j = 0; j < width_y; ++j) {
-      int64_t d = img1->planes[VPX_PLANE_Y][i * img1->stride[VPX_PLANE_Y] + j] -
-                  img2->planes[VPX_PLANE_Y][i * img2->stride[VPX_PLANE_Y] + j];
+      int64_t d = img1->planes[AOM_PLANE_Y][i * img1->stride[AOM_PLANE_Y] + j] -
+                  img2->planes[AOM_PLANE_Y][i * img2->stride[AOM_PLANE_Y] + j];
       sqrerr += d * d;
     }
   double mse = static_cast<double>(sqrerr) / (width_y * height_y);

@@ -12,14 +12,14 @@
 
 #include "./tools_common.h"
 
-struct vpx_codec_enc_cfg;
-struct vpx_codec_cx_pkt;
+struct aom_codec_enc_cfg;
+struct aom_codec_cx_pkt;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void ivf_write_file_header(FILE *outfile, const struct vpx_codec_enc_cfg *cfg,
+void ivf_write_file_header(FILE *outfile, const struct aom_codec_enc_cfg *cfg,
                            uint32_t fourcc, int frame_cnt);
 
 void ivf_write_frame_header(FILE *outfile, int64_t pts, size_t frame_size);

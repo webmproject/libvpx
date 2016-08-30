@@ -10,10 +10,10 @@
 
 #include <assert.h>
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 #include "aom_scale/yv12config.h"
-#include "aom_mem/vpx_mem.h"
-#include "aom_scale/vpx_scale.h"
+#include "aom_mem/aom_mem.h"
+#include "aom_scale/aom_scale.h"
 
 #if HAVE_DSPR2
 static void extend_plane(uint8_t *const src, int src_stride, int width,
@@ -125,13 +125,13 @@ static void extend_frame(YV12_BUFFER_CONFIG *const ybf, int ext_size) {
   extend_plane(ybf->v_buffer, ybf->uv_stride, c_w, c_h, c_et, c_el, c_eb, c_er);
 }
 
-void vpx_extend_frame_borders_dspr2(YV12_BUFFER_CONFIG *ybf) {
+void aom_extend_frame_borders_dspr2(YV12_BUFFER_CONFIG *ybf) {
   extend_frame(ybf, ybf->border);
 }
 
-void vpx_extend_frame_inner_borders_dspr2(YV12_BUFFER_CONFIG *ybf) {
-  const int inner_bw = (ybf->border > VPXINNERBORDERINPIXELS)
-                           ? VPXINNERBORDERINPIXELS
+void aom_extend_frame_inner_borders_dspr2(YV12_BUFFER_CONFIG *ybf) {
+  const int inner_bw = (ybf->border > AOMINNERBORDERINPIXELS)
+                           ? AOMINNERBORDERINPIXELS
                            : ybf->border;
   extend_frame(ybf, inner_bw);
 }

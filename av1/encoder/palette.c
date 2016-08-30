@@ -22,8 +22,8 @@ static float calc_dist(const float *p1, const float *p2, int dim) {
   return dist;
 }
 
-void vp10_calc_indices(const float *data, const float *centroids,
-                       uint8_t *indices, int n, int k, int dim) {
+void av1_calc_indices(const float *data, const float *centroids,
+                      uint8_t *indices, int n, int k, int dim) {
   int i, j;
   for (i = 0; i < n; ++i) {
     float min_dist = calc_dist(data + i * dim, centroids, dim);
@@ -93,14 +93,14 @@ static float calc_total_dist(const float *data, const float *centroids,
   return dist;
 }
 
-void vp10_k_means(const float *data, float *centroids, uint8_t *indices, int n,
-                  int k, int dim, int max_itr) {
+void av1_k_means(const float *data, float *centroids, uint8_t *indices, int n,
+                 int k, int dim, int max_itr) {
   int i;
   float this_dist;
   float pre_centroids[2 * PALETTE_MAX_SIZE];
   uint8_t pre_indices[MAX_SB_SQUARE];
 
-  vp10_calc_indices(data, centroids, indices, n, k, dim);
+  av1_calc_indices(data, centroids, indices, n, k, dim);
   this_dist = calc_total_dist(data, centroids, indices, n, k, dim);
 
   for (i = 0; i < max_itr; ++i) {
@@ -109,7 +109,7 @@ void vp10_k_means(const float *data, float *centroids, uint8_t *indices, int n,
     memcpy(pre_indices, indices, sizeof(pre_indices[0]) * n);
 
     calc_centroids(data, centroids, indices, n, k, dim);
-    vp10_calc_indices(data, centroids, indices, n, k, dim);
+    av1_calc_indices(data, centroids, indices, n, k, dim);
     this_dist = calc_total_dist(data, centroids, indices, n, k, dim);
 
     if (this_dist > pre_dist) {
@@ -128,7 +128,7 @@ static int float_comparer(const void *a, const void *b) {
   return (fa > fb) - (fb < fa);
 }
 
-int vp10_remove_duplicates(float *centroids, int num_centroids) {
+int av1_remove_duplicates(float *centroids, int num_centroids) {
   int num_unique;  // number of unique centroids
   int i;
   qsort(centroids, num_centroids, sizeof(*centroids), float_comparer);
@@ -142,7 +142,7 @@ int vp10_remove_duplicates(float *centroids, int num_centroids) {
   return num_unique;
 }
 
-int vp10_count_colors(const uint8_t *src, int stride, int rows, int cols) {
+int av1_count_colors(const uint8_t *src, int stride, int rows, int cols) {
   int n = 0, r, c, i, val_count[256];
   uint8_t val;
   memset(val_count, 0, sizeof(val_count));
@@ -163,9 +163,9 @@ int vp10_count_colors(const uint8_t *src, int stride, int rows, int cols) {
   return n;
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
-int vp10_count_colors_highbd(const uint8_t *src8, int stride, int rows,
-                             int cols, int bit_depth) {
+#if CONFIG_AOM_HIGHBITDEPTH
+int av1_count_colors_highbd(const uint8_t *src8, int stride, int rows, int cols,
+                            int bit_depth) {
   int n = 0, r, c, i;
   uint16_t val;
   uint16_t *src = CONVERT_TO_SHORTPTR(src8);
@@ -188,4 +188,4 @@ int vp10_count_colors_highbd(const uint8_t *src8, int stride, int rows,
 
   return n;
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH

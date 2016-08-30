@@ -18,42 +18,45 @@
 # Environment check: $YUV_RAW_INPUT is required.
 simple_encoder_verify_environment() {
   if [ ! -e "${YUV_RAW_INPUT}" ]; then
-    echo "Libvpx test data must exist in LIBVPX_TEST_DATA_PATH."
+    echo "Libaom test data must exist in LIBVPX_TEST_DATA_PATH."
     return 1
   fi
 }
 
 # Runs simple_encoder using the codec specified by $1 with a frame limit of 100.
 simple_encoder() {
-  local encoder="${LIBAOM_BIN_PATH}/simple_encoder${VPX_TEST_EXE_SUFFIX}"
+  local encoder="${LIBAOM_BIN_PATH}/simple_encoder${AOM_TEST_EXE_SUFFIX}"
   local codec="$1"
-  local output_file="${VPX_TEST_OUTPUT_DIR}/simple_encoder_${codec}.ivf"
+  local output_file="${AOM_TEST_OUTPUT_DIR}/simple_encoder_${codec}.ivf"
 
   if [ ! -x "${encoder}" ]; then
     elog "${encoder} does not exist or is not executable."
     return 1
   fi
 
-  eval "${VPX_TEST_PREFIX}" "${encoder}" "${codec}" "${YUV_RAW_INPUT_WIDTH}" \
+  eval "${AOM_TEST_PREFIX}" "${encoder}" "${codec}" "${YUV_RAW_INPUT_WIDTH}" \
       "${YUV_RAW_INPUT_HEIGHT}" "${YUV_RAW_INPUT}" "${output_file}" 9999 0 100 \
       ${devnull}
 
   [ -e "${output_file}" ] || return 1
 }
 
-simple_encoder_vp8() {
-  if [ "$(vp8_encode_available)" = "yes" ]; then
-    simple_encoder vp8 || return 1
+simple_encoder_aom() {
+  if [ "$(aom_encode_available)" = "yes" ]; then
+    simple_encoder aom || return 1
   fi
 }
 
-simple_encoder_vp9() {
-  if [ "$(vp9_encode_available)" = "yes" ]; then
-    simple_encoder vp9 || return 1
+# TODO(tomfinegan): Add a frame limit param to simple_encoder and enable this
+# test. AV1 is just too slow right now: This test takes 4m30s+ on a fast
+# machine.
+DISABLED_simple_encoder_av1() {
+  if [ "$(av1_encode_available)" = "yes" ]; then
+    simple_encoder av1 || return 1
   fi
 }
 
-simple_encoder_tests="simple_encoder_vp8
-                      simple_encoder_vp9"
+simple_encoder_tests="simple_encoder_aom
+                      DISABLED_simple_encoder_av1"
 
 run_tests simple_encoder_verify_environment "${simple_encoder_tests}"

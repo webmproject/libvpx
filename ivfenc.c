@@ -10,10 +10,10 @@
 
 #include "./ivfenc.h"
 
-#include "aom/vpx_encoder.h"
+#include "aom/aom_encoder.h"
 #include "aom_ports/mem_ops.h"
 
-void ivf_write_file_header(FILE *outfile, const struct vpx_codec_enc_cfg *cfg,
+void ivf_write_file_header(FILE *outfile, const struct aom_codec_enc_cfg *cfg,
                            unsigned int fourcc, int frame_cnt) {
   char header[32];
 

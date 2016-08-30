@@ -12,7 +12,7 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_dsp_rtcd.h"
 
 #include "test/acm_random.h"
 #include "test/register_state_check.h"
@@ -145,21 +145,21 @@ TEST_P(Hadamard8x8Test, VaryStride) {
 }
 
 INSTANTIATE_TEST_CASE_P(C, Hadamard8x8Test,
-                        ::testing::Values(&vpx_hadamard_8x8_c));
+                        ::testing::Values(&aom_hadamard_8x8_c));
 
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(SSE2, Hadamard8x8Test,
-                        ::testing::Values(&vpx_hadamard_8x8_sse2));
+                        ::testing::Values(&aom_hadamard_8x8_sse2));
 #endif  // HAVE_SSE2
 
 #if HAVE_SSSE3 && ARCH_X86_64
 INSTANTIATE_TEST_CASE_P(SSSE3, Hadamard8x8Test,
-                        ::testing::Values(&vpx_hadamard_8x8_ssse3));
+                        ::testing::Values(&aom_hadamard_8x8_ssse3));
 #endif  // HAVE_SSSE3 && ARCH_X86_64
 
 #if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(NEON, Hadamard8x8Test,
-                        ::testing::Values(&vpx_hadamard_8x8_neon));
+                        ::testing::Values(&aom_hadamard_8x8_neon));
 #endif  // HAVE_NEON
 
 class Hadamard16x16Test : public HadamardTestBase {};
@@ -206,15 +206,15 @@ TEST_P(Hadamard16x16Test, VaryStride) {
 }
 
 INSTANTIATE_TEST_CASE_P(C, Hadamard16x16Test,
-                        ::testing::Values(&vpx_hadamard_16x16_c));
+                        ::testing::Values(&aom_hadamard_16x16_c));
 
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(SSE2, Hadamard16x16Test,
-                        ::testing::Values(&vpx_hadamard_16x16_sse2));
+                        ::testing::Values(&aom_hadamard_16x16_sse2));
 #endif  // HAVE_SSE2
 
 #if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(NEON, Hadamard16x16Test,
-                        ::testing::Values(&vpx_hadamard_16x16_neon));
+                        ::testing::Values(&aom_hadamard_16x16_neon));
 #endif  // HAVE_NEON
 }  // namespace

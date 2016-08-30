@@ -13,10 +13,10 @@
 #include <emmintrin.h>
 #include <tmmintrin.h>
 
-#include "./vpx_config.h"
-#include "aom/vpx_integer.h"
+#include "./aom_config.h"
+#include "aom/aom_integer.h"
 #include "aom_ports/mem.h"
-#include "aom_dsp/vpx_filter.h"
+#include "aom_dsp/aom_filter.h"
 
 // Half pixel shift
 #define HALF_PIXEL_OFFSET (BIL_SUBPEL_SHIFTS / 2)
@@ -44,14 +44,14 @@ static INLINE int64_t hsum_epi64_si64(__m128i v_q) {
 #endif
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 static INLINE int64_t hsum_epi32_si64(__m128i v_d) {
   const __m128i v_sign_d = _mm_cmplt_epi32(v_d, _mm_setzero_si128());
   const __m128i v_0_q = _mm_unpacklo_epi32(v_d, v_sign_d);
   const __m128i v_1_q = _mm_unpackhi_epi32(v_d, v_sign_d);
   return hsum_epi64_si64(_mm_add_epi64(v_0_q, v_1_q));
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
 static INLINE uint32_t calc_masked_variance(__m128i v_sum_d, __m128i v_sse_q,
                                             uint32_t *sse, const int w,
@@ -144,7 +144,7 @@ static INLINE unsigned int masked_variancewxh_ssse3(
 }
 
 #define MASKED_VARWXH(W, H)                                                   \
-  unsigned int vpx_masked_variance##W##x##H##_ssse3(                          \
+  unsigned int aom_masked_variance##W##x##H##_ssse3(                          \
       const uint8_t *a, int a_stride, const uint8_t *b, int b_stride,         \
       const uint8_t *m, int m_stride, unsigned int *sse) {                    \
     return masked_variancewxh_ssse3(a, a_stride, b, b_stride, m, m_stride, W, \
@@ -219,7 +219,7 @@ static INLINE unsigned int masked_variance8xh_ssse3(
 }
 
 #define MASKED_VAR8XH(H)                                                      \
-  unsigned int vpx_masked_variance8x##H##_ssse3(                              \
+  unsigned int aom_masked_variance8x##H##_ssse3(                              \
       const uint8_t *a, int a_stride, const uint8_t *b, int b_stride,         \
       const uint8_t *m, int m_stride, unsigned int *sse) {                    \
     return masked_variance8xh_ssse3(a, a_stride, b, b_stride, m, m_stride, H, \
@@ -294,7 +294,7 @@ static INLINE unsigned int masked_variance4xh_ssse3(
 }
 
 #define MASKED_VAR4XH(H)                                                      \
-  unsigned int vpx_masked_variance4x##H##_ssse3(                              \
+  unsigned int aom_masked_variance4x##H##_ssse3(                              \
       const uint8_t *a, int a_stride, const uint8_t *b, int b_stride,         \
       const uint8_t *m, int m_stride, unsigned int *sse) {                    \
     return masked_variance4xh_ssse3(a, a_stride, b, b_stride, m, m_stride, H, \
@@ -304,7 +304,7 @@ static INLINE unsigned int masked_variance4xh_ssse3(
 MASKED_VAR4XH(4)
 MASKED_VAR4XH(8)
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 
 // Main calculation for n*8 wide blocks
 static INLINE void highbd_masked_variance64_ssse3(
@@ -517,7 +517,7 @@ static INLINE unsigned int highbd_12_masked_variancewxh_ssse3(
 }
 
 #define HIGHBD_MASKED_VARWXH(W, H)                                         \
-  unsigned int vpx_highbd_masked_variance##W##x##H##_ssse3(                \
+  unsigned int aom_highbd_masked_variance##W##x##H##_ssse3(                \
       const uint8_t *a8, int a_stride, const uint8_t *b8, int b_stride,    \
       const uint8_t *m, int m_stride, unsigned int *sse) {                 \
     uint16_t *a = CONVERT_TO_SHORTPTR(a8);                                 \
@@ -526,7 +526,7 @@ static INLINE unsigned int highbd_12_masked_variancewxh_ssse3(
                                            m_stride, W, H, sse);           \
   }                                                                        \
                                                                            \
-  unsigned int vpx_highbd_10_masked_variance##W##x##H##_ssse3(             \
+  unsigned int aom_highbd_10_masked_variance##W##x##H##_ssse3(             \
       const uint8_t *a8, int a_stride, const uint8_t *b8, int b_stride,    \
       const uint8_t *m, int m_stride, unsigned int *sse) {                 \
     uint16_t *a = CONVERT_TO_SHORTPTR(a8);                                 \
@@ -535,7 +535,7 @@ static INLINE unsigned int highbd_12_masked_variancewxh_ssse3(
                                               m_stride, W, H, sse);        \
   }                                                                        \
                                                                            \
-  unsigned int vpx_highbd_12_masked_variance##W##x##H##_ssse3(             \
+  unsigned int aom_highbd_12_masked_variance##W##x##H##_ssse3(             \
       const uint8_t *a8, int a_stride, const uint8_t *b8, int b_stride,    \
       const uint8_t *m, int m_stride, unsigned int *sse) {                 \
     uint16_t *a = CONVERT_TO_SHORTPTR(a8);                                 \
@@ -644,7 +644,7 @@ static void sum_and_sse(const __m128i v_a_b, const __m128i v_b_b,
 }
 
 // Functions for width (W) >= 16
-unsigned int vpx_masked_subpel_varWxH_xzero(const uint8_t *src, int src_stride,
+unsigned int aom_masked_subpel_varWxH_xzero(const uint8_t *src, int src_stride,
                                             int yoffset, const uint8_t *dst,
                                             int dst_stride, const uint8_t *msk,
                                             int msk_stride, unsigned int *sse,
@@ -689,7 +689,7 @@ unsigned int vpx_masked_subpel_varWxH_xzero(const uint8_t *src, int src_stride,
   }
   return calc_masked_variance(v_sum_d, v_sse_q, sse, w, h);
 }
-unsigned int vpx_masked_subpel_varWxH_yzero(const uint8_t *src, int src_stride,
+unsigned int aom_masked_subpel_varWxH_yzero(const uint8_t *src, int src_stride,
                                             int xoffset, const uint8_t *dst,
                                             int dst_stride, const uint8_t *msk,
                                             int msk_stride, unsigned int *sse,
@@ -720,7 +720,7 @@ unsigned int vpx_masked_subpel_varWxH_yzero(const uint8_t *src, int src_stride,
   }
   return calc_masked_variance(v_sum_d, v_sse_q, sse, w, h);
 }
-unsigned int vpx_masked_subpel_varWxH_xnonzero_ynonzero(
+unsigned int aom_masked_subpel_varWxH_xnonzero_ynonzero(
     const uint8_t *src, int src_stride, int xoffset, int yoffset,
     const uint8_t *dst, int dst_stride, const uint8_t *msk, int msk_stride,
     unsigned int *sse, int w, int h, filter_fn_t xfilter_fn,
@@ -780,7 +780,7 @@ unsigned int vpx_masked_subpel_varWxH_xnonzero_ynonzero(
 
 // Note order in which rows loaded xmm[127:96] = row 1, xmm[95:64] = row 2,
 // xmm[63:32] = row 3, xmm[31:0] = row 4
-unsigned int vpx_masked_subpel_var4xH_xzero(const uint8_t *src, int src_stride,
+unsigned int aom_masked_subpel_var4xH_xzero(const uint8_t *src, int src_stride,
                                             int yoffset, const uint8_t *dst,
                                             int dst_stride, const uint8_t *msk,
                                             int msk_stride, unsigned int *sse,
@@ -849,7 +849,7 @@ unsigned int vpx_masked_subpel_var4xH_xzero(const uint8_t *src, int src_stride,
 }
 
 // Note order in which rows loaded xmm[127:64] = row 1, xmm[63:0] = row 2
-unsigned int vpx_masked_subpel_var8xH_xzero(const uint8_t *src, int src_stride,
+unsigned int aom_masked_subpel_var8xH_xzero(const uint8_t *src, int src_stride,
                                             int yoffset, const uint8_t *dst,
                                             int dst_stride, const uint8_t *msk,
                                             int msk_stride, unsigned int *sse,
@@ -904,7 +904,7 @@ unsigned int vpx_masked_subpel_var8xH_xzero(const uint8_t *src, int src_stride,
 
 // Note order in which rows loaded xmm[127:96] = row 1, xmm[95:64] = row 2,
 // xmm[63:32] = row 3, xmm[31:0] = row 4
-unsigned int vpx_masked_subpel_var4xH_yzero(const uint8_t *src, int src_stride,
+unsigned int aom_masked_subpel_var4xH_yzero(const uint8_t *src, int src_stride,
                                             int xoffset, const uint8_t *dst,
                                             int dst_stride, const uint8_t *msk,
                                             int msk_stride, unsigned int *sse,
@@ -969,7 +969,7 @@ unsigned int vpx_masked_subpel_var4xH_yzero(const uint8_t *src, int src_stride,
   return calc_masked_variance(v_sum_d, v_sse_q, sse, 4, h);
 }
 
-unsigned int vpx_masked_subpel_var8xH_yzero(const uint8_t *src, int src_stride,
+unsigned int aom_masked_subpel_var8xH_yzero(const uint8_t *src, int src_stride,
                                             int xoffset, const uint8_t *dst,
                                             int dst_stride, const uint8_t *msk,
                                             int msk_stride, unsigned int *sse,
@@ -1018,7 +1018,7 @@ unsigned int vpx_masked_subpel_var8xH_yzero(const uint8_t *src, int src_stride,
 
 // Note order in which rows loaded xmm[127:96] = row 1, xmm[95:64] = row 2,
 // xmm[63:32] = row 3, xmm[31:0] = row 4
-unsigned int vpx_masked_subpel_var4xH_xnonzero_ynonzero(
+unsigned int aom_masked_subpel_var4xH_xnonzero_ynonzero(
     const uint8_t *src, int src_stride, int xoffset, int yoffset,
     const uint8_t *dst, int dst_stride, const uint8_t *msk, int msk_stride,
     unsigned int *sse, int h) {
@@ -1117,7 +1117,7 @@ unsigned int vpx_masked_subpel_var4xH_xnonzero_ynonzero(
   return calc_masked_variance(v_sum_d, v_sse_q, sse, 4, h);
 }
 
-unsigned int vpx_masked_subpel_var8xH_xnonzero_ynonzero(
+unsigned int aom_masked_subpel_var8xH_xnonzero_ynonzero(
     const uint8_t *src, int src_stride, int xoffset, int yoffset,
     const uint8_t *dst, int dst_stride, const uint8_t *msk, int msk_stride,
     unsigned int *sse, int h) {
@@ -1226,49 +1226,49 @@ unsigned int vpx_masked_subpel_var8xH_xnonzero_ynonzero(
 
 // For W >=16
 #define MASK_SUBPIX_VAR_LARGE(W, H)                                            \
-  unsigned int vpx_masked_sub_pixel_variance##W##x##H##_ssse3(                 \
+  unsigned int aom_masked_sub_pixel_variance##W##x##H##_ssse3(                 \
       const uint8_t *src, int src_stride, int xoffset, int yoffset,            \
       const uint8_t *dst, int dst_stride, const uint8_t *msk, int msk_stride,  \
       unsigned int *sse) {                                                     \
     assert(W % 16 == 0);                                                       \
     if (xoffset == 0) {                                                        \
       if (yoffset == 0)                                                        \
-        return vpx_masked_variance##W##x##H##_ssse3(                           \
+        return aom_masked_variance##W##x##H##_ssse3(                           \
             src, src_stride, dst, dst_stride, msk, msk_stride, sse);           \
       else if (yoffset == HALF_PIXEL_OFFSET)                                   \
-        return vpx_masked_subpel_varWxH_xzero(                                 \
+        return aom_masked_subpel_varWxH_xzero(                                 \
             src, src_stride, HALF_PIXEL_OFFSET, dst, dst_stride, msk,          \
             msk_stride, sse, W, H, apply_filter_avg);                          \
       else                                                                     \
-        return vpx_masked_subpel_varWxH_xzero(src, src_stride, yoffset, dst,   \
+        return aom_masked_subpel_varWxH_xzero(src, src_stride, yoffset, dst,   \
                                               dst_stride, msk, msk_stride,     \
                                               sse, W, H, apply_filter);        \
     } else if (yoffset == 0) {                                                 \
       if (xoffset == HALF_PIXEL_OFFSET)                                        \
-        return vpx_masked_subpel_varWxH_yzero(                                 \
+        return aom_masked_subpel_varWxH_yzero(                                 \
             src, src_stride, HALF_PIXEL_OFFSET, dst, dst_stride, msk,          \
             msk_stride, sse, W, H, apply_filter_avg);                          \
       else                                                                     \
-        return vpx_masked_subpel_varWxH_yzero(src, src_stride, xoffset, dst,   \
+        return aom_masked_subpel_varWxH_yzero(src, src_stride, xoffset, dst,   \
                                               dst_stride, msk, msk_stride,     \
                                               sse, W, H, apply_filter);        \
     } else if (xoffset == HALF_PIXEL_OFFSET) {                                 \
       if (yoffset == HALF_PIXEL_OFFSET)                                        \
-        return vpx_masked_subpel_varWxH_xnonzero_ynonzero(                     \
+        return aom_masked_subpel_varWxH_xnonzero_ynonzero(                     \
             src, src_stride, HALF_PIXEL_OFFSET, HALF_PIXEL_OFFSET, dst,        \
             dst_stride, msk, msk_stride, sse, W, H, apply_filter_avg,          \
             apply_filter_avg);                                                 \
       else                                                                     \
-        return vpx_masked_subpel_varWxH_xnonzero_ynonzero(                     \
+        return aom_masked_subpel_varWxH_xnonzero_ynonzero(                     \
             src, src_stride, HALF_PIXEL_OFFSET, yoffset, dst, dst_stride, msk, \
             msk_stride, sse, W, H, apply_filter_avg, apply_filter);            \
     } else {                                                                   \
       if (yoffset == HALF_PIXEL_OFFSET)                                        \
-        return vpx_masked_subpel_varWxH_xnonzero_ynonzero(                     \
+        return aom_masked_subpel_varWxH_xnonzero_ynonzero(                     \
             src, src_stride, xoffset, HALF_PIXEL_OFFSET, dst, dst_stride, msk, \
             msk_stride, sse, W, H, apply_filter, apply_filter_avg);            \
       else                                                                     \
-        return vpx_masked_subpel_varWxH_xnonzero_ynonzero(                     \
+        return aom_masked_subpel_varWxH_xnonzero_ynonzero(                     \
             src, src_stride, xoffset, yoffset, dst, dst_stride, msk,           \
             msk_stride, sse, W, H, apply_filter, apply_filter);                \
     }                                                                          \
@@ -1276,22 +1276,22 @@ unsigned int vpx_masked_subpel_var8xH_xnonzero_ynonzero(
 
 // For W < 16
 #define MASK_SUBPIX_VAR_SMALL(W, H)                                            \
-  unsigned int vpx_masked_sub_pixel_variance##W##x##H##_ssse3(                 \
+  unsigned int aom_masked_sub_pixel_variance##W##x##H##_ssse3(                 \
       const uint8_t *src, int src_stride, int xoffset, int yoffset,            \
       const uint8_t *dst, int dst_stride, const uint8_t *msk, int msk_stride,  \
       unsigned int *sse) {                                                     \
     assert(W == 4 || W == 8);                                                  \
     if (xoffset == 0 && yoffset == 0)                                          \
-      return vpx_masked_variance##W##x##H##_ssse3(                             \
+      return aom_masked_variance##W##x##H##_ssse3(                             \
           src, src_stride, dst, dst_stride, msk, msk_stride, sse);             \
     else if (xoffset == 0)                                                     \
-      return vpx_masked_subpel_var##W##xH_xzero(                               \
+      return aom_masked_subpel_var##W##xH_xzero(                               \
           src, src_stride, yoffset, dst, dst_stride, msk, msk_stride, sse, H); \
     else if (yoffset == 0)                                                     \
-      return vpx_masked_subpel_var##W##xH_yzero(                               \
+      return aom_masked_subpel_var##W##xH_yzero(                               \
           src, src_stride, xoffset, dst, dst_stride, msk, msk_stride, sse, H); \
     else                                                                       \
-      return vpx_masked_subpel_var##W##xH_xnonzero_ynonzero(                   \
+      return aom_masked_subpel_var##W##xH_xnonzero_ynonzero(                   \
           src, src_stride, xoffset, yoffset, dst, dst_stride, msk, msk_stride, \
           sse, H);                                                             \
   }
@@ -1315,7 +1315,7 @@ MASK_SUBPIX_VAR_LARGE(128, 64)
 MASK_SUBPIX_VAR_LARGE(128, 128)
 #endif  // CONFIG_EXT_PARTITION
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 typedef uint32_t (*highbd_calc_masked_var_t)(__m128i v_sum_d, __m128i v_sse_q,
                                              uint32_t *sse, const int w,
                                              const int h);
@@ -1446,7 +1446,7 @@ static INLINE uint32_t highbd_12_calc_masked_variance(
 }
 
 // High bit depth functions for width (W) >= 8
-unsigned int vpx_highbd_masked_subpel_varWxH_xzero(
+unsigned int aom_highbd_masked_subpel_varWxH_xzero(
     const uint16_t *src, int src_stride, int yoffset, const uint16_t *dst,
     int dst_stride, const uint8_t *msk, int msk_stride, unsigned int *sse,
     int w, int h, highbd_filter_fn_t filter_fn,
@@ -1491,7 +1491,7 @@ unsigned int vpx_highbd_masked_subpel_varWxH_xzero(
   }
   return calc_var(v_sum_d, v_sse_q, sse, w, h);
 }
-unsigned int vpx_highbd_masked_subpel_varWxH_yzero(
+unsigned int aom_highbd_masked_subpel_varWxH_yzero(
     const uint16_t *src, int src_stride, int xoffset, const uint16_t *dst,
     int dst_stride, const uint8_t *msk, int msk_stride, unsigned int *sse,
     int w, int h, highbd_filter_fn_t filter_fn,
@@ -1523,7 +1523,7 @@ unsigned int vpx_highbd_masked_subpel_varWxH_yzero(
   return calc_var(v_sum_d, v_sse_q, sse, w, h);
 }
 
-unsigned int vpx_highbd_masked_subpel_varWxH_xnonzero_ynonzero(
+unsigned int aom_highbd_masked_subpel_varWxH_xnonzero_ynonzero(
     const uint16_t *src, int src_stride, int xoffset, int yoffset,
     const uint16_t *dst, int dst_stride, const uint8_t *msk, int msk_stride,
     unsigned int *sse, int w, int h, highbd_filter_fn_t xfilter_fn,
@@ -1584,7 +1584,7 @@ unsigned int vpx_highbd_masked_subpel_varWxH_xnonzero_ynonzero(
 }
 
 // Note order in which rows loaded xmm[127:64] = row 1, xmm[63:0] = row 2
-unsigned int vpx_highbd_masked_subpel_var4xH_xzero(
+unsigned int aom_highbd_masked_subpel_var4xH_xzero(
     const uint16_t *src, int src_stride, int yoffset, const uint16_t *dst,
     int dst_stride, const uint8_t *msk, int msk_stride, unsigned int *sse,
     int h, highbd_calc_masked_var_t calc_var) {
@@ -1635,7 +1635,7 @@ unsigned int vpx_highbd_masked_subpel_var4xH_xzero(
   return calc_var(v_sum_d, v_sse_q, sse, 4, h);
 }
 
-unsigned int vpx_highbd_masked_subpel_var4xH_yzero(
+unsigned int aom_highbd_masked_subpel_var4xH_yzero(
     const uint16_t *src, int src_stride, int xoffset, const uint16_t *dst,
     int dst_stride, const uint8_t *msk, int msk_stride, unsigned int *sse,
     int h, highbd_calc_masked_var_t calc_var) {
@@ -1683,7 +1683,7 @@ unsigned int vpx_highbd_masked_subpel_var4xH_yzero(
   return calc_var(v_sum_d, v_sse_q, sse, 4, h);
 }
 
-unsigned int vpx_highbd_masked_subpel_var4xH_xnonzero_ynonzero(
+unsigned int aom_highbd_masked_subpel_var4xH_xnonzero_ynonzero(
     const uint16_t *src, int src_stride, int xoffset, int yoffset,
     const uint16_t *dst, int dst_stride, const uint8_t *msk, int msk_stride,
     unsigned int *sse, int h, highbd_calc_masked_var_t calc_var) {
@@ -1811,41 +1811,41 @@ unsigned int vpx_highbd_masked_subpel_var4xH_xnonzero_ynonzero(
         return full_variance_function(src8, src_stride, dst8, dst_stride, msk, \
                                       msk_stride, sse);                        \
       else if (yoffset == HALF_PIXEL_OFFSET)                                   \
-        return vpx_highbd_masked_subpel_varWxH_xzero(                          \
+        return aom_highbd_masked_subpel_varWxH_xzero(                          \
             src, src_stride, HALF_PIXEL_OFFSET, dst, dst_stride, msk,          \
             msk_stride, sse, W, H, highbd_apply_filter_avg, calc_var);         \
       else                                                                     \
-        return vpx_highbd_masked_subpel_varWxH_xzero(                          \
+        return aom_highbd_masked_subpel_varWxH_xzero(                          \
             src, src_stride, yoffset, dst, dst_stride, msk, msk_stride, sse,   \
             W, H, highbd_apply_filter, calc_var);                              \
     } else if (yoffset == 0) {                                                 \
       if (xoffset == HALF_PIXEL_OFFSET)                                        \
-        return vpx_highbd_masked_subpel_varWxH_yzero(                          \
+        return aom_highbd_masked_subpel_varWxH_yzero(                          \
             src, src_stride, HALF_PIXEL_OFFSET, dst, dst_stride, msk,          \
             msk_stride, sse, W, H, highbd_apply_filter_avg, calc_var);         \
       else                                                                     \
-        return vpx_highbd_masked_subpel_varWxH_yzero(                          \
+        return aom_highbd_masked_subpel_varWxH_yzero(                          \
             src, src_stride, xoffset, dst, dst_stride, msk, msk_stride, sse,   \
             W, H, highbd_apply_filter, calc_var);                              \
     } else if (xoffset == HALF_PIXEL_OFFSET) {                                 \
       if (yoffset == HALF_PIXEL_OFFSET)                                        \
-        return vpx_highbd_masked_subpel_varWxH_xnonzero_ynonzero(              \
+        return aom_highbd_masked_subpel_varWxH_xnonzero_ynonzero(              \
             src, src_stride, HALF_PIXEL_OFFSET, HALF_PIXEL_OFFSET, dst,        \
             dst_stride, msk, msk_stride, sse, W, H, highbd_apply_filter_avg,   \
             highbd_apply_filter_avg, calc_var);                                \
       else                                                                     \
-        return vpx_highbd_masked_subpel_varWxH_xnonzero_ynonzero(              \
+        return aom_highbd_masked_subpel_varWxH_xnonzero_ynonzero(              \
             src, src_stride, HALF_PIXEL_OFFSET, yoffset, dst, dst_stride, msk, \
             msk_stride, sse, W, H, highbd_apply_filter_avg,                    \
             highbd_apply_filter, calc_var);                                    \
     } else {                                                                   \
       if (yoffset == HALF_PIXEL_OFFSET)                                        \
-        return vpx_highbd_masked_subpel_varWxH_xnonzero_ynonzero(              \
+        return aom_highbd_masked_subpel_varWxH_xnonzero_ynonzero(              \
             src, src_stride, xoffset, HALF_PIXEL_OFFSET, dst, dst_stride, msk, \
             msk_stride, sse, W, H, highbd_apply_filter,                        \
             highbd_apply_filter_avg, calc_var);                                \
       else                                                                     \
-        return vpx_highbd_masked_subpel_varWxH_xnonzero_ynonzero(              \
+        return aom_highbd_masked_subpel_varWxH_xnonzero_ynonzero(              \
             src, src_stride, xoffset, yoffset, dst, dst_stride, msk,           \
             msk_stride, sse, W, H, highbd_apply_filter, highbd_apply_filter,   \
             calc_var);                                                         \
@@ -1866,46 +1866,46 @@ unsigned int vpx_highbd_masked_subpel_var4xH_xnonzero_ynonzero(
       return full_variance_function(src8, src_stride, dst8, dst_stride, msk,   \
                                     msk_stride, sse);                          \
     else if (xoffset == 0)                                                     \
-      return vpx_highbd_masked_subpel_var4xH_xzero(                            \
+      return aom_highbd_masked_subpel_var4xH_xzero(                            \
           src, src_stride, yoffset, dst, dst_stride, msk, msk_stride, sse, H,  \
           calc_var);                                                           \
     else if (yoffset == 0)                                                     \
-      return vpx_highbd_masked_subpel_var4xH_yzero(                            \
+      return aom_highbd_masked_subpel_var4xH_yzero(                            \
           src, src_stride, xoffset, dst, dst_stride, msk, msk_stride, sse, H,  \
           calc_var);                                                           \
     else                                                                       \
-      return vpx_highbd_masked_subpel_var4xH_xnonzero_ynonzero(                \
+      return aom_highbd_masked_subpel_var4xH_xnonzero_ynonzero(                \
           src, src_stride, xoffset, yoffset, dst, dst_stride, msk, msk_stride, \
           sse, H, calc_var);                                                   \
   }
 
 #define HIGHBD_MASK_SUBPIX_VAR_WRAPPERS(W, H)                                  \
-  unsigned int vpx_highbd_masked_sub_pixel_variance##W##x##H##_ssse3(          \
+  unsigned int aom_highbd_masked_sub_pixel_variance##W##x##H##_ssse3(          \
       const uint8_t *src8, int src_stride, int xoffset, int yoffset,           \
       const uint8_t *dst8, int dst_stride, const uint8_t *msk, int msk_stride, \
       unsigned int *sse) {                                                     \
     return highbd_masked_sub_pixel_variance##W##x##H##_ssse3(                  \
         src8, src_stride, xoffset, yoffset, dst8, dst_stride, msk, msk_stride, \
         sse, calc_masked_variance,                                             \
-        vpx_highbd_masked_variance##W##x##H##_ssse3);                          \
+        aom_highbd_masked_variance##W##x##H##_ssse3);                          \
   }                                                                            \
-  unsigned int vpx_highbd_10_masked_sub_pixel_variance##W##x##H##_ssse3(       \
+  unsigned int aom_highbd_10_masked_sub_pixel_variance##W##x##H##_ssse3(       \
       const uint8_t *src8, int src_stride, int xoffset, int yoffset,           \
       const uint8_t *dst8, int dst_stride, const uint8_t *msk, int msk_stride, \
       unsigned int *sse) {                                                     \
     return highbd_masked_sub_pixel_variance##W##x##H##_ssse3(                  \
         src8, src_stride, xoffset, yoffset, dst8, dst_stride, msk, msk_stride, \
         sse, highbd_10_calc_masked_variance,                                   \
-        vpx_highbd_10_masked_variance##W##x##H##_ssse3);                       \
+        aom_highbd_10_masked_variance##W##x##H##_ssse3);                       \
   }                                                                            \
-  unsigned int vpx_highbd_12_masked_sub_pixel_variance##W##x##H##_ssse3(       \
+  unsigned int aom_highbd_12_masked_sub_pixel_variance##W##x##H##_ssse3(       \
       const uint8_t *src8, int src_stride, int xoffset, int yoffset,           \
       const uint8_t *dst8, int dst_stride, const uint8_t *msk, int msk_stride, \
       unsigned int *sse) {                                                     \
     return highbd_masked_sub_pixel_variance##W##x##H##_ssse3(                  \
         src8, src_stride, xoffset, yoffset, dst8, dst_stride, msk, msk_stride, \
         sse, highbd_12_calc_masked_variance,                                   \
-        vpx_highbd_12_masked_variance##W##x##H##_ssse3);                       \
+        aom_highbd_12_masked_variance##W##x##H##_ssse3);                       \
   }
 
 HIGHBD_MASK_SUBPIX_VAR_SMALL(4, 4)

@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "./vp10_rtcd.h"
+#include "./av1_rtcd.h"
 #include "aom_dsp/mips/macros_msa.h"
 
 #define BLOCK_ERROR_BLOCKSIZE_MSA(BSize)                                     \
@@ -86,9 +86,9 @@ BLOCK_ERROR_BLOCKSIZE_MSA(256)
 BLOCK_ERROR_BLOCKSIZE_MSA(1024)
 /* clang-format on */
 
-int64_t vp10_block_error_msa(const tran_low_t *coeff_ptr,
-                             const tran_low_t *dq_coeff_ptr, intptr_t blk_size,
-                             int64_t *ssz) {
+int64_t av1_block_error_msa(const tran_low_t *coeff_ptr,
+                            const tran_low_t *dq_coeff_ptr, intptr_t blk_size,
+                            int64_t *ssz) {
   int64_t err;
   const int16_t *coeff = (const int16_t *)coeff_ptr;
   const int16_t *dq_coeff = (const int16_t *)dq_coeff_ptr;
@@ -99,7 +99,7 @@ int64_t vp10_block_error_msa(const tran_low_t *coeff_ptr,
     case 256: err = block_error_256size_msa(coeff, dq_coeff, ssz); break;
     case 1024: err = block_error_1024size_msa(coeff, dq_coeff, ssz); break;
     default:
-      err = vp10_block_error_c(coeff_ptr, dq_coeff_ptr, blk_size, ssz);
+      err = av1_block_error_c(coeff_ptr, dq_coeff_ptr, blk_size, ssz);
       break;
   }
 

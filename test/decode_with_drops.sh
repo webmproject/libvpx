@@ -16,10 +16,10 @@
 . $(dirname $0)/tools_common.sh
 
 # Environment check: Make sure input is available:
-#   $VP8_IVF_FILE and $VP9_IVF_FILE are required.
+#   $VP8_IVF_FILE and $AV1_IVF_FILE are required.
 decode_with_drops_verify_environment() {
-  if [ ! -e "${VP8_IVF_FILE}" ] || [ ! -e "${VP9_IVF_FILE}" ]; then
-    echo "Libvpx test data must exist in LIBVPX_TEST_DATA_PATH."
+  if [ ! -e "${VP8_IVF_FILE}" ] || [ ! -e "${AV1_IVF_FILE}" ]; then
+    echo "Libaom test data must exist in LIBVPX_TEST_DATA_PATH."
     return 1
   fi
 }
@@ -28,10 +28,10 @@ decode_with_drops_verify_environment() {
 # to name the output file. $3 is the drop mode, and is passed directly to
 # decode_with_drops.
 decode_with_drops() {
-  local decoder="${LIBAOM_BIN_PATH}/decode_with_drops${VPX_TEST_EXE_SUFFIX}"
+  local decoder="${LIBAOM_BIN_PATH}/decode_with_drops${AOM_TEST_EXE_SUFFIX}"
   local input_file="$1"
   local codec="$2"
-  local output_file="${VPX_TEST_OUTPUT_DIR}/decode_with_drops_${codec}"
+  local output_file="${AOM_TEST_OUTPUT_DIR}/decode_with_drops_${codec}"
   local drop_mode="$3"
 
   if [ ! -x "${decoder}" ]; then
@@ -39,7 +39,7 @@ decode_with_drops() {
     return 1
   fi
 
-  eval "${VPX_TEST_PREFIX}" "${decoder}" "${input_file}" "${output_file}" \
+  eval "${AOM_TEST_PREFIX}" "${decoder}" "${input_file}" "${output_file}" \
       "${drop_mode}" ${devnull}
 
   [ -e "${output_file}" ] || return 1
@@ -59,21 +59,21 @@ decode_with_drops_vp8() {
   fi
 }
 
-# Decodes $VP9_IVF_FILE while dropping frames, twice: once in sequence mode,
+# Decodes $AV1_IVF_FILE while dropping frames, twice: once in sequence mode,
 # and once in pattern mode.
-# Note: This test assumes that $VP9_IVF_FILE has exactly 20 frames, and could
+# Note: This test assumes that $AV1_IVF_FILE has exactly 20 frames, and could
 # break if the file is modified.
-decode_with_drops_vp9() {
-  if [ "$(vp9_decode_available)" = "yes" ]; then
+decode_with_drops_av1() {
+  if [ "$(av1_decode_available)" = "yes" ]; then
     # Test sequence mode: Drop frames 2-28.
-    decode_with_drops "${VP9_IVF_FILE}" "vp9" "2-19"
+    decode_with_drops "${AV1_IVF_FILE}" "av1" "2-19"
 
     # Test pattern mode: Drop 3 of every 4 frames.
-    decode_with_drops "${VP9_IVF_FILE}" "vp9" "3/4"
+    decode_with_drops "${AV1_IVF_FILE}" "av1" "3/4"
   fi
 }
 
 decode_with_drops_tests="decode_with_drops_vp8
-                         decode_with_drops_vp9"
+                         decode_with_drops_av1"
 
 run_tests decode_with_drops_verify_environment "${decode_with_drops_tests}"

@@ -10,59 +10,59 @@
 ##
 ##  This file contains shell code shared by test scripts for libaom tools.
 
-# Use $VPX_TEST_TOOLS_COMMON_SH as a pseudo include guard.
-if [ -z "${VPX_TEST_TOOLS_COMMON_SH}" ]; then
-VPX_TEST_TOOLS_COMMON_SH=included
+# Use $AOM_TEST_TOOLS_COMMON_SH as a pseudo include guard.
+if [ -z "${AOM_TEST_TOOLS_COMMON_SH}" ]; then
+AOM_TEST_TOOLS_COMMON_SH=included
 
 set -e
 devnull='> /dev/null 2>&1'
-VPX_TEST_PREFIX=""
+AOM_TEST_PREFIX=""
 
 elog() {
   echo "$@" 1>&2
 }
 
 vlog() {
-  if [ "${VPX_TEST_VERBOSE_OUTPUT}" = "yes" ]; then
+  if [ "${AOM_TEST_VERBOSE_OUTPUT}" = "yes" ]; then
     echo "$@"
   fi
 }
 
-# Sets $VPX_TOOL_TEST to the name specified by positional parameter one.
+# Sets $AOM_TOOL_TEST to the name specified by positional parameter one.
 test_begin() {
-  VPX_TOOL_TEST="${1}"
+  AOM_TOOL_TEST="${1}"
 }
 
-# Clears the VPX_TOOL_TEST variable after confirming that $VPX_TOOL_TEST matches
+# Clears the AOM_TOOL_TEST variable after confirming that $AOM_TOOL_TEST matches
 # positional parameter one.
 test_end() {
-  if [ "$1" != "${VPX_TOOL_TEST}" ]; then
+  if [ "$1" != "${AOM_TOOL_TEST}" ]; then
     echo "FAIL completed test mismatch!."
     echo "  completed test: ${1}"
-    echo "  active test: ${VPX_TOOL_TEST}."
+    echo "  active test: ${AOM_TOOL_TEST}."
     return 1
   fi
-  VPX_TOOL_TEST='<unset>'
+  AOM_TOOL_TEST='<unset>'
 }
 
 # Echoes the target configuration being tested.
 test_configuration_target() {
-  vpx_config_mk="${LIBAOM_CONFIG_PATH}/config.mk"
+  aom_config_mk="${LIBAOM_CONFIG_PATH}/config.mk"
   # Find the TOOLCHAIN line, split it using ':=' as the field separator, and
   # print the last field to get the value. Then pipe the value to tr to consume
   # any leading/trailing spaces while allowing tr to echo the output to stdout.
-  awk -F ':=' '/TOOLCHAIN/ { print $NF }' "${vpx_config_mk}" | tr -d ' '
+  awk -F ':=' '/TOOLCHAIN/ { print $NF }' "${aom_config_mk}" | tr -d ' '
 }
 
 # Trap function used for failure reports and tool output directory removal.
-# When the contents of $VPX_TOOL_TEST do not match the string '<unset>', reports
-# failure of test stored in $VPX_TOOL_TEST.
+# When the contents of $AOM_TOOL_TEST do not match the string '<unset>', reports
+# failure of test stored in $AOM_TOOL_TEST.
 cleanup() {
-  if [ -n "${VPX_TOOL_TEST}" ] && [ "${VPX_TOOL_TEST}" != '<unset>' ]; then
-    echo "FAIL: $VPX_TOOL_TEST"
+  if [ -n "${AOM_TOOL_TEST}" ] && [ "${AOM_TOOL_TEST}" != '<unset>' ]; then
+    echo "FAIL: $AOM_TOOL_TEST"
   fi
-  if [ -n "${VPX_TEST_OUTPUT_DIR}" ] && [ -d "${VPX_TEST_OUTPUT_DIR}" ]; then
-    rm -rf "${VPX_TEST_OUTPUT_DIR}"
+  if [ -n "${AOM_TEST_OUTPUT_DIR}" ] && [ -d "${AOM_TEST_OUTPUT_DIR}" ]; then
+    rm -rf "${AOM_TEST_OUTPUT_DIR}"
   fi
 }
 
@@ -70,17 +70,17 @@ cleanup() {
 # $LIBAOM_CONFIG_PATH/config.mk to stdout, or the version number string when
 # no git hash is contained in VERSION_STRING.
 config_hash() {
-  vpx_config_mk="${LIBAOM_CONFIG_PATH}/config.mk"
+  aom_config_mk="${LIBAOM_CONFIG_PATH}/config.mk"
   # Find VERSION_STRING line, split it with "-g" and print the last field to
   # output the git hash to stdout.
-  vpx_version=$(awk -F -g '/VERSION_STRING/ {print $NF}' "${vpx_config_mk}")
+  aom_version=$(awk -F -g '/VERSION_STRING/ {print $NF}' "${aom_config_mk}")
   # Handle two situations here:
-  # 1. The default case: $vpx_version is a git hash, so echo it unchanged.
+  # 1. The default case: $aom_version is a git hash, so echo it unchanged.
   # 2. When being run a non-dev tree, the -g portion is not present in the
   #    version string: It's only the version number.
-  #    In this case $vpx_version is something like 'VERSION_STRING=v1.3.0', so
+  #    In this case $aom_version is something like 'VERSION_STRING=v1.3.0', so
   #    we echo only what is after the '='.
-  echo "${vpx_version##*=}"
+  echo "${aom_version##*=}"
 }
 
 # Echoes the short form of the current git hash.
@@ -95,7 +95,7 @@ current_hash() {
   fi
 }
 
-# Echoes warnings to stdout when git hash in vpx_config.h does not match the
+# Echoes warnings to stdout when git hash in aom_config.h does not match the
 # current git hash.
 check_git_hashes() {
   hash_at_configure_time=$(config_hash)
@@ -120,19 +120,19 @@ test_env_var_dir() {
 # This script requires that the LIBAOM_BIN_PATH, LIBAOM_CONFIG_PATH, and
 # LIBVPX_TEST_DATA_PATH variables are in the environment: Confirm that
 # the variables are set and that they all evaluate to directory paths.
-verify_vpx_test_environment() {
+verify_aom_test_environment() {
   test_env_var_dir "LIBAOM_BIN_PATH" \
     && test_env_var_dir "LIBAOM_CONFIG_PATH" \
     && test_env_var_dir "LIBVPX_TEST_DATA_PATH"
 }
 
-# Greps vpx_config.h in LIBAOM_CONFIG_PATH for positional parameter one, which
+# Greps aom_config.h in LIBAOM_CONFIG_PATH for positional parameter one, which
 # should be a LIBAOM preprocessor flag. Echoes yes to stdout when the feature
 # is available.
-vpx_config_option_enabled() {
-  vpx_config_option="${1}"
-  vpx_config_file="${LIBAOM_CONFIG_PATH}/vpx_config.h"
-  config_line=$(grep "${vpx_config_option}" "${vpx_config_file}")
+aom_config_option_enabled() {
+  aom_config_option="${1}"
+  aom_config_file="${LIBAOM_CONFIG_PATH}/aom_config.h"
+  config_line=$(grep "${aom_config_option}" "${aom_config_file}")
   if echo "${config_line}" | egrep -q '1$'; then
     echo yes
   fi
@@ -149,13 +149,13 @@ is_windows_target() {
 # Echoes path to $1 when it's executable and exists in ${LIBAOM_BIN_PATH}, or an
 # empty string. Caller is responsible for testing the string once the function
 # returns.
-vpx_tool_path() {
+aom_tool_path() {
   local readonly tool_name="$1"
-  local tool_path="${LIBAOM_BIN_PATH}/${tool_name}${VPX_TEST_EXE_SUFFIX}"
+  local tool_path="${LIBAOM_BIN_PATH}/${tool_name}${AOM_TEST_EXE_SUFFIX}"
   if [ ! -x "${tool_path}" ]; then
     # Try one directory up: when running via examples.sh the tool could be in
     # the parent directory of $LIBAOM_BIN_PATH.
-    tool_path="${LIBAOM_BIN_PATH}/../${tool_name}${VPX_TEST_EXE_SUFFIX}"
+    tool_path="${LIBAOM_BIN_PATH}/../${tool_name}${AOM_TEST_EXE_SUFFIX}"
   fi
 
   if [ ! -x "${tool_path}" ]; then
@@ -166,28 +166,28 @@ vpx_tool_path() {
 
 # Echoes yes to stdout when the file named by positional parameter one exists
 # in LIBAOM_BIN_PATH, and is executable.
-vpx_tool_available() {
+aom_tool_available() {
   local tool_name="$1"
-  local tool="${LIBAOM_BIN_PATH}/${tool_name}${VPX_TEST_EXE_SUFFIX}"
+  local tool="${LIBAOM_BIN_PATH}/${tool_name}${AOM_TEST_EXE_SUFFIX}"
   [ -x "${tool}" ] && echo yes
 }
 
-# Echoes yes to stdout when vpx_config_option_enabled() reports yes for
-# CONFIG_VP10_DECODER.
-vp10_decode_available() {
-  [ "$(vpx_config_option_enabled CONFIG_VP10_DECODER)" = "yes" ] && echo yes
+# Echoes yes to stdout when aom_config_option_enabled() reports yes for
+# CONFIG_AV1_DECODER.
+av1_decode_available() {
+  [ "$(aom_config_option_enabled CONFIG_AV1_DECODER)" = "yes" ] && echo yes
 }
 
-# Echoes yes to stdout when vpx_config_option_enabled() reports yes for
-# CONFIG_VP10_ENCODER.
-vp10_encode_available() {
-  [ "$(vpx_config_option_enabled CONFIG_VP10_ENCODER)" = "yes" ] && echo yes
+# Echoes yes to stdout when aom_config_option_enabled() reports yes for
+# CONFIG_AV1_ENCODER.
+av1_encode_available() {
+  [ "$(aom_config_option_enabled CONFIG_AV1_ENCODER)" = "yes" ] && echo yes
 }
 
-# Echoes yes to stdout when vpx_config_option_enabled() reports yes for
+# Echoes yes to stdout when aom_config_option_enabled() reports yes for
 # CONFIG_WEBM_IO.
 webm_io_available() {
-  [ "$(vpx_config_option_enabled CONFIG_WEBM_IO)" = "yes" ] && echo yes
+  [ "$(aom_config_option_enabled CONFIG_WEBM_IO)" = "yes" ] && echo yes
 }
 
 # Filters strings from $1 using the filter specified by $2. Filter behavior
@@ -223,28 +223,28 @@ filter_strings() {
 # Runs user test functions passed via positional parameters one and two.
 # Functions in positional parameter one are treated as environment verification
 # functions and are run unconditionally. Functions in positional parameter two
-# are run according to the rules specified in vpx_test_usage().
+# are run according to the rules specified in aom_test_usage().
 run_tests() {
-  local env_tests="verify_vpx_test_environment $1"
+  local env_tests="verify_aom_test_environment $1"
   local tests_to_filter="$2"
-  local test_name="${VPX_TEST_NAME}"
+  local test_name="${AOM_TEST_NAME}"
 
   if [ -z "${test_name}" ]; then
     test_name="$(basename "${0%.*}")"
   fi
 
-  if [ "${VPX_TEST_RUN_DISABLED_TESTS}" != "yes" ]; then
+  if [ "${AOM_TEST_RUN_DISABLED_TESTS}" != "yes" ]; then
     # Filter out DISABLED tests.
     tests_to_filter=$(filter_strings "${tests_to_filter}" ^DISABLED exclude)
   fi
 
-  if [ -n "${VPX_TEST_FILTER}" ]; then
+  if [ -n "${AOM_TEST_FILTER}" ]; then
     # Remove tests not matching the user's filter.
-    tests_to_filter=$(filter_strings "${tests_to_filter}" ${VPX_TEST_FILTER})
+    tests_to_filter=$(filter_strings "${tests_to_filter}" ${AOM_TEST_FILTER})
   fi
 
   # User requested test listing: Dump test names and return.
-  if [ "${VPX_TEST_LIST_TESTS}" = "yes" ]; then
+  if [ "${AOM_TEST_LIST_TESTS}" = "yes" ]; then
     for test_name in $tests_to_filter; do
       echo ${test_name}
     done
@@ -272,7 +272,7 @@ run_tests() {
   echo "${test_name}: Done, all tests pass for ${tested_config}."
 }
 
-vpx_test_usage() {
+aom_test_usage() {
 cat << EOF
   Usage: ${0##*/} [arguments]
     --bin-path <path to libaom binaries directory>
@@ -301,7 +301,7 @@ EOF
 
 # Returns non-zero (failure) when required environment variables are empty
 # strings.
-vpx_test_check_environment() {
+aom_test_check_environment() {
   if [ -z "${LIBAOM_BIN_PATH}" ] || \
      [ -z "${LIBAOM_CONFIG_PATH}" ] || \
      [ -z "${LIBVPX_TEST_DATA_PATH}" ]; then
@@ -321,14 +321,14 @@ while [ -n "$1" ]; do
       shift
       ;;
     --filter)
-      VPX_TEST_FILTER="$2"
+      AOM_TEST_FILTER="$2"
       shift
       ;;
     --run-disabled-tests)
-      VPX_TEST_RUN_DISABLED_TESTS=yes
+      AOM_TEST_RUN_DISABLED_TESTS=yes
       ;;
     --help)
-      vpx_test_usage
+      aom_test_usage
       exit
       ;;
     --test-data-path)
@@ -336,20 +336,20 @@ while [ -n "$1" ]; do
       shift
       ;;
     --prefix)
-      VPX_TEST_PREFIX="$2"
+      AOM_TEST_PREFIX="$2"
       shift
       ;;
     --verbose)
-      VPX_TEST_VERBOSE_OUTPUT=yes
+      AOM_TEST_VERBOSE_OUTPUT=yes
       ;;
     --show-program-output)
       devnull=
       ;;
     --list-tests)
-      VPX_TEST_LIST_TESTS=yes
+      AOM_TEST_LIST_TESTS=yes
       ;;
     *)
-      vpx_test_usage
+      aom_test_usage
       exit 1
       ;;
   esac
@@ -364,33 +364,33 @@ LIBVPX_TEST_DATA_PATH="${LIBVPX_TEST_DATA_PATH:-.}"
 
 # Create a temporary directory for output files, and a trap to clean it up.
 if [ -n "${TMPDIR}" ]; then
-  VPX_TEST_TEMP_ROOT="${TMPDIR}"
+  AOM_TEST_TEMP_ROOT="${TMPDIR}"
 elif [ -n "${TEMPDIR}" ]; then
-  VPX_TEST_TEMP_ROOT="${TEMPDIR}"
+  AOM_TEST_TEMP_ROOT="${TEMPDIR}"
 else
-  VPX_TEST_TEMP_ROOT=/tmp
+  AOM_TEST_TEMP_ROOT=/tmp
 fi
 
-VPX_TEST_OUTPUT_DIR="${VPX_TEST_TEMP_ROOT}/vpx_test_$$"
+AOM_TEST_OUTPUT_DIR="${AOM_TEST_TEMP_ROOT}/aom_test_$$"
 
-if ! mkdir -p "${VPX_TEST_OUTPUT_DIR}" || \
-   [ ! -d "${VPX_TEST_OUTPUT_DIR}" ]; then
+if ! mkdir -p "${AOM_TEST_OUTPUT_DIR}" || \
+   [ ! -d "${AOM_TEST_OUTPUT_DIR}" ]; then
   echo "${0##*/}: Cannot create output directory, giving up."
-  echo "${0##*/}:   VPX_TEST_OUTPUT_DIR=${VPX_TEST_OUTPUT_DIR}"
+  echo "${0##*/}:   AOM_TEST_OUTPUT_DIR=${AOM_TEST_OUTPUT_DIR}"
   exit 1
 fi
 
 if [ "$(is_windows_target)" = "yes" ]; then
-  VPX_TEST_EXE_SUFFIX=".exe"
+  AOM_TEST_EXE_SUFFIX=".exe"
 fi
 
 # Variables shared by tests.
 VP8_IVF_FILE="${LIBVPX_TEST_DATA_PATH}/vp80-00-comprehensive-001.ivf"
-VP9_IVF_FILE="${LIBVPX_TEST_DATA_PATH}/vp90-2-09-subpixel-00.ivf"
+AV1_IVF_FILE="${LIBVPX_TEST_DATA_PATH}/vp90-2-09-subpixel-00.ivf"
 
-VP9_WEBM_FILE="${LIBVPX_TEST_DATA_PATH}/vp90-2-00-quantizer-00.webm"
-VP9_FPM_WEBM_FILE="${LIBVPX_TEST_DATA_PATH}/vp90-2-07-frame_parallel-1.webm"
-VP9_LT_50_FRAMES_WEBM_FILE="${LIBVPX_TEST_DATA_PATH}/vp90-2-02-size-32x08.webm"
+AV1_WEBM_FILE="${LIBVPX_TEST_DATA_PATH}/vp90-2-00-quantizer-00.webm"
+AV1_FPM_WEBM_FILE="${LIBVPX_TEST_DATA_PATH}/vp90-2-07-frame_parallel-1.webm"
+AV1_LT_50_FRAMES_WEBM_FILE="${LIBVPX_TEST_DATA_PATH}/vp90-2-02-size-32x08.webm"
 
 YUV_RAW_INPUT="${LIBVPX_TEST_DATA_PATH}/hantro_collage_w352h288.yuv"
 YUV_RAW_INPUT_WIDTH=352
@@ -406,21 +406,21 @@ vlog "$(basename "${0%.*}") test configuration:
   LIBAOM_BIN_PATH=${LIBAOM_BIN_PATH}
   LIBAOM_CONFIG_PATH=${LIBAOM_CONFIG_PATH}
   LIBVPX_TEST_DATA_PATH=${LIBVPX_TEST_DATA_PATH}
-  VP8_IVF_FILE=${VP8_IVF_FILE}
-  VP9_IVF_FILE=${VP9_IVF_FILE}
-  VP9_WEBM_FILE=${VP9_WEBM_FILE}
-  VPX_TEST_EXE_SUFFIX=${VPX_TEST_EXE_SUFFIX}
-  VPX_TEST_FILTER=${VPX_TEST_FILTER}
-  VPX_TEST_LIST_TESTS=${VPX_TEST_LIST_TESTS}
-  VPX_TEST_OUTPUT_DIR=${VPX_TEST_OUTPUT_DIR}
-  VPX_TEST_PREFIX=${VPX_TEST_PREFIX}
-  VPX_TEST_RUN_DISABLED_TESTS=${VPX_TEST_RUN_DISABLED_TESTS}
-  VPX_TEST_SHOW_PROGRAM_OUTPUT=${VPX_TEST_SHOW_PROGRAM_OUTPUT}
-  VPX_TEST_TEMP_ROOT=${VPX_TEST_TEMP_ROOT}
-  VPX_TEST_VERBOSE_OUTPUT=${VPX_TEST_VERBOSE_OUTPUT}
+  AOM_IVF_FILE=${AOM_IVF_FILE}
+  AV1_IVF_FILE=${AV1_IVF_FILE}
+  AV1_WEBM_FILE=${AV1_WEBM_FILE}
+  AOM_TEST_EXE_SUFFIX=${AOM_TEST_EXE_SUFFIX}
+  AOM_TEST_FILTER=${AOM_TEST_FILTER}
+  AOM_TEST_LIST_TESTS=${AOM_TEST_LIST_TESTS}
+  AOM_TEST_OUTPUT_DIR=${AOM_TEST_OUTPUT_DIR}
+  AOM_TEST_PREFIX=${AOM_TEST_PREFIX}
+  AOM_TEST_RUN_DISABLED_TESTS=${AOM_TEST_RUN_DISABLED_TESTS}
+  AOM_TEST_SHOW_PROGRAM_OUTPUT=${AOM_TEST_SHOW_PROGRAM_OUTPUT}
+  AOM_TEST_TEMP_ROOT=${AOM_TEST_TEMP_ROOT}
+  AOM_TEST_VERBOSE_OUTPUT=${AOM_TEST_VERBOSE_OUTPUT}
   YUV_RAW_INPUT=${YUV_RAW_INPUT}
   YUV_RAW_INPUT_WIDTH=${YUV_RAW_INPUT_WIDTH}
   YUV_RAW_INPUT_HEIGHT=${YUV_RAW_INPUT_HEIGHT}
   Y4M_NOSQ_PAR_INPUT=${Y4M_NOSQ_PAR_INPUT}"
 
-fi  # End $VPX_TEST_TOOLS_COMMON_SH pseudo include guard.
+fi  # End $AOM_TEST_TOOLS_COMMON_SH pseudo include guard.

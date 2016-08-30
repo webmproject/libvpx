@@ -11,8 +11,8 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "./vpx_config.h"
-#include "./vp10_rtcd.h"
+#include "./aom_config.h"
+#include "./av1_rtcd.h"
 #include "av1/common/common.h"
 #include "av1/common/blockd.h"
 #include "av1/common/idct.h"
@@ -21,8 +21,8 @@
 #include "aom_ports/mem.h"
 
 #if HAVE_DSPR2
-void vp10_iht16x16_256_add_dspr2(const int16_t *input, uint8_t *dest, int pitch,
-                                 int tx_type) {
+void av1_iht16x16_256_add_dspr2(const int16_t *input, uint8_t *dest, int pitch,
+                                int tx_type) {
   int i, j;
   DECLARE_ALIGNED(32, int16_t, out[16 * 16]);
   int16_t *outptr = out;
@@ -90,7 +90,7 @@ void vp10_iht16x16_256_add_dspr2(const int16_t *input, uint8_t *dest, int pitch,
                                            dest[j * pitch + i]);
       }
     } break;
-    default: printf("vp10_short_iht16x16_add_dspr2 : Invalid tx_type\n"); break;
+    default: printf("av1_short_iht16x16_add_dspr2 : Invalid tx_type\n"); break;
   }
 }
 #endif  // #if HAVE_DSPR2

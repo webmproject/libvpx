@@ -12,15 +12,15 @@
 
 #include <assert.h>
 
-#include "aom/vpx_integer.h"
+#include "aom/aom_integer.h"
 #include "aom_ports/mem.h"
-#include "aom_dsp/vpx_dsp_common.h"
+#include "aom_dsp/aom_dsp_common.h"
 #include "aom_dsp/blend.h"
 
 #include "aom_dsp/x86/synonyms.h"
 #include "aom_dsp/x86/blend_sse4.h"
 
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_dsp_rtcd.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // No sub-sampling
@@ -31,7 +31,7 @@ static void blend_a64_mask_w4_sse4_1(uint8_t *dst, uint32_t dst_stride,
                                      const uint8_t *src1, uint32_t src1_stride,
                                      const uint8_t *mask, uint32_t mask_stride,
                                      int h, int w) {
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   (void)w;
 
@@ -58,7 +58,7 @@ static void blend_a64_mask_w8_sse4_1(uint8_t *dst, uint32_t dst_stride,
                                      const uint8_t *src1, uint32_t src1_stride,
                                      const uint8_t *mask, uint32_t mask_stride,
                                      int h, int w) {
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   (void)w;
 
@@ -84,7 +84,7 @@ static void blend_a64_mask_w16n_sse4_1(
     uint8_t *dst, uint32_t dst_stride, const uint8_t *src0,
     uint32_t src0_stride, const uint8_t *src1, uint32_t src1_stride,
     const uint8_t *mask, uint32_t mask_stride, int h, int w) {
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   do {
     int c;
@@ -121,7 +121,7 @@ static void blend_a64_mask_sx_w4_sse4_1(
     const uint8_t *mask, uint32_t mask_stride, int h, int w) {
   const __m128i v_zmask_b = _mm_set_epi8(0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0,
                                          0xff, 0, 0xff, 0, 0xff, 0, 0xff);
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   (void)w;
 
@@ -151,7 +151,7 @@ static void blend_a64_mask_sx_w8_sse4_1(
     const uint8_t *mask, uint32_t mask_stride, int h, int w) {
   const __m128i v_zmask_b = _mm_set_epi8(0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0,
                                          0xff, 0, 0xff, 0, 0xff, 0, 0xff);
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   (void)w;
 
@@ -181,7 +181,7 @@ static void blend_a64_mask_sx_w16n_sse4_1(
     const uint8_t *mask, uint32_t mask_stride, int h, int w) {
   const __m128i v_zmask_b = _mm_set_epi8(0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0,
                                          0xff, 0, 0xff, 0, 0xff, 0, 0xff);
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   do {
     int c;
@@ -219,7 +219,7 @@ static void blend_a64_mask_sy_w4_sse4_1(
     uint8_t *dst, uint32_t dst_stride, const uint8_t *src0,
     uint32_t src0_stride, const uint8_t *src1, uint32_t src1_stride,
     const uint8_t *mask, uint32_t mask_stride, int h, int w) {
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   (void)w;
 
@@ -248,7 +248,7 @@ static void blend_a64_mask_sy_w8_sse4_1(
     uint8_t *dst, uint32_t dst_stride, const uint8_t *src0,
     uint32_t src0_stride, const uint8_t *src1, uint32_t src1_stride,
     const uint8_t *mask, uint32_t mask_stride, int h, int w) {
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   (void)w;
 
@@ -278,7 +278,7 @@ static void blend_a64_mask_sy_w16n_sse4_1(
     uint32_t src0_stride, const uint8_t *src1, uint32_t src1_stride,
     const uint8_t *mask, uint32_t mask_stride, int h, int w) {
   const __m128i v_zero = _mm_setzero_si128();
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   do {
     int c;
@@ -317,7 +317,7 @@ static void blend_a64_mask_sx_sy_w4_sse4_1(
     const uint8_t *mask, uint32_t mask_stride, int h, int w) {
   const __m128i v_zmask_b = _mm_set_epi8(0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0,
                                          0xff, 0, 0xff, 0, 0xff, 0, 0xff);
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   (void)w;
 
@@ -352,7 +352,7 @@ static void blend_a64_mask_sx_sy_w8_sse4_1(
     const uint8_t *mask, uint32_t mask_stride, int h, int w) {
   const __m128i v_zmask_b = _mm_set_epi8(0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0,
                                          0xff, 0, 0xff, 0, 0xff, 0, 0xff);
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   (void)w;
 
@@ -387,7 +387,7 @@ static void blend_a64_mask_sx_sy_w16n_sse4_1(
     const uint8_t *mask, uint32_t mask_stride, int h, int w) {
   const __m128i v_zmask_b = _mm_set_epi8(0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0,
                                          0xff, 0, 0xff, 0, 0xff, 0, 0xff);
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   do {
     int c;
@@ -431,7 +431,7 @@ static void blend_a64_mask_sx_sy_w16n_sse4_1(
 // Dispatch
 //////////////////////////////////////////////////////////////////////////////
 
-void vpx_blend_a64_mask_sse4_1(uint8_t *dst, uint32_t dst_stride,
+void aom_blend_a64_mask_sse4_1(uint8_t *dst, uint32_t dst_stride,
                                const uint8_t *src0, uint32_t src0_stride,
                                const uint8_t *src1, uint32_t src1_stride,
                                const uint8_t *mask, uint32_t mask_stride, int h,
@@ -463,7 +463,7 @@ void vpx_blend_a64_mask_sse4_1(uint8_t *dst, uint32_t dst_stride,
   assert(IS_POWER_OF_TWO(w));
 
   if (UNLIKELY((h | w) & 3)) {  // if (w <= 2 || h <= 2)
-    vpx_blend_a64_mask_c(dst, dst_stride, src0, src0_stride, src1, src1_stride,
+    aom_blend_a64_mask_c(dst, dst_stride, src0, src0_stride, src1, src1_stride,
                          mask, mask_stride, h, w, suby, subx);
   } else {
     blend[(w >> 2) & 3][subx != 0][suby != 0](dst, dst_stride, src0,
@@ -472,7 +472,7 @@ void vpx_blend_a64_mask_sse4_1(uint8_t *dst, uint32_t dst_stride,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 //////////////////////////////////////////////////////////////////////////////
 // No sub-sampling
 //////////////////////////////////////////////////////////////////////////////
@@ -481,7 +481,7 @@ static INLINE void blend_a64_mask_bn_w4_sse4_1(
     uint16_t *dst, uint32_t dst_stride, const uint16_t *src0,
     uint32_t src0_stride, const uint16_t *src1, uint32_t src1_stride,
     const uint8_t *mask, uint32_t mask_stride, int h, blend_unit_fn blend) {
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   do {
     const __m128i v_m0_b = xx_loadl_32(mask);
@@ -522,7 +522,7 @@ static INLINE void blend_a64_mask_bn_w8n_sse4_1(
     uint32_t src0_stride, const uint16_t *src1, uint32_t src1_stride,
     const uint8_t *mask, uint32_t mask_stride, int h, int w,
     blend_unit_fn blend) {
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   do {
     int c;
@@ -570,7 +570,7 @@ static INLINE void blend_a64_mask_bn_sx_w4_sse4_1(
     const uint8_t *mask, uint32_t mask_stride, int h, blend_unit_fn blend) {
   const __m128i v_zmask_b = _mm_set_epi8(0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0,
                                          0xff, 0, 0xff, 0, 0xff, 0, 0xff);
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   do {
     const __m128i v_r_b = xx_loadl_64(mask);
@@ -617,7 +617,7 @@ static INLINE void blend_a64_mask_bn_sx_w8n_sse4_1(
     blend_unit_fn blend) {
   const __m128i v_zmask_b = _mm_set_epi8(0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0,
                                          0xff, 0, 0xff, 0, 0xff, 0, 0xff);
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   do {
     int c;
@@ -665,7 +665,7 @@ static INLINE void blend_a64_mask_bn_sy_w4_sse4_1(
     uint16_t *dst, uint32_t dst_stride, const uint16_t *src0,
     uint32_t src0_stride, const uint16_t *src1, uint32_t src1_stride,
     const uint8_t *mask, uint32_t mask_stride, int h, blend_unit_fn blend) {
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   do {
     const __m128i v_ra_b = xx_loadl_32(mask);
@@ -711,7 +711,7 @@ static INLINE void blend_a64_mask_bn_sy_w8n_sse4_1(
     uint32_t src0_stride, const uint16_t *src1, uint32_t src1_stride,
     const uint8_t *mask, uint32_t mask_stride, int h, int w,
     blend_unit_fn blend) {
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   do {
     int c;
@@ -762,7 +762,7 @@ static INLINE void blend_a64_mask_bn_sx_sy_w4_sse4_1(
     const uint8_t *mask, uint32_t mask_stride, int h, blend_unit_fn blend) {
   const __m128i v_zmask_b = _mm_set_epi8(0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0,
                                          0xff, 0, 0xff, 0, 0xff, 0, 0xff);
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   do {
     const __m128i v_ra_b = xx_loadl_64(mask);
@@ -814,7 +814,7 @@ static INLINE void blend_a64_mask_bn_sx_sy_w8n_sse4_1(
     blend_unit_fn blend) {
   const __m128i v_zmask_b = _mm_set_epi8(0, 0xff, 0, 0xff, 0, 0xff, 0, 0xff, 0,
                                          0xff, 0, 0xff, 0, 0xff, 0, 0xff);
-  const __m128i v_maxval_w = _mm_set1_epi16(VPX_BLEND_A64_MAX_ALPHA);
+  const __m128i v_maxval_w = _mm_set1_epi16(AOM_BLEND_A64_MAX_ALPHA);
 
   do {
     int c;
@@ -863,7 +863,7 @@ static void blend_a64_mask_b12_sx_sy_w8n_sse4_1(
 // Dispatch
 //////////////////////////////////////////////////////////////////////////////
 
-void vpx_highbd_blend_a64_mask_sse4_1(uint8_t *dst_8, uint32_t dst_stride,
+void aom_highbd_blend_a64_mask_sse4_1(uint8_t *dst_8, uint32_t dst_stride,
                                       const uint8_t *src0_8,
                                       uint32_t src0_stride,
                                       const uint8_t *src1_8,
@@ -907,7 +907,7 @@ void vpx_highbd_blend_a64_mask_sse4_1(uint8_t *dst_8, uint32_t dst_stride,
 
   assert(bd == 8 || bd == 10 || bd == 12);
   if (UNLIKELY((h | w) & 3)) {  // if (w <= 2 || h <= 2)
-    vpx_highbd_blend_a64_mask_c(dst_8, dst_stride, src0_8, src0_stride, src1_8,
+    aom_highbd_blend_a64_mask_c(dst_8, dst_stride, src0_8, src0_stride, src1_8,
                                 src1_stride, mask, mask_stride, h, w, suby,
                                 subx, bd);
   } else {
@@ -920,4 +920,4 @@ void vpx_highbd_blend_a64_mask_sse4_1(uint8_t *dst_8, uint32_t dst_stride,
         mask_stride, h, w);
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH

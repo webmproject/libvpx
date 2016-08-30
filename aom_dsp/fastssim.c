@@ -14,8 +14,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_config.h"
+#include "./aom_dsp_rtcd.h"
 #include "aom_dsp/ssim.h"
 #include "aom_ports/system_state.h"
 
@@ -24,7 +24,7 @@ typedef struct fs_ctx fs_ctx;
 
 #define SSIM_C1 (255 * 255 * 0.01 * 0.01)
 #define SSIM_C2 (255 * 255 * 0.03 * 0.03)
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 #define SSIM_C1_10 (1023 * 1023 * 0.01 * 0.01)
 #define SSIM_C1_12 (4095 * 4095 * 0.01 * 0.01)
 #define SSIM_C2_10 (1023 * 1023 * 0.03 * 0.03)
@@ -197,7 +197,7 @@ static void fs_apply_luminance(fs_ctx *_ctx, int _l, int bit_depth) {
   int i;
   int j;
   double ssim_c1 = SSIM_C1;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   if (bit_depth == 10) ssim_c1 = SSIM_C1_10;
   if (bit_depth == 12) ssim_c1 = SSIM_C1_12;
 #else
@@ -321,7 +321,7 @@ static void fs_calc_structure(fs_ctx *_ctx, int _l, int bit_depth) {
   int i;
   int j;
   double ssim_c2 = SSIM_C2;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   if (bit_depth == 10) ssim_c2 = SSIM_C2_10;
   if (bit_depth == 12) ssim_c2 = SSIM_C2_12;
 #else
@@ -465,13 +465,13 @@ static double calc_ssim(const uint8_t *_src, int _systride, const uint8_t *_dst,
   return ret;
 }
 
-double vpx_calc_fastssim(const YV12_BUFFER_CONFIG *source,
+double aom_calc_fastssim(const YV12_BUFFER_CONFIG *source,
                          const YV12_BUFFER_CONFIG *dest, double *ssim_y,
                          double *ssim_u, double *ssim_v, uint32_t bd,
                          uint32_t in_bd) {
   double ssimv;
   uint32_t bd_shift = 0;
-  vpx_clear_system_state();
+  aom_clear_system_state();
   assert(bd >= in_bd);
   bd_shift = bd - in_bd;
 

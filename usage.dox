@@ -1,6 +1,6 @@
 /*!\page usage Usage
 
-    The vpx multi-format codec SDK provides a unified interface amongst its
+    The aom multi-format codec SDK provides a unified interface amongst its
     supported codecs. This abstraction allows applications using this SDK to
     easily support multiple video formats with minimal code duplication or
     "special casing." This section describes the interface common to all codecs.
@@ -34,7 +34,7 @@
 
     Most operations require an initialized codec context. Codec context
     instances are codec specific. That is, the codec to be used for the encoded
-    video must be known at initialization time. See #vpx_codec_ctx_t for further
+    video must be known at initialization time. See #aom_codec_ctx_t for further
     information.
 
     \subsection usage_ifaces Interfaces
@@ -46,7 +46,7 @@
 
     Each supported codec will expose an interface structure to the application
     as an <code>extern</code> reference to a structure of the incomplete type
-    #vpx_codec_iface_t.
+    #aom_codec_iface_t.
 
     \section usage_features Features
     Several "features" are defined that are optionally implemented by codec
@@ -54,8 +54,8 @@
     different platforms. The purpose of defining these features is that when
     they are implemented, they conform to a common interface. The features, or
     capabilities, of an algorithm can be queried from it's interface by using
-    the vpx_codec_get_caps() method. Attempts to invoke features not supported
-    by an algorithm will generally result in #VPX_CODEC_INCAPABLE.
+    the aom_codec_get_caps() method. Attempts to invoke features not supported
+    by an algorithm will generally result in #AOM_CODEC_INCAPABLE.
 
     \if decoder
     Currently defined decoder features include:
@@ -72,41 +72,41 @@
     the ABI is versioned. The ABI version number must be passed at
     initialization time to ensure the application is using a header file that
     matches the library. The current ABI version number is stored in the
-    preprocessor macros #VPX_CODEC_ABI_VERSION, #VPX_ENCODER_ABI_VERSION, and
-    #VPX_DECODER_ABI_VERSION. For convenience, each initialization function has
+    preprocessor macros #AOM_CODEC_ABI_VERSION, #AOM_ENCODER_ABI_VERSION, and
+    #AOM_DECODER_ABI_VERSION. For convenience, each initialization function has
     a wrapper macro that inserts the correct version number. These macros are
     named like the initialization methods, but without the _ver suffix.
 
 
     The available initialization methods are:
     \if encoder
-    \li #vpx_codec_enc_init (calls vpx_codec_enc_init_ver())
-    \li #vpx_codec_enc_init_multi (calls vpx_codec_enc_init_multi_ver())
+    \li #aom_codec_enc_init (calls aom_codec_enc_init_ver())
+    \li #aom_codec_enc_init_multi (calls aom_codec_enc_init_multi_ver())
     \endif
     \if decoder
-    \li #vpx_codec_dec_init (calls vpx_codec_dec_init_ver())
+    \li #aom_codec_dec_init (calls aom_codec_dec_init_ver())
     \endif
 
 
     \section usage_errors Error Handling
-    Almost all codec functions return an error status of type #vpx_codec_err_t.
+    Almost all codec functions return an error status of type #aom_codec_err_t.
     The semantics of how each error condition should be processed is clearly
     defined in the definitions of each enumerated value. Error values can be
-    converted into ASCII strings with the vpx_codec_error() and
-    vpx_codec_err_to_string() methods. The difference between these two methods is
-    that vpx_codec_error() returns the error state from an initialized context,
-    whereas vpx_codec_err_to_string() can be used in cases where an error occurs
+    converted into ASCII strings with the aom_codec_error() and
+    aom_codec_err_to_string() methods. The difference between these two methods is
+    that aom_codec_error() returns the error state from an initialized context,
+    whereas aom_codec_err_to_string() can be used in cases where an error occurs
     outside any context. The enumerated value returned from the last call can be
     retrieved from the <code>err</code> member of the decoder context as well.
     Finally, more detailed error information may be able to be obtained by using
-    the vpx_codec_error_detail() method. Not all errors produce detailed error
+    the aom_codec_error_detail() method. Not all errors produce detailed error
     information.
 
     In addition to error information, the codec library's build configuration
     is available at runtime on some platforms. This information can be returned
-    by calling vpx_codec_build_config(), and is formatted as a base64 coded string
+    by calling aom_codec_build_config(), and is formatted as a base64 coded string
     (comprised of characters in the set [a-z_a-Z0-9+/]). This information is not
-    useful to an application at runtime, but may be of use to vpx for support.
+    useful to an application at runtime, but may be of use to aom for support.
 
 
     \section usage_deadline Deadline
@@ -116,7 +116,7 @@
     returning. This is a soft deadline -- that is, the semantics of the
     requested operation take precedence over meeting the deadline. If, for
     example, an application sets a <code>deadline</code> of 1000us, and the
-    frame takes 2000us to decode, the call to vpx_codec_decode() will return
+    frame takes 2000us to decode, the call to aom_codec_decode() will return
     after 2000us. In this case the deadline is not met, but the semantics of the
     function are preserved. If, for the same frame, an application instead sets
     a <code>deadline</code> of 5000us, the decoder will see that it has 3000us

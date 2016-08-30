@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-struct VpxInputContext;
+struct AvxInputContext;
 
 struct WebmInputContext {
   void *reader;
@@ -38,7 +38,7 @@ struct WebmInputContext {
 // TODO(vigneshv): Refactor this function into two smaller functions specific
 // to their task.
 int file_is_webm(struct WebmInputContext *webm_ctx,
-                 struct VpxInputContext *vpx_ctx);
+                 struct AvxInputContext *aom_ctx);
 
 // Reads a WebM Video Frame. Memory for the buffer is created, owned and managed
 // by this function. For the first call, |buffer| should be NULL and
@@ -57,7 +57,7 @@ int webm_read_frame(struct WebmInputContext *webm_ctx, uint8_t **buffer,
 
 // Guesses the frame rate of the input file based on the container timestamps.
 int webm_guess_framerate(struct WebmInputContext *webm_ctx,
-                         struct VpxInputContext *vpx_ctx);
+                         struct AvxInputContext *aom_ctx);
 
 // Resets the WebMInputContext.
 void webm_free(struct WebmInputContext *webm_ctx);

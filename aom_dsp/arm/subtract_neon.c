@@ -10,10 +10,10 @@
 
 #include <arm_neon.h>
 
-#include "./vpx_config.h"
-#include "aom/vpx_integer.h"
+#include "./aom_config.h"
+#include "aom/aom_integer.h"
 
-void vpx_subtract_block_neon(int rows, int cols, int16_t *diff,
+void aom_subtract_block_neon(int rows, int cols, int16_t *diff,
                              ptrdiff_t diff_stride, const uint8_t *src,
                              ptrdiff_t src_stride, const uint8_t *pred,
                              ptrdiff_t pred_stride) {

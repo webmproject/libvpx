@@ -8,10 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_COMMON_ENTROPYMV_H_
-#define VP10_COMMON_ENTROPYMV_H_
+#ifndef AV1_COMMON_ENTROPYMV_H_
+#define AV1_COMMON_ENTROPYMV_H_
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 
 #include "aom_dsp/prob.h"
 
@@ -21,12 +21,12 @@
 extern "C" {
 #endif
 
-struct VP10Common;
+struct AV1Common;
 
-void vp10_init_mv_probs(struct VP10Common *cm);
+void av1_init_mv_probs(struct AV1Common *cm);
 
-void vp10_adapt_mv_probs(struct VP10Common *cm, int usehp);
-int vp10_use_mv_hp(const MV *ref);
+void av1_adapt_mv_probs(struct AV1Common *cm, int usehp);
+int av1_use_mv_hp(const MV *ref);
 
 #define MV_UPDATE_PROB 252
 
@@ -76,31 +76,31 @@ typedef enum {
 #define MV_UPP ((1 << MV_IN_USE_BITS) - 1)
 #define MV_LOW (-(1 << MV_IN_USE_BITS))
 
-extern const vpx_tree_index vp10_mv_joint_tree[];
-extern const vpx_tree_index vp10_mv_class_tree[];
-extern const vpx_tree_index vp10_mv_class0_tree[];
-extern const vpx_tree_index vp10_mv_fp_tree[];
+extern const aom_tree_index av1_mv_joint_tree[];
+extern const aom_tree_index av1_mv_class_tree[];
+extern const aom_tree_index av1_mv_class0_tree[];
+extern const aom_tree_index av1_mv_fp_tree[];
 
 typedef struct {
-  vpx_prob sign;
-  vpx_prob classes[MV_CLASSES - 1];
-  vpx_prob class0[CLASS0_SIZE - 1];
-  vpx_prob bits[MV_OFFSET_BITS];
-  vpx_prob class0_fp[CLASS0_SIZE][MV_FP_SIZE - 1];
-  vpx_prob fp[MV_FP_SIZE - 1];
-  vpx_prob class0_hp;
-  vpx_prob hp;
+  aom_prob sign;
+  aom_prob classes[MV_CLASSES - 1];
+  aom_prob class0[CLASS0_SIZE - 1];
+  aom_prob bits[MV_OFFSET_BITS];
+  aom_prob class0_fp[CLASS0_SIZE][MV_FP_SIZE - 1];
+  aom_prob fp[MV_FP_SIZE - 1];
+  aom_prob class0_hp;
+  aom_prob hp;
 } nmv_component;
 
 typedef struct {
-  vpx_prob joints[MV_JOINTS - 1];
+  aom_prob joints[MV_JOINTS - 1];
 #if CONFIG_REF_MV
-  vpx_prob zero_rmv;
+  aom_prob zero_rmv;
 #endif
   nmv_component comps[2];
 } nmv_context;
 
-static INLINE MV_JOINT_TYPE vp10_get_mv_joint(const MV *mv) {
+static INLINE MV_JOINT_TYPE av1_get_mv_joint(const MV *mv) {
   if (mv->row == 0) {
     return mv->col == 0 ? MV_JOINT_ZERO : MV_JOINT_HNZVZ;
   } else {
@@ -108,7 +108,7 @@ static INLINE MV_JOINT_TYPE vp10_get_mv_joint(const MV *mv) {
   }
 }
 
-MV_CLASS_TYPE vp10_get_mv_class(int z, int *offset);
+MV_CLASS_TYPE av1_get_mv_class(int z, int *offset);
 
 typedef struct {
   unsigned int sign[2];
@@ -129,15 +129,15 @@ typedef struct {
   nmv_component_counts comps[2];
 } nmv_context_counts;
 
-void vp10_inc_mv(const MV *mv, nmv_context_counts *mvctx, const int usehp);
+void av1_inc_mv(const MV *mv, nmv_context_counts *mvctx, const int usehp);
 
 #if CONFIG_GLOBAL_MOTION
-extern const vpx_tree_index
-    vp10_global_motion_types_tree[TREE_SIZE(GLOBAL_MOTION_TYPES)];
+extern const aom_tree_index
+    av1_global_motion_types_tree[TREE_SIZE(GLOBAL_MOTION_TYPES)];
 #endif  // CONFIG_GLOBAL_MOTION
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
 
-#endif  // VP10_COMMON_ENTROPYMV_H_
+#endif  // AV1_COMMON_ENTROPYMV_H_

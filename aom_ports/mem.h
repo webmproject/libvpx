@@ -8,11 +8,11 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_PORTS_MEM_H_
-#define VPX_PORTS_MEM_H_
+#ifndef AOM_PORTS_MEM_H_
+#define AOM_PORTS_MEM_H_
 
-#include "vpx_config.h"
-#include "aom/vpx_integer.h"
+#include "aom_config.h"
+#include "aom/aom_integer.h"
 
 #if (defined(__GNUC__) && __GNUC__) || defined(__SUNPRO_C)
 #define DECLARE_ALIGNED(n, typ, val) typ val __attribute__((aligned(n)))
@@ -49,8 +49,8 @@
   (((value) + ((1 << (n)) - 1)) & ~((1 << (n)) - 1))
 
 #define CONVERT_TO_SHORTPTR(x) ((uint16_t *)(((uintptr_t)(x)) << 1))
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 #define CONVERT_TO_BYTEPTR(x) ((uint8_t *)(((uintptr_t)(x)) >> 1))
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
-#endif  // VPX_PORTS_MEM_H_
+#endif  // AOM_PORTS_MEM_H_

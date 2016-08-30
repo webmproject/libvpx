@@ -1,9 +1,9 @@
-#ifndef VP10_COMMON_ODINTRIN_H_
-#define VP10_COMMON_ODINTRIN_H_
+#ifndef AV1_COMMON_ODINTRIN_H_
+#define AV1_COMMON_ODINTRIN_H_
 
 #include "av1/common/enums.h"
-#include "aom/vpx_integer.h"
-#include "aom_dsp/vpx_dsp_common.h"
+#include "aom/aom_integer.h"
+#include "aom_dsp/aom_dsp_common.h"
 #include "aom_ports/bitops.h"
 
 /*Smallest blocks are 4x4*/
@@ -33,7 +33,7 @@ extern uint32_t OD_DIVU_SMALL_CONSTS[OD_DIVU_DMAX][2];
 #define OD_DIVU(_x, _d) \
   (((_d) < OD_DIVU_DMAX) ? (OD_DIVU_SMALL((_x), (_d))) : ((_x) / (_d)))
 
-#define OD_MINI VPXMIN
+#define OD_MINI AOMMIN
 #define OD_CLAMPI(min, val, max) clamp((val), (min), (max))
 
 #define OD_CLZ0 (1)

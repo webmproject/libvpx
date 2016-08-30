@@ -8,10 +8,10 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-    EXPORT  |vpx_idct16x16_256_add_neon_pass1|
-    EXPORT  |vpx_idct16x16_256_add_neon_pass2|
-    EXPORT  |vpx_idct16x16_10_add_neon_pass1|
-    EXPORT  |vpx_idct16x16_10_add_neon_pass2|
+    EXPORT  |aom_idct16x16_256_add_neon_pass1|
+    EXPORT  |aom_idct16x16_256_add_neon_pass2|
+    EXPORT  |aom_idct16x16_10_add_neon_pass1|
+    EXPORT  |aom_idct16x16_10_add_neon_pass2|
     ARM
     REQUIRE8
     PRESERVE8
@@ -36,7 +36,7 @@
     MEND
 
     AREA    Block, CODE, READONLY ; name this block of code
-;void |vpx_idct16x16_256_add_neon_pass1|(int16_t *input,
+;void |aom_idct16x16_256_add_neon_pass1|(int16_t *input,
 ;                                          int16_t *output, int output_stride)
 ;
 ; r0  int16_t input
@@ -46,7 +46,7 @@
 ; idct16 stage1 - stage6 on all the elements loaded in q8-q15. The output
 ; will be stored back into q8-q15 registers. This function will touch q0-q7
 ; registers and use them as buffer during calculation.
-|vpx_idct16x16_256_add_neon_pass1| PROC
+|aom_idct16x16_256_add_neon_pass1| PROC
 
     ; TODO(hkuang): Find a better way to load the elements.
     ; load elements of 0, 2, 4, 6, 8, 10, 12, 14 into q8 - q15
@@ -273,9 +273,9 @@
     vst1.64         {d31}, [r1], r2
 
     bx              lr
-    ENDP  ; |vpx_idct16x16_256_add_neon_pass1|
+    ENDP  ; |aom_idct16x16_256_add_neon_pass1|
 
-;void vpx_idct16x16_256_add_neon_pass2(int16_t *src,
+;void aom_idct16x16_256_add_neon_pass2(int16_t *src,
 ;                                        int16_t *output,
 ;                                        int16_t *pass1Output,
 ;                                        int16_t skip_adding,
@@ -292,7 +292,7 @@
 ; idct16 stage1 - stage7 on all the elements loaded in q8-q15. The output
 ; will be stored back into q8-q15 registers. This function will touch q0-q7
 ; registers and use them as buffer during calculation.
-|vpx_idct16x16_256_add_neon_pass2| PROC
+|aom_idct16x16_256_add_neon_pass2| PROC
     push            {r3-r9}
 
     ; TODO(hkuang): Find a better way to load the elements.
@@ -784,9 +784,9 @@ skip_adding_dest
 end_idct16x16_pass2
     pop             {r3-r9}
     bx              lr
-    ENDP  ; |vpx_idct16x16_256_add_neon_pass2|
+    ENDP  ; |aom_idct16x16_256_add_neon_pass2|
 
-;void |vpx_idct16x16_10_add_neon_pass1|(int16_t *input,
+;void |aom_idct16x16_10_add_neon_pass1|(int16_t *input,
 ;                                             int16_t *output, int output_stride)
 ;
 ; r0  int16_t input
@@ -796,7 +796,7 @@ end_idct16x16_pass2
 ; idct16 stage1 - stage6 on all the elements loaded in q8-q15. The output
 ; will be stored back into q8-q15 registers. This function will touch q0-q7
 ; registers and use them as buffer during calculation.
-|vpx_idct16x16_10_add_neon_pass1| PROC
+|aom_idct16x16_10_add_neon_pass1| PROC
 
     ; TODO(hkuang): Find a better way to load the elements.
     ; load elements of 0, 2, 4, 6, 8, 10, 12, 14 into q8 - q15
@@ -905,9 +905,9 @@ end_idct16x16_pass2
     vst1.64         {d31}, [r1], r2
 
     bx              lr
-    ENDP  ; |vpx_idct16x16_10_add_neon_pass1|
+    ENDP  ; |aom_idct16x16_10_add_neon_pass1|
 
-;void vpx_idct16x16_10_add_neon_pass2(int16_t *src,
+;void aom_idct16x16_10_add_neon_pass2(int16_t *src,
 ;                                           int16_t *output,
 ;                                           int16_t *pass1Output,
 ;                                           int16_t skip_adding,
@@ -924,7 +924,7 @@ end_idct16x16_pass2
 ; idct16 stage1 - stage7 on all the elements loaded in q8-q15. The output
 ; will be stored back into q8-q15 registers. This function will touch q0-q7
 ; registers and use them as buffer during calculation.
-|vpx_idct16x16_10_add_neon_pass2| PROC
+|aom_idct16x16_10_add_neon_pass2| PROC
     push            {r3-r9}
 
     ; TODO(hkuang): Find a better way to load the elements.
@@ -1175,5 +1175,5 @@ end_idct16x16_pass2
 end_idct10_16x16_pass2
     pop             {r3-r9}
     bx              lr
-    ENDP  ; |vpx_idct16x16_10_add_neon_pass2|
+    ENDP  ; |aom_idct16x16_10_add_neon_pass2|
     END

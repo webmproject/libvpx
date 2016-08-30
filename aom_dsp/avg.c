@@ -9,10 +9,10 @@
  */
 #include <stdlib.h>
 
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_dsp_rtcd.h"
 #include "aom_ports/mem.h"
 
-unsigned int vpx_avg_8x8_c(const uint8_t *src, int stride) {
+unsigned int aom_avg_8x8_c(const uint8_t *src, int stride) {
   int i, j;
   int sum = 0;
   for (i = 0; i < 8; ++i, src += stride)
@@ -22,7 +22,7 @@ unsigned int vpx_avg_8x8_c(const uint8_t *src, int stride) {
   return ROUND_POWER_OF_TWO(sum, 6);
 }
 
-unsigned int vpx_avg_4x4_c(const uint8_t *src, int stride) {
+unsigned int aom_avg_4x4_c(const uint8_t *src, int stride) {
   int i, j;
   int sum = 0;
   for (i = 0; i < 4; ++i, src += stride)
@@ -66,7 +66,7 @@ static void hadamard_col8(const int16_t *src_diff, int src_stride,
 
 // The order of the output coeff of the hadamard is not important. For
 // optimization purposes the final transpose may be skipped.
-void vpx_hadamard_8x8_c(const int16_t *src_diff, int src_stride,
+void aom_hadamard_8x8_c(const int16_t *src_diff, int src_stride,
                         int16_t *coeff) {
   int idx;
   int16_t buffer[64];
@@ -89,14 +89,14 @@ void vpx_hadamard_8x8_c(const int16_t *src_diff, int src_stride,
 }
 
 // In place 16x16 2D Hadamard transform
-void vpx_hadamard_16x16_c(const int16_t *src_diff, int src_stride,
+void aom_hadamard_16x16_c(const int16_t *src_diff, int src_stride,
                           int16_t *coeff) {
   int idx;
   for (idx = 0; idx < 4; ++idx) {
     // src_diff: 9 bit, dynamic range [-255, 255]
     const int16_t *src_ptr =
         src_diff + (idx >> 1) * 8 * src_stride + (idx & 0x01) * 8;
-    vpx_hadamard_8x8_c(src_ptr, src_stride, coeff + idx * 64);
+    aom_hadamard_8x8_c(src_ptr, src_stride, coeff + idx * 64);
   }
 
   // coeff: 15 bit, dynamic range [-16320, 16320]
@@ -122,7 +122,7 @@ void vpx_hadamard_16x16_c(const int16_t *src_diff, int src_stride,
 
 // coeff: 16 bits, dynamic range [-32640, 32640].
 // length: value range {16, 64, 256, 1024}.
-int vpx_satd_c(const int16_t *coeff, int length) {
+int aom_satd_c(const int16_t *coeff, int length) {
   int i;
   int satd = 0;
   for (i = 0; i < length; ++i) satd += abs(coeff[i]);
@@ -133,7 +133,7 @@ int vpx_satd_c(const int16_t *coeff, int length) {
 
 // Integer projection onto row vectors.
 // height: value range {16, 32, 64}.
-void vpx_int_pro_row_c(int16_t hbuf[16], const uint8_t *ref,
+void aom_int_pro_row_c(int16_t hbuf[16], const uint8_t *ref,
                        const int ref_stride, const int height) {
   int idx;
   const int norm_factor = height >> 1;
@@ -149,7 +149,7 @@ void vpx_int_pro_row_c(int16_t hbuf[16], const uint8_t *ref,
 }
 
 // width: value range {16, 32, 64}.
-int16_t vpx_int_pro_col_c(const uint8_t *ref, const int width) {
+int16_t aom_int_pro_col_c(const uint8_t *ref, const int width) {
   int idx;
   int16_t sum = 0;
   // sum: 14 bit, dynamic range [0, 16320]
@@ -160,7 +160,7 @@ int16_t vpx_int_pro_col_c(const uint8_t *ref, const int width) {
 // ref: [0 - 510]
 // src: [0 - 510]
 // bwl: {2, 3, 4}
-int vpx_vector_var_c(const int16_t *ref, const int16_t *src, const int bwl) {
+int aom_vector_var_c(const int16_t *ref, const int16_t *src, const int bwl) {
   int i;
   int width = 4 << bwl;
   int sse = 0, mean = 0, var;
@@ -176,7 +176,7 @@ int vpx_vector_var_c(const int16_t *ref, const int16_t *src, const int bwl) {
   return var;
 }
 
-void vpx_minmax_8x8_c(const uint8_t *src, int src_stride, const uint8_t *ref,
+void aom_minmax_8x8_c(const uint8_t *src, int src_stride, const uint8_t *ref,
                       int ref_stride, int *min, int *max) {
   int i, j;
   *min = 255;
@@ -190,8 +190,8 @@ void vpx_minmax_8x8_c(const uint8_t *src, int src_stride, const uint8_t *ref,
   }
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
-unsigned int vpx_highbd_avg_8x8_c(const uint8_t *src, int stride) {
+#if CONFIG_AOM_HIGHBITDEPTH
+unsigned int aom_highbd_avg_8x8_c(const uint8_t *src, int stride) {
   int i, j;
   int sum = 0;
   const uint16_t *s = CONVERT_TO_SHORTPTR(src);
@@ -202,7 +202,7 @@ unsigned int vpx_highbd_avg_8x8_c(const uint8_t *src, int stride) {
   return ROUND_POWER_OF_TWO(sum, 6);
 }
 
-unsigned int vpx_highbd_avg_4x4_c(const uint8_t *src, int stride) {
+unsigned int aom_highbd_avg_4x4_c(const uint8_t *src, int stride) {
   int i, j;
   int sum = 0;
   const uint16_t *s = CONVERT_TO_SHORTPTR(src);
@@ -213,7 +213,7 @@ unsigned int vpx_highbd_avg_4x4_c(const uint8_t *src, int stride) {
   return ROUND_POWER_OF_TWO(sum, 4);
 }
 
-void vpx_highbd_minmax_8x8_c(const uint8_t *s8, int p, const uint8_t *d8,
+void aom_highbd_minmax_8x8_c(const uint8_t *s8, int p, const uint8_t *d8,
                              int dp, int *min, int *max) {
   int i, j;
   const uint16_t *s = CONVERT_TO_SHORTPTR(s8);
@@ -228,4 +228,4 @@ void vpx_highbd_minmax_8x8_c(const uint8_t *s8, int p, const uint8_t *d8,
     }
   }
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH

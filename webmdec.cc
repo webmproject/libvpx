@@ -52,34 +52,34 @@ void get_first_cluster(struct WebmInputContext *const webm_ctx) {
 }
 
 void rewind_and_reset(struct WebmInputContext *const webm_ctx,
-                      struct VpxInputContext *const vpx_ctx) {
-  rewind(vpx_ctx->file);
+                      struct AvxInputContext *const aom_ctx) {
+  rewind(aom_ctx->file);
   reset(webm_ctx);
 }
 
 }  // namespace
 
 int file_is_webm(struct WebmInputContext *webm_ctx,
-                 struct VpxInputContext *vpx_ctx) {
-  mkvparser::MkvReader *const reader = new mkvparser::MkvReader(vpx_ctx->file);
+                 struct AvxInputContext *aom_ctx) {
+  mkvparser::MkvReader *const reader = new mkvparser::MkvReader(aom_ctx->file);
   webm_ctx->reader = reader;
   webm_ctx->reached_eos = 0;
 
   mkvparser::EBMLHeader header;
   long long pos = 0;
   if (header.Parse(reader, pos) < 0) {
-    rewind_and_reset(webm_ctx, vpx_ctx);
+    rewind_and_reset(webm_ctx, aom_ctx);
     return 0;
   }
 
   mkvparser::Segment *segment;
   if (mkvparser::Segment::CreateInstance(reader, pos, segment)) {
-    rewind_and_reset(webm_ctx, vpx_ctx);
+    rewind_and_reset(webm_ctx, aom_ctx);
     return 0;
   }
   webm_ctx->segment = segment;
   if (segment->Load() < 0) {
-    rewind_and_reset(webm_ctx, vpx_ctx);
+    rewind_and_reset(webm_ctx, aom_ctx);
     return 0;
   }
 
@@ -95,25 +95,21 @@ int file_is_webm(struct WebmInputContext *webm_ctx,
   }
 
   if (video_track == NULL || video_track->GetCodecId() == NULL) {
-    rewind_and_reset(webm_ctx, vpx_ctx);
+    rewind_and_reset(webm_ctx, aom_ctx);
     return 0;
   }
 
-  if (!strncmp(video_track->GetCodecId(), "V_VP8", 5)) {
-    vpx_ctx->fourcc = VP8_FOURCC;
-  } else if (!strncmp(video_track->GetCodecId(), "V_VP9", 5)) {
-    vpx_ctx->fourcc = VP9_FOURCC;
-  } else if (!strncmp(video_track->GetCodecId(), "V_VP10", 6)) {
-    vpx_ctx->fourcc = VP10_FOURCC;
+  if (!strncmp(video_track->GetCodecId(), "V_AV1", 5)) {
+    aom_ctx->fourcc = AV1_FOURCC;
   } else {
-    rewind_and_reset(webm_ctx, vpx_ctx);
+    rewind_and_reset(webm_ctx, aom_ctx);
     return 0;
   }
 
-  vpx_ctx->framerate.denominator = 0;
-  vpx_ctx->framerate.numerator = 0;
-  vpx_ctx->width = static_cast<uint32_t>(video_track->GetWidth());
-  vpx_ctx->height = static_cast<uint32_t>(video_track->GetHeight());
+  aom_ctx->framerate.denominator = 0;
+  aom_ctx->framerate.numerator = 0;
+  aom_ctx->width = static_cast<uint32_t>(video_track->GetWidth());
+  aom_ctx->height = static_cast<uint32_t>(video_track->GetHeight());
 
   get_first_cluster(webm_ctx);
 
@@ -197,7 +193,7 @@ int webm_read_frame(struct WebmInputContext *webm_ctx, uint8_t **buffer,
 }
 
 int webm_guess_framerate(struct WebmInputContext *webm_ctx,
-                         struct VpxInputContext *vpx_ctx) {
+                         struct AvxInputContext *aom_ctx) {
   uint32_t i = 0;
   uint8_t *buffer = NULL;
   size_t buffer_size = 0;
@@ -207,8 +203,8 @@ int webm_guess_framerate(struct WebmInputContext *webm_ctx,
     }
     ++i;
   }
-  vpx_ctx->framerate.numerator = (i - 1) * 1000000;
-  vpx_ctx->framerate.denominator =
+  aom_ctx->framerate.numerator = (i - 1) * 1000000;
+  aom_ctx->framerate.denominator =
       static_cast<int>(webm_ctx->timestamp_ns / 1000);
   delete[] buffer;
 

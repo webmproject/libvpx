@@ -8,10 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_ENCODER_QUANTIZE_H_
-#define VP10_ENCODER_QUANTIZE_H_
+#ifndef AV1_ENCODER_QUANTIZE_H_
+#define AV1_ENCODER_QUANTIZE_H_
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 #include "av1/common/quant_common.h"
 #include "av1/common/scan.h"
 #include "av1/encoder/block.h"
@@ -22,13 +22,13 @@ extern "C" {
 
 typedef struct QUANT_PARAM { int log_scale; } QUANT_PARAM;
 
-typedef void (*VP10_QUANT_FACADE)(const tran_low_t *coeff_ptr,
-                                  intptr_t n_coeffs, const MACROBLOCK_PLANE *p,
-                                  tran_low_t *qcoeff_ptr,
-                                  const MACROBLOCKD_PLANE *pd,
-                                  tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
-                                  const scan_order *sc,
-                                  const QUANT_PARAM *qparam);
+typedef void (*AV1_QUANT_FACADE)(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
+                                 const MACROBLOCK_PLANE *p,
+                                 tran_low_t *qcoeff_ptr,
+                                 const MACROBLOCKD_PLANE *pd,
+                                 tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
+                                 const scan_order *sc,
+                                 const QUANT_PARAM *qparam);
 
 typedef struct {
 #if CONFIG_NEW_QUANT
@@ -58,42 +58,42 @@ typedef struct {
   DECLARE_ALIGNED(16, int16_t, uv_round[QINDEX_RANGE][8]);
 } QUANTS;
 
-struct VP10_COMP;
-struct VP10Common;
+struct AV1_COMP;
+struct AV1Common;
 
-void vp10_frame_init_quantizer(struct VP10_COMP *cpi);
+void av1_frame_init_quantizer(struct AV1_COMP *cpi);
 
-void vp10_init_plane_quantizers(const struct VP10_COMP *cpi, MACROBLOCK *x,
-                                int segment_id);
+void av1_init_plane_quantizers(const struct AV1_COMP *cpi, MACROBLOCK *x,
+                               int segment_id);
 
-void vp10_init_quantizer(struct VP10_COMP *cpi);
+void av1_init_quantizer(struct AV1_COMP *cpi);
 
-void vp10_set_quantizer(struct VP10Common *cm, int q);
+void av1_set_quantizer(struct AV1Common *cm, int q);
 
-int vp10_quantizer_to_qindex(int quantizer);
+int av1_quantizer_to_qindex(int quantizer);
 
-int vp10_qindex_to_quantizer(int qindex);
+int av1_qindex_to_quantizer(int qindex);
 
-void vp10_quantize_skip(intptr_t n_coeffs, tran_low_t *qcoeff_ptr,
-                        tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr);
+void av1_quantize_skip(intptr_t n_coeffs, tran_low_t *qcoeff_ptr,
+                       tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr);
 
-void vp10_quantize_fp_facade(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
-                             const MACROBLOCK_PLANE *p, tran_low_t *qcoeff_ptr,
-                             const MACROBLOCKD_PLANE *pd,
-                             tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
-                             const scan_order *sc, const QUANT_PARAM *qparam);
-
-void vp10_quantize_b_facade(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
+void av1_quantize_fp_facade(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                             const MACROBLOCK_PLANE *p, tran_low_t *qcoeff_ptr,
                             const MACROBLOCKD_PLANE *pd,
                             tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
                             const scan_order *sc, const QUANT_PARAM *qparam);
 
-void vp10_quantize_dc_facade(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
-                             const MACROBLOCK_PLANE *p, tran_low_t *qcoeff_ptr,
-                             const MACROBLOCKD_PLANE *pd,
-                             tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
-                             const scan_order *sc, const QUANT_PARAM *qparam);
+void av1_quantize_b_facade(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
+                           const MACROBLOCK_PLANE *p, tran_low_t *qcoeff_ptr,
+                           const MACROBLOCKD_PLANE *pd, tran_low_t *dqcoeff_ptr,
+                           uint16_t *eob_ptr, const scan_order *sc,
+                           const QUANT_PARAM *qparam);
+
+void av1_quantize_dc_facade(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
+                            const MACROBLOCK_PLANE *p, tran_low_t *qcoeff_ptr,
+                            const MACROBLOCKD_PLANE *pd,
+                            tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
+                            const scan_order *sc, const QUANT_PARAM *qparam);
 
 #if CONFIG_NEW_QUANT
 void quantize_dc_nuq(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
@@ -123,14 +123,8 @@ void quantize_dc_32x32_fp_nuq(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                               uint16_t *eob_ptr);
 #endif  // CONFIG_NEW_QUANT
 
-#if CONFIG_VP9_HIGHBITDEPTH
-void vp10_highbd_quantize_fp_facade(
-    const tran_low_t *coeff_ptr, intptr_t n_coeffs, const MACROBLOCK_PLANE *p,
-    tran_low_t *qcoeff_ptr, const MACROBLOCKD_PLANE *pd,
-    tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const scan_order *sc,
-    const QUANT_PARAM *qparam);
-
-void vp10_highbd_quantize_b_facade(const tran_low_t *coeff_ptr,
+#if CONFIG_AOM_HIGHBITDEPTH
+void av1_highbd_quantize_fp_facade(const tran_low_t *coeff_ptr,
                                    intptr_t n_coeffs, const MACROBLOCK_PLANE *p,
                                    tran_low_t *qcoeff_ptr,
                                    const MACROBLOCKD_PLANE *pd,
@@ -138,17 +132,27 @@ void vp10_highbd_quantize_b_facade(const tran_low_t *coeff_ptr,
                                    const scan_order *sc,
                                    const QUANT_PARAM *qparam);
 
-void vp10_highbd_quantize_dc_facade(
-    const tran_low_t *coeff_ptr, intptr_t n_coeffs, const MACROBLOCK_PLANE *p,
-    tran_low_t *qcoeff_ptr, const MACROBLOCKD_PLANE *pd,
-    tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const scan_order *sc,
-    const QUANT_PARAM *qparam);
+void av1_highbd_quantize_b_facade(const tran_low_t *coeff_ptr,
+                                  intptr_t n_coeffs, const MACROBLOCK_PLANE *p,
+                                  tran_low_t *qcoeff_ptr,
+                                  const MACROBLOCKD_PLANE *pd,
+                                  tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
+                                  const scan_order *sc,
+                                  const QUANT_PARAM *qparam);
 
-void vp10_highbd_quantize_dc(const tran_low_t *coeff_ptr, int n_coeffs,
-                             int skip_block, const int16_t *round_ptr,
-                             const int16_t quant, tran_low_t *qcoeff_ptr,
-                             tran_low_t *dqcoeff_ptr, const int16_t dequant_ptr,
-                             uint16_t *eob_ptr, const int log_scale);
+void av1_highbd_quantize_dc_facade(const tran_low_t *coeff_ptr,
+                                   intptr_t n_coeffs, const MACROBLOCK_PLANE *p,
+                                   tran_low_t *qcoeff_ptr,
+                                   const MACROBLOCKD_PLANE *pd,
+                                   tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
+                                   const scan_order *sc,
+                                   const QUANT_PARAM *qparam);
+
+void av1_highbd_quantize_dc(const tran_low_t *coeff_ptr, int n_coeffs,
+                            int skip_block, const int16_t *round_ptr,
+                            const int16_t quant, tran_low_t *qcoeff_ptr,
+                            tran_low_t *dqcoeff_ptr, const int16_t dequant_ptr,
+                            uint16_t *eob_ptr, const int log_scale);
 #if CONFIG_NEW_QUANT
 void highbd_quantize_dc_nuq(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                             int skip_block, const int16_t quant,
@@ -176,10 +180,10 @@ void highbd_quantize_dc_32x32_fp_nuq(
     tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr);
 
 #endif  // CONFIG_NEW_QUANT
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
 
-#endif  // VP10_ENCODER_QUANTIZE_H_
+#endif  // AV1_ENCODER_QUANTIZE_H_

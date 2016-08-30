@@ -18,7 +18,7 @@ static const BLOCK_SIZE square[MAX_SB_SIZE_LOG2 - 2] = {
 #endif  // CONFIG_EXT_PARTITION
 };
 
-static void alloc_mode_context(VP10_COMMON *cm, int num_4x4_blk,
+static void alloc_mode_context(AV1_COMMON *cm, int num_4x4_blk,
 #if CONFIG_EXT_PARTITION_TYPES
                                PARTITION_TYPE partition,
 #endif
@@ -33,17 +33,17 @@ static void alloc_mode_context(VP10_COMMON *cm, int num_4x4_blk,
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
 #if CONFIG_VAR_TX
-    CHECK_MEM_ERROR(cm, ctx->blk_skip[i], vpx_calloc(num_blk, sizeof(uint8_t)));
+    CHECK_MEM_ERROR(cm, ctx->blk_skip[i], aom_calloc(num_blk, sizeof(uint8_t)));
 #endif
     for (k = 0; k < 3; ++k) {
       CHECK_MEM_ERROR(cm, ctx->coeff[i][k],
-                      vpx_memalign(32, num_pix * sizeof(*ctx->coeff[i][k])));
+                      aom_memalign(32, num_pix * sizeof(*ctx->coeff[i][k])));
       CHECK_MEM_ERROR(cm, ctx->qcoeff[i][k],
-                      vpx_memalign(32, num_pix * sizeof(*ctx->qcoeff[i][k])));
+                      aom_memalign(32, num_pix * sizeof(*ctx->qcoeff[i][k])));
       CHECK_MEM_ERROR(cm, ctx->dqcoeff[i][k],
-                      vpx_memalign(32, num_pix * sizeof(*ctx->dqcoeff[i][k])));
+                      aom_memalign(32, num_pix * sizeof(*ctx->dqcoeff[i][k])));
       CHECK_MEM_ERROR(cm, ctx->eobs[i][k],
-                      vpx_memalign(32, num_blk * sizeof(*ctx->eobs[i][k])));
+                      aom_memalign(32, num_blk * sizeof(*ctx->eobs[i][k])));
     }
   }
 
@@ -51,7 +51,7 @@ static void alloc_mode_context(VP10_COMMON *cm, int num_4x4_blk,
     for (i = 0; i < 2; ++i) {
       CHECK_MEM_ERROR(
           cm, ctx->color_index_map[i],
-          vpx_memalign(32, num_pix * sizeof(*ctx->color_index_map[i])));
+          aom_memalign(32, num_pix * sizeof(*ctx->color_index_map[i])));
     }
   }
 }
@@ -60,28 +60,28 @@ static void free_mode_context(PICK_MODE_CONTEXT *ctx) {
   int i, k;
   for (i = 0; i < MAX_MB_PLANE; ++i) {
 #if CONFIG_VAR_TX
-    vpx_free(ctx->blk_skip[i]);
+    aom_free(ctx->blk_skip[i]);
     ctx->blk_skip[i] = 0;
 #endif
     for (k = 0; k < 3; ++k) {
-      vpx_free(ctx->coeff[i][k]);
+      aom_free(ctx->coeff[i][k]);
       ctx->coeff[i][k] = 0;
-      vpx_free(ctx->qcoeff[i][k]);
+      aom_free(ctx->qcoeff[i][k]);
       ctx->qcoeff[i][k] = 0;
-      vpx_free(ctx->dqcoeff[i][k]);
+      aom_free(ctx->dqcoeff[i][k]);
       ctx->dqcoeff[i][k] = 0;
-      vpx_free(ctx->eobs[i][k]);
+      aom_free(ctx->eobs[i][k]);
       ctx->eobs[i][k] = 0;
     }
   }
 
   for (i = 0; i < 2; ++i) {
-    vpx_free(ctx->color_index_map[i]);
+    aom_free(ctx->color_index_map[i]);
     ctx->color_index_map[i] = 0;
   }
 }
 
-static void alloc_tree_contexts(VP10_COMMON *cm, PC_TREE *tree,
+static void alloc_tree_contexts(AV1_COMMON *cm, PC_TREE *tree,
                                 int num_4x4_blk) {
 #if CONFIG_EXT_PARTITION_TYPES
   alloc_mode_context(cm, num_4x4_blk, PARTITION_NONE, &tree->none);
@@ -180,7 +180,7 @@ static void free_tree_contexts(PC_TREE *tree) {
 // partition level. There are contexts for none, horizontal, vertical, and
 // split.  Along with a block_size value and a selected block_size which
 // represents the state of our search.
-void vp10_setup_pc_tree(VP10_COMMON *cm, ThreadData *td) {
+void av1_setup_pc_tree(AV1_COMMON *cm, ThreadData *td) {
   int i, j;
 #if CONFIG_EXT_PARTITION
   const int leaf_nodes = 256;
@@ -195,12 +195,12 @@ void vp10_setup_pc_tree(VP10_COMMON *cm, ThreadData *td) {
   int square_index = 1;
   int nodes;
 
-  vpx_free(td->leaf_tree);
+  aom_free(td->leaf_tree);
   CHECK_MEM_ERROR(cm, td->leaf_tree,
-                  vpx_calloc(leaf_nodes, sizeof(*td->leaf_tree)));
-  vpx_free(td->pc_tree);
+                  aom_calloc(leaf_nodes, sizeof(*td->leaf_tree)));
+  aom_free(td->pc_tree);
   CHECK_MEM_ERROR(cm, td->pc_tree,
-                  vpx_calloc(tree_nodes, sizeof(*td->pc_tree)));
+                  aom_calloc(tree_nodes, sizeof(*td->pc_tree)));
 
   this_pc = &td->pc_tree[0];
   this_leaf = &td->leaf_tree[0];
@@ -248,7 +248,7 @@ void vp10_setup_pc_tree(VP10_COMMON *cm, ThreadData *td) {
   }
 }
 
-void vp10_free_pc_tree(ThreadData *td) {
+void av1_free_pc_tree(ThreadData *td) {
 #if CONFIG_EXT_PARTITION
   const int leaf_nodes = 256;
   const int tree_nodes = 256 + 64 + 16 + 4 + 1;
@@ -264,8 +264,8 @@ void vp10_free_pc_tree(ThreadData *td) {
   // Sets up all the leaf nodes in the tree.
   for (i = 0; i < tree_nodes; ++i) free_tree_contexts(&td->pc_tree[i]);
 
-  vpx_free(td->pc_tree);
+  aom_free(td->pc_tree);
   td->pc_tree = NULL;
-  vpx_free(td->leaf_tree);
+  aom_free(td->leaf_tree);
   td->leaf_tree = NULL;
 }

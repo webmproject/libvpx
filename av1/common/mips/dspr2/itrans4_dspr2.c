@@ -11,8 +11,8 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "./vpx_config.h"
-#include "./vp10_rtcd.h"
+#include "./aom_config.h"
+#include "./av1_rtcd.h"
 #include "av1/common/common.h"
 #include "av1/common/blockd.h"
 #include "av1/common/idct.h"
@@ -21,8 +21,8 @@
 #include "aom_ports/mem.h"
 
 #if HAVE_DSPR2
-void vp10_iht4x4_16_add_dspr2(const int16_t *input, uint8_t *dest,
-                              int dest_stride, int tx_type) {
+void av1_iht4x4_16_add_dspr2(const int16_t *input, uint8_t *dest,
+                             int dest_stride, int tx_type) {
   int i, j;
   DECLARE_ALIGNED(32, int16_t, out[4 * 4]);
   int16_t *outptr = out;
@@ -36,11 +36,11 @@ void vp10_iht4x4_16_add_dspr2(const int16_t *input, uint8_t *dest,
 
   switch (tx_type) {
     case DCT_DCT:  // DCT in both horizontal and vertical
-      vpx_idct4_rows_dspr2(input, outptr);
-      vpx_idct4_columns_add_blk_dspr2(&out[0], dest, dest_stride);
+      aom_idct4_rows_dspr2(input, outptr);
+      aom_idct4_columns_add_blk_dspr2(&out[0], dest, dest_stride);
       break;
     case ADST_DCT:  // ADST in vertical, DCT in horizontal
-      vpx_idct4_rows_dspr2(input, outptr);
+      aom_idct4_rows_dspr2(input, outptr);
 
       outptr = out;
 
@@ -66,7 +66,7 @@ void vp10_iht4x4_16_add_dspr2(const int16_t *input, uint8_t *dest,
           temp_in[i * 4 + j] = out[j * 4 + i];
         }
       }
-      vpx_idct4_columns_add_blk_dspr2(&temp_in[0], dest, dest_stride);
+      aom_idct4_columns_add_blk_dspr2(&temp_in[0], dest, dest_stride);
       break;
     case ADST_ADST:  // ADST in both directions
       for (i = 0; i < 4; ++i) {
@@ -84,7 +84,7 @@ void vp10_iht4x4_16_add_dspr2(const int16_t *input, uint8_t *dest,
               ROUND_POWER_OF_TWO(temp_out[j], 4) + dest[j * dest_stride + i]);
       }
       break;
-    default: printf("vp10_short_iht4x4_add_dspr2 : Invalid tx_type\n"); break;
+    default: printf("av1_short_iht4x4_add_dspr2 : Invalid tx_type\n"); break;
   }
 }
 #endif  // #if HAVE_DSPR2

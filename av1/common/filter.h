@@ -8,12 +8,12 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_COMMON_FILTER_H_
-#define VP10_COMMON_FILTER_H_
+#ifndef AV1_COMMON_FILTER_H_
+#define AV1_COMMON_FILTER_H_
 
-#include "./vpx_config.h"
-#include "aom/vpx_integer.h"
-#include "aom_dsp/vpx_filter.h"
+#include "./aom_config.h"
+#include "aom/aom_integer.h"
+#include "aom_dsp/aom_filter.h"
 #include "aom_ports/mem.h"
 
 #ifdef __cplusplus
@@ -65,7 +65,7 @@ typedef enum {
   INTRA_FILTERS,
 } INTRA_FILTER;
 
-extern const InterpKernel *vp10_intra_filter_kernels[INTRA_FILTERS];
+extern const InterpKernel *av1_intra_filter_kernels[INTRA_FILTERS];
 #endif  // CONFIG_EXT_INTRA
 
 typedef struct InterpFilterParams {
@@ -74,26 +74,26 @@ typedef struct InterpFilterParams {
   uint16_t subpel_shifts;
 } InterpFilterParams;
 
-InterpFilterParams vp10_get_interp_filter_params(
+InterpFilterParams av1_get_interp_filter_params(
     const INTERP_FILTER interp_filter);
 
-const int16_t *vp10_get_interp_filter_kernel(const INTERP_FILTER interp_filter);
+const int16_t *av1_get_interp_filter_kernel(const INTERP_FILTER interp_filter);
 
-static INLINE const int16_t *vp10_get_interp_filter_subpel_kernel(
+static INLINE const int16_t *av1_get_interp_filter_subpel_kernel(
     const InterpFilterParams filter_params, const int subpel) {
   return filter_params.filter_ptr + filter_params.taps * subpel;
 }
 
-static INLINE int vp10_is_interpolating_filter(
+static INLINE int av1_is_interpolating_filter(
     const INTERP_FILTER interp_filter) {
-  const InterpFilterParams ip = vp10_get_interp_filter_params(interp_filter);
+  const InterpFilterParams ip = av1_get_interp_filter_params(interp_filter);
   return (ip.filter_ptr[ip.taps / 2 - 1] == 128);
 }
 
 #if USE_TEMPORALFILTER_12TAP
 extern const int8_t sub_pel_filters_temporalfilter_12_signal_dir[15][2][16];
 extern const int8_t sub_pel_filters_temporalfilter_12_ver_signal_dir[15][6][16];
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 extern const int16_t
     sub_pel_filters_temporalfilter_12_highbd_ver_signal_dir[15][6][8];
 #endif
@@ -104,24 +104,24 @@ extern const int8_t sub_pel_filters_12sharp_signal_dir[15][2][16];
 extern const int8_t sub_pel_filters_10sharp_signal_dir[15][2][16];
 extern const int8_t sub_pel_filters_12sharp_ver_signal_dir[15][6][16];
 extern const int8_t sub_pel_filters_10sharp_ver_signal_dir[15][6][16];
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 extern const int16_t sub_pel_filters_12sharp_highbd_ver_signal_dir[15][6][8];
 extern const int16_t sub_pel_filters_10sharp_highbd_ver_signal_dir[15][6][8];
 #endif
 #endif
 
 typedef const int8_t (*SubpelFilterCoeffs)[16];
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 typedef const int16_t (*HbdSubpelFilterCoeffs)[8];
 #endif
 
-SubpelFilterCoeffs vp10_get_subpel_filter_signal_dir(const InterpFilterParams p,
-                                                     int index);
+SubpelFilterCoeffs av1_get_subpel_filter_signal_dir(const InterpFilterParams p,
+                                                    int index);
 
-SubpelFilterCoeffs vp10_get_subpel_filter_ver_signal_dir(
+SubpelFilterCoeffs av1_get_subpel_filter_ver_signal_dir(
     const InterpFilterParams p, int index);
-#if CONFIG_VP9_HIGHBITDEPTH
-HbdSubpelFilterCoeffs vp10_hbd_get_subpel_filter_ver_signal_dir(
+#if CONFIG_AOM_HIGHBITDEPTH
+HbdSubpelFilterCoeffs av1_hbd_get_subpel_filter_ver_signal_dir(
     const InterpFilterParams p, int index);
 #endif
 
@@ -129,4 +129,4 @@ HbdSubpelFilterCoeffs vp10_hbd_get_subpel_filter_ver_signal_dir(
 }  // extern "C"
 #endif
 
-#endif  // VP10_COMMON_FILTER_H_
+#endif  // AV1_COMMON_FILTER_H_

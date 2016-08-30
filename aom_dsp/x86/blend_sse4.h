@@ -8,8 +8,8 @@
 *  be found in the AUTHORS file in the root of the source tree.
 */
 
-#ifndef VPX_DSP_X86_BLEND_SSE4_H_
-#define VPX_DSP_X86_BLEND_SSE4_H_
+#ifndef AOM_DSP_X86_BLEND_SSE4_H_
+#define AOM_DSP_X86_BLEND_SSE4_H_
 
 #include "aom_dsp/blend.h"
 #include "aom_dsp/x86/synonyms.h"
@@ -30,7 +30,7 @@ static INLINE __m128i blend_4(const uint8_t *src0, const uint8_t *src1,
 
   const __m128i v_sum_w = _mm_add_epi16(v_p0_w, v_p1_w);
 
-  const __m128i v_res_w = xx_roundn_epu16(v_sum_w, VPX_BLEND_A64_ROUND_BITS);
+  const __m128i v_res_w = xx_roundn_epu16(v_sum_w, AOM_BLEND_A64_ROUND_BITS);
 
   return v_res_w;
 }
@@ -47,12 +47,12 @@ static INLINE __m128i blend_8(const uint8_t *src0, const uint8_t *src1,
 
   const __m128i v_sum_w = _mm_add_epi16(v_p0_w, v_p1_w);
 
-  const __m128i v_res_w = xx_roundn_epu16(v_sum_w, VPX_BLEND_A64_ROUND_BITS);
+  const __m128i v_res_w = xx_roundn_epu16(v_sum_w, AOM_BLEND_A64_ROUND_BITS);
 
   return v_res_w;
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 typedef __m128i (*blend_unit_fn)(const uint16_t *src0, const uint16_t *src1,
                                  const __m128i v_m0_w, const __m128i v_m1_w);
 
@@ -66,7 +66,7 @@ static INLINE __m128i blend_4_b10(const uint16_t *src0, const uint16_t *src1,
 
   const __m128i v_sum_w = _mm_add_epi16(v_p0_w, v_p1_w);
 
-  const __m128i v_res_w = xx_roundn_epu16(v_sum_w, VPX_BLEND_A64_ROUND_BITS);
+  const __m128i v_res_w = xx_roundn_epu16(v_sum_w, AOM_BLEND_A64_ROUND_BITS);
 
   return v_res_w;
 }
@@ -81,7 +81,7 @@ static INLINE __m128i blend_8_b10(const uint16_t *src0, const uint16_t *src1,
 
   const __m128i v_sum_w = _mm_add_epi16(v_p0_w, v_p1_w);
 
-  const __m128i v_res_w = xx_roundn_epu16(v_sum_w, VPX_BLEND_A64_ROUND_BITS);
+  const __m128i v_res_w = xx_roundn_epu16(v_sum_w, AOM_BLEND_A64_ROUND_BITS);
 
   return v_res_w;
 }
@@ -100,7 +100,7 @@ static INLINE __m128i blend_4_b12(const uint16_t *src0, const uint16_t *src1,
 
   // Scale
   const __m128i v_ssum_d =
-      _mm_srli_epi32(v_sum_d, VPX_BLEND_A64_ROUND_BITS - 1);
+      _mm_srli_epi32(v_sum_d, AOM_BLEND_A64_ROUND_BITS - 1);
 
   // Pack
   const __m128i v_pssum_d = _mm_packs_epi32(v_ssum_d, v_ssum_d);
@@ -128,9 +128,9 @@ static INLINE __m128i blend_8_b12(const uint16_t *src0, const uint16_t *src1,
 
   // Scale
   const __m128i v_ssuml_d =
-      _mm_srli_epi32(v_suml_d, VPX_BLEND_A64_ROUND_BITS - 1);
+      _mm_srli_epi32(v_suml_d, AOM_BLEND_A64_ROUND_BITS - 1);
   const __m128i v_ssumh_d =
-      _mm_srli_epi32(v_sumh_d, VPX_BLEND_A64_ROUND_BITS - 1);
+      _mm_srli_epi32(v_sumh_d, AOM_BLEND_A64_ROUND_BITS - 1);
 
   // Pack
   const __m128i v_pssum_d = _mm_packs_epi32(v_ssuml_d, v_ssumh_d);
@@ -140,6 +140,6 @@ static INLINE __m128i blend_8_b12(const uint16_t *src0, const uint16_t *src1,
 
   return v_res_w;
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
-#endif  // VPX_DSP_X86_BLEND_SSE4_H_
+#endif  // AOM_DSP_X86_BLEND_SSE4_H_

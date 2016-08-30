@@ -11,7 +11,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 #include "aom_dsp/mips/inv_txfm_dspr2.h"
 #include "aom_dsp/txfm_common.h"
 
@@ -835,7 +835,7 @@ static void idct32_rows_dspr2(const int16_t *input, int16_t *output,
   }
 }
 
-void vpx_idct32x32_1024_add_dspr2(const int16_t *input, uint8_t *dest,
+void aom_idct32x32_1024_add_dspr2(const int16_t *input, uint8_t *dest,
                                   int dest_stride) {
   DECLARE_ALIGNED(32, int16_t, out[32 * 32]);
   int16_t *outptr = out;
@@ -850,10 +850,10 @@ void vpx_idct32x32_1024_add_dspr2(const int16_t *input, uint8_t *dest,
   idct32_rows_dspr2(input, outptr, 32);
 
   // Columns
-  vpx_idct32_cols_add_blk_dspr2(out, dest, dest_stride);
+  aom_idct32_cols_add_blk_dspr2(out, dest, dest_stride);
 }
 
-void vpx_idct32x32_34_add_dspr2(const int16_t *input, uint8_t *dest,
+void aom_idct32x32_34_add_dspr2(const int16_t *input, uint8_t *dest,
                                 int stride) {
   DECLARE_ALIGNED(32, int16_t, out[32 * 32]);
   int16_t *outptr = out;
@@ -908,10 +908,10 @@ void vpx_idct32x32_34_add_dspr2(const int16_t *input, uint8_t *dest,
   }
 
   // Columns
-  vpx_idct32_cols_add_blk_dspr2(out, dest, stride);
+  aom_idct32_cols_add_blk_dspr2(out, dest, stride);
 }
 
-void vpx_idct32x32_1_add_dspr2(const int16_t *input, uint8_t *dest,
+void aom_idct32x32_1_add_dspr2(const int16_t *input, uint8_t *dest,
                                int stride) {
   int r, out;
   int32_t a1, absa1;

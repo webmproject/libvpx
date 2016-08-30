@@ -7,7 +7,7 @@
 ;  file in the root of the source tree.
 ;
 
-    EXPORT  |vpx_idct32x32_1_add_neon|
+    EXPORT  |aom_idct32x32_1_add_neon|
     ARM
     REQUIRE8
     PRESERVE8
@@ -64,14 +64,14 @@
     vst1.8           {q15},[$dst], $stride
     MEND
 
-;void vpx_idct32x32_1_add_neon(int16_t *input, uint8_t *dest,
+;void aom_idct32x32_1_add_neon(int16_t *input, uint8_t *dest,
 ;                              int dest_stride)
 ;
 ; r0  int16_t input
 ; r1  uint8_t *dest
 ; r2  int dest_stride
 
-|vpx_idct32x32_1_add_neon| PROC
+|aom_idct32x32_1_add_neon| PROC
     push             {lr}
     pld              [r1]
     add              r3, r1, #16               ; r3 dest + 16 for second loop
@@ -140,5 +140,5 @@ diff_positive_32_32_loop
     bne              diff_positive_32_32_loop
     pop              {pc}
 
-    ENDP             ; |vpx_idct32x32_1_add_neon|
+    ENDP             ; |aom_idct32x32_1_add_neon|
     END

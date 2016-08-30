@@ -17,7 +17,7 @@ typedef struct {
   uint32_t codec_fourcc;
   int frame_width;
   int frame_height;
-  struct VpxRational time_base;
-} VpxVideoInfo;
+  struct AvxRational time_base;
+} AvxVideoInfo;
 
 #endif  // VIDEO_COMMON_H_

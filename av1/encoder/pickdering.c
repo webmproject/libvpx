@@ -10,12 +10,12 @@
 
 #include <string.h>
 
-#include "./vpx_scale_rtcd.h"
+#include "./aom_scale_rtcd.h"
 #include "av1/common/dering.h"
 #include "av1/common/onyxc_int.h"
 #include "av1/common/reconinter.h"
 #include "av1/encoder/encoder.h"
-#include "aom/vpx_integer.h"
+#include "aom/aom_integer.h"
 
 static double compute_dist(int16_t *x, int xstride, int16_t *y, int ystride,
                            int nhb, int nvb, int coeff_shift) {
@@ -32,8 +32,8 @@ static double compute_dist(int16_t *x, int xstride, int16_t *y, int ystride,
   return sum / (double)(1 << 2 * coeff_shift);
 }
 
-int vp10_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
-                       VP10_COMMON *cm, MACROBLOCKD *xd) {
+int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
+                      AV1_COMMON *cm, MACROBLOCKD *xd) {
   int r, c;
   int sbr, sbc;
   int nhsb, nvsb;
@@ -52,11 +52,11 @@ int vp10_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
   int best_level;
   int global_level;
   double best_tot_mse = 1e15;
-  int coeff_shift = VPXMAX(cm->bit_depth - 8, 0);
-  src = vpx_malloc(sizeof(*src) * cm->mi_rows * cm->mi_cols * 64);
-  ref_coeff = vpx_malloc(sizeof(*ref_coeff) * cm->mi_rows * cm->mi_cols * 64);
-  bskip = vpx_malloc(sizeof(*bskip) * cm->mi_rows * cm->mi_cols);
-  vp10_setup_dst_planes(xd->plane, frame, 0, 0);
+  int coeff_shift = AOMMAX(cm->bit_depth - 8, 0);
+  src = aom_malloc(sizeof(*src) * cm->mi_rows * cm->mi_cols * 64);
+  ref_coeff = aom_malloc(sizeof(*ref_coeff) * cm->mi_rows * cm->mi_cols * 64);
+  bskip = aom_malloc(sizeof(*bskip) * cm->mi_rows * cm->mi_cols);
+  av1_setup_dst_planes(xd->plane, frame, 0, 0);
   for (pli = 0; pli < 3; pli++) {
     dec[pli] = xd->plane[pli].subsampling_x;
     bsize[pli] = 8 >> dec[pli];
@@ -64,7 +64,7 @@ int vp10_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
   stride = bsize[0] * cm->mi_cols;
   for (r = 0; r < bsize[0] * cm->mi_rows; ++r) {
     for (c = 0; c < bsize[0] * cm->mi_cols; ++c) {
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       if (cm->use_highbitdepth) {
         src[r * stride + c] = CONVERT_TO_SHORTPTR(
             xd->plane[0].dst.buf)[r * xd->plane[0].dst.stride + c];
@@ -75,7 +75,7 @@ int vp10_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
         src[r * stride + c] =
             xd->plane[0].dst.buf[r * xd->plane[0].dst.stride + c];
         ref_coeff[r * stride + c] = ref->y_buffer[r * ref->y_stride + c];
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
       }
 #endif
     }
@@ -89,15 +89,15 @@ int vp10_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
   }
   nvsb = (cm->mi_rows + MAX_MIB_SIZE - 1) / MAX_MIB_SIZE;
   nhsb = (cm->mi_cols + MAX_MIB_SIZE - 1) / MAX_MIB_SIZE;
-  mse = vpx_malloc(nvsb * nhsb * sizeof(*mse));
+  mse = aom_malloc(nvsb * nhsb * sizeof(*mse));
   for (sbr = 0; sbr < nvsb; sbr++) {
     for (sbc = 0; sbc < nhsb; sbc++) {
       int best_mse = 1000000000;
       int nvb, nhb;
       int16_t dst[MAX_MIB_SIZE * MAX_MIB_SIZE * 8 * 8];
       best_level = 0;
-      nhb = VPXMIN(MAX_MIB_SIZE, cm->mi_cols - MAX_MIB_SIZE * sbc);
-      nvb = VPXMIN(MAX_MIB_SIZE, cm->mi_rows - MAX_MIB_SIZE * sbr);
+      nhb = AOMMIN(MAX_MIB_SIZE, cm->mi_cols - MAX_MIB_SIZE * sbc);
+      nvb = AOMMIN(MAX_MIB_SIZE, cm->mi_rows - MAX_MIB_SIZE * sbr);
       for (level = 0; level < 64; level++) {
         int threshold;
         threshold = level << coeff_shift;
@@ -169,9 +169,9 @@ int vp10_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
       if (tot_mse[level] < tot_mse[best_level]) best_level = level;
     }
 #endif
-  vpx_free(src);
-  vpx_free(ref_coeff);
-  vpx_free(bskip);
-  vpx_free(mse);
+  aom_free(src);
+  aom_free(ref_coeff);
+  aom_free(bskip);
+  aom_free(mse);
   return best_level;
 }

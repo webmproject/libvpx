@@ -25,7 +25,7 @@ void init_fastdiv() {
   }
 }
 */
-const struct fastdiv_elem vp10_fastdiv_tab[256] = {
+const struct fastdiv_elem av1_fastdiv_tab[256] = {
   { 0, 0 },           { 0, 0 },           { 0, 1 },
   { 1431655766, 2 },  { 0, 2 },           { 2576980378u, 3 },
   { 1431655766, 3 },  { 613566757, 3 },   { 0, 3 },

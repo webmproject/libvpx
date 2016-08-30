@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_ENCODER_CORNER_MATCH_H_
-#define VP10_ENCODER_CORNER_MATCH_H_
+#ifndef AV1_ENCODER_CORNER_MATCH_H_
+#define AV1_ENCODER_CORNER_MATCH_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,4 +26,4 @@ int determine_correspondence(unsigned char *frm, int *frm_corners,
                              int height, int frm_stride, int ref_stride,
                              double *correspondence_pts);
 
-#endif  // VP10_ENCODER_CORNER_MATCH_H
+#endif  // AV1_ENCODER_CORNER_MATCH_H

@@ -15,9 +15,9 @@
 #endif  // CONFIG_ANS
 #include "av1/common/entropy.h"
 
-/* round(-log2(i/256.) * (1 << VP10_PROB_COST_SHIFT))
+/* round(-log2(i/256.) * (1 << AV1_PROB_COST_SHIFT))
    Begins with a bogus entry for simpler addressing. */
-const uint16_t vp10_prob_cost[256] = {
+const uint16_t av1_prob_cost[256] = {
   4096, 4096, 3584, 3284, 3072, 2907, 2772, 2659, 2560, 2473, 2395, 2325, 2260,
   2201, 2147, 2096, 2048, 2003, 1961, 1921, 1883, 1847, 1813, 1780, 1748, 1718,
   1689, 1661, 1635, 1609, 1584, 1559, 1536, 1513, 1491, 1470, 1449, 1429, 1409,
@@ -41,8 +41,8 @@ const uint16_t vp10_prob_cost[256] = {
 };
 
 #if CONFIG_ANS
-// round(-log2(i/1024.) * (1 << VP10_PROB_COST_SHIFT))
-static const uint16_t vp10_prob_cost10[1024] = {
+// round(-log2(i/1024.) * (1 << AV1_PROB_COST_SHIFT))
+static const uint16_t av1_prob_cost10[1024] = {
   5120, 5120, 4608, 4308, 4096, 3931, 3796, 3683, 3584, 3497, 3419, 3349, 3284,
   3225, 3171, 3120, 3072, 3027, 2985, 2945, 2907, 2871, 2837, 2804, 2772, 2742,
   2713, 2685, 2659, 2633, 2608, 2583, 2560, 2537, 2515, 2494, 2473, 2453, 2433,
@@ -125,15 +125,15 @@ static const uint16_t vp10_prob_cost10[1024] = {
 };
 #endif  // CONFIG_ANS
 
-static void cost(int *costs, vpx_tree tree, const vpx_prob *probs, int i,
+static void cost(int *costs, aom_tree tree, const aom_prob *probs, int i,
                  int c) {
-  const vpx_prob prob = probs[i / 2];
+  const aom_prob prob = probs[i / 2];
   int b;
 
   assert(prob != 0);
   for (b = 0; b <= 1; ++b) {
-    const int cc = c + vp10_cost_bit(prob, b);
-    const vpx_tree_index ii = tree[i + b];
+    const int cc = c + av1_cost_bit(prob, b);
+    const aom_tree_index ii = tree[i + b];
 
     if (ii <= 0)
       costs[-ii] = cc;
@@ -143,26 +143,26 @@ static void cost(int *costs, vpx_tree tree, const vpx_prob *probs, int i,
 }
 
 #if CONFIG_ANS
-void vp10_cost_tokens_ans(int *costs, const vpx_prob *tree_probs,
-                          const rans_dec_lut token_cdf, int skip_eob) {
+void av1_cost_tokens_ans(int *costs, const aom_prob *tree_probs,
+                         const rans_dec_lut token_cdf, int skip_eob) {
   int c_tree = 0;  // Cost of the "tree" nodes EOB and ZERO.
   int i;
-  costs[EOB_TOKEN] = vp10_cost_bit(tree_probs[0], 0);
-  if (!skip_eob) c_tree = vp10_cost_bit(tree_probs[0], 1);
+  costs[EOB_TOKEN] = av1_cost_bit(tree_probs[0], 0);
+  if (!skip_eob) c_tree = av1_cost_bit(tree_probs[0], 1);
   for (i = ZERO_TOKEN; i <= CATEGORY6_TOKEN; ++i) {
     const int p = token_cdf[i + 1] - token_cdf[i];
-    costs[i] = c_tree + vp10_prob_cost10[p];
+    costs[i] = c_tree + av1_prob_cost10[p];
   }
 }
 #endif  // CONFIG_ANS
 
-void vp10_cost_tokens(int *costs, const vpx_prob *probs, vpx_tree tree) {
+void av1_cost_tokens(int *costs, const aom_prob *probs, aom_tree tree) {
   cost(costs, tree, probs, 0, 0);
 }
 
-void vp10_cost_tokens_skip(int *costs, const vpx_prob *probs, vpx_tree tree) {
+void av1_cost_tokens_skip(int *costs, const aom_prob *probs, aom_tree tree) {
   assert(tree[0] <= 0 && tree[1] > 0);
 
-  costs[-tree[0]] = vp10_cost_bit(probs[0], 0);
+  costs[-tree[0]] = av1_cost_bit(probs[0], 0);
   cost(costs, tree, probs, 2, 0);
 }

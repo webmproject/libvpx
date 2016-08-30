@@ -14,7 +14,7 @@
 #include <math.h>
 #include <assert.h>
 
-#include "vp10/encoder/corner_detect.h"
+#include "av1/encoder/corner_detect.h"
 #include "third_party/fastfeat/fast.h"
 
 // Fast_9 wrapper

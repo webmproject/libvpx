@@ -6,7 +6,7 @@
 # in the file PATENTS.  All contributing project authors may
 # be found in the AUTHORS file in the root of the source tree.
 #
-# This make file builds vpx_test app for android.
+# This make file builds aom_test app for android.
 # The test app itself runs on the command line through adb shell
 # The paths are really messed up as the libaom make file
 # expects to be made from a parent directory.
@@ -42,9 +42,9 @@ LOCAL_MODULE := libaom_test
 LOCAL_STATIC_LIBRARIES := gtest libwebm
 
 ifeq ($(ENABLE_SHARED),1)
-  LOCAL_SHARED_LIBRARIES := vpx
+  LOCAL_SHARED_LIBRARIES := aom
 else
-  LOCAL_STATIC_LIBRARIES += vpx
+  LOCAL_STATIC_LIBRARIES += aom
 endif
 
 include $(LOCAL_PATH)/test/test.mk

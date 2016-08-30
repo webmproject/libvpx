@@ -18,18 +18,18 @@
 # Environment check: $YUV_RAW_INPUT is required.
 cx_set_ref_verify_environment() {
   if [ ! -e "${YUV_RAW_INPUT}" ]; then
-    echo "Libvpx test data must exist in LIBVPX_TEST_DATA_PATH."
+    echo "Libaom test data must exist in LIBVPX_TEST_DATA_PATH."
     return 1
   fi
 }
 
 # Runs cx_set_ref and updates the reference frame before encoding frame 90.
 # $1 is the codec name.
-vpx_set_ref() {
+aom_set_ref() {
   local codec="$1"
-  local encoder="${LIBAOM_BIN_PATH}/vpxcx_set_ref${VPX_TEST_EXE_SUFFIX}"
+  local encoder="${LIBAOM_BIN_PATH}/aomcx_set_ref${AOM_TEST_EXE_SUFFIX}"
 
-  local output_file="${VPX_TEST_OUTPUT_DIR}/${codec}cx_set_ref_${codec}.ivf"
+  local output_file="${AOM_TEST_OUTPUT_DIR}/${codec}cx_set_ref_${codec}.ivf"
   local ref_frame_num=90
 
   if [ ! -x "${encoder}" ]; then
@@ -38,11 +38,11 @@ vpx_set_ref() {
   fi
 
   if [ "$codec" = "vp8" ]; then
-    eval "${VPX_TEST_PREFIX}" "${encoder}" "${YUV_RAW_INPUT_WIDTH}" \
+    eval "${AOM_TEST_PREFIX}" "${encoder}" "${YUV_RAW_INPUT_WIDTH}" \
         "${YUV_RAW_INPUT_HEIGHT}" "${YUV_RAW_INPUT}" "${output_file}" \
         "${ref_frame_num}" ${devnull}
   else
-    eval "${VPX_TEST_PREFIX}" "${encoder}" "${codec}" "${YUV_RAW_INPUT_WIDTH}" \
+    eval "${AOM_TEST_PREFIX}" "${encoder}" "${codec}" "${YUV_RAW_INPUT_WIDTH}" \
         "${YUV_RAW_INPUT_HEIGHT}" "${YUV_RAW_INPUT}" "${output_file}" \
         "${ref_frame_num}" ${devnull}
   fi
@@ -50,12 +50,12 @@ vpx_set_ref() {
   [ -e "${output_file}" ] || return 1
 }
 
-cx_set_ref_vp10() {
-  if [ "$(vp10_encode_available)" = "yes" ]; then
-    vpx_set_ref vp10 || return 1
+cx_set_ref_av1() {
+  if [ "$(av1_encode_available)" = "yes" ]; then
+    aom_set_ref av1 || return 1
   fi
 }
 
-cx_set_ref_tests="cx_set_ref_vp10"
+cx_set_ref_tests="cx_set_ref_av1"
 
 run_tests cx_set_ref_verify_environment "${cx_set_ref_tests}"

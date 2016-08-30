@@ -14,9 +14,9 @@
 
 #include "aom_dsp/x86/synonyms.h"
 
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_dsp_rtcd.h"
 
-static uint64_t vpx_sum_squares_2d_i16_4x4_sse2(const int16_t *src,
+static uint64_t aom_sum_squares_2d_i16_4x4_sse2(const int16_t *src,
                                                 int stride) {
   const __m128i v_val_0_w =
       _mm_loadl_epi64((const __m128i *)(src + 0 * stride));
@@ -44,12 +44,12 @@ static uint64_t vpx_sum_squares_2d_i16_4x4_sse2(const int16_t *src,
 
 #ifdef __GNUC__
 // This prevents GCC/Clang from inlining this function into
-// vpx_sum_squares_2d_i16_sse2, which in turn saves some stack
+// aom_sum_squares_2d_i16_sse2, which in turn saves some stack
 // maintenance instructions in the common case of 4x4.
 __attribute__((noinline))
 #endif
 static uint64_t
-vpx_sum_squares_2d_i16_nxn_sse2(const int16_t *src, int stride, int size) {
+aom_sum_squares_2d_i16_nxn_sse2(const int16_t *src, int stride, int size) {
   int r, c;
 
   const __m128i v_zext_mask_q = _mm_set_epi32(0, 0xffffffff, 0, 0xffffffff);
@@ -118,15 +118,15 @@ vpx_sum_squares_2d_i16_nxn_sse2(const int16_t *src, int stride, int size) {
 #endif
 }
 
-uint64_t vpx_sum_squares_2d_i16_sse2(const int16_t *src, int stride, int size) {
+uint64_t aom_sum_squares_2d_i16_sse2(const int16_t *src, int stride, int size) {
   // 4 elements per row only requires half an XMM register, so this
   // must be a special case, but also note that over 75% of all calls
   // are with size == 4, so it is also the common case.
   if (LIKELY(size == 4)) {
-    return vpx_sum_squares_2d_i16_4x4_sse2(src, stride);
+    return aom_sum_squares_2d_i16_4x4_sse2(src, stride);
   } else {
     // Generic case
-    return vpx_sum_squares_2d_i16_nxn_sse2(src, stride, size);
+    return aom_sum_squares_2d_i16_nxn_sse2(src, stride, size);
   }
 }
 
@@ -134,7 +134,7 @@ uint64_t vpx_sum_squares_2d_i16_sse2(const int16_t *src, int stride, int size) {
 // 1D version
 //////////////////////////////////////////////////////////////////////////////
 
-static uint64_t vpx_sum_squares_i16_64n_sse2(const int16_t *src, uint32_t n) {
+static uint64_t aom_sum_squares_i16_64n_sse2(const int16_t *src, uint32_t n) {
   const __m128i v_zext_mask_q = _mm_set_epi32(0, 0xffffffff, 0, 0xffffffff);
   __m128i v_acc0_q = _mm_setzero_si128();
   __m128i v_acc1_q = _mm_setzero_si128();
@@ -192,14 +192,14 @@ static uint64_t vpx_sum_squares_i16_64n_sse2(const int16_t *src, uint32_t n) {
 #endif
 }
 
-uint64_t vpx_sum_squares_i16_sse2(const int16_t *src, uint32_t n) {
+uint64_t aom_sum_squares_i16_sse2(const int16_t *src, uint32_t n) {
   if (n % 64 == 0) {
-    return vpx_sum_squares_i16_64n_sse2(src, n);
+    return aom_sum_squares_i16_64n_sse2(src, n);
   } else if (n > 64) {
     int k = n & ~(64 - 1);
-    return vpx_sum_squares_i16_64n_sse2(src, k) +
-           vpx_sum_squares_i16_c(src + k, n - k);
+    return aom_sum_squares_i16_64n_sse2(src, k) +
+           aom_sum_squares_i16_c(src + k, n - k);
   } else {
-    return vpx_sum_squares_i16_c(src, n);
+    return aom_sum_squares_i16_c(src, n);
   }
 }

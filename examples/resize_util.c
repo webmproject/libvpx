@@ -16,7 +16,7 @@
 #include <string.h>
 
 #include "../tools_common.h"
-#include "../vp9/encoder/vp9_resize.h"
+#include "../av1/encoder/av1_resize.h"
 
 static const char *exec_name = NULL;
 
@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
   f = 0;
   while (f < frames) {
     if (fread(inbuf, width * height * 3 / 2, 1, fpin) != 1) break;
-    vp9_resize_frame420(inbuf, width, inbuf_u, inbuf_v, width / 2, height,
+    av1_resize_frame420(inbuf, width, inbuf_u, inbuf_v, width / 2, height,
                         width, outbuf, target_width, outbuf_u, outbuf_v,
                         target_width / 2, target_height, target_width);
     fwrite(outbuf, target_width * target_height * 3 / 2, 1, fpout);

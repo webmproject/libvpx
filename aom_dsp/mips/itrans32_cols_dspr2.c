@@ -8,12 +8,12 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 #include "aom_dsp/mips/inv_txfm_dspr2.h"
 #include "aom_dsp/txfm_common.h"
 
 #if HAVE_DSPR2
-void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
+void aom_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
                                    int dest_stride) {
   int16_t step1_0, step1_1, step1_2, step1_3, step1_4, step1_5, step1_6;
   int16_t step1_7, step1_8, step1_9, step1_10, step1_11, step1_12, step1_13;
@@ -35,17 +35,17 @@ void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
   int i, temp21;
   uint8_t *dest_pix, *dest_pix1;
   const int const_2_power_13 = 8192;
-  uint8_t *cm = vpx_ff_cropTbl;
+  uint8_t *cm = aom_ff_cropTbl;
 
-  /* prefetch vpx_ff_cropTbl */
-  prefetch_load(vpx_ff_cropTbl);
-  prefetch_load(vpx_ff_cropTbl + 32);
-  prefetch_load(vpx_ff_cropTbl + 64);
-  prefetch_load(vpx_ff_cropTbl + 96);
-  prefetch_load(vpx_ff_cropTbl + 128);
-  prefetch_load(vpx_ff_cropTbl + 160);
-  prefetch_load(vpx_ff_cropTbl + 192);
-  prefetch_load(vpx_ff_cropTbl + 224);
+  /* prefetch aom_ff_cropTbl */
+  prefetch_load(aom_ff_cropTbl);
+  prefetch_load(aom_ff_cropTbl + 32);
+  prefetch_load(aom_ff_cropTbl + 64);
+  prefetch_load(aom_ff_cropTbl + 96);
+  prefetch_load(aom_ff_cropTbl + 128);
+  prefetch_load(aom_ff_cropTbl + 160);
+  prefetch_load(aom_ff_cropTbl + 192);
+  prefetch_load(aom_ff_cropTbl + 224);
 
   for (i = 0; i < 32; ++i) {
     dest_pix = dest + i;

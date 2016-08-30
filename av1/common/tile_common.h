@@ -8,14 +8,14 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_COMMON_TILE_COMMON_H_
-#define VP10_COMMON_TILE_COMMON_H_
+#ifndef AV1_COMMON_TILE_COMMON_H_
+#define AV1_COMMON_TILE_COMMON_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct VP10Common;
+struct AV1Common;
 
 typedef struct TileInfo {
   int mi_row_start, mi_row_end;
@@ -24,17 +24,17 @@ typedef struct TileInfo {
 
 // initializes 'tile->mi_(row|col)_(start|end)' for (row, col) based on
 // 'cm->log2_tile_(rows|cols)' & 'cm->mi_(rows|cols)'
-void vp10_tile_init(TileInfo *tile, const struct VP10Common *cm, int row,
-                    int col);
+void av1_tile_init(TileInfo *tile, const struct AV1Common *cm, int row,
+                   int col);
 
-void vp10_tile_set_row(TileInfo *tile, const struct VP10Common *cm, int row);
-void vp10_tile_set_col(TileInfo *tile, const struct VP10Common *cm, int col);
+void av1_tile_set_row(TileInfo *tile, const struct AV1Common *cm, int row);
+void av1_tile_set_col(TileInfo *tile, const struct AV1Common *cm, int col);
 
-void vp10_get_tile_n_bits(const int mi_cols, int *min_log2_tile_cols,
-                          int *max_log2_tile_cols);
+void av1_get_tile_n_bits(const int mi_cols, int *min_log2_tile_cols,
+                         int *max_log2_tile_cols);
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
 
-#endif  // VP10_COMMON_TILE_COMMON_H_
+#endif  // AV1_COMMON_TILE_COMMON_H_

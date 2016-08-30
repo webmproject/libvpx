@@ -8,12 +8,12 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_VARIANCE_H_
-#define VPX_DSP_VARIANCE_H_
+#ifndef AOM_DSP_VARIANCE_H_
+#define AOM_DSP_VARIANCE_H_
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 
-#include "aom/vpx_integer.h"
+#include "aom/aom_integer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,95 +22,95 @@ extern "C" {
 #define FILTER_BITS 7
 #define FILTER_WEIGHT 128
 
-typedef unsigned int (*vpx_sad_fn_t)(const uint8_t *a, int a_stride,
+typedef unsigned int (*aom_sad_fn_t)(const uint8_t *a, int a_stride,
                                      const uint8_t *b, int b_stride);
 
-typedef unsigned int (*vpx_sad_avg_fn_t)(const uint8_t *a, int a_stride,
+typedef unsigned int (*aom_sad_avg_fn_t)(const uint8_t *a, int a_stride,
                                          const uint8_t *b, int b_stride,
                                          const uint8_t *second_pred);
 
-typedef void (*vp8_copy32xn_fn_t)(const uint8_t *a, int a_stride, uint8_t *b,
+typedef void (*aom_copy32xn_fn_t)(const uint8_t *a, int a_stride, uint8_t *b,
                                   int b_stride, int n);
 
-typedef void (*vpx_sad_multi_fn_t)(const uint8_t *a, int a_stride,
+typedef void (*aom_sad_multi_fn_t)(const uint8_t *a, int a_stride,
                                    const uint8_t *b, int b_stride,
                                    unsigned int *sad_array);
 
-typedef void (*vpx_sad_multi_d_fn_t)(const uint8_t *a, int a_stride,
+typedef void (*aom_sad_multi_d_fn_t)(const uint8_t *a, int a_stride,
                                      const uint8_t *const b_array[],
                                      int b_stride, unsigned int *sad_array);
 
-typedef unsigned int (*vpx_variance_fn_t)(const uint8_t *a, int a_stride,
+typedef unsigned int (*aom_variance_fn_t)(const uint8_t *a, int a_stride,
                                           const uint8_t *b, int b_stride,
                                           unsigned int *sse);
 
-typedef unsigned int (*vpx_subpixvariance_fn_t)(const uint8_t *a, int a_stride,
+typedef unsigned int (*aom_subpixvariance_fn_t)(const uint8_t *a, int a_stride,
                                                 int xoffset, int yoffset,
                                                 const uint8_t *b, int b_stride,
                                                 unsigned int *sse);
 
-typedef unsigned int (*vpx_subp_avg_variance_fn_t)(
+typedef unsigned int (*aom_subp_avg_variance_fn_t)(
     const uint8_t *a, int a_stride, int xoffset, int yoffset, const uint8_t *b,
     int b_stride, unsigned int *sse, const uint8_t *second_pred);
 
-#if CONFIG_VP10 && CONFIG_EXT_INTER
-typedef unsigned int (*vpx_masked_sad_fn_t)(const uint8_t *src, int src_stride,
+#if CONFIG_AV1 && CONFIG_EXT_INTER
+typedef unsigned int (*aom_masked_sad_fn_t)(const uint8_t *src, int src_stride,
                                             const uint8_t *ref, int ref_stride,
                                             const uint8_t *msk_ptr,
                                             int msk_stride);
-typedef unsigned int (*vpx_masked_variance_fn_t)(
+typedef unsigned int (*aom_masked_variance_fn_t)(
     const uint8_t *src, int src_stride, const uint8_t *ref, int ref_stride,
     const uint8_t *msk, int msk_stride, unsigned int *sse);
-typedef unsigned int (*vpx_masked_subpixvariance_fn_t)(
+typedef unsigned int (*aom_masked_subpixvariance_fn_t)(
     const uint8_t *src, int src_stride, int xoffset, int yoffset,
     const uint8_t *ref, int ref_stride, const uint8_t *msk, int msk_stride,
     unsigned int *sse);
-#endif  // CONFIG_VP10 && CONFIG_EXT_INTER
+#endif  // CONFIG_AV1 && CONFIG_EXT_INTER
 
-#if CONFIG_VP10 && CONFIG_OBMC
-typedef unsigned int (*vpx_obmc_sad_fn_t)(const uint8_t *pred, int pred_stride,
+#if CONFIG_AV1 && CONFIG_OBMC
+typedef unsigned int (*aom_obmc_sad_fn_t)(const uint8_t *pred, int pred_stride,
                                           const int32_t *wsrc,
                                           const int32_t *msk);
-typedef unsigned int (*vpx_obmc_variance_fn_t)(const uint8_t *pred,
+typedef unsigned int (*aom_obmc_variance_fn_t)(const uint8_t *pred,
                                                int pred_stride,
                                                const int32_t *wsrc,
                                                const int32_t *msk,
                                                unsigned int *sse);
-typedef unsigned int (*vpx_obmc_subpixvariance_fn_t)(
+typedef unsigned int (*aom_obmc_subpixvariance_fn_t)(
     const uint8_t *pred, int pred_stride, int xoffset, int yoffset,
     const int32_t *wsrc, const int32_t *msk, unsigned int *sse);
-#endif  // CONFIG_VP10 && CONFIG_OBMC
+#endif  // CONFIG_AV1 && CONFIG_OBMC
 
-#if CONFIG_VP10
-typedef struct vpx_variance_vtable {
-  vpx_sad_fn_t sdf;
-  vpx_sad_avg_fn_t sdaf;
-  vpx_variance_fn_t vf;
-  vpx_subpixvariance_fn_t svf;
-  vpx_subp_avg_variance_fn_t svaf;
-  vpx_sad_multi_fn_t sdx3f;
-  vpx_sad_multi_fn_t sdx8f;
-  vpx_sad_multi_d_fn_t sdx4df;
+#if CONFIG_AV1
+typedef struct aom_variance_vtable {
+  aom_sad_fn_t sdf;
+  aom_sad_avg_fn_t sdaf;
+  aom_variance_fn_t vf;
+  aom_subpixvariance_fn_t svf;
+  aom_subp_avg_variance_fn_t svaf;
+  aom_sad_multi_fn_t sdx3f;
+  aom_sad_multi_fn_t sdx8f;
+  aom_sad_multi_d_fn_t sdx4df;
 #if CONFIG_EXT_INTER
-  vpx_masked_sad_fn_t msdf;
-  vpx_masked_variance_fn_t mvf;
-  vpx_masked_subpixvariance_fn_t msvf;
+  aom_masked_sad_fn_t msdf;
+  aom_masked_variance_fn_t mvf;
+  aom_masked_subpixvariance_fn_t msvf;
 #endif  // CONFIG_EXT_INTER
 #if CONFIG_OBMC
-  vpx_obmc_sad_fn_t osdf;
-  vpx_obmc_variance_fn_t ovf;
-  vpx_obmc_subpixvariance_fn_t osvf;
+  aom_obmc_sad_fn_t osdf;
+  aom_obmc_variance_fn_t ovf;
+  aom_obmc_subpixvariance_fn_t osvf;
 #endif  // CONFIG_OBMC
-} vpx_variance_fn_ptr_t;
-#endif  // CONFIG_VP10
+} aom_variance_fn_ptr_t;
+#endif  // CONFIG_AV1
 
-void vpx_highbd_var_filter_block2d_bil_first_pass(
+void aom_highbd_var_filter_block2d_bil_first_pass(
     const uint8_t *src_ptr8, uint16_t *output_ptr,
     unsigned int src_pixels_per_line, int pixel_step,
     unsigned int output_height, unsigned int output_width,
     const uint8_t *filter);
 
-void vpx_highbd_var_filter_block2d_bil_second_pass(
+void aom_highbd_var_filter_block2d_bil_second_pass(
     const uint16_t *src_ptr, uint16_t *output_ptr,
     unsigned int src_pixels_per_line, unsigned int pixel_step,
     unsigned int output_height, unsigned int output_width,
@@ -120,4 +120,4 @@ void vpx_highbd_var_filter_block2d_bil_second_pass(
 }  // extern "C"
 #endif
 
-#endif  // VPX_DSP_VARIANCE_H_
+#endif  // AOM_DSP_VARIANCE_H_

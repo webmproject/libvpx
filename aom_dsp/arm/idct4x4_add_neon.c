@@ -10,7 +10,7 @@
 
 #include <arm_neon.h>
 
-void vpx_idct4x4_16_add_neon(int16_t *input, uint8_t *dest, int dest_stride) {
+void aom_idct4x4_16_add_neon(int16_t *input, uint8_t *dest, int dest_stride) {
   uint8x8_t d26u8, d27u8;
   uint32x2_t d26u32, d27u32;
   uint16x8_t q8u16, q9u16;

@@ -8,15 +8,15 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_PORTS_SYSTEM_STATE_H_
-#define VPX_PORTS_SYSTEM_STATE_H_
+#ifndef AOM_PORTS_SYSTEM_STATE_H_
+#define AOM_PORTS_SYSTEM_STATE_H_
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 
 #if ARCH_X86 || ARCH_X86_64
-void vpx_reset_mmx_state(void);
-#define vpx_clear_system_state() vpx_reset_mmx_state()
+void aom_reset_mmx_state(void);
+#define aom_clear_system_state() aom_reset_mmx_state()
 #else
-#define vpx_clear_system_state()
+#define aom_clear_system_state()
 #endif  // ARCH_X86 || ARCH_X86_64
-#endif  // VPX_PORTS_SYSTEM_STATE_H_
+#endif  // AOM_PORTS_SYSTEM_STATE_H_

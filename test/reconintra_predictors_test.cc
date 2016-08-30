@@ -10,7 +10,7 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-#include "./vp10_rtcd.h"
+#include "./av1_rtcd.h"
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
@@ -32,7 +32,7 @@ typedef void (*Predictor)(uint8_t *dst, ptrdiff_t stride, int bs,
 typedef tuple<Predictor, Predictor, int> PredFuncMode;
 typedef tuple<PredFuncMode, int> PredParams;
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 typedef void (*HbdPredictor)(uint16_t *dst, ptrdiff_t stride, int bs,
                              const uint16_t *above, const uint16_t *left,
                              int bd);
@@ -57,9 +57,9 @@ const int MaxTestNum = 100000;
 const int MaxTestNum = 100;
 #endif
 
-class VP10IntraPredOptimzTest : public ::testing::TestWithParam<PredParams> {
+class AV1IntraPredOptimzTest : public ::testing::TestWithParam<PredParams> {
  public:
-  virtual ~VP10IntraPredOptimzTest() {}
+  virtual ~AV1IntraPredOptimzTest() {}
   virtual void SetUp() {
     PredFuncMode funcMode = GET_PARAM(0);
     predFuncRef_ = std::tr1::get<0>(funcMode);
@@ -148,11 +148,11 @@ class VP10IntraPredOptimzTest : public ::testing::TestWithParam<PredParams> {
   uint8_t *predRef_;
 };
 
-#if CONFIG_VP9_HIGHBITDEPTH
-class VP10HbdIntraPredOptimzTest
+#if CONFIG_AOM_HIGHBITDEPTH
+class AV1HbdIntraPredOptimzTest
     : public ::testing::TestWithParam<HbdPredParams> {
  public:
-  virtual ~VP10HbdIntraPredOptimzTest() {}
+  virtual ~AV1HbdIntraPredOptimzTest() {}
   virtual void SetUp() {
     HbdPredFuncMode funcMode = GET_PARAM(0);
     predFuncRef_ = std::tr1::get<0>(funcMode);
@@ -243,87 +243,87 @@ class VP10HbdIntraPredOptimzTest
   uint16_t *pred_;
   uint16_t *predRef_;
 };
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
-TEST_P(VP10IntraPredOptimzTest, BitExactCheck) { RunTest(); }
+TEST_P(AV1IntraPredOptimzTest, BitExactCheck) { RunTest(); }
 
 #if PREDICTORS_SPEED_TEST
-TEST_P(VP10IntraPredOptimzTest, SpeedCheckC) { RunSpeedTestC(); }
+TEST_P(AV1IntraPredOptimzTest, SpeedCheckC) { RunSpeedTestC(); }
 
-TEST_P(VP10IntraPredOptimzTest, SpeedCheckSSE) { RunSpeedTestSSE(); }
+TEST_P(AV1IntraPredOptimzTest, SpeedCheckSSE) { RunSpeedTestSSE(); }
 #endif
 
-#if CONFIG_VP9_HIGHBITDEPTH
-TEST_P(VP10HbdIntraPredOptimzTest, BitExactCheck) { RunTest(); }
+#if CONFIG_AOM_HIGHBITDEPTH
+TEST_P(AV1HbdIntraPredOptimzTest, BitExactCheck) { RunTest(); }
 
 #if PREDICTORS_SPEED_TEST
-TEST_P(VP10HbdIntraPredOptimzTest, SpeedCheckC) { RunSpeedTestC(); }
+TEST_P(AV1HbdIntraPredOptimzTest, SpeedCheckC) { RunSpeedTestC(); }
 
-TEST_P(VP10HbdIntraPredOptimzTest, SpeedCheckSSE) { RunSpeedTestSSE(); }
+TEST_P(AV1HbdIntraPredOptimzTest, SpeedCheckSSE) { RunSpeedTestSSE(); }
 #endif  // PREDICTORS_SPEED_TEST
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
 using std::tr1::make_tuple;
 
 const PredFuncMode kPredFuncMdArray[] = {
-  make_tuple(vp10_dc_filter_predictor_c, vp10_dc_filter_predictor_sse4_1,
+  make_tuple(av1_dc_filter_predictor_c, av1_dc_filter_predictor_sse4_1,
              DC_PRED),
-  make_tuple(vp10_v_filter_predictor_c, vp10_v_filter_predictor_sse4_1, V_PRED),
-  make_tuple(vp10_h_filter_predictor_c, vp10_h_filter_predictor_sse4_1, H_PRED),
-  make_tuple(vp10_d45_filter_predictor_c, vp10_d45_filter_predictor_sse4_1,
+  make_tuple(av1_v_filter_predictor_c, av1_v_filter_predictor_sse4_1, V_PRED),
+  make_tuple(av1_h_filter_predictor_c, av1_h_filter_predictor_sse4_1, H_PRED),
+  make_tuple(av1_d45_filter_predictor_c, av1_d45_filter_predictor_sse4_1,
              D45_PRED),
-  make_tuple(vp10_d135_filter_predictor_c, vp10_d135_filter_predictor_sse4_1,
+  make_tuple(av1_d135_filter_predictor_c, av1_d135_filter_predictor_sse4_1,
              D135_PRED),
-  make_tuple(vp10_d117_filter_predictor_c, vp10_d117_filter_predictor_sse4_1,
+  make_tuple(av1_d117_filter_predictor_c, av1_d117_filter_predictor_sse4_1,
              D117_PRED),
-  make_tuple(vp10_d153_filter_predictor_c, vp10_d153_filter_predictor_sse4_1,
+  make_tuple(av1_d153_filter_predictor_c, av1_d153_filter_predictor_sse4_1,
              D153_PRED),
-  make_tuple(vp10_d207_filter_predictor_c, vp10_d207_filter_predictor_sse4_1,
+  make_tuple(av1_d207_filter_predictor_c, av1_d207_filter_predictor_sse4_1,
              D207_PRED),
-  make_tuple(vp10_d63_filter_predictor_c, vp10_d63_filter_predictor_sse4_1,
+  make_tuple(av1_d63_filter_predictor_c, av1_d63_filter_predictor_sse4_1,
              D63_PRED),
-  make_tuple(vp10_tm_filter_predictor_c, vp10_tm_filter_predictor_sse4_1,
+  make_tuple(av1_tm_filter_predictor_c, av1_tm_filter_predictor_sse4_1,
              TM_PRED),
 };
 
 const int kBlkSize[] = { 4, 8, 16, 32 };
 
 INSTANTIATE_TEST_CASE_P(
-    SSE4_1, VP10IntraPredOptimzTest,
+    SSE4_1, AV1IntraPredOptimzTest,
     ::testing::Combine(::testing::ValuesIn(kPredFuncMdArray),
                        ::testing::ValuesIn(kBlkSize)));
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 const HbdPredFuncMode kHbdPredFuncMdArray[] = {
-  make_tuple(vp10_highbd_dc_filter_predictor_c,
-             vp10_highbd_dc_filter_predictor_sse4_1, DC_PRED),
-  make_tuple(vp10_highbd_v_filter_predictor_c,
-             vp10_highbd_v_filter_predictor_sse4_1, V_PRED),
-  make_tuple(vp10_highbd_h_filter_predictor_c,
-             vp10_highbd_h_filter_predictor_sse4_1, H_PRED),
-  make_tuple(vp10_highbd_d45_filter_predictor_c,
-             vp10_highbd_d45_filter_predictor_sse4_1, D45_PRED),
-  make_tuple(vp10_highbd_d135_filter_predictor_c,
-             vp10_highbd_d135_filter_predictor_sse4_1, D135_PRED),
-  make_tuple(vp10_highbd_d117_filter_predictor_c,
-             vp10_highbd_d117_filter_predictor_sse4_1, D117_PRED),
-  make_tuple(vp10_highbd_d153_filter_predictor_c,
-             vp10_highbd_d153_filter_predictor_sse4_1, D153_PRED),
-  make_tuple(vp10_highbd_d207_filter_predictor_c,
-             vp10_highbd_d207_filter_predictor_sse4_1, D207_PRED),
-  make_tuple(vp10_highbd_d63_filter_predictor_c,
-             vp10_highbd_d63_filter_predictor_sse4_1, D63_PRED),
-  make_tuple(vp10_highbd_tm_filter_predictor_c,
-             vp10_highbd_tm_filter_predictor_sse4_1, TM_PRED),
+  make_tuple(av1_highbd_dc_filter_predictor_c,
+             av1_highbd_dc_filter_predictor_sse4_1, DC_PRED),
+  make_tuple(av1_highbd_v_filter_predictor_c,
+             av1_highbd_v_filter_predictor_sse4_1, V_PRED),
+  make_tuple(av1_highbd_h_filter_predictor_c,
+             av1_highbd_h_filter_predictor_sse4_1, H_PRED),
+  make_tuple(av1_highbd_d45_filter_predictor_c,
+             av1_highbd_d45_filter_predictor_sse4_1, D45_PRED),
+  make_tuple(av1_highbd_d135_filter_predictor_c,
+             av1_highbd_d135_filter_predictor_sse4_1, D135_PRED),
+  make_tuple(av1_highbd_d117_filter_predictor_c,
+             av1_highbd_d117_filter_predictor_sse4_1, D117_PRED),
+  make_tuple(av1_highbd_d153_filter_predictor_c,
+             av1_highbd_d153_filter_predictor_sse4_1, D153_PRED),
+  make_tuple(av1_highbd_d207_filter_predictor_c,
+             av1_highbd_d207_filter_predictor_sse4_1, D207_PRED),
+  make_tuple(av1_highbd_d63_filter_predictor_c,
+             av1_highbd_d63_filter_predictor_sse4_1, D63_PRED),
+  make_tuple(av1_highbd_tm_filter_predictor_c,
+             av1_highbd_tm_filter_predictor_sse4_1, TM_PRED),
 };
 
 const int kBd[] = { 10, 12 };
 
 INSTANTIATE_TEST_CASE_P(
-    SSE4_1, VP10HbdIntraPredOptimzTest,
+    SSE4_1, AV1HbdIntraPredOptimzTest,
     ::testing::Combine(::testing::ValuesIn(kHbdPredFuncMdArray),
                        ::testing::ValuesIn(kBlkSize),
                        ::testing::ValuesIn(kBd)));
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
 }  // namespace

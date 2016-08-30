@@ -8,14 +8,14 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_COMMON_ANS_H_
-#define VP10_COMMON_ANS_H_
+#ifndef AV1_COMMON_ANS_H_
+#define AV1_COMMON_ANS_H_
 // An implementation of Asymmetric Numeral Systems
 // http://arxiv.org/abs/1311.2540v2
 
 #include <assert.h>
-#include "./vpx_config.h"
-#include "aom/vpx_integer.h"
+#include "./aom_config.h"
+#include "aom/aom_integer.h"
 #include "aom_dsp/prob.h"
 #include "aom_ports/mem_ops.h"
 
@@ -250,9 +250,9 @@ static INLINE int uabs_read_literal(struct AnsDecoder *ans, int bits) {
 
 // TODO(aconverse): Replace trees with tokensets.
 static INLINE int uabs_read_tree(struct AnsDecoder *ans,
-                                 const vpx_tree_index *tree,
+                                 const aom_tree_index *tree,
                                  const AnsP8 *probs) {
-  vpx_tree_index i = 0;
+  aom_tree_index i = 0;
 
   while ((i = tree[i + uabs_read(ans, probs[i >> 1])]) > 0) continue;
 
@@ -313,8 +313,8 @@ static INLINE void rans_merge_prob8_pdf(AnsP10 *const out_pdf,
   adjustment -= out_pdf[0];
   for (i = 0; i < in_syms; ++i) {
     int p = (p1 * src_pdf[i] + round_fact) >> ans_p8_shift;
-    p = VPXMIN(p, (int)rans_precision - in_syms);
-    p = VPXMAX(p, 1);
+    p = AOMMIN(p, (int)rans_precision - in_syms);
+    p = AOMMAX(p, 1);
     out_pdf[i + 1] = p;
     adjustment -= p;
   }
@@ -411,4 +411,4 @@ static INLINE int ans_reader_has_error(const struct AnsDecoder *const ans) {
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
-#endif  // VP10_COMMON_ANS_H_
+#endif  // AV1_COMMON_ANS_H_

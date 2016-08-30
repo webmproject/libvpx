@@ -46,8 +46,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "aom/vp8cx.h"
-#include "aom/vpx_encoder.h"
+#include "aom/aomcx.h"
+#include "aom/aom_encoder.h"
 
 #include "../tools_common.h"
 #include "../video_writer.h"
@@ -60,10 +60,10 @@ void usage_exit(void) {
   exit(EXIT_FAILURE);
 }
 
-static void set_roi_map(const vpx_codec_enc_cfg_t *cfg,
-                        vpx_codec_ctx_t *codec) {
+static void set_roi_map(const aom_codec_enc_cfg_t *cfg,
+                        aom_codec_ctx_t *codec) {
   unsigned int i;
-  vpx_roi_map_t roi;
+  aom_roi_map_t roi;
   memset(&roi, 0, sizeof(roi));
 
   roi.rows = (cfg->g_h + 15) / 16;
@@ -87,16 +87,16 @@ static void set_roi_map(const vpx_codec_enc_cfg_t *cfg,
   roi.roi_map = (uint8_t *)malloc(roi.rows * roi.cols);
   for (i = 0; i < roi.rows * roi.cols; ++i) roi.roi_map[i] = i % 4;
 
-  if (vpx_codec_control(codec, VP8E_SET_ROI_MAP, &roi))
+  if (aom_codec_control(codec, AOME_SET_ROI_MAP, &roi))
     die_codec(codec, "Failed to set ROI map");
 
   free(roi.roi_map);
 }
 
-static void set_active_map(const vpx_codec_enc_cfg_t *cfg,
-                           vpx_codec_ctx_t *codec) {
+static void set_active_map(const aom_codec_enc_cfg_t *cfg,
+                           aom_codec_ctx_t *codec) {
   unsigned int i;
-  vpx_active_map_t map = { 0, 0, 0 };
+  aom_active_map_t map = { 0, 0, 0 };
 
   map.rows = (cfg->g_h + 15) / 16;
   map.cols = (cfg->g_w + 15) / 16;
@@ -104,39 +104,39 @@ static void set_active_map(const vpx_codec_enc_cfg_t *cfg,
   map.active_map = (uint8_t *)malloc(map.rows * map.cols);
   for (i = 0; i < map.rows * map.cols; ++i) map.active_map[i] = i % 2;
 
-  if (vpx_codec_control(codec, VP8E_SET_ACTIVEMAP, &map))
+  if (aom_codec_control(codec, AOME_SET_ACTIVEMAP, &map))
     die_codec(codec, "Failed to set active map");
 
   free(map.active_map);
 }
 
-static void unset_active_map(const vpx_codec_enc_cfg_t *cfg,
-                             vpx_codec_ctx_t *codec) {
-  vpx_active_map_t map = { 0, 0, 0 };
+static void unset_active_map(const aom_codec_enc_cfg_t *cfg,
+                             aom_codec_ctx_t *codec) {
+  aom_active_map_t map = { 0, 0, 0 };
 
   map.rows = (cfg->g_h + 15) / 16;
   map.cols = (cfg->g_w + 15) / 16;
   map.active_map = NULL;
 
-  if (vpx_codec_control(codec, VP8E_SET_ACTIVEMAP, &map))
+  if (aom_codec_control(codec, AOME_SET_ACTIVEMAP, &map))
     die_codec(codec, "Failed to set active map");
 }
 
-static int encode_frame(vpx_codec_ctx_t *codec, vpx_image_t *img,
-                        int frame_index, VpxVideoWriter *writer) {
+static int encode_frame(aom_codec_ctx_t *codec, aom_image_t *img,
+                        int frame_index, AvxVideoWriter *writer) {
   int got_pkts = 0;
-  vpx_codec_iter_t iter = NULL;
-  const vpx_codec_cx_pkt_t *pkt = NULL;
-  const vpx_codec_err_t res =
-      vpx_codec_encode(codec, img, frame_index, 1, 0, VPX_DL_GOOD_QUALITY);
-  if (res != VPX_CODEC_OK) die_codec(codec, "Failed to encode frame");
+  aom_codec_iter_t iter = NULL;
+  const aom_codec_cx_pkt_t *pkt = NULL;
+  const aom_codec_err_t res =
+      aom_codec_encode(codec, img, frame_index, 1, 0, AOM_DL_GOOD_QUALITY);
+  if (res != AOM_CODEC_OK) die_codec(codec, "Failed to encode frame");
 
-  while ((pkt = vpx_codec_get_cx_data(codec, &iter)) != NULL) {
+  while ((pkt = aom_codec_get_cx_data(codec, &iter)) != NULL) {
     got_pkts = 1;
 
-    if (pkt->kind == VPX_CODEC_CX_FRAME_PKT) {
-      const int keyframe = (pkt->data.frame.flags & VPX_FRAME_IS_KEY) != 0;
-      if (!vpx_video_writer_write_frame(writer, pkt->data.frame.buf,
+    if (pkt->kind == AOM_CODEC_CX_FRAME_PKT) {
+      const int keyframe = (pkt->data.frame.flags & AOM_FRAME_IS_KEY) != 0;
+      if (!aom_video_writer_write_frame(writer, pkt->data.frame.buf,
                                         pkt->data.frame.sz,
                                         pkt->data.frame.pts)) {
         die_codec(codec, "Failed to write compressed frame");
@@ -152,14 +152,14 @@ static int encode_frame(vpx_codec_ctx_t *codec, vpx_image_t *img,
 
 int main(int argc, char **argv) {
   FILE *infile = NULL;
-  vpx_codec_ctx_t codec;
-  vpx_codec_enc_cfg_t cfg;
+  aom_codec_ctx_t codec;
+  aom_codec_enc_cfg_t cfg;
   int frame_count = 0;
-  vpx_image_t raw;
-  vpx_codec_err_t res;
-  VpxVideoInfo info;
-  VpxVideoWriter *writer = NULL;
-  const VpxInterface *encoder = NULL;
+  aom_image_t raw;
+  aom_codec_err_t res;
+  AvxVideoInfo info;
+  AvxVideoWriter *writer = NULL;
+  const AvxInterface *encoder = NULL;
   const int fps = 2;  // TODO(dkovalev) add command line argument
   const double bits_per_pixel_per_frame = 0.067;
 
@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
 
   memset(&info, 0, sizeof(info));
 
-  encoder = get_vpx_encoder_by_name(argv[1]);
+  encoder = get_aom_encoder_by_name(argv[1]);
   if (encoder == NULL) {
     die("Unsupported codec.");
   }
@@ -184,14 +184,14 @@ int main(int argc, char **argv) {
     die("Invalid frame size: %dx%d", info.frame_width, info.frame_height);
   }
 
-  if (!vpx_img_alloc(&raw, VPX_IMG_FMT_I420, info.frame_width,
+  if (!aom_img_alloc(&raw, AOM_IMG_FMT_I420, info.frame_width,
                      info.frame_height, 1)) {
     die("Failed to allocate image.");
   }
 
-  printf("Using %s\n", vpx_codec_iface_name(encoder->codec_interface()));
+  printf("Using %s\n", aom_codec_iface_name(encoder->codec_interface()));
 
-  res = vpx_codec_enc_config_default(encoder->codec_interface(), &cfg, 0);
+  res = aom_codec_enc_config_default(encoder->codec_interface(), &cfg, 0);
   if (res) die_codec(&codec, "Failed to get default codec config.");
 
   cfg.g_w = info.frame_width;
@@ -202,20 +202,20 @@ int main(int argc, char **argv) {
       (unsigned int)(bits_per_pixel_per_frame * cfg.g_w * cfg.g_h * fps / 1000);
   cfg.g_lag_in_frames = 0;
 
-  writer = vpx_video_writer_open(argv[5], kContainerIVF, &info);
+  writer = aom_video_writer_open(argv[5], kContainerIVF, &info);
   if (!writer) die("Failed to open %s for writing.", argv[5]);
 
   if (!(infile = fopen(argv[4], "rb")))
     die("Failed to open %s for reading.", argv[4]);
 
-  if (vpx_codec_enc_init(&codec, encoder->codec_interface(), &cfg, 0))
+  if (aom_codec_enc_init(&codec, encoder->codec_interface(), &cfg, 0))
     die_codec(&codec, "Failed to initialize encoder");
 
   // Encode frames.
-  while (vpx_img_read(&raw, infile)) {
+  while (aom_img_read(&raw, infile)) {
     ++frame_count;
 
-    if (frame_count == 22 && encoder->fourcc == VP8_FOURCC) {
+    if (frame_count == 22 && encoder->fourcc == AV1_FOURCC) {
       set_roi_map(&cfg, &codec);
     } else if (frame_count == 33) {
       set_active_map(&cfg, &codec);
@@ -234,10 +234,10 @@ int main(int argc, char **argv) {
   fclose(infile);
   printf("Processed %d frames.\n", frame_count);
 
-  vpx_img_free(&raw);
-  if (vpx_codec_destroy(&codec)) die_codec(&codec, "Failed to destroy codec.");
+  aom_img_free(&raw);
+  if (aom_codec_destroy(&codec)) die_codec(&codec, "Failed to destroy codec.");
 
-  vpx_video_writer_close(writer);
+  aom_video_writer_close(writer);
 
   return EXIT_SUCCESS;
 }

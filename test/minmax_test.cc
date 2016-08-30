@@ -13,8 +13,8 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-#include "./vpx_dsp_rtcd.h"
-#include "aom/vpx_integer.h"
+#include "./aom_dsp_rtcd.h"
+#include "aom/aom_integer.h"
 
 #include "test/acm_random.h"
 #include "test/register_state_check.h"
@@ -115,16 +115,16 @@ TEST_P(MinMaxTest, CompareReferenceAndVaryStride) {
   }
 }
 
-INSTANTIATE_TEST_CASE_P(C, MinMaxTest, ::testing::Values(&vpx_minmax_8x8_c));
+INSTANTIATE_TEST_CASE_P(C, MinMaxTest, ::testing::Values(&aom_minmax_8x8_c));
 
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(SSE2, MinMaxTest,
-                        ::testing::Values(&vpx_minmax_8x8_sse2));
+                        ::testing::Values(&aom_minmax_8x8_sse2));
 #endif
 
 #if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(NEON, MinMaxTest,
-                        ::testing::Values(&vpx_minmax_8x8_neon));
+                        ::testing::Values(&aom_minmax_8x8_neon));
 #endif
 
 }  // namespace

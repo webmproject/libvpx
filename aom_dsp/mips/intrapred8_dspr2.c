@@ -11,7 +11,7 @@
 #include "aom_dsp/mips/common_dspr2.h"
 
 #if HAVE_DSPR2
-void vpx_h_predictor_8x8_dspr2(uint8_t *dst, ptrdiff_t stride,
+void aom_h_predictor_8x8_dspr2(uint8_t *dst, ptrdiff_t stride,
                                const uint8_t *above, const uint8_t *left) {
   int32_t tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8;
 
@@ -64,7 +64,7 @@ void vpx_h_predictor_8x8_dspr2(uint8_t *dst, ptrdiff_t stride,
       : [left] "r"(left), [dst] "r"(dst), [stride] "r"(stride));
 }
 
-void vpx_dc_predictor_8x8_dspr2(uint8_t *dst, ptrdiff_t stride,
+void aom_dc_predictor_8x8_dspr2(uint8_t *dst, ptrdiff_t stride,
                                 const uint8_t *above, const uint8_t *left) {
   int32_t expected_dc;
   int32_t average;
@@ -146,7 +146,7 @@ void vpx_dc_predictor_8x8_dspr2(uint8_t *dst, ptrdiff_t stride,
         [stride] "r"(stride));
 }
 
-void vpx_tm_predictor_8x8_dspr2(uint8_t *dst, ptrdiff_t stride,
+void aom_tm_predictor_8x8_dspr2(uint8_t *dst, ptrdiff_t stride,
                                 const uint8_t *above, const uint8_t *left) {
   int32_t abovel, abover;
   int32_t abovel_1, abover_1;
@@ -154,7 +154,7 @@ void vpx_tm_predictor_8x8_dspr2(uint8_t *dst, ptrdiff_t stride,
   int32_t res0, res1, res2, res3;
   int32_t reshw;
   int32_t top_left;
-  uint8_t *cm = vpx_ff_cropTbl;
+  uint8_t *cm = aom_ff_cropTbl;
 
   __asm__ __volatile__(
       "ulw             %[reshw],       (%[above])                         \n\t"

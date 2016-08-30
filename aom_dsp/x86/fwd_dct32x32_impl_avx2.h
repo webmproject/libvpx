@@ -10,7 +10,7 @@
 
 #include <immintrin.h>  // AVX2
 
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_dsp_rtcd.h"
 #include "aom_dsp/txfm_common.h"
 
 #define pair256_set_epi16(a, b)                                            \
@@ -2939,7 +2939,7 @@ void FDCT32x32_2D_AVX2(const int16_t *input, int16_t *output_org, int stride) {
             tr2_6 = _mm256_sub_epi16(tr2_6, tr2_6_0);
             tr2_7 = _mm256_sub_epi16(tr2_7, tr2_7_0);
             //           ... and here.
-            //           PS: also change code in vp9/encoder/vp9_dct.c
+            //           PS: also change code in av1/encoder/av1_dct.c
             tr2_0 = _mm256_add_epi16(tr2_0, kOne);
             tr2_1 = _mm256_add_epi16(tr2_1, kOne);
             tr2_2 = _mm256_add_epi16(tr2_2, kOne);

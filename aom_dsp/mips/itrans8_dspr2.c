@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_config.h"
+#include "./aom_dsp_rtcd.h"
 #include "aom_dsp/mips/inv_txfm_dspr2.h"
 #include "aom_dsp/txfm_common.h"
 
@@ -199,17 +199,17 @@ void idct8_columns_add_blk_dspr2(int16_t *input, uint8_t *dest,
   int i;
   const int const_2_power_13 = 8192;
   uint8_t *dest_pix;
-  uint8_t *cm = vpx_ff_cropTbl;
+  uint8_t *cm = aom_ff_cropTbl;
 
-  /* prefetch vpx_ff_cropTbl */
-  prefetch_load(vpx_ff_cropTbl);
-  prefetch_load(vpx_ff_cropTbl + 32);
-  prefetch_load(vpx_ff_cropTbl + 64);
-  prefetch_load(vpx_ff_cropTbl + 96);
-  prefetch_load(vpx_ff_cropTbl + 128);
-  prefetch_load(vpx_ff_cropTbl + 160);
-  prefetch_load(vpx_ff_cropTbl + 192);
-  prefetch_load(vpx_ff_cropTbl + 224);
+  /* prefetch aom_ff_cropTbl */
+  prefetch_load(aom_ff_cropTbl);
+  prefetch_load(aom_ff_cropTbl + 32);
+  prefetch_load(aom_ff_cropTbl + 64);
+  prefetch_load(aom_ff_cropTbl + 96);
+  prefetch_load(aom_ff_cropTbl + 128);
+  prefetch_load(aom_ff_cropTbl + 160);
+  prefetch_load(aom_ff_cropTbl + 192);
+  prefetch_load(aom_ff_cropTbl + 224);
 
   for (i = 0; i < 8; ++i) {
     dest_pix = (dest + i);
@@ -438,7 +438,7 @@ void idct8_columns_add_blk_dspr2(int16_t *input, uint8_t *dest,
   }
 }
 
-void vpx_idct8x8_64_add_dspr2(const int16_t *input, uint8_t *dest,
+void aom_idct8x8_64_add_dspr2(const int16_t *input, uint8_t *dest,
                               int dest_stride) {
   DECLARE_ALIGNED(32, int16_t, out[8 * 8]);
   int16_t *outptr = out;
@@ -454,7 +454,7 @@ void vpx_idct8x8_64_add_dspr2(const int16_t *input, uint8_t *dest,
   idct8_columns_add_blk_dspr2(&out[0], dest, dest_stride);
 }
 
-void vpx_idct8x8_12_add_dspr2(const int16_t *input, uint8_t *dest,
+void aom_idct8x8_12_add_dspr2(const int16_t *input, uint8_t *dest,
                               int dest_stride) {
   DECLARE_ALIGNED(32, int16_t, out[8 * 8]);
   int16_t *outptr = out;
@@ -493,7 +493,7 @@ void vpx_idct8x8_12_add_dspr2(const int16_t *input, uint8_t *dest,
   idct8_columns_add_blk_dspr2(&out[0], dest, dest_stride);
 }
 
-void vpx_idct8x8_1_add_dspr2(const int16_t *input, uint8_t *dest,
+void aom_idct8x8_1_add_dspr2(const int16_t *input, uint8_t *dest,
                              int dest_stride) {
   uint32_t pos = 45;
   int32_t out;

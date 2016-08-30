@@ -8,12 +8,12 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-    EXPORT  |vpx_lpf_horizontal_4_dual_neon|
+    EXPORT  |aom_lpf_horizontal_4_dual_neon|
     ARM
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
 
-;void vpx_lpf_horizontal_4_dual_neon(uint8_t *s, int p,
+;void aom_lpf_horizontal_4_dual_neon(uint8_t *s, int p,
 ;                                    const uint8_t *blimit0,
 ;                                    const uint8_t *limit0,
 ;                                    const uint8_t *thresh0,
@@ -29,7 +29,7 @@
 ; sp+8  const uint8_t *limit1,
 ; sp+12 const uint8_t *thresh1,
 
-|vpx_lpf_horizontal_4_dual_neon| PROC
+|aom_lpf_horizontal_4_dual_neon| PROC
     push        {lr}
 
     ldr         r12, [sp, #4]              ; load thresh0
@@ -66,7 +66,7 @@
     sub         r2, r2, r1, lsl #1
     sub         r3, r3, r1, lsl #1
 
-    bl          vpx_loop_filter_neon_16
+    bl          aom_loop_filter_neon_16
 
     vst1.u8     {q5}, [r2@64], r1          ; store op1
     vst1.u8     {q6}, [r3@64], r1          ; store op0
@@ -76,9 +76,9 @@
     vpop        {d8-d15}                   ; restore neon registers
 
     pop         {pc}
-    ENDP        ; |vpx_lpf_horizontal_4_dual_neon|
+    ENDP        ; |aom_lpf_horizontal_4_dual_neon|
 
-; void vpx_loop_filter_neon_16();
+; void aom_loop_filter_neon_16();
 ; This is a helper function for the loopfilters. The invidual functions do the
 ; necessary load, transpose (if necessary) and store. This function uses
 ; registers d8-d15, so the calling function must save those registers.
@@ -101,7 +101,7 @@
 ; q6    op0
 ; q7    oq0
 ; q8    oq1
-|vpx_loop_filter_neon_16| PROC
+|aom_loop_filter_neon_16| PROC
 
     ; filter_mask
     vabd.u8     q11, q3, q4                 ; m1 = abs(p3 - p2)
@@ -194,6 +194,6 @@
     veor        q8, q12, q10                ; *oq1 = u^0x80
 
     bx          lr
-    ENDP        ; |vpx_loop_filter_neon_16|
+    ENDP        ; |aom_loop_filter_neon_16|
 
     END

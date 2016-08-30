@@ -12,7 +12,7 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
@@ -22,8 +22,8 @@
 #include "vp8/encoder/block.h"
 #include "vp8/encoder/onyx_int.h"
 #include "vp8/encoder/quantize.h"
-#include "aom/vpx_integer.h"
-#include "aom_mem/vpx_mem.h"
+#include "aom/aom_integer.h"
+#include "aom_mem/aom_mem.h"
 
 namespace {
 #if !CONFIG_AOM_QM
@@ -45,7 +45,7 @@ class QuantizeTestBase {
   virtual ~QuantizeTestBase() {
     vp8_remove_compressor(&vp8_comp_);
     vp8_comp_ = NULL;
-    vpx_free(macroblockd_dst_);
+    aom_free(macroblockd_dst_);
     macroblockd_dst_ = NULL;
     libaom_test::ClearSystemState();
   }
@@ -68,7 +68,7 @@ class QuantizeTestBase {
 
     // Copy macroblockd from the reference to get pre-set-up dequant values.
     macroblockd_dst_ = reinterpret_cast<MACROBLOCKD *>(
-        vpx_memalign(32, sizeof(*macroblockd_dst_)));
+        aom_memalign(32, sizeof(*macroblockd_dst_)));
     memcpy(macroblockd_dst_, &vp8_comp_->mb.e_mbd, sizeof(*macroblockd_dst_));
     // Fix block pointers - currently they point to the blocks in the reference
     // structure.

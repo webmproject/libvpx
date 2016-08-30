@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "vp10/encoder/ransac.h"
+#include "av1/encoder/ransac.h"
 
 #define MAX_PARAMDIM 9
 #define MAX_MINPTS 4
@@ -468,7 +468,7 @@ int ransac_(double *matched_points, int npoints, int *number_of_inliers,
       corners1_int[2 * i + 1] = (int)corners1[i * 2 + 1];
     }
 
-    vp10_integerize_model(H, type, &wm);
+    av1_integerize_model(H, type, &wm);
     projectpoints(wm.wmmat, corners1_int, image1_coord, npoints, 2, 2, 0, 0);
 
     for (i = 0; i < npoints; ++i) {

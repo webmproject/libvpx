@@ -102,18 +102,18 @@ $(ASM_CNV_PATH)/libaom/%.asm.s: $(LIBAOM_PATH)/%.asm
 TGT_ISA:=$(word 1, $(subst -, ,$(TOOLCHAIN)))
 target := libs
 
-LOCAL_SRC_FILES += vpx_config.c
+LOCAL_SRC_FILES += aom_config.c
 
 # Remove duplicate entries
 CODEC_SRCS_UNIQUE = $(sort $(CODEC_SRCS))
 
-# Pull out C files.  vpx_config.c is in the immediate directory and
+# Pull out C files.  aom_config.c is in the immediate directory and
 # so it does not need libaom/ prefixed like the rest of the source files.
 # The neon files with intrinsics need to have .neon appended so the proper
 # flags are applied.
 CODEC_SRCS_C = $(filter %.c, $(CODEC_SRCS_UNIQUE))
 LOCAL_NEON_SRCS_C = $(filter %_neon.c, $(CODEC_SRCS_C))
-LOCAL_CODEC_SRCS_C = $(filter-out vpx_config.c %_neon.c, $(CODEC_SRCS_C))
+LOCAL_CODEC_SRCS_C = $(filter-out aom_config.c %_neon.c, $(CODEC_SRCS_C))
 
 LOCAL_SRC_FILES += $(foreach file, $(LOCAL_CODEC_SRCS_C), libaom/$(file))
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
@@ -154,7 +154,7 @@ ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
 endif
 
 LOCAL_CFLAGS += \
-    -DHAVE_CONFIG_H=vpx_config.h \
+    -DHAVE_CONFIG_H=aom_config.h \
     -I$(LIBAOM_PATH) \
     -I$(ASM_CNV_PATH)
 
@@ -168,14 +168,14 @@ endif
 define rtcd_dep_template
 rtcd_dep_template_SRCS := $(addprefix $(LOCAL_PATH)/, $(LOCAL_SRC_FILES))
 rtcd_dep_template_SRCS := $$(rtcd_dep_template_SRCS:.neon=)
-ifeq ($(CONFIG_VP10), yes)
-$$(rtcd_dep_template_SRCS): vp10_rtcd.h
+ifeq ($(CONFIG_AV1), yes)
+$$(rtcd_dep_template_SRCS): av1_rtcd.h
 endif
-$$(rtcd_dep_template_SRCS): vpx_scale_rtcd.h
-$$(rtcd_dep_template_SRCS): vpx_dsp_rtcd.h
+$$(rtcd_dep_template_SRCS): aom_scale_rtcd.h
+$$(rtcd_dep_template_SRCS): aom_dsp_rtcd.h
 
 ifneq ($(findstring $(TARGET_ARCH_ABI),x86 x86_64),)
-$$(rtcd_dep_template_SRCS): vpx_config.asm
+$$(rtcd_dep_template_SRCS): aom_config.asm
 endif
 endef
 

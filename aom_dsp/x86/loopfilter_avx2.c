@@ -10,10 +10,10 @@
 
 #include <immintrin.h> /* AVX2 */
 
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_dsp_rtcd.h"
 #include "aom_ports/mem.h"
 
-void vpx_lpf_horizontal_edge_8_avx2(unsigned char *s, int p,
+void aom_lpf_horizontal_edge_8_avx2(unsigned char *s, int p,
                                     const unsigned char *_blimit,
                                     const unsigned char *_limit,
                                     const unsigned char *_thresh) {
@@ -101,7 +101,7 @@ void vpx_lpf_horizontal_edge_8_avx2(unsigned char *s, int p,
     filt = _mm_adds_epi8(filt, work_a);
     filt = _mm_adds_epi8(filt, work_a);
     filt = _mm_adds_epi8(filt, work_a);
-    /* (vpx_filter + 3 * (qs0 - ps0)) & mask */
+    /* (aom_filter + 3 * (qs0 - ps0)) & mask */
     filt = _mm_and_si128(filt, mask);
 
     filter1 = _mm_adds_epi8(filt, t4);
@@ -367,7 +367,7 @@ DECLARE_ALIGNED(32, static const uint8_t, filt_loopfilter_avx2[32]) = {
   8, 128, 9, 128, 10, 128, 11, 128, 12, 128, 13, 128, 14, 128, 15, 128
 };
 
-void vpx_lpf_horizontal_edge_16_avx2(unsigned char *s, int p,
+void aom_lpf_horizontal_edge_16_avx2(unsigned char *s, int p,
                                      const unsigned char *_blimit,
                                      const unsigned char *_limit,
                                      const unsigned char *_thresh) {
@@ -480,7 +480,7 @@ void vpx_lpf_horizontal_edge_16_avx2(unsigned char *s, int p,
     filt = _mm_adds_epi8(filt, work_a);
     filt = _mm_adds_epi8(filt, work_a);
     filt = _mm_adds_epi8(filt, work_a);
-    /* (vpx_filter + 3 * (qs0 - ps0)) & mask */
+    /* (aom_filter + 3 * (qs0 - ps0)) & mask */
     filt = _mm_and_si128(filt, mask);
 
     filter1 = _mm_adds_epi8(filt, t4);

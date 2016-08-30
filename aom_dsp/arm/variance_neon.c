@@ -10,10 +10,10 @@
 
 #include <arm_neon.h>
 
-#include "./vpx_dsp_rtcd.h"
-#include "./vpx_config.h"
+#include "./aom_dsp_rtcd.h"
+#include "./aom_config.h"
 
-#include "aom/vpx_integer.h"
+#include "aom/aom_integer.h"
 #include "aom_ports/mem.h"
 
 static INLINE int horizontal_add_s16x8(const int16x8_t v_16x8) {
@@ -60,17 +60,17 @@ static void variance_neon_w8(const uint8_t *a, int a_stride, const uint8_t *b,
   *sse = (unsigned int)horizontal_add_s32x4(vaddq_s32(v_sse_lo, v_sse_hi));
 }
 
-void vpx_get8x8var_neon(const uint8_t *a, int a_stride, const uint8_t *b,
+void aom_get8x8var_neon(const uint8_t *a, int a_stride, const uint8_t *b,
                         int b_stride, unsigned int *sse, int *sum) {
   variance_neon_w8(a, a_stride, b, b_stride, 8, 8, sse, sum);
 }
 
-void vpx_get16x16var_neon(const uint8_t *a, int a_stride, const uint8_t *b,
+void aom_get16x16var_neon(const uint8_t *a, int a_stride, const uint8_t *b,
                           int b_stride, unsigned int *sse, int *sum) {
   variance_neon_w8(a, a_stride, b, b_stride, 16, 16, sse, sum);
 }
 
-unsigned int vpx_variance8x8_neon(const uint8_t *a, int a_stride,
+unsigned int aom_variance8x8_neon(const uint8_t *a, int a_stride,
                                   const uint8_t *b, int b_stride,
                                   unsigned int *sse) {
   int sum;
@@ -78,7 +78,7 @@ unsigned int vpx_variance8x8_neon(const uint8_t *a, int a_stride,
   return *sse - (((int64_t)sum * sum) >> 6);  //  >> 6 = / 8 * 8
 }
 
-unsigned int vpx_variance16x16_neon(const uint8_t *a, int a_stride,
+unsigned int aom_variance16x16_neon(const uint8_t *a, int a_stride,
                                     const uint8_t *b, int b_stride,
                                     unsigned int *sse) {
   int sum;
@@ -86,7 +86,7 @@ unsigned int vpx_variance16x16_neon(const uint8_t *a, int a_stride,
   return *sse - (((int64_t)sum * sum) >> 8);  //  >> 8 = / 16 * 16
 }
 
-unsigned int vpx_variance32x32_neon(const uint8_t *a, int a_stride,
+unsigned int aom_variance32x32_neon(const uint8_t *a, int a_stride,
                                     const uint8_t *b, int b_stride,
                                     unsigned int *sse) {
   int sum;
@@ -94,7 +94,7 @@ unsigned int vpx_variance32x32_neon(const uint8_t *a, int a_stride,
   return *sse - (((int64_t)sum * sum) >> 10);  // >> 10 = / 32 * 32
 }
 
-unsigned int vpx_variance32x64_neon(const uint8_t *a, int a_stride,
+unsigned int aom_variance32x64_neon(const uint8_t *a, int a_stride,
                                     const uint8_t *b, int b_stride,
                                     unsigned int *sse) {
   int sum1, sum2;
@@ -107,7 +107,7 @@ unsigned int vpx_variance32x64_neon(const uint8_t *a, int a_stride,
   return *sse - (((int64_t)sum1 * sum1) >> 11);  // >> 11 = / 32 * 64
 }
 
-unsigned int vpx_variance64x32_neon(const uint8_t *a, int a_stride,
+unsigned int aom_variance64x32_neon(const uint8_t *a, int a_stride,
                                     const uint8_t *b, int b_stride,
                                     unsigned int *sse) {
   int sum1, sum2;
@@ -120,7 +120,7 @@ unsigned int vpx_variance64x32_neon(const uint8_t *a, int a_stride,
   return *sse - (((int64_t)sum1 * sum1) >> 11);  // >> 11 = / 32 * 64
 }
 
-unsigned int vpx_variance64x64_neon(const uint8_t *a, int a_stride,
+unsigned int aom_variance64x64_neon(const uint8_t *a, int a_stride,
                                     const uint8_t *b, int b_stride,
                                     unsigned int *sse) {
   int sum1, sum2;
@@ -144,7 +144,7 @@ unsigned int vpx_variance64x64_neon(const uint8_t *a, int a_stride,
   return *sse - (((int64_t)sum1 * sum1) >> 12);  // >> 12 = / 64 * 64
 }
 
-unsigned int vpx_variance16x8_neon(const unsigned char *src_ptr,
+unsigned int aom_variance16x8_neon(const unsigned char *src_ptr,
                                    int source_stride,
                                    const unsigned char *ref_ptr,
                                    int recon_stride, unsigned int *sse) {
@@ -220,7 +220,7 @@ unsigned int vpx_variance16x8_neon(const unsigned char *src_ptr,
   return vget_lane_u32(d0u32, 0);
 }
 
-unsigned int vpx_variance8x16_neon(const unsigned char *src_ptr,
+unsigned int aom_variance8x16_neon(const unsigned char *src_ptr,
                                    int source_stride,
                                    const unsigned char *ref_ptr,
                                    int recon_stride, unsigned int *sse) {
@@ -282,7 +282,7 @@ unsigned int vpx_variance8x16_neon(const unsigned char *src_ptr,
   return vget_lane_u32(d0u32, 0);
 }
 
-unsigned int vpx_mse16x16_neon(const unsigned char *src_ptr, int source_stride,
+unsigned int aom_mse16x16_neon(const unsigned char *src_ptr, int source_stride,
                                const unsigned char *ref_ptr, int recon_stride,
                                unsigned int *sse) {
   int i;
@@ -345,7 +345,7 @@ unsigned int vpx_mse16x16_neon(const unsigned char *src_ptr, int source_stride,
   return vget_lane_u32(vreinterpret_u32_s64(d0s64), 0);
 }
 
-unsigned int vpx_get4x4sse_cs_neon(const unsigned char *src_ptr,
+unsigned int aom_get4x4sse_cs_neon(const unsigned char *src_ptr,
                                    int source_stride,
                                    const unsigned char *ref_ptr,
                                    int recon_stride) {

@@ -8,7 +8,7 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-    EXPORT  |vpx_idct4x4_16_add_neon|
+    EXPORT  |aom_idct4x4_16_add_neon|
     ARM
     REQUIRE8
     PRESERVE8
@@ -16,13 +16,13 @@
     AREA ||.text||, CODE, READONLY, ALIGN=2
 
     AREA     Block, CODE, READONLY ; name this block of code
-;void vpx_idct4x4_16_add_neon(int16_t *input, uint8_t *dest, int dest_stride)
+;void aom_idct4x4_16_add_neon(int16_t *input, uint8_t *dest, int dest_stride)
 ;
 ; r0  int16_t input
 ; r1  uint8_t *dest
 ; r2  int dest_stride)
 
-|vpx_idct4x4_16_add_neon| PROC
+|aom_idct4x4_16_add_neon| PROC
 
     ; The 2D transform is done with two passes which are actually pretty
     ; similar. We first transform the rows. This is done by transposing
@@ -185,6 +185,6 @@
     vst1.32 {d26[1]}, [r1], r2
     vst1.32 {d26[0]}, [r1]  ; no post-increment
     bx              lr
-    ENDP  ; |vpx_idct4x4_16_add_neon|
+    ENDP  ; |aom_idct4x4_16_add_neon|
 
     END

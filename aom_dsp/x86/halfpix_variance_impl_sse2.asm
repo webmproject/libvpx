@@ -10,15 +10,15 @@
 
 %include "aom_ports/x86_abi_support.asm"
 
-;void vpx_half_horiz_vert_variance16x_h_sse2(unsigned char *ref,
+;void aom_half_horiz_vert_variance16x_h_sse2(unsigned char *ref,
 ;                                            int ref_stride,
 ;                                            unsigned char *src,
 ;                                            int src_stride,
 ;                                            unsigned int height,
 ;                                            int *sum,
 ;                                            unsigned int *sumsquared)
-global sym(vpx_half_horiz_vert_variance16x_h_sse2) PRIVATE
-sym(vpx_half_horiz_vert_variance16x_h_sse2):
+global sym(aom_half_horiz_vert_variance16x_h_sse2) PRIVATE
+sym(aom_half_horiz_vert_variance16x_h_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -45,7 +45,7 @@ sym(vpx_half_horiz_vert_variance16x_h_sse2):
 
         lea             rsi,            [rsi + rax]
 
-vpx_half_horiz_vert_variance16x_h_1:
+aom_half_horiz_vert_variance16x_h_1:
         movdqu          xmm1,           XMMWORD PTR [rsi]     ;
         movdqu          xmm2,           XMMWORD PTR [rsi+1]   ;
         pavgb           xmm1,           xmm2                ;  xmm1 = avg(xmm1,xmm3) horizontal line i+1
@@ -77,7 +77,7 @@ vpx_half_horiz_vert_variance16x_h_1:
         lea             rdi,            [rdi + rdx]
 
         sub             rcx,            1                   ;
-        jnz             vpx_half_horiz_vert_variance16x_h_1     ;
+        jnz             aom_half_horiz_vert_variance16x_h_1     ;
 
         pxor        xmm1,           xmm1
         pxor        xmm5,           xmm5
@@ -123,15 +123,15 @@ vpx_half_horiz_vert_variance16x_h_1:
     ret
 
 
-;void vpx_half_vert_variance16x_h_sse2(unsigned char *ref,
+;void aom_half_vert_variance16x_h_sse2(unsigned char *ref,
 ;                                      int ref_stride,
 ;                                      unsigned char *src,
 ;                                      int src_stride,
 ;                                      unsigned int height,
 ;                                      int *sum,
 ;                                      unsigned int *sumsquared)
-global sym(vpx_half_vert_variance16x_h_sse2) PRIVATE
-sym(vpx_half_vert_variance16x_h_sse2):
+global sym(aom_half_vert_variance16x_h_sse2) PRIVATE
+sym(aom_half_vert_variance16x_h_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -154,7 +154,7 @@ sym(vpx_half_vert_variance16x_h_sse2):
         lea             rsi,            [rsi + rax          ]
         pxor            xmm0,           xmm0
 
-vpx_half_vert_variance16x_h_1:
+aom_half_vert_variance16x_h_1:
         movdqu          xmm3,           XMMWORD PTR [rsi]
 
         pavgb           xmm5,           xmm3                ;  xmm5 = avg(xmm1,xmm3)
@@ -182,7 +182,7 @@ vpx_half_vert_variance16x_h_1:
         lea             rdi,            [rdi + rdx]
 
         sub             rcx,            1
-        jnz             vpx_half_vert_variance16x_h_1
+        jnz             aom_half_vert_variance16x_h_1
 
         pxor        xmm1,           xmm1
         pxor        xmm5,           xmm5
@@ -228,15 +228,15 @@ vpx_half_vert_variance16x_h_1:
     ret
 
 
-;void vpx_half_horiz_variance16x_h_sse2(unsigned char *ref,
+;void aom_half_horiz_variance16x_h_sse2(unsigned char *ref,
 ;                                       int ref_stride
 ;                                       unsigned char *src,
 ;                                       int src_stride,
 ;                                       unsigned int height,
 ;                                       int *sum,
 ;                                       unsigned int *sumsquared)
-global sym(vpx_half_horiz_variance16x_h_sse2) PRIVATE
-sym(vpx_half_horiz_variance16x_h_sse2):
+global sym(aom_half_horiz_variance16x_h_sse2) PRIVATE
+sym(aom_half_horiz_variance16x_h_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -257,7 +257,7 @@ sym(vpx_half_horiz_variance16x_h_sse2):
 
         pxor            xmm0,           xmm0                ;
 
-vpx_half_horiz_variance16x_h_1:
+aom_half_horiz_variance16x_h_1:
         movdqu          xmm5,           XMMWORD PTR [rsi]     ;  xmm5 = s0,s1,s2..s15
         movdqu          xmm3,           XMMWORD PTR [rsi+1]   ;  xmm3 = s1,s2,s3..s16
 
@@ -284,7 +284,7 @@ vpx_half_horiz_variance16x_h_1:
         lea             rdi,            [rdi + rdx]
 
         sub             rcx,            1                   ;
-        jnz             vpx_half_horiz_variance16x_h_1        ;
+        jnz             aom_half_horiz_variance16x_h_1        ;
 
         pxor        xmm1,           xmm1
         pxor        xmm5,           xmm5
@@ -335,7 +335,7 @@ align 16
 xmm_bi_rd:
     times 8 dw 64
 align 16
-vpx_bilinear_filters_sse2:
+aom_bilinear_filters_sse2:
     dw 128, 128, 128, 128, 128, 128, 128, 128,  0,  0,  0,  0,  0,  0,  0,  0
     dw 112, 112, 112, 112, 112, 112, 112, 112, 16, 16, 16, 16, 16, 16, 16, 16
     dw 96, 96, 96, 96, 96, 96, 96, 96, 32, 32, 32, 32, 32, 32, 32, 32

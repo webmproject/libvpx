@@ -13,17 +13,17 @@
 
 #include "aom_dsp/x86/synonyms.h"
 
-#include "aom/vpx_integer.h"
+#include "aom/aom_integer.h"
 
 #include "av1/common/reconinter.h"
 
 #define MAX_MASK_VALUE (1 << WEDGE_WEIGHT_BITS)
 
 /**
- * See vp10_wedge_sse_from_residuals_c
+ * See av1_wedge_sse_from_residuals_c
  */
-uint64_t vp10_wedge_sse_from_residuals_sse2(const int16_t *r1, const int16_t *d,
-                                            const uint8_t *m, int N) {
+uint64_t av1_wedge_sse_from_residuals_sse2(const int16_t *r1, const int16_t *d,
+                                           const uint8_t *m, int N) {
   int n = -N;
   int n8 = n + 8;
 
@@ -94,10 +94,10 @@ uint64_t vp10_wedge_sse_from_residuals_sse2(const int16_t *r1, const int16_t *d,
 }
 
 /**
- * See vp10_wedge_sign_from_residuals_c
+ * See av1_wedge_sign_from_residuals_c
  */
-int vp10_wedge_sign_from_residuals_sse2(const int16_t *ds, const uint8_t *m,
-                                        int N, int64_t limit) {
+int av1_wedge_sign_from_residuals_sse2(const int16_t *ds, const uint8_t *m,
+                                       int N, int64_t limit) {
   int64_t acc;
 
   __m128i v_sign_d;
@@ -188,10 +188,10 @@ static INLINE __m128i negm_epi16(__m128i v_v_w, __m128i v_mask_w) {
 }
 
 /**
- * vp10_wedge_compute_delta_squares_c
+ * av1_wedge_compute_delta_squares_c
  */
-void vp10_wedge_compute_delta_squares_sse2(int16_t *d, const int16_t *a,
-                                           const int16_t *b, int N) {
+void av1_wedge_compute_delta_squares_sse2(int16_t *d, const int16_t *a,
+                                          const int16_t *b, int N) {
   const __m128i v_neg_w =
       _mm_set_epi16(0xffff, 0, 0xffff, 0, 0xffff, 0, 0xffff, 0);
 

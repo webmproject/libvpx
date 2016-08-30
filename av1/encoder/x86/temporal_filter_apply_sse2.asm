@@ -11,7 +11,7 @@
 
 %include "aom_ports/x86_abi_support.asm"
 
-; void vp10_temporal_filter_apply_sse2 | arg
+; void av1_temporal_filter_apply_sse2 | arg
 ;  (unsigned char  *frame1,           |  0
 ;   unsigned int    stride,           |  1
 ;   unsigned char  *frame2,           |  2
@@ -21,8 +21,8 @@
 ;   int             filter_weight,    |  6
 ;   unsigned int   *accumulator,      |  7
 ;   unsigned short *count)            |  8
-global sym(vp10_temporal_filter_apply_sse2) PRIVATE
-sym(vp10_temporal_filter_apply_sse2):
+global sym(av1_temporal_filter_apply_sse2) PRIVATE
+sym(av1_temporal_filter_apply_sse2):
 
     push        rbp
     mov         rbp, rsp

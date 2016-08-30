@@ -12,10 +12,10 @@
 #include <math.h>
 #include <stdio.h>
 
-#include "./vp10_rtcd.h"
+#include "./av1_rtcd.h"
 
-#include "aom_dsp/vpx_dsp_common.h"
-#include "aom_mem/vpx_mem.h"
+#include "aom_dsp/aom_dsp_common.h"
+#include "aom_mem/aom_mem.h"
 #include "aom_ports/bitops.h"
 #include "aom_ports/mem.h"
 #include "aom_ports/system_state.h"
@@ -45,13 +45,13 @@
 // Factor to weigh the rate for switchable interp filters.
 #define SWITCHABLE_INTERP_RATE_FACTOR 1
 
-void vp10_rd_cost_reset(RD_COST *rd_cost) {
+void av1_rd_cost_reset(RD_COST *rd_cost) {
   rd_cost->rate = INT_MAX;
   rd_cost->dist = INT64_MAX;
   rd_cost->rdcost = INT64_MAX;
 }
 
-void vp10_rd_cost_init(RD_COST *rd_cost) {
+void av1_rd_cost_init(RD_COST *rd_cost) {
   rd_cost->rate = 0;
   rd_cost->dist = 0;
   rd_cost->rdcost = 0;
@@ -68,94 +68,90 @@ static const uint8_t rd_thresh_block_size_factor[BLOCK_SIZES] = {
 #endif  // CONFIG_EXT_PARTITION
 };
 
-static void fill_mode_costs(VP10_COMP *cpi) {
+static void fill_mode_costs(AV1_COMP *cpi) {
   const FRAME_CONTEXT *const fc = cpi->common.fc;
   int i, j;
 
   for (i = 0; i < INTRA_MODES; ++i)
     for (j = 0; j < INTRA_MODES; ++j)
-      vp10_cost_tokens(cpi->y_mode_costs[i][j], vp10_kf_y_mode_prob[i][j],
-                       vp10_intra_mode_tree);
+      av1_cost_tokens(cpi->y_mode_costs[i][j], av1_kf_y_mode_prob[i][j],
+                      av1_intra_mode_tree);
 
   for (i = 0; i < BLOCK_SIZE_GROUPS; ++i)
-    vp10_cost_tokens(cpi->mbmode_cost[i], fc->y_mode_prob[i],
-                     vp10_intra_mode_tree);
+    av1_cost_tokens(cpi->mbmode_cost[i], fc->y_mode_prob[i],
+                    av1_intra_mode_tree);
 
   for (i = 0; i < INTRA_MODES; ++i)
-    vp10_cost_tokens(cpi->intra_uv_mode_cost[i], fc->uv_mode_prob[i],
-                     vp10_intra_mode_tree);
+    av1_cost_tokens(cpi->intra_uv_mode_cost[i], fc->uv_mode_prob[i],
+                    av1_intra_mode_tree);
 
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
-    vp10_cost_tokens(cpi->switchable_interp_costs[i],
-                     fc->switchable_interp_prob[i],
-                     vp10_switchable_interp_tree);
+    av1_cost_tokens(cpi->switchable_interp_costs[i],
+                    fc->switchable_interp_prob[i], av1_switchable_interp_tree);
 
   for (i = 0; i < PALETTE_BLOCK_SIZES; ++i) {
-    vp10_cost_tokens(cpi->palette_y_size_cost[i],
-                     vp10_default_palette_y_size_prob[i],
-                     vp10_palette_size_tree);
-    vp10_cost_tokens(cpi->palette_uv_size_cost[i],
-                     vp10_default_palette_uv_size_prob[i],
-                     vp10_palette_size_tree);
+    av1_cost_tokens(cpi->palette_y_size_cost[i],
+                    av1_default_palette_y_size_prob[i], av1_palette_size_tree);
+    av1_cost_tokens(cpi->palette_uv_size_cost[i],
+                    av1_default_palette_uv_size_prob[i], av1_palette_size_tree);
   }
 
   for (i = 0; i < PALETTE_MAX_SIZE - 1; ++i)
     for (j = 0; j < PALETTE_COLOR_CONTEXTS; ++j) {
-      vp10_cost_tokens(cpi->palette_y_color_cost[i][j],
-                       vp10_default_palette_y_color_prob[i][j],
-                       vp10_palette_color_tree[i]);
-      vp10_cost_tokens(cpi->palette_uv_color_cost[i][j],
-                       vp10_default_palette_uv_color_prob[i][j],
-                       vp10_palette_color_tree[i]);
+      av1_cost_tokens(cpi->palette_y_color_cost[i][j],
+                      av1_default_palette_y_color_prob[i][j],
+                      av1_palette_color_tree[i]);
+      av1_cost_tokens(cpi->palette_uv_color_cost[i][j],
+                      av1_default_palette_uv_color_prob[i][j],
+                      av1_palette_color_tree[i]);
     }
 
   for (i = 0; i < TX_SIZES - 1; ++i)
     for (j = 0; j < TX_SIZE_CONTEXTS; ++j)
-      vp10_cost_tokens(cpi->tx_size_cost[i][j], fc->tx_size_probs[i][j],
-                       vp10_tx_size_tree[i]);
+      av1_cost_tokens(cpi->tx_size_cost[i][j], fc->tx_size_probs[i][j],
+                      av1_tx_size_tree[i]);
 
 #if CONFIG_EXT_TX
   for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
     int s;
     for (s = 1; s < EXT_TX_SETS_INTER; ++s) {
       if (use_inter_ext_tx_for_txsize[s][i]) {
-        vp10_cost_tokens(cpi->inter_tx_type_costs[s][i],
-                         fc->inter_ext_tx_prob[s][i],
-                         vp10_ext_tx_inter_tree[s]);
+        av1_cost_tokens(cpi->inter_tx_type_costs[s][i],
+                        fc->inter_ext_tx_prob[s][i], av1_ext_tx_inter_tree[s]);
       }
     }
     for (s = 1; s < EXT_TX_SETS_INTRA; ++s) {
       if (use_intra_ext_tx_for_txsize[s][i]) {
         for (j = 0; j < INTRA_MODES; ++j)
-          vp10_cost_tokens(cpi->intra_tx_type_costs[s][i][j],
-                           fc->intra_ext_tx_prob[s][i][j],
-                           vp10_ext_tx_intra_tree[s]);
+          av1_cost_tokens(cpi->intra_tx_type_costs[s][i][j],
+                          fc->intra_ext_tx_prob[s][i][j],
+                          av1_ext_tx_intra_tree[s]);
       }
     }
   }
 #else
   for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
     for (j = 0; j < TX_TYPES; ++j)
-      vp10_cost_tokens(cpi->intra_tx_type_costs[i][j],
-                       fc->intra_ext_tx_prob[i][j], vp10_ext_tx_tree);
+      av1_cost_tokens(cpi->intra_tx_type_costs[i][j],
+                      fc->intra_ext_tx_prob[i][j], av1_ext_tx_tree);
   }
   for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
-    vp10_cost_tokens(cpi->inter_tx_type_costs[i], fc->inter_ext_tx_prob[i],
-                     vp10_ext_tx_tree);
+    av1_cost_tokens(cpi->inter_tx_type_costs[i], fc->inter_ext_tx_prob[i],
+                    av1_ext_tx_tree);
   }
 #endif  // CONFIG_EXT_TX
 #if CONFIG_EXT_INTRA
   for (i = 0; i < INTRA_FILTERS + 1; ++i)
-    vp10_cost_tokens(cpi->intra_filter_cost[i], fc->intra_filter_probs[i],
-                     vp10_intra_filter_tree);
+    av1_cost_tokens(cpi->intra_filter_cost[i], fc->intra_filter_probs[i],
+                    av1_intra_filter_tree);
 #endif  // CONFIG_EXT_INTRA
 }
 
-void vp10_fill_token_costs(vp10_coeff_cost *c,
+void av1_fill_token_costs(av1_coeff_cost *c,
 #if CONFIG_ANS
-                           coeff_cdf_model (*cdf)[PLANE_TYPES],
+                          coeff_cdf_model (*cdf)[PLANE_TYPES],
 #endif  // CONFIG_ANS
-                           vp10_coeff_probs_model (*p)[PLANE_TYPES]) {
+                          av1_coeff_probs_model (*p)[PLANE_TYPES]) {
   int i, j, k, l;
   TX_SIZE t;
   for (t = TX_4X4; t <= TX_32X32; ++t)
@@ -164,17 +160,17 @@ void vp10_fill_token_costs(vp10_coeff_cost *c,
         for (k = 0; k < COEF_BANDS; ++k)
           for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
 #if CONFIG_ANS
-            const vpx_prob *const tree_probs = p[t][i][j][k][l];
-            vp10_cost_tokens_ans((int *)c[t][i][j][k][0][l], tree_probs,
-                                 cdf[t][i][j][k][l], 0);
-            vp10_cost_tokens_ans((int *)c[t][i][j][k][1][l], tree_probs,
-                                 cdf[t][i][j][k][l], 1);
+            const aom_prob *const tree_probs = p[t][i][j][k][l];
+            av1_cost_tokens_ans((int *)c[t][i][j][k][0][l], tree_probs,
+                                cdf[t][i][j][k][l], 0);
+            av1_cost_tokens_ans((int *)c[t][i][j][k][1][l], tree_probs,
+                                cdf[t][i][j][k][l], 1);
 #else
-            vpx_prob probs[ENTROPY_NODES];
-            vp10_model_to_full_probs(p[t][i][j][k][l], probs);
-            vp10_cost_tokens((int *)c[t][i][j][k][0][l], probs, vp10_coef_tree);
-            vp10_cost_tokens_skip((int *)c[t][i][j][k][1][l], probs,
-                                  vp10_coef_tree);
+            aom_prob probs[ENTROPY_NODES];
+            av1_model_to_full_probs(p[t][i][j][k][l], probs);
+            av1_cost_tokens((int *)c[t][i][j][k][0][l], probs, av1_coef_tree);
+            av1_cost_tokens_skip((int *)c[t][i][j][k][1][l], probs,
+                                 av1_coef_tree);
 #endif  // CONFIG_ANS
             assert(c[t][i][j][k][0][l][EOB_TOKEN] ==
                    c[t][i][j][k][1][l][EOB_TOKEN]);
@@ -185,7 +181,7 @@ void vp10_fill_token_costs(vp10_coeff_cost *c,
 static int sad_per_bit16lut_8[QINDEX_RANGE];
 static int sad_per_bit4lut_8[QINDEX_RANGE];
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 static int sad_per_bit16lut_10[QINDEX_RANGE];
 static int sad_per_bit4lut_10[QINDEX_RANGE];
 static int sad_per_bit16lut_12[QINDEX_RANGE];
@@ -193,26 +189,26 @@ static int sad_per_bit4lut_12[QINDEX_RANGE];
 #endif
 
 static void init_me_luts_bd(int *bit16lut, int *bit4lut, int range,
-                            vpx_bit_depth_t bit_depth) {
+                            aom_bit_depth_t bit_depth) {
   int i;
   // Initialize the sad lut tables using a formulaic calculation for now.
   // This is to make it easier to resolve the impact of experimental changes
   // to the quantizer tables.
   for (i = 0; i < range; i++) {
-    const double q = vp10_convert_qindex_to_q(i, bit_depth);
+    const double q = av1_convert_qindex_to_q(i, bit_depth);
     bit16lut[i] = (int)(0.0418 * q + 2.4107);
     bit4lut[i] = (int)(0.063 * q + 2.742);
   }
 }
 
-void vp10_init_me_luts(void) {
+void av1_init_me_luts(void) {
   init_me_luts_bd(sad_per_bit16lut_8, sad_per_bit4lut_8, QINDEX_RANGE,
-                  VPX_BITS_8);
-#if CONFIG_VP9_HIGHBITDEPTH
+                  AOM_BITS_8);
+#if CONFIG_AOM_HIGHBITDEPTH
   init_me_luts_bd(sad_per_bit16lut_10, sad_per_bit4lut_10, QINDEX_RANGE,
-                  VPX_BITS_10);
+                  AOM_BITS_10);
   init_me_luts_bd(sad_per_bit16lut_12, sad_per_bit4lut_12, QINDEX_RANGE,
-                  VPX_BITS_12);
+                  AOM_BITS_12);
 #endif
 }
 
@@ -230,25 +226,25 @@ static const int rd_frame_type_factor[FRAME_UPDATE_TYPES] = {
 #endif  // CONFIG_EXT_REFS
 };
 
-int vp10_compute_rd_mult(const VP10_COMP *cpi, int qindex) {
-  const int64_t q = vp10_dc_quant(qindex, 0, cpi->common.bit_depth);
-#if CONFIG_VP9_HIGHBITDEPTH
+int av1_compute_rd_mult(const AV1_COMP *cpi, int qindex) {
+  const int64_t q = av1_dc_quant(qindex, 0, cpi->common.bit_depth);
+#if CONFIG_AOM_HIGHBITDEPTH
   int64_t rdmult = 0;
   switch (cpi->common.bit_depth) {
-    case VPX_BITS_8: rdmult = 88 * q * q / 24; break;
-    case VPX_BITS_10: rdmult = ROUND_POWER_OF_TWO(88 * q * q / 24, 4); break;
-    case VPX_BITS_12: rdmult = ROUND_POWER_OF_TWO(88 * q * q / 24, 8); break;
+    case AOM_BITS_8: rdmult = 88 * q * q / 24; break;
+    case AOM_BITS_10: rdmult = ROUND_POWER_OF_TWO(88 * q * q / 24, 4); break;
+    case AOM_BITS_12: rdmult = ROUND_POWER_OF_TWO(88 * q * q / 24, 8); break;
     default:
-      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+      assert(0 && "bit_depth should be AOM_BITS_8, AOM_BITS_10 or AOM_BITS_12");
       return -1;
   }
 #else
   int64_t rdmult = 88 * q * q / 24;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
   if (cpi->oxcf.pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
     const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
     const FRAME_UPDATE_TYPE frame_type = gf_group->update_type[gf_group->index];
-    const int boost_index = VPXMIN(15, (cpi->rc.gfu_boost / 100));
+    const int boost_index = AOMMIN(15, (cpi->rc.gfu_boost / 100));
 
     rdmult = (rdmult * rd_frame_type_factor[frame_type]) >> 7;
     rdmult += ((rdmult * rd_boost_factor[boost_index]) >> 7);
@@ -257,57 +253,56 @@ int vp10_compute_rd_mult(const VP10_COMP *cpi, int qindex) {
   return (int)rdmult;
 }
 
-static int compute_rd_thresh_factor(int qindex, vpx_bit_depth_t bit_depth) {
+static int compute_rd_thresh_factor(int qindex, aom_bit_depth_t bit_depth) {
   double q;
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   switch (bit_depth) {
-    case VPX_BITS_8: q = vp10_dc_quant(qindex, 0, VPX_BITS_8) / 4.0; break;
-    case VPX_BITS_10: q = vp10_dc_quant(qindex, 0, VPX_BITS_10) / 16.0; break;
-    case VPX_BITS_12: q = vp10_dc_quant(qindex, 0, VPX_BITS_12) / 64.0; break;
+    case AOM_BITS_8: q = av1_dc_quant(qindex, 0, AOM_BITS_8) / 4.0; break;
+    case AOM_BITS_10: q = av1_dc_quant(qindex, 0, AOM_BITS_10) / 16.0; break;
+    case AOM_BITS_12: q = av1_dc_quant(qindex, 0, AOM_BITS_12) / 64.0; break;
     default:
-      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+      assert(0 && "bit_depth should be AOM_BITS_8, AOM_BITS_10 or AOM_BITS_12");
       return -1;
   }
 #else
   (void)bit_depth;
-  q = vp10_dc_quant(qindex, 0, VPX_BITS_8) / 4.0;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+  q = av1_dc_quant(qindex, 0, AOM_BITS_8) / 4.0;
+#endif  // CONFIG_AOM_HIGHBITDEPTH
   // TODO(debargha): Adjust the function below.
-  return VPXMAX((int)(pow(q, RD_THRESH_POW) * 5.12), 8);
+  return AOMMAX((int)(pow(q, RD_THRESH_POW) * 5.12), 8);
 }
 
-void vp10_initialize_me_consts(const VP10_COMP *cpi, MACROBLOCK *x,
-                               int qindex) {
-#if CONFIG_VP9_HIGHBITDEPTH
+void av1_initialize_me_consts(const AV1_COMP *cpi, MACROBLOCK *x, int qindex) {
+#if CONFIG_AOM_HIGHBITDEPTH
   switch (cpi->common.bit_depth) {
-    case VPX_BITS_8:
+    case AOM_BITS_8:
       x->sadperbit16 = sad_per_bit16lut_8[qindex];
       x->sadperbit4 = sad_per_bit4lut_8[qindex];
       break;
-    case VPX_BITS_10:
+    case AOM_BITS_10:
       x->sadperbit16 = sad_per_bit16lut_10[qindex];
       x->sadperbit4 = sad_per_bit4lut_10[qindex];
       break;
-    case VPX_BITS_12:
+    case AOM_BITS_12:
       x->sadperbit16 = sad_per_bit16lut_12[qindex];
       x->sadperbit4 = sad_per_bit4lut_12[qindex];
       break;
     default:
-      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+      assert(0 && "bit_depth should be AOM_BITS_8, AOM_BITS_10 or AOM_BITS_12");
   }
 #else
   (void)cpi;
   x->sadperbit16 = sad_per_bit16lut_8[qindex];
   x->sadperbit4 = sad_per_bit4lut_8[qindex];
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 }
 
-static void set_block_thresholds(const VP10_COMMON *cm, RD_OPT *rd) {
+static void set_block_thresholds(const AV1_COMMON *cm, RD_OPT *rd) {
   int i, bsize, segment_id;
 
   for (segment_id = 0; segment_id < MAX_SEGMENTS; ++segment_id) {
     const int qindex =
-        clamp(vp10_get_qindex(&cm->seg, segment_id, cm->base_qindex) +
+        clamp(av1_get_qindex(&cm->seg, segment_id, cm->base_qindex) +
                   cm->y_dc_delta_q,
               0, MAXQ);
     const int q = compute_rd_thresh_factor(qindex, cm->bit_depth);
@@ -335,10 +330,10 @@ static void set_block_thresholds(const VP10_COMMON *cm, RD_OPT *rd) {
 }
 
 #if CONFIG_REF_MV
-void vp10_set_mvcost(MACROBLOCK *x, MV_REFERENCE_FRAME ref_frame) {
+void av1_set_mvcost(MACROBLOCK *x, MV_REFERENCE_FRAME ref_frame) {
   MB_MODE_INFO_EXT *mbmi_ext = x->mbmi_ext;
-  int nmv_ctx = vp10_nmv_ctx(mbmi_ext->ref_mv_count[ref_frame],
-                             mbmi_ext->ref_mv_stack[ref_frame]);
+  int nmv_ctx = av1_nmv_ctx(mbmi_ext->ref_mv_count[ref_frame],
+                            mbmi_ext->ref_mv_stack[ref_frame]);
   x->mvcost = x->mv_cost_stack[nmv_ctx];
   x->nmvjointcost = x->nmv_vec_cost[nmv_ctx];
   x->mvsadcost = x->mvcost;
@@ -349,16 +344,16 @@ void vp10_set_mvcost(MACROBLOCK *x, MV_REFERENCE_FRAME ref_frame) {
 }
 #endif
 
-void vp10_initialize_rd_consts(VP10_COMP *cpi) {
-  VP10_COMMON *const cm = &cpi->common;
+void av1_initialize_rd_consts(AV1_COMP *cpi) {
+  AV1_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->td.mb;
   RD_OPT *const rd = &cpi->rd;
   int i;
 
-  vpx_clear_system_state();
+  aom_clear_system_state();
 
   rd->RDDIV = RDDIV_BITS;  // In bits (to multiply D by 128).
-  rd->RDMULT = vp10_compute_rd_mult(cpi, cm->base_qindex + cm->y_dc_delta_q);
+  rd->RDMULT = av1_compute_rd_mult(cpi, cm->base_qindex + cm->y_dc_delta_q);
 
   set_error_per_bit(x, rd->RDMULT);
 
@@ -369,10 +364,10 @@ void vp10_initialize_rd_consts(VP10_COMP *cpi) {
     int nmv_ctx;
 
     for (nmv_ctx = 0; nmv_ctx < NMV_CONTEXTS; ++nmv_ctx) {
-      vpx_prob tmp_prob = cm->fc->nmvc[nmv_ctx].joints[MV_JOINT_ZERO];
+      aom_prob tmp_prob = cm->fc->nmvc[nmv_ctx].joints[MV_JOINT_ZERO];
       cm->fc->nmvc[nmv_ctx].joints[MV_JOINT_ZERO] = 1;
 
-      vp10_build_nmv_cost_table(
+      av1_build_nmv_cost_table(
           x->nmv_vec_cost[nmv_ctx],
           cm->allow_high_precision_mv ? x->nmvcost_hp[nmv_ctx]
                                       : x->nmvcost[nmv_ctx],
@@ -381,40 +376,40 @@ void vp10_initialize_rd_consts(VP10_COMP *cpi) {
 
       x->nmv_vec_cost[nmv_ctx][MV_JOINT_ZERO] = 0;
       x->zero_rmv_cost[nmv_ctx][0] =
-          vp10_cost_bit(cm->fc->nmvc[nmv_ctx].zero_rmv, 0);
+          av1_cost_bit(cm->fc->nmvc[nmv_ctx].zero_rmv, 0);
       x->zero_rmv_cost[nmv_ctx][1] =
-          vp10_cost_bit(cm->fc->nmvc[nmv_ctx].zero_rmv, 1);
+          av1_cost_bit(cm->fc->nmvc[nmv_ctx].zero_rmv, 1);
     }
     x->mvcost = x->mv_cost_stack[0];
     x->nmvjointcost = x->nmv_vec_cost[0];
     x->mvsadcost = x->mvcost;
     x->nmvjointsadcost = x->nmvjointcost;
 #else
-    vp10_build_nmv_cost_table(
+    av1_build_nmv_cost_table(
         x->nmvjointcost,
         cm->allow_high_precision_mv ? x->nmvcost_hp : x->nmvcost, &cm->fc->nmvc,
         cm->allow_high_precision_mv);
 #endif
   }
   if (cpi->oxcf.pass != 1) {
-    vp10_fill_token_costs(x->token_costs,
+    av1_fill_token_costs(x->token_costs,
 #if CONFIG_ANS
-                          cm->fc->coef_cdfs,
+                         cm->fc->coef_cdfs,
 #endif  // CONFIG_ANS
-                          cm->fc->coef_probs);
+                         cm->fc->coef_probs);
 
     if (cpi->sf.partition_search_type != VAR_BASED_PARTITION ||
         cm->frame_type == KEY_FRAME) {
 #if CONFIG_EXT_PARTITION_TYPES
-      vp10_cost_tokens(cpi->partition_cost[0], cm->fc->partition_prob[0],
-                       vp10_partition_tree);
+      av1_cost_tokens(cpi->partition_cost[0], cm->fc->partition_prob[0],
+                      av1_partition_tree);
       for (i = 1; i < PARTITION_CONTEXTS; ++i)
-        vp10_cost_tokens(cpi->partition_cost[i], cm->fc->partition_prob[i],
-                         vp10_ext_partition_tree);
+        av1_cost_tokens(cpi->partition_cost[i], cm->fc->partition_prob[i],
+                        av1_ext_partition_tree);
 #else
       for (i = 0; i < PARTITION_CONTEXTS; ++i)
-        vp10_cost_tokens(cpi->partition_cost[i], cm->fc->partition_prob[i],
-                         vp10_partition_tree);
+        av1_cost_tokens(cpi->partition_cost[i], cm->fc->partition_prob[i],
+                        av1_partition_tree);
 #endif  // CONFIG_EXT_PARTITION_TYPES
     }
 
@@ -423,47 +418,47 @@ void vp10_initialize_rd_consts(VP10_COMP *cpi) {
     if (!frame_is_intra_only(cm)) {
 #if CONFIG_REF_MV
       for (i = 0; i < NEWMV_MODE_CONTEXTS; ++i) {
-        cpi->newmv_mode_cost[i][0] = vp10_cost_bit(cm->fc->newmv_prob[i], 0);
-        cpi->newmv_mode_cost[i][1] = vp10_cost_bit(cm->fc->newmv_prob[i], 1);
+        cpi->newmv_mode_cost[i][0] = av1_cost_bit(cm->fc->newmv_prob[i], 0);
+        cpi->newmv_mode_cost[i][1] = av1_cost_bit(cm->fc->newmv_prob[i], 1);
       }
 
       for (i = 0; i < ZEROMV_MODE_CONTEXTS; ++i) {
-        cpi->zeromv_mode_cost[i][0] = vp10_cost_bit(cm->fc->zeromv_prob[i], 0);
-        cpi->zeromv_mode_cost[i][1] = vp10_cost_bit(cm->fc->zeromv_prob[i], 1);
+        cpi->zeromv_mode_cost[i][0] = av1_cost_bit(cm->fc->zeromv_prob[i], 0);
+        cpi->zeromv_mode_cost[i][1] = av1_cost_bit(cm->fc->zeromv_prob[i], 1);
       }
 
       for (i = 0; i < REFMV_MODE_CONTEXTS; ++i) {
-        cpi->refmv_mode_cost[i][0] = vp10_cost_bit(cm->fc->refmv_prob[i], 0);
-        cpi->refmv_mode_cost[i][1] = vp10_cost_bit(cm->fc->refmv_prob[i], 1);
+        cpi->refmv_mode_cost[i][0] = av1_cost_bit(cm->fc->refmv_prob[i], 0);
+        cpi->refmv_mode_cost[i][1] = av1_cost_bit(cm->fc->refmv_prob[i], 1);
       }
 
       for (i = 0; i < DRL_MODE_CONTEXTS; ++i) {
-        cpi->drl_mode_cost0[i][0] = vp10_cost_bit(cm->fc->drl_prob[i], 0);
-        cpi->drl_mode_cost0[i][1] = vp10_cost_bit(cm->fc->drl_prob[i], 1);
+        cpi->drl_mode_cost0[i][0] = av1_cost_bit(cm->fc->drl_prob[i], 0);
+        cpi->drl_mode_cost0[i][1] = av1_cost_bit(cm->fc->drl_prob[i], 1);
       }
 #if CONFIG_EXT_INTER
-      cpi->new2mv_mode_cost[0] = vp10_cost_bit(cm->fc->new2mv_prob, 0);
-      cpi->new2mv_mode_cost[1] = vp10_cost_bit(cm->fc->new2mv_prob, 1);
+      cpi->new2mv_mode_cost[0] = av1_cost_bit(cm->fc->new2mv_prob, 0);
+      cpi->new2mv_mode_cost[1] = av1_cost_bit(cm->fc->new2mv_prob, 1);
 #endif  // CONFIG_EXT_INTER
 #else
       for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
-        vp10_cost_tokens((int *)cpi->inter_mode_cost[i],
-                         cm->fc->inter_mode_probs[i], vp10_inter_mode_tree);
+        av1_cost_tokens((int *)cpi->inter_mode_cost[i],
+                        cm->fc->inter_mode_probs[i], av1_inter_mode_tree);
 #endif  // CONFIG_REF_MV
 #if CONFIG_EXT_INTER
       for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
-        vp10_cost_tokens((int *)cpi->inter_compound_mode_cost[i],
-                         cm->fc->inter_compound_mode_probs[i],
-                         vp10_inter_compound_mode_tree);
+        av1_cost_tokens((int *)cpi->inter_compound_mode_cost[i],
+                        cm->fc->inter_compound_mode_probs[i],
+                        av1_inter_compound_mode_tree);
       for (i = 0; i < BLOCK_SIZE_GROUPS; ++i)
-        vp10_cost_tokens((int *)cpi->interintra_mode_cost[i],
-                         cm->fc->interintra_mode_prob[i],
-                         vp10_interintra_mode_tree);
+        av1_cost_tokens((int *)cpi->interintra_mode_cost[i],
+                        cm->fc->interintra_mode_prob[i],
+                        av1_interintra_mode_tree);
 #endif  // CONFIG_EXT_INTER
 #if CONFIG_OBMC || CONFIG_WARPED_MOTION
       for (i = BLOCK_8X8; i < BLOCK_SIZES; i++) {
-        vp10_cost_tokens((int *)cpi->motvar_cost[i], cm->fc->motvar_prob[i],
-                         vp10_motvar_tree);
+        av1_cost_tokens((int *)cpi->motvar_cost[i], cm->fc->motvar_prob[i],
+                        av1_motvar_tree);
       }
 #endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
     }
@@ -536,9 +531,9 @@ static void model_rd_norm(int xsq_q10, int *r_q10, int *d_q10) {
   *d_q10 = (dist_tab_q10[xq] * b_q10 + dist_tab_q10[xq + 1] * a_q10) >> 10;
 }
 
-void vp10_model_rd_from_var_lapndz(int64_t var, unsigned int n_log2,
-                                   unsigned int qstep, int *rate,
-                                   int64_t *dist) {
+void av1_model_rd_from_var_lapndz(int64_t var, unsigned int n_log2,
+                                  unsigned int qstep, int *rate,
+                                  int64_t *dist) {
   // This function models the rate and distortion for a Laplacian
   // source with given variance when quantized with a uniform quantizer
   // with given stepsize. The closed form expressions are in:
@@ -553,9 +548,9 @@ void vp10_model_rd_from_var_lapndz(int64_t var, unsigned int n_log2,
     static const uint32_t MAX_XSQ_Q10 = 245727;
     const uint64_t xsq_q10_64 =
         (((uint64_t)qstep * qstep << (n_log2 + 10)) + (var >> 1)) / var;
-    const int xsq_q10 = (int)VPXMIN(xsq_q10_64, MAX_XSQ_Q10);
+    const int xsq_q10 = (int)AOMMIN(xsq_q10_64, MAX_XSQ_Q10);
     model_rd_norm(xsq_q10, &r_q10, &d_q10);
-    *rate = ROUND_POWER_OF_TWO(r_q10 << n_log2, 10 - VP10_PROB_COST_SHIFT);
+    *rate = ROUND_POWER_OF_TWO(r_q10 << n_log2, 10 - AV1_PROB_COST_SHIFT);
     *dist = (var * (int64_t)d_q10 + 512) >> 10;
   }
 }
@@ -633,16 +628,16 @@ static void get_entropy_contexts_plane(
   }
 }
 
-void vp10_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
-                               const struct macroblockd_plane *pd,
-                               ENTROPY_CONTEXT t_above[2 * MAX_MIB_SIZE],
-                               ENTROPY_CONTEXT t_left[2 * MAX_MIB_SIZE]) {
+void av1_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
+                              const struct macroblockd_plane *pd,
+                              ENTROPY_CONTEXT t_above[2 * MAX_MIB_SIZE],
+                              ENTROPY_CONTEXT t_left[2 * MAX_MIB_SIZE]) {
   const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
   get_entropy_contexts_plane(plane_bsize, tx_size, pd, t_above, t_left);
 }
 
-void vp10_mv_pred(VP10_COMP *cpi, MACROBLOCK *x, uint8_t *ref_y_buffer,
-                  int ref_y_stride, int ref_frame, BLOCK_SIZE block_size) {
+void av1_mv_pred(AV1_COMP *cpi, MACROBLOCK *x, uint8_t *ref_y_buffer,
+                 int ref_y_stride, int ref_frame, BLOCK_SIZE block_size) {
   int i;
   int zero_seen = 0;
   int best_index = 0;
@@ -672,7 +667,7 @@ void vp10_mv_pred(VP10_COMP *cpi, MACROBLOCK *x, uint8_t *ref_y_buffer,
     if (i == 1 && near_same_nearest) continue;
     fp_row = (this_mv->row + 3 + (this_mv->row >= 0)) >> 3;
     fp_col = (this_mv->col + 3 + (this_mv->col >= 0)) >> 3;
-    max_mv = VPXMAX(max_mv, VPXMAX(abs(this_mv->row), abs(this_mv->col)) >> 3);
+    max_mv = AOMMAX(max_mv, AOMMAX(abs(this_mv->row), abs(this_mv->col)) >> 3);
 
     if (fp_row == 0 && fp_col == 0 && zero_seen) continue;
     zero_seen |= (fp_row == 0 && fp_col == 0);
@@ -694,11 +689,11 @@ void vp10_mv_pred(VP10_COMP *cpi, MACROBLOCK *x, uint8_t *ref_y_buffer,
   x->pred_mv_sad[ref_frame] = best_sad;
 }
 
-void vp10_setup_pred_block(const MACROBLOCKD *xd,
-                           struct buf_2d dst[MAX_MB_PLANE],
-                           const YV12_BUFFER_CONFIG *src, int mi_row,
-                           int mi_col, const struct scale_factors *scale,
-                           const struct scale_factors *scale_uv) {
+void av1_setup_pred_block(const MACROBLOCKD *xd,
+                          struct buf_2d dst[MAX_MB_PLANE],
+                          const YV12_BUFFER_CONFIG *src, int mi_row, int mi_col,
+                          const struct scale_factors *scale,
+                          const struct scale_factors *scale_uv) {
   int i;
 
   dst[0].buf = src->y_buffer;
@@ -716,23 +711,23 @@ void vp10_setup_pred_block(const MACROBLOCKD *xd,
   }
 }
 
-int vp10_raster_block_offset(BLOCK_SIZE plane_bsize, int raster_block,
-                             int stride) {
+int av1_raster_block_offset(BLOCK_SIZE plane_bsize, int raster_block,
+                            int stride) {
   const int bw = b_width_log2_lookup[plane_bsize];
   const int y = 4 * (raster_block >> bw);
   const int x = 4 * (raster_block & ((1 << bw) - 1));
   return y * stride + x;
 }
 
-int16_t *vp10_raster_block_offset_int16(BLOCK_SIZE plane_bsize,
-                                        int raster_block, int16_t *base) {
+int16_t *av1_raster_block_offset_int16(BLOCK_SIZE plane_bsize, int raster_block,
+                                       int16_t *base) {
   const int stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
-  return base + vp10_raster_block_offset(plane_bsize, raster_block, stride);
+  return base + av1_raster_block_offset(plane_bsize, raster_block, stride);
 }
 
-YV12_BUFFER_CONFIG *vp10_get_scaled_ref_frame(const VP10_COMP *cpi,
-                                              int ref_frame) {
-  const VP10_COMMON *const cm = &cpi->common;
+YV12_BUFFER_CONFIG *av1_get_scaled_ref_frame(const AV1_COMP *cpi,
+                                             int ref_frame) {
+  const AV1_COMMON *const cm = &cpi->common;
   const int scaled_idx = cpi->scaled_ref_idx[ref_frame - 1];
   const int ref_idx = get_ref_frame_buf_idx(cpi, ref_frame);
   return (scaled_idx != ref_idx && scaled_idx != INVALID_IDX)
@@ -741,8 +736,7 @@ YV12_BUFFER_CONFIG *vp10_get_scaled_ref_frame(const VP10_COMP *cpi,
 }
 
 #if CONFIG_DUAL_FILTER
-int vp10_get_switchable_rate(const VP10_COMP *cpi,
-                             const MACROBLOCKD *const xd) {
+int av1_get_switchable_rate(const AV1_COMP *cpi, const MACROBLOCKD *const xd) {
   const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   int inter_filter_cost = 0;
   int dir;
@@ -751,7 +745,7 @@ int vp10_get_switchable_rate(const VP10_COMP *cpi,
     if (has_subpel_mv_component(xd->mi[0], xd, dir) ||
         (mbmi->ref_frame[1] > INTRA_FRAME &&
          has_subpel_mv_component(xd->mi[0], xd, dir + 2))) {
-      const int ctx = vp10_get_pred_context_switchable_interp(xd, dir);
+      const int ctx = av1_get_pred_context_switchable_interp(xd, dir);
       inter_filter_cost +=
           cpi->switchable_interp_costs[ctx][mbmi->interp_filter[dir]];
     }
@@ -759,19 +753,18 @@ int vp10_get_switchable_rate(const VP10_COMP *cpi,
   return SWITCHABLE_INTERP_RATE_FACTOR * inter_filter_cost;
 }
 #else
-int vp10_get_switchable_rate(const VP10_COMP *cpi,
-                             const MACROBLOCKD *const xd) {
+int av1_get_switchable_rate(const AV1_COMP *cpi, const MACROBLOCKD *const xd) {
   const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
-  const int ctx = vp10_get_pred_context_switchable_interp(xd);
+  const int ctx = av1_get_pred_context_switchable_interp(xd);
 #if CONFIG_EXT_INTERP
-  if (!vp10_is_interp_needed(xd)) return 0;
+  if (!av1_is_interp_needed(xd)) return 0;
 #endif  // CONFIG_EXT_INTERP
   return SWITCHABLE_INTERP_RATE_FACTOR *
          cpi->switchable_interp_costs[ctx][mbmi->interp_filter];
 }
 #endif
 
-void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {
+void av1_set_rd_speed_thresholds(AV1_COMP *cpi) {
   int i;
   RD_OPT *const rd = &cpi->rd;
   SPEED_FEATURES *const sf = &cpi->sf;
@@ -1046,7 +1039,7 @@ void vp10_set_rd_speed_thresholds(VP10_COMP *cpi) {
 #endif  // CONFIG_EXT_INTER
 }
 
-void vp10_set_rd_speed_thresholds_sub8x8(VP10_COMP *cpi) {
+void av1_set_rd_speed_thresholds_sub8x8(AV1_COMP *cpi) {
   static const int thresh_mult[2][MAX_REFS] = {
 #if CONFIG_EXT_REFS
     { 2500, 2500, 2500, 2500, 2500, 2500, 4500, 4500, 4500, 4500, 4500, 4500,
@@ -1063,41 +1056,41 @@ void vp10_set_rd_speed_thresholds_sub8x8(VP10_COMP *cpi) {
   memcpy(rd->thresh_mult_sub8x8, thresh_mult[idx], sizeof(thresh_mult[idx]));
 }
 
-void vp10_update_rd_thresh_fact(const VP10_COMMON *const cm,
-                                int (*factor_buf)[MAX_MODES], int rd_thresh,
-                                int bsize, int best_mode_index) {
+void av1_update_rd_thresh_fact(const AV1_COMMON *const cm,
+                               int (*factor_buf)[MAX_MODES], int rd_thresh,
+                               int bsize, int best_mode_index) {
   if (rd_thresh > 0) {
     const int top_mode = bsize < BLOCK_8X8 ? MAX_REFS : MAX_MODES;
     int mode;
     for (mode = 0; mode < top_mode; ++mode) {
-      const BLOCK_SIZE min_size = VPXMAX(bsize - 1, BLOCK_4X4);
-      const BLOCK_SIZE max_size = VPXMIN(bsize + 2, cm->sb_size);
+      const BLOCK_SIZE min_size = AOMMAX(bsize - 1, BLOCK_4X4);
+      const BLOCK_SIZE max_size = AOMMIN(bsize + 2, cm->sb_size);
       BLOCK_SIZE bs;
       for (bs = min_size; bs <= max_size; ++bs) {
         int *const fact = &factor_buf[bs][mode];
         if (mode == best_mode_index) {
           *fact -= (*fact >> 4);
         } else {
-          *fact = VPXMIN(*fact + RD_THRESH_INC, rd_thresh * RD_THRESH_MAX_FACT);
+          *fact = AOMMIN(*fact + RD_THRESH_INC, rd_thresh * RD_THRESH_MAX_FACT);
         }
       }
     }
   }
 }
 
-int vp10_get_intra_cost_penalty(int qindex, int qdelta,
-                                vpx_bit_depth_t bit_depth) {
-  const int q = vp10_dc_quant(qindex, qdelta, bit_depth);
-#if CONFIG_VP9_HIGHBITDEPTH
+int av1_get_intra_cost_penalty(int qindex, int qdelta,
+                               aom_bit_depth_t bit_depth) {
+  const int q = av1_dc_quant(qindex, qdelta, bit_depth);
+#if CONFIG_AOM_HIGHBITDEPTH
   switch (bit_depth) {
-    case VPX_BITS_8: return 20 * q;
-    case VPX_BITS_10: return 5 * q;
-    case VPX_BITS_12: return ROUND_POWER_OF_TWO(5 * q, 2);
+    case AOM_BITS_8: return 20 * q;
+    case AOM_BITS_10: return 5 * q;
+    case AOM_BITS_12: return ROUND_POWER_OF_TWO(5 * q, 2);
     default:
-      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+      assert(0 && "bit_depth should be AOM_BITS_8, AOM_BITS_10 or AOM_BITS_12");
       return -1;
   }
 #else
   return 20 * q;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 }

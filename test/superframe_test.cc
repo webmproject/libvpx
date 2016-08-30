@@ -40,7 +40,7 @@ class SuperframeTest
     SetMode(mode);
     sf_count_ = 0;
     sf_count_max_ = INT_MAX;
-    is_vp10_style_superframe_ = syntax;
+    is_av1_style_superframe_ = syntax;
     n_tile_cols_ = std::tr1::get<kTileCols>(input);
     n_tile_rows_ = std::tr1::get<kTileRows>(input);
   }
@@ -50,23 +50,22 @@ class SuperframeTest
   virtual void PreEncodeFrameHook(libaom_test::VideoSource *video,
                                   libaom_test::Encoder *encoder) {
     if (video->frame() == 1) {
-      encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
-      encoder->Control(VP8E_SET_CPUUSED, 2);
-      encoder->Control(VP9E_SET_TILE_COLUMNS, n_tile_cols_);
-      encoder->Control(VP9E_SET_TILE_ROWS, n_tile_rows_);
+      encoder->Control(AOME_SET_ENABLEAUTOALTREF, 1);
+      encoder->Control(AOME_SET_CPUUSED, 2);
+      encoder->Control(AV1E_SET_TILE_COLUMNS, n_tile_cols_);
+      encoder->Control(AV1E_SET_TILE_ROWS, n_tile_rows_);
     }
   }
 
-  virtual const vpx_codec_cx_pkt_t *MutateEncoderOutputHook(
-      const vpx_codec_cx_pkt_t *pkt) {
-    if (pkt->kind != VPX_CODEC_CX_FRAME_PKT) return pkt;
+  virtual const aom_codec_cx_pkt_t *MutateEncoderOutputHook(
+      const aom_codec_cx_pkt_t *pkt) {
+    if (pkt->kind != AOM_CODEC_CX_FRAME_PKT) return pkt;
 
     const uint8_t *buffer = reinterpret_cast<uint8_t *>(pkt->data.frame.buf);
     const uint8_t marker = buffer[pkt->data.frame.sz - 1];
     const int frames = (marker & 0x7) + 1;
     const int mag = ((marker >> 3) & 3) + 1;
-    const unsigned int index_sz =
-        2 + mag * (frames - is_vp10_style_superframe_);
+    const unsigned int index_sz = 2 + mag * (frames - is_av1_style_superframe_);
     if ((marker & 0xe0) == 0xc0 && pkt->data.frame.sz >= index_sz &&
         buffer[pkt->data.frame.sz - index_sz] == marker) {
       // frame is a superframe. strip off the index.
@@ -88,12 +87,12 @@ class SuperframeTest
     return pkt;
   }
 
-  int is_vp10_style_superframe_;
+  int is_av1_style_superframe_;
   int sf_count_;
   int sf_count_max_;
-  vpx_codec_cx_pkt_t modified_pkt_;
+  aom_codec_cx_pkt_t modified_pkt_;
   uint8_t *modified_buf_;
-  vpx_codec_pts_t last_sf_pts_;
+  aom_codec_pts_t last_sf_pts_;
 
  private:
   int n_tile_cols_;
@@ -126,7 +125,7 @@ const int tile_col_values[] = { 1, 2 };
 const int tile_col_values[] = { 1, 2, 32 };
 #endif
 const int tile_row_values[] = { 1, 2, 32 };
-VP10_INSTANTIATE_TEST_CASE(
+AV1_INSTANTIATE_TEST_CASE(
     SuperframeTest,
     ::testing::Combine(::testing::Values(::libaom_test::kTwoPassGood),
                        ::testing::Values(1),
@@ -134,7 +133,7 @@ VP10_INSTANTIATE_TEST_CASE(
                        ::testing::ValuesIn(tile_row_values)));
 #else
 #if !CONFIG_ANS
-VP10_INSTANTIATE_TEST_CASE(
+AV1_INSTANTIATE_TEST_CASE(
     SuperframeTest,
     ::testing::Combine(::testing::Values(::libaom_test::kTwoPassGood),
                        ::testing::Values(1), ::testing::Values(0),

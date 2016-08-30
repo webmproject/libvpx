@@ -8,10 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_COMMON_ENTROPY_H_
-#define VP10_COMMON_ENTROPY_H_
+#ifndef AV1_COMMON_ENTROPY_H_
+#define AV1_COMMON_ENTROPY_H_
 
-#include "aom/vpx_integer.h"
+#include "aom/aom_integer.h"
 #include "aom_dsp/prob.h"
 
 #if CONFIG_ANS
@@ -51,7 +51,7 @@ extern "C" {
 
 #define ENTROPY_NODES 11
 
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_pt_energy_class[ENTROPY_TOKENS]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_pt_energy_class[ENTROPY_TOKENS]);
 
 #define CAT1_MIN_VAL 5
 #define CAT2_MIN_VAL 7
@@ -61,50 +61,50 @@ DECLARE_ALIGNED(16, extern const uint8_t, vp10_pt_energy_class[ENTROPY_TOKENS]);
 #define CAT6_MIN_VAL 67
 
 // Extra bit probabilities.
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_cat1_prob[1]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_cat2_prob[2]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_cat3_prob[3]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_cat4_prob[4]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_cat5_prob[5]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_cat6_prob[14]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_cat1_prob[1]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_cat2_prob[2]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_cat3_prob[3]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_cat4_prob[4]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_cat5_prob[5]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_cat6_prob[14]);
 
-#if CONFIG_VP9_HIGHBITDEPTH
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_cat1_prob_high10[1]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_cat2_prob_high10[2]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_cat3_prob_high10[3]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_cat4_prob_high10[4]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_cat5_prob_high10[5]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_cat6_prob_high10[16]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_cat1_prob_high12[1]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_cat2_prob_high12[2]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_cat3_prob_high12[3]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_cat4_prob_high12[4]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_cat5_prob_high12[5]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_cat6_prob_high12[18]);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
+DECLARE_ALIGNED(16, extern const uint8_t, av1_cat1_prob_high10[1]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_cat2_prob_high10[2]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_cat3_prob_high10[3]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_cat4_prob_high10[4]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_cat5_prob_high10[5]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_cat6_prob_high10[16]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_cat1_prob_high12[1]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_cat2_prob_high12[2]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_cat3_prob_high12[3]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_cat4_prob_high12[4]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_cat5_prob_high12[5]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_cat6_prob_high12[18]);
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
 #define EOB_MODEL_TOKEN 3
 
 typedef struct {
-  const vpx_tree_index *tree;
-  const vpx_prob *prob;
+  const aom_tree_index *tree;
+  const aom_prob *prob;
   int len;
   int base_val;
   const int16_t *cost;
-} vp10_extra_bit;
+} av1_extra_bit;
 
 // indexed by token value
-extern const vp10_extra_bit vp10_extra_bits[ENTROPY_TOKENS];
-#if CONFIG_VP9_HIGHBITDEPTH
-extern const vp10_extra_bit vp10_extra_bits_high10[ENTROPY_TOKENS];
-extern const vp10_extra_bit vp10_extra_bits_high12[ENTROPY_TOKENS];
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+extern const av1_extra_bit av1_extra_bits[ENTROPY_TOKENS];
+#if CONFIG_AOM_HIGHBITDEPTH
+extern const av1_extra_bit av1_extra_bits_high10[ENTROPY_TOKENS];
+extern const av1_extra_bit av1_extra_bits_high12[ENTROPY_TOKENS];
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
 #define DCT_MAX_VALUE 16384
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
 #define DCT_MAX_VALUE_HIGH10 65536
 #define DCT_MAX_VALUE_HIGH12 262144
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
 /* Coefficients are predicted via a 3-dimensional probability table. */
 
@@ -135,18 +135,18 @@ extern const vp10_extra_bit vp10_extra_bits_high12[ENTROPY_TOKENS];
 // #define ENTROPY_STATS
 
 typedef unsigned int
-    vp10_coeff_count[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS][ENTROPY_TOKENS];
+    av1_coeff_count[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS][ENTROPY_TOKENS];
 typedef unsigned int
-    vp10_coeff_stats[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS][ENTROPY_NODES][2];
+    av1_coeff_stats[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS][ENTROPY_NODES][2];
 
 #define SUBEXP_PARAM 4   /* Subexponential code parameter */
 #define MODULUS_PARAM 13 /* Modulus parameter */
 
-struct VP10Common;
-void vp10_default_coef_probs(struct VP10Common *cm);
-void vp10_adapt_coef_probs(struct VP10Common *cm);
+struct AV1Common;
+void av1_default_coef_probs(struct AV1Common *cm);
+void av1_adapt_coef_probs(struct AV1Common *cm);
 #if CONFIG_ENTROPY
-void vp10_partial_adapt_probs(struct VP10Common *cm, int mi_row, int mi_col);
+void av1_partial_adapt_probs(struct AV1Common *cm, int mi_row, int mi_col);
 #endif  // CONFIG_ENTROPY
 
 // This is the index in the scan order beyond which all coefficients for
@@ -154,11 +154,11 @@ void vp10_partial_adapt_probs(struct VP10Common *cm, int mi_row, int mi_col);
 // This macro is currently unused but may be used by certain implementations
 #define MAXBAND_INDEX 21
 
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_coefband_trans_8x8plus[1024]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_coefband_trans_8x8plus[1024]);
 #if CONFIG_EXT_TX
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_coefband_trans_4x8_8x4[32]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_coefband_trans_4x8_8x4[32]);
 #endif  // CONFIG_EXT_TX
-DECLARE_ALIGNED(16, extern const uint8_t, vp10_coefband_trans_4x4[16]);
+DECLARE_ALIGNED(16, extern const uint8_t, av1_coefband_trans_4x4[16]);
 
 DECLARE_ALIGNED(16, extern const uint16_t, band_count_table[TX_SIZES_ALL][8]);
 DECLARE_ALIGNED(16, extern const uint16_t,
@@ -166,11 +166,11 @@ DECLARE_ALIGNED(16, extern const uint16_t,
 
 static INLINE const uint8_t *get_band_translate(TX_SIZE tx_size) {
   switch (tx_size) {
-    case TX_4X4: return vp10_coefband_trans_4x4;
+    case TX_4X4: return av1_coefband_trans_4x4;
 #if CONFIG_EXT_TX
-    case TX_4X8: return vp10_coefband_trans_4x8_8x4;
+    case TX_4X8: return av1_coefband_trans_4x8_8x4;
 #endif  // CONFIG_EXT_TX
-    default: return vp10_coefband_trans_8x8plus;
+    default: return av1_coefband_trans_8x8plus;
   }
 }
 
@@ -185,22 +185,22 @@ static INLINE const uint8_t *get_band_translate(TX_SIZE tx_size) {
 #define PIVOT_NODE 2  // which node is pivot
 
 #define MODEL_NODES (ENTROPY_NODES - UNCONSTRAINED_NODES)
-extern const vpx_tree_index vp10_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)];
-extern const vpx_prob vp10_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES];
+extern const aom_tree_index av1_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)];
+extern const aom_prob av1_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES];
 #if CONFIG_ANS
 extern const AnsP10
-    vp10_pareto8_token_probs[COEFF_PROB_MODELS][ENTROPY_TOKENS - 2];
+    av1_pareto8_token_probs[COEFF_PROB_MODELS][ENTROPY_TOKENS - 2];
 
 typedef rans_dec_lut coeff_cdf_model[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS];
 #endif  // CONFIG_ANS
 
-typedef vpx_prob vp10_coeff_probs_model[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS]
-                                       [UNCONSTRAINED_NODES];
+typedef aom_prob av1_coeff_probs_model[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS]
+                                      [UNCONSTRAINED_NODES];
 
-typedef unsigned int vp10_coeff_count_model
+typedef unsigned int av1_coeff_count_model
     [REF_TYPES][COEF_BANDS][COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1];
 
-void vp10_model_to_full_probs(const vpx_prob *model, vpx_prob *full);
+void av1_model_to_full_probs(const aom_prob *model, aom_prob *full);
 
 typedef char ENTROPY_CONTEXT;
 
@@ -263,7 +263,7 @@ static INLINE int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
 
 #if CONFIG_ANS
 struct frame_contexts;
-void vp10_coef_pareto_cdfs(struct frame_contexts *fc);
+void av1_coef_pareto_cdfs(struct frame_contexts *fc);
 #endif  // CONFIG_ANS
 
 #if CONFIG_ENTROPY
@@ -283,14 +283,14 @@ void vp10_coef_pareto_cdfs(struct frame_contexts *fc);
 
 #endif  // CONFIG_ENTROPY
 
-static INLINE vpx_prob vp10_merge_probs(vpx_prob pre_prob,
-                                        const unsigned int ct[2],
-                                        unsigned int count_sat,
-                                        unsigned int max_update_factor) {
+static INLINE aom_prob av1_merge_probs(aom_prob pre_prob,
+                                       const unsigned int ct[2],
+                                       unsigned int count_sat,
+                                       unsigned int max_update_factor) {
 #if CONFIG_ENTROPY
-  const vpx_prob prob = get_binary_prob(ct[0], ct[1]);
+  const aom_prob prob = get_binary_prob(ct[0], ct[1]);
   const unsigned int count =
-      VPXMIN(ct[0] + ct[1], (unsigned int)(1 << count_sat));
+      AOMMIN(ct[0] + ct[1], (unsigned int)(1 << count_sat));
   const unsigned int factor = count << (max_update_factor - count_sat);
   return weighted_prob(pre_prob, prob, factor);
 #else
@@ -298,11 +298,11 @@ static INLINE vpx_prob vp10_merge_probs(vpx_prob pre_prob,
 #endif  // CONFIG_ENTROPY
 }
 
-static INLINE vpx_prob vp10_mode_mv_merge_probs(vpx_prob pre_prob,
-                                                const unsigned int ct[2]) {
+static INLINE aom_prob av1_mode_mv_merge_probs(aom_prob pre_prob,
+                                               const unsigned int ct[2]) {
 #if CONFIG_ENTROPY
-  return vp10_merge_probs(pre_prob, ct, MODE_MV_COUNT_SAT_BITS,
-                          MODE_MV_MAX_UPDATE_FACTOR_BITS);
+  return av1_merge_probs(pre_prob, ct, MODE_MV_COUNT_SAT_BITS,
+                         MODE_MV_MAX_UPDATE_FACTOR_BITS);
 #else
   return mode_mv_merge_probs(pre_prob, ct);
 #endif  // CONFIG_ENTROPY
@@ -312,4 +312,4 @@ static INLINE vpx_prob vp10_mode_mv_merge_probs(vpx_prob pre_prob,
 }  // extern "C"
 #endif
 
-#endif  // VP10_COMMON_ENTROPY_H_
+#endif  // AV1_COMMON_ENTROPY_H_

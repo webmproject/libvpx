@@ -8,12 +8,12 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_COMMON_BLOCKD_H_
-#define VP10_COMMON_BLOCKD_H_
+#ifndef AV1_COMMON_BLOCKD_H_
+#define AV1_COMMON_BLOCKD_H_
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 
-#include "aom_dsp/vpx_dsp_common.h"
+#include "aom_dsp/aom_dsp_common.h"
 #include "aom_ports/mem.h"
 #include "aom_scale/yv12config.h"
 
@@ -39,7 +39,7 @@ typedef enum {
 } FRAME_TYPE;
 
 #if CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
-#define IsInterpolatingFilter(filter) (vp10_is_interpolating_filter(filter))
+#define IsInterpolatingFilter(filter) (av1_is_interpolating_filter(filter))
 #else
 #define IsInterpolatingFilter(filter) (1)
 #endif  // CONFIG_EXT_INTERP && SUPPORT_NONINTERPOLATING_FILTERS
@@ -158,11 +158,11 @@ typedef struct {
   // Number of base colors for Y (0) and UV (1)
   uint8_t palette_size[2];
 // Value of base colors for Y, U, and V
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   uint16_t palette_colors[3 * PALETTE_MAX_SIZE];
 #else
   uint8_t palette_colors[3 * PALETTE_MAX_SIZE];
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_AOM_HIGHBITDEPTH
   // Only used by encoder to store the color index of the top left pixel.
   // TODO(huisu): move this to encoder
   uint8_t palette_first_color_idx[2];
@@ -260,11 +260,11 @@ static INLINE int has_second_ref(const MB_MODE_INFO *mbmi) {
   return mbmi->ref_frame[1] > INTRA_FRAME;
 }
 
-PREDICTION_MODE vp10_left_block_mode(const MODE_INFO *cur_mi,
-                                     const MODE_INFO *left_mi, int b);
+PREDICTION_MODE av1_left_block_mode(const MODE_INFO *cur_mi,
+                                    const MODE_INFO *left_mi, int b);
 
-PREDICTION_MODE vp10_above_block_mode(const MODE_INFO *cur_mi,
-                                      const MODE_INFO *above_mi, int b);
+PREDICTION_MODE av1_above_block_mode(const MODE_INFO *cur_mi,
+                                     const MODE_INFO *above_mi, int b);
 
 enum mv_precision { MV_PRECISION_Q3, MV_PRECISION_Q4 };
 
@@ -314,7 +314,7 @@ typedef struct macroblockd_plane {
 
 typedef struct RefBuffer {
   // TODO(dkovalev): idx is not really required and should be removed, now it
-  // is used in vp10_onyxd_if.c
+  // is used in av1_onyxd_if.c
   int idx;
   YV12_BUFFER_CONFIG *buf;
   struct scale_factors sf;
@@ -339,7 +339,7 @@ typedef struct macroblockd {
   int up_available;
   int left_available;
 
-  const vpx_prob (*partition_probs)[PARTITION_TYPES - 1];
+  const aom_prob (*partition_probs)[PARTITION_TYPES - 1];
 
   /* Distance of MB away from frame edges */
   int mb_to_left_edge;
@@ -381,7 +381,7 @@ typedef struct macroblockd {
   uint8_t is_sec_rect;
 #endif
 
-#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_AOM_HIGHBITDEPTH
   /* Bit depth: 8, 10, 12 */
   int bd;
 #endif
@@ -389,7 +389,7 @@ typedef struct macroblockd {
   int lossless[MAX_SEGMENTS];
   int corrupted;
 
-  struct vpx_internal_error_info *error_info;
+  struct aom_internal_error_info *error_info;
 #if CONFIG_GLOBAL_MOTION
   Global_Motion_Params *global_motion;
 #endif  // CONFIG_GLOBAL_MOTION
@@ -419,7 +419,7 @@ static const TX_TYPE intra_mode_to_tx_type_context[INTRA_MODES] = {
 #if CONFIG_SUPERTX
 static INLINE int supertx_enabled(const MB_MODE_INFO *mbmi) {
   return (int)txsize_sqr_map[mbmi->tx_size] >
-         VPXMIN(b_width_log2_lookup[mbmi->sb_type],
+         AOMMIN(b_width_log2_lookup[mbmi->sb_type],
                 b_height_log2_lookup[mbmi->sb_type]);
 }
 #endif  // CONFIG_SUPERTX
@@ -567,7 +567,7 @@ static INLINE TX_SIZE tx_size_from_tx_mode(BLOCK_SIZE bsize, TX_MODE tx_mode,
 
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
   if (!is_inter) {
-    return VPXMIN(max_tx_size, largest_tx_size);
+    return AOMMIN(max_tx_size, largest_tx_size);
   } else {
     const TX_SIZE max_rect_tx_size = max_txsize_rect_lookup[bsize];
     if (txsize_sqr_up_map[max_rect_tx_size] <= largest_tx_size) {
@@ -578,7 +578,7 @@ static INLINE TX_SIZE tx_size_from_tx_mode(BLOCK_SIZE bsize, TX_MODE tx_mode,
   }
 #else
   (void)is_inter;
-  return VPXMIN(max_tx_size, largest_tx_size);
+  return AOMMIN(max_tx_size, largest_tx_size);
 #endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
 }
 
@@ -606,7 +606,7 @@ static const TX_TYPE filter_intra_mode_to_tx_type_lookup[FILTER_INTRA_MODES] = {
   ADST_ADST,  // FILTER_TM
 };
 
-int vp10_is_intra_filter_switchable(int angle);
+int av1_is_intra_filter_switchable(int angle);
 #endif  // CONFIG_EXT_INTRA
 
 #if CONFIG_EXT_TILE
@@ -718,7 +718,7 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type, const MACROBLOCKD *xd,
 #endif  // CONFIG_EXT_TX
 }
 
-void vp10_setup_block_planes(MACROBLOCKD *xd, int ss_x, int ss_y);
+void av1_setup_block_planes(MACROBLOCKD *xd, int ss_x, int ss_y);
 
 static INLINE TX_SIZE get_uv_tx_size_impl(TX_SIZE y_tx_size, BLOCK_SIZE bsize,
                                           int xss, int yss) {
@@ -726,7 +726,7 @@ static INLINE TX_SIZE get_uv_tx_size_impl(TX_SIZE y_tx_size, BLOCK_SIZE bsize,
     return TX_4X4;
   } else {
     const BLOCK_SIZE plane_bsize = ss_size_lookup[bsize][xss][yss];
-    return VPXMIN(txsize_sqr_map[y_tx_size], max_txsize_lookup[plane_bsize]);
+    return AOMMIN(txsize_sqr_map[y_tx_size], max_txsize_lookup[plane_bsize]);
   }
 }
 
@@ -763,18 +763,18 @@ typedef void (*foreach_transformed_block_visitor)(int plane, int block,
                                                   BLOCK_SIZE plane_bsize,
                                                   TX_SIZE tx_size, void *arg);
 
-void vp10_foreach_transformed_block_in_plane(
+void av1_foreach_transformed_block_in_plane(
     const MACROBLOCKD *const xd, BLOCK_SIZE bsize, int plane,
     foreach_transformed_block_visitor visit, void *arg);
 
-void vp10_foreach_transformed_block(const MACROBLOCKD *const xd,
-                                    BLOCK_SIZE bsize,
-                                    foreach_transformed_block_visitor visit,
-                                    void *arg);
+void av1_foreach_transformed_block(const MACROBLOCKD *const xd,
+                                   BLOCK_SIZE bsize,
+                                   foreach_transformed_block_visitor visit,
+                                   void *arg);
 
-void vp10_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
-                       BLOCK_SIZE plane_bsize, TX_SIZE tx_size, int has_eob,
-                       int aoff, int loff);
+void av1_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
+                      BLOCK_SIZE plane_bsize, TX_SIZE tx_size, int has_eob,
+                      int aoff, int loff);
 
 #if CONFIG_EXT_INTER
 static INLINE int is_interintra_allowed_bsize(const BLOCK_SIZE bsize) {
@@ -830,4 +830,4 @@ static INLINE int is_neighbor_overlappable(const MB_MODE_INFO *mbmi) {
 }  // extern "C"
 #endif
 
-#endif  // VP10_COMMON_BLOCKD_H_
+#endif  // AV1_COMMON_BLOCKD_H_

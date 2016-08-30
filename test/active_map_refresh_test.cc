@@ -17,7 +17,7 @@
 namespace {
 
 // Check if any pixel in a 16x16 macroblock varies between frames.
-int CheckMb(const vpx_image_t &current, const vpx_image_t &previous, int mb_r,
+int CheckMb(const aom_image_t &current, const aom_image_t &previous, int mb_r,
             int mb_c) {
   for (int plane = 0; plane < 3; plane++) {
     int r = 16 * mb_r;
@@ -45,8 +45,8 @@ int CheckMb(const vpx_image_t &current, const vpx_image_t &previous, int mb_r,
   return 0;
 }
 
-void GenerateMap(int mb_rows, int mb_cols, const vpx_image_t &current,
-                 const vpx_image_t &previous, uint8_t *map) {
+void GenerateMap(int mb_rows, int mb_cols, const aom_image_t &current,
+                 const aom_image_t &previous, uint8_t *map) {
   for (int mb_r = 0; mb_r < mb_rows; ++mb_r) {
     for (int mb_c = 0; mb_c < mb_cols; ++mb_c) {
       map[mb_r * mb_cols + mb_c] = CheckMb(current, previous, mb_r, mb_c);
@@ -74,13 +74,13 @@ class ActiveMapRefreshTest
     ::libaom_test::Y4mVideoSource *y4m_video =
         static_cast<libaom_test::Y4mVideoSource *>(video);
     if (video->frame() == 1) {
-      encoder->Control(VP8E_SET_CPUUSED, cpu_used_);
-      encoder->Control(VP9E_SET_AQ_MODE, kAqModeCyclicRefresh);
+      encoder->Control(AOME_SET_CPUUSED, cpu_used_);
+      encoder->Control(AV1E_SET_AQ_MODE, kAqModeCyclicRefresh);
     } else if (video->frame() >= 2 && video->img()) {
-      vpx_image_t *current = video->img();
-      vpx_image_t *previous = y4m_holder_->img();
+      aom_image_t *current = video->img();
+      aom_image_t *previous = y4m_holder_->img();
       ASSERT_TRUE(previous != NULL);
-      vpx_active_map_t map = vpx_active_map_t();
+      aom_active_map_t map = aom_active_map_t();
       const int width = static_cast<int>(current->d_w);
       const int height = static_cast<int>(current->d_h);
       const int mb_width = (width + 15) / 16;
@@ -90,7 +90,7 @@ class ActiveMapRefreshTest
       map.cols = mb_width;
       map.rows = mb_height;
       map.active_map = active_map;
-      encoder->Control(VP8E_SET_ACTIVEMAP, &map);
+      encoder->Control(AOME_SET_ACTIVEMAP, &map);
       delete[] active_map;
     }
     if (video->img()) {
@@ -109,15 +109,15 @@ TEST_P(ActiveMapRefreshTest, Test) {
   cfg_.rc_resize_allowed = 0;
   cfg_.rc_min_quantizer = 8;
   cfg_.rc_max_quantizer = 30;
-  cfg_.g_pass = VPX_RC_ONE_PASS;
-  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.g_pass = AOM_RC_ONE_PASS;
+  cfg_.rc_end_usage = AOM_CBR;
   cfg_.kf_max_dist = 90000;
 
-#if CONFIG_VP10
-  const int nframes = codec_ == &libaom_test::kVP10 ? 10 : 30;
+#if CONFIG_AV1
+  const int nframes = codec_ == &libaom_test::kAV1 ? 10 : 30;
 #else
   const int nframes = 30;
-#endif  // CONFIG_VP10
+#endif  // CONFIG_AV1
   ::libaom_test::Y4mVideoSource video("desktop_credits.y4m", 0, nframes);
   ::libaom_test::Y4mVideoSource video_holder("desktop_credits.y4m", 0, nframes);
   video_holder.Begin();
@@ -126,9 +126,9 @@ TEST_P(ActiveMapRefreshTest, Test) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
-#if CONFIG_VP10
-VP10_INSTANTIATE_TEST_CASE(ActiveMapRefreshTest,
-                           ::testing::Values(::libaom_test::kRealTime),
-                           ::testing::Range(5, 6));
-#endif  // CONFIG_VP10
+#if CONFIG_AV1
+AV1_INSTANTIATE_TEST_CASE(ActiveMapRefreshTest,
+                          ::testing::Values(::libaom_test::kRealTime),
+                          ::testing::Range(5, 6));
+#endif  // CONFIG_AV1
 }  // namespace

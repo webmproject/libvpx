@@ -10,7 +10,7 @@
 
 #include <arm_neon.h>
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 #include "aom_dsp/txfm_common.h"
 
 #define LOAD_FROM_TRANSPOSED(prev, first, second) \
@@ -427,7 +427,7 @@ static INLINE void idct32_bands_end_2nd_pass(
   return;
 }
 
-void vpx_idct32x32_1024_add_neon(int16_t *input, uint8_t *dest, int stride) {
+void aom_idct32x32_1024_add_neon(int16_t *input, uint8_t *dest, int stride) {
   int i, idct32_pass_loop;
   int16_t trans_buf[32 * 8];
   int16_t pass1[32 * 32];

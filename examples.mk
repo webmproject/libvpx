@@ -63,51 +63,51 @@ endif
 
 # List of examples to build. UTILS are tools meant for distribution
 # while EXAMPLES demonstrate specific portions of the API.
-UTILS-$(CONFIG_DECODERS)    += vpxdec.c
-vpxdec.SRCS                 += md5_utils.c md5_utils.h
-vpxdec.SRCS                 += aom_ports/mem_ops.h
-vpxdec.SRCS                 += aom_ports/mem_ops_aligned.h
-vpxdec.SRCS                 += aom_ports/msvc.h
-vpxdec.SRCS                 += aom_ports/vpx_timer.h
-vpxdec.SRCS                 += aom/vpx_integer.h
-vpxdec.SRCS                 += args.c args.h
-vpxdec.SRCS                 += ivfdec.c ivfdec.h
-vpxdec.SRCS                 += tools_common.c tools_common.h
-vpxdec.SRCS                 += y4menc.c y4menc.h
+UTILS-$(CONFIG_DECODERS)    += aomdec.c
+aomdec.SRCS                 += md5_utils.c md5_utils.h
+aomdec.SRCS                 += aom_ports/mem_ops.h
+aomdec.SRCS                 += aom_ports/mem_ops_aligned.h
+aomdec.SRCS                 += aom_ports/msvc.h
+aomdec.SRCS                 += aom_ports/aom_timer.h
+aomdec.SRCS                 += aom/aom_integer.h
+aomdec.SRCS                 += args.c args.h
+aomdec.SRCS                 += ivfdec.c ivfdec.h
+aomdec.SRCS                 += tools_common.c tools_common.h
+aomdec.SRCS                 += y4menc.c y4menc.h
 ifeq ($(CONFIG_LIBYUV),yes)
-  vpxdec.SRCS                 += $(LIBYUV_SRCS)
+  aomdec.SRCS                 += $(LIBYUV_SRCS)
 endif
 ifeq ($(CONFIG_WEBM_IO),yes)
-  vpxdec.SRCS                 += $(LIBWEBM_COMMON_SRCS)
-  vpxdec.SRCS                 += $(LIBWEBM_MUXER_SRCS)
-  vpxdec.SRCS                 += $(LIBWEBM_PARSER_SRCS)
-  vpxdec.SRCS                 += webmdec.cc webmdec.h
+  aomdec.SRCS                 += $(LIBWEBM_COMMON_SRCS)
+  aomdec.SRCS                 += $(LIBWEBM_MUXER_SRCS)
+  aomdec.SRCS                 += $(LIBWEBM_PARSER_SRCS)
+  aomdec.SRCS                 += webmdec.cc webmdec.h
 endif
-vpxdec.GUID                  = BA5FE66F-38DD-E034-F542-B1578C5FB950
-vpxdec.DESCRIPTION           = Full featured decoder
-UTILS-$(CONFIG_ENCODERS)    += vpxenc.c
-vpxenc.SRCS                 += args.c args.h y4minput.c y4minput.h vpxenc.h
-vpxenc.SRCS                 += ivfdec.c ivfdec.h
-vpxenc.SRCS                 += ivfenc.c ivfenc.h
-vpxenc.SRCS                 += rate_hist.c rate_hist.h
-vpxenc.SRCS                 += tools_common.c tools_common.h
-vpxenc.SRCS                 += warnings.c warnings.h
-vpxenc.SRCS                 += aom_ports/mem_ops.h
-vpxenc.SRCS                 += aom_ports/mem_ops_aligned.h
-vpxenc.SRCS                 += aom_ports/msvc.h
-vpxenc.SRCS                 += aom_ports/vpx_timer.h
-vpxenc.SRCS                 += vpxstats.c vpxstats.h
+aomdec.GUID                  = BA5FE66F-38DD-E034-F542-B1578C5FB950
+aomdec.DESCRIPTION           = Full featured decoder
+UTILS-$(CONFIG_ENCODERS)    += aomenc.c
+aomenc.SRCS                 += args.c args.h y4minput.c y4minput.h aomenc.h
+aomenc.SRCS                 += ivfdec.c ivfdec.h
+aomenc.SRCS                 += ivfenc.c ivfenc.h
+aomenc.SRCS                 += rate_hist.c rate_hist.h
+aomenc.SRCS                 += tools_common.c tools_common.h
+aomenc.SRCS                 += warnings.c warnings.h
+aomenc.SRCS                 += aom_ports/mem_ops.h
+aomenc.SRCS                 += aom_ports/mem_ops_aligned.h
+aomenc.SRCS                 += aom_ports/msvc.h
+aomenc.SRCS                 += aom_ports/aom_timer.h
+aomenc.SRCS                 += aomstats.c aomstats.h
 ifeq ($(CONFIG_LIBYUV),yes)
-  vpxenc.SRCS                 += $(LIBYUV_SRCS)
+  aomenc.SRCS                 += $(LIBYUV_SRCS)
 endif
 ifeq ($(CONFIG_WEBM_IO),yes)
-  vpxenc.SRCS                 += $(LIBWEBM_COMMON_SRCS)
-  vpxenc.SRCS                 += $(LIBWEBM_MUXER_SRCS)
-  vpxenc.SRCS                 += $(LIBWEBM_PARSER_SRCS)
-  vpxenc.SRCS                 += webmenc.cc webmenc.h
+  aomenc.SRCS                 += $(LIBWEBM_COMMON_SRCS)
+  aomenc.SRCS                 += $(LIBWEBM_MUXER_SRCS)
+  aomenc.SRCS                 += $(LIBWEBM_PARSER_SRCS)
+  aomenc.SRCS                 += webmenc.cc webmenc.h
 endif
-vpxenc.GUID                  = 548DEC74-7A15-4B2B-AFC3-AA102E7C25C1
-vpxenc.DESCRIPTION           = Full featured encoder
+aomenc.GUID                  = 548DEC74-7A15-4B2B-AFC3-AA102E7C25C1
+aomenc.DESCRIPTION           = Full featured encoder
 
 EXAMPLES-$(CONFIG_DECODERS)        += simple_decoder.c
 simple_decoder.GUID                 = D3BBF1E9-2427-450D-BBFF-B2843C1D44CC
@@ -138,7 +138,7 @@ simple_encoder.SRCS             += video_writer.h video_writer.c
 simple_encoder.SRCS             += aom_ports/msvc.h
 simple_encoder.GUID              = 4607D299-8A71-4D2C-9B1D-071899B6FBFD
 simple_encoder.DESCRIPTION       = Simplified encoder loop
-EXAMPLES-$(CONFIG_VP10_ENCODER) += lossless_encoder.c
+EXAMPLES-$(CONFIG_AV1_ENCODER) += lossless_encoder.c
 lossless_encoder.SRCS           += ivfenc.h ivfenc.c
 lossless_encoder.SRCS           += tools_common.h tools_common.c
 lossless_encoder.SRCS           += video_common.h
@@ -174,15 +174,15 @@ set_maps.GUID                       = ECB2D24D-98B8-4015-A465-A4AF3DCC145F
 set_maps.DESCRIPTION                = Set active and ROI maps
 
 
-ifeq ($(CONFIG_VP10_ENCODER), yes)
+ifeq ($(CONFIG_AV1_ENCODER), yes)
 ifeq ($(CONFIG_DECODERS),yes)
-EXAMPLES-yes                       += vpxcx_set_ref.c
-vpxcx_set_ref.SRCS                 += ivfenc.h ivfenc.c
-vpxcx_set_ref.SRCS                 += tools_common.h tools_common.c
-vpxcx_set_ref.SRCS                 += video_common.h
-vpxcx_set_ref.SRCS                 += video_writer.h video_writer.c
-vpxcx_set_ref.GUID                  = 65D7F14A-2EE6-4293-B958-AB5107A03B55
-vpxcx_set_ref.DESCRIPTION           = VP10 set encoder reference frame
+EXAMPLES-yes                       += aomcx_set_ref.c
+aomcx_set_ref.SRCS                 += ivfenc.h ivfenc.c
+aomcx_set_ref.SRCS                 += tools_common.h tools_common.c
+aomcx_set_ref.SRCS                 += video_common.h
+aomcx_set_ref.SRCS                 += video_writer.h video_writer.c
+aomcx_set_ref.GUID                  = 65D7F14A-2EE6-4293-B958-AB5107A03B55
+aomcx_set_ref.DESCRIPTION           = AV1 set encoder reference frame
 endif
 endif
 
@@ -192,10 +192,10 @@ endif
 # We should not link to math library (libm) on RVCT
 # when building for bare-metal targets
 ifeq ($(CONFIG_OS_SUPPORT), yes)
-CODEC_EXTRA_LIBS-$(CONFIG_VP10)        += m
+CODEC_EXTRA_LIBS-$(CONFIG_AV1)        += m
 else
     ifeq ($(CONFIG_GCC), yes)
-    CODEC_EXTRA_LIBS-$(CONFIG_VP10)        += m
+    CODEC_EXTRA_LIBS-$(CONFIG_AV1)        += m
     endif
 endif
 #
@@ -212,8 +212,8 @@ ifeq ($(HAVE_ALT_TREE_LAYOUT),yes)
     INC_PATH-yes := $(SRC_PATH_BARE)/../include
 else
     LIB_PATH-yes                     += $(if $(BUILD_PFX),$(BUILD_PFX),.)
-    INC_PATH-$(CONFIG_VP10_DECODER)   += $(SRC_PATH_BARE)/vp10
-    INC_PATH-$(CONFIG_VP10_ENCODER)   += $(SRC_PATH_BARE)/vp10
+    INC_PATH-$(CONFIG_AV1_DECODER)   += $(SRC_PATH_BARE)/av1
+    INC_PATH-$(CONFIG_AV1_ENCODER)   += $(SRC_PATH_BARE)/av1
 endif
 INC_PATH-$(CONFIG_LIBYUV) += $(SRC_PATH_BARE)/third_party/libyuv/include
 LIB_PATH := $(call enabled,LIB_PATH)
@@ -277,7 +277,7 @@ INSTALL_MAPS += %         %
 
 # Set up additional MSVS environment
 ifeq ($(CONFIG_MSVS),yes)
-CODEC_LIB=$(if $(CONFIG_SHARED),vpx,$(if $(CONFIG_STATIC_MSVCRT),vpxmt,vpxmd))
+CODEC_LIB=$(if $(CONFIG_SHARED),aom,$(if $(CONFIG_STATIC_MSVCRT),aommt,aommd))
 # This variable uses deferred expansion intentionally, since the results of
 # $(wildcard) may change during the course of the Make.
 VS_PLATFORMS = $(foreach d,$(wildcard */Release/$(CODEC_LIB).lib),$(word 1,$(subst /, ,$(d))))
@@ -292,7 +292,7 @@ endif
 # even though there is no real dependency there (the dependency is on
 # the makefiles). We may want to revisit this.
 define vcproj_template
-$(1): $($(1:.$(VCPROJ_SFX)=).SRCS) vpx.$(VCPROJ_SFX)
+$(1): $($(1:.$(VCPROJ_SFX)=).SRCS) aom.$(VCPROJ_SFX)
 	$(if $(quiet),@echo "    [vcproj] $$@")
 	$(qexec)$$(GEN_VCPROJ)\
             --exe\

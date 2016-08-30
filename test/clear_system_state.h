@@ -10,7 +10,7 @@
 #ifndef TEST_CLEAR_SYSTEM_STATE_H_
 #define TEST_CLEAR_SYSTEM_STATE_H_
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 #if ARCH_X86 || ARCH_X86_64
 #include "aom_ports/x86.h"
 #endif
@@ -21,7 +21,7 @@ namespace libaom_test {
 // test cases.
 inline void ClearSystemState() {
 #if ARCH_X86 || ARCH_X86_64
-  vpx_reset_mmx_state();
+  aom_reset_mmx_state();
 #endif
 }
 

@@ -10,7 +10,7 @@
 
 #include "aom_dsp/mips/inv_txfm_msa.h"
 
-void vpx_iwht4x4_16_add_msa(const int16_t *input, uint8_t *dst,
+void aom_iwht4x4_16_add_msa(const int16_t *input, uint8_t *dst,
                             int32_t dst_stride) {
   v8i16 in0, in1, in2, in3;
   v4i32 in0_r, in1_r, in2_r, in3_r, in4_r;
@@ -47,7 +47,7 @@ void vpx_iwht4x4_16_add_msa(const int16_t *input, uint8_t *dst,
   ADDBLK_ST4x4_UB(in0, in3, in1, in2, dst, dst_stride);
 }
 
-void vpx_iwht4x4_1_add_msa(const int16_t *input, uint8_t *dst,
+void aom_iwht4x4_1_add_msa(const int16_t *input, uint8_t *dst,
                            int32_t dst_stride) {
   int16_t a1, e1;
   v8i16 in1, in0 = { 0 };
@@ -67,7 +67,7 @@ void vpx_iwht4x4_1_add_msa(const int16_t *input, uint8_t *dst,
   ADDBLK_ST4x4_UB(in0, in1, in1, in1, dst, dst_stride);
 }
 
-void vpx_idct4x4_16_add_msa(const int16_t *input, uint8_t *dst,
+void aom_idct4x4_16_add_msa(const int16_t *input, uint8_t *dst,
                             int32_t dst_stride) {
   v8i16 in0, in1, in2, in3;
 
@@ -75,16 +75,16 @@ void vpx_idct4x4_16_add_msa(const int16_t *input, uint8_t *dst,
   LD4x4_SH(input, in0, in1, in2, in3);
   /* rows */
   TRANSPOSE4x4_SH_SH(in0, in1, in2, in3, in0, in1, in2, in3);
-  VPX_IDCT4x4(in0, in1, in2, in3, in0, in1, in2, in3);
+  AOM_IDCT4x4(in0, in1, in2, in3, in0, in1, in2, in3);
   /* columns */
   TRANSPOSE4x4_SH_SH(in0, in1, in2, in3, in0, in1, in2, in3);
-  VPX_IDCT4x4(in0, in1, in2, in3, in0, in1, in2, in3);
+  AOM_IDCT4x4(in0, in1, in2, in3, in0, in1, in2, in3);
   /* rounding (add 2^3, divide by 2^4) */
   SRARI_H4_SH(in0, in1, in2, in3, 4);
   ADDBLK_ST4x4_UB(in0, in1, in2, in3, dst, dst_stride);
 }
 
-void vpx_idct4x4_1_add_msa(const int16_t *input, uint8_t *dst,
+void aom_idct4x4_1_add_msa(const int16_t *input, uint8_t *dst,
                            int32_t dst_stride) {
   int16_t out;
   v8i16 vec;

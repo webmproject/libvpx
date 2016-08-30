@@ -15,7 +15,7 @@
 #define Y4MINPUT_H_
 
 #include <stdio.h>
-#include "aom/vpx_image.h"
+#include "aom/aom_image.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,7 +51,7 @@ struct y4m_input {
   y4m_convert_func convert;
   unsigned char *dst_buf;
   unsigned char *aux_buf;
-  enum vpx_img_fmt vpx_fmt;
+  enum aom_img_fmt aom_fmt;
   int bps;
   unsigned int bit_depth;
 };
@@ -59,7 +59,7 @@ struct y4m_input {
 int y4m_input_open(y4m_input *_y4m, FILE *_fin, char *_skip, int _nskip,
                    int only_420);
 void y4m_input_close(y4m_input *_y4m);
-int y4m_input_fetch_frame(y4m_input *_y4m, FILE *_fin, vpx_image_t *img);
+int y4m_input_fetch_frame(y4m_input *_y4m, FILE *_fin, aom_image_t *img);
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -8,12 +8,12 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_LOOPFILTER_MSA_H_
-#define VPX_DSP_LOOPFILTER_MSA_H_
+#ifndef AOM_DSP_LOOPFILTER_MSA_H_
+#define AOM_DSP_LOOPFILTER_MSA_H_
 
 #include "aom_dsp/mips/macros_msa.h"
 
-#define VPX_LPF_FILTER4_8W(p1_in, p0_in, q0_in, q1_in, mask_in, hev_in, \
+#define AOM_LPF_FILTER4_8W(p1_in, p0_in, q0_in, q1_in, mask_in, hev_in, \
                            p1_out, p0_out, q0_out, q1_out)              \
   {                                                                     \
     v16i8 p1_m, p0_m, q0_m, q1_m, q0_sub_p0, filt_sign;                 \
@@ -64,7 +64,7 @@
     p1_out = __msa_xori_b((v16u8)p1_m, 0x80);                           \
   }
 
-#define VPX_LPF_FILTER4_4W(p1_in, p0_in, q0_in, q1_in, mask_in, hev_in, \
+#define AOM_LPF_FILTER4_4W(p1_in, p0_in, q0_in, q1_in, mask_in, hev_in, \
                            p1_out, p0_out, q0_out, q1_out)              \
   {                                                                     \
     v16i8 p1_m, p0_m, q0_m, q1_m, q0_sub_p0, filt_sign;                 \
@@ -122,7 +122,7 @@
     p1_out = __msa_xori_b((v16u8)p1_m, 0x80);                           \
   }
 
-#define VPX_FLAT4(p3_in, p2_in, p0_in, q0_in, q2_in, q3_in, flat_out) \
+#define AOM_FLAT4(p3_in, p2_in, p0_in, q0_in, q2_in, q3_in, flat_out) \
   {                                                                   \
     v16u8 tmp, p2_a_sub_p0, q2_a_sub_q0, p3_a_sub_p0, q3_a_sub_q0;    \
     v16u8 zero_in = { 0 };                                            \
@@ -143,7 +143,7 @@
     flat_out = flat_out & (mask);                                     \
   }
 
-#define VPX_FLAT5(p7_in, p6_in, p5_in, p4_in, p0_in, q0_in, q4_in, q5_in, \
+#define AOM_FLAT5(p7_in, p6_in, p5_in, p4_in, p0_in, q0_in, q4_in, q5_in, \
                   q6_in, q7_in, flat_in, flat2_out)                       \
   {                                                                       \
     v16u8 tmp, zero_in = { 0 };                                           \
@@ -173,7 +173,7 @@
     flat2_out = flat2_out & flat_in;                                      \
   }
 
-#define VPX_FILTER8(p3_in, p2_in, p1_in, p0_in, q0_in, q1_in, q2_in, q3_in, \
+#define AOM_FILTER8(p3_in, p2_in, p1_in, p0_in, q0_in, q1_in, q2_in, q3_in, \
                     p2_filt8_out, p1_filt8_out, p0_filt8_out, q0_filt8_out, \
                     q1_filt8_out, q2_filt8_out)                             \
   {                                                                         \
@@ -247,4 +247,4 @@
     mask_out = limit_in < (v16u8)mask_out;                                   \
     mask_out = __msa_xori_b(mask_out, 0xff);                                 \
   }
-#endif /* VPX_DSP_LOOPFILTER_MSA_H_ */
+#endif /* AOM_DSP_LOOPFILTER_MSA_H_ */

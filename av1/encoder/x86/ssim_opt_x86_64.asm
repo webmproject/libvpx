@@ -61,8 +61,8 @@
 ; or pavgb At this point this is just meant to be first pass for calculating
 ; all the parms needed for 16x16 ssim so we can play with dssim as distortion
 ; in mode selection code.
-global sym(vp10_ssim_parms_16x16_sse2) PRIVATE
-sym(vp10_ssim_parms_16x16_sse2):
+global sym(av1_ssim_parms_16x16_sse2) PRIVATE
+sym(av1_ssim_parms_16x16_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 9
@@ -151,8 +151,8 @@ sym(vp10_ssim_parms_16x16_sse2):
 ; or pavgb At this point this is just meant to be first pass for calculating
 ; all the parms needed for 16x16 ssim so we can play with dssim as distortion
 ; in mode selection code.
-global sym(vp10_ssim_parms_8x8_sse2) PRIVATE
-sym(vp10_ssim_parms_8x8_sse2):
+global sym(av1_ssim_parms_8x8_sse2) PRIVATE
+sym(av1_ssim_parms_8x8_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 9

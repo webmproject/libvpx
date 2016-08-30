@@ -670,7 +670,7 @@ static void fdct32x8_1d_row_4x(int16_t *tmp_buf_big, int16_t *tmp_buf,
   fdct8x32_1d_row_transpose_store(tmp_buf, output);
 }
 
-void vpx_fdct32x32_msa(const int16_t *input, int16_t *output,
+void aom_fdct32x32_msa(const int16_t *input, int16_t *output,
                        int32_t src_stride) {
   int32_t i;
   DECLARE_ALIGNED(32, int16_t, tmp_buf_big[1024]);
@@ -907,7 +907,7 @@ static void fdct32x8_1d_row_rd(int16_t *tmp_buf_big, int16_t *tmp_buf,
   fdct8x32_1d_row_transpose_store(tmp_buf, output);
 }
 
-void vpx_fdct32x32_rd_msa(const int16_t *input, int16_t *out,
+void aom_fdct32x32_rd_msa(const int16_t *input, int16_t *out,
                           int32_t src_stride) {
   int32_t i;
   DECLARE_ALIGNED(32, int16_t, tmp_buf_big[1024]);
@@ -926,7 +926,7 @@ void vpx_fdct32x32_rd_msa(const int16_t *input, int16_t *out,
   }
 }
 
-void vpx_fdct32x32_1_msa(const int16_t *input, int16_t *out, int32_t stride) {
+void aom_fdct32x32_1_msa(const int16_t *input, int16_t *out, int32_t stride) {
   int sum = LD_HADD(input, stride);
   sum += LD_HADD(input + 8, stride);
   sum += LD_HADD(input + 16, stride);

@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_ENCODER_AQ_VARIANCE_H_
-#define VP10_ENCODER_AQ_VARIANCE_H_
+#ifndef AV1_ENCODER_AQ_VARIANCE_H_
+#define AV1_ENCODER_AQ_VARIANCE_H_
 
 #include "av1/encoder/encoder.h"
 
@@ -17,14 +17,14 @@
 extern "C" {
 #endif
 
-unsigned int vp10_vaq_segment_id(int energy);
-void vp10_vaq_frame_setup(VP10_COMP *cpi);
+unsigned int av1_vaq_segment_id(int energy);
+void av1_vaq_frame_setup(AV1_COMP *cpi);
 
-int vp10_block_energy(VP10_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs);
-double vp10_log_block_var(VP10_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs);
+int av1_block_energy(AV1_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs);
+double av1_log_block_var(AV1_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs);
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
 
-#endif  // VP10_ENCODER_AQ_VARIANCE_H_
+#endif  // AV1_ENCODER_AQ_VARIANCE_H_

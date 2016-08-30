@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP10_COMMON_WARPED_MOTION_H
-#define VP10_COMMON_WARPED_MOTION_H
+#ifndef AV1_COMMON_WARPED_MOTION_H
+#define AV1_COMMON_WARPED_MOTION_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,9 +17,9 @@
 #include <math.h>
 #include <assert.h>
 
-#include "./vpx_config.h"
+#include "./aom_config.h"
 #include "aom_ports/mem.h"
-#include "aom_dsp/vpx_dsp_common.h"
+#include "aom_dsp/aom_dsp_common.h"
 
 // Bits of precision used for the model
 #define WARPEDMODEL_PREC_BITS 8
@@ -72,25 +72,25 @@ typedef struct {
   int wmmat[8];  // For homography wmmat[9] is assumed to be 1
 } WarpedMotionParams;
 
-double vp10_warp_erroradv(WarpedMotionParams *wm,
-#if CONFIG_VP9_HIGHBITDEPTH
-                          int use_hbd, int bd,
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-                          uint8_t *ref, int width, int height, int stride,
-                          uint8_t *dst, int p_col, int p_row, int p_width,
-                          int p_height, int p_stride, int subsampling_x,
-                          int subsampling_y, int x_scale, int y_scale);
+double av1_warp_erroradv(WarpedMotionParams *wm,
+#if CONFIG_AOM_HIGHBITDEPTH
+                         int use_hbd, int bd,
+#endif  // CONFIG_AOM_HIGHBITDEPTH
+                         uint8_t *ref, int width, int height, int stride,
+                         uint8_t *dst, int p_col, int p_row, int p_width,
+                         int p_height, int p_stride, int subsampling_x,
+                         int subsampling_y, int x_scale, int y_scale);
 
-void vp10_warp_plane(WarpedMotionParams *wm,
-#if CONFIG_VP9_HIGHBITDEPTH
-                     int use_hbd, int bd,
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-                     uint8_t *ref, int width, int height, int stride,
-                     uint8_t *pred, int p_col, int p_row, int p_width,
-                     int p_height, int p_stride, int subsampling_x,
-                     int subsampling_y, int x_scale, int y_scale);
+void av1_warp_plane(WarpedMotionParams *wm,
+#if CONFIG_AOM_HIGHBITDEPTH
+                    int use_hbd, int bd,
+#endif  // CONFIG_AOM_HIGHBITDEPTH
+                    uint8_t *ref, int width, int height, int stride,
+                    uint8_t *pred, int p_col, int p_row, int p_width,
+                    int p_height, int p_stride, int subsampling_x,
+                    int subsampling_y, int x_scale, int y_scale);
 
 // Integerize model into the WarpedMotionParams structure
-void vp10_integerize_model(const double *model, TransformationType wmtype,
-                           WarpedMotionParams *wm);
-#endif  // VP10_COMMON_WARPED_MOTION_H
+void av1_integerize_model(const double *model, TransformationType wmtype,
+                          WarpedMotionParams *wm);
+#endif  // AV1_COMMON_WARPED_MOTION_H

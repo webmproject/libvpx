@@ -10,7 +10,7 @@
 
 #include <arm_neon.h>
 
-#include "./vpx_dsp_rtcd.h"
+#include "./aom_dsp_rtcd.h"
 
 static INLINE void loop_filter_neon(uint8x8_t dblimit,   // flimit
                                     uint8x8_t dlimit,    // limit
@@ -107,7 +107,7 @@ static INLINE void loop_filter_neon(uint8x8_t dblimit,   // flimit
   return;
 }
 
-void vpx_lpf_horizontal_4_neon(uint8_t *src, int pitch, const uint8_t *blimit,
+void aom_lpf_horizontal_4_neon(uint8_t *src, int pitch, const uint8_t *blimit,
                                const uint8_t *limit, const uint8_t *thresh) {
   int i;
   uint8_t *s, *psrc;
@@ -153,7 +153,7 @@ void vpx_lpf_horizontal_4_neon(uint8_t *src, int pitch, const uint8_t *blimit,
   return;
 }
 
-void vpx_lpf_vertical_4_neon(uint8_t *src, int pitch, const uint8_t *blimit,
+void aom_lpf_vertical_4_neon(uint8_t *src, int pitch, const uint8_t *blimit,
                              const uint8_t *limit, const uint8_t *thresh) {
   int i, pitch8;
   uint8_t *s;

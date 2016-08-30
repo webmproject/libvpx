@@ -4,7 +4,7 @@ LIBAOM_TEST_SRCS-yes += codec_factory.h
 LIBAOM_TEST_SRCS-yes += md5_helper.h
 LIBAOM_TEST_SRCS-yes += register_state_check.h
 LIBAOM_TEST_SRCS-yes += test.mk
-LIBAOM_TEST_SRCS-yes += test_libvpx.cc
+LIBAOM_TEST_SRCS-yes += test_libaom.cc
 LIBAOM_TEST_SRCS-yes += util.h
 LIBAOM_TEST_SRCS-yes += video_source.h
 LIBAOM_TEST_SRCS-yes += transform_test_base.h
@@ -29,14 +29,14 @@ LIBAOM_TEST_SRCS-$(CONFIG_ENCODERS)    += i420_video_source.h
 LIBAOM_TEST_SRCS-$(CONFIG_ENCODERS)    += y4m_video_source.h
 LIBAOM_TEST_SRCS-$(CONFIG_ENCODERS)    += yuv_video_source.h
 
-#LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += level_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += active_map_refresh_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += active_map_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += borders_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += cpu_speed_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += frame_size_tests.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += lossless_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += ethread_test.cc
+#LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += level_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += active_map_refresh_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += active_map_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += borders_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += cpu_speed_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += frame_size_tests.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += lossless_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += ethread_test.cc
 
 LIBAOM_TEST_SRCS-yes                   += decode_test_driver.cc
 LIBAOM_TEST_SRCS-yes                   += decode_test_driver.h
@@ -64,20 +64,20 @@ endif
 
 LIBAOM_TEST_SRCS-$(CONFIG_DECODERS)    += decode_api_test.cc
 
-# Currently we only support decoder perf tests for vp9. Also they read from WebM
+# Currently we only support decoder perf tests for av1. Also they read from WebM
 # files, so WebM IO is required.
-ifeq ($(CONFIG_DECODE_PERF_TESTS)$(CONFIG_VP10_DECODER)$(CONFIG_WEBM_IO), \
+ifeq ($(CONFIG_DECODE_PERF_TESTS)$(CONFIG_AV1_DECODER)$(CONFIG_WEBM_IO), \
       yesyesyes)
 LIBAOM_TEST_SRCS-yes                   += decode_perf_test.cc
 endif
 
-# encode perf tests are vp9 only
-ifeq ($(CONFIG_ENCODE_PERF_TESTS)$(CONFIG_VP10_ENCODER), yesyes)
+# encode perf tests are av1 only
+ifeq ($(CONFIG_ENCODE_PERF_TESTS)$(CONFIG_AV1_ENCODER), yesyes)
 LIBAOM_TEST_SRCS-yes += encode_perf_test.cc
 endif
 
 ## Multi-codec / unconditional black box tests.
-ifeq ($(findstring yes,$(CONFIG_VP10_ENCODER)),yes)
+ifeq ($(findstring yes,$(CONFIG_AV1_ENCODER)),yes)
 LIBAOM_TEST_SRCS-yes += active_map_refresh_test.cc
 LIBAOM_TEST_SRCS-yes += active_map_test.cc
 LIBAOM_TEST_SRCS-yes += end_to_end_test.cc
@@ -91,11 +91,11 @@ endif
 ##
 ifeq ($(CONFIG_SHARED),)
 
-## VP10
-ifeq ($(CONFIG_VP10),yes)
+## AV1
+ifeq ($(CONFIG_AV1),yes)
 
 # These tests require both the encoder and decoder to be built.
-ifeq ($(CONFIG_VP10_ENCODER)$(CONFIG_VP10_DECODER),yesyes)
+ifeq ($(CONFIG_AV1_ENCODER)$(CONFIG_AV1_DECODER),yesyes)
 # IDCT test currently depends on FDCT function
 LIBAOM_TEST_SRCS-yes                   += idct8x8_test.cc
 LIBAOM_TEST_SRCS-yes                   += partial_idct_test.cc
@@ -109,41 +109,41 @@ endif
 #LIBAOM_TEST_SRCS-yes                   += convolve_test.cc
 LIBAOM_TEST_SRCS-yes                   += lpf_8_test.cc
 LIBAOM_TEST_SRCS-yes                   += intrapred_test.cc
-#LIBAOM_TEST_SRCS-$(CONFIG_VP10_DECODER) += vp9_thread_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += dct16x16_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += dct32x32_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += fdct4x4_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += fdct8x8_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += hadamard_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += minmax_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += variance_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += error_block_test.cc
-#LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp9_quantize_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += subtract_test.cc
+#LIBAOM_TEST_SRCS-$(CONFIG_AV1_DECODER) += av1_thread_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += dct16x16_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += dct32x32_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += fdct4x4_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += fdct8x8_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += hadamard_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += minmax_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += variance_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += error_block_test.cc
+#LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += av1_quantize_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += subtract_test.cc
 
-ifeq ($(CONFIG_VP10_ENCODER)$(CONFIG_VP10_TEMPORAL_DENOISING),yesyes)
-LIBAOM_TEST_SRCS-$(HAVE_SSE2) += denoiser_sse2_test.cc
+ifeq ($(CONFIG_AV1_ENCODER)$(CONFIG_AV1_TEMPORAL_DENOISING),yesyes)
+#LIBAOM_TEST_SRCS-$(HAVE_SSE2) += denoiser_sse2_test.cc
 endif
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += arf_freq_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += arf_freq_test.cc
 
 
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_inv_txfm_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_dct_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_fht4x4_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_fht8x8_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_fht16x16_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_ANS)          += vp10_ans_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_EXT_TILE)     += vp10_ext_tile_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += av1_inv_txfm_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += av1_dct_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += av1_fht4x4_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += av1_fht8x8_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += av1_fht16x16_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_ANS)          += av1_ans_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_EXT_TILE)     += av1_ext_tile_test.cc
 
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += sum_squares_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += subtract_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += blend_a64_mask_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += blend_a64_mask_1d_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += sum_squares_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += subtract_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += blend_a64_mask_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += blend_a64_mask_1d_test.cc
 
 ifeq ($(CONFIG_EXT_INTER),yes)
 LIBAOM_TEST_SRCS-$(HAVE_SSSE3) += masked_variance_test.cc
 LIBAOM_TEST_SRCS-$(HAVE_SSSE3) += masked_sad_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += vp10_wedge_utils_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += av1_wedge_utils_test.cc
 endif
 
 ifeq ($(CONFIG_EXT_INTRA),yes)
@@ -151,33 +151,33 @@ LIBAOM_TEST_SRCS-$(HAVE_SSE4_1) += reconintra_predictors_test.cc
 endif
 
 ifeq ($(CONFIG_OBMC),yes)
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += obmc_sad_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10_ENCODER) += obmc_variance_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += obmc_sad_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += obmc_variance_test.cc
 endif
 
-ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
-LIBAOM_TEST_SRCS-$(HAVE_SSE4_1) += vp10_quantize_test.cc
-LIBAOM_TEST_SRCS-$(HAVE_SSE4_1) += vp10_highbd_iht_test.cc
-endif # CONFIG_VP9_HIGHBITDEPTH
-endif # VP10
+ifeq ($(CONFIG_AOM_HIGHBITDEPTH),yes)
+LIBAOM_TEST_SRCS-$(HAVE_SSE4_1) += av1_quantize_test.cc
+LIBAOM_TEST_SRCS-$(HAVE_SSE4_1) += av1_highbd_iht_test.cc
+endif # CONFIG_AOM_HIGHBITDEPTH
+endif # AV1
 
 ## Multi-codec / unconditional whitebox tests.
 
-ifeq ($(CONFIG_VP10_ENCODER),yes)
+ifeq ($(CONFIG_AV1_ENCODER),yes)
 LIBAOM_TEST_SRCS-yes += avg_test.cc
 endif
 ifeq ($(CONFIG_INTERNAL_STATS),yes)
-LIBAOM_TEST_SRCS-$(CONFIG_VP9_HIGHBITDEPTH) += hbd_metrics_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AOM_HIGHBITDEPTH) += hbd_metrics_test.cc
 endif
 LIBAOM_TEST_SRCS-$(CONFIG_ENCODERS) += sad_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10) += vp10_txfm_test.h
-LIBAOM_TEST_SRCS-$(CONFIG_VP10) += vp10_txfm_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10) += vp10_fwd_txfm1d_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10) += vp10_inv_txfm1d_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10) += vp10_fwd_txfm2d_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10) += vp10_inv_txfm2d_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10) += vp10_convolve_test.cc
-LIBAOM_TEST_SRCS-$(CONFIG_VP10) += vp10_convolve_optimz_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1) += av1_txfm_test.h
+LIBAOM_TEST_SRCS-$(CONFIG_AV1) += av1_txfm_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1) += av1_fwd_txfm1d_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1) += av1_inv_txfm1d_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1) += av1_fwd_txfm2d_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1) += av1_inv_txfm2d_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1) += av1_convolve_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1) += av1_convolve_optimz_test.cc
 
 TEST_INTRA_PRED_SPEED_SRCS-yes := test_intra_pred_speed.cc
 TEST_INTRA_PRED_SPEED_SRCS-yes += ../md5_utils.h ../md5_utils.c
