@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a5934ad9_2a1a1f83",
+        "filename": "vpx_dsp/arm/transpose_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-30T17:44:33Z",
+      "side": 1,
+      "message": "Doesn\u0027t need to be in this change (arguably, the 16x8 tweaks above could be in a separate cleanup), but this could use the same \u0027const\u0027 treatment as above.",
+      "range": {
+        "startLine": 275,
+        "startChar": 2,
+        "endLine": 275,
+        "endChar": 4
+      },
+      "revId": "647a41d6b84268d25546ddcc7d37cceb447822c8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a5934ad9_6a4b4787",
+        "filename": "vpx_dsp/arm/transpose_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 460,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-08-30T17:44:33Z",
+      "side": 1,
+      "message": "Define a new function \u0027vpx_vtrnq_*u*64\u0027 and you don\u0027t need the s32/u32 reinterpret. Pretty minor, but would look slightly nicer.",
+      "range": {
+        "startLine": 460,
+        "startChar": 25,
+        "endLine": 460,
+        "endChar": 38
+      },
+      "revId": "647a41d6b84268d25546ddcc7d37cceb447822c8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
