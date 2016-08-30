@@ -857,6 +857,12 @@ static const aom_prob
       },
     };
 
+#if CONFIG_EXT_TX && CONFIG_RECT_TX && CONFIG_VAR_TX
+// the probability of (0) using recursive square tx partition vs.
+// (1) biggest rect tx for 4X8-8X4/8X16-16X8/16X32-32X16 blocks
+static const aom_prob default_rect_tx_prob[TX_SIZES - 1] = { 192, 192, 192 };
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX && CONFIG_VAR_TX
+
 int av1_get_palette_color_context(const uint8_t *color_map, int cols, int r,
                                   int c, int n, int *color_order) {
   int i, j, max, max_idx, temp;
@@ -1298,6 +1304,9 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
   av1_copy(fc->tx_size_probs, default_tx_size_prob);
 #if CONFIG_VAR_TX
   av1_copy(fc->txfm_partition_prob, default_txfm_partition_probs);
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+  av1_copy(fc->rect_tx_prob, default_rect_tx_prob);
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
 #endif
   av1_copy(fc->skip_probs, default_skip_probs);
 #if CONFIG_REF_MV
@@ -1451,6 +1460,15 @@ void av1_adapt_inter_frame_probs(AV1_COMMON *cm) {
   }
 #endif  // CONFIG_EXT_INTER
 
+#if CONFIG_VAR_TX && CONFIG_EXT_TX && CONFIG_RECT_TX
+  if (cm->tx_mode == TX_MODE_SELECT) {
+    for (i = 0; i < TX_SIZES - 1; ++i) {
+      fc->rect_tx_prob[i] =
+          av1_mode_mv_merge_probs(pre_fc->rect_tx_prob[i], counts->rect_tx[i]);
+    }
+  }
+#endif  // CONFIG_VAR_TX && CONFIG_EXT_TX && CONFIG_RECT_TX
+
   for (i = 0; i < BLOCK_SIZE_GROUPS; i++)
     aom_tree_merge_probs(av1_intra_mode_tree, pre_fc->y_mode_prob[i],
                          counts->y_mode[i], fc->y_mode_prob[i]);
@@ -1478,10 +1496,11 @@ void av1_adapt_intra_frame_probs(AV1_COMMON *cm) {
   }
 
 #if CONFIG_VAR_TX
-  if (cm->tx_mode == TX_MODE_SELECT)
+  if (cm->tx_mode == TX_MODE_SELECT) {
     for (i = 0; i < TXFM_PARTITION_CONTEXTS; ++i)
       fc->txfm_partition_prob[i] = av1_mode_mv_merge_probs(
           pre_fc->txfm_partition_prob[i], counts->txfm_partition[i]);
+  }
 #endif
 
   for (i = 0; i < SKIP_CONTEXTS; ++i)

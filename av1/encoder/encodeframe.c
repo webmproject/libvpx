@@ -5031,7 +5031,7 @@ static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
     av1_encode_sb(x, AOMMAX(bsize, BLOCK_8X8));
 #if CONFIG_VAR_TX
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
-    if (mbmi->tx_size >= TX_SIZES)
+    if (is_rect_tx(mbmi->tx_size))
       av1_tokenize_sb(cpi, td, t, !output_enabled, AOMMAX(bsize, BLOCK_8X8));
     else
 #endif
@@ -5054,8 +5054,17 @@ static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
       assert(IMPLIES(is_rect_tx(mbmi->tx_size), is_rect_tx_allowed(mbmi)));
 #endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
 #if CONFIG_VAR_TX
-      if (is_inter)
-        tx_partition_count_update(cm, xd, bsize, mi_row, mi_col, td->counts);
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+      if (is_rect_tx_allowed(mbmi)) {
+        td->counts->rect_tx[tx_size_cat][is_rect_tx(mbmi->tx_size)]++;
+      }
+      if (!is_rect_tx_allowed(mbmi) || !is_rect_tx(mbmi->tx_size)) {
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
+        if (is_inter)
+          tx_partition_count_update(cm, xd, bsize, mi_row, mi_col, td->counts);
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+      }
+#endif
 #endif
       ++td->counts->tx_size[tx_size_cat][tx_size_ctx][coded_tx_size];
     } else {
@@ -5118,6 +5127,11 @@ static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
       is_inter_block(mbmi) && !(mbmi->skip || seg_skip)) {
     if (!output_enabled)
       tx_partition_set_contexts(cm, xd, bsize, mi_row, mi_col);
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+    if (is_rect_tx(mbmi->tx_size)) {
+      set_txfm_ctxs(mbmi->tx_size, xd->n8_w, xd->n8_h, xd);
+    }
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
   } else {
     TX_SIZE tx_size;
     // The new intra coding scheme requires no change of transform size

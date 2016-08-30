@@ -1121,9 +1121,25 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
       const int width = num_4x4_blocks_wide_lookup[bsize];
       const int height = num_4x4_blocks_high_lookup[bsize];
       int idx, idy;
-      for (idy = 0; idy < height; idy += bs)
-        for (idx = 0; idx < width; idx += bs)
-          write_tx_size_vartx(cm, xd, mbmi, max_tx_size, idy, idx, w);
+
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+      if (is_rect_tx_allowed(mbmi)) {
+        int tx_size_cat = inter_tx_size_cat_lookup[bsize];
+
+        aom_write(w, is_rect_tx(mbmi->tx_size),
+                  cm->fc->rect_tx_prob[tx_size_cat]);
+      }
+
+      if (is_rect_tx(mbmi->tx_size)) {
+        set_txfm_ctxs(mbmi->tx_size, xd->n8_w, xd->n8_h, xd);
+      } else {
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
+        for (idy = 0; idy < height; idy += bs)
+          for (idx = 0; idx < width; idx += bs)
+            write_tx_size_vartx(cm, xd, mbmi, max_tx_size, idy, idx, w);
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+      }
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
     } else {
       set_txfm_ctxs(mbmi->tx_size, xd->n8_w, xd->n8_h, xd);
       write_selected_tx_size(cm, xd, w);
@@ -1650,7 +1666,7 @@ static void write_modes_b(AV1_COMP *cpi, const TileInfo *const tile,
       TX_SIZE tx_size =
           plane ? get_uv_tx_size(mbmi, &xd->plane[plane]) : mbmi->tx_size;
 
-      if (is_inter_block(mbmi) && tx_size < TX_SIZES) {
+      if (is_inter_block(mbmi) && !is_rect_tx(tx_size)) {
 #else
       if (is_inter_block(mbmi)) {
 #endif
@@ -3271,6 +3287,13 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
 
 #if CONFIG_VAR_TX
   update_txfm_partition_probs(cm, header_bc, counts);
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+  if (cm->tx_mode == TX_MODE_SELECT) {
+    for (i = 1; i < TX_SIZES - 1; ++i)
+      av1_cond_prob_diff_update(header_bc, &fc->rect_tx_prob[i],
+                                counts->rect_tx[i]);
+  }
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
 #endif
 
   update_skip_probs(cm, header_bc, counts);

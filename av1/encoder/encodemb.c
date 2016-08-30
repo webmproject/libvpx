@@ -791,7 +791,7 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
 #endif
 
 #if CONFIG_VAR_TX
-  // Assert not magic number (uninitialised).
+  // Assert not magic number (uninitialized).
   assert(x->blk_skip[plane][(blk_row << bwl) + blk_col] != 234);
 
   if (x->blk_skip[plane][(blk_row << bwl) + blk_col] == 0) {
@@ -976,9 +976,6 @@ void av1_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
     int idx, idy;
     int block = 0;
     int step = num_4x4_blocks_txsize_lookup[max_tx_size];
-#if CONFIG_EXT_TX && CONFIG_RECT_TX
-    const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
-#endif
     av1_get_entropy_contexts(bsize, TX_4X4, pd, ctx.ta[plane], ctx.tl[plane]);
 #else
     const struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -991,7 +988,7 @@ void av1_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
 
 #if CONFIG_VAR_TX
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
-    if (tx_size >= TX_SIZES) {
+    if (is_rect_tx(mbmi->tx_size)) {
       av1_foreach_transformed_block_in_plane(xd, bsize, plane, encode_block,
                                              &arg);
     } else {

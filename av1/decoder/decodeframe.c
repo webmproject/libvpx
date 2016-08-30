@@ -1308,10 +1308,9 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
         const int step = num_4x4_blocks_txsize_lookup[max_tx_size];
         int block = 0;
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
-        const TX_SIZE tx_size =
-            plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
-
-        if (tx_size >= TX_SIZES) {  // rect txsize is used
+        if (is_rect_tx(mbmi->tx_size)) {
+          const TX_SIZE tx_size =
+              plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
           const int stepr = num_4x4_blocks_high_txsize_lookup[tx_size];
           const int stepc = num_4x4_blocks_wide_txsize_lookup[tx_size];
           const int max_blocks_wide =
@@ -3491,6 +3490,12 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
 #if CONFIG_VAR_TX
   for (k = 0; k < TXFM_PARTITION_CONTEXTS; ++k)
     av1_diff_update_prob(&r, &fc->txfm_partition_prob[k]);
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+  if (cm->tx_mode == TX_MODE_SELECT) {
+    for (i = 1; i < TX_SIZES - 1; ++i)
+      av1_diff_update_prob(&r, &fc->rect_tx_prob[i]);
+  }
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
 #endif
 
   for (k = 0; k < SKIP_CONTEXTS; ++k)

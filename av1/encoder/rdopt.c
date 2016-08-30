@@ -2814,6 +2814,61 @@ static int64_t rd_pick_intra_sby_mode(AV1_COMP *cpi, MACROBLOCK *x, int *rate,
   return best_rd;
 }
 
+// Return value 0: early termination triggered, no valid rd cost available;
+//              1: rd cost values are valid.
+static int super_block_uvrd(const AV1_COMP *cpi, MACROBLOCK *x, int *rate,
+                            int64_t *distortion, int *skippable, int64_t *sse,
+                            BLOCK_SIZE bsize, int64_t ref_best_rd) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  const TX_SIZE uv_tx_size = get_uv_tx_size(mbmi, &xd->plane[1]);
+  int plane;
+  int pnrate = 0, pnskip = 1;
+  int64_t pndist = 0, pnsse = 0;
+  int is_cost_valid = 1;
+
+  if (ref_best_rd < 0) is_cost_valid = 0;
+
+  if (is_inter_block(mbmi) && is_cost_valid) {
+    int plane;
+    for (plane = 1; plane < MAX_MB_PLANE; ++plane)
+      av1_subtract_plane(x, bsize, plane);
+  }
+
+  *rate = 0;
+  *distortion = 0;
+  *sse = 0;
+  *skippable = 1;
+
+  for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
+    txfm_rd_in_plane(x, cpi, &pnrate, &pndist, &pnskip, &pnsse, ref_best_rd,
+                     plane, bsize, uv_tx_size, cpi->sf.use_fast_coef_costing);
+    if (pnrate == INT_MAX) {
+      is_cost_valid = 0;
+      break;
+    }
+    *rate += pnrate;
+    *distortion += pndist;
+    *sse += pnsse;
+    *skippable &= pnskip;
+    if (RDCOST(x->rdmult, x->rddiv, *rate, *distortion) > ref_best_rd &&
+        RDCOST(x->rdmult, x->rddiv, 0, *sse) > ref_best_rd) {
+      is_cost_valid = 0;
+      break;
+    }
+  }
+
+  if (!is_cost_valid) {
+    // reset cost value
+    *rate = INT_MAX;
+    *distortion = INT64_MAX;
+    *sse = INT64_MAX;
+    *skippable = 0;
+  }
+
+  return is_cost_valid;
+}
+
 #if CONFIG_VAR_TX
 void av1_tx_block_rd_b(const AV1_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
                        int blk_row, int blk_col, int plane, int block,
@@ -3196,6 +3251,61 @@ static int64_t select_tx_size_fix_type(const AV1_COMP *cpi, MACROBLOCK *x,
 
   mbmi->tx_type = tx_type;
   inter_block_yrd(cpi, x, rate, dist, skippable, sse, bsize, ref_best_rd);
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+  if (is_rect_tx_allowed(mbmi)) {
+    int rate_rect_tx, skippable_rect_tx = 0;
+    int64_t dist_rect_tx, sse_rect_tx, rd, rd_rect_tx;
+    int tx_size_cat = inter_tx_size_cat_lookup[bsize];
+    TX_SIZE tx_size = max_txsize_rect_lookup[bsize];
+    TX_SIZE var_tx_size = mbmi->tx_size;
+
+    txfm_rd_in_plane(x, cpi, &rate_rect_tx, &dist_rect_tx, &skippable_rect_tx,
+                     &sse_rect_tx, ref_best_rd, 0, bsize, tx_size,
+                     cpi->sf.use_fast_coef_costing);
+
+    if (*rate != INT_MAX) {
+      *rate += av1_cost_bit(cm->fc->rect_tx_prob[tx_size_cat], 0);
+      if (*skippable) {
+        rd = RDCOST(x->rdmult, x->rddiv, s1, *sse);
+      } else {
+        rd = RDCOST(x->rdmult, x->rddiv, *rate + s0, *dist);
+        if (is_inter && !xd->lossless[xd->mi[0]->mbmi.segment_id] &&
+            !(*skippable))
+          rd = AOMMIN(rd, RDCOST(x->rdmult, x->rddiv, s1, *sse));
+      }
+    } else {
+      rd = INT64_MAX;
+    }
+
+    if (rate_rect_tx != INT_MAX) {
+      rate_rect_tx += av1_cost_bit(cm->fc->rect_tx_prob[tx_size_cat], 1);
+      if (skippable_rect_tx) {
+        rd_rect_tx = RDCOST(x->rdmult, x->rddiv, s1, sse_rect_tx);
+      } else {
+        rd_rect_tx =
+            RDCOST(x->rdmult, x->rddiv, rate_rect_tx + s0, dist_rect_tx);
+        if (is_inter && !xd->lossless[xd->mi[0]->mbmi.segment_id] &&
+            !(skippable_rect_tx))
+          rd_rect_tx =
+              AOMMIN(rd_rect_tx, RDCOST(x->rdmult, x->rddiv, s1, sse_rect_tx));
+      }
+    } else {
+      rd_rect_tx = INT64_MAX;
+    }
+
+    if (rd_rect_tx < rd) {
+      *rate = rate_rect_tx;
+      *dist = dist_rect_tx;
+      *sse = sse_rect_tx;
+      *skippable = skippable_rect_tx;
+      if (!xd->lossless[mbmi->segment_id]) x->blk_skip[0][0] = *skippable;
+      mbmi->tx_size = tx_size;
+      mbmi->inter_tx_size[0][0] = mbmi->tx_size;
+    } else {
+      mbmi->tx_size = var_tx_size;
+    }
+  }
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
 
   if (*rate == INT_MAX) return INT64_MAX;
 
@@ -3409,16 +3519,23 @@ static int inter_block_uvrd(const AV1_COMP *cpi, MACROBLOCK *x, int *rate,
 
   if (ref_best_rd < 0) is_cost_valid = 0;
 
+  *rate = 0;
+  *distortion = 0;
+  *sse = 0;
+  *skippable = 1;
+
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+  if (is_rect_tx(mbmi->tx_size)) {
+    return super_block_uvrd(cpi, x, rate, distortion, skippable, sse, bsize,
+                            ref_best_rd);
+  }
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
+
   if (is_inter_block(mbmi) && is_cost_valid) {
     int plane;
     for (plane = 1; plane < MAX_MB_PLANE; ++plane)
       av1_subtract_plane(x, bsize, plane);
   }
-
-  *rate = 0;
-  *distortion = 0;
-  *sse = 0;
-  *skippable = 1;
 
   for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
     const struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -3476,61 +3593,6 @@ static int inter_block_uvrd(const AV1_COMP *cpi, MACROBLOCK *x, int *rate,
   return is_cost_valid;
 }
 #endif  // CONFIG_VAR_TX
-
-// Return value 0: early termination triggered, no valid rd cost available;
-//              1: rd cost values are valid.
-static int super_block_uvrd(const AV1_COMP *cpi, MACROBLOCK *x, int *rate,
-                            int64_t *distortion, int *skippable, int64_t *sse,
-                            BLOCK_SIZE bsize, int64_t ref_best_rd) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
-  const TX_SIZE uv_tx_size = get_uv_tx_size(mbmi, &xd->plane[1]);
-  int plane;
-  int pnrate = 0, pnskip = 1;
-  int64_t pndist = 0, pnsse = 0;
-  int is_cost_valid = 1;
-
-  if (ref_best_rd < 0) is_cost_valid = 0;
-
-  if (is_inter_block(mbmi) && is_cost_valid) {
-    int plane;
-    for (plane = 1; plane < MAX_MB_PLANE; ++plane)
-      av1_subtract_plane(x, bsize, plane);
-  }
-
-  *rate = 0;
-  *distortion = 0;
-  *sse = 0;
-  *skippable = 1;
-
-  for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
-    txfm_rd_in_plane(x, cpi, &pnrate, &pndist, &pnskip, &pnsse, ref_best_rd,
-                     plane, bsize, uv_tx_size, cpi->sf.use_fast_coef_costing);
-    if (pnrate == INT_MAX) {
-      is_cost_valid = 0;
-      break;
-    }
-    *rate += pnrate;
-    *distortion += pndist;
-    *sse += pnsse;
-    *skippable &= pnskip;
-    if (RDCOST(x->rdmult, x->rddiv, *rate, *distortion) > ref_best_rd &&
-        RDCOST(x->rdmult, x->rddiv, 0, *sse) > ref_best_rd) {
-      is_cost_valid = 0;
-      break;
-    }
-  }
-
-  if (!is_cost_valid) {
-    // reset cost value
-    *rate = INT_MAX;
-    *distortion = INT64_MAX;
-    *sse = INT64_MAX;
-    *skippable = 0;
-  }
-
-  return is_cost_valid;
-}
 
 static void rd_pick_palette_intra_sbuv(
     AV1_COMP *cpi, MACROBLOCK *x, int dc_mode_cost,

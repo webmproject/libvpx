@@ -1632,13 +1632,34 @@ static void read_inter_frame_mode_info(AV1Decoder *const pbi,
       const int width = num_4x4_blocks_wide_lookup[bsize];
       const int height = num_4x4_blocks_high_lookup[bsize];
       int idx, idy;
-      for (idy = 0; idy < height; idy += bs)
-        for (idx = 0; idx < width; idx += bs)
-          read_tx_size_vartx(cm, xd, mbmi, xd->counts, max_tx_size, idy, idx,
-                             r);
+      int tx_size_cat = inter_tx_size_cat_lookup[bsize];
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+      int is_rect_tx_allowed = inter_block && is_rect_tx_allowed_bsize(bsize);
+      int use_rect_tx = 0;
+
+      if (is_rect_tx_allowed) {
+        use_rect_tx = aom_read(r, cm->fc->rect_tx_prob[tx_size_cat]);
+        if (xd->counts) {
+          ++xd->counts->rect_tx[tx_size_cat][use_rect_tx];
+        }
+      }
+
+      if (use_rect_tx) {
+        mbmi->tx_size = max_txsize_rect_lookup[bsize];
+        set_txfm_ctxs(mbmi->tx_size, xd->n8_w, xd->n8_h, xd);
+      } else {
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
+        for (idy = 0; idy < height; idy += bs)
+          for (idx = 0; idx < width; idx += bs)
+            read_tx_size_vartx(cm, xd, mbmi, xd->counts, max_tx_size, idy, idx,
+                               r);
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+      }
+#endif
       if (xd->counts) {
         const int ctx = get_tx_size_context(xd);
-        ++xd->counts->tx_size[max_tx_size - TX_8X8][ctx][mbmi->tx_size];
+        ++xd->counts
+              ->tx_size[tx_size_cat][ctx][txsize_sqr_up_map[mbmi->tx_size]];
       }
     } else {
       if (inter_block)
