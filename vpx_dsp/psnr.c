@@ -184,6 +184,24 @@ int64_t vpx_get_y_sse(const YV12_BUFFER_CONFIG *a,
                  a->y_crop_width, a->y_crop_height);
 }
 
+int64_t vpx_get_u_sse(const YV12_BUFFER_CONFIG *a,
+                      const YV12_BUFFER_CONFIG *b) {
+  assert(a->uv_crop_width == b->uv_crop_width);
+  assert(a->uv_crop_height == b->uv_crop_height);
+
+  return get_sse(a->u_buffer, a->uv_stride, b->u_buffer, b->uv_stride,
+                 a->uv_crop_width, a->uv_crop_height);
+}
+
+int64_t vpx_get_v_sse(const YV12_BUFFER_CONFIG *a,
+                      const YV12_BUFFER_CONFIG *b) {
+  assert(a->uv_crop_width == b->uv_crop_width);
+  assert(a->uv_crop_height == b->uv_crop_height);
+
+  return get_sse(a->v_buffer, a->uv_stride, b->v_buffer, b->uv_stride,
+                 a->uv_crop_width, a->uv_crop_height);
+}
+
 #if CONFIG_VP9_HIGHBITDEPTH
 int64_t vpx_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
                              const YV12_BUFFER_CONFIG *b) {
@@ -194,6 +212,28 @@ int64_t vpx_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
 
   return highbd_get_sse(a->y_buffer, a->y_stride, b->y_buffer, b->y_stride,
                         a->y_crop_width, a->y_crop_height);
+}
+
+int64_t vpx_highbd_get_u_sse(const YV12_BUFFER_CONFIG *a,
+                             const YV12_BUFFER_CONFIG *b) {
+  assert(a->uv_crop_width == b->uv_crop_width);
+  assert(a->uv_crop_height == b->uv_crop_height);
+  assert((a->flags & YV12_FLAG_HIGHBITDEPTH) != 0);
+  assert((b->flags & YV12_FLAG_HIGHBITDEPTH) != 0);
+
+  return highbd_get_sse(a->u_buffer, a->uv_stride, b->u_buffer, b->uv_stride,
+                        a->uv_crop_width, a->uv_crop_height);
+}
+
+int64_t vpx_highbd_get_v_sse(const YV12_BUFFER_CONFIG *a,
+                             const YV12_BUFFER_CONFIG *b) {
+  assert(a->uv_crop_width == b->uv_crop_width);
+  assert(a->uv_crop_height == b->uv_crop_height);
+  assert((a->flags & YV12_FLAG_HIGHBITDEPTH) != 0);
+  assert((b->flags & YV12_FLAG_HIGHBITDEPTH) != 0);
+
+  return highbd_get_sse(a->v_buffer, a->uv_stride, b->v_buffer, b->uv_stride,
+                        a->uv_crop_width, a->uv_crop_height);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 

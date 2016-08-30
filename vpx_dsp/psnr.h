@@ -37,8 +37,14 @@ typedef struct {
 */
 double vpx_sse_to_psnr(double samples, double peak, double sse);
 int64_t vpx_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b);
+int64_t vpx_get_u_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b);
+int64_t vpx_get_v_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b);
 #if CONFIG_VP9_HIGHBITDEPTH
 int64_t vpx_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
+                             const YV12_BUFFER_CONFIG *b);
+int64_t vpx_highbd_get_u_sse(const YV12_BUFFER_CONFIG *a,
+                             const YV12_BUFFER_CONFIG *b);
+int64_t vpx_highbd_get_v_sse(const YV12_BUFFER_CONFIG *a,
                              const YV12_BUFFER_CONFIG *b);
 void vpx_calc_highbd_psnr(const YV12_BUFFER_CONFIG *a,
                           const YV12_BUFFER_CONFIG *b, PSNR_STATS *psnr,

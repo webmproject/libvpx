@@ -3444,35 +3444,18 @@ static void loopfilter_frame(VP10_COMP *cpi, VP10_COMMON *cm) {
                 // encoded
 #if CLPF_FILTER_ALL_PLANES
       vpx_yv12_copy_frame(cm->frame_to_show, &cpi->last_frame_uf);
-      before =
-          get_sse(cpi->Source->y_buffer, cpi->Source->y_stride,
-                  cm->frame_to_show->y_buffer, cm->frame_to_show->y_stride,
-                  cpi->Source->y_crop_width, cpi->Source->y_crop_height) +
-          get_sse(cpi->Source->u_buffer, cpi->Source->uv_stride,
-                  cm->frame_to_show->u_buffer, cm->frame_to_show->uv_stride,
-                  cpi->Source->uv_crop_width, cpi->Source->uv_crop_height) +
-          get_sse(cpi->Source->v_buffer, cpi->Source->uv_stride,
-                  cm->frame_to_show->v_buffer, cm->frame_to_show->uv_stride,
-                  cpi->Source->uv_crop_width, cpi->Source->uv_crop_height);
+      before = vpx_get_y_sse(cpi->Source, cm->frame_to_show) +
+               vpx_get_u_sse(cpi->Source, cm->frame_to_show) +
+               vpx_get_v_sse(cpi->Source, cm->frame_to_show);
       vp10_clpf_frame(cm->frame_to_show, cm, xd);
-      after = get_sse(cpi->Source->y_buffer, cpi->Source->y_stride,
-                      cm->frame_to_show->y_buffer, cm->frame_to_show->y_stride,
-                      cpi->Source->y_crop_width, cpi->Source->y_crop_height) +
-              get_sse(cpi->Source->u_buffer, cpi->Source->uv_stride,
-                      cm->frame_to_show->u_buffer, cm->frame_to_show->uv_stride,
-                      cpi->Source->uv_crop_width, cpi->Source->uv_crop_height) +
-              get_sse(cpi->Source->v_buffer, cpi->Source->uv_stride,
-                      cm->frame_to_show->v_buffer, cm->frame_to_show->uv_stride,
-                      cpi->Source->uv_crop_width, cpi->Source->uv_crop_height);
+      after = vpx_get_y_sse(cpi->Source, cm->frame_to_show) +
+              vpx_get_u_sse(cpi->Source, cm->frame_to_show) +
+              vpx_get_v_sse(cpi->Source, cm->frame_to_show);
 #else
       vpx_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
-      before = get_sse(cpi->Source->y_buffer, cpi->Source->y_stride,
-                       cm->frame_to_show->y_buffer, cm->frame_to_show->y_stride,
-                       cpi->Source->y_crop_width, cpi->Source->y_crop_height);
+      before = vpx_get_y_sse(cpi->Source, cm->frame_to_show);
       vp10_clpf_frame(cm->frame_to_show, cm, xd);
-      after = get_sse(cpi->Source->y_buffer, cpi->Source->y_stride,
-                      cm->frame_to_show->y_buffer, cm->frame_to_show->y_stride,
-                      cpi->Source->y_crop_width, cpi->Source->y_crop_height);
+      after = vpx_get_y_sse(cpi->Source, cm->frame_to_show);
 #endif
       if (before < after) {
 // No improvement, restore original
