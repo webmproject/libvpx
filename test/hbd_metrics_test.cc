@@ -96,7 +96,7 @@ class HBDMetricsTestBase {
   void RunAccuracyCheck() {
     const int width = 1920;
     const int height = 1080;
-    int i = 0;
+    size_t i = 0;
     const uint8_t kPixFiller = 128;
     YV12_BUFFER_CONFIG lbd_src, lbd_dst;
     YV12_BUFFER_CONFIG hbd_src, hbd_dst;
