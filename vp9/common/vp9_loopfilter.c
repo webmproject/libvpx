@@ -655,7 +655,7 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
                         const int shift_uv, LOOP_FILTER_MASK *lfm) {
   const BLOCK_SIZE block_size = mi->sb_type;
   const TX_SIZE tx_size_y = mi->tx_size;
-  const TX_SIZE tx_size_uv = get_uv_tx_size_impl(tx_size_y, block_size, 1, 1);
+  const TX_SIZE tx_size_uv = uv_txsize_lookup[block_size][tx_size_y][1][1];
   const int filter_level = get_filter_level(lfi_n, mi);
   uint64_t *const left_y = &lfm->left_y[tx_size_y];
   uint64_t *const above_y = &lfm->above_y[tx_size_y];
@@ -1524,7 +1524,7 @@ void vp9_build_mask(VP9_COMMON *cm, const MODE_INFO *mi, int mi_row, int mi_col,
   const TX_SIZE tx_size_y = mi->tx_size;
   const loop_filter_info_n *const lfi_n = &cm->lf_info;
   const int filter_level = get_filter_level(lfi_n, mi);
-  const TX_SIZE tx_size_uv = get_uv_tx_size_impl(tx_size_y, block_size, 1, 1);
+  const TX_SIZE tx_size_uv = uv_txsize_lookup[block_size][tx_size_y][1][1];
   LOOP_FILTER_MASK *const lfm = get_lfm(&cm->lf, mi_row, mi_col);
   uint64_t *const left_y = &lfm->left_y[tx_size_y];
   uint64_t *const above_y = &lfm->above_y[tx_size_y];
