@@ -87,7 +87,7 @@ FILE *yuv_skinmap_file = NULL;
 #endif
 #ifdef OUTPUT_YUV_REC
 FILE *yuv_rec_file;
-#define FILE_NAME_LEN 80
+#define FILE_NAME_LEN 100
 #endif
 
 #if 0
