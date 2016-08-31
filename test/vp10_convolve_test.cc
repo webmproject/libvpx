@@ -30,7 +30,7 @@ TEST(VP10ConvolveTest, vp10_convolve8) {
   InterpFilterParams filter_params =
       vp10_get_interp_filter_params(interp_filter);
 #endif
-  ptrdiff_t filter_size = filter_params.taps;
+  int filter_size = filter_params.taps;
   int filter_center = filter_size / 2 - 1;
   uint8_t src[12 * 12];
   int src_stride = filter_size;
@@ -77,7 +77,7 @@ TEST(VP10ConvolveTest, vp10_convolve) {
   InterpFilterParams filter_params =
       vp10_get_interp_filter_params(interp_filter);
 #endif
-  ptrdiff_t filter_size = filter_params.taps;
+  int filter_size = filter_params.taps;
   int filter_center = filter_size / 2 - 1;
   uint8_t src[12 * 12];
   int src_stride = filter_size;
@@ -137,7 +137,7 @@ TEST(VP10ConvolveTest, vp10_convolve_avg) {
   InterpFilterParams filter_params =
       vp10_get_interp_filter_params(interp_filter);
 #endif
-  ptrdiff_t filter_size = filter_params.taps;
+  int filter_size = filter_params.taps;
   int filter_center = filter_size / 2 - 1;
   uint8_t src0[12 * 12];
   uint8_t src1[12 * 12];
@@ -203,7 +203,7 @@ TEST(VP10ConvolveTest, vp10_highbd_convolve) {
   InterpFilterParams filter_params =
       vp10_get_interp_filter_params(interp_filter);
 #endif
-  ptrdiff_t filter_size = filter_params.taps;
+  int filter_size = filter_params.taps;
   int filter_center = filter_size / 2 - 1;
   uint16_t src[12 * 12];
   int src_stride = filter_size;
@@ -264,7 +264,7 @@ TEST(VP10ConvolveTest, vp10_highbd_convolve_avg) {
   InterpFilterParams filter_params =
       vp10_get_interp_filter_params(interp_filter);
 #endif
-  ptrdiff_t filter_size = filter_params.taps;
+  int filter_size = filter_params.taps;
   int filter_center = filter_size / 2 - 1;
   uint16_t src0[12 * 12];
   uint16_t src1[12 * 12];
@@ -329,7 +329,7 @@ TEST(VP10ConvolveTest, vp10_highbd_convolve_avg) {
     INTERP_FILTER interp_filter = EIGHTTAP;                                  \
     InterpFilterParams filter_params =                                       \
         vp10_get_interp_filter_params(interp_filter);                        \
-    ptrdiff_t filter_size = filter_params.tap;                               \
+    int filter_size = filter_params.tap;                                     \
     int filter_center = filter_size / 2 - 1;                                 \
     DECLARE_ALIGNED(16, uint16_t,                                            \
                     src[(frame_size + 7) * (frame_size + 7)]) = { 0 };       \
@@ -381,7 +381,7 @@ TEST(VP10ConvolveTest, vp10_highbd_convolve_avg) {
     INTERP_FILTER interp_filter = EIGHTTAP;                                 \
     InterpFilterParams filter_params =                                      \
         vp10_get_interp_filter_params(interp_filter);                       \
-    ptrdiff_t filter_size = filter_params.tap;                              \
+    int filter_size = filter_params.tap;                                    \
     int filter_center = filter_size / 2 - 1;                                \
     DECLARE_ALIGNED(16, uint8_t, src[(frame_size + 7) * (frame_size + 7)]); \
     int src_stride = frame_size + 7;                                        \
