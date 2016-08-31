@@ -713,7 +713,7 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
   // rectangular transfroms are used with the EXT_TX expt.
   const TX_SIZE tx_size_y = txsize_sqr_up_map[mbmi->tx_size];
   const TX_SIZE tx_size_uv =
-      get_uv_tx_size_impl(mbmi->tx_size, block_size, 1, 1);
+      txsize_sqr_up_map[uv_txsize_lookup[block_size][mbmi->tx_size][1][1]];
   const int filter_level = get_filter_level(lfi_n, mbmi);
   uint64_t *const left_y = &lfm->left_y[tx_size_y];
   uint64_t *const above_y = &lfm->above_y[tx_size_y];
@@ -1238,9 +1238,9 @@ void av1_filter_block_plane_non420(AV1_COMMON *cm,
       // Filter level can vary per MI
       if (!(lfl[r][c >> ss_x] = get_filter_level(&cm->lf_info, mbmi))) continue;
 
-      if (tx_size == TX_32X32)
+      if (txsize_sqr_up_map[tx_size] == TX_32X32)
         tx_size_mask = 3;
-      else if (tx_size == TX_16X16)
+      else if (txsize_sqr_up_map[tx_size] == TX_16X16)
         tx_size_mask = 1;
       else
         tx_size_mask = 0;
@@ -1249,8 +1249,8 @@ void av1_filter_block_plane_non420(AV1_COMMON *cm,
       if (is_inter_block(mbmi) && !mbmi->skip)
         tx_size =
             (plane->plane_type == PLANE_TYPE_UV)
-                ? get_uv_tx_size_impl(mbmi->inter_tx_size[blk_row][blk_col],
-                                      sb_type, ss_x, ss_y)
+                ? uv_txsize_lookup[sb_type][mbmi->inter_tx_size
+                                                [blk_row][blk_col]][ss_x][ss_y]
                 : mbmi->inter_tx_size[blk_row][blk_col];
 
 #if CONFIG_EXT_TX && CONFIG_RECT_TX

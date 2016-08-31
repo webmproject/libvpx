@@ -137,6 +137,7 @@ typedef uint8_t TX_SIZE;
 #define TX_16X16 ((TX_SIZE)2)  // 16x16 transform
 #define TX_32X32 ((TX_SIZE)3)  // 32x32 transform
 #define TX_SIZES ((TX_SIZE)4)
+#define TX_INVALID ((TX_SIZE)255)  // Invalid transform size
 
 #if CONFIG_EXT_TX
 #define TX_4X8 ((TX_SIZE)4)         // 4x8 transform
