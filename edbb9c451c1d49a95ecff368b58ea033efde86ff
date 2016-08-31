@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "31a6c1c4_0fa0a5a4",
+        "filename": "test/hbd_metrics_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T19:16:19Z",
+      "side": 1,
+      "message": "you\u0027ll probably want size_t if that\u0027s the base type to avoid conversion warnings under visual studio (-Wshorten-64-to-32 would show this too I believe, but we haven\u0027t cleared this tree yet)",
+      "revId": "edbb9c451c1d49a95ecff368b58ea033efde86ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
