@@ -16,6 +16,24 @@
       "revId": "edbb9c451c1d49a95ecff368b58ea033efde86ff",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31a6c1c4_9589045d",
+        "filename": "test/hbd_metrics_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2016-08-31T21:56:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "31a6c1c4_0fa0a5a4",
+      "revId": "edbb9c451c1d49a95ecff368b58ea033efde86ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
