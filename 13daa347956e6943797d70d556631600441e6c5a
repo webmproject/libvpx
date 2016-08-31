@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "11f37dac_6e6b0f1a",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1352,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-08-31T08:44:46Z",
+      "side": 1,
+      "message": "the tx_size should use the same remapping as used when computing the set (maybe the whole index computation should be factored out?). There is some pruning of the updates to the costs/probabilities based on whether that size is allowed in that set, see rd.c:121 for example.",
+      "range": {
+        "startLine": 1352,
+        "startChar": 31,
+        "endLine": 1352,
+        "endChar": 48
+      },
+      "revId": "13daa347956e6943797d70d556631600441e6c5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11f37dac_4eebb3a0",
+        "filename": "vp10/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1583,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-08-31T08:44:46Z",
+      "side": 1,
+      "message": "This is unrelatad (used with higher cpu-used) but I think is necessary.",
+      "range": {
+        "startLine": 1583,
+        "startChar": 40,
+        "endLine": 1583,
+        "endChar": 75
+      },
+      "revId": "13daa347956e6943797d70d556631600441e6c5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
