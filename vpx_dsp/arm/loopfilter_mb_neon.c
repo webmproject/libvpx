@@ -633,147 +633,347 @@ void vpx_lpf_horizontal_edge_16_neon(uint8_t *s, int p, const uint8_t *blimit,
                   oq4, oq5, oq6, flat_u64, flat2_u64);
 }
 
-static void mb_lpf_vertical_edge_w(uint8_t *s, int p, const uint8_t *blimit,
-                                   const uint8_t *limit, const uint8_t *thresh,
-                                   int count) {
+void vpx_lpf_vertical_16_neon(uint8_t *s, int p, const uint8_t *blimit,
+                              const uint8_t *limit, const uint8_t *thresh) {
   const uint8x8_t blimit_u8x8 = vld1_dup_u8(blimit);
   const uint8x8_t limit_u8x8 = vld1_dup_u8(limit);
   const uint8x8_t thresh_u8x8 = vld1_dup_u8(thresh);
   uint8_t *d;
+  uint8x16_t t0, t1, t2, t3, t4, t5, t6, t7;
+  uint8x8_t p7, p6, p5, p4, p3, p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7, op6,
+      op5, op4, op3, op2, op1, op0, oq0, oq1, oq2, oq3, oq4, oq5, oq6, flat,
+      hev, mask, flat2;
+  uint64_t flat_u64, flat2_u64;
 
   s -= 8;
   d = s;
-  do {
-    uint8x16_t t0, t1, t2, t3, t4, t5, t6, t7;
-    uint8x8_t p7, p6, p5, p4, p3, p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7,
-        op6, op5, op4, op3, op2, op1, op0, oq0, oq1, oq2, oq3, oq4, oq5, oq6,
-        flat, hev, mask, flat2;
-    uint64_t flat_u64, flat2_u64;
+  t0 = vld1q_u8(s);
+  s += p;
+  t1 = vld1q_u8(s);
+  s += p;
+  t2 = vld1q_u8(s);
+  s += p;
+  t3 = vld1q_u8(s);
+  s += p;
+  t4 = vld1q_u8(s);
+  s += p;
+  t5 = vld1q_u8(s);
+  s += p;
+  t6 = vld1q_u8(s);
+  s += p;
+  t7 = vld1q_u8(s);
 
-    t0 = vld1q_u8(s);
-    s += p;
-    t1 = vld1q_u8(s);
-    s += p;
-    t2 = vld1q_u8(s);
-    s += p;
-    t3 = vld1q_u8(s);
-    s += p;
-    t4 = vld1q_u8(s);
-    s += p;
-    t5 = vld1q_u8(s);
-    s += p;
-    t6 = vld1q_u8(s);
-    s += p;
-    t7 = vld1q_u8(s);
-    s += p;
+  transpose_u8_16x8(t0, t1, t2, t3, t4, t5, t6, t7, &p7, &p6, &p5, &p4, &p3,
+                    &p2, &p1, &p0, &q0, &q1, &q2, &q3, &q4, &q5, &q6, &q7);
 
-    transpose_u8_16x8(t0, t1, t2, t3, t4, t5, t6, t7, &p7, &p6, &p5, &p4, &p3,
-                      &p2, &p1, &p0, &q0, &q1, &q2, &q3, &q4, &q5, &q6, &q7);
+  mask = filter_mask_8(limit_u8x8, blimit_u8x8, thresh_u8x8, p3, p2, p1, p0, q0,
+                       q1, q2, q3, &flat, &hev);
+  flat2 = flat_mask5_8(p7, p6, p5, p4, p0, q0, q4, q5, q6, q7);
+  flat = vand_u8(flat, mask);
+  flat2 = vand_u8(flat2, flat);
+  flat_u64 = vget_lane_u64(vreinterpret_u64_u8(flat), 0);
+  flat2_u64 = vget_lane_u64(vreinterpret_u64_u8(flat2), 0);
 
-    mask = filter_mask_8(limit_u8x8, blimit_u8x8, thresh_u8x8, p3, p2, p1, p0,
-                         q0, q1, q2, q3, &flat, &hev);
-    flat2 = flat_mask5_8(p7, p6, p5, p4, p0, q0, q4, q5, q6, q7);
-    flat = vand_u8(flat, mask);
-    flat2 = vand_u8(flat2, flat);
-    flat_u64 = vget_lane_u64(vreinterpret_u64_u8(flat), 0);
-    flat2_u64 = vget_lane_u64(vreinterpret_u64_u8(flat2), 0);
+  filter16_8(mask, flat, flat_u64, flat2, flat2_u64, hev, p7, p6, p5, p4, p3,
+             p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7, &op6, &op5, &op4, &op3,
+             &op2, &op1, &op0, &oq0, &oq1, &oq2, &oq3, &oq4, &oq5, &oq6);
 
-    filter16_8(mask, flat, flat_u64, flat2, flat2_u64, hev, p7, p6, p5, p4, p3,
-               p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7, &op6, &op5, &op4,
-               &op3, &op2, &op1, &op0, &oq0, &oq1, &oq2, &oq3, &oq4, &oq5,
-               &oq6);
+  if (flat_u64) {
+    if (flat2_u64) {
+      uint8x16_t o0, o1, o2, o3, o4, o5, o6, o7;
+      transpose_u8_8x16(p7, op6, op5, op4, op3, op2, op1, op0, oq0, oq1, oq2,
+                        oq3, oq4, oq5, oq6, q7, &o0, &o1, &o2, &o3, &o4, &o5,
+                        &o6, &o7);
 
-    if (flat_u64) {
-      if (flat2_u64) {
-        uint8x16_t o0, o1, o2, o3, o4, o5, o6, o7;
-        transpose_u8_8x16(p7, op6, op5, op4, op3, op2, op1, op0, oq0, oq1, oq2,
-                          oq3, oq4, oq5, oq6, q7, &o0, &o1, &o2, &o3, &o4, &o5,
-                          &o6, &o7);
-
-        vst1q_u8(d, o0);
-        d += p;
-        vst1q_u8(d, o1);
-        d += p;
-        vst1q_u8(d, o2);
-        d += p;
-        vst1q_u8(d, o3);
-        d += p;
-        vst1q_u8(d, o4);
-        d += p;
-        vst1q_u8(d, o5);
-        d += p;
-        vst1q_u8(d, o6);
-        d += p;
-        vst1q_u8(d, o7);
-        d += p;
-      } else {
-        uint8x8x3_t o0, o1;
-        d += 8;
-        o0.val[0] = op2;
-        o0.val[1] = op1;
-        o0.val[2] = op0;
-        o1.val[0] = oq0;
-        o1.val[1] = oq1;
-        o1.val[2] = oq2;
-        vst3_lane_u8(d - 3, o0, 0);
-        vst3_lane_u8(d + 0, o1, 0);
-        d += p;
-        vst3_lane_u8(d - 3, o0, 1);
-        vst3_lane_u8(d + 0, o1, 1);
-        d += p;
-        vst3_lane_u8(d - 3, o0, 2);
-        vst3_lane_u8(d + 0, o1, 2);
-        d += p;
-        vst3_lane_u8(d - 3, o0, 3);
-        vst3_lane_u8(d + 0, o1, 3);
-        d += p;
-        vst3_lane_u8(d - 3, o0, 4);
-        vst3_lane_u8(d + 0, o1, 4);
-        d += p;
-        vst3_lane_u8(d - 3, o0, 5);
-        vst3_lane_u8(d + 0, o1, 5);
-        d += p;
-        vst3_lane_u8(d - 3, o0, 6);
-        vst3_lane_u8(d + 0, o1, 6);
-        d += p;
-        vst3_lane_u8(d - 3, o0, 7);
-        vst3_lane_u8(d + 0, o1, 7);
-        d += p - 8;
-      }
+      vst1q_u8(d, o0);
+      d += p;
+      vst1q_u8(d, o1);
+      d += p;
+      vst1q_u8(d, o2);
+      d += p;
+      vst1q_u8(d, o3);
+      d += p;
+      vst1q_u8(d, o4);
+      d += p;
+      vst1q_u8(d, o5);
+      d += p;
+      vst1q_u8(d, o6);
+      d += p;
+      vst1q_u8(d, o7);
     } else {
-      uint8x8x4_t o;
-      d += 6;
-      o.val[0] = op1;
-      o.val[1] = op0;
-      o.val[2] = oq0;
-      o.val[3] = oq1;
-      vst4_lane_u8(d, o, 0);
+      uint8x8x3_t o0, o1;
+      d += 8;
+      o0.val[0] = op2;
+      o0.val[1] = op1;
+      o0.val[2] = op0;
+      o1.val[0] = oq0;
+      o1.val[1] = oq1;
+      o1.val[2] = oq2;
+      vst3_lane_u8(d - 3, o0, 0);
+      vst3_lane_u8(d + 0, o1, 0);
       d += p;
-      vst4_lane_u8(d, o, 1);
+      vst3_lane_u8(d - 3, o0, 1);
+      vst3_lane_u8(d + 0, o1, 1);
       d += p;
-      vst4_lane_u8(d, o, 2);
+      vst3_lane_u8(d - 3, o0, 2);
+      vst3_lane_u8(d + 0, o1, 2);
       d += p;
-      vst4_lane_u8(d, o, 3);
+      vst3_lane_u8(d - 3, o0, 3);
+      vst3_lane_u8(d + 0, o1, 3);
       d += p;
-      vst4_lane_u8(d, o, 4);
+      vst3_lane_u8(d - 3, o0, 4);
+      vst3_lane_u8(d + 0, o1, 4);
       d += p;
-      vst4_lane_u8(d, o, 5);
+      vst3_lane_u8(d - 3, o0, 5);
+      vst3_lane_u8(d + 0, o1, 5);
       d += p;
-      vst4_lane_u8(d, o, 6);
+      vst3_lane_u8(d - 3, o0, 6);
+      vst3_lane_u8(d + 0, o1, 6);
       d += p;
-      vst4_lane_u8(d, o, 7);
-      d += p - 6;
+      vst3_lane_u8(d - 3, o0, 7);
+      vst3_lane_u8(d + 0, o1, 7);
     }
-  } while (--count);
-}
-
-void vpx_lpf_vertical_16_neon(uint8_t *s, int p, const uint8_t *blimit,
-                              const uint8_t *limit, const uint8_t *thresh) {
-  mb_lpf_vertical_edge_w(s, p, blimit, limit, thresh, 1);
+  } else {
+    uint8x8x4_t o;
+    d += 6;
+    o.val[0] = op1;
+    o.val[1] = op0;
+    o.val[2] = oq0;
+    o.val[3] = oq1;
+    vst4_lane_u8(d, o, 0);
+    d += p;
+    vst4_lane_u8(d, o, 1);
+    d += p;
+    vst4_lane_u8(d, o, 2);
+    d += p;
+    vst4_lane_u8(d, o, 3);
+    d += p;
+    vst4_lane_u8(d, o, 4);
+    d += p;
+    vst4_lane_u8(d, o, 5);
+    d += p;
+    vst4_lane_u8(d, o, 6);
+    d += p;
+    vst4_lane_u8(d, o, 7);
+  }
 }
 
 void vpx_lpf_vertical_16_dual_neon(uint8_t *s, int p, const uint8_t *blimit,
                                    const uint8_t *limit,
                                    const uint8_t *thresh) {
-  mb_lpf_vertical_edge_w(s, p, blimit, limit, thresh, 2);
+  const uint8x16_t blimit_u8x16 = vld1q_dup_u8(blimit);
+  const uint8x16_t limit_u8x16 = vld1q_dup_u8(limit);
+  const uint8x16_t thresh_u8x16 = vld1q_dup_u8(thresh);
+  uint8_t *d;
+  uint8x16_t t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14,
+      t15;
+  uint8x16_t p7, p6, p5, p4, p3, p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7,
+      op6, op5, op4, op3, op2, op1, op0, oq0, oq1, oq2, oq3, oq4, oq5, oq6,
+      flat, hev, mask, flat2;
+  uint64x1_t flat_u64x1, flat2_u64x1;
+  uint64_t flat_u64, flat2_u64;
+
+  s -= 8;
+  d = s;
+  t0 = vld1q_u8(s);
+  s += p;
+  t1 = vld1q_u8(s);
+  s += p;
+  t2 = vld1q_u8(s);
+  s += p;
+  t3 = vld1q_u8(s);
+  s += p;
+  t4 = vld1q_u8(s);
+  s += p;
+  t5 = vld1q_u8(s);
+  s += p;
+  t6 = vld1q_u8(s);
+  s += p;
+  t7 = vld1q_u8(s);
+  s += p;
+  t8 = vld1q_u8(s);
+  s += p;
+  t9 = vld1q_u8(s);
+  s += p;
+  t10 = vld1q_u8(s);
+  s += p;
+  t11 = vld1q_u8(s);
+  s += p;
+  t12 = vld1q_u8(s);
+  s += p;
+  t13 = vld1q_u8(s);
+  s += p;
+  t14 = vld1q_u8(s);
+  s += p;
+  t15 = vld1q_u8(s);
+
+  transpose_u8_16x16(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13,
+                     t14, t15, &p7, &p6, &p5, &p4, &p3, &p2, &p1, &p0, &q0, &q1,
+                     &q2, &q3, &q4, &q5, &q6, &q7);
+
+  mask = filter_mask_16(limit_u8x16, blimit_u8x16, thresh_u8x16, p3, p2, p1, p0,
+                        q0, q1, q2, q3, &flat, &hev);
+  flat2 = flat_mask5_16(p7, p6, p5, p4, p0, q0, q4, q5, q6, q7);
+  flat = vandq_u8(flat, mask);
+  flat2 = vandq_u8(flat2, flat);
+  flat_u64x1 = vadd_u64(vreinterpret_u64_u8(vget_low_u8(flat)),
+                        vreinterpret_u64_u8(vget_high_u8(flat)));
+  flat2_u64x1 = vadd_u64(vreinterpret_u64_u8(vget_low_u8(flat2)),
+                         vreinterpret_u64_u8(vget_high_u8(flat2)));
+  flat_u64 = vget_lane_u64(flat_u64x1, 0);
+  flat2_u64 = vget_lane_u64(flat2_u64x1, 0);
+
+  filter16_16(mask, flat, flat_u64, flat2, flat2_u64, hev, p7, p6, p5, p4, p3,
+              p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7, &op6, &op5, &op4,
+              &op3, &op2, &op1, &op0, &oq0, &oq1, &oq2, &oq3, &oq4, &oq5, &oq6);
+
+  if (flat_u64) {
+    if (flat2_u64) {
+      uint8x16_t o0, o1, o2, o3, o4, o5, o6, o7, o8, o9, o10, o11, o12, o13,
+          o14, o15;
+      transpose_u8_16x16(p7, op6, op5, op4, op3, op2, op1, op0, oq0, oq1, oq2,
+                         oq3, oq4, oq5, oq6, q7, &o0, &o1, &o2, &o3, &o4, &o5,
+                         &o6, &o7, &o8, &o9, &o10, &o11, &o12, &o13, &o14,
+                         &o15);
+
+      vst1q_u8(d, o0);
+      d += p;
+      vst1q_u8(d, o1);
+      d += p;
+      vst1q_u8(d, o2);
+      d += p;
+      vst1q_u8(d, o3);
+      d += p;
+      vst1q_u8(d, o4);
+      d += p;
+      vst1q_u8(d, o5);
+      d += p;
+      vst1q_u8(d, o6);
+      d += p;
+      vst1q_u8(d, o7);
+      d += p;
+
+      vst1q_u8(d, o8);
+      d += p;
+      vst1q_u8(d, o9);
+      d += p;
+      vst1q_u8(d, o10);
+      d += p;
+      vst1q_u8(d, o11);
+      d += p;
+      vst1q_u8(d, o12);
+      d += p;
+      vst1q_u8(d, o13);
+      d += p;
+      vst1q_u8(d, o14);
+      d += p;
+      vst1q_u8(d, o15);
+    } else {
+      uint8x8x3_t o0, o1;
+      d += 8;
+      o0.val[0] = vget_low_u8(op2);
+      o0.val[1] = vget_low_u8(op1);
+      o0.val[2] = vget_low_u8(op0);
+      o1.val[0] = vget_low_u8(oq0);
+      o1.val[1] = vget_low_u8(oq1);
+      o1.val[2] = vget_low_u8(oq2);
+      vst3_lane_u8(d - 3, o0, 0);
+      vst3_lane_u8(d + 0, o1, 0);
+      d += p;
+      vst3_lane_u8(d - 3, o0, 1);
+      vst3_lane_u8(d + 0, o1, 1);
+      d += p;
+      vst3_lane_u8(d - 3, o0, 2);
+      vst3_lane_u8(d + 0, o1, 2);
+      d += p;
+      vst3_lane_u8(d - 3, o0, 3);
+      vst3_lane_u8(d + 0, o1, 3);
+      d += p;
+      vst3_lane_u8(d - 3, o0, 4);
+      vst3_lane_u8(d + 0, o1, 4);
+      d += p;
+      vst3_lane_u8(d - 3, o0, 5);
+      vst3_lane_u8(d + 0, o1, 5);
+      d += p;
+      vst3_lane_u8(d - 3, o0, 6);
+      vst3_lane_u8(d + 0, o1, 6);
+      d += p;
+      vst3_lane_u8(d - 3, o0, 7);
+      vst3_lane_u8(d + 0, o1, 7);
+      d += p;
+
+      o0.val[0] = vget_high_u8(op2);
+      o0.val[1] = vget_high_u8(op1);
+      o0.val[2] = vget_high_u8(op0);
+      o1.val[0] = vget_high_u8(oq0);
+      o1.val[1] = vget_high_u8(oq1);
+      o1.val[2] = vget_high_u8(oq2);
+      vst3_lane_u8(d - 3, o0, 0);
+      vst3_lane_u8(d + 0, o1, 0);
+      d += p;
+      vst3_lane_u8(d - 3, o0, 1);
+      vst3_lane_u8(d + 0, o1, 1);
+      d += p;
+      vst3_lane_u8(d - 3, o0, 2);
+      vst3_lane_u8(d + 0, o1, 2);
+      d += p;
+      vst3_lane_u8(d - 3, o0, 3);
+      vst3_lane_u8(d + 0, o1, 3);
+      d += p;
+      vst3_lane_u8(d - 3, o0, 4);
+      vst3_lane_u8(d + 0, o1, 4);
+      d += p;
+      vst3_lane_u8(d - 3, o0, 5);
+      vst3_lane_u8(d + 0, o1, 5);
+      d += p;
+      vst3_lane_u8(d - 3, o0, 6);
+      vst3_lane_u8(d + 0, o1, 6);
+      d += p;
+      vst3_lane_u8(d - 3, o0, 7);
+      vst3_lane_u8(d + 0, o1, 7);
+    }
+  } else {
+    uint8x8x4_t o;
+    d += 6;
+    o.val[0] = vget_low_u8(op1);
+    o.val[1] = vget_low_u8(op0);
+    o.val[2] = vget_low_u8(oq0);
+    o.val[3] = vget_low_u8(oq1);
+    vst4_lane_u8(d, o, 0);
+    d += p;
+    vst4_lane_u8(d, o, 1);
+    d += p;
+    vst4_lane_u8(d, o, 2);
+    d += p;
+    vst4_lane_u8(d, o, 3);
+    d += p;
+    vst4_lane_u8(d, o, 4);
+    d += p;
+    vst4_lane_u8(d, o, 5);
+    d += p;
+    vst4_lane_u8(d, o, 6);
+    d += p;
+    vst4_lane_u8(d, o, 7);
+    d += p;
+
+    o.val[0] = vget_high_u8(op1);
+    o.val[1] = vget_high_u8(op0);
+    o.val[2] = vget_high_u8(oq0);
+    o.val[3] = vget_high_u8(oq1);
+    vst4_lane_u8(d, o, 0);
+    d += p;
+    vst4_lane_u8(d, o, 1);
+    d += p;
+    vst4_lane_u8(d, o, 2);
+    d += p;
+    vst4_lane_u8(d, o, 3);
+    d += p;
+    vst4_lane_u8(d, o, 4);
+    d += p;
+    vst4_lane_u8(d, o, 5);
+    d += p;
+    vst4_lane_u8(d, o, 6);
+    d += p;
+    vst4_lane_u8(d, o, 7);
+  }
 }
