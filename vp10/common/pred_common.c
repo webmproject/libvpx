@@ -600,7 +600,7 @@ int vp10_get_pred_context_comp_bwdref_p(const VP10_COMMON *cm,
       const MB_MODE_INFO *edge_mbmi = above_intra ? left_mbmi : above_mbmi;
 
       if (!has_second_ref(edge_mbmi))  // single pred (1/3)
-        pred_context = 1 + 2 * (edge_mbmi->ref_frame[1] != cm->comp_bwd_ref[1]);
+        pred_context = 1 + 2 * (edge_mbmi->ref_frame[0] != cm->comp_bwd_ref[1]);
       else  // comp pred (1/3)
         pred_context =
             1 +
