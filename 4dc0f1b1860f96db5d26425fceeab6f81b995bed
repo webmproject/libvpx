@@ -1,0 +1,391 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f16a69fa_d8d651e1",
+        "filename": "third_party/fastfeat/README",
+        "patchSetId": 28
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "Normally this is placed in a separate README.libvpx under \u0027Local Modifications\u0027. See googletest/libyuv/x86inc for examples of the format",
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_b80d5599",
+        "filename": "vp10/common/warped_motion.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 494,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "what\u0027s the max width/height? any chance this could roll over in high bitdepth configs?",
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_980a197d",
+        "filename": "vp10/common/warped_motion.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 590,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "not necessary given the immediate return above",
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_58224114",
+        "filename": "vp10/common/warped_motion.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "I know these we just relocated in this cl, but note outside of C++ code we use lower with \u0027_\u0027s for function names; C++ is leading capital + camel case",
+      "range": {
+        "startLine": 54,
+        "startChar": 5,
+        "endLine": 54,
+        "endChar": 29
+      },
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_f8dceddc",
+        "filename": "vp10/encoder/corner_detect.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "2016",
+      "range": {
+        "startLine": 2,
+        "startChar": 18,
+        "endLine": 2,
+        "endChar": 23
+      },
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_38bf8583",
+        "filename": "vp10/encoder/corner_detect.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "these should be sorted",
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_18c44904",
+        "filename": "vp10/encoder/corner_detect.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "unneeded though you want string.h for memcpy",
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_b8d275c6",
+        "filename": "vp10/encoder/corner_detect.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "both of these look to be unnecessary",
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_d832d148",
+        "filename": "vp10/encoder/corner_detect.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "unused",
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_b83b9528",
+        "filename": "vp10/encoder/corner_detect.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "better to use sizeof(variable) here",
+      "range": {
+        "startLine": 29,
+        "startChar": 35,
+        "endLine": 29,
+        "endChar": 45
+      },
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_98f69956",
+        "filename": "vp10/encoder/corner_detect.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "this else is unnecessary with the return above",
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_b880b5a6",
+        "filename": "vp10/encoder/corner_detect.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "you could still hit this path with a valid frm_corners_xy pointer and leak. if that is an impossible condition you should assert() here",
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_3861453a",
+        "filename": "vp10/encoder/corner_detect.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "2016",
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_786bbd19",
+        "filename": "vp10/encoder/corner_detect.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "none of these are needed by this header",
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_18660952",
+        "filename": "vp10/encoder/corner_detect.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "fast_corner_detect; you could use (const) uint8_t for the buffer",
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_78ae1d3b",
+        "filename": "vp10/encoder/corner_match.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "2016",
+      "range": {
+        "startLine": 2,
+        "startChar": 18,
+        "endLine": 2,
+        "endChar": 22
+      },
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_d88771ba",
+        "filename": "vp10/encoder/corner_match.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "2016",
+      "range": {
+        "startLine": 2,
+        "startChar": 18,
+        "endLine": 2,
+        "endChar": 22
+      },
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_38b4a58b",
+        "filename": "vp10/encoder/corner_match.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "unneeed x3",
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_18b9e983",
+        "filename": "vp10/encoder/corner_match.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "should be Correspondence",
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_f88a2dc4",
+        "filename": "vp10/encoder/corner_match.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "VP10_ENCODER_CORNER_MATCH_H_",
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f16a69fa_58b361a1",
+        "filename": "vp10/encoder/encodeframe.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 4491,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-08-31T01:08:41Z",
+      "side": 1,
+      "message": "const",
+      "revId": "4dc0f1b1860f96db5d26425fceeab6f81b995bed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
