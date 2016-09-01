@@ -1388,7 +1388,7 @@ static int get_twopass_worst_quality(VP9_COMP *cpi, const double section_err,
     const double speed_term = 1.0 + 0.04 * oxcf->speed;
     double last_group_rate_err;
     const int target_norm_bits_per_mb =
-        ((uint64_t)target_rate << BPER_MB_NORMBITS) / active_mbs;
+        (int)(((uint64_t)target_rate << BPER_MB_NORMBITS) / active_mbs);
     int q;
     int is_svc_upper_layer = 0;
 

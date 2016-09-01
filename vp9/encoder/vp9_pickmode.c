@@ -336,7 +336,7 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
                  cpi->common.use_highbitdepth, bd,
 #endif
                  sse8x8, sum8x8, var8x8);
-  var = sse - (((int64_t)sum * sum) >> (bw + bh + 4));
+  var = sse - (unsigned int)(((int64_t)sum * sum) >> (bw + bh + 4));
 
   *var_y = var;
   *sse_y = sse;

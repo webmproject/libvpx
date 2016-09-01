@@ -166,7 +166,7 @@ static unsigned int block_variance(VP9_COMP *cpi, MACROBLOCK *x,
     aq_variance(x->plane[0].src.buf, x->plane[0].src.stride, vp9_64_zeros, 0,
                 bw, bh, &sse, &avg);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-    var = sse - (((int64_t)avg * avg) / (bw * bh));
+    var = sse - (unsigned int)(((int64_t)avg * avg) / (bw * bh));
     return (unsigned int)(((uint64_t)256 * var) / (bw * bh));
   } else {
 #if CONFIG_VP9_HIGHBITDEPTH
