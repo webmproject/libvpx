@@ -61,10 +61,10 @@ endif
 
 ifeq ($(CONFIG_AV1_ENCODER),yes)
   AV1_PREFIX=av1/
-  include $(SRC_PATH_BARE)/$(AV1_PREFIX)av1cx.mk
+  include $(SRC_PATH_BARE)/$(AV1_PREFIX)av1_cx.mk
   CODEC_SRCS-yes += $(addprefix $(AV1_PREFIX),$(call enabled,AV1_CX_SRCS))
   CODEC_EXPORTS-yes += $(addprefix $(AV1_PREFIX),$(AV1_CX_EXPORTS))
-  CODEC_SRCS-yes += $(AV1_PREFIX)av1cx.mk aom/aom.h aom/aomcx.h
+  CODEC_SRCS-yes += $(AV1_PREFIX)av1_cx.mk aom/aom.h aom/aomcx.h
   INSTALL-LIBS-yes += include/aom/aom.h include/aom/aomcx.h
   INSTALL_MAPS += include/aom/% $(SRC_PATH_BARE)/$(AV1_PREFIX)/%
   CODEC_DOC_SRCS += aom/aom.h aom/aomcx.h
@@ -73,10 +73,10 @@ endif
 
 ifeq ($(CONFIG_AV1_DECODER),yes)
   AV1_PREFIX=av1/
-  include $(SRC_PATH_BARE)/$(AV1_PREFIX)av1dx.mk
+  include $(SRC_PATH_BARE)/$(AV1_PREFIX)av1_dx.mk
   CODEC_SRCS-yes += $(addprefix $(AV1_PREFIX),$(call enabled,AV1_DX_SRCS))
   CODEC_EXPORTS-yes += $(addprefix $(AV1_PREFIX),$(AV1_DX_EXPORTS))
-  CODEC_SRCS-yes += $(AV1_PREFIX)av1dx.mk aom/aom.h aom/aomdx.h
+  CODEC_SRCS-yes += $(AV1_PREFIX)av1_dx.mk aom/aom.h aom/aomdx.h
   INSTALL-LIBS-yes += include/aom/aom.h include/aom/aomdx.h
   INSTALL_MAPS += include/aom/% $(SRC_PATH_BARE)/$(AV1_PREFIX)/%
   CODEC_DOC_SRCS += aom/aom.h aom/aomdx.h
