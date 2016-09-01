@@ -46,7 +46,6 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
   int dec[3];
   int pli;
   int(*mse)[MAX_DERING_LEVEL];
-  int best_count[MAX_DERING_LEVEL] = { 0 };
   double tot_mse[MAX_DERING_LEVEL] = { 0 };
   int level;
   int best_level;
@@ -92,13 +91,12 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
   mse = aom_malloc(nvsb * nhsb * sizeof(*mse));
   for (sbr = 0; sbr < nvsb; sbr++) {
     for (sbc = 0; sbc < nhsb; sbc++) {
-      int best_mse = 1000000000;
       int nvb, nhb;
       int16_t dst[MAX_MIB_SIZE * MAX_MIB_SIZE * 8 * 8];
-      best_level = 0;
       nhb = AOMMIN(MAX_MIB_SIZE, cm->mi_cols - MAX_MIB_SIZE * sbc);
       nvb = AOMMIN(MAX_MIB_SIZE, cm->mi_rows - MAX_MIB_SIZE * sbr);
       for (level = 0; level < 64; level++) {
+        int cur_mse;
         int threshold;
         threshold = level << coeff_shift;
         od_dering(
@@ -108,18 +106,14 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
             cm->mi_cols * bsize[0], nhb, nvb, sbc, sbr, nhsb, nvsb, 0, dir, 0,
             &bskip[MAX_MIB_SIZE * sbr * cm->mi_cols + MAX_MIB_SIZE * sbc],
             cm->mi_cols, threshold, OD_DERING_NO_CHECK_OVERLAP, coeff_shift);
-        mse[nhsb * sbr + sbc][level] = (int)compute_dist(
+        cur_mse = (int)compute_dist(
             dst, MAX_MIB_SIZE * bsize[0],
             &ref_coeff[sbr * stride * bsize[0] * MAX_MIB_SIZE +
                        sbc * bsize[0] * MAX_MIB_SIZE],
             stride, nhb, nvb, coeff_shift);
-        tot_mse[level] += mse[nhsb * sbr + sbc][level];
-        if (mse[nhsb * sbr + sbc][level] < best_mse) {
-          best_mse = mse[nhsb * sbr + sbc][level];
-          best_level = level;
-        }
+        mse[nhsb * sbr + sbc][level] = cur_mse;
+        tot_mse[level] += cur_mse;
       }
-      best_count[best_level]++;
     }
   }
 #if DERING_REFINEMENT
