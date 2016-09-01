@@ -464,7 +464,7 @@ static INLINE int highbd_quantize_coeff_nuq(
   }
   if (i == NUQ_KNOTS) {
     tmp -= cuml_bins_ptr[NUQ_KNOTS - 1];
-    q = NUQ_KNOTS + (((((tmp * quant) >> 16) + tmp) * quant_shift) >> 16);
+    q = NUQ_KNOTS + (int)(((((tmp * quant) >> 16) + tmp) * quant_shift) >> 16);
   }
   if (q) {
     *dqcoeff_ptr = av1_dequant_abscoeff_nuq(q, dequant, dequant_val);
@@ -493,7 +493,7 @@ static INLINE int highbd_quantize_coeff_fp_nuq(
     }
   }
   if (i == NUQ_KNOTS) {
-    q = NUQ_KNOTS + (((tmp - cuml_bins_ptr[NUQ_KNOTS - 1]) * quant) >> 16);
+    q = NUQ_KNOTS + (int)(((tmp - cuml_bins_ptr[NUQ_KNOTS - 1]) * quant) >> 16);
   }
   if (q) {
     *dqcoeff_ptr = av1_dequant_abscoeff_nuq(q, dequant, dequant_val);
@@ -522,10 +522,11 @@ static INLINE int highbd_quantize_coeff_bigtx_fp_nuq(
     }
   }
   if (i == NUQ_KNOTS) {
-    q = NUQ_KNOTS + (((tmp - ROUND_POWER_OF_TWO(cuml_bins_ptr[NUQ_KNOTS - 1],
-                                                1 + logsizeby32)) *
-                      quant) >>
-                     (15 - logsizeby32));
+    q = NUQ_KNOTS +
+        (int)(((tmp - ROUND_POWER_OF_TWO(cuml_bins_ptr[NUQ_KNOTS - 1],
+                                         1 + logsizeby32)) *
+               quant) >>
+              (15 - logsizeby32));
   }
   if (q) {
     *dqcoeff_ptr = ROUND_POWER_OF_TWO(
@@ -557,8 +558,8 @@ static INLINE int highbd_quantize_coeff_bigtx_nuq(
   }
   if (i == NUQ_KNOTS) {
     tmp -= ROUND_POWER_OF_TWO(cuml_bins_ptr[NUQ_KNOTS - 1], 1 + logsizeby32);
-    q = NUQ_KNOTS +
-        (((((tmp * quant) >> 16) + tmp) * quant_shift) >> (15 - logsizeby32));
+    q = NUQ_KNOTS + (int)(((((tmp * quant) >> 16) + tmp) * quant_shift) >>
+                          (15 - logsizeby32));
   }
   if (q) {
     *dqcoeff_ptr = ROUND_POWER_OF_TWO(
