@@ -218,6 +218,36 @@ static INLINE void h_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
   }
 }
 
+#if CONFIG_ALT_INTRA
+static INLINE int abs_diff(int a, int b) { return (a > b) ? a - b : b - a; }
+
+static INLINE uint16_t paeth_predictor_single(uint16_t left, uint16_t top,
+                                              uint16_t top_left) {
+  const int base = top + left - top_left;
+  const int p_left = abs_diff(base, left);
+  const int p_top = abs_diff(base, top);
+  const int p_top_left = abs_diff(base, top_left);
+
+  // Return nearest to base of left, top and top_left.
+  return (p_left <= p_top && p_left <= p_top_left)
+             ? left
+             : (p_top <= p_top_left) ? top : top_left;
+}
+
+static INLINE void paeth_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
+                                   const uint8_t *above, const uint8_t *left) {
+  int r, c;
+  const uint8_t ytop_left = above[-1];
+
+  for (r = 0; r < bs; r++) {
+    for (c = 0; c < bs; c++)
+      dst[c] = (uint8_t)paeth_predictor_single(left[r], above[c], ytop_left);
+    dst += stride;
+  }
+}
+
+#else
+
 static INLINE void tm_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                 const uint8_t *above, const uint8_t *left) {
   int r, c;
@@ -229,6 +259,7 @@ static INLINE void tm_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
     dst += stride;
   }
 }
+#endif  // CONFIG_ALT_INTRA
 
 static INLINE void dc_128_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                     const uint8_t *above, const uint8_t *left) {
@@ -688,6 +719,22 @@ static INLINE void highbd_h_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
   }
 }
 
+#if CONFIG_ALT_INTRA
+static INLINE void highbd_paeth_predictor(uint16_t *dst, ptrdiff_t stride,
+                                          int bs, const uint16_t *above,
+                                          const uint16_t *left, int bd) {
+  int r, c;
+  const uint16_t ytop_left = above[-1];
+  (void)bd;
+
+  for (r = 0; r < bs; r++) {
+    for (c = 0; c < bs; c++)
+      dst[c] = paeth_predictor_single(left[r], above[c], ytop_left);
+    dst += stride;
+  }
+}
+
+#else
 static INLINE void highbd_tm_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
                                        const uint16_t *above,
                                        const uint16_t *left, int bd) {
@@ -701,6 +748,7 @@ static INLINE void highbd_tm_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
     dst += stride;
   }
 }
+#endif  // CONFIG_ALT_INTRA
 
 static INLINE void highbd_dc_128_predictor(uint16_t *dst, ptrdiff_t stride,
                                            int bs, const uint16_t *above,
@@ -830,7 +878,11 @@ intra_pred_no_4x4(d135)
 intra_pred_no_4x4(d153)
 intra_pred_allsizes(v)
 intra_pred_allsizes(h)
+#if CONFIG_ALT_INTRA
+intra_pred_allsizes(paeth)
+#else
 intra_pred_allsizes(tm)
+#endif  // CONFIG_ALT_INTRA
 intra_pred_allsizes(dc_128)
 intra_pred_allsizes(dc_left)
 intra_pred_allsizes(dc_top)
