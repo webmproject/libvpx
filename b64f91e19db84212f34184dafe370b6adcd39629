@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "11f37dac_d12d8601",
+        "filename": "vp10/common/common_data.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 520,
+      "author": {
+        "id": 1137274
+      },
+      "writtenOn": "2016-09-01T09:33:13Z",
+      "side": 1,
+      "message": "Quite a couple of these seem to be invalid (eg BLOCK_8X16 can\u0027t use recangular transforms other than TX_8X16). It would be better if we added a TX_INVALID and fill in the appropriate table slots as such. This would help catch errors and be more self documenting.",
+      "range": {
+        "startLine": 520,
+        "startChar": 0,
+        "endLine": 520,
+        "endChar": 74
+      },
+      "revId": "b64f91e19db84212f34184dafe370b6adcd39629",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
