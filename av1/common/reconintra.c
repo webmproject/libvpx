@@ -640,7 +640,7 @@ static void dr_prediction_z3(uint8_t *dst, ptrdiff_t stride, int bs,
 // If angle > 0 && angle < 90, dx = -((int)(256 / t));
 // If angle > 90 && angle < 180, dx = (int)(256 / t);
 // If angle > 180 && angle < 270, dx = 1;
-static inline int get_dx(int angle) {
+static INLINE int get_dx(int angle) {
   if (angle > 0 && angle < 90) {
     return -dr_intra_derivative[angle];
   } else if (angle > 90 && angle < 180) {
@@ -655,7 +655,7 @@ static inline int get_dx(int angle) {
 // If angle > 0 && angle < 90, dy = 1;
 // If angle > 90 && angle < 180, dy = (int)(256 * t);
 // If angle > 180 && angle < 270, dy = -((int)(256 * t));
-static inline int get_dy(int angle) {
+static INLINE int get_dy(int angle) {
   if (angle > 90 && angle < 180) {
     return dr_intra_derivative[angle - 90];
   } else if (angle > 180 && angle < 270) {

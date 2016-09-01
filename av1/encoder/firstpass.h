@@ -182,7 +182,7 @@ void av1_calculate_coded_size(struct AV1_COMP *cpi, int *scaled_frame_width,
                               int *scaled_frame_height);
 
 #if CONFIG_EXT_REFS
-static inline int get_number_of_extra_arfs(int interval, int arf_pending) {
+static INLINE int get_number_of_extra_arfs(int interval, int arf_pending) {
   if (arf_pending && MAX_EXT_ARFS > 0)
     return interval >= MIN_EXT_ARF_INTERVAL * (MAX_EXT_ARFS + 1)
                ? MAX_EXT_ARFS
