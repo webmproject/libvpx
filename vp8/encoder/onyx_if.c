@@ -2072,11 +2072,11 @@ void vp8_remove_compressor(VP8_COMP **ptr) {
 
           fprintf(f,
                   "Bitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\t"
-                  "GLPsnrP\tVPXSSIM\t  Time(us)  Rc-Err "
+                  "GLPsnrP\tVPXSSIM\tTime(us)\tRc-Err\t"
                   "Abs Err\n");
           fprintf(f,
                   "%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t"
-                  "%7.3f\t%8.0f %7.2f %7.2f\n",
+                  "%7.3f\t%8.0f\t%7.2f\t%7.2f\n",
                   dr, cpi->total / cpi->count, total_psnr,
                   cpi->totalp / cpi->count, total_psnr2, total_ssim,
                   total_encode_time, rate_err, fabs(rate_err));
