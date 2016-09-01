@@ -529,7 +529,7 @@ int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
   // Calculate required scaling factor based on target frame size and size of
   // frame produced using previous Q.
   target_bits_per_mb =
-      ((uint64_t)target_bits_per_frame << BPER_MB_NORMBITS) / cm->MBs;
+      (int)(((uint64_t)target_bits_per_frame << BPER_MB_NORMBITS) / cm->MBs);
 
   i = active_best_quality;
 
@@ -1254,8 +1254,8 @@ void vp9_rc_set_frame_target(VP9_COMP *cpi, int target) {
                                   rate_thresh_mult[rc->frame_size_selector]);
 
   // Target rate per SB64 (including partial SB64s.
-  rc->sb64_target_rate =
-      ((int64_t)rc->this_frame_target * 64 * 64) / (cm->width * cm->height);
+  rc->sb64_target_rate = (int)(((int64_t)rc->this_frame_target * 64 * 64) /
+                               (cm->width * cm->height));
 }
 
 static void update_alt_ref_frame_stats(VP9_COMP *cpi) {
@@ -2323,7 +2323,8 @@ int vp9_encodedframe_overshoot(VP9_COMP *cpi, int frame_size, int *q) {
     cpi->rc.rc_1_frame = 0;
     cpi->rc.rc_2_frame = 0;
     // Adjust rate correction factor.
-    target_bits_per_mb = ((uint64_t)target_size << BPER_MB_NORMBITS) / cm->MBs;
+    target_bits_per_mb =
+        (int)(((uint64_t)target_size << BPER_MB_NORMBITS) / cm->MBs);
     // Rate correction factor based on target_bits_per_mb and qp (==max_QP).
     // This comes from the inverse computation of vp9_rc_bits_per_mb().
     q2 = vp9_convert_qindex_to_q(*q, cm->bit_depth);

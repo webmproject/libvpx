@@ -1788,7 +1788,10 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
           d32[i].sum += d16[j]->sum;
         }
 
-        d32[i].var = d32[i].sse - (((int64_t)d32[i].sum * d32[i].sum) >> 10);
+        d32[i].var =
+            (unsigned int)(d32[i].sse -
+                           (unsigned int)(((int64_t)d32[i].sum * d32[i].sum) >>
+                                          10));
 
         index = coord_lookup[i * 4].row * mis + coord_lookup[i * 4].col;
         mi_8x8[index] = mi_upper_left + index;
