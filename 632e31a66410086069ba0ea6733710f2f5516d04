@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f1d7c939_16d21d25",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-09-01T15:06:43Z",
+      "side": 1,
+      "message": "you can simply use: \n\nBUG\u003dwebm:1274\n\nGerrit would automatically add the link to the bug.",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 48
+      },
+      "revId": "632e31a66410086069ba0ea6733710f2f5516d04",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
