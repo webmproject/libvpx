@@ -335,7 +335,12 @@ static void av1_init_intra_predictors_internal(void) {
   INIT_ALL_SIZES(pred[D117_PRED], d117);
   INIT_ALL_SIZES(pred[D135_PRED], d135);
   INIT_ALL_SIZES(pred[D153_PRED], d153);
+
+#if CONFIG_ALT_INTRA
+  INIT_ALL_SIZES(pred[TM_PRED], paeth);
+#else
   INIT_ALL_SIZES(pred[TM_PRED], tm);
+#endif  // CONFIG_ALT_INTRA
 
   INIT_ALL_SIZES(dc_pred[0][0], dc_128);
   INIT_ALL_SIZES(dc_pred[0][1], dc_top);
@@ -351,7 +356,12 @@ static void av1_init_intra_predictors_internal(void) {
   INIT_ALL_SIZES(pred_high[D117_PRED], highbd_d117);
   INIT_ALL_SIZES(pred_high[D135_PRED], highbd_d135);
   INIT_ALL_SIZES(pred_high[D153_PRED], highbd_d153);
+
+#if CONFIG_ALT_INTRA
+  INIT_ALL_SIZES(pred_high[TM_PRED], highbd_paeth);
+#else
   INIT_ALL_SIZES(pred_high[TM_PRED], highbd_tm);
+#endif  // CONFIG_ALT_INTRA
 
   INIT_ALL_SIZES(dc_pred_high[0][0], highbd_dc_128);
   INIT_ALL_SIZES(dc_pred_high[0][1], highbd_dc_top);

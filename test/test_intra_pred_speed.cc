@@ -161,7 +161,13 @@ INTRA_PRED_TEST(C, TestIntraPred4, aom_dc_predictor_4x4_c,
                 aom_h_predictor_4x4_c, aom_d45_predictor_4x4_c,
                 aom_d135_predictor_4x4_c, aom_d117_predictor_4x4_c,
                 aom_d153_predictor_4x4_c, aom_d207_predictor_4x4_c,
-                aom_d63_predictor_4x4_c, aom_tm_predictor_4x4_c)
+                aom_d63_predictor_4x4_c,
+#if CONFIG_ALT_INTRA
+                aom_paeth_predictor_4x4_c
+#else
+                aom_tm_predictor_4x4_c
+#endif  // CONFIG_ALT_INTRA
+                )
 
 #if HAVE_SSE2
 INTRA_PRED_TEST(SSE2, TestIntraPred4, aom_dc_predictor_4x4_sse2,
@@ -169,7 +175,12 @@ INTRA_PRED_TEST(SSE2, TestIntraPred4, aom_dc_predictor_4x4_sse2,
                 aom_dc_128_predictor_4x4_sse2, aom_v_predictor_4x4_sse2,
                 aom_h_predictor_4x4_sse2, aom_d45_predictor_4x4_sse2, NULL,
                 NULL, NULL, aom_d207_predictor_4x4_sse2, NULL,
-                aom_tm_predictor_4x4_sse2)
+#if CONFIG_ALT_INTRA
+                NULL
+#else
+                aom_tm_predictor_4x4_sse2
+#endif  // CONFIG_ALT_INTRA
+                )
 #endif  // HAVE_SSE2
 
 #if HAVE_SSSE3
@@ -181,7 +192,13 @@ INTRA_PRED_TEST(SSSE3, TestIntraPred4, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 #if HAVE_DSPR2
 INTRA_PRED_TEST(DSPR2, TestIntraPred4, aom_dc_predictor_4x4_dspr2, NULL, NULL,
                 NULL, NULL, aom_h_predictor_4x4_dspr2, NULL, NULL, NULL, NULL,
-                NULL, NULL, aom_tm_predictor_4x4_dspr2)
+                NULL, NULL,
+#if CONFIG_ALT_INTRA
+                NULL
+#else
+                aom_tm_predictor_4x4_dspr2
+#endif  // CONFIG_ALT_INTRA
+                )
 #endif  // HAVE_DSPR2
 
 #if HAVE_NEON
@@ -190,7 +207,12 @@ INTRA_PRED_TEST(NEON, TestIntraPred4, aom_dc_predictor_4x4_neon,
                 aom_dc_128_predictor_4x4_neon, aom_v_predictor_4x4_neon,
                 aom_h_predictor_4x4_neon, aom_d45_predictor_4x4_neon,
                 aom_d135_predictor_4x4_neon, NULL, NULL, NULL, NULL,
-                aom_tm_predictor_4x4_neon)
+#if CONFIG_ALT_INTRA
+                NULL
+#else
+                aom_tm_predictor_4x4_neon
+#endif  // CONFIG_ALT_INTRA
+                )
 #endif  // HAVE_NEON
 
 #if HAVE_MSA
@@ -198,7 +220,12 @@ INTRA_PRED_TEST(MSA, TestIntraPred4, aom_dc_predictor_4x4_msa,
                 aom_dc_left_predictor_4x4_msa, aom_dc_top_predictor_4x4_msa,
                 aom_dc_128_predictor_4x4_msa, aom_v_predictor_4x4_msa,
                 aom_h_predictor_4x4_msa, NULL, NULL, NULL, NULL, NULL, NULL,
-                aom_tm_predictor_4x4_msa)
+#if CONFIG_ALT_INTRA
+                NULL
+#else
+                aom_tm_predictor_4x4_msa
+#endif  // CONFIG_ALT_INTRA
+                )
 #endif  // HAVE_MSA
 
 // -----------------------------------------------------------------------------
@@ -210,14 +237,26 @@ INTRA_PRED_TEST(C, TestIntraPred8, aom_dc_predictor_8x8_c,
                 aom_h_predictor_8x8_c, aom_d45_predictor_8x8_c,
                 aom_d135_predictor_8x8_c, aom_d117_predictor_8x8_c,
                 aom_d153_predictor_8x8_c, aom_d207_predictor_8x8_c,
-                aom_d63_predictor_8x8_c, aom_tm_predictor_8x8_c)
+                aom_d63_predictor_8x8_c,
+#if CONFIG_ALT_INTRA
+                aom_paeth_predictor_8x8_c
+#else
+                aom_tm_predictor_8x8_c
+#endif  // CONFIG_ALT_INTRA
+                )
 
 #if HAVE_SSE2
 INTRA_PRED_TEST(SSE2, TestIntraPred8, aom_dc_predictor_8x8_sse2,
                 aom_dc_left_predictor_8x8_sse2, aom_dc_top_predictor_8x8_sse2,
                 aom_dc_128_predictor_8x8_sse2, aom_v_predictor_8x8_sse2,
                 aom_h_predictor_8x8_sse2, aom_d45_predictor_8x8_sse2, NULL,
-                NULL, NULL, NULL, NULL, aom_tm_predictor_8x8_sse2)
+                NULL, NULL, NULL, NULL,
+#if CONFIG_ALT_INTRA
+                NULL
+#else
+                aom_tm_predictor_8x8_sse2
+#endif  // CONFIG_ALT_INTRA
+                )
 #endif  // HAVE_SSE2
 
 #if HAVE_SSSE3
@@ -229,7 +268,13 @@ INTRA_PRED_TEST(SSSE3, TestIntraPred8, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 #if HAVE_DSPR2
 INTRA_PRED_TEST(DSPR2, TestIntraPred8, aom_dc_predictor_8x8_dspr2, NULL, NULL,
                 NULL, NULL, aom_h_predictor_8x8_dspr2, NULL, NULL, NULL, NULL,
-                NULL, NULL, aom_tm_predictor_8x8_dspr2)
+                NULL, NULL,
+#if CONFIG_ALT_INTRA
+                NULL
+#else
+                aom_tm_predictor_8x8_dspr2
+#endif  // CONFIG_ALT_INTRA
+                )
 #endif  // HAVE_DSPR2
 
 #if HAVE_NEON
@@ -237,7 +282,13 @@ INTRA_PRED_TEST(NEON, TestIntraPred8, aom_dc_predictor_8x8_neon,
                 aom_dc_left_predictor_8x8_neon, aom_dc_top_predictor_8x8_neon,
                 aom_dc_128_predictor_8x8_neon, aom_v_predictor_8x8_neon,
                 aom_h_predictor_8x8_neon, aom_d45_predictor_8x8_neon, NULL,
-                NULL, NULL, NULL, NULL, aom_tm_predictor_8x8_neon)
+                NULL, NULL, NULL, NULL,
+#if CONFIG_ALT_INTRA
+                NULL
+#else
+                aom_tm_predictor_8x8_neon
+#endif  // CONFIG_ALT_INTRA
+                )
 
 #endif  // HAVE_NEON
 
@@ -246,7 +297,12 @@ INTRA_PRED_TEST(MSA, TestIntraPred8, aom_dc_predictor_8x8_msa,
                 aom_dc_left_predictor_8x8_msa, aom_dc_top_predictor_8x8_msa,
                 aom_dc_128_predictor_8x8_msa, aom_v_predictor_8x8_msa,
                 aom_h_predictor_8x8_msa, NULL, NULL, NULL, NULL, NULL, NULL,
-                aom_tm_predictor_8x8_msa)
+#if CONFIG_ALT_INTRA
+                NULL
+#else
+                aom_tm_predictor_8x8_msa
+#endif  // CONFIG_ALT_INTRA
+                )
 #endif  // HAVE_MSA
 
 // -----------------------------------------------------------------------------
@@ -258,7 +314,13 @@ INTRA_PRED_TEST(C, TestIntraPred16, aom_dc_predictor_16x16_c,
                 aom_h_predictor_16x16_c, aom_d45_predictor_16x16_c,
                 aom_d135_predictor_16x16_c, aom_d117_predictor_16x16_c,
                 aom_d153_predictor_16x16_c, aom_d207_predictor_16x16_c,
-                aom_d63_predictor_16x16_c, aom_tm_predictor_16x16_c)
+                aom_d63_predictor_16x16_c,
+#if CONFIG_ALT_INTRA
+                aom_paeth_predictor_16x16_c
+#else
+                aom_tm_predictor_16x16_c
+#endif  // CONFIG_ALT_INTRA
+                )
 
 #if HAVE_SSE2
 INTRA_PRED_TEST(SSE2, TestIntraPred16, aom_dc_predictor_16x16_sse2,
@@ -266,7 +328,12 @@ INTRA_PRED_TEST(SSE2, TestIntraPred16, aom_dc_predictor_16x16_sse2,
                 aom_dc_top_predictor_16x16_sse2,
                 aom_dc_128_predictor_16x16_sse2, aom_v_predictor_16x16_sse2,
                 aom_h_predictor_16x16_sse2, NULL, NULL, NULL, NULL, NULL, NULL,
-                aom_tm_predictor_16x16_sse2)
+#if CONFIG_ALT_INTRA
+                NULL
+#else
+                aom_tm_predictor_16x16_sse2
+#endif  // CONFIG_ALT_INTRA
+                )
 #endif  // HAVE_SSE2
 
 #if HAVE_SSSE3
@@ -288,7 +355,13 @@ INTRA_PRED_TEST(NEON, TestIntraPred16, aom_dc_predictor_16x16_neon,
                 aom_dc_top_predictor_16x16_neon,
                 aom_dc_128_predictor_16x16_neon, aom_v_predictor_16x16_neon,
                 aom_h_predictor_16x16_neon, aom_d45_predictor_16x16_neon, NULL,
-                NULL, NULL, NULL, NULL, aom_tm_predictor_16x16_neon)
+                NULL, NULL, NULL, NULL,
+#if CONFIG_ALT_INTRA
+                NULL
+#else
+                aom_tm_predictor_16x16_neon
+#endif  // CONFIG_ALT_INTRA
+                )
 #endif  // HAVE_NEON
 
 #if HAVE_MSA
@@ -296,7 +369,12 @@ INTRA_PRED_TEST(MSA, TestIntraPred16, aom_dc_predictor_16x16_msa,
                 aom_dc_left_predictor_16x16_msa, aom_dc_top_predictor_16x16_msa,
                 aom_dc_128_predictor_16x16_msa, aom_v_predictor_16x16_msa,
                 aom_h_predictor_16x16_msa, NULL, NULL, NULL, NULL, NULL, NULL,
-                aom_tm_predictor_16x16_msa)
+#if CONFIG_ALT_INTRA
+                NULL
+#else
+                aom_tm_predictor_16x16_msa
+#endif  // CONFIG_ALT_INTRA
+                )
 #endif  // HAVE_MSA
 
 // -----------------------------------------------------------------------------
@@ -308,7 +386,13 @@ INTRA_PRED_TEST(C, TestIntraPred32, aom_dc_predictor_32x32_c,
                 aom_h_predictor_32x32_c, aom_d45_predictor_32x32_c,
                 aom_d135_predictor_32x32_c, aom_d117_predictor_32x32_c,
                 aom_d153_predictor_32x32_c, aom_d207_predictor_32x32_c,
-                aom_d63_predictor_32x32_c, aom_tm_predictor_32x32_c)
+                aom_d63_predictor_32x32_c,
+#if CONFIG_ALT_INTRA
+                aom_paeth_predictor_32x32_c
+#else
+                aom_tm_predictor_32x32_c
+#endif  // CONFIG_ALT_INTRA
+                )
 
 #if HAVE_SSE2
 INTRA_PRED_TEST(SSE2, TestIntraPred32, aom_dc_predictor_32x32_sse2,
@@ -316,7 +400,12 @@ INTRA_PRED_TEST(SSE2, TestIntraPred32, aom_dc_predictor_32x32_sse2,
                 aom_dc_top_predictor_32x32_sse2,
                 aom_dc_128_predictor_32x32_sse2, aom_v_predictor_32x32_sse2,
                 aom_h_predictor_32x32_sse2, NULL, NULL, NULL, NULL, NULL, NULL,
-                aom_tm_predictor_32x32_sse2)
+#if CONFIG_ALT_INTRA
+                NULL
+#else
+                aom_tm_predictor_32x32_sse2
+#endif  // CONFIG_ALT_INTRA
+                )
 #endif  // HAVE_SSE2
 
 #if HAVE_SSSE3
@@ -332,7 +421,12 @@ INTRA_PRED_TEST(NEON, TestIntraPred32, aom_dc_predictor_32x32_neon,
                 aom_dc_top_predictor_32x32_neon,
                 aom_dc_128_predictor_32x32_neon, aom_v_predictor_32x32_neon,
                 aom_h_predictor_32x32_neon, NULL, NULL, NULL, NULL, NULL, NULL,
-                aom_tm_predictor_32x32_neon)
+#if CONFIG_ALT_INTRA
+                NULL
+#else
+                aom_tm_predictor_32x32_neon
+#endif  // CONFIG_ALT_INTRA
+                )
 #endif  // HAVE_NEON
 
 #if HAVE_MSA
@@ -340,7 +434,12 @@ INTRA_PRED_TEST(MSA, TestIntraPred32, aom_dc_predictor_32x32_msa,
                 aom_dc_left_predictor_32x32_msa, aom_dc_top_predictor_32x32_msa,
                 aom_dc_128_predictor_32x32_msa, aom_v_predictor_32x32_msa,
                 aom_h_predictor_32x32_msa, NULL, NULL, NULL, NULL, NULL, NULL,
-                aom_tm_predictor_32x32_msa)
+#if CONFIG_ALT_INTRA
+                NULL
+#else
+                aom_tm_predictor_32x32_msa
+#endif  // CONFIG_ALT_INTRA
+                )
 #endif  // HAVE_MSA
 
 #include "test/test_libaom.cc"

@@ -276,6 +276,7 @@ EXPERIMENT_LIST="
     entropy
     bidir_pred
     bitstream_debug
+    alt_intra
 "
 CONFIG_LIST="
     dependency_tracking
