@@ -176,13 +176,13 @@ set_maps.DESCRIPTION                = Set active and ROI maps
 
 ifeq ($(CONFIG_AV1_ENCODER), yes)
 ifeq ($(CONFIG_DECODERS),yes)
-EXAMPLES-yes                       += aomcx_set_ref.c
-aomcx_set_ref.SRCS                 += ivfenc.h ivfenc.c
-aomcx_set_ref.SRCS                 += tools_common.h tools_common.c
-aomcx_set_ref.SRCS                 += video_common.h
-aomcx_set_ref.SRCS                 += video_writer.h video_writer.c
-aomcx_set_ref.GUID                  = 65D7F14A-2EE6-4293-B958-AB5107A03B55
-aomcx_set_ref.DESCRIPTION           = AV1 set encoder reference frame
+EXAMPLES-yes                       += aom_cx_set_ref.c
+aom_cx_set_ref.SRCS                 += ivfenc.h ivfenc.c
+aom_cx_set_ref.SRCS                 += tools_common.h tools_common.c
+aom_cx_set_ref.SRCS                 += video_common.h
+aom_cx_set_ref.SRCS                 += video_writer.h video_writer.c
+aom_cx_set_ref.GUID                  = 65D7F14A-2EE6-4293-B958-AB5107A03B55
+aom_cx_set_ref.DESCRIPTION           = AV1 set encoder reference frame
 endif
 endif
 
