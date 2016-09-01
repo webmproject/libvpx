@@ -574,6 +574,9 @@ process_toolchain() {
         check_add_cflags -Wimplicit-function-declaration
         check_add_cflags -Wuninitialized
         check_add_cflags -Wunused
+        # check_add_cflags also adds to cxxflags. gtest does not do well with
+        # -Wundef so add it explicitly to CFLAGS only.
+        check_cflags -Wundef && add_cflags_only -Wundef
         case ${CC} in
           *clang*)
               # libvpx and/or clang have issues with aliasing:
