@@ -28,7 +28,7 @@ SIMD_INLINE v64 v128_high_v64(v128 a) { return vget_high_s64(a); }
 SIMD_INLINE v128 v128_from_v64(v64 a, v64 b) { return vcombine_s64(b, a); }
 
 SIMD_INLINE v128 v128_from_64(uint64_t a, uint64_t b) {
-  return vcombine_s64(b, a);
+  return vcombine_s64((uint64x1_t)b, (uint64x1_t)a);
 }
 
 SIMD_INLINE v128 v128_from_32(uint32_t a, uint32_t b, uint32_t c, uint32_t d) {
@@ -52,7 +52,9 @@ SIMD_INLINE void v128_store_unaligned(void *p, v128 r) {
 }
 
 SIMD_INLINE v128 v128_align(v128 a, v128 b, const unsigned int c) {
-#if __OPTIMIZE__
+// The following functions require an immediate.
+// Some compilers will check this during optimisation, others wont.
+#if __OPTIMIZE__ && !__clang__
   return c ? vreinterpretq_s64_s8(
                  vextq_s8(vreinterpretq_s8_s64(b), vreinterpretq_s8_s64(a), c))
            : b;
@@ -122,7 +124,7 @@ typedef struct { ssd64_internal hi, lo; } ssd128_internal;
 
 SIMD_INLINE ssd128_internal v128_ssd_u8_init() {
   ssd128_internal s;
-  s.hi = s.lo = 0;
+  s.hi = s.lo = (ssd64_internal)(uint64_t)0;
   return s;
 }
 
@@ -430,11 +432,11 @@ SIMD_INLINE v128 v128_unpackhi_s16_s32(v128 a) {
 
 SIMD_INLINE v128 v128_shuffle_8(v128 x, v128 pattern) {
   return v128_from_64(
-      vreinterpret_s64_u8(
+      (uint64_t)vreinterpret_s64_u8(
           vtbl2_u8((uint8x8x2_t){ { vget_low_u8(vreinterpretq_u8_s64(x)),
                                     vget_high_u8(vreinterpretq_u8_s64(x)) } },
                    vreinterpret_u8_s64(vget_high_s64(pattern)))),
-      vreinterpret_s64_u8(
+      (uint64_t)vreinterpret_s64_u8(
           vtbl2_u8((uint8x8x2_t){ { vget_low_u8(vreinterpretq_u8_s64(x)),
                                     vget_high_u8(vreinterpretq_u8_s64(x)) } },
                    vreinterpret_u8_s64(vget_low_s64(pattern)))));
@@ -521,21 +523,24 @@ SIMD_INLINE v128 v128_shr_s32(v128 a, unsigned int c) {
                         vshlq_s32(vreinterpretq_s32_s64(a), vdupq_n_s32(-c)));
 }
 
-#if __OPTIMIZE__
+#if __OPTIMIZE__ && !__clang__
 
 SIMD_INLINE v128 v128_shl_n_byte(v128 a, const unsigned int n) {
   return n < 8
              ? v128_from_64(
-                   vorr_u64(vshl_n_u64(vreinterpret_u64_s64(vget_high_s64(a)),
-                                       n * 8),
-                            vshr_n_u64(vreinterpret_u64_s64(vget_low_s64(a)),
-                                       (8 - n) * 8)),
-                   vshl_n_u64(vreinterpret_u64_s64(vget_low_s64(a)), n * 8))
-             : (n == 8 ? v128_from_64(vreinterpret_u64_s64(vget_low_s64(a)), 0)
-                       : v128_from_64(
-                             vshl_n_u64(vreinterpret_u64_s64(vget_low_s64(a)),
-                                        (n - 8) * 8),
-                             0));
+                   (uint64_t)vorr_u64(
+                       vshl_n_u64(vreinterpret_u64_s64(vget_high_s64(a)),
+                                  n * 8),
+                       vshr_n_u64(vreinterpret_u64_s64(vget_low_s64(a)),
+                                  (8 - n) * 8)),
+                   (uint64_t)vshl_n_u64(vreinterpret_u64_s64(vget_low_s64(a)),
+                                        n * 8))
+             : (n == 8 ? v128_from_64(
+                             (uint64_t)vreinterpret_u64_s64(vget_low_s64(a)), 0)
+                       : v128_from_64((uint64_t)vshl_n_u64(
+                                          vreinterpret_u64_s64(vget_low_s64(a)),
+                                          (n - 8) * 8),
+                                      0));
 }
 
 SIMD_INLINE v128 v128_shr_n_byte(v128 a, const unsigned int n) {
