@@ -3478,7 +3478,7 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
     aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder 0");
 #else
-  if (ans_read_init(&r, data, partition_size))
+  if (ans_read_init(&r, data, (int)partition_size))
     aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,
                        "Failed to allocate compressed header ANS decoder");
 #endif  // !CONFIG_ANS
