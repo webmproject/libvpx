@@ -21,6 +21,18 @@ static int queue_prev_w = -1;
 static int skip_r = 0;
 static int skip_w = 0;
 
+static int frame_idx_w = 0;
+
+static int frame_idx_r = 0;
+
+void bitstream_queue_set_frame_write(int frame_idx) { frame_idx_w = frame_idx; }
+
+int bitstream_queue_get_frame_write() { return frame_idx_w; }
+
+void bitstream_queue_set_frame_read(int frame_idx) { frame_idx_r = frame_idx; }
+
+int bitstream_queue_get_frame_read() { return frame_idx_r; }
+
 void bitstream_queue_set_skip_write(int skip) { skip_w = skip; }
 
 void bitstream_queue_set_skip_read(int skip) { skip_r = skip; }

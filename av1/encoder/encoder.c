@@ -5198,6 +5198,7 @@ int av1_get_compressed_data(AV1_COMP *cpi, unsigned int *frame_flags,
   assert(cpi->oxcf.max_threads == 0 &&
          "bitstream debug tool does not support multithreading");
   bitstream_queue_record_write();
+  bitstream_queue_set_frame_write(cm->current_video_frame * 2 + cm->show_frame);
 #endif
 
   aom_usec_timer_start(&cmptimer);

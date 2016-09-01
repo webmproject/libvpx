@@ -34,6 +34,10 @@ void bitstream_queue_pop(int *result, int *prob);
 void bitstream_queue_push(int result, int prob);
 void bitstream_queue_set_skip_write(int skip);
 void bitstream_queue_set_skip_read(int skip);
+void bitstream_queue_set_frame_write(int frame_idx);
+int bitstream_queue_get_frame_write();
+void bitstream_queue_set_frame_read(int frame_idx);
+int bitstream_queue_get_frame_read();
 #endif  // CONFIG_BITSTREAM_DEBUG
 
 #ifdef __cplusplus

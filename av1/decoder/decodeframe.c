@@ -3724,9 +3724,16 @@ void av1_decode_frame(AV1Decoder *pbi, const uint8_t *data,
   struct aom_read_bit_buffer rb;
   int context_updated = 0;
   uint8_t clear_data[MAX_AV1_HEADER_SIZE];
-  const size_t first_partition_size = read_uncompressed_header(
+  size_t first_partition_size;
+  YV12_BUFFER_CONFIG *new_fb;
+
+#if CONFIG_BITSTREAM_DEBUG
+  bitstream_queue_set_frame_read(cm->current_video_frame * 2 + cm->show_frame);
+#endif
+
+  first_partition_size = read_uncompressed_header(
       pbi, init_read_bit_buffer(pbi, &rb, data, data_end, clear_data));
-  YV12_BUFFER_CONFIG *const new_fb = get_frame_new_buffer(cm);
+  new_fb = get_frame_new_buffer(cm);
   xd->cur_buf = new_fb;
 #if CONFIG_GLOBAL_MOTION
   xd->global_motion = cm->global_motion;
