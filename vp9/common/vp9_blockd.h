@@ -228,20 +228,13 @@ static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
 
 void vp9_setup_block_planes(MACROBLOCKD *xd, int ss_x, int ss_y);
 
-static INLINE TX_SIZE get_uv_tx_size_impl(TX_SIZE y_tx_size, BLOCK_SIZE bsize,
-                                          int xss, int yss) {
-  if (bsize < BLOCK_8X8) {
-    return TX_4X4;
-  } else {
-    const BLOCK_SIZE plane_bsize = ss_size_lookup[bsize][xss][yss];
-    return VPXMIN(y_tx_size, max_txsize_lookup[plane_bsize]);
-  }
-}
-
 static INLINE TX_SIZE get_uv_tx_size(const MODE_INFO *mi,
                                      const struct macroblockd_plane *pd) {
-  return get_uv_tx_size_impl(mi->tx_size, mi->sb_type, pd->subsampling_x,
-                             pd->subsampling_y);
+  assert(mi->sb_type < BLOCK_8X8 ||
+         ss_size_lookup[mi->sb_type][pd->subsampling_x][pd->subsampling_y] !=
+             BLOCK_INVALID);
+  return uv_txsize_lookup[mi->sb_type][mi->tx_size][pd->subsampling_x]
+                         [pd->subsampling_y];
 }
 
 static INLINE BLOCK_SIZE

@@ -2848,8 +2848,8 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
       return;
     }
   }
-  max_uv_tx_size = get_uv_tx_size_impl(
-      xd->mi[0]->tx_size, bsize, pd[1].subsampling_x, pd[1].subsampling_y);
+  max_uv_tx_size = uv_txsize_lookup[bsize][xd->mi[0]->tx_size]
+                                   [pd[1].subsampling_x][pd[1].subsampling_y];
   rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv, &rate_uv_tokenonly, &dist_uv,
                           &uv_skip, VPXMAX(BLOCK_8X8, bsize), max_uv_tx_size);
 
@@ -3344,8 +3344,8 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
                       best_rd);
       if (rate_y == INT_MAX) continue;
 
-      uv_tx = get_uv_tx_size_impl(mi->tx_size, bsize, pd->subsampling_x,
-                                  pd->subsampling_y);
+      uv_tx = uv_txsize_lookup[bsize][mi->tx_size][pd->subsampling_x]
+                              [pd->subsampling_y];
       if (rate_uv_intra[uv_tx] == INT_MAX) {
         choose_intra_uv_mode(cpi, x, ctx, bsize, uv_tx, &rate_uv_intra[uv_tx],
                              &rate_uv_tokenonly[uv_tx], &dist_uv[uv_tx],
