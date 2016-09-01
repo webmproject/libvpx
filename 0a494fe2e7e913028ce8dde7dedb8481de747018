@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f1d7c939_879edab3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-01T05:44:23Z",
+      "side": 1,
+      "message": "BUG\u003dwebm:1069",
+      "revId": "0a494fe2e7e913028ce8dde7dedb8481de747018",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
