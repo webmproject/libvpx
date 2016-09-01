@@ -1,11 +1,12 @@
 /*
- *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+ * Copyright (c) 2016, Alliance for Open Media. All rights reserved
  *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree. An additional intellectual property rights grant can be found
- *  in the file PATENTS.  All contributing project authors may
- *  be found in the AUTHORS file in the root of the source tree.
+ * This source code is subject to the terms of the BSD 2 Clause License and
+ * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+ * was not distributed with this source code in the LICENSE file, you can
+ * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * Media Patent License 1.0 was not distributed with this source code in the
+ * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 
 /****************************************************************************
@@ -43,13 +44,13 @@ typedef struct {
  *  ROUTINE       : scale1d_2t1_i
  *
  *  INPUTS        : const unsigned char *source : Pointer to data to be scaled.
- *                  int source_step             : Number of pixels to step on in
- *                                                source.
+ *                  int source_step             : Number of pixels to step on
+ *                                                in source.
  *                  unsigned int source_scale   : Scale for source (UNUSED).
  *                  unsigned int source_length  : Length of source (UNUSED).
  *                  unsigned char *dest         : Pointer to output data array.
- *                  int dest_step               : Number of pixels to step on in
- *                                                destination.
+ *                  int dest_step               : Number of pixels to step on
+ *                                                in destination.
  *                  unsigned int dest_scale     : Scale for destination
  *                                                (UNUSED).
  *                  unsigned int dest_length    : Length of destination.
@@ -93,13 +94,13 @@ static void scale1d_2t1_i(const unsigned char *source, int source_step,
  *  ROUTINE       : scale1d_2t1_ps
  *
  *  INPUTS        : const unsigned char *source : Pointer to data to be scaled.
- *                  int source_step             : Number of pixels to step on in
- *                                                source.
+ *                  int source_step             : Number of pixels to step on
+ *                                                in source.
  *                  unsigned int source_scale   : Scale for source (UNUSED).
  *                  unsigned int source_length  : Length of source (UNUSED).
  *                  unsigned char *dest         : Pointer to output data array.
- *                  int dest_step               : Number of pixels to step on in
- *                                                destination.
+ *                  int dest_step               : Number of pixels to step on
+ *                                                in destination.
  *                  unsigned int dest_scale     : Scale for destination
  *                                                (UNUSED).
  *                  unsigned int dest_length    : Length of destination.
@@ -135,13 +136,13 @@ static void scale1d_2t1_ps(const unsigned char *source, int source_step,
  *  ROUTINE       : scale1d_c
  *
  *  INPUTS        : const unsigned char *source : Pointer to data to be scaled.
- *                  int source_step             : Number of pixels to step on in
- *                                                source.
+ *                  int source_step             : Number of pixels to step on
+ *                                                in source.
  *                  unsigned int source_scale   : Scale for source.
  *                  unsigned int source_length  : Length of source (UNUSED).
  *                  unsigned char *dest         : Pointer to output data array.
- *                  int dest_step               : Number of pixels to step on in
- *                                                destination.
+ *                  int dest_step               : Number of pixels to step on
+ *                                                in destination.
  *                  unsigned int dest_scale     : Scale for destination.
  *                  unsigned int dest_length    : Length of destination.
  *
@@ -168,9 +169,9 @@ static void scale1d_c(const unsigned char *source, int source_step,
   (void)source_length;
 
   /* These asserts are needed if there are boundary issues... */
-  /*assert ( dest_scale > source_scale );*/
-  /*assert ( (source_length-1) * dest_scale >= (dest_length-1) * source_scale
-   * );*/
+  /* assert ( dest_scale > source_scale );*/
+  /* assert ( (source_length - 1) * dest_scale >= (dest_length - 1) *
+   * source_scale);*/
 
   for (i = 0; i < dest_length * dest_step; i += dest_step) {
     dest[i] = (char)((left_modifier * left_pixel +

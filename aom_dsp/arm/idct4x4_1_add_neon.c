@@ -1,11 +1,12 @@
 /*
- *  Copyright (c) 2014 The WebM project authors. All Rights Reserved.
+ * Copyright (c) 2016, Alliance for Open Media. All rights reserved
  *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree. An additional intellectual property rights grant can be found
- *  in the file PATENTS.  All contributing project authors may
- *  be found in the AUTHORS file in the root of the source tree.
+ * This source code is subject to the terms of the BSD 2 Clause License and
+ * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+ * was not distributed with this source code in the LICENSE file, you can
+ * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * Media Patent License 1.0 was not distributed with this source code in the
+ * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 
 #include <arm_neon.h>
@@ -19,7 +20,7 @@ void aom_idct4x4_1_add_neon(int16_t *input, uint8_t *dest, int dest_stride) {
   uint16x8_t q8u16;
   int16x8_t q0s16;
   uint8_t *d1, *d2;
-  int16_t i, a1, cospi_16_64 = 11585;
+  int16_t i, a1;
   int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
   out = dct_const_round_shift(out * cospi_16_64);
   a1 = ROUND_POWER_OF_TWO(out, 4);

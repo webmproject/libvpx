@@ -1,25 +1,27 @@
 /*
- *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+ * Copyright (c) 2016, Alliance for Open Media. All rights reserved
  *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree. An additional intellectual property rights grant can be found
- *  in the file PATENTS.  All contributing project authors may
- *  be found in the AUTHORS file in the root of the source tree.
+ * This source code is subject to the terms of the BSD 2 Clause License and
+ * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+ * was not distributed with this source code in the LICENSE file, you can
+ * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * Media Patent License 1.0 was not distributed with this source code in the
+ * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  *
  *  This code was originally written by: Gregory Maxwell, at the Daala
  *  project.
  */
+
 #include <assert.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 
 #include "./aom_config.h"
 #include "./aom_dsp_rtcd.h"
+#include "aom_dsp/psnr.h"
 #include "aom_dsp/ssim.h"
 #include "aom_ports/system_state.h"
-#include "aom_dsp/psnr.h"
 
 #if !defined(M_PI)
 #define M_PI (3.141592653589793238462643)
@@ -35,6 +37,7 @@ static void od_bin_fdct8x8(tran_low_t *y, int ystride, const int16_t *x,
     for (j = 0; j < 8; j++)
       *(y + ystride * i + j) = (*(y + ystride * i + j) + 4) >> 3;
 }
+
 #if CONFIG_AOM_HIGHBITDEPTH
 static void hbd_od_bin_fdct8x8(tran_low_t *y, int ystride, const int16_t *x,
                                int xstride) {
@@ -134,7 +137,6 @@ static double calc_psnrhvs(const unsigned char *src, int _systride,
   int y;
   (void)_par;
   ret = pixels = 0;
-
   /*In the PSNR-HVS-M paper[1] the authors describe the construction of
    their masking table as "we have used the quantization table for the
    color component Y of JPEG [6] that has been also obtained on the
@@ -246,10 +248,9 @@ static double calc_psnrhvs(const unsigned char *src, int _systride,
   return ret;
 }
 
-double aom_psnrhvs(const YV12_BUFFER_CONFIG *src,
-                   const YV12_BUFFER_CONFIG *dest, double *y_psnrhvs,
-                   double *u_psnrhvs, double *v_psnrhvs, uint32_t bd,
-                   uint32_t in_bd) {
+double aom_psnrhvs(const YV12_BUFFER_CONFIG *src, const YV12_BUFFER_CONFIG *dst,
+                   double *y_psnrhvs, double *u_psnrhvs, double *v_psnrhvs,
+                   uint32_t bd, uint32_t in_bd) {
   double psnrhvs;
   const double par = 1.0;
   const int step = 7;
@@ -261,14 +262,14 @@ double aom_psnrhvs(const YV12_BUFFER_CONFIG *src,
 
   bd_shift = bd - in_bd;
 
-  *y_psnrhvs = calc_psnrhvs(src->y_buffer, src->y_stride, dest->y_buffer,
-                            dest->y_stride, par, src->y_crop_width,
+  *y_psnrhvs = calc_psnrhvs(src->y_buffer, src->y_stride, dst->y_buffer,
+                            dst->y_stride, par, src->y_crop_width,
                             src->y_crop_height, step, csf_y, bd, bd_shift);
-  *u_psnrhvs = calc_psnrhvs(src->u_buffer, src->uv_stride, dest->u_buffer,
-                            dest->uv_stride, par, src->uv_crop_width,
+  *u_psnrhvs = calc_psnrhvs(src->u_buffer, src->uv_stride, dst->u_buffer,
+                            dst->uv_stride, par, src->uv_crop_width,
                             src->uv_crop_height, step, csf_cb420, bd, bd_shift);
-  *v_psnrhvs = calc_psnrhvs(src->v_buffer, src->uv_stride, dest->v_buffer,
-                            dest->uv_stride, par, src->uv_crop_width,
+  *v_psnrhvs = calc_psnrhvs(src->v_buffer, src->uv_stride, dst->v_buffer,
+                            dst->uv_stride, par, src->uv_crop_width,
                             src->uv_crop_height, step, csf_cr420, bd, bd_shift);
   psnrhvs = (*y_psnrhvs) * .8 + .1 * ((*u_psnrhvs) + (*v_psnrhvs));
   return convert_score_db(psnrhvs, 1.0, in_bd);

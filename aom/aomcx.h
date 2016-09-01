@@ -1,17 +1,18 @@
 /*
- *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+ * Copyright (c) 2016, Alliance for Open Media. All rights reserved
  *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree. An additional intellectual property rights grant can be found
- *  in the file PATENTS.  All contributing project authors may
- *  be found in the AUTHORS file in the root of the source tree.
+ * This source code is subject to the terms of the BSD 2 Clause License and
+ * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+ * was not distributed with this source code in the LICENSE file, you can
+ * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * Media Patent License 1.0 was not distributed with this source code in the
+ * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 #ifndef AOM_AOMCX_H_
 #define AOM_AOMCX_H_
 
-/*!\defgroup vp8_encoder WebM VP8/AV1 Encoder
- * \ingroup vp8
+/*!\defgroup aom_encoder AOMedia AOM/AV1 Encoder
+ * \ingroup aom
  *
  * @{
  */
@@ -19,7 +20,7 @@
 #include "./aom_encoder.h"
 
 /*!\file
- * \brief Provides definitions for using VP8 or AV1 encoder algorithm within the
+ * \brief Provides definitions for using AOM or AV1 encoder algorithm within the
  *        aom Codec Interface.
  */
 

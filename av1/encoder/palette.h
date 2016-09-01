@@ -17,12 +17,14 @@
 extern "C" {
 #endif
 
+// Given 'n' 'data' points and 'k' 'centroids' each of dimension 'dim',
+// calculate the centroid 'indices' for the data points.
 void av1_calc_indices(const float *data, const float *centroids,
                       uint8_t *indices, int n, int k, int dim);
 
-// Given 'data' of size 'n' and initial guess of 'centroids' of size 'k x dim',
-// runs up to 'max_itr' iterations of k-means algorithm to get updated
-// 'centroids' and the centroid 'indices' for elements in 'data'.
+// Given 'n' 'data' points and an initial guess of 'k' 'centroids' each of
+// dimension 'dim', runs up to 'max_itr' iterations of k-means algorithm to get
+// updated 'centroids' and the centroid 'indices' for elements in 'data'.
 // Note: the output centroids are rounded off to nearest integers.
 void av1_k_means(const float *data, float *centroids, uint8_t *indices, int n,
                  int k, int dim, int max_itr);
@@ -33,8 +35,10 @@ void av1_k_means(const float *data, float *centroids, uint8_t *indices, int n,
 // method.
 int av1_remove_duplicates(float *centroids, int num_centroids);
 
+// Returns the number of colors in 'src'.
 int av1_count_colors(const uint8_t *src, int stride, int rows, int cols);
 #if CONFIG_AOM_HIGHBITDEPTH
+// Same as av1_count_colors(), but for high-bitdepth mode.
 int av1_count_colors_highbd(const uint8_t *src8, int stride, int rows, int cols,
                             int bit_depth);
 #endif  // CONFIG_AOM_HIGHBITDEPTH
