@@ -910,6 +910,11 @@ INSTANTIATE_TEST_CASE_P(
                                  &idct16x16_10_add_12_sse2, 3167, AOM_BITS_12),
                       make_tuple(&idct16x16_12, &idct16x16_256_add_12_sse2,
                                  3167, AOM_BITS_12)));
+// TODO(luoyi):
+// For this test case, we should test function: aom_highbd_fdct16x16_1_sse2.
+// However this function is not available yet. if we mistakely test
+// aom_fdct16x16_1_sse2, it could only pass AOM_BITS_8/AOM_BITS_10 but not
+// AOM_BITS_12.
 INSTANTIATE_TEST_CASE_P(SSE2, PartialTrans16x16Test,
                         ::testing::Values(make_tuple(&aom_fdct16x16_1_sse2,
                                                      AOM_BITS_8)));
