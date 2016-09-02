@@ -55,9 +55,7 @@ extern "C" {
 #define MV_ZBIN_BOOST 4
 #define ZBIN_OQ_MAX 192
 
-#if !(CONFIG_REALTIME_ONLY)
-#define VP8_TEMPORAL_ALT_REF 1
-#endif
+#define VP8_TEMPORAL_ALT_REF !CONFIG_REALTIME_ONLY
 
 typedef struct {
   int kf_indicated;

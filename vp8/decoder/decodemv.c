@@ -14,9 +14,6 @@
 #include "onyxd_int.h"
 #include "vp8/common/findnearmv.h"
 
-#if CONFIG_DEBUG
-#include <assert.h>
-#endif
 static B_PREDICTION_MODE read_bmode(vp8_reader *bc, const vp8_prob *p) {
   const int i = vp8_treed_read(bc, vp8_bmode_tree, p);
 
