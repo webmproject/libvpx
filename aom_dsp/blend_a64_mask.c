@@ -1,11 +1,12 @@
 /*
- *  Copyright (c) 2016 The WebM project authors. All Rights Reserved.
+ * Copyright (c) 2016, Alliance for Open Media. All rights reserved
  *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree. An additional intellectual property rights grant can be found
- *  in the file PATENTS.  All contributing project authors may
- *  be found in the AUTHORS file in the root of the source tree.
+ * This source code is subject to the terms of the BSD 2 Clause License and
+ * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+ * was not distributed with this source code in the LICENSE file, you can
+ * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * Media Patent License 1.0 was not distributed with this source code in the
+ * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 
 #include <assert.h>
@@ -18,7 +19,7 @@
 #include "./aom_dsp_rtcd.h"
 
 // Blending with alpha mask. Mask values come from the range [0, 64],
-// as described for AOM_BLEND_A64 in aom_dsp/blned.h. src0 or src1 can
+// as described for AOM_BLEND_A64 in aom_dsp/blend.h. src0 or src1 can
 // be the same as dst, or dst can be different from both sources.
 
 void aom_blend_a64_mask_c(uint8_t *dst, uint32_t dst_stride,
@@ -88,6 +89,7 @@ void aom_highbd_blend_a64_mask_c(uint8_t *dst_8, uint32_t dst_stride,
   uint16_t *dst = CONVERT_TO_SHORTPTR(dst_8);
   const uint16_t *src0 = CONVERT_TO_SHORTPTR(src0_8);
   const uint16_t *src1 = CONVERT_TO_SHORTPTR(src1_8);
+  (void)bd;
 
   assert(IMPLIES(src0 == dst, src0_stride == dst_stride));
   assert(IMPLIES(src1 == dst, src1_stride == dst_stride));

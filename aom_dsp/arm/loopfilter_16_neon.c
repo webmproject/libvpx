@@ -1,11 +1,12 @@
 /*
- *  Copyright (c) 2014 The WebM project authors. All Rights Reserved.
+ * Copyright (c) 2016, Alliance for Open Media. All rights reserved
  *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree. An additional intellectual property rights grant can be found
- *  in the file PATENTS.  All contributing project authors may
- *  be found in the AUTHORS file in the root of the source tree.
+ * This source code is subject to the terms of the BSD 2 Clause License and
+ * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+ * was not distributed with this source code in the LICENSE file, you can
+ * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * Media Patent License 1.0 was not distributed with this source code in the
+ * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 
 #include <arm_neon.h>
@@ -49,7 +50,7 @@ static INLINE void loop_filter_neon_16(uint8x16_t qblimit,  // blimit
 
   q9 = vabdq_u8(q6, q7);
 
-  // vp8_hevmask
+  // aom_hevmask
   q13u8 = vcgtq_u8(q13u8, qthresh);
   q14u8 = vcgtq_u8(q14u8, qthresh);
   q15u8 = vmaxq_u8(q15u8, q3);
@@ -59,7 +60,7 @@ static INLINE void loop_filter_neon_16(uint8x16_t qblimit,  // blimit
 
   q15u8 = vcgeq_u8(qlimit, q15u8);
 
-  // vp8_filter() function
+  // aom_filter() function
   // convert to signed
   q10 = vdupq_n_u8(0x80);
   q8 = veorq_u8(q8, q10);
@@ -94,7 +95,7 @@ static INLINE void loop_filter_neon_16(uint8x16_t qblimit,  // blimit
 
   q4 = vdupq_n_u8(3);
   q9 = vdupq_n_u8(4);
-  // vp8_filter = clamp(vp8_filter + 3 * ( qs0 - ps0))
+  // aom_filter = clamp(aom_filter + 3 * ( qs0 - ps0))
   d2s8 = vqmovn_s16(q2s16);
   d3s8 = vqmovn_s16(q11s16);
   q1s8 = vcombine_s8(d2s8, d3s8);

@@ -1,11 +1,12 @@
 /*
- *  Copyright (c) 2014 The WebM project authors. All Rights Reserved.
+ * Copyright (c) 2016, Alliance for Open Media. All rights reserved
  *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree. An additional intellectual property rights grant can be found
- *  in the file PATENTS.  All contributing project authors may
- *  be found in the AUTHORS file in the root of the source tree.
+ * This source code is subject to the terms of the BSD 2 Clause License and
+ * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+ * was not distributed with this source code in the LICENSE file, you can
+ * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * Media Patent License 1.0 was not distributed with this source code in the
+ * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 
 #include <emmintrin.h>  // SSE2
@@ -84,12 +85,12 @@ void FDCT4x4_2D(const int16_t *input, tran_low_t *output, int stride) {
   // Load inputs.
   in0 = _mm_loadl_epi64((const __m128i *)(input + 0 * stride));
   in1 = _mm_loadl_epi64((const __m128i *)(input + 1 * stride));
+  // in0 = [i0 i1 i2 i3 iC iD iE iF]
+  // in1 = [i4 i5 i6 i7 i8 i9 iA iB]
   in1 = _mm_unpacklo_epi64(
       in1, _mm_loadl_epi64((const __m128i *)(input + 2 * stride)));
   in0 = _mm_unpacklo_epi64(
       in0, _mm_loadl_epi64((const __m128i *)(input + 3 * stride)));
-// in0 = [i0 i1 i2 i3 iC iD iE iF]
-// in1 = [i4 i5 i6 i7 i8 i9 iA iB]
 #if DCT_HIGH_BIT_DEPTH
   // Check inputs small enough to use optimised code
   cmp0 = _mm_xor_si128(_mm_cmpgt_epi16(in0, _mm_set1_epi16(0x3ff)),
@@ -184,10 +185,10 @@ void FDCT4x4_2D(const int16_t *input, tran_low_t *output, int stride) {
     // vertical DCTs finished. Now we do the horizontal DCTs.
     // Stage 3: Add/subtract
 
+    // t0 = [c0 c1 c8 c9  c4  c5  cC  cD]
+    // t1 = [c3 c2 cB cA -c7 -c6 -cF -cE]
     const __m128i t0 = ADD_EPI16(in0, in1);
     const __m128i t1 = SUB_EPI16(in0, in1);
-// t0 = [c0 c1 c8 c9  c4  c5  cC  cD]
-// t1 = [c3 c2 cB cA -c7 -c6 -cF -cE]
 #if DCT_HIGH_BIT_DEPTH
     overflow = check_epi16_overflow_x2(&t0, &t1);
     if (overflow) {
