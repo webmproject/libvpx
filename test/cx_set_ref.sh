@@ -27,7 +27,7 @@ cx_set_ref_verify_environment() {
 # $1 is the codec name.
 aom_set_ref() {
   local codec="$1"
-  local encoder="${LIBAOM_BIN_PATH}/aomcx_set_ref${AOM_TEST_EXE_SUFFIX}"
+  local encoder="${LIBAOM_BIN_PATH}/aom_cx_set_ref${AOM_TEST_EXE_SUFFIX}"
 
   local output_file="${AOM_TEST_OUTPUT_DIR}/${codec}cx_set_ref_${codec}.ivf"
   local ref_frame_num=90
