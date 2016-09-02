@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "d602bbf6_9cc36580",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-09-02T17:47:20Z",
+      "side": 1,
+      "message": "A later patch removes the mutex lock altogether and just uses it for tsan.     \n\nI can change this to pthread_mutex_lock(mutex) for that purpose.  \n\nThis patch was just reintroducing yunqing\u0027s old patch.   \n\nSeparate patches fix separate issues.",
+      "parentUuid": "91668dcf_3a01a111",
+      "revId": "1dc3e8807c10bd62788bd6f7dd09435a1addadf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "91668dcf_7afb190f",
         "filename": "vp8/common/threading.h",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "d602bbf6_1cd8756f",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-09-02T17:47:20Z",
+      "side": 1,
+      "message": "a later patch removes it: here: https://chromium-review.googlesource.com/#/c/380426/",
+      "parentUuid": "91668dcf_7afb190f",
+      "revId": "1dc3e8807c10bd62788bd6f7dd09435a1addadf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "91668dcf_5afe5500",
         "filename": "vp8/decoder/threading.c",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2016-09-02T17:35:28Z",
       "side": 1,
       "message": "We\u0027re going to have several mutexes, which are being used to synchronize different pairs of threads, in the same cacheline.",
+      "revId": "1dc3e8807c10bd62788bd6f7dd09435a1addadf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d602bbf6_1c5d15e9",
+        "filename": "vp8/decoder/threading.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 746,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-09-02T17:47:20Z",
+      "side": 1,
+      "message": "Sorry what do you suggest in stead?",
+      "parentUuid": "91668dcf_5afe5500",
       "revId": "1dc3e8807c10bd62788bd6f7dd09435a1addadf4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
