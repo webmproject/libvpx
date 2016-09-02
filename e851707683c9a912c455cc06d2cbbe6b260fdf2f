@@ -89,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "d602bbf6_825ade52",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-09-02T20:32:27Z",
+      "side": 1,
+      "message": "re TSan works best if it tests exactly the same code as you\u0027re running without TSan. If you start adding mutexes that are enabled only for TSan, you\u0027ll be checking some other program, not the one you\u0027re interested in.\n\nAgreed : the if tsan threads won\u0027t be checked but the rest of the code is ( including the use of semaphores else where).  \n\nOther than that I\u0027m also happy to take patches with atomic.  Provided they don\u0027t hurt performance at all.",
+      "parentUuid": "91668dcf_1a1bfd7e",
+      "revId": "e851707683c9a912c455cc06d2cbbe6b260fdf2f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "117a9d68_b9c93b50",
         "filename": "vp8/common/threading.h",
         "patchSetId": 4
