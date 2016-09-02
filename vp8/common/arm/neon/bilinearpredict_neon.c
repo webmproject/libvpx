@@ -9,11 +9,140 @@
  */
 
 #include <arm_neon.h>
+#include <string.h>
+#include "./vpx_config.h"
 
 static const uint8_t bifilter4_coeff[8][2] = { { 128, 0 }, { 112, 16 },
                                                { 96, 32 }, { 80, 48 },
                                                { 64, 64 }, { 48, 80 },
                                                { 32, 96 }, { 16, 112 } };
+
+static INLINE uint8x8_t load_and_shift(const unsigned char *a) {
+  return vreinterpret_u8_u64(vshl_n_u64(vreinterpret_u64_u8(vld1_u8(a)), 32));
+}
+
+static INLINE void store4x4(unsigned char *dst, int dst_stride,
+                            const uint8x8_t a0, const uint8x8_t a1) {
+  if (!((uintptr_t)dst & 0x3) && !(dst_stride & 0x3)) {
+    vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(a0), 0);
+    dst += dst_stride;
+    vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(a0), 1);
+    dst += dst_stride;
+    vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(a1), 0);
+    dst += dst_stride;
+    vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(a1), 1);
+  } else {
+    // Store to the aligned local buffer and memcpy instead of vget_lane_u8
+    // which is really really slow.
+    uint32_t output_buffer[4];
+    vst1_lane_u32(output_buffer, vreinterpret_u32_u8(a0), 0);
+    vst1_lane_u32(output_buffer + 1, vreinterpret_u32_u8(a0), 1);
+    vst1_lane_u32(output_buffer + 2, vreinterpret_u32_u8(a1), 0);
+    vst1_lane_u32(output_buffer + 3, vreinterpret_u32_u8(a1), 1);
+
+    memcpy(dst, output_buffer, 4);
+    dst += dst_stride;
+    memcpy(dst, output_buffer + 1, 4);
+    dst += dst_stride;
+    memcpy(dst, output_buffer + 2, 4);
+    dst += dst_stride;
+    memcpy(dst, output_buffer + 3, 4);
+  }
+}
+
+void vp8_bilinear_predict4x4_neon(unsigned char *src_ptr,
+                                  int src_pixels_per_line, int xoffset,
+                                  int yoffset, unsigned char *dst_ptr,
+                                  int dst_pitch) {
+  uint8x8_t e0, e1, e2;
+
+  if (xoffset == 0) {  // skip_1stpass_filter
+    uint8x8_t a0, a1, a2, a3, a4;
+
+    a0 = load_and_shift(src_ptr);
+    src_ptr += src_pixels_per_line;
+    a1 = vld1_u8(src_ptr);
+    src_ptr += src_pixels_per_line;
+    a2 = load_and_shift(src_ptr);
+    src_ptr += src_pixels_per_line;
+    a3 = vld1_u8(src_ptr);
+    src_ptr += src_pixels_per_line;
+    a4 = vld1_u8(src_ptr);
+
+    e0 = vext_u8(a0, a1, 4);
+    e1 = vext_u8(a2, a3, 4);
+    e2 = a4;
+  } else {
+    uint8x8_t a0, a1, a2, a3, a4, b4;
+    uint8x16_t a01, a23;
+    uint8x16_t b01, b23;
+    uint32x2x2_t c0, c1, c2, c3;
+    uint16x8_t d0, d1, d2;
+    const uint8x8_t filter0 = vdup_n_u8(bifilter4_coeff[xoffset][0]);
+    const uint8x8_t filter1 = vdup_n_u8(bifilter4_coeff[xoffset][1]);
+
+    a0 = vld1_u8(src_ptr);
+    src_ptr += src_pixels_per_line;
+    a1 = vld1_u8(src_ptr);
+    src_ptr += src_pixels_per_line;
+    a2 = vld1_u8(src_ptr);
+    src_ptr += src_pixels_per_line;
+    a3 = vld1_u8(src_ptr);
+    src_ptr += src_pixels_per_line;
+    a4 = vld1_u8(src_ptr);
+
+    a01 = vcombine_u8(a0, a1);
+    a23 = vcombine_u8(a2, a3);
+
+    b01 = vreinterpretq_u8_u64(vshrq_n_u64(vreinterpretq_u64_u8(a01), 8));
+    b23 = vreinterpretq_u8_u64(vshrq_n_u64(vreinterpretq_u64_u8(a23), 8));
+    b4 = vreinterpret_u8_u64(vshr_n_u64(vreinterpret_u64_u8(a4), 8));
+
+    c0 = vzip_u32(vreinterpret_u32_u8(vget_low_u8(a01)),
+                  vreinterpret_u32_u8(vget_high_u8(a01)));
+    c1 = vzip_u32(vreinterpret_u32_u8(vget_low_u8(a23)),
+                  vreinterpret_u32_u8(vget_high_u8(a23)));
+    c2 = vzip_u32(vreinterpret_u32_u8(vget_low_u8(b01)),
+                  vreinterpret_u32_u8(vget_high_u8(b01)));
+    c3 = vzip_u32(vreinterpret_u32_u8(vget_low_u8(b23)),
+                  vreinterpret_u32_u8(vget_high_u8(b23)));
+
+    d0 = vmull_u8(vreinterpret_u8_u32(c0.val[0]), filter0);
+    d1 = vmull_u8(vreinterpret_u8_u32(c1.val[0]), filter0);
+    d2 = vmull_u8(a4, filter0);
+
+    d0 = vmlal_u8(d0, vreinterpret_u8_u32(c2.val[0]), filter1);
+    d1 = vmlal_u8(d1, vreinterpret_u8_u32(c3.val[0]), filter1);
+    d2 = vmlal_u8(d2, b4, filter1);
+
+    e0 = vqrshrn_n_u16(d0, 7);
+    e1 = vqrshrn_n_u16(d1, 7);
+    e2 = vqrshrn_n_u16(d2, 7);
+  }
+
+  // secondpass_filter
+  if (yoffset == 0) {  // skip_2ndpass_filter
+    store4x4(dst_ptr, dst_pitch, e0, e1);
+  } else {
+    uint8x8_t f0, f1;
+    const uint8x8_t filter0 = vdup_n_u8(bifilter4_coeff[yoffset][0]);
+    const uint8x8_t filter1 = vdup_n_u8(bifilter4_coeff[yoffset][1]);
+
+    uint16x8_t b0 = vmull_u8(e0, filter0);
+    uint16x8_t b1 = vmull_u8(e1, filter0);
+
+    const uint8x8_t a0 = vext_u8(e0, e1, 4);
+    const uint8x8_t a1 = vext_u8(e1, e2, 4);
+
+    b0 = vmlal_u8(b0, a0, filter1);
+    b1 = vmlal_u8(b1, a1, filter1);
+
+    f0 = vqrshrn_n_u16(b0, 7);
+    f1 = vqrshrn_n_u16(b1, 7);
+
+    store4x4(dst_ptr, dst_pitch, f0, f1);
+  }
+}
 
 void vp8_bilinear_predict8x4_neon(unsigned char *src_ptr,
                                   int src_pixels_per_line, int xoffset,

@@ -182,10 +182,8 @@ specialize qw/vp8_bilinear_predict8x8 mmx sse2 ssse3 neon msa/;
 add_proto qw/void vp8_bilinear_predict8x4/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
 specialize qw/vp8_bilinear_predict8x4 mmx neon msa/;
 
-# TODO(johannkoenig): Add neon implementation
-# https://bugs.chromium.org/p/webm/issues/detail?id=1273
 add_proto qw/void vp8_bilinear_predict4x4/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
-specialize qw/vp8_bilinear_predict4x4 mmx msa/;
+specialize qw/vp8_bilinear_predict4x4 mmx neon msa/;
 
 #
 # Encoder functions below this point.
