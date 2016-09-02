@@ -71,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "91668dcf_1a1bfd7e",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1000853
+      },
+      "writtenOn": "2016-09-02T18:12:34Z",
+      "side": 1,
+      "message": "\u003e  tried using atomic variables through gcc ( described in commit message above) and am happy to put them in but will need to do something different on windows \n\nYou can take a look at base/atomicops.h in Chrome, there is a Windows version.\nIt isn\u0027t 100% clear from the C++ Standard point of view (just because there are no atomics, and the ints aren\u0027t guaranteed to be such), but it\u0027s better than raw reads and writes, because you see which accesses are actually atomic (and will need to be replaced when migrating to std::atomic or such).\n\n\u003e I thought disabling tsan altogether was dangerous in case of other possibly real problems ( like the ones at the end of the encode loop) and hoped to keep some level of tsan on even if just for internal libvpx testing.\nTSan works best if it tests exactly the same code as you\u0027re running without TSan. If you start adding mutexes that are enabled only for TSan, you\u0027ll be checking some other program, not the one you\u0027re interested in.\nAlso, protecting every memory access with a mutex may introduce unwanted happens-before arcs which may mask some other problems (not sure this is the case here, I don\u0027t remember the code well enough).",
+      "parentUuid": "d602bbf6_3cf451ba",
+      "revId": "e851707683c9a912c455cc06d2cbbe6b260fdf2f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "117a9d68_b9c93b50",
         "filename": "vp8/common/threading.h",
         "patchSetId": 4
