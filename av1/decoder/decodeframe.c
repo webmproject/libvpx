@@ -17,6 +17,7 @@
 #include "./aom_scale_rtcd.h"
 #include "./av1_rtcd.h"
 
+#include "aom/aom_codec.h"
 #include "aom_dsp/aom_dsp_common.h"
 #include "aom_dsp/bitreader.h"
 #include "aom_dsp/bitreader_buffer.h"
@@ -2059,10 +2060,12 @@ static void setup_clpf(AV1_COMMON *cm, struct aom_read_bit_buffer *rb) {
   }
 }
 
-static int clpf_bit(int k, int l, const YV12_BUFFER_CONFIG *rec,
-                    const YV12_BUFFER_CONFIG *org, const AV1_COMMON *cm,
-                    int block_size, int w, int h, unsigned int strength,
-                    unsigned int fb_size_log2, uint8_t *bit) {
+static int clpf_bit(UNUSED int k, UNUSED int l,
+                    UNUSED const YV12_BUFFER_CONFIG *rec,
+                    UNUSED const YV12_BUFFER_CONFIG *org,
+                    UNUSED const AV1_COMMON *cm, UNUSED int block_size,
+                    UNUSED int w, UNUSED int h, UNUSED unsigned int strength,
+                    UNUSED unsigned int fb_size_log2, uint8_t *bit) {
   return *bit;
 }
 #endif
