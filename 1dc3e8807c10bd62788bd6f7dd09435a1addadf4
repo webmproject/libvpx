@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "d602bbf6_fc8a694d",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-09-02T17:50:45Z",
+      "side": 1,
+      "message": "will remove spinlock in this patch: \n\nhttps://chromium-review.googlesource.com/#/c/380389/4/vp8/common/threading.h",
+      "parentUuid": "d602bbf6_9cc36580",
+      "revId": "1dc3e8807c10bd62788bd6f7dd09435a1addadf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "91668dcf_7afb190f",
         "filename": "vp8/common/threading.h",
         "patchSetId": 3
