@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d602bbf6_90c46438",
+        "filename": "test/bilinear_predict_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-02T23:01:03Z",
+      "side": 1,
+      "message": "why not allocate this per test case to get a better sized arg. that should allow some boundary checking if a right-sized area is the expectation",
+      "revId": "90aa509d20e494972cacd449b268951d00a441f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
