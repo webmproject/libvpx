@@ -3430,35 +3430,23 @@ static void loopfilter_frame(AV1_COMP *cpi, AV1_COMMON *cm) {
                      ((cm->frame_to_show->y_crop_height + 31) & ~31) >>
                  10));
   if (!is_lossless_requested(&cpi->oxcf)) {
-    // Test CLPF
-    int i, hq = 1;
-    // TODO(yaowu): investigate per-segment CLPF decision and
-    // an optimal threshold, use 80 for now.
-    for (i = 0; i < MAX_SEGMENTS; i++)
-      hq &= av1_get_qindex(&cm->seg, i, cm->base_qindex) < 80;
+    // Find the best strength and block size for the entire frame
+    int fb_size_log2, strength;
+    av1_clpf_test_frame(cm->frame_to_show, cpi->Source, cm, &strength,
+                        &fb_size_log2);
 
-    // Don't try filter if the entire image is nearly losslessly encoded
-    if (!hq) {
-      // Find the best strength and block size for the entire frame
-      int fb_size_log2, strength;
-      av1_clpf_test_frame(&cpi->last_frame_uf, cpi->Source, cm, &strength,
-                          &fb_size_log2);
+    if (!fb_size_log2) fb_size_log2 = get_msb(MAX_FB_SIZE);
 
-      if (!fb_size_log2) fb_size_log2 = get_msb(MAX_FB_SIZE);
-
-      if (!strength) {  // Better to disable for the whole frame?
-        cm->clpf_strength = 0;
-      } else {
-        // Apply the filter using the chosen strength
-        cm->clpf_strength = strength - (strength == 4);
-        cm->clpf_size =
-            fb_size_log2 ? fb_size_log2 - get_msb(MAX_FB_SIZE) + 3 : 0;
-        aom_yv12_copy_frame(cm->frame_to_show, &cpi->last_frame_uf);
-        cm->clpf_numblocks =
-            av1_clpf_frame(cm->frame_to_show, &cpi->last_frame_uf, cpi->Source,
-                           cm, !!cm->clpf_size, strength, 4 + cm->clpf_size,
-                           cm->clpf_blocks, av1_clpf_decision);
-      }
+    if (strength) {
+      // Apply the filter using the chosen strength
+      cm->clpf_strength = strength - (strength == 4);
+      cm->clpf_size =
+          fb_size_log2 ? fb_size_log2 - get_msb(MAX_FB_SIZE) + 3 : 0;
+      aom_yv12_copy_frame(cm->frame_to_show, &cpi->last_frame_uf);
+      cm->clpf_numblocks =
+          av1_clpf_frame(cm->frame_to_show, &cpi->last_frame_uf, cpi->Source,
+                         cm, !!cm->clpf_size, strength, 4 + cm->clpf_size,
+                         cm->clpf_blocks, av1_clpf_decision);
     }
   }
 #endif
