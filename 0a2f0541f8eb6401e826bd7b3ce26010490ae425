@@ -36,6 +36,23 @@
     },
     {
       "key": {
+        "uuid": "d602bbf6_a29f1afd",
+        "filename": "vpx_dsp/x86/inv_txfm_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 4048,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-09-02T20:37:27Z",
+      "side": 1,
+      "message": "Another possible way is PADDSW, PMAXSW and PMINSW. a (dc_value) can saturate to int16_t. But no idea about the input uint16_t *dest whether it\u0027s overflowed when reinterpreted with int16_t.",
+      "revId": "0a2f0541f8eb6401e826bd7b3ce26010490ae425",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d602bbf6_9f20f7a8",
         "filename": "vpx_dsp/x86/inv_txfm_sse2.c",
         "patchSetId": 1
