@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d602bbf6_1ca075a2",
+        "filename": "AUTHORS",
+        "patchSetId": 4
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-02T18:08:19Z",
+      "side": 0,
+      "message": "this will get restored by tools/gen_authors.sh",
+      "revId": "9c323bc2721e3b7d6ce0df91e6cf36a7253f0422",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}

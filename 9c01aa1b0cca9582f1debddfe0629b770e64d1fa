@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d602bbf6_7ca1b9a9",
+        "filename": "CHANGELOG",
+        "patchSetId": 4
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-02T18:08:19Z",
+      "side": 1,
+      "message": "this really wasn\u0027t released or tagged",
+      "revId": "9c01aa1b0cca9582f1debddfe0629b770e64d1fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
