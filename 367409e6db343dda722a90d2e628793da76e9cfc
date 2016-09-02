@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "d602bbf6_627b521c",
+        "filename": "aom_dsp/x86/aom_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-09-02T19:52:40Z",
+      "side": 1,
+      "message": "removed in #8",
+      "parentUuid": "d602bbf6_5f4a6f0a",
+      "revId": "367409e6db343dda722a90d2e628793da76e9cfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d602bbf6_7feacbd7",
         "filename": "av1/encoder/aq_cyclicrefresh.h",
         "patchSetId": 5
@@ -47,6 +65,24 @@
       "writtenOn": "2016-09-02T19:32:21Z",
       "side": 1,
       "message": "maybe a visual studio warning?",
+      "revId": "367409e6db343dda722a90d2e628793da76e9cfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d602bbf6_ff949b46",
+        "filename": "av1/encoder/aq_cyclicrefresh.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-09-02T19:52:40Z",
+      "side": 1,
+      "message": "reverted in 7, will deal with the change in another patch",
+      "parentUuid": "d602bbf6_7feacbd7",
       "revId": "367409e6db343dda722a90d2e628793da76e9cfc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false

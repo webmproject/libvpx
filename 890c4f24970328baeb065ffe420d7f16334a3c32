@@ -16,6 +16,24 @@
       "revId": "890c4f24970328baeb065ffe420d7f16334a3c32",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d602bbf6_9f8b571f",
+        "filename": "aom_dsp/arm/idct16x16_1_add_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-09-02T19:52:40Z",
+      "side": 0,
+      "message": "reverted in patch 7, will revisit if necessary",
+      "parentUuid": "d602bbf6_7f1c0b28",
+      "revId": "890c4f24970328baeb065ffe420d7f16334a3c32",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
