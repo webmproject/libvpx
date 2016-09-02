@@ -3292,7 +3292,15 @@ static void write_uncompressed_header(AV1_COMP *cpi,
         aom_wb_write_bit(wb, cm->ref_frame_sign_bias[ref_frame]);
       }
 
+#if CONFIG_FRAME_SIZE
+      if (cm->error_resilient_mode == 0) {
+        write_frame_size_with_refs(cpi, wb);
+      } else {
+        write_frame_size(cm, wb);
+      }
+#else
       write_frame_size_with_refs(cpi, wb);
+#endif
 
       aom_wb_write_bit(wb, cm->allow_high_precision_mv);
 

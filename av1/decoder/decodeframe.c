@@ -3371,7 +3371,15 @@ static size_t read_uncompressed_header(AV1Decoder *pbi,
         cm->ref_frame_sign_bias[LAST_FRAME + i] = aom_rb_read_bit(rb);
       }
 
+#if CONFIG_FRAME_SIZE
+      if (cm->error_resilient_mode == 0) {
+        setup_frame_size_with_refs(cm, rb);
+      } else {
+        setup_frame_size(cm, rb);
+      }
+#else
       setup_frame_size_with_refs(cm, rb);
+#endif
 
       cm->allow_high_precision_mv = aom_rb_read_bit(rb);
       cm->interp_filter = read_interp_filter(rb);
