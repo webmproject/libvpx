@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "d602bbf6_9fbeb7ac",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-02T18:12:07Z",
+      "side": 1,
+      "message": "this number is meaningless outside of gerrit and the link below isn\u0027t guaranteed to be stable. you should reference the commit hash",
+      "revId": "1dc3e8807c10bd62788bd6f7dd09435a1addadf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "91668dcf_3a01a111",
         "filename": "vp8/common/threading.h",
         "patchSetId": 3
