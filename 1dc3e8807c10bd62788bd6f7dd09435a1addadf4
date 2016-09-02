@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "91668dcf_3a01a111",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1000853
+      },
+      "writtenOn": "2016-09-02T17:35:28Z",
+      "side": 1,
+      "message": "Why do we have this spinloop?\nIt travels from one vpx subproject to another, but isn\u0027t documented and I can\u0027t think of a reason to have it.",
+      "revId": "1dc3e8807c10bd62788bd6f7dd09435a1addadf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "91668dcf_7afb190f",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1000853
+      },
+      "writtenOn": "2016-09-02T17:35:28Z",
+      "side": 1,
+      "message": "This is also an artifact that only exists in vpx codebase.\nPer the recent discussion, it\u0027s quite unlikely that we need it.",
+      "revId": "1dc3e8807c10bd62788bd6f7dd09435a1addadf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "91668dcf_5afe5500",
+        "filename": "vp8/decoder/threading.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 746,
+      "author": {
+        "id": 1000853
+      },
+      "writtenOn": "2016-09-02T17:35:28Z",
+      "side": 1,
+      "message": "We\u0027re going to have several mutexes, which are being used to synchronize different pairs of threads, in the same cacheline.",
+      "revId": "1dc3e8807c10bd62788bd6f7dd09435a1addadf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
