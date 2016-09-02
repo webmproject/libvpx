@@ -78,10 +78,10 @@ void aom_highbd_quantize_b_sse2(const tran_low_t *coeff_ptr, intptr_t count,
       for (j = 0; j < 4; j++) {
         if (test & (1 << (4 * j))) {
           int k = 4 * i + j;
-          const int64_t tmp1 = abs_coeff[j] + round_ptr[k != 0];
-          const int64_t tmp2 = ((tmp1 * quant_ptr[k != 0]) >> 16) + tmp1;
+          const int64_t tmp3 = abs_coeff[j] + round_ptr[k != 0];
+          const int64_t tmp4 = ((tmp3 * quant_ptr[k != 0]) >> 16) + tmp3;
           const uint32_t abs_qcoeff =
-              (uint32_t)((tmp2 * quant_shift_ptr[k != 0]) >> 16);
+              (uint32_t)((tmp4 * quant_shift_ptr[k != 0]) >> 16);
           qcoeff_ptr[k] = (int)(abs_qcoeff ^ coeff_sign[j]) - coeff_sign[j];
           dqcoeff_ptr[k] = qcoeff_ptr[k] * dequant_ptr[k != 0];
           if (abs_qcoeff) eob_i = iscan[k] > eob_i ? iscan[k] : eob_i;
