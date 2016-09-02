@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "d602bbf6_3cf451ba",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-09-02T18:04:43Z",
+      "side": 1,
+      "message": "I tried using atomic variables through gcc ( described in commit message above) and am happy to put them in but will need to do something different on windows I thought disabling tsan altogether was dangerous in case of other possibly real problems ( like the ones at the end of the encode loop) and hoped to keep some level of tsan on even if just for internal libvpx testing.",
+      "parentUuid": "91668dcf_da10a55c",
+      "revId": "e851707683c9a912c455cc06d2cbbe6b260fdf2f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "117a9d68_b9c93b50",
         "filename": "vp8/common/threading.h",
         "patchSetId": 4
@@ -64,6 +82,24 @@
       "writtenOn": "2016-09-02T17:56:45Z",
       "side": 1,
       "message": "Could this block be protected with something like if !MSVC, and then use real atomics?",
+      "revId": "e851707683c9a912c455cc06d2cbbe6b260fdf2f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d602bbf6_dcfa0da3",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-09-02T18:04:43Z",
+      "side": 1,
+      "message": "I think its more than !msvc ( ie like specific versions of gcc ) but it can be done and I talked about that in the message above.   \n\nIf you guys prefer that I can do it.",
+      "parentUuid": "117a9d68_b9c93b50",
       "revId": "e851707683c9a912c455cc06d2cbbe6b260fdf2f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
