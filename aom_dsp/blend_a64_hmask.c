@@ -49,6 +49,7 @@ void aom_highbd_blend_a64_hmask_c(uint8_t *dst_8, uint32_t dst_stride,
   uint16_t *dst = CONVERT_TO_SHORTPTR(dst_8);
   const uint16_t *src0 = CONVERT_TO_SHORTPTR(src0_8);
   const uint16_t *src1 = CONVERT_TO_SHORTPTR(src1_8);
+  (void)bd;
 
   assert(IMPLIES(src0 == dst, src0_stride == dst_stride));
   assert(IMPLIES(src1 == dst, src1_stride == dst_stride));
