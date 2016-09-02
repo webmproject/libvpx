@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "117a9d68_99c47f37",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2016-09-02T17:56:45Z",
+      "side": 1,
+      "message": "Can we make use of this code when the compiler supports it, and leave the technically-unsafe code to platforms not supporting building atomics?",
+      "revId": "e851707683c9a912c455cc06d2cbbe6b260fdf2f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "117a9d68_59aca78c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2016-09-02T17:56:45Z",
+      "side": 1,
+      "message": "int32 on windows is not atomic unless the volatile keyword is used, but I don\u0027t know when visual studio would miscompile a program to x86 because of this.\n\nhttps://msdn.microsoft.com/en-us/library/12a04hfd.aspx (see /volatile:ms)",
+      "revId": "e851707683c9a912c455cc06d2cbbe6b260fdf2f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "91668dcf_da10a55c",
         "filename": "vp8/common/threading.h",
         "patchSetId": 4
@@ -13,6 +47,23 @@
       "writtenOn": "2016-09-02T17:56:24Z",
       "side": 1,
       "message": "As said in the other patch, there\u0027s a better solution for this problem (namely using atomic variables), and I suggest to concentrate our efforts on that.\nFor the present it\u0027s perfectly fine to just keep the existing suppressions instead of having a separate synchronization logic exclusively for TSan.",
+      "revId": "e851707683c9a912c455cc06d2cbbe6b260fdf2f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "117a9d68_b9c93b50",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2016-09-02T17:56:45Z",
+      "side": 1,
+      "message": "Could this block be protected with something like if !MSVC, and then use real atomics?",
       "revId": "e851707683c9a912c455cc06d2cbbe6b260fdf2f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
