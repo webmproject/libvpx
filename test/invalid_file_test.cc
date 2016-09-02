@@ -158,13 +158,16 @@ class InvalidFileInvalidPeekTest : public InvalidFileTest {
 
 TEST_P(InvalidFileInvalidPeekTest, ReturnCode) { RunTest(); }
 
+#if CONFIG_VP8_DECODER
 const DecodeParam kVP8InvalidFileTests[] = {
   { 1, "invalid-vp80-00-comprehensive-018.ivf.2kf_0x6.ivf" },
 };
 
 VP8_INSTANTIATE_TEST_CASE(InvalidFileInvalidPeekTest,
                           ::testing::ValuesIn(kVP8InvalidFileTests));
+#endif  // CONFIG_VP8_DECODER
 
+#if CONFIG_VP9_DECODER
 const DecodeParam kVP9InvalidFileInvalidPeekTests[] = {
   { 1, "invalid-vp90-01-v3.webm" },
 };
@@ -172,7 +175,6 @@ const DecodeParam kVP9InvalidFileInvalidPeekTests[] = {
 VP9_INSTANTIATE_TEST_CASE(InvalidFileInvalidPeekTest,
                           ::testing::ValuesIn(kVP9InvalidFileInvalidPeekTests));
 
-#if CONFIG_VP9_DECODER
 const DecodeParam kMultiThreadedVP9InvalidFileTests[] = {
   { 4, "invalid-vp90-2-08-tile_1x4_frame_parallel_all_key.webm" },
   { 4,
