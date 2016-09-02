@@ -743,7 +743,7 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t set_reference_and_update(vpx_codec_alg_priv_t *ctx,
-                                                int flags) {
+                                                vpx_enc_frame_flags_t flags) {
   /* Handle Flags */
   if (((flags & VP8_EFLAG_NO_UPD_GF) && (flags & VP8_EFLAG_FORCE_GF)) ||
       ((flags & VP8_EFLAG_NO_UPD_ARF) && (flags & VP8_EFLAG_FORCE_ARF))) {
