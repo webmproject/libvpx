@@ -11,6 +11,12 @@
 #ifndef AOM_DSP_BITWRITER_H_
 #define AOM_DSP_BITWRITER_H_
 
+#include "./aom_config.h"
+
+#if CONFIG_BITSTREAM_DEBUG
+#include <stdio.h>
+#endif
+
 #include "aom_ports/mem.h"
 #include "aom_dsp/prob.h"
 #include "aom_util/debug_util.h"
@@ -38,6 +44,14 @@ static INLINE void aom_write(aom_writer *br, int bit, int probability) {
   register int shift;
 
 #if CONFIG_BITSTREAM_DEBUG
+  // int queue_r = 0;
+  // int frame_idx_r = 0;
+  // int queue_w = bitstream_queue_get_write();
+  // int frame_idx_w = bitstream_queue_get_frame_write();
+  // if (frame_idx_w == frame_idx_r && queue_w == queue_r) {
+  //   fprintf(stderr, "\n *** bitstream queue at frame_idx_w %d queue_w %d\n",
+  //   frame_idx_w, queue_w);
+  // }
   bitstream_queue_push(bit, probability);
 #endif  // CONFIG_BITSTREAM_DEBUG
 

@@ -114,14 +114,18 @@ static INLINE int aom_read(aom_reader *r, int prob) {
   {
     int ref_bit, ref_prob;
     const int queue_r = bitstream_queue_get_read();
+    const int frame_idx = bitstream_queue_get_frame_read();
     bitstream_queue_pop(&ref_bit, &ref_prob);
     if (prob != ref_prob) {
-      fprintf(stderr, "prob error, prob %d ref_prob %d queue_r %d\n", prob,
-              ref_prob, queue_r);
+      fprintf(
+          stderr,
+          "\n *** prob error, frame_idx_r %d prob %d ref_prob %d queue_r %d\n",
+          frame_idx, prob, ref_prob, queue_r);
       assert(0);
     }
     if ((int)bit != ref_bit) {
-      fprintf(stderr, "bit error, bit %d ref_bit %d\n", bit, ref_bit);
+      fprintf(stderr, "\n *** bit error, frame_idx_r %d bit %d ref_bit %d\n",
+              frame_idx, bit, ref_bit);
       assert(0);
     }
   }
