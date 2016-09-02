@@ -16,6 +16,24 @@
       "revId": "90aa509d20e494972cacd449b268951d00a441f4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "162b737f_8e743bc7",
+        "filename": "test/bilinear_predict_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-02T23:34:08Z",
+      "side": 1,
+      "message": "I have some ideas to combine this with the sixtap test. Also found the asan issue - sixtap compensates the src pointer for the up and left buffer needed, but I had resized the buffers to be smaller for bilinear. Hilarity ensued.",
+      "parentUuid": "d602bbf6_90c46438",
+      "revId": "90aa509d20e494972cacd449b268951d00a441f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
