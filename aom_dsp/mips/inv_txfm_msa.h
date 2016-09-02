@@ -332,7 +332,7 @@
     out7 = -in7;                                                              \
   }
 
-#define AV1_IADST8x16_1D(r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11,     \
+#define AOM_IADST8x16_1D(r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11,     \
                          r12, r13, r14, r15, out0, out1, out2, out3, out4,     \
                          out5, out6, out7, out8, out9, out10, out11, out12,    \
                          out13, out14, out15)                                  \

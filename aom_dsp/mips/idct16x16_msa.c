@@ -303,7 +303,7 @@ void aom_iadst16_1d_rows_msa(const int16_t *input, int16_t *output) {
                      l12, l13, l14, l15);
 
   /* ADST in horizontal */
-  AV1_IADST8x16_1D(l0, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13,
+  AOM_IADST8x16_1D(l0, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13,
                    l14, l15, r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11,
                    r12, r13, r14, r15);
 
