@@ -42,7 +42,7 @@ typedef struct bilateral_params {
 static BilateralParamsType bilateral_level_to_params_arr[BILATERAL_LEVELS] = {
   // Values are rounded to 1/16 th precision
   { 8, 9, 30 },   { 9, 8, 30 },   { 9, 11, 32 },  { 11, 9, 32 },
-  { 14, 14, 32 }, { 18, 18, 36 }, { 24, 24, 40 }, { 32, 32, 40 },
+  { 14, 14, 36 }, { 18, 18, 36 }, { 24, 24, 40 }, { 32, 32, 40 },
 };
 
 static BilateralParamsType
