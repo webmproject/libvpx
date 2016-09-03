@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "162b737f_512dd6b3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-03T01:12:38Z",
+      "side": 1,
+      "message": "Add AOM_BITS_10/12 for ...",
+      "revId": "66bb842f8f6503fcf266defca806f4472f0bac2a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "162b737f_b1507a27",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 914,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-03T01:12:38Z",
+      "side": 1,
+      "message": "you should still test AOM_BITS_8 in this case",
+      "revId": "66bb842f8f6503fcf266defca806f4472f0bac2a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
