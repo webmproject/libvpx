@@ -171,7 +171,7 @@ void aom_idct4x4_1_add_sse2(const tran_low_t *input, uint8_t *dest,
   RECON_AND_STORE4X4(dest + 3 * stride, dc_value);
 }
 
-void idct4_sse2(__m128i *in) {
+void aom_idct4_sse2(__m128i *in) {
   const __m128i k__cospi_p16_p16 = pair_set_epi16(cospi_16_64, cospi_16_64);
   const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
   const __m128i k__cospi_p24_m08 = pair_set_epi16(cospi_24_64, -cospi_8_64);
@@ -207,7 +207,7 @@ void idct4_sse2(__m128i *in) {
   in[1] = _mm_shuffle_epi32(in[1], 0x4E);
 }
 
-void iadst4_sse2(__m128i *in) {
+void aom_iadst4_sse2(__m128i *in) {
   const __m128i k__sinpi_p01_p04 = pair_set_epi16(sinpi_1_9, sinpi_4_9);
   const __m128i k__sinpi_p03_p02 = pair_set_epi16(sinpi_3_9, sinpi_2_9);
   const __m128i k__sinpi_p02_m01 = pair_set_epi16(sinpi_2_9, -sinpi_1_9);
@@ -533,7 +533,7 @@ void aom_idct8x8_1_add_sse2(const tran_low_t *input, uint8_t *dest,
   RECON_AND_STORE(dest + 7 * stride, dc_value);
 }
 
-void idct8_sse2(__m128i *in) {
+void aom_idct8_sse2(__m128i *in) {
   const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i stg1_0 = pair_set_epi16(cospi_28_64, -cospi_4_64);
   const __m128i stg1_1 = pair_set_epi16(cospi_4_64, cospi_28_64);
@@ -558,7 +558,7 @@ void idct8_sse2(__m128i *in) {
         in[4], in[5], in[6], in[7]);
 }
 
-void iadst8_sse2(__m128i *in) {
+void aom_iadst8_sse2(__m128i *in) {
   const __m128i k__cospi_p02_p30 = pair_set_epi16(cospi_2_64, cospi_30_64);
   const __m128i k__cospi_p30_m02 = pair_set_epi16(cospi_30_64, -cospi_2_64);
   const __m128i k__cospi_p10_p22 = pair_set_epi16(cospi_10_64, cospi_22_64);
@@ -2114,13 +2114,13 @@ void idct16_8col(__m128i *in) {
   in[15] = _mm_sub_epi16(s[0], s[15]);
 }
 
-void idct16_sse2(__m128i *in0, __m128i *in1) {
+void aom_idct16_sse2(__m128i *in0, __m128i *in1) {
   array_transpose_16x16(in0, in1);
   idct16_8col(in0);
   idct16_8col(in1);
 }
 
-void iadst16_sse2(__m128i *in0, __m128i *in1) {
+void aom_iadst16_sse2(__m128i *in0, __m128i *in1) {
   array_transpose_16x16(in0, in1);
   iadst16_8col(in0);
   iadst16_8col(in1);
@@ -3596,7 +3596,7 @@ void aom_highbd_idct4x4_16_add_sse2(const tran_low_t *input, uint8_t *dest8,
 
   if (!test) {
     // Do the row transform
-    idct4_sse2(inptr);
+    aom_idct4_sse2(inptr);
 
     // Check the min & max values
     max_input = _mm_max_epi16(inptr[0], inptr[1]);
@@ -3632,7 +3632,7 @@ void aom_highbd_idct4x4_16_add_sse2(const tran_low_t *input, uint8_t *dest8,
   }
 
   if (optimised_cols) {
-    idct4_sse2(inptr);
+    aom_idct4_sse2(inptr);
 
     // Final round and shift
     inptr[0] = _mm_add_epi16(inptr[0], eight);
@@ -3712,7 +3712,7 @@ void aom_highbd_idct8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest8,
 
   if (!test) {
     // Do the row transform
-    idct8_sse2(inptr);
+    aom_idct8_sse2(inptr);
 
     // Find the min & max for the column transform
     max_input = _mm_max_epi16(inptr[0], inptr[1]);
@@ -3749,7 +3749,7 @@ void aom_highbd_idct8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest8,
   }
 
   if (optimised_cols) {
-    idct8_sse2(inptr);
+    aom_idct8_sse2(inptr);
 
     // Final round & shift and Reconstruction and Store
     {
@@ -3813,7 +3813,7 @@ void aom_highbd_idct8x8_10_add_sse2(const tran_low_t *input, uint8_t *dest8,
 
   if (!test) {
     // Do the row transform
-    idct8_sse2(inptr);
+    aom_idct8_sse2(inptr);
 
     // Find the min & max for the column transform
     // N.B. Only first 4 cols contain non-zero coeffs
@@ -3852,7 +3852,7 @@ void aom_highbd_idct8x8_10_add_sse2(const tran_low_t *input, uint8_t *dest8,
   }
 
   if (optimised_cols) {
-    idct8_sse2(inptr);
+    aom_idct8_sse2(inptr);
 
     // Final round & shift and Reconstruction and Store
     {
@@ -3918,7 +3918,7 @@ void aom_highbd_idct16x16_256_add_sse2(const tran_low_t *input, uint8_t *dest8,
 
   if (!test) {
     // Do the row transform
-    idct16_sse2(inptr, inptr + 16);
+    aom_idct16_sse2(inptr, inptr + 16);
 
     // Find the min & max for the column transform
     max_input = _mm_max_epi16(inptr[0], inptr[1]);
@@ -3960,7 +3960,7 @@ void aom_highbd_idct16x16_256_add_sse2(const tran_low_t *input, uint8_t *dest8,
   }
 
   if (optimised_cols) {
-    idct16_sse2(inptr, inptr + 16);
+    aom_idct16_sse2(inptr, inptr + 16);
 
     // Final round & shift and Reconstruction and Store
     {
@@ -4033,7 +4033,7 @@ void aom_highbd_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest8,
 
   if (!test) {
     // Do the row transform (N.B. This transposes inptr)
-    idct16_sse2(inptr, inptr + 16);
+    aom_idct16_sse2(inptr, inptr + 16);
 
     // Find the min & max for the column transform
     // N.B. Only first 4 cols contain non-zero coeffs
@@ -4078,7 +4078,7 @@ void aom_highbd_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest8,
   }
 
   if (optimised_cols) {
-    idct16_sse2(inptr, inptr + 16);
+    aom_idct16_sse2(inptr, inptr + 16);
 
     // Final round & shift and Reconstruction and Store
     {
