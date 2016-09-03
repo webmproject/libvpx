@@ -119,7 +119,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += variance_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += vp8_fdct4x4_test.cc
 
 LIBVPX_TEST_SRCS-yes                   += idct_test.cc
-LIBVPX_TEST_SRCS-yes                   += sixtap_predict_test.cc
+LIBVPX_TEST_SRCS-yes                   += predict_test.cc
 LIBVPX_TEST_SRCS-yes                   += vpx_scale_test.cc
 
 ifeq ($(CONFIG_VP8_ENCODER)$(CONFIG_TEMPORAL_DENOISING),yesyes)
