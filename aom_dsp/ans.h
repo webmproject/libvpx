@@ -39,8 +39,6 @@ typedef uint16_t AnsP10;
 // This is now just a boring cdf.
 typedef uint16_t rans_lut[16];
 
-void aom_rans_build_cdf_from_pdf(const AnsP10 token_probs[], rans_lut cdf_tab);
-
 void aom_rans_merge_prob8_pdf(AnsP10 *const out_pdf, const AnsP8 node_prob,
                               const AnsP10 *const src_pdf, int in_syms);
 #ifdef __cplusplus

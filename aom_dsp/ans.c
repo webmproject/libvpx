@@ -15,15 +15,6 @@
 #include "aom_dsp/ans.h"
 #include "aom_dsp/prob.h"
 
-void aom_rans_build_cdf_from_pdf(const AnsP10 token_probs[], rans_lut cdf_tab) {
-  int i;
-  cdf_tab[0] = 0;
-  for (i = 1; cdf_tab[i - 1] < RANS_PRECISION; ++i) {
-    cdf_tab[i] = cdf_tab[i - 1] + token_probs[i - 1];
-  }
-  assert(cdf_tab[i - 1] == RANS_PRECISION);
-}
-
 static int find_largest(const AnsP10 *const pdf_tab, int num_syms) {
   int largest_idx = -1;
   int largest_p = -1;
