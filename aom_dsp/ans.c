@@ -15,7 +15,7 @@
 #include "aom_dsp/ans.h"
 #include "aom_dsp/prob.h"
 
-static int find_largest(const AnsP10 *const pdf_tab, int num_syms) {
+static int find_largest(const aom_cdf_prob *const pdf_tab, int num_syms) {
   int largest_idx = -1;
   int largest_p = -1;
   int i;
@@ -29,8 +29,9 @@ static int find_largest(const AnsP10 *const pdf_tab, int num_syms) {
   return largest_idx;
 }
 
-void aom_rans_merge_prob8_pdf(AnsP10 *const out_pdf, const AnsP8 node_prob,
-                              const AnsP10 *const src_pdf, int in_syms) {
+void aom_rans_merge_prob8_pdf(aom_cdf_prob *const out_pdf,
+                              const AnsP8 node_prob,
+                              const aom_cdf_prob *const src_pdf, int in_syms) {
   int i;
   int adjustment = RANS_PRECISION;
   const int round_fact = ANS_P8_PRECISION >> 1;

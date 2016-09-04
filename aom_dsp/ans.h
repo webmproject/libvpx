@@ -26,21 +26,16 @@ extern "C" {
 typedef uint8_t AnsP8;
 #define ANS_P8_PRECISION 256u
 #define ANS_P8_SHIFT 8
-typedef uint16_t AnsP10;
-#define ANS_P10_PRECISION 1024u
+#define RANS_PRECISION 1024u
 #define RANS_PROB_BITS 10
 
-#define RANS_PRECISION ANS_P10_PRECISION
-
-#define L_BASE (ANS_P10_PRECISION * 4)  // L_BASE % precision must be 0
+#define L_BASE (RANS_PRECISION * 4)  // L_BASE % precision must be 0
 #define IO_BASE 256
 // Range I = { L_BASE, L_BASE + 1, ..., L_BASE * IO_BASE - 1 }
 
-// This is now just a boring cdf.
-typedef uint16_t rans_lut[16];
-
-void aom_rans_merge_prob8_pdf(AnsP10 *const out_pdf, const AnsP8 node_prob,
-                              const AnsP10 *const src_pdf, int in_syms);
+void aom_rans_merge_prob8_pdf(aom_cdf_prob *const out_pdf,
+                              const AnsP8 node_prob,
+                              const aom_cdf_prob *const src_pdf, int in_syms);
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
