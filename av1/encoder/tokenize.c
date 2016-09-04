@@ -402,17 +402,6 @@ static INLINE void add_token(TOKENEXTRA **t, const aom_prob *context_tree,
   ++counts[token];
 }
 
-static INLINE void add_token_no_extra(TOKENEXTRA **t,
-                                      const aom_prob *context_tree,
-                                      uint8_t token, uint8_t skip_eob_node,
-                                      unsigned int *counts) {
-  (*t)->token = token;
-  (*t)->context_tree = context_tree;
-  (*t)->skip_eob_node = skip_eob_node;
-  (*t)++;
-  ++counts[token];
-}
-
 static INLINE int get_tx_eob(const struct segmentation *seg, int segment_id,
                              TX_SIZE tx_size) {
   const int eob_max = num_4x4_blocks_txsize_lookup[tx_size] << 4;
@@ -532,8 +521,11 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
     skip_eob = (token == ZERO_TOKEN);
   }
   if (c < seg_eob) {
-    add_token_no_extra(&t, coef_probs[band[c]][pt], EOB_TOKEN, 0,
-                       counts[band[c]][pt]);
+    add_token(&t, coef_probs[band[c]][pt],
+#if CONFIG_ANS || CONFIG_DAALA_EC
+              NULL,
+#endif
+              0, EOB_TOKEN, 0, counts[band[c]][pt]);
     ++eob_branch[band[c]][pt];
   }
 
