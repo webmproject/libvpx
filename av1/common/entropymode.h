@@ -138,6 +138,9 @@ typedef struct frame_contexts {
   aom_cdf_prob intra_ext_tx_cdf[EXT_TX_SIZES][TX_TYPES][TX_TYPES];
   aom_cdf_prob inter_ext_tx_cdf[EXT_TX_SIZES][TX_TYPES];
 #endif
+#if CONFIG_DELTA_Q
+  aom_prob delta_q_prob[DELTA_Q_CONTEXTS];
+#endif
 } FRAME_CONTEXT;
 
 typedef struct FRAME_COUNTS {
@@ -202,6 +205,9 @@ typedef struct FRAME_COUNTS {
   nmv_context_counts mv[NMV_CONTEXTS];
 #else
   nmv_context_counts mv;
+#endif
+#if CONFIG_DELTA_Q
+  unsigned int delta_q[DELTA_Q_CONTEXTS][2];
 #endif
 #if CONFIG_EXT_TX
 #if CONFIG_RECT_TX

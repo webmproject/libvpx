@@ -341,4 +341,9 @@ void av1_accumulate_frame_counts(AV1_COMMON *cm, FRAME_COUNTS *counts) {
   unsigned int i;
 
   for (i = 0; i < n_counts; i++) acc[i] += cnt[i];
+
+#if CONFIG_DELTA_Q
+  for (i = 0; i < DELTA_Q_CONTEXTS; i++)
+    for (j = 0; j < 2; ++j) cm->counts.delta_q[i][j] += counts->delta_q[i][j];
+#endif
 }

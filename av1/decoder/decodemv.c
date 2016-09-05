@@ -46,6 +46,42 @@ static PREDICTION_MODE read_intra_mode(aom_reader *r, const aom_prob *p) {
   return (PREDICTION_MODE)aom_read_tree(r, av1_intra_mode_tree, p, ACCT_STR);
 }
 
+#if CONFIG_DELTA_Q
+static int read_delta_qindex(AV1_COMMON *cm, MACROBLOCKD *xd, aom_reader *r,
+                             MB_MODE_INFO *const mbmi, int mi_col, int mi_row) {
+  FRAME_COUNTS *counts = xd->counts;
+  int sign, abs, reduced_delta_qindex = 0;
+  BLOCK_SIZE bsize = mbmi->sb_type;
+  const int b_col = mi_col & MAX_MIB_MASK;
+  const int b_row = mi_row & MAX_MIB_MASK;
+  const int read_delta_q_flag = (b_col == 0 && b_row == 0);
+  int rem_bits, thr, bit = 1;
+
+  if ((bsize != BLOCK_64X64 || mbmi->skip == 0) && read_delta_q_flag) {
+    abs = 0;
+    while (abs < DELTA_Q_SMALL && bit) {
+      bit = aom_read(r, cm->fc->delta_q_prob[abs], ACCT_STR);
+      if (counts) counts->delta_q[abs][bit]++;
+      abs += bit;
+    }
+    if (abs == DELTA_Q_SMALL) {
+      rem_bits = aom_read_literal(r, 3, ACCT_STR);
+      thr = (1 << rem_bits) + 1;
+      abs = aom_read_literal(r, rem_bits, ACCT_STR) + thr;
+    }
+
+    if (abs) {
+      sign = aom_read_bit(r, ACCT_STR);
+    } else {
+      sign = 1;
+    }
+
+    reduced_delta_qindex = sign ? -abs : abs;
+  }
+  return reduced_delta_qindex;
+}
+#endif
+
 static PREDICTION_MODE read_intra_mode_y(AV1_COMMON *cm, MACROBLOCKD *xd,
                                          aom_reader *r, int size_group) {
   const PREDICTION_MODE y_mode =
@@ -601,32 +637,10 @@ static void read_intra_frame_mode_info(AV1_COMMON *const cm,
 
 #if CONFIG_DELTA_Q
   if (cm->delta_q_present_flag) {
-    int b_col = mi_col & 7;
-    int b_row = mi_row & 7;
-    int read_delta_q_flag = (b_col == 0 && b_row == 0);
-    if ((bsize != BLOCK_64X64 || mbmi->skip == 0) && read_delta_q_flag) {
-      int sign, abs, tmp, delta_qindex;
-
-      abs = 0;
-      tmp = aom_read_bit(r, ACCT_STR);
-      while (tmp == 0 && abs < 2) {
-        tmp = aom_read_bit(r, ACCT_STR);
-        abs++;
-      }
-      if (tmp == 0) {
-        abs = aom_read_literal(r, 6, ACCT_STR);
-      }
-
-      if (abs) {
-        sign = aom_read_bit(r, ACCT_STR);
-      } else {
-        sign = 1;
-      }
-
-      delta_qindex = sign ? -abs : abs;
-      xd->current_qindex = xd->prev_qindex + delta_qindex;
-      xd->prev_qindex = xd->current_qindex;
-    }
+    xd->current_qindex =
+        xd->prev_qindex +
+        read_delta_qindex(cm, xd, r, mbmi, mi_col, mi_row) * cm->delta_q_res;
+    xd->prev_qindex = xd->current_qindex;
   }
 #endif
 
@@ -1689,31 +1703,10 @@ static void read_inter_frame_mode_info(AV1Decoder *const pbi,
     mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
 #if CONFIG_DELTA_Q
     if (cm->delta_q_present_flag) {
-      BLOCK_SIZE bsize = mbmi->sb_type;
-      int b_col = mi_col & 7;
-      int b_row = mi_row & 7;
-      int read_delta_q_flag = (b_col == 0 && b_row == 0);
-      if ((bsize != BLOCK_64X64 || mbmi->skip == 0) && read_delta_q_flag) {
-        int sign, abs, tmp, delta_qindex;
-
-        abs = 0;
-        tmp = aom_read_bit(r, ACCT_STR);
-        while (tmp == 0 && abs < 2) {
-          tmp = aom_read_bit(r, ACCT_STR);
-          abs++;
-        }
-        if (tmp == 0) {
-          abs = aom_read_literal(r, 6, ACCT_STR);
-        }
-        if (abs) {
-          sign = aom_read_bit(r, ACCT_STR);
-        } else {
-          sign = 1;
-        }
-        delta_qindex = sign ? -abs : abs;
-        xd->current_qindex = xd->prev_qindex + delta_qindex;
-        xd->prev_qindex = xd->current_qindex;
-      }
+      xd->current_qindex =
+          xd->prev_qindex +
+          read_delta_qindex(cm, xd, r, mbmi, mi_col, mi_row) * cm->delta_q_res;
+      xd->prev_qindex = xd->current_qindex;
     }
 #endif
     inter_block = read_is_inter_block(cm, xd, mbmi->segment_id, r);

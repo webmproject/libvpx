@@ -3515,6 +3515,7 @@ static size_t read_uncompressed_header(AV1Decoder *pbi,
       }
     }
 
+    cm->delta_q_res = 1;
     if (segment_quantizer_active == 0) {
       cm->delta_q_present_flag = aom_rb_read_bit(rb);
     } else {
@@ -3522,6 +3523,7 @@ static size_t read_uncompressed_header(AV1Decoder *pbi,
     }
     if (cm->delta_q_present_flag) {
       xd->prev_qindex = cm->base_qindex;
+      cm->delta_q_res = 1 << aom_rb_read_literal(rb, 2);
     }
   }
 #endif
@@ -3723,6 +3725,11 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
 
   for (k = 0; k < SKIP_CONTEXTS; ++k)
     av1_diff_update_prob(&r, &fc->skip_probs[k], ACCT_STR);
+
+#if CONFIG_DELTA_Q
+  for (k = 0; k < DELTA_Q_CONTEXTS; ++k)
+    av1_diff_update_prob(&r, &fc->delta_q_prob[k], ACCT_STR);
+#endif
 
   if (cm->seg.enabled && cm->seg.update_map) {
     if (cm->seg.temporal_update) {
