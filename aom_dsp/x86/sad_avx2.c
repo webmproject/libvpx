@@ -81,8 +81,10 @@
   FSAD32_H(32); \
   FSAD32_H(16);
 
-FSAD64;
-FSAD32;
+/* clang-format off */
+FSAD64
+FSAD32
+/* clang-format on */
 
 #undef FSAD64
 #undef FSAD32
@@ -170,8 +172,10 @@ FSAD32;
   FSADAVG32_H(32); \
   FSADAVG32_H(16);
 
-FSADAVG64;
-FSADAVG32;
+/* clang-format off */
+FSADAVG64
+FSADAVG32
+/* clang-format on */
 
 #undef FSADAVG64
 #undef FSADAVG32
