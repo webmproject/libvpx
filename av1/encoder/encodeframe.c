@@ -5087,7 +5087,8 @@ static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
             mi_8x8[mis * y + x]->mbmi.tx_size = tx_size;
     }
     ++td->counts->tx_size_totals[txsize_sqr_map[mbmi->tx_size]];
-    ++td->counts->tx_size_totals[get_uv_tx_size(mbmi, &xd->plane[1])];
+    ++td->counts
+          ->tx_size_totals[txsize_sqr_map[get_uv_tx_size(mbmi, &xd->plane[1])]];
 #if CONFIG_EXT_TX
     if (get_ext_tx_types(mbmi->tx_size, bsize, is_inter_block(mbmi)) > 1 &&
         cm->base_qindex > 0 && !mbmi->skip &&
@@ -5987,8 +5988,8 @@ static void rd_supertx_sb(AV1_COMP *cpi, ThreadData *td,
     pnskip = 1;
 
     tx_size = max_txsize_lookup[bsize];
-    tx_size = get_uv_tx_size_impl(tx_size, bsize, cm->subsampling_x,
-                                  cm->subsampling_y);
+    tx_size =
+        uv_txsize_lookup[bsize][tx_size][cm->subsampling_x][cm->subsampling_y];
     av1_get_entropy_contexts(bsize, tx_size, pd, ctxa, ctxl);
     coeff_ctx = combine_entropy_contexts(ctxa[0], ctxl[0]);
 
@@ -5998,8 +5999,8 @@ static void rd_supertx_sb(AV1_COMP *cpi, ThreadData *td,
                       &this_dist, &pnsse, &pnskip);
 #else
     tx_size = max_txsize_lookup[bsize];
-    tx_size = get_uv_tx_size_impl(tx_size, bsize, cm->subsampling_x,
-                                  cm->subsampling_y);
+    tx_size =
+        uv_txsize_lookup[bsize][tx_size][cm->subsampling_x][cm->subsampling_y];
     av1_subtract_plane(x, bsize, plane);
     av1_txfm_rd_in_plane_supertx(x, cpi, &this_rate, &this_dist, &pnskip,
                                  &pnsse, INT64_MAX, plane, bsize, tx_size, 0);

@@ -584,9 +584,9 @@ void tokenize_tx(ThreadData *td, TOKENEXTRA **t, int dry_run, TX_SIZE tx_size,
 
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
 
-  plane_tx_size = plane ? get_uv_tx_size_impl(
-                              mbmi->inter_tx_size[tx_row][tx_col], bsize, 0, 0)
-                        : mbmi->inter_tx_size[tx_row][tx_col];
+  plane_tx_size =
+      plane ? uv_txsize_lookup[bsize][mbmi->inter_tx_size[tx_row][tx_col]][0][0]
+            : mbmi->inter_tx_size[tx_row][tx_col];
 
   if (tx_size == plane_tx_size) {
     const struct macroblockd_plane *const pd = &xd->plane[plane];

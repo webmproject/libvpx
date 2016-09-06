@@ -684,25 +684,18 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type, const MACROBLOCKD *xd,
 
 void av1_setup_block_planes(MACROBLOCKD *xd, int ss_x, int ss_y);
 
-static INLINE TX_SIZE get_uv_tx_size_impl(TX_SIZE y_tx_size, BLOCK_SIZE bsize,
-                                          int xss, int yss) {
-  if (bsize < BLOCK_8X8) {
-    return TX_4X4;
-  } else {
-    const BLOCK_SIZE plane_bsize = ss_size_lookup[bsize][xss][yss];
-    return AOMMIN(txsize_sqr_map[y_tx_size], max_txsize_lookup[plane_bsize]);
-  }
-}
-
 static INLINE TX_SIZE get_uv_tx_size(const MB_MODE_INFO *mbmi,
                                      const struct macroblockd_plane *pd) {
+  TX_SIZE uv_txsize;
 #if CONFIG_SUPERTX
   if (supertx_enabled(mbmi))
     return uvsupertx_size_lookup[txsize_sqr_map[mbmi->tx_size]]
                                 [pd->subsampling_x][pd->subsampling_y];
 #endif  // CONFIG_SUPERTX
-  return get_uv_tx_size_impl(mbmi->tx_size, mbmi->sb_type, pd->subsampling_x,
-                             pd->subsampling_y);
+  uv_txsize = uv_txsize_lookup[mbmi->sb_type][mbmi->tx_size][pd->subsampling_x]
+                              [pd->subsampling_y];
+  assert(uv_txsize != TX_INVALID);
+  return uv_txsize;
 }
 
 static INLINE BLOCK_SIZE

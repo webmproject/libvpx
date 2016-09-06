@@ -3347,9 +3347,9 @@ static void tx_block_rd(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
 
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
 
-  plane_tx_size = plane ? get_uv_tx_size_impl(
-                              mbmi->inter_tx_size[tx_row][tx_col], bsize, 0, 0)
-                        : mbmi->inter_tx_size[tx_row][tx_col];
+  plane_tx_size =
+      plane ? uv_txsize_lookup[bsize][mbmi->inter_tx_size[tx_row][tx_col]][0][0]
+            : mbmi->inter_tx_size[tx_row][tx_col];
 
   if (tx_size == plane_tx_size) {
     int coeff_ctx, i;
@@ -7750,8 +7750,8 @@ void av1_rd_pick_intra_mode_sb(AV1_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
       return;
     }
   }
-  max_uv_tx_size = get_uv_tx_size_impl(
-      xd->mi[0]->mbmi.tx_size, bsize, pd[1].subsampling_x, pd[1].subsampling_y);
+  max_uv_tx_size = uv_txsize_lookup[bsize][xd->mi[0]->mbmi.tx_size]
+                                   [pd[1].subsampling_x][pd[1].subsampling_y];
   rd_pick_intra_sbuv_mode(cpi, x, &rate_uv, &rate_uv_tokenonly, &dist_uv,
                           &uv_skip, AOMMAX(BLOCK_8X8, bsize), max_uv_tx_size);
 
@@ -7971,8 +7971,8 @@ static void pick_ext_intra_interframe(
     return;
   if (rate_y == INT_MAX) return;
 
-  uv_tx = get_uv_tx_size_impl(mbmi->tx_size, bsize, xd->plane[1].subsampling_x,
-                              xd->plane[1].subsampling_y);
+  uv_tx = uv_txsize_lookup[bsize][mbmi->tx_size][xd->plane[1].subsampling_x]
+                          [xd->plane[1].subsampling_y];
   if (rate_uv_intra[uv_tx] == INT_MAX) {
     choose_intra_uv_mode(cpi, x, ctx, bsize, uv_tx, &rate_uv_intra[uv_tx],
                          &rate_uv_tokenonly[uv_tx], &dist_uv[uv_tx],
@@ -8673,8 +8673,8 @@ void av1_rd_pick_inter_mode_sb(AV1_COMP *cpi, TileDataEnc *tile_data,
       if (mbmi->mode == DC_PRED) dc_skipped = 0;
 #endif  // CONFIG_EXT_INTRA
 
-      uv_tx = get_uv_tx_size_impl(mbmi->tx_size, bsize, pd->subsampling_x,
-                                  pd->subsampling_y);
+      uv_tx = uv_txsize_lookup[bsize][mbmi->tx_size][pd->subsampling_x]
+                              [pd->subsampling_y];
       if (rate_uv_intra[uv_tx] == INT_MAX) {
         choose_intra_uv_mode(cpi, x, ctx, bsize, uv_tx, &rate_uv_intra[uv_tx],
                              &rate_uv_tokenonly[uv_tx], &dist_uv[uv_tx],
@@ -9334,9 +9334,8 @@ void av1_rd_pick_inter_mode_sb(AV1_COMP *cpi, TileDataEnc *tile_data,
     super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable, NULL, bsize,
                     best_rd);
     if (rate_y == INT_MAX) goto PALETTE_EXIT;
-    uv_tx =
-        get_uv_tx_size_impl(mbmi->tx_size, bsize, xd->plane[1].subsampling_x,
-                            xd->plane[1].subsampling_y);
+    uv_tx = uv_txsize_lookup[bsize][mbmi->tx_size][xd->plane[1].subsampling_x]
+                            [xd->plane[1].subsampling_y];
     if (rate_uv_intra[uv_tx] == INT_MAX) {
       choose_intra_uv_mode(cpi, x, ctx, bsize, uv_tx, &rate_uv_intra[uv_tx],
                            &rate_uv_tokenonly[uv_tx], &dist_uv[uv_tx],

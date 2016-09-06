@@ -311,8 +311,7 @@ static void decode_reconstruct_tx(MACROBLOCKD *const xd, aom_reader *r,
   const int tx_row = blk_row >> (1 - pd->subsampling_y);
   const int tx_col = blk_col >> (1 - pd->subsampling_x);
   const TX_SIZE plane_tx_size =
-      plane ? get_uv_tx_size_impl(mbmi->inter_tx_size[tx_row][tx_col], bsize, 0,
-                                  0)
+      plane ? uv_txsize_lookup[bsize][mbmi->inter_tx_size[tx_row][tx_col]][0][0]
             : mbmi->inter_tx_size[tx_row][tx_col];
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
@@ -380,13 +379,6 @@ static int reconstruct_inter_block(MACROBLOCKD *const xd,
   return eob;
 }
 #endif  // !CONFIG_VAR_TX || CONFIG_SUPER_TX
-
-static INLINE TX_SIZE dec_get_uv_tx_size(const MB_MODE_INFO *mbmi, int n4_wl,
-                                         int n4_hl) {
-  // get minimum log2 num4x4s dimension
-  const int x = AOMMIN(n4_wl, n4_hl);
-  return AOMMIN(txsize_sqr_map[mbmi->tx_size], x);
-}
 
 static INLINE void dec_reset_skip_context(MACROBLOCKD *xd) {
   int i;
@@ -1225,9 +1217,7 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
     }
     for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
       const struct macroblockd_plane *const pd = &xd->plane[plane];
-      const TX_SIZE tx_size =
-          plane ? dec_get_uv_tx_size(mbmi, pd->n4_wl, pd->n4_hl)
-                : mbmi->tx_size;
+      const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
       const int num_4x4_w = pd->n4_w;
       const int num_4x4_h = pd->n4_h;
       const int stepr = num_4x4_blocks_high_txsize_lookup[tx_size];
@@ -1319,8 +1309,7 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
         int block = 0;
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
         const TX_SIZE tx_size =
-            plane ? dec_get_uv_tx_size(mbmi, pd->n4_wl, pd->n4_hl)
-                  : mbmi->tx_size;
+            plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
 
         if (tx_size >= TX_SIZES) {  // rect txsize is used
           const int stepr = num_4x4_blocks_high_txsize_lookup[tx_size];
@@ -1352,8 +1341,7 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
 #endif
 #else
         const TX_SIZE tx_size =
-            plane ? dec_get_uv_tx_size(mbmi, pd->n4_wl, pd->n4_hl)
-                  : mbmi->tx_size;
+            plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
         const int stepr = num_4x4_blocks_high_txsize_lookup[tx_size];
         const int stepc = num_4x4_blocks_wide_txsize_lookup[tx_size];
         const int max_blocks_wide =
@@ -1730,8 +1718,7 @@ static void decode_partition(AV1Decoder *const pbi, MACROBLOCKD *const xd,
         const int num_4x4_w = pd->n4_w;
         const int num_4x4_h = pd->n4_h;
         int row, col;
-        const TX_SIZE tx_size =
-            i ? dec_get_uv_tx_size(mbmi, pd->n4_wl, pd->n4_hl) : mbmi->tx_size;
+        const TX_SIZE tx_size = i ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
         const int stepr = num_4x4_blocks_high_txsize_lookup[tx_size];
         const int stepc = num_4x4_blocks_wide_txsize_lookup[tx_size];
         const int max_blocks_wide =
