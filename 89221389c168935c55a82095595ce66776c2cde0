@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "762d8fd5_d24d7a8c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-06T22:38:30Z",
+      "side": 1,
+      "message": "it\u0027s good to say where, e.g., sad_avx2.c: ...",
+      "revId": "89221389c168935c55a82095595ce66776c2cde0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
