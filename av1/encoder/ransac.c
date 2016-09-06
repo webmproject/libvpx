@@ -28,14 +28,14 @@
 
 static const double TINY_NEAR_ZERO = 1.0E-12;
 
-static inline double SIGN(double a, double b) {
+static INLINE double sign(double a, double b) {
   return ((b) >= 0 ? fabs(a) : -fabs(a));
 }
 
-static inline double PYTHAG(double a, double b) {
-  double absa, absb, ct;
-  absa = fabs(a);
-  absb = fabs(b);
+static INLINE double pythag(double a, double b) {
+  double ct;
+  const double absa = fabs(a);
+  const double absb = fabs(b);
 
   if (absa > absb) {
     ct = absb / absa;
@@ -46,33 +46,27 @@ static inline double PYTHAG(double a, double b) {
   }
 }
 
-int IMIN(int a, int b) { return (((a) < (b)) ? (a) : (b)); }
-
-int IMAX(int a, int b) { return (((a) < (b)) ? (b) : (a)); }
-
-void MultiplyMat(double *m1, double *m2, double *res, const int M1,
-                 const int N1, const int N2) {
-  int timesInner = N1;
-  int timesRows = M1;
-  int timesCols = N2;
+static void multiply_mat(const double *m1, const double *m2, double *res,
+                         const int m1_rows, const int inner_dim,
+                         const int m2_cols) {
   double sum;
 
   int row, col, inner;
-  for (row = 0; row < timesRows; ++row) {
-    for (col = 0; col < timesCols; ++col) {
+  for (row = 0; row < m1_rows; ++row) {
+    for (col = 0; col < m2_cols; ++col) {
       sum = 0;
-      for (inner = 0; inner < timesInner; ++inner)
-        sum += m1[row * N1 + inner] * m2[inner * N2 + col];
+      for (inner = 0; inner < inner_dim; ++inner)
+        sum += m1[row * m1_rows + inner] * m2[inner * m2_cols + col];
       *(res++) = sum;
     }
   }
 }
 
-static int svdcmp_(double **u, int m, int n, double w[], double **v) {
+static int svdcmp(double **u, int m, int n, double w[], double **v) {
   const int max_its = 30;
   int flag, i, its, j, jj, k, l, nm;
   double anorm, c, f, g, h, s, scale, x, y, z;
-  double *rv1 = (double *)malloc(sizeof(*rv1) * (n + 1));
+  double *rv1 = (double *)aom_malloc(sizeof(*rv1) * (n + 1));
   g = scale = anorm = 0.0;
   for (i = 0; i < n; i++) {
     l = i + 1;
@@ -86,7 +80,7 @@ static int svdcmp_(double **u, int m, int n, double w[], double **v) {
           s += u[k][i] * u[k][i];
         }
         f = u[i][i];
-        g = -SIGN(sqrt(s), f);
+        g = -sign(sqrt(s), f);
         h = f * g - s;
         u[i][i] = f - g;
         for (j = l; j < n; j++) {
@@ -107,7 +101,7 @@ static int svdcmp_(double **u, int m, int n, double w[], double **v) {
           s += u[i][k] * u[i][k];
         }
         f = u[i][l];
-        g = -SIGN(sqrt(s), f);
+        g = -sign(sqrt(s), f);
         h = f * g - s;
         u[i][l] = f - g;
         for (k = l; k < n; k++) rv1[k] = u[i][k] / h;
@@ -136,8 +130,7 @@ static int svdcmp_(double **u, int m, int n, double w[], double **v) {
     g = rv1[i];
     l = i;
   }
-
-  for (i = IMIN(m, n) - 1; i >= 0; i--) {
+  for (i = AOMMIN(m, n) - 1; i >= 0; i--) {
     l = i + 1;
     g = w[i];
     for (j = l; j < n; j++) u[i][j] = 0.0;
@@ -173,7 +166,7 @@ static int svdcmp_(double **u, int m, int n, double w[], double **v) {
           rv1[i] = c * rv1[i];
           if ((double)(fabs(f) + anorm) == anorm) break;
           g = w[i];
-          h = PYTHAG(f, g);
+          h = pythag(f, g);
           w[i] = h;
           h = 1.0 / h;
           c = g * h;
@@ -204,8 +197,8 @@ static int svdcmp_(double **u, int m, int n, double w[], double **v) {
       g = rv1[nm];
       h = rv1[k];
       f = ((y - z) * (y + z) + (g - h) * (g + h)) / (2.0 * h * y);
-      g = PYTHAG(f, 1.0);
-      f = ((x - z) * (x + z) + h * ((y / (f + SIGN(g, f))) - h)) / x;
+      g = pythag(f, 1.0);
+      f = ((x - z) * (x + z) + h * ((y / (f + sign(g, f))) - h)) / x;
       c = s = 1.0;
       for (j = l; j <= nm; j++) {
         i = j + 1;
@@ -213,7 +206,7 @@ static int svdcmp_(double **u, int m, int n, double w[], double **v) {
         y = w[i];
         h = s * g;
         g = c * g;
-        z = PYTHAG(f, h);
+        z = pythag(f, h);
         rv1[j] = z;
         c = f / z;
         s = h / z;
@@ -227,7 +220,7 @@ static int svdcmp_(double **u, int m, int n, double w[], double **v) {
           v[jj][j] = x * c + z * s;
           v[jj][i] = z * c - x * s;
         }
-        z = PYTHAG(f, h);
+        z = pythag(f, h);
         w[j] = z;
         if (z) {
           z = 1.0 / z;
@@ -248,28 +241,27 @@ static int svdcmp_(double **u, int m, int n, double w[], double **v) {
       w[k] = x;
     }
   }
-  free(rv1);
+  aom_free(rv1);
   return 0;
 }
 
 static int SVD(double *U, double *W, double *V, double *matx, int M, int N) {
   // Assumes allocation for U is MxN
-  double **nrU, **nrV;
+  double **nrU = (double **)aom_malloc((M) * sizeof(*nrU));
+  double **nrV = (double **)aom_malloc((N) * sizeof(*nrV));
   int problem, i;
 
-  nrU = (double **)malloc((M) * sizeof(*nrU));
-  nrV = (double **)malloc((N) * sizeof(*nrV));
   problem = !(nrU && nrV);
   if (!problem) {
-    problem = 0;
     for (i = 0; i < M; i++) {
       nrU[i] = &U[i * N];
     }
     for (i = 0; i < N; i++) {
       nrV[i] = &V[i * N];
     }
-  }
-  if (problem) {
+  } else {
+    if (nrU) aom_free(nrU);
+    if (nrV) aom_free(nrV);
     return 1;
   }
 
@@ -279,23 +271,25 @@ static int SVD(double *U, double *W, double *V, double *matx, int M, int N) {
   }
 
   /* HERE IT IS: do SVD */
-  if (svdcmp_(nrU, M, N, W, nrV)) {
+  if (svdcmp(nrU, M, N, W, nrV)) {
+    aom_free(nrU);
+    aom_free(nrV);
     return 1;
   }
 
-  /* free Numerical Recipes arrays */
-  free(nrU);
-  free(nrV);
+  /* aom_free Numerical Recipes arrays */
+  aom_free(nrU);
+  aom_free(nrV);
 
   return 0;
 }
 
-int PseudoInverse(double *inv, double *matx, const int M, const int N) {
-  double *U, *W, *V, ans;
+int pseudo_inverse(double *inv, double *matx, const int M, const int N) {
+  double ans;
   int i, j, k;
-  U = (double *)malloc(M * N * sizeof(*matx));
-  W = (double *)malloc(N * sizeof(*matx));
-  V = (double *)malloc(N * N * sizeof(*matx));
+  double *const U = (double *)aom_malloc(M * N * sizeof(*matx));
+  double *const W = (double *)aom_malloc(N * sizeof(*matx));
+  double *const V = (double *)aom_malloc(N * N * sizeof(*matx));
 
   if (!(U && W && V)) {
     return 1;
@@ -318,19 +312,19 @@ int PseudoInverse(double *inv, double *matx, const int M, const int N) {
       inv[j + M * i] = ans;
     }
   }
-  free(U);
-  free(W);
-  free(V);
+  aom_free(U);
+  aom_free(W);
+  aom_free(V);
   return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // ransac
-typedef int (*isDegenerateType)(double *p);
-typedef void (*normalizeType)(double *p, int np, double *T);
-typedef void (*denormalizeType)(double *H, double *T1, double *T2);
-typedef int (*findTransformationType)(int points, double *points1,
-                                      double *points2, double *H);
+typedef int (*IsDegenerateFunc)(double *p);
+typedef void (*NormalizeFunc)(double *p, int np, double *T);
+typedef void (*DenormalizeFunc)(double *params, double *T1, double *T2);
+typedef int (*FindTransformationFunc)(int points, double *points1,
+                                      double *points2, double *params);
 
 static int get_rand_indices(int npoints, int minpts, int *indices) {
   int i, j;
@@ -354,12 +348,12 @@ static int get_rand_indices(int npoints, int minpts, int *indices) {
   return 1;
 }
 
-int ransac_(double *matched_points, int npoints, int *number_of_inliers,
-            int *best_inlier_mask, double *bestH, const int minpts,
-            const int paramdim, isDegenerateType isDegenerate,
-            normalizeType normalize, denormalizeType denormalize,
-            findTransformationType findTransformation,
-            ProjectPointsType projectpoints, TransformationType type) {
+static int ransac(double *matched_points, int npoints, int *number_of_inliers,
+                  int *best_inlier_mask, double *best_params, const int minpts,
+                  const int paramdim, IsDegenerateFunc is_degenerate,
+                  NormalizeFunc normalize, DenormalizeFunc denormalize,
+                  FindTransformationFunc find_transformation,
+                  ProjectPointsFunc projectpoints, TransformationType type) {
   static const double INLIER_THRESHOLD_NORMALIZED = 0.1;
   static const double INLIER_THRESHOLD_UNNORMALIZED = 1.0;
   static const double PROBABILITY_REQUIRED = 0.9;
@@ -375,7 +369,7 @@ int ransac_(double *matched_points, int npoints, int *number_of_inliers,
 
   int max_inliers = 0;
   double best_variance = 0.0;
-  double H[MAX_PARAMDIM];
+  double params[MAX_PARAMDIM];
   WarpedMotionParams wm;
   double points1[2 * MAX_MINPTS];
   double points2[2 * MAX_MINPTS];
@@ -405,15 +399,23 @@ int ransac_(double *matched_points, int npoints, int *number_of_inliers,
   }
 
   memset(&wm, 0, sizeof(wm));
-  best_inlier_set1 = (double *)malloc(sizeof(*best_inlier_set1) * npoints * 2);
-  best_inlier_set2 = (double *)malloc(sizeof(*best_inlier_set2) * npoints * 2);
-  inlier_set1 = (double *)malloc(sizeof(*inlier_set1) * npoints * 2);
-  inlier_set2 = (double *)malloc(sizeof(*inlier_set2) * npoints * 2);
-  corners1 = (double *)malloc(sizeof(*corners1) * npoints * 2);
-  corners1_int = (int *)malloc(sizeof(*corners1_int) * npoints * 2);
-  corners2 = (double *)malloc(sizeof(*corners2) * npoints * 2);
-  image1_coord = (int *)malloc(sizeof(*image1_coord) * npoints * 2);
-  inlier_mask = (int *)malloc(sizeof(*inlier_mask) * npoints);
+  best_inlier_set1 =
+      (double *)aom_malloc(sizeof(*best_inlier_set1) * npoints * 2);
+  best_inlier_set2 =
+      (double *)aom_malloc(sizeof(*best_inlier_set2) * npoints * 2);
+  inlier_set1 = (double *)aom_malloc(sizeof(*inlier_set1) * npoints * 2);
+  inlier_set2 = (double *)aom_malloc(sizeof(*inlier_set2) * npoints * 2);
+  corners1 = (double *)aom_malloc(sizeof(*corners1) * npoints * 2);
+  corners1_int = (int *)aom_malloc(sizeof(*corners1_int) * npoints * 2);
+  corners2 = (double *)aom_malloc(sizeof(*corners2) * npoints * 2);
+  image1_coord = (int *)aom_malloc(sizeof(*image1_coord) * npoints * 2);
+  inlier_mask = (int *)aom_malloc(sizeof(*inlier_mask) * npoints);
+
+  if (!(best_inlier_set1 && best_inlier_set2 && inlier_set1 && inlier_set2 &&
+        corners1 && corners1_int && corners2 && image1_coord && inlier_mask)) {
+    ret_val = 1;
+    goto finish_ransac;
+  }
 
   for (cnp1 = corners1, cnp2 = corners2, i = 0; i < npoints; ++i) {
     *(cnp1++) = *(matched_points++);
@@ -451,14 +453,14 @@ int ransac_(double *matched_points, int npoints, int *number_of_inliers,
         points2[i * 2 + 1] = corners2[index * 2 + 1];
         i++;
       }
-      degenerate = isDegenerate(points1);
+      degenerate = is_degenerate(points1);
       if (num_degenerate_iter > MAX_DEGENERATE_ITER) {
         ret_val = 1;
         goto finish_ransac;
       }
     }
 
-    if (findTransformation(minpts, points1, points2, H)) {
+    if (find_transformation(minpts, points1, points2, params)) {
       trial_count++;
       continue;
     }
@@ -468,7 +470,7 @@ int ransac_(double *matched_points, int npoints, int *number_of_inliers,
       corners1_int[2 * i + 1] = (int)corners1[i * 2 + 1];
     }
 
-    av1_integerize_model(H, type, &wm);
+    av1_integerize_model(params, type, &wm);
     projectpoints((int16_t *)wm.wmmat, corners1_int, image1_coord, npoints, 2,
                   2, 0, 0);
 
@@ -500,7 +502,7 @@ int ransac_(double *matched_points, int npoints, int *number_of_inliers,
           (num_inliers == max_inliers && variance < best_variance)) {
         best_variance = variance;
         max_inliers = num_inliers;
-        memcpy(bestH, H, paramdim * sizeof(*bestH));
+        memcpy(best_params, params, paramdim * sizeof(*best_params));
         memcpy(best_inlier_set1, inlier_set1,
                num_inliers * 2 * sizeof(*best_inlier_set1));
         memcpy(best_inlier_set2, inlier_set2,
@@ -516,33 +518,34 @@ int ransac_(double *matched_points, int npoints, int *number_of_inliers,
           pNoOutliers = fmin(1 - EPS, pNoOutliers);
           temp = (int)(log(1.0 - PROBABILITY_REQUIRED) / log(pNoOutliers));
           if (temp > 0 && temp < N) {
-            N = IMAX(temp, MIN_TRIALS);
+            N = AOMMAX(temp, MIN_TRIALS);
           }
         }
       }
     }
     trial_count++;
   }
-  findTransformation(max_inliers, best_inlier_set1, best_inlier_set2, bestH);
+  find_transformation(max_inliers, best_inlier_set1, best_inlier_set2,
+                      best_params);
   if (normalize && denormalize) {
-    denormalize(bestH, T1, T2);
+    denormalize(best_params, T1, T2);
   }
   *number_of_inliers = max_inliers;
 finish_ransac:
-  free(best_inlier_set1);
-  free(best_inlier_set2);
-  free(inlier_set1);
-  free(inlier_set2);
-  free(corners1);
-  free(corners2);
-  free(image1_coord);
-  free(inlier_mask);
+  aom_free(best_inlier_set1);
+  aom_free(best_inlier_set2);
+  aom_free(inlier_set1);
+  aom_free(inlier_set2);
+  aom_free(corners1);
+  aom_free(corners2);
+  aom_free(image1_coord);
+  aom_free(inlier_mask);
   return ret_val;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void normalizeHomography(double *pts, int n, double *T) {
+static void normalize_homography(double *pts, int n, double *T) {
   // Assume the points are 2d coordinates with scale = 1
   double *p = pts;
   double mean[2] = { 0, 0 };
@@ -592,63 +595,63 @@ static void invnormalize_mat(double *T, double *iT) {
   iT[8] = 1;
 }
 
-static void denormalizeHomography(double *H, double *T1, double *T2) {
+static void denormalize_homography(double *params, double *T1, double *T2) {
   double iT2[9];
-  double H2[9];
+  double params2[9];
   invnormalize_mat(T2, iT2);
-  MultiplyMat(H, T1, H2, 3, 3, 3);
-  MultiplyMat(iT2, H2, H, 3, 3, 3);
+  multiply_mat(params, T1, params2, 3, 3, 3);
+  multiply_mat(iT2, params2, params, 3, 3, 3);
 }
 
-static void denormalizeAffine(double *H, double *T1, double *T2) {
-  double Ha[MAX_PARAMDIM];
-  Ha[0] = H[0];
-  Ha[1] = H[1];
-  Ha[2] = H[4];
-  Ha[3] = H[2];
-  Ha[4] = H[3];
-  Ha[5] = H[5];
-  Ha[6] = Ha[7] = 0;
-  Ha[8] = 1;
-  denormalizeHomography(Ha, T1, T2);
-  H[0] = Ha[5];
-  H[1] = Ha[2];
-  H[2] = Ha[1];
-  H[3] = Ha[0];
-  H[4] = Ha[3];
-  H[5] = Ha[4];
+static void denormalize_affine(double *params, double *T1, double *T2) {
+  double params_denorm[MAX_PARAMDIM];
+  params_denorm[0] = params[0];
+  params_denorm[1] = params[1];
+  params_denorm[2] = params[4];
+  params_denorm[3] = params[2];
+  params_denorm[4] = params[3];
+  params_denorm[5] = params[5];
+  params_denorm[6] = params_denorm[7] = 0;
+  params_denorm[8] = 1;
+  denormalize_homography(params_denorm, T1, T2);
+  params[0] = params_denorm[5];
+  params[1] = params_denorm[2];
+  params[2] = params_denorm[1];
+  params[3] = params_denorm[0];
+  params[4] = params_denorm[3];
+  params[5] = params_denorm[4];
 }
 
-static void denormalizeRotZoom(double *H, double *T1, double *T2) {
-  double Ha[MAX_PARAMDIM];
-  Ha[0] = H[0];
-  Ha[1] = H[1];
-  Ha[2] = H[2];
-  Ha[3] = -H[1];
-  Ha[4] = H[0];
-  Ha[5] = H[3];
-  Ha[6] = Ha[7] = 0;
-  Ha[8] = 1;
-  denormalizeHomography(Ha, T1, T2);
-  H[0] = Ha[5];
-  H[1] = Ha[2];
-  H[2] = Ha[1];
-  H[3] = Ha[0];
+static void denormalize_rotzoom(double *params, double *T1, double *T2) {
+  double params_denorm[MAX_PARAMDIM];
+  params_denorm[0] = params[0];
+  params_denorm[1] = params[1];
+  params_denorm[2] = params[2];
+  params_denorm[3] = -params[1];
+  params_denorm[4] = params[0];
+  params_denorm[5] = params[3];
+  params_denorm[6] = params_denorm[7] = 0;
+  params_denorm[8] = 1;
+  denormalize_homography(params_denorm, T1, T2);
+  params[0] = params_denorm[5];
+  params[1] = params_denorm[2];
+  params[2] = params_denorm[1];
+  params[3] = params_denorm[0];
 }
 
-static void denormalizeTranslation(double *H, double *T1, double *T2) {
-  double Ha[MAX_PARAMDIM];
-  Ha[0] = 1;
-  Ha[1] = 0;
-  Ha[2] = H[0];
-  Ha[3] = 0;
-  Ha[4] = 1;
-  Ha[5] = H[1];
-  Ha[6] = Ha[7] = 0;
-  Ha[8] = 1;
-  denormalizeHomography(Ha, T1, T2);
-  H[0] = Ha[5];
-  H[1] = Ha[2];
+static void denormalize_translation(double *params, double *T1, double *T2) {
+  double params_denorm[MAX_PARAMDIM];
+  params_denorm[0] = 1;
+  params_denorm[1] = 0;
+  params_denorm[2] = params[0];
+  params_denorm[3] = 0;
+  params_denorm[4] = 1;
+  params_denorm[5] = params[1];
+  params_denorm[6] = params_denorm[7] = 0;
+  params_denorm[8] = 1;
+  denormalize_homography(params_denorm, T1, T2);
+  params[0] = params_denorm[5];
+  params[1] = params_denorm[2];
 }
 
 static int is_collinear3(double *p1, double *p2, double *p3) {
@@ -658,27 +661,27 @@ static int is_collinear3(double *p1, double *p2, double *p3) {
   return fabs(v) < collinear_eps;
 }
 
-static int isDegenerateTranslation(double *p) {
+static int is_degenerate_translation(double *p) {
   return (p[0] - p[2]) * (p[0] - p[2]) + (p[1] - p[3]) * (p[1] - p[3]) <= 2;
 }
 
-static int isDegenerateAffine(double *p) {
+static int is_degenerate_affine(double *p) {
   return is_collinear3(p, p + 2, p + 4);
 }
 
-static int isDegenerateHomography(double *p) {
+static int is_degenerate_homography(double *p) {
   return is_collinear3(p, p + 2, p + 4) || is_collinear3(p, p + 2, p + 6) ||
          is_collinear3(p, p + 4, p + 6) || is_collinear3(p + 2, p + 4, p + 6);
 }
 
-int findTranslation(const int np, double *pts1, double *pts2, double *mat) {
+int find_translation(const int np, double *pts1, double *pts2, double *mat) {
   int i;
   double sx, sy, dx, dy;
   double sumx, sumy;
 
   double T1[9], T2[9];
-  normalizeHomography(pts1, np, T1);
-  normalizeHomography(pts2, np, T2);
+  normalize_homography(pts1, np, T1);
+  normalize_homography(pts2, np, T2);
 
   sumx = 0;
   sumy = 0;
@@ -693,21 +696,21 @@ int findTranslation(const int np, double *pts1, double *pts2, double *mat) {
   }
   mat[0] = sumx / np;
   mat[1] = sumy / np;
-  denormalizeTranslation(mat, T1, T2);
+  denormalize_translation(mat, T1, T2);
   return 0;
 }
 
-int findRotZoom(const int np, double *pts1, double *pts2, double *mat) {
+int find_rotzoom(const int np, double *pts1, double *pts2, double *mat) {
   const int np2 = np * 2;
-  double *a = (double *)malloc(sizeof(*a) * np2 * 9);
+  double *a = (double *)aom_malloc(sizeof(*a) * np2 * 9);
   double *b = a + np2 * 4;
   double *temp = b + np2;
   int i;
   double sx, sy, dx, dy;
 
   double T1[9], T2[9];
-  normalizeHomography(pts1, np, T1);
-  normalizeHomography(pts2, np, T2);
+  normalize_homography(pts1, np, T1);
+  normalize_homography(pts2, np, T2);
 
   for (i = 0; i < np; ++i) {
     dx = *(pts2++);
@@ -727,27 +730,27 @@ int findRotZoom(const int np, double *pts1, double *pts2, double *mat) {
     b[2 * i] = dx;
     b[2 * i + 1] = dy;
   }
-  if (PseudoInverse(temp, a, np2, 4)) {
-    free(a);
+  if (pseudo_inverse(temp, a, np2, 4)) {
+    aom_free(a);
     return 1;
   }
-  MultiplyMat(temp, b, mat, 4, np2, 1);
-  denormalizeRotZoom(mat, T1, T2);
-  free(a);
+  multiply_mat(temp, b, mat, 4, np2, 1);
+  denormalize_rotzoom(mat, T1, T2);
+  aom_free(a);
   return 0;
 }
 
-int findAffine(const int np, double *pts1, double *pts2, double *mat) {
+int find_affine(const int np, double *pts1, double *pts2, double *mat) {
   const int np2 = np * 2;
-  double *a = (double *)malloc(sizeof(*a) * np2 * 13);
+  double *a = (double *)aom_malloc(sizeof(*a) * np2 * 13);
   double *b = a + np2 * 6;
   double *temp = b + np2;
   int i;
   double sx, sy, dx, dy;
 
   double T1[9], T2[9];
-  normalizeHomography(pts1, np, T1);
-  normalizeHomography(pts2, np, T2);
+  normalize_homography(pts1, np, T1);
+  normalize_homography(pts2, np, T2);
 
   for (i = 0; i < np; ++i) {
     dx = *(pts2++);
@@ -771,28 +774,28 @@ int findAffine(const int np, double *pts1, double *pts2, double *mat) {
     b[2 * i] = dx;
     b[2 * i + 1] = dy;
   }
-  if (PseudoInverse(temp, a, np2, 6)) {
-    free(a);
+  if (pseudo_inverse(temp, a, np2, 6)) {
+    aom_free(a);
     return 1;
   }
-  MultiplyMat(temp, b, mat, 6, np2, 1);
-  denormalizeAffine(mat, T1, T2);
-  free(a);
+  multiply_mat(temp, b, mat, 6, np2, 1);
+  denormalize_affine(mat, T1, T2);
+  aom_free(a);
   return 0;
 }
 
-int findHomography(const int np, double *pts1, double *pts2, double *mat) {
+int find_homography(const int np, double *pts1, double *pts2, double *mat) {
   // Implemented from Peter Kovesi's normalized implementation
   const int np3 = np * 3;
-  double *a = (double *)malloc(sizeof(*a) * np3 * 18);
+  double *a = (double *)aom_malloc(sizeof(*a) * np3 * 18);
   double *U = a + np3 * 9;
   double S[9], V[9 * 9];
   int i, mini;
   double sx, sy, dx, dy;
   double T1[9], T2[9];
 
-  normalizeHomography(pts1, np, T1);
-  normalizeHomography(pts2, np, T2);
+  normalize_homography(pts1, np, T1);
+  normalize_homography(pts2, np, T2);
 
   for (i = 0; i < np; ++i) {
     dx = *(pts2++);
@@ -828,7 +831,7 @@ int findHomography(const int np, double *pts1, double *pts2, double *mat) {
   }
 
   if (SVD(U, S, V, a, np3, 9)) {
-    free(a);
+    aom_free(a);
     return 1;
   } else {
     double minS = 1e12;
@@ -842,100 +845,57 @@ int findHomography(const int np, double *pts1, double *pts2, double *mat) {
   }
 
   for (i = 0; i < 9; i++) mat[i] = V[i * 9 + mini];
-  denormalizeHomography(mat, T1, T2);
-  free(a);
+  denormalize_homography(mat, T1, T2);
+  aom_free(a);
   if (mat[8] == 0.0) {
     return 1;
   }
   return 0;
 }
 
-int findHomographyScale1(const int np, double *pts1, double *pts2,
-                         double *mat) {
-  // This implementation assumes h33 = 1, but does not seem to give good results
-  const int np2 = np * 2;
-  double *a = (double *)malloc(sizeof(*a) * np2 * 17);
-  double *b = a + np2 * 8;
-  double *temp = b + np2;
-  int i, j;
-  double sx, sy, dx, dy;
-  double T1[9], T2[9];
-
-  normalizeHomography(pts1, np, T1);
-  normalizeHomography(pts2, np, T2);
-
-  for (i = 0, j = np; i < np; ++i, ++j) {
-    dx = *(pts2++);
-    dy = *(pts2++);
-    sx = *(pts1++);
-    sy = *(pts1++);
-    a[i * 8 + 0] = a[j * 8 + 3] = sx;
-    a[i * 8 + 1] = a[j * 8 + 4] = sy;
-    a[i * 8 + 2] = a[j * 8 + 5] = 1;
-    a[i * 8 + 3] = a[i * 8 + 4] = a[i * 8 + 5] = a[j * 8 + 0] = a[j * 8 + 1] =
-        a[j * 8 + 2] = 0;
-    a[i * 8 + 6] = -dx * sx;
-    a[i * 8 + 7] = -dx * sy;
-    a[j * 8 + 6] = -dy * sx;
-    a[j * 8 + 7] = -dy * sy;
-    b[i] = dx;
-    b[j] = dy;
-  }
-
-  if (PseudoInverse(temp, a, np2, 8)) {
-    free(a);
-    return 1;
-  }
-  MultiplyMat(temp, b, &*mat, 8, np2, 1);
-  mat[8] = 1;
-
-  denormalizeHomography(mat, T1, T2);
-  free(a);
-  return 0;
+int ransac_translation(double *matched_points, int npoints,
+                       int *number_of_inliers, int *best_inlier_mask,
+                       double *best_params) {
+  return ransac(matched_points, npoints, number_of_inliers, best_inlier_mask,
+                best_params, 3, 2, is_degenerate_translation,
+                NULL,  // normalize_homography,
+                NULL,  // denormalize_rotzoom,
+                find_translation, project_points_translation, TRANSLATION);
 }
 
-int ransacTranslation(double *matched_points, int npoints,
+int ransac_rotzoom(double *matched_points, int npoints, int *number_of_inliers,
+                   int *best_inlier_mask, double *best_params) {
+  return ransac(matched_points, npoints, number_of_inliers, best_inlier_mask,
+                best_params, 3, 4, is_degenerate_affine,
+                NULL,  // normalize_homography,
+                NULL,  // denormalize_rotzoom,
+                find_rotzoom, project_points_rotzoom, ROTZOOM);
+}
+
+int ransac_affine(double *matched_points, int npoints, int *number_of_inliers,
+                  int *best_inlier_mask, double *best_params) {
+  return ransac(matched_points, npoints, number_of_inliers, best_inlier_mask,
+                best_params, 3, 6, is_degenerate_affine,
+                NULL,  // normalize_homography,
+                NULL,  // denormalize_affine,
+                find_affine, project_points_affine, AFFINE);
+}
+
+int ransac_homography(double *matched_points, int npoints,
                       int *number_of_inliers, int *best_inlier_mask,
-                      double *bestH) {
-  return ransac_(matched_points, npoints, number_of_inliers, best_inlier_mask,
-                 bestH, 3, 2, isDegenerateTranslation,
-                 NULL,  // normalizeHomography,
-                 NULL,  // denormalizeRotZoom,
-                 findTranslation, projectPointsTranslation, TRANSLATION);
-}
-
-int ransacRotZoom(double *matched_points, int npoints, int *number_of_inliers,
-                  int *best_inlier_mask, double *bestH) {
-  return ransac_(matched_points, npoints, number_of_inliers, best_inlier_mask,
-                 bestH, 3, 4, isDegenerateAffine,
-                 NULL,  // normalizeHomography,
-                 NULL,  // denormalizeRotZoom,
-                 findRotZoom, projectPointsRotZoom, ROTZOOM);
-}
-
-int ransacAffine(double *matched_points, int npoints, int *number_of_inliers,
-                 int *best_inlier_mask, double *bestH) {
-  return ransac_(matched_points, npoints, number_of_inliers, best_inlier_mask,
-                 bestH, 3, 6, isDegenerateAffine,
-                 NULL,  // normalizeHomography,
-                 NULL,  // denormalizeAffine,
-                 findAffine, projectPointsAffine, AFFINE);
-}
-
-int ransacHomography(double *matched_points, int npoints,
-                     int *number_of_inliers, int *best_inlier_mask,
-                     double *bestH) {
-  int result = ransac_(matched_points, npoints, number_of_inliers,
-                       best_inlier_mask, bestH, 4, 8, isDegenerateHomography,
-                       NULL,  // normalizeHomography,
-                       NULL,  // denormalizeHomography,
-                       findHomography, projectPointsHomography, HOMOGRAPHY);
+                      double *best_params) {
+  const int result =
+      ransac(matched_points, npoints, number_of_inliers, best_inlier_mask,
+             best_params, 4, 8, is_degenerate_homography,
+             NULL,  // normalize_homography,
+             NULL,  // denormalize_homography,
+             find_homography, project_points_homography, HOMOGRAPHY);
   if (!result) {
     // normalize so that H33 = 1
     int i;
-    double m = 1.0 / bestH[8];
-    for (i = 0; i < 8; ++i) bestH[i] *= m;
-    bestH[8] = 1.0;
+    const double m = 1.0 / best_params[8];
+    for (i = 0; i < 8; ++i) best_params[i] *= m;
+    best_params[8] = 1.0;
   }
   return result;
 }

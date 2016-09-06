@@ -4481,13 +4481,13 @@ static void refine_integerized_param(WarpedMotionParams *wm,
   }
 }
 
-static void convert_to_params(double *H, TransformationType type,
+static void convert_to_params(const double *params, TransformationType type,
                               int16_t *model) {
   int i, diag_value;
   int alpha_present = 0;
   int n_params = n_trans_model_params[type];
-  model[0] = (int16_t)floor(H[0] * (1 << GM_TRANS_PREC_BITS) + 0.5);
-  model[1] = (int16_t)floor(H[1] * (1 << GM_TRANS_PREC_BITS) + 0.5);
+  model[0] = (int16_t)floor(params[0] * (1 << GM_TRANS_PREC_BITS) + 0.5);
+  model[1] = (int16_t)floor(params[1] * (1 << GM_TRANS_PREC_BITS) + 0.5);
   model[0] = (int16_t)clamp(model[0], GM_TRANS_MIN, GM_TRANS_MAX) *
              GM_TRANS_DECODE_FACTOR;
   model[1] = (int16_t)clamp(model[1], GM_TRANS_MIN, GM_TRANS_MAX) *
@@ -4495,7 +4495,7 @@ static void convert_to_params(double *H, TransformationType type,
 
   for (i = 2; i < n_params; ++i) {
     diag_value = ((i && 1) ? (1 << GM_ALPHA_PREC_BITS) : 0);
-    model[i] = (int16_t)floor(H[i] * (1 << GM_ALPHA_PREC_BITS) + 0.5);
+    model[i] = (int16_t)floor(params[i] * (1 << GM_ALPHA_PREC_BITS) + 0.5);
     model[i] =
         (int16_t)(clamp(model[i] - diag_value, GM_ALPHA_MIN, GM_ALPHA_MAX) +
                   diag_value) *
@@ -4511,11 +4511,12 @@ static void convert_to_params(double *H, TransformationType type,
   }
 }
 
-static void convert_model_to_params(double *H, TransformationType type,
+static void convert_model_to_params(const double *params,
+                                    TransformationType type,
                                     Global_Motion_Params *model) {
   // TODO(sarahparker) implement for homography
   if (type > HOMOGRAPHY)
-    convert_to_params(H, type, (int16_t *)model->motion_params.wmmat);
+    convert_to_params(params, type, (int16_t *)model->motion_params.wmmat);
   model->gmtype = get_gmtype(model);
   model->motion_params.wmtype = gm_to_trans_type(model->gmtype);
 }
@@ -4547,13 +4548,14 @@ static void encode_frame_internal(AV1_COMP *cpi) {
   if (cpi->common.frame_type == INTER_FRAME && cpi->Source) {
     YV12_BUFFER_CONFIG *ref_buf;
     int frame;
-    double H[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    double erroradvantage = 0;
+    double params[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     for (frame = LAST_FRAME; frame <= ALTREF_FRAME; ++frame) {
       ref_buf = get_ref_frame_buffer(cpi, frame);
       if (ref_buf) {
         if (compute_global_motion_feature_based(GLOBAL_MOTION_MODEL,
-                                                cpi->Source, ref_buf, H)) {
-          convert_model_to_params(H, GLOBAL_MOTION_MODEL,
+                                                cpi->Source, ref_buf, params)) {
+          convert_model_to_params(params, GLOBAL_MOTION_MODEL,
                                   &cm->global_motion[frame]);
           if (get_gmtype(&cm->global_motion[frame]) > GLOBAL_ZERO) {
             refine_integerized_param(
@@ -4565,7 +4567,7 @@ static void encode_frame_internal(AV1_COMP *cpi) {
                 ref_buf->y_stride, cpi->Source->y_buffer, cpi->Source->y_width,
                 cpi->Source->y_height, cpi->Source->y_stride, 3);
             // compute the advantage of using gm parameters over 0 motion
-            double erroradvantage = av1_warp_erroradv(
+            erroradvantage = av1_warp_erroradv(
                 &cm->global_motion[frame].motion_params,
 #if CONFIG_AOM_HIGHBITDEPTH
                 xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH, xd->bd,

@@ -25,12 +25,12 @@
 #define MAX_CORNERS 4096
 #define MIN_INLIER_PROB 0.1
 
-INLINE RansacType get_ransac_type(TransformationType type) {
+INLINE RansacFunc get_ransac_type(TransformationType type) {
   switch (type) {
-    case HOMOGRAPHY: return ransacHomography;
-    case AFFINE: return ransacAffine;
-    case ROTZOOM: return ransacRotZoom;
-    case TRANSLATION: return ransacTranslation;
+    case HOMOGRAPHY: return ransac_homography;
+    case AFFINE: return ransac_affine;
+    case ROTZOOM: return ransac_rotzoom;
+    case TRANSLATION: return ransac_translation;
     default: assert(0); return NULL;
   }
 }
@@ -42,7 +42,7 @@ static int compute_global_motion_params(TransformationType type,
                                         int *inlier_map) {
   int result;
   int num_inliers = 0;
-  RansacType ransac = get_ransac_type(type);
+  RansacFunc ransac = get_ransac_type(type);
   if (ransac == NULL) return 0;
 
   result = ransac(correspondences, num_correspondences, &num_inliers,
@@ -66,10 +66,12 @@ int compute_global_motion_feature_based(TransformationType type,
   int *inlier_map = NULL;
 
   // compute interest points in images using FAST features
-  num_frm_corners = FastCornerDetect(frm->y_buffer, frm->y_width, frm->y_height,
-                                     frm->y_stride, frm_corners, MAX_CORNERS);
-  num_ref_corners = FastCornerDetect(ref->y_buffer, ref->y_width, ref->y_height,
-                                     ref->y_stride, ref_corners, MAX_CORNERS);
+  num_frm_corners =
+      fast_corner_detect(frm->y_buffer, frm->y_width, frm->y_height,
+                         frm->y_stride, frm_corners, MAX_CORNERS);
+  num_ref_corners =
+      fast_corner_detect(ref->y_buffer, ref->y_width, ref->y_height,
+                         ref->y_stride, ref_corners, MAX_CORNERS);
 
   // find correspondences between the two images
   correspondences =

@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef AV1_COMMON_WARPED_MOTION_H
-#define AV1_COMMON_WARPED_MOTION_H
+#ifndef AV1_COMMON_WARPED_MOTION_H_
+#define AV1_COMMON_WARPED_MOTION_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,43 +22,29 @@
 #include "aom_dsp/aom_dsp_common.h"
 #include "av1/common/mv.h"
 
-// Bits of precision used for the model
-#define WARPEDMODEL_PREC_BITS 8
-#define WARPEDMODEL_ROW3HOMO_PREC_BITS 12
-
-// Bits of subpel precision for warped interpolation
-#define WARPEDPIXEL_PREC_BITS 6
-#define WARPEDPIXEL_PREC_SHIFTS (1 << WARPEDPIXEL_PREC_BITS)
-
-// Taps for ntap filter
-#define WARPEDPIXEL_FILTER_TAPS 6
-
-// Precision of filter taps
-#define WARPEDPIXEL_FILTER_BITS 7
-
-#define WARPEDDIFF_PREC_BITS (WARPEDMODEL_PREC_BITS - WARPEDPIXEL_PREC_BITS)
-
-typedef void (*ProjectPointsType)(int16_t *mat, int *points, int *proj,
+typedef void (*ProjectPointsFunc)(int16_t *mat, int *points, int *proj,
                                   const int n, const int stride_points,
                                   const int stride_proj,
                                   const int subsampling_x,
                                   const int subsampling_y);
 
-void projectPointsHomography(int16_t *mat, int *points, int *proj, const int n,
-                             const int stride_points, const int stride_proj,
-                             const int subsampling_x, const int subsampling_y);
+void project_points_translation(int16_t *mat, int *points, int *proj,
+                                const int n, const int stride_points,
+                                const int stride_proj, const int subsampling_x,
+                                const int subsampling_y);
 
-void projectPointsAffine(int16_t *mat, int *points, int *proj, const int n,
-                         const int stride_points, const int stride_proj,
-                         const int subsampling_x, const int subsampling_y);
+void project_points_rotzoom(int16_t *mat, int *points, int *proj, const int n,
+                            const int stride_points, const int stride_proj,
+                            const int subsampling_x, const int subsampling_y);
 
-void projectPointsRotZoom(int16_t *mat, int *points, int *proj, const int n,
-                          const int stride_points, const int stride_proj,
-                          const int subsampling_x, const int subsampling_y);
+void project_points_affine(int16_t *mat, int *points, int *proj, const int n,
+                           const int stride_points, const int stride_proj,
+                           const int subsampling_x, const int subsampling_y);
 
-void projectPointsTranslation(int16_t *mat, int *points, int *proj, const int n,
-                              const int stride_points, const int stride_proj,
-                              const int subsampling_x, const int subsampling_y);
+void project_points_homography(int16_t *mat, int *points, int *proj,
+                               const int n, const int stride_points,
+                               const int stride_proj, const int subsampling_x,
+                               const int subsampling_y);
 
 double av1_warp_erroradv(WarpedMotionParams *wm,
 #if CONFIG_AOM_HIGHBITDEPTH
@@ -81,4 +67,4 @@ void av1_warp_plane(WarpedMotionParams *wm,
 // Integerize model into the WarpedMotionParams structure
 void av1_integerize_model(const double *model, TransformationType wmtype,
                           WarpedMotionParams *wm);
-#endif  // AV1_COMMON_WARPED_MOTION_H
+#endif  // AV1_COMMON_WARPED_MOTION_H_

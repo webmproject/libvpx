@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+ *  Copyright (c) 2016 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -76,7 +76,7 @@ static int is_eligible_distance(double point1x, double point1y, double point2x,
 static void improve_correspondence(unsigned char *frm, unsigned char *ref,
                                    int width, int height, int frm_stride,
                                    int ref_stride,
-                                   correspondence *correspondences,
+                                   Correspondence *correspondences,
                                    int num_correspondences) {
   int i;
   for (i = 0; i < num_correspondences; ++i) {
@@ -161,7 +161,7 @@ int determine_correspondence(unsigned char *frm, int *frm_corners,
                              double *correspondence_pts) {
   // TODO(sarahparker) Improve this to include 2-way match
   int i, j;
-  correspondence *correspondences = (correspondence *)correspondence_pts;
+  Correspondence *correspondences = (Correspondence *)correspondence_pts;
   int num_correspondences = 0;
   for (i = 0; i < num_frm_corners; ++i) {
     double best_match_ncc = 0.0;

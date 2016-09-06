@@ -1,8 +1,10 @@
-This code was taken from http://www.edwardrosten.com/work/fast.html. Fast 10, 11, and 12
-have been deleted.
+URL: https://github.com/edrosten/fast-C-src
+Version: 391d5e939eb1545d24c10533d7de424db8d9c191
+License: BSD
+License File: LICENSE
 
-FAST feature detectors in C Version 2.0
----------------------------------------
+Description:
+Library to compute FAST features with non-maximum suppression.
 
 The files are valid C and C++ code, and have no special requirements for
 compiling, and they do not depend on any libraries. Just compile them along with
@@ -31,4 +33,6 @@ is the same as xsize.
 The detection, scoring and nonmaximal suppression are available as individual
 functions.  To see how to use the individual functions, see fast.c
 
-
+Local Modifications:
+Add lines to turn off clang formatting for these files
+Remove Fast 10, 11 and 12

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+ *  Copyright (c) 2016 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <memory.h>
 
-int FastCornerDetect(unsigned char *buf, int width, int height, int stride,
-                     int *points, int max_points);
+int fast_corner_detect(unsigned char *buf, int width, int height, int stride,
+                       int *points, int max_points);
 
-#endif  // AV1_ENCODER_CORNER_DETECT_H
+#endif  // AV1_ENCODER_CORNER_DETECT_H_

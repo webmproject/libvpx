@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+ *  Copyright (c) 2016 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -18,7 +18,7 @@
 typedef struct {
   double x, y;
   double rx, ry;
-} correspondence;
+} Correspondence;
 
 int determine_correspondence(unsigned char *frm, int *frm_corners,
                              int num_frm_corners, unsigned char *ref,
@@ -26,4 +26,4 @@ int determine_correspondence(unsigned char *frm, int *frm_corners,
                              int height, int frm_stride, int ref_stride,
                              double *correspondence_pts);
 
-#endif  // AV1_ENCODER_CORNER_MATCH_H
+#endif  // AV1_ENCODER_CORNER_MATCH_H_
