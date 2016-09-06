@@ -26,7 +26,7 @@ static ProjectPointsType get_project_points_type(TransformationType type) {
   }
 }
 
-void projectPointsTranslation(int *mat, int *points, int *proj, const int n,
+void projectPointsTranslation(int16_t *mat, int *points, int *proj, const int n,
                               const int stride_points, const int stride_proj,
                               const int subsampling_x,
                               const int subsampling_y) {
@@ -35,24 +35,24 @@ void projectPointsTranslation(int *mat, int *points, int *proj, const int n,
     const int x = *(points++), y = *(points++);
     if (subsampling_x)
       *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
-          ((x << (WARPEDMODEL_PREC_BITS + 1)) + mat[0]),
+          ((x << (WARPEDMODEL_PREC_BITS + 1)) + mat[1]),
           WARPEDDIFF_PREC_BITS + 1);
     else
       *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
-          ((x << WARPEDMODEL_PREC_BITS)) + mat[0], WARPEDDIFF_PREC_BITS);
+          ((x << WARPEDMODEL_PREC_BITS) + mat[1]), WARPEDDIFF_PREC_BITS);
     if (subsampling_y)
       *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
-          ((y << (WARPEDMODEL_PREC_BITS + 1)) + mat[1]),
+          ((y << (WARPEDMODEL_PREC_BITS + 1)) + mat[0]),
           WARPEDDIFF_PREC_BITS + 1);
     else
       *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
-          ((y << WARPEDMODEL_PREC_BITS)) + mat[1], WARPEDDIFF_PREC_BITS);
+          ((y << WARPEDMODEL_PREC_BITS)) + mat[0], WARPEDDIFF_PREC_BITS);
     points += stride_points - 2;
     proj += stride_proj - 2;
   }
 }
 
-void projectPointsRotZoom(int *mat, int *points, int *proj, const int n,
+void projectPointsRotZoom(int16_t *mat, int *points, int *proj, const int n,
                           const int stride_points, const int stride_proj,
                           const int subsampling_x, const int subsampling_y) {
   int i;
@@ -60,26 +60,26 @@ void projectPointsRotZoom(int *mat, int *points, int *proj, const int n,
     const int x = *(points++), y = *(points++);
     if (subsampling_x)
       *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
-          mat[2] * 2 * x + mat[3] * 2 * y + mat[0] +
-              (mat[2] + mat[3] - (1 << WARPEDMODEL_PREC_BITS)) / 2,
+          mat[3] * 2 * x + mat[2] * 2 * y + mat[1] +
+              (mat[3] + mat[2] - (1 << WARPEDMODEL_PREC_BITS)) / 2,
           WARPEDDIFF_PREC_BITS + 1);
     else
-      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(mat[2] * x + mat[3] * y + mat[0],
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(mat[3] * x + mat[2] * y + mat[1],
                                             WARPEDDIFF_PREC_BITS);
     if (subsampling_y)
       *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
-          -mat[3] * 2 * x + mat[2] * 2 * y + mat[1] +
-              (-mat[3] + mat[2] - (1 << WARPEDMODEL_PREC_BITS)) / 2,
+          -mat[2] * 2 * x + mat[3] * 2 * y + mat[0] +
+              (-mat[2] + mat[3] - (1 << WARPEDMODEL_PREC_BITS)) / 2,
           WARPEDDIFF_PREC_BITS + 1);
     else
-      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(-mat[3] * x + mat[2] * y + mat[1],
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(-mat[2] * x + mat[3] * y + mat[0],
                                             WARPEDDIFF_PREC_BITS);
     points += stride_points - 2;
     proj += stride_proj - 2;
   }
 }
 
-void projectPointsAffine(int *mat, int *points, int *proj, const int n,
+void projectPointsAffine(int16_t *mat, int *points, int *proj, const int n,
                          const int stride_points, const int stride_proj,
                          const int subsampling_x, const int subsampling_y) {
   int i;
@@ -87,26 +87,26 @@ void projectPointsAffine(int *mat, int *points, int *proj, const int n,
     const int x = *(points++), y = *(points++);
     if (subsampling_x)
       *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
-          mat[2] * 2 * x + mat[3] * 2 * y + mat[0] +
-              (mat[2] + mat[3] - (1 << WARPEDMODEL_PREC_BITS)) / 2,
+          mat[3] * 2 * x + mat[2] * 2 * y + mat[1] +
+              (mat[3] + mat[2] - (1 << WARPEDMODEL_PREC_BITS)) / 2,
           WARPEDDIFF_PREC_BITS + 1);
     else
-      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(mat[2] * x + mat[3] * y + mat[0],
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(mat[3] * x + mat[2] * y + mat[1],
                                             WARPEDDIFF_PREC_BITS);
     if (subsampling_y)
       *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
-          mat[4] * 2 * x + mat[5] * 2 * y + mat[1] +
-              (mat[4] + mat[5] - (1 << WARPEDMODEL_PREC_BITS)) / 2,
+          mat[5] * 2 * x + mat[4] * 2 * y + mat[0] +
+              (mat[5] + mat[4] - (1 << WARPEDMODEL_PREC_BITS)) / 2,
           WARPEDDIFF_PREC_BITS + 1);
     else
-      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(mat[4] * x + mat[5] * y + mat[1],
+      *(proj++) = ROUND_POWER_OF_TWO_SIGNED(mat[5] * x + mat[4] * y + mat[0],
                                             WARPEDDIFF_PREC_BITS);
     points += stride_points - 2;
     proj += stride_proj - 2;
   }
 }
 
-void projectPointsHomography(int *mat, int *points, int *proj, const int n,
+void projectPointsHomography(int16_t *mat, int *points, int *proj, const int n,
                              const int stride_points, const int stride_proj,
                              const int subsampling_x, const int subsampling_y) {
   int i;
@@ -117,11 +117,11 @@ void projectPointsHomography(int *mat, int *points, int *proj, const int n,
     x = (subsampling_x ? 4 * x + 1 : 2 * x);
     y = (subsampling_y ? 4 * y + 1 : 2 * y);
 
-    Z = (mat[6] * x + mat[7] * y + (1 << (WARPEDMODEL_ROW3HOMO_PREC_BITS + 1)));
-    xp = (mat[0] * x + mat[1] * y + 2 * mat[2])
+    Z = (mat[7] * x + mat[6] * y + (1 << (WARPEDMODEL_ROW3HOMO_PREC_BITS + 1)));
+    xp = (mat[1] * x + mat[0] * y + 2 * mat[3])
          << (WARPEDPIXEL_PREC_BITS + WARPEDMODEL_ROW3HOMO_PREC_BITS -
              WARPEDMODEL_PREC_BITS);
-    yp = (mat[3] * x + mat[4] * y + 2 * mat[5])
+    yp = (mat[2] * x + mat[5] * y + 2 * mat[4])
          << (WARPEDPIXEL_PREC_BITS + WARPEDMODEL_ROW3HOMO_PREC_BITS -
              WARPEDMODEL_PREC_BITS);
 
@@ -483,7 +483,8 @@ static double highbd_warp_erroradv(WarpedMotionParams *wm, uint8_t *ref8,
       int in[2], out[2];
       in[0] = j;
       in[1] = i;
-      projectpoints(wm->wmmat, in, out, 1, 2, 2, subsampling_x, subsampling_y);
+      projectpoints((int16_t *)wm->wmmat, in, out, 1, 2, 2, subsampling_x,
+                    subsampling_y);
       out[0] = ROUND_POWER_OF_TWO_SIGNED(out[0] * x_scale, 4);
       out[1] = ROUND_POWER_OF_TWO_SIGNED(out[1] * y_scale, 4);
       gm_err = dst[(j - p_col) + (i - p_row) * p_stride] -
@@ -514,7 +515,8 @@ static void highbd_warp_plane(WarpedMotionParams *wm, uint8_t *ref8, int width,
       int in[2], out[2];
       in[0] = j;
       in[1] = i;
-      projectpoints(wm->wmmat, in, out, 1, 2, 2, subsampling_x, subsampling_y);
+      projectpoints((int16_t *)wm->wmmat, in, out, 1, 2, 2, subsampling_x,
+                    subsampling_y);
       out[0] = ROUND_POWER_OF_TWO_SIGNED(out[0] * x_scale, 4);
       out[1] = ROUND_POWER_OF_TWO_SIGNED(out[1] * y_scale, 4);
       pred[(j - p_col) + (i - p_row) * p_stride] = highbd_warp_interpolate(
@@ -538,7 +540,8 @@ static double warp_erroradv(WarpedMotionParams *wm, uint8_t *ref, int width,
       int in[2], out[2];
       in[0] = j;
       in[1] = i;
-      projectpoints(wm->wmmat, in, out, 1, 2, 2, subsampling_x, subsampling_y);
+      projectpoints((int16_t *)wm->wmmat, in, out, 1, 2, 2, subsampling_x,
+                    subsampling_y);
       out[0] = ROUND_POWER_OF_TWO_SIGNED(out[0] * x_scale, 4);
       out[1] = ROUND_POWER_OF_TWO_SIGNED(out[1] * y_scale, 4);
       gm_err = dst[(j - p_col) + (i - p_row) * p_stride] -
@@ -565,7 +568,8 @@ static void warp_plane(WarpedMotionParams *wm, uint8_t *ref, int width,
       int in[2], out[2];
       in[0] = j;
       in[1] = i;
-      projectpoints(wm->wmmat, in, out, 1, 2, 2, subsampling_x, subsampling_y);
+      projectpoints((int16_t *)wm->wmmat, in, out, 1, 2, 2, subsampling_x,
+                    subsampling_y);
       out[0] = ROUND_POWER_OF_TWO_SIGNED(out[0] * x_scale, 4);
       out[1] = ROUND_POWER_OF_TWO_SIGNED(out[1] * y_scale, 4);
       pred[(j - p_col) + (i - p_row) * p_stride] =
@@ -620,22 +624,28 @@ void av1_integerize_model(const double *model, TransformationType wmtype,
   switch (wmtype) {
     case HOMOGRAPHY:
       assert(fabs(model[8] - 1.0) < 1e-12);
-      wm->wmmat[7] =
-          (int)lrint(model[7] * (1 << WARPEDMODEL_ROW3HOMO_PREC_BITS));
-      wm->wmmat[6] =
-          (int)lrint(model[6] * (1 << WARPEDMODEL_ROW3HOMO_PREC_BITS));
+      wm->wmmat[3].as_mv.row =
+          (int16_t)lrint(model[6] * (1 << WARPEDMODEL_ROW3HOMO_PREC_BITS));
+      wm->wmmat[3].as_mv.col =
+          (int16_t)lrint(model[7] * (1 << WARPEDMODEL_ROW3HOMO_PREC_BITS));
     /* fallthrough intended */
     case AFFINE:
-      wm->wmmat[5] = (int)lrint(model[5] * (1 << WARPEDMODEL_PREC_BITS));
-      wm->wmmat[4] = (int)lrint(model[4] * (1 << WARPEDMODEL_PREC_BITS));
+      wm->wmmat[2].as_mv.row =
+          (int16_t)lrint(model[4] * (1 << WARPEDMODEL_PREC_BITS));
+      wm->wmmat[2].as_mv.col =
+          (int16_t)lrint(model[5] * (1 << WARPEDMODEL_PREC_BITS));
     /* fallthrough intended */
     case ROTZOOM:
-      wm->wmmat[3] = (int)lrint(model[3] * (1 << WARPEDMODEL_PREC_BITS));
-      wm->wmmat[2] = (int)lrint(model[2] * (1 << WARPEDMODEL_PREC_BITS));
+      wm->wmmat[1].as_mv.row =
+          (int16_t)lrint(model[2] * (1 << WARPEDMODEL_PREC_BITS));
+      wm->wmmat[1].as_mv.col =
+          (int16_t)lrint(model[3] * (1 << WARPEDMODEL_PREC_BITS));
     /* fallthrough intended */
     case TRANSLATION:
-      wm->wmmat[1] = (int)lrint(model[1] * (1 << WARPEDMODEL_PREC_BITS));
-      wm->wmmat[0] = (int)lrint(model[0] * (1 << WARPEDMODEL_PREC_BITS));
+      wm->wmmat[0].as_mv.row =
+          (int16_t)lrint(model[0] * (1 << WARPEDMODEL_PREC_BITS));
+      wm->wmmat[0].as_mv.col =
+          (int16_t)lrint(model[1] * (1 << WARPEDMODEL_PREC_BITS));
       break;
     default: assert(0 && "Invalid TransformationType");
   }

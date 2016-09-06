@@ -3411,28 +3411,28 @@ static void read_global_motion_params(Global_Motion_Params *params,
   switch (gmtype) {
     case GLOBAL_ZERO: break;
     case GLOBAL_AFFINE:
-      params->motion_params.wmmat[4] =
-          (aom_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
-           GM_ALPHA_DECODE_FACTOR);
-      params->motion_params.wmmat[5] =
+      params->motion_params.wmmat[2].as_mv.row =
           aom_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
               GM_ALPHA_DECODE_FACTOR +
           (1 << WARPEDMODEL_PREC_BITS);
+      params->motion_params.wmmat[2].as_mv.col =
+          (aom_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
+           GM_ALPHA_DECODE_FACTOR);
     // fallthrough intended
     case GLOBAL_ROTZOOM:
-      params->motion_params.wmmat[2] =
+      params->motion_params.wmmat[1].as_mv.row =
+          aom_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
+          GM_ALPHA_DECODE_FACTOR;
+      params->motion_params.wmmat[1].as_mv.col =
           (aom_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
            GM_ALPHA_DECODE_FACTOR) +
           (1 << WARPEDMODEL_PREC_BITS);
-      params->motion_params.wmmat[3] =
-          aom_read_primitive_symmetric(r, GM_ABS_ALPHA_BITS) *
-          GM_ALPHA_DECODE_FACTOR;
     // fallthrough intended
     case GLOBAL_TRANSLATION:
-      params->motion_params.wmmat[0] =
+      params->motion_params.wmmat[0].as_mv.row =
           aom_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
           GM_TRANS_DECODE_FACTOR;
-      params->motion_params.wmmat[1] =
+      params->motion_params.wmmat[0].as_mv.col =
           aom_read_primitive_symmetric(r, GM_ABS_TRANS_BITS) *
           GM_TRANS_DECODE_FACTOR;
       break;
@@ -3446,6 +3446,14 @@ static void read_global_motion(AV1_COMMON *cm, aom_reader *r) {
   for (frame = LAST_FRAME; frame <= ALTREF_FRAME; ++frame) {
     read_global_motion_params(&cm->global_motion[frame],
                               cm->fc->global_motion_types_prob, r);
+    /*
+          printf("Dec Ref %d [%d]: %d %d %d %d\n",
+                 frame, cm->current_video_frame,
+                 cm->global_motion[frame].motion_params.wmmat[0].as_mv.row,
+                 cm->global_motion[frame].motion_params.wmmat[0].as_mv.col,
+                 cm->global_motion[frame].motion_params.wmmat[1].as_mv.row,
+                 cm->global_motion[frame].motion_params.wmmat[1].as_mv.col);
+    */
   }
 }
 #endif  // CONFIG_GLOBAL_MOTION
