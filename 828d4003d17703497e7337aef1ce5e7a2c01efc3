@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "762d8fd5_d233ba4c",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-06T22:30:10Z",
+      "side": 1,
+      "message": "can you right-size these in SetUp() (instead of SetUpTestCase)? that would add an additional check on the bounds if smaller sizes are meant to stay within them",
+      "revId": "828d4003d17703497e7337aef1ce5e7a2c01efc3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
