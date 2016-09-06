@@ -788,14 +788,11 @@ void vp8_encode_frame(VP8_COMP *cpi) {
             xd->mode_info_stride * cpi->encoding_thread_count;
         x->partition_info += xd->mode_info_stride * cpi->encoding_thread_count;
         x->gf_active_ptr += cm->mb_cols * cpi->encoding_thread_count;
-
-        if (mb_row == cm->mb_rows - 1) {
-          sem_post(&cpi->h_event_end_encoding); /* signal frame encoding end */
-        }
       }
-
-      sem_wait(
-          &cpi->h_event_end_encoding); /* wait for other threads to finish */
+      /* Wait for all the threads to finish. */
+      for (i = 0; i < cpi->encoding_thread_count; ++i) {
+        sem_wait(&cpi->h_event_end_encoding[i]);
+      }
 
       for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
         cpi->tok_count += (unsigned int)(cpi->tplist[mb_row].stop -
