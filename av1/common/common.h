@@ -16,7 +16,6 @@
 
 #include <assert.h>
 
-#include "./aom_config.h"
 #include "aom_dsp/aom_dsp_common.h"
 #include "aom_mem/aom_mem.h"
 #include "aom/aom_integer.h"
@@ -49,24 +48,8 @@ static INLINE int get_unsigned_bits(unsigned int num_values) {
   return num_values > 0 ? get_msb(num_values) + 1 : 0;
 }
 
-#if CONFIG_DEBUG
-#define CHECK_MEM_ERROR(cm, lval, expr)                                     \
-  do {                                                                      \
-    lval = (expr);                                                          \
-    if (!lval)                                                              \
-      aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,                   \
-                         "Failed to allocate " #lval " at %s:%d", __FILE__, \
-                         __LINE__);                                         \
-  } while (0)
-#else
-#define CHECK_MEM_ERROR(cm, lval, expr)                   \
-  do {                                                    \
-    lval = (expr);                                        \
-    if (!lval)                                            \
-      aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR, \
-                         "Failed to allocate " #lval);    \
-  } while (0)
-#endif
+#define CHECK_MEM_ERROR(cm, lval, expr) \
+  AOM_CHECK_MEM_ERROR(&cm->error, lval, expr)
 // TODO(yaowu: validate the usage of these codes or develop new ones.)
 #define AV1_SYNC_CODE_0 0x49
 #define AV1_SYNC_CODE_1 0x83
