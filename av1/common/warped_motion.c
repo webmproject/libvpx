@@ -477,7 +477,7 @@ static double highbd_warp_erroradv(WarpedMotionParams *wm, uint8_t *ref8,
   uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
   uint16_t *ref = CONVERT_TO_SHORTPTR(ref8);
   int gm_err = 0, no_gm_err = 0;
-  int gm_sumerr = 0, no_gm_sumerr = 0;
+  int64_t gm_sumerr = 0, no_gm_sumerr = 0;
   for (i = p_row; i < p_row + p_height; ++i) {
     for (j = p_col; j < p_col + p_width; ++j) {
       int in[2], out[2];
@@ -492,8 +492,8 @@ static double highbd_warp_erroradv(WarpedMotionParams *wm, uint8_t *ref8,
                                        stride, bd);
       no_gm_err = dst[(j - p_col) + (i - p_row) * p_stride] -
                   ref[(j - p_col) + (i - p_row) * stride];
-      gm_sumerr += gm_err * gm_err;
-      no_gm_sumerr += no_gm_err * no_gm_err;
+      gm_sumerr += (int64_t)gm_err * gm_err;
+      no_gm_sumerr += (int64_t)no_gm_err * no_gm_err;
     }
   }
   return (double)gm_sumerr / no_gm_sumerr;
