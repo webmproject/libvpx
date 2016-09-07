@@ -16,6 +16,24 @@
       "revId": "828d4003d17703497e7337aef1ce5e7a2c01efc3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56edeb05_70e170be",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-07T16:49:29Z",
+      "side": 1,
+      "message": "I moved it to SetUp in PredictTestBase and moved SetUpTestCase to the children so they can set predict_reference_, which was the only per-test differentiation.",
+      "parentUuid": "762d8fd5_d233ba4c",
+      "revId": "828d4003d17703497e7337aef1ce5e7a2c01efc3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
