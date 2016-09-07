@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "762d8fd5_fe5de576",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-09-07T14:44:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "762d8fd5_b80f05e6",
+      "revId": "565ee5e08b588bb1851c30713cedb4de80ff92ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "762d8fd5_38eaf5d6",
         "filename": "vp9/decoder/vp9_detokenize.c",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2016-09-07T03:15:27Z",
       "side": 1,
       "message": "what\u0027s preventing updating \u0027r\u0027 directly instead of carrying these around?",
+      "revId": "565ee5e08b588bb1851c30713cedb4de80ff92ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762d8fd5_7e43b595",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-09-07T14:44:49Z",
+      "side": 1,
+      "message": "Not sure what the compiler will do.  I can try.",
+      "parentUuid": "762d8fd5_38eaf5d6",
       "revId": "565ee5e08b588bb1851c30713cedb4de80ff92ca",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "762d8fd5_5ee6b1a9",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-09-07T14:44:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "762d8fd5_38d3152b",
+      "revId": "565ee5e08b588bb1851c30713cedb4de80ff92ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "762d8fd5_18d8d141",
         "filename": "vp9/decoder/vp9_detokenize.c",
         "patchSetId": 4
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "762d8fd5_be3c0d21",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-09-07T14:44:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "762d8fd5_18d8d141",
+      "revId": "565ee5e08b588bb1851c30713cedb4de80ff92ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "762d8fd5_b8fd459e",
         "filename": "vp9/decoder/vp9_detokenize.c",
         "patchSetId": 4
@@ -81,6 +153,24 @@
       "writtenOn": "2016-09-07T03:15:27Z",
       "side": 1,
       "message": "we should be able to simplify prob\u003d128 further (later)",
+      "revId": "565ee5e08b588bb1851c30713cedb4de80ff92ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762d8fd5_5e4871ae",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-09-07T14:44:49Z",
+      "side": 1,
+      "message": "agreed",
+      "parentUuid": "762d8fd5_b8fd459e",
       "revId": "565ee5e08b588bb1851c30713cedb4de80ff92ca",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
