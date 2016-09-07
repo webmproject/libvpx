@@ -33,21 +33,21 @@ static int check_size_argument_overflow(uint64_t nmemb, uint64_t size) {
   return 1;
 }
 
-static INLINE size_t *get_malloc_address_location(void *const mem) {
+static size_t *get_malloc_address_location(void *const mem) {
   return ((size_t *)mem) - 1;
 }
 
-static INLINE uint64_t get_aligned_malloc_size(size_t size, size_t align) {
+static uint64_t get_aligned_malloc_size(size_t size, size_t align) {
   return (uint64_t)size + align - 1 + ADDRESS_STORAGE_SIZE;
 }
 
-static INLINE void set_actual_malloc_address(void *const mem,
-                                             const void *const malloc_addr) {
+static void set_actual_malloc_address(void *const mem,
+                                      const void *const malloc_addr) {
   size_t *const malloc_addr_location = get_malloc_address_location(mem);
   *malloc_addr_location = (size_t)malloc_addr;
 }
 
-static INLINE void *get_actual_malloc_address(void *const mem) {
+static void *get_actual_malloc_address(void *const mem) {
   size_t *const malloc_addr_location = get_malloc_address_location(mem);
   return (void *)(*malloc_addr_location);
 }
