@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d6c1dbc3_e4315a14",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T23:45:11Z",
+      "side": 1,
+      "message": "maybe we should break this out to the README and provide a build section with subsections for each platform. That could then redirect here for the alternative above.",
+      "revId": "97608406c3c3b4863b815a964b5ed61836191d58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6c1dbc3_44230ec5",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T23:45:11Z",
+      "side": 1,
+      "message": "adding the full libs/... path might be more copy and pasteable",
+      "revId": "97608406c3c3b4863b815a964b5ed61836191d58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6c1dbc3_e40f9a36",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 982,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T23:45:11Z",
+      "side": 1,
+      "message": "this can go",
+      "revId": "97608406c3c3b4863b815a964b5ed61836191d58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6c1dbc3_840a2628",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1023,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T23:45:11Z",
+      "side": 1,
+      "message": "you might put the ... assuming ... text in the echo",
+      "revId": "97608406c3c3b4863b815a964b5ed61836191d58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
