@@ -4403,7 +4403,80 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 #if CONFIG_GLOBAL_MOTION
 #define MIN_TRANS_THRESH 8
 #define GLOBAL_MOTION_ADVANTAGE_THRESH 0.60
-#define GLOBAL_MOTION_MODEL TRANSLATION
+#define GLOBAL_MOTION_MODEL ROTZOOM
+static void refine_integerized_param(WarpedMotionParams *wm,
+#if CONFIG_AOM_HIGHBITDEPTH
+                                     int use_hbd, int bd,
+#endif  // CONFIG_AOM_HIGHBITDEPTH
+                                     uint8_t *ref, int r_width, int r_height,
+                                     int r_stride, uint8_t *dst, int d_width,
+                                     int d_height, int d_stride,
+                                     int n_refinements) {
+  int i = 0, p;
+  int n_params = n_trans_model_params[wm->wmtype];
+  int16_t *param_mat = (int16_t *)wm->wmmat;
+  double step_error;
+  int step;
+  int16_t *param;
+  int16_t curr_param;
+  int16_t best_param;
+
+  double best_error =
+      av1_warp_erroradv(wm,
+#if CONFIG_AOM_HIGHBITDEPTH
+                        use_hbd, bd,
+#endif  // CONFIG_AOM_HIGHBITDEPTH
+                        ref, r_width, r_height, r_stride, dst, 0, 0, d_width,
+                        d_height, d_stride, 0, 0, 16, 16);
+  for (p = 0; p < n_params; ++p) {
+    param = param_mat + p;
+    step = 1 << (n_refinements + 1);
+    curr_param = *param;
+    best_param = curr_param;
+    for (i = 0; i < n_refinements; i++) {
+      // look to the left
+      *param = curr_param - step;
+      step_error =
+          av1_warp_erroradv(wm,
+#if CONFIG_AOM_HIGHBITDEPTH
+                            use_hbd, bd,
+#endif  // CONFIG_AOM_HIGHBITDEPTH
+                            ref, r_width, r_height, r_stride, dst, 0, 0,
+                            d_width, d_height, d_stride, 0, 0, 16, 16);
+      if (step_error < best_error) {
+        step >>= 1;
+        best_error = step_error;
+        best_param = *param;
+        curr_param = best_param;
+        continue;
+      }
+
+      // look to the right
+      *param = curr_param + step;
+      step_error =
+          av1_warp_erroradv(wm,
+#if CONFIG_AOM_HIGHBITDEPTH
+                            use_hbd, bd,
+#endif  // CONFIG_AOM_HIGHBITDEPTH
+                            ref, r_width, r_height, r_stride, dst, 0, 0,
+                            d_width, d_height, d_stride, 0, 0, 16, 16);
+      if (step_error < best_error) {
+        step >>= 1;
+        best_error = step_error;
+        best_param = *param;
+        curr_param = best_param;
+        continue;
+      }
+
+      // no improvement found-> means we're either already at a minimum or
+      // step is too wide
+      step >>= 1;
+    }
+
+    *param = best_param;
+  }
+}
+
 static void convert_to_params(double *H, TransformationType type,
                               int16_t *model) {
   int i;
@@ -4416,6 +4489,7 @@ static void convert_to_params(double *H, TransformationType type,
   model[1] = (int16_t)clamp(model[1], GM_TRANS_MIN, GM_TRANS_MAX) *
              GM_TRANS_DECODE_FACTOR;
 
+  // TODO(sarahparker) 1 should be subtracted here
   for (i = 2; i < n_params; ++i) {
     model[i] = (int16_t)floor(H[i] * (1 << GM_ALPHA_PREC_BITS) + 0.5);
     model[i] = (int16_t)clamp(model[i], GM_ALPHA_MIN, GM_ALPHA_MAX) *
@@ -4476,6 +4550,14 @@ static void encode_frame_internal(AV1_COMP *cpi) {
           convert_model_to_params(H, GLOBAL_MOTION_MODEL,
                                   &cm->global_motion[frame]);
           if (get_gmtype(&cm->global_motion[frame]) > GLOBAL_ZERO) {
+            refine_integerized_param(
+                &cm->global_motion[frame].motion_params,
+#if CONFIG_AOM_HIGHBITDEPTH
+                xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH, xd->bd,
+#endif  // CONFIG_AOM_HIGHBITDEPTH
+                ref_buf->y_buffer, ref_buf->y_width, ref_buf->y_height,
+                ref_buf->y_stride, cpi->Source->y_buffer, cpi->Source->y_width,
+                cpi->Source->y_height, cpi->Source->y_stride, 3);
             // compute the advantage of using gm parameters over 0 motion
             double erroradvantage = av1_warp_erroradv(
                 &cm->global_motion[frame].motion_params,
