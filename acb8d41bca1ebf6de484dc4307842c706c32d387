@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "16045397_a60fa637",
+        "filename": "av1/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1187,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-09-07T18:44:11Z",
+      "side": 1,
+      "message": "I\u0027d rather write it as:\nargs-\u003et_above[blk_col] \u003d (x-\u003eplane[plane].eobs[block] !\u003d 0);",
+      "range": {
+        "startLine": 1187,
+        "startChar": 28,
+        "endLine": 1187,
+        "endChar": 29
+      },
+      "revId": "acb8d41bca1ebf6de484dc4307842c706c32d387",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
