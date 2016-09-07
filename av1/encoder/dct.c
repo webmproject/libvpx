@@ -12,13 +12,13 @@
 #include <assert.h>
 #include <math.h>
 
-#include "./av1_rtcd.h"
 #include "./aom_config.h"
 #include "./aom_dsp_rtcd.h"
-#include "av1/common/blockd.h"
-#include "av1/common/idct.h"
+#include "./av1_rtcd.h"
 #include "aom_dsp/fwd_txfm.h"
 #include "aom_ports/mem.h"
+#include "av1/common/blockd.h"
+#include "av1/common/idct.h"
 
 static INLINE void range_check(const tran_low_t *input, const int size,
                                const int bit) {
@@ -1132,213 +1132,35 @@ static void maybe_flip_input(const int16_t **src, int *src_stride, int l, int w,
 }
 #endif  // CONFIG_EXT_TX
 
-static const transform_2d FHT_4[] = {
-  { fdct4, fdct4 },    // DCT_DCT
-  { fadst4, fdct4 },   // ADST_DCT
-  { fdct4, fadst4 },   // DCT_ADST
-  { fadst4, fadst4 },  // ADST_ADST
-#if CONFIG_EXT_TX
-  { fadst4, fdct4 },   // FLIPADST_DCT
-  { fdct4, fadst4 },   // DCT_FLIPADST
-  { fadst4, fadst4 },  // FLIPADST_FLIPADST
-  { fadst4, fadst4 },  // ADST_FLIPADST
-  { fadst4, fadst4 },  // FLIPADST_ADST
-  { fidtx4, fidtx4 },  // IDTX
-  { fdct4, fidtx4 },   // V_DCT
-  { fidtx4, fdct4 },   // H_DCT
-  { fadst4, fidtx4 },  // V_ADST
-  { fidtx4, fadst4 },  // H_ADST
-  { fadst4, fidtx4 },  // V_FLIPADST
-  { fidtx4, fadst4 },  // H_FLIPADST
-#endif                 // CONFIG_EXT_TX
-};
-
-static const transform_2d FHT_8[] = {
-  { fdct8, fdct8 },    // DCT_DCT
-  { fadst8, fdct8 },   // ADST_DCT
-  { fdct8, fadst8 },   // DCT_ADST
-  { fadst8, fadst8 },  // ADST_ADST
-#if CONFIG_EXT_TX
-  { fadst8, fdct8 },   // FLIPADST_DCT
-  { fdct8, fadst8 },   // DCT_FLIPADST
-  { fadst8, fadst8 },  // FLIPADST_FLIPADST
-  { fadst8, fadst8 },  // ADST_FLIPADST
-  { fadst8, fadst8 },  // FLIPADST_ADST
-  { fidtx8, fidtx8 },  // IDTX
-  { fdct8, fidtx8 },   // V_DCT
-  { fidtx8, fdct8 },   // H_DCT
-  { fadst8, fidtx8 },  // V_ADST
-  { fidtx8, fadst8 },  // H_ADST
-  { fadst8, fidtx8 },  // V_FLIPADST
-  { fidtx8, fadst8 },  // H_FLIPADST
-#endif                 // CONFIG_EXT_TX
-};
-
-static const transform_2d FHT_16[] = {
-  { fdct16, fdct16 },    // DCT_DCT
-  { fadst16, fdct16 },   // ADST_DCT
-  { fdct16, fadst16 },   // DCT_ADST
-  { fadst16, fadst16 },  // ADST_ADST
-#if CONFIG_EXT_TX
-  { fadst16, fdct16 },   // FLIPADST_DCT
-  { fdct16, fadst16 },   // DCT_FLIPADST
-  { fadst16, fadst16 },  // FLIPADST_FLIPADST
-  { fadst16, fadst16 },  // ADST_FLIPADST
-  { fadst16, fadst16 },  // FLIPADST_ADST
-  { fidtx16, fidtx16 },  // IDTX
-  { fdct16, fidtx16 },   // V_DCT
-  { fidtx16, fdct16 },   // H_DCT
-  { fadst16, fidtx16 },  // V_ADST
-  { fidtx16, fadst16 },  // H_ADST
-  { fadst16, fidtx16 },  // V_FLIPADST
-  { fidtx16, fadst16 },  // H_FLIPADST
-#endif                   // CONFIG_EXT_TX
-};
-
-#if CONFIG_EXT_TX
-static const transform_2d FHT_32[] = {
-  { fdct32, fdct32 },              // DCT_DCT
-  { fhalfright32, fdct32 },        // ADST_DCT
-  { fdct32, fhalfright32 },        // DCT_ADST
-  { fhalfright32, fhalfright32 },  // ADST_ADST
-  { fhalfright32, fdct32 },        // FLIPADST_DCT
-  { fdct32, fhalfright32 },        // DCT_FLIPADST
-  { fhalfright32, fhalfright32 },  // FLIPADST_FLIPADST
-  { fhalfright32, fhalfright32 },  // ADST_FLIPADST
-  { fhalfright32, fhalfright32 },  // FLIPADST_ADST
-  { fidtx32, fidtx32 },            // IDTX
-  { fdct32, fidtx32 },             // V_DCT
-  { fidtx32, fdct32 },             // H_DCT
-  { fhalfright32, fidtx32 },       // V_ADST
-  { fidtx32, fhalfright32 },       // H_ADST
-  { fhalfright32, fidtx32 },       // V_FLIPADST
-  { fidtx32, fhalfright32 },       // H_FLIPADST
-};
-
-static const transform_2d FHT_4x8[] = {
-  { fdct8, fdct4 },    // DCT_DCT
-  { fadst8, fdct4 },   // ADST_DCT
-  { fdct8, fadst4 },   // DCT_ADST
-  { fadst8, fadst4 },  // ADST_ADST
-  { fadst8, fdct4 },   // FLIPADST_DCT
-  { fdct8, fadst4 },   // DCT_FLIPADST
-  { fadst8, fadst4 },  // FLIPADST_FLIPADST
-  { fadst8, fadst4 },  // ADST_FLIPADST
-  { fadst8, fadst4 },  // FLIPADST_ADST
-  { fidtx8, fidtx4 },  // IDTX
-  { fdct8, fidtx4 },   // V_DCT
-  { fidtx8, fdct4 },   // H_DCT
-  { fadst8, fidtx4 },  // V_ADST
-  { fidtx8, fadst4 },  // H_ADST
-  { fadst8, fidtx4 },  // V_FLIPADST
-  { fidtx8, fadst4 },  // H_FLIPADST
-};
-
-static const transform_2d FHT_8x4[] = {
-  { fdct4, fdct8 },    // DCT_DCT
-  { fadst4, fdct8 },   // ADST_DCT
-  { fdct4, fadst8 },   // DCT_ADST
-  { fadst4, fadst8 },  // ADST_ADST
-  { fadst4, fdct8 },   // FLIPADST_DCT
-  { fdct4, fadst8 },   // DCT_FLIPADST
-  { fadst4, fadst8 },  // FLIPADST_FLIPADST
-  { fadst4, fadst8 },  // ADST_FLIPADST
-  { fadst4, fadst8 },  // FLIPADST_ADST
-  { fidtx4, fidtx8 },  // IDTX
-  { fdct4, fidtx8 },   // V_DCT
-  { fidtx4, fdct8 },   // H_DCT
-  { fadst4, fidtx8 },  // V_ADST
-  { fidtx4, fadst8 },  // H_ADST
-  { fadst4, fidtx8 },  // V_FLIPADST
-  { fidtx4, fadst8 },  // H_FLIPADST
-};
-
-static const transform_2d FHT_8x16[] = {
-  { fdct16, fdct8 },    // DCT_DCT
-  { fadst16, fdct8 },   // ADST_DCT
-  { fdct16, fadst8 },   // DCT_ADST
-  { fadst16, fadst8 },  // ADST_ADST
-  { fadst16, fdct8 },   // FLIPADST_DCT
-  { fdct16, fadst8 },   // DCT_FLIPADST
-  { fadst16, fadst8 },  // FLIPADST_FLIPADST
-  { fadst16, fadst8 },  // ADST_FLIPADST
-  { fadst16, fadst8 },  // FLIPADST_ADST
-  { fidtx16, fidtx8 },  // IDTX
-  { fdct16, fidtx8 },   // V_DCT
-  { fidtx16, fdct8 },   // H_DCT
-  { fadst16, fidtx8 },  // V_ADST
-  { fidtx16, fadst8 },  // H_ADST
-  { fadst16, fidtx8 },  // V_FLIPADST
-  { fidtx16, fadst8 },  // H_FLIPADST
-};
-
-static const transform_2d FHT_16x8[] = {
-  { fdct8, fdct16 },    // DCT_DCT
-  { fadst8, fdct16 },   // ADST_DCT
-  { fdct8, fadst16 },   // DCT_ADST
-  { fadst8, fadst16 },  // ADST_ADST
-  { fadst8, fdct16 },   // FLIPADST_DCT
-  { fdct8, fadst16 },   // DCT_FLIPADST
-  { fadst8, fadst16 },  // FLIPADST_FLIPADST
-  { fadst8, fadst16 },  // ADST_FLIPADST
-  { fadst8, fadst16 },  // FLIPADST_ADST
-  { fidtx8, fidtx16 },  // IDTX
-  { fdct8, fidtx16 },   // V_DCT
-  { fidtx8, fdct16 },   // H_DCT
-  { fadst8, fidtx16 },  // V_ADST
-  { fidtx8, fadst16 },  // H_ADST
-  { fadst8, fidtx16 },  // V_FLIPADST
-  { fidtx8, fadst16 },  // H_FLIPADST
-};
-
-static const transform_2d FHT_16x32[] = {
-  { fdct32, fdct16 },         // DCT_DCT
-  { fhalfright32, fdct16 },   // ADST_DCT
-  { fdct32, fadst16 },        // DCT_ADST
-  { fhalfright32, fadst16 },  // ADST_ADST
-  { fhalfright32, fdct16 },   // FLIPADST_DCT
-  { fdct32, fadst16 },        // DCT_FLIPADST
-  { fhalfright32, fadst16 },  // FLIPADST_FLIPADST
-  { fhalfright32, fadst16 },  // ADST_FLIPADST
-  { fhalfright32, fadst16 },  // FLIPADST_ADST
-  { fidtx32, fidtx16 },       // IDTX
-  { fdct32, fidtx16 },        // V_DCT
-  { fidtx32, fdct16 },        // H_DCT
-  { fhalfright32, fidtx16 },  // V_ADST
-  { fidtx32, fadst16 },       // H_ADST
-  { fhalfright32, fidtx16 },  // V_FLIPADST
-  { fidtx32, fadst16 },       // H_FLIPADST
-};
-
-static const transform_2d FHT_32x16[] = {
-  { fdct16, fdct32 },         // DCT_DCT
-  { fadst16, fdct32 },        // ADST_DCT
-  { fdct16, fhalfright32 },   // DCT_ADST
-  { fadst16, fhalfright32 },  // ADST_ADST
-  { fadst16, fdct32 },        // FLIPADST_DCT
-  { fdct16, fhalfright32 },   // DCT_FLIPADST
-  { fadst16, fhalfright32 },  // FLIPADST_FLIPADST
-  { fadst16, fhalfright32 },  // ADST_FLIPADST
-  { fadst16, fhalfright32 },  // FLIPADST_ADST
-  { fidtx16, fidtx32 },       // IDTX
-  { fdct16, fidtx32 },        // V_DCT
-  { fidtx16, fdct32 },        // H_DCT
-  { fadst16, fidtx32 },       // V_ADST
-  { fidtx16, fhalfright32 },  // H_ADST
-  { fadst16, fidtx32 },       // V_FLIPADST
-  { fidtx16, fhalfright32 },  // H_FLIPADST
-};
-#endif  // CONFIG_EXT_TX
-
 void av1_fht4x4_c(const int16_t *input, tran_low_t *output, int stride,
                   int tx_type) {
   if (tx_type == DCT_DCT) {
     aom_fdct4x4_c(input, output, stride);
   } else {
+    static const transform_2d FHT[] = {
+      { fdct4, fdct4 },    // DCT_DCT
+      { fadst4, fdct4 },   // ADST_DCT
+      { fdct4, fadst4 },   // DCT_ADST
+      { fadst4, fadst4 },  // ADST_ADST
+#if CONFIG_EXT_TX
+      { fadst4, fdct4 },   // FLIPADST_DCT
+      { fdct4, fadst4 },   // DCT_FLIPADST
+      { fadst4, fadst4 },  // FLIPADST_FLIPADST
+      { fadst4, fadst4 },  // ADST_FLIPADST
+      { fadst4, fadst4 },  // FLIPADST_ADST
+      { fidtx4, fidtx4 },  // IDTX
+      { fdct4, fidtx4 },   // V_DCT
+      { fidtx4, fdct4 },   // H_DCT
+      { fadst4, fidtx4 },  // V_ADST
+      { fidtx4, fadst4 },  // H_ADST
+      { fadst4, fidtx4 },  // V_FLIPADST
+      { fidtx4, fadst4 },  // H_FLIPADST
+#endif                     // CONFIG_EXT_TX
+    };
+    const transform_2d ht = FHT[tx_type];
     tran_low_t out[4 * 4];
     int i, j;
     tran_low_t temp_in[4], temp_out[4];
-    const transform_2d ht = FHT_4[tx_type];
 
 #if CONFIG_EXT_TX
     int16_t flipped_input[4 * 4];
@@ -1365,12 +1187,30 @@ void av1_fht4x4_c(const int16_t *input, tran_low_t *output, int stride,
 #if CONFIG_EXT_TX
 void av1_fht4x8_c(const int16_t *input, tran_low_t *output, int stride,
                   int tx_type) {
+  static const transform_2d FHT[] = {
+    { fdct8, fdct4 },    // DCT_DCT
+    { fadst8, fdct4 },   // ADST_DCT
+    { fdct8, fadst4 },   // DCT_ADST
+    { fadst8, fadst4 },  // ADST_ADST
+    { fadst8, fdct4 },   // FLIPADST_DCT
+    { fdct8, fadst4 },   // DCT_FLIPADST
+    { fadst8, fadst4 },  // FLIPADST_FLIPADST
+    { fadst8, fadst4 },  // ADST_FLIPADST
+    { fadst8, fadst4 },  // FLIPADST_ADST
+    { fidtx8, fidtx4 },  // IDTX
+    { fdct8, fidtx4 },   // V_DCT
+    { fidtx8, fdct4 },   // H_DCT
+    { fadst8, fidtx4 },  // V_ADST
+    { fidtx8, fadst4 },  // H_ADST
+    { fadst8, fidtx4 },  // V_FLIPADST
+    { fidtx8, fadst4 },  // H_FLIPADST
+  };
+  const transform_2d ht = FHT[tx_type];
   const int n = 4;
   const int n2 = 8;
   tran_low_t out[8 * 4];
   tran_low_t temp_in[8], temp_out[8];
   int i, j;
-  const transform_2d ht = FHT_4x8[tx_type];
   int16_t flipped_input[8 * 4];
   maybe_flip_input(&input, &stride, n2, n, flipped_input, tx_type);
 
@@ -1394,12 +1234,30 @@ void av1_fht4x8_c(const int16_t *input, tran_low_t *output, int stride,
 
 void av1_fht8x4_c(const int16_t *input, tran_low_t *output, int stride,
                   int tx_type) {
+  static const transform_2d FHT[] = {
+    { fdct4, fdct8 },    // DCT_DCT
+    { fadst4, fdct8 },   // ADST_DCT
+    { fdct4, fadst8 },   // DCT_ADST
+    { fadst4, fadst8 },  // ADST_ADST
+    { fadst4, fdct8 },   // FLIPADST_DCT
+    { fdct4, fadst8 },   // DCT_FLIPADST
+    { fadst4, fadst8 },  // FLIPADST_FLIPADST
+    { fadst4, fadst8 },  // ADST_FLIPADST
+    { fadst4, fadst8 },  // FLIPADST_ADST
+    { fidtx4, fidtx8 },  // IDTX
+    { fdct4, fidtx8 },   // V_DCT
+    { fidtx4, fdct8 },   // H_DCT
+    { fadst4, fidtx8 },  // V_ADST
+    { fidtx4, fadst8 },  // H_ADST
+    { fadst4, fidtx8 },  // V_FLIPADST
+    { fidtx4, fadst8 },  // H_FLIPADST
+  };
+  const transform_2d ht = FHT[tx_type];
   const int n = 4;
   const int n2 = 8;
   tran_low_t out[8 * 4];
   tran_low_t temp_in[8], temp_out[8];
   int i, j;
-  const transform_2d ht = FHT_8x4[tx_type];
   int16_t flipped_input[8 * 4];
   maybe_flip_input(&input, &stride, n, n2, flipped_input, tx_type);
 
@@ -1423,12 +1281,30 @@ void av1_fht8x4_c(const int16_t *input, tran_low_t *output, int stride,
 
 void av1_fht8x16_c(const int16_t *input, tran_low_t *output, int stride,
                    int tx_type) {
+  static const transform_2d FHT[] = {
+    { fdct16, fdct8 },    // DCT_DCT
+    { fadst16, fdct8 },   // ADST_DCT
+    { fdct16, fadst8 },   // DCT_ADST
+    { fadst16, fadst8 },  // ADST_ADST
+    { fadst16, fdct8 },   // FLIPADST_DCT
+    { fdct16, fadst8 },   // DCT_FLIPADST
+    { fadst16, fadst8 },  // FLIPADST_FLIPADST
+    { fadst16, fadst8 },  // ADST_FLIPADST
+    { fadst16, fadst8 },  // FLIPADST_ADST
+    { fidtx16, fidtx8 },  // IDTX
+    { fdct16, fidtx8 },   // V_DCT
+    { fidtx16, fdct8 },   // H_DCT
+    { fadst16, fidtx8 },  // V_ADST
+    { fidtx16, fadst8 },  // H_ADST
+    { fadst16, fidtx8 },  // V_FLIPADST
+    { fidtx16, fadst8 },  // H_FLIPADST
+  };
+  const transform_2d ht = FHT[tx_type];
   const int n = 8;
   const int n2 = 16;
   tran_low_t out[16 * 8];
   tran_low_t temp_in[16], temp_out[16];
   int i, j;
-  const transform_2d ht = FHT_8x16[tx_type];
   int16_t flipped_input[16 * 8];
   maybe_flip_input(&input, &stride, n2, n, flipped_input, tx_type);
 
@@ -1452,12 +1328,30 @@ void av1_fht8x16_c(const int16_t *input, tran_low_t *output, int stride,
 
 void av1_fht16x8_c(const int16_t *input, tran_low_t *output, int stride,
                    int tx_type) {
+  static const transform_2d FHT[] = {
+    { fdct8, fdct16 },    // DCT_DCT
+    { fadst8, fdct16 },   // ADST_DCT
+    { fdct8, fadst16 },   // DCT_ADST
+    { fadst8, fadst16 },  // ADST_ADST
+    { fadst8, fdct16 },   // FLIPADST_DCT
+    { fdct8, fadst16 },   // DCT_FLIPADST
+    { fadst8, fadst16 },  // FLIPADST_FLIPADST
+    { fadst8, fadst16 },  // ADST_FLIPADST
+    { fadst8, fadst16 },  // FLIPADST_ADST
+    { fidtx8, fidtx16 },  // IDTX
+    { fdct8, fidtx16 },   // V_DCT
+    { fidtx8, fdct16 },   // H_DCT
+    { fadst8, fidtx16 },  // V_ADST
+    { fidtx8, fadst16 },  // H_ADST
+    { fadst8, fidtx16 },  // V_FLIPADST
+    { fidtx8, fadst16 },  // H_FLIPADST
+  };
+  const transform_2d ht = FHT[tx_type];
   const int n = 8;
   const int n2 = 16;
   tran_low_t out[16 * 8];
   tran_low_t temp_in[16], temp_out[16];
   int i, j;
-  const transform_2d ht = FHT_16x8[tx_type];
   int16_t flipped_input[16 * 8];
   maybe_flip_input(&input, &stride, n, n2, flipped_input, tx_type);
 
@@ -1481,12 +1375,30 @@ void av1_fht16x8_c(const int16_t *input, tran_low_t *output, int stride,
 
 void av1_fht16x32_c(const int16_t *input, tran_low_t *output, int stride,
                     int tx_type) {
+  static const transform_2d FHT[] = {
+    { fdct32, fdct16 },         // DCT_DCT
+    { fhalfright32, fdct16 },   // ADST_DCT
+    { fdct32, fadst16 },        // DCT_ADST
+    { fhalfright32, fadst16 },  // ADST_ADST
+    { fhalfright32, fdct16 },   // FLIPADST_DCT
+    { fdct32, fadst16 },        // DCT_FLIPADST
+    { fhalfright32, fadst16 },  // FLIPADST_FLIPADST
+    { fhalfright32, fadst16 },  // ADST_FLIPADST
+    { fhalfright32, fadst16 },  // FLIPADST_ADST
+    { fidtx32, fidtx16 },       // IDTX
+    { fdct32, fidtx16 },        // V_DCT
+    { fidtx32, fdct16 },        // H_DCT
+    { fhalfright32, fidtx16 },  // V_ADST
+    { fidtx32, fadst16 },       // H_ADST
+    { fhalfright32, fidtx16 },  // V_FLIPADST
+    { fidtx32, fadst16 },       // H_FLIPADST
+  };
+  const transform_2d ht = FHT[tx_type];
   const int n = 16;
   const int n2 = 32;
   tran_low_t out[32 * 16];
   tran_low_t temp_in[32], temp_out[32];
   int i, j;
-  const transform_2d ht = FHT_16x32[tx_type];
   int16_t flipped_input[32 * 16];
   maybe_flip_input(&input, &stride, n2, n, flipped_input, tx_type);
 
@@ -1511,12 +1423,30 @@ void av1_fht16x32_c(const int16_t *input, tran_low_t *output, int stride,
 
 void av1_fht32x16_c(const int16_t *input, tran_low_t *output, int stride,
                     int tx_type) {
+  static const transform_2d FHT[] = {
+    { fdct16, fdct32 },         // DCT_DCT
+    { fadst16, fdct32 },        // ADST_DCT
+    { fdct16, fhalfright32 },   // DCT_ADST
+    { fadst16, fhalfright32 },  // ADST_ADST
+    { fadst16, fdct32 },        // FLIPADST_DCT
+    { fdct16, fhalfright32 },   // DCT_FLIPADST
+    { fadst16, fhalfright32 },  // FLIPADST_FLIPADST
+    { fadst16, fhalfright32 },  // ADST_FLIPADST
+    { fadst16, fhalfright32 },  // FLIPADST_ADST
+    { fidtx16, fidtx32 },       // IDTX
+    { fdct16, fidtx32 },        // V_DCT
+    { fidtx16, fdct32 },        // H_DCT
+    { fadst16, fidtx32 },       // V_ADST
+    { fidtx16, fhalfright32 },  // H_ADST
+    { fadst16, fidtx32 },       // V_FLIPADST
+    { fidtx16, fhalfright32 },  // H_FLIPADST
+  };
+  const transform_2d ht = FHT[tx_type];
   const int n = 16;
   const int n2 = 32;
   tran_low_t out[32 * 16];
   tran_low_t temp_in[32], temp_out[32];
   int i, j;
-  const transform_2d ht = FHT_32x16[tx_type];
   int16_t flipped_input[32 * 16];
   maybe_flip_input(&input, &stride, n, n2, flipped_input, tx_type);
 
@@ -1672,10 +1602,30 @@ void av1_fht8x8_c(const int16_t *input, tran_low_t *output, int stride,
   if (tx_type == DCT_DCT) {
     aom_fdct8x8_c(input, output, stride);
   } else {
+    static const transform_2d FHT[] = {
+      { fdct8, fdct8 },    // DCT_DCT
+      { fadst8, fdct8 },   // ADST_DCT
+      { fdct8, fadst8 },   // DCT_ADST
+      { fadst8, fadst8 },  // ADST_ADST
+#if CONFIG_EXT_TX
+      { fadst8, fdct8 },   // FLIPADST_DCT
+      { fdct8, fadst8 },   // DCT_FLIPADST
+      { fadst8, fadst8 },  // FLIPADST_FLIPADST
+      { fadst8, fadst8 },  // ADST_FLIPADST
+      { fadst8, fadst8 },  // FLIPADST_ADST
+      { fidtx8, fidtx8 },  // IDTX
+      { fdct8, fidtx8 },   // V_DCT
+      { fidtx8, fdct8 },   // H_DCT
+      { fadst8, fidtx8 },  // V_ADST
+      { fidtx8, fadst8 },  // H_ADST
+      { fadst8, fidtx8 },  // V_FLIPADST
+      { fidtx8, fadst8 },  // H_FLIPADST
+#endif                     // CONFIG_EXT_TX
+    };
+    const transform_2d ht = FHT[tx_type];
     tran_low_t out[64];
     int i, j;
     tran_low_t temp_in[8], temp_out[8];
-    const transform_2d ht = FHT_8[tx_type];
 
 #if CONFIG_EXT_TX
     int16_t flipped_input[8 * 8];
@@ -1760,10 +1710,30 @@ void av1_fht16x16_c(const int16_t *input, tran_low_t *output, int stride,
   if (tx_type == DCT_DCT) {
     aom_fdct16x16_c(input, output, stride);
   } else {
+    static const transform_2d FHT[] = {
+      { fdct16, fdct16 },    // DCT_DCT
+      { fadst16, fdct16 },   // ADST_DCT
+      { fdct16, fadst16 },   // DCT_ADST
+      { fadst16, fadst16 },  // ADST_ADST
+#if CONFIG_EXT_TX
+      { fadst16, fdct16 },   // FLIPADST_DCT
+      { fdct16, fadst16 },   // DCT_FLIPADST
+      { fadst16, fadst16 },  // FLIPADST_FLIPADST
+      { fadst16, fadst16 },  // ADST_FLIPADST
+      { fadst16, fadst16 },  // FLIPADST_ADST
+      { fidtx16, fidtx16 },  // IDTX
+      { fdct16, fidtx16 },   // V_DCT
+      { fidtx16, fdct16 },   // H_DCT
+      { fadst16, fidtx16 },  // V_ADST
+      { fidtx16, fadst16 },  // H_ADST
+      { fadst16, fidtx16 },  // V_FLIPADST
+      { fidtx16, fadst16 },  // H_FLIPADST
+#endif                       // CONFIG_EXT_TX
+    };
+    const transform_2d ht = FHT[tx_type];
     tran_low_t out[256];
     int i, j;
     tran_low_t temp_in[16], temp_out[16];
-    const transform_2d ht = FHT_16[tx_type];
 
 #if CONFIG_EXT_TX
     int16_t flipped_input[16 * 16];
@@ -1847,10 +1817,28 @@ void av1_fht32x32_c(const int16_t *input, tran_low_t *output, int stride,
   if (tx_type == DCT_DCT) {
     aom_fdct32x32_c(input, output, stride);
   } else {
+    static const transform_2d FHT[] = {
+      { fdct32, fdct32 },              // DCT_DCT
+      { fhalfright32, fdct32 },        // ADST_DCT
+      { fdct32, fhalfright32 },        // DCT_ADST
+      { fhalfright32, fhalfright32 },  // ADST_ADST
+      { fhalfright32, fdct32 },        // FLIPADST_DCT
+      { fdct32, fhalfright32 },        // DCT_FLIPADST
+      { fhalfright32, fhalfright32 },  // FLIPADST_FLIPADST
+      { fhalfright32, fhalfright32 },  // ADST_FLIPADST
+      { fhalfright32, fhalfright32 },  // FLIPADST_ADST
+      { fidtx32, fidtx32 },            // IDTX
+      { fdct32, fidtx32 },             // V_DCT
+      { fidtx32, fdct32 },             // H_DCT
+      { fhalfright32, fidtx32 },       // V_ADST
+      { fidtx32, fhalfright32 },       // H_ADST
+      { fhalfright32, fidtx32 },       // V_FLIPADST
+      { fidtx32, fhalfright32 },       // H_FLIPADST
+    };
+    const transform_2d ht = FHT[tx_type];
     tran_low_t out[1024];
     int i, j;
     tran_low_t temp_in[32], temp_out[32];
-    const transform_2d ht = FHT_32[tx_type];
 
     int16_t flipped_input[32 * 32];
     maybe_flip_input(&input, &stride, 32, 32, flipped_input, tx_type);
