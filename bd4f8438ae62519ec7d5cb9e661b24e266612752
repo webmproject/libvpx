@@ -16,6 +16,24 @@
       "revId": "bd4f8438ae62519ec7d5cb9e661b24e266612752",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762d8fd5_9eb4a9d1",
+        "filename": "vpx_dsp/x86/inv_txfm_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4027,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-09-07T12:58:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "762d8fd5_92f78254",
+      "revId": "bd4f8438ae62519ec7d5cb9e661b24e266612752",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
