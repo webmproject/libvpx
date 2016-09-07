@@ -16,6 +16,10 @@
 #include "aom_dsp/aom_dsp_common.h"
 #include "aom_ports/bitops.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*Smallest blocks are 4x4*/
 #define OD_LOG_BSIZE0 (2)
 /*There are 5 block sizes total (4x4, 8x8, 16x16, 32x32 and 64x64).*/
@@ -55,4 +59,8 @@ extern uint32_t OD_DIVU_SMALL_CONSTS[OD_DIVU_DMAX][2];
   We define a special version of the macro to use when x can be zero.*/
 #define OD_ILOG(x) ((x) ? OD_ILOG_NZ(x) : 0)
 
+#ifdef __cplusplus
+}  // extern "C"
 #endif
+
+#endif  // AV1_COMMON_ODINTRIN_H_
