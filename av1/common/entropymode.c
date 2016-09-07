@@ -147,6 +147,9 @@ const aom_prob av1_kf_y_mode_prob[INTRA_MODES][INTRA_MODES][INTRA_MODES - 1] = {
       { 43, 81, 53, 140, 169, 204, 68, 84, 72 }     // left = tm
   }
 };
+#if CONFIG_DAALA_EC
+aom_cdf_prob av1_kf_y_mode_cdf[INTRA_MODES][INTRA_MODES][INTRA_MODES];
+#endif
 
 static const aom_prob default_if_y_probs[BLOCK_SIZE_GROUPS][INTRA_MODES - 1] = {
   { 65, 32, 18, 144, 162, 194, 41, 51, 98 },   // block_size < 8x8
@@ -368,6 +371,8 @@ static const aom_prob default_motion_mode_prob[BLOCK_SIZES][MOTION_MODES - 1] =
 static const aom_prob default_delta_q_probs[DELTA_Q_CONTEXTS] = { 220, 220,
                                                                   220 };
 #endif
+int av1_intra_mode_ind[INTRA_MODES];
+int av1_intra_mode_inv[INTRA_MODES];
 
 /* Array indices are identical to previously-existing INTRAMODECONTEXTNODES. */
 const aom_tree_index av1_intra_mode_tree[TREE_SIZE(INTRA_MODES)] = {
@@ -1414,6 +1419,8 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
                      fc->inter_ext_tx_cdf, EXT_TX_SIZES);
   av1_tree_to_cdf_1D(av1_partition_tree, fc->partition_prob, fc->partition_cdf,
                      PARTITION_CONTEXTS);
+  av1_tree_to_cdf_2D(av1_intra_mode_tree, av1_kf_y_mode_prob, av1_kf_y_mode_cdf,
+                     INTRA_MODES, INTRA_MODES);
   av1_tree_to_cdf(av1_segment_tree, fc->seg.tree_probs, fc->seg.tree_cdf);
 #endif
 #if CONFIG_DELTA_Q

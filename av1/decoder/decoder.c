@@ -52,6 +52,8 @@ static void initialize_dec(void) {
                           SWITCHABLE_FILTERS, av1_switchable_interp_tree);
     av1_indices_from_tree(av1_ext_tx_ind, av1_ext_tx_inv, TX_TYPES,
                           av1_ext_tx_tree);
+    av1_indices_from_tree(av1_intra_mode_ind, av1_intra_mode_inv, INTRA_MODES,
+                          av1_intra_mode_tree);
 #endif
   }
 }

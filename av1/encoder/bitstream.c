@@ -192,6 +192,8 @@ void av1_encode_token_init(void) {
       structure. */
   av1_indices_from_tree(av1_ext_tx_ind, av1_ext_tx_inv, TX_TYPES,
                         av1_ext_tx_tree);
+  av1_indices_from_tree(av1_intra_mode_ind, av1_intra_mode_inv, INTRA_MODES,
+                        av1_intra_mode_tree);
 #endif
 }
 
@@ -1622,8 +1624,13 @@ static void write_mb_modes_kf(const AV1_COMMON *cm, const MACROBLOCKD *xd,
     write_selected_tx_size(cm, xd, w);
 
   if (bsize >= BLOCK_8X8) {
+#if CONFIG_DAALA_EC
+    aom_write_symbol(w, av1_intra_mode_ind[mbmi->mode],
+                     get_y_mode_cdf(cm, mi, above_mi, left_mi, 0), INTRA_MODES);
+#else
     write_intra_mode(w, mbmi->mode,
                      get_y_mode_probs(cm, mi, above_mi, left_mi, 0));
+#endif
   } else {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
     const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
@@ -1632,8 +1639,14 @@ static void write_mb_modes_kf(const AV1_COMMON *cm, const MACROBLOCKD *xd,
     for (idy = 0; idy < 2; idy += num_4x4_h) {
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         const int block = idy * 2 + idx;
+#if CONFIG_DAALA_EC
+        aom_write_symbol(w, av1_intra_mode_ind[mi->bmi[block].as_mode],
+                         get_y_mode_cdf(cm, mi, above_mi, left_mi, block),
+                         INTRA_MODES);
+#else
         write_intra_mode(w, mi->bmi[block].as_mode,
                          get_y_mode_probs(cm, mi, above_mi, left_mi, block));
+#endif
       }
     }
   }
@@ -3621,10 +3634,18 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
 
   if (frame_is_intra_only(cm)) {
     av1_copy(cm->kf_y_prob, av1_kf_y_mode_prob);
+#if CONFIG_DAALA_EC
+    av1_copy(cm->kf_y_cdf, av1_kf_y_mode_cdf);
+#endif
     for (i = 0; i < INTRA_MODES; ++i)
-      for (j = 0; j < INTRA_MODES; ++j)
+      for (j = 0; j < INTRA_MODES; ++j) {
         prob_diff_update(av1_intra_mode_tree, cm->kf_y_prob[i][j],
                          counts->kf_y_mode[i][j], INTRA_MODES, header_bc);
+#if CONFIG_DAALA_EC
+        av1_tree_to_cdf(av1_intra_mode_tree, cm->kf_y_prob[i][j],
+                        cm->kf_y_cdf[i][j]);
+#endif
+      }
   } else {
 #if CONFIG_REF_MV
     update_inter_mode_probs(cm, header_bc, counts);
