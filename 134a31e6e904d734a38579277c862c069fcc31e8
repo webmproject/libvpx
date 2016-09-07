@@ -1,0 +1,231 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "762d8fd5_9da83392",
+        "filename": "av1/encoder/corner_detect.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T00:49:43Z",
+      "side": 1,
+      "message": "*const",
+      "revId": "134a31e6e904d734a38579277c862c069fcc31e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762d8fd5_7d9bbf76",
+        "filename": "av1/encoder/encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 4471,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T00:49:43Z",
+      "side": 1,
+      "message": "const",
+      "revId": "134a31e6e904d734a38579277c862c069fcc31e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762d8fd5_d8a9197c",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T00:49:43Z",
+      "side": 1,
+      "message": "you probably just wanted string.h for memcpy()",
+      "revId": "134a31e6e904d734a38579277c862c069fcc31e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762d8fd5_38c4b536",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T00:49:43Z",
+      "side": 1,
+      "message": "is this used?",
+      "revId": "134a31e6e904d734a38579277c862c069fcc31e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762d8fd5_18c9f14c",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T00:49:43Z",
+      "side": 1,
+      "message": "is this used?",
+      "revId": "134a31e6e904d734a38579277c862c069fcc31e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762d8fd5_78ce2d56",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T00:49:43Z",
+      "side": 1,
+      "message": "these should be sorted",
+      "revId": "134a31e6e904d734a38579277c862c069fcc31e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762d8fd5_58d369fe",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T00:49:43Z",
+      "side": 1,
+      "message": "these could be normalized and made const, though they\u0027re a bit redundant; maybe the params to the function should be renamed / documented then this could go away",
+      "revId": "134a31e6e904d734a38579277c862c069fcc31e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762d8fd5_d890f947",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T00:49:43Z",
+      "side": 1,
+      "message": "you can join these with 252",
+      "revId": "134a31e6e904d734a38579277c862c069fcc31e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762d8fd5_78990d6d",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T00:49:43Z",
+      "side": 1,
+      "message": "this can leak if one pointer alloc succeeded",
+      "revId": "134a31e6e904d734a38579277c862c069fcc31e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762d8fd5_589ec956",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T00:49:43Z",
+      "side": 1,
+      "message": "this leaks",
+      "revId": "134a31e6e904d734a38579277c862c069fcc31e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762d8fd5_98afa181",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T00:49:43Z",
+      "side": 1,
+      "message": "you can join these with the declaration and make them *const",
+      "revId": "134a31e6e904d734a38579277c862c069fcc31e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762d8fd5_f8acdd8d",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T00:49:43Z",
+      "side": 1,
+      "message": "I would s/Type/Func/ or Fn here to make the type more explicit",
+      "range": {
+        "startLine": 324,
+        "startChar": 26,
+        "endLine": 324,
+        "endChar": 30
+      },
+      "revId": "134a31e6e904d734a38579277c862c069fcc31e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762d8fd5_38767536",
+        "filename": "av1/encoder/ransac.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T00:49:43Z",
+      "side": 1,
+      "message": "none of these are needed in the header",
+      "revId": "134a31e6e904d734a38579277c862c069fcc31e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
