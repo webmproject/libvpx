@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "762d8fd5_a3afd680",
+        "filename": "av1/encoder/encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 4471,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T04:11:14Z",
+      "side": 1,
+      "message": "I missed the call to prior to convert, thanks for pointing it out",
+      "parentUuid": "762d8fd5_d8811931",
+      "revId": "134a31e6e904d734a38579277c862c069fcc31e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "762d8fd5_d8a9197c",
         "filename": "av1/encoder/ransac.c",
         "patchSetId": 6
