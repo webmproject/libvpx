@@ -103,7 +103,7 @@ static INLINE int aom_reader_has_error(aom_reader *r) {
 }
 
 // Returns the position in the bit reader in bits.
-static INLINE ptrdiff_t aom_reader_tell(const aom_reader *r) {
+static INLINE uint32_t aom_reader_tell(const aom_reader *r) {
 #if CONFIG_ANS
   (void)r;
   assert(0 && "aom_reader_tell() is unimplemented for ANS");
@@ -116,7 +116,7 @@ static INLINE ptrdiff_t aom_reader_tell(const aom_reader *r) {
 }
 
 // Returns the position in the bit reader in 1/8th bits.
-static INLINE ptrdiff_t aom_reader_tell_frac(const aom_reader *r) {
+static INLINE uint32_t aom_reader_tell_frac(const aom_reader *r) {
 #if CONFIG_ANS
   (void)r;
   assert(0 && "aom_reader_tell_frac() is unimplemented for ANS");
