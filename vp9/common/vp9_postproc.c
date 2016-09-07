@@ -26,7 +26,6 @@
 
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_postproc.h"
-#include "vp9/common/vp9_textblit.h"
 
 #if CONFIG_VP9_POSTPROC
 

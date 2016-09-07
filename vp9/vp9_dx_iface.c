@@ -829,13 +829,6 @@ static vpx_codec_err_t ctrl_set_postproc(vpx_codec_alg_priv_t *ctx,
 #endif
 }
 
-static vpx_codec_err_t ctrl_set_dbg_options(vpx_codec_alg_priv_t *ctx,
-                                            va_list args) {
-  (void)ctx;
-  (void)args;
-  return VPX_CODEC_INCAPABLE;
-}
-
 static vpx_codec_err_t ctrl_get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
                                                  va_list args) {
   int *const update_info = va_arg(args, int *);
@@ -1014,10 +1007,6 @@ static vpx_codec_ctrl_fn_map_t decoder_ctrl_maps[] = {
   // Setters
   { VP8_SET_REFERENCE, ctrl_set_reference },
   { VP8_SET_POSTPROC, ctrl_set_postproc },
-  { VP8_SET_DBG_COLOR_REF_FRAME, ctrl_set_dbg_options },
-  { VP8_SET_DBG_COLOR_MB_MODES, ctrl_set_dbg_options },
-  { VP8_SET_DBG_COLOR_B_MODES, ctrl_set_dbg_options },
-  { VP8_SET_DBG_DISPLAY_MV, ctrl_set_dbg_options },
   { VP9_INVERT_TILE_DECODE_ORDER, ctrl_set_invert_tile_order },
   { VPXD_SET_DECRYPTOR, ctrl_set_decryptor },
   { VP9_SET_BYTE_ALIGNMENT, ctrl_set_byte_alignment },

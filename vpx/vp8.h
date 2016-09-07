@@ -47,11 +47,10 @@ enum vp8_com_control_id {
   VP8_SET_REFERENCE = 1,
   VP8_COPY_REFERENCE = 2, /**< get a copy of reference frame from the decoder */
   VP8_SET_POSTPROC = 3,   /**< set the decoder's post processing settings  */
-  VP8_SET_DBG_COLOR_REF_FRAME =
-      4, /**< set the reference frames to color for each macroblock */
-  VP8_SET_DBG_COLOR_MB_MODES = 5, /**< set which macro block modes to color */
-  VP8_SET_DBG_COLOR_B_MODES = 6,  /**< set which blocks modes to color */
-  VP8_SET_DBG_DISPLAY_MV = 7,     /**< set which motion vector modes to draw */
+  VP8_SET_DBG_COLOR_REF_FRAME = 4, /**< \deprecated */
+  VP8_SET_DBG_COLOR_MB_MODES = 5,  /**< \deprecated */
+  VP8_SET_DBG_COLOR_B_MODES = 6,   /**< \deprecated */
+  VP8_SET_DBG_DISPLAY_MV = 7,      /**< \deprecated */
 
   /* TODO(jkoleszar): The encoder incorrectly reuses some of these values (5+)
    * for its control ids. These should be migrated to something like the
@@ -133,13 +132,13 @@ VPX_CTRL_USE_TYPE(VP8_COPY_REFERENCE, vpx_ref_frame_t *)
 #define VPX_CTRL_VP8_COPY_REFERENCE
 VPX_CTRL_USE_TYPE(VP8_SET_POSTPROC, vp8_postproc_cfg_t *)
 #define VPX_CTRL_VP8_SET_POSTPROC
-VPX_CTRL_USE_TYPE(VP8_SET_DBG_COLOR_REF_FRAME, int)
+VPX_CTRL_USE_TYPE_DEPRECATED(VP8_SET_DBG_COLOR_REF_FRAME, int)
 #define VPX_CTRL_VP8_SET_DBG_COLOR_REF_FRAME
-VPX_CTRL_USE_TYPE(VP8_SET_DBG_COLOR_MB_MODES, int)
+VPX_CTRL_USE_TYPE_DEPRECATED(VP8_SET_DBG_COLOR_MB_MODES, int)
 #define VPX_CTRL_VP8_SET_DBG_COLOR_MB_MODES
-VPX_CTRL_USE_TYPE(VP8_SET_DBG_COLOR_B_MODES, int)
+VPX_CTRL_USE_TYPE_DEPRECATED(VP8_SET_DBG_COLOR_B_MODES, int)
 #define VPX_CTRL_VP8_SET_DBG_COLOR_B_MODES
-VPX_CTRL_USE_TYPE(VP8_SET_DBG_DISPLAY_MV, int)
+VPX_CTRL_USE_TYPE_DEPRECATED(VP8_SET_DBG_DISPLAY_MV, int)
 #define VPX_CTRL_VP8_SET_DBG_DISPLAY_MV
 VPX_CTRL_USE_TYPE(VP9_GET_REFERENCE, vp9_ref_frame_t *)
 #define VPX_CTRL_VP9_GET_REFERENCE
