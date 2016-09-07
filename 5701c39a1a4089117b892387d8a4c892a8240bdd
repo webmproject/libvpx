@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "56edeb05_50de6cfc",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-07T16:49:29Z",
+      "side": 1,
+      "message": "Didn\u0027t use private variables like width_, height_, because this way it *should* be easily movable to other uses. Maybe can go in utils.",
+      "revId": "5701c39a1a4089117b892387d8a4c892a8240bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
