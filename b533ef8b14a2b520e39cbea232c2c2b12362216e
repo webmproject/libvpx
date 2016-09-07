@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b64b87fc_fba3efa0",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T19:49:10Z",
+      "side": 1,
+      "message": "this part isn\u0027t necessary in this branch",
+      "range": {
+        "startLine": 9,
+        "startChar": 69,
+        "endLine": 11,
+        "endChar": 7
+      },
+      "revId": "b533ef8b14a2b520e39cbea232c2c2b12362216e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
