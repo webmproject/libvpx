@@ -320,7 +320,8 @@ static INLINE int av1_ceil_log2(int n) {
 
 #if CONFIG_PALETTE
 int av1_get_palette_color_context(const uint8_t *color_map, int cols, int r,
-                                  int c, int n, int *color_order);
+                                  int c, int n, uint8_t *color_order,
+                                  int *color_idx);
 #endif  // CONFIG_PALETTE
 
 #ifdef __cplusplus

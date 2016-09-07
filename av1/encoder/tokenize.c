@@ -409,18 +409,19 @@ static INLINE int get_tx_eob(const struct segmentation *seg, int segment_id,
 }
 
 #if CONFIG_PALETTE
-void av1_tokenize_palette_sb(const AV1_COMP *cpi, struct ThreadData *const td,
-                             int plane, TOKENEXTRA **t, RUN_TYPE dry_run,
-                             BLOCK_SIZE bsize, int *rate) {
-  MACROBLOCK *const x = &td->mb;
-  MACROBLOCKD *const xd = &x->e_mbd;
-  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
-  uint8_t *color_map = xd->plane[plane != 0].color_index_map;
-  PALETTE_MODE_INFO *pmi = &mbmi->palette_mode_info;
-  int n = pmi->palette_size[plane != 0];
-  int i, j, k;
+void av1_tokenize_palette_sb(const AV1_COMP *cpi,
+                             const struct ThreadData *const td, int plane,
+                             TOKENEXTRA **t, RUN_TYPE dry_run, BLOCK_SIZE bsize,
+                             int *rate) {
+  const MACROBLOCK *const x = &td->mb;
+  const MACROBLOCKD *const xd = &x->e_mbd;
+  const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  const uint8_t *const color_map = xd->plane[plane != 0].color_index_map;
+  const PALETTE_MODE_INFO *const pmi = &mbmi->palette_mode_info;
+  const int n = pmi->palette_size[plane != 0];
+  int i, j;
   int this_rate = 0;
-  int color_idx = -1, color_ctx, color_order[PALETTE_MAX_SIZE];
+  uint8_t color_order[PALETTE_MAX_SIZE];
   const int rows = (4 * num_4x4_blocks_high_lookup[bsize]) >>
                    (xd->plane[plane != 0].subsampling_y);
   const int cols = (4 * num_4x4_blocks_wide_lookup[bsize]) >>
@@ -431,17 +432,13 @@ void av1_tokenize_palette_sb(const AV1_COMP *cpi, struct ThreadData *const td,
 
   for (i = 0; i < rows; ++i) {
     for (j = (i == 0 ? 1 : 0); j < cols; ++j) {
-      color_ctx =
-          av1_get_palette_color_context(color_map, cols, i, j, n, color_order);
-      for (k = 0; k < n; ++k)
-        if (color_map[i * cols + j] == color_order[k]) {
-          color_idx = k;
-          break;
-        }
-      assert(color_idx >= 0 && color_idx < n);
+      int color_new_idx;
+      const int color_ctx = av1_get_palette_color_context(
+          color_map, cols, i, j, n, color_order, &color_new_idx);
+      assert(color_new_idx >= 0 && color_new_idx < n);
       if (dry_run == DRY_RUN_COSTCOEFFS)
-        this_rate += cpi->palette_y_color_cost[n - 2][color_ctx][color_idx];
-      (*t)->token = color_idx;
+        this_rate += cpi->palette_y_color_cost[n - 2][color_ctx][color_new_idx];
+      (*t)->token = color_new_idx;
       (*t)->context_tree = probs[n - 2][color_ctx];
       (*t)->skip_eob_node = 0;
       ++(*t);

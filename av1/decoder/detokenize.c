@@ -338,15 +338,15 @@ static void dec_set_contexts(const MACROBLOCKD *xd,
 #if CONFIG_PALETTE
 void av1_decode_palette_tokens(MACROBLOCKD *const xd, int plane,
                                aom_reader *r) {
-  MODE_INFO *const mi = xd->mi[0];
-  MB_MODE_INFO *const mbmi = &mi->mbmi;
+  const MODE_INFO *const mi = xd->mi[0];
+  const MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
   const int rows = (4 * num_4x4_blocks_high_lookup[bsize]) >>
                    (xd->plane[plane != 0].subsampling_y);
   const int cols = (4 * num_4x4_blocks_wide_lookup[bsize]) >>
                    (xd->plane[plane != 0].subsampling_x);
-  int color_idx, color_ctx, color_order[PALETTE_MAX_SIZE];
-  int n = mbmi->palette_mode_info.palette_size[plane != 0];
+  uint8_t color_order[PALETTE_MAX_SIZE];
+  const int n = mbmi->palette_mode_info.palette_size[plane != 0];
   int i, j;
   uint8_t *color_map = xd->plane[plane != 0].color_index_map;
   const aom_prob(*const prob)[PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1] =
@@ -355,10 +355,10 @@ void av1_decode_palette_tokens(MACROBLOCKD *const xd, int plane,
 
   for (i = 0; i < rows; ++i) {
     for (j = (i == 0 ? 1 : 0); j < cols; ++j) {
-      color_ctx =
-          av1_get_palette_color_context(color_map, cols, i, j, n, color_order);
-      color_idx = aom_read_tree(r, av1_palette_color_tree[n - 2],
-                                prob[n - 2][color_ctx], ACCT_STR);
+      const int color_ctx = av1_get_palette_color_context(color_map, cols, i, j,
+                                                          n, color_order, NULL);
+      const int color_idx = aom_read_tree(r, av1_palette_color_tree[n - 2],
+                                          prob[n - 2][color_ctx], ACCT_STR);
       assert(color_idx >= 0 && color_idx < n);
       color_map[i * cols + j] = color_order[color_idx];
     }
