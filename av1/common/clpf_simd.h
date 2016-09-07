@@ -187,7 +187,8 @@ void SIMD_FUNC(aom_clpf_block)(const uint8_t *src, uint8_t *dst, int stride,
   // This will only be used if 4:2:0 and width not a multiple of 16 and along
   // the right edge only, so we can fall back to the plain C implementation in
   // this case.  If not extended to chroma, this test will be redundant.
-  if (sizex != 8 || width < 16) {  // Fallback to C if frame width < 16
+  if (sizex != 8 || width < 16 || y0 + 8 > height || x0 + 8 > width) {
+    // Fallback to C for odd sizes
     aom_clpf_block_c(src, dst, stride, x0, y0, sizex, sizey, width, height,
                      strength);
   } else {
