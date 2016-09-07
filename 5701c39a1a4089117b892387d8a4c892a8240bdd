@@ -2,6 +2,74 @@
   "comments": [
     {
       "key": {
+        "uuid": "d6c1dbc3_44966e9b",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T23:57:44Z",
+      "side": 1,
+      "message": "are there no alignment requirements? these were memaligned previously (check x86). if not then new/delete will work",
+      "revId": "5701c39a1a4089117b892387d8a4c892a8240bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6c1dbc3_c4fedec8",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T23:57:44Z",
+      "side": 1,
+      "message": "can\u0027t this be variable sized?",
+      "revId": "5701c39a1a4089117b892387d8a4c892a8240bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6c1dbc3_04e11626",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T23:57:44Z",
+      "side": 1,
+      "message": "drop this",
+      "revId": "5701c39a1a4089117b892387d8a4c892a8240bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6c1dbc3_c4753e5f",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T23:57:44Z",
+      "side": 1,
+      "message": "these shouldn\u0027t be static if they\u0027re going to be per-test allocated",
+      "revId": "5701c39a1a4089117b892387d8a4c892a8240bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "56edeb05_50de6cfc",
         "filename": "test/predict_test.cc",
         "patchSetId": 2
@@ -13,6 +81,29 @@
       "writtenOn": "2016-09-07T16:49:29Z",
       "side": 1,
       "message": "Didn\u0027t use private variables like width_, height_, because this way it *should* be easily movable to other uses. Maybe can go in utils.",
+      "revId": "5701c39a1a4089117b892387d8a4c892a8240bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6c1dbc3_a4d80275",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-07T23:57:44Z",
+      "side": 1,
+      "message": "in c++ modules this would be TestWithRandomData",
+      "range": {
+        "startLine": 235,
+        "startChar": 7,
+        "endLine": 235,
+        "endChar": 28
+      },
       "revId": "5701c39a1a4089117b892387d8a4c892a8240bdd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
