@@ -1,0 +1,95 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b373ada_520a742d",
+        "filename": "vp8/common/atomic.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1121979
+      },
+      "writtenOn": "2016-09-08T13:09:33Z",
+      "side": 1,
+      "message": "I would use __atomic compiler builtins here:\nhttps://gcc.gnu.org/onlinedocs/gcc/_005f_005fatomic-Builtins.html\n\nFirst, this will eliminate any tsan-specific code.\nSecond, it will make vpx use proper atomics even when compiled with -std\u003dc99.\n\nGuard condition for usage of builtins can be something along the lines of:\n (__has_builtin(__atomic_load_n) ||   \n (__GNUC__*10000 + __GNUC_MINOR__*100 + __GNUC_PATCHLEVEL__ \u003e\u003d 40801))",
+      "revId": "43ca36ba7bdf5485750e2693d42005dbe10ea959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2bf48e40_ff825faf",
+        "filename": "vp8/common/atomic.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1121979
+      },
+      "writtenOn": "2016-09-08T13:09:33Z",
+      "side": 1,
+      "message": "s/int/volatile int/ as above?\nI think it\u0027s more correct from C/C++ point of view to declare a variable as volatile, rather then always cast it to volatile type.",
+      "range": {
+        "startLine": 75,
+        "startChar": 8,
+        "endLine": 75,
+        "endChar": 11
+      },
+      "revId": "43ca36ba7bdf5485750e2693d42005dbe10ea959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab2dde95_8b68adb2",
+        "filename": "vp8/common/atomic.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1121979
+      },
+      "writtenOn": "2016-09-08T13:09:33Z",
+      "side": 1,
+      "message": "MemoryBarrier() is much stronger than what we need on x86. MemoryBarrier turns into MFENCE/LOCK XADD, while on we don\u0027t need any hardware barriers for acquire_load/store_release on x86.\n\nI would suggest to do ifdef X86 __asm__ __volatile__(::: \"memory\").",
+      "revId": "43ca36ba7bdf5485750e2693d42005dbe10ea959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b373ada_1214ec49",
+        "filename": "vp8/common/atomic.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1121979
+      },
+      "writtenOn": "2016-09-08T13:09:33Z",
+      "side": 1,
+      "message": "Looks like a time bomb.",
+      "revId": "43ca36ba7bdf5485750e2693d42005dbe10ea959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b601ae6_ca08e389",
+        "filename": "vp8/common/atomic.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1121979
+      },
+      "writtenOn": "2016-09-08T13:09:33Z",
+      "side": 1,
+      "message": "#undef vpx_memory_barrier",
+      "revId": "43ca36ba7bdf5485750e2693d42005dbe10ea959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
