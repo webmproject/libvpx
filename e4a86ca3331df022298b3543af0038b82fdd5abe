@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "565c0b05_18106508",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-08T01:33:26Z",
+      "side": 1,
+      "message": "these aren\u0027t guaranteed to be stable. you could just rebase the change and keep the author or --amend with --author set",
+      "revId": "e4a86ca3331df022298b3543af0038b82fdd5abe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "96992396_a2cc3e2b",
         "filename": "vp8/encoder/onyx_int.h",
         "patchSetId": 1
@@ -31,6 +48,24 @@
       "side": 1,
       "message": "I think its okay to change the ABI in this case.   It solves a real potential issue. I\u0027ll add jz on this.",
       "parentUuid": "96992396_a2cc3e2b",
+      "revId": "e4a86ca3331df022298b3543af0038b82fdd5abe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "565c0b05_98b715f9",
+        "filename": "vp8/encoder/onyx_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 521,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-08T01:33:26Z",
+      "side": 1,
+      "message": "\u003e I think its okay to change the ABI in this case.   It solves a real\n \u003e potential issue. I\u0027ll add jz on this.\n\nit\u0027s already been broken since 1.6.0 it seems. in this case it\u0027s a bit debatable, but the problem is really with the interface itself making this visible if only indirectly.",
+      "parentUuid": "762d8fd5_fe084585",
       "revId": "e4a86ca3331df022298b3543af0038b82fdd5abe",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
