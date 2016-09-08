@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2bf48e40_df3c3bd0",
+        "filename": "vp8/common/atomic.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1121979
+      },
+      "writtenOn": "2016-09-08T18:04:24Z",
+      "side": 1,
+      "message": "I would do s/nobarrier/relaxed/ to match the official C/C++ terminology.",
+      "range": {
+        "startLine": 33,
+        "startChar": 22,
+        "endLine": 33,
+        "endChar": 31
+      },
+      "revId": "0795a4faa2687fe1fea4de6a7925f11c69a97793",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
