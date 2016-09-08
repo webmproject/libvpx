@@ -3191,11 +3191,7 @@ static int64_t select_tx_size_fix_type(const AV1_COMP *cpi, MACROBLOCK *x,
   const AV1_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
-  const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
   const int is_inter = is_inter_block(mbmi);
-#if CONFIG_EXT_TX
-  int ext_tx_set = get_ext_tx_set(max_tx_size, bsize, is_inter);
-#endif  // CONFIG_EXT_TX
   aom_prob skip_prob = av1_get_skip_prob(cm, xd);
   int s0 = av1_cost_bit(skip_prob, 0);
   int s1 = av1_cost_bit(skip_prob, 1);
@@ -3262,25 +3258,27 @@ static int64_t select_tx_size_fix_type(const AV1_COMP *cpi, MACROBLOCK *x,
   if (*rate == INT_MAX) return INT64_MAX;
 
 #if CONFIG_EXT_TX
-  if (get_ext_tx_types(max_tx_size, bsize, is_inter) > 1 &&
+  if (get_ext_tx_types(mbmi->tx_size, bsize, is_inter) > 1 &&
       !xd->lossless[xd->mi[0]->mbmi.segment_id]) {
+    int ext_tx_set = get_ext_tx_set(mbmi->tx_size, bsize, is_inter);
     if (is_inter) {
       if (ext_tx_set > 0)
         *rate +=
-            cpi->inter_tx_type_costs[ext_tx_set][max_tx_size][mbmi->tx_type];
+            cpi->inter_tx_type_costs
+                [ext_tx_set][txsize_sqr_up_map[mbmi->tx_size]][mbmi->tx_type];
     } else {
       if (ext_tx_set > 0 && ALLOW_INTRA_EXT_TX)
-        *rate += cpi->intra_tx_type_costs[ext_tx_set][max_tx_size][mbmi->mode]
+        *rate += cpi->intra_tx_type_costs[ext_tx_set][mbmi->tx_size][mbmi->mode]
                                          [mbmi->tx_type];
     }
   }
 #else   // CONFIG_EXT_TX
-  if (max_tx_size < TX_32X32 && !xd->lossless[xd->mi[0]->mbmi.segment_id]) {
+  if (mbmi->tx_size < TX_32X32 && !xd->lossless[xd->mi[0]->mbmi.segment_id]) {
     if (is_inter)
-      *rate += cpi->inter_tx_type_costs[max_tx_size][mbmi->tx_type];
+      *rate += cpi->inter_tx_type_costs[mbmi->tx_size][mbmi->tx_type];
     else
       *rate += cpi->intra_tx_type_costs
-                   [max_tx_size][intra_mode_to_tx_type_context[mbmi->mode]]
+                   [mbmi->tx_size][intra_mode_to_tx_type_context[mbmi->mode]]
                    [mbmi->tx_type];
   }
 #endif  // CONFIG_EXT_TX
