@@ -16,6 +16,24 @@
       "revId": "410e865e863c1188f3076c0ab848599d8213ca93",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "565c0b05_f284a866",
+        "filename": "vp8/common/arm/neon/bilinearpredict_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-08T22:20:01Z",
+      "side": 1,
+      "message": "wow that\u0027s a lot faster!",
+      "parentUuid": "d6c1dbc3_040d96ec",
+      "revId": "410e865e863c1188f3076c0ab848599d8213ca93",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
