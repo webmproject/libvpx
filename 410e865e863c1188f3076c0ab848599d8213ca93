@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d6c1dbc3_040d96ec",
+        "filename": "vp8/common/arm/neon/bilinearpredict_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-08T00:02:00Z",
+      "side": 1,
+      "message": "any difference if you store to a 32-bit temporary then memcpy to the dest?",
+      "revId": "410e865e863c1188f3076c0ab848599d8213ca93",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
