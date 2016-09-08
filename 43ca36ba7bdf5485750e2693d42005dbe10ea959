@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "2bf48e40_3f2687c3",
+        "filename": "vp8/common/atomic.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000853
+      },
+      "writtenOn": "2016-09-08T17:36:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8b373ada_520a742d",
+      "revId": "43ca36ba7bdf5485750e2693d42005dbe10ea959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2bf48e40_ff825faf",
         "filename": "vp8/common/atomic.h",
         "patchSetId": 13
@@ -30,6 +48,30 @@
       "writtenOn": "2016-09-08T13:09:33Z",
       "side": 1,
       "message": "s/int/volatile int/ as above?\nI think it\u0027s more correct from C/C++ point of view to declare a variable as volatile, rather then always cast it to volatile type.",
+      "range": {
+        "startLine": 75,
+        "startChar": 8,
+        "endLine": 75,
+        "endChar": 11
+      },
+      "revId": "43ca36ba7bdf5485750e2693d42005dbe10ea959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2bf48e40_3f3a07f6",
+        "filename": "vp8/common/atomic.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1000853
+      },
+      "writtenOn": "2016-09-08T17:36:47Z",
+      "side": 1,
+      "message": "Sorry, forgot to remove volatile int above.",
+      "parentUuid": "2bf48e40_ff825faf",
       "range": {
         "startLine": 75,
         "startChar": 8,
@@ -59,6 +101,24 @@
     },
     {
       "key": {
+        "uuid": "ab2dde95_2b29b94a",
+        "filename": "vp8/common/atomic.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000853
+      },
+      "writtenOn": "2016-09-08T17:36:47Z",
+      "side": 1,
+      "message": "Agreed. Replaced with a _ReadWriteBarrier() on x86.",
+      "parentUuid": "ab2dde95_8b68adb2",
+      "revId": "43ca36ba7bdf5485750e2693d42005dbe10ea959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b373ada_1214ec49",
         "filename": "vp8/common/atomic.h",
         "patchSetId": 13
@@ -76,6 +136,24 @@
     },
     {
       "key": {
+        "uuid": "6b3cc6c0_d13c24d0",
+        "filename": "vp8/common/atomic.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000853
+      },
+      "writtenOn": "2016-09-08T17:36:47Z",
+      "side": 1,
+      "message": "Fixed, good catch!",
+      "parentUuid": "8b373ada_1214ec49",
+      "revId": "43ca36ba7bdf5485750e2693d42005dbe10ea959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b601ae6_ca08e389",
         "filename": "vp8/common/atomic.h",
         "patchSetId": 13
@@ -87,6 +165,24 @@
       "writtenOn": "2016-09-08T13:09:33Z",
       "side": 1,
       "message": "#undef vpx_memory_barrier",
+      "revId": "43ca36ba7bdf5485750e2693d42005dbe10ea959",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2bf48e40_9f4a3375",
+        "filename": "vp8/common/atomic.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1000853
+      },
+      "writtenOn": "2016-09-08T17:36:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8b601ae6_ca08e389",
       "revId": "43ca36ba7bdf5485750e2693d42005dbe10ea959",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
