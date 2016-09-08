@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "565c0b05_b8f4d9ec",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 671,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-08T01:03:52Z",
+      "side": 1,
+      "message": "dropping these will have a very indirect effect on the ABI",
+      "revId": "b018ad8747f821c073c50726f11ef1fc82a9a25d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "565c0b05_38e1a926",
+        "filename": "vpx/vp8.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-08T01:03:52Z",
+      "side": 1,
+      "message": "dropping these has API implications; if we were to reuse the values that would be ABI",
+      "revId": "b018ad8747f821c073c50726f11ef1fc82a9a25d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
