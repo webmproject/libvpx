@@ -134,9 +134,14 @@ static void read_inter_mode_probs(FRAME_CONTEXT *fc, aom_reader *r) {
 #endif  // CONFIG_EXT_INTER
 #else
   int j;
-  for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
+  for (i = 0; i < INTER_MODE_CONTEXTS; ++i) {
     for (j = 0; j < INTER_MODES - 1; ++j)
       av1_diff_update_prob(r, &fc->inter_mode_probs[i][j], ACCT_STR);
+#if CONFIG_DAALA_EC
+    av1_tree_to_cdf(av1_inter_mode_tree, fc->inter_mode_probs[i],
+                    fc->inter_mode_cdf[i]);
+#endif
+  }
 #endif
 }
 

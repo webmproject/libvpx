@@ -190,8 +190,13 @@ static PREDICTION_MODE read_inter_mode(AV1_COMMON *cm, MACROBLOCKD *xd,
   // Invalid prediction mode.
   assert(0);
 #else
+#if CONFIG_DAALA_EC
+  const int mode = av1_inter_mode_inv[aom_read_symbol(
+      r, cm->fc->inter_mode_cdf[ctx], INTER_MODES, ACCT_STR)];
+#else
   const int mode = aom_read_tree(r, av1_inter_mode_tree,
                                  cm->fc->inter_mode_probs[ctx], ACCT_STR);
+#endif
   FRAME_COUNTS *counts = xd->counts;
   if (counts) ++counts->inter_mode[ctx][mode];
 

@@ -194,6 +194,8 @@ void av1_encode_token_init(void) {
                         av1_ext_tx_tree);
   av1_indices_from_tree(av1_intra_mode_ind, av1_intra_mode_inv, INTRA_MODES,
                         av1_intra_mode_tree);
+  av1_indices_from_tree(av1_inter_mode_ind, av1_inter_mode_inv, INTER_MODES,
+                        av1_inter_mode_tree);
 #endif
 }
 
@@ -256,10 +258,17 @@ static void write_inter_mode(AV1_COMMON *cm, aom_writer *w,
     }
   }
 #else
-  const aom_prob *const inter_probs = cm->fc->inter_mode_probs[mode_ctx];
   assert(is_inter_mode(mode));
-  av1_write_token(w, av1_inter_mode_tree, inter_probs,
-                  &inter_mode_encodings[INTER_OFFSET(mode)]);
+#if CONFIG_DAALA_EC
+  aom_write_symbol(w, av1_inter_mode_ind[INTER_OFFSET(mode)],
+                   cm->fc->inter_mode_cdf[mode_ctx], INTER_MODES);
+#else
+  {
+    const aom_prob *const inter_probs = cm->fc->inter_mode_probs[mode_ctx];
+    av1_write_token(w, av1_inter_mode_tree, inter_probs,
+                    &inter_mode_encodings[INTER_OFFSET(mode)]);
+  }
+#endif
 #endif
 }
 
@@ -3677,9 +3686,14 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
 #if CONFIG_REF_MV
     update_inter_mode_probs(cm, header_bc, counts);
 #else
-    for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
+    for (i = 0; i < INTER_MODE_CONTEXTS; ++i) {
       prob_diff_update(av1_inter_mode_tree, cm->fc->inter_mode_probs[i],
                        counts->inter_mode[i], INTER_MODES, header_bc);
+#if CONFIG_DAALA_EC
+      av1_tree_to_cdf(av1_inter_mode_tree, cm->fc->inter_mode_probs[i],
+                      cm->fc->inter_mode_cdf[i]);
+#endif
+    }
 #endif
 
 #if CONFIG_EXT_INTER

@@ -373,6 +373,8 @@ static const aom_prob default_delta_q_probs[DELTA_Q_CONTEXTS] = { 220, 220,
 #endif
 int av1_intra_mode_ind[INTRA_MODES];
 int av1_intra_mode_inv[INTRA_MODES];
+int av1_inter_mode_ind[INTER_MODES];
+int av1_inter_mode_inv[INTER_MODES];
 
 /* Array indices are identical to previously-existing INTRAMODECONTEXTNODES. */
 const aom_tree_index av1_intra_mode_tree[TREE_SIZE(INTRA_MODES)] = {
@@ -1417,12 +1419,14 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
                      INTRA_MODES);
   av1_tree_to_cdf_1D(av1_switchable_interp_tree, fc->switchable_interp_prob,
                      fc->switchable_interp_cdf, SWITCHABLE_FILTER_CONTEXTS);
+  av1_tree_to_cdf_1D(av1_partition_tree, fc->partition_prob, fc->partition_cdf,
+                     PARTITION_CONTEXTS);
+  av1_tree_to_cdf_1D(av1_inter_mode_tree, fc->inter_mode_probs,
+                     fc->inter_mode_cdf, INTER_MODE_CONTEXTS);
   av1_tree_to_cdf_2D(av1_ext_tx_tree, fc->intra_ext_tx_prob,
                      fc->intra_ext_tx_cdf, EXT_TX_SIZES, TX_TYPES);
   av1_tree_to_cdf_1D(av1_ext_tx_tree, fc->inter_ext_tx_prob,
                      fc->inter_ext_tx_cdf, EXT_TX_SIZES);
-  av1_tree_to_cdf_1D(av1_partition_tree, fc->partition_prob, fc->partition_cdf,
-                     PARTITION_CONTEXTS);
   av1_tree_to_cdf_2D(av1_intra_mode_tree, av1_kf_y_mode_prob, av1_kf_y_mode_cdf,
                      INTRA_MODES, INTRA_MODES);
   av1_tree_to_cdf(av1_segment_tree, fc->seg.tree_probs, fc->seg.tree_cdf);

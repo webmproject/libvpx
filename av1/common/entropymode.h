@@ -170,6 +170,7 @@ typedef struct frame_contexts {
   aom_cdf_prob partition_cdf[PARTITION_CONTEXTS][PARTITION_TYPES];
   aom_cdf_prob switchable_interp_cdf[SWITCHABLE_FILTER_CONTEXTS]
                                     [SWITCHABLE_FILTERS];
+  aom_cdf_prob inter_mode_cdf[INTER_MODE_CONTEXTS][INTER_MODES];
   aom_cdf_prob intra_ext_tx_cdf[EXT_TX_SIZES][TX_TYPES][TX_TYPES];
   aom_cdf_prob inter_ext_tx_cdf[EXT_TX_SIZES][TX_TYPES];
 #endif
@@ -302,6 +303,8 @@ extern const aom_tree_index av1_inter_mode_tree[TREE_SIZE(INTER_MODES)];
 #if CONFIG_DAALA_EC
 extern int av1_intra_mode_ind[INTRA_MODES];
 extern int av1_intra_mode_inv[INTRA_MODES];
+extern int av1_inter_mode_ind[INTER_MODES];
+extern int av1_inter_mode_inv[INTER_MODES];
 #endif
 #if CONFIG_EXT_INTER
 extern const aom_tree_index
