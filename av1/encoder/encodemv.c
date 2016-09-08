@@ -62,10 +62,16 @@ static void encode_mv_component(aom_writer *w, int comp,
     for (i = 0; i < n; ++i) aom_write(w, (d >> i) & 1, mvcomp->bits[i]);
   }
 
-  // Fractional bits
+// Fractional bits
+#if CONFIG_DAALA_EC
+  aom_write_symbol(
+      w, fr, mv_class == MV_CLASS_0 ? mvcomp->class0_fp_cdf[d] : mvcomp->fp_cdf,
+      MV_FP_SIZE);
+#else
   av1_write_token(w, av1_mv_fp_tree,
                   mv_class == MV_CLASS_0 ? mvcomp->class0_fp[d] : mvcomp->fp,
                   &mv_fp_encodings[fr]);
+#endif
 
   // High precision bit
   if (usehp)
@@ -217,12 +223,19 @@ void av1_write_nmv_probs(AV1_COMMON *cm, int usehp, aom_writer *w,
   }
 
   for (i = 0; i < 2; ++i) {
-    for (j = 0; j < CLASS0_SIZE; ++j)
+    for (j = 0; j < CLASS0_SIZE; ++j) {
       write_mv_update(av1_mv_fp_tree, mvc->comps[i].class0_fp[j],
                       counts->comps[i].class0_fp[j], MV_FP_SIZE, w);
-
+#if CONFIG_DAALA_EC
+      av1_tree_to_cdf(av1_mv_fp_tree, mvc->comps[i].class0_fp[j],
+                      mvc->comps[i].class0_fp_cdf[j]);
+#endif
+    }
     write_mv_update(av1_mv_fp_tree, mvc->comps[i].fp, counts->comps[i].fp,
                     MV_FP_SIZE, w);
+#if CONFIG_DAALA_EC
+    av1_tree_to_cdf(av1_mv_fp_tree, mvc->comps[i].fp, mvc->comps[i].fp_cdf);
+#endif
   }
 
   if (usehp) {

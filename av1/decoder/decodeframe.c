@@ -226,9 +226,17 @@ static void read_mv_probs(nmv_context *ctx, int allow_hp, aom_reader *r) {
 
   for (i = 0; i < 2; ++i) {
     nmv_component *const comp_ctx = &ctx->comps[i];
-    for (j = 0; j < CLASS0_SIZE; ++j)
+    for (j = 0; j < CLASS0_SIZE; ++j) {
       update_mv_probs(comp_ctx->class0_fp[j], MV_FP_SIZE - 1, r);
+#if CONFIG_DAALA_EC
+      av1_tree_to_cdf(av1_mv_fp_tree, comp_ctx->class0_fp[j],
+                      comp_ctx->class0_fp_cdf[j]);
+#endif
+    }
     update_mv_probs(comp_ctx->fp, MV_FP_SIZE - 1, r);
+#if CONFIG_DAALA_EC
+    av1_tree_to_cdf(av1_mv_fp_tree, comp_ctx->fp, comp_ctx->fp_cdf);
+#endif
   }
 
   if (allow_hp) {

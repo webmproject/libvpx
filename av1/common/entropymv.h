@@ -92,6 +92,10 @@ typedef struct {
   aom_prob bits[MV_OFFSET_BITS];
   aom_prob class0_fp[CLASS0_SIZE][MV_FP_SIZE - 1];
   aom_prob fp[MV_FP_SIZE - 1];
+#if CONFIG_DAALA_EC
+  aom_cdf_prob class0_fp_cdf[CLASS0_SIZE][MV_FP_SIZE];
+  aom_cdf_prob fp_cdf[MV_FP_SIZE];
+#endif
   aom_prob class0_hp;
   aom_prob hp;
 } nmv_component;
