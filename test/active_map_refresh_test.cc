@@ -115,22 +115,15 @@ TEST_P(ActiveMapRefreshTest, Test) {
   cfg_.rc_end_usage = AOM_CBR;
   cfg_.kf_max_dist = 90000;
 
-#if CONFIG_AV1
-  const int nframes = codec_ == &libaom_test::kAV1 ? 10 : 30;
-#else
-  const int nframes = 30;
-#endif  // CONFIG_AV1
-  ::libaom_test::Y4mVideoSource video("desktop_credits.y4m", 0, nframes);
-  ::libaom_test::Y4mVideoSource video_holder("desktop_credits.y4m", 0, nframes);
+  ::libaom_test::Y4mVideoSource video("desktop_credits.y4m", 0, 10);
+  ::libaom_test::Y4mVideoSource video_holder("desktop_credits.y4m", 0, 10);
   video_holder.Begin();
   y4m_holder_ = &video_holder;
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
-#if CONFIG_AV1
 AV1_INSTANTIATE_TEST_CASE(ActiveMapRefreshTest,
                           ::testing::Values(::libaom_test::kRealTime),
                           ::testing::Range(5, 6));
-#endif  // CONFIG_AV1
 }  // namespace
