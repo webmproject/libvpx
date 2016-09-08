@@ -746,7 +746,7 @@ static int read_mv_component(aom_reader *r, const nmv_component *mvcomp,
 
   // Integer part
   if (class0) {
-    d = aom_read_tree(r, av1_mv_class0_tree, mvcomp->class0, ACCT_STR);
+    d = aom_read(r, mvcomp->class0[0], ACCT_STR);
     mag = 0;
   } else {
     int i;
