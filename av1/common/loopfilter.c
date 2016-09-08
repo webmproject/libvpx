@@ -16,7 +16,6 @@
 #include "av1/common/loopfilter.h"
 #include "av1/common/onyxc_int.h"
 #include "av1/common/reconinter.h"
-#include "av1/common/restoration.h"
 #include "aom_dsp/aom_dsp_common.h"
 #include "aom_mem/aom_mem.h"
 #include "aom_ports/mem.h"
