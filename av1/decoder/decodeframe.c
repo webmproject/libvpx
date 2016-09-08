@@ -209,6 +209,9 @@ static void read_mv_probs(nmv_context *ctx, int allow_hp, aom_reader *r) {
   int i, j;
 
   update_mv_probs(ctx->joints, MV_JOINTS - 1, r);
+#if CONFIG_DAALA_EC
+  av1_tree_to_cdf(av1_mv_joint_tree, ctx->joints, ctx->joint_cdf);
+#endif
 
   for (i = 0; i < 2; ++i) {
     nmv_component *const comp_ctx = &ctx->comps[i];

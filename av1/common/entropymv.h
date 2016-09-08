@@ -95,6 +95,9 @@ typedef struct {
 
 typedef struct {
   aom_prob joints[MV_JOINTS - 1];
+#if CONFIG_DAALA_EC
+  aom_cdf_prob joint_cdf[MV_JOINTS];
+#endif
   nmv_component comps[2];
 } nmv_context;
 

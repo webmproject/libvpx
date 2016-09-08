@@ -42,7 +42,10 @@ const aom_tree_index av1_mv_fp_tree[TREE_SIZE(MV_FP_SIZE)] = { -0, 2,  -1,
                                                                4,  -2, -3 };
 
 static const nmv_context default_nmv_context = {
-  { 32, 64, 96 },
+  { 32, 64, 96 },  // joints
+#if CONFIG_DAALA_EC
+  { 0, 0, 0, 0 },  // joint_cdf is computed from joints in av1_init_mv_probs()
+#endif
   { {
         // Vertical component
         128,                                                   // sign
@@ -262,6 +265,10 @@ void av1_init_mv_probs(AV1_COMMON *cm) {
   for (i = 0; i < NMV_CONTEXTS; ++i) cm->fc->nmvc[i] = default_nmv_context;
 #else
   cm->fc->nmvc = default_nmv_context;
+#if CONFIG_DAALA_EC
+  av1_tree_to_cdf(av1_mv_joint_tree, cm->fc->nmvc.joints,
+                  cm->fc->nmvc.joint_cdf);
+#endif
 #endif
 #if CONFIG_GLOBAL_MOTION
   av1_copy(cm->fc->global_motion_types_prob, default_global_motion_types_prob);

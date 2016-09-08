@@ -239,7 +239,11 @@ void av1_encode_mv(AV1_COMP *cpi, aom_writer *w, const MV *mv, const MV *ref,
 #if CONFIG_REF_MV
   (void)is_compound;
 #endif
+#if CONFIG_DAALA_EC
+  aom_write_symbol(w, j, mvctx->joint_cdf, MV_JOINTS);
+#else
   av1_write_token(w, av1_mv_joint_tree, mvctx->joints, &mv_joint_encodings[j]);
+#endif
   if (mv_joint_vertical(j))
     encode_mv_component(w, diff.row, &mvctx->comps[0], usehp);
 
