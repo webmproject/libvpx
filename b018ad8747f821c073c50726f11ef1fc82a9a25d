@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "565c0b05_f89f315f",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 671,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-08T01:46:46Z",
+      "side": 1,
+      "message": "seems we\u0027ve already modified vp8 in a similar way since 1.6.0",
+      "parentUuid": "565c0b05_b8f4d9ec",
+      "revId": "b018ad8747f821c073c50726f11ef1fc82a9a25d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "565c0b05_38e1a926",
         "filename": "vpx/vp8.h",
         "patchSetId": 2
