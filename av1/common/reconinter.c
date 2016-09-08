@@ -34,10 +34,10 @@
 static int get_masked_weight(int m, int smoothness) {
 #define SMOOTHER_LEN 32
   static const uint8_t smoothfn[NSMOOTHERS][2 * SMOOTHER_LEN + 1] = { {
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 1, 2, 4, 7, 13, 21, 32, 43, 51, 57, 60, 62, 63, 64, 64, 64, 64, 64, 64,
-      64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-      64, 64,
+      0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+      0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  2,  4,  7,  13, 21, 32, 43,
+      51, 57, 60, 62, 63, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+      64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
   } };
   if (m < -SMOOTHER_LEN)
     return 0;
@@ -48,10 +48,9 @@ static int get_masked_weight(int m, int smoothness) {
 }
 
 // [smoother][negative][direction]
-DECLARE_ALIGNED(
-    16, static uint8_t,
-    wedge_mask_obl[NSMOOTHERS][2][WEDGE_DIRECTIONS][MASK_MASTER_SIZE *
-                                                    MASK_MASTER_SIZE]);
+DECLARE_ALIGNED(16, static uint8_t,
+                wedge_mask_obl[NSMOOTHERS][2][WEDGE_DIRECTIONS]
+                              [MASK_MASTER_SIZE * MASK_MASTER_SIZE]);
 
 DECLARE_ALIGNED(16, static uint8_t,
                 wedge_signflip_lookup[BLOCK_SIZES][MAX_WEDGE_TYPES]);

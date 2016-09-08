@@ -266,9 +266,9 @@ DECLARE_ALIGNED(16, const int16_t,
 #endif
 #if CONFIG_AOM_HIGHBITDEPTH
 #if USE_TEMPORALFILTER_12TAP
-DECLARE_ALIGNED(
-    16, const int16_t,
-    sub_pel_filters_temporalfilter_12_highbd_ver_signal_dir[15][6][8]) = {
+DECLARE_ALIGNED(16, const int16_t,
+                sub_pel_filters_temporalfilter_12_highbd_ver_signal_dir[15][6]
+                                                                       [8]) = {
   {
       { 0, 1, 0, 1, 0, 1, 0, 1 },
       { -1, 3, -1, 3, -1, 3, -1, 3 },

@@ -422,11 +422,13 @@ typedef enum QUANT_FUNC {
   QUANT_FUNC_LAST = 1
 } QUANT_FUNC;
 
-static AV1_QUANT_FACADE quant_func_list[AV1_XFORM_QUANT_LAST][QUANT_FUNC_LAST] =
-    { { av1_quantize_fp_facade },
-      { av1_quantize_b_facade },
-      { av1_quantize_dc_facade },
-      { NULL } };
+static AV1_QUANT_FACADE quant_func_list[AV1_XFORM_QUANT_LAST]
+                                       [QUANT_FUNC_LAST] = {
+                                         { av1_quantize_fp_facade },
+                                         { av1_quantize_b_facade },
+                                         { av1_quantize_dc_facade },
+                                         { NULL }
+                                       };
 #endif
 
 static FWD_TXFM_OPT fwd_txfm_opt_list[AV1_XFORM_QUANT_LAST] = {

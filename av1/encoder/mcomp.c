@@ -945,12 +945,13 @@ static INLINE void calc_int_sad_list(const MACROBLOCK *x,
 // candidates as indicated in the num_candidates and candidates arrays
 // passed into this function
 //
-static int pattern_search(
-    MACROBLOCK *x, MV *start_mv, int search_param, int sad_per_bit,
-    int do_init_search, int *cost_list, const aom_variance_fn_ptr_t *vfp,
-    int use_mvcost, const MV *center_mv,
-    const int num_candidates[MAX_PATTERN_SCALES],
-    const MV candidates[MAX_PATTERN_SCALES][MAX_PATTERN_CANDIDATES]) {
+static int pattern_search(MACROBLOCK *x, MV *start_mv, int search_param,
+                          int sad_per_bit, int do_init_search, int *cost_list,
+                          const aom_variance_fn_ptr_t *vfp, int use_mvcost,
+                          const MV *center_mv,
+                          const int num_candidates[MAX_PATTERN_SCALES],
+                          const MV candidates[MAX_PATTERN_SCALES]
+                                             [MAX_PATTERN_CANDIDATES]) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   static const int search_param_to_steps[MAX_MVSEARCH_STEPS] = {
     10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,

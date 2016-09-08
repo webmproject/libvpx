@@ -1461,8 +1461,9 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
       } else {
         av1_write_token(
             w, av1_ext_tx_tree,
-            cm->fc->intra_ext_tx_prob
-                [mbmi->tx_size][intra_mode_to_tx_type_context[mbmi->mode]],
+            cm->fc
+                ->intra_ext_tx_prob[mbmi->tx_size]
+                                   [intra_mode_to_tx_type_context[mbmi->mode]],
             &ext_tx_encodings[mbmi->tx_type]);
       }
     } else {
@@ -2115,11 +2116,12 @@ static void update_coef_probs_common(aom_writer *const bc, AV1_COMP *cpi,
 
 #if CONFIG_ENTROPY
 // Calculate the token counts between subsequent subframe updates.
-static void get_coef_counts_diff(
-    AV1_COMP *cpi, int index,
-    av1_coeff_count coef_counts[TX_SIZES][PLANE_TYPES],
-    unsigned int eob_counts[TX_SIZES][PLANE_TYPES][REF_TYPES][COEF_BANDS]
-                           [COEFF_CONTEXTS]) {
+static void get_coef_counts_diff(AV1_COMP *cpi, int index,
+                                 av1_coeff_count coef_counts[TX_SIZES]
+                                                            [PLANE_TYPES],
+                                 unsigned int eob_counts[TX_SIZES][PLANE_TYPES]
+                                                        [REF_TYPES][COEF_BANDS]
+                                                        [COEFF_CONTEXTS]) {
   int i, j, k, l, m, tx_size, val;
   const int max_idx = cpi->common.coef_probs_update_idx;
   const TX_MODE tx_mode = cpi->common.tx_mode;
@@ -2138,8 +2140,8 @@ static void get_coef_counts_diff(
                   cpi->common.counts.eob_branch[tx_size][i][j][k][l] -
                   subframe_stats->eob_counts_buf[max_idx][tx_size][i][j][k][l];
             } else {
-              val = subframe_stats
-                        ->eob_counts_buf[index + 1][tx_size][i][j][k][l] -
+              val = subframe_stats->eob_counts_buf[index + 1][tx_size][i][j][k]
+                                                  [l] -
                     subframe_stats->eob_counts_buf[index][tx_size][i][j][k][l];
             }
             assert(val >= 0);
@@ -2148,13 +2150,13 @@ static void get_coef_counts_diff(
             for (m = 0; m < ENTROPY_TOKENS; ++m) {
               if (index == max_idx) {
                 val = cpi->td.rd_counts.coef_counts[tx_size][i][j][k][l][m] -
-                      subframe_stats
-                          ->coef_counts_buf[max_idx][tx_size][i][j][k][l][m];
+                      subframe_stats->coef_counts_buf[max_idx][tx_size][i][j][k]
+                                                     [l][m];
               } else {
-                val = subframe_stats
-                          ->coef_counts_buf[index + 1][tx_size][i][j][k][l][m] -
-                      subframe_stats
-                          ->coef_counts_buf[index][tx_size][i][j][k][l][m];
+                val = subframe_stats->coef_counts_buf[index + 1][tx_size][i][j]
+                                                     [k][l][m] -
+                      subframe_stats->coef_counts_buf[index][tx_size][i][j][k]
+                                                     [l][m];
               }
               assert(val >= 0);
               coef_counts[tx_size][i][j][k][l][m] = val;
@@ -2358,8 +2360,8 @@ static void update_coef_probs(AV1_COMP *cpi, aom_writer *w) {
 #if CONFIG_ENTROPY
       if (cm->do_subframe_update &&
           cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
-        unsigned int
-            eob_counts_copy[PLANE_TYPES][REF_TYPES][COEF_BANDS][COEFF_CONTEXTS];
+        unsigned int eob_counts_copy[PLANE_TYPES][REF_TYPES][COEF_BANDS]
+                                    [COEFF_CONTEXTS];
         av1_coeff_count coef_counts_copy[PLANE_TYPES];
         av1_copy(eob_counts_copy, cpi->common.counts.eob_branch[tx_size]);
         av1_copy(coef_counts_copy, cpi->td.rd_counts.coef_counts[tx_size]);
@@ -2814,7 +2816,7 @@ static uint32_t write_tiles(AV1_COMP *const cpi, uint8_t *const dst,
 #endif  // CONFIG_ANS
   int tile_row, tile_col;
   TOKENEXTRA *(*const tok_buffers)[MAX_TILE_COLS] = cpi->tile_tok;
-  TileBufferEnc (*const tile_buffers)[MAX_TILE_COLS] = cpi->tile_buffers;
+  TileBufferEnc(*const tile_buffers)[MAX_TILE_COLS] = cpi->tile_buffers;
   size_t total_size = 0;
   const int tile_cols = cm->tile_cols;
   const int tile_rows = cm->tile_rows;

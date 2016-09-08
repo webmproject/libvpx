@@ -212,9 +212,10 @@ int av1_prob_update_search_subframe(unsigned int ct[][2], aom_prob oldp,
   return bestsavings;
 }
 
-int av1_prob_update_search_model_subframe(
-    unsigned int ct[ENTROPY_NODES][COEF_PROBS_BUFS][2], const aom_prob *oldp,
-    aom_prob *bestp, aom_prob upd, int stepsize, int n) {
+int av1_prob_update_search_model_subframe(unsigned int ct[ENTROPY_NODES]
+                                                         [COEF_PROBS_BUFS][2],
+                                          const aom_prob *oldp, aom_prob *bestp,
+                                          aom_prob upd, int stepsize, int n) {
   int i, old_b, new_b, update_b, savings, bestsavings;
   int newp;
   const int step_sign = *bestp > oldp[PIVOT_NODE] ? -1 : 1;

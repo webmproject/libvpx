@@ -409,7 +409,7 @@ void av1_tokenize_palette_sb(struct ThreadData *const td, BLOCK_SIZE bsize,
                    (xd->plane[plane != 0].subsampling_y);
   const int cols = (4 * num_4x4_blocks_wide_lookup[bsize]) >>
                    (xd->plane[plane != 0].subsampling_x);
-  const aom_prob (*const probs)[PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1] =
+  const aom_prob(*const probs)[PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1] =
       plane == 0 ? av1_default_palette_y_color_prob
                  : av1_default_palette_uv_color_prob;
 
@@ -458,21 +458,21 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
   const TX_TYPE tx_type = get_tx_type(type, xd, block, tx_size);
   const scan_order *const so = get_scan(tx_size, tx_type, is_inter_block(mbmi));
   const int ref = is_inter_block(mbmi);
-  unsigned int (*const counts)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
+  unsigned int(*const counts)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
       td->rd_counts.coef_counts[txsize_sqr_map[tx_size]][type][ref];
 #if CONFIG_ENTROPY
   aom_prob(*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       cpi->subframe_stats.coef_probs_buf[cpi->common.coef_probs_update_idx]
                                         [txsize_sqr_map[tx_size]][type][ref];
 #else
-  aom_prob (*const coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
+  aom_prob(*const coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       cpi->common.fc->coef_probs[txsize_sqr_map[tx_size]][type][ref];
 #endif  // CONFIG_ENTROPY
 #if CONFIG_ANS
-  rans_dec_lut (*const coef_cdfs)[COEFF_CONTEXTS] =
+  rans_dec_lut(*const coef_cdfs)[COEFF_CONTEXTS] =
       cpi->common.fc->coef_cdfs[txsize_sqr_map[tx_size]][type][ref];
 #endif  // CONFIG_ANS
-  unsigned int (*const eob_branch)[COEFF_CONTEXTS] =
+  unsigned int(*const eob_branch)[COEFF_CONTEXTS] =
       td->counts->eob_branch[txsize_sqr_map[tx_size]][type][ref];
   const uint8_t *const band = get_band_translate(tx_size);
   const int seg_eob = get_tx_eob(&cpi->common.seg, segment_id, tx_size);

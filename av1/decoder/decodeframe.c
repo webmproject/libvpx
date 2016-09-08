@@ -2564,7 +2564,7 @@ static const uint8_t *decode_tiles(AV1Decoder *pbi, const uint8_t *data,
   const int tile_cols = cm->tile_cols;
   const int tile_rows = cm->tile_rows;
   const int n_tiles = tile_cols * tile_rows;
-  TileBufferDec (*const tile_buffers)[MAX_TILE_COLS] = pbi->tile_buffers;
+  TileBufferDec(*const tile_buffers)[MAX_TILE_COLS] = pbi->tile_buffers;
 #if CONFIG_EXT_TILE
   const int dec_tile_row = AOMMIN(pbi->dec_tile_row, tile_rows);
   const int single_row = pbi->dec_tile_row >= 0;
@@ -2823,7 +2823,7 @@ static const uint8_t *decode_tiles_mt(AV1Decoder *pbi, const uint8_t *data,
   const int tile_cols = cm->tile_cols;
   const int tile_rows = cm->tile_rows;
   const int num_workers = AOMMIN(pbi->max_threads & ~1, tile_cols);
-  TileBufferDec (*const tile_buffers)[MAX_TILE_COLS] = pbi->tile_buffers;
+  TileBufferDec(*const tile_buffers)[MAX_TILE_COLS] = pbi->tile_buffers;
 #if CONFIG_EXT_TILE
   const int dec_tile_row = AOMMIN(pbi->dec_tile_row, tile_rows);
   const int single_row = pbi->dec_tile_row >= 0;

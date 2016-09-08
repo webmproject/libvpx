@@ -1325,8 +1325,9 @@ static int64_t txfm_yrd(AV1_COMP *cpi, MACROBLOCK *x, int *r, int64_t *d,
     const int ext_tx_set = get_ext_tx_set(tx_size, bs, is_inter);
     if (is_inter) {
       if (ext_tx_set > 0)
-        *r += cpi->inter_tx_type_costs
-                  [ext_tx_set][txsize_sqr_map[mbmi->tx_size]][mbmi->tx_type];
+        *r +=
+            cpi->inter_tx_type_costs[ext_tx_set][txsize_sqr_map[mbmi->tx_size]]
+                                    [mbmi->tx_type];
     } else {
       if (ext_tx_set > 0 && ALLOW_INTRA_EXT_TX)
         *r += cpi->intra_tx_type_costs[ext_tx_set][mbmi->tx_size][mbmi->mode]
@@ -2209,14 +2210,14 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(AV1_COMP *cpi, MACROBLOCK *mb,
 #if CONFIG_EXT_TX
     if (get_ext_tx_types(TX_4X4, bsize, 0) > 1) {
       const int eset = get_ext_tx_set(TX_4X4, bsize, 0);
-      rate_tx_type =
-          cpi->intra_tx_type_costs[eset][TX_4X4][mic->mbmi.mode][mic->mbmi
-                                                                     .tx_type];
+      rate_tx_type = cpi->intra_tx_type_costs[eset][TX_4X4][mic->mbmi.mode]
+                                             [mic->mbmi.tx_type];
     }
 #else
-    rate_tx_type = cpi->intra_tx_type_costs
-                       [TX_4X4][intra_mode_to_tx_type_context[mic->mbmi.mode]]
-                       [mic->mbmi.tx_type];
+    rate_tx_type =
+        cpi->intra_tx_type_costs[TX_4X4]
+                                [intra_mode_to_tx_type_context[mic->mbmi.mode]]
+                                [mic->mbmi.tx_type];
 #endif
     assert(mic->mbmi.tx_size == TX_4X4);
     cost += rate_tx_type;
@@ -2689,8 +2690,8 @@ static int64_t rd_pick_intra_sby_mode(AV1_COMP *cpi, MACROBLOCK *x, int *rate,
       // (prediction granularity), so we account for it in the full rate,
       // not the tokenonly rate.
       this_rate_tokenonly -=
-          cpi->tx_size_cost[max_tx_size -
-                            TX_8X8][get_tx_size_context(xd)][mic->mbmi.tx_size];
+          cpi->tx_size_cost[max_tx_size - TX_8X8][get_tx_size_context(xd)]
+                           [mic->mbmi.tx_size];
     }
     if (cpi->common.allow_screen_content_tools && mic->mbmi.mode == DC_PRED)
       this_rate += av1_cost_bit(
@@ -2981,7 +2982,7 @@ static void select_tx_block(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int tx_row = blk_row >> (1 - pd->subsampling_y);
   const int tx_col = blk_col >> (1 - pd->subsampling_x);
-  TX_SIZE (*const inter_tx_size)
+  TX_SIZE(*const inter_tx_size)
   [MAX_MIB_SIZE] =
       (TX_SIZE(*)[MAX_MIB_SIZE]) & mbmi->inter_tx_size[tx_row][tx_col];
   const int bw = num_4x4_blocks_wide_lookup[plane_bsize];
@@ -3276,9 +3277,9 @@ static int64_t select_tx_size_fix_type(const AV1_COMP *cpi, MACROBLOCK *x,
     int ext_tx_set = get_ext_tx_set(mbmi->tx_size, bsize, is_inter);
     if (is_inter) {
       if (ext_tx_set > 0)
-        *rate +=
-            cpi->inter_tx_type_costs
-                [ext_tx_set][txsize_sqr_up_map[mbmi->tx_size]][mbmi->tx_type];
+        *rate += cpi->inter_tx_type_costs[ext_tx_set]
+                                         [txsize_sqr_up_map[mbmi->tx_size]]
+                                         [mbmi->tx_type];
     } else {
       if (ext_tx_set > 0 && ALLOW_INTRA_EXT_TX)
         *rate += cpi->intra_tx_type_costs[ext_tx_set][mbmi->tx_size][mbmi->mode]
@@ -3290,9 +3291,10 @@ static int64_t select_tx_size_fix_type(const AV1_COMP *cpi, MACROBLOCK *x,
     if (is_inter)
       *rate += cpi->inter_tx_type_costs[mbmi->tx_size][mbmi->tx_type];
     else
-      *rate += cpi->intra_tx_type_costs
-                   [mbmi->tx_size][intra_mode_to_tx_type_context[mbmi->mode]]
-                   [mbmi->tx_type];
+      *rate +=
+          cpi->intra_tx_type_costs[mbmi->tx_size]
+                                  [intra_mode_to_tx_type_context[mbmi->mode]]
+                                  [mbmi->tx_type];
   }
 #endif  // CONFIG_EXT_TX
 
@@ -4042,8 +4044,8 @@ static int cost_mv_ref(const AV1_COMP *cpi, PREDICTION_MODE mode,
 
 #if CONFIG_EXT_INTER
   if (is_compound) {
-    return cpi
-        ->inter_compound_mode_cost[mode_context][INTER_COMPOUND_OFFSET(mode)];
+    return cpi->inter_compound_mode_cost[mode_context]
+                                        [INTER_COMPOUND_OFFSET(mode)];
   } else {
     if (mode == NEWMV || mode == NEWFROMNEARMV) {
 #else
@@ -4083,8 +4085,8 @@ static int cost_mv_ref(const AV1_COMP *cpi, PREDICTION_MODE mode,
   assert(is_inter_mode(mode));
 #if CONFIG_EXT_INTER
   if (is_inter_compound_mode(mode)) {
-    return cpi
-        ->inter_compound_mode_cost[mode_context][INTER_COMPOUND_OFFSET(mode)];
+    return cpi->inter_compound_mode_cost[mode_context]
+                                        [INTER_COMPOUND_OFFSET(mode)];
   } else {
 #endif  // CONFIG_EXT_INTER
     return cpi->inter_mode_cost[mode_context][INTER_OFFSET(mode)];
@@ -4119,14 +4121,16 @@ static int get_gmbitcost(const Global_Motion_Params *gm,
              2);
 #endif  // CONFIG_GLOBAL_MOTION
 
-static int set_and_cost_bmi_mvs(
-    AV1_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd, int i, PREDICTION_MODE mode,
-    int_mv this_mv[2], int_mv frame_mv[MB_MODE_COUNT][TOTAL_REFS_PER_FRAME],
-    int_mv seg_mvs[TOTAL_REFS_PER_FRAME],
+static int set_and_cost_bmi_mvs(AV1_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
+                                int i, PREDICTION_MODE mode, int_mv this_mv[2],
+                                int_mv frame_mv[MB_MODE_COUNT]
+                                               [TOTAL_REFS_PER_FRAME],
+                                int_mv seg_mvs[TOTAL_REFS_PER_FRAME],
 #if CONFIG_EXT_INTER
-    int_mv compound_seg_newmvs[2],
+                                int_mv compound_seg_newmvs[2],
 #endif  // CONFIG_EXT_INTER
-    int_mv *best_ref_mv[2], const int *mvjcost, int *mvcost[2]) {
+                                int_mv *best_ref_mv[2], const int *mvjcost,
+                                int *mvcost[2]) {
 #if CONFIG_GLOBAL_MOTION
   const AV1_COMMON *cm = &cpi->common;
 #endif  // CONFIG_GLOBAL_MOTION
@@ -5734,12 +5738,13 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
   ctx->hybrid_pred_diff = (int)comp_pred_diff[REFERENCE_MODE_SELECT];
 }
 
-static void setup_buffer_inter(
-    AV1_COMP *cpi, MACROBLOCK *x, MV_REFERENCE_FRAME ref_frame,
-    BLOCK_SIZE block_size, int mi_row, int mi_col,
-    int_mv frame_nearest_mv[TOTAL_REFS_PER_FRAME],
-    int_mv frame_near_mv[TOTAL_REFS_PER_FRAME],
-    struct buf_2d yv12_mb[TOTAL_REFS_PER_FRAME][MAX_MB_PLANE]) {
+static void setup_buffer_inter(AV1_COMP *cpi, MACROBLOCK *x,
+                               MV_REFERENCE_FRAME ref_frame,
+                               BLOCK_SIZE block_size, int mi_row, int mi_col,
+                               int_mv frame_nearest_mv[TOTAL_REFS_PER_FRAME],
+                               int_mv frame_near_mv[TOTAL_REFS_PER_FRAME],
+                               struct buf_2d yv12_mb[TOTAL_REFS_PER_FRAME]
+                                                    [MAX_MB_PLANE]) {
   const AV1_COMMON *cm = &cpi->common;
   const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref_frame);
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -8088,8 +8093,8 @@ static void pick_ext_intra_interframe(
     // tokenonly rate, but for intra blocks, tx_size is always coded
     // (prediction granularity), so we account for it in the full rate,
     // not the tokenonly rate.
-    rate_y -= cpi->tx_size_cost[max_tx_size -
-                                TX_8X8][get_tx_size_context(xd)][mbmi->tx_size];
+    rate_y -= cpi->tx_size_cost[max_tx_size - TX_8X8][get_tx_size_context(xd)]
+                               [mbmi->tx_size];
   }
 
   rate2 += av1_cost_bit(cm->fc->ext_intra_probs[0],
@@ -8813,8 +8818,8 @@ void av1_rd_pick_inter_mode_sb(AV1_COMP *cpi, TileDataEnc *tile_data,
         // tokenonly rate, but for intra blocks, tx_size is always coded
         // (prediction granularity), so we account for it in the full rate,
         // not the tokenonly rate.
-        rate_y -= cpi->tx_size_cost[max_tx_size - TX_8X8][get_tx_size_context(
-            xd)][mbmi->tx_size];
+        rate_y -= cpi->tx_size_cost[max_tx_size - TX_8X8]
+                                   [get_tx_size_context(xd)][mbmi->tx_size];
       }
 #if CONFIG_EXT_INTRA
       if (is_directional_mode) {
@@ -8992,12 +8997,12 @@ void av1_rd_pick_inter_mode_sb(AV1_COMP *cpi, TileDataEnc *tile_data,
           clamp_mv2(&cur_mv.as_mv, xd);
 
           if (!mv_check_bounds(x, &cur_mv.as_mv)) {
-            InterpFilter
-                dummy_single_inter_filter[MB_MODE_COUNT][TOTAL_REFS_PER_FRAME] =
-                    { { 0 } };
-            int dummy_single_skippable[MB_MODE_COUNT][TOTAL_REFS_PER_FRAME] = {
-              { 0 }
-            };
+            InterpFilter dummy_single_inter_filter[MB_MODE_COUNT]
+                                                  [TOTAL_REFS_PER_FRAME] = {
+                                                    { 0 }
+                                                  };
+            int dummy_single_skippable[MB_MODE_COUNT]
+                                      [TOTAL_REFS_PER_FRAME] = { { 0 } };
             int dummy_disable_skip = 0;
 #if CONFIG_EXT_INTER
             int_mv dummy_single_newmvs[2][TOTAL_REFS_PER_FRAME] = { { { 0 } },

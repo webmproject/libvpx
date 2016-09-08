@@ -24,10 +24,10 @@
 #define BILATERAL_AMP_RANGE 256
 #define BILATERAL_AMP_RANGE_SYM (2 * BILATERAL_AMP_RANGE + 1)
 
-static uint8_t
-    bilateral_filter_coeffs_r_kf[BILATERAL_LEVELS_KF][BILATERAL_AMP_RANGE_SYM];
-static uint8_t
-    bilateral_filter_coeffs_r[BILATERAL_LEVELS][BILATERAL_AMP_RANGE_SYM];
+static uint8_t bilateral_filter_coeffs_r_kf[BILATERAL_LEVELS_KF]
+                                           [BILATERAL_AMP_RANGE_SYM];
+static uint8_t bilateral_filter_coeffs_r[BILATERAL_LEVELS]
+                                        [BILATERAL_AMP_RANGE_SYM];
 static uint8_t bilateral_filter_coeffs_s_kf[BILATERAL_LEVELS_KF]
                                            [RESTORATION_WIN][RESTORATION_WIN];
 static uint8_t bilateral_filter_coeffs_s[BILATERAL_LEVELS][RESTORATION_WIN]
@@ -121,12 +121,14 @@ void av1_loop_restoration_precal() {
     }
     for (y = -RESTORATION_HALFWIN; y <= RESTORATION_HALFWIN; y++) {
       for (x = -RESTORATION_HALFWIN; x <= RESTORATION_HALFWIN; x++) {
-        bilateral_filter_coeffs_s_kf
-            [i][y + RESTORATION_HALFWIN][x + RESTORATION_HALFWIN] =
-                (uint8_t)(0.5 +
-                          RESTORATION_FILT_STEP *
-                              exp(-(x * x) / (2 * sigma_x_d * sigma_x_d) -
-                                  (y * y) / (2 * sigma_y_d * sigma_y_d)));
+        bilateral_filter_coeffs_s_kf[i][y + RESTORATION_HALFWIN]
+                                    [x + RESTORATION_HALFWIN] = (uint8_t)(
+                                        0.5 +
+                                        RESTORATION_FILT_STEP *
+                                            exp(-(x * x) / (2 * sigma_x_d *
+                                                            sigma_x_d) -
+                                                (y * y) / (2 * sigma_y_d *
+                                                           sigma_y_d)));
       }
     }
   }
@@ -149,13 +151,14 @@ void av1_loop_restoration_precal() {
     }
     for (y = -RESTORATION_HALFWIN; y <= RESTORATION_HALFWIN; y++) {
       for (x = -RESTORATION_HALFWIN; x <= RESTORATION_HALFWIN; x++) {
-        bilateral_filter_coeffs_s[i][y +
-                                     RESTORATION_HALFWIN][x +
-                                                          RESTORATION_HALFWIN] =
-            (uint8_t)(0.5 +
-                      RESTORATION_FILT_STEP *
-                          exp(-(x * x) / (2 * sigma_x_d * sigma_x_d) -
-                              (y * y) / (2 * sigma_y_d * sigma_y_d)));
+        bilateral_filter_coeffs_s[i][y + RESTORATION_HALFWIN]
+                                 [x + RESTORATION_HALFWIN] = (uint8_t)(
+                                     0.5 +
+                                     RESTORATION_FILT_STEP *
+                                         exp(-(x * x) /
+                                                 (2 * sigma_x_d * sigma_x_d) -
+                                             (y * y) /
+                                                 (2 * sigma_y_d * sigma_y_d)));
       }
     }
   }

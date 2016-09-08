@@ -367,10 +367,10 @@ qm_val_t *aom_qmatrix(AV1_COMMON *cm, int qmlevel, int is_chroma,
   return &cm->gqmatrix[qmlevel][!!is_chroma][!!is_intra][log2sizem2][0];
 }
 
-static uint16_t
-    iwt_matrix_ref[NUM_QM_LEVELS][2][2][4 * 4 + 8 * 8 + 16 * 16 + 32 * 32];
-static uint16_t
-    wt_matrix_ref[NUM_QM_LEVELS][2][2][4 * 4 + 8 * 8 + 16 * 16 + 32 * 32];
+static uint16_t iwt_matrix_ref[NUM_QM_LEVELS][2][2]
+                              [4 * 4 + 8 * 8 + 16 * 16 + 32 * 32];
+static uint16_t wt_matrix_ref[NUM_QM_LEVELS][2][2]
+                             [4 * 4 + 8 * 8 + 16 * 16 + 32 * 32];
 
 void aom_qm_init(AV1_COMMON *cm) {
   int q, c, f, t, size;

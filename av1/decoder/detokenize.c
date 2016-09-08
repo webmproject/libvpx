@@ -473,7 +473,7 @@ void av1_decode_palette_tokens(MACROBLOCKD *const xd, int plane,
   int n = mbmi->palette_mode_info.palette_size[plane != 0];
   int i, j;
   uint8_t *color_map = xd->plane[plane != 0].color_index_map;
-  const aom_prob (*const prob)[PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1] =
+  const aom_prob(*const prob)[PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1] =
       plane ? av1_default_palette_uv_color_prob
             : av1_default_palette_y_color_prob;
 

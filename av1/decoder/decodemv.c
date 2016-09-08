@@ -220,7 +220,7 @@ static void read_tx_size_vartx(AV1_COMMON *cm, MACROBLOCKD *xd,
   int max_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
   int ctx = txfm_partition_context(xd->above_txfm_context + tx_col,
                                    xd->left_txfm_context + tx_row, tx_size);
-  TX_SIZE (*const inter_tx_size)
+  TX_SIZE(*const inter_tx_size)
   [MAX_MIB_SIZE] =
       (TX_SIZE(*)[MAX_MIB_SIZE]) & mbmi->inter_tx_size[tx_row][tx_col];
 
@@ -458,9 +458,8 @@ static void read_palette_mode_info(AV1_COMMON *const cm, MACROBLOCKD *const xd,
       palette_ctx += (above_mi->mbmi.palette_mode_info.palette_size[0] > 0);
     if (left_mi)
       palette_ctx += (left_mi->mbmi.palette_mode_info.palette_size[0] > 0);
-    if (aom_read(
-            r,
-            av1_default_palette_y_mode_prob[bsize - BLOCK_8X8][palette_ctx])) {
+    if (aom_read(r, av1_default_palette_y_mode_prob[bsize - BLOCK_8X8]
+                                                   [palette_ctx])) {
       pmi->palette_size[0] =
           aom_read_tree(r, av1_palette_size_tree,
                         av1_default_palette_y_size_prob[bsize - BLOCK_8X8]) +
@@ -631,8 +630,8 @@ static void read_intra_frame_mode_info(AV1_COMMON *const cm,
             r, av1_ext_tx_intra_tree[eset],
             cm->fc->intra_ext_tx_prob[eset][mbmi->tx_size][mbmi->mode]);
         if (counts)
-          ++counts
-                ->intra_ext_tx[eset][mbmi->tx_size][mbmi->mode][mbmi->tx_type];
+          ++counts->intra_ext_tx[eset][mbmi->tx_size][mbmi->mode]
+                                [mbmi->tx_type];
       }
     } else {
       mbmi->tx_type = DCT_DCT;
@@ -1658,8 +1657,8 @@ static void read_inter_frame_mode_info(AV1Decoder *const pbi,
 #endif
       if (xd->counts) {
         const int ctx = get_tx_size_context(xd);
-        ++xd->counts
-              ->tx_size[tx_size_cat][ctx][txsize_sqr_up_map[mbmi->tx_size]];
+        ++xd->counts->tx_size[tx_size_cat][ctx]
+                             [txsize_sqr_up_map[mbmi->tx_size]];
       }
     } else {
       if (inter_block)

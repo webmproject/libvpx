@@ -57,9 +57,8 @@ typedef struct frame_contexts {
 #if CONFIG_ANS
   coeff_cdf_model coef_cdfs[TX_SIZES][PLANE_TYPES];
 #endif
-  aom_prob
-      switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS -
-                                                         1];
+  aom_prob switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
+                                 [SWITCHABLE_FILTERS - 1];
 
 #if CONFIG_REF_MV
   aom_prob newmv_prob[NEWMV_MODE_CONTEXTS];
@@ -74,8 +73,8 @@ typedef struct frame_contexts {
 
   aom_prob inter_mode_probs[INTER_MODE_CONTEXTS][INTER_MODES - 1];
 #if CONFIG_EXT_INTER
-  aom_prob
-      inter_compound_mode_probs[INTER_MODE_CONTEXTS][INTER_COMPOUND_MODES - 1];
+  aom_prob inter_compound_mode_probs[INTER_MODE_CONTEXTS]
+                                    [INTER_COMPOUND_MODES - 1];
   aom_prob interintra_prob[BLOCK_SIZE_GROUPS];
   aom_prob interintra_mode_prob[BLOCK_SIZE_GROUPS][INTERINTRA_MODES - 1];
   aom_prob wedge_interintra_prob[BLOCK_SIZES];
@@ -110,9 +109,8 @@ typedef struct frame_contexts {
   int initialized;
 #if CONFIG_EXT_TX
   aom_prob inter_ext_tx_prob[EXT_TX_SETS_INTER][EXT_TX_SIZES][TX_TYPES - 1];
-  aom_prob
-      intra_ext_tx_prob[EXT_TX_SETS_INTRA][EXT_TX_SIZES][INTRA_MODES][TX_TYPES -
-                                                                      1];
+  aom_prob intra_ext_tx_prob[EXT_TX_SETS_INTRA][EXT_TX_SIZES][INTRA_MODES]
+                            [TX_TYPES - 1];
 #else
   aom_prob intra_ext_tx_prob[EXT_TX_SIZES][TX_TYPES][TX_TYPES - 1];
   aom_prob inter_ext_tx_prob[EXT_TX_SIZES][TX_TYPES - 1];
@@ -142,10 +140,10 @@ typedef struct FRAME_COUNTS {
   unsigned int partition[PARTITION_CONTEXTS][PARTITION_TYPES];
 #endif
   av1_coeff_count_model coef[TX_SIZES][PLANE_TYPES];
-  unsigned int
-      eob_branch[TX_SIZES][PLANE_TYPES][REF_TYPES][COEF_BANDS][COEFF_CONTEXTS];
-  unsigned int
-      switchable_interp[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];
+  unsigned int eob_branch[TX_SIZES][PLANE_TYPES][REF_TYPES][COEF_BANDS]
+                         [COEFF_CONTEXTS];
+  unsigned int switchable_interp[SWITCHABLE_FILTER_CONTEXTS]
+                                [SWITCHABLE_FILTERS];
 #if CONFIG_REF_MV
   unsigned int newmv_mode[NEWMV_MODE_CONTEXTS][2];
   unsigned int zeromv_mode[ZEROMV_MODE_CONTEXTS][2];
@@ -198,8 +196,8 @@ typedef struct FRAME_COUNTS {
   unsigned int tx_size_implied[TX_SIZES][TX_SIZES];
 #endif  // CONFIG_RECT_TX
   unsigned int inter_ext_tx[EXT_TX_SETS_INTER][EXT_TX_SIZES][TX_TYPES];
-  unsigned int
-      intra_ext_tx[EXT_TX_SETS_INTRA][EXT_TX_SIZES][INTRA_MODES][TX_TYPES];
+  unsigned int intra_ext_tx[EXT_TX_SETS_INTRA][EXT_TX_SIZES][INTRA_MODES]
+                           [TX_TYPES];
 #else
   unsigned int intra_ext_tx[EXT_TX_SIZES][TX_TYPES][TX_TYPES];
   unsigned int inter_ext_tx[EXT_TX_SIZES][TX_TYPES];
@@ -215,19 +213,21 @@ typedef struct FRAME_COUNTS {
 #endif  // CONFIG_EXT_INTRA
 } FRAME_COUNTS;
 
-extern const aom_prob
-    av1_kf_y_mode_prob[INTRA_MODES][INTRA_MODES][INTRA_MODES - 1];
+extern const aom_prob av1_kf_y_mode_prob[INTRA_MODES][INTRA_MODES]
+                                        [INTRA_MODES - 1];
 extern const aom_prob av1_default_palette_y_mode_prob[PALETTE_BLOCK_SIZES]
                                                      [PALETTE_Y_MODE_CONTEXTS];
 extern const aom_prob av1_default_palette_uv_mode_prob[2];
-extern const aom_prob
-    av1_default_palette_y_size_prob[PALETTE_BLOCK_SIZES][PALETTE_SIZES - 1];
-extern const aom_prob
-    av1_default_palette_uv_size_prob[PALETTE_BLOCK_SIZES][PALETTE_SIZES - 1];
-extern const aom_prob av1_default_palette_y_color_prob
-    [PALETTE_MAX_SIZE - 1][PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1];
-extern const aom_prob av1_default_palette_uv_color_prob
-    [PALETTE_MAX_SIZE - 1][PALETTE_COLOR_CONTEXTS][PALETTE_COLORS - 1];
+extern const aom_prob av1_default_palette_y_size_prob[PALETTE_BLOCK_SIZES]
+                                                     [PALETTE_SIZES - 1];
+extern const aom_prob av1_default_palette_uv_size_prob[PALETTE_BLOCK_SIZES]
+                                                      [PALETTE_SIZES - 1];
+extern const aom_prob av1_default_palette_y_color_prob[PALETTE_MAX_SIZE - 1]
+                                                      [PALETTE_COLOR_CONTEXTS]
+                                                      [PALETTE_COLORS - 1];
+extern const aom_prob av1_default_palette_uv_color_prob[PALETTE_MAX_SIZE - 1]
+                                                       [PALETTE_COLOR_CONTEXTS]
+                                                       [PALETTE_COLORS - 1];
 
 extern const aom_tree_index av1_intra_mode_tree[TREE_SIZE(INTRA_MODES)];
 extern const aom_tree_index av1_inter_mode_tree[TREE_SIZE(INTER_MODES)];
@@ -245,17 +245,17 @@ extern const aom_tree_index
 extern const aom_tree_index
     av1_switchable_interp_tree[TREE_SIZE(SWITCHABLE_FILTERS)];
 extern const aom_tree_index av1_palette_size_tree[TREE_SIZE(PALETTE_SIZES)];
-extern const aom_tree_index
-    av1_palette_color_tree[PALETTE_MAX_SIZE - 1][TREE_SIZE(PALETTE_COLORS)];
+extern const aom_tree_index av1_palette_color_tree[PALETTE_MAX_SIZE - 1]
+                                                  [TREE_SIZE(PALETTE_COLORS)];
 extern const aom_tree_index av1_tx_size_tree[TX_SIZES - 1][TREE_SIZE(TX_SIZES)];
 #if CONFIG_EXT_INTRA
 extern const aom_tree_index av1_intra_filter_tree[TREE_SIZE(INTRA_FILTERS)];
 #endif  // CONFIG_EXT_INTRA
 #if CONFIG_EXT_TX
-extern const aom_tree_index
-    av1_ext_tx_inter_tree[EXT_TX_SETS_INTER][TREE_SIZE(TX_TYPES)];
-extern const aom_tree_index
-    av1_ext_tx_intra_tree[EXT_TX_SETS_INTRA][TREE_SIZE(TX_TYPES)];
+extern const aom_tree_index av1_ext_tx_inter_tree[EXT_TX_SETS_INTER]
+                                                 [TREE_SIZE(TX_TYPES)];
+extern const aom_tree_index av1_ext_tx_intra_tree[EXT_TX_SETS_INTRA]
+                                                 [TREE_SIZE(TX_TYPES)];
 #else
 extern const aom_tree_index av1_ext_tx_tree[TREE_SIZE(TX_TYPES)];
 #endif  // CONFIG_EXT_TX

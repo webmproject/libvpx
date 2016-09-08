@@ -135,10 +135,10 @@ extern const av1_extra_bit av1_extra_bits_high12[ENTROPY_TOKENS];
 
 // #define ENTROPY_STATS
 
-typedef unsigned int
-    av1_coeff_count[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS][ENTROPY_TOKENS];
-typedef unsigned int
-    av1_coeff_stats[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS][ENTROPY_NODES][2];
+typedef unsigned int av1_coeff_count[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS]
+                                    [ENTROPY_TOKENS];
+typedef unsigned int av1_coeff_stats[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS]
+                                    [ENTROPY_NODES][2];
 
 #define SUBEXP_PARAM 4   /* Subexponential code parameter */
 #define MODULUS_PARAM 13 /* Modulus parameter */
@@ -189,8 +189,8 @@ static INLINE const uint8_t *get_band_translate(TX_SIZE tx_size) {
 extern const aom_tree_index av1_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)];
 extern const aom_prob av1_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES];
 #if CONFIG_ANS
-extern const AnsP10
-    av1_pareto8_token_probs[COEFF_PROB_MODELS][ENTROPY_TOKENS - 2];
+extern const AnsP10 av1_pareto8_token_probs[COEFF_PROB_MODELS]
+                                           [ENTROPY_TOKENS - 2];
 
 typedef rans_dec_lut coeff_cdf_model[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS];
 #endif  // CONFIG_ANS
@@ -198,8 +198,9 @@ typedef rans_dec_lut coeff_cdf_model[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS];
 typedef aom_prob av1_coeff_probs_model[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS]
                                       [UNCONSTRAINED_NODES];
 
-typedef unsigned int av1_coeff_count_model
-    [REF_TYPES][COEF_BANDS][COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1];
+typedef unsigned int av1_coeff_count_model[REF_TYPES][COEF_BANDS]
+                                          [COEFF_CONTEXTS]
+                                          [UNCONSTRAINED_NODES + 1];
 
 void av1_model_to_full_probs(const aom_prob *model, aom_prob *full);
 

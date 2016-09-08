@@ -1823,8 +1823,8 @@ static void update_stats(AV1_COMMON *cm, ThreadData *td
 #endif  // CONFIG_EXT_REFS
 
         if (cm->reference_mode == REFERENCE_MODE_SELECT)
-          counts->comp_inter[av1_get_reference_mode_context(
-              cm, xd)][has_second_ref(mbmi)]++;
+          counts->comp_inter[av1_get_reference_mode_context(cm, xd)]
+                            [has_second_ref(mbmi)]++;
 
         if (has_second_ref(mbmi)) {
 #if CONFIG_EXT_REFS
@@ -1832,18 +1832,18 @@ static void update_stats(AV1_COMMON *cm, ThreadData *td
 
           counts->comp_ref[av1_get_pred_context_comp_ref_p(cm, xd)][0][bit]++;
           if (!bit) {
-            counts->comp_ref[av1_get_pred_context_comp_ref_p1(
-                cm, xd)][1][ref0 == LAST_FRAME]++;
+            counts->comp_ref[av1_get_pred_context_comp_ref_p1(cm, xd)][1]
+                            [ref0 == LAST_FRAME]++;
           } else {
-            counts->comp_ref[av1_get_pred_context_comp_ref_p2(
-                cm, xd)][2][ref0 == GOLDEN_FRAME]++;
+            counts->comp_ref[av1_get_pred_context_comp_ref_p2(cm, xd)][2]
+                            [ref0 == GOLDEN_FRAME]++;
           }
 
-          counts->comp_bwdref[av1_get_pred_context_comp_bwdref_p(
-              cm, xd)][0][ref1 == ALTREF_FRAME]++;
+          counts->comp_bwdref[av1_get_pred_context_comp_bwdref_p(cm, xd)][0]
+                             [ref1 == ALTREF_FRAME]++;
 #else
-          counts->comp_ref[av1_get_pred_context_comp_ref_p(
-              cm, xd)][0][ref0 == GOLDEN_FRAME]++;
+          counts->comp_ref[av1_get_pred_context_comp_ref_p(cm, xd)][0]
+                          [ref0 == GOLDEN_FRAME]++;
 #endif  // CONFIG_EXT_REFS
         } else {
 #if CONFIG_EXT_REFS
@@ -1851,26 +1851,26 @@ static void update_stats(AV1_COMMON *cm, ThreadData *td
 
           counts->single_ref[av1_get_pred_context_single_ref_p1(xd)][0][bit]++;
           if (bit) {
-            counts->single_ref[av1_get_pred_context_single_ref_p2(
-                xd)][1][ref0 != BWDREF_FRAME]++;
+            counts->single_ref[av1_get_pred_context_single_ref_p2(xd)][1]
+                              [ref0 != BWDREF_FRAME]++;
           } else {
             const int bit1 = !(ref0 == LAST2_FRAME || ref0 == LAST_FRAME);
-            counts
-                ->single_ref[av1_get_pred_context_single_ref_p3(xd)][2][bit1]++;
+            counts->single_ref[av1_get_pred_context_single_ref_p3(xd)][2]
+                              [bit1]++;
             if (!bit1) {
-              counts->single_ref[av1_get_pred_context_single_ref_p4(
-                  xd)][3][ref0 != LAST_FRAME]++;
+              counts->single_ref[av1_get_pred_context_single_ref_p4(xd)][3]
+                                [ref0 != LAST_FRAME]++;
             } else {
-              counts->single_ref[av1_get_pred_context_single_ref_p5(
-                  xd)][4][ref0 != LAST3_FRAME]++;
+              counts->single_ref[av1_get_pred_context_single_ref_p5(xd)][4]
+                                [ref0 != LAST3_FRAME]++;
             }
           }
 #else
-          counts->single_ref[av1_get_pred_context_single_ref_p1(
-              xd)][0][ref0 != LAST_FRAME]++;
+          counts->single_ref[av1_get_pred_context_single_ref_p1(xd)][0]
+                            [ref0 != LAST_FRAME]++;
           if (ref0 != LAST_FRAME) {
-            counts->single_ref[av1_get_pred_context_single_ref_p2(
-                xd)][1][ref0 != GOLDEN_FRAME]++;
+            counts->single_ref[av1_get_pred_context_single_ref_p2(xd)][1]
+                              [ref0 != GOLDEN_FRAME]++;
           }
 #endif  // CONFIG_EXT_REFS
         }
@@ -1990,8 +1990,8 @@ static void update_stats(AV1_COMMON *cm, ThreadData *td
 #if CONFIG_EXT_INTER
             if (has_second_ref(mbmi)) {
               mode_ctx = mbmi_ext->compound_mode_context[mbmi->ref_frame[0]];
-              ++counts->inter_compound_mode[mode_ctx][INTER_COMPOUND_OFFSET(
-                  b_mode)];
+              ++counts->inter_compound_mode[mode_ctx]
+                                           [INTER_COMPOUND_OFFSET(b_mode)];
             } else {
 #endif  // CONFIG_EXT_INTER
               mode_ctx = av1_mode_context_analyzer(mbmi_ext->mode_context,
@@ -2007,8 +2007,8 @@ static void update_stats(AV1_COMMON *cm, ThreadData *td
 #else
 #if CONFIG_EXT_INTER
             if (is_inter_compound_mode(b_mode))
-              ++counts->inter_compound_mode[mode_ctx][INTER_COMPOUND_OFFSET(
-                  b_mode)];
+              ++counts->inter_compound_mode[mode_ctx]
+                                           [INTER_COMPOUND_OFFSET(b_mode)];
             else
 #endif  // CONFIG_EXT_INTER
               ++counts->inter_mode[mode_ctx][INTER_OFFSET(b_mode)];
@@ -2206,8 +2206,8 @@ static void encode_sb(AV1_COMP *cpi, ThreadData *td, const TileInfo *const tile,
             !xd->mi[0]->mbmi.skip) {
           int eset = get_ext_tx_set(supertx_size, bsize, 1);
           if (eset > 0) {
-            ++td->counts
-                  ->inter_ext_tx[eset][supertx_size][xd->mi[0]->mbmi.tx_type];
+            ++td->counts->inter_ext_tx[eset][supertx_size]
+                                      [xd->mi[0]->mbmi.tx_type];
           }
         }
 #else
@@ -3608,10 +3608,11 @@ static void rd_pick_partition(AV1_COMP *cpi, ThreadData *td,
 
         pc_tree->partitioning = PARTITION_SPLIT;
 
-        sum_rdc.rate += av1_cost_bit(
-            cm->fc->supertx_prob[partition_supertx_context_lookup
-                                     [PARTITION_SPLIT]][supertx_size],
-            0);
+        sum_rdc.rate +=
+            av1_cost_bit(cm->fc->supertx_prob
+                             [partition_supertx_context_lookup[PARTITION_SPLIT]]
+                             [supertx_size],
+                         0);
         sum_rdc.rdcost =
             RDCOST(x->rdmult, x->rddiv, sum_rdc.rate, sum_rdc.dist);
 
@@ -3625,8 +3626,9 @@ static void rd_pick_partition(AV1_COMP *cpi, ThreadData *td,
                         &tmp_rdc.rate, &tmp_rdc.dist, &best_tx, pc_tree);
 
           tmp_rdc.rate += av1_cost_bit(
-              cm->fc->supertx_prob[partition_supertx_context_lookup
-                                       [PARTITION_SPLIT]][supertx_size],
+              cm->fc->supertx_prob
+                  [partition_supertx_context_lookup[PARTITION_SPLIT]]
+                  [supertx_size],
               1);
           tmp_rdc.rdcost =
               RDCOST(x->rdmult, x->rddiv, tmp_rdc.rate, tmp_rdc.dist);
@@ -3687,10 +3689,11 @@ static void rd_pick_partition(AV1_COMP *cpi, ThreadData *td,
 
         pc_tree->partitioning = PARTITION_SPLIT;
 
-        sum_rdc.rate += av1_cost_bit(
-            cm->fc->supertx_prob[partition_supertx_context_lookup
-                                     [PARTITION_SPLIT]][supertx_size],
-            0);
+        sum_rdc.rate +=
+            av1_cost_bit(cm->fc->supertx_prob
+                             [partition_supertx_context_lookup[PARTITION_SPLIT]]
+                             [supertx_size],
+                         0);
         sum_rdc.rdcost =
             RDCOST(x->rdmult, x->rddiv, sum_rdc.rate, sum_rdc.dist);
 
@@ -3704,8 +3707,9 @@ static void rd_pick_partition(AV1_COMP *cpi, ThreadData *td,
                         &tmp_rdc.rate, &tmp_rdc.dist, &best_tx, pc_tree);
 
           tmp_rdc.rate += av1_cost_bit(
-              cm->fc->supertx_prob[partition_supertx_context_lookup
-                                       [PARTITION_SPLIT]][supertx_size],
+              cm->fc->supertx_prob
+                  [partition_supertx_context_lookup[PARTITION_SPLIT]]
+                  [supertx_size],
               1);
           tmp_rdc.rdcost =
               RDCOST(x->rdmult, x->rddiv, tmp_rdc.rate, tmp_rdc.dist);
@@ -5187,8 +5191,8 @@ static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
           ++td->counts->inter_ext_tx[eset][txsize_sqr_map[mbmi->tx_size]]
                                     [mbmi->tx_type];
         } else {
-          ++td->counts
-                ->intra_ext_tx[eset][mbmi->tx_size][mbmi->mode][mbmi->tx_type];
+          ++td->counts->intra_ext_tx[eset][mbmi->tx_size][mbmi->mode]
+                                    [mbmi->tx_type];
         }
       }
     }
@@ -5198,9 +5202,9 @@ static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
       if (is_inter_block(mbmi)) {
         ++td->counts->inter_ext_tx[mbmi->tx_size][mbmi->tx_type];
       } else {
-        ++td->counts
-              ->intra_ext_tx[mbmi->tx_size][intra_mode_to_tx_type_context
-                                                [mbmi->mode]][mbmi->tx_type];
+        ++td->counts->intra_ext_tx[mbmi->tx_size]
+                                  [intra_mode_to_tx_type_context[mbmi->mode]]
+                                  [mbmi->tx_type];
       }
     }
 #endif  // CONFIG_EXT_TX

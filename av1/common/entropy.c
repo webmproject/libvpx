@@ -2857,8 +2857,8 @@ static void adapt_coef_probs(AV1_COMMON *cm, TX_SIZE tx_size,
   const av1_coeff_count_model *const counts =
       (const av1_coeff_count_model *)cm->counts.coef[tx_size];
   const unsigned int(*eob_counts)[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS] =
-      (const unsigned int(*)[
-          REF_TYPES][COEF_BANDS][COEFF_CONTEXTS])cm->counts.eob_branch[tx_size];
+      (const unsigned int(*)[REF_TYPES][COEF_BANDS]
+                            [COEFF_CONTEXTS])cm->counts.eob_branch[tx_size];
   int i, j, k, l, m;
 
   for (i = 0; i < PLANE_TYPES; ++i)

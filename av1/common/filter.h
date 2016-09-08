@@ -95,8 +95,9 @@ static INLINE int av1_is_interpolating_filter(
 extern const int8_t sub_pel_filters_temporalfilter_12_signal_dir[15][2][16];
 extern const int8_t sub_pel_filters_temporalfilter_12_ver_signal_dir[15][6][16];
 #if CONFIG_AOM_HIGHBITDEPTH
-extern const int16_t
-    sub_pel_filters_temporalfilter_12_highbd_ver_signal_dir[15][6][8];
+extern const int16_t sub_pel_filters_temporalfilter_12_highbd_ver_signal_dir[15]
+                                                                            [6]
+                                                                            [8];
 #endif
 #endif
 

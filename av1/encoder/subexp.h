@@ -38,9 +38,10 @@ int av1_cond_prob_diff_update_savings(aom_prob *oldp, const unsigned int ct[2]);
 #if CONFIG_ENTROPY
 int av1_prob_update_search_subframe(unsigned int ct[][2], aom_prob oldp,
                                     aom_prob *bestp, aom_prob upd, int n);
-int av1_prob_update_search_model_subframe(
-    unsigned int ct[ENTROPY_NODES][COEF_PROBS_BUFS][2], const aom_prob *oldp,
-    aom_prob *bestp, aom_prob upd, int stepsize, int n);
+int av1_prob_update_search_model_subframe(unsigned int ct[ENTROPY_NODES]
+                                                         [COEF_PROBS_BUFS][2],
+                                          const aom_prob *oldp, aom_prob *bestp,
+                                          aom_prob upd, int stepsize, int n);
 #endif  // CONFIG_ENTROPY
 
 //

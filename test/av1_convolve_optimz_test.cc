@@ -35,13 +35,15 @@ typedef void (*hbd_conv_filter_t)(const uint16_t *, int, uint16_t *, int, int,
 //  <width, height>, filter_params, subpel_x_q4, avg>
 typedef tuple<int, int> BlockDimension;
 typedef tuple<conv_filter_t, conv_filter_t, BlockDimension, InterpFilter, int,
-              int> ConvParams;
+              int>
+    ConvParams;
 #if CONFIG_AOM_HIGHBITDEPTH
 // Test parameter list:
 //  <convolve_horiz_func, convolve_vert_func,
 //  <width, height>, filter_params, subpel_x_q4, avg, bit_dpeth>
 typedef tuple<hbd_conv_filter_t, hbd_conv_filter_t, BlockDimension,
-              InterpFilter, int, int, int> HbdConvParams;
+              InterpFilter, int, int, int>
+    HbdConvParams;
 #endif
 
 // Note:

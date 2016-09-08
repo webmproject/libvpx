@@ -33,12 +33,10 @@ typedef void (*AV1_QUANT_FACADE)(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 
 typedef struct {
 #if CONFIG_NEW_QUANT
-  DECLARE_ALIGNED(
-      16, tran_low_t,
-      y_cuml_bins_nuq[QUANT_PROFILES][QINDEX_RANGE][COEF_BANDS][NUQ_KNOTS]);
-  DECLARE_ALIGNED(
-      16, tran_low_t,
-      uv_cuml_bins_nuq[QUANT_PROFILES][QINDEX_RANGE][COEF_BANDS][NUQ_KNOTS]);
+  DECLARE_ALIGNED(16, tran_low_t, y_cuml_bins_nuq[QUANT_PROFILES][QINDEX_RANGE]
+                                                 [COEF_BANDS][NUQ_KNOTS]);
+  DECLARE_ALIGNED(16, tran_low_t, uv_cuml_bins_nuq[QUANT_PROFILES][QINDEX_RANGE]
+                                                  [COEF_BANDS][NUQ_KNOTS]);
 #endif  // CONFIG_NEW_QUANT
   // 0: dc 1: ac 2-8: ac repeated to SIMD width
   DECLARE_ALIGNED(16, int16_t, y_quant[QINDEX_RANGE][8]);

@@ -539,8 +539,8 @@ typedef struct AV1_COMP {
 
   unsigned int inter_mode_cost[INTER_MODE_CONTEXTS][INTER_MODES];
 #if CONFIG_EXT_INTER
-  unsigned int
-      inter_compound_mode_cost[INTER_MODE_CONTEXTS][INTER_COMPOUND_MODES];
+  unsigned int inter_compound_mode_cost[INTER_MODE_CONTEXTS]
+                                       [INTER_COMPOUND_MODES];
   unsigned int interintra_mode_cost[BLOCK_SIZE_GROUPS][INTERINTRA_MODES];
 #endif  // CONFIG_EXT_INTER
 #if CONFIG_OBMC || CONFIG_WARPED_MOTION
@@ -556,10 +556,10 @@ typedef struct AV1_COMP {
 #endif
   int palette_y_size_cost[PALETTE_BLOCK_SIZES][PALETTE_SIZES];
   int palette_uv_size_cost[PALETTE_BLOCK_SIZES][PALETTE_SIZES];
-  int palette_y_color_cost[PALETTE_MAX_SIZE -
-                           1][PALETTE_COLOR_CONTEXTS][PALETTE_COLORS];
-  int palette_uv_color_cost[PALETTE_MAX_SIZE -
-                            1][PALETTE_COLOR_CONTEXTS][PALETTE_COLORS];
+  int palette_y_color_cost[PALETTE_MAX_SIZE - 1][PALETTE_COLOR_CONTEXTS]
+                          [PALETTE_COLORS];
+  int palette_uv_color_cost[PALETTE_MAX_SIZE - 1][PALETTE_COLOR_CONTEXTS]
+                           [PALETTE_COLORS];
   int tx_size_cost[TX_SIZES - 1][TX_SIZE_CONTEXTS][TX_SIZES];
 #if CONFIG_EXT_TX
   int inter_tx_type_costs[EXT_TX_SETS_INTER][EXT_TX_SIZES][TX_TYPES];

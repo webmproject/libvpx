@@ -349,7 +349,8 @@ TEST_P(HighbdMaskedVarianceTest, ExtremeValues) {
 }
 
 typedef std::tr1::tuple<MaskedSubPixelVarianceFunc, MaskedSubPixelVarianceFunc,
-                        aom_bit_depth_t> HighbdMaskedSubPixelVarianceParam;
+                        aom_bit_depth_t>
+    HighbdMaskedSubPixelVarianceParam;
 
 class HighbdMaskedSubPixelVarianceTest
     : public ::testing::TestWithParam<HighbdMaskedSubPixelVarianceParam> {

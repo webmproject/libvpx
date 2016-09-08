@@ -288,8 +288,8 @@ typedef struct macroblockd_plane {
   ENTROPY_CONTEXT *left_context;
   int16_t seg_dequant[MAX_SEGMENTS][2];
 #if CONFIG_NEW_QUANT
-  dequant_val_type_nuq
-      seg_dequant_nuq[MAX_SEGMENTS][QUANT_PROFILES][COEF_BANDS];
+  dequant_val_type_nuq seg_dequant_nuq[MAX_SEGMENTS][QUANT_PROFILES]
+                                      [COEF_BANDS];
 #endif
   uint8_t *color_index_map;
 
