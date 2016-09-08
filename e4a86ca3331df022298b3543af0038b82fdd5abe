@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "0bfd0a27_1e3aadec",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000853
+      },
+      "writtenOn": "2016-09-08T12:42:34Z",
+      "side": 1,
+      "message": "I\u0027ve pushed my patch to https://chromium-review.googlesource.com/#/c/380502\nAbandoning this patch set.",
+      "parentUuid": "565c0b05_18106508",
+      "revId": "e4a86ca3331df022298b3543af0038b82fdd5abe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "96992396_a2cc3e2b",
         "filename": "vp8/encoder/onyx_int.h",
         "patchSetId": 1
