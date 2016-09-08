@@ -1,12 +1,14 @@
 ##
-##  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+## Copyright (c) 2016, Alliance for Open Media. All rights reserved
 ##
-##  Use of this source code is governed by a BSD-style license
-##  that can be found in the LICENSE file in the root of the source
-##  tree. An additional intellectual property rights grant can be found
-##  in the file PATENTS.  All contributing project authors may
-##  be found in the AUTHORS file in the root of the source tree.
+## This source code is subject to the terms of the BSD 2 Clause License and
+## the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+## was not distributed with this source code in the LICENSE file, you can
+## obtain it at www.aomedia.org/license/software. If the Alliance for Open
+## Media Patent License 1.0 was not distributed with this source code in the
+## PATENTS file, you can obtain it at www.aomedia.org/license/patent.
 ##
+
 
 LIBYUV_SRCS +=  third_party/libyuv/include/libyuv/basic_types.h  \
                 third_party/libyuv/include/libyuv/convert.h \
@@ -172,27 +174,25 @@ set_maps.SRCS                      += video_writer.h video_writer.c
 set_maps.SRCS                      += aom_ports/msvc.h
 set_maps.GUID                       = ECB2D24D-98B8-4015-A465-A4AF3DCC145F
 set_maps.DESCRIPTION                = Set active and ROI maps
-
-
-ifeq ($(CONFIG_AV1_ENCODER), yes)
+ifeq ($(CONFIG_ENCODERS),yes)
 ifeq ($(CONFIG_DECODERS),yes)
-EXAMPLES-yes                       += aom_cx_set_ref.c
-aom_cx_set_ref.SRCS                 += ivfenc.h ivfenc.c
-aom_cx_set_ref.SRCS                 += tools_common.h tools_common.c
-aom_cx_set_ref.SRCS                 += video_common.h
-aom_cx_set_ref.SRCS                 += video_writer.h video_writer.c
-aom_cx_set_ref.GUID                  = 65D7F14A-2EE6-4293-B958-AB5107A03B55
-aom_cx_set_ref.DESCRIPTION           = AV1 set encoder reference frame
+EXAMPLES-$(CONFIG_ENCODERS)        += aom_cx_set_ref.c
+aom_cx_set_ref.SRCS                += ivfenc.h ivfenc.c
+aom_cx_set_ref.SRCS                += tools_common.h tools_common.c
+aom_cx_set_ref.SRCS                += video_common.h
+aom_cx_set_ref.SRCS                += video_writer.h video_writer.c
+aom_cx_set_ref.SRCS                += aom_ports/msvc.h
+aom_cx_set_ref.GUID                 = C5E31F7F-96F6-48BD-BD3E-10EBF6E8057A
+aom_cx_set_ref.DESCRIPTION          = AV1 set encoder reference frame
 endif
 endif
-
 
 # Handle extra library flags depending on codec configuration
 
 # We should not link to math library (libm) on RVCT
 # when building for bare-metal targets
 ifeq ($(CONFIG_OS_SUPPORT), yes)
-CODEC_EXTRA_LIBS-$(CONFIG_AV1)        += m
+CODEC_EXTRA_LIBS-$(CONFIG_AV1)            += m
 else
     ifeq ($(CONFIG_GCC), yes)
     CODEC_EXTRA_LIBS-$(CONFIG_AV1)        += m
