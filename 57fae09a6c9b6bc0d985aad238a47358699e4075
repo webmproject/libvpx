@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "565c0b05_81a08041",
+        "filename": "av1/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1893,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-09-08T16:56:28Z",
+      "side": 1,
+      "message": "Needs an initialization. In patch 3 I have initialized best_can_skip \u003d 0",
+      "revId": "57fae09a6c9b6bc0d985aad238a47358699e4075",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
