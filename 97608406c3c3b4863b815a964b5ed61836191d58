@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "565c0b05_7226d8d6",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-08T22:03:47Z",
+      "side": 1,
+      "message": "That would be an interesting approach.",
+      "parentUuid": "d6c1dbc3_e4315a14",
+      "revId": "97608406c3c3b4863b815a964b5ed61836191d58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d6c1dbc3_44230ec5",
         "filename": "build/make/Android.mk",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-09-07T23:45:11Z",
       "side": 1,
       "message": "adding the full libs/... path might be more copy and pasteable",
+      "revId": "97608406c3c3b4863b815a964b5ed61836191d58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "565c0b05_5219d491",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-08T22:03:47Z",
+      "side": 1,
+      "message": "test_libvpx is in the base output directory and with -static linking, nothing else needs to be pushed. What libs/ path do you mean?",
+      "parentUuid": "d6c1dbc3_44230ec5",
       "revId": "97608406c3c3b4863b815a964b5ed61836191d58",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "565c0b05_b205d01c",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 982,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-08T22:03:47Z",
+      "side": 1,
+      "message": "Whoops missed that.",
+      "parentUuid": "d6c1dbc3_e40f9a36",
+      "revId": "97608406c3c3b4863b815a964b5ed61836191d58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d6c1dbc3_840a2628",
         "filename": "build/make/configure.sh",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2016-09-07T23:45:11Z",
       "side": 1,
       "message": "you might put the ... assuming ... text in the echo",
+      "revId": "97608406c3c3b4863b815a964b5ed61836191d58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "565c0b05_5202b417",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1023,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-08T22:03:47Z",
+      "side": 1,
+      "message": "Agreed. If the directions go to the README than the echos can be removed.",
+      "parentUuid": "d6c1dbc3_840a2628",
       "revId": "97608406c3c3b4863b815a964b5ed61836191d58",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
