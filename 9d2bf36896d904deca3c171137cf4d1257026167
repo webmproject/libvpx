@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "565c0b05_72525809",
+        "filename": "av1/encoder/rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1187,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-09-08T22:10:25Z",
+      "side": 1,
+      "message": "Why not just: \"\u003d (x-\u003eplane[plane].eobs[block] !\u003d 0)\"?\n(That was 2nd part of my earlier comment).",
+      "revId": "9d2bf36896d904deca3c171137cf4d1257026167",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
