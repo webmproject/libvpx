@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "565c0b05_ed1beddc",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-08T22:53:00Z",
+      "side": 1,
+      "message": "vpx_malloc returns default 8 alignment:\nvoid *vpx_malloc(size_t size) { return vpx_memalign(DEFAULT_ALIGNMENT, size); }\n#define DEFAULT_ALIGNMENT (2 * sizeof(void *)) /* NOLINT */\n\nwell, i guess some platforms that\u0027d be 16 alignment? maybe i was misunderstanding it and it\u0027s not sufficient.",
+      "parentUuid": "d6c1dbc3_44966e9b",
+      "revId": "5701c39a1a4089117b892387d8a4c892a8240bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d6c1dbc3_c4fedec8",
         "filename": "test/predict_test.cc",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-09-07T23:57:44Z",
       "side": 1,
       "message": "can\u0027t this be variable sized?",
+      "revId": "5701c39a1a4089117b892387d8a4c892a8240bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "565c0b05_8d2d1101",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-08T22:53:00Z",
+      "side": 1,
+      "message": "reference destination. dst_buffered_/dst_ are variable",
+      "parentUuid": "d6c1dbc3_c4fedec8",
       "revId": "5701c39a1a4089117b892387d8a4c892a8240bdd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "565c0b05_0dfae15d",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-08T22:53:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d6c1dbc3_04e11626",
+      "revId": "5701c39a1a4089117b892387d8a4c892a8240bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d6c1dbc3_c4753e5f",
         "filename": "test/predict_test.cc",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2016-09-07T23:57:44Z",
       "side": 1,
       "message": "these shouldn\u0027t be static if they\u0027re going to be per-test allocated",
+      "revId": "5701c39a1a4089117b892387d8a4c892a8240bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "565c0b05_cdc2a9fa",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-08T22:53:00Z",
+      "side": 1,
+      "message": "I couldn\u0027t really figure out what was going on with the statics here ... and then having to declare them later? IDK",
+      "parentUuid": "d6c1dbc3_c4753e5f",
       "revId": "5701c39a1a4089117b892387d8a4c892a8240bdd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -98,6 +170,30 @@
       "writtenOn": "2016-09-07T23:57:44Z",
       "side": 1,
       "message": "in c++ modules this would be TestWithRandomData",
+      "range": {
+        "startLine": 235,
+        "startChar": 7,
+        "endLine": 235,
+        "endChar": 28
+      },
+      "revId": "5701c39a1a4089117b892387d8a4c892a8240bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "565c0b05_0dcd8126",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-08T22:53:00Z",
+      "side": 1,
+      "message": "Well, the test itself is TestWithRandomData, but this is kind of a helper function like compare_buffers or check_borders? wasn\u0027t sure on the convention.",
+      "parentUuid": "d6c1dbc3_a4d80275",
       "range": {
         "startLine": 235,
         "startChar": 7,
