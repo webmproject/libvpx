@@ -784,7 +784,11 @@ static int read_mv_component(aom_reader *r, const nmv_component *mvcomp,
   int mag, d, fr, hp;
   const int sign = aom_read(r, mvcomp->sign, ACCT_STR);
   const int mv_class =
+#if CONFIG_DAALA_EC
+      aom_read_symbol(r, mvcomp->class_cdf, MV_CLASSES, ACCT_STR);
+#else
       aom_read_tree(r, av1_mv_class_tree, mvcomp->classes, ACCT_STR);
+#endif
   const int class0 = mv_class == MV_CLASS_0;
 
   // Integer part

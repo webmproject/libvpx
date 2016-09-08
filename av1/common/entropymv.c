@@ -50,6 +50,9 @@ static const nmv_context default_nmv_context = {
         // Vertical component
         128,                                                   // sign
         { 224, 144, 192, 168, 192, 176, 192, 198, 198, 245 },  // class
+#if CONFIG_DAALA_EC
+        { 0 },  // class_cdf is computed from class in av1_init_mv_probs()
+#endif
         { 216 },                                               // class0
         { 136, 140, 148, 160, 176, 192, 224, 234, 234, 240 },  // bits
         { { 128, 128, 64 }, { 96, 112, 64 } },                 // class0_fp
@@ -61,6 +64,9 @@ static const nmv_context default_nmv_context = {
         // Horizontal component
         128,                                                   // sign
         { 216, 128, 176, 160, 176, 176, 192, 198, 198, 208 },  // class
+#if CONFIG_DAALA_EC
+        { 0 },  // class_cdf is computed from class in av1_init_mv_probs()
+#endif
         { 208 },                                               // class0
         { 136, 140, 148, 160, 176, 192, 224, 234, 234, 240 },  // bits
         { { 128, 128, 64 }, { 96, 112, 64 } },                 // class0_fp
@@ -268,6 +274,10 @@ void av1_init_mv_probs(AV1_COMMON *cm) {
 #if CONFIG_DAALA_EC
   av1_tree_to_cdf(av1_mv_joint_tree, cm->fc->nmvc.joints,
                   cm->fc->nmvc.joint_cdf);
+  av1_tree_to_cdf(av1_mv_class_tree, cm->fc->nmvc.comps[0].classes,
+                  cm->fc->nmvc.comps[0].class_cdf);
+  av1_tree_to_cdf(av1_mv_class_tree, cm->fc->nmvc.comps[1].classes,
+                  cm->fc->nmvc.comps[1].class_cdf);
 #endif
 #endif
 #if CONFIG_GLOBAL_MOTION

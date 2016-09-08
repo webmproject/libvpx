@@ -45,9 +45,13 @@ static void encode_mv_component(aom_writer *w, int comp,
   // Sign
   aom_write(w, sign, mvcomp->sign);
 
-  // Class
+// Class
+#if CONFIG_DAALA_EC
+  aom_write_symbol(w, mv_class, mvcomp->class_cdf, MV_CLASSES);
+#else
   av1_write_token(w, av1_mv_class_tree, mvcomp->classes,
                   &mv_class_encodings[mv_class]);
+#endif
 
   // Integer bits
   if (mv_class == MV_CLASS_0) {
@@ -203,6 +207,9 @@ void av1_write_nmv_probs(AV1_COMMON *cm, int usehp, aom_writer *w,
     update_mv(w, comp_counts->sign, &comp->sign, MV_UPDATE_PROB);
     write_mv_update(av1_mv_class_tree, comp->classes, comp_counts->classes,
                     MV_CLASSES, w);
+#if CONFIG_DAALA_EC
+    av1_tree_to_cdf(av1_mv_class_tree, comp->classes, comp->class_cdf);
+#endif
     write_mv_update(av1_mv_class0_tree, comp->class0, comp_counts->class0,
                     CLASS0_SIZE, w);
     for (j = 0; j < MV_OFFSET_BITS; ++j)

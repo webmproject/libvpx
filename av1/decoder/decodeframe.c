@@ -219,6 +219,9 @@ static void read_mv_probs(nmv_context *ctx, int allow_hp, aom_reader *r) {
     update_mv_probs(comp_ctx->classes, MV_CLASSES - 1, r);
     update_mv_probs(comp_ctx->class0, CLASS0_SIZE - 1, r);
     update_mv_probs(comp_ctx->bits, MV_OFFSET_BITS, r);
+#if CONFIG_DAALA_EC
+    av1_tree_to_cdf(av1_mv_class_tree, comp_ctx->classes, comp_ctx->class_cdf);
+#endif
   }
 
   for (i = 0; i < 2; ++i) {
