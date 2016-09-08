@@ -217,7 +217,7 @@ static void read_mv_probs(nmv_context *ctx, int allow_hp, aom_reader *r) {
     nmv_component *const comp_ctx = &ctx->comps[i];
     for (j = 0; j < CLASS0_SIZE; ++j)
       update_mv_probs(comp_ctx->class0_fp[j], MV_FP_SIZE - 1, r);
-    update_mv_probs(comp_ctx->fp, 3, r);
+    update_mv_probs(comp_ctx->fp, MV_FP_SIZE - 1, r);
   }
 
   if (allow_hp) {
