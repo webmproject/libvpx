@@ -3725,9 +3725,14 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
 #endif
   }
 
-  for (j = 0; j < INTRA_MODES; j++)
+  for (j = 0; j < INTRA_MODES; j++) {
     for (i = 0; i < INTRA_MODES - 1; ++i)
       av1_diff_update_prob(&r, &fc->uv_mode_prob[j][i], ACCT_STR);
+#if CONFIG_DAALA_EC
+    av1_tree_to_cdf(av1_intra_mode_tree, fc->uv_mode_prob[j],
+                    fc->uv_mode_cdf[j]);
+#endif
+  }
 
 #if CONFIG_EXT_PARTITION_TYPES
   for (i = 0; i < PARTITION_TYPES - 1; ++i)
