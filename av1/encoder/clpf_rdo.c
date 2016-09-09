@@ -66,6 +66,62 @@ void aom_clpf_detect_multi_c(const uint8_t *rec, const uint8_t *org,
   }
 }
 
+#if CONFIG_AOM_HIGHBITDEPTH
+// Identical to aom_clpf_detect_c() apart from "rec" and "org".
+void aom_clpf_detect_hbd_c(const uint16_t *rec, const uint16_t *org,
+                           int rstride, int ostride, int x0, int y0, int width,
+                           int height, int *sum0, int *sum1,
+                           unsigned int strength, int shift) {
+  int x, y;
+  for (y = y0; y < y0 + 8; y++) {
+    for (x = x0; x < x0 + 8; x++) {
+      int O = org[y * ostride + x] >> shift;
+      int X = rec[y * rstride + x] >> shift;
+      int A = rec[AOMMAX(0, y - 1) * rstride + x] >> shift;
+      int B = rec[y * rstride + AOMMAX(0, x - 2)] >> shift;
+      int C = rec[y * rstride + AOMMAX(0, x - 1)] >> shift;
+      int D = rec[y * rstride + AOMMIN(width - 1, x + 1)] >> shift;
+      int E = rec[y * rstride + AOMMIN(width - 1, x + 2)] >> shift;
+      int F = rec[AOMMIN(height - 1, y + 1) * rstride + x] >> shift;
+      int delta = av1_clpf_sample(X, A, B, C, D, E, F, strength >> shift);
+      int Y = X + delta;
+      *sum0 += (O - X) * (O - X);
+      *sum1 += (O - Y) * (O - Y);
+    }
+  }
+}
+
+// aom_clpf_detect_multi_c() apart from "rec" and "org".
+void aom_clpf_detect_multi_hbd_c(const uint16_t *rec, const uint16_t *org,
+                                 int rstride, int ostride, int x0, int y0,
+                                 int width, int height, int *sum, int shift) {
+  int x, y;
+
+  for (y = y0; y < y0 + 8; y++) {
+    for (x = x0; x < x0 + 8; x++) {
+      int O = org[y * ostride + x] >> shift;
+      int X = rec[y * rstride + x] >> shift;
+      int A = rec[AOMMAX(0, y - 1) * rstride + x] >> shift;
+      int B = rec[y * rstride + AOMMAX(0, x - 2)] >> shift;
+      int C = rec[y * rstride + AOMMAX(0, x - 1)] >> shift;
+      int D = rec[y * rstride + AOMMIN(width - 1, x + 1)] >> shift;
+      int E = rec[y * rstride + AOMMIN(width - 1, x + 2)] >> shift;
+      int F = rec[AOMMIN(height - 1, y + 1) * rstride + x] >> shift;
+      int delta1 = av1_clpf_sample(X, A, B, C, D, E, F, 1);
+      int delta2 = av1_clpf_sample(X, A, B, C, D, E, F, 2);
+      int delta3 = av1_clpf_sample(X, A, B, C, D, E, F, 4);
+      int F1 = X + delta1;
+      int F2 = X + delta2;
+      int F3 = X + delta3;
+      sum[0] += (O - X) * (O - X);
+      sum[1] += (O - F1) * (O - F1);
+      sum[2] += (O - F2) * (O - F2);
+      sum[3] += (O - F3) * (O - F3);
+    }
+  }
+}
+#endif
+
 int av1_clpf_decision(int k, int l, const YV12_BUFFER_CONFIG *rec,
                       const YV12_BUFFER_CONFIG *org, const AV1_COMMON *cm,
                       int block_size, int w, int h, unsigned int strength,
@@ -77,10 +133,25 @@ int av1_clpf_decision(int k, int l, const YV12_BUFFER_CONFIG *rec,
       int ypos = (k << fb_size_log2) + m * block_size;
       const int bs = MAX_MIB_SIZE;
       if (!cm->mi_grid_visible[ypos / bs * cm->mi_stride + xpos / bs]
-               ->mbmi.skip)
+               ->mbmi.skip) {
+#if CONFIG_AOM_HIGHBITDEPTH
+        if (cm->use_highbitdepth) {
+          aom_clpf_detect_hbd(CONVERT_TO_SHORTPTR(rec->y_buffer),
+                              CONVERT_TO_SHORTPTR(org->y_buffer), rec->y_stride,
+                              org->y_stride, xpos, ypos, rec->y_crop_width,
+                              rec->y_crop_height, &sum0, &sum1, strength,
+                              cm->bit_depth - 8);
+        } else {
+          aom_clpf_detect(rec->y_buffer, org->y_buffer, rec->y_stride,
+                          org->y_stride, xpos, ypos, rec->y_crop_width,
+                          rec->y_crop_height, &sum0, &sum1, strength);
+        }
+#else
         aom_clpf_detect(rec->y_buffer, org->y_buffer, rec->y_stride,
                         org->y_stride, xpos, ypos, rec->y_crop_width,
                         rec->y_crop_height, &sum0, &sum1, strength);
+#endif
+      }
     }
   }
   *res = sum1 < sum0;
@@ -145,9 +216,23 @@ static int clpf_rdo(int y, int x, const YV12_BUFFER_CONFIG *rec,
       if (!cm->mi_grid_visible[ypos / MAX_MIB_SIZE * cm->mi_stride +
                                xpos / MAX_MIB_SIZE]
                ->mbmi.skip) {
+#if CONFIG_AOM_HIGHBITDEPTH
+        if (cm->use_highbitdepth) {
+          aom_clpf_detect_multi_hbd(CONVERT_TO_SHORTPTR(rec->y_buffer),
+                                    CONVERT_TO_SHORTPTR(org->y_buffer),
+                                    rec->y_stride, org->y_stride, xpos, ypos,
+                                    rec->y_crop_width, rec->y_crop_height, sum,
+                                    cm->bit_depth - 8);
+        } else {
+          aom_clpf_detect_multi(rec->y_buffer, org->y_buffer, rec->y_stride,
+                                org->y_stride, xpos, ypos, rec->y_crop_width,
+                                rec->y_crop_height, sum);
+        }
+#else
         aom_clpf_detect_multi(rec->y_buffer, org->y_buffer, rec->y_stride,
                               org->y_stride, xpos, ypos, rec->y_crop_width,
                               rec->y_crop_height, sum);
+#endif
         filtered = 1;
       }
     }
