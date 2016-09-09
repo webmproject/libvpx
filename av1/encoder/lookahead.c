@@ -213,8 +213,8 @@ struct lookahead_entry *av1_lookahead_peek(struct lookahead_ctx *ctx,
   } else if (index < 0) {
     // Backward peek
     if (-index <= MAX_PRE_FRAMES) {
-      index += ctx->read_idx;
-      if (index < 0) index += ctx->max_sz;
+      index += (int)(ctx->read_idx);
+      if (index < 0) index += (int)(ctx->max_sz);
       buf = ctx->buf + index;
     }
   }
