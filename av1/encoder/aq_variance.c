@@ -170,7 +170,7 @@ static unsigned int block_variance(AV1_COMP *cpi, MACROBLOCK *x,
                 bw, bh, &sse, &avg);
 #endif  // CONFIG_AOM_HIGHBITDEPTH
     var = sse - (((int64_t)avg * avg) / (bw * bh));
-    return (256 * var) / (bw * bh);
+    return ((uint64_t)var * 256) / (bw * bh);
   } else {
 #if CONFIG_AOM_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -185,7 +185,7 @@ static unsigned int block_variance(AV1_COMP *cpi, MACROBLOCK *x,
     var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf, x->plane[0].src.stride,
                              av1_all_zeros, 0, &sse);
 #endif  // CONFIG_AOM_HIGHBITDEPTH
-    return (256 * var) >> num_pels_log2_lookup[bs];
+    return ((uint64_t)var * 256) >> num_pels_log2_lookup[bs];
   }
 }
 
