@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "565c0b05_22424f61",
+        "filename": "test/active_map_refresh_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T02:50:56Z",
+      "side": 1,
+      "message": "these were 10 by the earlier check",
+      "range": {
+        "startLine": 118,
+        "startChar": 64,
+        "endLine": 118,
+        "endChar": 66
+      },
+      "revId": "c64efba45cfea1b7bf2e58bfbb73dbb9b6009809",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
