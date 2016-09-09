@@ -1,0 +1,232 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8bcd7a7b_c8f943af",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T19:42:20Z",
+      "side": 1,
+      "message": "doing away with the tuple might be a nice followup",
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bcd7a7b_a8e31ff7",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T19:42:20Z",
+      "side": 1,
+      "message": "these should be checked: ASSERT_TRUE(src_ !\u003d NULL)",
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bcd7a7b_88cf3b7a",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T19:42:20Z",
+      "side": 1,
+      "message": "note alignment will be 8 on x86; again if alignment isn\u0027t a concern then prefer new[]",
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bcd7a7b_e88fe72d",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T19:42:20Z",
+      "side": 1,
+      "message": "just make this a member and set the value in setup or simply call the function directly",
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bcd7a7b_8b9bb563",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T19:42:20Z",
+      "side": 1,
+      "message": "maybe padded_dst_ with a comment? or a comment at least as the name doesn\u0027t really give away what it\u0027s for",
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bcd7a7b_88a1fbaa",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T19:42:20Z",
+      "side": 1,
+      "message": "this can be a const memmber function",
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bcd7a7b_48a7f3bf",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T19:42:20Z",
+      "side": 1,
+      "message": "I don\u0027t know if this is all necessary, you could just have one EXPECT_ above for the failed row and dump the location EXPECT_EQ(0, memcmp()) \u003c\u003c \"....\";",
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bcd7a7b_689cb76d",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T19:42:20Z",
+      "side": 1,
+      "message": "these should be \u0027\u0027d for consistency",
+      "range": {
+        "startLine": 116,
+        "startChar": 38,
+        "endLine": 116,
+        "endChar": 46
+      },
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bcd7a7b_8b84950e",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T19:42:20Z",
+      "side": 1,
+      "message": "use EXPECT",
+      "range": {
+        "startLine": 130,
+        "startChar": 6,
+        "endLine": 130,
+        "endChar": 48
+      },
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bcd7a7b_ab887921",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T19:42:20Z",
+      "side": 1,
+      "message": "same comment here for the debug output",
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bcd7a7b_2bc7093e",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T19:42:20Z",
+      "side": 1,
+      "message": "could be kTestData.\n\nhttps://google.github.io/styleguide/cppguide.html#Constant_Names",
+      "range": {
+        "startLine": 300,
+        "startChar": 23,
+        "endLine": 300,
+        "endChar": 32
+      },
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bcd7a7b_4bcc4d60",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T19:42:20Z",
+      "side": 1,
+      "message": "const int",
+      "range": {
+        "startLine": 334,
+        "startChar": 9,
+        "endLine": 334,
+        "endChar": 12
+      },
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
