@@ -203,6 +203,30 @@
       "revId": "5701c39a1a4089117b892387d8a4c892a8240bdd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "565c0b05_a223bfc3",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T02:56:03Z",
+      "side": 1,
+      "message": "https://google.github.io/styleguide/cppguide.html#Function_Names\n\n\u0027cheap\u0027 is usually applied to simple accessors / mutators",
+      "parentUuid": "565c0b05_0dcd8126",
+      "range": {
+        "startLine": 235,
+        "startChar": 7,
+        "endLine": 235,
+        "endChar": 28
+      },
+      "revId": "5701c39a1a4089117b892387d8a4c892a8240bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
