@@ -74,15 +74,18 @@ bool check_uabs(const PvVec &pv_vec, uint8_t *buf) {
   return ans_read_end(&d);
 }
 
-// TODO(aconverse@google.com): replace this with a more representative
-// distribution from the codec.
-const rans_sym rans_sym_tab[] = {
-  { 67, 0 }, { 99, 67 }, { 575, 166 }, { 283, 741 },
-};
-const int kRansSymbols =
-    static_cast<int>(sizeof(rans_sym_tab) / sizeof(rans_sym_tab[0]));
+const aom_cdf_prob spareto65[] = { 260, 188, 138, 102, 133, 122, 64, 15, 1, 1 };
 
-std::vector<int> ans_encode_build_vals(const rans_sym *tab, int iters) {
+const int kRansSymbols =
+    static_cast<int>(sizeof(spareto65) / sizeof(spareto65[0]));
+
+std::vector<int> ans_encode_build_vals(rans_sym *const tab, int iters) {
+  aom_cdf_prob sum = 0;
+  for (int i = 0; i < kRansSymbols; ++i) {
+    tab[i].cum_prob = sum;
+    tab[i].prob = spareto65[i];
+    sum += spareto65[i];
+  }
   std::vector<int> p_to_sym;
   for (int i = 0; i < kRansSymbols; ++i) {
     p_to_sym.insert(p_to_sym.end(), tab[i].prob, i);
@@ -150,16 +153,20 @@ PvVec AbsTest::pv_vec_;
 class AnsTest : public ::testing::Test {
  protected:
   static void SetUpTestCase() {
-    sym_vec_ = ans_encode_build_vals(rans_sym_tab, kNumSyms);
+    sym_vec_ = ans_encode_build_vals(rans_sym_tab_, kNumSyms);
   }
   virtual void SetUp() { buf_ = new uint8_t[kNumSyms / 2]; }
   virtual void TearDown() { delete[] buf_; }
   static const int kNumSyms = 25000000;
   static std::vector<int> sym_vec_;
+  static rans_sym rans_sym_tab_[kRansSymbols];
   uint8_t *buf_;
 };
 std::vector<int> AnsTest::sym_vec_;
+rans_sym AnsTest::rans_sym_tab_[kRansSymbols];
 
 TEST_F(AbsTest, Uabs) { EXPECT_TRUE(check_uabs(pv_vec_, buf_)); }
-TEST_F(AnsTest, Rans) { EXPECT_TRUE(check_rans(sym_vec_, rans_sym_tab, buf_)); }
+TEST_F(AnsTest, Rans) {
+  EXPECT_TRUE(check_rans(sym_vec_, rans_sym_tab_, buf_));
+}
 }  // namespace
