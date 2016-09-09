@@ -22,6 +22,30 @@
       "revId": "20b859833cff326a98ed501d7f73d5f0f3017825",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "565c0b05_e27a1717",
+        "filename": "aom_mem/include/aom_mem_intrnl.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T01:41:24Z",
+      "side": 1,
+      "message": "Technically that\u0027s more correct, yes. this is some dated code which didn\u0027t assume (as much) the availability of c99 types. Though this might break on 16-bit dos, it\u0027s effective on modern platforms. I\u0027m going to submit this as is to sync the branches then we can do a type normalization in another pass.",
+      "parentUuid": "4b562216_28354bfc",
+      "range": {
+        "startLine": 30,
+        "startChar": 21,
+        "endLine": 30,
+        "endChar": 25
+      },
+      "revId": "20b859833cff326a98ed501d7f73d5f0f3017825",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
