@@ -137,7 +137,7 @@ class TransformTestBase {
 
       // The minimum quant value is 4.
       for (int j = 0; j < num_coeffs_; ++j) {
-        EXPECT_EQ(output_block[j], output_ref_block[j])
+        ASSERT_EQ(output_block[j], output_ref_block[j])
             << "Error: not bit-exact result at index: " << j
             << " at test block: " << i;
       }
