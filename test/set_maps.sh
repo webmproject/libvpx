@@ -41,19 +41,12 @@ set_maps() {
   [ -e "${output_file}" ] || return 1
 }
 
-set_maps_aom() {
-  if [ "$(aom_encode_available)" = "yes" ]; then
-    set_maps aom || return 1
-  fi
-}
-
 set_maps_av1() {
   if [ "$(av1_encode_available)" = "yes" ]; then
     set_maps av1 || return 1
   fi
 }
 
-set_maps_tests="set_maps_aom
-                set_maps_av1"
+set_maps_tests="set_maps_av1"
 
 run_tests set_maps_verify_environment "${set_maps_tests}"

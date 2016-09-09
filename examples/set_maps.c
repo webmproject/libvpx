@@ -61,39 +61,6 @@ void usage_exit(void) {
   exit(EXIT_FAILURE);
 }
 
-static void set_roi_map(const aom_codec_enc_cfg_t *cfg,
-                        aom_codec_ctx_t *codec) {
-  unsigned int i;
-  aom_roi_map_t roi;
-  memset(&roi, 0, sizeof(roi));
-
-  roi.rows = (cfg->g_h + 15) / 16;
-  roi.cols = (cfg->g_w + 15) / 16;
-
-  roi.delta_q[0] = 0;
-  roi.delta_q[1] = -2;
-  roi.delta_q[2] = -4;
-  roi.delta_q[3] = -6;
-
-  roi.delta_lf[0] = 0;
-  roi.delta_lf[1] = 1;
-  roi.delta_lf[2] = 2;
-  roi.delta_lf[3] = 3;
-
-  roi.static_threshold[0] = 1500;
-  roi.static_threshold[1] = 1000;
-  roi.static_threshold[2] = 500;
-  roi.static_threshold[3] = 0;
-
-  roi.roi_map = (uint8_t *)malloc(roi.rows * roi.cols);
-  for (i = 0; i < roi.rows * roi.cols; ++i) roi.roi_map[i] = i % 4;
-
-  if (aom_codec_control(codec, AOME_SET_ROI_MAP, &roi))
-    die_codec(codec, "Failed to set ROI map");
-
-  free(roi.roi_map);
-}
-
 static void set_active_map(const aom_codec_enc_cfg_t *cfg,
                            aom_codec_ctx_t *codec) {
   unsigned int i;
@@ -216,9 +183,7 @@ int main(int argc, char **argv) {
   while (aom_img_read(&raw, infile)) {
     ++frame_count;
 
-    if (frame_count == 22 && encoder->fourcc == AV1_FOURCC) {
-      set_roi_map(&cfg, &codec);
-    } else if (frame_count == 33) {
+    if (frame_count == 33) {
       set_active_map(&cfg, &codec);
     } else if (frame_count == 44) {
       unset_active_map(&cfg, &codec);
