@@ -35,7 +35,7 @@
 extern unsigned int cnt_pm;
 #endif
 
-#define MODEL_MODE 0
+#define MODEL_MODE 1
 
 extern const int vp8_ref_frame_order[MAX_MODES];
 extern const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES];
