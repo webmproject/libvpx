@@ -112,7 +112,7 @@ bool CopyColour(const mkvparser::Colour& parser_colour,
   return true;
 }
 
-// Format of AVx private data:
+// Format of VPx private data:
 //
 //   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 //  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -151,18 +151,20 @@ bool CopyColour(const mkvparser::Colour& parser_colour,
 //   62: Level 6.2
 //
 // See the following link for more information:
-// http://www.webmproject.org/av1/profiles/
-int ParseAvxCodecPrivate(const uint8_t *private_data, int32_t length) {
-  const int kAvxCodecPrivateLength = 3;
-  if (!private_data || length != kAvxCodecPrivateLength) return 0;
+// http://www.webmproject.org/vp9/profiles/
+int ParseVpxCodecPrivate(const uint8_t* private_data, int32_t length) {
+  const int kVpxCodecPrivateLength = 3;
+  if (!private_data || length != kVpxCodecPrivateLength)
+    return 0;
 
   const uint8_t id_byte = *private_data;
   if (id_byte != 1)
     return 0;
 
-  const int kAvxProfileLength = 1;
+  const int kVpxProfileLength = 1;
   const uint8_t length_byte = private_data[1];
-  if (length_byte != kAvxProfileLength) return 0;
+  if (length_byte != kVpxProfileLength)
+    return 0;
 
   const int level = static_cast<int>(private_data[2]);
 
