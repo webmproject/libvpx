@@ -36,7 +36,6 @@
 /examples/simple_decoder
 /examples/simple_encoder
 /examples/twopass_encoder
-/examples/aom_multi_resolution_encoder
 /examples/aom_cx_set_ref
 /examples/av1_spatial_scalable_encoder
 /examples/aom_temporal_scalable_patterns
