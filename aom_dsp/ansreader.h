@@ -111,8 +111,12 @@ static INLINE int ans_read_init(struct AnsDecoder *const ans,
     if (offset < 3) return 1;
     ans->buf_offset = offset - 3;
     ans->state = mem_get_le24(buf + offset - 3) & 0x3FFFFF;
+  } else if ((buf[offset - 1] & 0xE0) == 0xE0) {
+    if (offset < 4) return 1;
+    ans->buf_offset = offset - 4;
+    ans->state = mem_get_le32(buf + offset - 4) & 0x1FFFFFFF;
   } else {
-    // x == 3 implies this byte is a superframe marker
+    // 110xxxxx implies this byte is a superframe marker
     return 1;
   }
   ans->state += L_BASE;

@@ -26,10 +26,12 @@ extern "C" {
 typedef uint8_t AnsP8;
 #define ANS_P8_PRECISION 256u
 #define ANS_P8_SHIFT 8
-#define RANS_PRECISION 1024u
-#define RANS_PROB_BITS 10
+#define RANS_PROB_BITS 15
+#define RANS_PRECISION (1u << RANS_PROB_BITS)
 
-#define L_BASE (RANS_PRECISION * 4)  // L_BASE % precision must be 0
+// L_BASE % PRECISION must be 0. Increasing L_BASE beyond 2**15 will cause uabs
+// to overflow.
+#define L_BASE (RANS_PRECISION)
 #define IO_BASE 256
 // Range I = { L_BASE, L_BASE + 1, ..., L_BASE * IO_BASE - 1 }
 
