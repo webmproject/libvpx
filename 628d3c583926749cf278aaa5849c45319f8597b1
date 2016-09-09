@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "565c0b05_229b2f1f",
+        "filename": "aom_dsp/x86/variance_impl_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T02:24:11Z",
+      "side": 1,
+      "message": "note clang-format tends to left justify keeping the constant 2 space indent (for lint); the master branch is formatted that way:\n\nhttps://chromium-review.googlesource.com/#/c/368610/",
+      "revId": "628d3c583926749cf278aaa5849c45319f8597b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
