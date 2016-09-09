@@ -615,8 +615,8 @@ static void denormalizeAffine(double *H, double *T1, double *T2) {
   H[1] = Ha[2];
   H[2] = Ha[1];
   H[3] = Ha[0];
-  H[4] = Ha[4];
-  H[5] = Ha[3];
+  H[4] = Ha[3];
+  H[5] = Ha[4];
 }
 
 static void denormalizeRotZoom(double *H, double *T1, double *T2) {

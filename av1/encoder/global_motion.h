@@ -17,7 +17,17 @@
 extern "C" {
 #endif
 
-// compute global motion parameters between two frames
+/*
+  Computes global motion parameters between two frames. The array
+  "params" should be length 9, where the first 2 slots are translation
+  parameters in (row, col) order, and the remaining slots correspond
+  to values in the transformation matrix of the corresponding motion
+  model. They are arranged in "params" such that values on the tx-matrix
+  diagonal have odd numbered indices so the folowing matrix:
+  A | B
+  C | D
+  would produce params = [trans row, trans col, B, A, C, D]
+*/
 int compute_global_motion_feature_based(TransformationType type,
                                         YV12_BUFFER_CONFIG *frm,
                                         YV12_BUFFER_CONFIG *ref,

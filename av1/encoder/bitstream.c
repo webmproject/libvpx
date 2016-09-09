@@ -3213,11 +3213,11 @@ static void write_global_motion_params(Global_Motion_Params *params,
     case GLOBAL_ZERO: break;
     case GLOBAL_AFFINE:
       aom_write_primitive_symmetric(
-          w, (params->motion_params.wmmat[2].as_mv.row >> GM_ALPHA_PREC_DIFF) -
-                 (1 << GM_ALPHA_PREC_BITS),
+          w, (params->motion_params.wmmat[2].as_mv.row >> GM_ALPHA_PREC_DIFF),
           GM_ABS_ALPHA_BITS);
       aom_write_primitive_symmetric(
-          w, (params->motion_params.wmmat[2].as_mv.col >> GM_ALPHA_PREC_DIFF),
+          w, (params->motion_params.wmmat[2].as_mv.col >> GM_ALPHA_PREC_DIFF) -
+                 (1 << GM_ALPHA_PREC_BITS),
           GM_ABS_ALPHA_BITS);
     // fallthrough intended
     case GLOBAL_ROTZOOM:
