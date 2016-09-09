@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "565c0b05_62cfe71d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T02:18:24Z",
+      "side": 1,
+      "message": "oops was thinking about the ndk-build/Android.mk output path not the native one",
+      "parentUuid": "565c0b05_5219d491",
+      "revId": "97608406c3c3b4863b815a964b5ed61836191d58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d6c1dbc3_e40f9a36",
         "filename": "build/make/configure.sh",
         "patchSetId": 2
