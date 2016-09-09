@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6ba046a6_1aa2a1b0",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-09T23:55:34Z",
+      "side": 1,
+      "message": "The place I\u0027ve seen that be successful is when the size is not passed in. The hadamard test has separate classes for 8x8 and 16x16. Is there another example?",
+      "parentUuid": "8bcd7a7b_c8f943af",
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bcd7a7b_a8e31ff7",
         "filename": "test/predict_test.cc",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2016-09-09T19:42:20Z",
       "side": 1,
       "message": "these should be checked: ASSERT_TRUE(src_ !\u003d NULL)",
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_3aa765c1",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-09T23:55:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8bcd7a7b_a8e31ff7",
       "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "6ba046a6_657f8e06",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-09T23:55:34Z",
+      "side": 1,
+      "message": "Doesn\u0027t appear to be an issue. The larger transforms fail the unaligned test, but word alignment seems sufficient.",
+      "parentUuid": "8bcd7a7b_88cf3b7a",
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bcd7a7b_e88fe72d",
         "filename": "test/predict_test.cc",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2016-09-09T19:42:20Z",
       "side": 1,
       "message": "just make this a member and set the value in setup or simply call the function directly",
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_c5859a08",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-09T23:55:34Z",
+      "side": 1,
+      "message": "I think I did what you want?",
+      "parentUuid": "8bcd7a7b_e88fe72d",
       "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "6ba046a6_e5929e4b",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-09T23:55:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8bcd7a7b_8b9bb563",
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bcd7a7b_88a1fbaa",
         "filename": "test/predict_test.cc",
         "patchSetId": 4
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "6ba046a6_259ca65e",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-09T23:55:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8bcd7a7b_88a1fbaa",
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bcd7a7b_48a7f3bf",
         "filename": "test/predict_test.cc",
         "patchSetId": 4
@@ -115,6 +223,24 @@
       "writtenOn": "2016-09-09T19:42:20Z",
       "side": 1,
       "message": "I don\u0027t know if this is all necessary, you could just have one EXPECT_ above for the failed row and dump the location EXPECT_EQ(0, memcmp()) \u003c\u003c \"....\";",
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_85d632ea",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-09T23:55:34Z",
+      "side": 1,
+      "message": "It\u0027s useful to see what went wrong, in context. Otherwise it fails on the first wrong pixel. With the extra info you can say \"oh, the stride is off by one\" or \"those values seem to be transposed\"",
+      "parentUuid": "8bcd7a7b_48a7f3bf",
       "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -144,6 +270,30 @@
     },
     {
       "key": {
+        "uuid": "6ba046a6_a5ba56b9",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-09T23:55:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8bcd7a7b_689cb76d",
+      "range": {
+        "startLine": 116,
+        "startChar": 38,
+        "endLine": 116,
+        "endChar": 46
+      },
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bcd7a7b_8b84950e",
         "filename": "test/predict_test.cc",
         "patchSetId": 4
@@ -155,6 +305,30 @@
       "writtenOn": "2016-09-09T19:42:20Z",
       "side": 1,
       "message": "use EXPECT",
+      "range": {
+        "startLine": 130,
+        "startChar": 6,
+        "endLine": 130,
+        "endChar": 48
+      },
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_c5b75ad0",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-09T23:55:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8bcd7a7b_8b84950e",
       "range": {
         "startLine": 130,
         "startChar": 6,
@@ -207,6 +381,30 @@
     },
     {
       "key": {
+        "uuid": "6ba046a6_05c24225",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-09T23:55:34Z",
+      "side": 1,
+      "message": "Woops skipped this one. Let me know what you think about the debug output.",
+      "parentUuid": "8bcd7a7b_2bc7093e",
+      "range": {
+        "startLine": 300,
+        "startChar": 23,
+        "endLine": 300,
+        "endChar": 32
+      },
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bcd7a7b_4bcc4d60",
         "filename": "test/predict_test.cc",
         "patchSetId": 4
@@ -218,6 +416,30 @@
       "writtenOn": "2016-09-09T19:42:20Z",
       "side": 1,
       "message": "const int",
+      "range": {
+        "startLine": 334,
+        "startChar": 9,
+        "endLine": 334,
+        "endChar": 12
+      },
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_25ee66b6",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-09T23:55:34Z",
+      "side": 1,
+      "message": "ibid",
+      "parentUuid": "8bcd7a7b_4bcc4d60",
       "range": {
         "startLine": 334,
         "startChar": 9,
