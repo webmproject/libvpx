@@ -1062,16 +1062,10 @@ static void dist_block(const AV1_COMP *cpi, MACROBLOCK *x, int plane, int block,
   }
 }
 
-static int rate_block(int plane, int block, int blk_row, int blk_col,
-                      int coeff_ctx, TX_SIZE tx_size,
+static int rate_block(int plane, int block, int coeff_ctx, TX_SIZE tx_size,
                       struct rdcost_block_args *args) {
-  int coeff_cost =
-      cost_coeffs(args->x, plane, block, coeff_ctx, tx_size, args->so->scan,
-                  args->so->neighbors, args->use_fast_coef_costing);
-  const struct macroblock_plane *p = &args->x->plane[plane];
-  *(args->t_above + blk_col) = !(p->eobs[block] == 0);
-  *(args->t_left + blk_row) = !(p->eobs[block] == 0);
-  return coeff_cost;
+  return cost_coeffs(args->x, plane, block, coeff_ctx, tx_size, args->so->scan,
+                     args->so->neighbors, args->use_fast_coef_costing);
 }
 
 static uint64_t sum_squares_2d(const int16_t *diff, int diff_stride,
@@ -1189,7 +1183,10 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     return;
   }
 
-  rate = rate_block(plane, block, blk_row, blk_col, coeff_ctx, tx_size, args);
+  rate = rate_block(plane, block, coeff_ctx, tx_size, args);
+  args->t_above[blk_col] = (x->plane[plane].eobs[block] > 0);
+  args->t_left[blk_row] = (x->plane[plane].eobs[block] > 0);
+
   rd1 = RDCOST(x->rdmult, x->rddiv, rate, dist);
   rd2 = RDCOST(x->rdmult, x->rddiv, 0, sse);
 
@@ -1877,7 +1874,8 @@ static int64_t rd_pick_intra4x4block(AV1_COMP *cpi, MACROBLOCK *x, int row,
                                      const int *bmode_costs, ENTROPY_CONTEXT *a,
                                      ENTROPY_CONTEXT *l, int *bestrate,
                                      int *bestratey, int64_t *bestdistortion,
-                                     BLOCK_SIZE bsize, int64_t rd_thresh) {
+                                     BLOCK_SIZE bsize, int *y_skip,
+                                     int64_t rd_thresh) {
   PREDICTION_MODE mode;
   MACROBLOCKD *const xd = &x->e_mbd;
   int64_t best_rd = rd_thresh;
@@ -1892,6 +1890,7 @@ static int64_t rd_pick_intra4x4block(AV1_COMP *cpi, MACROBLOCK *x, int row,
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
   const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
   int idx, idy;
+  int best_can_skip = 0;
   uint8_t best_dst[8 * 8];
 #if CONFIG_AOM_HIGHBITDEPTH
   uint16_t best_dst16[8 * 8];
@@ -1909,6 +1908,7 @@ static int64_t rd_pick_intra4x4block(AV1_COMP *cpi, MACROBLOCK *x, int row,
       int ratey = 0;
       int64_t distortion = 0;
       int rate = bmode_costs[mode];
+      int can_skip = 1;
 
       if (!(cpi->sf.intra_y_mode_mask[TX_4X4] & (1 << mode))) continue;
 
@@ -1949,6 +1949,7 @@ static int64_t rd_pick_intra4x4block(AV1_COMP *cpi, MACROBLOCK *x, int row,
                                  so->neighbors, cpi->sf.use_fast_coef_costing);
             *(tempa + idx) = !(p->eobs[block] == 0);
             *(templ + idy) = !(p->eobs[block] == 0);
+            can_skip &= (p->eobs[block] == 0);
             if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
               goto next_highbd;
             av1_highbd_inv_txfm_add_4x4(BLOCK_OFFSET(pd->dqcoeff, block), dst,
@@ -1973,6 +1974,7 @@ static int64_t rd_pick_intra4x4block(AV1_COMP *cpi, MACROBLOCK *x, int row,
                                  so->neighbors, cpi->sf.use_fast_coef_costing);
             *(tempa + idx) = !(p->eobs[block] == 0);
             *(templ + idy) = !(p->eobs[block] == 0);
+            can_skip &= (p->eobs[block] == 0);
             av1_highbd_inv_txfm_add_4x4(BLOCK_OFFSET(pd->dqcoeff, block), dst,
                                         dst_stride, p->eobs[block], xd->bd,
                                         tx_type, 0);
@@ -1993,6 +1995,7 @@ static int64_t rd_pick_intra4x4block(AV1_COMP *cpi, MACROBLOCK *x, int row,
         *bestratey = ratey;
         *bestdistortion = distortion;
         best_rd = this_rd;
+        best_can_skip = can_skip;
         *best_mode = mode;
         memcpy(a, tempa, num_4x4_blocks_wide * sizeof(tempa[0]));
         memcpy(l, templ, num_4x4_blocks_high * sizeof(templ[0]));
@@ -2006,6 +2009,8 @@ static int64_t rd_pick_intra4x4block(AV1_COMP *cpi, MACROBLOCK *x, int row,
     }
 
     if (best_rd >= rd_thresh) return best_rd;
+
+    if (y_skip) *y_skip &= best_can_skip;
 
     for (idy = 0; idy < num_4x4_blocks_high * 4; ++idy) {
       memcpy(CONVERT_TO_SHORTPTR(dst_init + idy * dst_stride),
@@ -2021,6 +2026,7 @@ static int64_t rd_pick_intra4x4block(AV1_COMP *cpi, MACROBLOCK *x, int row,
     int ratey = 0;
     int64_t distortion = 0;
     int rate = bmode_costs[mode];
+    int can_skip = 1;
 
     if (!(cpi->sf.intra_y_mode_mask[TX_4X4] & (1 << mode))) continue;
 
@@ -2061,6 +2067,7 @@ static int64_t rd_pick_intra4x4block(AV1_COMP *cpi, MACROBLOCK *x, int row,
                                so->neighbors, cpi->sf.use_fast_coef_costing);
           *(tempa + idx) = !(p->eobs[block] == 0);
           *(templ + idy) = !(p->eobs[block] == 0);
+          can_skip &= (p->eobs[block] == 0);
           if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
             goto next;
           av1_inv_txfm_add_4x4(BLOCK_OFFSET(pd->dqcoeff, block), dst,
@@ -2084,6 +2091,7 @@ static int64_t rd_pick_intra4x4block(AV1_COMP *cpi, MACROBLOCK *x, int row,
                                so->neighbors, cpi->sf.use_fast_coef_costing);
           *(tempa + idx) = !(p->eobs[block] == 0);
           *(templ + idy) = !(p->eobs[block] == 0);
+          can_skip &= (p->eobs[block] == 0);
           av1_inv_txfm_add_4x4(BLOCK_OFFSET(pd->dqcoeff, block), dst,
                                dst_stride, p->eobs[block], tx_type, 0);
           cpi->fn_ptr[BLOCK_4X4].vf(src, src_stride, dst, dst_stride, &tmp);
@@ -2106,6 +2114,7 @@ static int64_t rd_pick_intra4x4block(AV1_COMP *cpi, MACROBLOCK *x, int row,
       *bestratey = ratey;
       *bestdistortion = distortion;
       best_rd = this_rd;
+      best_can_skip = can_skip;
       *best_mode = mode;
       memcpy(a, tempa, num_4x4_blocks_wide * sizeof(tempa[0]));
       memcpy(l, templ, num_4x4_blocks_high * sizeof(templ[0]));
@@ -2118,6 +2127,8 @@ static int64_t rd_pick_intra4x4block(AV1_COMP *cpi, MACROBLOCK *x, int row,
 
   if (best_rd >= rd_thresh) return best_rd;
 
+  if (y_skip) *y_skip &= best_can_skip;
+
   for (idy = 0; idy < num_4x4_blocks_high * 4; ++idy)
     memcpy(dst_init + idy * dst_stride, best_dst + idy * 8,
            num_4x4_blocks_wide * 4);
@@ -2127,7 +2138,7 @@ static int64_t rd_pick_intra4x4block(AV1_COMP *cpi, MACROBLOCK *x, int row,
 
 static int64_t rd_pick_intra_sub_8x8_y_mode(AV1_COMP *cpi, MACROBLOCK *mb,
                                             int *rate, int *rate_y,
-                                            int64_t *distortion,
+                                            int64_t *distortion, int *y_skip,
                                             int64_t best_rd) {
   int i, j;
   const MACROBLOCKD *const xd = &mb->e_mbd;
@@ -2154,6 +2165,8 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(AV1_COMP *cpi, MACROBLOCK *mb,
   mic->mbmi.tx_type = DCT_DCT;
   mic->mbmi.tx_size = TX_4X4;
 
+  if (y_skip) *y_skip = 1;
+
   // Pick modes for each sub-block (of size 4x4, 4x8, or 8x4) in an 8x8 block.
   for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
     for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
@@ -2171,7 +2184,7 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(AV1_COMP *cpi, MACROBLOCK *mb,
       this_rd = rd_pick_intra4x4block(
           cpi, mb, idy, idx, &best_mode, bmode_costs,
           xd->plane[0].above_context + idx, xd->plane[0].left_context + idy, &r,
-          &ry, &d, bsize, best_rd - total_rd);
+          &ry, &d, bsize, y_skip, best_rd - total_rd);
       if (this_rd >= best_rd - total_rd) return INT64_MAX;
 
       total_rd += this_rd;
@@ -7810,9 +7823,8 @@ void av1_rd_pick_intra_mode_sb(AV1_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
       return;
     }
   } else {
-    y_skip = 0;
     if (rd_pick_intra_sub_8x8_y_mode(cpi, x, &rate_y, &rate_y_tokenonly,
-                                     &dist_y, best_rd) >= best_rd) {
+                                     &dist_y, &y_skip, best_rd) >= best_rd) {
       rd_cost->rate = INT_MAX;
       return;
     }
@@ -10175,7 +10187,7 @@ void av1_rd_pick_inter_mode_sub8x8(struct AV1_COMP *cpi, TileDataEnc *tile_data,
     if (ref_frame == INTRA_FRAME) {
       int rate;
       if (rd_pick_intra_sub_8x8_y_mode(cpi, x, &rate, &rate_y, &distortion_y,
-                                       best_rd) >= best_rd)
+                                       NULL, best_rd) >= best_rd)
         continue;
       rate2 += rate;
       rate2 += intra_cost_penalty;
