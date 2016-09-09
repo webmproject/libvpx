@@ -227,6 +227,30 @@
       "revId": "5701c39a1a4089117b892387d8a4c892a8240bdd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bcd7a7b_228f2edf",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-09T16:34:01Z",
+      "side": 1,
+      "message": "Ah, so I should change this and test_with_unaligned_dst. OK. check_border and compare_buffers should probably be CheckBorder and CompareBuffers too.\n\nAny other comments?",
+      "parentUuid": "565c0b05_a223bfc3",
+      "range": {
+        "startLine": 235,
+        "startChar": 7,
+        "endLine": 235,
+        "endChar": 28
+      },
+      "revId": "5701c39a1a4089117b892387d8a4c892a8240bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
