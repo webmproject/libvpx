@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6ba046a6_ba219510",
+        "filename": "aom_dsp/x86/blend_a64_mask_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 441,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T23:33:37Z",
+      "side": 1,
+      "message": "that\u0027s a bug. seems to be related to the scope and is still present in a newer version",
+      "range": {
+        "startLine": 441,
+        "startChar": 14,
+        "endLine": 441,
+        "endChar": 16
+      },
+      "revId": "9efb32b9438e21c5540da7f22eefa77f5ebe5dbf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_7a49edb4",
+        "filename": "av1/common/filter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T23:33:37Z",
+      "side": 1,
+      "message": "this seems worse now, but may be fixed in a newer version",
+      "revId": "9efb32b9438e21c5540da7f22eefa77f5ebe5dbf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_fa731dd9",
+        "filename": "av1/common/restoration.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T23:33:37Z",
+      "side": 1,
+      "message": "yikes. there\u0027s no harm in using some temporary constants...",
+      "revId": "9efb32b9438e21c5540da7f22eefa77f5ebe5dbf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_da4d7990",
+        "filename": "av1/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2819,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-09T23:33:37Z",
+      "side": 1,
+      "message": "seems like a bug",
+      "revId": "9efb32b9438e21c5540da7f22eefa77f5ebe5dbf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
