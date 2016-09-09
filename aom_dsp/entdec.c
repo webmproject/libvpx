@@ -206,6 +206,7 @@ int od_ec_decode_bool_q15(od_ec_dec *dec, unsigned fz) {
   od_ec_window dif;
   od_ec_window vw;
   unsigned r;
+  unsigned r_new;
   unsigned v;
   int ret;
   OD_ASSERT(0 < fz);
@@ -216,10 +217,14 @@ int od_ec_decode_bool_q15(od_ec_dec *dec, unsigned fz) {
   OD_ASSERT(32768U <= r);
   v = fz * (uint32_t)r >> 15;
   vw = (od_ec_window)v << (OD_EC_WINDOW_SIZE - 16);
-  ret = dif >= vw;
-  if (ret) dif -= vw;
-  r = ret ? r - v : v;
-  return od_ec_dec_normalize(dec, dif, r, ret);
+  ret = 0;
+  r_new = v;
+  if (dif >= vw) {
+    r_new = r - v;
+    dif -= vw;
+    ret = 1;
+  }
+  return od_ec_dec_normalize(dec, dif, r_new, ret);
 }
 
 /*Decodes a symbol given a cumulative distribution function (CDF) table.
