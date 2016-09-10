@@ -1,0 +1,107 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6ba046a6_0b8a51c6",
+        "filename": "av1/encoder/encodeframe.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 4512,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T03:03:46Z",
+      "side": 1,
+      "message": "note (for another change) this could be GlobalMotionParams\n\nhttps://google.github.io/styleguide/cppguide.html#Type_Names",
+      "range": {
+        "startLine": 4512,
+        "startChar": 36,
+        "endLine": 4512,
+        "endChar": 56
+      },
+      "revId": "974708a0a213581b66eb4c57f606dc4f7d8213a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_4bbb797a",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T03:03:46Z",
+      "side": 1,
+      "message": "that\u0027s spelled INLINE with libvpx (from vpx_config.h)",
+      "range": {
+        "startLine": 33,
+        "startChar": 7,
+        "endLine": 33,
+        "endChar": 13
+      },
+      "revId": "974708a0a213581b66eb4c57f606dc4f7d8213a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_6bb03d94",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T03:03:46Z",
+      "side": 1,
+      "message": "these could be merged with the declaration and made const",
+      "revId": "974708a0a213581b66eb4c57f606dc4f7d8213a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_2bb63593",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T03:03:46Z",
+      "side": 1,
+      "message": "m1 and m2 can be const; this should also be static. anything visible across modules should be namespaced (aom_, vpx_, etc) to avoid conflicts:\n\nhttps://aomedia-review.googlesource.com/#/c/3705/",
+      "revId": "974708a0a213581b66eb4c57f606dc4f7d8213a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_8bb56185",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T03:03:46Z",
+      "side": 1,
+      "message": "the trailing \u0027_\u0027 could be dropped",
+      "range": {
+        "startLine": 62,
+        "startChar": 11,
+        "endLine": 62,
+        "endChar": 18
+      },
+      "revId": "974708a0a213581b66eb4c57f606dc4f7d8213a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
