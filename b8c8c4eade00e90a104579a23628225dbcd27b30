@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "6ba046a6_a00b2484",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T01:21:44Z",
+      "side": 1,
+      "message": "the tuple can just become a simple struct, one example:\n\nhttps://chromium-review.googlesource.com/#/c/360939/",
+      "parentUuid": "6ba046a6_1aa2a1b0",
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bcd7a7b_a8e31ff7",
         "filename": "test/predict_test.cc",
         "patchSetId": 4
