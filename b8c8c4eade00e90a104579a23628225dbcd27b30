@@ -142,6 +142,24 @@
     },
     {
       "key": {
+        "uuid": "6ba046a6_059322a8",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T00:27:00Z",
+      "side": 1,
+      "message": "I didn\u0027t mean to publish that one in the end, given the setup static was OK, but either way.",
+      "parentUuid": "6ba046a6_c5859a08",
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bcd7a7b_8b9bb563",
         "filename": "test/predict_test.cc",
         "patchSetId": 4
@@ -241,6 +259,24 @@
       "side": 1,
       "message": "It\u0027s useful to see what went wrong, in context. Otherwise it fails on the first wrong pixel. With the extra info you can say \"oh, the stride is off by one\" or \"those values seem to be transposed\"",
       "parentUuid": "8bcd7a7b_48a7f3bf",
+      "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_45f8cadd",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T00:27:00Z",
+      "side": 1,
+      "message": "that can be dumped at the row level as part of EXPECT or when the failure is detected. this is fairly trivial to write if someone is working on it, but is mostly dead code that won\u0027t often get hit.",
+      "parentUuid": "6ba046a6_85d632ea",
       "revId": "b8c8c4eade00e90a104579a23628225dbcd27b30",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
