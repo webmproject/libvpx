@@ -95,7 +95,7 @@ vpx_codec_err_t vpx_codec_control_(vpx_codec_ctx_t *ctx, int ctrl_id, ...) {
   else {
     vpx_codec_ctrl_fn_map_t *entry;
 
-    res = VPX_CODEC_ERROR;
+    res = VPX_CODEC_INCAPABLE;
 
     for (entry = ctx->iface->ctrl_maps; entry && entry->fn; entry++) {
       if (!entry->ctrl_id || entry->ctrl_id == ctrl_id) {
