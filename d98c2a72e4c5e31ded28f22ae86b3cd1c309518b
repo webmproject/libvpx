@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6ba046a6_2011f4bd",
+        "filename": "vp8/common/filter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T01:02:44Z",
+      "side": 1,
+      "message": "this part is a bit irrelevant here. calling it to perform the copy is the pointless operation that\u0027s being documented in this module I\u0027d say",
+      "range": {
+        "startLine": 340,
+        "startChar": 28,
+        "endLine": 340,
+        "endChar": 74
+      },
+      "revId": "d98c2a72e4c5e31ded28f22ae86b3cd1c309518b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
