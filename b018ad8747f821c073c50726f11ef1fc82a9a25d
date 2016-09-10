@@ -51,6 +51,24 @@
       "revId": "b018ad8747f821c073c50726f11ef1fc82a9a25d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_2588267c",
+        "filename": "vpx/vp8.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T00:23:09Z",
+      "side": 1,
+      "message": "marked the corresponding control definitions deprecated too",
+      "parentUuid": "565c0b05_38e1a926",
+      "revId": "b018ad8747f821c073c50726f11ef1fc82a9a25d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
