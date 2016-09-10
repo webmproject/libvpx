@@ -1,0 +1,186 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6ba046a6_60de9ccf",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T01:21:44Z",
+      "side": 1,
+      "message": "I don\u0027t think you\u0027re using anything from this",
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_80e38098",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T01:21:44Z",
+      "side": 1,
+      "message": "stdio.h is missing if you\u0027re going to keep the debug output",
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_40e9987a",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T01:21:44Z",
+      "side": 1,
+      "message": "unused",
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_005eb070",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T01:21:44Z",
+      "side": 1,
+      "message": "given the comment maybe kBorderSize or kBufferSize?",
+      "range": {
+        "startLine": 46,
+        "startChar": 41,
+        "endLine": 46,
+        "endChar": 48
+      },
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_00d870e2",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T01:21:44Z",
+      "side": 1,
+      "message": "you need to delete[] these, you\u0027re not using a smart pointer, better if the members were initialized to NULL in the constructor too",
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_c0cd8829",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T01:21:44Z",
+      "side": 1,
+      "message": "swap this and the line above",
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_0003106a",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T01:21:44Z",
+      "side": 1,
+      "message": "with this name a true return would be more common to indicate the buffers match.\nboth buffers should be marked const too",
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_e02e0cff",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T01:21:44Z",
+      "side": 1,
+      "message": "if you really want to keep this I\u0027d use stderr and dump the expected followed by actual blocks labeled for easy identification",
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_c053c867",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T01:21:44Z",
+      "side": 1,
+      "message": "\u0027Bottom border.\u0027 to match the others",
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ba046a6_809e200b",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-10T01:21:44Z",
+      "side": 1,
+      "message": "this won\u0027t be necessary once the function is updated",
+      "range": {
+        "startLine": 344,
+        "startChar": 29,
+        "endLine": 344,
+        "endChar": 39
+      },
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
