@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "4b3b825a_5535062d",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-12T23:35:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6ba046a6_60de9ccf",
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6ba046a6_80e38098",
         "filename": "test/predict_test.cc",
         "patchSetId": 6
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "4b3b825a_f5bc5a8c",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-12T23:35:44Z",
+      "side": 1,
+      "message": "Removed printf",
+      "parentUuid": "6ba046a6_80e38098",
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6ba046a6_40e9987a",
         "filename": "test/predict_test.cc",
         "patchSetId": 6
@@ -47,6 +83,24 @@
       "writtenOn": "2016-09-10T01:21:44Z",
       "side": 1,
       "message": "unused",
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b3b825a_15c21efc",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-12T23:35:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6ba046a6_40e9987a",
       "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -76,6 +130,30 @@
     },
     {
       "key": {
+        "uuid": "4b3b825a_b5c6d20c",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-12T23:35:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6ba046a6_005eb070",
+      "range": {
+        "startLine": 46,
+        "startChar": 41,
+        "endLine": 46,
+        "endChar": 48
+      },
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6ba046a6_00d870e2",
         "filename": "test/predict_test.cc",
         "patchSetId": 6
@@ -87,6 +165,24 @@
       "writtenOn": "2016-09-10T01:21:44Z",
       "side": 1,
       "message": "you need to delete[] these, you\u0027re not using a smart pointer, better if the members were initialized to NULL in the constructor too",
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b3b825a_75d12ac1",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-12T23:35:44Z",
+      "side": 1,
+      "message": "What other members? I think everything is initialized here.",
+      "parentUuid": "6ba046a6_00d870e2",
       "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -110,6 +206,24 @@
     },
     {
       "key": {
+        "uuid": "4b3b825a_95ce2e23",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-12T23:35:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6ba046a6_c0cd8829",
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6ba046a6_0003106a",
         "filename": "test/predict_test.cc",
         "patchSetId": 6
@@ -121,6 +235,24 @@
       "writtenOn": "2016-09-10T01:21:44Z",
       "side": 1,
       "message": "with this name a true return would be more common to indicate the buffers match.\nboth buffers should be marked const too",
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b3b825a_35dba2e3",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-12T23:35:44Z",
+      "side": 1,
+      "message": "Made void",
+      "parentUuid": "6ba046a6_0003106a",
       "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -144,6 +276,24 @@
     },
     {
       "key": {
+        "uuid": "4b3b825a_55d8a6e3",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-12T23:35:44Z",
+      "side": 1,
+      "message": "Removed",
+      "parentUuid": "6ba046a6_e02e0cff",
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6ba046a6_c053c867",
         "filename": "test/predict_test.cc",
         "patchSetId": 6
@@ -161,6 +311,24 @@
     },
     {
       "key": {
+        "uuid": "4b3b825a_f5e3fa9a",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-12T23:35:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6ba046a6_c053c867",
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6ba046a6_809e200b",
         "filename": "test/predict_test.cc",
         "patchSetId": 6
@@ -172,6 +340,30 @@
       "writtenOn": "2016-09-10T01:21:44Z",
       "side": 1,
       "message": "this won\u0027t be necessary once the function is updated",
+      "range": {
+        "startLine": 344,
+        "startChar": 29,
+        "endLine": 344,
+        "endChar": 39
+      },
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b3b825a_15e9be7b",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-12T23:35:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6ba046a6_809e200b",
       "range": {
         "startLine": 344,
         "startChar": 29,
