@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b3b825a_6683cab5",
+        "filename": "av1/common/warped_motion.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-09-12T17:24:08Z",
+      "side": 1,
+      "message": "The original order was intentional, I wanted the diagonal of the matrix to be in odd numbered locations in the parameter array so it is easy to subtract  1 from these coefficients in a loop and so it is easier to remember how the parameters in the array are ordered. If you want the order to go from {*, *, 0, 256, 0, 256} to {*, *, 0, 256, 256, 0} there are several other locations that much be changed. If you are seeing the parameters come up as {*, *, 0, 256, 256, 0}, then the bug is probably in RANSAC. I can look into that.",
+      "range": {
+        "startLine": 98,
+        "startChar": 22,
+        "endLine": 98,
+        "endChar": 23
+      },
+      "revId": "498882a7b226a6cc406b76280176dc654b6829bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
