@@ -3929,8 +3929,7 @@ void av1_decode_frame(AV1Decoder *pbi, const uint8_t *data,
 
 #if CONFIG_CLPF
   if (cm->clpf_strength && !cm->skip_loop_filter) {
-    const YV12_BUFFER_CONFIG *const frame = &pbi->cur_buf->buf;
-    av1_clpf_frame(frame, frame, 0, cm, !!cm->clpf_size,
+    av1_clpf_frame(&pbi->cur_buf->buf, 0, cm, !!cm->clpf_size,
                    cm->clpf_strength + (cm->clpf_strength == 3),
                    4 + cm->clpf_size, cm->clpf_blocks, clpf_bit);
   }
