@@ -16,6 +16,24 @@
       "revId": "4d717ac3631b59751ccfa97b9a99df3b83872483",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b3b825a_15f8dedc",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-13T00:14:57Z",
+      "side": 1,
+      "message": "Tested and updated. Unfortunately the documentation on the web still uses the .sh file.",
+      "parentUuid": "6ba046a6_cb7f69b1",
+      "revId": "4d717ac3631b59751ccfa97b9a99df3b83872483",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
