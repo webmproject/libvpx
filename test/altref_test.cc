@@ -31,7 +31,7 @@ class AltRefTest : public ::libvpx_test::EncoderTest,
     SetMode(libvpx_test::kTwoPassGood);
   }
 
-  virtual void BeginPassHook(unsigned int pass) { altref_count_ = 0; }
+  virtual void BeginPassHook(unsigned int /*pass*/) { altref_count_ = 0; }
 
   virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
                                   libvpx_test::Encoder *encoder) {
