@@ -22,6 +22,30 @@
       "revId": "4c6819d0fcb24caa064af47a939b4a9f9c17225b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6be6865b_87b98ae7",
+        "filename": "vp8/decoder/threading.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 634,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-13T22:08:36Z",
+      "side": 1,
+      "message": "Do you mean unsigned? I\u0027m not sure how it\u0027s used, if negative means anything. I tried making the other one signed, but it is used in a bunch of comparisons with unsigned values and I didn\u0027t want to chase it too far down the rabbit hole.",
+      "parentUuid": "6be6865b_67dba639",
+      "range": {
+        "startLine": 634,
+        "startChar": 13,
+        "endLine": 634,
+        "endChar": 44
+      },
+      "revId": "4c6819d0fcb24caa064af47a939b4a9f9c17225b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
