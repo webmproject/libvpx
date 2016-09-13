@@ -39,7 +39,6 @@ typedef enum stereo_format {
 
 void write_webm_file_header(struct WebmOutputContext *webm_ctx,
                             const vpx_codec_enc_cfg_t *cfg,
-                            const struct vpx_rational *fps,
                             stereo_format_t stereo_fmt, unsigned int fourcc,
                             const struct VpxRational *par);
 

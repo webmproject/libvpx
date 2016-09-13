@@ -1432,9 +1432,8 @@ static void open_output_file(struct stream_state *stream,
 #if CONFIG_WEBM_IO
   if (stream->config.write_webm) {
     stream->webm_ctx.stream = stream->file;
-    write_webm_file_header(&stream->webm_ctx, cfg, &global->framerate,
-                           stream->config.stereo_fmt, global->codec->fourcc,
-                           pixel_aspect_ratio);
+    write_webm_file_header(&stream->webm_ctx, cfg, stream->config.stereo_fmt,
+                           global->codec->fourcc, pixel_aspect_ratio);
   }
 #else
   (void)pixel_aspect_ratio;
