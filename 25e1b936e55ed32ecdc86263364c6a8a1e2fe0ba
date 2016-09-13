@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6be6865b_f5712008",
+        "filename": "av1/common/warped_motion.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1088,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-09-13T23:31:25Z",
+      "side": 1,
+      "message": "These functions have been changed in ransac.c. I assume you only have them here now temporarily for testing, but they should be updated. Updating these should fix the issue with the parameter order in projectAffine.",
+      "range": {
+        "startLine": 1031,
+        "startChar": 0,
+        "endLine": 1088,
+        "endChar": 1
+      },
+      "revId": "25e1b936e55ed32ecdc86263364c6a8a1e2fe0ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
