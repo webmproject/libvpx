@@ -631,7 +631,8 @@ void vp8_decoder_create_threads(VP8D_COMP *pbi) {
     }
 
     pbi->allocated_decoding_thread_count = ithread;
-    if (pbi->allocated_decoding_thread_count != pbi->decoding_thread_count) {
+    if (pbi->allocated_decoding_thread_count !=
+        (int)pbi->decoding_thread_count) {
       /* the remainder of cleanup cases will be handled in
        * vp8_decoder_remove_threads(). */
       if (pbi->allocated_decoding_thread_count == 0) {
