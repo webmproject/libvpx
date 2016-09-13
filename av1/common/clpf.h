@@ -20,10 +20,10 @@ int av1_clpf_sample(int X, int A, int B, int C, int D, int E, int F, int b);
 int av1_clpf_frame(const YV12_BUFFER_CONFIG *frame,
                    const YV12_BUFFER_CONFIG *org, AV1_COMMON *cm,
                    int enable_fb_flag, unsigned int strength,
-                   unsigned int fb_size_log2, uint8_t *blocks,
+                   unsigned int fb_size_log2, uint8_t *blocks, int plane,
                    int (*decision)(int, int, const YV12_BUFFER_CONFIG *,
                                    const YV12_BUFFER_CONFIG *,
                                    const AV1_COMMON *cm, int, int, int,
-                                   unsigned int, unsigned int, uint8_t *));
+                                   unsigned int, unsigned int, uint8_t *, int));
 
 #endif

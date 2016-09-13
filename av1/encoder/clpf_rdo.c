@@ -11,16 +11,17 @@
 
 #include "av1/common/clpf.h"
 #include "./aom_dsp_rtcd.h"
+#include "aom/aom_image.h"
 #include "aom/aom_integer.h"
 #include "av1/common/quant_common.h"
 
 // Calculate the error of a filtered and unfiltered block
 void aom_clpf_detect_c(const uint8_t *rec, const uint8_t *org, int rstride,
                        int ostride, int x0, int y0, int width, int height,
-                       int *sum0, int *sum1, unsigned int strength) {
+                       int *sum0, int *sum1, unsigned int strength, int size) {
   int x, y;
-  for (y = y0; y < y0 + 8; y++) {
-    for (x = x0; x < x0 + 8; x++) {
+  for (y = y0; y < y0 + size; y++) {
+    for (x = x0; x < x0 + size; x++) {
       int O = org[y * ostride + x];
       int X = rec[y * rstride + x];
       int A = rec[AOMMAX(0, y - 1) * rstride + x];
@@ -39,11 +40,11 @@ void aom_clpf_detect_c(const uint8_t *rec, const uint8_t *org, int rstride,
 
 void aom_clpf_detect_multi_c(const uint8_t *rec, const uint8_t *org,
                              int rstride, int ostride, int x0, int y0,
-                             int width, int height, int *sum) {
+                             int width, int height, int *sum, int size) {
   int x, y;
 
-  for (y = y0; y < y0 + 8; y++) {
-    for (x = x0; x < x0 + 8; x++) {
+  for (y = y0; y < y0 + size; y++) {
+    for (x = x0; x < x0 + size; x++) {
       int O = org[y * ostride + x];
       int X = rec[y * rstride + x];
       int A = rec[AOMMAX(0, y - 1) * rstride + x];
@@ -71,10 +72,10 @@ void aom_clpf_detect_multi_c(const uint8_t *rec, const uint8_t *org,
 void aom_clpf_detect_hbd_c(const uint16_t *rec, const uint16_t *org,
                            int rstride, int ostride, int x0, int y0, int width,
                            int height, int *sum0, int *sum1,
-                           unsigned int strength, int shift) {
+                           unsigned int strength, int shift, int size) {
   int x, y;
-  for (y = y0; y < y0 + 8; y++) {
-    for (x = x0; x < x0 + 8; x++) {
+  for (y = y0; y < y0 + size; y++) {
+    for (x = x0; x < x0 + size; x++) {
       int O = org[y * ostride + x] >> shift;
       int X = rec[y * rstride + x] >> shift;
       int A = rec[AOMMAX(0, y - 1) * rstride + x] >> shift;
@@ -94,11 +95,12 @@ void aom_clpf_detect_hbd_c(const uint16_t *rec, const uint16_t *org,
 // aom_clpf_detect_multi_c() apart from "rec" and "org".
 void aom_clpf_detect_multi_hbd_c(const uint16_t *rec, const uint16_t *org,
                                  int rstride, int ostride, int x0, int y0,
-                                 int width, int height, int *sum, int shift) {
+                                 int width, int height, int *sum, int shift,
+                                 int size) {
   int x, y;
 
-  for (y = y0; y < y0 + 8; y++) {
-    for (x = x0; x < x0 + 8; x++) {
+  for (y = y0; y < y0 + size; y++) {
+    for (x = x0; x < x0 + size; x++) {
       int O = org[y * ostride + x] >> shift;
       int X = rec[y * rstride + x] >> shift;
       int A = rec[AOMMAX(0, y - 1) * rstride + x] >> shift;
@@ -125,31 +127,45 @@ void aom_clpf_detect_multi_hbd_c(const uint16_t *rec, const uint16_t *org,
 int av1_clpf_decision(int k, int l, const YV12_BUFFER_CONFIG *rec,
                       const YV12_BUFFER_CONFIG *org, const AV1_COMMON *cm,
                       int block_size, int w, int h, unsigned int strength,
-                      unsigned int fb_size_log2, uint8_t *res) {
+                      unsigned int fb_size_log2, uint8_t *res, int plane) {
   int m, n, sum0 = 0, sum1 = 0;
+  const int subx = plane != AOM_PLANE_Y && rec->subsampling_x;
+  const int suby = plane != AOM_PLANE_Y && rec->subsampling_y;
+  uint8_t *rec_buffer =
+      plane != AOM_PLANE_Y
+          ? (plane == AOM_PLANE_U ? rec->u_buffer : rec->v_buffer)
+          : rec->y_buffer;
+  uint8_t *org_buffer =
+      plane != AOM_PLANE_Y
+          ? (plane == AOM_PLANE_U ? org->u_buffer : org->v_buffer)
+          : org->y_buffer;
+  int rec_width = plane != AOM_PLANE_Y ? rec->uv_crop_width : rec->y_crop_width;
+  int rec_height =
+      plane != AOM_PLANE_Y ? rec->uv_crop_height : rec->y_crop_height;
+  int rec_stride = plane != AOM_PLANE_Y ? rec->uv_stride : rec->y_stride;
+  int org_stride = plane != AOM_PLANE_Y ? org->uv_stride : org->y_stride;
   for (m = 0; m < h; m++) {
     for (n = 0; n < w; n++) {
       int xpos = (l << fb_size_log2) + n * block_size;
       int ypos = (k << fb_size_log2) + m * block_size;
-      const int bs = MAX_MIB_SIZE;
-      if (!cm->mi_grid_visible[ypos / bs * cm->mi_stride + xpos / bs]
+      if (!cm->mi_grid_visible[(ypos << suby) / MI_SIZE * cm->mi_stride +
+                               (xpos << subx) / MI_SIZE]
                ->mbmi.skip) {
 #if CONFIG_AOM_HIGHBITDEPTH
         if (cm->use_highbitdepth) {
-          aom_clpf_detect_hbd(CONVERT_TO_SHORTPTR(rec->y_buffer),
-                              CONVERT_TO_SHORTPTR(org->y_buffer), rec->y_stride,
-                              org->y_stride, xpos, ypos, rec->y_crop_width,
-                              rec->y_crop_height, &sum0, &sum1, strength,
-                              cm->bit_depth - 8);
+          aom_clpf_detect_hbd(
+              CONVERT_TO_SHORTPTR(rec_buffer), CONVERT_TO_SHORTPTR(org_buffer),
+              rec_stride, org_stride, xpos, ypos, rec_width, rec_height, &sum0,
+              &sum1, strength, cm->bit_depth - 8, block_size);
         } else {
-          aom_clpf_detect(rec->y_buffer, org->y_buffer, rec->y_stride,
-                          org->y_stride, xpos, ypos, rec->y_crop_width,
-                          rec->y_crop_height, &sum0, &sum1, strength);
+          aom_clpf_detect(rec_buffer, org_buffer, rec_stride, org_stride, xpos,
+                          ypos, rec_width, rec_height, &sum0, &sum1, strength,
+                          block_size);
         }
 #else
-        aom_clpf_detect(rec->y_buffer, org->y_buffer, rec->y_stride,
-                        org->y_stride, xpos, ypos, rec->y_crop_width,
-                        rec->y_crop_height, &sum0, &sum1, strength);
+        aom_clpf_detect(rec_buffer, org_buffer, rec_stride, org_stride, xpos,
+                        ypos, rec_width, rec_height, &sum0, &sum1, strength,
+                        block_size);
 #endif
       }
     }
@@ -161,6 +177,7 @@ int av1_clpf_decision(int k, int l, const YV12_BUFFER_CONFIG *rec,
 // Calculate the square error of all filter settings.  Result:
 // res[0][0]   : unfiltered
 // res[0][1-3] : strength=1,2,4, no signals
+// (Only for luma:)
 // res[1][0]   : (bit count, fb size = 128)
 // res[1][1-3] : strength=1,2,4, fb size = 128
 // res[2][0]   : (bit count, fb size = 64)
@@ -170,12 +187,28 @@ int av1_clpf_decision(int k, int l, const YV12_BUFFER_CONFIG *rec,
 static int clpf_rdo(int y, int x, const YV12_BUFFER_CONFIG *rec,
                     const YV12_BUFFER_CONFIG *org, const AV1_COMMON *cm,
                     unsigned int block_size, unsigned int fb_size_log2, int w,
-                    int h, int64_t res[4][4]) {
+                    int h, int64_t res[4][4], int plane) {
   int c, m, n, filtered = 0;
   int sum[4];
+  const int subx = plane != AOM_PLANE_Y && rec->subsampling_x;
+  const int suby = plane != AOM_PLANE_Y && rec->subsampling_y;
   int bslog = get_msb(block_size);
+  uint8_t *rec_buffer =
+      plane != AOM_PLANE_Y
+          ? (plane == AOM_PLANE_U ? rec->u_buffer : rec->v_buffer)
+          : rec->y_buffer;
+  uint8_t *org_buffer =
+      plane != AOM_PLANE_Y
+          ? (plane == AOM_PLANE_U ? org->u_buffer : org->v_buffer)
+          : org->y_buffer;
+  int rec_width = plane != AOM_PLANE_Y ? rec->uv_crop_width : rec->y_crop_width;
+  int rec_height =
+      plane != AOM_PLANE_Y ? rec->uv_crop_height : rec->y_crop_height;
+  int rec_stride = plane != AOM_PLANE_Y ? rec->uv_stride : rec->y_stride;
+  int org_stride = plane != AOM_PLANE_Y ? org->uv_stride : org->y_stride;
   sum[0] = sum[1] = sum[2] = sum[3] = 0;
-  if (fb_size_log2 > (unsigned int)get_msb(MAX_FB_SIZE) - 3) {
+  if (plane == AOM_PLANE_Y &&
+      fb_size_log2 > (unsigned int)get_msb(MAX_FB_SIZE) - 3) {
     int w1, h1, w2, h2, i, sum1, sum2, sum3, oldfiltered;
 
     fb_size_log2--;
@@ -190,16 +223,17 @@ static int clpf_rdo(int y, int x, const YV12_BUFFER_CONFIG *rec,
     oldfiltered = res[i][0];
     res[i][0] = 0;
 
-    filtered =
-        clpf_rdo(y, x, rec, org, cm, block_size, fb_size_log2, w1, h1, res);
+    filtered = clpf_rdo(y, x, rec, org, cm, block_size, fb_size_log2, w1, h1,
+                        res, plane);
     if (1 << (fb_size_log2 - bslog) < w)
       filtered |= clpf_rdo(y, x + (1 << fb_size_log2), rec, org, cm, block_size,
-                           fb_size_log2, w2, h1, res);
+                           fb_size_log2, w2, h1, res, plane);
     if (1 << (fb_size_log2 - bslog) < h) {
       filtered |= clpf_rdo(y + (1 << fb_size_log2), x, rec, org, cm, block_size,
-                           fb_size_log2, w1, h2, res);
-      filtered |= clpf_rdo(y + (1 << fb_size_log2), x + (1 << fb_size_log2),
-                           rec, org, cm, block_size, fb_size_log2, w2, h2, res);
+                           fb_size_log2, w1, h2, res, plane);
+      filtered |=
+          clpf_rdo(y + (1 << fb_size_log2), x + (1 << fb_size_log2), rec, org,
+                   cm, block_size, fb_size_log2, w2, h2, res, plane);
     }
 
     res[i][1] = AOMMIN(sum1 + res[i][0], res[i][1]);
@@ -213,32 +247,31 @@ static int clpf_rdo(int y, int x, const YV12_BUFFER_CONFIG *rec,
     for (n = 0; n < w; n++) {
       int xpos = x + n * block_size;
       int ypos = y + m * block_size;
-      if (!cm->mi_grid_visible[ypos / MAX_MIB_SIZE * cm->mi_stride +
-                               xpos / MAX_MIB_SIZE]
+      if (!cm->mi_grid_visible[(ypos << suby) / MI_SIZE * cm->mi_stride +
+                               (xpos << subx) / MI_SIZE]
                ->mbmi.skip) {
 #if CONFIG_AOM_HIGHBITDEPTH
         if (cm->use_highbitdepth) {
-          aom_clpf_detect_multi_hbd(CONVERT_TO_SHORTPTR(rec->y_buffer),
-                                    CONVERT_TO_SHORTPTR(org->y_buffer),
-                                    rec->y_stride, org->y_stride, xpos, ypos,
-                                    rec->y_crop_width, rec->y_crop_height, sum,
-                                    cm->bit_depth - 8);
+          aom_clpf_detect_multi_hbd(
+              CONVERT_TO_SHORTPTR(rec_buffer), CONVERT_TO_SHORTPTR(org_buffer),
+              rec_stride, org_stride, xpos, ypos, rec_width, rec_height, sum,
+              cm->bit_depth - 8, block_size);
         } else {
-          aom_clpf_detect_multi(rec->y_buffer, org->y_buffer, rec->y_stride,
-                                org->y_stride, xpos, ypos, rec->y_crop_width,
-                                rec->y_crop_height, sum);
+          aom_clpf_detect_multi(rec_buffer, org_buffer, rec_stride, org_stride,
+                                xpos, ypos, rec_width, rec_height, sum,
+                                block_size);
         }
 #else
-        aom_clpf_detect_multi(rec->y_buffer, org->y_buffer, rec->y_stride,
-                              org->y_stride, xpos, ypos, rec->y_crop_width,
-                              rec->y_crop_height, sum);
+        aom_clpf_detect_multi(rec_buffer, org_buffer, rec_stride, org_stride,
+                              xpos, ypos, rec_width, rec_height, sum,
+                              block_size);
 #endif
         filtered = 1;
       }
     }
   }
 
-  for (c = 0; c < 4; c++) {
+  for (c = 0; c < (plane == AOM_PLANE_Y ? 4 : 1); c++) {
     res[c][0] += sum[0];
     res[c][1] += sum[1];
     res[c][2] += sum[2];
@@ -249,30 +282,42 @@ static int clpf_rdo(int y, int x, const YV12_BUFFER_CONFIG *rec,
 
 void av1_clpf_test_frame(const YV12_BUFFER_CONFIG *rec,
                          const YV12_BUFFER_CONFIG *org, const AV1_COMMON *cm,
-                         int *best_strength, int *best_bs) {
+                         int *best_strength, int *best_bs, int plane) {
   int c, j, k, l;
   int64_t best, sums[4][4];
-  int width = rec->y_crop_width, height = rec->y_crop_height;
-  const int bs = MAX_MIB_SIZE;
+  int width = plane != AOM_PLANE_Y ? rec->uv_crop_width : rec->y_crop_width;
+  int height = plane != AOM_PLANE_Y ? rec->uv_crop_height : rec->y_crop_height;
+  const int bs = MI_SIZE;
+  const int bslog = get_msb(bs);
   int fb_size_log2 = get_msb(MAX_FB_SIZE);
   int num_fb_ver = (height + (1 << fb_size_log2) - bs) >> fb_size_log2;
   int num_fb_hor = (width + (1 << fb_size_log2) - bs) >> fb_size_log2;
 
   memset(sums, 0, sizeof(sums));
 
-  for (k = 0; k < num_fb_ver; k++) {
-    for (l = 0; l < num_fb_hor; l++) {
-      // Calculate the block size after frame border clipping
-      int h =
-          AOMMIN(height, (k + 1) << fb_size_log2) & ((1 << fb_size_log2) - 1);
-      int w =
-          AOMMIN(width, (l + 1) << fb_size_log2) & ((1 << fb_size_log2) - 1);
-      h += !h << fb_size_log2;
-      w += !w << fb_size_log2;
-      clpf_rdo(k << fb_size_log2, l << fb_size_log2, rec, org, cm, bs,
-               fb_size_log2, w / bs, h / bs, sums);
+  if (plane != AOM_PLANE_Y)
+    // Use a block size of MI_SIZE regardless of the subsampling.  This
+    // This is accurate enough to determine the best strength and
+    // we don't need to add SIMD optimisations for 4x4 blocks.
+    clpf_rdo(0, 0, rec, org, cm, bs, fb_size_log2, width >> bslog,
+             height >> bslog, sums, plane);
+  else
+    for (k = 0; k < num_fb_ver; k++) {
+      for (l = 0; l < num_fb_hor; l++) {
+        // Calculate the block size after frame border clipping
+        int h =
+            AOMMIN(height, (k + 1) << fb_size_log2) & ((1 << fb_size_log2) - 1);
+        int w =
+            AOMMIN(width, (l + 1) << fb_size_log2) & ((1 << fb_size_log2) - 1);
+        h += !h << fb_size_log2;
+        w += !w << fb_size_log2;
+        clpf_rdo(k << fb_size_log2, l << fb_size_log2, rec, org, cm, MI_SIZE,
+                 fb_size_log2, w >> bslog, h >> bslog, sums, plane);
+      }
     }
-  }
+
+  if (plane != AOM_PLANE_Y)  // Slightly favour unfiltered chroma
+    sums[0][0] -= sums[0][0] >> 7;
 
   for (j = 0; j < 4; j++) {
     static const double lambda_square[] = {
@@ -290,13 +335,13 @@ void av1_clpf_test_frame(const YV12_BUFFER_CONFIG *rec,
     // Estimate the bit costs and adjust the square errors
     double lambda =
         lambda_square[av1_get_qindex(&cm->seg, 0, cm->base_qindex) >> 2];
-    int i, cost = (int)((lambda * (sums[j][0] + 2 + 2 * (j > 0)) + 0.5));
+    int i, cost = (int)((lambda * (sums[j][0] + 6 + 2 * (j > 0)) + 0.5));
     for (i = 0; i < 4; i++)
       sums[j][i] = ((sums[j][i] + (i && j) * cost) << 4) + j * 4 + i;
   }
 
   best = (int64_t)1 << 62;
-  for (c = 0; c < 4; c++)
+  for (c = 0; c < (plane == AOM_PLANE_Y ? 4 : 1); c++)
     for (j = 0; j < 4; j++)
       if ((!c || j) && sums[c][j] < best) best = sums[c][j];
   best &= 15;

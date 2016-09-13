@@ -590,16 +590,16 @@ if (aom_config("CONFIG_CLPF") eq "yes") {
   if (aom_config("CONFIG_AOM_HIGHBITDEPTH") eq "yes") {
     add_proto qw/void aom_clpf_block_hbd/, "const uint16_t *src, uint16_t *dst, int sstride, int dstride, int x0, int y0, int sizex, int sizey, int width, int height, unsigned int strength";
     specialize qw/aom_clpf_block_hbd sse2 ssse3 sse4_1 neon/;
-    add_proto qw/void aom_clpf_detect_hbd/, "const uint16_t *rec, const uint16_t *org, int rstride, int ostride, int x0, int y0, int width, int height, int *sum0, int *sum1, unsigned int strength, int shift";
+    add_proto qw/void aom_clpf_detect_hbd/, "const uint16_t *rec, const uint16_t *org, int rstride, int ostride, int x0, int y0, int width, int height, int *sum0, int *sum1, unsigned int strength, int shift, int size";
     specialize qw/aom_clpf_detect_hbd sse2 ssse3 sse4_1 neon/;
-    add_proto qw/void aom_clpf_detect_multi_hbd/, "const uint16_t *rec, const uint16_t *org, int rstride, int ostride, int x0, int y0, int width, int height, int *sum, int shift";
+    add_proto qw/void aom_clpf_detect_multi_hbd/, "const uint16_t *rec, const uint16_t *org, int rstride, int ostride, int x0, int y0, int width, int height, int *sum, int shift, int size";
     specialize qw/aom_clpf_detect_multi_hbd sse2 ssse3 sse4_1 neon/;
   }
   add_proto qw/void aom_clpf_block/, "const uint8_t *src, uint8_t *dst, int sstride, int dstride, int x0, int y0, int sizex, int sizey, int width, int height, unsigned int strength";
   specialize qw/aom_clpf_block sse2 ssse3 sse4_1 neon/;
-  add_proto qw/void aom_clpf_detect/, "const uint8_t *rec, const uint8_t *org, int rstride, int ostride, int x0, int y0, int width, int height, int *sum0, int *sum1, unsigned int strength";
+  add_proto qw/void aom_clpf_detect/, "const uint8_t *rec, const uint8_t *org, int rstride, int ostride, int x0, int y0, int width, int height, int *sum0, int *sum1, unsigned int strength, int size";
   specialize qw/aom_clpf_detect sse2 ssse3 sse4_1 neon/;
-  add_proto qw/void aom_clpf_detect_multi/, "const uint8_t *rec, const uint8_t *org, int rstride, int ostride, int x0, int y0, int width, int height, int *sum";
+  add_proto qw/void aom_clpf_detect_multi/, "const uint8_t *rec, const uint8_t *org, int rstride, int ostride, int x0, int y0, int width, int height, int *sum, int size";
   specialize qw/aom_clpf_detect_multi sse2 ssse3 sse4_1 neon/;
 }
 

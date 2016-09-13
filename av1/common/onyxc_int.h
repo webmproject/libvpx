@@ -153,7 +153,9 @@ typedef struct AV1Common {
 #if CONFIG_CLPF
   int clpf_numblocks;
   int clpf_size;
-  int clpf_strength;
+  int clpf_strength_y;
+  int clpf_strength_u;
+  int clpf_strength_v;
   uint8_t *clpf_blocks;
 #endif
 
