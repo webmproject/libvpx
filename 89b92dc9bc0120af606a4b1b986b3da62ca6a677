@@ -189,6 +189,24 @@
     },
     {
       "key": {
+        "uuid": "6be6865b_90826235",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-14T01:55:08Z",
+      "side": 1,
+      "message": "ASSERT() will return from the function, best to set them to a known good state in the constructor",
+      "parentUuid": "4b3b825a_75d12ac1",
+      "revId": "89b92dc9bc0120af606a4b1b986b3da62ca6a677",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6ba046a6_c0cd8829",
         "filename": "test/predict_test.cc",
         "patchSetId": 6
