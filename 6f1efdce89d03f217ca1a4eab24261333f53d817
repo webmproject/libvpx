@@ -53,6 +53,23 @@
     },
     {
       "key": {
+        "uuid": "6be6865b_708d1e35",
+        "filename": "vp8/common/arm/neon/sixtappredict_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-14T02:09:07Z",
+      "side": 1,
+      "message": "I\u0027d prefer {}s in new code",
+      "revId": "6f1efdce89d03f217ca1a4eab24261333f53d817",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6be6865b_903a62d0",
         "filename": "vp8/common/arm/neon/sixtappredict_neon.c",
         "patchSetId": 6
