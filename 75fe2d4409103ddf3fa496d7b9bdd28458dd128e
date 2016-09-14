@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6be6865b_7b5e9f71",
+        "filename": "test/vp9_frame_parallel_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-14T02:18:23Z",
+      "side": 1,
+      "message": "you can just do:\nvpx_codec_dec_cfg_t cfg \u003d vpx_codec_dec_cfg_t();\n\nmost of the other tests do this",
+      "revId": "75fe2d4409103ddf3fa496d7b9bdd28458dd128e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
