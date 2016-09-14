@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6be6865b_1bd4b33a",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-14T03:50:03Z",
+      "side": 1,
+      "message": "this is one case were goto labels are acceptable to allow for early returns and cleanup in one place (goto finish_ransac after setting ret_val). also note the standard implementation of free() is supposed to support NULL; only some very old platforms we\u0027re not concerned with had buggy implementations.",
+      "revId": "2f4224c9bd63b04c8eb6b6c94b29675e4d92c88e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
