@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "eb243697_6837dbe7",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-15T19:04:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6be6865b_901d421f",
+      "range": {
+        "startLine": 44,
+        "startChar": 19,
+        "endLine": 44,
+        "endChar": 20
+      },
+      "revId": "341c512983b05c225e08be36c3db61250ad2c7bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6be6865b_3010b604",
         "filename": "test/predict_test.cc",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2016-09-14T02:11:35Z",
       "side": 1,
       "message": "you can join this and the line above",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 52
+      },
+      "revId": "341c512983b05c225e08be36c3db61250ad2c7bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_483a1fd3",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-15T19:04:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6be6865b_3010b604",
       "range": {
         "startLine": 45,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "eb243697_08402737",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-15T19:04:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6be6865b_f0448efe",
+      "range": {
+        "startLine": 102,
+        "startChar": 18,
+        "endLine": 102,
+        "endChar": 46
+      },
+      "revId": "341c512983b05c225e08be36c3db61250ad2c7bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6be6865b_3037169b",
         "filename": "test/predict_test.cc",
         "patchSetId": 7
@@ -82,6 +154,24 @@
       "writtenOn": "2016-09-14T02:11:35Z",
       "side": 1,
       "message": "const",
+      "revId": "341c512983b05c225e08be36c3db61250ad2c7bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_e82aeb85",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-15T19:04:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6be6865b_3037169b",
       "revId": "341c512983b05c225e08be36c3db61250ad2c7bf",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -105,6 +195,24 @@
     },
     {
       "key": {
+        "uuid": "eb243697_c8252fb7",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-15T19:04:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6be6865b_90342295",
+      "revId": "341c512983b05c225e08be36c3db61250ad2c7bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6be6865b_d0e86ae3",
         "filename": "test/predict_test.cc",
         "patchSetId": 7
@@ -122,6 +230,24 @@
     },
     {
       "key": {
+        "uuid": "eb243697_a830f3f5",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-15T19:04:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6be6865b_d0e86ae3",
+      "revId": "341c512983b05c225e08be36c3db61250ad2c7bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6be6865b_900702be",
         "filename": "test/predict_test.cc",
         "patchSetId": 7
@@ -133,6 +259,24 @@
       "writtenOn": "2016-09-14T02:11:35Z",
       "side": 1,
       "message": "EXPECT_EQ(expected, actual)",
+      "revId": "341c512983b05c225e08be36c3db61250ad2c7bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_882b378d",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-15T19:04:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6be6865b_900702be",
       "revId": "341c512983b05c225e08be36c3db61250ad2c7bf",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -162,6 +306,30 @@
     },
     {
       "key": {
+        "uuid": "eb243697_6820bba9",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-15T19:04:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6be6865b_d0cfca7b",
+      "range": {
+        "startLine": 125,
+        "startChar": 15,
+        "endLine": 125,
+        "endChar": 20
+      },
+      "revId": "341c512983b05c225e08be36c3db61250ad2c7bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6be6865b_50e45aff",
         "filename": "test/predict_test.cc",
         "patchSetId": 7
@@ -173,6 +341,24 @@
       "writtenOn": "2016-09-14T02:11:35Z",
       "side": 1,
       "message": "to cut the noise you could ASSERT_FALSE(HasFailure()) to catch the expects in the call",
+      "revId": "341c512983b05c225e08be36c3db61250ad2c7bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_4823ffb6",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-15T19:04:07Z",
+      "side": 1,
+      "message": "But doesn\u0027t it halt on any of the EXPECT_*() calls? What would HasFailure catch that is missed by those?",
+      "parentUuid": "6be6865b_50e45aff",
       "revId": "341c512983b05c225e08be36c3db61250ad2c7bf",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
