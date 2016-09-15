@@ -83,6 +83,7 @@ extern void vp8_blit_line(int x0, int x1, int y0, int y1, unsigned char *image,
                           const int pitch);
 /***********************************************************************************************************
  */
+#if CONFIG_POSTPROC
 static int q2mbl(int x) {
   if (x < 20) x = 20;
 
@@ -90,7 +91,6 @@ static int q2mbl(int x) {
   return x * x / 3;
 }
 
-#if CONFIG_POSTPROC
 static void vp8_de_mblock(YV12_BUFFER_CONFIG *post, int q) {
   vpx_mbpost_proc_across_ip(post->y_buffer, post->y_stride, post->y_height,
                             post->y_width, q2mbl(q));
@@ -154,7 +154,6 @@ void vp8_deblock(VP8_COMMON *cm, YV12_BUFFER_CONFIG *source,
     vp8_yv12_copy_frame(source, post);
   }
 }
-#endif
 
 void vp8_de_noise(VP8_COMMON *cm, YV12_BUFFER_CONFIG *source,
                   YV12_BUFFER_CONFIG *post, int q, int low_var_thresh, int flag,
@@ -189,6 +188,7 @@ void vp8_de_noise(VP8_COMMON *cm, YV12_BUFFER_CONFIG *source,
     }
   }
 }
+#endif  // CONFIG_POSTPROC
 
 /* Blend the macro block with a solid colored square.  Leave the
  * edges unblended to give distinction to macro blocks in areas
