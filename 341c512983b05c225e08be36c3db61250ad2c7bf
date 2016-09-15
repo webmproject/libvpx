@@ -365,6 +365,24 @@
     },
     {
       "key": {
+        "uuid": "eb243697_286fa3bd",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-15T19:13:08Z",
+      "side": 1,
+      "message": "nevermind, i think i get what you mean. it stops it after compare buffers fails, before doing check border",
+      "parentUuid": "eb243697_4823ffb6",
+      "revId": "341c512983b05c225e08be36c3db61250ad2c7bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6be6865b_9090a24d",
         "filename": "test/predict_test.cc",
         "patchSetId": 7
