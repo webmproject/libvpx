@@ -64,7 +64,7 @@
 #else
 #define ASSIGN_MINQ_TABLE(bit_depth, name) \
   do {                                     \
-    (void) bit_depth;                      \
+    (void)bit_depth;                       \
     name = name##_8;                       \
   } while (0)
 #endif

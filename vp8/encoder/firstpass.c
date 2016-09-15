@@ -53,8 +53,8 @@ extern const int vp8_gf_boost_qadjustment[QINDEX_RANGE];
 
 #define DOUBLE_DIVIDE_CHECK(X) ((X) < 0 ? (X)-.000001 : (X) + .000001)
 
-#define POW1 (double) cpi->oxcf.two_pass_vbrbias / 100.0
-#define POW2 (double) cpi->oxcf.two_pass_vbrbias / 100.0
+#define POW1 (double)cpi->oxcf.two_pass_vbrbias / 100.0
+#define POW2 (double)cpi->oxcf.two_pass_vbrbias / 100.0
 
 #define NEW_BOOST 1
 

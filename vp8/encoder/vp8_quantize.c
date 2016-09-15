@@ -297,13 +297,13 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x, int ok_to_skip) {
   if (xd->segmentation_enabled) {
     /* Abs Value */
     if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA) {
-      QIndex = xd->segment_feature_data[MB_LVL_ALT_Q][xd->mode_info_context
-                                                          ->mbmi.segment_id];
+      QIndex = xd->segment_feature_data[MB_LVL_ALT_Q]
+                                       [xd->mode_info_context->mbmi.segment_id];
       /* Delta Value */
     } else {
       QIndex = cpi->common.base_qindex +
-               xd->segment_feature_data[MB_LVL_ALT_Q][xd->mode_info_context
-                                                          ->mbmi.segment_id];
+               xd->segment_feature_data[MB_LVL_ALT_Q]
+                                       [xd->mode_info_context->mbmi.segment_id];
       /* Clamp to valid range */
       QIndex = (QIndex >= 0) ? ((QIndex <= MAXQ) ? QIndex : MAXQ) : 0;
     }

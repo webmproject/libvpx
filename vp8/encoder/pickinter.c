@@ -976,8 +976,8 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             xd->dst.y_stride, xd->predictor, 16);
         distortion2 = vpx_variance16x16(*(b->base_src), b->src_stride,
                                         x->e_mbd.predictor, 16, &sse);
-        rate2 += x->mbmode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context
-                                                         ->mbmi.mode];
+        rate2 += x->mbmode_cost[x->e_mbd.frame_type]
+                               [x->e_mbd.mode_info_context->mbmi.mode];
         this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
 
         if (this_rd < best_intra_rd) {

@@ -1981,8 +1981,7 @@ int main(int argc, const char **argv_) {
     if (global.pass && global.passes == 2)
       FOREACH_STREAM({
         if (!stream->config.stats_fn)
-          die(
-              "Stream %d: Must specify --fpf when --pass=%d"
+          die("Stream %d: Must specify --fpf when --pass=%d"
               " and --passes=2\n",
               stream->index, global.pass);
       });

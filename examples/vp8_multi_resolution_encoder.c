@@ -340,8 +340,7 @@ int main(int argc, char **argv) {
   unsigned int num_temporal_layers[NUM_ENCODERS] = { 3, 3, 3 };
 
   if (argc != (7 + 3 * NUM_ENCODERS))
-    die(
-        "Usage: %s <width> <height> <frame_rate>  <infile> <outfile(s)> "
+    die("Usage: %s <width> <height> <frame_rate>  <infile> <outfile(s)> "
         "<rate_encoder(s)> <temporal_layer(s)> <key_frame_insert> <output "
         "psnr?> \n",
         argv[0]);

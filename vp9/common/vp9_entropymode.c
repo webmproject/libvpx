@@ -179,29 +179,29 @@ static const vpx_prob default_if_uv_probs[INTRA_MODES][INTRA_MODES - 1] = {
   { 101, 21, 107, 181, 192, 103, 19, 67, 125 }  // y = tm
 };
 
-const vpx_prob vp9_kf_partition_probs[PARTITION_CONTEXTS][PARTITION_TYPES - 1] =
-    {
-      // 8x8 -> 4x4
-      { 158, 97, 94 },  // a/l both not split
-      { 93, 24, 99 },   // a split, l not split
-      { 85, 119, 44 },  // l split, a not split
-      { 62, 59, 67 },   // a/l both split
-      // 16x16 -> 8x8
-      { 149, 53, 53 },  // a/l both not split
-      { 94, 20, 48 },   // a split, l not split
-      { 83, 53, 24 },   // l split, a not split
-      { 52, 18, 18 },   // a/l both split
-      // 32x32 -> 16x16
-      { 150, 40, 39 },  // a/l both not split
-      { 78, 12, 26 },   // a split, l not split
-      { 67, 33, 11 },   // l split, a not split
-      { 24, 7, 5 },     // a/l both split
-      // 64x64 -> 32x32
-      { 174, 35, 49 },  // a/l both not split
-      { 68, 11, 27 },   // a split, l not split
-      { 57, 15, 9 },    // l split, a not split
-      { 12, 3, 3 },     // a/l both split
-    };
+const vpx_prob vp9_kf_partition_probs[PARTITION_CONTEXTS]
+                                     [PARTITION_TYPES - 1] = {
+                                       // 8x8 -> 4x4
+                                       { 158, 97, 94 },  // a/l both not split
+                                       { 93, 24, 99 },   // a split, l not split
+                                       { 85, 119, 44 },  // l split, a not split
+                                       { 62, 59, 67 },   // a/l both split
+                                       // 16x16 -> 8x8
+                                       { 149, 53, 53 },  // a/l both not split
+                                       { 94, 20, 48 },   // a split, l not split
+                                       { 83, 53, 24 },   // l split, a not split
+                                       { 52, 18, 18 },   // a/l both split
+                                       // 32x32 -> 16x16
+                                       { 150, 40, 39 },  // a/l both not split
+                                       { 78, 12, 26 },   // a split, l not split
+                                       { 67, 33, 11 },   // l split, a not split
+                                       { 24, 7, 5 },     // a/l both split
+                                       // 64x64 -> 32x32
+                                       { 174, 35, 49 },  // a/l both not split
+                                       { 68, 11, 27 },   // a split, l not split
+                                       { 57, 15, 9 },    // l split, a not split
+                                       { 12, 3, 3 },     // a/l both split
+                                     };
 
 static const vpx_prob
     default_partition_probs[PARTITION_CONTEXTS][PARTITION_TYPES - 1] = {
@@ -309,10 +309,13 @@ void tx_counts_to_branch_counts_8x8(const unsigned int *tx_count_8x8p,
 
 static const vpx_prob default_skip_probs[SKIP_CONTEXTS] = { 192, 128, 64 };
 
-static const vpx_prob default_switchable_interp_prob
-    [SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS - 1] = {
-      { 235, 162 }, { 36, 255 }, { 34, 3 }, { 149, 144 },
-    };
+static const vpx_prob default_switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
+                                                    [SWITCHABLE_FILTERS - 1] = {
+                                                      { 235, 162 },
+                                                      { 36, 255 },
+                                                      { 34, 3 },
+                                                      { 149, 144 },
+                                                    };
 
 static void init_mode_probs(FRAME_CONTEXT *fc) {
   vp9_copy(fc->uv_mode_prob, default_if_uv_probs);

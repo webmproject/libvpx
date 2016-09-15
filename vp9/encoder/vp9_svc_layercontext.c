@@ -377,9 +377,10 @@ void vp9_inc_frame_in_layer(VP9_COMP *const cpi) {
 
 int vp9_is_upper_layer_key_frame(const VP9_COMP *const cpi) {
   return is_two_pass_svc(cpi) && cpi->svc.spatial_layer_id > 0 &&
-         cpi->svc.layer_context[cpi->svc.spatial_layer_id *
-                                    cpi->svc.number_temporal_layers +
-                                cpi->svc.temporal_layer_id]
+         cpi->svc
+             .layer_context[cpi->svc.spatial_layer_id *
+                                cpi->svc.number_temporal_layers +
+                            cpi->svc.temporal_layer_id]
              .is_key_frame;
 }
 
@@ -409,8 +410,9 @@ static void set_flags_and_fb_idx_for_temporal_mode3(VP9_COMP *const cpi) {
   int spatial_id, temporal_id;
   spatial_id = cpi->svc.spatial_layer_id = cpi->svc.spatial_layer_to_encode;
   frame_num_within_temporal_struct =
-      cpi->svc.layer_context[cpi->svc.spatial_layer_id *
-                             cpi->svc.number_temporal_layers]
+      cpi->svc
+          .layer_context[cpi->svc.spatial_layer_id *
+                         cpi->svc.number_temporal_layers]
           .current_video_frame_in_layer %
       4;
   temporal_id = cpi->svc.temporal_layer_id =
@@ -512,8 +514,9 @@ static void set_flags_and_fb_idx_for_temporal_mode2(VP9_COMP *const cpi) {
   int spatial_id, temporal_id;
   spatial_id = cpi->svc.spatial_layer_id = cpi->svc.spatial_layer_to_encode;
   temporal_id = cpi->svc.temporal_layer_id =
-      cpi->svc.layer_context[cpi->svc.spatial_layer_id *
-                             cpi->svc.number_temporal_layers]
+      cpi->svc
+          .layer_context[cpi->svc.spatial_layer_id *
+                         cpi->svc.number_temporal_layers]
           .current_video_frame_in_layer &
       1;
   cpi->ext_refresh_last_frame = cpi->ext_refresh_golden_frame =
