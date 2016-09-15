@@ -1,0 +1,107 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb243697_59a4b355",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-15T22:55:33Z",
+      "side": 1,
+      "message": "this will give you an int to bool conversion warning under msvc. use EXPECT_EQ(0, ...)",
+      "revId": "dd2ee945d36131bf18157cdd6e4d7a46a3f2aef8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_f9671f1b",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-15T22:55:33Z",
+      "side": 1,
+      "message": "no change necessary, but note \u0027\u0026 1\u0027 also works",
+      "range": {
+        "startLine": 107,
+        "startChar": 65,
+        "endLine": 107,
+        "endChar": 68
+      },
+      "revId": "dd2ee945d36131bf18157cdd6e4d7a46a3f2aef8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_f939dff8",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-15T22:55:33Z",
+      "side": 1,
+      "message": "you need to static_cast\u003cint\u003e() since the return will be a ptrdiff_t",
+      "range": {
+        "startLine": 136,
+        "startChar": 21,
+        "endLine": 136,
+        "endChar": 35
+      },
+      "revId": "dd2ee945d36131bf18157cdd6e4d7a46a3f2aef8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_993f0be7",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-15T22:55:33Z",
+      "side": 1,
+      "message": "I suppose these could return HasFailure() but as is will be fine",
+      "revId": "dd2ee945d36131bf18157cdd6e4d7a46a3f2aef8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_594e738c",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-15T22:55:33Z",
+      "side": 1,
+      "message": "could be preincrement to match the others, but there\u0027s no preference for scalars now...\n\nhttps://google.github.io/styleguide/cppguide.html#Preincrement_and_Predecrement",
+      "range": {
+        "startLine": 178,
+        "startChar": 33,
+        "endLine": 178,
+        "endChar": 36
+      },
+      "revId": "dd2ee945d36131bf18157cdd6e4d7a46a3f2aef8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
