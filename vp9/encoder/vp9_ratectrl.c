@@ -45,8 +45,6 @@
 
 #define FRAME_OVERHEAD_BITS 200
 
-#define LIMIT_QP_ONEPASS_VBR_LAG 0
-
 #if CONFIG_VP9_HIGHBITDEPTH
 #define ASSIGN_MINQ_TABLE(bit_depth, name)                   \
   do {                                                       \
@@ -944,14 +942,6 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
       clamp(active_best_quality, rc->best_quality, rc->worst_quality);
   active_worst_quality =
       clamp(active_worst_quality, active_best_quality, rc->worst_quality);
-
-#if LIMIT_QP_ONEPASS_VBR_LAG
-  if (oxcf->lag_in_frames > 0 && oxcf->rc_mode == VPX_VBR) {
-    if (rc->force_qpmin > 0 && active_best_quality < rc->force_qpmin)
-      active_best_quality =
-          clamp(active_best_quality, rc->force_qpmin, rc->worst_quality);
-  }
-#endif
 
   *top_index = active_worst_quality;
   *bottom_index = active_best_quality;
@@ -2145,13 +2135,6 @@ void adjust_gf_boost_lag_one_pass_vbr(VP9_COMP *cpi, uint64_t avg_sad_current) {
     }
     target = calc_pframe_target_size_one_pass_vbr(cpi);
     vp9_rc_set_frame_target(cpi, target);
-#if LIMIT_QP_ONEPASS_VBR_LAG
-    if (rc->avg_frame_low_motion > 85 &&
-        avg_source_sad_lag < (sad_thresh1 >> 1))
-      rc->force_qpmin = 48;
-    else
-      rc->force_qpmin = 0;
-#endif
   }
   rc->prev_avg_source_sad_lag = avg_source_sad_lag;
 }
