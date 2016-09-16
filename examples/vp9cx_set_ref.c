@@ -53,6 +53,7 @@
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_decoder.h"
 #include "vpx/vpx_encoder.h"
+#include "vp9/common/vp9_common.h"
 
 #include "./tools_common.h"
 #include "./video_writer.h"
@@ -277,12 +278,12 @@ static int encode_frame(vpx_codec_ctx_t *ecodec, vpx_image_t *img,
 int main(int argc, char **argv) {
   FILE *infile = NULL;
   // Encoder
-  vpx_codec_ctx_t ecodec = { 0 };
-  vpx_codec_enc_cfg_t cfg = { 0 };
+  vpx_codec_ctx_t ecodec;
+  vpx_codec_enc_cfg_t cfg;
   unsigned int frame_in = 0;
   vpx_image_t raw;
   vpx_codec_err_t res;
-  VpxVideoInfo info = { 0 };
+  VpxVideoInfo info;
   VpxVideoWriter *writer = NULL;
   const VpxInterface *encoder = NULL;
 
@@ -304,6 +305,11 @@ int main(int argc, char **argv) {
   const char *infile_arg = NULL;
   const char *outfile_arg = NULL;
   unsigned int limit = 0;
+
+  vp9_zero(ecodec);
+  vp9_zero(cfg);
+  vp9_zero(info);
+
   exec_name = argv[0];
 
   if (argc < 6) die("Invalid number of arguments");

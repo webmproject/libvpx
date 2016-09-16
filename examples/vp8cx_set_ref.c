@@ -51,6 +51,7 @@
 
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
+#include "vp8/common/common.h"
 
 #include "../tools_common.h"
 #include "../video_writer.h"
@@ -93,17 +94,21 @@ static int encode_frame(vpx_codec_ctx_t *codec, vpx_image_t *img,
 
 int main(int argc, char **argv) {
   FILE *infile = NULL;
-  vpx_codec_ctx_t codec = { 0 };
-  vpx_codec_enc_cfg_t cfg = { 0 };
+  vpx_codec_ctx_t codec;
+  vpx_codec_enc_cfg_t cfg;
   int frame_count = 0;
   vpx_image_t raw;
   vpx_codec_err_t res;
-  VpxVideoInfo info = { 0 };
+  VpxVideoInfo info;
   VpxVideoWriter *writer = NULL;
   const VpxInterface *encoder = NULL;
   int update_frame_num = 0;
   const int fps = 30;       // TODO(dkovalev) add command line argument
   const int bitrate = 200;  // kbit/s TODO(dkovalev) add command line argument
+
+  vp8_zero(codec);
+  vp8_zero(cfg);
+  vp8_zero(info);
 
   exec_name = argv[0];
 

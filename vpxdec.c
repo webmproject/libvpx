@@ -538,7 +538,7 @@ static int main_loop(int argc, const char **argv_) {
   unsigned int output_bit_depth = 0;
 #endif
 #if CONFIG_VP8_DECODER
-  vp8_postproc_cfg_t vp8_pp_cfg = { 0 };
+  vp8_postproc_cfg_t vp8_pp_cfg = { 0, 0, 0 };
   int vp8_dbg_color_ref_frame = 0;
   int vp8_dbg_color_mb_modes = 0;
   int vp8_dbg_color_b_modes = 0;
