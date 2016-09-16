@@ -42,8 +42,8 @@ typedef struct frame_contexts {
   vp8_prob ymode_prob[VP8_YMODES - 1]; /* interframe intra mode probs */
   vp8_prob uv_mode_prob[VP8_UV_MODES - 1];
   vp8_prob sub_mv_ref_prob[VP8_SUBMVREFS - 1];
-  vp8_prob
-      coef_probs[BLOCK_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
+  vp8_prob coef_probs[BLOCK_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
+                     [ENTROPY_NODES];
   MV_CONTEXT mvc[2];
 } FRAME_CONTEXT;
 

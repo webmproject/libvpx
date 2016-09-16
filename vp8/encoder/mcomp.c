@@ -206,17 +206,19 @@ void vp8_init3smotion_compensation(MACROBLOCK *x, int stride) {
 /* returns distortion + motion vector cost */
 #define ERR(r, c) (MVC(r, c) + DIST(r, c))
 /* checks if (r,c) has better score than previous best */
-#define CHECK_BETTER(v, r, c)                    \
-  IFMVCV(r, c, {                                 \
-    thismse = DIST(r, c);                        \
-    if ((v = (MVC(r, c) + thismse)) < besterr) { \
-      besterr = v;                               \
-      br = r;                                    \
-      bc = c;                                    \
-      *distortion = thismse;                     \
-      *sse1 = sse;                               \
-    }                                            \
-  }, v = UINT_MAX;)
+#define CHECK_BETTER(v, r, c)                           \
+  IFMVCV(r, c,                                          \
+         {                                              \
+           thismse = DIST(r, c);                        \
+           if ((v = (MVC(r, c) + thismse)) < besterr) { \
+             besterr = v;                               \
+             br = r;                                    \
+             bc = c;                                    \
+             *distortion = thismse;                     \
+             *sse1 = sse;                               \
+           }                                            \
+         },                                             \
+         v = UINT_MAX;)
 
 int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                                              int_mv *bestmv, int_mv *ref_mv,

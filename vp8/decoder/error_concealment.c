@@ -435,8 +435,8 @@ static void interpolate_mvs(MACROBLOCKD *mb, EC_BLOCK *neighbors,
         /* Calculate the weighted sum of neighboring MVs referring
          * to the dominant frame type.
          */
-        const int w = weights_q7[abs(row - neigh_pos[i].row)][abs(
-            col - neigh_pos[i].col)];
+        const int w = weights_q7[abs(row - neigh_pos[i].row)]
+                                [abs(col - neigh_pos[i].col)];
         if (neighbors[i].ref_frame != dom_ref_frame) continue;
         w_sum += w;
         /* Q7 * Q3 = Q10 */

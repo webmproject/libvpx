@@ -109,10 +109,10 @@ DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat6_prob_high12[18]);
 
 // #define ENTROPY_STATS
 
-typedef unsigned int
-    vp9_coeff_count[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS][ENTROPY_TOKENS];
-typedef unsigned int
-    vp9_coeff_stats[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS][ENTROPY_NODES][2];
+typedef unsigned int vp9_coeff_count[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS]
+                                    [ENTROPY_TOKENS];
+typedef unsigned int vp9_coeff_stats[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS]
+                                    [ENTROPY_NODES][2];
 
 #define SUBEXP_PARAM 4   /* Subexponential code parameter */
 #define MODULUS_PARAM 13 /* Modulus parameter */
@@ -151,8 +151,9 @@ extern const vpx_prob vp9_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES];
 typedef vpx_prob vp9_coeff_probs_model[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS]
                                       [UNCONSTRAINED_NODES];
 
-typedef unsigned int vp9_coeff_count_model
-    [REF_TYPES][COEF_BANDS][COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1];
+typedef unsigned int vp9_coeff_count_model[REF_TYPES][COEF_BANDS]
+                                          [COEFF_CONTEXTS]
+                                          [UNCONSTRAINED_NODES + 1];
 
 void vp9_model_to_full_probs(const vpx_prob *model, vpx_prob *full);
 

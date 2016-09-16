@@ -148,12 +148,10 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
       if (next < default_eob) {
         band = band_translate[i + 1];
         pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache);
-        rate0 +=
-            mb->token_costs[tx_size][type][ref][band][0][pt][tokens[next][0]
-                                                                 .token];
-        rate1 +=
-            mb->token_costs[tx_size][type][ref][band][0][pt][tokens[next][1]
-                                                                 .token];
+        rate0 += mb->token_costs[tx_size][type][ref][band][0][pt]
+                                [tokens[next][0].token];
+        rate1 += mb->token_costs[tx_size][type][ref][band][0][pt]
+                                [tokens[next][1].token];
       }
       UPDATE_RD_COST();
       /* And pick the best. */
@@ -210,15 +208,13 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
         band = band_translate[i + 1];
         if (t0 != EOB_TOKEN) {
           pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache);
-          rate0 +=
-              mb->token_costs[tx_size][type][ref][band][!x][pt][tokens[next][0]
-                                                                    .token];
+          rate0 += mb->token_costs[tx_size][type][ref][band][!x][pt]
+                                  [tokens[next][0].token];
         }
         if (t1 != EOB_TOKEN) {
           pt = trellis_get_coeff_context(scan, nb, i, t1, token_cache);
-          rate1 +=
-              mb->token_costs[tx_size][type][ref][band][!x][pt][tokens[next][1]
-                                                                    .token];
+          rate1 += mb->token_costs[tx_size][type][ref][band][!x][pt]
+                                  [tokens[next][1].token];
         }
       }
 

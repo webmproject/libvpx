@@ -1451,18 +1451,18 @@ static void update_stats(VP9_COMMON *cm, ThreadData *td) {
       if (inter_block) {
         const MV_REFERENCE_FRAME ref0 = mi->ref_frame[0];
         if (cm->reference_mode == REFERENCE_MODE_SELECT)
-          counts->comp_inter[vp9_get_reference_mode_context(
-              cm, xd)][has_second_ref(mi)]++;
+          counts->comp_inter[vp9_get_reference_mode_context(cm, xd)]
+                            [has_second_ref(mi)]++;
 
         if (has_second_ref(mi)) {
-          counts->comp_ref[vp9_get_pred_context_comp_ref_p(
-              cm, xd)][ref0 == GOLDEN_FRAME]++;
+          counts->comp_ref[vp9_get_pred_context_comp_ref_p(cm, xd)]
+                          [ref0 == GOLDEN_FRAME]++;
         } else {
-          counts->single_ref[vp9_get_pred_context_single_ref_p1(
-              xd)][0][ref0 != LAST_FRAME]++;
+          counts->single_ref[vp9_get_pred_context_single_ref_p1(xd)][0]
+                            [ref0 != LAST_FRAME]++;
           if (ref0 != LAST_FRAME)
-            counts->single_ref[vp9_get_pred_context_single_ref_p2(
-                xd)][1][ref0 != GOLDEN_FRAME]++;
+            counts->single_ref[vp9_get_pred_context_single_ref_p2(xd)][1]
+                              [ref0 != GOLDEN_FRAME]++;
         }
       }
     }

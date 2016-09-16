@@ -530,14 +530,12 @@ int main(int argc, char **argv) {
   // Check usage and arguments.
   if (argc < min_args) {
 #if CONFIG_VP9_HIGHBITDEPTH
-    die(
-        "Usage: %s <infile> <outfile> <codec_type(vp8/vp9)> <width> <height> "
+    die("Usage: %s <infile> <outfile> <codec_type(vp8/vp9)> <width> <height> "
         "<rate_num> <rate_den> <speed> <frame_drop_threshold> <mode> "
         "<Rate_0> ... <Rate_nlayers-1> <bit-depth> \n",
         argv[0]);
 #else
-    die(
-        "Usage: %s <infile> <outfile> <codec_type(vp8/vp9)> <width> <height> "
+    die("Usage: %s <infile> <outfile> <codec_type(vp8/vp9)> <width> <height> "
         "<rate_num> <rate_den> <speed> <frame_drop_threshold> <mode> "
         "<Rate_0> ... <Rate_nlayers-1> \n",
         argv[0]);

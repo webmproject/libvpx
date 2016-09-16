@@ -975,9 +975,10 @@ static vpx_codec_frame_flags_t get_frame_pkt_flags(const VP9_COMP *cpi,
 
   if (lib_flags & FRAMEFLAGS_KEY ||
       (cpi->use_svc &&
-       cpi->svc.layer_context[cpi->svc.spatial_layer_id *
-                                  cpi->svc.number_temporal_layers +
-                              cpi->svc.temporal_layer_id]
+       cpi->svc
+           .layer_context[cpi->svc.spatial_layer_id *
+                              cpi->svc.number_temporal_layers +
+                          cpi->svc.temporal_layer_id]
            .is_key_frame))
     flags |= VPX_FRAME_IS_KEY;
 
@@ -1102,8 +1103,9 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
 
 #if CONFIG_SPATIAL_SVC
         if (cpi->use_svc)
-          cpi->svc.layer_context[cpi->svc.spatial_layer_id *
-                                 cpi->svc.number_temporal_layers]
+          cpi->svc
+              .layer_context[cpi->svc.spatial_layer_id *
+                             cpi->svc.number_temporal_layers]
               .layer_size += size;
 #endif
 

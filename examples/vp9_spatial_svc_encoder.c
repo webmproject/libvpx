@@ -497,8 +497,7 @@ static void printout_rate_control_summary(struct RateControlStats *rc,
          rc->avg_st_encoding_bitrate, sqrt(rc->variance_st_encoding_bitrate),
          perc_fluctuation);
   if (frame_cnt != tot_num_frames)
-    die(
-        "Error: Number of input frames not equal to output encoded frames != "
+    die("Error: Number of input frames not equal to output encoded frames != "
         "%d tot_num_frames = %d\n",
         frame_cnt, tot_num_frames);
 }
