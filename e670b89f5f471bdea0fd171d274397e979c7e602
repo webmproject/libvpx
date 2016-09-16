@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "eb243697_bf5d874b",
+        "filename": "libs.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-16T04:10:47Z",
+      "side": 1,
+      "message": "yeah i just started encountering a lot more issues than i could deal with before submitting, so i started looking for a shortcut that would get *something* in that could be iterated on. now i need to find where to add CFLAGS to the tests because the line below isn\u0027t working. trying not to spread them throughout the mk files, but it is what it is.\n\nbut yeah, definitely the plan is to remove them or significantly tighten the scope if there are some problematic files, to make sure nothing new creeps in.",
+      "parentUuid": "eb243697_34937e5b",
+      "revId": "e670b89f5f471bdea0fd171d274397e979c7e602",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eb243697_b4a68ec1",
         "filename": "libs.mk",
         "patchSetId": 4
@@ -48,6 +66,30 @@
       "writtenOn": "2016-09-16T02:11:49Z",
       "side": 1,
       "message": "be nice to deal with that",
+      "range": {
+        "startLine": 123,
+        "startChar": 75,
+        "endLine": 123,
+        "endChar": 89
+      },
+      "revId": "e670b89f5f471bdea0fd171d274397e979c7e602",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_df62430e",
+        "filename": "libs.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-16T04:10:47Z",
+      "side": 1,
+      "message": "i had trouble reproing locally, and there actually is a bug that mentions it, but it hasn\u0027t gotten any attention.",
+      "parentUuid": "eb243697_b4a68ec1",
       "range": {
         "startLine": 123,
         "startChar": 75,
