@@ -208,6 +208,24 @@
     },
     {
       "key": {
+        "uuid": "eb243697_dfafa335",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-16T04:00:56Z",
+      "side": 1,
+      "message": "so the functions would be bool and \u0027return HasFailure()\u0027 at the end? or i guess maybe ! HasFailure() and then the check would be ASSERT_TRUE",
+      "parentUuid": "eb243697_3fb8b7c1",
+      "revId": "dd2ee945d36131bf18157cdd6e4d7a46a3f2aef8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eb243697_594e738c",
         "filename": "test/predict_test.cc",
         "patchSetId": 9
