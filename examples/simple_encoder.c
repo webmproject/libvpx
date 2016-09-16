@@ -150,7 +150,7 @@ int main(int argc, char **argv) {
   int frame_count = 0;
   vpx_image_t raw;
   vpx_codec_err_t res;
-  VpxVideoInfo info = { 0 };
+  VpxVideoInfo info = { 0, 0, 0, { 0, 0 } };
   VpxVideoWriter *writer = NULL;
   const VpxInterface *encoder = NULL;
   const int fps = 30;
