@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb243697_5f2f33fb",
+        "filename": "vp8/common/arm/neon/bilinearpredict_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-16T03:14:23Z",
+      "side": 1,
+      "message": "this and the load could be made common between the filters",
+      "revId": "be36906ce785a66f9cf89c73ebc59e5c4738b334",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_9ff7eb75",
+        "filename": "vp8/common/arm/neon/bilinearpredict_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-16T03:14:23Z",
+      "side": 1,
+      "message": "you could invert this and do some of the initial operations along with the declaration",
+      "revId": "be36906ce785a66f9cf89c73ebc59e5c4738b334",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
