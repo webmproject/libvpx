@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "eb243697_5f8d73dd",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-16T04:00:56Z",
+      "side": 1,
+      "message": "whoops left over from the printfs",
+      "parentUuid": "eb243697_5fc5732c",
+      "range": {
+        "startLine": 109,
+        "startChar": 67,
+        "endLine": 109,
+        "endChar": 69
+      },
+      "revId": "0709a76e420f52832b597c9cb601b15e4a9c1ecc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eb243697_7fc22f27",
         "filename": "test/predict_test.cc",
         "patchSetId": 10
@@ -36,6 +60,30 @@
       "writtenOn": "2016-09-16T02:41:45Z",
       "side": 1,
       "message": "wonder if these could go, similar to how we stripped mmx from vp9/vpx_dsp",
+      "range": {
+        "startLine": 340,
+        "startChar": 4,
+        "endLine": 340,
+        "endChar": 12
+      },
+      "revId": "0709a76e420f52832b597c9cb601b15e4a9c1ecc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_bfbae774",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-16T04:00:56Z",
+      "side": 1,
+      "message": "for sure. i don\u0027t think we\u0027ll gain anything size-wise on chrome though. they should be stripped pretty well for 64bit builds already.",
+      "parentUuid": "eb243697_7fc22f27",
       "range": {
         "startLine": 340,
         "startChar": 4,
