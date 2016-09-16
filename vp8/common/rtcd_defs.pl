@@ -163,15 +163,21 @@ if (vpx_config("CONFIG_POSTPROC") eq "yes") {
 #
 add_proto qw/void vp8_sixtap_predict16x16/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
 specialize qw/vp8_sixtap_predict16x16 mmx sse2 ssse3 neon dspr2 msa/;
+$vp8_sixtap_predict16x16_dspr2=vp8_sixtap_predict16x16_dspr2;
 
 add_proto qw/void vp8_sixtap_predict8x8/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
 specialize qw/vp8_sixtap_predict8x8 mmx sse2 ssse3 neon dspr2 msa/;
+$vp8_sixtap_predict8x8_dspr2=vp8_sixtap_predict8x8_dspr2;
 
 add_proto qw/void vp8_sixtap_predict8x4/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
 specialize qw/vp8_sixtap_predict8x4 mmx sse2 ssse3 neon dspr2 msa/;
+$vp8_sixtap_predict8x4_dspr2=vp8_sixtap_predict8x4_dspr2;
 
+# TODO(johannkoenig): Add neon implementation
+# https://bugs.chromium.org/p/webm/issues/detail?id=1273
 add_proto qw/void vp8_sixtap_predict4x4/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
-specialize qw/vp8_sixtap_predict4x4 mmx ssse3 neon dspr2 msa/;
+specialize qw/vp8_sixtap_predict4x4 mmx ssse3 dspr2 msa/;
+$vp8_sixtap_predict4x4_dspr2=vp8_sixtap_predict4x4_dspr2;
 
 add_proto qw/void vp8_bilinear_predict16x16/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
 specialize qw/vp8_bilinear_predict16x16 mmx sse2 ssse3 neon msa/;
