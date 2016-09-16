@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb243697_2796e94a",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-16T23:08:45Z",
+      "side": 1,
+      "message": "note Yaowu updated to the AOM copyright, these might have been missed or regressed. that can be done in a followup",
+      "revId": "ca9255803bfa57aeedf558e0dfbc8b10d08a2a6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_c7d4350f",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-16T23:08:45Z",
+      "side": 1,
+      "message": "when you fixup the includes it would be best to include aom_config.h directly for INLINE",
+      "revId": "ca9255803bfa57aeedf558e0dfbc8b10d08a2a6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_07cf2d7b",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-16T23:08:45Z",
+      "side": 1,
+      "message": "these aren\u0027t macros so could be lowercase",
+      "range": {
+        "startLine": 31,
+        "startChar": 21,
+        "endLine": 31,
+        "endChar": 25
+      },
+      "revId": "ca9255803bfa57aeedf558e0dfbc8b10d08a2a6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
