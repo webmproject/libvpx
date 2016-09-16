@@ -16,6 +16,10 @@
 
 #include "./aom_config.h"
 #include "aom_dsp/prob.h"
+// Include bitwriter.h in the CONFIG_ANS to keep ANS building while
+// porting from VP10 style entropy coder abstraction to the aom/master style
+// entropy coder abstractions.
+#include "aom_dsp/bitwriter.h"
 
 #if CONFIG_ANS
 typedef struct BufAnsCoder BufAnsCoder;
@@ -25,7 +29,6 @@ typedef struct BufAnsCoder BufAnsCoder;
 #define aom_write_bit buf_uabs_write_bit
 #define aom_write_literal buf_uabs_write_literal
 #else
-#include "aom_dsp/bitwriter.h"
 #define aom_writer aom_writer
 #define aom_write aom_write
 #define aom_write_bit aom_write_bit
