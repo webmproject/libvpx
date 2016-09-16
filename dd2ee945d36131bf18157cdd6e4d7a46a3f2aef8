@@ -226,6 +226,24 @@
     },
     {
       "key": {
+        "uuid": "eb243697_1faa1b26",
+        "filename": "test/predict_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-16T04:03:06Z",
+      "side": 1,
+      "message": "\u003e so the functions would be bool and \u0027return HasFailure()\u0027 at the\n \u003e end? or i guess maybe ! HasFailure() and then the check would be\n \u003e ASSERT_TRUE\n\nright. positive returns and checks are generally better for readability, i.e., return true on success.",
+      "parentUuid": "eb243697_dfafa335",
+      "revId": "dd2ee945d36131bf18157cdd6e4d7a46a3f2aef8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eb243697_594e738c",
         "filename": "test/predict_test.cc",
         "patchSetId": 9
