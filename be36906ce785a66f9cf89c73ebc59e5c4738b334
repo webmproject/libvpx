@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "eb243697_1f83fbb5",
+        "filename": "vp8/common/arm/neon/bilinearpredict_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-16T04:16:36Z",
+      "side": 1,
+      "message": "for sure. since this appears to have a surprising effect on speed and there were lots of weird things going on, i was considering looking at the larger transforms.\n\nif that ends up happening, i can make a predict header and share probably a bunch of stuff.",
+      "parentUuid": "eb243697_5f2f33fb",
+      "revId": "be36906ce785a66f9cf89c73ebc59e5c4738b334",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eb243697_9ff7eb75",
         "filename": "vp8/common/arm/neon/bilinearpredict_neon.c",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2016-09-16T03:14:23Z",
       "side": 1,
       "message": "you could invert this and do some of the initial operations along with the declaration",
+      "revId": "be36906ce785a66f9cf89c73ebc59e5c4738b334",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_3f80b7a6",
+        "filename": "vp8/common/arm/neon/bilinearpredict_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-16T04:16:36Z",
+      "side": 1,
+      "message": "i think i know what you mean",
+      "parentUuid": "eb243697_9ff7eb75",
       "revId": "be36906ce785a66f9cf89c73ebc59e5c4738b334",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
