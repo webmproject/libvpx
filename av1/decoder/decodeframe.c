@@ -1920,101 +1920,96 @@ static void decode_restoration(AV1_COMMON *cm, aom_reader *rb) {
     rsi->restoration_type = (RestorationType *)aom_realloc(
         rsi->restoration_type, sizeof(*rsi->restoration_type) * ntiles);
     if (rsi->frame_restoration_type == RESTORE_SWITCHABLE) {
-      rsi->bilateral_level = (int *)aom_realloc(
-          rsi->bilateral_level,
-          sizeof(*rsi->bilateral_level) * ntiles * BILATERAL_SUBTILES);
-      assert(rsi->bilateral_level != NULL);
-      rsi->wiener_level = (int *)aom_realloc(
-          rsi->wiener_level, sizeof(*rsi->wiener_level) * ntiles);
-      assert(rsi->wiener_level != NULL);
-      rsi->vfilter = (int(*)[RESTORATION_WIN])aom_realloc(
-          rsi->vfilter, sizeof(*rsi->vfilter) * ntiles);
-      assert(rsi->vfilter != NULL);
-      rsi->hfilter = (int(*)[RESTORATION_WIN])aom_realloc(
-          rsi->hfilter, sizeof(*rsi->hfilter) * ntiles);
-      assert(rsi->hfilter != NULL);
+      rsi->bilateral_info = (BilateralInfo *)aom_realloc(
+          rsi->bilateral_info, sizeof(*rsi->bilateral_info) * ntiles);
+      assert(rsi->bilateral_info != NULL);
+      rsi->wiener_info = (WienerInfo *)aom_realloc(
+          rsi->wiener_info, sizeof(*rsi->wiener_info) * ntiles);
+      assert(rsi->wiener_info != NULL);
       for (i = 0; i < ntiles; ++i) {
         rsi->restoration_type[i] = aom_read_tree(
             rb, av1_switchable_restore_tree, cm->fc->switchable_restore_prob);
         if (rsi->restoration_type[i] == RESTORE_WIENER) {
-          rsi->wiener_level[i] = 1;
-          rsi->vfilter[i][0] = aom_read_literal(rb, WIENER_FILT_TAP0_BITS) +
-                               WIENER_FILT_TAP0_MINV;
-          rsi->vfilter[i][1] = aom_read_literal(rb, WIENER_FILT_TAP1_BITS) +
-                               WIENER_FILT_TAP1_MINV;
-          rsi->vfilter[i][2] = aom_read_literal(rb, WIENER_FILT_TAP2_BITS) +
-                               WIENER_FILT_TAP2_MINV;
-          rsi->hfilter[i][0] = aom_read_literal(rb, WIENER_FILT_TAP0_BITS) +
-                               WIENER_FILT_TAP0_MINV;
-          rsi->hfilter[i][1] = aom_read_literal(rb, WIENER_FILT_TAP1_BITS) +
-                               WIENER_FILT_TAP1_MINV;
-          rsi->hfilter[i][2] = aom_read_literal(rb, WIENER_FILT_TAP2_BITS) +
-                               WIENER_FILT_TAP2_MINV;
+          rsi->wiener_info[i].level = 1;
+          rsi->wiener_info[i].vfilter[0] =
+              aom_read_literal(rb, WIENER_FILT_TAP0_BITS) +
+              WIENER_FILT_TAP0_MINV;
+          rsi->wiener_info[i].vfilter[1] =
+              aom_read_literal(rb, WIENER_FILT_TAP1_BITS) +
+              WIENER_FILT_TAP1_MINV;
+          rsi->wiener_info[i].vfilter[2] =
+              aom_read_literal(rb, WIENER_FILT_TAP2_BITS) +
+              WIENER_FILT_TAP2_MINV;
+          rsi->wiener_info[i].hfilter[0] =
+              aom_read_literal(rb, WIENER_FILT_TAP0_BITS) +
+              WIENER_FILT_TAP0_MINV;
+          rsi->wiener_info[i].hfilter[1] =
+              aom_read_literal(rb, WIENER_FILT_TAP1_BITS) +
+              WIENER_FILT_TAP1_MINV;
+          rsi->wiener_info[i].hfilter[2] =
+              aom_read_literal(rb, WIENER_FILT_TAP2_BITS) +
+              WIENER_FILT_TAP2_MINV;
         } else if (rsi->restoration_type[i] == RESTORE_BILATERAL) {
           int s;
           for (s = 0; s < BILATERAL_SUBTILES; ++s) {
-            const int j = i * BILATERAL_SUBTILES + s;
 #if BILATERAL_SUBTILES == 0
-            rsi->bilateral_level[j] =
+            rsi->bilateral_info[i].level[s] =
                 aom_read_literal(rb, av1_bilateral_level_bits(cm));
 #else
             if (aom_read(rb, RESTORE_NONE_BILATERAL_PROB)) {
-              rsi->bilateral_level[j] =
+              rsi->bilateral_info[i].level[s] =
                   aom_read_literal(rb, av1_bilateral_level_bits(cm));
             } else {
-              rsi->bilateral_level[j] = -1;
+              rsi->bilateral_info[i].level[s] = -1;
             }
 #endif
           }
         }
       }
     } else if (rsi->frame_restoration_type == RESTORE_WIENER) {
-      rsi->wiener_level = (int *)aom_realloc(
-          rsi->wiener_level, sizeof(*rsi->wiener_level) * ntiles);
-      assert(rsi->wiener_level != NULL);
-      rsi->vfilter = (int(*)[RESTORATION_WIN])aom_realloc(
-          rsi->vfilter, sizeof(*rsi->vfilter) * ntiles);
-      assert(rsi->vfilter != NULL);
-      rsi->hfilter = (int(*)[RESTORATION_WIN])aom_realloc(
-          rsi->hfilter, sizeof(*rsi->hfilter) * ntiles);
-      assert(rsi->hfilter != NULL);
+      rsi->wiener_info = (WienerInfo *)aom_realloc(
+          rsi->wiener_info, sizeof(*rsi->wiener_info) * ntiles);
+      assert(rsi->wiener_info != NULL);
       for (i = 0; i < ntiles; ++i) {
         if (aom_read(rb, RESTORE_NONE_WIENER_PROB)) {
-          rsi->wiener_level[i] = 1;
+          rsi->wiener_info[i].level = 1;
           rsi->restoration_type[i] = RESTORE_WIENER;
-          rsi->vfilter[i][0] = aom_read_literal(rb, WIENER_FILT_TAP0_BITS) +
-                               WIENER_FILT_TAP0_MINV;
-          rsi->vfilter[i][1] = aom_read_literal(rb, WIENER_FILT_TAP1_BITS) +
-                               WIENER_FILT_TAP1_MINV;
-          rsi->vfilter[i][2] = aom_read_literal(rb, WIENER_FILT_TAP2_BITS) +
-                               WIENER_FILT_TAP2_MINV;
-          rsi->hfilter[i][0] = aom_read_literal(rb, WIENER_FILT_TAP0_BITS) +
-                               WIENER_FILT_TAP0_MINV;
-          rsi->hfilter[i][1] = aom_read_literal(rb, WIENER_FILT_TAP1_BITS) +
-                               WIENER_FILT_TAP1_MINV;
-          rsi->hfilter[i][2] = aom_read_literal(rb, WIENER_FILT_TAP2_BITS) +
-                               WIENER_FILT_TAP2_MINV;
+          rsi->wiener_info[i].vfilter[0] =
+              aom_read_literal(rb, WIENER_FILT_TAP0_BITS) +
+              WIENER_FILT_TAP0_MINV;
+          rsi->wiener_info[i].vfilter[1] =
+              aom_read_literal(rb, WIENER_FILT_TAP1_BITS) +
+              WIENER_FILT_TAP1_MINV;
+          rsi->wiener_info[i].vfilter[2] =
+              aom_read_literal(rb, WIENER_FILT_TAP2_BITS) +
+              WIENER_FILT_TAP2_MINV;
+          rsi->wiener_info[i].hfilter[0] =
+              aom_read_literal(rb, WIENER_FILT_TAP0_BITS) +
+              WIENER_FILT_TAP0_MINV;
+          rsi->wiener_info[i].hfilter[1] =
+              aom_read_literal(rb, WIENER_FILT_TAP1_BITS) +
+              WIENER_FILT_TAP1_MINV;
+          rsi->wiener_info[i].hfilter[2] =
+              aom_read_literal(rb, WIENER_FILT_TAP2_BITS) +
+              WIENER_FILT_TAP2_MINV;
         } else {
-          rsi->wiener_level[i] = 0;
+          rsi->wiener_info[i].level = 0;
           rsi->restoration_type[i] = RESTORE_NONE;
         }
       }
     } else {
-      rsi->frame_restoration_type = RESTORE_BILATERAL;
-      rsi->bilateral_level = (int *)aom_realloc(
-          rsi->bilateral_level,
-          sizeof(*rsi->bilateral_level) * ntiles * BILATERAL_SUBTILES);
-      assert(rsi->bilateral_level != NULL);
+      rsi->bilateral_info = (BilateralInfo *)aom_realloc(
+          rsi->bilateral_info, sizeof(*rsi->bilateral_info) * ntiles);
+      assert(rsi->bilateral_info != NULL);
       for (i = 0; i < ntiles; ++i) {
         int s;
         rsi->restoration_type[i] = RESTORE_BILATERAL;
         for (s = 0; s < BILATERAL_SUBTILES; ++s) {
-          const int j = i * BILATERAL_SUBTILES + s;
           if (aom_read(rb, RESTORE_NONE_BILATERAL_PROB)) {
-            rsi->bilateral_level[j] =
+            rsi->bilateral_info[i].level[s] =
                 aom_read_literal(rb, av1_bilateral_level_bits(cm));
           } else {
-            rsi->bilateral_level[j] = -1;
+            rsi->bilateral_info[i].level[s] = -1;
           }
         }
       }

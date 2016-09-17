@@ -85,14 +85,10 @@ void av1_free_ref_frame_buffers(BufferPool *pool) {
 void av1_free_restoration_buffers(AV1_COMMON *cm) {
   aom_free(cm->rst_info.restoration_type);
   cm->rst_info.restoration_type = NULL;
-  aom_free(cm->rst_info.bilateral_level);
-  cm->rst_info.bilateral_level = NULL;
-  aom_free(cm->rst_info.vfilter);
-  cm->rst_info.vfilter = NULL;
-  aom_free(cm->rst_info.hfilter);
-  cm->rst_info.hfilter = NULL;
-  aom_free(cm->rst_info.wiener_level);
-  cm->rst_info.wiener_level = NULL;
+  aom_free(cm->rst_info.bilateral_info);
+  cm->rst_info.bilateral_info = NULL;
+  aom_free(cm->rst_info.wiener_info);
+  cm->rst_info.wiener_info = NULL;
 }
 #endif  // CONFIG_LOOP_RESTORATION
 
