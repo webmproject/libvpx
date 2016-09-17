@@ -17,131 +17,131 @@
 // 8 samples in a bunch, and the functions ending with '_16' process 16 samples
 // in a bunch.
 
-// Should we apply any filter at all: 11111111 yes, 00000000 no
-static INLINE uint8x8_t filter_mask_8(
-    const uint8x8_t limit, const uint8x8_t blimit, const uint8x8_t thresh,
-    const uint8x8_t p3, const uint8x8_t p2, const uint8x8_t p1,
-    const uint8x8_t p0, const uint8x8_t q0, const uint8x8_t q1,
-    const uint8x8_t q2, const uint8x8_t q3, uint8x8_t *flat, uint8x8_t *hev) {
-  uint8x8_t t0, t1;
-  uint8x8_t max = vabd_u8(p1, p0);
-  max = vmax_u8(max, vabd_u8(q1, q0));
+#define FUN_LOAD_THRESH(w, r)                                             \
+  static INLINE void load_thresh_##w(                                     \
+      const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, \
+      uint8x##w##_t *blimit_vec, uint8x##w##_t *limit_vec,                \
+      uint8x##w##_t *thresh_vec) {                                        \
+    *blimit_vec = vld1##r##dup_u8(blimit);                                \
+    *limit_vec = vld1##r##dup_u8(limit);                                  \
+    *thresh_vec = vld1##r##dup_u8(thresh);                                \
+  }
 
-  // Is there high edge variance internal edge: 11111111 yes, 00000000 no
-  *hev = vcgt_u8(max, thresh);
-  *flat = vmax_u8(max, vabd_u8(p2, p0));
-  max = vmax_u8(max, vabd_u8(p3, p2));
-  max = vmax_u8(max, vabd_u8(p2, p1));
-  max = vmax_u8(max, vabd_u8(q2, q1));
-  max = vmax_u8(max, vabd_u8(q3, q2));
-  t0 = vabd_u8(p0, q0);
-  t1 = vabd_u8(p1, q1);
-  t0 = vqshl_n_u8(t0, 1);
-  t1 = vshr_n_u8(t1, 1);
-  t0 = vqadd_u8(t0, t1);
-  max = vcle_u8(max, limit);
-  t0 = vcle_u8(t0, blimit);
-  max = vand_u8(max, t0);
+FUN_LOAD_THRESH(8, _)    // load_thresh_8
+FUN_LOAD_THRESH(16, q_)  // load_thresh_16
+#undef FUN_LOAD_THRESH
 
-  *flat = vmax_u8(*flat, vabd_u8(q2, q0));
-  *flat = vmax_u8(*flat, vabd_u8(p3, p0));
-  *flat = vmax_u8(*flat, vabd_u8(q3, q0));
-  *flat = vcle_u8(*flat, vdup_n_u8(1));  // flat_mask4()
-
-  return max;
+// Here flat is 64-bit long, with each 8-bit (or 4-bit) chunk being a mask of a
+// pixel. When used to control filter branches, we only detect whether it is all
+// 0s or all 1s. We pairwise add flat to a 32-bit long number flat_status.
+// flat equals 0 if and only if flat_status equals 0.
+// flat equals -1 (all 1s) if and only if flat_status equals -2. (This is true
+// because each mask occupies more than 1 bit.)
+static INLINE uint32_t calc_flat_status_8(uint8x8_t flat) {
+  return vget_lane_u32(
+      vreinterpret_u32_u64(vpaddl_u32(vreinterpret_u32_u8(flat))), 0);
 }
 
-// Should we apply any filter at all: 11111111 yes, 00000000 no
-static INLINE uint8x16_t
-filter_mask_16(const uint8x16_t limit, const uint8x16_t blimit,
-               const uint8x16_t thresh, const uint8x16_t p3,
-               const uint8x16_t p2, const uint8x16_t p1, const uint8x16_t p0,
-               const uint8x16_t q0, const uint8x16_t q1, const uint8x16_t q2,
-               const uint8x16_t q3, uint8x16_t *flat, uint8x16_t *hev) {
-  uint8x16_t t0, t1;
-  uint8x16_t max = vabdq_u8(p1, p0);
-  max = vmaxq_u8(max, vabdq_u8(q1, q0));
-
-  // Is there high edge variance internal edge: 11111111 yes, 00000000 no
-  *hev = vcgtq_u8(max, thresh);
-  *flat = vmaxq_u8(max, vabdq_u8(p2, p0));
-  max = vmaxq_u8(max, vabdq_u8(p3, p2));
-  max = vmaxq_u8(max, vabdq_u8(p2, p1));
-  max = vmaxq_u8(max, vabdq_u8(q2, q1));
-  max = vmaxq_u8(max, vabdq_u8(q3, q2));
-  t0 = vabdq_u8(p0, q0);
-  t1 = vabdq_u8(p1, q1);
-  t0 = vqshlq_n_u8(t0, 1);
-  t1 = vshrq_n_u8(t1, 1);
-  t0 = vqaddq_u8(t0, t1);
-  max = vcleq_u8(max, limit);
-  t0 = vcleq_u8(t0, blimit);
-  max = vandq_u8(max, t0);
-
-  *flat = vmaxq_u8(*flat, vabdq_u8(q2, q0));
-  *flat = vmaxq_u8(*flat, vabdq_u8(p3, p0));
-  *flat = vmaxq_u8(*flat, vabdq_u8(q3, q0));
-  *flat = vcleq_u8(*flat, vdupq_n_u8(1));  // flat_mask4()
-
-  return max;
+// Here flat is 128-bit long, with each 8-bit chunk being a mask of a pixel.
+// When used to control filter branches, we only detect whether it is all 0s or
+// all 1s. We narrowing shift right each 16-bit chunk by 4 arithmetically, so
+// we get a 64-bit long number, with each 4-bit chunk being a mask of a pixel.
+// Then we pairwise add flat to a 32-bit long number flat_status.
+// flat equals 0 if and only if flat_status equals 0.
+// flat equals -1 (all 1s) if and only if flat_status equals -2. (This is true
+// because each mask occupies more than 1 bit.)
+static INLINE uint32_t calc_flat_status_16(uint8x16_t flat) {
+  const uint8x8_t flat_4bit =
+      vreinterpret_u8_s8(vshrn_n_s16(vreinterpretq_s16_u8(flat), 4));
+  return calc_flat_status_8(flat_4bit);
 }
 
-static INLINE uint8x8_t flat_mask5_8(const uint8x8_t p4, const uint8x8_t p3,
-                                     const uint8x8_t p2, const uint8x8_t p1,
-                                     const uint8x8_t p0, const uint8x8_t q0,
-                                     const uint8x8_t q1, const uint8x8_t q2,
-                                     const uint8x8_t q3, const uint8x8_t q4) {
-  uint8x8_t max = vabd_u8(p4, p0);
-  max = vmax_u8(max, vabd_u8(p3, p0));
-  max = vmax_u8(max, vabd_u8(p2, p0));
-  max = vmax_u8(max, vabd_u8(p1, p0));
-  max = vmax_u8(max, vabd_u8(q1, q0));
-  max = vmax_u8(max, vabd_u8(q2, q0));
-  max = vmax_u8(max, vabd_u8(q3, q0));
-  max = vmax_u8(max, vabd_u8(q4, q0));
-  max = vcle_u8(max, vdup_n_u8(1));
+#define FUN_FILTER_FLAT_HEV_MASK(w, r)                                        \
+  static INLINE uint8x##w##_t filter_flat_hev_mask_##w(                       \
+      const uint8x##w##_t limit, const uint8x##w##_t blimit,                  \
+      const uint8x##w##_t thresh, const uint8x##w##_t p3,                     \
+      const uint8x##w##_t p2, const uint8x##w##_t p1, const uint8x##w##_t p0, \
+      const uint8x##w##_t q0, const uint8x##w##_t q1, const uint8x##w##_t q2, \
+      const uint8x##w##_t q3, uint8x##w##_t *flat, uint32_t *flat_status,     \
+      uint8x##w##_t *hev) {                                                   \
+    uint8x##w##_t t0, t1, mask;                                               \
+                                                                              \
+    mask = vabd##r##u8(p1, p0);                                               \
+    mask = vmax##r##u8(mask, vabd##r##u8(q1, q0));                            \
+    *hev = vcgt##r##u8(mask, thresh);                                         \
+    *flat = vmax##r##u8(mask, vabd##r##u8(p2, p0));                           \
+    mask = vmax##r##u8(mask, vabd##r##u8(p3, p2));                            \
+    mask = vmax##r##u8(mask, vabd##r##u8(p2, p1));                            \
+    mask = vmax##r##u8(mask, vabd##r##u8(q2, q1));                            \
+    mask = vmax##r##u8(mask, vabd##r##u8(q3, q2));                            \
+    t0 = vabd##r##u8(p0, q0);                                                 \
+    t1 = vabd##r##u8(p1, q1);                                                 \
+    t0 = vqadd##r##u8(t0, t0);                                                \
+    t1 = vshr##r##n_u8(t1, 1);                                                \
+    t0 = vqadd##r##u8(t0, t1);                                                \
+    mask = vcle##r##u8(mask, limit);                                          \
+    t0 = vcle##r##u8(t0, blimit);                                             \
+    mask = vand##r##u8(mask, t0);                                             \
+                                                                              \
+    *flat = vmax##r##u8(*flat, vabd##r##u8(q2, q0));                          \
+    *flat = vmax##r##u8(*flat, vabd##r##u8(p3, p0));                          \
+    *flat = vmax##r##u8(*flat, vabd##r##u8(q3, q0));                          \
+    *flat = vcle##r##u8(*flat, vdup##r##n_u8(1)); /* flat_mask4() */          \
+    *flat = vand##r##u8(*flat, mask);                                         \
+    *flat_status = calc_flat_status_##w(*flat);                               \
+                                                                              \
+    return mask;                                                              \
+  }
 
-  return max;
-}
+FUN_FILTER_FLAT_HEV_MASK(8, _)    // filter_flat_hev_mask_8
+FUN_FILTER_FLAT_HEV_MASK(16, q_)  // filter_flat_hev_mask_16
+#undef FUN_FILTER_FLAT_HEV_MASK
 
-static INLINE uint8x16_t flat_mask5_16(const uint8x16_t p4, const uint8x16_t p3,
-                                       const uint8x16_t p2, const uint8x16_t p1,
-                                       const uint8x16_t p0, const uint8x16_t q0,
-                                       const uint8x16_t q1, const uint8x16_t q2,
-                                       const uint8x16_t q3,
-                                       const uint8x16_t q4) {
-  uint8x16_t max = vabdq_u8(p4, p0);
-  max = vmaxq_u8(max, vabdq_u8(p3, p0));
-  max = vmaxq_u8(max, vabdq_u8(p2, p0));
-  max = vmaxq_u8(max, vabdq_u8(p1, p0));
-  max = vmaxq_u8(max, vabdq_u8(q1, q0));
-  max = vmaxq_u8(max, vabdq_u8(q2, q0));
-  max = vmaxq_u8(max, vabdq_u8(q3, q0));
-  max = vmaxq_u8(max, vabdq_u8(q4, q0));
-  max = vcleq_u8(max, vdupq_n_u8(1));
+#define FUN_FLAT_MASK5(w, r)                                                  \
+  static INLINE uint8x##w##_t flat_mask5_##w(                                 \
+      const uint8x##w##_t p4, const uint8x##w##_t p3, const uint8x##w##_t p2, \
+      const uint8x##w##_t p1, const uint8x##w##_t p0, const uint8x##w##_t q0, \
+      const uint8x##w##_t q1, const uint8x##w##_t q2, const uint8x##w##_t q3, \
+      const uint8x##w##_t q4, const uint8x##w##_t flat,                       \
+      uint32_t *flat2_status) {                                               \
+    uint8x##w##_t flat2 = vabd##r##u8(p4, p0);                                \
+    flat2 = vmax##r##u8(flat2, vabd##r##u8(p3, p0));                          \
+    flat2 = vmax##r##u8(flat2, vabd##r##u8(p2, p0));                          \
+    flat2 = vmax##r##u8(flat2, vabd##r##u8(p1, p0));                          \
+    flat2 = vmax##r##u8(flat2, vabd##r##u8(q1, q0));                          \
+    flat2 = vmax##r##u8(flat2, vabd##r##u8(q2, q0));                          \
+    flat2 = vmax##r##u8(flat2, vabd##r##u8(q3, q0));                          \
+    flat2 = vmax##r##u8(flat2, vabd##r##u8(q4, q0));                          \
+    flat2 = vcle##r##u8(flat2, vdup##r##n_u8(1));                             \
+    flat2 = vand##r##u8(flat2, flat);                                         \
+    *flat2_status = calc_flat_status_##w(flat2);                              \
+                                                                              \
+    return flat2;                                                             \
+  }
 
-  return max;
-}
+FUN_FLAT_MASK5(8, _)    // flat_mask5_8
+FUN_FLAT_MASK5(16, q_)  // flat_mask5_16
+#undef FUN_FLAT_MASK5
 
-static INLINE int8x8_t flip_sign_8(const uint8x8_t v) {
-  const uint8x8_t sign_bit = vdup_n_u8(0x80);
-  return vreinterpret_s8_u8(veor_u8(v, sign_bit));
-}
+#define FUN_FLIP_SIGN(w, r)                                         \
+  static INLINE int8x##w##_t flip_sign_##w(const uint8x##w##_t v) { \
+    const uint8x##w##_t sign_bit = vdup##r##n_u8(0x80);             \
+    return vreinterpret##r##s8_u8(veor##r##u8(v, sign_bit));        \
+  }
 
-static INLINE int8x16_t flip_sign_16(const uint8x16_t v) {
-  const uint8x16_t sign_bit = vdupq_n_u8(0x80);
-  return vreinterpretq_s8_u8(veorq_u8(v, sign_bit));
-}
+FUN_FLIP_SIGN(8, _)    // flip_sign_8
+FUN_FLIP_SIGN(16, q_)  // flip_sign_16
+#undef FUN_FLIP_SIGN
 
-static INLINE uint8x8_t flip_sign_back_8(const int8x8_t v) {
-  const int8x8_t sign_bit = vdup_n_s8(0x80);
-  return vreinterpret_u8_s8(veor_s8(v, sign_bit));
-}
+#define FUN_FLIP_SIGN_BACK(w, r)                                         \
+  static INLINE uint8x##w##_t flip_sign_back_##w(const int8x##w##_t v) { \
+    const int8x##w##_t sign_bit = vdup##r##n_s8(0x80);                   \
+    return vreinterpret##r##u8_s8(veor##r##s8(v, sign_bit));             \
+  }
 
-static INLINE uint8x16_t flip_sign_back_16(const int8x16_t v) {
-  const int8x16_t sign_bit = vdupq_n_s8(0x80);
-  return vreinterpretq_u8_s8(veorq_s8(v, sign_bit));
-}
+FUN_FLIP_SIGN_BACK(8, _)    // flip_sign_back_8
+FUN_FLIP_SIGN_BACK(16, q_)  // flip_sign_back_16
+#undef FUN_FLIP_SIGN_BACK
 
 static INLINE void filter_update_8(const uint8x8_t sub0, const uint8x8_t sub1,
                                    const uint8x8_t add0, const uint8x8_t add1,
@@ -167,37 +167,31 @@ static INLINE void filter_update_16(const uint8x16_t sub0,
   *sum1 = vaddw_u8(*sum1, vget_high_u8(add1));
 }
 
-static INLINE uint8x8_t filter_tap7_8(const uint8x8_t flat,
-                                      const uint8x8_t sub0,
-                                      const uint8x8_t sub1,
-                                      const uint8x8_t add0,
-                                      const uint8x8_t add1, const uint8x8_t in,
-                                      uint16x8_t *sum) {
+static INLINE uint8x8_t calc_7_tap_filter_8_kernel(const uint8x8_t sub0,
+                                                   const uint8x8_t sub1,
+                                                   const uint8x8_t add0,
+                                                   const uint8x8_t add1,
+                                                   uint16x8_t *sum) {
   filter_update_8(sub0, sub1, add0, add1, sum);
-  return vbsl_u8(flat, vrshrn_n_u16(*sum, 3), in);
+  return vrshrn_n_u16(*sum, 3);
 }
 
-static INLINE uint8x16_t filter_tap7_16(
-    const uint8x16_t flat, const uint8x16_t sub0, const uint8x16_t sub1,
-    const uint8x16_t add0, const uint8x16_t add1, const uint8x16_t in,
-    uint16x8_t *sum0, uint16x8_t *sum1) {
-  uint8x16_t t;
+static INLINE uint8x16_t calc_7_tap_filter_16_kernel(
+    const uint8x16_t sub0, const uint8x16_t sub1, const uint8x16_t add0,
+    const uint8x16_t add1, uint16x8_t *sum0, uint16x8_t *sum1) {
   filter_update_16(sub0, sub1, add0, add1, sum0, sum1);
-  t = vcombine_u8(vrshrn_n_u16(*sum0, 3), vrshrn_n_u16(*sum1, 3));
-  return vbslq_u8(flat, t, in);
+  return vcombine_u8(vrshrn_n_u16(*sum0, 3), vrshrn_n_u16(*sum1, 3));
 }
 
-static INLINE uint8x8_t filter_tap15_8(const uint8x8_t flat,
-                                       const uint8x8_t sub0,
-                                       const uint8x8_t sub1,
-                                       const uint8x8_t add0,
-                                       const uint8x8_t add1, const uint8x8_t in,
-                                       uint16x8_t *sum) {
+static INLINE uint8x8_t apply_15_tap_filter_8_kernel(
+    const uint8x8_t flat, const uint8x8_t sub0, const uint8x8_t sub1,
+    const uint8x8_t add0, const uint8x8_t add1, const uint8x8_t in,
+    uint16x8_t *sum) {
   filter_update_8(sub0, sub1, add0, add1, sum);
   return vbsl_u8(flat, vrshrn_n_u16(*sum, 4), in);
 }
 
-static INLINE uint8x16_t filter_tap15_16(
+static INLINE uint8x16_t apply_15_tap_filter_16_kernel(
     const uint8x16_t flat, const uint8x16_t sub0, const uint8x16_t sub1,
     const uint8x16_t add0, const uint8x16_t add1, const uint8x16_t in,
     uint16x8_t *sum0, uint16x8_t *sum1) {
@@ -208,14 +202,13 @@ static INLINE uint8x16_t filter_tap15_16(
 }
 
 // 7-tap filter [1, 1, 1, 2, 1, 1, 1]
-static INLINE void apply_7_tap_filter_8(const uint8x8_t flat,
-                                        const uint8x8_t p3, const uint8x8_t p2,
-                                        const uint8x8_t p1, const uint8x8_t p0,
-                                        const uint8x8_t q0, const uint8x8_t q1,
-                                        const uint8x8_t q2, const uint8x8_t q3,
-                                        uint8x8_t *op2, uint8x8_t *op1,
-                                        uint8x8_t *op0, uint8x8_t *oq0,
-                                        uint8x8_t *oq1, uint8x8_t *oq2) {
+static INLINE void calc_7_tap_filter_8(const uint8x8_t p3, const uint8x8_t p2,
+                                       const uint8x8_t p1, const uint8x8_t p0,
+                                       const uint8x8_t q0, const uint8x8_t q1,
+                                       const uint8x8_t q2, const uint8x8_t q3,
+                                       uint8x8_t *op2, uint8x8_t *op1,
+                                       uint8x8_t *op0, uint8x8_t *oq0,
+                                       uint8x8_t *oq1, uint8x8_t *oq2) {
   uint16x8_t sum;
   sum = vaddl_u8(p3, p3);   // 2*p3
   sum = vaddw_u8(sum, p3);  // 3*p3
@@ -224,23 +217,20 @@ static INLINE void apply_7_tap_filter_8(const uint8x8_t flat,
   sum = vaddw_u8(sum, p1);  // 3*p3+2*p2+p1
   sum = vaddw_u8(sum, p0);  // 3*p3+2*p2+p1+p0
   sum = vaddw_u8(sum, q0);  // 3*p3+2*p2+p1+p0+q0
-  *op2 = vbsl_u8(flat, vrshrn_n_u16(sum, 3), p2);
-  *op1 = filter_tap7_8(flat, p3, p2, p1, q1, *op1, &sum);
-  *op0 = filter_tap7_8(flat, p3, p1, p0, q2, *op0, &sum);
-  *oq0 = filter_tap7_8(flat, p3, p0, q0, q3, *oq0, &sum);
-  *oq1 = filter_tap7_8(flat, p2, q0, q1, q3, *oq1, &sum);
-  *oq2 = filter_tap7_8(flat, p1, q1, q2, q3, q2, &sum);
+  *op2 = vrshrn_n_u16(sum, 3);
+  *op1 = calc_7_tap_filter_8_kernel(p3, p2, p1, q1, &sum);
+  *op0 = calc_7_tap_filter_8_kernel(p3, p1, p0, q2, &sum);
+  *oq0 = calc_7_tap_filter_8_kernel(p3, p0, q0, q3, &sum);
+  *oq1 = calc_7_tap_filter_8_kernel(p2, q0, q1, q3, &sum);
+  *oq2 = calc_7_tap_filter_8_kernel(p1, q1, q2, q3, &sum);
 }
 
-// 7-tap filter [1, 1, 1, 2, 1, 1, 1]
-static INLINE void apply_7_tap_filter_16(
-    const uint8x16_t flat, const uint8x16_t p3, const uint8x16_t p2,
-    const uint8x16_t p1, const uint8x16_t p0, const uint8x16_t q0,
-    const uint8x16_t q1, const uint8x16_t q2, const uint8x16_t q3,
-    uint8x16_t *op2, uint8x16_t *op1, uint8x16_t *op0, uint8x16_t *oq0,
-    uint8x16_t *oq1, uint8x16_t *oq2) {
+static INLINE void calc_7_tap_filter_16(
+    const uint8x16_t p3, const uint8x16_t p2, const uint8x16_t p1,
+    const uint8x16_t p0, const uint8x16_t q0, const uint8x16_t q1,
+    const uint8x16_t q2, const uint8x16_t q3, uint8x16_t *op2, uint8x16_t *op1,
+    uint8x16_t *op0, uint8x16_t *oq0, uint8x16_t *oq1, uint8x16_t *oq2) {
   uint16x8_t sum0, sum1;
-  uint8x16_t t;
   sum0 = vaddl_u8(vget_low_u8(p3), vget_low_u8(p3));    // 2*p3
   sum1 = vaddl_u8(vget_high_u8(p3), vget_high_u8(p3));  // 2*p3
   sum0 = vaddw_u8(sum0, vget_low_u8(p3));               // 3*p3
@@ -255,14 +245,36 @@ static INLINE void apply_7_tap_filter_16(
   sum1 = vaddw_u8(sum1, vget_high_u8(p0));              // 3*p3+2*p2+p1+p0
   sum0 = vaddw_u8(sum0, vget_low_u8(q0));               // 3*p3+2*p2+p1+p0+q0
   sum1 = vaddw_u8(sum1, vget_high_u8(q0));              // 3*p3+2*p2+p1+p0+q0
-  t = vcombine_u8(vrshrn_n_u16(sum0, 3), vrshrn_n_u16(sum1, 3));
-  *op2 = vbslq_u8(flat, t, p2);
-  *op1 = filter_tap7_16(flat, p3, p2, p1, q1, *op1, &sum0, &sum1);
-  *op0 = filter_tap7_16(flat, p3, p1, p0, q2, *op0, &sum0, &sum1);
-  *oq0 = filter_tap7_16(flat, p3, p0, q0, q3, *oq0, &sum0, &sum1);
-  *oq1 = filter_tap7_16(flat, p2, q0, q1, q3, *oq1, &sum0, &sum1);
-  *oq2 = filter_tap7_16(flat, p1, q1, q2, q3, q2, &sum0, &sum1);
+  *op2 = vcombine_u8(vrshrn_n_u16(sum0, 3), vrshrn_n_u16(sum1, 3));
+  *op1 = calc_7_tap_filter_16_kernel(p3, p2, p1, q1, &sum0, &sum1);
+  *op0 = calc_7_tap_filter_16_kernel(p3, p1, p0, q2, &sum0, &sum1);
+  *oq0 = calc_7_tap_filter_16_kernel(p3, p0, q0, q3, &sum0, &sum1);
+  *oq1 = calc_7_tap_filter_16_kernel(p2, q0, q1, q3, &sum0, &sum1);
+  *oq2 = calc_7_tap_filter_16_kernel(p1, q1, q2, q3, &sum0, &sum1);
 }
+
+#define FUN_APPLY_7_TAP_FILTER(w, r)                                          \
+  static INLINE void apply_7_tap_filter_##w(                                  \
+      const uint8x##w##_t flat, const uint8x##w##_t p3,                       \
+      const uint8x##w##_t p2, const uint8x##w##_t p1, const uint8x##w##_t p0, \
+      const uint8x##w##_t q0, const uint8x##w##_t q1, const uint8x##w##_t q2, \
+      const uint8x##w##_t q3, uint8x##w##_t *op2, uint8x##w##_t *op1,         \
+      uint8x##w##_t *op0, uint8x##w##_t *oq0, uint8x##w##_t *oq1,             \
+      uint8x##w##_t *oq2) {                                                   \
+    uint8x##w##_t tp1, tp0, tq0, tq1;                                         \
+    calc_7_tap_filter_##w(p3, p2, p1, p0, q0, q1, q2, q3, op2, &tp1, &tp0,    \
+                          &tq0, &tq1, oq2);                                   \
+    *op2 = vbsl##r##u8(flat, *op2, p2);                                       \
+    *op1 = vbsl##r##u8(flat, tp1, *op1);                                      \
+    *op0 = vbsl##r##u8(flat, tp0, *op0);                                      \
+    *oq0 = vbsl##r##u8(flat, tq0, *oq0);                                      \
+    *oq1 = vbsl##r##u8(flat, tq1, *oq1);                                      \
+    *oq2 = vbsl##r##u8(flat, *oq2, q2);                                       \
+  }
+
+FUN_APPLY_7_TAP_FILTER(8, _)    // apply_7_tap_filter_8
+FUN_APPLY_7_TAP_FILTER(16, q_)  // apply_7_tap_filter_16
+#undef FUN_APPLY_7_TAP_FILTER
 
 // 15-tap filter [1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1]
 static INLINE void apply_15_tap_filter_8(
@@ -288,22 +300,21 @@ static INLINE void apply_15_tap_filter_8(
   sum = vaddw_u8(sum, p0);  // 7*p7+2*p6+p5+p4+p3+p2+p1+p0
   sum = vaddw_u8(sum, q0);  // 7*p7+2*p6+p5+p4+p3+p2+p1+p0+q0
   *op6 = vbsl_u8(flat2, vrshrn_n_u16(sum, 4), p6);
-  *op5 = filter_tap15_8(flat2, p7, p6, p5, q1, p5, &sum);
-  *op4 = filter_tap15_8(flat2, p7, p5, p4, q2, p4, &sum);
-  *op3 = filter_tap15_8(flat2, p7, p4, p3, q3, p3, &sum);
-  *op2 = filter_tap15_8(flat2, p7, p3, p2, q4, *op2, &sum);
-  *op1 = filter_tap15_8(flat2, p7, p2, p1, q5, *op1, &sum);
-  *op0 = filter_tap15_8(flat2, p7, p1, p0, q6, *op0, &sum);
-  *oq0 = filter_tap15_8(flat2, p7, p0, q0, q7, *oq0, &sum);
-  *oq1 = filter_tap15_8(flat2, p6, q0, q1, q7, *oq1, &sum);
-  *oq2 = filter_tap15_8(flat2, p5, q1, q2, q7, *oq2, &sum);
-  *oq3 = filter_tap15_8(flat2, p4, q2, q3, q7, q3, &sum);
-  *oq4 = filter_tap15_8(flat2, p3, q3, q4, q7, q4, &sum);
-  *oq5 = filter_tap15_8(flat2, p2, q4, q5, q7, q5, &sum);
-  *oq6 = filter_tap15_8(flat2, p1, q5, q6, q7, q6, &sum);
+  *op5 = apply_15_tap_filter_8_kernel(flat2, p7, p6, p5, q1, p5, &sum);
+  *op4 = apply_15_tap_filter_8_kernel(flat2, p7, p5, p4, q2, p4, &sum);
+  *op3 = apply_15_tap_filter_8_kernel(flat2, p7, p4, p3, q3, p3, &sum);
+  *op2 = apply_15_tap_filter_8_kernel(flat2, p7, p3, p2, q4, *op2, &sum);
+  *op1 = apply_15_tap_filter_8_kernel(flat2, p7, p2, p1, q5, *op1, &sum);
+  *op0 = apply_15_tap_filter_8_kernel(flat2, p7, p1, p0, q6, *op0, &sum);
+  *oq0 = apply_15_tap_filter_8_kernel(flat2, p7, p0, q0, q7, *oq0, &sum);
+  *oq1 = apply_15_tap_filter_8_kernel(flat2, p6, q0, q1, q7, *oq1, &sum);
+  *oq2 = apply_15_tap_filter_8_kernel(flat2, p5, q1, q2, q7, *oq2, &sum);
+  *oq3 = apply_15_tap_filter_8_kernel(flat2, p4, q2, q3, q7, q3, &sum);
+  *oq4 = apply_15_tap_filter_8_kernel(flat2, p3, q3, q4, q7, q4, &sum);
+  *oq5 = apply_15_tap_filter_8_kernel(flat2, p2, q4, q5, q7, q5, &sum);
+  *oq6 = apply_15_tap_filter_8_kernel(flat2, p1, q5, q6, q7, q6, &sum);
 }
 
-// 15-tap filter [1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1]
 static INLINE void apply_15_tap_filter_16(
     const uint8x16_t flat2, const uint8x16_t p7, const uint8x16_t p6,
     const uint8x16_t p5, const uint8x16_t p4, const uint8x16_t p3,
@@ -340,640 +351,487 @@ static INLINE void apply_15_tap_filter_16(
   sum1 = vaddw_u8(sum1, vget_high_u8(q0));  // 7*p7+2*p6+p5+p4+p3+p2+p1+p0+q0
   t = vcombine_u8(vrshrn_n_u16(sum0, 4), vrshrn_n_u16(sum1, 4));
   *op6 = vbslq_u8(flat2, t, p6);
-  *op5 = filter_tap15_16(flat2, p7, p6, p5, q1, p5, &sum0, &sum1);
-  *op4 = filter_tap15_16(flat2, p7, p5, p4, q2, p4, &sum0, &sum1);
-  *op3 = filter_tap15_16(flat2, p7, p4, p3, q3, p3, &sum0, &sum1);
-  *op2 = filter_tap15_16(flat2, p7, p3, p2, q4, *op2, &sum0, &sum1);
-  *op1 = filter_tap15_16(flat2, p7, p2, p1, q5, *op1, &sum0, &sum1);
-  *op0 = filter_tap15_16(flat2, p7, p1, p0, q6, *op0, &sum0, &sum1);
-  *oq0 = filter_tap15_16(flat2, p7, p0, q0, q7, *oq0, &sum0, &sum1);
-  *oq1 = filter_tap15_16(flat2, p6, q0, q1, q7, *oq1, &sum0, &sum1);
-  *oq2 = filter_tap15_16(flat2, p5, q1, q2, q7, *oq2, &sum0, &sum1);
-  *oq3 = filter_tap15_16(flat2, p4, q2, q3, q7, q3, &sum0, &sum1);
-  *oq4 = filter_tap15_16(flat2, p3, q3, q4, q7, q4, &sum0, &sum1);
-  *oq5 = filter_tap15_16(flat2, p2, q4, q5, q7, q5, &sum0, &sum1);
-  *oq6 = filter_tap15_16(flat2, p1, q5, q6, q7, q6, &sum0, &sum1);
+  *op5 = apply_15_tap_filter_16_kernel(flat2, p7, p6, p5, q1, p5, &sum0, &sum1);
+  *op4 = apply_15_tap_filter_16_kernel(flat2, p7, p5, p4, q2, p4, &sum0, &sum1);
+  *op3 = apply_15_tap_filter_16_kernel(flat2, p7, p4, p3, q3, p3, &sum0, &sum1);
+  *op2 =
+      apply_15_tap_filter_16_kernel(flat2, p7, p3, p2, q4, *op2, &sum0, &sum1);
+  *op1 =
+      apply_15_tap_filter_16_kernel(flat2, p7, p2, p1, q5, *op1, &sum0, &sum1);
+  *op0 =
+      apply_15_tap_filter_16_kernel(flat2, p7, p1, p0, q6, *op0, &sum0, &sum1);
+  *oq0 =
+      apply_15_tap_filter_16_kernel(flat2, p7, p0, q0, q7, *oq0, &sum0, &sum1);
+  *oq1 =
+      apply_15_tap_filter_16_kernel(flat2, p6, q0, q1, q7, *oq1, &sum0, &sum1);
+  *oq2 =
+      apply_15_tap_filter_16_kernel(flat2, p5, q1, q2, q7, *oq2, &sum0, &sum1);
+  *oq3 = apply_15_tap_filter_16_kernel(flat2, p4, q2, q3, q7, q3, &sum0, &sum1);
+  *oq4 = apply_15_tap_filter_16_kernel(flat2, p3, q3, q4, q7, q4, &sum0, &sum1);
+  *oq5 = apply_15_tap_filter_16_kernel(flat2, p2, q4, q5, q7, q5, &sum0, &sum1);
+  *oq6 = apply_15_tap_filter_16_kernel(flat2, p1, q5, q6, q7, q6, &sum0, &sum1);
 }
 
-static INLINE void filter16_8(
-    const uint8x8_t mask, const uint8x8_t flat, const uint64_t flat_u64,
-    const uint8x8_t flat2, const uint64_t flat2_u64, const uint8x8_t hev,
-    const uint8x8_t p7, const uint8x8_t p6, const uint8x8_t p5,
-    const uint8x8_t p4, const uint8x8_t p3, const uint8x8_t p2,
-    const uint8x8_t p1, const uint8x8_t p0, const uint8x8_t q0,
-    const uint8x8_t q1, const uint8x8_t q2, const uint8x8_t q3,
-    const uint8x8_t q4, const uint8x8_t q5, const uint8x8_t q6,
-    const uint8x8_t q7, uint8x8_t *op6, uint8x8_t *op5, uint8x8_t *op4,
-    uint8x8_t *op3, uint8x8_t *op2, uint8x8_t *op1, uint8x8_t *op0,
-    uint8x8_t *oq0, uint8x8_t *oq1, uint8x8_t *oq2, uint8x8_t *oq3,
-    uint8x8_t *oq4, uint8x8_t *oq5, uint8x8_t *oq6) {
-  // add outer taps if we have high edge variance
-  if (flat_u64 != (uint64_t)-1) {
-    int8x8_t filter, filter1, filter2, t;
-    int8x8_t ps1 = flip_sign_8(p1);
-    int8x8_t ps0 = flip_sign_8(p0);
-    int8x8_t qs0 = flip_sign_8(q0);
-    int8x8_t qs1 = flip_sign_8(q1);
-
-    filter = vqsub_s8(ps1, qs1);
-    filter = vand_s8(filter, vreinterpret_s8_u8(hev));
-    t = vqsub_s8(qs0, ps0);
-
-    // inner taps
-    filter = vqadd_s8(filter, t);
-    filter = vqadd_s8(filter, t);
-    filter = vqadd_s8(filter, t);
-    filter = vand_s8(filter, vreinterpret_s8_u8(mask));
-
-    // save bottom 3 bits so that we round one side +4 and the other +3
-    // if it equals 4 we'll set to adjust by -1 to account for the fact
-    // we'd round 3 the other way
-    filter1 = vshr_n_s8(vqadd_s8(filter, vdup_n_s8(4)), 3);
-    filter2 = vshr_n_s8(vqadd_s8(filter, vdup_n_s8(3)), 3);
-
-    qs0 = vqsub_s8(qs0, filter1);
-    ps0 = vqadd_s8(ps0, filter2);
-    *oq0 = flip_sign_back_8(qs0);
-    *op0 = flip_sign_back_8(ps0);
-
-    // outer tap adjustments
-    filter = vrshr_n_s8(filter1, 1);
-    filter = vbic_s8(filter, vreinterpret_s8_u8(hev));
-
-    qs1 = vqsub_s8(qs1, filter);
-    ps1 = vqadd_s8(ps1, filter);
-    *oq1 = flip_sign_back_8(qs1);
-    *op1 = flip_sign_back_8(ps1);
+#define FUN_FILTER4(w, r)                                                     \
+  static INLINE void filter4_##w(                                             \
+      const uint8x##w##_t mask, const uint8x##w##_t hev,                      \
+      const uint8x##w##_t p1, const uint8x##w##_t p0, const uint8x##w##_t q0, \
+      const uint8x##w##_t q1, uint8x##w##_t *op1, uint8x##w##_t *op0,         \
+      uint8x##w##_t *oq0, uint8x##w##_t *oq1) {                               \
+    int8x##w##_t filter, filter1, filter2, t;                                 \
+    int8x##w##_t ps1 = flip_sign_##w(p1);                                     \
+    int8x##w##_t ps0 = flip_sign_##w(p0);                                     \
+    int8x##w##_t qs0 = flip_sign_##w(q0);                                     \
+    int8x##w##_t qs1 = flip_sign_##w(q1);                                     \
+                                                                              \
+    /* add outer taps if we have high edge variance */                        \
+    filter = vqsub##r##s8(ps1, qs1);                                          \
+    filter = vand##r##s8(filter, vreinterpret##r##s8_u8(hev));                \
+    t = vqsub##r##s8(qs0, ps0);                                               \
+                                                                              \
+    /* inner taps */                                                          \
+    filter = vqadd##r##s8(filter, t);                                         \
+    filter = vqadd##r##s8(filter, t);                                         \
+    filter = vqadd##r##s8(filter, t);                                         \
+    filter = vand##r##s8(filter, vreinterpret##r##s8_u8(mask));               \
+                                                                              \
+    /* save bottom 3 bits so that we round one side +4 and the other +3 */    \
+    /* if it equals 4 we'll set to adjust by -1 to account for the fact */    \
+    /* we'd round 3 the other way */                                          \
+    filter1 = vshr##r##n_s8(vqadd##r##s8(filter, vdup##r##n_s8(4)), 3);       \
+    filter2 = vshr##r##n_s8(vqadd##r##s8(filter, vdup##r##n_s8(3)), 3);       \
+                                                                              \
+    qs0 = vqsub##r##s8(qs0, filter1);                                         \
+    ps0 = vqadd##r##s8(ps0, filter2);                                         \
+    *oq0 = flip_sign_back_##w(qs0);                                           \
+    *op0 = flip_sign_back_##w(ps0);                                           \
+                                                                              \
+    /* outer tap adjustments */                                               \
+    filter = vrshr##r##n_s8(filter1, 1);                                      \
+    filter = vbic##r##s8(filter, vreinterpret##r##s8_u8(hev));                \
+                                                                              \
+    qs1 = vqsub##r##s8(qs1, filter);                                          \
+    ps1 = vqadd##r##s8(ps1, filter);                                          \
+    *oq1 = flip_sign_back_##w(qs1);                                           \
+    *op1 = flip_sign_back_##w(ps1);                                           \
   }
 
-  if (flat_u64) {
-    *op2 = p2;
-    *oq2 = q2;
-    if (flat2_u64 != (uint64_t)-1) {
-      apply_7_tap_filter_8(flat, p3, p2, p1, p0, q0, q1, q2, q3, op2, op1, op0,
-                           oq0, oq1, oq2);
-    }
-    if (flat2_u64) {
-      apply_15_tap_filter_8(flat2, p7, p6, p5, p4, p3, p2, p1, p0, q0, q1, q2,
-                            q3, q4, q5, q6, q7, op6, op5, op4, op3, op2, op1,
-                            op0, oq0, oq1, oq2, oq3, oq4, oq5, oq6);
-    }
+FUN_FILTER4(8, _)    // filter4_8
+FUN_FILTER4(16, q_)  // filter4_16
+#undef FUN_FILTER4
+
+#define FUN_FILTER16(w)                                                        \
+  static INLINE void filter16_##w(                                             \
+      const uint8x##w##_t mask, const uint8x##w##_t flat,                      \
+      const uint32_t flat_status, const uint8x##w##_t flat2,                   \
+      const uint32_t flat2_status, const uint8x##w##_t hev,                    \
+      const uint8x##w##_t p7, const uint8x##w##_t p6, const uint8x##w##_t p5,  \
+      const uint8x##w##_t p4, const uint8x##w##_t p3, const uint8x##w##_t p2,  \
+      const uint8x##w##_t p1, const uint8x##w##_t p0, const uint8x##w##_t q0,  \
+      const uint8x##w##_t q1, const uint8x##w##_t q2, const uint8x##w##_t q3,  \
+      const uint8x##w##_t q4, const uint8x##w##_t q5, const uint8x##w##_t q6,  \
+      const uint8x##w##_t q7, uint8x##w##_t *op6, uint8x##w##_t *op5,          \
+      uint8x##w##_t *op4, uint8x##w##_t *op3, uint8x##w##_t *op2,              \
+      uint8x##w##_t *op1, uint8x##w##_t *op0, uint8x##w##_t *oq0,              \
+      uint8x##w##_t *oq1, uint8x##w##_t *oq2, uint8x##w##_t *oq3,              \
+      uint8x##w##_t *oq4, uint8x##w##_t *oq5, uint8x##w##_t *oq6) {            \
+    if (flat_status != (uint32_t)-2) {                                         \
+      filter4_##w(mask, hev, p1, p0, q0, q1, op1, op0, oq0, oq1);              \
+    }                                                                          \
+                                                                               \
+    if (flat_status) {                                                         \
+      *op2 = p2;                                                               \
+      *oq2 = q2;                                                               \
+      if (flat2_status != (uint32_t)-2) {                                      \
+        apply_7_tap_filter_##w(flat, p3, p2, p1, p0, q0, q1, q2, q3, op2, op1, \
+                               op0, oq0, oq1, oq2);                            \
+      }                                                                        \
+      if (flat2_status) {                                                      \
+        apply_15_tap_filter_##w(flat2, p7, p6, p5, p4, p3, p2, p1, p0, q0, q1, \
+                                q2, q3, q4, q5, q6, q7, op6, op5, op4, op3,    \
+                                op2, op1, op0, oq0, oq1, oq2, oq3, oq4, oq5,   \
+                                oq6);                                          \
+      }                                                                        \
+    }                                                                          \
   }
+
+FUN_FILTER16(8)   // filter16_8
+FUN_FILTER16(16)  // filter16_16
+#undef FUN_FILTER16
+
+#define FUN_LOAD8(w, r)                                                    \
+  static INLINE void load_##w##x8(                                         \
+      const uint8_t *s, const int p, uint8x##w##_t *p3, uint8x##w##_t *p2, \
+      uint8x##w##_t *p1, uint8x##w##_t *p0, uint8x##w##_t *q0,             \
+      uint8x##w##_t *q1, uint8x##w##_t *q2, uint8x##w##_t *q3) {           \
+    *p3 = vld1##r##u8(s);                                                  \
+    s += p;                                                                \
+    *p2 = vld1##r##u8(s);                                                  \
+    s += p;                                                                \
+    *p1 = vld1##r##u8(s);                                                  \
+    s += p;                                                                \
+    *p0 = vld1##r##u8(s);                                                  \
+    s += p;                                                                \
+    *q0 = vld1##r##u8(s);                                                  \
+    s += p;                                                                \
+    *q1 = vld1##r##u8(s);                                                  \
+    s += p;                                                                \
+    *q2 = vld1##r##u8(s);                                                  \
+    s += p;                                                                \
+    *q3 = vld1##r##u8(s);                                                  \
+  }
+
+FUN_LOAD8(8, _)    // load_8x8
+FUN_LOAD8(16, q_)  // load_16x8
+#undef FUN_LOAD8
+
+#define FUN_LOAD16(w, r)                                                   \
+  static INLINE void load_##w##x16(                                        \
+      const uint8_t *s, const int p, uint8x##w##_t *s0, uint8x##w##_t *s1, \
+      uint8x##w##_t *s2, uint8x##w##_t *s3, uint8x##w##_t *s4,             \
+      uint8x##w##_t *s5, uint8x##w##_t *s6, uint8x##w##_t *s7,             \
+      uint8x##w##_t *s8, uint8x##w##_t *s9, uint8x##w##_t *s10,            \
+      uint8x##w##_t *s11, uint8x##w##_t *s12, uint8x##w##_t *s13,          \
+      uint8x##w##_t *s14, uint8x##w##_t *s15) {                            \
+    *s0 = vld1##r##u8(s);                                                  \
+    s += p;                                                                \
+    *s1 = vld1##r##u8(s);                                                  \
+    s += p;                                                                \
+    *s2 = vld1##r##u8(s);                                                  \
+    s += p;                                                                \
+    *s3 = vld1##r##u8(s);                                                  \
+    s += p;                                                                \
+    *s4 = vld1##r##u8(s);                                                  \
+    s += p;                                                                \
+    *s5 = vld1##r##u8(s);                                                  \
+    s += p;                                                                \
+    *s6 = vld1##r##u8(s);                                                  \
+    s += p;                                                                \
+    *s7 = vld1##r##u8(s);                                                  \
+    s += p;                                                                \
+    *s8 = vld1##r##u8(s);                                                  \
+    s += p;                                                                \
+    *s9 = vld1##r##u8(s);                                                  \
+    s += p;                                                                \
+    *s10 = vld1##r##u8(s);                                                 \
+    s += p;                                                                \
+    *s11 = vld1##r##u8(s);                                                 \
+    s += p;                                                                \
+    *s12 = vld1##r##u8(s);                                                 \
+    s += p;                                                                \
+    *s13 = vld1##r##u8(s);                                                 \
+    s += p;                                                                \
+    *s14 = vld1##r##u8(s);                                                 \
+    s += p;                                                                \
+    *s15 = vld1##r##u8(s);                                                 \
+  }
+
+FUN_LOAD16(8, _)    // load_8x16
+FUN_LOAD16(16, q_)  // load_16x16
+#undef FUN_LOAD16
+
+static INLINE void store_6x8(uint8_t *s, const int p, const uint8x8_t s0,
+                             const uint8x8_t s1, const uint8x8_t s2,
+                             const uint8x8_t s3, const uint8x8_t s4,
+                             const uint8x8_t s5) {
+  uint8x8x3_t o0, o1;
+
+  o0.val[0] = s0;
+  o0.val[1] = s1;
+  o0.val[2] = s2;
+  o1.val[0] = s3;
+  o1.val[1] = s4;
+  o1.val[2] = s5;
+  vst3_lane_u8(s - 3, o0, 0);
+  vst3_lane_u8(s + 0, o1, 0);
+  s += p;
+  vst3_lane_u8(s - 3, o0, 1);
+  vst3_lane_u8(s + 0, o1, 1);
+  s += p;
+  vst3_lane_u8(s - 3, o0, 2);
+  vst3_lane_u8(s + 0, o1, 2);
+  s += p;
+  vst3_lane_u8(s - 3, o0, 3);
+  vst3_lane_u8(s + 0, o1, 3);
+  s += p;
+  vst3_lane_u8(s - 3, o0, 4);
+  vst3_lane_u8(s + 0, o1, 4);
+  s += p;
+  vst3_lane_u8(s - 3, o0, 5);
+  vst3_lane_u8(s + 0, o1, 5);
+  s += p;
+  vst3_lane_u8(s - 3, o0, 6);
+  vst3_lane_u8(s + 0, o1, 6);
+  s += p;
+  vst3_lane_u8(s - 3, o0, 7);
+  vst3_lane_u8(s + 0, o1, 7);
 }
 
-static INLINE void filter16_16(
-    const uint8x16_t mask, const uint8x16_t flat, const uint64_t flat_u64,
-    const uint8x16_t flat2, const uint64_t flat2_u64, const uint8x16_t hev,
-    const uint8x16_t p7, const uint8x16_t p6, const uint8x16_t p5,
-    const uint8x16_t p4, const uint8x16_t p3, const uint8x16_t p2,
-    const uint8x16_t p1, const uint8x16_t p0, const uint8x16_t q0,
-    const uint8x16_t q1, const uint8x16_t q2, const uint8x16_t q3,
-    const uint8x16_t q4, const uint8x16_t q5, const uint8x16_t q6,
-    const uint8x16_t q7, uint8x16_t *op6, uint8x16_t *op5, uint8x16_t *op4,
-    uint8x16_t *op3, uint8x16_t *op2, uint8x16_t *op1, uint8x16_t *op0,
-    uint8x16_t *oq0, uint8x16_t *oq1, uint8x16_t *oq2, uint8x16_t *oq3,
-    uint8x16_t *oq4, uint8x16_t *oq5, uint8x16_t *oq6) {
-  // add outer taps if we have high edge variance
-  if (flat_u64 != (uint64_t)-2) {
-    int8x16_t filter, filter1, filter2, t;
-    int8x16_t ps1 = flip_sign_16(p1);
-    int8x16_t ps0 = flip_sign_16(p0);
-    int8x16_t qs0 = flip_sign_16(q0);
-    int8x16_t qs1 = flip_sign_16(q1);
+static INLINE void store_4x8(uint8_t *s, const int p, const uint8x8_t p1,
+                             const uint8x8_t p0, const uint8x8_t q0,
+                             const uint8x8_t q1) {
+  uint8x8x4_t o;
 
-    filter = vqsubq_s8(ps1, qs1);
-    filter = vandq_s8(filter, vreinterpretq_s8_u8(hev));
-    t = vqsubq_s8(qs0, ps0);
-
-    // inner taps
-    filter = vqaddq_s8(filter, t);
-    filter = vqaddq_s8(filter, t);
-    filter = vqaddq_s8(filter, t);
-    filter = vandq_s8(filter, vreinterpretq_s8_u8(mask));
-
-    // save bottom 3 bits so that we round one side +4 and the other +3
-    // if it equals 4 we'll set to adjust by -1 to account for the fact
-    // we'd round 3 the other way
-    filter1 = vshrq_n_s8(vqaddq_s8(filter, vdupq_n_s8(4)), 3);
-    filter2 = vshrq_n_s8(vqaddq_s8(filter, vdupq_n_s8(3)), 3);
-
-    qs0 = vqsubq_s8(qs0, filter1);
-    ps0 = vqaddq_s8(ps0, filter2);
-    *oq0 = flip_sign_back_16(qs0);
-    *op0 = flip_sign_back_16(ps0);
-
-    // outer tap adjustments
-    filter = vrshrq_n_s8(filter1, 1);
-    filter = vbicq_s8(filter, vreinterpretq_s8_u8(hev));
-
-    qs1 = vqsubq_s8(qs1, filter);
-    ps1 = vqaddq_s8(ps1, filter);
-    *oq1 = flip_sign_back_16(qs1);
-    *op1 = flip_sign_back_16(ps1);
-  }
-
-  if (flat_u64) {
-    *op2 = p2;
-    *oq2 = q2;
-    if (flat2_u64 != (uint64_t)-2) {
-      apply_7_tap_filter_16(flat, p3, p2, p1, p0, q0, q1, q2, q3, op2, op1, op0,
-                            oq0, oq1, oq2);
-    }
-    if (flat2_u64) {
-      apply_15_tap_filter_16(flat2, p7, p6, p5, p4, p3, p2, p1, p0, q0, q1, q2,
-                             q3, q4, q5, q6, q7, op6, op5, op4, op3, op2, op1,
-                             op0, oq0, oq1, oq2, oq3, oq4, oq5, oq6);
-    }
-  }
+  o.val[0] = p1;
+  o.val[1] = p0;
+  o.val[2] = q0;
+  o.val[3] = q1;
+  vst4_lane_u8(s, o, 0);
+  s += p;
+  vst4_lane_u8(s, o, 1);
+  s += p;
+  vst4_lane_u8(s, o, 2);
+  s += p;
+  vst4_lane_u8(s, o, 3);
+  s += p;
+  vst4_lane_u8(s, o, 4);
+  s += p;
+  vst4_lane_u8(s, o, 5);
+  s += p;
+  vst4_lane_u8(s, o, 6);
+  s += p;
+  vst4_lane_u8(s, o, 7);
 }
 
-static INLINE void store_result_8(uint8_t *s, int p, const uint8x8_t p6,
-                                  const uint8x8_t p5, const uint8x8_t p4,
-                                  const uint8x8_t p3, const uint8x8_t p2,
-                                  const uint8x8_t p1, const uint8x8_t p0,
-                                  const uint8x8_t q0, const uint8x8_t q1,
-                                  const uint8x8_t q2, const uint8x8_t q3,
-                                  const uint8x8_t q4, const uint8x8_t q5,
-                                  const uint8x8_t q6, const uint64_t flat_u64,
-                                  const uint64_t flat2_u64) {
-  if (flat_u64) {
-    if (flat2_u64) {
-      vst1_u8(s - 7 * p, p6);
-      vst1_u8(s - 6 * p, p5);
-      vst1_u8(s - 5 * p, p4);
-      vst1_u8(s - 4 * p, p3);
-      vst1_u8(s + 3 * p, q3);
-      vst1_u8(s + 4 * p, q4);
-      vst1_u8(s + 5 * p, q5);
-      vst1_u8(s + 6 * p, q6);
-    }
-    vst1_u8(s - 3 * p, p2);
-    vst1_u8(s + 2 * p, q2);
-  }
-  vst1_u8(s - 2 * p, p1);
-  vst1_u8(s - 1 * p, p0);
-  vst1_u8(s + 0 * p, q0);
-  vst1_u8(s + 1 * p, q1);
+static INLINE void store_16x8(uint8_t *s, const int p, const uint8x16_t s0,
+                              const uint8x16_t s1, const uint8x16_t s2,
+                              const uint8x16_t s3, const uint8x16_t s4,
+                              const uint8x16_t s5, const uint8x16_t s6,
+                              const uint8x16_t s7) {
+  vst1q_u8(s, s0);
+  s += p;
+  vst1q_u8(s, s1);
+  s += p;
+  vst1q_u8(s, s2);
+  s += p;
+  vst1q_u8(s, s3);
+  s += p;
+  vst1q_u8(s, s4);
+  s += p;
+  vst1q_u8(s, s5);
+  s += p;
+  vst1q_u8(s, s6);
+  s += p;
+  vst1q_u8(s, s7);
 }
 
-static INLINE void store_result_16(uint8_t *s, int p, const uint8x16_t p6,
-                                   const uint8x16_t p5, const uint8x16_t p4,
-                                   const uint8x16_t p3, const uint8x16_t p2,
-                                   const uint8x16_t p1, const uint8x16_t p0,
-                                   const uint8x16_t q0, const uint8x16_t q1,
-                                   const uint8x16_t q2, const uint8x16_t q3,
-                                   const uint8x16_t q4, const uint8x16_t q5,
-                                   const uint8x16_t q6, const uint64_t flat_u64,
-                                   const uint64_t flat2_u64) {
-  if (flat_u64) {
-    if (flat2_u64) {
-      vst1q_u8(s - 7 * p, p6);
-      vst1q_u8(s - 6 * p, p5);
-      vst1q_u8(s - 5 * p, p4);
-      vst1q_u8(s - 4 * p, p3);
-      vst1q_u8(s + 3 * p, q3);
-      vst1q_u8(s + 4 * p, q4);
-      vst1q_u8(s + 5 * p, q5);
-      vst1q_u8(s + 6 * p, q6);
-    }
-    vst1q_u8(s - 3 * p, p2);
-    vst1q_u8(s + 2 * p, q2);
-  }
-  vst1q_u8(s - 2 * p, p1);
-  vst1q_u8(s - 1 * p, p0);
-  vst1q_u8(s + 0 * p, q0);
-  vst1q_u8(s + 1 * p, q1);
+static INLINE void store_16x16(uint8_t *s, const int p, const uint8x16_t s0,
+                               const uint8x16_t s1, const uint8x16_t s2,
+                               const uint8x16_t s3, const uint8x16_t s4,
+                               const uint8x16_t s5, const uint8x16_t s6,
+                               const uint8x16_t s7, const uint8x16_t s8,
+                               const uint8x16_t s9, const uint8x16_t s10,
+                               const uint8x16_t s11, const uint8x16_t s12,
+                               const uint8x16_t s13, const uint8x16_t s14,
+                               const uint8x16_t s15) {
+  vst1q_u8(s, s0);
+  s += p;
+  vst1q_u8(s, s1);
+  s += p;
+  vst1q_u8(s, s2);
+  s += p;
+  vst1q_u8(s, s3);
+  s += p;
+  vst1q_u8(s, s4);
+  s += p;
+  vst1q_u8(s, s5);
+  s += p;
+  vst1q_u8(s, s6);
+  s += p;
+  vst1q_u8(s, s7);
+  s += p;
+  vst1q_u8(s, s8);
+  s += p;
+  vst1q_u8(s, s9);
+  s += p;
+  vst1q_u8(s, s10);
+  s += p;
+  vst1q_u8(s, s11);
+  s += p;
+  vst1q_u8(s, s12);
+  s += p;
+  vst1q_u8(s, s13);
+  s += p;
+  vst1q_u8(s, s14);
+  s += p;
+  vst1q_u8(s, s15);
 }
+
+#define FUN_STORE14(w, r)                                                      \
+  static INLINE void store_##w##x14(                                           \
+      uint8_t *s, const int p, const uint8x##w##_t p6, const uint8x##w##_t p5, \
+      const uint8x##w##_t p4, const uint8x##w##_t p3, const uint8x##w##_t p2,  \
+      const uint8x##w##_t p1, const uint8x##w##_t p0, const uint8x##w##_t q0,  \
+      const uint8x##w##_t q1, const uint8x##w##_t q2, const uint8x##w##_t q3,  \
+      const uint8x##w##_t q4, const uint8x##w##_t q5, const uint8x##w##_t q6,  \
+      const uint32_t flat_status, const uint32_t flat2_status) {               \
+    if (flat_status) {                                                         \
+      if (flat2_status) {                                                      \
+        vst1##r##u8(s - 7 * p, p6);                                            \
+        vst1##r##u8(s - 6 * p, p5);                                            \
+        vst1##r##u8(s - 5 * p, p4);                                            \
+        vst1##r##u8(s - 4 * p, p3);                                            \
+        vst1##r##u8(s + 3 * p, q3);                                            \
+        vst1##r##u8(s + 4 * p, q4);                                            \
+        vst1##r##u8(s + 5 * p, q5);                                            \
+        vst1##r##u8(s + 6 * p, q6);                                            \
+      }                                                                        \
+      vst1##r##u8(s - 3 * p, p2);                                              \
+      vst1##r##u8(s + 2 * p, q2);                                              \
+    }                                                                          \
+    vst1##r##u8(s - 2 * p, p1);                                                \
+    vst1##r##u8(s - 1 * p, p0);                                                \
+    vst1##r##u8(s + 0 * p, q0);                                                \
+    vst1##r##u8(s + 1 * p, q1);                                                \
+  }
+
+FUN_STORE14(8, _)    // store_8x14
+FUN_STORE14(16, q_)  // store_16x14
+#undef FUN_STORE14
+
+#define FUN_LPF_16_KERNEL(name, w)                                             \
+  static INLINE void lpf_16##name##kernel(                                     \
+      const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh,      \
+      const uint8x##w##_t p7, const uint8x##w##_t p6, const uint8x##w##_t p5,  \
+      const uint8x##w##_t p4, const uint8x##w##_t p3, const uint8x##w##_t p2,  \
+      const uint8x##w##_t p1, const uint8x##w##_t p0, const uint8x##w##_t q0,  \
+      const uint8x##w##_t q1, const uint8x##w##_t q2, const uint8x##w##_t q3,  \
+      const uint8x##w##_t q4, const uint8x##w##_t q5, const uint8x##w##_t q6,  \
+      const uint8x##w##_t q7, uint8x##w##_t *op6, uint8x##w##_t *op5,          \
+      uint8x##w##_t *op4, uint8x##w##_t *op3, uint8x##w##_t *op2,              \
+      uint8x##w##_t *op1, uint8x##w##_t *op0, uint8x##w##_t *oq0,              \
+      uint8x##w##_t *oq1, uint8x##w##_t *oq2, uint8x##w##_t *oq3,              \
+      uint8x##w##_t *oq4, uint8x##w##_t *oq5, uint8x##w##_t *oq6,              \
+      uint32_t *flat_status, uint32_t *flat2_status) {                         \
+    uint8x##w##_t blimit_vec, limit_vec, thresh_vec, mask, flat, flat2, hev;   \
+                                                                               \
+    load_thresh_##w(blimit, limit, thresh, &blimit_vec, &limit_vec,            \
+                    &thresh_vec);                                              \
+    mask = filter_flat_hev_mask_##w(limit_vec, blimit_vec, thresh_vec, p3, p2, \
+                                    p1, p0, q0, q1, q2, q3, &flat,             \
+                                    flat_status, &hev);                        \
+    flat2 = flat_mask5_##w(p7, p6, p5, p4, p0, q0, q4, q5, q6, q7, flat,       \
+                           flat2_status);                                      \
+    filter16_##w(mask, flat, *flat_status, flat2, *flat2_status, hev, p7, p6,  \
+                 p5, p4, p3, p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7, op6,  \
+                 op5, op4, op3, op2, op1, op0, oq0, oq1, oq2, oq3, oq4, oq5,   \
+                 oq6);                                                         \
+  }
+
+FUN_LPF_16_KERNEL(_, 8)        // lpf_16_kernel
+FUN_LPF_16_KERNEL(_dual_, 16)  // lpf_16_dual_kernel
+#undef FUN_LPF_16_KERNEL
 
 void vpx_lpf_horizontal_edge_8_neon(uint8_t *s, int p, const uint8_t *blimit,
                                     const uint8_t *limit,
                                     const uint8_t *thresh) {
-  const uint8x8_t blimit_u8x8 = vld1_dup_u8(blimit);
-  const uint8x8_t limit_u8x8 = vld1_dup_u8(limit);
-  const uint8x8_t thresh_u8x8 = vld1_dup_u8(thresh);
-  const uint8x8_t p7 = vld1_u8(s - 8 * p);
-  const uint8x8_t p6 = vld1_u8(s - 7 * p);
-  const uint8x8_t p5 = vld1_u8(s - 6 * p);
-  const uint8x8_t p4 = vld1_u8(s - 5 * p);
-  const uint8x8_t p3 = vld1_u8(s - 4 * p);
-  const uint8x8_t p2 = vld1_u8(s - 3 * p);
-  const uint8x8_t p1 = vld1_u8(s - 2 * p);
-  const uint8x8_t p0 = vld1_u8(s - 1 * p);
-  const uint8x8_t q0 = vld1_u8(s + 0 * p);
-  const uint8x8_t q1 = vld1_u8(s + 1 * p);
-  const uint8x8_t q2 = vld1_u8(s + 2 * p);
-  const uint8x8_t q3 = vld1_u8(s + 3 * p);
-  const uint8x8_t q4 = vld1_u8(s + 4 * p);
-  const uint8x8_t q5 = vld1_u8(s + 5 * p);
-  const uint8x8_t q6 = vld1_u8(s + 6 * p);
-  const uint8x8_t q7 = vld1_u8(s + 7 * p);
-  uint8x8_t op6, op5, op4, op3, op2, op1, op0, oq0, oq1, oq2, oq3, oq4, oq5,
-      oq6, flat, hev;
-  const uint8x8_t mask = filter_mask_8(limit_u8x8, blimit_u8x8, thresh_u8x8, p3,
-                                       p2, p1, p0, q0, q1, q2, q3, &flat, &hev);
-  uint8x8_t flat2 = flat_mask5_8(p7, p6, p5, p4, p0, q0, q4, q5, q6, q7);
-  uint64_t flat_u64, flat2_u64;
+  uint8x8_t p7, p6, p5, p4, p3, p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7, op6,
+      op5, op4, op3, op2, op1, op0, oq0, oq1, oq2, oq3, oq4, oq5, oq6;
+  uint32_t flat_status, flat2_status;
 
-  flat = vand_u8(flat, mask);
-  flat2 = vand_u8(flat2, flat);
-  flat_u64 = vget_lane_u64(vreinterpret_u64_u8(flat), 0);
-  flat2_u64 = vget_lane_u64(vreinterpret_u64_u8(flat2), 0);
-
-  filter16_8(mask, flat, flat_u64, flat2, flat2_u64, hev, p7, p6, p5, p4, p3,
-             p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7, &op6, &op5, &op4, &op3,
-             &op2, &op1, &op0, &oq0, &oq1, &oq2, &oq3, &oq4, &oq5, &oq6);
-  store_result_8(s, p, op6, op5, op4, op3, op2, op1, op0, oq0, oq1, oq2, oq3,
-                 oq4, oq5, oq6, flat_u64, flat2_u64);
+  load_8x16(s - 8 * p, p, &p7, &p6, &p5, &p4, &p3, &p2, &p1, &p0, &q0, &q1, &q2,
+            &q3, &q4, &q5, &q6, &q7);
+  lpf_16_kernel(blimit, limit, thresh, p7, p6, p5, p4, p3, p2, p1, p0, q0, q1,
+                q2, q3, q4, q5, q6, q7, &op6, &op5, &op4, &op3, &op2, &op1,
+                &op0, &oq0, &oq1, &oq2, &oq3, &oq4, &oq5, &oq6, &flat_status,
+                &flat2_status);
+  store_8x14(s, p, op6, op5, op4, op3, op2, op1, op0, oq0, oq1, oq2, oq3, oq4,
+             oq5, oq6, flat_status, flat2_status);
 }
 
 void vpx_lpf_horizontal_edge_16_neon(uint8_t *s, int p, const uint8_t *blimit,
                                      const uint8_t *limit,
                                      const uint8_t *thresh) {
-  const uint8x16_t blimit_u8x16 = vld1q_dup_u8(blimit);
-  const uint8x16_t limit_u8x16 = vld1q_dup_u8(limit);
-  const uint8x16_t thresh_u8x16 = vld1q_dup_u8(thresh);
-  const uint8x16_t p3 = vld1q_u8(s - 4 * p);
-  const uint8x16_t p2 = vld1q_u8(s - 3 * p);
-  const uint8x16_t p1 = vld1q_u8(s - 2 * p);
-  const uint8x16_t p0 = vld1q_u8(s - 1 * p);
-  const uint8x16_t q0 = vld1q_u8(s + 0 * p);
-  const uint8x16_t q1 = vld1q_u8(s + 1 * p);
-  const uint8x16_t q2 = vld1q_u8(s + 2 * p);
-  const uint8x16_t q3 = vld1q_u8(s + 3 * p);
-  uint8x16_t op6, op5, op4, op3, op2, op1, op0, oq0, oq1, oq2, oq3, oq4, oq5,
-      oq6, flat, hev;
-  const uint8x16_t mask =
-      filter_mask_16(limit_u8x16, blimit_u8x16, thresh_u8x16, p3, p2, p1, p0,
-                     q0, q1, q2, q3, &flat, &hev);
-  const uint8x16_t p7 = vld1q_u8(s - 8 * p);
-  const uint8x16_t p6 = vld1q_u8(s - 7 * p);
-  const uint8x16_t p5 = vld1q_u8(s - 6 * p);
-  const uint8x16_t p4 = vld1q_u8(s - 5 * p);
-  const uint8x16_t q4 = vld1q_u8(s + 4 * p);
-  const uint8x16_t q5 = vld1q_u8(s + 5 * p);
-  const uint8x16_t q6 = vld1q_u8(s + 6 * p);
-  const uint8x16_t q7 = vld1q_u8(s + 7 * p);
-  uint8x16_t flat2 = flat_mask5_16(p7, p6, p5, p4, p0, q0, q4, q5, q6, q7);
-  uint64x1_t flat_u64x1, flat2_u64x1;
-  uint64_t flat_u64, flat2_u64;
+  uint8x16_t p7, p6, p5, p4, p3, p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7,
+      op6, op5, op4, op3, op2, op1, op0, oq0, oq1, oq2, oq3, oq4, oq5, oq6;
+  uint32_t flat_status, flat2_status;
 
-  flat = vandq_u8(flat, mask);
-  flat2 = vandq_u8(flat2, flat);
-  flat_u64x1 = vadd_u64(vreinterpret_u64_u8(vget_low_u8(flat)),
-                        vreinterpret_u64_u8(vget_high_u8(flat)));
-  flat2_u64x1 = vadd_u64(vreinterpret_u64_u8(vget_low_u8(flat2)),
-                         vreinterpret_u64_u8(vget_high_u8(flat2)));
-  flat_u64 = vget_lane_u64(flat_u64x1, 0);
-  flat2_u64 = vget_lane_u64(flat2_u64x1, 0);
-
-  filter16_16(mask, flat, flat_u64, flat2, flat2_u64, hev, p7, p6, p5, p4, p3,
-              p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7, &op6, &op5, &op4,
-              &op3, &op2, &op1, &op0, &oq0, &oq1, &oq2, &oq3, &oq4, &oq5, &oq6);
-  store_result_16(s, p, op6, op5, op4, op3, op2, op1, op0, oq0, oq1, oq2, oq3,
-                  oq4, oq5, oq6, flat_u64, flat2_u64);
+  load_16x8(s - 4 * p, p, &p3, &p2, &p1, &p0, &q0, &q1, &q2, &q3);
+  p7 = vld1q_u8(s - 8 * p);
+  p6 = vld1q_u8(s - 7 * p);
+  p5 = vld1q_u8(s - 6 * p);
+  p4 = vld1q_u8(s - 5 * p);
+  q4 = vld1q_u8(s + 4 * p);
+  q5 = vld1q_u8(s + 5 * p);
+  q6 = vld1q_u8(s + 6 * p);
+  q7 = vld1q_u8(s + 7 * p);
+  lpf_16_dual_kernel(blimit, limit, thresh, p7, p6, p5, p4, p3, p2, p1, p0, q0,
+                     q1, q2, q3, q4, q5, q6, q7, &op6, &op5, &op4, &op3, &op2,
+                     &op1, &op0, &oq0, &oq1, &oq2, &oq3, &oq4, &oq5, &oq6,
+                     &flat_status, &flat2_status);
+  store_16x14(s, p, op6, op5, op4, op3, op2, op1, op0, oq0, oq1, oq2, oq3, oq4,
+              oq5, oq6, flat_status, flat2_status);
 }
 
 void vpx_lpf_vertical_16_neon(uint8_t *s, int p, const uint8_t *blimit,
                               const uint8_t *limit, const uint8_t *thresh) {
-  const uint8x8_t blimit_u8x8 = vld1_dup_u8(blimit);
-  const uint8x8_t limit_u8x8 = vld1_dup_u8(limit);
-  const uint8x8_t thresh_u8x8 = vld1_dup_u8(thresh);
-  uint8_t *d;
-  uint8x16_t t0, t1, t2, t3, t4, t5, t6, t7;
   uint8x8_t p7, p6, p5, p4, p3, p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7, op6,
-      op5, op4, op3, op2, op1, op0, oq0, oq1, oq2, oq3, oq4, oq5, oq6, flat,
-      hev, mask, flat2;
-  uint64_t flat_u64, flat2_u64;
+      op5, op4, op3, op2, op1, op0, oq0, oq1, oq2, oq3, oq4, oq5, oq6;
+  uint8x16_t s0, s1, s2, s3, s4, s5, s6, s7;
+  uint32_t flat_status, flat2_status;
 
   s -= 8;
-  d = s;
-  t0 = vld1q_u8(s);
-  s += p;
-  t1 = vld1q_u8(s);
-  s += p;
-  t2 = vld1q_u8(s);
-  s += p;
-  t3 = vld1q_u8(s);
-  s += p;
-  t4 = vld1q_u8(s);
-  s += p;
-  t5 = vld1q_u8(s);
-  s += p;
-  t6 = vld1q_u8(s);
-  s += p;
-  t7 = vld1q_u8(s);
-
-  transpose_u8_16x8(t0, t1, t2, t3, t4, t5, t6, t7, &p7, &p6, &p5, &p4, &p3,
+  load_16x8(s, p, &s0, &s1, &s2, &s3, &s4, &s5, &s6, &s7);
+  transpose_u8_16x8(s0, s1, s2, s3, s4, s5, s6, s7, &p7, &p6, &p5, &p4, &p3,
                     &p2, &p1, &p0, &q0, &q1, &q2, &q3, &q4, &q5, &q6, &q7);
-
-  mask = filter_mask_8(limit_u8x8, blimit_u8x8, thresh_u8x8, p3, p2, p1, p0, q0,
-                       q1, q2, q3, &flat, &hev);
-  flat2 = flat_mask5_8(p7, p6, p5, p4, p0, q0, q4, q5, q6, q7);
-  flat = vand_u8(flat, mask);
-  flat2 = vand_u8(flat2, flat);
-  flat_u64 = vget_lane_u64(vreinterpret_u64_u8(flat), 0);
-  flat2_u64 = vget_lane_u64(vreinterpret_u64_u8(flat2), 0);
-
-  filter16_8(mask, flat, flat_u64, flat2, flat2_u64, hev, p7, p6, p5, p4, p3,
-             p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7, &op6, &op5, &op4, &op3,
-             &op2, &op1, &op0, &oq0, &oq1, &oq2, &oq3, &oq4, &oq5, &oq6);
-
-  if (flat_u64) {
-    if (flat2_u64) {
-      uint8x16_t o0, o1, o2, o3, o4, o5, o6, o7;
+  lpf_16_kernel(blimit, limit, thresh, p7, p6, p5, p4, p3, p2, p1, p0, q0, q1,
+                q2, q3, q4, q5, q6, q7, &op6, &op5, &op4, &op3, &op2, &op1,
+                &op0, &oq0, &oq1, &oq2, &oq3, &oq4, &oq5, &oq6, &flat_status,
+                &flat2_status);
+  if (flat_status) {
+    if (flat2_status) {
       transpose_u8_8x16(p7, op6, op5, op4, op3, op2, op1, op0, oq0, oq1, oq2,
-                        oq3, oq4, oq5, oq6, q7, &o0, &o1, &o2, &o3, &o4, &o5,
-                        &o6, &o7);
-
-      vst1q_u8(d, o0);
-      d += p;
-      vst1q_u8(d, o1);
-      d += p;
-      vst1q_u8(d, o2);
-      d += p;
-      vst1q_u8(d, o3);
-      d += p;
-      vst1q_u8(d, o4);
-      d += p;
-      vst1q_u8(d, o5);
-      d += p;
-      vst1q_u8(d, o6);
-      d += p;
-      vst1q_u8(d, o7);
+                        oq3, oq4, oq5, oq6, q7, &s0, &s1, &s2, &s3, &s4, &s5,
+                        &s6, &s7);
+      store_16x8(s, p, s0, s1, s2, s3, s4, s5, s6, s7);
     } else {
-      uint8x8x3_t o0, o1;
-      d += 8;
-      o0.val[0] = op2;
-      o0.val[1] = op1;
-      o0.val[2] = op0;
-      o1.val[0] = oq0;
-      o1.val[1] = oq1;
-      o1.val[2] = oq2;
-      vst3_lane_u8(d - 3, o0, 0);
-      vst3_lane_u8(d + 0, o1, 0);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 1);
-      vst3_lane_u8(d + 0, o1, 1);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 2);
-      vst3_lane_u8(d + 0, o1, 2);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 3);
-      vst3_lane_u8(d + 0, o1, 3);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 4);
-      vst3_lane_u8(d + 0, o1, 4);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 5);
-      vst3_lane_u8(d + 0, o1, 5);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 6);
-      vst3_lane_u8(d + 0, o1, 6);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 7);
-      vst3_lane_u8(d + 0, o1, 7);
+      store_6x8(s + 8, p, op2, op1, op0, oq0, oq1, oq2);
     }
   } else {
-    uint8x8x4_t o;
-    d += 6;
-    o.val[0] = op1;
-    o.val[1] = op0;
-    o.val[2] = oq0;
-    o.val[3] = oq1;
-    vst4_lane_u8(d, o, 0);
-    d += p;
-    vst4_lane_u8(d, o, 1);
-    d += p;
-    vst4_lane_u8(d, o, 2);
-    d += p;
-    vst4_lane_u8(d, o, 3);
-    d += p;
-    vst4_lane_u8(d, o, 4);
-    d += p;
-    vst4_lane_u8(d, o, 5);
-    d += p;
-    vst4_lane_u8(d, o, 6);
-    d += p;
-    vst4_lane_u8(d, o, 7);
+    store_4x8(s + 6, p, op1, op0, oq0, oq1);
   }
 }
 
 void vpx_lpf_vertical_16_dual_neon(uint8_t *s, int p, const uint8_t *blimit,
                                    const uint8_t *limit,
                                    const uint8_t *thresh) {
-  const uint8x16_t blimit_u8x16 = vld1q_dup_u8(blimit);
-  const uint8x16_t limit_u8x16 = vld1q_dup_u8(limit);
-  const uint8x16_t thresh_u8x16 = vld1q_dup_u8(thresh);
-  uint8_t *d;
-  uint8x16_t t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14,
-      t15;
   uint8x16_t p7, p6, p5, p4, p3, p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7,
-      op6, op5, op4, op3, op2, op1, op0, oq0, oq1, oq2, oq3, oq4, oq5, oq6,
-      flat, hev, mask, flat2;
-  uint64x1_t flat_u64x1, flat2_u64x1;
-  uint64_t flat_u64, flat2_u64;
+      op6, op5, op4, op3, op2, op1, op0, oq0, oq1, oq2, oq3, oq4, oq5, oq6;
+  uint8x16_t s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14,
+      s15;
+  uint32_t flat_status, flat2_status;
 
   s -= 8;
-  d = s;
-  t0 = vld1q_u8(s);
-  s += p;
-  t1 = vld1q_u8(s);
-  s += p;
-  t2 = vld1q_u8(s);
-  s += p;
-  t3 = vld1q_u8(s);
-  s += p;
-  t4 = vld1q_u8(s);
-  s += p;
-  t5 = vld1q_u8(s);
-  s += p;
-  t6 = vld1q_u8(s);
-  s += p;
-  t7 = vld1q_u8(s);
-  s += p;
-  t8 = vld1q_u8(s);
-  s += p;
-  t9 = vld1q_u8(s);
-  s += p;
-  t10 = vld1q_u8(s);
-  s += p;
-  t11 = vld1q_u8(s);
-  s += p;
-  t12 = vld1q_u8(s);
-  s += p;
-  t13 = vld1q_u8(s);
-  s += p;
-  t14 = vld1q_u8(s);
-  s += p;
-  t15 = vld1q_u8(s);
-
-  transpose_u8_16x16(t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13,
-                     t14, t15, &p7, &p6, &p5, &p4, &p3, &p2, &p1, &p0, &q0, &q1,
+  load_16x16(s, p, &s0, &s1, &s2, &s3, &s4, &s5, &s6, &s7, &s8, &s9, &s10, &s11,
+             &s12, &s13, &s14, &s15);
+  transpose_u8_16x16(s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13,
+                     s14, s15, &p7, &p6, &p5, &p4, &p3, &p2, &p1, &p0, &q0, &q1,
                      &q2, &q3, &q4, &q5, &q6, &q7);
-
-  mask = filter_mask_16(limit_u8x16, blimit_u8x16, thresh_u8x16, p3, p2, p1, p0,
-                        q0, q1, q2, q3, &flat, &hev);
-  flat2 = flat_mask5_16(p7, p6, p5, p4, p0, q0, q4, q5, q6, q7);
-  flat = vandq_u8(flat, mask);
-  flat2 = vandq_u8(flat2, flat);
-  flat_u64x1 = vadd_u64(vreinterpret_u64_u8(vget_low_u8(flat)),
-                        vreinterpret_u64_u8(vget_high_u8(flat)));
-  flat2_u64x1 = vadd_u64(vreinterpret_u64_u8(vget_low_u8(flat2)),
-                         vreinterpret_u64_u8(vget_high_u8(flat2)));
-  flat_u64 = vget_lane_u64(flat_u64x1, 0);
-  flat2_u64 = vget_lane_u64(flat2_u64x1, 0);
-
-  filter16_16(mask, flat, flat_u64, flat2, flat2_u64, hev, p7, p6, p5, p4, p3,
-              p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7, &op6, &op5, &op4,
-              &op3, &op2, &op1, &op0, &oq0, &oq1, &oq2, &oq3, &oq4, &oq5, &oq6);
-
-  if (flat_u64) {
-    if (flat2_u64) {
-      uint8x16_t o0, o1, o2, o3, o4, o5, o6, o7, o8, o9, o10, o11, o12, o13,
-          o14, o15;
+  lpf_16_dual_kernel(blimit, limit, thresh, p7, p6, p5, p4, p3, p2, p1, p0, q0,
+                     q1, q2, q3, q4, q5, q6, q7, &op6, &op5, &op4, &op3, &op2,
+                     &op1, &op0, &oq0, &oq1, &oq2, &oq3, &oq4, &oq5, &oq6,
+                     &flat_status, &flat2_status);
+  if (flat_status) {
+    if (flat2_status) {
       transpose_u8_16x16(p7, op6, op5, op4, op3, op2, op1, op0, oq0, oq1, oq2,
-                         oq3, oq4, oq5, oq6, q7, &o0, &o1, &o2, &o3, &o4, &o5,
-                         &o6, &o7, &o8, &o9, &o10, &o11, &o12, &o13, &o14,
-                         &o15);
-
-      vst1q_u8(d, o0);
-      d += p;
-      vst1q_u8(d, o1);
-      d += p;
-      vst1q_u8(d, o2);
-      d += p;
-      vst1q_u8(d, o3);
-      d += p;
-      vst1q_u8(d, o4);
-      d += p;
-      vst1q_u8(d, o5);
-      d += p;
-      vst1q_u8(d, o6);
-      d += p;
-      vst1q_u8(d, o7);
-      d += p;
-
-      vst1q_u8(d, o8);
-      d += p;
-      vst1q_u8(d, o9);
-      d += p;
-      vst1q_u8(d, o10);
-      d += p;
-      vst1q_u8(d, o11);
-      d += p;
-      vst1q_u8(d, o12);
-      d += p;
-      vst1q_u8(d, o13);
-      d += p;
-      vst1q_u8(d, o14);
-      d += p;
-      vst1q_u8(d, o15);
+                         oq3, oq4, oq5, oq6, q7, &s0, &s1, &s2, &s3, &s4, &s5,
+                         &s6, &s7, &s8, &s9, &s10, &s11, &s12, &s13, &s14,
+                         &s15);
+      store_16x16(s, p, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12,
+                  s13, s14, s15);
     } else {
-      uint8x8x3_t o0, o1;
-      d += 8;
-      o0.val[0] = vget_low_u8(op2);
-      o0.val[1] = vget_low_u8(op1);
-      o0.val[2] = vget_low_u8(op0);
-      o1.val[0] = vget_low_u8(oq0);
-      o1.val[1] = vget_low_u8(oq1);
-      o1.val[2] = vget_low_u8(oq2);
-      vst3_lane_u8(d - 3, o0, 0);
-      vst3_lane_u8(d + 0, o1, 0);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 1);
-      vst3_lane_u8(d + 0, o1, 1);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 2);
-      vst3_lane_u8(d + 0, o1, 2);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 3);
-      vst3_lane_u8(d + 0, o1, 3);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 4);
-      vst3_lane_u8(d + 0, o1, 4);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 5);
-      vst3_lane_u8(d + 0, o1, 5);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 6);
-      vst3_lane_u8(d + 0, o1, 6);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 7);
-      vst3_lane_u8(d + 0, o1, 7);
-      d += p;
-
-      o0.val[0] = vget_high_u8(op2);
-      o0.val[1] = vget_high_u8(op1);
-      o0.val[2] = vget_high_u8(op0);
-      o1.val[0] = vget_high_u8(oq0);
-      o1.val[1] = vget_high_u8(oq1);
-      o1.val[2] = vget_high_u8(oq2);
-      vst3_lane_u8(d - 3, o0, 0);
-      vst3_lane_u8(d + 0, o1, 0);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 1);
-      vst3_lane_u8(d + 0, o1, 1);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 2);
-      vst3_lane_u8(d + 0, o1, 2);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 3);
-      vst3_lane_u8(d + 0, o1, 3);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 4);
-      vst3_lane_u8(d + 0, o1, 4);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 5);
-      vst3_lane_u8(d + 0, o1, 5);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 6);
-      vst3_lane_u8(d + 0, o1, 6);
-      d += p;
-      vst3_lane_u8(d - 3, o0, 7);
-      vst3_lane_u8(d + 0, o1, 7);
+      s += 8;
+      store_6x8(s, p, vget_low_u8(op2), vget_low_u8(op1), vget_low_u8(op0),
+                vget_low_u8(oq0), vget_low_u8(oq1), vget_low_u8(oq2));
+      store_6x8(s + 8 * p, p, vget_high_u8(op2), vget_high_u8(op1),
+                vget_high_u8(op0), vget_high_u8(oq0), vget_high_u8(oq1),
+                vget_high_u8(oq2));
     }
   } else {
-    uint8x8x4_t o;
-    d += 6;
-    o.val[0] = vget_low_u8(op1);
-    o.val[1] = vget_low_u8(op0);
-    o.val[2] = vget_low_u8(oq0);
-    o.val[3] = vget_low_u8(oq1);
-    vst4_lane_u8(d, o, 0);
-    d += p;
-    vst4_lane_u8(d, o, 1);
-    d += p;
-    vst4_lane_u8(d, o, 2);
-    d += p;
-    vst4_lane_u8(d, o, 3);
-    d += p;
-    vst4_lane_u8(d, o, 4);
-    d += p;
-    vst4_lane_u8(d, o, 5);
-    d += p;
-    vst4_lane_u8(d, o, 6);
-    d += p;
-    vst4_lane_u8(d, o, 7);
-    d += p;
-
-    o.val[0] = vget_high_u8(op1);
-    o.val[1] = vget_high_u8(op0);
-    o.val[2] = vget_high_u8(oq0);
-    o.val[3] = vget_high_u8(oq1);
-    vst4_lane_u8(d, o, 0);
-    d += p;
-    vst4_lane_u8(d, o, 1);
-    d += p;
-    vst4_lane_u8(d, o, 2);
-    d += p;
-    vst4_lane_u8(d, o, 3);
-    d += p;
-    vst4_lane_u8(d, o, 4);
-    d += p;
-    vst4_lane_u8(d, o, 5);
-    d += p;
-    vst4_lane_u8(d, o, 6);
-    d += p;
-    vst4_lane_u8(d, o, 7);
+    s += 6;
+    store_4x8(s, p, vget_low_u8(op1), vget_low_u8(op0), vget_low_u8(oq0),
+              vget_low_u8(oq1));
+    store_4x8(s + 8 * p, p, vget_high_u8(op1), vget_high_u8(op0),
+              vget_high_u8(oq0), vget_high_u8(oq1));
   }
 }
