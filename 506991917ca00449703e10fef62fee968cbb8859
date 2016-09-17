@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb243697_d3931704",
+        "filename": "vpx_dsp/arm/transpose_neon.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-17T19:15:37Z",
+      "side": 1,
+      "message": "maybe just bring in the comment fixes and leave the other 2 until they\u0027re needed",
+      "revId": "506991917ca00449703e10fef62fee968cbb8859",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
