@@ -481,7 +481,6 @@ FUN_FILTER16(16)  // filter16_16
     *q3 = vld1##r##u8(s);                                                  \
   }
 
-FUN_LOAD8(8, _)    // load_8x8
 FUN_LOAD8(16, q_)  // load_16x8
 #undef FUN_LOAD8
 
