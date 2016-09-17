@@ -32,7 +32,7 @@
 #include "av1/encoder/aq_variance.h"
 #include "av1/encoder/bitstream.h"
 #if CONFIG_ANS
-#include "av1/encoder/buf_ans.h"
+#include "aom_dsp/buf_ans.h"
 #endif
 #include "av1/encoder/context_tree.h"
 #include "av1/encoder/encodeframe.h"
@@ -485,7 +485,7 @@ static void dealloc_compressor_data(AV1_COMP *cpi) {
     cpi->source_diff_var = NULL;
   }
 #if CONFIG_ANS
-  av1_buf_ans_free(&cpi->buf_ans);
+  aom_buf_ans_free(&cpi->buf_ans);
 #endif  // CONFIG_ANS
 }
 
@@ -811,7 +811,7 @@ void av1_alloc_compressor_data(AV1_COMP *cpi) {
     CHECK_MEM_ERROR(cm, cpi->tile_tok[0][0],
                     aom_calloc(tokens, sizeof(*cpi->tile_tok[0][0])));
 #if CONFIG_ANS
-    av1_buf_ans_alloc(&cpi->buf_ans, cm, tokens);
+    aom_buf_ans_alloc(&cpi->buf_ans, &cm->error, tokens);
 #endif  // CONFIG_ANS
   }
 

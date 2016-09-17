@@ -19,6 +19,7 @@ DSP_SRCS-$(ARCH_X86)$(ARCH_X86_64)   += x86/synonyms.h
 # bit reader
 DSP_SRCS-yes += prob.h
 DSP_SRCS-yes += prob.c
+DSP_SRCS-$(CONFIG_ANS) += ans.h
 
 ifeq ($(CONFIG_ENCODERS),yes)
 DSP_SRCS-yes += bitwriter.h
@@ -26,6 +27,10 @@ DSP_SRCS-yes += dkboolwriter.h
 DSP_SRCS-yes += dkboolwriter.c
 DSP_SRCS-yes += bitwriter_buffer.c
 DSP_SRCS-yes += bitwriter_buffer.h
+DSP_SRCS-$(CONFIG_ANS) += buf_ans.h
+DSP_SRCS-$(CONFIG_ANS) += buf_ans.c
+DSP_SRCS-$(CONFIG_ANS) += divide.h
+DSP_SRCS-$(CONFIG_ANS) += divide.c
 DSP_SRCS-yes += psnr.c
 DSP_SRCS-yes += psnr.h
 DSP_SRCS-$(CONFIG_INTERNAL_STATS) += ssim.c

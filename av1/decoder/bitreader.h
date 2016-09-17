@@ -17,7 +17,7 @@
 #include "./aom_config.h"
 
 #if CONFIG_ANS
-#include "av1/common/ans.h"
+#include "aom_dsp/ans.h"
 #include "aom/aomdx.h"  // for av1_decrypt_cb
 #define aom_reader struct AnsDecoder
 #define aom_reader_has_error ans_reader_has_error

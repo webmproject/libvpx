@@ -15,7 +15,7 @@
 #include <limits.h>
 
 #if CONFIG_ANS
-#include "av1/common/ans.h"
+#include "aom_dsp/ans.h"
 #endif  // CONFIG_ANS
 #include "av1/common/blockd.h"
 

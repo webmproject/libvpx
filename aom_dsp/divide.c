@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "av1/common/divide.h"
+#include "aom_dsp/divide.h"
 
 /* Constants for divide by multiply for small divisors generated with:
 void init_fastdiv() {
