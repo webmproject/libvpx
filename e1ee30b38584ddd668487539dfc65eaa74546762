@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "10545b0d_4646327a",
+        "filename": "av1/encoder/bitwriter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-09-17T07:01:02Z",
+      "side": 1,
+      "message": "this #include is a dup. Should move to line 19.",
+      "range": {
+        "startLine": 32,
+        "startChar": 10,
+        "endLine": 32,
+        "endChar": 17
+      },
+      "revId": "e1ee30b38584ddd668487539dfc65eaa74546762",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
