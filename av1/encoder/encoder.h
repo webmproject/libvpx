@@ -572,6 +572,9 @@ typedef struct AV1_COMP {
 #if CONFIG_EXT_INTRA
   int intra_filter_cost[INTRA_FILTERS + 1][INTRA_FILTERS];
 #endif  // CONFIG_EXT_INTRA
+#if CONFIG_LOOP_RESTORATION
+  int switchable_restore_cost[RESTORE_SWITCHABLE_TYPES];
+#endif  // CONFIG_LOOP_RESTORATION
 
   int multi_arf_allowed;
   int multi_arf_enabled;

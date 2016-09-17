@@ -16,7 +16,6 @@
 #include "./aom_config.h"
 
 #include "av1/common/blockd.h"
-#include "av1/common/restoration.h"
 #include "av1/common/seg_common.h"
 
 #ifdef __cplusplus

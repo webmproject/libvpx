@@ -865,6 +865,17 @@ static const aom_prob default_tx_size_prob[TX_SIZES - 1][TX_SIZE_CONTEXTS]
                                             },
                                           };
 
+#if CONFIG_LOOP_RESTORATION
+const aom_tree_index
+    av1_switchable_restore_tree[TREE_SIZE(RESTORE_SWITCHABLE_TYPES)] = {
+      -RESTORE_NONE, 2,
+      -RESTORE_BILATERAL, -RESTORE_WIENER,
+    };
+
+static const aom_prob
+    default_switchable_restore_prob[RESTORE_SWITCHABLE_TYPES - 1] = {32, 128};
+#endif  // CONFIG_LOOP_RESTORATION
+
 #if CONFIG_EXT_TX && CONFIG_RECT_TX && CONFIG_VAR_TX
 // the probability of (0) using recursive square tx partition vs.
 // (1) biggest rect tx for 4X8-8X4/8X16-16X8/16X32-32X16 blocks
@@ -1361,6 +1372,9 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
 #endif  // CONFIG_EXT_INTRA
   av1_copy(fc->inter_ext_tx_prob, default_inter_ext_tx_prob);
   av1_copy(fc->intra_ext_tx_prob, default_intra_ext_tx_prob);
+#if CONFIG_LOOP_RESTORATION
+  av1_copy(fc->switchable_restore_prob, default_switchable_restore_prob);
+#endif  // CONFIG_LOOP_RESTORATION
 }
 
 #if CONFIG_EXT_INTERP

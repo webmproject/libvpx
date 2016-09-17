@@ -126,6 +126,9 @@ typedef struct frame_contexts {
 #if CONFIG_GLOBAL_MOTION
   aom_prob global_motion_types_prob[GLOBAL_MOTION_TYPES - 1];
 #endif  // CONFIG_GLOBAL_MOTION
+#if CONFIG_LOOP_RESTORATION
+  aom_prob switchable_restore_prob[RESTORE_SWITCHABLE_TYPES - 1];
+#endif  // CONFIG_LOOP_RESTORATION
 } FRAME_CONTEXT;
 
 typedef struct FRAME_COUNTS {
@@ -262,6 +265,13 @@ extern const aom_tree_index av1_ext_tx_tree[TREE_SIZE(TX_TYPES)];
 #if CONFIG_OBMC || CONFIG_WARPED_MOTION
 extern const aom_tree_index av1_motvar_tree[TREE_SIZE(MOTION_VARIATIONS)];
 #endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+
+#if CONFIG_LOOP_RESTORATION
+#define RESTORE_NONE_BILATERAL_PROB 16
+#define RESTORE_NONE_WIENER_PROB 64
+extern const aom_tree_index
+    av1_switchable_restore_tree[TREE_SIZE(RESTORE_SWITCHABLE_TYPES)];
+#endif  // CONFIG_LOOP_RESTORATION
 
 void av1_setup_past_independence(struct AV1Common *cm);
 

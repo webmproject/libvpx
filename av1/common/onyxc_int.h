@@ -25,7 +25,9 @@
 #include "av1/common/frame_buffers.h"
 #include "av1/common/quant_common.h"
 #include "av1/common/tile_common.h"
+#if CONFIG_LOOP_RESTORATION
 #include "av1/common/restoration.h"
+#endif  // CONFIG_LOOP_RESTORATION
 
 #ifdef __cplusplus
 extern "C" {

@@ -83,6 +83,8 @@ void av1_free_ref_frame_buffers(BufferPool *pool) {
 
 #if CONFIG_LOOP_RESTORATION
 void av1_free_restoration_buffers(AV1_COMMON *cm) {
+  aom_free(cm->rst_info.restoration_type);
+  cm->rst_info.restoration_type = NULL;
   aom_free(cm->rst_info.bilateral_level);
   cm->rst_info.bilateral_level = NULL;
   aom_free(cm->rst_info.vfilter);

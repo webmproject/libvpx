@@ -150,6 +150,9 @@ static struct av1_token interintra_mode_encodings[INTERINTRA_MODES];
 #if CONFIG_OBMC || CONFIG_WARPED_MOTION
 static struct av1_token motvar_encodings[MOTION_VARIATIONS];
 #endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+#if CONFIG_LOOP_RESTORATION
+static struct av1_token switchable_restore_encodings[RESTORE_SWITCHABLE_TYPES];
+#endif  // CONFIG_LOOP_RESTORATION
 
 void av1_encode_token_init(void) {
 #if CONFIG_EXT_TX
@@ -176,6 +179,10 @@ void av1_encode_token_init(void) {
   av1_tokens_from_tree(global_motion_types_encodings,
                        av1_global_motion_types_tree);
 #endif  // CONFIG_GLOBAL_MOTION
+#if CONFIG_LOOP_RESTORATION
+  av1_tokens_from_tree(switchable_restore_encodings,
+                       av1_switchable_restore_tree);
+#endif  // CONFIG_LOOP_RESTORATION
 }
 
 static void write_intra_mode(aom_writer *w, PREDICTION_MODE mode,
@@ -2422,42 +2429,102 @@ static void update_coef_probs(AV1_COMP *cpi, aom_writer *w) {
 }
 
 #if CONFIG_LOOP_RESTORATION
-static void encode_restoration(AV1_COMMON *cm,
-                               struct aom_write_bit_buffer *wb) {
+static void encode_restoration_mode(AV1_COMMON *cm,
+                                    struct aom_write_bit_buffer *wb) {
+  RestorationInfo *rst = &cm->rst_info;
+  switch (rst->frame_restoration_type) {
+    case RESTORE_NONE:
+      aom_wb_write_bit(wb, 0);
+      aom_wb_write_bit(wb, 0);
+      break;
+    case RESTORE_SWITCHABLE:
+      aom_wb_write_bit(wb, 0);
+      aom_wb_write_bit(wb, 1);
+      break;
+    case RESTORE_BILATERAL:
+      aom_wb_write_bit(wb, 1);
+      aom_wb_write_bit(wb, 0);
+      break;
+    case RESTORE_WIENER:
+      aom_wb_write_bit(wb, 1);
+      aom_wb_write_bit(wb, 1);
+      break;
+    default: assert(0);
+  }
+}
+
+static void encode_restoration(AV1_COMMON *cm, aom_writer *wb) {
   int i;
   RestorationInfo *rst = &cm->rst_info;
-  aom_wb_write_bit(wb, rst->restoration_type != RESTORE_NONE);
-  if (rst->restoration_type != RESTORE_NONE) {
-    if (rst->restoration_type == RESTORE_BILATERAL) {
-      aom_wb_write_bit(wb, 1);
+  if (rst->frame_restoration_type != RESTORE_NONE) {
+    if (rst->frame_restoration_type == RESTORE_SWITCHABLE) {
+      // RESTORE_SWITCHABLE
       for (i = 0; i < cm->rst_internal.ntiles; ++i) {
-        if (rst->bilateral_level[i] >= 0) {
-          aom_wb_write_bit(wb, 1);
-          aom_wb_write_literal(wb, rst->bilateral_level[i],
-                               av1_bilateral_level_bits(cm));
+        av1_write_token(
+            wb, av1_switchable_restore_tree,
+            cm->fc->switchable_restore_prob,
+            &switchable_restore_encodings[rst->restoration_type[i]]);
+        if (rst->restoration_type[i] == RESTORE_NONE) {
+        } else if (rst->restoration_type[i] == RESTORE_BILATERAL) {
+          int s;
+          for (s = 0; s < BILATERAL_SUBTILES; ++s) {
+            const int j = i * BILATERAL_SUBTILES + s;
+#if BILATERAL_SUBTILES == 0
+            aom_write_literal(wb, rst->bilateral_level[j],
+                              av1_bilateral_level_bits(cm));
+#else
+            aom_write(wb, rst->bilateral_level[j] >= 0,
+                      RESTORE_NONE_BILATERAL_PROB);
+            if (rst->bilateral_level[j] >= 0) {
+              aom_write_literal(wb, rst->bilateral_level[j],
+                                av1_bilateral_level_bits(cm));
+            }
+#endif
+          }
         } else {
-          aom_wb_write_bit(wb, 0);
+          aom_write_literal(wb, rst->vfilter[i][0] - WIENER_FILT_TAP0_MINV,
+                            WIENER_FILT_TAP0_BITS);
+          aom_write_literal(wb, rst->vfilter[i][1] - WIENER_FILT_TAP1_MINV,
+                            WIENER_FILT_TAP1_BITS);
+          aom_write_literal(wb, rst->vfilter[i][2] - WIENER_FILT_TAP2_MINV,
+                               WIENER_FILT_TAP2_BITS);
+          aom_write_literal(wb, rst->hfilter[i][0] - WIENER_FILT_TAP0_MINV,
+                               WIENER_FILT_TAP0_BITS);
+          aom_write_literal(wb, rst->hfilter[i][1] - WIENER_FILT_TAP1_MINV,
+                               WIENER_FILT_TAP1_BITS);
+          aom_write_literal(wb, rst->hfilter[i][2] - WIENER_FILT_TAP2_MINV,
+                               WIENER_FILT_TAP2_BITS);
         }
       }
-    } else {
-      aom_wb_write_bit(wb, 0);
+    } else if (rst->frame_restoration_type == RESTORE_BILATERAL) {
       for (i = 0; i < cm->rst_internal.ntiles; ++i) {
+        int s;
+        for (s = 0; s < BILATERAL_SUBTILES; ++s) {
+          const int j = i * BILATERAL_SUBTILES + s;
+          aom_write(wb, rst->bilateral_level[j] >= 0,
+                    RESTORE_NONE_BILATERAL_PROB);
+          if (rst->bilateral_level[j] >= 0) {
+            aom_write_literal(wb, rst->bilateral_level[j],
+                                 av1_bilateral_level_bits(cm));
+          }
+        }
+      }
+    } else if (rst->frame_restoration_type == RESTORE_WIENER) {
+      for (i = 0; i < cm->rst_internal.ntiles; ++i) {
+        aom_write(wb, rst->wiener_level[i] != 0, RESTORE_NONE_WIENER_PROB);
         if (rst->wiener_level[i]) {
-          aom_wb_write_bit(wb, 1);
-          aom_wb_write_literal(wb, rst->vfilter[i][0] - WIENER_FILT_TAP0_MINV,
-                               WIENER_FILT_TAP0_BITS);
-          aom_wb_write_literal(wb, rst->vfilter[i][1] - WIENER_FILT_TAP1_MINV,
-                               WIENER_FILT_TAP1_BITS);
-          aom_wb_write_literal(wb, rst->vfilter[i][2] - WIENER_FILT_TAP2_MINV,
-                               WIENER_FILT_TAP2_BITS);
-          aom_wb_write_literal(wb, rst->hfilter[i][0] - WIENER_FILT_TAP0_MINV,
-                               WIENER_FILT_TAP0_BITS);
-          aom_wb_write_literal(wb, rst->hfilter[i][1] - WIENER_FILT_TAP1_MINV,
-                               WIENER_FILT_TAP1_BITS);
-          aom_wb_write_literal(wb, rst->hfilter[i][2] - WIENER_FILT_TAP2_MINV,
-                               WIENER_FILT_TAP2_BITS);
-        } else {
-          aom_wb_write_bit(wb, 0);
+          aom_write_literal(wb, rst->vfilter[i][0] - WIENER_FILT_TAP0_MINV,
+                            WIENER_FILT_TAP0_BITS);
+          aom_write_literal(wb, rst->vfilter[i][1] - WIENER_FILT_TAP1_MINV,
+                            WIENER_FILT_TAP1_BITS);
+          aom_write_literal(wb, rst->vfilter[i][2] - WIENER_FILT_TAP2_MINV,
+                            WIENER_FILT_TAP2_BITS);
+          aom_write_literal(wb, rst->hfilter[i][0] - WIENER_FILT_TAP0_MINV,
+                            WIENER_FILT_TAP0_BITS);
+          aom_write_literal(wb, rst->hfilter[i][1] - WIENER_FILT_TAP1_MINV,
+                            WIENER_FILT_TAP1_BITS);
+          aom_write_literal(wb, rst->hfilter[i][2] - WIENER_FILT_TAP2_MINV,
+                            WIENER_FILT_TAP2_BITS);
         }
       }
     }
@@ -3185,7 +3252,7 @@ static void write_uncompressed_header(AV1_COMP *cpi,
   encode_dering(cm->dering_level, wb);
 #endif  // CONFIG_DERING
 #if CONFIG_LOOP_RESTORATION
-  encode_restoration(cm, wb);
+  encode_restoration_mode(cm, wb);
 #endif  // CONFIG_LOOP_RESTORATION
   encode_quantization(cm, wb);
   encode_segmentation(cm, xd, wb);
@@ -3284,6 +3351,11 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
   header_bc = &real_header_bc;
   aom_start_encode(header_bc, data);
 #endif
+
+#if CONFIG_LOOP_RESTORATION
+  encode_restoration(cm, header_bc);
+#endif  // CONFIG_LOOP_RESTORATION
+
   update_txfm_probs(cm, header_bc, counts);
   update_coef_probs(cpi, header_bc);
 
