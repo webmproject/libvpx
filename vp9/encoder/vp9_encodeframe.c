@@ -3990,17 +3990,12 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   MACROBLOCK *const x = &td->mb;
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
-  RD_COUNTS *const rdc = &cpi->td.rd_counts;
 
   xd->mi = cm->mi_grid_visible;
   xd->mi[0] = cm->mi;
 
   vp9_zero(*td->counts);
-  vp9_zero(rdc->coef_counts);
-  vp9_zero(rdc->comp_pred_diff);
-  vp9_zero(rdc->filter_diff);
-  rdc->m_search_count = 0;   // Count of motion search hits.
-  rdc->ex_search_count = 0;  // Exhaustive mesh search hits.
+  vp9_zero(cpi->td.rd_counts);
 
   xd->lossless = cm->base_qindex == 0 && cm->y_dc_delta_q == 0 &&
                  cm->uv_dc_delta_q == 0 && cm->uv_ac_delta_q == 0;
