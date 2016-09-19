@@ -1,0 +1,153 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb243697_e78cc891",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-19T21:48:41Z",
+      "side": 1,
+      "message": "A comment, specifically on what this does compared to FUN_FILTER_FLAT_HEV_MASK below. It also looks like max* should be named mask?",
+      "revId": "f66f983e0342ede742fd46f0dd202d2ede4989af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_07fd64cc",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 773,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-19T21:48:41Z",
+      "side": 1,
+      "message": "comment about why it\u0027s disabled, when/why it might be enabled (such as \"to be used for lpf nXm function\")",
+      "revId": "f66f983e0342ede742fd46f0dd202d2ede4989af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_a7c57086",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 841,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-19T21:48:41Z",
+      "side": 1,
+      "message": "load_thresh_8_dual?",
+      "range": {
+        "startLine": 841,
+        "startChar": 0,
+        "endLine": 841,
+        "endChar": 80
+      },
+      "revId": "f66f983e0342ede742fd46f0dd202d2ede4989af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_e7784858",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 897,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-19T21:48:41Z",
+      "side": 1,
+      "message": "seems like a big macro with a long declaration just to extract 2 function calls",
+      "range": {
+        "startLine": 897,
+        "startChar": 0,
+        "endLine": 897,
+        "endChar": 80
+      },
+      "revId": "f66f983e0342ede742fd46f0dd202d2ede4989af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_e723e869",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 965,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-19T21:48:41Z",
+      "side": 1,
+      "message": "Are the two 6x8 stores overwriting anything important?",
+      "range": {
+        "startLine": 965,
+        "startChar": 11,
+        "endLine": 965,
+        "endChar": 20
+      },
+      "revId": "f66f983e0342ede742fd46f0dd202d2ede4989af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_c71eec1e",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1069,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-19T21:48:41Z",
+      "side": 1,
+      "message": "Are you storing/overwriting anything important by writing the extra 2 lines?",
+      "range": {
+        "startLine": 1069,
+        "startChar": 26,
+        "endLine": 1069,
+        "endChar": 35
+      },
+      "revId": "f66f983e0342ede742fd46f0dd202d2ede4989af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_a71ad022",
+        "filename": "vpx_dsp/arm/transpose_neon.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-19T21:48:41Z",
+      "side": 1,
+      "message": "this function is unused? comment about why it\u0027s not used/why it might be used. or remove and add a comment to the 8x8d about how it\u0027s faster than using q registers",
+      "range": {
+        "startLine": 117,
+        "startChar": 19,
+        "endLine": 117,
+        "endChar": 36
+      },
+      "revId": "f66f983e0342ede742fd46f0dd202d2ede4989af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
