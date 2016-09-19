@@ -1914,8 +1914,8 @@ static void decode_restoration_mode(AV1_COMMON *cm,
 static void decode_restoration(AV1_COMMON *cm, aom_reader *rb) {
   int i;
   RestorationInfo *rsi = &cm->rst_info;
-  const int ntiles = av1_get_rest_ntiles(cm->width, cm->height,
-                                         NULL, NULL, NULL, NULL);
+  const int ntiles =
+      av1_get_rest_ntiles(cm->width, cm->height, NULL, NULL, NULL, NULL);
   if (rsi->frame_restoration_type != RESTORE_NONE) {
     rsi->restoration_type = (RestorationType *)aom_realloc(
         rsi->restoration_type, sizeof(*rsi->restoration_type) * ntiles);
@@ -1938,24 +1938,18 @@ static void decode_restoration(AV1_COMMON *cm, aom_reader *rb) {
             rb, av1_switchable_restore_tree, cm->fc->switchable_restore_prob);
         if (rsi->restoration_type[i] == RESTORE_WIENER) {
           rsi->wiener_level[i] = 1;
-          rsi->vfilter[i][0] =
-              aom_read_literal(rb, WIENER_FILT_TAP0_BITS) +
-              WIENER_FILT_TAP0_MINV;
-          rsi->vfilter[i][1] =
-              aom_read_literal(rb, WIENER_FILT_TAP1_BITS) +
-              WIENER_FILT_TAP1_MINV;
-          rsi->vfilter[i][2] =
-              aom_read_literal(rb, WIENER_FILT_TAP2_BITS) +
-              WIENER_FILT_TAP2_MINV;
-          rsi->hfilter[i][0] =
-              aom_read_literal(rb, WIENER_FILT_TAP0_BITS) +
-              WIENER_FILT_TAP0_MINV;
-          rsi->hfilter[i][1] =
-              aom_read_literal(rb, WIENER_FILT_TAP1_BITS) +
-              WIENER_FILT_TAP1_MINV;
-          rsi->hfilter[i][2] =
-              aom_read_literal(rb, WIENER_FILT_TAP2_BITS) +
-              WIENER_FILT_TAP2_MINV;
+          rsi->vfilter[i][0] = aom_read_literal(rb, WIENER_FILT_TAP0_BITS) +
+                               WIENER_FILT_TAP0_MINV;
+          rsi->vfilter[i][1] = aom_read_literal(rb, WIENER_FILT_TAP1_BITS) +
+                               WIENER_FILT_TAP1_MINV;
+          rsi->vfilter[i][2] = aom_read_literal(rb, WIENER_FILT_TAP2_BITS) +
+                               WIENER_FILT_TAP2_MINV;
+          rsi->hfilter[i][0] = aom_read_literal(rb, WIENER_FILT_TAP0_BITS) +
+                               WIENER_FILT_TAP0_MINV;
+          rsi->hfilter[i][1] = aom_read_literal(rb, WIENER_FILT_TAP1_BITS) +
+                               WIENER_FILT_TAP1_MINV;
+          rsi->hfilter[i][2] = aom_read_literal(rb, WIENER_FILT_TAP2_BITS) +
+                               WIENER_FILT_TAP2_MINV;
         } else if (rsi->restoration_type[i] == RESTORE_BILATERAL) {
           int s;
           for (s = 0; s < BILATERAL_SUBTILES; ++s) {

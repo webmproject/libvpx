@@ -36,16 +36,15 @@ typedef struct {
 */
 double aom_sse_to_psnr(double samples, double peak, double sse);
 int64_t aom_get_y_sse_part(const YV12_BUFFER_CONFIG *a,
-                           const YV12_BUFFER_CONFIG *b,
-                           int hstart, int width, int vstart, int height);
+                           const YV12_BUFFER_CONFIG *b, int hstart, int width,
+                           int vstart, int height);
 int64_t aom_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b);
 int64_t aom_get_u_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b);
 int64_t aom_get_v_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b);
 #if CONFIG_AOM_HIGHBITDEPTH
 int64_t aom_highbd_get_y_sse_part(const YV12_BUFFER_CONFIG *a,
-                                  const YV12_BUFFER_CONFIG *b,
-                                  int hstart, int width,
-                                  int vstart, int height);
+                                  const YV12_BUFFER_CONFIG *b, int hstart,
+                                  int width, int vstart, int height);
 int64_t aom_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
                              const YV12_BUFFER_CONFIG *b);
 int64_t aom_highbd_get_u_sse(const YV12_BUFFER_CONFIG *a,

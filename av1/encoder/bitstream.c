@@ -2461,8 +2461,7 @@ static void encode_restoration(AV1_COMMON *cm, aom_writer *wb) {
       // RESTORE_SWITCHABLE
       for (i = 0; i < cm->rst_internal.ntiles; ++i) {
         av1_write_token(
-            wb, av1_switchable_restore_tree,
-            cm->fc->switchable_restore_prob,
+            wb, av1_switchable_restore_tree, cm->fc->switchable_restore_prob,
             &switchable_restore_encodings[rst->restoration_type[i]]);
         if (rst->restoration_type[i] == RESTORE_NONE) {
         } else if (rst->restoration_type[i] == RESTORE_BILATERAL) {
@@ -2487,13 +2486,13 @@ static void encode_restoration(AV1_COMMON *cm, aom_writer *wb) {
           aom_write_literal(wb, rst->vfilter[i][1] - WIENER_FILT_TAP1_MINV,
                             WIENER_FILT_TAP1_BITS);
           aom_write_literal(wb, rst->vfilter[i][2] - WIENER_FILT_TAP2_MINV,
-                               WIENER_FILT_TAP2_BITS);
+                            WIENER_FILT_TAP2_BITS);
           aom_write_literal(wb, rst->hfilter[i][0] - WIENER_FILT_TAP0_MINV,
-                               WIENER_FILT_TAP0_BITS);
+                            WIENER_FILT_TAP0_BITS);
           aom_write_literal(wb, rst->hfilter[i][1] - WIENER_FILT_TAP1_MINV,
-                               WIENER_FILT_TAP1_BITS);
+                            WIENER_FILT_TAP1_BITS);
           aom_write_literal(wb, rst->hfilter[i][2] - WIENER_FILT_TAP2_MINV,
-                               WIENER_FILT_TAP2_BITS);
+                            WIENER_FILT_TAP2_BITS);
         }
       }
     } else if (rst->frame_restoration_type == RESTORE_BILATERAL) {
@@ -2505,7 +2504,7 @@ static void encode_restoration(AV1_COMMON *cm, aom_writer *wb) {
                     RESTORE_NONE_BILATERAL_PROB);
           if (rst->bilateral_level[j] >= 0) {
             aom_write_literal(wb, rst->bilateral_level[j],
-                                 av1_bilateral_level_bits(cm));
+                              av1_bilateral_level_bits(cm));
           }
         }
       }

@@ -147,8 +147,8 @@ void av1_loop_restoration_init(RestorationInternal *rst, RestorationInfo *rsi,
   rst->subsampling_x = 0;
   rst->subsampling_y = 0;
   rst->ntiles =
-      av1_get_rest_ntiles(width, height, &rst->tile_width,
-                          &rst->tile_height, &rst->nhtiles, &rst->nvtiles);
+      av1_get_rest_ntiles(width, height, &rst->tile_width, &rst->tile_height,
+                          &rst->nhtiles, &rst->nvtiles);
   if (rsi->frame_restoration_type == RESTORE_WIENER) {
     for (tile_idx = 0; tile_idx < rst->ntiles; ++tile_idx) {
       rsi->vfilter[tile_idx][RESTORATION_HALFWIN] =

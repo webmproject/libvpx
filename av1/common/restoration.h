@@ -84,9 +84,9 @@ static INLINE int get_rest_tilesize(int width, int height) {
     return RESTORATION_TILESIZE_BIG;
 }
 
-static INLINE int av1_get_rest_ntiles(int width, int height,
-                                      int *tile_width, int *tile_height,
-                                      int *nhtiles, int *nvtiles) {
+static INLINE int av1_get_rest_ntiles(int width, int height, int *tile_width,
+                                      int *tile_height, int *nhtiles,
+                                      int *nvtiles) {
   int nhtiles_, nvtiles_;
   int tile_width_, tile_height_;
   int tilesize = get_rest_tilesize(width, height);
