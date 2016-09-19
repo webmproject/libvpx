@@ -578,14 +578,6 @@ process_toolchain() {
         # check_add_cflags also adds to cxxflags. gtest does not do well with
         # -Wundef so add it explicitly to CFLAGS only.
         check_cflags -Wundef && add_cflags_only -Wundef
-        case ${CC} in
-          *clang*)
-              # libvpx and/or clang have issues with aliasing:
-              # https://code.google.com/p/webm/issues/detail?id=603
-              # work around them until they are fixed
-              check_add_cflags -fno-strict-aliasing
-          ;;
-        esac
         if enabled mips || [ -z "${INLINE}" ]; then
           enabled extra_warnings || check_add_cflags -Wno-unused-function
         fi
