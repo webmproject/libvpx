@@ -1860,9 +1860,7 @@ int main(int argc, const char **argv_) {
   uint64_t cx_time = 0;
   int stream_cnt = 0;
   int res = 0;
-#if CONFIG_AOM_HIGHBITDEPTH
   int profile_updated = 0;
-#endif
 
   memset(&input, 0, sizeof(input));
   exec_name = argv_[0];
@@ -1966,10 +1964,25 @@ int main(int argc, const char **argv_) {
           { stream->config.cfg.g_input_bit_depth = input.bit_depth; });
     }
 
-#if CONFIG_AOM_HIGHBITDEPTH
-    /* Automatically set the codec bit depth to match the input bit depth.
-     * Upgrade the profile if required. */
     FOREACH_STREAM({
+      if (input.fmt != AOM_IMG_FMT_I420 && input.fmt != AOM_IMG_FMT_I42016) {
+        /* Automatically upgrade if input is non-4:2:0 but a 4:2:0 profile
+           was selected. */
+        switch (stream->config.cfg.g_profile) {
+          case 0:
+            stream->config.cfg.g_profile = 1;
+            profile_updated = 1;
+            break;
+          case 2:
+            stream->config.cfg.g_profile = 3;
+            profile_updated = 1;
+            break;
+          default: break;
+        }
+      }
+#if CONFIG_AOM_HIGHBITDEPTH
+      /* Automatically set the codec bit depth to match the input bit depth.
+       * Upgrade the profile if required. */
       if (stream->config.cfg.g_input_bit_depth >
           (unsigned int)stream->config.cfg.g_bit_depth) {
         stream->config.cfg.g_bit_depth = stream->config.cfg.g_input_bit_depth;
@@ -1990,6 +2003,7 @@ int main(int argc, const char **argv_) {
       if (stream->config.cfg.g_profile > 1) {
         stream->config.use_16bit_internal = 1;
       }
+#endif
       if (profile_updated) {
         fprintf(stderr,
                 "Warning: automatically upgrading to profile %d to "
@@ -1997,7 +2011,6 @@ int main(int argc, const char **argv_) {
                 stream->config.cfg.g_profile);
       }
     });
-#endif
 
     FOREACH_STREAM(set_stream_dimensions(stream, input.width, input.height));
     FOREACH_STREAM(validate_stream_config(stream, &global));
