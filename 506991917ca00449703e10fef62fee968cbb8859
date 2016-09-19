@@ -16,6 +16,24 @@
       "revId": "506991917ca00449703e10fef62fee968cbb8859",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb243697_3614584a",
+        "filename": "vpx_dsp/arm/transpose_neon.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-09-19T16:13:09Z",
+      "side": 1,
+      "message": "Then I\u0027ll abandon this commit, and check in again with the loop filter ARM NEON intrinsics refactors.",
+      "parentUuid": "eb243697_d3931704",
+      "revId": "506991917ca00449703e10fef62fee968cbb8859",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
