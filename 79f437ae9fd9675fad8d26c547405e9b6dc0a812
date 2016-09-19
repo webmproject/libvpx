@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "10c7fb2d_ceb903c7",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-19T22:25:43Z",
+      "side": 1,
+      "message": "add a note about these locals otherwise this runs the risk of being cleaned up to access the reader members directly",
+      "revId": "79f437ae9fd9675fad8d26c547405e9b6dc0a812",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
