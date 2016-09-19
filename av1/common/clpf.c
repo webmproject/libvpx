@@ -73,13 +73,14 @@ void aom_clpf_block_hbd_c(const uint16_t *src, uint16_t *dst, int sstride,
 #endif
 
 // Return number of filtered blocks
-int av1_clpf_frame(
-    const YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *org,
-    AV1_COMMON *cm, int enable_fb_flag, unsigned int strength,
-    unsigned int fb_size_log2, uint8_t *blocks, int plane,
-    int (*decision)(int, int, const YV12_BUFFER_CONFIG *,
-                    const YV12_BUFFER_CONFIG *, const AV1_COMMON *cm, int, int,
-                    int, unsigned int, unsigned int, uint8_t *, int)) {
+int av1_clpf_frame(const YV12_BUFFER_CONFIG *frame,
+                   const YV12_BUFFER_CONFIG *org, AV1_COMMON *cm,
+                   int enable_fb_flag, unsigned int strength,
+                   unsigned int fb_size_log2, uint8_t *blocks, int plane,
+                   int (*decision)(int, int, const YV12_BUFFER_CONFIG *,
+                                   const YV12_BUFFER_CONFIG *,
+                                   const AV1_COMMON *cm, int, int, int,
+                                   unsigned int, unsigned int, uint8_t *)) {
   /* Constrained low-pass filter (CLPF) */
   int c, k, l, m, n;
   const int subx = plane != AOM_PLANE_Y && frame->subsampling_x;
@@ -151,7 +152,7 @@ int av1_clpf_frame(
       if (!allskip &&  // Do not filter the block if all is skip encoded
           (!enable_fb_flag ||
            decision(k, l, frame, org, cm, bs, w / bs, h / bs, strength,
-                    fb_size_log2, blocks + block_index, plane))) {
+                    fb_size_log2, blocks + block_index))) {
         // Iterate over all smaller blocks inside the filter block
         for (m = 0; m < ((h + bs - 1) >> bslog); m++) {
           for (n = 0; n < ((w + bs - 1) >> bslog); n++) {
