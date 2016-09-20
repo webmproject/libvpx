@@ -392,12 +392,15 @@ static const arg_def_t frame_parallel_decoding =
     ARG_DEF(NULL, "frame-parallel", 1,
             "Enable frame parallel decodability features "
             "(0: false (default), 1: true)");
+#if CONFIG_DELTA_Q
 static const arg_def_t aq_mode = ARG_DEF(
     NULL, "aq-mode", 1,
     "Adaptive quantization mode (0: off (default), 1: variance 2: complexity, "
-#if CONFIG_DELTA_Q
     "3: cyclic refresh, 4: delta quant)");
 #else
+static const arg_def_t aq_mode = ARG_DEF(
+    NULL, "aq-mode", 1,
+    "Adaptive quantization mode (0: off (default), 1: variance 2: complexity, "
     "3: cyclic refresh)");
 #endif
 static const arg_def_t frame_periodic_boost =
