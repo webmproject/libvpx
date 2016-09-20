@@ -14,7 +14,7 @@
 #include "aom_dsp/prob.h"
 #include "aom/aom_integer.h"
 #if CONFIG_ANS
-#include "av1/common/ans.h"
+#include "aom_dsp/ans.h"
 #endif  // CONFIG_ANS
 
 #ifdef __cplusplus

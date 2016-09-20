@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef AV1_COMMON_ANS_H_
-#define AV1_COMMON_ANS_H_
+#ifndef AOM_DSP_ANS_H_
+#define AOM_DSP_ANS_H_
 // An implementation of Asymmetric Numeral Systems
 // http://arxiv.org/abs/1311.2540v2
 
@@ -21,7 +21,7 @@
 
 #define ANS_DIVIDE_BY_MULTIPLY 1
 #if ANS_DIVIDE_BY_MULTIPLY
-#include "av1/common/divide.h"
+#include "aom_dsp/divide.h"
 #define ANS_DIVREM(quotient, remainder, dividend, divisor) \
   do {                                                     \
     quotient = fastdiv(dividend, divisor);                 \
@@ -411,4 +411,4 @@ static INLINE int ans_reader_has_error(const struct AnsDecoder *const ans) {
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
-#endif  // AV1_COMMON_ANS_H_
+#endif  // AOM_DSP_ANS_H_

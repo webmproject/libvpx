@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef AV1_ENCODER_BUF_ANS_H_
-#define AV1_ENCODER_BUF_ANS_H_
+#ifndef AOM_DSP_BUF_ANS_H_
+#define AOM_DSP_BUF_ANS_H_
 // Buffered forward ANS writer.
 // Symbols are written to the writer in forward (decode) order and serialzed
 // backwards due to ANS's stack like behavior.
@@ -17,7 +17,7 @@
 #include <assert.h>
 #include "./aom_config.h"
 #include "aom/aom_integer.h"
-#include "av1/common/ans.h"
+#include "aom_dsp/ans.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,18 +34,18 @@ struct buffered_ans_symbol {
 };
 
 struct BufAnsCoder {
-  struct AV1Common *cm;
+  struct aom_internal_error_info *error;
   struct buffered_ans_symbol *buf;
   int size;
   int offset;
 };
 
-void av1_buf_ans_alloc(struct BufAnsCoder *c, struct AV1Common *cm,
-                       int size_hint);
+void aom_buf_ans_alloc(struct BufAnsCoder *c,
+                       struct aom_internal_error_info *error, int size_hint);
 
-void av1_buf_ans_free(struct BufAnsCoder *c);
+void aom_buf_ans_free(struct BufAnsCoder *c);
 
-void av1_buf_ans_grow(struct BufAnsCoder *c);
+void aom_buf_ans_grow(struct BufAnsCoder *c);
 
 static INLINE void buf_ans_write_reset(struct BufAnsCoder *const c) {
   c->offset = 0;
@@ -55,7 +55,7 @@ static INLINE void buf_uabs_write(struct BufAnsCoder *const c, uint8_t val,
                                   AnsP8 prob) {
   assert(c->offset <= c->size);
   if (c->offset == c->size) {
-    av1_buf_ans_grow(c);
+    aom_buf_ans_grow(c);
   }
   c->buf[c->offset].method = ANS_METHOD_UABS;
   c->buf[c->offset].val_start = val;
@@ -67,7 +67,7 @@ static INLINE void buf_rans_write(struct BufAnsCoder *const c,
                                   const struct rans_sym *const sym) {
   assert(c->offset <= c->size);
   if (c->offset == c->size) {
-    av1_buf_ans_grow(c);
+    aom_buf_ans_grow(c);
   }
   c->buf[c->offset].method = ANS_METHOD_RANS;
   c->buf[c->offset].val_start = sym->cum_prob;
@@ -106,4 +106,4 @@ static INLINE void buf_uabs_write_literal(struct BufAnsCoder *c, int literal,
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
-#endif  // AV1_ENCODER_BUF_ANS_H_
+#endif  // AOM_DSP_BUF_ANS_H_

@@ -37,7 +37,7 @@
 #include "av1/common/tile_common.h"
 
 #if CONFIG_ANS
-#include "av1/encoder/buf_ans.h"
+#include "aom_dsp/buf_ans.h"
 #endif  // CONFIG_ANS
 #include "av1/encoder/bitstream.h"
 #include "av1/encoder/cost.h"

@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef AV1_COMMON_DIVIDE_H_
-#define AV1_COMMON_DIVIDE_H_
+#ifndef AOM_DSP_DIVIDE_H_
+#define AOM_DSP_DIVIDE_H_
 // An implemntation of the divide by multiply alogrithm
 // https://gmplib.org/~tege/divcnst-pldi94.pdf
 
@@ -37,4 +37,4 @@ static INLINE unsigned fastdiv(unsigned x, int y) {
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
-#endif  // AV1_COMMON_DIVIDE_H_
+#endif  // AOM_DSP_DIVIDE_H_

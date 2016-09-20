@@ -23,7 +23,7 @@
 
 #if CONFIG_ANS
 typedef struct BufAnsCoder BufAnsCoder;
-#include "av1/encoder/buf_ans.h"
+#include "aom_dsp/buf_ans.h"
 #define aom_writer BufAnsCoder
 #define aom_write buf_uabs_write
 #define aom_write_bit buf_uabs_write_bit

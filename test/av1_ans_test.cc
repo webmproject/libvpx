@@ -20,7 +20,7 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "test/acm_random.h"
-#include "av1/common/ans.h"
+#include "aom_dsp/ans.h"
 #include "av1/encoder/treewriter.h"
 #include "aom_dsp/bitreader.h"
 #include "aom_dsp/bitwriter.h"

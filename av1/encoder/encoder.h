@@ -22,7 +22,7 @@
 #include "av1/common/onyxc_int.h"
 #include "av1/encoder/aq_cyclicrefresh.h"
 #if CONFIG_ANS
-#include "av1/encoder/buf_ans.h"
+#include "aom_dsp/buf_ans.h"
 #endif
 #include "av1/encoder/context_tree.h"
 #include "av1/encoder/encodemb.h"
