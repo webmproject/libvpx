@@ -570,7 +570,7 @@ static int evaluate_inter_mode(unsigned int *sse, int rate2, int *distortion2,
     // No adjustment if block is considered to be skin area.
     if (x->is_skin) rd_adj = 100;
 
-    this_rd = ((int64_t)this_rd) * rd_adj / 100;
+    this_rd = (int)(((int64_t)this_rd) * rd_adj / 100);
   }
 
   check_for_encode_breakout(*sse, x);

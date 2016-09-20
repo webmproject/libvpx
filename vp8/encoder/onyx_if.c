@@ -2746,7 +2746,7 @@ static int decide_key_frame(VP8_COMP *cpi) {
   return code_key_frame;
 }
 
-static void Pass1Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
+static void Pass1Encode(VP8_COMP *cpi, size_t *size, unsigned char *dest,
                         unsigned int *frame_flags) {
   (void)size;
   (void)dest;
@@ -3185,7 +3185,7 @@ void vp8_loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm) {
   vp8_yv12_extend_frame_borders(cm->frame_to_show);
 }
 
-static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size,
+static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
                                       unsigned char *dest,
                                       unsigned char *dest_end,
                                       unsigned int *frame_flags) {
@@ -4384,7 +4384,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size,
 
   /* Update rate control heuristics */
   cpi->total_byte_count += (*size);
-  cpi->projected_frame_size = (*size) << 3;
+  cpi->projected_frame_size = (int)(*size) << 3;
 
   if (cpi->oxcf.number_of_layers > 1) {
     unsigned int i;
@@ -4711,7 +4711,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size,
   /* vp8_write_yuv_frame("encoder_recon.yuv", cm->frame_to_show); */
 }
 #if !CONFIG_REALTIME_ONLY
-static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
+static void Pass2Encode(VP8_COMP *cpi, size_t *size, unsigned char *dest,
                         unsigned char *dest_end, unsigned int *frame_flags) {
   if (!cpi->common.refresh_alt_ref_frame) vp8_second_pass(cpi);
 
@@ -4764,7 +4764,7 @@ static int frame_is_reference(const VP8_COMP *cpi) {
 }
 
 int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
-                            unsigned long *size, unsigned char *dest,
+                            size_t *size, unsigned char *dest,
                             unsigned char *dest_end, int64_t *time_stamp,
                             int64_t *time_end, int flush) {
   VP8_COMMON *cm;

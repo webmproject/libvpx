@@ -1056,7 +1056,7 @@ static void put_delta_q(vp8_writer *bc, int delta_q) {
 }
 
 void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
-                        unsigned char *dest_end, unsigned long *size) {
+                        unsigned char *dest_end, size_t *size) {
   int i, j;
   VP8_HEADER oh;
   VP8_COMMON *const pc = &cpi->common;
@@ -1347,7 +1347,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
 
   *size = VP8_HEADER_SIZE + extra_bytes_packed + cpi->bc->pos;
 
-  cpi->partition_sz[0] = *size;
+  cpi->partition_sz[0] = (unsigned int)*size;
 
 #if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
   {
