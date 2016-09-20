@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "10b0dbbd_4d7e6a71",
+        "filename": "vp8/decoder/threading.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 616,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-20T23:13:42Z",
+      "side": 1,
+      "message": "some cleanup will be missed as allocated_decoding_thread_count won\u0027t have been set. to avoid any potential leaks you\u0027d need something like is done with the pthread_create check below.",
+      "revId": "df4c2d026e4bd1c507d107778a24acda6a367a67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
