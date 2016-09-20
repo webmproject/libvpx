@@ -56,7 +56,7 @@ static void multiply_mat(const double *m1, const double *m2, double *res,
     for (col = 0; col < m2_cols; ++col) {
       sum = 0;
       for (inner = 0; inner < inner_dim; ++inner)
-        sum += m1[row * m1_rows + inner] * m2[inner * m2_cols + col];
+        sum += m1[row * inner_dim + inner] * m2[inner * m2_cols + col];
       *(res++) = sum;
     }
   }
