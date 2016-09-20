@@ -241,7 +241,7 @@ static int read_mv_component(vpx_reader *r, const nmv_component *mvcomp,
 
   // Integer part
   if (class0) {
-    d = vpx_read_tree(r, vp9_mv_class0_tree, mvcomp->class0);
+    d = vpx_read(r, mvcomp->class0[0]);
     mag = 0;
   } else {
     int i;
