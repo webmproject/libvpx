@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "10b0dbbd_4689727e",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-09-20T00:10:35Z",
+      "side": 1,
+      "message": "Done. Now FUN_FILTER_FLAT_HEV_MASK() includes FUN_FILTER_HEV_MASK4().",
+      "parentUuid": "eb243697_e78cc891",
+      "revId": "f66f983e0342ede742fd46f0dd202d2ede4989af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eb243697_07fd64cc",
         "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "10b0dbbd_c69c82bc",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 773,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-09-20T00:10:35Z",
+      "side": 1,
+      "message": "\u003e comment about why it\u0027s disabled, when/why it might be enabled (such\n \u003e as \"to be used for lpf nXm function\")\n\nDone. Removed FUN_STORE16 and only keep store_16x16().",
+      "parentUuid": "eb243697_07fd64cc",
+      "revId": "f66f983e0342ede742fd46f0dd202d2ede4989af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eb243697_a7c57086",
         "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
         "patchSetId": 1
@@ -47,6 +83,30 @@
       "writtenOn": "2016-09-19T21:48:41Z",
       "side": 1,
       "message": "load_thresh_8_dual?",
+      "range": {
+        "startLine": 841,
+        "startChar": 0,
+        "endLine": 841,
+        "endChar": 80
+      },
+      "revId": "f66f983e0342ede742fd46f0dd202d2ede4989af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "10b0dbbd_06413aee",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 841,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-09-20T00:10:35Z",
+      "side": 1,
+      "message": "\u003e load_thresh_8_dual?\n\nDone.",
+      "parentUuid": "eb243697_a7c57086",
       "range": {
         "startLine": 841,
         "startChar": 0,
@@ -82,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "10b0dbbd_46f2d200",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 897,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-09-20T00:10:35Z",
+      "side": 1,
+      "message": "\u003e seems like a big macro with a long declaration just to extract 2\n \u003e function calls\n\nDone. Removed FUN_LPF_8_KERNEL.",
+      "parentUuid": "eb243697_e7784858",
+      "range": {
+        "startLine": 897,
+        "startChar": 0,
+        "endLine": 897,
+        "endChar": 80
+      },
+      "revId": "f66f983e0342ede742fd46f0dd202d2ede4989af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eb243697_e723e869",
         "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
         "patchSetId": 1
@@ -93,6 +177,30 @@
       "writtenOn": "2016-09-19T21:48:41Z",
       "side": 1,
       "message": "Are the two 6x8 stores overwriting anything important?",
+      "range": {
+        "startLine": 965,
+        "startChar": 11,
+        "endLine": 965,
+        "endChar": 20
+      },
+      "revId": "f66f983e0342ede742fd46f0dd202d2ede4989af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "10b0dbbd_664cae27",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 965,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-09-20T00:10:35Z",
+      "side": 1,
+      "message": "\u003e Are the two 6x8 stores overwriting anything important?\n\nNo. They store exact 6x16 pixels which could have their values filtered.",
+      "parentUuid": "eb243697_e723e869",
       "range": {
         "startLine": 965,
         "startChar": 11,
@@ -128,6 +236,30 @@
     },
     {
       "key": {
+        "uuid": "10b0dbbd_e65c1eeb",
+        "filename": "vpx_dsp/arm/loopfilter_mb_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1069,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-09-20T00:10:35Z",
+      "side": 1,
+      "message": "\u003e Are you storing/overwriting anything important by writing the extra\n \u003e 2 lines?\n\nNo. The 2 extra columns are the p3 and q3 pixels. They were overwritten with their original values.",
+      "parentUuid": "eb243697_c71eec1e",
+      "range": {
+        "startLine": 1069,
+        "startChar": 26,
+        "endLine": 1069,
+        "endChar": 35
+      },
+      "revId": "f66f983e0342ede742fd46f0dd202d2ede4989af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eb243697_a71ad022",
         "filename": "vpx_dsp/arm/transpose_neon.h",
         "patchSetId": 1
@@ -139,6 +271,30 @@
       "writtenOn": "2016-09-19T21:48:41Z",
       "side": 1,
       "message": "this function is unused? comment about why it\u0027s not used/why it might be used. or remove and add a comment to the 8x8d about how it\u0027s faster than using q registers",
+      "range": {
+        "startLine": 117,
+        "startChar": 19,
+        "endLine": 117,
+        "endChar": 36
+      },
+      "revId": "f66f983e0342ede742fd46f0dd202d2ede4989af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "10b0dbbd_c611e20b",
+        "filename": "vpx_dsp/arm/transpose_neon.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-09-20T00:10:35Z",
+      "side": 1,
+      "message": "I did speed test of these 2 functions only, and they have almost identical speed, so I decide to only keep the \u0027q\u0027 registers version, by assuming that modern cpus should have more efficient implementation of vtrn and vuzp on \u0027q\u0027 registers. Also \u0027q\u0027 version has less instructions.\n\nCalling \u0027q\u0027 version is a little bit slower than \u0027d\u0027 version in lpf functions, and I think it\u0027s just because of bad luck.",
+      "parentUuid": "eb243697_a71ad022",
       "range": {
         "startLine": 117,
         "startChar": 19,
