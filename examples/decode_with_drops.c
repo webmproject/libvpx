@@ -92,8 +92,8 @@ int main(int argc, char **argv) {
   if (!(outfile = fopen(argv[2], "wb")))
     die("Failed to open %s for writing.", argv[2]);
 
-  n = strtol(argv[3], &nptr, 0);
-  m = strtol(nptr + 1, NULL, 0);
+  n = (int)strtol(argv[3], &nptr, 0);
+  m = (int)strtol(nptr + 1, NULL, 0);
   is_range = (*nptr == '-');
   if (!n || !m || (*nptr != '-' && *nptr != '/'))
     die("Couldn't parse pattern %s.\n", argv[3]);

@@ -547,13 +547,13 @@ int main(int argc, char **argv) {
 
   printf("Using %s\n", vpx_codec_iface_name(encoder->codec_interface()));
 
-  width = strtol(argv[4], NULL, 0);
-  height = strtol(argv[5], NULL, 0);
+  width = (unsigned int)strtoul(argv[4], NULL, 0);
+  height = (unsigned int)strtoul(argv[5], NULL, 0);
   if (width < 16 || width % 2 || height < 16 || height % 2) {
     die("Invalid resolution: %d x %d", width, height);
   }
 
-  layering_mode = strtol(argv[10], NULL, 0);
+  layering_mode = (int)strtol(argv[10], NULL, 0);
   if (layering_mode < 0 || layering_mode > 13) {
     die("Invalid layering mode (0..12) %s", argv[10]);
   }
@@ -609,17 +609,17 @@ int main(int argc, char **argv) {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   // Timebase format e.g. 30fps: numerator=1, demoninator = 30.
-  cfg.g_timebase.num = strtol(argv[6], NULL, 0);
-  cfg.g_timebase.den = strtol(argv[7], NULL, 0);
+  cfg.g_timebase.num = (int)strtol(argv[6], NULL, 0);
+  cfg.g_timebase.den = (int)strtol(argv[7], NULL, 0);
 
-  speed = strtol(argv[8], NULL, 0);
+  speed = (int)strtol(argv[8], NULL, 0);
   if (speed < 0) {
     die("Invalid speed setting: must be positive");
   }
 
   for (i = min_args_base;
        (int)i < min_args_base + mode_to_num_layers[layering_mode]; ++i) {
-    rc.layer_target_bitrate[i - 11] = strtol(argv[i], NULL, 0);
+    rc.layer_target_bitrate[i - 11] = (int)strtol(argv[i], NULL, 0);
     if (strncmp(encoder->name, "vp8", 3) == 0)
       cfg.ts_target_bitrate[i - 11] = rc.layer_target_bitrate[i - 11];
     else if (strncmp(encoder->name, "vp9", 3) == 0)
@@ -627,7 +627,7 @@ int main(int argc, char **argv) {
   }
 
   // Real time parameters.
-  cfg.rc_dropframe_thresh = strtol(argv[9], NULL, 0);
+  cfg.rc_dropframe_thresh = (unsigned int)strtoul(argv[9], NULL, 0);
   cfg.rc_end_usage = VPX_CBR;
   cfg.rc_min_quantizer = 2;
   cfg.rc_max_quantizer = 56;

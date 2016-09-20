@@ -209,13 +209,13 @@ int main(int argc, char **argv) {
 
   if (argc != 7) die("Invalid number of arguments.");
 
-  max_frames = strtol(argv[6], NULL, 0);
+  max_frames = (int)strtol(argv[6], NULL, 0);
 
   encoder = get_vpx_encoder_by_name(codec_arg);
   if (!encoder) die("Unsupported codec.");
 
-  w = strtol(width_arg, NULL, 0);
-  h = strtol(height_arg, NULL, 0);
+  w = (int)strtol(width_arg, NULL, 0);
+  h = (int)strtol(height_arg, NULL, 0);
 
   if (w <= 0 || h <= 0 || (w % 2) != 0 || (h % 2) != 0)
     die("Invalid frame size: %dx%d", w, h);
