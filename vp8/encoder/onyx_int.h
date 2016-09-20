@@ -687,7 +687,7 @@ void vp8_new_framerate(VP8_COMP *cpi, double framerate);
 void vp8_loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm);
 
 void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
-                        unsigned char *dest_end, unsigned long *size);
+                        unsigned char *dest_end, size_t *size);
 
 void vp8_tokenize_mb(VP8_COMP *, MACROBLOCK *, TOKENEXTRA **);
 
