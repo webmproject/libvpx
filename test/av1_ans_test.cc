@@ -19,11 +19,12 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-#include "test/acm_random.h"
 #include "aom_dsp/ans.h"
-#include "av1/encoder/treewriter.h"
 #include "aom_dsp/bitreader.h"
 #include "aom_dsp/bitwriter.h"
+#include "aom_dsp/dkboolwriter.h"
+#include "av1/encoder/treewriter.h"
+#include "test/acm_random.h"
 
 namespace {
 typedef std::vector<std::pair<uint8_t, bool> > PvVec;
@@ -125,16 +126,16 @@ bool check_uabs(const PvVec &pv_vec, uint8_t *buf) {
 }
 
 bool check_aombool(const PvVec &pv_vec, uint8_t *buf) {
-  aom_writer w;
+  aom_dk_writer w;
   aom_reader r;
-  aom_start_encode(&w, buf);
+  aom_dk_start_encode(&w, buf);
 
   std::clock_t start = std::clock();
   for (PvVec::const_iterator it = pv_vec.begin(); it != pv_vec.end(); ++it) {
-    aom_write(&w, it->second, 256 - it->first);
+    aom_dk_write(&w, it->second, 256 - it->first);
   }
   std::clock_t enc_time = std::clock() - start;
-  aom_stop_encode(&w);
+  aom_dk_stop_encode(&w);
   bool okay = true;
   aom_reader_init(&r, buf, w.pos, NULL, NULL);
   start = std::clock();
@@ -274,9 +275,9 @@ void build_tpb(aom_prob probs[/*num_syms*/],
 
 bool check_aomtree(const std::vector<int> &sym_vec, const rans_sym *sym_tab,
                    uint8_t *buf) {
-  aom_writer w;
+  aom_dk_writer w;
   aom_reader r;
-  aom_start_encode(&w, buf);
+  aom_dk_start_encode(&w, buf);
 
   aom_prob probs[kDistinctSyms];
   aom_tree_index tree[2 * kDistinctSyms];
@@ -289,7 +290,7 @@ bool check_aomtree(const std::vector<int> &sym_vec, const rans_sym *sym_tab,
     av1_write_tree(&w, tree, probs, bit_len[*it].bits, bit_len[*it].len, 0);
   }
   std::clock_t enc_time = std::clock() - start;
-  aom_stop_encode(&w);
+  aom_dk_stop_encode(&w);
   aom_reader_init(&r, buf, w.pos, NULL, NULL);
   start = std::clock();
   for (std::vector<int>::const_iterator it = sym_vec.begin();

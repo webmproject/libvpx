@@ -13,9 +13,9 @@
 #define AV1_ENCODER_TREEWRITER_H_
 
 #ifdef AV1_FORCE_AOMBOOL_TREEWRITER
-#include "aom_dsp/bitwriter.h"
-#define tree_writer aom_writer
-#define tree_bit_write aom_write
+#include "aom_dsp/dkboolwriter.h"
+#define tree_writer aom_dk_writer
+#define tree_bit_write aom_dk_write
 #else
 #include "av1/encoder/bitwriter.h"
 #define tree_writer aom_writer

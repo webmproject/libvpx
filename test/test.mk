@@ -101,7 +101,11 @@ LIBAOM_TEST_SRCS-yes                   += idct8x8_test.cc
 LIBAOM_TEST_SRCS-yes                   += partial_idct_test.cc
 LIBAOM_TEST_SRCS-yes                   += superframe_test.cc
 LIBAOM_TEST_SRCS-yes                   += tile_independence_test.cc
+ifeq ($(CONFIG_ANS),yes)
+LIBAOM_TEST_SRCS-yes                   += av1_ans_test.cc
+else
 LIBAOM_TEST_SRCS-yes                   += boolcoder_test.cc
+endif
 LIBAOM_TEST_SRCS-yes                   += divu_small_test.cc
 #LIBAOM_TEST_SRCS-yes                   += encoder_parms_get_to_decoder.cc
 endif
@@ -136,7 +140,6 @@ ifeq ($(CONFIG_EXT_TX),yes)
 LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += av1_fht8x16_test.cc
 LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += av1_fht16x8_test.cc
 endif
-LIBAOM_TEST_SRCS-$(CONFIG_ANS)          += av1_ans_test.cc
 LIBAOM_TEST_SRCS-$(CONFIG_EXT_TILE)     += av1_ext_tile_test.cc
 
 LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += sum_squares_test.cc
