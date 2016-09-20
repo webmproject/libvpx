@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "10b0dbbd_4dee6ab3",
+        "filename": "vp8/common/arm/neon/dequant_idct_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-20T22:50:58Z",
+      "side": 1,
+      "message": "this is the quick fix, the underlying instruction in this case seems to be doing the right thing. consider, however:\n\nhttps://chromium.googlesource.com/webm/libwebp/+/master/src/dsp/dec_neon.c#974",
+      "revId": "ec57f07fea1085beec6e2424f1a3863580150230",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
