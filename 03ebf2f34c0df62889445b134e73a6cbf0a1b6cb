@@ -22,6 +22,29 @@
       "revId": "03ebf2f34c0df62889445b134e73a6cbf0a1b6cb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "10b0dbbd_4d13ca64",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-20T23:04:23Z",
+      "side": 1,
+      "message": "you can drop \u0027detect\u0027 here and below",
+      "range": {
+        "startLine": 235,
+        "startChar": 17,
+        "endLine": 235,
+        "endChar": 24
+      },
+      "revId": "03ebf2f34c0df62889445b134e73a6cbf0a1b6cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
