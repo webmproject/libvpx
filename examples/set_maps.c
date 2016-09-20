@@ -174,8 +174,8 @@ int main(int argc, char **argv) {
   }
   assert(encoder != NULL);
   info.codec_fourcc = encoder->fourcc;
-  info.frame_width = strtol(argv[2], NULL, 0);
-  info.frame_height = strtol(argv[3], NULL, 0);
+  info.frame_width = (int)strtol(argv[2], NULL, 0);
+  info.frame_height = (int)strtol(argv[3], NULL, 0);
   info.time_base.numerator = 1;
   info.time_base.denominator = fps;
 

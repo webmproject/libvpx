@@ -175,14 +175,14 @@ int main(int argc, char **argv) {
   infile_arg = argv[4];
   outfile_arg = argv[5];
   keyframe_interval_arg = argv[6];
-  max_frames = strtol(argv[8], NULL, 0);
+  max_frames = (int)strtol(argv[8], NULL, 0);
 
   encoder = get_vpx_encoder_by_name(codec_arg);
   if (!encoder) die("Unsupported codec.");
 
   info.codec_fourcc = encoder->fourcc;
-  info.frame_width = strtol(width_arg, NULL, 0);
-  info.frame_height = strtol(height_arg, NULL, 0);
+  info.frame_width = (int)strtol(width_arg, NULL, 0);
+  info.frame_height = (int)strtol(height_arg, NULL, 0);
   info.time_base.numerator = 1;
   info.time_base.denominator = fps;
 
@@ -196,7 +196,7 @@ int main(int argc, char **argv) {
     die("Failed to allocate image.");
   }
 
-  keyframe_interval = strtol(keyframe_interval_arg, NULL, 0);
+  keyframe_interval = (int)strtol(keyframe_interval_arg, NULL, 0);
   if (keyframe_interval < 0) die("Invalid keyframe interval value.");
 
   printf("Using %s\n", vpx_codec_iface_name(encoder->codec_interface()));
@@ -209,7 +209,7 @@ int main(int argc, char **argv) {
   cfg.g_timebase.num = info.time_base.numerator;
   cfg.g_timebase.den = info.time_base.denominator;
   cfg.rc_target_bitrate = bitrate;
-  cfg.g_error_resilient = strtol(argv[7], NULL, 0);
+  cfg.g_error_resilient = (vpx_codec_er_flags_t)strtoul(argv[7], NULL, 0);
 
   writer = vpx_video_writer_open(outfile_arg, kContainerIVF, &info);
   if (!writer) die("Failed to open %s for writing.", outfile_arg);
