@@ -399,7 +399,7 @@ typedef struct macroblockd {
 static INLINE BLOCK_SIZE get_subsize(BLOCK_SIZE bsize,
                                      PARTITION_TYPE partition) {
   if (partition == PARTITION_INVALID)
-    return PARTITION_INVALID;
+    return BLOCK_INVALID;
   else
     return subsize_lookup[partition][bsize];
 }
@@ -756,8 +756,10 @@ static INLINE int is_interintra_allowed(const MB_MODE_INFO *mbmi) {
 static INLINE int is_interintra_allowed_bsize_group(const int group) {
   int i;
   for (i = 0; i < BLOCK_SIZES; i++) {
-    if (size_group_lookup[i] == group && is_interintra_allowed_bsize(i))
+    if (size_group_lookup[i] == group &&
+        is_interintra_allowed_bsize((BLOCK_SIZE)i)) {
       return 1;
+    }
   }
   return 0;
 }

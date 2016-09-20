@@ -13,6 +13,7 @@
 #define AV1_COMMON_ENUMS_H_
 
 #include "./aom_config.h"
+#include "aom/aom_codec.h"
 #include "aom/aom_integer.h"
 
 #ifdef __cplusplus
@@ -72,55 +73,49 @@ typedef enum BITSTREAM_PROFILE {
   MAX_PROFILES
 } BITSTREAM_PROFILE;
 
-#define BLOCK_4X4 0
-#define BLOCK_4X8 1
-#define BLOCK_8X4 2
-#define BLOCK_8X8 3
-#define BLOCK_8X16 4
-#define BLOCK_16X8 5
-#define BLOCK_16X16 6
-#define BLOCK_16X32 7
-#define BLOCK_32X16 8
-#define BLOCK_32X32 9
-#define BLOCK_32X64 10
-#define BLOCK_64X32 11
-#define BLOCK_64X64 12
-#if !CONFIG_EXT_PARTITION
-#define BLOCK_SIZES 13
-#else
-#define BLOCK_64X128 13
-#define BLOCK_128X64 14
-#define BLOCK_128X128 15
-#define BLOCK_SIZES 16
-#endif  // !CONFIG_EXT_PARTITION
-#define BLOCK_INVALID BLOCK_SIZES
-#define BLOCK_LARGEST (BLOCK_SIZES - 1)
-typedef uint8_t BLOCK_SIZE;
+// Note: Some enums use the attribute 'packed' to use smallest possible integer
+// type, so that we can save memory when they are used in structs/arrays.
 
-#if CONFIG_EXT_PARTITION_TYPES
-typedef enum PARTITION_TYPE {
+typedef enum ATTRIBUTE_PACKED {
+  BLOCK_4X4,
+  BLOCK_4X8,
+  BLOCK_8X4,
+  BLOCK_8X8,
+  BLOCK_8X16,
+  BLOCK_16X8,
+  BLOCK_16X16,
+  BLOCK_16X32,
+  BLOCK_32X16,
+  BLOCK_32X32,
+  BLOCK_32X64,
+  BLOCK_64X32,
+  BLOCK_64X64,
+#if CONFIG_EXT_PARTITION
+  BLOCK_64X128,
+  BLOCK_128X64,
+  BLOCK_128X128,
+#endif  // CONFIG_EXT_PARTITION
+
+  BLOCK_SIZES,
+  BLOCK_INVALID = BLOCK_SIZES,
+  BLOCK_LARGEST = (BLOCK_SIZES - 1)
+} BLOCK_SIZE;
+
+typedef enum {
   PARTITION_NONE,
   PARTITION_HORZ,
   PARTITION_VERT,
   PARTITION_SPLIT,
+#if CONFIG_EXT_PARTITION_TYPES
   PARTITION_HORZ_A,  // HORZ split and the left partition is split again
   PARTITION_HORZ_B,  // HORZ split and the right partition is split again
   PARTITION_VERT_A,  // VERT split and the top partition is split again
   PARTITION_VERT_B,  // VERT split and the bottom partition is split again
   EXT_PARTITION_TYPES,
-  PARTITION_TYPES = PARTITION_SPLIT + 1,
-  PARTITION_INVALID = EXT_PARTITION_TYPES
-} PARTITION_TYPE;
-#else
-typedef enum PARTITION_TYPE {
-  PARTITION_NONE,
-  PARTITION_HORZ,
-  PARTITION_VERT,
-  PARTITION_SPLIT,
-  PARTITION_TYPES,
-  PARTITION_INVALID = PARTITION_TYPES
-} PARTITION_TYPE;
 #endif  // CONFIG_EXT_PARTITION_TYPES
+  PARTITION_TYPES = PARTITION_SPLIT + 1,
+  PARTITION_INVALID = 255
+} PARTITION_TYPE;
 
 typedef char PARTITION_CONTEXT;
 #define PARTITION_PLOFFSET 4  // number of probability models per block size
@@ -131,25 +126,23 @@ typedef char PARTITION_CONTEXT;
 #endif  // CONFIG_EXT_PARTITION
 
 // block transform size
-typedef uint8_t TX_SIZE;
-#define TX_4X4 ((TX_SIZE)0)    // 4x4 transform
-#define TX_8X8 ((TX_SIZE)1)    // 8x8 transform
-#define TX_16X16 ((TX_SIZE)2)  // 16x16 transform
-#define TX_32X32 ((TX_SIZE)3)  // 32x32 transform
-#define TX_SIZES ((TX_SIZE)4)
-#define TX_INVALID ((TX_SIZE)255)  // Invalid transform size
-
+typedef enum ATTRIBUTE_PACKED {
+  TX_4X4,    // 4x4 transform
+  TX_8X8,    // 8x8 transform
+  TX_16X16,  // 16x16 transform
+  TX_32X32,  // 32x32 transform
 #if CONFIG_EXT_TX
-#define TX_4X8 ((TX_SIZE)4)         // 4x8 transform
-#define TX_8X4 ((TX_SIZE)5)         // 8x4 transform
-#define TX_8X16 ((TX_SIZE)6)        // 8x16 transform
-#define TX_16X8 ((TX_SIZE)7)        // 16x8 transform
-#define TX_16X32 ((TX_SIZE)8)       // 16x32 transform
-#define TX_32X16 ((TX_SIZE)9)       // 32x16 transform
-#define TX_SIZES_ALL ((TX_SIZE)10)  // Includes rectangular transforms
-#else
-#define TX_SIZES_ALL ((TX_SIZE)4)
-#endif  // CONFIG_EXT_TX
+  TX_4X8,                   // 4x8 transform
+  TX_8X4,                   // 8x4 transform
+  TX_8X16,                  // 8x16 transform
+  TX_16X8,                  // 16x8 transform
+  TX_16X32,                 // 16x32 transform
+  TX_32X16,                 // 32x16 transform
+#endif                      // CONFIG_EXT_TX
+  TX_SIZES_ALL,             // Includes rectangular transforms
+  TX_SIZES = TX_32X32 + 1,  // Does NOT include rectangular transforms
+  TX_INVALID = 255          // Invalid transform size
+} TX_SIZE;
 
 #define MAX_TX_SIZE_LOG2 5
 #define MAX_TX_SIZE (1 << MAX_TX_SIZE_LOG2)
@@ -253,39 +246,37 @@ typedef enum {
   PALETTE_COLORS
 } PALETTE_COLOR;
 
-#define DC_PRED 0    // Average of above and left pixels
-#define V_PRED 1     // Vertical
-#define H_PRED 2     // Horizontal
-#define D45_PRED 3   // Directional 45  deg = round(arctan(1/1) * 180/pi)
-#define D135_PRED 4  // Directional 135 deg = 180 - 45
-#define D117_PRED 5  // Directional 117 deg = 180 - 63
-#define D153_PRED 6  // Directional 153 deg = 180 - 27
-#define D207_PRED 7  // Directional 207 deg = 180 + 27
-#define D63_PRED 8   // Directional 63  deg = round(arctan(2/1) * 180/pi)
-#define TM_PRED 9    // True-motion
-#define NEARESTMV 10
-#define NEARMV 11
-#define ZEROMV 12
-#define NEWMV 13
+typedef enum ATTRIBUTE_PACKED {
+  DC_PRED,    // Average of above and left pixels
+  V_PRED,     // Vertical
+  H_PRED,     // Horizontal
+  D45_PRED,   // Directional 45  deg = round(arctan(1/1) * 180/pi)
+  D135_PRED,  // Directional 135 deg = 180 - 45
+  D117_PRED,  // Directional 117 deg = 180 - 63
+  D153_PRED,  // Directional 153 deg = 180 - 27
+  D207_PRED,  // Directional 207 deg = 180 + 27
+  D63_PRED,   // Directional 63  deg = round(arctan(2/1) * 180/pi)
+  TM_PRED,    // True-motion
+  NEARESTMV,
+  NEARMV,
+  ZEROMV,
+  NEWMV,
 #if CONFIG_EXT_INTER
-#define NEWFROMNEARMV 14
-#define NEAREST_NEARESTMV 15
-#define NEAREST_NEARMV 16
-#define NEAR_NEARESTMV 17
-#define NEAR_NEARMV 18
-#define NEAREST_NEWMV 19
-#define NEW_NEARESTMV 20
-#define NEAR_NEWMV 21
-#define NEW_NEARMV 22
-#define ZERO_ZEROMV 23
-#define NEW_NEWMV 24
-#define MB_MODE_COUNT 25
-#else
-#define MB_MODE_COUNT 14
+  NEWFROMNEARMV,
+  NEAREST_NEARESTMV,
+  NEAREST_NEARMV,
+  NEAR_NEARESTMV,
+  NEAR_NEARMV,
+  NEAREST_NEWMV,
+  NEW_NEARESTMV,
+  NEAR_NEWMV,
+  NEW_NEARMV,
+  ZERO_ZEROMV,
+  NEW_NEWMV,
 #endif  // CONFIG_EXT_INTER
-typedef uint8_t PREDICTION_MODE;
-
-#define INTRA_MODES (TM_PRED + 1)
+  MB_MODE_COUNT,
+  INTRA_MODES = TM_PRED + 1
+} PREDICTION_MODE;
 
 typedef enum {
   SIMPLE_TRANSLATION = 0,

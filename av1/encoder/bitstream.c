@@ -2132,7 +2132,7 @@ static void get_coef_counts_diff(AV1_COMP *cpi, int index,
   int i, j, k, l, m, tx_size, val;
   const int max_idx = cpi->common.coef_probs_update_idx;
   const TX_MODE tx_mode = cpi->common.tx_mode;
-  const TX_SIZE max_tx_size = tx_mode_to_biggest_tx_size[tx_mode];
+  const int max_tx_size = tx_mode_to_biggest_tx_size[tx_mode];
   const SUBFRAME_STATS *subframe_stats = &cpi->subframe_stats;
 
   assert(max_idx < COEF_PROBS_BUFS);
@@ -3265,7 +3265,7 @@ static void write_uncompressed_header(AV1_COMP *cpi,
   encode_quantization(cm, wb);
   encode_segmentation(cm, xd, wb);
   if (!cm->seg.enabled && xd->lossless[0])
-    cm->tx_mode = TX_4X4;
+    cm->tx_mode = ONLY_4X4;
   else
     write_txfm_mode(cm->tx_mode, wb);
 

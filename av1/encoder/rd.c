@@ -1069,7 +1069,7 @@ void av1_update_rd_thresh_fact(const AV1_COMMON *const cm,
     int mode;
     for (mode = 0; mode < top_mode; ++mode) {
       const BLOCK_SIZE min_size = AOMMAX(bsize - 1, BLOCK_4X4);
-      const BLOCK_SIZE max_size = AOMMIN(bsize + 2, cm->sb_size);
+      const BLOCK_SIZE max_size = AOMMIN(bsize + 2, (int)cm->sb_size);
       BLOCK_SIZE bs;
       for (bs = min_size; bs <= max_size; ++bs) {
         int *const fact = &factor_buf[bs][mode];
