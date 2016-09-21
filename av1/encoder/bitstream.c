@@ -1869,6 +1869,37 @@ static void write_modes_sb(AV1_COMP *const cpi, const TileInfo *const tile,
       (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT))
     update_partition_context(xd, mi_row, mi_col, subsize, bsize);
 
+#if CONFIG_CLPF
+  if (bsize == BLOCK_64X64 && cm->clpf_blocks && cm->clpf_strength_y &&
+      cm->clpf_size != CLPF_NOSIZE) {
+    const int tl = mi_row * MI_SIZE / MIN_FB_SIZE * cm->clpf_stride +
+                   mi_col * MI_SIZE / MIN_FB_SIZE;
+    const int tr = tl + 1;
+    const int bl = tl + cm->clpf_stride;
+    const int br = tr + cm->clpf_stride;
+
+    // Up to four bits per SB.
+    // When clpf_size indicates a size larger than the SB size
+    // (CLPF_128X128), one bit for every fourth SB will be transmitted
+    // regardless of skip blocks.
+    if (cm->clpf_blocks[tl] != CLPF_NOFLAG)
+      aom_write_literal(w, cm->clpf_blocks[tl], 1);
+
+    if (mi_col + MI_SIZE / 2 < cm->mi_cols &&
+        cm->clpf_blocks[tr] != CLPF_NOFLAG)
+      aom_write_literal(w, cm->clpf_blocks[tr], 1);
+
+    if (mi_row + MI_SIZE / 2 < cm->mi_rows &&
+        cm->clpf_blocks[bl] != CLPF_NOFLAG)
+      aom_write_literal(w, cm->clpf_blocks[bl], 1);
+
+    if (mi_row + MI_SIZE / 2 < cm->mi_rows &&
+        mi_col + MI_SIZE / 2 < cm->mi_cols &&
+        cm->clpf_blocks[br] != CLPF_NOFLAG)
+      aom_write_literal(w, cm->clpf_blocks[br], 1);
+  }
+#endif
+
 #if CONFIG_DERING
   if (bsize == BLOCK_64X64 && cm->dering_level != 0 &&
       !sb_all_skip(cm, mi_row, mi_col)) {
@@ -2533,18 +2564,6 @@ static void encode_clpf(const AV1_COMMON *cm, struct aom_write_bit_buffer *wb) {
   aom_wb_write_literal(wb, cm->clpf_strength_v, 2);
   if (cm->clpf_strength_y) {
     aom_wb_write_literal(wb, cm->clpf_size, 2);
-    if (cm->clpf_size) {
-      int i;
-      // TODO(stemidts): The number of bits to transmit could be
-      // implicitly deduced if transmitted after the filter block or
-      // after the frame (when it's known whether the block is all
-      // skip and implicitly unfiltered).  And the bits do not have
-      // 50% probability, so a more efficient coding is possible.
-      aom_wb_write_literal(wb, cm->clpf_numblocks, av1_clpf_maxbits(cm));
-      for (i = 0; i < cm->clpf_numblocks; i++) {
-        aom_wb_write_literal(wb, cm->clpf_blocks ? cm->clpf_blocks[i] : 0, 1);
-      }
-    }
   }
 }
 #endif
