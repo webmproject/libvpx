@@ -2481,7 +2481,13 @@ void av1_fht16x16_sse2(const int16_t *input, tran_low_t *output, int stride,
   __m128i in0[16], in1[16];
 
   switch (tx_type) {
-    case DCT_DCT: aom_fdct16x16_sse2(input, output, stride); break;
+    case DCT_DCT:
+      load_buffer_16x16(input, in0, in1, stride, 0, 0);
+      fdct16_sse2(in0, in1);
+      right_shift_16x16(in0, in1);
+      fdct16_sse2(in0, in1);
+      write_buffer_16x16(output, in0, in1, 16);
+      break;
     case ADST_DCT:
       load_buffer_16x16(input, in0, in1, stride, 0, 0);
       fadst16_sse2(in0, in1);

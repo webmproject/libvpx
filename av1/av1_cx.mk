@@ -116,6 +116,7 @@ endif
 
 AV1_CX_SRCS-$(HAVE_SSE2) += encoder/x86/dct_intrin_sse2.c
 AV1_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/dct_ssse3.c
+AV1_CX_SRCS-$(HAVE_AVX2) += encoder/x86/hybrid_fwd_txfm_avx2.c
 ifeq ($(CONFIG_AOM_HIGHBITDEPTH),yes)
 AV1_CX_SRCS-$(HAVE_SSE4_1) += encoder/x86/highbd_fwd_txfm_sse4.c
 AV1_CX_SRCS-$(HAVE_SSE4_1) += common/x86/highbd_inv_txfm_sse4.c
