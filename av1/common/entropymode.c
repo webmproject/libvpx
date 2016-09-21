@@ -1655,9 +1655,11 @@ void av1_setup_past_independence(AV1_COMMON *cm) {
   // To force update of the sharpness
   lf->last_sharpness_level = -1;
 #if CONFIG_LOOP_RESTORATION
-  if (cm->rst_info.bilateral_level) {
+  if (cm->rst_info.bilateral_info) {
+    int s;
     for (i = 0; i < cm->rst_internal.ntiles; ++i)
-      cm->rst_info.bilateral_level[i] = -1;
+      for (s = 0; s < BILATERAL_SUBTILES; ++s)
+        cm->rst_info.bilateral_info[i].level[s] = -1;
   }
 #endif  // CONFIG_LOOP_RESTORATION
 
