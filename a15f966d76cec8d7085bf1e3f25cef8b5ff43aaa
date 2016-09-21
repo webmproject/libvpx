@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30407fd3_5f244b20",
+        "filename": "test/av1_quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-09-21T23:35:48Z",
+      "side": 1,
+      "message": "Maybe this is subjective, but I think a switch statement here would be more readable.",
+      "range": {
+        "startLine": 182,
+        "startChar": 0,
+        "endLine": 187,
+        "endChar": 73
+      },
+      "revId": "a15f966d76cec8d7085bf1e3f25cef8b5ff43aaa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
