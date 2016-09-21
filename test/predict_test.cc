@@ -20,6 +20,7 @@
 #include "test/register_state_check.h"
 #include "test/util.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_mem/vpx_mem.h"
 
 namespace {
 
@@ -46,7 +47,8 @@ class PredictTestBase : public ::testing::TestWithParam<PredictParam> {
     // memory to facilitate detecting out of bounds writes.
     dst_stride_ = kBorderSize + width_ + kBorderSize;
     padded_dst_size_ = dst_stride_ * (kBorderSize + height_ + kBorderSize);
-    padded_dst_ = new uint8_t[padded_dst_size_];
+    padded_dst_ =
+        reinterpret_cast<uint8_t *>(vpx_memalign(16, padded_dst_size_));
     ASSERT_TRUE(padded_dst_ != NULL);
     dst_ = padded_dst_ + (kBorderSize * dst_stride_) + kBorderSize;
 
@@ -61,7 +63,7 @@ class PredictTestBase : public ::testing::TestWithParam<PredictParam> {
   virtual void TearDown() {
     delete[] src_;
     src_ = NULL;
-    delete[] padded_dst_;
+    vpx_free(padded_dst_);
     padded_dst_ = NULL;
     dst_ = NULL;
     delete[] dst_c_;
