@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b0af0fac_611bd28a",
+        "filename": "configure",
+        "patchSetId": 5
+      },
+      "lineNbr": 584,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-21T19:56:23Z",
+      "side": 1,
+      "message": "I think this will probably raise issues in other configs. I\u0027ll hold it until I run at least one (clang+arm)",
+      "revId": "ab97f6cf37eabe017d0d1a623df80a96b0e891ee",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
