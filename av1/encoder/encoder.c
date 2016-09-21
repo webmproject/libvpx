@@ -65,7 +65,9 @@
 #include "aom_ports/mem.h"
 #include "aom_ports/system_state.h"
 #include "aom_scale/aom_scale.h"
+#if CONFIG_BITSTREAM_DEBUG
 #include "aom_util/debug_util.h"
+#endif  // CONFIG_BITSTREAM_DEBUG
 
 #define AM_SEGMENT_ID_INACTIVE 7
 #define AM_SEGMENT_ID_ACTIVE 0

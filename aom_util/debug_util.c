@@ -8,10 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "aom_util/debug_util.h"
 #include <assert.h>
 #include <stdio.h>
-#if CONFIG_BITSTREAM_DEBUG
+#include "aom_util/debug_util.h"
+
 #define QUEUE_MAX_SIZE 2000000
 static int result_queue[QUEUE_MAX_SIZE];
 static int prob_queue[QUEUE_MAX_SIZE];
@@ -27,11 +27,11 @@ static int frame_idx_r = 0;
 
 void bitstream_queue_set_frame_write(int frame_idx) { frame_idx_w = frame_idx; }
 
-int bitstream_queue_get_frame_write() { return frame_idx_w; }
+int bitstream_queue_get_frame_write(void) { return frame_idx_w; }
 
 void bitstream_queue_set_frame_read(int frame_idx) { frame_idx_r = frame_idx; }
 
-int bitstream_queue_get_frame_read() { return frame_idx_r; }
+int bitstream_queue_get_frame_read(void) { return frame_idx_r; }
 
 void bitstream_queue_set_skip_write(int skip) { skip_w = skip; }
 
@@ -68,4 +68,3 @@ void bitstream_queue_push(int result, int prob) {
     }
   }
 }
-#endif  // CONFIG_BITSTREAM_DEBUG

@@ -16,11 +16,11 @@
 
 #if CONFIG_BITSTREAM_DEBUG
 #include <stdio.h>
-#endif
+#include "aom_util/debug_util.h"
+#endif  // CONFIG_BITSTREAM_DEBUG
 
 #include "aom_dsp/prob.h"
 #include "aom_ports/mem.h"
-#include "aom_util/debug_util.h"
 
 #ifdef __cplusplus
 extern "C" {

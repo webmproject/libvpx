@@ -17,7 +17,6 @@
 extern "C" {
 #endif
 
-#if CONFIG_BITSTREAM_DEBUG
 /* This is a debug tool used to detect bitstream error. On encoder side, it
  * pushes each bit and probability into a queue before the bit is written into
  * the Arithmetic coder. On decoder side, whenever a bit is read out from the
@@ -35,10 +34,9 @@ void bitstream_queue_push(int result, int prob);
 void bitstream_queue_set_skip_write(int skip);
 void bitstream_queue_set_skip_read(int skip);
 void bitstream_queue_set_frame_write(int frame_idx);
-int bitstream_queue_get_frame_write();
+int bitstream_queue_get_frame_write(void);
 void bitstream_queue_set_frame_read(int frame_idx);
-int bitstream_queue_get_frame_read();
-#endif  // CONFIG_BITSTREAM_DEBUG
+int bitstream_queue_get_frame_read(void);
 
 #ifdef __cplusplus
 }  // extern "C"

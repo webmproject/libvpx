@@ -19,7 +19,9 @@
 #include "aom_mem/aom_mem.h"
 #include "aom_ports/mem_ops.h"
 #include "aom_ports/system_state.h"
+#if CONFIG_BITSTREAM_DEBUG
 #include "aom_util/debug_util.h"
+#endif  // CONFIG_BITSTREAM_DEBUG
 
 #if CONFIG_CLPF
 #include "av1/common/clpf.h"

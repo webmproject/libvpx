@@ -19,13 +19,13 @@
 #if CONFIG_BITSTREAM_DEBUG
 #include <assert.h>
 #include <stdio.h>
+#include "aom_util/debug_util.h"
 #endif  // CONFIG_BITSTREAM_DEBUG
 
 #include "aom_ports/mem.h"
 #include "aom/aomdx.h"
 #include "aom/aom_integer.h"
 #include "aom_dsp/prob.h"
-#include "aom_util/debug_util.h"
 
 #ifdef __cplusplus
 extern "C" {
