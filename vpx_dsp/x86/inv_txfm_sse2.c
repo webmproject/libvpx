@@ -3066,17 +3066,7 @@ void vpx_idct32x32_34_add_sse2(const tran_low_t *input, uint8_t *dest,
   in[6] = load_input_data(input + 192);
   in[7] = load_input_data(input + 224);
 
-  for (i = 8; i < 32; ++i) {
-    in[i] = _mm_setzero_si128();
-  }
-
   array_transpose_8x8(in, in);
-  // TODO(hkuang): Following transposes are unnecessary. But remove them will
-  // lead to performance drop on some devices.
-  array_transpose_8x8(in + 8, in + 8);
-  array_transpose_8x8(in + 16, in + 16);
-  array_transpose_8x8(in + 24, in + 24);
-
   IDCT32_34
 
   // 1_D: Store 32 intermediate results for each 8x32 block.
