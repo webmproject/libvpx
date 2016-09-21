@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30407fd3_9f61730d",
+        "filename": "av1/common/enums.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-21T23:59:17Z",
+      "side": 1,
+      "message": "this will require some if\u0027defry to make visual studio happy, is it worth it?",
+      "range": {
+        "startLine": 78,
+        "startChar": 13,
+        "endLine": 78,
+        "endChar": 40
+      },
+      "revId": "7a4f7c9f68b5ad3647b51fa9ae2894d844421d53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
