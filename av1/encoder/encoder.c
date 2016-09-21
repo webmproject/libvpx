@@ -3438,10 +3438,8 @@ static void loopfilter_frame(AV1_COMP *cpi, AV1_COMMON *cm) {
     int fb_size_log2, strength_y, strength_u, strength_v;
     av1_clpf_test_frame(frame, cpi->Source, cm, &strength_y, &fb_size_log2,
                         AOM_PLANE_Y);
-    av1_clpf_test_frame(frame, cpi->Source, cm, &strength_u, &fb_size_log2,
-                        AOM_PLANE_U);
-    av1_clpf_test_frame(frame, cpi->Source, cm, &strength_v, &fb_size_log2,
-                        AOM_PLANE_V);
+    av1_clpf_test_frame(frame, cpi->Source, cm, &strength_u, 0, AOM_PLANE_U);
+    av1_clpf_test_frame(frame, cpi->Source, cm, &strength_v, 0, AOM_PLANE_V);
 
     if (!fb_size_log2) fb_size_log2 = get_msb(MAX_FB_SIZE);
 

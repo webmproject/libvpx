@@ -332,6 +332,6 @@ void av1_clpf_test_frame(const YV12_BUFFER_CONFIG *rec,
     for (j = 0; j < 4; j++)
       if ((!c || j) && sums[c][j] < best) best = sums[c][j];
   best &= 15;
-  *best_bs = (best > 3) * (5 + (best < 12) + (best < 8));
+  if (best_bs) *best_bs = (best > 3) * (5 + (best < 12) + (best < 8));
   *best_strength = best ? 1 << ((best - 1) & 3) : 0;
 }
