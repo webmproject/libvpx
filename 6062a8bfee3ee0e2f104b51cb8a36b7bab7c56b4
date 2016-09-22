@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d04e430b_a29c5a6c",
+        "filename": "aom_util/debug_util.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-22T19:43:38Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "6062a8bfee3ee0e2f104b51cb8a36b7bab7c56b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d04e430b_02a8ae8d",
+        "filename": "aom_util/debug_util.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-22T19:43:38Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "6062a8bfee3ee0e2f104b51cb8a36b7bab7c56b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d04e430b_e2a262b1",
+        "filename": "aom_util/debug_util.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-22T19:43:38Z",
+      "side": 1,
+      "message": "you could join some of these lines for the logically related pairs (get/set)",
+      "revId": "6062a8bfee3ee0e2f104b51cb8a36b7bab7c56b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d04e430b_22b84adf",
+        "filename": "aom_util/debug_util.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-22T19:43:38Z",
+      "side": 1,
+      "message": "these could go to stderr",
+      "revId": "6062a8bfee3ee0e2f104b51cb8a36b7bab7c56b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d04e430b_82ab5e8f",
+        "filename": "aom_util/debug_util.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-22T19:43:38Z",
+      "side": 1,
+      "message": "this is unnecessary now",
+      "revId": "6062a8bfee3ee0e2f104b51cb8a36b7bab7c56b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
