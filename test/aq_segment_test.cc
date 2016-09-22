@@ -9,6 +9,7 @@
  * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
 */
 
+#include "./aom_config.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
@@ -79,6 +80,21 @@ TEST_P(AqSegmentTestLarge, TestNoMisMatchAQ1) { DoTest(1); }
 TEST_P(AqSegmentTestLarge, TestNoMisMatchAQ2) { DoTest(2); }
 
 TEST_P(AqSegmentTestLarge, TestNoMisMatchAQ3) { DoTest(3); }
+
+#if CONFIG_DELTA_Q
+// Validate that this AQ mode (AQ=4, delta q)
+// encodes and decodes without a mismatch.
+TEST_P(AqSegmentTest, TestNoMisMatchAQ4) {
+  cfg_.rc_end_usage = AOM_CQ;
+
+  aq_mode_ = 4;
+
+  ::libaom_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 100);
+
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+}
+#endif
 
 AV1_INSTANTIATE_TEST_CASE(AqSegmentTest,
                           ::testing::Values(::libaom_test::kRealTime,
