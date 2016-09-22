@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30407fd3_b344b09f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-09-22T16:22:54Z",
+      "side": 1,
+      "message": "I\u0027d write \"bitstream_debug: build related cleanup\" or something similar, as this is not a \u0027refactor\u0027 to be precise.",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 8
+      },
+      "revId": "14687e57675ea6e1ad33c941b7e8dc8c5601279f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
