@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "90668bcf_9a61cd3f",
+        "filename": "vpx_dsp/arm/variance_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-22T20:48:02Z",
+      "side": 1,
+      "message": "should this be unsigned int?",
+      "revId": "e372bfd5ac4d3d41f2bcfb9ea2776213751df374",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "90668bcf_ba669152",
+        "filename": "vpx_dsp/arm/variance_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-22T20:48:02Z",
+      "side": 1,
+      "message": "or should these be uint32_t?",
+      "revId": "e372bfd5ac4d3d41f2bcfb9ea2776213751df374",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
