@@ -22,6 +22,30 @@
       "revId": "7a4f7c9f68b5ad3647b51fa9ae2894d844421d53",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30407fd3_5f41ab3b",
+        "filename": "av1/common/enums.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-09-22T00:15:48Z",
+      "side": 1,
+      "message": "Our options seem to be manually packing with defines, (unpacked) enums, or packed enums.\n\nUsing the wrong type places does seem to have crept in with the defines. \n\nScott did get a real speedup converting these from enums in the first place. (Although this branch does probably have enough of a slow down that it\u0027s less relevant). \n\nPacked enums seems to be a reasonable tradeoff between the two. \n\nWe can put the ifdeffery in one header just like we do for DEPRECATED, UNUSED, and FORCE_INLINE.",
+      "parentUuid": "30407fd3_9f61730d",
+      "range": {
+        "startLine": 78,
+        "startChar": 13,
+        "endLine": 78,
+        "endChar": 40
+      },
+      "revId": "7a4f7c9f68b5ad3647b51fa9ae2894d844421d53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
