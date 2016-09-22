@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "30407fd3_ff22ff67",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-22T00:43:59Z",
+      "side": 1,
+      "message": "better, thanks",
+      "parentUuid": "30407fd3_ff5aff20",
+      "revId": "8c43a83dc8207b0221c62ba5d782df62b9b9d501",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "108ffb3e_0e742b2a",
         "filename": "vp9/common/vp9_idct.c",
         "patchSetId": 6
