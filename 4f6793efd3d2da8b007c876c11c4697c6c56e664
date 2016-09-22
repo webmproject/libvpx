@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "30407fd3_68e5d7fb",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-09-22T15:27:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "30407fd3_9f33b319",
+      "revId": "4f6793efd3d2da8b007c876c11c4697c6c56e664",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30407fd3_3f6aa7aa",
         "filename": "vp9/decoder/vp9_decodeframe.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-09-22T00:19:46Z",
       "side": 1,
       "message": "couldn\u0027t you pull the xd from twd?",
+      "revId": "4f6793efd3d2da8b007c876c11c4697c6c56e664",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30407fd3_88e29bf3",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-09-22T15:27:35Z",
+      "side": 1,
+      "message": "I think this function is being inlined, so it probably does not matter that it is an argument.  I can pull from twd if you want.",
+      "parentUuid": "30407fd3_3f6aa7aa",
       "revId": "4f6793efd3d2da8b007c876c11c4697c6c56e664",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
