@@ -578,7 +578,7 @@ static const TX_SIZE uv_txsize_lookup[BLOCK_SIZES][TX_SIZES_ALL][2][2] = {
   {
       // BLOCK_8X8
       { { TX_4X4, TX_4X4 }, { TX_4X4, TX_4X4 } },
-      { { TX_8X8, TX_8X8 }, { TX_4X4, TX_4X4 } },
+      { { TX_8X8, TX_4X4 }, { TX_4X4, TX_4X4 } },
       { { TX_8X8, TX_8X8 }, { TX_4X4, TX_4X4 } },
       { { TX_8X8, TX_8X8 }, { TX_4X4, TX_4X4 } },
 #if CONFIG_EXT_TX
