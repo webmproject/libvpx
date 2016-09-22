@@ -156,9 +156,11 @@ static void get_ctx_shift(MACROBLOCKD *xd, int *ctx_shift_a, int *ctx_shift_l,
   }
 }
 
-int vp9_decode_block_tokens(MACROBLOCKD *xd, int plane, const scan_order *sc,
-                            int x, int y, TX_SIZE tx_size, vpx_reader *r,
+int vp9_decode_block_tokens(TileWorkerData *twd, int plane,
+                            const scan_order *sc, int x, int y, TX_SIZE tx_size,
                             int seg_id) {
+  vpx_reader *r = &twd->bit_reader;
+  MACROBLOCKD *xd = &twd->xd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int16_t *const dequant = pd->seg_dequant[seg_id];
   int eob;
