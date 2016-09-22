@@ -46,6 +46,30 @@
       "revId": "7a4f7c9f68b5ad3647b51fa9ae2894d844421d53",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30407fd3_df55bbf3",
+        "filename": "av1/common/enums.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-09-22T00:17:02Z",
+      "side": 1,
+      "message": "Added the #ifdefs. Can you check if it\u0027s correct?\n\nI think it is worth it, because we get the best of both worlds:\n- Smaller memory use when used in structs etc (which seems to be desirable as seen in the earlier patch I mentioned in commit msg).\n- At the same time, have enums collecting related #defines, and avoid some possible bugs through the use of common \u0027uint8_t\u0027 type (see the s/PARTITION_INVALID/BLOCK_INVALID/ fix in blockd.h)",
+      "parentUuid": "30407fd3_9f61730d",
+      "range": {
+        "startLine": 78,
+        "startChar": 13,
+        "endLine": 78,
+        "endChar": 40
+      },
+      "revId": "7a4f7c9f68b5ad3647b51fa9ae2894d844421d53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
