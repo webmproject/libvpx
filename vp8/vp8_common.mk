@@ -68,7 +68,6 @@ VP8_COMMON_SRCS-yes += common/vp8_entropymodedata.h
 
 
 
-VP8_COMMON_SRCS-$(CONFIG_POSTPROC_VISUALIZER) += common/textblit.c
 VP8_COMMON_SRCS-yes += common/treecoder.c
 
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/filter_x86.c
