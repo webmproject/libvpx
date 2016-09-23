@@ -22,6 +22,7 @@
 #include "aom_dsp/ans.h"
 #include "aom_dsp/bitreader.h"
 #include "aom_dsp/bitwriter.h"
+#include "aom_dsp/dkboolreader.h"
 #include "aom_dsp/dkboolwriter.h"
 #include "av1/encoder/treewriter.h"
 #include "test/acm_random.h"
@@ -127,7 +128,7 @@ bool check_uabs(const PvVec &pv_vec, uint8_t *buf) {
 
 bool check_aombool(const PvVec &pv_vec, uint8_t *buf) {
   aom_dk_writer w;
-  aom_reader r;
+  aom_dk_reader r;
   aom_dk_start_encode(&w, buf);
 
   std::clock_t start = std::clock();
@@ -137,10 +138,10 @@ bool check_aombool(const PvVec &pv_vec, uint8_t *buf) {
   std::clock_t enc_time = std::clock() - start;
   aom_dk_stop_encode(&w);
   bool okay = true;
-  aom_reader_init(&r, buf, w.pos, NULL, NULL);
+  aom_dk_reader_init(&r, buf, w.pos, NULL, NULL);
   start = std::clock();
   for (PvVec::const_iterator it = pv_vec.begin(); it != pv_vec.end(); ++it) {
-    okay &= aom_read(&r, 256 - it->first) == it->second;
+    okay &= aom_dk_read(&r, 256 - it->first) == it->second;
   }
   std::clock_t dec_time = std::clock() - start;
   printf("AOM size %d enc_time %f dec_time %f\n", w.pos,
@@ -276,7 +277,7 @@ void build_tpb(aom_prob probs[/*num_syms*/],
 bool check_aomtree(const std::vector<int> &sym_vec, const rans_sym *sym_tab,
                    uint8_t *buf) {
   aom_dk_writer w;
-  aom_reader r;
+  aom_dk_reader r;
   aom_dk_start_encode(&w, buf);
 
   aom_prob probs[kDistinctSyms];
@@ -291,11 +292,11 @@ bool check_aomtree(const std::vector<int> &sym_vec, const rans_sym *sym_tab,
   }
   std::clock_t enc_time = std::clock() - start;
   aom_dk_stop_encode(&w);
-  aom_reader_init(&r, buf, w.pos, NULL, NULL);
+  aom_dk_reader_init(&r, buf, w.pos, NULL, NULL);
   start = std::clock();
   for (std::vector<int>::const_iterator it = sym_vec.begin();
        it != sym_vec.end(); ++it) {
-    if (aom_read_tree(&r, tree, probs) != *it) return false;
+    if (aom_dk_read_tree(&r, tree, probs) != *it) return false;
   }
   std::clock_t dec_time = std::clock() - start;
   printf("AOMtree size %u enc_time %f dec_time %f\n", w.pos,
