@@ -42,7 +42,7 @@ static INLINE int read_uniform(aom_reader *r, int n) {
 #endif  // CONFIG_EXT_INTRA || CONFIG_FILTER_INTRA || CONFIG_PALETTE
 
 #if CONFIG_DAALA_EC
-static PREDICTION_MODE read_intra_mode(aom_reader *r, const aom_cdf_prob *cdf) {
+static PREDICTION_MODE read_intra_mode(aom_reader *r, aom_cdf_prob *cdf) {
   return (PREDICTION_MODE)
       av1_intra_mode_inv[aom_read_symbol(r, cdf, INTRA_MODES, ACCT_STR)];
 }
@@ -264,8 +264,7 @@ static PREDICTION_MODE read_inter_compound_mode(AV1_COMMON *cm, MACROBLOCKD *xd,
 }
 #endif  // CONFIG_EXT_INTER
 
-static int read_segment_id(aom_reader *r,
-                           const struct segmentation_probs *segp) {
+static int read_segment_id(aom_reader *r, struct segmentation_probs *segp) {
 #if CONFIG_DAALA_EC
   return aom_read_symbol(r, segp->tree_cdf, MAX_SEGMENTS, ACCT_STR);
 #else
@@ -796,8 +795,7 @@ static void read_intra_frame_mode_info(AV1_COMMON *const cm,
   }
 }
 
-static int read_mv_component(aom_reader *r, const nmv_component *mvcomp,
-                             int usehp) {
+static int read_mv_component(aom_reader *r, nmv_component *mvcomp, int usehp) {
   int mag, d, fr, hp;
   const int sign = aom_read(r, mvcomp->sign, ACCT_STR);
   const int mv_class =
@@ -840,7 +838,7 @@ static int read_mv_component(aom_reader *r, const nmv_component *mvcomp,
 }
 
 static INLINE void read_mv(aom_reader *r, MV *mv, const MV *ref,
-                           const nmv_context *ctx, nmv_context_counts *counts,
+                           nmv_context *ctx, nmv_context_counts *counts,
                            int allow_hp) {
   MV_JOINT_TYPE joint_type;
   MV diff = { 0, 0 };

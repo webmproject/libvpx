@@ -329,6 +329,7 @@ static void prob_diff_update(const aom_tree_index *tree,
     av1_cond_prob_diff_update(w, &probs[i], branch_ct[i], probwt);
 }
 
+#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
 static int prob_diff_update_savings(const aom_tree_index *tree,
                                     aom_prob probs[/*n - 1*/],
                                     const unsigned int counts[/*n - 1*/], int n,
@@ -346,6 +347,7 @@ static int prob_diff_update_savings(const aom_tree_index *tree,
   }
   return savings;
 }
+#endif
 
 #if CONFIG_VAR_TX
 static void write_tx_size_vartx(const AV1_COMMON *cm, const MACROBLOCKD *xd,
@@ -550,6 +552,7 @@ static void update_skip_probs(AV1_COMMON *cm, aom_writer *w,
   }
 }
 
+#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
 static void update_switchable_interp_probs(AV1_COMMON *cm, aom_writer *w,
                                            FRAME_COUNTS *counts) {
   int j;
@@ -681,7 +684,7 @@ static void update_ext_tx_probs(AV1_COMMON *cm, aom_writer *w) {
   }
 }
 #endif  // CONFIG_EXT_TX
-
+#endif
 #if CONFIG_PALETTE
 static void pack_palette_tokens(aom_writer *w, const TOKENEXTRA **tp, int n,
                                 int num) {
@@ -877,8 +880,7 @@ static void pack_txb_tokens(aom_writer *w, const TOKENEXTRA **tp,
 #endif
 
 static void write_segment_id(aom_writer *w, const struct segmentation *seg,
-                             const struct segmentation_probs *segp,
-                             int segment_id) {
+                             struct segmentation_probs *segp, int segment_id) {
   if (seg->enabled && seg->update_map) {
 #if CONFIG_DAALA_EC
     aom_write_symbol(w, segment_id, segp->tree_cdf, MAX_SEGMENTS);
@@ -1139,7 +1141,7 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
                                 aom_writer *w) {
   AV1_COMMON *const cm = &cpi->common;
 #if !CONFIG_REF_MV
-  const nmv_context *nmvc = &cm->fc->nmvc;
+  nmv_context *nmvc = &cm->fc->nmvc;
 #endif
 
 #if CONFIG_DELTA_Q
@@ -1150,7 +1152,7 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
   const MACROBLOCKD *xd = &x->e_mbd;
 #endif
   const struct segmentation *const seg = &cm->seg;
-  const struct segmentation_probs *const segp = &cm->fc->seg;
+  struct segmentation_probs *const segp = &cm->fc->seg;
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
   const MB_MODE_INFO_EXT *const mbmi_ext = x->mbmi_ext;
   const PREDICTION_MODE mode = mbmi->mode;
@@ -1363,7 +1365,7 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
               int nmv_ctx = av1_nmv_ctx(mbmi_ext->ref_mv_count[rf_type],
                                         mbmi_ext->ref_mv_stack[rf_type], ref,
                                         mbmi->ref_mv_idx);
-              const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
+              nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
 #endif
               av1_encode_mv(cpi, w, &mi->bmi[j].as_mv[ref].as_mv,
 #if CONFIG_EXT_INTER
@@ -1388,7 +1390,7 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
             int nmv_ctx = av1_nmv_ctx(mbmi_ext->ref_mv_count[rf_type],
                                       mbmi_ext->ref_mv_stack[rf_type], 1,
                                       mbmi->ref_mv_idx);
-            const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
+            nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
 #endif
             av1_encode_mv(cpi, w, &mi->bmi[j].as_mv[1].as_mv,
                           &mi->bmi[j].ref_mv[1].as_mv,
@@ -1402,7 +1404,7 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
             int nmv_ctx = av1_nmv_ctx(mbmi_ext->ref_mv_count[rf_type],
                                       mbmi_ext->ref_mv_stack[rf_type], 0,
                                       mbmi->ref_mv_idx);
-            const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
+            nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
 #endif
             av1_encode_mv(cpi, w, &mi->bmi[j].as_mv[0].as_mv,
                           &mi->bmi[j].ref_mv[0].as_mv,
@@ -1427,7 +1429,7 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
           int nmv_ctx = av1_nmv_ctx(mbmi_ext->ref_mv_count[rf_type],
                                     mbmi_ext->ref_mv_stack[rf_type], ref,
                                     mbmi->ref_mv_idx);
-          const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
+          nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
 #endif
           ref_mv = mbmi_ext->ref_mvs[mbmi->ref_frame[ref]][0];
 #if CONFIG_EXT_INTER
@@ -1453,7 +1455,7 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
         int nmv_ctx =
             av1_nmv_ctx(mbmi_ext->ref_mv_count[rf_type],
                         mbmi_ext->ref_mv_stack[rf_type], 1, mbmi->ref_mv_idx);
-        const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
+        nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
 #endif
         av1_encode_mv(cpi, w, &mbmi->mv[1].as_mv,
                       &mbmi_ext->ref_mvs[mbmi->ref_frame[1]][0].as_mv,
@@ -1467,7 +1469,7 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
         int nmv_ctx =
             av1_nmv_ctx(mbmi_ext->ref_mv_count[rf_type],
                         mbmi_ext->ref_mv_stack[rf_type], 0, mbmi->ref_mv_idx);
-        const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
+        nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
 #endif
         av1_encode_mv(cpi, w, &mbmi->mv[0].as_mv,
                       &mbmi_ext->ref_mvs[mbmi->ref_frame[0]][0].as_mv,
@@ -1613,15 +1615,15 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
 }
 
 #if CONFIG_DELTA_Q
-static void write_mb_modes_kf(const AV1_COMMON *cm, MACROBLOCKD *xd,
+static void write_mb_modes_kf(AV1_COMMON *cm, MACROBLOCKD *xd,
                               MODE_INFO **mi_8x8, aom_writer *w) {
   int skip;
 #else
-static void write_mb_modes_kf(const AV1_COMMON *cm, const MACROBLOCKD *xd,
+static void write_mb_modes_kf(AV1_COMMON *cm, const MACROBLOCKD *xd,
                               MODE_INFO **mi_8x8, aom_writer *w) {
 #endif
   const struct segmentation *const seg = &cm->seg;
-  const struct segmentation_probs *const segp = &cm->fc->seg;
+  struct segmentation_probs *const segp = &cm->fc->seg;
   const MODE_INFO *const mi = mi_8x8[0];
   const MODE_INFO *const above_mi = xd->above_mi;
   const MODE_INFO *const left_mi = xd->left_mi;
@@ -2203,7 +2205,11 @@ static void update_coef_probs_common(aom_writer *const bc, AV1_COMP *cpi,
                                      av1_coeff_probs_model *new_coef_probs) {
   av1_coeff_probs_model *old_coef_probs = cpi->common.fc->coef_probs[tx_size];
   const aom_prob upd = DIFF_UPDATE_PROB;
+#if CONFIG_EC_ADAPT
+  const int entropy_nodes_update = ONE_TOKEN;
+#else
   const int entropy_nodes_update = UNCONSTRAINED_NODES;
+#endif
   int i, j, k, l, t;
   int stepsize = cpi->sf.coeff_prob_appx_step;
 #if CONFIG_TILE_GROUPS
@@ -2889,6 +2895,7 @@ static void encode_segmentation(AV1_COMMON *cm, MACROBLOCKD *xd,
   }
 }
 
+#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
 static void update_seg_probs(AV1_COMP *cpi, aom_writer *w) {
   AV1_COMMON *cm = &cpi->common;
 #if CONFIG_TILE_GROUPS
@@ -2917,6 +2924,7 @@ static void update_seg_probs(AV1_COMP *cpi, aom_writer *w) {
                   cm->fc->seg.tree_cdf);
 #endif
 }
+#endif  // CONFIG_EC_ADAPT,CONFIG_DAALA_EC
 
 static void write_txfm_mode(TX_MODE mode, struct aom_write_bit_buffer *wb) {
   aom_wb_write_bit(wb, mode == TX_MODE_SELECT);
@@ -3691,6 +3699,7 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
   FRAME_COUNTS *counts = cpi->td.counts;
   aom_writer *header_bc;
   int i, j;
+
 #if CONFIG_TILE_GROUPS
   const int probwt = cm->num_tg;
 #else
@@ -3713,6 +3722,7 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
 #endif  // CONFIG_LOOP_RESTORATION
 
   update_txfm_probs(cm, header_bc, counts);
+
   update_coef_probs(cpi, header_bc);
 
 #if CONFIG_VAR_TX
@@ -3730,6 +3740,7 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
 #if CONFIG_DELTA_Q
   update_delta_q_probs(cm, header_bc, counts);
 #endif
+#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
   update_seg_probs(cpi, header_bc);
 
   for (i = 0; i < INTRA_MODES; ++i) {
@@ -3764,12 +3775,14 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
     prob_diff_update(av1_intra_filter_tree, fc->intra_filter_probs[i],
                      counts->intra_filter[i], INTRA_FILTERS, probwt, header_bc);
 #endif  // CONFIG_EXT_INTRA
-
+#endif  // CONFIG_EC_ADAPT, CONFIG_DAALA_EC
   if (frame_is_intra_only(cm)) {
     av1_copy(cm->kf_y_prob, av1_kf_y_mode_prob);
 #if CONFIG_DAALA_EC
     av1_copy(cm->kf_y_cdf, av1_kf_y_mode_cdf);
 #endif
+
+#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
     for (i = 0; i < INTRA_MODES; ++i)
       for (j = 0; j < INTRA_MODES; ++j) {
         prob_diff_update(av1_intra_mode_tree, cm->kf_y_prob[i][j],
@@ -3780,7 +3793,9 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
                         cm->kf_y_cdf[i][j]);
 #endif
       }
+#endif  // CONFIG_EC_ADAPT, CONFIG_DAALA_EC
   } else {
+#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
 #if CONFIG_REF_MV
     update_inter_mode_probs(cm, header_bc, counts);
 #else
@@ -3793,7 +3808,7 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
 #endif
     }
 #endif
-
+#endif  // CONFIG_EC_ADAPT, CONFIG_DAALA_EC
 #if CONFIG_EXT_INTER
     update_inter_compound_mode_probs(cm, probwt, header_bc);
 
@@ -3828,9 +3843,10 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
       prob_diff_update(av1_motion_mode_tree, fc->motion_mode_prob[i],
                        counts->motion_mode[i], MOTION_MODES, probwt, header_bc);
 #endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
-
+#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
     if (cm->interp_filter == SWITCHABLE)
       update_switchable_interp_probs(cm, header_bc, counts);
+#endif
 
     for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
       av1_cond_prob_diff_update(header_bc, &fc->intra_inter_prob[i],
@@ -3852,7 +3868,6 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
         }
       }
     }
-
     if (cm->reference_mode != SINGLE_REFERENCE) {
       for (i = 0; i < REF_CONTEXTS; i++) {
 #if CONFIG_EXT_REFS
@@ -3873,6 +3888,7 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
       }
     }
 
+#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
     for (i = 0; i < BLOCK_SIZE_GROUPS; ++i) {
       prob_diff_update(av1_intra_mode_tree, cm->fc->y_mode_prob[i],
                        counts->y_mode[i], INTRA_MODES, probwt, header_bc);
@@ -3881,6 +3897,7 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
                       cm->fc->y_mode_cdf[i]);
 #endif
     }
+#endif  // CONFIG_EC_ADAPT, CONFIG_DAALA_EC
 
     av1_write_nmv_probs(cm, cm->allow_high_precision_mv, header_bc,
 #if CONFIG_REF_MV
@@ -3892,7 +3909,9 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
     av1_tree_to_cdf(av1_mv_joint_tree, cm->fc->nmvc.joints,
                     cm->fc->nmvc.joint_cdf);
 #endif
+#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
     update_ext_tx_probs(cm, header_bc);
+#endif
 #if CONFIG_SUPERTX
     if (!xd->lossless[0]) update_supertx_probs(cm, probwt, header_bc);
 #endif  // CONFIG_SUPERTX

@@ -291,6 +291,7 @@ EXPERIMENT_LIST="
     filter_7bit
     parallel_deblocking
     tile_groups
+    ec_adapt
 "
 CONFIG_LIST="
     dependency_tracking

@@ -592,11 +592,10 @@ static INLINE const aom_prob *get_y_mode_probs(const AV1_COMMON *cm,
 }
 
 #if CONFIG_DAALA_EC
-static INLINE const aom_cdf_prob *get_y_mode_cdf(const AV1_COMMON *cm,
-                                                 const MODE_INFO *mi,
-                                                 const MODE_INFO *above_mi,
-                                                 const MODE_INFO *left_mi,
-                                                 int block) {
+static INLINE aom_cdf_prob *get_y_mode_cdf(AV1_COMMON *cm, const MODE_INFO *mi,
+                                           const MODE_INFO *above_mi,
+                                           const MODE_INFO *left_mi,
+                                           int block) {
   const PREDICTION_MODE above = av1_above_block_mode(mi, above_mi, block);
   const PREDICTION_MODE left = av1_left_block_mode(mi, left_mi, block);
   return cm->kf_y_cdf[above][left];
