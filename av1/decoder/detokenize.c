@@ -505,7 +505,8 @@ int av1_decode_block_tokens(MACROBLOCKD *const xd, int plane,
   const int ctx =
       get_entropy_context(tx_size, pd->above_context + x, pd->left_context + y);
 #if CONFIG_NEW_QUANT
-  int dq = get_dq_profile_from_ctx(ctx);
+  const int ref = is_inter_block(&xd->mi[0]->mbmi);
+  int dq = get_dq_profile_from_ctx(ctx, ref, pd->plane_type);
 #endif  //  CONFIG_NEW_QUANT
 
 #if !CONFIG_ANS
