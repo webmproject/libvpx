@@ -29,9 +29,45 @@
     if (counts) ++coef_counts[band][ctx][token]; \
   } while (0)
 
-static INLINE int read_coeff(const vpx_prob *probs, int n, vpx_reader *r) {
+static INLINE int read_bool(vpx_reader *r, int prob, BD_VALUE *value,
+                            int *count, unsigned int *range) {
+  const unsigned int split = (*range * prob + (256 - prob)) >> CHAR_BIT;
+  const BD_VALUE bigsplit = (BD_VALUE)split << (BD_VALUE_SIZE - CHAR_BIT);
+
+  if (*count < 0) {
+    r->value = *value;
+    r->count = *count;
+    vpx_reader_fill(r);
+    *value = r->value;
+    *count = r->count;
+  }
+
+  if (*value >= bigsplit) {
+    *range = *range - split;
+    *value = *value - bigsplit;
+    {
+      const int shift = vpx_norm[*range];
+      *range <<= shift;
+      *value <<= shift;
+      *count -= shift;
+    }
+    return 1;
+  }
+  *range = split;
+  {
+    const int shift = vpx_norm[*range];
+    *range <<= shift;
+    *value <<= shift;
+    *count -= shift;
+  }
+  return 0;
+}
+
+static INLINE int read_coeff(vpx_reader *r, const vpx_prob *probs, int n,
+                             BD_VALUE *value, int *count, unsigned int *range) {
   int i, val = 0;
-  for (i = 0; i < n; ++i) val = (val << 1) | vpx_read(r, probs[i]);
+  for (i = 0; i < n; ++i)
+    val = (val << 1) | read_bool(r, probs[i], value, count, range);
   return val;
 }
 
@@ -52,7 +88,7 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
   uint8_t token_cache[32 * 32];
   const uint8_t *band_translate = get_band_translate(tx_size);
   const int dq_shift = (tx_size == TX_32X32);
-  int v, token;
+  int v;
   int16_t dqv = dq[0];
   const uint8_t *const cat6_prob =
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -66,6 +102,11 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
       (xd->bd == VPX_BITS_12) ? 18 : (xd->bd == VPX_BITS_10) ? 16 :
 #endif  // CONFIG_VP9_HIGHBITDEPTH
                                                              14;
+  // Keep value, range, and count as locals.  The compiler produces better
+  // results with the locals than using r directly.
+  BD_VALUE value = r->value;
+  unsigned int range = r->range;
+  int count = r->count;
 
   if (counts) {
     coef_counts = counts->coef[tx_size][type][ref];
@@ -77,70 +118,98 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
     band = *band_translate++;
     prob = coef_probs[band][ctx];
     if (counts) ++eob_branch_count[band][ctx];
-    if (!vpx_read(r, prob[EOB_CONTEXT_NODE])) {
+    if (!read_bool(r, prob[EOB_CONTEXT_NODE], &value, &count, &range)) {
       INCREMENT_COUNT(EOB_MODEL_TOKEN);
       break;
     }
 
-    while (!vpx_read(r, prob[ZERO_CONTEXT_NODE])) {
+    while (!read_bool(r, prob[ZERO_CONTEXT_NODE], &value, &count, &range)) {
       INCREMENT_COUNT(ZERO_TOKEN);
       dqv = dq[1];
       token_cache[scan[c]] = 0;
       ++c;
-      if (c >= max_eob) return c;  // zero tokens at the end (no eob token)
+      if (c >= max_eob) {
+        r->value = value;
+        r->range = range;
+        r->count = count;
+        return c;  // zero tokens at the end (no eob token)
+      }
       ctx = get_coef_context(nb, token_cache, c);
       band = *band_translate++;
       prob = coef_probs[band][ctx];
     }
 
-    if (!vpx_read(r, prob[ONE_CONTEXT_NODE])) {
-      INCREMENT_COUNT(ONE_TOKEN);
-      token = ONE_TOKEN;
-      val = 1;
-    } else {
+    if (read_bool(r, prob[ONE_CONTEXT_NODE], &value, &count, &range)) {
+      const vpx_prob *p = vp9_pareto8_full[prob[PIVOT_NODE] - 1];
       INCREMENT_COUNT(TWO_TOKEN);
-      token = vpx_read_tree(r, vp9_coef_con_tree,
-                            vp9_pareto8_full[prob[PIVOT_NODE] - 1]);
-      switch (token) {
-        case TWO_TOKEN:
-        case THREE_TOKEN:
-        case FOUR_TOKEN: val = token; break;
-        case CATEGORY1_TOKEN:
-          val = CAT1_MIN_VAL + read_coeff(vp9_cat1_prob, 1, r);
-          break;
-        case CATEGORY2_TOKEN:
-          val = CAT2_MIN_VAL + read_coeff(vp9_cat2_prob, 2, r);
-          break;
-        case CATEGORY3_TOKEN:
-          val = CAT3_MIN_VAL + read_coeff(vp9_cat3_prob, 3, r);
-          break;
-        case CATEGORY4_TOKEN:
-          val = CAT4_MIN_VAL + read_coeff(vp9_cat4_prob, 4, r);
-          break;
-        case CATEGORY5_TOKEN:
-          val = CAT5_MIN_VAL + read_coeff(vp9_cat5_prob, 5, r);
-          break;
-        case CATEGORY6_TOKEN:
-          val = CAT6_MIN_VAL + read_coeff(cat6_prob, cat6_bits, r);
-          break;
+      if (read_bool(r, p[0], &value, &count, &range)) {
+        if (read_bool(r, p[3], &value, &count, &range)) {
+          token_cache[scan[c]] = 5;
+          if (read_bool(r, p[5], &value, &count, &range)) {
+            if (read_bool(r, p[7], &value, &count, &range)) {
+              val = CAT6_MIN_VAL +
+                    read_coeff(r, cat6_prob, cat6_bits, &value, &count, &range);
+            } else {
+              val = CAT5_MIN_VAL +
+                    read_coeff(r, vp9_cat5_prob, 5, &value, &count, &range);
+            }
+          } else if (read_bool(r, p[6], &value, &count, &range)) {
+            val = CAT4_MIN_VAL +
+                  read_coeff(r, vp9_cat4_prob, 4, &value, &count, &range);
+          } else {
+            val = CAT3_MIN_VAL +
+                  read_coeff(r, vp9_cat3_prob, 3, &value, &count, &range);
+          }
+        } else {
+          token_cache[scan[c]] = 4;
+          if (read_bool(r, p[4], &value, &count, &range)) {
+            val = CAT2_MIN_VAL +
+                  read_coeff(r, vp9_cat2_prob, 2, &value, &count, &range);
+          } else {
+            val = CAT1_MIN_VAL +
+                  read_coeff(r, vp9_cat1_prob, 1, &value, &count, &range);
+          }
+        }
+        v = (val * dqv) >> dq_shift;
+      } else {
+        if (read_bool(r, p[1], &value, &count, &range)) {
+          token_cache[scan[c]] = 3;
+          v = ((3 + read_bool(r, p[2], &value, &count, &range)) * dqv) >>
+              dq_shift;
+        } else {
+          token_cache[scan[c]] = 2;
+          v = (2 * dqv) >> dq_shift;
+        }
       }
+    } else {
+      INCREMENT_COUNT(ONE_TOKEN);
+      token_cache[scan[c]] = 1;
+      v = dqv >> dq_shift;
     }
-    v = (val * dqv) >> dq_shift;
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
 #if CONFIG_VP9_HIGHBITDEPTH
-    dqcoeff[scan[c]] = highbd_check_range((vpx_read_bit(r) ? -v : v), xd->bd);
+    dqcoeff[scan[c]] =
+        highbd_check_range(read_bool(r, 128, &value, &count, &range) ? -v : v),
+                           xd->bd);
 #else
-    dqcoeff[scan[c]] = check_range(vpx_read_bit(r) ? -v : v);
+    dqcoeff[scan[c]] =
+        check_range(read_bool(r, 128, &value, &count, &range) ? -v : v);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #else
-    dqcoeff[scan[c]] = vpx_read_bit(r) ? -v : v;
+    if (read_bool(r, 128, &value, &count, &range)) {
+      dqcoeff[scan[c]] = -v;
+    } else {
+      dqcoeff[scan[c]] = v;
+    }
 #endif  // CONFIG_COEFFICIENT_RANGE_CHECKING
-    token_cache[scan[c]] = vp9_pt_energy_class[token];
     ++c;
     ctx = get_coef_context(nb, token_cache, c);
     dqv = dq[1];
   }
 
+  r->value = value;
+  r->range = range;
+  r->count = count;
   return c;
 }
 
