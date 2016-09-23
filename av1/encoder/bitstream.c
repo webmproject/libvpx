@@ -2901,7 +2901,7 @@ static uint32_t write_tiles(AV1_COMP *const cpi, uint8_t *const dst,
   const int have_tiles = tile_cols * tile_rows > 1;
 #endif  // CONFIG_EXT_TILE
 #if CONFIG_ANS
-  BufAnsCoder *buf_ans = &cpi->buf_ans;
+  struct BufAnsCoder *buf_ans = &cpi->buf_ans;
 #endif  // CONFIG_ANS
 
   *max_tile_size = 0;
