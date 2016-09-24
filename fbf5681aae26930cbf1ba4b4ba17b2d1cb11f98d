@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "90668bcf_e666a353",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 916,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-24T02:03:38Z",
+      "side": 1,
+      "message": "is that true? I thought both 10 \u0026 12 were failing",
+      "range": {
+        "startLine": 916,
+        "startChar": 55,
+        "endLine": 916,
+        "endChar": 66
+      },
+      "revId": "fbf5681aae26930cbf1ba4b4ba17b2d1cb11f98d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
