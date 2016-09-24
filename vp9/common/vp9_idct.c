@@ -139,8 +139,6 @@ void vp9_idct8x8_add(const tran_low_t *input, uint8_t *dest, int stride,
 
   // The calculation can be simplified if there are not many non-zero dct
   // coefficients. Use eobs to decide what to do.
-  // TODO(yunqingwang): "eobs = 1" case is also handled in vp9_short_idct8x8_c.
-  // Combine that with code here.
   if (eob == 1)
     // DC only DCT coefficient
     vpx_idct8x8_1_add(input, dest, stride);
@@ -362,8 +360,6 @@ void vp9_highbd_idct8x8_add(const tran_low_t *input, uint8_t *dest, int stride,
 
   // The calculation can be simplified if there are not many non-zero dct
   // coefficients. Use eobs to decide what to do.
-  // TODO(yunqingwang): "eobs = 1" case is also handled in vp9_short_idct8x8_c.
-  // Combine that with code here.
   // DC only DCT coefficient
   if (eob == 1) {
     vpx_highbd_idct8x8_1_add(input, dest, stride, bd);
