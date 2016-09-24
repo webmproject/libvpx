@@ -76,6 +76,17 @@ extern "C" {
 #define UNUSED
 #endif
 
+/*!\brief Decorator indicating that given struct/union/enum is packed */
+#ifndef ATTRIBUTE_PACKED
+#if defined(__GNUC__) && __GNUC__
+#define ATTRIBUTE_PACKED __attribute__((packed))
+#elif defined(_MSC_VER)
+#define ATTRIBUTE_PACKED
+#else
+#define ATTRIBUTE_PACKED
+#endif
+#endif /* ATTRIBUTE_PACKED */
+
 /*!\brief Current ABI version number
  *
  * \internal

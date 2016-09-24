@@ -226,8 +226,8 @@ static void update_tx_counts(AV1_COMMON *cm, MACROBLOCKD *xd,
       const int offsetc = blk_col + ((i & 0x01) << bsl);
 
       if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide) continue;
-      update_tx_counts(cm, xd, mbmi, plane_bsize, tx_size - 1, offsetr, offsetc,
-                       max_tx_size, ctx);
+      update_tx_counts(cm, xd, mbmi, plane_bsize, (TX_SIZE)(tx_size - 1),
+                       offsetr, offsetc, max_tx_size, ctx);
     }
   }
 }
