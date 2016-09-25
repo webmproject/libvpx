@@ -2092,6 +2092,16 @@ static void write_modes_sb(AV1_COMP *const cpi, const TileInfo *const tile,
     update_partition_context(xd, mi_row, mi_col, subsize, bsize);
 #endif  // CONFIG_EXT_PARTITION_TYPES
 
+#if CONFIG_DERING
+  if (bsize == BLOCK_64X64 && cm->dering_level != 0 &&
+      !sb_all_skip(cm, mi_row, mi_col)) {
+    aom_write_literal(
+        w,
+        cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col]->mbmi.dering_gain,
+        DERING_REFINEMENT_BITS);
+  }
+#endif
+
 #if CONFIG_CLPF
   if (bsize == BLOCK_64X64 && cm->clpf_blocks && cm->clpf_strength_y &&
       cm->clpf_size != CLPF_NOSIZE) {
@@ -2120,16 +2130,6 @@ static void write_modes_sb(AV1_COMP *const cpi, const TileInfo *const tile,
         mi_col + MI_SIZE / 2 < cm->mi_cols &&
         cm->clpf_blocks[br] != CLPF_NOFLAG)
       aom_write_literal(w, cm->clpf_blocks[br], 1);
-  }
-#endif
-
-#if CONFIG_DERING
-  if (bsize == BLOCK_64X64 && cm->dering_level != 0 &&
-      !sb_all_skip(cm, mi_row, mi_col)) {
-    aom_write_literal(
-        w,
-        cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col]->mbmi.dering_gain,
-        DERING_REFINEMENT_BITS);
   }
 #endif
 }
@@ -3570,12 +3570,12 @@ static void write_uncompressed_header(AV1_COMP *cpi,
 #endif  // CONFIG_EXT_PARTITION
 
   encode_loopfilter(cm, wb);
-#if CONFIG_CLPF
-  encode_clpf(cm, wb);
-#endif
 #if CONFIG_DERING
   encode_dering(cm->dering_level, wb);
 #endif  // CONFIG_DERING
+#if CONFIG_CLPF
+  encode_clpf(cm, wb);
+#endif
 #if CONFIG_LOOP_RESTORATION
   encode_restoration_mode(cm, wb);
 #endif  // CONFIG_LOOP_RESTORATION

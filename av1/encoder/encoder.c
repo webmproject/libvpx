@@ -3324,6 +3324,16 @@ static void loopfilter_frame(AV1_COMP *cpi, AV1_COMMON *cm) {
       av1_loop_filter_frame(cm->frame_to_show, cm, xd, lf->filter_level, 0, 0);
 #endif
   }
+#if CONFIG_DERING
+  if (is_lossless_requested(&cpi->oxcf)) {
+    cm->dering_level = 0;
+  } else {
+    cm->dering_level =
+        av1_dering_search(cm->frame_to_show, cpi->Source, cm, xd);
+    av1_dering_frame(cm->frame_to_show, cm, xd, cm->dering_level);
+  }
+#endif  // CONFIG_DERING
+
 #if CONFIG_CLPF
   cm->clpf_strength_y = cm->clpf_strength_u = cm->clpf_strength_v = 0;
   cm->clpf_size = CLPF_64X64;
@@ -3372,15 +3382,6 @@ static void loopfilter_frame(AV1_COMP *cpi, AV1_COMMON *cm) {
     }
   }
 #endif
-#if CONFIG_DERING
-  if (is_lossless_requested(&cpi->oxcf)) {
-    cm->dering_level = 0;
-  } else {
-    cm->dering_level =
-        av1_dering_search(cm->frame_to_show, cpi->Source, cm, xd);
-    av1_dering_frame(cm->frame_to_show, cm, xd, cm->dering_level);
-  }
-#endif  // CONFIG_DERING
 #if CONFIG_LOOP_RESTORATION
   if (cm->rst_info.restoration_type != RESTORE_NONE) {
     av1_loop_restoration_init(&cm->rst_internal, &cm->rst_info,
