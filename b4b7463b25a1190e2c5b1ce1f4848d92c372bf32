@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "90668bcf_31fc54cf",
+        "filename": "test/convolve_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-09-26T16:13:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "90668bcf_a65d8b74",
+      "range": {
+        "startLine": 41,
+        "startChar": 19,
+        "endLine": 41,
+        "endChar": 26
+      },
+      "revId": "b4b7463b25a1190e2c5b1ce1f4848d92c372bf32",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "90668bcf_c64a7fac",
         "filename": "test/convolve_test.cc",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-09-24T02:06:54Z",
       "side": 1,
       "message": "same here",
+      "range": {
+        "startLine": 295,
+        "startChar": 19,
+        "endLine": 295,
+        "endChar": 26
+      },
+      "revId": "b4b7463b25a1190e2c5b1ce1f4848d92c372bf32",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "90668bcf_5101c8dc",
+        "filename": "test/convolve_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-09-26T16:13:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "90668bcf_c64a7fac",
       "range": {
         "startLine": 295,
         "startChar": 19,
