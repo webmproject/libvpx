@@ -153,8 +153,11 @@ int av1_clpf_frame(const YV12_BUFFER_CONFIG *frame,
         // Iterate over all smaller blocks inside the filter block
         for (m = 0; m < ((h + bs - 1) >> bslog); m++) {
           for (n = 0; n < ((w + bs - 1) >> bslog); n++) {
+            int sizex, sizey;
             xpos = xoff + n * bs;
             ypos = yoff + m * bs;
+            sizex = AOMMIN(width - xpos, bs);
+            sizey = AOMMIN(height - ypos, bs);
             if (!cm->mi_grid_visible[(ypos << suby) / MI_SIZE * cm->mi_stride +
                                      (xpos << subx) / MI_SIZE]
                      ->mbmi.skip) {  // Not skip block
@@ -164,30 +167,49 @@ int av1_clpf_frame(const YV12_BUFFER_CONFIG *frame,
 #if CONFIG_AOM_HIGHBITDEPTH
                 if (cm->use_highbitdepth) {
                   uint16_t *const d = CONVERT_TO_SHORTPTR(cache_dst[cache_idx]);
-                  for (c = 0; c < bs; c++) {
-                    *(uint64_t *)(d + c * sstride) =
-                        *(uint64_t *)(cache_ptr[cache_idx] + c * bs * 2);
-                    if (bs == 8)
+                  if (sizex == 8) {
+                    for (c = 0; c < sizey; c++) {
+                      *(uint64_t *)(d + c * sstride) =
+                          *(uint64_t *)(cache_ptr[cache_idx] + c * bs * 2);
                       *(uint64_t *)(d + c * sstride + 4) =
                           *(uint64_t *)(cache_ptr[cache_idx] + c * bs * 2 + 8);
+                    }
+                  } else if (sizex == 4) {
+                    for (c = 0; c < sizey; c++)
+                      *(uint64_t *)(d + c * sstride) =
+                          *(uint64_t *)(cache_ptr[cache_idx] + c * bs * 2);
+                  } else {
+                    for (c = 0; c < sizey; c++)
+                      memcpy(d + c * sstride, cache_ptr[cache_idx] + c * bs * 2,
+                             sizex);
                   }
                 } else {
-                  for (c = 0; c < bs; c++)
-                    if (bs == 8)
+                  if (sizex == 8)
+                    for (c = 0; c < sizey; c++)
                       *(uint64_t *)(cache_dst[cache_idx] + c * sstride) =
                           *(uint64_t *)(cache_ptr[cache_idx] + c * bs);
-                    else
+                  else if (sizex == 4)
+                    for (c = 0; c < sizey; c++)
                       *(uint32_t *)(cache_dst[cache_idx] + c * sstride) =
                           *(uint32_t *)(cache_ptr[cache_idx] + c * bs);
+                  else
+                    for (c = 0; c < sizey; c++)
+                      memcpy(cache_dst[cache_idx] + c * sstride,
+                             cache_ptr[cache_idx] + c * bs, sizex);
                 }
 #else
-                for (c = 0; c < bs; c++)
-                  if (bs == 8)
+                if (sizex == 8)
+                  for (c = 0; c < sizey; c++)
                     *(uint64_t *)(cache_dst[cache_idx] + c * sstride) =
                         *(uint64_t *)(cache_ptr[cache_idx] + c * bs);
-                  else
+                else if (sizex == 4)
+                  for (c = 0; c < sizey; c++)
                     *(uint32_t *)(cache_dst[cache_idx] + c * sstride) =
                         *(uint32_t *)(cache_ptr[cache_idx] + c * bs);
+                else
+                  for (c = 0; c < sizey; c++)
+                    memcpy(cache_dst[cache_idx] + c * sstride,
+                           cache_ptr[cache_idx] + c * bs, sizex);
 #endif
               }
 #if CONFIG_AOM_HIGHBITDEPTH
@@ -211,15 +233,15 @@ int av1_clpf_frame(const YV12_BUFFER_CONFIG *frame,
               if (cm->use_highbitdepth) {
                 aom_clpf_block_hbd(CONVERT_TO_SHORTPTR(src_buffer),
                                    CONVERT_TO_SHORTPTR(dst_buffer), sstride,
-                                   dstride, xpos, ypos, bs, bs, width, height,
-                                   strength);
+                                   dstride, xpos, ypos, sizex, sizey, width,
+                                   height, strength);
               } else {
                 aom_clpf_block(src_buffer, dst_buffer, sstride, dstride, xpos,
-                               ypos, bs, bs, width, height, strength);
+                               ypos, sizex, sizey, width, height, strength);
               }
 #else
               aom_clpf_block(src_buffer, dst_buffer, sstride, dstride, xpos,
-                             ypos, bs, bs, width, height, strength);
+                             ypos, sizex, sizey, width, height, strength);
 #endif
             }
           }
