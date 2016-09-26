@@ -189,8 +189,8 @@ void test_clpf_speed(int w, int h, int depth, int iterations,
 
   EXPECT_GT(ref_elapsed_time, elapsed_time)
       << "Error: ClpfSpeedTest, SIMD slower than C." << std::endl
-      << "C time: " << ref_elapsed_time << "ms" << std::endl
-      << "SIMD time: " << elapsed_time << "ms" << std::endl;
+      << "C time: " << ref_elapsed_time << " us" << std::endl
+      << "SIMD time: " << elapsed_time << " us" << std::endl;
 }
 
 TEST_P(ClpfBlockTest, TestSIMDNoMismatch) {
