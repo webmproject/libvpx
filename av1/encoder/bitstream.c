@@ -1269,7 +1269,7 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
 #endif
 #else
 #if CONFIG_REF_MV
-                            &mi->bmi[j].pred_mv_s8[ref].as_mv, is_compound,
+                            &mi->bmi[j].pred_mv[ref].as_mv, is_compound,
 #else
                             &mbmi_ext->ref_mvs[mbmi->ref_frame[ref]][0].as_mv,
 #endif  // CONFIG_REF_MV

@@ -430,7 +430,7 @@ void av1_update_mv_count(ThreadData *td) {
         if (mi->bmi[i].as_mode == NEWMV)
           inc_mvs(mbmi, mbmi_ext, mi->bmi[i].as_mv,
 #if CONFIG_REF_MV
-                  mi->bmi[i].pred_mv_s8, td->counts->mv);
+                  mi->bmi[i].pred_mv, td->counts->mv);
 #else
                   &td->counts->mv);
 #endif
