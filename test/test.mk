@@ -102,7 +102,7 @@ LIBAOM_TEST_SRCS-yes                   += partial_idct_test.cc
 LIBAOM_TEST_SRCS-yes                   += superframe_test.cc
 LIBAOM_TEST_SRCS-yes                   += tile_independence_test.cc
 ifeq ($(CONFIG_ANS),yes)
-LIBAOM_TEST_SRCS-yes                   += av1_ans_test.cc
+LIBAOM_TEST_SRCS-yes                   += ans_test.cc
 else
 LIBAOM_TEST_SRCS-yes                   += boolcoder_test.cc
 endif

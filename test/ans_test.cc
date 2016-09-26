@@ -305,7 +305,7 @@ bool check_aomtree(const std::vector<int> &sym_vec, const rans_sym *sym_tab,
   return true;
 }
 
-class Av1AbsTest : public ::testing::Test {
+class AbsTest : public ::testing::Test {
  protected:
   static void SetUpTestCase() { pv_vec_ = abs_encode_build_vals(kNumBools); }
   virtual void SetUp() { buf_ = new uint8_t[kNumBools / 8]; }
@@ -314,9 +314,9 @@ class Av1AbsTest : public ::testing::Test {
   static PvVec pv_vec_;
   uint8_t *buf_;
 };
-PvVec Av1AbsTest::pv_vec_;
+PvVec AbsTest::pv_vec_;
 
-class Av1AnsTest : public ::testing::Test {
+class AnsTest : public ::testing::Test {
  protected:
   static void SetUpTestCase() {
     sym_vec_ = ans_encode_build_vals(rans_sym_tab, kNumSyms);
@@ -327,17 +327,15 @@ class Av1AnsTest : public ::testing::Test {
   static std::vector<int> sym_vec_;
   uint8_t *buf_;
 };
-std::vector<int> Av1AnsTest::sym_vec_;
+std::vector<int> AnsTest::sym_vec_;
 
-TEST_F(Av1AbsTest, Avxbool) { EXPECT_TRUE(check_aombool(pv_vec_, buf_)); }
-TEST_F(Av1AbsTest, Rabs) { EXPECT_TRUE(check_rabs(pv_vec_, buf_)); }
-TEST_F(Av1AbsTest, RabsAsc) { EXPECT_TRUE(check_rabs_asc(pv_vec_, buf_)); }
-TEST_F(Av1AbsTest, Uabs) { EXPECT_TRUE(check_uabs(pv_vec_, buf_)); }
+TEST_F(AbsTest, Avxbool) { EXPECT_TRUE(check_aombool(pv_vec_, buf_)); }
+TEST_F(AbsTest, Rabs) { EXPECT_TRUE(check_rabs(pv_vec_, buf_)); }
+TEST_F(AbsTest, RabsAsc) { EXPECT_TRUE(check_rabs_asc(pv_vec_, buf_)); }
+TEST_F(AbsTest, Uabs) { EXPECT_TRUE(check_uabs(pv_vec_, buf_)); }
 
-TEST_F(Av1AnsTest, Rans) {
-  EXPECT_TRUE(check_rans(sym_vec_, rans_sym_tab, buf_));
-}
-TEST_F(Av1AnsTest, Avxtree) {
+TEST_F(AnsTest, Rans) { EXPECT_TRUE(check_rans(sym_vec_, rans_sym_tab, buf_)); }
+TEST_F(AnsTest, Avxtree) {
   EXPECT_TRUE(check_aomtree(sym_vec_, rans_sym_tab, buf_));
 }
 }  // namespace
