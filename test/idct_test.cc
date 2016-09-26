@@ -115,6 +115,10 @@ TEST_P(IDCTTest, TestWithData) {
 }
 
 INSTANTIATE_TEST_CASE_P(C, IDCTTest, ::testing::Values(vp8_short_idct4x4llm_c));
+#if HAVE_NEON
+INSTANTIATE_TEST_CASE_P(NEON, IDCTTest,
+                        ::testing::Values(vp8_short_idct4x4llm_neon));
+#endif
 #if HAVE_MMX
 INSTANTIATE_TEST_CASE_P(MMX, IDCTTest,
                         ::testing::Values(vp8_short_idct4x4llm_mmx));
