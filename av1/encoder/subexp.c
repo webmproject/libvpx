@@ -8,7 +8,7 @@
  * Media Patent License 1.0 was not distributed with this source code in the
  * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
-#include "av1/encoder/bitwriter.h"
+#include "aom_dsp/bitwriter.h"
 
 #include "av1/common/common.h"
 #include "av1/common/entropy.h"

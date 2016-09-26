@@ -12,7 +12,7 @@
 #ifndef AV1_DECODER_DECODEMV_H_
 #define AV1_DECODER_DECODEMV_H_
 
-#include "av1/decoder/bitreader.h"
+#include "aom_dsp/bitreader.h"
 
 #include "av1/decoder/decoder.h"
 

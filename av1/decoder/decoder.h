@@ -15,7 +15,7 @@
 #include "./aom_config.h"
 
 #include "aom/aom_codec.h"
-#include "av1/decoder/bitreader.h"
+#include "aom_dsp/bitreader.h"
 #include "aom_scale/yv12config.h"
 #include "aom_util/aom_thread.h"
 

@@ -17,7 +17,7 @@
 #define tree_writer aom_dk_writer
 #define tree_bit_write aom_dk_write
 #else
-#include "av1/encoder/bitwriter.h"
+#include "aom_dsp/bitwriter.h"
 #define tree_writer aom_writer
 #define tree_bit_write aom_write
 #endif
