@@ -251,7 +251,9 @@ specialize qw/vp8_refining_search_sad sse3/;
 $vp8_refining_search_sad_sse3=vp8_refining_search_sadx4;
 
 add_proto qw/int vp8_diamond_search_sad/, "struct macroblock *x, struct block *b, struct blockd *d, union int_mv *ref_mv, union int_mv *best_mv, int search_param, int sad_per_bit, int *num00, struct variance_vtable *fn_ptr, int *mvcost[2], union int_mv *center_mv";
-$vp8_diamond_search_sad_sse3=vp8_diamond_search_sadx4;
+specialize qw/vp8_diamond_search_sad sse2 msa/;
+$vp8_diamond_search_sad_sse2=vp8_diamond_search_sadx4;
+$vp8_diamond_search_sad_msa=vp8_diamond_search_sadx4;
 
 #
 # Alt-ref Noise Reduction (ARNR)
