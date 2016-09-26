@@ -292,7 +292,8 @@ INSTANTIATE_TEST_CASE_P(
     NEON, SixtapPredictTest,
     ::testing::Values(make_tuple(16, 16, &vp8_sixtap_predict16x16_neon),
                       make_tuple(8, 8, &vp8_sixtap_predict8x8_neon),
-                      make_tuple(8, 4, &vp8_sixtap_predict8x4_neon)));
+                      make_tuple(8, 4, &vp8_sixtap_predict8x4_neon),
+                      make_tuple(4, 4, &vp8_sixtap_predict4x4_neon)));
 #endif
 #if HAVE_MMX
 INSTANTIATE_TEST_CASE_P(
