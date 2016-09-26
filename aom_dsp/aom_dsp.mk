@@ -376,4 +376,6 @@ DSP_SRCS-no += $(DSP_SRCS_REMOVE-yes)
 DSP_SRCS-yes += aom_dsp_rtcd.c
 DSP_SRCS-yes += aom_dsp_rtcd_defs.pl
 
+DSP_SRCS-yes += aom_simd.c
+
 $(eval $(call rtcd_h_template,aom_dsp_rtcd,aom_dsp/aom_dsp_rtcd_defs.pl))

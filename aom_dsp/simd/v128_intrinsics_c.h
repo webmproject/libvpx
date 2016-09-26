@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "./v64_intrinsics_c.h"
+#include "./aom_config.h"
 
 typedef union {
   uint8_t u8[16];
@@ -406,11 +407,13 @@ SIMD_INLINE c_v128 _c_v128_unzip_8(c_v128 a, c_v128 b, int mode) {
 }
 
 SIMD_INLINE c_v128 c_v128_unziplo_8(c_v128 a, c_v128 b) {
-  return big_endian() ? _c_v128_unzip_8(a, b, 1) : _c_v128_unzip_8(a, b, 0);
+  return CONFIG_BIG_ENDIAN ? _c_v128_unzip_8(a, b, 1)
+                           : _c_v128_unzip_8(a, b, 0);
 }
 
 SIMD_INLINE c_v128 c_v128_unziphi_8(c_v128 a, c_v128 b) {
-  return big_endian() ? _c_v128_unzip_8(b, a, 0) : _c_v128_unzip_8(b, a, 1);
+  return CONFIG_BIG_ENDIAN ? _c_v128_unzip_8(b, a, 0)
+                           : _c_v128_unzip_8(b, a, 1);
 }
 
 SIMD_INLINE c_v128 _c_v128_unzip_16(c_v128 a, c_v128 b, int mode) {
@@ -438,11 +441,13 @@ SIMD_INLINE c_v128 _c_v128_unzip_16(c_v128 a, c_v128 b, int mode) {
 }
 
 SIMD_INLINE c_v128 c_v128_unziplo_16(c_v128 a, c_v128 b) {
-  return big_endian() ? _c_v128_unzip_16(a, b, 1) : _c_v128_unzip_16(a, b, 0);
+  return CONFIG_BIG_ENDIAN ? _c_v128_unzip_16(a, b, 1)
+                           : _c_v128_unzip_16(a, b, 0);
 }
 
 SIMD_INLINE c_v128 c_v128_unziphi_16(c_v128 a, c_v128 b) {
-  return big_endian() ? _c_v128_unzip_16(b, a, 0) : _c_v128_unzip_16(b, a, 1);
+  return CONFIG_BIG_ENDIAN ? _c_v128_unzip_16(b, a, 0)
+                           : _c_v128_unzip_16(b, a, 1);
 }
 
 SIMD_INLINE c_v128 _c_v128_unzip_32(c_v128 a, c_v128 b, int mode) {
@@ -462,11 +467,13 @@ SIMD_INLINE c_v128 _c_v128_unzip_32(c_v128 a, c_v128 b, int mode) {
 }
 
 SIMD_INLINE c_v128 c_v128_unziplo_32(c_v128 a, c_v128 b) {
-  return big_endian() ? _c_v128_unzip_32(a, b, 1) : _c_v128_unzip_32(a, b, 0);
+  return CONFIG_BIG_ENDIAN ? _c_v128_unzip_32(a, b, 1)
+                           : _c_v128_unzip_32(a, b, 0);
 }
 
 SIMD_INLINE c_v128 c_v128_unziphi_32(c_v128 a, c_v128 b) {
-  return big_endian() ? _c_v128_unzip_32(b, a, 0) : _c_v128_unzip_32(b, a, 1);
+  return CONFIG_BIG_ENDIAN ? _c_v128_unzip_32(b, a, 0)
+                           : _c_v128_unzip_32(b, a, 1);
 }
 
 SIMD_INLINE c_v128 c_v128_unpack_u8_s16(c_v64 a) {
@@ -535,8 +542,8 @@ SIMD_INLINE c_v128 c_v128_shuffle_8(c_v128 a, c_v128 pattern) {
               c);
       abort();
     }
-    t.u8[c] =
-        a.u8[big_endian() ? 15 - (pattern.u8[c] & 15) : pattern.u8[c] & 15];
+    t.u8[c] = a.u8[CONFIG_BIG_ENDIAN ? 15 - (pattern.u8[c] & 15)
+                                     : pattern.u8[c] & 15];
   }
   return t;
 }
