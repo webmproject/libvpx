@@ -19,7 +19,6 @@ AV1_CX_SRCS_REMOVE-no  += $(AV1_COMMON_SRCS_REMOVE-no)
 AV1_CX_SRCS-yes += av1_cx_iface.c
 
 AV1_CX_SRCS-yes += encoder/bitstream.c
-AV1_CX_SRCS-yes += encoder/bitwriter.h
 AV1_CX_SRCS-yes += encoder/context_tree.c
 AV1_CX_SRCS-yes += encoder/context_tree.h
 AV1_CX_SRCS-yes += encoder/variance_tree.c

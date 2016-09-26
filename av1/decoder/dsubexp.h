@@ -12,7 +12,7 @@
 #ifndef AV1_DECODER_DSUBEXP_H_
 #define AV1_DECODER_DSUBEXP_H_
 
-#include "av1/decoder/bitreader.h"
+#include "aom_dsp/bitreader.h"
 
 #ifdef __cplusplus
 extern "C" {

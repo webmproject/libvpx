@@ -30,6 +30,5 @@ AV1_DX_SRCS-yes += decoder/decoder.c
 AV1_DX_SRCS-yes += decoder/decoder.h
 AV1_DX_SRCS-yes += decoder/dsubexp.c
 AV1_DX_SRCS-yes += decoder/dsubexp.h
-AV1_DX_SRCS-yes += decoder/bitreader.h
 
 AV1_DX_SRCS-yes := $(filter-out $(AV1_DX_SRCS_REMOVE-yes),$(AV1_DX_SRCS-yes))
