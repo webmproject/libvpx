@@ -951,7 +951,7 @@ static INLINE int assign_mv(AV1_COMMON *cm, MACROBLOCKD *xd,
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   BLOCK_SIZE bsize = mbmi->sb_type;
   int_mv *pred_mv =
-      (bsize >= BLOCK_8X8) ? mbmi->pred_mv : xd->mi[0]->bmi[block].pred_mv_s8;
+      (bsize >= BLOCK_8X8) ? mbmi->pred_mv : xd->mi[0]->bmi[block].pred_mv;
 #endif
   (void)ref_frame;
 
@@ -1462,8 +1462,8 @@ static void read_inter_block_mode_info(AV1Decoder *const pbi,
     }
 
 #if CONFIG_REF_MV
-    mbmi->pred_mv[0].as_int = mi->bmi[3].pred_mv_s8[0].as_int;
-    mbmi->pred_mv[1].as_int = mi->bmi[3].pred_mv_s8[1].as_int;
+    mbmi->pred_mv[0].as_int = mi->bmi[3].pred_mv[0].as_int;
+    mbmi->pred_mv[1].as_int = mi->bmi[3].pred_mv[1].as_int;
 #endif
     mi->mbmi.mode = b_mode;
 

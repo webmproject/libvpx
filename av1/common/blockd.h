@@ -146,7 +146,7 @@ typedef struct {
   PREDICTION_MODE as_mode;
   int_mv as_mv[2];  // first, second inter predictor motion vectors
 #if CONFIG_REF_MV
-  int_mv pred_mv_s8[2];
+  int_mv pred_mv[2];
 #endif
 #if CONFIG_EXT_INTER
   int_mv ref_mv[2];
