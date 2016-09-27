@@ -306,14 +306,14 @@ static TX_SIZE read_tx_size_inter(AV1_COMMON *cm, MACROBLOCKD *xd,
     if (allow_select && tx_mode == TX_MODE_SELECT) {
       const TX_SIZE coded_tx_size =
           read_selected_tx_size(cm, xd, inter_tx_size_cat_lookup[bsize], r);
-#if !CONFIG_RECT_TX
-      assert(coded_tx_size <= max_txsize_lookup[bsize]);
-#else
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
       if (coded_tx_size > max_txsize_lookup[bsize]) {
         assert(coded_tx_size == max_txsize_lookup[bsize] + 1);
         return max_txsize_rect_lookup[bsize];
       }
-#endif  // !CONFIG_RECT_TX
+#else
+      assert(coded_tx_size <= max_txsize_lookup[bsize]);
+#endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
       return coded_tx_size;
     } else {
       return tx_size_from_tx_mode(bsize, cm->tx_mode, 1);
