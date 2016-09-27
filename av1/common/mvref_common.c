@@ -17,11 +17,8 @@ static uint8_t add_ref_mv_candidate(
     const MODE_INFO *const candidate_mi, const MB_MODE_INFO *const candidate,
     const MV_REFERENCE_FRAME rf[2], uint8_t *refmv_count,
     CANDIDATE_MV *ref_mv_stack, const int use_hp, int len, int block, int col) {
-  const int weight = len;
   int index = 0, ref;
   int newmv_count = 0;
-
-  assert(2 * weight < REF_CAT_LEVEL);
 
   if (rf[1] == NONE) {
     // single reference frame
@@ -33,14 +30,14 @@ static uint8_t add_ref_mv_candidate(
         for (index = 0; index < *refmv_count; ++index)
           if (ref_mv_stack[index].this_mv.as_int == this_refmv.as_int) break;
 
-        if (index < *refmv_count) ref_mv_stack[index].weight += 2 * weight;
+        if (index < *refmv_count) ref_mv_stack[index].weight += 2 * len;
 
         // Add a new item to the list.
         if (index == *refmv_count) {
           ref_mv_stack[index].this_mv = this_refmv;
           ref_mv_stack[index].pred_mv =
               get_sub_block_pred_mv(candidate_mi, ref, col, block);
-          ref_mv_stack[index].weight = 2 * weight;
+          ref_mv_stack[index].weight = 2 * len;
           ++(*refmv_count);
 
 #if CONFIG_EXT_INTER
@@ -59,14 +56,14 @@ static uint8_t add_ref_mv_candidate(
           for (index = 0; index < *refmv_count; ++index)
             if (ref_mv_stack[index].this_mv.as_int == this_refmv.as_int) break;
 
-          if (index < *refmv_count) ref_mv_stack[index].weight += weight;
+          if (index < *refmv_count) ref_mv_stack[index].weight += len;
 
           // Add a new item to the list.
           if (index == *refmv_count) {
             ref_mv_stack[index].this_mv = this_refmv;
             ref_mv_stack[index].pred_mv =
                 get_sub_block_pred_mv(candidate_mi, ref, col, alt_block);
-            ref_mv_stack[index].weight = weight;
+            ref_mv_stack[index].weight = len;
             ++(*refmv_count);
 
 #if CONFIG_EXT_INTER
@@ -94,13 +91,13 @@ static uint8_t add_ref_mv_candidate(
             (ref_mv_stack[index].comp_mv.as_int == this_refmv[1].as_int))
           break;
 
-      if (index < *refmv_count) ref_mv_stack[index].weight += 2 * weight;
+      if (index < *refmv_count) ref_mv_stack[index].weight += 2 * len;
 
       // Add a new item to the list.
       if (index == *refmv_count) {
         ref_mv_stack[index].this_mv = this_refmv[0];
         ref_mv_stack[index].comp_mv = this_refmv[1];
-        ref_mv_stack[index].weight = 2 * weight;
+        ref_mv_stack[index].weight = 2 * len;
         ++(*refmv_count);
 
 #if CONFIG_EXT_INTER
@@ -124,13 +121,13 @@ static uint8_t add_ref_mv_candidate(
               ref_mv_stack[index].comp_mv.as_int == this_refmv[1].as_int)
             break;
 
-        if (index < *refmv_count) ref_mv_stack[index].weight += weight;
+        if (index < *refmv_count) ref_mv_stack[index].weight += len;
 
         // Add a new item to the list.
         if (index == *refmv_count) {
           ref_mv_stack[index].this_mv = this_refmv[0];
           ref_mv_stack[index].comp_mv = this_refmv[1];
-          ref_mv_stack[index].weight = weight;
+          ref_mv_stack[index].weight = len;
           ++(*refmv_count);
 
 #if CONFIG_EXT_INTER
