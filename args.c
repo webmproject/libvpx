@@ -122,7 +122,7 @@ unsigned int arg_parse_uint(const struct arg *arg) {
   uint32_t rawval;
   char *endptr;
 
-  rawval = strtoul(arg->val, &endptr, 10);
+  rawval = (uint32_t)strtoul(arg->val, &endptr, 10);
 
   if (arg->val[0] != '\0' && endptr[0] == '\0') {
     if (rawval <= UINT_MAX) return rawval;
@@ -139,7 +139,7 @@ int arg_parse_int(const struct arg *arg) {
   int32_t rawval;
   char *endptr;
 
-  rawval = strtol(arg->val, &endptr, 10);
+  rawval = (int32_t)strtol(arg->val, &endptr, 10);
 
   if (arg->val[0] != '\0' && endptr[0] == '\0') {
     if (rawval >= INT_MIN && rawval <= INT_MAX) return (int)rawval;
