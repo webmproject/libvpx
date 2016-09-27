@@ -19,7 +19,7 @@
 namespace libaom_test {
 
 const char kVP8Name[] = "WebM Project VP8";
-const char kAV1Name[] = "WebM Project AV1";
+const char kAV1Name[] = "AOMedia Project AV1 Decoder";
 
 aom_codec_err_t Decoder::PeekStream(const uint8_t *cxdata, size_t size,
                                     aom_codec_stream_info_t *stream_info) {
