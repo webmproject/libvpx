@@ -64,6 +64,10 @@ void vpx_convolve8_avg_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
 
   assert(x_step_q4 == 16);
 
+  (void)x_step_q4;
+  (void)y_step_q4;
+  (void)filter_y;
+
   q0s16 = vld1q_s16(filter_x);
 
   src -= 3;                // adjust for taps
@@ -239,6 +243,10 @@ void vpx_convolve8_avg_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
   int32x4_t q1s32, q2s32, q14s32, q15s32;
 
   assert(y_step_q4 == 16);
+
+  (void)x_step_q4;
+  (void)y_step_q4;
+  (void)filter_x;
 
   src -= src_stride * 3;
   q0s16 = vld1q_s16(filter_y);

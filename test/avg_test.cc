@@ -53,7 +53,7 @@ class AverageTestBase : public ::testing::Test {
   }
 
   // Sum Pixels
-  unsigned int ReferenceAverage8x8(const uint8_t *source, int pitch) {
+  static unsigned int ReferenceAverage8x8(const uint8_t *source, int pitch) {
     unsigned int average = 0;
     for (int h = 0; h < 8; ++h) {
       for (int w = 0; w < 8; ++w) average += source[h * pitch + w];
@@ -61,7 +61,7 @@ class AverageTestBase : public ::testing::Test {
     return ((average + 32) >> 6);
   }
 
-  unsigned int ReferenceAverage4x4(const uint8_t *source, int pitch) {
+  static unsigned int ReferenceAverage4x4(const uint8_t *source, int pitch) {
     unsigned int average = 0;
     for (int h = 0; h < 4; ++h) {
       for (int w = 0; w < 4; ++w) average += source[h * pitch + w];
@@ -98,11 +98,12 @@ class AverageTest : public AverageTestBase,
 
  protected:
   void CheckAverages() {
+    const int block_size = GET_PARAM(3);
     unsigned int expected = 0;
-    if (GET_PARAM(3) == 8) {
+    if (block_size == 8) {
       expected =
           ReferenceAverage8x8(source_data_ + GET_PARAM(2), source_stride_);
-    } else if (GET_PARAM(3) == 4) {
+    } else if (block_size == 4) {
       expected =
           ReferenceAverage4x4(source_data_ + GET_PARAM(2), source_stride_);
     }

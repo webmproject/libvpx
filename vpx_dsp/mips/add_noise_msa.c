@@ -14,7 +14,7 @@
 void vpx_plane_add_noise_msa(uint8_t *start_ptr, const int8_t *noise,
                              int blackclamp, int whiteclamp, int width,
                              int height, int32_t pitch) {
-  uint32_t i, j;
+  int i, j;
 
   for (i = 0; i < height / 2; ++i) {
     uint8_t *pos0_ptr = start_ptr + (2 * i) * pitch;
