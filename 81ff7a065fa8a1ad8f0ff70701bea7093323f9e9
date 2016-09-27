@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c5be8336_667d70a6",
+        "filename": "test/convolve_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 665,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-27T23:54:29Z",
+      "side": 1,
+      "message": "static isn\u0027t strictly necessary in an anonymous namespace",
+      "range": {
+        "startLine": 665,
+        "startChar": 0,
+        "endLine": 665,
+        "endChar": 7
+      },
+      "revId": "81ff7a065fa8a1ad8f0ff70701bea7093323f9e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
