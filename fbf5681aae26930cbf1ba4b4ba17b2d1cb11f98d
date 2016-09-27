@@ -46,6 +46,30 @@
       "revId": "fbf5681aae26930cbf1ba4b4ba17b2d1cb11f98d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e5e0e714_a1ae6432",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 916,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-27T19:46:34Z",
+      "side": 1,
+      "message": "\u003e James, I just re-edit the test file and added AOM_BITS_10.  It can\n \u003e pass this test.\n\nso don\u0027t you want to add the 10-bit case here along with the todo for 12?",
+      "parentUuid": "90668bcf_f1a2dcb0",
+      "range": {
+        "startLine": 916,
+        "startChar": 55,
+        "endLine": 916,
+        "endChar": 66
+      },
+      "revId": "fbf5681aae26930cbf1ba4b4ba17b2d1cb11f98d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
