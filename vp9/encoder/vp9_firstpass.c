@@ -2089,6 +2089,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double mv_in_out_accumulator = 0.0;
   double abs_mv_in_out_accumulator = 0.0;
   double mv_ratio_accumulator_thresh;
+  double mv_in_out_thresh;
+  double abs_mv_in_out_thresh;
   unsigned int allow_alt_ref = is_altref_enabled(cpi);
 
   int f_boost = 0;
@@ -2132,6 +2134,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Motion breakout threshold for loop below depends on image size.
   mv_ratio_accumulator_thresh =
       (cpi->initial_height + cpi->initial_width) / 4.0;
+  mv_in_out_thresh = (cpi->initial_height + cpi->initial_width) / 300.0;
+  abs_mv_in_out_thresh = (cpi->initial_height + cpi->initial_width) / 200.0;
 
   // Set a maximum and minimum interval for the GF group.
   // If the image appears almost completely static we can extend beyond this.
@@ -2228,8 +2232,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
             ((rc->frames_to_key - i) >= rc->min_gf_interval) &&
             (!flash_detected) &&
             ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
-             (abs_mv_in_out_accumulator > 3.0) ||
-             (mv_in_out_accumulator < -2.0) ||
+             (abs_mv_in_out_accumulator > abs_mv_in_out_thresh) ||
+             (mv_in_out_accumulator < -mv_in_out_thresh) ||
              ((boost_score - old_boost_score) < BOOST_BREAKOUT)))) {
       boost_score = old_boost_score;
       break;
@@ -2260,6 +2264,9 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     rc->gfu_boost = VPXMAX((int)boost_score, MIN_ARF_GF_BOOST);
     rc->source_alt_ref_pending = 0;
   }
+
+  // Limit maximum boost based on interval length.
+  rc->gfu_boost = VPXMIN((int)rc->gfu_boost, i * 200);
 
   // Set the interval until the next gf.
   rc->baseline_gf_interval = i - (is_key_frame || rc->source_alt_ref_pending);
