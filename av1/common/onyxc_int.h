@@ -82,6 +82,9 @@ typedef enum {
 
 typedef struct {
   int_mv mv[2];
+#if CONFIG_REF_MV
+  int_mv pred_mv[2];
+#endif
   MV_REFERENCE_FRAME ref_frame[2];
 } MV_REF;
 

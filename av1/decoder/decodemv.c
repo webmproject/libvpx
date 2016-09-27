@@ -966,8 +966,10 @@ static INLINE int assign_mv(AV1_COMMON *cm, MACROBLOCKD *xd,
 #endif
       for (i = 0; i < 1 + is_compound; ++i) {
 #if CONFIG_REF_MV
-        int nmv_ctx = av1_nmv_ctx(xd->ref_mv_count[mbmi->ref_frame[i]],
-                                  xd->ref_mv_stack[mbmi->ref_frame[i]]);
+        int8_t rf_type = av1_ref_frame_type(mbmi->ref_frame);
+        int nmv_ctx =
+            av1_nmv_ctx(xd->ref_mv_count[rf_type], xd->ref_mv_stack[rf_type], i,
+                        mbmi->ref_mv_idx);
         nmv_context_counts *const mv_counts =
             counts ? &counts->mv[nmv_ctx] : NULL;
         read_mv(r, &mv[i].as_mv, &ref_mv[i].as_mv, is_compound,
@@ -1031,8 +1033,10 @@ static INLINE int assign_mv(AV1_COMMON *cm, MACROBLOCKD *xd,
       assert(is_compound);
       for (i = 0; i < 2; ++i) {
 #if CONFIG_REF_MV
-        int nmv_ctx = av1_nmv_ctx(xd->ref_mv_count[mbmi->ref_frame[i]],
-                                  xd->ref_mv_stack[mbmi->ref_frame[i]]);
+        int8_t rf_type = av1_ref_frame_type(mbmi->ref_frame);
+        int nmv_ctx =
+            av1_nmv_ctx(xd->ref_mv_count[rf_type], xd->ref_mv_stack[rf_type], i,
+                        mbmi->ref_mv_idx);
         nmv_context_counts *const mv_counts =
             counts ? &counts->mv[nmv_ctx] : NULL;
         read_mv(r, &mv[i].as_mv, &ref_mv[i].as_mv, is_compound,
@@ -1072,8 +1076,9 @@ static INLINE int assign_mv(AV1_COMMON *cm, MACROBLOCKD *xd,
     case NEW_NEARESTMV: {
       FRAME_COUNTS *counts = xd->counts;
 #if CONFIG_REF_MV
-      int nmv_ctx = av1_nmv_ctx(xd->ref_mv_count[mbmi->ref_frame[0]],
-                                xd->ref_mv_stack[mbmi->ref_frame[0]]);
+      int8_t rf_type = av1_ref_frame_type(mbmi->ref_frame);
+      int nmv_ctx = av1_nmv_ctx(xd->ref_mv_count[rf_type],
+                                xd->ref_mv_stack[rf_type], 0, mbmi->ref_mv_idx);
       nmv_context_counts *const mv_counts =
           counts ? &counts->mv[nmv_ctx] : NULL;
       read_mv(r, &mv[0].as_mv, &ref_mv[0].as_mv, is_compound,
@@ -1091,8 +1096,9 @@ static INLINE int assign_mv(AV1_COMMON *cm, MACROBLOCKD *xd,
     case NEAREST_NEWMV: {
       FRAME_COUNTS *counts = xd->counts;
 #if CONFIG_REF_MV
-      int nmv_ctx = av1_nmv_ctx(xd->ref_mv_count[mbmi->ref_frame[1]],
-                                xd->ref_mv_stack[mbmi->ref_frame[1]]);
+      int8_t rf_type = av1_ref_frame_type(mbmi->ref_frame);
+      int nmv_ctx = av1_nmv_ctx(xd->ref_mv_count[rf_type],
+                                xd->ref_mv_stack[rf_type], 1, mbmi->ref_mv_idx);
       nmv_context_counts *const mv_counts =
           counts ? &counts->mv[nmv_ctx] : NULL;
       mv[0].as_int = nearest_mv[0].as_int;
@@ -1111,8 +1117,9 @@ static INLINE int assign_mv(AV1_COMMON *cm, MACROBLOCKD *xd,
     case NEAR_NEWMV: {
       FRAME_COUNTS *counts = xd->counts;
 #if CONFIG_REF_MV
-      int nmv_ctx = av1_nmv_ctx(xd->ref_mv_count[mbmi->ref_frame[1]],
-                                xd->ref_mv_stack[mbmi->ref_frame[1]]);
+      int8_t rf_type = av1_ref_frame_type(mbmi->ref_frame);
+      int nmv_ctx = av1_nmv_ctx(xd->ref_mv_count[rf_type],
+                                xd->ref_mv_stack[rf_type], 1, mbmi->ref_mv_idx);
       nmv_context_counts *const mv_counts =
           counts ? &counts->mv[nmv_ctx] : NULL;
       mv[0].as_int = near_mv[0].as_int;
@@ -1132,8 +1139,9 @@ static INLINE int assign_mv(AV1_COMMON *cm, MACROBLOCKD *xd,
     case NEW_NEARMV: {
       FRAME_COUNTS *counts = xd->counts;
 #if CONFIG_REF_MV
-      int nmv_ctx = av1_nmv_ctx(xd->ref_mv_count[mbmi->ref_frame[0]],
-                                xd->ref_mv_stack[mbmi->ref_frame[0]]);
+      int8_t rf_type = av1_ref_frame_type(mbmi->ref_frame);
+      int nmv_ctx = av1_nmv_ctx(xd->ref_mv_count[rf_type],
+                                xd->ref_mv_stack[rf_type], 0, mbmi->ref_mv_idx);
       nmv_context_counts *const mv_counts =
           counts ? &counts->mv[nmv_ctx] : NULL;
       read_mv(r, &mv[0].as_mv, &ref_mv[0].as_mv, is_compound,
@@ -1235,6 +1243,29 @@ static void read_inter_block_mode_info(AV1Decoder *const pbi,
   }
 
 #if CONFIG_REF_MV
+  for (; ref_frame < MODE_CTX_REF_FRAMES; ++ref_frame) {
+    av1_find_mv_refs(cm, xd, mi, ref_frame, &xd->ref_mv_count[ref_frame],
+                     xd->ref_mv_stack[ref_frame],
+#if CONFIG_EXT_INTER
+                     compound_inter_mode_ctx,
+#endif  // CONFIG_EXT_INTER
+                     ref_mvs[ref_frame], mi_row, mi_col, fpm_sync, (void *)pbi,
+                     inter_mode_ctx);
+
+    if (xd->ref_mv_count[ref_frame] < 2) {
+      MV_REFERENCE_FRAME rf[2];
+      av1_set_ref_frame(rf, ref_frame);
+      for (ref = 0; ref < 2; ++ref) {
+        lower_mv_precision(&ref_mvs[rf[ref]][0].as_mv, allow_hp);
+        lower_mv_precision(&ref_mvs[rf[ref]][1].as_mv, allow_hp);
+      }
+
+      if (ref_mvs[rf[0]][0].as_int != 0 || ref_mvs[rf[0]][1].as_int != 0 ||
+          ref_mvs[rf[1]][0].as_int != 0 || ref_mvs[rf[1]][1].as_int != 0)
+        inter_mode_ctx[ref_frame] &= ~(1 << ALL_ZERO_FLAG_OFFSET);
+    }
+  }
+
 #if CONFIG_EXT_INTER
   if (is_compound)
     mode_ctx = compound_inter_mode_ctx[mbmi->ref_frame[0]];
@@ -1802,6 +1833,10 @@ void av1_read_mode_info(AV1Decoder *const pbi, MACROBLOCKD *xd,
         mv->ref_frame[1] = mi->mbmi.ref_frame[1];
         mv->mv[0].as_int = mi->mbmi.mv[0].as_int;
         mv->mv[1].as_int = mi->mbmi.mv[1].as_int;
+#if CONFIG_REF_MV
+        mv->pred_mv[0].as_int = mi->mbmi.pred_mv[0].as_int;
+        mv->pred_mv[1].as_int = mi->mbmi.pred_mv[1].as_int;
+#endif
       }
     }
   }

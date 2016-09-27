@@ -152,7 +152,7 @@ static INLINE GLOBAL_MOTION_TYPE get_gmtype(const Global_Motion_Params *gm) {
 typedef struct candidate_mv {
   int_mv this_mv;
   int_mv comp_mv;
-  int_mv pred_mv;
+  int_mv pred_mv[2];
   int weight;
 } CANDIDATE_MV;
 #endif
