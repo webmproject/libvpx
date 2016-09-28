@@ -92,24 +92,15 @@ static INLINE int av1_is_interpolating_filter(
 }
 
 #if USE_TEMPORALFILTER_12TAP
-extern const int8_t sub_pel_filters_temporalfilter_12_signal_dir[15][2][16];
-extern const int8_t sub_pel_filters_temporalfilter_12_ver_signal_dir[15][6][16];
-#if CONFIG_AOM_HIGHBITDEPTH
-extern const int16_t sub_pel_filters_temporalfilter_12_highbd_ver_signal_dir[15]
-                                                                            [6]
-                                                                            [8];
-#endif
+DECLARE_ALIGNED(16, extern const int16_t,
+                av1_sub_pel_filters_temporalfilter_12[SUBPEL_SHIFTS][12]);
 #endif
 
 #if CONFIG_EXT_INTERP
-extern const int8_t sub_pel_filters_12sharp_signal_dir[15][2][16];
-extern const int8_t sub_pel_filters_10sharp_signal_dir[15][2][16];
-extern const int8_t sub_pel_filters_12sharp_ver_signal_dir[15][6][16];
-extern const int8_t sub_pel_filters_10sharp_ver_signal_dir[15][6][16];
-#if CONFIG_AOM_HIGHBITDEPTH
-extern const int16_t sub_pel_filters_12sharp_highbd_ver_signal_dir[15][6][8];
-extern const int16_t sub_pel_filters_10sharp_highbd_ver_signal_dir[15][6][8];
-#endif
+DECLARE_ALIGNED(256, extern const int16_t,
+                av1_sub_pel_filters_10sharp[SUBPEL_SHIFTS][10]);
+DECLARE_ALIGNED(16, extern const int16_t,
+                av1_sub_pel_filters_12sharp[SUBPEL_SHIFTS][12]);
 #endif
 
 typedef const int8_t (*SubpelFilterCoeffs)[16];

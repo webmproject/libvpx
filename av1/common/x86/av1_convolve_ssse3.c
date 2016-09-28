@@ -13,10 +13,50 @@
 #include <tmmintrin.h>
 
 #include "./av1_rtcd.h"
-#include "av1/common/filter.h"
+#include "av1/common/x86/convolve_filter_ssse3.h"
 
 #define WIDTH_BOUND (16)
 #define HEIGHT_BOUND (16)
+
+static SubpelFilterCoeffs get_subpel_filter_signal_dir(
+    const InterpFilterParams p, int index) {
+#if CONFIG_EXT_INTERP
+  if (p.filter_ptr == (const int16_t *)av1_sub_pel_filters_12sharp) {
+    return &av1_sub_pel_filters_12sharp_signal_dir[index][0];
+  }
+  if (p.filter_ptr == (const int16_t *)av1_sub_pel_filters_10sharp) {
+    return &av1_sub_pel_filters_10sharp_signal_dir[index][0];
+  }
+#endif
+#if USE_TEMPORALFILTER_12TAP
+  if (p.filter_ptr == (const int16_t *)av1_sub_pel_filters_temporalfilter_12) {
+    return &av1_sub_pel_filters_temporalfilter_12_signal_dir[index][0];
+  }
+#endif
+  (void)p;
+  (void)index;
+  return NULL;
+}
+
+static SubpelFilterCoeffs get_subpel_filter_ver_signal_dir(
+    const InterpFilterParams p, int index) {
+#if CONFIG_EXT_INTERP
+  if (p.filter_ptr == (const int16_t *)av1_sub_pel_filters_12sharp) {
+    return &av1_sub_pel_filters_12sharp_ver_signal_dir[index][0];
+  }
+  if (p.filter_ptr == (const int16_t *)av1_sub_pel_filters_10sharp) {
+    return &av1_sub_pel_filters_10sharp_ver_signal_dir[index][0];
+  }
+#endif
+#if USE_TEMPORALFILTER_12TAP
+  if (p.filter_ptr == (const int16_t *)av1_sub_pel_filters_temporalfilter_12) {
+    return &av1_sub_pel_filters_temporalfilter_12_ver_signal_dir[index][0];
+  }
+#endif
+  (void)p;
+  (void)index;
+  return NULL;
+}
 
 static INLINE void transpose_4x8(const __m128i *in, __m128i *out) {
   __m128i t0, t1;
@@ -636,9 +676,8 @@ void av1_convolve_horiz_ssse3(const uint8_t *src, int src_stride, uint8_t *dst,
     return;
   }
 
-  hCoeffs = av1_get_subpel_filter_signal_dir(filter_params, subpel_x_q4 - 1);
-  vCoeffs =
-      av1_get_subpel_filter_ver_signal_dir(filter_params, subpel_x_q4 - 1);
+  hCoeffs = get_subpel_filter_signal_dir(filter_params, subpel_x_q4 - 1);
+  vCoeffs = get_subpel_filter_ver_signal_dir(filter_params, subpel_x_q4 - 1);
 
   if (!hCoeffs || !vCoeffs) {
     av1_convolve_horiz_c(src, src_stride, dst, dst_stride, w, h, filter_params,
@@ -845,8 +884,7 @@ void av1_convolve_vert_ssse3(const uint8_t *src, int src_stride, uint8_t *dst,
     return;
   }
 
-  vCoeffs =
-      av1_get_subpel_filter_ver_signal_dir(filter_params, subpel_y_q4 - 1);
+  vCoeffs = get_subpel_filter_ver_signal_dir(filter_params, subpel_y_q4 - 1);
 
   if (!vCoeffs) {
     av1_convolve_vert_c(src, src_stride, dst, dst_stride, w, h, filter_params,

@@ -13,11 +13,32 @@
 #include <smmintrin.h>
 
 #include "./av1_rtcd.h"
-#include "av1/common/filter.h"
+#include "av1/common/x86/highbd_convolve_filter_sse4.h"
 
 typedef void (*TransposeSave)(const int width, int pixelsNum, uint32_t *src,
                               int src_stride, uint16_t *dst, int dst_stride,
                               int bd);
+
+static HbdSubpelFilterCoeffs hbd_get_subpel_filter_ver_signal_dir(
+    const InterpFilterParams p, int index) {
+#if CONFIG_EXT_INTERP
+  if (p.filter_ptr == (const int16_t *)av1_sub_pel_filters_12sharp) {
+    return &av1_sub_pel_filters_12sharp_highbd_ver_signal_dir[index][0];
+  }
+  if (p.filter_ptr == (const int16_t *)av1_sub_pel_filters_10sharp) {
+    return &av1_sub_pel_filters_10sharp_highbd_ver_signal_dir[index][0];
+  }
+#endif
+#if USE_TEMPORALFILTER_12TAP
+  if (p.filter_ptr == (const int16_t *)av1_sub_pel_filters_temporalfilter_12) {
+    return &av1_sub_pel_filters_temporalfilter_12_highbd_ver_signal_dir[index]
+                                                                       [0];
+  }
+#endif
+  (void)p;
+  (void)index;
+  return NULL;
+}
 
 // pixelsNum 0: write all 4 pixels
 //           1/2/3: residual pixels 1/2/3
@@ -235,7 +256,7 @@ void av1_highbd_convolve_horiz_sse4_1(const uint16_t *src, int src_stride,
   }
 
   vCoeffs =
-      av1_hbd_get_subpel_filter_ver_signal_dir(filter_params, subpel_x_q4 - 1);
+      hbd_get_subpel_filter_ver_signal_dir(filter_params, subpel_x_q4 - 1);
   if (!vCoeffs) {
     av1_highbd_convolve_horiz_c(src, src_stride, dst, dst_stride, w, h,
                                 filter_params, subpel_x_q4, x_step_q4, avg, bd);
@@ -439,7 +460,7 @@ void av1_highbd_convolve_vert_sse4_1(const uint16_t *src, int src_stride,
   }
 
   vCoeffs =
-      av1_hbd_get_subpel_filter_ver_signal_dir(filter_params, subpel_y_q4 - 1);
+      hbd_get_subpel_filter_ver_signal_dir(filter_params, subpel_y_q4 - 1);
   if (!vCoeffs) {
     av1_highbd_convolve_vert_c(src, src_stride, dst, dst_stride, w, h,
                                filter_params, subpel_y_q4, y_step_q4, avg, bd);

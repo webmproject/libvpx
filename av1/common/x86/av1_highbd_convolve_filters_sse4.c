@@ -13,7 +13,7 @@
 #if CONFIG_AOM_HIGHBITDEPTH
 #if CONFIG_EXT_INTERP
 DECLARE_ALIGNED(16, const int16_t,
-                sub_pel_filters_10sharp_highbd_ver_signal_dir[15][6][8]) = {
+                av1_sub_pel_filters_10sharp_highbd_ver_signal_dir[15][6][8]) = {
   {
       { 0, 0, 0, 0, 0, 0, 0, 0 },
       { -1, 3, -1, 3, -1, 3, -1, 3 },
@@ -140,7 +140,7 @@ DECLARE_ALIGNED(16, const int16_t,
 #if CONFIG_AOM_HIGHBITDEPTH
 #if CONFIG_EXT_INTERP
 DECLARE_ALIGNED(16, const int16_t,
-                sub_pel_filters_12sharp_highbd_ver_signal_dir[15][6][8]) = {
+                av1_sub_pel_filters_12sharp_highbd_ver_signal_dir[15][6][8]) = {
   {
       { 0, 1, 0, 1, 0, 1, 0, 1 },
       { -2, 3, -2, 3, -2, 3, -2, 3 },
@@ -266,9 +266,9 @@ DECLARE_ALIGNED(16, const int16_t,
 #endif
 #if CONFIG_AOM_HIGHBITDEPTH
 #if USE_TEMPORALFILTER_12TAP
-DECLARE_ALIGNED(16, const int16_t,
-                sub_pel_filters_temporalfilter_12_highbd_ver_signal_dir[15][6]
-                                                                       [8]) = {
+DECLARE_ALIGNED(
+    16, const int16_t,
+    av1_sub_pel_filters_temporalfilter_12_highbd_ver_signal_dir[15][6][8]) = {
   {
       { 0, 1, 0, 1, 0, 1, 0, 1 },
       { -1, 3, -1, 3, -1, 3, -1, 3 },

@@ -12,7 +12,7 @@
 
 #if CONFIG_EXT_INTERP
 DECLARE_ALIGNED(16, const int8_t,
-                sub_pel_filters_10sharp_signal_dir[15][2][16]) = {
+                av1_sub_pel_filters_10sharp_signal_dir[15][2][16]) = {
   {
       { 0, 0, -1, 3, -6, 127, 8, -4, 2, -1, 0, 0, 0, 0, 0, 0 },
       { 0, 0, 0, 0, -1, 3, -6, 127, 8, -4, 2, -1, 0, 0, 0, 0 },
@@ -77,7 +77,7 @@ DECLARE_ALIGNED(16, const int8_t,
 #endif
 #if CONFIG_EXT_INTERP
 DECLARE_ALIGNED(16, const int8_t,
-                sub_pel_filters_10sharp_ver_signal_dir[15][6][16]) = {
+                av1_sub_pel_filters_10sharp_ver_signal_dir[15][6][16]) = {
   {
       { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
       { -1, 3, -1, 3, -1, 3, -1, 3, -1, 3, -1, 3, -1, 3, -1, 3 },
@@ -228,7 +228,7 @@ DECLARE_ALIGNED(16, const int8_t,
 #endif
 #if CONFIG_EXT_INTERP
 DECLARE_ALIGNED(16, const int8_t,
-                sub_pel_filters_12sharp_signal_dir[15][2][16]) = {
+                av1_sub_pel_filters_12sharp_signal_dir[15][2][16]) = {
   {
       { 0, 1, -2, 3, -7, 127, 8, -4, 2, -1, 1, 0, 0, 0, 0, 0 },
       { 0, 0, 0, 1, -2, 3, -7, 127, 8, -4, 2, -1, 1, 0, 0, 0 },
@@ -293,7 +293,7 @@ DECLARE_ALIGNED(16, const int8_t,
 #endif
 #if CONFIG_EXT_INTERP
 DECLARE_ALIGNED(16, const int8_t,
-                sub_pel_filters_12sharp_ver_signal_dir[15][6][16]) = {
+                av1_sub_pel_filters_12sharp_ver_signal_dir[15][6][16]) = {
   {
       { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
       { -2, 3, -2, 3, -2, 3, -2, 3, -2, 3, -2, 3, -2, 3, -2, 3 },
@@ -444,7 +444,7 @@ DECLARE_ALIGNED(16, const int8_t,
 #endif
 #if USE_TEMPORALFILTER_12TAP
 DECLARE_ALIGNED(16, const int8_t,
-                sub_pel_filters_temporalfilter_12_signal_dir[15][2][16]) = {
+                av1_sub_pel_filters_temporalfilter_12_signal_dir[15][2][16]) = {
   {
       { 0, 1, -1, 3, -7, 127, 8, -4, 2, -1, 0, 0, 0, 0, 0, 0 },
       { 0, 0, 0, 1, -1, 3, -7, 127, 8, -4, 2, -1, 0, 0, 0, 0 },
@@ -509,7 +509,8 @@ DECLARE_ALIGNED(16, const int8_t,
 #endif
 #if USE_TEMPORALFILTER_12TAP
 DECLARE_ALIGNED(16, const int8_t,
-                sub_pel_filters_temporalfilter_12_ver_signal_dir[15][6][16]) = {
+                av1_sub_pel_filters_temporalfilter_12_ver_signal_dir[15][6]
+                                                                    [16]) = {
   {
       { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
       { -1, 3, -1, 3, -1, 3, -1, 3, -1, 3, -1, 3, -1, 3, -1, 3 },
