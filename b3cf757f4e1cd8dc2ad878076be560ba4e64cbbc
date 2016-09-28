@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "452ff370_8745e66f",
+        "filename": "vpx_dsp/arm/vpx_convolve8_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-28T22:49:31Z",
+      "side": 1,
+      "message": "any benefit to splitting the accumulation in half and combining at the end? might be OK to leave as a followup.",
+      "revId": "b3cf757f4e1cd8dc2ad878076be560ba4e64cbbc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5be8336_e2e02389",
+        "filename": "vpx_dsp/arm/vpx_convolve8_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-28T22:49:31Z",
+      "side": 1,
+      "message": "in each case like this add an assert for dst alignment -\u003e assert(!(dst \u0026 3))",
+      "revId": "b3cf757f4e1cd8dc2ad878076be560ba4e64cbbc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
