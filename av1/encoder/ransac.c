@@ -351,7 +351,7 @@ static void project_points_double_rotzoom(double *mat, double *points,
   int i;
   for (i = 0; i < n; ++i) {
     const double x = *(points++), y = *(points++);
-    *(proj++) =  mat[3] * x + mat[2] * y + mat[1];
+    *(proj++) = mat[3] * x + mat[2] * y + mat[1];
     *(proj++) = -mat[2] * x + mat[3] * y + mat[0];
     points += stride_points - 2;
     proj += stride_proj - 2;
