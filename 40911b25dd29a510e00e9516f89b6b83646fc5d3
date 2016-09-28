@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c5be8336_e5978df3",
+        "filename": "av1/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-28T23:51:47Z",
+      "side": 1,
+      "message": "these should be prefixed with av1 to prevent name clashes; would be a good followup",
+      "range": {
+        "startLine": 30,
+        "startChar": 16,
+        "endLine": 30,
+        "endChar": 49
+      },
+      "revId": "40911b25dd29a510e00e9516f89b6b83646fc5d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5be8336_25052521",
+        "filename": "av1/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-28T23:51:47Z",
+      "side": 1,
+      "message": "I don\u0027t like having to expose these just for some helper function in 1 asm file",
+      "revId": "40911b25dd29a510e00e9516f89b6b83646fc5d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5be8336_c5137173",
+        "filename": "av1/common/x86/av1_convolve_filters_ssse3.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 662,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-28T23:51:47Z",
+      "side": 1,
+      "message": "these should be static or just removed (see earlier comment)",
+      "revId": "40911b25dd29a510e00e9516f89b6b83646fc5d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
