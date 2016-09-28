@@ -18,12 +18,9 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-#include "aom_dsp/ans.h"
 #include "test/acm_random.h"
-
-// Local hacks to resolve circular dependencies in these commits
-#define RANS_PRECISION rans_precision
-#define rans_lut rans_dec_lut
+#include "aom_dsp/ansreader.h"
+#include "aom_dsp/answriter.h"
 
 namespace {
 typedef std::vector<std::pair<uint8_t, bool> > PvVec;

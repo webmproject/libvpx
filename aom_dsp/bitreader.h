@@ -13,12 +13,13 @@
 #define AOM_DSP_BITREADER_H_
 
 #include <assert.h>
+#include <limits.h>
 
 #include "./aom_config.h"
 #include "aom/aomdx.h"
 #include "aom/aom_integer.h"
 #if CONFIG_ANS
-#include "aom_dsp/ans.h"
+#include "aom_dsp/ansreader.h"
 #else
 #include "aom_dsp/dkboolreader.h"
 #endif
