@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c5be8336_581e496f",
+        "filename": "vpx_dsp/prob.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-28T18:53:40Z",
+      "side": 1,
+      "message": "this can probably be relocated to get_binary_prob in another commit as the other call site checks den \u003d\u003d 0 already",
+      "revId": "7481edb33f5ea82e29f12e0e872d04ea1a5373cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
