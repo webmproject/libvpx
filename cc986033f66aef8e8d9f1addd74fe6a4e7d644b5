@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c5be8336_f8f8d5ac",
+        "filename": "vpx_dsp/arm/vpx_convolve8_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-28T19:48:51Z",
+      "side": 1,
+      "message": "Is this any better than vdup_n_s16(filter_x[3])? Seems like the function is pretty tight on registers, freeing up \u0027filters\u0027 might help.\n\nah, nevermind, looks like \u0027filters\u0027 get used again later",
+      "range": {
+        "startLine": 153,
+        "startChar": 14,
+        "endLine": 153,
+        "endChar": 27
+      },
+      "revId": "cc986033f66aef8e8d9f1addd74fe6a4e7d644b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5be8336_b8a3fdad",
+        "filename": "vpx_dsp/arm/vpx_convolve8_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-28T19:48:51Z",
+      "side": 1,
+      "message": "Does it help to interleave the __builtin_prefetch() calls? If not, they should be grouped for readability.",
+      "revId": "cc986033f66aef8e8d9f1addd74fe6a4e7d644b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5be8336_8c91a650",
+        "filename": "vpx_dsp/arm/vpx_convolve_copy_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-28T19:48:51Z",
+      "side": 1,
+      "message": "Have you compared this to memcpy()? Might still be worth checking and using constants like memcpy(dst, src, 4) as opposed to memcpy(dst, src, w)",
+      "revId": "cc986033f66aef8e8d9f1addd74fe6a4e7d644b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5be8336_0c949638",
+        "filename": "vpx_dsp/arm/vpx_convolve_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-09-28T19:48:51Z",
+      "side": 1,
+      "message": "Is this why you can\u0027t trust src to be aligned?",
+      "range": {
+        "startLine": 42,
+        "startChar": 33,
+        "endLine": 42,
+        "endChar": 34
+      },
+      "revId": "cc986033f66aef8e8d9f1addd74fe6a4e7d644b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
