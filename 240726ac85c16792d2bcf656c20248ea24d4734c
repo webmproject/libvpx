@@ -22,6 +22,30 @@
       "revId": "240726ac85c16792d2bcf656c20248ea24d4734c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5be8336_cf29d090",
+        "filename": "test/convolve_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 665,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-09-28T21:50:07Z",
+      "side": 0,
+      "message": "To address a leftover comment of change https://chromium-review.googlesource.com/#/c/387132/5/test/convolve_test.cc\n\n\"static isn\u0027t strictly necessary in an anonymous namespace\"",
+      "parentUuid": "c5be8336_4cae8e84",
+      "range": {
+        "startLine": 665,
+        "startChar": 0,
+        "endLine": 665,
+        "endChar": 70
+      },
+      "revId": "240726ac85c16792d2bcf656c20248ea24d4734c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }

@@ -42,6 +42,24 @@
     },
     {
       "key": {
+        "uuid": "c5be8336_8f2b5899",
+        "filename": "vpx_dsp/arm/vpx_convolve8_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-09-28T21:50:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c5be8336_b8a3fdad",
+      "revId": "cc986033f66aef8e8d9f1addd74fe6a4e7d644b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c5be8336_8c91a650",
         "filename": "vpx_dsp/arm/vpx_convolve_copy_neon.c",
         "patchSetId": 1
@@ -59,6 +77,24 @@
     },
     {
       "key": {
+        "uuid": "c5be8336_4f2160b9",
+        "filename": "vpx_dsp/arm/vpx_convolve_copy_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-09-28T21:50:07Z",
+      "side": 1,
+      "message": "Just tried and this NEON version is a little bit faster than memcpy(dst, src, some const), since the inlined gcc memcpy() only uses at most 32-bit ldr and str. Maybe a total inlined vpx_convolve_copy() with inlined memcpy could be better. Will revisit it with other convolve functions later.",
+      "parentUuid": "c5be8336_8c91a650",
+      "revId": "cc986033f66aef8e8d9f1addd74fe6a4e7d644b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c5be8336_0c949638",
         "filename": "vpx_dsp/arm/vpx_convolve_neon.c",
         "patchSetId": 1
@@ -70,6 +106,30 @@
       "writtenOn": "2016-09-28T19:48:51Z",
       "side": 1,
       "message": "Is this why you can\u0027t trust src to be aligned?",
+      "range": {
+        "startLine": 42,
+        "startChar": 33,
+        "endLine": 42,
+        "endChar": 34
+      },
+      "revId": "cc986033f66aef8e8d9f1addd74fe6a4e7d644b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5be8336_af073424",
+        "filename": "vpx_dsp/arm/vpx_convolve_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-09-28T21:50:07Z",
+      "side": 1,
+      "message": "No. src is decided by arbitrary motion vector and usually not aligned. src of vpx_convolve8_vert() following vpx_convolve8_horiz() would be always aligned. Will revisit it with a special case later.\n\nHere changing 64 to w may make the temp buffer visiting more tight for small w.",
+      "parentUuid": "c5be8336_0c949638",
       "range": {
         "startLine": 42,
         "startChar": 33,
