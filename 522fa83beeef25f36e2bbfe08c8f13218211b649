@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c5be8336_c5fd3156",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-28T23:30:59Z",
+      "side": 1,
+      "message": "splitting on this and maybe the xmm -\u003e sse2 rename would have been good",
+      "revId": "522fa83beeef25f36e2bbfe08c8f13218211b649",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5be8336_85d699e4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-28T23:30:59Z",
+      "side": 1,
+      "message": "it\u0027s the other way around",
+      "range": {
+        "startLine": 13,
+        "startChar": 34,
+        "endLine": 14,
+        "endChar": 15
+      },
+      "revId": "522fa83beeef25f36e2bbfe08c8f13218211b649",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
