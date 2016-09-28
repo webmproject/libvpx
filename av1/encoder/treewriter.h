@@ -12,15 +12,7 @@
 #ifndef AV1_ENCODER_TREEWRITER_H_
 #define AV1_ENCODER_TREEWRITER_H_
 
-#ifdef AV1_FORCE_AOMBOOL_TREEWRITER
-#include "aom_dsp/dkboolwriter.h"
-#define tree_writer aom_dk_writer
-#define tree_bit_write aom_dk_write
-#else
 #include "aom_dsp/bitwriter.h"
-#define tree_writer aom_writer
-#define tree_bit_write aom_write
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,24 +29,22 @@ struct av1_token {
 
 void av1_tokens_from_tree(struct av1_token *, const aom_tree_index *);
 
-static INLINE void av1_write_tree(tree_writer *w, const aom_tree_index *tree,
+static INLINE void av1_write_tree(aom_writer *w, const aom_tree_index *tree,
                                   const aom_prob *probs, int bits, int len,
                                   aom_tree_index i) {
   do {
     const int bit = (bits >> --len) & 1;
-    tree_bit_write(w, bit, probs[i >> 1]);
+    aom_write(w, bit, probs[i >> 1]);
     i = tree[i + bit];
   } while (len);
 }
 
-static INLINE void av1_write_token(tree_writer *w, const aom_tree_index *tree,
+static INLINE void av1_write_token(aom_writer *w, const aom_tree_index *tree,
                                    const aom_prob *probs,
                                    const struct av1_token *token) {
   av1_write_tree(w, tree, probs, token->value, token->len, 0);
 }
 
-#undef tree_writer
-#undef tree_bit_write
 #ifdef __cplusplus
 }  // extern "C"
 #endif
