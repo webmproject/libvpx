@@ -22,6 +22,8 @@
 #include "aom_dsp/aom_dsp_common.h"
 #include "av1/common/mv.h"
 
+#define MAX_PARAMDIM 9
+
 typedef void (*ProjectPointsFunc)(int16_t *mat, int *points, int *proj,
                                   const int n, const int stride_points,
                                   const int stride_proj,
@@ -67,4 +69,9 @@ void av1_warp_plane(WarpedMotionParams *wm,
 // Integerize model into the WarpedMotionParams structure
 void av1_integerize_model(const double *model, TransformationType wmtype,
                           WarpedMotionParams *wm);
+
+int find_translation(const int np, double *pts1, double *pts2, double *mat);
+int find_rotzoom(const int np, double *pts1, double *pts2, double *mat);
+int find_affine(const int np, double *pts1, double *pts2, double *mat);
+int find_homography(const int np, double *pts1, double *pts2, double *mat);
 #endif  // AV1_COMMON_WARPED_MOTION_H_
