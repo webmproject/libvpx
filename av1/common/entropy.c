@@ -2801,7 +2801,7 @@ void av1_model_to_full_probs(const aom_prob *model, aom_prob *full) {
 }
 
 #if CONFIG_ANS
-void av1_build_token_cdfs(const aom_prob *pdf_model, rans_dec_lut cdf) {
+void av1_build_token_cdfs(const aom_prob *pdf_model, rans_lut cdf) {
   AnsP10 pdf_tab[ENTROPY_TOKENS - 1];
   assert(pdf_model[2] != 0);
   // TODO(aconverse): Investigate making the precision of the zero and EOB tree

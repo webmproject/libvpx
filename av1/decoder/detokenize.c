@@ -265,10 +265,10 @@ static int decode_coefs_ans(const MACROBLOCKD *const xd, PLANE_TYPE type,
   const int tx_size_ctx = txsize_sqr_map[tx_size];
   const aom_prob(*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       fc->coef_probs[tx_size_ctx][type][ref];
-  const rans_dec_lut(*coef_cdfs)[COEFF_CONTEXTS] =
+  const rans_lut(*coef_cdfs)[COEFF_CONTEXTS] =
       fc->coef_cdfs[tx_size_ctx][type][ref];
   const aom_prob *prob;
-  const rans_dec_lut *cdf;
+  const rans_lut *cdf;
   unsigned int(*coef_counts)[COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1];
   unsigned int(*eob_branch_count)[COEFF_CONTEXTS];
   uint8_t token_cache[MAX_TX_SQUARE];

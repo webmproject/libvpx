@@ -192,7 +192,7 @@ extern const aom_prob av1_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES];
 extern const AnsP10 av1_pareto8_token_probs[COEFF_PROB_MODELS]
                                            [ENTROPY_TOKENS - 2];
 
-typedef rans_dec_lut coeff_cdf_model[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS];
+typedef rans_lut coeff_cdf_model[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS];
 #endif  // CONFIG_ANS
 
 typedef aom_prob av1_coeff_probs_model[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS]

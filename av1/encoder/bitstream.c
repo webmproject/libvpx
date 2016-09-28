@@ -738,7 +738,7 @@ static void pack_mb_tokens(struct BufAnsCoder *ans, const TOKENEXTRA **tp,
 
     if (t != EOB_TOKEN) {
       struct rans_sym s;
-      const rans_dec_lut *token_cdf = p->token_cdf;
+      const rans_lut *token_cdf = p->token_cdf;
       assert(token_cdf);
       s.cum_prob = (*token_cdf)[t - ZERO_TOKEN];
       s.prob = (*token_cdf)[t - ZERO_TOKEN + 1] - s.cum_prob;
