@@ -145,7 +145,7 @@ static void cost(int *costs, aom_tree tree, const aom_prob *probs, int i,
 
 #if CONFIG_ANS
 void av1_cost_tokens_ans(int *costs, const aom_prob *tree_probs,
-                         const rans_dec_lut token_cdf, int skip_eob) {
+                         const rans_lut token_cdf, int skip_eob) {
   int c_tree = 0;  // Cost of the "tree" nodes EOB and ZERO.
   int i;
   costs[EOB_TOKEN] = av1_cost_bit(tree_probs[0], 0);

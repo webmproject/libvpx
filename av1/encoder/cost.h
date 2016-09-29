@@ -60,7 +60,7 @@ void av1_cost_tokens_skip(int *costs, const aom_prob *probs, aom_tree tree);
 
 #if CONFIG_ANS
 void av1_cost_tokens_ans(int *costs, const aom_prob *tree_probs,
-                         const rans_dec_lut token_cdf, int skip_eob);
+                         const rans_lut token_cdf, int skip_eob);
 #endif
 
 #ifdef __cplusplus

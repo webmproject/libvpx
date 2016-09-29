@@ -39,8 +39,6 @@ typedef uint16_t AnsP10;
 // This is now just a boring cdf. It starts with an explicit zero.
 // TODO(aconverse): Remove starting zero.
 typedef uint16_t rans_lut[16];
-// TODO(aconverse): Update callers and remove this shim
-#define rans_dec_lut rans_lut
 
 void aom_rans_build_cdf_from_pdf(const AnsP10 token_probs[], rans_lut cdf_tab);
 
