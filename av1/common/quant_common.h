@@ -70,7 +70,10 @@ void av1_get_dequant_val_nuq(int q, int qindex, int band, tran_low_t *dq,
 tran_low_t av1_dequant_abscoeff_nuq(int v, int q, const tran_low_t *dq);
 tran_low_t av1_dequant_coeff_nuq(int v, int q, const tran_low_t *dq);
 
-static INLINE int get_dq_profile_from_ctx(int q_ctx) {
+static INLINE int get_dq_profile_from_ctx(int q_ctx, int is_inter,
+                                          PLANE_TYPE plane_type) {
+  if (plane_type == PLANE_TYPE_UV) return 0;
+  if (!is_inter) return QUANT_PROFILES - 1;
   return AOMMIN(q_ctx, QUANT_PROFILES - 1);
 }
 #endif  // CONFIG_NEW_QUANT
