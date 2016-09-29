@@ -33,6 +33,7 @@
 #include "vp8/common/reconintra.h"
 #include "vp8/common/swapyv12buffer.h"
 #include "vp8/common/threading.h"
+#include "vpx_ports/system_state.h"
 #include "vpx_ports/vpx_timer.h"
 #if ARCH_ARM
 #include "vpx_ports/arm.h"
@@ -2296,7 +2297,7 @@ static uint64_t calc_plane_error(unsigned char *orig, int orig_stride,
     recon += recon_stride;
   }
 
-  vp8_clear_system_state();
+  vpx_clear_system_state();
   return total_sse;
 }
 
@@ -2691,7 +2692,7 @@ static int decide_key_frame(VP8_COMP *cpi) {
   if (cpi->Speed > 11) return 0;
 
   /* Clear down mmx registers */
-  vp8_clear_system_state();
+  vpx_clear_system_state();
 
   if ((cpi->compressor_speed == 2) && (cpi->Speed >= 5) && (cpi->sf.RD == 0)) {
     double change = 1.0 *
@@ -3129,7 +3130,7 @@ void vp8_loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm) {
   } else {
     struct vpx_usec_timer timer;
 
-    vp8_clear_system_state();
+    vpx_clear_system_state();
 
     vpx_usec_timer_start(&timer);
     if (cpi->sf.auto_filter == 0) {
@@ -3217,7 +3218,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
   int drop_mark25 = drop_mark / 8;
 
   /* Clear down mmx registers to allow floating point in what follows */
-  vp8_clear_system_state();
+  vpx_clear_system_state();
 
   if (cpi->force_next_frame_intra) {
     cm->frame_type = KEY_FRAME; /* delayed intra frame */
@@ -3576,7 +3577,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
    * There is some odd behavior for one pass here that needs attention.
    */
   if ((cpi->pass == 2) || (cpi->ni_frames > 150)) {
-    vp8_clear_system_state();
+    vpx_clear_system_state();
 
     Q = cpi->active_worst_quality;
 
@@ -3802,7 +3803,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
 #endif
 
   do {
-    vp8_clear_system_state();
+    vpx_clear_system_state();
 
     vp8_set_quantizer(cpi, Q);
 
@@ -3935,7 +3936,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
     cpi->projected_frame_size =
         (cpi->projected_frame_size > 0) ? cpi->projected_frame_size : 0;
 #endif
-    vp8_clear_system_state();
+    vpx_clear_system_state();
 
     /* Test to see if the stats generated for this frame indicate that
      * we should have coded a key frame (assuming that we didn't)!
@@ -3979,7 +3980,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
 #endif
     }
 
-    vp8_clear_system_state();
+    vpx_clear_system_state();
 
     if (frame_over_shoot_limit == 0) frame_over_shoot_limit = 1;
 
@@ -4549,7 +4550,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
     {
         FILE *f = fopen("tmp.stt", "a");
 
-        vp8_clear_system_state();
+        vpx_clear_system_state();
 
         if (cpi->twopass.total_left_stats.coded_error != 0.0)
             fprintf(f, "%10d %10d %10d %10d %10d %10"PRId64" %10"PRId64
@@ -4779,7 +4780,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
 
   if (setjmp(cpi->common.error.jmp)) {
     cpi->common.error.setjmp = 0;
-    vp8_clear_system_state();
+    vpx_clear_system_state();
     return VPX_CODEC_CORRUPT_FRAME;
   }
 
@@ -4986,7 +4987,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
   *size = 0;
 
   /* Clear down mmx registers */
-  vp8_clear_system_state();
+  vpx_clear_system_state();
 
   cm->frame_type = INTER_FRAME;
   cm->frame_flags = *frame_flags;
@@ -5139,7 +5140,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
 
           vp8_deblock(cm, cm->frame_to_show, &cm->post_proc_buffer,
                       cm->filter_level * 10 / 6, 1, 0);
-          vp8_clear_system_state();
+          vpx_clear_system_state();
 
           ye = calc_plane_error(orig->y_buffer, orig->y_stride, pp->y_buffer,
                                 pp->y_stride, y_width, y_height);
@@ -5249,7 +5250,7 @@ int vp8_get_preview_raw_frame(VP8_COMP *cpi, YV12_BUFFER_CONFIG *dest,
     }
 
 #endif
-    vp8_clear_system_state();
+    vpx_clear_system_state();
     return ret;
   }
 }

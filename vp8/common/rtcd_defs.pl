@@ -19,13 +19,6 @@ EOF
 forward_decls qw/vp8_common_forward_decls/;
 
 #
-# system state
-#
-add_proto qw/void vp8_clear_system_state/, "";
-specialize qw/vp8_clear_system_state mmx/;
-$vp8_clear_system_state_mmx=vpx_reset_mmx_state;
-
-#
 # Dequant
 #
 add_proto qw/void vp8_dequantize_b/, "struct blockd*, short *dqc";
@@ -33,34 +26,27 @@ specialize qw/vp8_dequantize_b mmx neon msa/;
 
 add_proto qw/void vp8_dequant_idct_add/, "short *input, short *dq, unsigned char *output, int stride";
 specialize qw/vp8_dequant_idct_add mmx neon dspr2 msa/;
-$vp8_dequant_idct_add_dspr2=vp8_dequant_idct_add_dspr2;
 
 add_proto qw/void vp8_dequant_idct_add_y_block/, "short *q, short *dq, unsigned char *dst, int stride, char *eobs";
 specialize qw/vp8_dequant_idct_add_y_block mmx sse2 neon dspr2 msa/;
-$vp8_dequant_idct_add_y_block_dspr2=vp8_dequant_idct_add_y_block_dspr2;
 
 add_proto qw/void vp8_dequant_idct_add_uv_block/, "short *q, short *dq, unsigned char *dst_u, unsigned char *dst_v, int stride, char *eobs";
 specialize qw/vp8_dequant_idct_add_uv_block mmx sse2 neon dspr2 msa/;
-$vp8_dequant_idct_add_y_block_dspr2=vp8_dequant_idct_add_y_block_dspr2;
 
 #
 # Loopfilter
 #
 add_proto qw/void vp8_loop_filter_mbv/, "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi";
 specialize qw/vp8_loop_filter_mbv mmx sse2 neon dspr2 msa/;
-$vp8_loop_filter_mbv_dspr2=vp8_loop_filter_mbv_dspr2;
 
 add_proto qw/void vp8_loop_filter_bv/, "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi";
 specialize qw/vp8_loop_filter_bv mmx sse2 neon dspr2 msa/;
-$vp8_loop_filter_bv_dspr2=vp8_loop_filter_bv_dspr2;
 
 add_proto qw/void vp8_loop_filter_mbh/, "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi";
 specialize qw/vp8_loop_filter_mbh mmx sse2 neon dspr2 msa/;
-$vp8_loop_filter_mbh_dspr2=vp8_loop_filter_mbh_dspr2;
 
 add_proto qw/void vp8_loop_filter_bh/, "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi";
 specialize qw/vp8_loop_filter_bh mmx sse2 neon dspr2 msa/;
-$vp8_loop_filter_bh_dspr2=vp8_loop_filter_bh_dspr2;
 
 
 add_proto qw/void vp8_loop_filter_simple_mbv/, "unsigned char *y, int ystride, const unsigned char *blimit";
@@ -101,38 +87,30 @@ $vp8_loop_filter_simple_bh_msa=vp8_loop_filter_bhs_msa;
 #idct16
 add_proto qw/void vp8_short_idct4x4llm/, "short *input, unsigned char *pred, int pitch, unsigned char *dst, int dst_stride";
 specialize qw/vp8_short_idct4x4llm mmx neon dspr2 msa/;
-$vp8_short_idct4x4llm_dspr2=vp8_short_idct4x4llm_dspr2;
 
 #iwalsh1
 add_proto qw/void vp8_short_inv_walsh4x4_1/, "short *input, short *output";
 specialize qw/vp8_short_inv_walsh4x4_1 dspr2/;
-$vp8_short_inv_walsh4x4_1_dspr2=vp8_short_inv_walsh4x4_1_dspr2;
-# no asm yet
 
 #iwalsh16
 add_proto qw/void vp8_short_inv_walsh4x4/, "short *input, short *output";
 specialize qw/vp8_short_inv_walsh4x4 mmx sse2 neon dspr2 msa/;
-$vp8_short_inv_walsh4x4_dspr2=vp8_short_inv_walsh4x4_dspr2;
 
 #idct1_scalar_add
 add_proto qw/void vp8_dc_only_idct_add/, "short input, unsigned char *pred, int pred_stride, unsigned char *dst, int dst_stride";
 specialize qw/vp8_dc_only_idct_add mmx neon dspr2 msa/;
-$vp8_dc_only_idct_add_dspr2=vp8_dc_only_idct_add_dspr2;
 
 #
 # RECON
 #
 add_proto qw/void vp8_copy_mem16x16/, "unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch";
 specialize qw/vp8_copy_mem16x16 mmx sse2 neon dspr2 msa/;
-$vp8_copy_mem16x16_dspr2=vp8_copy_mem16x16_dspr2;
 
 add_proto qw/void vp8_copy_mem8x8/, "unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch";
 specialize qw/vp8_copy_mem8x8 mmx neon dspr2 msa/;
-$vp8_copy_mem8x8_dspr2=vp8_copy_mem8x8_dspr2;
 
 add_proto qw/void vp8_copy_mem8x4/, "unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch";
 specialize qw/vp8_copy_mem8x4 mmx neon dspr2 msa/;
-$vp8_copy_mem8x4_dspr2=vp8_copy_mem8x4_dspr2;
 
 #
 # Postproc
@@ -140,13 +118,10 @@ $vp8_copy_mem8x4_dspr2=vp8_copy_mem8x4_dspr2;
 if (vpx_config("CONFIG_POSTPROC") eq "yes") {
 
     add_proto qw/void vp8_blend_mb_inner/, "unsigned char *y, unsigned char *u, unsigned char *v, int y1, int u1, int v1, int alpha, int stride";
-    # no asm yet
 
     add_proto qw/void vp8_blend_mb_outer/, "unsigned char *y, unsigned char *u, unsigned char *v, int y1, int u1, int v1, int alpha, int stride";
-    # no asm yet
 
     add_proto qw/void vp8_blend_b/, "unsigned char *y, unsigned char *u, unsigned char *v, int y1, int u1, int v1, int alpha, int stride";
-    # no asm yet
 
     add_proto qw/void vp8_filter_by_weight16x16/, "unsigned char *src, int src_stride, unsigned char *dst, int dst_stride, int src_weight";
     specialize qw/vp8_filter_by_weight16x16 sse2 msa/;
@@ -155,7 +130,6 @@ if (vpx_config("CONFIG_POSTPROC") eq "yes") {
     specialize qw/vp8_filter_by_weight8x8 sse2 msa/;
 
     add_proto qw/void vp8_filter_by_weight4x4/, "unsigned char *src, int src_stride, unsigned char *dst, int dst_stride, int src_weight";
-    # no asm yet
 }
 
 #
@@ -163,19 +137,15 @@ if (vpx_config("CONFIG_POSTPROC") eq "yes") {
 #
 add_proto qw/void vp8_sixtap_predict16x16/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
 specialize qw/vp8_sixtap_predict16x16 mmx sse2 ssse3 neon dspr2 msa/;
-$vp8_sixtap_predict16x16_dspr2=vp8_sixtap_predict16x16_dspr2;
 
 add_proto qw/void vp8_sixtap_predict8x8/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
 specialize qw/vp8_sixtap_predict8x8 mmx sse2 ssse3 neon dspr2 msa/;
-$vp8_sixtap_predict8x8_dspr2=vp8_sixtap_predict8x8_dspr2;
 
 add_proto qw/void vp8_sixtap_predict8x4/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
 specialize qw/vp8_sixtap_predict8x4 mmx sse2 ssse3 neon dspr2 msa/;
-$vp8_sixtap_predict8x4_dspr2=vp8_sixtap_predict8x4_dspr2;
 
 add_proto qw/void vp8_sixtap_predict4x4/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
 specialize qw/vp8_sixtap_predict4x4 mmx ssse3 neon dspr2 msa/;
-$vp8_sixtap_predict4x4_dspr2=vp8_sixtap_predict4x4_dspr2;
 
 add_proto qw/void vp8_bilinear_predict16x16/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
 specialize qw/vp8_bilinear_predict16x16 mmx sse2 ssse3 neon msa/;

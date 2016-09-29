@@ -29,6 +29,7 @@
 #include "./vpx_scale_rtcd.h"
 #include "vpx_scale/vpx_scale.h"
 #include "vp8/common/systemdependent.h"
+#include "vpx_ports/system_state.h"
 #include "vpx_ports/vpx_once.h"
 #include "vpx_ports/vpx_timer.h"
 #include "detokenize.h"
@@ -352,7 +353,7 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, size_t size,
     goto decode_exit;
   }
 
-  vp8_clear_system_state();
+  vpx_clear_system_state();
 
   if (cm->show_frame) {
     cm->current_video_frame++;
@@ -383,7 +384,7 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, size_t size,
 
 decode_exit:
   pbi->common.error.setjmp = 0;
-  vp8_clear_system_state();
+  vpx_clear_system_state();
   return retcode;
 }
 int vp8dx_get_raw_frame(VP8D_COMP *pbi, YV12_BUFFER_CONFIG *sd,
@@ -416,7 +417,7 @@ int vp8dx_get_raw_frame(VP8D_COMP *pbi, YV12_BUFFER_CONFIG *sd,
   }
 
 #endif /*!CONFIG_POSTPROC*/
-  vp8_clear_system_state();
+  vpx_clear_system_state();
   return ret;
 }
 
@@ -447,7 +448,7 @@ int vp8_create_decoder_instances(struct frame_buffers *fb, VP8D_CONFIG *oxcf) {
     if (setjmp(fb->pbi[0]->common.error.jmp)) {
       vp8_remove_decoder_instances(fb);
       memset(fb->pbi, 0, sizeof(fb->pbi) / sizeof(fb->pbi[0]));
-      vp8_clear_system_state();
+      vpx_clear_system_state();
       return VPX_CODEC_ERROR;
     }
 

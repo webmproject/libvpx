@@ -12,6 +12,7 @@
 #include "encodemv.h"
 #include "vp8/common/entropymode.h"
 #include "vp8/common/systemdependent.h"
+#include "vpx_ports/system_state.h"
 
 #include <math.h>
 
@@ -126,7 +127,7 @@ void vp8_build_component_cost_table(int *mvcost[2], const MV_CONTEXT *mvc,
   unsigned int cost0 = 0;
   unsigned int cost1 = 0;
 
-  vp8_clear_system_state();
+  vpx_clear_system_state();
 
   i = 1;
 

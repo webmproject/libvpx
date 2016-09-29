@@ -24,6 +24,7 @@
 #include "decoder/onyxd_int.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/system_state.h"
 #if CONFIG_ERROR_CONCEALMENT
 #include "decoder/error_concealment.h"
 #endif
@@ -365,7 +366,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
            * reallocation is attempted on resync. */
           ctx->si.w = 0;
           ctx->si.h = 0;
-          vp8_clear_system_state();
+          vpx_clear_system_state();
           /* same return value as used in vp8dx_receive_compressed_data */
           return -1;
         }

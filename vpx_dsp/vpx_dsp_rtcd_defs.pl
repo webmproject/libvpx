@@ -11,12 +11,6 @@ EOF
 }
 forward_decls qw/vpx_dsp_forward_decls/;
 
-# optimizations which depend on multiple features
-$avx2_ssse3 = '';
-if ((vpx_config("HAVE_AVX2") eq "yes") && (vpx_config("HAVE_SSSE3") eq "yes")) {
-  $avx2_ssse3 = 'avx2';
-}
-
 # functions that are 64 bit only.
 $mmx_x86_64 = $sse2_x86_64 = $ssse3_x86_64 = $avx_x86_64 = $avx2_x86_64 = '';
 if ($opts{arch} eq "x86_64") {
@@ -437,13 +431,13 @@ add_proto qw/void vpx_convolve_avg/, "const uint8_t *src, ptrdiff_t src_stride, 
 specialize qw/vpx_convolve_avg neon dspr2 msa sse2/;
 
 add_proto qw/void vpx_convolve8/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
-specialize qw/vpx_convolve8 sse2 ssse3 neon dspr2 msa/, "$avx2_ssse3";
+specialize qw/vpx_convolve8 sse2 ssse3 avx2 neon dspr2 msa/;
 
 add_proto qw/void vpx_convolve8_horiz/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
-specialize qw/vpx_convolve8_horiz sse2 ssse3 neon dspr2 msa/, "$avx2_ssse3";
+specialize qw/vpx_convolve8_horiz sse2 ssse3 avx2 neon dspr2 msa/;
 
 add_proto qw/void vpx_convolve8_vert/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
-specialize qw/vpx_convolve8_vert sse2 ssse3 neon dspr2 msa/, "$avx2_ssse3";
+specialize qw/vpx_convolve8_vert sse2 ssse3 avx2 neon dspr2 msa/;
 
 add_proto qw/void vpx_convolve8_avg/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
 specialize qw/vpx_convolve8_avg sse2 ssse3 neon dspr2 msa/;
