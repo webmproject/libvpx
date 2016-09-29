@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c5be8336_60bb8b2e",
+        "filename": "vpx_dsp/arm/vpx_convolve_avg_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-29T01:46:53Z",
+      "side": 1,
+      "message": "these need to be initialized when doing lane loads; you may want to localize the definition of these variables",
+      "range": {
+        "startLine": 37,
+        "startChar": 67,
+        "endLine": 37,
+        "endChar": 70
+      },
+      "revId": "1a3e4745e633ae7c15cda79fe5abe7bb0c6bca0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
