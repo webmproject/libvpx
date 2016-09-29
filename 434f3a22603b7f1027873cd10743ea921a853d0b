@@ -16,6 +16,24 @@
       "revId": "434f3a22603b7f1027873cd10743ea921a853d0b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "828ac1d9_4a6de7f5",
+        "filename": "av1/common/x86/av1_convolve_filters_ssse3.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-09-29T23:16:49Z",
+      "side": 1,
+      "message": "\u003e why are these public? if they\u0027re meant to be shared they belong in\n \u003e the filters.c\n\nnm I see they\u0027re shared in ssse3 code.",
+      "parentUuid": "828ac1d9_aa9ef304",
+      "revId": "434f3a22603b7f1027873cd10743ea921a853d0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
