@@ -34,13 +34,13 @@ void vpx_convolve8_neon(const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
    * the temp buffer which has lots of extra room and is subsequently discarded
    * this is safe if somewhat less than ideal.
    */
-  vpx_convolve8_horiz_neon(src - src_stride * 3, src_stride, temp, 64, filter_x,
+  vpx_convolve8_horiz_neon(src - src_stride * 3, src_stride, temp, w, filter_x,
                            x_step_q4, filter_y, y_step_q4, w,
                            intermediate_height);
 
   /* Step into the temp buffer 3 lines to get the actual frame data */
-  vpx_convolve8_vert_neon(temp + 64 * 3, 64, dst, dst_stride, filter_x,
-                          x_step_q4, filter_y, y_step_q4, w, h);
+  vpx_convolve8_vert_neon(temp + w * 3, w, dst, dst_stride, filter_x, x_step_q4,
+                          filter_y, y_step_q4, w, h);
 }
 
 void vpx_convolve8_avg_neon(const uint8_t *src, ptrdiff_t src_stride,
@@ -57,9 +57,9 @@ void vpx_convolve8_avg_neon(const uint8_t *src, ptrdiff_t src_stride,
   /* This implementation has the same issues as above. In addition, we only want
    * to average the values after both passes.
    */
-  vpx_convolve8_horiz_neon(src - src_stride * 3, src_stride, temp, 64, filter_x,
+  vpx_convolve8_horiz_neon(src - src_stride * 3, src_stride, temp, w, filter_x,
                            x_step_q4, filter_y, y_step_q4, w,
                            intermediate_height);
-  vpx_convolve8_avg_vert_neon(temp + 64 * 3, 64, dst, dst_stride, filter_x,
+  vpx_convolve8_avg_vert_neon(temp + w * 3, w, dst, dst_stride, filter_x,
                               x_step_q4, filter_y, y_step_q4, w, h);
 }
