@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "c5be8336_05d6294a",
+        "filename": "vpx_dsp/arm/vpx_convolve8_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-09-29T00:10:12Z",
+      "side": 1,
+      "message": "Maybe. But there is no vmul_lane_s16(), so the splitting needs one more 0 initialization. Will test later.",
+      "parentUuid": "452ff370_8745e66f",
+      "revId": "b3cf757f4e1cd8dc2ad878076be560ba4e64cbbc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c5be8336_e2e02389",
         "filename": "vpx_dsp/arm/vpx_convolve8_neon.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-09-28T22:49:31Z",
       "side": 1,
       "message": "in each case like this add an assert for dst alignment -\u003e assert(!(dst \u0026 3))",
+      "revId": "b3cf757f4e1cd8dc2ad878076be560ba4e64cbbc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5be8336_e5daed6d",
+        "filename": "vpx_dsp/arm/vpx_convolve8_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-09-29T00:10:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c5be8336_e2e02389",
       "revId": "b3cf757f4e1cd8dc2ad878076be560ba4e64cbbc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
