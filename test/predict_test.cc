@@ -298,10 +298,7 @@ INSTANTIATE_TEST_CASE_P(
 #if HAVE_MMX
 INSTANTIATE_TEST_CASE_P(
     MMX, SixtapPredictTest,
-    ::testing::Values(make_tuple(16, 16, &vp8_sixtap_predict16x16_mmx),
-                      make_tuple(8, 8, &vp8_sixtap_predict8x8_mmx),
-                      make_tuple(8, 4, &vp8_sixtap_predict8x4_mmx),
-                      make_tuple(4, 4, &vp8_sixtap_predict4x4_mmx)));
+    ::testing::Values(make_tuple(4, 4, &vp8_sixtap_predict4x4_mmx)));
 #endif
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
@@ -353,9 +350,7 @@ INSTANTIATE_TEST_CASE_P(
 #if HAVE_MMX
 INSTANTIATE_TEST_CASE_P(
     MMX, BilinearPredictTest,
-    ::testing::Values(make_tuple(16, 16, &vp8_bilinear_predict16x16_mmx),
-                      make_tuple(8, 8, &vp8_bilinear_predict8x8_mmx),
-                      make_tuple(8, 4, &vp8_bilinear_predict8x4_mmx),
+    ::testing::Values(make_tuple(8, 4, &vp8_bilinear_predict8x4_mmx),
                       make_tuple(4, 4, &vp8_bilinear_predict4x4_mmx)));
 #endif
 #if HAVE_SSE2
