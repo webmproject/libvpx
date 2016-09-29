@@ -20,19 +20,19 @@ DSP_SRCS-$(ARCH_X86)$(ARCH_X86_64)   += x86/synonyms.h
 DSP_SRCS-yes += prob.h
 DSP_SRCS-yes += prob.c
 DSP_SRCS-$(CONFIG_ANS) += ans.h
+DSP_SRCS-$(CONFIG_ANS) += ans.c
 
 ifeq ($(CONFIG_ENCODERS),yes)
+DSP_SRCS-$(CONFIG_ANS) += answriter.h
 DSP_SRCS-yes += bitwriter.h
 DSP_SRCS-yes += dkboolwriter.h
 DSP_SRCS-yes += dkboolwriter.c
 DSP_SRCS-yes += bitwriter_buffer.c
 DSP_SRCS-yes += bitwriter_buffer.h
-DSP_SRCS-$(CONFIG_ANS) += buf_ans.h
-DSP_SRCS-$(CONFIG_ANS) += buf_ans.c
-DSP_SRCS-$(CONFIG_ANS) += divide.h
-DSP_SRCS-$(CONFIG_ANS) += divide.c
 DSP_SRCS-yes += psnr.c
 DSP_SRCS-yes += psnr.h
+DSP_SRCS-$(CONFIG_ANS) += buf_ans.h
+DSP_SRCS-$(CONFIG_ANS) += buf_ans.c
 DSP_SRCS-$(CONFIG_INTERNAL_STATS) += ssim.c
 DSP_SRCS-$(CONFIG_INTERNAL_STATS) += ssim.h
 DSP_SRCS-$(CONFIG_INTERNAL_STATS) += psnrhvs.c
@@ -40,6 +40,7 @@ DSP_SRCS-$(CONFIG_INTERNAL_STATS) += fastssim.c
 endif
 
 ifeq ($(CONFIG_DECODERS),yes)
+DSP_SRCS-$(CONFIG_ANS) += ansreader.h
 DSP_SRCS-yes += bitreader.h
 DSP_SRCS-yes += dkboolreader.h
 DSP_SRCS-yes += dkboolreader.c

@@ -18,6 +18,10 @@
 #include "aom_mem/aom_mem.h"
 #include "aom_util/endian_inl.h"
 
+static INLINE int aom_dk_read_bit(struct aom_dk_reader *r) {
+  return aom_dk_read(r, 128);  // aom_prob_half
+}
+
 int aom_dk_reader_init(struct aom_dk_reader *r, const uint8_t *buffer,
                        size_t size, aom_decrypt_cb decrypt_cb,
                        void *decrypt_state) {

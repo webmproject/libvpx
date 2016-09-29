@@ -12,6 +12,10 @@
 
 #include "./dkboolwriter.h"
 
+static INLINE void aom_dk_write_bit(aom_dk_writer *w, int bit) {
+  aom_dk_write(w, bit, 128);  // aom_prob_half
+}
+
 void aom_dk_start_encode(aom_dk_writer *br, uint8_t *source) {
   br->lowvalue = 0;
   br->range = 255;

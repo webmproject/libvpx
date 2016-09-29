@@ -97,16 +97,6 @@ static INLINE void aom_dk_write(aom_dk_writer *br, int bit, int probability) {
   br->range = range;
 }
 
-static INLINE void aom_dk_write_bit(aom_dk_writer *w, int bit) {
-  aom_dk_write(w, bit, 128);  // aom_prob_half
-}
-
-static INLINE void aom_dk_write_literal(aom_dk_writer *w, int data, int bits) {
-  int bit;
-
-  for (bit = bits - 1; bit >= 0; bit--) aom_dk_write_bit(w, 1 & (data >> bit));
-}
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif

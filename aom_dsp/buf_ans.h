@@ -1,23 +1,25 @@
 /*
- *  Copyright (c) 2016 The WebM project authors. All Rights Reserved.
+ * Copyright (c) 2016, Alliance for Open Media. All rights reserved
  *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree. An additional intellectual property rights grant can be found
- *  in the file PATENTS.  All contributing project authors may
- *  be found in the AUTHORS file in the root of the source tree.
+ * This source code is subject to the terms of the BSD 2 Clause License and
+ * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+ * was not distributed with this source code in the LICENSE file, you can
+ * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * Media Patent License 1.0 was not distributed with this source code in the
+ * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 
 #ifndef AOM_DSP_BUF_ANS_H_
 #define AOM_DSP_BUF_ANS_H_
 // Buffered forward ANS writer.
-// Symbols are written to the writer in forward (decode) order and serialzed
+// Symbols are written to the writer in forward (decode) order and serialized
 // backwards due to ANS's stack like behavior.
 
 #include <assert.h>
 #include "./aom_config.h"
 #include "aom/aom_integer.h"
 #include "aom_dsp/ans.h"
+#include "aom_dsp/answriter.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,11 +28,14 @@ extern "C" {
 #define ANS_METHOD_UABS 0
 #define ANS_METHOD_RANS 1
 
+struct aom_internal_error_info *error;
+
 struct buffered_ans_symbol {
-  uint8_t method;  // one of ANS_METHOD_UABS or ANS_METHOD_RANS
-  // TODO(aconverse): Should be possible to write this interms of start for ABS
-  AnsP10 val_start;  // Boolean value for ABS, start in symbol cycle for Rans
-  AnsP10 prob;       // Probability of this symbol
+  unsigned int method : 1;  // one of ANS_METHOD_UABS or ANS_METHOD_RANS
+  // TODO(aconverse): Should be possible to write this in terms of start for ABS
+  unsigned int val_start : RANS_PROB_BITS;  // Boolean value for ABS
+                                            // start in symbol cycle for Rans
+  unsigned int prob : RANS_PROB_BITS;       // Probability of this symbol
 };
 
 struct BufAnsCoder {
