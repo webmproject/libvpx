@@ -11,9 +11,9 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
-;int vp8_block_error_xmm(short *coeff_ptr,  short *dcoef_ptr)
-global sym(vp8_block_error_xmm) PRIVATE
-sym(vp8_block_error_xmm):
+;int vp8_block_error_sse2(short *coeff_ptr,  short *dcoef_ptr)
+global sym(vp8_block_error_sse2) PRIVATE
+sym(vp8_block_error_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 2
@@ -202,9 +202,9 @@ sym(vp8_mbblock_error_mmx_impl):
     ret
 
 
-;int vp8_mbblock_error_xmm_impl(short *coeff_ptr, short *dcoef_ptr, int dc);
-global sym(vp8_mbblock_error_xmm_impl) PRIVATE
-sym(vp8_mbblock_error_xmm_impl):
+;int vp8_mbblock_error_sse2_impl(short *coeff_ptr, short *dcoef_ptr, int dc);
+global sym(vp8_mbblock_error_sse2_impl) PRIVATE
+sym(vp8_mbblock_error_sse2_impl):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 3
@@ -329,9 +329,9 @@ sym(vp8_mbuverror_mmx_impl):
     ret
 
 
-;int vp8_mbuverror_xmm_impl(short *s_ptr, short *d_ptr);
-global sym(vp8_mbuverror_xmm_impl) PRIVATE
-sym(vp8_mbuverror_xmm_impl):
+;int vp8_mbuverror_sse2_impl(short *s_ptr, short *d_ptr);
+global sym(vp8_mbuverror_sse2_impl) PRIVATE
+sym(vp8_mbuverror_sse2_impl):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 2
