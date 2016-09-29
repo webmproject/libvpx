@@ -11,6 +11,8 @@
 #ifndef VPX_DSP_PROB_H_
 #define VPX_DSP_PROB_H_
 
+#include <assert.h>
+
 #include "./vpx_config.h"
 #include "./vpx_dsp_common.h"
 
@@ -44,7 +46,7 @@ typedef int8_t vpx_tree_index;
 typedef const vpx_tree_index vpx_tree[];
 
 static INLINE vpx_prob get_prob(unsigned int num, unsigned int den) {
-  if (den == 0) return 128u;
+  assert(den != 0);
   {
     const int p = (int)(((int64_t)num * 256 + (den >> 1)) / den);
     // (p > 255) ? 255 : (p < 1) ? 1 : p;
@@ -54,7 +56,9 @@ static INLINE vpx_prob get_prob(unsigned int num, unsigned int den) {
 }
 
 static INLINE vpx_prob get_binary_prob(unsigned int n0, unsigned int n1) {
-  return get_prob(n0, n0 + n1);
+  const unsigned int den = n0 + n1;
+  if (den == 0) return 128u;
+  return get_prob(n0, den);
 }
 
 /* This function assumes prob1 and prob2 are already within [1,255] range. */
