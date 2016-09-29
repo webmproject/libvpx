@@ -406,7 +406,7 @@ static void write_selected_tx_size(const AV1_COMMON *cm, const MACROBLOCKD *xd,
     const TX_SIZE coded_tx_size = txsize_sqr_up_map[tx_size];
 
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
-    assert(IMPLIES(is_rect_tx(tx_size), is_rect_tx_allowed(mbmi)));
+    assert(IMPLIES(is_rect_tx(tx_size), is_rect_tx_allowed(xd, mbmi)));
     assert(
         IMPLIES(is_rect_tx(tx_size), tx_size == max_txsize_rect_lookup[bsize]));
 #endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
@@ -1132,7 +1132,7 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
       int idx, idy;
 
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
-      if (is_rect_tx_allowed(mbmi)) {
+      if (is_rect_tx_allowed(xd, mbmi)) {
         int tx_size_cat = inter_tx_size_cat_lookup[bsize];
 
         aom_write(w, is_rect_tx(mbmi->tx_size),

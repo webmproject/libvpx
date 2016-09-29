@@ -5141,14 +5141,14 @@ static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
                                        : intra_tx_size_cat_lookup[bsize];
       const TX_SIZE coded_tx_size = txsize_sqr_up_map[mbmi->tx_size];
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
-      assert(IMPLIES(is_rect_tx(mbmi->tx_size), is_rect_tx_allowed(mbmi)));
+      assert(IMPLIES(is_rect_tx(mbmi->tx_size), is_rect_tx_allowed(xd, mbmi)));
 #endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
 #if CONFIG_VAR_TX
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
-      if (is_rect_tx_allowed(mbmi)) {
+      if (is_rect_tx_allowed(xd, mbmi)) {
         td->counts->rect_tx[tx_size_cat][is_rect_tx(mbmi->tx_size)]++;
       }
-      if (!is_rect_tx_allowed(mbmi) || !is_rect_tx(mbmi->tx_size)) {
+      if (!is_rect_tx_allowed(xd, mbmi) || !is_rect_tx(mbmi->tx_size)) {
 #endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
         if (is_inter)
           tx_partition_count_update(cm, xd, bsize, mi_row, mi_col, td->counts);

@@ -1630,7 +1630,8 @@ static void read_inter_frame_mode_info(AV1Decoder *const pbi,
       int idx, idy;
       int tx_size_cat = inter_tx_size_cat_lookup[bsize];
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
-      int is_rect_tx_allowed = inter_block && is_rect_tx_allowed_bsize(bsize);
+      int is_rect_tx_allowed = inter_block && is_rect_tx_allowed_bsize(bsize) &&
+                               !xd->lossless[mbmi->segment_id];
       int use_rect_tx = 0;
 
       if (is_rect_tx_allowed) {
