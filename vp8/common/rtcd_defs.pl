@@ -19,13 +19,6 @@ EOF
 forward_decls qw/vp8_common_forward_decls/;
 
 #
-# system state
-#
-add_proto qw/void vp8_clear_system_state/, "";
-specialize qw/vp8_clear_system_state mmx/;
-$vp8_clear_system_state_mmx=vpx_reset_mmx_state;
-
-#
 # Dequant
 #
 add_proto qw/void vp8_dequantize_b/, "struct blockd*, short *dqc";

@@ -19,6 +19,7 @@
 #include <limits.h>
 #include "vpx/vpx_encoder.h"
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/system_state.h"
 #include "bitstream.h"
 
 #include "defaultcoefcounts.h"
@@ -843,7 +844,7 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi) {
   int new_intra, new_last, new_garf, oldtotal, newtotal;
   int ref_frame_cost[MAX_REF_FRAMES];
 
-  vp8_clear_system_state();
+  vpx_clear_system_state();
 
   if (cpi->common.frame_type != KEY_FRAME) {
     if (!(new_intra = rf_intra * 255 / (rf_intra + rf_inter))) new_intra = 1;
@@ -908,7 +909,7 @@ void vp8_update_coef_probs(VP8_COMP *cpi) {
 #endif
   int savings = 0;
 
-  vp8_clear_system_state();
+  vpx_clear_system_state();
 
   do {
     int j = 0;
@@ -1295,7 +1296,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
 
 #endif
 
-  vp8_clear_system_state();
+  vpx_clear_system_state();
 
 #if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
   pack_coef_probs(cpi);
