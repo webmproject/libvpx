@@ -350,19 +350,24 @@ static INLINE void lower_mv_precision(MV *mv, int allow_hp) {
 
 #if CONFIG_REF_MV
 static INLINE int av1_nmv_ctx(const uint8_t ref_mv_count,
-                              const CANDIDATE_MV *ref_mv_stack) {
+                              const CANDIDATE_MV *ref_mv_stack, int ref,
+                              int ref_mv_idx) {
+  int_mv this_mv = (ref == 0) ? ref_mv_stack[ref_mv_idx].this_mv
+                              : ref_mv_stack[ref_mv_idx].comp_mv;
 #if CONFIG_EXT_INTER
   return 0;
 #endif
-  if (ref_mv_stack[0].weight > REF_CAT_LEVEL && ref_mv_count > 0) {
-    if (abs(ref_mv_stack[0].this_mv.as_mv.row -
-            ref_mv_stack[0].pred_mv.as_mv.row) <= 4 &&
-        abs(ref_mv_stack[0].this_mv.as_mv.col -
-            ref_mv_stack[0].pred_mv.as_mv.col) <= 4)
+
+  if (ref_mv_stack[ref_mv_idx].weight >= REF_CAT_LEVEL && ref_mv_count > 0) {
+    if (abs(this_mv.as_mv.row -
+            ref_mv_stack[ref_mv_idx].pred_mv[ref].as_mv.row) <= 4 &&
+        abs(this_mv.as_mv.col -
+            ref_mv_stack[ref_mv_idx].pred_mv[ref].as_mv.col) <= 4)
       return 2;
     else
       return 1;
   }
+
   return 0;
 }
 
@@ -404,6 +409,8 @@ static INLINE int16_t av1_mode_context_analyzer(
     const int16_t *const mode_context, const MV_REFERENCE_FRAME *const rf,
     BLOCK_SIZE bsize, int block) {
   int16_t mode_ctx = 0;
+  int8_t ref_frame_type = av1_ref_frame_type(rf);
+
   if (block >= 0) {
     mode_ctx = mode_context[rf[0]] & 0x00ff;
 
@@ -418,7 +425,7 @@ static INLINE int16_t av1_mode_context_analyzer(
   else if (rf[0] != ALTREF_FRAME)
     return mode_context[rf[0]] & ~(mode_context[ALTREF_FRAME] & 0xfe00);
   else
-    return mode_context[rf[0]];
+    return mode_context[ref_frame_type];
 }
 
 static INLINE uint8_t av1_drl_ctx(const CANDIDATE_MV *ref_mv_stack,

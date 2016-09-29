@@ -1256,9 +1256,10 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
 #endif  // CONFIG_EXT_INTER
             for (ref = 0; ref < 1 + is_compound; ++ref) {
 #if CONFIG_REF_MV
-              int nmv_ctx =
-                  av1_nmv_ctx(mbmi_ext->ref_mv_count[mbmi->ref_frame[ref]],
-                              mbmi_ext->ref_mv_stack[mbmi->ref_frame[ref]]);
+              int8_t rf_type = av1_ref_frame_type(mbmi->ref_frame);
+              int nmv_ctx = av1_nmv_ctx(mbmi_ext->ref_mv_count[rf_type],
+                                        mbmi_ext->ref_mv_stack[rf_type], ref,
+                                        mbmi->ref_mv_idx);
               const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
 #endif
               av1_encode_mv(cpi, w, &mi->bmi[j].as_mv[ref].as_mv,
@@ -1280,9 +1281,10 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
 #if CONFIG_EXT_INTER
           else if (b_mode == NEAREST_NEWMV || b_mode == NEAR_NEWMV) {
 #if CONFIG_REF_MV
-            int nmv_ctx =
-                av1_nmv_ctx(mbmi_ext->ref_mv_count[mbmi->ref_frame[1]],
-                            mbmi_ext->ref_mv_stack[mbmi->ref_frame[1]]);
+            int8_t rf_type = av1_ref_frame_type(mbmi->ref_frame);
+            int nmv_ctx = av1_nmv_ctx(mbmi_ext->ref_mv_count[rf_type],
+                                      mbmi_ext->ref_mv_stack[rf_type], 1,
+                                      mbmi->ref_mv_idx);
             const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
 #endif
             av1_encode_mv(cpi, w, &mi->bmi[j].as_mv[1].as_mv,
@@ -1293,9 +1295,10 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
                           nmvc, allow_hp);
           } else if (b_mode == NEW_NEARESTMV || b_mode == NEW_NEARMV) {
 #if CONFIG_REF_MV
-            int nmv_ctx =
-                av1_nmv_ctx(mbmi_ext->ref_mv_count[mbmi->ref_frame[0]],
-                            mbmi_ext->ref_mv_stack[mbmi->ref_frame[0]]);
+            int8_t rf_type = av1_ref_frame_type(mbmi->ref_frame);
+            int nmv_ctx = av1_nmv_ctx(mbmi_ext->ref_mv_count[rf_type],
+                                      mbmi_ext->ref_mv_stack[rf_type], 0,
+                                      mbmi->ref_mv_idx);
             const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
 #endif
             av1_encode_mv(cpi, w, &mi->bmi[j].as_mv[0].as_mv,
@@ -1317,9 +1320,10 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
         int_mv ref_mv;
         for (ref = 0; ref < 1 + is_compound; ++ref) {
 #if CONFIG_REF_MV
-          int nmv_ctx =
-              av1_nmv_ctx(mbmi_ext->ref_mv_count[mbmi->ref_frame[ref]],
-                          mbmi_ext->ref_mv_stack[mbmi->ref_frame[ref]]);
+          int8_t rf_type = av1_ref_frame_type(mbmi->ref_frame);
+          int nmv_ctx = av1_nmv_ctx(mbmi_ext->ref_mv_count[rf_type],
+                                    mbmi_ext->ref_mv_stack[rf_type], ref,
+                                    mbmi->ref_mv_idx);
           const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
 #endif
           ref_mv = mbmi_ext->ref_mvs[mbmi->ref_frame[ref]][0];
@@ -1342,8 +1346,10 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
 #if CONFIG_EXT_INTER
       } else if (mode == NEAREST_NEWMV || mode == NEAR_NEWMV) {
 #if CONFIG_REF_MV
-        int nmv_ctx = av1_nmv_ctx(mbmi_ext->ref_mv_count[mbmi->ref_frame[1]],
-                                  mbmi_ext->ref_mv_stack[mbmi->ref_frame[1]]);
+        int8_t rf_type = av1_ref_frame_type(mbmi->ref_frame);
+        int nmv_ctx =
+            av1_nmv_ctx(mbmi_ext->ref_mv_count[rf_type],
+                        mbmi_ext->ref_mv_stack[rf_type], 1, mbmi->ref_mv_idx);
         const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
 #endif
         av1_encode_mv(cpi, w, &mbmi->mv[1].as_mv,
@@ -1354,8 +1360,10 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
                       nmvc, allow_hp);
       } else if (mode == NEW_NEARESTMV || mode == NEW_NEARMV) {
 #if CONFIG_REF_MV
-        int nmv_ctx = av1_nmv_ctx(mbmi_ext->ref_mv_count[mbmi->ref_frame[0]],
-                                  mbmi_ext->ref_mv_stack[mbmi->ref_frame[0]]);
+        int8_t rf_type = av1_ref_frame_type(mbmi->ref_frame);
+        int nmv_ctx =
+            av1_nmv_ctx(mbmi_ext->ref_mv_count[rf_type],
+                        mbmi_ext->ref_mv_stack[rf_type], 0, mbmi->ref_mv_idx);
         const nmv_context *nmvc = &cm->fc->nmvc[nmv_ctx];
 #endif
         av1_encode_mv(cpi, w, &mbmi->mv[0].as_mv,

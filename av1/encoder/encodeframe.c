@@ -1075,6 +1075,7 @@ static void update_state(AV1_COMP *cpi, ThreadData *td, PICK_MODE_CONTEXT *ctx,
       clamp_mv_ref(&this_mv.as_mv, xd->n8_w << 3, xd->n8_h << 3, xd);
       x->mbmi_ext->ref_mvs[mbmi->ref_frame[i]][0] = this_mv;
       mbmi->pred_mv[i] = this_mv;
+      mi->mbmi.pred_mv[i] = this_mv;
     }
   }
 #endif
