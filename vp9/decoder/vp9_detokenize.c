@@ -170,7 +170,12 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
                   read_coeff(r, vp9_cat1_prob, 1, &value, &count, &range);
           }
         }
+#if CONFIG_VP9_HIGHBITDEPTH
+        // val may use 18-bits
+        v = (int)(((int64_t)val * dqv) >> dq_shift);
+#else
         v = (val * dqv) >> dq_shift;
+#endif
       } else {
         if (read_bool(r, p[1], &value, &count, &range)) {
           token_cache[scan[c]] = 3;
