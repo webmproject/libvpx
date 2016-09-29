@@ -82,7 +82,7 @@ AV1_COMMON_SRCS-yes += common/av1_convolve.c
 AV1_COMMON_SRCS-yes += common/av1_convolve.h
 AV1_COMMON_SRCS-$(CONFIG_LOOP_RESTORATION) += common/restoration.h
 AV1_COMMON_SRCS-$(CONFIG_LOOP_RESTORATION) += common/restoration.c
-ifeq (yes,$(filter yes,$(CONFIG_GLOBAL_MOTION) $(CONFIG_WARPED_MOTION)))
+ifeq (yes,$(filter $(CONFIG_GLOBAL_MOTION) $(CONFIG_WARPED_MOTION),yes))
 AV1_COMMON_SRCS-yes += common/warped_motion.h
 AV1_COMMON_SRCS-yes += common/warped_motion.c
 endif
