@@ -1117,10 +1117,9 @@ void av1_init_quantizer(AV1_COMP *cpi) {
       for (i = 0; i < COEF_BANDS; i++) {
         const int quant = cpi->y_dequant[q][i != 0];
         const int uvquant = cpi->uv_dequant[q][i != 0];
-        av1_get_dequant_val_nuq(quant, q, i, cpi->y_dequant_val_nuq[dq][q][i],
+        av1_get_dequant_val_nuq(quant, i, cpi->y_dequant_val_nuq[dq][q][i],
                                 quants->y_cuml_bins_nuq[dq][q][i], dq);
-        av1_get_dequant_val_nuq(uvquant, q, i,
-                                cpi->uv_dequant_val_nuq[dq][q][i],
+        av1_get_dequant_val_nuq(uvquant, i, cpi->uv_dequant_val_nuq[dq][q][i],
                                 quants->uv_cuml_bins_nuq[dq][q][i], dq);
       }
     }

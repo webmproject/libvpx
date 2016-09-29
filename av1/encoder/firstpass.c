@@ -492,6 +492,7 @@ void av1_first_pass(AV1_COMP *cpi, const struct lookahead_entry *source) {
   double intra_factor;
   double brightness_factor;
   BufferPool *const pool = cm->buffer_pool;
+  const int qindex = find_fp_qindex(cm->bit_depth);
 
   // First pass code requires valid last and new frame buffers.
   assert(new_yv12 != NULL);
@@ -510,7 +511,7 @@ void av1_first_pass(AV1_COMP *cpi, const struct lookahead_entry *source) {
   neutral_count = 0.0;
 
   set_first_pass_params(cpi);
-  av1_set_quantizer(cm, find_fp_qindex(cm->bit_depth));
+  av1_set_quantizer(cm, qindex);
 
   av1_setup_block_planes(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
@@ -584,6 +585,8 @@ void av1_first_pass(AV1_COMP *cpi, const struct lookahead_entry *source) {
 #if CONFIG_SUPERTX
       xd->mi[0]->mbmi.segment_id_supertx = 0;
 #endif  // CONFIG_SUPERTX
+      xd->qindex[xd->mi[0]->mbmi.segment_id] = qindex;
+      xd->lossless[xd->mi[0]->mbmi.segment_id] = (qindex == 0);
       xd->mi[0]->mbmi.mode = DC_PRED;
       xd->mi[0]->mbmi.tx_size =
           use_dc_pred ? (bsize >= BLOCK_16X16 ? TX_16X16 : TX_8X8) : TX_4X4;

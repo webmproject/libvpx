@@ -2124,9 +2124,9 @@ static void setup_segmentation_dequant(AV1_COMMON *const cm) {
 #if CONFIG_NEW_QUANT
       for (dq = 0; dq < QUANT_PROFILES; dq++) {
         for (b = 0; b < COEF_BANDS; ++b) {
-          av1_get_dequant_val_nuq(cm->y_dequant[i][b != 0], qindex, b,
+          av1_get_dequant_val_nuq(cm->y_dequant[i][b != 0], b,
                                   cm->y_dequant_nuq[i][dq][b], NULL, dq);
-          av1_get_dequant_val_nuq(cm->uv_dequant[i][b != 0], qindex, b,
+          av1_get_dequant_val_nuq(cm->uv_dequant[i][b != 0], b,
                                   cm->uv_dequant_nuq[i][dq][b], NULL, dq);
         }
       }
@@ -2159,9 +2159,9 @@ static void setup_segmentation_dequant(AV1_COMMON *const cm) {
 #if CONFIG_NEW_QUANT
     for (dq = 0; dq < QUANT_PROFILES; dq++) {
       for (b = 0; b < COEF_BANDS; ++b) {
-        av1_get_dequant_val_nuq(cm->y_dequant[0][b != 0], qindex, b,
+        av1_get_dequant_val_nuq(cm->y_dequant[0][b != 0], b,
                                 cm->y_dequant_nuq[0][dq][b], NULL, dq);
-        av1_get_dequant_val_nuq(cm->uv_dequant[0][b != 0], qindex, b,
+        av1_get_dequant_val_nuq(cm->uv_dequant[0][b != 0], b,
                                 cm->uv_dequant_nuq[0][dq][b], NULL, dq);
       }
     }
@@ -3374,6 +3374,7 @@ static size_t read_uncompressed_header(AV1Decoder *pbi,
                              : cm->base_qindex;
       xd->lossless[i] = qindex == 0 && cm->y_dc_delta_q == 0 &&
                         cm->uv_dc_delta_q == 0 && cm->uv_ac_delta_q == 0;
+      xd->qindex[i] = qindex;
     }
   }
 

@@ -844,6 +844,7 @@ static void choose_partitioning(AV1_COMP *const cpi, ThreadData *const td,
 
     if (cyclic_refresh_segment_id_boosted(segment_id)) {
       int q = av1_get_qindex(&cm->seg, segment_id, cm->base_qindex);
+      assert(q == xd->qindex[segment_id]);
       set_vbp_thresholds(cpi, thresholds, q);
     }
   }
@@ -1597,6 +1598,7 @@ static int set_segment_rdmult(AV1_COMP *const cpi, MACROBLOCK *const x,
   av1_init_plane_quantizers(cpi, x, segment_id);
   aom_clear_system_state();
   segment_qindex = av1_get_qindex(&cm->seg, segment_id, cm->base_qindex);
+  assert(segment_qindex == x->e_mbd.qindex[segment_id]);
   return av1_compute_rd_mult(cpi, segment_qindex + cm->y_dc_delta_q);
 }
 
@@ -4594,6 +4596,7 @@ static void encode_frame_internal(AV1_COMP *cpi) {
                            : cm->base_qindex;
     xd->lossless[i] = qindex == 0 && cm->y_dc_delta_q == 0 &&
                       cm->uv_dc_delta_q == 0 && cm->uv_ac_delta_q == 0;
+    xd->qindex[i] = qindex;
   }
 
   if (!cm->seg.enabled && xd->lossless[0]) x->optimize = 0;
@@ -5126,7 +5129,7 @@ static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
       av1_tokenize_sb(cpi, td, t, !output_enabled, AOMMAX(bsize, BLOCK_8X8));
     else
 #endif
-      av1_tokenize_sb_inter(cpi, td, t, !output_enabled, mi_row, mi_col,
+      av1_tokenize_sb_vartx(cpi, td, t, !output_enabled, mi_row, mi_col,
                             AOMMAX(bsize, BLOCK_8X8));
 #else
     av1_tokenize_sb(cpi, td, t, !output_enabled, AOMMAX(bsize, BLOCK_8X8));
