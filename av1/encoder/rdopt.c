@@ -4220,8 +4220,7 @@ static int set_and_cost_bmi_mvs(const AV1_COMP *const cpi, MACROBLOCK *x,
 #endif  // CONFIG_EXT_INTER
       this_mv[0].as_int = seg_mvs[mbmi->ref_frame[0]].as_int;
 #if CONFIG_EXT_INTER
-      if (!cpi->common.allow_high_precision_mv ||
-          !av1_use_mv_hp(&best_ref_mv[0]->as_mv))
+      if (!cpi->common.allow_high_precision_mv)
         lower_mv_precision(&this_mv[0].as_mv, 0);
 #endif  // CONFIG_EXT_INTER
 
@@ -4280,11 +4279,9 @@ static int set_and_cost_bmi_mvs(const AV1_COMP *const cpi, MACROBLOCK *x,
         this_mv[0].as_int = compound_seg_newmvs[0].as_int;
         this_mv[1].as_int = compound_seg_newmvs[1].as_int;
       }
-      if (!cpi->common.allow_high_precision_mv ||
-          !av1_use_mv_hp(&best_ref_mv[0]->as_mv))
+      if (!cpi->common.allow_high_precision_mv)
         lower_mv_precision(&this_mv[0].as_mv, 0);
-      if (!cpi->common.allow_high_precision_mv ||
-          !av1_use_mv_hp(&best_ref_mv[1]->as_mv))
+      if (!cpi->common.allow_high_precision_mv)
         lower_mv_precision(&this_mv[1].as_mv, 0);
       thismvcost += av1_mv_bit_cost(&this_mv[0].as_mv, &best_ref_mv[0]->as_mv,
                                     mvjcost, mvcost, MV_COST_WEIGHT_SUB);
@@ -4294,8 +4291,7 @@ static int set_and_cost_bmi_mvs(const AV1_COMP *const cpi, MACROBLOCK *x,
     case NEW_NEARMV:
     case NEW_NEARESTMV:
       this_mv[0].as_int = seg_mvs[mbmi->ref_frame[0]].as_int;
-      if (!cpi->common.allow_high_precision_mv ||
-          !av1_use_mv_hp(&best_ref_mv[0]->as_mv))
+      if (!cpi->common.allow_high_precision_mv)
         lower_mv_precision(&this_mv[0].as_mv, 0);
       thismvcost += av1_mv_bit_cost(&this_mv[0].as_mv, &best_ref_mv[0]->as_mv,
                                     mvjcost, mvcost, MV_COST_WEIGHT_SUB);
@@ -4305,8 +4301,7 @@ static int set_and_cost_bmi_mvs(const AV1_COMP *const cpi, MACROBLOCK *x,
     case NEAREST_NEWMV:
       this_mv[0].as_int = frame_mv[mode][mbmi->ref_frame[0]].as_int;
       this_mv[1].as_int = seg_mvs[mbmi->ref_frame[1]].as_int;
-      if (!cpi->common.allow_high_precision_mv ||
-          !av1_use_mv_hp(&best_ref_mv[1]->as_mv))
+      if (!cpi->common.allow_high_precision_mv)
         lower_mv_precision(&this_mv[1].as_mv, 0);
       thismvcost += av1_mv_bit_cost(&this_mv[1].as_mv, &best_ref_mv[1]->as_mv,
                                     mvjcost, mvcost, MV_COST_WEIGHT_SUB);
@@ -5147,8 +5142,7 @@ static int64_t rd_pick_best_sub8x8_mode(
         if (!has_second_rf &&
 #if CONFIG_EXT_INTER
             have_newmv_in_inter_mode(this_mode) &&
-            (seg_mvs[index][mv_idx][mbmi->ref_frame[0]].as_int == INVALID_MV ||
-             av1_use_mv_hp(&bsi->ref_mv[0]->as_mv) == 0)
+            (seg_mvs[index][mv_idx][mbmi->ref_frame[0]].as_int == INVALID_MV)
 #else
             this_mode == NEWMV &&
             (seg_mvs[index][mbmi->ref_frame[0]].as_int == INVALID_MV ||

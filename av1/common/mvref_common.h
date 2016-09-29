@@ -341,8 +341,7 @@ static INLINE int is_inside(const TileInfo *const tile, int mi_col, int mi_row,
 }
 
 static INLINE void lower_mv_precision(MV *mv, int allow_hp) {
-  const int use_hp = allow_hp && av1_use_mv_hp(mv);
-  if (!use_hp) {
+  if (!allow_hp) {
     if (mv->row & 1) mv->row += (mv->row > 0 ? -1 : 1);
     if (mv->col & 1) mv->col += (mv->col > 0 ? -1 : 1);
   }

@@ -149,13 +149,6 @@ MV_CLASS_TYPE av1_get_mv_class(int z, int *offset) {
   return c;
 }
 
-// TODO(jingning): This idle function is intentionally left as is for
-// experimental purpose.
-int av1_use_mv_hp(const MV *ref) {
-  (void)ref;
-  return 1;
-}
-
 static void inc_mv_component(int v, nmv_component_counts *comp_counts, int incr,
                              int usehp) {
   int s, z, c, o, d, e, f;

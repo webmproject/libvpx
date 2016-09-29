@@ -27,7 +27,6 @@ struct AV1Common;
 void av1_init_mv_probs(struct AV1Common *cm);
 
 void av1_adapt_mv_probs(struct AV1Common *cm, int usehp);
-int av1_use_mv_hp(const MV *ref);
 
 #define MV_UPDATE_PROB 252
 

@@ -839,7 +839,6 @@ static INLINE void read_mv(aom_reader *r, MV *mv, const MV *ref,
                            const nmv_context *ctx, nmv_context_counts *counts,
                            int allow_hp) {
   MV_JOINT_TYPE joint_type;
-  const int use_hp = allow_hp && av1_use_mv_hp(ref);
   MV diff = { 0, 0 };
   joint_type =
 #if CONFIG_DAALA_EC || CONFIG_RANS
@@ -849,12 +848,12 @@ static INLINE void read_mv(aom_reader *r, MV *mv, const MV *ref,
 #endif
 
   if (mv_joint_vertical(joint_type))
-    diff.row = read_mv_component(r, &ctx->comps[0], use_hp);
+    diff.row = read_mv_component(r, &ctx->comps[0], allow_hp);
 
   if (mv_joint_horizontal(joint_type))
-    diff.col = read_mv_component(r, &ctx->comps[1], use_hp);
+    diff.col = read_mv_component(r, &ctx->comps[1], allow_hp);
 
-  av1_inc_mv(&diff, counts, use_hp);
+  av1_inc_mv(&diff, counts, allow_hp);
 
   mv->row = ref->row + diff.row;
   mv->col = ref->col + diff.col;
