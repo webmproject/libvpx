@@ -139,6 +139,8 @@ LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += av1_fht16x16_test.cc
 ifeq ($(CONFIG_EXT_TX),yes)
 LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += av1_fht8x16_test.cc
 LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += av1_fht16x8_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += av1_iht8x16_test.cc
+LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += av1_iht16x8_test.cc
 endif
 LIBAOM_TEST_SRCS-$(CONFIG_EXT_TILE)     += av1_ext_tile_test.cc
 

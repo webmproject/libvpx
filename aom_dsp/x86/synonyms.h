@@ -73,6 +73,14 @@ static INLINE __m128i xx_roundn_epu32(__m128i v_val_d, int bits) {
   return _mm_srli_epi32(v_tmp_d, bits);
 }
 
+// This is equivalent to ROUND_POWER_OF_TWO(v_val_d, bits)
+static INLINE __m128i xx_roundn_epi32_unsigned(__m128i v_val_d, int bits) {
+  const __m128i v_bias_d = _mm_set1_epi32((1 << bits) >> 1);
+  const __m128i v_tmp_d = _mm_add_epi32(v_val_d, v_bias_d);
+  return _mm_srai_epi32(v_tmp_d, bits);
+}
+
+// This is equivalent to ROUND_POWER_OF_TWO_SIGNED(v_val_d, bits)
 static INLINE __m128i xx_roundn_epi32(__m128i v_val_d, int bits) {
   const __m128i v_bias_d = _mm_set1_epi32((1 << bits) >> 1);
   const __m128i v_sign_d = _mm_srai_epi32(v_val_d, 31);

@@ -1308,7 +1308,7 @@ void aom_idct16x16_1_add_sse2(const tran_low_t *input, uint8_t *dest,
   }
 }
 
-static void iadst16_8col(__m128i *in) {
+void iadst16_8col(__m128i *in) {
   // perform 16x16 1-D ADST for 8 columns
   __m128i s[16], x[16], u[32], v[32];
   const __m128i k__cospi_p01_p31 = pair_set_epi16(cospi_1_64, cospi_31_64);
@@ -1778,7 +1778,7 @@ static void iadst16_8col(__m128i *in) {
   in[15] = _mm_sub_epi16(kZero, s[1]);
 }
 
-static void idct16_8col(__m128i *in) {
+void idct16_8col(__m128i *in) {
   const __m128i k__cospi_p30_m02 = pair_set_epi16(cospi_30_64, -cospi_2_64);
   const __m128i k__cospi_p02_p30 = pair_set_epi16(cospi_2_64, cospi_30_64);
   const __m128i k__cospi_p14_m18 = pair_set_epi16(cospi_14_64, -cospi_18_64);
