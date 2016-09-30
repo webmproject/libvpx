@@ -197,8 +197,10 @@ ifeq ($(ARCH_X86_64),yes)
 DSP_SRCS-$(HAVE_SSSE3)  += x86/inv_txfm_ssse3_x86_64.asm
 endif  # ARCH_X86_64
 
+DSP_SRCS-$(HAVE_NEON_ASM) += arm/save_reg_neon$(ASM)
+
+ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 ifeq ($(HAVE_NEON_ASM),yes)
-DSP_SRCS-yes  += arm/save_reg_neon$(ASM)
 DSP_SRCS-yes  += arm/idct4x4_1_add_neon$(ASM)
 DSP_SRCS-yes  += arm/idct4x4_add_neon$(ASM)
 DSP_SRCS-yes  += arm/idct8x8_1_add_neon$(ASM)
@@ -227,7 +229,6 @@ DSP_SRCS-$(HAVE_MSA)   += mips/idct8x8_msa.c
 DSP_SRCS-$(HAVE_MSA)   += mips/idct16x16_msa.c
 DSP_SRCS-$(HAVE_MSA)   += mips/idct32x32_msa.c
 
-ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_DSPR2) += mips/inv_txfm_dspr2.h
 DSP_SRCS-$(HAVE_DSPR2) += mips/itrans4_dspr2.c
 DSP_SRCS-$(HAVE_DSPR2) += mips/itrans8_dspr2.c
