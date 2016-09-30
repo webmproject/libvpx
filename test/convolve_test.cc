@@ -662,7 +662,7 @@ TEST(ConvolveTest, FiltersWontSaturateWhenAddedPairwise) {
 }
 
 const int16_t kInvalidFilter[8] = { 0 };
-static const WrapperFilterBlock2d8Func wrapper_filter_block2d_8[2] = {
+const WrapperFilterBlock2d8Func wrapper_filter_block2d_8[2] = {
   wrapper_filter_block2d_8_c, wrapper_filter_average_block2d_8_c
 };
 
