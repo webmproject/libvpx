@@ -1481,7 +1481,9 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
     }
   }
 
-  update_frame_size(cpi);
+  if (cm->current_video_frame == 0 || last_w != cpi->oxcf.width ||
+      last_h != cpi->oxcf.height)
+    update_frame_size(cpi);
 
   if (last_w != cpi->oxcf.width || last_h != cpi->oxcf.height) {
     memset(cpi->consec_zero_mv, 0,
