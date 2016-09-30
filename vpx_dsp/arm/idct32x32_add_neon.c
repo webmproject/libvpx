@@ -11,6 +11,7 @@
 #include <arm_neon.h>
 
 #include "./vpx_config.h"
+#include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/arm/transpose_neon.h"
 #include "vpx_dsp/txfm_common.h"
 
@@ -152,8 +153,8 @@ static INLINE void DO_BUTTERFLY(int16x8_t q14s16, int16x8_t q13s16,
   return;
 }
 
-static INLINE void idct32_transpose_pair(int16_t *input, int16_t *t_buf) {
-  int16_t *in;
+static INLINE void idct32_transpose_pair(const int16_t *input, int16_t *t_buf) {
+  const int16_t *in;
   int i;
   const int stride = 32;
   int16x8_t q8s16, q9s16, q10s16, q11s16, q12s16, q13s16, q14s16, q15s16;
@@ -382,7 +383,8 @@ static INLINE void idct32_bands_end_2nd_pass(
   return;
 }
 
-void vpx_idct32x32_1024_add_neon(int16_t *input, uint8_t *dest, int stride) {
+void vpx_idct32x32_1024_add_neon(const tran_low_t *input, uint8_t *dest,
+                                 int stride) {
   int i, idct32_pass_loop;
   int16_t trans_buf[32 * 8];
   int16_t pass1[32 * 32];

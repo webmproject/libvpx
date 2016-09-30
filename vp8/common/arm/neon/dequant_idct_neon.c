@@ -10,6 +10,8 @@
 
 #include <arm_neon.h>
 
+#include "./vp8_rtcd.h"
+
 static const int16_t cospi8sqrt2minus1 = 20091;
 // 35468 exceeds INT16_MAX and gets converted to a negative number. Because of
 // the way it is used in vqdmulh, where the result is doubled, it can be divided

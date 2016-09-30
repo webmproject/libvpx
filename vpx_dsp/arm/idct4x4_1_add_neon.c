@@ -10,10 +10,12 @@
 
 #include <arm_neon.h>
 
+#include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/inv_txfm.h"
 #include "vpx_ports/mem.h"
 
-void vpx_idct4x4_1_add_neon(int16_t *input, uint8_t *dest, int dest_stride) {
+void vpx_idct4x4_1_add_neon(const tran_low_t *input, uint8_t *dest,
+                            int dest_stride) {
   uint8x8_t d6u8;
   uint32x2_t d2u32 = vdup_n_u32(0);
   uint16x8_t q8u16;
