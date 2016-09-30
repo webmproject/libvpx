@@ -161,22 +161,26 @@ static uint8_t scan_row_mbmi(const AV1_COMMON *cm, const MACROBLOCKD *xd,
 
   for (i = 0; i < xd->n8_w && *refmv_count < MAX_REF_MV_STACK_SIZE;) {
     POSITION mi_pos;
+    const int use_step_16 = (xd->n8_w >= 8);
+
     mi_pos.row = row_offset;
     mi_pos.col = i;
-
     if (is_inside(tile, mi_col, mi_row, &mi_pos)) {
       const MODE_INFO *const candidate_mi =
           xd->mi[mi_pos.row * xd->mi_stride + mi_pos.col];
       const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
-      const int len =
+      int len =
           AOMMIN(xd->n8_w, num_8x8_blocks_wide_lookup[candidate->sb_type]);
-
+      if (use_step_16) len = AOMMAX(2, len);
       newmv_count += add_ref_mv_candidate(
           candidate_mi, candidate, rf, refmv_count, ref_mv_stack,
           cm->allow_high_precision_mv, len, block, mi_pos.col);
       i += len;
     } else {
-      ++i;
+      if (use_step_16)
+        i += 2;
+      else
+        ++i;
     }
   }
 
@@ -193,22 +197,26 @@ static uint8_t scan_col_mbmi(const AV1_COMMON *cm, const MACROBLOCKD *xd,
 
   for (i = 0; i < xd->n8_h && *refmv_count < MAX_REF_MV_STACK_SIZE;) {
     POSITION mi_pos;
+    const int use_step_16 = (xd->n8_h >= 8);
+
     mi_pos.row = i;
     mi_pos.col = col_offset;
-
     if (is_inside(tile, mi_col, mi_row, &mi_pos)) {
       const MODE_INFO *const candidate_mi =
           xd->mi[mi_pos.row * xd->mi_stride + mi_pos.col];
       const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
-      const int len =
+      int len =
           AOMMIN(xd->n8_h, num_8x8_blocks_high_lookup[candidate->sb_type]);
-
+      if (use_step_16) len = AOMMAX(2, len);
       newmv_count += add_ref_mv_candidate(
           candidate_mi, candidate, rf, refmv_count, ref_mv_stack,
           cm->allow_high_precision_mv, len, block, mi_pos.col);
       i += len;
     } else {
-      ++i;
+      if (use_step_16)
+        i += 2;
+      else
+        ++i;
     }
   }
 
