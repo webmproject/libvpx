@@ -13,12 +13,6 @@
 #include "vpx_ports/x86.h"
 #include "vp8/encoder/block.h"
 
-void vp8_short_fdct4x4_mmx(short *input, short *output, int pitch);
-void vp8_short_fdct8x4_mmx(short *input, short *output, int pitch) {
-  vp8_short_fdct4x4_mmx(input, output, pitch);
-  vp8_short_fdct4x4_mmx(input + 4, output + 16, pitch);
-}
-
 int vp8_fast_quantize_b_impl_mmx(short *coeff_ptr, short *zbin_ptr,
                                  short *qcoeff_ptr, short *dequant_ptr,
                                  const short *scan_mask, short *round_ptr,
@@ -37,18 +31,4 @@ void vp8_fast_quantize_b_mmx(BLOCK *b, BLOCKD *d) {
       coeff_ptr, zbin_ptr, qcoeff_ptr, dequant_ptr, scan_mask,
 
       round_ptr, quant_ptr, dqcoeff_ptr);
-}
-
-int vp8_mbblock_error_mmx_impl(short *coeff_ptr, short *dcoef_ptr, int dc);
-int vp8_mbblock_error_mmx(MACROBLOCK *mb, int dc) {
-  short *coeff_ptr = mb->block[0].coeff;
-  short *dcoef_ptr = mb->e_mbd.block[0].dqcoeff;
-  return vp8_mbblock_error_mmx_impl(coeff_ptr, dcoef_ptr, dc);
-}
-
-int vp8_mbuverror_mmx_impl(short *s_ptr, short *d_ptr);
-int vp8_mbuverror_mmx(MACROBLOCK *mb) {
-  short *s_ptr = &mb->coeff[256];
-  short *d_ptr = &mb->e_mbd.dqcoeff[256];
-  return vp8_mbuverror_mmx_impl(s_ptr, d_ptr);
 }

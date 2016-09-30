@@ -76,7 +76,6 @@ VP8_CX_SRCS_REMOVE-yes += encoder/firstpass.c
 VP8_CX_SRCS_REMOVE-yes += encoder/temporal_filter.c
 endif
 
-VP8_CX_SRCS-$(HAVE_MMX) += encoder/x86/dct_mmx.asm
 VP8_CX_SRCS-$(HAVE_MMX) += encoder/x86/vp8_enc_stubs_mmx.c
 VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/dct_sse2.asm
 VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/fwalsh_sse2.asm
