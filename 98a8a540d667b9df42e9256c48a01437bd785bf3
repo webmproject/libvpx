@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "828ac1d9_96c55a38",
+        "filename": "av1/common/mvref_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-09-30T16:39:05Z",
+      "side": 1,
+      "message": "Refactor \"xd-\u003en8w \u003e\u003d 8\" into a const:\n\"const width_at_least_64 \u003d (xd-\u003en8_w \u003e\u003d 8);\"\n(same below)",
+      "range": {
+        "startLine": 179,
+        "startChar": 6,
+        "endLine": 179,
+        "endChar": 24
+      },
+      "revId": "98a8a540d667b9df42e9256c48a01437bd785bf3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "828ac1d9_f6dce609",
+        "filename": "av1/common/mvref_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-09-30T16:39:05Z",
+      "side": 1,
+      "message": "Unrelated to this patch, but \"scan_row_mbmi\" and \"scan_col_mbmi\" look almost same. These should be refactored.",
+      "range": {
+        "startLine": 189,
+        "startChar": 15,
+        "endLine": 189,
+        "endChar": 28
+      },
+      "revId": "98a8a540d667b9df42e9256c48a01437bd785bf3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
