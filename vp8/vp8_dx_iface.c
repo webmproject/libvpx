@@ -106,20 +106,6 @@ static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx,
     priv = (vpx_codec_alg_priv_t *)ctx->priv;
   }
 
-  priv->yv12_frame_buffers.use_frame_threads =
-      (ctx->priv->init_flags & VPX_CODEC_USE_FRAME_THREADING);
-
-  /* for now, disable frame threading */
-  priv->yv12_frame_buffers.use_frame_threads = 0;
-
-  if (priv->yv12_frame_buffers.use_frame_threads &&
-      ((ctx->priv->init_flags & VPX_CODEC_USE_ERROR_CONCEALMENT) ||
-       (ctx->priv->init_flags & VPX_CODEC_USE_INPUT_FRAGMENTS))) {
-    /* row-based threading, error concealment, and input fragments will
-     * not be supported when using frame-based threading */
-    res = VPX_CODEC_INVALID_PARAM;
-  }
-
   return res;
 }
 
@@ -519,7 +505,7 @@ static vpx_codec_err_t vp8_set_reference(vpx_codec_alg_priv_t *ctx,
                                          va_list args) {
   vpx_ref_frame_t *data = va_arg(args, vpx_ref_frame_t *);
 
-  if (data && !ctx->yv12_frame_buffers.use_frame_threads) {
+  if (data) {
     vpx_ref_frame_t *frame = (vpx_ref_frame_t *)data;
     YV12_BUFFER_CONFIG sd;
 
@@ -536,7 +522,7 @@ static vpx_codec_err_t vp8_get_reference(vpx_codec_alg_priv_t *ctx,
                                          va_list args) {
   vpx_ref_frame_t *data = va_arg(args, vpx_ref_frame_t *);
 
-  if (data && !ctx->yv12_frame_buffers.use_frame_threads) {
+  if (data) {
     vpx_ref_frame_t *frame = (vpx_ref_frame_t *)data;
     YV12_BUFFER_CONFIG sd;
 
@@ -573,7 +559,7 @@ static vpx_codec_err_t vp8_get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
                                                 va_list args) {
   int *update_info = va_arg(args, int *);
 
-  if (update_info && !ctx->yv12_frame_buffers.use_frame_threads) {
+  if (update_info) {
     VP8D_COMP *pbi = (VP8D_COMP *)ctx->yv12_frame_buffers.pbi[0];
 
     *update_info = pbi->common.refresh_alt_ref_frame * (int)VP8_ALTR_FRAME +
@@ -591,7 +577,7 @@ static vpx_codec_err_t vp8_get_last_ref_frame(vpx_codec_alg_priv_t *ctx,
                                               va_list args) {
   int *ref_info = va_arg(args, int *);
 
-  if (ref_info && !ctx->yv12_frame_buffers.use_frame_threads) {
+  if (ref_info) {
     VP8D_COMP *pbi = (VP8D_COMP *)ctx->yv12_frame_buffers.pbi[0];
     VP8_COMMON *oci = &pbi->common;
     *ref_info =
