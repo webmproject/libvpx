@@ -202,9 +202,7 @@ void av1_adapt_mv_probs(AV1_COMMON *cm, int allow_hp) {
 
     aom_tree_merge_probs(av1_mv_joint_tree, pre_fc->joints, counts->joints,
                          fc->joints);
-#if CONFIG_REF_MV
     fc->zero_rmv = av1_mode_mv_merge_probs(pre_fc->zero_rmv, counts->zero_rmv);
-#endif
 
     for (i = 0; i < 2; ++i) {
       nmv_component *comp = &fc->comps[i];
