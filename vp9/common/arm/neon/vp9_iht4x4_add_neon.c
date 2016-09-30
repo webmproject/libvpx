@@ -37,7 +37,6 @@ static INLINE void TRANSPOSE4X4(int16x8_t *q8s16, int16x8_t *q9s16) {
 
   *q8s16 = vreinterpretq_s16_s32(q0x2s32.val[0]);
   *q9s16 = vreinterpretq_s16_s32(q0x2s32.val[1]);
-  return;
 }
 
 static INLINE void GENERATE_COSINE_CONSTANTS(int16x4_t *d0s16, int16x4_t *d1s16,
@@ -45,7 +44,6 @@ static INLINE void GENERATE_COSINE_CONSTANTS(int16x4_t *d0s16, int16x4_t *d1s16,
   *d0s16 = vdup_n_s16(cospi_8_64);
   *d1s16 = vdup_n_s16(cospi_16_64);
   *d2s16 = vdup_n_s16(cospi_24_64);
-  return;
 }
 
 static INLINE void GENERATE_SINE_CONSTANTS(int16x4_t *d3s16, int16x4_t *d4s16,
@@ -54,7 +52,6 @@ static INLINE void GENERATE_SINE_CONSTANTS(int16x4_t *d3s16, int16x4_t *d4s16,
   *d4s16 = vdup_n_s16(sinpi_2_9);
   *q3s16 = vdupq_n_s16(sinpi_3_9);
   *d5s16 = vdup_n_s16(sinpi_4_9);
-  return;
 }
 
 static INLINE void IDCT4x4_1D(int16x4_t *d0s16, int16x4_t *d1s16,
@@ -90,7 +87,6 @@ static INLINE void IDCT4x4_1D(int16x4_t *d0s16, int16x4_t *d1s16,
   *q8s16 = vaddq_s16(q13s16, q14s16);
   *q9s16 = vsubq_s16(q13s16, q14s16);
   *q9s16 = vcombine_s16(vget_high_s16(*q9s16), vget_low_s16(*q9s16));  // vswp
-  return;
 }
 
 static INLINE void IADST4x4_1D(int16x4_t *d3s16, int16x4_t *d4s16,
@@ -136,7 +132,6 @@ static INLINE void IADST4x4_1D(int16x4_t *d3s16, int16x4_t *d4s16,
 
   *q8s16 = vcombine_s16(d16s16, d17s16);
   *q9s16 = vcombine_s16(d18s16, d19s16);
-  return;
 }
 
 void vp9_iht4x4_16_add_neon(const tran_low_t *input, uint8_t *dest,
@@ -158,7 +153,6 @@ void vp9_iht4x4_16_add_neon(const tran_low_t *input, uint8_t *dest,
     case 0:  // idct_idct is not supported. Fall back to C
       vp9_iht4x4_16_add_c(input, dest, dest_stride, tx_type);
       return;
-      break;
     case 1:  // iadst_idct
       // generate constants
       GENERATE_COSINE_CONSTANTS(&d0s16, &d1s16, &d2s16);
@@ -229,5 +223,4 @@ void vp9_iht4x4_16_add_neon(const tran_low_t *input, uint8_t *dest,
   vst1_lane_u32((uint32_t *)dest, vreinterpret_u32_u8(d26u8), 1);
   dest -= dest_stride;
   vst1_lane_u32((uint32_t *)dest, vreinterpret_u32_u8(d26u8), 0);
-  return;
 }

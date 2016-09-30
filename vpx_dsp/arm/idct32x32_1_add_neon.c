@@ -35,7 +35,6 @@ static INLINE void LD_16x8(uint8_t *d, int d_stride, uint8x16_t *q8u8,
   *q14u8 = vld1q_u8(d);
   d += d_stride;
   *q15u8 = vld1q_u8(d);
-  return;
 }
 
 static INLINE void ADD_DIFF_16x8(uint8x16_t qdiffu8, uint8x16_t *q8u8,
@@ -51,7 +50,6 @@ static INLINE void ADD_DIFF_16x8(uint8x16_t qdiffu8, uint8x16_t *q8u8,
   *q13u8 = vqaddq_u8(*q13u8, qdiffu8);
   *q14u8 = vqaddq_u8(*q14u8, qdiffu8);
   *q15u8 = vqaddq_u8(*q15u8, qdiffu8);
-  return;
 }
 
 static INLINE void SUB_DIFF_16x8(uint8x16_t qdiffu8, uint8x16_t *q8u8,
@@ -67,7 +65,6 @@ static INLINE void SUB_DIFF_16x8(uint8x16_t qdiffu8, uint8x16_t *q8u8,
   *q13u8 = vqsubq_u8(*q13u8, qdiffu8);
   *q14u8 = vqsubq_u8(*q14u8, qdiffu8);
   *q15u8 = vqsubq_u8(*q15u8, qdiffu8);
-  return;
 }
 
 static INLINE void ST_16x8(uint8_t *d, int d_stride, uint8x16_t *q8u8,
@@ -90,7 +87,6 @@ static INLINE void ST_16x8(uint8_t *d, int d_stride, uint8x16_t *q8u8,
   vst1q_u8(d, *q14u8);
   d += d_stride;
   vst1q_u8(d, *q15u8);
-  return;
 }
 
 void vpx_idct32x32_1_add_neon(const tran_low_t *input, uint8_t *dest,
@@ -137,5 +133,4 @@ void vpx_idct32x32_1_add_neon(const tran_low_t *input, uint8_t *dest,
       }
     }
   }
-  return;
 }

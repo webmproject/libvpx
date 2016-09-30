@@ -163,7 +163,6 @@ static INLINE void IDCT8x8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   *q13s16 = vsubq_s16(q2s16, q5s16);
   *q14s16 = vsubq_s16(q1s16, q6s16);
   *q15s16 = vsubq_s16(q0s16, q7s16);
-  return;
 }
 
 void vpx_idct8x8_64_add_neon(const tran_low_t *input, uint8_t *dest,
@@ -266,7 +265,6 @@ void vpx_idct8x8_64_add_neon(const tran_low_t *input, uint8_t *dest,
   d2 += dest_stride;
   vst1_u64((uint64_t *)d2, vreinterpret_u64_u8(d3u8));
   d2 += dest_stride;
-  return;
 }
 
 void vpx_idct8x8_12_add_neon(const tran_low_t *input, uint8_t *dest,
@@ -444,5 +442,4 @@ void vpx_idct8x8_12_add_neon(const tran_low_t *input, uint8_t *dest,
   d2 += dest_stride;
   vst1_u64((uint64_t *)d2, vreinterpret_u64_u8(d3u8));
   d2 += dest_stride;
-  return;
 }

@@ -68,7 +68,6 @@ static INLINE void __STORE_COMBINE_CENTER_RESULTS(uint8_t *p1, uint8_t *p2,
   p2 += stride;
   vst1_s16((int16_t *)p1, d8s16);
   vst1_s16((int16_t *)p2, d11s16);
-  return;
 }
 
 #define STORE_COMBINE_EXTREME_RESULTS(r7, r6) \
@@ -112,7 +111,6 @@ static INLINE void __STORE_COMBINE_EXTREME_RESULTS(uint8_t *p1, uint8_t *p2,
   p2 += stride;
   vst1_s16((int16_t *)p2, d7s16);
   vst1_s16((int16_t *)p1, d4s16);
-  return;
 }
 
 #define DO_BUTTERFLY_STD(const_1, const_2, qA, qB) \
@@ -150,7 +148,6 @@ static INLINE void DO_BUTTERFLY(int16x8_t q14s16, int16x8_t q13s16,
 
   *qAs16 = vcombine_s16(vqrshrn_n_s32(q8s32, 14), vqrshrn_n_s32(q9s32, 14));
   *qBs16 = vcombine_s16(vqrshrn_n_s32(q11s32, 14), vqrshrn_n_s32(q10s32, 14));
-  return;
 }
 
 static INLINE void idct32_transpose_pair(const int16_t *input, int16_t *t_buf) {
@@ -197,7 +194,6 @@ static INLINE void idct32_transpose_pair(const int16_t *input, int16_t *t_buf) {
     vst1q_s16(t_buf, q15s16);
     t_buf += 8;
   }
-  return;
 }
 
 static INLINE void idct32_bands_end_1st_pass(int16_t *out, int16x8_t q2s16,
@@ -285,7 +281,6 @@ static INLINE void idct32_bands_end_1st_pass(int16_t *out, int16x8_t q2s16,
   q7s16 = vsubq_s16(q2s16, q1s16);
   STORE_IN_OUTPUT(25, 24, 25, q6s16, q7s16);
   STORE_IN_OUTPUT(25, 6, 7, q4s16, q5s16);
-  return;
 }
 
 static INLINE void idct32_bands_end_2nd_pass(
@@ -380,7 +375,6 @@ static INLINE void idct32_bands_end_2nd_pass(
   q6s16 = vsubq_s16(q3s16, q0s16);
   q7s16 = vsubq_s16(q2s16, q1s16);
   STORE_COMBINE_EXTREME_RESULTS(r7, r6);
-  return;
 }
 
 void vpx_idct32x32_1024_add_neon(const tran_low_t *input, uint8_t *dest,
@@ -638,5 +632,4 @@ void vpx_idct32x32_1024_add_neon(const tran_low_t *input, uint8_t *dest,
       }
     }
   }
-  return;
 }

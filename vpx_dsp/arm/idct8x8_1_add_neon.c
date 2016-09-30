@@ -59,5 +59,4 @@ void vpx_idct8x8_1_add_neon(const tran_low_t *input, uint8_t *dest,
     vst1_u64((uint64_t *)d2, vreinterpret_u64_u8(d31u8));
     d2 += dest_stride;
   }
-  return;
 }

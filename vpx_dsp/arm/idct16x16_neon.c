@@ -90,8 +90,6 @@ void vpx_idct16x16_256_add_neon(const int16_t *input, uint8_t *dest,
   // restore d8-d15 register values.
   vpx_pop_neon(store_reg);
 #endif
-
-  return;
 }
 
 void vpx_idct16x16_10_add_neon(const int16_t *input, uint8_t *dest,
@@ -147,6 +145,4 @@ void vpx_idct16x16_10_add_neon(const int16_t *input, uint8_t *dest,
   // restore d8-d15 register values.
   vpx_pop_neon(store_reg);
 #endif
-
-  return;
 }

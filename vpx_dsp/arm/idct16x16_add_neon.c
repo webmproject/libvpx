@@ -247,7 +247,6 @@ void vpx_idct16x16_256_add_neon_pass1(int16_t *in, int16_t *out,
   vst1_u64((uint64_t *)out, d30u64);
   out += output_stride;
   vst1_u64((uint64_t *)out, d31u64);
-  return;
 }
 
 void vpx_idct16x16_256_add_neon_pass2(int16_t *src, int16_t *out,
@@ -796,7 +795,6 @@ void vpx_idct16x16_256_add_neon_pass2(int16_t *src, int16_t *out,
     out += 4;
     vst1_u64((uint64_t *)out, vreinterpret_u64_s16(vget_high_s16(q15s16)));
   }
-  return;
 }
 
 void vpx_idct16x16_10_add_neon_pass1(int16_t *in, int16_t *out,
@@ -932,7 +930,6 @@ void vpx_idct16x16_10_add_neon_pass1(int16_t *in, int16_t *out,
   vst1_u64((uint64_t *)out, d30u64);
   out += output_stride;
   vst1_u64((uint64_t *)out, d31u64);
-  return;
 }
 
 void vpx_idct16x16_10_add_neon_pass2(int16_t *src, int16_t *out,
@@ -1227,5 +1224,4 @@ void vpx_idct16x16_10_add_neon_pass2(int16_t *src, int16_t *out,
   vst1_u64((uint64_t *)out, d30u64);
   out += 4;
   vst1_u64((uint64_t *)out, d31u64);
-  return;
 }

@@ -56,5 +56,4 @@ void vpx_idct16x16_1_add_neon(const tran_low_t *input, uint8_t *dest,
       d2 += dest_stride;
     }
   }
-  return;
 }
