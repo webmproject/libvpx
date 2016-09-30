@@ -975,9 +975,8 @@ FUN_LPF_16_KERNEL(_, 8)        // lpf_16_kernel
 FUN_LPF_16_KERNEL(_dual_, 16)  // lpf_16_dual_kernel
 #undef FUN_LPF_16_KERNEL
 
-void vpx_lpf_horizontal_edge_8_neon(uint8_t *s, int p, const uint8_t *blimit,
-                                    const uint8_t *limit,
-                                    const uint8_t *thresh) {
+void vpx_lpf_horizontal_16_neon(uint8_t *s, int p, const uint8_t *blimit,
+                                const uint8_t *limit, const uint8_t *thresh) {
   uint8x8_t p7, p6, p5, p4, p3, p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7, op6,
       op5, op4, op3, op2, op1, op0, oq0, oq1, oq2, oq3, oq4, oq5, oq6;
   uint32_t flat_status, flat2_status;
@@ -992,7 +991,7 @@ void vpx_lpf_horizontal_edge_8_neon(uint8_t *s, int p, const uint8_t *blimit,
              oq5, oq6, flat_status, flat2_status);
 }
 
-void vpx_lpf_horizontal_edge_16_neon(uint8_t *s, int p, const uint8_t *blimit,
+void vpx_lpf_horizontal_16_dual_neon(uint8_t *s, int p, const uint8_t *blimit,
                                      const uint8_t *limit,
                                      const uint8_t *thresh) {
   uint8x16_t p7, p6, p5, p4, p3, p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7,

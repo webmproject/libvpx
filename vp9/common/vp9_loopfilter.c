@@ -465,12 +465,11 @@ static void filter_selectively_horiz(
 
       if (mask_16x16 & 1) {
         if ((mask_16x16 & 3) == 3) {
-          vpx_lpf_horizontal_edge_16(s, pitch, lfi->mblim, lfi->lim,
+          vpx_lpf_horizontal_16_dual(s, pitch, lfi->mblim, lfi->lim,
                                      lfi->hev_thr);
           count = 2;
         } else {
-          vpx_lpf_horizontal_edge_8(s, pitch, lfi->mblim, lfi->lim,
-                                    lfi->hev_thr);
+          vpx_lpf_horizontal_16(s, pitch, lfi->mblim, lfi->lim, lfi->hev_thr);
         }
       } else if (mask_8x8 & 1) {
         if ((mask_8x8 & 3) == 3) {
@@ -559,12 +558,12 @@ static void highbd_filter_selectively_horiz(
 
       if (mask_16x16 & 1) {
         if ((mask_16x16 & 3) == 3) {
-          vpx_highbd_lpf_horizontal_edge_16(s, pitch, lfi->mblim, lfi->lim,
+          vpx_highbd_lpf_horizontal_16_dual(s, pitch, lfi->mblim, lfi->lim,
                                             lfi->hev_thr, bd);
           count = 2;
         } else {
-          vpx_highbd_lpf_horizontal_edge_8(s, pitch, lfi->mblim, lfi->lim,
-                                           lfi->hev_thr, bd);
+          vpx_highbd_lpf_horizontal_16(s, pitch, lfi->mblim, lfi->lim,
+                                       lfi->hev_thr, bd);
         }
       } else if (mask_8x8 & 1) {
         if ((mask_8x8 & 3) == 3) {

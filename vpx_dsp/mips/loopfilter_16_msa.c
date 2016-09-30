@@ -403,10 +403,11 @@ void vpx_hz_lpf_t16_16w(uint8_t *src, int32_t pitch, uint8_t *filter48) {
   }
 }
 
-void vpx_lpf_horizontal_16_dual_msa(uint8_t *src, int32_t pitch,
-                                    const uint8_t *b_limit_ptr,
-                                    const uint8_t *limit_ptr,
-                                    const uint8_t *thresh_ptr, int32_t count) {
+static void mb_lpf_horizontal_edge_dual(uint8_t *src, int32_t pitch,
+                                        const uint8_t *b_limit_ptr,
+                                        const uint8_t *limit_ptr,
+                                        const uint8_t *thresh_ptr,
+                                        int32_t count) {
   DECLARE_ALIGNED(32, uint8_t, filter48[16 * 8]);
   uint8_t early_exit = 0;
 
@@ -638,19 +639,19 @@ static void mb_lpf_horizontal_edge(uint8_t *src, int32_t pitch,
       }
     }
   } else {
-    vpx_lpf_horizontal_16_dual_msa(src, pitch, b_limit_ptr, limit_ptr,
-                                   thresh_ptr, count);
+    mb_lpf_horizontal_edge_dual(src, pitch, b_limit_ptr, limit_ptr, thresh_ptr,
+                                count);
   }
 }
 
-void vpx_lpf_horizontal_edge_8_msa(uint8_t *src, int32_t pitch,
-                                   const uint8_t *b_limit_ptr,
-                                   const uint8_t *limit_ptr,
-                                   const uint8_t *thresh_ptr) {
+void vpx_lpf_horizontal_16_msa(uint8_t *src, int32_t pitch,
+                               const uint8_t *b_limit_ptr,
+                               const uint8_t *limit_ptr,
+                               const uint8_t *thresh_ptr) {
   mb_lpf_horizontal_edge(src, pitch, b_limit_ptr, limit_ptr, thresh_ptr, 1);
 }
 
-void vpx_lpf_horizontal_edge_16_msa(uint8_t *src, int32_t pitch,
+void vpx_lpf_horizontal_16_dual_msa(uint8_t *src, int32_t pitch,
                                     const uint8_t *b_limit_ptr,
                                     const uint8_t *limit_ptr,
                                     const uint8_t *thresh_ptr) {
