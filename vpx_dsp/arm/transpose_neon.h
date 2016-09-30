@@ -39,6 +39,68 @@ static INLINE uint8x16x2_t vpx_vtrnq_u64(uint32x4_t a0, uint32x4_t a1) {
   return b0;
 }
 
+static INLINE void transpose_u8_4x4(uint8x8_t *a0, uint8x8_t *a1) {
+  // Swap 16 bit elements. Goes from:
+  // a0: 00 01 02 03  10 11 12 13
+  // a1: 20 21 22 23  30 31 32 33
+  // to:
+  // b0.val[0]: 00 01 20 21  10 11 30 31
+  // b0.val[1]: 02 03 22 23  12 13 32 33
+
+  const uint16x4x2_t b0 =
+      vtrn_u16(vreinterpret_u16_u8(*a0), vreinterpret_u16_u8(*a1));
+
+  // Swap 32 bit elements resulting in:
+  // c0.val[0]: 00 01 20 21  02 03 22 23
+  // c0.val[1]: 10 11 30 31  12 13 32 33
+
+  const uint32x2x2_t c0 = vtrn_u32(vreinterpret_u32_u16(b0.val[0]),
+                                   vreinterpret_u32_u16(b0.val[1]));
+
+  // Swap 8 bit elements resulting in:
+  // d0.val[0]: 00 10 20 30  02 12 22 32
+  // d0.val[1]: 01 11 21 31  03 13 23 33
+
+  const uint8x8x2_t d0 =
+      vtrn_u8(vreinterpret_u8_u32(c0.val[0]), vreinterpret_u8_u32(c0.val[1]));
+
+  *a0 = d0.val[0];
+  *a1 = d0.val[1];
+}
+
+static INLINE void transpose_u8_8x4(uint8x8_t *a0, uint8x8_t *a1, uint8x8_t *a2,
+                                    uint8x8_t *a3) {
+  // Swap 8 bit elements. Goes from:
+  // a0: 00 01 02 03 04 05 06 07
+  // a1: 10 11 12 13 14 15 16 17
+  // a2: 20 21 22 23 24 25 26 27
+  // a3: 30 31 32 33 34 35 36 37
+  // to:
+  // b0.val[0]: 00 10 02 12 04 14 06 16
+  // b0.val[1]: 01 11 03 13 05 15 07 17
+  // b1.val[0]: 20 30 22 32 24 34 26 36
+  // b1.val[1]: 21 31 23 33 25 35 27 37
+
+  const uint8x8x2_t b0 = vtrn_u8(*a0, *a1);
+  const uint8x8x2_t b1 = vtrn_u8(*a2, *a3);
+
+  // Swap 16 bit elements resulting in:
+  // c0.val[0]: 00 10 20 30 04 14 24 34
+  // c0.val[1]: 02 12 22 32 06 16 26 36
+  // c1.val[0]: 01 11 21 31 05 15 25 35
+  // c1.val[1]: 03 13 23 33 07 17 27 37
+
+  const uint16x4x2_t c0 =
+      vtrn_u16(vreinterpret_u16_u8(b0.val[0]), vreinterpret_u16_u8(b1.val[0]));
+  const uint16x4x2_t c1 =
+      vtrn_u16(vreinterpret_u16_u8(b0.val[1]), vreinterpret_u16_u8(b1.val[1]));
+
+  *a0 = vreinterpret_u8_u16(c0.val[0]);
+  *a1 = vreinterpret_u8_u16(c1.val[0]);
+  *a2 = vreinterpret_u8_u16(c0.val[1]);
+  *a3 = vreinterpret_u8_u16(c1.val[1]);
+}
+
 // Note: Using 'd' registers or 'q' registers has almost identical speed. We use
 // 'q' registers here to save some instructions.
 static INLINE void transpose_u8_8x8(uint8x8_t *a0, uint8x8_t *a1, uint8x8_t *a2,

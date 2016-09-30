@@ -99,7 +99,6 @@ DSP_SRCS-yes += arm/vpx_convolve_neon.c
 else
 ifeq ($(HAVE_NEON),yes)
 DSP_SRCS-yes += arm/vpx_convolve_copy_neon.c
-DSP_SRCS-yes += arm/vpx_convolve8_avg_neon.c
 DSP_SRCS-yes += arm/vpx_convolve8_neon.c
 DSP_SRCS-yes += arm/vpx_convolve_avg_neon.c
 DSP_SRCS-yes += arm/vpx_convolve_neon.c
