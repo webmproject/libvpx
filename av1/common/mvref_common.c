@@ -399,8 +399,8 @@ static void setup_ref_mv_list(const AV1_COMMON *cm, const MACROBLOCKD *xd,
     int blk_row, blk_col;
     int coll_blk_count = 0;
 
-    for (blk_row = 0; blk_row < xd->n8_h; ++blk_row) {
-      for (blk_col = 0; blk_col < xd->n8_w; ++blk_col) {
+    for (blk_row = 0; blk_row < xd->n8_h; blk_row += 2) {
+      for (blk_col = 0; blk_col < xd->n8_w; blk_col += 2) {
         coll_blk_count += add_col_ref_mv(
             cm, prev_frame_mvs_base, xd, mi_row, mi_col, ref_frame, blk_row,
             blk_col, refmv_count, ref_mv_stack, mode_context);
