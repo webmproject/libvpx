@@ -585,7 +585,7 @@ void av1_loop_restoration_rows(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
 #if CONFIG_AOM_HIGHBITDEPTH
           cm->use_highbitdepth,
 #endif
-          AOM_DEC_BORDER_IN_PIXELS, cm->byte_alignment, NULL, NULL, NULL) < 0)
+          AOM_BORDER_IN_PIXELS, cm->byte_alignment, NULL, NULL, NULL) < 0)
     aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,
                        "Failed to allocate tmp restoration buffer");
 

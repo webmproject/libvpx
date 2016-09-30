@@ -41,7 +41,7 @@ static void yuvconfig2image(aom_image_t *img, const YV12_BUFFER_CONFIG *yv12,
   img->range = yv12->color_range;
   img->bit_depth = 8;
   img->w = yv12->y_stride;
-  img->h = ALIGN_POWER_OF_TWO(yv12->y_height + 2 * AOM_ENC_BORDER_IN_PIXELS, 3);
+  img->h = ALIGN_POWER_OF_TWO(yv12->y_height + 2 * AOM_BORDER_IN_PIXELS, 3);
   img->d_w = yv12->y_crop_width;
   img->d_h = yv12->y_crop_height;
   img->r_w = yv12->render_width;

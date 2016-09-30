@@ -67,12 +67,12 @@ struct lookahead_ctx *av1_lookahead_init(unsigned int width,
     ctx->buf = calloc(depth, sizeof(*ctx->buf));
     if (!ctx->buf) goto bail;
     for (i = 0; i < depth; i++)
-      if (aom_alloc_frame_buffer(
-              &ctx->buf[i].img, width, height, subsampling_x, subsampling_y,
+      if (aom_alloc_frame_buffer(&ctx->buf[i].img, width, height, subsampling_x,
+                                 subsampling_y,
 #if CONFIG_AOM_HIGHBITDEPTH
-              use_highbitdepth,
+                                 use_highbitdepth,
 #endif
-              AOM_ENC_BORDER_IN_PIXELS, legacy_byte_alignment))
+                                 AOM_BORDER_IN_PIXELS, legacy_byte_alignment))
         goto bail;
   }
   return ctx;
@@ -164,7 +164,7 @@ int av1_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG *src,
 #if CONFIG_AOM_HIGHBITDEPTH
                                  use_highbitdepth,
 #endif
-                                 AOM_ENC_BORDER_IN_PIXELS, 0))
+                                 AOM_BORDER_IN_PIXELS, 0))
         return 1;
       aom_free_frame_buffer(&buf->img);
       buf->img = new_img;

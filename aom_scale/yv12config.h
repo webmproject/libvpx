@@ -28,8 +28,11 @@ extern "C" {
 #define AOMINNERBORDERINPIXELS 96
 #endif  // CONFIG_EXT_PARTITION
 #define AOM_INTERP_EXTEND 4
-#define AOM_ENC_BORDER_IN_PIXELS 160
-#define AOM_DEC_BORDER_IN_PIXELS 160
+
+// TODO(jingning): Use unified inter predictor for encoder and
+// decoder during the development process. Revisit the frame border
+// to improve the decoder performance.
+#define AOM_BORDER_IN_PIXELS 160
 
 typedef struct yv12_buffer_config {
   int y_width;

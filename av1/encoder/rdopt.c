@@ -6297,9 +6297,8 @@ static int discount_newmv_test(const AV1_COMP *cpi, int this_mode,
            (mode_mv[NEARMV][ref_frame].as_int == INVALID_MV)));
 }
 
-#define LEFT_TOP_MARGIN ((AOM_ENC_BORDER_IN_PIXELS - AOM_INTERP_EXTEND) << 3)
-#define RIGHT_BOTTOM_MARGIN \
-  ((AOM_ENC_BORDER_IN_PIXELS - AOM_INTERP_EXTEND) << 3)
+#define LEFT_TOP_MARGIN ((AOM_BORDER_IN_PIXELS - AOM_INTERP_EXTEND) << 3)
+#define RIGHT_BOTTOM_MARGIN ((AOM_BORDER_IN_PIXELS - AOM_INTERP_EXTEND) << 3)
 
 // TODO(jingning): this mv clamping function should be block size dependent.
 static INLINE void clamp_mv2(MV *mv, const MACROBLOCKD *xd) {

@@ -48,7 +48,7 @@ static const qprofile_type nuq_lossless[COEF_BANDS] = {
 static const qprofile_type nuq[QUANT_PROFILES][QUANT_RANGES][COEF_BANDS] = {
   { {
         { { 64, 128, 128 }, 8 },   // dc, band 0
-        { { 64, 128, 128 }, 10 },   // band 1
+        { { 64, 128, 128 }, 10 },  // band 1
         { { 64, 128, 128 }, 12 },  // band 2
         { { 72, 128, 128 }, 14 },  // band 3
         { { 76, 128, 128 }, 16 },  // band 4
@@ -56,8 +56,8 @@ static const qprofile_type nuq[QUANT_PROFILES][QUANT_RANGES][COEF_BANDS] = {
     },
     {
         { { 64, 128, 128 }, 4 },   // dc, band 0
-        { { 64, 128, 128 }, 6 },  // band 1
-        { { 64, 128, 128 }, 8 },  // band 2
+        { { 64, 128, 128 }, 6 },   // band 1
+        { { 64, 128, 128 }, 8 },   // band 2
         { { 64, 128, 128 }, 10 },  // band 3
         { { 72, 128, 128 }, 12 },  // band 4
         { { 80, 128, 128 }, 14 }   // band 5
@@ -74,7 +74,7 @@ static const qprofile_type nuq[QUANT_PROFILES][QUANT_RANGES][COEF_BANDS] = {
     {
         { { 64, 128, 128 }, 4 },   // dc, band 0
         { { 64, 128, 128 }, 6 },   // band 1
-        { { 64, 128, 128 }, 8 },  // band 2
+        { { 64, 128, 128 }, 8 },   // band 2
         { { 64, 128, 128 }, 10 },  // band 3
         { { 72, 128, 128 }, 12 },  // band 4
         { { 80, 128, 128 }, 14 }   // band 5
@@ -91,7 +91,7 @@ static const qprofile_type nuq[QUANT_PROFILES][QUANT_RANGES][COEF_BANDS] = {
     {
         { { 64, 128, 128 }, 4 },   // dc, band 0
         { { 64, 128, 128 }, 6 },   // band 1
-        { { 64, 128, 128 }, 8 },  // band 2
+        { { 64, 128, 128 }, 8 },   // band 2
         { { 64, 128, 128 }, 10 },  // band 3
         { { 72, 128, 128 }, 12 },  // band 4
         { { 80, 128, 128 }, 14 }   // band 5

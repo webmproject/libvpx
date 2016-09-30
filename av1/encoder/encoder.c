@@ -738,8 +738,8 @@ static void alloc_raw_frame_buffers(AV1_COMP *cpi) {
 #if CONFIG_AOM_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
-                               AOM_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
-                               NULL, NULL, NULL))
+                               AOM_BORDER_IN_PIXELS, cm->byte_alignment, NULL,
+                               NULL, NULL))
     aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,
                        "Failed to allocate altref buffer");
 }
@@ -751,8 +751,8 @@ static void alloc_util_frame_buffers(AV1_COMP *cpi) {
 #if CONFIG_AOM_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
-                               AOM_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
-                               NULL, NULL, NULL))
+                               AOM_BORDER_IN_PIXELS, cm->byte_alignment, NULL,
+                               NULL, NULL))
     aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,
                        "Failed to allocate last frame buffer");
 
@@ -762,8 +762,8 @@ static void alloc_util_frame_buffers(AV1_COMP *cpi) {
 #if CONFIG_AOM_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
-                               AOM_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
-                               NULL, NULL, NULL))
+                               AOM_BORDER_IN_PIXELS, cm->byte_alignment, NULL,
+                               NULL, NULL))
     aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,
                        "Failed to allocate last frame deblocked buffer");
 #endif  // CONFIG_LOOP_RESTORATION
@@ -773,8 +773,8 @@ static void alloc_util_frame_buffers(AV1_COMP *cpi) {
 #if CONFIG_AOM_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
-                               AOM_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
-                               NULL, NULL, NULL))
+                               AOM_BORDER_IN_PIXELS, cm->byte_alignment, NULL,
+                               NULL, NULL))
     aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,
                        "Failed to allocate scaled source buffer");
 
@@ -783,8 +783,8 @@ static void alloc_util_frame_buffers(AV1_COMP *cpi) {
 #if CONFIG_AOM_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
-                               AOM_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
-                               NULL, NULL, NULL))
+                               AOM_BORDER_IN_PIXELS, cm->byte_alignment, NULL,
+                               NULL, NULL))
     aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,
                        "Failed to allocate scaled last source buffer");
 }
@@ -3005,7 +3005,7 @@ static INLINE int upsample_ref_frame(AV1_COMP *cpi,
 #if CONFIG_AOM_HIGHBITDEPTH
                                    cm->use_highbitdepth,
 #endif
-                                   (AOM_ENC_BORDER_IN_PIXELS << 3),
+                                   (AOM_BORDER_IN_PIXELS << 3),
                                    cm->byte_alignment, NULL, NULL, NULL))
         aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,
                            "Failed to allocate up-sampled frame buffer");
@@ -3537,11 +3537,10 @@ void av1_scale_references(AV1_COMP *cpi) {
         new_fb_ptr = &pool->frame_bufs[new_fb];
         if (force_scaling || new_fb_ptr->buf.y_crop_width != cm->width ||
             new_fb_ptr->buf.y_crop_height != cm->height) {
-          if (aom_realloc_frame_buffer(&new_fb_ptr->buf, cm->width, cm->height,
-                                       cm->subsampling_x, cm->subsampling_y,
-                                       cm->use_highbitdepth,
-                                       AOM_ENC_BORDER_IN_PIXELS,
-                                       cm->byte_alignment, NULL, NULL, NULL))
+          if (aom_realloc_frame_buffer(
+                  &new_fb_ptr->buf, cm->width, cm->height, cm->subsampling_x,
+                  cm->subsampling_y, cm->use_highbitdepth, AOM_BORDER_IN_PIXELS,
+                  cm->byte_alignment, NULL, NULL, NULL))
             aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,
                                "Failed to allocate frame buffer");
           scale_and_extend_frame(ref, &new_fb_ptr->buf, MAX_MB_PLANE,
@@ -3564,8 +3563,8 @@ void av1_scale_references(AV1_COMP *cpi) {
             new_fb_ptr->buf.y_crop_height != cm->height) {
           if (aom_realloc_frame_buffer(&new_fb_ptr->buf, cm->width, cm->height,
                                        cm->subsampling_x, cm->subsampling_y,
-                                       AOM_ENC_BORDER_IN_PIXELS,
-                                       cm->byte_alignment, NULL, NULL, NULL))
+                                       AOM_BORDER_IN_PIXELS, cm->byte_alignment,
+                                       NULL, NULL, NULL))
             aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,
                                "Failed to allocate frame buffer");
           scale_and_extend_frame(ref, &new_fb_ptr->buf, MAX_MB_PLANE);
@@ -3587,7 +3586,7 @@ void av1_scale_references(AV1_COMP *cpi) {
 #if CONFIG_AOM_HIGHBITDEPTH
                                        cm->use_highbitdepth,
 #endif
-                                       (AOM_ENC_BORDER_IN_PIXELS << 3),
+                                       (AOM_BORDER_IN_PIXELS << 3),
                                        cm->byte_alignment, NULL, NULL, NULL))
             aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,
                                "Failed to allocate up-sampled frame buffer");
@@ -3863,8 +3862,8 @@ static void set_frame_size(AV1_COMP *cpi) {
 #if CONFIG_AOM_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
-                               AOM_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
-                               NULL, NULL, NULL))
+                               AOM_BORDER_IN_PIXELS, cm->byte_alignment, NULL,
+                               NULL, NULL))
     aom_internal_error(&cm->error, AOM_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffer");
 
