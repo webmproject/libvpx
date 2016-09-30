@@ -938,10 +938,7 @@ static INLINE int is_mv_valid(const MV *mv) {
 
 static INLINE int assign_mv(AV1_COMMON *cm, MACROBLOCKD *xd,
                             PREDICTION_MODE mode,
-                            MV_REFERENCE_FRAME ref_frame[2],
-#if CONFIG_REF_MV
-                            int block,
-#endif
+                            MV_REFERENCE_FRAME ref_frame[2], int block,
                             int_mv mv[2], int_mv ref_mv[2],
                             int_mv nearest_mv[2], int_mv near_mv[2],
                             int is_compound, int allow_hp, aom_reader *r) {
@@ -952,6 +949,8 @@ static INLINE int assign_mv(AV1_COMMON *cm, MACROBLOCKD *xd,
   BLOCK_SIZE bsize = mbmi->sb_type;
   int_mv *pred_mv =
       (bsize >= BLOCK_8X8) ? mbmi->pred_mv : xd->mi[0]->bmi[block].pred_mv;
+#else
+  (void)block;
 #endif
   (void)ref_frame;
 
@@ -1466,11 +1465,7 @@ static void read_inter_block_mode_info(AV1Decoder *const pbi,
         (void)ref_mv_s8;
 #endif
 
-        if (!assign_mv(cm, xd, b_mode, mbmi->ref_frame,
-#if CONFIG_REF_MV
-                       j,
-#endif
-                       block,
+        if (!assign_mv(cm, xd, b_mode, mbmi->ref_frame, j, block,
 #if CONFIG_EXT_INTER
                        ref_mv[mv_idx],
 #else
@@ -1518,11 +1513,7 @@ static void read_inter_block_mode_info(AV1Decoder *const pbi,
     }
 
     xd->corrupted |=
-        !assign_mv(cm, xd, mbmi->mode, mbmi->ref_frame,
-#if CONFIG_REF_MV
-                   0,
-#endif
-                   mbmi->mv,
+        !assign_mv(cm, xd, mbmi->mode, mbmi->ref_frame, 0, mbmi->mv,
 #if CONFIG_EXT_INTER
                    mbmi->mode == NEWFROMNEARMV ? nearmv : nearestmv,
 #else
