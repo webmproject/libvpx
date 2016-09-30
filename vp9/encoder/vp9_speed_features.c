@@ -491,7 +491,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed,
   if (speed >= 8) {
     sf->adaptive_rd_thresh = 4;
     sf->mv.subpel_force_stop = (content == VP9E_CONTENT_SCREEN) ? 3 : 2;
-    sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
+    if (content == VP9E_CONTENT_SCREEN) sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
     // Only keep INTRA_DC mode for speed 8.
     if (!is_keyframe) {
       int i = 0;
