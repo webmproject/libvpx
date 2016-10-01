@@ -247,8 +247,6 @@
     bx          lr
     ENDP        ; |vpx_loop_filter_neon|
 
-    END
-
 ;void vpx_lpf_horizontal_4_dual_neon(uint8_t *s, int p,
 ;                                    const uint8_t *blimit0,
 ;                                    const uint8_t *limit0,
