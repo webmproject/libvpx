@@ -153,7 +153,7 @@ static void write_mv_update(const aom_tree_index *tree,
     update_mv(w, branch_ct[i], &probs[i], MV_UPDATE_PROB);
 }
 
-void aom_write_nmv_probs(AV1_COMMON *cm, int usehp, aom_writer *w,
+void av1_write_nmv_probs(AV1_COMMON *cm, int usehp, aom_writer *w,
                          nmv_context_counts *const nmv_counts) {
   int i, j;
 #if CONFIG_REF_MV

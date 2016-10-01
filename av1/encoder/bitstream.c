@@ -3511,7 +3511,7 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
       prob_diff_update(av1_intra_mode_tree, cm->fc->y_mode_prob[i],
                        counts->y_mode[i], INTRA_MODES, header_bc);
 
-    aom_write_nmv_probs(cm, cm->allow_high_precision_mv, header_bc,
+    av1_write_nmv_probs(cm, cm->allow_high_precision_mv, header_bc,
 #if CONFIG_REF_MV
                         counts->mv);
 #else
