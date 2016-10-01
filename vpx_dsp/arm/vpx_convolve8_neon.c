@@ -29,7 +29,7 @@
 // instructions. This optimization is much faster in speed unit test, but slowed
 // down the whole decoder by 5%.
 
-static INLINE void load_8x4(const uint8_t *s, const int p, uint8x8_t *s0,
+static INLINE void load_8x4(const uint8_t *s, ptrdiff_t p, uint8x8_t *s0,
                             uint8x8_t *s1, uint8x8_t *s2, uint8x8_t *s3) {
   *s0 = vld1_u8(s);
   s += p;
@@ -40,7 +40,7 @@ static INLINE void load_8x4(const uint8_t *s, const int p, uint8x8_t *s0,
   *s3 = vld1_u8(s);
 }
 
-static INLINE void load_8x8(const uint8_t *s, const int p, uint8x8_t *s0,
+static INLINE void load_8x8(const uint8_t *s, ptrdiff_t p, uint8x8_t *s0,
                             uint8x8_t *s1, uint8x8_t *s2, uint8x8_t *s3,
                             uint8x8_t *s4, uint8x8_t *s5, uint8x8_t *s6,
                             uint8x8_t *s7) {
@@ -61,7 +61,7 @@ static INLINE void load_8x8(const uint8_t *s, const int p, uint8x8_t *s0,
   *s7 = vld1_u8(s);
 }
 
-static INLINE void store_8x8(uint8_t *s, const int p, const uint8x8_t s0,
+static INLINE void store_8x8(uint8_t *s, ptrdiff_t p, const uint8x8_t s0,
                              const uint8x8_t s1, const uint8x8_t s2,
                              const uint8x8_t s3, const uint8x8_t s4,
                              const uint8x8_t s5, const uint8x8_t s6,
