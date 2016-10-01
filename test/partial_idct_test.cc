@@ -201,7 +201,19 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(&vpx_fdct4x4_c, &vpx_idct4x4_16_add_c,
                                  &vpx_idct4x4_1_add_c, TX_4X4, 1)));
 
-#if HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#if HAVE_NEON && !CONFIG_EMULATE_HARDWARE
+#if CONFIG_VP9_HIGHBITDEPTH
+INSTANTIATE_TEST_CASE_P(
+    NEON, PartialIDctTest,
+    ::testing::Values(make_tuple(&vpx_fdct32x32_c, &vpx_idct32x32_1024_add_c,
+                                 &vpx_idct32x32_1_add_neon, TX_32X32, 1),
+                      make_tuple(&vpx_fdct16x16_c, &vpx_idct16x16_256_add_c,
+                                 &vpx_idct16x16_1_add_neon, TX_16X16, 1),
+                      make_tuple(&vpx_fdct8x8_c, &vpx_idct8x8_64_add_c,
+                                 &vpx_idct8x8_1_add_neon, TX_8X8, 1),
+                      make_tuple(&vpx_fdct4x4_c, &vpx_idct4x4_16_add_c,
+                                 &vpx_idct4x4_1_add_neon, TX_4X4, 1)));
+#else   // !CONFIG_VP9_HIGHBITDEPTH
 // 32x32_34_ 32x32_135_ are implemented using the 1024 version.
 INSTANTIATE_TEST_CASE_P(
     NEON, PartialIDctTest,
@@ -229,7 +241,8 @@ INSTANTIATE_TEST_CASE_P(
                                  &vpx_idct4x4_16_add_neon, TX_4X4, 16),
                       make_tuple(&vpx_fdct4x4_c, &vpx_idct4x4_16_add_c,
                                  &vpx_idct4x4_1_add_neon, TX_4X4, 1)));
-#endif  // HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // HAVE_NEON && !CONFIG_EMULATE_HARDWARE
 
 #if HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 // 32x32_135_ is implemented using the 1024 version.
