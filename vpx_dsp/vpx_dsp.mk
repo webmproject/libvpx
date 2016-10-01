@@ -136,9 +136,8 @@ DSP_SRCS-$(ARCH_X86)$(ARCH_X86_64)   += x86/loopfilter_sse2.c
 DSP_SRCS-$(HAVE_AVX2)                += x86/loopfilter_avx2.c
 
 ifeq ($(HAVE_NEON_ASM),yes)
-DSP_SRCS-yes  += arm/loopfilter_neon.c
+DSP_SRCS-yes  += arm/loopfilter_vertical_4_dual_neon.c
 DSP_SRCS-yes  += arm/loopfilter_mb_neon$(ASM)
-DSP_SRCS-yes  += arm/loopfilter_16_neon$(ASM)
 DSP_SRCS-yes  += arm/loopfilter_8_neon$(ASM)
 DSP_SRCS-yes  += arm/loopfilter_4_neon$(ASM)
 else
