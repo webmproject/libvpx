@@ -47,9 +47,6 @@ struct frame_buffers {
    * this struct will be populated with frame buffer management
    * info in future commits. */
 
-  /* enable/disable frame-based threading */
-  int use_frame_threads;
-
   /* decoder instances */
   struct VP8D_COMP *pbi[MAX_FB_MT_DEC];
 };

@@ -439,47 +439,35 @@ int vp8dx_references_buffer(VP8_COMMON *oci, int ref_frame) {
 }
 
 int vp8_create_decoder_instances(struct frame_buffers *fb, VP8D_CONFIG *oxcf) {
-  if (!fb->use_frame_threads) {
-    /* decoder instance for single thread mode */
-    fb->pbi[0] = create_decompressor(oxcf);
-    if (!fb->pbi[0]) return VPX_CODEC_ERROR;
+  /* decoder instance for single thread mode */
+  fb->pbi[0] = create_decompressor(oxcf);
+  if (!fb->pbi[0]) return VPX_CODEC_ERROR;
 
 #if CONFIG_MULTITHREAD
-    if (setjmp(fb->pbi[0]->common.error.jmp)) {
-      vp8_remove_decoder_instances(fb);
-      memset(fb->pbi, 0, sizeof(fb->pbi) / sizeof(fb->pbi[0]));
-      vpx_clear_system_state();
-      return VPX_CODEC_ERROR;
-    }
-
-    fb->pbi[0]->common.error.setjmp = 1;
-    fb->pbi[0]->max_threads = oxcf->max_threads;
-    vp8_decoder_create_threads(fb->pbi[0]);
-    fb->pbi[0]->common.error.setjmp = 0;
-#endif
-  } else {
-    /* TODO : create frame threads and decoder instances for each
-     * thread here */
+  if (setjmp(fb->pbi[0]->common.error.jmp)) {
+    vp8_remove_decoder_instances(fb);
+    memset(fb->pbi, 0, sizeof(fb->pbi) / sizeof(fb->pbi[0]));
+    vpx_clear_system_state();
+    return VPX_CODEC_ERROR;
   }
 
+  fb->pbi[0]->common.error.setjmp = 1;
+  fb->pbi[0]->max_threads = oxcf->max_threads;
+  vp8_decoder_create_threads(fb->pbi[0]);
+  fb->pbi[0]->common.error.setjmp = 0;
+#endif
   return VPX_CODEC_OK;
 }
 
 int vp8_remove_decoder_instances(struct frame_buffers *fb) {
-  if (!fb->use_frame_threads) {
-    VP8D_COMP *pbi = fb->pbi[0];
+  VP8D_COMP *pbi = fb->pbi[0];
 
-    if (!pbi) return VPX_CODEC_ERROR;
+  if (!pbi) return VPX_CODEC_ERROR;
 #if CONFIG_MULTITHREAD
-    vp8_decoder_remove_threads(pbi);
+  vp8_decoder_remove_threads(pbi);
 #endif
 
-    /* decoder instance for single thread mode */
-    remove_decompressor(pbi);
-  } else {
-    /* TODO : remove frame threads and decoder instances for each
-     * thread here */
-  }
-
+  /* decoder instance for single thread mode */
+  remove_decompressor(pbi);
   return VPX_CODEC_OK;
 }
