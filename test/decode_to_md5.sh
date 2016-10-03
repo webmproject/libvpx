@@ -16,10 +16,10 @@
 . $(dirname $0)/tools_common.sh
 
 # Environment check: Make sure input is available:
-#   $VP8_IVF_FILE and $AV1_IVF_FILE are required.
+#   $AOM_IVF_FILE and $AV1_IVF_FILE are required.
 decode_to_md5_verify_environment() {
-  if [ ! -e "${VP8_IVF_FILE}" ] || [ ! -e "${AV1_IVF_FILE}" ]; then
-    echo "Libaom test data must exist in LIBVPX_TEST_DATA_PATH."
+  if [ ! -e "${AOM_IVF_FILE}" ] || [ ! -e "${AV1_IVF_FILE}" ]; then
+    echo "Libaom test data must exist in LIBAOM_TEST_DATA_PATH."
     return 1
   fi
 }
@@ -49,12 +49,12 @@ decode_to_md5() {
   [ "${actual_md5}" = "${expected_md5}" ] || return 1
 }
 
-decode_to_md5_vp8() {
+decode_to_md5_aom() {
   # expected MD5 sum for the last frame.
   local expected_md5="56794d911b02190212bca92f88ad60c6"
 
-  if [ "$(vp8_decode_available)" = "yes" ]; then
-    decode_to_md5 "${VP8_IVF_FILE}" "vp8" "${expected_md5}"
+  if [ "$(aom_decode_available)" = "yes" ]; then
+    decode_to_md5 "${AOM_IVF_FILE}" "aom" "${expected_md5}"
   fi
 }
 
@@ -67,7 +67,7 @@ decode_to_md5_av1() {
   fi
 }
 
-decode_to_md5_tests="decode_to_md5_vp8
+decode_to_md5_tests="decode_to_md5_aom
                      decode_to_md5_av1"
 
 run_tests decode_to_md5_verify_environment "${decode_to_md5_tests}"
