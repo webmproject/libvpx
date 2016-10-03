@@ -180,7 +180,6 @@ static INLINE void IDCT8x8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   *q13s16 = vsubq_s16(q2s16, q5s16);
   *q14s16 = vsubq_s16(q1s16, q6s16);
   *q15s16 = vsubq_s16(q0s16, q7s16);
-  return;
 }
 
 static INLINE void IADST8X8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
@@ -405,7 +404,6 @@ static INLINE void IADST8X8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   *q11s16 = vsubq_s16(q5s16, q2s16);
   *q13s16 = vsubq_s16(q5s16, q6s16);
   *q15s16 = vsubq_s16(q5s16, q4s16);
-  return;
 }
 
 void vp9_iht8x8_64_add_neon(const tran_low_t *input, uint8_t *dest,
@@ -433,7 +431,6 @@ void vp9_iht8x8_64_add_neon(const tran_low_t *input, uint8_t *dest,
     case 0:  // idct_idct is not supported. Fall back to C
       vp9_iht8x8_64_add_c(input, dest, dest_stride, tx_type);
       return;
-      break;
     case 1:  // iadst_idct
       // generate IDCT constants
       // GENERATE_IDCT_CONSTANTS
@@ -540,5 +537,4 @@ void vp9_iht8x8_64_add_neon(const tran_low_t *input, uint8_t *dest,
     vst1_u64((uint64_t *)d2, vreinterpret_u64_u8(d3u8));
     d2 += dest_stride;
   }
-  return;
 }

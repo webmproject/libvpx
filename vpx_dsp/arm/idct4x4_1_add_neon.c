@@ -44,5 +44,4 @@ void vpx_idct4x4_1_add_neon(const tran_low_t *input, uint8_t *dest,
     vst1_lane_u32((uint32_t *)d2, vreinterpret_u32_u8(d6u8), 1);
     d2 += dest_stride;
   }
-  return;
 }
