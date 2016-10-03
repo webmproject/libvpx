@@ -22,6 +22,30 @@
       "revId": "3c00132181fb945dcea2b0fc2ce5e9c5325618b5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "828ac1d9_752522b0",
+        "filename": "vpx_dsp/arm/vpx_convolve8_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-03T19:33:35Z",
+      "side": 0,
+      "message": "yes const on non-pointers/simple types in parameter lists doesn\u0027t buy as much as const on locals for readability. it can be limiting to the implementation.",
+      "parentUuid": "828ac1d9_3287b04d",
+      "range": {
+        "startLine": 32,
+        "startChar": 46,
+        "endLine": 32,
+        "endChar": 51
+      },
+      "revId": "3c00132181fb945dcea2b0fc2ce5e9c5325618b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
