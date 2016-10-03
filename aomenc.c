@@ -2064,8 +2064,9 @@ int main(int argc, const char **argv_) {
           print_time("ETA", estimated_time_left);
         }
 
-      } else
+      } else {
         frame_avail = 0;
+      }
 
       if (frames_in > global.skip_frames) {
 #if CONFIG_AOM_HIGHBITDEPTH
