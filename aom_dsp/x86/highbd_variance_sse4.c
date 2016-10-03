@@ -68,39 +68,42 @@ static INLINE void variance4x4_64_sse4_1(const uint8_t *a8, int a_stride,
 uint32_t aom_highbd_8_variance4x4_sse4_1(const uint8_t *a, int a_stride,
                                          const uint8_t *b, int b_stride,
                                          uint32_t *sse) {
-  int64_t sum;
+  int64_t sum, diff;
   uint64_t local_sse;
 
   variance4x4_64_sse4_1(a, a_stride, b, b_stride, &local_sse, &sum);
   *sse = (uint32_t)local_sse;
 
-  return *sse - (uint32_t)((sum * sum) >> 4);
+  diff = (int64_t)*sse - ((sum * sum) >> 4);
+  return (diff >= 0) ? (uint32_t)diff : 0;
 }
 
 uint32_t aom_highbd_10_variance4x4_sse4_1(const uint8_t *a, int a_stride,
                                           const uint8_t *b, int b_stride,
                                           uint32_t *sse) {
-  int64_t sum;
+  int64_t sum, diff;
   uint64_t local_sse;
 
   variance4x4_64_sse4_1(a, a_stride, b, b_stride, &local_sse, &sum);
   *sse = (uint32_t)ROUND_POWER_OF_TWO(local_sse, 4);
   sum = ROUND_POWER_OF_TWO(sum, 2);
 
-  return *sse - (uint32_t)((sum * sum) >> 4);
+  diff = (int64_t)*sse - ((sum * sum) >> 4);
+  return (diff >= 0) ? (uint32_t)diff : 0;
 }
 
 uint32_t aom_highbd_12_variance4x4_sse4_1(const uint8_t *a, int a_stride,
                                           const uint8_t *b, int b_stride,
                                           uint32_t *sse) {
-  int64_t sum;
+  int64_t sum, diff;
   uint64_t local_sse;
 
   variance4x4_64_sse4_1(a, a_stride, b, b_stride, &local_sse, &sum);
   *sse = (uint32_t)ROUND_POWER_OF_TWO(local_sse, 8);
   sum = ROUND_POWER_OF_TWO(sum, 4);
 
-  return *sse - (uint32_t)((sum * sum) >> 4);
+  diff = (int64_t)*sse - ((sum * sum) >> 4);
+  return diff >= 0 ? (uint32_t)diff : 0;
 }
 
 // Sub-pixel
