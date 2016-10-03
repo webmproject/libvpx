@@ -120,6 +120,7 @@ class InvalidFileTest : public ::libvpx_test::DecoderTest,
 
 TEST_P(InvalidFileTest, ReturnCode) { RunTest(); }
 
+#if CONFIG_VP9_DECODER
 const DecodeParam kVP9InvalidFileTests[] = {
   { 1, "invalid-vp90-02-v2.webm" },
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -147,6 +148,7 @@ const DecodeParam kVP9InvalidFileTests[] = {
 
 VP9_INSTANTIATE_TEST_CASE(InvalidFileTest,
                           ::testing::ValuesIn(kVP9InvalidFileTests));
+#endif  // CONFIG_VP9_DECODER
 
 // This class will include test vectors that are expected to fail
 // peek. However they are still expected to have no fatal failures.
