@@ -16,10 +16,10 @@
 . $(dirname $0)/tools_common.sh
 
 # Environment check: Make sure input is available:
-#   $VP8_IVF_FILE and $AV1_IVF_FILE are required.
+#   $AOM_IVF_FILE and $AV1_IVF_FILE are required.
 decode_with_drops_verify_environment() {
-  if [ ! -e "${VP8_IVF_FILE}" ] || [ ! -e "${AV1_IVF_FILE}" ]; then
-    echo "Libaom test data must exist in LIBVPX_TEST_DATA_PATH."
+  if [ ! -e "${AOM_IVF_FILE}" ] || [ ! -e "${AV1_IVF_FILE}" ]; then
+    echo "Libaom test data must exist in LIBAOM_TEST_DATA_PATH."
     return 1
   fi
 }
@@ -45,17 +45,17 @@ decode_with_drops() {
   [ -e "${output_file}" ] || return 1
 }
 
-# Decodes $VP8_IVF_FILE while dropping frames, twice: once in sequence mode,
+# Decodes $AOM_IVF_FILE while dropping frames, twice: once in sequence mode,
 # and once in pattern mode.
-# Note: This test assumes that $VP8_IVF_FILE has exactly 29 frames, and could
+# Note: This test assumes that $AOM_IVF_FILE has exactly 29 frames, and could
 # break if the file is modified.
-decode_with_drops_vp8() {
-  if [ "$(vp8_decode_available)" = "yes" ]; then
+decode_with_drops_aom() {
+  if [ "$(aom_decode_available)" = "yes" ]; then
     # Test sequence mode: Drop frames 2-28.
-    decode_with_drops "${VP8_IVF_FILE}" "vp8" "2-28"
+    decode_with_drops "${AOM_IVF_FILE}" "aom" "2-28"
 
     # Test pattern mode: Drop 3 of every 4 frames.
-    decode_with_drops "${VP8_IVF_FILE}" "vp8" "3/4"
+    decode_with_drops "${AOM_IVF_FILE}" "aom" "3/4"
   fi
 }
 
@@ -73,7 +73,7 @@ decode_with_drops_av1() {
   fi
 }
 
-decode_with_drops_tests="decode_with_drops_vp8
+decode_with_drops_tests="decode_with_drops_aom
                          decode_with_drops_av1"
 
 run_tests decode_with_drops_verify_environment "${decode_with_drops_tests}"
