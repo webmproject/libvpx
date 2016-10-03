@@ -387,6 +387,7 @@ typedef struct macroblockd {
   int bd;
 #endif
 
+  int qindex[MAX_SEGMENTS];
   int lossless[MAX_SEGMENTS];
   int corrupted;
 

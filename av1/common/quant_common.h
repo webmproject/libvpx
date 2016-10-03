@@ -15,6 +15,7 @@
 #include "aom/aom_codec.h"
 #include "av1/common/seg_common.h"
 #include "av1/common/enums.h"
+#include "av1/common/entropy.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,7 +46,7 @@ int av1_get_qindex(const struct segmentation *seg, int segment_id,
 #if CONFIG_AOM_QM
 // Reduce the large number of quantizers to a smaller number of levels for which
 // different matrices may be defined
-static inline int aom_get_qmlevel(int qindex, int first, int last) {
+static INLINE int aom_get_qmlevel(int qindex, int first, int last) {
   int qmlevel = (qindex * (last + 1 - first) + QINDEX_RANGE / 2) / QINDEX_RANGE;
   qmlevel = AOMMIN(qmlevel + first, NUM_QM_LEVELS - 1);
   return qmlevel;
@@ -59,22 +60,41 @@ qm_val_t *aom_qmatrix(struct AV1Common *cm, int qindex, int comp,
 
 #if CONFIG_NEW_QUANT
 
-#define QUANT_PROFILES 3
+#define QUANT_PROFILES 4
 #define QUANT_RANGES 2
 #define NUQ_KNOTS 3
 
 typedef tran_low_t dequant_val_type_nuq[NUQ_KNOTS + 1];
 typedef tran_low_t cuml_bins_type_nuq[NUQ_KNOTS];
-void av1_get_dequant_val_nuq(int q, int qindex, int band, tran_low_t *dq,
+void av1_get_dequant_val_nuq(int q, int band, tran_low_t *dq,
                              tran_low_t *cuml_bins, int dq_off_index);
 tran_low_t av1_dequant_abscoeff_nuq(int v, int q, const tran_low_t *dq);
 tran_low_t av1_dequant_coeff_nuq(int v, int q, const tran_low_t *dq);
 
-static INLINE int get_dq_profile_from_ctx(int q_ctx, int is_inter,
+static INLINE int qindex_to_qrange(int qindex) {
+  return (qindex < 140 ? 1 : 0);
+}
+
+static INLINE int get_dq_profile_from_ctx(int qindex, int q_ctx, int is_inter,
                                           PLANE_TYPE plane_type) {
-  if (plane_type == PLANE_TYPE_UV) return 0;
-  if (!is_inter) return QUANT_PROFILES - 1;
-  return AOMMIN(q_ctx, QUANT_PROFILES - 1);
+  // intra/inter, Y/UV, ctx, qrange
+  static const int
+      def_dq_profile_lookup[REF_TYPES][PLANE_TYPES][COEFF_CONTEXTS0]
+                           [QUANT_RANGES] = {
+                             {
+                                 // intra
+                                 { { 2, 1 }, { 2, 1 }, { 2, 1 } },  // Y
+                                 { { 3, 1 }, { 3, 1 }, { 3, 1 } },  // UV
+                             },
+                             {
+                                 // inter
+                                 { { 3, 1 }, { 2, 1 }, { 2, 1 } },  // Y
+                                 { { 3, 1 }, { 3, 1 }, { 3, 1 } },  // UV
+                             },
+                           };
+  if (!qindex) return 0;  // lossless
+  return def_dq_profile_lookup[is_inter][plane_type][q_ctx]
+                              [qindex_to_qrange(qindex)];
 }
 #endif  // CONFIG_NEW_QUANT
 

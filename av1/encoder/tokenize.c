@@ -560,9 +560,9 @@ int av1_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
 }
 
 #if CONFIG_VAR_TX
-void tokenize_tx(ThreadData *td, TOKENEXTRA **t, int dry_run, TX_SIZE tx_size,
-                 BLOCK_SIZE plane_bsize, int blk_row, int blk_col, int block,
-                 int plane, void *arg) {
+void tokenize_vartx(ThreadData *td, TOKENEXTRA **t, int dry_run,
+                    TX_SIZE tx_size, BLOCK_SIZE plane_bsize, int blk_row,
+                    int blk_col, int block, int plane, void *arg) {
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
@@ -610,13 +610,13 @@ void tokenize_tx(ThreadData *td, TOKENEXTRA **t, int dry_run, TX_SIZE tx_size,
 
       if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide) continue;
 
-      tokenize_tx(td, t, dry_run, tx_size - 1, plane_bsize, offsetr, offsetc,
-                  block + i * step, plane, arg);
+      tokenize_vartx(td, t, dry_run, tx_size - 1, plane_bsize, offsetr, offsetc,
+                     block + i * step, plane, arg);
     }
   }
 }
 
-void av1_tokenize_sb_inter(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
+void av1_tokenize_sb_vartx(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
                            int dry_run, int mi_row, int mi_col,
                            BLOCK_SIZE bsize) {
   AV1_COMMON *const cm = &cpi->common;
@@ -656,8 +656,8 @@ void av1_tokenize_sb_inter(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
     int step = num_4x4_blocks_txsize_lookup[max_tx_size];
     for (idy = 0; idy < mi_height; idy += bh) {
       for (idx = 0; idx < mi_width; idx += bh) {
-        tokenize_tx(td, t, dry_run, max_tx_size, plane_bsize, idy, idx, block,
-                    plane, &arg);
+        tokenize_vartx(td, t, dry_run, max_tx_size, plane_bsize, idy, idx,
+                       block, plane, &arg);
         block += step;
       }
     }

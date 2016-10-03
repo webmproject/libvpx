@@ -57,7 +57,7 @@ struct AV1_COMP;
 struct ThreadData;
 
 #if CONFIG_VAR_TX
-void av1_tokenize_sb_inter(struct AV1_COMP *cpi, struct ThreadData *td,
+void av1_tokenize_sb_vartx(struct AV1_COMP *cpi, struct ThreadData *td,
                            TOKENEXTRA **t, int dry_run, int mi_row, int mi_col,
                            BLOCK_SIZE bsize);
 #endif
