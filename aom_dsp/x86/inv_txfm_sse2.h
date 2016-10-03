@@ -19,6 +19,14 @@
 #include "aom_dsp/x86/txfm_common_sse2.h"
 
 // perform 8x8 transpose
+static INLINE void array_transpose_4x4(__m128i *res) {
+  const __m128i tr0_0 = _mm_unpacklo_epi16(res[0], res[1]);
+  const __m128i tr0_1 = _mm_unpackhi_epi16(res[0], res[1]);
+
+  res[0] = _mm_unpacklo_epi16(tr0_0, tr0_1);
+  res[1] = _mm_unpackhi_epi16(tr0_0, tr0_1);
+}
+
 static INLINE void array_transpose_8x8(__m128i *in, __m128i *res) {
   const __m128i tr0_0 = _mm_unpacklo_epi16(in[0], in[1]);
   const __m128i tr0_1 = _mm_unpacklo_epi16(in[2], in[3]);

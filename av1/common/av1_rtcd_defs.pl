@@ -91,10 +91,10 @@ if (aom_config("CONFIG_AOM_HIGHBITDEPTH") eq "yes") {
 
     if (aom_config("CONFIG_EXT_TX") eq "yes") {
       add_proto qw/void av1_iht4x8_32_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int tx_type";
-      specialize qw/av1_iht4x8_32_add/;
+      specialize qw/av1_iht4x8_32_add sse2/;
 
       add_proto qw/void av1_iht8x4_32_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int tx_type";
-      specialize qw/av1_iht8x4_32_add/;
+      specialize qw/av1_iht8x4_32_add sse2/;
 
       add_proto qw/void av1_iht8x16_128_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int tx_type";
       specialize qw/av1_iht8x16_128_add sse2/;
@@ -152,10 +152,10 @@ if (aom_config("CONFIG_AOM_HIGHBITDEPTH") eq "yes") {
 
     if (aom_config("CONFIG_EXT_TX") eq "yes") {
       add_proto qw/void av1_iht4x8_32_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int tx_type";
-      specialize qw/av1_iht4x8_32_add/;
+      specialize qw/av1_iht4x8_32_add sse2/;
 
       add_proto qw/void av1_iht8x4_32_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int tx_type";
-      specialize qw/av1_iht8x4_32_add/;
+      specialize qw/av1_iht8x4_32_add sse2/;
 
       add_proto qw/void av1_iht8x16_128_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int tx_type";
       specialize qw/av1_iht8x16_128_add sse2/;
@@ -395,10 +395,10 @@ specialize qw/av1_fht32x32/;
 
 if (aom_config("CONFIG_EXT_TX") eq "yes") {
   add_proto qw/void av1_fht4x8/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
-  specialize qw/av1_fht4x8/;
+  specialize qw/av1_fht4x8 sse2/;
 
   add_proto qw/void av1_fht8x4/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
-  specialize qw/av1_fht8x4/;
+  specialize qw/av1_fht8x4 sse2/;
 
   add_proto qw/void av1_fht8x16/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
   specialize qw/av1_fht8x16 sse2/;
