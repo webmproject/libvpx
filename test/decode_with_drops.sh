@@ -18,8 +18,7 @@
 # Environment check: Make sure input is available:
 #   $AOM_IVF_FILE and $AV1_IVF_FILE are required.
 decode_with_drops_verify_environment() {
-  if [ ! -e "${AOM_IVF_FILE}" ] || [ ! -e "${AV1_IVF_FILE}" ]; then
-    echo "Libaom test data must exist in LIBAOM_TEST_DATA_PATH."
+  if [ "$(av1_encode_available)" != "yes" ] && [ ! -e "${AV1_IVF_FILE}" ]; then
     return 1
   fi
 }
@@ -45,35 +44,24 @@ decode_with_drops() {
   [ -e "${output_file}" ] || return 1
 }
 
-# Decodes $AOM_IVF_FILE while dropping frames, twice: once in sequence mode,
-# and once in pattern mode.
-# Note: This test assumes that $AOM_IVF_FILE has exactly 29 frames, and could
-# break if the file is modified.
-decode_with_drops_aom() {
-  if [ "$(aom_decode_available)" = "yes" ]; then
-    # Test sequence mode: Drop frames 2-28.
-    decode_with_drops "${AOM_IVF_FILE}" "aom" "2-28"
-
-    # Test pattern mode: Drop 3 of every 4 frames.
-    decode_with_drops "${AOM_IVF_FILE}" "aom" "3/4"
-  fi
-}
 
 # Decodes $AV1_IVF_FILE while dropping frames, twice: once in sequence mode,
 # and once in pattern mode.
-# Note: This test assumes that $AV1_IVF_FILE has exactly 20 frames, and could
-# break if the file is modified.
 decode_with_drops_av1() {
   if [ "$(av1_decode_available)" = "yes" ]; then
-    # Test sequence mode: Drop frames 2-28.
-    decode_with_drops "${AV1_IVF_FILE}" "av1" "2-19"
+    local file="${AV1_IVF_FILE}"
+    if [ ! -e "${AV1_IVF_FILE}" ]; then
+      file="${AOM_TEST_OUTPUT_DIR}/test_encode.ivf"
+      encode_yuv_raw_input_av1 "${file}" --ivf
+    fi
+    # Drop frames 2 and 3.
+    decode_with_drops "${file}" "av1" "2-3"
 
     # Test pattern mode: Drop 3 of every 4 frames.
-    decode_with_drops "${AV1_IVF_FILE}" "av1" "3/4"
+    decode_with_drops "${file}" "av1" "3/4"
   fi
 }
 
-decode_with_drops_tests="decode_with_drops_aom
-                         decode_with_drops_av1"
+decode_with_drops_tests="decode_with_drops_av1"
 
 run_tests decode_with_drops_verify_environment "${decode_with_drops_tests}"
