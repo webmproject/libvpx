@@ -73,6 +73,7 @@ typedef struct InterpFilterParams {
   const int16_t *filter_ptr;
   uint16_t taps;
   uint16_t subpel_shifts;
+  InterpFilter interp_filter;
 } InterpFilterParams;
 
 InterpFilterParams av1_get_interp_filter_params(
@@ -90,33 +91,6 @@ static INLINE int av1_is_interpolating_filter(
   const InterpFilterParams ip = av1_get_interp_filter_params(interp_filter);
   return (ip.filter_ptr[ip.taps / 2 - 1] == 128);
 }
-
-#if USE_TEMPORALFILTER_12TAP
-DECLARE_ALIGNED(16, extern const int16_t,
-                av1_sub_pel_filters_temporalfilter_12[SUBPEL_SHIFTS][12]);
-#endif
-
-#if CONFIG_EXT_INTERP
-DECLARE_ALIGNED(256, extern const int16_t,
-                av1_sub_pel_filters_10sharp[SUBPEL_SHIFTS][10]);
-DECLARE_ALIGNED(16, extern const int16_t,
-                av1_sub_pel_filters_12sharp[SUBPEL_SHIFTS][12]);
-#endif
-
-typedef const int8_t (*SubpelFilterCoeffs)[16];
-#if CONFIG_AOM_HIGHBITDEPTH
-typedef const int16_t (*HbdSubpelFilterCoeffs)[8];
-#endif
-
-SubpelFilterCoeffs av1_get_subpel_filter_signal_dir(const InterpFilterParams p,
-                                                    int index);
-
-SubpelFilterCoeffs av1_get_subpel_filter_ver_signal_dir(
-    const InterpFilterParams p, int index);
-#if CONFIG_AOM_HIGHBITDEPTH
-HbdSubpelFilterCoeffs av1_hbd_get_subpel_filter_ver_signal_dir(
-    const InterpFilterParams p, int index);
-#endif
 
 #ifdef __cplusplus
 }  // extern "C"
