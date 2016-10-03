@@ -1,0 +1,101 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "828ac1d9_d5318e10",
+        "filename": "av1/common/x86/av1_convolve_ssse3.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-03T19:31:42Z",
+      "side": 1,
+      "message": "this is redundant now",
+      "range": {
+        "startLine": 23,
+        "startChar": 22,
+        "endLine": 23,
+        "endChar": 35
+      },
+      "revId": "82f6fa8c855e767066132e7346fc8e3de21b6102",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "828ac1d9_75368209",
+        "filename": "av1/common/x86/av1_highbd_convolve_sse4.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-03T19:31:42Z",
+      "side": 1,
+      "message": "this is redundant now",
+      "range": {
+        "startLine": 25,
+        "startChar": 22,
+        "endLine": 25,
+        "endChar": 36
+      },
+      "revId": "82f6fa8c855e767066132e7346fc8e3de21b6102",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "828ac1d9_551d7e81",
+        "filename": "av1/common/x86/convolve_filter_ssse3.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-03T19:31:42Z",
+      "side": 1,
+      "message": "you need to add a trailing \u0027_\u0027\n\nhttps://google.github.io/styleguide/cppguide.html#The__define_Guard",
+      "revId": "82f6fa8c855e767066132e7346fc8e3de21b6102",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "828ac1d9_151db670",
+        "filename": "av1/common/x86/convolve_filter_ssse3.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-03T19:31:42Z",
+      "side": 1,
+      "message": "note relying on this to get aom_config.h is fragile, you should include that directly here",
+      "revId": "82f6fa8c855e767066132e7346fc8e3de21b6102",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "828ac1d9_b52baa85",
+        "filename": "av1/common/x86/highbd_convolve_filter_sse4.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-03T19:31:42Z",
+      "side": 1,
+      "message": "same comments in this file as the ssse3 one",
+      "revId": "82f6fa8c855e767066132e7346fc8e3de21b6102",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
