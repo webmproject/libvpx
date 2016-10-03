@@ -42,12 +42,7 @@ const aom_tree_index av1_mv_fp_tree[TREE_SIZE(MV_FP_SIZE)] = { -0, 2,  -1,
                                                                4,  -2, -3 };
 
 static const nmv_context default_nmv_context = {
-#if CONFIG_REF_MV
-  { 1, 64, 96 },
-  128,
-#else
   { 32, 64, 96 },
-#endif
   { {
         // Vertical component
         128,                                                   // sign
@@ -175,11 +170,6 @@ static void inc_mv_component(int v, nmv_component_counts *comp_counts, int incr,
 void av1_inc_mv(const MV *mv, nmv_context_counts *counts, const int usehp) {
   if (counts != NULL) {
     const MV_JOINT_TYPE j = av1_get_mv_joint(mv);
-
-#if CONFIG_REF_MV
-    ++counts->zero_rmv[j == MV_JOINT_ZERO];
-    if (j == MV_JOINT_ZERO) return;
-#endif
     ++counts->joints[j];
 
     if (mv_joint_vertical(j))
@@ -202,8 +192,6 @@ void av1_adapt_mv_probs(AV1_COMMON *cm, int allow_hp) {
 
     aom_tree_merge_probs(av1_mv_joint_tree, pre_fc->joints, counts->joints,
                          fc->joints);
-    fc->zero_rmv = av1_mode_mv_merge_probs(pre_fc->zero_rmv, counts->zero_rmv);
-
     for (i = 0; i < 2; ++i) {
       nmv_component *comp = &fc->comps[i];
       const nmv_component *pre_comp = &pre_fc->comps[i];

@@ -197,10 +197,6 @@ static void read_mv_probs(nmv_context *ctx, int allow_hp, aom_reader *r) {
 
   update_mv_probs(ctx->joints, MV_JOINTS - 1, r);
 
-#if CONFIG_REF_MV
-  av1_diff_update_prob(r, &ctx->zero_rmv);
-#endif
-
   for (i = 0; i < 2; ++i) {
     nmv_component *const comp_ctx = &ctx->comps[i];
     update_mv_probs(&comp_ctx->sign, 1, r);

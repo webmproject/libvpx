@@ -164,8 +164,6 @@ void av1_write_nmv_probs(AV1_COMMON *cm, int usehp, aom_writer *w,
     write_mv_update(av1_mv_joint_tree, mvc->joints, counts->joints, MV_JOINTS,
                     w);
 
-    av1_cond_prob_diff_update(w, &mvc->zero_rmv, counts->zero_rmv);
-
     for (i = 0; i < 2; ++i) {
       nmv_component *comp = &mvc->comps[i];
       nmv_component_counts *comp_counts = &counts->comps[i];
@@ -242,20 +240,9 @@ void av1_encode_mv(AV1_COMP *cpi, aom_writer *w, const MV *mv, const MV *ref,
   const MV diff = { mv->row - ref->row, mv->col - ref->col };
   const MV_JOINT_TYPE j = av1_get_mv_joint(&diff);
   usehp = usehp && av1_use_mv_hp(ref);
-
-#if CONFIG_REF_MV && !CONFIG_EXT_INTER
-  if (is_compound) {
-    aom_write(w, (j == MV_JOINT_ZERO), mvctx->zero_rmv);
-    if (j == MV_JOINT_ZERO) return;
-  } else {
-    if (j == MV_JOINT_ZERO) assert(0);
-  }
-#endif
-
-#if CONFIG_REF_MV && CONFIG_EXT_INTER
+#if CONFIG_REF_MV
   (void)is_compound;
 #endif
-
   av1_write_token(w, av1_mv_joint_tree, mvctx->joints, &mv_joint_encodings[j]);
   if (mv_joint_vertical(j))
     encode_mv_component(w, diff.row, &mvctx->comps[0], usehp);
