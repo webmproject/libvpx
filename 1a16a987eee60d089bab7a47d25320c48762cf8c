@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c2a5991c_ce80c3fe",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-04T21:39:51Z",
+      "side": 1,
+      "message": "use BUG\u003d... to have the bug auto-updated on submit",
+      "revId": "1a16a987eee60d089bab7a47d25320c48762cf8c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
