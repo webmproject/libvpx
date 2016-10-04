@@ -47,7 +47,11 @@ SIMD_INLINE v64 v64_from_32(uint32_t x, uint32_t y) {
 }
 
 SIMD_INLINE v64 v64_from_64(uint64_t x) {
+#ifdef __x86_64__
+  return _mm_cvtsi64_si128(x);
+#else
   return _mm_set_epi32(0, 0, x >> 32, (uint32_t)x);
+#endif
 }
 
 SIMD_INLINE uint64_t v64_u64(v64 x) {
@@ -168,7 +172,7 @@ SIMD_INLINE v64 v64_pack_s16_s8(v64 a, v64 b) {
 SIMD_INLINE v64 v64_unziphi_8(v64 a, v64 b) {
 #if defined(__SSSE3__)
   return _mm_shuffle_epi8(_mm_unpacklo_epi64(b, a),
-                          _mm_cvtsi64_si128(0x0f0d0b0907050301LL));
+                          v64_from_64(0x0f0d0b0907050301LL));
 #else
   return _mm_packus_epi16(
       _mm_unpacklo_epi64(_mm_srli_epi16(b, 8), _mm_srli_epi16(a, 8)),
@@ -179,7 +183,7 @@ SIMD_INLINE v64 v64_unziphi_8(v64 a, v64 b) {
 SIMD_INLINE v64 v64_unziplo_8(v64 a, v64 b) {
 #if defined(__SSSE3__)
   return _mm_shuffle_epi8(_mm_unpacklo_epi64(b, a),
-                          _mm_cvtsi64_si128(0x0e0c0a0806040200LL));
+                          v64_from_64(0x0e0c0a0806040200LL));
 #else
   return v64_unziphi_8(_mm_slli_si128(a, 1), _mm_slli_si128(b, 1));
 #endif
@@ -188,7 +192,7 @@ SIMD_INLINE v64 v64_unziplo_8(v64 a, v64 b) {
 SIMD_INLINE v64 v64_unziphi_16(v64 a, v64 b) {
 #if defined(__SSSE3__)
   return _mm_shuffle_epi8(_mm_unpacklo_epi64(b, a),
-                          _mm_cvtsi64_si128(0x0f0e0b0a07060302LL));
+                          v64_from_64(0x0f0e0b0a07060302LL));
 #else
   return _mm_packs_epi32(
       _mm_unpacklo_epi64(_mm_srai_epi32(b, 16), _mm_srai_epi32(a, 16)),
@@ -199,7 +203,7 @@ SIMD_INLINE v64 v64_unziphi_16(v64 a, v64 b) {
 SIMD_INLINE v64 v64_unziplo_16(v64 a, v64 b) {
 #if defined(__SSSE3__)
   return _mm_shuffle_epi8(_mm_unpacklo_epi64(b, a),
-                          _mm_cvtsi64_si128(0x0d0c090805040100LL));
+                          v64_from_64(0x0d0c090805040100LL));
 #else
   return v64_unziphi_16(_mm_slli_si128(a, 2), _mm_slli_si128(b, 2));
 #endif
