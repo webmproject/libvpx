@@ -16,6 +16,24 @@
       "revId": "24c0146403e357ac84b7ddc125c7f2d75f83411a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2a5991c_2b87b94c",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-04T21:30:46Z",
+      "side": 1,
+      "message": "my mistake I forgot it redirected the unadorned version:\n\n#define vpx_idct32x32_135_add vpx_idct32x32_1024_add_neon",
+      "parentUuid": "025df1d3_080c67e2",
+      "revId": "24c0146403e357ac84b7ddc125c7f2d75f83411a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
