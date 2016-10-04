@@ -2041,7 +2041,7 @@ void vp8_remove_compressor(VP8_COMP **ptr) {
 
           fprintf(f,
                   "Layer\tBitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\t"
-                  "GLPsnrP\tVPXSSIM\t\n");
+                  "GLPsnrP\tVPXSSIM\n");
           for (i = 0; i < (int)cpi->oxcf.number_of_layers; ++i) {
             double dr =
                 (double)cpi->bytes_in_layer[i] * 8.0 / 1000.0 / time_encoded;
@@ -2073,14 +2073,12 @@ void vp8_remove_compressor(VP8_COMP **ptr) {
 
           fprintf(f,
                   "Bitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\t"
-                  "GLPsnrP\tVPXSSIM\tTime(us)\tRc-Err\t"
-                  "Abs Err\n");
+                  "GLPsnrP\tVPXSSIM\n");
           fprintf(f,
                   "%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t"
-                  "%7.3f\t%8.0f\t%7.2f\t%7.2f\n",
+                  "%7.3f\n",
                   dr, cpi->total / cpi->count, total_psnr,
-                  cpi->totalp / cpi->count, total_psnr2, total_ssim,
-                  total_encode_time, rate_err, fabs(rate_err));
+                  cpi->totalp / cpi->count, total_psnr2, total_ssim);
         }
       }
       fclose(f);
