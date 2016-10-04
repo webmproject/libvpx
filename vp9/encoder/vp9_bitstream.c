@@ -80,8 +80,8 @@ static void prob_diff_update(const vpx_tree_index *tree,
     vp9_cond_prob_diff_update(w, &probs[i], branch_ct[i]);
 }
 
-static void write_selected_tx_size(const VP9_COMMON *cm, const MACROBLOCKD *xd,
-                                   vpx_writer *w) {
+static void write_selected_tx_size(const VP9_COMMON *cm,
+                                   const MACROBLOCKD *const xd, vpx_writer *w) {
   TX_SIZE tx_size = xd->mi[0]->tx_size;
   BLOCK_SIZE bsize = xd->mi[0]->sb_type;
   const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
@@ -95,7 +95,7 @@ static void write_selected_tx_size(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   }
 }
 
-static int write_skip(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+static int write_skip(const VP9_COMMON *cm, const MACROBLOCKD *const xd,
                       int segment_id, const MODE_INFO *mi, vpx_writer *w) {
   if (segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)) {
     return 1;
@@ -195,7 +195,7 @@ static void write_segment_id(vpx_writer *w, const struct segmentation *seg,
 }
 
 // This function encodes the reference frame
-static void write_ref_frames(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+static void write_ref_frames(const VP9_COMMON *cm, const MACROBLOCKD *const xd,
                              vpx_writer *w) {
   const MODE_INFO *const mi = xd->mi[0];
   const int is_compound = has_second_ref(mi);
@@ -230,14 +230,13 @@ static void write_ref_frames(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   }
 }
 
-static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
+static void pack_inter_mode_mvs(VP9_COMP *cpi, const MACROBLOCKD *const xd,
+                                const MB_MODE_INFO_EXT *const mbmi_ext,
                                 vpx_writer *w) {
   VP9_COMMON *const cm = &cpi->common;
   const nmv_context *nmvc = &cm->fc->nmvc;
-  const MACROBLOCK *const x = &cpi->td.mb;
-  const MACROBLOCKD *const xd = &x->e_mbd;
   const struct segmentation *const seg = &cm->seg;
-  const MB_MODE_INFO_EXT *const mbmi_ext = x->mbmi_ext;
+  const MODE_INFO *const mi = xd->mi[0];
   const PREDICTION_MODE mode = mi->mode;
   const int segment_id = mi->segment_id;
   const BLOCK_SIZE bsize = mi->sb_type;
@@ -333,9 +332,9 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 }
 
 static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
-                              MODE_INFO **mi_8x8, vpx_writer *w) {
+                              vpx_writer *w) {
   const struct segmentation *const seg = &cm->seg;
-  const MODE_INFO *const mi = mi_8x8[0];
+  const MODE_INFO *const mi = xd->mi[0];
   const MODE_INFO *const above_mi = xd->above_mi;
   const MODE_INFO *const left_mi = xd->left_mi;
   const BLOCK_SIZE bsize = mi->sb_type;
@@ -366,27 +365,25 @@ static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   write_intra_mode(w, mi->uv_mode, vp9_kf_uv_mode_prob[mi->mode]);
 }
 
-static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
-                          vpx_writer *w, TOKENEXTRA **tok,
-                          const TOKENEXTRA *const tok_end, int mi_row,
-                          int mi_col) {
+static void write_modes_b(VP9_COMP *cpi, MACROBLOCKD *const xd,
+                          const TileInfo *const tile, vpx_writer *w,
+                          TOKENEXTRA **tok, const TOKENEXTRA *const tok_end,
+                          int mi_row, int mi_col) {
   const VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
+  const MB_MODE_INFO_EXT *const mbmi_ext =
+      cpi->td.mb.mbmi_ext_base + (mi_row * cm->mi_cols + mi_col);
   MODE_INFO *m;
 
   xd->mi = cm->mi_grid_visible + (mi_row * cm->mi_stride + mi_col);
   m = xd->mi[0];
 
-  cpi->td.mb.mbmi_ext =
-      cpi->td.mb.mbmi_ext_base + (mi_row * cm->mi_cols + mi_col);
-
   set_mi_row_col(xd, tile, mi_row, num_8x8_blocks_high_lookup[m->sb_type],
                  mi_col, num_8x8_blocks_wide_lookup[m->sb_type], cm->mi_rows,
                  cm->mi_cols);
   if (frame_is_intra_only(cm)) {
-    write_mb_modes_kf(cm, xd, xd->mi, w);
+    write_mb_modes_kf(cm, xd, w);
   } else {
-    pack_inter_mode_mvs(cpi, m, w);
+    pack_inter_mode_mvs(cpi, xd, mbmi_ext, w);
   }
 
   assert(*tok < tok_end);
@@ -415,13 +412,11 @@ static void write_partition(const VP9_COMMON *const cm,
   }
 }
 
-static void write_modes_sb(VP9_COMP *cpi, const TileInfo *const tile,
-                           vpx_writer *w, TOKENEXTRA **tok,
-                           const TOKENEXTRA *const tok_end, int mi_row,
-                           int mi_col, BLOCK_SIZE bsize) {
+static void write_modes_sb(VP9_COMP *cpi, MACROBLOCKD *const xd,
+                           const TileInfo *const tile, vpx_writer *w,
+                           TOKENEXTRA **tok, const TOKENEXTRA *const tok_end,
+                           int mi_row, int mi_col, BLOCK_SIZE bsize) {
   const VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
-
   const int bsl = b_width_log2_lookup[bsize];
   const int bs = (1 << bsl) / 4;
   PARTITION_TYPE partition;
@@ -436,29 +431,29 @@ static void write_modes_sb(VP9_COMP *cpi, const TileInfo *const tile,
   write_partition(cm, xd, bs, mi_row, mi_col, partition, bsize, w);
   subsize = get_subsize(bsize, partition);
   if (subsize < BLOCK_8X8) {
-    write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
+    write_modes_b(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col);
   } else {
     switch (partition) {
       case PARTITION_NONE:
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
+        write_modes_b(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col);
         break;
       case PARTITION_HORZ:
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
+        write_modes_b(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col);
         if (mi_row + bs < cm->mi_rows)
-          write_modes_b(cpi, tile, w, tok, tok_end, mi_row + bs, mi_col);
+          write_modes_b(cpi, xd, tile, w, tok, tok_end, mi_row + bs, mi_col);
         break;
       case PARTITION_VERT:
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
+        write_modes_b(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col);
         if (mi_col + bs < cm->mi_cols)
-          write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col + bs);
+          write_modes_b(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col + bs);
         break;
       case PARTITION_SPLIT:
-        write_modes_sb(cpi, tile, w, tok, tok_end, mi_row, mi_col, subsize);
-        write_modes_sb(cpi, tile, w, tok, tok_end, mi_row, mi_col + bs,
+        write_modes_sb(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col, subsize);
+        write_modes_sb(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col + bs,
                        subsize);
-        write_modes_sb(cpi, tile, w, tok, tok_end, mi_row + bs, mi_col,
+        write_modes_sb(cpi, xd, tile, w, tok, tok_end, mi_row + bs, mi_col,
                        subsize);
-        write_modes_sb(cpi, tile, w, tok, tok_end, mi_row + bs, mi_col + bs,
+        write_modes_sb(cpi, xd, tile, w, tok, tok_end, mi_row + bs, mi_col + bs,
                        subsize);
         break;
       default: assert(0);
@@ -471,11 +466,10 @@ static void write_modes_sb(VP9_COMP *cpi, const TileInfo *const tile,
     update_partition_context(xd, mi_row, mi_col, subsize, bsize);
 }
 
-static void write_modes(VP9_COMP *cpi, const TileInfo *const tile,
-                        vpx_writer *w, TOKENEXTRA **tok,
-                        const TOKENEXTRA *const tok_end) {
+static void write_modes(VP9_COMP *cpi, MACROBLOCKD *const xd,
+                        const TileInfo *const tile, vpx_writer *w,
+                        TOKENEXTRA **tok, const TOKENEXTRA *const tok_end) {
   const VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   int mi_row, mi_col;
 
   set_partition_probs(cm, xd);
@@ -485,7 +479,8 @@ static void write_modes(VP9_COMP *cpi, const TileInfo *const tile,
     vp9_zero(xd->left_seg_context);
     for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
          mi_col += MI_BLOCK_SIZE)
-      write_modes_sb(cpi, tile, w, tok, tok_end, mi_row, mi_col, BLOCK_64X64);
+      write_modes_sb(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col,
+                     BLOCK_64X64);
   }
 }
 
@@ -902,6 +897,7 @@ int vp9_get_refresh_mask(VP9_COMP *cpi) {
 
 static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
   VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   vpx_writer residual_bc;
   int tile_row, tile_col;
   TOKENEXTRA *tok_end;
@@ -925,8 +921,8 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
       else
         vpx_start_encode(&residual_bc, data_ptr + total_size);
 
-      write_modes(cpi, &cpi->tile_data[tile_idx].tile_info, &residual_bc, &tok,
-                  tok_end);
+      write_modes(cpi, xd, &cpi->tile_data[tile_idx].tile_info, &residual_bc,
+                  &tok, tok_end);
       assert(tok == tok_end);
       vpx_stop_encode(&residual_bc);
       if (tile_col < tile_cols - 1 || tile_row < tile_rows - 1) {
