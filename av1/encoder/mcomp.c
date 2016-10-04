@@ -2591,7 +2591,7 @@ int av1_find_best_masked_sub_pixel_tree_up(
   if (use_upsampled_ref)
     besterr = upsampled_setup_masked_center_error(
         xd, mask, mask_stride, bestmv, ref_mv, error_per_bit, vfp, z,
-        src_stride, y, y_stride, w, h, (offset << 3), mvjcost, mvcost, sse1,
+        src_stride, y, y_stride, w, h, (offset * 8), mvjcost, mvcost, sse1,
         distortion);
   else
     besterr = setup_masked_center_error(
@@ -3090,7 +3090,7 @@ int av1_find_best_obmc_sub_pixel_tree_up(
   if (use_upsampled_ref)
     besterr = upsampled_setup_obmc_center_error(
         xd, mask, bestmv, ref_mv, error_per_bit, vfp, z, y, y_stride, w, h,
-        (offset << 3), mvjcost, mvcost, sse1, distortion);
+        (offset * 8), mvjcost, mvcost, sse1, distortion);
   else
     besterr = setup_obmc_center_error(mask, bestmv, ref_mv, error_per_bit, vfp,
                                       z, y, y_stride, offset, mvjcost, mvcost,

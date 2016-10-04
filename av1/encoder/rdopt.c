@@ -2713,7 +2713,7 @@ static int64_t rd_pick_intra_sby_mode(AV1_COMP *cpi, MACROBLOCK *x, int *rate,
 #endif  // CONFIG_EXT_INTRA
     this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
 #if CONFIG_EXT_INTRA
-    if (best_rd == INT64_MAX || this_rd < (best_rd + (best_rd >> 4))) {
+    if (best_rd == INT64_MAX || this_rd - best_rd < (best_rd >> 4)) {
       filter_intra_mode_skip_mask ^= (1 << mic->mbmi.mode);
     }
 #endif  // CONFIG_EXT_INTRA
@@ -8958,7 +8958,7 @@ void av1_rd_pick_inter_mode_sb(AV1_COMP *cpi, TileDataEnc *tile_data,
         backup_fmv[0] = frame_mv[NEWMV][ref_frame];
         if (comp_pred) backup_fmv[1] = frame_mv[NEWMV][second_ref_frame];
 
-        rate2 += cpi->drl_mode_cost0[drl_ctx][0];
+        rate2 += (rate2 < INT_MAX ? cpi->drl_mode_cost0[drl_ctx][0] : 0);
 
         if (this_rd < INT64_MAX) {
           if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
@@ -9049,7 +9049,7 @@ void av1_rd_pick_inter_mode_sb(AV1_COMP *cpi, TileDataEnc *tile_data,
             uint8_t drl1_ctx = 0;
             drl1_ctx = av1_drl_ctx(mbmi_ext->ref_mv_stack[ref_frame_type],
                                    i + idx_offset);
-            tmp_rate += cpi->drl_mode_cost0[drl1_ctx][1];
+            tmp_rate += (tmp_rate < INT_MAX ? cpi->drl_mode_cost0[drl1_ctx][1] : 0);
           }
 
           if (mbmi_ext->ref_mv_count[ref_frame_type] >
