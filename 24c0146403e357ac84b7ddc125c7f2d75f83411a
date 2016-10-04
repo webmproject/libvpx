@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "025df1d3_080c67e2",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-04T20:00:00Z",
+      "side": 1,
+      "message": "there\u0027s a mapping though, so you could reference them directly. that would allow updated versions to get tested without a change here",
+      "revId": "24c0146403e357ac84b7ddc125c7f2d75f83411a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
