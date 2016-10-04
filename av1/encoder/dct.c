@@ -1871,7 +1871,7 @@ void av1_fwd_idtx_c(const int16_t *src_diff, tran_low_t *coeff, int stride,
   const int shift = bs < 32 ? 3 : 2;
   if (tx_type == IDTX) {
     for (r = 0; r < bs; ++r) {
-      for (c = 0; c < bs; ++c) coeff[c] = src_diff[c] << shift;
+      for (c = 0; c < bs; ++c) coeff[c] = src_diff[c] * (1 << shift);
       src_diff += stride;
       coeff += bs;
     }
