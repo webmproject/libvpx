@@ -28,6 +28,20 @@ void av1_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
 #if CONFIG_EXT_INTRA
 int av1_is_intra_filter_switchable(int angle);
 #endif  // CONFIG_EXT_INTRA
+
+#if CONFIG_EXT_INTER
+// Mapping of interintra to intra mode for use in the intra component
+static const PREDICTION_MODE interintra_to_intra_mode[INTERINTRA_MODES] = {
+  DC_PRED,   V_PRED,    H_PRED,    D45_PRED, D135_PRED,
+  D117_PRED, D153_PRED, D207_PRED, D63_PRED, TM_PRED
+};
+
+// Mapping of intra mode to the interintra mode
+static const INTERINTRA_MODE intra_to_interintra_mode[INTRA_MODES] = {
+  II_DC_PRED,   II_V_PRED,    II_H_PRED,    II_D45_PRED, II_D135_PRED,
+  II_D117_PRED, II_D153_PRED, II_D207_PRED, II_D63_PRED, II_TM_PRED
+};
+#endif  // CONFIG_EXT_INTER
 #ifdef __cplusplus
 }  // extern "C"
 #endif

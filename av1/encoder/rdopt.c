@@ -8738,7 +8738,7 @@ void av1_rd_pick_inter_mode_sb(AV1_COMP *cpi, TileDataEnc *tile_data,
     }
 
 #if CONFIG_EXT_INTER
-    mbmi->interintra_mode = (PREDICTION_MODE)(DC_PRED - 1);
+    mbmi->interintra_mode = (INTERINTRA_MODE)(II_DC_PRED - 1);
 #endif  // CONFIG_EXT_INTER
 
     if (ref_frame == INTRA_FRAME) {
@@ -8892,7 +8892,7 @@ void av1_rd_pick_inter_mode_sb(AV1_COMP *cpi, TileDataEnc *tile_data,
 #if CONFIG_EXT_INTER
       if (second_ref_frame == INTRA_FRAME) {
         if (best_single_inter_ref != ref_frame) continue;
-        mbmi->interintra_mode = best_intra_mode;
+        mbmi->interintra_mode = intra_to_interintra_mode[best_intra_mode];
 #if CONFIG_EXT_INTRA
         // TODO(debargha|geza.lore):
         // Should we use ext_intra modes for interintra?

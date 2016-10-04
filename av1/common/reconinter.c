@@ -1788,12 +1788,6 @@ static void build_intra_predictors_for_interintra(MACROBLOCKD *xd, uint8_t *ref,
   }
 }
 
-// Mapping of interintra to intra mode for use in the intra component
-static const int interintra_to_intra_mode[INTERINTRA_MODES] = {
-  DC_PRED,   V_PRED,    H_PRED,    D45_PRED, D135_PRED,
-  D117_PRED, D153_PRED, D207_PRED, D63_PRED, TM_PRED
-};
-
 void av1_build_intra_predictors_for_interintra(MACROBLOCKD *xd,
                                                BLOCK_SIZE bsize, int plane,
                                                uint8_t *dst, int dst_stride) {
