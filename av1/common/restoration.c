@@ -218,15 +218,15 @@ static void loop_bilateral_filter_tile(uint8_t *data, int tile_idx, int width,
 
     for (i = 0; i < (v_end - v_start); ++i) {
       for (j = 0; j < (h_end - h_start); ++j) {
-        int x, y;
-        int flsum = 0, wtsum = 0, wt;
+        int x, y, wt;
+        int64_t flsum = 0, wtsum = 0;
         uint8_t *data_p2 = data_p + j - RESTORATION_HALFWIN * stride;
         for (y = -RESTORATION_HALFWIN; y <= RESTORATION_HALFWIN; ++y) {
           for (x = -RESTORATION_HALFWIN; x <= RESTORATION_HALFWIN; ++x) {
             wt = (int)wx_lut[y + RESTORATION_HALFWIN][x + RESTORATION_HALFWIN] *
                  (int)wr_lut_[data_p2[x] - data_p[j]];
-            wtsum += wt;
-            flsum += wt * data_p2[x];
+            wtsum += (int64_t)wt;
+            flsum += (int64_t)wt * data_p2[x];
           }
           data_p2 += stride;
         }
@@ -392,15 +392,15 @@ static void loop_bilateral_filter_tile_highbd(uint16_t *data, int tile_idx,
 
     for (i = 0; i < (v_end - v_start); ++i) {
       for (j = 0; j < (h_end - h_start); ++j) {
-        int x, y;
-        int flsum = 0, wtsum = 0, wt;
+        int x, y, wt;
+        int64_t flsum = 0, wtsum = 0;
         uint16_t *data_p2 = data_p + j - RESTORATION_HALFWIN * stride;
         for (y = -RESTORATION_HALFWIN; y <= RESTORATION_HALFWIN; ++y) {
           for (x = -RESTORATION_HALFWIN; x <= RESTORATION_HALFWIN; ++x) {
             wt = (int)wx_lut[y + RESTORATION_HALFWIN][x + RESTORATION_HALFWIN] *
                  (int)wr_lut_[data_p2[x] - data_p[j]];
-            wtsum += wt;
-            flsum += wt * data_p2[x];
+            wtsum += (int64_t)wt;
+            flsum += (int64_t)wt * data_p2[x];
           }
           data_p2 += stride;
         }
