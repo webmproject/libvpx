@@ -1167,11 +1167,12 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
   const int bh = 1 << (bhl - 1);
   const int x_mis = AOMMIN(bw, cm->mi_cols - mi_col);
   const int y_mis = AOMMIN(bh, cm->mi_rows - mi_row);
+  MB_MODE_INFO *mbmi;
+
 #if CONFIG_ACCOUNTING
   aom_accounting_set_context(&pbi->accounting, mi_col, mi_row);
 #endif
 #if CONFIG_SUPERTX
-  MB_MODE_INFO *mbmi;
   if (supertx_enabled) {
     mbmi = set_mb_offsets(cm, xd, bsize, mi_row, mi_col, bw, bh, x_mis, y_mis);
   } else {
@@ -1183,8 +1184,8 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
 #endif
   av1_read_mode_info(pbi, xd, supertx_enabled, mi_row, mi_col, r, x_mis, y_mis);
 #else
-  MB_MODE_INFO *mbmi = set_offsets(cm, xd, bsize, mi_row, mi_col, bw, bh, x_mis,
-                                   y_mis, bwl, bhl);
+  mbmi = set_offsets(cm, xd, bsize, mi_row, mi_col, bw, bh, x_mis, y_mis, bwl,
+                     bhl);
 #if CONFIG_EXT_PARTITION_TYPES
   xd->mi[0]->mbmi.partition = partition;
 #endif
