@@ -1,19 +1,23 @@
 /*
- *  Copyright (c) 2016 The WebM project authors. All Rights Reserved.
+ * Copyright (c) 2016, Alliance for Open Media. All rights reserved
  *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree. An additional intellectual property rights grant can be found
- *  in the file PATENTS.  All contributing project authors may
- *  be found in the AUTHORS file in the root of the source tree.
+ * This source code is subject to the terms of the BSD 2 Clause License and
+ * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+ * was not distributed with this source code in the LICENSE file, you can
+ * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * Media Patent License 1.0 was not distributed with this source code in the
+ * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
+
+#ifndef AV1_COMMON_X86_AV1_HIGHBD_CONVOLVE_FILTERS_SSE4_H_
+#define AV1_COMMON_X86_AV1_HIGHBD_CONVOLVE_FILTERS_SSE4_H_
+
 #include "./aom_config.h"
-#include "av1/common/filter.h"
 
 #if CONFIG_AOM_HIGHBITDEPTH
 #if CONFIG_EXT_INTERP
-DECLARE_ALIGNED(16, const int16_t,
-                av1_sub_pel_filters_10sharp_highbd_ver_signal_dir[15][6][8]) = {
+DECLARE_ALIGNED(16, static const int16_t,
+                sub_pel_filters_10sharp_highbd_ver_signal_dir[15][6][8]) = {
   {
       { 0, 0, 0, 0, 0, 0, 0, 0 },
       { -1, 3, -1, 3, -1, 3, -1, 3 },
@@ -139,8 +143,8 @@ DECLARE_ALIGNED(16, const int16_t,
 #endif
 #if CONFIG_AOM_HIGHBITDEPTH
 #if CONFIG_EXT_INTERP
-DECLARE_ALIGNED(16, const int16_t,
-                av1_sub_pel_filters_12sharp_highbd_ver_signal_dir[15][6][8]) = {
+DECLARE_ALIGNED(16, static const int16_t,
+                sub_pel_filters_12sharp_highbd_ver_signal_dir[15][6][8]) = {
   {
       { 0, 1, 0, 1, 0, 1, 0, 1 },
       { -2, 3, -2, 3, -2, 3, -2, 3 },
@@ -266,9 +270,9 @@ DECLARE_ALIGNED(16, const int16_t,
 #endif
 #if CONFIG_AOM_HIGHBITDEPTH
 #if USE_TEMPORALFILTER_12TAP
-DECLARE_ALIGNED(
-    16, const int16_t,
-    av1_sub_pel_filters_temporalfilter_12_highbd_ver_signal_dir[15][6][8]) = {
+DECLARE_ALIGNED(16, static const int16_t,
+                sub_pel_filters_temporalfilter_12_highbd_ver_signal_dir[15][6]
+                                                                       [8]) = {
   {
       { 0, 1, 0, 1, 0, 1, 0, 1 },
       { -1, 3, -1, 3, -1, 3, -1, 3 },
@@ -392,3 +396,4 @@ DECLARE_ALIGNED(
 };
 #endif
 #endif
+#endif  // AV1_COMMON_X86_AV1_HIGHBD_CONVOLVE_FILTERS_SSE4_H_

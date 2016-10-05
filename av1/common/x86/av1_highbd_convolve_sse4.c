@@ -13,26 +13,28 @@
 #include <smmintrin.h>
 
 #include "./av1_rtcd.h"
-#include "av1/common/x86/highbd_convolve_filter_sse4.h"
+#include "av1/common/filter.h"
+#include "av1/common/x86/av1_highbd_convolve_filters_sse4.h"
+
+typedef const int16_t (*HbdSubpelFilterCoeffs)[8];
 
 typedef void (*TransposeSave)(const int width, int pixelsNum, uint32_t *src,
                               int src_stride, uint16_t *dst, int dst_stride,
                               int bd);
 
-static HbdSubpelFilterCoeffs hbd_get_subpel_filter_ver_signal_dir(
-    const InterpFilterParams p, int index) {
+static INLINE HbdSubpelFilterCoeffs
+hbd_get_subpel_filter_ver_signal_dir(const InterpFilterParams p, int index) {
 #if CONFIG_EXT_INTERP
-  if (p.filter_ptr == (const int16_t *)av1_sub_pel_filters_12sharp) {
-    return &av1_sub_pel_filters_12sharp_highbd_ver_signal_dir[index][0];
+  if (p.interp_filter == MULTITAP_SHARP2) {
+    return &sub_pel_filters_12sharp_highbd_ver_signal_dir[index][0];
   }
-  if (p.filter_ptr == (const int16_t *)av1_sub_pel_filters_10sharp) {
-    return &av1_sub_pel_filters_10sharp_highbd_ver_signal_dir[index][0];
+  if (p.interp_filter == MULTITAP_SHARP) {
+    return &sub_pel_filters_10sharp_highbd_ver_signal_dir[index][0];
   }
 #endif
 #if USE_TEMPORALFILTER_12TAP
-  if (p.filter_ptr == (const int16_t *)av1_sub_pel_filters_temporalfilter_12) {
-    return &av1_sub_pel_filters_temporalfilter_12_highbd_ver_signal_dir[index]
-                                                                       [0];
+  if (p.interp_filter == TEMPORALFILTER_12TAP) {
+    return &sub_pel_filters_temporalfilter_12_highbd_ver_signal_dir[index][0];
   }
 #endif
   (void)p;
