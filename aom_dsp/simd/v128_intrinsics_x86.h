@@ -270,7 +270,7 @@ SIMD_INLINE v128 v128_shuffle_8(v128 x, v128 pattern) {
 
 SIMD_INLINE int64_t v128_dotp_s16(v128 a, v128 b) {
   v128 r = _mm_madd_epi16(a, b);
-#if defined(__SSE4_1__)
+#if defined(__SSE4_1__) && defined(__x86_64__)
   v128 c = _mm_add_epi64(_mm_cvtepi32_epi64(r),
                          _mm_cvtepi32_epi64(_mm_srli_si128(r, 8)));
   return _mm_cvtsi128_si64(_mm_add_epi64(c, _mm_srli_si128(c, 8)));

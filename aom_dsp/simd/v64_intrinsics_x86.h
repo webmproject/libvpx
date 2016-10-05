@@ -265,7 +265,7 @@ SIMD_INLINE int64_t v64_dotp_su8(v64 a, v64 b) {
 
 SIMD_INLINE int64_t v64_dotp_s16(v64 a, v64 b) {
   __m128i r = _mm_madd_epi16(a, b);
-#if defined(__SSE4_1__)
+#if defined(__SSE4_1__) && defined(__x86_64__)
   __m128i x = _mm_cvtepi32_epi64(r);
   return _mm_cvtsi128_si64(_mm_add_epi64(x, _mm_srli_si128(x, 8)));
 #else
