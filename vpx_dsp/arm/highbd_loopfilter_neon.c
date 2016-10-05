@@ -157,6 +157,32 @@ static INLINE void store_8x4(uint16_t *s, const int p, const uint16x8_t s0,
   vst1q_u16(s, s3);
 }
 
+static INLINE void store_4x8(uint16_t *s, const int p, const uint16x8_t p1,
+                             const uint16x8_t p0, const uint16x8_t q0,
+                             const uint16x8_t q1) {
+  uint16x8x4_t o;
+
+  o.val[0] = p1;
+  o.val[1] = p0;
+  o.val[2] = q0;
+  o.val[3] = q1;
+  vst4q_lane_u16(s, o, 0);
+  s += p;
+  vst4q_lane_u16(s, o, 1);
+  s += p;
+  vst4q_lane_u16(s, o, 2);
+  s += p;
+  vst4q_lane_u16(s, o, 3);
+  s += p;
+  vst4q_lane_u16(s, o, 4);
+  s += p;
+  vst4q_lane_u16(s, o, 5);
+  s += p;
+  vst4q_lane_u16(s, o, 6);
+  s += p;
+  vst4q_lane_u16(s, o, 7);
+}
+
 void vpx_highbd_lpf_horizontal_4_neon(uint16_t *s, int p, const uint8_t *blimit,
                                       const uint8_t *limit,
                                       const uint8_t *thresh, int bd) {
@@ -177,4 +203,29 @@ void vpx_highbd_lpf_horizontal_4_dual_neon(
     const uint8_t *thresh1, int bd) {
   vpx_highbd_lpf_horizontal_4_neon(s, p, blimit0, limit0, thresh0, bd);
   vpx_highbd_lpf_horizontal_4_neon(s + 8, p, blimit1, limit1, thresh1, bd);
+}
+
+void vpx_highbd_lpf_vertical_4_neon(uint16_t *s, int p, const uint8_t *blimit,
+                                    const uint8_t *limit, const uint8_t *thresh,
+                                    int bd) {
+  uint16x8_t blimit_vec, limit_vec, thresh_vec, p3, p2, p1, p0, q0, q1, q2, q3,
+      mask, hev;
+
+  load_8x8(s - 4, p, &p3, &p2, &p1, &p0, &q0, &q1, &q2, &q3);
+  transpose_s16_8x8((int16x8_t *)&p3, (int16x8_t *)&p2, (int16x8_t *)&p1,
+                    (int16x8_t *)&p0, (int16x8_t *)&q0, (int16x8_t *)&q1,
+                    (int16x8_t *)&q2, (int16x8_t *)&q3);
+  load_thresh(blimit, limit, thresh, &blimit_vec, &limit_vec, &thresh_vec, bd);
+  filter_hev_mask4(limit_vec, blimit_vec, thresh_vec, p3, p2, p1, p0, q0, q1,
+                   q2, q3, &hev, &mask);
+  filter4(mask, hev, p1, p0, q0, q1, &p1, &p0, &q0, &q1, bd);
+  store_4x8(s - 2, p, p1, p0, q0, q1);
+}
+
+void vpx_highbd_lpf_vertical_4_dual_neon(
+    uint16_t *s, int p, const uint8_t *blimit0, const uint8_t *limit0,
+    const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1,
+    const uint8_t *thresh1, int bd) {
+  vpx_highbd_lpf_vertical_4_neon(s, p, blimit0, limit0, thresh0, bd);
+  vpx_highbd_lpf_vertical_4_neon(s + 8 * p, p, blimit1, limit1, thresh1, bd);
 }

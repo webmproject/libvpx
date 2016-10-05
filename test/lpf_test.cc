@@ -521,7 +521,13 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(&vpx_highbd_lpf_horizontal_4_neon,
                                  &vpx_highbd_lpf_horizontal_4_c, 10),
                       make_tuple(&vpx_highbd_lpf_horizontal_4_neon,
-                                 &vpx_highbd_lpf_horizontal_4_c, 12)));
+                                 &vpx_highbd_lpf_horizontal_4_c, 12),
+                      make_tuple(&vpx_highbd_lpf_vertical_4_neon,
+                                 &vpx_highbd_lpf_vertical_4_c, 8),
+                      make_tuple(&vpx_highbd_lpf_vertical_4_neon,
+                                 &vpx_highbd_lpf_vertical_4_c, 10),
+                      make_tuple(&vpx_highbd_lpf_vertical_4_neon,
+                                 &vpx_highbd_lpf_vertical_4_c, 12)));
 INSTANTIATE_TEST_CASE_P(
     NEON, Loop8Test9Param,
     ::testing::Values(make_tuple(&vpx_highbd_lpf_horizontal_4_dual_neon,
@@ -529,7 +535,13 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(&vpx_highbd_lpf_horizontal_4_dual_neon,
                                  &vpx_highbd_lpf_horizontal_4_dual_c, 10),
                       make_tuple(&vpx_highbd_lpf_horizontal_4_dual_neon,
-                                 &vpx_highbd_lpf_horizontal_4_dual_c, 12)));
+                                 &vpx_highbd_lpf_horizontal_4_dual_c, 12),
+                      make_tuple(&vpx_highbd_lpf_vertical_4_dual_neon,
+                                 &vpx_highbd_lpf_vertical_4_dual_c, 8),
+                      make_tuple(&vpx_highbd_lpf_vertical_4_dual_neon,
+                                 &vpx_highbd_lpf_vertical_4_dual_c, 10),
+                      make_tuple(&vpx_highbd_lpf_vertical_4_dual_neon,
+                                 &vpx_highbd_lpf_vertical_4_dual_c, 12)));
 #else
 INSTANTIATE_TEST_CASE_P(
     NEON, Loop8Test6Param,
