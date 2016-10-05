@@ -423,8 +423,8 @@ static INLINE void apply_15_tap_filter_16(
     filter = vand##r##s8(filter, vreinterpret##r##s8_u8(mask));               \
                                                                               \
     /* save bottom 3 bits so that we round one side +4 and the other +3 */    \
-    /* if it equals 4 we'll set to adjust by -1 to account for the fact */    \
-    /* we'd round 3 the other way */                                          \
+    /* if it equals 4 we'll set it to adjust by -1 to account for the fact */ \
+    /* we'd round it by 3 the other way */                                    \
     filter1 = vshr##r##n_s8(vqadd##r##s8(filter, vdup##r##n_s8(4)), 3);       \
     filter2 = vshr##r##n_s8(vqadd##r##s8(filter, vdup##r##n_s8(3)), 3);       \
                                                                               \
