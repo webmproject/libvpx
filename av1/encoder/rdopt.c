@@ -3321,7 +3321,7 @@ static void select_tx_type_yrd(const AV1_COMP *cpi, MACROBLOCK *x, int *rate,
   TX_TYPE tx_type, best_tx_type = DCT_DCT;
   const int is_inter = is_inter_block(mbmi);
   TX_SIZE best_tx_size[MAX_MIB_SIZE][MAX_MIB_SIZE];
-  TX_SIZE best_tx = TX_SIZES;
+  TX_SIZE best_tx = max_txsize_lookup[bsize];
   uint8_t best_blk_skip[MAX_MIB_SIZE * MAX_MIB_SIZE * 4];
   const int n4 = 1 << (num_pels_log2_lookup[bsize] - 4);
   int idx, idy;
@@ -7707,6 +7707,7 @@ static int64_t handle_inter_mode(
     } else {
       x->skip = 1;
       *disable_skip = 1;
+      mbmi->tx_size = tx_size_from_tx_mode(bsize, cm->tx_mode, 1);
 
 // The cost of skip bit needs to be added.
 #if CONFIG_OBMC || CONFIG_WARPED_MOTION
