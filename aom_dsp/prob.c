@@ -11,7 +11,7 @@
 
 #include "./aom_config.h"
 
-#if CONFIG_DAALA_EC
+#if CONFIG_DAALA_EC || CONFIG_RANS
 #include <string.h>
 #endif
 
@@ -57,7 +57,7 @@ void aom_tree_merge_probs(const aom_tree_index *tree, const aom_prob *pre_probs,
   tree_merge_probs_impl(0, tree, pre_probs, counts, probs);
 }
 
-#if CONFIG_DAALA_EC
+#if CONFIG_DAALA_EC || CONFIG_RANS
 typedef struct tree_node tree_node;
 
 struct tree_node {
@@ -86,7 +86,7 @@ static int tree_node_cmp(tree_node a, tree_node b) {
   int i;
   uint32_t pa;
   uint32_t pb;
-  for (i = 0; i < OD_MINI(a.len, b.len) && a.probs[i] == b.probs[i]; i++) {
+  for (i = 0; i < AOMMIN(a.len, b.len) && a.probs[i] == b.probs[i]; i++) {
   }
   pa = tree_node_prob(a, i);
   pb = tree_node_prob(b, i);

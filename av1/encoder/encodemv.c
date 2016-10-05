@@ -46,7 +46,7 @@ static void encode_mv_component(aom_writer *w, int comp,
   aom_write(w, sign, mvcomp->sign);
 
 // Class
-#if CONFIG_DAALA_EC
+#if CONFIG_DAALA_EC || CONFIG_RANS
   aom_write_symbol(w, mv_class, mvcomp->class_cdf, MV_CLASSES);
 #else
   av1_write_token(w, av1_mv_class_tree, mvcomp->classes,
@@ -63,7 +63,7 @@ static void encode_mv_component(aom_writer *w, int comp,
   }
 
 // Fractional bits
-#if CONFIG_DAALA_EC
+#if CONFIG_DAALA_EC || CONFIG_RANS
   aom_write_symbol(
       w, fr, mv_class == MV_CLASS_0 ? mvcomp->class0_fp_cdf[d] : mvcomp->fp_cdf,
       MV_FP_SIZE);
@@ -204,7 +204,12 @@ void av1_write_nmv_probs(AV1_COMMON *cm, int usehp, aom_writer *w,
   nmv_context *const mvc = &cm->fc->nmvc;
   nmv_context_counts *const counts = nmv_counts;
 
+#if !(CONFIG_DAALA_EC || CONFIG_RANS)
   write_mv_update(av1_mv_joint_tree, mvc->joints, counts->joints, MV_JOINTS, w);
+#if CONFIG_DAALA_EC || CONFIG_RANS
+  av1_tree_to_cdf(av1_mv_joint_tree, cm->fc->nmvc.joints,
+                  cm->fc->nmvc.joint_cdf);
+#endif
 
   for (i = 0; i < 2; ++i) {
     nmv_component *comp = &mvc->comps[i];
@@ -213,7 +218,7 @@ void av1_write_nmv_probs(AV1_COMMON *cm, int usehp, aom_writer *w,
     update_mv(w, comp_counts->sign, &comp->sign, MV_UPDATE_PROB);
     write_mv_update(av1_mv_class_tree, comp->classes, comp_counts->classes,
                     MV_CLASSES, w);
-#if CONFIG_DAALA_EC
+#if CONFIG_DAALA_EC || CONFIG_RANS
     av1_tree_to_cdf(av1_mv_class_tree, comp->classes, comp->class_cdf);
 #endif
     write_mv_update(av1_mv_class0_tree, comp->class0, comp_counts->class0,
@@ -226,17 +231,18 @@ void av1_write_nmv_probs(AV1_COMMON *cm, int usehp, aom_writer *w,
     for (j = 0; j < CLASS0_SIZE; ++j) {
       write_mv_update(av1_mv_fp_tree, mvc->comps[i].class0_fp[j],
                       counts->comps[i].class0_fp[j], MV_FP_SIZE, w);
-#if CONFIG_DAALA_EC
+#if CONFIG_DAALA_EC || CONFIG_RANS
       av1_tree_to_cdf(av1_mv_fp_tree, mvc->comps[i].class0_fp[j],
                       mvc->comps[i].class0_fp_cdf[j]);
 #endif
     }
     write_mv_update(av1_mv_fp_tree, mvc->comps[i].fp, counts->comps[i].fp,
                     MV_FP_SIZE, w);
-#if CONFIG_DAALA_EC
+#if CONFIG_DAALA_EC || CONFIG_RANS
     av1_tree_to_cdf(av1_mv_fp_tree, mvc->comps[i].fp, mvc->comps[i].fp_cdf);
 #endif
   }
+#endif  // !CONFIG_EC_ADAPT || !(CONFIG_DAALA_EC || CONFIG_RANS)
 
   if (usehp) {
     for (i = 0; i < 2; ++i) {
@@ -259,7 +265,7 @@ void av1_encode_mv(AV1_COMP *cpi, aom_writer *w, const MV *mv, const MV *ref,
 #if CONFIG_REF_MV
   (void)is_compound;
 #endif
-#if CONFIG_DAALA_EC
+#if CONFIG_DAALA_EC || CONFIG_RANS
   aom_write_symbol(w, j, mvctx->joint_cdf, MV_JOINTS);
 #else
   av1_write_token(w, av1_mv_joint_tree, mvctx->joints, &mv_joint_encodings[j]);
