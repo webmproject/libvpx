@@ -127,6 +127,7 @@ AV1Decoder *av1_decoder_create(BufferPool *const pool) {
   av1_loop_restoration_precal();
 #endif  // CONFIG_LOOP_RESTORATION
 #if CONFIG_ACCOUNTING
+  pbi->acct_enabled = 1;
   aom_accounting_init(&pbi->accounting);
 #endif
 

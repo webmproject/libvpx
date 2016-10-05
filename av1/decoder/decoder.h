@@ -104,6 +104,7 @@ typedef struct AV1Decoder {
   int dec_tile_row, dec_tile_col;
 #endif  // CONFIG_EXT_TILE
 #if CONFIG_ACCOUNTING
+  int acct_enabled;
   Accounting accounting;
 #endif
 
