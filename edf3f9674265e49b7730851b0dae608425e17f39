@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "c2a5991c_5ad489dd",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 736,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-10-05T17:27:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c2a5991c_b4dca66c",
+      "revId": "edf3f9674265e49b7730851b0dae608425e17f39",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2a5991c_54c8e29e",
         "filename": "vp9/decoder/vp9_decodeframe.c",
         "patchSetId": 11
@@ -30,6 +48,30 @@
       "writtenOn": "2016-10-05T02:04:59Z",
       "side": 1,
       "message": "these are validated beforehand right? could cause a out of bounds read otherwise",
+      "range": {
+        "startLine": 754,
+        "startChar": 23,
+        "endLine": 754,
+        "endChar": 26
+      },
+      "revId": "edf3f9674265e49b7730851b0dae608425e17f39",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2a5991c_65ee0a79",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 754,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2016-10-05T17:27:10Z",
+      "side": 1,
+      "message": "The largest width/height is 4. (hardcoded parameter for the first decode_partition in the superblock)  The smallest width/height is 1.  The bmode_blocks_xx will be 0 or 1.  Even with corrupt data, I can\u0027t think of a case where these values would be invalid.",
+      "parentUuid": "c2a5991c_54c8e29e",
       "range": {
         "startLine": 754,
         "startChar": 23,
