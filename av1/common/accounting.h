@@ -54,14 +54,16 @@ typedef struct {
   AccountingDictionary dictionary;
 } AccountingSymbols;
 
-typedef struct {
+typedef struct Accounting Accounting;
+
+struct Accounting {
   AccountingSymbols syms;
   /** Size allocated for symbols (not all may be used). */
   int num_syms_allocated;
   int16_t hash_dictionary[AOM_ACCOUNTING_HASH_SIZE];
   AccountingSymbolContext context;
   uint32_t last_tell_frac;
-} Accounting;
+};
 
 void aom_accounting_init(Accounting *accounting);
 void aom_accounting_reset(Accounting *accounting);

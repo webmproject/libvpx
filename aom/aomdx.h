@@ -37,6 +37,10 @@ extern aom_codec_iface_t aom_codec_av1_dx_algo;
 extern aom_codec_iface_t *aom_codec_av1_dx(void);
 /*!@} - end algorithm interface member group*/
 
+/** Data structure that stores bit accounting for debug
+ */
+typedef struct Accounting Accounting;
+
 /*!\enum aom_dec_control_id
  * \brief AOM decoder control functions
  *
@@ -103,6 +107,14 @@ enum aom_dec_control_id {
    */
   AV1_SET_SKIP_LOOP_FILTER,
 
+  /** control function to retrieve a pointer to the Accounting struct.  When
+   * compiled without --enable-accounting, this returns AOM_CODEC_INCAPABLE.
+   * If called before a frame has been decoded, this returns AOM_CODEC_ERROR.
+   * The caller should ensure that AOM_CODEC_OK is returned before attempting
+   * to dereference the Accounting pointer.
+   */
+  AV1_GET_ACCOUNTING,
+
   AOM_DECODER_CTRL_ID_MAX,
 
   /** control function to set the range of tile decoding. A value that is
@@ -163,12 +175,14 @@ AOM_CTRL_USE_TYPE(AV1D_GET_FRAME_SIZE, int *)
 #define AOM_CTRL_AV1D_GET_FRAME_SIZE
 AOM_CTRL_USE_TYPE(AV1_INVERT_TILE_DECODE_ORDER, int)
 #define AOM_CTRL_AV1_INVERT_TILE_DECODE_ORDER
+AOM_CTRL_USE_TYPE(AV1_GET_ACCOUNTING, Accounting **)
+#define AOM_CTRL_AV1_GET_ACCOUNTING
 AOM_CTRL_USE_TYPE(AV1_SET_DECODE_TILE_ROW, int)
 #define AOM_CTRL_AV1_SET_DECODE_TILE_ROW
 AOM_CTRL_USE_TYPE(AV1_SET_DECODE_TILE_COL, int)
 #define AOM_CTRL_AV1_SET_DECODE_TILE_COL
 /*!\endcond */
-/*! @} - end defgroup vp8_decoder */
+/*! @} - end defgroup aom_decoder */
 
 #ifdef __cplusplus
 }  // extern "C"
