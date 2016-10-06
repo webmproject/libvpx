@@ -496,6 +496,12 @@ static void iidtx16_8col(__m128i *in) {
   in[15] = _mm_packs_epi32(u7, y7);
 }
 
+static void iidtx16_sse2(__m128i *in0, __m128i *in1) {
+  array_transpose_16x16(in0, in1);
+  iidtx16_8col(in0);
+  iidtx16_8col(in1);
+}
+
 static void iidtx8_sse2(__m128i *in) {
   in[0] = _mm_slli_epi16(in[0], 1);
   in[1] = _mm_slli_epi16(in[1], 1);
@@ -626,6 +632,11 @@ static INLINE void scale_sqrt2_8x8(__m128i *in) {
                           xx_roundn_epi32_unsigned(v_p6b_d, DCT_CONST_BITS));
   in[7] = _mm_packs_epi32(xx_roundn_epi32_unsigned(v_p7a_d, DCT_CONST_BITS),
                           xx_roundn_epi32_unsigned(v_p7b_d, DCT_CONST_BITS));
+}
+
+static INLINE void scale_sqrt2_8x16(__m128i *in) {
+  scale_sqrt2_8x8(in);
+  scale_sqrt2_8x8(in + 8);
 }
 
 void av1_iht8x16_128_add_sse2(const tran_low_t *input, uint8_t *dest,
@@ -1201,5 +1212,323 @@ void av1_iht4x8_32_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
   in[2] = _mm_unpacklo_epi64(in[4], in[5]);
   in[3] = _mm_unpacklo_epi64(in[6], in[7]);
   write_buffer_4x8_round5(dest, in, stride);
+}
+
+// Note: The 16-column 32-element transforms take input in the form of four
+// 8x16 blocks (each stored as a __m128i[16]), which are the four quadrants
+// of the overall 16x32 input buffer.
+static INLINE void idct32_16col(__m128i *tl, __m128i *tr, __m128i *bl,
+                                __m128i *br) {
+  array_transpose_16x16(tl, tr);
+  array_transpose_16x16(bl, br);
+  idct32_8col(tl, bl);
+  idct32_8col(tr, br);
+}
+
+static INLINE void ihalfright32_16col(__m128i *tl, __m128i *tr, __m128i *bl,
+                                      __m128i *br) {
+  __m128i tmpl[16], tmpr[16];
+  int i;
+
+  // Copy the top half of the input to temporary storage
+  for (i = 0; i < 16; ++i) {
+    tmpl[i] = tl[i];
+    tmpr[i] = tr[i];
+  }
+
+  // Generate the top half of the output
+  for (i = 0; i < 16; ++i) {
+    tl[i] = _mm_slli_epi16(bl[i], 2);
+    tr[i] = _mm_slli_epi16(br[i], 2);
+  }
+  array_transpose_16x16(tl, tr);
+
+  // Copy the temporary storage back to the bottom half of the input
+  for (i = 0; i < 16; ++i) {
+    bl[i] = tmpl[i];
+    br[i] = tmpr[i];
+  }
+
+  // Generate the bottom half of the output
+  scale_sqrt2_8x16(bl);
+  scale_sqrt2_8x16(br);
+  idct16_sse2(bl, br);  // Includes a transposition
+}
+
+static INLINE void iidtx32_16col(__m128i *tl, __m128i *tr, __m128i *bl,
+                                 __m128i *br) {
+  int i;
+  array_transpose_16x16(tl, tr);
+  array_transpose_16x16(bl, br);
+  for (i = 0; i < 16; ++i) {
+    tl[i] = _mm_slli_epi16(tl[i], 2);
+    tr[i] = _mm_slli_epi16(tr[i], 2);
+    bl[i] = _mm_slli_epi16(bl[i], 2);
+    br[i] = _mm_slli_epi16(br[i], 2);
+  }
+}
+
+static INLINE void write_buffer_16x32_round6(uint8_t *dest, __m128i *intl,
+                                             __m128i *intr, __m128i *inbl,
+                                             __m128i *inbr, int stride) {
+  const __m128i zero = _mm_setzero_si128();
+  const __m128i final_rounding = _mm_set1_epi16(1 << 5);
+  int i;
+
+  for (i = 0; i < 16; ++i) {
+    intl[i] = _mm_adds_epi16(intl[i], final_rounding);
+    intr[i] = _mm_adds_epi16(intr[i], final_rounding);
+    inbl[i] = _mm_adds_epi16(inbl[i], final_rounding);
+    inbr[i] = _mm_adds_epi16(inbr[i], final_rounding);
+    intl[i] = _mm_srai_epi16(intl[i], 6);
+    intr[i] = _mm_srai_epi16(intr[i], 6);
+    inbl[i] = _mm_srai_epi16(inbl[i], 6);
+    inbr[i] = _mm_srai_epi16(inbr[i], 6);
+    RECON_AND_STORE(dest + i * stride + 0, intl[i]);
+    RECON_AND_STORE(dest + i * stride + 8, intr[i]);
+    RECON_AND_STORE(dest + (i + 16) * stride + 0, inbl[i]);
+    RECON_AND_STORE(dest + (i + 16) * stride + 8, inbr[i]);
+  }
+}
+
+void av1_iht16x32_512_add_sse2(const tran_low_t *input, uint8_t *dest,
+                               int stride, int tx_type) {
+  __m128i intl[16], intr[16], inbl[16], inbr[16];
+
+  int i;
+  for (i = 0; i < 16; ++i) {
+    intl[i] = load_input_data(input + i * 16 + 0);
+    intr[i] = load_input_data(input + i * 16 + 8);
+    inbl[i] = load_input_data(input + (i + 16) * 16 + 0);
+    inbr[i] = load_input_data(input + (i + 16) * 16 + 8);
+  }
+
+  // Row transform
+  switch (tx_type) {
+    case DCT_DCT:
+    case ADST_DCT:
+    case FLIPADST_DCT:
+    case H_DCT:
+      idct16_sse2(intl, intr);
+      idct16_sse2(inbl, inbr);
+      break;
+    case DCT_ADST:
+    case ADST_ADST:
+    case DCT_FLIPADST:
+    case FLIPADST_FLIPADST:
+    case ADST_FLIPADST:
+    case FLIPADST_ADST:
+    case H_ADST:
+    case H_FLIPADST:
+      iadst16_sse2(intl, intr);
+      iadst16_sse2(inbl, inbr);
+      break;
+    case V_FLIPADST:
+    case V_ADST:
+    case V_DCT:
+    case IDTX:
+      iidtx16_sse2(intl, intr);
+      iidtx16_sse2(inbl, inbr);
+      break;
+    default: assert(0); break;
+  }
+
+  scale_sqrt2_8x16(intl);
+  scale_sqrt2_8x16(intr);
+  scale_sqrt2_8x16(inbl);
+  scale_sqrt2_8x16(inbr);
+
+  // Column transform
+  switch (tx_type) {
+    case DCT_DCT:
+    case DCT_ADST:
+    case DCT_FLIPADST:
+    case V_DCT: idct32_16col(intl, intr, inbl, inbr); break;
+    case ADST_DCT:
+    case ADST_ADST:
+    case FLIPADST_ADST:
+    case ADST_FLIPADST:
+    case FLIPADST_FLIPADST:
+    case FLIPADST_DCT:
+    case V_ADST:
+    case V_FLIPADST: ihalfright32_16col(intl, intr, inbl, inbr); break;
+    case H_DCT:
+    case H_ADST:
+    case H_FLIPADST:
+    case IDTX: iidtx32_16col(intl, intr, inbl, inbr); break;
+    default: assert(0); break;
+  }
+
+  switch (tx_type) {
+    case DCT_DCT:
+    case ADST_DCT:
+    case H_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+    case H_ADST:
+    case V_ADST:
+    case V_DCT:
+    case IDTX: break;
+    case FLIPADST_DCT:
+    case FLIPADST_ADST:
+    case V_FLIPADST: FLIPUD_PTR(dest, stride, 32); break;
+    case DCT_FLIPADST:
+    case ADST_FLIPADST:
+    case H_FLIPADST:
+      for (i = 0; i < 16; ++i) {
+        __m128i tmp = intl[i];
+        intl[i] = mm_reverse_epi16(intr[i]);
+        intr[i] = mm_reverse_epi16(tmp);
+        tmp = inbl[i];
+        inbl[i] = mm_reverse_epi16(inbr[i]);
+        inbr[i] = mm_reverse_epi16(tmp);
+      }
+      break;
+    case FLIPADST_FLIPADST:
+      for (i = 0; i < 16; ++i) {
+        __m128i tmp = intl[i];
+        intl[i] = mm_reverse_epi16(intr[i]);
+        intr[i] = mm_reverse_epi16(tmp);
+        tmp = inbl[i];
+        inbl[i] = mm_reverse_epi16(inbr[i]);
+        inbr[i] = mm_reverse_epi16(tmp);
+      }
+      FLIPUD_PTR(dest, stride, 32);
+      break;
+    default: assert(0); break;
+  }
+  write_buffer_16x32_round6(dest, intl, intr, inbl, inbr, stride);
+}
+
+static INLINE void write_buffer_32x16_round6(uint8_t *dest, __m128i *in0,
+                                             __m128i *in1, __m128i *in2,
+                                             __m128i *in3, int stride) {
+  const __m128i zero = _mm_setzero_si128();
+  const __m128i final_rounding = _mm_set1_epi16(1 << 5);
+  int i;
+
+  for (i = 0; i < 16; ++i) {
+    in0[i] = _mm_adds_epi16(in0[i], final_rounding);
+    in1[i] = _mm_adds_epi16(in1[i], final_rounding);
+    in2[i] = _mm_adds_epi16(in2[i], final_rounding);
+    in3[i] = _mm_adds_epi16(in3[i], final_rounding);
+    in0[i] = _mm_srai_epi16(in0[i], 6);
+    in1[i] = _mm_srai_epi16(in1[i], 6);
+    in2[i] = _mm_srai_epi16(in2[i], 6);
+    in3[i] = _mm_srai_epi16(in3[i], 6);
+    RECON_AND_STORE(dest + i * stride + 0, in0[i]);
+    RECON_AND_STORE(dest + i * stride + 8, in1[i]);
+    RECON_AND_STORE(dest + i * stride + 16, in2[i]);
+    RECON_AND_STORE(dest + i * stride + 24, in3[i]);
+  }
+}
+
+void av1_iht32x16_512_add_sse2(const tran_low_t *input, uint8_t *dest,
+                               int stride, int tx_type) {
+  __m128i in0[16], in1[16], in2[16], in3[16];
+  int i;
+
+  for (i = 0; i < 16; ++i) {
+    in0[i] = load_input_data(input + i * 32 + 0);
+    in1[i] = load_input_data(input + i * 32 + 8);
+    in2[i] = load_input_data(input + i * 32 + 16);
+    in3[i] = load_input_data(input + i * 32 + 24);
+  }
+
+  // Row transform
+  switch (tx_type) {
+    case DCT_DCT:
+    case ADST_DCT:
+    case FLIPADST_DCT:
+    case H_DCT: idct32_16col(in0, in1, in2, in3); break;
+    case DCT_ADST:
+    case ADST_ADST:
+    case DCT_FLIPADST:
+    case FLIPADST_FLIPADST:
+    case ADST_FLIPADST:
+    case FLIPADST_ADST:
+    case H_ADST:
+    case H_FLIPADST: ihalfright32_16col(in0, in1, in2, in3); break;
+    case V_FLIPADST:
+    case V_ADST:
+    case V_DCT:
+    case IDTX: iidtx32_16col(in0, in1, in2, in3); break;
+    default: assert(0); break;
+  }
+
+  scale_sqrt2_8x16(in0);
+  scale_sqrt2_8x16(in1);
+  scale_sqrt2_8x16(in2);
+  scale_sqrt2_8x16(in3);
+
+  // Column transform
+  switch (tx_type) {
+    case DCT_DCT:
+    case DCT_ADST:
+    case DCT_FLIPADST:
+    case V_DCT:
+      idct16_sse2(in0, in1);
+      idct16_sse2(in2, in3);
+      break;
+    case ADST_DCT:
+    case ADST_ADST:
+    case FLIPADST_ADST:
+    case ADST_FLIPADST:
+    case FLIPADST_FLIPADST:
+    case FLIPADST_DCT:
+    case V_ADST:
+    case V_FLIPADST:
+      iadst16_sse2(in0, in1);
+      iadst16_sse2(in2, in3);
+      break;
+    case H_DCT:
+    case H_ADST:
+    case H_FLIPADST:
+    case IDTX:
+      iidtx16_sse2(in0, in1);
+      iidtx16_sse2(in2, in3);
+      break;
+    default: assert(0); break;
+  }
+
+  switch (tx_type) {
+    case DCT_DCT:
+    case ADST_DCT:
+    case H_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+    case H_ADST:
+    case V_ADST:
+    case V_DCT:
+    case IDTX: break;
+    case FLIPADST_DCT:
+    case FLIPADST_ADST:
+    case V_FLIPADST: FLIPUD_PTR(dest, stride, 16); break;
+    case DCT_FLIPADST:
+    case ADST_FLIPADST:
+    case H_FLIPADST:
+      for (i = 0; i < 16; ++i) {
+        __m128i tmp1 = in0[i];
+        __m128i tmp2 = in1[i];
+        in0[i] = mm_reverse_epi16(in3[i]);
+        in1[i] = mm_reverse_epi16(in2[i]);
+        in2[i] = mm_reverse_epi16(tmp2);
+        in3[i] = mm_reverse_epi16(tmp1);
+      }
+      break;
+    case FLIPADST_FLIPADST:
+      for (i = 0; i < 16; ++i) {
+        __m128i tmp1 = in0[i];
+        __m128i tmp2 = in1[i];
+        in0[i] = mm_reverse_epi16(in3[i]);
+        in1[i] = mm_reverse_epi16(in2[i]);
+        in2[i] = mm_reverse_epi16(tmp2);
+        in3[i] = mm_reverse_epi16(tmp1);
+      }
+      FLIPUD_PTR(dest, stride, 16);
+      break;
+    default: assert(0); break;
+  }
+  write_buffer_32x16_round6(dest, in0, in1, in2, in3, stride);
 }
 #endif  // CONFIG_EXT_TX
