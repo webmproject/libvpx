@@ -111,7 +111,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
         if (pli) level = (level * 5 + 4) >> 3;
         if (sb_all_skip(cm, sbr * MAX_MIB_SIZE, sbc * MAX_MIB_SIZE)) continue;
         threshold = level << coeff_shift;
-        od_dering(&OD_DERING_VTBL_C, dst, MAX_MIB_SIZE * bsize[pli],
+        od_dering(dst, MAX_MIB_SIZE * bsize[pli],
                   &src[pli][sbr * stride * bsize[pli] * MAX_MIB_SIZE +
                             sbc * bsize[pli] * MAX_MIB_SIZE],
                   stride, nhb, nvb, sbc, sbr, nhsb, nvsb, dec[pli], dir, pli,
