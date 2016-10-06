@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9fb69ce5_5dd88f74",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-06T19:18:03Z",
+      "side": 1,
+      "message": "better to reference the change-id or commit hash these links aren\u0027t that stable",
+      "revId": "1aca86dcfdf433161f21e986718ee6abdfc7b976",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
