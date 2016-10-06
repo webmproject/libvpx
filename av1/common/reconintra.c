@@ -868,7 +868,7 @@ static void highbd_dr_prediction_z1(uint16_t *dst, ptrdiff_t stride, int bs,
     for (c = 0; c < bs; ++c) {
       x = (c << 8) - y * dx;
       base = x >> 8;
-      shift = x - (base << 8);
+      shift = x & 0xFF;
       if (base < 2 * bs - 1) {
         val = highbd_intra_subpel_interp(base, shift, above, 0, 2 * bs - 1,
                                          filter_type);
@@ -897,7 +897,7 @@ static void highbd_dr_prediction_z2(uint16_t *dst, ptrdiff_t stride, int bs,
       x = (c << 8) - y * dx;
       base = x >> 8;
       if (base >= -1) {
-        shift = x - (base << 8);
+        shift = x & 0xFF;
         val = highbd_intra_subpel_interp(base, shift, above, -1, bs - 1,
                                          filter_type);
       } else {
@@ -905,7 +905,7 @@ static void highbd_dr_prediction_z2(uint16_t *dst, ptrdiff_t stride, int bs,
         y = (r << 8) - x * dy;
         base = y >> 8;
         if (base >= 0) {
-          shift = y - (base << 8);
+          shift = y & 0xFF;
           val = highbd_intra_subpel_interp(base, shift, left, 0, bs - 1,
                                            filter_type);
         } else {
@@ -935,7 +935,7 @@ static void highbd_dr_prediction_z3(uint16_t *dst, ptrdiff_t stride, int bs,
       x = c + 1;
       y = (r << 8) - x * dy;
       base = y >> 8;
-      shift = y - (base << 8);
+      shift = y & 0xFF;
       if (base < 2 * bs - 1) {
         val = highbd_intra_subpel_interp(base, shift, left, 0, 2 * bs - 1,
                                          filter_type);
