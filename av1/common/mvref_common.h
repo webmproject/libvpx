@@ -431,24 +431,16 @@ static INLINE int16_t av1_mode_context_analyzer(
 static INLINE uint8_t av1_drl_ctx(const CANDIDATE_MV *ref_mv_stack,
                                   int ref_idx) {
   if (ref_mv_stack[ref_idx].weight >= REF_CAT_LEVEL &&
-      ref_mv_stack[ref_idx + 1].weight >= REF_CAT_LEVEL) {
-    if (ref_mv_stack[ref_idx].weight == ref_mv_stack[ref_idx + 1].weight)
-      return 0;
-    else
-      return 1;
-  }
+      ref_mv_stack[ref_idx + 1].weight >= REF_CAT_LEVEL)
+    return 0;
 
   if (ref_mv_stack[ref_idx].weight >= REF_CAT_LEVEL &&
       ref_mv_stack[ref_idx + 1].weight < REF_CAT_LEVEL)
     return 2;
 
   if (ref_mv_stack[ref_idx].weight < REF_CAT_LEVEL &&
-      ref_mv_stack[ref_idx + 1].weight < REF_CAT_LEVEL) {
-    if (ref_mv_stack[ref_idx].weight == ref_mv_stack[ref_idx + 1].weight)
-      return 3;
-    else
-      return 4;
-  }
+      ref_mv_stack[ref_idx + 1].weight < REF_CAT_LEVEL)
+    return 3;
 
   return 0;
 }
