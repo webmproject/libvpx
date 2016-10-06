@@ -77,9 +77,8 @@
     add              r3, r1, #16               ; r3 dest + 16 for second loop
     ldrsh            r0, [r0]
 
-    ; generate cospi_16_64 = 11585
-    mov              r12, #0x2d00
-    add              r12, #0x41
+    ; cospi_16_64 = 11585
+    movw             r12, #0x2d41
 
     ; out = dct_const_round_shift(input[0] * cospi_16_64)
     mul              r0, r0, r12               ; input[0] * cospi_16_64

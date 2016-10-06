@@ -60,13 +60,11 @@
     vld2.s16        {q1,q2}, [r0]!
     vmov.s16        q15, q1
 
-    ; generate  cospi_28_64 = 3196
-    mov             r3, #0xc00
-    add             r3, #0x7c
+    ; cospi_28_64 = 3196
+    movw            r3, #0x0c7c
 
-    ; generate cospi_4_64  = 16069
-    mov             r12, #0x3e00
-    add             r12, #0xc5
+    ; cospi_4_64  = 16069
+    movw            r12, #0x3ec5
 
     ; transpose the input data
     TRANSPOSE8X8
@@ -76,13 +74,11 @@
     vdup.16         d1, r12                   ; duplicate cospi_4_64
 
     ; preloading to avoid stall
-    ; generate cospi_12_64 = 13623
-    mov             r3, #0x3500
-    add             r3, #0x37
+    ; cospi_12_64 = 13623
+    movw            r3, #0x3537
 
-    ; generate cospi_20_64 = 9102
-    mov             r12, #0x2300
-    add             r12, #0x8e
+    ; cospi_20_64 = 9102
+    movw            r12, #0x238e
 
     ; step2[4] * cospi_28_64
     vmull.s16       q2, d18, d0
@@ -112,13 +108,11 @@
     vqrshrn.s32     d15, q6, #14              ; >> 14
 
     ; preloading to avoid stall
-    ; generate cospi_16_64 = 11585
-    mov             r3, #0x2d00
-    add             r3, #0x41
+    ; cospi_16_64 = 11585
+    movw            r3, #0x2d41
 
-    ; generate cospi_24_64 = 6270
-    mov             r12, #0x1800
-    add             r12, #0x7e
+    ; cospi_24_64 = 6270
+    movw            r12, #0x187e
 
     ; step2[5] * cospi_12_64
     vmull.s16       q2, d26, d2
@@ -155,9 +149,8 @@
     vmull.s16       q0, d24, d30
     vmull.s16       q1, d25, d30
 
-    ; generate cospi_8_64 = 15137
-    mov             r3, #0x3b00
-    add             r3, #0x21
+    ; cospi_8_64 = 15137
+    movw            r3, #0x3b21
 
     vdup.16         d30, r12                  ; duplicate cospi_24_64
     vdup.16         d31, r3                   ; duplicate cospi_8_64
@@ -208,9 +201,8 @@
     vsub.s16        q14, q7, q6               ; step2[6] = -step1[6] + step1[7];
     vadd.s16        q15, q6, q7               ; step2[7] = step1[6] + step1[7];
 
-    ; generate cospi_16_64 = 11585
-    mov             r3, #0x2d00
-    add             r3, #0x41
+    ; cospi_16_64 = 11585
+    movw            r3, #0x2d41
 
     ; stage 5
     vadd.s16        q0, q8, q11               ; step1[0] = step2[0] + step2[3];
@@ -307,13 +299,11 @@
     vld2.s16        {q0,q1}, [r0]!
     vmov.s16        q15, q0;
 
-    ; generate  cospi_30_64 = 1606
-    mov             r3, #0x0600
-    add             r3, #0x46
+    ; cospi_30_64 = 1606
+    movw            r3, #0x0646
 
-    ; generate cospi_2_64  = 16305
-    mov             r12, #0x3f00
-    add             r12, #0xb1
+    ; cospi_2_64  = 16305
+    movw            r12, #0x3fb1
 
     ; transpose the input data
     TRANSPOSE8X8
@@ -323,13 +313,11 @@
     vdup.16         d13, r12                  ; duplicate cospi_2_64
 
     ; preloading to avoid stall
-    ; generate cospi_14_64 = 12665
-    mov             r3, #0x3100
-    add             r3, #0x79
+    ; cospi_14_64 = 12665
+    movw            r3, #0x3179
 
-    ; generate cospi_18_64 = 10394
-    mov             r12, #0x2800
-    add             r12, #0x9a
+    ; cospi_18_64 = 10394
+    movw            r12, #0x289a
 
     ; step1[8] * cospi_30_64
     vmull.s16       q2, d16, d12
@@ -359,13 +347,11 @@
     vqrshrn.s32     d15, q4, #14              ; >> 14
 
     ; preloading to avoid stall
-    ; generate cospi_22_64 = 7723
-    mov             r3, #0x1e00
-    add             r3, #0x2b
+    ; cospi_22_64 = 7723
+    movw            r3, #0x1e2b
 
-    ; generate cospi_10_64 = 14449
-    mov             r12, #0x3800
-    add             r12, #0x71
+    ; cospi_10_64 = 14449
+    movw            r12, #0x3871
 
     ; step1[9] * cospi_14_64
     vmull.s16       q2, d24, d30
@@ -411,13 +397,11 @@
     vmlal.s16       q5, d27, d30
 
     ; preloading to avoid stall
-    ; generate cospi_6_64 = 15679
-    mov             r3, #0x3d00
-    add             r3, #0x3f
+    ; cospi_6_64 = 15679
+    movw            r3, #0x3d3f
 
-    ; generate cospi_26_64 = 4756
-    mov             r12, #0x1200
-    add             r12, #0x94
+    ; cospi_26_64 = 4756
+    movw            r12, #0x1294
 
     vdup.16         d30, r3                   ; duplicate cospi_6_64
     vdup.16         d31, r12                  ; duplicate cospi_26_64
@@ -466,13 +450,11 @@
     vadd.s16        q7, q6, q7                ; step1[15]=step2[14]+step2[15]
 
     ; stage 4
-    ; generate cospi_24_64 = 6270
-    mov             r3, #0x1800
-    add             r3, #0x7e
+    ; cospi_24_64 = 6270
+    movw            r3, #0x187e
 
-    ; generate cospi_8_64 = 15137
-    mov             r12, #0x3b00
-    add             r12, #0x21
+    ; cospi_8_64 = 15137
+    movw            r12, #0x3b21
 
     ; -step1[9] * cospi_8_64 + step1[14] * cospi_24_64
     vdup.16         d30, r12                  ; duplicate cospi_8_64
@@ -543,9 +525,8 @@
     vadd.s16        q15, q7, q4               ; step1[15] =step2[12]+step2[15];
 
     ; stage 6.
-    ; generate cospi_16_64 = 11585
-    mov             r12, #0x2d00
-    add             r12, #0x41
+    ; cospi_16_64 = 11585
+    movw            r12, #0x2d41
 
     vdup.16         d14, r12                  ; duplicate cospi_16_64
 
@@ -810,13 +791,11 @@ end_idct16x16_pass2
     vld2.s16        {q1,q2}, [r0]!
     vmov.s16        q15, q1
 
-    ; generate  cospi_28_64*2 = 6392
-    mov             r3, #0x1800
-    add             r3, #0xf8
+    ; cospi_28_64*2 = 6392
+    movw            r3, #0x18f8
 
-    ; generate cospi_4_64*2  = 32138
-    mov             r12, #0x7d00
-    add             r12, #0x8a
+    ; cospi_4_64*2  = 32138
+    movw            r12, #0x7d8a
 
     ; transpose the input data
     TRANSPOSE8X8
@@ -833,9 +812,8 @@ end_idct16x16_pass2
     vqrdmulh.s16    q4, q9, q0
 
     ; preloading to avoid stall
-    ; generate cospi_16_64*2 = 23170
-    mov             r3, #0x5a00
-    add             r3, #0x82
+    ; cospi_16_64*2 = 23170
+    movw            r3, #0x5a82
 
     ; dct_const_round_shift(step2[4] * cospi_4_64);
     vqrdmulh.s16    q7, q9, q1
@@ -843,9 +821,8 @@ end_idct16x16_pass2
     ; stage 4
     vdup.16         q1, r3                    ; cospi_16_64*2
 
-    ; generate cospi_16_64 = 11585
-    mov             r3, #0x2d00
-    add             r3, #0x41
+    ; cospi_16_64 = 11585
+    movw            r3, #0x2d41
 
     vdup.16         d4, r3;                   ; duplicate cospi_16_64
 
@@ -939,13 +916,11 @@ end_idct16x16_pass2
     vld2.s16        {q0,q1}, [r0]!
     vmov.s16        q15, q0;
 
-    ; generate 2*cospi_30_64 = 3212
-    mov             r3, #0xc00
-    add             r3, #0x8c
+    ; 2*cospi_30_64 = 3212
+    movw            r3, #0x0c8c
 
-    ; generate 2*cospi_2_64  = 32610
-    mov             r12, #0x7f00
-    add             r12, #0x62
+    ; 2*cospi_2_64  = 32610
+    movw            r12, #0x7f62
 
     ; transpose the input data
     TRANSPOSE8X8
@@ -962,15 +937,13 @@ end_idct16x16_pass2
     vqrdmulh.s16    q7, q8, q6
 
     ; preloading to avoid stall
-    ; generate 2*cospi_26_64 = 9512
-    mov             r12, #0x2500
-    add             r12, #0x28
+    ; 2*cospi_26_64 = 9512
+    movw            r12, #0x2528
     rsb             r12, #0
     vdup.16         q15, r12                  ; duplicate -2*cospi_26_64
 
-    ; generate 2*cospi_6_64 = 31358
-    mov             r3, #0x7a00
-    add             r3, #0x7e
+    ; 2*cospi_6_64 = 31358
+    movw            r3, #0x7a7e
     vdup.16         q14, r3                   ; duplicate 2*cospi_6_64
 
     ; dct_const_round_shift(- step1[12] * cospi_26_64)
@@ -980,14 +953,12 @@ end_idct16x16_pass2
     vqrdmulh.s16    q4, q9, q14
 
     ; stage 4
-    ; generate cospi_24_64 = 6270
-    mov             r3, #0x1800
-    add             r3, #0x7e
+    ; cospi_24_64 = 6270
+    movw            r3, #0x187e
     vdup.16         d31, r3                   ; duplicate cospi_24_64
 
-    ; generate cospi_8_64 = 15137
-    mov             r12, #0x3b00
-    add             r12, #0x21
+    ; cospi_8_64 = 15137
+    movw            r12, #0x3b21
     vdup.16         d30, r12                  ; duplicate cospi_8_64
 
     ; step1[14] * cospi_24_64
@@ -1052,9 +1023,8 @@ end_idct16x16_pass2
     vadd.s16        q15, q7, q4               ; step1[15] =step2[12]+step2[15];
 
     ; stage 6.
-    ; generate cospi_16_64 = 11585
-    mov             r12, #0x2d00
-    add             r12, #0x41
+    ; cospi_16_64 = 11585
+    movw            r12, #0x2d41
 
     vdup.16         d14, r12                  ; duplicate cospi_16_64
 
