@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bf7440be_59d4e311",
+        "filename": "test/lpf_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 520,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-06T06:53:55Z",
+      "side": 1,
+      "message": "just 8, not 10/12? I haven\u0027t looked, but was thinking 8-bit would be redundant with the non-high-bitdepth version",
+      "revId": "b2fb49f2477355ce3ab26ff32be8ecc0785442ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
