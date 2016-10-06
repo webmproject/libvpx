@@ -467,8 +467,8 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
     // as the size of the first intra frame be better? This will
     // avoid too many deallocate and allocate.
     if (frame_worker_data->scratch_buffer_size < data_sz) {
-      frame_worker_data->scratch_buffer =
-          (uint8_t *)vpx_realloc(frame_worker_data->scratch_buffer, data_sz);
+      vpx_free(frame_worker_data->scratch_buffer);
+      frame_worker_data->scratch_buffer = (uint8_t *)vpx_malloc(data_sz);
       if (frame_worker_data->scratch_buffer == NULL) {
         set_error_detail(ctx, "Failed to reallocate scratch buffer");
         return VPX_CODEC_MEM_ERROR;
