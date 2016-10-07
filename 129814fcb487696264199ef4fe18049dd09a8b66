@@ -46,6 +46,30 @@
       "revId": "129814fcb487696264199ef4fe18049dd09a8b66",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5fed0406_19c00f90",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2016-10-07T17:25:55Z",
+      "side": 0,
+      "message": "yeah discussed this with James as well. This is fine.",
+      "parentUuid": "5fed0406_16c9fca5",
+      "range": {
+        "startLine": 380,
+        "startChar": 2,
+        "endLine": 381,
+        "endChar": 65
+      },
+      "revId": "129814fcb487696264199ef4fe18049dd09a8b66",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
