@@ -37,6 +37,7 @@
     sum_sad128 = _mm256_extracti128_si256(sum_sad, 1);                        \
     sum_sad128 = _mm_add_epi32(_mm256_castsi256_si128(sum_sad), sum_sad128);  \
     res = _mm_cvtsi128_si32(sum_sad128);                                      \
+    _mm256_zeroupper();                                                       \
     return res;                                                               \
   }
 
@@ -69,6 +70,7 @@
     sum_sad128 = _mm256_extracti128_si256(sum_sad, 1);                        \
     sum_sad128 = _mm_add_epi32(_mm256_castsi256_si128(sum_sad), sum_sad128);  \
     res = _mm_cvtsi128_si32(sum_sad128);                                      \
+    _mm256_zeroupper();                                                       \
     return res;                                                               \
   }
 
@@ -122,6 +124,7 @@ FSAD32
     sum_sad128 = _mm256_extracti128_si256(sum_sad, 1);                        \
     sum_sad128 = _mm_add_epi32(_mm256_castsi256_si128(sum_sad), sum_sad128);  \
     res = _mm_cvtsi128_si32(sum_sad128);                                      \
+    _mm256_zeroupper();                                                       \
     return res;                                                               \
   }
 
@@ -160,6 +163,7 @@ FSAD32
     sum_sad128 = _mm256_extracti128_si256(sum_sad, 1);                        \
     sum_sad128 = _mm_add_epi32(_mm256_castsi256_si128(sum_sad), sum_sad128);  \
     res = _mm_cvtsi128_si32(sum_sad128);                                      \
+    _mm256_zeroupper();                                                       \
     return res;                                                               \
   }
 

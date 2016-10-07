@@ -78,6 +78,7 @@ void aom_sad32x32x4d_avx2(const uint8_t *src, int src_stride,
 
     _mm_storeu_si128((__m128i *)(res), sum);
   }
+  _mm256_zeroupper();
 }
 
 void aom_sad64x64x4d_avx2(const uint8_t *src, int src_stride,
@@ -162,4 +163,5 @@ void aom_sad64x64x4d_avx2(const uint8_t *src, int src_stride,
 
     _mm_storeu_si128((__m128i *)(res), sum);
   }
+  _mm256_zeroupper();
 }

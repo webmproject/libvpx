@@ -139,6 +139,7 @@ void aom_get16x16var_avx2(const unsigned char *src_ptr, int source_stride,
 
     *((int *)Sum) = _mm_cvtsi128_si32(sum_res);
   }
+  _mm256_zeroupper();
 }
 
 void aom_get32x32var_avx2(const unsigned char *src_ptr, int source_stride,
@@ -228,6 +229,7 @@ void aom_get32x32var_avx2(const unsigned char *src_ptr, int source_stride,
     *((int *)Sum) = _mm_cvtsi128_si32(_mm256_castsi256_si128(sum_ref_src)) +
                     _mm_cvtsi128_si32(_mm256_extractf128_si256(sum_ref_src, 1));
   }
+  _mm256_zeroupper();
 }
 
 #define FILTER_SRC(filter)                               \
@@ -482,6 +484,7 @@ unsigned int aom_sub_pixel_variance32xh_avx2(const uint8_t *src, int src_stride,
     }
   }
   CALC_SUM_AND_SSE
+  _mm256_zeroupper();
   return sum;
 }
 
@@ -705,5 +708,6 @@ unsigned int aom_sub_pixel_avg_variance32xh_avx2(
     }
   }
   CALC_SUM_AND_SSE
+  _mm256_zeroupper();
   return sum;
 }

@@ -68,5 +68,6 @@ int64_t av1_block_error_avx2(const int16_t *coeff, const int16_t *dqcoeff,
   _mm_storel_epi64((__m128i *)(&sse), sse_reg128);
 
   _mm_storel_epi64((__m128i *)(ssz), ssz_reg128);
+  _mm256_zeroupper();
   return sse;
 }
