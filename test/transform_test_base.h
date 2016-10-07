@@ -28,6 +28,9 @@ const int kDctMaxValue = 16384;
 typedef void (*FhtFunc)(const int16_t *in, tran_low_t *out, int stride,
                         int tx_type);
 
+typedef void (*IhtFunc)(const tran_low_t *in, uint8_t *out, int stride,
+                        int tx_type);
+
 class TransformTestBase {
  public:
   virtual ~TransformTestBase() {}
@@ -128,9 +131,16 @@ class TransformTestBase {
         aom_memalign(16, sizeof(tran_low_t) * num_coeffs_));
 
     for (int i = 0; i < count_test_block; ++i) {
-      // Initialize a test block with input range [-mask_, mask_].
-      for (int j = 0; j < num_coeffs_; ++j)
+      for (int j = 0; j < num_coeffs_; ++j) {
         input_block[j] = (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
+        if (bit_depth_ == AOM_BITS_8) {
+          output_block[j] = output_ref_block[j] = rnd.Rand8();
+#if CONFIG_AOM_HIGHBITDEPTH
+        } else {
+          output_block[j] = output_ref_block[j] = rnd.Rand16() & mask_;
+#endif
+        }
+      }
 
       fwd_txfm_ref(input_block, output_ref_block, pitch_, tx_type_);
       ASM_REGISTER_STATE_CHECK(RunFwdTxfm(input_block, output_block, pitch_));
@@ -143,6 +153,44 @@ class TransformTestBase {
       }
     }
     aom_free(input_block);
+    aom_free(output_ref_block);
+    aom_free(output_block);
+  }
+
+  void RunInvCoeffCheck() {
+    ACMRandom rnd(ACMRandom::DeterministicSeed());
+    const int count_test_block = 5000;
+
+    int16_t *input_block = reinterpret_cast<int16_t *>(
+        aom_memalign(16, sizeof(int16_t) * num_coeffs_));
+    tran_low_t *trans_block = reinterpret_cast<tran_low_t *>(
+        aom_memalign(16, sizeof(tran_low_t) * num_coeffs_));
+    uint8_t *output_block = reinterpret_cast<uint8_t *>(
+        aom_memalign(16, sizeof(uint8_t) * num_coeffs_));
+    uint8_t *output_ref_block = reinterpret_cast<uint8_t *>(
+        aom_memalign(16, sizeof(uint8_t) * num_coeffs_));
+
+    for (int i = 0; i < count_test_block; ++i) {
+      // Initialize a test block with input range [-mask_, mask_].
+      for (int j = 0; j < num_coeffs_; ++j) {
+        input_block[j] = (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
+        output_ref_block[j] = rnd.Rand16() & mask_;
+        output_block[j] = output_ref_block[j];
+      }
+
+      fwd_txfm_ref(input_block, trans_block, pitch_, tx_type_);
+
+      inv_txfm_ref(trans_block, output_ref_block, pitch_, tx_type_);
+      ASM_REGISTER_STATE_CHECK(RunInvTxfm(trans_block, output_block, pitch_));
+
+      for (int j = 0; j < num_coeffs_; ++j) {
+        ASSERT_EQ(output_block[j], output_ref_block[j])
+            << "Error: not bit-exact result at index: " << j
+            << " at test block: " << i;
+      }
+    }
+    aom_free(input_block);
+    aom_free(trans_block);
     aom_free(output_ref_block);
     aom_free(output_block);
   }
@@ -259,6 +307,7 @@ class TransformTestBase {
   int pitch_;
   int tx_type_;
   FhtFunc fwd_txfm_ref;
+  IhtFunc inv_txfm_ref;
   aom_bit_depth_t bit_depth_;
   int mask_;
   int num_coeffs_;
