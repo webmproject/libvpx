@@ -16,6 +16,29 @@
       "revId": "1789f4c460b6a232f4fc1d34276cf17e1cd1113a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5fed0406_56e8a407",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-10-07T15:52:43Z",
+      "side": 1,
+      "message": "Why the extra const?",
+      "range": {
+        "startLine": 84,
+        "startChar": 54,
+        "endLine": 84,
+        "endChar": 59
+      },
+      "revId": "1789f4c460b6a232f4fc1d34276cf17e1cd1113a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
