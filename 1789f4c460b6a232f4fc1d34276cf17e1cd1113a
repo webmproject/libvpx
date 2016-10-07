@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5fed0406_702970f4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-07T02:58:50Z",
+      "side": 1,
+      "message": "do you want to add a bug or use a topic branch for tracking purposes?",
+      "revId": "1789f4c460b6a232f4fc1d34276cf17e1cd1113a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
