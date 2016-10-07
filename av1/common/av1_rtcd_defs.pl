@@ -388,7 +388,7 @@ add_proto qw/void av1_fht8x8/, "const int16_t *input, tran_low_t *output, int st
 specialize qw/av1_fht8x8 sse2/;
 
 add_proto qw/void av1_fht16x16/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
-specialize qw/av1_fht16x16 sse2/;
+specialize qw/av1_fht16x16 sse2 avx2/;
 
 add_proto qw/void av1_fht32x32/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
 specialize qw/av1_fht32x32/;

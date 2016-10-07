@@ -12,16 +12,7 @@
 #include <immintrin.h>  // AVX2
 
 #include "aom_dsp/txfm_common.h"
-
-#define pair256_set_epi16(a, b)                                            \
-  _mm256_set_epi16((int16_t)(b), (int16_t)(a), (int16_t)(b), (int16_t)(a), \
-                   (int16_t)(b), (int16_t)(a), (int16_t)(b), (int16_t)(a), \
-                   (int16_t)(b), (int16_t)(a), (int16_t)(b), (int16_t)(a), \
-                   (int16_t)(b), (int16_t)(a), (int16_t)(b), (int16_t)(a))
-
-#define pair256_set_epi32(a, b)                                                \
-  _mm256_set_epi32((int)(b), (int)(a), (int)(b), (int)(a), (int)(b), (int)(a), \
-                   (int)(b), (int)(a))
+#include "aom_dsp/x86/txfm_common_avx2.h"
 
 #if FDCT32x32_HIGH_PRECISION
 static INLINE __m256i k_madd_epi32_avx2(__m256i a, __m256i b) {

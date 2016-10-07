@@ -700,7 +700,7 @@ if (aom_config("CONFIG_AOM_HIGHBITDEPTH") eq "yes") {
   specialize qw/aom_fdct16x16 sse2 msa/;
 
   add_proto qw/void aom_fdct16x16_1/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/aom_fdct16x16_1 sse2 msa/;
+  specialize qw/aom_fdct16x16_1 sse2 avx2 msa/;
 
   add_proto qw/void aom_fdct32x32/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/aom_fdct32x32 sse2 avx2 msa/;
