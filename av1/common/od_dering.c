@@ -12,6 +12,8 @@
 #include "config.h"
 #endif
 
+// clang-format off
+
 #include <stdlib.h>
 #include <math.h>
 #include "dering.h"
@@ -247,26 +249,17 @@ static const int16_t OD_THRESH_TABLE_Q8[18] = {
   327, 365, 408, 455, 509, 569, 635, 710, 768,
 };
 
-/* Compute deringing filter threshold for each 8x8 block based on the
+/* Compute deringing filter threshold for an 8x8 block based on the
    directional variance difference. A high variance difference means that we
    have a highly directional pattern (e.g. a high contrast edge), so we can
    apply more deringing. A low variance means that we either have a low
    contrast edge, or a non-directional texture, so we want to be careful not
    to blur. */
-static void od_compute_thresh(int thresh[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS],
-                              int threshold,
-                              int32_t var[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS],
-                              int nhb, int nvb) {
-  int bx;
-  int by;
-  for (by = 0; by < nvb; by++) {
-    for (bx = 0; bx < nhb; bx++) {
-      int v1;
-      /* We use the variance of 8x8 blocks to adjust the threshold. */
-      v1 = OD_MINI(32767, var[by][bx] >> 6);
-      thresh[by][bx] = (threshold * OD_THRESH_TABLE_Q8[OD_ILOG(v1)] + 128) >> 8;
-    }
-  }
+static INLINE int od_adjust_thresh(int threshold, int32_t var) {
+  int v1;
+  /* We use the variance of 8x8 blocks to adjust the threshold. */
+  v1 = OD_MINI(32767, var >> 6);
+  return (threshold * OD_THRESH_TABLE_Q8[OD_ILOG(v1)] + 128) >> 8;
 }
 
 void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
@@ -282,8 +275,7 @@ void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
   int16_t *in;
   int bsize;
   int32_t var[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS];
-  int thresh[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS];
-  int thresh2[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS];
+  int filter2_thresh[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS];
   od_filter_dering_direction_func filter_dering_direction[OD_DERINGSIZES] = {
     od_filter_dering_direction_4x4, od_filter_dering_direction_8x8
   };
@@ -313,38 +305,32 @@ void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
   if (pli == 0) {
     for (by = 0; by < nvb; by++) {
       for (bx = 0; bx < nhb; bx++) {
+        if (bskip[by * skip_stride + bx]) continue;
         dir[by][bx] = od_dir_find8(&x[8 * by * xstride + 8 * bx], xstride,
                                    &var[by][bx], coeff_shift);
+        /* Deringing orthogonal to the direction uses a tighter threshold
+           because we want to be conservative. We've presumably already
+           achieved some deringing, so the amount of change is expected
+           to be low. Also, since we might be filtering across an edge, we
+           want to make sure not to blur it. That being said, we might want
+           to be a little bit more aggressive on pure horizontal/vertical
+           since the ringing there tends to be directional, so it doesn't
+           get removed by the directional filtering. */
+        filter2_thresh[by][bx] = (filter_dering_direction[bsize - OD_LOG_BSIZE0])(
+            &y[(by * ystride << bsize) + (bx << bsize)], ystride,
+            &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)],
+            od_adjust_thresh(threshold, var[by][bx]), dir[by][bx]);
       }
     }
-    od_compute_thresh(thresh, threshold, var, nhb, nvb);
   } else {
     for (by = 0; by < nvb; by++) {
       for (bx = 0; bx < nhb; bx++) {
-        thresh[by][bx] = threshold;
+        if (bskip[by * skip_stride + bx]) continue;
+        filter2_thresh[by][bx] = (filter_dering_direction[bsize - OD_LOG_BSIZE0])(
+            &y[(by * ystride << bsize) + (bx << bsize)], ystride,
+            &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)], threshold,
+            dir[by][bx]);
       }
-    }
-  }
-  for (by = 0; by < nvb; by++) {
-    for (bx = 0; bx < nhb; bx++) {
-      if (bskip[by * skip_stride + bx]) thresh[by][bx] = 0;
-    }
-  }
-  for (by = 0; by < nvb; by++) {
-    for (bx = 0; bx < nhb; bx++) {
-      if (thresh[by][bx] == 0) continue;
-      /* Deringing orthogonal to the direction uses a tighter threshold
-         because we want to be conservative. We've presumably already
-         achieved some deringing, so the amount of change is expected
-         to be low. Also, since we might be filtering across an edge, we
-         want to make sure not to blur it. That being said, we might want
-         to be a little bit more aggressive on pure horizontal/vertical
-         since the ringing there tends to be directional, so it doesn't
-         get removed by the directional filtering. */
-      thresh2[by][bx] = (filter_dering_direction[bsize - OD_LOG_BSIZE0])(
-          &y[(by * ystride << bsize) + (bx << bsize)], ystride,
-          &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)], thresh[by][bx],
-          dir[by][bx]);
     }
   }
   for (i = 0; i < nvb << bsize; i++) {
@@ -354,10 +340,10 @@ void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
   }
   for (by = 0; by < nvb; by++) {
     for (bx = 0; bx < nhb; bx++) {
-      if (thresh[by][bx] == 0) continue;
+      if (bskip[by * skip_stride + bx] || filter2_thresh[by][bx] == 0) continue;
       (filter_dering_orthogonal[bsize - OD_LOG_BSIZE0])(
           &y[(by * ystride << bsize) + (bx << bsize)], ystride,
-          &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)], thresh2[by][bx],
+          &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)], filter2_thresh[by][bx],
           dir[by][bx]);
     }
   }
