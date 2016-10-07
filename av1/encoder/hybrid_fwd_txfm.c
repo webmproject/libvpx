@@ -180,16 +180,14 @@ static void fwd_txfm_32x32(int rd_transform, const int16_t *src_diff,
     case FLIPADST_FLIPADST:
     case ADST_FLIPADST:
     case FLIPADST_ADST:
-      av1_fht32x32_c(src_diff, coeff, diff_stride, tx_type);
+      av1_fht32x32(src_diff, coeff, diff_stride, tx_type);
       break;
     case V_DCT:
     case H_DCT:
     case V_ADST:
     case H_ADST:
     case V_FLIPADST:
-    case H_FLIPADST:
-      av1_fht32x32_c(src_diff, coeff, diff_stride, tx_type);
-      break;
+    case H_FLIPADST: av1_fht32x32(src_diff, coeff, diff_stride, tx_type); break;
     case IDTX: av1_fwd_idtx_c(src_diff, coeff, diff_stride, 32, tx_type); break;
 #endif  // CONFIG_EXT_TX
     default: assert(0); break;
