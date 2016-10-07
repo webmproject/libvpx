@@ -22,6 +22,30 @@
       "revId": "129814fcb487696264199ef4fe18049dd09a8b66",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5fed0406_16c9fca5",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-10-07T15:52:43Z",
+      "side": 0,
+      "message": "If no one is using it globally then it is probably an artifact of old code.",
+      "parentUuid": "9fb69ce5_40018269",
+      "range": {
+        "startLine": 380,
+        "startChar": 2,
+        "endLine": 381,
+        "endChar": 65
+      },
+      "revId": "129814fcb487696264199ef4fe18049dd09a8b66",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
