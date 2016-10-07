@@ -1304,10 +1304,13 @@ static void update_state_supertx(AV1_COMP *cpi, ThreadData *td,
 #if CONFIG_VAR_TX
   {
     const TX_SIZE mtx = mbmi->tx_size;
+    const int num_4x4_blocks_wide = num_4x4_blocks_wide_txsize_lookup[mtx] >> 1;
+    const int num_4x4_blocks_high = num_4x4_blocks_high_txsize_lookup[mtx] >> 1;
     int idy, idx;
-    for (idy = 0; idy < (1 << mtx) / 2; ++idy)
-      for (idx = 0; idx < (1 << mtx) / 2; ++idx)
-        mbmi->inter_tx_size[idy][idx] = mbmi->tx_size;
+    mbmi->inter_tx_size[0][0] = mtx;
+    for (idy = 0; idy < num_4x4_blocks_high; ++idy)
+      for (idx = 0; idx < num_4x4_blocks_wide; ++idx)
+        mbmi->inter_tx_size[idy][idx] = mtx;
   }
 #endif  // CONFIG_VAR_TX
   // Turn motion variation off for supertx
