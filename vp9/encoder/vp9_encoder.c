@@ -2030,7 +2030,10 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
   vpx_free(cpi->tile_thr_data);
   vpx_free(cpi->workers);
 
-  if (cpi->num_workers > 1) vp9_loop_filter_dealloc(&cpi->lf_row_sync);
+  if (cpi->num_workers > 1) {
+    vp9_loop_filter_dealloc(&cpi->lf_row_sync);
+    vp9_bitstream_encode_tiles_buffer_dealloc(cpi);
+  }
 
   vp9_alt_ref_aq_destroy(cpi->alt_ref_aq);
 
