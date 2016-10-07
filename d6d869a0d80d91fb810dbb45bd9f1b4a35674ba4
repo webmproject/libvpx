@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5f3b445a_2904b524",
+        "filename": "vpx_dsp/arm/highbd_loopfilter_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-07T22:35:48Z",
+      "side": 1,
+      "message": "I don\u0027t think it will affect much but you could just pass the pointer as an output parameter and use vst1_lane",
+      "revId": "d6d869a0d80d91fb810dbb45bd9f1b4a35674ba4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5f3b445a_499d7906",
+        "filename": "vpx_dsp/arm/highbd_loopfilter_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-07T22:35:48Z",
+      "side": 1,
+      "message": "this function is unused in this patchset",
+      "revId": "d6d869a0d80d91fb810dbb45bd9f1b4a35674ba4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5f3b445a_497819b4",
+        "filename": "vpx_dsp/arm/highbd_loopfilter_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-07T22:35:48Z",
+      "side": 1,
+      "message": "this function is unused in this patchset",
+      "revId": "d6d869a0d80d91fb810dbb45bd9f1b4a35674ba4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
