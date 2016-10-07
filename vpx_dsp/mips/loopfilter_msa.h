@@ -13,113 +13,40 @@
 
 #include "vpx_dsp/mips/macros_msa.h"
 
-#define VP9_LPF_FILTER4_8W(p1_in, p0_in, q0_in, q1_in, mask_in, hev_in, \
-                           p1_out, p0_out, q0_out, q1_out)              \
-  {                                                                     \
-    v16i8 p1_m, p0_m, q0_m, q1_m, q0_sub_p0, filt_sign;                 \
-    v16i8 filt, filt1, filt2, cnst4b, cnst3b;                           \
-    v8i16 q0_sub_p0_r, filt_r, cnst3h;                                  \
-                                                                        \
-    p1_m = (v16i8)__msa_xori_b(p1_in, 0x80);                            \
-    p0_m = (v16i8)__msa_xori_b(p0_in, 0x80);                            \
-    q0_m = (v16i8)__msa_xori_b(q0_in, 0x80);                            \
-    q1_m = (v16i8)__msa_xori_b(q1_in, 0x80);                            \
-                                                                        \
-    filt = __msa_subs_s_b(p1_m, q1_m);                                  \
-    filt = filt & (v16i8)hev_in;                                        \
-    q0_sub_p0 = q0_m - p0_m;                                            \
-    filt_sign = __msa_clti_s_b(filt, 0);                                \
-                                                                        \
-    cnst3h = __msa_ldi_h(3);                                            \
-    q0_sub_p0_r = (v8i16)__msa_ilvr_b(q0_sub_p0, q0_sub_p0);            \
-    q0_sub_p0_r = __msa_dotp_s_h((v16i8)q0_sub_p0_r, (v16i8)cnst3h);    \
-    filt_r = (v8i16)__msa_ilvr_b(filt_sign, filt);                      \
-    filt_r += q0_sub_p0_r;                                              \
-    filt_r = __msa_sat_s_h(filt_r, 7);                                  \
-                                                                        \
-    /* combine left and right part */                                   \
-    filt = __msa_pckev_b((v16i8)filt_r, (v16i8)filt_r);                 \
-                                                                        \
-    filt = filt & (v16i8)mask_in;                                       \
-    cnst4b = __msa_ldi_b(4);                                            \
-    filt1 = __msa_adds_s_b(filt, cnst4b);                               \
-    filt1 >>= 3;                                                        \
-                                                                        \
-    cnst3b = __msa_ldi_b(3);                                            \
-    filt2 = __msa_adds_s_b(filt, cnst3b);                               \
-    filt2 >>= 3;                                                        \
-                                                                        \
-    q0_m = __msa_subs_s_b(q0_m, filt1);                                 \
-    q0_out = __msa_xori_b((v16u8)q0_m, 0x80);                           \
-    p0_m = __msa_adds_s_b(p0_m, filt2);                                 \
-    p0_out = __msa_xori_b((v16u8)p0_m, 0x80);                           \
-                                                                        \
-    filt = __msa_srari_b(filt1, 1);                                     \
-    hev_in = __msa_xori_b((v16u8)hev_in, 0xff);                         \
-    filt = filt & (v16i8)hev_in;                                        \
-                                                                        \
-    q1_m = __msa_subs_s_b(q1_m, filt);                                  \
-    q1_out = __msa_xori_b((v16u8)q1_m, 0x80);                           \
-    p1_m = __msa_adds_s_b(p1_m, filt);                                  \
-    p1_out = __msa_xori_b((v16u8)p1_m, 0x80);                           \
-  }
-
-#define VP9_LPF_FILTER4_4W(p1_in, p0_in, q0_in, q1_in, mask_in, hev_in, \
-                           p1_out, p0_out, q0_out, q1_out)              \
-  {                                                                     \
-    v16i8 p1_m, p0_m, q0_m, q1_m, q0_sub_p0, filt_sign;                 \
-    v16i8 filt, filt1, filt2, cnst4b, cnst3b;                           \
-    v8i16 q0_sub_p0_r, q0_sub_p0_l, filt_l, filt_r, cnst3h;             \
-                                                                        \
-    p1_m = (v16i8)__msa_xori_b(p1_in, 0x80);                            \
-    p0_m = (v16i8)__msa_xori_b(p0_in, 0x80);                            \
-    q0_m = (v16i8)__msa_xori_b(q0_in, 0x80);                            \
-    q1_m = (v16i8)__msa_xori_b(q1_in, 0x80);                            \
-                                                                        \
-    filt = __msa_subs_s_b(p1_m, q1_m);                                  \
-                                                                        \
-    filt = filt & (v16i8)hev_in;                                        \
-                                                                        \
-    q0_sub_p0 = q0_m - p0_m;                                            \
-    filt_sign = __msa_clti_s_b(filt, 0);                                \
-                                                                        \
-    cnst3h = __msa_ldi_h(3);                                            \
-    q0_sub_p0_r = (v8i16)__msa_ilvr_b(q0_sub_p0, q0_sub_p0);            \
-    q0_sub_p0_r = __msa_dotp_s_h((v16i8)q0_sub_p0_r, (v16i8)cnst3h);    \
-    filt_r = (v8i16)__msa_ilvr_b(filt_sign, filt);                      \
-    filt_r += q0_sub_p0_r;                                              \
-    filt_r = __msa_sat_s_h(filt_r, 7);                                  \
-                                                                        \
-    q0_sub_p0_l = (v8i16)__msa_ilvl_b(q0_sub_p0, q0_sub_p0);            \
-    q0_sub_p0_l = __msa_dotp_s_h((v16i8)q0_sub_p0_l, (v16i8)cnst3h);    \
-    filt_l = (v8i16)__msa_ilvl_b(filt_sign, filt);                      \
-    filt_l += q0_sub_p0_l;                                              \
-    filt_l = __msa_sat_s_h(filt_l, 7);                                  \
-                                                                        \
-    filt = __msa_pckev_b((v16i8)filt_l, (v16i8)filt_r);                 \
-    filt = filt & (v16i8)mask_in;                                       \
-                                                                        \
-    cnst4b = __msa_ldi_b(4);                                            \
-    filt1 = __msa_adds_s_b(filt, cnst4b);                               \
-    filt1 >>= 3;                                                        \
-                                                                        \
-    cnst3b = __msa_ldi_b(3);                                            \
-    filt2 = __msa_adds_s_b(filt, cnst3b);                               \
-    filt2 >>= 3;                                                        \
-                                                                        \
-    q0_m = __msa_subs_s_b(q0_m, filt1);                                 \
-    q0_out = __msa_xori_b((v16u8)q0_m, 0x80);                           \
-    p0_m = __msa_adds_s_b(p0_m, filt2);                                 \
-    p0_out = __msa_xori_b((v16u8)p0_m, 0x80);                           \
-                                                                        \
-    filt = __msa_srari_b(filt1, 1);                                     \
-    hev_in = __msa_xori_b((v16u8)hev_in, 0xff);                         \
-    filt = filt & (v16i8)hev_in;                                        \
-                                                                        \
-    q1_m = __msa_subs_s_b(q1_m, filt);                                  \
-    q1_out = __msa_xori_b((v16u8)q1_m, 0x80);                           \
-    p1_m = __msa_adds_s_b(p1_m, filt);                                  \
-    p1_out = __msa_xori_b((v16u8)p1_m, 0x80);                           \
+#define VP9_LPF_FILTER4_4W(p1_in, p0_in, q0_in, q1_in, mask, hev, p1_out, \
+                           p0_out, q0_out, q1_out)                        \
+  {                                                                       \
+    v16i8 p1_m, p0_m, q0_m, q1_m, filt, q0_sub_p0, t1, t2;                \
+    const v16i8 cnst4b = __msa_ldi_b(4);                                  \
+    const v16i8 cnst3b = __msa_ldi_b(3);                                  \
+                                                                          \
+    p1_m = (v16i8)__msa_xori_b(p1_in, 0x80);                              \
+    p0_m = (v16i8)__msa_xori_b(p0_in, 0x80);                              \
+    q0_m = (v16i8)__msa_xori_b(q0_in, 0x80);                              \
+    q1_m = (v16i8)__msa_xori_b(q1_in, 0x80);                              \
+                                                                          \
+    filt = __msa_subs_s_b(p1_m, q1_m);                                    \
+    filt &= hev;                                                          \
+    q0_sub_p0 = __msa_subs_s_b(q0_m, p0_m);                               \
+    filt = __msa_adds_s_b(filt, q0_sub_p0);                               \
+    filt = __msa_adds_s_b(filt, q0_sub_p0);                               \
+    filt = __msa_adds_s_b(filt, q0_sub_p0);                               \
+    filt &= mask;                                                         \
+    t1 = __msa_adds_s_b(filt, cnst4b);                                    \
+    t1 >>= cnst3b;                                                        \
+    t2 = __msa_adds_s_b(filt, cnst3b);                                    \
+    t2 >>= cnst3b;                                                        \
+    q0_m = __msa_subs_s_b(q0_m, t1);                                      \
+    q0_out = __msa_xori_b((v16u8)q0_m, 0x80);                             \
+    p0_m = __msa_adds_s_b(p0_m, t2);                                      \
+    p0_out = __msa_xori_b((v16u8)p0_m, 0x80);                             \
+    filt = __msa_srari_b(t1, 1);                                          \
+    hev = __msa_xori_b(hev, 0xff);                                        \
+    filt &= hev;                                                          \
+    q1_m = __msa_subs_s_b(q1_m, filt);                                    \
+    q1_out = __msa_xori_b((v16u8)q1_m, 0x80);                             \
+    p1_m = __msa_adds_s_b(p1_m, filt);                                    \
+    p1_out = __msa_xori_b((v16u8)p1_m, 0x80);                             \
   }
 
 #define VP9_FLAT4(p3_in, p2_in, p0_in, q0_in, q2_in, q3_in, flat_out) \

@@ -27,7 +27,7 @@ void vpx_lpf_horizontal_4_msa(uint8_t *src, int32_t pitch,
 
   LPF_MASK_HEV(p3, p2, p1, p0, q0, q1, q2, q3, limit, b_limit, thresh, hev,
                mask, flat);
-  VP9_LPF_FILTER4_8W(p1, p0, q0, q1, mask, hev, p1_out, p0_out, q0_out, q1_out);
+  VP9_LPF_FILTER4_4W(p1, p0, q0, q1, mask, hev, p1_out, p0_out, q0_out, q1_out);
 
   p1_d = __msa_copy_u_d((v2i64)p1_out, 0);
   p0_d = __msa_copy_u_d((v2i64)p0_out, 0);
@@ -86,7 +86,7 @@ void vpx_lpf_vertical_4_msa(uint8_t *src, int32_t pitch,
                      q3);
   LPF_MASK_HEV(p3, p2, p1, p0, q0, q1, q2, q3, limit, b_limit, thresh, hev,
                mask, flat);
-  VP9_LPF_FILTER4_8W(p1, p0, q0, q1, mask, hev, p1, p0, q0, q1);
+  VP9_LPF_FILTER4_4W(p1, p0, q0, q1, mask, hev, p1, p0, q0, q1);
   ILVR_B2_SH(p0, p1, q1, q0, vec0, vec1);
   ILVRL_H2_SH(vec1, vec0, vec2, vec3);
 
