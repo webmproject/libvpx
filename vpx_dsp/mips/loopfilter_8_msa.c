@@ -32,7 +32,7 @@ void vpx_lpf_horizontal_8_msa(uint8_t *src, int32_t pitch,
   LPF_MASK_HEV(p3, p2, p1, p0, q0, q1, q2, q3, limit, b_limit, thresh, hev,
                mask, flat);
   VP9_FLAT4(p3, p2, p0, q0, q2, q3, flat);
-  VP9_LPF_FILTER4_8W(p1, p0, q0, q1, mask, hev, p1_out, p0_out, q0_out, q1_out);
+  VP9_LPF_FILTER4_4W(p1, p0, q0, q1, mask, hev, p1_out, p0_out, q0_out, q1_out);
 
   flat = (v16u8)__msa_ilvr_d((v2i64)zero, (v2i64)flat);
 
@@ -177,7 +177,7 @@ void vpx_lpf_vertical_8_msa(uint8_t *src, int32_t pitch,
   /* flat4 */
   VP9_FLAT4(p3, p2, p0, q0, q2, q3, flat);
   /* filter4 */
-  VP9_LPF_FILTER4_8W(p1, p0, q0, q1, mask, hev, p1_out, p0_out, q0_out, q1_out);
+  VP9_LPF_FILTER4_4W(p1, p0, q0, q1, mask, hev, p1_out, p0_out, q0_out, q1_out);
 
   flat = (v16u8)__msa_ilvr_d((v2i64)zero, (v2i64)flat);
 
