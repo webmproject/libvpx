@@ -41,7 +41,7 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
   int nhsb, nvsb;
   od_dering_in *src;
   int16_t *ref_coeff;
-  unsigned char *bskip;
+  unsigned char bskip[MAX_MIB_SIZE*MAX_MIB_SIZE];
   int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS] = { { 0 } };
   int stride;
   int bsize[3];
@@ -52,7 +52,6 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
   int coeff_shift = AOMMAX(cm->bit_depth - 8, 0);
   src = aom_malloc(sizeof(*src) * cm->mi_rows * cm->mi_cols * 64);
   ref_coeff = aom_malloc(sizeof(*ref_coeff) * cm->mi_rows * cm->mi_cols * 64);
-  bskip = aom_malloc(sizeof(*bskip) * cm->mi_rows * cm->mi_cols);
   av1_setup_dst_planes(xd->plane, frame, 0, 0);
   for (pli = 0; pli < 3; pli++) {
     dec[pli] = xd->plane[pli].subsampling_x;
@@ -77,13 +76,6 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
 #endif
     }
   }
-  for (r = 0; r < cm->mi_rows; ++r) {
-    for (c = 0; c < cm->mi_cols; ++c) {
-      const MB_MODE_INFO *mbmi =
-          &cm->mi_grid_visible[r * cm->mi_stride + c]->mbmi;
-      bskip[r * cm->mi_cols + c] = mbmi->skip;
-    }
-  }
   nvsb = (cm->mi_rows + MAX_MIB_SIZE - 1) / MAX_MIB_SIZE;
   nhsb = (cm->mi_cols + MAX_MIB_SIZE - 1) / MAX_MIB_SIZE;
   /* Pick a base threshold based on the quantizer. The threshold will then be
@@ -105,7 +97,8 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
       int16_t dst[MAX_MIB_SIZE * MAX_MIB_SIZE * 8 * 8];
       nhb = AOMMIN(MAX_MIB_SIZE, cm->mi_cols - MAX_MIB_SIZE * sbc);
       nvb = AOMMIN(MAX_MIB_SIZE, cm->mi_rows - MAX_MIB_SIZE * sbr);
-      if (sb_all_skip(cm, sbr * MAX_MIB_SIZE, sbc * MAX_MIB_SIZE)) continue;
+      if (sb_all_skip_out(cm, sbr * MAX_MIB_SIZE, sbc * MAX_MIB_SIZE, bskip))
+        continue;
       best_gi = 0;
       for (gi = 0; gi < DERING_REFINEMENT_LEVELS; gi++) {
         int cur_mse;
@@ -117,8 +110,8 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
                        sbc * bsize[0] * MAX_MIB_SIZE],
                   cm->mi_cols * bsize[0], nhb, nvb, sbc, sbr, nhsb, nvsb, 0,
                   dir, 0,
-                  &bskip[MAX_MIB_SIZE * sbr * cm->mi_cols + MAX_MIB_SIZE * sbc],
-                  cm->mi_cols, threshold, coeff_shift);
+                  bskip,
+                  MAX_MIB_SIZE, threshold, coeff_shift);
         cur_mse = (int)compute_dist(
             dst, MAX_MIB_SIZE * bsize[0],
             &ref_coeff[sbr * stride * bsize[0] * MAX_MIB_SIZE +
@@ -136,6 +129,5 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
   }
   aom_free(src);
   aom_free(ref_coeff);
-  aom_free(bskip);
   return best_level;
 }

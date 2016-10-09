@@ -11,6 +11,8 @@
 #ifndef AV1_COMMON_DERING_H_
 #define AV1_COMMON_DERING_H_
 
+// clang-format off
+
 #include "av1/common/od_dering.h"
 #include "av1/common/onyxc_int.h"
 #include "aom/aom_integer.h"
@@ -29,6 +31,8 @@ extern "C" {
 
 int compute_level_from_index(int global_level, int gi);
 int sb_all_skip(const AV1_COMMON *const cm, int mi_row, int mi_col);
+int sb_all_skip_out(const AV1_COMMON *const cm, int mi_row, int mi_col,
+    unsigned char *bskip);
 void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
                       MACROBLOCKD *xd, int global_level);
 
