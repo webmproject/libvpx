@@ -127,6 +127,10 @@ struct macroblock {
   int *nmvsadcost[2];
   int *nmvsadcost_hp[2];
   int **mvsadcost;
+#if CONFIG_MOTION_VAR
+  int32_t *wsrc_buf;
+  int32_t *mask_buf;
+#endif  // CONFIG_MOTION_VAR
 
   PALETTE_BUFFER *palette_buffer;
 
