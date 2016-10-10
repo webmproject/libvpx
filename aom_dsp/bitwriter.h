@@ -117,7 +117,7 @@ static INLINE void aom_write_symbol(aom_writer *w, int symb, aom_cdf_prob *cdf,
   assert(0 && "Unsupported bitwriter operation");
 #endif
 
-#if ((CONFIG_RANS || CONFIG_DAALA_EC) && CONFIG_EC_ADAPT)
+#if CONFIG_EC_ADAPT
   update_cdf(cdf, symb, nsymbs);
 #endif
 }

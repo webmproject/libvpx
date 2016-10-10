@@ -14,9 +14,6 @@
 
 #include "./aom_config.h"
 #include "aom/aom_integer.h"
-#if CONFIG_RANS
-#include "aom_dsp/ans.h"
-#endif  // CONFIG_RANS
 #include "aom_dsp/prob.h"
 
 #include "av1/common/common.h"
@@ -200,14 +197,14 @@ typedef unsigned int av1_coeff_count_model[REF_TYPES][COEF_BANDS]
 
 void av1_model_to_full_probs(const aom_prob *model, aom_prob *full);
 
-#if CONFIG_RANS || CONFIG_DAALA_EC
+#if CONFIG_EC_MULTISYMBOL
 typedef aom_cdf_prob coeff_cdf_model[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS]
                                     [ENTROPY_TOKENS];
 extern const aom_cdf_prob av1_pareto8_token_probs[COEFF_PROB_MODELS]
                                                  [ENTROPY_TOKENS - 2];
 struct frame_contexts;
 void av1_coef_pareto_cdfs(struct frame_contexts *fc);
-#endif  // CONFIG_RANS
+#endif  // CONFIG_EC_MULTISYMBOL
 
 typedef char ENTROPY_CONTEXT;
 

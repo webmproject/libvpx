@@ -62,9 +62,9 @@ typedef struct frame_contexts {
   aom_prob partition_prob[PARTITION_CONTEXTS][PARTITION_TYPES - 1];
 #endif
   av1_coeff_probs_model coef_probs[TX_SIZES][PLANE_TYPES];
-#if CONFIG_RANS || CONFIG_DAALA_EC
+#if CONFIG_EC_MULTISYMBOL
   coeff_cdf_model coef_cdfs[TX_SIZES][PLANE_TYPES];
-#endif  // CONFIG_RANS
+#endif  // CONFIG_EC_MULTISYMBOL
   aom_prob switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
                                  [SWITCHABLE_FILTERS - 1];
 

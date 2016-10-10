@@ -272,6 +272,7 @@ EXPERIMENT_LIST="
     supertx
     ans
     rans
+    ec_multisymbol
     loop_restoration
     ext_partition
     ext_partition_types
@@ -455,9 +456,10 @@ post_process_cmdline() {
     done
 
     # Fix up experiment dependencies
-    enabled ec_adapt && ! enabled rans && soft_enable daala_ec
-    enabled ec_adapt && ! enabled daala_ec && soft_enable rans
-    enabled rans && enable_feature ans
+    enabled ec_adapt && enable_feature ec_multisymbol
+    enabled ec_multisymbol && ! enabled ans && soft_enable daala_ec
+    enabled ec_multisymbol && ! enabled daala_ec && soft_enable ans
+    enabled daala_ec && enable_feature ec_multisymbol
     if enabled global_motion && (enabled ext_inter || enabled dual_filter); then
       log_echo "global_motion currently not compatible with ext_inter"
       log_echo "and dual_filter. Disabling global_motion."

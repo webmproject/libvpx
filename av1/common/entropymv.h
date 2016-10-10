@@ -84,14 +84,14 @@ extern const aom_tree_index av1_mv_fp_tree[];
 typedef struct {
   aom_prob sign;
   aom_prob classes[MV_CLASSES - 1];
-#if CONFIG_DAALA_EC || CONFIG_RANS
+#if CONFIG_EC_MULTISYMBOL
   aom_cdf_prob class_cdf[MV_CLASSES];
 #endif
   aom_prob class0[CLASS0_SIZE - 1];
   aom_prob bits[MV_OFFSET_BITS];
   aom_prob class0_fp[CLASS0_SIZE][MV_FP_SIZE - 1];
   aom_prob fp[MV_FP_SIZE - 1];
-#if CONFIG_DAALA_EC || CONFIG_RANS
+#if CONFIG_EC_MULTISYMBOL
   aom_cdf_prob class0_fp_cdf[CLASS0_SIZE][MV_FP_SIZE];
   aom_cdf_prob fp_cdf[MV_FP_SIZE];
 #endif
@@ -101,7 +101,7 @@ typedef struct {
 
 typedef struct {
   aom_prob joints[MV_JOINTS - 1];
-#if CONFIG_DAALA_EC || CONFIG_RANS
+#if CONFIG_EC_MULTISYMBOL
   aom_cdf_prob joint_cdf[MV_JOINTS];
 #endif
   nmv_component comps[2];
