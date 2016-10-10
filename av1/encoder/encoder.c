@@ -17,6 +17,7 @@
 #include "av1/common/alloccommon.h"
 #if CONFIG_CLPF
 #include "av1/common/clpf.h"
+#include "av1/encoder/clpf_rdo.h"
 #endif
 #if CONFIG_DERING
 #include "av1/common/dering.h"
@@ -3420,6 +3421,47 @@ static void loopfilter_frame(AV1_COMP *cpi, AV1_COMMON *cm) {
       av1_loop_filter_frame(cm->frame_to_show, cm, xd, lf->filter_level, 0, 0);
 #endif
   }
+#if CONFIG_CLPF
+  cm->clpf_strength = 0;
+  cm->clpf_size = 2;
+  CHECK_MEM_ERROR(
+      cm, cm->clpf_blocks,
+      aom_malloc(((cm->frame_to_show->y_crop_width + 31) & ~31) *
+                     ((cm->frame_to_show->y_crop_height + 31) & ~31) >>
+                 10));
+  if (!is_lossless_requested(&cpi->oxcf)) {
+    // Test CLPF
+    int i, hq = 1;
+    // TODO(yaowu): investigate per-segment CLPF decision and
+    // an optimal threshold, use 80 for now.
+    for (i = 0; i < MAX_SEGMENTS; i++)
+      hq &= av1_get_qindex(&cm->seg, i, cm->base_qindex) < 80;
+
+    // Don't try filter if the entire image is nearly losslessly encoded
+    if (!hq) {
+      // Find the best strength and block size for the entire frame
+      int fb_size_log2, strength;
+      av1_clpf_test_frame(&cpi->last_frame_uf, cpi->Source, cm, &strength,
+                          &fb_size_log2);
+
+      if (!fb_size_log2) fb_size_log2 = get_msb(MAX_FB_SIZE);
+
+      if (!strength) {  // Better to disable for the whole frame?
+        cm->clpf_strength = 0;
+      } else {
+        // Apply the filter using the chosen strength
+        cm->clpf_strength = strength - (strength == 4);
+        cm->clpf_size =
+            fb_size_log2 ? fb_size_log2 - get_msb(MAX_FB_SIZE) + 3 : 0;
+        aom_yv12_copy_frame(cm->frame_to_show, &cpi->last_frame_uf);
+        cm->clpf_numblocks =
+            av1_clpf_frame(cm->frame_to_show, &cpi->last_frame_uf, cpi->Source,
+                           cm, !!cm->clpf_size, strength, 4 + cm->clpf_size,
+                           cm->clpf_blocks, av1_clpf_decision);
+      }
+    }
+  }
+#endif
 #if CONFIG_DERING
   if (is_lossless_requested(&cpi->oxcf)) {
     cm->dering_level = 0;
@@ -3429,48 +3471,6 @@ static void loopfilter_frame(AV1_COMP *cpi, AV1_COMMON *cm) {
     av1_dering_frame(cm->frame_to_show, cm, xd, cm->dering_level);
   }
 #endif  // CONFIG_DERING
-
-#if CONFIG_CLPF
-  cm->clpf = 0;
-  if (!is_lossless_requested(&cpi->oxcf)) {
-    // Test CLPF
-    int i, hq = 1;
-    uint64_t before, after;
-    // TODO(yaowu): investigate per-segment CLPF decision and
-    // an optimal threshold, use 80 for now.
-    for (i = 0; i < MAX_SEGMENTS; i++)
-      hq &= av1_get_qindex(&cm->seg, i, cm->base_qindex) < 80;
-
-    if (!hq) {  // Don't try filter if the entire image is nearly losslessly
-                // encoded
-#if CLPF_FILTER_ALL_PLANES
-      aom_yv12_copy_frame(cm->frame_to_show, &cpi->last_frame_uf);
-      before = aom_get_y_sse(cpi->Source, cm->frame_to_show) +
-               aom_get_u_sse(cpi->Source, cm->frame_to_show) +
-               aom_get_v_sse(cpi->Source, cm->frame_to_show);
-      av1_clpf_frame(cm->frame_to_show, cm, xd);
-      after = aom_get_y_sse(cpi->Source, cm->frame_to_show) +
-              aom_get_u_sse(cpi->Source, cm->frame_to_show) +
-              aom_get_v_sse(cpi->Source, cm->frame_to_show);
-#else
-      aom_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
-      before = aom_get_y_sse(cpi->Source, cm->frame_to_show);
-      av1_clpf_frame(cm->frame_to_show, cm, xd);
-      after = aom_get_y_sse(cpi->Source, cm->frame_to_show);
-#endif
-      if (before < after) {
-// No improvement, restore original
-#if CLPF_FILTER_ALL_PLANES
-        aom_yv12_copy_frame(&cpi->last_frame_uf, cm->frame_to_show);
-#else
-        aom_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
-#endif
-      } else {
-        cm->clpf = 1;
-      }
-    }
-  }
-#endif
 #if CONFIG_LOOP_RESTORATION
   if (cm->rst_info.restoration_type != RESTORE_NONE) {
     av1_loop_restoration_init(&cm->rst_internal, &cm->rst_info,
@@ -4729,6 +4729,10 @@ static void encode_frame_to_data_rate(AV1_COMP *cpi, size_t *size,
   // NOTE(zoeliu): For debug - Output the filtered reconstructed video.
   if (cm->show_frame) dump_filtered_recon_frames(cpi);
 #endif  // DUMP_RECON_FRAMES
+
+#if CONFIG_CLPF
+  aom_free(cm->clpf_blocks);
+#endif
 
   if (cm->seg.update_map) update_reference_segmentation_map(cpi);
 

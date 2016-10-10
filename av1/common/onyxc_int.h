@@ -151,7 +151,10 @@ typedef struct AV1Common {
   int use_highbitdepth;
 #endif
 #if CONFIG_CLPF
-  int clpf;
+  int clpf_numblocks;
+  int clpf_size;
+  int clpf_strength;
+  uint8_t *clpf_blocks;
 #endif
 
   YV12_BUFFER_CONFIG *frame_to_show;

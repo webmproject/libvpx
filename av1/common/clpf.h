@@ -13,15 +13,17 @@
 
 #include "av1/common/reconinter.h"
 
-// Configuration
-#define CLPF_ALLOW_PIXEL_PARALLELISM \
-  1  // 1 = SIMD friendly (adds a buffer requirement)
-#define CLPF_ALLOW_BLOCK_PARALLELISM \
-  0  // 1 = MT friendly (degrades quality slighty)
-#define CLPF_FILTER_ALL_PLANES \
-  0  // 1 = filter both luma and chroma, 0 = filter only luma
+#define MAX_FB_SIZE 128
 
-void av1_clpf_frame(const YV12_BUFFER_CONFIG *frame, const AV1_COMMON *cm,
-                    MACROBLOCKD *xd);
+int av1_clpf_maxbits(const AV1_COMMON *cm);
+int av1_clpf_sample(int X, int A, int B, int C, int D, int E, int F, int b);
+int av1_clpf_frame(const YV12_BUFFER_CONFIG *dst, const YV12_BUFFER_CONFIG *rec,
+                   const YV12_BUFFER_CONFIG *org, const AV1_COMMON *cm,
+                   int enable_fb_flag, unsigned int strength,
+                   unsigned int fb_size_log2, uint8_t *blocks,
+                   int (*decision)(int, int, const YV12_BUFFER_CONFIG *,
+                                   const YV12_BUFFER_CONFIG *,
+                                   const AV1_COMMON *cm, int, int, int,
+                                   unsigned int, unsigned int, uint8_t *));
 
 #endif
