@@ -454,6 +454,10 @@ post_process_cmdline() {
         enabled ${c} && enable_feature ${c##*_}s
     done
 
+    # Fix up experiment dependencies
+    enabled ec_adapt && ! enabled rans && soft_enable daala_ec
+    enabled ec_adapt && ! enabled daala_ec && soft_enable rans
+    enabled rans && enable_feature ans
     if enabled global_motion && (enabled ext_inter || enabled dual_filter); then
       log_echo "global_motion currently not compatible with ext_inter"
       log_echo "and dual_filter. Disabling global_motion."
