@@ -94,8 +94,8 @@ static INLINE void filter4(int8_t mask, uint8_t thresh, uint8_t *op1,
   filter = signed_char_clamp(filter + 3 * (qs0 - ps0)) & mask;
 
   // save bottom 3 bits so that we round one side +4 and the other +3
-  // if it equals 4 we'll set to adjust by -1 to account for the fact
-  // we'd round 3 the other way
+  // if it equals 4 we'll set it to adjust by -1 to account for the fact
+  // we'd round it by 3 the other way
   filter1 = signed_char_clamp(filter + 4) >> 3;
   filter2 = signed_char_clamp(filter + 3) >> 3;
 
@@ -425,8 +425,8 @@ static INLINE void highbd_filter4(int8_t mask, uint8_t thresh, uint16_t *op1,
   filter = signed_char_clamp_high(filter + 3 * (qs0 - ps0), bd) & mask;
 
   // Save bottom 3 bits so that we round one side +4 and the other +3
-  // if it equals 4 we'll set to adjust by -1 to account for the fact
-  // we'd round 3 the other way.
+  // if it equals 4 we'll set it to adjust by -1 to account for the fact
+  // we'd round it by 3 the other way.
   filter1 = signed_char_clamp_high(filter + 4, bd) >> 3;
   filter2 = signed_char_clamp_high(filter + 3, bd) >> 3;
 

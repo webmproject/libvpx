@@ -63,8 +63,8 @@ static void vp8_filter(signed char mask, uc hev, uc *op1, uc *op0, uc *oq0,
   filter_value &= mask;
 
   /* save bottom 3 bits so that we round one side +4 and the other +3
-   * if it equals 4 we'll set to adjust by -1 to account for the fact
-   * we'd round 3 the other way
+   * if it equals 4 we'll set it to adjust by -1 to account for the fact
+   * we'd round it by 3 the other way
    */
   Filter1 = vp8_signed_char_clamp(filter_value + 4);
   Filter2 = vp8_signed_char_clamp(filter_value + 3);
