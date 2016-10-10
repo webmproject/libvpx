@@ -9,6 +9,7 @@
 ## PATENTS file, you can obtain it at www.aomedia.org/license/patent.
 ##
 
+
 UTIL_SRCS-yes += aom_util.mk
 UTIL_SRCS-yes += aom_thread.c
 UTIL_SRCS-yes += aom_thread.h
