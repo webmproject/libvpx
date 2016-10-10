@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5f3b445a_d6aef9ee",
+        "filename": "vpx_dsp/arm/highbd_loopfilter_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-10T18:07:45Z",
+      "side": 1,
+      "message": "The disassembly changed from\nvmov.32\tr2, d16[0]\nto\nadd\tr3, sp, #84\nvst1.32\t{d16[0]}, [r3]\nldr\tr2, [sp, #84]\n\nSo I keep it unchanged.",
+      "parentUuid": "5f3b445a_2904b524",
+      "revId": "d6d869a0d80d91fb810dbb45bd9f1b4a35674ba4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5f3b445a_499d7906",
         "filename": "vpx_dsp/arm/highbd_loopfilter_neon.c",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "3fd3f097_c77ffefe",
+        "filename": "vpx_dsp/arm/highbd_loopfilter_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-10T18:07:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5f3b445a_499d7906",
+      "revId": "d6d869a0d80d91fb810dbb45bd9f1b4a35674ba4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5f3b445a_497819b4",
         "filename": "vpx_dsp/arm/highbd_loopfilter_neon.c",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2016-10-07T22:35:48Z",
       "side": 1,
       "message": "this function is unused in this patchset",
+      "revId": "d6d869a0d80d91fb810dbb45bd9f1b4a35674ba4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5f3b445a_d67359a3",
+        "filename": "vpx_dsp/arm/highbd_loopfilter_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-10T18:07:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5f3b445a_497819b4",
       "revId": "d6d869a0d80d91fb810dbb45bd9f1b4a35674ba4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
