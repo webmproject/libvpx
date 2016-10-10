@@ -1499,8 +1499,8 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
     if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cpi->oxcf.pass == 0) {
       vp9_cyclic_refresh_set_golden_update(cpi);
     } else {
-      rc->baseline_gf_interval =
-          (rc->min_gf_interval + rc->max_gf_interval) / 2;
+      rc->baseline_gf_interval = VPXMIN(
+          20, VPXMAX(10, (rc->min_gf_interval + rc->max_gf_interval) / 2));
     }
     rc->af_ratio_onepass_vbr = 10;
     if (rc->rolling_target_bits > 0)
@@ -2088,8 +2088,8 @@ void adjust_gf_boost_lag_one_pass_vbr(VP9_COMP *cpi, uint64_t avg_sad_current) {
     rc->high_source_sad_lagindex = high_source_sad_lagindex;
   // Adjust some factors for the next GF group, ignore initial key frame,
   // and only for lag_in_frames not too small.
-  if (cpi->refresh_golden_frame == 1 && cm->frame_type != KEY_FRAME &&
-      cm->current_video_frame > 30 && cpi->oxcf.lag_in_frames > 8) {
+  if (cpi->refresh_golden_frame == 1 && cm->current_video_frame > 30 &&
+      cpi->oxcf.lag_in_frames > 8) {
     int frame_constraint;
     if (rc->rolling_target_bits > 0)
       rate_err =
@@ -2110,6 +2110,8 @@ void adjust_gf_boost_lag_one_pass_vbr(VP9_COMP *cpi, uint64_t avg_sad_current) {
                                      ? VPXMAX(10, rc->baseline_gf_interval >> 1)
                                      : VPXMAX(6, rc->baseline_gf_interval >> 1);
     }
+    if (rc->baseline_gf_interval > cpi->oxcf.lag_in_frames - 1)
+      rc->baseline_gf_interval = cpi->oxcf.lag_in_frames - 1;
     // Check for constraining gf_interval for up-coming scene/content changes,
     // or for up-coming key frame, whichever is closer.
     frame_constraint = rc->frames_to_key;
