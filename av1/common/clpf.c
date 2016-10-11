@@ -9,6 +9,7 @@
  * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 #include "av1/common/clpf.h"
+#include "./aom_dsp_rtcd.h"
 #include "aom_dsp/aom_dsp_common.h"
 
 int av1_clpf_maxbits(const AV1_COMMON *cm) {
@@ -27,9 +28,9 @@ int av1_clpf_sample(int X, int A, int B, int C, int D, int E, int F, int b) {
   return (8 + delta - (delta < 0)) >> 4;
 }
 
-static void clpf_block(const uint8_t *src, uint8_t *dst, int stride, int x0,
-                       int y0, int sizex, int sizey, int width, int height,
-                       unsigned int strength) {
+void aom_clpf_block_c(const uint8_t *src, uint8_t *dst, int stride, int x0,
+                      int y0, int sizex, int sizey, int width, int height,
+                      unsigned int strength) {
   int x, y;
   for (y = y0; y < y0 + sizey; y++) {
     for (x = x0; x < x0 + sizex; x++) {
@@ -102,8 +103,8 @@ int av1_clpf_frame(const YV12_BUFFER_CONFIG *dst, const YV12_BUFFER_CONFIG *rec,
             if (!cm->mi_grid_visible[ypos / bs * cm->mi_stride + xpos / bs]
                      ->mbmi.skip) {
               // Not skip block, apply the filter
-              clpf_block(rec->y_buffer, dst->y_buffer, stride_y, xpos, ypos, bs,
-                         bs, width, height, strength);
+              aom_clpf_block(rec->y_buffer, dst->y_buffer, stride_y, xpos, ypos,
+                             bs, bs, width, height, strength);
             } else {  // Skip block, copy instead
               for (c = 0; c < bs; c++)
                 *(uint64_t *)(dst->y_buffer + (ypos + c) * stride_y + xpos) =
