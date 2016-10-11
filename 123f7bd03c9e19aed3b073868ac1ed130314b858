@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ff76b882_4f121163",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-11T19:52:04Z",
+      "side": 1,
+      "message": "is there documentation for this that you could add to the body of the commit?",
+      "revId": "123f7bd03c9e19aed3b073868ac1ed130314b858",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ff76b882_0f10195a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-11T19:52:04Z",
+      "side": 1,
+      "message": "this doesn\u0027t look like it\u0027s necessary in this change, split it to keep the fix in the subject small.",
+      "revId": "123f7bd03c9e19aed3b073868ac1ed130314b858",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
