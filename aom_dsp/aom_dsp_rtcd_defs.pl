@@ -587,7 +587,7 @@ add_proto qw/void aom_lpf_horizontal_4_dual/, "uint8_t *s, int pitch, const uint
 specialize qw/aom_lpf_horizontal_4_dual sse2 neon dspr2 msa/;
 
 if (aom_config("CONFIG_CLPF") eq "yes") {
-  add_proto qw/void aom_clpf_block/, "const uint8_t *src, uint8_t *dst, int stride, int x0, int y0, int sizex, int sizey, int width, int height, unsigned int strength";
+  add_proto qw/void aom_clpf_block/, "const uint8_t *src, uint8_t *dst, int sstride, int dstride, int x0, int y0, int sizex, int sizey, int width, int height, unsigned int strength";
   specialize qw/aom_clpf_block sse2 ssse3 sse4_1 neon/;
   add_proto qw/void aom_clpf_detect/, "const uint8_t *rec, const uint8_t *org, int rstride, int ostride, int x0, int y0, int width, int height, int *sum0, int *sum1, unsigned int strength";
   specialize qw/aom_clpf_detect sse2 ssse3 sse4_1 neon/;

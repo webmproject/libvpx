@@ -26,9 +26,9 @@ using libaom_test::ACMRandom;
 
 namespace {
 
-typedef void (*clpf_block_t)(const uint8_t *src, uint8_t *dst, int stride,
-                             int x0, int y0, int sizex, int sizey, int width,
-                             int height, unsigned int strength);
+typedef void (*clpf_block_t)(const uint8_t *src, uint8_t *dst, int sstride,
+                             int dstride, int x0, int y0, int sizex, int sizey,
+                             int width, int height, unsigned int strength);
 
 typedef std::tr1::tuple<clpf_block_t, clpf_block_t, int, int>
     clpf_block_param_t;
@@ -85,10 +85,10 @@ TEST_P(ClpfBlockTest, TestSIMDNoMismatch) {
       for (ypos = 0; ypos < size && !error; ypos += h * !error) {
         for (xpos = 0; xpos < size && !error; xpos += w * !error) {
           for (strength = 0; strength < 3 && !error; strength += !error) {
-            ref_clpf(s, ref_d, size, xpos, ypos, w, h, size, size,
+            ref_clpf(s, ref_d, size, size, xpos, ypos, w, h, size, size,
                      1 << strength);
-            ASM_REGISTER_STATE_CHECK(
-                clpf(s, d, size, xpos, ypos, w, h, size, size, 1 << strength));
+            ASM_REGISTER_STATE_CHECK(clpf(s, d, size, size, xpos, ypos, w, h,
+                                          size, size, 1 << strength));
 
             for (pos = 0; pos < size * size && !error; pos++) {
               error = ref_d[pos] != d[pos];
@@ -137,7 +137,8 @@ TEST_P(ClpfSpeedTest, TestSpeed) {
     for (ypos = 0; ypos < size; ypos += h) {
       for (xpos = 0; xpos < size; xpos += w) {
         for (strength = 0; strength < 3; strength++) {
-          ref_clpf(s, d, size, xpos, ypos, w, h, size, size, 1 << strength);
+          ref_clpf(s, d, size, size, xpos, ypos, w, h, size, size,
+                   1 << strength);
         }
       }
     }
@@ -150,7 +151,7 @@ TEST_P(ClpfSpeedTest, TestSpeed) {
     for (ypos = 0; ypos < size; ypos += h) {
       for (xpos = 0; xpos < size; xpos += w) {
         for (strength = 0; strength < 3; strength++) {
-          clpf(s, d, size, xpos, ypos, w, h, size, size, 1 << strength);
+          clpf(s, d, size, size, xpos, ypos, w, h, size, size, 1 << strength);
         }
       }
     }
