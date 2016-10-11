@@ -4733,6 +4733,7 @@ static void encode_frame_to_data_rate(AV1_COMP *cpi, size_t *size,
 
 #if CONFIG_CLPF
   aom_free(cm->clpf_blocks);
+  cm->clpf_blocks = 0;
 #endif
 
   if (cm->seg.update_map) update_reference_segmentation_map(cpi);
