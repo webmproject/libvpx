@@ -147,6 +147,8 @@ void test_clpf(int w, int h, int depth, int iterations,
       << "strength: " << (1 << strength) << std::endl
       << "xpos: " << xpos << std::endl
       << "ypos: " << ypos << std::endl
+      << "w: " << w << std::endl
+      << "h: " << h << std::endl
       << "A=" << (pos > size ? (int16_t)s[pos - size] : -1) << std::endl
       << "B=" << (pos % size - 2 >= 0 ? (int16_t)s[pos - 2] : -1) << std::endl
       << "C=" << (pos % size - 1 >= 0 ? (int16_t)s[pos - 1] : -1) << std::endl

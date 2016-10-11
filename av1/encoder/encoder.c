@@ -16,6 +16,7 @@
 
 #include "av1/common/alloccommon.h"
 #if CONFIG_CLPF
+#include "aom/aom_image.h"
 #include "av1/common/clpf.h"
 #include "av1/encoder/clpf_rdo.h"
 #endif
@@ -3423,7 +3424,7 @@ static void loopfilter_frame(AV1_COMP *cpi, AV1_COMMON *cm) {
 #endif
   }
 #if CONFIG_CLPF
-  cm->clpf_strength = 0;
+  cm->clpf_strength_y = cm->clpf_strength_u = cm->clpf_strength_v = 0;
   cm->clpf_size = 2;
   CHECK_MEM_ERROR(
       cm, cm->clpf_blocks,
@@ -3431,21 +3432,37 @@ static void loopfilter_frame(AV1_COMP *cpi, AV1_COMMON *cm) {
                      ((cm->frame_to_show->y_crop_height + 31) & ~31) >>
                  10));
   if (!is_lossless_requested(&cpi->oxcf)) {
+    const YV12_BUFFER_CONFIG *const frame = cm->frame_to_show;
+
     // Find the best strength and block size for the entire frame
-    int fb_size_log2, strength;
-    av1_clpf_test_frame(cm->frame_to_show, cpi->Source, cm, &strength,
-                        &fb_size_log2);
+    int fb_size_log2, strength_y, strength_u, strength_v;
+    av1_clpf_test_frame(frame, cpi->Source, cm, &strength_y, &fb_size_log2,
+                        AOM_PLANE_Y);
+    av1_clpf_test_frame(frame, cpi->Source, cm, &strength_u, &fb_size_log2,
+                        AOM_PLANE_U);
+    av1_clpf_test_frame(frame, cpi->Source, cm, &strength_v, &fb_size_log2,
+                        AOM_PLANE_V);
 
     if (!fb_size_log2) fb_size_log2 = get_msb(MAX_FB_SIZE);
 
-    if (strength) {
+    if (strength_y) {
       // Apply the filter using the chosen strength
-      cm->clpf_strength = strength - (strength == 4);
+      cm->clpf_strength_y = strength_y - (strength_y == 4);
       cm->clpf_size =
           fb_size_log2 ? fb_size_log2 - get_msb(MAX_FB_SIZE) + 3 : 0;
       cm->clpf_numblocks = av1_clpf_frame(
-          cm->frame_to_show, cpi->Source, cm, !!cm->clpf_size, strength,
-          4 + cm->clpf_size, cm->clpf_blocks, av1_clpf_decision);
+          frame, cpi->Source, cm, !!cm->clpf_size, strength_y,
+          4 + cm->clpf_size, cm->clpf_blocks, AOM_PLANE_Y, av1_clpf_decision);
+    }
+    if (strength_u) {
+      cm->clpf_strength_u = strength_u - (strength_u == 4);
+      av1_clpf_frame(frame, NULL, cm, 0, strength_u, 4, NULL, AOM_PLANE_U,
+                     NULL);
+    }
+    if (strength_v) {
+      cm->clpf_strength_v = strength_v - (strength_v == 4);
+      av1_clpf_frame(frame, NULL, cm, 0, strength_v, 4, NULL, AOM_PLANE_V,
+                     NULL);
     }
   }
 #endif

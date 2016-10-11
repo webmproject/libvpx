@@ -29,6 +29,7 @@
 
 #include "av1/common/alloccommon.h"
 #if CONFIG_CLPF
+#include "aom/aom_image.h"
 #include "av1/common/clpf.h"
 #endif
 #include "av1/common/common.h"
@@ -2046,8 +2047,10 @@ static void setup_loopfilter(AV1_COMMON *cm, struct aom_read_bit_buffer *rb) {
 #if CONFIG_CLPF
 static void setup_clpf(AV1_COMMON *cm, struct aom_read_bit_buffer *rb) {
   cm->clpf_blocks = 0;
-  cm->clpf_strength = aom_rb_read_literal(rb, 2);
-  if (cm->clpf_strength) {
+  cm->clpf_strength_y = aom_rb_read_literal(rb, 2);
+  cm->clpf_strength_u = aom_rb_read_literal(rb, 2);
+  cm->clpf_strength_v = aom_rb_read_literal(rb, 2);
+  if (cm->clpf_strength_y) {
     cm->clpf_size = aom_rb_read_literal(rb, 2);
     if (cm->clpf_size) {
       int i;
@@ -2065,7 +2068,8 @@ static int clpf_bit(UNUSED int k, UNUSED int l,
                     UNUSED const YV12_BUFFER_CONFIG *org,
                     UNUSED const AV1_COMMON *cm, UNUSED int block_size,
                     UNUSED int w, UNUSED int h, UNUSED unsigned int strength,
-                    UNUSED unsigned int fb_size_log2, uint8_t *bit) {
+                    UNUSED unsigned int fb_size_log2, uint8_t *bit,
+                    UNUSED int comp) {
   return *bit;
 }
 #endif
@@ -3928,10 +3932,23 @@ void av1_decode_frame(AV1Decoder *pbi, const uint8_t *data,
 #endif  // CONFIG_LOOP_RESTORATION
 
 #if CONFIG_CLPF
-  if (cm->clpf_strength && !cm->skip_loop_filter) {
-    av1_clpf_frame(&pbi->cur_buf->buf, 0, cm, !!cm->clpf_size,
-                   cm->clpf_strength + (cm->clpf_strength == 3),
-                   4 + cm->clpf_size, cm->clpf_blocks, clpf_bit);
+  if (!cm->skip_loop_filter) {
+    const YV12_BUFFER_CONFIG *const frame = &pbi->cur_buf->buf;
+    if (cm->clpf_strength_y) {
+      av1_clpf_frame(frame, NULL, cm, !!cm->clpf_size,
+                     cm->clpf_strength_y + (cm->clpf_strength_y == 3),
+                     4 + cm->clpf_size, cm->clpf_blocks, AOM_PLANE_Y, clpf_bit);
+    }
+    if (cm->clpf_strength_u) {
+      av1_clpf_frame(frame, NULL, cm, 0,
+                     cm->clpf_strength_u + (cm->clpf_strength_u == 3), 4, NULL,
+                     AOM_PLANE_U, NULL);
+    }
+    if (cm->clpf_strength_v) {
+      av1_clpf_frame(frame, NULL, cm, 0,
+                     cm->clpf_strength_v + (cm->clpf_strength_v == 3), 4, NULL,
+                     AOM_PLANE_V, NULL);
+    }
   }
   if (cm->clpf_blocks) aom_free(cm->clpf_blocks);
 #endif
