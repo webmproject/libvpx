@@ -1257,11 +1257,12 @@ static void build_intra_predictors_high(
     const int need_right = !!(extend_modes[mode] & NEED_ABOVERIGHT);
 #endif  // CONFIG_EXT_INTRA
     if (n_top_px > 0) {
-      memcpy(above_row, above_ref, n_top_px * 2);
+      memcpy(above_row, above_ref, n_top_px * sizeof(above_ref[0]));
       i = n_top_px;
       if (need_right && n_topright_px > 0) {
         assert(n_top_px == bs);
-        memcpy(above_row + bs, above_ref + bs, n_topright_px * 2);
+        memcpy(above_row + bs, above_ref + bs,
+               n_topright_px * sizeof(above_ref[0]));
         i += n_topright_px;
       }
       if (i < (bs << need_right))
