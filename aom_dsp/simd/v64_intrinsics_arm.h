@@ -71,7 +71,7 @@ SIMD_INLINE void u32_store_unaligned(void *p, uint32_t a) {
 #elif __GNUC__
   *((__attribute((packed)) uint32_t *)p) = a;
 #else
-  vst1_lane_u32((uint32_t*)p, vreinterpret_u32_s64(a), 0);
+  vst1_lane_u32((uint32_t *)p, vreinterpret_u32_s64(a), 0);
 #endif
 }
 
