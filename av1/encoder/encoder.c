@@ -2735,7 +2735,10 @@ static void check_show_existing_frame(AV1_COMP *cpi) {
   const FRAME_UPDATE_TYPE next_frame_update_type =
       gf_group->update_type[gf_group->index];
   const int which_arf = gf_group->arf_update_idx[gf_group->index];
-  if (cpi->rc.is_last_bipred_frame) {
+
+  if (cm->show_existing_frame == 1) {
+    cm->show_existing_frame = 0;
+  } else if (cpi->rc.is_last_bipred_frame) {
     // NOTE(zoeliu): If the current frame is a last bi-predictive frame, it is
     //               needed next to show the BWDREF_FRAME, which is pointed by
     //               the last_fb_idxes[0] after reference frame buffer update
@@ -2751,8 +2754,6 @@ static void check_show_existing_frame(AV1_COMP *cpi) {
     cpi->rc.is_src_frame_alt_ref = 1;
     cpi->existing_fb_idx_to_show = cpi->alt_fb_idx;
     cpi->is_arf_filter_off[which_arf] = 0;
-  } else {
-    cm->show_existing_frame = 0;
   }
   cpi->rc.is_src_frame_ext_arf = 0;
 }
@@ -3187,8 +3188,6 @@ void av1_update_reference_frames(AV1_COMP *cpi) {
              sizeof(cpi->interp_filter_selected[BWDREF_FRAME]));
     }
     cpi->bwd_fb_idx = tmp;
-#endif  // CONFIG_EXT_REFS
-#if CONFIG_EXT_REFS
   } else if (cpi->rc.is_src_frame_ext_arf && cm->show_existing_frame) {
     // Deal with the special case for showing existing internal ALTREF_FRAME
     // Refresh the LAST_FRAME with the ALTREF_FRAME and retire the LAST3_FRAME
@@ -3317,6 +3316,7 @@ void av1_update_reference_frames(AV1_COMP *cpi) {
     //      v                v                v
     // lst_fb_idxes[2], lst_fb_idxes[0], lst_fb_idxes[1]
     int ref_frame;
+
     if (cpi->rc.is_bwd_ref_frame && cpi->num_extra_arfs) {
       // We have swapped the virtual indices to use ALT0 as BWD_REF
       // and we need to swap them back.
@@ -3325,6 +3325,7 @@ void av1_update_reference_frames(AV1_COMP *cpi) {
       cpi->alt_fb_idx = cpi->bwd_fb_idx;
       cpi->bwd_fb_idx = tmp;
     }
+
     if (cm->frame_type == KEY_FRAME) {
       for (ref_frame = 0; ref_frame < LAST_REF_FRAMES; ++ref_frame) {
         ref_cnt_fb(pool->frame_bufs,
