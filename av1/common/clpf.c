@@ -168,6 +168,7 @@ int av1_clpf_frame(const YV12_BUFFER_CONFIG *orig_dst,
 
     aom_free(cache);
     aom_free(cache_ptr);
+    aom_free(cache_dst);
   }
 
   return block_index;
