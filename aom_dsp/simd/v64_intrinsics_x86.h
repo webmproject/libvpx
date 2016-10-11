@@ -389,25 +389,18 @@ SIMD_INLINE v64 v64_cmplt_s16(v64 a, v64 b) { return _mm_cmplt_epi16(a, b); }
 SIMD_INLINE v64 v64_cmpeq_16(v64 a, v64 b) { return _mm_cmpeq_epi16(a, b); }
 
 SIMD_INLINE v64 v64_shl_8(v64 a, unsigned int c) {
-  return _mm_packus_epi16(
-      _mm_srli_epi16(_mm_sll_epi16(_mm_unpacklo_epi8(_mm_setzero_si128(), a),
-                                   _mm_cvtsi32_si128(c)),
-                     8),
-      _mm_setzero_si128());
+  return _mm_and_si128(_mm_set1_epi8((uint8_t)(0xff << c)),
+                       _mm_sll_epi16(a, _mm_cvtsi32_si128(c)));
 }
 
 SIMD_INLINE v64 v64_shr_u8(v64 a, unsigned int c) {
-  __m128i cp8 = _mm_cvtsi32_si128(c + 8);
-  return _mm_packus_epi16(
-      _mm_srl_epi16(_mm_unpacklo_epi8(_mm_setzero_si128(), a), cp8),
-      _mm_setzero_si128());
+  return _mm_and_si128(_mm_set1_epi8(0xff >> c),
+                       _mm_srl_epi16(a, _mm_cvtsi32_si128(c)));
 }
 
 SIMD_INLINE v64 v64_shr_s8(v64 a, unsigned int c) {
-  __m128i cp8 = _mm_cvtsi32_si128(c + 8);
   return _mm_packs_epi16(
-      _mm_sra_epi16(_mm_unpacklo_epi8(_mm_setzero_si128(), a), cp8),
-      _mm_setzero_si128());
+      _mm_sra_epi16(_mm_unpacklo_epi8(a, a), _mm_cvtsi32_si128(c + 8)), a);
 }
 
 SIMD_INLINE v64 v64_shl_16(v64 a, unsigned int c) {
@@ -438,19 +431,12 @@ SIMD_INLINE v64 v64_shr_s32(v64 a, unsigned int c) {
    to enforce that. */
 #define v64_shl_n_byte(a, c) _mm_slli_si128(a, c)
 #define v64_shr_n_byte(a, c) _mm_srli_si128(_mm_unpacklo_epi64(a, a), c + 8)
-#define v64_shl_n_8(a, c)                                                  \
-  _mm_packus_epi16(                                                        \
-      _mm_srli_epi16(                                                      \
-          _mm_sll_epi16(_mm_unpacklo_epi8(_mm_setzero_si128(), a), c), 8), \
-      _mm_setzero_si128())
-#define v64_shr_n_u8(a, c)                                               \
-  _mm_packus_epi16(                                                      \
-      _mm_srl_epi16(_mm_unpacklo_epi8(_mm_setzero_si128(), a), (c) + 8), \
-      _mm_setzero_si128())
-#define v64_shr_n_s8(a, c)                                               \
-  _mm_packs_epi16(                                                       \
-      _mm_sra_epi16(_mm_unpacklo_epi8(_mm_setzero_si128(), a), (c) + 8), \
-      _mm_setzero_si128())
+#define v64_shl_n_8(a, c) \
+  _mm_and_si128(_mm_set1_epi8((uint8_t)(0xff << (c))), _mm_slli_epi16(a, c))
+#define v64_shr_n_u8(a, c) \
+  _mm_and_si128(_mm_set1_epi8(0xff >> (c)), _mm_srli_epi16(a, c))
+#define v64_shr_n_s8(a, c) \
+  _mm_packs_epi16(_mm_srai_epi16(_mm_unpacklo_epi8(a, a), (c) + 8), a)
 #define v64_shl_n_16(a, c) _mm_slli_epi16(a, c)
 #define v64_shr_n_u16(a, c) _mm_srli_epi16(a, c)
 #define v64_shr_n_s16(a, c) _mm_srai_epi16(a, c)
