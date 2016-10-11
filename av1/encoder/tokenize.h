@@ -56,19 +56,31 @@ int av1_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 struct AV1_COMP;
 struct ThreadData;
 
+typedef enum {
+  OUTPUT_ENABLED = 0,
+  DRY_RUN_NORMAL,
+  DRY_RUN_COSTCOEFFS,
+} RUN_TYPE;
+
+// Note in all the tokenize functions rate if non NULL is incremented
+// with the coefficient token cost only if dry_run = DRY_RUN_COSTCOEFS,
+// otherwise rate is not incremented.
 #if CONFIG_VAR_TX
 void av1_tokenize_sb_vartx(struct AV1_COMP *cpi, struct ThreadData *td,
-                           TOKENEXTRA **t, int dry_run, int mi_row, int mi_col,
-                           BLOCK_SIZE bsize);
+                           TOKENEXTRA **t, RUN_TYPE dry_run, int mi_row,
+                           int mi_col, BLOCK_SIZE bsize, int *rate);
 #endif
 
-void av1_tokenize_palette_sb(struct ThreadData *const td, BLOCK_SIZE bsize,
-                             int plane, TOKENEXTRA **t);
+void av1_tokenize_palette_sb(struct AV1_COMP *cpi, struct ThreadData *const td,
+                             int plane, TOKENEXTRA **t, RUN_TYPE dry_run,
+                             BLOCK_SIZE bsize, int *rate);
 void av1_tokenize_sb(struct AV1_COMP *cpi, struct ThreadData *td,
-                     TOKENEXTRA **t, int dry_run, BLOCK_SIZE bsize);
+                     TOKENEXTRA **t, RUN_TYPE dry_run, BLOCK_SIZE bsize,
+                     int *rate);
 #if CONFIG_SUPERTX
 void av1_tokenize_sb_supertx(struct AV1_COMP *cpi, struct ThreadData *td,
-                             TOKENEXTRA **t, int dry_run, BLOCK_SIZE bsize);
+                             TOKENEXTRA **t, RUN_TYPE dry_run, BLOCK_SIZE bsize,
+                             int *rate);
 #endif
 
 extern const int16_t *av1_dct_value_cost_ptr;

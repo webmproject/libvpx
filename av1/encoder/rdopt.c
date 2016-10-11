@@ -46,6 +46,7 @@
 #include "av1/encoder/ratectrl.h"
 #include "av1/encoder/rd.h"
 #include "av1/encoder/rdopt.h"
+#include "av1/encoder/tokenize.h"
 
 #if CONFIG_DUAL_FILTER
 #if CONFIG_EXT_INTERP
@@ -865,14 +866,14 @@ int64_t av1_highbd_block_error_c(const tran_low_t *coeff,
 }
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 
-/* The trailing '0' is a terminator which is used inside cost_coeffs() to
+/* The trailing '0' is a terminator which is used inside av1_cost_coeffs() to
  * decide whether to include cost of a trailing EOB node or not (i.e. we
  * can skip this if the last coefficient in this transform block, e.g. the
  * 16th coefficient in a 4x4 block or the 64th coefficient in a 8x8 block,
  * were non-zero). */
-static int cost_coeffs(MACROBLOCK *x, int plane, int block, int coeff_ctx,
-                       TX_SIZE tx_size, const int16_t *scan, const int16_t *nb,
-                       int use_fast_coef_costing) {
+int av1_cost_coeffs(MACROBLOCK *x, int plane, int block, int coeff_ctx,
+                    TX_SIZE tx_size, const int16_t *scan, const int16_t *nb,
+                    int use_fast_coef_costing) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   const struct macroblock_plane *p = &x->plane[plane];
@@ -1064,8 +1065,9 @@ static void dist_block(const AV1_COMP *cpi, MACROBLOCK *x, int plane, int block,
 
 static int rate_block(int plane, int block, int coeff_ctx, TX_SIZE tx_size,
                       struct rdcost_block_args *args) {
-  return cost_coeffs(args->x, plane, block, coeff_ctx, tx_size, args->so->scan,
-                     args->so->neighbors, args->use_fast_coef_costing);
+  return av1_cost_coeffs(args->x, plane, block, coeff_ctx, tx_size,
+                         args->so->scan, args->so->neighbors,
+                         args->use_fast_coef_costing);
 }
 
 static uint64_t sum_squares_2d(const int16_t *diff, int diff_stride,
@@ -1946,8 +1948,9 @@ static int64_t rd_pick_intra4x4block(AV1_COMP *cpi, MACROBLOCK *x, int row,
             av1_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8,
                             TX_4X4, AV1_XFORM_QUANT_FP);
 #endif  // CONFIG_NEW_QUANT
-            ratey += cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
-                                 so->neighbors, cpi->sf.use_fast_coef_costing);
+            ratey +=
+                av1_cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
+                                so->neighbors, cpi->sf.use_fast_coef_costing);
             *(tempa + idx) = !(p->eobs[block] == 0);
             *(templ + idy) = !(p->eobs[block] == 0);
             can_skip &= (p->eobs[block] == 0);
@@ -1971,8 +1974,9 @@ static int64_t rd_pick_intra4x4block(AV1_COMP *cpi, MACROBLOCK *x, int row,
                             TX_4X4, AV1_XFORM_QUANT_FP);
 #endif  // CONFIG_NEW_QUANT
             av1_optimize_b(x, 0, block, TX_4X4, coeff_ctx);
-            ratey += cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
-                                 so->neighbors, cpi->sf.use_fast_coef_costing);
+            ratey +=
+                av1_cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
+                                so->neighbors, cpi->sf.use_fast_coef_costing);
             *(tempa + idx) = !(p->eobs[block] == 0);
             *(templ + idy) = !(p->eobs[block] == 0);
             can_skip &= (p->eobs[block] == 0);
@@ -2064,8 +2068,9 @@ static int64_t rd_pick_intra4x4block(AV1_COMP *cpi, MACROBLOCK *x, int row,
           av1_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8, TX_4X4,
                           AV1_XFORM_QUANT_B);
 #endif  // CONFIG_NEW_QUANT
-          ratey += cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
-                               so->neighbors, cpi->sf.use_fast_coef_costing);
+          ratey +=
+              av1_cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
+                              so->neighbors, cpi->sf.use_fast_coef_costing);
           *(tempa + idx) = !(p->eobs[block] == 0);
           *(templ + idy) = !(p->eobs[block] == 0);
           can_skip &= (p->eobs[block] == 0);
@@ -2088,8 +2093,9 @@ static int64_t rd_pick_intra4x4block(AV1_COMP *cpi, MACROBLOCK *x, int row,
                           AV1_XFORM_QUANT_FP);
 #endif  // CONFIG_NEW_QUANT
           av1_optimize_b(x, 0, block, TX_4X4, coeff_ctx);
-          ratey += cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
-                               so->neighbors, cpi->sf.use_fast_coef_costing);
+          ratey +=
+              av1_cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
+                              so->neighbors, cpi->sf.use_fast_coef_costing);
           *(tempa + idx) = !(p->eobs[block] == 0);
           *(templ + idy) = !(p->eobs[block] == 0);
           can_skip &= (p->eobs[block] == 0);
@@ -2964,8 +2970,8 @@ void av1_tx_block_rd_b(const AV1_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
     }
   }
   *dist += tmp * 16;
-  *rate += cost_coeffs(x, plane, block, coeff_ctx, tx_size, scan_order->scan,
-                       scan_order->neighbors, 0);
+  *rate += av1_cost_coeffs(x, plane, block, coeff_ctx, tx_size,
+                           scan_order->scan, scan_order->neighbors, 0);
   *skip &= (p->eobs[block] == 0);
 }
 
@@ -4374,8 +4380,8 @@ static int64_t encode_inter_mb_segment(AV1_COMP *cpi, MACROBLOCK *x,
                  &dist, &ssz);
       thisdistortion += dist;
       thissse += ssz;
-      thisrate += cost_coeffs(x, 0, block, coeff_ctx, tx_size, so->scan,
-                              so->neighbors, cpi->sf.use_fast_coef_costing);
+      thisrate += av1_cost_coeffs(x, 0, block, coeff_ctx, tx_size, so->scan,
+                                  so->neighbors, cpi->sf.use_fast_coef_costing);
       *(ta + (k & 1)) = !(p->eobs[block] == 0);
       *(tl + (k >> 1)) = !(p->eobs[block] == 0);
 #if CONFIG_EXT_TX
