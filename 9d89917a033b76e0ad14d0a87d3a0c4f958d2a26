@@ -33,6 +33,24 @@
       "revId": "9d89917a033b76e0ad14d0a87d3a0c4f958d2a26",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ff76b882_1e792c84",
+        "filename": "test/fht32x32_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-10-11T22:24:09Z",
+      "side": 1,
+      "message": "These functions are not available yet, which should be enabled after 32x32 HBD txfm optimization.",
+      "parentUuid": "ff76b882_3e2988f5",
+      "revId": "9d89917a033b76e0ad14d0a87d3a0c4f958d2a26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
