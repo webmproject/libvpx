@@ -9,6 +9,8 @@
  * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 
+// clang-format off
+
 #include <string.h>
 #include <math.h>
 
@@ -41,7 +43,7 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
   int nhsb, nvsb;
   od_dering_in *src;
   int16_t *ref_coeff;
-  unsigned char bskip[MAX_MIB_SIZE*MAX_MIB_SIZE];
+  unsigned char bskip[MAX_MIB_SIZE*MAX_MIB_SIZE][2];
   int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS] = { { 0 } };
   int stride;
   int bsize[3];
@@ -49,6 +51,7 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
   int pli;
   int level;
   int best_level;
+  int dering_count;
   int coeff_shift = AOMMAX(cm->bit_depth - 8, 0);
   src = aom_malloc(sizeof(*src) * cm->mi_rows * cm->mi_cols * 64);
   ref_coeff = aom_malloc(sizeof(*ref_coeff) * cm->mi_rows * cm->mi_cols * 64);
@@ -97,7 +100,7 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
       int16_t dst[MAX_MIB_SIZE * MAX_MIB_SIZE * 8 * 8];
       nhb = AOMMIN(MAX_MIB_SIZE, cm->mi_cols - MAX_MIB_SIZE * sbc);
       nvb = AOMMIN(MAX_MIB_SIZE, cm->mi_rows - MAX_MIB_SIZE * sbr);
-      if (sb_all_skip_out(cm, sbr * MAX_MIB_SIZE, sbc * MAX_MIB_SIZE, bskip))
+      if (sb_all_skip_out(cm, sbr * MAX_MIB_SIZE, sbc * MAX_MIB_SIZE, bskip, &dering_count))
         continue;
       best_gi = 0;
       for (gi = 0; gi < DERING_REFINEMENT_LEVELS; gi++) {
@@ -111,7 +114,7 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
                   cm->mi_cols * bsize[0], nhb, nvb, sbc, sbr, nhsb, nvsb, 0,
                   dir, 0,
                   bskip,
-                  MAX_MIB_SIZE, threshold, coeff_shift);
+                  dering_count, threshold, coeff_shift);
         cur_mse = (int)compute_dist(
             dst, MAX_MIB_SIZE * bsize[0],
             &ref_coeff[sbr * stride * bsize[0] * MAX_MIB_SIZE +

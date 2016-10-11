@@ -9,6 +9,8 @@
  * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 
+// clang-format off
+
 #include <string.h>
 #include <math.h>
 
@@ -46,11 +48,12 @@ int sb_all_skip(const AV1_COMMON *const cm, int mi_row, int mi_col) {
 }
 
 int sb_all_skip_out(const AV1_COMMON *const cm, int mi_row, int mi_col,
-    unsigned char *bskip) {
+    unsigned char (*bskip)[2], int *count_ptr) {
   int r, c;
   int maxc, maxr;
   int skip = 1;
   MODE_INFO **grid;
+  int count=0;
   grid = cm->mi_grid_visible;
   maxc = cm->mi_cols - mi_col;
   maxr = cm->mi_rows - mi_row;
@@ -60,12 +63,15 @@ int sb_all_skip_out(const AV1_COMMON *const cm, int mi_row, int mi_col,
     MODE_INFO **grid_row;
     grid_row = &grid[(mi_row + r) * cm->mi_stride + mi_col];
     for (c = 0; c < maxc; c++) {
-      int tmp;
-      tmp = grid_row[c]->mbmi.skip;
-      bskip[r*MAX_MIB_SIZE + c] = tmp;
-      skip = skip && tmp;
+      if (!grid_row[c]->mbmi.skip) {
+        skip = 0;
+        bskip[count][0] = r;
+        bskip[count][1] = c;
+        count++;
+      }
     }
   }
+  *count_ptr = count;
   return skip;
 }
 
@@ -75,7 +81,8 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
   int sbr, sbc;
   int nhsb, nvsb;
   od_dering_in *src[3];
-  unsigned char bskip[MAX_MIB_SIZE*MAX_MIB_SIZE];
+  unsigned char bskip[MAX_MIB_SIZE*MAX_MIB_SIZE][2];
+  int dering_count;
   int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS] = { { 0 } };
   int stride;
   int bsize[3];
@@ -125,7 +132,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
                                             MAX_MIB_SIZE * sbc]
                             ->mbmi.dering_gain);
       if (level == 0 ||
-          sb_all_skip_out(cm, sbr * MAX_MIB_SIZE, sbc * MAX_MIB_SIZE, bskip))
+          sb_all_skip_out(cm, sbr * MAX_MIB_SIZE, sbc * MAX_MIB_SIZE, bskip, &dering_count))
         continue;
       for (pli = 0; pli < nplanes; pli++) {
         int16_t dst[MAX_MIB_SIZE * MAX_MIB_SIZE * 8 * 8];
@@ -141,7 +148,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
                   &src[pli][sbr * stride * bsize[pli] * MAX_MIB_SIZE +
                             sbc * bsize[pli] * MAX_MIB_SIZE],
                   stride, nhb, nvb, sbc, sbr, nhsb, nvsb, dec[pli], dir, pli,
-                  bskip, MAX_MIB_SIZE, threshold, coeff_shift);
+                  bskip, dering_count, threshold, coeff_shift);
         for (r = 0; r < bsize[pli] * nvb; ++r) {
           for (c = 0; c < bsize[pli] * nhb; ++c) {
 #if CONFIG_AOM_HIGHBITDEPTH
