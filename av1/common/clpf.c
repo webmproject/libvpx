@@ -63,7 +63,6 @@ int av1_clpf_frame(const YV12_BUFFER_CONFIG *dst, const YV12_BUFFER_CONFIG *rec,
   int height = rec->y_crop_height;
   int xpos, ypos;
   int stride_y = rec->y_stride;
-  int stride_c = rec->uv_stride;
   const int bs = MAX_MIB_SIZE;
   int num_fb_hor = (width + (1 << fb_size_log2) - bs) >> fb_size_log2;
   int num_fb_ver = (height + (1 << fb_size_log2) - bs) >> fb_size_log2;

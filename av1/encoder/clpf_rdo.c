@@ -100,7 +100,7 @@ static int clpf_rdo(int y, int x, const YV12_BUFFER_CONFIG *rec,
                     const YV12_BUFFER_CONFIG *org, const AV1_COMMON *cm,
                     unsigned int block_size, unsigned int fb_size_log2, int w,
                     int h, int64_t res[4][4]) {
-  int i, m, n, filtered = 0;
+  int c, m, n, filtered = 0;
   int sum[4];
   int bslog = get_msb(block_size);
   sum[0] = sum[1] = sum[2] = sum[3] = 0;
@@ -153,11 +153,11 @@ static int clpf_rdo(int y, int x, const YV12_BUFFER_CONFIG *rec,
     }
   }
 
-  for (i = 0; i < 4; i++) {
-    res[i][0] += sum[0];
-    res[i][1] += sum[1];
-    res[i][2] += sum[2];
-    res[i][3] += sum[3];
+  for (c = 0; c < 4; c++) {
+    res[c][0] += sum[0];
+    res[c][1] += sum[1];
+    res[c][2] += sum[2];
+    res[c][3] += sum[3];
   }
   return filtered;
 }
@@ -165,7 +165,7 @@ static int clpf_rdo(int y, int x, const YV12_BUFFER_CONFIG *rec,
 void av1_clpf_test_frame(const YV12_BUFFER_CONFIG *rec,
                          const YV12_BUFFER_CONFIG *org, const AV1_COMMON *cm,
                          int *best_strength, int *best_bs) {
-  int i, j, k, l;
+  int c, j, k, l;
   int64_t best, sums[4][4];
   int width = rec->y_crop_width, height = rec->y_crop_height;
   const int bs = MAX_MIB_SIZE;
@@ -213,9 +213,9 @@ void av1_clpf_test_frame(const YV12_BUFFER_CONFIG *rec,
   }
 
   best = (int64_t)1 << 62;
-  for (i = 0; i < 4; i++)
+  for (c = 0; c < 4; c++)
     for (j = 0; j < 4; j++)
-      if ((!i || j) && sums[i][j] < best) best = sums[i][j];
+      if ((!c || j) && sums[c][j] < best) best = sums[c][j];
   best &= 15;
   *best_bs = (best > 3) * (5 + (best < 12) + (best < 8));
   *best_strength = best ? 1 << ((best - 1) & 3) : 0;
