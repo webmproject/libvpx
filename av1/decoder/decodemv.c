@@ -1454,6 +1454,7 @@ static void read_inter_block_mode_info(AV1Decoder *const pbi,
         };
 
         mi->bmi[j].as_mv[0].as_int = block[0].as_int;
+        mi->bmi[j].as_mode = b_mode;
         if (is_compound) mi->bmi[j].as_mv[1].as_int = block[1].as_int;
 
         if (num_4x4_h == 2) mi->bmi[j + 2] = mi->bmi[j];
