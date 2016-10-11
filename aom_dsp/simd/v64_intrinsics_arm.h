@@ -14,12 +14,10 @@
 
 #include <arm_neon.h>
 #include "./v64_intrinsics_arm.h"
+#include "aom_ports/arm.h"
 
-/* vzip in gcc is broken.  Fixed in 4.6.1? */
-#if __GNUC__ &&                                                       \
-    ((__GNUC__ << 16) + (__GNUC_MINOR__ << 8) + __GNUC_PATCHLEVEL__ < \
-     (4 << 16) + (6 << 8) + 1)
-#error vzip buggy in gcc.  Get at least gcc 4.6.1.
+#ifdef AOM_INCOMPATIBLE_GCC
+#error Incompatible gcc
 #endif
 
 typedef int64x1_t v64;
@@ -51,7 +49,7 @@ SIMD_INLINE v64 v64_from_32(uint32_t x, uint32_t y) {
 
 SIMD_INLINE v64 v64_from_64(uint64_t x) { return vcreate_s64(x); }
 
-SIMD_INLINE uint64_t v64_u64(v64 x) { return x; }
+SIMD_INLINE uint64_t v64_u64(v64 x) { return (uint64_t)x; }
 
 SIMD_INLINE uint32_t u32_load_aligned(const void *p) {
   return *((uint32_t *)p);
@@ -66,12 +64,16 @@ SIMD_INLINE void u32_store_aligned(void *p, uint32_t a) {
 }
 
 SIMD_INLINE void u32_store_unaligned(void *p, uint32_t a) {
-#if __CC_ARM
+#if __clang__
+  vst1_lane_u32((uint32_t *)p, vreinterpret_u32_s64((uint64x1_t)(uint64_t)a),
+                0);
+#elif __CC_ARM
   *(__packed uint32_t *)p) = a;
 #elif __GNUC__
   *((__attribute((packed)) uint32_t *)p) = a;
 #else
-  vst1_lane_u32((uint32_t *)p, vreinterpret_u32_s64(a), 0);
+  vst1_lane_u32((uint32_t *)p, vreinterpret_u32_s64((uint64x1_t)(uint64_t)a),
+                0);
 #endif
 }
 
@@ -91,13 +93,16 @@ SIMD_INLINE void v64_store_unaligned(void *p, v64 r) {
   vst1_u8((uint8_t *)p, vreinterpret_u8_s64(r));
 }
 
+// The following function requires an immediate.
+// Some compilers will check this if it's optimising, others wont.
 SIMD_INLINE v64 v64_align(v64 a, v64 b, const unsigned int c) {
-#if __OPTIMIZE__
+#if __OPTIMIZE__ && !__clang__
   return c ? vreinterpret_s64_s8(
                  vext_s8(vreinterpret_s8_s64(b), vreinterpret_s8_s64(a), c))
            : b;
 #else
-  return c ? v64_from_64(b >> c * 8) | (a << (8 - c) * 8) : b;
+  return c ? v64_from_64((uint64_t)b >> c * 8) | ((uint64_t)a << (8 - c) * 8)
+           : b;
 #endif
 }
 
@@ -121,21 +126,21 @@ SIMD_INLINE int64_t v64_dotp_su8(v64 x, v64 y) {
   int64x2_t r = vpaddlq_s32(vpaddlq_s16(
       vmulq_s16(vmovl_s8(vreinterpret_s8_s64(x)),
                 vreinterpretq_s16_u16(vmovl_u8(vreinterpret_u8_s64(y))))));
-  return vadd_s64(vget_high_s64(r), vget_low_s64(r));
+  return (int64_t)vadd_s64(vget_high_s64(r), vget_low_s64(r));
 }
 
 SIMD_INLINE int64_t v64_dotp_s16(v64 x, v64 y) {
   int64x2_t r =
       vpaddlq_s32(vmull_s16(vreinterpret_s16_s64(x), vreinterpret_s16_s64(y)));
-  return vget_high_s64(r) + vget_low_s64(r);
+  return (int64_t)(vget_high_s64(r) + vget_low_s64(r));
 }
 
 SIMD_INLINE uint64_t v64_hadd_u8(v64 x) {
-  return vpaddl_u32(vpaddl_u16(vpaddl_u8(vreinterpret_u8_s64(x))));
+  return (uint64_t)vpaddl_u32(vpaddl_u16(vpaddl_u8(vreinterpret_u8_s64(x))));
 }
 
 SIMD_INLINE int64_t v64_hadd_s16(v64 a) {
-  return vpaddl_s32(vpaddl_s16(vreinterpret_s16_s64(a)));
+  return (int64_t)vpaddl_s32(vpaddl_s16(vreinterpret_s16_s64(a)));
 }
 
 typedef uint16x8_t sad64_internal;
@@ -151,12 +156,14 @@ SIMD_INLINE sad64_internal v64_sad_u8(sad64_internal s, v64 a, v64 b) {
 
 SIMD_INLINE uint32_t v64_sad_u8_sum(sad64_internal s) {
   uint64x2_t r = vpaddlq_u32(vpaddlq_u16(s));
-  return (uint32_t)(vget_high_u64(r) + vget_low_u64(r));
+  return (uint32_t)(uint64_t)(vget_high_u64(r) + vget_low_u64(r));
 }
 
 typedef int64x1_t ssd64_internal;
 
-SIMD_INLINE ssd64_internal v64_ssd_u8_init() { return 0; }
+SIMD_INLINE ssd64_internal v64_ssd_u8_init() {
+  return (ssd64_internal)(uint64_t)0;
+}
 
 /* Implementation dependent return value.  Result must be finalised with
  * v64_ssd_u8_sum(). */
@@ -166,7 +173,9 @@ SIMD_INLINE ssd64_internal v64_ssd_u8(ssd64_internal s, v64 a, v64 b) {
   return vadd_u64(s, vadd_u64(vget_high_u64(r), vget_low_u64(r)));
 }
 
-SIMD_INLINE uint32_t v64_ssd_u8_sum(ssd64_internal s) { return (uint32_t)s; }
+SIMD_INLINE uint32_t v64_ssd_u8_sum(ssd64_internal s) {
+  return (uint32_t)(uint64_t)s;
+}
 
 SIMD_INLINE v64 v64_or(v64 x, v64 y) { return vorr_s64(x, y); }
 
@@ -470,7 +479,9 @@ SIMD_INLINE v64 v64_shr_s32(v64 a, unsigned int c) {
       vshl_s32(vreinterpret_s32_s64(a), vdup_n_s32(-(int)c)));
 }
 
-#if __OPTIMIZE__
+// The following functions require an immediate.
+// Some compilers will check this during optimisation, others wont.
+#if __OPTIMIZE__ && !__clang__
 
 SIMD_INLINE v64 v64_shl_n_byte(v64 a, const unsigned int c) {
   return vshl_n_s64(a, c * 8);

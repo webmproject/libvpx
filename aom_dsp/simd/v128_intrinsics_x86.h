@@ -58,7 +58,9 @@ SIMD_INLINE void v128_store_unaligned(void *p, v128 a) {
   _mm_storeu_si128((__m128i *)p, a);
 }
 
-#if defined(__OPTIMIZE__)
+// The following function requires an immediate.
+// Some compilers will check this during optimisation, others wont.
+#if __OPTIMIZE__ && !__clang__
 #if defined(__SSSE3__)
 SIMD_INLINE v128 v128_align(v128 a, v128 b, const unsigned int c) {
   return c ? _mm_alignr_epi8(a, b, c) : b;
