@@ -54,44 +54,84 @@ class ClpfBlockTest : public ::testing::TestWithParam<clpf_block_param_t> {
 
 typedef ClpfBlockTest ClpfSpeedTest;
 
-TEST_P(ClpfBlockTest, TestSIMDNoMismatch) {
-  int w = sizex;
-  int h = sizey;
-  const int size = 32;
-  ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED(16, uint8_t, s[size * size]);
-  DECLARE_ALIGNED(16, uint8_t, d[size * size]);
-  DECLARE_ALIGNED(16, uint8_t, ref_d[size * size]);
-  memset(ref_d, 0, size * size);
-  memset(d, 0, size * size);
+#if CONFIG_AOM_HIGHBITDEPTH
+typedef void (*clpf_block_hbd_t)(const uint16_t *src, uint16_t *dst,
+                                 int sstride, int dstride, int x0, int y0,
+                                 int sizex, int sizey, int width, int height,
+                                 unsigned int strength);
 
-  int error = 0;
-  int pos = 0;
-  int strength = 0;
-  int xpos = 0, ypos = 0;
-  int bits;
-  int level;
+typedef std::tr1::tuple<clpf_block_hbd_t, clpf_block_hbd_t, int, int>
+    clpf_block_hbd_param_t;
+
+class ClpfBlockHbdTest
+    : public ::testing::TestWithParam<clpf_block_hbd_param_t> {
+ public:
+  virtual ~ClpfBlockHbdTest() {}
+  virtual void SetUp() {
+    clpf = GET_PARAM(0);
+    ref_clpf = GET_PARAM(1);
+    sizex = GET_PARAM(2);
+    sizey = GET_PARAM(3);
+  }
+
+  virtual void TearDown() { libaom_test::ClearSystemState(); }
+
+ protected:
+  int sizex;
+  int sizey;
+  clpf_block_hbd_t clpf;
+  clpf_block_hbd_t ref_clpf;
+};
+
+typedef ClpfBlockHbdTest ClpfHbdSpeedTest;
+#endif
+
+template <typename pixel>
+void test_clpf(int w, int h, int depth, int iterations,
+               void (*clpf)(const pixel *src, pixel *dst, int sstride,
+                            int dstride, int x0, int y0, int sizex, int sizey,
+                            int width, int height, unsigned int strength),
+               void (*ref_clpf)(const pixel *src, pixel *dst, int sstride,
+                                int dstride, int x0, int y0, int sizex,
+                                int sizey, int width, int height,
+                                unsigned int strength)) {
+  const int size = 24;
+  ACMRandom rnd(ACMRandom::DeterministicSeed());
+  DECLARE_ALIGNED(16, pixel, s[size * size]);
+  DECLARE_ALIGNED(16, pixel, d[size * size]);
+  DECLARE_ALIGNED(16, pixel, ref_d[size * size]);
+  memset(ref_d, 0, size * size * sizeof(*ref_d));
+  memset(d, 0, size * size * sizeof(*d));
+
+  int error = 0, pos = 0, strength = 0, xpos = 0, ypos = 0;
+  int bits, level, count;
 
   // Test every combination of:
-  // * Input with 1-8 bits of noise
-  // * Noise level around every value from 0 to 255
+  // * Input with up to <depth> bits of noise
+  // * Noise level around every value from 0 to (1<<depth)-1
   // * Blocks anywhere in the frame (along all egdes and also fully inside)
   // * All strengths
-  for (level = 0; level < 256 && !error; level++) {
-    for (bits = 1; bits < 9 && !error; bits++) {
-      for (int i = 0; i < size * size; i++)
-        s[i] = clamp((rnd.Rand8() & ((1 << bits) - 1)) + level, 0, 255);
+  // If clpf and ref_clpf are the same, we're just testing speed
+  for (count = 0; count < iterations; count++) {
+    for (level = 0; level < (1 << depth) && !error; level++) {
+      for (bits = 1; bits <= depth && !error; bits++) {
+        for (int i = 0; i < size * size; i++)
+          s[i] = clamp((rnd.Rand16() & ((1 << bits) - 1)) + level, 0,
+                       (1 << depth) - 1);
 
-      for (ypos = 0; ypos < size && !error; ypos += h * !error) {
-        for (xpos = 0; xpos < size && !error; xpos += w * !error) {
-          for (strength = 0; strength < 3 && !error; strength += !error) {
-            ref_clpf(s, ref_d, size, size, xpos, ypos, w, h, size, size,
-                     1 << strength);
-            ASM_REGISTER_STATE_CHECK(clpf(s, d, size, size, xpos, ypos, w, h,
-                                          size, size, 1 << strength));
-
-            for (pos = 0; pos < size * size && !error; pos++) {
-              error = ref_d[pos] != d[pos];
+        for (ypos = 0; ypos < size && !error; ypos += h * !error) {
+          for (xpos = 0; xpos < size && !error; xpos += w * !error) {
+            for (strength = depth - 8; strength < depth - 5 && !error;
+                 strength += !error) {
+              ref_clpf(s, ref_d, size, size, xpos, ypos, w, h, size, size,
+                       1 << strength);
+              if (clpf != ref_clpf)
+                ASM_REGISTER_STATE_CHECK(clpf(s, d, size, size, xpos, ypos, w,
+                                              h, size, size, 1 << strength));
+              if (ref_clpf != clpf)
+                for (pos = 0; pos < size * size && !error; pos++) {
+                  error = ref_d[pos] != d[pos];
+                }
             }
           }
         }
@@ -116,46 +156,26 @@ TEST_P(ClpfBlockTest, TestSIMDNoMismatch) {
       << std::endl;
 }
 
-TEST_P(ClpfSpeedTest, TestSpeed) {
-  int w = sizex;
-  int h = sizey;
-  const int size = 32;
-  ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED(16, uint8_t, s[size * size]);
-  DECLARE_ALIGNED(16, uint8_t, d[size * size]);
-
-  int strength;
-  int xpos, ypos;
-
-  for (int i = 0; i < size * size; i++) s[i] = rnd.Rand8();
-
+template <typename pixel>
+void test_clpf_speed(int w, int h, int depth, int iterations,
+                     void (*clpf)(const pixel *src, pixel *dst, int sstride,
+                                  int dstride, int x0, int y0, int sizex,
+                                  int sizey, int width, int height,
+                                  unsigned int strength),
+                     void (*ref_clpf)(const pixel *src, pixel *dst, int sstride,
+                                      int dstride, int x0, int y0, int sizex,
+                                      int sizey, int width, int height,
+                                      unsigned int strength)) {
   aom_usec_timer ref_timer;
   aom_usec_timer timer;
 
   aom_usec_timer_start(&ref_timer);
-  for (int c = 0; c < 65536; c++) {
-    for (ypos = 0; ypos < size; ypos += h) {
-      for (xpos = 0; xpos < size; xpos += w) {
-        for (strength = 0; strength < 3; strength++) {
-          ref_clpf(s, d, size, size, xpos, ypos, w, h, size, size,
-                   1 << strength);
-        }
-      }
-    }
-  }
+  test_clpf(w, h, depth, iterations, ref_clpf, ref_clpf);
   aom_usec_timer_mark(&ref_timer);
   int ref_elapsed_time = aom_usec_timer_elapsed(&ref_timer);
 
   aom_usec_timer_start(&timer);
-  for (int c = 0; c < 65536; c++) {
-    for (ypos = 0; ypos < size; ypos += h) {
-      for (xpos = 0; xpos < size; xpos += w) {
-        for (strength = 0; strength < 3; strength++) {
-          clpf(s, d, size, size, xpos, ypos, w, h, size, size, 1 << strength);
-        }
-      }
-    }
-  }
+  test_clpf(w, h, depth, iterations, clpf, clpf);
   aom_usec_timer_mark(&timer);
   int elapsed_time = aom_usec_timer_elapsed(&timer);
 
@@ -169,6 +189,24 @@ TEST_P(ClpfSpeedTest, TestSpeed) {
       << "C time: " << ref_elapsed_time << "ms" << std::endl
       << "SIMD time: " << elapsed_time << "ms" << std::endl;
 }
+
+TEST_P(ClpfBlockTest, TestSIMDNoMismatch) {
+  test_clpf(sizex, sizey, 8, 1, clpf, ref_clpf);
+}
+
+TEST_P(ClpfSpeedTest, TestSpeed) {
+  test_clpf_speed(sizex, sizey, 8, 16, clpf, ref_clpf);
+}
+
+#if CONFIG_AOM_HIGHBITDEPTH
+TEST_P(ClpfBlockHbdTest, TestSIMDNoMismatch) {
+  test_clpf(sizex, sizey, 12, 1, clpf, ref_clpf);
+}
+
+TEST_P(ClpfHbdSpeedTest, TestSpeed) {
+  test_clpf_speed(sizex, sizey, 12, 1, clpf, ref_clpf);
+}
+#endif
 
 using std::tr1::make_tuple;
 
@@ -213,6 +251,48 @@ INSTANTIATE_TEST_CASE_P(
                                  4)));
 #endif
 
+#if CONFIG_AOM_HIGHBITDEPTH
+#if HAVE_SSE2
+INSTANTIATE_TEST_CASE_P(
+    SSE2, ClpfBlockHbdTest,
+    ::testing::Values(
+        make_tuple(&aom_clpf_block_hbd_sse2, &aom_clpf_block_hbd_c, 8, 8),
+        make_tuple(&aom_clpf_block_hbd_sse2, &aom_clpf_block_hbd_c, 8, 4),
+        make_tuple(&aom_clpf_block_hbd_sse2, &aom_clpf_block_hbd_c, 4, 8),
+        make_tuple(&aom_clpf_block_hbd_sse2, &aom_clpf_block_hbd_c, 4, 4)));
+#endif
+
+#if HAVE_SSSE3
+INSTANTIATE_TEST_CASE_P(
+    SSSE3, ClpfBlockHbdTest,
+    ::testing::Values(
+        make_tuple(&aom_clpf_block_hbd_ssse3, &aom_clpf_block_hbd_c, 8, 8),
+        make_tuple(&aom_clpf_block_hbd_ssse3, &aom_clpf_block_hbd_c, 8, 4),
+        make_tuple(&aom_clpf_block_hbd_ssse3, &aom_clpf_block_hbd_c, 4, 8),
+        make_tuple(&aom_clpf_block_hbd_ssse3, &aom_clpf_block_hbd_c, 4, 4)));
+#endif
+
+#if HAVE_SSE4_1
+INSTANTIATE_TEST_CASE_P(
+    SSSE4_1, ClpfBlockHbdTest,
+    ::testing::Values(
+        make_tuple(&aom_clpf_block_hbd_sse4_1, &aom_clpf_block_hbd_c, 8, 8),
+        make_tuple(&aom_clpf_block_hbd_sse4_1, &aom_clpf_block_hbd_c, 8, 4),
+        make_tuple(&aom_clpf_block_hbd_sse4_1, &aom_clpf_block_hbd_c, 4, 8),
+        make_tuple(&aom_clpf_block_hbd_sse4_1, &aom_clpf_block_hbd_c, 4, 4)));
+#endif
+
+#if HAVE_NEON
+INSTANTIATE_TEST_CASE_P(
+    NEON, ClpfBlockHbdTest,
+    ::testing::Values(
+        make_tuple(&aom_clpf_block_hbd_neon, &aom_clpf_block_hbd_c, 8, 8),
+        make_tuple(&aom_clpf_block_hbd_neon, &aom_clpf_block_hbd_c, 8, 4),
+        make_tuple(&aom_clpf_block_hbd_neon, &aom_clpf_block_hbd_c, 4, 8),
+        make_tuple(&aom_clpf_block_hbd_neon, &aom_clpf_block_hbd_c, 4, 4)));
+#endif
+#endif
+
 // Test speed for all supported architectures
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(SSE2, ClpfSpeedTest,
@@ -237,4 +317,35 @@ INSTANTIATE_TEST_CASE_P(NEON, ClpfSpeedTest,
                         ::testing::Values(make_tuple(&aom_clpf_block_neon,
                                                      &aom_clpf_block_c, 8, 8)));
 #endif
+
+#if CONFIG_AOM_HIGHBITDEPTH
+#if HAVE_SSE2
+INSTANTIATE_TEST_CASE_P(SSE2, ClpfHbdSpeedTest,
+                        ::testing::Values(make_tuple(&aom_clpf_block_hbd_sse2,
+                                                     &aom_clpf_block_hbd_c, 8,
+                                                     8)));
+#endif
+
+#if HAVE_SSSE3
+INSTANTIATE_TEST_CASE_P(SSSE3, ClpfHbdSpeedTest,
+                        ::testing::Values(make_tuple(&aom_clpf_block_hbd_ssse3,
+                                                     &aom_clpf_block_hbd_c, 8,
+                                                     8)));
+#endif
+
+#if HAVE_SSE4_1
+INSTANTIATE_TEST_CASE_P(SSSE4_1, ClpfHbdSpeedTest,
+                        ::testing::Values(make_tuple(&aom_clpf_block_hbd_ssse3,
+                                                     &aom_clpf_block_hbd_c, 8,
+                                                     8)));
+#endif
+
+#if HAVE_NEON
+INSTANTIATE_TEST_CASE_P(NEON, ClpfHbdSpeedTest,
+                        ::testing::Values(make_tuple(&aom_clpf_block_hbd_neon,
+                                                     &aom_clpf_block_hbd_c, 8,
+                                                     8)));
+#endif
+#endif
+
 }  // namespace
