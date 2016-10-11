@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ff76b882_deeed4af",
+        "filename": "aom_dsp/aom_dsp_rtcd_defs.pl",
+        "patchSetId": 10
+      },
+      "lineNbr": 660,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-10-11T21:49:59Z",
+      "side": 1,
+      "message": "align indent",
+      "revId": "9d89917a033b76e0ad14d0a87d3a0c4f958d2a26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ff76b882_3e2988f5",
+        "filename": "test/fht32x32_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-10-11T21:49:59Z",
+      "side": 1,
+      "message": "why these tests are disabled ?",
+      "revId": "9d89917a033b76e0ad14d0a87d3a0c4f958d2a26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
