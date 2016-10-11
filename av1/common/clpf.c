@@ -72,9 +72,9 @@ void aom_clpf_block_hbd_c(const uint16_t *src, uint16_t *dst, int sstride,
 #endif
 
 // Return number of filtered blocks
-int av1_clpf_frame(const YV12_BUFFER_CONFIG *orig_dst,
-                   const YV12_BUFFER_CONFIG *rec, const YV12_BUFFER_CONFIG *org,
-                   AV1_COMMON *cm, int enable_fb_flag, unsigned int strength,
+int av1_clpf_frame(const YV12_BUFFER_CONFIG *frame,
+                   const YV12_BUFFER_CONFIG *org, AV1_COMMON *cm,
+                   int enable_fb_flag, unsigned int strength,
                    unsigned int fb_size_log2, uint8_t *blocks,
                    int (*decision)(int, int, const YV12_BUFFER_CONFIG *,
                                    const YV12_BUFFER_CONFIG *,
@@ -83,11 +83,11 @@ int av1_clpf_frame(const YV12_BUFFER_CONFIG *orig_dst,
   /* Constrained low-pass filter (CLPF) */
   int c, k, l, m, n;
   const int bs = MI_SIZE;
-  const int width = rec->y_crop_width;
-  const int height = rec->y_crop_height;
+  const int width = frame->y_crop_width;
+  const int height = frame->y_crop_height;
   int xpos, ypos;
-  const int sstride = rec->y_stride;
-  int dstride = orig_dst->y_stride;
+  const int sstride = frame->y_stride;
+  int dstride = bs;
   const int num_fb_hor = (width + (1 << fb_size_log2) - 1) >> fb_size_log2;
   const int num_fb_ver = (height + (1 << fb_size_log2) - 1) >> fb_size_log2;
   int block_index = 0;
@@ -97,7 +97,7 @@ int av1_clpf_frame(const YV12_BUFFER_CONFIG *orig_dst,
   int cache_idx = 0;
   const int cache_size = num_fb_hor << (2 * fb_size_log2);
   const int cache_blocks = cache_size / (bs * bs);
-  YV12_BUFFER_CONFIG dst = *orig_dst;
+  YV12_BUFFER_CONFIG dst = *frame;
 
   assert(bs == 8);  // Optimised code assumes this.
 
@@ -106,22 +106,16 @@ int av1_clpf_frame(const YV12_BUFFER_CONFIG *orig_dst,
 #endif
 
   // Make buffer space for in-place filtering
-  if (rec->y_buffer == dst.y_buffer) {
 #if CONFIG_AOM_HIGHBITDEPTH
-    CHECK_MEM_ERROR(cm, cache,
-                    aom_malloc(cache_size << !!cm->use_highbitdepth));
-    dst.y_buffer = cm->use_highbitdepth ? CONVERT_TO_BYTEPTR(cache) : cache;
+  CHECK_MEM_ERROR(cm, cache, aom_malloc(cache_size << !!cm->use_highbitdepth));
+  dst.y_buffer = cm->use_highbitdepth ? CONVERT_TO_BYTEPTR(cache) : cache;
 #else
-    CHECK_MEM_ERROR(cm, cache, aom_malloc(cache_size));
-    dst.y_buffer = cache;
+  CHECK_MEM_ERROR(cm, cache, aom_malloc(cache_size));
+  dst.y_buffer = cache;
 #endif
-    CHECK_MEM_ERROR(cm, cache_ptr,
-                    aom_malloc(cache_blocks * sizeof(*cache_ptr)));
-    CHECK_MEM_ERROR(cm, cache_dst,
-                    aom_malloc(cache_blocks * sizeof(*cache_dst)));
-    memset(cache_ptr, 0, cache_blocks * sizeof(*cache_dst));
-    dstride = bs;
-  }
+  CHECK_MEM_ERROR(cm, cache_ptr, aom_malloc(cache_blocks * sizeof(*cache_ptr)));
+  CHECK_MEM_ERROR(cm, cache_dst, aom_malloc(cache_blocks * sizeof(*cache_dst)));
+  memset(cache_ptr, 0, cache_blocks * sizeof(*cache_dst));
 
   // Iterate over all filter blocks
   for (k = 0; k < num_fb_ver; k++) {
@@ -149,7 +143,7 @@ int av1_clpf_frame(const YV12_BUFFER_CONFIG *orig_dst,
       w += !w << fb_size_log2;
       if (!allskip &&  // Do not filter the block if all is skip encoded
           (!enable_fb_flag ||
-           decision(k, l, rec, org, cm, bs, w / bs, h / bs, strength,
+           decision(k, l, frame, org, cm, bs, w / bs, h / bs, strength,
                     fb_size_log2, blocks + block_index))) {
         // Iterate over all smaller blocks inside the filter block
         for (m = 0; m < (h + bs - 1) / bs; m++) {
@@ -159,144 +153,94 @@ int av1_clpf_frame(const YV12_BUFFER_CONFIG *orig_dst,
             if (!cm->mi_grid_visible[ypos / bs * cm->mi_stride + xpos / bs]
                      ->mbmi.skip) {  // Not skip block
               // Temporary buffering needed if filtering in-place
-              if (cache) {
-                if (cache_ptr[cache_idx]) {
+              if (cache_ptr[cache_idx]) {
 // Copy filtered block back into the frame
 #if CONFIG_AOM_HIGHBITDEPTH
-                  if (cm->use_highbitdepth) {
-                    uint16_t *const d =
-                        CONVERT_TO_SHORTPTR(cache_dst[cache_idx]);
-                    for (c = 0; c < bs; c++) {
-                      *(uint64_t *)(d + c * sstride) =
-                          *(uint64_t *)(cache_ptr[cache_idx] + c * bs * 2);
-                      *(uint64_t *)(d + c * sstride + 4) =
-                          *(uint64_t *)(cache_ptr[cache_idx] + c * bs * 2 + 8);
-                    }
-                  } else {
-                    for (c = 0; c < bs; c++)
-                      *(uint64_t *)(cache_dst[cache_idx] + c * sstride) =
-                          *(uint64_t *)(cache_ptr[cache_idx] + c * bs);
+                if (cm->use_highbitdepth) {
+                  uint16_t *const d = CONVERT_TO_SHORTPTR(cache_dst[cache_idx]);
+                  for (c = 0; c < bs; c++) {
+                    *(uint64_t *)(d + c * sstride) =
+                        *(uint64_t *)(cache_ptr[cache_idx] + c * bs * 2);
+                    *(uint64_t *)(d + c * sstride + 4) =
+                        *(uint64_t *)(cache_ptr[cache_idx] + c * bs * 2 + 8);
                   }
-#else
+                } else {
                   for (c = 0; c < bs; c++)
                     *(uint64_t *)(cache_dst[cache_idx] + c * sstride) =
                         *(uint64_t *)(cache_ptr[cache_idx] + c * bs);
-#endif
-                }
-#if CONFIG_AOM_HIGHBITDEPTH
-                if (cm->use_highbitdepth) {
-                  cache_ptr[cache_idx] = cache + cache_idx * bs * bs * 2;
-                  dst.y_buffer = CONVERT_TO_BYTEPTR(cache_ptr[cache_idx]) -
-                                 ypos * bs - xpos;
-                } else {
-                  cache_ptr[cache_idx] = cache + cache_idx * bs * bs;
-                  dst.y_buffer = cache_ptr[cache_idx] - ypos * bs - xpos;
                 }
 #else
+                for (c = 0; c < bs; c++)
+                  *(uint64_t *)(cache_dst[cache_idx] + c * sstride) =
+                      *(uint64_t *)(cache_ptr[cache_idx] + c * bs);
+#endif
+              }
+#if CONFIG_AOM_HIGHBITDEPTH
+              if (cm->use_highbitdepth) {
+                cache_ptr[cache_idx] = cache + cache_idx * bs * bs * 2;
+                dst.y_buffer =
+                    CONVERT_TO_BYTEPTR(cache_ptr[cache_idx]) - ypos * bs - xpos;
+              } else {
                 cache_ptr[cache_idx] = cache + cache_idx * bs * bs;
                 dst.y_buffer = cache_ptr[cache_idx] - ypos * bs - xpos;
-#endif
-                cache_dst[cache_idx] = rec->y_buffer + ypos * sstride + xpos;
-                if (++cache_idx >= cache_blocks) cache_idx = 0;
               }
+#else
+              cache_ptr[cache_idx] = cache + cache_idx * bs * bs;
+              dst.y_buffer = cache_ptr[cache_idx] - ypos * bs - xpos;
+#endif
+              cache_dst[cache_idx] = frame->y_buffer + ypos * sstride + xpos;
+              if (++cache_idx >= cache_blocks) cache_idx = 0;
 
 // Apply the filter
 #if CONFIG_AOM_HIGHBITDEPTH
               if (cm->use_highbitdepth) {
-                aom_clpf_block_hbd(CONVERT_TO_SHORTPTR(rec->y_buffer),
+                aom_clpf_block_hbd(CONVERT_TO_SHORTPTR(frame->y_buffer),
                                    CONVERT_TO_SHORTPTR(dst.y_buffer), sstride,
                                    dstride, xpos, ypos, bs, bs, width, height,
                                    strength);
               } else {
-                aom_clpf_block(rec->y_buffer, dst.y_buffer, sstride, dstride,
+                aom_clpf_block(frame->y_buffer, dst.y_buffer, sstride, dstride,
                                xpos, ypos, bs, bs, width, height, strength);
               }
 #else
-              aom_clpf_block(rec->y_buffer, dst.y_buffer, sstride, dstride,
+              aom_clpf_block(frame->y_buffer, dst.y_buffer, sstride, dstride,
                              xpos, ypos, bs, bs, width, height, strength);
 #endif
-            } else {  // Skip block, copy instead
-              if (!cache) {
-#if CONFIG_AOM_HIGHBITDEPTH
-                if (cm->use_highbitdepth) {
-                  uint16_t *const d = CONVERT_TO_SHORTPTR(dst.y_buffer);
-                  const uint16_t *const s = CONVERT_TO_SHORTPTR(rec->y_buffer);
-                  for (c = 0; c < bs; c++) {
-                    *(uint64_t *)(d + (ypos + c) * dstride + xpos) =
-                        *(uint64_t *)(s + (ypos + c) * sstride + xpos);
-                    *(uint64_t *)(d + (ypos + c) * dstride + xpos + 4) =
-                        *(uint64_t *)(s + (ypos + c) * sstride + xpos + 4);
-                  }
-                } else {
-                  for (c = 0; c < bs; c++)
-                    *(uint64_t *)(dst.y_buffer + (ypos + c) * dstride + xpos) =
-                        *(uint64_t *)(rec->y_buffer + (ypos + c) * sstride +
-                                      xpos);
-                }
-#else
-                for (c = 0; c < bs; c++)
-                  *(uint64_t *)(dst.y_buffer + (ypos + c) * dstride + xpos) = *(
-                      uint64_t *)(rec->y_buffer + (ypos + c) * sstride + xpos);
-#endif
-              }
             }
           }
-        }
-      } else {  // Entire filter block is skip, copy
-        if (!cache) {
-#if CONFIG_AOM_HIGHBITDEPTH
-          if (cm->use_highbitdepth) {
-            for (m = 0; m < h; m++)
-              memcpy(CONVERT_TO_SHORTPTR(dst.y_buffer) + (yoff + m) * dstride +
-                         xoff,
-                     CONVERT_TO_SHORTPTR(rec->y_buffer) + (yoff + m) * sstride +
-                         xoff,
-                     w * 2);
-          } else {
-            for (m = 0; m < h; m++)
-              memcpy(dst.y_buffer + (yoff + m) * dstride + xoff,
-                     rec->y_buffer + (yoff + m) * sstride + xoff, w);
-          }
-#else
-          for (m = 0; m < h; m++)
-            memcpy(dst.y_buffer + (yoff + m) * dstride + xoff,
-                   rec->y_buffer + (yoff + m) * sstride + xoff, w);
-#endif
         }
       }
       block_index += !allskip;  // Count number of blocks filtered
     }
   }
 
-  if (cache) {
-    // Copy remaining blocks into the frame
-    for (cache_idx = 0; cache_idx < cache_blocks && cache_ptr[cache_idx];
-         cache_idx++) {
+  // Copy remaining blocks into the frame
+  for (cache_idx = 0; cache_idx < cache_blocks && cache_ptr[cache_idx];
+       cache_idx++) {
 #if CONFIG_AOM_HIGHBITDEPTH
-      if (cm->use_highbitdepth) {
-        uint16_t *const d = CONVERT_TO_SHORTPTR(cache_dst[cache_idx]);
-        for (c = 0; c < bs; c++) {
-          *(uint64_t *)(d + c * sstride) =
-              *(uint64_t *)(cache_ptr[cache_idx] + c * bs * 2);
-          *(uint64_t *)(d + c * sstride + 4) =
-              *(uint64_t *)(cache_ptr[cache_idx] + c * bs * 2 + 8);
-        }
-      } else {
-        for (c = 0; c < bs; c++)
-          *(uint64_t *)(cache_dst[cache_idx] + c * sstride) =
-              *(uint64_t *)(cache_ptr[cache_idx] + c * bs);
+    if (cm->use_highbitdepth) {
+      uint16_t *const d = CONVERT_TO_SHORTPTR(cache_dst[cache_idx]);
+      for (c = 0; c < bs; c++) {
+        *(uint64_t *)(d + c * sstride) =
+            *(uint64_t *)(cache_ptr[cache_idx] + c * bs * 2);
+        *(uint64_t *)(d + c * sstride + 4) =
+            *(uint64_t *)(cache_ptr[cache_idx] + c * bs * 2 + 8);
       }
-#else
+    } else {
       for (c = 0; c < bs; c++)
         *(uint64_t *)(cache_dst[cache_idx] + c * sstride) =
             *(uint64_t *)(cache_ptr[cache_idx] + c * bs);
-#endif
     }
-
-    aom_free(cache);
-    aom_free(cache_ptr);
-    aom_free(cache_dst);
+#else
+    for (c = 0; c < bs; c++)
+      *(uint64_t *)(cache_dst[cache_idx] + c * sstride) =
+          *(uint64_t *)(cache_ptr[cache_idx] + c * bs);
+#endif
   }
+
+  aom_free(cache);
+  aom_free(cache_ptr);
+  aom_free(cache_dst);
 
   return block_index;
 }
