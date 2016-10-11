@@ -3536,10 +3536,10 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
 #if CONFIG_SUPERTX
     if (!xd->lossless[0]) update_supertx_probs(cm, header_bc);
 #endif  // CONFIG_SUPERTX
-  }
 #if CONFIG_GLOBAL_MOTION
-  write_global_motion(cpi, header_bc);
+    write_global_motion(cpi, header_bc);
 #endif  // CONFIG_GLOBAL_MOTION
+  }
 #if CONFIG_ANS
   ans_write_init(&header_ans, data);
   buf_ans_flush(header_bc, &header_ans);
