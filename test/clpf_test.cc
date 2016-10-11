@@ -139,6 +139,7 @@ void test_clpf(int w, int h, int depth, int iterations,
     }
   }
 
+  pos--;
   EXPECT_EQ(0, error)
       << "Error: ClpfBlockTest, SIMD and C mismatch." << std::endl
       << "First error at " << pos % size << "," << pos / size << " ("
