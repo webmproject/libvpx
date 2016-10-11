@@ -262,6 +262,44 @@ static INLINE int od_adjust_thresh(int threshold, int32_t var) {
   return (threshold * OD_THRESH_TABLE_Q8[OD_ILOG(v1)] + 128) >> 8;
 }
 
+static INLINE void copy_8x8_16bit(int16_t *dst, int dstride, int16_t *src, int sstride) {
+  int i, j;
+  for (i = 0; i < 8; i++)
+    for (j = 0; j < 8; j++)
+      dst[i * dstride + j] = src[i * sstride + j];
+}
+
+static INLINE void copy_4x4_16bit(int16_t *dst, int dstride, int16_t *src, int sstride) {
+  int i, j;
+  for (i = 0; i < 4; i++)
+    for (j = 0; j < 4; j++)
+      dst[i * dstride + j] = src[i * sstride + j];
+}
+
+/* TODO: Optimize this function for SSE. */
+void copy_blocks_16bit(int16_t *dst, int dstride, int16_t *src, int sstride,
+    unsigned char (*bskip)[2], int dering_count, int bsize)
+{
+  int bi, bx, by;
+  if (bsize == 3) {
+    for (bi = 0; bi < dering_count; bi++) {
+      by = bskip[bi][0];
+      bx = bskip[bi][1];
+      copy_8x8_16bit(&dst[(by << 3) * dstride + (bx << 3)],
+                     dstride,
+                     &src[(by << 3) * sstride + (bx << 3)], sstride);
+    }
+  } else {
+    for (bi = 0; bi < dering_count; bi++) {
+      by = bskip[bi][0];
+      bx = bskip[bi][1];
+      copy_4x4_16bit(&dst[(by << 2) * dstride + (bx << 2)],
+                     dstride,
+                     &src[(by << 2) * sstride + (bx << 2)], sstride);
+    }
+  }
+}
+
 void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
                int nhb, int nvb, int sbx, int sby, int nhsb, int nvsb, int xdec,
                int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS], int pli,
@@ -332,11 +370,8 @@ void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
           dir[by][bx]);
     }
   }
-  for (i = 0; i < nvb << bsize; i++) {
-    for (j = 0; j < nhb << bsize; j++) {
-      in[i * OD_FILT_BSTRIDE + j] = y[i * ystride + j];
-    }
-  }
+  copy_blocks_16bit(in, OD_FILT_BSTRIDE, y, ystride, bskip, dering_count,
+      bsize);
   for (bi = 0; bi < dering_count; bi++) {
     by = bskip[bi][0];
     bx = bskip[bi][1];
