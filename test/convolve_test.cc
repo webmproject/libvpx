@@ -396,8 +396,8 @@ class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
   void CopyOutputToRef() {
     memcpy(output_ref_, output_, kOutputBufferSize);
 #if CONFIG_AOM_HIGHBITDEPTH
-    memcpy(output16_ref_, output16_,
-           kOutputBufferSize * sizeof(output16_ref_[0]));
+    // Copy 16-bit pixels values. The effective number of bytes is double.
+    memcpy(output16_ref_, output16_, sizeof(output16_[0]) * kOutputBufferSize);
 #endif
   }
 
