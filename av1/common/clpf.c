@@ -108,12 +108,9 @@ int av1_clpf_frame(const YV12_BUFFER_CONFIG *frame,
           : frame->y_buffer;
   uint8_t *dst_buffer;
 
+// Make buffer space for in-place filtering
 #if CONFIG_AOM_HIGHBITDEPTH
   strength <<= (cm->bit_depth - 8);
-#endif
-
-  // Make buffer space for in-place filtering
-#if CONFIG_AOM_HIGHBITDEPTH
   CHECK_MEM_ERROR(cm, cache, aom_malloc(cache_size << !!cm->use_highbitdepth));
   dst_buffer = cm->use_highbitdepth ? CONVERT_TO_BYTEPTR(cache) : cache;
 #else
