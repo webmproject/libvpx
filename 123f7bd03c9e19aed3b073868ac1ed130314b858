@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ff76b882_4aa91f7b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002622
+      },
+      "writtenOn": "2016-10-11T20:48:35Z",
+      "side": 1,
+      "message": "Here is a public white paper from Intel on this topic -\u003e https://software.intel.com/en-us/articles/intel-avx-state-transitions-migrating-sse-code-to-avx. It is unclear to me how much of this content you want to insert in the code however.",
+      "parentUuid": "ff76b882_4f121163",
+      "revId": "123f7bd03c9e19aed3b073868ac1ed130314b858",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ff76b882_0f10195a",
         "filename": "/COMMIT_MSG",
         "patchSetId": 2
