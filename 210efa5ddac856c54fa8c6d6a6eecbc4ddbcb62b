@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ff76b882_a1301954",
+        "filename": "aom_dsp/x86/variance_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-11T23:05:59Z",
+      "side": 1,
+      "message": "you\u0027re doing this twice here. it might be best to limit this to the called functions or delay it as long as possible as you are here, rather go for 100% function coverage. given the structure of this code variance_avx2(), aom_get16x16var_avx2, etc might be a simpler choice",
+      "revId": "210efa5ddac856c54fa8c6d6a6eecbc4ddbcb62b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
