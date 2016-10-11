@@ -507,6 +507,25 @@ static void iidtx8_sse2(__m128i *in) {
   in[7] = _mm_slli_epi16(in[7], 1);
 }
 
+static INLINE void iidtx4_sse2(__m128i *in) {
+  const __m128i v_scale_w = _mm_set1_epi16(Sqrt2);
+
+  const __m128i v_p0l_w = _mm_mullo_epi16(in[0], v_scale_w);
+  const __m128i v_p0h_w = _mm_mulhi_epi16(in[0], v_scale_w);
+  const __m128i v_p1l_w = _mm_mullo_epi16(in[1], v_scale_w);
+  const __m128i v_p1h_w = _mm_mulhi_epi16(in[1], v_scale_w);
+
+  const __m128i v_p0a_d = _mm_unpacklo_epi16(v_p0l_w, v_p0h_w);
+  const __m128i v_p0b_d = _mm_unpackhi_epi16(v_p0l_w, v_p0h_w);
+  const __m128i v_p1a_d = _mm_unpacklo_epi16(v_p1l_w, v_p1h_w);
+  const __m128i v_p1b_d = _mm_unpackhi_epi16(v_p1l_w, v_p1h_w);
+
+  in[0] = _mm_packs_epi32(xx_roundn_epi32_unsigned(v_p0a_d, DCT_CONST_BITS),
+                          xx_roundn_epi32_unsigned(v_p0b_d, DCT_CONST_BITS));
+  in[1] = _mm_packs_epi32(xx_roundn_epi32_unsigned(v_p1a_d, DCT_CONST_BITS),
+                          xx_roundn_epi32_unsigned(v_p1b_d, DCT_CONST_BITS));
+}
+
 // load 8x8 array
 static INLINE void flip_buffer_lr_8x8(__m128i *in) {
   in[0] = mm_reverse_epi16(in[0]);
@@ -517,6 +536,39 @@ static INLINE void flip_buffer_lr_8x8(__m128i *in) {
   in[5] = mm_reverse_epi16(in[5]);
   in[6] = mm_reverse_epi16(in[6]);
   in[7] = mm_reverse_epi16(in[7]);
+}
+
+static INLINE void scale_sqrt2_8x4(__m128i *in) {
+  // Implements 'ROUND_POWER_OF_TWO(input * Sqrt2, DCT_CONST_BITS)'
+  // for each element
+  const __m128i v_scale_w = _mm_set1_epi16(Sqrt2);
+
+  const __m128i v_p0l_w = _mm_mullo_epi16(in[0], v_scale_w);
+  const __m128i v_p0h_w = _mm_mulhi_epi16(in[0], v_scale_w);
+  const __m128i v_p1l_w = _mm_mullo_epi16(in[1], v_scale_w);
+  const __m128i v_p1h_w = _mm_mulhi_epi16(in[1], v_scale_w);
+  const __m128i v_p2l_w = _mm_mullo_epi16(in[2], v_scale_w);
+  const __m128i v_p2h_w = _mm_mulhi_epi16(in[2], v_scale_w);
+  const __m128i v_p3l_w = _mm_mullo_epi16(in[3], v_scale_w);
+  const __m128i v_p3h_w = _mm_mulhi_epi16(in[3], v_scale_w);
+
+  const __m128i v_p0a_d = _mm_unpacklo_epi16(v_p0l_w, v_p0h_w);
+  const __m128i v_p0b_d = _mm_unpackhi_epi16(v_p0l_w, v_p0h_w);
+  const __m128i v_p1a_d = _mm_unpacklo_epi16(v_p1l_w, v_p1h_w);
+  const __m128i v_p1b_d = _mm_unpackhi_epi16(v_p1l_w, v_p1h_w);
+  const __m128i v_p2a_d = _mm_unpacklo_epi16(v_p2l_w, v_p2h_w);
+  const __m128i v_p2b_d = _mm_unpackhi_epi16(v_p2l_w, v_p2h_w);
+  const __m128i v_p3a_d = _mm_unpacklo_epi16(v_p3l_w, v_p3h_w);
+  const __m128i v_p3b_d = _mm_unpackhi_epi16(v_p3l_w, v_p3h_w);
+
+  in[0] = _mm_packs_epi32(xx_roundn_epi32_unsigned(v_p0a_d, DCT_CONST_BITS),
+                          xx_roundn_epi32_unsigned(v_p0b_d, DCT_CONST_BITS));
+  in[1] = _mm_packs_epi32(xx_roundn_epi32_unsigned(v_p1a_d, DCT_CONST_BITS),
+                          xx_roundn_epi32_unsigned(v_p1b_d, DCT_CONST_BITS));
+  in[2] = _mm_packs_epi32(xx_roundn_epi32_unsigned(v_p2a_d, DCT_CONST_BITS),
+                          xx_roundn_epi32_unsigned(v_p2b_d, DCT_CONST_BITS));
+  in[3] = _mm_packs_epi32(xx_roundn_epi32_unsigned(v_p3a_d, DCT_CONST_BITS),
+                          xx_roundn_epi32_unsigned(v_p3b_d, DCT_CONST_BITS));
 }
 
 static INLINE void scale_sqrt2_8x8(__m128i *in) {
@@ -834,5 +886,320 @@ void av1_iht16x8_128_add_sse2(const tran_low_t *input, uint8_t *dest,
       break;
     default: assert(0); break;
   }
+}
+
+static INLINE void write_buffer_8x4_round5(uint8_t *dest, __m128i *in,
+                                           int stride) {
+  const __m128i final_rounding = _mm_set1_epi16(1 << 4);
+  const __m128i zero = _mm_setzero_si128();
+  // Final rounding and shift
+  in[0] = _mm_adds_epi16(in[0], final_rounding);
+  in[1] = _mm_adds_epi16(in[1], final_rounding);
+  in[2] = _mm_adds_epi16(in[2], final_rounding);
+  in[3] = _mm_adds_epi16(in[3], final_rounding);
+
+  in[0] = _mm_srai_epi16(in[0], 5);
+  in[1] = _mm_srai_epi16(in[1], 5);
+  in[2] = _mm_srai_epi16(in[2], 5);
+  in[3] = _mm_srai_epi16(in[3], 5);
+
+  RECON_AND_STORE(dest + 0 * stride, in[0]);
+  RECON_AND_STORE(dest + 1 * stride, in[1]);
+  RECON_AND_STORE(dest + 2 * stride, in[2]);
+  RECON_AND_STORE(dest + 3 * stride, in[3]);
+}
+
+void av1_iht8x4_32_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
+                            int tx_type) {
+  __m128i in[8];
+
+  in[0] = load_input_data(input + 0 * 8);
+  in[1] = load_input_data(input + 1 * 8);
+  in[2] = load_input_data(input + 2 * 8);
+  in[3] = load_input_data(input + 3 * 8);
+
+  // Row transform
+  switch (tx_type) {
+    case DCT_DCT:
+    case ADST_DCT:
+    case FLIPADST_DCT:
+    case H_DCT: idct8_sse2(in); break;
+    case DCT_ADST:
+    case ADST_ADST:
+    case DCT_FLIPADST:
+    case FLIPADST_FLIPADST:
+    case ADST_FLIPADST:
+    case FLIPADST_ADST:
+    case H_ADST:
+    case H_FLIPADST: iadst8_sse2(in); break;
+    case V_FLIPADST:
+    case V_ADST:
+    case V_DCT:
+    case IDTX:
+      iidtx8_sse2(in);
+      array_transpose_8x8(in, in);
+      break;
+    default: assert(0); break;
+  }
+
+  scale_sqrt2_8x8(in);
+
+  // Repack data. We pack into the bottom half of 'in'
+  // so that the next repacking stage can pack into the
+  // top half without overwriting anything
+  in[7] = _mm_unpacklo_epi64(in[6], in[7]);
+  in[6] = _mm_unpacklo_epi64(in[4], in[5]);
+  in[5] = _mm_unpacklo_epi64(in[2], in[3]);
+  in[4] = _mm_unpacklo_epi64(in[0], in[1]);
+
+  // Column transform
+  switch (tx_type) {
+    case DCT_DCT:
+    case DCT_ADST:
+    case DCT_FLIPADST:
+    case V_DCT:
+      idct4_sse2(in + 4);
+      idct4_sse2(in + 6);
+      break;
+    case ADST_DCT:
+    case ADST_ADST:
+    case FLIPADST_ADST:
+    case ADST_FLIPADST:
+    case FLIPADST_FLIPADST:
+    case FLIPADST_DCT:
+    case V_ADST:
+    case V_FLIPADST:
+      iadst4_sse2(in + 4);
+      iadst4_sse2(in + 6);
+      break;
+    case H_DCT:
+    case H_ADST:
+    case H_FLIPADST:
+    case IDTX:
+      iidtx4_sse2(in + 4);
+      array_transpose_4x4(in + 4);
+      iidtx4_sse2(in + 6);
+      array_transpose_4x4(in + 6);
+      break;
+    default: assert(0); break;
+  }
+
+  // Repack data
+  in[0] = _mm_unpacklo_epi64(in[4], in[6]);
+  in[1] = _mm_unpackhi_epi64(in[4], in[6]);
+  in[2] = _mm_unpacklo_epi64(in[5], in[7]);
+  in[3] = _mm_unpackhi_epi64(in[5], in[7]);
+
+  switch (tx_type) {
+    case DCT_DCT:
+    case ADST_DCT:
+    case H_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+    case H_ADST:
+    case V_ADST:
+    case V_DCT:
+    case IDTX: break;
+    case FLIPADST_DCT:
+    case FLIPADST_ADST:
+    case V_FLIPADST: FLIPUD_PTR(dest, stride, 4); break;
+    case DCT_FLIPADST:
+    case ADST_FLIPADST:
+    case H_FLIPADST:
+      in[0] = mm_reverse_epi16(in[0]);
+      in[1] = mm_reverse_epi16(in[1]);
+      in[2] = mm_reverse_epi16(in[2]);
+      in[3] = mm_reverse_epi16(in[3]);
+      break;
+    case FLIPADST_FLIPADST:
+      in[0] = mm_reverse_epi16(in[0]);
+      in[1] = mm_reverse_epi16(in[1]);
+      in[2] = mm_reverse_epi16(in[2]);
+      in[3] = mm_reverse_epi16(in[3]);
+      FLIPUD_PTR(dest, stride, 4);
+      break;
+    default: assert(0); break;
+  }
+  write_buffer_8x4_round5(dest, in, stride);
+}
+
+static INLINE void write_buffer_4x8_round5(uint8_t *dest, __m128i *in,
+                                           int stride) {
+  const __m128i final_rounding = _mm_set1_epi16(1 << 4);
+  const __m128i zero = _mm_setzero_si128();
+  // Final rounding and shift
+  in[0] = _mm_adds_epi16(in[0], final_rounding);
+  in[1] = _mm_adds_epi16(in[1], final_rounding);
+  in[2] = _mm_adds_epi16(in[2], final_rounding);
+  in[3] = _mm_adds_epi16(in[3], final_rounding);
+
+  in[0] = _mm_srai_epi16(in[0], 5);
+  in[1] = _mm_srai_epi16(in[1], 5);
+  in[2] = _mm_srai_epi16(in[2], 5);
+  in[3] = _mm_srai_epi16(in[3], 5);
+
+  // Reconstruction and Store
+  {
+    __m128i d0 = _mm_cvtsi32_si128(*(const int *)(dest + stride * 0));
+    __m128i d1 = _mm_cvtsi32_si128(*(const int *)(dest + stride * 1));
+    __m128i d2 = _mm_cvtsi32_si128(*(const int *)(dest + stride * 2));
+    __m128i d3 = _mm_cvtsi32_si128(*(const int *)(dest + stride * 3));
+    __m128i d4 = _mm_cvtsi32_si128(*(const int *)(dest + stride * 4));
+    __m128i d5 = _mm_cvtsi32_si128(*(const int *)(dest + stride * 5));
+    __m128i d6 = _mm_cvtsi32_si128(*(const int *)(dest + stride * 6));
+    __m128i d7 = _mm_cvtsi32_si128(*(const int *)(dest + stride * 7));
+
+    d0 = _mm_unpacklo_epi32(d0, d1);
+    d2 = _mm_unpacklo_epi32(d2, d3);
+    d4 = _mm_unpacklo_epi32(d4, d5);
+    d6 = _mm_unpacklo_epi32(d6, d7);
+    d0 = _mm_unpacklo_epi8(d0, zero);
+    d2 = _mm_unpacklo_epi8(d2, zero);
+    d4 = _mm_unpacklo_epi8(d4, zero);
+    d6 = _mm_unpacklo_epi8(d6, zero);
+    d0 = _mm_add_epi16(d0, in[0]);
+    d2 = _mm_add_epi16(d2, in[1]);
+    d4 = _mm_add_epi16(d4, in[2]);
+    d6 = _mm_add_epi16(d6, in[3]);
+
+    d0 = _mm_packus_epi16(d0, d2);
+    *(int *)dest = _mm_cvtsi128_si32(d0);
+    d0 = _mm_srli_si128(d0, 4);
+    *(int *)(dest + stride) = _mm_cvtsi128_si32(d0);
+    d0 = _mm_srli_si128(d0, 4);
+    *(int *)(dest + stride * 2) = _mm_cvtsi128_si32(d0);
+    d0 = _mm_srli_si128(d0, 4);
+    *(int *)(dest + stride * 3) = _mm_cvtsi128_si32(d0);
+    d0 = _mm_packus_epi16(d4, d6);
+    *(int *)(dest + stride * 4) = _mm_cvtsi128_si32(d0);
+    d0 = _mm_srli_si128(d0, 4);
+    *(int *)(dest + stride * 5) = _mm_cvtsi128_si32(d0);
+    d0 = _mm_srli_si128(d0, 4);
+    *(int *)(dest + stride * 6) = _mm_cvtsi128_si32(d0);
+    d0 = _mm_srli_si128(d0, 4);
+    *(int *)(dest + stride * 7) = _mm_cvtsi128_si32(d0);
+  }
+}
+
+void av1_iht4x8_32_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
+                            int tx_type) {
+  __m128i in[8];
+
+  // Load rows, packed two per element of 'in'.
+  // We pack into the bottom half of 'in' so that the
+  // later repacking stage can pack into the
+  // top half without overwriting anything
+  in[4] = load_input_data(input + 0 * 8);
+  in[5] = load_input_data(input + 1 * 8);
+  in[6] = load_input_data(input + 2 * 8);
+  in[7] = load_input_data(input + 3 * 8);
+
+  scale_sqrt2_8x4(in + 4);
+
+  // Row transform
+  switch (tx_type) {
+    case DCT_DCT:
+    case ADST_DCT:
+    case FLIPADST_DCT:
+    case H_DCT:
+      idct4_sse2(in + 4);
+      idct4_sse2(in + 6);
+      break;
+    case DCT_ADST:
+    case ADST_ADST:
+    case DCT_FLIPADST:
+    case FLIPADST_FLIPADST:
+    case ADST_FLIPADST:
+    case FLIPADST_ADST:
+    case H_ADST:
+    case H_FLIPADST:
+      iadst4_sse2(in + 4);
+      iadst4_sse2(in + 6);
+      break;
+    case V_FLIPADST:
+    case V_ADST:
+    case V_DCT:
+    case IDTX:
+      iidtx4_sse2(in + 4);
+      array_transpose_4x4(in + 4);
+      iidtx4_sse2(in + 6);
+      array_transpose_4x4(in + 6);
+      break;
+    default: assert(0); break;
+  }
+
+  // Repack data
+  in[0] = _mm_unpacklo_epi64(in[4], in[6]);
+  in[1] = _mm_unpackhi_epi64(in[4], in[6]);
+  in[2] = _mm_unpacklo_epi64(in[5], in[7]);
+  in[3] = _mm_unpackhi_epi64(in[5], in[7]);
+
+  // Column transform
+  switch (tx_type) {
+    case DCT_DCT:
+    case DCT_ADST:
+    case DCT_FLIPADST:
+    case V_DCT: idct8_sse2(in); break;
+    case ADST_DCT:
+    case ADST_ADST:
+    case FLIPADST_ADST:
+    case ADST_FLIPADST:
+    case FLIPADST_FLIPADST:
+    case FLIPADST_DCT:
+    case V_ADST:
+    case V_FLIPADST: iadst8_sse2(in); break;
+    case H_DCT:
+    case H_ADST:
+    case H_FLIPADST:
+    case IDTX:
+      iidtx8_sse2(in);
+      array_transpose_8x8(in, in);
+      break;
+    default: assert(0); break;
+  }
+
+  switch (tx_type) {
+    case DCT_DCT:
+    case ADST_DCT:
+    case H_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+    case H_ADST:
+    case V_ADST:
+    case V_DCT:
+    case IDTX: break;
+    case FLIPADST_DCT:
+    case FLIPADST_ADST:
+    case V_FLIPADST: FLIPUD_PTR(dest, stride, 8); break;
+    case DCT_FLIPADST:
+    case ADST_FLIPADST:
+    case H_FLIPADST:
+      in[0] = _mm_shufflelo_epi16(in[0], 0x1b);
+      in[1] = _mm_shufflelo_epi16(in[1], 0x1b);
+      in[2] = _mm_shufflelo_epi16(in[2], 0x1b);
+      in[3] = _mm_shufflelo_epi16(in[3], 0x1b);
+      in[4] = _mm_shufflelo_epi16(in[4], 0x1b);
+      in[5] = _mm_shufflelo_epi16(in[5], 0x1b);
+      in[6] = _mm_shufflelo_epi16(in[6], 0x1b);
+      in[7] = _mm_shufflelo_epi16(in[7], 0x1b);
+      break;
+    case FLIPADST_FLIPADST:
+      in[0] = _mm_shufflelo_epi16(in[0], 0x1b);
+      in[1] = _mm_shufflelo_epi16(in[1], 0x1b);
+      in[2] = _mm_shufflelo_epi16(in[2], 0x1b);
+      in[3] = _mm_shufflelo_epi16(in[3], 0x1b);
+      in[4] = _mm_shufflelo_epi16(in[4], 0x1b);
+      in[5] = _mm_shufflelo_epi16(in[5], 0x1b);
+      in[6] = _mm_shufflelo_epi16(in[6], 0x1b);
+      in[7] = _mm_shufflelo_epi16(in[7], 0x1b);
+      FLIPUD_PTR(dest, stride, 8);
+      break;
+    default: assert(0); break;
+  }
+  in[0] = _mm_unpacklo_epi64(in[0], in[1]);
+  in[1] = _mm_unpacklo_epi64(in[2], in[3]);
+  in[2] = _mm_unpacklo_epi64(in[4], in[5]);
+  in[3] = _mm_unpacklo_epi64(in[6], in[7]);
+  write_buffer_4x8_round5(dest, in, stride);
 }
 #endif  // CONFIG_EXT_TX

@@ -171,14 +171,6 @@ void aom_idct4x4_1_add_sse2(const tran_low_t *input, uint8_t *dest,
   RECON_AND_STORE4X4(dest + 3 * stride, dc_value);
 }
 
-static INLINE void transpose_4x4(__m128i *res) {
-  const __m128i tr0_0 = _mm_unpacklo_epi16(res[0], res[1]);
-  const __m128i tr0_1 = _mm_unpackhi_epi16(res[0], res[1]);
-
-  res[0] = _mm_unpacklo_epi16(tr0_0, tr0_1);
-  res[1] = _mm_unpackhi_epi16(tr0_0, tr0_1);
-}
-
 void idct4_sse2(__m128i *in) {
   const __m128i k__cospi_p16_p16 = pair_set_epi16(cospi_16_64, cospi_16_64);
   const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
@@ -187,7 +179,7 @@ void idct4_sse2(__m128i *in) {
   const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);
   __m128i u[8], v[8];
 
-  transpose_4x4(in);
+  array_transpose_4x4(in);
   // stage 1
   u[0] = _mm_unpacklo_epi16(in[0], in[1]);
   u[1] = _mm_unpackhi_epi16(in[0], in[1]);
@@ -225,7 +217,7 @@ void iadst4_sse2(__m128i *in) {
   const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);
   __m128i u[8], v[8], in7;
 
-  transpose_4x4(in);
+  array_transpose_4x4(in);
   in7 = _mm_srli_si128(in[1], 8);
   in7 = _mm_add_epi16(in7, in[0]);
   in7 = _mm_sub_epi16(in7, in[1]);
@@ -3518,7 +3510,7 @@ void aom_highbd_idct4x4_16_add_sse2(const tran_low_t *input, uint8_t *dest8,
     test = _mm_movemask_epi8(temp_mm);
 
     if (test) {
-      transpose_4x4(inptr);
+      array_transpose_4x4(inptr);
       sign_bits[0] = _mm_cmplt_epi16(inptr[0], zero);
       sign_bits[1] = _mm_cmplt_epi16(inptr[1], zero);
       inptr[3] = _mm_unpackhi_epi16(inptr[1], sign_bits[1]);
