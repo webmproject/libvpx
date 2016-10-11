@@ -16,6 +16,24 @@
       "revId": "210efa5ddac856c54fa8c6d6a6eecbc4ddbcb62b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ff76b882_21dde963",
+        "filename": "aom_dsp/x86/variance_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-10-11T23:49:36Z",
+      "side": 1,
+      "message": "aom_get16x16var_avx2() call _mm256_zeroupper() firstly. After it returns, aom_mse16x16_avx2 is still in AVX2 state. Compiler might have some instructions using YMM high 128b. So I think it\u0027s safer to call it again.\n\naom_get16x16var_avx2() is a global function which may be called somewhere else. That\u0027s why it\u0027s called twice.",
+      "parentUuid": "ff76b882_a1301954",
+      "revId": "210efa5ddac856c54fa8c6d6a6eecbc4ddbcb62b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
