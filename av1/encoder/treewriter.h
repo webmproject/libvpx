@@ -29,20 +29,10 @@ struct av1_token {
 
 void av1_tokens_from_tree(struct av1_token *, const aom_tree_index *);
 
-static INLINE void av1_write_tree(aom_writer *w, const aom_tree_index *tree,
-                                  const aom_prob *probs, int bits, int len,
-                                  aom_tree_index i) {
-  do {
-    const int bit = (bits >> --len) & 1;
-    aom_write(w, bit, probs[i >> 1]);
-    i = tree[i + bit];
-  } while (len);
-}
-
 static INLINE void av1_write_token(aom_writer *w, const aom_tree_index *tree,
                                    const aom_prob *probs,
                                    const struct av1_token *token) {
-  av1_write_tree(w, tree, probs, token->value, token->len, 0);
+  aom_write_tree(w, tree, probs, token->value, token->len, 0);
 }
 
 #ifdef __cplusplus

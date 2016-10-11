@@ -90,13 +90,18 @@ static INLINE int aom_read_literal(aom_reader *r, int bits) {
   return literal;
 }
 
-static INLINE int aom_read_tree(aom_reader *r, const aom_tree_index *tree,
-                                const aom_prob *probs) {
+static INLINE int aom_read_tree_bits(aom_reader *r, const aom_tree_index *tree,
+                                     const aom_prob *probs) {
   aom_tree_index i = 0;
 
   while ((i = tree[i + aom_read(r, probs[i >> 1])]) > 0) continue;
 
   return -i;
+}
+
+static INLINE int aom_read_tree(aom_reader *r, const aom_tree_index *tree,
+                                const aom_prob *probs) {
+  return aom_read_tree_bits(r, tree, probs);
 }
 
 #ifdef __cplusplus

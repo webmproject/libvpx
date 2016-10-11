@@ -70,6 +70,22 @@ static INLINE void aom_write_literal(aom_writer *w, int data, int bits) {
   for (bit = bits - 1; bit >= 0; bit--) aom_write_bit(w, 1 & (data >> bit));
 }
 
+static INLINE void aom_write_tree_bits(aom_writer *w, const aom_tree_index *tr,
+                                       const aom_prob *probs, int bits, int len,
+                                       aom_tree_index i) {
+  do {
+    const int bit = (bits >> --len) & 1;
+    aom_write(w, bit, probs[i >> 1]);
+    i = tr[i + bit];
+  } while (len);
+}
+
+static INLINE void aom_write_tree(aom_writer *w, const aom_tree_index *tree,
+                                  const aom_prob *probs, int bits, int len,
+                                  aom_tree_index i) {
+  aom_write_tree_bits(w, tree, probs, bits, len, i);
+}
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
