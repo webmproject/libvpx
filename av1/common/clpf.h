@@ -24,6 +24,6 @@ int av1_clpf_frame(const YV12_BUFFER_CONFIG *frame,
                    int (*decision)(int, int, const YV12_BUFFER_CONFIG *,
                                    const YV12_BUFFER_CONFIG *,
                                    const AV1_COMMON *cm, int, int, int,
-                                   unsigned int, unsigned int, uint8_t *, int));
+                                   unsigned int, unsigned int, uint8_t *));
 
 #endif
