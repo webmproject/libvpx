@@ -3443,10 +3443,9 @@ static void loopfilter_frame(AV1_COMP *cpi, AV1_COMMON *cm) {
       cm->clpf_strength = strength - (strength == 4);
       cm->clpf_size =
           fb_size_log2 ? fb_size_log2 - get_msb(MAX_FB_SIZE) + 3 : 0;
-      aom_yv12_copy_frame(cm->frame_to_show, &cpi->last_frame_uf);
       cm->clpf_numblocks =
-          av1_clpf_frame(cm->frame_to_show, &cpi->last_frame_uf, cpi->Source,
-                         cm, !!cm->clpf_size, strength, 4 + cm->clpf_size,
+          av1_clpf_frame(cm->frame_to_show, cm->frame_to_show, cpi->Source, cm,
+                         !!cm->clpf_size, strength, 4 + cm->clpf_size,
                          cm->clpf_blocks, av1_clpf_decision);
     }
   }
