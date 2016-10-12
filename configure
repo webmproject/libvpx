@@ -458,6 +458,9 @@ post_process_cmdline() {
         enabled ${c} && enable_feature ${c##*_}s
     done
 
+    # Enable daala_ec by default
+    ! enabled ans && soft_enable daala_ec
+
     # Fix up experiment dependencies
     enabled ec_adapt && enable_feature ec_multisymbol
     enabled ec_multisymbol && ! enabled ans && soft_enable daala_ec
