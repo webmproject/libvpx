@@ -20,13 +20,13 @@ readonly TEST_FRAMES=10
 # Environment check: Make sure input is available.
 aomenc_verify_environment() {
   if [ ! -e "${YUV_RAW_INPUT}" ]; then
-    elog "The file ${YUV_RAW_INPUT##*/} must exist in LIBVPX_TEST_DATA_PATH."
+    elog "The file ${YUV_RAW_INPUT##*/} must exist in LIBAOM_TEST_DATA_PATH."
     return 1
   fi
   if [ "$(aomenc_can_encode_av1)" = "yes" ]; then
     if [ ! -e "${Y4M_NOSQ_PAR_INPUT}" ]; then
       elog "The file ${Y4M_NOSQ_PAR_INPUT##*/} must exist in"
-      elog "LIBVPX_TEST_DATA_PATH."
+      elog "LIBAOM_TEST_DATA_PATH."
       return 1
     fi
   fi

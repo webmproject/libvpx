@@ -356,12 +356,12 @@ endif
 ## libaom test directives
 ##
 ifeq ($(CONFIG_UNIT_TESTS),yes)
-LIBVPX_TEST_DATA_PATH ?= .
+LIBAOM_TEST_DATA_PATH ?= .
 
 include $(SRC_PATH_BARE)/test/test.mk
 LIBAOM_TEST_SRCS=$(addprefix test/,$(call enabled,LIBAOM_TEST_SRCS))
 LIBAOM_TEST_BIN=./test_libaom$(EXE_SFX)
-LIBAOM_TEST_DATA=$(addprefix $(LIBVPX_TEST_DATA_PATH)/,\
+LIBAOM_TEST_DATA=$(addprefix $(LIBAOM_TEST_DATA_PATH)/,\
                      $(call enabled,LIBAOM_TEST_DATA))
 libaom_test_data_url=http://downloads.webmproject.org/test_data/libvpx/$(1)
 
@@ -388,7 +388,7 @@ testdata:: $(LIBAOM_TEST_DATA)
             echo "Checking test data:";\
             for f in $(call enabled,LIBAOM_TEST_DATA); do\
                 grep $$f $(SRC_PATH_BARE)/test/test-data.sha1 |\
-                    (cd $(LIBVPX_TEST_DATA_PATH); $${sha1sum} -c);\
+                    (cd $(LIBAOM_TEST_DATA_PATH); $${sha1sum} -c);\
             done; \
         else\
             echo "Skipping test data integrity check, sha1sum not found.";\
@@ -554,10 +554,10 @@ TEST_BIN_PATH := $(addsuffix /$(TGT_OS:win64=x64)/Release, $(TEST_BIN_PATH))
 endif
 utiltest utiltest-no-data-check:
 	$(qexec)$(SRC_PATH_BARE)/test/aomdec.sh \
-		--test-data-path $(LIBVPX_TEST_DATA_PATH) \
+		--test-data-path $(LIBAOM_TEST_DATA_PATH) \
 		--bin-path $(TEST_BIN_PATH)
 	$(qexec)$(SRC_PATH_BARE)/test/aomenc.sh \
-		--test-data-path $(LIBVPX_TEST_DATA_PATH) \
+		--test-data-path $(LIBAOM_TEST_DATA_PATH) \
 		--bin-path $(TEST_BIN_PATH)
 utiltest: testdata
 else
@@ -581,7 +581,7 @@ EXAMPLES_BIN_PATH := $(TGT_OS:win64=x64)/Release
 endif
 exampletest exampletest-no-data-check: examples
 	$(qexec)$(SRC_PATH_BARE)/test/examples.sh \
-		--test-data-path $(LIBVPX_TEST_DATA_PATH) \
+		--test-data-path $(LIBAOM_TEST_DATA_PATH) \
 		--bin-path $(EXAMPLES_BIN_PATH)
 exampletest: testdata
 else

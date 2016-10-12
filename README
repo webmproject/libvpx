@@ -122,10 +122,10 @@ COMPILING THE APPLICATIONS/LIBRARIES:
 VP8/AV1 TEST VECTORS:
   The test vectors can be downloaded and verified using the build system after
   running configure. To specify an alternate directory the
-  LIBVPX_TEST_DATA_PATH environment variable can be used.
+  LIBAOM_TEST_DATA_PATH environment variable can be used.
 
   $ ./configure --enable-unit-tests
-  $ LIBVPX_TEST_DATA_PATH=../-test-data make testdata
+  $ LIBAOM_TEST_DATA_PATH=../-test-data make testdata
 
 CODE STYLE:
   The coding style used by this project is enforced with clang-format using the

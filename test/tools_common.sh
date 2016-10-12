@@ -118,12 +118,12 @@ test_env_var_dir() {
 }
 
 # This script requires that the LIBAOM_BIN_PATH, LIBAOM_CONFIG_PATH, and
-# LIBVPX_TEST_DATA_PATH variables are in the environment: Confirm that
+# LIBAOM_TEST_DATA_PATH variables are in the environment: Confirm that
 # the variables are set and that they all evaluate to directory paths.
 verify_aom_test_environment() {
   test_env_var_dir "LIBAOM_BIN_PATH" \
     && test_env_var_dir "LIBAOM_CONFIG_PATH" \
-    && test_env_var_dir "LIBVPX_TEST_DATA_PATH"
+    && test_env_var_dir "LIBAOM_TEST_DATA_PATH"
 }
 
 # Greps aom_config.h in LIBAOM_CONFIG_PATH for positional parameter one, which
@@ -295,7 +295,7 @@ cat << EOF
     \$LIBAOM_CONFIG_PATH and then the current directory.
 
     When the -test-data-path option is not specified the script attempts to use
-    \$LIBVPX_TEST_DATA_PATH and then the current directory.
+    \$LIBAOM_TEST_DATA_PATH and then the current directory.
 EOF
 }
 
@@ -304,7 +304,7 @@ EOF
 aom_test_check_environment() {
   if [ -z "${LIBAOM_BIN_PATH}" ] || \
      [ -z "${LIBAOM_CONFIG_PATH}" ] || \
-     [ -z "${LIBVPX_TEST_DATA_PATH}" ]; then
+     [ -z "${LIBAOM_TEST_DATA_PATH}" ]; then
     return 1
   fi
 }
@@ -360,7 +360,7 @@ while [ -n "$1" ]; do
       exit
       ;;
     --test-data-path)
-      LIBVPX_TEST_DATA_PATH="$2"
+      LIBAOM_TEST_DATA_PATH="$2"
       shift
       ;;
     --prefix)
@@ -388,7 +388,7 @@ done
 # the tests on *nix/macosx.
 LIBAOM_BIN_PATH="${LIBAOM_BIN_PATH:-.}"
 LIBAOM_CONFIG_PATH="${LIBAOM_CONFIG_PATH:-.}"
-LIBVPX_TEST_DATA_PATH="${LIBVPX_TEST_DATA_PATH:-.}"
+LIBAOM_TEST_DATA_PATH="${LIBAOM_TEST_DATA_PATH:-.}"
 
 # Create a temporary directory for output files, and a trap to clean it up.
 if [ -n "${TMPDIR}" ]; then
@@ -413,19 +413,19 @@ if [ "$(is_windows_target)" = "yes" ]; then
 fi
 
 # Variables shared by tests.
-VP8_IVF_FILE="${LIBVPX_TEST_DATA_PATH}/vp80-00-comprehensive-001.ivf"
-AV1_IVF_FILE="${LIBVPX_TEST_DATA_PATH}/vp90-2-09-subpixel-00.ivf"
+VP8_IVF_FILE="${LIBAOM_TEST_DATA_PATH}/vp80-00-comprehensive-001.ivf"
+AV1_IVF_FILE="${LIBAOM_TEST_DATA_PATH}/vp90-2-09-subpixel-00.ivf"
 
-AV1_WEBM_FILE="${LIBVPX_TEST_DATA_PATH}/vp90-2-00-quantizer-00.webm"
-AV1_FPM_WEBM_FILE="${LIBVPX_TEST_DATA_PATH}/vp90-2-07-frame_parallel-1.webm"
-AV1_LT_50_FRAMES_WEBM_FILE="${LIBVPX_TEST_DATA_PATH}/vp90-2-02-size-32x08.webm"
+AV1_WEBM_FILE="${LIBAOM_TEST_DATA_PATH}/vp90-2-00-quantizer-00.webm"
+AV1_FPM_WEBM_FILE="${LIBAOM_TEST_DATA_PATH}/vp90-2-07-frame_parallel-1.webm"
+AV1_LT_50_FRAMES_WEBM_FILE="${LIBAOM_TEST_DATA_PATH}/vp90-2-02-size-32x08.webm"
 
-YUV_RAW_INPUT="${LIBVPX_TEST_DATA_PATH}/hantro_collage_w352h288.yuv"
+YUV_RAW_INPUT="${LIBAOM_TEST_DATA_PATH}/hantro_collage_w352h288.yuv"
 YUV_RAW_INPUT_WIDTH=352
 YUV_RAW_INPUT_HEIGHT=288
 
-Y4M_NOSQ_PAR_INPUT="${LIBVPX_TEST_DATA_PATH}/park_joy_90p_8_420_a10-1.y4m"
-Y4M_720P_INPUT="${LIBVPX_TEST_DATA_PATH}/niklas_1280_720_30.y4m"
+Y4M_NOSQ_PAR_INPUT="${LIBAOM_TEST_DATA_PATH}/park_joy_90p_8_420_a10-1.y4m"
+Y4M_720P_INPUT="${LIBAOM_TEST_DATA_PATH}/niklas_1280_720_30.y4m"
 
 # Setup a trap function to clean up after tests complete.
 trap cleanup EXIT
@@ -433,7 +433,7 @@ trap cleanup EXIT
 vlog "$(basename "${0%.*}") test configuration:
   LIBAOM_BIN_PATH=${LIBAOM_BIN_PATH}
   LIBAOM_CONFIG_PATH=${LIBAOM_CONFIG_PATH}
-  LIBVPX_TEST_DATA_PATH=${LIBVPX_TEST_DATA_PATH}
+  LIBAOM_TEST_DATA_PATH=${LIBAOM_TEST_DATA_PATH}
   AOM_IVF_FILE=${AOM_IVF_FILE}
   AV1_IVF_FILE=${AV1_IVF_FILE}
   AV1_WEBM_FILE=${AV1_WEBM_FILE}
