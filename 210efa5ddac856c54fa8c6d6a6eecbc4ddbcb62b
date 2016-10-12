@@ -34,6 +34,41 @@
       "revId": "210efa5ddac856c54fa8c6d6a6eecbc4ddbcb62b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ff76b882_81307d9d",
+        "filename": "aom_dsp/x86/variance_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-12T00:04:39Z",
+      "side": 1,
+      "message": "\u003e aom_get16x16var_avx2() call _mm256_zeroupper() firstly. After it\n \u003e returns, aom_mse16x16_avx2 is still in AVX2 state. Compiler might\n \u003e have some instructions using YMM high 128b. So I think it\u0027s safer\n \u003e to call it again.\n \u003e \n\n \u003e aom_get16x16var_avx2() is a global function which may be called\n \u003e somewhere else. That\u0027s why it\u0027s called twice.\n\nnot sure why we need the split with variance_impl_avx2.c, but that\u0027s another discussion. as the code is now this is safest",
+      "parentUuid": "ff76b882_21dde963",
+      "revId": "210efa5ddac856c54fa8c6d6a6eecbc4ddbcb62b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ff76b882_214169f1",
+        "filename": "aom_dsp/x86/variance_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-12T00:04:39Z",
+      "side": 1,
+      "message": "given the others don\u0027t you want to issue this as soon as possible. you can add another level of scope to keep the \u0027const int se\u0027 declaration",
+      "revId": "210efa5ddac856c54fa8c6d6a6eecbc4ddbcb62b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
