@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3ca69ec4_52cfb27e",
+        "filename": "av1/encoder/encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3187,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2016-10-12T23:55:15Z",
+      "side": 1,
+      "message": "It is 0 in the original code. Is it right here?",
+      "range": {
+        "startLine": 3187,
+        "startChar": 39,
+        "endLine": 3187,
+        "endChar": 49
+      },
+      "revId": "542dc6f7d6180ef41f1663665e9f43ba66b59ef4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
