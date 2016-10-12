@@ -39,7 +39,6 @@
     if (counts) ++coef_counts[band][ctx][token]; \
   } while (0)
 
-#if !CONFIG_ANS
 static INLINE int read_coeff(const aom_prob *probs, int n, aom_reader *r) {
   int i, val = 0;
   for (i = 0; i < n; ++i) val = (val << 1) | aom_read(r, probs[i]);
@@ -75,6 +74,11 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
   const aom_prob(*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       fc->coef_probs[tx_size_ctx][type][ref];
   const aom_prob *prob;
+#if CONFIG_ANS
+  const rans_lut(*coef_cdfs)[COEFF_CONTEXTS] =
+      fc->coef_cdfs[tx_size_ctx][type][ref];
+  const rans_lut *cdf;
+#endif  // CONFIG_ANS
   unsigned int(*coef_counts)[COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1];
   unsigned int(*eob_branch_count)[COEFF_CONTEXTS];
   uint8_t token_cache[MAX_TX_SQUARE];
@@ -160,7 +164,52 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
       dqv_val = &dq_val[band][0];
 #endif  // CONFIG_NEW_QUANT
     }
-
+#if CONFIG_ANS
+    cdf = &coef_cdfs[band][ctx];
+    token = ONE_TOKEN + rans_read(r, *cdf);
+    INCREMENT_COUNT(ONE_TOKEN + (token > ONE_TOKEN));
+    switch (token) {
+      case ONE_TOKEN:
+      case TWO_TOKEN:
+      case THREE_TOKEN:
+      case FOUR_TOKEN: val = token; break;
+      case CATEGORY1_TOKEN:
+        val = CAT1_MIN_VAL + read_coeff(cat1_prob, 1, r);
+        break;
+      case CATEGORY2_TOKEN:
+        val = CAT2_MIN_VAL + read_coeff(cat2_prob, 2, r);
+        break;
+      case CATEGORY3_TOKEN:
+        val = CAT3_MIN_VAL + read_coeff(cat3_prob, 3, r);
+        break;
+      case CATEGORY4_TOKEN:
+        val = CAT4_MIN_VAL + read_coeff(cat4_prob, 4, r);
+        break;
+      case CATEGORY5_TOKEN:
+        val = CAT5_MIN_VAL + read_coeff(cat5_prob, 5, r);
+        break;
+      case CATEGORY6_TOKEN: {
+        const int skip_bits = TX_SIZES - 1 - txsize_sqr_up_map[tx_size];
+        const uint8_t *cat6p = cat6_prob + skip_bits;
+#if CONFIG_AOM_HIGHBITDEPTH
+        switch (xd->bd) {
+          case AOM_BITS_8:
+            val = CAT6_MIN_VAL + read_coeff(cat6p, 14 - skip_bits, r);
+            break;
+          case AOM_BITS_10:
+            val = CAT6_MIN_VAL + read_coeff(cat6p, 16 - skip_bits, r);
+            break;
+          case AOM_BITS_12:
+            val = CAT6_MIN_VAL + read_coeff(cat6p, 18 - skip_bits, r);
+            break;
+          default: assert(0); return -1;
+        }
+#else
+        val = CAT6_MIN_VAL + read_coeff(cat6p, 14 - skip_bits, r);
+#endif
+      } break;
+    }
+#else
     if (!aom_read(r, prob[ONE_CONTEXT_NODE])) {
       INCREMENT_COUNT(ONE_TOKEN);
       token = ONE_TOKEN;
@@ -211,8 +260,8 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
         }
       }
     }
+#endif  // CONFIG_ANS
 #if CONFIG_NEW_QUANT
-
     v = av1_dequant_abscoeff_nuq(val, dqv, dqv_val);
     v = dq_shift ? ROUND_POWER_OF_TWO(v, dq_shift) : v;
 #else
@@ -240,186 +289,6 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
 
   return c;
 }
-#else  // !CONFIG_ANS
-static INLINE int read_coeff(const aom_prob *const probs, int n,
-                             struct AnsDecoder *const ans) {
-  int i, val = 0;
-  for (i = 0; i < n; ++i) val = (val << 1) | uabs_read(ans, probs[i]);
-  return val;
-}
-
-static int decode_coefs_ans(const MACROBLOCKD *const xd, PLANE_TYPE type,
-                            tran_low_t *dqcoeff, TX_SIZE tx_size,
-                            TX_TYPE tx_type, const int16_t *dq,
-#if CONFIG_NEW_QUANT
-                            dequant_val_type_nuq *dq_val,
-#endif  // CONFIG_NEW_QUANT
-                            int ctx, const int16_t *scan, const int16_t *nb,
-                            struct AnsDecoder *const ans) {
-  FRAME_COUNTS *counts = xd->counts;
-  const int max_eob = get_tx2d_size(tx_size);
-  const FRAME_CONTEXT *const fc = xd->fc;
-  const int ref = is_inter_block(&xd->mi[0]->mbmi);
-  int band, c = 0;
-  int skip_eob = 0;
-  const int tx_size_ctx = txsize_sqr_map[tx_size];
-  const aom_prob(*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
-      fc->coef_probs[tx_size_ctx][type][ref];
-  const rans_lut(*coef_cdfs)[COEFF_CONTEXTS] =
-      fc->coef_cdfs[tx_size_ctx][type][ref];
-  const aom_prob *prob;
-  const rans_lut *cdf;
-  unsigned int(*coef_counts)[COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1];
-  unsigned int(*eob_branch_count)[COEFF_CONTEXTS];
-  uint8_t token_cache[MAX_TX_SQUARE];
-  const uint8_t *band_translate = get_band_translate(tx_size);
-  int dq_shift;
-  int v, token;
-  int16_t dqv = dq[0];
-#if CONFIG_NEW_QUANT
-  const tran_low_t *dqv_val = &dq_val[0][0];
-#endif  // CONFIG_NEW_QUANT
-  const uint8_t *cat1_prob;
-  const uint8_t *cat2_prob;
-  const uint8_t *cat3_prob;
-  const uint8_t *cat4_prob;
-  const uint8_t *cat5_prob;
-  const uint8_t *cat6_prob;
-
-  dq_shift = get_tx_scale(xd, tx_type, tx_size);
-
-  if (counts) {
-    coef_counts = counts->coef[tx_size_ctx][type][ref];
-    eob_branch_count = counts->eob_branch[tx_size_ctx][type][ref];
-  }
-
-#if CONFIG_AOM_HIGHBITDEPTH
-  if (xd->bd > AOM_BITS_8) {
-    if (xd->bd == AOM_BITS_10) {
-      cat1_prob = av1_cat1_prob_high10;
-      cat2_prob = av1_cat2_prob_high10;
-      cat3_prob = av1_cat3_prob_high10;
-      cat4_prob = av1_cat4_prob_high10;
-      cat5_prob = av1_cat5_prob_high10;
-      cat6_prob = av1_cat6_prob_high10;
-    } else {
-      cat1_prob = av1_cat1_prob_high12;
-      cat2_prob = av1_cat2_prob_high12;
-      cat3_prob = av1_cat3_prob_high12;
-      cat4_prob = av1_cat4_prob_high12;
-      cat5_prob = av1_cat5_prob_high12;
-      cat6_prob = av1_cat6_prob_high12;
-    }
-  } else {
-    cat1_prob = av1_cat1_prob;
-    cat2_prob = av1_cat2_prob;
-    cat3_prob = av1_cat3_prob;
-    cat4_prob = av1_cat4_prob;
-    cat5_prob = av1_cat5_prob;
-    cat6_prob = av1_cat6_prob;
-  }
-#else
-  cat1_prob = av1_cat1_prob;
-  cat2_prob = av1_cat2_prob;
-  cat3_prob = av1_cat3_prob;
-  cat4_prob = av1_cat4_prob;
-  cat5_prob = av1_cat5_prob;
-  cat6_prob = av1_cat6_prob;
-#endif
-
-  while (c < max_eob) {
-    int val = -1;
-    band = *band_translate++;
-    prob = coef_probs[band][ctx];
-    if (!skip_eob) {
-      if (counts) ++eob_branch_count[band][ctx];
-      if (!uabs_read(ans, prob[EOB_CONTEXT_NODE])) {
-        INCREMENT_COUNT(EOB_MODEL_TOKEN);
-        break;
-      }
-    }
-
-#if CONFIG_NEW_QUANT
-    dqv_val = &dq_val[band][0];
-#endif  // CONFIG_NEW_QUANT
-
-    cdf = &coef_cdfs[band][ctx];
-    token = ZERO_TOKEN + rans_read(ans, *cdf);
-    if (token == ZERO_TOKEN) {
-      INCREMENT_COUNT(ZERO_TOKEN);
-      token_cache[scan[c]] = 0;
-      skip_eob = 1;
-    } else {
-      INCREMENT_COUNT(ONE_TOKEN + (token > ONE_TOKEN));
-      switch (token) {
-        case ONE_TOKEN:
-        case TWO_TOKEN:
-        case THREE_TOKEN:
-        case FOUR_TOKEN: val = token; break;
-        case CATEGORY1_TOKEN:
-          val = CAT1_MIN_VAL + read_coeff(cat1_prob, 1, ans);
-          break;
-        case CATEGORY2_TOKEN:
-          val = CAT2_MIN_VAL + read_coeff(cat2_prob, 2, ans);
-          break;
-        case CATEGORY3_TOKEN:
-          val = CAT3_MIN_VAL + read_coeff(cat3_prob, 3, ans);
-          break;
-        case CATEGORY4_TOKEN:
-          val = CAT4_MIN_VAL + read_coeff(cat4_prob, 4, ans);
-          break;
-        case CATEGORY5_TOKEN:
-          val = CAT5_MIN_VAL + read_coeff(cat5_prob, 5, ans);
-          break;
-        case CATEGORY6_TOKEN: {
-          const int skip_bits = TX_SIZES - 1 - txsize_sqr_up_map[tx_size];
-          const uint8_t *cat6p = cat6_prob + skip_bits;
-#if CONFIG_AOM_HIGHBITDEPTH
-          switch (xd->bd) {
-            case AOM_BITS_8:
-              val = CAT6_MIN_VAL + read_coeff(cat6p, 14 - skip_bits, ans);
-              break;
-            case AOM_BITS_10:
-              val = CAT6_MIN_VAL + read_coeff(cat6p, 16 - skip_bits, ans);
-              break;
-            case AOM_BITS_12:
-              val = CAT6_MIN_VAL + read_coeff(cat6p, 18 - skip_bits, ans);
-              break;
-            default: assert(0); return -1;
-          }
-#else
-          val = CAT6_MIN_VAL + read_coeff(cat6p, 14 - skip_bits, ans);
-#endif
-        } break;
-      }
-#if CONFIG_NEW_QUANT
-      v = av1_dequant_abscoeff_nuq(val, dqv, dqv_val);
-      v = dq_shift ? ROUND_POWER_OF_TWO(v, dq_shift) : v;
-#else
-      v = (val * dqv) >> dq_shift;
-#endif  // CONFIG_NEW_QUANT
-
-#if CONFIG_COEFFICIENT_RANGE_CHECKING
-#if CONFIG_AOM_HIGHBITDEPTH
-      dqcoeff[scan[c]] =
-          highbd_check_range((uabs_read_bit(ans) ? -v : v), xd->bd);
-#else
-      dqcoeff[scan[c]] = check_range(uabs_read_bit(ans) ? -v : v);
-#endif  // CONFIG_AOM_HIGHBITDEPTH
-#else
-      dqcoeff[scan[c]] = uabs_read_bit(ans) ? -v : v;
-#endif  // CONFIG_COEFFICIENT_RANGE_CHECKING
-      token_cache[scan[c]] = av1_pt_energy_class[token];
-      skip_eob = 0;
-    }
-    ++c;
-    ctx = get_coef_context(nb, token_cache, c);
-    dqv = dq[1];
-  }
-
-  return c;
-}
-#endif  // !CONFIG_ANS
 
 // TODO(slavarnway): Decode version of av1_set_context.  Modify
 // av1_set_context
@@ -510,7 +379,6 @@ int av1_decode_block_tokens(MACROBLOCKD *const xd, int plane,
       get_dq_profile_from_ctx(xd->qindex[seg_id], ctx, ref, pd->plane_type);
 #endif  //  CONFIG_NEW_QUANT
 
-#if !CONFIG_ANS
 #if CONFIG_AOM_QM
   const int eob =
       decode_coefs(xd, pd->plane_type, pd->dqcoeff, tx_size, tx_type, dequant,
@@ -523,14 +391,6 @@ int av1_decode_block_tokens(MACROBLOCKD *const xd, int plane,
 #endif  // CONFIG_NEW_QUANT
                    ctx, sc->scan, sc->neighbors, r);
 #endif  // CONFIG_AOM_QM
-#else
-  const int eob = decode_coefs_ans(xd, pd->plane_type, pd->dqcoeff, tx_size,
-                                   tx_type, dequant,
-#if CONFIG_NEW_QUANT
-                                   pd->seg_dequant_nuq[seg_id][dq],
-#endif  // CONFIG_NEW_QUANT
-                                   ctx, sc->scan, sc->neighbors, r);
-#endif  // !CONFIG_ANS
   dec_set_contexts(xd, pd, tx_size, eob > 0, x, y);
   /*
   av1_set_contexts(xd, pd,

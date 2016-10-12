@@ -620,7 +620,6 @@ static void update_supertx_probs(AV1_COMMON *cm, aom_writer *w) {
 }
 #endif  // CONFIG_SUPERTX
 
-#if !CONFIG_ANS
 static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
                            const TOKENEXTRA *const stop,
                            aom_bit_depth_t bit_depth, const TX_SIZE tx) {
@@ -632,9 +631,11 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
 
   while (p < stop && p->token != EOSB_TOKEN) {
     const int t = p->token;
+#if !CONFIG_ANS
     const struct av1_token *const a = &av1_coef_encodings[t];
     int v = a->value;
     int n = a->len;
+#endif  // !CONFIG_ANS
 #if CONFIG_AOM_HIGHBITDEPTH
     const av1_extra_bit *b;
     if (bit_depth == AOM_BITS_12)
@@ -648,6 +649,22 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
     (void)bit_depth;
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 
+#if CONFIG_ANS
+    /* skip one or two nodes */
+    if (!p->skip_eob_node) aom_write(w, t != EOB_TOKEN, p->context_tree[0]);
+
+    if (t != EOB_TOKEN) {
+      aom_write(w, t != ZERO_TOKEN, p->context_tree[1]);
+
+      if (t != ZERO_TOKEN) {
+        struct rans_sym s;
+        const rans_lut *token_cdf = p->token_cdf;
+        s.cum_prob = (*token_cdf)[t - ONE_TOKEN];
+        s.prob = (*token_cdf)[t - ONE_TOKEN + 1] - s.cum_prob;
+        buf_rans_write(w, &s);
+      }
+    }
+#else
     /* skip one or two nodes */
     if (p->skip_eob_node)
       n -= p->skip_eob_node;
@@ -668,6 +685,7 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
         }
       }
     }
+#endif  // CONFIG_ANS
 
     if (b->base_val) {
       const int e = p->extra, l = b->len;
@@ -705,83 +723,6 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
 
   *tp = p;
 }
-#else
-// This function serializes the tokens in forward order using a buffered ans
-// coder.
-static void pack_mb_tokens(struct BufAnsCoder *ans, const TOKENEXTRA **tp,
-                           const TOKENEXTRA *const stop,
-                           aom_bit_depth_t bit_depth, const TX_SIZE tx) {
-  const TOKENEXTRA *p = *tp;
-#if CONFIG_VAR_TX
-  int count = 0;
-  const int seg_eob = 16 << (tx << 1);
-#endif  // CONFIG_VAR_TX
-
-  while (p < stop && p->token != EOSB_TOKEN) {
-    const int t = p->token;
-#if CONFIG_AOM_HIGHBITDEPTH
-    const av1_extra_bit *b;
-    if (bit_depth == AOM_BITS_12)
-      b = &av1_extra_bits_high12[t];
-    else if (bit_depth == AOM_BITS_10)
-      b = &av1_extra_bits_high10[t];
-    else
-      b = &av1_extra_bits[t];
-#else
-    const av1_extra_bit *const b = &av1_extra_bits[t];
-    (void)bit_depth;
-#endif  // CONFIG_AOM_HIGHBITDEPTH
-
-    /* skip one or two nodes */
-    if (!p->skip_eob_node)
-      buf_uabs_write(ans, t != EOB_TOKEN, p->context_tree[0]);
-
-    if (t != EOB_TOKEN) {
-      struct rans_sym s;
-      const rans_lut *token_cdf = p->token_cdf;
-      assert(token_cdf);
-      s.cum_prob = (*token_cdf)[t - ZERO_TOKEN];
-      s.prob = (*token_cdf)[t - ZERO_TOKEN + 1] - s.cum_prob;
-      buf_rans_write(ans, &s);
-
-      if (b->base_val) {
-        const int e = p->extra, l = b->len;
-        int skip_bits = (b->base_val == CAT6_MIN_VAL)
-                            ? TX_SIZES - 1 - txsize_sqr_up_map[tx]
-                            : 0;
-
-        if (l) {
-          const unsigned char *pb = b->prob;
-          int v = e >> 1;
-          int n = l; /* number of bits in v, assumed nonzero */
-          int i = 0;
-
-          do {
-            const int bb = (v >> --n) & 1;
-            if (skip_bits) {
-              skip_bits--;
-              assert(!bb);
-            } else {
-              buf_uabs_write(ans, bb, pb[i >> 1]);
-            }
-            i = b->tree[i + bb];
-          } while (n);
-        }
-
-        buf_uabs_write(ans, e & 1, 128);
-      }
-    }
-    ++p;
-
-#if CONFIG_VAR_TX
-    ++count;
-    if (t == EOB_TOKEN || count == seg_eob) break;
-#endif  // CONFIG_VAR_TX
-  }
-
-  *tp = p;
-}
-#endif  // !CONFIG_ANS
 
 #if CONFIG_VAR_TX
 static void pack_txb_tokens(aom_writer *w, const TOKENEXTRA **tp,

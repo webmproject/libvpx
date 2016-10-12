@@ -4243,11 +4243,7 @@ static void encode_rd_sb_row(AV1_COMP *cpi, ThreadData *td,
                cpi->td.rd_counts.coef_counts);
       av1_copy(subframe_stats->eob_counts_buf[cm->coef_probs_update_idx],
                cm->counts.eob_branch);
-      av1_fill_token_costs(x->token_costs,
-#if CONFIG_ANS
-                           cm->fc->coef_cdfs,
-#endif  // CONFIG_ANS
-                           cm->fc->coef_probs);
+      av1_fill_token_costs(x->token_costs, cm->fc->coef_probs);
     }
   }
 #endif  // CONFIG_ENTROPY

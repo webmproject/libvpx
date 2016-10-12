@@ -431,9 +431,6 @@ void av1_update_rd_thresh_fact(const AV1_COMMON *const cm,
                                int best_mode_index);
 
 void av1_fill_token_costs(av1_coeff_cost *c,
-#if CONFIG_ANS
-                          coeff_cdf_model (*cdf)[PLANE_TYPES],
-#endif  // CONFIG_ANS
                           av1_coeff_probs_model (*p)[PLANE_TYPES]);
 
 static INLINE int rd_less_than_thresh(int64_t best_rd, int thresh,
