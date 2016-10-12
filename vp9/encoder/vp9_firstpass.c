@@ -48,10 +48,8 @@
 #define FIRST_PASS_Q 10.0
 #define GF_MAX_BOOST 96.0
 #define INTRA_MODE_PENALTY 1024
-#define KF_MAX_BOOST 128.0
 #define MIN_ARF_GF_BOOST 240
 #define MIN_DECAY_FACTOR 0.01
-#define MIN_KF_BOOST 300
 #define NEW_MV_MODE_PENALTY 32
 #define SVC_FACTOR_PT_LOW 0.45
 #define DARK_THRESH 64
@@ -2470,6 +2468,9 @@ static int test_candidate_kf(TWO_PASS *twopass,
 }
 
 #define FRAMES_TO_CHECK_DECAY 8
+#define KF_MAX_FRAME_BOOST 128.0
+#define MIN_KF_TOT_BOOST 300
+#define MAX_KF_TOT_BOOST 4800
 
 static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int i, j;
@@ -2484,7 +2485,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int kf_bits = 0;
   int loop_decay_counter = 0;
   double decay_accumulator = 1.0;
-  double av_decay_accumulator = 0.0;
   double zero_motion_accumulator = 1.0;
   double boost_score = 0.0;
   double kf_mod_err = 0.0;
@@ -2652,7 +2652,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     if ((i <= rc->max_gf_interval) ||
         ((i <= (rc->max_gf_interval * 4)) && (decay_accumulator > 0.5))) {
       const double frame_boost =
-          calc_frame_boost(cpi, &next_frame, 0, KF_MAX_BOOST);
+          calc_frame_boost(cpi, &next_frame, 0, KF_MAX_FRAME_BOOST);
 
       // How fast is prediction quality decaying.
       if (!detect_flash(twopass, 0)) {
@@ -2660,13 +2660,11 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
             get_prediction_decay_rate(cpi, &next_frame);
         decay_accumulator *= loop_decay_rate;
         decay_accumulator = VPXMAX(decay_accumulator, MIN_DECAY_FACTOR);
-        av_decay_accumulator += decay_accumulator;
         ++loop_decay_counter;
       }
       boost_score += (decay_accumulator * frame_boost);
     }
   }
-  av_decay_accumulator /= (double)loop_decay_counter;
 
   reset_fpf_position(twopass, start_position);
 
@@ -2678,9 +2676,9 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       start_position, twopass->stats_in_end, rc->frames_to_key);
 
   // Apply various clamps for min and max boost
-  rc->kf_boost = (int)(av_decay_accumulator * boost_score);
-  rc->kf_boost = VPXMAX(rc->kf_boost, (rc->frames_to_key * 3));
-  rc->kf_boost = VPXMAX(rc->kf_boost, MIN_KF_BOOST);
+  rc->kf_boost = VPXMAX((int)boost_score, (rc->frames_to_key * 3));
+  rc->kf_boost = VPXMAX(rc->kf_boost, MIN_KF_TOT_BOOST);
+  rc->kf_boost = VPXMIN(rc->kf_boost, MAX_KF_TOT_BOOST);
 
   // Work out how many bits to allocate for the key frame itself.
   kf_bits = calculate_boost_bits((rc->frames_to_key - 1), rc->kf_boost,
