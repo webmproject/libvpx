@@ -70,6 +70,24 @@
       "revId": "0fe8d1723c7e1e5d39b70d4e6189556e92803cd7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c2d76d5_6cd95377",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-10-12T17:57:45Z",
+      "side": 1,
+      "message": "The seed would automatically change at every rand_r(seed) call. You just need to pass in the same variable pointer.",
+      "parentUuid": "7c2d76d5_ccbe7f17",
+      "revId": "0fe8d1723c7e1e5d39b70d4e6189556e92803cd7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
