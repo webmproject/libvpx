@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c2d76d5_ef8d3533",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-12T18:27:21Z",
+      "side": 1,
+      "message": "reading this now I see there\u0027s mixed cosmetics and code changes. in talking offline I expected this to be a rename which should be a noop and not result in crashes. please split this",
+      "revId": "85be6bf0123b68d31674247db5148b4cf0b9ae64",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
