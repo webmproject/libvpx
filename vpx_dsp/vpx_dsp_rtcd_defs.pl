@@ -475,10 +475,10 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_highbd_lpf_vertical_4_dual sse2 neon/;
 
   add_proto qw/void vpx_highbd_lpf_horizontal_16/, "uint16_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int bd";
-  specialize qw/vpx_highbd_lpf_horizontal_16 sse2/;
+  specialize qw/vpx_highbd_lpf_horizontal_16 sse2 neon/;
 
   add_proto qw/void vpx_highbd_lpf_horizontal_16_dual/, "uint16_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int bd";
-  specialize qw/vpx_highbd_lpf_horizontal_16_dual sse2/;
+  specialize qw/vpx_highbd_lpf_horizontal_16_dual sse2 neon/;
 
   add_proto qw/void vpx_highbd_lpf_horizontal_8/, "uint16_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int bd";
   specialize qw/vpx_highbd_lpf_horizontal_8 sse2 neon/;
