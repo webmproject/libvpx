@@ -223,6 +223,7 @@ typedef enum {
 
 typedef enum { PLANE_TYPE_Y = 0, PLANE_TYPE_UV = 1, PLANE_TYPES } PLANE_TYPE;
 
+#if CONFIG_PALETTE
 typedef enum {
   TWO_COLORS,
   THREE_COLORS,
@@ -245,6 +246,7 @@ typedef enum {
   PALETTE_COLOR_EIGHT,
   PALETTE_COLORS
 } PALETTE_COLOR;
+#endif  // CONFIG_PALETTE
 
 #ifdef CONFIG_CLPF
 #define CLPF_NOFLAG -1

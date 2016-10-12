@@ -474,6 +474,7 @@ static const aom_prob default_single_ref_p[REF_CONTEXTS][SINGLE_REFS - 1] = {
 #endif  // CONFIG_EXT_REFS
 };
 
+#if CONFIG_PALETTE
 const aom_tree_index av1_palette_size_tree[TREE_SIZE(PALETTE_SIZES)] = {
   -TWO_COLORS,  2, -THREE_COLORS, 4,  -FOUR_COLORS,  6,
   -FIVE_COLORS, 8, -SIX_COLORS,   10, -SEVEN_COLORS, -EIGHT_COLORS,
@@ -832,6 +833,7 @@ static const int palette_color_context_lookup[PALETTE_COLOR_CONTEXTS] = {
   // (7, 3, 0, 0), (8, 0, 0, 0), (8, 2, 0, 0), (10, 0, 0, 0)
   9680, 10648, 10890, 13310
 };
+#endif  // CONFIG_PALETTE
 
 const aom_tree_index av1_tx_size_tree[TX_SIZES - 1][TREE_SIZE(TX_SIZES)] = {
   {
@@ -883,6 +885,7 @@ static const aom_prob
 static const aom_prob default_rect_tx_prob[TX_SIZES - 1] = { 192, 192, 192 };
 #endif  // CONFIG_EXT_TX && CONFIG_RECT_TX && CONFIG_VAR_TX
 
+#if CONFIG_PALETTE
 int av1_get_palette_color_context(const uint8_t *color_map, int cols, int r,
                                   int c, int n, int *color_order) {
   int i, j, max, max_idx, temp;
@@ -951,6 +954,7 @@ int av1_get_palette_color_context(const uint8_t *color_map, int cols, int r,
 
   return color_ctx;
 }
+#endif  // CONFIG_PALETTE
 
 #if CONFIG_VAR_TX
 static const aom_prob default_txfm_partition_probs[TXFM_PARTITION_CONTEXTS] = {

@@ -278,6 +278,7 @@ EXPERIMENT_LIST="
     bidir_pred
     bitstream_debug
     alt_intra
+    palette
 "
 CONFIG_LIST="
     dependency_tracking

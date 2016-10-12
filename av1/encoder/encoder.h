@@ -554,12 +554,14 @@ typedef struct AV1_COMP {
 #else
   int partition_cost[PARTITION_CONTEXTS][PARTITION_TYPES];
 #endif
+#if CONFIG_PALETTE
   int palette_y_size_cost[PALETTE_BLOCK_SIZES][PALETTE_SIZES];
   int palette_uv_size_cost[PALETTE_BLOCK_SIZES][PALETTE_SIZES];
   int palette_y_color_cost[PALETTE_MAX_SIZE - 1][PALETTE_COLOR_CONTEXTS]
                           [PALETTE_COLORS];
   int palette_uv_color_cost[PALETTE_MAX_SIZE - 1][PALETTE_COLOR_CONTEXTS]
                            [PALETTE_COLORS];
+#endif  // CONFIG_PALETTE
   int tx_size_cost[TX_SIZES - 1][TX_SIZE_CONTEXTS][TX_SIZES];
 #if CONFIG_EXT_TX
   int inter_tx_type_costs[EXT_TX_SETS_INTER][EXT_TX_SIZES][TX_TYPES];

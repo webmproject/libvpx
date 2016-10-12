@@ -70,10 +70,11 @@ void av1_tokenize_sb_vartx(struct AV1_COMP *cpi, struct ThreadData *td,
                            TOKENEXTRA **t, RUN_TYPE dry_run, int mi_row,
                            int mi_col, BLOCK_SIZE bsize, int *rate);
 #endif
-
+#if CONFIG_PALETTE
 void av1_tokenize_palette_sb(struct AV1_COMP *cpi, struct ThreadData *const td,
                              int plane, TOKENEXTRA **t, RUN_TYPE dry_run,
                              BLOCK_SIZE bsize, int *rate);
+#endif  // CONFIG_PALETTE
 void av1_tokenize_sb(struct AV1_COMP *cpi, struct ThreadData *td,
                      TOKENEXTRA **t, RUN_TYPE dry_run, BLOCK_SIZE bsize,
                      int *rate);

@@ -48,6 +48,7 @@ static void alloc_mode_context(AV1_COMMON *cm, int num_4x4_blk,
     }
   }
 
+#if CONFIG_PALETTE
   if (cm->allow_screen_content_tools) {
     for (i = 0; i < 2; ++i) {
       CHECK_MEM_ERROR(
@@ -55,6 +56,7 @@ static void alloc_mode_context(AV1_COMMON *cm, int num_4x4_blk,
           aom_memalign(32, num_pix * sizeof(*ctx->color_index_map[i])));
     }
   }
+#endif  // CONFIG_PALETTE
 }
 
 static void free_mode_context(PICK_MODE_CONTEXT *ctx) {
@@ -76,10 +78,12 @@ static void free_mode_context(PICK_MODE_CONTEXT *ctx) {
     }
   }
 
+#if CONFIG_PALETTE
   for (i = 0; i < 2; ++i) {
     aom_free(ctx->color_index_map[i]);
     ctx->color_index_map[i] = 0;
   }
+#endif  // CONFIG_PALETTE
 }
 
 static void alloc_tree_contexts(AV1_COMMON *cm, PC_TREE *tree,

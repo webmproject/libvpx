@@ -1526,6 +1526,7 @@ void av1_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
   const int have_bottom = av1_has_bottom(bsize, mi_row, mi_col, yd > 0, tx_size,
                                          row_off, col_off, pd->subsampling_y);
 
+#if CONFIG_PALETTE
   if (xd->mi[0]->mbmi.palette_mode_info.palette_size[plane != 0] > 0) {
     const int bs = 4 * num_4x4_blocks_wide_txsize_lookup[tx_size];
     const int stride = 4 * (1 << bwl_in);
@@ -1560,6 +1561,7 @@ void av1_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
 #endif  // CONFIG_AOM_HIGHBITDEPTH
     return;
   }
+#endif  // CONFIG_PALETTE
 
 #if CONFIG_AOM_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {

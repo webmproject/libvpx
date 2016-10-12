@@ -218,7 +218,9 @@ typedef struct AV1Common {
 
   int allow_high_precision_mv;
 
+#if CONFIG_PALETTE
   int allow_screen_content_tools;
+#endif  // CONFIG_PALETTE
 
   // Flag signaling which frame contexts should be reset to default values.
   RESET_FRAME_CONTEXT_MODE reset_frame_context;

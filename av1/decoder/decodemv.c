@@ -25,6 +25,7 @@
 
 #include "aom_dsp/aom_dsp_common.h"
 
+#if CONFIG_EXT_INTRA || CONFIG_PALETTE
 static INLINE int read_uniform(aom_reader *r, int n) {
   int l = get_unsigned_bits(n);
   int m = (1 << l) - n;
@@ -37,6 +38,7 @@ static INLINE int read_uniform(aom_reader *r, int n) {
   else
     return (v << 1) - m + aom_read_literal(r, 1);
 }
+#endif  // CONFIG_EXT_INTRA || CONFIG_PALETTE
 
 static PREDICTION_MODE read_intra_mode(aom_reader *r, const aom_prob *p) {
   return (PREDICTION_MODE)aom_read_tree(r, av1_intra_mode_tree, p);
@@ -443,6 +445,7 @@ static int read_skip(AV1_COMMON *cm, const MACROBLOCKD *xd, int segment_id,
   }
 }
 
+#if CONFIG_PALETTE
 static void read_palette_mode_info(AV1_COMMON *const cm, MACROBLOCKD *const xd,
                                    aom_reader *r) {
   MODE_INFO *const mi = xd->mi[0];
@@ -492,6 +495,7 @@ static void read_palette_mode_info(AV1_COMMON *const cm, MACROBLOCKD *const xd,
     }
   }
 }
+#endif  // CONFIG_PALETTE
 
 #if CONFIG_EXT_INTRA
 static void read_ext_intra_mode_info(AV1_COMMON *const cm,
@@ -503,7 +507,11 @@ static void read_ext_intra_mode_info(AV1_COMMON *const cm,
 #if !ALLOW_FILTER_INTRA_MODES
   return;
 #endif
-  if (mbmi->mode == DC_PRED && mbmi->palette_mode_info.palette_size[0] == 0) {
+  if (mbmi->mode == DC_PRED
+#if CONFIG_PALETTE
+      && mbmi->palette_mode_info.palette_size[0] == 0
+#endif  // CONFIG_PALETTE
+      ) {
     mbmi->ext_intra_mode_info.use_ext_intra_mode[0] =
         aom_read(r, cm->fc->ext_intra_probs[0]);
     if (mbmi->ext_intra_mode_info.use_ext_intra_mode[0]) {
@@ -513,8 +521,11 @@ static void read_ext_intra_mode_info(AV1_COMMON *const cm,
     if (counts)
       ++counts->ext_intra[0][mbmi->ext_intra_mode_info.use_ext_intra_mode[0]];
   }
-  if (mbmi->uv_mode == DC_PRED &&
-      mbmi->palette_mode_info.palette_size[1] == 0) {
+  if (mbmi->uv_mode == DC_PRED
+#if CONFIG_PALETTE
+      && mbmi->palette_mode_info.palette_size[1] == 0
+#endif  // CONFIG_PALETTE
+      ) {
     mbmi->ext_intra_mode_info.use_ext_intra_mode[1] =
         aom_read(r, cm->fc->ext_intra_probs[1]);
     if (mbmi->ext_intra_mode_info.use_ext_intra_mode[1]) {
@@ -607,10 +618,12 @@ static void read_intra_frame_mode_info(AV1_COMMON *const cm,
 #if CONFIG_EXT_INTRA
   read_intra_angle_info(cm, xd, r);
 #endif  // CONFIG_EXT_INTRA
+#if CONFIG_PALETTE
   mbmi->palette_mode_info.palette_size[0] = 0;
   mbmi->palette_mode_info.palette_size[1] = 0;
   if (bsize >= BLOCK_8X8 && cm->allow_screen_content_tools)
     read_palette_mode_info(cm, xd, r);
+#endif  // CONFIG_PALETTE
 #if CONFIG_EXT_INTRA
   mbmi->ext_intra_mode_info.use_ext_intra_mode[0] = 0;
   mbmi->ext_intra_mode_info.use_ext_intra_mode[1] = 0;
@@ -895,10 +908,12 @@ static void read_intra_block_mode_info(AV1_COMMON *const cm,
 #if CONFIG_EXT_INTRA
   read_intra_angle_info(cm, xd, r);
 #endif  // CONFIG_EXT_INTRA
+#if CONFIG_PALETTE
   mbmi->palette_mode_info.palette_size[0] = 0;
   mbmi->palette_mode_info.palette_size[1] = 0;
   if (bsize >= BLOCK_8X8 && cm->allow_screen_content_tools)
     read_palette_mode_info(cm, xd, r);
+#endif  // CONFIG_PALETTE
 #if CONFIG_EXT_INTRA
   mbmi->ext_intra_mode_info.use_ext_intra_mode[0] = 0;
   mbmi->ext_intra_mode_info.use_ext_intra_mode[1] = 0;
@@ -1187,8 +1202,10 @@ static void read_inter_block_mode_info(AV1Decoder *const pbi,
   int16_t mode_ctx = 0;
   MV_REFERENCE_FRAME ref_frame;
 
+#if CONFIG_PALETTE
   mbmi->palette_mode_info.palette_size[0] = 0;
   mbmi->palette_mode_info.palette_size[1] = 0;
+#endif  // CONFIG_PALETTE
 
   read_ref_frames(cm, xd, r, mbmi->segment_id, mbmi->ref_frame);
   is_compound = has_second_ref(mbmi);

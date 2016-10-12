@@ -66,8 +66,10 @@ AV1_CX_SRCS-yes += encoder/tokenize.h
 AV1_CX_SRCS-yes += encoder/treewriter.h
 AV1_CX_SRCS-yes += encoder/mcomp.c
 AV1_CX_SRCS-yes += encoder/encoder.c
+ifeq ($(CONFIG_PALETTE),yes)
 AV1_CX_SRCS-yes += encoder/palette.h
 AV1_CX_SRCS-yes += encoder/palette.c
+endif
 AV1_CX_SRCS-yes += encoder/picklpf.c
 AV1_CX_SRCS-yes += encoder/picklpf.h
 AV1_CX_SRCS-$(CONFIG_LOOP_RESTORATION) += encoder/pickrst.c

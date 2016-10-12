@@ -155,6 +155,7 @@ typedef struct {
 
 typedef int8_t MV_REFERENCE_FRAME;
 
+#if CONFIG_PALETTE
 typedef struct {
   // Number of base colors for Y (0) and UV (1)
   uint8_t palette_size[2];
@@ -168,6 +169,7 @@ typedef struct {
   // TODO(huisu): move this to encoder
   uint8_t palette_first_color_idx[2];
 } PALETTE_MODE_INFO;
+#endif  // CONFIG_PALETTE
 
 #if CONFIG_EXT_INTRA
 typedef struct {
@@ -199,7 +201,9 @@ typedef struct {
 
   // Only for INTRA blocks
   PREDICTION_MODE uv_mode;
+#if CONFIG_PALETTE
   PALETTE_MODE_INFO palette_mode_info;
+#endif  // CONFIG_PALETTE
 
 // Only for INTER blocks
 #if CONFIG_DUAL_FILTER
@@ -291,7 +295,9 @@ typedef struct macroblockd_plane {
   dequant_val_type_nuq seg_dequant_nuq[MAX_SEGMENTS][QUANT_PROFILES]
                                       [COEF_BANDS];
 #endif
+#if CONFIG_PALETTE
   uint8_t *color_index_map;
+#endif  // CONFIG_PALETTE
 
   // number of 4x4s in current block
   uint16_t n4_w, n4_h;

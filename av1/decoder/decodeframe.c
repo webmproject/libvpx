@@ -1209,10 +1209,12 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
   }
   if (!is_inter_block(mbmi)) {
     int plane;
+#if CONFIG_PALETTE
     for (plane = 0; plane <= 1; ++plane) {
       if (mbmi->palette_mode_info.palette_size[plane])
         av1_decode_palette_tokens(xd, plane, r);
     }
+#endif  // CONFIG_PALETTE
     for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
       const struct macroblockd_plane *const pd = &xd->plane[plane];
       const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
@@ -2785,8 +2787,10 @@ static const uint8_t *decode_tiles(AV1Decoder *pbi, const uint8_t *data,
                           &td->bit_reader, pbi->decrypt_cb, pbi->decrypt_state);
 #endif
       av1_init_macroblockd(cm, &td->xd, td->dqcoeff);
+#if CONFIG_PALETTE
       td->xd.plane[0].color_index_map = td->color_index_map[0];
       td->xd.plane[1].color_index_map = td->color_index_map[1];
+#endif  // CONFIG_PALETTE
     }
   }
 
@@ -3095,8 +3099,10 @@ static const uint8_t *decode_tiles_mt(AV1Decoder *pbi, const uint8_t *data,
                             pbi->decrypt_state);
 #endif  // CONFIG_ANS
         av1_init_macroblockd(cm, &twd->xd, twd->dqcoeff);
+#if CONFIG_PALETTE
         twd->xd.plane[0].color_index_map = twd->color_index_map[0];
         twd->xd.plane[1].color_index_map = twd->color_index_map[1];
+#endif  // CONFIG_PALETTE
 
         worker->had_error = 0;
         if (i == num_workers - 1 || tile_col == tile_cols_end - 1) {
@@ -3283,10 +3289,14 @@ static size_t read_uncompressed_header(AV1Decoder *pbi,
       memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
       pbi->need_resync = 0;
     }
+#if CONFIG_PALETTE
     cm->allow_screen_content_tools = aom_rb_read_bit(rb);
+#endif  // CONFIG_PALETTE
   } else {
     cm->intra_only = cm->show_frame ? 0 : aom_rb_read_bit(rb);
+#if CONFIG_PALETTE
     if (cm->intra_only) cm->allow_screen_content_tools = aom_rb_read_bit(rb);
+#endif  // CONFIG_PALETTE
     if (cm->error_resilient_mode) {
       cm->reset_frame_context = RESET_FRAME_CONTEXT_ALL;
     } else {

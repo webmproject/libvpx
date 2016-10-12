@@ -408,6 +408,7 @@ static INLINE int get_tx_eob(const struct segmentation *seg, int segment_id,
   return segfeature_active(seg, segment_id, SEG_LVL_SKIP) ? 0 : eob_max;
 }
 
+#if CONFIG_PALETTE
 void av1_tokenize_palette_sb(AV1_COMP *cpi, struct ThreadData *const td,
                              int plane, TOKENEXTRA **t, RUN_TYPE dry_run,
                              BLOCK_SIZE bsize, int *rate) {
@@ -448,6 +449,7 @@ void av1_tokenize_palette_sb(AV1_COMP *cpi, struct ThreadData *const td,
   }
   if (rate) *rate += this_rate;
 }
+#endif  // CONFIG_PALETTE
 
 static void tokenize_b(int plane, int block, int blk_row, int blk_col,
                        BLOCK_SIZE plane_bsize, TX_SIZE tx_size, void *arg) {

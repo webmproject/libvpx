@@ -1100,7 +1100,9 @@ static void update_state(AV1_COMP *cpi, ThreadData *td, PICK_MODE_CONTEXT *ctx,
     p[i].eobs = ctx->eobs[i][2];
   }
 
+#if CONFIG_PALETTE
   for (i = 0; i < 2; ++i) pd[i].color_index_map = ctx->color_index_map[i];
+#endif  // CONFIG_PALETTE
 
   // Restore the coding context of the MB to that that was in place
   // when the mode was picked for it
@@ -1640,7 +1642,9 @@ static void rd_pick_sb_modes(AV1_COMP *cpi, TileDataEnc *tile_data,
     p[i].eobs = ctx->eobs[i][0];
   }
 
+#if CONFIG_PALETTE
   for (i = 0; i < 2; ++i) pd[i].color_index_map = ctx->color_index_map[i];
+#endif  // CONFIG_PALETTE
 
   ctx->is_coded = 0;
   ctx->skippable = 0;
@@ -5031,10 +5035,17 @@ static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
 #if CONFIG_EXT_INTRA
     if (!dry_run && bsize >= BLOCK_8X8) {
       FRAME_COUNTS *counts = td->counts;
-      if (mbmi->mode == DC_PRED && mbmi->palette_mode_info.palette_size[0] == 0)
+      if (mbmi->mode == DC_PRED
+#if CONFIG_PALETTE
+          && mbmi->palette_mode_info.palette_size[0] == 0
+#endif  // CONFIG_PALETTE
+          )
         ++counts->ext_intra[0][mbmi->ext_intra_mode_info.use_ext_intra_mode[0]];
-      if (mbmi->uv_mode == DC_PRED &&
-          mbmi->palette_mode_info.palette_size[1] == 0)
+      if (mbmi->uv_mode == DC_PRED
+#if CONFIG_PALETTE
+          && mbmi->palette_mode_info.palette_size[1] == 0
+#endif  // CONFIG_PALETTE
+          )
         ++counts->ext_intra[1][mbmi->ext_intra_mode_info.use_ext_intra_mode[1]];
       if (mbmi->mode != DC_PRED && mbmi->mode != TM_PRED) {
         int p_angle;
@@ -5047,6 +5058,7 @@ static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
     }
 #endif  // CONFIG_EXT_INTRA
 
+#if CONFIG_PALETTE
     if (bsize >= BLOCK_8X8 && !dry_run) {
       for (plane = 0; plane <= 1; ++plane) {
         if (mbmi->palette_mode_info.palette_size[plane] > 0) {
@@ -5058,6 +5070,7 @@ static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
         }
       }
     }
+#endif  // CONFIG_PALETTE
     av1_tokenize_sb(cpi, td, t, dry_run, AOMMAX(bsize, BLOCK_8X8), rate);
   } else {
     int ref;
