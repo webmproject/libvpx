@@ -34,6 +34,24 @@
       "revId": "0fe8d1723c7e1e5d39b70d4e6189556e92803cd7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c2d76d5_4c3d6fde",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-10-12T17:35:51Z",
+      "side": 1,
+      "message": "How about passing in unsigned int *seed as an argument to this function.\n\nThen in ransac, initialize this variable the way you want.",
+      "parentUuid": "7c2d76d5_6cadd339",
+      "revId": "0fe8d1723c7e1e5d39b70d4e6189556e92803cd7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
