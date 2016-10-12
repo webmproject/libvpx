@@ -232,7 +232,8 @@ static void write_ref_frames(const VP9_COMMON *cm, const MACROBLOCKD *const xd,
 
 static void pack_inter_mode_mvs(VP9_COMP *cpi, const MACROBLOCKD *const xd,
                                 const MB_MODE_INFO_EXT *const mbmi_ext,
-                                vpx_writer *w) {
+                                vpx_writer *w,
+                                unsigned int *const max_mv_magnitude) {
   VP9_COMMON *const cm = &cpi->common;
   const nmv_context *nmvc = &cm->fc->nmvc;
   const struct segmentation *const seg = &cm->seg;
@@ -316,7 +317,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MACROBLOCKD *const xd,
             for (ref = 0; ref < 1 + is_compound; ++ref)
               vp9_encode_mv(cpi, w, &mi->bmi[j].as_mv[ref].as_mv,
                             &mbmi_ext->ref_mvs[mi->ref_frame[ref]][0].as_mv,
-                            nmvc, allow_hp);
+                            nmvc, allow_hp, max_mv_magnitude);
           }
         }
       }
@@ -325,7 +326,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MACROBLOCKD *const xd,
         for (ref = 0; ref < 1 + is_compound; ++ref)
           vp9_encode_mv(cpi, w, &mi->mv[ref].as_mv,
                         &mbmi_ext->ref_mvs[mi->ref_frame[ref]][0].as_mv, nmvc,
-                        allow_hp);
+                        allow_hp, max_mv_magnitude);
       }
     }
   }
@@ -368,7 +369,8 @@ static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
 static void write_modes_b(VP9_COMP *cpi, MACROBLOCKD *const xd,
                           const TileInfo *const tile, vpx_writer *w,
                           TOKENEXTRA **tok, const TOKENEXTRA *const tok_end,
-                          int mi_row, int mi_col) {
+                          int mi_row, int mi_col,
+                          unsigned int *const max_mv_magnitude) {
   const VP9_COMMON *const cm = &cpi->common;
   const MB_MODE_INFO_EXT *const mbmi_ext =
       cpi->td.mb.mbmi_ext_base + (mi_row * cm->mi_cols + mi_col);
@@ -383,7 +385,7 @@ static void write_modes_b(VP9_COMP *cpi, MACROBLOCKD *const xd,
   if (frame_is_intra_only(cm)) {
     write_mb_modes_kf(cm, xd, w);
   } else {
-    pack_inter_mode_mvs(cpi, xd, mbmi_ext, w);
+    pack_inter_mode_mvs(cpi, xd, mbmi_ext, w, max_mv_magnitude);
   }
 
   assert(*tok < tok_end);
@@ -415,7 +417,8 @@ static void write_partition(const VP9_COMMON *const cm,
 static void write_modes_sb(VP9_COMP *cpi, MACROBLOCKD *const xd,
                            const TileInfo *const tile, vpx_writer *w,
                            TOKENEXTRA **tok, const TOKENEXTRA *const tok_end,
-                           int mi_row, int mi_col, BLOCK_SIZE bsize) {
+                           int mi_row, int mi_col, BLOCK_SIZE bsize,
+                           unsigned int *const max_mv_magnitude) {
   const VP9_COMMON *const cm = &cpi->common;
   const int bsl = b_width_log2_lookup[bsize];
   const int bs = (1 << bsl) / 4;
@@ -431,30 +434,37 @@ static void write_modes_sb(VP9_COMP *cpi, MACROBLOCKD *const xd,
   write_partition(cm, xd, bs, mi_row, mi_col, partition, bsize, w);
   subsize = get_subsize(bsize, partition);
   if (subsize < BLOCK_8X8) {
-    write_modes_b(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col);
+    write_modes_b(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col,
+                  max_mv_magnitude);
   } else {
     switch (partition) {
       case PARTITION_NONE:
-        write_modes_b(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col);
+        write_modes_b(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col,
+                      max_mv_magnitude);
         break;
       case PARTITION_HORZ:
-        write_modes_b(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col);
+        write_modes_b(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col,
+                      max_mv_magnitude);
         if (mi_row + bs < cm->mi_rows)
-          write_modes_b(cpi, xd, tile, w, tok, tok_end, mi_row + bs, mi_col);
+          write_modes_b(cpi, xd, tile, w, tok, tok_end, mi_row + bs, mi_col,
+                        max_mv_magnitude);
         break;
       case PARTITION_VERT:
-        write_modes_b(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col);
+        write_modes_b(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col,
+                      max_mv_magnitude);
         if (mi_col + bs < cm->mi_cols)
-          write_modes_b(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col + bs);
+          write_modes_b(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col + bs,
+                        max_mv_magnitude);
         break;
       case PARTITION_SPLIT:
-        write_modes_sb(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col, subsize);
+        write_modes_sb(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col, subsize,
+                       max_mv_magnitude);
         write_modes_sb(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col + bs,
-                       subsize);
+                       subsize, max_mv_magnitude);
         write_modes_sb(cpi, xd, tile, w, tok, tok_end, mi_row + bs, mi_col,
-                       subsize);
+                       subsize, max_mv_magnitude);
         write_modes_sb(cpi, xd, tile, w, tok, tok_end, mi_row + bs, mi_col + bs,
-                       subsize);
+                       subsize, max_mv_magnitude);
         break;
       default: assert(0);
     }
@@ -468,7 +478,8 @@ static void write_modes_sb(VP9_COMP *cpi, MACROBLOCKD *const xd,
 
 static void write_modes(VP9_COMP *cpi, MACROBLOCKD *const xd,
                         const TileInfo *const tile, vpx_writer *w,
-                        TOKENEXTRA **tok, const TOKENEXTRA *const tok_end) {
+                        TOKENEXTRA **tok, const TOKENEXTRA *const tok_end,
+                        unsigned int *const max_mv_magnitude) {
   const VP9_COMMON *const cm = &cpi->common;
   int mi_row, mi_col;
 
@@ -480,7 +491,7 @@ static void write_modes(VP9_COMP *cpi, MACROBLOCKD *const xd,
     for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
          mi_col += MI_BLOCK_SIZE)
       write_modes_sb(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col,
-                     BLOCK_64X64);
+                     BLOCK_64X64, max_mv_magnitude);
   }
 }
 
@@ -922,7 +933,7 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
         vpx_start_encode(&residual_bc, data_ptr + total_size);
 
       write_modes(cpi, xd, &cpi->tile_data[tile_idx].tile_info, &residual_bc,
-                  &tok, tok_end);
+                  &tok, tok_end, &cpi->max_mv_magnitude);
       assert(tok == tok_end);
       vpx_stop_encode(&residual_bc);
       if (tile_col < tile_cols - 1 || tile_row < tile_rows - 1) {
