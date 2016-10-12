@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c2d76d5_4cfbafa3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-12T18:13:51Z",
+      "side": 1,
+      "message": "in general it\u0027s best to keep bug fixes separate from new code changes which might introduce errors on their own. please split this.",
+      "revId": "ef8bd2342df344943be7eda5981d4306ffb90c24",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
