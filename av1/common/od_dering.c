@@ -334,13 +334,6 @@ void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
       in[i * OD_FILT_BSTRIDE + j] = x[i * xstride + j];
     }
   }
-  /* Assume deringing filter is sparsely applied, so do one large copy rather
-     than small copies later if deringing is skipped. */
-  for (i = 0; i < nvb << bsize; i++) {
-    for (j = 0; j < nhb << bsize; j++) {
-      y[i * ystride + j] = in[i * OD_FILT_BSTRIDE + j];
-    }
-  }
   if (pli == 0) {
     for (bi = 0; bi < dering_count; bi++) {
       by = bskip[bi][0];

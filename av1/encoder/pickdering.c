@@ -108,6 +108,13 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
         int threshold;
         level = compute_level_from_index(best_level, gi);
         threshold = level << coeff_shift;
+        for (r = 0; r < bsize[0] * nvb; r++) {
+          for (c = 0; c < bsize[0] * nhb; c++) {
+            dst[r * MAX_MIB_SIZE * bsize[0] + c] =
+                src[(sbr * bsize[0] * MAX_MIB_SIZE + r) * stride +
+                    sbc * bsize[0] * MAX_MIB_SIZE + c];
+          }
+        }
         od_dering(dst, MAX_MIB_SIZE * bsize[0],
                   &src[sbr * stride * bsize[0] * MAX_MIB_SIZE +
                        sbc * bsize[0] * MAX_MIB_SIZE],
