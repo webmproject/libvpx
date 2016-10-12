@@ -605,6 +605,7 @@ process_toolchain() {
         check_add_cflags -Wimplicit-function-declaration
         check_add_cflags -Wuninitialized
         check_add_cflags -Wunused-variable
+        check_add_cflags -Wsign-compare
         case ${CC} in
           *clang*) ;;
           *) check_add_cflags -Wunused-but-set-variable ;;
