@@ -648,7 +648,7 @@ if (aom_config("CONFIG_AOM_HIGHBITDEPTH") eq "yes") {
 #
 # Forward transform
 #
-if ((aom_config("CONFIG_AV1_ENCODER") eq "yes")) {
+if (aom_config("CONFIG_AV1_ENCODER") eq "yes") {
 if (aom_config("CONFIG_AOM_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void aom_fdct4x4/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/aom_fdct4x4 sse2/;
