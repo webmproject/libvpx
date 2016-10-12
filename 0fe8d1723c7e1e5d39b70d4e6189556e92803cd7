@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c2d76d5_0ce6d7a8",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-10-12T17:25:07Z",
+      "side": 1,
+      "message": "Wonder why we have the seed used here. Could we not just use rand() here? And use srand() in the ransac call as before. For the srand call however, it may be worth seeding based on something derived from \u0027matched_points\u0027 rather than npoints.",
+      "revId": "0fe8d1723c7e1e5d39b70d4e6189556e92803cd7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
