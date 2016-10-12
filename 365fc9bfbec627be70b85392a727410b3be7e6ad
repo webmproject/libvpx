@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bc9b6e32_bec955a6",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2016-10-12T19:55:27Z",
+      "side": 1,
+      "message": "clang-format seems to think this is the right format:\n\nstatic void pack_inter_mode_mvs(VP9_COMP *cpi, const MACROBLOCKD *const xd,\n                                const MB_MODE_INFO_EXT *const mbmi_ext,\n                                vpx_writer *w,\n                                unsigned int *const max_mv_magnitude,\n                                int interp_filter_selected[MAX_REF_FRAMES]\n                                                          [SWITCHABLE]) {\n\nNo idea why or what setting to change in .clang-format. If not, i\u0027ll just go with this.",
+      "range": {
+        "startLine": 233,
+        "startChar": 0,
+        "endLine": 237,
+        "endChar": 61
+      },
+      "revId": "365fc9bfbec627be70b85392a727410b3be7e6ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
