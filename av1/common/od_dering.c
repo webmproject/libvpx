@@ -277,7 +277,7 @@ static INLINE void copy_4x4_16bit(int16_t *dst, int dstride, int16_t *src, int s
 }
 
 /* TODO: Optimize this function for SSE. */
-void copy_blocks_16bit(int16_t *dst, int dstride, int16_t *src, int sstride,
+void copy_blocks_16bit(int16_t *dst, int dstride, int16_t *src,
     unsigned char (*bskip)[2], int dering_count, int bsize)
 {
   int bi, bx, by;
@@ -287,7 +287,7 @@ void copy_blocks_16bit(int16_t *dst, int dstride, int16_t *src, int sstride,
       bx = bskip[bi][1];
       copy_8x8_16bit(&dst[(by << 3) * dstride + (bx << 3)],
                      dstride,
-                     &src[(by << 3) * sstride + (bx << 3)], sstride);
+                     &src[bi << 2*bsize], 1 << bsize);
     }
   } else {
     for (bi = 0; bi < dering_count; bi++) {
@@ -295,12 +295,12 @@ void copy_blocks_16bit(int16_t *dst, int dstride, int16_t *src, int sstride,
       bx = bskip[bi][1];
       copy_4x4_16bit(&dst[(by << 2) * dstride + (bx << 2)],
                      dstride,
-                     &src[(by << 2) * sstride + (bx << 2)], sstride);
+                     &src[bi << 2*bsize], 1 << bsize);
     }
   }
 }
 
-void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
+void od_dering(int16_t *y, const od_dering_in *x, int xstride,
                int nhb, int nvb, int sbx, int sby, int nhsb, int nvsb, int xdec,
                int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS], int pli,
                unsigned char (*bskip)[2], int dering_count, int threshold,
@@ -349,7 +349,7 @@ void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
          since the ringing there tends to be directional, so it doesn't
          get removed by the directional filtering. */
       filter2_thresh[by][bx] = (filter_dering_direction[bsize - OD_LOG_BSIZE0])(
-          &y[(by * ystride << bsize) + (bx << bsize)], ystride,
+          &y[bi << 2*bsize], 1 << bsize,
           &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)],
           od_adjust_thresh(threshold, var), dir[by][bx]);
     }
@@ -358,19 +358,19 @@ void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
       by = bskip[bi][0];
       bx = bskip[bi][1];
       filter2_thresh[by][bx] = (filter_dering_direction[bsize - OD_LOG_BSIZE0])(
-          &y[(by * ystride << bsize) + (bx << bsize)], ystride,
+          &y[bi << 2*bsize], 1 << bsize,
           &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)], threshold,
           dir[by][bx]);
     }
   }
-  copy_blocks_16bit(in, OD_FILT_BSTRIDE, y, ystride, bskip, dering_count,
+  copy_blocks_16bit(in, OD_FILT_BSTRIDE, y, bskip, dering_count,
       bsize);
   for (bi = 0; bi < dering_count; bi++) {
     by = bskip[bi][0];
     bx = bskip[bi][1];
     if (filter2_thresh[by][bx] == 0) continue;
     (filter_dering_orthogonal[bsize - OD_LOG_BSIZE0])(
-        &y[(by * ystride << bsize) + (bx << bsize)], ystride,
+        &y[bi << 2*bsize], 1 << bsize,
         &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)], filter2_thresh[by][bx],
         dir[by][bx]);
   }

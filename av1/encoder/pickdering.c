@@ -98,6 +98,7 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
       int best_gi;
       int32_t best_mse = INT32_MAX;
       int16_t dst[MAX_MIB_SIZE * MAX_MIB_SIZE * 8 * 8];
+      int16_t tmp_dst[MAX_MIB_SIZE * MAX_MIB_SIZE * 8 * 8];
       nhb = AOMMIN(MAX_MIB_SIZE, cm->mi_cols - MAX_MIB_SIZE * sbc);
       nvb = AOMMIN(MAX_MIB_SIZE, cm->mi_rows - MAX_MIB_SIZE * sbr);
       if (sb_all_skip_out(cm, sbr * MAX_MIB_SIZE, sbc * MAX_MIB_SIZE, bskip, &dering_count))
@@ -115,13 +116,15 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
                     sbc * bsize[0] * MAX_MIB_SIZE + c];
           }
         }
-        od_dering(dst, MAX_MIB_SIZE * bsize[0],
+        od_dering(tmp_dst,
                   &src[sbr * stride * bsize[0] * MAX_MIB_SIZE +
                        sbc * bsize[0] * MAX_MIB_SIZE],
                   cm->mi_cols * bsize[0], nhb, nvb, sbc, sbr, nhsb, nvsb, 0,
                   dir, 0,
                   bskip,
                   dering_count, threshold, coeff_shift);
+        copy_blocks_16bit(dst, MAX_MIB_SIZE * bsize[0], tmp_dst, bskip,
+            dering_count, 3);
         cur_mse = (int)compute_dist(
             dst, MAX_MIB_SIZE * bsize[0],
             &ref_coeff[sbr * stride * bsize[0] * MAX_MIB_SIZE +

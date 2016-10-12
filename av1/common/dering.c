@@ -90,7 +90,7 @@ static INLINE void copy_4x4_16_8bit(uint8_t *dst, int dstride, int16_t *src, int
 }
 
 /* TODO: Optimize this function for SSE. */
-void copy_blocks_16_8bit(uint8_t *dst, int dstride, int16_t *src, int sstride,
+void copy_blocks_16_8bit(uint8_t *dst, int dstride, int16_t *src,
     unsigned char (*bskip)[2], int dering_count, int bsize)
 {
   int bi, bx, by;
@@ -100,7 +100,7 @@ void copy_blocks_16_8bit(uint8_t *dst, int dstride, int16_t *src, int sstride,
       bx = bskip[bi][1];
       copy_8x8_16_8bit(&dst[(by << 3) * dstride + (bx << 3)],
                      dstride,
-                     &src[(by << 3) * sstride + (bx << 3)], sstride);
+                     &src[bi << 2*bsize], 1 << bsize);
     }
   } else {
     for (bi = 0; bi < dering_count; bi++) {
@@ -108,7 +108,7 @@ void copy_blocks_16_8bit(uint8_t *dst, int dstride, int16_t *src, int sstride,
       bx = bskip[bi][1];
       copy_4x4_16_8bit(&dst[(by << 2) * dstride + (bx << 2)],
                      dstride,
-                     &src[(by << 2) * sstride + (bx << 2)], sstride);
+                     &src[bi << 2*bsize], 1 << bsize);
     }
   }
 }
@@ -182,7 +182,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
         else
           threshold = level << coeff_shift;
         if (threshold == 0) continue;
-        od_dering(dst, MAX_MIB_SIZE * bsize[pli],
+        od_dering(dst,
                   &src[pli][sbr * stride * bsize[pli] * MAX_MIB_SIZE +
                             sbc * bsize[pli] * MAX_MIB_SIZE],
                   stride, nhb, nvb, sbc, sbr, nhsb, nvsb, dec[pli], dir, pli,
@@ -194,7 +194,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
                   xd->plane[pli].dst.buf)[xd->plane[pli].dst.stride *
                   (bsize[pli] * MAX_MIB_SIZE * sbr) +
                   sbc * bsize[pli] * MAX_MIB_SIZE],
-              xd->plane[pli].dst.stride, dst, MAX_MIB_SIZE * bsize[pli], bskip,
+              xd->plane[pli].dst.stride, dst, bskip,
               dering_count, 3 - dec[pli]);
         } else {
 #endif
@@ -202,7 +202,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
               &xd->plane[pli].dst.buf[xd->plane[pli].dst.stride *
                                     (bsize[pli] * MAX_MIB_SIZE * sbr) +
                                     sbc * bsize[pli] * MAX_MIB_SIZE],
-              xd->plane[pli].dst.stride, dst, MAX_MIB_SIZE * bsize[pli], bskip,
+              xd->plane[pli].dst.stride, dst, bskip,
               dering_count, 3 - dec[pli]);
 #if CONFIG_AOM_HIGHBITDEPTH
         }
