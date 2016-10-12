@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ff76b882_3243796b",
+        "filename": "vp8/decoder/threading.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 615,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-12T06:09:32Z",
+      "side": 1,
+      "message": "this will longjmp so you\u0027ll miss setting allocated_decoding_thread_count",
+      "revId": "30bed35157e39d053ce042fa558df706534e22bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
