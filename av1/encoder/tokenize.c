@@ -23,6 +23,7 @@
 
 #include "av1/encoder/cost.h"
 #include "av1/encoder/encoder.h"
+#include "av1/encoder/rdopt.h"
 #include "av1/encoder/tokenize.h"
 
 static const TOKENVALUE dct_cat_lt_10_value_tokens[] = {
@@ -346,7 +347,30 @@ struct tokenize_b_args {
   AV1_COMP *cpi;
   ThreadData *td;
   TOKENEXTRA **tp;
+  int this_rate;
 };
+
+static void cost_coeffs_b(int plane, int block, int blk_row, int blk_col,
+                          BLOCK_SIZE plane_bsize, TX_SIZE tx_size, void *arg) {
+  struct tokenize_b_args *const args = arg;
+  ThreadData *const td = args->td;
+  MACROBLOCK *const x = &td->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
+  struct macroblock_plane *p = &x->plane[plane];
+  struct macroblockd_plane *pd = &xd->plane[plane];
+  const PLANE_TYPE type = pd->plane_type;
+  const int ref = is_inter_block(mbmi);
+  const TX_TYPE tx_type = get_tx_type(type, xd, block, tx_size);
+  const scan_order *const so = get_scan(tx_size, tx_type, ref);
+  int pt = get_entropy_context(tx_size, pd->above_context + blk_col,
+                               pd->left_context + blk_row);
+  int rate =
+      av1_cost_coeffs(x, plane, block, pt, tx_size, so->scan, so->neighbors, 0);
+  args->this_rate += rate;
+  av1_set_contexts(xd, pd, plane_bsize, tx_size, p->eobs[block] > 0, blk_col,
+                   blk_row);
+}
 
 static void set_entropy_context_b(int plane, int block, int blk_row,
                                   int blk_col, BLOCK_SIZE plane_bsize,
@@ -395,8 +419,9 @@ static INLINE int get_tx_eob(const struct segmentation *seg, int segment_id,
   return segfeature_active(seg, segment_id, SEG_LVL_SKIP) ? 0 : eob_max;
 }
 
-void av1_tokenize_palette_sb(struct ThreadData *const td, BLOCK_SIZE bsize,
-                             int plane, TOKENEXTRA **t) {
+void av1_tokenize_palette_sb(AV1_COMP *cpi, struct ThreadData *const td,
+                             int plane, TOKENEXTRA **t, RUN_TYPE dry_run,
+                             BLOCK_SIZE bsize, int *rate) {
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
@@ -404,7 +429,8 @@ void av1_tokenize_palette_sb(struct ThreadData *const td, BLOCK_SIZE bsize,
   PALETTE_MODE_INFO *pmi = &mbmi->palette_mode_info;
   int n = pmi->palette_size[plane != 0];
   int i, j, k;
-  int color_new_idx = -1, color_ctx, color_order[PALETTE_MAX_SIZE];
+  int this_rate = 0;
+  int color_idx = -1, color_ctx, color_order[PALETTE_MAX_SIZE];
   const int rows = (4 * num_4x4_blocks_high_lookup[bsize]) >>
                    (xd->plane[plane != 0].subsampling_y);
   const int cols = (4 * num_4x4_blocks_wide_lookup[bsize]) >>
@@ -419,16 +445,19 @@ void av1_tokenize_palette_sb(struct ThreadData *const td, BLOCK_SIZE bsize,
           av1_get_palette_color_context(color_map, cols, i, j, n, color_order);
       for (k = 0; k < n; ++k)
         if (color_map[i * cols + j] == color_order[k]) {
-          color_new_idx = k;
+          color_idx = k;
           break;
         }
-      assert(color_new_idx >= 0 && color_new_idx < n);
-      (*t)->token = color_new_idx;
+      assert(color_idx >= 0 && color_idx < n);
+      if (dry_run == DRY_RUN_COSTCOEFFS)
+        this_rate += cpi->palette_y_color_cost[n - 2][color_ctx][color_idx];
+      (*t)->token = color_idx;
       (*t)->context_tree = probs[n - 2][color_ctx];
       (*t)->skip_eob_node = 0;
       ++(*t);
     }
   }
+  if (rate) *rate += this_rate;
 }
 
 static void tokenize_b(int plane, int block, int blk_row, int blk_col,
@@ -560,7 +589,7 @@ int av1_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
 }
 
 #if CONFIG_VAR_TX
-void tokenize_vartx(ThreadData *td, TOKENEXTRA **t, int dry_run,
+void tokenize_vartx(ThreadData *td, TOKENEXTRA **t, RUN_TYPE dry_run,
                     TX_SIZE tx_size, BLOCK_SIZE plane_bsize, int blk_row,
                     int blk_col, int block, int plane, void *arg) {
   MACROBLOCK *const x = &td->mb;
@@ -593,9 +622,11 @@ void tokenize_vartx(ThreadData *td, TOKENEXTRA **t, int dry_run,
     BLOCK_SIZE plane_bsize = get_plane_block_size(mbmi->sb_type, pd);
     if (!dry_run)
       tokenize_b(plane, block, blk_row, blk_col, plane_bsize, tx_size, arg);
-    else
+    else if (dry_run == DRY_RUN_NORMAL)
       set_entropy_context_b(plane, block, blk_row, blk_col, plane_bsize,
                             tx_size, arg);
+    else if (dry_run == DRY_RUN_COSTCOEFFS)
+      cost_coeffs_b(plane, block, blk_row, blk_col, plane_bsize, tx_size, arg);
   } else {
     int bsl = b_width_log2_lookup[bsize];
     int i;
@@ -617,8 +648,8 @@ void tokenize_vartx(ThreadData *td, TOKENEXTRA **t, int dry_run,
 }
 
 void av1_tokenize_sb_vartx(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
-                           int dry_run, int mi_row, int mi_col,
-                           BLOCK_SIZE bsize) {
+                           RUN_TYPE dry_run, int mi_row, int mi_col,
+                           BLOCK_SIZE bsize, int *rate) {
   AV1_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -627,7 +658,7 @@ void av1_tokenize_sb_vartx(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
   const int ctx = av1_get_skip_context(xd);
   const int skip_inc =
       !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP);
-  struct tokenize_b_args arg = { cpi, td, t };
+  struct tokenize_b_args arg = { cpi, td, t, 0 };
   int plane;
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols) return;
 
@@ -667,11 +698,12 @@ void av1_tokenize_sb_vartx(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
       (*t)++;
     }
   }
+  if (rate) *rate += arg.this_rate;
 }
 #endif  // CONFIG_VAR_TX
 
-void av1_tokenize_sb(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t, int dry_run,
-                     BLOCK_SIZE bsize) {
+void av1_tokenize_sb(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
+                     RUN_TYPE dry_run, BLOCK_SIZE bsize, int *rate) {
   AV1_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -679,7 +711,7 @@ void av1_tokenize_sb(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t, int dry_run,
   const int ctx = av1_get_skip_context(xd);
   const int skip_inc =
       !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP);
-  struct tokenize_b_args arg = { cpi, td, t };
+  struct tokenize_b_args arg = { cpi, td, t, 0 };
   if (mbmi->skip) {
     if (!dry_run) td->counts->skip[ctx][1] += skip_inc;
     reset_skip_context(xd, bsize);
@@ -697,14 +729,17 @@ void av1_tokenize_sb(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t, int dry_run,
       (*t)->token = EOSB_TOKEN;
       (*t)++;
     }
-  } else {
+  } else if (dry_run == DRY_RUN_NORMAL) {
     av1_foreach_transformed_block(xd, bsize, set_entropy_context_b, &arg);
+  } else if (dry_run == DRY_RUN_COSTCOEFFS) {
+    av1_foreach_transformed_block(xd, bsize, cost_coeffs_b, &arg);
   }
+  if (rate) *rate += arg.this_rate;
 }
 
 #if CONFIG_SUPERTX
 void av1_tokenize_sb_supertx(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
-                             int dry_run, BLOCK_SIZE bsize) {
+                             RUN_TYPE dry_run, BLOCK_SIZE bsize, int *rate) {
   AV1_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &td->mb.e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
@@ -712,7 +747,7 @@ void av1_tokenize_sb_supertx(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
   const int ctx = av1_get_skip_context(xd);
   const int skip_inc =
       !segfeature_active(&cm->seg, mbmi->segment_id_supertx, SEG_LVL_SKIP);
-  struct tokenize_b_args arg = { cpi, td, t };
+  struct tokenize_b_args arg = { cpi, td, t, 0 };
   if (mbmi->skip) {
     if (!dry_run) td->counts->skip[ctx][1] += skip_inc;
     reset_skip_context(xd, bsize);
@@ -730,9 +765,12 @@ void av1_tokenize_sb_supertx(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
       (*t)->token = EOSB_TOKEN;
       (*t)++;
     }
-  } else {
+  } else if (dry_run == DRY_RUN_NORMAL) {
     av1_foreach_transformed_block(xd, bsize, set_entropy_context_b, &arg);
     *t = t_backup;
+  } else if (dry_run == DRY_RUN_COSTCOEFFS) {
+    av1_foreach_transformed_block(xd, bsize, cost_coeffs_b, &arg);
   }
+  if (rate) *rate += arg.this_rate;
 }
 #endif  // CONFIG_SUPERTX

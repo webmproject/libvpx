@@ -61,8 +61,9 @@
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 
 static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
-                              int output_enabled, int mi_row, int mi_col,
-                              BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx);
+                              RUN_TYPE dry_run, int mi_row, int mi_col,
+                              BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx,
+                              int *rate);
 
 #if CONFIG_SUPERTX
 static int check_intra_b(PICK_MODE_CONTEXT *ctx);
@@ -80,13 +81,13 @@ static int check_supertx_sb(BLOCK_SIZE bsize, TX_SIZE supertx_size,
 static void predict_sb_complex(AV1_COMP *cpi, ThreadData *td,
                                const TileInfo *const tile, int mi_row,
                                int mi_col, int mi_row_ori, int mi_col_ori,
-                               int output_enabled, BLOCK_SIZE bsize,
+                               RUN_TYPE dry_run, BLOCK_SIZE bsize,
                                BLOCK_SIZE top_bsize, uint8_t *dst_buf[3],
                                int dst_stride[3], PC_TREE *pc_tree);
 static void update_state_sb_supertx(AV1_COMP *cpi, ThreadData *td,
                                     const TileInfo *const tile, int mi_row,
                                     int mi_col, BLOCK_SIZE bsize,
-                                    int output_enabled, PC_TREE *pc_tree);
+                                    RUN_TYPE dry_run, PC_TREE *pc_tree);
 static void rd_supertx_sb(AV1_COMP *cpi, ThreadData *td,
                           const TileInfo *const tile, int mi_row, int mi_col,
                           BLOCK_SIZE bsize, int *tmp_rate, int64_t *tmp_dist,
@@ -1012,7 +1013,7 @@ static void update_global_motion_used(PREDICTION_MODE mode,
 
 static void update_state(AV1_COMP *cpi, ThreadData *td, PICK_MODE_CONTEXT *ctx,
                          int mi_row, int mi_col, BLOCK_SIZE bsize,
-                         int output_enabled) {
+                         RUN_TYPE dry_run) {
   int i, x_idx, y;
   AV1_COMMON *const cm = &cpi->common;
   RD_COUNTS *const rdc = &td->rd_counts;
@@ -1126,7 +1127,7 @@ static void update_state(AV1_COMP *cpi, ThreadData *td, PICK_MODE_CONTEXT *ctx,
            sizeof(uint8_t) * ctx->num_4x4_blk);
 #endif
 
-  if (!output_enabled) return;
+  if (dry_run) return;
 
 #if CONFIG_INTERNAL_STATS
   if (frame_is_intra_only(cm)) {
@@ -1195,7 +1196,7 @@ static void update_state(AV1_COMP *cpi, ThreadData *td, PICK_MODE_CONTEXT *ctx,
 #if CONFIG_SUPERTX
 static void update_state_supertx(AV1_COMP *cpi, ThreadData *td,
                                  PICK_MODE_CONTEXT *ctx, int mi_row, int mi_col,
-                                 BLOCK_SIZE bsize, int output_enabled) {
+                                 BLOCK_SIZE bsize, RUN_TYPE dry_run) {
   int y, x_idx;
 #if CONFIG_VAR_TX || CONFIG_REF_MV
   int i;
@@ -1303,7 +1304,7 @@ static void update_state_supertx(AV1_COMP *cpi, ThreadData *td,
   // Turn motion variation off for supertx
   mbmi->motion_variation = SIMPLE_TRANSLATION;
 
-  if (!output_enabled) return;
+  if (dry_run) return;
 
   if (!frame_is_intra_only(cm)) {
     av1_update_mv_count(td);
@@ -1341,7 +1342,7 @@ static void update_state_supertx(AV1_COMP *cpi, ThreadData *td,
 static void update_state_sb_supertx(AV1_COMP *cpi, ThreadData *td,
                                     const TileInfo *const tile, int mi_row,
                                     int mi_col, BLOCK_SIZE bsize,
-                                    int output_enabled, PC_TREE *pc_tree) {
+                                    RUN_TYPE dry_run, PC_TREE *pc_tree) {
   AV1_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -1365,27 +1366,27 @@ static void update_state_sb_supertx(AV1_COMP *cpi, ThreadData *td,
     case PARTITION_NONE:
       set_offsets_supertx(cpi, td, tile, mi_row, mi_col, subsize);
       update_state_supertx(cpi, td, &pc_tree->none, mi_row, mi_col, subsize,
-                           output_enabled);
+                           dry_run);
       break;
     case PARTITION_VERT:
       set_offsets_supertx(cpi, td, tile, mi_row, mi_col, subsize);
       update_state_supertx(cpi, td, &pc_tree->vertical[0], mi_row, mi_col,
-                           subsize, output_enabled);
+                           subsize, dry_run);
       if (mi_col + hbs < cm->mi_cols && bsize > BLOCK_8X8) {
         set_offsets_supertx(cpi, td, tile, mi_row, mi_col + hbs, subsize);
         update_state_supertx(cpi, td, &pc_tree->vertical[1], mi_row,
-                             mi_col + hbs, subsize, output_enabled);
+                             mi_col + hbs, subsize, dry_run);
       }
       pmc = &pc_tree->vertical_supertx;
       break;
     case PARTITION_HORZ:
       set_offsets_supertx(cpi, td, tile, mi_row, mi_col, subsize);
       update_state_supertx(cpi, td, &pc_tree->horizontal[0], mi_row, mi_col,
-                           subsize, output_enabled);
+                           subsize, dry_run);
       if (mi_row + hbs < cm->mi_rows && bsize > BLOCK_8X8) {
         set_offsets_supertx(cpi, td, tile, mi_row + hbs, mi_col, subsize);
         update_state_supertx(cpi, td, &pc_tree->horizontal[1], mi_row + hbs,
-                             mi_col, subsize, output_enabled);
+                             mi_col, subsize, dry_run);
       }
       pmc = &pc_tree->horizontal_supertx;
       break;
@@ -1393,20 +1394,20 @@ static void update_state_sb_supertx(AV1_COMP *cpi, ThreadData *td,
       if (bsize == BLOCK_8X8) {
         set_offsets_supertx(cpi, td, tile, mi_row, mi_col, subsize);
         update_state_supertx(cpi, td, pc_tree->leaf_split[0], mi_row, mi_col,
-                             subsize, output_enabled);
+                             subsize, dry_run);
       } else {
         set_offsets_supertx(cpi, td, tile, mi_row, mi_col, subsize);
-        update_state_sb_supertx(cpi, td, tile, mi_row, mi_col, subsize,
-                                output_enabled, pc_tree->split[0]);
+        update_state_sb_supertx(cpi, td, tile, mi_row, mi_col, subsize, dry_run,
+                                pc_tree->split[0]);
         set_offsets_supertx(cpi, td, tile, mi_row, mi_col + hbs, subsize);
         update_state_sb_supertx(cpi, td, tile, mi_row, mi_col + hbs, subsize,
-                                output_enabled, pc_tree->split[1]);
+                                dry_run, pc_tree->split[1]);
         set_offsets_supertx(cpi, td, tile, mi_row + hbs, mi_col, subsize);
         update_state_sb_supertx(cpi, td, tile, mi_row + hbs, mi_col, subsize,
-                                output_enabled, pc_tree->split[2]);
+                                dry_run, pc_tree->split[2]);
         set_offsets_supertx(cpi, td, tile, mi_row + hbs, mi_col + hbs, subsize);
         update_state_sb_supertx(cpi, td, tile, mi_row + hbs, mi_col + hbs,
-                                subsize, output_enabled, pc_tree->split[3]);
+                                subsize, dry_run, pc_tree->split[3]);
       }
       pmc = &pc_tree->split_supertx;
       break;
@@ -1414,49 +1415,49 @@ static void update_state_sb_supertx(AV1_COMP *cpi, ThreadData *td,
     case PARTITION_HORZ_A:
       set_offsets_supertx(cpi, td, tile, mi_row, mi_col, bsize2);
       update_state_supertx(cpi, td, &pc_tree->horizontala[0], mi_row, mi_col,
-                           bsize2, output_enabled);
+                           bsize2, dry_run);
       set_offsets_supertx(cpi, td, tile, mi_row, mi_col + hbs, bsize2);
       update_state_supertx(cpi, td, &pc_tree->horizontala[1], mi_row,
-                           mi_col + hbs, bsize2, output_enabled);
+                           mi_col + hbs, bsize2, dry_run);
       set_offsets_supertx(cpi, td, tile, mi_row + hbs, mi_col, subsize);
       update_state_supertx(cpi, td, &pc_tree->horizontala[2], mi_row + hbs,
-                           mi_col, subsize, output_enabled);
+                           mi_col, subsize, dry_run);
       pmc = &pc_tree->horizontala_supertx;
       break;
     case PARTITION_HORZ_B:
       set_offsets_supertx(cpi, td, tile, mi_row, mi_col, subsize);
       update_state_supertx(cpi, td, &pc_tree->horizontalb[0], mi_row, mi_col,
-                           subsize, output_enabled);
+                           subsize, dry_run);
       set_offsets_supertx(cpi, td, tile, mi_row + hbs, mi_col, bsize2);
       update_state_supertx(cpi, td, &pc_tree->horizontalb[1], mi_row + hbs,
-                           mi_col, bsize2, output_enabled);
+                           mi_col, bsize2, dry_run);
       set_offsets_supertx(cpi, td, tile, mi_row + hbs, mi_col + hbs, bsize2);
       update_state_supertx(cpi, td, &pc_tree->horizontalb[2], mi_row + hbs,
-                           mi_col + hbs, bsize2, output_enabled);
+                           mi_col + hbs, bsize2, dry_run);
       pmc = &pc_tree->horizontalb_supertx;
       break;
     case PARTITION_VERT_A:
       set_offsets_supertx(cpi, td, tile, mi_row, mi_col, bsize2);
       update_state_supertx(cpi, td, &pc_tree->verticala[0], mi_row, mi_col,
-                           bsize2, output_enabled);
+                           bsize2, dry_run);
       set_offsets_supertx(cpi, td, tile, mi_row + hbs, mi_col, bsize2);
       update_state_supertx(cpi, td, &pc_tree->verticala[1], mi_row + hbs,
-                           mi_col, bsize2, output_enabled);
+                           mi_col, bsize2, dry_run);
       set_offsets_supertx(cpi, td, tile, mi_row, mi_col + hbs, subsize);
       update_state_supertx(cpi, td, &pc_tree->verticala[2], mi_row,
-                           mi_col + hbs, subsize, output_enabled);
+                           mi_col + hbs, subsize, dry_run);
       pmc = &pc_tree->verticala_supertx;
       break;
     case PARTITION_VERT_B:
       set_offsets_supertx(cpi, td, tile, mi_row, mi_col, subsize);
       update_state_supertx(cpi, td, &pc_tree->verticalb[0], mi_row, mi_col,
-                           subsize, output_enabled);
+                           subsize, dry_run);
       set_offsets_supertx(cpi, td, tile, mi_row, mi_col + hbs, bsize2);
       update_state_supertx(cpi, td, &pc_tree->verticalb[1], mi_row,
-                           mi_col + hbs, bsize2, output_enabled);
+                           mi_col + hbs, bsize2, dry_run);
       set_offsets_supertx(cpi, td, tile, mi_row + hbs, mi_col + hbs, bsize2);
       update_state_supertx(cpi, td, &pc_tree->verticalb[2], mi_row + hbs,
-                           mi_col + hbs, bsize2, output_enabled);
+                           mi_col + hbs, bsize2, dry_run);
       pmc = &pc_tree->verticalb_supertx;
       break;
 #endif  // CONFIG_EXT_PARTITION_TYPES
@@ -2096,21 +2097,21 @@ static void save_context(const MACROBLOCK *x, RD_SEARCH_MACROBLOCK_CONTEXT *ctx,
 }
 
 static void encode_b(AV1_COMP *cpi, const TileInfo *const tile, ThreadData *td,
-                     TOKENEXTRA **tp, int mi_row, int mi_col,
-                     int output_enabled, BLOCK_SIZE bsize,
+                     TOKENEXTRA **tp, int mi_row, int mi_col, RUN_TYPE dry_run,
+                     BLOCK_SIZE bsize,
 #if CONFIG_EXT_PARTITION_TYPES
                      PARTITION_TYPE partition,
 #endif
-                     PICK_MODE_CONTEXT *ctx) {
+                     PICK_MODE_CONTEXT *ctx, int *rate) {
   MACROBLOCK *const x = &td->mb;
   set_offsets(cpi, tile, x, mi_row, mi_col, bsize);
 #if CONFIG_EXT_PARTITION_TYPES
   x->e_mbd.mi[0]->mbmi.partition = partition;
 #endif
-  update_state(cpi, td, ctx, mi_row, mi_col, bsize, output_enabled);
-  encode_superblock(cpi, td, tp, output_enabled, mi_row, mi_col, bsize, ctx);
+  update_state(cpi, td, ctx, mi_row, mi_col, bsize, dry_run);
+  encode_superblock(cpi, td, tp, dry_run, mi_row, mi_col, bsize, ctx, rate);
 
-  if (output_enabled) {
+  if (!dry_run) {
 #if CONFIG_SUPERTX
     update_stats(&cpi->common, td, 0);
 #else
@@ -2120,8 +2121,8 @@ static void encode_b(AV1_COMP *cpi, const TileInfo *const tile, ThreadData *td,
 }
 
 static void encode_sb(AV1_COMP *cpi, ThreadData *td, const TileInfo *const tile,
-                      TOKENEXTRA **tp, int mi_row, int mi_col,
-                      int output_enabled, BLOCK_SIZE bsize, PC_TREE *pc_tree) {
+                      TOKENEXTRA **tp, int mi_row, int mi_col, RUN_TYPE dry_run,
+                      BLOCK_SIZE bsize, PC_TREE *pc_tree, int *rate) {
   const AV1_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -2138,7 +2139,7 @@ static void encode_sb(AV1_COMP *cpi, ThreadData *td, const TileInfo *const tile,
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols) return;
 
-  if (output_enabled) td->counts->partition[ctx][partition]++;
+  if (!dry_run) td->counts->partition[ctx][partition]++;
 
 #if CONFIG_SUPERTX
   if (!frame_is_intra_only(cm) && bsize <= MAX_SUPERTX_BLOCK_SIZE &&
@@ -2154,33 +2155,34 @@ static void encode_sb(AV1_COMP *cpi, ThreadData *td, const TileInfo *const tile,
       int dst_stride[3];
       set_skip_context(xd, mi_row, mi_col);
       set_mode_info_offsets(cpi, x, xd, mi_row, mi_col);
-      update_state_sb_supertx(cpi, td, tile, mi_row, mi_col, bsize,
-                              output_enabled, pc_tree);
+      update_state_sb_supertx(cpi, td, tile, mi_row, mi_col, bsize, dry_run,
+                              pc_tree);
 
       av1_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
       for (i = 0; i < MAX_MB_PLANE; i++) {
         dst_buf[i] = xd->plane[i].dst.buf;
         dst_stride[i] = xd->plane[i].dst.stride;
       }
-      predict_sb_complex(cpi, td, tile, mi_row, mi_col, mi_row, mi_col,
-                         output_enabled, bsize, bsize, dst_buf, dst_stride,
-                         pc_tree);
+      predict_sb_complex(cpi, td, tile, mi_row, mi_col, mi_row, mi_col, dry_run,
+                         bsize, bsize, dst_buf, dst_stride, pc_tree);
 
       set_offsets_without_segment_id(cpi, tile, x, mi_row, mi_col, bsize);
       set_segment_id_supertx(cpi, x, mi_row, mi_col, bsize);
 
       if (!x->skip) {
+        int this_rate = 0;
         x->skip_optimize = 0;
         x->use_lp32x32fdct = cpi->sf.use_lp32x32fdct;
 
         av1_encode_sb_supertx(x, bsize);
-        av1_tokenize_sb_supertx(cpi, td, tp, !output_enabled, bsize);
+        av1_tokenize_sb_supertx(cpi, td, tp, dry_run, bsize, rate);
+        if (rate) *rate += this_rate;
       } else {
         xd->mi[0]->mbmi.skip = 1;
-        if (output_enabled) td->counts->skip[av1_get_skip_context(xd)][1]++;
+        if (!dry_run) td->counts->skip[av1_get_skip_context(xd)][1]++;
         reset_skip_context(xd, bsize);
       }
-      if (output_enabled) {
+      if (!dry_run) {
         for (y_idx = 0; y_idx < mi_height; y_idx++)
           for (x_idx = 0; x_idx < mi_width; x_idx++) {
             if ((xd->mb_to_right_edge >> (3 + MI_SIZE_LOG2)) + mi_width >
@@ -2221,7 +2223,7 @@ static void encode_sb(AV1_COMP *cpi, ThreadData *td, const TileInfo *const tile,
 #endif  // CONFIG_VAR_TX
       return;
     } else {
-      if (output_enabled) {
+      if (!dry_run) {
         td->counts->supertx[partition_supertx_context_lookup[partition]]
                            [supertx_size][0]++;
       }
@@ -2231,93 +2233,91 @@ static void encode_sb(AV1_COMP *cpi, ThreadData *td, const TileInfo *const tile,
 
   switch (partition) {
     case PARTITION_NONE:
-      encode_b(cpi, tile, td, tp, mi_row, mi_col, output_enabled, subsize,
+      encode_b(cpi, tile, td, tp, mi_row, mi_col, dry_run, subsize,
 #if CONFIG_EXT_PARTITION_TYPES
                partition,
 #endif
-               &pc_tree->none);
+               &pc_tree->none, rate);
       break;
     case PARTITION_VERT:
-      encode_b(cpi, tile, td, tp, mi_row, mi_col, output_enabled, subsize,
+      encode_b(cpi, tile, td, tp, mi_row, mi_col, dry_run, subsize,
 #if CONFIG_EXT_PARTITION_TYPES
                partition,
 #endif
-               &pc_tree->vertical[0]);
+               &pc_tree->vertical[0], rate);
       if (mi_col + hbs < cm->mi_cols && bsize > BLOCK_8X8) {
-        encode_b(cpi, tile, td, tp, mi_row, mi_col + hbs, output_enabled,
-                 subsize,
+        encode_b(cpi, tile, td, tp, mi_row, mi_col + hbs, dry_run, subsize,
 #if CONFIG_EXT_PARTITION_TYPES
                  partition,
 #endif
-                 &pc_tree->vertical[1]);
+                 &pc_tree->vertical[1], rate);
       }
       break;
     case PARTITION_HORZ:
-      encode_b(cpi, tile, td, tp, mi_row, mi_col, output_enabled, subsize,
+      encode_b(cpi, tile, td, tp, mi_row, mi_col, dry_run, subsize,
 #if CONFIG_EXT_PARTITION_TYPES
                partition,
 #endif
-               &pc_tree->horizontal[0]);
+               &pc_tree->horizontal[0], rate);
       if (mi_row + hbs < cm->mi_rows && bsize > BLOCK_8X8) {
-        encode_b(cpi, tile, td, tp, mi_row + hbs, mi_col, output_enabled,
-                 subsize,
+        encode_b(cpi, tile, td, tp, mi_row + hbs, mi_col, dry_run, subsize,
 #if CONFIG_EXT_PARTITION_TYPES
                  partition,
 #endif
-                 &pc_tree->horizontal[1]);
+                 &pc_tree->horizontal[1], rate);
       }
       break;
     case PARTITION_SPLIT:
       if (bsize == BLOCK_8X8) {
-        encode_b(cpi, tile, td, tp, mi_row, mi_col, output_enabled, subsize,
+        encode_b(cpi, tile, td, tp, mi_row, mi_col, dry_run, subsize,
 #if CONFIG_EXT_PARTITION_TYPES
                  partition,
 #endif
-                 pc_tree->leaf_split[0]);
+                 pc_tree->leaf_split[0], rate);
       } else {
-        encode_sb(cpi, td, tile, tp, mi_row, mi_col, output_enabled, subsize,
-                  pc_tree->split[0]);
-        encode_sb(cpi, td, tile, tp, mi_row, mi_col + hbs, output_enabled,
-                  subsize, pc_tree->split[1]);
-        encode_sb(cpi, td, tile, tp, mi_row + hbs, mi_col, output_enabled,
-                  subsize, pc_tree->split[2]);
-        encode_sb(cpi, td, tile, tp, mi_row + hbs, mi_col + hbs, output_enabled,
-                  subsize, pc_tree->split[3]);
+        encode_sb(cpi, td, tile, tp, mi_row, mi_col, dry_run, subsize,
+                  pc_tree->split[0], rate);
+        encode_sb(cpi, td, tile, tp, mi_row, mi_col + hbs, dry_run, subsize,
+                  pc_tree->split[1], rate);
+        encode_sb(cpi, td, tile, tp, mi_row + hbs, mi_col, dry_run, subsize,
+                  pc_tree->split[2], rate);
+        encode_sb(cpi, td, tile, tp, mi_row + hbs, mi_col + hbs, dry_run,
+                  subsize, pc_tree->split[3], rate);
       }
       break;
 #if CONFIG_EXT_PARTITION_TYPES
     case PARTITION_HORZ_A:
-      encode_b(cpi, tile, td, tp, mi_row, mi_col, output_enabled, bsize2,
-               partition, &pc_tree->horizontala[0]);
-      encode_b(cpi, tile, td, tp, mi_row, mi_col + hbs, output_enabled, bsize2,
-               partition, &pc_tree->horizontala[1]);
-      encode_b(cpi, tile, td, tp, mi_row + hbs, mi_col, output_enabled, subsize,
-               partition, &pc_tree->horizontala[2]);
+      encode_b(cpi, tile, td, tp, mi_row, mi_col, dry_run, bsize2, partition,
+               &pc_tree->horizontala[0], rate);
+      encode_b(cpi, tile, td, tp, mi_row, mi_col + hbs, dry_run, bsize2,
+               partition, &pc_tree->horizontala[1], rate);
+      encode_b(cpi, tile, td, tp, mi_row + hbs, mi_col, dry_run, subsize,
+               partition, &pc_tree->horizontala[2], rate);
       break;
     case PARTITION_HORZ_B:
-      encode_b(cpi, tile, td, tp, mi_row, mi_col, output_enabled, subsize,
-               partition, &pc_tree->horizontalb[0]);
-      encode_b(cpi, tile, td, tp, mi_row + hbs, mi_col, output_enabled, bsize2,
-               partition, &pc_tree->horizontalb[1]);
-      encode_b(cpi, tile, td, tp, mi_row + hbs, mi_col + hbs, output_enabled,
-               bsize2, partition, &pc_tree->horizontalb[2]);
+      encode_b(cpi, tile, td, tp, mi_row, mi_col, dry_run, subsize, partition,
+               &pc_tree->horizontalb[0], rate);
+      encode_b(cpi, tile, td, tp, mi_row + hbs, mi_col, dry_run, bsize2,
+               partition, &pc_tree->horizontalb[1], rate);
+      encode_b(cpi, tile, td, tp, mi_row + hbs, mi_col + hbs, dry_run, bsize2,
+               partition, &pc_tree->horizontalb[2], rate);
       break;
     case PARTITION_VERT_A:
-      encode_b(cpi, tile, td, tp, mi_row, mi_col, output_enabled, bsize2,
-               partition, &pc_tree->verticala[0]);
-      encode_b(cpi, tile, td, tp, mi_row + hbs, mi_col, output_enabled, bsize2,
-               partition, &pc_tree->verticala[1]);
-      encode_b(cpi, tile, td, tp, mi_row, mi_col + hbs, output_enabled, subsize,
-               partition, &pc_tree->verticala[2]);
+      encode_b(cpi, tile, td, tp, mi_row, mi_col, dry_run, bsize2, partition,
+               &pc_tree->verticala[0], rate);
+      encode_b(cpi, tile, td, tp, mi_row + hbs, mi_col, dry_run, bsize2,
+               partition, &pc_tree->verticala[1], rate);
+      encode_b(cpi, tile, td, tp, mi_row, mi_col + hbs, dry_run, subsize,
+               partition, &pc_tree->verticala[2], rate);
 
       break;
     case PARTITION_VERT_B:
-      encode_b(cpi, tile, td, tp, mi_row, mi_col, output_enabled, subsize,
-               partition, &pc_tree->verticalb[0]);
-      encode_b(cpi, tile, td, tp, mi_row, mi_col + hbs, output_enabled, bsize2,
-               partition, &pc_tree->verticalb[1]);
-      encode_b(cpi, tile, td, tp, mi_row + hbs, mi_col + hbs, output_enabled,
-               bsize2, partition, &pc_tree->verticalb[2]);
+      encode_b(cpi, tile, td, tp, mi_row, mi_col, dry_run, subsize, partition,
+               &pc_tree->verticalb[0], rate);
+      encode_b(cpi, tile, td, tp, mi_row, mi_col + hbs, dry_run, bsize2,
+               partition, &pc_tree->verticalb[1], rate);
+      encode_b(cpi, tile, td, tp, mi_row + hbs, mi_col + hbs, dry_run, bsize2,
+               partition, &pc_tree->verticalb[2], rate);
       break;
 #endif  // CONFIG_EXT_PARTITION_TYPES
     default: assert(0 && "Invalid partition type."); break;
@@ -2532,8 +2532,9 @@ static void rd_use_partition(AV1_COMP *cpi, ThreadData *td,
 #endif
         PICK_MODE_CONTEXT *ctx = &pc_tree->horizontal[0];
         av1_rd_cost_init(&tmp_rdc);
-        update_state(cpi, td, ctx, mi_row, mi_col, subsize, 0);
-        encode_superblock(cpi, td, tp, 0, mi_row, mi_col, subsize, ctx);
+        update_state(cpi, td, ctx, mi_row, mi_col, subsize, 1);
+        encode_superblock(cpi, td, tp, DRY_RUN_NORMAL, mi_row, mi_col, subsize,
+                          ctx, NULL);
         rd_pick_sb_modes(cpi, tile_data, x, mi_row + hbs, mi_col, &tmp_rdc,
 #if CONFIG_SUPERTX
                          &rt_nocoef,
@@ -2574,8 +2575,9 @@ static void rd_use_partition(AV1_COMP *cpi, ThreadData *td,
 #endif
         PICK_MODE_CONTEXT *ctx = &pc_tree->vertical[0];
         av1_rd_cost_init(&tmp_rdc);
-        update_state(cpi, td, ctx, mi_row, mi_col, subsize, 0);
-        encode_superblock(cpi, td, tp, 0, mi_row, mi_col, subsize, ctx);
+        update_state(cpi, td, ctx, mi_row, mi_col, subsize, 1);
+        encode_superblock(cpi, td, tp, DRY_RUN_NORMAL, mi_row, mi_col, subsize,
+                          ctx, NULL);
         rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col + hbs, &tmp_rdc,
 #if CONFIG_SUPERTX
                          &rt_nocoef,
@@ -2728,8 +2730,8 @@ static void rd_use_partition(AV1_COMP *cpi, ThreadData *td,
 #endif
 
       if (i != 3)
-        encode_sb(cpi, td, tile_info, tp, mi_row + y_idx, mi_col + x_idx, 0,
-                  split_subsize, pc_tree->split[i]);
+        encode_sb(cpi, td, tile_info, tp, mi_row + y_idx, mi_col + x_idx,
+                  OUTPUT_ENABLED, split_subsize, pc_tree->split[i], NULL);
 
       chosen_rdc.rate += cpi->partition_cost[pl][PARTITION_NONE];
 #if CONFIG_SUPERTX
@@ -2772,9 +2774,17 @@ static void rd_use_partition(AV1_COMP *cpi, ThreadData *td,
     assert(chosen_rdc.rate < INT_MAX && chosen_rdc.dist < INT64_MAX);
 
   if (do_recon) {
-    int output_enabled = (bsize == cm->sb_size);
-    encode_sb(cpi, td, tile_info, tp, mi_row, mi_col, output_enabled, bsize,
-              pc_tree);
+    if (bsize == cm->sb_size) {
+      // NOTE: To get estimate for rate due to the tokens, use:
+      // int rate_coeffs = 0;
+      // encode_sb(cpi, td, tile_info, tp, mi_row, mi_col, DRY_RUN_COSTCOEFFS,
+      //           bsize, pc_tree, &rate_coeffs);
+      encode_sb(cpi, td, tile_info, tp, mi_row, mi_col, OUTPUT_ENABLED, bsize,
+                pc_tree, NULL);
+    } else {
+      encode_sb(cpi, td, tile_info, tp, mi_row, mi_col, DRY_RUN_NORMAL, bsize,
+                pc_tree, NULL);
+    }
   }
 
   *rate = chosen_rdc.rate;
@@ -3123,8 +3133,9 @@ static void rd_test_partition3(
   if (sum_rdc.rdcost < best_rdc->rdcost) {
 #endif
     PICK_MODE_CONTEXT *ctx = &ctxs[0];
-    update_state(cpi, td, ctx, mi_row0, mi_col0, subsize0, 0);
-    encode_superblock(cpi, td, tp, 0, mi_row0, mi_col0, subsize0, ctx);
+    update_state(cpi, td, ctx, mi_row0, mi_col0, subsize0, 1);
+    encode_superblock(cpi, td, tp, DRY_RUN_NORMAL, mi_row0, mi_col0, subsize0,
+                      ctx, NULL);
 
     if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
 
@@ -3163,8 +3174,9 @@ static void rd_test_partition3(
     if (sum_rdc.rdcost < best_rdc->rdcost) {
 #endif
       PICK_MODE_CONTEXT *ctx = &ctxs[1];
-      update_state(cpi, td, ctx, mi_row1, mi_col1, subsize1, 0);
-      encode_superblock(cpi, td, tp, 0, mi_row1, mi_col1, subsize1, ctx);
+      update_state(cpi, td, ctx, mi_row1, mi_col1, subsize1, 1);
+      encode_superblock(cpi, td, tp, DRY_RUN_NORMAL, mi_row1, mi_col1, subsize1,
+                        ctx, NULL);
 
       if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
 
@@ -3775,8 +3787,9 @@ static void rd_pick_partition(AV1_COMP *cpi, ThreadData *td,
 #endif  // CONFIG_SUPERTX
         mi_row + mi_step < cm->mi_rows && bsize > BLOCK_8X8) {
       PICK_MODE_CONTEXT *ctx = &pc_tree->horizontal[0];
-      update_state(cpi, td, ctx, mi_row, mi_col, subsize, 0);
-      encode_superblock(cpi, td, tp, 0, mi_row, mi_col, subsize, ctx);
+      update_state(cpi, td, ctx, mi_row, mi_col, subsize, 1);
+      encode_superblock(cpi, td, tp, DRY_RUN_NORMAL, mi_row, mi_col, subsize,
+                        ctx, NULL);
 
       if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
 
@@ -3911,9 +3924,9 @@ static void rd_pick_partition(AV1_COMP *cpi, ThreadData *td,
     if (sum_rdc.rdcost < best_rdc.rdcost &&
 #endif  // CONFIG_SUPERTX
         mi_col + mi_step < cm->mi_cols && bsize > BLOCK_8X8) {
-      update_state(cpi, td, &pc_tree->vertical[0], mi_row, mi_col, subsize, 0);
-      encode_superblock(cpi, td, tp, 0, mi_row, mi_col, subsize,
-                        &pc_tree->vertical[0]);
+      update_state(cpi, td, &pc_tree->vertical[0], mi_row, mi_col, subsize, 1);
+      encode_superblock(cpi, td, tp, DRY_RUN_NORMAL, mi_row, mi_col, subsize,
+                        &pc_tree->vertical[0], NULL);
 
       if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
 
@@ -4086,9 +4099,13 @@ static void rd_pick_partition(AV1_COMP *cpi, ThreadData *td,
 
   if (best_rdc.rate < INT_MAX && best_rdc.dist < INT64_MAX &&
       pc_tree->index != 3) {
-    int output_enabled = (bsize == cm->sb_size);
-    encode_sb(cpi, td, tile_info, tp, mi_row, mi_col, output_enabled, bsize,
-              pc_tree);
+    if (bsize == cm->sb_size) {
+      encode_sb(cpi, td, tile_info, tp, mi_row, mi_col, OUTPUT_ENABLED, bsize,
+                pc_tree, NULL);
+    } else {
+      encode_sb(cpi, td, tile_info, tp, mi_row, mi_col, DRY_RUN_NORMAL, bsize,
+                pc_tree, NULL);
+    }
   }
 
   if (bsize == cm->sb_size) {
@@ -4987,8 +5004,9 @@ static void tx_partition_set_contexts(AV1_COMMON *cm, MACROBLOCKD *xd,
 #endif
 
 static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
-                              int output_enabled, int mi_row, int mi_col,
-                              BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx) {
+                              RUN_TYPE dry_run, int mi_row, int mi_col,
+                              BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx,
+                              int *rate) {
   AV1_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -5010,12 +5028,12 @@ static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
     mbmi->skip = 1;
     for (plane = 0; plane < MAX_MB_PLANE; ++plane)
       av1_encode_intra_block_plane(x, AOMMAX(bsize, BLOCK_8X8), plane, 1);
-    if (output_enabled)
+    if (!dry_run)
       sum_intra_stats(td->counts, mi, xd->above_mi, xd->left_mi,
                       frame_is_intra_only(cm));
 
 #if CONFIG_EXT_INTRA
-    if (output_enabled && bsize >= BLOCK_8X8) {
+    if (!dry_run && bsize >= BLOCK_8X8) {
       FRAME_COUNTS *counts = td->counts;
       if (mbmi->mode == DC_PRED && mbmi->palette_mode_info.palette_size[0] == 0)
         ++counts->ext_intra[0][mbmi->ext_intra_mode_info.use_ext_intra_mode[0]];
@@ -5033,18 +5051,18 @@ static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
     }
 #endif  // CONFIG_EXT_INTRA
 
-    if (bsize >= BLOCK_8X8 && output_enabled) {
+    if (bsize >= BLOCK_8X8 && !dry_run) {
       for (plane = 0; plane <= 1; ++plane) {
         if (mbmi->palette_mode_info.palette_size[plane] > 0) {
           mbmi->palette_mode_info.palette_first_color_idx[plane] =
               xd->plane[plane].color_index_map[0];
           // TODO(huisu): this increases the use of token buffer. Needs stretch
           // test to verify.
-          av1_tokenize_palette_sb(td, bsize, plane, t);
+          av1_tokenize_palette_sb(cpi, td, plane, t, dry_run, bsize, rate);
         }
       }
     }
-    av1_tokenize_sb(cpi, td, t, !output_enabled, AOMMAX(bsize, BLOCK_8X8));
+    av1_tokenize_sb(cpi, td, t, dry_run, AOMMAX(bsize, BLOCK_8X8), rate);
   } else {
     int ref;
     const int is_compound = has_second_ref(mbmi);
@@ -5116,17 +5134,17 @@ static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
 #if CONFIG_VAR_TX
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
     if (is_rect_tx(mbmi->tx_size))
-      av1_tokenize_sb(cpi, td, t, !output_enabled, AOMMAX(bsize, BLOCK_8X8));
+      av1_tokenize_sb(cpi, td, t, dry_run, AOMMAX(bsize, BLOCK_8X8), rate);
     else
 #endif
-      av1_tokenize_sb_vartx(cpi, td, t, !output_enabled, mi_row, mi_col,
-                            AOMMAX(bsize, BLOCK_8X8));
+      av1_tokenize_sb_vartx(cpi, td, t, dry_run, mi_row, mi_col,
+                            AOMMAX(bsize, BLOCK_8X8), rate);
 #else
-    av1_tokenize_sb(cpi, td, t, !output_enabled, AOMMAX(bsize, BLOCK_8X8));
+    av1_tokenize_sb(cpi, td, t, dry_run, AOMMAX(bsize, BLOCK_8X8), rate);
 #endif
   }
 
-  if (output_enabled) {
+  if (!dry_run) {
     if (cm->tx_mode == TX_MODE_SELECT && mbmi->sb_type >= BLOCK_8X8 &&
         !(is_inter_block(mbmi) && (mbmi->skip || seg_skip))) {
       const int is_inter = is_inter_block(mbmi);
@@ -5209,8 +5227,7 @@ static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
 #if CONFIG_VAR_TX
   if (cm->tx_mode == TX_MODE_SELECT && mbmi->sb_type >= BLOCK_8X8 &&
       is_inter_block(mbmi) && !(mbmi->skip || seg_skip)) {
-    if (!output_enabled)
-      tx_partition_set_contexts(cm, xd, bsize, mi_row, mi_col);
+    if (dry_run) tx_partition_set_contexts(cm, xd, bsize, mi_row, mi_col);
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
     if (is_rect_tx(mbmi->tx_size)) {
       set_txfm_ctxs(mbmi->tx_size, xd->n8_w, xd->n8_h, xd);
@@ -5406,7 +5423,7 @@ static void predict_b_extend(AV1_COMP *cpi, ThreadData *td,
                              int mi_col_pred, int mi_row_top, int mi_col_top,
                              uint8_t *dst_buf[3], int dst_stride[3],
                              BLOCK_SIZE bsize_top, BLOCK_SIZE bsize_pred,
-                             int output_enabled, int b_sub8x8, int bextend) {
+                             RUN_TYPE dry_run, int b_sub8x8, int bextend) {
   // Used in supertx
   // (mi_row_ori, mi_col_ori): location for mv
   // (mi_row_pred, mi_col_pred, bsize_pred): region to predict
@@ -5450,13 +5467,13 @@ static void predict_b_extend(AV1_COMP *cpi, ThreadData *td,
 #endif  // CONFIG_EXT_INTER
                      mi_row_pred, mi_col_pred, bsize_pred, b_sub8x8, block);
 
-  if (output_enabled && !bextend) update_stats(&cpi->common, td, 1);
+  if (!dry_run && !bextend) update_stats(&cpi->common, td, 1);
 }
 
 static void extend_dir(AV1_COMP *cpi, ThreadData *td,
                        const TileInfo *const tile, int block, BLOCK_SIZE bsize,
                        BLOCK_SIZE top_bsize, int mi_row, int mi_col,
-                       int mi_row_top, int mi_col_top, int output_enabled,
+                       int mi_row_top, int mi_col_top, RUN_TYPE dry_run,
                        uint8_t *dst_buf[3], int dst_stride[3], int dir) {
   // dir: 0-lower, 1-upper, 2-left, 3-right
   //      4-lowerleft, 5-upperleft, 6-lowerright, 7-upperright
@@ -5480,7 +5497,7 @@ static void extend_dir(AV1_COMP *cpi, ThreadData *td,
 
     predict_b_extend(cpi, td, tile, block, mi_row, mi_col, mi_row_pred,
                      mi_col_pred, mi_row_top, mi_col_top, dst_buf, dst_stride,
-                     top_bsize, extend_bsize, output_enabled, b_sub8x8, 1);
+                     top_bsize, extend_bsize, dry_run, b_sub8x8, 1);
 
     if (mi_width > unit) {
       int i;
@@ -5488,8 +5505,8 @@ static void extend_dir(AV1_COMP *cpi, ThreadData *td,
         mi_col_pred += unit;
         predict_b_extend(cpi, td, tile, block, mi_row, mi_col, mi_row_pred,
                          mi_col_pred, mi_row_top, mi_col_top, dst_buf,
-                         dst_stride, top_bsize, extend_bsize, output_enabled,
-                         b_sub8x8, 1);
+                         dst_stride, top_bsize, extend_bsize, dry_run, b_sub8x8,
+                         1);
       }
     }
   } else if (dir == 2 || dir == 3) {  // left and right
@@ -5502,7 +5519,7 @@ static void extend_dir(AV1_COMP *cpi, ThreadData *td,
 
     predict_b_extend(cpi, td, tile, block, mi_row, mi_col, mi_row_pred,
                      mi_col_pred, mi_row_top, mi_col_top, dst_buf, dst_stride,
-                     top_bsize, extend_bsize, output_enabled, b_sub8x8, 1);
+                     top_bsize, extend_bsize, dry_run, b_sub8x8, 1);
 
     if (mi_height > unit) {
       int i;
@@ -5510,8 +5527,8 @@ static void extend_dir(AV1_COMP *cpi, ThreadData *td,
         mi_row_pred += unit;
         predict_b_extend(cpi, td, tile, block, mi_row, mi_col, mi_row_pred,
                          mi_col_pred, mi_row_top, mi_col_top, dst_buf,
-                         dst_stride, top_bsize, extend_bsize, output_enabled,
-                         b_sub8x8, 1);
+                         dst_stride, top_bsize, extend_bsize, dry_run, b_sub8x8,
+                         1);
       }
     }
   } else {
@@ -5521,32 +5538,32 @@ static void extend_dir(AV1_COMP *cpi, ThreadData *td,
 
     predict_b_extend(cpi, td, tile, block, mi_row, mi_col, mi_row_pred,
                      mi_col_pred, mi_row_top, mi_col_top, dst_buf, dst_stride,
-                     top_bsize, extend_bsize, output_enabled, b_sub8x8, 1);
+                     top_bsize, extend_bsize, dry_run, b_sub8x8, 1);
   }
 }
 
 static void extend_all(AV1_COMP *cpi, ThreadData *td,
                        const TileInfo *const tile, int block, BLOCK_SIZE bsize,
                        BLOCK_SIZE top_bsize, int mi_row, int mi_col,
-                       int mi_row_top, int mi_col_top, int output_enabled,
+                       int mi_row_top, int mi_col_top, RUN_TYPE dry_run,
                        uint8_t *dst_buf[3], int dst_stride[3]) {
   assert(block >= 0 && block < 4);
   extend_dir(cpi, td, tile, block, bsize, top_bsize, mi_row, mi_col, mi_row_top,
-             mi_col_top, output_enabled, dst_buf, dst_stride, 0);
+             mi_col_top, dry_run, dst_buf, dst_stride, 0);
   extend_dir(cpi, td, tile, block, bsize, top_bsize, mi_row, mi_col, mi_row_top,
-             mi_col_top, output_enabled, dst_buf, dst_stride, 1);
+             mi_col_top, dry_run, dst_buf, dst_stride, 1);
   extend_dir(cpi, td, tile, block, bsize, top_bsize, mi_row, mi_col, mi_row_top,
-             mi_col_top, output_enabled, dst_buf, dst_stride, 2);
+             mi_col_top, dry_run, dst_buf, dst_stride, 2);
   extend_dir(cpi, td, tile, block, bsize, top_bsize, mi_row, mi_col, mi_row_top,
-             mi_col_top, output_enabled, dst_buf, dst_stride, 3);
+             mi_col_top, dry_run, dst_buf, dst_stride, 3);
   extend_dir(cpi, td, tile, block, bsize, top_bsize, mi_row, mi_col, mi_row_top,
-             mi_col_top, output_enabled, dst_buf, dst_stride, 4);
+             mi_col_top, dry_run, dst_buf, dst_stride, 4);
   extend_dir(cpi, td, tile, block, bsize, top_bsize, mi_row, mi_col, mi_row_top,
-             mi_col_top, output_enabled, dst_buf, dst_stride, 5);
+             mi_col_top, dry_run, dst_buf, dst_stride, 5);
   extend_dir(cpi, td, tile, block, bsize, top_bsize, mi_row, mi_col, mi_row_top,
-             mi_col_top, output_enabled, dst_buf, dst_stride, 6);
+             mi_col_top, dry_run, dst_buf, dst_stride, 6);
   extend_dir(cpi, td, tile, block, bsize, top_bsize, mi_row, mi_col, mi_row_top,
-             mi_col_top, output_enabled, dst_buf, dst_stride, 7);
+             mi_col_top, dry_run, dst_buf, dst_stride, 7);
 }
 
 // This function generates prediction for multiple blocks, between which
@@ -5560,7 +5577,7 @@ static void extend_all(AV1_COMP *cpi, ThreadData *td,
 static void predict_sb_complex(AV1_COMP *cpi, ThreadData *td,
                                const TileInfo *const tile, int mi_row,
                                int mi_col, int mi_row_top, int mi_col_top,
-                               int output_enabled, BLOCK_SIZE bsize,
+                               RUN_TYPE dry_run, BLOCK_SIZE bsize,
                                BLOCK_SIZE top_bsize, uint8_t *dst_buf[3],
                                int dst_stride[3], PC_TREE *pc_tree) {
   AV1_COMMON *const cm = &cpi->common;
@@ -5615,8 +5632,7 @@ static void predict_sb_complex(AV1_COMP *cpi, ThreadData *td,
   }
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 
-  if (output_enabled && bsize < top_bsize)
-    cm->counts.partition[ctx][partition]++;
+  if (!dry_run && bsize < top_bsize) cm->counts.partition[ctx][partition]++;
 
   for (i = 0; i < MAX_MB_PLANE; i++) {
     xd->plane[i].dst.buf = dst_buf[i];
@@ -5628,29 +5644,27 @@ static void predict_sb_complex(AV1_COMP *cpi, ThreadData *td,
       assert(bsize < top_bsize);
       predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                        mi_row_top, mi_col_top, dst_buf, dst_stride, top_bsize,
-                       bsize, output_enabled, 0, 0);
+                       bsize, dry_run, 0, 0);
       extend_all(cpi, td, tile, 0, bsize, top_bsize, mi_row, mi_col, mi_row_top,
-                 mi_col_top, output_enabled, dst_buf, dst_stride);
+                 mi_col_top, dry_run, dst_buf, dst_stride);
       break;
     case PARTITION_HORZ:
       if (bsize == BLOCK_8X8) {
         // Fisrt half
         predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf, dst_stride, top_bsize,
-                         BLOCK_8X8, output_enabled, 1, 0);
+                         BLOCK_8X8, dry_run, 1, 0);
         if (bsize < top_bsize)
           extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
-                     mi_row_top, mi_col_top, output_enabled, dst_buf,
-                     dst_stride);
+                     mi_row_top, mi_col_top, dry_run, dst_buf, dst_stride);
 
         // Second half
         predict_b_extend(cpi, td, tile, 2, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf1, dst_stride1,
-                         top_bsize, BLOCK_8X8, output_enabled, 1, 1);
+                         top_bsize, BLOCK_8X8, dry_run, 1, 1);
         if (bsize < top_bsize)
           extend_all(cpi, td, tile, 2, subsize, top_bsize, mi_row, mi_col,
-                     mi_row_top, mi_col_top, output_enabled, dst_buf1,
-                     dst_stride1);
+                     mi_row_top, mi_col_top, dry_run, dst_buf1, dst_stride1);
 
         // Smooth
         xd->plane[0].dst.buf = dst_buf[0];
@@ -5663,29 +5677,26 @@ static void predict_sb_complex(AV1_COMP *cpi, ThreadData *td,
         // First half
         predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf, dst_stride, top_bsize,
-                         subsize, output_enabled, 0, 0);
+                         subsize, dry_run, 0, 0);
         if (bsize < top_bsize)
           extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
-                     mi_row_top, mi_col_top, output_enabled, dst_buf,
-                     dst_stride);
+                     mi_row_top, mi_col_top, dry_run, dst_buf, dst_stride);
         else
           extend_dir(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
-                     mi_row_top, mi_col_top, output_enabled, dst_buf,
-                     dst_stride, 0);
+                     mi_row_top, mi_col_top, dry_run, dst_buf, dst_stride, 0);
 
         if (mi_row + hbs < cm->mi_rows) {
           // Second half
           predict_b_extend(cpi, td, tile, 0, mi_row + hbs, mi_col, mi_row + hbs,
                            mi_col, mi_row_top, mi_col_top, dst_buf1,
-                           dst_stride1, top_bsize, subsize, output_enabled, 0,
-                           0);
+                           dst_stride1, top_bsize, subsize, dry_run, 0, 0);
           if (bsize < top_bsize)
             extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row + hbs,
-                       mi_col, mi_row_top, mi_col_top, output_enabled, dst_buf1,
+                       mi_col, mi_row_top, mi_col_top, dry_run, dst_buf1,
                        dst_stride1);
           else
             extend_dir(cpi, td, tile, 0, subsize, top_bsize, mi_row + hbs,
-                       mi_col, mi_row_top, mi_col_top, output_enabled, dst_buf1,
+                       mi_col, mi_row_top, mi_col_top, dry_run, dst_buf1,
                        dst_stride1, 1);
 
           // Smooth
@@ -5705,20 +5716,18 @@ static void predict_sb_complex(AV1_COMP *cpi, ThreadData *td,
         // First half
         predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf, dst_stride, top_bsize,
-                         BLOCK_8X8, output_enabled, 1, 0);
+                         BLOCK_8X8, dry_run, 1, 0);
         if (bsize < top_bsize)
           extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
-                     mi_row_top, mi_col_top, output_enabled, dst_buf,
-                     dst_stride);
+                     mi_row_top, mi_col_top, dry_run, dst_buf, dst_stride);
 
         // Second half
         predict_b_extend(cpi, td, tile, 1, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf1, dst_stride1,
-                         top_bsize, BLOCK_8X8, output_enabled, 1, 1);
+                         top_bsize, BLOCK_8X8, dry_run, 1, 1);
         if (bsize < top_bsize)
           extend_all(cpi, td, tile, 1, subsize, top_bsize, mi_row, mi_col,
-                     mi_row_top, mi_col_top, output_enabled, dst_buf1,
-                     dst_stride1);
+                     mi_row_top, mi_col_top, dry_run, dst_buf1, dst_stride1);
 
         // Smooth
         xd->plane[0].dst.buf = dst_buf[0];
@@ -5731,29 +5740,26 @@ static void predict_sb_complex(AV1_COMP *cpi, ThreadData *td,
         // bsize: not important, not useful
         predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf, dst_stride, top_bsize,
-                         subsize, output_enabled, 0, 0);
+                         subsize, dry_run, 0, 0);
         if (bsize < top_bsize)
           extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
-                     mi_row_top, mi_col_top, output_enabled, dst_buf,
-                     dst_stride);
+                     mi_row_top, mi_col_top, dry_run, dst_buf, dst_stride);
         else
           extend_dir(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
-                     mi_row_top, mi_col_top, output_enabled, dst_buf,
-                     dst_stride, 3);
+                     mi_row_top, mi_col_top, dry_run, dst_buf, dst_stride, 3);
 
         if (mi_col + hbs < cm->mi_cols) {
           predict_b_extend(cpi, td, tile, 0, mi_row, mi_col + hbs, mi_row,
                            mi_col + hbs, mi_row_top, mi_col_top, dst_buf1,
-                           dst_stride1, top_bsize, subsize, output_enabled, 0,
-                           0);
+                           dst_stride1, top_bsize, subsize, dry_run, 0, 0);
           if (bsize < top_bsize)
             extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row,
-                       mi_col + hbs, mi_row_top, mi_col_top, output_enabled,
-                       dst_buf1, dst_stride1);
+                       mi_col + hbs, mi_row_top, mi_col_top, dry_run, dst_buf1,
+                       dst_stride1);
           else
             extend_dir(cpi, td, tile, 0, subsize, top_bsize, mi_row,
-                       mi_col + hbs, mi_row_top, mi_col_top, output_enabled,
-                       dst_buf1, dst_stride1, 2);
+                       mi_col + hbs, mi_row_top, mi_col_top, dry_run, dst_buf1,
+                       dst_stride1, 2);
 
           for (i = 0; i < MAX_MB_PLANE; i++) {
             xd->plane[i].dst.buf = dst_buf[i];
@@ -5770,46 +5776,42 @@ static void predict_sb_complex(AV1_COMP *cpi, ThreadData *td,
       if (bsize == BLOCK_8X8) {
         predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf, dst_stride, top_bsize,
-                         BLOCK_8X8, output_enabled, 1, 0);
+                         BLOCK_8X8, dry_run, 1, 0);
         predict_b_extend(cpi, td, tile, 1, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf1, dst_stride1,
-                         top_bsize, BLOCK_8X8, output_enabled, 1, 1);
+                         top_bsize, BLOCK_8X8, dry_run, 1, 1);
         predict_b_extend(cpi, td, tile, 2, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf2, dst_stride2,
-                         top_bsize, BLOCK_8X8, output_enabled, 1, 1);
+                         top_bsize, BLOCK_8X8, dry_run, 1, 1);
         predict_b_extend(cpi, td, tile, 3, mi_row, mi_col, mi_row, mi_col,
                          mi_row_top, mi_col_top, dst_buf3, dst_stride3,
-                         top_bsize, BLOCK_8X8, output_enabled, 1, 1);
+                         top_bsize, BLOCK_8X8, dry_run, 1, 1);
 
         if (bsize < top_bsize) {
           extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
-                     mi_row_top, mi_col_top, output_enabled, dst_buf,
-                     dst_stride);
+                     mi_row_top, mi_col_top, dry_run, dst_buf, dst_stride);
           extend_all(cpi, td, tile, 1, subsize, top_bsize, mi_row, mi_col,
-                     mi_row_top, mi_col_top, output_enabled, dst_buf1,
-                     dst_stride1);
+                     mi_row_top, mi_col_top, dry_run, dst_buf1, dst_stride1);
           extend_all(cpi, td, tile, 2, subsize, top_bsize, mi_row, mi_col,
-                     mi_row_top, mi_col_top, output_enabled, dst_buf2,
-                     dst_stride2);
+                     mi_row_top, mi_col_top, dry_run, dst_buf2, dst_stride2);
           extend_all(cpi, td, tile, 3, subsize, top_bsize, mi_row, mi_col,
-                     mi_row_top, mi_col_top, output_enabled, dst_buf3,
-                     dst_stride3);
+                     mi_row_top, mi_col_top, dry_run, dst_buf3, dst_stride3);
         }
       } else {
         predict_sb_complex(cpi, td, tile, mi_row, mi_col, mi_row_top,
-                           mi_col_top, output_enabled, subsize, top_bsize,
-                           dst_buf, dst_stride, pc_tree->split[0]);
+                           mi_col_top, dry_run, subsize, top_bsize, dst_buf,
+                           dst_stride, pc_tree->split[0]);
         if (mi_row < cm->mi_rows && mi_col + hbs < cm->mi_cols)
           predict_sb_complex(cpi, td, tile, mi_row, mi_col + hbs, mi_row_top,
-                             mi_col_top, output_enabled, subsize, top_bsize,
-                             dst_buf1, dst_stride1, pc_tree->split[1]);
+                             mi_col_top, dry_run, subsize, top_bsize, dst_buf1,
+                             dst_stride1, pc_tree->split[1]);
         if (mi_row + hbs < cm->mi_rows && mi_col < cm->mi_cols)
           predict_sb_complex(cpi, td, tile, mi_row + hbs, mi_col, mi_row_top,
-                             mi_col_top, output_enabled, subsize, top_bsize,
-                             dst_buf2, dst_stride2, pc_tree->split[2]);
+                             mi_col_top, dry_run, subsize, top_bsize, dst_buf2,
+                             dst_stride2, pc_tree->split[2]);
         if (mi_row + hbs < cm->mi_rows && mi_col + hbs < cm->mi_cols)
           predict_sb_complex(cpi, td, tile, mi_row + hbs, mi_col + hbs,
-                             mi_row_top, mi_col_top, output_enabled, subsize,
+                             mi_row_top, mi_col_top, dry_run, subsize,
                              top_bsize, dst_buf3, dst_stride3,
                              pc_tree->split[3]);
       }
@@ -5843,27 +5845,25 @@ static void predict_sb_complex(AV1_COMP *cpi, ThreadData *td,
     case PARTITION_HORZ_A:
       predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                        mi_row_top, mi_col_top, dst_buf, dst_stride, top_bsize,
-                       bsize2, output_enabled, 0, 0);
+                       bsize2, dry_run, 0, 0);
       extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row, mi_col,
-                 mi_row_top, mi_col_top, output_enabled, dst_buf, dst_stride);
+                 mi_row_top, mi_col_top, dry_run, dst_buf, dst_stride);
 
       predict_b_extend(cpi, td, tile, 0, mi_row, mi_col + hbs, mi_row,
                        mi_col + hbs, mi_row_top, mi_col_top, dst_buf1,
-                       dst_stride1, top_bsize, bsize2, output_enabled, 0, 0);
+                       dst_stride1, top_bsize, bsize2, dry_run, 0, 0);
       extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row, mi_col + hbs,
-                 mi_row_top, mi_col_top, output_enabled, dst_buf1, dst_stride1);
+                 mi_row_top, mi_col_top, dry_run, dst_buf1, dst_stride1);
 
       predict_b_extend(cpi, td, tile, 0, mi_row + hbs, mi_col, mi_row + hbs,
                        mi_col, mi_row_top, mi_col_top, dst_buf2, dst_stride2,
-                       top_bsize, subsize, output_enabled, 0, 0);
+                       top_bsize, subsize, dry_run, 0, 0);
       if (bsize < top_bsize)
         extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row + hbs, mi_col,
-                   mi_row_top, mi_col_top, output_enabled, dst_buf2,
-                   dst_stride2);
+                   mi_row_top, mi_col_top, dry_run, dst_buf2, dst_stride2);
       else
         extend_dir(cpi, td, tile, 0, subsize, top_bsize, mi_row + hbs, mi_col,
-                   mi_row_top, mi_col_top, output_enabled, dst_buf2,
-                   dst_stride2, 1);
+                   mi_row_top, mi_col_top, dry_run, dst_buf2, dst_stride2, 1);
 
       for (i = 0; i < MAX_MB_PLANE; i++) {
         xd->plane[i].dst.buf = dst_buf[i];
@@ -5885,27 +5885,25 @@ static void predict_sb_complex(AV1_COMP *cpi, ThreadData *td,
 
       predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                        mi_row_top, mi_col_top, dst_buf, dst_stride, top_bsize,
-                       bsize2, output_enabled, 0, 0);
+                       bsize2, dry_run, 0, 0);
       extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row, mi_col,
-                 mi_row_top, mi_col_top, output_enabled, dst_buf, dst_stride);
+                 mi_row_top, mi_col_top, dry_run, dst_buf, dst_stride);
 
       predict_b_extend(cpi, td, tile, 0, mi_row + hbs, mi_col, mi_row + hbs,
                        mi_col, mi_row_top, mi_col_top, dst_buf1, dst_stride1,
-                       top_bsize, bsize2, output_enabled, 0, 0);
+                       top_bsize, bsize2, dry_run, 0, 0);
       extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row + hbs, mi_col,
-                 mi_row_top, mi_col_top, output_enabled, dst_buf1, dst_stride1);
+                 mi_row_top, mi_col_top, dry_run, dst_buf1, dst_stride1);
 
       predict_b_extend(cpi, td, tile, 0, mi_row, mi_col + hbs, mi_row,
                        mi_col + hbs, mi_row_top, mi_col_top, dst_buf2,
-                       dst_stride2, top_bsize, subsize, output_enabled, 0, 0);
+                       dst_stride2, top_bsize, subsize, dry_run, 0, 0);
       if (bsize < top_bsize)
         extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col + hbs,
-                   mi_row_top, mi_col_top, output_enabled, dst_buf2,
-                   dst_stride2);
+                   mi_row_top, mi_col_top, dry_run, dst_buf2, dst_stride2);
       else
         extend_dir(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col + hbs,
-                   mi_row_top, mi_col_top, output_enabled, dst_buf2,
-                   dst_stride2, 2);
+                   mi_row_top, mi_col_top, dry_run, dst_buf2, dst_stride2, 2);
 
       for (i = 0; i < MAX_MB_PLANE; i++) {
         xd->plane[i].dst.buf = dst_buf[i];
@@ -5926,27 +5924,25 @@ static void predict_sb_complex(AV1_COMP *cpi, ThreadData *td,
 
       predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                        mi_row_top, mi_col_top, dst_buf, dst_stride, top_bsize,
-                       subsize, output_enabled, 0, 0);
+                       subsize, dry_run, 0, 0);
       if (bsize < top_bsize)
         extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
-                   mi_row_top, mi_col_top, output_enabled, dst_buf, dst_stride);
+                   mi_row_top, mi_col_top, dry_run, dst_buf, dst_stride);
       else
         extend_dir(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
-                   mi_row_top, mi_col_top, output_enabled, dst_buf, dst_stride,
-                   0);
+                   mi_row_top, mi_col_top, dry_run, dst_buf, dst_stride, 0);
 
       predict_b_extend(cpi, td, tile, 0, mi_row + hbs, mi_col, mi_row + hbs,
                        mi_col, mi_row_top, mi_col_top, dst_buf1, dst_stride1,
-                       top_bsize, bsize2, output_enabled, 0, 0);
+                       top_bsize, bsize2, dry_run, 0, 0);
       extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row + hbs, mi_col,
-                 mi_row_top, mi_col_top, output_enabled, dst_buf1, dst_stride1);
+                 mi_row_top, mi_col_top, dry_run, dst_buf1, dst_stride1);
 
       predict_b_extend(cpi, td, tile, 0, mi_row + hbs, mi_col + hbs,
                        mi_row + hbs, mi_col + hbs, mi_row_top, mi_col_top,
-                       dst_buf2, dst_stride2, top_bsize, bsize2, output_enabled,
-                       0, 0);
+                       dst_buf2, dst_stride2, top_bsize, bsize2, dry_run, 0, 0);
       extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row + hbs,
-                 mi_col + hbs, mi_row_top, mi_col_top, output_enabled, dst_buf2,
+                 mi_col + hbs, mi_row_top, mi_col_top, dry_run, dst_buf2,
                  dst_stride2);
 
       for (i = 0; i < MAX_MB_PLANE; i++) {
@@ -5970,27 +5966,25 @@ static void predict_sb_complex(AV1_COMP *cpi, ThreadData *td,
 
       predict_b_extend(cpi, td, tile, 0, mi_row, mi_col, mi_row, mi_col,
                        mi_row_top, mi_col_top, dst_buf, dst_stride, top_bsize,
-                       subsize, output_enabled, 0, 0);
+                       subsize, dry_run, 0, 0);
       if (bsize < top_bsize)
         extend_all(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
-                   mi_row_top, mi_col_top, output_enabled, dst_buf, dst_stride);
+                   mi_row_top, mi_col_top, dry_run, dst_buf, dst_stride);
       else
         extend_dir(cpi, td, tile, 0, subsize, top_bsize, mi_row, mi_col,
-                   mi_row_top, mi_col_top, output_enabled, dst_buf, dst_stride,
-                   3);
+                   mi_row_top, mi_col_top, dry_run, dst_buf, dst_stride, 3);
 
       predict_b_extend(cpi, td, tile, 0, mi_row, mi_col + hbs, mi_row,
                        mi_col + hbs, mi_row_top, mi_col_top, dst_buf1,
-                       dst_stride1, top_bsize, bsize2, output_enabled, 0, 0);
+                       dst_stride1, top_bsize, bsize2, dry_run, 0, 0);
       extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row, mi_col + hbs,
-                 mi_row_top, mi_col_top, output_enabled, dst_buf1, dst_stride1);
+                 mi_row_top, mi_col_top, dry_run, dst_buf1, dst_stride1);
 
       predict_b_extend(cpi, td, tile, 0, mi_row + hbs, mi_col + hbs,
                        mi_row + hbs, mi_col + hbs, mi_row_top, mi_col_top,
-                       dst_buf2, dst_stride2, top_bsize, bsize2, output_enabled,
-                       0, 0);
+                       dst_buf2, dst_stride2, top_bsize, bsize2, dry_run, 0, 0);
       extend_all(cpi, td, tile, 0, bsize2, top_bsize, mi_row + hbs,
-                 mi_col + hbs, mi_row_top, mi_col_top, output_enabled, dst_buf2,
+                 mi_col + hbs, mi_row_top, mi_col_top, dry_run, dst_buf2,
                  dst_stride2);
 
       for (i = 0; i < MAX_MB_PLANE; i++) {
@@ -6046,13 +6040,13 @@ static void rd_supertx_sb(AV1_COMP *cpi, ThreadData *td,
 
   set_skip_context(xd, mi_row, mi_col);
   set_mode_info_offsets(cpi, x, xd, mi_row, mi_col);
-  update_state_sb_supertx(cpi, td, tile, mi_row, mi_col, bsize, 0, pc_tree);
+  update_state_sb_supertx(cpi, td, tile, mi_row, mi_col, bsize, 1, pc_tree);
   av1_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
   for (plane = 0; plane < MAX_MB_PLANE; plane++) {
     dst_buf[plane] = xd->plane[plane].dst.buf;
     dst_stride[plane] = xd->plane[plane].dst.stride;
   }
-  predict_sb_complex(cpi, td, tile, mi_row, mi_col, mi_row, mi_col, 0, bsize,
+  predict_sb_complex(cpi, td, tile, mi_row, mi_col, mi_row, mi_col, 1, bsize,
                      bsize, dst_buf, dst_stride, pc_tree);
 
   set_offsets_without_segment_id(cpi, tile, x, mi_row, mi_col, bsize);
