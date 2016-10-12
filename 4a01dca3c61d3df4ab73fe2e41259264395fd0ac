@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bca28e7a_831d1e72",
+        "filename": "av1/common/idct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2016-10-12T18:46:37Z",
+      "side": 0,
+      "message": "to fix the bug, you don\u0027t need the extra tmp[] array.\nYou could just move the block 66-69 *before* the copy block 63-65.\n\n(and add a warning comment about input/output aliasing)",
+      "range": {
+        "startLine": 68,
+        "startChar": 16,
+        "endLine": 68,
+        "endChar": 17
+      },
+      "revId": "4a01dca3c61d3df4ab73fe2e41259264395fd0ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
