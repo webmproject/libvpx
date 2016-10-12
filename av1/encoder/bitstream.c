@@ -654,12 +654,15 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
     if (!p->skip_eob_node) aom_write(w, t != EOB_TOKEN, p->context_tree[0]);
 
     if (t != EOB_TOKEN) {
-      struct rans_sym s;
-      const rans_lut *token_cdf = p->token_cdf;
-      assert(token_cdf);
-      s.cum_prob = (*token_cdf)[t - ZERO_TOKEN];
-      s.prob = (*token_cdf)[t - ZERO_TOKEN + 1] - s.cum_prob;
-      buf_rans_write(w, &s);
+      aom_write(w, t != ZERO_TOKEN, p->context_tree[1]);
+
+      if (t != ZERO_TOKEN) {
+        struct rans_sym s;
+        const rans_lut *token_cdf = p->token_cdf;
+        s.cum_prob = (*token_cdf)[t - ONE_TOKEN];
+        s.prob = (*token_cdf)[t - ONE_TOKEN + 1] - s.cum_prob;
+        buf_rans_write(w, &s);
+      }
     }
 #else
     /* skip one or two nodes */
