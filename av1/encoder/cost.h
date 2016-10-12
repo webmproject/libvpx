@@ -13,9 +13,6 @@
 
 #include "aom_dsp/prob.h"
 #include "aom/aom_integer.h"
-#if CONFIG_ANS
-#include "aom_dsp/ans.h"
-#endif  // CONFIG_ANS
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,11 +54,6 @@ static INLINE int treed_cost(aom_tree tree, const aom_prob *probs, int bits,
 
 void av1_cost_tokens(int *costs, const aom_prob *probs, aom_tree tree);
 void av1_cost_tokens_skip(int *costs, const aom_prob *probs, aom_tree tree);
-
-#if CONFIG_ANS
-void av1_cost_tokens_ans(int *costs, const aom_prob *tree_probs,
-                         const rans_lut token_cdf, int skip_eob);
-#endif
 
 #ifdef __cplusplus
 }  // extern "C"

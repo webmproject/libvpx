@@ -153,9 +153,6 @@ static void fill_mode_costs(AV1_COMP *cpi) {
 }
 
 void av1_fill_token_costs(av1_coeff_cost *c,
-#if CONFIG_ANS
-                          coeff_cdf_model (*cdf)[PLANE_TYPES],
-#endif  // CONFIG_ANS
                           av1_coeff_probs_model (*p)[PLANE_TYPES]) {
   int i, j, k, l;
   TX_SIZE t;
@@ -164,19 +161,11 @@ void av1_fill_token_costs(av1_coeff_cost *c,
       for (j = 0; j < REF_TYPES; ++j)
         for (k = 0; k < COEF_BANDS; ++k)
           for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
-#if CONFIG_ANS
-            const aom_prob *const tree_probs = p[t][i][j][k][l];
-            av1_cost_tokens_ans((int *)c[t][i][j][k][0][l], tree_probs,
-                                cdf[t][i][j][k][l], 0);
-            av1_cost_tokens_ans((int *)c[t][i][j][k][1][l], tree_probs,
-                                cdf[t][i][j][k][l], 1);
-#else
             aom_prob probs[ENTROPY_NODES];
             av1_model_to_full_probs(p[t][i][j][k][l], probs);
             av1_cost_tokens((int *)c[t][i][j][k][0][l], probs, av1_coef_tree);
             av1_cost_tokens_skip((int *)c[t][i][j][k][1][l], probs,
                                  av1_coef_tree);
-#endif  // CONFIG_ANS
             assert(c[t][i][j][k][0][l][EOB_TOKEN] ==
                    c[t][i][j][k][1][l][EOB_TOKEN]);
           }
@@ -387,11 +376,7 @@ void av1_initialize_rd_consts(AV1_COMP *cpi) {
 #endif
   }
   if (cpi->oxcf.pass != 1) {
-    av1_fill_token_costs(x->token_costs,
-#if CONFIG_ANS
-                         cm->fc->coef_cdfs,
-#endif  // CONFIG_ANS
-                         cm->fc->coef_probs);
+    av1_fill_token_costs(x->token_costs, cm->fc->coef_probs);
 
     if (cpi->sf.partition_search_type != VAR_BASED_PARTITION ||
         cm->frame_type == KEY_FRAME) {
