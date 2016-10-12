@@ -86,6 +86,24 @@ static INLINE void aom_write_tree(aom_writer *w, const aom_tree_index *tree,
   aom_write_tree_bits(w, tree, probs, bits, len, i);
 }
 
+static INLINE void aom_write_symbol(aom_writer *w, int symb,
+                                    const aom_cdf_prob *cdf, int nsymbs) {
+#if CONFIG_ANS
+  struct rans_sym s;
+  (void)nsymbs;
+  assert(cdf);
+  s.cum_prob = cdf[symb];
+  s.prob = cdf[symb + 1] - s.cum_prob;
+  buf_rans_write(w, &s);
+#else
+  (void)w;
+  (void)symb;
+  (void)cdf;
+  (void)nsymbs;
+  assert(0 && "Unsupported bitwriter operation");
+#endif
+}
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

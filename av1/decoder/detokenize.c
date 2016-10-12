@@ -166,7 +166,8 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
     }
 #if CONFIG_ANS
     cdf = &coef_cdfs[band][ctx];
-    token = ONE_TOKEN + rans_read(r, *cdf);
+    token =
+        ONE_TOKEN + aom_read_symbol(r, *cdf, CATEGORY6_TOKEN - ONE_TOKEN + 1);
     INCREMENT_COUNT(ONE_TOKEN + (token > ONE_TOKEN));
     switch (token) {
       case ONE_TOKEN:
