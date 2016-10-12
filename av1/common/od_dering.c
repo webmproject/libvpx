@@ -313,7 +313,6 @@ void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
   int16_t inbuf[OD_DERING_INBUF_SIZE];
   int16_t *in;
   int bsize;
-  int32_t var[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS];
   int filter2_thresh[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS];
   od_filter_dering_direction_func filter_dering_direction[OD_DERINGSIZES] = {
     od_filter_dering_direction_4x4, od_filter_dering_direction_8x8
@@ -336,10 +335,11 @@ void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
   }
   if (pli == 0) {
     for (bi = 0; bi < dering_count; bi++) {
+      int32_t var;
       by = bskip[bi][0];
       bx = bskip[bi][1];
       dir[by][bx] = od_dir_find8(&x[8 * by * xstride + 8 * bx], xstride,
-                                 &var[by][bx], coeff_shift);
+                                 &var, coeff_shift);
       /* Deringing orthogonal to the direction uses a tighter threshold
          because we want to be conservative. We've presumably already
          achieved some deringing, so the amount of change is expected
@@ -351,7 +351,7 @@ void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
       filter2_thresh[by][bx] = (filter_dering_direction[bsize - OD_LOG_BSIZE0])(
           &y[(by * ystride << bsize) + (bx << bsize)], ystride,
           &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)],
-          od_adjust_thresh(threshold, var[by][bx]), dir[by][bx]);
+          od_adjust_thresh(threshold, var), dir[by][bx]);
     }
   } else {
     for (bi = 0; bi < dering_count; bi++) {
