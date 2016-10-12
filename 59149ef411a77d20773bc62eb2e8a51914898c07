@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ff76b882_72b411c9",
+        "filename": "aom_dsp/x86/variance_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-12T03:52:09Z",
+      "side": 1,
+      "message": "these lines never got:\n\nhttps://chromium-review.googlesource.com/#/c/387265/\n\nit\u0027d be good to pull that in in a separate change; it might apply fairly easily before this commit. the commit message would be off as even variance.c didn\u0027t get the update yet. let me see about those.",
+      "revId": "59149ef411a77d20773bc62eb2e8a51914898c07",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
