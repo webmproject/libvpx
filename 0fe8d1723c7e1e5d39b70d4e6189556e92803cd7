@@ -52,6 +52,24 @@
       "revId": "0fe8d1723c7e1e5d39b70d4e6189556e92803cd7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c2d76d5_ccbe7f17",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-10-12T17:55:13Z",
+      "side": 1,
+      "message": "The seed needs to change at every call of get_rand_indices, otherwise it produces the same random sequence of integers and ransac will never find a model different from the one it finds on the first iteration. The first seed here is 0 because I initialized indices.",
+      "parentUuid": "7c2d76d5_4c3d6fde",
+      "revId": "0fe8d1723c7e1e5d39b70d4e6189556e92803cd7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
