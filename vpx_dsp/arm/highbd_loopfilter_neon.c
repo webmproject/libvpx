@@ -494,6 +494,45 @@ static INLINE void store_6x8(uint16_t *s, const int p, const uint16x8_t s0,
   vst3q_lane_u16(s + 0, o1, 7);
 }
 
+static INLINE void store_7x8(uint16_t *s, const int p, const uint16x8_t s0,
+                             const uint16x8_t s1, const uint16x8_t s2,
+                             const uint16x8_t s3, const uint16x8_t s4,
+                             const uint16x8_t s5, const uint16x8_t s6) {
+  uint16x8x4_t o0;
+  uint16x8x3_t o1;
+
+  o0.val[0] = s0;
+  o0.val[1] = s1;
+  o0.val[2] = s2;
+  o0.val[3] = s3;
+  o1.val[0] = s4;
+  o1.val[1] = s5;
+  o1.val[2] = s6;
+  vst4q_lane_u16(s - 4, o0, 0);
+  vst3q_lane_u16(s + 0, o1, 0);
+  s += p;
+  vst4q_lane_u16(s - 4, o0, 1);
+  vst3q_lane_u16(s + 0, o1, 1);
+  s += p;
+  vst4q_lane_u16(s - 4, o0, 2);
+  vst3q_lane_u16(s + 0, o1, 2);
+  s += p;
+  vst4q_lane_u16(s - 4, o0, 3);
+  vst3q_lane_u16(s + 0, o1, 3);
+  s += p;
+  vst4q_lane_u16(s - 4, o0, 4);
+  vst3q_lane_u16(s + 0, o1, 4);
+  s += p;
+  vst4q_lane_u16(s - 4, o0, 5);
+  vst3q_lane_u16(s + 0, o1, 5);
+  s += p;
+  vst4q_lane_u16(s - 4, o0, 6);
+  vst3q_lane_u16(s + 0, o1, 6);
+  s += p;
+  vst4q_lane_u16(s - 4, o0, 7);
+  vst3q_lane_u16(s + 0, o1, 7);
+}
+
 static INLINE void store_8x14(uint16_t *s, const int p, const uint16x8_t p6,
                               const uint16x8_t p5, const uint16x8_t p4,
                               const uint16x8_t p3, const uint16x8_t p2,
@@ -646,6 +685,44 @@ static void lpf_horizontal_16_kernel(uint16_t *s, int p,
              oq5, oq6, flat_status, flat2_status);
 }
 
+static void lpf_vertical_16_kernel(uint16_t *s, int p,
+                                   const uint16x8_t blimit_vec,
+                                   const uint16x8_t limit_vec,
+                                   const uint16x8_t thresh_vec, const int bd) {
+  uint16x8_t mask, flat, flat2, hev, p7, p6, p5, p4, p3, p2, p1, p0, q0, q1, q2,
+      q3, q4, q5, q6, q7, op6, op5, op4, op3, op2, op1, op0, oq0, oq1, oq2, oq3,
+      oq4, oq5, oq6;
+  uint32_t flat_status, flat2_status;
+
+  load_8x8(s - 8, p, &p7, &p6, &p5, &p4, &p3, &p2, &p1, &p0);
+  transpose_s16_8x8((int16x8_t *)&p7, (int16x8_t *)&p6, (int16x8_t *)&p5,
+                    (int16x8_t *)&p4, (int16x8_t *)&p3, (int16x8_t *)&p2,
+                    (int16x8_t *)&p1, (int16x8_t *)&p0);
+  load_8x8(s, p, &q0, &q1, &q2, &q3, &q4, &q5, &q6, &q7);
+  transpose_s16_8x8((int16x8_t *)&q0, (int16x8_t *)&q1, (int16x8_t *)&q2,
+                    (int16x8_t *)&q3, (int16x8_t *)&q4, (int16x8_t *)&q5,
+                    (int16x8_t *)&q6, (int16x8_t *)&q7);
+  mask = filter_flat_hev_mask(limit_vec, blimit_vec, thresh_vec, p3, p2, p1, p0,
+                              q0, q1, q2, q3, &flat, &flat_status, &hev, bd);
+  flat2 = flat_mask5(p7, p6, p5, p4, p0, q0, q4, q5, q6, q7, flat,
+                     &flat2_status, bd);
+  filter16(mask, flat, flat_status, flat2, flat2_status, hev, p7, p6, p5, p4,
+           p3, p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7, &op6, &op5, &op4,
+           &op3, &op2, &op1, &op0, &oq0, &oq1, &oq2, &oq3, &oq4, &oq5, &oq6,
+           bd);
+  if (flat_status) {
+    if (flat2_status) {
+      store_7x8(s - 3, p, op6, op5, op4, op3, op2, op1, op0);
+      store_7x8(s + 4, p, oq0, oq1, oq2, oq3, oq4, oq5, oq6);
+    } else {
+      // Note: store_6x8() is faster than tranpose + store_8x8().
+      store_6x8(s, p, op2, op1, op0, oq0, oq1, oq2);
+    }
+  } else {
+    store_4x8(s - 2, p, op1, op0, oq0, oq1);
+  }
+}
+
 void vpx_highbd_lpf_horizontal_16_neon(uint16_t *s, int p,
                                        const uint8_t *blimit,
                                        const uint8_t *limit,
@@ -663,4 +740,22 @@ void vpx_highbd_lpf_horizontal_16_dual_neon(uint16_t *s, int p,
   load_thresh(blimit, limit, thresh, &blimit_vec, &limit_vec, &thresh_vec, bd);
   lpf_horizontal_16_kernel(s, p, blimit_vec, limit_vec, thresh_vec, bd);
   lpf_horizontal_16_kernel(s + 8, p, blimit_vec, limit_vec, thresh_vec, bd);
+}
+
+void vpx_highbd_lpf_vertical_16_neon(uint16_t *s, int p, const uint8_t *blimit,
+                                     const uint8_t *limit,
+                                     const uint8_t *thresh, int bd) {
+  uint16x8_t blimit_vec, limit_vec, thresh_vec;
+  load_thresh(blimit, limit, thresh, &blimit_vec, &limit_vec, &thresh_vec, bd);
+  lpf_vertical_16_kernel(s, p, blimit_vec, limit_vec, thresh_vec, bd);
+}
+
+void vpx_highbd_lpf_vertical_16_dual_neon(uint16_t *s, int p,
+                                          const uint8_t *blimit,
+                                          const uint8_t *limit,
+                                          const uint8_t *thresh, int bd) {
+  uint16x8_t blimit_vec, limit_vec, thresh_vec;
+  load_thresh(blimit, limit, thresh, &blimit_vec, &limit_vec, &thresh_vec, bd);
+  lpf_vertical_16_kernel(s, p, blimit_vec, limit_vec, thresh_vec, bd);
+  lpf_vertical_16_kernel(s + 8 * p, p, blimit_vec, limit_vec, thresh_vec, bd);
 }
