@@ -22,6 +22,30 @@
       "revId": "542dc6f7d6180ef41f1663665e9f43ba66b59ef4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ca69ec4_52c8926d",
+        "filename": "av1/encoder/encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3187,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2016-10-12T23:58:33Z",
+      "side": 1,
+      "message": "It was a bug in the original code.\n\nIn this scenario, we refresh LAST_FRAME with the existing BWDREF_FRAME, so we should use the filtered BWDREF_FRAME to replace the filed LAST_FRAME.\n\nThe spot of [0] should always be reserved for the newly coded frame. In this case, the LAST_BIPRED_FRAME is the newly coded frame, which is not being used as a reference at all.",
+      "parentUuid": "3ca69ec4_52cfb27e",
+      "range": {
+        "startLine": 3187,
+        "startChar": 39,
+        "endLine": 3187,
+        "endChar": 49
+      },
+      "revId": "542dc6f7d6180ef41f1663665e9f43ba66b59ef4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
