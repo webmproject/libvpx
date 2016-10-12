@@ -147,7 +147,7 @@ class AV1NewEncodeDecodePerfTest
   }
 
   virtual void BeginPassHook(unsigned int /*pass*/) {
-    const std::string data_path = getenv("LIBVPX_TEST_DATA_PATH");
+    const std::string data_path = getenv("LIBAOM_TEST_DATA_PATH");
     const std::string path_to_source = data_path + "/" + kNewEncodeOutputFile;
     outfile_ = fopen(path_to_source.c_str(), "wb");
     ASSERT_TRUE(outfile_ != NULL);

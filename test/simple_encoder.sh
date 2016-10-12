@@ -18,7 +18,7 @@
 # Environment check: $YUV_RAW_INPUT is required.
 simple_encoder_verify_environment() {
   if [ ! -e "${YUV_RAW_INPUT}" ]; then
-    echo "Libaom test data must exist in LIBVPX_TEST_DATA_PATH."
+    echo "Libaom test data must exist in LIBAOM_TEST_DATA_PATH."
     return 1
   fi
 }

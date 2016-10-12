@@ -20,7 +20,7 @@ aomdec_verify_environment() {
     if [ ! -e "${AV1_WEBM_FILE}" ] || \
       [ ! -e "${AV1_FPM_WEBM_FILE}" ] || \
       [ ! -e "${AV1_LT_50_FRAMES_WEBM_FILE}" ] ; then
-      elog "Libaom test data must exist in LIBVPX_TEST_DATA_PATH."
+      elog "Libaom test data must exist in LIBAOM_TEST_DATA_PATH."
       return 1
     fi
   fi
