@@ -75,6 +75,44 @@ int sb_all_skip_out(const AV1_COMMON *const cm, int mi_row, int mi_col,
   return skip;
 }
 
+static INLINE void copy_8x8_16_8bit(uint8_t *dst, int dstride, int16_t *src, int sstride) {
+  int i, j;
+  for (i = 0; i < 8; i++)
+    for (j = 0; j < 8; j++)
+      dst[i * dstride + j] = src[i * sstride + j];
+}
+
+static INLINE void copy_4x4_16_8bit(uint8_t *dst, int dstride, int16_t *src, int sstride) {
+  int i, j;
+  for (i = 0; i < 4; i++)
+    for (j = 0; j < 4; j++)
+      dst[i * dstride + j] = src[i * sstride + j];
+}
+
+/* TODO: Optimize this function for SSE. */
+void copy_blocks_16_8bit(uint8_t *dst, int dstride, int16_t *src, int sstride,
+    unsigned char (*bskip)[2], int dering_count, int bsize)
+{
+  int bi, bx, by;
+  if (bsize == 3) {
+    for (bi = 0; bi < dering_count; bi++) {
+      by = bskip[bi][0];
+      bx = bskip[bi][1];
+      copy_8x8_16_8bit(&dst[(by << 3) * dstride + (bx << 3)],
+                     dstride,
+                     &src[(by << 3) * sstride + (bx << 3)], sstride);
+    }
+  } else {
+    for (bi = 0; bi < dering_count; bi++) {
+      by = bskip[bi][0];
+      bx = bskip[bi][1];
+      copy_4x4_16_8bit(&dst[(by << 2) * dstride + (bx << 2)],
+                     dstride,
+                     &src[(by << 2) * sstride + (bx << 2)], sstride);
+    }
+  }
+}
+
 void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
                       MACROBLOCKD *xd, int global_level) {
   int r, c;
@@ -149,26 +187,26 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
                             sbc * bsize[pli] * MAX_MIB_SIZE],
                   stride, nhb, nvb, sbc, sbr, nhsb, nvsb, dec[pli], dir, pli,
                   bskip, dering_count, threshold, coeff_shift);
-        for (r = 0; r < bsize[pli] * nvb; ++r) {
-          for (c = 0; c < bsize[pli] * nhb; ++c) {
 #if CONFIG_AOM_HIGHBITDEPTH
-            if (cm->use_highbitdepth) {
-              CONVERT_TO_SHORTPTR(xd->plane[pli].dst.buf)
-              [xd->plane[pli].dst.stride *
-                   (bsize[pli] * MAX_MIB_SIZE * sbr + r) +
-               sbc * bsize[pli] * MAX_MIB_SIZE + c] =
-                  dst[r * MAX_MIB_SIZE * bsize[pli] + c];
-            } else {
+        if (cm->use_highbitdepth) {
+          copy_blocks_16bit(
+              (int16_t*)&CONVERT_TO_SHORTPTR(
+                  xd->plane[pli].dst.buf)[xd->plane[pli].dst.stride *
+                  (bsize[pli] * MAX_MIB_SIZE * sbr) +
+                  sbc * bsize[pli] * MAX_MIB_SIZE],
+              xd->plane[pli].dst.stride, dst, MAX_MIB_SIZE * bsize[pli], bskip,
+              dering_count, 3 - dec[pli]);
+        } else {
 #endif
-              xd->plane[pli].dst.buf[xd->plane[pli].dst.stride *
-                                         (bsize[pli] * MAX_MIB_SIZE * sbr + r) +
-                                     sbc * bsize[pli] * MAX_MIB_SIZE + c] =
-                  dst[r * MAX_MIB_SIZE * bsize[pli] + c];
+          copy_blocks_16_8bit(
+              &xd->plane[pli].dst.buf[xd->plane[pli].dst.stride *
+                                    (bsize[pli] * MAX_MIB_SIZE * sbr) +
+                                    sbc * bsize[pli] * MAX_MIB_SIZE],
+              xd->plane[pli].dst.stride, dst, MAX_MIB_SIZE * bsize[pli], bskip,
+              dering_count, 3 - dec[pli]);
 #if CONFIG_AOM_HIGHBITDEPTH
-            }
-#endif
-          }
         }
+#endif
       }
     }
   }
