@@ -317,6 +317,43 @@ static INLINE void store_4x8(uint16_t *s, const int p, const uint16x8_t p1,
   vst4q_lane_u16(s, o, 7);
 }
 
+static INLINE void store_6x8(uint16_t *s, const int p, const uint16x8_t s0,
+                             const uint16x8_t s1, const uint16x8_t s2,
+                             const uint16x8_t s3, const uint16x8_t s4,
+                             const uint16x8_t s5) {
+  uint16x8x3_t o0, o1;
+
+  o0.val[0] = s0;
+  o0.val[1] = s1;
+  o0.val[2] = s2;
+  o1.val[0] = s3;
+  o1.val[1] = s4;
+  o1.val[2] = s5;
+  vst3q_lane_u16(s - 3, o0, 0);
+  vst3q_lane_u16(s + 0, o1, 0);
+  s += p;
+  vst3q_lane_u16(s - 3, o0, 1);
+  vst3q_lane_u16(s + 0, o1, 1);
+  s += p;
+  vst3q_lane_u16(s - 3, o0, 2);
+  vst3q_lane_u16(s + 0, o1, 2);
+  s += p;
+  vst3q_lane_u16(s - 3, o0, 3);
+  vst3q_lane_u16(s + 0, o1, 3);
+  s += p;
+  vst3q_lane_u16(s - 3, o0, 4);
+  vst3q_lane_u16(s + 0, o1, 4);
+  s += p;
+  vst3q_lane_u16(s - 3, o0, 5);
+  vst3q_lane_u16(s + 0, o1, 5);
+  s += p;
+  vst3q_lane_u16(s - 3, o0, 6);
+  vst3q_lane_u16(s + 0, o1, 6);
+  s += p;
+  vst3q_lane_u16(s - 3, o0, 7);
+  vst3q_lane_u16(s + 0, o1, 7);
+}
+
 void vpx_highbd_lpf_horizontal_4_neon(uint16_t *s, int p, const uint8_t *blimit,
                                       const uint8_t *limit,
                                       const uint8_t *thresh, int bd) {
@@ -386,4 +423,32 @@ void vpx_highbd_lpf_horizontal_8_dual_neon(
     const uint8_t *thresh1, int bd) {
   vpx_highbd_lpf_horizontal_8_neon(s, p, blimit0, limit0, thresh0, bd);
   vpx_highbd_lpf_horizontal_8_neon(s + 8, p, blimit1, limit1, thresh1, bd);
+}
+
+void vpx_highbd_lpf_vertical_8_neon(uint16_t *s, int p, const uint8_t *blimit,
+                                    const uint8_t *limit, const uint8_t *thresh,
+                                    int bd) {
+  uint16x8_t blimit_vec, limit_vec, thresh_vec, p3, p2, p1, p0, q0, q1, q2, q3,
+      op2, op1, op0, oq0, oq1, oq2, mask, flat, hev;
+  uint32_t flat_status;
+
+  load_8x8(s - 4, p, &p3, &p2, &p1, &p0, &q0, &q1, &q2, &q3);
+  transpose_s16_8x8((int16x8_t *)&p3, (int16x8_t *)&p2, (int16x8_t *)&p1,
+                    (int16x8_t *)&p0, (int16x8_t *)&q0, (int16x8_t *)&q1,
+                    (int16x8_t *)&q2, (int16x8_t *)&q3);
+  load_thresh(blimit, limit, thresh, &blimit_vec, &limit_vec, &thresh_vec, bd);
+  mask = filter_flat_hev_mask(limit_vec, blimit_vec, thresh_vec, p3, p2, p1, p0,
+                              q0, q1, q2, q3, &flat, &flat_status, &hev, bd);
+  filter8(mask, flat, flat_status, hev, p3, p2, p1, p0, q0, q1, q2, q3, &op2,
+          &op1, &op0, &oq0, &oq1, &oq2, bd);
+  // Note: store_6x8() is faster than tranpose + store_8x8().
+  store_6x8(s, p, op2, op1, op0, oq0, oq1, oq2);
+}
+
+void vpx_highbd_lpf_vertical_8_dual_neon(
+    uint16_t *s, int p, const uint8_t *blimit0, const uint8_t *limit0,
+    const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1,
+    const uint8_t *thresh1, int bd) {
+  vpx_highbd_lpf_vertical_8_neon(s, p, blimit0, limit0, thresh0, bd);
+  vpx_highbd_lpf_vertical_8_neon(s + 8 * p, p, blimit1, limit1, thresh1, bd);
 }
