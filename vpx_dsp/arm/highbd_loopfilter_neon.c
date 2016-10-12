@@ -649,7 +649,7 @@ void vpx_highbd_lpf_vertical_8_neon(uint16_t *s, int p, const uint8_t *blimit,
                               q0, q1, q2, q3, &flat, &flat_status, &hev, bd);
   filter8(mask, flat, flat_status, hev, p3, p2, p1, p0, q0, q1, q2, q3, &op2,
           &op1, &op0, &oq0, &oq1, &oq2, bd);
-  // Note: store_6x8() is faster than tranpose + store_8x8().
+  // Note: store_6x8() is faster than transpose + store_8x8().
   store_6x8(s, p, op2, op1, op0, oq0, oq1, oq2);
 }
 
@@ -715,7 +715,7 @@ static void lpf_vertical_16_kernel(uint16_t *s, int p,
       store_7x8(s - 3, p, op6, op5, op4, op3, op2, op1, op0);
       store_7x8(s + 4, p, oq0, oq1, oq2, oq3, oq4, oq5, oq6);
     } else {
-      // Note: store_6x8() is faster than tranpose + store_8x8().
+      // Note: store_6x8() is faster than transpose + store_8x8().
       store_6x8(s, p, op2, op1, op0, oq0, oq1, oq2);
     }
   } else {

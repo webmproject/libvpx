@@ -909,7 +909,7 @@ void vpx_lpf_vertical_8_neon(uint8_t *s, int p, const uint8_t *blimit,
                                 p0, q0, q1, q2, q3, &flat, &flat_status, &hev);
   filter8_8(mask, flat, flat_status, hev, p3, p2, p1, p0, q0, q1, q2, q3, &op2,
             &op1, &op0, &oq0, &oq1, &oq2);
-  // Note: tranpose + store_8x8() is faster than store_6x8().
+  // Note: transpose + store_8x8() is faster than store_6x8().
   transpose_u8_8x8(&p3, &op2, &op1, &op0, &oq0, &oq1, &oq2, &q3);
   store_8x8(s - 4, p, p3, op2, op1, op0, oq0, oq1, oq2, q3);
 }
@@ -934,7 +934,7 @@ void vpx_lpf_vertical_8_dual_neon(uint8_t *s, int p, const uint8_t *blimit0,
                                  p0, q0, q1, q2, q3, &flat, &flat_status, &hev);
   filter8_16(mask, flat, flat_status, hev, p3, p2, p1, p0, q0, q1, q2, q3, &op2,
              &op1, &op0, &oq0, &oq1, &oq2);
-  // Note: store_6x8() twice is faster than tranpose + store_8x16().
+  // Note: store_6x8() twice is faster than transpose + store_8x16().
   store_6x8(s, p, vget_low_u8(op2), vget_low_u8(op1), vget_low_u8(op0),
             vget_low_u8(oq0), vget_low_u8(oq1), vget_low_u8(oq2));
   store_6x8(s + 8 * p, p, vget_high_u8(op2), vget_high_u8(op1),
@@ -1037,7 +1037,7 @@ void vpx_lpf_vertical_16_neon(uint8_t *s, int p, const uint8_t *blimit,
                         &s6, &s7);
       store_16x8(s, p, s0, s1, s2, s3, s4, s5, s6, s7);
     } else {
-      // Note: tranpose + store_8x8() is faster than store_6x8().
+      // Note: transpose + store_8x8() is faster than store_6x8().
       transpose_u8_8x8(&p3, &op2, &op1, &op0, &oq0, &oq1, &oq2, &q3);
       store_8x8(s + 4, p, p3, op2, op1, op0, oq0, oq1, oq2, q3);
     }
@@ -1074,7 +1074,7 @@ void vpx_lpf_vertical_16_dual_neon(uint8_t *s, int p, const uint8_t *blimit,
       store_16x16(s, p, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12,
                   s13, s14, s15);
     } else {
-      // Note: store_6x8() twice is faster than tranpose + store_8x16().
+      // Note: store_6x8() twice is faster than transpose + store_8x16().
       s += 8;
       store_6x8(s, p, vget_low_u8(op2), vget_low_u8(op1), vget_low_u8(op0),
                 vget_low_u8(oq0), vget_low_u8(oq1), vget_low_u8(oq2));
