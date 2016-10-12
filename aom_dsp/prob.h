@@ -137,37 +137,17 @@ DECLARE_ALIGNED(16, extern const uint8_t, aom_norm[256]);
 
 #if CONFIG_EC_ADAPT
 static INLINE void update_cdf(aom_cdf_prob *cdf, int val, int nsymbs) {
-  const int rate = 3 + get_msb(nsymbs);
-  // Daala method
-  int i, tmp;
-  for (i = 0; i < val; ++i) {
-    tmp = 2 - (1 << rate) + i;
-    cdf[i] -= (cdf[i] - tmp) >> rate;
+  const int rate = 4 + get_msb(nsymbs);
+  int i, diff, tmp;
+  for (i = 0; i < nsymbs; ++i) {
+    tmp = (i + 1) << (12 - rate);
+    cdf[i] -= ((cdf[i] - tmp) >> rate);
   }
-  for (i = val; i < nsymbs; ++i) {
-    tmp = -(1 << rate) + 32768 + (1 << rate) - ((nsymbs - 1) - i);
-    cdf[i] -= (cdf[i] - tmp) >> rate;
-  }
+  diff = 32768 - cdf[nsymbs - 1];
 
-  // Slightly better
-  //  int prob[16];
-  //  int i;
-  //  int diff;
-  //  prob[0] = cdf[0];
-  //  for (i=1; i<nsymbs; ++i)
-  //    prob[i] = cdf[i] - cdf[i-1];
-  //
-  //  for (i=0; i<nsymbs; ++i) {
-  //    prob[i] -= (prob[i] >> rate);
-  //    prob[i] = AOMMAX(prob[i],1);
-  //    cdf[i] = i==0 ? prob[i] : cdf[i-1]+prob[i];
-  //  }
-  //  diff = (1<<15) - cdf[nsymbs-1];
-  //
-  //  for (i=val; i<nsymbs; ++i) {
-  //    cdf[i] += diff;
-  //  }
-  //
+  for (i = val; i < nsymbs; ++i) {
+    cdf[i] += diff;
+  }
 }
 #endif
 
