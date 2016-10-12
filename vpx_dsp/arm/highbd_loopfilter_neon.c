@@ -26,6 +26,19 @@ static INLINE void load_thresh(const uint8_t *blimit, const uint8_t *limit,
   *thresh_vec = vshlq_u16(*thresh_vec, shift);
 }
 
+// Here flat is 128-bit long, with each 16-bit chunk being a mask of
+// a pixel. When used to control filter branches, we only detect whether it is
+// all 0s or all 1s. We pairwise add flat to a 32-bit long number flat_status.
+// flat equals 0 if and only if flat_status equals 0.
+// flat equals -1 (all 1s) if and only if flat_status equals -4. (This is true
+// because each mask occupies more than 1 bit.)
+static INLINE uint32_t calc_flat_status(const uint16x8_t flat) {
+  const uint64x1_t t0 = vadd_u64(vreinterpret_u64_u16(vget_low_u16(flat)),
+                                 vreinterpret_u64_u16(vget_high_u16(flat)));
+  const uint64x1_t t1 = vpaddl_u32(vreinterpret_u32_u64(t0));
+  return vget_lane_u32(vreinterpret_u32_u64(t1), 0);
+}
+
 static INLINE uint16x8_t
 filter_hev_mask4(const uint16x8_t limit, const uint16x8_t blimit,
                  const uint16x8_t thresh, const uint16x8_t p3,
@@ -53,6 +66,26 @@ filter_hev_mask4(const uint16x8_t limit, const uint16x8_t blimit,
   return max;
 }
 
+static INLINE uint16x8_t filter_flat_hev_mask(
+    const uint16x8_t limit, const uint16x8_t blimit, const uint16x8_t thresh,
+    const uint16x8_t p3, const uint16x8_t p2, const uint16x8_t p1,
+    const uint16x8_t p0, const uint16x8_t q0, const uint16x8_t q1,
+    const uint16x8_t q2, const uint16x8_t q3, uint16x8_t *flat,
+    uint32_t *flat_status, uint16x8_t *hev, const int bd) {
+  uint16x8_t mask;
+  const uint16x8_t max = filter_hev_mask4(limit, blimit, thresh, p3, p2, p1, p0,
+                                          q0, q1, q2, q3, hev, &mask);
+  *flat = vmaxq_u16(max, vabdq_u16(p2, p0));
+  *flat = vmaxq_u16(*flat, vabdq_u16(q2, q0));
+  *flat = vmaxq_u16(*flat, vabdq_u16(p3, p0));
+  *flat = vmaxq_u16(*flat, vabdq_u16(q3, q0));
+  *flat = vcleq_u16(*flat, vdupq_n_u16(1 << (bd - 8))); /* flat_mask4() */
+  *flat = vandq_u16(*flat, mask);
+  *flat_status = calc_flat_status(*flat);
+
+  return mask;
+}
+
 static INLINE int16x8_t flip_sign(const uint16x8_t v, const int bd) {
   const uint16x8_t offset = vdupq_n_u16(0x80 << (bd - 8));
   return vreinterpretq_s16_u16(vsubq_u16(v, offset));
@@ -61,6 +94,67 @@ static INLINE int16x8_t flip_sign(const uint16x8_t v, const int bd) {
 static INLINE uint16x8_t flip_sign_back(const int16x8_t v, const int bd) {
   const int16x8_t offset = vdupq_n_s16(0x80 << (bd - 8));
   return vreinterpretq_u16_s16(vaddq_s16(v, offset));
+}
+
+static INLINE void filter_update(const uint16x8_t sub0, const uint16x8_t sub1,
+                                 const uint16x8_t add0, const uint16x8_t add1,
+                                 uint16x8_t *sum) {
+  *sum = vsubq_u16(*sum, sub0);
+  *sum = vsubq_u16(*sum, sub1);
+  *sum = vaddq_u16(*sum, add0);
+  *sum = vaddq_u16(*sum, add1);
+}
+
+static INLINE uint16x8_t calc_7_tap_filter_kernel(const uint16x8_t sub0,
+                                                  const uint16x8_t sub1,
+                                                  const uint16x8_t add0,
+                                                  const uint16x8_t add1,
+                                                  uint16x8_t *sum) {
+  filter_update(sub0, sub1, add0, add1, sum);
+  return vrshrq_n_u16(*sum, 3);
+}
+
+// 7-tap filter [1, 1, 1, 2, 1, 1, 1]
+static INLINE void calc_7_tap_filter(const uint16x8_t p3, const uint16x8_t p2,
+                                     const uint16x8_t p1, const uint16x8_t p0,
+                                     const uint16x8_t q0, const uint16x8_t q1,
+                                     const uint16x8_t q2, const uint16x8_t q3,
+                                     uint16x8_t *op2, uint16x8_t *op1,
+                                     uint16x8_t *op0, uint16x8_t *oq0,
+                                     uint16x8_t *oq1, uint16x8_t *oq2) {
+  uint16x8_t sum;
+  sum = vaddq_u16(p3, p3);   // 2*p3
+  sum = vaddq_u16(sum, p3);  // 3*p3
+  sum = vaddq_u16(sum, p2);  // 3*p3+p2
+  sum = vaddq_u16(sum, p2);  // 3*p3+2*p2
+  sum = vaddq_u16(sum, p1);  // 3*p3+2*p2+p1
+  sum = vaddq_u16(sum, p0);  // 3*p3+2*p2+p1+p0
+  sum = vaddq_u16(sum, q0);  // 3*p3+2*p2+p1+p0+q0
+  *op2 = vrshrq_n_u16(sum, 3);
+  *op1 = calc_7_tap_filter_kernel(p3, p2, p1, q1, &sum);
+  *op0 = calc_7_tap_filter_kernel(p3, p1, p0, q2, &sum);
+  *oq0 = calc_7_tap_filter_kernel(p3, p0, q0, q3, &sum);
+  *oq1 = calc_7_tap_filter_kernel(p2, q0, q1, q3, &sum);
+  *oq2 = calc_7_tap_filter_kernel(p1, q1, q2, q3, &sum);
+}
+
+static INLINE void apply_7_tap_filter(const uint16x8_t flat,
+                                      const uint16x8_t p3, const uint16x8_t p2,
+                                      const uint16x8_t p1, const uint16x8_t p0,
+                                      const uint16x8_t q0, const uint16x8_t q1,
+                                      const uint16x8_t q2, const uint16x8_t q3,
+                                      uint16x8_t *op2, uint16x8_t *op1,
+                                      uint16x8_t *op0, uint16x8_t *oq0,
+                                      uint16x8_t *oq1, uint16x8_t *oq2) {
+  uint16x8_t tp1, tp0, tq0, tq1;
+  calc_7_tap_filter(p3, p2, p1, p0, q0, q1, q2, q3, op2, &tp1, &tp0, &tq0, &tq1,
+                    oq2);
+  *op2 = vbslq_u16(flat, *op2, p2);
+  *op1 = vbslq_u16(flat, tp1, *op1);
+  *op0 = vbslq_u16(flat, tp0, *op0);
+  *oq0 = vbslq_u16(flat, tq0, *oq0);
+  *oq1 = vbslq_u16(flat, tq1, *oq1);
+  *oq2 = vbslq_u16(flat, *oq2, q2);
 }
 
 static INLINE void filter4(const uint16x8_t mask, const uint16x8_t hev,
@@ -124,6 +218,29 @@ static INLINE void filter4(const uint16x8_t mask, const uint16x8_t hev,
   *op1 = flip_sign_back(ps1, bd);
 }
 
+static INLINE void filter8(const uint16x8_t mask, const uint16x8_t flat,
+                           const uint32_t flat_status, const uint16x8_t hev,
+                           const uint16x8_t p3, const uint16x8_t p2,
+                           const uint16x8_t p1, const uint16x8_t p0,
+                           const uint16x8_t q0, const uint16x8_t q1,
+                           const uint16x8_t q2, const uint16x8_t q3,
+                           uint16x8_t *op2, uint16x8_t *op1, uint16x8_t *op0,
+                           uint16x8_t *oq0, uint16x8_t *oq1, uint16x8_t *oq2,
+                           const int bd) {
+  if (flat_status != (uint32_t)-4) {
+    filter4(mask, hev, p1, p0, q0, q1, op1, op0, oq0, oq1, bd);
+    *op2 = p2;
+    *oq2 = q2;
+    if (flat_status) {
+      apply_7_tap_filter(flat, p3, p2, p1, p0, q0, q1, q2, q3, op2, op1, op0,
+                         oq0, oq1, oq2);
+    }
+  } else {
+    calc_7_tap_filter(p3, p2, p1, p0, q0, q1, q2, q3, op2, op1, op0, oq0, oq1,
+                      oq2);
+  }
+}
+
 static INLINE void load_8x8(const uint16_t *s, const int p, uint16x8_t *p3,
                             uint16x8_t *p2, uint16x8_t *p1, uint16x8_t *p0,
                             uint16x8_t *q0, uint16x8_t *q1, uint16x8_t *q2,
@@ -155,6 +272,23 @@ static INLINE void store_8x4(uint16_t *s, const int p, const uint16x8_t s0,
   vst1q_u16(s, s2);
   s += p;
   vst1q_u16(s, s3);
+}
+
+static INLINE void store_8x6(uint16_t *s, const int p, const uint16x8_t s0,
+                             const uint16x8_t s1, const uint16x8_t s2,
+                             const uint16x8_t s3, const uint16x8_t s4,
+                             const uint16x8_t s5) {
+  vst1q_u16(s, s0);
+  s += p;
+  vst1q_u16(s, s1);
+  s += p;
+  vst1q_u16(s, s2);
+  s += p;
+  vst1q_u16(s, s3);
+  s += p;
+  vst1q_u16(s, s4);
+  s += p;
+  vst1q_u16(s, s5);
 }
 
 static INLINE void store_4x8(uint16_t *s, const int p, const uint16x8_t p1,
@@ -228,4 +362,28 @@ void vpx_highbd_lpf_vertical_4_dual_neon(
     const uint8_t *thresh1, int bd) {
   vpx_highbd_lpf_vertical_4_neon(s, p, blimit0, limit0, thresh0, bd);
   vpx_highbd_lpf_vertical_4_neon(s + 8 * p, p, blimit1, limit1, thresh1, bd);
+}
+
+void vpx_highbd_lpf_horizontal_8_neon(uint16_t *s, int p, const uint8_t *blimit,
+                                      const uint8_t *limit,
+                                      const uint8_t *thresh, int bd) {
+  uint16x8_t blimit_vec, limit_vec, thresh_vec, p3, p2, p1, p0, q0, q1, q2, q3,
+      op2, op1, op0, oq0, oq1, oq2, mask, flat, hev;
+  uint32_t flat_status;
+
+  load_thresh(blimit, limit, thresh, &blimit_vec, &limit_vec, &thresh_vec, bd);
+  load_8x8(s - 4 * p, p, &p3, &p2, &p1, &p0, &q0, &q1, &q2, &q3);
+  mask = filter_flat_hev_mask(limit_vec, blimit_vec, thresh_vec, p3, p2, p1, p0,
+                              q0, q1, q2, q3, &flat, &flat_status, &hev, bd);
+  filter8(mask, flat, flat_status, hev, p3, p2, p1, p0, q0, q1, q2, q3, &op2,
+          &op1, &op0, &oq0, &oq1, &oq2, bd);
+  store_8x6(s - 3 * p, p, op2, op1, op0, oq0, oq1, oq2);
+}
+
+void vpx_highbd_lpf_horizontal_8_dual_neon(
+    uint16_t *s, int p, const uint8_t *blimit0, const uint8_t *limit0,
+    const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1,
+    const uint8_t *thresh1, int bd) {
+  vpx_highbd_lpf_horizontal_8_neon(s, p, blimit0, limit0, thresh0, bd);
+  vpx_highbd_lpf_horizontal_8_neon(s + 8, p, blimit1, limit1, thresh1, bd);
 }
