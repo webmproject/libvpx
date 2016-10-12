@@ -9,6 +9,7 @@
 ## PATENTS file, you can obtain it at www.aomedia.org/license/patent.
 ##
 
+
 DSP_SRCS-yes += aom_dsp.mk
 DSP_SRCS-yes += aom_dsp_common.h
 
@@ -72,8 +73,6 @@ DSP_SRCS-$(HAVE_DSPR2)  += mips/common_dspr2.h
 DSP_SRCS-$(HAVE_DSPR2)  += mips/common_dspr2.c
 
 # inter predictions
-
-ifeq ($(CONFIG_AV1),yes)
 DSP_SRCS-yes            += blend.h
 DSP_SRCS-yes            += blend_a64_mask.c
 DSP_SRCS-yes            += blend_a64_hmask.c
@@ -82,7 +81,6 @@ DSP_SRCS-$(HAVE_SSE4_1) += x86/blend_sse4.h
 DSP_SRCS-$(HAVE_SSE4_1) += x86/blend_a64_mask_sse4.c
 DSP_SRCS-$(HAVE_SSE4_1) += x86/blend_a64_hmask_sse4.c
 DSP_SRCS-$(HAVE_SSE4_1) += x86/blend_a64_vmask_sse4.c
-endif  #CONFIG_AV1
 
 # interpolation filters
 DSP_SRCS-yes += aom_convolve.c
@@ -101,7 +99,6 @@ ifeq ($(CONFIG_AOM_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_SSE2)  += x86/aom_high_subpixel_8t_sse2.asm
 DSP_SRCS-$(HAVE_SSE2)  += x86/aom_high_subpixel_bilinear_sse2.asm
 endif
-
 DSP_SRCS-$(HAVE_SSE2)  += x86/aom_convolve_copy_sse2.asm
 
 ifeq ($(HAVE_NEON_ASM),yes)

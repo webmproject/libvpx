@@ -17,7 +17,7 @@
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
 
-; Currently aom only works on iterations 8 at a time. The vp8 loop filter
+; Currently aom only works on iterations 8 at a time. The aom loop filter
 ; works on 16 iterations at a time.
 ;
 ; void aom_lpf_horizontal_8_neon(uint8_t *s, int p,
