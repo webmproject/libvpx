@@ -338,7 +338,7 @@ void od_dering(int16_t *y, const od_dering_in *x, int xstride,
       int32_t var;
       by = bskip[bi][0];
       bx = bskip[bi][1];
-      dir[by][bx] = od_dir_find8(&x[8 * by * xstride + 8 * bx], xstride,
+      dir[by][bx] = od_dir_find8(&in[8 * by * OD_FILT_BSTRIDE + 8 * bx], OD_FILT_BSTRIDE,
                                  &var, coeff_shift);
       /* Deringing orthogonal to the direction uses a tighter threshold
          because we want to be conservative. We've presumably already
