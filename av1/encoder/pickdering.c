@@ -58,11 +58,11 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
   av1_setup_dst_planes(xd->plane, frame, 0, 0);
   for (pli = 0; pli < 3; pli++) {
     dec[pli] = xd->plane[pli].subsampling_x;
-    bsize[pli] = 8 >> dec[pli];
+    bsize[pli] = 3 - dec[pli];
   }
-  stride = bsize[0] * cm->mi_cols;
-  for (r = 0; r < bsize[0] * cm->mi_rows; ++r) {
-    for (c = 0; c < bsize[0] * cm->mi_cols; ++c) {
+  stride = cm->mi_cols << bsize[0];
+  for (r = 0; r < cm->mi_rows << bsize[0]; ++r) {
+    for (c = 0; c < cm->mi_cols << bsize[0]; ++c) {
 #if CONFIG_AOM_HIGHBITDEPTH
       if (cm->use_highbitdepth) {
         src[r * stride + c] = CONVERT_TO_SHORTPTR(
@@ -109,26 +109,26 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
         int threshold;
         level = compute_level_from_index(best_level, gi);
         threshold = level << coeff_shift;
-        for (r = 0; r < bsize[0] * nvb; r++) {
-          for (c = 0; c < bsize[0] * nhb; c++) {
-            dst[r * MAX_MIB_SIZE * bsize[0] + c] =
-                src[(sbr * bsize[0] * MAX_MIB_SIZE + r) * stride +
-                    sbc * bsize[0] * MAX_MIB_SIZE + c];
+        for (r = 0; r < nvb << bsize[0]; r++) {
+          for (c = 0; c < nhb << bsize[0]; c++) {
+            dst[(r * MAX_MIB_SIZE << bsize[0]) + c] =
+                src[((sbr * MAX_MIB_SIZE << bsize[0]) + r) * stride +
+                    (sbc * MAX_MIB_SIZE << bsize[0]) + c];
           }
         }
         od_dering(tmp_dst,
-                  &src[sbr * stride * bsize[0] * MAX_MIB_SIZE +
-                       sbc * bsize[0] * MAX_MIB_SIZE],
-                  cm->mi_cols * bsize[0], nhb, nvb, sbc, sbr, nhsb, nvsb, 0,
+                  &src[(sbr * stride * MAX_MIB_SIZE << bsize[0]) +
+                       (sbc * MAX_MIB_SIZE << bsize[0])],
+                  cm->mi_cols << bsize[0], nhb, nvb, sbc, sbr, nhsb, nvsb, 0,
                   dir, 0,
                   bskip,
                   dering_count, threshold, coeff_shift);
-        copy_blocks_16bit(dst, MAX_MIB_SIZE * bsize[0], tmp_dst, bskip,
+        copy_blocks_16bit(dst, MAX_MIB_SIZE << bsize[0], tmp_dst, bskip,
             dering_count, 3);
         cur_mse = (int)compute_dist(
-            dst, MAX_MIB_SIZE * bsize[0],
-            &ref_coeff[sbr * stride * bsize[0] * MAX_MIB_SIZE +
-                       sbc * bsize[0] * MAX_MIB_SIZE],
+            dst, MAX_MIB_SIZE << bsize[0],
+            &ref_coeff[(sbr * stride * MAX_MIB_SIZE << bsize[0]) +
+                       (sbc * MAX_MIB_SIZE << bsize[0])],
             stride, nhb, nvb, coeff_shift);
         if (cur_mse < best_mse) {
           best_gi = gi;
