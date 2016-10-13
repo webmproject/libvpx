@@ -25,8 +25,7 @@ static INLINE void mm256_reverse_epi16(__m256i *u) {
   *u = _mm256_permute2x128_si256(v, v, 1);
 }
 
-void aom_fdct16x16_1_avx2(const int16_t *input, tran_low_t *output,
-                          int stride) {
+static int32_t get_16x16_sum(const int16_t *input, int stride) {
   __m256i r0, r1, r2, r3, u0, u1;
   __m256i zero = _mm256_setzero_si256();
   __m256i sum = _mm256_setzero_si256();
@@ -61,8 +60,14 @@ void aom_fdct16x16_1_avx2(const int16_t *input, tran_low_t *output,
                      _mm256_castsi256_si128(u1));
   v1 = _mm_srli_si128(v0, 4);
   v0 = _mm_add_epi32(v0, v1);
-  v0 = _mm_srai_epi32(v0, 1);
-  output[0] = (tran_low_t)_mm_extract_epi32(v0, 0);
+  return (int32_t)_mm_extract_epi32(v0, 0);
+}
+
+void aom_fdct16x16_1_avx2(const int16_t *input, tran_low_t *output,
+                          int stride) {
+  int32_t dc = get_16x16_sum(input, stride);
+  output[0] = (tran_low_t)(dc >> 1);
+  _mm256_zeroupper();
 }
 
 static void mm256_transpose_16x16(__m256i *in) {
@@ -559,8 +564,6 @@ static void fdct16_avx2(__m256i *in) {
   x1 = _mm256_unpackhi_epi16(u3, u4);
   in[13] = butter_fly(x0, x1, cospi_p06_p26);
   in[3] = butter_fly(x0, x1, cospi_m26_p06);
-
-  mm256_transpose_16x16(in);
 }
 
 void fadst16_avx2(__m256i *in) {
@@ -1105,8 +1108,6 @@ void fadst16_avx2(__m256i *in) {
   in[3] = _mm256_sub_epi16(zero, x4);
   in[13] = _mm256_sub_epi16(zero, x13);
   in[15] = _mm256_sub_epi16(zero, x1);
-
-  mm256_transpose_16x16(in);
 }
 
 #if CONFIG_EXT_TX
@@ -1134,7 +1135,6 @@ static void fidtx16_avx2(__m256i *in) {
     in[i] = _mm256_packs_epi32(u0, u1);
     i++;
   }
-  mm256_transpose_16x16(in);
 }
 #endif
 
@@ -1146,24 +1146,28 @@ void av1_fht16x16_avx2(const int16_t *input, tran_low_t *output, int stride,
     case DCT_DCT:
       load_buffer_16x16(input, stride, 0, 0, in);
       fdct16_avx2(in);
+      mm256_transpose_16x16(in);
       right_shift_16x16(in);
       fdct16_avx2(in);
       break;
     case ADST_DCT:
       load_buffer_16x16(input, stride, 0, 0, in);
       fadst16_avx2(in);
+      mm256_transpose_16x16(in);
       right_shift_16x16(in);
       fdct16_avx2(in);
       break;
     case DCT_ADST:
       load_buffer_16x16(input, stride, 0, 0, in);
       fdct16_avx2(in);
+      mm256_transpose_16x16(in);
       right_shift_16x16(in);
       fadst16_avx2(in);
       break;
     case ADST_ADST:
       load_buffer_16x16(input, stride, 0, 0, in);
       fadst16_avx2(in);
+      mm256_transpose_16x16(in);
       right_shift_16x16(in);
       fadst16_avx2(in);
       break;
@@ -1171,71 +1175,698 @@ void av1_fht16x16_avx2(const int16_t *input, tran_low_t *output, int stride,
     case FLIPADST_DCT:
       load_buffer_16x16(input, stride, 1, 0, in);
       fadst16_avx2(in);
+      mm256_transpose_16x16(in);
       right_shift_16x16(in);
       fdct16_avx2(in);
       break;
     case DCT_FLIPADST:
       load_buffer_16x16(input, stride, 0, 1, in);
       fdct16_avx2(in);
+      mm256_transpose_16x16(in);
       right_shift_16x16(in);
       fadst16_avx2(in);
       break;
     case FLIPADST_FLIPADST:
       load_buffer_16x16(input, stride, 1, 1, in);
       fadst16_avx2(in);
+      mm256_transpose_16x16(in);
       right_shift_16x16(in);
       fadst16_avx2(in);
       break;
     case ADST_FLIPADST:
       load_buffer_16x16(input, stride, 0, 1, in);
       fadst16_avx2(in);
+      mm256_transpose_16x16(in);
       right_shift_16x16(in);
       fadst16_avx2(in);
       break;
     case FLIPADST_ADST:
       load_buffer_16x16(input, stride, 1, 0, in);
       fadst16_avx2(in);
+      mm256_transpose_16x16(in);
       right_shift_16x16(in);
       fadst16_avx2(in);
       break;
     case V_DCT:
       load_buffer_16x16(input, stride, 0, 0, in);
       fdct16_avx2(in);
+      mm256_transpose_16x16(in);
       right_shift_16x16(in);
       fidtx16_avx2(in);
       break;
     case H_DCT:
       load_buffer_16x16(input, stride, 0, 0, in);
       fidtx16_avx2(in);
+      mm256_transpose_16x16(in);
       right_shift_16x16(in);
       fdct16_avx2(in);
       break;
     case V_ADST:
       load_buffer_16x16(input, stride, 0, 0, in);
       fadst16_avx2(in);
+      mm256_transpose_16x16(in);
       right_shift_16x16(in);
       fidtx16_avx2(in);
       break;
     case H_ADST:
       load_buffer_16x16(input, stride, 0, 0, in);
       fidtx16_avx2(in);
+      mm256_transpose_16x16(in);
       right_shift_16x16(in);
       fadst16_avx2(in);
       break;
     case V_FLIPADST:
       load_buffer_16x16(input, stride, 1, 0, in);
       fadst16_avx2(in);
+      mm256_transpose_16x16(in);
       right_shift_16x16(in);
       fidtx16_avx2(in);
       break;
     case H_FLIPADST:
       load_buffer_16x16(input, stride, 0, 1, in);
       fidtx16_avx2(in);
+      mm256_transpose_16x16(in);
       right_shift_16x16(in);
       fadst16_avx2(in);
       break;
 #endif  // CONFIG_EXT_TX
     default: assert(0); break;
   }
+  mm256_transpose_16x16(in);
   write_buffer_16x16(in, 16, output);
+  _mm256_zeroupper();
+}
+
+void aom_fdct32x32_1_avx2(const int16_t *input, tran_low_t *output,
+                          int stride) {
+  // left and upper corner
+  int32_t sum = get_16x16_sum(input, stride);
+  // right and upper corner
+  sum += get_16x16_sum(input + 16, stride);
+  // left and lower corner
+  sum += get_16x16_sum(input + (stride << 4), stride);
+  // right and lower corner
+  sum += get_16x16_sum(input + (stride << 4) + 16, stride);
+
+  sum >>= 3;
+  output[0] = (tran_low_t)sum;
+  _mm256_zeroupper();
+}
+
+#if CONFIG_EXT_TX
+static void mm256_vectors_swap(__m256i *a0, __m256i *a1, const int size) {
+  int i = 0;
+  __m256i temp;
+  while (i < size) {
+    temp = a0[i];
+    a0[i] = a1[i];
+    a1[i] = temp;
+    i++;
+  }
+}
+
+static void mm256_transpose_32x32(__m256i *in0, __m256i *in1) {
+  mm256_transpose_16x16(in0);
+  mm256_transpose_16x16(&in0[16]);
+  mm256_transpose_16x16(in1);
+  mm256_transpose_16x16(&in1[16]);
+  mm256_vectors_swap(&in0[16], in1, 16);
+}
+
+static void prepare_16x16_even(const __m256i *in, __m256i *even) {
+  even[0] = _mm256_add_epi16(in[0], in[31]);
+  even[1] = _mm256_add_epi16(in[1], in[30]);
+  even[2] = _mm256_add_epi16(in[2], in[29]);
+  even[3] = _mm256_add_epi16(in[3], in[28]);
+  even[4] = _mm256_add_epi16(in[4], in[27]);
+  even[5] = _mm256_add_epi16(in[5], in[26]);
+  even[6] = _mm256_add_epi16(in[6], in[25]);
+  even[7] = _mm256_add_epi16(in[7], in[24]);
+  even[8] = _mm256_add_epi16(in[8], in[23]);
+  even[9] = _mm256_add_epi16(in[9], in[22]);
+  even[10] = _mm256_add_epi16(in[10], in[21]);
+  even[11] = _mm256_add_epi16(in[11], in[20]);
+  even[12] = _mm256_add_epi16(in[12], in[19]);
+  even[13] = _mm256_add_epi16(in[13], in[18]);
+  even[14] = _mm256_add_epi16(in[14], in[17]);
+  even[15] = _mm256_add_epi16(in[15], in[16]);
+}
+
+static void prepare_16x16_odd(const __m256i *in, __m256i *odd) {
+  odd[0] = _mm256_sub_epi16(in[15], in[16]);
+  odd[1] = _mm256_sub_epi16(in[14], in[17]);
+  odd[2] = _mm256_sub_epi16(in[13], in[18]);
+  odd[3] = _mm256_sub_epi16(in[12], in[19]);
+  odd[4] = _mm256_sub_epi16(in[11], in[20]);
+  odd[5] = _mm256_sub_epi16(in[10], in[21]);
+  odd[6] = _mm256_sub_epi16(in[9], in[22]);
+  odd[7] = _mm256_sub_epi16(in[8], in[23]);
+  odd[8] = _mm256_sub_epi16(in[7], in[24]);
+  odd[9] = _mm256_sub_epi16(in[6], in[25]);
+  odd[10] = _mm256_sub_epi16(in[5], in[26]);
+  odd[11] = _mm256_sub_epi16(in[4], in[27]);
+  odd[12] = _mm256_sub_epi16(in[3], in[28]);
+  odd[13] = _mm256_sub_epi16(in[2], in[29]);
+  odd[14] = _mm256_sub_epi16(in[1], in[30]);
+  odd[15] = _mm256_sub_epi16(in[0], in[31]);
+}
+
+static void collect_16col(const __m256i *even, const __m256i *odd,
+                          __m256i *out) {
+  // fdct16_avx2() already maps the output
+  out[0] = even[0];
+  out[2] = even[1];
+  out[4] = even[2];
+  out[6] = even[3];
+  out[8] = even[4];
+  out[10] = even[5];
+  out[12] = even[6];
+  out[14] = even[7];
+  out[16] = even[8];
+  out[18] = even[9];
+  out[20] = even[10];
+  out[22] = even[11];
+  out[24] = even[12];
+  out[26] = even[13];
+  out[28] = even[14];
+  out[30] = even[15];
+
+  out[1] = odd[0];
+  out[17] = odd[1];
+  out[9] = odd[2];
+  out[25] = odd[3];
+  out[5] = odd[4];
+  out[21] = odd[5];
+  out[13] = odd[6];
+  out[29] = odd[7];
+  out[3] = odd[8];
+  out[19] = odd[9];
+  out[11] = odd[10];
+  out[27] = odd[11];
+  out[7] = odd[12];
+  out[23] = odd[13];
+  out[15] = odd[14];
+  out[31] = odd[15];
+}
+
+static void collect_coeffs(const __m256i *first_16col_even,
+                           const __m256i *first_16col_odd,
+                           const __m256i *second_16col_even,
+                           const __m256i *second_16col_odd, __m256i *in0,
+                           __m256i *in1) {
+  collect_16col(first_16col_even, first_16col_odd, in0);
+  collect_16col(second_16col_even, second_16col_odd, in1);
+}
+
+static void fdct16_odd_avx2(__m256i *in) {
+  // sequence: cospi_L_H = pairs(L, H) and L first
+  const __m256i cospi_p16_p16 = pair256_set_epi16(cospi_16_64, cospi_16_64);
+  const __m256i cospi_m16_p16 = pair256_set_epi16(-cospi_16_64, cospi_16_64);
+  const __m256i cospi_m08_p24 = pair256_set_epi16(-cospi_8_64, cospi_24_64);
+  const __m256i cospi_p24_p08 = pair256_set_epi16(cospi_24_64, cospi_8_64);
+  const __m256i cospi_m24_m08 = pair256_set_epi16(-cospi_24_64, -cospi_8_64);
+  const __m256i cospi_m04_p28 = pair256_set_epi16(-cospi_4_64, cospi_28_64);
+  const __m256i cospi_p28_p04 = pair256_set_epi16(cospi_28_64, cospi_4_64);
+  const __m256i cospi_m28_m04 = pair256_set_epi16(-cospi_28_64, -cospi_4_64);
+  const __m256i cospi_m20_p12 = pair256_set_epi16(-cospi_20_64, cospi_12_64);
+  const __m256i cospi_p12_p20 = pair256_set_epi16(cospi_12_64, cospi_20_64);
+  const __m256i cospi_m12_m20 = pair256_set_epi16(-cospi_12_64, -cospi_20_64);
+
+  const __m256i cospi_p31_p01 = pair256_set_epi16(cospi_31_64, cospi_1_64);
+  const __m256i cospi_m01_p31 = pair256_set_epi16(-cospi_1_64, cospi_31_64);
+  const __m256i cospi_p15_p17 = pair256_set_epi16(cospi_15_64, cospi_17_64);
+  const __m256i cospi_m17_p15 = pair256_set_epi16(-cospi_17_64, cospi_15_64);
+  const __m256i cospi_p23_p09 = pair256_set_epi16(cospi_23_64, cospi_9_64);
+  const __m256i cospi_m09_p23 = pair256_set_epi16(-cospi_9_64, cospi_23_64);
+  const __m256i cospi_p07_p25 = pair256_set_epi16(cospi_7_64, cospi_25_64);
+  const __m256i cospi_m25_p07 = pair256_set_epi16(-cospi_25_64, cospi_7_64);
+  const __m256i cospi_p27_p05 = pair256_set_epi16(cospi_27_64, cospi_5_64);
+  const __m256i cospi_m05_p27 = pair256_set_epi16(-cospi_5_64, cospi_27_64);
+  const __m256i cospi_p11_p21 = pair256_set_epi16(cospi_11_64, cospi_21_64);
+  const __m256i cospi_m21_p11 = pair256_set_epi16(-cospi_21_64, cospi_11_64);
+  const __m256i cospi_p19_p13 = pair256_set_epi16(cospi_19_64, cospi_13_64);
+  const __m256i cospi_m13_p19 = pair256_set_epi16(-cospi_13_64, cospi_19_64);
+  const __m256i cospi_p03_p29 = pair256_set_epi16(cospi_3_64, cospi_29_64);
+  const __m256i cospi_m29_p03 = pair256_set_epi16(-cospi_29_64, cospi_3_64);
+
+  __m256i x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15;
+  __m256i y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15;
+  __m256i u0, u1;
+
+  // stage 1 is in prepare_16x16_odd()
+
+  // stage 2
+  y0 = in[0];
+  y1 = in[1];
+  y2 = in[2];
+  y3 = in[3];
+
+  u0 = _mm256_unpacklo_epi16(in[4], in[11]);
+  u1 = _mm256_unpackhi_epi16(in[4], in[11]);
+  y4 = butter_fly(u0, u1, cospi_m16_p16);
+  y11 = butter_fly(u0, u1, cospi_p16_p16);
+
+  u0 = _mm256_unpacklo_epi16(in[5], in[10]);
+  u1 = _mm256_unpackhi_epi16(in[5], in[10]);
+  y5 = butter_fly(u0, u1, cospi_m16_p16);
+  y10 = butter_fly(u0, u1, cospi_p16_p16);
+
+  u0 = _mm256_unpacklo_epi16(in[6], in[9]);
+  u1 = _mm256_unpackhi_epi16(in[6], in[9]);
+  y6 = butter_fly(u0, u1, cospi_m16_p16);
+  y9 = butter_fly(u0, u1, cospi_p16_p16);
+
+  u0 = _mm256_unpacklo_epi16(in[7], in[8]);
+  u1 = _mm256_unpackhi_epi16(in[7], in[8]);
+  y7 = butter_fly(u0, u1, cospi_m16_p16);
+  y8 = butter_fly(u0, u1, cospi_p16_p16);
+
+  y12 = in[12];
+  y13 = in[13];
+  y14 = in[14];
+  y15 = in[15];
+
+  // stage 3
+  x0 = _mm256_add_epi16(y0, y7);
+  x1 = _mm256_add_epi16(y1, y6);
+  x2 = _mm256_add_epi16(y2, y5);
+  x3 = _mm256_add_epi16(y3, y4);
+  x4 = _mm256_sub_epi16(y3, y4);
+  x5 = _mm256_sub_epi16(y2, y5);
+  x6 = _mm256_sub_epi16(y1, y6);
+  x7 = _mm256_sub_epi16(y0, y7);
+  x8 = _mm256_sub_epi16(y15, y8);
+  x9 = _mm256_sub_epi16(y14, y9);
+  x10 = _mm256_sub_epi16(y13, y10);
+  x11 = _mm256_sub_epi16(y12, y11);
+  x12 = _mm256_add_epi16(y12, y11);
+  x13 = _mm256_add_epi16(y13, y10);
+  x14 = _mm256_add_epi16(y14, y9);
+  x15 = _mm256_add_epi16(y15, y8);
+
+  // stage 4
+  y0 = x0;
+  y1 = x1;
+  y6 = x6;
+  y7 = x7;
+  y8 = x8;
+  y9 = x9;
+  y14 = x14;
+  y15 = x15;
+
+  u0 = _mm256_unpacklo_epi16(x2, x13);
+  u1 = _mm256_unpackhi_epi16(x2, x13);
+  y2 = butter_fly(u0, u1, cospi_m08_p24);
+  y13 = butter_fly(u0, u1, cospi_p24_p08);
+
+  u0 = _mm256_unpacklo_epi16(x3, x12);
+  u1 = _mm256_unpackhi_epi16(x3, x12);
+  y3 = butter_fly(u0, u1, cospi_m08_p24);
+  y12 = butter_fly(u0, u1, cospi_p24_p08);
+
+  u0 = _mm256_unpacklo_epi16(x4, x11);
+  u1 = _mm256_unpackhi_epi16(x4, x11);
+  y4 = butter_fly(u0, u1, cospi_m24_m08);
+  y11 = butter_fly(u0, u1, cospi_m08_p24);
+
+  u0 = _mm256_unpacklo_epi16(x5, x10);
+  u1 = _mm256_unpackhi_epi16(x5, x10);
+  y5 = butter_fly(u0, u1, cospi_m24_m08);
+  y10 = butter_fly(u0, u1, cospi_m08_p24);
+
+  // stage 5
+  x0 = _mm256_add_epi16(y0, y3);
+  x1 = _mm256_add_epi16(y1, y2);
+  x2 = _mm256_sub_epi16(y1, y2);
+  x3 = _mm256_sub_epi16(y0, y3);
+  x4 = _mm256_sub_epi16(y7, y4);
+  x5 = _mm256_sub_epi16(y6, y5);
+  x6 = _mm256_add_epi16(y6, y5);
+  x7 = _mm256_add_epi16(y7, y4);
+
+  x8 = _mm256_add_epi16(y8, y11);
+  x9 = _mm256_add_epi16(y9, y10);
+  x10 = _mm256_sub_epi16(y9, y10);
+  x11 = _mm256_sub_epi16(y8, y11);
+  x12 = _mm256_sub_epi16(y15, y12);
+  x13 = _mm256_sub_epi16(y14, y13);
+  x14 = _mm256_add_epi16(y14, y13);
+  x15 = _mm256_add_epi16(y15, y12);
+
+  // stage 6
+  y0 = x0;
+  y3 = x3;
+  y4 = x4;
+  y7 = x7;
+  y8 = x8;
+  y11 = x11;
+  y12 = x12;
+  y15 = x15;
+
+  u0 = _mm256_unpacklo_epi16(x1, x14);
+  u1 = _mm256_unpackhi_epi16(x1, x14);
+  y1 = butter_fly(u0, u1, cospi_m04_p28);
+  y14 = butter_fly(u0, u1, cospi_p28_p04);
+
+  u0 = _mm256_unpacklo_epi16(x2, x13);
+  u1 = _mm256_unpackhi_epi16(x2, x13);
+  y2 = butter_fly(u0, u1, cospi_m28_m04);
+  y13 = butter_fly(u0, u1, cospi_m04_p28);
+
+  u0 = _mm256_unpacklo_epi16(x5, x10);
+  u1 = _mm256_unpackhi_epi16(x5, x10);
+  y5 = butter_fly(u0, u1, cospi_m20_p12);
+  y10 = butter_fly(u0, u1, cospi_p12_p20);
+
+  u0 = _mm256_unpacklo_epi16(x6, x9);
+  u1 = _mm256_unpackhi_epi16(x6, x9);
+  y6 = butter_fly(u0, u1, cospi_m12_m20);
+  y9 = butter_fly(u0, u1, cospi_m20_p12);
+
+  // stage 7
+  x0 = _mm256_add_epi16(y0, y1);
+  x1 = _mm256_sub_epi16(y0, y1);
+  x2 = _mm256_sub_epi16(y3, y2);
+  x3 = _mm256_add_epi16(y3, y2);
+  x4 = _mm256_add_epi16(y4, y5);
+  x5 = _mm256_sub_epi16(y4, y5);
+  x6 = _mm256_sub_epi16(y7, y6);
+  x7 = _mm256_add_epi16(y7, y6);
+
+  x8 = _mm256_add_epi16(y8, y9);
+  x9 = _mm256_sub_epi16(y8, y9);
+  x10 = _mm256_sub_epi16(y11, y10);
+  x11 = _mm256_add_epi16(y11, y10);
+  x12 = _mm256_add_epi16(y12, y13);
+  x13 = _mm256_sub_epi16(y12, y13);
+  x14 = _mm256_sub_epi16(y15, y14);
+  x15 = _mm256_add_epi16(y15, y14);
+
+  // stage 8
+  u0 = _mm256_unpacklo_epi16(x0, x15);
+  u1 = _mm256_unpackhi_epi16(x0, x15);
+  in[0] = butter_fly(u0, u1, cospi_p31_p01);
+  in[15] = butter_fly(u0, u1, cospi_m01_p31);
+
+  u0 = _mm256_unpacklo_epi16(x1, x14);
+  u1 = _mm256_unpackhi_epi16(x1, x14);
+  in[1] = butter_fly(u0, u1, cospi_p15_p17);
+  in[14] = butter_fly(u0, u1, cospi_m17_p15);
+
+  u0 = _mm256_unpacklo_epi16(x2, x13);
+  u1 = _mm256_unpackhi_epi16(x2, x13);
+  in[2] = butter_fly(u0, u1, cospi_p23_p09);
+  in[13] = butter_fly(u0, u1, cospi_m09_p23);
+
+  u0 = _mm256_unpacklo_epi16(x3, x12);
+  u1 = _mm256_unpackhi_epi16(x3, x12);
+  in[3] = butter_fly(u0, u1, cospi_p07_p25);
+  in[12] = butter_fly(u0, u1, cospi_m25_p07);
+
+  u0 = _mm256_unpacklo_epi16(x4, x11);
+  u1 = _mm256_unpackhi_epi16(x4, x11);
+  in[4] = butter_fly(u0, u1, cospi_p27_p05);
+  in[11] = butter_fly(u0, u1, cospi_m05_p27);
+
+  u0 = _mm256_unpacklo_epi16(x5, x10);
+  u1 = _mm256_unpackhi_epi16(x5, x10);
+  in[5] = butter_fly(u0, u1, cospi_p11_p21);
+  in[10] = butter_fly(u0, u1, cospi_m21_p11);
+
+  u0 = _mm256_unpacklo_epi16(x6, x9);
+  u1 = _mm256_unpackhi_epi16(x6, x9);
+  in[6] = butter_fly(u0, u1, cospi_p19_p13);
+  in[9] = butter_fly(u0, u1, cospi_m13_p19);
+
+  u0 = _mm256_unpacklo_epi16(x7, x8);
+  u1 = _mm256_unpackhi_epi16(x7, x8);
+  in[7] = butter_fly(u0, u1, cospi_p03_p29);
+  in[8] = butter_fly(u0, u1, cospi_m29_p03);
+}
+
+static void fdct32_avx2(__m256i *in0, __m256i *in1) {
+  __m256i even0[16], even1[16], odd0[16], odd1[16];
+  prepare_16x16_even(in0, even0);
+  fdct16_avx2(even0);
+
+  prepare_16x16_odd(in0, odd0);
+  fdct16_odd_avx2(odd0);
+
+  prepare_16x16_even(in1, even1);
+  fdct16_avx2(even1);
+
+  prepare_16x16_odd(in1, odd1);
+  fdct16_odd_avx2(odd1);
+
+  collect_coeffs(even0, odd0, even1, odd1, in0, in1);
+
+  mm256_transpose_32x32(in0, in1);
+}
+#endif  // CONFIG_EXT_TX
+
+static INLINE void write_buffer_32x32(const __m256i *in0, const __m256i *in1,
+                                      int stride, tran_low_t *output) {
+  int i = 0;
+  tran_low_t *coeff = output;
+  while (i < 32) {
+    _mm256_storeu_si256((__m256i *)coeff, in0[i]);
+    _mm256_storeu_si256((__m256i *)(coeff + 16), in1[i]);
+    coeff += stride;
+    i += 1;
+  }
+}
+
+#if CONFIG_EXT_TX
+static void fhalfright32_16col_avx2(__m256i *in) {
+  int i = 0;
+  const __m256i zero = _mm256_setzero_si256();
+  const __m256i sqrt2 = _mm256_set1_epi16(Sqrt2);
+  const __m256i dct_rounding = _mm256_set1_epi32(DCT_CONST_ROUNDING);
+  __m256i x0, x1;
+
+  while (i < 16) {
+    in[i] = _mm256_slli_epi16(in[i], 2);
+    x0 = _mm256_unpacklo_epi16(in[i + 16], zero);
+    x1 = _mm256_unpackhi_epi16(in[i + 16], zero);
+    x0 = _mm256_madd_epi16(x0, sqrt2);
+    x1 = _mm256_madd_epi16(x1, sqrt2);
+    x0 = _mm256_add_epi32(x0, dct_rounding);
+    x1 = _mm256_add_epi32(x1, dct_rounding);
+    x0 = _mm256_srai_epi32(x0, DCT_CONST_BITS);
+    x1 = _mm256_srai_epi32(x1, DCT_CONST_BITS);
+    in[i + 16] = _mm256_packs_epi32(x0, x1);
+    i += 1;
+  }
+  fdct16_avx2(&in[16]);
+}
+
+static void fhalfright32_avx2(__m256i *in0, __m256i *in1) {
+  fhalfright32_16col_avx2(in0);
+  fhalfright32_16col_avx2(in1);
+  mm256_vectors_swap(in0, &in0[16], 16);
+  mm256_vectors_swap(in1, &in1[16], 16);
+  mm256_transpose_32x32(in0, in1);
+}
+
+static void load_buffer_32x32(const int16_t *input, int stride, int flipud,
+                              int fliplr, __m256i *in0, __m256i *in1) {
+  // Load 4 16x16 blocks
+  const int16_t *topL = input;
+  const int16_t *topR = input + 16;
+  const int16_t *botL = input + 16 * stride;
+  const int16_t *botR = input + 16 * stride + 16;
+
+  const int16_t *tmp;
+
+  if (flipud) {
+    // Swap left columns
+    tmp = topL;
+    topL = botL;
+    botL = tmp;
+    // Swap right columns
+    tmp = topR;
+    topR = botR;
+    botR = tmp;
+  }
+
+  if (fliplr) {
+    // Swap top rows
+    tmp = topL;
+    topL = topR;
+    topR = tmp;
+    // Swap bottom rows
+    tmp = botL;
+    botL = botR;
+    botR = tmp;
+  }
+
+  // load first 16 columns
+  load_buffer_16x16(topL, stride, flipud, fliplr, in0);
+  load_buffer_16x16(botL, stride, flipud, fliplr, in0 + 16);
+
+  // load second 16 columns
+  load_buffer_16x16(topR, stride, flipud, fliplr, in1);
+  load_buffer_16x16(botR, stride, flipud, fliplr, in1 + 16);
+}
+#endif  // CONFIG_EXT_TX
+
+static void nr_right_shift_32x32_16col(__m256i *in) {
+  int i = 0;
+  const __m256i one = _mm256_set1_epi16(1);
+  __m256i sign;
+  while (i < 32) {
+    sign = _mm256_srai_epi16(in[i], 15);
+    in[i] = _mm256_add_epi16(in[i], one);
+    in[i] = _mm256_sub_epi16(in[i], sign);
+    in[i] = _mm256_srai_epi16(in[i], 2);
+    i += 1;
+  }
+}
+
+// Negative rounding
+static void nr_right_shift_32x32(__m256i *in0, __m256i *in1) {
+  nr_right_shift_32x32_16col(in0);
+  nr_right_shift_32x32_16col(in1);
+}
+
+#if CONFIG_EXT_TX
+static void pr_right_shift_32x32_16col(__m256i *in) {
+  int i = 0;
+  const __m256i zero = _mm256_setzero_si256();
+  const __m256i one = _mm256_set1_epi16(1);
+  __m256i sign;
+  while (i < 32) {
+    sign = _mm256_cmpgt_epi16(in[i], zero);
+    in[i] = _mm256_add_epi16(in[i], one);
+    in[i] = _mm256_sub_epi16(in[i], sign);
+    in[i] = _mm256_srai_epi16(in[i], 2);
+    i += 1;
+  }
+}
+
+// Positive rounding
+static void pr_right_shift_32x32(__m256i *in0, __m256i *in1) {
+  pr_right_shift_32x32_16col(in0);
+  pr_right_shift_32x32_16col(in1);
+}
+
+static void fidtx32_avx2(__m256i *in0, __m256i *in1) {
+  int i = 0;
+  while (i < 32) {
+    in0[i] = _mm256_slli_epi16(in0[i], 2);
+    in1[i] = _mm256_slli_epi16(in1[i], 2);
+    i += 1;
+  }
+  mm256_transpose_32x32(in0, in1);
+}
+#endif
+
+void av1_fht32x32_avx2(const int16_t *input, tran_low_t *output, int stride,
+                       int tx_type) {
+  __m256i in0[32];  // left 32 columns
+  __m256i in1[32];  // right 32 columns
+  (void)input;
+  (void)stride;
+
+  switch (tx_type) {
+// TODO(luoyi): For DCT_DCT, fwd_txfm_32x32() uses aom set. But this
+// function has better speed. The replacement must work with the
+// corresponding inverse transform.
+// case DCT_DCT:
+//   load_buffer_32x32(input, stride, 0, 0, in0, in1);
+//   fdct32_avx2(in0, in1);
+//   pr_right_shift_32x32(in0, in1);
+//   fdct32_avx2(in0, in1);
+//   break;
+#if CONFIG_EXT_TX
+    case ADST_DCT:
+      load_buffer_32x32(input, stride, 0, 0, in0, in1);
+      fhalfright32_avx2(in0, in1);
+      pr_right_shift_32x32(in0, in1);
+      fdct32_avx2(in0, in1);
+      break;
+    case DCT_ADST:
+      load_buffer_32x32(input, stride, 0, 0, in0, in1);
+      fdct32_avx2(in0, in1);
+      pr_right_shift_32x32(in0, in1);
+      fhalfright32_avx2(in0, in1);
+      break;
+    case ADST_ADST:
+      load_buffer_32x32(input, stride, 0, 0, in0, in1);
+      fhalfright32_avx2(in0, in1);
+      pr_right_shift_32x32(in0, in1);
+      fhalfright32_avx2(in0, in1);
+      break;
+    case FLIPADST_DCT:
+      load_buffer_32x32(input, stride, 1, 0, in0, in1);
+      fhalfright32_avx2(in0, in1);
+      pr_right_shift_32x32(in0, in1);
+      fdct32_avx2(in0, in1);
+      break;
+    case DCT_FLIPADST:
+      load_buffer_32x32(input, stride, 0, 1, in0, in1);
+      fdct32_avx2(in0, in1);
+      pr_right_shift_32x32(in0, in1);
+      fhalfright32_avx2(in0, in1);
+      break;
+    case FLIPADST_FLIPADST:
+      load_buffer_32x32(input, stride, 1, 1, in0, in1);
+      fhalfright32_avx2(in0, in1);
+      pr_right_shift_32x32(in0, in1);
+      fhalfright32_avx2(in0, in1);
+      break;
+    case ADST_FLIPADST:
+      load_buffer_32x32(input, stride, 0, 1, in0, in1);
+      fhalfright32_avx2(in0, in1);
+      pr_right_shift_32x32(in0, in1);
+      fhalfright32_avx2(in0, in1);
+      break;
+    case FLIPADST_ADST:
+      load_buffer_32x32(input, stride, 1, 0, in0, in1);
+      fhalfright32_avx2(in0, in1);
+      pr_right_shift_32x32(in0, in1);
+      fhalfright32_avx2(in0, in1);
+      break;
+    case V_DCT:
+      load_buffer_32x32(input, stride, 0, 0, in0, in1);
+      fdct32_avx2(in0, in1);
+      pr_right_shift_32x32(in0, in1);
+      fidtx32_avx2(in0, in1);
+      break;
+    case H_DCT:
+      load_buffer_32x32(input, stride, 0, 0, in0, in1);
+      fidtx32_avx2(in0, in1);
+      pr_right_shift_32x32(in0, in1);
+      fdct32_avx2(in0, in1);
+      break;
+    case V_ADST:
+      load_buffer_32x32(input, stride, 0, 0, in0, in1);
+      fhalfright32_avx2(in0, in1);
+      pr_right_shift_32x32(in0, in1);
+      fidtx32_avx2(in0, in1);
+      break;
+    case H_ADST:
+      load_buffer_32x32(input, stride, 0, 0, in0, in1);
+      fidtx32_avx2(in0, in1);
+      pr_right_shift_32x32(in0, in1);
+      fhalfright32_avx2(in0, in1);
+      break;
+    case V_FLIPADST:
+      load_buffer_32x32(input, stride, 1, 0, in0, in1);
+      fhalfright32_avx2(in0, in1);
+      pr_right_shift_32x32(in0, in1);
+      fidtx32_avx2(in0, in1);
+      break;
+    case H_FLIPADST:
+      load_buffer_32x32(input, stride, 0, 1, in0, in1);
+      fidtx32_avx2(in0, in1);
+      pr_right_shift_32x32(in0, in1);
+      fhalfright32_avx2(in0, in1);
+      break;
+#endif  // CONFIG_EXT_TX
+    default: assert(0); break;
+  }
+  nr_right_shift_32x32(in0, in1);
+  write_buffer_32x32(in0, in1, 32, output);
+  _mm256_zeroupper();
 }
