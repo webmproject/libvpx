@@ -22,6 +22,30 @@
       "revId": "365fc9bfbec627be70b85392a727410b3be7e6ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ca69ec4_557a3c11",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-13T00:04:04Z",
+      "side": 1,
+      "message": "\u003e clang-format seems to think this is the right format:\n \u003e \n \u003e static void pack_inter_mode_mvs(VP9_COMP *cpi, const MACROBLOCKD\n \u003e *const xd,\n \u003e const MB_MODE_INFO_EXT *const mbmi_ext,\n \u003e vpx_writer *w,\n \u003e unsigned int *const max_mv_magnitude,\n \u003e int interp_filter_selected[MAX_REF_FRAMES]\n \u003e [SWITCHABLE]) {\n \u003e \n \u003e No idea why or what setting to change in .clang-format. If not,\n \u003e i\u0027ll just go with this.\n\n3.8 seems to differ in how it tries to align multi-dimension arrays. I believe this will change again with 3.9, for now best to accept it",
+      "parentUuid": "bc9b6e32_bec955a6",
+      "range": {
+        "startLine": 233,
+        "startChar": 0,
+        "endLine": 237,
+        "endChar": 61
+      },
+      "revId": "365fc9bfbec627be70b85392a727410b3be7e6ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
