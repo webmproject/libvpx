@@ -21,12 +21,6 @@ typedef int16_t od_dering_in;
 
 #define OD_DERINGSIZES (2)
 
-#define OD_DERING_NO_CHECK_OVERLAP (0)
-#define OD_DERING_CHECK_OVERLAP (1)
-
-#define OD_DERING_LEVELS (6)
-extern const double OD_DERING_GAIN_TABLE[OD_DERING_LEVELS];
-
 #define OD_DERING_NBLOCKS (OD_BSIZE_MAX / 8)
 
 #define OD_FILT_BORDER (3)
@@ -54,7 +48,7 @@ void od_dering(const od_dering_opt_vtbl *vtbl, int16_t *y, int ystride,
                int sby, int nhsb, int nvsb, int xdec,
                int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS], int pli,
                unsigned char *bskip, int skip_stride, int threshold,
-               int overlap, int coeff_shift);
+               int coeff_shift);
 void od_filter_dering_direction_c(int16_t *y, int ystride, const int16_t *in,
                                   int ln, int threshold, int dir);
 void od_filter_dering_orthogonal_c(int16_t *y, int ystride, const int16_t *in,

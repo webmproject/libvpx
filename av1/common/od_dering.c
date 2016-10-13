@@ -35,9 +35,6 @@ const int OD_DIRECTION_OFFSETS_TABLE[8][3] = {
   { 1 * OD_FILT_BSTRIDE + 0, 2 * OD_FILT_BSTRIDE - 1, 3 * OD_FILT_BSTRIDE - 1 },
 };
 
-const double OD_DERING_GAIN_TABLE[OD_DERING_LEVELS] = { 0, 0.5,  0.707,
-                                                        1, 1.41, 2 };
-
 /* Detect direction. 0 means 45-degree up-right, 2 is horizontal, and so on.
    The search minimizes the weighted variance along all the lines in a
    particular direction, i.e. the squared error between the input and a
@@ -252,7 +249,7 @@ void od_dering(const od_dering_opt_vtbl *vtbl, int16_t *y, int ystride,
                int sby, int nhsb, int nvsb, int xdec,
                int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS], int pli,
                unsigned char *bskip, int skip_stride, int threshold,
-               int overlap, int coeff_shift) {
+               int coeff_shift) {
   int i;
   int j;
   int bx;
@@ -299,35 +296,7 @@ void od_dering(const od_dering_opt_vtbl *vtbl, int16_t *y, int ystride,
   }
   for (by = 0; by < nvb; by++) {
     for (bx = 0; bx < nhb; bx++) {
-      int skip;
-#if defined(DAALA_ODINTRIN)
-      int xstart;
-      int ystart;
-      int xend;
-      int yend;
-      xstart = ystart = 0;
-      xend = yend = (2 >> xdec);
-      if (overlap) {
-        xstart -= (sbx != 0);
-        ystart -= (sby != 0);
-        xend += (sbx != nhsb - 1);
-        yend += (sby != nvsb - 1);
-      }
-      skip = 1;
-      /* We look at whether the current block and its 4x4 surrounding (due to
-         lapping) are skipped to avoid filtering the same content multiple
-         times. */
-      for (i = ystart; i < yend; i++) {
-        for (j = xstart; j < xend; j++) {
-          skip = skip && bskip[((by << 1 >> xdec) + i) * skip_stride +
-                               (bx << 1 >> xdec) + j];
-        }
-      }
-#else
-      (void)overlap;
-      skip = bskip[by * skip_stride + bx];
-#endif
-      if (skip) thresh[by][bx] = 0;
+      if (bskip[by * skip_stride + bx]) thresh[by][bx] = 0;
     }
   }
   for (by = 0; by < nvb; by++) {
