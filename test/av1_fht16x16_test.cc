@@ -68,6 +68,7 @@ class AV1Trans16x16HT : public libaom_test::TransformTestBase,
     inv_txfm_ = GET_PARAM(1);
     tx_type_ = GET_PARAM(2);
     pitch_ = 16;
+    height_ = 16;
     fwd_txfm_ref = fht16x16_ref;
     bit_depth_ = GET_PARAM(3);
     mask_ = (1 << bit_depth_) - 1;
