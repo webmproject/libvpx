@@ -820,14 +820,14 @@ void vpx_convolve8_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
         s10 = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(s)));
         s += src_stride;
 
-        __builtin_prefetch(dst + 0 * dst_stride);
-        __builtin_prefetch(dst + 1 * dst_stride);
-        __builtin_prefetch(dst + 2 * dst_stride);
-        __builtin_prefetch(dst + 3 * dst_stride);
-        __builtin_prefetch(src + 0 * src_stride);
-        __builtin_prefetch(src + 1 * src_stride);
-        __builtin_prefetch(src + 2 * src_stride);
-        __builtin_prefetch(src + 3 * src_stride);
+        __builtin_prefetch(d + 0 * dst_stride);
+        __builtin_prefetch(d + 1 * dst_stride);
+        __builtin_prefetch(d + 2 * dst_stride);
+        __builtin_prefetch(d + 3 * dst_stride);
+        __builtin_prefetch(s + 0 * src_stride);
+        __builtin_prefetch(s + 1 * src_stride);
+        __builtin_prefetch(s + 2 * src_stride);
+        __builtin_prefetch(s + 3 * src_stride);
         d0 = convolve8_8(s0, s1, s2, s3, s4, s5, s6, s7, filters, filter3,
                          filter4);
         d1 = convolve8_8(s1, s2, s3, s4, s5, s6, s7, s8, filters, filter3,
@@ -1002,14 +1002,14 @@ void vpx_convolve8_avg_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
         s10 = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(s)));
         s += src_stride;
 
-        __builtin_prefetch(dst + 0 * dst_stride);
-        __builtin_prefetch(dst + 1 * dst_stride);
-        __builtin_prefetch(dst + 2 * dst_stride);
-        __builtin_prefetch(dst + 3 * dst_stride);
-        __builtin_prefetch(src + 0 * src_stride);
-        __builtin_prefetch(src + 1 * src_stride);
-        __builtin_prefetch(src + 2 * src_stride);
-        __builtin_prefetch(src + 3 * src_stride);
+        __builtin_prefetch(d + 0 * dst_stride);
+        __builtin_prefetch(d + 1 * dst_stride);
+        __builtin_prefetch(d + 2 * dst_stride);
+        __builtin_prefetch(d + 3 * dst_stride);
+        __builtin_prefetch(s + 0 * src_stride);
+        __builtin_prefetch(s + 1 * src_stride);
+        __builtin_prefetch(s + 2 * src_stride);
+        __builtin_prefetch(s + 3 * src_stride);
         d0 = convolve8_8(s0, s1, s2, s3, s4, s5, s6, s7, filters, filter3,
                          filter4);
         d1 = convolve8_8(s1, s2, s3, s4, s5, s6, s7, s8, filters, filter3,

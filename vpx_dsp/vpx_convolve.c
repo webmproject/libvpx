@@ -131,7 +131,7 @@ static void convolve(const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
   // --Require an additional SUBPEL_TAPS rows for the 8-tap filter tails.
   // --((64 - 1) * 32 + 15) >> 4 + 8 = 135.
   uint8_t temp[64 * 135];
-  int intermediate_height =
+  const int intermediate_height =
       (((h - 1) * y_step_q4 + y0_q4) >> SUBPEL_BITS) + SUBPEL_TAPS;
 
   assert(w <= 64);
@@ -143,16 +143,6 @@ static void convolve(const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
                  x_filters, x0_q4, x_step_q4, w, intermediate_height);
   convolve_vert(temp + 64 * (SUBPEL_TAPS / 2 - 1), 64, dst, dst_stride,
                 y_filters, y0_q4, y_step_q4, w, h);
-}
-
-static const InterpKernel *get_filter_base(const int16_t *filter) {
-  // NOTE: This assumes that the filter table is 256-byte aligned.
-  // TODO(agrange) Modify to make independent of table alignment.
-  return (const InterpKernel *)(((intptr_t)filter) & ~((intptr_t)0xFF));
-}
-
-static int get_filter_offset(const int16_t *f, const InterpKernel *base) {
-  return (int)((const InterpKernel *)(intptr_t)f - base);
 }
 
 void vpx_convolve8_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
@@ -451,7 +441,7 @@ static void highbd_convolve(const uint8_t *src, ptrdiff_t src_stride,
   // --Require an additional SUBPEL_TAPS rows for the 8-tap filter tails.
   // --((64 - 1) * 32 + 15) >> 4 + 8 = 135.
   uint16_t temp[64 * 135];
-  int intermediate_height =
+  const int intermediate_height =
       (((h - 1) * y_step_q4 + y0_q4) >> SUBPEL_BITS) + SUBPEL_TAPS;
 
   assert(w <= 64);

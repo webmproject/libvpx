@@ -860,16 +860,6 @@ static void scaledconvolve2d(const uint8_t *src, ptrdiff_t src_stride,
   }
 }
 
-static const InterpKernel *get_filter_base(const int16_t *filter) {
-  // NOTE: This assumes that the filter table is 256-byte aligned.
-  // TODO(agrange) Modify to make independent of table alignment.
-  return (const InterpKernel *)(((intptr_t)filter) & ~((intptr_t)0xFF));
-}
-
-static int get_filter_offset(const int16_t *f, const InterpKernel *base) {
-  return (int)((const InterpKernel *)(intptr_t)f - base);
-}
-
 void vpx_scaled_2d_ssse3(const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
                          ptrdiff_t dst_stride, const int16_t *filter_x,
                          int x_step_q4, const int16_t *filter_y, int y_step_q4,
