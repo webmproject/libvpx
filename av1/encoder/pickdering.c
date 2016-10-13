@@ -10,6 +10,7 @@
  */
 
 #include <string.h>
+#include <math.h>
 
 #include "./aom_scale_rtcd.h"
 #include "av1/common/dering.h"
@@ -46,12 +47,8 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
   int bsize[3];
   int dec[3];
   int pli;
-  int(*mse)[MAX_DERING_LEVEL];
-  double tot_mse[MAX_DERING_LEVEL] = { 0 };
   int level;
   int best_level;
-  int global_level;
-  double best_tot_mse = 1e15;
   int coeff_shift = AOMMAX(cm->bit_depth - 8, 0);
   src = aom_malloc(sizeof(*src) * cm->mi_rows * cm->mi_cols * 64);
   ref_coeff = aom_malloc(sizeof(*ref_coeff) * cm->mi_rows * cm->mi_cols * 64);
@@ -89,17 +86,27 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
   }
   nvsb = (cm->mi_rows + MAX_MIB_SIZE - 1) / MAX_MIB_SIZE;
   nhsb = (cm->mi_cols + MAX_MIB_SIZE - 1) / MAX_MIB_SIZE;
-  mse = aom_malloc(nvsb * nhsb * sizeof(*mse));
+  /* Pick a base threshold based on the quantizer. The threshold will then be
+     adjusted on a 64x64 basis. We use a threshold of the form T = a*Q^b,
+     where a and b are derived empirically trying to optimize rate-distortion
+     at different quantizer settings. */
+  best_level = (int)floor(
+      .5 + .45 * pow(av1_ac_quant(cm->base_qindex, 0, cm->bit_depth), 0.6));
   for (sbr = 0; sbr < nvsb; sbr++) {
     for (sbc = 0; sbc < nhsb; sbc++) {
       int nvb, nhb;
+      int gi;
+      int best_gi;
+      int32_t best_mse = INT32_MAX;
       int16_t dst[MAX_MIB_SIZE * MAX_MIB_SIZE * 8 * 8];
       nhb = AOMMIN(MAX_MIB_SIZE, cm->mi_cols - MAX_MIB_SIZE * sbc);
       nvb = AOMMIN(MAX_MIB_SIZE, cm->mi_rows - MAX_MIB_SIZE * sbr);
       if (sb_all_skip(cm, sbr * MAX_MIB_SIZE, sbc * MAX_MIB_SIZE)) continue;
-      for (level = 0; level < 64; level++) {
+      best_gi = 0;
+      for (gi = 0; gi < DERING_REFINEMENT_LEVELS; gi++) {
         int cur_mse;
         int threshold;
+        level = compute_level_from_index(best_level, gi);
         threshold = level << coeff_shift;
         od_dering(
             &OD_DERING_VTBL_C, dst, MAX_MIB_SIZE * bsize[0],
@@ -113,46 +120,9 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
             &ref_coeff[sbr * stride * bsize[0] * MAX_MIB_SIZE +
                        sbc * bsize[0] * MAX_MIB_SIZE],
             stride, nhb, nvb, coeff_shift);
-        mse[nhsb * sbr + sbc][level] = cur_mse;
-        tot_mse[level] += cur_mse;
-      }
-    }
-  }
-  best_level = 0;
-  /* Search for the best global level one value at a time. */
-  for (global_level = 2; global_level < MAX_DERING_LEVEL; global_level++) {
-    double tot_mse = 0;
-    for (sbr = 0; sbr < nvsb; sbr++) {
-      for (sbc = 0; sbc < nhsb; sbc++) {
-        int gi;
-        int best_mse = mse[nhsb * sbr + sbc][0];
-        if (sb_all_skip(cm, sbr * MAX_MIB_SIZE, sbc * MAX_MIB_SIZE)) continue;
-        for (gi = 1; gi < 4; gi++) {
-          level = compute_level_from_index(global_level, gi);
-          if (mse[nhsb * sbr + sbc][level] < best_mse) {
-            best_mse = mse[nhsb * sbr + sbc][level];
-          }
-        }
-        tot_mse += best_mse;
-      }
-    }
-    if (tot_mse < best_tot_mse) {
-      best_level = global_level;
-      best_tot_mse = tot_mse;
-    }
-  }
-  for (sbr = 0; sbr < nvsb; sbr++) {
-    for (sbc = 0; sbc < nhsb; sbc++) {
-      int gi;
-      int best_gi;
-      int best_mse = mse[nhsb * sbr + sbc][0];
-      if (sb_all_skip(cm, sbr * MAX_MIB_SIZE, sbc * MAX_MIB_SIZE)) continue;
-      best_gi = 0;
-      for (gi = 1; gi < DERING_REFINEMENT_LEVELS; gi++) {
-        level = compute_level_from_index(best_level, gi);
-        if (mse[nhsb * sbr + sbc][level] < best_mse) {
+        if (cur_mse < best_mse) {
           best_gi = gi;
-          best_mse = mse[nhsb * sbr + sbc][level];
+          best_mse = cur_mse;
         }
       }
       cm->mi_grid_visible[MAX_MIB_SIZE * sbr * cm->mi_stride +
@@ -163,6 +133,5 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
   aom_free(src);
   aom_free(ref_coeff);
   aom_free(bskip);
-  aom_free(mse);
   return best_level;
 }
