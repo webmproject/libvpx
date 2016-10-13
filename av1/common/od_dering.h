@@ -34,27 +34,11 @@ typedef int (*od_filter_dering_direction_func)(int16_t *y, int ystride,
 typedef void (*od_filter_dering_orthogonal_func)(int16_t *y, int ystride,
                                                  const int16_t *in,
                                                  int threshold, int dir);
-
-struct od_dering_opt_vtbl {
-  od_filter_dering_direction_func filter_dering_direction[OD_DERINGSIZES];
-  od_filter_dering_orthogonal_func filter_dering_orthogonal[OD_DERINGSIZES];
-};
-typedef struct od_dering_opt_vtbl od_dering_opt_vtbl;
-
-void od_dering(const od_dering_opt_vtbl *vtbl, int16_t *y, int ystride,
-               const od_dering_in *x, int xstride, int nvb, int nhb, int sbx,
-               int sby, int nhsb, int nvsb, int xdec,
+void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
+               int nvb, int nhb, int sbx, int sby, int nhsb, int nvsb, int xdec,
                int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS], int pli,
                unsigned char *bskip, int skip_stride, int threshold,
                int coeff_shift);
-void od_filter_dering_direction_c(int16_t *y, int ystride, const int16_t *in,
-                                  int ln, int threshold, int dir);
-void od_filter_dering_orthogonal_c(int16_t *y, int ystride, const int16_t *in,
-                                   const od_dering_in *x, int xstride, int ln,
-                                   int threshold, int dir);
-
-extern const od_dering_opt_vtbl OD_DERING_VTBL_C;
-
 int od_filter_dering_direction_4x4_c(int16_t *y, int ystride, const int16_t *in,
                                      int threshold, int dir);
 int od_filter_dering_direction_8x8_c(int16_t *y, int ystride, const int16_t *in,
@@ -65,5 +49,4 @@ void od_filter_dering_orthogonal_4x4_c(int16_t *y, int ystride,
 void od_filter_dering_orthogonal_8x8_c(int16_t *y, int ystride,
                                        const int16_t *in, int threshold,
                                        int dir);
-
 #endif

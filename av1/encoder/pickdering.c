@@ -108,7 +108,7 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
         int threshold;
         level = compute_level_from_index(best_level, gi);
         threshold = level << coeff_shift;
-        od_dering(&OD_DERING_VTBL_C, dst, MAX_MIB_SIZE * bsize[0],
+        od_dering(dst, MAX_MIB_SIZE * bsize[0],
                   &src[sbr * stride * bsize[0] * MAX_MIB_SIZE +
                        sbc * bsize[0] * MAX_MIB_SIZE],
                   cm->mi_cols * bsize[0], nhb, nvb, sbc, sbr, nhsb, nvsb, 0,

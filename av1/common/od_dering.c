@@ -15,11 +15,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "dering.h"
-
-const od_dering_opt_vtbl OD_DERING_VTBL_C = {
-  { od_filter_dering_direction_4x4_c, od_filter_dering_direction_8x8_c },
-  { od_filter_dering_orthogonal_4x4_c, od_filter_dering_orthogonal_8x8_c }
-};
+#include "./av1_rtcd.h"
 
 /* Generated from gen_filter_tables.c. */
 const int OD_DIRECTION_OFFSETS_TABLE[8][3] = {
@@ -42,8 +38,8 @@ const int OD_DIRECTION_OFFSETS_TABLE[8][3] = {
    in a particular direction. Since each direction have the same sum(x^2) term,
    that term is never computed. See Section 2, step 2, of:
    http://jmvalin.ca/notes/intra_paint.pdf */
-static int od_dir_find8(const od_dering_in *img, int stride, int32_t *var,
-                        int coeff_shift) {
+int od_dir_find8_c(const od_dering_in *img, int stride, int32_t *var,
+                   int coeff_shift) {
   int i;
   int32_t cost[8] = { 0 };
   int partial[8][15] = { { 0 } };
@@ -273,9 +269,8 @@ static void od_compute_thresh(int thresh[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS],
   }
 }
 
-void od_dering(const od_dering_opt_vtbl *vtbl, int16_t *y, int ystride,
-               const od_dering_in *x, int xstride, int nhb, int nvb, int sbx,
-               int sby, int nhsb, int nvsb, int xdec,
+void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
+               int nhb, int nvb, int sbx, int sby, int nhsb, int nvsb, int xdec,
                int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS], int pli,
                unsigned char *bskip, int skip_stride, int threshold,
                int coeff_shift) {
@@ -289,6 +284,12 @@ void od_dering(const od_dering_opt_vtbl *vtbl, int16_t *y, int ystride,
   int32_t var[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS];
   int thresh[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS];
   int thresh2[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS];
+  od_filter_dering_direction_func filter_dering_direction[OD_DERINGSIZES] = {
+    od_filter_dering_direction_4x4, od_filter_dering_direction_8x8
+  };
+  od_filter_dering_orthogonal_func filter_dering_orthogonal[OD_DERINGSIZES] = {
+    od_filter_dering_orthogonal_4x4, od_filter_dering_orthogonal_8x8
+  };
   bsize = 3 - xdec;
   in = inbuf + OD_FILT_BORDER * OD_FILT_BSTRIDE + OD_FILT_BORDER;
   /* We avoid filtering the pixels for which some of the pixels to average
@@ -340,7 +341,7 @@ void od_dering(const od_dering_opt_vtbl *vtbl, int16_t *y, int ystride,
          to be a little bit more aggressive on pure horizontal/vertical
          since the ringing there tends to be directional, so it doesn't
          get removed by the directional filtering. */
-      thresh2[by][bx] = (vtbl->filter_dering_direction[bsize - OD_LOG_BSIZE0])(
+      thresh2[by][bx] = (filter_dering_direction[bsize - OD_LOG_BSIZE0])(
           &y[(by * ystride << bsize) + (bx << bsize)], ystride,
           &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)], thresh[by][bx],
           dir[by][bx]);
@@ -354,7 +355,7 @@ void od_dering(const od_dering_opt_vtbl *vtbl, int16_t *y, int ystride,
   for (by = 0; by < nvb; by++) {
     for (bx = 0; bx < nhb; bx++) {
       if (thresh[by][bx] == 0) continue;
-      (vtbl->filter_dering_orthogonal[bsize - OD_LOG_BSIZE0])(
+      (filter_dering_orthogonal[bsize - OD_LOG_BSIZE0])(
           &y[(by * ystride << bsize) + (bx << bsize)], ystride,
           &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)], thresh2[by][bx],
           dir[by][bx]);

@@ -20,6 +20,7 @@ struct search_site_config;
 struct mv;
 union int_mv;
 struct yv12_buffer_config;
+typedef int16_t od_dering_in;
 EOF
 }
 forward_decls qw/av1_common_forward_decls/;
@@ -840,4 +841,24 @@ if (aom_config("CONFIG_EXT_INTER") eq "yes") {
 
 }
 # end encoder functions
+
+# Deringing Functions
+
+if (aom_config("CONFIG_DERING") eq "yes") {
+  add_proto qw/int od_dir_find8/, "const od_dering_in *img, int stride, int32_t *var, int coeff_shift";
+  specialize qw/od_dir_find8 sse4_1/;
+
+  add_proto qw/int od_filter_dering_direction_4x4/, "int16_t *y, int ystride, const int16_t *in, int threshold, int dir";
+  specialize qw/od_filter_dering_direction_4x4 sse4_1/;
+
+  add_proto qw/int od_filter_dering_direction_8x8/, "int16_t *y, int ystride, const int16_t *in, int threshold, int dir";
+  specialize qw/od_filter_dering_direction_8x8 sse4_1/;
+
+  add_proto qw/void od_filter_dering_orthogonal_4x4/, "int16_t *y, int ystride, const int16_t *in, int threshold, int dir";
+  specialize qw/od_filter_dering_orthogonal_4x4 sse4_1/;
+
+  add_proto qw/void od_filter_dering_orthogonal_8x8/, "int16_t *y, int ystride, const int16_t *in, int threshold, int dir";
+  specialize qw/od_filter_dering_orthogonal_8x8 sse4_1/;
+}
+
 1;
