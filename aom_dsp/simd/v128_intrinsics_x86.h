@@ -162,7 +162,11 @@ SIMD_INLINE v128 v128_unziphi_8(v128 a, v128 b) {
 
 SIMD_INLINE v128 v128_unziplo_8(v128 a, v128 b) {
 #if defined(__SSSE3__)
+#ifdef __x86_64__
   v128 order = _mm_cvtsi64_si128(0x0e0c0a0806040200LL);
+#else
+  v128 order = _mm_set_epi32(0, 0, 0x0e0c0a08, 0x06040200);
+#endif
   return _mm_unpacklo_epi64(_mm_shuffle_epi8(b, order),
                             _mm_shuffle_epi8(a, order));
 #else
@@ -176,7 +180,11 @@ SIMD_INLINE v128 v128_unziphi_16(v128 a, v128 b) {
 
 SIMD_INLINE v128 v128_unziplo_16(v128 a, v128 b) {
 #if defined(__SSSE3__)
+#ifdef __x86_64__
   v128 order = _mm_cvtsi64_si128(0x0d0c090805040100LL);
+#else
+  v128 order = _mm_set_epi32(0, 0, 0x0d0c0908, 0x05040100);
+#endif
   return _mm_unpacklo_epi64(_mm_shuffle_epi8(b, order),
                             _mm_shuffle_epi8(a, order));
 #else

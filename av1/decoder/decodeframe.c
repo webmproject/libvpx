@@ -1772,7 +1772,7 @@ static void decode_partition(AV1Decoder *const pbi, MACROBLOCKD *const xd,
   if (bsize >= BLOCK_8X8 &&
       (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT))
     dec_update_partition_context(xd, mi_row, mi_col, subsize, num_8x8_wh);
-#if DERING_REFINEMENT
+#if CONFIG_DERING
   if (bsize == BLOCK_64X64) {
     if (cm->dering_level != 0 && !sb_all_skip(cm, mi_row, mi_col)) {
       cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col]->mbmi.dering_gain =
@@ -1782,7 +1782,7 @@ static void decode_partition(AV1Decoder *const pbi, MACROBLOCKD *const xd,
           0;
     }
   }
-#endif  // DERGING_REFINEMENT
+#endif
 #endif  // CONFIG_EXT_PARTITION_TYPES
 }
 

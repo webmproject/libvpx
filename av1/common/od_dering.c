@@ -275,6 +275,13 @@ void od_dering(const od_dering_opt_vtbl *vtbl, int16_t *y, int ystride,
       in[i * OD_FILT_BSTRIDE + j] = x[i * xstride + j];
     }
   }
+  /* Assume deringing filter is sparsely applied, so do one large copy rather
+     than small copies later if deringing is skipped. */
+  for (i = 0; i < nvb << bsize; i++) {
+    for (j = 0; j < nhb << bsize; j++) {
+      y[i * ystride + j] = in[i * OD_FILT_BSTRIDE + j];
+    }
+  }
   if (pli == 0) {
     for (by = 0; by < nvb; by++) {
       for (bx = 0; bx < nhb; bx++) {
@@ -325,6 +332,7 @@ void od_dering(const od_dering_opt_vtbl *vtbl, int16_t *y, int ystride,
   }
   for (by = 0; by < nvb; by++) {
     for (bx = 0; bx < nhb; bx++) {
+      if (thresh[by][bx] == 0) continue;
       (vtbl->filter_dering_direction[bsize - OD_LOG_BSIZE0])(
           &y[(by * ystride << bsize) + (bx << bsize)], ystride,
           &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)], thresh[by][bx],
@@ -338,6 +346,7 @@ void od_dering(const od_dering_opt_vtbl *vtbl, int16_t *y, int ystride,
   }
   for (by = 0; by < nvb; by++) {
     for (bx = 0; bx < nhb; bx++) {
+      if (thresh[by][bx] == 0) continue;
       (vtbl->filter_dering_orthogonal[bsize - OD_LOG_BSIZE0])(
           &y[(by * ystride << bsize) + (bx << bsize)], ystride,
           &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)],
