@@ -25,8 +25,12 @@ typedef int16_t od_dering_in;
 
 #define OD_DERING_NBLOCKS (OD_BSIZE_MAX / 8)
 
-#define OD_FILT_BORDER (3)
-#define OD_FILT_BSTRIDE (OD_BSIZE_MAX + 2 * OD_FILT_BORDER)
+/* We need to buffer three vertical lines. */
+#define OD_FILT_VBORDER (3)
+/* We only need to buffer three horizontal lines too, but let's make it four
+   to make vectorization easier. */
+#define OD_FILT_HBORDER (4)
+#define OD_FILT_BSTRIDE (OD_BSIZE_MAX + 2 * OD_FILT_HBORDER)
 
 extern const int OD_DIRECTION_OFFSETS_TABLE[8][3];
 
