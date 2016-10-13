@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc7ca22f_8f09393c",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 920,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-13T22:34:32Z",
+      "side": 1,
+      "message": "no CHECK/vpx_internal_error calls live below any of these calls, right?",
+      "revId": "c815880c18d9987450d10f5e8a512fcfd02b894c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc7ca22f_cf5bc159",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 945,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-13T22:34:32Z",
+      "side": 1,
+      "message": "you might want calloc here as if your CHECK fails halfway through you\u0027ll probably try to free uninitialized data",
+      "revId": "c815880c18d9987450d10f5e8a512fcfd02b894c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc7ca22f_0f7a29ad",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 992,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-13T22:34:32Z",
+      "side": 1,
+      "message": "if () else would be more consistent with the rest of the code",
+      "revId": "c815880c18d9987450d10f5e8a512fcfd02b894c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc7ca22f_0f054922",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1003,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-13T22:34:32Z",
+      "side": 1,
+      "message": "it always succeeds now, but you may want to check the return to protect against future changes",
+      "revId": "c815880c18d9987450d10f5e8a512fcfd02b894c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc7ca22f_0f3d4913",
+        "filename": "vp9/encoder/vp9_bitstream.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-13T22:34:32Z",
+      "side": 1,
+      "message": "I\u0027d prefer to have typedefs precede functions, kind of like the class definition ordering",
+      "revId": "c815880c18d9987450d10f5e8a512fcfd02b894c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
