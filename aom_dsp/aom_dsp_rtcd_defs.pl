@@ -44,6 +44,27 @@ foreach $w (@block_widths) {
 # Intra prediction
 #
 
+add_proto qw/void aom_dc_predictor_2x2/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+specialize qw/aom_dc_predictor_2x2/;
+
+add_proto qw/void aom_dc_top_predictor_2x2/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+specialize qw/aom_dc_top_predictor_2x2/;
+
+add_proto qw/void aom_dc_left_predictor_2x2/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+specialize qw/aom_dc_left_predictor_2x2/;
+
+add_proto qw/void aom_dc_128_predictor_2x2/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+specialize qw/aom_dc_128_predictor_2x2/;
+
+add_proto qw/void aom_v_predictor_2x2/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+specialize qw/aom_v_predictor_2x2/;
+
+add_proto qw/void aom_h_predictor_2x2/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+specialize qw/aom_h_predictor_2x2/;
+
+add_proto qw/void aom_tm_predictor_2x2/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+specialize qw/aom_tm_predictor_2x2/;
+
 add_proto qw/void aom_d207_predictor_4x4/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
 specialize qw/aom_d207_predictor_4x4 sse2/;
 
