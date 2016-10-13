@@ -16,6 +16,24 @@
       "revId": "85be6bf0123b68d31674247db5148b4cf0b9ae64",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc7ca22f_6fe64d06",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-10-13T22:57:55Z",
+      "side": 1,
+      "message": "A step1 patch is here https://chromium-review.googlesource.com/#/c/398538/. Will rebase this patch after these initial renamings are submitted.",
+      "parentUuid": "7c2d76d5_ef8d3533",
+      "revId": "85be6bf0123b68d31674247db5148b4cf0b9ae64",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
