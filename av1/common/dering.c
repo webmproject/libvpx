@@ -175,6 +175,9 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
       for (pli = 0; pli < nplanes; pli++) {
         int16_t dst[MAX_MIB_SIZE * MAX_MIB_SIZE * 8 * 8];
         int threshold;
+        int16_t inbuf[OD_DERING_INBUF_SIZE];
+        int16_t *in;
+        int i, j;
         /* FIXME: This is a temporary hack that uses more conservative
            deringing for chroma. */
         if (pli)
@@ -182,10 +185,22 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
         else
           threshold = level << coeff_shift;
         if (threshold == 0) continue;
-        od_dering(dst,
-                  &src[pli][(sbr * stride * MAX_MIB_SIZE << bsize[pli]) +
-                            (sbc * MAX_MIB_SIZE << bsize[pli])],
-                  stride, nhb, nvb, sbc, sbr, nhsb, nvsb, dec[pli], dir, pli,
+        in = inbuf + OD_FILT_VBORDER * OD_FILT_BSTRIDE + OD_FILT_HBORDER;
+        /* We avoid filtering the pixels for which some of the pixels to average
+           are outside the frame. We could change the filter instead, but it would
+           add special cases for any future vectorization. */
+        for (i = 0; i < OD_DERING_INBUF_SIZE; i++) inbuf[i] = OD_DERING_VERY_LARGE;
+        for (i = -OD_FILT_VBORDER * (sbr != 0);
+             i < (nvb << bsize[pli]) + OD_FILT_VBORDER * (sbr != nvsb - 1); i++) {
+          for (j = -OD_FILT_HBORDER * (sbc != 0);
+               j < (nhb << bsize[pli]) + OD_FILT_HBORDER * (sbc != nhsb - 1); j++) {
+            int16_t *x;
+            x = &src[pli][(sbr * stride * MAX_MIB_SIZE << bsize[pli]) +
+                          (sbc * MAX_MIB_SIZE << bsize[pli])];
+            in[i * OD_FILT_BSTRIDE + j] = x[i * stride + j];
+          }
+        }
+        od_dering(dst, in, dec[pli], dir, pli,
                   bskip, dering_count, threshold, coeff_shift);
 #if CONFIG_AOM_HIGHBITDEPTH
         if (cm->use_highbitdepth) {

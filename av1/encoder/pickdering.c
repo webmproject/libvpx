@@ -107,6 +107,9 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
       for (gi = 0; gi < DERING_REFINEMENT_LEVELS; gi++) {
         int cur_mse;
         int threshold;
+        int16_t inbuf[OD_DERING_INBUF_SIZE];
+        int16_t *in;
+        int i, j;
         level = compute_level_from_index(best_level, gi);
         threshold = level << coeff_shift;
         for (r = 0; r < nvb << bsize[0]; r++) {
@@ -116,13 +119,23 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
                     (sbc * MAX_MIB_SIZE << bsize[0]) + c];
           }
         }
-        od_dering(tmp_dst,
-                  &src[(sbr * stride * MAX_MIB_SIZE << bsize[0]) +
-                       (sbc * MAX_MIB_SIZE << bsize[0])],
-                  cm->mi_cols << bsize[0], nhb, nvb, sbc, sbr, nhsb, nvsb, 0,
-                  dir, 0,
-                  bskip,
-                  dering_count, threshold, coeff_shift);
+        in = inbuf + OD_FILT_VBORDER * OD_FILT_BSTRIDE + OD_FILT_HBORDER;
+        /* We avoid filtering the pixels for which some of the pixels to average
+           are outside the frame. We could change the filter instead, but it would
+           add special cases for any future vectorization. */
+        for (i = 0; i < OD_DERING_INBUF_SIZE; i++) inbuf[i] = OD_DERING_VERY_LARGE;
+        for (i = -OD_FILT_VBORDER * (sbr != 0);
+             i < (nvb << bsize[0]) + OD_FILT_VBORDER * (sbr != nvsb - 1); i++) {
+          for (j = -OD_FILT_HBORDER * (sbc != 0);
+               j < (nhb << bsize[0]) + OD_FILT_HBORDER * (sbc != nhsb - 1); j++) {
+            int16_t *x;
+            x = &src[(sbr * stride * MAX_MIB_SIZE << bsize[0]) +
+                     (sbc * MAX_MIB_SIZE << bsize[0])];
+            in[i * OD_FILT_BSTRIDE + j] = x[i * stride + j];
+          }
+        }
+        od_dering(tmp_dst, in, 0, dir, 0, bskip, dering_count, threshold,
+            coeff_shift);
         copy_blocks_16bit(dst, MAX_MIB_SIZE << bsize[0], tmp_dst, bskip,
             dering_count, 3);
         cur_mse = (int)compute_dist(

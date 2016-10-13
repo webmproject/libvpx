@@ -111,10 +111,6 @@ int od_dir_find8_c(const od_dering_in *img, int stride, int32_t *var,
   return best_dir;
 }
 
-#define OD_DERING_VERY_LARGE (30000)
-#define OD_DERING_INBUF_SIZE \
-  ((OD_BSIZE_MAX + 2 * OD_FILT_HBORDER) * (OD_BSIZE_MAX + 2 * OD_FILT_VBORDER))
-
 /* Smooth in the direction detected. */
 int od_filter_dering_direction_8x8_c(int16_t *y, int ystride, const int16_t *in,
                                      int threshold, int dir) {
@@ -300,18 +296,13 @@ void copy_blocks_16bit(int16_t *dst, int dstride, int16_t *src,
   }
 }
 
-void od_dering(int16_t *y, const od_dering_in *x, int xstride,
-               int nhb, int nvb, int sbx, int sby, int nhsb, int nvsb, int xdec,
+void od_dering(int16_t *y, int16_t *in, int xdec,
                int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS], int pli,
                unsigned char (*bskip)[2], int dering_count, int threshold,
                int coeff_shift) {
-  int i;
-  int j;
   int bi;
   int bx;
   int by;
-  int16_t inbuf[OD_DERING_INBUF_SIZE];
-  int16_t *in;
   int bsize;
   int filter2_thresh[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS];
   od_filter_dering_direction_func filter_dering_direction[OD_DERINGSIZES] = {
@@ -321,18 +312,6 @@ void od_dering(int16_t *y, const od_dering_in *x, int xstride,
     od_filter_dering_orthogonal_4x4, od_filter_dering_orthogonal_8x8
   };
   bsize = 3 - xdec;
-  in = inbuf + OD_FILT_VBORDER * OD_FILT_BSTRIDE + OD_FILT_HBORDER;
-  /* We avoid filtering the pixels for which some of the pixels to average
-     are outside the frame. We could change the filter instead, but it would
-     add special cases for any future vectorization. */
-  for (i = 0; i < OD_DERING_INBUF_SIZE; i++) inbuf[i] = OD_DERING_VERY_LARGE;
-  for (i = -OD_FILT_VBORDER * (sby != 0);
-       i < (nvb << bsize) + OD_FILT_VBORDER * (sby != nvsb - 1); i++) {
-    for (j = -OD_FILT_HBORDER * (sbx != 0);
-         j < (nhb << bsize) + OD_FILT_HBORDER * (sbx != nhsb - 1); j++) {
-      in[i * OD_FILT_BSTRIDE + j] = x[i * xstride + j];
-    }
-  }
   if (pli == 0) {
     for (bi = 0; bi < dering_count; bi++) {
       int32_t var;

@@ -32,6 +32,10 @@ typedef int16_t od_dering_in;
 #define OD_FILT_HBORDER (4)
 #define OD_FILT_BSTRIDE (OD_BSIZE_MAX + 2 * OD_FILT_HBORDER)
 
+#define OD_DERING_VERY_LARGE (30000)
+#define OD_DERING_INBUF_SIZE \
+  (OD_FILT_BSTRIDE * (OD_BSIZE_MAX + 2 * OD_FILT_VBORDER))
+
 extern const int OD_DIRECTION_OFFSETS_TABLE[8][3];
 
 typedef int (*od_filter_dering_direction_func)(int16_t *y, int ystride,
@@ -43,8 +47,7 @@ typedef void (*od_filter_dering_orthogonal_func)(int16_t *y, int ystride,
 void copy_blocks_16bit(int16_t *dst, int dstride, int16_t *src,
     unsigned char (*bskip)[2], int dering_count, int bsize);
 
-void od_dering(int16_t *y, const od_dering_in *x, int xstride,
-               int nvb, int nhb, int sbx, int sby, int nhsb, int nvsb, int xdec,
+void od_dering(int16_t *y, int16_t *in, int xdec,
                int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS], int pli,
                unsigned char (*bskip)[2], int skip_stride, int threshold,
                int coeff_shift);
