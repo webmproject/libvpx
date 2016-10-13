@@ -46,6 +46,30 @@
       "revId": "365fc9bfbec627be70b85392a727410b3be7e6ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ca69ec4_63494ab9",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2016-10-13T03:23:07Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "3ca69ec4_557a3c11",
+      "range": {
+        "startLine": 233,
+        "startChar": 0,
+        "endLine": 237,
+        "endChar": 61
+      },
+      "revId": "365fc9bfbec627be70b85392a727410b3be7e6ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
