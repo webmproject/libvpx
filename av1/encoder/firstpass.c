@@ -2585,10 +2585,11 @@ static void configure_buffer_updates(AV1_COMP *cpi) {
       if (cpi->num_extra_arfs) {
         int tmp = cpi->bwd_fb_idx;
 
-        cpi->rc.is_bwd_ref_frame = 1;
         cpi->bwd_fb_idx = cpi->alt_fb_idx;
         cpi->alt_fb_idx = cpi->arf_map[0];
         cpi->arf_map[0] = tmp;
+
+        cpi->rc.is_bwd_ref_frame = 1;
       } else {
         cpi->rc.is_bwd_ref_frame = 0;
       }
@@ -2639,11 +2640,13 @@ static void configure_buffer_updates(AV1_COMP *cpi) {
         // NOTE: The indices will be swapped back after this frame is encoded
         //       (in av1_update_reference_frames()).
         int tmp = cpi->bwd_fb_idx;
+
         cpi->bwd_fb_idx = cpi->alt_fb_idx;
         cpi->alt_fb_idx = cpi->arf_map[0];
         cpi->arf_map[0] = tmp;
       }
       break;
+
     case LAST_BIPRED_UPDATE:
       cpi->refresh_last_frame = 0;
       cpi->refresh_golden_frame = 0;
