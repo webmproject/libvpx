@@ -149,9 +149,9 @@ static struct av1_token intra_filter_encodings[INTRA_FILTERS];
 #if CONFIG_EXT_INTER
 static struct av1_token interintra_mode_encodings[INTERINTRA_MODES];
 #endif  // CONFIG_EXT_INTER
-#if CONFIG_OBMC || CONFIG_WARPED_MOTION
-static struct av1_token motvar_encodings[MOTION_VARIATIONS];
-#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
+static struct av1_token motion_mode_encodings[MOTION_MODES];
+#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
 #if CONFIG_LOOP_RESTORATION
 static struct av1_token switchable_restore_encodings[RESTORE_SWITCHABLE_TYPES];
 #endif  // CONFIG_LOOP_RESTORATION
@@ -174,9 +174,9 @@ void av1_encode_token_init(void) {
 #if CONFIG_EXT_INTER
   av1_tokens_from_tree(interintra_mode_encodings, av1_interintra_mode_tree);
 #endif  // CONFIG_EXT_INTER
-#if CONFIG_OBMC || CONFIG_WARPED_MOTION
-  av1_tokens_from_tree(motvar_encodings, av1_motvar_tree);
-#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
+  av1_tokens_from_tree(motion_mode_encodings, av1_motion_mode_tree);
+#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
 #if CONFIG_GLOBAL_MOTION
   av1_tokens_from_tree(global_motion_types_encodings,
                        av1_global_motion_types_tree);
@@ -1401,30 +1401,31 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
     }
 #endif  // CONFIG_EXT_INTER
 
-#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
 #if CONFIG_SUPERTX
     if (!supertx_enabled)
 #endif  // CONFIG_SUPERTX
 #if CONFIG_EXT_INTER
       if (mbmi->ref_frame[1] != INTRA_FRAME)
 #endif  // CONFIG_EXT_INTER
-        if (is_motvar_allowed(mbmi)) {
+        if (is_motion_variation_allowed(mbmi)) {
           // TODO(debargha): Might want to only emit this if SEG_LVL_SKIP
           // is not active, and assume SIMPLE_TRANSLATION in the decoder if
           // it is active.
-          assert(mbmi->motion_variation < MOTION_VARIATIONS);
-          av1_write_token(w, av1_motvar_tree, cm->fc->motvar_prob[bsize],
-                          &motvar_encodings[mbmi->motion_variation]);
+          assert(mbmi->motion_mode < MOTION_MODES);
+          av1_write_token(w, av1_motion_mode_tree,
+                          cm->fc->motion_mode_prob[bsize],
+                          &motion_mode_encodings[mbmi->motion_mode]);
         }
-#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
 
 #if CONFIG_EXT_INTER
     if (cpi->common.reference_mode != SINGLE_REFERENCE &&
         is_inter_compound_mode(mbmi->mode) &&
-#if CONFIG_OBMC
-        !(is_motvar_allowed(mbmi) &&
-          mbmi->motion_variation != SIMPLE_TRANSLATION) &&
-#endif  // CONFIG_OBMC
+#if CONFIG_MOTION_VAR
+        !(is_motion_variation_allowed(mbmi) &&
+          mbmi->motion_mode != SIMPLE_TRANSLATION) &&
+#endif  // CONFIG_MOTION_VAR
         is_interinter_wedge_used(bsize)) {
       aom_write(w, mbmi->use_wedge_interinter,
                 cm->fc->wedge_interinter_prob[bsize]);
@@ -3474,11 +3475,11 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
     }
 #endif  // CONFIG_EXT_INTER
 
-#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
     for (i = BLOCK_8X8; i < BLOCK_SIZES; ++i)
-      prob_diff_update(av1_motvar_tree, fc->motvar_prob[i], counts->motvar[i],
-                       MOTION_VARIATIONS, header_bc);
-#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+      prob_diff_update(av1_motion_mode_tree, fc->motion_mode_prob[i],
+                       counts->motion_mode[i], MOTION_MODES, header_bc);
+#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
 
     if (cm->interp_filter == SWITCHABLE)
       update_switchable_interp_probs(cm, header_bc, counts);

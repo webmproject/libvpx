@@ -227,7 +227,7 @@ typedef struct {
   int interinter_wedge_index;
   int interinter_wedge_sign;
 #endif  // CONFIG_EXT_INTER
-  MOTION_VARIATION motion_variation;
+  MOTION_MODE motion_mode;
   int_mv mv[2];
   int_mv pred_mv[2];
 #if CONFIG_REF_MV
@@ -772,21 +772,26 @@ static INLINE int is_interintra_pred(const MB_MODE_INFO *mbmi) {
 }
 #endif  // CONFIG_EXT_INTER
 
-#if CONFIG_OBMC || CONFIG_WARPED_MOTION
-static INLINE int is_motvar_allowed(const MB_MODE_INFO *mbmi) {
+#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
+static INLINE int is_motion_variation_allowed_bsize(BLOCK_SIZE bsize) {
+  return (bsize >= BLOCK_8X8);
+}
+
+static INLINE int is_motion_variation_allowed(const MB_MODE_INFO *mbmi) {
 #if CONFIG_EXT_INTER
-  return (mbmi->sb_type >= BLOCK_8X8 && mbmi->ref_frame[1] != INTRA_FRAME);
+  return is_motion_variation_allowed_bsize(mbmi->sb_type) &&
+         mbmi->ref_frame[1] != INTRA_FRAME;
 #else
-  return (mbmi->sb_type >= BLOCK_8X8);
+  return is_motion_variation_allowed_bsize(mbmi->sb_type);
 #endif  // CONFIG_EXT_INTER
 }
 
-#if CONFIG_OBMC
+#if CONFIG_MOTION_VAR
 static INLINE int is_neighbor_overlappable(const MB_MODE_INFO *mbmi) {
   return (is_inter_block(mbmi));
 }
-#endif  // CONFIG_OBMC
-#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+#endif  // CONFIG_MOTION_VAR
+#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
 
 #ifdef __cplusplus
 }  // extern "C"

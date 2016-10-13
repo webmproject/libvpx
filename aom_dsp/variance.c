@@ -942,7 +942,7 @@ HIGHBD_MASK_SUBPIX_VAR(128, 128)
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 #endif  // CONFIG_AV1 && CONFIG_EXT_INTER
 
-#if CONFIG_AV1 && CONFIG_OBMC
+#if CONFIG_AV1 && CONFIG_MOTION_VAR
 static INLINE void obmc_variance(const uint8_t *pre, int pre_stride,
                                  const int32_t *wsrc, const int32_t *mask,
                                  int w, int h, unsigned int *sse, int *sum) {
@@ -1216,4 +1216,4 @@ HIGHBD_OBMC_VAR(128, 128)
 HIGHBD_OBMC_SUBPIX_VAR(128, 128)
 #endif  // CONFIG_EXT_PARTITION
 #endif  // CONFIG_AOM_HIGHBITDEPTH
-#endif  // CONFIG_AV1 && CONFIG_OBMC
+#endif  // CONFIG_AV1 && CONFIG_MOTION_VAR

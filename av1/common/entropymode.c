@@ -315,43 +315,45 @@ static const aom_prob default_wedge_interinter_prob[BLOCK_SIZES] = {
 #endif  // CONFIG_EXT_INTER
 
 // Change this section appropriately once warped motion is supported
-#if CONFIG_OBMC && !CONFIG_WARPED_MOTION
-const aom_tree_index av1_motvar_tree[TREE_SIZE(MOTION_VARIATIONS)] = {
+#if CONFIG_MOTION_VAR && !CONFIG_WARPED_MOTION
+const aom_tree_index av1_motion_mode_tree[TREE_SIZE(MOTION_MODES)] = {
   -SIMPLE_TRANSLATION, -OBMC_CAUSAL
 };
-static const aom_prob default_motvar_prob[BLOCK_SIZES]
-                                         [MOTION_VARIATIONS - 1] = {
-                                           { 255 }, { 255 }, { 255 }, { 151 },
-                                           { 153 }, { 144 }, { 178 }, { 165 },
-                                           { 160 }, { 207 }, { 195 }, { 168 },
-                                           { 244 },
+static const aom_prob default_motion_mode_prob[BLOCK_SIZES]
+                                              [MOTION_MODES - 1] = {
+                                                { 255 }, { 255 }, { 255 },
+                                                { 151 }, { 153 }, { 144 },
+                                                { 178 }, { 165 }, { 160 },
+                                                { 207 }, { 195 }, { 168 },
+                                                { 244 },
 #if CONFIG_EXT_PARTITION
-                                           { 252 }, { 252 }, { 252 },
+                                                { 252 }, { 252 }, { 252 },
 #endif  // CONFIG_EXT_PARTITION
-                                         };
+                                              };
 
-#elif !CONFIG_OBMC && CONFIG_WARPED_MOTION
+#elif !CONFIG_MOTION_VAR && CONFIG_WARPED_MOTION
 
-const aom_tree_index av1_motvar_tree[TREE_SIZE(MOTION_VARIATIONS)] = {
+const aom_tree_index av1_motion_mode_tree[TREE_SIZE(MOTION_MODES)] = {
   -SIMPLE_TRANSLATION, -WARPED_CAUSAL
 };
-static const aom_prob default_motvar_prob[BLOCK_SIZES]
-                                         [MOTION_VARIATIONS - 1] = {
-                                           { 255 }, { 255 }, { 255 }, { 151 },
-                                           { 153 }, { 144 }, { 178 }, { 165 },
-                                           { 160 }, { 207 }, { 195 }, { 168 },
-                                           { 244 },
+static const aom_prob default_motion_mode_prob[BLOCK_SIZES]
+                                              [MOTION_MODES - 1] = {
+                                                { 255 }, { 255 }, { 255 },
+                                                { 151 }, { 153 }, { 144 },
+                                                { 178 }, { 165 }, { 160 },
+                                                { 207 }, { 195 }, { 168 },
+                                                { 244 },
 #if CONFIG_EXT_PARTITION
-                                           { 252 }, { 252 }, { 252 },
+                                                { 252 }, { 252 }, { 252 },
 #endif  // CONFIG_EXT_PARTITION
-                                         };
+                                              };
 
-#elif CONFIG_OBMC && CONFIG_WARPED_MOTION
+#elif CONFIG_MOTION_VAR && CONFIG_WARPED_MOTION
 
-const aom_tree_index av1_motvar_tree[TREE_SIZE(MOTION_VARIATIONS)] = {
+const aom_tree_index av1_motion_mode_tree[TREE_SIZE(MOTION_MODES)] = {
   -SIMPLE_TRANSLATION, 2, -OBMC_CAUSAL, -WARPED_CAUSAL,
 };
-static const aom_prob default_motvar_prob[BLOCK_SIZES][MOTION_VARIATIONS - 1] =
+static const aom_prob default_motion_mode_prob[BLOCK_SIZES][MOTION_MODES - 1] =
     {
       { 255, 200 }, { 255, 200 }, { 255, 200 }, { 151, 200 }, { 153, 200 },
       { 144, 200 }, { 178, 200 }, { 165, 200 }, { 160, 200 }, { 207, 200 },
@@ -360,7 +362,7 @@ static const aom_prob default_motvar_prob[BLOCK_SIZES][MOTION_VARIATIONS - 1] =
       { 252, 200 }, { 252, 200 }, { 252, 200 },
 #endif  // CONFIG_EXT_PARTITION
     };
-#endif  // CONFIG_OBMC || !CONFIG_WARPED_MOTION
+#endif  // CONFIG_MOTION_VAR || !CONFIG_WARPED_MOTION
 
 /* Array indices are identical to previously-existing INTRAMODECONTEXTNODES. */
 const aom_tree_index av1_intra_mode_tree[TREE_SIZE(INTRA_MODES)] = {
@@ -1350,9 +1352,9 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
 #endif  // CONFIG_EXT_INTER
 #endif  // CONFIG_REF_MV
   av1_copy(fc->inter_mode_probs, default_inter_mode_probs);
-#if CONFIG_OBMC || CONFIG_WARPED_MOTION
-  av1_copy(fc->motvar_prob, default_motvar_prob);
-#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
+  av1_copy(fc->motion_mode_prob, default_motion_mode_prob);
+#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
 #if CONFIG_EXT_INTER
   av1_copy(fc->inter_compound_mode_probs, default_inter_compound_mode_probs);
   av1_copy(fc->interintra_prob, default_interintra_prob);
@@ -1451,11 +1453,11 @@ void av1_adapt_inter_frame_probs(AV1_COMMON *cm) {
                          counts->inter_mode[i], fc->inter_mode_probs[i]);
 #endif
 
-#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
   for (i = BLOCK_8X8; i < BLOCK_SIZES; ++i)
-    aom_tree_merge_probs(av1_motvar_tree, pre_fc->motvar_prob[i],
-                         counts->motvar[i], fc->motvar_prob[i]);
-#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+    aom_tree_merge_probs(av1_motion_mode_tree, pre_fc->motion_mode_prob[i],
+                         counts->motion_mode[i], fc->motion_mode_prob[i]);
+#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
 
 #if CONFIG_SUPERTX
   for (i = 0; i < PARTITION_SUPERTX_CONTEXTS; ++i) {

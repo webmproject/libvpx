@@ -214,9 +214,9 @@ static INLINE int get_interintra_wedge_bits(BLOCK_SIZE sb_type) {
 #endif  // CONFIG_EXT_INTER
 
 void build_inter_predictors(MACROBLOCKD *xd, int plane,
-#if CONFIG_OBMC
+#if CONFIG_MOTION_VAR
                             int mi_col_offset, int mi_row_offset,
-#endif  // CONFIG_OBMC
+#endif  // CONFIG_MOTION_VAR
                             int block, int bw, int bh, int x, int y, int w,
                             int h,
 #if CONFIG_SUPERTX && CONFIG_EXT_INTER
@@ -515,7 +515,7 @@ static INLINE int av1_is_interp_needed(const MACROBLOCKD *const xd) {
 }
 #endif  // CONFIG_EXT_INTERP
 
-#if CONFIG_OBMC
+#if CONFIG_MOTION_VAR
 const uint8_t *av1_get_obmc_mask(int length);
 void av1_build_obmc_inter_prediction(AV1_COMMON *cm, MACROBLOCKD *xd,
                                      int mi_row, int mi_col,
@@ -535,7 +535,7 @@ void av1_build_prediction_by_left_preds(AV1_COMMON *cm, MACROBLOCKD *xd,
                                         int tmp_width[MAX_MB_PLANE],
                                         int tmp_height[MAX_MB_PLANE],
                                         int tmp_stride[MAX_MB_PLANE]);
-#endif  // CONFIG_OBMC
+#endif  // CONFIG_MOTION_VAR
 
 #if CONFIG_EXT_INTER
 #define MASK_MASTER_SIZE (2 * MAX_SB_SIZE)

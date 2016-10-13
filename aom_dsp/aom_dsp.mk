@@ -314,10 +314,10 @@ ifeq ($(CONFIG_EXT_INTER),yes)
 DSP_SRCS-$(HAVE_SSSE3)  += x86/masked_sad_intrin_ssse3.c
 DSP_SRCS-$(HAVE_SSSE3)  += x86/masked_variance_intrin_ssse3.c
 endif  #CONFIG_EXT_INTER
-ifeq ($(CONFIG_OBMC),yes)
+ifeq ($(CONFIG_MOTION_VAR),yes)
 DSP_SRCS-$(HAVE_SSE4_1) += x86/obmc_sad_sse4.c
 DSP_SRCS-$(HAVE_SSE4_1) += x86/obmc_variance_sse4.c
-endif  #CONFIG_OBMC
+endif  #CONFIG_MOTION_VAR
 endif  #CONFIG_AV1_ENCODER
 
 DSP_SRCS-$(HAVE_SSE)    += x86/sad4d_sse2.asm

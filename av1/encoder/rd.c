@@ -450,12 +450,12 @@ void av1_initialize_rd_consts(AV1_COMP *cpi) {
                         cm->fc->interintra_mode_prob[i],
                         av1_interintra_mode_tree);
 #endif  // CONFIG_EXT_INTER
-#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
       for (i = BLOCK_8X8; i < BLOCK_SIZES; i++) {
-        av1_cost_tokens((int *)cpi->motvar_cost[i], cm->fc->motvar_prob[i],
-                        av1_motvar_tree);
+        av1_cost_tokens((int *)cpi->motion_mode_cost[i],
+                        cm->fc->motion_mode_prob[i], av1_motion_mode_tree);
       }
-#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
     }
   }
 }

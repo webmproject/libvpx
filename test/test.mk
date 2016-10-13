@@ -162,7 +162,7 @@ ifeq ($(CONFIG_EXT_INTRA),yes)
 LIBAOM_TEST_SRCS-$(HAVE_SSE4_1) += reconintra_predictors_test.cc
 endif
 
-ifeq ($(CONFIG_OBMC),yes)
+ifeq ($(CONFIG_MOTION_VAR),yes)
 LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += obmc_sad_test.cc
 LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += obmc_variance_test.cc
 endif

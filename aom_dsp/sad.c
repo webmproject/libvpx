@@ -410,7 +410,7 @@ HIGHBD_MASKSADMXN(4, 4)
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 #endif  // CONFIG_AV1 && CONFIG_EXT_INTER
 
-#if CONFIG_AV1 && CONFIG_OBMC
+#if CONFIG_AV1 && CONFIG_MOTION_VAR
 // pre: predictor being evaluated
 // wsrc: target weighted prediction (has been *4096 to keep precision)
 // mask: 2d weights (scaled by 4096)
@@ -509,4 +509,4 @@ HIGHBD_OBMCSADMXN(4, 8)
 HIGHBD_OBMCSADMXN(4, 4)
 /* clang-format on */
 #endif  // CONFIG_AOM_HIGHBITDEPTH
-#endif  // CONFIG_AV1 && CONFIG_OBMC
+#endif  // CONFIG_AV1 && CONFIG_MOTION_VAR
