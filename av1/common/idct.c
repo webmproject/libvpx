@@ -33,6 +33,9 @@ int get_tx_scale(const MACROBLOCKD *const xd, const TX_TYPE tx_type,
   return txsize_sqr_up_map[tx_size] == TX_32X32;
 }
 
+// NOTE: The implementation of all inverses need to be aware of the fact
+// that input and output could be the same buffer.
+
 #if CONFIG_EXT_TX
 static void iidtx4_c(const tran_low_t *input, tran_low_t *output) {
   int i;
@@ -56,16 +59,16 @@ static void iidtx32_c(const tran_low_t *input, tran_low_t *output) {
   for (i = 0; i < 32; ++i) output[i] = input[i] * 4;
 }
 
-// For use in lieu of DST
+// For use in lieu of ADST
 static void ihalfright32_c(const tran_low_t *input, tran_low_t *output) {
   int i;
   tran_low_t inputhalf[16];
-  for (i = 0; i < 16; ++i) {
-    output[i] = input[16 + i] * 4;
-  }
   // Multiply input by sqrt(2)
   for (i = 0; i < 16; ++i) {
     inputhalf[i] = (tran_low_t)dct_const_round_shift(input[i] * Sqrt2);
+  }
+  for (i = 0; i < 16; ++i) {
+    output[i] = input[16 + i] * 4;
   }
   idct16_c(inputhalf, output + 16);
   // Note overall scaling factor is 4 times orthogonal
@@ -106,13 +109,13 @@ static void highbd_ihalfright32_c(const tran_low_t *input, tran_low_t *output,
                                   int bd) {
   int i;
   tran_low_t inputhalf[16];
-  for (i = 0; i < 16; ++i) {
-    output[i] = input[16 + i] * 4;
-  }
   // Multiply input by sqrt(2)
   for (i = 0; i < 16; ++i) {
     inputhalf[i] =
         HIGHBD_WRAPLOW(highbd_dct_const_round_shift(input[i] * Sqrt2), bd);
+  }
+  for (i = 0; i < 16; ++i) {
+    output[i] = input[16 + i] * 4;
   }
   aom_highbd_idct16_c(inputhalf, output + 16, bd);
   // Note overall scaling factor is 4 times orthogonal
