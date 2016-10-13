@@ -1,11 +1,12 @@
 /*
- *  Copyright (c) 2015 The WebM project authors. All Rights Reserved.
+ * Copyright (c) 2016, Alliance for Open Media. All rights reserved
  *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree. An additional intellectual property rights grant can be found
- *  in the file PATENTS.  All contributing project authors may
- *  be found in the AUTHORS file in the root of the source tree.
+ * This source code is subject to the terms of the BSD 2 Clause License and
+ * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+ * was not distributed with this source code in the LICENSE file, you can
+ * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * Media Patent License 1.0 was not distributed with this source code in the
+ * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 
 #include "./aom_dsp_rtcd.h"
@@ -1652,23 +1653,25 @@ static uint32_t sub_pixel_avg_sse_diff_64width_hv_msa(
     return var;                                                               \
   }
 
-AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(4, 4);
-AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(4, 8);
+/* clang-format off */
+AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(4, 4)
+AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(4, 8)
 
-AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(8, 4);
-AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(8, 8);
-AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(8, 16);
+AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(8, 4)
+AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(8, 8)
+AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(8, 16)
 
-AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(16, 8);
-AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(16, 16);
-AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(16, 32);
+AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(16, 8)
+AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(16, 16)
+AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(16, 32)
 
-AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(32, 16);
-AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(32, 32);
-AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(32, 64);
+AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(32, 16)
+AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(32, 32)
+AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(32, 64)
 
-AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(64, 32);
-AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(64, 64);
+AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(64, 32)
+AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(64, 64)
+/* clang-format on */
 
 #define AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(wd, ht)                          \
   uint32_t aom_sub_pixel_avg_variance##wd##x##ht##_msa(                       \
@@ -1703,19 +1706,21 @@ AOM_SUB_PIXEL_VARIANCE_WDXHT_MSA(64, 64);
     return VARIANCE_##wd##Wx##ht##H(*sse, diff);                              \
   }
 
-AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(4, 4);
-AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(4, 8);
+/* clang-format off */
+AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(4, 4)
+AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(4, 8)
 
-AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(8, 4);
-AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(8, 8);
-AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(8, 16);
+AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(8, 4)
+AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(8, 8)
+AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(8, 16)
 
-AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(16, 8);
-AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(16, 16);
-AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(16, 32);
+AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(16, 8)
+AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(16, 16)
+AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(16, 32)
 
-AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(32, 16);
-AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(32, 32);
+AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(32, 16)
+AOM_SUB_PIXEL_AVG_VARIANCE_WDXHT_MSA(32, 32)
+/* clang-format on */
 
 uint32_t aom_sub_pixel_avg_variance32x64_msa(const uint8_t *src_ptr,
                                              int32_t src_stride,
@@ -1784,5 +1789,7 @@ uint32_t aom_sub_pixel_avg_variance32x64_msa(const uint8_t *src_ptr,
     return VARIANCE_64Wx##ht##H(*sse, diff);                                  \
   }
 
-AOM_SUB_PIXEL_AVG_VARIANCE64XHEIGHT_MSA(32);
-AOM_SUB_PIXEL_AVG_VARIANCE64XHEIGHT_MSA(64);
+/* clang-format off */
+AOM_SUB_PIXEL_AVG_VARIANCE64XHEIGHT_MSA(32)
+AOM_SUB_PIXEL_AVG_VARIANCE64XHEIGHT_MSA(64)
+/* clang-format on */

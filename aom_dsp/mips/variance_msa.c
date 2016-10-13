@@ -540,8 +540,9 @@ uint32_t aom_get4x4sse_cs_msa(const uint8_t *src_ptr, int32_t src_stride,
     return VARIANCE_##wd##Wx##ht##H(*sse, diff);                               \
   }
 
-AOM_VARIANCE_WDXHT_MSA(4, 4);
-AOM_VARIANCE_WDXHT_MSA(4, 8);
+/* clang-format off */
+AOM_VARIANCE_WDXHT_MSA(4, 4)
+AOM_VARIANCE_WDXHT_MSA(4, 8)
 
 AOM_VARIANCE_WDXHT_MSA(8, 4)
 AOM_VARIANCE_WDXHT_MSA(8, 8)
@@ -553,6 +554,7 @@ AOM_VARIANCE_WDXHT_MSA(16, 32)
 
 AOM_VARIANCE_WDXHT_MSA(32, 16)
 AOM_VARIANCE_WDXHT_MSA(32, 32)
+/* clang-format on */
 
 uint32_t aom_variance32x64_msa(const uint8_t *src, int32_t src_stride,
                                const uint8_t *ref, int32_t ref_stride,
