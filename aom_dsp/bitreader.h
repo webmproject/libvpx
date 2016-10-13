@@ -104,6 +104,20 @@ static INLINE int aom_read_tree(aom_reader *r, const aom_tree_index *tree,
   return aom_read_tree_bits(r, tree, probs);
 }
 
+static INLINE int aom_read_symbol(aom_reader *r, const aom_cdf_prob *cdf,
+                                  int nsymbs) {
+#if CONFIG_ANS
+  (void)nsymbs;
+  return rans_read(r, cdf);
+#else
+  (void)r;
+  (void)cdf;
+  (void)nsymbs;
+  assert(0 && "Unsupported bitreader operation");
+  return -1;
+#endif
+}
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

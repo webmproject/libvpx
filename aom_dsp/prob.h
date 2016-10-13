@@ -23,6 +23,9 @@ extern "C" {
 
 typedef uint8_t aom_prob;
 
+// TODO(negge): Rename this aom_prob once we remove vpxbool.
+typedef uint16_t aom_cdf_prob;
+
 #define MAX_PROB 255
 
 #define aom_prob_half ((aom_prob)128)

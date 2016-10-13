@@ -37,7 +37,7 @@ typedef struct {
 typedef struct {
   const aom_prob *context_tree;
 #if CONFIG_ANS
-  const rans_lut *token_cdf;
+  const aom_cdf_prob (*token_cdf)[ENTROPY_TOKENS];
 #endif  // CONFIG_ANS
   EXTRABIT extra;
   uint8_t token;

@@ -387,7 +387,7 @@ static void set_entropy_context_b(int plane, int block, int blk_row,
 
 static INLINE void add_token(TOKENEXTRA **t, const aom_prob *context_tree,
 #if CONFIG_ANS
-                             const rans_lut *token_cdf,
+                             const aom_cdf_prob (*token_cdf)[ENTROPY_TOKENS],
 #endif  // CONFIG_ANS
                              int32_t extra, uint8_t token,
                              uint8_t skip_eob_node, unsigned int *counts) {
@@ -397,17 +397,6 @@ static INLINE void add_token(TOKENEXTRA **t, const aom_prob *context_tree,
 #if CONFIG_ANS
   (*t)->token_cdf = token_cdf;
 #endif  // CONFIG_ANS
-  (*t)->skip_eob_node = skip_eob_node;
-  (*t)++;
-  ++counts[token];
-}
-
-static INLINE void add_token_no_extra(TOKENEXTRA **t,
-                                      const aom_prob *context_tree,
-                                      uint8_t token, uint8_t skip_eob_node,
-                                      unsigned int *counts) {
-  (*t)->token = token;
-  (*t)->context_tree = context_tree;
   (*t)->skip_eob_node = skip_eob_node;
   (*t)++;
   ++counts[token];
@@ -498,8 +487,8 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
       cpi->common.fc->coef_probs[txsize_sqr_map[tx_size]][type][ref];
 #endif  // CONFIG_ENTROPY
 #if CONFIG_ANS
-  rans_lut(*const coef_cdfs)[COEFF_CONTEXTS] =
-      cpi->common.fc->coef_cdfs[txsize_sqr_map[tx_size]][type][ref];
+  aom_cdf_prob(*const coef_cdfs)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
+      cpi->common.fc->coef_cdfs[tx_size][type][ref];
 #endif  // CONFIG_ANS
   unsigned int(*const eob_branch)[COEFF_CONTEXTS] =
       td->counts->eob_branch[txsize_sqr_map[tx_size]][type][ref];
@@ -522,7 +511,7 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
 
     add_token(&t, coef_probs[band[c]][pt],
 #if CONFIG_ANS
-              (const rans_lut *)&coef_cdfs[band[c]][pt],
+              (const aom_cdf_prob(*)[ENTROPY_TOKENS]) & coef_cdfs[band[c]][pt],
 #endif  // CONFIG_ANS
               extra, (uint8_t)token, (uint8_t)skip_eob, counts[band[c]][pt]);
 
@@ -532,8 +521,11 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
     skip_eob = (token == ZERO_TOKEN);
   }
   if (c < seg_eob) {
-    add_token_no_extra(&t, coef_probs[band[c]][pt], EOB_TOKEN, 0,
-                       counts[band[c]][pt]);
+    add_token(&t, coef_probs[band[c]][pt],
+#if CONFIG_ANS || CONFIG_DAALA_EC
+              NULL,
+#endif
+              0, EOB_TOKEN, 0, counts[band[c]][pt]);
     ++eob_branch[band[c]][pt];
   }
 

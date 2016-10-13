@@ -657,11 +657,8 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
       aom_write(w, t != ZERO_TOKEN, p->context_tree[1]);
 
       if (t != ZERO_TOKEN) {
-        struct rans_sym s;
-        const rans_lut *token_cdf = p->token_cdf;
-        s.cum_prob = (*token_cdf)[t - ONE_TOKEN];
-        s.prob = (*token_cdf)[t - ONE_TOKEN + 1] - s.cum_prob;
-        buf_rans_write(w, &s);
+        aom_write_symbol(w, t - ONE_TOKEN, *p->token_cdf,
+                         CATEGORY6_TOKEN - ONE_TOKEN + 1);
       }
     }
 #else

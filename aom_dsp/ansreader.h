@@ -62,24 +62,25 @@ static INLINE int uabs_read_bit(struct AnsDecoder *ans) {
 
 struct rans_dec_sym {
   uint8_t val;
-  AnsP10 prob;
-  AnsP10 cum_prob;  // not-inclusive
+  aom_cdf_prob prob;
+  aom_cdf_prob cum_prob;  // not-inclusive
 };
 
-static INLINE void fetch_sym(struct rans_dec_sym *out, const rans_lut cdf,
-                             AnsP10 rem) {
-  int i = 0;
+static INLINE void fetch_sym(struct rans_dec_sym *out, const aom_cdf_prob *cdf,
+                             aom_cdf_prob rem) {
+  int i;
+  aom_cdf_prob cum_prob = 0, top_prob;
   // TODO(skal): if critical, could be a binary search.
   // Or, better, an O(1) alias-table.
-  while (rem >= cdf[i]) {
-    ++i;
+  for (i = 0; rem >= (top_prob = cdf[i]); ++i) {
+    cum_prob = top_prob;
   }
-  out->val = i - 1;
-  out->prob = (AnsP10)(cdf[i] - cdf[i - 1]);
-  out->cum_prob = (AnsP10)cdf[i - 1];
+  out->val = i;
+  out->prob = top_prob - cum_prob;
+  out->cum_prob = cum_prob;
 }
 
-static INLINE int rans_read(struct AnsDecoder *ans, const rans_lut tab) {
+static INLINE int rans_read(struct AnsDecoder *ans, const aom_cdf_prob *tab) {
   unsigned rem;
   unsigned quo;
   struct rans_dec_sym sym;

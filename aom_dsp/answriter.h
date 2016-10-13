@@ -75,8 +75,8 @@ static INLINE void uabs_write(struct AnsCoder *ans, int val, AnsP8 p0) {
 }
 
 struct rans_sym {
-  AnsP10 prob;
-  AnsP10 cum_prob;  // not-inclusive
+  aom_cdf_prob prob;
+  aom_cdf_prob cum_prob;  // not-inclusive
 };
 
 // rANS with normalization
@@ -84,7 +84,7 @@ struct rans_sym {
 // ANS_P10_PRECISION is m
 static INLINE void rans_write(struct AnsCoder *ans,
                               const struct rans_sym *const sym) {
-  const AnsP10 p = sym->prob;
+  const aom_cdf_prob p = sym->prob;
   while (ans->state >= L_BASE / RANS_PRECISION * IO_BASE * p) {
     ans->buf[ans->buf_offset++] = ans->state % IO_BASE;
     ans->state /= IO_BASE;
