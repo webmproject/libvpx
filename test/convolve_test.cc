@@ -884,6 +884,7 @@ using std::tr1::make_tuple;
     vpx_highbd_##func(src, src_stride, dst, dst_stride, filter_x,            \
                       filter_x_stride, filter_y, filter_y_stride, w, h, bd); \
   }
+
 #if HAVE_SSE2 && ARCH_X86_64
 WRAP(convolve_copy_sse2, 8)
 WRAP(convolve_avg_sse2, 8)
@@ -910,6 +911,15 @@ WRAP(convolve8_avg_vert_sse2, 12)
 WRAP(convolve8_sse2, 12)
 WRAP(convolve8_avg_sse2, 12)
 #endif  // HAVE_SSE2 && ARCH_X86_64
+
+#if HAVE_NEON
+WRAP(convolve_copy_neon, 8)
+WRAP(convolve_avg_neon, 8)
+WRAP(convolve_copy_neon, 10)
+WRAP(convolve_avg_neon, 10)
+WRAP(convolve_copy_neon, 12)
+WRAP(convolve_avg_neon, 12)
+#endif  // HAVE_NEON
 
 WRAP(convolve_copy_c, 8)
 WRAP(convolve_avg_c, 8)
@@ -1043,6 +1053,34 @@ INSTANTIATE_TEST_CASE_P(AVX2, ConvolveTest,
 #endif  // HAVE_AVX2 && HAVE_SSSE3
 
 #if HAVE_NEON
+#if CONFIG_VP9_HIGHBITDEPTH
+const ConvolveFunctions convolve8_neon(
+    wrap_convolve_copy_neon_8, wrap_convolve_avg_neon_8,
+    wrap_convolve8_horiz_c_8, wrap_convolve8_avg_horiz_c_8,
+    wrap_convolve8_vert_c_8, wrap_convolve8_avg_vert_c_8, wrap_convolve8_c_8,
+    wrap_convolve8_avg_c_8, wrap_convolve8_horiz_c_8,
+    wrap_convolve8_avg_horiz_c_8, wrap_convolve8_vert_c_8,
+    wrap_convolve8_avg_vert_c_8, wrap_convolve8_c_8, wrap_convolve8_avg_c_8, 8);
+const ConvolveFunctions convolve10_neon(
+    wrap_convolve_copy_neon_10, wrap_convolve_avg_neon_10,
+    wrap_convolve8_horiz_c_10, wrap_convolve8_avg_horiz_c_10,
+    wrap_convolve8_vert_c_10, wrap_convolve8_avg_vert_c_10, wrap_convolve8_c_10,
+    wrap_convolve8_avg_c_10, wrap_convolve8_horiz_c_10,
+    wrap_convolve8_avg_horiz_c_10, wrap_convolve8_vert_c_10,
+    wrap_convolve8_avg_vert_c_10, wrap_convolve8_c_10, wrap_convolve8_avg_c_10,
+    10);
+const ConvolveFunctions convolve12_neon(
+    wrap_convolve_copy_neon_12, wrap_convolve_avg_neon_12,
+    wrap_convolve8_horiz_c_12, wrap_convolve8_avg_horiz_c_12,
+    wrap_convolve8_vert_c_12, wrap_convolve8_avg_vert_c_12, wrap_convolve8_c_12,
+    wrap_convolve8_avg_c_12, wrap_convolve8_horiz_c_12,
+    wrap_convolve8_avg_horiz_c_12, wrap_convolve8_vert_c_12,
+    wrap_convolve8_avg_vert_c_12, wrap_convolve8_c_12, wrap_convolve8_avg_c_12,
+    12);
+const ConvolveParam kArrayConvolve_neon[] = { ALL_SIZES(convolve8_neon),
+                                              ALL_SIZES(convolve10_neon),
+                                              ALL_SIZES(convolve12_neon) };
+#else
 const ConvolveFunctions convolve8_neon(
     vpx_convolve_copy_neon, vpx_convolve_avg_neon, vpx_convolve8_horiz_neon,
     vpx_convolve8_avg_horiz_neon, vpx_convolve8_vert_neon,
@@ -1050,9 +1088,10 @@ const ConvolveFunctions convolve8_neon(
     vpx_scaled_horiz_c, vpx_scaled_avg_horiz_c, vpx_scaled_vert_c,
     vpx_scaled_avg_vert_c, vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
 
-const ConvolveParam kArrayConvolve8_neon[] = { ALL_SIZES(convolve8_neon) };
+const ConvolveParam kArrayConvolve_neon[] = { ALL_SIZES(convolve8_neon) };
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(NEON, ConvolveTest,
-                        ::testing::ValuesIn(kArrayConvolve8_neon));
+                        ::testing::ValuesIn(kArrayConvolve_neon));
 #endif  // HAVE_NEON
 
 #if HAVE_DSPR2

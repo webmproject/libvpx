@@ -86,6 +86,8 @@ DSP_SRCS-$(HAVE_SSSE3) += x86/vpx_subpixel_8t_intrin_ssse3.c
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_SSE2)  += x86/vpx_high_subpixel_8t_sse2.asm
 DSP_SRCS-$(HAVE_SSE2)  += x86/vpx_high_subpixel_bilinear_sse2.asm
+DSP_SRCS-$(HAVE_NEON)  += arm/highbd_vpx_convolve_copy_neon.c
+DSP_SRCS-$(HAVE_NEON)  += arm/highbd_vpx_convolve_avg_neon.c
 endif
 
 DSP_SRCS-$(HAVE_SSE2)  += x86/vpx_convolve_copy_sse2.asm
