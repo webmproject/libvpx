@@ -3952,7 +3952,6 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
 #else
     /* transform / motion compensation build reconstruction frame */
     vp8_encode_frame(cpi);
-
     if (cpi->oxcf.screen_content_mode == 2) {
       if (vp8_drop_encodedframe_overshoot(cpi, Q)) return;
     }
@@ -4229,6 +4228,20 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
 #endif
     }
   } while (Loop == 1);
+
+#if defined(DROP_UNCODED_FRAMES)
+  /* if there are no coded macroblocks at all drop this frame */
+  if (cpi->common.MBs == cpi->mb.skip_true_count &&
+      (cpi->drop_frame_count & 7) != 7 && cm->frame_type != KEY_FRAME) {
+    cpi->common.current_video_frame++;
+    cpi->frames_since_key++;
+    cpi->drop_frame_count++;
+    // We advance the temporal pattern for dropped frames.
+    cpi->temporal_pattern_counter++;
+    return;
+  }
+  cpi->drop_frame_count = 0;
+#endif
 
 #if 0
     /* Experimental code for lagged and one pass
