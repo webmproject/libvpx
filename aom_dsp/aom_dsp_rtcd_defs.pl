@@ -1201,7 +1201,7 @@ if (aom_config("CONFIG_EXT_INTER") eq "yes") {
 #
 # OBMC SAD
 #
-if (aom_config("CONFIG_OBMC") eq "yes") {
+if (aom_config("CONFIG_MOTION_VAR") eq "yes") {
   foreach (@block_sizes) {
     ($w, $h) = @$_;
     add_proto qw/unsigned int/, "aom_obmc_sad${w}x${h}", "const uint8_t *pre, int pre_stride, const int32_t *wsrc, const int32_t *mask";
@@ -1533,7 +1533,7 @@ if (aom_config("CONFIG_EXT_INTER") eq "yes") {
 #
 # OBMC Variance / OBMC Subpixel Variance
 #
-if (aom_config("CONFIG_OBMC") eq "yes") {
+if (aom_config("CONFIG_MOTION_VAR") eq "yes") {
   foreach (@block_sizes) {
     ($w, $h) = @$_;
     add_proto qw/unsigned int/, "aom_obmc_variance${w}x${h}", "const uint8_t *pre, int pre_stride, const int32_t *wsrc, const int32_t *mask, unsigned int *sse";

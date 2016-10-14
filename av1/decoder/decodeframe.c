@@ -1238,8 +1238,8 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
   } else {
     // Prediction
     av1_build_inter_predictors_sb(xd, mi_row, mi_col, AOMMAX(bsize, BLOCK_8X8));
-#if CONFIG_OBMC
-    if (mbmi->motion_variation == OBMC_CAUSAL) {
+#if CONFIG_MOTION_VAR
+    if (mbmi->motion_mode == OBMC_CAUSAL) {
 #if CONFIG_AOM_HIGHBITDEPTH
       DECLARE_ALIGNED(16, uint8_t, tmp_buf1[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
       DECLARE_ALIGNED(16, uint8_t, tmp_buf2[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
@@ -1284,7 +1284,7 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
       av1_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, dst_buf1,
                                       dst_stride1, dst_buf2, dst_stride2);
     }
-#endif  // CONFIG_OBMC
+#endif  // CONFIG_MOTION_VAR
 
     // Reconstruction
     if (!mbmi->skip) {
@@ -3707,12 +3707,12 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
     }
 #endif  // CONFIG_EXT_INTER
 
-#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
     for (i = BLOCK_8X8; i < BLOCK_SIZES; ++i) {
-      for (j = 0; j < MOTION_VARIATIONS - 1; ++j)
-        av1_diff_update_prob(&r, &fc->motvar_prob[i][j]);
+      for (j = 0; j < MOTION_MODES - 1; ++j)
+        av1_diff_update_prob(&r, &fc->motion_mode_prob[i][j]);
     }
-#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
 
     if (cm->interp_filter == SWITCHABLE) read_switchable_interp_probs(fc, &r);
 
@@ -3780,10 +3780,10 @@ static void debug_check_frame_counts(const AV1_COMMON *const cm) {
   assert(!memcmp(cm->counts.wedge_interinter, zero_counts.wedge_interinter,
                  sizeof(cm->counts.wedge_interinter)));
 #endif  // CONFIG_EXT_INTER
-#if CONFIG_OBMC || CONFIG_WARPED_MOTION
-  assert(!memcmp(cm->counts.motvar, zero_counts.motvar,
-                 sizeof(cm->counts.motvar)));
-#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
+  assert(!memcmp(cm->counts.motion_mode, zero_counts.motion_mode,
+                 sizeof(cm->counts.motion_mode)));
+#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
   assert(!memcmp(cm->counts.intra_inter, zero_counts.intra_inter,
                  sizeof(cm->counts.intra_inter)));
   assert(!memcmp(cm->counts.comp_inter, zero_counts.comp_inter,

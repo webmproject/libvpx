@@ -819,24 +819,22 @@ static void read_ref_frames(AV1_COMMON *const cm, MACROBLOCKD *const xd,
   }
 }
 
-#if CONFIG_OBMC || CONFIG_WARPED_MOTION
-static MOTION_VARIATION read_motvar_block(AV1_COMMON *const cm,
-                                          MACROBLOCKD *const xd,
-                                          aom_reader *r) {
-  BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
-  FRAME_COUNTS *counts = xd->counts;
-  MOTION_VARIATION motvar;
+#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
+static MOTION_MODE read_motion_mode(AV1_COMMON *cm, MACROBLOCKD *xd,
+                                    MB_MODE_INFO *mbmi, aom_reader *r) {
+  if (is_motion_variation_allowed(mbmi)) {
+    int motion_mode;
+    FRAME_COUNTS *counts = xd->counts;
 
-  if (is_motvar_allowed(&xd->mi[0]->mbmi)) {
-    motvar = (MOTION_VARIATION)aom_read_tree(r, av1_motvar_tree,
-                                             cm->fc->motvar_prob[bsize]);
-    if (counts) ++counts->motvar[bsize][motvar];
-    return motvar;
+    motion_mode = aom_read_tree(r, av1_motion_mode_tree,
+                                cm->fc->motion_mode_prob[mbmi->sb_type]);
+    if (counts) ++counts->motion_mode[mbmi->sb_type][motion_mode];
+    return (MOTION_MODE)(SIMPLE_TRANSLATION + motion_mode);
   } else {
     return SIMPLE_TRANSLATION;
   }
 }
-#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
 
 static INLINE InterpFilter read_interp_filter(AV1_COMMON *const cm,
                                               MACROBLOCKD *const xd,
@@ -1166,12 +1164,12 @@ static void fpm_sync(void *const data, int mi_row) {
 static void read_inter_block_mode_info(AV1Decoder *const pbi,
                                        MACROBLOCKD *const xd,
                                        MODE_INFO *const mi,
-#if (CONFIG_OBMC || CONFIG_EXT_INTER) && CONFIG_SUPERTX
+#if (CONFIG_MOTION_VAR || CONFIG_EXT_INTER) && CONFIG_SUPERTX
                                        int mi_row, int mi_col, aom_reader *r,
                                        int supertx_enabled) {
 #else
                                        int mi_row, int mi_col, aom_reader *r) {
-#endif  // CONFIG_OBMC && CONFIG_SUPERTX
+#endif  // CONFIG_MOTION_VAR && CONFIG_SUPERTX
   AV1_COMMON *const cm = &pbi->common;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
@@ -1538,25 +1536,25 @@ static void read_inter_block_mode_info(AV1Decoder *const pbi,
   }
 #endif  // CONFIG_EXT_INTER
 
-#if CONFIG_OBMC || CONFIG_WARPED_MOTION
-  mbmi->motion_variation = SIMPLE_TRANSLATION;
+#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
+  mbmi->motion_mode = SIMPLE_TRANSLATION;
 #if CONFIG_SUPERTX
   if (!supertx_enabled)
 #endif  // CONFIG_SUPERTX
 #if CONFIG_EXT_INTER
     if (mbmi->ref_frame[1] != INTRA_FRAME)
 #endif  // CONFIG_EXT_INTER
-      mbmi->motion_variation = read_motvar_block(cm, xd, r);
-#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+      mbmi->motion_mode = read_motion_mode(cm, xd, mbmi, r);
+#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
 
 #if CONFIG_EXT_INTER
   mbmi->use_wedge_interinter = 0;
   if (cm->reference_mode != SINGLE_REFERENCE &&
       is_inter_compound_mode(mbmi->mode) &&
-#if CONFIG_OBMC || CONFIG_WARPED_MOTION
-      !(is_motvar_allowed(mbmi) &&
-        mbmi->motion_variation != SIMPLE_TRANSLATION) &&
-#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
+      !(is_motion_variation_allowed(mbmi) &&
+        mbmi->motion_mode != SIMPLE_TRANSLATION) &&
+#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
       is_interinter_wedge_used(bsize)) {
     mbmi->use_wedge_interinter =
         aom_read(r, cm->fc->wedge_interinter_prob[bsize]);
@@ -1698,12 +1696,12 @@ static void read_inter_frame_mode_info(AV1Decoder *const pbi,
 
   if (inter_block)
     read_inter_block_mode_info(pbi, xd,
-#if (CONFIG_OBMC || CONFIG_EXT_INTER) && CONFIG_SUPERTX
+#if (CONFIG_MOTION_VAR || CONFIG_EXT_INTER) && CONFIG_SUPERTX
 
                                mi, mi_row, mi_col, r, supertx_enabled);
 #else
                                mi, mi_row, mi_col, r);
-#endif  // CONFIG_OBMC && CONFIG_SUPERTX
+#endif  // CONFIG_MOTION_VAR && CONFIG_SUPERTX
   else
     read_intra_block_mode_info(cm, xd, mi, r);
 

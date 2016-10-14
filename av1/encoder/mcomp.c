@@ -2930,7 +2930,7 @@ int av1_masked_full_pixel_diamond(const AV1_COMP *cpi, MACROBLOCK *x,
 }
 #endif  // CONFIG_EXT_INTER
 
-#if CONFIG_OBMC
+#if CONFIG_MOTION_VAR
 /* returns subpixel variance error function */
 #define DIST(r, c) \
   vfp->osvf(pre(y, y_stride, r, c), y_stride, sp(c), sp(r), z, mask, &sse)
@@ -3414,4 +3414,4 @@ int av1_obmc_full_pixel_diamond(const AV1_COMP *cpi, MACROBLOCK *x,
   }
   return bestsme;
 }
-#endif  // CONFIG_OBMC
+#endif  // CONFIG_MOTION_VAR

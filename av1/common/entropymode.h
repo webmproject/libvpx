@@ -80,9 +80,9 @@ typedef struct frame_contexts {
   aom_prob wedge_interintra_prob[BLOCK_SIZES];
   aom_prob wedge_interinter_prob[BLOCK_SIZES];
 #endif  // CONFIG_EXT_INTER
-#if CONFIG_OBMC || CONFIG_WARPED_MOTION
-  aom_prob motvar_prob[BLOCK_SIZES][MOTION_VARIATIONS - 1];
-#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
+  aom_prob motion_mode_prob[BLOCK_SIZES][MOTION_MODES - 1];
+#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
   aom_prob intra_inter_prob[INTRA_INTER_CONTEXTS];
   aom_prob comp_inter_prob[COMP_INTER_CONTEXTS];
   aom_prob single_ref_prob[REF_CONTEXTS][SINGLE_REFS - 1];
@@ -165,9 +165,9 @@ typedef struct FRAME_COUNTS {
   unsigned int wedge_interintra[BLOCK_SIZES][2];
   unsigned int wedge_interinter[BLOCK_SIZES][2];
 #endif  // CONFIG_EXT_INTER
-#if CONFIG_OBMC || CONFIG_WARPED_MOTION
-  unsigned int motvar[BLOCK_SIZES][MOTION_VARIATIONS];
-#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
+  unsigned int motion_mode[BLOCK_SIZES][MOTION_MODES];
+#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
   unsigned int intra_inter[INTRA_INTER_CONTEXTS][2];
   unsigned int comp_inter[COMP_INTER_CONTEXTS][2];
   unsigned int single_ref[REF_CONTEXTS][SINGLE_REFS - 1][2];
@@ -262,9 +262,9 @@ extern const aom_tree_index av1_ext_tx_intra_tree[EXT_TX_SETS_INTRA]
 #else
 extern const aom_tree_index av1_ext_tx_tree[TREE_SIZE(TX_TYPES)];
 #endif  // CONFIG_EXT_TX
-#if CONFIG_OBMC || CONFIG_WARPED_MOTION
-extern const aom_tree_index av1_motvar_tree[TREE_SIZE(MOTION_VARIATIONS)];
-#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
+extern const aom_tree_index av1_motion_mode_tree[TREE_SIZE(MOTION_MODES)];
+#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
 
 #if CONFIG_LOOP_RESTORATION
 #define RESTORE_NONE_BILATERAL_PROB 16

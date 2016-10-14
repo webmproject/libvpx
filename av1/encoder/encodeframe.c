@@ -1302,7 +1302,7 @@ static void update_state_supertx(AV1_COMP *cpi, ThreadData *td,
   }
 #endif  // CONFIG_VAR_TX
   // Turn motion variation off for supertx
-  mbmi->motion_variation = SIMPLE_TRANSLATION;
+  mbmi->motion_mode = SIMPLE_TRANSLATION;
 
   if (dry_run) return;
 
@@ -1887,24 +1887,24 @@ static void update_stats(AV1_COMMON *cm, ThreadData *td
         }
 #endif  // CONFIG_EXT_INTER
 
-#if CONFIG_OBMC || CONFIG_WARPED_MOTION
+#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
 #if CONFIG_SUPERTX
         if (!supertx_enabled)
 #endif  // CONFIG_SUPERTX
 #if CONFIG_EXT_INTER
           if (mbmi->ref_frame[1] != INTRA_FRAME)
 #endif  // CONFIG_EXT_INTER
-            if (is_motvar_allowed(mbmi))
-              counts->motvar[mbmi->sb_type][mbmi->motion_variation]++;
-#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+            if (is_motion_variation_allowed(mbmi))
+              counts->motion_mode[mbmi->sb_type][mbmi->motion_mode]++;
+#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
 
 #if CONFIG_EXT_INTER
         if (cm->reference_mode != SINGLE_REFERENCE &&
             is_inter_compound_mode(mbmi->mode) &&
-#if CONFIG_OBMC || CONFIG_WARPED_MOTION
-            !(is_motvar_allowed(mbmi) &&
-              mbmi->motion_variation != SIMPLE_TRANSLATION) &&
-#endif  // CONFIG_OBMC || CONFIG_WARPED_MOTION
+#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
+            !(is_motion_variation_allowed(mbmi) &&
+              mbmi->motion_mode != SIMPLE_TRANSLATION) &&
+#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
             is_interinter_wedge_used(bsize)) {
           counts->wedge_interinter[bsize][mbmi->use_wedge_interinter]++;
         }
@@ -5077,8 +5077,8 @@ static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
     av1_build_inter_predictors_sbuv(xd, mi_row, mi_col,
                                     AOMMAX(bsize, BLOCK_8X8));
 
-#if CONFIG_OBMC
-    if (mbmi->motion_variation == OBMC_CAUSAL) {
+#if CONFIG_MOTION_VAR
+    if (mbmi->motion_mode == OBMC_CAUSAL) {
 #if CONFIG_AOM_HIGHBITDEPTH
       DECLARE_ALIGNED(16, uint8_t, tmp_buf1[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
       DECLARE_ALIGNED(16, uint8_t, tmp_buf2[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
@@ -5124,7 +5124,7 @@ static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
       av1_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, dst_buf1,
                                       dst_stride1, dst_buf2, dst_stride2);
     }
-#endif  // CONFIG_OBMC
+#endif  // CONFIG_MOTION_VAR
 
     av1_encode_sb(x, AOMMAX(bsize, BLOCK_8X8));
 #if CONFIG_VAR_TX

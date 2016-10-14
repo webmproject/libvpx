@@ -21,9 +21,9 @@
 #include "av1/common/blockd.h"
 #include "av1/common/reconinter.h"
 #include "av1/common/reconintra.h"
-#if CONFIG_OBMC
+#if CONFIG_MOTION_VAR
 #include "av1/common/onyxc_int.h"
-#endif  // CONFIG_OBMC
+#endif  // CONFIG_MOTION_VAR
 #if CONFIG_GLOBAL_MOTION
 #include "av1/common/warped_motion.h"
 #endif  // CONFIG_GLOBAL_MOTION
@@ -534,9 +534,9 @@ void av1_build_inter_predictor(const uint8_t *src, int src_stride, uint8_t *dst,
 }
 
 void build_inter_predictors(MACROBLOCKD *xd, int plane,
-#if CONFIG_OBMC
+#if CONFIG_MOTION_VAR
                             int mi_col_offset, int mi_row_offset,
-#endif  // CONFIG_OBMC
+#endif  // CONFIG_MOTION_VAR
                             int block, int bw, int bh, int x, int y, int w,
                             int h,
 #if CONFIG_SUPERTX && CONFIG_EXT_INTER
@@ -544,11 +544,11 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane,
 #endif  // CONFIG_SUPERTX && CONFIG_EXT_INTER
                             int mi_x, int mi_y) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
-#if CONFIG_OBMC
+#if CONFIG_MOTION_VAR
   const MODE_INFO *mi = xd->mi[mi_col_offset + xd->mi_stride * mi_row_offset];
 #else
   const MODE_INFO *mi = xd->mi[0];
-#endif  // CONFIG_OBMC
+#endif  // CONFIG_MOTION_VAR
   const int is_compound = has_second_ref(&mi->mbmi);
   int ref;
 #if CONFIG_GLOBAL_MOTION
@@ -782,9 +782,9 @@ static void build_inter_predictors_for_planes(MACROBLOCKD *xd, BLOCK_SIZE bsize,
       for (y = 0; y < num_4x4_h; ++y)
         for (x = 0; x < num_4x4_w; ++x)
           build_inter_predictors(xd, plane,
-#if CONFIG_OBMC
+#if CONFIG_MOTION_VAR
                                  0, 0,
-#endif  // CONFIG_OBMC
+#endif  // CONFIG_MOTION_VAR
                                  y * 2 + x, bw, bh, 4 * x, 4 * y, pw, ph,
 #if CONFIG_SUPERTX && CONFIG_EXT_INTER
                                  0, 0,
@@ -792,9 +792,9 @@ static void build_inter_predictors_for_planes(MACROBLOCKD *xd, BLOCK_SIZE bsize,
                                  mi_x, mi_y);
     } else {
       build_inter_predictors(xd, plane,
-#if CONFIG_OBMC
+#if CONFIG_MOTION_VAR
                              0, 0,
-#endif  // CONFIG_OBMC
+#endif  // CONFIG_MOTION_VAR
                              0, bw, bh, 0, 0, bw, bh,
 #if CONFIG_SUPERTX && CONFIG_EXT_INTER
                              0, 0,
@@ -1056,9 +1056,9 @@ void av1_build_inter_predictors_sb_sub8x8_extend(MACROBLOCKD *xd,
     const int bh = 4 * num_4x4_h;
 
     build_inter_predictors(xd, plane,
-#if CONFIG_OBMC
+#if CONFIG_MOTION_VAR
                            0, 0,
-#endif  // CONFIG_OBMC
+#endif  // CONFIG_MOTION_VAR
                            block, bw, bh, 0, 0, bw, bh,
 #if CONFIG_EXT_INTER
                            wedge_offset_x, wedge_offset_y,
@@ -1101,9 +1101,9 @@ void av1_build_inter_predictors_sb_extend(MACROBLOCKD *xd,
       for (y = 0; y < num_4x4_h; ++y)
         for (x = 0; x < num_4x4_w; ++x)
           build_inter_predictors(xd, plane,
-#if CONFIG_OBMC
+#if CONFIG_MOTION_VAR
                                  0, 0,
-#endif  // CONFIG_OBMC
+#endif  // CONFIG_MOTION_VAR
                                  y * 2 + x, bw, bh, 4 * x, 4 * y, 4, 4,
 #if CONFIG_EXT_INTER
                                  wedge_offset_x, wedge_offset_y,
@@ -1111,9 +1111,9 @@ void av1_build_inter_predictors_sb_extend(MACROBLOCKD *xd,
                                  mi_x, mi_y);
     } else {
       build_inter_predictors(xd, plane,
-#if CONFIG_OBMC
+#if CONFIG_MOTION_VAR
                              0, 0,
-#endif  // CONFIG_OBMC
+#endif  // CONFIG_MOTION_VAR
                              0, bw, bh, 0, 0, bw, bh,
 #if CONFIG_EXT_INTER
                              wedge_offset_x, wedge_offset_y,
@@ -1124,7 +1124,7 @@ void av1_build_inter_predictors_sb_extend(MACROBLOCKD *xd,
 }
 #endif  // CONFIG_SUPERTX
 
-#if CONFIG_OBMC
+#if CONFIG_MOTION_VAR
 // obmc_mask_N[overlap_position]
 static const uint8_t obmc_mask_1[1] = { 55 };
 
@@ -1474,7 +1474,7 @@ void av1_build_prediction_by_left_preds(AV1_COMMON *cm, MACROBLOCKD *xd,
   }
   xd->mb_to_top_edge = -((mi_row * MI_SIZE) * 8);
 }
-#endif  // CONFIG_OBMC
+#endif  // CONFIG_MOTION_VAR
 
 #if CONFIG_EXT_INTER
 #if CONFIG_EXT_PARTITION

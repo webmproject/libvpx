@@ -290,14 +290,14 @@ typedef enum ATTRIBUTE_PACKED {
 
 typedef enum {
   SIMPLE_TRANSLATION = 0,
-#if CONFIG_OBMC
+#if CONFIG_MOTION_VAR
   OBMC_CAUSAL,  // 2-sided OBMC
-#endif          // CONFIG_OBMC
+#endif          // CONFIG_MOTION_VAR
 #if CONFIG_WARPED_MOTION
   WARPED_CAUSAL,  // 2-sided WARPED
 #endif            // CONFIG_WARPED_MOTION
-  MOTION_VARIATIONS
-} MOTION_VARIATION;
+  MOTION_MODES
+} MOTION_MODE;
 
 #if CONFIG_EXT_INTER
 typedef enum {
