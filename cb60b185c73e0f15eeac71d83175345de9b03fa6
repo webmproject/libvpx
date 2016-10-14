@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc7ca22f_a03e82e2",
+        "filename": "av1/common/enums.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-14T02:14:48Z",
+      "side": 1,
+      "message": "did you want to rename this one to match?",
+      "revId": "cb60b185c73e0f15eeac71d83175345de9b03fa6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc7ca22f_0033d617",
+        "filename": "av1/decoder/decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 829,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-14T02:14:48Z",
+      "side": 1,
+      "message": "this could be joined with the declaration and made const",
+      "revId": "cb60b185c73e0f15eeac71d83175345de9b03fa6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
