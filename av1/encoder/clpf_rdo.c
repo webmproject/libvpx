@@ -127,15 +127,14 @@ void aom_clpf_detect_multi_hbd_c(const uint16_t *rec, const uint16_t *org,
 int av1_clpf_decision(int k, int l, const YV12_BUFFER_CONFIG *rec,
                       const YV12_BUFFER_CONFIG *org, const AV1_COMMON *cm,
                       int block_size, int w, int h, unsigned int strength,
-                      unsigned int fb_size_log2, int8_t *res) {
+                      unsigned int fb_size_log2, uint8_t *res) {
   int m, n, sum0 = 0, sum1 = 0;
 
   for (m = 0; m < h; m++) {
     for (n = 0; n < w; n++) {
       int xpos = (l << fb_size_log2) + n * block_size;
       int ypos = (k << fb_size_log2) + m * block_size;
-      if (fb_size_log2 == MAX_FB_SIZE_LOG2 ||
-          !cm->mi_grid_visible[ypos / MI_SIZE * cm->mi_stride + xpos / MI_SIZE]
+      if (!cm->mi_grid_visible[ypos / MI_SIZE * cm->mi_stride + xpos / MI_SIZE]
                ->mbmi.skip) {
 #if CONFIG_AOM_HIGHBITDEPTH
         if (cm->use_highbitdepth) {
@@ -168,8 +167,6 @@ int av1_clpf_decision(int k, int l, const YV12_BUFFER_CONFIG *rec,
 // (Only for luma:)
 // res[1][0]   : (bit count, fb size = 128)
 // res[1][1-3] : strength=1,2,4, fb size = 128
-// res[1][4]   : unfiltered, including skip
-// res[1][5-7] : strength=1,2,4, including skip, fb_size = 128
 // res[2][0]   : (bit count, fb size = 64)
 // res[2][1-3] : strength=1,2,4, fb size = 64
 // res[3][0]   : (bit count, fb size = 32)
@@ -177,9 +174,9 @@ int av1_clpf_decision(int k, int l, const YV12_BUFFER_CONFIG *rec,
 static int clpf_rdo(int y, int x, const YV12_BUFFER_CONFIG *rec,
                     const YV12_BUFFER_CONFIG *org, const AV1_COMMON *cm,
                     unsigned int block_size, unsigned int fb_size_log2, int w,
-                    int h, int64_t res[4][8], int plane) {
+                    int h, int64_t res[4][4], int plane) {
   int c, m, n, filtered = 0;
-  int sum[8];
+  int sum[4];
   const int subx = plane != AOM_PLANE_Y && rec->subsampling_x;
   const int suby = plane != AOM_PLANE_Y && rec->subsampling_y;
   int bslog = get_msb(block_size);
@@ -196,12 +193,12 @@ static int clpf_rdo(int y, int x, const YV12_BUFFER_CONFIG *rec,
       plane != AOM_PLANE_Y ? rec->uv_crop_height : rec->y_crop_height;
   int rec_stride = plane != AOM_PLANE_Y ? rec->uv_stride : rec->y_stride;
   int org_stride = plane != AOM_PLANE_Y ? org->uv_stride : org->y_stride;
-  sum[0] = sum[1] = sum[2] = sum[3] = sum[4] = sum[5] = sum[6] = sum[7] = 0;
+  sum[0] = sum[1] = sum[2] = sum[3] = 0;
   if (plane == AOM_PLANE_Y &&
       fb_size_log2 > (unsigned int)get_msb(MAX_FB_SIZE) - 3) {
     int w1, h1, w2, h2, i, sum1, sum2, sum3, oldfiltered;
 
-    filtered = fb_size_log2-- == MAX_FB_SIZE_LOG2;
+    fb_size_log2--;
     w1 = AOMMIN(1 << (fb_size_log2 - bslog), w);
     h1 = AOMMIN(1 << (fb_size_log2 - bslog), h);
     w2 = AOMMIN(w - (1 << (fb_size_log2 - bslog)), w >> 1);
@@ -213,8 +210,8 @@ static int clpf_rdo(int y, int x, const YV12_BUFFER_CONFIG *rec,
     oldfiltered = res[i][0];
     res[i][0] = 0;
 
-    filtered |= clpf_rdo(y, x, rec, org, cm, block_size, fb_size_log2, w1, h1,
-                         res, plane);
+    filtered = clpf_rdo(y, x, rec, org, cm, block_size, fb_size_log2, w1, h1,
+                        res, plane);
     if (1 << (fb_size_log2 - bslog) < w)
       filtered |= clpf_rdo(y, x + (1 << fb_size_log2), rec, org, cm, block_size,
                            fb_size_log2, w2, h1, res, plane);
@@ -226,18 +223,10 @@ static int clpf_rdo(int y, int x, const YV12_BUFFER_CONFIG *rec,
                    cm, block_size, fb_size_log2, w2, h2, res, plane);
     }
 
-    // Correct sums for unfiltered blocks
     res[i][1] = AOMMIN(sum1 + res[i][0], res[i][1]);
     res[i][2] = AOMMIN(sum2 + res[i][0], res[i][2]);
     res[i][3] = AOMMIN(sum3 + res[i][0], res[i][3]);
-    if (i == 1) {
-      res[i][5] = AOMMIN(sum1 + res[i][4], res[i][5]);
-      res[i][6] = AOMMIN(sum2 + res[i][4], res[i][6]);
-      res[i][7] = AOMMIN(sum3 + res[i][4], res[i][7]);
-    }
-
     res[i][0] = oldfiltered + filtered;  // Number of signal bits
-
     return filtered;
   }
 
@@ -245,28 +234,27 @@ static int clpf_rdo(int y, int x, const YV12_BUFFER_CONFIG *rec,
     for (n = 0; n < w; n++) {
       int xpos = x + n * block_size;
       int ypos = y + m * block_size;
-      int skip =  // Filtered skip blocks stored only for fb_size == 128
-          4 *
-          !!cm->mi_grid_visible[(ypos << suby) / MI_SIZE * cm->mi_stride +
-                                (xpos << subx) / MI_SIZE]
-                ->mbmi.skip;
+      if (!cm->mi_grid_visible[(ypos << suby) / MI_SIZE * cm->mi_stride +
+                               (xpos << subx) / MI_SIZE]
+               ->mbmi.skip) {
 #if CONFIG_AOM_HIGHBITDEPTH
-      if (cm->use_highbitdepth) {
-        aom_clpf_detect_multi_hbd(CONVERT_TO_SHORTPTR(rec_buffer),
-                                  CONVERT_TO_SHORTPTR(org_buffer), rec_stride,
-                                  org_stride, xpos, ypos, rec_width, rec_height,
-                                  sum + skip, cm->bit_depth - 8, block_size);
-      } else {
-        aom_clpf_detect_multi(rec_buffer, org_buffer, rec_stride, org_stride,
-                              xpos, ypos, rec_width, rec_height, sum + skip,
-                              block_size);
-      }
+        if (cm->use_highbitdepth) {
+          aom_clpf_detect_multi_hbd(
+              CONVERT_TO_SHORTPTR(rec_buffer), CONVERT_TO_SHORTPTR(org_buffer),
+              rec_stride, org_stride, xpos, ypos, rec_width, rec_height, sum,
+              cm->bit_depth - 8, block_size);
+        } else {
+          aom_clpf_detect_multi(rec_buffer, org_buffer, rec_stride, org_stride,
+                                xpos, ypos, rec_width, rec_height, sum,
+                                block_size);
+        }
 #else
-      aom_clpf_detect_multi(rec_buffer, org_buffer, rec_stride, org_stride,
-                            xpos, ypos, rec_width, rec_height, sum + skip,
-                            block_size);
+        aom_clpf_detect_multi(rec_buffer, org_buffer, rec_stride, org_stride,
+                              xpos, ypos, rec_width, rec_height, sum,
+                              block_size);
 #endif
-      filtered |= !skip;
+        filtered = 1;
+      }
     }
   }
 
@@ -275,12 +263,6 @@ static int clpf_rdo(int y, int x, const YV12_BUFFER_CONFIG *rec,
     res[c][1] += sum[1];
     res[c][2] += sum[2];
     res[c][3] += sum[3];
-    if (c != 1) continue;
-    // Only needed when fb_size == 128
-    res[c][4] += sum[4];
-    res[c][5] += sum[5];
-    res[c][6] += sum[6];
-    res[c][7] += sum[7];
   }
   return filtered;
 }
@@ -289,7 +271,7 @@ void av1_clpf_test_frame(const YV12_BUFFER_CONFIG *rec,
                          const YV12_BUFFER_CONFIG *org, const AV1_COMMON *cm,
                          int *best_strength, int *best_bs, int plane) {
   int c, j, k, l;
-  int64_t best, sums[4][8];
+  int64_t best, sums[4][4];
   int width = plane != AOM_PLANE_Y ? rec->uv_crop_width : rec->y_crop_width;
   int height = plane != AOM_PLANE_Y ? rec->uv_crop_height : rec->y_crop_height;
   const int bs = MI_SIZE;
@@ -321,14 +303,8 @@ void av1_clpf_test_frame(const YV12_BUFFER_CONFIG *rec,
       }
     }
 
-  // For fb_size == 128 skip blocks are included in the result.
-  if (plane == AOM_PLANE_Y) {
-    sums[1][1] += sums[1][5] - sums[1][4];
-    sums[1][2] += sums[1][6] - sums[1][4];
-    sums[1][3] += sums[1][7] - sums[1][4];
-  } else {  // Slightly favour unfiltered chroma
+  if (plane != AOM_PLANE_Y)  // Slightly favour unfiltered chroma
     sums[0][0] -= sums[0][0] >> 7;
-  }
 
   for (j = 0; j < 4; j++) {
     static const double lambda_square[] = {
