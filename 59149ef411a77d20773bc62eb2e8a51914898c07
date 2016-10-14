@@ -52,6 +52,24 @@
       "revId": "59149ef411a77d20773bc62eb2e8a51914898c07",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fc240697_056f32b9",
+        "filename": "aom_dsp/x86/variance_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-14T19:12:30Z",
+      "side": 1,
+      "message": "these have been submitted, you should be able to rebase",
+      "parentUuid": "dc7ca22f_e6b7c2a1",
+      "revId": "59149ef411a77d20773bc62eb2e8a51914898c07",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
