@@ -580,7 +580,7 @@ static aom_codec_err_t decoder_decode(aom_codec_alg_priv_t *ctx,
 
   // Initialize the decoder workers on the first frame.
   if (ctx->frame_workers == NULL) {
-    const aom_codec_err_t res = init_decoder(ctx);
+    res = init_decoder(ctx);
     if (res != AOM_CODEC_OK) return res;
   }
 
@@ -646,7 +646,6 @@ static aom_codec_err_t decoder_decode(aom_codec_alg_priv_t *ctx,
       for (i = 0; i < frame_count; ++i) {
         const uint8_t *data_start_copy = data_start;
         const uint32_t frame_size = frame_sizes[i];
-        aom_codec_err_t res;
         if (data_start < data ||
             frame_size > (uint32_t)(data_end - data_start)) {
           set_error_detail(ctx, "Invalid frame size in index");
@@ -662,8 +661,7 @@ static aom_codec_err_t decoder_decode(aom_codec_alg_priv_t *ctx,
     } else {
       while (data_start < data_end) {
         const uint32_t frame_size = (uint32_t)(data_end - data_start);
-        const aom_codec_err_t res =
-            decode_one(ctx, &data_start, frame_size, user_priv, deadline);
+        res = decode_one(ctx, &data_start, frame_size, user_priv, deadline);
         if (res != AOM_CODEC_OK) return res;
 
         // Account for suboptimal termination by the encoder.

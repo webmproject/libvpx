@@ -1177,8 +1177,8 @@ static void update_state(const AV1_COMP *const cpi, ThreadData *td,
 #if CONFIG_DUAL_FILTER
         update_filter_type_count(td->counts, xd, mbmi);
 #else
-        const int ctx = av1_get_pred_context_switchable_interp(xd);
-        ++td->counts->switchable_interp[ctx][mbmi->interp_filter];
+        const int switchable_ctx = av1_get_pred_context_switchable_interp(xd);
+        ++td->counts->switchable_interp[switchable_ctx][mbmi->interp_filter];
 #endif
       }
     }
@@ -2436,7 +2436,7 @@ static void rd_use_partition(AV1_COMP *cpi, ThreadData *td,
   int splits_below = 0;
   BLOCK_SIZE bs_type = mib[0]->mbmi.sb_type;
   int do_partition_search = 1;
-  PICK_MODE_CONTEXT *ctx = &pc_tree->none;
+  PICK_MODE_CONTEXT *ctx_none = &pc_tree->none;
 #if CONFIG_SUPERTX
   int last_part_rate_nocoef = INT_MAX;
   int none_rate_nocoef = INT_MAX;
@@ -2495,7 +2495,7 @@ static void rd_use_partition(AV1_COMP *cpi, ThreadData *td,
 #if CONFIG_EXT_PARTITION_TYPES
                        PARTITION_NONE,
 #endif
-                       bsize, ctx, INT64_MAX);
+                       bsize, ctx_none, INT64_MAX);
 
       if (none_rdc.rate < INT_MAX) {
         none_rdc.rate += cpi->partition_cost[pl][PARTITION_NONE];
@@ -2522,7 +2522,7 @@ static void rd_use_partition(AV1_COMP *cpi, ThreadData *td,
 #if CONFIG_EXT_PARTITION_TYPES
                        PARTITION_NONE,
 #endif
-                       bsize, ctx, INT64_MAX);
+                       bsize, ctx_none, INT64_MAX);
       break;
     case PARTITION_HORZ:
       rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &last_part_rdc,
@@ -2539,11 +2539,11 @@ static void rd_use_partition(AV1_COMP *cpi, ThreadData *td,
 #if CONFIG_SUPERTX
         int rt_nocoef = 0;
 #endif
-        PICK_MODE_CONTEXT *ctx = &pc_tree->horizontal[0];
+        PICK_MODE_CONTEXT *ctx_h = &pc_tree->horizontal[0];
         av1_rd_cost_init(&tmp_rdc);
-        update_state(cpi, td, ctx, mi_row, mi_col, subsize, 1);
+        update_state(cpi, td, ctx_h, mi_row, mi_col, subsize, 1);
         encode_superblock(cpi, td, tp, DRY_RUN_NORMAL, mi_row, mi_col, subsize,
-                          ctx, NULL);
+                          ctx_h, NULL);
         rd_pick_sb_modes(cpi, tile_data, x, mi_row + hbs, mi_col, &tmp_rdc,
 #if CONFIG_SUPERTX
                          &rt_nocoef,
@@ -2582,11 +2582,11 @@ static void rd_use_partition(AV1_COMP *cpi, ThreadData *td,
 #if CONFIG_SUPERTX
         int rt_nocoef = 0;
 #endif
-        PICK_MODE_CONTEXT *ctx = &pc_tree->vertical[0];
+        PICK_MODE_CONTEXT *ctx_v = &pc_tree->vertical[0];
         av1_rd_cost_init(&tmp_rdc);
-        update_state(cpi, td, ctx, mi_row, mi_col, subsize, 1);
+        update_state(cpi, td, ctx_v, mi_row, mi_col, subsize, 1);
         encode_superblock(cpi, td, tp, DRY_RUN_NORMAL, mi_row, mi_col, subsize,
-                          ctx, NULL);
+                          ctx_v, NULL);
         rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col + hbs, &tmp_rdc,
 #if CONFIG_SUPERTX
                          &rt_nocoef,
@@ -3295,7 +3295,7 @@ static void rd_pick_partition(const AV1_COMP *const cpi, ThreadData *td,
   const int mi_step = num_8x8_blocks_wide_lookup[bsize] / 2;
   RD_SEARCH_MACROBLOCK_CONTEXT x_ctx;
   const TOKENEXTRA *const tp_orig = *tp;
-  PICK_MODE_CONTEXT *ctx = &pc_tree->none;
+  PICK_MODE_CONTEXT *ctx_none = &pc_tree->none;
   const int pl = partition_plane_context(xd, mi_row, mi_col, bsize);
   const int *partition_cost = cpi->partition_cost[pl];
   int tmp_partition_cost[PARTITION_TYPES];
@@ -3484,7 +3484,7 @@ static void rd_pick_partition(const AV1_COMP *const cpi, ThreadData *td,
 #if CONFIG_EXT_PARTITION_TYPES
                      PARTITION_NONE,
 #endif
-                     bsize, ctx, best_rdc.rdcost);
+                     bsize, ctx_none, best_rdc.rdcost);
     if (this_rdc.rate != INT_MAX) {
       if (bsize_at_least_8x8) {
         this_rdc.rate += partition_cost[PARTITION_NONE];
@@ -3518,7 +3518,7 @@ static void rd_pick_partition(const AV1_COMP *const cpi, ThreadData *td,
         // The dist & rate thresholds are set to 0 at speed 0 to disable the
         // early termination at that speed.
         if (!x->e_mbd.lossless[xd->mi[0]->mbmi.segment_id] &&
-            (ctx->skippable && best_rdc.dist < dist_breakout_thr &&
+            (ctx_none->skippable && best_rdc.dist < dist_breakout_thr &&
              best_rdc.rate < rate_breakout_thr)) {
           do_square_split = 0;
           do_rectangular_split = 0;
@@ -3576,7 +3576,7 @@ static void rd_pick_partition(const AV1_COMP *const cpi, ThreadData *td,
   }
 
   // store estimated motion vector
-  if (cpi->sf.adaptive_motion_search) store_pred_mv(x, ctx);
+  if (cpi->sf.adaptive_motion_search) store_pred_mv(x, ctx_none);
 
   // PARTITION_SPLIT
   // TODO(jingning): use the motion vectors given by the above search as
@@ -3588,11 +3588,11 @@ static void rd_pick_partition(const AV1_COMP *const cpi, ThreadData *td,
 #if CONFIG_DUAL_FILTER
       if (cpi->sf.adaptive_pred_interp_filter && partition_none_allowed)
         pc_tree->leaf_split[0]->pred_interp_filter =
-            ctx->mic.mbmi.interp_filter[0];
+            ctx_none->mic.mbmi.interp_filter[0];
 #else
       if (cpi->sf.adaptive_pred_interp_filter && partition_none_allowed)
         pc_tree->leaf_split[0]->pred_interp_filter =
-            ctx->mic.mbmi.interp_filter;
+            ctx_none->mic.mbmi.interp_filter;
 #endif
 #if CONFIG_SUPERTX
       rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &sum_rdc,
@@ -3669,7 +3669,7 @@ static void rd_pick_partition(const AV1_COMP *const cpi, ThreadData *td,
         if (mi_row + y_idx >= cm->mi_rows || mi_col + x_idx >= cm->mi_cols)
           continue;
 
-        if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
+        if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx_none);
 
         pc_tree->split[idx]->index = idx;
 #if CONFIG_SUPERTX
@@ -3769,16 +3769,17 @@ static void rd_pick_partition(const AV1_COMP *const cpi, ThreadData *td,
   if (partition_horz_allowed &&
       (do_rectangular_split || av1_active_h_edge(cpi, mi_row, mi_step))) {
     subsize = get_subsize(bsize, PARTITION_HORZ);
-    if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
+    if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx_none);
 #if CONFIG_DUAL_FILTER
     if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
         partition_none_allowed)
       pc_tree->horizontal[0].pred_interp_filter =
-          ctx->mic.mbmi.interp_filter[0];
+          ctx_none->mic.mbmi.interp_filter[0];
 #else
     if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
         partition_none_allowed)
-      pc_tree->horizontal[0].pred_interp_filter = ctx->mic.mbmi.interp_filter;
+      pc_tree->horizontal[0].pred_interp_filter =
+          ctx_none->mic.mbmi.interp_filter;
 #endif
     rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &sum_rdc,
 #if CONFIG_SUPERTX
@@ -3797,22 +3798,23 @@ static void rd_pick_partition(const AV1_COMP *const cpi, ThreadData *td,
     if (sum_rdc.rdcost < best_rdc.rdcost &&
 #endif  // CONFIG_SUPERTX
         !force_horz_split && bsize > BLOCK_8X8) {
-      PICK_MODE_CONTEXT *ctx = &pc_tree->horizontal[0];
-      update_state(cpi, td, ctx, mi_row, mi_col, subsize, 1);
+      PICK_MODE_CONTEXT *ctx_h = &pc_tree->horizontal[0];
+      update_state(cpi, td, ctx_h, mi_row, mi_col, subsize, 1);
       encode_superblock(cpi, td, tp, DRY_RUN_NORMAL, mi_row, mi_col, subsize,
-                        ctx, NULL);
+                        ctx_h, NULL);
 
-      if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
+      if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx_h);
 
 #if CONFIG_DUAL_FILTER
       if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
           partition_none_allowed)
         pc_tree->horizontal[1].pred_interp_filter =
-            ctx->mic.mbmi.interp_filter[0];
+            ctx_h->mic.mbmi.interp_filter[0];
 #else
       if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
           partition_none_allowed)
-        pc_tree->horizontal[1].pred_interp_filter = ctx->mic.mbmi.interp_filter;
+        pc_tree->horizontal[1].pred_interp_filter =
+            ctx_none->mic.mbmi.interp_filter;
 #endif
 #if CONFIG_SUPERTX
       rd_pick_sb_modes(cpi, tile_data, x, mi_row + mi_step, mi_col, &this_rdc,
@@ -3908,16 +3910,18 @@ static void rd_pick_partition(const AV1_COMP *const cpi, ThreadData *td,
       (do_rectangular_split || av1_active_v_edge(cpi, mi_col, mi_step))) {
     subsize = get_subsize(bsize, PARTITION_VERT);
 
-    if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
+    if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx_none);
 
 #if CONFIG_DUAL_FILTER
     if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
         partition_none_allowed)
-      pc_tree->vertical[0].pred_interp_filter = ctx->mic.mbmi.interp_filter[0];
+      pc_tree->vertical[0].pred_interp_filter =
+          ctx_none->mic.mbmi.interp_filter[0];
 #else
     if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
         partition_none_allowed)
-      pc_tree->vertical[0].pred_interp_filter = ctx->mic.mbmi.interp_filter;
+      pc_tree->vertical[0].pred_interp_filter =
+          ctx_none->mic.mbmi.interp_filter;
 #endif
     rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &sum_rdc,
 #if CONFIG_SUPERTX
@@ -3939,17 +3943,18 @@ static void rd_pick_partition(const AV1_COMP *const cpi, ThreadData *td,
       encode_superblock(cpi, td, tp, DRY_RUN_NORMAL, mi_row, mi_col, subsize,
                         &pc_tree->vertical[0], NULL);
 
-      if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
+      if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx_none);
 
 #if CONFIG_DUAL_FILTER
       if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
           partition_none_allowed)
         pc_tree->vertical[1].pred_interp_filter =
-            ctx->mic.mbmi.interp_filter[0];
+            ctx_none->mic.mbmi.interp_filter[0];
 #else
       if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
           partition_none_allowed)
-        pc_tree->vertical[1].pred_interp_filter = ctx->mic.mbmi.interp_filter;
+        pc_tree->vertical[1].pred_interp_filter =
+            ctx_none->mic.mbmi.interp_filter;
 #endif
 #if CONFIG_SUPERTX
       rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col + mi_step, &this_rdc,
@@ -4045,7 +4050,7 @@ static void rd_pick_partition(const AV1_COMP *const cpi, ThreadData *td,
       partition_none_allowed) {
     subsize = get_subsize(bsize, PARTITION_HORZ_A);
     rd_test_partition3(cpi, td, tile_data, tp, pc_tree, &best_rdc,
-                       pc_tree->horizontala, ctx, mi_row, mi_col, bsize,
+                       pc_tree->horizontala, ctx_none, mi_row, mi_col, bsize,
                        PARTITION_HORZ_A,
 #if CONFIG_SUPERTX
                        best_rd, &best_rate_nocoef, &x_ctx,
@@ -4059,7 +4064,7 @@ static void rd_pick_partition(const AV1_COMP *const cpi, ThreadData *td,
       partition_none_allowed) {
     subsize = get_subsize(bsize, PARTITION_HORZ_B);
     rd_test_partition3(cpi, td, tile_data, tp, pc_tree, &best_rdc,
-                       pc_tree->horizontalb, ctx, mi_row, mi_col, bsize,
+                       pc_tree->horizontalb, ctx_none, mi_row, mi_col, bsize,
                        PARTITION_HORZ_B,
 #if CONFIG_SUPERTX
                        best_rd, &best_rate_nocoef, &x_ctx,
@@ -4073,7 +4078,7 @@ static void rd_pick_partition(const AV1_COMP *const cpi, ThreadData *td,
       partition_none_allowed) {
     subsize = get_subsize(bsize, PARTITION_VERT_A);
     rd_test_partition3(cpi, td, tile_data, tp, pc_tree, &best_rdc,
-                       pc_tree->verticala, ctx, mi_row, mi_col, bsize,
+                       pc_tree->verticala, ctx_none, mi_row, mi_col, bsize,
                        PARTITION_VERT_A,
 #if CONFIG_SUPERTX
                        best_rd, &best_rate_nocoef, &x_ctx,
@@ -4087,7 +4092,7 @@ static void rd_pick_partition(const AV1_COMP *const cpi, ThreadData *td,
       partition_none_allowed) {
     subsize = get_subsize(bsize, PARTITION_VERT_B);
     rd_test_partition3(cpi, td, tile_data, tp, pc_tree, &best_rdc,
-                       pc_tree->verticalb, ctx, mi_row, mi_col, bsize,
+                       pc_tree->verticalb, ctx_none, mi_row, mi_col, bsize,
                        PARTITION_VERT_B,
 #if CONFIG_SUPERTX
                        best_rd, &best_rate_nocoef, &x_ctx,
@@ -5185,7 +5190,7 @@ static void encode_superblock(const AV1_COMP *const cpi, ThreadData *td,
 #endif
       ++td->counts->tx_size[tx_size_cat][tx_size_ctx][coded_tx_size];
     } else {
-      int x, y;
+      int i, j;
       TX_SIZE tx_size;
       // The new intra coding scheme requires no change of transform size
       if (is_inter_block(&mi->mbmi)) {
@@ -5202,10 +5207,10 @@ static void encode_superblock(const AV1_COMP *const cpi, ThreadData *td,
         tx_size = (bsize >= BLOCK_8X8) ? mbmi->tx_size : TX_4X4;
       }
 
-      for (y = 0; y < mi_height; y++)
-        for (x = 0; x < mi_width; x++)
-          if (mi_col + x < cm->mi_cols && mi_row + y < cm->mi_rows)
-            mi_8x8[mis * y + x]->mbmi.tx_size = tx_size;
+      for (j = 0; j < mi_height; j++)
+        for (i = 0; i < mi_width; i++)
+          if (mi_col + i < cm->mi_cols && mi_row + j < cm->mi_rows)
+            mi_8x8[mis * j + i]->mbmi.tx_size = tx_size;
     }
     ++td->counts->tx_size_totals[txsize_sqr_map[mbmi->tx_size]];
     ++td->counts

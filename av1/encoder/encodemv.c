@@ -111,8 +111,7 @@ static void build_nmv_component_cost_table(int *mvcost,
     if (c == MV_CLASS_0) {
       cost += class0_cost[d];
     } else {
-      int i, b;
-      b = c + CLASS0_BITS - 1; /* number of bits */
+      const int b = c + CLASS0_BITS - 1; /* number of bits */
       for (i = 0; i < b; ++i) cost += bits_cost[i][((d >> i) & 1)];
     }
     if (c == MV_CLASS_0) {

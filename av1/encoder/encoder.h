@@ -519,7 +519,7 @@ typedef struct AV1_COMP {
                     // scaled.
 
   // Store frame variance info in SOURCE_VAR_BASED_PARTITION search type.
-  diff *source_diff_var;
+  DIFF *source_diff_var;
   // The threshold used in SOURCE_VAR_BASED_PARTITION search type.
   unsigned int source_var_thresh;
   int frames_till_next_var_check;

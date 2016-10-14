@@ -1492,7 +1492,6 @@ static void read_inter_block_mode_info(AV1Decoder *const pbi,
     mbmi->mv[0].as_int = mi->bmi[3].as_mv[0].as_int;
     mbmi->mv[1].as_int = mi->bmi[3].as_mv[1].as_int;
   } else {
-    int ref;
     int_mv ref_mv[2];
     ref_mv[0] = nearestmv[0];
     ref_mv[1] = nearestmv[1];

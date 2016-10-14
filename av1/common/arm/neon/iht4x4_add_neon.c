@@ -12,17 +12,10 @@
 #include <arm_neon.h>
 #include <assert.h>
 
-#include "./av1_rtcd.h"
 #include "./aom_config.h"
+#include "./av1_rtcd.h"
+#include "aom_dsp/txfm_common.h"
 #include "av1/common/common.h"
-
-static int16_t sinpi_1_9 = 0x14a3;
-static int16_t sinpi_2_9 = 0x26c9;
-static int16_t sinpi_3_9 = 0x3441;
-static int16_t sinpi_4_9 = 0x3b6c;
-static int16_t cospi_8_64 = 0x3b21;
-static int16_t cospi_16_64 = 0x2d41;
-static int16_t cospi_24_64 = 0x187e;
 
 static INLINE void TRANSPOSE4X4(int16x8_t *q8s16, int16x8_t *q9s16) {
   int32x4_t q8s32, q9s32;
@@ -43,18 +36,18 @@ static INLINE void TRANSPOSE4X4(int16x8_t *q8s16, int16x8_t *q9s16) {
 
 static INLINE void GENERATE_COSINE_CONSTANTS(int16x4_t *d0s16, int16x4_t *d1s16,
                                              int16x4_t *d2s16) {
-  *d0s16 = vdup_n_s16(cospi_8_64);
-  *d1s16 = vdup_n_s16(cospi_16_64);
-  *d2s16 = vdup_n_s16(cospi_24_64);
+  *d0s16 = vdup_n_s16((int16_t)cospi_8_64);
+  *d1s16 = vdup_n_s16((int16_t)cospi_16_64);
+  *d2s16 = vdup_n_s16((int16_t)cospi_24_64);
   return;
 }
 
 static INLINE void GENERATE_SINE_CONSTANTS(int16x4_t *d3s16, int16x4_t *d4s16,
                                            int16x4_t *d5s16, int16x8_t *q3s16) {
-  *d3s16 = vdup_n_s16(sinpi_1_9);
-  *d4s16 = vdup_n_s16(sinpi_2_9);
-  *q3s16 = vdupq_n_s16(sinpi_3_9);
-  *d5s16 = vdup_n_s16(sinpi_4_9);
+  *d3s16 = vdup_n_s16((int16_t)sinpi_1_9);
+  *d4s16 = vdup_n_s16((int16_t)sinpi_2_9);
+  *q3s16 = vdupq_n_s16((int16_t)sinpi_3_9);
+  *d5s16 = vdup_n_s16((int16_t)sinpi_4_9);
   return;
 }
 
@@ -121,7 +114,7 @@ static INLINE void IADST4x4_1D(int16x4_t *d3s16, int16x4_t *d4s16,
   q10s32 = vaddq_s32(q10s32, q13s32);
   q10s32 = vaddq_s32(q10s32, q8s32);
   q11s32 = vsubq_s32(q11s32, q14s32);
-  q8s32 = vdupq_n_s32(sinpi_3_9);
+  q8s32 = vdupq_n_s32((int32_t)sinpi_3_9);
   q11s32 = vsubq_s32(q11s32, q9s32);
   q15s32 = vmulq_s32(q15s32, q8s32);
 

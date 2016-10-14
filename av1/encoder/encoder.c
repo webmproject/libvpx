@@ -2284,7 +2284,8 @@ AV1_COMP *av1_create_compressor(AV1EncoderConfig *oxcf,
   av1_set_speed_features_framesize_dependent(cpi);
 
   // Allocate memory to store variances for a frame.
-  CHECK_MEM_ERROR(cm, cpi->source_diff_var, aom_calloc(cm->MBs, sizeof(diff)));
+  CHECK_MEM_ERROR(cm, cpi->source_diff_var,
+                  aom_calloc(cm->MBs, sizeof(*cpi->source_diff_var)));
   cpi->source_var_thresh = 0;
   cpi->frames_till_next_var_check = 0;
 

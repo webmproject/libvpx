@@ -1498,7 +1498,6 @@ void av1_fdct8x8_quant_c(const int16_t *input, int stride,
     tran_high_t t0, t1, t2, t3;                  // needs32
     tran_high_t x0, x1, x2, x3;                  // canbe16
 
-    int i;
     for (i = 0; i < 8; i++) {
       // stage 1
       s0 = (input[0 * stride] + input[7 * stride]) * 4;
