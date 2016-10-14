@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc7ca22f_55d3de57",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-14T00:51:05Z",
+      "side": 1,
+      "message": "Would vqrdmulh_s16 work with doubling a_const? Not sure.",
+      "revId": "9adddaef64c800204c6cf6073c3be6e7229937c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc7ca22f_55851e43",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-14T00:51:05Z",
+      "side": 1,
+      "message": "vaddq_s16 is more compliant to WRAPLOW() definition with CONFIG_EMULATE_HARDWARE.",
+      "range": {
+        "startLine": 38,
+        "startChar": 25,
+        "endLine": 38,
+        "endChar": 35
+      },
+      "revId": "9adddaef64c800204c6cf6073c3be6e7229937c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc7ca22f_157f9635",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-14T00:51:05Z",
+      "side": 1,
+      "message": "vsubq_s16 is more compliant to WRAPLOW() definition with CONFIG_EMULATE_HARDWARE.",
+      "range": {
+        "startLine": 48,
+        "startChar": 25,
+        "endLine": 48,
+        "endChar": 35
+      },
+      "revId": "9adddaef64c800204c6cf6073c3be6e7229937c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
