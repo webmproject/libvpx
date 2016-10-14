@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "9c4b0a46_92defc60",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 945,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2016-10-14T18:39:05Z",
+      "side": 1,
+      "message": "Done.\n\nThe same problem might exist with the loop filter as well: https://chromium.googlesource.com/webm/libvpx/+/master/vp9/common/vp9_thread_common.c#256",
+      "parentUuid": "dc7ca22f_cf5bc159",
+      "revId": "c815880c18d9987450d10f5e8a512fcfd02b894c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dc7ca22f_0f7a29ad",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 5
@@ -47,6 +65,24 @@
       "writtenOn": "2016-10-13T22:34:32Z",
       "side": 1,
       "message": "if () else would be more consistent with the rest of the code",
+      "revId": "c815880c18d9987450d10f5e8a512fcfd02b894c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9c4b0a46_b2f060c3",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 992,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2016-10-14T18:39:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dc7ca22f_0f7a29ad",
       "revId": "c815880c18d9987450d10f5e8a512fcfd02b894c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "9c4b0a46_129bec77",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1003,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2016-10-14T18:39:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dc7ca22f_0f054922",
+      "revId": "c815880c18d9987450d10f5e8a512fcfd02b894c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dc7ca22f_0f3d4913",
         "filename": "vp9/encoder/vp9_bitstream.h",
         "patchSetId": 5
@@ -81,6 +135,24 @@
       "writtenOn": "2016-10-13T22:34:32Z",
       "side": 1,
       "message": "I\u0027d prefer to have typedefs precede functions, kind of like the class definition ordering",
+      "revId": "c815880c18d9987450d10f5e8a512fcfd02b894c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9c4b0a46_92a35c09",
+        "filename": "vp9/encoder/vp9_bitstream.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2016-10-14T18:39:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dc7ca22f_0f3d4913",
       "revId": "c815880c18d9987450d10f5e8a512fcfd02b894c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
