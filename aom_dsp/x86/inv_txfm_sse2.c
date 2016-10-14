@@ -2372,7 +2372,6 @@ void aom_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
 #define IDCT32_34                                                              \
   /* Stage1 */                                                                 \
   {                                                                            \
-    const __m128i zero = _mm_setzero_si128();                                  \
     const __m128i lo_1_31 = _mm_unpacklo_epi16(in[1], zero);                   \
     const __m128i hi_1_31 = _mm_unpackhi_epi16(in[1], zero);                   \
                                                                                \
@@ -2397,7 +2396,6 @@ void aom_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
                                                                                \
   /* Stage2 */                                                                 \
   {                                                                            \
-    const __m128i zero = _mm_setzero_si128();                                  \
     const __m128i lo_2_30 = _mm_unpacklo_epi16(in[2], zero);                   \
     const __m128i hi_2_30 = _mm_unpackhi_epi16(in[2], zero);                   \
                                                                                \
@@ -2424,7 +2422,6 @@ void aom_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
                                                                                \
   /* Stage3 */                                                                 \
   {                                                                            \
-    const __m128i zero = _mm_setzero_si128();                                  \
     const __m128i lo_4_28 = _mm_unpacklo_epi16(in[4], zero);                   \
     const __m128i hi_4_28 = _mm_unpackhi_epi16(in[4], zero);                   \
                                                                                \
@@ -2465,7 +2462,6 @@ void aom_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
                                                                                \
   /* Stage4 */                                                                 \
   {                                                                            \
-    const __m128i zero = _mm_setzero_si128();                                  \
     const __m128i lo_0_16 = _mm_unpacklo_epi16(in[0], zero);                   \
     const __m128i hi_0_16 = _mm_unpackhi_epi16(in[0], zero);                   \
                                                                                \
@@ -3002,6 +2998,7 @@ void aom_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
 // Only upper-left 8x8 has non-zero coeff
 void aom_idct32x32_34_add_sse2(const tran_low_t *input, uint8_t *dest,
                                int stride) {
+  const __m128i zero = _mm_setzero_si128();
   const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1 << 5);
 
@@ -3107,7 +3104,6 @@ void aom_idct32x32_34_add_sse2(const tran_low_t *input, uint8_t *dest,
   col[31] = _mm_sub_epi16(stp1_0, stp1_31);
   for (i = 0; i < 4; i++) {
     int j;
-    const __m128i zero = _mm_setzero_si128();
     // Transpose 32x8 block to 8x32 block
     array_transpose_8x8(col + i * 8, in);
     IDCT32_34

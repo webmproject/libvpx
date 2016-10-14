@@ -123,35 +123,35 @@
     p1_out = __msa_xori_b((v16u8)p1_m, 0x80);                           \
   }
 
-#define AOM_FLAT4(p3_in, p2_in, p0_in, q0_in, q2_in, q3_in, flat_out) \
-  {                                                                   \
-    v16u8 tmp, p2_a_sub_p0, q2_a_sub_q0, p3_a_sub_p0, q3_a_sub_q0;    \
-    v16u8 zero_in = { 0 };                                            \
-                                                                      \
-    tmp = __msa_ori_b(zero_in, 1);                                    \
-    p2_a_sub_p0 = __msa_asub_u_b(p2_in, p0_in);                       \
-    q2_a_sub_q0 = __msa_asub_u_b(q2_in, q0_in);                       \
-    p3_a_sub_p0 = __msa_asub_u_b(p3_in, p0_in);                       \
-    q3_a_sub_q0 = __msa_asub_u_b(q3_in, q0_in);                       \
-                                                                      \
-    p2_a_sub_p0 = __msa_max_u_b(p2_a_sub_p0, q2_a_sub_q0);            \
-    flat_out = __msa_max_u_b(p2_a_sub_p0, flat_out);                  \
-    p3_a_sub_p0 = __msa_max_u_b(p3_a_sub_p0, q3_a_sub_q0);            \
-    flat_out = __msa_max_u_b(p3_a_sub_p0, flat_out);                  \
-                                                                      \
-    flat_out = (tmp < (v16u8)flat_out);                               \
-    flat_out = __msa_xori_b(flat_out, 0xff);                          \
-    flat_out = flat_out & (mask);                                     \
+#define AOM_FLAT4(p3_in, p2_in, p0_in, q0_in, q2_in, q3_in, flat_out)    \
+  {                                                                      \
+    v16u8 tmp_flat4, p2_a_sub_p0, q2_a_sub_q0, p3_a_sub_p0, q3_a_sub_q0; \
+    v16u8 zero_in = { 0 };                                               \
+                                                                         \
+    tmp_flat4 = __msa_ori_b(zero_in, 1);                                 \
+    p2_a_sub_p0 = __msa_asub_u_b(p2_in, p0_in);                          \
+    q2_a_sub_q0 = __msa_asub_u_b(q2_in, q0_in);                          \
+    p3_a_sub_p0 = __msa_asub_u_b(p3_in, p0_in);                          \
+    q3_a_sub_q0 = __msa_asub_u_b(q3_in, q0_in);                          \
+                                                                         \
+    p2_a_sub_p0 = __msa_max_u_b(p2_a_sub_p0, q2_a_sub_q0);               \
+    flat_out = __msa_max_u_b(p2_a_sub_p0, flat_out);                     \
+    p3_a_sub_p0 = __msa_max_u_b(p3_a_sub_p0, q3_a_sub_q0);               \
+    flat_out = __msa_max_u_b(p3_a_sub_p0, flat_out);                     \
+                                                                         \
+    flat_out = (tmp_flat4 < (v16u8)flat_out);                            \
+    flat_out = __msa_xori_b(flat_out, 0xff);                             \
+    flat_out = flat_out & (mask);                                        \
   }
 
 #define AOM_FLAT5(p7_in, p6_in, p5_in, p4_in, p0_in, q0_in, q4_in, q5_in, \
                   q6_in, q7_in, flat_in, flat2_out)                       \
   {                                                                       \
-    v16u8 tmp, zero_in = { 0 };                                           \
+    v16u8 tmp_flat5, zero_in = { 0 };                                     \
     v16u8 p4_a_sub_p0, q4_a_sub_q0, p5_a_sub_p0, q5_a_sub_q0;             \
     v16u8 p6_a_sub_p0, q6_a_sub_q0, p7_a_sub_p0, q7_a_sub_q0;             \
                                                                           \
-    tmp = __msa_ori_b(zero_in, 1);                                        \
+    tmp_flat5 = __msa_ori_b(zero_in, 1);                                  \
     p4_a_sub_p0 = __msa_asub_u_b(p4_in, p0_in);                           \
     q4_a_sub_q0 = __msa_asub_u_b(q4_in, q0_in);                           \
     p5_a_sub_p0 = __msa_asub_u_b(p5_in, p0_in);                           \
@@ -169,7 +169,7 @@
     p7_a_sub_p0 = __msa_max_u_b(p7_a_sub_p0, q7_a_sub_q0);                \
     flat2_out = __msa_max_u_b(p7_a_sub_p0, flat2_out);                    \
                                                                           \
-    flat2_out = (tmp < (v16u8)flat2_out);                                 \
+    flat2_out = (tmp_flat5 < (v16u8)flat2_out);                           \
     flat2_out = __msa_xori_b(flat2_out, 0xff);                            \
     flat2_out = flat2_out & flat_in;                                      \
   }
@@ -178,38 +178,38 @@
                     p2_filt8_out, p1_filt8_out, p0_filt8_out, q0_filt8_out, \
                     q1_filt8_out, q2_filt8_out)                             \
   {                                                                         \
-    v8u16 tmp0, tmp1, tmp2;                                                 \
+    v8u16 tmp_filt8_0, tmp_filt8_1, tmp_filt8_2;                            \
                                                                             \
-    tmp2 = p2_in + p1_in + p0_in;                                           \
-    tmp0 = p3_in << 1;                                                      \
+    tmp_filt8_2 = p2_in + p1_in + p0_in;                                    \
+    tmp_filt8_0 = p3_in << 1;                                               \
                                                                             \
-    tmp0 = tmp0 + tmp2 + q0_in;                                             \
-    tmp1 = tmp0 + p3_in + p2_in;                                            \
-    p2_filt8_out = (v8i16)__msa_srari_h((v8i16)tmp1, 3);                    \
+    tmp_filt8_0 = tmp_filt8_0 + tmp_filt8_2 + q0_in;                        \
+    tmp_filt8_1 = tmp_filt8_0 + p3_in + p2_in;                              \
+    p2_filt8_out = (v8i16)__msa_srari_h((v8i16)tmp_filt8_1, 3);             \
                                                                             \
-    tmp1 = tmp0 + p1_in + q1_in;                                            \
-    p1_filt8_out = (v8i16)__msa_srari_h((v8i16)tmp1, 3);                    \
+    tmp_filt8_1 = tmp_filt8_0 + p1_in + q1_in;                              \
+    p1_filt8_out = (v8i16)__msa_srari_h((v8i16)tmp_filt8_1, 3);             \
                                                                             \
-    tmp1 = q2_in + q1_in + q0_in;                                           \
-    tmp2 = tmp2 + tmp1;                                                     \
-    tmp0 = tmp2 + (p0_in);                                                  \
-    tmp0 = tmp0 + (p3_in);                                                  \
-    p0_filt8_out = (v8i16)__msa_srari_h((v8i16)tmp0, 3);                    \
+    tmp_filt8_1 = q2_in + q1_in + q0_in;                                    \
+    tmp_filt8_2 = tmp_filt8_2 + tmp_filt8_1;                                \
+    tmp_filt8_0 = tmp_filt8_2 + (p0_in);                                    \
+    tmp_filt8_0 = tmp_filt8_0 + (p3_in);                                    \
+    p0_filt8_out = (v8i16)__msa_srari_h((v8i16)tmp_filt8_0, 3);             \
                                                                             \
-    tmp0 = q2_in + q3_in;                                                   \
-    tmp0 = p0_in + tmp1 + tmp0;                                             \
-    tmp1 = q3_in + q3_in;                                                   \
-    tmp1 = tmp1 + tmp0;                                                     \
-    q2_filt8_out = (v8i16)__msa_srari_h((v8i16)tmp1, 3);                    \
+    tmp_filt8_0 = q2_in + q3_in;                                            \
+    tmp_filt8_0 = p0_in + tmp_filt8_1 + tmp_filt8_0;                        \
+    tmp_filt8_1 = q3_in + q3_in;                                            \
+    tmp_filt8_1 = tmp_filt8_1 + tmp_filt8_0;                                \
+    q2_filt8_out = (v8i16)__msa_srari_h((v8i16)tmp_filt8_1, 3);             \
                                                                             \
-    tmp0 = tmp2 + q3_in;                                                    \
-    tmp1 = tmp0 + q0_in;                                                    \
-    q0_filt8_out = (v8i16)__msa_srari_h((v8i16)tmp1, 3);                    \
+    tmp_filt8_0 = tmp_filt8_2 + q3_in;                                      \
+    tmp_filt8_1 = tmp_filt8_0 + q0_in;                                      \
+    q0_filt8_out = (v8i16)__msa_srari_h((v8i16)tmp_filt8_1, 3);             \
                                                                             \
-    tmp1 = tmp0 - p2_in;                                                    \
-    tmp0 = q1_in + q3_in;                                                   \
-    tmp1 = tmp0 + tmp1;                                                     \
-    q1_filt8_out = (v8i16)__msa_srari_h((v8i16)tmp1, 3);                    \
+    tmp_filt8_1 = tmp_filt8_0 - p2_in;                                      \
+    tmp_filt8_0 = q1_in + q3_in;                                            \
+    tmp_filt8_1 = tmp_filt8_0 + tmp_filt8_1;                                \
+    q1_filt8_out = (v8i16)__msa_srari_h((v8i16)tmp_filt8_1, 3);             \
   }
 
 #define LPF_MASK_HEV(p3_in, p2_in, p1_in, p0_in, q0_in, q1_in, q2_in, q3_in, \

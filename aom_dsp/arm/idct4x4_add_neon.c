@@ -11,6 +11,8 @@
 
 #include <arm_neon.h>
 
+#include "aom_dsp/txfm_common.h"
+
 void aom_idct4x4_16_add_neon(int16_t *input, uint8_t *dest, int dest_stride) {
   uint8x8_t d26u8, d27u8;
   uint32x2_t d26u32, d27u32;
@@ -22,9 +24,6 @@ void aom_idct4x4_16_add_neon(int16_t *input, uint8_t *dest, int dest_stride) {
   int16x4x2_t d0x2s16, d1x2s16;
   int32x4x2_t q0x2s32;
   uint8_t *d;
-  int16_t cospi_8_64 = 15137;
-  int16_t cospi_16_64 = 11585;
-  int16_t cospi_24_64 = 6270;
 
   d26u32 = d27u32 = vdup_n_u32(0);
 
@@ -41,8 +40,8 @@ void aom_idct4x4_16_add_neon(int16_t *input, uint8_t *dest, int dest_stride) {
   q8s16 = vcombine_s16(d0x2s16.val[0], d0x2s16.val[1]);
   q9s16 = vcombine_s16(d1x2s16.val[0], d1x2s16.val[1]);
 
-  d20s16 = vdup_n_s16(cospi_8_64);
-  d21s16 = vdup_n_s16(cospi_16_64);
+  d20s16 = vdup_n_s16((int16_t)cospi_8_64);
+  d21s16 = vdup_n_s16((int16_t)cospi_16_64);
 
   q0x2s32 =
       vtrnq_s32(vreinterpretq_s32_s16(q8s16), vreinterpretq_s32_s16(q9s16));
@@ -51,7 +50,7 @@ void aom_idct4x4_16_add_neon(int16_t *input, uint8_t *dest, int dest_stride) {
   d18s16 = vget_low_s16(vreinterpretq_s16_s32(q0x2s32.val[1]));
   d19s16 = vget_high_s16(vreinterpretq_s16_s32(q0x2s32.val[1]));
 
-  d22s16 = vdup_n_s16(cospi_24_64);
+  d22s16 = vdup_n_s16((int16_t)cospi_24_64);
 
   // stage 1
   d23s16 = vadd_s16(d16s16, d18s16);

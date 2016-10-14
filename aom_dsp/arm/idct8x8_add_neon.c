@@ -90,10 +90,10 @@ static INLINE void IDCT8x8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   int32x4_t q2s32, q3s32, q5s32, q6s32, q8s32, q9s32;
   int32x4_t q10s32, q11s32, q12s32, q13s32, q15s32;
 
-  d0s16 = vdup_n_s16(cospi_28_64);
-  d1s16 = vdup_n_s16(cospi_4_64);
-  d2s16 = vdup_n_s16(cospi_12_64);
-  d3s16 = vdup_n_s16(cospi_20_64);
+  d0s16 = vdup_n_s16((int16_t)cospi_28_64);
+  d1s16 = vdup_n_s16((int16_t)cospi_4_64);
+  d2s16 = vdup_n_s16((int16_t)cospi_12_64);
+  d3s16 = vdup_n_s16((int16_t)cospi_20_64);
 
   d16s16 = vget_low_s16(*q8s16);
   d17s16 = vget_high_s16(*q8s16);
@@ -146,7 +146,7 @@ static INLINE void IDCT8x8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   q6s16 = vcombine_s16(d12s16, d13s16);
   q7s16 = vcombine_s16(d14s16, d15s16);
 
-  d0s16 = vdup_n_s16(cospi_16_64);
+  d0s16 = vdup_n_s16((int16_t)cospi_16_64);
 
   q2s32 = vmull_s16(d16s16, d0s16);
   q3s32 = vmull_s16(d17s16, d0s16);
@@ -158,8 +158,8 @@ static INLINE void IDCT8x8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   q13s32 = vmlsl_s16(q13s32, d24s16, d0s16);
   q15s32 = vmlsl_s16(q15s32, d25s16, d0s16);
 
-  d0s16 = vdup_n_s16(cospi_24_64);
-  d1s16 = vdup_n_s16(cospi_8_64);
+  d0s16 = vdup_n_s16((int16_t)cospi_24_64);
+  d1s16 = vdup_n_s16((int16_t)cospi_8_64);
 
   d18s16 = vqrshrn_n_s32(q2s32, 14);
   d19s16 = vqrshrn_n_s32(q3s32, 14);
@@ -199,7 +199,7 @@ static INLINE void IDCT8x8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   d28s16 = vget_low_s16(*q14s16);
   d29s16 = vget_high_s16(*q14s16);
 
-  d16s16 = vdup_n_s16(cospi_16_64);
+  d16s16 = vdup_n_s16((int16_t)cospi_16_64);
 
   q9s32 = vmull_s16(d28s16, d16s16);
   q10s32 = vmull_s16(d29s16, d16s16);
@@ -356,29 +356,29 @@ void aom_idct8x8_12_add_neon(int16_t *input, uint8_t *dest, int dest_stride) {
 
   // First transform rows
   // stage 1
-  q0s16 = vdupq_n_s16(cospi_28_64 * 2);
-  q1s16 = vdupq_n_s16(cospi_4_64 * 2);
+  q0s16 = vdupq_n_s16((int16_t)cospi_28_64 * 2);
+  q1s16 = vdupq_n_s16((int16_t)cospi_4_64 * 2);
 
   q4s16 = vqrdmulhq_s16(q9s16, q0s16);
 
-  q0s16 = vdupq_n_s16(-cospi_20_64 * 2);
+  q0s16 = vdupq_n_s16(-(int16_t)cospi_20_64 * 2);
 
   q7s16 = vqrdmulhq_s16(q9s16, q1s16);
 
-  q1s16 = vdupq_n_s16(cospi_12_64 * 2);
+  q1s16 = vdupq_n_s16((int16_t)cospi_12_64 * 2);
 
   q5s16 = vqrdmulhq_s16(q11s16, q0s16);
 
-  q0s16 = vdupq_n_s16(cospi_16_64 * 2);
+  q0s16 = vdupq_n_s16((int16_t)cospi_16_64 * 2);
 
   q6s16 = vqrdmulhq_s16(q11s16, q1s16);
 
   // stage 2 & stage 3 - even half
-  q1s16 = vdupq_n_s16(cospi_24_64 * 2);
+  q1s16 = vdupq_n_s16((int16_t)cospi_24_64 * 2);
 
   q9s16 = vqrdmulhq_s16(q8s16, q0s16);
 
-  q0s16 = vdupq_n_s16(cospi_8_64 * 2);
+  q0s16 = vdupq_n_s16((int16_t)cospi_8_64 * 2);
 
   q13s16 = vqrdmulhq_s16(q10s16, q1s16);
 
@@ -400,7 +400,7 @@ void aom_idct8x8_12_add_neon(int16_t *input, uint8_t *dest, int dest_stride) {
   d28s16 = vget_low_s16(q14s16);
   d29s16 = vget_high_s16(q14s16);
 
-  d16s16 = vdup_n_s16(cospi_16_64);
+  d16s16 = vdup_n_s16((int16_t)cospi_16_64);
   q9s32 = vmull_s16(d28s16, d16s16);
   q10s32 = vmull_s16(d29s16, d16s16);
   q11s32 = vmull_s16(d28s16, d16s16);
