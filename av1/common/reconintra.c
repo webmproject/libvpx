@@ -22,9 +22,9 @@
 #include "aom_mem/aom_mem.h"
 #include "aom_ports/mem.h"
 #include "aom_ports/aom_once.h"
-#if CONFIG_EXT_INTRA
+#if CONFIG_FILTER_INTRA
 #include "av1/common/intra_filters.h"
-#endif
+#endif  // CONFIG_FILTER_INTRA
 #include "av1/common/reconintra.h"
 #include "av1/common/onyxc_int.h"
 
@@ -382,20 +382,6 @@ static void av1_init_intra_predictors_internal(void) {
 }
 
 #if CONFIG_EXT_INTRA
-
-static const uint8_t ext_intra_extend_modes[FILTER_INTRA_MODES] = {
-  NEED_LEFT | NEED_ABOVE,  // FILTER_DC
-  NEED_LEFT | NEED_ABOVE,  // FILTER_V
-  NEED_LEFT | NEED_ABOVE,  // FILTER_H
-  NEED_LEFT | NEED_ABOVE,  // FILTER_D45
-  NEED_LEFT | NEED_ABOVE,  // FILTER_D135
-  NEED_LEFT | NEED_ABOVE,  // FILTER_D117
-  NEED_LEFT | NEED_ABOVE,  // FILTER_D153
-  NEED_LEFT | NEED_ABOVE,  // FILTER_D207
-  NEED_LEFT | NEED_ABOVE,  // FILTER_D63
-  NEED_LEFT | NEED_ABOVE,  // FILTER_TM
-};
-
 static int intra_subpel_interp(int base, int shift, const uint8_t *ref,
                                int ref_start_idx, int ref_end_idx,
                                INTRA_FILTER filter_type) {
@@ -706,129 +692,6 @@ static void dr_predictor(uint8_t *dst, ptrdiff_t stride, TX_SIZE tx_size,
   }
 }
 
-static void filter_intra_predictors_4tap(uint8_t *dst, ptrdiff_t stride, int bs,
-                                         const uint8_t *above,
-                                         const uint8_t *left, int mode) {
-  int k, r, c;
-  int preds[33][65];
-  int mean, ipred;
-  const TX_SIZE tx_size =
-      (bs == 32) ? TX_32X32
-                 : ((bs == 16) ? TX_16X16 : ((bs == 8) ? TX_8X8 : (TX_4X4)));
-  const int c0 = filter_intra_taps_4[tx_size][mode][0];
-  const int c1 = filter_intra_taps_4[tx_size][mode][1];
-  const int c2 = filter_intra_taps_4[tx_size][mode][2];
-  const int c3 = filter_intra_taps_4[tx_size][mode][3];
-
-  k = 0;
-  mean = 0;
-  while (k < bs) {
-    mean = mean + (int)left[k];
-    mean = mean + (int)above[k];
-    k++;
-  }
-  mean = (mean + bs) / (2 * bs);
-
-  for (r = 0; r < bs; ++r) preds[r + 1][0] = (int)left[r] - mean;
-
-  for (c = 0; c < 2 * bs + 1; ++c) preds[0][c] = (int)above[c - 1] - mean;
-
-  for (r = 1; r < bs + 1; ++r)
-    for (c = 1; c < 2 * bs + 1 - r; ++c) {
-      ipred = c0 * preds[r - 1][c] + c1 * preds[r][c - 1] +
-              c2 * preds[r - 1][c - 1] + c3 * preds[r - 1][c + 1];
-      preds[r][c] = ROUND_POWER_OF_TWO_SIGNED(ipred, FILTER_INTRA_PREC_BITS);
-    }
-
-  for (r = 0; r < bs; ++r) {
-    for (c = 0; c < bs; ++c) {
-      ipred = preds[r + 1][c + 1] + mean;
-      dst[c] = clip_pixel(ipred);
-    }
-    dst += stride;
-  }
-}
-
-void av1_dc_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                               const uint8_t *above, const uint8_t *left) {
-  filter_intra_predictors_4tap(dst, stride, bs, above, left, DC_PRED);
-}
-
-void av1_v_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                              const uint8_t *above, const uint8_t *left) {
-  filter_intra_predictors_4tap(dst, stride, bs, above, left, V_PRED);
-}
-
-void av1_h_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                              const uint8_t *above, const uint8_t *left) {
-  filter_intra_predictors_4tap(dst, stride, bs, above, left, H_PRED);
-}
-
-void av1_d45_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                                const uint8_t *above, const uint8_t *left) {
-  filter_intra_predictors_4tap(dst, stride, bs, above, left, D45_PRED);
-}
-
-void av1_d135_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                                 const uint8_t *above, const uint8_t *left) {
-  filter_intra_predictors_4tap(dst, stride, bs, above, left, D135_PRED);
-}
-
-void av1_d117_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                                 const uint8_t *above, const uint8_t *left) {
-  filter_intra_predictors_4tap(dst, stride, bs, above, left, D117_PRED);
-}
-
-void av1_d153_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                                 const uint8_t *above, const uint8_t *left) {
-  filter_intra_predictors_4tap(dst, stride, bs, above, left, D153_PRED);
-}
-
-void av1_d207_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                                 const uint8_t *above, const uint8_t *left) {
-  filter_intra_predictors_4tap(dst, stride, bs, above, left, D207_PRED);
-}
-
-void av1_d63_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                                const uint8_t *above, const uint8_t *left) {
-  filter_intra_predictors_4tap(dst, stride, bs, above, left, D63_PRED);
-}
-
-void av1_tm_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
-                               const uint8_t *above, const uint8_t *left) {
-  filter_intra_predictors_4tap(dst, stride, bs, above, left, TM_PRED);
-}
-
-static void filter_intra_predictors(int mode, uint8_t *dst, ptrdiff_t stride,
-                                    int bs, const uint8_t *above,
-                                    const uint8_t *left) {
-  switch (mode) {
-    case DC_PRED: av1_dc_filter_predictor(dst, stride, bs, above, left); break;
-    case V_PRED: av1_v_filter_predictor(dst, stride, bs, above, left); break;
-    case H_PRED: av1_h_filter_predictor(dst, stride, bs, above, left); break;
-    case D45_PRED:
-      av1_d45_filter_predictor(dst, stride, bs, above, left);
-      break;
-    case D135_PRED:
-      av1_d135_filter_predictor(dst, stride, bs, above, left);
-      break;
-    case D117_PRED:
-      av1_d117_filter_predictor(dst, stride, bs, above, left);
-      break;
-    case D153_PRED:
-      av1_d153_filter_predictor(dst, stride, bs, above, left);
-      break;
-    case D207_PRED:
-      av1_d207_filter_predictor(dst, stride, bs, above, left);
-      break;
-    case D63_PRED:
-      av1_d63_filter_predictor(dst, stride, bs, above, left);
-      break;
-    case TM_PRED: av1_tm_filter_predictor(dst, stride, bs, above, left); break;
-    default: assert(0);
-  }
-}
-
 #if CONFIG_AOM_HIGHBITDEPTH
 static int highbd_intra_subpel_interp(int base, int shift, const uint16_t *ref,
                                       int ref_start_idx, int ref_end_idx,
@@ -999,7 +862,133 @@ static void highbd_dr_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
     highbd_h_predictor(dst, stride, bs, above, left, bd);
   }
 }
+#endif  // CONFIG_AOM_HIGHBITDEPTH
+#endif  // CONFIG_EXT_INTRA
 
+#if CONFIG_FILTER_INTRA
+static void filter_intra_predictors_4tap(uint8_t *dst, ptrdiff_t stride, int bs,
+                                         const uint8_t *above,
+                                         const uint8_t *left, int mode) {
+  int k, r, c;
+  int buffer[33][65];
+  int mean, ipred;
+  const TX_SIZE tx_size =
+      (bs == 32) ? TX_32X32
+                 : ((bs == 16) ? TX_16X16 : ((bs == 8) ? TX_8X8 : (TX_4X4)));
+  const int c0 = filter_intra_taps_4[tx_size][mode][0];
+  const int c1 = filter_intra_taps_4[tx_size][mode][1];
+  const int c2 = filter_intra_taps_4[tx_size][mode][2];
+  const int c3 = filter_intra_taps_4[tx_size][mode][3];
+
+  k = 0;
+  mean = 0;
+  while (k < bs) {
+    mean = mean + (int)left[k];
+    mean = mean + (int)above[k];
+    k++;
+  }
+  mean = (mean + bs) / (2 * bs);
+
+  for (r = 0; r < bs; ++r) buffer[r + 1][0] = (int)left[r] - mean;
+
+  for (c = 0; c < 2 * bs + 1; ++c) buffer[0][c] = (int)above[c - 1] - mean;
+
+  for (r = 1; r < bs + 1; ++r)
+    for (c = 1; c < 2 * bs + 1 - r; ++c) {
+      ipred = c0 * buffer[r - 1][c] + c1 * buffer[r][c - 1] +
+              c2 * buffer[r - 1][c - 1] + c3 * buffer[r - 1][c + 1];
+      buffer[r][c] = ROUND_POWER_OF_TWO_SIGNED(ipred, FILTER_INTRA_PREC_BITS);
+    }
+
+  for (r = 0; r < bs; ++r) {
+    for (c = 0; c < bs; ++c) {
+      ipred = buffer[r + 1][c + 1] + mean;
+      dst[c] = clip_pixel(ipred);
+    }
+    dst += stride;
+  }
+}
+
+void av1_dc_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                               const uint8_t *above, const uint8_t *left) {
+  filter_intra_predictors_4tap(dst, stride, bs, above, left, DC_PRED);
+}
+
+void av1_v_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                              const uint8_t *above, const uint8_t *left) {
+  filter_intra_predictors_4tap(dst, stride, bs, above, left, V_PRED);
+}
+
+void av1_h_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                              const uint8_t *above, const uint8_t *left) {
+  filter_intra_predictors_4tap(dst, stride, bs, above, left, H_PRED);
+}
+
+void av1_d45_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                                const uint8_t *above, const uint8_t *left) {
+  filter_intra_predictors_4tap(dst, stride, bs, above, left, D45_PRED);
+}
+
+void av1_d135_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                                 const uint8_t *above, const uint8_t *left) {
+  filter_intra_predictors_4tap(dst, stride, bs, above, left, D135_PRED);
+}
+
+void av1_d117_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                                 const uint8_t *above, const uint8_t *left) {
+  filter_intra_predictors_4tap(dst, stride, bs, above, left, D117_PRED);
+}
+
+void av1_d153_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                                 const uint8_t *above, const uint8_t *left) {
+  filter_intra_predictors_4tap(dst, stride, bs, above, left, D153_PRED);
+}
+
+void av1_d207_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                                 const uint8_t *above, const uint8_t *left) {
+  filter_intra_predictors_4tap(dst, stride, bs, above, left, D207_PRED);
+}
+
+void av1_d63_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                                const uint8_t *above, const uint8_t *left) {
+  filter_intra_predictors_4tap(dst, stride, bs, above, left, D63_PRED);
+}
+
+void av1_tm_filter_predictor_c(uint8_t *dst, ptrdiff_t stride, int bs,
+                               const uint8_t *above, const uint8_t *left) {
+  filter_intra_predictors_4tap(dst, stride, bs, above, left, TM_PRED);
+}
+
+static void filter_intra_predictors(int mode, uint8_t *dst, ptrdiff_t stride,
+                                    int bs, const uint8_t *above,
+                                    const uint8_t *left) {
+  switch (mode) {
+    case DC_PRED: av1_dc_filter_predictor(dst, stride, bs, above, left); break;
+    case V_PRED: av1_v_filter_predictor(dst, stride, bs, above, left); break;
+    case H_PRED: av1_h_filter_predictor(dst, stride, bs, above, left); break;
+    case D45_PRED:
+      av1_d45_filter_predictor(dst, stride, bs, above, left);
+      break;
+    case D135_PRED:
+      av1_d135_filter_predictor(dst, stride, bs, above, left);
+      break;
+    case D117_PRED:
+      av1_d117_filter_predictor(dst, stride, bs, above, left);
+      break;
+    case D153_PRED:
+      av1_d153_filter_predictor(dst, stride, bs, above, left);
+      break;
+    case D207_PRED:
+      av1_d207_filter_predictor(dst, stride, bs, above, left);
+      break;
+    case D63_PRED:
+      av1_d63_filter_predictor(dst, stride, bs, above, left);
+      break;
+    case TM_PRED: av1_tm_filter_predictor(dst, stride, bs, above, left); break;
+    default: assert(0);
+  }
+}
+#if CONFIG_AOM_HIGHBITDEPTH
 static void highbd_filter_intra_predictors_4tap(uint16_t *dst, ptrdiff_t stride,
                                                 int bs, const uint16_t *above,
                                                 const uint16_t *left, int mode,
@@ -1151,7 +1140,7 @@ static void highbd_filter_intra_predictors(int mode, uint16_t *dst,
   }
 }
 #endif  // CONFIG_AOM_HIGHBITDEPTH
-#endif  // CONFIG_EXT_INTRA
+#endif  // CONFIG_FILTER_INTRA
 
 #if CONFIG_AOM_HIGHBITDEPTH
 static void build_intra_predictors_high(
@@ -1168,7 +1157,19 @@ static void build_intra_predictors_high(
   const int bs = 4 * num_4x4_blocks_wide_txsize_lookup[tx_size];
   int need_left = extend_modes[mode] & NEED_LEFT;
   int need_above = extend_modes[mode] & NEED_ABOVE;
+  int need_above_left = extend_modes[mode] & NEED_ABOVELEFT;
   const uint16_t *above_ref = ref - ref_stride;
+#if CONFIG_EXT_INTRA
+  int p_angle = 0;
+  const int is_dr_mode = mode != DC_PRED && mode != TM_PRED &&
+                         xd->mi[0]->mbmi.sb_type >= BLOCK_8X8;
+#endif  // CONFIG_EXT_INTRA
+#if CONFIG_FILTER_INTRA
+  const FILTER_INTRA_MODE_INFO *filter_intra_mode_info =
+      &xd->mi[0]->mbmi.filter_intra_mode_info;
+  const FILTER_INTRA_MODE filter_intra_mode =
+      filter_intra_mode_info->filter_intra_mode[plane != 0];
+#endif  // CONFIG_FILTER_INTRA
   int base = 128 << (xd->bd - 8);
 // 127 127 127 .. 127 127 127 127 127 127
 // 129  A   B  ..  Y   Z
@@ -1177,29 +1178,21 @@ static void build_intra_predictors_high(
 // 129  G   H  ..  S   T   T   T   T   T
 
 #if CONFIG_EXT_INTRA
-  const EXT_INTRA_MODE_INFO *ext_intra_mode_info =
-      &xd->mi[0]->mbmi.ext_intra_mode_info;
-  const EXT_INTRA_MODE ext_intra_mode =
-      ext_intra_mode_info->ext_intra_mode[plane != 0];
-  int p_angle = 0;
-
-  if (mode != DC_PRED && mode != TM_PRED &&
-      xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
+  if (is_dr_mode) {
     p_angle = mode_to_angle_map[mode] +
               xd->mi[0]->mbmi.angle_delta[plane != 0] * ANGLE_STEP;
     if (p_angle <= 90)
-      need_above = 1, need_left = 0;
+      need_above = 1, need_left = 0, need_above_left = 1;
     else if (p_angle < 180)
-      need_above = 1, need_left = 1;
+      need_above = 1, need_left = 1, need_above_left = 1;
     else
-      need_above = 0, need_left = 1;
-  }
-
-  if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
-    need_left = ext_intra_extend_modes[ext_intra_mode] & NEED_LEFT;
-    need_above = ext_intra_extend_modes[ext_intra_mode] & NEED_ABOVE;
+      need_above = 0, need_left = 1, need_above_left = 1;
   }
 #endif  // CONFIG_EXT_INTRA
+#if CONFIG_FILTER_INTRA
+  if (filter_intra_mode_info->use_filter_intra_mode[plane != 0])
+    need_left = need_above = need_above_left = 1;
+#endif  // CONFIG_FILTER_INTRA
 
   (void)plane;
   assert(n_top_px >= 0);
@@ -1218,19 +1211,18 @@ static void build_intra_predictors_high(
 
   // NEED_LEFT
   if (need_left) {
-#if CONFIG_EXT_INTRA
-    int need_bottom;
-    if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
+#if CONFIG_EXT_INTRA || CONFIG_FILTER_INTRA
+    int need_bottom = !!(extend_modes[mode] & NEED_BOTTOMLEFT);
+#if CONFIG_FILTER_INTRA
+    if (filter_intra_mode_info->use_filter_intra_mode[plane != 0])
       need_bottom = 0;
-    } else if (mode != DC_PRED && mode != TM_PRED &&
-               xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
-      need_bottom = p_angle > 180;
-    } else {
-      need_bottom = !!(extend_modes[mode] & NEED_BOTTOMLEFT);
-    }
+#endif  // CONFIG_FILTER_INTRA
+#if CONFIG_EXT_INTRA
+    if (is_dr_mode) need_bottom = p_angle > 180;
+#endif  // CONFIG_EXT_INTRA
 #else
     const int need_bottom = !!(extend_modes[mode] & NEED_BOTTOMLEFT);
-#endif  // CONFIG_EXT_INTRA
+#endif  // CONFIG_EXT_INTRA || CONFIG_FILTER_INTRA
     i = 0;
     if (n_left_px > 0) {
       for (; i < n_left_px; i++) left_col[i] = ref[i * ref_stride - 1];
@@ -1248,19 +1240,18 @@ static void build_intra_predictors_high(
 
   // NEED_ABOVE
   if (need_above) {
-#if CONFIG_EXT_INTRA
-    int need_right;
-    if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
+#if CONFIG_EXT_INTRA || CONFIG_FILTER_INTRA
+    int need_right = !!(extend_modes[mode] & NEED_ABOVERIGHT);
+#if CONFIG_FILTER_INTRA
+    if (filter_intra_mode_info->use_filter_intra_mode[plane != 0])
       need_right = 1;
-    } else if (mode != DC_PRED && mode != TM_PRED &&
-               xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
-      need_right = p_angle < 90;
-    } else {
-      need_right = !!(extend_modes[mode] & NEED_ABOVERIGHT);
-    }
+#endif  // CONFIG_FILTER_INTRA
+#if CONFIG_EXT_INTRA
+    if (is_dr_mode) need_right = p_angle < 90;
+#endif  // CONFIG_EXT_INTRA
 #else
     const int need_right = !!(extend_modes[mode] & NEED_ABOVERIGHT);
-#endif  // CONFIG_EXT_INTRA
+#endif  // CONFIG_EXT_INTRA || CONFIG_FILTER_INTRA
     if (n_top_px > 0) {
       memcpy(above_row, above_ref, n_top_px * sizeof(above_ref[0]));
       i = n_top_px;
@@ -1277,30 +1268,21 @@ static void build_intra_predictors_high(
     }
   }
 
-#if CONFIG_EXT_INTRA
-  if (ext_intra_mode_info->use_ext_intra_mode[plane != 0] ||
-      (extend_modes[mode] & NEED_ABOVELEFT) ||
-      (mode != DC_PRED && mode != TM_PRED &&
-       xd->mi[0]->mbmi.sb_type >= BLOCK_8X8)) {
+  if (need_above_left) {
     above_row[-1] =
         n_top_px > 0 ? (n_left_px > 0 ? above_ref[-1] : base + 1) : base - 1;
   }
-#else
-  if ((extend_modes[mode] & NEED_ABOVELEFT)) {
-    above_row[-1] =
-        n_top_px > 0 ? (n_left_px > 0 ? above_ref[-1] : base + 1) : base - 1;
-  }
-#endif  // CONFIG_EXT_INTRA
 
-#if CONFIG_EXT_INTRA
-  if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
-    highbd_filter_intra_predictors(ext_intra_mode, dst, dst_stride, bs,
+#if CONFIG_FILTER_INTRA
+  if (filter_intra_mode_info->use_filter_intra_mode[plane != 0]) {
+    highbd_filter_intra_predictors(filter_intra_mode, dst, dst_stride, bs,
                                    const_above_row, left_col, xd->bd);
     return;
   }
+#endif  // CONFIG_FILTER_INTRA
 
-  if (mode != DC_PRED && mode != TM_PRED &&
-      xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
+#if CONFIG_EXT_INTRA
+  if (is_dr_mode) {
     INTRA_FILTER filter = INTRA_FILTER_LINEAR;
     if (plane == 0 && av1_is_intra_filter_switchable(p_angle))
       filter = xd->mi[0]->mbmi.intra_filter;
@@ -1336,37 +1318,42 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
   const int bs = 4 * num_4x4_blocks_wide_txsize_lookup[tx_size];
   int need_left = extend_modes[mode] & NEED_LEFT;
   int need_above = extend_modes[mode] & NEED_ABOVE;
+  int need_above_left = extend_modes[mode] & NEED_ABOVELEFT;
 #if CONFIG_EXT_INTRA
-  const EXT_INTRA_MODE_INFO *ext_intra_mode_info =
-      &xd->mi[0]->mbmi.ext_intra_mode_info;
-  const EXT_INTRA_MODE ext_intra_mode =
-      ext_intra_mode_info->ext_intra_mode[plane != 0];
   int p_angle = 0;
+  const int is_dr_mode = mode != DC_PRED && mode != TM_PRED &&
+                         xd->mi[0]->mbmi.sb_type >= BLOCK_8X8;
+#endif  // CONFIG_EXT_INTRA
+#if CONFIG_FILTER_INTRA
+  const FILTER_INTRA_MODE_INFO *filter_intra_mode_info =
+      &xd->mi[0]->mbmi.filter_intra_mode_info;
+  const FILTER_INTRA_MODE filter_intra_mode =
+      filter_intra_mode_info->filter_intra_mode[plane != 0];
+#endif  // CONFIG_FILTER_INTRA
 
-  if (mode != DC_PRED && mode != TM_PRED &&
-      xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
+// 127 127 127 .. 127 127 127 127 127 127
+// 129  A   B  ..  Y   Z
+// 129  C   D  ..  W   X
+// 129  E   F  ..  U   V
+// 129  G   H  ..  S   T   T   T   T   T
+// ..
+
+#if CONFIG_EXT_INTRA
+  if (is_dr_mode) {
     p_angle = mode_to_angle_map[mode] +
               xd->mi[0]->mbmi.angle_delta[plane != 0] * ANGLE_STEP;
     if (p_angle <= 90)
-      need_above = 1, need_left = 0;
+      need_above = 1, need_left = 0, need_above_left = 1;
     else if (p_angle < 180)
-      need_above = 1, need_left = 1;
+      need_above = 1, need_left = 1, need_above_left = 1;
     else
-      need_above = 0, need_left = 1;
-  }
-
-  if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
-    need_left = ext_intra_extend_modes[ext_intra_mode] & NEED_LEFT;
-    need_above = ext_intra_extend_modes[ext_intra_mode] & NEED_ABOVE;
+      need_above = 0, need_left = 1, need_above_left = 1;
   }
 #endif  // CONFIG_EXT_INTRA
-
-  // 127 127 127 .. 127 127 127 127 127 127
-  // 129  A   B  ..  Y   Z
-  // 129  C   D  ..  W   X
-  // 129  E   F  ..  U   V
-  // 129  G   H  ..  S   T   T   T   T   T
-  // ..
+#if CONFIG_FILTER_INTRA
+  if (filter_intra_mode_info->use_filter_intra_mode[plane != 0])
+    need_left = need_above = need_above_left = 1;
+#endif  // CONFIG_FILTER_INTRA
 
   (void)xd;
   (void)plane;
@@ -1386,19 +1373,18 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
 
   // NEED_LEFT
   if (need_left) {
-#if CONFIG_EXT_INTRA
-    int need_bottom;
-    if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
+#if CONFIG_EXT_INTRA || CONFIG_FILTER_INTRA
+    int need_bottom = !!(extend_modes[mode] & NEED_BOTTOMLEFT);
+#if CONFIG_FILTER_INTRA
+    if (filter_intra_mode_info->use_filter_intra_mode[plane != 0])
       need_bottom = 0;
-    } else if (mode != DC_PRED && mode != TM_PRED &&
-               xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
-      need_bottom = p_angle > 180;
-    } else {
-      need_bottom = !!(extend_modes[mode] & NEED_BOTTOMLEFT);
-    }
+#endif  // CONFIG_FILTER_INTRA
+#if CONFIG_EXT_INTRA
+    if (is_dr_mode) need_bottom = p_angle > 180;
+#endif  // CONFIG_EXT_INTRA
 #else
     const int need_bottom = !!(extend_modes[mode] & NEED_BOTTOMLEFT);
-#endif  // CONFIG_EXT_INTRA
+#endif  // CONFIG_EXT_INTRA || CONFIG_FILTER_INTRA
     i = 0;
     if (n_left_px > 0) {
       for (; i < n_left_px; i++) left_col[i] = ref[i * ref_stride - 1];
@@ -1416,19 +1402,18 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
 
   // NEED_ABOVE
   if (need_above) {
-#if CONFIG_EXT_INTRA
-    int need_right;
-    if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
+#if CONFIG_EXT_INTRA || CONFIG_FILTER_INTRA
+    int need_right = !!(extend_modes[mode] & NEED_ABOVERIGHT);
+#if CONFIG_FILTER_INTRA
+    if (filter_intra_mode_info->use_filter_intra_mode[plane != 0])
       need_right = 1;
-    } else if (mode != DC_PRED && mode != TM_PRED &&
-               xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
-      need_right = p_angle < 90;
-    } else {
-      need_right = !!(extend_modes[mode] & NEED_ABOVERIGHT);
-    }
+#endif  // CONFIG_FILTER_INTRA
+#if CONFIG_EXT_INTRA
+    if (is_dr_mode) need_right = p_angle < 90;
+#endif  // CONFIG_EXT_INTRA
 #else
     const int need_right = !!(extend_modes[mode] & NEED_ABOVERIGHT);
-#endif  // CONFIG_EXT_INTRA
+#endif  // CONFIG_EXT_INTRA || CONFIG_FITLER_INTRA
     if (n_top_px > 0) {
       memcpy(above_row, above_ref, n_top_px);
       i = n_top_px;
@@ -1444,26 +1429,18 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
     }
   }
 
-#if CONFIG_EXT_INTRA
-  if (ext_intra_mode_info->use_ext_intra_mode[plane != 0] ||
-      (extend_modes[mode] & NEED_ABOVELEFT) ||
-      (mode != DC_PRED && mode != TM_PRED &&
-       xd->mi[0]->mbmi.sb_type >= BLOCK_8X8)) {
+  if (need_above_left) {
     above_row[-1] = n_top_px > 0 ? (n_left_px > 0 ? above_ref[-1] : 129) : 127;
   }
-#else
-  if ((extend_modes[mode] & NEED_ABOVELEFT)) {
-    above_row[-1] = n_top_px > 0 ? (n_left_px > 0 ? above_ref[-1] : 129) : 127;
-  }
-#endif  // CONFIG_EXT_INTRA
 
-#if CONFIG_EXT_INTRA
-  if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
-    filter_intra_predictors(ext_intra_mode, dst, dst_stride, bs,
+#if CONFIG_FILTER_INTRA
+  if (filter_intra_mode_info->use_filter_intra_mode[plane != 0]) {
+    filter_intra_predictors(filter_intra_mode, dst, dst_stride, bs,
                             const_above_row, left_col);
     return;
   }
-
+#endif  // CONFIG_FILTER_INTRA
+#if CONFIG_EXT_INTRA
   if (mode != DC_PRED && mode != TM_PRED &&
       xd->mi[0]->mbmi.sb_type >= BLOCK_8X8) {
     INTRA_FILTER filter = INTRA_FILTER_LINEAR;

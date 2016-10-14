@@ -162,7 +162,7 @@ LIBAOM_TEST_SRCS-$(HAVE_SSSE3) += masked_sad_test.cc
 LIBAOM_TEST_SRCS-$(CONFIG_AV1_ENCODER) += av1_wedge_utils_test.cc
 endif
 
-ifeq ($(CONFIG_EXT_INTRA),yes)
+ifeq ($(CONFIG_FILTER_INTRA),yes)
 LIBAOM_TEST_SRCS-$(HAVE_SSE4_1) += reconintra_predictors_test.cc
 endif
 

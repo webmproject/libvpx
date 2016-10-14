@@ -5108,21 +5108,31 @@ static void encode_superblock(const AV1_COMP *const cpi, ThreadData *td,
       sum_intra_stats(td->counts, mi, xd->above_mi, xd->left_mi,
                       frame_is_intra_only(cm));
 
-#if CONFIG_EXT_INTRA
+    // TODO(huisu): move this into sum_intra_stats().
     if (!dry_run && bsize >= BLOCK_8X8) {
       FRAME_COUNTS *counts = td->counts;
+      (void)counts;
+#if CONFIG_FILTER_INTRA
       if (mbmi->mode == DC_PRED
 #if CONFIG_PALETTE
           && mbmi->palette_mode_info.palette_size[0] == 0
 #endif  // CONFIG_PALETTE
-          )
-        ++counts->ext_intra[0][mbmi->ext_intra_mode_info.use_ext_intra_mode[0]];
+          ) {
+        const int use_filter_intra_mode =
+            mbmi->filter_intra_mode_info.use_filter_intra_mode[0];
+        ++counts->filter_intra[0][use_filter_intra_mode];
+      }
       if (mbmi->uv_mode == DC_PRED
 #if CONFIG_PALETTE
           && mbmi->palette_mode_info.palette_size[1] == 0
 #endif  // CONFIG_PALETTE
-          )
-        ++counts->ext_intra[1][mbmi->ext_intra_mode_info.use_ext_intra_mode[1]];
+          ) {
+        const int use_filter_intra_mode =
+            mbmi->filter_intra_mode_info.use_filter_intra_mode[1];
+        ++counts->filter_intra[1][use_filter_intra_mode];
+      }
+#endif  // CONFIG_FILTER_INTRA
+#if CONFIG_EXT_INTRA
       if (mbmi->mode != DC_PRED && mbmi->mode != TM_PRED) {
         int p_angle;
         const int intra_filter_ctx = av1_get_pred_context_intra_interp(xd);
@@ -5131,8 +5141,8 @@ static void encode_superblock(const AV1_COMP *const cpi, ThreadData *td,
         if (av1_is_intra_filter_switchable(p_angle))
           ++counts->intra_filter[intra_filter_ctx][mbmi->intra_filter];
       }
-    }
 #endif  // CONFIG_EXT_INTRA
+    }
 
 #if CONFIG_PALETTE
     if (bsize >= BLOCK_8X8 && !dry_run) {

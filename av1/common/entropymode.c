@@ -1313,13 +1313,15 @@ static const aom_prob default_intra_filter_probs[INTRA_FILTERS + 1]
                                                   { 49, 25, 24 },
                                                   { 72, 38, 50 },
                                                 };
-static const aom_prob default_ext_intra_probs[2] = { 230, 230 };
-
 const aom_tree_index av1_intra_filter_tree[TREE_SIZE(INTRA_FILTERS)] = {
   -INTRA_FILTER_LINEAR,      2, -INTRA_FILTER_8TAP, 4, -INTRA_FILTER_8TAP_SHARP,
   -INTRA_FILTER_8TAP_SMOOTH,
 };
 #endif  // CONFIG_EXT_INTRA
+
+#if CONFIG_FILTER_INTRA
+static const aom_prob default_filter_intra_probs[2] = { 230, 230 };
+#endif  // CONFIG_FILTER_INTRA
 
 #if CONFIG_SUPERTX
 static const aom_prob default_supertx_prob[PARTITION_SUPERTX_CONTEXTS]
@@ -1385,9 +1387,11 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
   av1_copy(fc->seg.tree_probs, default_segment_tree_probs);
   av1_copy(fc->seg.pred_probs, default_segment_pred_probs);
 #if CONFIG_EXT_INTRA
-  av1_copy(fc->ext_intra_probs, default_ext_intra_probs);
   av1_copy(fc->intra_filter_probs, default_intra_filter_probs);
 #endif  // CONFIG_EXT_INTRA
+#if CONFIG_FILTER_INTRA
+  av1_copy(fc->filter_intra_probs, default_filter_intra_probs);
+#endif  // CONFIG_FILTER_INTRA
   av1_copy(fc->inter_ext_tx_prob, default_inter_ext_tx_prob);
   av1_copy(fc->intra_ext_tx_prob, default_intra_ext_tx_prob);
 #if CONFIG_LOOP_RESTORATION
@@ -1657,22 +1661,23 @@ void av1_adapt_intra_frame_probs(AV1_COMMON *cm) {
 #endif
   }
 #endif  // CONFIG_EXT_PARTITION_TYPES
-
 #if CONFIG_DELTA_Q
   for (i = 0; i < DELTA_Q_CONTEXTS; ++i)
     fc->delta_q_prob[i] =
         mode_mv_merge_probs(pre_fc->delta_q_prob[i], counts->delta_q[i]);
 #endif
 #if CONFIG_EXT_INTRA
-  for (i = 0; i < PLANE_TYPES; ++i) {
-    fc->ext_intra_probs[i] = av1_mode_mv_merge_probs(pre_fc->ext_intra_probs[i],
-                                                     counts->ext_intra[i]);
-  }
-
-  for (i = 0; i < INTRA_FILTERS + 1; ++i)
+  for (i = 0; i < INTRA_FILTERS + 1; ++i) {
     aom_tree_merge_probs(av1_intra_filter_tree, pre_fc->intra_filter_probs[i],
                          counts->intra_filter[i], fc->intra_filter_probs[i]);
+  }
 #endif  // CONFIG_EXT_INTRA
+#if CONFIG_FILTER_INTRA
+  for (i = 0; i < PLANE_TYPES; ++i) {
+    fc->filter_intra_probs[i] = av1_mode_mv_merge_probs(
+        pre_fc->filter_intra_probs[i], counts->filter_intra[i]);
+  }
+#endif  // CONFIG_FILTER_INTRA
 }
 
 static void set_default_lf_deltas(struct loopfilter *lf) {
