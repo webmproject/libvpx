@@ -54,6 +54,9 @@ static INLINE int ans_write_end(struct AnsCoder *const ans) {
   } else if (state < (1 << 22)) {
     mem_put_le24(ans->buf + ans->buf_offset, (0x02 << 22) + state);
     return ans->buf_offset + 3;
+  } else if (state < (1 << 29)) {
+    mem_put_le32(ans->buf + ans->buf_offset, (0x07 << 29) + state);
+    return ans->buf_offset + 4;
   } else {
     assert(0 && "State is too large to be serialized");
     return ans->buf_offset;

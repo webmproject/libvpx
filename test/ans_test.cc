@@ -74,7 +74,8 @@ bool check_uabs(const PvVec &pv_vec, uint8_t *buf) {
   return ans_read_end(&d);
 }
 
-const aom_cdf_prob spareto65[] = { 260, 188, 138, 102, 133, 122, 64, 15, 1, 1 };
+const aom_cdf_prob spareto65[] = { 8320, 6018, 4402, 3254, 4259,
+                                   3919, 2057, 492,  45,   2 };
 
 const int kRansSymbols =
     static_cast<int>(sizeof(spareto65) / sizeof(spareto65[0]));
@@ -94,7 +95,8 @@ std::vector<int> ans_encode_build_vals(rans_sym *const tab, int iters) {
   std::vector<int> ret;
   libaom_test::ACMRandom gen(18543637);
   for (int i = 0; i < iters; ++i) {
-    int sym = p_to_sym[gen.Rand8() * 4];
+    int sym =
+        p_to_sym[((gen.Rand8() << 8) + gen.Rand8()) & (RANS_PRECISION - 1)];
     ret.push_back(sym);
   }
   return ret;
