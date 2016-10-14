@@ -1,0 +1,124 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3c821fce_f6f940d8",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-14T23:37:04Z",
+      "side": 1,
+      "message": "the comment is redundant given the name of the test and the field being set",
+      "revId": "b0ea34a9affa52a3f532bb384ed2fc0bb12e1a28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3c821fce_9606ccf7",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-14T23:37:04Z",
+      "side": 1,
+      "message": "technically this should be !BUILDING..., sorry for the churn",
+      "revId": "b0ea34a9affa52a3f532bb384ed2fc0bb12e1a28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3c821fce_765c5008",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-14T23:37:04Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "b0ea34a9affa52a3f532bb384ed2fc0bb12e1a28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3c821fce_16615cbf",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-14T23:37:04Z",
+      "side": 1,
+      "message": "https://bugs.chromium.org/ would be a better choice",
+      "range": {
+        "startLine": 355,
+        "startChar": 5,
+        "endLine": 355,
+        "endChar": 27
+      },
+      "revId": "b0ea34a9affa52a3f532bb384ed2fc0bb12e1a28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3c821fce_f66700d0",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-14T23:37:04Z",
+      "side": 1,
+      "message": "that\u0027s a weird bound given the step size and initial value. maybe make it \u003c\u003d 700 to be explicit about the range",
+      "range": {
+        "startLine": 364,
+        "startChar": 20,
+        "endLine": 364,
+        "endChar": 27
+      },
+      "revId": "b0ea34a9affa52a3f532bb384ed2fc0bb12e1a28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3c821fce_b61f481e",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 1373,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-14T23:37:04Z",
+      "side": 1,
+      "message": "you intended Values() here not Range() right?",
+      "range": {
+        "startLine": 1373,
+        "startChar": 37,
+        "endLine": 1373,
+        "endChar": 43
+      },
+      "revId": "b0ea34a9affa52a3f532bb384ed2fc0bb12e1a28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
