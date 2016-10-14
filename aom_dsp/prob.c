@@ -205,4 +205,20 @@ int tree_to_cdf(const aom_tree_index *tree, const aom_prob *probs,
   }
   return nsymbs;
 }
+
+/* This code assumes that tree contains as unique leaf nodes the integer values
+    0 to len - 1 and produces the forward and inverse mapping tables in ind[]
+    and inv[] respectively. */
+void av1_indices_from_tree(int *ind, int *inv, int len,
+                           const aom_tree_index *tree) {
+  int i;
+  int index;
+  for (i = index = 0; i < TREE_SIZE(len); i++) {
+    const aom_tree_index j = tree[i];
+    if (j <= 0) {
+      inv[index] = -j;
+      ind[-j] = index++;
+    }
+  }
+}
 #endif
