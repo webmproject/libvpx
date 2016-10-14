@@ -49,7 +49,7 @@ int av1_cyclic_refresh_rc_bits_per_mb(const struct AV1_COMP *cpi, int i,
 // Prior to coding a given prediction block, of size bsize at (mi_row, mi_col),
 // check if we should reset the segment_id, and update the cyclic_refresh map
 // and segmentation map.
-void av1_cyclic_refresh_update_segment(struct AV1_COMP *const cpi,
+void av1_cyclic_refresh_update_segment(const struct AV1_COMP *cpi,
                                        MB_MODE_INFO *const mbmi, int mi_row,
                                        int mi_col, BLOCK_SIZE bsize,
                                        int64_t rate, int64_t dist, int skip);

@@ -606,7 +606,6 @@ process_toolchain() {
         check_add_cflags -Wfloat-conversion
         check_add_cflags -Wpointer-arith
         check_add_cflags -Wtype-limits
-        check_add_cflags -Wcast-qual
         check_add_cflags -Wvla
         check_add_cflags -Wimplicit-function-declaration
         check_add_cflags -Wuninitialized

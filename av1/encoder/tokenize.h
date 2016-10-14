@@ -66,20 +66,21 @@ typedef enum {
 // with the coefficient token cost only if dry_run = DRY_RUN_COSTCOEFS,
 // otherwise rate is not incremented.
 #if CONFIG_VAR_TX
-void av1_tokenize_sb_vartx(struct AV1_COMP *cpi, struct ThreadData *td,
+void av1_tokenize_sb_vartx(const struct AV1_COMP *cpi, struct ThreadData *td,
                            TOKENEXTRA **t, RUN_TYPE dry_run, int mi_row,
                            int mi_col, BLOCK_SIZE bsize, int *rate);
 #endif
 #if CONFIG_PALETTE
-void av1_tokenize_palette_sb(struct AV1_COMP *cpi, struct ThreadData *const td,
-                             int plane, TOKENEXTRA **t, RUN_TYPE dry_run,
-                             BLOCK_SIZE bsize, int *rate);
+void av1_tokenize_palette_sb(const struct AV1_COMP *cpi,
+                             struct ThreadData *const td, int plane,
+                             TOKENEXTRA **t, RUN_TYPE dry_run, BLOCK_SIZE bsize,
+                             int *rate);
 #endif  // CONFIG_PALETTE
-void av1_tokenize_sb(struct AV1_COMP *cpi, struct ThreadData *td,
+void av1_tokenize_sb(const struct AV1_COMP *cpi, struct ThreadData *td,
                      TOKENEXTRA **t, RUN_TYPE dry_run, BLOCK_SIZE bsize,
                      int *rate);
 #if CONFIG_SUPERTX
-void av1_tokenize_sb_supertx(struct AV1_COMP *cpi, struct ThreadData *td,
+void av1_tokenize_sb_supertx(const struct AV1_COMP *cpi, struct ThreadData *td,
                              TOKENEXTRA **t, RUN_TYPE dry_run, BLOCK_SIZE bsize,
                              int *rate);
 #endif

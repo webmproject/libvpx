@@ -619,7 +619,7 @@ void av1_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
   get_entropy_contexts_plane(plane_bsize, tx_size, pd, t_above, t_left);
 }
 
-void av1_mv_pred(AV1_COMP *cpi, MACROBLOCK *x, uint8_t *ref_y_buffer,
+void av1_mv_pred(const AV1_COMP *cpi, MACROBLOCK *x, uint8_t *ref_y_buffer,
                  int ref_y_stride, int ref_frame, BLOCK_SIZE block_size) {
   int i;
   int zero_seen = 0;

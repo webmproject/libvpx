@@ -114,10 +114,10 @@ int av1_refining_search_8p_c(MACROBLOCK *x, int error_per_bit, int search_range,
 
 struct AV1_COMP;
 
-int av1_full_pixel_search(struct AV1_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
-                          MV *mvp_full, int step_param, int error_per_bit,
-                          int *cost_list, const MV *ref_mv, int var_max,
-                          int rd);
+int av1_full_pixel_search(const struct AV1_COMP *cpi, MACROBLOCK *x,
+                          BLOCK_SIZE bsize, MV *mvp_full, int step_param,
+                          int error_per_bit, int *cost_list, const MV *ref_mv,
+                          int var_max, int rd);
 
 #if CONFIG_EXT_INTER
 int av1_find_best_masked_sub_pixel_tree(
@@ -127,11 +127,11 @@ int av1_find_best_masked_sub_pixel_tree(
     int *mvjcost, int *mvcost[2], int *distortion, unsigned int *sse1,
     int is_second);
 int av1_find_best_masked_sub_pixel_tree_up(
-    struct AV1_COMP *cpi, MACROBLOCK *x, const uint8_t *mask, int mask_stride,
-    int mi_row, int mi_col, MV *bestmv, const MV *ref_mv, int allow_hp,
-    int error_per_bit, const aom_variance_fn_ptr_t *vfp, int forced_stop,
-    int iters_per_step, int *mvjcost, int *mvcost[2], int *distortion,
-    unsigned int *sse1, int is_second, int use_upsampled_ref);
+    const struct AV1_COMP *cpi, MACROBLOCK *x, const uint8_t *mask,
+    int mask_stride, int mi_row, int mi_col, MV *bestmv, const MV *ref_mv,
+    int allow_hp, int error_per_bit, const aom_variance_fn_ptr_t *vfp,
+    int forced_stop, int iters_per_step, int *mvjcost, int *mvcost[2],
+    int *distortion, unsigned int *sse1, int is_second, int use_upsampled_ref);
 int av1_masked_full_pixel_diamond(const struct AV1_COMP *cpi, MACROBLOCK *x,
                                   const uint8_t *mask, int mask_stride,
                                   MV *mvp_full, int step_param, int sadpb,
@@ -147,8 +147,8 @@ int av1_obmc_full_pixel_diamond(const struct AV1_COMP *cpi, MACROBLOCK *x,
                                 const aom_variance_fn_ptr_t *fn_ptr,
                                 const MV *ref_mv, MV *dst_mv, int is_second);
 int av1_find_best_obmc_sub_pixel_tree_up(
-    struct AV1_COMP *cpi, MACROBLOCK *x, int mi_row, int mi_col, MV *bestmv,
-    const MV *ref_mv, int allow_hp, int error_per_bit,
+    const struct AV1_COMP *cpi, MACROBLOCK *x, int mi_row, int mi_col,
+    MV *bestmv, const MV *ref_mv, int allow_hp, int error_per_bit,
     const aom_variance_fn_ptr_t *vfp, int forced_stop, int iters_per_step,
     int *mvjcost, int *mvcost[2], int *distortion, unsigned int *sse1,
     int is_second, int use_upsampled_ref);

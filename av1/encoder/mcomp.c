@@ -1805,9 +1805,9 @@ unsigned int av1_int_pro_motion_estimation(const AV1_COMP *cpi, MACROBLOCK *x,
 /* do_refine: If last step (1-away) of n-step search doesn't pick the center
               point as the best match, we will do a final 1-away diamond
               refining search  */
-static int full_pixel_diamond(AV1_COMP *cpi, MACROBLOCK *x, MV *mvp_full,
-                              int step_param, int sadpb, int further_steps,
-                              int do_refine, int *cost_list,
+static int full_pixel_diamond(const AV1_COMP *const cpi, MACROBLOCK *x,
+                              MV *mvp_full, int step_param, int sadpb,
+                              int further_steps, int do_refine, int *cost_list,
                               const aom_variance_fn_ptr_t *fn_ptr,
                               const MV *ref_mv) {
   MV temp_mv;
@@ -1870,7 +1870,7 @@ static int full_pixel_diamond(AV1_COMP *cpi, MACROBLOCK *x, MV *mvp_full,
 #define MIN_INTERVAL 1
 // Runs an limited range exhaustive mesh search using a pattern set
 // according to the encode speed profile.
-static int full_pixel_exhaustive(AV1_COMP *cpi, MACROBLOCK *x,
+static int full_pixel_exhaustive(const AV1_COMP *const cpi, MACROBLOCK *x,
                                  const MV *centre_mv_full, int sadpb,
                                  int *cost_list,
                                  const aom_variance_fn_ptr_t *fn_ptr,
@@ -2243,7 +2243,7 @@ int av1_refining_search_8p_c(MACROBLOCK *x, int error_per_bit, int search_range,
 }
 
 #define MIN_EX_SEARCH_LIMIT 128
-static int is_exhaustive_allowed(AV1_COMP *cpi, MACROBLOCK *x) {
+static int is_exhaustive_allowed(const AV1_COMP *const cpi, MACROBLOCK *x) {
   const SPEED_FEATURES *const sf = &cpi->sf;
   const int max_ex =
       AOMMAX(MIN_EX_SEARCH_LIMIT,
@@ -2254,13 +2254,13 @@ static int is_exhaustive_allowed(AV1_COMP *cpi, MACROBLOCK *x) {
          (*x->ex_search_count_ptr <= max_ex) && !cpi->rc.is_src_frame_alt_ref;
 }
 
-int av1_full_pixel_search(AV1_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
+int av1_full_pixel_search(const AV1_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
                           MV *mvp_full, int step_param, int error_per_bit,
                           int *cost_list, const MV *ref_mv, int var_max,
                           int rd) {
   const SPEED_FEATURES *const sf = &cpi->sf;
   const SEARCH_METHODS method = sf->mv.search_method;
-  aom_variance_fn_ptr_t *fn_ptr = &cpi->fn_ptr[bsize];
+  const aom_variance_fn_ptr_t *fn_ptr = &cpi->fn_ptr[bsize];
   int var = 0;
 
   if (cost_list) {
@@ -2530,7 +2530,7 @@ static unsigned int upsampled_setup_masked_center_error(
 }
 
 int av1_find_best_masked_sub_pixel_tree_up(
-    AV1_COMP *cpi, MACROBLOCK *x, const uint8_t *mask, int mask_stride,
+    const AV1_COMP *cpi, MACROBLOCK *x, const uint8_t *mask, int mask_stride,
     int mi_row, int mi_col, MV *bestmv, const MV *ref_mv, int allow_hp,
     int error_per_bit, const aom_variance_fn_ptr_t *vfp, int forced_stop,
     int iters_per_step, int *mvjcost, int *mvcost[2], int *distortion,
@@ -3031,7 +3031,7 @@ static unsigned int upsampled_setup_obmc_center_error(
 }
 
 int av1_find_best_obmc_sub_pixel_tree_up(
-    AV1_COMP *cpi, MACROBLOCK *x, int mi_row, int mi_col, MV *bestmv,
+    const AV1_COMP *cpi, MACROBLOCK *x, int mi_row, int mi_col, MV *bestmv,
     const MV *ref_mv, int allow_hp, int error_per_bit,
     const aom_variance_fn_ptr_t *vfp, int forced_stop, int iters_per_step,
     int *mvjcost, int *mvcost[2], int *distortion, unsigned int *sse1,
