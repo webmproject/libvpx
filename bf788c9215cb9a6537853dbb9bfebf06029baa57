@@ -16,6 +16,24 @@
       "revId": "bf788c9215cb9a6537853dbb9bfebf06029baa57",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc7ca22f_3592d259",
+        "filename": "vpx_dsp/arm/loopfilter_4_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-14T01:18:42Z",
+      "side": 1,
+      "message": "All q registers are already used. Some are used in subfunction filter4_16().",
+      "parentUuid": "3ca69ec4_12452a71",
+      "revId": "bf788c9215cb9a6537853dbb9bfebf06029baa57",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
