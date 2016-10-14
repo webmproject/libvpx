@@ -2990,4 +2990,5 @@ void FDCT32x32_2D_AVX2(const int16_t *input, int16_t *output_org, int stride) {
       }
     }
   }
+  _mm256_zeroupper();
 }  // NOLINT
