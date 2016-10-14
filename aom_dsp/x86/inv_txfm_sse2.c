@@ -2669,28 +2669,28 @@ void aom_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
     stp1_31 = stp2_31;                                                         \
   }
 
-#define IDCT32                                                                 \
+#define IDCT32(in0, in1)                                                       \
   /* Stage1 */                                                                 \
   {                                                                            \
-    const __m128i lo_1_31 = _mm_unpacklo_epi16(in[1], in[31]);                 \
-    const __m128i hi_1_31 = _mm_unpackhi_epi16(in[1], in[31]);                 \
-    const __m128i lo_17_15 = _mm_unpacklo_epi16(in[17], in[15]);               \
-    const __m128i hi_17_15 = _mm_unpackhi_epi16(in[17], in[15]);               \
+    const __m128i lo_1_31 = _mm_unpacklo_epi16((in0)[1], (in1)[15]);           \
+    const __m128i hi_1_31 = _mm_unpackhi_epi16((in0)[1], (in1)[15]);           \
+    const __m128i lo_17_15 = _mm_unpacklo_epi16((in1)[1], (in0)[15]);          \
+    const __m128i hi_17_15 = _mm_unpackhi_epi16((in1)[1], (in0)[15]);          \
                                                                                \
-    const __m128i lo_9_23 = _mm_unpacklo_epi16(in[9], in[23]);                 \
-    const __m128i hi_9_23 = _mm_unpackhi_epi16(in[9], in[23]);                 \
-    const __m128i lo_25_7 = _mm_unpacklo_epi16(in[25], in[7]);                 \
-    const __m128i hi_25_7 = _mm_unpackhi_epi16(in[25], in[7]);                 \
+    const __m128i lo_9_23 = _mm_unpacklo_epi16((in0)[9], (in1)[7]);            \
+    const __m128i hi_9_23 = _mm_unpackhi_epi16((in0)[9], (in1)[7]);            \
+    const __m128i lo_25_7 = _mm_unpacklo_epi16((in1)[9], (in0)[7]);            \
+    const __m128i hi_25_7 = _mm_unpackhi_epi16((in1)[9], (in0)[7]);            \
                                                                                \
-    const __m128i lo_5_27 = _mm_unpacklo_epi16(in[5], in[27]);                 \
-    const __m128i hi_5_27 = _mm_unpackhi_epi16(in[5], in[27]);                 \
-    const __m128i lo_21_11 = _mm_unpacklo_epi16(in[21], in[11]);               \
-    const __m128i hi_21_11 = _mm_unpackhi_epi16(in[21], in[11]);               \
+    const __m128i lo_5_27 = _mm_unpacklo_epi16((in0)[5], (in1)[11]);           \
+    const __m128i hi_5_27 = _mm_unpackhi_epi16((in0)[5], (in1)[11]);           \
+    const __m128i lo_21_11 = _mm_unpacklo_epi16((in1)[5], (in0)[11]);          \
+    const __m128i hi_21_11 = _mm_unpackhi_epi16((in1)[5], (in0)[11]);          \
                                                                                \
-    const __m128i lo_13_19 = _mm_unpacklo_epi16(in[13], in[19]);               \
-    const __m128i hi_13_19 = _mm_unpackhi_epi16(in[13], in[19]);               \
-    const __m128i lo_29_3 = _mm_unpacklo_epi16(in[29], in[3]);                 \
-    const __m128i hi_29_3 = _mm_unpackhi_epi16(in[29], in[3]);                 \
+    const __m128i lo_13_19 = _mm_unpacklo_epi16((in0)[13], (in1)[3]);          \
+    const __m128i hi_13_19 = _mm_unpackhi_epi16((in0)[13], (in1)[3]);          \
+    const __m128i lo_29_3 = _mm_unpacklo_epi16((in1)[13], (in0)[3]);           \
+    const __m128i hi_29_3 = _mm_unpackhi_epi16((in1)[13], (in0)[3]);           \
                                                                                \
     MULTIPLICATION_AND_ADD(lo_1_31, hi_1_31, lo_17_15, hi_17_15, stg1_0,       \
                            stg1_1, stg1_2, stg1_3, stp1_16, stp1_31, stp1_17,  \
@@ -2707,15 +2707,15 @@ void aom_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
                                                                                \
   /* Stage2 */                                                                 \
   {                                                                            \
-    const __m128i lo_2_30 = _mm_unpacklo_epi16(in[2], in[30]);                 \
-    const __m128i hi_2_30 = _mm_unpackhi_epi16(in[2], in[30]);                 \
-    const __m128i lo_18_14 = _mm_unpacklo_epi16(in[18], in[14]);               \
-    const __m128i hi_18_14 = _mm_unpackhi_epi16(in[18], in[14]);               \
+    const __m128i lo_2_30 = _mm_unpacklo_epi16((in0)[2], (in1)[14]);           \
+    const __m128i hi_2_30 = _mm_unpackhi_epi16((in0)[2], (in1)[14]);           \
+    const __m128i lo_18_14 = _mm_unpacklo_epi16((in1)[2], (in0)[14]);          \
+    const __m128i hi_18_14 = _mm_unpackhi_epi16((in1)[2], (in0)[14]);          \
                                                                                \
-    const __m128i lo_10_22 = _mm_unpacklo_epi16(in[10], in[22]);               \
-    const __m128i hi_10_22 = _mm_unpackhi_epi16(in[10], in[22]);               \
-    const __m128i lo_26_6 = _mm_unpacklo_epi16(in[26], in[6]);                 \
-    const __m128i hi_26_6 = _mm_unpackhi_epi16(in[26], in[6]);                 \
+    const __m128i lo_10_22 = _mm_unpacklo_epi16((in0)[10], (in1)[6]);          \
+    const __m128i hi_10_22 = _mm_unpackhi_epi16((in0)[10], (in1)[6]);          \
+    const __m128i lo_26_6 = _mm_unpacklo_epi16((in1)[10], (in0)[6]);           \
+    const __m128i hi_26_6 = _mm_unpackhi_epi16((in1)[10], (in0)[6]);           \
                                                                                \
     MULTIPLICATION_AND_ADD(lo_2_30, hi_2_30, lo_18_14, hi_18_14, stg2_0,       \
                            stg2_1, stg2_2, stg2_3, stp2_8, stp2_15, stp2_9,    \
@@ -2747,10 +2747,10 @@ void aom_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
                                                                                \
   /* Stage3 */                                                                 \
   {                                                                            \
-    const __m128i lo_4_28 = _mm_unpacklo_epi16(in[4], in[28]);                 \
-    const __m128i hi_4_28 = _mm_unpackhi_epi16(in[4], in[28]);                 \
-    const __m128i lo_20_12 = _mm_unpacklo_epi16(in[20], in[12]);               \
-    const __m128i hi_20_12 = _mm_unpackhi_epi16(in[20], in[12]);               \
+    const __m128i lo_4_28 = _mm_unpacklo_epi16((in0)[4], (in1)[12]);           \
+    const __m128i hi_4_28 = _mm_unpackhi_epi16((in0)[4], (in1)[12]);           \
+    const __m128i lo_20_12 = _mm_unpacklo_epi16((in1)[4], (in0)[12]);          \
+    const __m128i hi_20_12 = _mm_unpackhi_epi16((in1)[4], (in0)[12]);          \
                                                                                \
     const __m128i lo_17_30 = _mm_unpacklo_epi16(stp2_17, stp2_30);             \
     const __m128i hi_17_30 = _mm_unpackhi_epi16(stp2_17, stp2_30);             \
@@ -2794,10 +2794,10 @@ void aom_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
                                                                                \
   /* Stage4 */                                                                 \
   {                                                                            \
-    const __m128i lo_0_16 = _mm_unpacklo_epi16(in[0], in[16]);                 \
-    const __m128i hi_0_16 = _mm_unpackhi_epi16(in[0], in[16]);                 \
-    const __m128i lo_8_24 = _mm_unpacklo_epi16(in[8], in[24]);                 \
-    const __m128i hi_8_24 = _mm_unpackhi_epi16(in[8], in[24]);                 \
+    const __m128i lo_0_16 = _mm_unpacklo_epi16((in0)[0], (in1)[0]);            \
+    const __m128i hi_0_16 = _mm_unpackhi_epi16((in0)[0], (in1)[0]);            \
+    const __m128i lo_8_24 = _mm_unpacklo_epi16((in0)[8], (in1)[8]);            \
+    const __m128i hi_8_24 = _mm_unpackhi_epi16((in0)[8], (in1)[8]);            \
                                                                                \
     const __m128i lo_9_14 = _mm_unpacklo_epi16(stp1_9, stp1_14);               \
     const __m128i hi_9_14 = _mm_unpackhi_epi16(stp1_9, stp1_14);               \
@@ -3338,7 +3338,7 @@ void aom_idct32x32_1024_add_sse2(const tran_low_t *input, uint8_t *dest,
     array_transpose_8x8(in + 16, in + 16);
     array_transpose_8x8(in + 24, in + 24);
 
-    IDCT32
+    IDCT32(in, in + 16)
 
     // 1_D: Store 32 intermediate results for each 8x32 block.
     col[i32 + 0] = _mm_add_epi16(stp1_0, stp1_31);
@@ -3384,7 +3384,7 @@ void aom_idct32x32_1024_add_sse2(const tran_low_t *input, uint8_t *dest,
     array_transpose_8x8(col + j + 64, in + 16);
     array_transpose_8x8(col + j + 96, in + 24);
 
-    IDCT32
+    IDCT32(in, in + 16)
 
     // 2_D: Calculate the results and store them to destination.
     in[0] = _mm_add_epi16(stp1_0, stp1_31);
@@ -3449,6 +3449,107 @@ void aom_idct32x32_1_add_sse2(const tran_low_t *input, uint8_t *dest,
     RECON_AND_STORE(dest + 16 + j * stride, dc_value);
     RECON_AND_STORE(dest + 24 + j * stride, dc_value);
   }
+}
+
+// Apply a 32-element IDCT to 8 columns. This does not do any transposition
+// of its input - the caller is expected to have done that.
+// The input buffers are the top and bottom halves of an 8x32 block.
+void idct32_8col(__m128i *in0, __m128i *in1) {
+  const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
+
+  // idct constants for each stage
+  const __m128i stg1_0 = pair_set_epi16(cospi_31_64, -cospi_1_64);
+  const __m128i stg1_1 = pair_set_epi16(cospi_1_64, cospi_31_64);
+  const __m128i stg1_2 = pair_set_epi16(cospi_15_64, -cospi_17_64);
+  const __m128i stg1_3 = pair_set_epi16(cospi_17_64, cospi_15_64);
+  const __m128i stg1_4 = pair_set_epi16(cospi_23_64, -cospi_9_64);
+  const __m128i stg1_5 = pair_set_epi16(cospi_9_64, cospi_23_64);
+  const __m128i stg1_6 = pair_set_epi16(cospi_7_64, -cospi_25_64);
+  const __m128i stg1_7 = pair_set_epi16(cospi_25_64, cospi_7_64);
+  const __m128i stg1_8 = pair_set_epi16(cospi_27_64, -cospi_5_64);
+  const __m128i stg1_9 = pair_set_epi16(cospi_5_64, cospi_27_64);
+  const __m128i stg1_10 = pair_set_epi16(cospi_11_64, -cospi_21_64);
+  const __m128i stg1_11 = pair_set_epi16(cospi_21_64, cospi_11_64);
+  const __m128i stg1_12 = pair_set_epi16(cospi_19_64, -cospi_13_64);
+  const __m128i stg1_13 = pair_set_epi16(cospi_13_64, cospi_19_64);
+  const __m128i stg1_14 = pair_set_epi16(cospi_3_64, -cospi_29_64);
+  const __m128i stg1_15 = pair_set_epi16(cospi_29_64, cospi_3_64);
+
+  const __m128i stg2_0 = pair_set_epi16(cospi_30_64, -cospi_2_64);
+  const __m128i stg2_1 = pair_set_epi16(cospi_2_64, cospi_30_64);
+  const __m128i stg2_2 = pair_set_epi16(cospi_14_64, -cospi_18_64);
+  const __m128i stg2_3 = pair_set_epi16(cospi_18_64, cospi_14_64);
+  const __m128i stg2_4 = pair_set_epi16(cospi_22_64, -cospi_10_64);
+  const __m128i stg2_5 = pair_set_epi16(cospi_10_64, cospi_22_64);
+  const __m128i stg2_6 = pair_set_epi16(cospi_6_64, -cospi_26_64);
+  const __m128i stg2_7 = pair_set_epi16(cospi_26_64, cospi_6_64);
+
+  const __m128i stg3_0 = pair_set_epi16(cospi_28_64, -cospi_4_64);
+  const __m128i stg3_1 = pair_set_epi16(cospi_4_64, cospi_28_64);
+  const __m128i stg3_2 = pair_set_epi16(cospi_12_64, -cospi_20_64);
+  const __m128i stg3_3 = pair_set_epi16(cospi_20_64, cospi_12_64);
+  const __m128i stg3_4 = pair_set_epi16(-cospi_4_64, cospi_28_64);
+  const __m128i stg3_5 = pair_set_epi16(cospi_28_64, cospi_4_64);
+  const __m128i stg3_6 = pair_set_epi16(-cospi_28_64, -cospi_4_64);
+  const __m128i stg3_8 = pair_set_epi16(-cospi_20_64, cospi_12_64);
+  const __m128i stg3_9 = pair_set_epi16(cospi_12_64, cospi_20_64);
+  const __m128i stg3_10 = pair_set_epi16(-cospi_12_64, -cospi_20_64);
+
+  const __m128i stg4_0 = pair_set_epi16(cospi_16_64, cospi_16_64);
+  const __m128i stg4_1 = pair_set_epi16(cospi_16_64, -cospi_16_64);
+  const __m128i stg4_2 = pair_set_epi16(cospi_24_64, -cospi_8_64);
+  const __m128i stg4_3 = pair_set_epi16(cospi_8_64, cospi_24_64);
+  const __m128i stg4_4 = pair_set_epi16(-cospi_8_64, cospi_24_64);
+  const __m128i stg4_5 = pair_set_epi16(cospi_24_64, cospi_8_64);
+  const __m128i stg4_6 = pair_set_epi16(-cospi_24_64, -cospi_8_64);
+
+  const __m128i stg6_0 = pair_set_epi16(-cospi_16_64, cospi_16_64);
+
+  __m128i stp1_0, stp1_1, stp1_2, stp1_3, stp1_4, stp1_5, stp1_6, stp1_7,
+      stp1_8, stp1_9, stp1_10, stp1_11, stp1_12, stp1_13, stp1_14, stp1_15,
+      stp1_16, stp1_17, stp1_18, stp1_19, stp1_20, stp1_21, stp1_22, stp1_23,
+      stp1_24, stp1_25, stp1_26, stp1_27, stp1_28, stp1_29, stp1_30, stp1_31;
+  __m128i stp2_0, stp2_1, stp2_2, stp2_3, stp2_4, stp2_5, stp2_6, stp2_7,
+      stp2_8, stp2_9, stp2_10, stp2_11, stp2_12, stp2_13, stp2_14, stp2_15,
+      stp2_16, stp2_17, stp2_18, stp2_19, stp2_20, stp2_21, stp2_22, stp2_23,
+      stp2_24, stp2_25, stp2_26, stp2_27, stp2_28, stp2_29, stp2_30, stp2_31;
+  __m128i tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+
+  IDCT32(in0, in1)
+
+  // 2_D: Calculate the results and store them to destination.
+  in0[0] = _mm_add_epi16(stp1_0, stp1_31);
+  in0[1] = _mm_add_epi16(stp1_1, stp1_30);
+  in0[2] = _mm_add_epi16(stp1_2, stp1_29);
+  in0[3] = _mm_add_epi16(stp1_3, stp1_28);
+  in0[4] = _mm_add_epi16(stp1_4, stp1_27);
+  in0[5] = _mm_add_epi16(stp1_5, stp1_26);
+  in0[6] = _mm_add_epi16(stp1_6, stp1_25);
+  in0[7] = _mm_add_epi16(stp1_7, stp1_24);
+  in0[8] = _mm_add_epi16(stp1_8, stp1_23);
+  in0[9] = _mm_add_epi16(stp1_9, stp1_22);
+  in0[10] = _mm_add_epi16(stp1_10, stp1_21);
+  in0[11] = _mm_add_epi16(stp1_11, stp1_20);
+  in0[12] = _mm_add_epi16(stp1_12, stp1_19);
+  in0[13] = _mm_add_epi16(stp1_13, stp1_18);
+  in0[14] = _mm_add_epi16(stp1_14, stp1_17);
+  in0[15] = _mm_add_epi16(stp1_15, stp1_16);
+  in1[0] = _mm_sub_epi16(stp1_15, stp1_16);
+  in1[1] = _mm_sub_epi16(stp1_14, stp1_17);
+  in1[2] = _mm_sub_epi16(stp1_13, stp1_18);
+  in1[3] = _mm_sub_epi16(stp1_12, stp1_19);
+  in1[4] = _mm_sub_epi16(stp1_11, stp1_20);
+  in1[5] = _mm_sub_epi16(stp1_10, stp1_21);
+  in1[6] = _mm_sub_epi16(stp1_9, stp1_22);
+  in1[7] = _mm_sub_epi16(stp1_8, stp1_23);
+  in1[8] = _mm_sub_epi16(stp1_7, stp1_24);
+  in1[9] = _mm_sub_epi16(stp1_6, stp1_25);
+  in1[10] = _mm_sub_epi16(stp1_5, stp1_26);
+  in1[11] = _mm_sub_epi16(stp1_4, stp1_27);
+  in1[12] = _mm_sub_epi16(stp1_3, stp1_28);
+  in1[13] = _mm_sub_epi16(stp1_2, stp1_29);
+  in1[14] = _mm_sub_epi16(stp1_1, stp1_30);
+  in1[15] = _mm_sub_epi16(stp1_0, stp1_31);
 }
 
 #if CONFIG_AOM_HIGHBITDEPTH

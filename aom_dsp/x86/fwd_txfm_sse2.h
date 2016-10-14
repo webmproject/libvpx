@@ -365,6 +365,8 @@ static INLINE void transpose_and_output8x8(
   }
 }
 
+void fdct32_8col(__m128i *in0, __m128i *in1);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
