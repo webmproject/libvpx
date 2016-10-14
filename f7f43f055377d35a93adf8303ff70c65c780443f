@@ -1,0 +1,107 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1cfabb31_dd30cb4c",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-14T20:02:25Z",
+      "side": 1,
+      "message": "// BUILDING_WITH_TSAN",
+      "revId": "f7f43f055377d35a93adf8303ff70c65c780443f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1c28fb81_6d96b52a",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-14T20:02:25Z",
+      "side": 1,
+      "message": ", ignoring",
+      "range": {
+        "startLine": 352,
+        "startChar": 49,
+        "endLine": 352,
+        "endChar": 52
+      },
+      "revId": "f7f43f055377d35a93adf8303ff70c65c780443f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1c28fb81_4d9bf950",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-14T20:02:25Z",
+      "side": 1,
+      "message": "missing a period",
+      "revId": "f7f43f055377d35a93adf8303ff70c65c780443f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1c28fb81_cda6c995",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-14T20:02:25Z",
+      "side": 1,
+      "message": "drop the ()s",
+      "range": {
+        "startLine": 354,
+        "startChar": 24,
+        "endLine": 354,
+        "endChar": 26
+      },
+      "revId": "f7f43f055377d35a93adf8303ff70c65c780443f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1c28fb81_8da0c177",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-14T20:02:25Z",
+      "side": 1,
+      "message": "above",
+      "range": {
+        "startLine": 361,
+        "startChar": 37,
+        "endLine": 361,
+        "endChar": 42
+      },
+      "revId": "f7f43f055377d35a93adf8303ff70c65c780443f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
