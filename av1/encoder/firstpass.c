@@ -126,12 +126,12 @@ static void output_stats(FIRSTPASS_STATS *stats,
 }
 
 #if CONFIG_FP_MB_STATS
-static void output_fpmb_stats(uint8_t *this_frame_mb_stats, AV1_COMMON *cm,
+static void output_fpmb_stats(uint8_t *this_frame_mb_stats, int stats_size,
                               struct aom_codec_pkt_list *pktlist) {
   struct aom_codec_cx_pkt pkt;
   pkt.kind = AOM_CODEC_FPMB_STATS_PKT;
   pkt.data.firstpass_mb_stats.buf = this_frame_mb_stats;
-  pkt.data.firstpass_mb_stats.sz = cm->initial_mbs * sizeof(uint8_t);
+  pkt.data.firstpass_mb_stats.sz = stats_size * sizeof(*this_frame_mb_stats);
   aom_codec_pkt_list_add(pktlist, &pkt);
 }
 #endif
@@ -500,7 +500,7 @@ void av1_first_pass(AV1_COMP *cpi, const struct lookahead_entry *source) {
 
 #if CONFIG_FP_MB_STATS
   if (cpi->use_fp_mb_stats) {
-    av1_zero_array(cpi->twopass.frame_mb_stats_buf, cm->initial_mbs);
+    av1_zero_array(cpi->twopass.frame_mb_stats_buf, cpi->initial_mbs);
   }
 #endif
 
@@ -846,17 +846,15 @@ void av1_first_pass(AV1_COMP *cpi, const struct lookahead_entry *source) {
               cpi->twopass.frame_mb_stats_buf[mb_index] &=
                   ~FPMB_MOTION_ZERO_MASK;
               // check estimated motion direction
-              if (mv.as_mv.col > 0 && mv.as_mv.col >= abs(mv.as_mv.row)) {
+              if (mv.col > 0 && mv.col >= abs(mv.row)) {
                 // right direction
                 cpi->twopass.frame_mb_stats_buf[mb_index] |=
                     FPMB_MOTION_RIGHT_MASK;
-              } else if (mv.as_mv.row < 0 &&
-                         abs(mv.as_mv.row) >= abs(mv.as_mv.col)) {
+              } else if (mv.row < 0 && abs(mv.row) >= abs(mv.col)) {
                 // up direction
                 cpi->twopass.frame_mb_stats_buf[mb_index] |=
                     FPMB_MOTION_UP_MASK;
-              } else if (mv.as_mv.col < 0 &&
-                         abs(mv.as_mv.col) >= abs(mv.as_mv.row)) {
+              } else if (mv.col < 0 && abs(mv.col) >= abs(mv.row)) {
                 // left direction
                 cpi->twopass.frame_mb_stats_buf[mb_index] |=
                     FPMB_MOTION_LEFT_MASK;
@@ -999,7 +997,8 @@ void av1_first_pass(AV1_COMP *cpi, const struct lookahead_entry *source) {
 
 #if CONFIG_FP_MB_STATS
     if (cpi->use_fp_mb_stats) {
-      output_fpmb_stats(twopass->frame_mb_stats_buf, cm, cpi->output_pkt_list);
+      output_fpmb_stats(twopass->frame_mb_stats_buf, cpi->initial_mbs,
+                        cpi->output_pkt_list);
     }
 #endif
   }
