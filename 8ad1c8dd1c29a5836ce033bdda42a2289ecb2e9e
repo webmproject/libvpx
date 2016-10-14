@@ -16,6 +16,29 @@
       "revId": "8ad1c8dd1c29a5836ce033bdda42a2289ecb2e9e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1c28fb81_f004be33",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1046,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-10-14T22:03:02Z",
+      "side": 1,
+      "message": "Just wondering if you tested VOD on 4K with 8 tiles?",
+      "range": {
+        "startLine": 1046,
+        "startChar": 27,
+        "endLine": 1046,
+        "endChar": 40
+      },
+      "revId": "8ad1c8dd1c29a5836ce033bdda42a2289ecb2e9e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
