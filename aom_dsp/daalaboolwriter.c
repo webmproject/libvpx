@@ -28,4 +28,5 @@ void aom_daala_stop_encode(daala_writer *br) {
      Must always be added, so that rawbits knows the exact length of the
       bitstream. */
   br->buffer[br->pos++] = 0;
+  od_ec_enc_clear(&br->ec);
 }
