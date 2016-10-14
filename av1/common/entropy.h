@@ -190,7 +190,7 @@ static INLINE const uint8_t *get_band_translate(TX_SIZE tx_size) {
 #define MODEL_NODES (ENTROPY_NODES - UNCONSTRAINED_NODES)
 extern const aom_tree_index av1_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)];
 extern const aom_prob av1_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES];
-#if CONFIG_ANS
+#if CONFIG_ANS || CONFIG_DAALA_EC
 typedef aom_cdf_prob coeff_cdf_model[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS]
                                     [ENTROPY_TOKENS];
 extern const aom_cdf_prob av1_pareto8_token_probs[COEFF_PROB_MODELS]

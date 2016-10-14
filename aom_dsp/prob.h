@@ -96,6 +96,39 @@ static INLINE aom_prob mode_mv_merge_probs(aom_prob pre_prob,
 void aom_tree_merge_probs(const aom_tree_index *tree, const aom_prob *pre_probs,
                           const unsigned int *counts, aom_prob *probs);
 
+#if CONFIG_DAALA_EC
+int tree_to_cdf(const aom_tree_index *tree, const aom_prob *probs,
+                aom_tree_index root, uint16_t *cdf, aom_tree_index *ind,
+                int *pth, int *len);
+
+static INLINE void av1_tree_to_cdf(const aom_tree_index *tree,
+                                   const aom_prob *probs, uint16_t *cdf) {
+  aom_tree_index index[16];
+  int path[16];
+  int dist[16];
+  tree_to_cdf(tree, probs, 0, cdf, index, path, dist);
+}
+
+#define av1_tree_to_cdf_1D(tree, probs, cdf, u) \
+  do {                                          \
+    int i;                                      \
+    for (i = 0; i < u; i++) {                   \
+      av1_tree_to_cdf(tree, probs[i], cdf[i]);  \
+    }                                           \
+  } while (0)
+
+#define av1_tree_to_cdf_2D(tree, probs, cdf, u, v)     \
+  do {                                                 \
+    int j;                                             \
+    int i;                                             \
+    for (j = 0; j < v; j++) {                          \
+      for (i = 0; i < u; i++) {                        \
+        av1_tree_to_cdf(tree, probs[j][i], cdf[j][i]); \
+      }                                                \
+    }                                                  \
+  } while (0)
+#endif
+
 DECLARE_ALIGNED(16, extern const uint8_t, aom_norm[256]);
 
 #ifdef __cplusplus

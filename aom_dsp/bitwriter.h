@@ -29,6 +29,8 @@ extern "C" {
 
 #if CONFIG_ANS
 typedef struct BufAnsCoder aom_writer;
+#elif CONFIG_DAALA_EC
+typedef struct daala_writer aom_writer;
 #else
 typedef struct aom_dk_writer aom_writer;
 #endif
@@ -38,6 +40,8 @@ static INLINE void aom_start_encode(aom_writer *bc, uint8_t *buffer) {
   (void)bc;
   (void)buffer;
   assert(0 && "buf_ans requires a more complicated startup procedure");
+#elif CONFIG_DAALA_EC
+  aom_daala_start_encode(bc, buffer);
 #else
   aom_dk_start_encode(bc, buffer);
 #endif
@@ -47,6 +51,8 @@ static INLINE void aom_stop_encode(aom_writer *bc) {
 #if CONFIG_ANS
   (void)bc;
   assert(0 && "buf_ans requires a more complicated shutdown procedure");
+#elif CONFIG_DAALA_EC
+  aom_daala_stop_encode(bc);
 #else
   aom_dk_stop_encode(bc);
 #endif
@@ -55,6 +61,8 @@ static INLINE void aom_stop_encode(aom_writer *bc) {
 static INLINE void aom_write(aom_writer *br, int bit, int probability) {
 #if CONFIG_ANS
   buf_uabs_write(br, bit, probability);
+#elif CONFIG_DAALA_EC
+  aom_daala_write(br, bit, probability);
 #else
   aom_dk_write(br, bit, probability);
 #endif
@@ -83,7 +91,11 @@ static INLINE void aom_write_tree_bits(aom_writer *w, const aom_tree_index *tr,
 static INLINE void aom_write_tree(aom_writer *w, const aom_tree_index *tree,
                                   const aom_prob *probs, int bits, int len,
                                   aom_tree_index i) {
+#if CONFIG_DAALA_EC
+  daala_write_tree_bits(w, tree, probs, bits, len, i);
+#else
   aom_write_tree_bits(w, tree, probs, bits, len, i);
+#endif
 }
 
 static INLINE void aom_write_symbol(aom_writer *w, int symb,
@@ -95,6 +107,19 @@ static INLINE void aom_write_symbol(aom_writer *w, int symb,
   s.cum_prob = symb > 0 ? cdf[symb - 1] : 0;
   s.prob = cdf[symb] - s.cum_prob;
   buf_rans_write(w, &s);
+#else
+  (void)w;
+  (void)symb;
+  (void)cdf;
+  (void)nsymbs;
+  assert(0 && "Unsupported bitwriter operation");
+#endif
+}
+
+static INLINE void aom_write_tree_cdf(aom_writer *w, int symb,
+                                      const uint16_t *cdf, int nsymbs) {
+#if CONFIG_DAALA_EC
+  daala_write_tree_cdf(w, symb, cdf, nsymbs);
 #else
   (void)w;
   (void)symb;
