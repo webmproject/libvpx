@@ -22,6 +22,30 @@
       "revId": "788df4d0cffa8c430ca350fd1f19fbd093b42949",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1c28fb81_f0339e56",
+        "filename": "aom_dsp/simd/v64_intrinsics_arm.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-10-14T21:40:04Z",
+      "side": 1,
+      "message": "Thanks for catching this, it was somehow got mixed in. now removed.",
+      "parentUuid": "1c28fb81_6df0f5e7",
+      "range": {
+        "startLine": 75,
+        "startChar": 0,
+        "endLine": 75,
+        "endChar": 59
+      },
+      "revId": "788df4d0cffa8c430ca350fd1f19fbd093b42949",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
