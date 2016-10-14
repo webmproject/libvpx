@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fc240697_45e3eaf3",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 920,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2016-10-14T19:38:18Z",
+      "side": 1,
+      "message": "Nope. Verified all the functions that are being called underneath the callers here.",
+      "parentUuid": "dc7ca22f_8f09393c",
+      "revId": "c815880c18d9987450d10f5e8a512fcfd02b894c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dc7ca22f_cf5bc159",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 5
