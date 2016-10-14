@@ -362,11 +362,11 @@ static void cost_coeffs_b(int plane, int block, int blk_row, int blk_col,
   const PLANE_TYPE type = pd->plane_type;
   const int ref = is_inter_block(mbmi);
   const TX_TYPE tx_type = get_tx_type(type, xd, block, tx_size);
-  const scan_order *const so = get_scan(tx_size, tx_type, ref);
+  const SCAN_ORDER *const scan_order = get_scan(tx_size, tx_type, ref);
   int pt = get_entropy_context(tx_size, pd->above_context + blk_col,
                                pd->left_context + blk_row);
-  int rate =
-      av1_cost_coeffs(x, plane, block, pt, tx_size, so->scan, so->neighbors, 0);
+  int rate = av1_cost_coeffs(x, plane, block, pt, tx_size, scan_order->scan,
+                             scan_order->neighbors, 0);
   args->this_rate += rate;
   av1_set_contexts(xd, pd, plane_bsize, tx_size, p->eobs[block] > 0, blk_col,
                    blk_row);
@@ -476,7 +476,8 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
 #endif  // CONFIG_SUEPRTX
   const int16_t *scan, *nb;
   const TX_TYPE tx_type = get_tx_type(type, xd, block, tx_size);
-  const scan_order *const so = get_scan(tx_size, tx_type, is_inter_block(mbmi));
+  const SCAN_ORDER *const scan_order =
+      get_scan(tx_size, tx_type, is_inter_block(mbmi));
   const int ref = is_inter_block(mbmi);
   unsigned int(*const counts)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
       td->rd_counts.coef_counts[txsize_sqr_map[tx_size]][type][ref];
@@ -501,8 +502,8 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
   EXTRABIT extra;
   pt = get_entropy_context(tx_size, pd->above_context + blk_col,
                            pd->left_context + blk_row);
-  scan = so->scan;
-  nb = so->neighbors;
+  scan = scan_order->scan;
+  nb = scan_order->neighbors;
   c = 0;
 
   while (c < eob) {

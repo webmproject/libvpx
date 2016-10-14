@@ -295,9 +295,9 @@ static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
 
   if (!mbmi->skip) {
     TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx, tx_size);
-    const scan_order *sc = get_scan(tx_size, tx_type, 0);
-    const int eob = av1_decode_block_tokens(xd, plane, sc, col, row, tx_size,
-                                            tx_type, r, mbmi->segment_id);
+    const SCAN_ORDER *scan_order = get_scan(tx_size, tx_type, 0);
+    const int eob = av1_decode_block_tokens(
+        xd, plane, scan_order, col, row, tx_size, tx_type, r, mbmi->segment_id);
     inverse_transform_block(xd, plane, tx_type, tx_size, dst, pd->dst.stride,
                             eob);
   }
@@ -329,7 +329,7 @@ static void decode_reconstruct_tx(MACROBLOCKD *const xd, aom_reader *r,
   if (tx_size == plane_tx_size) {
     PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
     TX_TYPE tx_type = get_tx_type(plane_type, xd, block, plane_tx_size);
-    const scan_order *sc = get_scan(plane_tx_size, tx_type, 1);
+    const SCAN_ORDER *sc = get_scan(plane_tx_size, tx_type, 1);
     const int eob =
         av1_decode_block_tokens(xd, plane, sc, blk_col, blk_row, plane_tx_size,
                                 tx_type, r, mbmi->segment_id);
@@ -372,9 +372,9 @@ static int reconstruct_inter_block(MACROBLOCKD *const xd,
   PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
   int block_idx = (row << 1) + col;
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx, tx_size);
-  const scan_order *sc = get_scan(tx_size, tx_type, 1);
-  const int eob = av1_decode_block_tokens(xd, plane, sc, col, row, tx_size,
-                                          tx_type, r, segment_id);
+  const SCAN_ORDER *scan_order = get_scan(tx_size, tx_type, 1);
+  const int eob = av1_decode_block_tokens(xd, plane, scan_order, col, row,
+                                          tx_size, tx_type, r, segment_id);
 
   inverse_transform_block(xd, plane, tx_type, tx_size,
                           &pd->dst.buf[4 * row * pd->dst.stride + 4 * col],

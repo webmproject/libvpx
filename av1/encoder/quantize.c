@@ -344,7 +344,7 @@ void av1_quantize_fp_facade(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                             const MACROBLOCK_PLANE *p, tran_low_t *qcoeff_ptr,
                             const MACROBLOCKD_PLANE *pd,
                             tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
-                            const scan_order *sc, const QUANT_PARAM *qparam) {
+                            const SCAN_ORDER *sc, const QUANT_PARAM *qparam) {
   // obsolete skip_block
   const int skip_block = 0;
 
@@ -362,7 +362,7 @@ void av1_quantize_fp_facade(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 void av1_quantize_b_facade(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                            const MACROBLOCK_PLANE *p, tran_low_t *qcoeff_ptr,
                            const MACROBLOCKD_PLANE *pd, tran_low_t *dqcoeff_ptr,
-                           uint16_t *eob_ptr, const scan_order *sc,
+                           uint16_t *eob_ptr, const SCAN_ORDER *sc,
                            const QUANT_PARAM *qparam) {
   // obsolete skip_block
   const int skip_block = 0;
@@ -382,7 +382,7 @@ void av1_quantize_dc_facade(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                             const MACROBLOCK_PLANE *p, tran_low_t *qcoeff_ptr,
                             const MACROBLOCKD_PLANE *pd,
                             tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
-                            const scan_order *sc, const QUANT_PARAM *qparam) {
+                            const SCAN_ORDER *sc, const QUANT_PARAM *qparam) {
   // obsolete skip_block
   const int skip_block = 0;
   (void)sc;
@@ -402,7 +402,7 @@ void av1_highbd_quantize_fp_facade(const tran_low_t *coeff_ptr,
                                    tran_low_t *qcoeff_ptr,
                                    const MACROBLOCKD_PLANE *pd,
                                    tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
-                                   const scan_order *sc,
+                                   const SCAN_ORDER *sc,
                                    const QUANT_PARAM *qparam) {
   // obsolete skip_block
   const int skip_block = 0;
@@ -418,7 +418,7 @@ void av1_highbd_quantize_b_facade(const tran_low_t *coeff_ptr,
                                   tran_low_t *qcoeff_ptr,
                                   const MACROBLOCKD_PLANE *pd,
                                   tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
-                                  const scan_order *sc,
+                                  const SCAN_ORDER *sc,
                                   const QUANT_PARAM *qparam) {
   // obsolete skip_block
   const int skip_block = 0;
@@ -434,7 +434,7 @@ void av1_highbd_quantize_dc_facade(const tran_low_t *coeff_ptr,
                                    tran_low_t *qcoeff_ptr,
                                    const MACROBLOCKD_PLANE *pd,
                                    tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr,
-                                   const scan_order *sc,
+                                   const SCAN_ORDER *sc,
                                    const QUANT_PARAM *qparam) {
   // obsolete skip_block
   const int skip_block = 0;

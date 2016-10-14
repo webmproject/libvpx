@@ -135,7 +135,7 @@ struct rdcost_block_args {
   int64_t best_rd;
   int exit_early;
   int use_fast_coef_costing;
-  const scan_order *so;
+  const SCAN_ORDER *scan_order;
   uint8_t skippable;
 };
 
@@ -1070,7 +1070,7 @@ static void dist_block(const AV1_COMP *cpi, MACROBLOCK *x, int plane, int block,
 static int rate_block(int plane, int block, int coeff_ctx, TX_SIZE tx_size,
                       struct rdcost_block_args *args) {
   return av1_cost_coeffs(args->x, plane, block, coeff_ctx, tx_size,
-                         args->so->scan, args->so->neighbors,
+                         args->scan_order->scan, args->scan_order->neighbors,
                          args->use_fast_coef_costing);
 }
 
@@ -1232,7 +1232,8 @@ static void txfm_rd_in_plane(MACROBLOCK *x, const AV1_COMP *cpi, int *rate,
   av1_get_entropy_contexts(bsize, tx_size, pd, args.t_above, args.t_left);
 
   tx_type = get_tx_type(pd->plane_type, xd, 0, tx_size);
-  args.so = get_scan(tx_size, tx_type, is_inter_block(&xd->mi[0]->mbmi));
+  args.scan_order =
+      get_scan(tx_size, tx_type, is_inter_block(&xd->mi[0]->mbmi));
 
   av1_foreach_transformed_block_in_plane(xd, bsize, plane, block_rd_txfm,
                                          &args);
@@ -1275,7 +1276,8 @@ void av1_txfm_rd_in_plane_supertx(MACROBLOCK *x, const AV1_COMP *cpi, int *rate,
   av1_get_entropy_contexts(bsize, tx_size, pd, args.t_above, args.t_left);
 
   tx_type = get_tx_type(pd->plane_type, xd, 0, tx_size);
-  args.so = get_scan(tx_size, tx_type, is_inter_block(&xd->mi[0]->mbmi));
+  args.scan_order =
+      get_scan(tx_size, tx_type, is_inter_block(&xd->mi[0]->mbmi));
 
   block_rd_txfm(plane, 0, 0, 0, get_plane_block_size(bsize, pd), tx_size,
                 &args);
@@ -1946,7 +1948,7 @@ static int64_t rd_pick_intra4x4block(
                                     dst_stride, xd->bd);
           if (xd->lossless[xd->mi[0]->mbmi.segment_id]) {
             TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
-            const scan_order *so = get_scan(TX_4X4, tx_type, 0);
+            const SCAN_ORDER *scan_order = get_scan(TX_4X4, tx_type, 0);
             const int coeff_ctx =
                 combine_entropy_contexts(*(tempa + idx), *(templ + idy));
 #if CONFIG_NEW_QUANT
@@ -1956,9 +1958,9 @@ static int64_t rd_pick_intra4x4block(
             av1_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8,
                             TX_4X4, AV1_XFORM_QUANT_FP);
 #endif  // CONFIG_NEW_QUANT
-            ratey +=
-                av1_cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
-                                so->neighbors, cpi->sf.use_fast_coef_costing);
+            ratey += av1_cost_coeffs(x, 0, block, coeff_ctx, TX_4X4,
+                                     scan_order->scan, scan_order->neighbors,
+                                     cpi->sf.use_fast_coef_costing);
             *(tempa + idx) = !(p->eobs[block] == 0);
             *(templ + idy) = !(p->eobs[block] == 0);
             can_skip &= (p->eobs[block] == 0);
@@ -1971,7 +1973,7 @@ static int64_t rd_pick_intra4x4block(
             int64_t dist;
             unsigned int tmp;
             TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
-            const scan_order *so = get_scan(TX_4X4, tx_type, 0);
+            const SCAN_ORDER *scan_order = get_scan(TX_4X4, tx_type, 0);
             const int coeff_ctx =
                 combine_entropy_contexts(*(tempa + idx), *(templ + idy));
 #if CONFIG_NEW_QUANT
@@ -1982,9 +1984,9 @@ static int64_t rd_pick_intra4x4block(
                             TX_4X4, AV1_XFORM_QUANT_FP);
 #endif  // CONFIG_NEW_QUANT
             av1_optimize_b(x, 0, block, TX_4X4, coeff_ctx);
-            ratey +=
-                av1_cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
-                                so->neighbors, cpi->sf.use_fast_coef_costing);
+            ratey += av1_cost_coeffs(x, 0, block, coeff_ctx, TX_4X4,
+                                     scan_order->scan, scan_order->neighbors,
+                                     cpi->sf.use_fast_coef_costing);
             *(tempa + idx) = !(p->eobs[block] == 0);
             *(templ + idy) = !(p->eobs[block] == 0);
             can_skip &= (p->eobs[block] == 0);
@@ -2066,7 +2068,7 @@ static int64_t rd_pick_intra4x4block(
 
         if (xd->lossless[xd->mi[0]->mbmi.segment_id]) {
           TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
-          const scan_order *so = get_scan(TX_4X4, tx_type, 0);
+          const SCAN_ORDER *scan_order = get_scan(TX_4X4, tx_type, 0);
           const int coeff_ctx =
               combine_entropy_contexts(*(tempa + idx), *(templ + idy));
 #if CONFIG_NEW_QUANT
@@ -2076,9 +2078,9 @@ static int64_t rd_pick_intra4x4block(
           av1_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8, TX_4X4,
                           AV1_XFORM_QUANT_B);
 #endif  // CONFIG_NEW_QUANT
-          ratey +=
-              av1_cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
-                              so->neighbors, cpi->sf.use_fast_coef_costing);
+          ratey += av1_cost_coeffs(x, 0, block, coeff_ctx, TX_4X4,
+                                   scan_order->scan, scan_order->neighbors,
+                                   cpi->sf.use_fast_coef_costing);
           *(tempa + idx) = !(p->eobs[block] == 0);
           *(templ + idy) = !(p->eobs[block] == 0);
           can_skip &= (p->eobs[block] == 0);
@@ -2090,7 +2092,7 @@ static int64_t rd_pick_intra4x4block(
           int64_t dist;
           unsigned int tmp;
           TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
-          const scan_order *so = get_scan(TX_4X4, tx_type, 0);
+          const SCAN_ORDER *scan_order = get_scan(TX_4X4, tx_type, 0);
           const int coeff_ctx =
               combine_entropy_contexts(*(tempa + idx), *(templ + idy));
 #if CONFIG_NEW_QUANT
@@ -2101,9 +2103,9 @@ static int64_t rd_pick_intra4x4block(
                           AV1_XFORM_QUANT_FP);
 #endif  // CONFIG_NEW_QUANT
           av1_optimize_b(x, 0, block, TX_4X4, coeff_ctx);
-          ratey +=
-              av1_cost_coeffs(x, 0, block, coeff_ctx, TX_4X4, so->scan,
-                              so->neighbors, cpi->sf.use_fast_coef_costing);
+          ratey += av1_cost_coeffs(x, 0, block, coeff_ctx, TX_4X4,
+                                   scan_order->scan, scan_order->neighbors,
+                                   cpi->sf.use_fast_coef_costing);
           *(tempa + idx) = !(p->eobs[block] == 0);
           *(templ + idy) = !(p->eobs[block] == 0);
           can_skip &= (p->eobs[block] == 0);
@@ -2880,7 +2882,7 @@ void av1_tx_block_rd_b(const AV1_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block, tx_size);
-  const scan_order *const scan_order =
+  const SCAN_ORDER *const scan_order =
       get_scan(tx_size, tx_type, is_inter_block(&xd->mi[0]->mbmi));
 
   BLOCK_SIZE txm_bsize = txsize_to_bsize[tx_size];
@@ -4346,7 +4348,7 @@ static int64_t encode_inter_mb_segment(const AV1_COMP *const cpi, MACROBLOCK *x,
   TX_SIZE tx_size = mi->mbmi.tx_size;
 
   TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, i, tx_size);
-  const scan_order *so = get_scan(tx_size, tx_type, 1);
+  const SCAN_ORDER *scan_order = get_scan(tx_size, tx_type, 1);
   const int num_4x4_w = num_4x4_blocks_wide_txsize_lookup[tx_size];
   const int num_4x4_h = num_4x4_blocks_high_txsize_lookup[tx_size];
 
@@ -4406,8 +4408,9 @@ static int64_t encode_inter_mb_segment(const AV1_COMP *const cpi, MACROBLOCK *x,
                  &dist, &ssz);
       thisdistortion += dist;
       thissse += ssz;
-      thisrate += av1_cost_coeffs(x, 0, block, coeff_ctx, tx_size, so->scan,
-                                  so->neighbors, cpi->sf.use_fast_coef_costing);
+      thisrate +=
+          av1_cost_coeffs(x, 0, block, coeff_ctx, tx_size, scan_order->scan,
+                          scan_order->neighbors, cpi->sf.use_fast_coef_costing);
       *(ta + (k & 1)) = !(p->eobs[block] == 0);
       *(tl + (k >> 1)) = !(p->eobs[block] == 0);
 #if CONFIG_EXT_TX
