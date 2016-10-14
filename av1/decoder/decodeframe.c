@@ -1440,6 +1440,22 @@ static int read_skip(AV1_COMMON *cm, const MACROBLOCKD *xd, int segment_id,
   }
 }
 #endif  // CONFIG_SUPERTX
+#if CONFIG_CLPF
+static int clpf_all_skip(const AV1_COMMON *cm, int mi_col, int mi_row,
+                         int size) {
+  int r, c;
+  int skip = 1;
+  const int maxc = AOMMIN(size, cm->mi_cols - mi_col);
+  const int maxr = AOMMIN(size, cm->mi_rows - mi_row);
+  for (r = 0; r < maxr && skip; r++) {
+    for (c = 0; c < maxc && skip; c++) {
+      skip &= !!cm->mi_grid_visible[(mi_row + r) * cm->mi_stride + mi_col + c]
+                    ->mbmi.skip;
+    }
+  }
+  return skip;
+}
+#endif
 
 // TODO(slavarnway): eliminate bsize and subsize in future commits
 static void decode_partition(AV1Decoder *const pbi, MACROBLOCKD *const xd,
@@ -1772,6 +1788,43 @@ static void decode_partition(AV1Decoder *const pbi, MACROBLOCKD *const xd,
   if (bsize >= BLOCK_8X8 &&
       (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT))
     dec_update_partition_context(xd, mi_row, mi_col, subsize, num_8x8_wh);
+
+#if CONFIG_CLPF
+  if (bsize == BLOCK_64X64 && cm->clpf_strength_y &&
+      cm->clpf_size != CLPF_NOSIZE) {
+    const int tl = mi_row * MI_SIZE / MIN_FB_SIZE * cm->clpf_stride +
+                   mi_col * MI_SIZE / MIN_FB_SIZE;
+
+    if (!((mi_row * MI_SIZE) & 127) && !((mi_col * MI_SIZE) & 127) &&
+        cm->clpf_size == CLPF_128X128) {
+      cm->clpf_blocks[tl] = aom_read_literal(r, 1);
+    } else if (cm->clpf_size == CLPF_64X64 &&
+               !clpf_all_skip(cm, mi_col, mi_row, 64 / MI_SIZE)) {
+      cm->clpf_blocks[tl] = aom_read_literal(r, 1);
+    } else if (cm->clpf_size == CLPF_32X32) {
+      const int tr = tl + 1;
+      const int bl = tl + cm->clpf_stride;
+      const int br = tr + cm->clpf_stride;
+      const int size = 32 / MI_SIZE;
+
+      // Up to four bits per SB
+      if (!clpf_all_skip(cm, mi_col, mi_row, size))
+        cm->clpf_blocks[tl] = aom_read_literal(r, 1);
+
+      if (mi_col + size < cm->mi_cols &&
+          !clpf_all_skip(cm, mi_col + size, mi_row, size))
+        cm->clpf_blocks[tr] = aom_read_literal(r, 1);
+
+      if (mi_row + size < cm->mi_rows &&
+          !clpf_all_skip(cm, mi_col, mi_row + size, size))
+        cm->clpf_blocks[bl] = aom_read_literal(r, 1);
+
+      if (mi_col + size < cm->mi_cols && mi_row + size < cm->mi_rows &&
+          !clpf_all_skip(cm, mi_col + size, mi_row + size, size))
+        cm->clpf_blocks[br] = aom_read_literal(r, 1);
+    }
+  }
+#endif
 #if CONFIG_DERING
   if (bsize == BLOCK_64X64) {
     if (cm->dering_level != 0 && !sb_all_skip(cm, mi_row, mi_col)) {
@@ -2045,20 +2098,26 @@ static void setup_loopfilter(AV1_COMMON *cm, struct aom_read_bit_buffer *rb) {
 }
 
 #if CONFIG_CLPF
-static void setup_clpf(AV1_COMMON *cm, struct aom_read_bit_buffer *rb) {
+static void setup_clpf(AV1Decoder *pbi, struct aom_read_bit_buffer *rb) {
+  AV1_COMMON *const cm = &pbi->common;
+  const int width = pbi->cur_buf->buf.y_crop_width;
+  const int height = pbi->cur_buf->buf.y_crop_height;
+
   cm->clpf_blocks = 0;
   cm->clpf_strength_y = aom_rb_read_literal(rb, 2);
   cm->clpf_strength_u = aom_rb_read_literal(rb, 2);
   cm->clpf_strength_v = aom_rb_read_literal(rb, 2);
   if (cm->clpf_strength_y) {
     cm->clpf_size = aom_rb_read_literal(rb, 2);
-    if (cm->clpf_size) {
-      int i;
-      cm->clpf_numblocks = aom_rb_read_literal(rb, av1_clpf_maxbits(cm));
-      CHECK_MEM_ERROR(cm, cm->clpf_blocks, aom_malloc(cm->clpf_numblocks));
-      for (i = 0; i < cm->clpf_numblocks; i++) {
-        cm->clpf_blocks[i] = aom_rb_read_literal(rb, 1);
-      }
+    if (cm->clpf_size != CLPF_NOSIZE) {
+      int size;
+      cm->clpf_stride =
+          ((width + MIN_FB_SIZE - 1) & ~(MIN_FB_SIZE - 1)) >> MIN_FB_SIZE_LOG2;
+      size =
+          cm->clpf_stride * ((height + MIN_FB_SIZE - 1) & ~(MIN_FB_SIZE - 1)) >>
+          MIN_FB_SIZE_LOG2;
+      CHECK_MEM_ERROR(cm, cm->clpf_blocks, aom_malloc(size));
+      memset(cm->clpf_blocks, -1, size);
     }
   }
 }
@@ -2068,7 +2127,7 @@ static int clpf_bit(UNUSED int k, UNUSED int l,
                     UNUSED const YV12_BUFFER_CONFIG *org,
                     UNUSED const AV1_COMMON *cm, UNUSED int block_size,
                     UNUSED int w, UNUSED int h, UNUSED unsigned int strength,
-                    UNUSED unsigned int fb_size_log2, uint8_t *bit) {
+                    UNUSED unsigned int fb_size_log2, int8_t *bit) {
   return *bit;
 }
 #endif
@@ -3361,7 +3420,7 @@ static size_t read_uncompressed_header(AV1Decoder *pbi,
 
   setup_loopfilter(cm, rb);
 #if CONFIG_CLPF
-  setup_clpf(cm, rb);
+  setup_clpf(pbi, rb);
 #endif
 #if CONFIG_DERING
   setup_dering(cm, rb);
@@ -3933,18 +3992,18 @@ void av1_decode_frame(AV1Decoder *pbi, const uint8_t *data,
   if (!cm->skip_loop_filter) {
     const YV12_BUFFER_CONFIG *const frame = &pbi->cur_buf->buf;
     if (cm->clpf_strength_y) {
-      av1_clpf_frame(frame, NULL, cm, !!cm->clpf_size,
+      av1_clpf_frame(frame, NULL, cm, cm->clpf_size != CLPF_NOSIZE,
                      cm->clpf_strength_y + (cm->clpf_strength_y == 3),
-                     4 + cm->clpf_size, cm->clpf_blocks, AOM_PLANE_Y, clpf_bit);
+                     4 + cm->clpf_size, AOM_PLANE_Y, clpf_bit);
     }
     if (cm->clpf_strength_u) {
-      av1_clpf_frame(frame, NULL, cm, 0,
-                     cm->clpf_strength_u + (cm->clpf_strength_u == 3), 4, NULL,
+      av1_clpf_frame(frame, NULL, cm, 0,  // No block signals for chroma
+                     cm->clpf_strength_u + (cm->clpf_strength_u == 3), 4,
                      AOM_PLANE_U, NULL);
     }
     if (cm->clpf_strength_v) {
-      av1_clpf_frame(frame, NULL, cm, 0,
-                     cm->clpf_strength_v + (cm->clpf_strength_v == 3), 4, NULL,
+      av1_clpf_frame(frame, NULL, cm, 0,  // No block signals for chroma
+                     cm->clpf_strength_v + (cm->clpf_strength_v == 3), 4,
                      AOM_PLANE_V, NULL);
     }
   }
