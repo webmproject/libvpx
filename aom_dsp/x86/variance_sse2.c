@@ -249,7 +249,7 @@ unsigned int aom_variance32x32_sse2(const uint8_t *src, int src_stride,
                 aom_get16x16var_sse2, 16);
   assert(sum <= 255 * 32 * 32);
   assert(sum >= -255 * 32 * 32);
-  return *sse - (((int64_t)sum * sum) >> 10);
+  return *sse - (unsigned int)(((int64_t)sum * sum) >> 10);
 }
 
 unsigned int aom_variance32x16_sse2(const uint8_t *src, int src_stride,
@@ -260,7 +260,7 @@ unsigned int aom_variance32x16_sse2(const uint8_t *src, int src_stride,
                 aom_get16x16var_sse2, 16);
   assert(sum <= 255 * 32 * 16);
   assert(sum >= -255 * 32 * 16);
-  return *sse - (((int64_t)sum * sum) >> 9);
+  return *sse - (unsigned int)(((int64_t)sum * sum) >> 9);
 }
 
 unsigned int aom_variance16x32_sse2(const uint8_t *src, int src_stride,
@@ -271,7 +271,7 @@ unsigned int aom_variance16x32_sse2(const uint8_t *src, int src_stride,
                 aom_get16x16var_sse2, 16);
   assert(sum <= 255 * 32 * 16);
   assert(sum >= -255 * 32 * 16);
-  return *sse - (((int64_t)sum * sum) >> 9);
+  return *sse - (unsigned int)(((int64_t)sum * sum) >> 9);
 }
 
 unsigned int aom_variance64x64_sse2(const uint8_t *src, int src_stride,
@@ -282,7 +282,7 @@ unsigned int aom_variance64x64_sse2(const uint8_t *src, int src_stride,
                 aom_get16x16var_sse2, 16);
   assert(sum <= 255 * 64 * 64);
   assert(sum >= -255 * 64 * 64);
-  return *sse - (((int64_t)sum * sum) >> 12);
+  return *sse - (unsigned int)(((int64_t)sum * sum) >> 12);
 }
 
 unsigned int aom_variance64x32_sse2(const uint8_t *src, int src_stride,
@@ -293,7 +293,7 @@ unsigned int aom_variance64x32_sse2(const uint8_t *src, int src_stride,
                 aom_get16x16var_sse2, 16);
   assert(sum <= 255 * 64 * 32);
   assert(sum >= -255 * 64 * 32);
-  return *sse - (((int64_t)sum * sum) >> 11);
+  return *sse - (unsigned int)(((int64_t)sum * sum) >> 11);
 }
 
 unsigned int aom_variance32x64_sse2(const uint8_t *src, int src_stride,
@@ -304,7 +304,7 @@ unsigned int aom_variance32x64_sse2(const uint8_t *src, int src_stride,
                 aom_get16x16var_sse2, 16);
   assert(sum <= 255 * 64 * 32);
   assert(sum >= -255 * 64 * 32);
-  return *sse - (((int64_t)sum * sum) >> 11);
+  return *sse - (unsigned int)(((int64_t)sum * sum) >> 11);
 }
 
 unsigned int aom_mse8x8_sse2(const uint8_t *src, int src_stride,
@@ -381,7 +381,7 @@ DECLS(ssse3, ssse3);
       }                                                                        \
     }                                                                          \
     *sse_ptr = sse;                                                            \
-    return sse - (cast_prod(cast se * se) >> (wlog2 + hlog2));                 \
+    return sse - (unsigned int)(cast_prod(cast se * se) >> (wlog2 + hlog2));   \
   }
 
 #define FNS(opt1, opt2)                              \
@@ -452,7 +452,7 @@ DECLS(ssse3, ssse3);
       }                                                                        \
     }                                                                          \
     *sseptr = sse;                                                             \
-    return sse - (cast_prod(cast se * se) >> (wlog2 + hlog2));                 \
+    return sse - (unsigned int)(cast_prod(cast se * se) >> (wlog2 + hlog2));   \
   }
 
 #define FNS(opt1, opt2)                              \
