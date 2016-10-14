@@ -123,33 +123,46 @@ class TransformTestBase {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int count_test_block = 5000;
 
+    // Use a stride value which is not the width of any transform, to catch
+    // cases where the transforms use the stride incorrectly.
+    int stride = 96;
+
     int16_t *input_block = reinterpret_cast<int16_t *>(
-        aom_memalign(16, sizeof(int16_t) * num_coeffs_));
+        aom_memalign(16, sizeof(int16_t) * stride * height_));
     tran_low_t *output_ref_block = reinterpret_cast<tran_low_t *>(
         aom_memalign(16, sizeof(tran_low_t) * num_coeffs_));
     tran_low_t *output_block = reinterpret_cast<tran_low_t *>(
         aom_memalign(16, sizeof(tran_low_t) * num_coeffs_));
 
     for (int i = 0; i < count_test_block; ++i) {
-      for (int j = 0; j < num_coeffs_; ++j) {
-        input_block[j] = (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
-        if (bit_depth_ == AOM_BITS_8) {
-          output_block[j] = output_ref_block[j] = rnd.Rand8();
+      int j, k;
+      for (j = 0; j < height_; ++j) {
+        for (k = 0; k < pitch_; ++k) {
+          int in_idx = j * stride + k;
+          int out_idx = j * pitch_ + k;
+          input_block[in_idx] = (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
+          if (bit_depth_ == AOM_BITS_8) {
+            output_block[out_idx] = output_ref_block[out_idx] = rnd.Rand8();
 #if CONFIG_AOM_HIGHBITDEPTH
-        } else {
-          output_block[j] = output_ref_block[j] = rnd.Rand16() & mask_;
+          } else {
+            output_block[out_idx] = output_ref_block[out_idx] =
+                rnd.Rand16() & mask_;
 #endif
+          }
         }
       }
 
-      fwd_txfm_ref(input_block, output_ref_block, pitch_, tx_type_);
-      ASM_REGISTER_STATE_CHECK(RunFwdTxfm(input_block, output_block, pitch_));
+      fwd_txfm_ref(input_block, output_ref_block, stride, tx_type_);
+      ASM_REGISTER_STATE_CHECK(RunFwdTxfm(input_block, output_block, stride));
 
       // The minimum quant value is 4.
-      for (int j = 0; j < num_coeffs_; ++j) {
-        ASSERT_EQ(output_block[j], output_ref_block[j])
-            << "Error: not bit-exact result at index: " << j
-            << " at test block: " << i;
+      for (j = 0; j < height_; ++j) {
+        for (k = 0; k < pitch_; ++k) {
+          int out_idx = j * pitch_ + k;
+          ASSERT_EQ(output_block[out_idx], output_ref_block[out_idx])
+              << "Error: not bit-exact result at index: " << out_idx
+              << " at test block: " << i;
+        }
       }
     }
     aom_free(input_block);
@@ -161,32 +174,44 @@ class TransformTestBase {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int count_test_block = 5000;
 
+    // Use a stride value which is not the width of any transform, to catch
+    // cases where the transforms use the stride incorrectly.
+    int stride = 96;
+
     int16_t *input_block = reinterpret_cast<int16_t *>(
         aom_memalign(16, sizeof(int16_t) * num_coeffs_));
     tran_low_t *trans_block = reinterpret_cast<tran_low_t *>(
         aom_memalign(16, sizeof(tran_low_t) * num_coeffs_));
     uint8_t *output_block = reinterpret_cast<uint8_t *>(
-        aom_memalign(16, sizeof(uint8_t) * num_coeffs_));
+        aom_memalign(16, sizeof(uint8_t) * stride * height_));
     uint8_t *output_ref_block = reinterpret_cast<uint8_t *>(
-        aom_memalign(16, sizeof(uint8_t) * num_coeffs_));
+        aom_memalign(16, sizeof(uint8_t) * stride * height_));
 
     for (int i = 0; i < count_test_block; ++i) {
       // Initialize a test block with input range [-mask_, mask_].
-      for (int j = 0; j < num_coeffs_; ++j) {
-        input_block[j] = (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
-        output_ref_block[j] = rnd.Rand16() & mask_;
-        output_block[j] = output_ref_block[j];
+      int j, k;
+      for (j = 0; j < height_; ++j) {
+        for (k = 0; k < pitch_; ++k) {
+          int in_idx = j * pitch_ + k;
+          int out_idx = j * stride + k;
+          input_block[in_idx] = (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
+          output_ref_block[out_idx] = rnd.Rand16() & mask_;
+          output_block[out_idx] = output_ref_block[out_idx];
+        }
       }
 
       fwd_txfm_ref(input_block, trans_block, pitch_, tx_type_);
 
-      inv_txfm_ref(trans_block, output_ref_block, pitch_, tx_type_);
-      ASM_REGISTER_STATE_CHECK(RunInvTxfm(trans_block, output_block, pitch_));
+      inv_txfm_ref(trans_block, output_ref_block, stride, tx_type_);
+      ASM_REGISTER_STATE_CHECK(RunInvTxfm(trans_block, output_block, stride));
 
-      for (int j = 0; j < num_coeffs_; ++j) {
-        ASSERT_EQ(output_block[j], output_ref_block[j])
-            << "Error: not bit-exact result at index: " << j
-            << " at test block: " << i;
+      for (j = 0; j < height_; ++j) {
+        for (k = 0; k < pitch_; ++k) {
+          int out_idx = j * stride + k;
+          ASSERT_EQ(output_block[out_idx], output_ref_block[out_idx])
+              << "Error: not bit-exact result at index: " << out_idx
+              << " at test block: " << i;
+        }
       }
     }
     aom_free(input_block);
@@ -305,6 +330,7 @@ class TransformTestBase {
   }
 
   int pitch_;
+  int height_;
   int tx_type_;
   FhtFunc fwd_txfm_ref;
   IhtFunc inv_txfm_ref;

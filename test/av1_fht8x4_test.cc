@@ -47,6 +47,7 @@ class AV1Trans8x4HT : public libaom_test::TransformTestBase,
     inv_txfm_ = GET_PARAM(1);
     tx_type_ = GET_PARAM(2);
     pitch_ = 8;
+    height_ = 4;
     fwd_txfm_ref = fht8x4_ref;
     inv_txfm_ref = iht8x4_ref;
     bit_depth_ = GET_PARAM(3);
