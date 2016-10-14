@@ -413,6 +413,9 @@ typedef struct VP8_COMP {
 
   int drop_frames_allowed; /* Are we permitted to drop frames? */
   int drop_frame;          /* Drop this frame? */
+#if defined(DROP_UNCODED_FRAMES)
+  int drop_frame_count;
+#endif
 
   vp8_prob frame_coef_probs[BLOCK_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
                            [ENTROPY_NODES];
