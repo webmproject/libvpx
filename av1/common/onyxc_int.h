@@ -151,27 +151,12 @@ typedef struct AV1Common {
   int use_highbitdepth;
 #endif
 #if CONFIG_CLPF
-  // Two bits are used to signal the strength for all blocks and the
-  // valid values are:
-  // 0: no filtering
-  // 1: strength = 1
-  // 2: strength = 2
-  // 3: strength = 4
+  int clpf_numblocks;
+  int clpf_size;
   int clpf_strength_y;
   int clpf_strength_u;
   int clpf_strength_v;
-
-  // If clpf_strength_y is not 0, another two bits are used to signal
-  // the filter block size.  The valid values for clfp_size are:
-  // 0: no block signalling
-  // 1: 32x32
-  // 2: 64x64
-  // 3: 128x128
-  CLPF_BLOCK_SIZE clpf_size;
-
-  // Buffer for storing whether to filter individual blocks.
-  int8_t *clpf_blocks;
-  int clpf_stride;
+  uint8_t *clpf_blocks;
 #endif
 
   YV12_BUFFER_CONFIG *frame_to_show;
