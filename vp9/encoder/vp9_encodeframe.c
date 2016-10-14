@@ -795,7 +795,11 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   v16x16 vt2[16];
   int force_split[21];
   int avg_32x32;
+  int max_var_32x32 = 0;
+  int min_var_32x32 = INT_MAX;
+  int var_32x32;
   int avg_16x16[4];
+  NOISE_LEVEL noise_level = kLow;
   uint8_t *s;
   const uint8_t *d;
   int sp;
@@ -1038,6 +1042,9 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     // (64x64) level.
     if (!force_split[i + 1]) {
       get_variance(&vt.split[i].part_variances.none);
+      var_32x32 = vt.split[i].part_variances.none.variance;
+      max_var_32x32 = VPXMAX(var_32x32, max_var_32x32);
+      min_var_32x32 = VPXMIN(var_32x32, min_var_32x32);
       if (vt.split[i].part_variances.none.variance > thresholds[1] ||
           (!is_key_frame &&
            vt.split[i].part_variances.none.variance > (thresholds[1] >> 1) &&
@@ -1045,15 +1052,27 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
         force_split[i + 1] = 1;
         force_split[0] = 1;
       }
-      avg_32x32 += vt.split[i].part_variances.none.variance;
+      avg_32x32 += var_32x32;
     }
   }
   if (!force_split[0]) {
     fill_variance_tree(&vt, BLOCK_64X64);
     get_variance(&vt.part_variances.none);
+    if (cpi->noise_estimate.enabled)
+      noise_level = vp9_noise_estimate_extract_level(&cpi->noise_estimate);
     // If variance of this 64x64 block is above (some threshold of) the average
     // variance over the sub-32x32 blocks, then force this block to split.
-    if (!is_key_frame && vt.part_variances.none.variance > (5 * avg_32x32) >> 4)
+    // Only checking this for noise level >= medium for now.
+    if (!is_key_frame && noise_level >= kMedium &&
+        vt.part_variances.none.variance > (5 * avg_32x32) >> 4)
+      force_split[0] = 1;
+    // Else if the maximum 32x32 variance minus the miniumum 32x32 variance in
+    // a 64x64 block is greater than threshold and the maximum 32x32 variance is
+    // above a miniumum threshold, then force the split of a 64x64 block
+    // Only check this for low noise.
+    else if (!is_key_frame && noise_level < kMedium &&
+             (max_var_32x32 - min_var_32x32) > 3 * (thresholds[0] >> 3) &&
+             max_var_32x32 > thresholds[0] >> 1)
       force_split[0] = 1;
   }
 
