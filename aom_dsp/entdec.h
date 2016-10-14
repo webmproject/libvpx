@@ -25,9 +25,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
 #if !defined(_entdec_H)
 #define _entdec_H (1)
 #include <limits.h>
-#include "entcode.h"
+#include "aom_dsp/entcode.h"
 #if OD_ACCOUNTING
-#include "accounting.h"
+#include "./accounting.h"
 #endif
 
 #ifdef __cplusplus

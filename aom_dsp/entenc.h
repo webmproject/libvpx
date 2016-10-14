@@ -25,7 +25,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
 #if !defined(_entenc_H)
 #define _entenc_H (1)
 #include <stddef.h>
-#include "entcode.h"
+#include "aom_dsp/entcode.h"
 
 #ifdef __cplusplus
 extern "C" {

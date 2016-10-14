@@ -66,7 +66,7 @@ extern uint32_t OD_DIVU_SMALL_CONSTS[OD_DIVU_DMAX][2];
 #if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__)
 #define OD_GNUC_PREREQ(maj, min, pat)                                \
   ((__GNUC__ << 16) + (__GNUC_MINOR__ << 8) + __GNUC_PATCHLEVEL__ >= \
-   ((maj) << 16) + ((min) << 8) + pat)
+   ((maj) << 16) + ((min) << 8) + pat)  // NOLINT
 #else
 #define OD_GNUC_PREREQ(maj, min, pat) (0)
 #endif

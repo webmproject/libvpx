@@ -23,12 +23,12 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include "./config.h"
 #endif
 
 #include <stdlib.h>
 #include <string.h>
-#include "entenc.h"
+#include "aom_dsp/entenc.h"
 
 /*A range encoder.
   See entdec.c and the references for implementation details \cite{Mar79,MNW98}.
@@ -419,8 +419,9 @@ void od_ec_enc_uint(od_ec_enc *enc, uint32_t fl, uint32_t ft) {
     ft1 = (int)(ft >> ftb) + 1;
     od_ec_encode_cdf_q15(enc, (int)(fl >> ftb), OD_UNIFORM_CDF_Q15(ft1), ft1);
     od_ec_enc_bits(enc, fl & (((uint32_t)1 << ftb) - 1), ftb);
-  } else
+  } else {
     od_ec_encode_cdf_q15(enc, (int)fl, OD_UNIFORM_CDF_Q15(ft), (int)ft);
+  }
 }
 
 /*Encodes a sequence of raw bits in the stream.
@@ -506,10 +507,10 @@ void od_ec_enc_patch_initial_bits(od_ec_enc *enc, unsigned val, int nbits) {
     /*The first byte has yet to be output.*/
     enc->low = (enc->low & ~((od_ec_window)mask << (16 + enc->cnt))) |
                (od_ec_window)val << (16 + enc->cnt + shift);
-  }
-  /*The encoder hasn't even encoded _nbits of data yet.*/
-  else
+  } else {
+    /*The encoder hasn't even encoded _nbits of data yet.*/
     enc->error = -1;
+  }
 }
 
 #if OD_MEASURE_EC_OVERHEAD
