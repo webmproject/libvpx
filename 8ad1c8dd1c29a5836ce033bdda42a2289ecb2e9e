@@ -39,6 +39,30 @@
       "revId": "8ad1c8dd1c29a5836ce033bdda42a2289ecb2e9e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3c821fce_5c96152a",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1046,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2016-10-15T01:18:05Z",
+      "side": 1,
+      "message": "No i have not. I will try and see if it provides some speed up. Anyway, i won\u0027t let this comment block this CL.",
+      "parentUuid": "1c28fb81_f004be33",
+      "range": {
+        "startLine": 1046,
+        "startChar": 27,
+        "endLine": 1046,
+        "endChar": 40
+      },
+      "revId": "8ad1c8dd1c29a5836ce033bdda42a2289ecb2e9e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
