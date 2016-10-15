@@ -20,7 +20,7 @@ namespace {
 
 class DatarateTestLarge
     : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
+      public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
  public:
   DatarateTestLarge() : EncoderTest(GET_PARAM(0)) {}
 
@@ -30,6 +30,7 @@ class DatarateTestLarge
   virtual void SetUp() {
     InitializeConfig();
     SetMode(GET_PARAM(1));
+    set_cpu_used_ = GET_PARAM(2);
     ResetModel();
   }
 
@@ -48,6 +49,7 @@ class DatarateTestLarge
                                   ::libvpx_test::Encoder *encoder) {
     if (video->frame() == 0) {
       encoder->Control(VP8E_SET_NOISE_SENSITIVITY, denoiser_on_);
+      encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
     }
 
     if (denoiser_offon_test_) {
@@ -139,6 +141,7 @@ class DatarateTestLarge
   int denoiser_on_;
   int denoiser_offon_test_;
   int denoiser_offon_period_;
+  int set_cpu_used_;
 };
 
 #if CONFIG_TEMPORAL_DENOISING
@@ -156,9 +159,6 @@ TEST_P(DatarateTestLarge, DenoiserLevels) {
     // For the temporal denoiser (#if CONFIG_TEMPORAL_DENOISING) the level j
     // refers to the 4 denoiser modes: denoiserYonly, denoiserOnYUV,
     // denoiserOnAggressive, and denoiserOnAdaptive.
-    // For the spatial denoiser (if !CONFIG_TEMPORAL_DENOISING), the level j
-    // refers to the blur thresholds: 20, 40, 60 80.
-    // The j = 0 case (denoiser off) is covered in the tests below.
     denoiser_on_ = j;
     cfg_.rc_target_bitrate = 300;
     ResetModel();
@@ -264,6 +264,146 @@ TEST_P(DatarateTestLarge, ChangingDropFrameThresh) {
 #endif
 #ifndef BUILDING_WITH_TSAN
 TEST_P(DatarateTestLarge, DropFramesMultiThreads) {
+  denoiser_on_ = 0;
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_dropframe_thresh = 30;
+  cfg_.rc_max_quantizer = 56;
+  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.g_threads = 2;
+
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 140);
+  cfg_.rc_target_bitrate = 200;
+  ResetModel();
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_GE(cfg_.rc_target_bitrate, effective_datarate_ * 0.95)
+      << " The datarate for the file exceeds the target!";
+
+  ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.4)
+      << " The datarate for the file missed the target!";
+}
+#endif  // !BUILDING_WITH_TSAN
+
+class DatarateTestRealTime : public DatarateTestLarge {
+ public:
+  virtual ~DatarateTestRealTime() {}
+};
+
+#if CONFIG_TEMPORAL_DENOISING
+// Check basic datarate targeting, for a single bitrate, but loop over the
+// various denoiser settings.
+TEST_P(DatarateTestRealTime, DenoiserLevels) {
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_dropframe_thresh = 1;
+  cfg_.rc_max_quantizer = 56;
+  cfg_.rc_end_usage = VPX_CBR;
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 140);
+  for (int j = 1; j < 5; ++j) {
+    // Run over the denoiser levels.
+    // For the temporal denoiser (#if CONFIG_TEMPORAL_DENOISING) the level j
+    // refers to the 4 denoiser modes: denoiserYonly, denoiserOnYUV,
+    // denoiserOnAggressive, and denoiserOnAdaptive.
+    denoiser_on_ = j;
+    cfg_.rc_target_bitrate = 300;
+    ResetModel();
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+    ASSERT_GE(cfg_.rc_target_bitrate, effective_datarate_ * 0.95)
+        << " The datarate for the file exceeds the target!";
+    ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.4)
+        << " The datarate for the file missed the target!";
+  }
+}
+
+// Check basic datarate targeting, for a single bitrate, when denoiser is off
+// and on.
+TEST_P(DatarateTestRealTime, DenoiserOffOn) {
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_dropframe_thresh = 1;
+  cfg_.rc_max_quantizer = 56;
+  cfg_.rc_end_usage = VPX_CBR;
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 299);
+  cfg_.rc_target_bitrate = 300;
+  ResetModel();
+  // The denoiser is off by default.
+  denoiser_on_ = 0;
+  // Set the offon test flag.
+  denoiser_offon_test_ = 1;
+  denoiser_offon_period_ = 100;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_GE(cfg_.rc_target_bitrate, effective_datarate_ * 0.95)
+      << " The datarate for the file exceeds the target!";
+  ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.4)
+      << " The datarate for the file missed the target!";
+}
+#endif  // CONFIG_TEMPORAL_DENOISING
+
+TEST_P(DatarateTestRealTime, BasicBufferModel) {
+  denoiser_on_ = 0;
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_dropframe_thresh = 1;
+  cfg_.rc_max_quantizer = 56;
+  cfg_.rc_end_usage = VPX_CBR;
+  // 2 pass cbr datarate control has a bug hidden by the small # of
+  // frames selected in this encode. The problem is that even if the buffer is
+  // negative we produce a keyframe on a cutscene, ignoring datarate
+  // constraints
+  // TODO(jimbankoski): Fix when issue
+  // http://bugs.chromium.org/p/webm/issues/detail?id=495 is addressed.
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 140);
+
+  // There is an issue for low bitrates in real-time mode, where the
+  // effective_datarate slightly overshoots the target bitrate.
+  // This is same the issue as noted above (#495).
+  // TODO(jimbankoski/marpan): Update test to run for lower bitrates (< 100),
+  // when the issue is resolved.
+  for (int i = 100; i <= 700; i += 200) {
+    cfg_.rc_target_bitrate = i;
+    ResetModel();
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+    ASSERT_GE(cfg_.rc_target_bitrate, effective_datarate_ * 0.95)
+        << " The datarate for the file exceeds the target!";
+    ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.4)
+        << " The datarate for the file missed the target!";
+  }
+}
+
+TEST_P(DatarateTestRealTime, ChangingDropFrameThresh) {
+  denoiser_on_ = 0;
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_max_quantizer = 36;
+  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.rc_target_bitrate = 200;
+  cfg_.kf_mode = VPX_KF_DISABLED;
+
+  const int frame_count = 40;
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, frame_count);
+
+  // Check that the first dropped frame gets earlier and earlier
+  // as the drop frame threshold is increased.
+
+  const int kDropFrameThreshTestStep = 30;
+  vpx_codec_pts_t last_drop = frame_count;
+  for (int i = 1; i < 91; i += kDropFrameThreshTestStep) {
+    cfg_.rc_dropframe_thresh = i;
+    ResetModel();
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+    ASSERT_LE(first_drop_, last_drop)
+        << " The first dropped frame for drop_thresh " << i
+        << " > first dropped frame for drop_thresh "
+        << i - kDropFrameThreshTestStep;
+    last_drop = first_drop_;
+  }
+}
+
+// Disabled for tsan, see:
+// https://bugs.chromium.org/p/webm/issues/detail?id=1049
+
+#ifndef BUILDING_WITH_TSAN
+TEST_P(DatarateTestRealTime, DropFramesMultiThreads) {
   denoiser_on_ = 0;
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_dropframe_thresh = 30;
@@ -1224,7 +1364,11 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SpatialLayers4threads) {
   EXPECT_EQ(static_cast<unsigned int>(0), GetMismatchFrames());
 }
 
-VP8_INSTANTIATE_TEST_CASE(DatarateTestLarge, ALL_TEST_MODES);
+VP8_INSTANTIATE_TEST_CASE(DatarateTestLarge, ALL_TEST_MODES,
+                          ::testing::Values(0));
+VP8_INSTANTIATE_TEST_CASE(DatarateTestRealTime,
+                          ::testing::Values(::libvpx_test::kRealTime),
+                          ::testing::Values(-6, -12));
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9Large,
                           ::testing::Values(::libvpx_test::kOnePassGood,
                                             ::libvpx_test::kRealTime),
