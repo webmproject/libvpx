@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3c821fce_39cd6b18",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2016-10-15T00:10:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3c821fce_f6f940d8",
+      "revId": "b0ea34a9affa52a3f532bb384ed2fc0bb12e1a28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3c821fce_9606ccf7",
         "filename": "test/datarate_test.cc",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2016-10-14T23:37:04Z",
       "side": 1,
       "message": "technically this should be !BUILDING..., sorry for the churn",
+      "revId": "b0ea34a9affa52a3f532bb384ed2fc0bb12e1a28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3c821fce_d9e1d786",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2016-10-15T00:10:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3c821fce_9606ccf7",
       "revId": "b0ea34a9affa52a3f532bb384ed2fc0bb12e1a28",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "3c821fce_39848ba2",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2016-10-15T00:10:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3c821fce_765c5008",
+      "revId": "b0ea34a9affa52a3f532bb384ed2fc0bb12e1a28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3c821fce_16615cbf",
         "filename": "test/datarate_test.cc",
         "patchSetId": 4
@@ -64,6 +118,30 @@
       "writtenOn": "2016-10-14T23:37:04Z",
       "side": 1,
       "message": "https://bugs.chromium.org/ would be a better choice",
+      "range": {
+        "startLine": 355,
+        "startChar": 5,
+        "endLine": 355,
+        "endChar": 27
+      },
+      "revId": "b0ea34a9affa52a3f532bb384ed2fc0bb12e1a28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3c821fce_197f4fd1",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2016-10-15T00:10:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3c821fce_16615cbf",
       "range": {
         "startLine": 355,
         "startChar": 5,
@@ -99,6 +177,30 @@
     },
     {
       "key": {
+        "uuid": "3c821fce_797a03e2",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2016-10-15T00:10:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3c821fce_f66700d0",
+      "range": {
+        "startLine": 364,
+        "startChar": 20,
+        "endLine": 364,
+        "endChar": 27
+      },
+      "revId": "b0ea34a9affa52a3f532bb384ed2fc0bb12e1a28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3c821fce_b61f481e",
         "filename": "test/datarate_test.cc",
         "patchSetId": 4
@@ -110,6 +212,30 @@
       "writtenOn": "2016-10-14T23:37:04Z",
       "side": 1,
       "message": "you intended Values() here not Range() right?",
+      "range": {
+        "startLine": 1373,
+        "startChar": 37,
+        "endLine": 1373,
+        "endChar": 43
+      },
+      "revId": "b0ea34a9affa52a3f532bb384ed2fc0bb12e1a28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3c821fce_f965b339",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 1373,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2016-10-15T00:10:52Z",
+      "side": 1,
+      "message": "this sets the cpu speed to either -6 or -12, which we intend to compare.",
+      "parentUuid": "3c821fce_b61f481e",
       "range": {
         "startLine": 1373,
         "startChar": 37,
