@@ -49,44 +49,55 @@ void vpx_highbd_convolve_copy_neon(const uint8_t *src8, ptrdiff_t src_stride,
     } while (h > 0);
   } else if (w < 32) {  // copy16
     do {
-      vst1q_u16(dst, vld1q_u16(src));
-      vst1q_u16(dst + 8, vld1q_u16(src + 8));
+      vst2q_u16(dst, vld2q_u16(src));
       src += src_stride;
       dst += dst_stride;
-      vst1q_u16(dst, vld1q_u16(src));
-      vst1q_u16(dst + 8, vld1q_u16(src + 8));
+      vst2q_u16(dst, vld2q_u16(src));
       src += src_stride;
       dst += dst_stride;
-      h -= 2;
+      vst2q_u16(dst, vld2q_u16(src));
+      src += src_stride;
+      dst += dst_stride;
+      vst2q_u16(dst, vld2q_u16(src));
+      src += src_stride;
+      dst += dst_stride;
+      h -= 4;
     } while (h > 0);
   } else if (w == 32) {  // copy32
     do {
-      vst1q_u16(dst, vld1q_u16(src));
-      vst1q_u16(dst + 8, vld1q_u16(src + 8));
-      vst1q_u16(dst + 16, vld1q_u16(src + 16));
-      vst1q_u16(dst + 24, vld1q_u16(src + 24));
+      vst4q_u16(dst, vld4q_u16(src));
       src += src_stride;
       dst += dst_stride;
-      vst1q_u16(dst, vld1q_u16(src));
-      vst1q_u16(dst + 8, vld1q_u16(src + 8));
-      vst1q_u16(dst + 16, vld1q_u16(src + 16));
-      vst1q_u16(dst + 24, vld1q_u16(src + 24));
+      vst4q_u16(dst, vld4q_u16(src));
       src += src_stride;
       dst += dst_stride;
-      h -= 2;
+      vst4q_u16(dst, vld4q_u16(src));
+      src += src_stride;
+      dst += dst_stride;
+      vst4q_u16(dst, vld4q_u16(src));
+      src += src_stride;
+      dst += dst_stride;
+      h -= 4;
     } while (h > 0);
   } else {  // copy64
     do {
-      vst1q_u16(dst, vld1q_u16(src));
-      vst1q_u16(dst + 8, vld1q_u16(src + 8));
-      vst1q_u16(dst + 16, vld1q_u16(src + 16));
-      vst1q_u16(dst + 24, vld1q_u16(src + 24));
-      vst1q_u16(dst + 32, vld1q_u16(src + 32));
-      vst1q_u16(dst + 40, vld1q_u16(src + 40));
-      vst1q_u16(dst + 48, vld1q_u16(src + 48));
-      vst1q_u16(dst + 56, vld1q_u16(src + 56));
+      vst4q_u16(dst, vld4q_u16(src));
+      vst4q_u16(dst + 32, vld4q_u16(src + 32));
       src += src_stride;
       dst += dst_stride;
-    } while (--h);
+      vst4q_u16(dst, vld4q_u16(src));
+      vst4q_u16(dst + 32, vld4q_u16(src + 32));
+      src += src_stride;
+      dst += dst_stride;
+      vst4q_u16(dst, vld4q_u16(src));
+      vst4q_u16(dst + 32, vld4q_u16(src + 32));
+      src += src_stride;
+      dst += dst_stride;
+      vst4q_u16(dst, vld4q_u16(src));
+      vst4q_u16(dst + 32, vld4q_u16(src + 32));
+      src += src_stride;
+      dst += dst_stride;
+      h -= 4;
+    } while (h > 0);
   }
 }
