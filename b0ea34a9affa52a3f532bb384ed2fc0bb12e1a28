@@ -245,6 +245,30 @@
       "revId": "b0ea34a9affa52a3f532bb384ed2fc0bb12e1a28",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3c821fce_d98f97b6",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 1373,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-15T00:12:45Z",
+      "side": 1,
+      "message": "right I just wanted to be sure you meant that and not [-6, -12] or [-6, 12)",
+      "parentUuid": "3c821fce_f965b339",
+      "range": {
+        "startLine": 1373,
+        "startChar": 37,
+        "endLine": 1373,
+        "endChar": 43
+      },
+      "revId": "b0ea34a9affa52a3f532bb384ed2fc0bb12e1a28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
