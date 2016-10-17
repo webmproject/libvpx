@@ -239,23 +239,24 @@ void highbd_filter_block2d_8_c(const uint16_t *src_ptr,
 
   // Vertical pass (transposed intermediate -> dst).
   {
-    uint16_t *src_ptr = intermediate_buffer;
+    const uint16_t *interm_ptr = intermediate_buffer;
     const int dst_next_row_stride = dst_stride - output_width;
     unsigned int i, j;
     for (i = 0; i < output_height; ++i) {
       for (j = 0; j < output_width; ++j) {
         // Apply filter...
-        const int temp = (src_ptr[0] * VFilter[0]) + (src_ptr[1] * VFilter[1]) +
-                         (src_ptr[2] * VFilter[2]) + (src_ptr[3] * VFilter[3]) +
-                         (src_ptr[4] * VFilter[4]) + (src_ptr[5] * VFilter[5]) +
-                         (src_ptr[6] * VFilter[6]) + (src_ptr[7] * VFilter[7]) +
-                         (AV1_FILTER_WEIGHT >> 1);  // Rounding
+        const int temp =
+            (interm_ptr[0] * VFilter[0]) + (interm_ptr[1] * VFilter[1]) +
+            (interm_ptr[2] * VFilter[2]) + (interm_ptr[3] * VFilter[3]) +
+            (interm_ptr[4] * VFilter[4]) + (interm_ptr[5] * VFilter[5]) +
+            (interm_ptr[6] * VFilter[6]) + (interm_ptr[7] * VFilter[7]) +
+            (AV1_FILTER_WEIGHT >> 1);  // Rounding
 
         // Normalize back to 0-255...
         *dst_ptr++ = clip_pixel_highbd(temp >> AV1_FILTER_SHIFT, bd);
-        src_ptr += intermediate_height;
+        interm_ptr += intermediate_height;
       }
-      src_ptr += intermediate_next_stride;
+      interm_ptr += intermediate_next_stride;
       dst_ptr += dst_next_row_stride;
     }
   }
