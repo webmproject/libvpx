@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bc28cfc6_cd5ddd5f",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-17T22:06:26Z",
+      "side": 1,
+      "message": "this definitely breaks ABI since you\u0027re changing the order of enum values. to preserve the values you\u0027d need to explicitly set this one (or more simply) move it to the end and use \\copydoc",
+      "revId": "e30d4278b12e38883bd2c9a8948883c6974fe087",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
