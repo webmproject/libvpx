@@ -100,6 +100,10 @@ FILE *kf_list;
 FILE *keyfile;
 #endif
 
+#if CONFIG_INTERNAL_STATS
+typedef enum { Y, U, V, ALL } STAT_TYPE;
+#endif  // CONFIG_INTERNAL_STATS
+
 static INLINE void Scale2Ratio(AOM_SCALING mode, int *hr, int *hs) {
   switch (mode) {
     case NORMAL:
