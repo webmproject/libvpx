@@ -113,6 +113,34 @@ void copy_blocks_16_8bit(uint8_t *dst, int dstride, int16_t *src,
   }
 }
 
+/* TODO: Optimize this function for SSE. */
+static void copy_sb8_16(AV1_COMMON *cm, int16_t *dst, int dstride,
+    const uint8_t *src, int src_voffset, int src_hoffset, int sstride,
+    int vsize, int hsize)
+{
+  int r, c;
+  (void)cm;
+#if CONFIG_AOM_HIGHBITDEPTH
+  if (cm->use_highbitdepth) {
+    const uint16_t *base = &CONVERT_TO_SHORTPTR(src)[src_voffset * sstride
+                                                     + src_hoffset];
+    for (r = 0; r < vsize; r++) {
+      for (c = 0; c < hsize; c++) {
+        dst[r * dstride + c] = base[r*sstride + c];
+      }
+    }
+  } else
+#endif
+  {
+    const uint8_t *base = &src[src_voffset * sstride + src_hoffset];
+    for (r = 0; r < vsize; r++) {
+      for (c = 0; c < hsize; c++) {
+        dst[r * dstride + c] = base[r*sstride + c];
+      }
+    }
+  }
+}
+
 void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
                       MACROBLOCKD *xd, int global_level) {
   int r, c;
@@ -157,28 +185,10 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
   for (sbr = 0; sbr < nvsb; sbr++) {
     last_sbc = -1;
     for (pli = 0; pli < nplanes; pli++) {
-#if CONFIG_AOM_HIGHBITDEPTH
-      if (cm->use_highbitdepth) {
-        for (r = 0; r < OD_FILT_VBORDER; r++) {
-          for (c = 0; c < cm->mi_cols << bsize[pli]; c++) {
-            curr_linebuf[pli][r * stride + c] = CONVERT_TO_SHORTPTR(
-                xd->plane[pli].dst.buf)[((MAX_MIB_SIZE << bsize[pli]) *
-                    (sbr + 1) - OD_FILT_VBORDER + r) * xd->plane[pli].dst.stride
-                    + c];
-          }
-        }
-      } else {
-#endif
-        for (r = 0; r < OD_FILT_VBORDER; r++) {
-          for (c = 0; c < cm->mi_cols << bsize[pli]; c++) {
-            curr_linebuf[pli][r * stride + c] =
-                xd->plane[pli].dst.buf[((MAX_MIB_SIZE << bsize[pli]) * (sbr + 1)
-                    - OD_FILT_VBORDER + r) * xd->plane[pli].dst.stride + c];
-          }
-        }
-#if CONFIG_AOM_HIGHBITDEPTH
-      }
-#endif
+      copy_sb8_16(cm, curr_linebuf[pli], stride, xd->plane[pli].dst.buf,
+          (MAX_MIB_SIZE << bsize[pli]) * (sbr + 1) - OD_FILT_VBORDER, 0,
+          xd->plane[pli].dst.stride, OD_FILT_VBORDER,
+          cm->mi_cols << bsize[pli]);
       for (r = 0; r < (MAX_MIB_SIZE << bsize[pli]) + OD_FILT_VBORDER; r++) {
         for (c = 0; c < OD_FILT_HBORDER; c++) {
           colbuf[pli][r][c] = OD_DERING_VERY_LARGE;
@@ -218,28 +228,10 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
         coffset = sbc * MAX_MIB_SIZE << bsize[pli];
         /* Copy in the pixels we need from the current superblock for
            deringing.*/
-#if CONFIG_AOM_HIGHBITDEPTH
-        if (cm->use_highbitdepth) {
-          for (r = 0; r < rend; r++) {
-            for (c = cstart; c < cend; ++c) {
-              src[(r + OD_FILT_VBORDER) * OD_FILT_BSTRIDE + c + OD_FILT_HBORDER]
-                  = CONVERT_TO_SHORTPTR(xd->plane[pli].dst.buf)[
-                  ((MAX_MIB_SIZE << bsize[pli]) * sbr + r) *
-                  xd->plane[pli].dst.stride + c + coffset];
-            }
-          }
-        } else {
-#endif
-          for (r = 0; r < rend; r++) {
-            for (c = cstart; c < cend; ++c) {
-              src[(r + OD_FILT_VBORDER) * OD_FILT_BSTRIDE + c + OD_FILT_HBORDER]
-                  = xd->plane[pli].dst.buf[((MAX_MIB_SIZE << bsize[pli]) * sbr
-                  + r) * xd->plane[pli].dst.stride + c + coffset];
-            }
-          }
-#if CONFIG_AOM_HIGHBITDEPTH
-        }
-#endif
+        copy_sb8_16(cm, &src[OD_FILT_VBORDER*OD_FILT_BSTRIDE + OD_FILT_HBORDER
+                             + cstart], OD_FILT_BSTRIDE, xd->plane[pli].dst.buf,
+            (MAX_MIB_SIZE << bsize[pli]) * sbr, coffset + cstart,
+            xd->plane[pli].dst.stride, rend, cend-cstart);
         if (sbc == nhsb - 1) {
           /* On the last superblock column, fill in the right border with
              OD_DERING_VERY_LARGE to avoid filtering with the outside. */
