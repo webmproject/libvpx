@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1cad5b6a_cb332957",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-17T17:31:42Z",
+      "side": 1,
+      "message": "hmm that\u0027s an interesting idea. will investigate",
+      "parentUuid": "dc7ca22f_55d3de57",
+      "revId": "9adddaef64c800204c6cf6073c3be6e7229937c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dc7ca22f_55851e43",
         "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
         "patchSetId": 2
@@ -30,6 +48,30 @@
       "writtenOn": "2016-10-14T00:51:05Z",
       "side": 1,
       "message": "vaddq_s16 is more compliant to WRAPLOW() definition with CONFIG_EMULATE_HARDWARE.",
+      "range": {
+        "startLine": 38,
+        "startChar": 25,
+        "endLine": 38,
+        "endChar": 35
+      },
+      "revId": "9adddaef64c800204c6cf6073c3be6e7229937c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1cad5b6a_6b4555b0",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-17T17:31:42Z",
+      "side": 1,
+      "message": "That\u0027s true, WRAPLOW does not saturate it just truncates. I\u0027m a little surprised it didn\u0027t detect this issue but it might have something to do with the _34_ version skipping so many of the early calculations and passing the input directly.\n\nIf we decide this should be normative behavior I\u0027ll switch back to vaddq so it potentially matches the EMULATE_HARDWARE version",
+      "parentUuid": "dc7ca22f_55851e43",
       "range": {
         "startLine": 38,
         "startChar": 25,
