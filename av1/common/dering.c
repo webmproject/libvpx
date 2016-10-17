@@ -152,6 +152,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
   int16_t *prev_linebuf[3];
   int16_t colbuf[3][OD_BSIZE_MAX + OD_FILT_VBORDER][OD_FILT_HBORDER];
   unsigned char bskip[MAX_MIB_SIZE*MAX_MIB_SIZE][2];
+  unsigned char *row_dering, *prev_row_dering, *curr_row_dering;
   int dering_count;
   int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS] = { { 0 } };
   int stride;
@@ -169,6 +170,10 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
   nvsb = (cm->mi_rows + MAX_MIB_SIZE - 1) / MAX_MIB_SIZE;
   nhsb = (cm->mi_cols + MAX_MIB_SIZE - 1) / MAX_MIB_SIZE;
   av1_setup_dst_planes(xd->plane, frame, 0, 0);
+  row_dering = aom_malloc(sizeof(*row_dering) * nhsb * 2);
+  memset(row_dering, 1, sizeof(*row_dering) * (nhsb + 2) * 2);
+  prev_row_dering = row_dering + 1;
+  curr_row_dering = prev_row_dering + nhsb + 2;
   for (pli = 0; pli < nplanes; pli++) {
     dec[pli] = xd->plane[pli].subsampling_x;
     bsize[pli] = 3 - dec[pli];
@@ -185,10 +190,6 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
   for (sbr = 0; sbr < nvsb; sbr++) {
     last_sbc = -1;
     for (pli = 0; pli < nplanes; pli++) {
-      copy_sb8_16(cm, curr_linebuf[pli], stride, xd->plane[pli].dst.buf,
-          (MAX_MIB_SIZE << bsize[pli]) * (sbr + 1) - OD_FILT_VBORDER, 0,
-          xd->plane[pli].dst.stride, OD_FILT_VBORDER,
-          cm->mi_cols << bsize[pli]);
       for (r = 0; r < (MAX_MIB_SIZE << bsize[pli]) + OD_FILT_VBORDER; r++) {
         for (c = 0; c < OD_FILT_HBORDER; c++) {
           colbuf[pli][r][c] = OD_DERING_VERY_LARGE;
@@ -207,9 +208,11 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
           global_level, cm->mi_grid_visible[MAX_MIB_SIZE * sbr * cm->mi_stride +
                                             MAX_MIB_SIZE * sbc]
                             ->mbmi.dering_gain);
+      curr_row_dering[sbc] = 0;
       if (level == 0 ||
           sb_all_skip_out(cm, sbr * MAX_MIB_SIZE, sbc * MAX_MIB_SIZE, bskip, &dering_count))
         continue;
+      curr_row_dering[sbc] = 1;
       for (pli = 0; pli < nplanes; pli++) {
         int16_t dst[MAX_MIB_SIZE * MAX_MIB_SIZE * 8 * 8];
         int threshold;
@@ -226,12 +229,6 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
         else
           rend = (nvb << bsize[pli]) + OD_FILT_VBORDER;
         coffset = sbc * MAX_MIB_SIZE << bsize[pli];
-        /* Copy in the pixels we need from the current superblock for
-           deringing.*/
-        copy_sb8_16(cm, &src[OD_FILT_VBORDER*OD_FILT_BSTRIDE + OD_FILT_HBORDER
-                             + cstart], OD_FILT_BSTRIDE, xd->plane[pli].dst.buf,
-            (MAX_MIB_SIZE << bsize[pli]) * sbr, coffset + cstart,
-            xd->plane[pli].dst.stride, rend, cend-cstart);
         if (sbc == nhsb - 1) {
           /* On the last superblock column, fill in the right border with
              OD_DERING_VERY_LARGE to avoid filtering with the outside. */
@@ -252,14 +249,6 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
             }
           }
         }
-        for (r = 0; r < rend; r++) {
-          for (c = 0; c < OD_FILT_HBORDER; c++) {
-            /* Saving pixels in case we need to dering the superblock on the
-               right. */
-            colbuf[pli][r][c] = src[(r + OD_FILT_VBORDER) * OD_FILT_BSTRIDE + c
-                                    + (nhb << bsize[pli])];
-          }
-        }
         if (sbr == nvsb - 1) {
           /* On the last superblock row, fill in the bottom border with
              OD_DERING_VERY_LARGE to avoid filtering with the outside. */
@@ -270,13 +259,6 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
             }
           }
         }
-        /* FIXME: This is a temporary hack that uses more conservative
-           deringing for chroma. */
-        if (pli)
-          threshold = (level * 5 + 4) >> 3 << coeff_shift;
-        else
-          threshold = level << coeff_shift;
-        if (threshold == 0) continue;
         in = src + OD_FILT_VBORDER * OD_FILT_BSTRIDE + OD_FILT_HBORDER;
         /* We avoid filtering the pixels for which some of the pixels to average
            are outside the frame. We could change the filter instead, but it would
@@ -290,6 +272,52 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
                                   (sbc * MAX_MIB_SIZE << bsize[pli]) + j];
           }
         }
+        /* Copy in the pixels we need from the current superblock for
+           deringing.*/
+        copy_sb8_16(cm, &src[OD_FILT_VBORDER*OD_FILT_BSTRIDE + OD_FILT_HBORDER
+                             + cstart], OD_FILT_BSTRIDE, xd->plane[pli].dst.buf,
+            (MAX_MIB_SIZE << bsize[pli]) * sbr, coffset + cstart,
+            xd->plane[pli].dst.stride, rend, cend-cstart);
+        if (!prev_row_dering[sbc]) {
+          copy_sb8_16(cm, &src[OD_FILT_HBORDER], OD_FILT_BSTRIDE,
+              xd->plane[pli].dst.buf,
+              (MAX_MIB_SIZE << bsize[pli]) * sbr - OD_FILT_VBORDER, coffset,
+              xd->plane[pli].dst.stride, OD_FILT_VBORDER, nhb << bsize[pli]);
+        }
+        if (!prev_row_dering[sbc - 1]) {
+          copy_sb8_16(cm, src, OD_FILT_BSTRIDE,
+              xd->plane[pli].dst.buf,
+              (MAX_MIB_SIZE << bsize[pli]) * sbr - OD_FILT_VBORDER,
+              coffset - OD_FILT_HBORDER,
+              xd->plane[pli].dst.stride, OD_FILT_VBORDER, OD_FILT_HBORDER);
+        }
+        if (!prev_row_dering[sbc + 1]) {
+          copy_sb8_16(cm, &src[OD_FILT_HBORDER + (nhb << bsize[pli])],
+              OD_FILT_BSTRIDE, xd->plane[pli].dst.buf,
+              (MAX_MIB_SIZE << bsize[pli]) * sbr - OD_FILT_VBORDER,
+              coffset + (nhb << bsize[pli]),
+              xd->plane[pli].dst.stride, OD_FILT_VBORDER, OD_FILT_HBORDER);
+        }
+        for (r = 0; r < rend; r++) {
+          for (c = 0; c < OD_FILT_HBORDER; c++) {
+            /* Saving pixels in case we need to dering the superblock on the
+               right. */
+            colbuf[pli][r][c] = src[(r + OD_FILT_VBORDER) * OD_FILT_BSTRIDE + c
+                                    + (nhb << bsize[pli])];
+          }
+        }
+        copy_sb8_16(cm, &curr_linebuf[pli][coffset], stride, xd->plane[pli].dst.buf,
+            (MAX_MIB_SIZE << bsize[pli]) * (sbr + 1) - OD_FILT_VBORDER, coffset,
+            xd->plane[pli].dst.stride, OD_FILT_VBORDER,
+            (nhb << bsize[pli]));
+
+        /* FIXME: This is a temporary hack that uses more conservative
+           deringing for chroma. */
+        if (pli)
+          threshold = (level * 5 + 4) >> 3 << coeff_shift;
+        else
+          threshold = level << coeff_shift;
+        if (threshold == 0) continue;
         od_dering(dst, in, dec[pli], dir, pli,
                   bskip, dering_count, threshold, coeff_shift);
 #if CONFIG_AOM_HIGHBITDEPTH
@@ -321,7 +349,14 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
       prev_linebuf[pli] = curr_linebuf[pli];
       curr_linebuf[pli] = tmp;
     }
+    {
+      unsigned char *tmp;
+      tmp = prev_row_dering;
+      prev_row_dering = curr_row_dering;
+      curr_row_dering = tmp;
+    }
   }
+  aom_free(row_dering);
   for (pli = 0; pli < nplanes; pli++) {
     aom_free(linebuf[pli]);
   }
