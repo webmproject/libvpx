@@ -232,8 +232,7 @@ int main(int argc, char **argv) {
   }
 
   // Flush encoder.
-  while (encode_frame(&codec, NULL, -1, 0, writer)) {
-  }
+  while (encode_frame(&codec, NULL, -1, 0, writer)) continue;
 
   printf("\n");
   fclose(infile);
