@@ -1308,8 +1308,8 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
         const BLOCK_SIZE plane_bsize =
             get_plane_block_size(AOMMAX(bsize, BLOCK_8X8), pd);
         const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
-        int bw = num_4x4_blocks_wide_txsize_lookup[max_tx_size];
-        int bh = num_4x4_blocks_high_txsize_lookup[max_tx_size];
+        const int bw_var_tx = num_4x4_blocks_wide_txsize_lookup[max_tx_size];
+        const int bh_var_tx = num_4x4_blocks_high_txsize_lookup[max_tx_size];
         const int step = num_4x4_blocks_txsize_lookup[max_tx_size];
         int block = 0;
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
@@ -1333,8 +1333,8 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
                                                   plane, row, col, tx_size);
         } else {
 #endif
-          for (row = 0; row < num_4x4_h; row += bh) {
-            for (col = 0; col < num_4x4_w; col += bw) {
+          for (row = 0; row < num_4x4_h; row += bh_var_tx) {
+            for (col = 0; col < num_4x4_w; col += bw_var_tx) {
               decode_reconstruct_tx(xd, r, mbmi, plane, plane_bsize, block, row,
                                     col, max_tx_size, &eobtotal);
               block += step;

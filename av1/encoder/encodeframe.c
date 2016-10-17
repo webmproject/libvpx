@@ -2705,8 +2705,6 @@ static void rd_use_partition(AV1_COMP *cpi, ThreadData *td,
 #if CONFIG_SUPERTX
       int rt_nocoef = 0;
 #endif
-      RD_SEARCH_MACROBLOCK_CONTEXT x_ctx;
-
       if ((mi_row + y_idx >= cm->mi_rows) || (mi_col + x_idx >= cm->mi_cols))
         continue;
 
@@ -3140,12 +3138,12 @@ static void rd_test_partition3(
 #else
   if (sum_rdc.rdcost < best_rdc->rdcost) {
 #endif
-    PICK_MODE_CONTEXT *ctx = &ctxs[0];
-    update_state(cpi, td, ctx, mi_row0, mi_col0, subsize0, 1);
+    PICK_MODE_CONTEXT *ctx_0 = &ctxs[0];
+    update_state(cpi, td, ctx_0, mi_row0, mi_col0, subsize0, 1);
     encode_superblock(cpi, td, tp, DRY_RUN_NORMAL, mi_row0, mi_col0, subsize0,
-                      ctx, NULL);
+                      ctx_0, NULL);
 
-    if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
+    if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx_0);
 
 #if CONFIG_SUPERTX
     rd_pick_sb_modes(cpi, tile_data, x, mi_row1, mi_col1, &this_rdc,
@@ -3181,12 +3179,12 @@ static void rd_test_partition3(
 #else
     if (sum_rdc.rdcost < best_rdc->rdcost) {
 #endif
-      PICK_MODE_CONTEXT *ctx = &ctxs[1];
-      update_state(cpi, td, ctx, mi_row1, mi_col1, subsize1, 1);
+      PICK_MODE_CONTEXT *ctx_1 = &ctxs[1];
+      update_state(cpi, td, ctx_1, mi_row1, mi_col1, subsize1, 1);
       encode_superblock(cpi, td, tp, DRY_RUN_NORMAL, mi_row1, mi_col1, subsize1,
-                        ctx, NULL);
+                        ctx_1, NULL);
 
-      if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
+      if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx_1);
 
 #if CONFIG_SUPERTX
       rd_pick_sb_modes(cpi, tile_data, x, mi_row2, mi_col2, &this_rdc,

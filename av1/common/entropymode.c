@@ -1483,7 +1483,6 @@ void av1_adapt_inter_frame_probs(AV1_COMMON *cm) {
 
 #if CONFIG_SUPERTX
   for (i = 0; i < PARTITION_SUPERTX_CONTEXTS; ++i) {
-    int j;
     for (j = 1; j < TX_SIZES; ++j) {
       fc->supertx_prob[i][j] = av1_mode_mv_merge_probs(
           pre_fc->supertx_prob[i][j], counts->supertx[i][j]);
@@ -1577,7 +1576,6 @@ void av1_adapt_intra_frame_probs(AV1_COMMON *cm) {
     }
     for (s = 1; s < EXT_TX_SETS_INTRA; ++s) {
       if (use_intra_ext_tx_for_txsize[s][i]) {
-        int j;
         for (j = 0; j < INTRA_MODES; ++j)
           aom_tree_merge_probs(
               av1_ext_tx_intra_tree[s], pre_fc->intra_ext_tx_prob[s][i][j],

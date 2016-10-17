@@ -1697,9 +1697,9 @@ static void write_modes_b(AV1_COMP *cpi, const TileInfo *const tile,
 #endif
         const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
         const BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
-        int bw = num_4x4_blocks_wide_lookup[txb_size];
         int block = 0;
         const int step = num_4x4_blocks_txsize_lookup[max_tx_size];
+        bw = num_4x4_blocks_wide_lookup[txb_size];
         for (row = 0; row < num_4x4_h; row += bw) {
           for (col = 0; col < num_4x4_w; col += bw) {
             pack_txb_tokens(w, tok, tok_end, xd, mbmi, plane, plane_bsize,
@@ -1711,8 +1711,8 @@ static void write_modes_b(AV1_COMP *cpi, const TileInfo *const tile,
         TX_SIZE tx = plane ? get_uv_tx_size(&m->mbmi, &xd->plane[plane])
                            : m->mbmi.tx_size;
         BLOCK_SIZE txb_size = txsize_to_bsize[tx];
-        int bw = num_4x4_blocks_wide_lookup[txb_size];
-        int bh = num_4x4_blocks_high_lookup[txb_size];
+        bw = num_4x4_blocks_wide_lookup[txb_size];
+        bh = num_4x4_blocks_high_lookup[txb_size];
 
         for (row = 0; row < num_4x4_h; row += bh)
           for (col = 0; col < num_4x4_w; col += bw)
@@ -2295,7 +2295,6 @@ static void update_coef_probs_subframe(
               for (t = 0; t < entropy_nodes_update; ++t) {
                 aom_prob newp = new_coef_probs[i][j][k][l][t];
                 aom_prob *oldp = old_coef_probs[i][j][k][l] + t;
-                const aom_prob upd = DIFF_UPDATE_PROB;
                 int s;
                 int u = 0;
 
@@ -2418,8 +2417,6 @@ static void update_coef_probs(AV1_COMP *cpi, aom_writer *w) {
 #if CONFIG_ENTROPY
       if (cm->do_subframe_update &&
           cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
-        unsigned int eob_counts_copy[PLANE_TYPES][REF_TYPES][COEF_BANDS]
-                                    [COEFF_CONTEXTS];
         av1_coeff_count coef_counts_copy[PLANE_TYPES];
         av1_copy(eob_counts_copy, cpi->common.counts.eob_branch[tx_size]);
         av1_copy(coef_counts_copy, cpi->td.rd_counts.coef_counts[tx_size]);

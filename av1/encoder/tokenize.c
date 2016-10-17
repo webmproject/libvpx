@@ -613,8 +613,7 @@ void tokenize_vartx(ThreadData *td, TOKENEXTRA **t, RUN_TYPE dry_run,
             : mbmi->inter_tx_size[tx_row][tx_col];
 
   if (tx_size == plane_tx_size) {
-    const struct macroblockd_plane *const pd = &xd->plane[plane];
-    BLOCK_SIZE plane_bsize = get_plane_block_size(mbmi->sb_type, pd);
+    plane_bsize = get_plane_block_size(mbmi->sb_type, pd);
     if (!dry_run)
       tokenize_b(plane, block, blk_row, blk_col, plane_bsize, tx_size, arg);
     else if (dry_run == DRY_RUN_NORMAL)

@@ -702,7 +702,7 @@ static void filter_intra_predictors_4tap(uint8_t *dst, ptrdiff_t stride, int bs,
                                          const uint8_t *above,
                                          const uint8_t *left, int mode) {
   int k, r, c;
-  int pred[33][65];
+  int preds[33][65];
   int mean, ipred;
   const TX_SIZE tx_size =
       (bs == 32) ? TX_32X32
@@ -721,20 +721,20 @@ static void filter_intra_predictors_4tap(uint8_t *dst, ptrdiff_t stride, int bs,
   }
   mean = (mean + bs) / (2 * bs);
 
-  for (r = 0; r < bs; ++r) pred[r + 1][0] = (int)left[r] - mean;
+  for (r = 0; r < bs; ++r) preds[r + 1][0] = (int)left[r] - mean;
 
-  for (c = 0; c < 2 * bs + 1; ++c) pred[0][c] = (int)above[c - 1] - mean;
+  for (c = 0; c < 2 * bs + 1; ++c) preds[0][c] = (int)above[c - 1] - mean;
 
   for (r = 1; r < bs + 1; ++r)
     for (c = 1; c < 2 * bs + 1 - r; ++c) {
-      ipred = c0 * pred[r - 1][c] + c1 * pred[r][c - 1] +
-              c2 * pred[r - 1][c - 1] + c3 * pred[r - 1][c + 1];
-      pred[r][c] = ROUND_POWER_OF_TWO_SIGNED(ipred, FILTER_INTRA_PREC_BITS);
+      ipred = c0 * preds[r - 1][c] + c1 * preds[r][c - 1] +
+              c2 * preds[r - 1][c - 1] + c3 * preds[r - 1][c + 1];
+      preds[r][c] = ROUND_POWER_OF_TWO_SIGNED(ipred, FILTER_INTRA_PREC_BITS);
     }
 
   for (r = 0; r < bs; ++r) {
     for (c = 0; c < bs; ++c) {
-      ipred = pred[r + 1][c + 1] + mean;
+      ipred = preds[r + 1][c + 1] + mean;
       dst[c] = clip_pixel(ipred);
     }
     dst += stride;
@@ -997,7 +997,7 @@ static void highbd_filter_intra_predictors_4tap(uint16_t *dst, ptrdiff_t stride,
                                                 const uint16_t *left, int mode,
                                                 int bd) {
   int k, r, c;
-  int pred[33][65];
+  int preds[33][65];
   int mean, ipred;
   const TX_SIZE tx_size =
       (bs == 32) ? TX_32X32
@@ -1016,20 +1016,20 @@ static void highbd_filter_intra_predictors_4tap(uint16_t *dst, ptrdiff_t stride,
   }
   mean = (mean + bs) / (2 * bs);
 
-  for (r = 0; r < bs; ++r) pred[r + 1][0] = (int)left[r] - mean;
+  for (r = 0; r < bs; ++r) preds[r + 1][0] = (int)left[r] - mean;
 
-  for (c = 0; c < 2 * bs + 1; ++c) pred[0][c] = (int)above[c - 1] - mean;
+  for (c = 0; c < 2 * bs + 1; ++c) preds[0][c] = (int)above[c - 1] - mean;
 
   for (r = 1; r < bs + 1; ++r)
     for (c = 1; c < 2 * bs + 1 - r; ++c) {
-      ipred = c0 * pred[r - 1][c] + c1 * pred[r][c - 1] +
-              c2 * pred[r - 1][c - 1] + c3 * pred[r - 1][c + 1];
-      pred[r][c] = ROUND_POWER_OF_TWO_SIGNED(ipred, FILTER_INTRA_PREC_BITS);
+      ipred = c0 * preds[r - 1][c] + c1 * preds[r][c - 1] +
+              c2 * preds[r - 1][c - 1] + c3 * preds[r - 1][c + 1];
+      preds[r][c] = ROUND_POWER_OF_TWO_SIGNED(ipred, FILTER_INTRA_PREC_BITS);
     }
 
   for (r = 0; r < bs; ++r) {
     for (c = 0; c < bs; ++c) {
-      ipred = pred[r + 1][c + 1] + mean;
+      ipred = preds[r + 1][c + 1] + mean;
       dst[c] = clip_pixel_highbd(ipred, bd);
     }
     dst += stride;
@@ -1188,8 +1188,6 @@ static void build_intra_predictors_high(
   }
 
   if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
-    EXT_INTRA_MODE ext_intra_mode =
-        ext_intra_mode_info->ext_intra_mode[plane != 0];
     need_left = ext_intra_extend_modes[ext_intra_mode] & NEED_LEFT;
     need_above = ext_intra_extend_modes[ext_intra_mode] & NEED_ABOVE;
   }
@@ -1202,7 +1200,6 @@ static void build_intra_predictors_high(
   assert(n_bottomleft_px >= 0);
 
   if ((!need_above && n_left_px == 0) || (!need_left && n_top_px == 0)) {
-    int i;
     const int val = (n_left_px == 0) ? base + 1 : base - 1;
     for (i = 0; i < bs; ++i) {
       aom_memset16(dst, val, bs);
@@ -1351,8 +1348,6 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
   }
 
   if (ext_intra_mode_info->use_ext_intra_mode[plane != 0]) {
-    EXT_INTRA_MODE ext_intra_mode =
-        ext_intra_mode_info->ext_intra_mode[plane != 0];
     need_left = ext_intra_extend_modes[ext_intra_mode] & NEED_LEFT;
     need_above = ext_intra_extend_modes[ext_intra_mode] & NEED_ABOVE;
   }
@@ -1373,7 +1368,6 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
   assert(n_bottomleft_px >= 0);
 
   if ((!need_above && n_left_px == 0) || (!need_left && n_top_px == 0)) {
-    int i;
     const int val = (n_left_px == 0) ? 129 : 127;
     for (i = 0; i < bs; ++i) {
       memset(dst, val, bs);
