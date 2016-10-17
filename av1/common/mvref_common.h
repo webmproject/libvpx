@@ -18,7 +18,11 @@
 extern "C" {
 #endif
 
+#if CONFIG_SIMP_MV_PRED
+#define MVREF_NEIGHBOURS 9
+#else
 #define MVREF_NEIGHBOURS 8
+#endif
 
 typedef struct position {
   int row;
@@ -96,6 +100,7 @@ static const int counter_to_context[19] = {
   BOTH_INTRA             // 18
 };
 
+#if !CONFIG_SIMP_MV_PRED
 static const POSITION mv_ref_blocks[BLOCK_SIZES][MVREF_NEIGHBOURS] = {
   // 4X4
   { { -1, 0 },
@@ -245,6 +250,7 @@ static const POSITION mv_ref_blocks[BLOCK_SIZES][MVREF_NEIGHBOURS] = {
     { -2, 12 } },
 #endif  // CONFIG_EXT_PARTITION
 };
+#endif
 
 static const int idx_n_column_to_subblock[4][2] = {
   { 1, 2 }, { 1, 3 }, { 3, 2 }, { 3, 3 }
@@ -268,22 +274,30 @@ static INLINE void clamp_mv_ref(MV *mv, int bw, int bh, const MACROBLOCKD *xd) {
 // on whether the block_size < 8x8 and we have check_sub_blocks set.
 static INLINE int_mv get_sub_block_mv(const MODE_INFO *candidate, int which_mv,
                                       int search_col, int block_idx) {
+#if CONFIG_SIMP_MV_PRED
+  return candidate->mbmi.mv[which_mv];
+#else
   return block_idx >= 0 && candidate->mbmi.sb_type < BLOCK_8X8
              ? candidate
                    ->bmi[idx_n_column_to_subblock[block_idx][search_col == 0]]
                    .as_mv[which_mv]
              : candidate->mbmi.mv[which_mv];
+#endif
 }
 
 #if CONFIG_REF_MV
 static INLINE int_mv get_sub_block_pred_mv(const MODE_INFO *candidate,
                                            int which_mv, int search_col,
                                            int block_idx) {
+#if CONFIG_SIMP_MV_PRED
+  return candidate->mbmi.mv[which_mv];
+#else
   return block_idx >= 0 && candidate->mbmi.sb_type < BLOCK_8X8
              ? candidate
                    ->bmi[idx_n_column_to_subblock[block_idx][search_col == 0]]
                    .pred_mv[which_mv]
              : candidate->mbmi.pred_mv[which_mv];
+#endif
 }
 #endif
 
