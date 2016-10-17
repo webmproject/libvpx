@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1cad5b6a_0b7701b8",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 952,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2016-10-17T17:43:55Z",
+      "side": 1,
+      "message": "changed to return 0 on success.",
+      "parentUuid": "fc240697_457f6a34",
+      "revId": "8ad1c8dd1c29a5836ce033bdda42a2289ecb2e9e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1c28fb81_f004be33",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 6
