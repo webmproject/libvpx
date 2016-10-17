@@ -1753,13 +1753,11 @@ static void test_decode(struct stream_state *stream,
   /* Get the internal reference frame */
   if (strcmp(codec->name, "vp8") == 0) {
     struct aom_ref_frame ref_enc, ref_dec;
-    int width, height;
-
-    width = (stream->config.cfg.g_w + 15) & ~15;
-    height = (stream->config.cfg.g_h + 15) & ~15;
-    aom_img_alloc(&ref_enc.img, AOM_IMG_FMT_I420, width, height, 1);
+    const unsigned int frame_width = (stream->config.cfg.g_w + 15) & ~15;
+    const unsigned int frame_height = (stream->config.cfg.g_h + 15) & ~15;
+    aom_img_alloc(&ref_enc.img, AOM_IMG_FMT_I420, frame_width, frame_height, 1);
     enc_img = ref_enc.img;
-    aom_img_alloc(&ref_dec.img, AOM_IMG_FMT_I420, width, height, 1);
+    aom_img_alloc(&ref_dec.img, AOM_IMG_FMT_I420, frame_width, frame_height, 1);
     dec_img = ref_dec.img;
 
     ref_enc.frame_type = AOM_LAST_FRAME;
@@ -2131,10 +2129,10 @@ int main(int argc, const char **argv_) {
           } else {
             const int64_t input_pos = ftello(input.file);
             const int64_t input_pos_lagged = input_pos - lagged_count;
-            const int64_t limit = input.length;
+            const int64_t input_limit = input.length;
 
             rate = cx_time ? input_pos_lagged * (int64_t)1000000 / cx_time : 0;
-            remaining = limit - input_pos + lagged_count;
+            remaining = input_limit - input_pos + lagged_count;
           }
 
           average_rate =

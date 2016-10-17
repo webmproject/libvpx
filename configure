@@ -611,6 +611,10 @@ process_toolchain() {
         check_add_cflags -Wuninitialized
         check_add_cflags -Wunused-variable
         check_add_cflags -Wsign-compare
+        # Enabling the following warning for C++ generates some useless warnings
+        # about some function parameters shadowing class member function names.
+        # So, only enable this warning for C code.
+        check_cflags "-Wshadow" && add_cflags_only "-Wshadow"
         case ${CC} in
           *clang*) ;;
           *) check_add_cflags -Wunused-but-set-variable ;;

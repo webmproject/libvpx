@@ -893,7 +893,7 @@ static int main_loop(int argc, const char **argv_) {
 
       if (single_file) {
         if (use_y4m) {
-          char buf[Y4M_BUFFER_SIZE] = { 0 };
+          char y4m_buf[Y4M_BUFFER_SIZE] = { 0 };
           size_t len = 0;
           if (img->fmt == AOM_IMG_FMT_I440 || img->fmt == AOM_IMG_FMT_I44016) {
             fprintf(stderr, "Cannot produce y4m output for 440 sampling.\n");
@@ -902,21 +902,22 @@ static int main_loop(int argc, const char **argv_) {
           if (frame_out == 1) {
             // Y4M file header
             len = y4m_write_file_header(
-                buf, sizeof(buf), aom_input_ctx.width, aom_input_ctx.height,
-                &aom_input_ctx.framerate, img->fmt, img->bit_depth);
+                y4m_buf, sizeof(y4m_buf), aom_input_ctx.width,
+                aom_input_ctx.height, &aom_input_ctx.framerate, img->fmt,
+                img->bit_depth);
             if (do_md5) {
-              MD5Update(&md5_ctx, (md5byte *)buf, (unsigned int)len);
+              MD5Update(&md5_ctx, (md5byte *)y4m_buf, (unsigned int)len);
             } else {
-              fputs(buf, outfile);
+              fputs(y4m_buf, outfile);
             }
           }
 
           // Y4M frame header
-          len = y4m_write_frame_header(buf, sizeof(buf));
+          len = y4m_write_frame_header(y4m_buf, sizeof(y4m_buf));
           if (do_md5) {
-            MD5Update(&md5_ctx, (md5byte *)buf, (unsigned int)len);
+            MD5Update(&md5_ctx, (md5byte *)y4m_buf, (unsigned int)len);
           } else {
-            fputs(buf, outfile);
+            fputs(y4m_buf, outfile);
           }
         } else {
           if (frame_out == 1) {

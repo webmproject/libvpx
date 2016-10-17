@@ -9381,7 +9381,7 @@ void av1_rd_pick_inter_mode_sb(const AV1_COMP *cpi, TileDataEnc *tile_data,
     int best_rate_nocoef;
 #endif
     int64_t distortion2 = 0, distortion_y = 0, dummy_rd = best_rd, this_rd;
-    int skippable = 0, rate_overhead = 0;
+    int skippable = 0;
     TX_SIZE best_tx_size, uv_tx;
     TX_TYPE best_tx_type;
     PALETTE_MODE_INFO palette_mode_info;
@@ -9389,6 +9389,7 @@ void av1_rd_pick_inter_mode_sb(const AV1_COMP *cpi, TileDataEnc *tile_data,
         x->palette_buffer->best_palette_color_map;
     uint8_t *const color_map = xd->plane[0].color_index_map;
 
+    rate_overhead = 0;
     mbmi->mode = DC_PRED;
     mbmi->uv_mode = DC_PRED;
     mbmi->ref_frame[0] = INTRA_FRAME;
@@ -9551,7 +9552,6 @@ PALETTE_EXIT:
         nearmv[1] = frame_mv[NEARMV][refs[1]];
       }
 #else
-      int i;
       int ref_set = (mbmi_ext->ref_mv_count[rf_type] >= 2)
                         ? AOMMIN(2, mbmi_ext->ref_mv_count[rf_type] - 2)
                         : INT_MAX;
