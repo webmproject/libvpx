@@ -355,6 +355,8 @@ static const arg_def_t cq_level =
     ARG_DEF(NULL, "cq-level", 1, "Constant/Constrained Quality level");
 static const arg_def_t max_intra_rate_pct =
     ARG_DEF(NULL, "max-intra-rate", 1, "Max I-frame bitrate (pct)");
+static const arg_def_t gf_cbr_boost_pct = ARG_DEF(
+    NULL, "gf-cbr-boost", 1, "Boost for Golden Frame in CBR mode (pct)");
 
 #if CONFIG_VP8_ENCODER
 static const arg_def_t cpu_used_vp8 =
@@ -363,12 +365,21 @@ static const arg_def_t token_parts =
     ARG_DEF(NULL, "token-parts", 1, "Number of token partitions to use, log2");
 static const arg_def_t screen_content_mode =
     ARG_DEF(NULL, "screen-content-mode", 1, "Screen content mode");
-static const arg_def_t *vp8_args[] = {
-  &cpu_used_vp8,        &auto_altref, &noise_sens,     &sharpness,
-  &static_thresh,       &token_parts, &arnr_maxframes, &arnr_strength,
-  &arnr_type,           &tune_ssim,   &cq_level,       &max_intra_rate_pct,
-  &screen_content_mode, NULL
-};
+static const arg_def_t *vp8_args[] = { &cpu_used_vp8,
+                                       &auto_altref,
+                                       &noise_sens,
+                                       &sharpness,
+                                       &static_thresh,
+                                       &token_parts,
+                                       &arnr_maxframes,
+                                       &arnr_strength,
+                                       &arnr_type,
+                                       &tune_ssim,
+                                       &cq_level,
+                                       &max_intra_rate_pct,
+                                       &gf_cbr_boost_pct,
+                                       &screen_content_mode,
+                                       NULL };
 static const int vp8_arg_ctrl_map[] = { VP8E_SET_CPUUSED,
                                         VP8E_SET_ENABLEAUTOALTREF,
                                         VP8E_SET_NOISE_SENSITIVITY,
@@ -381,6 +392,7 @@ static const int vp8_arg_ctrl_map[] = { VP8E_SET_CPUUSED,
                                         VP8E_SET_TUNING,
                                         VP8E_SET_CQ_LEVEL,
                                         VP8E_SET_MAX_INTRA_BITRATE_PCT,
+                                        VP8E_SET_GF_CBR_BOOST_PCT,
                                         VP8E_SET_SCREEN_CONTENT_MODE,
                                         0 };
 #endif
@@ -407,8 +419,6 @@ static const arg_def_t alt_ref_aq = ARG_DEF(NULL, "alt-ref-aq", 1,
 static const arg_def_t frame_periodic_boost =
     ARG_DEF(NULL, "frame-boost", 1,
             "Enable frame periodic boost (0: off (default), 1: on)");
-static const arg_def_t gf_cbr_boost_pct = ARG_DEF(
-    NULL, "gf-cbr-boost", 1, "Boost for Golden Frame in CBR mode (pct)");
 static const arg_def_t max_inter_rate_pct =
     ARG_DEF(NULL, "max-inter-rate", 1, "Max P-frame bitrate (pct)");
 static const arg_def_t min_gf_interval = ARG_DEF(

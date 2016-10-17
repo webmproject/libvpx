@@ -43,6 +43,7 @@ class DatarateTestLarge
     duration_ = 0.0;
     denoiser_offon_test_ = 0;
     denoiser_offon_period_ = -1;
+    gf_boost_ = 0;
   }
 
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
@@ -50,6 +51,7 @@ class DatarateTestLarge
     if (video->frame() == 0) {
       encoder->Control(VP8E_SET_NOISE_SENSITIVITY, denoiser_on_);
       encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
+      encoder->Control(VP8E_SET_GF_CBR_BOOST_PCT, gf_boost_);
     }
 
     if (denoiser_offon_test_) {
@@ -142,6 +144,7 @@ class DatarateTestLarge
   int denoiser_offon_test_;
   int denoiser_offon_period_;
   int set_cpu_used_;
+  int gf_boost_;
 };
 
 #if CONFIG_TEMPORAL_DENOISING
@@ -424,6 +427,29 @@ TEST_P(DatarateTestRealTime, DropFramesMultiThreads) {
       << " The datarate for the file missed the target!";
 }
 #endif
+
+TEST_P(DatarateTestRealTime, GFBoost) {
+  denoiser_on_ = 0;
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_dropframe_thresh = 0;
+  cfg_.rc_max_quantizer = 56;
+  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.g_error_resilient = 0;
+
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 300);
+  cfg_.rc_target_bitrate = 300;
+  ResetModel();
+  // Apply a gf boost.
+  gf_boost_ = 50;
+
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_GE(cfg_.rc_target_bitrate, effective_datarate_ * 0.95)
+      << " The datarate for the file exceeds the target!";
+
+  ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.4)
+      << " The datarate for the file missed the target!";
+}
 
 class DatarateTestVP9Large
     : public ::libvpx_test::EncoderTest,
