@@ -21,7 +21,7 @@ static INLINE void fdct32x32(int rd_transform, const int16_t *src,
   if (rd_transform)
     aom_fdct32x32_rd(src, dst, src_stride);
   else
-    aom_fdct32x32(src, dst, src_stride);
+    av1_fht32x32(src, dst, src_stride, DCT_DCT);
 }
 
 static void fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,

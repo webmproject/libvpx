@@ -198,8 +198,8 @@ static void mm256_transpose_16x16(__m256i *in) {
   in[15] = _mm256_permute2x128_si256(tr0_7, tr0_f, 0x31);
 }
 
-static void load_buffer_16x16(const int16_t *input, int stride, int flipud,
-                              int fliplr, __m256i *in) {
+static INLINE void load_buffer_16x16(const int16_t *input, int stride,
+                                     int flipud, int fliplr, __m256i *in) {
   if (!flipud) {
     in[0] = _mm256_loadu_si256((const __m256i *)(input + 0 * stride));
     in[1] = _mm256_loadu_si256((const __m256i *)(input + 1 * stride));
@@ -1273,7 +1273,6 @@ void aom_fdct32x32_1_avx2(const int16_t *input, tran_low_t *output,
   _mm256_zeroupper();
 }
 
-#if CONFIG_EXT_TX
 static void mm256_vectors_swap(__m256i *a0, __m256i *a1, const int size) {
   int i = 0;
   __m256i temp;
@@ -1622,7 +1621,6 @@ static void fdct32_avx2(__m256i *in0, __m256i *in1) {
 
   mm256_transpose_32x32(in0, in1);
 }
-#endif  // CONFIG_EXT_TX
 
 static INLINE void write_buffer_32x32(const __m256i *in0, const __m256i *in1,
                                       int stride, tran_low_t *output) {
@@ -1667,9 +1665,11 @@ static void fhalfright32_avx2(__m256i *in0, __m256i *in1) {
   mm256_vectors_swap(in1, &in1[16], 16);
   mm256_transpose_32x32(in0, in1);
 }
+#endif  // CONFIG_EXT_TX
 
-static void load_buffer_32x32(const int16_t *input, int stride, int flipud,
-                              int fliplr, __m256i *in0, __m256i *in1) {
+static INLINE void load_buffer_32x32(const int16_t *input, int stride,
+                                     int flipud, int fliplr, __m256i *in0,
+                                     __m256i *in1) {
   // Load 4 16x16 blocks
   const int16_t *topL = input;
   const int16_t *topR = input + 16;
@@ -1708,7 +1708,6 @@ static void load_buffer_32x32(const int16_t *input, int stride, int flipud,
   load_buffer_16x16(topR, stride, flipud, fliplr, in1);
   load_buffer_16x16(botR, stride, flipud, fliplr, in1 + 16);
 }
-#endif  // CONFIG_EXT_TX
 
 static void nr_right_shift_32x32_16col(__m256i *in) {
   int i = 0;
@@ -1729,8 +1728,7 @@ static void nr_right_shift_32x32(__m256i *in0, __m256i *in1) {
   nr_right_shift_32x32_16col(in1);
 }
 
-#if CONFIG_EXT_TX
-static void pr_right_shift_32x32_16col(__m256i *in) {
+static INLINE void pr_right_shift_32x32_16col(__m256i *in) {
   int i = 0;
   const __m256i zero = _mm256_setzero_si256();
   const __m256i one = _mm256_set1_epi16(1);
@@ -1745,11 +1743,12 @@ static void pr_right_shift_32x32_16col(__m256i *in) {
 }
 
 // Positive rounding
-static void pr_right_shift_32x32(__m256i *in0, __m256i *in1) {
+static INLINE void pr_right_shift_32x32(__m256i *in0, __m256i *in1) {
   pr_right_shift_32x32_16col(in0);
   pr_right_shift_32x32_16col(in1);
 }
 
+#if CONFIG_EXT_TX
 static void fidtx32_avx2(__m256i *in0, __m256i *in1) {
   int i = 0;
   while (i < 32) {
@@ -1761,23 +1760,42 @@ static void fidtx32_avx2(__m256i *in0, __m256i *in1) {
 }
 #endif
 
+static INLINE int range_check_dct32x32(const __m256i *in0, const __m256i *in1,
+                                       int row) {
+  __m256i value, bits0, bits1;
+  const __m256i bound = _mm256_set1_epi16((1 << 6) - 1);
+  int flag;
+  int i = 0;
+
+  while (i < row) {
+    value = _mm256_abs_epi16(in0[i]);
+    bits0 = _mm256_cmpgt_epi16(value, bound);
+    value = _mm256_abs_epi16(in1[i]);
+    bits1 = _mm256_cmpgt_epi16(value, bound);
+    bits0 = _mm256_or_si256(bits0, bits1);
+    flag = _mm256_movemask_epi8(bits0);
+    if (flag) return 1;
+    i++;
+  }
+  return 0;
+}
+
 void av1_fht32x32_avx2(const int16_t *input, tran_low_t *output, int stride,
                        int tx_type) {
   __m256i in0[32];  // left 32 columns
   __m256i in1[32];  // right 32 columns
-  (void)input;
-  (void)stride;
 
   switch (tx_type) {
-// TODO(luoyi): For DCT_DCT, fwd_txfm_32x32() uses aom set. But this
-// function has better speed. The replacement must work with the
-// corresponding inverse transform.
-// case DCT_DCT:
-//   load_buffer_32x32(input, stride, 0, 0, in0, in1);
-//   fdct32_avx2(in0, in1);
-//   pr_right_shift_32x32(in0, in1);
-//   fdct32_avx2(in0, in1);
-//   break;
+    case DCT_DCT:
+      load_buffer_32x32(input, stride, 0, 0, in0, in1);
+      if (range_check_dct32x32(in0, in1, 32)) {
+        aom_fdct32x32_avx2(input, output, stride);
+        return;
+      }
+      fdct32_avx2(in0, in1);
+      pr_right_shift_32x32(in0, in1);
+      fdct32_avx2(in0, in1);
+      break;
 #if CONFIG_EXT_TX
     case ADST_DCT:
       load_buffer_32x32(input, stride, 0, 0, in0, in1);
