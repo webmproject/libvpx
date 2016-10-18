@@ -3309,9 +3309,9 @@ static int64_t select_tx_size_fix_type(const AV1_COMP *cpi, MACROBLOCK *x,
     int ext_tx_set = get_ext_tx_set(mbmi->tx_size, bsize, is_inter);
     if (is_inter) {
       if (ext_tx_set > 0)
-        *rate += cpi->inter_tx_type_costs[ext_tx_set]
-                                         [txsize_sqr_up_map[mbmi->tx_size]]
-                                         [mbmi->tx_type];
+        *rate +=
+            cpi->inter_tx_type_costs[ext_tx_set][txsize_sqr_map[mbmi->tx_size]]
+                                    [mbmi->tx_type];
     } else {
       if (ext_tx_set > 0 && ALLOW_INTRA_EXT_TX)
         *rate += cpi->intra_tx_type_costs[ext_tx_set][mbmi->tx_size][mbmi->mode]
