@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bc28cfc6_9f8ca7c3",
+        "filename": "av1/encoder/encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2178,
+      "author": {
+        "id": 1144769
+      },
+      "writtenOn": "2016-10-18T18:03:39Z",
+      "side": 1,
+      "message": "This line also needs be removed.",
+      "range": {
+        "startLine": 2178,
+        "startChar": 28,
+        "endLine": 2178,
+        "endChar": 29
+      },
+      "revId": "8abeaf8d93e15f709b975093045cbaf87c20b225",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
