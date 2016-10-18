@@ -4408,7 +4408,11 @@ static int64_t encode_inter_mb_segment(AV1_COMP *cpi, MACROBLOCK *x,
         block = k;
       else
         block = (i ? 2 : 0);
+#if CONFIG_VAR_TX
+      coeff_ctx = get_entropy_context(tx_size, ta + (k & 1), tl + (k >> 1));
+#else
       coeff_ctx = combine_entropy_contexts(*(ta + (k & 1)), *(tl + (k >> 1)));
+#endif
 #if CONFIG_NEW_QUANT
       av1_xform_quant_fp_nuq(x, 0, block, idy + (i >> 1), idx + (i & 0x01),
                              BLOCK_8X8, tx_size, coeff_ctx);
