@@ -12,7 +12,7 @@
 #include "./av1_rtcd.h"
 #include "aom_ports/mem.h"
 #include "av1/common/enums.h"
-#include "av1/common/intra_filters.h"
+#include "av1/common/reconintra.h"
 
 static INLINE void AddPixelsSmall(const uint8_t *above, const uint8_t *left,
                                   __m128i *sum) {
@@ -153,25 +153,25 @@ static INLINE void GetIntraFilterParams(int bs, int mode, __m128i *params) {
       (bs == 32) ? TX_32X32
                  : ((bs == 16) ? TX_16X16 : ((bs == 8) ? TX_8X8 : (TX_4X4)));
   // c0
-  params[0] = _mm_set_epi32(filter_intra_taps_4[tx_size][mode][0],
-                            filter_intra_taps_4[tx_size][mode][0],
-                            filter_intra_taps_4[tx_size][mode][0],
-                            filter_intra_taps_4[tx_size][mode][0]);
+  params[0] = _mm_set_epi32(av1_filter_intra_taps_4[tx_size][mode][0],
+                            av1_filter_intra_taps_4[tx_size][mode][0],
+                            av1_filter_intra_taps_4[tx_size][mode][0],
+                            av1_filter_intra_taps_4[tx_size][mode][0]);
   // c1
-  params[1] = _mm_set_epi32(filter_intra_taps_4[tx_size][mode][1],
-                            filter_intra_taps_4[tx_size][mode][1],
-                            filter_intra_taps_4[tx_size][mode][1],
-                            filter_intra_taps_4[tx_size][mode][1]);
+  params[1] = _mm_set_epi32(av1_filter_intra_taps_4[tx_size][mode][1],
+                            av1_filter_intra_taps_4[tx_size][mode][1],
+                            av1_filter_intra_taps_4[tx_size][mode][1],
+                            av1_filter_intra_taps_4[tx_size][mode][1]);
   // c2
-  params[2] = _mm_set_epi32(filter_intra_taps_4[tx_size][mode][2],
-                            filter_intra_taps_4[tx_size][mode][2],
-                            filter_intra_taps_4[tx_size][mode][2],
-                            filter_intra_taps_4[tx_size][mode][2]);
+  params[2] = _mm_set_epi32(av1_filter_intra_taps_4[tx_size][mode][2],
+                            av1_filter_intra_taps_4[tx_size][mode][2],
+                            av1_filter_intra_taps_4[tx_size][mode][2],
+                            av1_filter_intra_taps_4[tx_size][mode][2]);
   // c3
-  params[3] = _mm_set_epi32(filter_intra_taps_4[tx_size][mode][3],
-                            filter_intra_taps_4[tx_size][mode][3],
-                            filter_intra_taps_4[tx_size][mode][3],
-                            filter_intra_taps_4[tx_size][mode][3]);
+  params[3] = _mm_set_epi32(av1_filter_intra_taps_4[tx_size][mode][3],
+                            av1_filter_intra_taps_4[tx_size][mode][3],
+                            av1_filter_intra_taps_4[tx_size][mode][3],
+                            av1_filter_intra_taps_4[tx_size][mode][3]);
 }
 
 static const int maxBlkSize = 32;

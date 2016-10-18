@@ -43,4 +43,9 @@ static const INTERINTRA_MODE intra_to_interintra_mode[INTRA_MODES] = {
 }  // extern "C"
 #endif
 
+#if CONFIG_FILTER_INTRA
+#define FILTER_INTRA_PREC_BITS 10
+extern int av1_filter_intra_taps_4[TX_SIZES][INTRA_MODES][4];
+#endif  // CONFIG_FILTER_INTRA
+
 #endif  // AV1_COMMON_RECONINTRA_H_
