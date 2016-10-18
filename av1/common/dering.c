@@ -147,10 +147,9 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
   int sbr, sbc;
   int nhsb, nvsb;
   od_dering_in src[OD_DERING_INBUF_SIZE];
+  int16_t *_linebuf[3];
   int16_t *linebuf[3];
-  int16_t *curr_linebuf[3];
-  int16_t *prev_linebuf[3];
-  int16_t colbuf[3][OD_BSIZE_MAX + OD_FILT_VBORDER][OD_FILT_HBORDER];
+  int16_t colbuf[3][OD_BSIZE_MAX + 2*OD_FILT_VBORDER][OD_FILT_HBORDER];
   unsigned char bskip[MAX_MIB_SIZE*MAX_MIB_SIZE][2];
   unsigned char *row_dering, *prev_row_dering, *curr_row_dering;
   int dering_count;
@@ -181,16 +180,15 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
   stride = (cm->mi_cols << bsize[0]) + 2*OD_FILT_HBORDER;
   for (pli = 0; pli < nplanes; pli++) {
     int i;
-    linebuf[pli] = aom_malloc(sizeof(*linebuf) * 2*OD_FILT_VBORDER * stride);
-    for (i = 0; i < 2 * OD_FILT_VBORDER * stride; i++)
-      linebuf[pli][i] = OD_DERING_VERY_LARGE;
-    prev_linebuf[pli] = linebuf[pli] + OD_FILT_HBORDER;
-    curr_linebuf[pli] = prev_linebuf[pli] + OD_FILT_VBORDER * stride;
+    _linebuf[pli] = aom_malloc(sizeof(*_linebuf) * OD_FILT_VBORDER * stride);
+    for (i = 0; i < OD_FILT_VBORDER * stride; i++)
+      _linebuf[pli][i] = OD_DERING_VERY_LARGE;
+    linebuf[pli] = _linebuf[pli] + OD_FILT_HBORDER;
   }
   for (sbr = 0; sbr < nvsb; sbr++) {
     last_sbc = -1;
     for (pli = 0; pli < nplanes; pli++) {
-      for (r = 0; r < (MAX_MIB_SIZE << bsize[pli]) + OD_FILT_VBORDER; r++) {
+      for (r = 0; r < (MAX_MIB_SIZE << bsize[pli]) + 2*OD_FILT_VBORDER; r++) {
         for (c = 0; c < OD_FILT_HBORDER; c++) {
           colbuf[pli][r][c] = OD_DERING_VERY_LARGE;
         }
@@ -239,16 +237,6 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
             }
           }
         }
-        if (sbc == last_sbc + 1) {
-          /* If we deringed the superblock on the left then we need to copy in
-             saved pixels. */
-          for (r = 0; r < rend; r++) {
-            for (c = 0; c < OD_FILT_HBORDER; c++) {
-              src[(r + OD_FILT_VBORDER) * OD_FILT_BSTRIDE + c] =
-                  colbuf[pli][r][c];
-            }
-          }
-        }
         if (sbr == nvsb - 1) {
           /* On the last superblock row, fill in the bottom border with
              OD_DERING_VERY_LARGE to avoid filtering with the outside. */
@@ -268,7 +256,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
               j < (nhb << bsize[pli]) + OD_FILT_HBORDER;
               j++) {
             in[i * OD_FILT_BSTRIDE + j] =
-                prev_linebuf[pli][(OD_FILT_VBORDER + i) * stride +
+                linebuf[pli][(OD_FILT_VBORDER + i) * stride +
                                   (sbc * MAX_MIB_SIZE << bsize[pli]) + j];
           }
         }
@@ -298,15 +286,24 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
               coffset + (nhb << bsize[pli]),
               xd->plane[pli].dst.stride, OD_FILT_VBORDER, OD_FILT_HBORDER);
         }
-        for (r = 0; r < rend; r++) {
+        if (sbc == last_sbc + 1) {
+          /* If we deringed the superblock on the left then we need to copy in
+             saved pixels. */
+          for (r = 0; r < rend + OD_FILT_VBORDER; r++) {
+            for (c = 0; c < OD_FILT_HBORDER; c++) {
+              src[r * OD_FILT_BSTRIDE + c] = colbuf[pli][r][c];
+            }
+          }
+        }
+        for (r = 0; r < rend + OD_FILT_VBORDER; r++) {
           for (c = 0; c < OD_FILT_HBORDER; c++) {
             /* Saving pixels in case we need to dering the superblock on the
                right. */
-            colbuf[pli][r][c] = src[(r + OD_FILT_VBORDER) * OD_FILT_BSTRIDE + c
+            colbuf[pli][r][c] = src[r * OD_FILT_BSTRIDE + c
                                     + (nhb << bsize[pli])];
           }
         }
-        copy_sb8_16(cm, &curr_linebuf[pli][coffset], stride, xd->plane[pli].dst.buf,
+        copy_sb8_16(cm, &linebuf[pli][coffset], stride, xd->plane[pli].dst.buf,
             (MAX_MIB_SIZE << bsize[pli]) * (sbr + 1) - OD_FILT_VBORDER, coffset,
             xd->plane[pli].dst.stride, OD_FILT_VBORDER,
             (nhb << bsize[pli]));
@@ -343,12 +340,6 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
       }
       last_sbc = sbc;
     }
-    for (pli = 0; pli < nplanes; pli++) {
-      int16_t *tmp;
-      tmp = prev_linebuf[pli];
-      prev_linebuf[pli] = curr_linebuf[pli];
-      curr_linebuf[pli] = tmp;
-    }
     {
       unsigned char *tmp;
       tmp = prev_row_dering;
@@ -358,6 +349,6 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
   }
   aom_free(row_dering);
   for (pli = 0; pli < nplanes; pli++) {
-    aom_free(linebuf[pli]);
+    aom_free(_linebuf[pli]);
   }
 }
