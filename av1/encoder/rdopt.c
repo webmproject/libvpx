@@ -4039,19 +4039,6 @@ static int64_t rd_pick_intra_sbuv_mode(AV1_COMP *cpi, MACROBLOCK *x, int *rate,
   return best_rd;
 }
 
-static int64_t rd_sbuv_dcpred(const AV1_COMP *cpi, MACROBLOCK *x, int *rate,
-                              int *rate_tokenonly, int64_t *distortion,
-                              int *skippable, BLOCK_SIZE bsize) {
-  int64_t unused;
-
-  x->e_mbd.mi[0]->mbmi.uv_mode = DC_PRED;
-  super_block_uvrd(cpi, x, rate_tokenonly, distortion, skippable, &unused,
-                   bsize, INT64_MAX);
-  *rate = *rate_tokenonly +
-          cpi->intra_uv_mode_cost[x->e_mbd.mi[0]->mbmi.mode][DC_PRED];
-  return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
-}
-
 static void choose_intra_uv_mode(AV1_COMP *cpi, MACROBLOCK *const x,
                                  PICK_MODE_CONTEXT *ctx, BLOCK_SIZE bsize,
                                  TX_SIZE max_tx_size, int *rate_uv,
@@ -4059,17 +4046,9 @@ static void choose_intra_uv_mode(AV1_COMP *cpi, MACROBLOCK *const x,
                                  int *skip_uv, PREDICTION_MODE *mode_uv) {
   // Use an estimated rd for uv_intra based on DC_PRED if the
   // appropriate speed flag is set.
-  if (cpi->sf.use_uv_intra_rd_estimate) {
-    rd_sbuv_dcpred(cpi, x, rate_uv, rate_uv_tokenonly, dist_uv, skip_uv,
-                   bsize < BLOCK_8X8 ? BLOCK_8X8 : bsize);
-    // Else do a proper rd search for each possible transform size that may
-    // be considered in the main rd loop.
-  } else {
-    (void)ctx;
-    rd_pick_intra_sbuv_mode(cpi, x, rate_uv, rate_uv_tokenonly, dist_uv,
-                            skip_uv, bsize < BLOCK_8X8 ? BLOCK_8X8 : bsize,
-                            max_tx_size);
-  }
+  (void)ctx;
+  rd_pick_intra_sbuv_mode(cpi, x, rate_uv, rate_uv_tokenonly, dist_uv, skip_uv,
+                          bsize < BLOCK_8X8 ? BLOCK_8X8 : bsize, max_tx_size);
   *mode_uv = x->e_mbd.mi[0]->mbmi.uv_mode;
 }
 
@@ -8546,11 +8525,9 @@ void av1_rd_pick_inter_mode_sb(AV1_COMP *cpi, TileDataEnc *tile_data,
     int skippable = 0;
     int this_skip2 = 0;
     int64_t total_sse = INT64_MAX;
-    int early_term = 0;
 #if CONFIG_REF_MV
     uint8_t ref_frame_type;
 #endif
-
     mode_index = mode_map[midx];
     this_mode = av1_mode_order[mode_index].mode;
     ref_frame = av1_mode_order[mode_index].ref_frame[0];
@@ -9255,27 +9232,6 @@ void av1_rd_pick_inter_mode_sb(AV1_COMP *cpi, TileDataEnc *tile_data,
           memcpy(ctx->blk_skip[i], x->blk_skip[i],
                  sizeof(uint8_t) * ctx->num_4x4_blk);
 #endif
-
-        // TODO(debargha): enhance this test with a better distortion prediction
-        // based on qp, activity mask and history
-        if ((mode_search_skip_flags & FLAG_EARLY_TERMINATE) &&
-            (mode_index > MIN_EARLY_TERM_INDEX)) {
-          int qstep = xd->plane[0].dequant[1];
-          // TODO(debargha): Enhance this by specializing for each mode_index
-          int scale = 4;
-#if CONFIG_AOM_HIGHBITDEPTH
-          if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-            qstep >>= (xd->bd - 8);
-          }
-#endif  // CONFIG_AOM_HIGHBITDEPTH
-          if (x->source_variance < UINT_MAX) {
-            const int var_adjust = (x->source_variance < 16);
-            scale -= var_adjust;
-          }
-          if (ref_frame > INTRA_FRAME && distortion2 * scale < qstep * qstep) {
-            early_term = 1;
-          }
-        }
       }
     }
 
@@ -9304,8 +9260,6 @@ void av1_rd_pick_inter_mode_sb(AV1_COMP *cpi, TileDataEnc *tile_data,
       if (hybrid_rd < best_pred_rd[REFERENCE_MODE_SELECT])
         best_pred_rd[REFERENCE_MODE_SELECT] = hybrid_rd;
     }
-
-    if (early_term) break;
 
     if (x->skip && !comp_pred) break;
   }
@@ -9710,20 +9664,6 @@ PALETTE_EXIT:
     return;
   }
 
-  // If we used an estimate for the uv intra rd in the loop above...
-  if (sf->use_uv_intra_rd_estimate) {
-    // Do Intra UV best rd mode selection if best mode choice above was intra.
-    if (best_mbmode.ref_frame[0] == INTRA_FRAME) {
-      TX_SIZE uv_tx_size;
-      *mbmi = best_mbmode;
-      uv_tx_size = get_uv_tx_size(mbmi, &xd->plane[1]);
-      rd_pick_intra_sbuv_mode(
-          cpi, x, &rate_uv_intra[uv_tx_size], &rate_uv_tokenonly[uv_tx_size],
-          &dist_uv[uv_tx_size], &skip_uv[uv_tx_size],
-          bsize < BLOCK_8X8 ? BLOCK_8X8 : bsize, uv_tx_size);
-    }
-  }
-
 #if CONFIG_DUAL_FILTER
   assert((cm->interp_filter == SWITCHABLE) ||
          (cm->interp_filter == best_mbmode.interp_filter[0]) ||
@@ -9965,8 +9905,8 @@ void av1_rd_pick_inter_mode_sub8x8(struct AV1_COMP *cpi, TileDataEnc *tile_data,
 #else
   InterpFilter tmp_best_filter = SWITCHABLE;
 #endif
-  int rate_uv_intra, rate_uv_tokenonly;
-  int64_t dist_uv;
+  int rate_uv_intra, rate_uv_tokenonly = INT_MAX;
+  int64_t dist_uv = INT64_MAX;
   int skip_uv;
   PREDICTION_MODE mode_uv = DC_PRED;
   const int intra_cost_penalty = av1_get_intra_cost_penalty(
@@ -10059,7 +9999,6 @@ void av1_rd_pick_inter_mode_sub8x8(struct AV1_COMP *cpi, TileDataEnc *tile_data,
     int i;
     int this_skip2 = 0;
     int64_t total_sse = INT_MAX;
-    int early_term = 0;
 
     ref_frame = av1_ref_order[ref_index].ref_frame[0];
     second_ref_frame = av1_ref_order[ref_index].ref_frame[1];
@@ -10601,27 +10540,6 @@ void av1_rd_pick_inter_mode_sub8x8(struct AV1_COMP *cpi, TileDataEnc *tile_data,
 #endif
 
         for (i = 0; i < 4; i++) best_bmodes[i] = xd->mi[0]->bmi[i];
-
-        // TODO(debargha): enhance this test with a better distortion prediction
-        // based on qp, activity mask and history
-        if ((sf->mode_search_skip_flags & FLAG_EARLY_TERMINATE) &&
-            (ref_index > MIN_EARLY_TERM_INDEX)) {
-          int qstep = xd->plane[0].dequant[1];
-          // TODO(debargha): Enhance this by specializing for each mode_index
-          int scale = 4;
-#if CONFIG_AOM_HIGHBITDEPTH
-          if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-            qstep >>= (xd->bd - 8);
-          }
-#endif  // CONFIG_AOM_HIGHBITDEPTH
-          if (x->source_variance < UINT_MAX) {
-            const int var_adjust = (x->source_variance < 16);
-            scale -= var_adjust;
-          }
-          if (ref_frame > INTRA_FRAME && distortion2 * scale < qstep * qstep) {
-            early_term = 1;
-          }
-        }
       }
     }
 
@@ -10649,8 +10567,6 @@ void av1_rd_pick_inter_mode_sub8x8(struct AV1_COMP *cpi, TileDataEnc *tile_data,
         best_pred_rd[REFERENCE_MODE_SELECT] = hybrid_rd;
     }
 
-    if (early_term) break;
-
     if (x->skip && !comp_pred) break;
   }
 
@@ -10661,16 +10577,6 @@ void av1_rd_pick_inter_mode_sub8x8(struct AV1_COMP *cpi, TileDataEnc *tile_data,
     *returnrate_nocoef = INT_MAX;
 #endif  // CONFIG_SUPERTX
     return;
-  }
-
-  // If we used an estimate for the uv intra rd in the loop above...
-  if (sf->use_uv_intra_rd_estimate) {
-    // Do Intra UV best rd mode selection if best mode choice above was intra.
-    if (best_mbmode.ref_frame[0] == INTRA_FRAME) {
-      *mbmi = best_mbmode;
-      rd_pick_intra_sbuv_mode(cpi, x, &rate_uv_intra, &rate_uv_tokenonly,
-                              &dist_uv, &skip_uv, BLOCK_8X8, TX_4X4);
-    }
   }
 
   if (best_rd == INT64_MAX) {
