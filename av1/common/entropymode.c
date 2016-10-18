@@ -1390,6 +1390,8 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
                      fc->intra_ext_tx_cdf, EXT_TX_SIZES, TX_TYPES);
   av1_tree_to_cdf_1D(av1_ext_tx_tree, fc->inter_ext_tx_prob,
                      fc->inter_ext_tx_cdf, EXT_TX_SIZES);
+  av1_tree_to_cdf_1D(av1_partition_tree, fc->partition_prob, fc->partition_cdf,
+                     PARTITION_CONTEXTS);
 #endif
 }
 
@@ -1628,9 +1630,14 @@ void av1_adapt_intra_frame_probs(AV1_COMMON *cm) {
     aom_tree_merge_probs(av1_ext_partition_tree, pre_fc->partition_prob[i],
                          counts->partition[i], fc->partition_prob[i]);
 #else
-  for (i = 0; i < PARTITION_CONTEXTS; i++)
+  for (i = 0; i < PARTITION_CONTEXTS; i++) {
     aom_tree_merge_probs(av1_partition_tree, pre_fc->partition_prob[i],
                          counts->partition[i], fc->partition_prob[i]);
+#if CONFIG_DAALA_EC
+    av1_tree_to_cdf(av1_partition_tree, fc->partition_prob[i],
+                    fc->partition_cdf[i]);
+#endif
+  }
 #endif  // CONFIG_EXT_PARTITION_TYPES
 
 #if CONFIG_EXT_INTRA

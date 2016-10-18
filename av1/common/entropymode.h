@@ -55,6 +55,9 @@ typedef struct frame_contexts {
 #else
   aom_prob partition_prob[PARTITION_CONTEXTS][PARTITION_TYPES - 1];
 #endif
+#if CONFIG_DAALA_EC
+  uint16_t partition_cdf[PARTITION_CONTEXTS][PARTITION_TYPES];
+#endif
   av1_coeff_probs_model coef_probs[TX_SIZES][PLANE_TYPES];
 #if CONFIG_ANS || CONFIG_DAALA_EC
   coeff_cdf_model coef_cdfs[TX_SIZES][PLANE_TYPES];
