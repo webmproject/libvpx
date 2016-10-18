@@ -107,9 +107,14 @@ static TX_MODE read_tx_mode(struct aom_read_bit_buffer *rb) {
 
 static void read_switchable_interp_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   int i, j;
-  for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; ++j)
+  for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; ++j) {
     for (i = 0; i < SWITCHABLE_FILTERS - 1; ++i)
       av1_diff_update_prob(r, &fc->switchable_interp_prob[j][i]);
+#if CONFIG_DAALA_EC
+    av1_tree_to_cdf(av1_switchable_interp_tree, fc->switchable_interp_prob[j],
+                    fc->switchable_interp_cdf[j]);
+#endif
+  }
 }
 
 static void read_inter_mode_probs(FRAME_CONTEXT *fc, aom_reader *r) {

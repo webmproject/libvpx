@@ -1380,7 +1380,16 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
 #if CONFIG_LOOP_RESTORATION
   av1_copy(fc->switchable_restore_prob, default_switchable_restore_prob);
 #endif  // CONFIG_LOOP_RESTORATION
+#if CONFIG_DAALA_EC
+  av1_tree_to_cdf_1D(av1_switchable_interp_tree, fc->switchable_interp_prob,
+                     fc->switchable_interp_cdf, SWITCHABLE_FILTER_CONTEXTS);
+#endif
 }
+
+#if CONFIG_DAALA_EC
+int av1_switchable_interp_ind[SWITCHABLE_FILTERS];
+int av1_switchable_interp_inv[SWITCHABLE_FILTERS];
+#endif
 
 #if CONFIG_EXT_INTERP
 const aom_tree_index av1_switchable_interp_tree[TREE_SIZE(SWITCHABLE_FILTERS)] =

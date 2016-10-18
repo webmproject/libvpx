@@ -867,8 +867,14 @@ static INLINE InterpFilter read_interp_filter(AV1_COMMON *const cm,
     const int ctx = av1_get_pred_context_switchable_interp(xd);
 #endif
     FRAME_COUNTS *counts = xd->counts;
+#if CONFIG_DAALA_EC
+    const InterpFilter type =
+        (InterpFilter)av1_switchable_interp_inv[aom_read_tree_cdf(
+            r, cm->fc->switchable_interp_cdf[ctx], SWITCHABLE_FILTERS)];
+#else
     const InterpFilter type = (InterpFilter)aom_read_tree(
         r, av1_switchable_interp_tree, cm->fc->switchable_interp_prob[ctx]);
+#endif
     if (counts) ++counts->switchable_interp[ctx][type];
     return type;
   }
