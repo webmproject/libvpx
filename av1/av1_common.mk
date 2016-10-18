@@ -92,7 +92,7 @@ AV1_COMMON_SRCS-yes += common/clpf.h
 AV1_COMMON_SRCS-yes += common/clpf_simd.h
 AV1_COMMON_SRCS-$(HAVE_SSE2) += common/clpf_sse2.c
 AV1_COMMON_SRCS-$(HAVE_SSSE3) += common/clpf_ssse3.c
-AV1_COMMON_SRCS-$(HAVE_SSE4_1) += common/clpf_sse4_1.c
+AV1_COMMON_SRCS-$(HAVE_SSE4_1) += common/clpf_sse4.c
 AV1_COMMON_SRCS-$(HAVE_NEON) += common/clpf_neon.c
 endif
 ifeq ($(CONFIG_DERING),yes)
