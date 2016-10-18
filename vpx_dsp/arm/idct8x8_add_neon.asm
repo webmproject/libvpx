@@ -16,6 +16,8 @@
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
 
+    INCLUDE vpx_dsp/arm/idct_neon.asm.s
+
     ; Parallel 1D IDCT on all the columns of a 8x8 16bit data matrix which are
     ; loaded in q8-q15. The output will be stored back into q8-q15 registers.
     ; This macro will touch q0-q7 registers and use them as buffer during
@@ -207,10 +209,10 @@
 |vpx_idct8x8_64_add_neon| PROC
     push            {r4-r9}
     vpush           {d8-d15}
-    vld1.s16        {q8,q9}, [r0]!
-    vld1.s16        {q10,q11}, [r0]!
-    vld1.s16        {q12,q13}, [r0]!
-    vld1.s16        {q14,q15}, [r0]!
+    LOAD_TRAN_LOW_TO_S16 d16, d17, d18, d19, r0
+    LOAD_TRAN_LOW_TO_S16 d20, d21, d22, d23, r0
+    LOAD_TRAN_LOW_TO_S16 d24, d25, d26, d27, r0
+    LOAD_TRAN_LOW_TO_S16 d28, d29, d30, d31, r0
 
     ; transpose the input data
     TRANSPOSE8X8
@@ -312,10 +314,10 @@
 |vpx_idct8x8_12_add_neon| PROC
     push            {r4-r9}
     vpush           {d8-d15}
-    vld1.s16        {q8,q9}, [r0]!
-    vld1.s16        {q10,q11}, [r0]!
-    vld1.s16        {q12,q13}, [r0]!
-    vld1.s16        {q14,q15}, [r0]!
+    LOAD_TRAN_LOW_TO_S16 d16, d17, d18, d19, r0
+    LOAD_TRAN_LOW_TO_S16 d20, d21, d22, d23, r0
+    LOAD_TRAN_LOW_TO_S16 d24, d25, d26, d27, r0
+    LOAD_TRAN_LOW_TO_S16 d28, d29, d30, d31, r0
 
     ; transpose the input data
     TRANSPOSE8X8
