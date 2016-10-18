@@ -1388,6 +1388,8 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
                      fc->switchable_interp_cdf, SWITCHABLE_FILTER_CONTEXTS);
   av1_tree_to_cdf_2D(av1_ext_tx_tree, fc->intra_ext_tx_prob,
                      fc->intra_ext_tx_cdf, EXT_TX_SIZES, TX_TYPES);
+  av1_tree_to_cdf_1D(av1_ext_tx_tree, fc->inter_ext_tx_prob,
+                     fc->inter_ext_tx_cdf, EXT_TX_SIZES);
 #endif
 }
 
@@ -1596,6 +1598,10 @@ void av1_adapt_intra_frame_probs(AV1_COMMON *cm) {
   for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
     aom_tree_merge_probs(av1_ext_tx_tree, pre_fc->inter_ext_tx_prob[i],
                          counts->inter_ext_tx[i], fc->inter_ext_tx_prob[i]);
+#if CONFIG_DAALA_EC
+    av1_tree_to_cdf(av1_ext_tx_tree, fc->inter_ext_tx_prob[i],
+                    fc->inter_ext_tx_cdf[i]);
+#endif
   }
 #endif  // CONFIG_EXT_TX
 

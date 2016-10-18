@@ -135,6 +135,7 @@ typedef struct frame_contexts {
   uint16_t switchable_interp_cdf[SWITCHABLE_FILTER_CONTEXTS]
                                 [SWITCHABLE_FILTERS];
   uint16_t intra_ext_tx_cdf[EXT_TX_SIZES][TX_TYPES][TX_TYPES];
+  uint16_t inter_ext_tx_cdf[EXT_TX_SIZES][TX_TYPES];
 #endif
 } FRAME_CONTEXT;
 
