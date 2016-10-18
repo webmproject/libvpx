@@ -43,7 +43,7 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
   int nhsb, nvsb;
   od_dering_in *src;
   int16_t *ref_coeff;
-  unsigned char bskip[MAX_MIB_SIZE*MAX_MIB_SIZE][2];
+  dering_list dlist[MAX_MIB_SIZE*MAX_MIB_SIZE];
   int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS] = { { 0 } };
   int stride;
   int bsize[3];
@@ -101,7 +101,9 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
       int16_t tmp_dst[MAX_MIB_SIZE * MAX_MIB_SIZE * 8 * 8];
       nhb = AOMMIN(MAX_MIB_SIZE, cm->mi_cols - MAX_MIB_SIZE * sbc);
       nvb = AOMMIN(MAX_MIB_SIZE, cm->mi_rows - MAX_MIB_SIZE * sbr);
-      if (sb_all_skip_out(cm, sbr * MAX_MIB_SIZE, sbc * MAX_MIB_SIZE, bskip, &dering_count))
+      dering_count = sb_compute_dering_list(cm, sbr * MAX_MIB_SIZE, sbc * MAX_MIB_SIZE,
+          dlist);
+      if (dering_count == 0)
         continue;
       best_gi = 0;
       for (gi = 0; gi < DERING_REFINEMENT_LEVELS; gi++) {
@@ -134,9 +136,9 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
             in[i * OD_FILT_BSTRIDE + j] = x[i * stride + j];
           }
         }
-        od_dering(tmp_dst, in, 0, dir, 0, bskip, dering_count, threshold,
+        od_dering(tmp_dst, in, 0, dir, 0, dlist, dering_count, threshold,
             coeff_shift);
-        copy_blocks_16bit(dst, MAX_MIB_SIZE << bsize[0], tmp_dst, bskip,
+        copy_blocks_16bit(dst, MAX_MIB_SIZE << bsize[0], tmp_dst, dlist,
             dering_count, 3);
         cur_mse = (int)compute_dist(
             dst, MAX_MIB_SIZE << bsize[0],

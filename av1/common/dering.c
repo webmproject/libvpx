@@ -47,13 +47,12 @@ int sb_all_skip(const AV1_COMMON *const cm, int mi_row, int mi_col) {
   return skip;
 }
 
-int sb_all_skip_out(const AV1_COMMON *const cm, int mi_row, int mi_col,
-    unsigned char (*bskip)[2], int *count_ptr) {
+int sb_compute_dering_list(const AV1_COMMON *const cm, int mi_row, int mi_col,
+    dering_list *dlist) {
   int r, c;
   int maxc, maxr;
-  int skip = 1;
   MODE_INFO **grid;
-  int count=0;
+  int count = 0;
   grid = cm->mi_grid_visible;
   maxc = cm->mi_cols - mi_col;
   maxr = cm->mi_rows - mi_row;
@@ -64,15 +63,13 @@ int sb_all_skip_out(const AV1_COMMON *const cm, int mi_row, int mi_col,
     grid_row = &grid[(mi_row + r) * cm->mi_stride + mi_col];
     for (c = 0; c < maxc; c++) {
       if (!grid_row[c]->mbmi.skip) {
-        skip = 0;
-        bskip[count][0] = r;
-        bskip[count][1] = c;
+        dlist[count].by = r;
+        dlist[count].bx = c;
         count++;
       }
     }
   }
-  *count_ptr = count;
-  return skip;
+  return count;
 }
 
 static INLINE void copy_8x8_16_8bit(uint8_t *dst, int dstride, int16_t *src, int sstride) {
@@ -91,21 +88,21 @@ static INLINE void copy_4x4_16_8bit(uint8_t *dst, int dstride, int16_t *src, int
 
 /* TODO: Optimize this function for SSE. */
 void copy_blocks_16_8bit(uint8_t *dst, int dstride, int16_t *src,
-    unsigned char (*bskip)[2], int dering_count, int bsize)
+    dering_list *dlist, int dering_count, int bsize)
 {
   int bi, bx, by;
   if (bsize == 3) {
     for (bi = 0; bi < dering_count; bi++) {
-      by = bskip[bi][0];
-      bx = bskip[bi][1];
+      by = dlist[bi].by;
+      bx = dlist[bi].bx;
       copy_8x8_16_8bit(&dst[(by << 3) * dstride + (bx << 3)],
                      dstride,
                      &src[bi << 2*bsize], 1 << bsize);
     }
   } else {
     for (bi = 0; bi < dering_count; bi++) {
-      by = bskip[bi][0];
-      bx = bskip[bi][1];
+      by = dlist[bi].by;
+      bx = dlist[bi].bx;
       copy_4x4_16_8bit(&dst[(by << 2) * dstride + (bx << 2)],
                      dstride,
                      &src[bi << 2*bsize], 1 << bsize);
@@ -149,7 +146,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
   od_dering_in src[OD_DERING_INBUF_SIZE];
   int16_t *linebuf[3];
   int16_t colbuf[3][OD_BSIZE_MAX + 2*OD_FILT_VBORDER][OD_FILT_HBORDER];
-  unsigned char bskip[MAX_MIB_SIZE*MAX_MIB_SIZE][2];
+  dering_list dlist[MAX_MIB_SIZE*MAX_MIB_SIZE];
   unsigned char *row_dering, *prev_row_dering, *curr_row_dering;
   int dering_count;
   int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS] = { { 0 } };
@@ -203,7 +200,8 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
                             ->mbmi.dering_gain);
       curr_row_dering[sbc] = 0;
       if (level == 0 ||
-          sb_all_skip_out(cm, sbr * MAX_MIB_SIZE, sbc * MAX_MIB_SIZE, bskip, &dering_count))
+          (dering_count = sb_compute_dering_list(cm, sbr * MAX_MIB_SIZE,
+              sbc * MAX_MIB_SIZE, dlist)) == 0)
         continue;
       curr_row_dering[sbc] = 1;
       for (pli = 0; pli < nplanes; pli++) {
@@ -341,7 +339,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
         if (threshold == 0) continue;
         od_dering(dst, &src[OD_FILT_VBORDER * OD_FILT_BSTRIDE
                             + OD_FILT_HBORDER],
-            dec[pli], dir, pli, bskip, dering_count, threshold, coeff_shift);
+            dec[pli], dir, pli, dlist, dering_count, threshold, coeff_shift);
 #if CONFIG_AOM_HIGHBITDEPTH
         if (cm->use_highbitdepth) {
           copy_blocks_16bit(
@@ -349,7 +347,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
                   xd->plane[pli].dst.buf)[xd->plane[pli].dst.stride *
                   (MAX_MIB_SIZE * sbr << bsize[pli]) +
                   (sbc * MAX_MIB_SIZE << bsize[pli])],
-              xd->plane[pli].dst.stride, dst, bskip,
+              xd->plane[pli].dst.stride, dst, dlist,
               dering_count, 3 - dec[pli]);
         } else {
 #endif
@@ -357,7 +355,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
               &xd->plane[pli].dst.buf[xd->plane[pli].dst.stride *
                                     (MAX_MIB_SIZE * sbr << bsize[pli]) +
                                     (sbc * MAX_MIB_SIZE << bsize[pli])],
-              xd->plane[pli].dst.stride, dst, bskip,
+              xd->plane[pli].dst.stride, dst, dlist,
               dering_count, 3 - dec[pli]);
 #if CONFIG_AOM_HIGHBITDEPTH
         }

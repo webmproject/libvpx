@@ -38,6 +38,11 @@ typedef int16_t od_dering_in;
 
 extern const int OD_DIRECTION_OFFSETS_TABLE[8][3];
 
+typedef struct {
+  unsigned char by;
+  unsigned char bx;
+} dering_list;
+
 typedef int (*od_filter_dering_direction_func)(int16_t *y, int ystride,
                                                const int16_t *in, int threshold,
                                                int dir);
@@ -45,11 +50,11 @@ typedef void (*od_filter_dering_orthogonal_func)(int16_t *y, int ystride,
                                                  const int16_t *in,
                                                  int threshold, int dir);
 void copy_blocks_16bit(int16_t *dst, int dstride, int16_t *src,
-    unsigned char (*bskip)[2], int dering_count, int bsize);
+    dering_list *dlist, int dering_count, int bsize);
 
 void od_dering(int16_t *y, int16_t *in, int xdec,
                int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS], int pli,
-               unsigned char (*bskip)[2], int skip_stride, int threshold,
+               dering_list *dlist, int skip_stride, int threshold,
                int coeff_shift);
 int od_filter_dering_direction_4x4_c(int16_t *y, int ystride, const int16_t *in,
                                      int threshold, int dir);
