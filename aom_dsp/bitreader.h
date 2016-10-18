@@ -79,6 +79,18 @@ static INLINE int aom_reader_has_error(aom_reader *r) {
 #endif
 }
 
+static INLINE ptrdiff_t aom_reader_tell(const aom_reader *r) {
+#if CONFIG_ANS
+  (void)r;
+  assert(0 && "aom_reader_tell() is unimplemented for ANS");
+  return 0;
+#elif CONFIG_DAALA_EC
+  return aom_daala_reader_tell(r);
+#else
+  return aom_dk_reader_tell(r);
+#endif
+}
+
 static INLINE int aom_read(aom_reader *r, int prob) {
 #if CONFIG_ANS
   return uabs_read(r, prob);

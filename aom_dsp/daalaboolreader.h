@@ -29,6 +29,7 @@ typedef struct daala_reader daala_reader;
 
 int aom_daala_reader_init(daala_reader *r, const uint8_t *buffer, int size);
 const uint8_t *aom_daala_reader_find_end(daala_reader *r);
+ptrdiff_t aom_daala_reader_tell(const daala_reader *r);
 
 static INLINE int aom_daala_read(daala_reader *r, int prob) {
   if (prob == 128) {

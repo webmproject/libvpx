@@ -29,7 +29,7 @@ int aom_dk_reader_init(struct aom_dk_reader *r, const uint8_t *buffer,
     return 1;
   } else {
     r->buffer_end = buffer + size;
-    r->buffer = buffer;
+    r->buffer_start = r->buffer = buffer;
     r->value = 0;
     r->count = -8;
     r->range = 255;

@@ -133,8 +133,8 @@ typedef struct frame_contexts {
 #endif  // CONFIG_LOOP_RESTORATION
 #if CONFIG_DAALA_EC
   aom_cdf_prob partition_cdf[PARTITION_CONTEXTS][PARTITION_TYPES];
-  aom_cdf_prob
-      switchable_interp_cdf[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];
+  aom_cdf_prob switchable_interp_cdf[SWITCHABLE_FILTER_CONTEXTS]
+                                    [SWITCHABLE_FILTERS];
   aom_cdf_prob intra_ext_tx_cdf[EXT_TX_SIZES][TX_TYPES][TX_TYPES];
   aom_cdf_prob inter_ext_tx_cdf[EXT_TX_SIZES][TX_TYPES];
 #endif
