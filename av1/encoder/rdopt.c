@@ -2836,21 +2836,23 @@ static int super_block_uvrd(const AV1_COMP *cpi, MACROBLOCK *x, int *rate,
   *sse = 0;
   *skippable = 1;
 
-  for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
-    txfm_rd_in_plane(x, cpi, &pnrate, &pndist, &pnskip, &pnsse, ref_best_rd,
-                     plane, bsize, uv_tx_size, cpi->sf.use_fast_coef_costing);
-    if (pnrate == INT_MAX) {
-      is_cost_valid = 0;
-      break;
-    }
-    *rate += pnrate;
-    *distortion += pndist;
-    *sse += pnsse;
-    *skippable &= pnskip;
-    if (RDCOST(x->rdmult, x->rddiv, *rate, *distortion) > ref_best_rd &&
-        RDCOST(x->rdmult, x->rddiv, 0, *sse) > ref_best_rd) {
-      is_cost_valid = 0;
-      break;
+  if (is_cost_valid) {
+    for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
+      txfm_rd_in_plane(x, cpi, &pnrate, &pndist, &pnskip, &pnsse, ref_best_rd,
+                       plane, bsize, uv_tx_size, cpi->sf.use_fast_coef_costing);
+      if (pnrate == INT_MAX) {
+        is_cost_valid = 0;
+        break;
+      }
+      *rate += pnrate;
+      *distortion += pndist;
+      *sse += pnsse;
+      *skippable &= pnskip;
+      if (RDCOST(x->rdmult, x->rddiv, *rate, *distortion) > ref_best_rd &&
+          RDCOST(x->rdmult, x->rddiv, 0, *sse) > ref_best_rd) {
+        is_cost_valid = 0;
+        break;
+      }
     }
   }
 
