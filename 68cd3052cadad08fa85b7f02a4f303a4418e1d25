@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bc28cfc6_7363f258",
+        "filename": "vpx_dsp/arm/highbd_vpx_convolve_copy_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-18T00:21:01Z",
+      "side": 1,
+      "message": "unrolling these a bit more helped with gcc-4.9 likely due to the extra latency for later registers in the list.\nalso note gcc-4.9/5.3 produced worse code with the \u0027N * stride\u0027 pattern as you noticed, clang (3.8.1) produced the same output.",
+      "revId": "68cd3052cadad08fa85b7f02a4f303a4418e1d25",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
