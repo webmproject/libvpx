@@ -647,7 +647,7 @@ unsigned char *od_ec_enc_done(od_ec_enc *enc, uint32_t *nbytes) {
   Return: The number of bits.
           This will always be slightly larger than the exact value (e.g., all
            rounding error is in the positive direction).*/
-int od_ec_enc_tell(od_ec_enc *enc) {
+int od_ec_enc_tell(const od_ec_enc *enc) {
   /*The 10 here counteracts the offset of -9 baked into cnt, and adds 1 extra
      bit, which we reserve for terminating the stream.*/
   return (enc->offs + enc->end_offs) * 8 + enc->cnt + enc->nend_bits + 10;
@@ -662,7 +662,7 @@ int od_ec_enc_tell(od_ec_enc *enc) {
   Return: The number of bits scaled by 2**OD_BITRES.
           This will always be slightly larger than the exact value (e.g., all
            rounding error is in the positive direction).*/
-uint32_t od_ec_enc_tell_frac(od_ec_enc *enc) {
+uint32_t od_ec_enc_tell_frac(const od_ec_enc *enc) {
   return od_ec_tell_frac(od_ec_enc_tell(enc), enc->rng);
 }
 

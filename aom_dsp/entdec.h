@@ -133,8 +133,10 @@ OD_WARN_UNUSED_RESULT uint32_t od_ec_dec_bits_(od_ec_dec *dec,
                                                unsigned ftb OD_ACC_STR)
     OD_ARG_NONNULL(1);
 
-OD_WARN_UNUSED_RESULT int od_ec_dec_tell(od_ec_dec *dec) OD_ARG_NONNULL(1);
-uint32_t od_ec_dec_tell_frac(od_ec_dec *dec) OD_ARG_NONNULL(1);
+OD_WARN_UNUSED_RESULT int od_ec_dec_tell(const od_ec_dec *dec)
+    OD_ARG_NONNULL(1);
+OD_WARN_UNUSED_RESULT uint32_t od_ec_dec_tell_frac(const od_ec_dec *dec)
+    OD_ARG_NONNULL(1);
 
 #ifdef __cplusplus
 }  // extern "C"

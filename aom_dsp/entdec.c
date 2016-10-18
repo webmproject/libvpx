@@ -518,7 +518,7 @@ uint32_t od_ec_dec_bits_(od_ec_dec *dec, unsigned ftb OD_ACC_STR) {
   Return: The number of bits.
           This will always be slightly larger than the exact value (e.g., all
            rounding error is in the positive direction).*/
-int od_ec_dec_tell(od_ec_dec *dec) {
+int od_ec_dec_tell(const od_ec_dec *dec) {
   return ((dec->end - dec->eptr) + (dec->bptr - dec->buf)) * 8 - dec->cnt -
          dec->nend_bits + dec->tell_offs;
 }
@@ -529,6 +529,6 @@ int od_ec_dec_tell(od_ec_dec *dec) {
   Return: The number of bits scaled by 2**OD_BITRES.
           This will always be slightly larger than the exact value (e.g., all
            rounding error is in the positive direction).*/
-uint32_t od_ec_dec_tell_frac(od_ec_dec *dec) {
+uint32_t od_ec_dec_tell_frac(const od_ec_dec *dec) {
   return od_ec_tell_frac(od_ec_dec_tell(dec), dec->rng);
 }
