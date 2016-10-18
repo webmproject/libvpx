@@ -126,6 +126,9 @@ class TileIndependenceTestLarge : public TileIndependenceTest {
 
 TEST_P(TileIndependenceTestLarge, MD5Match) { DoTest(); }
 
+#if CONFIG_EC_ADAPT
+// TODO(thdavies): EC_ADAPT does not support tiles
+#else
 #if CONFIG_EXT_TILE
 AV1_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Values(1, 2, 32),
                           ::testing::Values(1, 2, 32));
@@ -138,4 +141,5 @@ AV1_INSTANTIATE_TEST_CASE(TileIndependenceTest, ::testing::Values(0, 1),
 AV1_INSTANTIATE_TEST_CASE(TileIndependenceTestLarge, ::testing::Values(0, 1),
                           ::testing::Values(0, 1));
 #endif  // CONFIG_EXT_TILE
+#endif  // CONFIG_EC_ADAPT
 }  // namespace
