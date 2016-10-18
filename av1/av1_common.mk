@@ -140,7 +140,7 @@ AV1_COMMON_SRCS-$(HAVE_NEON) += common/arm/neon/iht8x8_add_neon.c
 endif
 
 ifeq ($(CONFIG_FILTER_INTRA),yes)
-AV1_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/reconintra_sse4.c
+AV1_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/filterintra_sse4.c
 endif
 
 AV1_COMMON_SRCS-$(HAVE_SSE2) += common/x86/av1_inv_txfm_sse2.c
