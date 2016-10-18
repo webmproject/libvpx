@@ -9,24 +9,13 @@
  * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 
-#ifndef AOM_DSP_AOM_AOM_SIMD_H_
-#define AOM_DSP_AOM_AOM_SIMD_H_
+#ifndef AOM_DSP_AOM_SIMD_INLINE_H_
+#define AOM_DSP_AOM_SIMD_INLINE_H_
 
-#include <stdint.h>
+#include "aom/aom_integer.h"
 
-#if defined(_WIN32)
-#include <intrin.h>
+#ifndef SIMD_INLINE
+#define SIMD_INLINE static AOM_FORCE_INLINE
 #endif
 
-#include "./aom_config.h"
-#include "./aom_simd_inline.h"
-
-#if HAVE_NEON
-#include "simd/v128_intrinsics_arm.h"
-#elif HAVE_SSE2
-#include "simd/v128_intrinsics_x86.h"
-#else
-#include "simd/v128_intrinsics.h"
-#endif
-
-#endif  // AOM_DSP_AOM_AOM_SIMD_H_
+#endif  // AOM_DSP_AOM_SIMD_INLINE_H_
