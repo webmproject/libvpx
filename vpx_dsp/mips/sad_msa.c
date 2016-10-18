@@ -1030,6 +1030,7 @@ static void sad_64width_x4d_msa(const uint8_t *src, int32_t src_stride,
   v8u16 sad2_1 = { 0 };
   v8u16 sad3_0 = { 0 };
   v8u16 sad3_1 = { 0 };
+  v4u32 sad;
 
   ref0_ptr = aref_ptr[0];
   ref1_ptr = aref_ptr[1];
@@ -1061,14 +1062,21 @@ static void sad_64width_x4d_msa(const uint8_t *src, int32_t src_stride,
     sad3_1 += SAD_UB2_UH(src2, src3, ref2, ref3);
   }
 
-  sad_array[0] = HADD_UH_U32(sad0_0);
-  sad_array[0] += HADD_UH_U32(sad0_1);
-  sad_array[1] = HADD_UH_U32(sad1_0);
-  sad_array[1] += HADD_UH_U32(sad1_1);
-  sad_array[2] = HADD_UH_U32(sad2_0);
-  sad_array[2] += HADD_UH_U32(sad2_1);
-  sad_array[3] = HADD_UH_U32(sad3_0);
-  sad_array[3] += HADD_UH_U32(sad3_1);
+  sad = __msa_hadd_u_w(sad0_0, sad0_0);
+  sad += __msa_hadd_u_w(sad0_1, sad0_1);
+  sad_array[0] = HADD_UW_U32(sad);
+
+  sad = __msa_hadd_u_w(sad1_0, sad1_0);
+  sad += __msa_hadd_u_w(sad1_1, sad1_1);
+  sad_array[1] = HADD_UW_U32(sad);
+
+  sad = __msa_hadd_u_w(sad2_0, sad2_0);
+  sad += __msa_hadd_u_w(sad2_1, sad2_1);
+  sad_array[2] = HADD_UW_U32(sad);
+
+  sad = __msa_hadd_u_w(sad3_0, sad3_0);
+  sad += __msa_hadd_u_w(sad3_1, sad3_1);
+  sad_array[3] = HADD_UW_U32(sad);
 }
 
 static uint32_t avgsad_4width_msa(const uint8_t *src_ptr, int32_t src_stride,
