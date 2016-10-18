@@ -78,8 +78,8 @@ static INLINE void daala_write_tree_bits(daala_writer *w,
   } while (len);
 }
 
-static INLINE void daala_write_tree_cdf(daala_writer *w, int symb,
-                                        const uint16_t *cdf, int nsymbs) {
+static INLINE void daala_write_symbol(daala_writer *w, int symb,
+                                      const uint16_t *cdf, int nsymbs) {
   od_ec_encode_cdf_q15(&w->ec, symb, cdf, nsymbs);
 }
 

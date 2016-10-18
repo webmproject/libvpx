@@ -107,19 +107,8 @@ static INLINE void aom_write_symbol(aom_writer *w, int symb,
   s.cum_prob = symb > 0 ? cdf[symb - 1] : 0;
   s.prob = cdf[symb] - s.cum_prob;
   buf_rans_write(w, &s);
-#else
-  (void)w;
-  (void)symb;
-  (void)cdf;
-  (void)nsymbs;
-  assert(0 && "Unsupported bitwriter operation");
-#endif
-}
-
-static INLINE void aom_write_tree_cdf(aom_writer *w, int symb,
-                                      const uint16_t *cdf, int nsymbs) {
-#if CONFIG_DAALA_EC
-  daala_write_tree_cdf(w, symb, cdf, nsymbs);
+#elif CONFIG_DAALA_EC
+  daala_write_symbol(w, symb, cdf, nsymbs);
 #else
   (void)w;
   (void)symb;
