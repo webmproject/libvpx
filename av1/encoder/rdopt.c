@@ -1401,7 +1401,7 @@ static int64_t choose_tx_size_fix_type(AV1_COMP *cpi, BLOCK_SIZE bs,
     evaluate_rect_tx = is_rect_tx_allowed(xd, mbmi);
 #endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
     start_tx = max_tx_size;
-    end_tx = 0;
+    end_tx = (max_tx_size == TX_32X32) ? TX_8X8 : TX_4X4;
   } else {
     const TX_SIZE chosen_tx_size =
         tx_size_from_tx_mode(bs, cm->tx_mode, is_inter);
