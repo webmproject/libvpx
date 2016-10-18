@@ -198,6 +198,17 @@ static const arg_def_t disable_warning_prompt =
 #if CONFIG_AOM_HIGHBITDEPTH
 static const arg_def_t test16bitinternalarg = ARG_DEF(
     NULL, "test-16bit-internal", 0, "Force use of 16 bit internal buffer");
+
+static const struct arg_enum_list bitdepth_enum[] = {
+  { "8", AOM_BITS_8 }, { "10", AOM_BITS_10 }, { "12", AOM_BITS_12 }, { NULL, 0 }
+};
+
+static const arg_def_t bitdeptharg = ARG_DEF_ENUM(
+    "b", "bit-depth", 1,
+    "Bit depth for codec (8 for version <=1, 10 or 12 for version 2)",
+    bitdepth_enum);
+static const arg_def_t inbitdeptharg =
+    ARG_DEF(NULL, "input-bit-depth", 1, "Bit depth of input");
 #endif
 
 static const arg_def_t *main_args[] = { &debugmode,
@@ -270,6 +281,7 @@ static const arg_def_t *global_args[] = { &use_yv12,
                                           &error_resilient,
 #if CONFIG_AOM_HIGHBITDEPTH
                                           &test16bitinternalarg,
+                                          &bitdeptharg,
 #endif
                                           &lag_in_frames,
                                           NULL };
@@ -413,19 +425,6 @@ static const struct arg_enum_list color_space_enum[] = {
 static const arg_def_t input_color_space =
     ARG_DEF_ENUM(NULL, "color-space", 1, "The color space of input content:",
                  color_space_enum);
-
-#if CONFIG_AOM_HIGHBITDEPTH
-static const struct arg_enum_list bitdepth_enum[] = {
-  { "8", AOM_BITS_8 }, { "10", AOM_BITS_10 }, { "12", AOM_BITS_12 }, { NULL, 0 }
-};
-
-static const arg_def_t bitdeptharg = ARG_DEF_ENUM(
-    "b", "bit-depth", 1,
-    "Bit depth for codec (8 for version <=1, 10 or 12 for version 2)",
-    bitdepth_enum);
-static const arg_def_t inbitdeptharg =
-    ARG_DEF(NULL, "input-bit-depth", 1, "Bit depth of input");
-#endif
 
 static const struct arg_enum_list tune_content_enum[] = {
   { "default", AOM_CONTENT_DEFAULT },
