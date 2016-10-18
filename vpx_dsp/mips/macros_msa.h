@@ -168,20 +168,20 @@
     val_m;                                                 \
   })
 #else  // !(__mips == 64)
-#define LD(psrc)                                            \
-  ({                                                        \
-    const uint8_t *psrc_m1 = (const uint8_t *)(psrc);       \
-    uint32_t val0_m, val1_m;                                \
-    uint64_t val_m = 0;                                     \
-                                                            \
-    val0_m = LW(psrc_m1);                                   \
-    val1_m = LW(psrc_m1 + 4);                               \
-                                                            \
-    val_m = (uint64_t)(val1_m);                             \
-    val_m = (uint64_t)((val_m << 32) & 0xFFFFFFFF00000000); \
-    val_m = (uint64_t)(val_m | (uint64_t)val0_m);           \
-                                                            \
-    val_m;                                                  \
+#define LD(psrc)                                                              \
+  ({                                                                          \
+    const uint8_t *psrc_m1 = (const uint8_t *)(psrc);                         \
+    uint32_t val0_m, val1_m;                                                  \
+    uint64_t val_m_combined = 0;                                              \
+                                                                              \
+    val0_m = LW(psrc_m1);                                                     \
+    val1_m = LW(psrc_m1 + 4);                                                 \
+                                                                              \
+    val_m_combined = (uint64_t)(val1_m);                                      \
+    val_m_combined = (uint64_t)((val_m_combined << 32) & 0xFFFFFFFF00000000); \
+    val_m_combined = (uint64_t)(val_m_combined | (uint64_t)val0_m);           \
+                                                                              \
+    val_m_combined;                                                           \
   })
 #endif  // (__mips == 64)
 
@@ -2034,13 +2034,12 @@
                                 pdst, stride)                               \
   {                                                                         \
     v16u8 tmp0_m, tmp1_m, tmp2_m, tmp3_m;                                   \
-    uint8_t *pdst_m = (uint8_t *)(pdst);                                    \
                                                                             \
     tmp0_m = PCKEV_XORI128_UB(in0, in1);                                    \
     tmp1_m = PCKEV_XORI128_UB(in2, in3);                                    \
     ILVR_D2_UB(dst1, dst0, dst3, dst2, tmp2_m, tmp3_m);                     \
     AVER_UB2_UB(tmp0_m, tmp2_m, tmp1_m, tmp3_m, tmp0_m, tmp1_m);            \
-    ST8x4_UB(tmp0_m, tmp1_m, pdst_m, stride);                               \
+    ST8x4_UB(tmp0_m, tmp1_m, pdst, stride);                                 \
   }
 
 /* Description : Pack even byte elements and store byte vector in destination

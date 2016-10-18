@@ -21,7 +21,7 @@ void vpx_idct4x4_1_add_neon(const tran_low_t *input, uint8_t *dest,
   uint16x8_t q8u16;
   int16x8_t q0s16;
   uint8_t *d1, *d2;
-  int16_t i, a1, cospi_16_64 = 11585;
+  int16_t i, a1;
   int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
   out = dct_const_round_shift(out * cospi_16_64);
   a1 = ROUND_POWER_OF_TWO(out, 4);
