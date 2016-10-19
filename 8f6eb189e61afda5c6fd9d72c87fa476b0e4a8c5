@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bc28cfc6_67c15a3d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-19T22:25:36Z",
+      "side": 1,
+      "message": "better to say what you\u0027re fixing or at least add it in addition to the subject. this was a cosmetic formatting \u0027fix\u0027, but one needs to check the diff to find out what was broken",
+      "revId": "8f6eb189e61afda5c6fd9d72c87fa476b0e4a8c5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
