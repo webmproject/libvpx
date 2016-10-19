@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bc28cfc6_a7c87209",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-19T21:43:48Z",
+      "side": 1,
+      "message": "you should say \u0027add high-bitdepth support\u0027 or so",
+      "revId": "50ecf53c07726d17a022baad9ff632c47540b000",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc28cfc6_e7e1ca86",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-19T21:43:48Z",
+      "side": 1,
+      "message": "you can attach this to the bug, BUG\u003dwebm:1316",
+      "revId": "50ecf53c07726d17a022baad9ff632c47540b000",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc28cfc6_27380202",
+        "filename": "test/vp9_intrapred_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-19T21:43:48Z",
+      "side": 1,
+      "message": "note highbd will only be called with 10/12-bit; the non-hbd version is used for 8-bit regardless of the config",
+      "revId": "50ecf53c07726d17a022baad9ff632c47540b000",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc28cfc6_472ff6be",
+        "filename": "test/vp9_intrapred_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-19T21:43:48Z",
+      "side": 1,
+      "message": "this would be !CONFIG_VP9_HIGHBITDEPTH to describe the next block",
+      "revId": "50ecf53c07726d17a022baad9ff632c47540b000",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
