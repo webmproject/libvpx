@@ -42,6 +42,40 @@
     },
     {
       "key": {
+        "uuid": "bc28cfc6_87344eaa",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-19T22:17:52Z",
+      "side": 1,
+      "message": "did this make much difference? in webp we were trying to avoid multiple calls/casts where possible for readability",
+      "revId": "02990a3ff149ccf2d44f36184d3e94f54c88c5d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc28cfc6_2723e26d",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-19T22:17:52Z",
+      "side": 1,
+      "message": "clang was producing the same code for me in the convolve copy, but gcc was doing better with this layout",
+      "revId": "02990a3ff149ccf2d44f36184d3e94f54c88c5d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bc28cfc6_8ca755a3",
         "filename": "vpx_dsp/arm/intrapred_neon.c",
         "patchSetId": 1
@@ -53,6 +87,24 @@
       "writtenOn": "2016-10-19T21:14:17Z",
       "side": 1,
       "message": "Unrolling improves clang building.",
+      "revId": "02990a3ff149ccf2d44f36184d3e94f54c88c5d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc28cfc6_874bae23",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-19T22:17:52Z",
+      "side": 1,
+      "message": "makes sense; leaving them somewhat packed gave the compiler discretion. with larger block sizes (in vp9, 16, 32) over doing the manual unrolling resulted in quite a few fills and spills. most recently in sse2 I rerolled a few loops",
+      "parentUuid": "bc28cfc6_8ca755a3",
       "revId": "02990a3ff149ccf2d44f36184d3e94f54c88c5d0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
