@@ -1930,9 +1930,9 @@ static void read_coef_probs(FRAME_CONTEXT *fc, TX_MODE tx_mode, aom_reader *r) {
   TX_SIZE tx_size;
   for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
     read_coef_probs_common(fc->coef_probs[tx_size], r);
-#if CONFIG_ANS
+#if CONFIG_RANS
   av1_coef_pareto_cdfs(fc);
-#endif  // CONFIG_ANS
+#endif  // CONFIG_RANS
 }
 
 static void setup_segmentation(AV1_COMMON *const cm,

@@ -702,11 +702,11 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
   while (p < stop && p->token != EOSB_TOKEN) {
     const int token = p->token;
     aom_tree_index index = 0;
-#if !CONFIG_ANS
+#if !CONFIG_RANS
     const struct av1_token *const coef_encoding = &av1_coef_encodings[token];
     int coef_value = coef_encoding->value;
     int coef_length = coef_encoding->len;
-#endif  // !CONFIG_ANS
+#endif  // !CONFIG_RANS
 #if CONFIG_AOM_HIGHBITDEPTH
     const av1_extra_bit *const extra_bits_av1 =
         (bit_depth == AOM_BITS_12)
@@ -718,7 +718,7 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
     (void)bit_depth;
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 
-#if CONFIG_ANS
+#if CONFIG_RANS
     /* skip one or two nodes */
     if (!p->skip_eob_node) aom_write(w, token != EOB_TOKEN, p->context_tree[0]);
 
@@ -751,7 +751,7 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
         }
       }
     }
-#endif  // CONFIG_ANS
+#endif  // CONFIG_RANS
 
     if (extra_bits_av1->base_val) {
       const int extra_bits = p->extra;
@@ -1661,7 +1661,7 @@ static void write_mb_modes_kf(const AV1_COMMON *cm, const MACROBLOCKD *xd,
 #define write_modes_b_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled, \
                               mi_row, mi_col)                              \
   write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col)
-#endif  // CONFIG_ANS && CONFIG_SUPERTX
+#endif  // CONFIG_SUPERTX
 
 static void write_modes_b(AV1_COMP *cpi, const TileInfo *const tile,
                           aom_writer *w, const TOKENEXTRA **tok,
@@ -1675,11 +1675,11 @@ static void write_modes_b(AV1_COMP *cpi, const TileInfo *const tile,
   MODE_INFO *m;
   int plane;
   int bh, bw;
-#if CONFIG_ANS
+#if CONFIG_RANS
   (void)tok;
   (void)tok_end;
   (void)plane;
-#endif  // !CONFIG_ANS
+#endif  // !CONFIG_RANS
 
   xd->mi = cm->mi_grid_visible + (mi_row * cm->mi_stride + mi_col);
   m = xd->mi[0];
@@ -1854,7 +1854,7 @@ static void write_partition(const AV1_COMMON *const cm,
 #define write_modes_sb_wrapper(cpi, tile, w, tok, tok_end, supertx_enabled, \
                                mi_row, mi_col, bsize)                       \
   write_modes_sb(cpi, tile, w, tok, tok_end, mi_row, mi_col, bsize)
-#endif  // CONFIG_ANS && CONFIG_SUPERTX
+#endif  // CONFIG_SUPERTX
 
 static void write_modes_sb(AV1_COMP *const cpi, const TileInfo *const tile,
                            aom_writer *const w, const TOKENEXTRA **tok,
@@ -2471,9 +2471,9 @@ static void update_coef_probs(AV1_COMP *cpi, aom_writer *w) {
   const TX_MODE tx_mode = cpi->common.tx_mode;
   const TX_SIZE max_tx_size = tx_mode_to_biggest_tx_size[tx_mode];
   TX_SIZE tx_size;
-#if CONFIG_ANS
+#if CONFIG_RANS
   int update = 0;
-#endif  // CONFIG_ANS
+#endif  // CONFIG_RANS
 #if CONFIG_ENTROPY
   AV1_COMMON *cm = &cpi->common;
   SUBFRAME_STATS *subframe_stats = &cpi->subframe_stats;
@@ -2521,18 +2521,18 @@ static void update_coef_probs(AV1_COMP *cpi, aom_writer *w) {
 
         update_coef_probs_subframe(w, cpi, tx_size, cpi->branch_ct_buf,
                                    frame_coef_probs);
-#if CONFIG_ANS
+#if CONFIG_RANS
         update = 1;
-#endif  // CONFIG_ANS
+#endif  // CONFIG_RANS
       } else {
 #endif  // CONFIG_ENTROPY
         build_tree_distribution(cpi, tx_size, frame_branch_ct,
                                 frame_coef_probs);
         update_coef_probs_common(w, cpi, tx_size, frame_branch_ct,
                                  frame_coef_probs);
-#if CONFIG_ANS
+#if CONFIG_RANS
         update = 1;
-#endif  // CONFIG_ANS
+#endif  // CONFIG_RANS
 #if CONFIG_ENTROPY
       }
 #endif  // CONFIG_ENTROPY
@@ -2557,9 +2557,9 @@ static void update_coef_probs(AV1_COMP *cpi, aom_writer *w) {
     av1_copy(cm->counts.eob_branch, eob_counts_copy);
   }
 #endif  // CONFIG_ENTROPY
-#if CONFIG_ANS
+#if CONFIG_RANS
   if (update) av1_coef_pareto_cdfs(cpi->common.fc);
-#endif  // CONFIG_ANS
+#endif  // CONFIG_RANS
 }
 
 #if CONFIG_LOOP_RESTORATION

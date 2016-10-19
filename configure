@@ -271,6 +271,7 @@ EXPERIMENT_LIST="
     new_quant
     supertx
     ans
+    rans
     loop_restoration
     ext_partition
     ext_partition_types

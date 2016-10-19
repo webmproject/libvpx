@@ -12,12 +12,13 @@
 #ifndef AV1_COMMON_ENTROPY_H_
 #define AV1_COMMON_ENTROPY_H_
 
+#include "./aom_config.h"
 #include "aom/aom_integer.h"
+#if CONFIG_RANS
+#include "aom_dsp/ans.h"
+#endif  // CONFIG_RANS
 #include "aom_dsp/prob.h"
 
-#if CONFIG_ANS
-#include "aom_dsp/ans.h"
-#endif  // CONFIG_ANS
 #include "av1/common/common.h"
 #include "av1/common/enums.h"
 
@@ -190,12 +191,12 @@ static INLINE const uint8_t *get_band_translate(TX_SIZE tx_size) {
 #define MODEL_NODES (ENTROPY_NODES - UNCONSTRAINED_NODES)
 extern const aom_tree_index av1_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)];
 extern const aom_prob av1_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES];
-#if CONFIG_ANS || CONFIG_DAALA_EC
+#if CONFIG_RANS || CONFIG_DAALA_EC
 typedef aom_cdf_prob coeff_cdf_model[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS]
                                     [ENTROPY_TOKENS];
 extern const aom_cdf_prob av1_pareto8_token_probs[COEFF_PROB_MODELS]
                                                  [ENTROPY_TOKENS - 2];
-#endif  // CONFIG_ANS
+#endif  // CONFIG_RANS
 
 typedef aom_prob av1_coeff_probs_model[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS]
                                       [UNCONSTRAINED_NODES];
@@ -265,10 +266,10 @@ static INLINE int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
   return combine_entropy_contexts(above_ec, left_ec);
 }
 
-#if CONFIG_ANS
+#if CONFIG_RANS
 struct frame_contexts;
 void av1_coef_pareto_cdfs(struct frame_contexts *fc);
-#endif  // CONFIG_ANS
+#endif  // CONFIG_RANS
 
 #if CONFIG_ENTROPY
 #define COEF_COUNT_SAT_BITS 5

@@ -46,9 +46,9 @@ typedef struct {
 
 extern const aom_tree_index av1_coef_tree[];
 extern const aom_tree_index av1_coef_con_tree[];
-#if !CONFIG_ANS
+#if !CONFIG_RANS
 extern const struct av1_token av1_coef_encodings[];
-#endif  // !CONFIG_ANS
+#endif  // !CONFIG_RANS
 
 int av1_is_skippable_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 int av1_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
