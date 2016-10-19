@@ -65,6 +65,12 @@ class CodecTestWith3Params
     : public ::testing::TestWithParam<
           std::tr1::tuple<const libvpx_test::CodecFactory *, T1, T2, T3> > {};
 
+template <class T1, class T2, class T3, class T4>
+class CodecTestWith4Params
+    : public ::testing::TestWithParam<
+          std::tr1::tuple<const libvpx_test::CodecFactory *, T1, T2, T3, T4> > {
+};
+
 /*
  * VP8 Codec Definitions
  */

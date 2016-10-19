@@ -601,6 +601,7 @@ typedef struct VP9_COMP {
   VPxWorker *workers;
   struct EncWorkerData *tile_thr_data;
   VP9LfSync lf_row_sync;
+  struct VP9BitstreamWorkerData *vp9_bitstream_worker_data;
 
   int keep_level_stats;
   Vp9LevelInfo level_info;
