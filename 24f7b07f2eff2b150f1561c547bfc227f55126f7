@@ -16,6 +16,24 @@
       "revId": "24f7b07f2eff2b150f1561c547bfc227f55126f7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc6c4f82_caa723a5",
+        "filename": "av1/decoder/decodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3261,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-10-19T23:46:09Z",
+      "side": 1,
+      "message": "Both are OK, IMHO.\nDo you have a strong reason to prefer that order except just symmetry?",
+      "parentUuid": "3cdbff69_8ef6fb1f",
+      "revId": "24f7b07f2eff2b150f1561c547bfc227f55126f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
