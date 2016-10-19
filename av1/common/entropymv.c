@@ -266,6 +266,25 @@ void av1_adapt_mv_probs(AV1_COMMON *cm, int allow_hp) {
 #endif
 }
 
+#if CONFIG_EC_MULTISYMBOL
+void av1_set_mv_cdfs(nmv_context *ctx) {
+  int i;
+  int j;
+  av1_tree_to_cdf(av1_mv_joint_tree, ctx->joints, ctx->joint_cdf);
+
+  for (i = 0; i < 2; ++i) {
+    nmv_component *const comp_ctx = &ctx->comps[i];
+    av1_tree_to_cdf(av1_mv_class_tree, comp_ctx->classes, comp_ctx->class_cdf);
+
+    for (j = 0; j < CLASS0_SIZE; ++j) {
+      av1_tree_to_cdf(av1_mv_fp_tree, comp_ctx->class0_fp[j],
+                      comp_ctx->class0_fp_cdf[j]);
+    }
+    av1_tree_to_cdf(av1_mv_fp_tree, comp_ctx->fp, comp_ctx->fp_cdf);
+  }
+}
+#endif
+
 void av1_init_mv_probs(AV1_COMMON *cm) {
 #if CONFIG_REF_MV
   int i;
@@ -273,21 +292,7 @@ void av1_init_mv_probs(AV1_COMMON *cm) {
 #else
   cm->fc->nmvc = default_nmv_context;
 #if CONFIG_EC_MULTISYMBOL
-  {
-    int i, j;
-    av1_tree_to_cdf(av1_mv_joint_tree, cm->fc->nmvc.joints,
-                    cm->fc->nmvc.joint_cdf);
-    for (i = 0; i < 2; i++) {
-      av1_tree_to_cdf(av1_mv_class_tree, cm->fc->nmvc.comps[i].classes,
-                      cm->fc->nmvc.comps[i].class_cdf);
-      av1_tree_to_cdf(av1_mv_fp_tree, cm->fc->nmvc.comps[i].fp,
-                      cm->fc->nmvc.comps[i].fp_cdf);
-      for (j = 0; j < CLASS0_SIZE; j++) {
-        av1_tree_to_cdf(av1_mv_fp_tree, cm->fc->nmvc.comps[i].class0_fp[j],
-                        cm->fc->nmvc.comps[i].class0_fp_cdf[j]);
-      }
-    }
-  }
+  av1_set_mv_cdfs(&cm->fc->nmvc);
 #endif
 #endif
 #if CONFIG_GLOBAL_MOTION

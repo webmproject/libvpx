@@ -349,6 +349,8 @@ extern const aom_tree_index
 #if CONFIG_DAALA_EC
 extern int av1_switchable_interp_ind[SWITCHABLE_FILTERS];
 extern int av1_switchable_interp_inv[SWITCHABLE_FILTERS];
+
+void av1_set_mode_cdfs(struct AV1Common *cm);
 #endif
 
 void av1_setup_past_independence(struct AV1Common *cm);

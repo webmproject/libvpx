@@ -2925,9 +2925,6 @@ void av1_adapt_coef_probs(AV1_COMMON *cm) {
 #endif  // CONFIG_ENTROPY
   for (tx_size = 0; tx_size < TX_SIZES; tx_size++)
     adapt_coef_probs(cm, tx_size, count_sat, update_factor);
-#if CONFIG_RANS
-  av1_coef_pareto_cdfs(cm->fc);
-#endif  // CONFIG_RANS
 
 #if CONFIG_ADAPT_SCAN
   for (tx_size = TX_4X4; tx_size < TX_SIZES; ++tx_size)
