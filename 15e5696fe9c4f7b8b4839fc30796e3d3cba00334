@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bc28cfc6_07933e42",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-19T22:29:36Z",
+      "side": 1,
+      "message": "I\u0027d call it a brace. good subject though, I prefer to label changes like this as cosmetics",
+      "range": {
+        "startLine": 7,
+        "startChar": 23,
+        "endLine": 7,
+        "endChar": 31
+      },
+      "revId": "15e5696fe9c4f7b8b4839fc30796e3d3cba00334",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
