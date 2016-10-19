@@ -16,6 +16,24 @@
       "revId": "799588e939ebadc217402ecaf971794ebc9e758d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc28cfc6_18cf273e",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1014,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-10-19T16:46:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bc28cfc6_c0de37c4",
+      "revId": "799588e939ebadc217402ecaf971794ebc9e758d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
