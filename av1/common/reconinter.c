@@ -1170,7 +1170,7 @@ const uint8_t *av1_get_obmc_mask(int length) {
 // top/left neighboring blocks' inter predictors with the regular inter
 // prediction. We assume the original prediction (bmc) is stored in
 // xd->plane[].dst.buf
-void av1_build_obmc_inter_prediction(AV1_COMMON *cm, MACROBLOCKD *xd,
+void av1_build_obmc_inter_prediction(const AV1_COMMON *cm, MACROBLOCKD *xd,
                                      int mi_row, int mi_col,
                                      uint8_t *above[MAX_MB_PLANE],
                                      int above_stride[MAX_MB_PLANE],
@@ -1281,7 +1281,7 @@ void modify_neighbor_predictor_for_obmc(MB_MODE_INFO *mbmi) {
 }
 #endif  // CONFIG_EXT_INTER
 
-void av1_build_prediction_by_above_preds(AV1_COMMON *cm, MACROBLOCKD *xd,
+void av1_build_prediction_by_above_preds(const AV1_COMMON *cm, MACROBLOCKD *xd,
                                          int mi_row, int mi_col,
                                          uint8_t *tmp_buf[MAX_MB_PLANE],
                                          int tmp_width[MAX_MB_PLANE],
@@ -1319,8 +1319,8 @@ void av1_build_prediction_by_above_preds(AV1_COMMON *cm, MACROBLOCKD *xd,
                        pd->subsampling_y);
     }
     for (ref = 0; ref < 1 + has_second_ref(above_mbmi); ++ref) {
-      MV_REFERENCE_FRAME frame = above_mbmi->ref_frame[ref];
-      RefBuffer *ref_buf = &cm->frame_refs[frame - LAST_FRAME];
+      const MV_REFERENCE_FRAME frame = above_mbmi->ref_frame[ref];
+      const RefBuffer *const ref_buf = &cm->frame_refs[frame - LAST_FRAME];
 
       xd->block_refs[ref] = ref_buf;
       if ((!av1_is_valid_scale(&ref_buf->sf)))
@@ -1378,7 +1378,7 @@ void av1_build_prediction_by_above_preds(AV1_COMMON *cm, MACROBLOCKD *xd,
   xd->mb_to_left_edge = -((mi_col * MI_SIZE) * 8);
 }
 
-void av1_build_prediction_by_left_preds(AV1_COMMON *cm, MACROBLOCKD *xd,
+void av1_build_prediction_by_left_preds(const AV1_COMMON *cm, MACROBLOCKD *xd,
                                         int mi_row, int mi_col,
                                         uint8_t *tmp_buf[MAX_MB_PLANE],
                                         int tmp_width[MAX_MB_PLANE],
@@ -1416,8 +1416,8 @@ void av1_build_prediction_by_left_preds(AV1_COMMON *cm, MACROBLOCKD *xd,
                        pd->subsampling_y);
     }
     for (ref = 0; ref < 1 + has_second_ref(left_mbmi); ++ref) {
-      MV_REFERENCE_FRAME frame = left_mbmi->ref_frame[ref];
-      RefBuffer *ref_buf = &cm->frame_refs[frame - LAST_FRAME];
+      const MV_REFERENCE_FRAME frame = left_mbmi->ref_frame[ref];
+      const RefBuffer *const ref_buf = &cm->frame_refs[frame - LAST_FRAME];
 
       xd->block_refs[ref] = ref_buf;
       if ((!av1_is_valid_scale(&ref_buf->sf)))

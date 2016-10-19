@@ -20,7 +20,7 @@
 extern "C" {
 #endif
 
-static INLINE int get_segment_id(const AV1_COMMON *cm,
+static INLINE int get_segment_id(const AV1_COMMON *const cm,
                                  const uint8_t *segment_ids, BLOCK_SIZE bsize,
                                  int mi_row, int mi_col) {
   const int mi_offset = mi_row * cm->mi_cols + mi_col;

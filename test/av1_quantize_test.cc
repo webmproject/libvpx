@@ -70,7 +70,7 @@ class AV1QuantizeTest : public ::testing::TestWithParam<QuantizeFuncParams> {
     QuantizeFpFunc quanFunc = params_.qFunc;
     QuantizeFpFunc quanFuncRef = params_.qFuncRef;
 
-    const scan_order scanOrder = av1_default_scan_orders[txSize];
+    const SCAN_ORDER scanOrder = av1_default_scan_orders[txSize];
     for (int i = 0; i < numTests; i++) {
       int err_count = 0;
       ref_eob = eob = -1;
@@ -137,7 +137,7 @@ class AV1QuantizeTest : public ::testing::TestWithParam<QuantizeFuncParams> {
     int log_scale = (txSize == TX_32X32);
     QuantizeFpFunc quanFunc = params_.qFunc;
     QuantizeFpFunc quanFuncRef = params_.qFuncRef;
-    const scan_order scanOrder = av1_default_scan_orders[txSize];
+    const SCAN_ORDER scanOrder = av1_default_scan_orders[txSize];
 
     for (int i = 0; i < numTests; i++) {
       ref_eob = eob = -1;

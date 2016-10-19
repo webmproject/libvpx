@@ -22,7 +22,7 @@ struct AV1_COMP;
 struct macroblock;
 
 // Select a segment for the current Block.
-void av1_caq_select_segment(struct AV1_COMP *cpi, struct macroblock *,
+void av1_caq_select_segment(const struct AV1_COMP *cpi, struct macroblock *,
                             BLOCK_SIZE bs, int mi_row, int mi_col,
                             int projected_rate);
 

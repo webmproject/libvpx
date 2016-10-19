@@ -12,25 +12,10 @@
 #include <arm_neon.h>
 #include <assert.h>
 
-#include "./av1_rtcd.h"
 #include "./aom_config.h"
+#include "./av1_rtcd.h"
+#include "aom_dsp/txfm_common.h"
 #include "av1/common/common.h"
-
-static int16_t cospi_2_64 = 16305;
-static int16_t cospi_4_64 = 16069;
-static int16_t cospi_6_64 = 15679;
-static int16_t cospi_8_64 = 15137;
-static int16_t cospi_10_64 = 14449;
-static int16_t cospi_12_64 = 13623;
-static int16_t cospi_14_64 = 12665;
-static int16_t cospi_16_64 = 11585;
-static int16_t cospi_18_64 = 10394;
-static int16_t cospi_20_64 = 9102;
-static int16_t cospi_22_64 = 7723;
-static int16_t cospi_24_64 = 6270;
-static int16_t cospi_26_64 = 4756;
-static int16_t cospi_28_64 = 3196;
-static int16_t cospi_30_64 = 1606;
 
 static INLINE void TRANSPOSE8X8(int16x8_t *q8s16, int16x8_t *q9s16,
                                 int16x8_t *q10s16, int16x8_t *q11s16,
@@ -108,10 +93,10 @@ static INLINE void IDCT8x8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   int32x4_t q2s32, q3s32, q5s32, q6s32, q8s32, q9s32;
   int32x4_t q10s32, q11s32, q12s32, q13s32, q15s32;
 
-  d0s16 = vdup_n_s16(cospi_28_64);
-  d1s16 = vdup_n_s16(cospi_4_64);
-  d2s16 = vdup_n_s16(cospi_12_64);
-  d3s16 = vdup_n_s16(cospi_20_64);
+  d0s16 = vdup_n_s16((int16_t)cospi_28_64);
+  d1s16 = vdup_n_s16((int16_t)cospi_4_64);
+  d2s16 = vdup_n_s16((int16_t)cospi_12_64);
+  d3s16 = vdup_n_s16((int16_t)cospi_20_64);
 
   d16s16 = vget_low_s16(*q8s16);
   d17s16 = vget_high_s16(*q8s16);
@@ -164,7 +149,7 @@ static INLINE void IDCT8x8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   q6s16 = vcombine_s16(d12s16, d13s16);
   q7s16 = vcombine_s16(d14s16, d15s16);
 
-  d0s16 = vdup_n_s16(cospi_16_64);
+  d0s16 = vdup_n_s16((int16_t)cospi_16_64);
 
   q2s32 = vmull_s16(d16s16, d0s16);
   q3s32 = vmull_s16(d17s16, d0s16);
@@ -176,8 +161,8 @@ static INLINE void IDCT8x8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   q13s32 = vmlsl_s16(q13s32, d24s16, d0s16);
   q15s32 = vmlsl_s16(q15s32, d25s16, d0s16);
 
-  d0s16 = vdup_n_s16(cospi_24_64);
-  d1s16 = vdup_n_s16(cospi_8_64);
+  d0s16 = vdup_n_s16((int16_t)cospi_24_64);
+  d1s16 = vdup_n_s16((int16_t)cospi_8_64);
 
   d18s16 = vqrshrn_n_s32(q2s32, 14);
   d19s16 = vqrshrn_n_s32(q3s32, 14);
@@ -217,7 +202,7 @@ static INLINE void IDCT8x8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   d28s16 = vget_low_s16(*q14s16);
   d29s16 = vget_high_s16(*q14s16);
 
-  d16s16 = vdup_n_s16(cospi_16_64);
+  d16s16 = vdup_n_s16((int16_t)cospi_16_64);
 
   q9s32 = vmull_s16(d28s16, d16s16);
   q10s32 = vmull_s16(d29s16, d16s16);
@@ -276,16 +261,16 @@ static INLINE void IADST8X8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   d30s16 = vget_low_s16(*q15s16);
   d31s16 = vget_high_s16(*q15s16);
 
-  d14s16 = vdup_n_s16(cospi_2_64);
-  d15s16 = vdup_n_s16(cospi_30_64);
+  d14s16 = vdup_n_s16((int16_t)cospi_2_64);
+  d15s16 = vdup_n_s16((int16_t)cospi_30_64);
 
   q1s32 = vmull_s16(d30s16, d14s16);
   q2s32 = vmull_s16(d31s16, d14s16);
   q3s32 = vmull_s16(d30s16, d15s16);
   q4s32 = vmull_s16(d31s16, d15s16);
 
-  d30s16 = vdup_n_s16(cospi_18_64);
-  d31s16 = vdup_n_s16(cospi_14_64);
+  d30s16 = vdup_n_s16((int16_t)cospi_18_64);
+  d31s16 = vdup_n_s16((int16_t)cospi_14_64);
 
   q1s32 = vmlal_s16(q1s32, d16s16, d15s16);
   q2s32 = vmlal_s16(q2s32, d17s16, d15s16);
@@ -324,15 +309,15 @@ static INLINE void IADST8X8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   d7s16 = vqrshrn_n_s32(q4s32, 14);
   *q12s16 = vcombine_s16(d24s16, d25s16);
 
-  d0s16 = vdup_n_s16(cospi_10_64);
-  d1s16 = vdup_n_s16(cospi_22_64);
+  d0s16 = vdup_n_s16((int16_t)cospi_10_64);
+  d1s16 = vdup_n_s16((int16_t)cospi_22_64);
   q4s32 = vmull_s16(d26s16, d0s16);
   q5s32 = vmull_s16(d27s16, d0s16);
   q2s32 = vmull_s16(d26s16, d1s16);
   q6s32 = vmull_s16(d27s16, d1s16);
 
-  d30s16 = vdup_n_s16(cospi_26_64);
-  d31s16 = vdup_n_s16(cospi_6_64);
+  d30s16 = vdup_n_s16((int16_t)cospi_26_64);
+  d31s16 = vdup_n_s16((int16_t)cospi_6_64);
 
   q4s32 = vmlal_s16(q4s32, d20s16, d1s16);
   q5s32 = vmlal_s16(q5s32, d21s16, d1s16);
@@ -367,8 +352,8 @@ static INLINE void IADST8X8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   q4s32 = vsubq_s32(q4s32, q0s32);
   q5s32 = vsubq_s32(q5s32, q13s32);
 
-  d30s16 = vdup_n_s16(cospi_8_64);
-  d31s16 = vdup_n_s16(cospi_24_64);
+  d30s16 = vdup_n_s16((int16_t)cospi_8_64);
+  d31s16 = vdup_n_s16((int16_t)cospi_24_64);
 
   d18s16 = vqrshrn_n_s32(q9s32, 14);
   d19s16 = vqrshrn_n_s32(q10s32, 14);
@@ -423,7 +408,7 @@ static INLINE void IADST8X8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   d15s16 = vqrshrn_n_s32(q0s32, 14);
   *q14s16 = vcombine_s16(d28s16, d29s16);
 
-  d30s16 = vdup_n_s16(cospi_16_64);
+  d30s16 = vdup_n_s16((int16_t)cospi_16_64);
 
   d22s16 = vget_low_s16(*q11s16);
   d23s16 = vget_high_s16(*q11s16);

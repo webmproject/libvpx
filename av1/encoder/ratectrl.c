@@ -776,20 +776,20 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const AV1_COMP *cpi,
 
   if (frame_is_intra_only(cm)) {
     if (oxcf->rc_mode == AOM_Q) {
-      int qindex = cq_level;
-      double q = av1_convert_qindex_to_q(qindex, cm->bit_depth);
-      int delta_qindex = av1_compute_qdelta(rc, q, q * 0.25, cm->bit_depth);
+      const int qindex = cq_level;
+      const double q_val = av1_convert_qindex_to_q(qindex, cm->bit_depth);
+      const int delta_qindex =
+          av1_compute_qdelta(rc, q_val, q_val * 0.25, cm->bit_depth);
       active_best_quality = AOMMAX(qindex + delta_qindex, rc->best_quality);
     } else if (rc->this_key_frame_forced) {
-      int qindex = rc->last_boosted_qindex;
-      double last_boosted_q = av1_convert_qindex_to_q(qindex, cm->bit_depth);
-      int delta_qindex = av1_compute_qdelta(
+      const int qindex = rc->last_boosted_qindex;
+      const double last_boosted_q =
+          av1_convert_qindex_to_q(qindex, cm->bit_depth);
+      const int delta_qindex = av1_compute_qdelta(
           rc, last_boosted_q, last_boosted_q * 0.75, cm->bit_depth);
       active_best_quality = AOMMAX(qindex + delta_qindex, rc->best_quality);
-    } else {
-      // not first frame of one pass and kf_boost is set
+    } else {  // not first frame of one pass and kf_boost is set
       double q_adj_factor = 1.0;
-      double q_val;
 
       active_best_quality = get_kf_active_quality(
           rc, rc->avg_frame_qindex[KEY_FRAME], cm->bit_depth);
@@ -799,60 +799,56 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const AV1_COMP *cpi,
         q_adj_factor -= 0.25;
       }
 
-      // Convert the adjustment factor to a qindex delta
-      // on active_best_quality.
-      q_val = av1_convert_qindex_to_q(active_best_quality, cm->bit_depth);
-      active_best_quality +=
-          av1_compute_qdelta(rc, q_val, q_val * q_adj_factor, cm->bit_depth);
+      // Convert the adjustment factor to a qindex delta on active_best_quality.
+      {
+        const double q_val =
+            av1_convert_qindex_to_q(active_best_quality, cm->bit_depth);
+        active_best_quality +=
+            av1_compute_qdelta(rc, q_val, q_val * q_adj_factor, cm->bit_depth);
+      }
     }
   } else if (!rc->is_src_frame_alt_ref &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
     // Use the lower of active_worst_quality and recent
     // average Q as basis for GF/ARF best Q limit unless last frame was
     // a key frame.
-    if (rc->frames_since_key > 1 &&
-        rc->avg_frame_qindex[INTER_FRAME] < active_worst_quality) {
-      q = rc->avg_frame_qindex[INTER_FRAME];
-    } else {
-      q = rc->avg_frame_qindex[KEY_FRAME];
-    }
+    q = (rc->frames_since_key > 1 &&
+         rc->avg_frame_qindex[INTER_FRAME] < active_worst_quality)
+            ? rc->avg_frame_qindex[INTER_FRAME]
+            : rc->avg_frame_qindex[KEY_FRAME];
     // For constrained quality dont allow Q less than the cq level
     if (oxcf->rc_mode == AOM_CQ) {
       if (q < cq_level) q = cq_level;
-
       active_best_quality = get_gf_active_quality(rc, q, cm->bit_depth);
-
       // Constrained quality use slightly lower active best.
       active_best_quality = active_best_quality * 15 / 16;
-
     } else if (oxcf->rc_mode == AOM_Q) {
-      int qindex = cq_level;
-      double q = av1_convert_qindex_to_q(qindex, cm->bit_depth);
-      int delta_qindex;
-      if (cpi->refresh_alt_ref_frame)
-        delta_qindex = av1_compute_qdelta(rc, q, q * 0.40, cm->bit_depth);
-      else
-        delta_qindex = av1_compute_qdelta(rc, q, q * 0.50, cm->bit_depth);
+      const int qindex = cq_level;
+      const double q_val = av1_convert_qindex_to_q(qindex, cm->bit_depth);
+      const int delta_qindex =
+          (cpi->refresh_alt_ref_frame)
+              ? av1_compute_qdelta(rc, q_val, q_val * 0.40, cm->bit_depth)
+              : av1_compute_qdelta(rc, q_val, q_val * 0.50, cm->bit_depth);
       active_best_quality = AOMMAX(qindex + delta_qindex, rc->best_quality);
     } else {
       active_best_quality = get_gf_active_quality(rc, q, cm->bit_depth);
     }
   } else {
     if (oxcf->rc_mode == AOM_Q) {
-      int qindex = cq_level;
-      double q = av1_convert_qindex_to_q(qindex, cm->bit_depth);
-      double delta_rate[FIXED_GF_INTERVAL] = { 0.50, 1.0, 0.85, 1.0,
-                                               0.70, 1.0, 0.85, 1.0 };
-      int delta_qindex = av1_compute_qdelta(
-          rc, q, q * delta_rate[cm->current_video_frame % FIXED_GF_INTERVAL],
+      const int qindex = cq_level;
+      const double q_val = av1_convert_qindex_to_q(qindex, cm->bit_depth);
+      const double delta_rate[FIXED_GF_INTERVAL] = { 0.50, 1.0, 0.85, 1.0,
+                                                     0.70, 1.0, 0.85, 1.0 };
+      const int delta_qindex = av1_compute_qdelta(
+          rc, q_val,
+          q_val * delta_rate[cm->current_video_frame % FIXED_GF_INTERVAL],
           cm->bit_depth);
       active_best_quality = AOMMAX(qindex + delta_qindex, rc->best_quality);
     } else {
       // Use the lower of active_worst_quality and recent/average Q.
-      if (cm->current_video_frame > 1)
-        active_best_quality = inter_minq[rc->avg_frame_qindex[INTER_FRAME]];
-      else
-        active_best_quality = inter_minq[rc->avg_frame_qindex[KEY_FRAME]];
+      active_best_quality = (cm->current_video_frame > 1)
+                                ? inter_minq[rc->avg_frame_qindex[INTER_FRAME]]
+                                : inter_minq[rc->avg_frame_qindex[KEY_FRAME]];
       // For the constrained quality mode we don't want
       // q to fall below the cq level.
       if ((oxcf->rc_mode == AOM_CQ) && (active_best_quality < cq_level)) {

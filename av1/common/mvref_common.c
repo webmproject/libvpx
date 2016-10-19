@@ -763,8 +763,8 @@ void av1_find_best_ref_mvs(int allow_hp, int_mv *mvlist, int_mv *nearest_mv,
   *near_mv = mvlist[1];
 }
 
-void av1_append_sub8x8_mvs_for_idx(AV1_COMMON *cm, MACROBLOCKD *xd, int block,
-                                   int ref, int mi_row, int mi_col,
+void av1_append_sub8x8_mvs_for_idx(const AV1_COMMON *cm, MACROBLOCKD *xd,
+                                   int block, int ref, int mi_row, int mi_col,
 #if CONFIG_REF_MV
                                    CANDIDATE_MV *ref_mv_stack,
                                    uint8_t *ref_mv_count,

@@ -28,10 +28,10 @@ typedef struct {
   const int16_t *scan;
   const int16_t *iscan;
   const int16_t *neighbors;
-} scan_order;
+} SCAN_ORDER;
 
-extern const scan_order av1_default_scan_orders[TX_SIZES];
-extern const scan_order av1_intra_scan_orders[TX_SIZES][TX_TYPES];
+extern const SCAN_ORDER av1_default_scan_orders[TX_SIZES];
+extern const SCAN_ORDER av1_intra_scan_orders[TX_SIZES][TX_TYPES];
 
 static INLINE int get_coef_context(const int16_t *neighbors,
                                    const uint8_t *token_cache, int c) {
@@ -40,21 +40,21 @@ static INLINE int get_coef_context(const int16_t *neighbors,
          1;
 }
 
-static INLINE const scan_order *get_intra_scan(TX_SIZE tx_size,
+static INLINE const SCAN_ORDER *get_intra_scan(TX_SIZE tx_size,
                                                TX_TYPE tx_type) {
   return &av1_intra_scan_orders[tx_size][tx_type];
 }
 
 #if CONFIG_EXT_TX
-extern const scan_order av1_inter_scan_orders[TX_SIZES_ALL][TX_TYPES];
+extern const SCAN_ORDER av1_inter_scan_orders[TX_SIZES_ALL][TX_TYPES];
 
-static INLINE const scan_order *get_inter_scan(TX_SIZE tx_size,
+static INLINE const SCAN_ORDER *get_inter_scan(TX_SIZE tx_size,
                                                TX_TYPE tx_type) {
   return &av1_inter_scan_orders[tx_size][tx_type];
 }
 #endif  // CONFIG_EXT_TX
 
-static INLINE const scan_order *get_scan(TX_SIZE tx_size, TX_TYPE tx_type,
+static INLINE const SCAN_ORDER *get_scan(TX_SIZE tx_size, TX_TYPE tx_type,
                                          int is_inter) {
 #if CONFIG_EXT_TX
   return is_inter ? &av1_inter_scan_orders[tx_size][tx_type]

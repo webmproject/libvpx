@@ -31,12 +31,12 @@ typedef struct {
   int64_t sum_error;
   int log2_count;
   int variance;
-} var;
+} VAR;
 
 typedef struct {
-  var none;
-  var horz[2];
-  var vert[2];
+  VAR none;
+  VAR horz[2];
+  VAR vert[2];
 } partition_variance;
 
 typedef struct VAR_TREE {
@@ -59,7 +59,7 @@ void av1_setup_var_tree(struct AV1Common *cm, struct ThreadData *td);
 void av1_free_var_tree(struct ThreadData *td);
 
 // Set variance values given sum square error, sum error, count.
-static INLINE void fill_variance(int64_t s2, int64_t s, int c, var *v) {
+static INLINE void fill_variance(int64_t s2, int64_t s, int c, VAR *v) {
   v->sum_square_error = s2;
   v->sum_error = s;
   v->log2_count = c;
@@ -69,7 +69,7 @@ static INLINE void fill_variance(int64_t s2, int64_t s, int c, var *v) {
             v->log2_count);
 }
 
-static INLINE void sum_2_variances(const var *a, const var *b, var *r) {
+static INLINE void sum_2_variances(const VAR *a, const VAR *b, VAR *r) {
   assert(a->log2_count == b->log2_count);
   fill_variance(a->sum_square_error + b->sum_square_error,
                 a->sum_error + b->sum_error, a->log2_count + 1, r);

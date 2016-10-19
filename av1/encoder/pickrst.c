@@ -351,7 +351,6 @@ static void update_a_sep_sym(double **Mc, double **Hc, double *a, double *b) {
   memset(A, 0, sizeof(A));
   memset(B, 0, sizeof(B));
   for (i = 0; i < RESTORATION_WIN; i++) {
-    int j;
     for (j = 0; j < RESTORATION_WIN; ++j) {
       const int jj = wrap_index(j);
       A[jj] += Mc[i][j] * b[i];
@@ -399,7 +398,6 @@ static void update_b_sep_sym(double **Mc, double **Hc, double *a, double *b) {
   memset(A, 0, sizeof(A));
   memset(B, 0, sizeof(B));
   for (i = 0; i < RESTORATION_WIN; i++) {
-    int j;
     const int ii = wrap_index(i);
     for (j = 0; j < RESTORATION_WIN; j++) A[ii] += Mc[i][j] * a[j];
   }

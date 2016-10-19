@@ -344,7 +344,7 @@ const struct av1_token av1_coef_encodings[ENTROPY_TOKENS] = {
 #endif  // !CONFIG_ANS
 
 struct tokenize_b_args {
-  AV1_COMP *cpi;
+  const AV1_COMP *cpi;
   ThreadData *td;
   TOKENEXTRA **tp;
   int this_rate;
@@ -362,11 +362,11 @@ static void cost_coeffs_b(int plane, int block, int blk_row, int blk_col,
   const PLANE_TYPE type = pd->plane_type;
   const int ref = is_inter_block(mbmi);
   const TX_TYPE tx_type = get_tx_type(type, xd, block, tx_size);
-  const scan_order *const so = get_scan(tx_size, tx_type, ref);
+  const SCAN_ORDER *const scan_order = get_scan(tx_size, tx_type, ref);
   int pt = get_entropy_context(tx_size, pd->above_context + blk_col,
                                pd->left_context + blk_row);
-  int rate =
-      av1_cost_coeffs(x, plane, block, pt, tx_size, so->scan, so->neighbors, 0);
+  int rate = av1_cost_coeffs(x, plane, block, pt, tx_size, scan_order->scan,
+                             scan_order->neighbors, 0);
   args->this_rate += rate;
   av1_set_contexts(xd, pd, plane_bsize, tx_size, p->eobs[block] > 0, blk_col,
                    blk_row);
@@ -409,7 +409,7 @@ static INLINE int get_tx_eob(const struct segmentation *seg, int segment_id,
 }
 
 #if CONFIG_PALETTE
-void av1_tokenize_palette_sb(AV1_COMP *cpi, struct ThreadData *const td,
+void av1_tokenize_palette_sb(const AV1_COMP *cpi, struct ThreadData *const td,
                              int plane, TOKENEXTRA **t, RUN_TYPE dry_run,
                              BLOCK_SIZE bsize, int *rate) {
   MACROBLOCK *const x = &td->mb;
@@ -454,7 +454,7 @@ void av1_tokenize_palette_sb(AV1_COMP *cpi, struct ThreadData *const td,
 static void tokenize_b(int plane, int block, int blk_row, int blk_col,
                        BLOCK_SIZE plane_bsize, TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args *const args = arg;
-  AV1_COMP *cpi = args->cpi;
+  const AV1_COMP *cpi = args->cpi;
   ThreadData *const td = args->td;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -476,12 +476,13 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
 #endif  // CONFIG_SUEPRTX
   const int16_t *scan, *nb;
   const TX_TYPE tx_type = get_tx_type(type, xd, block, tx_size);
-  const scan_order *const so = get_scan(tx_size, tx_type, is_inter_block(mbmi));
+  const SCAN_ORDER *const scan_order =
+      get_scan(tx_size, tx_type, is_inter_block(mbmi));
   const int ref = is_inter_block(mbmi);
   unsigned int(*const counts)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
       td->rd_counts.coef_counts[txsize_sqr_map[tx_size]][type][ref];
 #if CONFIG_ENTROPY
-  aom_prob(*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
+  const aom_prob(*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       cpi->subframe_stats.coef_probs_buf[cpi->common.coef_probs_update_idx]
                                         [txsize_sqr_map[tx_size]][type][ref];
 #else
@@ -501,8 +502,8 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
   EXTRABIT extra;
   pt = get_entropy_context(tx_size, pd->above_context + blk_col,
                            pd->left_context + blk_row);
-  scan = so->scan;
-  nb = so->neighbors;
+  scan = scan_order->scan;
+  nb = scan_order->neighbors;
   c = 0;
 
   while (c < eob) {
@@ -612,8 +613,7 @@ void tokenize_vartx(ThreadData *td, TOKENEXTRA **t, RUN_TYPE dry_run,
             : mbmi->inter_tx_size[tx_row][tx_col];
 
   if (tx_size == plane_tx_size) {
-    const struct macroblockd_plane *const pd = &xd->plane[plane];
-    BLOCK_SIZE plane_bsize = get_plane_block_size(mbmi->sb_type, pd);
+    plane_bsize = get_plane_block_size(mbmi->sb_type, pd);
     if (!dry_run)
       tokenize_b(plane, block, blk_row, blk_col, plane_bsize, tx_size, arg);
     else if (dry_run == DRY_RUN_NORMAL)
@@ -641,10 +641,10 @@ void tokenize_vartx(ThreadData *td, TOKENEXTRA **t, RUN_TYPE dry_run,
   }
 }
 
-void av1_tokenize_sb_vartx(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
+void av1_tokenize_sb_vartx(const AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
                            RUN_TYPE dry_run, int mi_row, int mi_col,
                            BLOCK_SIZE bsize, int *rate) {
-  AV1_COMMON *const cm = &cpi->common;
+  const AV1_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
@@ -696,9 +696,9 @@ void av1_tokenize_sb_vartx(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
 }
 #endif  // CONFIG_VAR_TX
 
-void av1_tokenize_sb(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
+void av1_tokenize_sb(const AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
                      RUN_TYPE dry_run, BLOCK_SIZE bsize, int *rate) {
-  AV1_COMMON *const cm = &cpi->common;
+  const AV1_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
@@ -732,9 +732,10 @@ void av1_tokenize_sb(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
 }
 
 #if CONFIG_SUPERTX
-void av1_tokenize_sb_supertx(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
-                             RUN_TYPE dry_run, BLOCK_SIZE bsize, int *rate) {
-  AV1_COMMON *const cm = &cpi->common;
+void av1_tokenize_sb_supertx(const AV1_COMP *cpi, ThreadData *td,
+                             TOKENEXTRA **t, RUN_TYPE dry_run, BLOCK_SIZE bsize,
+                             int *rate) {
+  const AV1_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &td->mb.e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   TOKENEXTRA *t_backup = *t;

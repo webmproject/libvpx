@@ -137,8 +137,8 @@ void aom_idct16x16_256_add_neon_pass1(int16_t *in, int16_t *out,
   d31s16 = vget_high_s16(q15s16);
 
   // stage 3
-  d0s16 = vdup_n_s16(cospi_28_64);
-  d1s16 = vdup_n_s16(cospi_4_64);
+  d0s16 = vdup_n_s16((int16_t)cospi_28_64);
+  d1s16 = vdup_n_s16((int16_t)cospi_4_64);
 
   q2s32 = vmull_s16(d18s16, d0s16);
   q3s32 = vmull_s16(d19s16, d0s16);
@@ -150,8 +150,8 @@ void aom_idct16x16_256_add_neon_pass1(int16_t *in, int16_t *out,
   q5s32 = vmlal_s16(q5s32, d30s16, d0s16);
   q6s32 = vmlal_s16(q6s32, d31s16, d0s16);
 
-  d2s16 = vdup_n_s16(cospi_12_64);
-  d3s16 = vdup_n_s16(cospi_20_64);
+  d2s16 = vdup_n_s16((int16_t)cospi_12_64);
+  d3s16 = vdup_n_s16((int16_t)cospi_20_64);
 
   d8s16 = vqrshrn_n_s32(q2s32, 14);
   d9s16 = vqrshrn_n_s32(q3s32, 14);
@@ -178,15 +178,15 @@ void aom_idct16x16_256_add_neon_pass1(int16_t *in, int16_t *out,
   q6s16 = vcombine_s16(d12s16, d13s16);
 
   // stage 4
-  d30s16 = vdup_n_s16(cospi_16_64);
+  d30s16 = vdup_n_s16((int16_t)cospi_16_64);
 
   q2s32 = vmull_s16(d16s16, d30s16);
   q11s32 = vmull_s16(d17s16, d30s16);
   q0s32 = vmull_s16(d24s16, d30s16);
   q1s32 = vmull_s16(d25s16, d30s16);
 
-  d30s16 = vdup_n_s16(cospi_24_64);
-  d31s16 = vdup_n_s16(cospi_8_64);
+  d30s16 = vdup_n_s16((int16_t)cospi_24_64);
+  d31s16 = vdup_n_s16((int16_t)cospi_8_64);
 
   q3s32 = vaddq_s32(q2s32, q0s32);
   q12s32 = vaddq_s32(q11s32, q1s32);
@@ -232,7 +232,7 @@ void aom_idct16x16_256_add_neon_pass1(int16_t *in, int16_t *out,
   q2s16 = vsubq_s16(q9s16, q10s16);
   q3s16 = vsubq_s16(q8s16, q11s16);
 
-  d16s16 = vdup_n_s16(cospi_16_64);
+  d16s16 = vdup_n_s16((int16_t)cospi_16_64);
 
   q11s32 = vmull_s16(d26s16, d16s16);
   q12s32 = vmull_s16(d27s16, d16s16);
@@ -378,8 +378,8 @@ void aom_idct16x16_256_add_neon_pass2(int16_t *src, int16_t *out,
   d31s16 = vget_high_s16(q15s16);
 
   // stage 3
-  d12s16 = vdup_n_s16(cospi_30_64);
-  d13s16 = vdup_n_s16(cospi_2_64);
+  d12s16 = vdup_n_s16((int16_t)cospi_30_64);
+  d13s16 = vdup_n_s16((int16_t)cospi_2_64);
 
   q2s32 = vmull_s16(d16s16, d12s16);
   q3s32 = vmull_s16(d17s16, d12s16);
@@ -398,8 +398,8 @@ void aom_idct16x16_256_add_neon_pass2(int16_t *src, int16_t *out,
   q0s16 = vcombine_s16(d0s16, d1s16);
   q7s16 = vcombine_s16(d14s16, d15s16);
 
-  d30s16 = vdup_n_s16(cospi_14_64);
-  d31s16 = vdup_n_s16(cospi_18_64);
+  d30s16 = vdup_n_s16((int16_t)cospi_14_64);
+  d31s16 = vdup_n_s16((int16_t)cospi_18_64);
 
   q2s32 = vmull_s16(d24s16, d30s16);
   q3s32 = vmull_s16(d25s16, d30s16);
@@ -418,8 +418,8 @@ void aom_idct16x16_256_add_neon_pass2(int16_t *src, int16_t *out,
   q1s16 = vcombine_s16(d2s16, d3s16);
   q6s16 = vcombine_s16(d12s16, d13s16);
 
-  d30s16 = vdup_n_s16(cospi_22_64);
-  d31s16 = vdup_n_s16(cospi_10_64);
+  d30s16 = vdup_n_s16((int16_t)cospi_22_64);
+  d31s16 = vdup_n_s16((int16_t)cospi_10_64);
 
   q11s32 = vmull_s16(d20s16, d30s16);
   q12s32 = vmull_s16(d21s16, d30s16);
@@ -438,8 +438,8 @@ void aom_idct16x16_256_add_neon_pass2(int16_t *src, int16_t *out,
   q2s16 = vcombine_s16(d4s16, d5s16);
   q5s16 = vcombine_s16(d10s16, d11s16);
 
-  d30s16 = vdup_n_s16(cospi_6_64);
-  d31s16 = vdup_n_s16(cospi_26_64);
+  d30s16 = vdup_n_s16((int16_t)cospi_6_64);
+  d31s16 = vdup_n_s16((int16_t)cospi_26_64);
 
   q10s32 = vmull_s16(d28s16, d30s16);
   q11s32 = vmull_s16(d29s16, d30s16);
@@ -478,8 +478,8 @@ void aom_idct16x16_256_add_neon_pass2(int16_t *src, int16_t *out,
   d28s16 = vget_low_s16(q14s16);
   d29s16 = vget_high_s16(q14s16);
 
-  d30s16 = vdup_n_s16(cospi_8_64);
-  d31s16 = vdup_n_s16(cospi_24_64);
+  d30s16 = vdup_n_s16((int16_t)cospi_8_64);
+  d31s16 = vdup_n_s16((int16_t)cospi_24_64);
 
   q2s32 = vmull_s16(d18s16, d31s16);
   q3s32 = vmull_s16(d19s16, d31s16);
@@ -539,7 +539,7 @@ void aom_idct16x16_256_add_neon_pass2(int16_t *src, int16_t *out,
   d26s16 = vget_low_s16(q13s16);
   d27s16 = vget_high_s16(q13s16);
 
-  d14s16 = vdup_n_s16(cospi_16_64);
+  d14s16 = vdup_n_s16((int16_t)cospi_16_64);
 
   q3s32 = vmull_s16(d26s16, d14s16);
   q4s32 = vmull_s16(d27s16, d14s16);
@@ -903,15 +903,15 @@ void aom_idct16x16_10_add_neon_pass1(int16_t *in, int16_t *out,
                &q15s16);
 
   // stage 3
-  q0s16 = vdupq_n_s16(cospi_28_64 * 2);
-  q1s16 = vdupq_n_s16(cospi_4_64 * 2);
+  q0s16 = vdupq_n_s16((int16_t)(cospi_28_64 * 2));
+  q1s16 = vdupq_n_s16((int16_t)(cospi_4_64 * 2));
 
   q4s16 = vqrdmulhq_s16(q9s16, q0s16);
   q7s16 = vqrdmulhq_s16(q9s16, q1s16);
 
   // stage 4
-  q1s16 = vdupq_n_s16(cospi_16_64 * 2);
-  d4s16 = vdup_n_s16(cospi_16_64);
+  q1s16 = vdupq_n_s16((int16_t)(cospi_16_64 * 2));
+  d4s16 = vdup_n_s16((int16_t)cospi_16_64);
 
   q8s16 = vqrdmulhq_s16(q8s16, q1s16);
 
@@ -1046,13 +1046,13 @@ void aom_idct16x16_10_add_neon_pass2(int16_t *src, int16_t *out,
                &q15s16);
 
   // stage 3
-  q6s16 = vdupq_n_s16(cospi_30_64 * 2);
+  q6s16 = vdupq_n_s16((int16_t)(cospi_30_64 * 2));
   q0s16 = vqrdmulhq_s16(q8s16, q6s16);
-  q6s16 = vdupq_n_s16(cospi_2_64 * 2);
+  q6s16 = vdupq_n_s16((int16_t)(cospi_2_64 * 2));
   q7s16 = vqrdmulhq_s16(q8s16, q6s16);
 
   q15s16 = vdupq_n_s16(-cospi_26_64 * 2);
-  q14s16 = vdupq_n_s16(cospi_6_64 * 2);
+  q14s16 = vdupq_n_s16((int16_t)(cospi_6_64 * 2));
   q3s16 = vqrdmulhq_s16(q9s16, q15s16);
   q4s16 = vqrdmulhq_s16(q9s16, q14s16);
 
@@ -1066,8 +1066,8 @@ void aom_idct16x16_10_add_neon_pass2(int16_t *src, int16_t *out,
   d14s16 = vget_low_s16(q7s16);
   d15s16 = vget_high_s16(q7s16);
 
-  d30s16 = vdup_n_s16(cospi_8_64);
-  d31s16 = vdup_n_s16(cospi_24_64);
+  d30s16 = vdup_n_s16((int16_t)cospi_8_64);
+  d31s16 = vdup_n_s16((int16_t)cospi_24_64);
 
   q12s32 = vmull_s16(d14s16, d31s16);
   q5s32 = vmull_s16(d15s16, d31s16);
@@ -1124,7 +1124,7 @@ void aom_idct16x16_10_add_neon_pass2(int16_t *src, int16_t *out,
   d26s16 = vget_low_s16(q13s16);
   d27s16 = vget_high_s16(q13s16);
 
-  d14s16 = vdup_n_s16(cospi_16_64);
+  d14s16 = vdup_n_s16((int16_t)cospi_16_64);
   q3s32 = vmull_s16(d26s16, d14s16);
   q4s32 = vmull_s16(d27s16, d14s16);
   q0s32 = vmull_s16(d20s16, d14s16);

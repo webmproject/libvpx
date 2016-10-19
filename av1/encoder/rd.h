@@ -398,8 +398,7 @@ void av1_initialize_me_consts(const struct AV1_COMP *cpi, MACROBLOCK *x,
 void av1_model_rd_from_var_lapndz(int64_t var, unsigned int n,
                                   unsigned int qstep, int *rate, int64_t *dist);
 
-int av1_get_switchable_rate(const struct AV1_COMP *cpi,
-                            const MACROBLOCKD *const xd);
+int av1_get_switchable_rate(const struct AV1_COMP *cpi, const MACROBLOCKD *xd);
 
 int av1_raster_block_offset(BLOCK_SIZE plane_bsize, int raster_block,
                             int stride);
@@ -438,8 +437,9 @@ static INLINE int rd_less_than_thresh(int64_t best_rd, int thresh,
   return best_rd < ((int64_t)thresh * thresh_fact >> 5) || thresh == INT_MAX;
 }
 
-void av1_mv_pred(struct AV1_COMP *cpi, MACROBLOCK *x, uint8_t *ref_y_buffer,
-                 int ref_y_stride, int ref_frame, BLOCK_SIZE block_size);
+void av1_mv_pred(const struct AV1_COMP *cpi, MACROBLOCK *x,
+                 uint8_t *ref_y_buffer, int ref_y_stride, int ref_frame,
+                 BLOCK_SIZE block_size);
 
 static INLINE void set_error_per_bit(MACROBLOCK *x, int rdmult) {
   x->errorperbit = rdmult >> RD_EPB_SHIFT;

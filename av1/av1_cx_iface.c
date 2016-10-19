@@ -871,7 +871,6 @@ static int write_superframe_index(aom_codec_alg_priv_t *ctx) {
   index_sz = 2 + (mag + 1) * (ctx->pending_frame_count - 1);
   if (ctx->pending_cx_data_sz + index_sz < ctx->cx_data_sz) {
     uint8_t *x = ctx->pending_cx_data + ctx->pending_cx_data_sz;
-    int i, j;
 #ifdef TEST_SUPPLEMENTAL_SUPERFRAME_DATA
     uint8_t marker_test = 0xc0;
     int mag_test = 2;     // 1 - 4
@@ -890,6 +889,7 @@ static int write_superframe_index(aom_codec_alg_priv_t *ctx) {
     *x++ = marker;
     for (i = 0; i < ctx->pending_frame_count - 1; i++) {
       unsigned int this_sz;
+      int j;
 
       assert(ctx->pending_frame_sizes[i] > 0);
       this_sz = (unsigned int)ctx->pending_frame_sizes[i] - 1;

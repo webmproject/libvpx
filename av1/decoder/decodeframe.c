@@ -296,9 +296,9 @@ static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
 
   if (!mbmi->skip) {
     TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx, tx_size);
-    const scan_order *sc = get_scan(tx_size, tx_type, 0);
-    const int eob = av1_decode_block_tokens(xd, plane, sc, col, row, tx_size,
-                                            tx_type, r, mbmi->segment_id);
+    const SCAN_ORDER *scan_order = get_scan(tx_size, tx_type, 0);
+    const int eob = av1_decode_block_tokens(
+        xd, plane, scan_order, col, row, tx_size, tx_type, r, mbmi->segment_id);
     inverse_transform_block(xd, plane, tx_type, tx_size, dst, pd->dst.stride,
                             eob);
   }
@@ -330,7 +330,7 @@ static void decode_reconstruct_tx(MACROBLOCKD *const xd, aom_reader *r,
   if (tx_size == plane_tx_size) {
     PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
     TX_TYPE tx_type = get_tx_type(plane_type, xd, block, plane_tx_size);
-    const scan_order *sc = get_scan(plane_tx_size, tx_type, 1);
+    const SCAN_ORDER *sc = get_scan(plane_tx_size, tx_type, 1);
     const int eob =
         av1_decode_block_tokens(xd, plane, sc, blk_col, blk_row, plane_tx_size,
                                 tx_type, r, mbmi->segment_id);
@@ -373,9 +373,9 @@ static int reconstruct_inter_block(MACROBLOCKD *const xd,
   PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
   int block_idx = (row << 1) + col;
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx, tx_size);
-  const scan_order *sc = get_scan(tx_size, tx_type, 1);
-  const int eob = av1_decode_block_tokens(xd, plane, sc, col, row, tx_size,
-                                          tx_type, r, segment_id);
+  const SCAN_ORDER *scan_order = get_scan(tx_size, tx_type, 1);
+  const int eob = av1_decode_block_tokens(xd, plane, scan_order, col, row,
+                                          tx_size, tx_type, r, segment_id);
 
   inverse_transform_block(xd, plane, tx_type, tx_size,
                           &pd->dst.buf[4 * row * pd->dst.stride + 4 * col],
@@ -1308,8 +1308,8 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
         const BLOCK_SIZE plane_bsize =
             get_plane_block_size(AOMMAX(bsize, BLOCK_8X8), pd);
         const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
-        int bw = num_4x4_blocks_wide_txsize_lookup[max_tx_size];
-        int bh = num_4x4_blocks_high_txsize_lookup[max_tx_size];
+        const int bw_var_tx = num_4x4_blocks_wide_txsize_lookup[max_tx_size];
+        const int bh_var_tx = num_4x4_blocks_high_txsize_lookup[max_tx_size];
         const int step = num_4x4_blocks_txsize_lookup[max_tx_size];
         int block = 0;
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
@@ -1333,8 +1333,8 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
                                                   plane, row, col, tx_size);
         } else {
 #endif
-          for (row = 0; row < num_4x4_h; row += bh) {
-            for (col = 0; col < num_4x4_w; col += bw) {
+          for (row = 0; row < num_4x4_h; row += bh_var_tx) {
+            for (col = 0; col < num_4x4_w; col += bw_var_tx) {
               decode_reconstruct_tx(xd, r, mbmi, plane, plane_bsize, block, row,
                                     col, max_tx_size, &eobtotal);
               block += step;
@@ -3478,16 +3478,13 @@ static size_t read_uncompressed_header(AV1Decoder *pbi,
 
   setup_segmentation(cm, rb);
 
-  {
-    int i;
-    for (i = 0; i < MAX_SEGMENTS; ++i) {
-      const int qindex = cm->seg.enabled
-                             ? av1_get_qindex(&cm->seg, i, cm->base_qindex)
-                             : cm->base_qindex;
-      xd->lossless[i] = qindex == 0 && cm->y_dc_delta_q == 0 &&
-                        cm->uv_dc_delta_q == 0 && cm->uv_ac_delta_q == 0;
-      xd->qindex[i] = qindex;
-    }
+  for (i = 0; i < MAX_SEGMENTS; ++i) {
+    const int qindex = cm->seg.enabled
+                           ? av1_get_qindex(&cm->seg, i, cm->base_qindex)
+                           : cm->base_qindex;
+    xd->lossless[i] = qindex == 0 && cm->y_dc_delta_q == 0 &&
+                      cm->uv_dc_delta_q == 0 && cm->uv_ac_delta_q == 0;
+    xd->qindex[i] = qindex;
   }
 
   setup_segmentation_dequant(cm);

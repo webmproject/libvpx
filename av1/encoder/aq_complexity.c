@@ -111,9 +111,9 @@ void av1_setup_in_frame_q_adj(AV1_COMP *cpi) {
 // Select a segment for the current block.
 // The choice of segment for a block depends on the ratio of the projected
 // bits for the block vs a target average and its spatial complexity.
-void av1_caq_select_segment(AV1_COMP *cpi, MACROBLOCK *mb, BLOCK_SIZE bs,
+void av1_caq_select_segment(const AV1_COMP *cpi, MACROBLOCK *mb, BLOCK_SIZE bs,
                             int mi_row, int mi_col, int projected_rate) {
-  AV1_COMMON *const cm = &cpi->common;
+  const AV1_COMMON *const cm = &cpi->common;
 
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
   const int xmis = AOMMIN(cm->mi_cols - mi_col, num_8x8_blocks_wide_lookup[bs]);

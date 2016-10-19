@@ -85,10 +85,10 @@ int av1_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
   const int16_t *const dequant_ptr = pd->dequant;
   const uint8_t *const band_translate = get_band_translate(tx_size);
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block, tx_size);
-  const scan_order *const so =
+  const SCAN_ORDER *const scan_order =
       get_scan(tx_size, tx_type, is_inter_block(&xd->mi[0]->mbmi));
-  const int16_t *const scan = so->scan;
-  const int16_t *const nb = so->neighbors;
+  const int16_t *const scan = scan_order->scan;
+  const int16_t *const nb = scan_order->neighbors;
 #if CONFIG_AOM_QM
   int seg_id = xd->mi[0]->mbmi.segment_id;
   const qm_val_t *iqmatrix = pd->seg_iqmatrix[seg_id][!ref][tx_size];
@@ -447,7 +447,7 @@ void av1_xform_quant(MACROBLOCK *x, int plane, int block, int blk_row,
   PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block, tx_size);
   const int is_inter = is_inter_block(&xd->mi[0]->mbmi);
-  const scan_order *const scan_order = get_scan(tx_size, tx_type, is_inter);
+  const SCAN_ORDER *const scan_order = get_scan(tx_size, tx_type, is_inter);
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
@@ -520,7 +520,7 @@ void av1_xform_quant_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
   PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block, tx_size);
   const int is_inter = is_inter_block(&xd->mi[0]->mbmi);
-  const scan_order *const scan_order = get_scan(tx_size, tx_type, is_inter);
+  const SCAN_ORDER *const scan_order = get_scan(tx_size, tx_type, is_inter);
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
@@ -593,7 +593,7 @@ void av1_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
   const int is_inter = is_inter_block(&xd->mi[0]->mbmi);
   PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block, tx_size);
-  const scan_order *const scan_order = get_scan(tx_size, tx_type, is_inter);
+  const SCAN_ORDER *const scan_order = get_scan(tx_size, tx_type, is_inter);
   int dq = get_dq_profile_from_ctx(xd->qindex[xd->mi[0]->mbmi.segment_id], ctx,
                                    is_inter, plane_type);
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);

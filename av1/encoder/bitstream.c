@@ -664,91 +664,92 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
 #endif
 
   while (p < stop && p->token != EOSB_TOKEN) {
-    const int t = p->token;
+    const int token = p->token;
+    aom_tree_index index = 0;
 #if !CONFIG_ANS
-    const struct av1_token *const a = &av1_coef_encodings[t];
-    int v = a->value;
-    int n = a->len;
+    const struct av1_token *const coef_encoding = &av1_coef_encodings[token];
+    int coef_value = coef_encoding->value;
+    int coef_length = coef_encoding->len;
 #endif  // !CONFIG_ANS
 #if CONFIG_AOM_HIGHBITDEPTH
-    const av1_extra_bit *b;
-    if (bit_depth == AOM_BITS_12)
-      b = &av1_extra_bits_high12[t];
-    else if (bit_depth == AOM_BITS_10)
-      b = &av1_extra_bits_high10[t];
-    else
-      b = &av1_extra_bits[t];
+    const av1_extra_bit *const extra_bits_av1 =
+        (bit_depth == AOM_BITS_12)
+            ? &av1_extra_bits_high12[token]
+            : (bit_depth == AOM_BITS_10) ? &av1_extra_bits_high10[token]
+                                         : &av1_extra_bits[token];
 #else
-    const av1_extra_bit *const b = &av1_extra_bits[t];
+    const av1_extra_bit *const extra_bits_av1 = &av1_extra_bits[token];
     (void)bit_depth;
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 
 #if CONFIG_ANS
     /* skip one or two nodes */
-    if (!p->skip_eob_node) aom_write(w, t != EOB_TOKEN, p->context_tree[0]);
+    if (!p->skip_eob_node) aom_write(w, token != EOB_TOKEN, p->context_tree[0]);
 
-    if (t != EOB_TOKEN) {
-      aom_write(w, t != ZERO_TOKEN, p->context_tree[1]);
+    if (token != EOB_TOKEN) {
+      aom_write(w, token != ZERO_TOKEN, p->context_tree[1]);
 
-      if (t != ZERO_TOKEN) {
-        aom_write_symbol(w, t - ONE_TOKEN, *p->token_cdf,
+      if (token != ZERO_TOKEN) {
+        aom_write_symbol(w, token - ONE_TOKEN, *p->token_cdf,
                          CATEGORY6_TOKEN - ONE_TOKEN + 1);
       }
     }
 #else
     /* skip one or two nodes */
     if (p->skip_eob_node)
-      n -= p->skip_eob_node;
+      coef_length -= p->skip_eob_node;
     else
-      aom_write(w, t != EOB_TOKEN, p->context_tree[0]);
+      aom_write(w, token != EOB_TOKEN, p->context_tree[0]);
 
-    if (t != EOB_TOKEN) {
-      aom_write(w, t != ZERO_TOKEN, p->context_tree[1]);
+    if (token != EOB_TOKEN) {
+      aom_write(w, token != ZERO_TOKEN, p->context_tree[1]);
 
-      if (t != ZERO_TOKEN) {
-        aom_write(w, t != ONE_TOKEN, p->context_tree[2]);
+      if (token != ZERO_TOKEN) {
+        aom_write(w, token != ONE_TOKEN, p->context_tree[2]);
 
-        if (t != ONE_TOKEN) {
-          int len = UNCONSTRAINED_NODES - p->skip_eob_node;
+        if (token != ONE_TOKEN) {
+          const int unconstrained_len = UNCONSTRAINED_NODES - p->skip_eob_node;
           aom_write_tree(w, av1_coef_con_tree,
-                         av1_pareto8_full[p->context_tree[PIVOT_NODE] - 1], v,
-                         n - len, 0);
+                         av1_pareto8_full[p->context_tree[PIVOT_NODE] - 1],
+                         coef_value, coef_length - unconstrained_len, 0);
         }
       }
     }
 #endif  // CONFIG_ANS
 
-    if (b->base_val) {
-      const int e = p->extra, l = b->len;
-      int skip_bits = (b->base_val == CAT6_MIN_VAL)
+    if (extra_bits_av1->base_val) {
+      const int extra_bits = p->extra;
+      const int extra_bits_av1_length = extra_bits_av1->len;
+      int skip_bits = (extra_bits_av1->base_val == CAT6_MIN_VAL)
                           ? TX_SIZES - 1 - txsize_sqr_up_map[tx]
                           : 0;
 
-      if (l) {
-        const unsigned char *pb = b->prob;
-        int v = e >> 1;
-        int n = l; /* number of bits in v, assumed nonzero */
-        int i = 0;
+      if (extra_bits_av1_length) {
+        const unsigned char *pb = extra_bits_av1->prob;
+        const int value = extra_bits >> 1;
+        int num_bits = extra_bits_av1_length;  // number of bits in value
+        assert(num_bits > 0);
 
+        index = 0;
         do {
-          const int bb = (v >> --n) & 1;
+          const int bb = (value >> --num_bits) & 1;
           if (skip_bits) {
-            skip_bits--;
+            --skip_bits;
             assert(!bb);
           } else {
-            aom_write(w, bb, pb[i >> 1]);
+            aom_write(w, bb, pb[index >> 1]);
           }
-          i = b->tree[i + bb];
-        } while (n);
+          index = extra_bits_av1->tree[index + bb];
+        } while (num_bits);
       }
 
-      aom_write_bit(w, e & 1);
+      aom_write_bit(w, extra_bits & 1);
     }
     ++p;
 
 #if CONFIG_VAR_TX
     ++count;
-    if (t == EOB_TOKEN || count == seg_eob) break;
+    if (token == EOB_TOKEN || count == seg_eob) break;
 #endif
   }
 
@@ -1701,9 +1702,9 @@ static void write_modes_b(AV1_COMP *cpi, const TileInfo *const tile,
 #endif
         const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
         const BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
-        int bw = num_4x4_blocks_wide_lookup[txb_size];
         int block = 0;
         const int step = num_4x4_blocks_txsize_lookup[max_tx_size];
+        bw = num_4x4_blocks_wide_lookup[txb_size];
         for (row = 0; row < num_4x4_h; row += bw) {
           for (col = 0; col < num_4x4_w; col += bw) {
             pack_txb_tokens(w, tok, tok_end, xd, mbmi, plane, plane_bsize,
@@ -1715,8 +1716,8 @@ static void write_modes_b(AV1_COMP *cpi, const TileInfo *const tile,
         TX_SIZE tx = plane ? get_uv_tx_size(&m->mbmi, &xd->plane[plane])
                            : m->mbmi.tx_size;
         BLOCK_SIZE txb_size = txsize_to_bsize[tx];
-        int bw = num_4x4_blocks_wide_lookup[txb_size];
-        int bh = num_4x4_blocks_high_lookup[txb_size];
+        bw = num_4x4_blocks_wide_lookup[txb_size];
+        bh = num_4x4_blocks_high_lookup[txb_size];
 
         for (row = 0; row < num_4x4_h; row += bh)
           for (col = 0; col < num_4x4_w; col += bw)
@@ -2096,7 +2097,6 @@ static void update_coef_probs_common(aom_writer *const bc, AV1_COMP *cpi,
               for (t = 0; t < entropy_nodes_update; ++t) {
                 aom_prob newp = new_coef_probs[i][j][k][l][t];
                 aom_prob *oldp = old_coef_probs[i][j][k][l] + t;
-                const aom_prob upd = DIFF_UPDATE_PROB;
                 int s;
                 int u = 0;
                 if (t == PIVOT_NODE)
@@ -2300,7 +2300,6 @@ static void update_coef_probs_subframe(
               for (t = 0; t < entropy_nodes_update; ++t) {
                 aom_prob newp = new_coef_probs[i][j][k][l][t];
                 aom_prob *oldp = old_coef_probs[i][j][k][l] + t;
-                const aom_prob upd = DIFF_UPDATE_PROB;
                 int s;
                 int u = 0;
 
@@ -2423,8 +2422,6 @@ static void update_coef_probs(AV1_COMP *cpi, aom_writer *w) {
 #if CONFIG_ENTROPY
       if (cm->do_subframe_update &&
           cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
-        unsigned int eob_counts_copy[PLANE_TYPES][REF_TYPES][COEF_BANDS]
-                                    [COEFF_CONTEXTS];
         av1_coeff_count coef_counts_copy[PLANE_TYPES];
         av1_copy(eob_counts_copy, cpi->common.counts.eob_branch[tx_size]);
         av1_copy(coef_counts_copy, cpi->td.rd_counts.coef_counts[tx_size]);

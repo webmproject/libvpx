@@ -336,7 +336,7 @@ static void temporal_filter_iterate_c(AV1_COMP *cpi,
         ((mb_rows - 1 - mb_row) * 16) + (17 - 2 * AOM_INTERP_EXTEND);
 
     for (mb_col = 0; mb_col < mb_cols; mb_col++) {
-      int i, j, k;
+      int j, k;
       int stride;
 
       memset(accumulator, 0, 16 * 16 * 3 * sizeof(accumulator[0]));
