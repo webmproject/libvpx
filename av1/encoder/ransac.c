@@ -92,16 +92,16 @@ static void project_points_double_homography(double *mat, double *points,
   }
 }
 
-static int get_rand_indices(int npoints, int minpts, int *indices) {
+static int get_rand_indices(int npoints, int minpts, int *indices,
+                            unsigned int *seed) {
   int i, j;
-  unsigned int seed = (unsigned int)npoints;
-  int ptr = rand_r(&seed) % npoints;
+  int ptr = rand_r(seed) % npoints;
   if (minpts > npoints) return 0;
   indices[0] = ptr;
   ptr = (ptr == npoints - 1 ? 0 : ptr + 1);
   i = 1;
   while (i < minpts) {
-    int index = rand_r(&seed) % npoints;
+    int index = rand_r(seed) % npoints;
     while (index) {
       ptr = (ptr == npoints - 1 ? 0 : ptr + 1);
       for (j = 0; j < i; ++j) {
@@ -132,6 +132,7 @@ static int ransac(double *matched_points, int npoints, int *number_of_inliers,
   int N = 10000, trial_count = 0;
   int i;
   int ret_val = 0;
+  unsigned int seed = (unsigned int)npoints;
 
   int max_inliers = 0;
   double best_variance = 0.0;
@@ -139,7 +140,7 @@ static int ransac(double *matched_points, int npoints, int *number_of_inliers,
   WarpedMotionParams wm;
   double points1[2 * MAX_MINPTS];
   double points2[2 * MAX_MINPTS];
-  int indices[MAX_MINPTS];
+  int indices[MAX_MINPTS] = { 0 };
 
   double *best_inlier_set1;
   double *best_inlier_set2;
@@ -152,10 +153,6 @@ static int ransac(double *matched_points, int npoints, int *number_of_inliers,
 
   double *cnp1, *cnp2;
   double T1[9], T2[9];
-
-  // srand((unsigned)time(NULL)) ;
-  // better to make this deterministic for a given sequence for ease of testing
-  srand(npoints);
 
   *number_of_inliers = 0;
   if (npoints < minpts * MINPTS_MULTIPLIER) {
@@ -203,7 +200,7 @@ static int ransac(double *matched_points, int npoints, int *number_of_inliers,
     int num_degenerate_iter = 0;
     while (degenerate) {
       num_degenerate_iter++;
-      if (!get_rand_indices(npoints, minpts, indices)) {
+      if (!get_rand_indices(npoints, minpts, indices, &seed)) {
         ret_val = 1;
         goto finish_ransac;
       }
