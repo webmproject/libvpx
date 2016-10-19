@@ -13,21 +13,21 @@
 #define AV1_COMMON_ONYXC_INT_H_
 
 #include "./aom_config.h"
+#include "./av1_rtcd.h"
 #include "aom/internal/aom_codec_internal.h"
 #include "aom_util/aom_thread.h"
-#include "./av1_rtcd.h"
 #include "av1/common/alloccommon.h"
-#include "av1/common/loopfilter.h"
-#include "av1/common/entropymv.h"
 #include "av1/common/entropy.h"
 #include "av1/common/entropymode.h"
-#include "av1/common/mv.h"
+#include "av1/common/entropymv.h"
 #include "av1/common/frame_buffers.h"
+#include "av1/common/loopfilter.h"
+#include "av1/common/mv.h"
 #include "av1/common/quant_common.h"
-#include "av1/common/tile_common.h"
 #if CONFIG_LOOP_RESTORATION
 #include "av1/common/restoration.h"
 #endif  // CONFIG_LOOP_RESTORATION
+#include "av1/common/tile_common.h"
 
 #ifdef __cplusplus
 extern "C" {
