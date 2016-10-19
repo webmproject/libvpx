@@ -65,6 +65,36 @@ specialize qw/aom_h_predictor_2x2/;
 add_proto qw/void aom_tm_predictor_2x2/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
 specialize qw/aom_tm_predictor_2x2/;
 
+add_proto qw/void aom_he_predictor_2x2/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+specialize qw/aom_he_predictor_2x2/;
+
+add_proto qw/void aom_ve_predictor_2x2/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+specialize qw/aom_ve_predictor_2x2/;
+
+add_proto qw/void aom_d207_predictor_2x2/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+specialize qw/aom_d207_predictor_2x2/;
+
+add_proto qw/void aom_d63_predictor_2x2/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+specialize qw/aom_d63_predictor_2x2/;
+
+add_proto qw/void aom_d63f_predictor_2x2/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+specialize qw/aom_d63f_predictor_2x2/;
+
+add_proto qw/void aom_d45_predictor_2x2/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+specialize qw/aom_d45_predictor_2x2/;
+
+add_proto qw/void aom_d45e_predictor_2x2/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+specialize qw/aom_d45e_predictor_2x2/;
+
+add_proto qw/void aom_d117_predictor_2x2/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+specialize qw/aom_d117_predictor_2x2/;
+
+add_proto qw/void aom_d135_predictor_2x2/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+specialize qw/aom_d135_predictor_2x2/;
+
+add_proto qw/void aom_d153_predictor_2x2/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+specialize qw/aom_d153_predictor_2x2/;
+
 add_proto qw/void aom_d207_predictor_4x4/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
 specialize qw/aom_d207_predictor_4x4 sse2/;
 
