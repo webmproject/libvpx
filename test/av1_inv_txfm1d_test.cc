@@ -18,15 +18,25 @@ using libaom_test::input_base;
 namespace {
 const int txfm_type_num = 2;
 const int txfm_size_num = 5;
-const int txfm_size_ls[5] = { 4, 8, 16, 32 };
+const int txfm_size_ls[5] = { 4, 8, 16, 32, 64 };
 
 const TxfmFunc fwd_txfm_func_ls[2][5] = {
+#if CONFIG_TX64X64
+  { av1_fdct4_new, av1_fdct8_new, av1_fdct16_new, av1_fdct32_new,
+    av1_fdct64_new },
+#else
   { av1_fdct4_new, av1_fdct8_new, av1_fdct16_new, av1_fdct32_new, NULL },
+#endif
   { av1_fadst4_new, av1_fadst8_new, av1_fadst16_new, av1_fadst32_new, NULL }
 };
 
 const TxfmFunc inv_txfm_func_ls[2][5] = {
+#if CONFIG_TX64X64
+  { av1_idct4_new, av1_idct8_new, av1_idct16_new, av1_idct32_new,
+    av1_idct64_new },
+#else
   { av1_idct4_new, av1_idct8_new, av1_idct16_new, av1_idct32_new, NULL },
+#endif
   { av1_iadst4_new, av1_iadst8_new, av1_iadst16_new, av1_iadst32_new, NULL }
 };
 
