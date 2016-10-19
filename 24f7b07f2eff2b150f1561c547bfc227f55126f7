@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3cdbff69_8ef6fb1f",
+        "filename": "av1/decoder/decodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3261,
+      "author": {
+        "id": 1138583
+      },
+      "writtenOn": "2016-10-19T13:19:46Z",
+      "side": 1,
+      "message": "Would it make more sense to read allow_screen_content_tools at this point (to match the location when it is read for key_frames immediately after setup_frame_size?)",
+      "revId": "24f7b07f2eff2b150f1561c547bfc227f55126f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
