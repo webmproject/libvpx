@@ -284,6 +284,7 @@ EXPERIMENT_LIST="
     palette
     daala_ec
     cb4x4
+    frame_size
 "
 CONFIG_LIST="
     dependency_tracking
