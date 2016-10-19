@@ -4447,7 +4447,9 @@ static void refine_integerized_param(WarpedMotionParams *wm,
     best_param = curr_param;
     for (i = 0; i < n_refinements; i++) {
       // look to the left
-      *param = curr_param - step;
+      *param =
+          (int16_t)clamp(curr_param - step, p < 2 ? GM_TRANS_MIN : GM_ALPHA_MIN,
+                         p < 2 ? GM_TRANS_MAX : GM_ALPHA_MAX);
       step_error =
           av1_warp_erroradv(wm,
 #if CONFIG_AOM_HIGHBITDEPTH
@@ -4464,7 +4466,9 @@ static void refine_integerized_param(WarpedMotionParams *wm,
       }
 
       // look to the right
-      *param = curr_param + step;
+      *param =
+          (int16_t)clamp(curr_param + step, p < 2 ? GM_TRANS_MIN : GM_ALPHA_MIN,
+                         p < 2 ? GM_TRANS_MAX : GM_ALPHA_MAX);
       step_error =
           av1_warp_erroradv(wm,
 #if CONFIG_AOM_HIGHBITDEPTH
