@@ -4137,7 +4137,7 @@ static int get_gmbitcost(const Global_Motion_Params *gm,
     bits =
         (gm->motion_params.wmmat[0].as_int ? ((GM_ABS_TRANS_BITS + 1) * 2) : 0);
   }
-  return (bits << AV1_PROB_COST_SHIFT) + gmtype_cost[gm->gmtype];
+  return bits ? (bits << AV1_PROB_COST_SHIFT) + gmtype_cost[gm->gmtype] : 0;
 }
 
 #define GLOBAL_MOTION_RATE(ref)                            \
