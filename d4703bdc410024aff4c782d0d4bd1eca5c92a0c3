@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bc28cfc6_07721e91",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-19T22:17:52Z",
+      "side": 1,
+      "message": "add a few of the notes here, i.e., dst +\u003d stride behaving better with gcc/clang; for dst + \u003cconst\u003e * stride clang output the same code for me, it was gcc-4.9 with issues. not sure why the loop index wouldn\u0027t degrade to a const if the loop was unrolled.",
+      "revId": "d4703bdc410024aff4c782d0d4bd1eca5c92a0c3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc28cfc6_47837625",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-19T22:17:52Z",
+      "side": 1,
+      "message": "would a vld2q work here?",
+      "revId": "d4703bdc410024aff4c782d0d4bd1eca5c92a0c3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
