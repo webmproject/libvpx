@@ -1719,8 +1719,7 @@ static void decode_partition(AV1Decoder *const pbi, MACROBLOCKD *const xd,
 #else
       if (supertx_size < TX_32X32) {
         txfm = aom_read_tree(r, av1_ext_tx_tree,
-                             cm->fc->inter_ext_tx_prob[supertx_size],
-                             ACCT_STR);
+                             cm->fc->inter_ext_tx_prob[supertx_size], ACCT_STR);
         if (xd->counts) ++xd->counts->inter_ext_tx[supertx_size][txfm];
       }
 #endif  // CONFIG_EXT_TX
