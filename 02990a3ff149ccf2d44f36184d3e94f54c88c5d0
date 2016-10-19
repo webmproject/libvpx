@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bc28cfc6_0c37e5a2",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-19T21:14:17Z",
+      "side": 1,
+      "message": "Updating first and then accessing dst reduces instructions for clang.",
+      "range": {
+        "startLine": 51,
+        "startChar": 28,
+        "endLine": 51,
+        "endChar": 41
+      },
+      "revId": "02990a3ff149ccf2d44f36184d3e94f54c88c5d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc28cfc6_accb395c",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-19T21:14:17Z",
+      "side": 1,
+      "message": "Clang cannot inline dc_32x32() for vpx_dc_left_predictor_32x32_neon() and vpx_dc_top_predictor_32x32_neon(), so it is replaced with more straight code.",
+      "revId": "02990a3ff149ccf2d44f36184d3e94f54c88c5d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc28cfc6_8ca755a3",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-19T21:14:17Z",
+      "side": 1,
+      "message": "Unrolling improves clang building.",
+      "revId": "02990a3ff149ccf2d44f36184d3e94f54c88c5d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc28cfc6_ec9b715b",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-19T21:14:17Z",
+      "side": 1,
+      "message": "Unrolling improves clang building.",
+      "revId": "02990a3ff149ccf2d44f36184d3e94f54c88c5d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
