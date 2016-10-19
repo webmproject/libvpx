@@ -386,12 +386,6 @@ int av1_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
   for (i = next; i < eob; i = next) {
     const int x = tokens[i][best].qc;
     const int rc = scan[i];
-#if CONFIG_AOM_QM
-    const int iwt = iqmatrix[rc];
-    const int dequant =
-        (dequant_ptr[rc != 0] * iwt + (1 << (AOM_QM_BITS - 1))) >> AOM_QM_BITS;
-#endif
-
     if (x) final_eob = i;
     qcoeff[rc] = x;
     dqcoeff[rc] = tokens[i][best].dqc;
