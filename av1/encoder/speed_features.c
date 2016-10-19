@@ -134,6 +134,11 @@ static void set_good_speed_feature(AV1_COMP *cpi, AV1_COMMON *cm,
   const int boosted = frame_is_boosted(cpi);
 
   if (speed >= 1) {
+    sf->tx_type_search.fast_intra_tx_type_search = 1;
+    sf->tx_type_search.fast_inter_tx_type_search = 1;
+  }
+
+  if (speed >= 2) {
     if ((cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) ||
         av1_internal_image_edge(cpi)) {
       sf->use_square_partition_only = !frame_is_boosted(cpi);
@@ -160,8 +165,6 @@ static void set_good_speed_feature(AV1_COMP *cpi, AV1_COMMON *cm,
     sf->tx_size_search_breakout = 1;
     sf->partition_search_breakout_rate_thr = 80;
     sf->tx_type_search.prune_mode = PRUNE_ONE;
-    sf->tx_type_search.fast_intra_tx_type_search = 1;
-    sf->tx_type_search.fast_inter_tx_type_search = 1;
     // Use transform domain distortion.
     // Note var-tx expt always uses pixel domain distortion.
     sf->use_transform_domain_distortion = 1;
@@ -171,7 +174,7 @@ static void set_good_speed_feature(AV1_COMP *cpi, AV1_COMMON *cm,
 #endif  // CONFIG_EXT_INTER
   }
 
-  if (speed >= 2) {
+  if (speed >= 3) {
     sf->tx_size_search_method =
         frame_is_boosted(cpi) ? USE_FULL_RD : USE_LARGESTALL;
     sf->mode_search_skip_flags =
@@ -190,7 +193,7 @@ static void set_good_speed_feature(AV1_COMP *cpi, AV1_COMMON *cm,
 #endif
   }
 
-  if (speed >= 3) {
+  if (speed >= 4) {
     sf->use_square_partition_only = !frame_is_intra_only(cm);
     sf->tx_size_search_method =
         frame_is_intra_only(cm) ? USE_FULL_RD : USE_LARGESTALL;
@@ -208,7 +211,7 @@ static void set_good_speed_feature(AV1_COMP *cpi, AV1_COMMON *cm,
     sf->adaptive_interp_filter_search = 1;
   }
 
-  if (speed >= 4) {
+  if (speed >= 5) {
     sf->use_square_partition_only = 1;
     sf->tx_size_search_method = USE_LARGESTALL;
     sf->mv.search_method = BIGDIA;
@@ -223,7 +226,7 @@ static void set_good_speed_feature(AV1_COMP *cpi, AV1_COMMON *cm,
     sf->partition_search_breakout_rate_thr = 300;
   }
 
-  if (speed >= 5) {
+  if (speed >= 6) {
     int i;
     sf->optimize_coefficients = 0;
     sf->mv.search_method = HEX;
