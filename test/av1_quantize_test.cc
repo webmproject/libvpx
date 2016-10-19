@@ -195,6 +195,7 @@ TEST_P(AV1QuantizeTest, BitExactCheck) { RunQuantizeTest(); }
 TEST_P(AV1QuantizeTest, EobVerify) { RunEobTest(); }
 
 #if HAVE_SSE4_1
+#if !CONFIG_AOM_QM
 INSTANTIATE_TEST_CASE_P(
     SSE4_1, AV1QuantizeTest,
     ::testing::Values(QuantizeFuncParams(&av1_highbd_quantize_fp_sse4_1,
@@ -205,5 +206,6 @@ INSTANTIATE_TEST_CASE_P(
                                          &av1_highbd_quantize_fp_c, 256),
                       QuantizeFuncParams(&av1_highbd_quantize_fp_sse4_1,
                                          &av1_highbd_quantize_fp_c, 1024)));
+#endif  // !CONFIG_AOM_QM
 #endif  // HAVE_SSE4_1
 }  // namespace
