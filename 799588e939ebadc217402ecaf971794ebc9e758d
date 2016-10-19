@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bc28cfc6_c0de37c4",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1014,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-19T01:21:36Z",
+      "side": 1,
+      "message": "you could just set this to the condition above:\n cpi-\u003egf_noboost_onepass_cbr \u003d (cpi-\u003eoxcf.gf_cbr_boost_pct \u003c\u003d 50)",
+      "revId": "799588e939ebadc217402ecaf971794ebc9e758d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
