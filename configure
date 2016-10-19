@@ -275,7 +275,6 @@ EXPERIMENT_LIST="
     ext_partition
     ext_partition_types
     ext_tile
-    obmc
     motion_var
     warped_motion
     entropy
