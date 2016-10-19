@@ -5236,11 +5236,14 @@ static void encode_superblock(AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
 #if CONFIG_VAR_TX
   if (cm->tx_mode == TX_MODE_SELECT && mbmi->sb_type >= BLOCK_8X8 &&
       is_inter_block(mbmi) && !(mbmi->skip || seg_skip)) {
-    if (dry_run) tx_partition_set_contexts(cm, xd, bsize, mi_row, mi_col);
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
     if (is_rect_tx(mbmi->tx_size)) {
       set_txfm_ctxs(mbmi->tx_size, xd->n8_w, xd->n8_h, xd);
+    } else {
+      if (dry_run) tx_partition_set_contexts(cm, xd, bsize, mi_row, mi_col);
     }
+#else
+    if (dry_run) tx_partition_set_contexts(cm, xd, bsize, mi_row, mi_col);
 #endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
   } else {
     TX_SIZE tx_size;
