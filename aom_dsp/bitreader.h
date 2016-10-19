@@ -206,7 +206,7 @@ static INLINE int aom_read_tree_(aom_reader *r, const aom_tree_index *tree,
 static INLINE int aom_read_symbol_(aom_reader *r, const aom_cdf_prob *cdf,
                                    int nsymbs ACCT_STR_PARAM) {
   int ret;
-#if CONFIG_ANS
+#if CONFIG_RANS
   (void)nsymbs;
   ret = rans_read(r, cdf);
 #elif CONFIG_DAALA_EC

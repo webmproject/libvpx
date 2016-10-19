@@ -406,16 +406,18 @@ const aom_prob av1_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES] = {
   { 255, 246, 247, 255, 239, 255, 253, 255 },
 };
 
-#if CONFIG_ANS
-// Model obtained from a 2-sided zero-centerd distribuition derived
+#if CONFIG_RANS
+// Model obtained from a 2-sided zero-centered distribution derived
 // from a Pareto distribution. The cdf of the distribution is:
 // cdf(x) = 0.5 + 0.5 * sgn(x) * [1 - {alpha/(alpha + |x|)} ^ beta]
 //
-// For a given beta and a given probablity of the 1-node, the alpha
+// For a given beta and a given probability of the 1-node, the alpha
 // is first solved, and then the {alpha, beta} pair is used to generate
 // the probabilities for the rest of the nodes.
 //
-// beta = 8
+// The full source code of the generating program is available in:
+// tools/gen_constrained_tokenset.py
+//
 // Values for tokens ONE_TOKEN through CATEGORY6_TOKEN included here.
 // ZERO_TOKEN and EOB_TOKEN are coded as flags outside this coder.
 const aom_cdf_prob
@@ -676,7 +678,7 @@ const aom_cdf_prob
       { 32512, 238, 11, 1, 1, 1, 1, 1, 1, 1 },
       { 32640, 117, 4, 1, 1, 1, 1, 1, 1, 1 },
     };
-#endif  // CONFIG_ANS
+#endif  // CONFIG_RANS
 
 /* clang-format off */
 #if CONFIG_ENTROPY
@@ -2801,7 +2803,7 @@ void av1_model_to_full_probs(const aom_prob *model, aom_prob *full) {
   extend_to_full_distribution(&full[UNCONSTRAINED_NODES], model[PIVOT_NODE]);
 }
 
-#if CONFIG_ANS
+#if CONFIG_RANS
 static void build_token_cdfs(const aom_prob *pdf_model,
                              aom_cdf_prob cdf[ENTROPY_TOKENS]) {
   int i, sum = 0;
@@ -2818,12 +2820,11 @@ void av1_coef_pareto_cdfs(FRAME_CONTEXT *fc) {
     for (i = 0; i < PLANE_TYPES; ++i)
       for (j = 0; j < REF_TYPES; ++j)
         for (k = 0; k < COEF_BANDS; ++k)
-          for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
+          for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l)
             build_token_cdfs(fc->coef_probs[t][i][j][k][l],
                              fc->coef_cdfs[t][i][j][k][l]);
-          }
 }
-#endif  // CONFIG_ANS
+#endif  // CONFIG_RANS
 
 void av1_default_coef_probs(AV1_COMMON *cm) {
 #if CONFIG_ENTROPY
@@ -2836,9 +2837,9 @@ void av1_default_coef_probs(AV1_COMMON *cm) {
   av1_copy(cm->fc->coef_probs[TX_16X16], default_coef_probs_16x16);
   av1_copy(cm->fc->coef_probs[TX_32X32], default_coef_probs_32x32);
 #endif  // CONFIG_ENTROPY
-#if CONFIG_ANS
+#if CONFIG_RANS
   av1_coef_pareto_cdfs(cm->fc);
-#endif  // CONFIG_ANS
+#endif  // CONFIG_RANS
 }
 
 static void adapt_coef_probs(AV1_COMMON *cm, TX_SIZE tx_size,
@@ -2905,9 +2906,9 @@ void av1_adapt_coef_probs(AV1_COMMON *cm) {
 #endif  // CONFIG_ENTROPY
   for (t = TX_4X4; t <= TX_32X32; t++)
     adapt_coef_probs(cm, t, count_sat, update_factor);
-#if CONFIG_ANS
+#if CONFIG_RANS
   av1_coef_pareto_cdfs(cm->fc);
-#endif
+#endif  // CONFIG_RANS
 }
 
 #if CONFIG_ENTROPY

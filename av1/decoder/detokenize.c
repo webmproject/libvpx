@@ -76,11 +76,11 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
   const aom_prob(*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       fc->coef_probs[tx_size_ctx][type][ref];
   const aom_prob *prob;
-#if CONFIG_ANS
+#if CONFIG_RANS
   const aom_cdf_prob(*const coef_cdfs)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
       fc->coef_cdfs[tx_size_ctx][type][ref];
   const aom_cdf_prob(*cdf)[ENTROPY_TOKENS];
-#endif  // CONFIG_ANS
+#endif  // CONFIG_RANS
   unsigned int(*coef_counts)[COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1];
   unsigned int(*eob_branch_count)[COEFF_CONTEXTS];
   uint8_t token_cache[MAX_TX_SQUARE];
@@ -166,7 +166,7 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
       dqv_val = &dq_val[band][0];
 #endif  // CONFIG_NEW_QUANT
     }
-#if CONFIG_ANS
+#if CONFIG_RANS
     cdf = &coef_cdfs[band][ctx];
     token = ONE_TOKEN +
             aom_read_symbol(r, *cdf, CATEGORY6_TOKEN - ONE_TOKEN + 1, ACCT_STR);
@@ -263,7 +263,7 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
         }
       }
     }
-#endif  // CONFIG_ANS
+#endif  // CONFIG_RANS
 #if CONFIG_NEW_QUANT
     v = av1_dequant_abscoeff_nuq(val, dqv, dqv_val);
     v = dq_shift ? ROUND_POWER_OF_TWO(v, dq_shift) : v;
@@ -368,13 +368,7 @@ void av1_decode_palette_tokens(MACROBLOCKD *const xd, int plane,
 
 int av1_decode_block_tokens(MACROBLOCKD *const xd, int plane,
                             const SCAN_ORDER *sc, int x, int y, TX_SIZE tx_size,
-                            TX_TYPE tx_type,
-#if CONFIG_ANS
-                            struct AnsDecoder *const r,
-#else
-                            aom_reader *r,
-#endif  // CONFIG_ANS
-                            int seg_id) {
+                            TX_TYPE tx_type, aom_reader *r, int seg_id) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int16_t *const dequant = pd->seg_dequant[seg_id];
   const int ctx =
