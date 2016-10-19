@@ -193,7 +193,7 @@ static INLINE int get_number_of_extra_arfs(int interval, int arf_pending) {
   else
     return 0;
 }
-#endif
+#endif  // CONFIG_EXT_REFS
 
 #ifdef __cplusplus
 }  // extern "C"

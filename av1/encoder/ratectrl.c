@@ -193,7 +193,7 @@ int av1_rc_clamp_pframe_target_size(const AV1_COMP *const cpi, int target) {
   if (cpi->rc.is_src_frame_alt_ref) {
 #else
   if (cpi->refresh_golden_frame && rc->is_src_frame_alt_ref) {
-#endif
+#endif  // CONFIG_EXT_REFS
     // If there is an active ARF at this location use the minimum
     // bits on this frame even if it is a constructed arf.
     // The active maximum quantizer insures that an appropriate
@@ -1189,11 +1189,12 @@ static void update_golden_frame_stats(AV1_COMP *cpi) {
 #else
   // Update the Golden frame usage counts.
   if (cpi->refresh_golden_frame) {
-#endif
+#endif  // CONFIG_EXT_REFS
+
 #if CONFIG_EXT_REFS
     // We will not use internal overlay frames to replace the golden frame
     if (!rc->is_src_frame_ext_arf)
-#endif
+#endif  // CONFIG_EXT_REFS
       // this frame refreshes means next frames don't unless specified by user
       rc->frames_since_golden = 0;
 

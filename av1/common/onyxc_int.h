@@ -195,13 +195,6 @@ typedef struct AV1Common {
   int new_fb_idx;
 
   FRAME_TYPE last_frame_type; /* last frame's frame type for motion search.*/
-#if CONFIG_EXT_REFS
-  // frame type of the frame before last frame
-  FRAME_TYPE last2_frame_type;
-  // TODO(zoeliu): To check whether last3_frame_type is still needed.
-  // frame type of the frame two frames before last frame
-  FRAME_TYPE last3_frame_type;
-#endif  // CONFIG_EXT_REFS
   FRAME_TYPE frame_type;
 
   int show_frame;
