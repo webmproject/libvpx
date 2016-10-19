@@ -69,6 +69,11 @@ static void set_good_speed_feature_framesize_dependent(AV1_COMP *cpi,
                                                        int speed) {
   AV1_COMMON *const cm = &cpi->common;
 
+  // Limit memory usage for high resolutions
+  if (AOMMIN(cm->width, cm->height) > 1080) {
+    sf->use_upsampled_references = 0;
+  }
+
   if (speed >= 1) {
     if (AOMMIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask =
