@@ -321,6 +321,134 @@ static INLINE void dc_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
   }
 }
 
+void aom_he_predictor_2x2_c(uint8_t *dst, ptrdiff_t stride,
+                            const uint8_t *above, const uint8_t *left) {
+  const int H = above[-1];
+  const int I = left[0];
+  const int J = left[1];
+  const int K = left[2];
+
+  memset(dst + stride * 0, AVG3(H, I, J), 2);
+  memset(dst + stride * 1, AVG3(I, J, K), 2);
+}
+
+void aom_ve_predictor_2x2_c(uint8_t *dst, ptrdiff_t stride,
+                            const uint8_t *above, const uint8_t *left) {
+  const int H = above[-1];
+  const int I = above[0];
+  const int J = above[1];
+  const int K = above[2];
+
+  dst[0] = AVG3(H, I, J);
+  dst[1] = AVG3(I, J, K);
+  memcpy(dst + stride * 1, dst, 2);
+}
+
+void aom_d207_predictor_2x2_c(uint8_t *dst, ptrdiff_t stride,
+                              const uint8_t *above, const uint8_t *left) {
+  const int I = left[0];
+  const int J = left[1];
+  const int K = left[2];
+  const int L = left[3];
+  (void)above;
+  DST(0, 0) = AVG2(I, J);
+  DST(0, 1) = AVG2(J, K);
+  DST(1, 0) = AVG3(I, J, K);
+  DST(1, 1) = AVG3(J, K, L);
+}
+
+void aom_d63_predictor_2x2_c(uint8_t *dst, ptrdiff_t stride,
+                             const uint8_t *above, const uint8_t *left) {
+  const int A = above[0];
+  const int B = above[1];
+  const int C = above[2];
+  const int D = above[3];
+  (void)left;
+  DST(0, 0) = AVG2(A, B);
+  DST(1, 0) = AVG2(B, C);
+  DST(0, 1) = AVG3(A, B, C);
+  DST(1, 1) = AVG3(B, C, D);
+}
+
+void aom_d63f_predictor_2x2_c(uint8_t *dst, ptrdiff_t stride,
+                              const uint8_t *above, const uint8_t *left) {
+  const int A = above[0];
+  const int B = above[1];
+  const int C = above[2];
+  const int D = above[3];
+  (void)left;
+  DST(0, 0) = AVG2(A, B);
+  DST(1, 0) = AVG2(B, C);
+  DST(0, 1) = AVG3(A, B, C);
+  DST(1, 1) = AVG3(B, C, D);
+}
+
+void aom_d45_predictor_2x2_c(uint8_t *dst, ptrdiff_t stride,
+                             const uint8_t *above, const uint8_t *left) {
+  const int A = above[0];
+  const int B = above[1];
+  const int C = above[2];
+  const int D = above[3];
+  const int E = above[4];
+  (void)stride;
+  (void)left;
+  DST(0, 0) = AVG3(A, B, C);
+  DST(1, 0) = DST(0, 1) = AVG3(B, C, D);
+  DST(1, 1) = AVG3(C, D, E);
+}
+
+void aom_d45e_predictor_2x2_c(uint8_t *dst, ptrdiff_t stride,
+                              const uint8_t *above, const uint8_t *left) {
+  const int A = above[0];
+  const int B = above[1];
+  const int C = above[2];
+  const int D = above[3];
+  const int E = above[4];
+  (void)stride;
+  (void)left;
+  DST(0, 0) = AVG3(A, B, C);
+  DST(1, 0) = DST(0, 1) = AVG3(B, C, D);
+  DST(1, 1) = AVG3(C, D, E);
+}
+
+void aom_d117_predictor_2x2_c(uint8_t *dst, ptrdiff_t stride,
+                              const uint8_t *above, const uint8_t *left) {
+  const int I = left[0];
+  const int X = above[-1];
+  const int A = above[0];
+  const int B = above[1];
+  DST(0, 0) = AVG2(X, A);
+  DST(1, 0) = AVG2(A, B);
+  DST(0, 1) = AVG3(I, X, A);
+  DST(1, 1) = AVG3(X, A, B);
+}
+
+void aom_d135_predictor_2x2_c(uint8_t *dst, ptrdiff_t stride,
+                              const uint8_t *above, const uint8_t *left) {
+  const int I = left[0];
+  const int J = left[1];
+  const int X = above[-1];
+  const int A = above[0];
+  const int B = above[1];
+  (void)stride;
+  DST(0, 1) = AVG3(X, I, J);
+  DST(1, 1) = DST(0, 0) = AVG3(A, X, I);
+  DST(1, 0) = AVG3(B, A, X);
+}
+
+void aom_d153_predictor_2x2_c(uint8_t *dst, ptrdiff_t stride,
+                              const uint8_t *above, const uint8_t *left) {
+  const int I = left[0];
+  const int J = left[1];
+  const int X = above[-1];
+  const int A = above[0];
+
+  DST(0, 0) = AVG2(I, X);
+  DST(0, 1) = AVG2(J, I);
+  DST(1, 0) = AVG3(I, X, A);
+  DST(1, 1) = AVG3(J, I, X);
+}
+
 void aom_he_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
                             const uint8_t *above, const uint8_t *left) {
   const int H = above[-1];
