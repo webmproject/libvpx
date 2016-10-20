@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc93c3d8_fb2d6fac",
+        "filename": "av1/encoder/dct.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1853,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-10-20T23:51:39Z",
+      "side": 1,
+      "message": "remove this if condition",
+      "range": {
+        "startLine": 1853,
+        "startChar": 2,
+        "endLine": 1853,
+        "endChar": 27
+      },
+      "revId": "157e45a44b3fdf46f7d086f966374984ffe08312",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
