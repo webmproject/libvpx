@@ -37,6 +37,7 @@
 /examples/twopass_encoder
 /examples/vp8_multi_resolution_encoder
 /examples/vp8cx_set_ref
+/examples/vp9cx_set_ref
 /examples/vp9_lossless_encoder
 /examples/vp9_spatial_scalable_encoder
 /examples/vpx_temporal_scalable_patterns
