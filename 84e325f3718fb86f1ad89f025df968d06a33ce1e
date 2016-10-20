@@ -19,6 +19,41 @@
     },
     {
       "key": {
+        "uuid": "bc6c4f82_2dbcd9bc",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-20T01:26:50Z",
+      "side": 1,
+      "message": "this can probably be split off, we can adjust things in that change",
+      "parentUuid": "bc6c4f82_8d28659e",
+      "revId": "84e325f3718fb86f1ad89f025df968d06a33ce1e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc6c4f82_0dbf95b4",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-20T01:26:50Z",
+      "side": 1,
+      "message": "?",
+      "revId": "84e325f3718fb86f1ad89f025df968d06a33ce1e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bc6c4f82_ad2d29ad",
         "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
         "patchSetId": 5
@@ -30,6 +65,24 @@
       "writtenOn": "2016-10-20T00:41:11Z",
       "side": 1,
       "message": "Wow was my previous implementation *wrong*",
+      "revId": "84e325f3718fb86f1ad89f025df968d06a33ce1e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc6c4f82_0de8f5c7",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-20T01:26:50Z",
+      "side": 1,
+      "message": "this is failing the test vectors for me",
+      "parentUuid": "bc6c4f82_ad2d29ad",
       "revId": "84e325f3718fb86f1ad89f025df968d06a33ce1e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
