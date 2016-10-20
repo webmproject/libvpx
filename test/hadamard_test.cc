@@ -13,6 +13,7 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "./vpx_dsp_rtcd.h"
+#include "vpx_ports/vpx_timer.h"
 
 #include "test/acm_random.h"
 #include "test/register_state_check.h"
@@ -99,7 +100,30 @@ class HadamardTestBase : public ::testing::TestWithParam<HadamardFunc> {
   ACMRandom rnd_;
 };
 
+void HadamardSpeedTest(const char *name, HadamardFunc const func,
+                       const int16_t *input, int stride, tran_low_t *output,
+                       int times) {
+  int i;
+  vpx_usec_timer timer;
+
+  vpx_usec_timer_start(&timer);
+  for (i = 0; i < times; ++i) {
+    func(input, stride, output);
+  }
+  vpx_usec_timer_mark(&timer);
+
+  const int elapsed_time = static_cast<int>(vpx_usec_timer_elapsed(&timer));
+  printf("%s[%12d runs]: %d us\n", name, times, elapsed_time);
+}
+
 class Hadamard8x8Test : public HadamardTestBase {};
+
+void HadamardSpeedTest8x8(HadamardFunc const func, int times) {
+  DECLARE_ALIGNED(16, int16_t, input[64]);
+  DECLARE_ALIGNED(16, tran_low_t, output[64]);
+  memset(input, 1, sizeof(input));
+  HadamardSpeedTest("Hadamard8x8", func, input, 8, output, times);
+}
 
 TEST_P(Hadamard8x8Test, CompareReferenceRandom) {
   DECLARE_ALIGNED(16, int16_t, a[64]);
@@ -142,6 +166,12 @@ TEST_P(Hadamard8x8Test, VaryStride) {
   }
 }
 
+TEST_P(Hadamard8x8Test, DISABLED_Speed) {
+  HadamardSpeedTest8x8(h_func_, 10);
+  HadamardSpeedTest8x8(h_func_, 10000);
+  HadamardSpeedTest8x8(h_func_, 10000000);
+}
+
 INSTANTIATE_TEST_CASE_P(C, Hadamard8x8Test,
                         ::testing::Values(&vpx_hadamard_8x8_c));
 
@@ -169,7 +199,19 @@ INSTANTIATE_TEST_CASE_P(MSA, Hadamard8x8Test,
 #endif  // HAVE_MSA
 #endif  // !CONFIG_VP9_HIGHBITDEPTH
 
+#if HAVE_VSX
+INSTANTIATE_TEST_CASE_P(VSX, Hadamard8x8Test,
+                        ::testing::Values(&vpx_hadamard_8x8_vsx));
+#endif  // HAVE_VSX
+
 class Hadamard16x16Test : public HadamardTestBase {};
+
+void HadamardSpeedTest16x16(HadamardFunc const func, int times) {
+  DECLARE_ALIGNED(16, int16_t, input[256]);
+  DECLARE_ALIGNED(16, tran_low_t, output[256]);
+  memset(input, 1, sizeof(input));
+  HadamardSpeedTest("Hadamard16x16", func, input, 16, output, times);
+}
 
 TEST_P(Hadamard16x16Test, CompareReferenceRandom) {
   DECLARE_ALIGNED(16, int16_t, a[16 * 16]);
@@ -212,6 +254,12 @@ TEST_P(Hadamard16x16Test, VaryStride) {
   }
 }
 
+TEST_P(Hadamard16x16Test, DISABLED_Speed) {
+  HadamardSpeedTest16x16(h_func_, 10);
+  HadamardSpeedTest16x16(h_func_, 10000);
+  HadamardSpeedTest16x16(h_func_, 10000000);
+}
+
 INSTANTIATE_TEST_CASE_P(C, Hadamard16x16Test,
                         ::testing::Values(&vpx_hadamard_16x16_c));
 
@@ -219,6 +267,11 @@ INSTANTIATE_TEST_CASE_P(C, Hadamard16x16Test,
 INSTANTIATE_TEST_CASE_P(SSE2, Hadamard16x16Test,
                         ::testing::Values(&vpx_hadamard_16x16_sse2));
 #endif  // HAVE_SSE2
+
+#if HAVE_VSX
+INSTANTIATE_TEST_CASE_P(VSX, Hadamard16x16Test,
+                        ::testing::Values(&vpx_hadamard_16x16_vsx));
+#endif  // HAVE_VSX
 
 #if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(NEON, Hadamard16x16Test,

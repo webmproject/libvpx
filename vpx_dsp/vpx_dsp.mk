@@ -264,11 +264,12 @@ endif
 DSP_SRCS-yes           += avg.c
 DSP_SRCS-$(HAVE_SSE2)  += x86/avg_intrin_sse2.c
 DSP_SRCS-$(HAVE_NEON)  += arm/avg_neon.c
-DSP_SRCS-$(HAVE_MSA)   += mips/avg_msa.c
 DSP_SRCS-$(HAVE_NEON)  += arm/hadamard_neon.c
+DSP_SRCS-$(HAVE_MSA)   += mips/avg_msa.c
 ifeq ($(ARCH_X86_64),yes)
 DSP_SRCS-$(HAVE_SSSE3) += x86/avg_ssse3_x86_64.asm
 endif
+DSP_SRCS-$(HAVE_VSX)   += ppc/hadamard_vsx.c
 
 endif  # CONFIG_VP9_ENCODER
 
@@ -336,6 +337,11 @@ endif  # CONFIG_ENCODERS || CONFIG_POSTPROC || CONFIG_VP9_POSTPROC
 
 # Neon utilities
 DSP_SRCS-$(HAVE_NEON) += arm/transpose_neon.h
+
+# PPC VSX utilities
+DSP_SRCS-$(HAVE_VSX)  += ppc/types_vsx.h
+DSP_SRCS-$(HAVE_VSX)  += ppc/transpose_vsx.h
+DSP_SRCS-$(HAVE_VSX)  += ppc/bitdepth_conversion_vsx.h
 
 DSP_SRCS-no += $(DSP_SRCS_REMOVE-yes)
 
