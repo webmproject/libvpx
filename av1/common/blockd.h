@@ -191,7 +191,6 @@ typedef struct {
   TX_SIZE inter_tx_size[MAX_MIB_SIZE][MAX_MIB_SIZE];
 #endif
   int8_t skip;
-  int8_t has_no_coeffs;
   int8_t segment_id;
 #if CONFIG_SUPERTX
   // Minimum of all segment IDs under the current supertx block.
