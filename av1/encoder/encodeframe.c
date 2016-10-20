@@ -4485,6 +4485,10 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 #define MIN_TRANS_THRESH 8
 #define GLOBAL_MOTION_ADVANTAGE_THRESH 0.60
 #define GLOBAL_MOTION_MODEL ROTZOOM
+// TODO(sarahparker) This function needs to be adjusted
+// to accomodate changes in the paraemter integerization.
+// Commenting it out until the fix is made.
+/*
 static void refine_integerized_param(WarpedMotionParams *wm,
 #if CONFIG_AOM_HIGHBITDEPTH
                                      int use_hbd, int bd,
@@ -4561,6 +4565,7 @@ static void refine_integerized_param(WarpedMotionParams *wm,
     *param = best_param;
   }
 }
+*/
 
 static void convert_to_params(const double *params, TransformationType type,
                               int16_t *model) {
@@ -4575,7 +4580,7 @@ static void convert_to_params(const double *params, TransformationType type,
              GM_TRANS_DECODE_FACTOR;
 
   for (i = 2; i < n_params; ++i) {
-    diag_value = ((i && 1) ? (1 << GM_ALPHA_PREC_BITS) : 0);
+    diag_value = ((i & 1) ? (1 << GM_ALPHA_PREC_BITS) : 0);
     model[i] = (int16_t)floor(params[i] * (1 << GM_ALPHA_PREC_BITS) + 0.5);
     model[i] =
         (int16_t)(clamp(model[i] - diag_value, GM_ALPHA_MIN, GM_ALPHA_MAX) +
@@ -4639,14 +4644,6 @@ static void encode_frame_internal(AV1_COMP *cpi) {
           convert_model_to_params(params, GLOBAL_MOTION_MODEL,
                                   &cm->global_motion[frame]);
           if (get_gmtype(&cm->global_motion[frame]) > GLOBAL_ZERO) {
-            refine_integerized_param(
-                &cm->global_motion[frame].motion_params,
-#if CONFIG_AOM_HIGHBITDEPTH
-                xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH, xd->bd,
-#endif  // CONFIG_AOM_HIGHBITDEPTH
-                ref_buf->y_buffer, ref_buf->y_width, ref_buf->y_height,
-                ref_buf->y_stride, cpi->Source->y_buffer, cpi->Source->y_width,
-                cpi->Source->y_height, cpi->Source->y_stride, 3);
             // compute the advantage of using gm parameters over 0 motion
             erroradvantage = av1_warp_erroradv(
                 &cm->global_motion[frame].motion_params,
