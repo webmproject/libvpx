@@ -2478,8 +2478,6 @@ static void update_coef_probs(AV1_COMP *cpi, aom_writer *w) {
 #if CONFIG_ENTROPY
   AV1_COMMON *cm = &cpi->common;
   SUBFRAME_STATS *subframe_stats = &cpi->subframe_stats;
-  unsigned int eob_counts_copy[TX_SIZES][PLANE_TYPES][REF_TYPES][COEF_BANDS]
-                              [COEFF_CONTEXTS];
   int i;
   av1_coeff_probs_model dummy_frame_coef_probs[PLANE_TYPES];
 
@@ -2504,8 +2502,10 @@ static void update_coef_probs(AV1_COMP *cpi, aom_writer *w) {
 #if CONFIG_ENTROPY
       if (cm->do_subframe_update &&
           cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
+        unsigned int this_eob_counts_copy[PLANE_TYPES][REF_TYPES][COEF_BANDS]
+                                         [COEFF_CONTEXTS];
         av1_coeff_count coef_counts_copy[PLANE_TYPES];
-        av1_copy(eob_counts_copy, cpi->common.counts.eob_branch[tx_size]);
+        av1_copy(this_eob_counts_copy, cpi->common.counts.eob_branch[tx_size]);
         av1_copy(coef_counts_copy, cpi->td.rd_counts.coef_counts[tx_size]);
         build_tree_distribution(cpi, tx_size, frame_branch_ct,
                                 frame_coef_probs);
@@ -2517,7 +2517,7 @@ static void update_coef_probs(AV1_COMP *cpi, aom_writer *w) {
           build_tree_distribution(cpi, tx_size, cpi->branch_ct_buf[i][tx_size],
                                   dummy_frame_coef_probs);
         }
-        av1_copy(cpi->common.counts.eob_branch[tx_size], eob_counts_copy);
+        av1_copy(cpi->common.counts.eob_branch[tx_size], this_eob_counts_copy);
         av1_copy(cpi->td.rd_counts.coef_counts[tx_size], coef_counts_copy);
 
         update_coef_probs_subframe(w, cpi, tx_size, cpi->branch_ct_buf,
@@ -2545,6 +2545,8 @@ static void update_coef_probs(AV1_COMP *cpi, aom_writer *w) {
   av1_copy(subframe_stats->coef_probs_buf[0], cm->fc->coef_probs);
   if (cm->do_subframe_update &&
       cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {
+    unsigned int eob_counts_copy[TX_SIZES][PLANE_TYPES][REF_TYPES][COEF_BANDS]
+                                [COEFF_CONTEXTS];
     av1_copy(eob_counts_copy, cm->counts.eob_branch);
     for (i = 1; i <= cpi->common.coef_probs_update_idx; ++i) {
       for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
