@@ -98,6 +98,10 @@ struct macroblock {
   int *m_search_count_ptr;
   int *ex_search_count_ptr;
 
+#if CONFIG_VAR_TX
+  unsigned int txb_split_count;
+#endif
+
   // These are set to their default values at the beginning, and then adjusted
   // further in the encoding process.
   BLOCK_SIZE min_partition_size;
