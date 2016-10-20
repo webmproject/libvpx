@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bc6c4f82_11248bc7",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-20T22:08:37Z",
+      "side": 1,
+      "message": "return the value instead of passing in a pointer",
+      "revId": "0b19a6b93fb787d261fd8d1bf197750bb3afb882",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc6c4f82_f11e9778",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-20T22:08:37Z",
+      "side": 1,
+      "message": "added a lot of const",
+      "revId": "0b19a6b93fb787d261fd8d1bf197750bb3afb882",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
