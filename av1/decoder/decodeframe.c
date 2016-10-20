@@ -3254,10 +3254,6 @@ static size_t read_uncompressed_header(AV1Decoder *pbi,
   RefCntBuffer *const frame_bufs = pool->frame_bufs;
   int i, mask, ref_index = 0;
   size_t sz;
-#if CONFIG_EXT_REFS
-  cm->last3_frame_type = cm->last2_frame_type;
-  cm->last2_frame_type = cm->last_frame_type;
-#endif  // CONFIG_EXT_REFS
   cm->last_frame_type = cm->frame_type;
   cm->last_intra_only = cm->intra_only;
 

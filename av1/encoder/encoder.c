@@ -300,7 +300,7 @@ static void setup_frame(AV1_COMP *cpi) {
       cm->frame_context_idx = ARF_FRAME;
 #else
     if (cpi->refresh_alt_ref_frame) cm->frame_context_idx = ARF_FRAME;
-#endif
+#endif  // CONFIG_EXT_REFS
     else if (cpi->rc.is_src_frame_alt_ref)
       cm->frame_context_idx = OVERLAY_FRAME;
     else if (cpi->refresh_golden_frame)
@@ -308,7 +308,7 @@ static void setup_frame(AV1_COMP *cpi) {
 #if CONFIG_EXT_REFS
     else if (cpi->refresh_bwd_ref_frame)
       cm->frame_context_idx = BRF_FRAME;
-#endif
+#endif  // CONFIG_EXT_REFS
     else
       cm->frame_context_idx = REGULAR_FRAME;
   }
@@ -4412,7 +4412,8 @@ static void set_arf_sign_bias(AV1_COMP *cpi) {
     arf_sign_bias =
         (cpi->rc.source_alt_ref_active && !cpi->refresh_alt_ref_frame);
   }
-#endif
+#endif  // CONFIG_EXT_REFS
+
   cm->ref_frame_sign_bias[ALTREF_FRAME] = arf_sign_bias;
 #if CONFIG_EXT_REFS
   cm->ref_frame_sign_bias[BWDREF_FRAME] = cm->ref_frame_sign_bias[ALTREF_FRAME];
@@ -4430,7 +4431,7 @@ static int setup_interp_filter_search_mask(AV1_COMP *cpi) {
   // Get which arf used as ALTREF_FRAME
   if (cpi->oxcf.pass == 2)
     arf_idx += cpi->twopass.gf_group.arf_ref_idx[cpi->twopass.gf_group.index];
-#endif
+#endif  // CONFIG_EXT_REFS
 
   if (cpi->common.last_frame_type == KEY_FRAME || cpi->refresh_alt_ref_frame)
     return mask;
@@ -4446,7 +4447,7 @@ static int setup_interp_filter_search_mask(AV1_COMP *cpi) {
   for (ref = LAST_FRAME; ref <= ALTREF_FRAME; ++ref)
     for (ifilter = EIGHTTAP_REGULAR; ifilter < SWITCHABLE_FILTERS; ++ifilter)
       ref_total[ref] += cpi->interp_filter_selected[ref][ifilter];
-#endif
+#endif  // CONFIG_EXT_REFS
 
   for (ifilter = EIGHTTAP_REGULAR; ifilter < SWITCHABLE_FILTERS; ++ifilter) {
     if ((ref_total[LAST_FRAME] &&
@@ -4597,14 +4598,12 @@ static void encode_frame_to_data_rate(AV1_COMP *cpi, size_t *size,
     // Update the frame type
     cm->last_frame_type = cm->frame_type;
 
-#if CONFIG_EXT_REFS
     // Since we allocate a spot for the OVERLAY frame in the gf group, we need
     // to do post-encoding update accordingly.
     if (cpi->rc.is_src_frame_alt_ref) {
       av1_set_target_rate(cpi);
       av1_rc_postencode_update(cpi, *size);
     }
-#endif
 
     cm->last_width = cm->width;
     cm->last_height = cm->height;
@@ -4773,10 +4772,6 @@ static void encode_frame_to_data_rate(AV1_COMP *cpi, size_t *size,
   cpi->ref_frame_flags = get_ref_frame_flags(cpi);
 #endif  // !CONFIG_EXT_REFS
 
-#if CONFIG_EXT_REFS
-  cm->last3_frame_type = cm->last2_frame_type;
-  cm->last2_frame_type = cm->last_frame_type;
-#endif  // CONFIG_EXT_REFS
   cm->last_frame_type = cm->frame_type;
 
   av1_rc_postencode_update(cpi, *size);
@@ -5041,7 +5036,7 @@ static void check_src_altref(AV1_COMP *cpi,
     rc->is_src_frame_alt_ref =
 #if CONFIG_EXT_REFS
         (gf_group->update_type[gf_group->index] == INTNL_OVERLAY_UPDATE) ||
-#endif
+#endif  // CONFIG_EXT_REFS
         (gf_group->update_type[gf_group->index] == OVERLAY_UPDATE);
   } else {
     rc->is_src_frame_alt_ref =
@@ -5409,7 +5404,8 @@ int av1_get_compressed_data(AV1_COMP *cpi, unsigned int *frame_flags,
       cpi->alt_fb_idx = gf_group->arf_ref_idx[gf_group->index];
     }
   }
-#endif
+#endif  // CONFIG_EXT_REFS
+
   // Start with a 0 size frame.
   *size = 0;
 
