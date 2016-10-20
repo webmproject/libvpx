@@ -135,7 +135,7 @@ TEST(AV1, TestTell) {
     }
     const uint32_t expected = (uint32_t)(-kSymbols * log2(probability));
     // Last tell should be close to the expected value.
-    GTEST_ASSERT_LE(last_tell - expected, 20) << " last_tell: " << last_tell;
+    GTEST_ASSERT_LE(last_tell, expected + 20) << " last_tell: " << last_tell;
     // The average frac_diff error should be pretty small.
     GTEST_ASSERT_LE(frac_diff_total / kSymbols, FRAC_DIFF_TOTAL_ERROR)
         << " frac_diff_total: " << frac_diff_total;
