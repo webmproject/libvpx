@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "7cce57f1_882357c1",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-20T22:59:52Z",
+      "side": 1,
+      "message": "There is no saturation to get signed 16-bit intermediates.\nAll vqrshrn_n_s32, vqaddq_s16 and vqsubq_s16 should use non-saturated versions.",
+      "revId": "0b19a6b93fb787d261fd8d1bf197750bb3afb882",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bc6c4f82_11248bc7",
         "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
         "patchSetId": 7
