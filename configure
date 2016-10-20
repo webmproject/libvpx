@@ -113,6 +113,9 @@ all_platforms="${all_platforms} armv7s-darwin-gcc"
 all_platforms="${all_platforms} armv8-linux-gcc"
 all_platforms="${all_platforms} mips32-linux-gcc"
 all_platforms="${all_platforms} mips64-linux-gcc"
+all_platforms="${all_platforms} ppc-linux-gcc"
+all_platforms="${all_platforms} ppc64-linux-gcc"
+all_platforms="${all_platforms} ppc64le-linux-gcc"
 all_platforms="${all_platforms} sparc-solaris-gcc"
 all_platforms="${all_platforms} x86-android-gcc"
 all_platforms="${all_platforms} x86-darwin8-gcc"
@@ -225,6 +228,7 @@ ARCH_LIST="
     mips
     x86
     x86_64
+    ppc
 "
 ARCH_EXT_LIST_X86="
     mmx
@@ -246,6 +250,8 @@ ARCH_EXT_LIST="
     mips64
 
     ${ARCH_EXT_LIST_X86}
+
+    vsx
 "
 HAVE_LIST="
     ${ARCH_EXT_LIST}

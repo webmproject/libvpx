@@ -94,5 +94,7 @@ void vp8_machine_specific_config(VP8_COMMON *ctx) {
   ctx->cpu_caps = arm_cpu_caps();
 #elif ARCH_X86 || ARCH_X86_64
   ctx->cpu_caps = x86_simd_caps();
+#elif ARCH_PPC
+  ctx->cpu_caps = ppc_simd_caps();
 #endif
 }
