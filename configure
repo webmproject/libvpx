@@ -287,6 +287,7 @@ EXPERIMENT_LIST="
     cb4x4
     frame_size
     delta_q
+    adapt_scan
 "
 CONFIG_LIST="
     dependency_tracking

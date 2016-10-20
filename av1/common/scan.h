@@ -24,12 +24,6 @@ extern "C" {
 
 #define MAX_NEIGHBORS 2
 
-typedef struct {
-  const int16_t *scan;
-  const int16_t *iscan;
-  const int16_t *neighbors;
-} SCAN_ORDER;
-
 extern const SCAN_ORDER av1_default_scan_orders[TX_SIZES];
 extern const SCAN_ORDER av1_intra_scan_orders[TX_SIZES][TX_TYPES];
 

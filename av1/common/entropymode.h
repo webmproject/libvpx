@@ -41,6 +41,12 @@ extern "C" {
 
 struct AV1Common;
 
+typedef struct {
+  const int16_t *scan;
+  const int16_t *iscan;
+  const int16_t *neighbors;
+} SCAN_ORDER;
+
 struct seg_counts {
   unsigned int tree_total[MAX_SEGMENTS];
   unsigned int tree_mispred[MAX_SEGMENTS];
@@ -61,6 +67,31 @@ typedef struct frame_contexts {
 #endif  // CONFIG_RANS
   aom_prob switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
                                  [SWITCHABLE_FILTERS - 1];
+
+#if CONFIG_ADAPT_SCAN
+  // TODO(angiebird): try aom_prob
+  uint32_t non_zero_prob_4X4[TX_TYPES][16];
+  uint32_t non_zero_prob_8X8[TX_TYPES][64];
+  uint32_t non_zero_prob_16X16[TX_TYPES][256];
+  uint32_t non_zero_prob_32X32[TX_TYPES][1024];
+
+  DECLARE_ALIGNED(16, int16_t, scan_4X4[TX_TYPES][16]);
+  DECLARE_ALIGNED(16, int16_t, scan_8X8[TX_TYPES][64]);
+  DECLARE_ALIGNED(16, int16_t, scan_16X16[TX_TYPES][256]);
+  DECLARE_ALIGNED(16, int16_t, scan_32X32[TX_TYPES][1024]);
+
+  DECLARE_ALIGNED(16, int16_t, iscan_4X4[TX_TYPES][16]);
+  DECLARE_ALIGNED(16, int16_t, iscan_8X8[TX_TYPES][64]);
+  DECLARE_ALIGNED(16, int16_t, iscan_16X16[TX_TYPES][256]);
+  DECLARE_ALIGNED(16, int16_t, iscan_32X32[TX_TYPES][1024]);
+
+  int16_t nb_4X4[TX_TYPES][(16 + 1) * 2];
+  int16_t nb_8X8[TX_TYPES][(64 + 1) * 2];
+  int16_t nb_16X16[TX_TYPES][(256 + 1) * 2];
+  int16_t nb_32X32[TX_TYPES][(1024 + 1) * 2];
+
+  SCAN_ORDER sc[TX_SIZES][TX_TYPES];
+#endif  // CONFIG_ADAPT_SCAN
 
 #if CONFIG_REF_MV
   aom_prob newmv_prob[NEWMV_MODE_CONTEXTS];
@@ -161,6 +192,14 @@ typedef struct FRAME_COUNTS {
                          [COEFF_CONTEXTS];
   unsigned int switchable_interp[SWITCHABLE_FILTER_CONTEXTS]
                                 [SWITCHABLE_FILTERS];
+#if CONFIG_ADAPT_SCAN
+  unsigned int non_zero_count_4X4[TX_TYPES][16];
+  unsigned int non_zero_count_8X8[TX_TYPES][64];
+  unsigned int non_zero_count_16X16[TX_TYPES][256];
+  unsigned int non_zero_count_32X32[TX_TYPES][1024];
+  unsigned int txb_count[TX_SIZES][TX_TYPES];
+#endif
+
 #if CONFIG_REF_MV
   unsigned int newmv_mode[NEWMV_MODE_CONTEXTS][2];
   unsigned int zeromv_mode[ZEROMV_MODE_CONTEXTS][2];
