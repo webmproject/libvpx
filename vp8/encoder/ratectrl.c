@@ -1011,12 +1011,13 @@ static void calc_pframe_target_size(VP8_COMP *cpi) {
       // gf_noboost_onepass_cbr = 1, which forces the gf to use the same
       // rate correction factor as last.
       cpi->gf_noboost_onepass_cbr = (cpi->oxcf.gf_cbr_boost_pct <= 100);
-      cpi->this_frame_target =
-          (cpi->this_frame_target * (100 + cpi->oxcf.gf_cbr_boost_pct)) / 100;
       cpi->baseline_gf_interval = cpi->gf_interval_onepass_cbr;
       // Skip this update if the zero_mvcount is low.
-      if (cpi->zeromv_count > (cpi->common.MBs >> 1))
+      if (cpi->zeromv_count > (cpi->common.MBs >> 1)) {
         cpi->common.refresh_golden_frame = 1;
+        cpi->this_frame_target =
+            (cpi->this_frame_target * (100 + cpi->oxcf.gf_cbr_boost_pct)) / 100;
+      }
       cpi->frames_till_gf_update_due = cpi->baseline_gf_interval;
       cpi->current_gf_interval = cpi->frames_till_gf_update_due;
     }
