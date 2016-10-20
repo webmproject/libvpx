@@ -137,6 +137,30 @@
     },
     {
       "key": {
+        "uuid": "bc6c4f82_710707c7",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-20T22:59:52Z",
+      "side": 1,
+      "message": "What I think is that 1, 3, 6, 9, 13, 21 and 24 should align with 0 ([0,0]), not 2([0,1]), so only column 0, 1, 2, 3, 4 and 5 have non-zeros.\nJust curious, what if put assert() after transpose_s16_8x8(), to check whether in6 is all zero?",
+      "parentUuid": "bc6c4f82_112fabbf",
+      "range": {
+        "startLine": 142,
+        "startChar": 0,
+        "endLine": 142,
+        "endChar": 24
+      },
+      "revId": "a21cdf8f6a1f534c1a077224daa14344c451593f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bc6c4f82_313d0fdb",
         "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
         "patchSetId": 6
