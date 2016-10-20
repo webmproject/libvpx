@@ -57,9 +57,10 @@ const int MaxTestNum = 100000;
 const int MaxTestNum = 100;
 #endif
 
-class AV1IntraPredOptimzTest : public ::testing::TestWithParam<PredParams> {
+class AV1FilterIntraPredOptimzTest
+    : public ::testing::TestWithParam<PredParams> {
  public:
-  virtual ~AV1IntraPredOptimzTest() {}
+  virtual ~AV1FilterIntraPredOptimzTest() {}
   virtual void SetUp() {
     PredFuncMode funcMode = GET_PARAM(0);
     predFuncRef_ = std::tr1::get<0>(funcMode);
@@ -149,10 +150,10 @@ class AV1IntraPredOptimzTest : public ::testing::TestWithParam<PredParams> {
 };
 
 #if CONFIG_AOM_HIGHBITDEPTH
-class AV1HbdIntraPredOptimzTest
+class AV1HbdFilterIntraPredOptimzTest
     : public ::testing::TestWithParam<HbdPredParams> {
  public:
-  virtual ~AV1HbdIntraPredOptimzTest() {}
+  virtual ~AV1HbdFilterIntraPredOptimzTest() {}
   virtual void SetUp() {
     HbdPredFuncMode funcMode = GET_PARAM(0);
     predFuncRef_ = std::tr1::get<0>(funcMode);
@@ -245,21 +246,21 @@ class AV1HbdIntraPredOptimzTest
 };
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 
-TEST_P(AV1IntraPredOptimzTest, BitExactCheck) { RunTest(); }
+TEST_P(AV1FilterIntraPredOptimzTest, BitExactCheck) { RunTest(); }
 
 #if PREDICTORS_SPEED_TEST
-TEST_P(AV1IntraPredOptimzTest, SpeedCheckC) { RunSpeedTestC(); }
+TEST_P(AV1FilterIntraPredOptimzTest, SpeedCheckC) { RunSpeedTestC(); }
 
-TEST_P(AV1IntraPredOptimzTest, SpeedCheckSSE) { RunSpeedTestSSE(); }
+TEST_P(AV1FilterIntraPredOptimzTest, SpeedCheckSSE) { RunSpeedTestSSE(); }
 #endif
 
 #if CONFIG_AOM_HIGHBITDEPTH
-TEST_P(AV1HbdIntraPredOptimzTest, BitExactCheck) { RunTest(); }
+TEST_P(AV1HbdFilterIntraPredOptimzTest, BitExactCheck) { RunTest(); }
 
 #if PREDICTORS_SPEED_TEST
-TEST_P(AV1HbdIntraPredOptimzTest, SpeedCheckC) { RunSpeedTestC(); }
+TEST_P(AV1HbdFilterIntraPredOptimzTest, SpeedCheckC) { RunSpeedTestC(); }
 
-TEST_P(AV1HbdIntraPredOptimzTest, SpeedCheckSSE) { RunSpeedTestSSE(); }
+TEST_P(AV1HbdFilterIntraPredOptimzTest, SpeedCheckSSE) { RunSpeedTestSSE(); }
 #endif  // PREDICTORS_SPEED_TEST
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 
@@ -289,7 +290,7 @@ const PredFuncMode kPredFuncMdArray[] = {
 const int kBlkSize[] = { 4, 8, 16, 32 };
 
 INSTANTIATE_TEST_CASE_P(
-    SSE4_1, AV1IntraPredOptimzTest,
+    SSE4_1, AV1FilterIntraPredOptimzTest,
     ::testing::Combine(::testing::ValuesIn(kPredFuncMdArray),
                        ::testing::ValuesIn(kBlkSize)));
 
@@ -320,7 +321,7 @@ const HbdPredFuncMode kHbdPredFuncMdArray[] = {
 const int kBd[] = { 10, 12 };
 
 INSTANTIATE_TEST_CASE_P(
-    SSE4_1, AV1HbdIntraPredOptimzTest,
+    SSE4_1, AV1HbdFilterIntraPredOptimzTest,
     ::testing::Combine(::testing::ValuesIn(kHbdPredFuncMdArray),
                        ::testing::ValuesIn(kBlkSize),
                        ::testing::ValuesIn(kBd)));
