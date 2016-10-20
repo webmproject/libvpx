@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "bc6c4f82_71570741",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-20T21:59:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bc6c4f82_e4f256c8",
+      "range": {
+        "startLine": 72,
+        "startChar": 36,
+        "endLine": 72,
+        "endChar": 39
+      },
+      "revId": "a21cdf8f6a1f534c1a077224daa14344c451593f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bc6c4f82_9f1407b7",
         "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2016-10-20T20:30:42Z",
       "side": 1,
       "message": "Please shift left by 1 column. Looks like non-zeros are only 6 columns and may be idct32_6_neon() is enough.",
+      "range": {
+        "startLine": 142,
+        "startChar": 0,
+        "endLine": 142,
+        "endChar": 24
+      },
+      "revId": "a21cdf8f6a1f534c1a077224daa14344c451593f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc6c4f82_112fabbf",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-20T21:59:45Z",
+      "side": 1,
+      "message": "The numbers at the edge are just for reference. The numbers in the block show the order of the 34 non-zero coefficients. The 0 at 0,0 is the [0] index of the first coefficient.\n\nThe 7 column is empty, which is why this is idct32_7.\n\nFrom this initial input it generates 8 rows and 32 columns. Those values are transposed and the same process happens again. Then there are a full complements of 8 columns and idct32_8 needs to take all those into account.",
+      "parentUuid": "bc6c4f82_9f1407b7",
       "range": {
         "startLine": 142,
         "startChar": 0,
