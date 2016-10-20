@@ -122,9 +122,11 @@ typedef struct frame_contexts {
 #endif  // CONFIG_SUPERTX
   struct segmentation_probs seg;
 #if CONFIG_EXT_INTRA
-  aom_prob ext_intra_probs[PLANE_TYPES];
   aom_prob intra_filter_probs[INTRA_FILTERS + 1][INTRA_FILTERS - 1];
 #endif  // CONFIG_EXT_INTRA
+#if CONFIG_FILTER_INTRA
+  aom_prob filter_intra_probs[PLANE_TYPES];
+#endif  // CONFIG_FILTER_INTRA
 #if CONFIG_GLOBAL_MOTION
   aom_prob global_motion_types_prob[GLOBAL_MOTION_TYPES - 1];
 #endif  // CONFIG_GLOBAL_MOTION
@@ -226,9 +228,11 @@ typedef struct FRAME_COUNTS {
 #endif  // CONFIG_SUPERTX
   struct seg_counts seg;
 #if CONFIG_EXT_INTRA
-  unsigned int ext_intra[PLANE_TYPES][2];
   unsigned int intra_filter[INTRA_FILTERS + 1][INTRA_FILTERS];
 #endif  // CONFIG_EXT_INTRA
+#if CONFIG_FILTER_INTRA
+  unsigned int filter_intra[PLANE_TYPES][2];
+#endif  // CONFIG_FILTER_INTRA
 } FRAME_COUNTS;
 
 extern const aom_prob av1_kf_y_mode_prob[INTRA_MODES][INTRA_MODES]

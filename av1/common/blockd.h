@@ -171,13 +171,13 @@ typedef struct {
 } PALETTE_MODE_INFO;
 #endif  // CONFIG_PALETTE
 
-#if CONFIG_EXT_INTRA
+#if CONFIG_FILTER_INTRA
 typedef struct {
   // 1: an ext intra mode is used; 0: otherwise.
-  uint8_t use_ext_intra_mode[PLANE_TYPES];
-  EXT_INTRA_MODE ext_intra_mode[PLANE_TYPES];
-} EXT_INTRA_MODE_INFO;
-#endif  // CONFIG_EXT_INTRA
+  uint8_t use_filter_intra_mode[PLANE_TYPES];
+  FILTER_INTRA_MODE filter_intra_mode[PLANE_TYPES];
+} FILTER_INTRA_MODE_INFO;
+#endif  // CONFIG_FILTER_INTRA
 
 // This structure now relates to 8x8 block regions.
 typedef struct {
@@ -214,8 +214,10 @@ typedef struct {
   MV_REFERENCE_FRAME ref_frame[2];
   TX_TYPE tx_type;
 
+#if CONFIG_FILTER_INTRA
+  FILTER_INTRA_MODE_INFO filter_intra_mode_info;
+#endif  // CONFIG_FILTER_INTRA
 #if CONFIG_EXT_INTRA
-  EXT_INTRA_MODE_INFO ext_intra_mode_info;
   int8_t angle_delta[2];
   // To-Do (huisu): this may be replaced by interp_filter
   INTRA_FILTER intra_filter;
@@ -563,17 +565,7 @@ static INLINE TX_SIZE tx_size_from_tx_mode(BLOCK_SIZE bsize, TX_MODE tx_mode,
 #endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
 }
 
-#if CONFIG_EXT_INTRA
-#define ALLOW_FILTER_INTRA_MODES 1
-#define ANGLE_STEP 3
-#define MAX_ANGLE_DELTAS 3
-
-extern const int16_t dr_intra_derivative[90];
-
-static const uint8_t mode_to_angle_map[INTRA_MODES] = {
-  0, 90, 180, 45, 135, 111, 157, 203, 67, 0,
-};
-
+#if CONFIG_FILTER_INTRA
 static const TX_TYPE filter_intra_mode_to_tx_type_lookup[FILTER_INTRA_MODES] = {
   DCT_DCT,    // FILTER_DC
   ADST_DCT,   // FILTER_V
@@ -586,7 +578,18 @@ static const TX_TYPE filter_intra_mode_to_tx_type_lookup[FILTER_INTRA_MODES] = {
   ADST_DCT,   // FILTER_D63
   ADST_ADST,  // FILTER_TM
 };
+#endif  // CONFIG_FILTER_INTRA
 
+#if CONFIG_EXT_INTRA
+#define ANGLE_STEP 3
+#define MAX_ANGLE_DELTAS 3
+extern const int16_t dr_intra_derivative[90];
+static const uint8_t mode_to_angle_map[INTRA_MODES] = {
+  0, 90, 180, 45, 135, 111, 157, 203, 67, 0,
+};
+
+// Returns whether filter selection is needed for a given
+// intra prediction angle.
 int av1_is_intra_filter_switchable(int angle);
 #endif  // CONFIG_EXT_INTRA
 
@@ -618,15 +621,19 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type, const MACROBLOCKD *xd,
   if (FIXED_TX_TYPE)
     return get_default_tx_type(plane_type, xd, block_idx, tx_size);
 
-#if CONFIG_EXT_INTRA
+#if CONFIG_EXT_INTRA || CONFIG_FILTER_INTRA
   if (!is_inter_block(mbmi)) {
-    const int use_ext_intra_mode_info =
-        mbmi->ext_intra_mode_info.use_ext_intra_mode[plane_type];
-    const EXT_INTRA_MODE ext_intra_mode =
-        mbmi->ext_intra_mode_info.ext_intra_mode[plane_type];
+#if CONFIG_FILTER_INTRA
+    const int use_filter_intra_mode_info =
+        mbmi->filter_intra_mode_info.use_filter_intra_mode[plane_type];
+    const FILTER_INTRA_MODE filter_intra_mode =
+        mbmi->filter_intra_mode_info.filter_intra_mode[plane_type];
+#endif  // CONFIG_FILTER_INTRA
+#if CONFIG_EXT_INTRA
     const PREDICTION_MODE mode = (plane_type == PLANE_TYPE_Y)
                                      ? get_y_mode(mi, block_idx)
                                      : mbmi->uv_mode;
+#endif  // CONFIG_EXT_INTRA
 
     if (xd->lossless[mbmi->segment_id] || tx_size >= TX_32X32) return DCT_DCT;
 
@@ -637,9 +644,11 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type, const MACROBLOCKD *xd,
 #endif  // ALLOW_INTRA_EXT_TX
 #endif  // CONFIG_EXT_TX
 
-    if (use_ext_intra_mode_info)
-      return filter_intra_mode_to_tx_type_lookup[ext_intra_mode];
-
+#if CONFIG_FILTER_INTRA
+    if (use_filter_intra_mode_info)
+      return filter_intra_mode_to_tx_type_lookup[filter_intra_mode];
+#endif  // CONFIG_FILTER_INTRA
+#if CONFIG_EXT_INTRA
     if (mode == DC_PRED) {
       return DCT_DCT;
     } else if (mode == TM_PRED) {
@@ -658,8 +667,9 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type, const MACROBLOCKD *xd,
       else
         return DCT_ADST;
     }
-  }
 #endif  // CONFIG_EXT_INTRA
+  }
+#endif  // CONFIG_EXT_INTRA || CONFIG_FILTER_INTRA
 
 #if CONFIG_EXT_TX
 #if EXT_TX_SIZES == 4
