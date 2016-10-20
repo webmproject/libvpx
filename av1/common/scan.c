@@ -11,6 +11,7 @@
 
 #include <assert.h>
 
+#include "av1/common/common_data.h"
 #include "av1/common/scan.h"
 
 DECLARE_ALIGNED(16, static const int16_t, default_scan_4x4[16]) = {
@@ -4166,3 +4167,239 @@ const SCAN_ORDER av1_intra_scan_orders[TX_SIZES][TX_TYPES] = {
   }
 };
 #endif  // CONFIG_EXT_TX
+
+#if CONFIG_ADAPT_SCAN
+// TX_32X32 will has 1024 coefficients whose indexes can be represented in 10
+// bits
+#define COEFF_IDX_BITS 10
+#define COEFF_IDX_SIZE (1 << COEFF_IDX_BITS)
+#define COEFF_IDX_MASK (COEFF_IDX_SIZE - 1)
+
+static uint32_t *get_non_zero_prob(FRAME_CONTEXT *fc, TX_SIZE tx_size,
+                                   TX_TYPE tx_type) {
+  switch (tx_size) {
+    case TX_4X4: return fc->non_zero_prob_4X4[tx_type];
+    case TX_8X8: return fc->non_zero_prob_8X8[tx_type];
+    case TX_16X16: return fc->non_zero_prob_16X16[tx_type];
+    case TX_32X32: return fc->non_zero_prob_32X32[tx_type];
+    default: assert(0); return NULL;
+  }
+}
+
+static int16_t *get_adapt_scan(FRAME_CONTEXT *fc, TX_SIZE tx_size,
+                               TX_TYPE tx_type) {
+  switch (tx_size) {
+    case TX_4X4: return fc->scan_4X4[tx_type];
+    case TX_8X8: return fc->scan_8X8[tx_type];
+    case TX_16X16: return fc->scan_16X16[tx_type];
+    case TX_32X32: return fc->scan_32X32[tx_type];
+    default: assert(0); return NULL;
+  }
+}
+
+static int16_t *get_adapt_iscan(FRAME_CONTEXT *fc, TX_SIZE tx_size,
+                                TX_TYPE tx_type) {
+  switch (tx_size) {
+    case TX_4X4: return fc->iscan_4X4[tx_type];
+    case TX_8X8: return fc->iscan_8X8[tx_type];
+    case TX_16X16: return fc->iscan_16X16[tx_type];
+    case TX_32X32: return fc->iscan_32X32[tx_type];
+    default: assert(0); return NULL;
+  }
+}
+
+static int16_t *get_adapt_nb(FRAME_CONTEXT *fc, TX_SIZE tx_size,
+                             TX_TYPE tx_type) {
+  switch (tx_size) {
+    case TX_4X4: return fc->nb_4X4[tx_type];
+    case TX_8X8: return fc->nb_8X8[tx_type];
+    case TX_16X16: return fc->nb_16X16[tx_type];
+    case TX_32X32: return fc->nb_32X32[tx_type];
+    default: assert(0); return NULL;
+  }
+}
+
+static uint32_t *get_non_zero_counts(FRAME_COUNTS *counts, TX_SIZE tx_size,
+                                     TX_TYPE tx_type) {
+  switch (tx_size) {
+    case TX_4X4: return counts->non_zero_count_4X4[tx_type];
+    case TX_8X8: return counts->non_zero_count_8X8[tx_type];
+    case TX_16X16: return counts->non_zero_count_16X16[tx_type];
+    case TX_32X32: return counts->non_zero_count_32X32[tx_type];
+    default: assert(0); return NULL;
+  }
+}
+
+void av1_update_scan_prob(AV1_COMMON *cm, TX_SIZE tx_size, TX_TYPE tx_type,
+                          int rate_16) {
+  FRAME_CONTEXT *pre_fc = &cm->frame_contexts[cm->frame_context_idx];
+  uint32_t *prev_non_zero_prob = get_non_zero_prob(pre_fc, tx_size, tx_type);
+  uint32_t *non_zero_prob = get_non_zero_prob(cm->fc, tx_size, tx_type);
+  uint32_t *non_zero_count = get_non_zero_counts(&cm->counts, tx_size, tx_type);
+  const int tx2d_size = tx_size_2d[tx_size];
+  unsigned int block_num = cm->counts.txb_count[tx_size][tx_type];
+  int i;
+  for (i = 0; i < tx2d_size; i++) {
+    int64_t curr_prob =
+        block_num == 0 ? 0 : (non_zero_count[i] << 16) / block_num;
+    int64_t prev_prob = prev_non_zero_prob[i];
+    int64_t pred_prob =
+        (curr_prob * rate_16 + prev_prob * ((1 << 16) - rate_16)) >> 16;
+    non_zero_prob[i] = clamp(pred_prob, 0, UINT16_MAX);
+  }
+}
+
+static void update_scan_count(int16_t *scan, int max_scan,
+                              const tran_low_t *dqcoeffs,
+                              uint32_t *non_zero_count) {
+  int i;
+  for (i = 0; i < max_scan; ++i) {
+    int coeff_idx = scan[i];
+    non_zero_count[coeff_idx] += (dqcoeffs[coeff_idx] != 0);
+  }
+}
+
+void av1_update_scan_count_facade(AV1_COMMON *cm, TX_SIZE tx_size,
+                                  TX_TYPE tx_type, const tran_low_t *dqcoeffs,
+                                  int max_scan) {
+  int16_t *scan = get_adapt_scan(cm->fc, tx_size, tx_type);
+  uint32_t *non_zero_count = get_non_zero_counts(&cm->counts, tx_size, tx_type);
+  update_scan_count(scan, max_scan, dqcoeffs, non_zero_count);
+  ++cm->counts.txb_count[tx_size][tx_type];
+}
+
+static int cmp_prob(const void *a, const void *b) {
+  return *(const uint32_t *)b > *(const uint32_t *)a ? 1 : -1;
+}
+
+void av1_augment_prob(uint32_t *prob, int size, int tx1d_size) {
+  int r, c;
+  for (r = 0; r < size; r++) {
+    for (c = 0; c < size; c++) {
+      const int coeff_idx = r * tx1d_size + c;
+      const int idx = r * size + c;
+      const uint32_t mask_16 = ((1 << 16) - 1);
+      const uint32_t tie_breaker = ~(((r + c) << COEFF_IDX_BITS) | coeff_idx);
+      // prob[idx]: 16 bits  r+c: 6 bits  coeff_idx: 10 bits
+      prob[idx] = (prob[idx] << 16) | (mask_16 & tie_breaker);
+    }
+  }
+}
+
+// topological sort
+static void dfs_scan(int tx1d_size, int *scan_idx, int coeff_idx, int16_t *scan,
+                     int16_t *iscan) {
+  const int r = coeff_idx / tx1d_size;
+  const int c = coeff_idx % tx1d_size;
+
+  if (iscan[coeff_idx] != -1) return;
+
+  if (r > 0) dfs_scan(tx1d_size, scan_idx, coeff_idx - tx1d_size, scan, iscan);
+
+  if (c > 0) dfs_scan(tx1d_size, scan_idx, coeff_idx - 1, scan, iscan);
+
+  scan[*scan_idx] = coeff_idx;
+  iscan[coeff_idx] = *scan_idx;
+  ++(*scan_idx);
+}
+
+void av1_update_neighbors(int tx_size, const int16_t *scan,
+                          const int16_t *iscan, int16_t *neighbors) {
+  const int tx1d_size = tx_size_1d[tx_size];
+  const int tx2d_size = tx_size_2d[tx_size];
+  int scan_idx;
+  for (scan_idx = 0; scan_idx < tx2d_size; ++scan_idx) {
+    const int coeff_idx = scan[scan_idx];
+    const int r = coeff_idx / tx1d_size;
+    const int c = coeff_idx % tx1d_size;
+    const int has_left = c > 0 && iscan[coeff_idx - 1] < scan_idx;
+    const int has_above = r > 0 && iscan[coeff_idx - tx1d_size] < scan_idx;
+
+    if (has_left && has_above) {
+      neighbors[scan_idx * MAX_NEIGHBORS + 0] = coeff_idx - 1;
+      neighbors[scan_idx * MAX_NEIGHBORS + 1] = coeff_idx - tx1d_size;
+    } else if (has_left) {
+      neighbors[scan_idx * MAX_NEIGHBORS + 0] = coeff_idx - 1;
+      neighbors[scan_idx * MAX_NEIGHBORS + 1] = coeff_idx - 1;
+    } else if (has_above) {
+      neighbors[scan_idx * MAX_NEIGHBORS + 0] = coeff_idx - tx1d_size;
+      neighbors[scan_idx * MAX_NEIGHBORS + 1] = coeff_idx - tx1d_size;
+    } else {
+      neighbors[scan_idx * MAX_NEIGHBORS + 0] = scan[0];
+      neighbors[scan_idx * MAX_NEIGHBORS + 1] = scan[0];
+    }
+  }
+  neighbors[tx2d_size * MAX_NEIGHBORS + 0] = scan[0];
+  neighbors[tx2d_size * MAX_NEIGHBORS + 1] = scan[0];
+}
+
+void av1_update_sort_order(TX_SIZE tx_size, const uint32_t *non_zero_prob,
+                           int16_t *sort_order) {
+  uint32_t temp[COEFF_IDX_SIZE];
+  const int tx1d_size = tx_size_1d[tx_size];
+  const int tx2d_size = tx_size_2d[tx_size];
+  int sort_idx;
+  assert(tx2d_size <= COEFF_IDX_SIZE);
+  memcpy(temp, non_zero_prob, tx2d_size * sizeof(*non_zero_prob));
+  av1_augment_prob(temp, tx1d_size, tx1d_size);
+  qsort(temp, tx2d_size, sizeof(*temp), cmp_prob);
+  for (sort_idx = 0; sort_idx < tx2d_size; ++sort_idx) {
+    const int coeff_idx = (temp[sort_idx] & COEFF_IDX_MASK) ^ COEFF_IDX_MASK;
+    sort_order[sort_idx] = coeff_idx;
+  }
+}
+
+void av1_update_scan_order(TX_SIZE tx_size, int16_t *sort_order, int16_t *scan,
+                           int16_t *iscan) {
+  int coeff_idx;
+  int scan_idx;
+  int sort_idx;
+  const int tx1d_size = tx_size_1d[tx_size];
+  const int tx2d_size = tx_size_2d[tx_size];
+
+  for (coeff_idx = 0; coeff_idx < tx2d_size; ++coeff_idx) {
+    iscan[coeff_idx] = -1;
+  }
+
+  scan_idx = 0;
+  for (sort_idx = 0; sort_idx < tx2d_size; ++sort_idx) {
+    coeff_idx = sort_order[sort_idx];
+    dfs_scan(tx1d_size, &scan_idx, coeff_idx, scan, iscan);
+  }
+}
+
+void av1_update_scan_order_facade(AV1_COMMON *cm, TX_SIZE tx_size,
+                                  TX_TYPE tx_type) {
+  int16_t sort_order[1024];
+  uint32_t *non_zero_prob = get_non_zero_prob(cm->fc, tx_size, tx_type);
+  int16_t *scan = get_adapt_scan(cm->fc, tx_size, tx_type);
+  int16_t *iscan = get_adapt_iscan(cm->fc, tx_size, tx_type);
+  int16_t *nb = get_adapt_nb(cm->fc, tx_size, tx_type);
+  const int tx2d_size = tx_size_2d[tx_size];
+  assert(tx2d_size <= 1024);
+  av1_update_sort_order(tx_size, non_zero_prob, sort_order);
+  av1_update_scan_order(tx_size, sort_order, scan, iscan);
+  av1_update_neighbors(tx_size, scan, iscan, nb);
+}
+
+void av1_init_scan_order(AV1_COMMON *cm) {
+  TX_SIZE tx_size;
+  TX_TYPE tx_type;
+  for (tx_size = TX_4X4; tx_size < TX_SIZES; ++tx_size) {
+    for (tx_type = DCT_DCT; tx_type < TX_TYPES; ++tx_type) {
+      uint32_t *non_zero_prob = get_non_zero_prob(cm->fc, tx_size, tx_type);
+      const int tx2d_size = tx_size_2d[tx_size];
+      int i;
+      SCAN_ORDER *sc = &cm->fc->sc[tx_size][tx_type];
+      for (i = 0; i < tx2d_size; ++i) {
+        non_zero_prob[i] = (1 << 16) / 2;  // init non_zero_prob to 0.5
+      }
+      av1_update_scan_order_facade(cm, tx_size, tx_type);
+      sc->scan = get_adapt_scan(cm->fc, tx_size, tx_type);
+      sc->iscan = get_adapt_iscan(cm->fc, tx_size, tx_type);
+      sc->neighbors = get_adapt_nb(cm->fc, tx_size, tx_type);
+    }
+  }
+}
+
+#endif  // CONFIG_ADAPT_SCAN
