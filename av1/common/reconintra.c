@@ -22,9 +22,6 @@
 #include "aom_mem/aom_mem.h"
 #include "aom_ports/mem.h"
 #include "aom_ports/aom_once.h"
-#if CONFIG_FILTER_INTRA
-#include "av1/common/intra_filters.h"
-#endif  // CONFIG_FILTER_INTRA
 #include "av1/common/reconintra.h"
 #include "av1/common/onyxc_int.h"
 
@@ -866,6 +863,57 @@ static void highbd_dr_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
 #endif  // CONFIG_EXT_INTRA
 
 #if CONFIG_FILTER_INTRA
+int av1_filter_intra_taps_4[TX_SIZES][INTRA_MODES][4] = {
+  {
+      { 735, 881, -537, -54 },
+      { 1005, 519, -488, -11 },
+      { 383, 990, -343, -6 },
+      { 442, 805, -542, 319 },
+      { 658, 616, -133, -116 },
+      { 875, 442, -141, -151 },
+      { 386, 741, -23, -80 },
+      { 390, 1027, -446, 51 },
+      { 679, 606, -523, 262 },
+      { 903, 922, -778, -23 },
+  },
+  {
+      { 648, 803, -444, 16 },
+      { 972, 620, -576, 7 },
+      { 561, 967, -499, -5 },
+      { 585, 762, -468, 144 },
+      { 596, 619, -182, -9 },
+      { 895, 459, -176, -153 },
+      { 557, 722, -126, -129 },
+      { 601, 839, -523, 105 },
+      { 562, 709, -499, 251 },
+      { 803, 872, -695, 43 },
+  },
+  {
+      { 423, 728, -347, 111 },
+      { 963, 685, -665, 23 },
+      { 281, 1024, -480, 216 },
+      { 640, 596, -437, 78 },
+      { 429, 669, -259, 99 },
+      { 740, 646, -415, 23 },
+      { 568, 771, -346, 40 },
+      { 404, 833, -486, 209 },
+      { 398, 712, -423, 307 },
+      { 939, 935, -887, 17 },
+  },
+  {
+      { 477, 737, -393, 150 },
+      { 881, 630, -546, 67 },
+      { 506, 984, -443, -20 },
+      { 114, 459, -270, 528 },
+      { 433, 528, 14, 3 },
+      { 837, 470, -301, -30 },
+      { 181, 777, 89, -107 },
+      { -29, 716, -232, 259 },
+      { 589, 646, -495, 255 },
+      { 740, 884, -728, 77 },
+  },
+};
+
 static void filter_intra_predictors_4tap(uint8_t *dst, ptrdiff_t stride, int bs,
                                          const uint8_t *above,
                                          const uint8_t *left, int mode) {
@@ -875,10 +923,10 @@ static void filter_intra_predictors_4tap(uint8_t *dst, ptrdiff_t stride, int bs,
   const TX_SIZE tx_size =
       (bs == 32) ? TX_32X32
                  : ((bs == 16) ? TX_16X16 : ((bs == 8) ? TX_8X8 : (TX_4X4)));
-  const int c0 = filter_intra_taps_4[tx_size][mode][0];
-  const int c1 = filter_intra_taps_4[tx_size][mode][1];
-  const int c2 = filter_intra_taps_4[tx_size][mode][2];
-  const int c3 = filter_intra_taps_4[tx_size][mode][3];
+  const int c0 = av1_filter_intra_taps_4[tx_size][mode][0];
+  const int c1 = av1_filter_intra_taps_4[tx_size][mode][1];
+  const int c2 = av1_filter_intra_taps_4[tx_size][mode][2];
+  const int c3 = av1_filter_intra_taps_4[tx_size][mode][3];
 
   k = 0;
   mean = 0;
@@ -999,10 +1047,10 @@ static void highbd_filter_intra_predictors_4tap(uint16_t *dst, ptrdiff_t stride,
   const TX_SIZE tx_size =
       (bs == 32) ? TX_32X32
                  : ((bs == 16) ? TX_16X16 : ((bs == 8) ? TX_8X8 : (TX_4X4)));
-  const int c0 = filter_intra_taps_4[tx_size][mode][0];
-  const int c1 = filter_intra_taps_4[tx_size][mode][1];
-  const int c2 = filter_intra_taps_4[tx_size][mode][2];
-  const int c3 = filter_intra_taps_4[tx_size][mode][3];
+  const int c0 = av1_filter_intra_taps_4[tx_size][mode][0];
+  const int c1 = av1_filter_intra_taps_4[tx_size][mode][1];
+  const int c2 = av1_filter_intra_taps_4[tx_size][mode][2];
+  const int c3 = av1_filter_intra_taps_4[tx_size][mode][3];
 
   k = 0;
   mean = 0;
