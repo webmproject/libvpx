@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "bc6c4f82_51e3e35b",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-20T22:08:37Z",
+      "side": 1,
+      "message": "removed unused includes",
+      "revId": "a21cdf8f6a1f534c1a077224daa14344c451593f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bc6c4f82_e4f256c8",
         "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
         "patchSetId": 6
@@ -89,6 +106,53 @@
         "startChar": 0,
         "endLine": 142,
         "endChar": 24
+      },
+      "revId": "a21cdf8f6a1f534c1a077224daa14344c451593f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc6c4f82_d12d93ac",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-20T22:08:37Z",
+      "side": 1,
+      "message": "added a space so the grid format is uniform. let me know if it\u0027s still not clear.",
+      "parentUuid": "bc6c4f82_112fabbf",
+      "range": {
+        "startLine": 142,
+        "startChar": 0,
+        "endLine": 142,
+        "endChar": 24
+      },
+      "revId": "a21cdf8f6a1f534c1a077224daa14344c451593f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc6c4f82_313d0fdb",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-20T22:08:37Z",
+      "side": 1,
+      "message": "remove \"note-to-self\" comments",
+      "range": {
+        "startLine": 219,
+        "startChar": 49,
+        "endLine": 219,
+        "endChar": 55
       },
       "revId": "a21cdf8f6a1f534c1a077224daa14344c451593f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
