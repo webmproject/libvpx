@@ -615,227 +615,170 @@ void vpx_h_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
 
 // -----------------------------------------------------------------------------
 
+static INLINE int16x8_t convert_u8_to_s16(uint8x8_t v) {
+  return vreinterpretq_s16_u16(vmovl_u8(v));
+}
+
 void vpx_tm_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
                                const uint8_t *above, const uint8_t *left) {
-  int i;
-  uint16x8_t q1u16, q3u16;
-  int16x8_t q1s16;
-  uint8x8_t d0u8 = vdup_n_u8(0);
-  uint32x2_t d2u32 = vdup_n_u32(0);
+  const uint8x8_t top_left = vld1_dup_u8(above - 1);
+  const uint8x8_t left_u8 = vld1_u8(left);
+  const uint8x8_t above_u8 = vld1_u8(above);
+  const int16x4_t left_s16 = vget_low_s16(convert_u8_to_s16(left_u8));
+  int16x8_t sub, sum;
+  uint32x2_t d;
 
-  d0u8 = vld1_dup_u8(above - 1);
-  d2u32 = vld1_lane_u32((const uint32_t *)above, d2u32, 0);
-  q3u16 = vsubl_u8(vreinterpret_u8_u32(d2u32), d0u8);
-  for (i = 0; i < 4; i++, dst += stride) {
-    q1u16 = vdupq_n_u16((uint16_t)left[i]);
-    q1s16 =
-        vaddq_s16(vreinterpretq_s16_u16(q1u16), vreinterpretq_s16_u16(q3u16));
-    d0u8 = vqmovun_s16(q1s16);
-    vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d0u8), 0);
-  }
+  sub = vreinterpretq_s16_u16(vsubl_u8(above_u8, top_left));
+  // Avoid vcombine_s16() which generates lots of redundant code with clang-3.8.
+  sub = vreinterpretq_s16_s64(
+      vdupq_lane_s64(vreinterpret_s64_s16(vget_low_s16(sub)), 0));
+
+  sum = vcombine_s16(vdup_lane_s16(left_s16, 0), vdup_lane_s16(left_s16, 1));
+  sum = vaddq_s16(sum, sub);
+  d = vreinterpret_u32_u8(vqmovun_s16(sum));
+  vst1_lane_u32((uint32_t *)dst, d, 0);
+  dst += stride;
+  vst1_lane_u32((uint32_t *)dst, d, 1);
+  dst += stride;
+
+  sum = vcombine_s16(vdup_lane_s16(left_s16, 2), vdup_lane_s16(left_s16, 3));
+  sum = vaddq_s16(sum, sub);
+  d = vreinterpret_u32_u8(vqmovun_s16(sum));
+  vst1_lane_u32((uint32_t *)dst, d, 0);
+  dst += stride;
+  vst1_lane_u32((uint32_t *)dst, d, 1);
+}
+
+static INLINE void tm_8_kernel(uint8_t **dst, const ptrdiff_t stride,
+                               const int16x8_t left_dup, const int16x8_t sub) {
+  const int16x8_t sum = vaddq_s16(left_dup, sub);
+  const uint8x8_t d = vqmovun_s16(sum);
+  vst1_u8(*dst, d);
+  *dst += stride;
 }
 
 void vpx_tm_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
                                const uint8_t *above, const uint8_t *left) {
-  int j;
-  uint16x8_t q0u16, q3u16, q10u16;
-  int16x8_t q0s16;
-  uint16x4_t d20u16;
-  uint8x8_t d0u8, d2u8, d30u8;
+  const uint8x8_t top_left = vld1_dup_u8(above - 1);
+  const uint8x8_t above_u8 = vld1_u8(above);
+  const uint8x8_t left_u8 = vld1_u8(left);
+  const int16x8_t left_s16q = convert_u8_to_s16(left_u8);
+  const int16x8_t sub = vreinterpretq_s16_u16(vsubl_u8(above_u8, top_left));
+  int16x4_t left_s16d = vget_low_s16(left_s16q);
+  int i;
 
-  d0u8 = vld1_dup_u8(above - 1);
-  d30u8 = vld1_u8(left);
-  d2u8 = vld1_u8(above);
-  q10u16 = vmovl_u8(d30u8);
-  q3u16 = vsubl_u8(d2u8, d0u8);
-  d20u16 = vget_low_u16(q10u16);
-  for (j = 0; j < 2; j++, d20u16 = vget_high_u16(q10u16)) {
-    q0u16 = vdupq_lane_u16(d20u16, 0);
-    q0s16 =
-        vaddq_s16(vreinterpretq_s16_u16(q3u16), vreinterpretq_s16_u16(q0u16));
-    d0u8 = vqmovun_s16(q0s16);
-    vst1_u64((uint64_t *)dst, vreinterpret_u64_u8(d0u8));
-    dst += stride;
-    q0u16 = vdupq_lane_u16(d20u16, 1);
-    q0s16 =
-        vaddq_s16(vreinterpretq_s16_u16(q3u16), vreinterpretq_s16_u16(q0u16));
-    d0u8 = vqmovun_s16(q0s16);
-    vst1_u64((uint64_t *)dst, vreinterpret_u64_u8(d0u8));
-    dst += stride;
-    q0u16 = vdupq_lane_u16(d20u16, 2);
-    q0s16 =
-        vaddq_s16(vreinterpretq_s16_u16(q3u16), vreinterpretq_s16_u16(q0u16));
-    d0u8 = vqmovun_s16(q0s16);
-    vst1_u64((uint64_t *)dst, vreinterpret_u64_u8(d0u8));
-    dst += stride;
-    q0u16 = vdupq_lane_u16(d20u16, 3);
-    q0s16 =
-        vaddq_s16(vreinterpretq_s16_u16(q3u16), vreinterpretq_s16_u16(q0u16));
-    d0u8 = vqmovun_s16(q0s16);
-    vst1_u64((uint64_t *)dst, vreinterpret_u64_u8(d0u8));
-    dst += stride;
+  for (i = 0; i < 2; i++, left_s16d = vget_high_s16(left_s16q)) {
+    int16x8_t left_dup;
+
+    left_dup = vdupq_lane_s16(left_s16d, 0);
+    tm_8_kernel(&dst, stride, left_dup, sub);
+    left_dup = vdupq_lane_s16(left_s16d, 1);
+    tm_8_kernel(&dst, stride, left_dup, sub);
+    left_dup = vdupq_lane_s16(left_s16d, 2);
+    tm_8_kernel(&dst, stride, left_dup, sub);
+    left_dup = vdupq_lane_s16(left_s16d, 3);
+    tm_8_kernel(&dst, stride, left_dup, sub);
   }
+}
+
+static INLINE void tm_16_kernel(uint8_t **dst, const ptrdiff_t stride,
+                                const int16x8_t left_dup, const int16x8_t sub0,
+                                const int16x8_t sub1) {
+  const int16x8_t sum0 = vaddq_s16(left_dup, sub0);
+  const int16x8_t sum1 = vaddq_s16(left_dup, sub1);
+  const uint8x8_t d0 = vqmovun_s16(sum0);
+  const uint8x8_t d1 = vqmovun_s16(sum1);
+  vst1_u8(*dst, d0);
+  *dst += 8;
+  vst1_u8(*dst, d1);
+  *dst += stride - 8;
 }
 
 void vpx_tm_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
                                  const uint8_t *above, const uint8_t *left) {
-  int j, k;
-  uint16x8_t q0u16, q2u16, q3u16, q8u16, q10u16;
-  uint8x16_t q0u8, q1u8;
-  int16x8_t q0s16, q1s16, q8s16, q11s16;
-  uint16x4_t d20u16;
-  uint8x8_t d2u8, d3u8, d18u8, d22u8, d23u8;
+  const uint8x16_t top_left = vld1q_dup_u8(above - 1);
+  const uint8x16_t above_u8 = vld1q_u8(above);
+  const int16x8_t sub0 = vreinterpretq_s16_u16(
+      vsubl_u8(vget_low_u8(above_u8), vget_low_u8(top_left)));
+  const int16x8_t sub1 = vreinterpretq_s16_u16(
+      vsubl_u8(vget_high_u8(above_u8), vget_high_u8(top_left)));
+  int16x8_t left_dup;
+  int i;
 
-  q0u8 = vld1q_dup_u8(above - 1);
-  q1u8 = vld1q_u8(above);
-  q2u16 = vsubl_u8(vget_low_u8(q1u8), vget_low_u8(q0u8));
-  q3u16 = vsubl_u8(vget_high_u8(q1u8), vget_high_u8(q0u8));
-  for (k = 0; k < 2; k++, left += 8) {
-    d18u8 = vld1_u8(left);
-    q10u16 = vmovl_u8(d18u8);
-    d20u16 = vget_low_u16(q10u16);
-    for (j = 0; j < 2; j++, d20u16 = vget_high_u16(q10u16)) {
-      q0u16 = vdupq_lane_u16(d20u16, 0);
-      q8u16 = vdupq_lane_u16(d20u16, 1);
-      q1s16 =
-          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q2u16));
-      q0s16 =
-          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q3u16));
-      q11s16 =
-          vaddq_s16(vreinterpretq_s16_u16(q8u16), vreinterpretq_s16_u16(q2u16));
-      q8s16 =
-          vaddq_s16(vreinterpretq_s16_u16(q8u16), vreinterpretq_s16_u16(q3u16));
-      d2u8 = vqmovun_s16(q1s16);
-      d3u8 = vqmovun_s16(q0s16);
-      d22u8 = vqmovun_s16(q11s16);
-      d23u8 = vqmovun_s16(q8s16);
-      vst1_u64((uint64_t *)dst, vreinterpret_u64_u8(d2u8));
-      vst1_u64((uint64_t *)(dst + 8), vreinterpret_u64_u8(d3u8));
-      dst += stride;
-      vst1_u64((uint64_t *)dst, vreinterpret_u64_u8(d22u8));
-      vst1_u64((uint64_t *)(dst + 8), vreinterpret_u64_u8(d23u8));
-      dst += stride;
+  for (i = 0; i < 2; i++, left += 8) {
+    const uint8x8_t left_u8 = vld1_u8(left);
+    const int16x8_t left_s16q = convert_u8_to_s16(left_u8);
+    const int16x4_t left_low = vget_low_s16(left_s16q);
+    const int16x4_t left_high = vget_high_s16(left_s16q);
 
-      q0u16 = vdupq_lane_u16(d20u16, 2);
-      q8u16 = vdupq_lane_u16(d20u16, 3);
-      q1s16 =
-          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q2u16));
-      q0s16 =
-          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q3u16));
-      q11s16 =
-          vaddq_s16(vreinterpretq_s16_u16(q8u16), vreinterpretq_s16_u16(q2u16));
-      q8s16 =
-          vaddq_s16(vreinterpretq_s16_u16(q8u16), vreinterpretq_s16_u16(q3u16));
-      d2u8 = vqmovun_s16(q1s16);
-      d3u8 = vqmovun_s16(q0s16);
-      d22u8 = vqmovun_s16(q11s16);
-      d23u8 = vqmovun_s16(q8s16);
-      vst1_u64((uint64_t *)dst, vreinterpret_u64_u8(d2u8));
-      vst1_u64((uint64_t *)(dst + 8), vreinterpret_u64_u8(d3u8));
-      dst += stride;
-      vst1_u64((uint64_t *)dst, vreinterpret_u64_u8(d22u8));
-      vst1_u64((uint64_t *)(dst + 8), vreinterpret_u64_u8(d23u8));
-      dst += stride;
-    }
+    left_dup = vdupq_lane_s16(left_low, 0);
+    tm_16_kernel(&dst, stride, left_dup, sub0, sub1);
+    left_dup = vdupq_lane_s16(left_low, 1);
+    tm_16_kernel(&dst, stride, left_dup, sub0, sub1);
+    left_dup = vdupq_lane_s16(left_low, 2);
+    tm_16_kernel(&dst, stride, left_dup, sub0, sub1);
+    left_dup = vdupq_lane_s16(left_low, 3);
+    tm_16_kernel(&dst, stride, left_dup, sub0, sub1);
+
+    left_dup = vdupq_lane_s16(left_high, 0);
+    tm_16_kernel(&dst, stride, left_dup, sub0, sub1);
+    left_dup = vdupq_lane_s16(left_high, 1);
+    tm_16_kernel(&dst, stride, left_dup, sub0, sub1);
+    left_dup = vdupq_lane_s16(left_high, 2);
+    tm_16_kernel(&dst, stride, left_dup, sub0, sub1);
+    left_dup = vdupq_lane_s16(left_high, 3);
+    tm_16_kernel(&dst, stride, left_dup, sub0, sub1);
   }
+}
+
+static INLINE void tm_32_kernel(uint8_t **dst, const ptrdiff_t stride,
+                                const int16x8_t left_dup, const int16x8_t sub0,
+                                const int16x8_t sub1, const int16x8_t sub2,
+                                const int16x8_t sub3) {
+  const int16x8_t sum0 = vaddq_s16(left_dup, sub0);
+  const int16x8_t sum1 = vaddq_s16(left_dup, sub1);
+  const int16x8_t sum2 = vaddq_s16(left_dup, sub2);
+  const int16x8_t sum3 = vaddq_s16(left_dup, sub3);
+  const uint8x8_t d0 = vqmovun_s16(sum0);
+  const uint8x8_t d1 = vqmovun_s16(sum1);
+  const uint8x8_t d2 = vqmovun_s16(sum2);
+  const uint8x8_t d3 = vqmovun_s16(sum3);
+
+  vst1q_u8(*dst, vcombine_u8(d0, d1));
+  *dst += 16;
+  vst1q_u8(*dst, vcombine_u8(d2, d3));
+  *dst += stride - 16;
 }
 
 void vpx_tm_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
                                  const uint8_t *above, const uint8_t *left) {
-  int j, k;
-  uint16x8_t q0u16, q3u16, q8u16, q9u16, q10u16, q11u16;
-  uint8x16_t q0u8, q1u8, q2u8;
-  int16x8_t q12s16, q13s16, q14s16, q15s16;
-  uint16x4_t d6u16;
-  uint8x8_t d0u8, d1u8, d2u8, d3u8, d26u8;
+  const uint8x16_t top_left = vld1q_dup_u8(above - 1);
+  const uint8x16_t above_low = vld1q_u8(above);
+  const uint8x16_t above_high = vld1q_u8(above + 16);
+  const int16x8_t sub0 = vreinterpretq_s16_u16(
+      vsubl_u8(vget_low_u8(above_low), vget_low_u8(top_left)));
+  const int16x8_t sub1 = vreinterpretq_s16_u16(
+      vsubl_u8(vget_high_u8(above_low), vget_high_u8(top_left)));
+  const int16x8_t sub2 = vreinterpretq_s16_u16(
+      vsubl_u8(vget_low_u8(above_high), vget_low_u8(top_left)));
+  const int16x8_t sub3 = vreinterpretq_s16_u16(
+      vsubl_u8(vget_high_u8(above_high), vget_high_u8(top_left)));
+  int16x8_t left_dup;
+  int i, j;
 
-  q0u8 = vld1q_dup_u8(above - 1);
-  q1u8 = vld1q_u8(above);
-  q2u8 = vld1q_u8(above + 16);
-  q8u16 = vsubl_u8(vget_low_u8(q1u8), vget_low_u8(q0u8));
-  q9u16 = vsubl_u8(vget_high_u8(q1u8), vget_high_u8(q0u8));
-  q10u16 = vsubl_u8(vget_low_u8(q2u8), vget_low_u8(q0u8));
-  q11u16 = vsubl_u8(vget_high_u8(q2u8), vget_high_u8(q0u8));
-  for (k = 0; k < 4; k++, left += 8) {
-    d26u8 = vld1_u8(left);
-    q3u16 = vmovl_u8(d26u8);
-    d6u16 = vget_low_u16(q3u16);
-    for (j = 0; j < 2; j++, d6u16 = vget_high_u16(q3u16)) {
-      q0u16 = vdupq_lane_u16(d6u16, 0);
-      q12s16 =
-          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q8u16));
-      q13s16 =
-          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q9u16));
-      q14s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                         vreinterpretq_s16_u16(q10u16));
-      q15s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                         vreinterpretq_s16_u16(q11u16));
-      d0u8 = vqmovun_s16(q12s16);
-      d1u8 = vqmovun_s16(q13s16);
-      d2u8 = vqmovun_s16(q14s16);
-      d3u8 = vqmovun_s16(q15s16);
-      q0u8 = vcombine_u8(d0u8, d1u8);
-      q1u8 = vcombine_u8(d2u8, d3u8);
-      vst1q_u64((uint64_t *)dst, vreinterpretq_u64_u8(q0u8));
-      vst1q_u64((uint64_t *)(dst + 16), vreinterpretq_u64_u8(q1u8));
-      dst += stride;
-
-      q0u16 = vdupq_lane_u16(d6u16, 1);
-      q12s16 =
-          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q8u16));
-      q13s16 =
-          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q9u16));
-      q14s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                         vreinterpretq_s16_u16(q10u16));
-      q15s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                         vreinterpretq_s16_u16(q11u16));
-      d0u8 = vqmovun_s16(q12s16);
-      d1u8 = vqmovun_s16(q13s16);
-      d2u8 = vqmovun_s16(q14s16);
-      d3u8 = vqmovun_s16(q15s16);
-      q0u8 = vcombine_u8(d0u8, d1u8);
-      q1u8 = vcombine_u8(d2u8, d3u8);
-      vst1q_u64((uint64_t *)dst, vreinterpretq_u64_u8(q0u8));
-      vst1q_u64((uint64_t *)(dst + 16), vreinterpretq_u64_u8(q1u8));
-      dst += stride;
-
-      q0u16 = vdupq_lane_u16(d6u16, 2);
-      q12s16 =
-          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q8u16));
-      q13s16 =
-          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q9u16));
-      q14s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                         vreinterpretq_s16_u16(q10u16));
-      q15s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                         vreinterpretq_s16_u16(q11u16));
-      d0u8 = vqmovun_s16(q12s16);
-      d1u8 = vqmovun_s16(q13s16);
-      d2u8 = vqmovun_s16(q14s16);
-      d3u8 = vqmovun_s16(q15s16);
-      q0u8 = vcombine_u8(d0u8, d1u8);
-      q1u8 = vcombine_u8(d2u8, d3u8);
-      vst1q_u64((uint64_t *)dst, vreinterpretq_u64_u8(q0u8));
-      vst1q_u64((uint64_t *)(dst + 16), vreinterpretq_u64_u8(q1u8));
-      dst += stride;
-
-      q0u16 = vdupq_lane_u16(d6u16, 3);
-      q12s16 =
-          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q8u16));
-      q13s16 =
-          vaddq_s16(vreinterpretq_s16_u16(q0u16), vreinterpretq_s16_u16(q9u16));
-      q14s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                         vreinterpretq_s16_u16(q10u16));
-      q15s16 = vaddq_s16(vreinterpretq_s16_u16(q0u16),
-                         vreinterpretq_s16_u16(q11u16));
-      d0u8 = vqmovun_s16(q12s16);
-      d1u8 = vqmovun_s16(q13s16);
-      d2u8 = vqmovun_s16(q14s16);
-      d3u8 = vqmovun_s16(q15s16);
-      q0u8 = vcombine_u8(d0u8, d1u8);
-      q1u8 = vcombine_u8(d2u8, d3u8);
-      vst1q_u64((uint64_t *)dst, vreinterpretq_u64_u8(q0u8));
-      vst1q_u64((uint64_t *)(dst + 16), vreinterpretq_u64_u8(q1u8));
-      dst += stride;
+  for (j = 0; j < 4; j++, left += 8) {
+    const uint8x8_t left_u8 = vld1_u8(left);
+    const int16x8_t left_s16q = convert_u8_to_s16(left_u8);
+    int16x4_t left_s16d = vget_low_s16(left_s16q);
+    for (i = 0; i < 2; i++, left_s16d = vget_high_s16(left_s16q)) {
+      left_dup = vdupq_lane_s16(left_s16d, 0);
+      tm_32_kernel(&dst, stride, left_dup, sub0, sub1, sub2, sub3);
+      left_dup = vdupq_lane_s16(left_s16d, 1);
+      tm_32_kernel(&dst, stride, left_dup, sub0, sub1, sub2, sub3);
+      left_dup = vdupq_lane_s16(left_s16d, 2);
+      tm_32_kernel(&dst, stride, left_dup, sub0, sub1, sub2, sub3);
+      left_dup = vdupq_lane_s16(left_s16d, 3);
+      tm_32_kernel(&dst, stride, left_dup, sub0, sub1, sub2, sub3);
     }
   }
 }
