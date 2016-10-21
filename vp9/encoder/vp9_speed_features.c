@@ -508,7 +508,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed,
       sf->short_circuit_low_temp_var = 2;
     }
     sf->limit_newmv_early_exit = 0;
-    sf->bias_golden = 0;
   }
 }
 
