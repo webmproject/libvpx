@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc93c3d8_e12ea258",
+        "filename": "av1/common/scan.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-21T03:59:31Z",
+      "side": 1,
+      "message": "not sure what that means. a facade is the front of something (a building) or something superficial",
+      "range": {
+        "startLine": 34,
+        "startChar": 5,
+        "endLine": 34,
+        "endChar": 33
+      },
+      "revId": "648aeb0b1b95ddca8a020ed7e8f08755e573336e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
