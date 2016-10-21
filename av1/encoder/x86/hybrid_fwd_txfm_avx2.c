@@ -14,6 +14,7 @@
 #include "./av1_rtcd.h"
 #include "./aom_dsp_rtcd.h"
 
+#include "aom_dsp/x86/fwd_txfm_avx2.h"
 #include "aom_dsp/txfm_common.h"
 #include "aom_dsp/x86/txfm_common_avx2.h"
 
@@ -273,24 +274,11 @@ static INLINE void load_buffer_16x16(const int16_t *input, int stride,
   in[15] = _mm256_slli_epi16(in[15], 2);
 }
 
-static INLINE void write_buffer_16x16(const __m256i *in, int stride,
-                                      tran_low_t *output) {
-  _mm256_storeu_si256((__m256i *)output, in[0]);
-  _mm256_storeu_si256((__m256i *)(output + stride), in[1]);
-  _mm256_storeu_si256((__m256i *)(output + 2 * stride), in[2]);
-  _mm256_storeu_si256((__m256i *)(output + 3 * stride), in[3]);
-  _mm256_storeu_si256((__m256i *)(output + 4 * stride), in[4]);
-  _mm256_storeu_si256((__m256i *)(output + 5 * stride), in[5]);
-  _mm256_storeu_si256((__m256i *)(output + 6 * stride), in[6]);
-  _mm256_storeu_si256((__m256i *)(output + 7 * stride), in[7]);
-  _mm256_storeu_si256((__m256i *)(output + 8 * stride), in[8]);
-  _mm256_storeu_si256((__m256i *)(output + 9 * stride), in[9]);
-  _mm256_storeu_si256((__m256i *)(output + 10 * stride), in[10]);
-  _mm256_storeu_si256((__m256i *)(output + 11 * stride), in[11]);
-  _mm256_storeu_si256((__m256i *)(output + 12 * stride), in[12]);
-  _mm256_storeu_si256((__m256i *)(output + 13 * stride), in[13]);
-  _mm256_storeu_si256((__m256i *)(output + 14 * stride), in[14]);
-  _mm256_storeu_si256((__m256i *)(output + 15 * stride), in[15]);
+static INLINE void write_buffer_16x16(const __m256i *in, tran_low_t *output) {
+  int i;
+  for (i = 0; i < 16; ++i) {
+    storeu_output_avx2(&in[i], output + (i << 4));
+  }
 }
 
 static void right_shift_16x16(__m256i *in) {
@@ -1253,7 +1241,7 @@ void av1_fht16x16_avx2(const int16_t *input, tran_low_t *output, int stride,
     default: assert(0); break;
   }
   mm256_transpose_16x16(in);
-  write_buffer_16x16(in, 16, output);
+  write_buffer_16x16(in, output);
   _mm256_zeroupper();
 }
 
@@ -1623,12 +1611,13 @@ static void fdct32_avx2(__m256i *in0, __m256i *in1) {
 }
 
 static INLINE void write_buffer_32x32(const __m256i *in0, const __m256i *in1,
-                                      int stride, tran_low_t *output) {
+                                      tran_low_t *output) {
   int i = 0;
+  const int stride = 32;
   tran_low_t *coeff = output;
   while (i < 32) {
-    _mm256_storeu_si256((__m256i *)coeff, in0[i]);
-    _mm256_storeu_si256((__m256i *)(coeff + 16), in1[i]);
+    storeu_output_avx2(&in0[i], coeff);
+    storeu_output_avx2(&in1[i], coeff + 16);
     coeff += stride;
     i += 1;
   }
@@ -1885,6 +1874,6 @@ void av1_fht32x32_avx2(const int16_t *input, tran_low_t *output, int stride,
     default: assert(0); break;
   }
   nr_right_shift_32x32(in0, in1);
-  write_buffer_32x32(in0, in1, 32, output);
+  write_buffer_32x32(in0, in1, output);
   _mm256_zeroupper();
 }
