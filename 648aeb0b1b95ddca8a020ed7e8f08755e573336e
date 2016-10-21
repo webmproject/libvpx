@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "fcfa47f1_10a2d494",
+        "filename": "av1/common/common_data.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 851,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-10-21T21:55:03Z",
+      "side": 1,
+      "message": "After a merge, this is defined twice.",
+      "range": {
+        "startLine": 851,
+        "startChar": 7,
+        "endLine": 851,
+        "endChar": 12
+      },
+      "revId": "648aeb0b1b95ddca8a020ed7e8f08755e573336e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dc93c3d8_e12ea258",
         "filename": "av1/common/scan.h",
         "patchSetId": 1
