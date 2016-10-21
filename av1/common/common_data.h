@@ -444,7 +444,12 @@ static const TX_SIZE txsize_vert_map[TX_SIZES_ALL] = {
 
 static const int tx_size_1d[TX_SIZES] = { 4, 8, 16, 32 };
 
-static const int tx_size_2d[TX_SIZES] = { 16, 64, 256, 1024 };
+static const int tx_size_2d[TX_SIZES_ALL] = {
+  16, 64, 256, 1024,
+#if CONFIG_EXT_TX
+  32, 32, 128, 128,  512, 512,
+#endif
+};
 
 static const uint8_t tx_size_1d_log2[TX_SIZES] = { 2, 3, 4, 5 };
 
