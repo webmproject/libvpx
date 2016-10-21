@@ -197,10 +197,12 @@ void av1_encode_token_init(void) {
 #endif
 }
 
+#if !CONFIG_DAALA_EC
 static void write_intra_mode(aom_writer *w, PREDICTION_MODE mode,
                              const aom_prob *probs) {
   av1_write_token(w, av1_intra_mode_tree, probs, &intra_mode_encodings[mode]);
 }
+#endif
 
 #if CONFIG_EXT_INTER
 static void write_interintra_mode(aom_writer *w, INTERINTRA_MODE mode,
@@ -1258,7 +1260,12 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
         }
       }
     }
+#if CONFIG_DAALA_EC
+    aom_write_symbol(w, av1_intra_mode_ind[mbmi->uv_mode],
+                     cm->fc->uv_mode_cdf[mode], INTRA_MODES);
+#else
     write_intra_mode(w, mbmi->uv_mode, cm->fc->uv_mode_prob[mode]);
+#endif
 #if CONFIG_EXT_INTRA
     write_intra_angle_info(cm, xd, w);
 #endif  // CONFIG_EXT_INTRA
@@ -1661,8 +1668,12 @@ static void write_mb_modes_kf(const AV1_COMMON *cm, const MACROBLOCKD *xd,
       }
     }
   }
-
+#if CONFIG_DAALA_EC
+  aom_write_symbol(w, av1_intra_mode_ind[mbmi->uv_mode],
+                   cm->fc->uv_mode_cdf[mbmi->mode], INTRA_MODES);
+#else
   write_intra_mode(w, mbmi->uv_mode, cm->fc->uv_mode_prob[mbmi->mode]);
+#endif
 #if CONFIG_EXT_INTRA
   write_intra_angle_info(cm, xd, w);
 #endif  // CONFIG_EXT_INTRA
@@ -3616,9 +3627,14 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
 #endif
   update_seg_probs(cpi, header_bc);
 
-  for (i = 0; i < INTRA_MODES; ++i)
+  for (i = 0; i < INTRA_MODES; ++i) {
     prob_diff_update(av1_intra_mode_tree, fc->uv_mode_prob[i],
                      counts->uv_mode[i], INTRA_MODES, header_bc);
+#if CONFIG_DAALA_EC
+    av1_tree_to_cdf(av1_intra_mode_tree, fc->uv_mode_prob[i],
+                    fc->uv_mode_cdf[i]);
+#endif
+  }
 
 #if CONFIG_EXT_PARTITION_TYPES
   prob_diff_update(av1_partition_tree, fc->partition_prob[0],

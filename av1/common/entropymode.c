@@ -1413,6 +1413,8 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
 #if CONFIG_DAALA_EC
   av1_tree_to_cdf_1D(av1_intra_mode_tree, fc->y_mode_prob, fc->y_mode_cdf,
                      BLOCK_SIZE_GROUPS);
+  av1_tree_to_cdf_1D(av1_intra_mode_tree, fc->uv_mode_prob, fc->uv_mode_cdf,
+                     INTRA_MODES);
   av1_tree_to_cdf_1D(av1_switchable_interp_tree, fc->switchable_interp_prob,
                      fc->switchable_interp_cdf, SWITCHABLE_FILTER_CONTEXTS);
   av1_tree_to_cdf_2D(av1_ext_tx_tree, fc->intra_ext_tx_prob,
