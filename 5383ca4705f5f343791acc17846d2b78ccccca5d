@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc93c3d8_50cc7ac1",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-21T20:48:22Z",
+      "side": 1,
+      "message": "If the compiler doesn\u0027t initialize a register to 0 and sub it in line 246 \u0026 247, it\u0027s fine.",
+      "range": {
+        "startLine": 229,
+        "startChar": 0,
+        "endLine": 230,
+        "endChar": 25
+      },
+      "revId": "5383ca4705f5f343791acc17846d2b78ccccca5d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc93c3d8_f01ae692",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-21T20:48:22Z",
+      "side": 1,
+      "message": "remove this comment?",
+      "range": {
+        "startLine": 245,
+        "startChar": 2,
+        "endLine": 245,
+        "endChar": 11
+      },
+      "revId": "5383ca4705f5f343791acc17846d2b78ccccca5d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc93c3d8_d0232ac0",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-21T20:48:22Z",
+      "side": 1,
+      "message": "set but not used",
+      "range": {
+        "startLine": 248,
+        "startChar": 2,
+        "endLine": 248,
+        "endChar": 35
+      },
+      "revId": "5383ca4705f5f343791acc17846d2b78ccccca5d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
