@@ -2507,7 +2507,7 @@ static const uint8_t mode_to_angle_bin[INTRA_MODES] = {
 
 static void angle_estimation(const uint8_t *src, int src_stride, int rows,
                              int cols, uint8_t *directional_mode_skip_mask) {
-  int i, r, c, dx, dy, temp, sn, remd, quot;
+  int i, r, c, index, dx, dy, temp, sn, remd, quot;
   uint64_t hist[DIRECTIONAL_MODES];
   uint64_t hist_sum = 0;
 
@@ -2515,7 +2515,6 @@ static void angle_estimation(const uint8_t *src, int src_stride, int rows,
   src += src_stride;
   for (r = 1; r < rows; ++r) {
     for (c = 1; c < cols; ++c) {
-      uint8_t index;
       dx = src[c] - src[c - 1];
       dy = src[c] - src[c - src_stride];
       temp = dx * dx + dy * dy;
@@ -2538,16 +2537,16 @@ static void angle_estimation(const uint8_t *src, int src_stride, int rows,
   for (i = 0; i < DIRECTIONAL_MODES; ++i) hist_sum += hist[i];
   for (i = 0; i < INTRA_MODES; ++i) {
     if (i != DC_PRED && i != TM_PRED) {
-      const uint8_t index = mode_to_angle_bin[i];
-      uint64_t score = 2 * hist[index];
+      const uint8_t angle_bin = mode_to_angle_bin[i];
+      uint64_t score = 2 * hist[angle_bin];
       int weight = 2;
-      if (index > 0) {
-        score += hist[index - 1];
-        weight += 1;
+      if (angle_bin > 0) {
+        score += hist[angle_bin - 1];
+        ++weight;
       }
-      if (index < DIRECTIONAL_MODES - 1) {
-        score += hist[index + 1];
-        weight += 1;
+      if (angle_bin < DIRECTIONAL_MODES - 1) {
+        score += hist[angle_bin + 1];
+        ++weight;
       }
       if (score * ANGLE_SKIP_THRESH < hist_sum * weight)
         directional_mode_skip_mask[i] = 1;
@@ -2559,7 +2558,7 @@ static void angle_estimation(const uint8_t *src, int src_stride, int rows,
 static void highbd_angle_estimation(const uint8_t *src8, int src_stride,
                                     int rows, int cols,
                                     uint8_t *directional_mode_skip_mask) {
-  int i, r, c, dx, dy, temp, sn, remd, quot;
+  int i, r, c, index, dx, dy, temp, sn, remd, quot;
   uint64_t hist[DIRECTIONAL_MODES];
   uint64_t hist_sum = 0;
   uint16_t *src = CONVERT_TO_SHORTPTR(src8);
@@ -2568,7 +2567,6 @@ static void highbd_angle_estimation(const uint8_t *src8, int src_stride,
   src += src_stride;
   for (r = 1; r < rows; ++r) {
     for (c = 1; c < cols; ++c) {
-      uint8_t index;
       dx = src[c] - src[c - 1];
       dy = src[c] - src[c - src_stride];
       temp = dx * dx + dy * dy;
@@ -2591,16 +2589,16 @@ static void highbd_angle_estimation(const uint8_t *src8, int src_stride,
   for (i = 0; i < DIRECTIONAL_MODES; ++i) hist_sum += hist[i];
   for (i = 0; i < INTRA_MODES; ++i) {
     if (i != DC_PRED && i != TM_PRED) {
-      const uint8_t index = mode_to_angle_bin[i];
-      uint64_t score = 2 * hist[index];
+      const uint8_t angle_bin = mode_to_angle_bin[i];
+      uint64_t score = 2 * hist[angle_bin];
       int weight = 2;
-      if (index > 0) {
-        score += hist[index - 1];
-        weight += 1;
+      if (angle_bin > 0) {
+        score += hist[angle_bin - 1];
+        ++weight;
       }
-      if (index < DIRECTIONAL_MODES - 1) {
-        score += hist[index + 1];
-        weight += 1;
+      if (angle_bin < DIRECTIONAL_MODES - 1) {
+        score += hist[angle_bin + 1];
+        ++weight;
       }
       if (score * ANGLE_SKIP_THRESH < hist_sum * weight)
         directional_mode_skip_mask[i] = 1;
