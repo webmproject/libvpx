@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc93c3d8_35060083",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-21T18:19:33Z",
+      "side": 0,
+      "message": "depending on the range this wasn\u0027t quite so useless. this also now differs from the reference in variance.c; check the history there for the promotion reasoning",
+      "revId": "d71a231c493999bc885eabcf4c856978b9ecff97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
