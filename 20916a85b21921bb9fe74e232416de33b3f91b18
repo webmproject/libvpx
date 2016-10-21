@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fcfa47f1_6b724d93",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-21T22:47:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fcfa47f1_2bdfa5c1",
+      "range": {
+        "startLine": 18,
+        "startChar": 26,
+        "endLine": 18,
+        "endChar": 34
+      },
+      "revId": "20916a85b21921bb9fe74e232416de33b3f91b18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fcfa47f1_abfc5504",
         "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
         "patchSetId": 11
@@ -36,6 +60,30 @@
       "writtenOn": "2016-10-21T22:27:36Z",
       "side": 1,
       "message": "All vqrshrn_n_s32() should be vrshrn_n_s32() to comply with C code.\nThe above vqrdmulhq_n_s16() is fine because it never saturates except -32768*-32768 which doesn\u0027t happen in VP9, and ther is no vrdmulhq_n_s16().",
+      "range": {
+        "startLine": 47,
+        "startChar": 22,
+        "endLine": 47,
+        "endChar": 35
+      },
+      "revId": "20916a85b21921bb9fe74e232416de33b3f91b18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcfa47f1_8b75197c",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-21T22:47:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fcfa47f1_abfc5504",
       "range": {
         "startLine": 47,
         "startChar": 22,
