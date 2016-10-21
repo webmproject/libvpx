@@ -1666,11 +1666,19 @@ static void write_mb_modes_kf(const AV1_COMMON *cm, const MACROBLOCKD *xd,
 #else
     if (mbmi->tx_size < TX_32X32 && cm->base_qindex > 0 && !mbmi->skip &&
         !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+#if CONFIG_DAALA_EC
+      aom_write_symbol(
+          w, av1_ext_tx_ind[mbmi->tx_type],
+          cm->fc->intra_ext_tx_cdf[mbmi->tx_size]
+                                  [intra_mode_to_tx_type_context[mbmi->mode]],
+          TX_TYPES);
+#else
       av1_write_token(
           w, av1_ext_tx_tree,
           cm->fc->intra_ext_tx_prob[mbmi->tx_size]
                                    [intra_mode_to_tx_type_context[mbmi->mode]],
           &ext_tx_encodings[mbmi->tx_type]);
+#endif
     }
 #endif  // CONFIG_EXT_TX
   }

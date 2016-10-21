@@ -718,9 +718,15 @@ static void read_intra_frame_mode_info(AV1_COMMON *const cm,
         !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
       FRAME_COUNTS *counts = xd->counts;
       TX_TYPE tx_type_nom = intra_mode_to_tx_type_context[mbmi->mode];
+#if CONFIG_DAALA_EC
+      mbmi->tx_type = av1_ext_tx_inv[aom_read_symbol(
+          r, cm->fc->intra_ext_tx_cdf[mbmi->tx_size][tx_type_nom], TX_TYPES,
+          ACCT_STR)];
+#else
       mbmi->tx_type = aom_read_tree(
           r, av1_ext_tx_tree,
           cm->fc->intra_ext_tx_prob[mbmi->tx_size][tx_type_nom], ACCT_STR);
+#endif
       if (counts)
         ++counts->intra_ext_tx[mbmi->tx_size][tx_type_nom][mbmi->tx_type];
     } else {
