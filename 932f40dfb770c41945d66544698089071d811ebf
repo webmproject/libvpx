@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "fcfa47f1_f6cc801d",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-21T23:20:57Z",
+      "side": 1,
+      "message": "you can use new [] here",
+      "revId": "932f40dfb770c41945d66544698089071d811ebf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fcfa47f1_eb33fdbf",
         "filename": "test/partial_idct_test.cc",
         "patchSetId": 2
@@ -30,6 +47,23 @@
       "writtenOn": "2016-10-21T22:52:39Z",
       "side": 1,
       "message": "The test before was only reporting difference, not anything more useful. Simplify the test.",
+      "revId": "932f40dfb770c41945d66544698089071d811ebf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcfa47f1_164dacb0",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-21T23:20:57Z",
+      "side": 1,
+      "message": "you could shift the EXPECT here (and probably make it an assert)",
       "revId": "932f40dfb770c41945d66544698089071d811ebf",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
