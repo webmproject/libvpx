@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc93c3d8_5e8c9150",
+        "filename": "av1/encoder/rdopt.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 9395,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-10-21T01:29:43Z",
+      "side": 0,
+      "message": "this and next line, \"s\" has been removed from skip_uvs and dist_uvs, which breaks build.",
+      "range": {
+        "startLine": 9395,
+        "startChar": 36,
+        "endLine": 9395,
+        "endChar": 37
+      },
+      "revId": "cfc5ac50345d0fd90ff906d9c1e7570f0c1471c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
