@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fcfa47f1_eb33fdbf",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-21T22:52:39Z",
+      "side": 1,
+      "message": "woops i should have used *input_block_ for sizeof",
+      "revId": "932f40dfb770c41945d66544698089071d811ebf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcfa47f1_8b23596c",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-21T22:52:39Z",
+      "side": 1,
+      "message": "The test before was only reporting difference, not anything more useful. Simplify the test.",
+      "revId": "932f40dfb770c41945d66544698089071d811ebf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}

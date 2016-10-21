@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fcfa47f1_cb24417c",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-21T22:52:39Z",
+      "side": 0,
+      "message": "removes block2 which was unused in RunQuantCheck and unnecessary in ResultsMatch",
+      "revId": "a7d116aa67797b7dc14ad735bb75fe499b0b76ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
