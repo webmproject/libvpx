@@ -520,6 +520,17 @@ static INLINE int calc_mi_size(int len) {
   return len + MAX_MIB_SIZE;
 }
 
+static INLINE void set_plane_n4(MACROBLOCKD *const xd, int bw, int bh, int bwl,
+                                int bhl) {
+  int i;
+  for (i = 0; i < MAX_MB_PLANE; i++) {
+    xd->plane[i].n4_w = (bw << 1) >> xd->plane[i].subsampling_x;
+    xd->plane[i].n4_h = (bh << 1) >> xd->plane[i].subsampling_y;
+    xd->plane[i].n4_wl = bwl - xd->plane[i].subsampling_x;
+    xd->plane[i].n4_hl = bhl - xd->plane[i].subsampling_y;
+  }
+}
+
 static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
                                   int mi_row, int bh, int mi_col, int bw,
                                   int mi_rows, int mi_cols) {
