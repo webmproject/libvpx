@@ -1235,7 +1235,13 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
 
   if (!is_inter) {
     if (bsize >= BLOCK_8X8) {
+#if CONFIG_DAALA_EC
+      aom_write_symbol(w, av1_intra_mode_ind[mode],
+                       cm->fc->y_mode_cdf[size_group_lookup[bsize]],
+                       INTRA_MODES);
+#else
       write_intra_mode(w, mode, cm->fc->y_mode_prob[size_group_lookup[bsize]]);
+#endif
     } else {
       int idx, idy;
       const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
@@ -1243,7 +1249,12 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
       for (idy = 0; idy < 2; idy += num_4x4_h) {
         for (idx = 0; idx < 2; idx += num_4x4_w) {
           const PREDICTION_MODE b_mode = mi->bmi[idy * 2 + idx].as_mode;
+#if CONFIG_DAALA_EC
+          aom_write_symbol(w, av1_intra_mode_ind[b_mode], cm->fc->y_mode_cdf[0],
+                           INTRA_MODES);
+#else
           write_intra_mode(w, b_mode, cm->fc->y_mode_prob[0]);
+#endif
         }
       }
     }
@@ -3734,9 +3745,14 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
       }
     }
 
-    for (i = 0; i < BLOCK_SIZE_GROUPS; ++i)
+    for (i = 0; i < BLOCK_SIZE_GROUPS; ++i) {
       prob_diff_update(av1_intra_mode_tree, cm->fc->y_mode_prob[i],
                        counts->y_mode[i], INTRA_MODES, header_bc);
+#if CONFIG_DAALA_EC
+      av1_tree_to_cdf(av1_intra_mode_tree, cm->fc->y_mode_prob[i],
+                      cm->fc->y_mode_cdf[i]);
+#endif
+    }
 
     av1_write_nmv_probs(cm, cm->allow_high_precision_mv, header_bc,
 #if CONFIG_REF_MV
