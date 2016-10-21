@@ -16,6 +16,24 @@
       "revId": "7bdecb4bb05a1a742487327372ef62a9c76c59d2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc93c3d8_70bb36a8",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2016-10-21T19:31:27Z",
+      "side": 1,
+      "message": "ah, so that\u0027s why the numbers didn\u0027t add up. they are as expected now.\n\nalso, i was able to get the test to fail without the fix (PS2) on tiles_\u003d2 and threads_\u003d3 (which is one of the combinations in the parameterized test).",
+      "parentUuid": "dc93c3d8_15182459",
+      "revId": "7bdecb4bb05a1a742487327372ef62a9c76c59d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
