@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "dc93c3d8_fe947d1e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-21T00:17:48Z",
+      "side": 1,
+      "message": "Actually add support to 8-bit. Changed to \"\nUpdate vp9_intrapred_test.cc to support 8-bit\"",
+      "parentUuid": "bc28cfc6_a7c87209",
+      "revId": "50ecf53c07726d17a022baad9ff632c47540b000",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bc28cfc6_e7e1ca86",
         "filename": "/COMMIT_MSG",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2016-10-19T21:43:48Z",
       "side": 1,
       "message": "you can attach this to the bug, BUG\u003dwebm:1316",
+      "revId": "50ecf53c07726d17a022baad9ff632c47540b000",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc93c3d8_7ea14d7a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-21T00:17:48Z",
+      "side": 1,
+      "message": "Actually no change to current high bitdepth testing.\n\nWill create new commit when adding new NEON high bitdepth optimization and include this BUG ticket.",
+      "parentUuid": "bc28cfc6_e7e1ca86",
       "revId": "50ecf53c07726d17a022baad9ff632c47540b000",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "dc93c3d8_1eb129c8",
+        "filename": "test/vp9_intrapred_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-21T00:17:48Z",
+      "side": 1,
+      "message": "Fixed. Now both paths could be tested.",
+      "parentUuid": "bc28cfc6_27380202",
+      "revId": "50ecf53c07726d17a022baad9ff632c47540b000",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bc28cfc6_472ff6be",
         "filename": "test/vp9_intrapred_test.cc",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2016-10-19T21:43:48Z",
       "side": 1,
       "message": "this would be !CONFIG_VP9_HIGHBITDEPTH to describe the next block",
+      "revId": "50ecf53c07726d17a022baad9ff632c47540b000",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc93c3d8_5ebbb1a7",
+        "filename": "test/vp9_intrapred_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-21T00:17:48Z",
+      "side": 1,
+      "message": "Done. Restructured and removed #else.",
+      "parentUuid": "bc28cfc6_472ff6be",
       "revId": "50ecf53c07726d17a022baad9ff632c47540b000",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
