@@ -325,7 +325,6 @@ static void fdct16(const tran_low_t *input, tran_low_t *output) {
   range_check(output, 16, 16);
 }
 
-#if CONFIG_EXT_TX
 static void fdct32(const tran_low_t *input, tran_low_t *output) {
   tran_high_t temp;
   tran_low_t step[32];
@@ -723,7 +722,6 @@ static void fdct32(const tran_low_t *input, tran_low_t *output) {
 
   range_check(output, 32, 18);
 }
-#endif  // CONFIG_EXT_TX
 
 static void fadst4(const tran_low_t *input, tran_low_t *output) {
   tran_high_t x0, x1, x2, x3;
@@ -1809,57 +1807,74 @@ void av1_highbd_fht16x16_c(const int16_t *input, tran_low_t *output, int stride,
 }
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 
-#if CONFIG_EXT_TX
+// TODO(luoyi): Adding this function to avoid DCT_DCT overflow.
+// Remove this function after we scale the column txfm output correctly.
+static INLINE int range_check_dct32x32(const int16_t *input, int16_t bound,
+                                       int size) {
+  int i;
+  for (i = 0; i < size; ++i) {
+    if (abs(input[i]) > bound) return 1;
+  }
+  return 0;
+}
+
 void av1_fht32x32_c(const int16_t *input, tran_low_t *output, int stride,
                     int tx_type) {
-  if (tx_type == DCT_DCT) {
-    aom_fdct32x32_c(input, output, stride);
-  } else {
-    static const transform_2d FHT[] = {
-      { fdct32, fdct32 },              // DCT_DCT
-      { fhalfright32, fdct32 },        // ADST_DCT
-      { fdct32, fhalfright32 },        // DCT_ADST
-      { fhalfright32, fhalfright32 },  // ADST_ADST
-      { fhalfright32, fdct32 },        // FLIPADST_DCT
-      { fdct32, fhalfright32 },        // DCT_FLIPADST
-      { fhalfright32, fhalfright32 },  // FLIPADST_FLIPADST
-      { fhalfright32, fhalfright32 },  // ADST_FLIPADST
-      { fhalfright32, fhalfright32 },  // FLIPADST_ADST
-      { fidtx32, fidtx32 },            // IDTX
-      { fdct32, fidtx32 },             // V_DCT
-      { fidtx32, fdct32 },             // H_DCT
-      { fhalfright32, fidtx32 },       // V_ADST
-      { fidtx32, fhalfright32 },       // H_ADST
-      { fhalfright32, fidtx32 },       // V_FLIPADST
-      { fidtx32, fhalfright32 },       // H_FLIPADST
-    };
-    const transform_2d ht = FHT[tx_type];
-    tran_low_t out[1024];
-    int i, j;
-    tran_low_t temp_in[32], temp_out[32];
+  static const transform_2d FHT[] = {
+    { fdct32, fdct32 },  // DCT_DCT
+#if CONFIG_EXT_TX
+    { fhalfright32, fdct32 },        // ADST_DCT
+    { fdct32, fhalfright32 },        // DCT_ADST
+    { fhalfright32, fhalfright32 },  // ADST_ADST
+    { fhalfright32, fdct32 },        // FLIPADST_DCT
+    { fdct32, fhalfright32 },        // DCT_FLIPADST
+    { fhalfright32, fhalfright32 },  // FLIPADST_FLIPADST
+    { fhalfright32, fhalfright32 },  // ADST_FLIPADST
+    { fhalfright32, fhalfright32 },  // FLIPADST_ADST
+    { fidtx32, fidtx32 },            // IDTX
+    { fdct32, fidtx32 },             // V_DCT
+    { fidtx32, fdct32 },             // H_DCT
+    { fhalfright32, fidtx32 },       // V_ADST
+    { fidtx32, fhalfright32 },       // H_ADST
+    { fhalfright32, fidtx32 },       // V_FLIPADST
+    { fidtx32, fhalfright32 },       // H_FLIPADST
+#endif
+  };
+  const transform_2d ht = FHT[tx_type];
+  tran_low_t out[1024];
+  int i, j;
+  tran_low_t temp_in[32], temp_out[32];
 
-    int16_t flipped_input[32 * 32];
-    maybe_flip_input(&input, &stride, 32, 32, flipped_input, tx_type);
+#if CONFIG_EXT_TX
+  int16_t flipped_input[32 * 32];
+  maybe_flip_input(&input, &stride, 32, 32, flipped_input, tx_type);
+#endif
 
-    // Columns
-    for (i = 0; i < 32; ++i) {
-      for (j = 0; j < 32; ++j) temp_in[j] = input[j * stride + i] * 4;
-      ht.cols(temp_in, temp_out);
-      for (j = 0; j < 32; ++j)
-        out[j * 32 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
+  if (DCT_DCT == tx_type) {
+    if (range_check_dct32x32(input, (1 << 6) - 1, 1 << 10)) {
+      aom_fdct32x32_c(input, output, stride);
+      return;
     }
+  }
+  // Columns
+  for (i = 0; i < 32; ++i) {
+    for (j = 0; j < 32; ++j) temp_in[j] = input[j * stride + i] * 4;
+    ht.cols(temp_in, temp_out);
+    for (j = 0; j < 32; ++j)
+      out[j * 32 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
+  }
 
-    // Rows
-    for (i = 0; i < 32; ++i) {
-      for (j = 0; j < 32; ++j) temp_in[j] = out[j + i * 32];
-      ht.rows(temp_in, temp_out);
-      for (j = 0; j < 32; ++j)
-        output[j + i * 32] =
-            (tran_low_t)((temp_out[j] + 1 + (temp_out[j] < 0)) >> 2);
-    }
+  // Rows
+  for (i = 0; i < 32; ++i) {
+    for (j = 0; j < 32; ++j) temp_in[j] = out[j + i * 32];
+    ht.rows(temp_in, temp_out);
+    for (j = 0; j < 32; ++j)
+      output[j + i * 32] =
+          (tran_low_t)((temp_out[j] + 1 + (temp_out[j] < 0)) >> 2);
   }
 }
 
+#if CONFIG_EXT_TX
 // Forward identity transform.
 void av1_fwd_idtx_c(const int16_t *src_diff, tran_low_t *coeff, int stride,
                     int bs, int tx_type) {
