@@ -3746,10 +3746,18 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
 
   if (frame_is_intra_only(cm)) {
     av1_copy(cm->kf_y_prob, av1_kf_y_mode_prob);
+#if CONFIG_DAALA_EC
+    av1_copy(cm->kf_y_cdf, av1_kf_y_mode_cdf);
+#endif
     for (k = 0; k < INTRA_MODES; k++)
-      for (j = 0; j < INTRA_MODES; j++)
+      for (j = 0; j < INTRA_MODES; j++) {
         for (i = 0; i < INTRA_MODES - 1; ++i)
           av1_diff_update_prob(&r, &cm->kf_y_prob[k][j][i], ACCT_STR);
+#if CONFIG_DAALA_EC
+        av1_tree_to_cdf(av1_intra_mode_tree, cm->kf_y_prob[k][j],
+                        cm->kf_y_cdf[k][j]);
+#endif
+      }
   } else {
 #if !CONFIG_REF_MV
     nmv_context *const nmvc = &fc->nmvc;

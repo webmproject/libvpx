@@ -378,6 +378,9 @@ typedef struct AV1Common {
   // - this is intentionally not placed in FRAME_CONTEXT since it's reset upon
   // each keyframe and not used afterwards
   aom_prob kf_y_prob[INTRA_MODES][INTRA_MODES][INTRA_MODES - 1];
+#if CONFIG_DAALA_EC
+  aom_cdf_prob kf_y_cdf[INTRA_MODES][INTRA_MODES][INTRA_MODES];
+#endif
 #if CONFIG_GLOBAL_MOTION
   Global_Motion_Params global_motion[TOTAL_REFS_PER_FRAME];
 #endif
@@ -581,6 +584,18 @@ static INLINE const aom_prob *get_y_mode_probs(const AV1_COMMON *cm,
   const PREDICTION_MODE left = av1_left_block_mode(mi, left_mi, block);
   return cm->kf_y_prob[above][left];
 }
+
+#if CONFIG_DAALA_EC
+static INLINE const aom_cdf_prob *get_y_mode_cdf(const AV1_COMMON *cm,
+                                                 const MODE_INFO *mi,
+                                                 const MODE_INFO *above_mi,
+                                                 const MODE_INFO *left_mi,
+                                                 int block) {
+  const PREDICTION_MODE above = av1_above_block_mode(mi, above_mi, block);
+  const PREDICTION_MODE left = av1_left_block_mode(mi, left_mi, block);
+  return cm->kf_y_cdf[above][left];
+}
+#endif
 
 static INLINE void update_partition_context(MACROBLOCKD *xd, int mi_row,
                                             int mi_col, BLOCK_SIZE subsize,

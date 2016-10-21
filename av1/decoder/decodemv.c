@@ -26,7 +26,6 @@
 #include "aom_dsp/aom_dsp_common.h"
 
 #define ACCT_STR __func__
-
 #if CONFIG_EXT_INTRA || CONFIG_FILTER_INTRA || CONFIG_PALETTE
 static INLINE int read_uniform(aom_reader *r, int n) {
   int l = get_unsigned_bits(n);
@@ -42,6 +41,13 @@ static INLINE int read_uniform(aom_reader *r, int n) {
 }
 #endif  // CONFIG_EXT_INTRA || CONFIG_FILTER_INTRA || CONFIG_PALETTE
 
+#if CONFIG_DAALA_EC
+static PREDICTION_MODE read_intra_mode_cdf(aom_reader *r,
+                                           const aom_cdf_prob *cdf) {
+  return (PREDICTION_MODE)
+      av1_intra_mode_inv[aom_read_symbol(r, cdf, INTRA_MODES, ACCT_STR)];
+}
+#endif
 static PREDICTION_MODE read_intra_mode(aom_reader *r, const aom_prob *p) {
   return (PREDICTION_MODE)aom_read_tree(r, av1_intra_mode_tree, p, ACCT_STR);
 }
@@ -657,24 +663,49 @@ static void read_intra_frame_mode_info(AV1_COMMON *const cm,
     case BLOCK_4X4:
       for (i = 0; i < 4; ++i)
         mi->bmi[i].as_mode =
+#if CONFIG_DAALA_EC
+            read_intra_mode_cdf(r,
+                                get_y_mode_cdf(cm, mi, above_mi, left_mi, i));
+#else
             read_intra_mode(r, get_y_mode_probs(cm, mi, above_mi, left_mi, i));
+#endif
       mbmi->mode = mi->bmi[3].as_mode;
       break;
     case BLOCK_4X8:
       mi->bmi[0].as_mode = mi->bmi[2].as_mode =
+#if CONFIG_DAALA_EC
+          read_intra_mode_cdf(r, get_y_mode_cdf(cm, mi, above_mi, left_mi, 0));
+#else
           read_intra_mode(r, get_y_mode_probs(cm, mi, above_mi, left_mi, 0));
+#endif
       mi->bmi[1].as_mode = mi->bmi[3].as_mode = mbmi->mode =
+#if CONFIG_DAALA_EC
+          read_intra_mode_cdf(r, get_y_mode_cdf(cm, mi, above_mi, left_mi, 1));
+#else
           read_intra_mode(r, get_y_mode_probs(cm, mi, above_mi, left_mi, 1));
+#endif
       break;
     case BLOCK_8X4:
       mi->bmi[0].as_mode = mi->bmi[1].as_mode =
+#if CONFIG_DAALA_EC
+          read_intra_mode_cdf(r, get_y_mode_cdf(cm, mi, above_mi, left_mi, 0));
+#else
           read_intra_mode(r, get_y_mode_probs(cm, mi, above_mi, left_mi, 0));
+#endif
       mi->bmi[2].as_mode = mi->bmi[3].as_mode = mbmi->mode =
+#if CONFIG_DAALA_EC
+          read_intra_mode_cdf(r, get_y_mode_cdf(cm, mi, above_mi, left_mi, 2));
+#else
           read_intra_mode(r, get_y_mode_probs(cm, mi, above_mi, left_mi, 2));
+#endif
       break;
     default:
       mbmi->mode =
+#if CONFIG_DAALA_EC
+          read_intra_mode_cdf(r, get_y_mode_cdf(cm, mi, above_mi, left_mi, 0));
+#else
           read_intra_mode(r, get_y_mode_probs(cm, mi, above_mi, left_mi, 0));
+#endif
   }
 
   mbmi->uv_mode = read_intra_mode_uv(cm, xd, r, mbmi->mode);
