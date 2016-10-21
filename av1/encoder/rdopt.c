@@ -1122,6 +1122,7 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  const AV1_COMMON *cm = &args->cpi->common;
   int64_t rd1, rd2, rd;
   int rate;
   int64_t dist;
@@ -1134,7 +1135,7 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
 
   if (!is_inter_block(mbmi)) {
     struct encode_b_args b_args = {
-      x, NULL, &mbmi->skip, args->t_above, args->t_left, 1
+      (AV1_COMMON *)cm, x, NULL, &mbmi->skip, args->t_above, args->t_left, 1
     };
     av1_encode_block_intra(plane, block, blk_row, blk_col, plane_bsize, tx_size,
                            &b_args);
@@ -1174,14 +1175,14 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
   } else {
 // full forward transform and quantization
 #if CONFIG_NEW_QUANT
-    av1_xform_quant_fp_nuq(x, plane, block, blk_row, blk_col, plane_bsize,
+    av1_xform_quant_fp_nuq(cm, x, plane, block, blk_row, blk_col, plane_bsize,
                            tx_size, coeff_ctx);
 #else
-    av1_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
+    av1_xform_quant(cm, x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
                     AV1_XFORM_QUANT_FP);
 #endif  // CONFIG_NEW_QUANT
     if (x->plane[plane].eobs[block])
-      av1_optimize_b(x, plane, block, tx_size, coeff_ctx);
+      av1_optimize_b(cm, x, plane, block, tx_size, coeff_ctx);
     dist_block(args->cpi, x, plane, block, blk_row, blk_col, tx_size, &dist,
                &sse);
   }
@@ -1219,6 +1220,7 @@ static void txfm_rd_in_plane(MACROBLOCK *x, const AV1_COMP *cpi, int *rate,
                              int64_t *distortion, int *skippable, int64_t *sse,
                              int64_t ref_best_rd, int plane, BLOCK_SIZE bsize,
                              TX_SIZE tx_size, int use_fast_coef_casting) {
+  const AV1_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblockd_plane *const pd = &xd->plane[plane];
   TX_TYPE tx_type;
@@ -1236,7 +1238,7 @@ static void txfm_rd_in_plane(MACROBLOCK *x, const AV1_COMP *cpi, int *rate,
 
   tx_type = get_tx_type(pd->plane_type, xd, 0, tx_size);
   args.scan_order =
-      get_scan(tx_size, tx_type, is_inter_block(&xd->mi[0]->mbmi));
+      get_scan(cm, tx_size, tx_type, is_inter_block(&xd->mi[0]->mbmi));
 
   av1_foreach_transformed_block_in_plane(xd, bsize, plane, block_rd_txfm,
                                          &args);
@@ -1259,6 +1261,7 @@ void av1_txfm_rd_in_plane_supertx(MACROBLOCK *x, const AV1_COMP *cpi, int *rate,
                                   int64_t *sse, int64_t ref_best_rd, int plane,
                                   BLOCK_SIZE bsize, TX_SIZE tx_size,
                                   int use_fast_coef_casting) {
+  const AV1_COMMON *cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblockd_plane *const pd = &xd->plane[plane];
   struct rdcost_block_args args;
@@ -1280,7 +1283,7 @@ void av1_txfm_rd_in_plane_supertx(MACROBLOCK *x, const AV1_COMP *cpi, int *rate,
 
   tx_type = get_tx_type(pd->plane_type, xd, 0, tx_size);
   args.scan_order =
-      get_scan(tx_size, tx_type, is_inter_block(&xd->mi[0]->mbmi));
+      get_scan(cm, tx_size, tx_type, is_inter_block(&xd->mi[0]->mbmi));
 
   block_rd_txfm(plane, 0, 0, 0, get_plane_block_size(bsize, pd), tx_size,
                 &args);
@@ -1947,14 +1950,14 @@ static int64_t rd_pick_intra4x4block(
                                     dst_stride, xd->bd);
           if (xd->lossless[xd->mi[0]->mbmi.segment_id]) {
             TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
-            const SCAN_ORDER *scan_order = get_scan(TX_4X4, tx_type, 0);
+            const SCAN_ORDER *scan_order = get_scan(cm, TX_4X4, tx_type, 0);
             const int coeff_ctx =
                 combine_entropy_contexts(*(tempa + idx), *(templ + idy));
 #if CONFIG_NEW_QUANT
-            av1_xform_quant_fp_nuq(x, 0, block, row + idy, col + idx, BLOCK_8X8,
-                                   TX_4X4, coeff_ctx);
+            av1_xform_quant_fp_nuq(cm, x, 0, block, row + idy, col + idx,
+                                   BLOCK_8X8, TX_4X4, coeff_ctx);
 #else
-            av1_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8,
+            av1_xform_quant(cm, x, 0, block, row + idy, col + idx, BLOCK_8X8,
                             TX_4X4, AV1_XFORM_QUANT_FP);
 #endif  // CONFIG_NEW_QUANT
             ratey += av1_cost_coeffs(cm, x, 0, block, coeff_ctx, TX_4X4,
@@ -1972,17 +1975,17 @@ static int64_t rd_pick_intra4x4block(
             int64_t dist;
             unsigned int tmp;
             TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
-            const SCAN_ORDER *scan_order = get_scan(TX_4X4, tx_type, 0);
+            const SCAN_ORDER *scan_order = get_scan(cm, TX_4X4, tx_type, 0);
             const int coeff_ctx =
                 combine_entropy_contexts(*(tempa + idx), *(templ + idy));
 #if CONFIG_NEW_QUANT
-            av1_xform_quant_fp_nuq(x, 0, block, row + idy, col + idx, BLOCK_8X8,
-                                   TX_4X4, coeff_ctx);
+            av1_xform_quant_fp_nuq(cm, x, 0, block, row + idy, col + idx,
+                                   BLOCK_8X8, TX_4X4, coeff_ctx);
 #else
-            av1_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8,
+            av1_xform_quant(cm, x, 0, block, row + idy, col + idx, BLOCK_8X8,
                             TX_4X4, AV1_XFORM_QUANT_FP);
 #endif  // CONFIG_NEW_QUANT
-            av1_optimize_b(x, 0, block, TX_4X4, coeff_ctx);
+            av1_optimize_b(cm, x, 0, block, TX_4X4, coeff_ctx);
             ratey += av1_cost_coeffs(cm, x, 0, block, coeff_ctx, TX_4X4,
                                      scan_order->scan, scan_order->neighbors,
                                      cpi->sf.use_fast_coef_costing);
@@ -2067,15 +2070,15 @@ static int64_t rd_pick_intra4x4block(
 
         if (xd->lossless[xd->mi[0]->mbmi.segment_id]) {
           TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
-          const SCAN_ORDER *scan_order = get_scan(TX_4X4, tx_type, 0);
+          const SCAN_ORDER *scan_order = get_scan(cm, TX_4X4, tx_type, 0);
           const int coeff_ctx =
               combine_entropy_contexts(*(tempa + idx), *(templ + idy));
 #if CONFIG_NEW_QUANT
-          av1_xform_quant_fp_nuq(x, 0, block, row + idy, col + idx, BLOCK_8X8,
-                                 TX_4X4, coeff_ctx);
+          av1_xform_quant_fp_nuq(cm, x, 0, block, row + idy, col + idx,
+                                 BLOCK_8X8, TX_4X4, coeff_ctx);
 #else
-          av1_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8, TX_4X4,
-                          AV1_XFORM_QUANT_B);
+          av1_xform_quant(cm, x, 0, block, row + idy, col + idx, BLOCK_8X8,
+                          TX_4X4, AV1_XFORM_QUANT_B);
 #endif  // CONFIG_NEW_QUANT
           ratey += av1_cost_coeffs(cm, x, 0, block, coeff_ctx, TX_4X4,
                                    scan_order->scan, scan_order->neighbors,
@@ -2091,17 +2094,17 @@ static int64_t rd_pick_intra4x4block(
           int64_t dist;
           unsigned int tmp;
           TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
-          const SCAN_ORDER *scan_order = get_scan(TX_4X4, tx_type, 0);
+          const SCAN_ORDER *scan_order = get_scan(cm, TX_4X4, tx_type, 0);
           const int coeff_ctx =
               combine_entropy_contexts(*(tempa + idx), *(templ + idy));
 #if CONFIG_NEW_QUANT
-          av1_xform_quant_fp_nuq(x, 0, block, row + idy, col + idx, BLOCK_8X8,
-                                 TX_4X4, coeff_ctx);
+          av1_xform_quant_fp_nuq(cm, x, 0, block, row + idy, col + idx,
+                                 BLOCK_8X8, TX_4X4, coeff_ctx);
 #else
-          av1_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8, TX_4X4,
-                          AV1_XFORM_QUANT_FP);
+          av1_xform_quant(cm, x, 0, block, row + idy, col + idx, BLOCK_8X8,
+                          TX_4X4, AV1_XFORM_QUANT_FP);
 #endif  // CONFIG_NEW_QUANT
-          av1_optimize_b(x, 0, block, TX_4X4, coeff_ctx);
+          av1_optimize_b(cm, x, 0, block, TX_4X4, coeff_ctx);
           ratey += av1_cost_coeffs(cm, x, 0, block, coeff_ctx, TX_4X4,
                                    scan_order->scan, scan_order->neighbors,
                                    cpi->sf.use_fast_coef_costing);
@@ -2894,7 +2897,7 @@ void av1_tx_block_rd_b(const AV1_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
   PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block, tx_size);
   const SCAN_ORDER *const scan_order =
-      get_scan(tx_size, tx_type, is_inter_block(&xd->mi[0]->mbmi));
+      get_scan(cm, tx_size, tx_type, is_inter_block(&xd->mi[0]->mbmi));
 
   BLOCK_SIZE txm_bsize = txsize_to_bsize[tx_size];
   int bh = 4 * num_4x4_blocks_wide_lookup[txm_bsize];
@@ -2923,14 +2926,14 @@ void av1_tx_block_rd_b(const AV1_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
     max_blocks_wide += xd->mb_to_right_edge >> (5 + pd->subsampling_x);
 
 #if CONFIG_NEW_QUANT
-  av1_xform_quant_fp_nuq(x, plane, block, blk_row, blk_col, plane_bsize,
+  av1_xform_quant_fp_nuq(cm, x, plane, block, blk_row, blk_col, plane_bsize,
                          tx_size, coeff_ctx);
 #else
-  av1_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
+  av1_xform_quant(cm, x, plane, block, blk_row, blk_col, plane_bsize, tx_size,
                   AV1_XFORM_QUANT_FP);
 #endif  // CONFIG_NEW_QUANT
 
-  av1_optimize_b(x, plane, block, tx_size, coeff_ctx);
+  av1_optimize_b(cm, x, plane, block, tx_size, coeff_ctx);
 
 // TODO(any): Use dist_block to compute distortion
 #if CONFIG_AOM_HIGHBITDEPTH
@@ -4361,7 +4364,7 @@ static int64_t encode_inter_mb_segment(const AV1_COMP *const cpi, MACROBLOCK *x,
   TX_SIZE tx_size = mi->mbmi.tx_size;
 
   TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, i, tx_size);
-  const SCAN_ORDER *scan_order = get_scan(tx_size, tx_type, 1);
+  const SCAN_ORDER *scan_order = get_scan(cm, tx_size, tx_type, 1);
   const int num_4x4_w = num_4x4_blocks_wide_txsize_lookup[tx_size];
   const int num_4x4_h = num_4x4_blocks_high_txsize_lookup[tx_size];
 
@@ -4409,14 +4412,14 @@ static int64_t encode_inter_mb_segment(const AV1_COMP *const cpi, MACROBLOCK *x,
       coeff_ctx = combine_entropy_contexts(*(ta + (k & 1)), *(tl + (k >> 1)));
 #endif
 #if CONFIG_NEW_QUANT
-      av1_xform_quant_fp_nuq(x, 0, block, idy + (i >> 1), idx + (i & 0x01),
+      av1_xform_quant_fp_nuq(cm, x, 0, block, idy + (i >> 1), idx + (i & 0x01),
                              BLOCK_8X8, tx_size, coeff_ctx);
 #else
-      av1_xform_quant(x, 0, block, idy + (i >> 1), idx + (i & 0x01), BLOCK_8X8,
-                      tx_size, AV1_XFORM_QUANT_FP);
+      av1_xform_quant(cm, x, 0, block, idy + (i >> 1), idx + (i & 0x01),
+                      BLOCK_8X8, tx_size, AV1_XFORM_QUANT_FP);
 #endif  // CONFIG_NEW_QUANT
       if (xd->lossless[xd->mi[0]->mbmi.segment_id] == 0)
-        av1_optimize_b(x, 0, block, tx_size, coeff_ctx);
+        av1_optimize_b(cm, x, 0, block, tx_size, coeff_ctx);
       dist_block(cpi, x, 0, block, idy + (i >> 1), idx + (i & 0x1), tx_size,
                  &dist, &ssz);
       thisdistortion += dist;
@@ -8069,7 +8072,7 @@ static void pick_filter_intra_interframe(
                              mbmi->filter_intra_mode_info.filter_intra_mode[1]);
   }
   distortion2 = distortion_y + distortion_uv;
-  av1_encode_intra_block_plane(x, bsize, 0, 0);
+  av1_encode_intra_block_plane((AV1_COMMON *)cm, x, bsize, 0, 0);
 #if CONFIG_AOM_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     x->recon_variance = av1_high_get_sby_perpixel_variance(
@@ -8846,7 +8849,7 @@ void av1_rd_pick_inter_mode_sb(const AV1_COMP *cpi, TileDataEnc *tile_data,
       if (this_mode != DC_PRED && this_mode != TM_PRED)
         rate2 += intra_cost_penalty;
       distortion2 = distortion_y + distortion_uv;
-      av1_encode_intra_block_plane(x, bsize, 0, 1);
+      av1_encode_intra_block_plane((AV1_COMMON *)cm, x, bsize, 0, 1);
 #if CONFIG_AOM_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         x->recon_variance = av1_high_get_sby_perpixel_variance(

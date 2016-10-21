@@ -184,8 +184,9 @@ TEST_P(AV1PartialIDctTest, RunQuantCheck) {
       // quantization with maximum allowed step sizes
       test_coef_block1[0] = (output_ref_block[0] / 1336) * 1336;
       for (int j = 1; j < last_nonzero_; ++j)
-        test_coef_block1[get_scan(tx_size_, DCT_DCT, 0)->scan[j]] =
-            (output_ref_block[j] / 1828) * 1828;
+        test_coef_block1[get_scan((const AV1_COMMON *)NULL, tx_size_, DCT_DCT,
+                                  0)
+                             ->scan[j]] = (output_ref_block[j] / 1828) * 1828;
     }
 
     ASM_REGISTER_STATE_CHECK(full_itxfm_(test_coef_block1, dst1, size));
@@ -235,7 +236,8 @@ TEST_P(AV1PartialIDctTest, ResultsMatch) {
         max_energy_leftover = 0;
         coef = 0;
       }
-      test_coef_block1[get_scan(tx_size_, DCT_DCT, 0)->scan[j]] = coef;
+      test_coef_block1[get_scan((const AV1_COMMON *)NULL, tx_size_, DCT_DCT, 0)
+                           ->scan[j]] = coef;
     }
 
     memcpy(test_coef_block2, test_coef_block1,

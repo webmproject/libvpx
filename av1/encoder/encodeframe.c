@@ -2213,7 +2213,7 @@ static void encode_sb(const AV1_COMP *const cpi, ThreadData *td,
         int this_rate = 0;
         x->use_lp32x32fdct = cpi->sf.use_lp32x32fdct;
 
-        av1_encode_sb_supertx(x, bsize);
+        av1_encode_sb_supertx((AV1_COMMON *)cm, x, bsize);
         av1_tokenize_sb_supertx(cpi, td, tp, dry_run, bsize, rate);
         if (rate) *rate += this_rate;
       } else {
@@ -5107,7 +5107,8 @@ static void encode_superblock(const AV1_COMP *const cpi, ThreadData *td,
     int plane;
     mbmi->skip = 1;
     for (plane = 0; plane < MAX_MB_PLANE; ++plane)
-      av1_encode_intra_block_plane(x, AOMMAX(bsize, BLOCK_8X8), plane, 1);
+      av1_encode_intra_block_plane((AV1_COMMON *)cm, x,
+                                   AOMMAX(bsize, BLOCK_8X8), plane, 1);
     if (!dry_run)
       sum_intra_stats(td->counts, mi, xd->above_mi, xd->left_mi,
                       frame_is_intra_only(cm));
@@ -5229,7 +5230,7 @@ static void encode_superblock(const AV1_COMP *const cpi, ThreadData *td,
     }
 #endif  // CONFIG_MOTION_VAR
 
-    av1_encode_sb(x, AOMMAX(bsize, BLOCK_8X8));
+    av1_encode_sb((AV1_COMMON *)cm, x, AOMMAX(bsize, BLOCK_8X8));
 #if CONFIG_VAR_TX
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
     if (is_rect_tx(mbmi->tx_size))

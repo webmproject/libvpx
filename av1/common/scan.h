@@ -80,8 +80,9 @@ static INLINE const SCAN_ORDER *get_inter_scan(TX_SIZE tx_size,
 }
 #endif  // CONFIG_EXT_TX
 
-static INLINE const SCAN_ORDER *get_scan(TX_SIZE tx_size, TX_TYPE tx_type,
-                                         int is_inter) {
+static INLINE const SCAN_ORDER *get_scan(const AV1_COMMON *cm, TX_SIZE tx_size,
+                                         TX_TYPE tx_type, int is_inter) {
+  (void)cm;
 #if CONFIG_EXT_TX
   return is_inter ? &av1_inter_scan_orders[tx_size][tx_type]
                   : &av1_intra_scan_orders[tx_size][tx_type];
