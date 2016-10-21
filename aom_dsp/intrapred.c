@@ -338,6 +338,7 @@ void aom_ve_predictor_2x2_c(uint8_t *dst, ptrdiff_t stride,
   const int I = above[0];
   const int J = above[1];
   const int K = above[2];
+  (void)left;
 
   dst[0] = AVG3(H, I, J);
   dst[1] = AVG3(I, J, K);
