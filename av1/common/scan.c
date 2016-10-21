@@ -4305,7 +4305,7 @@ static void dfs_scan(int tx1d_size, int *scan_idx, int coeff_idx, int16_t *scan,
 
 void av1_update_neighbors(int tx_size, const int16_t *scan,
                           const int16_t *iscan, int16_t *neighbors) {
-  const int tx1d_size = tx_size_1d[tx_size];
+  const int tx1d_size = tx_size_wide[tx_size];
   const int tx2d_size = tx_size_2d[tx_size];
   int scan_idx;
   for (scan_idx = 0; scan_idx < tx2d_size; ++scan_idx) {
@@ -4336,7 +4336,7 @@ void av1_update_neighbors(int tx_size, const int16_t *scan,
 void av1_update_sort_order(TX_SIZE tx_size, const uint32_t *non_zero_prob,
                            int16_t *sort_order) {
   uint32_t temp[COEFF_IDX_SIZE];
-  const int tx1d_size = tx_size_1d[tx_size];
+  const int tx1d_size = tx_size_wide[tx_size];
   const int tx2d_size = tx_size_2d[tx_size];
   int sort_idx;
   assert(tx2d_size <= COEFF_IDX_SIZE);
@@ -4354,7 +4354,7 @@ void av1_update_scan_order(TX_SIZE tx_size, int16_t *sort_order, int16_t *scan,
   int coeff_idx;
   int scan_idx;
   int sort_idx;
-  const int tx1d_size = tx_size_1d[tx_size];
+  const int tx1d_size = tx_size_wide[tx_size];
   const int tx2d_size = tx_size_2d[tx_size];
 
   for (coeff_idx = 0; coeff_idx < tx2d_size; ++coeff_idx) {

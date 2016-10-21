@@ -442,7 +442,37 @@ static const TX_SIZE txsize_vert_map[TX_SIZES_ALL] = {
 #endif       // CONFIG_EXT_TX
 };
 
-static const int tx_size_1d[TX_SIZES] = { 4, 8, 16, 32 };
+// Transform block width in pixels
+static const int tx_size_wide[TX_SIZES_ALL] = {
+  4, 8, 16, 32,
+#if CONFIG_EXT_TX
+  4, 8, 8,  16, 16, 32,
+#endif
+};
+
+// Transform block height in pixels
+static const int tx_size_high[TX_SIZES_ALL] = {
+  4, 8, 16, 32,
+#if CONFIG_EXT_TX
+  8, 4, 16, 8,  32, 16,
+#endif
+};
+
+// Transform block width in unit
+static const int tx_size_wide_unit[TX_SIZES_ALL] = {
+  1, 2, 4, 8,
+#if CONFIG_EXT_TX
+  1, 2, 2, 4, 4, 8,
+#endif
+};
+
+// Transform block height in unit
+static const int tx_size_high_unit[TX_SIZES_ALL] = {
+  1, 2, 4, 8,
+#if CONFIG_EXT_TX
+  2, 1, 4, 2, 8, 4,
+#endif
+};
 
 static const int tx_size_2d[TX_SIZES_ALL] = {
   16, 64, 256, 1024,
@@ -452,8 +482,6 @@ static const int tx_size_2d[TX_SIZES_ALL] = {
 };
 
 static const uint8_t tx_size_1d_log2[TX_SIZES] = { 2, 3, 4, 5 };
-
-static const int tx_size_1d_in_unit[TX_SIZES] = { 1, 2, 4, 8 };
 
 // TODO(jingning): Temporary table during the construction.
 static const int tx_size_1d_in_unit_log2[TX_SIZES] = { 0, 1, 2, 3 };
