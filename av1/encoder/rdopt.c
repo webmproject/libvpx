@@ -9440,8 +9440,8 @@ void av1_rd_pick_inter_mode_sb(const AV1_COMP *cpi, TileDataEnc *tile_data,
           filter_intra_mode_info_uv[uv_tx].filter_intra_mode[1];
     }
 #endif  // CONFIG_FILTER_INTRA
-    skippable = skippable && skip_uv[uv_tx];
-    distortion2 = distortion_y + dist_uv[uv_tx];
+    skippable = skippable && skip_uvs[uv_tx];
+    distortion2 = distortion_y + dist_uvs[uv_tx];
     rate2 = rate_y + rate_overhead + rate_uv_intra[uv_tx];
     rate2 += ref_costs_single[INTRA_FRAME];
 
