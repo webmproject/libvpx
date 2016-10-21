@@ -63,12 +63,16 @@ int main(int argc, char **argv) {
   int frame_count = 0;
   aom_image_t raw;
   aom_codec_err_t res;
-  AvxVideoInfo info = { 0 };
+  AvxVideoInfo info;
   AvxVideoWriter *writer = NULL;
   const AvxInterface *encoder = NULL;
   const int fps = 30;
 
   exec_name = argv[0];
+
+  // Clear explicitly, as simply assigning "{ 0 }" generates
+  // "missing-field-initializers" warning in some compilers.
+  memset(&info, 0, sizeof(info));
 
   if (argc < 5) die("Invalid number of arguments");
 

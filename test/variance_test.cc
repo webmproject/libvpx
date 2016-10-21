@@ -101,8 +101,7 @@ static uint32_t variance_ref(const uint8_t *src, const uint8_t *ref, int l2w,
   }
   RoundHighBitDepth(bit_depth, &se, &sse);
   *sse_ptr = static_cast<uint32_t>(sse);
-  return static_cast<uint32_t>(
-      sse - ((static_cast<int64_t>(se) * se) >> (l2w + l2h)));
+  return static_cast<uint32_t>(sse - ((se * se) >> (l2w + l2h)));
 }
 
 /* The subpel reference functions differ from the codec version in one aspect:
@@ -157,8 +156,7 @@ static uint32_t subpel_variance_ref(const uint8_t *ref, const uint8_t *src,
   }
   RoundHighBitDepth(bit_depth, &se, &sse);
   *sse_ptr = static_cast<uint32_t>(sse);
-  return static_cast<uint32_t>(
-      sse - ((static_cast<int64_t>(se) * se) >> (l2w + l2h)));
+  return static_cast<uint32_t>(sse - ((se * se) >> (l2w + l2h)));
 }
 
 static uint32_t subpel_avg_variance_ref(const uint8_t *ref, const uint8_t *src,
@@ -211,8 +209,7 @@ static uint32_t subpel_avg_variance_ref(const uint8_t *ref, const uint8_t *src,
   }
   RoundHighBitDepth(bit_depth, &se, &sse);
   *sse_ptr = static_cast<uint32_t>(sse);
-  return static_cast<uint32_t>(
-      sse - ((static_cast<int64_t>(se) * se) >> (l2w + l2h)));
+  return static_cast<uint32_t>(sse - ((se * se) >> (l2w + l2h)));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -28,7 +28,6 @@ class AV1FrameSizeTestsLarge : public ::libaom_test::EncoderTest,
   }
 
   virtual bool HandleDecodeResult(const aom_codec_err_t res_dec,
-                                  const libaom_test::VideoSource & /*video*/,
                                   libaom_test::Decoder *decoder) {
     EXPECT_EQ(expected_res_, res_dec) << decoder->DecodeError();
     return !::testing::Test::HasFailure();

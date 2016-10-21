@@ -68,24 +68,25 @@ static void scale1d_2t1_i(const unsigned char *source, int source_step,
                           unsigned int source_scale, unsigned int source_length,
                           unsigned char *dest, int dest_step,
                           unsigned int dest_scale, unsigned int dest_length) {
-  unsigned int i, j;
-  unsigned int temp;
-  int source_pitch = source_step;
+  const unsigned int source_pitch = source_step;
+  const unsigned char *const dest_end = dest + dest_length * dest_step;
   (void)source_length;
   (void)source_scale;
   (void)dest_scale;
 
-  source_step *= 2;
-  dest[0] = source[0];
+  source_step *= 2;  // Every other row.
 
-  for (i = dest_step, j = source_step; i < dest_length * dest_step;
-       i += dest_step, j += source_step) {
-    temp = 8;
-    temp += 3 * source[j - source_pitch];
-    temp += 10 * source[j];
-    temp += 3 * source[j + source_pitch];
-    temp >>= 4;
-    dest[i] = (char)(temp);
+  dest[0] = source[0];  // Special case: 1st pixel.
+  source += source_step;
+  dest += dest_step;
+
+  while (dest < dest_end) {
+    const unsigned int a = 3 * source[-source_pitch];
+    const unsigned int b = 10 * source[0];
+    const unsigned int c = 3 * source[source_pitch];
+    *dest = (unsigned char)((8 + a + b + c) >> 4);
+    source += source_step;
+    dest += dest_step;
   }
 }
 
@@ -119,17 +120,18 @@ static void scale1d_2t1_ps(const unsigned char *source, int source_step,
                            unsigned int source_length, unsigned char *dest,
                            int dest_step, unsigned int dest_scale,
                            unsigned int dest_length) {
-  unsigned int i, j;
-
+  const unsigned char *const dest_end = dest + dest_length * dest_step;
   (void)source_length;
   (void)source_scale;
   (void)dest_scale;
 
-  source_step *= 2;
-  j = 0;
+  source_step *= 2;  // Every other row.
 
-  for (i = 0; i < dest_length * dest_step; i += dest_step, j += source_step)
-    dest[i] = source[j];
+  while (dest < dest_end) {
+    *dest = *source;
+    source += source_step;
+    dest += dest_step;
+  }
 }
 /****************************************************************************
  *
@@ -159,12 +161,12 @@ static void scale1d_c(const unsigned char *source, int source_step,
                       unsigned int source_scale, unsigned int source_length,
                       unsigned char *dest, int dest_step,
                       unsigned int dest_scale, unsigned int dest_length) {
-  unsigned int i;
-  unsigned int round_value = dest_scale / 2;
+  const unsigned char *const dest_end = dest + dest_length * dest_step;
+  const unsigned int round_value = dest_scale / 2;
   unsigned int left_modifier = dest_scale;
   unsigned int right_modifier = 0;
-  unsigned char left_pixel = *source;
-  unsigned char right_pixel = *(source + source_step);
+  unsigned char left_pixel = source[0];
+  unsigned char right_pixel = source[source_step];
 
   (void)source_length;
 
@@ -173,18 +175,18 @@ static void scale1d_c(const unsigned char *source, int source_step,
   /* assert ( (source_length - 1) * dest_scale >= (dest_length - 1) *
    * source_scale);*/
 
-  for (i = 0; i < dest_length * dest_step; i += dest_step) {
-    dest[i] = (char)((left_modifier * left_pixel +
-                      right_modifier * right_pixel + round_value) /
-                     dest_scale);
+  while (dest < dest_end) {
+    *dest = (unsigned char)((left_modifier * left_pixel +
+                             right_modifier * right_pixel + round_value) /
+                            dest_scale);
 
     right_modifier += source_scale;
 
     while (right_modifier > dest_scale) {
       right_modifier -= dest_scale;
       source += source_step;
-      left_pixel = *source;
-      right_pixel = *(source + source_step);
+      left_pixel = source[0];
+      right_pixel = source[source_step];
     }
 
     left_modifier = dest_scale - right_modifier;
@@ -236,11 +238,10 @@ static void Scale2D(
     unsigned int dest_width, unsigned int dest_height, unsigned char *temp_area,
     unsigned char temp_area_height, unsigned int hscale, unsigned int hratio,
     unsigned int vscale, unsigned int vratio, unsigned int interlaced) {
-  /*unsigned*/
-  int i, j, k;
-  int bands;
-  int dest_band_height;
-  int source_band_height;
+  unsigned int i, j, k;
+  unsigned int bands;
+  unsigned int dest_band_height;
+  unsigned int source_band_height;
 
   typedef void (*Scale1D)(const unsigned char *source, int source_step,
                           unsigned int source_scale, unsigned int source_length,
@@ -331,7 +332,7 @@ static void Scale2D(
   if (ratio_scalable) {
     if (source_height == dest_height) {
       /* for each band of the image */
-      for (k = 0; k < (int)dest_height; k++) {
+      for (k = 0; k < dest_height; ++k) {
         horiz_line_scale(source, source_width, dest, dest_width);
         source += source_pitch;
         dest += dest_pitch;
@@ -346,14 +347,13 @@ static void Scale2D(
       horiz_line_scale(source, source_width, temp_area, dest_width);
     }
 
-    for (k = 0;
-         k < (int)(dest_height + dest_band_height - 1) / dest_band_height;
-         k++) {
+    for (k = 0; k < (dest_height + dest_band_height - 1) / dest_band_height;
+         ++k) {
       /* scale one band horizontally */
-      for (i = 0; i < source_band_height; i++) {
+      for (i = 0; i < source_band_height; ++i) {
         /* Trap case where we could read off the base of the source buffer */
 
-        line_src = (unsigned char *)source + i * source_pitch;
+        line_src = source + i * source_pitch;
 
         if (line_src < source_base) line_src = source_base;
 
@@ -388,7 +388,7 @@ static void Scale2D(
 
   if (source_height == dest_height) {
     /* for each band of the image */
-    for (k = 0; k < (int)dest_height; k++) {
+    for (k = 0; k < dest_height; ++k) {
       Scale1Dh(source, 1, hscale, source_width + 1, dest, 1, hratio,
                dest_width);
       source += source_pitch;
@@ -414,10 +414,10 @@ static void Scale2D(
   /* for each band of the image */
   bands = (dest_height + dest_band_height - 1) / dest_band_height;
 
-  for (k = 0; k < bands; k++) {
+  for (k = 0; k < bands; ++k) {
     /* scale one band horizontally */
-    for (i = 1; i < source_band_height + 1; i++) {
-      if (k * source_band_height + i < (int)source_height) {
+    for (i = 1; i < source_band_height + 1; ++i) {
+      if (k * source_band_height + i < source_height) {
         Scale1Dh(source + i * source_pitch, 1, hscale, source_width + 1,
                  temp_area + i * dest_pitch, 1, hratio, dest_width);
       } else { /*  Duplicate the last row */
@@ -428,7 +428,7 @@ static void Scale2D(
     }
 
     /* scale one band vertically */
-    for (j = 0; j < (int)dest_width; j++) {
+    for (j = 0; j < dest_width; ++j) {
       Scale1Dv(&temp_area[j], dest_pitch, vscale, source_band_height + 1,
                &dest[j], dest_pitch, vratio, dest_band_height);
     }
@@ -487,12 +487,12 @@ void aom_scale_frame(YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
           temp_area, temp_height, hscale, hratio, vscale, vratio, interlaced);
 
   if (dw < (int)dst->y_width)
-    for (i = 0; i < dh; i++)
+    for (i = 0; i < dh; ++i)
       memset(dst->y_buffer + i * dst->y_stride + dw - 1,
              dst->y_buffer[i * dst->y_stride + dw - 2], dst->y_width - dw + 1);
 
   if (dh < (int)dst->y_height)
-    for (i = dh - 1; i < (int)dst->y_height; i++)
+    for (i = dh - 1; i < (int)dst->y_height; ++i)
       memcpy(dst->y_buffer + i * dst->y_stride,
              dst->y_buffer + (dh - 2) * dst->y_stride, dst->y_width + 1);
 
@@ -502,13 +502,13 @@ void aom_scale_frame(YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
           vratio, interlaced);
 
   if (dw / 2 < (int)dst->uv_width)
-    for (i = 0; i < dst->uv_height; i++)
+    for (i = 0; i < dst->uv_height; ++i)
       memset(dst->u_buffer + i * dst->uv_stride + dw / 2 - 1,
              dst->u_buffer[i * dst->uv_stride + dw / 2 - 2],
              dst->uv_width - dw / 2 + 1);
 
   if (dh / 2 < (int)dst->uv_height)
-    for (i = dh / 2 - 1; i < (int)dst->y_height / 2; i++)
+    for (i = dh / 2 - 1; i < (int)dst->y_height / 2; ++i)
       memcpy(dst->u_buffer + i * dst->uv_stride,
              dst->u_buffer + (dh / 2 - 2) * dst->uv_stride, dst->uv_width);
 
@@ -518,13 +518,13 @@ void aom_scale_frame(YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
           vratio, interlaced);
 
   if (dw / 2 < (int)dst->uv_width)
-    for (i = 0; i < dst->uv_height; i++)
+    for (i = 0; i < dst->uv_height; ++i)
       memset(dst->v_buffer + i * dst->uv_stride + dw / 2 - 1,
              dst->v_buffer[i * dst->uv_stride + dw / 2 - 2],
              dst->uv_width - dw / 2 + 1);
 
   if (dh / 2 < (int)dst->uv_height)
-    for (i = dh / 2 - 1; i < (int)dst->y_height / 2; i++)
+    for (i = dh / 2 - 1; i < (int)dst->y_height / 2; ++i)
       memcpy(dst->v_buffer + i * dst->uv_stride,
              dst->v_buffer + (dh / 2 - 2) * dst->uv_stride, dst->uv_width);
 }

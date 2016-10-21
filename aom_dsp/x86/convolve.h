@@ -27,6 +27,10 @@ typedef void filter8_1dfunction(const uint8_t *src_ptr, ptrdiff_t src_pitch,
       const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,                \
       ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4,          \
       const int16_t *filter_y, int y_step_q4, int w, int h) {                \
+    (void)filter_x;                                                          \
+    (void)x_step_q4;                                                         \
+    (void)filter_y;                                                          \
+    (void)y_step_q4;                                                         \
     assert(filter[3] != 128);                                                \
     assert(step_q4 == 16);                                                   \
     if (filter[0] | filter[1] | filter[2]) {                                 \

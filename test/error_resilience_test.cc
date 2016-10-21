@@ -55,8 +55,7 @@ class ErrorResilienceTestLarge
     nframes_++;
   }
 
-  virtual void PreEncodeFrameHook(libaom_test::VideoSource *video,
-                                  ::libaom_test::Encoder * /*encoder*/) {
+  virtual void PreEncodeFrameHook(libaom_test::VideoSource *video) {
     frame_flags_ &=
         ~(AOM_EFLAG_NO_UPD_LAST | AOM_EFLAG_NO_UPD_GF | AOM_EFLAG_NO_UPD_ARF);
     if (droppable_nframes_ > 0 &&
