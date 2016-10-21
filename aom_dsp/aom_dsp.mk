@@ -394,9 +394,13 @@ DSP_SRCS-yes += simd/v64_intrinsics.h
 DSP_SRCS-yes += simd/v64_intrinsics_c.h
 DSP_SRCS-yes += simd/v128_intrinsics.h
 DSP_SRCS-yes += simd/v128_intrinsics_c.h
+DSP_SRCS-yes += simd/v256_intrinsics.h
+DSP_SRCS-yes += simd/v256_intrinsics_c.h
 DSP_SRCS-$(HAVE_SSE2) += simd/v64_intrinsics_x86.h
 DSP_SRCS-$(HAVE_SSE2) += simd/v128_intrinsics_x86.h
+DSP_SRCS-$(HAVE_SSE2) += simd/v256_intrinsics_x86.h
 DSP_SRCS-$(HAVE_NEON) += simd/v64_intrinsics_arm.h
 DSP_SRCS-$(HAVE_NEON) += simd/v128_intrinsics_arm.h
+DSP_SRCS-$(HAVE_NEON) += simd/v256_intrinsics_arm.h
 
 $(eval $(call rtcd_h_template,aom_dsp_rtcd,aom_dsp/aom_dsp_rtcd_defs.pl))
