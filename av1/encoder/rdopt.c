@@ -875,8 +875,9 @@ int64_t av1_highbd_block_error_c(const tran_low_t *coeff,
  * can skip this if the last coefficient in this transform block, e.g. the
  * 16th coefficient in a 4x4 block or the 64th coefficient in a 8x8 block,
  * were non-zero). */
-int av1_cost_coeffs(MACROBLOCK *x, int plane, int block, int coeff_ctx,
-                    TX_SIZE tx_size, const int16_t *scan, const int16_t *nb,
+int av1_cost_coeffs(const AV1_COMMON *const cm, MACROBLOCK *x, int plane,
+                    int block, int coeff_ctx, TX_SIZE tx_size,
+                    const int16_t *scan, const int16_t *nb,
                     int use_fast_coef_costing) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
@@ -903,6 +904,7 @@ int av1_cost_coeffs(MACROBLOCK *x, int plane, int block, int coeff_ctx,
   assert(type == PLANE_TYPE_Y ? mbmi->tx_size == tx_size
                               : get_uv_tx_size(mbmi, pd) == tx_size);
 #endif  // !CONFIG_VAR_TX && !CONFIG_SUPERTX
+  (void)cm;
 
   if (eob == 0) {
     // single eob token
@@ -1069,8 +1071,9 @@ static void dist_block(const AV1_COMP *cpi, MACROBLOCK *x, int plane, int block,
 
 static int rate_block(int plane, int block, int coeff_ctx, TX_SIZE tx_size,
                       struct rdcost_block_args *args) {
-  return av1_cost_coeffs(args->x, plane, block, coeff_ctx, tx_size,
-                         args->scan_order->scan, args->scan_order->neighbors,
+  return av1_cost_coeffs(&args->cpi->common, args->x, plane, block, coeff_ctx,
+                         tx_size, args->scan_order->scan,
+                         args->scan_order->neighbors,
                          args->use_fast_coef_costing);
 }
 
@@ -1887,6 +1890,7 @@ static int64_t rd_pick_intra4x4block(
     PREDICTION_MODE *best_mode, const int *bmode_costs, ENTROPY_CONTEXT *a,
     ENTROPY_CONTEXT *l, int *bestrate, int *bestratey, int64_t *bestdistortion,
     BLOCK_SIZE bsize, int *y_skip, int64_t rd_thresh) {
+  const AV1_COMMON *const cm = &cpi->common;
   PREDICTION_MODE mode;
   MACROBLOCKD *const xd = &x->e_mbd;
   int64_t best_rd = rd_thresh;
@@ -1958,7 +1962,7 @@ static int64_t rd_pick_intra4x4block(
             av1_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8,
                             TX_4X4, AV1_XFORM_QUANT_FP);
 #endif  // CONFIG_NEW_QUANT
-            ratey += av1_cost_coeffs(x, 0, block, coeff_ctx, TX_4X4,
+            ratey += av1_cost_coeffs(cm, x, 0, block, coeff_ctx, TX_4X4,
                                      scan_order->scan, scan_order->neighbors,
                                      cpi->sf.use_fast_coef_costing);
             *(tempa + idx) = !(p->eobs[block] == 0);
@@ -1984,7 +1988,7 @@ static int64_t rd_pick_intra4x4block(
                             TX_4X4, AV1_XFORM_QUANT_FP);
 #endif  // CONFIG_NEW_QUANT
             av1_optimize_b(x, 0, block, TX_4X4, coeff_ctx);
-            ratey += av1_cost_coeffs(x, 0, block, coeff_ctx, TX_4X4,
+            ratey += av1_cost_coeffs(cm, x, 0, block, coeff_ctx, TX_4X4,
                                      scan_order->scan, scan_order->neighbors,
                                      cpi->sf.use_fast_coef_costing);
             *(tempa + idx) = !(p->eobs[block] == 0);
@@ -2078,7 +2082,7 @@ static int64_t rd_pick_intra4x4block(
           av1_xform_quant(x, 0, block, row + idy, col + idx, BLOCK_8X8, TX_4X4,
                           AV1_XFORM_QUANT_B);
 #endif  // CONFIG_NEW_QUANT
-          ratey += av1_cost_coeffs(x, 0, block, coeff_ctx, TX_4X4,
+          ratey += av1_cost_coeffs(cm, x, 0, block, coeff_ctx, TX_4X4,
                                    scan_order->scan, scan_order->neighbors,
                                    cpi->sf.use_fast_coef_costing);
           *(tempa + idx) = !(p->eobs[block] == 0);
@@ -2103,7 +2107,7 @@ static int64_t rd_pick_intra4x4block(
                           AV1_XFORM_QUANT_FP);
 #endif  // CONFIG_NEW_QUANT
           av1_optimize_b(x, 0, block, TX_4X4, coeff_ctx);
-          ratey += av1_cost_coeffs(x, 0, block, coeff_ctx, TX_4X4,
+          ratey += av1_cost_coeffs(cm, x, 0, block, coeff_ctx, TX_4X4,
                                    scan_order->scan, scan_order->neighbors,
                                    cpi->sf.use_fast_coef_costing);
           *(tempa + idx) = !(p->eobs[block] == 0);
@@ -2888,6 +2892,7 @@ void av1_tx_block_rd_b(const AV1_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
                        int blk_row, int blk_col, int plane, int block,
                        int plane_bsize, int coeff_ctx, int *rate, int64_t *dist,
                        int64_t *bsse, int *skip) {
+  const AV1_COMMON *const cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -3012,7 +3017,7 @@ void av1_tx_block_rd_b(const AV1_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
     }
   }
   *dist += tmp * 16;
-  *rate += av1_cost_coeffs(x, plane, block, coeff_ctx, tx_size,
+  *rate += av1_cost_coeffs(cm, x, plane, block, coeff_ctx, tx_size,
                            scan_order->scan, scan_order->neighbors, 0);
   *skip &= (p->eobs[block] == 0);
 }
@@ -4349,6 +4354,7 @@ static int64_t encode_inter_mb_segment(const AV1_COMP *const cpi, MACROBLOCK *x,
                                        int64_t *distortion, int64_t *sse,
                                        ENTROPY_CONTEXT *ta, ENTROPY_CONTEXT *tl,
                                        int ir, int ic, int mi_row, int mi_col) {
+  const AV1_COMMON *const cm = &cpi->common;
   int k;
   MACROBLOCKD *xd = &x->e_mbd;
   struct macroblockd_plane *const pd = &xd->plane[0];
@@ -4428,7 +4434,7 @@ static int64_t encode_inter_mb_segment(const AV1_COMP *const cpi, MACROBLOCK *x,
       thisdistortion += dist;
       thissse += ssz;
       thisrate +=
-          av1_cost_coeffs(x, 0, block, coeff_ctx, tx_size, scan_order->scan,
+          av1_cost_coeffs(cm, x, 0, block, coeff_ctx, tx_size, scan_order->scan,
                           scan_order->neighbors, cpi->sf.use_fast_coef_costing);
       *(ta + (k & 1)) = !(p->eobs[block] == 0);
       *(tl + (k >> 1)) = !(p->eobs[block] == 0);
