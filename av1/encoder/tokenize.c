@@ -353,6 +353,7 @@ struct tokenize_b_args {
 static void cost_coeffs_b(int plane, int block, int blk_row, int blk_col,
                           BLOCK_SIZE plane_bsize, TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args *const args = arg;
+  const AV1_COMMON *cm = &args->cpi->common;
   ThreadData *const td = args->td;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -365,7 +366,7 @@ static void cost_coeffs_b(int plane, int block, int blk_row, int blk_col,
   const SCAN_ORDER *const scan_order = get_scan(tx_size, tx_type, ref);
   int pt = get_entropy_context(tx_size, pd->above_context + blk_col,
                                pd->left_context + blk_row);
-  int rate = av1_cost_coeffs(x, plane, block, pt, tx_size, scan_order->scan,
+  int rate = av1_cost_coeffs(cm, x, plane, block, pt, tx_size, scan_order->scan,
                              scan_order->neighbors, 0);
   args->this_rate += rate;
   av1_set_contexts(xd, pd, plane_bsize, tx_size, p->eobs[block] > 0, blk_col,
