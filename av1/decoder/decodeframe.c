@@ -253,22 +253,12 @@ static void inverse_transform_block(MACROBLOCKD *xd, int plane,
     }
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 
-    if (eob == 1) {
+    // TODO(jingning): This cleans up different reset requests from various
+    // experiments, but incurs unnecessary memset size.
+    if (eob == 1)
       dqcoeff[0] = 0;
-    } else {
-      if (tx_type == DCT_DCT && tx_size <= TX_16X16 && eob <= 10)
-        memset(dqcoeff, 0, 4 * 4 * num_4x4_blocks_wide_txsize_lookup[tx_size] *
-                               sizeof(dqcoeff[0]));
-#if CONFIG_EXT_TX
-      else
-        memset(dqcoeff, 0, get_tx2d_size(tx_size) * sizeof(dqcoeff[0]));
-#else
-      else if (tx_size == TX_32X32 && eob <= 34)
-        memset(dqcoeff, 0, 256 * sizeof(dqcoeff[0]));
-      else
-        memset(dqcoeff, 0, get_tx2d_size(tx_size) * sizeof(dqcoeff[0]));
-#endif
-    }
+    else
+      memset(dqcoeff, 0, tx_size_2d[tx_size] * sizeof(dqcoeff[0]));
   }
 }
 
