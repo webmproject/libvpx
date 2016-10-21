@@ -257,8 +257,8 @@ static int read_segment_id(aom_reader *r,
 #if CONFIG_VAR_TX
 static void read_tx_size_vartx(AV1_COMMON *cm, MACROBLOCKD *xd,
                                MB_MODE_INFO *mbmi, FRAME_COUNTS *counts,
-                               TX_SIZE tx_size, int blk_row, int blk_col,
-                               aom_reader *r) {
+                               TX_SIZE tx_size, int depth, int blk_row,
+                               int blk_col, aom_reader *r) {
   int is_split = 0;
   const int tx_row = blk_row >> 1;
   const int tx_col = blk_col >> 1;
@@ -274,6 +274,19 @@ static void read_tx_size_vartx(AV1_COMMON *cm, MACROBLOCKD *xd,
   if (xd->mb_to_right_edge < 0) max_blocks_wide += xd->mb_to_right_edge >> 5;
 
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
+
+  if (depth == 2) {
+    int idx, idy;
+    inter_tx_size[0][0] = tx_size;
+    for (idy = 0; idy < num_4x4_blocks_high_txsize_lookup[tx_size] / 2; ++idy)
+      for (idx = 0; idx < num_4x4_blocks_wide_txsize_lookup[tx_size] / 2; ++idx)
+        inter_tx_size[idy][idx] = tx_size;
+    mbmi->tx_size = tx_size;
+    if (counts) ++counts->txfm_partition[ctx][0];
+    txfm_partition_update(xd->above_txfm_context + tx_col,
+                          xd->left_txfm_context + tx_row, tx_size);
+    return;
+  }
 
   is_split = aom_read(r, cm->fc->txfm_partition_prob[ctx], ACCT_STR);
 
@@ -297,8 +310,8 @@ static void read_tx_size_vartx(AV1_COMMON *cm, MACROBLOCKD *xd,
     for (i = 0; i < 4; ++i) {
       int offsetr = blk_row + ((i >> 1) << bsl);
       int offsetc = blk_col + ((i & 0x01) << bsl);
-      read_tx_size_vartx(cm, xd, mbmi, counts, tx_size - 1, offsetr, offsetc,
-                         r);
+      read_tx_size_vartx(cm, xd, mbmi, counts, tx_size - 1, depth + 1, offsetr,
+                         offsetc, r);
     }
   } else {
     int idx, idy;
@@ -1755,8 +1768,8 @@ static void read_inter_frame_mode_info(AV1Decoder *const pbi,
 #endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
         for (idy = 0; idy < height; idy += bs)
           for (idx = 0; idx < width; idx += bs)
-            read_tx_size_vartx(cm, xd, mbmi, xd->counts, max_tx_size, idy, idx,
-                               r);
+            read_tx_size_vartx(cm, xd, mbmi, xd->counts, max_tx_size,
+                               height != width, idy, idx, r);
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
       }
 #endif

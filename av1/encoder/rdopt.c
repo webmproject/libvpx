@@ -3020,11 +3020,11 @@ void av1_tx_block_rd_b(const AV1_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
 
 static void select_tx_block(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
                             int blk_col, int plane, int block, TX_SIZE tx_size,
-                            BLOCK_SIZE plane_bsize, ENTROPY_CONTEXT *ta,
-                            ENTROPY_CONTEXT *tl, TXFM_CONTEXT *tx_above,
-                            TXFM_CONTEXT *tx_left, int *rate, int64_t *dist,
-                            int64_t *bsse, int *skip, int64_t ref_best_rd,
-                            int *is_cost_valid) {
+                            int depth, BLOCK_SIZE plane_bsize,
+                            ENTROPY_CONTEXT *ta, ENTROPY_CONTEXT *tl,
+                            TXFM_CONTEXT *tx_above, TXFM_CONTEXT *tx_left,
+                            int *rate, int64_t *dist, int64_t *bsse, int *skip,
+                            int64_t ref_best_rd, int *is_cost_valid) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   struct macroblock_plane *const p = &x->plane[plane];
@@ -3116,13 +3116,13 @@ static void select_tx_block(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
       *skip = 0;
     }
 
-    if (tx_size > TX_4X4)
+    if (tx_size > TX_4X4 && depth < 2)
       *rate += av1_cost_bit(cpi->common.fc->txfm_partition_prob[ctx], 0);
     this_rd = RDCOST(x->rdmult, x->rddiv, *rate, *dist);
     tmp_eob = p->eobs[block];
   }
 
-  if (tx_size > TX_4X4) {
+  if (tx_size > TX_4X4 && depth < 2) {
     BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
     int bsl = b_height_log2_lookup[bsize];
     int sub_step = num_4x4_blocks_txsize_lookup[tx_size - 1];
@@ -3141,9 +3141,10 @@ static void select_tx_block(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
       int offsetr = (i >> 1) << bsl;
       int offsetc = (i & 0x01) << bsl;
       select_tx_block(cpi, x, blk_row + offsetr, blk_col + offsetc, plane,
-                      block + i * sub_step, tx_size - 1, plane_bsize, ta, tl,
-                      tx_above, tx_left, &this_rate, &this_dist, &this_bsse,
-                      &this_skip, ref_best_rd - tmp_rd, &this_cost_valid);
+                      block + i * sub_step, tx_size - 1, depth + 1, plane_bsize,
+                      ta, tl, tx_above, tx_left, &this_rate, &this_dist,
+                      &this_bsse, &this_skip, ref_best_rd - tmp_rd,
+                      &this_cost_valid);
       sum_rate += this_rate;
       sum_dist += this_dist;
       sum_bsse += this_bsse;
@@ -3219,9 +3220,10 @@ static void inter_block_yrd(const AV1_COMP *cpi, MACROBLOCK *x, int *rate,
     for (idy = 0; idy < mi_height; idy += bh) {
       for (idx = 0; idx < mi_width; idx += bh) {
         select_tx_block(cpi, x, idy, idx, 0, block,
-                        max_txsize_lookup[plane_bsize], plane_bsize, ctxa, ctxl,
-                        tx_above, tx_left, &pnrate, &pndist, &pnsse, &pnskip,
-                        ref_best_rd - this_rd, &is_cost_valid);
+                        max_txsize_lookup[plane_bsize], mi_height != mi_width,
+                        plane_bsize, ctxa, ctxl, tx_above, tx_left, &pnrate,
+                        &pndist, &pnsse, &pnskip, ref_best_rd - this_rd,
+                        &is_cost_valid);
         *rate += pnrate;
         *distortion += pndist;
         *sse += pnsse;
@@ -7586,7 +7588,7 @@ static int64_t handle_inter_mode(
       // Y cost and distortion
       av1_subtract_plane(x, bsize, 0);
 #if CONFIG_VAR_TX
-      if (cm->tx_mode == TX_MODE_SELECT || xd->lossless[mbmi->segment_id]) {
+      if (cm->tx_mode == TX_MODE_SELECT && !xd->lossless[mbmi->segment_id]) {
         select_tx_type_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
                            bsize, ref_best_rd);
       } else {

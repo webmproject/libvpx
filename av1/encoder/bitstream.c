@@ -352,7 +352,8 @@ static int prob_diff_update_savings(const aom_tree_index *tree,
 #if CONFIG_VAR_TX
 static void write_tx_size_vartx(const AV1_COMMON *cm, const MACROBLOCKD *xd,
                                 const MB_MODE_INFO *mbmi, TX_SIZE tx_size,
-                                int blk_row, int blk_col, aom_writer *w) {
+                                int depth, int blk_row, int blk_col,
+                                aom_writer *w) {
   const int tx_row = blk_row >> 1;
   const int tx_col = blk_col >> 1;
   int max_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
@@ -364,6 +365,12 @@ static void write_tx_size_vartx(const AV1_COMMON *cm, const MACROBLOCKD *xd,
   if (xd->mb_to_right_edge < 0) max_blocks_wide += xd->mb_to_right_edge >> 5;
 
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
+
+  if (depth == 2) {
+    txfm_partition_update(xd->above_txfm_context + tx_col,
+                          xd->left_txfm_context + tx_row, tx_size);
+    return;
+  }
 
   if (tx_size == mbmi->inter_tx_size[tx_row][tx_col]) {
     aom_write(w, 0, cm->fc->txfm_partition_prob[ctx]);
@@ -386,7 +393,8 @@ static void write_tx_size_vartx(const AV1_COMMON *cm, const MACROBLOCKD *xd,
     for (i = 0; i < 4; ++i) {
       int offsetr = blk_row + ((i >> 1) << bsl);
       int offsetc = blk_col + ((i & 0x01) << bsl);
-      write_tx_size_vartx(cm, xd, mbmi, tx_size - 1, offsetr, offsetc, w);
+      write_tx_size_vartx(cm, xd, mbmi, tx_size - 1, depth + 1, offsetr,
+                          offsetc, w);
     }
   }
 }
@@ -1216,7 +1224,8 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
 #endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
         for (idy = 0; idy < height; idy += bs)
           for (idx = 0; idx < width; idx += bs)
-            write_tx_size_vartx(cm, xd, mbmi, max_tx_size, idy, idx, w);
+            write_tx_size_vartx(cm, xd, mbmi, max_tx_size, height != width, idy,
+                                idx, w);
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
       }
 #endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
