@@ -161,6 +161,30 @@
     },
     {
       "key": {
+        "uuid": "dc93c3d8_ca4a9b72",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-21T17:27:32Z",
+      "side": 1,
+      "message": "Woah, I transposed the array wrong. Thanks for catching that! Indeed I can now skip all the 6 values too!",
+      "parentUuid": "bc6c4f82_710707c7",
+      "range": {
+        "startLine": 142,
+        "startChar": 0,
+        "endLine": 142,
+        "endChar": 24
+      },
+      "revId": "a21cdf8f6a1f534c1a077224daa14344c451593f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bc6c4f82_313d0fdb",
         "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
         "patchSetId": 6
