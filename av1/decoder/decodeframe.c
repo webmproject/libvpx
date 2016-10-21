@@ -1152,7 +1152,6 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
 #endif  // CONFIG_EXT_PARTITION_TYPES
                          BLOCK_SIZE bsize, int bwl, int bhl) {
   AV1_COMMON *const cm = &pbi->common;
-  const int less8x8 = bsize < BLOCK_8X8;
   const int bw = 1 << (bwl - 1);
   const int bh = 1 << (bhl - 1);
   const int x_mis = AOMMIN(bw, cm->mi_cols - mi_col);
@@ -1372,9 +1371,6 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
                                                 row, col, tx_size);
 #endif
       }
-
-      if (!less8x8 && eobtotal == 0)
-        mbmi->has_no_coeffs = 1;  // skip loopfilter
     }
   }
 
