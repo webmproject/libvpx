@@ -22,6 +22,30 @@
       "revId": "157e45a44b3fdf46f7d086f966374984ffe08312",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc93c3d8_7ed6ad52",
+        "filename": "av1/encoder/dct.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1853,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-10-21T01:00:39Z",
+      "side": 1,
+      "message": "If EXT_TX\u003d1, tx_type\u003dIDTX, then if range_check() \u003d 1, we call fdct32x32().  This is not correct.",
+      "parentUuid": "dc93c3d8_fb2d6fac",
+      "range": {
+        "startLine": 1853,
+        "startChar": 2,
+        "endLine": 1853,
+        "endChar": 27
+      },
+      "revId": "157e45a44b3fdf46f7d086f966374984ffe08312",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
