@@ -12,6 +12,7 @@
 #include "av1/common/entropy.h"
 #include "av1/common/blockd.h"
 #include "av1/common/onyxc_int.h"
+#include "av1/common/scan.h"
 #include "av1/common/entropymode.h"
 #include "aom_mem/aom_mem.h"
 #include "aom/aom_integer.h"
@@ -2842,6 +2843,10 @@ void av1_default_coef_probs(AV1_COMMON *cm) {
 #endif  // CONFIG_RANS
 }
 
+#if CONFIG_ADAPT_SCAN
+#define ADAPT_SCAN_UPDATE_RATE_16 (1 << 13)
+#endif
+
 static void adapt_coef_probs(AV1_COMMON *cm, TX_SIZE tx_size,
                              unsigned int count_sat,
                              unsigned int update_factor) {
@@ -2881,8 +2886,12 @@ static void adapt_coef_probs(AV1_COMMON *cm, TX_SIZE tx_size,
 }
 
 void av1_adapt_coef_probs(AV1_COMMON *cm) {
-  TX_SIZE t;
+  TX_SIZE tx_size;
   unsigned int count_sat, update_factor;
+
+#if CONFIG_ADAPT_SCAN
+  TX_TYPE tx_type;
+#endif
 
 #if CONFIG_ENTROPY
   if (cm->last_frame_type == KEY_FRAME) {
@@ -2904,11 +2913,19 @@ void av1_adapt_coef_probs(AV1_COMMON *cm) {
     count_sat = COEF_COUNT_SAT;
   }
 #endif  // CONFIG_ENTROPY
-  for (t = TX_4X4; t <= TX_32X32; t++)
-    adapt_coef_probs(cm, t, count_sat, update_factor);
+  for (tx_size = TX_4X4; tx_size <= TX_32X32; tx_size++)
+    adapt_coef_probs(cm, tx_size, count_sat, update_factor);
 #if CONFIG_RANS
   av1_coef_pareto_cdfs(cm->fc);
 #endif  // CONFIG_RANS
+
+#if CONFIG_ADAPT_SCAN
+  for (tx_size = TX_4X4; tx_size < TX_SIZES; ++tx_size)
+    for (tx_type = TX_4X4; tx_type < TX_TYPES; ++tx_type) {
+      av1_update_scan_prob(cm, tx_size, tx_type, ADAPT_SCAN_UPDATE_RATE_16);
+      av1_update_scan_order_facade(cm, tx_size, tx_type);
+    }
+#endif
 }
 
 #if CONFIG_ENTROPY

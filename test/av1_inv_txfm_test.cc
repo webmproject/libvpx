@@ -137,6 +137,7 @@ class AV1PartialIDctTest
   InvTxfmFunc partial_itxfm_;
 };
 
+#if !CONFIG_ADAPT_SCAN
 TEST_P(AV1PartialIDctTest, RunQuantCheck) {
   int size;
   switch (tx_size_) {
@@ -256,6 +257,7 @@ TEST_P(AV1PartialIDctTest, ResultsMatch) {
   EXPECT_EQ(0, max_error)
       << "Error: partial inverse transform produces different results";
 }
+#endif
 using std::tr1::make_tuple;
 
 INSTANTIATE_TEST_CASE_P(

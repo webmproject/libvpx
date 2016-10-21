@@ -837,8 +837,10 @@ void av1_idct8x8_add(const tran_low_t *input, uint8_t *dest, int stride,
   if (eob == 1)
     // DC only DCT coefficient
     aom_idct8x8_1_add(input, dest, stride);
+#if !CONFIG_ADAPT_SCAN
   else if (eob <= 12)
     aom_idct8x8_12_add(input, dest, stride);
+#endif
   else
     aom_idct8x8_64_add(input, dest, stride);
 }
@@ -849,19 +851,22 @@ void av1_idct16x16_add(const tran_low_t *input, uint8_t *dest, int stride,
    * coefficients. Use eobs to separate different cases. */
   if (eob == 1) /* DC only DCT coefficient. */
     aom_idct16x16_1_add(input, dest, stride);
+#if !CONFIG_ADAPT_SCAN
   else if (eob <= 10)
     aom_idct16x16_10_add(input, dest, stride);
+#endif
   else
     aom_idct16x16_256_add(input, dest, stride);
 }
 
 void av1_idct32x32_add(const tran_low_t *input, uint8_t *dest, int stride,
                        int eob) {
-  if (eob == 1)
-    aom_idct32x32_1_add(input, dest, stride);
+  if (eob == 1) aom_idct32x32_1_add(input, dest, stride);
+#if !CONFIG_ADAPT_SCAN
   else if (eob <= 34)
     // non-zero coeff only in upper-left 8x8
     aom_idct32x32_34_add(input, dest, stride);
+#endif
   else
     aom_idct32x32_1024_add(input, dest, stride);
 }
@@ -1659,13 +1664,13 @@ void av1_highbd_idct8x8_add(const tran_low_t *input, uint8_t *dest, int stride,
   // TODO(yunqingwang): "eobs = 1" case is also handled in av1_short_idct8x8_c.
   // Combine that with code here.
   // DC only DCT coefficient
-  if (eob == 1) {
-    aom_highbd_idct8x8_1_add(input, dest, stride, bd);
-  } else if (eob <= 10) {
+  if (eob == 1) aom_highbd_idct8x8_1_add(input, dest, stride, bd);
+#if !CONFIG_ADAPT_SCAN
+  else if (eob <= 10)
     aom_highbd_idct8x8_10_add(input, dest, stride, bd);
-  } else {
+#endif
+  else
     aom_highbd_idct8x8_64_add(input, dest, stride, bd);
-  }
 }
 
 void av1_highbd_idct16x16_add(const tran_low_t *input, uint8_t *dest,
@@ -1673,25 +1678,25 @@ void av1_highbd_idct16x16_add(const tran_low_t *input, uint8_t *dest,
   // The calculation can be simplified if there are not many non-zero dct
   // coefficients. Use eobs to separate different cases.
   // DC only DCT coefficient.
-  if (eob == 1) {
-    aom_highbd_idct16x16_1_add(input, dest, stride, bd);
-  } else if (eob <= 10) {
+  if (eob == 1) aom_highbd_idct16x16_1_add(input, dest, stride, bd);
+#if !CONFIG_ADAPT_SCAN
+  else if (eob <= 10)
     aom_highbd_idct16x16_10_add(input, dest, stride, bd);
-  } else {
+#endif
+  else
     aom_highbd_idct16x16_256_add(input, dest, stride, bd);
-  }
 }
 
 void av1_highbd_idct32x32_add(const tran_low_t *input, uint8_t *dest,
                               int stride, int eob, int bd) {
   // Non-zero coeff only in upper-left 8x8
-  if (eob == 1) {
-    aom_highbd_idct32x32_1_add(input, dest, stride, bd);
-  } else if (eob <= 34) {
+  if (eob == 1) aom_highbd_idct32x32_1_add(input, dest, stride, bd);
+#if !CONFIG_ADAPT_SCAN
+  else if (eob <= 34)
     aom_highbd_idct32x32_34_add(input, dest, stride, bd);
-  } else {
+#endif
+  else
     aom_highbd_idct32x32_1024_add(input, dest, stride, bd);
-  }
 }
 
 void av1_highbd_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,

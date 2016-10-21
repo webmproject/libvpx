@@ -534,6 +534,14 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
 
   *tp = t;
 
+#if CONFIG_ADAPT_SCAN
+  // Since dqcoeff is not available here, we pass qcoeff into
+  // av1_update_scan_count_facade(). The update behavior should be the same
+  // because av1_update_scan_count_facade() only cares if coefficients are zero
+  // or not.
+  av1_update_scan_count_facade((AV1_COMMON *)cm, tx_size, tx_type, qcoeff, c);
+#endif
+
   av1_set_contexts(xd, pd, tx_size, c > 0, blk_col, blk_row);
 }
 
