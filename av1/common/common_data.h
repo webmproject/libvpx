@@ -859,8 +859,4 @@ static const int partition_supertx_context_lookup[PARTITION_TYPES] = { -1, 0, 0,
 }  // extern "C"
 #endif
 
-static const int tx_size_1d[TX_SIZES] = { 4, 8, 16, 32 };
-
-static const int tx_size_2d[TX_SIZES] = { 16, 64, 256, 1024 };
-
 #endif  // AV1_COMMON_COMMON_DATA_H_
