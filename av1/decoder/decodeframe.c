@@ -232,34 +232,26 @@ static void read_mv_probs(nmv_context *ctx, int allow_hp, aom_reader *r) {
 static void inverse_transform_block(MACROBLOCKD *xd, int plane,
                                     const TX_TYPE tx_type,
                                     const TX_SIZE tx_size, uint8_t *dst,
-                                    int stride, int eob) {
+                                    int stride, int16_t scan_line, int eob) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  if (eob > 0) {
-    tran_low_t *const dqcoeff = pd->dqcoeff;
-    INV_TXFM_PARAM inv_txfm_param;
-    inv_txfm_param.tx_type = tx_type;
-    inv_txfm_param.tx_size = tx_size;
-    inv_txfm_param.eob = eob;
-    inv_txfm_param.lossless = xd->lossless[xd->mi[0]->mbmi.segment_id];
+  tran_low_t *const dqcoeff = pd->dqcoeff;
+  INV_TXFM_PARAM inv_txfm_param;
+  inv_txfm_param.tx_type = tx_type;
+  inv_txfm_param.tx_size = tx_size;
+  inv_txfm_param.eob = eob;
+  inv_txfm_param.lossless = xd->lossless[xd->mi[0]->mbmi.segment_id];
 
 #if CONFIG_AOM_HIGHBITDEPTH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      inv_txfm_param.bd = xd->bd;
-      highbd_inv_txfm_add(dqcoeff, dst, stride, &inv_txfm_param);
-    } else {
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    inv_txfm_param.bd = xd->bd;
+    highbd_inv_txfm_add(dqcoeff, dst, stride, &inv_txfm_param);
+  } else {
 #endif  // CONFIG_AOM_HIGHBITDEPTH
-      inv_txfm_add(dqcoeff, dst, stride, &inv_txfm_param);
+    inv_txfm_add(dqcoeff, dst, stride, &inv_txfm_param);
 #if CONFIG_AOM_HIGHBITDEPTH
-    }
-#endif  // CONFIG_AOM_HIGHBITDEPTH
-
-    // TODO(jingning): This cleans up different reset requests from various
-    // experiments, but incurs unnecessary memset size.
-    if (eob == 1)
-      dqcoeff[0] = 0;
-    else
-      memset(dqcoeff, 0, tx_size_2d[tx_size] * sizeof(dqcoeff[0]));
   }
+#endif  // CONFIG_AOM_HIGHBITDEPTH
+  memset(dqcoeff, 0, (scan_line + 1) * sizeof(dqcoeff[0]));
 }
 
 static void predict_and_reconstruct_intra_block(AV1_COMMON *cm,
@@ -288,10 +280,13 @@ static void predict_and_reconstruct_intra_block(AV1_COMMON *cm,
   if (!mbmi->skip) {
     TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx, tx_size);
     const SCAN_ORDER *scan_order = get_scan(cm, tx_size, tx_type, 0);
-    const int eob = av1_decode_block_tokens(
-        xd, plane, scan_order, col, row, tx_size, tx_type, r, mbmi->segment_id);
-    inverse_transform_block(xd, plane, tx_type, tx_size, dst, pd->dst.stride,
-                            eob);
+    int16_t max_scan_line = 0;
+    const int eob =
+        av1_decode_block_tokens(xd, plane, scan_order, col, row, tx_size,
+                                tx_type, &max_scan_line, r, mbmi->segment_id);
+    if (eob)
+      inverse_transform_block(xd, plane, tx_type, tx_size, dst, pd->dst.stride,
+                              max_scan_line, eob);
   }
 }
 
@@ -322,13 +317,14 @@ static void decode_reconstruct_tx(AV1_COMMON *cm, MACROBLOCKD *const xd,
     PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
     TX_TYPE tx_type = get_tx_type(plane_type, xd, block, plane_tx_size);
     const SCAN_ORDER *sc = get_scan(cm, plane_tx_size, tx_type, 1);
+    int16_t max_scan_line = 0;
     const int eob =
         av1_decode_block_tokens(xd, plane, sc, blk_col, blk_row, plane_tx_size,
-                                tx_type, r, mbmi->segment_id);
+                                tx_type, &max_scan_line, r, mbmi->segment_id);
     inverse_transform_block(
         xd, plane, tx_type, plane_tx_size,
         &pd->dst.buf[4 * blk_row * pd->dst.stride + 4 * blk_col],
-        pd->dst.stride, eob);
+        pd->dst.stride, max_scan_line, eob);
     *eob_total += eob;
   } else {
     int bsl = b_width_log2_lookup[bsize];
@@ -366,12 +362,14 @@ static int reconstruct_inter_block(AV1_COMMON *cm, MACROBLOCKD *const xd,
   int block_idx = (row << 1) + col;
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx, tx_size);
   const SCAN_ORDER *scan_order = get_scan(cm, tx_size, tx_type, 1);
-  const int eob = av1_decode_block_tokens(xd, plane, scan_order, col, row,
-                                          tx_size, tx_type, r, segment_id);
-
-  inverse_transform_block(xd, plane, tx_type, tx_size,
-                          &pd->dst.buf[4 * row * pd->dst.stride + 4 * col],
-                          pd->dst.stride, eob);
+  int16_t max_scan_line = 0;
+  const int eob =
+      av1_decode_block_tokens(xd, plane, scan_order, col, row, tx_size, tx_type,
+                              &max_scan_line, r, segment_id);
+  if (eob)
+    inverse_transform_block(xd, plane, tx_type, tx_size,
+                            &pd->dst.buf[4 * row * pd->dst.stride + 4 * col],
+                            pd->dst.stride, max_scan_line, eob);
   return eob;
 }
 #endif  // !CONFIG_VAR_TX || CONFIG_SUPER_TX

@@ -28,7 +28,7 @@ void av1_decode_palette_tokens(MACROBLOCKD *const xd, int plane, aom_reader *r);
 
 int av1_decode_block_tokens(MACROBLOCKD *const xd, int plane,
                             const SCAN_ORDER *sc, int x, int y, TX_SIZE tx_size,
-                            TX_TYPE tx_type,
+                            TX_TYPE tx_type, int16_t *max_scan_line,
 #if CONFIG_ANS
                             struct AnsDecoder *const r,
 #else
