@@ -16,6 +16,24 @@
       "revId": "55b6df450331c8393403c483bcb0c2f614506a94",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dcf74308_4f9cbd54",
+        "filename": "av1/decoder/decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1185,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-10-21T21:29:21Z",
+      "side": 1,
+      "message": "thanks for looking at this. now properly fixed in newer patch.",
+      "parentUuid": "fcfa47f1_253d1484",
+      "revId": "55b6df450331c8393403c483bcb0c2f614506a94",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
