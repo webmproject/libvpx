@@ -50,7 +50,7 @@ static INLINE void inter_predictor(const uint8_t *src, int src_stride,
     const int16_t *kernel_y =
         av1_get_interp_filter_subpel_kernel(interp_filter_params_y, subpel_y);
 #else
-  if (interp_filter_params.taps == SUBPEL_TAPS) {
+  if (interp_filter_params.taps == SUBPEL_TAPS && w > 2 && h > 2) {
     const int16_t *kernel_x =
         av1_get_interp_filter_subpel_kernel(interp_filter_params, subpel_x);
     const int16_t *kernel_y =
@@ -109,7 +109,7 @@ static INLINE void highbd_inter_predictor(const uint8_t *src, int src_stride,
     const int16_t *kernel_y =
         av1_get_interp_filter_subpel_kernel(interp_filter_params_y, subpel_y);
 #else
-  if (interp_filter_params.taps == SUBPEL_TAPS) {
+  if (interp_filter_params.taps == SUBPEL_TAPS && w > 2 && h > 2) {
     const int16_t *kernel_x =
         av1_get_interp_filter_subpel_kernel(interp_filter_params, subpel_x);
     const int16_t *kernel_y =
