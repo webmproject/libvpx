@@ -262,7 +262,8 @@ static void inverse_transform_block(MACROBLOCKD *xd, int plane,
   }
 }
 
-static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
+static void predict_and_reconstruct_intra_block(AV1_COMMON *cm,
+                                                MACROBLOCKD *const xd,
 #if CONFIG_ANS
                                                 struct AnsDecoder *const r,
 #else
@@ -286,7 +287,7 @@ static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
 
   if (!mbmi->skip) {
     TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx, tx_size);
-    const SCAN_ORDER *scan_order = get_scan(tx_size, tx_type, 0);
+    const SCAN_ORDER *scan_order = get_scan(cm, tx_size, tx_type, 0);
     const int eob = av1_decode_block_tokens(
         xd, plane, scan_order, col, row, tx_size, tx_type, r, mbmi->segment_id);
     inverse_transform_block(xd, plane, tx_type, tx_size, dst, pd->dst.stride,
@@ -295,9 +296,9 @@ static void predict_and_reconstruct_intra_block(MACROBLOCKD *const xd,
 }
 
 #if CONFIG_VAR_TX
-static void decode_reconstruct_tx(MACROBLOCKD *const xd, aom_reader *r,
-                                  MB_MODE_INFO *const mbmi, int plane,
-                                  BLOCK_SIZE plane_bsize, int block,
+static void decode_reconstruct_tx(AV1_COMMON *cm, MACROBLOCKD *const xd,
+                                  aom_reader *r, MB_MODE_INFO *const mbmi,
+                                  int plane, BLOCK_SIZE plane_bsize, int block,
                                   int blk_row, int blk_col, TX_SIZE tx_size,
                                   int *eob_total) {
   const struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -320,7 +321,7 @@ static void decode_reconstruct_tx(MACROBLOCKD *const xd, aom_reader *r,
   if (tx_size == plane_tx_size) {
     PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
     TX_TYPE tx_type = get_tx_type(plane_type, xd, block, plane_tx_size);
-    const SCAN_ORDER *sc = get_scan(plane_tx_size, tx_type, 1);
+    const SCAN_ORDER *sc = get_scan(cm, plane_tx_size, tx_type, 1);
     const int eob =
         av1_decode_block_tokens(xd, plane, sc, blk_col, blk_row, plane_tx_size,
                                 tx_type, r, mbmi->segment_id);
@@ -343,15 +344,16 @@ static void decode_reconstruct_tx(MACROBLOCKD *const xd, aom_reader *r,
 
       if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide) continue;
 
-      decode_reconstruct_tx(xd, r, mbmi, plane, plane_bsize, block + i * step,
-                            offsetr, offsetc, tx_size - 1, eob_total);
+      decode_reconstruct_tx(cm, xd, r, mbmi, plane, plane_bsize,
+                            block + i * step, offsetr, offsetc, tx_size - 1,
+                            eob_total);
     }
   }
 }
 #endif  // CONFIG_VAR_TX
 
 #if !CONFIG_VAR_TX || CONFIG_SUPERTX || (CONFIG_EXT_TX && CONFIG_RECT_TX)
-static int reconstruct_inter_block(MACROBLOCKD *const xd,
+static int reconstruct_inter_block(AV1_COMMON *cm, MACROBLOCKD *const xd,
 #if CONFIG_ANS
                                    struct AnsDecoder *const r,
 #else
@@ -363,7 +365,7 @@ static int reconstruct_inter_block(MACROBLOCKD *const xd,
   PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
   int block_idx = (row << 1) + col;
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx, tx_size);
-  const SCAN_ORDER *scan_order = get_scan(tx_size, tx_type, 1);
+  const SCAN_ORDER *scan_order = get_scan(cm, tx_size, tx_type, 1);
   const int eob = av1_decode_block_tokens(xd, plane, scan_order, col, row,
                                           tx_size, tx_type, r, segment_id);
 
@@ -1237,7 +1239,7 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
 
       for (row = 0; row < max_blocks_high; row += stepr)
         for (col = 0; col < max_blocks_wide; col += stepc)
-          predict_and_reconstruct_intra_block(xd, r, mbmi, plane, row, col,
+          predict_and_reconstruct_intra_block(cm, xd, r, mbmi, plane, row, col,
                                               tx_size);
     }
   } else {
@@ -1327,14 +1329,14 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
 
           for (row = 0; row < max_blocks_high; row += stepr)
             for (col = 0; col < max_blocks_wide; col += stepc)
-              eobtotal += reconstruct_inter_block(xd, r, mbmi->segment_id,
+              eobtotal += reconstruct_inter_block(cm, xd, r, mbmi->segment_id,
                                                   plane, row, col, tx_size);
         } else {
 #endif
           for (row = 0; row < num_4x4_h; row += bh_var_tx) {
             for (col = 0; col < num_4x4_w; col += bw_var_tx) {
-              decode_reconstruct_tx(xd, r, mbmi, plane, plane_bsize, block, row,
-                                    col, max_tx_size, &eobtotal);
+              decode_reconstruct_tx(cm, xd, r, mbmi, plane, plane_bsize, block,
+                                    row, col, max_tx_size, &eobtotal);
               block += step;
             }
           }
@@ -1357,8 +1359,8 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
 
         for (row = 0; row < max_blocks_high; row += stepr)
           for (col = 0; col < max_blocks_wide; col += stepc)
-            eobtotal += reconstruct_inter_block(xd, r, mbmi->segment_id, plane,
-                                                row, col, tx_size);
+            eobtotal += reconstruct_inter_block(cm, xd, r, mbmi->segment_id,
+                                                plane, row, col, tx_size);
 #endif
       }
     }
@@ -1754,8 +1756,8 @@ static void decode_partition(AV1Decoder *const pbi, MACROBLOCKD *const xd,
 
         for (row = 0; row < max_blocks_high; row += stepr)
           for (col = 0; col < max_blocks_wide; col += stepc)
-            eobtotal += reconstruct_inter_block(xd, r, mbmi->segment_id_supertx,
-                                                i, row, col, tx_size);
+            eobtotal += reconstruct_inter_block(
+                cm, xd, r, mbmi->segment_id_supertx, i, row, col, tx_size);
       }
       if (!(subsize < BLOCK_8X8) && eobtotal == 0) skip = 1;
     }

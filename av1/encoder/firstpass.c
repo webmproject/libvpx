@@ -590,7 +590,7 @@ void av1_first_pass(AV1_COMP *cpi, const struct lookahead_entry *source) {
       xd->mi[0]->mbmi.mode = DC_PRED;
       xd->mi[0]->mbmi.tx_size =
           use_dc_pred ? (bsize >= BLOCK_16X16 ? TX_16X16 : TX_8X8) : TX_4X4;
-      av1_encode_intra_block_plane(x, bsize, 0, 0);
+      av1_encode_intra_block_plane(cm, x, bsize, 0, 0);
       this_error = aom_get_mb_ss(x->plane[0].src_diff);
 
       // Keep a record of blocks that have almost no intra error residual
@@ -811,7 +811,7 @@ void av1_first_pass(AV1_COMP *cpi, const struct lookahead_entry *source) {
           xd->mi[0]->mbmi.ref_frame[0] = LAST_FRAME;
           xd->mi[0]->mbmi.ref_frame[1] = NONE;
           av1_build_inter_predictors_sby(xd, mb_row << 1, mb_col << 1, bsize);
-          av1_encode_sby_pass1(x, bsize);
+          av1_encode_sby_pass1(cm, x, bsize);
           sum_mvr += mv.row;
           sum_mvr_abs += abs(mv.row);
           sum_mvc += mv.col;
