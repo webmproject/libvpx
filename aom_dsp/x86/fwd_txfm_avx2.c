@@ -17,6 +17,14 @@
 #undef FDCT32x32_2D_AVX2
 #undef FDCT32x32_HIGH_PRECISION
 
+// TODO(luoyi): The following macro hides an error. The second parameter type of
+// function,
+//   void FDCT32x32_2D_AVX2(const int16_t *, int16_t*, int);
+// is different from the one in,
+//   void aom_fdct32x32_avx2(const int16_t *, tran_low_t*, int);
+// In CONFIG_AOM_HIGHBITDEPTH=1 build, the second parameter type should be
+// int32_t.
+// This function should be removed after av1_fht32x32 scaling/rounding fix.
 #define FDCT32x32_2D_AVX2 aom_fdct32x32_avx2
 #define FDCT32x32_HIGH_PRECISION 1
 #include "aom_dsp/x86/fwd_dct32x32_impl_avx2.h"  // NOLINT
