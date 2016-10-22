@@ -228,7 +228,7 @@ static int av1_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
                          TX_SIZE txsz, int y, int x, int ss_x) {
   const int wl = mi_width_log2_lookup[bsize];
   const int w = AOMMAX(num_4x4_blocks_wide_lookup[bsize] >> ss_x, 1);
-  const int step = 1 << txsz;
+  const int step = tx_size_wide_unit[txsz];
 
   // TODO(bshacklett, huisu): Currently the RD loop traverses 4X8 blocks in
   // inverted N order while in the bitstream the subblocks are stored in Z
@@ -238,41 +238,39 @@ static int av1_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
   // blocks in inverted N order, and then update this function appropriately.
   if (bsize == BLOCK_4X8 && y == 1) return 0;
 
-  if (!right_available) {
-    return 0;
-  } else {
-    // Handle block size 4x8 and 4x4
-    if (ss_x == 0 && num_4x4_blocks_wide_lookup[bsize] < 2 && x == 0) return 1;
+  if (!right_available) return 0;
 
-    if (y == 0) {
-      const int hl = mi_height_log2_lookup[bsize];
-      const uint8_t *order;
-      int my_order, tr_order;
+  // Handle block size 4x8 and 4x4
+  if (ss_x == 0 && num_4x4_blocks_wide_lookup[bsize] < 2 && x == 0) return 1;
+
+  if (y == 0) {
+    const int hl = mi_height_log2_lookup[bsize];
+    const uint8_t *order;
+    int my_order, tr_order;
 #if CONFIG_EXT_PARTITION_TYPES
-      if (partition == PARTITION_VERT_A)
-        order = orders_verta[bsize];
-      else
+    if (partition == PARTITION_VERT_A)
+      order = orders_verta[bsize];
+    else
 #endif  // CONFIG_EXT_PARTITION_TYPES
-        order = orders[bsize];
+      order = orders[bsize];
 
-      if (x + step < w) return 1;
+    if (x + step < w) return 1;
 
-      mi_row = (mi_row & MAX_MIB_MASK) >> hl;
-      mi_col = (mi_col & MAX_MIB_MASK) >> wl;
+    mi_row = (mi_row & MAX_MIB_MASK) >> hl;
+    mi_col = (mi_col & MAX_MIB_MASK) >> wl;
 
-      // If top row of coding unit
-      if (mi_row == 0) return 1;
+    // If top row of coding unit
+    if (mi_row == 0) return 1;
 
-      // If rightmost column of coding unit
-      if (((mi_col + 1) << wl) >= MAX_MIB_SIZE) return 0;
+    // If rightmost column of coding unit
+    if (((mi_col + 1) << wl) >= MAX_MIB_SIZE) return 0;
 
-      my_order = order[((mi_row + 0) << (MAX_MIB_SIZE_LOG2 - wl)) + mi_col + 0];
-      tr_order = order[((mi_row - 1) << (MAX_MIB_SIZE_LOG2 - wl)) + mi_col + 1];
+    my_order = order[((mi_row + 0) << (MAX_MIB_SIZE_LOG2 - wl)) + mi_col + 0];
+    tr_order = order[((mi_row - 1) << (MAX_MIB_SIZE_LOG2 - wl)) + mi_col + 1];
 
-      return my_order > tr_order;
-    } else {
-      return x + step < w;
-    }
+    return my_order > tr_order;
+  } else {
+    return x + step < w;
   }
 }
 
