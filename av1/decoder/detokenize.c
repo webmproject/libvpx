@@ -61,7 +61,7 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
                         dequant_val_type_nuq *dq_val,
 #endif  // CONFIG_NEW_QUANT
                         int ctx, const int16_t *scan, const int16_t *nb,
-                        aom_reader *r)
+                        int16_t *max_scan_line, aom_reader *r)
 #endif
 {
   FRAME_COUNTS *counts = xd->counts;
@@ -166,6 +166,9 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
       dqv_val = &dq_val[band][0];
 #endif  // CONFIG_NEW_QUANT
     }
+
+    *max_scan_line = AOMMAX(*max_scan_line, scan[c]);
+
 #if CONFIG_RANS
     cdf = &coef_cdfs[band][ctx];
     token = ONE_TOKEN +
@@ -327,7 +330,8 @@ void av1_decode_palette_tokens(MACROBLOCKD *const xd, int plane,
 
 int av1_decode_block_tokens(MACROBLOCKD *const xd, int plane,
                             const SCAN_ORDER *sc, int x, int y, TX_SIZE tx_size,
-                            TX_TYPE tx_type, aom_reader *r, int seg_id) {
+                            TX_TYPE tx_type, int16_t *max_scan_line,
+                            aom_reader *r, int seg_id) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int16_t *const dequant = pd->seg_dequant[seg_id];
   const int ctx =
@@ -339,16 +343,16 @@ int av1_decode_block_tokens(MACROBLOCKD *const xd, int plane,
 #endif  //  CONFIG_NEW_QUANT
 
 #if CONFIG_AOM_QM
-  const int eob =
-      decode_coefs(xd, pd->plane_type, pd->dqcoeff, tx_size, tx_type, dequant,
-                   ctx, sc->scan, sc->neighbors, r, pd->seg_iqmatrix[seg_id]);
+  const int eob = decode_coefs(xd, pd->plane_type, pd->dqcoeff, tx_size,
+                               tx_type, dequant, ctx, sc->scan, sc->neighbors,
+                               &sc->max_scan_line, r, pd->seg_iqmatrix[seg_id]);
 #else
   const int eob =
       decode_coefs(xd, pd->plane_type, pd->dqcoeff, tx_size, tx_type, dequant,
 #if CONFIG_NEW_QUANT
                    pd->seg_dequant_nuq[seg_id][dq],
 #endif  // CONFIG_NEW_QUANT
-                   ctx, sc->scan, sc->neighbors, r);
+                   ctx, sc->scan, sc->neighbors, max_scan_line, r);
 #endif  // CONFIG_AOM_QM
   av1_set_contexts(xd, pd, tx_size, eob > 0, x, y);
   return eob;
