@@ -1243,8 +1243,8 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
       const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
       const int num_4x4_w = pd->n4_w;
       const int num_4x4_h = pd->n4_h;
-      const int stepr = num_4x4_blocks_high_txsize_lookup[tx_size];
-      const int stepc = num_4x4_blocks_wide_txsize_lookup[tx_size];
+      const int stepr = tx_size_high_unit[tx_size];
+      const int stepc = tx_size_wide_unit[tx_size];
       int row, col;
       const int max_blocks_wide =
           num_4x4_w + (xd->mb_to_right_edge >= 0
@@ -1326,16 +1326,16 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
         const BLOCK_SIZE plane_bsize =
             get_plane_block_size(AOMMAX(bsize, BLOCK_8X8), pd);
         const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
-        const int bw_var_tx = num_4x4_blocks_wide_txsize_lookup[max_tx_size];
-        const int bh_var_tx = num_4x4_blocks_high_txsize_lookup[max_tx_size];
+        const int bw_var_tx = tx_size_high_unit[max_tx_size];
+        const int bh_var_tx = tx_size_wide_unit[max_tx_size];
         const int step = num_4x4_blocks_txsize_lookup[max_tx_size];
         int block = 0;
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
         if (is_rect_tx(mbmi->tx_size)) {
           const TX_SIZE tx_size =
               plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
-          const int stepr = num_4x4_blocks_high_txsize_lookup[tx_size];
-          const int stepc = num_4x4_blocks_wide_txsize_lookup[tx_size];
+          const int stepr = tx_size_high_unit[tx_size];
+          const int stepc = tx_size_wide_unit[tx_size];
           const int max_blocks_wide =
               num_4x4_w +
               (xd->mb_to_right_edge >= 0 ? 0 : xd->mb_to_right_edge >>
@@ -1364,8 +1364,8 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
 #else
         const TX_SIZE tx_size =
             plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
-        const int stepr = num_4x4_blocks_high_txsize_lookup[tx_size];
-        const int stepc = num_4x4_blocks_wide_txsize_lookup[tx_size];
+        const int stepr = tx_size_high_unit[tx_size];
+        const int stepc = tx_size_wide_unit[tx_size];
         const int max_blocks_wide =
             num_4x4_w + (xd->mb_to_right_edge >= 0
                              ? 0
