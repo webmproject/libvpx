@@ -788,7 +788,7 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane,
                      pre_buf->buf0, pre_buf->width, pre_buf->height,
                      pre_buf->stride, dst, (mi_x >> pd->subsampling_x) + x,
                      (mi_y >> pd->subsampling_y) + y, w, h, dst_buf->stride,
-                     pd->subsampling_x, pd->subsampling_y, xs, ys);
+                     pd->subsampling_x, pd->subsampling_y, xs, ys, ref);
     else
 #endif  // CONFIG_GLOBAL_MOTION
 #endif  // CONFIG_EXT_INTER
