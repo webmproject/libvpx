@@ -61,8 +61,8 @@ static const nmv_context default_nmv_context = {
         { { 0 }, { 0 } },  // class0_fp_cdf is computed in av1_init_mv_probs()
         { 0 },             // fp_cdf is computed from fp in av1_init_mv_probs()
 #endif
-        160,                                                   // class0_hp bit
-        128,                                                   // hp
+        160,  // class0_hp bit
+        128,  // hp
     },
     {
         // Horizontal component
@@ -79,8 +79,8 @@ static const nmv_context default_nmv_context = {
         { { 0 }, { 0 } },  // class0_fp_cdf is computed in av1_init_mv_probs()
         { 0 },             // fp_cdf is computed from fp in av1_init_mv_probs()
 #endif
-        160,                                                   // class0_hp bit
-        128,                                                   // hp
+        160,  // class0_hp bit
+        128,  // hp
     } },
 };
 
