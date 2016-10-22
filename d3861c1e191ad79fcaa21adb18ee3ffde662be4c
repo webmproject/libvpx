@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fcfa47f1_23906929",
+        "filename": "test/vp9_intrapred_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-22T02:01:05Z",
+      "side": 1,
+      "message": "since the bitdepth is contained in the parameter list these could be joined and named simply SSE2 which is what the main application filters on when disabling unsupported architectures. maybe in a subsequent change...",
+      "range": {
+        "startLine": 331,
+        "startChar": 4,
+        "endLine": 331,
+        "endChar": 15
+      },
+      "revId": "d3861c1e191ad79fcaa21adb18ee3ffde662be4c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
