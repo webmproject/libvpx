@@ -1083,6 +1083,24 @@ static aom_codec_err_t ctrl_set_skip_loop_filter(aom_codec_alg_priv_t *ctx,
   return AOM_CODEC_OK;
 }
 
+static aom_codec_err_t ctrl_get_accounting(aom_codec_alg_priv_t *ctx,
+                                           va_list args) {
+#if !CONFIG_ACCOUNTING
+  (void)ctx;
+  (void)args;
+  return AOM_CODEC_INCAPABLE;
+#else
+  if (ctx->frame_workers) {
+    AVxWorker *const worker = ctx->frame_workers;
+    FrameWorkerData *const frame_worker_data = (FrameWorkerData *)worker->data1;
+    AV1Decoder *pbi = frame_worker_data->pbi;
+    Accounting **acct = va_arg(args, Accounting **);
+    *acct = &pbi->accounting;
+    return AOM_CODEC_OK;
+  }
+  return AOM_CODEC_ERROR;
+#endif
+}
 static aom_codec_err_t ctrl_set_decode_tile_row(aom_codec_alg_priv_t *ctx,
                                                 va_list args) {
   ctx->decode_tile_row = va_arg(args, int);
@@ -1119,6 +1137,7 @@ static aom_codec_ctrl_fn_map_t decoder_ctrl_maps[] = {
   { AV1D_GET_DISPLAY_SIZE, ctrl_get_render_size },
   { AV1D_GET_BIT_DEPTH, ctrl_get_bit_depth },
   { AV1D_GET_FRAME_SIZE, ctrl_get_frame_size },
+  { AV1_GET_ACCOUNTING, ctrl_get_accounting },
   { AV1_GET_NEW_FRAME_IMAGE, ctrl_get_new_frame_image },
 
   { -1, NULL },
