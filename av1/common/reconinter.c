@@ -710,16 +710,16 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane,
           if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
             high_inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
                                  subpel_x, subpel_y, sf, x_step, y_step, ref,
-                                 &mi->mbmi.interp_filter, xs, ys, xd->bd);
+                                 mi->mbmi.interp_filter, xs, ys, xd->bd);
           } else {
             inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
                             subpel_x, subpel_y, sf, x_step, y_step, ref,
-                            &mi->mbmi.interp_filter, xs, ys);
+                            mi->mbmi.interp_filter, xs, ys);
           }
 #else
           inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride, subpel_x,
                           subpel_y, sf, x_step, y_step, ref,
-                          &mi->mbmi.interp_filter, xs, ys);
+                          mi->mbmi.interp_filter, xs, ys);
 #endif
         }
       }
