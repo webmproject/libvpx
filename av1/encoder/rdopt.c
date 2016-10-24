@@ -8991,10 +8991,6 @@ void av1_rd_pick_inter_mode_sb(const AV1_COMP *cpi, TileDataEnc *tile_data,
           clamp_mv2(&cur_mv.as_mv, xd);
 
           if (!mv_check_bounds(x, &cur_mv.as_mv)) {
-            InterpFilter dummy_single_inter_filter[MB_MODE_COUNT]
-                                                  [TOTAL_REFS_PER_FRAME] = {
-                                                    { 0 }
-                                                  };
             int dummy_single_skippable[MB_MODE_COUNT]
                                       [TOTAL_REFS_PER_FRAME] = { { 0 } };
 #if CONFIG_EXT_INTER
@@ -9022,8 +9018,7 @@ void av1_rd_pick_inter_mode_sb(const AV1_COMP *cpi, TileDataEnc *tile_data,
 #else
                 dummy_single_newmv,
 #endif
-                dummy_single_inter_filter, dummy_single_skippable, &tmp_sse,
-                best_rd);
+                single_inter_filter, dummy_single_skippable, &tmp_sse, best_rd);
           }
 
           for (i = 0; i < mbmi->ref_mv_idx; ++i) {
