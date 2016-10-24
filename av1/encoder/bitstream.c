@@ -379,7 +379,7 @@ static void write_tx_size_vartx(const AV1_COMMON *cm, const MACROBLOCKD *xd,
 
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
 
-  if (depth == 2) {
+  if (depth == MAX_VARTX_DEPTH) {
     txfm_partition_update(xd->above_txfm_context + tx_col,
                           xd->left_txfm_context + tx_row, tx_size);
     return;

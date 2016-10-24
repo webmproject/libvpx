@@ -58,6 +58,10 @@ extern "C" {
 #define MAX_TILE_COLS 64
 #endif  // CONFIG_EXT_TILE
 
+#if CONFIG_VAR_TX
+#define MAX_VARTX_DEPTH 2
+#endif
+
 // Bitstream profiles indicated by 2-3 bits in the uncompressed header.
 // 00: Profile 0.  8-bit 4:2:0 only.
 // 10: Profile 1.  8-bit 4:4:4, 4:2:2, and 4:4:0.
