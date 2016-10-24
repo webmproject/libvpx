@@ -16,6 +16,10 @@
 #include <limits.h>
 
 #include "./aom_config.h"
+#if CONFIG_EC_ADAPT && !CONFIG_EC_MULTISYMBOL
+#error "CONFIG_EC_ADAPT is enabled without enabling CONFIG_EC_MULTISYMBOL."
+#endif
+
 #include "aom/aomdx.h"
 #include "aom/aom_integer.h"
 #if CONFIG_ANS
