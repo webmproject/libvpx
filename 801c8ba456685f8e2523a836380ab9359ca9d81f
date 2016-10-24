@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "81d9e40f_7330fa1f",
+        "filename": "av1/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1605,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-10-24T22:03:59Z",
+      "side": 1,
+      "message": "Probably need to add\n\nmbmi-\u003etx_type \u003d DCT_DCT;\n\nbefore txfm_rd_in_plane().\n\nSame as the one below.",
+      "revId": "801c8ba456685f8e2523a836380ab9359ca9d81f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
