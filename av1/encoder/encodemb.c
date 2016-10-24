@@ -1077,15 +1077,14 @@ void av1_encode_block_intra(int plane, int block, int blk_row, int blk_col,
   PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
   const TX_TYPE tx_type = get_tx_type(plane_type, xd, block, tx_size);
   PREDICTION_MODE mode;
-  const int bwl = b_width_log2_lookup[plane_bsize];
-  const int diff_stride = 4 * (1 << bwl);
+  const int diff_stride = block_size_wide[plane_bsize];
   uint8_t *src, *dst;
   int16_t *src_diff;
   uint16_t *eob = &p->eobs[block];
   const int src_stride = p->src.stride;
   const int dst_stride = pd->dst.stride;
-  const int tx1d_width = num_4x4_blocks_wide_txsize_lookup[tx_size] << 2;
-  const int tx1d_height = num_4x4_blocks_high_txsize_lookup[tx_size] << 2;
+  const int tx1d_width = tx_size_wide[tx_size];
+  const int tx1d_height = tx_size_high[tx_size];
   ENTROPY_CONTEXT *a = NULL, *l = NULL;
   int ctx;
 
