@@ -90,11 +90,11 @@ class TransformTestBase {
 
       for (int j = 0; j < num_coeffs_; ++j) {
 #if CONFIG_AOM_HIGHBITDEPTH
-        const uint32_t diff =
+        const int diff =
             bit_depth_ == AOM_BITS_8 ? dst[j] - src[j] : dst16[j] - src16[j];
 #else
         ASSERT_EQ(AOM_BITS_8, bit_depth_);
-        const uint32_t diff = dst[j] - src[j];
+        const int diff = dst[j] - src[j];
 #endif
         const uint32_t error = diff * diff;
         if (max_error < error) max_error = error;
@@ -309,10 +309,10 @@ class TransformTestBase {
 
       for (int j = 0; j < num_coeffs_; ++j) {
 #if CONFIG_AOM_HIGHBITDEPTH
-        const uint32_t diff =
+        const int diff =
             bit_depth_ == AOM_BITS_8 ? dst[j] - src[j] : dst16[j] - src16[j];
 #else
-        const uint32_t diff = dst[j] - src[j];
+        const int diff = dst[j] - src[j];
 #endif
         const uint32_t error = diff * diff;
         EXPECT_GE(static_cast<uint32_t>(limit), error)
