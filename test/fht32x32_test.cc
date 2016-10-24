@@ -90,12 +90,11 @@ class AV1Trans32x32HT : public libaom_test::TransformTestBase,
   IhtFunc inv_txfm_;
 };
 
-// TODO(luoyi): Owing to the range check in DCT_DCT of av1_fht32x32_avx2, as
-// input is out of the range, we use aom_fdct32x32_avx2. However this function
-// does not support CONFIG_AOM_HIGHBITDEPTH. I need to fix the scaling/rounding
-// of av1_fht32x32_avx2 then add this test on CONFIG_AOM_HIGHBITDEPTH.
-#if !CONFIG_AOM_HIGHBITDEPTH
 TEST_P(AV1Trans32x32HT, CoeffCheck) { RunCoeffCheck(); }
+// TODO(luoyi): As CONFIG_AOM_HIGHBITDEPTH = 1, our AVX2 implementation of
+// av1_fht32x32 does not support tran_low_t (int32_t) as intermediate result.
+// Therefore MemCheck test, tx_type=1,2,...,8 can't pass the test yet.
+#if !CONFIG_AOM_HIGHBITDEPTH
 TEST_P(AV1Trans32x32HT, MemCheck) { RunMemCheck(); }
 #endif
 

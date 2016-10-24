@@ -191,6 +191,7 @@ DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_loopfilter_sse2.c
 endif  # CONFIG_AOM_HIGHBITDEPTH
 
 DSP_SRCS-yes            += txfm_common.h
+DSP_SRCS-yes            += x86/txfm_common_intrin.h
 DSP_SRCS-$(HAVE_SSE2)   += x86/txfm_common_sse2.h
 DSP_SRCS-$(HAVE_MSA)    += mips/txfm_macros_msa.h
 # forward transform
