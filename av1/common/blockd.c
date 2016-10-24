@@ -95,21 +95,22 @@ void av1_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
                       TX_SIZE tx_size, int has_eob, int aoff, int loff) {
   ENTROPY_CONTEXT *const a = pd->above_context + aoff;
   ENTROPY_CONTEXT *const l = pd->left_context + loff;
-  const int tx_size_in_blocks = 1 << tx_size;
+  const int txs_wide = tx_size_wide_unit[tx_size];
+  const int txs_high = tx_size_high_unit[tx_size];
 
   // above
   if (has_eob && xd->mb_to_right_edge < 0) {
     int i;
     const int blocks_wide =
         pd->n4_w + (xd->mb_to_right_edge >> (5 + pd->subsampling_x));
-    int above_contexts = tx_size_in_blocks;
+    int above_contexts = txs_wide;
     if (above_contexts + aoff > blocks_wide)
       above_contexts = blocks_wide - aoff;
 
     for (i = 0; i < above_contexts; ++i) a[i] = has_eob;
-    for (i = above_contexts; i < tx_size_in_blocks; ++i) a[i] = 0;
+    for (i = above_contexts; i < txs_wide; ++i) a[i] = 0;
   } else {
-    memset(a, has_eob, sizeof(ENTROPY_CONTEXT) * tx_size_in_blocks);
+    memset(a, has_eob, sizeof(ENTROPY_CONTEXT) * txs_wide);
   }
 
   // left
@@ -117,13 +118,13 @@ void av1_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
     int i;
     const int blocks_high =
         pd->n4_h + (xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
-    int left_contexts = tx_size_in_blocks;
+    int left_contexts = txs_high;
     if (left_contexts + loff > blocks_high) left_contexts = blocks_high - loff;
 
     for (i = 0; i < left_contexts; ++i) l[i] = has_eob;
-    for (i = left_contexts; i < tx_size_in_blocks; ++i) l[i] = 0;
+    for (i = left_contexts; i < txs_high; ++i) l[i] = 0;
   } else {
-    memset(l, has_eob, sizeof(ENTROPY_CONTEXT) * tx_size_in_blocks);
+    memset(l, has_eob, sizeof(ENTROPY_CONTEXT) * txs_high);
   }
 }
 
