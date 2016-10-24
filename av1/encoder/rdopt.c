@@ -7017,14 +7017,11 @@ static int64_t handle_inter_mode(
     int64_t tmp_dist_sum = 0;
 
 #if CONFIG_DUAL_FILTER
-#if CONFIG_EXT_INTERP
-    for (i = 0; i < 25; ++i) {
+    for (i = 0; i < SWITCHABLE_FILTERS * SWITCHABLE_FILTERS; ++i)
 #else
-    for (i = 0; i < 9; ++i) {
+    for (i = 0; i < SWITCHABLE_FILTERS; ++i)
 #endif
-#else
-    for (i = 0; i < SWITCHABLE_FILTERS; ++i) {
-#endif
+    {
       int j;
       int64_t rs_rd;
       int tmp_skip_sb = 0;
@@ -7113,10 +7110,11 @@ static int64_t handle_inter_mode(
       if ((cm->interp_filter == SWITCHABLE && newbest) ||
           (cm->interp_filter != SWITCHABLE &&
 #if CONFIG_DUAL_FILTER
-           cm->interp_filter == mbmi->interp_filter[0])) {
+           cm->interp_filter == mbmi->interp_filter[0]
 #else
-           cm->interp_filter == mbmi->interp_filter)) {
+           cm->interp_filter == mbmi->interp_filter
 #endif
+           )) {
         pred_exists = 1;
         tmp_rd = best_rd;
 
