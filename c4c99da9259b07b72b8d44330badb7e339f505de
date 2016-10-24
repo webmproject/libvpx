@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "81d9e40f_332d92ab",
+        "filename": "av1/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1519,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-10-24T22:19:19Z",
+      "side": 1,
+      "message": "tx_size_wide_unit and num_4x4_blocks_wide_txsize_lookup are identical, will remove one of them?",
+      "range": {
+        "startLine": 1519,
+        "startChar": 18,
+        "endLine": 1519,
+        "endChar": 35
+      },
+      "revId": "c4c99da9259b07b72b8d44330badb7e339f505de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
