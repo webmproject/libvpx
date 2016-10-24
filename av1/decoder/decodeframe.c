@@ -2239,7 +2239,7 @@ static void setup_segmentation_dequant(AV1_COMMON *const cm) {
 
 static InterpFilter read_interp_filter(struct aom_read_bit_buffer *rb) {
   return aom_rb_read_bit(rb) ? SWITCHABLE
-                             : aom_rb_read_literal(rb, 2 + CONFIG_EXT_INTERP);
+                             : aom_rb_read_literal(rb, LOG_SWITCHABLE_FILTERS);
 }
 
 static void setup_render_size(AV1_COMMON *cm, struct aom_read_bit_buffer *rb) {
