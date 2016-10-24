@@ -307,6 +307,8 @@ typedef struct macroblockd_plane {
   uint16_t n4_w, n4_h;
   // log2 of n4_w, n4_h
   uint8_t n4_wl, n4_hl;
+  // block size in pixels
+  uint8_t width, height;
 
 #if CONFIG_AOM_QM
   const qm_val_t *seg_iqmatrix[MAX_SEGMENTS][2][TX_SIZES];

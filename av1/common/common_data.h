@@ -42,6 +42,12 @@ static const uint8_t mi_height_log2_lookup[BLOCK_SIZES] = {
 };
 
 // Width/height lookup tables in units of various block sizes
+static const uint8_t block_size_wide[BLOCK_SIZES] = {
+  4, 4, 8, 8, 8, 16, 16, 16, 32, 32, 32, 64, 64, IF_EXT_PARTITION(64, 128, 128)
+};
+static const uint8_t block_size_high[BLOCK_SIZES] = {
+  4, 8, 4, 8, 16, 8, 16, 32, 16, 32, 64, 32, 64, IF_EXT_PARTITION(128, 64, 128)
+};
 static const uint8_t num_4x4_blocks_wide_lookup[BLOCK_SIZES] = {
   1, 1, 2, 2, 2, 4, 4, 4, 8, 8, 8, 16, 16, IF_EXT_PARTITION(16, 32, 32)
 };
