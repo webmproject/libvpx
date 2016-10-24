@@ -16,6 +16,24 @@
       "revId": "f3a0fa8e73dd1b95f23b22a6d94db89ddc5d5a6e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "81d9e40f_101404b6",
+        "filename": "aom_scale/generic/aom_scale.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-10-24T18:52:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fcfa47f1_5254593a",
+      "revId": "f3a0fa8e73dd1b95f23b22a6d94db89ddc5d5a6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
