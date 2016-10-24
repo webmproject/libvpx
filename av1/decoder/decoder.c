@@ -99,10 +99,13 @@ AV1Decoder *av1_decoder_create(BufferPool *const pool) {
 
   cm->error.setjmp = 1;
 
-  CHECK_MEM_ERROR(cm, cm->fc, (FRAME_CONTEXT *)aom_calloc(1, sizeof(*cm->fc)));
-  CHECK_MEM_ERROR(
-      cm, cm->frame_contexts,
-      (FRAME_CONTEXT *)aom_calloc(FRAME_CONTEXTS, sizeof(*cm->frame_contexts)));
+  CHECK_MEM_ERROR(cm, cm->fc,
+                  (FRAME_CONTEXT *)aom_memalign(32, sizeof(*cm->fc)));
+  CHECK_MEM_ERROR(cm, cm->frame_contexts,
+                  (FRAME_CONTEXT *)aom_memalign(
+                      32, FRAME_CONTEXTS * sizeof(*cm->frame_contexts)));
+  memset(cm->fc, 0, sizeof(*cm->fc));
+  memset(cm->frame_contexts, 0, FRAME_CONTEXTS * sizeof(*cm->frame_contexts));
 
   pbi->need_resync = 1;
   once(initialize_dec);

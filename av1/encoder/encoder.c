@@ -2040,10 +2040,13 @@ AV1_COMP *av1_create_compressor(AV1EncoderConfig *oxcf,
   cm->free_mi = av1_enc_free_mi;
   cm->setup_mi = av1_enc_setup_mi;
 
-  CHECK_MEM_ERROR(cm, cm->fc, (FRAME_CONTEXT *)aom_calloc(1, sizeof(*cm->fc)));
-  CHECK_MEM_ERROR(
-      cm, cm->frame_contexts,
-      (FRAME_CONTEXT *)aom_calloc(FRAME_CONTEXTS, sizeof(*cm->frame_contexts)));
+  CHECK_MEM_ERROR(cm, cm->fc,
+                  (FRAME_CONTEXT *)aom_memalign(32, sizeof(*cm->fc)));
+  CHECK_MEM_ERROR(cm, cm->frame_contexts,
+                  (FRAME_CONTEXT *)aom_memalign(
+                      32, FRAME_CONTEXTS * sizeof(*cm->frame_contexts)));
+  memset(cm->fc, 0, sizeof(*cm->fc));
+  memset(cm->frame_contexts, 0, FRAME_CONTEXTS * sizeof(*cm->frame_contexts));
 
   cpi->resize_state = 0;
   cpi->resize_avg_qp = 0;
