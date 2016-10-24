@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fcfa47f1_57ebabc6",
+        "filename": "av1/decoder/decodemv.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-10-24T17:19:08Z",
+      "side": 1,
+      "message": "I would recommend making the \u00272\u0027 a macro such as MAX_VARTX_DEPTH which we can experiment with later.",
+      "revId": "94d5bfccdd5dbd0b04d41592f41031d6cc561aab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcfa47f1_97e533f1",
+        "filename": "av1/encoder/bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-10-24T17:19:08Z",
+      "side": 1,
+      "message": "make \u00272\u0027 a macro.",
+      "revId": "94d5bfccdd5dbd0b04d41592f41031d6cc561aab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
