@@ -228,7 +228,7 @@ static int av1_has_right(BLOCK_SIZE bsize, int mi_row, int mi_col,
                          TX_SIZE txsz, int y, int x, int ss_x) {
   const int wl = mi_width_log2_lookup[bsize];
   const int w = AOMMAX(num_4x4_blocks_wide_lookup[bsize] >> ss_x, 1);
-  const int step = 1 << txsz;
+  const int step = tx_size_wide_unit[txsz];
 
   // TODO(bshacklett, huisu): Currently the RD loop traverses 4X8 blocks in
   // inverted N order while in the bitstream the subblocks are stored in Z
@@ -285,7 +285,7 @@ static int av1_has_bottom(BLOCK_SIZE bsize, int mi_row, int mi_col,
     const int wl = mi_width_log2_lookup[bsize];
     const int hl = mi_height_log2_lookup[bsize];
     const int h = 1 << (hl + 1 - ss_y);
-    const int step = 1 << txsz;
+    const int step = tx_size_wide_unit[txsz];
     const uint8_t *order = orders[bsize];
     int my_order, bl_order;
 
@@ -673,7 +673,7 @@ static void dr_predictor(uint8_t *dst, ptrdiff_t stride, TX_SIZE tx_size,
                          INTRA_FILTER filter_type) {
   const int dx = get_dx(angle);
   const int dy = get_dy(angle);
-  const int bs = 4 * num_4x4_blocks_wide_txsize_lookup[tx_size];
+  const int bs = tx_size_wide[tx_size];
   assert(angle > 0 && angle < 270);
 
   if (angle > 0 && angle < 90) {
@@ -1202,7 +1202,7 @@ static void build_intra_predictors_high(
   DECLARE_ALIGNED(16, uint16_t, above_data[MAX_SB_SIZE + 16]);
   uint16_t *above_row = above_data + 16;
   const uint16_t *const_above_row = above_row;
-  const int bs = 4 * num_4x4_blocks_wide_txsize_lookup[tx_size];
+  const int bs = tx_size_wide[tx_size];
   int need_left = extend_modes[mode] & NEED_LEFT;
   int need_above = extend_modes[mode] & NEED_ABOVE;
   int need_above_left = extend_modes[mode] & NEED_ABOVELEFT;
@@ -1363,7 +1363,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
   DECLARE_ALIGNED(16, uint8_t, above_data[MAX_SB_SIZE + 16]);
   uint8_t *above_row = above_data + 16;
   const uint8_t *const_above_row = above_row;
-  const int bs = 4 * num_4x4_blocks_wide_txsize_lookup[tx_size];
+  const int bs = tx_size_wide[tx_size];
   int need_left = extend_modes[mode] & NEED_LEFT;
   int need_above = extend_modes[mode] & NEED_ABOVE;
   int need_above_left = extend_modes[mode] & NEED_ABOVELEFT;
@@ -1551,7 +1551,7 @@ void av1_predict_intra_block(const MACROBLOCKD *xd, int wpx, int hpx,
 
 #if CONFIG_PALETTE
   if (xd->mi[0]->mbmi.palette_mode_info.palette_size[plane != 0] > 0) {
-    const int bs = 4 * num_4x4_blocks_wide_txsize_lookup[tx_size];
+    const int bs = tx_size_wide[tx_size];
     const int stride = wpx;
     int r, c;
     uint8_t *map = NULL;
