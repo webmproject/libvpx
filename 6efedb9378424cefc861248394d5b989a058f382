@@ -66,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "fcfa47f1_b2b03d2b",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-24T18:07:00Z",
+      "side": 1,
+      "message": "It still steps up to 32 bits, returning the high half which effectively shifts/narrows the result ... sure the implementation is down to a single instruction, but the behavior is similar to expanding to 32.",
+      "parentUuid": "fcfa47f1_36cc28c1",
+      "revId": "6efedb9378424cefc861248394d5b989a058f382",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fcfa47f1_169c8ca5",
         "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
         "patchSetId": 12
@@ -89,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "fcfa47f1_126651d7",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-24T18:07:00Z",
+      "side": 1,
+      "message": "Ack. Will fix after the other comments are resolved.",
+      "parentUuid": "fcfa47f1_169c8ca5",
+      "range": {
+        "startLine": 36,
+        "startChar": 22,
+        "endLine": 36,
+        "endChar": 26
+      },
+      "revId": "6efedb9378424cefc861248394d5b989a058f382",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fcfa47f1_3616e80b",
         "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
         "patchSetId": 12
@@ -100,6 +142,30 @@
       "writtenOn": "2016-10-21T23:58:28Z",
       "side": 1,
       "message": "currently these won\u0027t be int16 in high bitdepth. you\u0027ll want to cast these",
+      "range": {
+        "startLine": 197,
+        "startChar": 40,
+        "endLine": 197,
+        "endChar": 51
+      },
+      "revId": "6efedb9378424cefc861248394d5b989a058f382",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcfa47f1_52e1f913",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-24T18:07:00Z",
+      "side": 1,
+      "message": "The whole file falls down with high bit depth. Wouldn\u0027t the correct fix be to use int16_t for those constants?\n\nThey are actually currently int32_t (tran_high_t, not tran_low_t). I guess it doesn\u0027t complain about the conversion since they are const.",
+      "parentUuid": "fcfa47f1_3616e80b",
       "range": {
         "startLine": 197,
         "startChar": 40,
