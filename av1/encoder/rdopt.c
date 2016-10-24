@@ -1944,8 +1944,9 @@ static int64_t rd_pick_intra4x4block(
           int16_t *const src_diff =
               av1_raster_block_offset_int16(BLOCK_8X8, block, p->src_diff);
           xd->mi[0]->bmi[block].as_mode = mode;
-          av1_predict_intra_block(xd, 1, 1, TX_4X4, mode, dst, dst_stride, dst,
-                                  dst_stride, col + idx, row + idy, 0);
+          av1_predict_intra_block(xd, pd->width, pd->height, TX_4X4, mode, dst,
+                                  dst_stride, dst, dst_stride, col + idx,
+                                  row + idy, 0);
           aom_highbd_subtract_block(4, 4, src_diff, 8, src, src_stride, dst,
                                     dst_stride, xd->bd);
           if (xd->lossless[xd->mi[0]->mbmi.segment_id]) {
@@ -2064,8 +2065,9 @@ static int64_t rd_pick_intra4x4block(
         int16_t *const src_diff =
             av1_raster_block_offset_int16(BLOCK_8X8, block, p->src_diff);
         xd->mi[0]->bmi[block].as_mode = mode;
-        av1_predict_intra_block(xd, 1, 1, TX_4X4, mode, dst, dst_stride, dst,
-                                dst_stride, col + idx, row + idy, 0);
+        av1_predict_intra_block(xd, pd->width, pd->height, TX_4X4, mode, dst,
+                                dst_stride, dst, dst_stride, col + idx,
+                                row + idy, 0);
         aom_subtract_block(4, 4, src_diff, 8, src, src_stride, dst, dst_stride);
 
         if (xd->lossless[xd->mi[0]->mbmi.segment_id]) {
