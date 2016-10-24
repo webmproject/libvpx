@@ -1068,7 +1068,6 @@ void av1_encode_block_intra(int plane, int block, int blk_row, int blk_col,
   const TX_TYPE tx_type = get_tx_type(plane_type, xd, block, tx_size);
   PREDICTION_MODE mode;
   const int bwl = b_width_log2_lookup[plane_bsize];
-  const int bhl = b_height_log2_lookup[plane_bsize];
   const int diff_stride = 4 * (1 << bwl);
   uint8_t *src, *dst;
   int16_t *src_diff;
@@ -1087,10 +1086,9 @@ void av1_encode_block_intra(int plane, int block, int blk_row, int blk_col,
   dst = &pd->dst.buf[4 * (blk_row * dst_stride + blk_col)];
   src = &p->src.buf[4 * (blk_row * src_stride + blk_col)];
   src_diff = &p->src_diff[4 * (blk_row * diff_stride + blk_col)];
-
   mode = plane == 0 ? get_y_mode(xd->mi[0], block) : mbmi->uv_mode;
-  av1_predict_intra_block(xd, bwl, bhl, tx_size, mode, dst, dst_stride, dst,
-                          dst_stride, blk_col, blk_row, plane);
+  av1_predict_intra_block(xd, pd->width, pd->height, tx_size, mode, dst,
+                          dst_stride, dst, dst_stride, blk_col, blk_row, plane);
 #if CONFIG_AOM_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     aom_highbd_subtract_block(tx1d_height, tx1d_width, src_diff, diff_stride,

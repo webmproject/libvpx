@@ -1507,25 +1507,21 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
   }
 }
 
-void av1_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
+void av1_predict_intra_block(const MACROBLOCKD *xd, int wpx, int hpx,
                              TX_SIZE tx_size, PREDICTION_MODE mode,
                              const uint8_t *ref, int ref_stride, uint8_t *dst,
                              int dst_stride, int col_off, int row_off,
                              int plane) {
   const BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   const struct macroblockd_plane *const pd = &xd->plane[plane];
-  const int txw = num_4x4_blocks_wide_txsize_lookup[tx_size];
-  const int txh = num_4x4_blocks_high_txsize_lookup[tx_size];
+  const int txw = tx_size_wide_unit[tx_size];
+  const int txh = tx_size_high_unit[tx_size];
   const int have_top = row_off || xd->up_available;
   const int have_left = col_off || xd->left_available;
   const int x = col_off * 4;
   const int y = row_off * 4;
-  const int bw = pd->subsampling_x ? 1 << bwl_in : AOMMAX(2, 1 << bwl_in);
-  const int bh = pd->subsampling_y ? 1 << bhl_in : AOMMAX(2, 1 << bhl_in);
   const int mi_row = -xd->mb_to_top_edge >> (3 + MI_SIZE_LOG2);
   const int mi_col = -xd->mb_to_left_edge >> (3 + MI_SIZE_LOG2);
-  const int wpx = 4 * bw;
-  const int hpx = 4 * bh;
   const int txwpx = 4 * txw;
   const int txhpx = 4 * txh;
   // Distance between the right edge of this prediction block to
@@ -1554,7 +1550,7 @@ void av1_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, int bhl_in,
 #if CONFIG_PALETTE
   if (xd->mi[0]->mbmi.palette_mode_info.palette_size[plane != 0] > 0) {
     const int bs = 4 * num_4x4_blocks_wide_txsize_lookup[tx_size];
-    const int stride = 4 * (1 << bwl_in);
+    const int stride = wpx;
     int r, c;
     uint8_t *map = NULL;
 #if CONFIG_AOM_HIGHBITDEPTH

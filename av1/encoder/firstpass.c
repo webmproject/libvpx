@@ -579,6 +579,9 @@ void av1_first_pass(AV1_COMP *cpi, const struct lookahead_entry *source) {
       set_mi_row_col(xd, &tile, mb_row << 1, num_8x8_blocks_high_lookup[bsize],
                      mb_col << 1, num_8x8_blocks_wide_lookup[bsize],
                      cm->mi_rows, cm->mi_cols);
+      set_plane_n4(xd, num_8x8_blocks_wide_lookup[bsize],
+                   num_8x8_blocks_high_lookup[bsize],
+                   mi_width_log2_lookup[bsize], mi_height_log2_lookup[bsize]);
 
       // Do intra 16x16 prediction.
       xd->mi[0]->mbmi.segment_id = 0;
