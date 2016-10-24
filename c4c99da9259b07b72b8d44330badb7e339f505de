@@ -22,6 +22,30 @@
       "revId": "c4c99da9259b07b72b8d44330badb7e339f505de",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "81d9e40f_7371dac2",
+        "filename": "av1/common/reconintra.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1519,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-10-24T22:23:19Z",
+      "side": 1,
+      "message": "Indeed. In the process of removing of one them.\n\nNeed to integrate rectangular transform size and 2x2 transform block size. Once we get it settled, we can take out these duplicate table definitions.",
+      "parentUuid": "81d9e40f_332d92ab",
+      "range": {
+        "startLine": 1519,
+        "startChar": 18,
+        "endLine": 1519,
+        "endChar": 35
+      },
+      "revId": "c4c99da9259b07b72b8d44330badb7e339f505de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
