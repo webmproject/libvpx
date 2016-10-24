@@ -68,7 +68,6 @@ static void scale1d_2t1_i(const unsigned char *source, int source_step,
                           unsigned int source_scale, unsigned int source_length,
                           unsigned char *dest, int dest_step,
                           unsigned int dest_scale, unsigned int dest_length) {
-  const unsigned int source_pitch = source_step;
   const unsigned char *const dest_end = dest + dest_length * dest_step;
   (void)source_length;
   (void)source_scale;
@@ -81,9 +80,9 @@ static void scale1d_2t1_i(const unsigned char *source, int source_step,
   dest += dest_step;
 
   while (dest < dest_end) {
-    const unsigned int a = 3 * source[-source_pitch];
+    const unsigned int a = 3 * source[-source_step];
     const unsigned int b = 10 * source[0];
-    const unsigned int c = 3 * source[source_pitch];
+    const unsigned int c = 3 * source[source_step];
     *dest = (unsigned char)((8 + a + b + c) >> 4);
     source += source_step;
     dest += dest_step;
