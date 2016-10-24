@@ -9373,7 +9373,7 @@ void av1_rd_pick_inter_mode_sb(const AV1_COMP *cpi, TileDataEnc *tile_data,
     int best_rate_nocoef;
 #endif
     int64_t distortion2 = 0, distortion_y = 0, dummy_rd = best_rd, this_rd;
-    int skippable = 0, rate_overhead = 0;
+    int skippable = 0, rate_overhead_palette = 0;
     TX_SIZE best_tx_size, uv_tx;
     TX_TYPE best_tx_type;
     PALETTE_MODE_INFO palette_mode_info;
@@ -9381,13 +9381,12 @@ void av1_rd_pick_inter_mode_sb(const AV1_COMP *cpi, TileDataEnc *tile_data,
         x->palette_buffer->best_palette_color_map;
     uint8_t *const color_map = xd->plane[0].color_index_map;
 
-    rate_overhead = 0;
     mbmi->mode = DC_PRED;
     mbmi->uv_mode = DC_PRED;
     mbmi->ref_frame[0] = INTRA_FRAME;
     mbmi->ref_frame[1] = NONE;
     palette_mode_info.palette_size[0] = 0;
-    rate_overhead = rd_pick_palette_intra_sby(
+    rate_overhead_palette = rd_pick_palette_intra_sby(
         cpi, x, bsize, palette_ctx, intra_mode_cost[DC_PRED],
         &palette_mode_info, best_palette_color_map, &best_tx_size,
         &best_tx_type, &mode_selected, &dummy_rd);
@@ -9436,7 +9435,7 @@ void av1_rd_pick_inter_mode_sb(const AV1_COMP *cpi, TileDataEnc *tile_data,
 #endif  // CONFIG_FILTER_INTRA
     skippable = skippable && skip_uvs[uv_tx];
     distortion2 = distortion_y + dist_uvs[uv_tx];
-    rate2 = rate_y + rate_overhead + rate_uv_intra[uv_tx];
+    rate2 = rate_y + rate_overhead_palette + rate_uv_intra[uv_tx];
     rate2 += ref_costs_single[INTRA_FRAME];
 
     if (skippable) {
