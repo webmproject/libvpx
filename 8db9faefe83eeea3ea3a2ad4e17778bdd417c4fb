@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fcfa47f1_179be3ff",
+        "filename": "aom_dsp/ans.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-10-24T16:10:39Z",
+      "side": 1,
+      "message": "Alex, Is this commit still applicable? quick search says RANS_PROB_BITS is defined as 15 in nextgenv2 currently.",
+      "range": {
+        "startLine": 42,
+        "startChar": 29,
+        "endLine": 42,
+        "endChar": 43
+      },
+      "revId": "8db9faefe83eeea3ea3a2ad4e17778bdd417c4fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
