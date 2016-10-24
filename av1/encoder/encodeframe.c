@@ -5261,11 +5261,15 @@ static void encode_superblock(const AV1_COMP *const cpi, ThreadData *td,
 #endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
         if (is_inter)
           tx_partition_count_update(cm, xd, bsize, mi_row, mi_col, td->counts);
+        else
+          ++td->counts->tx_size[tx_size_cat][tx_size_ctx][coded_tx_size];
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
       }
 #endif
 #endif
+#if !CONFIG_VAR_TX
       ++td->counts->tx_size[tx_size_cat][tx_size_ctx][coded_tx_size];
+#endif
     } else {
       int i, j;
       TX_SIZE tx_size;
