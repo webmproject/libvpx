@@ -70,37 +70,9 @@ static const struct av1_token
     };
 #endif  // CONFIG_EXT_INTER
 #if CONFIG_PALETTE
-static const struct av1_token palette_size_encodings[] = {
-  { 0, 1 }, { 2, 2 }, { 6, 3 }, { 14, 4 }, { 30, 5 }, { 62, 6 }, { 63, 6 },
-};
-static const struct av1_token
-    palette_color_encodings[PALETTE_MAX_SIZE - 1][PALETTE_MAX_SIZE] = {
-      { { 0, 1 }, { 1, 1 } },                                  // 2 colors
-      { { 0, 1 }, { 2, 2 }, { 3, 2 } },                        // 3 colors
-      { { 0, 1 }, { 2, 2 }, { 6, 3 }, { 7, 3 } },              // 4 colors
-      { { 0, 1 }, { 2, 2 }, { 6, 3 }, { 14, 4 }, { 15, 4 } },  // 5 colors
-      { { 0, 1 },
-        { 2, 2 },
-        { 6, 3 },
-        { 14, 4 },
-        { 30, 5 },
-        { 31, 5 } },  // 6 colors
-      { { 0, 1 },
-        { 2, 2 },
-        { 6, 3 },
-        { 14, 4 },
-        { 30, 5 },
-        { 62, 6 },
-        { 63, 6 } },  // 7 colors
-      { { 0, 1 },
-        { 2, 2 },
-        { 6, 3 },
-        { 14, 4 },
-        { 30, 5 },
-        { 62, 6 },
-        { 126, 7 },
-        { 127, 7 } },  // 8 colors
-    };
+static struct av1_token palette_size_encodings[PALETTE_MAX_SIZE - 1];
+static struct av1_token palette_color_encodings[PALETTE_MAX_SIZE - 1]
+                                               [PALETTE_MAX_SIZE];
 #endif  // CONFIG_PALETTE
 static const struct av1_token tx_size_encodings[TX_SIZES - 1][TX_SIZES] = {
   { { 0, 1 }, { 1, 1 } },                      // Max tx_size is 8X8
@@ -145,8 +117,10 @@ static struct av1_token switchable_restore_encodings[RESTORE_SWITCHABLE_TYPES];
 #endif  // CONFIG_LOOP_RESTORATION
 
 void av1_encode_token_init(void) {
-#if CONFIG_EXT_TX
+#if CONFIG_EXT_TX || CONFIG_PALETTE
   int s;
+#endif  // CONFIG_EXT_TX || CONFIG_PALETTE
+#if CONFIG_EXT_TX
   for (s = 1; s < EXT_TX_SETS_INTER; ++s) {
     av1_tokens_from_tree(ext_tx_inter_encodings[s], av1_ext_tx_inter_tree[s]);
   }
@@ -162,6 +136,13 @@ void av1_encode_token_init(void) {
 #if !CONFIG_REF_MV
   av1_tokens_from_tree(inter_mode_encodings, av1_inter_mode_tree);
 #endif
+
+#if CONFIG_PALETTE
+  av1_tokens_from_tree(palette_size_encodings, av1_palette_size_tree);
+  for (s = 0; s < PALETTE_MAX_SIZE - 1; ++s) {
+    av1_tokens_from_tree(palette_color_encodings[s], av1_palette_color_tree[s]);
+  }
+#endif  // CONFIG_PALETTE
 
 #if CONFIG_EXT_INTRA
   av1_tokens_from_tree(intra_filter_encodings, av1_intra_filter_tree);
