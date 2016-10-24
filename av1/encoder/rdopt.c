@@ -3116,13 +3116,13 @@ static void select_tx_block(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
       *skip = 0;
     }
 
-    if (tx_size > TX_4X4 && depth < 2)
+    if (tx_size > TX_4X4 && depth < MAX_VARTX_DEPTH)
       *rate += av1_cost_bit(cpi->common.fc->txfm_partition_prob[ctx], 0);
     this_rd = RDCOST(x->rdmult, x->rddiv, *rate, *dist);
     tmp_eob = p->eobs[block];
   }
 
-  if (tx_size > TX_4X4 && depth < 2) {
+  if (tx_size > TX_4X4 && depth < MAX_VARTX_DEPTH) {
     BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
     int bsl = b_height_log2_lookup[bsize];
     int sub_step = num_4x4_blocks_txsize_lookup[tx_size - 1];

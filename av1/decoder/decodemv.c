@@ -294,7 +294,7 @@ static void read_tx_size_vartx(AV1_COMMON *cm, MACROBLOCKD *xd,
 
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
 
-  if (depth == 2) {
+  if (depth == MAX_VARTX_DEPTH) {
     int idx, idy;
     inter_tx_size[0][0] = tx_size;
     for (idy = 0; idy < num_4x4_blocks_high_txsize_lookup[tx_size] / 2; ++idy)
