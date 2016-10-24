@@ -7044,14 +7044,6 @@ static int64_t handle_inter_mode(
       } else {
         int rate_sum = 0;
         int64_t dist_sum = 0;
-
-        if (i > 0 && cpi->sf.adaptive_interp_filter_search &&
-            (cpi->sf.interp_filter_search_mask & (1 << i))) {
-          rate_sum = INT_MAX;
-          dist_sum = INT64_MAX;
-          continue;
-        }
-
         if ((cm->interp_filter == SWITCHABLE && (!i || best_needs_copy)) ||
 #if CONFIG_EXT_INTER
             is_comp_interintra_pred ||
@@ -7081,13 +7073,6 @@ static int64_t handle_inter_mode(
         if (i == 0 && intpel_mv && IsInterpolatingFilter(i)) {
           tmp_rate_sum = rate_sum;
           tmp_dist_sum = dist_sum;
-        }
-      }
-
-      if (i == 0 && cpi->sf.use_rd_breakout && ref_best_rd < INT64_MAX) {
-        if (rd / 2 > ref_best_rd) {
-          restore_dst_buf(xd, orig_dst, orig_dst_stride);
-          return INT64_MAX;
         }
       }
       newbest = i == 0 || rd < best_rd;
