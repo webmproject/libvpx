@@ -76,7 +76,7 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
   const aom_prob(*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       fc->coef_probs[tx_size_ctx][type][ref];
   const aom_prob *prob;
-#if CONFIG_RANS
+#if CONFIG_RANS || CONFIG_DAALA_EC
   const aom_cdf_prob(*const coef_cdfs)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
       fc->coef_cdfs[tx_size_ctx][type][ref];
   const aom_cdf_prob(*cdf)[ENTROPY_TOKENS];
@@ -169,7 +169,7 @@ static int decode_coefs(const MACROBLOCKD *xd, PLANE_TYPE type,
 
     *max_scan_line = AOMMAX(*max_scan_line, scan[c]);
 
-#if CONFIG_RANS
+#if CONFIG_RANS || CONFIG_DAALA_EC
     cdf = &coef_cdfs[band][ctx];
     token = ONE_TOKEN +
             aom_read_symbol(r, *cdf, CATEGORY6_TOKEN - ONE_TOKEN + 1, ACCT_STR);

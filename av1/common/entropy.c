@@ -407,7 +407,7 @@ const aom_prob av1_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES] = {
   { 255, 246, 247, 255, 239, 255, 253, 255 },
 };
 
-#if CONFIG_RANS
+#if CONFIG_RANS || CONFIG_DAALA_EC
 // Model obtained from a 2-sided zero-centered distribution derived
 // from a Pareto distribution. The cdf of the distribution is:
 // cdf(x) = 0.5 + 0.5 * sgn(x) * [1 - {alpha/(alpha + |x|)} ^ beta]
@@ -2804,7 +2804,7 @@ void av1_model_to_full_probs(const aom_prob *model, aom_prob *full) {
   extend_to_full_distribution(&full[UNCONSTRAINED_NODES], model[PIVOT_NODE]);
 }
 
-#if CONFIG_RANS
+#if CONFIG_RANS || CONFIG_DAALA_EC
 static void build_token_cdfs(const aom_prob *pdf_model,
                              aom_cdf_prob cdf[ENTROPY_TOKENS]) {
   int i, sum = 0;
@@ -2838,7 +2838,7 @@ void av1_default_coef_probs(AV1_COMMON *cm) {
   av1_copy(cm->fc->coef_probs[TX_16X16], default_coef_probs_16x16);
   av1_copy(cm->fc->coef_probs[TX_32X32], default_coef_probs_32x32);
 #endif  // CONFIG_ENTROPY
-#if CONFIG_RANS
+#if CONFIG_RANS || CONFIG_DAALA_EC
   av1_coef_pareto_cdfs(cm->fc);
 #endif  // CONFIG_RANS
 }

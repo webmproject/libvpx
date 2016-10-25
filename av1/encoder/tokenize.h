@@ -36,9 +36,9 @@ typedef struct {
 
 typedef struct {
   const aom_prob *context_tree;
-#if CONFIG_ANS || CONFIG_DAALA_EC
+#if CONFIG_RANS || CONFIG_DAALA_EC
   const aom_cdf_prob (*token_cdf)[ENTROPY_TOKENS];
-#endif  // CONFIG_ANS
+#endif
   EXTRABIT extra;
   uint8_t token;
   uint8_t skip_eob_node;

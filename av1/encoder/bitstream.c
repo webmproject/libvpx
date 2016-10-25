@@ -703,17 +703,14 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
   while (p < stop && p->token != EOSB_TOKEN) {
     const int token = p->token;
     aom_tree_index index = 0;
-#if !CONFIG_RANS
+#if !CONFIG_RANS && !CONFIG_DAALA_EC
     const struct av1_token *const coef_encoding = &av1_coef_encodings[token];
-#if CONFIG_DAALA_EC
-    int i = 0;
-#endif
     int coef_value = coef_encoding->value;
     int coef_length = coef_encoding->len;
 #endif  // !CONFIG_RANS
     const av1_extra_bit *const extra_bits = &extra_bits_table[token];
 
-#if CONFIG_RANS
+#if CONFIG_RANS || CONFIG_DAALA_EC
     /* skip one or two nodes */
     if (!p->skip_eob_node) aom_write(w, token != EOB_TOKEN, p->context_tree[0]);
 
@@ -724,34 +721,6 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
         aom_write_symbol(w, token - ONE_TOKEN, *p->token_cdf,
                          CATEGORY6_TOKEN - ONE_TOKEN + 1);
       }
-    }
-#else
-#if CONFIG_DAALA_EC
-    /* skip one or two nodes */
-    if (p->skip_eob_node) {
-      coef_length -= p->skip_eob_node;
-      i = 2 * p->skip_eob_node;
-    }
-
-    // TODO(jbb): expanding this can lead to big gains.  It allows
-    // much better branch prediction and would enable us to avoid numerous
-    // lookups and compares.
-
-    // If we have a token that's in the constrained set, the coefficient tree
-    // is split into two treed writes.  The first treed write takes care of the
-    // unconstrained nodes.  The second treed write takes care of the
-    // constrained nodes.
-    if (token >= TWO_TOKEN && token < EOB_TOKEN) {
-      int len = UNCONSTRAINED_NODES - p->skip_eob_node;
-      int bits = coef_value >> (coef_length - len);
-      aom_write_tree_bits(w, av1_coef_tree, p->context_tree, bits, len, i);
-      coef_value &= (1 << (coef_length - len)) - 1;
-      aom_write_tree(w, av1_coef_con_tree,
-                     av1_pareto8_full[p->context_tree[PIVOT_NODE] - 1],
-                     coef_value, coef_length - len, 0);
-    } else {
-      aom_write_tree_bits(w, av1_coef_tree, p->context_tree, coef_value,
-                          coef_length, i);
     }
 #else
     /* skip one or two nodes */
@@ -774,7 +743,6 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
         }
       }
     }
-#endif
 #endif  // CONFIG_RANS
 
     if (extra_bits->base_val) {
