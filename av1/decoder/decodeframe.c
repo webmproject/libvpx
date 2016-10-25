@@ -2778,9 +2778,9 @@ static const uint8_t *decode_tiles(AV1Decoder *pbi, const uint8_t *data,
 #endif
 #if CONFIG_ACCOUNTING
       if (pbi->acct_enabled) {
-        tile_data->bit_reader.accounting = &pbi->accounting;
+        td->bit_reader.accounting = &pbi->accounting;
       } else {
-        tile_data->bit_reader.accounting = NULL;
+        td->bit_reader.accounting = NULL;
       }
 #endif
       av1_init_macroblockd(cm, &td->xd, td->dqcoeff);
@@ -2803,8 +2803,8 @@ static const uint8_t *decode_tiles(AV1Decoder *pbi, const uint8_t *data,
       TileData *const td = pbi->tile_data + tile_cols * row + col;
 #if CONFIG_ACCOUNTING
       if (pbi->acct_enabled) {
-        tile_data->bit_reader.accounting->last_tell_frac =
-            aom_reader_tell_frac(&tile_data->bit_reader);
+        td->bit_reader.accounting->last_tell_frac =
+            aom_reader_tell_frac(&td->bit_reader);
       }
 #endif
 
