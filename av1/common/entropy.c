@@ -2894,7 +2894,7 @@ void av1_adapt_coef_probs(AV1_COMMON *cm) {
 #endif
 
 #if CONFIG_ENTROPY
-  if (cm->last_frame_type == KEY_FRAME) {
+  if (!frame_is_intra_only(cm) && cm->last_frame_type == KEY_FRAME) {
     update_factor = COEF_MAX_UPDATE_FACTOR_AFTER_KEY_BITS; /* adapt quickly */
     count_sat = COEF_COUNT_SAT_AFTER_KEY_BITS;
   } else {
@@ -2905,7 +2905,7 @@ void av1_adapt_coef_probs(AV1_COMMON *cm) {
     update_factor = COEF_MAX_UPDATE_FACTOR_BITS;
   }
 #else
-  if (cm->last_frame_type == KEY_FRAME) {
+  if (!frame_is_intra_only(cm) && cm->last_frame_type == KEY_FRAME) {
     update_factor = COEF_MAX_UPDATE_FACTOR_AFTER_KEY; /* adapt quickly */
     count_sat = COEF_COUNT_SAT_AFTER_KEY;
   } else {
