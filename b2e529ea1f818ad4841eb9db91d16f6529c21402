@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "41f36cab_54cea414",
+        "filename": "aom_dsp/dkboolreader.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-10-25T16:25:11Z",
+      "side": 1,
+      "message": "This looks like it should be a different commit",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 3
+      },
+      "revId": "b2e529ea1f818ad4841eb9db91d16f6529c21402",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "41f36cab_34cf9814",
+        "filename": "av1/common/entropy.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 425,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-10-25T16:25:11Z",
+      "side": 1,
+      "message": "No #if here, the tables are the same on both sides",
+      "range": {
+        "startLine": 425,
+        "startChar": 0,
+        "endLine": 425,
+        "endChar": 19
+      },
+      "revId": "b2e529ea1f818ad4841eb9db91d16f6529c21402",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "41f36cab_1446dcbe",
+        "filename": "av1/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 774,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-10-25T16:25:11Z",
+      "side": 1,
+      "message": "It seems suspicious that we are keeping the daala_ec block here and not the non-daala_ec block",
+      "range": {
+        "startLine": 745,
+        "startChar": 1,
+        "endLine": 774,
+        "endChar": 5
+      },
+      "revId": "b2e529ea1f818ad4841eb9db91d16f6529c21402",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "41f36cab_74b00097",
+        "filename": "av1/encoder/bitstream.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-10-25T16:25:11Z",
+      "side": 1,
+      "message": "This seems stray",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 74
+      },
+      "revId": "b2e529ea1f818ad4841eb9db91d16f6529c21402",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
