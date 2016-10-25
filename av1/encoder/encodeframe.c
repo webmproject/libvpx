@@ -1159,7 +1159,9 @@ static void update_state(const AV1_COMP *const cpi, ThreadData *td,
       av1_update_mv_count(td);
 #if CONFIG_GLOBAL_MOTION
       if (bsize >= BLOCK_8X8) {
-        update_global_motion_used(mbmi->mode, mbmi, cpi);
+        // TODO(sarahparker): global motion stats need to be handled per-tile
+        // to be compatible with tile-based threading.
+        update_global_motion_used(mbmi->mode, mbmi, (AV1_COMP *)cpi);
       } else {
         const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
         const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
@@ -1167,7 +1169,8 @@ static void update_state(const AV1_COMP *const cpi, ThreadData *td,
         for (idy = 0; idy < 2; idy += num_4x4_h) {
           for (idx = 0; idx < 2; idx += num_4x4_w) {
             const int j = idy * 2 + idx;
-            update_global_motion_used(mi->bmi[j].as_mode, mbmi, cpi);
+            update_global_motion_used(mi->bmi[j].as_mode, mbmi,
+                                      (AV1_COMP *)cpi);
           }
         }
       }
