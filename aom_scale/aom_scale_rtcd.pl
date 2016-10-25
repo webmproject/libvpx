@@ -8,12 +8,12 @@ forward_decls qw/aom_scale_forward_decls/;
 # Scaler functions
 if (aom_config("CONFIG_SPATIAL_RESAMPLING") eq "yes") {
     add_proto qw/void aom_horizontal_line_5_4_scale/, "const unsigned char *source, unsigned int source_width, unsigned char *dest, unsigned int dest_width";
-    add_proto qw/void aom_vertical_band_5_4_scale/, "unsigned char *source, unsigned int src_pitch, unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width";
+    add_proto qw/void aom_vertical_band_5_4_scale/, "unsigned char *source, int src_pitch, unsigned char *dest, int dest_pitch, unsigned int dest_width";
     add_proto qw/void aom_horizontal_line_5_3_scale/, "const unsigned char *source, unsigned int source_width, unsigned char *dest, unsigned int dest_width";
-    add_proto qw/void aom_vertical_band_5_3_scale/, "unsigned char *source, unsigned int src_pitch, unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width";
+    add_proto qw/void aom_vertical_band_5_3_scale/, "unsigned char *source, int src_pitch, unsigned char *dest, int dest_pitch, unsigned int dest_width";
     add_proto qw/void aom_horizontal_line_2_1_scale/, "const unsigned char *source, unsigned int source_width, unsigned char *dest, unsigned int dest_width";
-    add_proto qw/void aom_vertical_band_2_1_scale/, "unsigned char *source, unsigned int src_pitch, unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width";
-    add_proto qw/void aom_vertical_band_2_1_scale_i/, "unsigned char *source, unsigned int src_pitch, unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width";
+    add_proto qw/void aom_vertical_band_2_1_scale/, "unsigned char *source, int src_pitch, unsigned char *dest, int dest_pitch, unsigned int dest_width";
+    add_proto qw/void aom_vertical_band_2_1_scale_i/, "unsigned char *source, int src_pitch, unsigned char *dest, int dest_pitch, unsigned int dest_width";
 }
 
 add_proto qw/void aom_yv12_extend_frame_borders/, "struct yv12_buffer_config *ybf";

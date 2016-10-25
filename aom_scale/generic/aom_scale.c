@@ -252,8 +252,8 @@ static void Scale2D(
 
   void (*horiz_line_scale)(const unsigned char *, unsigned int, unsigned char *,
                            unsigned int) = NULL;
-  void (*vert_band_scale)(unsigned char *, unsigned int, unsigned char *,
-                          unsigned int, unsigned int) = NULL;
+  void (*vert_band_scale)(unsigned char *, int, unsigned char *, int,
+                          unsigned int) = NULL;
 
   int ratio_scalable = 1;
   int interpolation = 0;
