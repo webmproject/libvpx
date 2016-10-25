@@ -1270,49 +1270,7 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
     av1_build_inter_predictors_sb(xd, mi_row, mi_col, AOMMAX(bsize, BLOCK_8X8));
 #if CONFIG_MOTION_VAR
     if (mbmi->motion_mode == OBMC_CAUSAL) {
-#if CONFIG_AOM_HIGHBITDEPTH
-      DECLARE_ALIGNED(16, uint8_t, tmp_buf1[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
-      DECLARE_ALIGNED(16, uint8_t, tmp_buf2[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
-#else
-      DECLARE_ALIGNED(16, uint8_t, tmp_buf1[MAX_MB_PLANE * MAX_SB_SQUARE]);
-      DECLARE_ALIGNED(16, uint8_t, tmp_buf2[MAX_MB_PLANE * MAX_SB_SQUARE]);
-#endif  // CONFIG_AOM_HIGHBITDEPTH
-      uint8_t *dst_buf1[MAX_MB_PLANE], *dst_buf2[MAX_MB_PLANE];
-      int dst_width1[MAX_MB_PLANE] = { MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE };
-      int dst_width2[MAX_MB_PLANE] = { MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE };
-      int dst_height1[MAX_MB_PLANE] = { MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE };
-      int dst_height2[MAX_MB_PLANE] = { MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE };
-      int dst_stride1[MAX_MB_PLANE] = { MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE };
-      int dst_stride2[MAX_MB_PLANE] = { MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE };
-
-      assert(mbmi->sb_type >= BLOCK_8X8);
-#if CONFIG_AOM_HIGHBITDEPTH
-      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-        int len = sizeof(uint16_t);
-        dst_buf1[0] = CONVERT_TO_BYTEPTR(tmp_buf1);
-        dst_buf1[1] = CONVERT_TO_BYTEPTR(tmp_buf1 + MAX_SB_SQUARE * len);
-        dst_buf1[2] = CONVERT_TO_BYTEPTR(tmp_buf1 + MAX_SB_SQUARE * 2 * len);
-        dst_buf2[0] = CONVERT_TO_BYTEPTR(tmp_buf2);
-        dst_buf2[1] = CONVERT_TO_BYTEPTR(tmp_buf2 + MAX_SB_SQUARE * len);
-        dst_buf2[2] = CONVERT_TO_BYTEPTR(tmp_buf2 + MAX_SB_SQUARE * 2 * len);
-      } else {
-#endif  // CONFIG_AOM_HIGHBITDEPTH
-        dst_buf1[0] = tmp_buf1;
-        dst_buf1[1] = tmp_buf1 + MAX_SB_SQUARE;
-        dst_buf1[2] = tmp_buf1 + MAX_SB_SQUARE * 2;
-        dst_buf2[0] = tmp_buf2;
-        dst_buf2[1] = tmp_buf2 + MAX_SB_SQUARE;
-        dst_buf2[2] = tmp_buf2 + MAX_SB_SQUARE * 2;
-#if CONFIG_AOM_HIGHBITDEPTH
-      }
-#endif  // CONFIG_AOM_HIGHBITDEPTH
-      av1_build_prediction_by_above_preds(cm, xd, mi_row, mi_col, dst_buf1,
-                                          dst_width1, dst_height1, dst_stride1);
-      av1_build_prediction_by_left_preds(cm, xd, mi_row, mi_col, dst_buf2,
-                                         dst_width2, dst_height2, dst_stride2);
-      av1_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
-      av1_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, dst_buf1,
-                                      dst_stride1, dst_buf2, dst_stride2);
+      av1_build_obmc_inter_predictors_sb(cm, xd, mi_row, mi_col);
     }
 #endif  // CONFIG_MOTION_VAR
 

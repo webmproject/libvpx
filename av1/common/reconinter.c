@@ -546,6 +546,7 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane,
   struct macroblockd_plane *const pd = &xd->plane[plane];
 #if CONFIG_MOTION_VAR
   const MODE_INFO *mi = xd->mi[mi_col_offset + xd->mi_stride * mi_row_offset];
+  const int build_for_obmc = !(mi_col_offset == 0 && mi_row_offset == 0);
 #else
   const MODE_INFO *mi = xd->mi[0];
 #endif  // CONFIG_MOTION_VAR
@@ -567,7 +568,11 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane,
 // TODO(sarahparker) enable the use of DUAL_FILTER in warped motion functions
 // in order to allow GLOBAL_MOTION and DUAL_FILTER to work together
 #if CONFIG_DUAL_FILTER
+#if CONFIG_MOTION_VAR
+  if (mi->mbmi.sb_type < BLOCK_8X8 && plane > 0 && !build_for_obmc) {
+#else
   if (mi->mbmi.sb_type < BLOCK_8X8 && plane > 0) {
+#endif  // CONFIG_MOTION_VAR
     // block size in log2
     const int b4_wl = b_width_log2_lookup[mi->mbmi.sb_type];
     const int b4_hl = b_height_log2_lookup[mi->mbmi.sb_type];
@@ -648,7 +653,11 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane,
 #endif
 
 #if CONFIG_SUB8X8_MC
+#if CONFIG_MOTION_VAR
+  if (mi->mbmi.sb_type < BLOCK_8X8 && plane > 0 && !build_for_obmc) {
+#else
   if (mi->mbmi.sb_type < BLOCK_8X8 && plane > 0) {
+#endif  // CONFIG_MOTION_VAR
     // block size in log2
     const int b4_wl = b_width_log2_lookup[mi->mbmi.sb_type];
     const int b4_hl = b_height_log2_lookup[mi->mbmi.sb_type];
@@ -734,7 +743,12 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane,
     struct buf_2d *const dst_buf = &pd->dst;
     uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
     const MV mv = mi->mbmi.sb_type < BLOCK_8X8
+#if CONFIG_MOTION_VAR
+                      ? (build_for_obmc ? mi->bmi[block].as_mv[ref].as_mv
+                                        : average_split_mvs(pd, mi, ref, block))
+#else
                       ? average_split_mvs(pd, mi, ref, block)
+#endif  // CONFIG_MOTION_VAR
                       : mi->mbmi.mv[ref].as_mv;
 
     // TODO(jkoleszar): This clamping is done in the incorrect place for the
@@ -1371,9 +1385,11 @@ void av1_build_prediction_by_above_preds(const AV1_COMMON *cm, MACROBLOCKD *xd,
   const TileInfo *const tile = &xd->tile;
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   int i, j, mi_step, ref;
+  int mb_to_right_edge_base = xd->mb_to_right_edge;
 
   if (mi_row <= tile->mi_row_start) return;
 
+  xd->mb_to_bottom_edge += xd->n8_h * 32;
   for (i = 0; i < AOMMIN(xd->n8_w, cm->mi_cols - mi_col); i += mi_step) {
     int mi_row_offset = -1;
     int mi_col_offset = i;
@@ -1412,6 +1428,8 @@ void av1_build_prediction_by_above_preds(const AV1_COMMON *cm, MACROBLOCKD *xd,
     }
 
     xd->mb_to_left_edge = -(((mi_col + i) * MI_SIZE) * 8);
+    xd->mb_to_right_edge =
+        mb_to_right_edge_base + (xd->n8_w - i - mi_step) * 64;
     mi_x = (mi_col + i) << MI_SIZE_LOG2;
     mi_y = mi_row << MI_SIZE_LOG2;
 
@@ -1425,19 +1443,19 @@ void av1_build_prediction_by_above_preds(const AV1_COMMON *cm, MACROBLOCKD *xd,
         const PARTITION_TYPE bp = BLOCK_8X8 - above_mbmi->sb_type;
         const int have_vsplit = bp != PARTITION_HORZ;
         const int have_hsplit = bp != PARTITION_VERT;
-        const int num_4x4_w = 2 >> ((!have_vsplit) | pd->subsampling_x);
-        const int num_4x4_h = 2 >> ((!have_hsplit) | pd->subsampling_y);
-        const int pw = 8 >> (have_vsplit | pd->subsampling_x);
+        const int num_4x4_w = 2 >> !have_vsplit;
+        const int num_4x4_h = 2 >> !have_hsplit;
+        const int pw = 8 >> (have_vsplit + pd->subsampling_x);
         int x, y;
 
         for (y = 0; y < num_4x4_h; ++y)
           for (x = 0; x < num_4x4_w; ++x) {
-            if ((bp == PARTITION_HORZ || bp == PARTITION_SPLIT) && y == 0 &&
-                !pd->subsampling_y)
+            if ((bp == PARTITION_HORZ || bp == PARTITION_SPLIT) && y == 0)
               continue;
 
             build_inter_predictors(xd, j, mi_col_offset, mi_row_offset,
-                                   y * 2 + x, bw, bh, 4 * x, 0, pw, bh,
+                                   y * 2 + x, bw, bh,
+                                   (4 * x) >> pd->subsampling_x, 0, pw, bh,
 #if CONFIG_SUPERTX && CONFIG_EXT_INTER
                                    0, 0,
 #endif  // CONFIG_SUPERTX && CONFIG_EXT_INTER
@@ -1457,6 +1475,8 @@ void av1_build_prediction_by_above_preds(const AV1_COMMON *cm, MACROBLOCKD *xd,
 #endif  // CONFIG_EXT_INTER
   }
   xd->mb_to_left_edge = -((mi_col * MI_SIZE) * 8);
+  xd->mb_to_right_edge = mb_to_right_edge_base;
+  xd->mb_to_bottom_edge -= xd->n8_h * 32;
 }
 
 void av1_build_prediction_by_left_preds(const AV1_COMMON *cm, MACROBLOCKD *xd,
@@ -1468,9 +1488,11 @@ void av1_build_prediction_by_left_preds(const AV1_COMMON *cm, MACROBLOCKD *xd,
   const TileInfo *const tile = &xd->tile;
   BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   int i, j, mi_step, ref;
+  int mb_to_bottom_edge_base = xd->mb_to_bottom_edge;
 
   if (mi_col == 0 || (mi_col - 1 < tile->mi_col_start)) return;
 
+  xd->mb_to_right_edge += xd->n8_w * 32;
   for (i = 0; i < AOMMIN(xd->n8_h, cm->mi_rows - mi_row); i += mi_step) {
     int mi_row_offset = i;
     int mi_col_offset = -1;
@@ -1509,6 +1531,8 @@ void av1_build_prediction_by_left_preds(const AV1_COMMON *cm, MACROBLOCKD *xd,
     }
 
     xd->mb_to_top_edge = -(((mi_row + i) * MI_SIZE) * 8);
+    xd->mb_to_bottom_edge =
+        mb_to_bottom_edge_base + (xd->n8_h - i - mi_step) * 64;
     mi_x = mi_col << MI_SIZE_LOG2;
     mi_y = (mi_row + i) << MI_SIZE_LOG2;
 
@@ -1522,19 +1546,19 @@ void av1_build_prediction_by_left_preds(const AV1_COMMON *cm, MACROBLOCKD *xd,
         const PARTITION_TYPE bp = BLOCK_8X8 - left_mbmi->sb_type;
         const int have_vsplit = bp != PARTITION_HORZ;
         const int have_hsplit = bp != PARTITION_VERT;
-        const int num_4x4_w = 2 >> ((!have_vsplit) | pd->subsampling_x);
-        const int num_4x4_h = 2 >> ((!have_hsplit) | pd->subsampling_y);
-        const int ph = 8 >> (have_hsplit | pd->subsampling_y);
+        const int num_4x4_w = 2 >> !have_vsplit;
+        const int num_4x4_h = 2 >> !have_hsplit;
+        const int ph = 8 >> (have_hsplit + pd->subsampling_y);
         int x, y;
 
         for (y = 0; y < num_4x4_h; ++y)
           for (x = 0; x < num_4x4_w; ++x) {
-            if ((bp == PARTITION_VERT || bp == PARTITION_SPLIT) && x == 0 &&
-                !pd->subsampling_x)
+            if ((bp == PARTITION_VERT || bp == PARTITION_SPLIT) && x == 0)
               continue;
 
             build_inter_predictors(xd, j, mi_col_offset, mi_row_offset,
-                                   y * 2 + x, bw, bh, 0, 4 * y, bw, ph,
+                                   y * 2 + x, bw, bh, 0,
+                                   (4 * y) >> pd->subsampling_y, bw, ph,
 #if CONFIG_SUPERTX && CONFIG_EXT_INTER
                                    0, 0,
 #endif  // CONFIG_SUPERTX && CONFIG_EXT_INTER
@@ -1554,6 +1578,54 @@ void av1_build_prediction_by_left_preds(const AV1_COMMON *cm, MACROBLOCKD *xd,
 #endif  // CONFIG_EXT_INTER
   }
   xd->mb_to_top_edge = -((mi_row * MI_SIZE) * 8);
+  xd->mb_to_bottom_edge = mb_to_bottom_edge_base;
+  xd->mb_to_right_edge -= xd->n8_w * 32;
+}
+
+void av1_build_obmc_inter_predictors_sb(const AV1_COMMON *cm, MACROBLOCKD *xd,
+                                        int mi_row, int mi_col) {
+#if CONFIG_AOM_HIGHBITDEPTH
+  DECLARE_ALIGNED(16, uint8_t, tmp_buf1[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
+  DECLARE_ALIGNED(16, uint8_t, tmp_buf2[2 * MAX_MB_PLANE * MAX_SB_SQUARE]);
+#else
+  DECLARE_ALIGNED(16, uint8_t, tmp_buf1[MAX_MB_PLANE * MAX_SB_SQUARE]);
+  DECLARE_ALIGNED(16, uint8_t, tmp_buf2[MAX_MB_PLANE * MAX_SB_SQUARE]);
+#endif  // CONFIG_AOM_HIGHBITDEPTH
+  uint8_t *dst_buf1[MAX_MB_PLANE], *dst_buf2[MAX_MB_PLANE];
+  int dst_stride1[MAX_MB_PLANE] = { MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE };
+  int dst_stride2[MAX_MB_PLANE] = { MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE };
+  int dst_width1[MAX_MB_PLANE] = { MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE };
+  int dst_width2[MAX_MB_PLANE] = { MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE };
+  int dst_height1[MAX_MB_PLANE] = { MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE };
+  int dst_height2[MAX_MB_PLANE] = { MAX_SB_SIZE, MAX_SB_SIZE, MAX_SB_SIZE };
+
+#if CONFIG_AOM_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    int len = sizeof(uint16_t);
+    dst_buf1[0] = CONVERT_TO_BYTEPTR(tmp_buf1);
+    dst_buf1[1] = CONVERT_TO_BYTEPTR(tmp_buf1 + MAX_SB_SQUARE * len);
+    dst_buf1[2] = CONVERT_TO_BYTEPTR(tmp_buf1 + MAX_SB_SQUARE * 2 * len);
+    dst_buf2[0] = CONVERT_TO_BYTEPTR(tmp_buf2);
+    dst_buf2[1] = CONVERT_TO_BYTEPTR(tmp_buf2 + MAX_SB_SQUARE * len);
+    dst_buf2[2] = CONVERT_TO_BYTEPTR(tmp_buf2 + MAX_SB_SQUARE * 2 * len);
+  } else {
+#endif  // CONFIG_AOM_HIGHBITDEPTH
+    dst_buf1[0] = tmp_buf1;
+    dst_buf1[1] = tmp_buf1 + MAX_SB_SQUARE;
+    dst_buf1[2] = tmp_buf1 + MAX_SB_SQUARE * 2;
+    dst_buf2[0] = tmp_buf2;
+    dst_buf2[1] = tmp_buf2 + MAX_SB_SQUARE;
+    dst_buf2[2] = tmp_buf2 + MAX_SB_SQUARE * 2;
+#if CONFIG_AOM_HIGHBITDEPTH
+  }
+#endif  // CONFIG_AOM_HIGHBITDEPTH
+  av1_build_prediction_by_above_preds(cm, xd, mi_row, mi_col, dst_buf1,
+                                      dst_width1, dst_height1, dst_stride1);
+  av1_build_prediction_by_left_preds(cm, xd, mi_row, mi_col, dst_buf2,
+                                     dst_width2, dst_height2, dst_stride2);
+  av1_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
+  av1_build_obmc_inter_prediction(cm, xd, mi_row, mi_col, dst_buf1, dst_stride1,
+                                  dst_buf2, dst_stride2);
 }
 #endif  // CONFIG_MOTION_VAR
 
