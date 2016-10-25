@@ -82,6 +82,10 @@ static INLINE const SCAN_ORDER *get_inter_scan(TX_SIZE tx_size,
 
 static INLINE const SCAN_ORDER *get_scan(const AV1_COMMON *cm, TX_SIZE tx_size,
                                          TX_TYPE tx_type, int is_inter) {
+#if CONFIG_ADAPT_SCAN
+  (void)is_inter;
+  return &cm->fc->sc[tx_size][tx_type];
+#else  // CONFIG_ADAPT_SCAN
   (void)cm;
 #if CONFIG_EXT_TX
   return is_inter ? &av1_inter_scan_orders[tx_size][tx_type]
@@ -90,6 +94,7 @@ static INLINE const SCAN_ORDER *get_scan(const AV1_COMMON *cm, TX_SIZE tx_size,
   (void)is_inter;
   return &av1_intra_scan_orders[tx_size][tx_type];
 #endif  // CONFIG_EXT_TX
+#endif  // CONFIG_ADAPT_SCAN
 }
 
 #ifdef __cplusplus

@@ -12,6 +12,7 @@
 #include "aom_mem/aom_mem.h"
 
 #include "av1/common/reconinter.h"
+#include "av1/common/scan.h"
 #include "av1/common/onyxc_int.h"
 #include "av1/common/seg_common.h"
 
@@ -1755,6 +1756,9 @@ void av1_setup_past_independence(AV1_COMMON *cm) {
   av1_default_coef_probs(cm);
   init_mode_probs(cm->fc);
   av1_init_mv_probs(cm);
+#if CONFIG_ADAPT_SCAN
+  av1_init_scan_order(cm);
+#endif
   cm->fc->initialized = 1;
 
   if (cm->frame_type == KEY_FRAME || cm->error_resilient_mode ||

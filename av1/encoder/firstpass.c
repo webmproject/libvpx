@@ -535,6 +535,9 @@ void av1_first_pass(AV1_COMP *cpi, const struct lookahead_entry *source) {
   }
 
   av1_init_mv_probs(cm);
+#if CONFIG_ADAPT_SCAN
+  av1_init_scan_order(cm);
+#endif
   av1_initialize_rd_consts(cpi);
 
   // Tiling is ignored in the first pass.

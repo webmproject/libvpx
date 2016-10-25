@@ -288,6 +288,10 @@ void av1_coef_pareto_cdfs(struct frame_contexts *fc);
 
 #endif  // CONFIG_ENTROPY
 
+#if CONFIG_ADAPT_SCAN
+#define ADAPT_SCAN_UPDATE_RATE_16 (1 << 13)
+#endif
+
 static INLINE aom_prob av1_merge_probs(aom_prob pre_prob,
                                        const unsigned int ct[2],
                                        unsigned int count_sat,
