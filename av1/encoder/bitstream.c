@@ -690,6 +690,15 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
   int count = 0;
   const int seg_eob = get_tx2d_size(tx);
 #endif
+#if CONFIG_AOM_HIGHBITDEPTH
+  const av1_extra_bit *const extra_bits_table =
+      (bit_depth == AOM_BITS_12)
+          ? av1_extra_bits_high12
+          : (bit_depth == AOM_BITS_10) ? av1_extra_bits_high10 : av1_extra_bits;
+#else
+  const av1_extra_bit *const extra_bits_table = av1_extra_bits;
+  (void)bit_depth;
+#endif  // CONFIG_AOM_HIGHBITDEPTH
 
   while (p < stop && p->token != EOSB_TOKEN) {
     const int token = p->token;
@@ -702,16 +711,7 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
     int coef_value = coef_encoding->value;
     int coef_length = coef_encoding->len;
 #endif  // !CONFIG_RANS
-#if CONFIG_AOM_HIGHBITDEPTH
-    const av1_extra_bit *const extra_bits_av1 =
-        (bit_depth == AOM_BITS_12)
-            ? &av1_extra_bits_high12[token]
-            : (bit_depth == AOM_BITS_10) ? &av1_extra_bits_high10[token]
-                                         : &av1_extra_bits[token];
-#else
-    const av1_extra_bit *const extra_bits_av1 = &av1_extra_bits[token];
-    (void)bit_depth;
-#endif  // CONFIG_AOM_HIGHBITDEPTH
+    const av1_extra_bit *const extra_bits = &extra_bits_table[token];
 
 #if CONFIG_RANS
     /* skip one or two nodes */
@@ -777,17 +777,19 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
 #endif
 #endif  // CONFIG_RANS
 
-    if (extra_bits_av1->base_val) {
-      const int extra_bits = p->extra;
-      const int extra_bits_av1_length = extra_bits_av1->len;
-      int skip_bits = (extra_bits_av1->base_val == CAT6_MIN_VAL)
+    if (extra_bits->base_val) {
+      const int bit_string = p->extra;
+      const int bit_string_length = extra_bits->len;  // Length of extra bits to
+                                                      // be written excluding
+                                                      // the sign bit.
+      int skip_bits = (extra_bits->base_val == CAT6_MIN_VAL)
                           ? TX_SIZES - 1 - txsize_sqr_up_map[tx]
                           : 0;
 
-      if (extra_bits_av1_length) {
-        const unsigned char *pb = extra_bits_av1->prob;
-        const int value = extra_bits >> 1;
-        const int num_bits = extra_bits_av1_length;  // number of bits in value
+      if (bit_string_length > 0) {
+        const unsigned char *pb = extra_bits->prob;
+        const int value = bit_string >> 1;
+        const int num_bits = bit_string_length;  // number of bits in value
         assert(num_bits > 0);
 
         for (index = 0; index < num_bits; ++index) {
@@ -802,7 +804,7 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
         }
       }
 
-      aom_write_bit(w, extra_bits & 1);
+      aom_write_bit(w, bit_string & 1);
     }
     ++p;
 
