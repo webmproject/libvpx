@@ -74,7 +74,7 @@ static struct av1_token palette_size_encodings[PALETTE_MAX_SIZE - 1];
 static struct av1_token palette_color_encodings[PALETTE_MAX_SIZE - 1]
                                                [PALETTE_MAX_SIZE];
 #endif  // CONFIG_PALETTE
-static const struct av1_token tx_size_encodings[TX_SIZES - 1][TX_SIZES] = {
+static const struct av1_token tx_size_encodings[MAX_TX_DEPTH][TX_SIZES] = {
   { { 0, 1 }, { 1, 1 } },                      // Max tx_size is 8X8
   { { 0, 1 }, { 2, 2 }, { 3, 2 } },            // Max tx_size is 16X16
   { { 0, 1 }, { 2, 2 }, { 6, 3 }, { 7, 3 } },  // Max tx_size is 32X32
@@ -2904,7 +2904,7 @@ static void update_txfm_probs(AV1_COMMON *cm, aom_writer *w,
                               FRAME_COUNTS *counts) {
   if (cm->tx_mode == TX_MODE_SELECT) {
     int i, j;
-    for (i = 0; i < TX_SIZES - 1; ++i)
+    for (i = 0; i < MAX_TX_DEPTH; ++i)
       for (j = 0; j < TX_SIZE_CONTEXTS; ++j)
         prob_diff_update(av1_tx_size_tree[i], cm->fc->tx_size_probs[i][j],
                          counts->tx_size[i][j], i + 2, w);
