@@ -89,6 +89,7 @@ class AVxEncoderThreadTest
         encoder->Control(AOME_SET_ARNR_MAXFRAMES, 7);
         encoder->Control(AOME_SET_ARNR_STRENGTH, 5);
         encoder->Control(AOME_SET_ARNR_TYPE, 3);
+        encoder->Control(AV1E_SET_FRAME_PARALLEL_DECODING, 0);
       } else {
         encoder->Control(AOME_SET_ENABLEAUTOALTREF, 0);
         encoder->Control(AV1E_SET_AQ_MODE, 3);
@@ -180,5 +181,5 @@ AV1_INSTANTIATE_TEST_CASE(AVxEncoderThreadTest,
 AV1_INSTANTIATE_TEST_CASE(AVxEncoderThreadTestLarge,
                           ::testing::Values(::libaom_test::kTwoPassGood,
                                             ::libaom_test::kOnePassGood),
-                          ::testing::Range(1, 3));
+                          ::testing::Range(0, 3));
 }  // namespace

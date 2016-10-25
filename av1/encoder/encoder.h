@@ -268,13 +268,13 @@ typedef struct TileDataEnc {
   TileInfo tile_info;
   int thresh_freq_fact[BLOCK_SIZES][MAX_MODES];
   int mode_map[BLOCK_SIZES][MAX_MODES];
+  int m_search_count;
+  int ex_search_count;
 } TileDataEnc;
 
 typedef struct RD_COUNTS {
   av1_coeff_count coef_counts[TX_SIZES][PLANE_TYPES];
   int64_t comp_pred_diff[REFERENCE_MODES];
-  int m_search_count;
-  int ex_search_count;
 } RD_COUNTS;
 
 typedef struct ThreadData {
