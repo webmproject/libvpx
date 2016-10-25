@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c1e75c23_92505c4b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2016-10-25T18:32:11Z",
+      "side": 1,
+      "message": "could you please include a reason in the commit message as to why this is being hard-coded to 0 and not parameter\u0027ized to test both 0 and 1?",
+      "range": {
+        "startLine": 10,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 16
+      },
+      "revId": "274d5f7e32251741fba11bcefa3ec623c82e2482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
