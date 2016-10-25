@@ -175,6 +175,30 @@
       "revId": "6efedb9378424cefc861248394d5b989a058f382",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c1e75c23_f27e885b",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-25T20:00:29Z",
+      "side": 1,
+      "message": "you can get that warning, but 64 -\u003e 32 is one that\u0027s more sensitive. I think they should be int16 always, yes. There are probably assumptions built in to existing calculations around the promotion so that will need to be done carefully. I was planning on taking a look after the base hbd NEON coverage was there",
+      "parentUuid": "fcfa47f1_52e1f913",
+      "range": {
+        "startLine": 197,
+        "startChar": 40,
+        "endLine": 197,
+        "endChar": 51
+      },
+      "revId": "6efedb9378424cefc861248394d5b989a058f382",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
