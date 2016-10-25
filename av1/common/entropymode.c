@@ -901,30 +901,24 @@ static const aom_prob default_rect_tx_prob[TX_SIZES - 1] = { 192, 192, 192 };
 int av1_get_palette_color_context(const uint8_t *color_map, int cols, int r,
                                   int c, int n, uint8_t *color_order,
                                   int *color_idx) {
-  int i, j, max, max_idx, temp;
+  int i;
+  // The +10 below should not be needed. But we get a warning "array subscript
+  // is above array bounds [-Werror=array-bounds]" without it, possibly due to
+  // this (or similar) bug: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=59124
   int scores[PALETTE_MAX_SIZE + 10];
-  int weights[4] = { 3, 2, 3, 2 };
+  const int weights[4] = { 3, 2, 3, 2 };
   int color_ctx = 0;
   int color_neighbors[4];
   int inverse_color_order[PALETTE_MAX_SIZE];
   assert(n <= PALETTE_MAX_SIZE);
 
-  if (c - 1 >= 0)
-    color_neighbors[0] = color_map[r * cols + c - 1];
-  else
-    color_neighbors[0] = -1;
-  if (c - 1 >= 0 && r - 1 >= 0)
-    color_neighbors[1] = color_map[(r - 1) * cols + c - 1];
-  else
-    color_neighbors[1] = -1;
-  if (r - 1 >= 0)
-    color_neighbors[2] = color_map[(r - 1) * cols + c];
-  else
-    color_neighbors[2] = -1;
-  if (r - 1 >= 0 && c + 1 <= cols - 1)
-    color_neighbors[3] = color_map[(r - 1) * cols + c + 1];
-  else
-    color_neighbors[3] = -1;
+  color_neighbors[0] = (c - 1 >= 0) ? color_map[r * cols + c - 1] : -1;
+  color_neighbors[1] =
+      (c - 1 >= 0 && r - 1 >= 0) ? color_map[(r - 1) * cols + c - 1] : -1;
+  color_neighbors[2] = (r - 1 >= 0) ? color_map[(r - 1) * cols + c] : -1;
+  color_neighbors[3] = (r - 1 >= 0 && c + 1 <= cols - 1)
+                           ? color_map[(r - 1) * cols + c + 1]
+                           : -1;
 
   for (i = 0; i < PALETTE_MAX_SIZE; ++i) {
     color_order[i] = i;
@@ -932,23 +926,25 @@ int av1_get_palette_color_context(const uint8_t *color_map, int cols, int r,
   }
   memset(scores, 0, PALETTE_MAX_SIZE * sizeof(scores[0]));
   for (i = 0; i < 4; ++i) {
-    if (color_neighbors[i] >= 0) scores[color_neighbors[i]] += weights[i];
+    if (color_neighbors[i] >= 0) {
+      scores[color_neighbors[i]] += weights[i];
+    }
   }
 
+  // Get the top 4 scores (sorted from large to small).
   for (i = 0; i < 4; ++i) {
-    max = scores[i];
-    max_idx = i;
-    j = i + 1;
-    while (j < n) {
+    int max = scores[i];
+    int max_idx = i;
+    int j;
+    for (j = i + 1; j < n; ++j) {
       if (scores[j] > max) {
         max = scores[j];
         max_idx = j;
       }
-      ++j;
     }
 
     if (max_idx != i) {
-      temp = scores[i];
+      int temp = scores[i];
       scores[i] = scores[max_idx];
       scores[max_idx] = temp;
 
