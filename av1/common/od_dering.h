@@ -16,11 +16,6 @@
 
 #include "odintrin.h"
 
-#if defined(DAALA_ODINTRIN)
-#include "filter.h"
-typedef int16_t od_dering_in;
-#endif
-
 #define OD_DERINGSIZES (2)
 
 #define OD_DERING_NBLOCKS (OD_BSIZE_MAX / 8)

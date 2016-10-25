@@ -40,7 +40,7 @@ const int OD_DIRECTION_OFFSETS_TABLE[8][3] = {
    in a particular direction. Since each direction have the same sum(x^2) term,
    that term is never computed. See Section 2, step 2, of:
    http://jmvalin.ca/notes/intra_paint.pdf */
-int od_dir_find8_c(const od_dering_in *img, int stride, int32_t *var,
+int od_dir_find8_c(const int16_t *img, int stride, int32_t *var,
                    int coeff_shift) {
   int i;
   int32_t cost[8] = { 0 };

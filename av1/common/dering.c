@@ -143,7 +143,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
   int r, c;
   int sbr, sbc;
   int nhsb, nvsb;
-  od_dering_in src[OD_DERING_INBUF_SIZE];
+  int16_t src[OD_DERING_INBUF_SIZE];
   int16_t *linebuf[3];
   int16_t colbuf[3][OD_BSIZE_MAX + 2*OD_FILT_VBORDER][OD_FILT_HBORDER];
   dering_list dlist[MAX_MIB_SIZE*MAX_MIB_SIZE];
