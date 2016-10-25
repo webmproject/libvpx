@@ -1327,8 +1327,8 @@ static void update_state_supertx(const AV1_COMP *const cpi, ThreadData *td,
 #if CONFIG_DUAL_FILTER
       update_filter_type_count(td->counts, xd, mbmi);
 #else
-      const int ctx = av1_get_pred_context_switchable_interp(xd);
-      ++td->counts->switchable_interp[ctx][mbmi->interp_filter];
+      const int pred_ctx = av1_get_pred_context_switchable_interp(xd);
+      ++td->counts->switchable_interp[pred_ctx][mbmi->interp_filter];
 #endif
     }
 
