@@ -22,6 +22,30 @@
       "revId": "32d4f4d6ef9d90274ae07c682579bab64a12fe33",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c1e75c23_55ad3e67",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2016-10-25T20:23:15Z",
+      "side": 1,
+      "message": "ASSERT would stop the testing, easer for debugging. EXPECT would keep on poping up non-equal values.",
+      "parentUuid": "c1e75c23_d2838425",
+      "range": {
+        "startLine": 224,
+        "startChar": 8,
+        "endLine": 224,
+        "endChar": 14
+      },
+      "revId": "32d4f4d6ef9d90274ae07c682579bab64a12fe33",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
