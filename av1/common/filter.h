@@ -33,8 +33,12 @@ extern "C" {
 
 #define SUPPORT_NONINTERPOLATING_FILTERS 0 /* turn on for experimentation */
 #define SWITCHABLE_FILTERS 5               /* Number of switchable filters */
+#define LOG_SWITCHABLE_FILTERS \
+  3 /* (1 << LOG_SWITCHABLE_FILTERS) > SWITCHABLE_FILTERS */
 #else
 #define SWITCHABLE_FILTERS 3 /* Number of switchable filters */
+#define LOG_SWITCHABLE_FILTERS \
+  2 /* (1 << LOG_SWITCHABLE_FILTERS) > SWITCHABLE_FILTERS */
 #endif                       // CONFIG_EXT_INTERP
 
 #define USE_TEMPORALFILTER_12TAP 1
