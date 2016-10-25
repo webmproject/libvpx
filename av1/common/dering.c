@@ -54,8 +54,10 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
   unsigned char *bskip;
   int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS] = { { 0 } };
   int stride;
-  int bsize[3];
-  int dec[3];
+  int bsize_x[3];
+  int bsize_y[3];
+  int dec_x[3];
+  int dec_y[3];
   int pli;
   int coeff_shift = AOMMAX(cm->bit_depth - 8, 0);
   nvsb = (cm->mi_rows + MAX_MIB_SIZE - 1) / MAX_MIB_SIZE;
@@ -63,14 +65,16 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
   bskip = aom_malloc(sizeof(*bskip) * cm->mi_rows * cm->mi_cols);
   av1_setup_dst_planes(xd->plane, frame, 0, 0);
   for (pli = 0; pli < 3; pli++) {
-    dec[pli] = xd->plane[pli].subsampling_x;
-    bsize[pli] = 8 >> dec[pli];
+    dec_x[pli] = xd->plane[pli].subsampling_x;
+    dec_y[pli] = xd->plane[pli].subsampling_y;
+    bsize_x[pli] = 8 >> dec_x[pli];
+    bsize_y[pli] = 8 >> dec_y[pli];
   }
-  stride = bsize[0] * cm->mi_cols;
+  stride = bsize_x[0] * cm->mi_cols;
   for (pli = 0; pli < 3; pli++) {
     src[pli] = aom_malloc(sizeof(*src) * cm->mi_rows * cm->mi_cols * 64);
-    for (r = 0; r < bsize[pli] * cm->mi_rows; ++r) {
-      for (c = 0; c < bsize[pli] * cm->mi_cols; ++c) {
+    for (r = 0; r < bsize_y[pli] * cm->mi_rows; ++r) {
+      for (c = 0; c < bsize_x[pli] * cm->mi_cols; ++c) {
 #if CONFIG_AOM_HIGHBITDEPTH
         if (cm->use_highbitdepth) {
           src[pli][r * stride + c] = CONVERT_TO_SHORTPTR(
@@ -114,27 +118,29 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
         else
           threshold = level << coeff_shift;
         if (threshold == 0) continue;
-        od_dering(dst, MAX_MIB_SIZE * bsize[pli],
-                  &src[pli][sbr * stride * bsize[pli] * MAX_MIB_SIZE +
-                            sbc * bsize[pli] * MAX_MIB_SIZE],
-                  stride, nhb, nvb, sbc, sbr, nhsb, nvsb, dec[pli], dir, pli,
+        od_dering(dst, MAX_MIB_SIZE * bsize_x[pli],
+                  &src[pli][sbr * stride * bsize_x[pli] * MAX_MIB_SIZE +
+                            sbc * bsize_x[pli] * MAX_MIB_SIZE],
+                  stride, nhb, nvb, sbc, sbr, nhsb, nvsb, dec_x[pli],
+                  dec_y[pli], dir, pli,
                   &bskip[MAX_MIB_SIZE * sbr * cm->mi_cols + MAX_MIB_SIZE * sbc],
                   cm->mi_cols, threshold, coeff_shift);
-        for (r = 0; r < bsize[pli] * nvb; ++r) {
-          for (c = 0; c < bsize[pli] * nhb; ++c) {
+        for (r = 0; r < bsize_y[pli] * nvb; ++r) {
+          for (c = 0; c < bsize_x[pli] * nhb; ++c) {
 #if CONFIG_AOM_HIGHBITDEPTH
             if (cm->use_highbitdepth) {
               CONVERT_TO_SHORTPTR(xd->plane[pli].dst.buf)
               [xd->plane[pli].dst.stride *
-                   (bsize[pli] * MAX_MIB_SIZE * sbr + r) +
-               sbc * bsize[pli] * MAX_MIB_SIZE + c] =
-                  dst[r * MAX_MIB_SIZE * bsize[pli] + c];
+                   (bsize_x[pli] * MAX_MIB_SIZE * sbr + r) +
+               sbc * bsize_x[pli] * MAX_MIB_SIZE + c] =
+                  dst[r * MAX_MIB_SIZE * bsize_x[pli] + c];
             } else {
 #endif
-              xd->plane[pli].dst.buf[xd->plane[pli].dst.stride *
-                                         (bsize[pli] * MAX_MIB_SIZE * sbr + r) +
-                                     sbc * bsize[pli] * MAX_MIB_SIZE + c] =
-                  dst[r * MAX_MIB_SIZE * bsize[pli] + c];
+              xd->plane[pli]
+                  .dst.buf[xd->plane[pli].dst.stride *
+                               (bsize_x[pli] * MAX_MIB_SIZE * sbr + r) +
+                           sbc * bsize_x[pli] * MAX_MIB_SIZE + c] =
+                  dst[r * MAX_MIB_SIZE * bsize_x[pli] + c];
 #if CONFIG_AOM_HIGHBITDEPTH
             }
 #endif

@@ -183,6 +183,19 @@ int od_filter_dering_direction_4x4_c(int16_t *y, int ystride, const int16_t *in,
   return (total_abs + 2) >> 2;
 }
 
+int od_filter_dering_direction_4x8(int16_t *y, int ystride, const int16_t *in,
+                                     int threshold, int dir) {
+  return od_filter_dering_direction_4x4(y, ystride, in, threshold, dir)
+  + od_filter_dering_direction_4x4(y + 4*ystride, ystride,
+                                   in + 4*OD_FILT_BSTRIDE, threshold, dir);
+}
+
+int od_filter_dering_direction_8x4(int16_t *y, int ystride, const int16_t *in,
+                                     int threshold, int dir) {
+  return od_filter_dering_direction_4x4(y, ystride, in, threshold, dir)
+  + od_filter_dering_direction_4x4(y + 4, ystride, in + 4, threshold, dir);
+}
+
 /* Smooth in the direction orthogonal to what was detected. */
 void od_filter_dering_orthogonal_8x8_c(int16_t *y, int ystride,
                                        const int16_t *in, int threshold,
@@ -241,6 +254,21 @@ void od_filter_dering_orthogonal_4x4_c(int16_t *y, int ystride,
   }
 }
 
+void od_filter_dering_orthogonal_4x8(int16_t *y, int ystride,
+                                       const int16_t *in, int threshold,
+                                       int dir) {
+  od_filter_dering_orthogonal_4x4(y, ystride, in, threshold, dir);
+  od_filter_dering_orthogonal_4x4(y + 4*ystride, ystride,
+                                  in + 4*OD_FILT_BSTRIDE, threshold, dir);
+}
+
+void od_filter_dering_orthogonal_8x4(int16_t *y, int ystride,
+                                       const int16_t *in, int threshold,
+                                       int dir) {
+  od_filter_dering_orthogonal_4x4(y, ystride, in, threshold, dir);
+  od_filter_dering_orthogonal_4x4(y + 4, ystride, in + 4, threshold, dir);
+}
+
 /* This table approximates x^0.16 with the index being log2(x). It is clamped
    to [-.5, 3]. The table is computed as:
    round(256*min(3, max(.5, 1.08*(sqrt(2)*2.^([0:17]+8)/256/256).^.16))) */
@@ -264,7 +292,7 @@ static INLINE int od_adjust_thresh(int threshold, int32_t var) {
 
 void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
                int nhb, int nvb, int sbx, int sby, int nhsb, int nvsb, int xdec,
-               int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS], int pli,
+               int ydec, int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS], int pli,
                unsigned char *bskip, int skip_stride, int threshold,
                int coeff_shift) {
   int i;
@@ -273,32 +301,35 @@ void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
   int by;
   int16_t inbuf[OD_DERING_INBUF_SIZE];
   int16_t *in;
-  int bsize;
+  int bsize_x = 3 - xdec;
+  int bsize_y = 3 - ydec;
   int32_t var[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS];
   int filter2_thresh[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS];
   od_filter_dering_direction_func filter_dering_direction[OD_DERINGSIZES] = {
-    od_filter_dering_direction_4x4, od_filter_dering_direction_8x8
+    od_filter_dering_direction_8x8, od_filter_dering_direction_8x4,
+    od_filter_dering_direction_4x8, od_filter_dering_direction_4x4
   };
   od_filter_dering_orthogonal_func filter_dering_orthogonal[OD_DERINGSIZES] = {
-    od_filter_dering_orthogonal_4x4, od_filter_dering_orthogonal_8x8
+    od_filter_dering_orthogonal_8x8, od_filter_dering_orthogonal_8x4,
+    od_filter_dering_orthogonal_4x8, od_filter_dering_orthogonal_4x4
   };
-  bsize = 3 - xdec;
+  int filter_idx = xdec*2 + ydec;
   in = inbuf + OD_FILT_BORDER * OD_FILT_BSTRIDE + OD_FILT_BORDER;
   /* We avoid filtering the pixels for which some of the pixels to average
      are outside the frame. We could change the filter instead, but it would
      add special cases for any future vectorization. */
   for (i = 0; i < OD_DERING_INBUF_SIZE; i++) inbuf[i] = OD_DERING_VERY_LARGE;
   for (i = -OD_FILT_BORDER * (sby != 0);
-       i < (nvb << bsize) + OD_FILT_BORDER * (sby != nvsb - 1); i++) {
+       i < (nvb << bsize_y) + OD_FILT_BORDER * (sby != nvsb - 1); i++) {
     for (j = -OD_FILT_BORDER * (sbx != 0);
-         j < (nhb << bsize) + OD_FILT_BORDER * (sbx != nhsb - 1); j++) {
+         j < (nhb << bsize_x) + OD_FILT_BORDER * (sbx != nhsb - 1); j++) {
       in[i * OD_FILT_BSTRIDE + j] = x[i * xstride + j];
     }
   }
   /* Assume deringing filter is sparsely applied, so do one large copy rather
      than small copies later if deringing is skipped. */
-  for (i = 0; i < nvb << bsize; i++) {
-    for (j = 0; j < nhb << bsize; j++) {
+  for (i = 0; i < nvb << bsize_y; i++) {
+    for (j = 0; j < nhb << bsize_x; j++) {
       y[i * ystride + j] = in[i * OD_FILT_BSTRIDE + j];
     }
   }
@@ -316,9 +347,9 @@ void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
            to be a little bit more aggressive on pure horizontal/vertical
            since the ringing there tends to be directional, so it doesn't
            get removed by the directional filtering. */
-        filter2_thresh[by][bx] = (filter_dering_direction[bsize - OD_LOG_BSIZE0])(
-            &y[(by * ystride << bsize) + (bx << bsize)], ystride,
-            &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)],
+        filter2_thresh[by][bx] = (filter_dering_direction[filter_idx])(
+            &y[(by * ystride << bsize_y) + (bx << bsize_x)], ystride,
+            &in[(by * OD_FILT_BSTRIDE << bsize_y) + (bx << bsize_x)],
             od_adjust_thresh(threshold, var[by][bx]), dir[by][bx]);
       }
     }
@@ -326,25 +357,25 @@ void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
     for (by = 0; by < nvb; by++) {
       for (bx = 0; bx < nhb; bx++) {
         if (bskip[by * skip_stride + bx]) continue;
-        filter2_thresh[by][bx] = (filter_dering_direction[bsize - OD_LOG_BSIZE0])(
-            &y[(by * ystride << bsize) + (bx << bsize)], ystride,
-            &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)], threshold,
+        filter2_thresh[by][bx] = (filter_dering_direction[filter_idx])(
+            &y[(by * ystride << bsize_y) + (bx << bsize_x)], ystride,
+            &in[(by * OD_FILT_BSTRIDE << bsize_y) + (bx << bsize_x)], threshold,
             dir[by][bx]);
       }
     }
   }
-  for (i = 0; i < nvb << bsize; i++) {
-    for (j = 0; j < nhb << bsize; j++) {
+  for (i = 0; i < nvb << bsize_y; i++) {
+    for (j = 0; j < nhb << bsize_x; j++) {
       in[i * OD_FILT_BSTRIDE + j] = y[i * ystride + j];
     }
   }
   for (by = 0; by < nvb; by++) {
     for (bx = 0; bx < nhb; bx++) {
       if (bskip[by * skip_stride + bx] || filter2_thresh[by][bx] == 0) continue;
-      (filter_dering_orthogonal[bsize - OD_LOG_BSIZE0])(
-          &y[(by * ystride << bsize) + (bx << bsize)], ystride,
-          &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)], filter2_thresh[by][bx],
-          dir[by][bx]);
+      (filter_dering_orthogonal[filter_idx])(
+          &y[(by * ystride << bsize_y) + (bx << bsize_x)], ystride,
+          &in[(by * OD_FILT_BSTRIDE << bsize_y) + (bx << bsize_x)],
+          filter2_thresh[by][bx], dir[by][bx]);
     }
   }
 }
