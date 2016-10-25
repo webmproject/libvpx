@@ -90,15 +90,6 @@ const aom_tree_index av1_coef_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
 };
 /* clang-format on */
 
-static const aom_tree_index cat1[2] = { 0, 0 };
-static const aom_tree_index cat2[4] = { 2, 2, 0, 0 };
-static const aom_tree_index cat3[6] = { 2, 2, 4, 4, 0, 0 };
-static const aom_tree_index cat4[8] = { 2, 2, 4, 4, 6, 6, 0, 0 };
-static const aom_tree_index cat5[10] = { 2, 2, 4, 4, 6, 6, 8, 8, 0, 0 };
-static const aom_tree_index cat6[28] = { 2,  2,  4,  4,  6,  6,  8,  8,  10, 10,
-                                         12, 12, 14, 14, 16, 16, 18, 18, 20, 20,
-                                         22, 22, 24, 24, 26, 26, 0,  0 };
-
 static const int16_t zero_cost[] = { 0 };
 static const int16_t sign_cost[1] = { 512 };
 static const int16_t cat1_cost[1 << 1] = { 864, 1229 };
@@ -269,70 +260,49 @@ const int av1_cat6_high12_high_cost[1024] = {
 };
 #endif
 
-#if CONFIG_AOM_HIGHBITDEPTH
-static const aom_tree_index cat1_high10[2] = { 0, 0 };
-static const aom_tree_index cat2_high10[4] = { 2, 2, 0, 0 };
-static const aom_tree_index cat3_high10[6] = { 2, 2, 4, 4, 0, 0 };
-static const aom_tree_index cat4_high10[8] = { 2, 2, 4, 4, 6, 6, 0, 0 };
-static const aom_tree_index cat5_high10[10] = { 2, 2, 4, 4, 6, 6, 8, 8, 0, 0 };
-static const aom_tree_index cat6_high10[32] = { 2,  2,  4,  4,  6,  6,  8,  8,
-                                                10, 10, 12, 12, 14, 14, 16, 16,
-                                                18, 18, 20, 20, 22, 22, 24, 24,
-                                                26, 26, 28, 28, 30, 30, 0,  0 };
-static const aom_tree_index cat1_high12[2] = { 0, 0 };
-static const aom_tree_index cat2_high12[4] = { 2, 2, 0, 0 };
-static const aom_tree_index cat3_high12[6] = { 2, 2, 4, 4, 0, 0 };
-static const aom_tree_index cat4_high12[8] = { 2, 2, 4, 4, 6, 6, 0, 0 };
-static const aom_tree_index cat5_high12[10] = { 2, 2, 4, 4, 6, 6, 8, 8, 0, 0 };
-static const aom_tree_index cat6_high12[36] = {
-  2,  2,  4,  4,  6,  6,  8,  8,  10, 10, 12, 12, 14, 14, 16, 16, 18, 18,
-  20, 20, 22, 22, 24, 24, 26, 26, 28, 28, 30, 30, 32, 32, 34, 34, 0,  0
-};
-#endif
-
 const av1_extra_bit av1_extra_bits[ENTROPY_TOKENS] = {
-  { 0, 0, 0, 0, zero_cost },                            // ZERO_TOKEN
-  { 0, 0, 0, 1, sign_cost },                            // ONE_TOKEN
-  { 0, 0, 0, 2, sign_cost },                            // TWO_TOKEN
-  { 0, 0, 0, 3, sign_cost },                            // THREE_TOKEN
-  { 0, 0, 0, 4, sign_cost },                            // FOUR_TOKEN
-  { cat1, av1_cat1_prob, 1, CAT1_MIN_VAL, cat1_cost },  // CATEGORY1_TOKEN
-  { cat2, av1_cat2_prob, 2, CAT2_MIN_VAL, cat2_cost },  // CATEGORY2_TOKEN
-  { cat3, av1_cat3_prob, 3, CAT3_MIN_VAL, cat3_cost },  // CATEGORY3_TOKEN
-  { cat4, av1_cat4_prob, 4, CAT4_MIN_VAL, cat4_cost },  // CATEGORY4_TOKEN
-  { cat5, av1_cat5_prob, 5, CAT5_MIN_VAL, cat5_cost },  // CATEGORY5_TOKEN
-  { cat6, av1_cat6_prob, 14, CAT6_MIN_VAL, 0 },         // CATEGORY6_TOKEN
-  { 0, 0, 0, 0, zero_cost }                             // EOB_TOKEN
+  { 0, 0, 0, zero_cost },                         // ZERO_TOKEN
+  { 0, 0, 1, sign_cost },                         // ONE_TOKEN
+  { 0, 0, 2, sign_cost },                         // TWO_TOKEN
+  { 0, 0, 3, sign_cost },                         // THREE_TOKEN
+  { 0, 0, 4, sign_cost },                         // FOUR_TOKEN
+  { av1_cat1_prob, 1, CAT1_MIN_VAL, cat1_cost },  // CATEGORY1_TOKEN
+  { av1_cat2_prob, 2, CAT2_MIN_VAL, cat2_cost },  // CATEGORY2_TOKEN
+  { av1_cat3_prob, 3, CAT3_MIN_VAL, cat3_cost },  // CATEGORY3_TOKEN
+  { av1_cat4_prob, 4, CAT4_MIN_VAL, cat4_cost },  // CATEGORY4_TOKEN
+  { av1_cat5_prob, 5, CAT5_MIN_VAL, cat5_cost },  // CATEGORY5_TOKEN
+  { av1_cat6_prob, 14, CAT6_MIN_VAL, 0 },         // CATEGORY6_TOKEN
+  { 0, 0, 0, zero_cost }                          // EOB_TOKEN
 };
 
 #if CONFIG_AOM_HIGHBITDEPTH
 const av1_extra_bit av1_extra_bits_high10[ENTROPY_TOKENS] = {
-  { 0, 0, 0, 0, zero_cost },                                          // ZERO
-  { 0, 0, 0, 1, sign_cost },                                          // ONE
-  { 0, 0, 0, 2, sign_cost },                                          // TWO
-  { 0, 0, 0, 3, sign_cost },                                          // THREE
-  { 0, 0, 0, 4, sign_cost },                                          // FOUR
-  { cat1_high10, av1_cat1_prob_high10, 1, CAT1_MIN_VAL, cat1_cost },  // CAT1
-  { cat2_high10, av1_cat2_prob_high10, 2, CAT2_MIN_VAL, cat2_cost },  // CAT2
-  { cat3_high10, av1_cat3_prob_high10, 3, CAT3_MIN_VAL, cat3_cost },  // CAT3
-  { cat4_high10, av1_cat4_prob_high10, 4, CAT4_MIN_VAL, cat4_cost },  // CAT4
-  { cat5_high10, av1_cat5_prob_high10, 5, CAT5_MIN_VAL, cat5_cost },  // CAT5
-  { cat6_high10, av1_cat6_prob_high10, 16, CAT6_MIN_VAL, 0 },         // CAT6
-  { 0, 0, 0, 0, zero_cost }                                           // EOB
+  { 0, 0, 0, zero_cost },                                // ZERO
+  { 0, 0, 1, sign_cost },                                // ONE
+  { 0, 0, 2, sign_cost },                                // TWO
+  { 0, 0, 3, sign_cost },                                // THREE
+  { 0, 0, 4, sign_cost },                                // FOUR
+  { av1_cat1_prob_high10, 1, CAT1_MIN_VAL, cat1_cost },  // CAT1
+  { av1_cat2_prob_high10, 2, CAT2_MIN_VAL, cat2_cost },  // CAT2
+  { av1_cat3_prob_high10, 3, CAT3_MIN_VAL, cat3_cost },  // CAT3
+  { av1_cat4_prob_high10, 4, CAT4_MIN_VAL, cat4_cost },  // CAT4
+  { av1_cat5_prob_high10, 5, CAT5_MIN_VAL, cat5_cost },  // CAT5
+  { av1_cat6_prob_high10, 16, CAT6_MIN_VAL, 0 },         // CAT6
+  { 0, 0, 0, zero_cost }                                 // EOB
 };
 const av1_extra_bit av1_extra_bits_high12[ENTROPY_TOKENS] = {
-  { 0, 0, 0, 0, zero_cost },                                          // ZERO
-  { 0, 0, 0, 1, sign_cost },                                          // ONE
-  { 0, 0, 0, 2, sign_cost },                                          // TWO
-  { 0, 0, 0, 3, sign_cost },                                          // THREE
-  { 0, 0, 0, 4, sign_cost },                                          // FOUR
-  { cat1_high12, av1_cat1_prob_high12, 1, CAT1_MIN_VAL, cat1_cost },  // CAT1
-  { cat2_high12, av1_cat2_prob_high12, 2, CAT2_MIN_VAL, cat2_cost },  // CAT2
-  { cat3_high12, av1_cat3_prob_high12, 3, CAT3_MIN_VAL, cat3_cost },  // CAT3
-  { cat4_high12, av1_cat4_prob_high12, 4, CAT4_MIN_VAL, cat4_cost },  // CAT4
-  { cat5_high12, av1_cat5_prob_high12, 5, CAT5_MIN_VAL, cat5_cost },  // CAT5
-  { cat6_high12, av1_cat6_prob_high12, 18, CAT6_MIN_VAL, 0 },         // CAT6
-  { 0, 0, 0, 0, zero_cost }                                           // EOB
+  { 0, 0, 0, zero_cost },                                // ZERO
+  { 0, 0, 1, sign_cost },                                // ONE
+  { 0, 0, 2, sign_cost },                                // TWO
+  { 0, 0, 3, sign_cost },                                // THREE
+  { 0, 0, 4, sign_cost },                                // FOUR
+  { av1_cat1_prob_high12, 1, CAT1_MIN_VAL, cat1_cost },  // CAT1
+  { av1_cat2_prob_high12, 2, CAT2_MIN_VAL, cat2_cost },  // CAT2
+  { av1_cat3_prob_high12, 3, CAT3_MIN_VAL, cat3_cost },  // CAT3
+  { av1_cat4_prob_high12, 4, CAT4_MIN_VAL, cat4_cost },  // CAT4
+  { av1_cat5_prob_high12, 5, CAT5_MIN_VAL, cat5_cost },  // CAT5
+  { av1_cat6_prob_high12, 18, CAT6_MIN_VAL, 0 },         // CAT6
+  { 0, 0, 0, zero_cost }                                 // EOB
 };
 #endif
 

@@ -88,7 +88,6 @@ DECLARE_ALIGNED(16, extern const uint8_t, av1_cat6_prob_high12[18]);
 #define EOB_MODEL_TOKEN 3
 
 typedef struct {
-  const aom_tree_index *tree;
   const aom_prob *prob;
   int len;
   int base_val;
