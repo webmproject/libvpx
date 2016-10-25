@@ -81,7 +81,7 @@ int av1_optimize_b(const AV1_COMMON *cm, MACROBLOCK *mb, int plane, int block,
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   const int eob = p->eobs[block];
   const PLANE_TYPE plane_type = pd->plane_type;
-  const int default_eob = get_tx2d_size(tx_size);
+  const int default_eob = tx_size_2d[tx_size];
   const int16_t *const dequant_ptr = pd->dequant;
   const uint8_t *const band_translate = get_band_translate(tx_size);
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block, tx_size);
@@ -826,12 +826,9 @@ static void encode_block(int plane, int block, int blk_row, int blk_col,
   }
 
 #if CONFIG_VAR_TX
-  for (i = 0; i < num_4x4_blocks_wide_txsize_lookup[tx_size]; ++i) {
-    a[i] = a[0];
-  }
-  for (i = 0; i < num_4x4_blocks_high_txsize_lookup[tx_size]; ++i) {
-    l[i] = l[0];
-  }
+  for (i = 0; i < tx_size_wide_unit[tx_size]; ++i) a[i] = a[0];
+
+  for (i = 0; i < tx_size_high_unit[tx_size]; ++i) l[i] = l[0];
 #endif
 
   if (p->eobs[block]) *(args->skip) = 0;
@@ -885,25 +882,23 @@ static void encode_block_inter(int plane, int block, int blk_row, int blk_col,
   if (tx_size == plane_tx_size) {
     encode_block(plane, block, blk_row, blk_col, plane_bsize, tx_size, arg);
   } else {
-    int bsl = b_width_log2_lookup[bsize];
+    int bsl = block_size_wide[bsize] >> (tx_size_wide_log2[0] + 1);
     int i;
-
     assert(bsl > 0);
-    --bsl;
-
 #if CONFIG_EXT_TX
     assert(tx_size < TX_SIZES);
 #endif  // CONFIG_EXT_TX
 
     for (i = 0; i < 4; ++i) {
-      const int offsetr = blk_row + ((i >> 1) << bsl);
-      const int offsetc = blk_col + ((i & 0x01) << bsl);
-      int step = num_4x4_blocks_txsize_lookup[tx_size - 1];
+      const int offsetr = blk_row + ((i >> 1) * bsl);
+      const int offsetc = blk_col + ((i & 0x01) * bsl);
+      const TX_SIZE sub_txs = tx_size - 1;
+      int step = tx_size_wide_unit[sub_txs] * tx_size_high_unit[sub_txs];
 
       if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide) continue;
 
       encode_block_inter(plane, block + i * step, offsetr, offsetc, plane_bsize,
-                         tx_size - 1, arg);
+                         sub_txs, arg);
     }
   }
 }
@@ -983,14 +978,15 @@ void av1_encode_sb(AV1_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE bsize) {
     // TODO(jingning): Clean this up.
     const struct macroblockd_plane *const pd = &xd->plane[plane];
     const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
-    const int mi_width = num_4x4_blocks_wide_lookup[plane_bsize];
-    const int mi_height = num_4x4_blocks_high_lookup[plane_bsize];
+    const int mi_width = block_size_wide[plane_bsize] >> tx_size_wide_log2[0];
+    const int mi_height = block_size_high[plane_bsize] >> tx_size_wide_log2[0];
     const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
     const BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
-    const int bh = num_4x4_blocks_wide_lookup[txb_size];
+    const int bw = block_size_wide[txb_size] >> tx_size_wide_log2[0];
+    const int bh = block_size_high[txb_size] >> tx_size_wide_log2[0];
     int idx, idy;
     int block = 0;
-    int step = num_4x4_blocks_txsize_lookup[max_tx_size];
+    int step = tx_size_wide_unit[max_tx_size] * tx_size_high_unit[max_tx_size];
     av1_get_entropy_contexts(bsize, TX_4X4, pd, ctx.ta[plane], ctx.tl[plane]);
 #else
     const struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -1009,7 +1005,7 @@ void av1_encode_sb(AV1_COMMON *cm, MACROBLOCK *x, BLOCK_SIZE bsize) {
     } else {
 #endif
       for (idy = 0; idy < mi_height; idy += bh) {
-        for (idx = 0; idx < mi_width; idx += bh) {
+        for (idx = 0; idx < mi_width; idx += bw) {
           encode_block_inter(plane, block, idy, idx, plane_bsize, max_tx_size,
                              &arg);
           block += step;
