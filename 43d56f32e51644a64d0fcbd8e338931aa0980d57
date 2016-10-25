@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c1e75c23_38a51189",
+        "filename": "av1/common/warped_motion.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-25T22:05:25Z",
+      "side": 1,
+      "message": "you should prefer {}s when if statements go multi-line for readability",
+      "range": {
+        "startLine": 505,
+        "startChar": 6,
+        "endLine": 505,
+        "endChar": 18
+      },
+      "revId": "43d56f32e51644a64d0fcbd8e338931aa0980d57",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c1e75c23_78ab995f",
+        "filename": "av1/common/warped_motion.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 512,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-25T22:05:25Z",
+      "side": 1,
+      "message": "this is a bit hard to parse. given it\u0027s used multiple time a const would be a good choice or modify the loop bounds as in[0]/in[1] seem a simpler place to deal with the offset",
+      "range": {
+        "startLine": 512,
+        "startChar": 13,
+        "endLine": 512,
+        "endChar": 49
+      },
+      "revId": "43d56f32e51644a64d0fcbd8e338931aa0980d57",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
