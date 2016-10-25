@@ -193,11 +193,12 @@ void aom_vertical_band_2_1_scale_i_c(unsigned char *source,
                                      unsigned int dest_pitch,
                                      unsigned int dest_width) {
   const unsigned char *const dest_end = dest + dest_width;
+  const int src_step = src_pitch;
   (void)dest_pitch;
   while (dest < dest_end) {
-    const unsigned int a = source[-src_pitch] * 3;
+    const unsigned int a = source[-src_step] * 3;
     const unsigned int b = source[0] * 10;
-    const unsigned int c = source[src_pitch] * 3;
+    const unsigned int c = source[src_step] * 3;
     dest[0] = (unsigned char)((8 + a + b + c) >> 4);
     ++source;
     ++dest;
