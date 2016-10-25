@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c1e75c23_d2838425",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2016-10-25T19:34:54Z",
+      "side": 1,
+      "message": "Why do we need assert here?",
+      "range": {
+        "startLine": 224,
+        "startChar": 8,
+        "endLine": 224,
+        "endChar": 14
+      },
+      "revId": "32d4f4d6ef9d90274ae07c682579bab64a12fe33",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
