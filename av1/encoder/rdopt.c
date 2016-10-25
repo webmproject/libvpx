@@ -1318,9 +1318,9 @@ static int64_t txfm_yrd(const AV1_COMP *const cpi, MACROBLOCK *x, int *r,
   const int tx_size_cat =
       is_inter ? inter_tx_size_cat_lookup[bs] : intra_tx_size_cat_lookup[bs];
   const TX_SIZE coded_tx_size = txsize_sqr_up_map[tx_size];
+  const int depth = tx_size_to_depth(coded_tx_size);
   const int tx_select = cm->tx_mode == TX_MODE_SELECT;
-  const int r_tx_size =
-      cpi->tx_size_cost[tx_size_cat][tx_size_ctx][coded_tx_size];
+  const int r_tx_size = cpi->tx_size_cost[tx_size_cat][tx_size_ctx][depth];
 
   assert(skip_prob > 0);
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
@@ -2746,7 +2746,7 @@ static int64_t rd_pick_intra_sby_mode(const AV1_COMP *const cpi, MACROBLOCK *x,
       // not the tokenonly rate.
       this_rate_tokenonly -=
           cpi->tx_size_cost[max_tx_size - TX_8X8][get_tx_size_context(xd)]
-                           [mic->mbmi.tx_size];
+                           [tx_size_to_depth(mic->mbmi.tx_size)];
     }
 #if CONFIG_PALETTE
     if (cpi->common.allow_screen_content_tools && mic->mbmi.mode == DC_PRED)
@@ -8014,7 +8014,7 @@ static void pick_filter_intra_interframe(
     // (prediction granularity), so we account for it in the full rate,
     // not the tokenonly rate.
     rate_y -= cpi->tx_size_cost[max_tx_size - TX_8X8][get_tx_size_context(xd)]
-                               [mbmi->tx_size];
+                               [tx_size_to_depth(mbmi->tx_size)];
   }
 
   rate2 += av1_cost_bit(cm->fc->filter_intra_probs[0],
@@ -8771,8 +8771,9 @@ void av1_rd_pick_inter_mode_sb(const AV1_COMP *cpi, TileDataEnc *tile_data,
         // tokenonly rate, but for intra blocks, tx_size is always coded
         // (prediction granularity), so we account for it in the full rate,
         // not the tokenonly rate.
-        rate_y -= cpi->tx_size_cost[max_tx_size - TX_8X8]
-                                   [get_tx_size_context(xd)][mbmi->tx_size];
+        rate_y -=
+            cpi->tx_size_cost[max_tx_size - TX_8X8][get_tx_size_context(xd)]
+                             [tx_size_to_depth(mbmi->tx_size)];
       }
 #if CONFIG_EXT_INTRA
       if (is_directional_mode) {
