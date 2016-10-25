@@ -3974,8 +3974,10 @@ void vp9_encode_tile(VP9_COMP *cpi, ThreadData *td, int tile_row,
   int mi_row;
 
   // Set up pointers to per thread motion search counters.
-  td->mb.m_search_count_ptr = &td->rd_counts.m_search_count;
-  td->mb.ex_search_count_ptr = &td->rd_counts.ex_search_count;
+  this_tile->m_search_count = 0;   // Count of motion search hits.
+  this_tile->ex_search_count = 0;  // Exhaustive mesh search hits.
+  td->mb.m_search_count_ptr = &this_tile->m_search_count;
+  td->mb.ex_search_count_ptr = &this_tile->ex_search_count;
 
   for (mi_row = mi_row_start; mi_row < mi_row_end; mi_row += MI_BLOCK_SIZE) {
     if (cpi->sf.use_nonrd_pick_mode)
