@@ -4484,10 +4484,35 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 #define MIN_TRANS_THRESH 8
 #define GLOBAL_MOTION_ADVANTAGE_THRESH 0.60
 #define GLOBAL_MOTION_MODEL ROTZOOM
-// TODO(sarahparker) This function needs to be adjusted
-// to accomodate changes in the paraemter integerization.
-// Commenting it out until the fix is made.
-/*
+
+// Adds some offset to a global motion parameter and handles
+// all of the necessary precision shifts, clamping, and
+// zero-centering.
+static int16_t add_param_offset(int param_index, int16_t param_value,
+                                int16_t offset) {
+  int scale_vals[2] = { GM_ALPHA_PREC_DIFF, GM_TRANS_PREC_DIFF };
+  int clamp_vals[2] = { GM_ALPHA_MAX, GM_TRANS_MAX };
+  int is_trans_param = param_index < 2;
+  int is_one_centered = (!is_trans_param) && (param_index & 1);
+
+  // Make parameter zero-centered and offset the shift that was done to make
+  // it compatible with the warped model
+  param_value = (param_value - (is_one_centered << WARPEDMODEL_PREC_BITS)) >>
+                scale_vals[is_trans_param];
+  // Add desired offset to the rescaled/zero-centered parameter
+  param_value += offset;
+  // Clamp the parameter so it does not overflow the number of bits allotted
+  // to it in the bitstream
+  param_value = (int16_t)clamp(param_value, -clamp_vals[is_trans_param],
+                               clamp_vals[is_trans_param]);
+  // Rescale the parameter to WARPEDMODEL_PRECIION_BITS so it is compatible
+  // with the warped motion library
+  param_value *= (1 << scale_vals[is_trans_param]);
+
+  // Undo the zero-centring step if necessary
+  return param_value + (is_one_centered << WARPEDMODEL_PREC_BITS);
+}
+
 static void refine_integerized_param(WarpedMotionParams *wm,
 #if CONFIG_AOM_HIGHBITDEPTH
                                      int use_hbd, int bd,
@@ -4500,7 +4525,7 @@ static void refine_integerized_param(WarpedMotionParams *wm,
   int n_params = n_trans_model_params[wm->wmtype];
   int16_t *param_mat = (int16_t *)wm->wmmat;
   double step_error;
-  int step;
+  int16_t step;
   int16_t *param;
   int16_t curr_param;
   int16_t best_param;
@@ -4519,9 +4544,7 @@ static void refine_integerized_param(WarpedMotionParams *wm,
     best_param = curr_param;
     for (i = 0; i < n_refinements; i++) {
       // look to the left
-      *param =
-          (int16_t)clamp(curr_param - step, p < 2 ? GM_TRANS_MIN : GM_ALPHA_MIN,
-                         p < 2 ? GM_TRANS_MAX : GM_ALPHA_MAX);
+      *param = add_param_offset(p, curr_param, -step);
       step_error =
           av1_warp_erroradv(wm,
 #if CONFIG_AOM_HIGHBITDEPTH
@@ -4538,9 +4561,7 @@ static void refine_integerized_param(WarpedMotionParams *wm,
       }
 
       // look to the right
-      *param =
-          (int16_t)clamp(curr_param + step, p < 2 ? GM_TRANS_MIN : GM_ALPHA_MIN,
-                         p < 2 ? GM_TRANS_MAX : GM_ALPHA_MAX);
+      *param = add_param_offset(p, curr_param, step);
       step_error =
           av1_warp_erroradv(wm,
 #if CONFIG_AOM_HIGHBITDEPTH
@@ -4564,7 +4585,6 @@ static void refine_integerized_param(WarpedMotionParams *wm,
     *param = best_param;
   }
 }
-*/
 
 static void convert_to_params(const double *params, TransformationType type,
                               int16_t *model) {
@@ -4643,6 +4663,14 @@ static void encode_frame_internal(AV1_COMP *cpi) {
           convert_model_to_params(params, GLOBAL_MOTION_MODEL,
                                   &cm->global_motion[frame]);
           if (get_gmtype(&cm->global_motion[frame]) > GLOBAL_ZERO) {
+            refine_integerized_param(
+                &cm->global_motion[frame].motion_params,
+#if CONFIG_AOM_HIGHBITDEPTH
+                xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH, xd->bd,
+#endif  // CONFIG_AOM_HIGHBITDEPTH
+                ref_buf->y_buffer, ref_buf->y_width, ref_buf->y_height,
+                ref_buf->y_stride, cpi->Source->y_buffer, cpi->Source->y_width,
+                cpi->Source->y_height, cpi->Source->y_stride, 3);
             // compute the advantage of using gm parameters over 0 motion
             erroradvantage = av1_warp_erroradv(
                 &cm->global_motion[frame].motion_params,
