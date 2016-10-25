@@ -49,32 +49,35 @@ void av1_foreach_transformed_block_in_plane(
   // transform size varies per plane, look it up in a common way.
   const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
   const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
-  const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
-  const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
-  const uint8_t num_4x4_tw = num_4x4_blocks_wide_txsize_lookup[tx_size];
-  const uint8_t num_4x4_th = num_4x4_blocks_high_txsize_lookup[tx_size];
-  const int step = num_4x4_tw * num_4x4_th;
+  const int num_4x4_w = block_size_wide[plane_bsize];
+  const int num_4x4_h = block_size_high[plane_bsize];
+  const uint8_t txw_unit = tx_size_wide_unit[tx_size];
+  const uint8_t txh_unit = tx_size_high_unit[tx_size];
+  const int step = txw_unit * txh_unit;
   int i = 0, r, c;
 
   // If mb_to_right_edge is < 0 we are in a situation in which
   // the current block size extends into the UMV and we won't
   // visit the sub blocks that are wholly within the UMV.
-  const int max_blocks_wide =
+  int max_blocks_wide =
       num_4x4_w + (xd->mb_to_right_edge >= 0 ? 0 : xd->mb_to_right_edge >>
-                                                       (5 + pd->subsampling_x));
-  const int max_blocks_high =
+                                                       (3 + pd->subsampling_x));
+  int max_blocks_high =
       num_4x4_h + (xd->mb_to_bottom_edge >= 0
                        ? 0
-                       : xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
-  const int extra_step = ((num_4x4_w - max_blocks_wide) >>
-                          num_4x4_blocks_wide_txsize_log2_lookup[tx_size]) *
-                         step;
+                       : xd->mb_to_bottom_edge >> (3 + pd->subsampling_y));
+  const int extra_step =
+      ((num_4x4_w - max_blocks_wide) >> tx_size_wide_log2[tx_size]) * step;
+
+  // Scale to the transform block unit.
+  max_blocks_wide >>= tx_size_wide_log2[0];
+  max_blocks_high >>= tx_size_high_log2[0];
 
   // Keep track of the row and column of the blocks we use so that we know
   // if we are in the unrestricted motion border.
-  for (r = 0; r < max_blocks_high; r += num_4x4_th) {
+  for (r = 0; r < max_blocks_high; r += txh_unit) {
     // Skip visiting the sub blocks that are wholly within the UMV.
-    for (c = 0; c < max_blocks_wide; c += num_4x4_tw) {
+    for (c = 0; c < max_blocks_wide; c += txw_unit) {
       visit(plane, i, r, c, plane_bsize, tx_size, arg);
       i += step;
     }
