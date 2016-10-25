@@ -487,7 +487,7 @@ static void highbd_warp_plane(WarpedMotionParams *wm, uint8_t *ref8, int width,
                               int p_row, int p_width, int p_height,
                               int p_stride, int subsampling_x,
                               int subsampling_y, int x_scale, int y_scale,
-                              int bd) {
+                              int bd, int ref_frm) {
   int i, j;
   ProjectPointsFunc projectpoints = get_project_points_type(wm->wmtype);
   uint16_t *pred = CONVERT_TO_SHORTPTR(pred8);
@@ -502,8 +502,15 @@ static void highbd_warp_plane(WarpedMotionParams *wm, uint8_t *ref8, int width,
                     subsampling_y);
       out[0] = ROUND_POWER_OF_TWO_SIGNED(out[0] * x_scale, 4);
       out[1] = ROUND_POWER_OF_TWO_SIGNED(out[1] * y_scale, 4);
-      pred[(j - p_col) + (i - p_row) * p_stride] = highbd_warp_interpolate(
-          ref, out[0], out[1], width, height, stride, bd);
+      if (ref_frm)
+        pred[(j - p_col) + (i - p_row) * p_stride] = ROUND_POWER_OF_TWO(
+            pred[(j - p_col) + (i - p_row) * p_stride] +
+                highbd_warp_interpolate(ref, out[0], out[1], width, height,
+                                        stride, bd),
+            1);
+      else
+        pred[(j - p_col) + (i - p_row) * p_stride] = highbd_warp_interpolate(
+            ref, out[0], out[1], width, height, stride, bd);
     }
   }
 }
@@ -542,7 +549,7 @@ static void warp_plane(WarpedMotionParams *wm, uint8_t *ref, int width,
                        int height, int stride, uint8_t *pred, int p_col,
                        int p_row, int p_width, int p_height, int p_stride,
                        int subsampling_x, int subsampling_y, int x_scale,
-                       int y_scale) {
+                       int y_scale, int ref_frm) {
   int i, j;
   ProjectPointsFunc projectpoints = get_project_points_type(wm->wmtype);
   if (projectpoints == NULL) return;
@@ -555,8 +562,14 @@ static void warp_plane(WarpedMotionParams *wm, uint8_t *ref, int width,
                     subsampling_y);
       out[0] = ROUND_POWER_OF_TWO_SIGNED(out[0] * x_scale, 4);
       out[1] = ROUND_POWER_OF_TWO_SIGNED(out[1] * y_scale, 4);
-      pred[(j - p_col) + (i - p_row) * p_stride] =
-          warp_interpolate(ref, out[0], out[1], width, height, stride);
+      if (ref_frm)
+        pred[(j - p_col) + (i - p_row) * p_stride] = ROUND_POWER_OF_TWO(
+            pred[(j - p_col) + (i - p_row) * p_stride] +
+                warp_interpolate(ref, out[0], out[1], width, height, stride),
+            1);
+      else
+        pred[(j - p_col) + (i - p_row) * p_stride] =
+            warp_interpolate(ref, out[0], out[1], width, height, stride);
     }
   }
 }
@@ -587,17 +600,17 @@ void av1_warp_plane(WarpedMotionParams *wm,
                     uint8_t *ref, int width, int height, int stride,
                     uint8_t *pred, int p_col, int p_row, int p_width,
                     int p_height, int p_stride, int subsampling_x,
-                    int subsampling_y, int x_scale, int y_scale) {
+                    int subsampling_y, int x_scale, int y_scale, int ref_frm) {
 #if CONFIG_AOM_HIGHBITDEPTH
   if (use_hbd)
     highbd_warp_plane(wm, ref, width, height, stride, pred, p_col, p_row,
                       p_width, p_height, p_stride, subsampling_x, subsampling_y,
-                      x_scale, y_scale, bd);
+                      x_scale, y_scale, bd, ref_frm);
   else
 #endif  // CONFIG_AOM_HIGHBITDEPTH
     warp_plane(wm, ref, width, height, stride, pred, p_col, p_row, p_width,
                p_height, p_stride, subsampling_x, subsampling_y, x_scale,
-               y_scale);
+               y_scale, ref_frm);
 }
 
 void av1_integerize_model(const double *model, TransformationType wmtype,

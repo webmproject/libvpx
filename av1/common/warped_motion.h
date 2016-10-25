@@ -64,7 +64,7 @@ void av1_warp_plane(WarpedMotionParams *wm,
                     uint8_t *ref, int width, int height, int stride,
                     uint8_t *pred, int p_col, int p_row, int p_width,
                     int p_height, int p_stride, int subsampling_x,
-                    int subsampling_y, int x_scale, int y_scale);
+                    int subsampling_y, int x_scale, int y_scale, int ref_frm);
 
 // Integerize model into the WarpedMotionParams structure
 void av1_integerize_model(const double *model, TransformationType wmtype,
