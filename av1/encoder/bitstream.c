@@ -414,6 +414,7 @@ static void write_selected_tx_size(const AV1_COMMON *cm, const MACROBLOCKD *xd,
     const int tx_size_cat = is_inter ? inter_tx_size_cat_lookup[bsize]
                                      : intra_tx_size_cat_lookup[bsize];
     const TX_SIZE coded_tx_size = txsize_sqr_up_map[tx_size];
+    const int depth = tx_size_to_depth(coded_tx_size);
 
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
     assert(IMPLIES(is_rect_tx(tx_size), is_rect_tx_allowed(xd, mbmi)));
@@ -423,7 +424,7 @@ static void write_selected_tx_size(const AV1_COMMON *cm, const MACROBLOCKD *xd,
 
     av1_write_token(w, av1_tx_size_tree[tx_size_cat],
                     cm->fc->tx_size_probs[tx_size_cat][tx_size_ctx],
-                    &tx_size_encodings[tx_size_cat][coded_tx_size]);
+                    &tx_size_encodings[tx_size_cat][depth]);
   }
 }
 
