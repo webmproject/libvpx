@@ -475,6 +475,33 @@ HIGHBD_INTRA_PRED_TEST(SSE2, TestHighbdIntraPred32,
                        vpx_highbd_tm_predictor_32x32_sse2)
 #endif  // HAVE_SSE2
 
+#if HAVE_NEON
+HIGHBD_INTRA_PRED_TEST(NEON, TestHighbdIntraPred4,
+                       vpx_highbd_dc_predictor_4x4_neon,
+                       vpx_highbd_dc_left_predictor_4x4_neon,
+                       vpx_highbd_dc_top_predictor_4x4_neon,
+                       vpx_highbd_dc_128_predictor_4x4_neon, NULL, NULL, NULL,
+                       NULL, NULL, NULL, NULL, NULL, NULL)
+HIGHBD_INTRA_PRED_TEST(NEON, TestHighbdIntraPred8,
+                       vpx_highbd_dc_predictor_8x8_neon,
+                       vpx_highbd_dc_left_predictor_8x8_neon,
+                       vpx_highbd_dc_top_predictor_8x8_neon,
+                       vpx_highbd_dc_128_predictor_8x8_neon, NULL, NULL, NULL,
+                       NULL, NULL, NULL, NULL, NULL, NULL)
+HIGHBD_INTRA_PRED_TEST(NEON, TestHighbdIntraPred16,
+                       vpx_highbd_dc_predictor_16x16_neon,
+                       vpx_highbd_dc_left_predictor_16x16_neon,
+                       vpx_highbd_dc_top_predictor_16x16_neon,
+                       vpx_highbd_dc_128_predictor_16x16_neon, NULL, NULL, NULL,
+                       NULL, NULL, NULL, NULL, NULL, NULL)
+HIGHBD_INTRA_PRED_TEST(NEON, TestHighbdIntraPred32,
+                       vpx_highbd_dc_predictor_32x32_neon,
+                       vpx_highbd_dc_left_predictor_32x32_neon,
+                       vpx_highbd_dc_top_predictor_32x32_neon,
+                       vpx_highbd_dc_128_predictor_32x32_neon, NULL, NULL, NULL,
+                       NULL, NULL, NULL, NULL, NULL, NULL)
+#endif  // HAVE_NEON
+
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #include "test/test_libvpx.cc"
