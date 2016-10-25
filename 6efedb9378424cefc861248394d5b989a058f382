@@ -199,6 +199,30 @@
       "revId": "6efedb9378424cefc861248394d5b989a058f382",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c1e75c23_358cfa16",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-25T20:04:59Z",
+      "side": 1,
+      "message": "I can see problems if they were stored in an array or similar, but as individual constants they probably could even be replaced with a #define",
+      "parentUuid": "c1e75c23_f27e885b",
+      "range": {
+        "startLine": 197,
+        "startChar": 40,
+        "endLine": 197,
+        "endChar": 51
+      },
+      "revId": "6efedb9378424cefc861248394d5b989a058f382",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
