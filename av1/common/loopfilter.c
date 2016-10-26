@@ -1183,9 +1183,10 @@ static void highbd_filter_selectively_vert(
 }
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 
-void av1_filter_block_plane_non420(AV1_COMMON *cm,
-                                   struct macroblockd_plane *plane,
-                                   MODE_INFO **mib, int mi_row, int mi_col) {
+void av1_filter_block_plane_non420_ver(AV1_COMMON *cm,
+                                       struct macroblockd_plane *plane,
+                                       MODE_INFO **mib, int mi_row,
+                                       int mi_col) {
   const int ss_x = plane->subsampling_x;
   const int ss_y = plane->subsampling_y;
   const int row_step = 1 << ss_y;
@@ -1369,6 +1370,22 @@ void av1_filter_block_plane_non420(AV1_COMMON *cm,
 
   // Now do horizontal pass
   dst->buf = dst0;
+}
+
+void av1_filter_block_plane_non420_hor(AV1_COMMON *cm,
+                                       struct macroblockd_plane *plane,
+                                       int mi_row) {
+  const int ss_y = plane->subsampling_y;
+  const int row_step = 1 << ss_y;
+  struct buf_2d *const dst = &plane->dst;
+  uint8_t *const dst0 = dst->buf;
+  unsigned int mask_16x16[MAX_MIB_SIZE] = { 0 };
+  unsigned int mask_8x8[MAX_MIB_SIZE] = { 0 };
+  unsigned int mask_4x4[MAX_MIB_SIZE] = { 0 };
+  unsigned int mask_4x4_int[MAX_MIB_SIZE] = { 0 };
+  uint8_t lfl[MAX_MIB_SIZE][MAX_MIB_SIZE];
+  int r;
+
   for (r = 0; r < cm->mib_size && mi_row + r < cm->mi_rows; r += row_step) {
     const int skip_border_4x4_r = ss_y && mi_row + r == cm->mi_rows - 1;
     const unsigned int mask_4x4_int_r = skip_border_4x4_r ? 0 : mask_4x4_int[r];
@@ -1404,11 +1421,12 @@ void av1_filter_block_plane_non420(AV1_COMMON *cm,
 #endif  // CONFIG_AOM_HIGHBITDEPTH
     dst->buf += MI_SIZE * dst->stride;
   }
+  dst->buf = dst0;
 }
 
-void av1_filter_block_plane_ss00(AV1_COMMON *const cm,
-                                 struct macroblockd_plane *const plane,
-                                 int mi_row, LOOP_FILTER_MASK *lfm) {
+void av1_filter_block_plane_ss00_ver(AV1_COMMON *const cm,
+                                     struct macroblockd_plane *const plane,
+                                     int mi_row, LOOP_FILTER_MASK *lfm) {
   struct buf_2d *const dst = &plane->dst;
   uint8_t *const dst0 = dst->buf;
   int r;
@@ -1452,10 +1470,20 @@ void av1_filter_block_plane_ss00(AV1_COMMON *const cm,
 
   // Horizontal pass
   dst->buf = dst0;
-  mask_16x16 = lfm->above_y[TX_16X16];
-  mask_8x8 = lfm->above_y[TX_8X8];
-  mask_4x4 = lfm->above_y[TX_4X4];
-  mask_4x4_int = lfm->int_4x4_y;
+}
+
+void av1_filter_block_plane_ss00_hor(AV1_COMMON *const cm,
+                                     struct macroblockd_plane *const plane,
+                                     int mi_row, LOOP_FILTER_MASK *lfm) {
+  struct buf_2d *const dst = &plane->dst;
+  uint8_t *const dst0 = dst->buf;
+  int r;
+  uint64_t mask_16x16 = lfm->above_y[TX_16X16];
+  uint64_t mask_8x8 = lfm->above_y[TX_8X8];
+  uint64_t mask_4x4 = lfm->above_y[TX_4X4];
+  uint64_t mask_4x4_int = lfm->int_4x4_y;
+
+  assert(plane->subsampling_x == 0 && plane->subsampling_y == 0);
 
   for (r = 0; r < cm->mib_size && mi_row + r < cm->mi_rows; r++) {
     unsigned int mask_16x16_r;
@@ -1495,11 +1523,13 @@ void av1_filter_block_plane_ss00(AV1_COMMON *const cm,
     mask_4x4 >>= MI_SIZE;
     mask_4x4_int >>= MI_SIZE;
   }
+  // restore the buf pointer in case there is additional filter pass.
+  dst->buf = dst0;
 }
 
-void av1_filter_block_plane_ss11(AV1_COMMON *const cm,
-                                 struct macroblockd_plane *const plane,
-                                 int mi_row, LOOP_FILTER_MASK *lfm) {
+void av1_filter_block_plane_ss11_ver(AV1_COMMON *const cm,
+                                     struct macroblockd_plane *const plane,
+                                     int mi_row, LOOP_FILTER_MASK *lfm) {
   struct buf_2d *const dst = &plane->dst;
   uint8_t *const dst0 = dst->buf;
   int r, c;
@@ -1554,10 +1584,20 @@ void av1_filter_block_plane_ss11(AV1_COMMON *const cm,
 
   // Horizontal pass
   dst->buf = dst0;
-  mask_16x16 = lfm->above_uv[TX_16X16];
-  mask_8x8 = lfm->above_uv[TX_8X8];
-  mask_4x4 = lfm->above_uv[TX_4X4];
-  mask_4x4_int = lfm->above_int_4x4_uv;
+}
+
+void av1_filter_block_plane_ss11_hor(AV1_COMMON *const cm,
+                                     struct macroblockd_plane *const plane,
+                                     int mi_row, LOOP_FILTER_MASK *lfm) {
+  struct buf_2d *const dst = &plane->dst;
+  uint8_t *const dst0 = dst->buf;
+  int r;
+  uint64_t mask_16x16 = lfm->above_uv[TX_16X16];
+  uint64_t mask_8x8 = lfm->above_uv[TX_8X8];
+  uint64_t mask_4x4 = lfm->above_uv[TX_4X4];
+  uint64_t mask_4x4_int = lfm->above_int_4x4_uv;
+
+  assert(plane->subsampling_x == 1 && plane->subsampling_y == 1);
 
   for (r = 0; r < cm->mib_size && mi_row + r < cm->mi_rows; r += 2) {
     const int skip_border_4x4_r = mi_row + r == cm->mi_rows - 1;
@@ -1600,6 +1640,8 @@ void av1_filter_block_plane_ss11(AV1_COMMON *const cm,
     mask_4x4 >>= MI_SIZE / 2;
     mask_4x4_int >>= MI_SIZE / 2;
   }
+  // restore the buf pointer in case there is additional filter pass.
+  dst->buf = dst0;
 }
 
 void av1_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer, AV1_COMMON *cm,
@@ -1622,12 +1664,14 @@ void av1_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer, AV1_COMMON *cm,
 
       av1_setup_dst_planes(planes, frame_buffer, mi_row, mi_col);
 
-      for (plane = 0; plane < num_planes; ++plane)
-        av1_filter_block_plane_non420(cm, &planes[plane], mi + mi_col, mi_row,
-                                      mi_col);
+      for (plane = 0; plane < num_planes; ++plane) {
+        av1_filter_block_plane_non420_ver(cm, &planes[plane], mi + mi_col,
+                                          mi_row, mi_col);
+        av1_filter_block_plane_non420_hor(cm, &planes[plane], mi_row);
+      }
     }
   }
-#else
+#else  // CONFIG_VAR_TX || CONFIG_EXT_PARTITION || CONFIG_EXT_PARTITION_TYPES
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
   int mi_row, mi_col;
   enum lf_path path;
@@ -1641,7 +1685,7 @@ void av1_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer, AV1_COMMON *cm,
     path = LF_PATH_444;
   else
     path = LF_PATH_SLOW;
-
+#if CONFIG_PARALLEL_DEBLOCKING
   for (mi_row = start; mi_row < stop; mi_row += MAX_MIB_SIZE) {
     MODE_INFO **mi = cm->mi_grid_visible + mi_row * cm->mi_stride;
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MAX_MIB_SIZE) {
@@ -1652,23 +1696,83 @@ void av1_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer, AV1_COMMON *cm,
       // TODO(JBB): Make setup_mask work for non 420.
       av1_setup_mask(cm, mi_row, mi_col, mi + mi_col, cm->mi_stride, &lfm);
 
-      av1_filter_block_plane_ss00(cm, &planes[0], mi_row, &lfm);
+      av1_filter_block_plane_ss00_ver(cm, &planes[0], mi_row, &lfm);
       for (plane = 1; plane < num_planes; ++plane) {
         switch (path) {
           case LF_PATH_420:
-            av1_filter_block_plane_ss11(cm, &planes[plane], mi_row, &lfm);
+            av1_filter_block_plane_ss11_ver(cm, &planes[plane], mi_row, &lfm);
             break;
           case LF_PATH_444:
-            av1_filter_block_plane_ss00(cm, &planes[plane], mi_row, &lfm);
+            av1_filter_block_plane_ss00_ver(cm, &planes[plane], mi_row, &lfm);
             break;
           case LF_PATH_SLOW:
-            av1_filter_block_plane_non420(cm, &planes[plane], mi + mi_col,
-                                          mi_row, mi_col);
+            av1_filter_block_plane_non420_ver(cm, &planes[plane], mi + mi_col,
+                                              mi_row, mi_col);
             break;
         }
       }
     }
   }
+  for (mi_row = start; mi_row < stop; mi_row += MAX_MIB_SIZE) {
+    MODE_INFO **mi = cm->mi_grid_visible + mi_row * cm->mi_stride;
+    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MAX_MIB_SIZE) {
+      int plane;
+
+      av1_setup_dst_planes(planes, frame_buffer, mi_row, mi_col);
+
+      // TODO(JBB): Make setup_mask work for non 420.
+      av1_setup_mask(cm, mi_row, mi_col, mi + mi_col, cm->mi_stride, &lfm);
+
+      av1_filter_block_plane_ss00_hor(cm, &planes[0], mi_row, &lfm);
+      for (plane = 1; plane < num_planes; ++plane) {
+        switch (path) {
+          case LF_PATH_420:
+            av1_filter_block_plane_ss11_hor(cm, &planes[plane], mi_row, &lfm);
+            break;
+          case LF_PATH_444:
+            av1_filter_block_plane_ss00_hor(cm, &planes[plane], mi_row, &lfm);
+            break;
+          case LF_PATH_SLOW:
+            av1_filter_block_plane_non420_hor(cm, &planes[plane], mi_row);
+            break;
+        }
+      }
+    }
+  }
+#else   // CONFIG_PARALLEL_DEBLOCKING
+  for (mi_row = start; mi_row < stop; mi_row += MAX_MIB_SIZE) {
+    MODE_INFO **mi = cm->mi_grid_visible + mi_row * cm->mi_stride;
+    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MAX_MIB_SIZE) {
+      int plane;
+
+      av1_setup_dst_planes(planes, frame_buffer, mi_row, mi_col);
+
+      // TODO(JBB): Make setup_mask work for non 420.
+      av1_setup_mask(cm, mi_row, mi_col, mi + mi_col, cm->mi_stride, &lfm);
+
+      av1_filter_block_plane_ss00_ver(cm, &planes[0], mi_row, &lfm);
+      av1_filter_block_plane_ss00_hor(cm, &planes[0], mi_row, &lfm);
+      for (plane = 1; plane < num_planes; ++plane) {
+        switch (path) {
+          case LF_PATH_420:
+            av1_filter_block_plane_ss11_ver(cm, &planes[plane], mi_row, &lfm);
+            av1_filter_block_plane_ss11_hor(cm, &planes[plane], mi_row, &lfm);
+            break;
+          case LF_PATH_444:
+            av1_filter_block_plane_ss00_ver(cm, &planes[plane], mi_row, &lfm);
+            av1_filter_block_plane_ss00_hor(cm, &planes[plane], mi_row, &lfm);
+            break;
+          case LF_PATH_SLOW:
+            av1_filter_block_plane_non420_ver(cm, &planes[plane], mi + mi_col,
+                                              mi_row, mi_col);
+            av1_filter_block_plane_non420_hor(cm, &planes[plane], mi_row);
+
+            break;
+        }
+      }
+    }
+  }
+#endif  // CONFIG_PARALLEL_DEBLOCKING
 #endif  // CONFIG_VAR_TX || CONFIG_EXT_PARTITION || CONFIG_EXT_PARTITION_TYPES
 }
 
