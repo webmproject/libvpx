@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "218e78b3_40d670dd",
+        "filename": "test/stress.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-10-26T16:20:37Z",
+      "side": 1,
+      "message": "Make this configurable? local jobs_to_run or something, and load STRESS_MAX_JOBS from env if set, and default to 5?\n\nWhy 5? Seems to trigger things?\n\nYou can probably drop that second sentence.",
+      "range": {
+        "startLine": 52,
+        "startChar": 4,
+        "endLine": 52,
+        "endChar": 12
+      },
+      "revId": "894dbe1f092458bfeee16d558b500793633c877a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "218e78b3_60d36cec",
+        "filename": "test/stress.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-10-26T16:20:37Z",
+      "side": 1,
+      "message": "one letter variable names are cruel and unusual punishment for future maintainers that have to locate --target-bitrate in the eval command to find out what $b is for (even if it seems mind numbingly obvious right now, to me as well).",
+      "range": {
+        "startLine": 54,
+        "startChar": 4,
+        "endLine": 54,
+        "endChar": 5
+      },
+      "revId": "894dbe1f092458bfeee16d558b500793633c877a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "218e78b3_6028ccf8",
+        "filename": "test/stress.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-10-26T16:20:37Z",
+      "side": 1,
+      "message": "Re earlier comment, it might be nice to set these individually:\n\nlocal rt_max_jobs\u003d${STRESS_RT_MAX_JOBS:-5}\nlocal twopass_max_jobs\u003d${STRESS_TWOPASS_MAX_JOBS:-5}\n\nAnd same below for decode, make that configurable maybe?",
+      "range": {
+        "startLine": 61,
+        "startChar": 4,
+        "endLine": 61,
+        "endChar": 11
+      },
+      "revId": "894dbe1f092458bfeee16d558b500793633c877a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "218e78b3_8025d821",
+        "filename": "test/stress.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-10-26T16:20:37Z",
+      "side": 1,
+      "message": "$decode_count",
+      "range": {
+        "startLine": 76,
+        "startChar": 10,
+        "endLine": 76,
+        "endChar": 12
+      },
+      "revId": "894dbe1f092458bfeee16d558b500793633c877a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
