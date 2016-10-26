@@ -25,7 +25,7 @@
 #define MAX_CORNERS 4096
 #define MIN_INLIER_PROB 0.1
 
-INLINE RansacFunc get_ransac_type(TransformationType type) {
+static INLINE RansacFunc get_ransac_type(TransformationType type) {
   switch (type) {
     case HOMOGRAPHY: return ransac_homography;
     case AFFINE: return ransac_affine;
