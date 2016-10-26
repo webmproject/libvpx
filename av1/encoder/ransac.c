@@ -81,10 +81,12 @@ static void project_points_double_homography(double *mat, double *points,
                                              const int stride_points,
                                              const int stride_proj) {
   int i;
-  double x, y, Z;
+  double x, y, Z, Z_inv;
   for (i = 0; i < n; ++i) {
     x = *(points++), y = *(points++);
-    Z = 1. / (mat[7] * x + mat[6] * y + 1);
+    Z_inv = mat[7] * x + mat[6] * y + 1;
+    assert(fabs(Z_inv) > 0.00001);
+    Z = 1. / Z_inv;
     *(proj++) = (mat[1] * x + mat[0] * y + mat[3]) * Z;
     *(proj++) = (mat[2] * x + mat[4] * y + mat[4]) * Z;
     points += stride_points - 2;
@@ -155,7 +157,7 @@ static int ransac(double *matched_points, int npoints, int *number_of_inliers,
   double T1[9], T2[9];
 
   *number_of_inliers = 0;
-  if (npoints < minpts * MINPTS_MULTIPLIER) {
+  if (npoints < minpts * MINPTS_MULTIPLIER || npoints == 0) {
     printf("Cannot find motion with %d matches\n", npoints);
     return 1;
   }
@@ -245,11 +247,15 @@ static int ransac(double *matched_points, int npoints, int *number_of_inliers,
       }
     }
 
-    if (num_inliers >= max_inliers) {
-      double mean_distance = sum_distance / ((double)num_inliers);
-      double variance = sum_distance_squared / ((double)num_inliers - 1.0) -
-                        mean_distance * mean_distance * ((double)num_inliers) /
-                            ((double)num_inliers - 1.0);
+    if (num_inliers >= max_inliers && num_inliers > 1) {
+      int temp;
+      double fracinliers, pNoOutliers, mean_distance, variance;
+
+      assert(num_inliers > 1);
+      mean_distance = sum_distance / ((double)num_inliers);
+      variance = sum_distance_squared / ((double)num_inliers - 1.0) -
+                 mean_distance * mean_distance * ((double)num_inliers) /
+                     ((double)num_inliers - 1.0);
       if ((num_inliers > max_inliers) ||
           (num_inliers == max_inliers && variance < best_variance)) {
         best_variance = variance;
@@ -262,16 +268,15 @@ static int ransac(double *matched_points, int npoints, int *number_of_inliers,
         memcpy(best_inlier_mask, inlier_mask,
                npoints * sizeof(*best_inlier_mask));
 
-        if (num_inliers > 0) {
-          double fracinliers = (double)num_inliers / (double)npoints;
-          double pNoOutliers = 1 - pow(fracinliers, minpts);
-          int temp;
-          pNoOutliers = fmax(EPS, pNoOutliers);
-          pNoOutliers = fmin(1 - EPS, pNoOutliers);
-          temp = (int)(log(1.0 - PROBABILITY_REQUIRED) / log(pNoOutliers));
-          if (temp > 0 && temp < N) {
-            N = AOMMAX(temp, MIN_TRIALS);
-          }
+        assert(npoints > 0);
+        fracinliers = (double)num_inliers / (double)npoints;
+        pNoOutliers = 1 - pow(fracinliers, minpts);
+        pNoOutliers = fmax(EPS, pNoOutliers);
+        pNoOutliers = fmin(1 - EPS, pNoOutliers);
+        assert(fabs(1.0 - pNoOutliers) > 0.00001);
+        temp = (int)(log(1.0 - PROBABILITY_REQUIRED) / log(pNoOutliers));
+        if (temp > 0 && temp < N) {
+          N = AOMMAX(temp, MIN_TRIALS);
         }
       }
     }
@@ -356,6 +361,7 @@ int ransac_homography(double *matched_points, int npoints,
     // normalize so that H33 = 1
     int i;
     const double m = 1.0 / best_params[8];
+    assert(fabs(best_params[8]) > 0.00001);
     for (i = 0; i < 8; ++i) best_params[i] *= m;
     best_params[8] = 1.0;
   }
