@@ -3222,7 +3222,8 @@ static void inter_block_yrd(const AV1_COMP *cpi, MACROBLOCK *x, int *rate,
     int bh = num_4x4_blocks_wide_lookup[txb_size];
     int idx, idy;
     int block = 0;
-    int step = 1 << (max_txsize_lookup[plane_bsize] * 2);
+    int step = tx_size_wide_unit[max_txsize_lookup[plane_bsize]] *
+               tx_size_high_unit[max_txsize_lookup[plane_bsize]];
     ENTROPY_CONTEXT ctxa[2 * MAX_MIB_SIZE];
     ENTROPY_CONTEXT ctxl[2 * MAX_MIB_SIZE];
     TXFM_CONTEXT tx_above[MAX_MIB_SIZE];
@@ -3519,6 +3520,7 @@ static void tx_block_rd(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
     coeff_ctx = combine_entropy_contexts(ta[0], tl[0]);
     av1_tx_block_rd_b(cpi, x, tx_size, blk_row, blk_col, plane, block,
                       plane_bsize, coeff_ctx, rate, dist, bsse, skip);
+
     for (i = 0; i < num_4x4_blocks_wide_txsize_lookup[tx_size]; ++i)
       ta[i] = !(p->eobs[block] == 0);
     for (i = 0; i < num_4x4_blocks_high_txsize_lookup[tx_size]; ++i)

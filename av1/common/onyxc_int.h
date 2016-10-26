@@ -733,7 +733,8 @@ static INLINE int txfm_partition_context(TXFM_CONTEXT *above_ctx,
                                          TX_SIZE tx_size) {
   int above = *above_ctx < tx_size;
   int left = *left_ctx < tx_size;
-  return (tx_size - 1) * 3 + above + left;
+
+  return (tx_size - TX_8X8) * 3 + above + left;
 }
 #endif
 

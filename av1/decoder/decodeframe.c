@@ -3674,7 +3674,7 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
     av1_diff_update_prob(&r, &fc->txfm_partition_prob[k], ACCT_STR);
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
   if (cm->tx_mode == TX_MODE_SELECT) {
-    for (i = 1; i < TX_SIZES - 1; ++i)
+    for (i = 1; i < MAX_TX_DEPTH; ++i)
       av1_diff_update_prob(&r, &fc->rect_tx_prob[i], ACCT_STR);
   }
 #endif  // CONFIG_EXT_TX && CONFIG_RECT_TX

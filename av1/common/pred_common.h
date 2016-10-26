@@ -186,8 +186,13 @@ static INLINE int get_tx_size_context(const MACROBLOCKD *xd) {
   if (!has_left) left_ctx = above_ctx;
 
   if (!has_above) above_ctx = left_ctx;
-
+#if CONFIG_CB4X4
+  // TODO(jingning): Temporary setup. Will rework this after the cb4x4
+  // framework is up running.
+  return (above_ctx + left_ctx) > max_tx_size + 1;
+#else
   return (above_ctx + left_ctx) > max_tx_size;
+#endif
 }
 
 #if CONFIG_VAR_TX
