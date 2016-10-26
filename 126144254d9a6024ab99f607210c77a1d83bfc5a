@@ -16,6 +16,24 @@
       "revId": "126144254d9a6024ab99f607210c77a1d83bfc5a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "218e78b3_c60c581f",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-26T19:29:17Z",
+      "side": 1,
+      "message": "they were all aligned. at least the sse2 load uses the aligned _mm_si128, so yeah should have kept that. sorry.",
+      "parentUuid": "218e78b3_1d5bf345",
+      "revId": "126144254d9a6024ab99f607210c77a1d83bfc5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
