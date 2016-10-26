@@ -107,7 +107,13 @@ typedef struct AV1Decoder {
   int acct_enabled;
   Accounting accounting;
 #endif
-
+  size_t uncomp_hdr_size;       // Size of the uncompressed header
+  size_t first_partition_size;  // Size of the compressed header
+#if CONFIG_TILE_GROUPS
+  int tg_size;   // Number of tiles in the current tilegroup
+  int tg_start;  // First tile in the current tilegroup
+  int tg_size_bit_offset;
+#endif
 } AV1Decoder;
 
 int av1_receive_compressed_data(struct AV1Decoder *pbi, size_t size,

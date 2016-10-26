@@ -4563,6 +4563,12 @@ static void encode_frame_to_data_rate(AV1_COMP *cpi, size_t *size,
       cm->reset_frame_context = RESET_FRAME_CONTEXT_CURRENT;
     }
   }
+#if CONFIG_TILE_GROUPS
+  if (cm->error_resilient_mode)
+    cm->num_tg = MAX_NUM_TG;
+  else
+    cm->num_tg = 1;
+#endif
 
   // For 1 pass CBR, check if we are dropping this frame.
   // Never drop on key frame.

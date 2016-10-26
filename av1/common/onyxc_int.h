@@ -391,10 +391,14 @@ typedef struct AV1Common {
 #if CONFIG_DERING
   int dering_level;
 #endif
+
 #if CONFIG_DELTA_Q
   int delta_q_present_flag;
   // Resolution of delta quant
   int delta_q_res;
+#endif
+#if CONFIG_TILE_GROUPS
+  int num_tg;
 #endif
 } AV1_COMMON;
 

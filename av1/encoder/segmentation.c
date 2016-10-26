@@ -51,7 +51,8 @@ void av1_clear_segdata(struct segmentation *seg, int segment_id,
 // Based on set of segment counts calculate a probability tree
 static void calc_segtree_probs(unsigned *segcounts,
                                aom_prob *segment_tree_probs,
-                               const aom_prob *cur_tree_probs) {
+                               const aom_prob *cur_tree_probs,
+                               const int probwt) {
   // Work out probabilities of each segment
   const unsigned cc[4] = { segcounts[0] + segcounts[1],
                            segcounts[2] + segcounts[3],
@@ -71,8 +72,9 @@ static void calc_segtree_probs(unsigned *segcounts,
   for (i = 0; i < 7; i++) {
     const unsigned *ct =
         i == 0 ? ccc : i < 3 ? cc + (i & 2) : segcounts + (i - 3) * 2;
-    av1_prob_diff_update_savings_search(
-        ct, cur_tree_probs[i], &segment_tree_probs[i], DIFF_UPDATE_PROB);
+    av1_prob_diff_update_savings_search(ct, cur_tree_probs[i],
+                                        &segment_tree_probs[i],
+                                        DIFF_UPDATE_PROB, probwt);
   }
 }
 
@@ -294,6 +296,11 @@ void av1_choose_segmap_coding_method(AV1_COMMON *cm, MACROBLOCKD *xd) {
   int t_pred_cost = INT_MAX;
 
   int i, tile_col, tile_row, mi_row, mi_col;
+#if CONFIG_TILE_GROUPS
+  const int probwt = cm->num_tg;
+#else
+  const int probwt = 1;
+#endif
 
   unsigned(*temporal_predictor_count)[2] = cm->counts.seg.pred;
   unsigned *no_pred_segcounts = cm->counts.seg.tree_total;
@@ -333,14 +340,15 @@ void av1_choose_segmap_coding_method(AV1_COMMON *cm, MACROBLOCKD *xd) {
 
   // Work out probability tree for coding segments without prediction
   // and the cost.
-  calc_segtree_probs(no_pred_segcounts, no_pred_tree, segp->tree_probs);
+  calc_segtree_probs(no_pred_segcounts, no_pred_tree, segp->tree_probs, probwt);
   no_pred_cost = cost_segmap(no_pred_segcounts, no_pred_tree);
 
   // Key frames cannot use temporal prediction
   if (!frame_is_intra_only(cm) && !cm->error_resilient_mode) {
     // Work out probability tree for coding those segments not
     // predicted using the temporal method and the cost.
-    calc_segtree_probs(t_unpred_seg_counts, t_pred_tree, segp->tree_probs);
+    calc_segtree_probs(t_unpred_seg_counts, t_pred_tree, segp->tree_probs,
+                       probwt);
     t_pred_cost = cost_segmap(t_unpred_seg_counts, t_pred_tree);
 
     // Add in the cost of the signaling for each prediction context.
@@ -349,9 +357,9 @@ void av1_choose_segmap_coding_method(AV1_COMMON *cm, MACROBLOCKD *xd) {
       const int count1 = temporal_predictor_count[i][1];
 
       t_nopred_prob[i] = get_binary_prob(count0, count1);
-      av1_prob_diff_update_savings_search(temporal_predictor_count[i],
-                                          segp->pred_probs[i],
-                                          &t_nopred_prob[i], DIFF_UPDATE_PROB);
+      av1_prob_diff_update_savings_search(
+          temporal_predictor_count[i], segp->pred_probs[i], &t_nopred_prob[i],
+          DIFF_UPDATE_PROB, probwt);
 
       // Add in the predictor signaling cost
       t_pred_cost += count0 * av1_cost_zero(t_nopred_prob[i]) +
