@@ -4442,8 +4442,10 @@ void av1_encode_tile(AV1_COMP *cpi, ThreadData *td, int tile_row,
   av1_zero_above_context(cm, tile_info->mi_col_start, tile_info->mi_col_end);
 
   // Set up pointers to per thread motion search counters.
-  td->mb.m_search_count_ptr = &td->rd_counts.m_search_count;
-  td->mb.ex_search_count_ptr = &td->rd_counts.ex_search_count;
+  this_tile->m_search_count = 0;   // Count of motion search hits.
+  this_tile->ex_search_count = 0;  // Exhaustive mesh search hits.
+  td->mb.m_search_count_ptr = &this_tile->m_search_count;
+  td->mb.ex_search_count_ptr = &this_tile->ex_search_count;
 
   for (mi_row = tile_info->mi_row_start; mi_row < tile_info->mi_row_end;
        mi_row += cm->mib_size) {
@@ -4624,8 +4626,6 @@ static void encode_frame_internal(AV1_COMP *cpi) {
   av1_zero(*td->counts);
   av1_zero(rdc->coef_counts);
   av1_zero(rdc->comp_pred_diff);
-  rdc->m_search_count = 0;   // Count of motion search hits.
-  rdc->ex_search_count = 0;  // Exhaustive mesh search hits.
 
 #if CONFIG_GLOBAL_MOTION
   aom_clear_system_state();
