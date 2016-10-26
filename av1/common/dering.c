@@ -72,14 +72,14 @@ int sb_compute_dering_list(const AV1_COMMON *const cm, int mi_row, int mi_col,
   return count;
 }
 
-static INLINE void copy_8x8_16_8bit(uint8_t *dst, int dstride, int16_t *src, int sstride) {
+static INLINE void copy_8x8_16bit_to_8bit(uint8_t *dst, int dstride, int16_t *src, int sstride) {
   int i, j;
   for (i = 0; i < 8; i++)
     for (j = 0; j < 8; j++)
       dst[i * dstride + j] = src[i * sstride + j];
 }
 
-static INLINE void copy_4x4_16_8bit(uint8_t *dst, int dstride, int16_t *src, int sstride) {
+static INLINE void copy_4x4_16bit_to_8bit(uint8_t *dst, int dstride, int16_t *src, int sstride) {
   int i, j;
   for (i = 0; i < 4; i++)
     for (j = 0; j < 4; j++)
@@ -87,7 +87,7 @@ static INLINE void copy_4x4_16_8bit(uint8_t *dst, int dstride, int16_t *src, int
 }
 
 /* TODO: Optimize this function for SSE. */
-void copy_blocks_16_8bit(uint8_t *dst, int dstride, int16_t *src,
+void copy_dering_16bit_to_8bit(uint8_t *dst, int dstride, int16_t *src,
     dering_list *dlist, int dering_count, int bsize)
 {
   int bi, bx, by;
@@ -95,7 +95,7 @@ void copy_blocks_16_8bit(uint8_t *dst, int dstride, int16_t *src,
     for (bi = 0; bi < dering_count; bi++) {
       by = dlist[bi].by;
       bx = dlist[bi].bx;
-      copy_8x8_16_8bit(&dst[(by << 3) * dstride + (bx << 3)],
+      copy_8x8_16bit_to_8bit(&dst[(by << 3) * dstride + (bx << 3)],
                      dstride,
                      &src[bi << 2*bsize], 1 << bsize);
     }
@@ -103,7 +103,7 @@ void copy_blocks_16_8bit(uint8_t *dst, int dstride, int16_t *src,
     for (bi = 0; bi < dering_count; bi++) {
       by = dlist[bi].by;
       bx = dlist[bi].bx;
-      copy_4x4_16_8bit(&dst[(by << 2) * dstride + (bx << 2)],
+      copy_4x4_16bit_to_8bit(&dst[(by << 2) * dstride + (bx << 2)],
                      dstride,
                      &src[bi << 2*bsize], 1 << bsize);
     }
@@ -344,7 +344,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
             dec[pli], dir, pli, dlist, dering_count, threshold, coeff_shift);
 #if CONFIG_AOM_HIGHBITDEPTH
         if (cm->use_highbitdepth) {
-          copy_blocks_16bit(
+          copy_dering_16bit_to_16bit(
               (int16_t*)&CONVERT_TO_SHORTPTR(
                   xd->plane[pli].dst.buf)[xd->plane[pli].dst.stride *
                   (MAX_MIB_SIZE * sbr << bsize[pli]) +
@@ -353,7 +353,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
               dering_count, 3 - dec[pli]);
         } else {
 #endif
-          copy_blocks_16_8bit(
+          copy_dering_16bit_to_8bit(
               &xd->plane[pli].dst.buf[xd->plane[pli].dst.stride *
                                     (MAX_MIB_SIZE * sbr << bsize[pli]) +
                                     (sbc * MAX_MIB_SIZE << bsize[pli])],

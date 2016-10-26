@@ -138,7 +138,7 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
         }
         od_dering(tmp_dst, in, 0, dir, 0, dlist, dering_count, threshold,
             coeff_shift);
-        copy_blocks_16bit(dst, MAX_MIB_SIZE << bsize[0], tmp_dst, dlist,
+        copy_dering_16bit_to_16bit(dst, MAX_MIB_SIZE << bsize[0], tmp_dst, dlist,
             dering_count, 3);
         cur_mse = (int)compute_dist(
             dst, MAX_MIB_SIZE << bsize[0],

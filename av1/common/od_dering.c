@@ -258,14 +258,14 @@ static INLINE int od_adjust_thresh(int threshold, int32_t var) {
   return (threshold * OD_THRESH_TABLE_Q8[OD_ILOG(v1)] + 128) >> 8;
 }
 
-static INLINE void copy_8x8_16bit(int16_t *dst, int dstride, int16_t *src, int sstride) {
+static INLINE void copy_8x8_16bit_to_16bit(int16_t *dst, int dstride, int16_t *src, int sstride) {
   int i, j;
   for (i = 0; i < 8; i++)
     for (j = 0; j < 8; j++)
       dst[i * dstride + j] = src[i * sstride + j];
 }
 
-static INLINE void copy_4x4_16bit(int16_t *dst, int dstride, int16_t *src, int sstride) {
+static INLINE void copy_4x4_16bit_to_16bit(int16_t *dst, int dstride, int16_t *src, int sstride) {
   int i, j;
   for (i = 0; i < 4; i++)
     for (j = 0; j < 4; j++)
@@ -273,7 +273,7 @@ static INLINE void copy_4x4_16bit(int16_t *dst, int dstride, int16_t *src, int s
 }
 
 /* TODO: Optimize this function for SSE. */
-void copy_blocks_16bit(int16_t *dst, int dstride, int16_t *src,
+void copy_dering_16bit_to_16bit(int16_t *dst, int dstride, int16_t *src,
     dering_list *dlist, int dering_count, int bsize)
 {
   int bi, bx, by;
@@ -281,7 +281,7 @@ void copy_blocks_16bit(int16_t *dst, int dstride, int16_t *src,
     for (bi = 0; bi < dering_count; bi++) {
       by = dlist[bi].by;
       bx = dlist[bi].bx;
-      copy_8x8_16bit(&dst[(by << 3) * dstride + (bx << 3)],
+      copy_8x8_16bit_to_16bit(&dst[(by << 3) * dstride + (bx << 3)],
                      dstride,
                      &src[bi << 2*bsize], 1 << bsize);
     }
@@ -289,7 +289,7 @@ void copy_blocks_16bit(int16_t *dst, int dstride, int16_t *src,
     for (bi = 0; bi < dering_count; bi++) {
       by = dlist[bi].by;
       bx = dlist[bi].bx;
-      copy_4x4_16bit(&dst[(by << 2) * dstride + (bx << 2)],
+      copy_4x4_16bit_to_16bit(&dst[(by << 2) * dstride + (bx << 2)],
                      dstride,
                      &src[bi << 2*bsize], 1 << bsize);
     }
@@ -342,7 +342,7 @@ void od_dering(int16_t *y, int16_t *in, int xdec,
           dir[by][bx]);
     }
   }
-  copy_blocks_16bit(in, OD_FILT_BSTRIDE, y, dlist, dering_count,
+  copy_dering_16bit_to_16bit(in, OD_FILT_BSTRIDE, y, dlist, dering_count,
       bsize);
   for (bi = 0; bi < dering_count; bi++) {
     by = dlist[bi].by;
