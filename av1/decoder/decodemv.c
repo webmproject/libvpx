@@ -353,7 +353,7 @@ static TX_SIZE read_selected_tx_size(AV1_COMMON *cm, MACROBLOCKD *xd,
   int depth = aom_read_tree(r, av1_tx_size_tree[tx_size_cat],
                             cm->fc->tx_size_probs[tx_size_cat][ctx], ACCT_STR);
   TX_SIZE tx_size = depth_to_tx_size(depth);
-  if (counts) ++counts->tx_size[tx_size_cat][ctx][tx_size];
+  if (counts) ++counts->tx_size[tx_size_cat][ctx][depth];
   return tx_size;
 }
 
