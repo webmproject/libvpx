@@ -12,8 +12,12 @@ cmake_minimum_required(VERSION 3.2)
 project(AOM C CXX)
 
 set(AOM_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
+set(AOM_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+include("${AOM_ROOT}/build/cmake/aom_configure.cmake")
 
 set(AOM_SRCS
+    "${AOM_CONFIG_DIR}/aom_config.c"
+    "${AOM_CONFIG_DIR}/aom_config.h"
     "${AOM_ROOT}/aom/aom.h"
     "${AOM_ROOT}/aom/aom_codec.h"
     "${AOM_ROOT}/aom/aom_decoder.h"
@@ -242,8 +246,10 @@ set(AOM_AV1_ENCODER_SRCS
 
 # Targets
 add_library(aom_dsp ${AOM_DSP_SRCS})
+include_directories(${AOM_ROOT} ${AOM_CONFIG_DIR})
 add_library(aom_mem ${AOM_MEM_SRCS})
 add_library(aom_scale ${AOM_SCALE_SRCS})
+include_directories(${AOM_ROOT} ${AOM_CONFIG_DIR})
 add_library(aom_util ${AOM_UTIL_SRCS})
 add_library(aom_av1_decoder ${AOM_AV1_DECODER_SRCS})
 add_library(aom_av1_encoder ${AOM_AV1_ENCODER_SRCS})
