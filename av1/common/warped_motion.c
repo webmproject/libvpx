@@ -35,18 +35,18 @@ void project_points_translation(int16_t *mat, int *points, int *proj,
     const int x = *(points++), y = *(points++);
     if (subsampling_x)
       *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
-          ((x << (WARPEDMODEL_PREC_BITS + 1)) + mat[1]),
+          ((x * (1 << (WARPEDMODEL_PREC_BITS + 1))) + mat[1]),
           WARPEDDIFF_PREC_BITS + 1);
     else
       *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
-          ((x << WARPEDMODEL_PREC_BITS) + mat[1]), WARPEDDIFF_PREC_BITS);
+          ((x * (1 << WARPEDMODEL_PREC_BITS)) + mat[1]), WARPEDDIFF_PREC_BITS);
     if (subsampling_y)
       *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
-          ((y << (WARPEDMODEL_PREC_BITS + 1)) + mat[0]),
+          ((y * (1 << (WARPEDMODEL_PREC_BITS + 1))) + mat[0]),
           WARPEDDIFF_PREC_BITS + 1);
     else
       *(proj++) = ROUND_POWER_OF_TWO_SIGNED(
-          ((y << WARPEDMODEL_PREC_BITS)) + mat[0], WARPEDDIFF_PREC_BITS);
+          ((y * (1 << WARPEDMODEL_PREC_BITS))) + mat[0], WARPEDDIFF_PREC_BITS);
     points += stride_points - 2;
     proj += stride_proj - 2;
   }
@@ -119,12 +119,12 @@ void project_points_homography(int16_t *mat, int *points, int *proj,
     y = (subsampling_y ? 4 * y + 1 : 2 * y);
 
     Z = (mat[7] * x + mat[6] * y + (1 << (WARPEDMODEL_ROW3HOMO_PREC_BITS + 1)));
-    xp = (mat[1] * x + mat[0] * y + 2 * mat[3])
-         << (WARPEDPIXEL_PREC_BITS + WARPEDMODEL_ROW3HOMO_PREC_BITS -
-             WARPEDMODEL_PREC_BITS);
-    yp = (mat[2] * x + mat[5] * y + 2 * mat[4])
-         << (WARPEDPIXEL_PREC_BITS + WARPEDMODEL_ROW3HOMO_PREC_BITS -
-             WARPEDMODEL_PREC_BITS);
+    xp = (mat[1] * x + mat[0] * y + 2 * mat[3]) *
+         (1 << (WARPEDPIXEL_PREC_BITS + WARPEDMODEL_ROW3HOMO_PREC_BITS -
+                WARPEDMODEL_PREC_BITS));
+    yp = (mat[2] * x + mat[5] * y + 2 * mat[4]) *
+         (1 << (WARPEDPIXEL_PREC_BITS + WARPEDMODEL_ROW3HOMO_PREC_BITS -
+                WARPEDMODEL_PREC_BITS));
 
     xp = xp > 0 ? (xp + Z / 2) / Z : (xp - Z / 2) / Z;
     yp = yp > 0 ? (yp + Z / 2) / Z : (yp - Z / 2) / Z;
@@ -220,9 +220,9 @@ static int32_t do_cubic_filter(int32_t *p, int x) {
     const int64_t v3 = x * (p[1] - p[-1]);
     const int64_t v4 = 2 * p[0];
     return (int32_t)ROUND_POWER_OF_TWO_SIGNED(
-        (v4 << (3 * WARPEDPIXEL_PREC_BITS)) +
-            (v3 << (2 * WARPEDPIXEL_PREC_BITS)) +
-            (v2 << WARPEDPIXEL_PREC_BITS) + v1,
+        (v4 * (1 << (3 * WARPEDPIXEL_PREC_BITS))) +
+            (v3 * (1 << (2 * WARPEDPIXEL_PREC_BITS))) +
+            (v2 * (1 << WARPEDPIXEL_PREC_BITS)) + v1,
         3 * WARPEDPIXEL_PREC_BITS + 1 - WARPEDPIXEL_FILTER_BITS);
   }
 }
@@ -246,10 +246,10 @@ static uint8_t bi_ntap_filter(uint8_t *ref, int x, int y, int stride) {
                   i + k + 1 - WARPEDPIXEL_FILTER_TAPS / 2,
                   j + 1 - WARPEDPIXEL_FILTER_TAPS / 2);
     arr[k] = do_ntap_filter(arr_temp + WARPEDPIXEL_FILTER_TAPS / 2 - 1,
-                            y - (j << WARPEDPIXEL_PREC_BITS));
+                            y - (j * (1 << WARPEDPIXEL_PREC_BITS)));
   }
   val = do_ntap_filter(arr + WARPEDPIXEL_FILTER_TAPS / 2 - 1,
-                       x - (i << WARPEDPIXEL_PREC_BITS));
+                       x - (i * (1 << WARPEDPIXEL_PREC_BITS)));
   val = ROUND_POWER_OF_TWO_SIGNED(val, WARPEDPIXEL_FILTER_BITS * 2);
   return (uint8_t)clip_pixel(val);
 }
@@ -262,9 +262,10 @@ static uint8_t bi_cubic_filter(uint8_t *ref, int x, int y, int stride) {
   for (k = 0; k < 4; ++k) {
     int32_t arr_temp[4];
     get_subcolumn(4, ref, arr_temp, stride, i + k - 1, j - 1);
-    arr[k] = do_cubic_filter(arr_temp + 1, y - (j << WARPEDPIXEL_PREC_BITS));
+    arr[k] =
+        do_cubic_filter(arr_temp + 1, y - (j * (1 << WARPEDPIXEL_PREC_BITS)));
   }
-  val = do_cubic_filter(arr + 1, x - (i << WARPEDPIXEL_PREC_BITS));
+  val = do_cubic_filter(arr + 1, x - (i * (1 << WARPEDPIXEL_PREC_BITS)));
   val = ROUND_POWER_OF_TWO_SIGNED(val, WARPEDPIXEL_FILTER_BITS * 2);
   return (uint8_t)clip_pixel(val);
 }
@@ -272,8 +273,8 @@ static uint8_t bi_cubic_filter(uint8_t *ref, int x, int y, int stride) {
 static uint8_t bi_linear_filter(uint8_t *ref, int x, int y, int stride) {
   const int ix = x >> WARPEDPIXEL_PREC_BITS;
   const int iy = y >> WARPEDPIXEL_PREC_BITS;
-  const int sx = x - (ix << WARPEDPIXEL_PREC_BITS);
-  const int sy = y - (iy << WARPEDPIXEL_PREC_BITS);
+  const int sx = x - (ix * (1 << WARPEDPIXEL_PREC_BITS));
+  const int sy = y - (iy * (1 << WARPEDPIXEL_PREC_BITS));
   int32_t val;
   val = ROUND_POWER_OF_TWO_SIGNED(
       ref[iy * stride + ix] * (WARPEDPIXEL_PREC_SHIFTS - sy) *
@@ -289,8 +290,8 @@ static uint8_t warp_interpolate(uint8_t *ref, int x, int y, int width,
                                 int height, int stride) {
   int ix = x >> WARPEDPIXEL_PREC_BITS;
   int iy = y >> WARPEDPIXEL_PREC_BITS;
-  int sx = x - (ix << WARPEDPIXEL_PREC_BITS);
-  int sy = y - (iy << WARPEDPIXEL_PREC_BITS);
+  int sx = x - (ix * (1 << WARPEDPIXEL_PREC_BITS));
+  int sy = y - (iy * (1 << WARPEDPIXEL_PREC_BITS));
   int32_t v;
 
   if (ix < 0 && iy < 0)
@@ -357,10 +358,10 @@ static uint16_t highbd_bi_ntap_filter(uint16_t *ref, int x, int y, int stride,
                          i + k + 1 - WARPEDPIXEL_FILTER_TAPS / 2,
                          j + 1 - WARPEDPIXEL_FILTER_TAPS / 2);
     arr[k] = do_ntap_filter(arr_temp + WARPEDPIXEL_FILTER_TAPS / 2 - 1,
-                            y - (j << WARPEDPIXEL_PREC_BITS));
+                            y - (j * (1 << WARPEDPIXEL_PREC_BITS)));
   }
   val = do_ntap_filter(arr + WARPEDPIXEL_FILTER_TAPS / 2 - 1,
-                       x - (i << WARPEDPIXEL_PREC_BITS));
+                       x - (i * (1 << WARPEDPIXEL_PREC_BITS)));
   val = ROUND_POWER_OF_TWO_SIGNED(val, WARPEDPIXEL_FILTER_BITS * 2);
   return (uint16_t)clip_pixel_highbd(val, bd);
 }
@@ -374,9 +375,10 @@ static uint16_t highbd_bi_cubic_filter(uint16_t *ref, int x, int y, int stride,
   for (k = 0; k < 4; ++k) {
     int32_t arr_temp[4];
     highbd_get_subcolumn(4, ref, arr_temp, stride, i + k - 1, j - 1);
-    arr[k] = do_cubic_filter(arr_temp + 1, y - (j << WARPEDPIXEL_PREC_BITS));
+    arr[k] =
+        do_cubic_filter(arr_temp + 1, y - (j * (1 << WARPEDPIXEL_PREC_BITS)));
   }
-  val = do_cubic_filter(arr + 1, x - (i << WARPEDPIXEL_PREC_BITS));
+  val = do_cubic_filter(arr + 1, x - (i * (1 << WARPEDPIXEL_PREC_BITS)));
   val = ROUND_POWER_OF_TWO_SIGNED(val, WARPEDPIXEL_FILTER_BITS * 2);
   return (uint16_t)clip_pixel_highbd(val, bd);
 }
@@ -385,8 +387,8 @@ static uint16_t highbd_bi_linear_filter(uint16_t *ref, int x, int y, int stride,
                                         int bd) {
   const int ix = x >> WARPEDPIXEL_PREC_BITS;
   const int iy = y >> WARPEDPIXEL_PREC_BITS;
-  const int sx = x - (ix << WARPEDPIXEL_PREC_BITS);
-  const int sy = y - (iy << WARPEDPIXEL_PREC_BITS);
+  const int sx = x - (ix * (1 << WARPEDPIXEL_PREC_BITS));
+  const int sy = y - (iy * (1 << WARPEDPIXEL_PREC_BITS));
   int32_t val;
   val = ROUND_POWER_OF_TWO_SIGNED(
       ref[iy * stride + ix] * (WARPEDPIXEL_PREC_SHIFTS - sy) *
@@ -402,8 +404,8 @@ static uint16_t highbd_warp_interpolate(uint16_t *ref, int x, int y, int width,
                                         int height, int stride, int bd) {
   int ix = x >> WARPEDPIXEL_PREC_BITS;
   int iy = y >> WARPEDPIXEL_PREC_BITS;
-  int sx = x - (ix << WARPEDPIXEL_PREC_BITS);
-  int sy = y - (iy << WARPEDPIXEL_PREC_BITS);
+  int sx = x - (ix * (1 << WARPEDPIXEL_PREC_BITS));
+  int sy = y - (iy * (1 << WARPEDPIXEL_PREC_BITS));
   int32_t v;
 
   if (ix < 0 && iy < 0)
