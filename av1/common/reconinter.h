@@ -462,7 +462,6 @@ static INLINE int has_subpel_mv_component(const MODE_INFO *const mi,
 }
 #endif
 
-#if CONFIG_EXT_INTERP
 static INLINE int av1_is_interp_needed(const MACROBLOCKD *const xd) {
   MODE_INFO *const mi = xd->mi[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
@@ -513,7 +512,6 @@ static INLINE int av1_is_interp_needed(const MACROBLOCKD *const xd) {
   }
   return !intpel_mv;
 }
-#endif  // CONFIG_EXT_INTERP
 
 #if CONFIG_MOTION_VAR
 const uint8_t *av1_get_obmc_mask(int length);

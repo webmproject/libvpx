@@ -720,30 +720,41 @@ YV12_BUFFER_CONFIG *av1_get_scaled_ref_frame(const AV1_COMP *cpi,
 
 #if CONFIG_DUAL_FILTER
 int av1_get_switchable_rate(const AV1_COMP *cpi, const MACROBLOCKD *const xd) {
-  const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
-  int inter_filter_cost = 0;
-  int dir;
+  const AV1_COMMON *const cm = &cpi->common;
+  if (cm->interp_filter == SWITCHABLE) {
+    const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+    int inter_filter_cost = 0;
+    int dir;
 
-  for (dir = 0; dir < 2; ++dir) {
-    if (has_subpel_mv_component(xd->mi[0], xd, dir) ||
-        (mbmi->ref_frame[1] > INTRA_FRAME &&
-         has_subpel_mv_component(xd->mi[0], xd, dir + 2))) {
-      const int ctx = av1_get_pred_context_switchable_interp(xd, dir);
-      inter_filter_cost +=
-          cpi->switchable_interp_costs[ctx][mbmi->interp_filter[dir]];
+    for (dir = 0; dir < 2; ++dir) {
+      if (has_subpel_mv_component(xd->mi[0], xd, dir) ||
+          (mbmi->ref_frame[1] > INTRA_FRAME &&
+           has_subpel_mv_component(xd->mi[0], xd, dir + 2))) {
+        const int ctx = av1_get_pred_context_switchable_interp(xd, dir);
+        inter_filter_cost +=
+            cpi->switchable_interp_costs[ctx][mbmi->interp_filter[dir]];
+      }
     }
+    return SWITCHABLE_INTERP_RATE_FACTOR * inter_filter_cost;
+  } else {
+    return 0;
   }
-  return SWITCHABLE_INTERP_RATE_FACTOR * inter_filter_cost;
 }
 #else
 int av1_get_switchable_rate(const AV1_COMP *cpi, const MACROBLOCKD *const xd) {
-  const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
-  const int ctx = av1_get_pred_context_switchable_interp(xd);
+  const AV1_COMMON *const cm = &cpi->common;
+  if (cm->interp_filter == SWITCHABLE) {
 #if CONFIG_EXT_INTERP
-  if (!av1_is_interp_needed(xd)) return 0;
-#endif  // CONFIG_EXT_INTERP
-  return SWITCHABLE_INTERP_RATE_FACTOR *
-         cpi->switchable_interp_costs[ctx][mbmi->interp_filter];
+    if (av1_is_interp_needed(xd))
+#endif
+    {
+      const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+      const int ctx = av1_get_pred_context_switchable_interp(xd);
+      return SWITCHABLE_INTERP_RATE_FACTOR *
+             cpi->switchable_interp_costs[ctx][mbmi->interp_filter];
+    }
+  }
+  return 0;
 }
 #endif
 
