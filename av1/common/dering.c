@@ -154,7 +154,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
   int bsize[3];
   int dec[3];
   int pli;
-  int last_sbc;
+  int dering_left;
   int coeff_shift = AOMMAX(cm->bit_depth - 8, 0);
   int nplanes;
   if (xd->plane[1].subsampling_x == xd->plane[1].subsampling_y &&
@@ -178,7 +178,6 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
     linebuf[pli] = aom_malloc(sizeof(*linebuf) * OD_FILT_VBORDER * stride);
   }
   for (sbr = 0; sbr < nvsb; sbr++) {
-    last_sbc = -1;
     for (pli = 0; pli < nplanes; pli++) {
       for (r = 0; r < (MAX_MIB_SIZE << bsize[pli]) + 2*OD_FILT_VBORDER; r++) {
         for (c = 0; c < OD_FILT_HBORDER; c++) {
@@ -186,11 +185,12 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
         }
       }
     }
+    dering_left = 1;
     for (sbc = 0; sbc < nhsb; sbc++) {
       int level;
       int nhb, nvb;
       int cstart = 0;
-      if (sbc != last_sbc + 1)
+      if (!dering_left)
         cstart = -OD_FILT_HBORDER;
       nhb = AOMMIN(MAX_MIB_SIZE, cm->mi_cols - MAX_MIB_SIZE * sbc);
       nvb = AOMMIN(MAX_MIB_SIZE, cm->mi_rows - MAX_MIB_SIZE * sbr);
@@ -201,8 +201,10 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
       curr_row_dering[sbc] = 0;
       if (level == 0 ||
           (dering_count = sb_compute_dering_list(cm, sbr * MAX_MIB_SIZE,
-              sbc * MAX_MIB_SIZE, dlist)) == 0)
+              sbc * MAX_MIB_SIZE, dlist)) == 0) {
+        dering_left = 0;
         continue;
+      }
       curr_row_dering[sbc] = 1;
       for (pli = 0; pli < nplanes; pli++) {
         int16_t dst[MAX_MIB_SIZE * MAX_MIB_SIZE * 8 * 8];
@@ -308,7 +310,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
             }
           }
         }
-        if (sbc == last_sbc + 1) {
+        if (dering_left) {
           /* If we deringed the superblock on the left then we need to copy in
              saved pixels. */
           for (r = 0; r < rend + OD_FILT_VBORDER; r++) {
@@ -361,7 +363,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
         }
 #endif
       }
-      last_sbc = sbc;
+      dering_left = 1;
     }
     {
       unsigned char *tmp;
