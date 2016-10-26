@@ -1775,6 +1775,7 @@ static void decode_partition(AV1Decoder *const pbi, MACROBLOCKD *const xd,
   if (bsize >= BLOCK_8X8 &&
       (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT))
     dec_update_partition_context(xd, mi_row, mi_col, subsize, num_8x8_wh);
+#endif  // CONFIG_EXT_PARTITION_TYPES
 
 #if CONFIG_CLPF
   if (bsize == BLOCK_64X64 && cm->clpf_strength_y &&
@@ -1812,6 +1813,7 @@ static void decode_partition(AV1Decoder *const pbi, MACROBLOCKD *const xd,
     }
   }
 #endif
+
 #if CONFIG_DERING
   if (bsize == BLOCK_64X64) {
     if (cm->dering_level != 0 && !sb_all_skip(cm, mi_row, mi_col)) {
@@ -1823,7 +1825,6 @@ static void decode_partition(AV1Decoder *const pbi, MACROBLOCKD *const xd,
     }
   }
 #endif
-#endif  // CONFIG_EXT_PARTITION_TYPES
 }
 
 #if !CONFIG_ANS
