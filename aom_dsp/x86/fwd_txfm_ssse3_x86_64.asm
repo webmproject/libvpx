@@ -130,12 +130,30 @@ SECTION .text
   psraw              m%2, 1
 %endmacro
 
+%macro STORE_OUTPUT 2 ; index, result
+%if CONFIG_AOM_HIGHBITDEPTH
+  ; const __m128i sign_bits = _mm_cmplt_epi16(*poutput, zero);
+  ; __m128i out0 = _mm_unpacklo_epi16(*poutput, sign_bits);
+  ; __m128i out1 = _mm_unpackhi_epi16(*poutput, sign_bits);
+  ; _mm_store_si128((__m128i *)(dst_ptr), out0);
+  ; _mm_store_si128((__m128i *)(dst_ptr + 4), out1);
+  pxor               m11, m11
+  pcmpgtw            m11, m%2
+  movdqa             m12, m%2
+  punpcklwd          m%2, m11
+  punpckhwd          m12, m11
+  mova               [outputq + 4*%1 +  0], m%2
+  mova               [outputq + 4*%1 + 16], m12
+%else
+  mova               [outputq + 2*%1], m%2
+%endif
+%endmacro
+
 INIT_XMM ssse3
 cglobal fdct8x8, 3, 5, 13, input, output, stride
 
   mova               m8, [pd_8192]
   mova              m12, [pw_11585x2]
-  pxor              m11, m11
 
   lea                r3, [2 * strideq]
   lea                r4, [4 * strideq]
@@ -173,14 +191,14 @@ cglobal fdct8x8, 3, 5, 13, input, output, stride
   DIVIDE_ROUND_2X   4, 5, 9, 10
   DIVIDE_ROUND_2X   6, 7, 9, 10
 
-  mova              [outputq +   0], m0
-  mova              [outputq +  16], m1
-  mova              [outputq +  32], m2
-  mova              [outputq +  48], m3
-  mova              [outputq +  64], m4
-  mova              [outputq +  80], m5
-  mova              [outputq +  96], m6
-  mova              [outputq + 112], m7
+  STORE_OUTPUT       0, 0
+  STORE_OUTPUT       8, 1
+  STORE_OUTPUT      16, 2
+  STORE_OUTPUT      24, 3
+  STORE_OUTPUT      32, 4
+  STORE_OUTPUT      40, 5
+  STORE_OUTPUT      48, 6
+  STORE_OUTPUT      56, 7
 
   RET
 %endif
