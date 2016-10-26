@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "218e78b3_cc4b9774",
+        "filename": "av1/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 9520,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-26T23:28:57Z",
+      "side": 1,
+      "message": "in new code I\u0027d prefer {}s on multi-line if()s for readability and in the case code shifts around",
+      "revId": "975004e2c40ecf385fcab4dee7ee888733ddd500",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
