@@ -9424,7 +9424,10 @@ PALETTE_EXIT:
 #endif  // CONFIG_REF_MV
 #if CONFIG_GLOBAL_MOTION
     zeromv[0].as_int = cm->global_motion[refs[0]].motion_params.wmmat[0].as_int;
-    zeromv[1].as_int = cm->global_motion[refs[1]].motion_params.wmmat[0].as_int;
+    if (comp_pred_mode) {
+      zeromv[1].as_int =
+          cm->global_motion[refs[1]].motion_params.wmmat[0].as_int;
+    }
 #else
     zeromv[0].as_int = 0;
     zeromv[1].as_int = 0;
