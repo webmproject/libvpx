@@ -18,6 +18,8 @@
 
 #define OD_DERINGSIZES (2)
 
+#define OD_DERING_SIZE_LOG2 (3)
+
 #define OD_DERING_NBLOCKS (OD_BSIZE_MAX / 8)
 
 /* We need to buffer three vertical lines. */

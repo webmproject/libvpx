@@ -58,7 +58,7 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
   av1_setup_dst_planes(xd->plane, frame, 0, 0);
   for (pli = 0; pli < 3; pli++) {
     dec[pli] = xd->plane[pli].subsampling_x;
-    bsize[pli] = 3 - dec[pli];
+    bsize[pli] = OD_DERING_SIZE_LOG2 - dec[pli];
   }
   stride = cm->mi_cols << bsize[0];
   for (r = 0; r < cm->mi_rows << bsize[0]; ++r) {
@@ -139,7 +139,7 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
         od_dering(tmp_dst, in, 0, dir, 0, dlist, dering_count, threshold,
             coeff_shift);
         copy_dering_16bit_to_16bit(dst, MAX_MIB_SIZE << bsize[0], tmp_dst, dlist,
-            dering_count, 3);
+            dering_count, bsize[0]);
         cur_mse = (int)compute_dist(
             dst, MAX_MIB_SIZE << bsize[0],
             &ref_coeff[(sbr * stride * MAX_MIB_SIZE << bsize[0]) +

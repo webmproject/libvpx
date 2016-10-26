@@ -311,7 +311,7 @@ void od_dering(int16_t *y, int16_t *in, int xdec,
   od_filter_dering_orthogonal_func filter_dering_orthogonal[OD_DERINGSIZES] = {
     od_filter_dering_orthogonal_4x4, od_filter_dering_orthogonal_8x8
   };
-  bsize = 3 - xdec;
+  bsize = OD_DERING_SIZE_LOG2 - xdec;
   if (pli == 0) {
     for (bi = 0; bi < dering_count; bi++) {
       int32_t var;

@@ -171,7 +171,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
   curr_row_dering = prev_row_dering + nhsb + 2;
   for (pli = 0; pli < nplanes; pli++) {
     dec[pli] = xd->plane[pli].subsampling_x;
-    bsize[pli] = 3 - dec[pli];
+    bsize[pli] = OD_DERING_SIZE_LOG2 - dec[pli];
   }
   stride = (cm->mi_cols << bsize[0]) + 2*OD_FILT_HBORDER;
   for (pli = 0; pli < nplanes; pli++) {
@@ -207,7 +207,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
       }
       curr_row_dering[sbc] = 1;
       for (pli = 0; pli < nplanes; pli++) {
-        int16_t dst[MAX_MIB_SIZE * MAX_MIB_SIZE * 8 * 8];
+        int16_t dst[OD_BSIZE_MAX * OD_BSIZE_MAX];
         int threshold;
         int coffset;
         int rend, cend;
@@ -358,7 +358,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
                                     (MAX_MIB_SIZE * sbr << bsize[pli]) +
                                     (sbc * MAX_MIB_SIZE << bsize[pli])],
               xd->plane[pli].dst.stride, dst, dlist,
-              dering_count, 3 - dec[pli]);
+              dering_count, bsize[pli]);
 #if CONFIG_AOM_HIGHBITDEPTH
         }
 #endif
