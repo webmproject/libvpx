@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "218e78b3_209de44f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-26T17:52:20Z",
+      "side": 1,
+      "message": "you can just mention the patch by name; git log --oneline -1 is helpful for this",
+      "range": {
+        "startLine": 9,
+        "startChar": 2,
+        "endLine": 9,
+        "endChar": 12
+      },
+      "revId": "cb00503822ada9f583681de7b5d5fc99ad73d925",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "218e78b3_437f5a1b",
+        "filename": "vpxdec.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 823,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-26T17:52:20Z",
+      "side": 1,
+      "message": "a decode error might count as a corrupted frame as you previously described. you could just do the accounting here",
+      "revId": "cb00503822ada9f583681de7b5d5fc99ad73d925",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
