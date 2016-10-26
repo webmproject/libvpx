@@ -418,7 +418,6 @@ void av1_setup_pre_planes(MACROBLOCKD *xd, int idx,
                           const YV12_BUFFER_CONFIG *src, int mi_row, int mi_col,
                           const struct scale_factors *sf);
 
-#if CONFIG_DUAL_FILTER
 // Detect if the block have sub-pixel level motion vectors
 // per component.
 static INLINE int has_subpel_mv_component(const MODE_INFO *const mi,
@@ -460,57 +459,21 @@ static INLINE int has_subpel_mv_component(const MODE_INFO *const mi,
 
   return 0;
 }
-#endif
 
 static INLINE int av1_is_interp_needed(const MACROBLOCKD *const xd) {
   MODE_INFO *const mi = xd->mi[0];
-  MB_MODE_INFO *const mbmi = &mi->mbmi;
-  const BLOCK_SIZE bsize = mbmi->sb_type;
-  const int is_compound = has_second_ref(mbmi);
-  int intpel_mv = 1;
-  int plane;
-
-#if SUPPORT_NONINTERPOLATING_FILTERS
-  // TODO(debargha): This is is currently only for experimentation
-  // with non-interpolating filters. Remove later.
-  // If any of the filters are non-interpolating, then indicate the
-  // interpolation filter always.
-  int i;
-  for (i = 0; i < SWITCHABLE_FILTERS; ++i) {
-    if (!IsInterpolatingFilter(i)) return 1;
-  }
-#endif
-
-  // For scaled references, interpolation filter is indicated all the time.
-  if (av1_is_scaled(&xd->block_refs[0]->sf)) return 1;
-  if (is_compound && av1_is_scaled(&xd->block_refs[1]->sf)) return 1;
-
-  if (bsize < BLOCK_8X8) {
-    for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
-      const PARTITION_TYPE bp = BLOCK_8X8 - bsize;
-      const struct macroblockd_plane *const pd = &xd->plane[plane];
-      const int have_vsplit = bp != PARTITION_HORZ;
-      const int have_hsplit = bp != PARTITION_VERT;
-      const int num_4x4_w = 2 >> ((!have_vsplit) | pd->subsampling_x);
-      const int num_4x4_h = 2 >> ((!have_hsplit) | pd->subsampling_y);
-      int ref;
-      for (ref = 0; ref < 1 + is_compound; ++ref) {
-        int x, y;
-        for (y = 0; y < num_4x4_h; ++y)
-          for (x = 0; x < num_4x4_w; ++x) {
-            const MV mv = average_split_mvs(pd, mi, ref, y * 2 + x);
-            if (mv_has_subpel(&mv)) return 1;
-          }
+  const int is_compound = has_second_ref(&mi->mbmi);
+  int ref;
+  for (ref = 0; ref < 1 + is_compound; ++ref) {
+    int row_col;
+    for (row_col = 0; row_col < 2; ++row_col) {
+      const int dir = (ref << 1) + row_col;
+      if (has_subpel_mv_component(mi, xd, dir)) {
+        return 1;
       }
     }
-    return 0;
-  } else {
-    intpel_mv = !mv_has_subpel(&mbmi->mv[0].as_mv);
-    if (is_compound && intpel_mv) {
-      intpel_mv &= !mv_has_subpel(&mbmi->mv[1].as_mv);
-    }
   }
-  return !intpel_mv;
+  return 0;
 }
 
 #if CONFIG_MOTION_VAR
