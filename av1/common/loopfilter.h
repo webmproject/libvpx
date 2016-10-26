@@ -118,7 +118,8 @@ void av1_filter_block_plane_non420_ver(struct AV1Common *cm,
                                        int mi_col);
 void av1_filter_block_plane_non420_hor(struct AV1Common *cm,
                                        struct macroblockd_plane *plane,
-                                       int mi_row);
+                                       MODE_INFO **mi_8x8, int mi_row,
+                                       int mi_col);
 
 void av1_loop_filter_init(struct AV1Common *cm);
 
