@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "218e78b3_23ba4e75",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-26T18:19:55Z",
+      "side": 1,
+      "message": "this selects the sanitizer (address, memory, undefined, integer) ubsan would be a bit clearer",
+      "range": {
+        "startLine": 7,
+        "startChar": 4,
+        "endLine": 7,
+        "endChar": 13
+      },
+      "revId": "a75e8ad14db52bfcb6ecf9a215dd9a1963de3513",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "218e78b3_43e03a82",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-26T18:19:55Z",
+      "side": 1,
+      "message": "I would split on each of these as they change implementation; additionally there was an unsigned overflow warning is that addressed here?",
+      "revId": "a75e8ad14db52bfcb6ecf9a215dd9a1963de3513",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
