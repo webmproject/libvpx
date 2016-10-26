@@ -125,7 +125,7 @@ typedef struct frame_contexts {
 #else
   aom_prob comp_ref_prob[REF_CONTEXTS][COMP_REFS - 1];
 #endif  // CONFIG_EXT_REFS
-  aom_prob tx_size_probs[TX_SIZES - 1][TX_SIZE_CONTEXTS][TX_SIZES - 1];
+  aom_prob tx_size_probs[MAX_TX_DEPTH][TX_SIZE_CONTEXTS][MAX_TX_DEPTH];
 #if CONFIG_VAR_TX
   aom_prob txfm_partition_prob[TXFM_PARTITION_CONTEXTS];
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
@@ -237,7 +237,7 @@ typedef struct FRAME_COUNTS {
   // to use forward updates for the coeff probs, and as such it does not really
   // belong into this structure.
   unsigned int tx_size_totals[TX_SIZES];
-  unsigned int tx_size[TX_SIZES - 1][TX_SIZE_CONTEXTS][TX_SIZES];
+  unsigned int tx_size[MAX_TX_DEPTH][TX_SIZE_CONTEXTS][TX_SIZES];
 #if CONFIG_VAR_TX
   unsigned int txfm_partition[TXFM_PARTITION_CONTEXTS][2];
 #if CONFIG_EXT_TX && CONFIG_RECT_TX

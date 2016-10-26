@@ -863,8 +863,8 @@ const aom_tree_index av1_tx_size_tree[TX_SIZES - 1][TREE_SIZE(TX_SIZES)] = {
   },
 };
 
-static const aom_prob default_tx_size_prob[TX_SIZES - 1][TX_SIZE_CONTEXTS]
-                                          [TX_SIZES - 1] = {
+static const aom_prob default_tx_size_prob[MAX_TX_DEPTH][TX_SIZE_CONTEXTS]
+                                          [MAX_TX_DEPTH] = {
                                             {
                                                 // Max tx_size is 8X8
                                                 { 100 },
@@ -1593,7 +1593,7 @@ void av1_adapt_intra_frame_probs(AV1_COMMON *cm) {
   const FRAME_COUNTS *counts = &cm->counts;
 
   if (cm->tx_mode == TX_MODE_SELECT) {
-    for (i = 0; i < TX_SIZES - 1; ++i) {
+    for (i = 0; i < MAX_TX_DEPTH; ++i) {
       for (j = 0; j < TX_SIZE_CONTEXTS; ++j)
         aom_tree_merge_probs(av1_tx_size_tree[i], pre_fc->tx_size_probs[i][j],
                              counts->tx_size[i][j], fc->tx_size_probs[i][j]);

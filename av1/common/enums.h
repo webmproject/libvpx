@@ -148,6 +148,8 @@ typedef enum ATTRIBUTE_PACKED {
   TX_INVALID = 255          // Invalid transform size
 } TX_SIZE;
 
+#define MAX_TX_DEPTH (TX_32X32 - TX_4X4)
+
 #define MAX_TX_SIZE_LOG2 5
 #define MAX_TX_SIZE (1 << MAX_TX_SIZE_LOG2)
 #define MIN_TX_SIZE_LOG2 2

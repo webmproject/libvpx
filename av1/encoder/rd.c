@@ -110,7 +110,7 @@ static void fill_mode_costs(AV1_COMP *cpi) {
   }
 #endif  // CONFIG_PALETTE
 
-  for (i = 0; i < TX_SIZES - 1; ++i)
+  for (i = 0; i < MAX_TX_DEPTH; ++i)
     for (j = 0; j < TX_SIZE_CONTEXTS; ++j)
       av1_cost_tokens(cpi->tx_size_cost[i][j], fc->tx_size_probs[i][j],
                       av1_tx_size_tree[i]);
