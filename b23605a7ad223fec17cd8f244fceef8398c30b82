@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "218e78b3_26e5fc22",
+        "filename": "vpx_dsp/arm/highbd_intrapred_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-26T19:36:13Z",
+      "side": 1,
+      "message": "vst4q_u16() is actually two vst4_u16(). Changing to two vst2q_u16() saved initialization and stride update instructions.",
+      "range": {
+        "startLine": 230,
+        "startChar": 4,
+        "endLine": 230,
+        "endChar": 13
+      },
+      "revId": "b23605a7ad223fec17cd8f244fceef8398c30b82",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
