@@ -12,6 +12,7 @@
 #include <immintrin.h>  // AVX2
 
 #include "aom_dsp/txfm_common.h"
+#include "aom_dsp/x86/txfm_common_intrin.h"
 #include "aom_dsp/x86/txfm_common_avx2.h"
 
 #if FDCT32x32_HIGH_PRECISION
@@ -31,7 +32,19 @@ static INLINE __m256i k_packs_epi64_avx2(__m256i a, __m256i b) {
 }
 #endif
 
-void FDCT32x32_2D_AVX2(const int16_t *input, int16_t *output_org, int stride) {
+#ifndef STORE_COEFF_FUNC
+#define STORE_COEFF_FUNC
+static void store_coeff(const __m256i *coeff, tran_low_t *curr,
+                        tran_low_t *next) {
+  __m128i u = _mm256_castsi256_si128(*coeff);
+  storeu_output(&u, curr);
+  u = _mm256_extractf128_si256(*coeff, 1);
+  storeu_output(&u, next);
+}
+#endif
+
+void FDCT32x32_2D_AVX2(const int16_t *input, tran_low_t *output_org,
+                       int stride) {
   // Calculate pre-multiplied strides
   const int str1 = stride;
   const int str2 = 2 * stride;
@@ -2842,13 +2855,14 @@ void FDCT32x32_2D_AVX2(const int16_t *input, int16_t *output_org, int stride) {
       {
         int transpose_block;
         int16_t *output_currStep, *output_nextStep;
-        if (0 == pass) {
-          output_currStep = &intermediate[column_start * 32];
-          output_nextStep = &intermediate[(column_start + 8) * 32];
-        } else {
-          output_currStep = &output_org[column_start * 32];
-          output_nextStep = &output_org[(column_start + 8) * 32];
-        }
+        tran_low_t *curr_out, *next_out;
+        // Pass 0
+        output_currStep = &intermediate[column_start * 32];
+        output_nextStep = &intermediate[(column_start + 8) * 32];
+        // Pass 1
+        curr_out = &output_org[column_start * 32];
+        next_out = &output_org[(column_start + 8) * 32];
+
         for (transpose_block = 0; transpose_block < 4; ++transpose_block) {
           __m256i *this_out = &out[8 * transpose_block];
           // 00  01  02  03  04  05  06  07  08  09  10  11  12  13  14  15
@@ -2948,44 +2962,58 @@ void FDCT32x32_2D_AVX2(const int16_t *input, int16_t *output_org, int stride) {
             tr2_6 = _mm256_srai_epi16(tr2_6, 2);
             tr2_7 = _mm256_srai_epi16(tr2_7, 2);
           }
-          // Note: even though all these stores are aligned, using the aligned
-          //       intrinsic make the code slightly slower.
-          _mm_storeu_si128((__m128i *)(output_currStep + 0 * 32),
-                           _mm256_castsi256_si128(tr2_0));
-          _mm_storeu_si128((__m128i *)(output_currStep + 1 * 32),
-                           _mm256_castsi256_si128(tr2_1));
-          _mm_storeu_si128((__m128i *)(output_currStep + 2 * 32),
-                           _mm256_castsi256_si128(tr2_2));
-          _mm_storeu_si128((__m128i *)(output_currStep + 3 * 32),
-                           _mm256_castsi256_si128(tr2_3));
-          _mm_storeu_si128((__m128i *)(output_currStep + 4 * 32),
-                           _mm256_castsi256_si128(tr2_4));
-          _mm_storeu_si128((__m128i *)(output_currStep + 5 * 32),
-                           _mm256_castsi256_si128(tr2_5));
-          _mm_storeu_si128((__m128i *)(output_currStep + 6 * 32),
-                           _mm256_castsi256_si128(tr2_6));
-          _mm_storeu_si128((__m128i *)(output_currStep + 7 * 32),
-                           _mm256_castsi256_si128(tr2_7));
+          if (0 == pass) {
+            // Note: even though all these stores are aligned, using the aligned
+            //       intrinsic make the code slightly slower.
+            _mm_storeu_si128((__m128i *)(output_currStep + 0 * 32),
+                             _mm256_castsi256_si128(tr2_0));
+            _mm_storeu_si128((__m128i *)(output_currStep + 1 * 32),
+                             _mm256_castsi256_si128(tr2_1));
+            _mm_storeu_si128((__m128i *)(output_currStep + 2 * 32),
+                             _mm256_castsi256_si128(tr2_2));
+            _mm_storeu_si128((__m128i *)(output_currStep + 3 * 32),
+                             _mm256_castsi256_si128(tr2_3));
+            _mm_storeu_si128((__m128i *)(output_currStep + 4 * 32),
+                             _mm256_castsi256_si128(tr2_4));
+            _mm_storeu_si128((__m128i *)(output_currStep + 5 * 32),
+                             _mm256_castsi256_si128(tr2_5));
+            _mm_storeu_si128((__m128i *)(output_currStep + 6 * 32),
+                             _mm256_castsi256_si128(tr2_6));
+            _mm_storeu_si128((__m128i *)(output_currStep + 7 * 32),
+                             _mm256_castsi256_si128(tr2_7));
 
-          _mm_storeu_si128((__m128i *)(output_nextStep + 0 * 32),
-                           _mm256_extractf128_si256(tr2_0, 1));
-          _mm_storeu_si128((__m128i *)(output_nextStep + 1 * 32),
-                           _mm256_extractf128_si256(tr2_1, 1));
-          _mm_storeu_si128((__m128i *)(output_nextStep + 2 * 32),
-                           _mm256_extractf128_si256(tr2_2, 1));
-          _mm_storeu_si128((__m128i *)(output_nextStep + 3 * 32),
-                           _mm256_extractf128_si256(tr2_3, 1));
-          _mm_storeu_si128((__m128i *)(output_nextStep + 4 * 32),
-                           _mm256_extractf128_si256(tr2_4, 1));
-          _mm_storeu_si128((__m128i *)(output_nextStep + 5 * 32),
-                           _mm256_extractf128_si256(tr2_5, 1));
-          _mm_storeu_si128((__m128i *)(output_nextStep + 6 * 32),
-                           _mm256_extractf128_si256(tr2_6, 1));
-          _mm_storeu_si128((__m128i *)(output_nextStep + 7 * 32),
-                           _mm256_extractf128_si256(tr2_7, 1));
-          // Process next 8x8
-          output_currStep += 8;
-          output_nextStep += 8;
+            _mm_storeu_si128((__m128i *)(output_nextStep + 0 * 32),
+                             _mm256_extractf128_si256(tr2_0, 1));
+            _mm_storeu_si128((__m128i *)(output_nextStep + 1 * 32),
+                             _mm256_extractf128_si256(tr2_1, 1));
+            _mm_storeu_si128((__m128i *)(output_nextStep + 2 * 32),
+                             _mm256_extractf128_si256(tr2_2, 1));
+            _mm_storeu_si128((__m128i *)(output_nextStep + 3 * 32),
+                             _mm256_extractf128_si256(tr2_3, 1));
+            _mm_storeu_si128((__m128i *)(output_nextStep + 4 * 32),
+                             _mm256_extractf128_si256(tr2_4, 1));
+            _mm_storeu_si128((__m128i *)(output_nextStep + 5 * 32),
+                             _mm256_extractf128_si256(tr2_5, 1));
+            _mm_storeu_si128((__m128i *)(output_nextStep + 6 * 32),
+                             _mm256_extractf128_si256(tr2_6, 1));
+            _mm_storeu_si128((__m128i *)(output_nextStep + 7 * 32),
+                             _mm256_extractf128_si256(tr2_7, 1));
+            // Process next 8x8
+            output_currStep += 8;
+            output_nextStep += 8;
+          }
+          if (1 == pass) {
+            store_coeff(&tr2_0, curr_out + 0 * 32, next_out + 0 * 32);
+            store_coeff(&tr2_1, curr_out + 1 * 32, next_out + 1 * 32);
+            store_coeff(&tr2_2, curr_out + 2 * 32, next_out + 2 * 32);
+            store_coeff(&tr2_3, curr_out + 3 * 32, next_out + 3 * 32);
+            store_coeff(&tr2_4, curr_out + 4 * 32, next_out + 4 * 32);
+            store_coeff(&tr2_5, curr_out + 5 * 32, next_out + 5 * 32);
+            store_coeff(&tr2_6, curr_out + 6 * 32, next_out + 6 * 32);
+            store_coeff(&tr2_7, curr_out + 7 * 32, next_out + 7 * 32);
+            curr_out += 8;
+            next_out += 8;
+          }
         }
       }
     }

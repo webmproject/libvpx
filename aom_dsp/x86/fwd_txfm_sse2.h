@@ -12,6 +12,8 @@
 #ifndef AOM_DSP_X86_FWD_TXFM_SSE2_H_
 #define AOM_DSP_X86_FWD_TXFM_SSE2_H_
 
+#include "aom_dsp/x86/txfm_common_intrin.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -254,19 +256,6 @@ static INLINE void store_output(const __m128i *poutput, tran_low_t *dst_ptr) {
   _mm_store_si128((__m128i *)(dst_ptr + 4), out1);
 #else
   _mm_store_si128((__m128i *)(dst_ptr), *poutput);
-#endif  // CONFIG_AOM_HIGHBITDEPTH
-}
-
-static INLINE void storeu_output(const __m128i *poutput, tran_low_t *dst_ptr) {
-#if CONFIG_AOM_HIGHBITDEPTH
-  const __m128i zero = _mm_setzero_si128();
-  const __m128i sign_bits = _mm_cmplt_epi16(*poutput, zero);
-  __m128i out0 = _mm_unpacklo_epi16(*poutput, sign_bits);
-  __m128i out1 = _mm_unpackhi_epi16(*poutput, sign_bits);
-  _mm_storeu_si128((__m128i *)(dst_ptr), out0);
-  _mm_storeu_si128((__m128i *)(dst_ptr + 4), out1);
-#else
-  _mm_storeu_si128((__m128i *)(dst_ptr), *poutput);
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 }
 
