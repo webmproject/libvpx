@@ -6702,7 +6702,6 @@ static int64_t handle_inter_mode(
 #endif  // CONFIG_EXT_INTER
 #endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
   int64_t rd = INT64_MAX;
-  int64_t tmp_rd = INT64_MAX;
   uint8_t *orig_dst[MAX_MB_PLANE];
   int orig_dst_stride[MAX_MB_PLANE];
   uint8_t *tmp_dst[MAX_MB_PLANE];
@@ -7041,6 +7040,7 @@ static int64_t handle_inter_mode(
           int tmp_skip_sb = 0;
           int64_t tmp_skip_sse = INT64_MAX;
           int tmp_rs;
+          int tmp_rd;
 #if CONFIG_DUAL_FILTER
           mbmi->interp_filter[0] = filter_sets[i][0];
           mbmi->interp_filter[1] = filter_sets[i][1];
@@ -7236,7 +7236,6 @@ static int64_t handle_inter_mode(
       return INT64_MAX;
 
     pred_exists = 0;
-    tmp_rd = AOMMIN(best_rd_wedge, best_rd_nowedge);
 
     if (mbmi->use_wedge_interinter)
       *compmode_wedge_cost =
@@ -7377,7 +7376,6 @@ static int64_t handle_inter_mode(
     }
 
     pred_exists = 0;
-    tmp_rd = best_interintra_rd;
     *compmode_interintra_cost =
         av1_cost_bit(cm->fc->interintra_prob[size_group_lookup[bsize]], 1);
     *compmode_interintra_cost += interintra_mode_cost[mbmi->interintra_mode];
@@ -7456,6 +7454,7 @@ static int64_t handle_inter_mode(
   for (mbmi->motion_mode = SIMPLE_TRANSLATION;
        mbmi->motion_mode < (allow_motvar ? MOTION_MODES : 1);
        mbmi->motion_mode++) {
+    int64_t tmp_rd = INT64_MAX;
 #if CONFIG_EXT_INTER
     int tmp_rate2 = mbmi->motion_mode != SIMPLE_TRANSLATION ? rate2_bmc_nocoeff
                                                             : rate2_nocoeff;
