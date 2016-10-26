@@ -911,11 +911,13 @@ int av1_get_palette_color_context(const uint8_t *color_map, int cols, int r,
   // this (or similar) bug: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=59124
   int scores[PALETTE_MAX_SIZE + 10];
   const int weights[4] = { 3, 2, 3, 2 };
-  int color_ctx = 0;
+  int color_ctx_hash;
+  int color_ctx;
   int color_neighbors[4];
   int inverse_color_order[PALETTE_MAX_SIZE];
   assert(n <= PALETTE_MAX_SIZE);
 
+  // Get color indices of neighbors.
   color_neighbors[0] = (c - 1 >= 0) ? color_map[r * cols + c - 1] : -1;
   color_neighbors[1] =
       (c - 1 >= 0 && r - 1 >= 0) ? color_map[(r - 1) * cols + c - 1] : -1;
@@ -960,15 +962,19 @@ int av1_get_palette_color_context(const uint8_t *color_map, int cols, int r,
     }
   }
 
-  for (i = 0; i < 4; ++i) color_ctx = color_ctx * 11 + scores[i];
+  // Get hash value of context.
+  color_ctx_hash = 0;
+  for (i = 0; i < 4; ++i) color_ctx_hash = color_ctx_hash * 11 + scores[i];
 
-  for (i = 0; i < PALETTE_COLOR_CONTEXTS; ++i)
-    if (color_ctx == palette_color_context_lookup[i]) {
+  // Lookup context from hash.
+  color_ctx = 0;  // Default.
+  for (i = 0; i < PALETTE_COLOR_CONTEXTS; ++i) {
+    if (color_ctx_hash == palette_color_context_lookup[i]) {
       color_ctx = i;
       break;
     }
+  }
 
-  if (color_ctx >= PALETTE_COLOR_CONTEXTS) color_ctx = 0;
   if (color_idx != NULL) {
     *color_idx = inverse_color_order[color_map[r * cols + c]];
   }
