@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "218e78b3_23688e11",
+        "filename": "av1/encoder/encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 4496,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-26T18:23:04Z",
+      "side": 1,
+      "message": "these can all be const I think",
+      "revId": "f41a06b231dec4a87460f0b7c3085bcaedf55ef7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "218e78b3_039c72f3",
+        "filename": "av1/encoder/encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 4503,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-26T18:23:04Z",
+      "side": 1,
+      "message": "I didn\u0027t look at the ranges here prior to the clamp, but are they guaranteed to fit in 15-bits?",
+      "revId": "f41a06b231dec4a87460f0b7c3085bcaedf55ef7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "218e78b3_a39c9ef8",
+        "filename": "av1/encoder/encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 4508,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-26T18:23:04Z",
+      "side": 1,
+      "message": "precision",
+      "range": {
+        "startLine": 4508,
+        "startChar": 30,
+        "endLine": 4508,
+        "endChar": 55
+      },
+      "revId": "f41a06b231dec4a87460f0b7c3085bcaedf55ef7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "218e78b3_63729605",
+        "filename": "av1/encoder/encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 4512,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-26T18:23:04Z",
+      "side": 1,
+      "message": "centering",
+      "range": {
+        "startLine": 4512,
+        "startChar": 19,
+        "endLine": 4512,
+        "endChar": 27
+      },
+      "revId": "f41a06b231dec4a87460f0b7c3085bcaedf55ef7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
