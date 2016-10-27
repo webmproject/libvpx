@@ -16,6 +16,24 @@
       "revId": "e379bd42402ebe048ae5e28fb043909e77f96adc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "218e78b3_52d642dd",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-27T06:12:06Z",
+      "side": 1,
+      "message": "it\u0027s also easier to recover with git log --grep",
+      "parentUuid": "218e78b3_12e4bac6",
+      "revId": "e379bd42402ebe048ae5e28fb043909e77f96adc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
