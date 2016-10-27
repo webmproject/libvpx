@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "218e78b3_575d542d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-27T01:26:48Z",
+      "side": 1,
+      "message": "you could say \u0027partial_idct_test: ...\u0027 to be explicit and you could expand on what you mean in the body",
+      "revId": "4550542e3534e5326da658b360367268afe6495d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "218e78b3_9767dcff",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-27T01:26:48Z",
+      "side": 1,
+      "message": "this cleanup could be separate",
+      "revId": "4550542e3534e5326da658b360367268afe6495d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "218e78b3_b794d891",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-27T01:26:48Z",
+      "side": 1,
+      "message": "prefer sizeof(var)",
+      "range": {
+        "startLine": 171,
+        "startChar": 35,
+        "endLine": 171,
+        "endChar": 45
+      },
+      "revId": "4550542e3534e5326da658b360367268afe6495d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
