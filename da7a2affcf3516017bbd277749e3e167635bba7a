@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "61ba3039_3b5d422f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-27T23:21:40Z",
+      "side": 1,
+      "message": "it can be nice to be specific here -\u003e rdopt,global-motion: ...",
+      "revId": "da7a2affcf3516017bbd277749e3e167635bba7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
