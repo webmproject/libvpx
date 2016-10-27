@@ -51,6 +51,9 @@
 /samples.dox
 /test_intra_pred_speed
 /test_libvpx
+/tools.dox
+/tools/*.dox
+/tools/tiny_ssim
 /vp8_api1_migration.dox
 /vp[89x]_rtcd.h
 /vpx.pc
