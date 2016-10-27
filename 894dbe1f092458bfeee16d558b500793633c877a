@@ -163,6 +163,24 @@
       "revId": "894dbe1f092458bfeee16d558b500793633c877a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c685b2c9_42c872b1",
+        "filename": "test/stress.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-10-27T21:08:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "218e78b3_8025d821",
+      "revId": "894dbe1f092458bfeee16d558b500793633c877a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
