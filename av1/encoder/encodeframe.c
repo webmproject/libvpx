@@ -4492,10 +4492,10 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 // zero-centering.
 static int16_t add_param_offset(int param_index, int16_t param_value,
                                 int16_t offset) {
-  int scale_vals[2] = { GM_ALPHA_PREC_DIFF, GM_TRANS_PREC_DIFF };
-  int clamp_vals[2] = { GM_ALPHA_MAX, GM_TRANS_MAX };
-  int is_trans_param = param_index < 2;
-  int is_one_centered = (!is_trans_param) && (param_index & 1);
+  const int scale_vals[2] = { GM_ALPHA_PREC_DIFF, GM_TRANS_PREC_DIFF };
+  const int clamp_vals[2] = { GM_ALPHA_MAX, GM_TRANS_MAX };
+  const int is_trans_param = param_index < 2;
+  const int is_one_centered = (!is_trans_param) && (param_index & 1);
 
   // Make parameter zero-centered and offset the shift that was done to make
   // it compatible with the warped model
@@ -4507,11 +4507,11 @@ static int16_t add_param_offset(int param_index, int16_t param_value,
   // to it in the bitstream
   param_value = (int16_t)clamp(param_value, -clamp_vals[is_trans_param],
                                clamp_vals[is_trans_param]);
-  // Rescale the parameter to WARPEDMODEL_PRECIION_BITS so it is compatible
+  // Rescale the parameter to WARPEDMODEL_PRECISION_BITS so it is compatible
   // with the warped motion library
   param_value *= (1 << scale_vals[is_trans_param]);
 
-  // Undo the zero-centring step if necessary
+  // Undo the zero-centering step if necessary
   return param_value + (is_one_centered << WARPEDMODEL_PREC_BITS);
 }
 
