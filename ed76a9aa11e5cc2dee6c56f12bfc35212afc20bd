@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "218e78b3_f746601c",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-27T03:58:46Z",
+      "side": 1,
+      "message": "this implementation causes clang to generate more arm code than neon. reverting still incurs an increase in runtime at the function level, maybe due to the overall code size change.\ngcc-4.9 is neutral with this change",
+      "revId": "ed76a9aa11e5cc2dee6c56f12bfc35212afc20bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "218e78b3_773b308f",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-27T03:58:46Z",
+      "side": 1,
+      "message": "this shows the most gain; 16x16 is neutral with gcc, slightly positive with clang",
+      "revId": "ed76a9aa11e5cc2dee6c56f12bfc35212afc20bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
