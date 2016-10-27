@@ -39,6 +39,24 @@
       "revId": "cb00503822ada9f583681de7b5d5fc99ad73d925",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "218e78b3_17cbcc3c",
+        "filename": "vpxdec.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 823,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-10-27T00:28:33Z",
+      "side": 1,
+      "message": "I\u0027m not sure what you are suggesting.    What I did is make a frame corrupt if either we get an error decoing or vp8_get_frame_corrupted returns that the frame is corrupt. \n\nAre you suggesting something different from the two variables corrupted vs frames_corrupted?",
+      "parentUuid": "218e78b3_437f5a1b",
+      "revId": "cb00503822ada9f583681de7b5d5fc99ad73d925",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
