@@ -3054,9 +3054,9 @@ static void select_tx_block(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
   TX_SIZE(*const inter_tx_size)
   [MAX_MIB_SIZE] =
       (TX_SIZE(*)[MAX_MIB_SIZE]) & mbmi->inter_tx_size[tx_row][tx_col];
-  const int bw = num_4x4_blocks_wide_lookup[plane_bsize];
-  int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
-  int max_blocks_wide = bw;
+  int max_blocks_high = block_size_high[plane_bsize];
+  int max_blocks_wide = block_size_wide[plane_bsize];
+  const int bw = block_size_wide[plane_bsize] >> tx_size_wide_log2[0];
   int64_t this_rd = INT64_MAX;
   ENTROPY_CONTEXT *pta = ta + blk_col;
   ENTROPY_CONTEXT *ptl = tl + blk_row;
@@ -3103,9 +3103,12 @@ static void select_tx_block(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
   coeff_ctx = combine_entropy_contexts(stxa, stxl);
 
   if (xd->mb_to_bottom_edge < 0)
-    max_blocks_high += xd->mb_to_bottom_edge >> (5 + pd->subsampling_y);
+    max_blocks_high += xd->mb_to_bottom_edge >> (3 + pd->subsampling_y);
   if (xd->mb_to_right_edge < 0)
-    max_blocks_wide += xd->mb_to_right_edge >> (5 + pd->subsampling_x);
+    max_blocks_wide += xd->mb_to_right_edge >> (3 + pd->subsampling_x);
+
+  max_blocks_high >>= tx_size_wide_log2[0];
+  max_blocks_wide >>= tx_size_wide_log2[0];
 
   *rate = 0;
   *dist = 0;
@@ -3144,8 +3147,10 @@ static void select_tx_block(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
 
   if (tx_size > TX_4X4 && depth < MAX_VARTX_DEPTH) {
     BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
-    int bsl = b_height_log2_lookup[bsize];
-    int sub_step = num_4x4_blocks_txsize_lookup[tx_size - 1];
+    int bsl = block_size_wide[bsize] >> (tx_size_wide_log2[0] + 1);
+    // TODO(jingning): Refactor this transform block size transition.
+    TX_SIZE sub_txs = tx_size - 1;
+    int sub_step = tx_size_wide_unit[sub_txs] * tx_size_high_unit[sub_txs];
     int this_rate;
     int64_t this_dist;
     int64_t this_bsse;
@@ -3156,15 +3161,13 @@ static void select_tx_block(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
 #if CONFIG_EXT_TX
     assert(tx_size < TX_SIZES);
 #endif  // CONFIG_EXT_TX
-    --bsl;
     for (i = 0; i < 4 && this_cost_valid; ++i) {
-      int offsetr = (i >> 1) << bsl;
-      int offsetc = (i & 0x01) << bsl;
+      int offsetr = (i >> 1) * bsl;
+      int offsetc = (i & 0x01) * bsl;
       select_tx_block(cpi, x, blk_row + offsetr, blk_col + offsetc, plane,
-                      block + i * sub_step, tx_size - 1, depth + 1, plane_bsize,
-                      ta, tl, tx_above, tx_left, &this_rate, &this_dist,
-                      &this_bsse, &this_skip, ref_best_rd - tmp_rd,
-                      &this_cost_valid);
+                      block + i * sub_step, sub_txs, depth + 1, plane_bsize, ta,
+                      tl, tx_above, tx_left, &this_rate, &this_dist, &this_bsse,
+                      &this_skip, ref_best_rd - tmp_rd, &this_cost_valid);
       sum_rate += this_rate;
       sum_dist += this_dist;
       sum_bsse += this_bsse;
@@ -3177,15 +3180,13 @@ static void select_tx_block(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
 
   if (this_rd < sum_rd) {
     int idx, idy;
-    for (i = 0; i < num_4x4_blocks_wide_txsize_lookup[tx_size]; ++i)
-      pta[i] = !(tmp_eob == 0);
-    for (i = 0; i < num_4x4_blocks_high_txsize_lookup[tx_size]; ++i)
-      ptl[i] = !(tmp_eob == 0);
+    for (i = 0; i < tx_size_wide_unit[tx_size]; ++i) pta[i] = !(tmp_eob == 0);
+    for (i = 0; i < tx_size_high_unit[tx_size]; ++i) ptl[i] = !(tmp_eob == 0);
     txfm_partition_update(tx_above + (blk_col >> 1), tx_left + (blk_row >> 1),
                           tx_size);
     inter_tx_size[0][0] = tx_size;
-    for (idy = 0; idy < num_4x4_blocks_high_txsize_lookup[tx_size] / 2; ++idy)
-      for (idx = 0; idx < num_4x4_blocks_wide_txsize_lookup[tx_size] / 2; ++idx)
+    for (idy = 0; idy < tx_size_high_unit[tx_size] / 2; ++idy)
+      for (idx = 0; idx < tx_size_wide_unit[tx_size] / 2; ++idx)
         inter_tx_size[idy][idx] = tx_size;
     mbmi->tx_size = tx_size;
     if (this_rd == INT64_MAX) *is_cost_valid = 0;
@@ -3479,17 +3480,20 @@ static void tx_block_rd(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
   const int tx_row = blk_row >> (1 - pd->subsampling_y);
   const int tx_col = blk_col >> (1 - pd->subsampling_x);
   TX_SIZE plane_tx_size;
-  int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
-  int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
+  int max_blocks_high = block_size_high[plane_bsize];
+  int max_blocks_wide = block_size_wide[plane_bsize];
 
 #if CONFIG_EXT_TX
   assert(tx_size < TX_SIZES);
 #endif  // CONFIG_EXT_TX
 
   if (xd->mb_to_bottom_edge < 0)
-    max_blocks_high += xd->mb_to_bottom_edge >> (5 + pd->subsampling_y);
+    max_blocks_high += xd->mb_to_bottom_edge >> (3 + pd->subsampling_y);
   if (xd->mb_to_right_edge < 0)
-    max_blocks_wide += xd->mb_to_right_edge >> (5 + pd->subsampling_x);
+    max_blocks_wide += xd->mb_to_right_edge >> (3 + pd->subsampling_x);
+
+  max_blocks_high >>= tx_size_wide_log2[0];
+  max_blocks_wide >>= tx_size_wide_log2[0];
 
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
 
@@ -3521,24 +3525,24 @@ static void tx_block_rd(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
     av1_tx_block_rd_b(cpi, x, tx_size, blk_row, blk_col, plane, block,
                       plane_bsize, coeff_ctx, rate, dist, bsse, skip);
 
-    for (i = 0; i < num_4x4_blocks_wide_txsize_lookup[tx_size]; ++i)
+    for (i = 0; i < tx_size_wide_unit[tx_size]; ++i)
       ta[i] = !(p->eobs[block] == 0);
-    for (i = 0; i < num_4x4_blocks_high_txsize_lookup[tx_size]; ++i)
+    for (i = 0; i < tx_size_high_unit[tx_size]; ++i)
       tl[i] = !(p->eobs[block] == 0);
   } else {
-    int bsl = b_width_log2_lookup[bsize];
-    int step = num_4x4_blocks_txsize_lookup[tx_size - 1];
+    const int bsl = block_size_wide[bsize] >> (1 + tx_size_wide_log2[0]);
+    const TX_SIZE sub_txs = tx_size - 1;
+    int step = tx_size_wide_unit[sub_txs] * tx_size_high_unit[sub_txs];
     int i;
 
     assert(bsl > 0);
-    --bsl;
 
     for (i = 0; i < 4; ++i) {
-      int offsetr = (i >> 1) << bsl;
-      int offsetc = (i & 0x01) << bsl;
+      int offsetr = (i >> 1) * bsl;
+      int offsetc = (i & 0x01) * bsl;
       tx_block_rd(cpi, x, blk_row + offsetr, blk_col + offsetc, plane,
-                  block + i * step, tx_size - 1, plane_bsize, above_ctx,
-                  left_ctx, rate, dist, bsse, skip);
+                  block + i * step, sub_txs, plane_bsize, above_ctx, left_ctx,
+                  rate, dist, bsse, skip);
     }
   }
 }
