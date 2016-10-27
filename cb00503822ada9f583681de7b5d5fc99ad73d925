@@ -57,6 +57,41 @@
       "revId": "cb00503822ada9f583681de7b5d5fc99ad73d925",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "218e78b3_9780bc45",
+        "filename": "vpxdec.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 823,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-27T01:29:20Z",
+      "side": 1,
+      "message": "I guess I was assuming corrupted would get set in the control call, but maybe it gets cleared in this case",
+      "parentUuid": "218e78b3_17cbcc3c",
+      "revId": "cb00503822ada9f583681de7b5d5fc99ad73d925",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "218e78b3_b7b93826",
+        "filename": "vpxdec.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 981,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-27T01:29:20Z",
+      "side": 1,
+      "message": "this shouldn\u0027t be necessary as you\u0027ll either account for them or jump to fail",
+      "revId": "cb00503822ada9f583681de7b5d5fc99ad73d925",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
