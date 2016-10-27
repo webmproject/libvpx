@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "c685b2c9_057ef41e",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-27T21:47:05Z",
+      "side": 1,
+      "message": "\u003e For the original neon code, clang generates 3 \"vst1_lane_u32()\",\n \u003e and 1 \"vget_lane_u32()\" plus \"str r3, [r0, r1]!\".\n \u003e For the new neon code, clang generates 4 \"vget_lane_u32()\" plus\n \u003e \"str r3, [r0, r1]!\", which is slower.\n \u003e \n \u003e The new neon code (with dst +\u003d stride) is more compiler friendly,\n \u003e but current clang compiles it with redundancy.\n \u003e \n \u003e I reverted thess 4 memory stores back.\n\nall right, I think I ran locally with something similar and though the code was the same as the base the overall runtime was still penalized. I wonder if there\u0027s an outlier in the individual runs that is causing things to shift upward.",
+      "parentUuid": "c685b2c9_62f1f6c0",
+      "revId": "ed76a9aa11e5cc2dee6c56f12bfc35212afc20bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "218e78b3_773b308f",
         "filename": "vpx_dsp/arm/intrapred_neon.c",
         "patchSetId": 1
