@@ -10189,14 +10189,13 @@ void av1_rd_pick_inter_mode_sub8x8(const struct AV1_COMP *cpi,
       this_rd_thresh = (ref_frame == LAST3_FRAME)
                            ? rd_opt->threshes[segment_id][bsize][THR_LAST3]
                            : this_rd_thresh;
+      this_rd_thresh = (ref_frame == BWDREF_FRAME)
+                           ? rd_opt->threshes[segment_id][bsize][THR_BWDR]
+                           : this_rd_thresh;
 #endif  // CONFIG_EXT_REFS
       this_rd_thresh = (ref_frame == GOLDEN_FRAME)
                            ? rd_opt->threshes[segment_id][bsize][THR_GOLD]
                            : this_rd_thresh;
-#if CONFIG_EXT_REFS
-// TODO(zoeliu): To explore whether this_rd_thresh should consider
-//               BWDREF_FRAME and ALTREF_FRAME
-#endif  // CONFIG_EXT_REFS
 
       // TODO(any): Add search of the tx_type to improve rd performance at the
       // expense of speed.
