@@ -1578,7 +1578,7 @@ static double get_sr_decay_rate(const VP9_COMP *cpi,
     sr_decay = 1.0 - (SR_DIFF_PART * sr_diff) - motion_amplitude_part -
                (INTRA_PART * modified_pcnt_intra);
   }
-  return VPXMAX(sr_decay, VPXMIN(DEFAULT_DECAY_LIMIT, modified_pct_inter));
+  return VPXMAX(sr_decay, DEFAULT_DECAY_LIMIT);
 }
 
 // This function gives an estimate of how badly we believe the prediction
@@ -1695,16 +1695,13 @@ static double calc_frame_boost(VP9_COMP *cpi, const FIRSTPASS_STATS *this_frame,
   // Underlying boost factor is based on inter error ratio.
   frame_boost = (BASELINE_ERR_PER_MB * num_mbs) /
                 DOUBLE_DIVIDE_CHECK(this_frame->coded_error);
-  frame_boost = frame_boost * BOOST_FACTOR * boost_q_correction;
 
-  // Increase boost for frames where new data coming into frame (e.g. zoom out).
-  // Slightly reduce boost if there is a net balance of motion out of the frame
-  // (zoom in). The range for this_frame_mv_in_out is -1.0 to +1.0.
+  // Small adjustment for cases where there is a zoom out
   if (this_frame_mv_in_out > 0.0)
     frame_boost += frame_boost * (this_frame_mv_in_out * 2.0);
-  // In the extreme case the boost is halved.
-  else
-    frame_boost += frame_boost * (this_frame_mv_in_out / 2.0);
+
+  // Q correction and scalling
+  frame_boost = frame_boost * BOOST_FACTOR * boost_q_correction;
 
   return VPXMIN(frame_boost, max_boost * boost_q_correction);
 }
