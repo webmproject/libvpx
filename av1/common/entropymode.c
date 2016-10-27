@@ -851,18 +851,18 @@ static const int palette_color_context_lookup[PALETTE_COLOR_CONTEXTS] = {
 };
 #endif  // CONFIG_PALETTE
 
-const aom_tree_index av1_tx_size_tree[TX_SIZES - 1][TREE_SIZE(TX_SIZES)] = {
+const aom_tree_index av1_tx_size_tree[MAX_TX_DEPTH][TREE_SIZE(TX_SIZES)] = {
   {
       // Max tx_size is 8X8
-      -TX_4X4, -TX_8X8,
+      -0, -1,
   },
   {
       // Max tx_size is 16X16
-      -TX_4X4, 2, -TX_8X8, -TX_16X16,
+      -0, 2, -1, -2,
   },
   {
       // Max tx_size is 32X32
-      -TX_4X4, 2, -TX_8X8, 4, -TX_16X16, -TX_32X32,
+      -0, 2, -1, 4, -2, -3,
   },
 };
 
@@ -1309,13 +1309,21 @@ int av1_ext_tx_inv[TX_TYPES];
 
 static const aom_prob
     default_intra_ext_tx_prob[EXT_TX_SIZES][TX_TYPES][TX_TYPES - 1] = {
+#if CONFIG_CB4X4
+      { { 240, 85, 128 }, { 4, 1, 248 }, { 4, 1, 8 }, { 4, 248, 128 } },
+#endif
       { { 240, 85, 128 }, { 4, 1, 248 }, { 4, 1, 8 }, { 4, 248, 128 } },
       { { 244, 85, 128 }, { 8, 2, 248 }, { 8, 2, 8 }, { 8, 248, 128 } },
       { { 248, 85, 128 }, { 16, 4, 248 }, { 16, 4, 8 }, { 16, 248, 128 } },
     };
 
 static const aom_prob default_inter_ext_tx_prob[EXT_TX_SIZES][TX_TYPES - 1] = {
-  { 160, 85, 128 }, { 176, 85, 128 }, { 192, 85, 128 },
+#if CONFIG_CB4X4
+  { 160, 85, 128 },
+#endif
+  { 160, 85, 128 },
+  { 176, 85, 128 },
+  { 192, 85, 128 },
 };
 #endif  // CONFIG_EXT_TX
 
@@ -1560,7 +1568,7 @@ void av1_adapt_inter_frame_probs(AV1_COMMON *cm) {
 
 #if CONFIG_VAR_TX && CONFIG_EXT_TX && CONFIG_RECT_TX
   if (cm->tx_mode == TX_MODE_SELECT) {
-    for (i = 0; i < TX_SIZES - 1; ++i) {
+    for (i = 0; i < MAX_TX_DEPTH; ++i) {
       fc->rect_tx_prob[i] =
           av1_mode_mv_merge_probs(pre_fc->rect_tx_prob[i], counts->rect_tx[i]);
     }

@@ -324,7 +324,7 @@ extern const aom_tree_index av1_palette_size_tree[TREE_SIZE(PALETTE_SIZES)];
 extern const aom_tree_index av1_palette_color_tree[PALETTE_MAX_SIZE - 1]
                                                   [TREE_SIZE(PALETTE_COLORS)];
 #endif  // CONFIG_PALETTE
-extern const aom_tree_index av1_tx_size_tree[TX_SIZES - 1][TREE_SIZE(TX_SIZES)];
+extern const aom_tree_index av1_tx_size_tree[MAX_TX_DEPTH][TREE_SIZE(TX_SIZES)];
 #if CONFIG_EXT_INTRA
 extern const aom_tree_index av1_intra_filter_tree[TREE_SIZE(INTRA_FILTERS)];
 #endif  // CONFIG_EXT_INTRA

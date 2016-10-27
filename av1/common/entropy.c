@@ -58,6 +58,9 @@ const aom_prob av1_cat6_prob_high12[] = { 255, 255, 255, 255, 254, 254,
 #endif
 
 const uint16_t band_count_table[TX_SIZES_ALL][8] = {
+#if CONFIG_CB4X4
+  { 1, 2, 2, 3, 0, 0, 0 },
+#endif
   { 1, 2, 3, 4, 3, 16 - 13, 0 },   { 1, 2, 3, 4, 11, 64 - 21, 0 },
   { 1, 2, 3, 4, 11, 256 - 21, 0 }, { 1, 2, 3, 4, 11, 1024 - 21, 0 },
 #if CONFIG_EXT_TX
@@ -68,6 +71,9 @@ const uint16_t band_count_table[TX_SIZES_ALL][8] = {
 };
 
 const uint16_t band_cum_count_table[TX_SIZES_ALL][8] = {
+#if CONFIG_CB4X4
+  { 0, 1, 3, 6, 10, 13, 16, 0 },
+#endif
   { 0, 1, 3, 6, 10, 13, 16, 0 },  { 0, 1, 3, 6, 10, 21, 64, 0 },
   { 0, 1, 3, 6, 10, 21, 256, 0 }, { 0, 1, 3, 6, 10, 21, 1024, 0 },
 #if CONFIG_EXT_TX
@@ -2833,6 +2839,9 @@ void av1_default_coef_probs(AV1_COMMON *cm) {
       ROUND_POWER_OF_TWO(cm->base_qindex, 8 - QCTX_BIN_BITS), QCTX_BINS - 1);
   av1_copy(cm->fc->coef_probs, default_qctx_coef_probs[index]);
 #else
+#if CONFIG_CB4X4
+  av1_copy(cm->fc->coef_probs[TX_2X2], default_coef_probs_4x4);
+#endif
   av1_copy(cm->fc->coef_probs[TX_4X4], default_coef_probs_4x4);
   av1_copy(cm->fc->coef_probs[TX_8X8], default_coef_probs_8x8);
   av1_copy(cm->fc->coef_probs[TX_16X16], default_coef_probs_16x16);

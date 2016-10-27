@@ -40,6 +40,9 @@
 //
 // A loopfilter should be applied to every other 8x8 horizontally.
 static const uint64_t left_64x64_txform_mask[TX_SIZES] = {
+#if CONFIG_CB4X4
+  0xffffffffffffffffULL,  // TX_2X2
+#endif
   0xffffffffffffffffULL,  // TX_4X4
   0xffffffffffffffffULL,  // TX_8x8
   0x5555555555555555ULL,  // TX_16x16
@@ -64,6 +67,9 @@ static const uint64_t left_64x64_txform_mask[TX_SIZES] = {
 //
 // A loopfilter should be applied to every other 4 the row vertically.
 static const uint64_t above_64x64_txform_mask[TX_SIZES] = {
+#if CONFIG_CB4X4
+  0xffffffffffffffffULL,  // TX_4X4
+#endif
   0xffffffffffffffffULL,  // TX_4X4
   0xffffffffffffffffULL,  // TX_8x8
   0x00ff00ff00ff00ffULL,  // TX_16x16
@@ -142,6 +148,9 @@ static const uint64_t above_border = 0x000000ff000000ffULL;
 
 // 16 bit masks for uv transform sizes.
 static const uint16_t left_64x64_txform_mask_uv[TX_SIZES] = {
+#if CONFIG_CB4X4
+  0xffff,  // TX_2X2
+#endif
   0xffff,  // TX_4X4
   0xffff,  // TX_8x8
   0x5555,  // TX_16x16
@@ -149,6 +158,9 @@ static const uint16_t left_64x64_txform_mask_uv[TX_SIZES] = {
 };
 
 static const uint16_t above_64x64_txform_mask_uv[TX_SIZES] = {
+#if CONFIG_CB4X4
+  0xffff,  // TX_2X2
+#endif
   0xffff,  // TX_4X4
   0xffff,  // TX_8x8
   0x0f0f,  // TX_16x16
