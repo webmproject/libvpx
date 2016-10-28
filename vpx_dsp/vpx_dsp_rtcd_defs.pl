@@ -233,7 +233,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_highbd_v_predictor_4x4 neon sse2/;
 
   add_proto qw/void vpx_highbd_tm_predictor_4x4/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
-  specialize qw/vpx_highbd_tm_predictor_4x4 sse2/;
+  specialize qw/vpx_highbd_tm_predictor_4x4 neon sse2/;
 
   add_proto qw/void vpx_highbd_dc_predictor_4x4/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
   specialize qw/vpx_highbd_dc_predictor_4x4 neon sse2/;
@@ -274,7 +274,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_highbd_v_predictor_8x8 neon sse2/;
 
   add_proto qw/void vpx_highbd_tm_predictor_8x8/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
-  specialize qw/vpx_highbd_tm_predictor_8x8 sse2/;
+  specialize qw/vpx_highbd_tm_predictor_8x8 neon sse2/;
 
   add_proto qw/void vpx_highbd_dc_predictor_8x8/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
   specialize qw/vpx_highbd_dc_predictor_8x8 neon sse2/;
@@ -315,7 +315,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_highbd_v_predictor_16x16 neon sse2/;
 
   add_proto qw/void vpx_highbd_tm_predictor_16x16/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
-  specialize qw/vpx_highbd_tm_predictor_16x16 sse2/;
+  specialize qw/vpx_highbd_tm_predictor_16x16 neon sse2/;
 
   add_proto qw/void vpx_highbd_dc_predictor_16x16/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
   specialize qw/vpx_highbd_dc_predictor_16x16 neon sse2/;
@@ -356,7 +356,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_highbd_v_predictor_32x32 neon sse2/;
 
   add_proto qw/void vpx_highbd_tm_predictor_32x32/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
-  specialize qw/vpx_highbd_tm_predictor_32x32 sse2/;
+  specialize qw/vpx_highbd_tm_predictor_32x32 neon sse2/;
 
   add_proto qw/void vpx_highbd_dc_predictor_32x32/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
   specialize qw/vpx_highbd_dc_predictor_32x32 neon sse2/;

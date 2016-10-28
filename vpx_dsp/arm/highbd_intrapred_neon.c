@@ -895,3 +895,184 @@ void vpx_highbd_h_predictor_32x32_neon(uint16_t *dst, ptrdiff_t stride,
     h_store_32(&dst, stride, row);
   }
 }
+
+// -----------------------------------------------------------------------------
+
+void vpx_highbd_tm_predictor_4x4_neon(uint16_t *dst, ptrdiff_t stride,
+                                      const uint16_t *above,
+                                      const uint16_t *left, int bd) {
+  const int16x8_t max = vmovq_n_s16((1 << bd) - 1);
+  const int16x8_t top_left = vld1q_dup_s16((const int16_t *)(above - 1));
+  const int16x4_t above_s16d = vld1_s16((const int16_t *)above);
+  const int16x8_t above_s16 = vcombine_s16(above_s16d, above_s16d);
+  const int16x4_t left_s16 = vld1_s16((const int16_t *)left);
+  const int16x8_t sub = vsubq_s16(above_s16, top_left);
+  int16x8_t sum;
+  uint16x8_t row;
+
+  sum = vcombine_s16(vdup_lane_s16(left_s16, 0), vdup_lane_s16(left_s16, 1));
+  sum = vaddq_s16(sum, sub);
+  sum = vminq_s16(sum, max);
+  row = vqshluq_n_s16(sum, 0);
+  vst1_u16(dst, vget_low_u16(row));
+  dst += stride;
+  vst1_u16(dst, vget_high_u16(row));
+  dst += stride;
+
+  sum = vcombine_s16(vdup_lane_s16(left_s16, 2), vdup_lane_s16(left_s16, 3));
+  sum = vaddq_s16(sum, sub);
+  sum = vminq_s16(sum, max);
+  row = vqshluq_n_s16(sum, 0);
+  vst1_u16(dst, vget_low_u16(row));
+  dst += stride;
+  vst1_u16(dst, vget_high_u16(row));
+}
+
+static INLINE void tm_8_kernel(uint16_t **dst, const ptrdiff_t stride,
+                               const int16x8_t left_dup, const int16x8_t sub,
+                               const int16x8_t max) {
+  uint16x8_t row;
+  int16x8_t sum = vaddq_s16(left_dup, sub);
+  sum = vminq_s16(sum, max);
+  row = vqshluq_n_s16(sum, 0);
+  vst1q_u16(*dst, row);
+  *dst += stride;
+}
+
+void vpx_highbd_tm_predictor_8x8_neon(uint16_t *dst, ptrdiff_t stride,
+                                      const uint16_t *above,
+                                      const uint16_t *left, int bd) {
+  const int16x8_t max = vmovq_n_s16((1 << bd) - 1);
+  const int16x8_t top_left = vld1q_dup_s16((const int16_t *)(above - 1));
+  const int16x8_t above_s16 = vld1q_s16((const int16_t *)above);
+  const int16x8_t left_s16 = vld1q_s16((const int16_t *)left);
+  const int16x8_t sub = vsubq_s16(above_s16, top_left);
+  int16x4_t left_s16d;
+  int16x8_t left_dup;
+  int i;
+
+  left_s16d = vget_low_s16(left_s16);
+
+  for (i = 0; i < 2; i++, left_s16d = vget_high_s16(left_s16)) {
+    left_dup = vdupq_lane_s16(left_s16d, 0);
+    tm_8_kernel(&dst, stride, left_dup, sub, max);
+
+    left_dup = vdupq_lane_s16(left_s16d, 1);
+    tm_8_kernel(&dst, stride, left_dup, sub, max);
+
+    left_dup = vdupq_lane_s16(left_s16d, 2);
+    tm_8_kernel(&dst, stride, left_dup, sub, max);
+
+    left_dup = vdupq_lane_s16(left_s16d, 3);
+    tm_8_kernel(&dst, stride, left_dup, sub, max);
+  }
+}
+
+static INLINE void tm_16_kernel(uint16_t **dst, const ptrdiff_t stride,
+                                const int16x8_t left_dup, const int16x8_t sub0,
+                                const int16x8_t sub1, const int16x8_t max) {
+  uint16x8_t row0, row1;
+  int16x8_t sum0 = vaddq_s16(left_dup, sub0);
+  int16x8_t sum1 = vaddq_s16(left_dup, sub1);
+  sum0 = vminq_s16(sum0, max);
+  sum1 = vminq_s16(sum1, max);
+  row0 = vqshluq_n_s16(sum0, 0);
+  row1 = vqshluq_n_s16(sum1, 0);
+  vst1q_u16(*dst, row0);
+  *dst += 8;
+  vst1q_u16(*dst, row1);
+  *dst += stride - 8;
+}
+
+void vpx_highbd_tm_predictor_16x16_neon(uint16_t *dst, ptrdiff_t stride,
+                                        const uint16_t *above,
+                                        const uint16_t *left, int bd) {
+  const int16x8_t max = vmovq_n_s16((1 << bd) - 1);
+  const int16x8_t top_left = vld1q_dup_s16((const int16_t *)(above - 1));
+  const int16x8_t above0 = vld1q_s16((const int16_t *)above);
+  const int16x8_t above1 = vld1q_s16((const int16_t *)(above + 8));
+  const int16x8_t sub0 = vsubq_s16(above0, top_left);
+  const int16x8_t sub1 = vsubq_s16(above1, top_left);
+  int16x8_t left_dup;
+  int i, j;
+
+  for (j = 0; j < 2; j++, left += 8) {
+    const int16x8_t left_s16q = vld1q_s16((const int16_t *)left);
+    int16x4_t left_s16d = vget_low_s16(left_s16q);
+    for (i = 0; i < 2; i++, left_s16d = vget_high_s16(left_s16q)) {
+      left_dup = vdupq_lane_s16(left_s16d, 0);
+      tm_16_kernel(&dst, stride, left_dup, sub0, sub1, max);
+
+      left_dup = vdupq_lane_s16(left_s16d, 1);
+      tm_16_kernel(&dst, stride, left_dup, sub0, sub1, max);
+
+      left_dup = vdupq_lane_s16(left_s16d, 2);
+      tm_16_kernel(&dst, stride, left_dup, sub0, sub1, max);
+
+      left_dup = vdupq_lane_s16(left_s16d, 3);
+      tm_16_kernel(&dst, stride, left_dup, sub0, sub1, max);
+    }
+  }
+}
+
+static INLINE void tm_32_kernel(uint16_t **dst, const ptrdiff_t stride,
+                                const int16x8_t left_dup, const int16x8_t sub0,
+                                const int16x8_t sub1, const int16x8_t sub2,
+                                const int16x8_t sub3, const int16x8_t max) {
+  uint16x8_t row0, row1, row2, row3;
+  int16x8_t sum0 = vaddq_s16(left_dup, sub0);
+  int16x8_t sum1 = vaddq_s16(left_dup, sub1);
+  int16x8_t sum2 = vaddq_s16(left_dup, sub2);
+  int16x8_t sum3 = vaddq_s16(left_dup, sub3);
+  sum0 = vminq_s16(sum0, max);
+  sum1 = vminq_s16(sum1, max);
+  sum2 = vminq_s16(sum2, max);
+  sum3 = vminq_s16(sum3, max);
+  row0 = vqshluq_n_s16(sum0, 0);
+  row1 = vqshluq_n_s16(sum1, 0);
+  row2 = vqshluq_n_s16(sum2, 0);
+  row3 = vqshluq_n_s16(sum3, 0);
+  vst1q_u16(*dst, row0);
+  *dst += 8;
+  vst1q_u16(*dst, row1);
+  *dst += 8;
+  vst1q_u16(*dst, row2);
+  *dst += 8;
+  vst1q_u16(*dst, row3);
+  *dst += stride - 24;
+}
+
+void vpx_highbd_tm_predictor_32x32_neon(uint16_t *dst, ptrdiff_t stride,
+                                        const uint16_t *above,
+                                        const uint16_t *left, int bd) {
+  const int16x8_t max = vmovq_n_s16((1 << bd) - 1);
+  const int16x8_t top_left = vld1q_dup_s16((const int16_t *)(above - 1));
+  const int16x8_t above0 = vld1q_s16((const int16_t *)above);
+  const int16x8_t above1 = vld1q_s16((const int16_t *)(above + 8));
+  const int16x8_t above2 = vld1q_s16((const int16_t *)(above + 16));
+  const int16x8_t above3 = vld1q_s16((const int16_t *)(above + 24));
+  const int16x8_t sub0 = vsubq_s16(above0, top_left);
+  const int16x8_t sub1 = vsubq_s16(above1, top_left);
+  const int16x8_t sub2 = vsubq_s16(above2, top_left);
+  const int16x8_t sub3 = vsubq_s16(above3, top_left);
+  int16x8_t left_dup;
+  int i, j;
+
+  for (i = 0; i < 4; i++, left += 8) {
+    const int16x8_t left_s16q = vld1q_s16((const int16_t *)left);
+    int16x4_t left_s16d = vget_low_s16(left_s16q);
+    for (j = 0; j < 2; j++, left_s16d = vget_high_s16(left_s16q)) {
+      left_dup = vdupq_lane_s16(left_s16d, 0);
+      tm_32_kernel(&dst, stride, left_dup, sub0, sub1, sub2, sub3, max);
+
+      left_dup = vdupq_lane_s16(left_s16d, 1);
+      tm_32_kernel(&dst, stride, left_dup, sub0, sub1, sub2, sub3, max);
+
+      left_dup = vdupq_lane_s16(left_s16d, 2);
+      tm_32_kernel(&dst, stride, left_dup, sub0, sub1, sub2, sub3, max);
+
+      left_dup = vdupq_lane_s16(left_s16d, 3);
+      tm_32_kernel(&dst, stride, left_dup, sub0, sub1, sub2, sub3, max);
+    }
+  }
+}
