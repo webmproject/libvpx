@@ -69,46 +69,46 @@ void av1_iht4x4_16_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
 
   switch (tx_type) {
     case DCT_DCT:
-      idct4_sse2(in);
-      idct4_sse2(in);
+      aom_idct4_sse2(in);
+      aom_idct4_sse2(in);
       break;
     case ADST_DCT:
-      idct4_sse2(in);
-      iadst4_sse2(in);
+      aom_idct4_sse2(in);
+      aom_iadst4_sse2(in);
       break;
     case DCT_ADST:
-      iadst4_sse2(in);
-      idct4_sse2(in);
+      aom_iadst4_sse2(in);
+      aom_idct4_sse2(in);
       break;
     case ADST_ADST:
-      iadst4_sse2(in);
-      iadst4_sse2(in);
+      aom_iadst4_sse2(in);
+      aom_iadst4_sse2(in);
       break;
 #if CONFIG_EXT_TX
     case FLIPADST_DCT:
-      idct4_sse2(in);
-      iadst4_sse2(in);
+      aom_idct4_sse2(in);
+      aom_iadst4_sse2(in);
       FLIPUD_PTR(dest, stride, 4);
       break;
     case DCT_FLIPADST:
-      iadst4_sse2(in);
-      idct4_sse2(in);
+      aom_iadst4_sse2(in);
+      aom_idct4_sse2(in);
       fliplr_4x4(in);
       break;
     case FLIPADST_FLIPADST:
-      iadst4_sse2(in);
-      iadst4_sse2(in);
+      aom_iadst4_sse2(in);
+      aom_iadst4_sse2(in);
       FLIPUD_PTR(dest, stride, 4);
       fliplr_4x4(in);
       break;
     case ADST_FLIPADST:
-      iadst4_sse2(in);
-      iadst4_sse2(in);
+      aom_iadst4_sse2(in);
+      aom_iadst4_sse2(in);
       fliplr_4x4(in);
       break;
     case FLIPADST_ADST:
-      iadst4_sse2(in);
-      iadst4_sse2(in);
+      aom_iadst4_sse2(in);
+      aom_iadst4_sse2(in);
       FLIPUD_PTR(dest, stride, 4);
       break;
 #endif  // CONFIG_EXT_TX
@@ -167,46 +167,46 @@ void av1_iht8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
 
   switch (tx_type) {
     case DCT_DCT:
-      idct8_sse2(in);
-      idct8_sse2(in);
+      aom_idct8_sse2(in);
+      aom_idct8_sse2(in);
       break;
     case ADST_DCT:
-      idct8_sse2(in);
-      iadst8_sse2(in);
+      aom_idct8_sse2(in);
+      aom_iadst8_sse2(in);
       break;
     case DCT_ADST:
-      iadst8_sse2(in);
-      idct8_sse2(in);
+      aom_iadst8_sse2(in);
+      aom_idct8_sse2(in);
       break;
     case ADST_ADST:
-      iadst8_sse2(in);
-      iadst8_sse2(in);
+      aom_iadst8_sse2(in);
+      aom_iadst8_sse2(in);
       break;
 #if CONFIG_EXT_TX
     case FLIPADST_DCT:
-      idct8_sse2(in);
-      iadst8_sse2(in);
+      aom_idct8_sse2(in);
+      aom_iadst8_sse2(in);
       FLIPUD_PTR(dest, stride, 8);
       break;
     case DCT_FLIPADST:
-      iadst8_sse2(in);
-      idct8_sse2(in);
+      aom_iadst8_sse2(in);
+      aom_idct8_sse2(in);
       fliplr_8x8(in);
       break;
     case FLIPADST_FLIPADST:
-      iadst8_sse2(in);
-      iadst8_sse2(in);
+      aom_iadst8_sse2(in);
+      aom_iadst8_sse2(in);
       FLIPUD_PTR(dest, stride, 8);
       fliplr_8x8(in);
       break;
     case ADST_FLIPADST:
-      iadst8_sse2(in);
-      iadst8_sse2(in);
+      aom_iadst8_sse2(in);
+      aom_iadst8_sse2(in);
       fliplr_8x8(in);
       break;
     case FLIPADST_ADST:
-      iadst8_sse2(in);
-      iadst8_sse2(in);
+      aom_iadst8_sse2(in);
+      aom_iadst8_sse2(in);
       FLIPUD_PTR(dest, stride, 8);
       break;
 #endif  // CONFIG_EXT_TX
@@ -254,46 +254,46 @@ void av1_iht16x16_256_add_sse2(const tran_low_t *input, uint8_t *dest,
 
   switch (tx_type) {
     case DCT_DCT:
-      idct16_sse2(in0, in1);
-      idct16_sse2(in0, in1);
+      aom_idct16_sse2(in0, in1);
+      aom_idct16_sse2(in0, in1);
       break;
     case ADST_DCT:
-      idct16_sse2(in0, in1);
-      iadst16_sse2(in0, in1);
+      aom_idct16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
       break;
     case DCT_ADST:
-      iadst16_sse2(in0, in1);
-      idct16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
+      aom_idct16_sse2(in0, in1);
       break;
     case ADST_ADST:
-      iadst16_sse2(in0, in1);
-      iadst16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
       break;
 #if CONFIG_EXT_TX
     case FLIPADST_DCT:
-      idct16_sse2(in0, in1);
-      iadst16_sse2(in0, in1);
+      aom_idct16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
       FLIPUD_PTR(dest, stride, 16);
       break;
     case DCT_FLIPADST:
-      iadst16_sse2(in0, in1);
-      idct16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
+      aom_idct16_sse2(in0, in1);
       FLIPLR_16x16(in0, in1);
       break;
     case FLIPADST_FLIPADST:
-      iadst16_sse2(in0, in1);
-      iadst16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
       FLIPUD_PTR(dest, stride, 16);
       FLIPLR_16x16(in0, in1);
       break;
     case ADST_FLIPADST:
-      iadst16_sse2(in0, in1);
-      iadst16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
       FLIPLR_16x16(in0, in1);
       break;
     case FLIPADST_ADST:
-      iadst16_sse2(in0, in1);
-      iadst16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
       FLIPUD_PTR(dest, stride, 16);
       break;
 #endif  // CONFIG_EXT_TX
@@ -667,9 +667,9 @@ void av1_iht8x16_128_add_sse2(const tran_low_t *input, uint8_t *dest,
     case ADST_DCT:
     case FLIPADST_DCT:
     case H_DCT:
-      idct8_sse2(in);
+      aom_idct8_sse2(in);
       array_transpose_8x8(in, in);
-      idct8_sse2(in + 8);
+      aom_idct8_sse2(in + 8);
       array_transpose_8x8(in + 8, in + 8);
       break;
     case DCT_ADST:
@@ -680,9 +680,9 @@ void av1_iht8x16_128_add_sse2(const tran_low_t *input, uint8_t *dest,
     case FLIPADST_ADST:
     case H_ADST:
     case H_FLIPADST:
-      iadst8_sse2(in);
+      aom_iadst8_sse2(in);
       array_transpose_8x8(in, in);
-      iadst8_sse2(in + 8);
+      aom_iadst8_sse2(in + 8);
       array_transpose_8x8(in + 8, in + 8);
       break;
     case V_FLIPADST:
@@ -836,8 +836,8 @@ void av1_iht16x8_128_add_sse2(const tran_low_t *input, uint8_t *dest,
     case DCT_ADST:
     case DCT_FLIPADST:
     case V_DCT:
-      idct8_sse2(in);
-      idct8_sse2(in + 8);
+      aom_idct8_sse2(in);
+      aom_idct8_sse2(in + 8);
       break;
     case ADST_DCT:
     case ADST_ADST:
@@ -847,8 +847,8 @@ void av1_iht16x8_128_add_sse2(const tran_low_t *input, uint8_t *dest,
     case FLIPADST_DCT:
     case V_ADST:
     case V_FLIPADST:
-      iadst8_sse2(in);
-      iadst8_sse2(in + 8);
+      aom_iadst8_sse2(in);
+      aom_iadst8_sse2(in + 8);
       break;
     case H_DCT:
     case H_ADST:
@@ -934,7 +934,7 @@ void av1_iht8x4_32_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
     case DCT_DCT:
     case ADST_DCT:
     case FLIPADST_DCT:
-    case H_DCT: idct8_sse2(in); break;
+    case H_DCT: aom_idct8_sse2(in); break;
     case DCT_ADST:
     case ADST_ADST:
     case DCT_FLIPADST:
@@ -942,7 +942,7 @@ void av1_iht8x4_32_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
     case ADST_FLIPADST:
     case FLIPADST_ADST:
     case H_ADST:
-    case H_FLIPADST: iadst8_sse2(in); break;
+    case H_FLIPADST: aom_iadst8_sse2(in); break;
     case V_FLIPADST:
     case V_ADST:
     case V_DCT:
@@ -969,8 +969,8 @@ void av1_iht8x4_32_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
     case DCT_ADST:
     case DCT_FLIPADST:
     case V_DCT:
-      idct4_sse2(in + 4);
-      idct4_sse2(in + 6);
+      aom_idct4_sse2(in + 4);
+      aom_idct4_sse2(in + 6);
       break;
     case ADST_DCT:
     case ADST_ADST:
@@ -980,8 +980,8 @@ void av1_iht8x4_32_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
     case FLIPADST_DCT:
     case V_ADST:
     case V_FLIPADST:
-      iadst4_sse2(in + 4);
-      iadst4_sse2(in + 6);
+      aom_iadst4_sse2(in + 4);
+      aom_iadst4_sse2(in + 6);
       break;
     case H_DCT:
     case H_ADST:
@@ -1113,8 +1113,8 @@ void av1_iht4x8_32_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
     case ADST_DCT:
     case FLIPADST_DCT:
     case H_DCT:
-      idct4_sse2(in + 4);
-      idct4_sse2(in + 6);
+      aom_idct4_sse2(in + 4);
+      aom_idct4_sse2(in + 6);
       break;
     case DCT_ADST:
     case ADST_ADST:
@@ -1124,8 +1124,8 @@ void av1_iht4x8_32_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
     case FLIPADST_ADST:
     case H_ADST:
     case H_FLIPADST:
-      iadst4_sse2(in + 4);
-      iadst4_sse2(in + 6);
+      aom_iadst4_sse2(in + 4);
+      aom_iadst4_sse2(in + 6);
       break;
     case V_FLIPADST:
     case V_ADST:
@@ -1150,7 +1150,7 @@ void av1_iht4x8_32_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
     case DCT_DCT:
     case DCT_ADST:
     case DCT_FLIPADST:
-    case V_DCT: idct8_sse2(in); break;
+    case V_DCT: aom_idct8_sse2(in); break;
     case ADST_DCT:
     case ADST_ADST:
     case FLIPADST_ADST:
@@ -1158,7 +1158,7 @@ void av1_iht4x8_32_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
     case FLIPADST_FLIPADST:
     case FLIPADST_DCT:
     case V_ADST:
-    case V_FLIPADST: iadst8_sse2(in); break;
+    case V_FLIPADST: aom_iadst8_sse2(in); break;
     case H_DCT:
     case H_ADST:
     case H_FLIPADST:
@@ -1252,7 +1252,7 @@ static INLINE void ihalfright32_16col(__m128i *tl, __m128i *tr, __m128i *bl,
   // Generate the bottom half of the output
   scale_sqrt2_8x16(bl);
   scale_sqrt2_8x16(br);
-  idct16_sse2(bl, br);  // Includes a transposition
+  aom_idct16_sse2(bl, br);  // Includes a transposition
 }
 
 static INLINE void iidtx32_16col(__m128i *tl, __m128i *tr, __m128i *bl,
@@ -1309,8 +1309,8 @@ void av1_iht16x32_512_add_sse2(const tran_low_t *input, uint8_t *dest,
     case ADST_DCT:
     case FLIPADST_DCT:
     case H_DCT:
-      idct16_sse2(intl, intr);
-      idct16_sse2(inbl, inbr);
+      aom_idct16_sse2(intl, intr);
+      aom_idct16_sse2(inbl, inbr);
       break;
     case DCT_ADST:
     case ADST_ADST:
@@ -1320,8 +1320,8 @@ void av1_iht16x32_512_add_sse2(const tran_low_t *input, uint8_t *dest,
     case FLIPADST_ADST:
     case H_ADST:
     case H_FLIPADST:
-      iadst16_sse2(intl, intr);
-      iadst16_sse2(inbl, inbr);
+      aom_iadst16_sse2(intl, intr);
+      aom_iadst16_sse2(inbl, inbr);
       break;
     case V_FLIPADST:
     case V_ADST:
@@ -1467,8 +1467,8 @@ void av1_iht32x16_512_add_sse2(const tran_low_t *input, uint8_t *dest,
     case DCT_ADST:
     case DCT_FLIPADST:
     case V_DCT:
-      idct16_sse2(in0, in1);
-      idct16_sse2(in2, in3);
+      aom_idct16_sse2(in0, in1);
+      aom_idct16_sse2(in2, in3);
       break;
     case ADST_DCT:
     case ADST_ADST:
@@ -1478,8 +1478,8 @@ void av1_iht32x16_512_add_sse2(const tran_low_t *input, uint8_t *dest,
     case FLIPADST_DCT:
     case V_ADST:
     case V_FLIPADST:
-      iadst16_sse2(in0, in1);
-      iadst16_sse2(in2, in3);
+      aom_iadst16_sse2(in0, in1);
+      aom_iadst16_sse2(in2, in3);
       break;
     case H_DCT:
     case H_ADST:

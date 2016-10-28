@@ -70,7 +70,7 @@ static void ihalfright32_c(const tran_low_t *input, tran_low_t *output) {
   for (i = 0; i < 16; ++i) {
     output[i] = input[16 + i] * 4;
   }
-  idct16_c(inputhalf, output + 16);
+  aom_idct16_c(inputhalf, output + 16);
   // Note overall scaling factor is 4 times orthogonal
 }
 
@@ -241,24 +241,24 @@ static void maybe_flip_strides16(uint16_t **dst, int *dstride, tran_low_t **src,
 void av1_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride,
                          int tx_type) {
   static const transform_2d IHT_4[] = {
-    { idct4_c, idct4_c },    // DCT_DCT
-    { iadst4_c, idct4_c },   // ADST_DCT
-    { idct4_c, iadst4_c },   // DCT_ADST
-    { iadst4_c, iadst4_c },  // ADST_ADST
+    { aom_idct4_c, aom_idct4_c },    // DCT_DCT  = 0
+    { aom_iadst4_c, aom_idct4_c },   // ADST_DCT = 1
+    { aom_idct4_c, aom_iadst4_c },   // DCT_ADST = 2
+    { aom_iadst4_c, aom_iadst4_c },  // ADST_ADST = 3
 #if CONFIG_EXT_TX
-    { iadst4_c, idct4_c },   // FLIPADST_DCT
-    { idct4_c, iadst4_c },   // DCT_FLIPADST
-    { iadst4_c, iadst4_c },  // FLIPADST_FLIPADST
-    { iadst4_c, iadst4_c },  // ADST_FLIPADST
-    { iadst4_c, iadst4_c },  // FLIPADST_ADST
-    { iidtx4_c, iidtx4_c },  // IDTX
-    { idct4_c, iidtx4_c },   // V_DCT
-    { iidtx4_c, idct4_c },   // H_DCT
-    { iadst4_c, iidtx4_c },  // V_ADST
-    { iidtx4_c, iadst4_c },  // H_ADST
-    { iadst4_c, iidtx4_c },  // V_FLIPADST
-    { iidtx4_c, iadst4_c },  // H_FLIPADST
-#endif                       // CONFIG_EXT_TX
+    { aom_iadst4_c, aom_idct4_c },   // FLIPADST_DCT
+    { aom_idct4_c, aom_iadst4_c },   // DCT_FLIPADST
+    { aom_iadst4_c, aom_iadst4_c },  // FLIPADST_FLIPADST
+    { aom_iadst4_c, aom_iadst4_c },  // ADST_FLIPADST
+    { aom_iadst4_c, aom_iadst4_c },  // FLIPADST_ADST
+    { iidtx4_c, iidtx4_c },          // IDTX
+    { aom_idct4_c, iidtx4_c },       // V_DCT
+    { iidtx4_c, aom_idct4_c },       // H_DCT
+    { aom_iadst4_c, iidtx4_c },      // V_ADST
+    { iidtx4_c, aom_iadst4_c },      // H_ADST
+    { aom_iadst4_c, iidtx4_c },      // V_FLIPADST
+    { iidtx4_c, aom_iadst4_c },      // H_FLIPADST
+#endif                               // CONFIG_EXT_TX
   };
 
   int i, j;
@@ -305,22 +305,22 @@ void av1_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride,
 void av1_iht4x8_32_add_c(const tran_low_t *input, uint8_t *dest, int stride,
                          int tx_type) {
   static const transform_2d IHT_4x8[] = {
-    { idct8_c, idct4_c },    // DCT_DCT
-    { iadst8_c, idct4_c },   // ADST_DCT
-    { idct8_c, iadst4_c },   // DCT_ADST
-    { iadst8_c, iadst4_c },  // ADST_ADST
-    { iadst8_c, idct4_c },   // FLIPADST_DCT
-    { idct8_c, iadst4_c },   // DCT_FLIPADST
-    { iadst8_c, iadst4_c },  // FLIPADST_FLIPADST
-    { iadst8_c, iadst4_c },  // ADST_FLIPADST
-    { iadst8_c, iadst4_c },  // FLIPADST_ADST
-    { iidtx8_c, iidtx4_c },  // IDTX
-    { idct8_c, iidtx4_c },   // V_DCT
-    { iidtx8_c, idct4_c },   // H_DCT
-    { iadst8_c, iidtx4_c },  // V_ADST
-    { iidtx8_c, iadst4_c },  // H_ADST
-    { iadst8_c, iidtx4_c },  // V_FLIPADST
-    { iidtx8_c, iadst4_c },  // H_FLIPADST
+    { aom_idct8_c, aom_idct4_c },    // DCT_DCT
+    { aom_iadst8_c, aom_idct4_c },   // ADST_DCT
+    { aom_idct8_c, aom_iadst4_c },   // DCT_ADST
+    { aom_iadst8_c, aom_iadst4_c },  // ADST_ADST
+    { aom_iadst8_c, aom_idct4_c },   // FLIPADST_DCT
+    { aom_idct8_c, aom_iadst4_c },   // DCT_FLIPADST
+    { aom_iadst8_c, aom_iadst4_c },  // FLIPADST_FLIPADST
+    { aom_iadst8_c, aom_iadst4_c },  // ADST_FLIPADST
+    { aom_iadst8_c, aom_iadst4_c },  // FLIPADST_ADST
+    { iidtx8_c, iidtx4_c },          // IDTX
+    { aom_idct8_c, iidtx4_c },       // V_DCT
+    { iidtx8_c, aom_idct4_c },       // H_DCT
+    { aom_iadst8_c, iidtx4_c },      // V_ADST
+    { iidtx8_c, aom_iadst4_c },      // H_ADST
+    { aom_iadst8_c, iidtx4_c },      // V_FLIPADST
+    { iidtx8_c, aom_iadst4_c },      // H_FLIPADST
   };
 
   const int n = 4;
@@ -358,22 +358,22 @@ void av1_iht4x8_32_add_c(const tran_low_t *input, uint8_t *dest, int stride,
 void av1_iht8x4_32_add_c(const tran_low_t *input, uint8_t *dest, int stride,
                          int tx_type) {
   static const transform_2d IHT_8x4[] = {
-    { idct4_c, idct8_c },    // DCT_DCT
-    { iadst4_c, idct8_c },   // ADST_DCT
-    { idct4_c, iadst8_c },   // DCT_ADST
-    { iadst4_c, iadst8_c },  // ADST_ADST
-    { iadst4_c, idct8_c },   // FLIPADST_DCT
-    { idct4_c, iadst8_c },   // DCT_FLIPADST
-    { iadst4_c, iadst8_c },  // FLIPADST_FLIPADST
-    { iadst4_c, iadst8_c },  // ADST_FLIPADST
-    { iadst4_c, iadst8_c },  // FLIPADST_ADST
-    { iidtx4_c, iidtx8_c },  // IDTX
-    { idct4_c, iidtx8_c },   // V_DCT
-    { iidtx4_c, idct8_c },   // H_DCT
-    { iadst4_c, iidtx8_c },  // V_ADST
-    { iidtx4_c, iadst8_c },  // H_ADST
-    { iadst4_c, iidtx8_c },  // V_FLIPADST
-    { iidtx4_c, iadst8_c },  // H_FLIPADST
+    { aom_idct4_c, aom_idct8_c },    // DCT_DCT
+    { aom_iadst4_c, aom_idct8_c },   // ADST_DCT
+    { aom_idct4_c, aom_iadst8_c },   // DCT_ADST
+    { aom_iadst4_c, aom_iadst8_c },  // ADST_ADST
+    { aom_iadst4_c, aom_idct8_c },   // FLIPADST_DCT
+    { aom_idct4_c, aom_iadst8_c },   // DCT_FLIPADST
+    { aom_iadst4_c, aom_iadst8_c },  // FLIPADST_FLIPADST
+    { aom_iadst4_c, aom_iadst8_c },  // ADST_FLIPADST
+    { aom_iadst4_c, aom_iadst8_c },  // FLIPADST_ADST
+    { iidtx4_c, iidtx8_c },          // IDTX
+    { aom_idct4_c, iidtx8_c },       // V_DCT
+    { iidtx4_c, aom_idct8_c },       // H_DCT
+    { aom_iadst4_c, iidtx8_c },      // V_ADST
+    { iidtx4_c, aom_iadst8_c },      // H_ADST
+    { aom_iadst4_c, iidtx8_c },      // V_FLIPADST
+    { iidtx4_c, aom_iadst8_c },      // H_FLIPADST
   };
   const int n = 4;
   const int n2 = 8;
@@ -411,22 +411,22 @@ void av1_iht8x4_32_add_c(const tran_low_t *input, uint8_t *dest, int stride,
 void av1_iht8x16_128_add_c(const tran_low_t *input, uint8_t *dest, int stride,
                            int tx_type) {
   static const transform_2d IHT_8x16[] = {
-    { idct16_c, idct8_c },    // DCT_DCT
-    { iadst16_c, idct8_c },   // ADST_DCT
-    { idct16_c, iadst8_c },   // DCT_ADST
-    { iadst16_c, iadst8_c },  // ADST_ADST
-    { iadst16_c, idct8_c },   // FLIPADST_DCT
-    { idct16_c, iadst8_c },   // DCT_FLIPADST
-    { iadst16_c, iadst8_c },  // FLIPADST_FLIPADST
-    { iadst16_c, iadst8_c },  // ADST_FLIPADST
-    { iadst16_c, iadst8_c },  // FLIPADST_ADST
-    { iidtx16_c, iidtx8_c },  // IDTX
-    { idct16_c, iidtx8_c },   // V_DCT
-    { iidtx16_c, idct8_c },   // H_DCT
-    { iadst16_c, iidtx8_c },  // V_ADST
-    { iidtx16_c, iadst8_c },  // H_ADST
-    { iadst16_c, iidtx8_c },  // V_FLIPADST
-    { iidtx16_c, iadst8_c },  // H_FLIPADST
+    { aom_idct16_c, aom_idct8_c },    // DCT_DCT
+    { aom_iadst16_c, aom_idct8_c },   // ADST_DCT
+    { aom_idct16_c, aom_iadst8_c },   // DCT_ADST
+    { aom_iadst16_c, aom_iadst8_c },  // ADST_ADST
+    { aom_iadst16_c, aom_idct8_c },   // FLIPADST_DCT
+    { aom_idct16_c, aom_iadst8_c },   // DCT_FLIPADST
+    { aom_iadst16_c, aom_iadst8_c },  // FLIPADST_FLIPADST
+    { aom_iadst16_c, aom_iadst8_c },  // ADST_FLIPADST
+    { aom_iadst16_c, aom_iadst8_c },  // FLIPADST_ADST
+    { iidtx16_c, iidtx8_c },          // IDTX
+    { aom_idct16_c, iidtx8_c },       // V_DCT
+    { iidtx16_c, aom_idct8_c },       // H_DCT
+    { aom_iadst16_c, iidtx8_c },      // V_ADST
+    { iidtx16_c, aom_iadst8_c },      // H_ADST
+    { aom_iadst16_c, iidtx8_c },      // V_FLIPADST
+    { iidtx16_c, aom_iadst8_c },      // H_FLIPADST
   };
 
   const int n = 8;
@@ -464,22 +464,22 @@ void av1_iht8x16_128_add_c(const tran_low_t *input, uint8_t *dest, int stride,
 void av1_iht16x8_128_add_c(const tran_low_t *input, uint8_t *dest, int stride,
                            int tx_type) {
   static const transform_2d IHT_16x8[] = {
-    { idct8_c, idct16_c },    // DCT_DCT
-    { iadst8_c, idct16_c },   // ADST_DCT
-    { idct8_c, iadst16_c },   // DCT_ADST
-    { iadst8_c, iadst16_c },  // ADST_ADST
-    { iadst8_c, idct16_c },   // FLIPADST_DCT
-    { idct8_c, iadst16_c },   // DCT_FLIPADST
-    { iadst8_c, iadst16_c },  // FLIPADST_FLIPADST
-    { iadst8_c, iadst16_c },  // ADST_FLIPADST
-    { iadst8_c, iadst16_c },  // FLIPADST_ADST
-    { iidtx8_c, iidtx16_c },  // IDTX
-    { idct8_c, iidtx16_c },   // V_DCT
-    { iidtx8_c, idct16_c },   // H_DCT
-    { iadst8_c, iidtx16_c },  // V_ADST
-    { iidtx8_c, iadst16_c },  // H_ADST
-    { iadst8_c, iidtx16_c },  // V_FLIPADST
-    { iidtx8_c, iadst16_c },  // H_FLIPADST
+    { aom_idct8_c, aom_idct16_c },    // DCT_DCT
+    { aom_iadst8_c, aom_idct16_c },   // ADST_DCT
+    { aom_idct8_c, aom_iadst16_c },   // DCT_ADST
+    { aom_iadst8_c, aom_iadst16_c },  // ADST_ADST
+    { aom_iadst8_c, aom_idct16_c },   // FLIPADST_DCT
+    { aom_idct8_c, aom_iadst16_c },   // DCT_FLIPADST
+    { aom_iadst8_c, aom_iadst16_c },  // FLIPADST_FLIPADST
+    { aom_iadst8_c, aom_iadst16_c },  // ADST_FLIPADST
+    { aom_iadst8_c, aom_iadst16_c },  // FLIPADST_ADST
+    { iidtx8_c, iidtx16_c },          // IDTX
+    { aom_idct8_c, iidtx16_c },       // V_DCT
+    { iidtx8_c, aom_idct16_c },       // H_DCT
+    { aom_iadst8_c, iidtx16_c },      // V_ADST
+    { iidtx8_c, aom_iadst16_c },      // H_ADST
+    { aom_iadst8_c, iidtx16_c },      // V_FLIPADST
+    { iidtx8_c, aom_iadst16_c },      // H_FLIPADST
   };
   const int n = 8;
   const int n2 = 16;
@@ -517,22 +517,22 @@ void av1_iht16x8_128_add_c(const tran_low_t *input, uint8_t *dest, int stride,
 void av1_iht16x32_512_add_c(const tran_low_t *input, uint8_t *dest, int stride,
                             int tx_type) {
   static const transform_2d IHT_16x32[] = {
-    { idct32_c, idct16_c },         // DCT_DCT
-    { ihalfright32_c, idct16_c },   // ADST_DCT
-    { idct32_c, iadst16_c },        // DCT_ADST
-    { ihalfright32_c, iadst16_c },  // ADST_ADST
-    { ihalfright32_c, idct16_c },   // FLIPADST_DCT
-    { idct32_c, iadst16_c },        // DCT_FLIPADST
-    { ihalfright32_c, iadst16_c },  // FLIPADST_FLIPADST
-    { ihalfright32_c, iadst16_c },  // ADST_FLIPADST
-    { ihalfright32_c, iadst16_c },  // FLIPADST_ADST
-    { iidtx32_c, iidtx16_c },       // IDTX
-    { idct32_c, iidtx16_c },        // V_DCT
-    { iidtx32_c, idct16_c },        // H_DCT
-    { ihalfright32_c, iidtx16_c },  // V_ADST
-    { iidtx32_c, iadst16_c },       // H_ADST
-    { ihalfright32_c, iidtx16_c },  // V_FLIPADST
-    { iidtx32_c, iadst16_c },       // H_FLIPADST
+    { aom_idct32_c, aom_idct16_c },     // DCT_DCT
+    { ihalfright32_c, aom_idct16_c },   // ADST_DCT
+    { aom_idct32_c, aom_iadst16_c },    // DCT_ADST
+    { ihalfright32_c, aom_iadst16_c },  // ADST_ADST
+    { ihalfright32_c, aom_idct16_c },   // FLIPADST_DCT
+    { aom_idct32_c, aom_iadst16_c },    // DCT_FLIPADST
+    { ihalfright32_c, aom_iadst16_c },  // FLIPADST_FLIPADST
+    { ihalfright32_c, aom_iadst16_c },  // ADST_FLIPADST
+    { ihalfright32_c, aom_iadst16_c },  // FLIPADST_ADST
+    { iidtx32_c, iidtx16_c },           // IDTX
+    { aom_idct32_c, iidtx16_c },        // V_DCT
+    { iidtx32_c, aom_idct16_c },        // H_DCT
+    { ihalfright32_c, iidtx16_c },      // V_ADST
+    { iidtx32_c, aom_iadst16_c },       // H_ADST
+    { ihalfright32_c, iidtx16_c },      // V_FLIPADST
+    { iidtx32_c, aom_iadst16_c },       // H_FLIPADST
   };
 
   const int n = 16;
@@ -570,22 +570,22 @@ void av1_iht16x32_512_add_c(const tran_low_t *input, uint8_t *dest, int stride,
 void av1_iht32x16_512_add_c(const tran_low_t *input, uint8_t *dest, int stride,
                             int tx_type) {
   static const transform_2d IHT_32x16[] = {
-    { idct16_c, idct32_c },         // DCT_DCT
-    { iadst16_c, idct32_c },        // ADST_DCT
-    { idct16_c, ihalfright32_c },   // DCT_ADST
-    { iadst16_c, ihalfright32_c },  // ADST_ADST
-    { iadst16_c, idct32_c },        // FLIPADST_DCT
-    { idct16_c, ihalfright32_c },   // DCT_FLIPADST
-    { iadst16_c, ihalfright32_c },  // FLIPADST_FLIPADST
-    { iadst16_c, ihalfright32_c },  // ADST_FLIPADST
-    { iadst16_c, ihalfright32_c },  // FLIPADST_ADST
-    { iidtx16_c, iidtx32_c },       // IDTX
-    { idct16_c, iidtx32_c },        // V_DCT
-    { iidtx16_c, idct32_c },        // H_DCT
-    { iadst16_c, iidtx32_c },       // V_ADST
-    { iidtx16_c, ihalfright32_c },  // H_ADST
-    { iadst16_c, iidtx32_c },       // V_FLIPADST
-    { iidtx16_c, ihalfright32_c },  // H_FLIPADST
+    { aom_idct16_c, aom_idct32_c },     // DCT_DCT
+    { aom_iadst16_c, aom_idct32_c },    // ADST_DCT
+    { aom_idct16_c, ihalfright32_c },   // DCT_ADST
+    { aom_iadst16_c, ihalfright32_c },  // ADST_ADST
+    { aom_iadst16_c, aom_idct32_c },    // FLIPADST_DCT
+    { aom_idct16_c, ihalfright32_c },   // DCT_FLIPADST
+    { aom_iadst16_c, ihalfright32_c },  // FLIPADST_FLIPADST
+    { aom_iadst16_c, ihalfright32_c },  // ADST_FLIPADST
+    { aom_iadst16_c, ihalfright32_c },  // FLIPADST_ADST
+    { iidtx16_c, iidtx32_c },           // IDTX
+    { aom_idct16_c, iidtx32_c },        // V_DCT
+    { iidtx16_c, aom_idct32_c },        // H_DCT
+    { aom_iadst16_c, iidtx32_c },       // V_ADST
+    { iidtx16_c, ihalfright32_c },      // H_ADST
+    { aom_iadst16_c, iidtx32_c },       // V_FLIPADST
+    { iidtx16_c, ihalfright32_c },      // H_FLIPADST
   };
   const int n = 16;
   const int n2 = 32;
@@ -624,24 +624,24 @@ void av1_iht32x16_512_add_c(const tran_low_t *input, uint8_t *dest, int stride,
 void av1_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest, int stride,
                          int tx_type) {
   static const transform_2d IHT_8[] = {
-    { idct8_c, idct8_c },    // DCT_DCT
-    { iadst8_c, idct8_c },   // ADST_DCT
-    { idct8_c, iadst8_c },   // DCT_ADST
-    { iadst8_c, iadst8_c },  // ADST_ADST
+    { aom_idct8_c, aom_idct8_c },    // DCT_DCT  = 0
+    { aom_iadst8_c, aom_idct8_c },   // ADST_DCT = 1
+    { aom_idct8_c, aom_iadst8_c },   // DCT_ADST = 2
+    { aom_iadst8_c, aom_iadst8_c },  // ADST_ADST = 3
 #if CONFIG_EXT_TX
-    { iadst8_c, idct8_c },   // FLIPADST_DCT
-    { idct8_c, iadst8_c },   // DCT_FLIPADST
-    { iadst8_c, iadst8_c },  // FLIPADST_FLIPADST
-    { iadst8_c, iadst8_c },  // ADST_FLIPADST
-    { iadst8_c, iadst8_c },  // FLIPADST_ADST
-    { iidtx8_c, iidtx8_c },  // IDTX
-    { idct8_c, iidtx8_c },   // V_DCT
-    { iidtx8_c, idct8_c },   // H_DCT
-    { iadst8_c, iidtx8_c },  // V_ADST
-    { iidtx8_c, iadst8_c },  // H_ADST
-    { iadst8_c, iidtx8_c },  // V_FLIPADST
-    { iidtx8_c, iadst8_c },  // H_FLIPADST
-#endif                       // CONFIG_EXT_TX
+    { aom_iadst8_c, aom_idct8_c },   // FLIPADST_DCT
+    { aom_idct8_c, aom_iadst8_c },   // DCT_FLIPADST
+    { aom_iadst8_c, aom_iadst8_c },  // FLIPADST_FLIPADST
+    { aom_iadst8_c, aom_iadst8_c },  // ADST_FLIPADST
+    { aom_iadst8_c, aom_iadst8_c },  // FLIPADST_ADST
+    { iidtx8_c, iidtx8_c },          // IDTX
+    { aom_idct8_c, iidtx8_c },       // V_DCT
+    { iidtx8_c, aom_idct8_c },       // H_DCT
+    { aom_iadst8_c, iidtx8_c },      // V_ADST
+    { iidtx8_c, aom_iadst8_c },      // H_ADST
+    { aom_iadst8_c, iidtx8_c },      // V_FLIPADST
+    { iidtx8_c, aom_iadst8_c },      // H_FLIPADST
+#endif                               // CONFIG_EXT_TX
   };
 
   int i, j;
@@ -687,24 +687,24 @@ void av1_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest, int stride,
 void av1_iht16x16_256_add_c(const tran_low_t *input, uint8_t *dest, int stride,
                             int tx_type) {
   static const transform_2d IHT_16[] = {
-    { idct16_c, idct16_c },    // DCT_DCT
-    { iadst16_c, idct16_c },   // ADST_DCT
-    { idct16_c, iadst16_c },   // DCT_ADST
-    { iadst16_c, iadst16_c },  // ADST_ADST
+    { aom_idct16_c, aom_idct16_c },    // DCT_DCT  = 0
+    { aom_iadst16_c, aom_idct16_c },   // ADST_DCT = 1
+    { aom_idct16_c, aom_iadst16_c },   // DCT_ADST = 2
+    { aom_iadst16_c, aom_iadst16_c },  // ADST_ADST = 3
 #if CONFIG_EXT_TX
-    { iadst16_c, idct16_c },   // FLIPADST_DCT
-    { idct16_c, iadst16_c },   // DCT_FLIPADST
-    { iadst16_c, iadst16_c },  // FLIPADST_FLIPADST
-    { iadst16_c, iadst16_c },  // ADST_FLIPADST
-    { iadst16_c, iadst16_c },  // FLIPADST_ADST
-    { iidtx16_c, iidtx16_c },  // IDTX
-    { idct16_c, iidtx16_c },   // V_DCT
-    { iidtx16_c, idct16_c },   // H_DCT
-    { iadst16_c, iidtx16_c },  // V_ADST
-    { iidtx16_c, iadst16_c },  // H_ADST
-    { iadst16_c, iidtx16_c },  // V_FLIPADST
-    { iidtx16_c, iadst16_c },  // H_FLIPADST
-#endif                         // CONFIG_EXT_TX
+    { aom_iadst16_c, aom_idct16_c },   // FLIPADST_DCT
+    { aom_idct16_c, aom_iadst16_c },   // DCT_FLIPADST
+    { aom_iadst16_c, aom_iadst16_c },  // FLIPADST_FLIPADST
+    { aom_iadst16_c, aom_iadst16_c },  // ADST_FLIPADST
+    { aom_iadst16_c, aom_iadst16_c },  // FLIPADST_ADST
+    { iidtx16_c, iidtx16_c },          // IDTX
+    { aom_idct16_c, iidtx16_c },       // V_DCT
+    { iidtx16_c, aom_idct16_c },       // H_DCT
+    { aom_iadst16_c, iidtx16_c },      // V_ADST
+    { iidtx16_c, aom_iadst16_c },      // H_ADST
+    { aom_iadst16_c, iidtx16_c },      // V_FLIPADST
+    { iidtx16_c, aom_iadst16_c },      // H_FLIPADST
+#endif                                 // CONFIG_EXT_TX
   };
 
   int i, j;
@@ -751,18 +751,18 @@ void av1_iht16x16_256_add_c(const tran_low_t *input, uint8_t *dest, int stride,
 void av1_iht32x32_1024_add_c(const tran_low_t *input, uint8_t *dest, int stride,
                              int tx_type) {
   static const transform_2d IHT_32[] = {
-    { idct32_c, idct32_c },              // DCT_DCT
-    { ihalfright32_c, idct32_c },        // ADST_DCT
-    { idct32_c, ihalfright32_c },        // DCT_ADST
+    { aom_idct32_c, aom_idct32_c },      // DCT_DCT
+    { ihalfright32_c, aom_idct32_c },    // ADST_DCT
+    { aom_idct32_c, ihalfright32_c },    // DCT_ADST
     { ihalfright32_c, ihalfright32_c },  // ADST_ADST
-    { ihalfright32_c, idct32_c },        // FLIPADST_DCT
-    { idct32_c, ihalfright32_c },        // DCT_FLIPADST
+    { ihalfright32_c, aom_idct32_c },    // FLIPADST_DCT
+    { aom_idct32_c, ihalfright32_c },    // DCT_FLIPADST
     { ihalfright32_c, ihalfright32_c },  // FLIPADST_FLIPADST
     { ihalfright32_c, ihalfright32_c },  // ADST_FLIPADST
     { ihalfright32_c, ihalfright32_c },  // FLIPADST_ADST
     { iidtx32_c, iidtx32_c },            // IDTX
-    { idct32_c, iidtx32_c },             // V_DCT
-    { iidtx32_c, idct32_c },             // H_DCT
+    { aom_idct32_c, iidtx32_c },         // V_DCT
+    { iidtx32_c, aom_idct32_c },         // H_DCT
     { ihalfright32_c, iidtx16_c },       // V_ADST
     { iidtx16_c, ihalfright32_c },       // H_ADST
     { ihalfright32_c, iidtx16_c },       // V_FLIPADST

@@ -93,7 +93,7 @@ void aom_iwht4x4_1_add_c(const tran_low_t *in, uint8_t *dest, int dest_stride) {
   }
 }
 
-void idct4_c(const tran_low_t *input, tran_low_t *output) {
+void aom_idct4_c(const tran_low_t *input, tran_low_t *output) {
   tran_low_t step[4];
   tran_high_t temp1, temp2;
   // stage 1
@@ -121,7 +121,7 @@ void aom_idct4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
 
   // Rows
   for (i = 0; i < 4; ++i) {
-    idct4_c(input, outptr);
+    aom_idct4_c(input, outptr);
     input += 4;
     outptr += 4;
   }
@@ -129,7 +129,7 @@ void aom_idct4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   // Columns
   for (i = 0; i < 4; ++i) {
     for (j = 0; j < 4; ++j) temp_in[j] = out[j * 4 + i];
-    idct4_c(temp_in, temp_out);
+    aom_idct4_c(temp_in, temp_out);
     for (j = 0; j < 4; ++j) {
       dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
                                             ROUND_POWER_OF_TWO(temp_out[j], 4));
@@ -154,7 +154,7 @@ void aom_idct4x4_1_add_c(const tran_low_t *input, uint8_t *dest,
   }
 }
 
-void idct8_c(const tran_low_t *input, tran_low_t *output) {
+void aom_idct8_c(const tran_low_t *input, tran_low_t *output) {
   tran_low_t step1[8], step2[8];
   tran_high_t temp1, temp2;
   // stage 1
@@ -216,7 +216,7 @@ void aom_idct8x8_64_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
 
   // First transform rows
   for (i = 0; i < 8; ++i) {
-    idct8_c(input, outptr);
+    aom_idct8_c(input, outptr);
     input += 8;
     outptr += 8;
   }
@@ -224,7 +224,7 @@ void aom_idct8x8_64_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   // Then transform columns
   for (i = 0; i < 8; ++i) {
     for (j = 0; j < 8; ++j) temp_in[j] = out[j * 8 + i];
-    idct8_c(temp_in, temp_out);
+    aom_idct8_c(temp_in, temp_out);
     for (j = 0; j < 8; ++j) {
       dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
                                             ROUND_POWER_OF_TWO(temp_out[j], 5));
@@ -244,7 +244,7 @@ void aom_idct8x8_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   }
 }
 
-void iadst4_c(const tran_low_t *input, tran_low_t *output) {
+void aom_iadst4_c(const tran_low_t *input, tran_low_t *output) {
   tran_high_t s0, s1, s2, s3, s4, s5, s6, s7;
 
   tran_low_t x0 = input[0];
@@ -281,7 +281,7 @@ void iadst4_c(const tran_low_t *input, tran_low_t *output) {
   output[3] = WRAPLOW(dct_const_round_shift(s0 + s1 - s3));
 }
 
-void iadst8_c(const tran_low_t *input, tran_low_t *output) {
+void aom_iadst8_c(const tran_low_t *input, tran_low_t *output) {
   int s0, s1, s2, s3, s4, s5, s6, s7;
 
   tran_high_t x0 = input[7];
@@ -367,7 +367,7 @@ void aom_idct8x8_12_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   // First transform rows
   // only first 4 row has non-zero coefs
   for (i = 0; i < 4; ++i) {
-    idct8_c(input, outptr);
+    aom_idct8_c(input, outptr);
     input += 8;
     outptr += 8;
   }
@@ -375,7 +375,7 @@ void aom_idct8x8_12_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   // Then transform columns
   for (i = 0; i < 8; ++i) {
     for (j = 0; j < 8; ++j) temp_in[j] = out[j * 8 + i];
-    idct8_c(temp_in, temp_out);
+    aom_idct8_c(temp_in, temp_out);
     for (j = 0; j < 8; ++j) {
       dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
                                             ROUND_POWER_OF_TWO(temp_out[j], 5));
@@ -383,7 +383,7 @@ void aom_idct8x8_12_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   }
 }
 
-void idct16_c(const tran_low_t *input, tran_low_t *output) {
+void aom_idct16_c(const tran_low_t *input, tran_low_t *output) {
   tran_low_t step1[16], step2[16];
   tran_high_t temp1, temp2;
 
@@ -557,7 +557,7 @@ void aom_idct16x16_256_add_c(const tran_low_t *input, uint8_t *dest,
 
   // First transform rows
   for (i = 0; i < 16; ++i) {
-    idct16_c(input, outptr);
+    aom_idct16_c(input, outptr);
     input += 16;
     outptr += 16;
   }
@@ -565,7 +565,7 @@ void aom_idct16x16_256_add_c(const tran_low_t *input, uint8_t *dest,
   // Then transform columns
   for (i = 0; i < 16; ++i) {
     for (j = 0; j < 16; ++j) temp_in[j] = out[j * 16 + i];
-    idct16_c(temp_in, temp_out);
+    aom_idct16_c(temp_in, temp_out);
     for (j = 0; j < 16; ++j) {
       dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
                                             ROUND_POWER_OF_TWO(temp_out[j], 6));
@@ -573,7 +573,7 @@ void aom_idct16x16_256_add_c(const tran_low_t *input, uint8_t *dest,
   }
 }
 
-void iadst16_c(const tran_low_t *input, tran_low_t *output) {
+void aom_iadst16_c(const tran_low_t *input, tran_low_t *output) {
   tran_high_t s0, s1, s2, s3, s4, s5, s6, s7, s8;
   tran_high_t s9, s10, s11, s12, s13, s14, s15;
 
@@ -754,7 +754,7 @@ void aom_idct16x16_10_add_c(const tran_low_t *input, uint8_t *dest,
   // First transform rows. Since all non-zero dct coefficients are in
   // upper-left 4x4 area, we only need to calculate first 4 rows here.
   for (i = 0; i < 4; ++i) {
-    idct16_c(input, outptr);
+    aom_idct16_c(input, outptr);
     input += 16;
     outptr += 16;
   }
@@ -762,7 +762,7 @@ void aom_idct16x16_10_add_c(const tran_low_t *input, uint8_t *dest,
   // Then transform columns
   for (i = 0; i < 16; ++i) {
     for (j = 0; j < 16; ++j) temp_in[j] = out[j * 16 + i];
-    idct16_c(temp_in, temp_out);
+    aom_idct16_c(temp_in, temp_out);
     for (j = 0; j < 16; ++j) {
       dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
                                             ROUND_POWER_OF_TWO(temp_out[j], 6));
@@ -782,7 +782,7 @@ void aom_idct16x16_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   }
 }
 
-void idct32_c(const tran_low_t *input, tran_low_t *output) {
+void aom_idct32_c(const tran_low_t *input, tran_low_t *output) {
   tran_low_t step1[32], step2[32];
   tran_high_t temp1, temp2;
 
@@ -1168,7 +1168,7 @@ void aom_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest,
       zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
 
     if (zero_coeff[0] | zero_coeff[1])
-      idct32_c(input, outptr);
+      aom_idct32_c(input, outptr);
     else
       memset(outptr, 0, sizeof(tran_low_t) * 32);
     input += 32;
@@ -1178,7 +1178,7 @@ void aom_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest,
   // Columns
   for (i = 0; i < 32; ++i) {
     for (j = 0; j < 32; ++j) temp_in[j] = out[j * 32 + i];
-    idct32_c(temp_in, temp_out);
+    aom_idct32_c(temp_in, temp_out);
     for (j = 0; j < 32; ++j) {
       dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
                                             ROUND_POWER_OF_TWO(temp_out[j], 6));
@@ -1196,7 +1196,7 @@ void aom_idct32x32_135_add_c(const tran_low_t *input, uint8_t *dest,
   // Rows
   // only upper-left 16x16 has non-zero coeff
   for (i = 0; i < 16; ++i) {
-    idct32_c(input, outptr);
+    aom_idct32_c(input, outptr);
     input += 32;
     outptr += 32;
   }
@@ -1204,7 +1204,7 @@ void aom_idct32x32_135_add_c(const tran_low_t *input, uint8_t *dest,
   // Columns
   for (i = 0; i < 32; ++i) {
     for (j = 0; j < 32; ++j) temp_in[j] = out[j * 32 + i];
-    idct32_c(temp_in, temp_out);
+    aom_idct32_c(temp_in, temp_out);
     for (j = 0; j < 32; ++j) {
       dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
                                             ROUND_POWER_OF_TWO(temp_out[j], 6));
@@ -1222,7 +1222,7 @@ void aom_idct32x32_34_add_c(const tran_low_t *input, uint8_t *dest,
   // Rows
   // only upper-left 8x8 has non-zero coeff
   for (i = 0; i < 8; ++i) {
-    idct32_c(input, outptr);
+    aom_idct32_c(input, outptr);
     input += 32;
     outptr += 32;
   }
@@ -1230,7 +1230,7 @@ void aom_idct32x32_34_add_c(const tran_low_t *input, uint8_t *dest,
   // Columns
   for (i = 0; i < 32; ++i) {
     for (j = 0; j < 32; ++j) temp_in[j] = out[j * 32 + i];
-    idct32_c(temp_in, temp_out);
+    aom_idct32_c(temp_in, temp_out);
     for (j = 0; j < 32; ++j) {
       dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
                                             ROUND_POWER_OF_TWO(temp_out[j], 6));

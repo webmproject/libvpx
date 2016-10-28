@@ -97,13 +97,13 @@ static INLINE tran_high_t highbd_dct_const_round_shift(tran_high_t input) {
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 #endif  // CONFIG_EMULATE_HARDWARE
 
-void idct4_c(const tran_low_t *input, tran_low_t *output);
-void idct8_c(const tran_low_t *input, tran_low_t *output);
-void idct16_c(const tran_low_t *input, tran_low_t *output);
-void idct32_c(const tran_low_t *input, tran_low_t *output);
-void iadst4_c(const tran_low_t *input, tran_low_t *output);
-void iadst8_c(const tran_low_t *input, tran_low_t *output);
-void iadst16_c(const tran_low_t *input, tran_low_t *output);
+void aom_idct4_c(const tran_low_t *input, tran_low_t *output);
+void aom_idct8_c(const tran_low_t *input, tran_low_t *output);
+void aom_idct16_c(const tran_low_t *input, tran_low_t *output);
+void aom_idct32_c(const tran_low_t *input, tran_low_t *output);
+void aom_iadst4_c(const tran_low_t *input, tran_low_t *output);
+void aom_iadst8_c(const tran_low_t *input, tran_low_t *output);
+void aom_iadst16_c(const tran_low_t *input, tran_low_t *output);
 
 #if CONFIG_AOM_HIGHBITDEPTH
 void aom_highbd_idct4_c(const tran_low_t *input, tran_low_t *output, int bd);

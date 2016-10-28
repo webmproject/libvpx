@@ -175,11 +175,4 @@ static INLINE void write_buffer_8x16(uint8_t *dest, __m128i *in, int stride) {
   RECON_AND_STORE(dest + 15 * stride, in[15]);
 }
 
-void idct4_sse2(__m128i *in);
-void idct8_sse2(__m128i *in);
-void idct16_sse2(__m128i *in0, __m128i *in1);
-void iadst4_sse2(__m128i *in);
-void iadst8_sse2(__m128i *in);
-void iadst16_sse2(__m128i *in0, __m128i *in1);
-
 #endif  // AOM_DSP_X86_INV_TXFM_SSE2_H_
