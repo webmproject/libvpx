@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "01a974f7_e255c7dd",
+        "filename": "av1/decoder/decodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 338,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-10-28T17:04:24Z",
+      "side": 1,
+      "message": "My comment from https://chromium-review.googlesource.com/#/c/404512/2/av1/encoder/rdopt.c@3496 applies here too.",
+      "revId": "5f61426424cbe6366389ea1ef600b80e91c84e0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
