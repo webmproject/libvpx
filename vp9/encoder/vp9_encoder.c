@@ -2441,6 +2441,8 @@ static int recode_loop_test(VP9_COMP *cpi, int high_limit, int low_limit, int q,
       cpi->resize_pending = 1;
       return 1;
     }
+    // Force recode if projected_frame_size > max_frame_bandwidth
+    if (rc->projected_frame_size >= rc->max_frame_bandwidth) return 1;
 
     // TODO(agrange) high_limit could be greater than the scale-down threshold.
     if ((rc->projected_frame_size > high_limit && q < maxq) ||
