@@ -122,6 +122,8 @@ AV1_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/idct8x8_msa.c
 AV1_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/idct16x16_msa.c
 
 AV1_COMMON_SRCS-$(HAVE_SSE2) += common/x86/idct_intrin_sse2.c
+AV1_COMMON_SRCS-$(HAVE_AVX2) += common/x86/hybrid_inv_txfm_avx2.c
+
 ifeq ($(CONFIG_AV1_ENCODER),yes)
 AV1_COMMON_SRCS-$(HAVE_SSE2) += common/x86/av1_fwd_txfm_sse2.c
 AV1_COMMON_SRCS-$(HAVE_SSE2) += common/x86/av1_fwd_dct32x32_impl_sse2.h

@@ -210,7 +210,7 @@ class TransformTestBase {
           int out_idx = j * stride + k;
           ASSERT_EQ(output_block[out_idx], output_ref_block[out_idx])
               << "Error: not bit-exact result at index: " << out_idx
-              << " at test block: " << i;
+              << " j = " << j << " k = " << k << " at test block: " << i;
         }
       }
     }

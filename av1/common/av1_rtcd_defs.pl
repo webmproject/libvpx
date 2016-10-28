@@ -114,7 +114,7 @@ if (aom_config("CONFIG_AOM_HIGHBITDEPTH") eq "yes") {
     specialize qw/av1_iht8x8_64_add sse2/;
 
     add_proto qw/void av1_iht16x16_256_add/, "const tran_low_t *input, uint8_t *output, int pitch, int tx_type";
-    specialize qw/av1_iht16x16_256_add sse2/;
+    specialize qw/av1_iht16x16_256_add sse2 avx2/;
   }
 } else {
   # Force C versions if CONFIG_EMULATE_HARDWARE is 1
@@ -175,7 +175,7 @@ if (aom_config("CONFIG_AOM_HIGHBITDEPTH") eq "yes") {
     specialize qw/av1_iht8x8_64_add sse2 neon dspr2/;
 
     add_proto qw/void av1_iht16x16_256_add/, "const tran_low_t *input, uint8_t *output, int pitch, int tx_type";
-    specialize qw/av1_iht16x16_256_add sse2 dspr2/;
+    specialize qw/av1_iht16x16_256_add sse2 avx2 dspr2/;
 
     if (aom_config("CONFIG_EXT_TX") ne "yes") {
       specialize qw/av1_iht4x4_16_add msa/;
