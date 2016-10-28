@@ -707,17 +707,17 @@ static int prune_tx_types(const AV1_COMP *cpi, BLOCK_SIZE bsize, MACROBLOCK *x,
   switch (cpi->sf.tx_type_search.prune_mode) {
     case NO_PRUNE: return 0; break;
     case PRUNE_ONE:
-      if ((tx_set >= 0) & !(tx_set_1D[FLIPADST_1D] & tx_set_1D[ADST_1D]))
+      if ((tx_set >= 0) && !(tx_set_1D[FLIPADST_1D] & tx_set_1D[ADST_1D]))
         return 0;
       return prune_one_for_sby(cpi, bsize, x, xd);
       break;
 #if CONFIG_EXT_TX
     case PRUNE_TWO:
-      if ((tx_set >= 0) & !(tx_set_1D[FLIPADST_1D] & tx_set_1D[ADST_1D])) {
+      if ((tx_set >= 0) && !(tx_set_1D[FLIPADST_1D] & tx_set_1D[ADST_1D])) {
         if (!(tx_set_1D[DCT_1D] & tx_set_1D[IDTX_1D])) return 0;
         return prune_two_for_sby(cpi, bsize, x, xd, 0, 1);
       }
-      if ((tx_set >= 0) & !(tx_set_1D[DCT_1D] & tx_set_1D[IDTX_1D]))
+      if ((tx_set >= 0) && !(tx_set_1D[DCT_1D] & tx_set_1D[IDTX_1D]))
         return prune_two_for_sby(cpi, bsize, x, xd, 1, 0);
       return prune_two_for_sby(cpi, bsize, x, xd, 1, 1);
       break;
