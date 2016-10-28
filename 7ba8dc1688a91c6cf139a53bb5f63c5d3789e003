@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "466e220f_5c7b5568",
+        "filename": "av1/common/warped_motion.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-28T22:34:49Z",
+      "side": 1,
+      "message": "better to keep the fix simple, this can be a follow-up",
+      "parentUuid": "466e220f_3c55b9da",
+      "revId": "7ba8dc1688a91c6cf139a53bb5f63c5d3789e003",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "466e220f_9c2dedae",
         "filename": "av1/common/warped_motion.c",
         "patchSetId": 2
@@ -95,6 +113,30 @@
       "side": 1,
       "message": "Should that be done in this change?",
       "parentUuid": "466e220f_dc3765f6",
+      "range": {
+        "startLine": 126,
+        "startChar": 10,
+        "endLine": 127,
+        "endChar": 37
+      },
+      "revId": "7ba8dc1688a91c6cf139a53bb5f63c5d3789e003",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "466e220f_9c8ccd55",
+        "filename": "av1/common/warped_motion.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-28T22:34:49Z",
+      "side": 1,
+      "message": "it\u0027s fine as it is and makes this fix easier to spot in the history",
+      "parentUuid": "466e220f_9ce20d1a",
       "range": {
         "startLine": 126,
         "startChar": 10,
