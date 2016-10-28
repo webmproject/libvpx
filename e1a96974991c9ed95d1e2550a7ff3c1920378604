@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "81b56446_10c65935",
+        "filename": "vpxdec.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 525,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-28T01:49:18Z",
+      "side": 1,
+      "message": "this is a dead store now. you can move it back into the loop I think",
+      "revId": "e1a96974991c9ed95d1e2550a7ff3c1920378604",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
