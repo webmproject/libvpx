@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "466e220f_3c6f79e3",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-10-28T22:23:50Z",
+      "side": 1,
+      "message": "I just went through and adjusted all of the divisions and added asserts to be safe. Assumed you were going to keep pointing them all out anyway.",
+      "parentUuid": "c1667cd0_f7f2d72e",
+      "revId": "5b5644e8044f7b6c2d5fdd1aec5e861066a4b5ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "81ce44ee_a8f610ba",
         "filename": "av1/encoder/ransac.c",
         "patchSetId": 2
@@ -30,6 +48,30 @@
       "writtenOn": "2016-10-28T06:02:16Z",
       "side": 1,
       "message": "\u0027- 0\u0027 shouldn\u0027t be necessary; the string is a bit excessive here as you\u0027ll get a file and line number along with the specific check as opposed to e.g., enum checks where assert(0 \u0026\u0026 \"...\") is your only error reporting option",
+      "range": {
+        "startLine": 88,
+        "startChar": 21,
+        "endLine": 88,
+        "endChar": 25
+      },
+      "revId": "5b5644e8044f7b6c2d5fdd1aec5e861066a4b5ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "466e220f_dc800547",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-10-28T22:23:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "81ce44ee_a8f610ba",
       "range": {
         "startLine": 88,
         "startChar": 21,
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "466e220f_fc834150",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-10-28T22:23:50Z",
+      "side": 1,
+      "message": "aknowledged",
+      "parentUuid": "868bbadf_94d1d4b6",
+      "range": {
+        "startLine": 89,
+        "startChar": 13,
+        "endLine": 89,
+        "endChar": 18
+      },
+      "revId": "5b5644e8044f7b6c2d5fdd1aec5e861066a4b5ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "868bbadf_f4df00be",
         "filename": "av1/encoder/ransac.c",
         "patchSetId": 2
@@ -82,6 +148,24 @@
     },
     {
       "key": {
+        "uuid": "466e220f_1cbefd0a",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-10-28T22:23:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "868bbadf_f4df00be",
+      "revId": "5b5644e8044f7b6c2d5fdd1aec5e861066a4b5ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e19380d8_ba4cb83e",
         "filename": "av1/encoder/ransac.c",
         "patchSetId": 2
@@ -93,6 +177,24 @@
       "writtenOn": "2016-10-28T06:02:16Z",
       "side": 1,
       "message": "as above, I\u0027d drop the strings in these cases",
+      "revId": "5b5644e8044f7b6c2d5fdd1aec5e861066a4b5ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "466e220f_bccc29c6",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-10-28T22:23:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e19380d8_ba4cb83e",
       "revId": "5b5644e8044f7b6c2d5fdd1aec5e861066a4b5ca",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
