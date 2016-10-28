@@ -2713,7 +2713,6 @@ static void get_tile_buffers(
 
   for (r = 0; r < tile_rows; ++r) {
     for (c = 0; c < tile_cols; ++c, ++tc) {
-      const int is_last = (r == tile_rows - 1) && (c == tile_cols - 1);
       TileBufferDec *const buf = &tile_buffers[r][c];
       hdr_offset = (tc && tc == first_tile_in_tg) ? hdr_size : 0;
 
@@ -2728,9 +2727,8 @@ static void get_tile_buffers(
       }
       first_tile_in_tg += tc == first_tile_in_tg ? pbi->tg_size : 0;
       data += hdr_offset;
-      get_tile_buffer(data_end, pbi->tile_size_bytes, is_last,
-                      &pbi->common.error, &data, pbi->decrypt_cb,
-                      pbi->decrypt_state, buf);
+      get_tile_buffer(data_end, pbi->tile_size_bytes, 0, &pbi->common.error,
+                      &data, pbi->decrypt_cb, pbi->decrypt_state, buf);
     }
   }
 #else
