@@ -22,6 +22,7 @@ show_help(){
 Advanced options:
   ${toggle_libs}                  libraries
   ${toggle_examples}              examples
+  ${toggle_tools}                 tools
   ${toggle_docs}                  documentation
   ${toggle_unit_tests}            unit tests
   ${toggle_decode_perf_tests}     build decoder perf tests with unit tests
@@ -155,7 +156,7 @@ all_platforms="${all_platforms} generic-gnu"
 
 # all_targets is a list of all targets that can be configured
 # note that these should be in dependency order for now.
-all_targets="libs examples docs"
+all_targets="libs examples tools docs"
 
 # all targets available are enabled, by default.
 for t in ${all_targets}; do
@@ -331,6 +332,7 @@ CMDLINE_SELECT="
 
     libs
     examples
+    tools
     docs
     libc
     as
@@ -476,7 +478,7 @@ EOF
     #
     # Write makefiles for all enabled targets
     #
-    for tgt in libs examples docs solution; do
+    for tgt in libs examples tools docs solution; do
         tgt_fn="$tgt-$toolchain.mk"
 
         if enabled $tgt; then
