@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "466e220f_b9039b73",
+        "filename": "test/scan_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-28T20:06:05Z",
+      "side": 1,
+      "message": "I don\u0027t think you\u0027re pulling anything from these headers",
+      "revId": "3f8419976d55c5b734b1460a7a63b1a5acbdd525",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "466e220f_d923f71b",
+        "filename": "test/scan_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-28T20:06:05Z",
+      "side": 1,
+      "message": "function/class names in c++ are typically upper camel cased (ScanTest)\n\nhttps://google.github.io/styleguide/cppguide.html#Function_Names",
+      "revId": "3f8419976d55c5b734b1460a7a63b1a5acbdd525",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "466e220f_39f02b75",
+        "filename": "test/scan_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-28T20:06:05Z",
+      "side": 1,
+      "message": "const x3",
+      "revId": "3f8419976d55c5b734b1460a7a63b1a5acbdd525",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "466e220f_b91c3bdc",
+        "filename": "test/scan_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-28T20:06:05Z",
+      "side": 1,
+      "message": "const",
+      "revId": "3f8419976d55c5b734b1460a7a63b1a5acbdd525",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "466e220f_99197fec",
+        "filename": "test/scan_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-28T20:06:05Z",
+      "side": 1,
+      "message": "const",
+      "revId": "3f8419976d55c5b734b1460a7a63b1a5acbdd525",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "466e220f_79eaa388",
+        "filename": "test/scan_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-28T20:06:05Z",
+      "side": 1,
+      "message": "you could merge these 2 loops",
+      "revId": "3f8419976d55c5b734b1460a7a63b1a5acbdd525",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
