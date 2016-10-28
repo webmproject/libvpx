@@ -1305,8 +1305,8 @@ static void update_state_supertx(const AV1_COMP *const cpi, ThreadData *td,
 #if CONFIG_VAR_TX
   {
     const TX_SIZE mtx = mbmi->tx_size;
-    const int num_4x4_blocks_wide = num_4x4_blocks_wide_txsize_lookup[mtx] >> 1;
-    const int num_4x4_blocks_high = num_4x4_blocks_high_txsize_lookup[mtx] >> 1;
+    const int num_4x4_blocks_wide = tx_size_wide_unit[mtx] >> 1;
+    const int num_4x4_blocks_high = tx_size_high_unit[mtx] >> 1;
     int idy, idx;
     mbmi->inter_tx_size[0][0] = mtx;
     for (idy = 0; idy < num_4x4_blocks_high; ++idy)
