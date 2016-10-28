@@ -553,6 +553,9 @@ static vpx_codec_err_t decoder_decode(vpx_codec_alg_priv_t *ctx,
                                    ctx->decrypt_cb, ctx->decrypt_state);
   if (res != VPX_CODEC_OK) return res;
 
+  if (ctx->svc_decoding && ctx->svc_spatial_layer < frame_count - 1)
+    frame_count = ctx->svc_spatial_layer + 1;
+
   if (ctx->frame_parallel_decode) {
     // Decode in frame parallel mode. When decoding in this mode, the frame
     // passed to the decoder must be either a normal frame or a superframe with
@@ -1001,6 +1004,16 @@ static vpx_codec_err_t ctrl_set_skip_loop_filter(vpx_codec_alg_priv_t *ctx,
   return VPX_CODEC_OK;
 }
 
+static vpx_codec_err_t ctrl_set_spatial_layer_svc(vpx_codec_alg_priv_t *ctx,
+                                                  va_list args) {
+  ctx->svc_decoding = 1;
+  ctx->svc_spatial_layer = va_arg(args, int);
+  if (ctx->svc_spatial_layer < 0)
+    return VPX_CODEC_INVALID_PARAM;
+  else
+    return VPX_CODEC_OK;
+}
+
 static vpx_codec_ctrl_fn_map_t decoder_ctrl_maps[] = {
   { VP8_COPY_REFERENCE, ctrl_copy_reference },
 
@@ -1011,6 +1024,7 @@ static vpx_codec_ctrl_fn_map_t decoder_ctrl_maps[] = {
   { VPXD_SET_DECRYPTOR, ctrl_set_decryptor },
   { VP9_SET_BYTE_ALIGNMENT, ctrl_set_byte_alignment },
   { VP9_SET_SKIP_LOOP_FILTER, ctrl_set_skip_loop_filter },
+  { VP9_DECODE_SVC_SPATIAL_LAYER, ctrl_set_spatial_layer_svc },
 
   // Getters
   { VP8D_GET_LAST_REF_UPDATES, ctrl_get_last_ref_updates },

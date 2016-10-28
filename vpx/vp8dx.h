@@ -111,6 +111,11 @@ enum vp8_dec_control_id {
    */
   VP9_SET_SKIP_LOOP_FILTER,
 
+  /** control function to decode SVC stream up to the x spatial layers,
+   * where x is passed in through the control, and is 0 for base layer.
+   */
+  VP9_DECODE_SVC_SPATIAL_LAYER,
+
   VP8_DECODER_CTRL_ID_MAX
 };
 
@@ -162,6 +167,8 @@ VPX_CTRL_USE_TYPE(VP9D_GET_FRAME_SIZE, int *)
 #define VPX_CTRL_VP9D_GET_FRAME_SIZE
 VPX_CTRL_USE_TYPE(VP9_INVERT_TILE_DECODE_ORDER, int)
 #define VPX_CTRL_VP9_INVERT_TILE_DECODE_ORDER
+#define VPX_CTRL_VP9_DECODE_SVC_SPATIAL_LAYER
+VPX_CTRL_USE_TYPE(VP9_DECODE_SVC_SPATIAL_LAYER, int)
 
 /*!\endcond */
 /*! @} - end defgroup vp8_decoder */
