@@ -4371,8 +4371,8 @@ static int64_t encode_inter_mb_segment(const AV1_COMP *const cpi, MACROBLOCK *x,
   struct macroblock_plane *const p = &x->plane[0];
   MODE_INFO *const mi = xd->mi[0];
   const BLOCK_SIZE plane_bsize = get_plane_block_size(mi->mbmi.sb_type, pd);
-  const int width = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
-  const int height = 4 * num_4x4_blocks_high_lookup[plane_bsize];
+  const int width = block_size_wide[plane_bsize];
+  const int height = block_size_high[plane_bsize];
   int idx, idy;
   const uint8_t *const src =
       &p->src.buf[av1_raster_block_offset(BLOCK_8X8, i, p->src.stride)];
@@ -4384,8 +4384,8 @@ static int64_t encode_inter_mb_segment(const AV1_COMP *const cpi, MACROBLOCK *x,
 
   TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, i, tx_size);
   const SCAN_ORDER *scan_order = get_scan(cm, tx_size, tx_type, 1);
-  const int num_4x4_w = num_4x4_blocks_wide_txsize_lookup[tx_size];
-  const int num_4x4_h = num_4x4_blocks_high_txsize_lookup[tx_size];
+  const int num_4x4_w = tx_size_wide_unit[tx_size];
+  const int num_4x4_h = tx_size_high_unit[tx_size];
 
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
   assert(IMPLIES(xd->lossless[mi->mbmi.segment_id], tx_size == TX_4X4));
@@ -4425,11 +4425,8 @@ static int64_t encode_inter_mb_segment(const AV1_COMP *const cpi, MACROBLOCK *x,
         block = k;
       else
         block = (i ? 2 : 0);
-#if CONFIG_VAR_TX
-      coeff_ctx = get_entropy_context(tx_size, ta + (k & 1), tl + (k >> 1));
-#else
+
       coeff_ctx = combine_entropy_contexts(*(ta + (k & 1)), *(tl + (k >> 1)));
-#endif
 #if CONFIG_NEW_QUANT
       av1_xform_quant_fp_nuq(cm, x, 0, block, idy + (i >> 1), idx + (i & 0x01),
                              BLOCK_8X8, tx_size, coeff_ctx);
