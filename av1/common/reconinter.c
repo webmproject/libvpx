@@ -1889,6 +1889,7 @@ static void build_intra_predictors_for_interintra(MACROBLOCKD *xd, uint8_t *ref,
                                                   int dst_stride,
                                                   PREDICTION_MODE mode,
                                                   BLOCK_SIZE bsize, int plane) {
+  struct macroblockd_plane *const pd = &xd->plane[plane];
   BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, &xd->plane[plane]);
   const int bwl = b_width_log2_lookup[plane_bsize];
   const int bhl = b_height_log2_lookup[plane_bsize];
@@ -1897,14 +1898,14 @@ static void build_intra_predictors_for_interintra(MACROBLOCKD *xd, uint8_t *ref,
   TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
 
   if (bwl == bhl) {
-    av1_predict_intra_block(xd, bwl, bhl, max_tx_size, mode, ref, ref_stride,
-                            dst, dst_stride, 0, 0, plane);
+    av1_predict_intra_block(xd, pd->width, pd->height, max_tx_size, mode, ref,
+                            ref_stride, dst, dst_stride, 0, 0, plane);
 
   } else if (bwl < bhl) {
     uint8_t *src_2 = ref + pxbw * ref_stride;
     uint8_t *dst_2 = dst + pxbw * dst_stride;
-    av1_predict_intra_block(xd, bwl, bhl, max_tx_size, mode, ref, ref_stride,
-                            dst, dst_stride, 0, 0, plane);
+    av1_predict_intra_block(xd, pd->width, pd->height, max_tx_size, mode, ref,
+                            ref_stride, dst, dst_stride, 0, 0, plane);
 #if CONFIG_AOM_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       uint16_t *src_216 = CONVERT_TO_SHORTPTR(src_2);
@@ -1916,14 +1917,14 @@ static void build_intra_predictors_for_interintra(MACROBLOCKD *xd, uint8_t *ref,
     {
       memcpy(src_2 - ref_stride, dst_2 - dst_stride, sizeof(*src_2) * pxbw);
     }
-    av1_predict_intra_block(xd, bwl, bhl, max_tx_size, mode, src_2, ref_stride,
-                            dst_2, dst_stride, 0, 1 << bwl, plane);
+    av1_predict_intra_block(xd, pd->width, pd->height, max_tx_size, mode, src_2,
+                            ref_stride, dst_2, dst_stride, 0, 1 << bwl, plane);
   } else {  // bwl > bhl
     int i;
     uint8_t *src_2 = ref + pxbh;
     uint8_t *dst_2 = dst + pxbh;
-    av1_predict_intra_block(xd, bwl, bhl, max_tx_size, mode, ref, ref_stride,
-                            dst, dst_stride, 0, 0, plane);
+    av1_predict_intra_block(xd, pd->width, pd->height, max_tx_size, mode, ref,
+                            ref_stride, dst, dst_stride, 0, 0, plane);
 #if CONFIG_AOM_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       uint16_t *src_216 = CONVERT_TO_SHORTPTR(src_2);
@@ -1936,8 +1937,8 @@ static void build_intra_predictors_for_interintra(MACROBLOCKD *xd, uint8_t *ref,
       for (i = 0; i < pxbh; ++i)
         src_2[i * ref_stride - 1] = dst_2[i * dst_stride - 1];
     }
-    av1_predict_intra_block(xd, bwl, bhl, max_tx_size, mode, src_2, ref_stride,
-                            dst_2, dst_stride, 1 << bhl, 0, plane);
+    av1_predict_intra_block(xd, pd->width, pd->height, max_tx_size, mode, src_2,
+                            ref_stride, dst_2, dst_stride, 1 << bhl, 0, plane);
   }
 }
 
