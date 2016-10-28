@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "466e220f_bf353b3c",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 388,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-28T23:38:36Z",
+      "side": 1,
+      "message": "clang was already making this transformation it seems; gcc is helped by the change",
+      "revId": "f66a64d761eed304460e1b1254d1bf8ba7cee88a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "466e220f_9cc96db6",
         "filename": "vpx_dsp/arm/intrapred_neon.c",
         "patchSetId": 2
@@ -30,6 +47,24 @@
       "writtenOn": "2016-10-28T22:26:22Z",
       "side": 1,
       "message": "wonder if you should unroll this by 2 or 4 to deal with the latency as I did in convolve. I can try that out locally",
+      "revId": "f66a64d761eed304460e1b1254d1bf8ba7cee88a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "466e220f_7f98c300",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 420,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-28T23:38:36Z",
+      "side": 1,
+      "message": "both clang and gcc had no problem unrolling this actually",
+      "parentUuid": "466e220f_9cc96db6",
       "revId": "f66a64d761eed304460e1b1254d1bf8ba7cee88a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
