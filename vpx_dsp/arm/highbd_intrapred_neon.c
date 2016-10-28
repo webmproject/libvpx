@@ -693,3 +693,205 @@ void vpx_highbd_d135_predictor_32x32_neon(uint16_t *dst, ptrdiff_t stride,
     row_6 = row_7;
   }
 }
+
+//------------------------------------------------------------------------------
+
+void vpx_highbd_v_predictor_4x4_neon(uint16_t *dst, ptrdiff_t stride,
+                                     const uint16_t *above,
+                                     const uint16_t *left, int bd) {
+  const uint16x4_t row = vld1_u16(above);
+  int i;
+  (void)left;
+  (void)bd;
+
+  for (i = 0; i < 4; i++, dst += stride) {
+    vst1_u16(dst, row);
+  }
+}
+
+void vpx_highbd_v_predictor_8x8_neon(uint16_t *dst, ptrdiff_t stride,
+                                     const uint16_t *above,
+                                     const uint16_t *left, int bd) {
+  const uint16x8_t row = vld1q_u16(above);
+  int i;
+  (void)left;
+  (void)bd;
+
+  for (i = 0; i < 8; i++, dst += stride) {
+    vst1q_u16(dst, row);
+  }
+}
+
+void vpx_highbd_v_predictor_16x16_neon(uint16_t *dst, ptrdiff_t stride,
+                                       const uint16_t *above,
+                                       const uint16_t *left, int bd) {
+  const uint16x8x2_t row = vld2q_u16(above);
+  int i;
+  (void)left;
+  (void)bd;
+
+  for (i = 0; i < 16; i++, dst += stride) {
+    vst2q_u16(dst, row);
+  }
+}
+
+void vpx_highbd_v_predictor_32x32_neon(uint16_t *dst, ptrdiff_t stride,
+                                       const uint16_t *above,
+                                       const uint16_t *left, int bd) {
+  const uint16x8x2_t row0 = vld2q_u16(above);
+  const uint16x8x2_t row1 = vld2q_u16(above + 16);
+  int i;
+  (void)left;
+  (void)bd;
+
+  for (i = 0; i < 32; i++) {
+    vst2q_u16(dst, row0);
+    dst += 16;
+    vst2q_u16(dst, row1);
+    dst += stride - 16;
+  }
+}
+
+// -----------------------------------------------------------------------------
+
+void vpx_highbd_h_predictor_4x4_neon(uint16_t *dst, ptrdiff_t stride,
+                                     const uint16_t *above,
+                                     const uint16_t *left, int bd) {
+  const uint16x4_t left_u16 = vld1_u16(left);
+  uint16x4_t row;
+  (void)above;
+  (void)bd;
+
+  row = vdup_lane_u16(left_u16, 0);
+  vst1_u16(dst, row);
+  dst += stride;
+  row = vdup_lane_u16(left_u16, 1);
+  vst1_u16(dst, row);
+  dst += stride;
+  row = vdup_lane_u16(left_u16, 2);
+  vst1_u16(dst, row);
+  dst += stride;
+  row = vdup_lane_u16(left_u16, 3);
+  vst1_u16(dst, row);
+}
+
+void vpx_highbd_h_predictor_8x8_neon(uint16_t *dst, ptrdiff_t stride,
+                                     const uint16_t *above,
+                                     const uint16_t *left, int bd) {
+  const uint16x8_t left_u16 = vld1q_u16(left);
+  const uint16x4_t left_low = vget_low_u16(left_u16);
+  const uint16x4_t left_high = vget_high_u16(left_u16);
+  uint16x8_t row;
+  (void)above;
+  (void)bd;
+
+  row = vdupq_lane_u16(left_low, 0);
+  vst1q_u16(dst, row);
+  dst += stride;
+  row = vdupq_lane_u16(left_low, 1);
+  vst1q_u16(dst, row);
+  dst += stride;
+  row = vdupq_lane_u16(left_low, 2);
+  vst1q_u16(dst, row);
+  dst += stride;
+  row = vdupq_lane_u16(left_low, 3);
+  vst1q_u16(dst, row);
+  dst += stride;
+  row = vdupq_lane_u16(left_high, 0);
+  vst1q_u16(dst, row);
+  dst += stride;
+  row = vdupq_lane_u16(left_high, 1);
+  vst1q_u16(dst, row);
+  dst += stride;
+  row = vdupq_lane_u16(left_high, 2);
+  vst1q_u16(dst, row);
+  dst += stride;
+  row = vdupq_lane_u16(left_high, 3);
+  vst1q_u16(dst, row);
+}
+
+static INLINE void h_store_16(uint16_t **dst, const ptrdiff_t stride,
+                              const uint16x8_t row) {
+  // Note: vst1q is faster than vst2q
+  vst1q_u16(*dst, row);
+  *dst += 8;
+  vst1q_u16(*dst, row);
+  *dst += stride - 8;
+}
+
+void vpx_highbd_h_predictor_16x16_neon(uint16_t *dst, ptrdiff_t stride,
+                                       const uint16_t *above,
+                                       const uint16_t *left, int bd) {
+  int i;
+  (void)above;
+  (void)bd;
+
+  for (i = 0; i < 2; i++, left += 8) {
+    const uint16x8_t left_u16q = vld1q_u16(left);
+    const uint16x4_t left_low = vget_low_u16(left_u16q);
+    const uint16x4_t left_high = vget_high_u16(left_u16q);
+    uint16x8_t row;
+
+    row = vdupq_lane_u16(left_low, 0);
+    h_store_16(&dst, stride, row);
+    row = vdupq_lane_u16(left_low, 1);
+    h_store_16(&dst, stride, row);
+    row = vdupq_lane_u16(left_low, 2);
+    h_store_16(&dst, stride, row);
+    row = vdupq_lane_u16(left_low, 3);
+    h_store_16(&dst, stride, row);
+    row = vdupq_lane_u16(left_high, 0);
+    h_store_16(&dst, stride, row);
+    row = vdupq_lane_u16(left_high, 1);
+    h_store_16(&dst, stride, row);
+    row = vdupq_lane_u16(left_high, 2);
+    h_store_16(&dst, stride, row);
+    row = vdupq_lane_u16(left_high, 3);
+    h_store_16(&dst, stride, row);
+  }
+}
+
+static INLINE void h_store_32(uint16_t **dst, const ptrdiff_t stride,
+                              const uint16x8_t row) {
+  // Note: vst1q is faster than vst2q
+  vst1q_u16(*dst, row);
+  *dst += 8;
+  vst1q_u16(*dst, row);
+  *dst += 8;
+  vst1q_u16(*dst, row);
+  *dst += 8;
+  vst1q_u16(*dst, row);
+  *dst += stride - 24;
+}
+
+void vpx_highbd_h_predictor_32x32_neon(uint16_t *dst, ptrdiff_t stride,
+                                       const uint16_t *above,
+                                       const uint16_t *left, int bd) {
+  int i;
+  (void)above;
+  (void)bd;
+
+  for (i = 0; i < 4; i++, left += 8) {
+    const uint16x8_t left_u16q = vld1q_u16(left);
+    const uint16x4_t left_low = vget_low_u16(left_u16q);
+    const uint16x4_t left_high = vget_high_u16(left_u16q);
+    uint16x8_t row;
+
+    row = vdupq_lane_u16(left_low, 0);
+    h_store_32(&dst, stride, row);
+    row = vdupq_lane_u16(left_low, 1);
+    h_store_32(&dst, stride, row);
+    row = vdupq_lane_u16(left_low, 2);
+    h_store_32(&dst, stride, row);
+    row = vdupq_lane_u16(left_low, 3);
+    h_store_32(&dst, stride, row);
+    row = vdupq_lane_u16(left_high, 0);
+    h_store_32(&dst, stride, row);
+    row = vdupq_lane_u16(left_high, 1);
+    h_store_32(&dst, stride, row);
+    row = vdupq_lane_u16(left_high, 2);
+    h_store_32(&dst, stride, row);
+    row = vdupq_lane_u16(left_high, 3);
+    h_store_32(&dst, stride, row);
+  }
+}

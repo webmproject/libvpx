@@ -463,7 +463,23 @@ INSTANTIATE_TEST_CASE_P(
         HighbdIntraPredParam(&vpx_highbd_dc_top_predictor_16x16_neon,
                              &vpx_highbd_dc_top_predictor_16x16_c, 16, 8),
         HighbdIntraPredParam(&vpx_highbd_dc_top_predictor_32x32_neon,
-                             &vpx_highbd_dc_top_predictor_32x32_c, 32, 8)));
+                             &vpx_highbd_dc_top_predictor_32x32_c, 32, 8),
+        HighbdIntraPredParam(&vpx_highbd_h_predictor_4x4_neon,
+                             &vpx_highbd_h_predictor_4x4_c, 4, 8),
+        HighbdIntraPredParam(&vpx_highbd_h_predictor_8x8_neon,
+                             &vpx_highbd_h_predictor_8x8_c, 8, 8),
+        HighbdIntraPredParam(&vpx_highbd_h_predictor_16x16_neon,
+                             &vpx_highbd_h_predictor_16x16_c, 16, 8),
+        HighbdIntraPredParam(&vpx_highbd_h_predictor_32x32_neon,
+                             &vpx_highbd_h_predictor_32x32_c, 32, 8),
+        HighbdIntraPredParam(&vpx_highbd_v_predictor_4x4_neon,
+                             &vpx_highbd_v_predictor_4x4_c, 4, 8),
+        HighbdIntraPredParam(&vpx_highbd_v_predictor_8x8_neon,
+                             &vpx_highbd_v_predictor_8x8_c, 8, 8),
+        HighbdIntraPredParam(&vpx_highbd_v_predictor_16x16_neon,
+                             &vpx_highbd_v_predictor_16x16_c, 16, 8),
+        HighbdIntraPredParam(&vpx_highbd_v_predictor_32x32_neon,
+                             &vpx_highbd_v_predictor_32x32_c, 32, 8)));
 
 INSTANTIATE_TEST_CASE_P(
     NEON_TO_C_10, VP9HighbdIntraPredTest,
@@ -515,7 +531,23 @@ INSTANTIATE_TEST_CASE_P(
         HighbdIntraPredParam(&vpx_highbd_dc_top_predictor_16x16_neon,
                              &vpx_highbd_dc_top_predictor_16x16_c, 16, 10),
         HighbdIntraPredParam(&vpx_highbd_dc_top_predictor_32x32_neon,
-                             &vpx_highbd_dc_top_predictor_32x32_c, 32, 10)));
+                             &vpx_highbd_dc_top_predictor_32x32_c, 32, 10),
+        HighbdIntraPredParam(&vpx_highbd_h_predictor_4x4_neon,
+                             &vpx_highbd_h_predictor_4x4_c, 4, 10),
+        HighbdIntraPredParam(&vpx_highbd_h_predictor_8x8_neon,
+                             &vpx_highbd_h_predictor_8x8_c, 8, 10),
+        HighbdIntraPredParam(&vpx_highbd_h_predictor_16x16_neon,
+                             &vpx_highbd_h_predictor_16x16_c, 16, 10),
+        HighbdIntraPredParam(&vpx_highbd_h_predictor_32x32_neon,
+                             &vpx_highbd_h_predictor_32x32_c, 32, 10),
+        HighbdIntraPredParam(&vpx_highbd_v_predictor_4x4_neon,
+                             &vpx_highbd_v_predictor_4x4_c, 4, 10),
+        HighbdIntraPredParam(&vpx_highbd_v_predictor_8x8_neon,
+                             &vpx_highbd_v_predictor_8x8_c, 8, 10),
+        HighbdIntraPredParam(&vpx_highbd_v_predictor_16x16_neon,
+                             &vpx_highbd_v_predictor_16x16_c, 16, 10),
+        HighbdIntraPredParam(&vpx_highbd_v_predictor_32x32_neon,
+                             &vpx_highbd_v_predictor_32x32_c, 32, 10)));
 
 INSTANTIATE_TEST_CASE_P(
     NEON_TO_C_12, VP9HighbdIntraPredTest,
@@ -567,7 +599,23 @@ INSTANTIATE_TEST_CASE_P(
         HighbdIntraPredParam(&vpx_highbd_dc_top_predictor_16x16_neon,
                              &vpx_highbd_dc_top_predictor_16x16_c, 16, 12),
         HighbdIntraPredParam(&vpx_highbd_dc_top_predictor_32x32_neon,
-                             &vpx_highbd_dc_top_predictor_32x32_c, 32, 12)));
+                             &vpx_highbd_dc_top_predictor_32x32_c, 32, 12),
+        HighbdIntraPredParam(&vpx_highbd_h_predictor_4x4_neon,
+                             &vpx_highbd_h_predictor_4x4_c, 4, 12),
+        HighbdIntraPredParam(&vpx_highbd_h_predictor_8x8_neon,
+                             &vpx_highbd_h_predictor_8x8_c, 8, 12),
+        HighbdIntraPredParam(&vpx_highbd_h_predictor_16x16_neon,
+                             &vpx_highbd_h_predictor_16x16_c, 16, 12),
+        HighbdIntraPredParam(&vpx_highbd_h_predictor_32x32_neon,
+                             &vpx_highbd_h_predictor_32x32_c, 32, 12),
+        HighbdIntraPredParam(&vpx_highbd_v_predictor_4x4_neon,
+                             &vpx_highbd_v_predictor_4x4_c, 4, 12),
+        HighbdIntraPredParam(&vpx_highbd_v_predictor_8x8_neon,
+                             &vpx_highbd_v_predictor_8x8_c, 8, 12),
+        HighbdIntraPredParam(&vpx_highbd_v_predictor_16x16_neon,
+                             &vpx_highbd_v_predictor_16x16_c, 16, 12),
+        HighbdIntraPredParam(&vpx_highbd_v_predictor_32x32_neon,
+                             &vpx_highbd_v_predictor_32x32_c, 32, 12)));
 #endif  // HAVE_NEON
 
 #endif  // CONFIG_VP9_HIGHBITDEPTH
