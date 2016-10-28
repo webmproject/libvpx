@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a16b489a_31337bc4",
+        "filename": "av1/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3496,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2016-10-28T17:04:29Z",
+      "side": 1,
+      "message": "This block from 3483-3484 + 3490-3496 seems to be repeated at least twice here.\n(And I just saw that the other patch on decode side has similar logic too: https://chromium-review.googlesource.com/#/c/404591/4/av1/decoder/decodeframe.c)\n\nSo, we should probably have a function that just returns the final max_blocks_high and max_blocks_wide based on these variables.",
+      "revId": "58224044853d4aed3b30b63c35756fa841eaf9a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
