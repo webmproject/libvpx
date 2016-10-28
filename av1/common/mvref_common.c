@@ -394,8 +394,8 @@ static void setup_ref_mv_list(const AV1_COMMON *cm, const MACROBLOCKD *xd,
 
   // Check top-right boundary
   if (has_tr)
-    newmv_count += scan_blk_mbmi(cm, xd, mi_row, mi_col, block, rf, -1, 1,
-                                 ref_mv_stack, refmv_count);
+    newmv_count += scan_blk_mbmi(cm, xd, mi_row, mi_col, block, rf, -1,
+                                 xd->n8_w, ref_mv_stack, refmv_count);
 
   nearest_refmv_count = *refmv_count;
 
