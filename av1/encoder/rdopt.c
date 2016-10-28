@@ -7039,7 +7039,7 @@ static int64_t handle_inter_mode(
           int tmp_skip_sb = 0;
           int64_t tmp_skip_sse = INT64_MAX;
           int tmp_rs;
-          int tmp_rd;
+          int64_t tmp_rd;
 #if CONFIG_DUAL_FILTER
           mbmi->interp_filter[0] = filter_sets[i][0];
           mbmi->interp_filter[1] = filter_sets[i][1];
