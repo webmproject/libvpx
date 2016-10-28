@@ -620,6 +620,7 @@ process_toolchain() {
         check_add_cflags -Wuninitialized
         check_add_cflags -Wunused
         check_add_cflags -Wsign-compare
+        check_add_cflags -Wlogical-op
         # Enabling the following warning (in combination with -Wunused above)
         # for C++ generates errors in third_party code including googletest and
         # libyuv. So enable it only for C code.

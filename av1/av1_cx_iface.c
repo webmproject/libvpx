@@ -142,10 +142,10 @@ static aom_codec_err_t update_error_state(
     return AOM_CODEC_INVALID_PARAM; \
   } while (0)
 
-#define RANGE_CHECK(p, memb, lo, hi)                                 \
-  do {                                                               \
-    if (!(((p)->memb == lo || (p)->memb > (lo)) && (p)->memb <= hi)) \
-      ERROR(#memb " out of range [" #lo ".." #hi "]");               \
+#define RANGE_CHECK(p, memb, lo, hi)                   \
+  do {                                                 \
+    if (!((p)->memb >= (lo) && (p)->memb <= (hi)))     \
+      ERROR(#memb " out of range [" #lo ".." #hi "]"); \
   } while (0)
 
 #define RANGE_CHECK_HI(p, memb, hi)                                     \
@@ -176,7 +176,7 @@ static aom_codec_err_t validate_config(aom_codec_alg_priv_t *ctx,
   RANGE_CHECK_HI(cfg, rc_min_quantizer, cfg->rc_max_quantizer);
   RANGE_CHECK_BOOL(extra_cfg, lossless);
   RANGE_CHECK(extra_cfg, aq_mode, 0, AQ_MODE_COUNT - 1);
-  RANGE_CHECK(extra_cfg, frame_periodic_boost, 0, 1);
+  RANGE_CHECK_HI(extra_cfg, frame_periodic_boost, 1);
   RANGE_CHECK_HI(cfg, g_threads, 64);
   RANGE_CHECK_HI(cfg, g_lag_in_frames, MAX_LAG_BUFFERS);
   RANGE_CHECK(cfg, rc_end_usage, AOM_VBR, AOM_Q);
@@ -189,8 +189,8 @@ static aom_codec_err_t validate_config(aom_codec_alg_priv_t *ctx,
   RANGE_CHECK_HI(cfg, rc_resize_up_thresh, 100);
   RANGE_CHECK_HI(cfg, rc_resize_down_thresh, 100);
   RANGE_CHECK(cfg, g_pass, AOM_RC_ONE_PASS, AOM_RC_LAST_PASS);
-  RANGE_CHECK(extra_cfg, min_gf_interval, 0, (MAX_LAG_BUFFERS - 1));
-  RANGE_CHECK(extra_cfg, max_gf_interval, 0, (MAX_LAG_BUFFERS - 1));
+  RANGE_CHECK_HI(extra_cfg, min_gf_interval, MAX_LAG_BUFFERS - 1);
+  RANGE_CHECK_HI(extra_cfg, max_gf_interval, MAX_LAG_BUFFERS - 1);
   if (extra_cfg->max_gf_interval > 0) {
     RANGE_CHECK(extra_cfg, max_gf_interval, 2, (MAX_LAG_BUFFERS - 1));
   }
@@ -200,8 +200,8 @@ static aom_codec_err_t validate_config(aom_codec_alg_priv_t *ctx,
   }
 
   if (cfg->rc_resize_allowed == 1) {
-    RANGE_CHECK(cfg, rc_scaled_width, 0, cfg->g_w);
-    RANGE_CHECK(cfg, rc_scaled_height, 0, cfg->g_h);
+    RANGE_CHECK_HI(cfg, rc_scaled_width, cfg->g_w);
+    RANGE_CHECK_HI(cfg, rc_scaled_height, cfg->g_h);
   }
 
   // AV1 does not support a lower bound on the keyframe interval in
@@ -212,9 +212,9 @@ static aom_codec_err_t validate_config(aom_codec_alg_priv_t *ctx,
         "kf_min_dist not supported in auto mode, use 0 "
         "or kf_max_dist instead.");
 
-  RANGE_CHECK(extra_cfg, enable_auto_alt_ref, 0, 2);
+  RANGE_CHECK_HI(extra_cfg, enable_auto_alt_ref, 2);
 #if CONFIG_EXT_REFS
-  RANGE_CHECK(extra_cfg, enable_auto_bwd_ref, 0, 2);
+  RANGE_CHECK_HI(extra_cfg, enable_auto_bwd_ref, 2);
 #endif  // CONFIG_EXT_REFS
   RANGE_CHECK(extra_cfg, cpu_used, -8, 8);
   RANGE_CHECK_HI(extra_cfg, noise_sensitivity, 6);
@@ -239,13 +239,13 @@ static aom_codec_err_t validate_config(aom_codec_alg_priv_t *ctx,
       RANGE_CHECK(extra_cfg, tile_rows, 1, 64);
   }
 #else
-  RANGE_CHECK(extra_cfg, tile_columns, 0, 6);
-  RANGE_CHECK(extra_cfg, tile_rows, 0, 2);
+  RANGE_CHECK_HI(extra_cfg, tile_columns, 6);
+  RANGE_CHECK_HI(extra_cfg, tile_rows, 2);
 #endif  // CONFIG_EXT_TILE
   RANGE_CHECK_HI(extra_cfg, sharpness, 7);
-  RANGE_CHECK(extra_cfg, arnr_max_frames, 0, 15);
+  RANGE_CHECK_HI(extra_cfg, arnr_max_frames, 15);
   RANGE_CHECK_HI(extra_cfg, arnr_strength, 6);
-  RANGE_CHECK(extra_cfg, cq_level, 0, 63);
+  RANGE_CHECK_HI(extra_cfg, cq_level, 63);
   RANGE_CHECK(cfg, g_bit_depth, AOM_BITS_8, AOM_BITS_12);
   RANGE_CHECK(cfg, g_input_bit_depth, 8, 12);
   RANGE_CHECK(extra_cfg, content, AOM_CONTENT_DEFAULT, AOM_CONTENT_INVALID - 1);
