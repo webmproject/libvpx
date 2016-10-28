@@ -60,18 +60,24 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
   int dec_y[3];
   int pli;
   int coeff_shift = AOMMAX(cm->bit_depth - 8, 0);
+  int nplanes;
+  if (xd->plane[1].subsampling_x == xd->plane[1].subsampling_y &&
+      xd->plane[2].subsampling_x == xd->plane[2].subsampling_y)
+    nplanes = 3;
+  else
+    nplanes = 1;
   nvsb = (cm->mi_rows + MAX_MIB_SIZE - 1) / MAX_MIB_SIZE;
   nhsb = (cm->mi_cols + MAX_MIB_SIZE - 1) / MAX_MIB_SIZE;
   bskip = aom_malloc(sizeof(*bskip) * cm->mi_rows * cm->mi_cols);
   av1_setup_dst_planes(xd->plane, frame, 0, 0);
-  for (pli = 0; pli < 3; pli++) {
+  for (pli = 0; pli < nplanes; pli++) {
     dec_x[pli] = xd->plane[pli].subsampling_x;
     dec_y[pli] = xd->plane[pli].subsampling_y;
     bsize_x[pli] = 8 >> dec_x[pli];
     bsize_y[pli] = 8 >> dec_y[pli];
   }
   stride = bsize_x[0] * cm->mi_cols;
-  for (pli = 0; pli < 3; pli++) {
+  for (pli = 0; pli < nplanes; pli++) {
     src[pli] = aom_malloc(sizeof(*src) * cm->mi_rows * cm->mi_cols * 64);
     for (r = 0; r < bsize_y[pli] * cm->mi_rows; ++r) {
       for (c = 0; c < bsize_x[pli] * cm->mi_cols; ++c) {
@@ -108,7 +114,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
                             ->mbmi.dering_gain);
       if (level == 0 || sb_all_skip(cm, sbr * MAX_MIB_SIZE, sbc * MAX_MIB_SIZE))
         continue;
-      for (pli = 0; pli < 3; pli++) {
+      for (pli = 0; pli < nplanes; pli++) {
         int16_t dst[MAX_MIB_SIZE * MAX_MIB_SIZE * 8 * 8];
         int threshold;
         /* FIXME: This is a temporary hack that uses more conservative
@@ -149,7 +155,7 @@ void av1_dering_frame(YV12_BUFFER_CONFIG *frame, AV1_COMMON *cm,
       }
     }
   }
-  for (pli = 0; pli < 3; pli++) {
+  for (pli = 0; pli < nplanes; pli++) {
     aom_free(src[pli]);
   }
   aom_free(bskip);
