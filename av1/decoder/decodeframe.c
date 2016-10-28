@@ -209,7 +209,7 @@ static void read_mv_probs(nmv_context *ctx, int allow_hp, aom_reader *r) {
   int i, j;
 
   update_mv_probs(ctx->joints, MV_JOINTS - 1, r);
-#if CONFIG_DAALA_EC
+#if CONFIG_DAALA_EC || CONFIG_RANS
   av1_tree_to_cdf(av1_mv_joint_tree, ctx->joints, ctx->joint_cdf);
 #endif
 
@@ -219,7 +219,7 @@ static void read_mv_probs(nmv_context *ctx, int allow_hp, aom_reader *r) {
     update_mv_probs(comp_ctx->classes, MV_CLASSES - 1, r);
     update_mv_probs(comp_ctx->class0, CLASS0_SIZE - 1, r);
     update_mv_probs(comp_ctx->bits, MV_OFFSET_BITS, r);
-#if CONFIG_DAALA_EC
+#if CONFIG_DAALA_EC || CONFIG_RANS
     av1_tree_to_cdf(av1_mv_class_tree, comp_ctx->classes, comp_ctx->class_cdf);
 #endif
   }
@@ -228,13 +228,13 @@ static void read_mv_probs(nmv_context *ctx, int allow_hp, aom_reader *r) {
     nmv_component *const comp_ctx = &ctx->comps[i];
     for (j = 0; j < CLASS0_SIZE; ++j) {
       update_mv_probs(comp_ctx->class0_fp[j], MV_FP_SIZE - 1, r);
-#if CONFIG_DAALA_EC
+#if CONFIG_DAALA_EC || CONFIG_RANS
       av1_tree_to_cdf(av1_mv_fp_tree, comp_ctx->class0_fp[j],
                       comp_ctx->class0_fp_cdf[j]);
 #endif
     }
     update_mv_probs(comp_ctx->fp, MV_FP_SIZE - 1, r);
-#if CONFIG_DAALA_EC
+#if CONFIG_DAALA_EC || CONFIG_RANS
     av1_tree_to_cdf(av1_mv_fp_tree, comp_ctx->fp, comp_ctx->fp_cdf);
 #endif
   }
