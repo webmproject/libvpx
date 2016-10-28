@@ -424,7 +424,7 @@ int av1_find_best_sub_pixel_tree_pruned_evenmore(
   tr = br;
   tc = bc;
 
-  if (allow_hp && av1_use_mv_hp(ref_mv) && forced_stop == 0) {
+  if (allow_hp && forced_stop == 0) {
     hstep >>= 1;
     FIRST_LEVEL_CHECKS;
     if (eighthiters > 1) {
@@ -484,7 +484,7 @@ int av1_find_best_sub_pixel_tree_pruned_more(
     }
   }
 
-  if (allow_hp && av1_use_mv_hp(ref_mv) && forced_stop == 0) {
+  if (allow_hp && forced_stop == 0) {
     tr = br;
     tc = bc;
     hstep >>= 1;
@@ -572,7 +572,7 @@ int av1_find_best_sub_pixel_tree_pruned(
     tc = bc;
   }
 
-  if (allow_hp && av1_use_mv_hp(ref_mv) && forced_stop == 0) {
+  if (allow_hp && forced_stop == 0) {
     hstep >>= 1;
     FIRST_LEVEL_CHECKS;
     if (eighthiters > 1) {
@@ -687,7 +687,7 @@ int av1_find_best_sub_pixel_tree(MACROBLOCK *x, const MV *ref_mv, int allow_hp,
   unsigned int cost_array[5];
   int kr, kc;
 
-  if (!(allow_hp && av1_use_mv_hp(ref_mv)))
+  if (!allow_hp)
     if (round == 3) round = 2;
 
   bestmv->row *= 8;
@@ -2446,7 +2446,7 @@ int av1_find_best_masked_sub_pixel_tree(
     tc = bc;
   }
 
-  if (allow_hp && av1_use_mv_hp(ref_mv) && forced_stop == 0) {
+  if (allow_hp && forced_stop == 0) {
     hstep >>= 1;
     FIRST_LEVEL_CHECKS;
     if (eighthiters > 1) {
@@ -2581,7 +2581,7 @@ int av1_find_best_masked_sub_pixel_tree_up(
   y_stride = pd->pre[is_second].stride;
   offset = bestmv->row * y_stride + bestmv->col;
 
-  if (!(allow_hp && av1_use_mv_hp(ref_mv)))
+  if (!allow_hp)
     if (round == 3) round = 2;
 
   bestmv->row *= 8;
@@ -3083,7 +3083,7 @@ int av1_find_best_obmc_sub_pixel_tree_up(
   y_stride = pd->pre[is_second].stride;
   offset = bestmv->row * y_stride + bestmv->col;
 
-  if (!(allow_hp && av1_use_mv_hp(ref_mv)))
+  if (!allow_hp)
     if (round == 3) round = 2;
 
   bestmv->row *= 8;
