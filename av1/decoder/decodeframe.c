@@ -56,6 +56,14 @@
 #define MAX_AV1_HEADER_SIZE 80
 #define ACCT_STR __func__
 
+static struct aom_read_bit_buffer *init_read_bit_buffer(
+    AV1Decoder *pbi, struct aom_read_bit_buffer *rb, const uint8_t *data,
+    const uint8_t *data_end, uint8_t clear_data[MAX_AV1_HEADER_SIZE]);
+static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
+                                  size_t partition_size);
+static size_t read_uncompressed_header(AV1Decoder *pbi,
+                                       struct aom_read_bit_buffer *rb);
+
 static int is_compound_reference_allowed(const AV1_COMMON *cm) {
   int i;
   if (frame_is_intra_only(cm)) return 0;
@@ -2481,6 +2489,17 @@ static void read_tile_info(AV1Decoder *const pbi,
     pbi->tile_size_bytes = aom_rb_read_literal(rb, 2) + 1;
   }
 #endif  // CONFIG_EXT_TILE
+#if CONFIG_TILE_GROUPS
+  // Store an index to the location of the tile group information
+  pbi->tg_size_bit_offset = rb->bit_offset;
+  pbi->tg_size = 1 << (cm->log2_tile_rows + cm->log2_tile_cols);
+  if (cm->log2_tile_rows + cm->log2_tile_cols > 0) {
+    pbi->tg_start =
+        aom_rb_read_literal(rb, cm->log2_tile_rows + cm->log2_tile_cols);
+    pbi->tg_size =
+        1 + aom_rb_read_literal(rb, cm->log2_tile_rows + cm->log2_tile_cols);
+  }
+#endif
 }
 
 static int mem_get_varsize(const uint8_t *src, const int sz) {
@@ -2678,6 +2697,43 @@ static void get_tile_buffers(
     AV1Decoder *pbi, const uint8_t *data, const uint8_t *data_end,
     TileBufferDec (*const tile_buffers)[MAX_TILE_COLS]) {
   AV1_COMMON *const cm = &pbi->common;
+#if CONFIG_TILE_GROUPS
+  int r, c;
+  const int tile_cols = cm->tile_cols;
+  const int tile_rows = cm->tile_rows;
+  int tc = 0;
+  int first_tile_in_tg = 0;
+  int hdr_offset;
+  struct aom_read_bit_buffer rb_tg_hdr;
+  uint8_t clear_data[MAX_AV1_HEADER_SIZE];
+  const int num_tiles = tile_rows * tile_cols;
+  const int num_bits = OD_ILOG(num_tiles) - 1;
+  const int hdr_size = pbi->uncomp_hdr_size + pbi->first_partition_size;
+  const int tg_size_bit_offset = pbi->tg_size_bit_offset;
+
+  for (r = 0; r < tile_rows; ++r) {
+    for (c = 0; c < tile_cols; ++c, ++tc) {
+      const int is_last = (r == tile_rows - 1) && (c == tile_cols - 1);
+      TileBufferDec *const buf = &tile_buffers[r][c];
+      hdr_offset = (tc && tc == first_tile_in_tg) ? hdr_size : 0;
+
+      buf->col = c;
+      if (hdr_offset) {
+        init_read_bit_buffer(pbi, &rb_tg_hdr, data, data_end, clear_data);
+        rb_tg_hdr.bit_offset = tg_size_bit_offset;
+        if (num_tiles) {
+          pbi->tg_start = aom_rb_read_literal(&rb_tg_hdr, num_bits);
+          pbi->tg_size = 1 + aom_rb_read_literal(&rb_tg_hdr, num_bits);
+        }
+      }
+      first_tile_in_tg += tc == first_tile_in_tg ? pbi->tg_size : 0;
+      data += hdr_offset;
+      get_tile_buffer(data_end, pbi->tile_size_bytes, is_last,
+                      &pbi->common.error, &data, pbi->decrypt_cb,
+                      pbi->decrypt_state, buf);
+    }
+  }
+#else
   int r, c;
   const int tile_cols = cm->tile_cols;
   const int tile_rows = cm->tile_rows;
@@ -2691,6 +2747,7 @@ static void get_tile_buffers(
                       &data, pbi->decrypt_cb, pbi->decrypt_state, buf);
     }
   }
+#endif
 }
 #endif  // CONFIG_EXT_TILE
 
@@ -3527,7 +3584,6 @@ static size_t read_uncompressed_header(AV1Decoder *pbi,
   if (sz == 0)
     aom_internal_error(&cm->error, AOM_CODEC_CORRUPT_FRAME,
                        "Invalid header size");
-
   return sz;
 }
 
@@ -3953,7 +4009,56 @@ BITSTREAM_PROFILE av1_read_profile(struct aom_read_bit_buffer *rb) {
   if (profile > 2) profile += aom_rb_read_bit(rb);
   return (BITSTREAM_PROFILE)profile;
 }
+#if CONFIG_TILE_GROUPS
+static int read_all_headers(AV1Decoder *pbi, struct aom_read_bit_buffer *rb,
+                            const uint8_t **p_data,
+                            const uint8_t **p_data_end) {
+  AV1_COMMON *const cm = &pbi->common;
+  MACROBLOCKD *const xd = &pbi->mb;
+  YV12_BUFFER_CONFIG *fb = (YV12_BUFFER_CONFIG *)xd->cur_buf;
 
+  pbi->first_partition_size = read_uncompressed_header(pbi, rb);
+  pbi->uncomp_hdr_size = aom_rb_bytes_read(rb);
+#if CONFIG_GLOBAL_MOTION
+  xd->global_motion = cm->global_motion;
+#endif  // CONFIG_GLOBAL_MOTION
+
+  if (!pbi->first_partition_size) {
+// showing a frame directly
+#if CONFIG_EXT_REFS
+    if (cm->show_existing_frame)
+      *p_data_end = *p_data + pbi->uncomp_hdr_size;
+    else
+#endif  // CONFIG_EXT_REFS
+      *p_data_end = *p_data + (cm->profile <= PROFILE_2 ? 1 : 2);
+    return 1;
+  }
+
+  *p_data += pbi->uncomp_hdr_size;
+
+  if (!read_is_valid(*p_data, pbi->first_partition_size, *p_data_end))
+    aom_internal_error(&cm->error, AOM_CODEC_CORRUPT_FRAME,
+                       "Truncated packet or corrupt header length");
+
+  *cm->fc = cm->frame_contexts[cm->frame_context_idx];
+  if (!cm->fc->initialized)
+    aom_internal_error(&cm->error, AOM_CODEC_CORRUPT_FRAME,
+                       "Uninitialized entropy context.");
+
+  av1_zero(cm->counts);
+
+  xd->corrupted = 0;
+  fb->corrupted =
+      read_compressed_header(pbi, *p_data, pbi->first_partition_size);
+  if (fb->corrupted)
+    aom_internal_error(&cm->error, AOM_CODEC_CORRUPT_FRAME,
+                       "Decode failed. Frame data header is corrupted.");
+
+  *p_data += pbi->first_partition_size;
+
+  return 0;
+}
+#endif
 void av1_decode_frame(AV1Decoder *pbi, const uint8_t *data,
                       const uint8_t *data_end, const uint8_t **p_data_end) {
   AV1_COMMON *const cm = &pbi->common;
