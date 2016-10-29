@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "466e220f_6a863faf",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 566,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-29T02:43:25Z",
+      "side": 1,
+      "message": "for webp we use a helper to make this a bit more readable, I think it can work here too.\n\n    // Zero extend \u0027v\u0027 to an int16x8_t.\n    static WEBP_INLINE int16x8_t ConvertU8ToS16(uint8x8_t v) {\n      return vreinterpretq_s16_u16(vmovl_u8(v));\n    }\n\nSee Truemotion() / TM16 for reference\nhttps://chromium.googlesource.com/webm/libwebp/+/master/src/dsp/dec_neon.c",
+      "revId": "6b413e4c19b65144eaf7a9b4d5b7d39fcb1c88a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
