@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "466e220f_cad9530c",
+        "filename": "av1/encoder/ransac.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-29T01:00:58Z",
+      "side": 1,
+      "message": "the ()s are no longer necessary",
+      "range": {
+        "startLine": 87,
+        "startChar": 40,
+        "endLine": 87,
+        "endChar": 41
+      },
+      "revId": "a8489ed11cccef6eb36d3d239a6e7f60eb24ce91",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
