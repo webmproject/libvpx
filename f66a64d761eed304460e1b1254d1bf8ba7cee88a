@@ -103,6 +103,24 @@
       "revId": "f66a64d761eed304460e1b1254d1bf8ba7cee88a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "466e220f_ead6cfa6",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 515,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-29T02:23:02Z",
+      "side": 1,
+      "message": "\u003e this one shows mixed behavior; clang makes a mess, fully unrolling\n \u003e and spilling quite a bit. I\u0027ll revert this and the v_pred for now,\n \u003e we can revisit them separately at some point\n\nDone. I also added a note in the comments as a reminder",
+      "parentUuid": "466e220f_8aaf5b37",
+      "revId": "f66a64d761eed304460e1b1254d1bf8ba7cee88a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
