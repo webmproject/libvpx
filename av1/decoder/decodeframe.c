@@ -1730,20 +1730,21 @@ static void decode_partition(AV1Decoder *const pbi, MACROBLOCKD *const xd,
       assert(mbmi->segment_id_supertx != MAX_SEGMENTS);
       for (i = 0; i < MAX_MB_PLANE; ++i) {
         const struct macroblockd_plane *const pd = &xd->plane[i];
-        const int num_4x4_w = pd->n4_w;
-        const int num_4x4_h = pd->n4_h;
         int row, col;
         const TX_SIZE tx_size = i ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
-        const int stepr = num_4x4_blocks_high_txsize_lookup[tx_size];
-        const int stepc = num_4x4_blocks_wide_txsize_lookup[tx_size];
-        const int max_blocks_wide =
-            num_4x4_w + (xd->mb_to_right_edge >= 0
+        const int stepr = tx_size_high_unit[tx_size];
+        const int stepc = tx_size_wide_unit[tx_size];
+        int max_blocks_wide =
+            pd->width + (xd->mb_to_right_edge >= 0
                              ? 0
-                             : xd->mb_to_right_edge >> (5 + pd->subsampling_x));
-        const int max_blocks_high =
-            num_4x4_h +
+                             : xd->mb_to_right_edge >> (3 + pd->subsampling_x));
+        int max_blocks_high =
+            pd->height +
             (xd->mb_to_bottom_edge >= 0 ? 0 : xd->mb_to_bottom_edge >>
-                                                  (5 + pd->subsampling_y));
+                                                  (3 + pd->subsampling_y));
+
+        max_blocks_wide >>= tx_size_wide_log2[0];
+        max_blocks_high >>= tx_size_wide_log2[0];
 
         for (row = 0; row < max_blocks_high; row += stepr)
           for (col = 0; col < max_blocks_wide; col += stepc)
