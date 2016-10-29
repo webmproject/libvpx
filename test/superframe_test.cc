@@ -134,7 +134,7 @@ AV1_INSTANTIATE_TEST_CASE(
                        ::testing::ValuesIn(tile_col_values),
                        ::testing::ValuesIn(tile_row_values)));
 #else
-#if !CONFIG_ANS
+#if !CONFIG_ANS && !CONFIG_DAALA_EC
 AV1_INSTANTIATE_TEST_CASE(
     SuperframeTest,
     ::testing::Combine(::testing::Values(::libaom_test::kTwoPassGood),
