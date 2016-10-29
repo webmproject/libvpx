@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <inttypes.h>
+#include "vpx/vpx_integer.h"
 
 void vp8_ssim_parms_8x8_c(unsigned char *s, int sp, unsigned char *r, int rp,
                           uint32_t *sum_s, uint32_t *sum_r, uint32_t *sum_sq_s,
@@ -177,7 +177,8 @@ int main(int argc, char *argv[]) {
     psnr_and_ssim(ssimv, psnrv, buf[0] + w * h * 5 / 4, buf[1] + w * h * 5 / 4,
                   w / 2, h / 2);
     ssim += 0.8 * ssimy + 0.1 * (ssimu + ssimv);
-    psnravg += vp9_mse2psnr(w * h * 6 / 4, 255.0, psnry + psnru + psnrv);
+    psnravg +=
+        vp9_mse2psnr(w * h * 6 / 4, 255.0, (double)psnry + psnru + psnrv);
     psnrglb += psnry + psnru + psnrv;
     n_frames++;
   }
