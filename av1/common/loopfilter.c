@@ -1241,25 +1241,36 @@ void av1_filter_block_plane_non420_ver(AV1_COMMON *cm,
       const int skip_this_r = skip_this && !block_edge_above;
 
 #if CONFIG_VAR_TX
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+      TX_SIZE mb_tx_size = is_rect_tx(mbmi->tx_size)
+                               ? mbmi->tx_size
+                               : mbmi->inter_tx_size[blk_row][blk_col];
+#else
+      const TX_SIZE mb_tx_size = mbmi->inter_tx_size[blk_row][blk_col];
+#endif
+#endif
+
       TX_SIZE tx_size = (plane->plane_type == PLANE_TYPE_UV)
                             ? get_uv_tx_size(mbmi, plane)
                             : mbmi->tx_size;
-#else
-      const TX_SIZE tx_size = (plane->plane_type == PLANE_TYPE_UV)
-                                  ? get_uv_tx_size(mbmi, plane)
-                                  : mbmi->tx_size;
-#endif
 
       const int skip_border_4x4_c = ss_x && mi_col + c == cm->mi_cols - 1;
       const int skip_border_4x4_r = ss_y && mi_row + r == cm->mi_rows - 1;
 
-      TX_SIZE tx_size_c = num_4x4_blocks_wide_txsize_log2_lookup[tx_size];
-      TX_SIZE tx_size_r = num_4x4_blocks_high_txsize_log2_lookup[tx_size];
+      TX_SIZE tx_size_c = tx_size_wide_unit[tx_size];
+      TX_SIZE tx_size_r = tx_size_high_unit[tx_size];
 
       int tx_size_mask = 0;
       const int c_step = (c >> ss_x);
       const int r_step = (r >> ss_y);
       const int col_mask = 1 << c_step;
+
+#if CONFIG_VAR_TX
+      if (is_inter_block(mbmi) && !mbmi->skip)
+        tx_size = (plane->plane_type == PLANE_TYPE_UV)
+                      ? uv_txsize_lookup[sb_type][mb_tx_size][ss_x][ss_y]
+                      : mb_tx_size;
+#endif
 
       // Filter level can vary per MI
       if (!(lfl[r][c_step] = get_filter_level(&cm->lf_info, mbmi))) continue;
@@ -1272,19 +1283,6 @@ void av1_filter_block_plane_non420_ver(AV1_COMMON *cm,
         tx_size_mask = 0;
 
 #if CONFIG_VAR_TX
-      if (is_inter_block(mbmi) && !mbmi->skip) {
-#if CONFIG_EXT_TX && CONFIG_RECT_TX
-        TX_SIZE mb_tx_size = is_rect_tx(mbmi->tx_size)
-                                 ? mbmi->tx_size
-                                 : mbmi->inter_tx_size[blk_row][blk_col];
-#else
-        TX_SIZE mb_tx_size = mbmi->inter_tx_size[blk_row][blk_col];
-#endif
-        tx_size = (plane->plane_type == PLANE_TYPE_UV)
-                      ? uv_txsize_lookup[sb_type][mb_tx_size][ss_x][ss_y]
-                      : mb_tx_size;
-      }
-
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
       tx_size_r =
           AOMMIN(txsize_horz_map[tx_size], cm->above_txfm_context[mi_col + c]);
@@ -1433,26 +1431,36 @@ void av1_filter_block_plane_non420_hor(AV1_COMMON *cm,
           (num_4x4_blocks_high_lookup[sb_type] > 1) ? !blk_row : 1;
       const int skip_this_r = skip_this && !block_edge_above;
 
-#if CONFIG_VAR_TX
       TX_SIZE tx_size = (plane->plane_type == PLANE_TYPE_UV)
                             ? get_uv_tx_size(mbmi, plane)
                             : mbmi->tx_size;
+#if CONFIG_VAR_TX
+#if CONFIG_EXT_TX && CONFIG_RECT_TX
+      TX_SIZE mb_tx_size = is_rect_tx(mbmi->tx_size)
+                               ? mbmi->tx_size
+                               : mbmi->inter_tx_size[blk_row][blk_col];
 #else
-      const TX_SIZE tx_size = (plane->plane_type == PLANE_TYPE_UV)
-                                  ? get_uv_tx_size(mbmi, plane)
-                                  : mbmi->tx_size;
+      TX_SIZE mb_tx_size = mbmi->inter_tx_size[blk_row][blk_col];
 #endif
-
+#endif
       const int skip_border_4x4_c = ss_x && mi_col + c == cm->mi_cols - 1;
       const int skip_border_4x4_r = ss_y && mi_row + r == cm->mi_rows - 1;
 
-      TX_SIZE tx_size_c = num_4x4_blocks_wide_txsize_log2_lookup[tx_size];
-      TX_SIZE tx_size_r = num_4x4_blocks_high_txsize_log2_lookup[tx_size];
+      TX_SIZE tx_size_c = tx_size_wide_unit[tx_size];
+      TX_SIZE tx_size_r = tx_size_high_unit[tx_size];
 
       int tx_size_mask = 0;
       const int c_step = (c >> ss_x);
       const int r_step = (r >> ss_y);
       const int col_mask = 1 << c_step;
+
+#if CONFIG_VAR_TX
+      if (is_inter_block(mbmi) && !mbmi->skip) {
+        tx_size = (plane->plane_type == PLANE_TYPE_UV)
+                      ? uv_txsize_lookup[sb_type][mb_tx_size][ss_x][ss_y]
+                      : mb_tx_size;
+      }
+#endif
 
       // Filter level can vary per MI
       if (!(lfl[r][c_step] = get_filter_level(&cm->lf_info, mbmi))) continue;
@@ -1465,19 +1473,6 @@ void av1_filter_block_plane_non420_hor(AV1_COMMON *cm,
         tx_size_mask = 0;
 
 #if CONFIG_VAR_TX
-      if (is_inter_block(mbmi) && !mbmi->skip) {
-#if CONFIG_EXT_TX && CONFIG_RECT_TX
-        TX_SIZE mb_tx_size = is_rect_tx(mbmi->tx_size)
-                                 ? mbmi->tx_size
-                                 : mbmi->inter_tx_size[blk_row][blk_col];
-#else
-        TX_SIZE mb_tx_size = mbmi->inter_tx_size[blk_row][blk_col];
-#endif
-        tx_size = (plane->plane_type == PLANE_TYPE_UV)
-                      ? uv_txsize_lookup[sb_type][mb_tx_size][ss_x][ss_y]
-                      : mb_tx_size;
-      }
-
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
       tx_size_r =
           AOMMIN(txsize_horz_map[tx_size], cm->above_txfm_context[mi_col + c]);
