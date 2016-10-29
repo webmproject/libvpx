@@ -68,6 +68,24 @@
       "revId": "f66a64d761eed304460e1b1254d1bf8ba7cee88a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "466e220f_7f1d6388",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 420,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-29T00:27:51Z",
+      "side": 1,
+      "message": "I was incorrect, gcc needed some coaxing by manually unrolling this by 2. both seem slower than the original version at the function level on 2 platforms, though",
+      "parentUuid": "466e220f_7f98c300",
+      "revId": "f66a64d761eed304460e1b1254d1bf8ba7cee88a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
