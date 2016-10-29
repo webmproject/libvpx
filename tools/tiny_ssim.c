@@ -119,18 +119,25 @@ double vp9_mse2psnr(double samples, double peak, double mse) {
 int main(int argc, char *argv[]) {
   FILE *f[2];
   uint8_t *buf[2];
-  int w, h, n_frames;
+  int w, h, n_frames, tl_skip = 0, tl_skips_remaining = 0;
   double ssim = 0, psnravg = 0, psnrglb = 0;
   double ssimy, ssimu, ssimv;
   uint64_t psnry, psnru, psnrv;
 
   if (argc < 4) {
-    fprintf(stderr, "Usage: %s file1.yuv file2.yuv WxH\n", argv[0]);
+    fprintf(stderr, "Usage: %s file1.yuv file2.yuv WxH [tl_skip={0,1,3}]\n",
+            argv[0]);
     return 1;
   }
   f[0] = strcmp(argv[1], "-") ? fopen(argv[1], "rb") : stdin;
   f[1] = strcmp(argv[2], "-") ? fopen(argv[2], "rb") : stdin;
   sscanf(argv[3], "%dx%d", &w, &h);
+  // Number of frames to skip from file1.yuv for every frame used. Normal values
+  // 0, 1 and 3 correspond to TL2, TL1 and TL0 respectively for a 3TL encoding
+  // in mode 10. 7 would be reasonable for comparing TL0 of a 4-layer encoding.
+  if (argc > 4) {
+    sscanf(argv[4], "%d", &tl_skip);
+  }
   if (!f[0] || !f[1]) {
     fprintf(stderr, "Could not open input files: %s\n", strerror(errno));
     return 1;
@@ -141,9 +148,20 @@ int main(int argc, char *argv[]) {
   }
   buf[0] = malloc(w * h * 3 / 2);
   buf[1] = malloc(w * h * 3 / 2);
-  for (n_frames = 0;; n_frames++) {
-    size_t r1 = fread(buf[0], w * h * 3 / 2, 1, f[0]);
-    size_t r2 = fread(buf[1], w * h * 3 / 2, 1, f[1]);
+  n_frames = 0;
+  while (1) {
+    size_t r1, r2;
+    r1 = fread(buf[0], w * h * 3 / 2, 1, f[0]);
+    if (r1) {
+      // Reading parts of file1.yuv that were not used in temporal layer.
+      if (tl_skips_remaining > 0) {
+        --tl_skips_remaining;
+        continue;
+      }
+      // Use frame, but skip |tl_skip| after it.
+      tl_skips_remaining = tl_skip;
+    }
+    r2 = fread(buf[1], w * h * 3 / 2, 1, f[1]);
     if (r1 && r2 && r1 != r2) {
       fprintf(stderr, "Failed to read data: %s [%d/%d]\n", strerror(errno),
               (int)r1, (int)r2);
@@ -161,6 +179,7 @@ int main(int argc, char *argv[]) {
     ssim += 0.8 * ssimy + 0.1 * (ssimu + ssimv);
     psnravg += vp9_mse2psnr(w * h * 6 / 4, 255.0, psnry + psnru + psnrv);
     psnrglb += psnry + psnru + psnrv;
+    n_frames++;
   }
   free(buf[0]);
   free(buf[1]);
