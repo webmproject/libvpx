@@ -36,7 +36,7 @@ typedef struct {
 
 typedef struct {
   const aom_prob *context_tree;
-#if CONFIG_RANS || CONFIG_DAALA_EC
+#if CONFIG_EC_MULTISYMBOL
   aom_cdf_prob (*token_cdf)[ENTROPY_TOKENS];
 #endif
   EXTRABIT extra;

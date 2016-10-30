@@ -245,10 +245,10 @@ static void update_mv_probs(aom_prob *p, int n, aom_reader *r) {
 static void read_mv_probs(nmv_context *ctx, int allow_hp, aom_reader *r) {
   int i;
 
-#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
+#if !CONFIG_EC_ADAPT || !CONFIG_EC_MULTISYMBOL
   int j;
   update_mv_probs(ctx->joints, MV_JOINTS - 1, r);
-#if CONFIG_DAALA_EC || CONFIG_RANS
+#if CONFIG_EC_MULTISYMBOL
   av1_tree_to_cdf(av1_mv_joint_tree, ctx->joints, ctx->joint_cdf);
 #endif
 
@@ -258,7 +258,7 @@ static void read_mv_probs(nmv_context *ctx, int allow_hp, aom_reader *r) {
     update_mv_probs(comp_ctx->classes, MV_CLASSES - 1, r);
     update_mv_probs(comp_ctx->class0, CLASS0_SIZE - 1, r);
     update_mv_probs(comp_ctx->bits, MV_OFFSET_BITS, r);
-#if CONFIG_DAALA_EC || CONFIG_RANS
+#if CONFIG_EC_MULTISYMBOL
     av1_tree_to_cdf(av1_mv_class_tree, comp_ctx->classes, comp_ctx->class_cdf);
 #endif
   }
@@ -266,17 +266,17 @@ static void read_mv_probs(nmv_context *ctx, int allow_hp, aom_reader *r) {
     nmv_component *const comp_ctx = &ctx->comps[i];
     for (j = 0; j < CLASS0_SIZE; ++j) {
       update_mv_probs(comp_ctx->class0_fp[j], MV_FP_SIZE - 1, r);
-#if CONFIG_DAALA_EC || CONFIG_RANS
+#if CONFIG_EC_MULTISYMBOL
       av1_tree_to_cdf(av1_mv_fp_tree, comp_ctx->class0_fp[j],
                       comp_ctx->class0_fp_cdf[j]);
 #endif
     }
     update_mv_probs(comp_ctx->fp, MV_FP_SIZE - 1, r);
-#if CONFIG_DAALA_EC || CONFIG_RANS
+#if CONFIG_EC_MULTISYMBOL
     av1_tree_to_cdf(av1_mv_fp_tree, comp_ctx->fp, comp_ctx->fp_cdf);
 #endif
   }
-#endif  // CONFIG_EC_ADAPT, CONFIG_DAALA_EC
+#endif  // !CONFIG_EC_ADAPT
 
   if (allow_hp) {
     for (i = 0; i < 2; ++i) {
@@ -1936,9 +1936,9 @@ static void read_coef_probs(FRAME_CONTEXT *fc, TX_MODE tx_mode, aom_reader *r) {
   TX_SIZE tx_size;
   for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
     read_coef_probs_common(fc->coef_probs[tx_size], r);
-#if CONFIG_RANS || CONFIG_DAALA_EC
+#if CONFIG_EC_MULTISYMBOL
   av1_coef_pareto_cdfs(fc);
-#endif  // CONFIG_RANS
+#endif  // CONFIG_EC_MULTISYMBOL
 }
 
 static void setup_segmentation(AV1_COMMON *const cm,

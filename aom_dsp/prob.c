@@ -11,7 +11,7 @@
 
 #include "./aom_config.h"
 
-#if CONFIG_DAALA_EC || CONFIG_RANS
+#if CONFIG_EC_MULTISYMBOL
 #include <string.h>
 #endif
 
@@ -57,7 +57,7 @@ void aom_tree_merge_probs(const aom_tree_index *tree, const aom_prob *pre_probs,
   tree_merge_probs_impl(0, tree, pre_probs, counts, probs);
 }
 
-#if CONFIG_DAALA_EC || CONFIG_RANS
+#if CONFIG_EC_MULTISYMBOL
 typedef struct tree_node tree_node;
 
 struct tree_node {

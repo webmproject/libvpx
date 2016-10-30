@@ -9,11 +9,12 @@
  * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 
+#include "./aom_config.h"
 #include "av1/common/entropy.h"
 #include "av1/common/blockd.h"
 #include "av1/common/onyxc_int.h"
-#include "av1/common/scan.h"
 #include "av1/common/entropymode.h"
+#include "av1/common/scan.h"
 #include "aom_mem/aom_mem.h"
 #include "aom/aom_integer.h"
 
@@ -413,7 +414,7 @@ const aom_prob av1_pareto8_full[COEFF_PROB_MODELS][MODEL_NODES] = {
   { 255, 246, 247, 255, 239, 255, 253, 255 },
 };
 
-#if CONFIG_RANS || CONFIG_DAALA_EC
+#if CONFIG_EC_MULTISYMBOL
 // Model obtained from a 2-sided zero-centered distribution derived
 // from a Pareto distribution. The cdf of the distribution is:
 // cdf(x) = 0.5 + 0.5 * sgn(x) * [1 - {alpha/(alpha + |x|)} ^ beta]
@@ -685,7 +686,7 @@ const aom_cdf_prob
       { 32512, 238, 11, 1, 1, 1, 1, 1, 1, 1 },
       { 32640, 117, 4, 1, 1, 1, 1, 1, 1, 1 },
     };
-#endif  // CONFIG_RANS
+#endif  // CONFIG_EC_MULTISYMBOL
 
 /* clang-format off */
 #if CONFIG_ENTROPY

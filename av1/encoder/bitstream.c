@@ -748,14 +748,14 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
   while (p < stop && p->token != EOSB_TOKEN) {
     const int token = p->token;
     aom_tree_index index = 0;
-#if !CONFIG_RANS && !CONFIG_DAALA_EC
+#if !CONFIG_EC_MULTISYMBOL
     const struct av1_token *const coef_encoding = &av1_coef_encodings[token];
     int coef_value = coef_encoding->value;
     int coef_length = coef_encoding->len;
-#endif  // !CONFIG_RANS
+#endif  // !CONFIG_EC_MULTISYMBOL
     const av1_extra_bit *const extra_bits = &extra_bits_table[token];
 
-#if CONFIG_RANS || CONFIG_DAALA_EC
+#if CONFIG_EC_MULTISYMBOL
     /* skip one or two nodes */
     if (!p->skip_eob_node) aom_write(w, token != EOB_TOKEN, p->context_tree[0]);
 
@@ -788,7 +788,7 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
         }
       }
     }
-#endif  // CONFIG_RANS
+#endif  // CONFIG_EC_MULTISYMBOL
 
     if (extra_bits->base_val) {
       const int bit_string = p->extra;
@@ -2345,6 +2345,9 @@ static void update_coef_probs_common(aom_writer *const bc, AV1_COMP *cpi,
     }
     default: assert(0);
   }
+#if CONFIG_RANS || CONFIG_DAALA_EC
+  av1_coef_pareto_cdfs(cpi->common.fc);
+#endif  // CONFIG_EC_MULTISYMBOL
 }
 
 #if CONFIG_ENTROPY
