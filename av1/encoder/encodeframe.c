@@ -4639,6 +4639,9 @@ static void encode_frame_internal(AV1_COMP *cpi) {
 
   x->min_partition_size = AOMMIN(x->min_partition_size, cm->sb_size);
   x->max_partition_size = AOMMIN(x->max_partition_size, cm->sb_size);
+#if CONFIG_SIMP_MV_PRED
+  cm->setup_mi(cm);
+#endif
 
   xd->mi = cm->mi_grid_visible;
   xd->mi[0] = cm->mi;
