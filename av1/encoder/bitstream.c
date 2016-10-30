@@ -2206,7 +2206,7 @@ static void update_coef_probs_common(aom_writer *const bc, AV1_COMP *cpi,
   av1_coeff_probs_model *old_coef_probs = cpi->common.fc->coef_probs[tx_size];
   const aom_prob upd = DIFF_UPDATE_PROB;
 #if CONFIG_EC_ADAPT
-  const int entropy_nodes_update = ONE_TOKEN;
+  const int entropy_nodes_update = UNCONSTRAINED_NODES - 1;
 #else
   const int entropy_nodes_update = UNCONSTRAINED_NODES;
 #endif
