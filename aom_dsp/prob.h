@@ -15,6 +15,7 @@
 #include "./aom_config.h"
 #include "./aom_dsp_common.h"
 
+#include "aom_ports/bitops.h"
 #include "aom_ports/mem.h"
 
 #ifdef __cplusplus
@@ -133,6 +134,42 @@ void av1_indices_from_tree(int *ind, int *inv, int len,
 #endif
 
 DECLARE_ALIGNED(16, extern const uint8_t, aom_norm[256]);
+
+#if CONFIG_EC_ADAPT
+static INLINE void update_cdf(aom_cdf_prob *cdf, int val, int nsymbs) {
+  const int rate = 3 + get_msb(nsymbs);
+  // Daala method
+  int i, tmp;
+  for (i = 0; i < val; ++i) {
+    tmp = 2 - (1 << rate) + i;
+    cdf[i] -= (cdf[i] - tmp) >> rate;
+  }
+  for (i = val; i < nsymbs; ++i) {
+    tmp = -(1 << rate) + 32768 + (1 << rate) - ((nsymbs - 1) - i);
+    cdf[i] -= (cdf[i] - tmp) >> rate;
+  }
+
+  // Slightly better
+  //  int prob[16];
+  //  int i;
+  //  int diff;
+  //  prob[0] = cdf[0];
+  //  for (i=1; i<nsymbs; ++i)
+  //    prob[i] = cdf[i] - cdf[i-1];
+  //
+  //  for (i=0; i<nsymbs; ++i) {
+  //    prob[i] -= (prob[i] >> rate);
+  //    prob[i] = AOMMAX(prob[i],1);
+  //    cdf[i] = i==0 ? prob[i] : cdf[i-1]+prob[i];
+  //  }
+  //  diff = (1<<15) - cdf[nsymbs-1];
+  //
+  //  for (i=val; i<nsymbs; ++i) {
+  //    cdf[i] += diff;
+  //  }
+  //
+}
+#endif
 
 #ifdef __cplusplus
 }  // extern "C"

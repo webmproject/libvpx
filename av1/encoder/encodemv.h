@@ -27,7 +27,7 @@ void av1_encode_mv(AV1_COMP *cpi, aom_writer *w, const MV *mv, const MV *ref,
 #if CONFIG_REF_MV
                    int is_compound,
 #endif
-                   const nmv_context *mvctx, int usehp);
+                   nmv_context *mvctx, int usehp);
 
 void av1_build_nmv_cost_table(int *mvjoint, int *mvcost[2],
                               const nmv_context *mvctx, int usehp);

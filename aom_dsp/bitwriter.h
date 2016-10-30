@@ -98,8 +98,8 @@ static INLINE void aom_write_tree(aom_writer *w, const aom_tree_index *tree,
 #endif
 }
 
-static INLINE void aom_write_symbol(aom_writer *w, int symb,
-                                    const aom_cdf_prob *cdf, int nsymbs) {
+static INLINE void aom_write_symbol(aom_writer *w, int symb, aom_cdf_prob *cdf,
+                                    int nsymbs) {
 #if CONFIG_RANS
   struct rans_sym s;
   (void)nsymbs;
@@ -115,6 +115,10 @@ static INLINE void aom_write_symbol(aom_writer *w, int symb,
   (void)cdf;
   (void)nsymbs;
   assert(0 && "Unsupported bitwriter operation");
+#endif
+
+#if ((CONFIG_RANS || CONFIG_DAALA_EC) && CONFIG_EC_ADAPT)
+  update_cdf(cdf, symb, nsymbs);
 #endif
 }
 

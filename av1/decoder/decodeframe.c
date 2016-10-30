@@ -114,6 +114,7 @@ static TX_MODE read_tx_mode(struct aom_read_bit_buffer *rb) {
   return aom_rb_read_bit(rb) ? TX_MODE_SELECT : aom_rb_read_literal(rb, 2);
 }
 
+#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
 static void read_switchable_interp_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   int i, j;
   for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; ++j) {
@@ -165,6 +166,34 @@ static void read_inter_compound_mode_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   }
 }
 #endif  // CONFIG_EXT_INTER
+#if !CONFIG_EXT_TX
+static void read_ext_tx_probs(FRAME_CONTEXT *fc, aom_reader *r) {
+  int i, j, k;
+  if (aom_read(r, GROUP_DIFF_UPDATE_PROB, ACCT_STR)) {
+    for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
+      for (j = 0; j < TX_TYPES; ++j) {
+        for (k = 0; k < TX_TYPES - 1; ++k)
+          av1_diff_update_prob(r, &fc->intra_ext_tx_prob[i][j][k], ACCT_STR);
+#if CONFIG_DAALA_EC
+        av1_tree_to_cdf(av1_ext_tx_tree, fc->intra_ext_tx_prob[i][j],
+                        fc->intra_ext_tx_cdf[i][j]);
+#endif
+      }
+    }
+  }
+  if (aom_read(r, GROUP_DIFF_UPDATE_PROB, ACCT_STR)) {
+    for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
+      for (k = 0; k < TX_TYPES - 1; ++k)
+        av1_diff_update_prob(r, &fc->inter_ext_tx_prob[i][k], ACCT_STR);
+#if CONFIG_DAALA_EC
+      av1_tree_to_cdf(av1_ext_tx_tree, fc->inter_ext_tx_prob[i],
+                      fc->inter_ext_tx_cdf[i]);
+#endif
+    }
+  }
+}
+#endif
+#endif
 
 static REFERENCE_MODE read_frame_reference_mode(
     const AV1_COMMON *cm, struct aom_read_bit_buffer *rb) {
@@ -214,8 +243,10 @@ static void update_mv_probs(aom_prob *p, int n, aom_reader *r) {
 }
 
 static void read_mv_probs(nmv_context *ctx, int allow_hp, aom_reader *r) {
-  int i, j;
+  int i;
 
+#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
+  int j;
   update_mv_probs(ctx->joints, MV_JOINTS - 1, r);
 #if CONFIG_DAALA_EC || CONFIG_RANS
   av1_tree_to_cdf(av1_mv_joint_tree, ctx->joints, ctx->joint_cdf);
@@ -231,7 +262,6 @@ static void read_mv_probs(nmv_context *ctx, int allow_hp, aom_reader *r) {
     av1_tree_to_cdf(av1_mv_class_tree, comp_ctx->classes, comp_ctx->class_cdf);
 #endif
   }
-
   for (i = 0; i < 2; ++i) {
     nmv_component *const comp_ctx = &ctx->comps[i];
     for (j = 0; j < CLASS0_SIZE; ++j) {
@@ -246,6 +276,7 @@ static void read_mv_probs(nmv_context *ctx, int allow_hp, aom_reader *r) {
     av1_tree_to_cdf(av1_mv_fp_tree, comp_ctx->fp, comp_ctx->fp_cdf);
 #endif
   }
+#endif  // CONFIG_EC_ADAPT, CONFIG_DAALA_EC
 
   if (allow_hp) {
     for (i = 0; i < 2; ++i) {
@@ -1885,13 +1916,18 @@ static void setup_token_decoder(const uint8_t *data, const uint8_t *data_end,
 static void read_coef_probs_common(av1_coeff_probs_model *coef_probs,
                                    aom_reader *r) {
   int i, j, k, l, m;
+#if CONFIG_EC_ADAPT
+  const int node_limit = ONE_TOKEN;
+#else
+  const int node_limit = UNCONSTRAINED_NODES;
+#endif
 
   if (aom_read_bit(r, ACCT_STR))
     for (i = 0; i < PLANE_TYPES; ++i)
       for (j = 0; j < REF_TYPES; ++j)
         for (k = 0; k < COEF_BANDS; ++k)
           for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l)
-            for (m = 0; m < UNCONSTRAINED_NODES; ++m)
+            for (m = 0; m < node_limit; ++m)
               av1_diff_update_prob(r, &coef_probs[i][j][k][l][m], ACCT_STR);
 }
 
@@ -3587,6 +3623,7 @@ static size_t read_uncompressed_header(AV1Decoder *pbi,
 }
 
 #if CONFIG_EXT_TX
+#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
 static void read_ext_tx_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   int i, j, k;
   int s;
@@ -3612,36 +3649,10 @@ static void read_ext_tx_probs(FRAME_CONTEXT *fc, aom_reader *r) {
     }
   }
 }
-
+#endif  // !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
 #else
 
-static void read_ext_tx_probs(FRAME_CONTEXT *fc, aom_reader *r) {
-  int i, j, k;
-  if (aom_read(r, GROUP_DIFF_UPDATE_PROB, ACCT_STR)) {
-    for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
-      for (j = 0; j < TX_TYPES; ++j) {
-        for (k = 0; k < TX_TYPES - 1; ++k)
-          av1_diff_update_prob(r, &fc->intra_ext_tx_prob[i][j][k], ACCT_STR);
-#if CONFIG_DAALA_EC
-        av1_tree_to_cdf(av1_ext_tx_tree, fc->intra_ext_tx_prob[i][j],
-                        fc->intra_ext_tx_cdf[i][j]);
-#endif
-      }
-    }
-  }
-  if (aom_read(r, GROUP_DIFF_UPDATE_PROB, ACCT_STR)) {
-    for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
-      for (k = 0; k < TX_TYPES - 1; ++k)
-        av1_diff_update_prob(r, &fc->inter_ext_tx_prob[i][k], ACCT_STR);
-#if CONFIG_DAALA_EC
-      av1_tree_to_cdf(av1_ext_tx_tree, fc->inter_ext_tx_prob[i],
-                      fc->inter_ext_tx_cdf[i]);
-#endif
-    }
-  }
-}
 #endif  // CONFIG_EXT_TX
-
 #if CONFIG_SUPERTX
 static void read_supertx_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   int i, j;
@@ -3765,6 +3776,7 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
     av1_diff_update_prob(&r, &fc->delta_q_prob[k], ACCT_STR);
 #endif
 
+#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
   if (cm->seg.enabled && cm->seg.update_map) {
     if (cm->seg.temporal_update) {
       for (k = 0; k < PREDICTION_PROBS; k++)
@@ -3803,7 +3815,7 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
 #endif
   }
 #endif  // CONFIG_EXT_PARTITION_TYPES
-
+#endif  // EC_ADAPT, DAALA_EC
 #if CONFIG_EXT_INTRA
   for (i = 0; i < INTRA_FILTERS + 1; ++i)
     for (j = 0; j < INTRA_FILTERS - 1; ++j)
@@ -3815,6 +3827,7 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
 #if CONFIG_DAALA_EC
     av1_copy(cm->kf_y_cdf, av1_kf_y_mode_cdf);
 #endif
+#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
     for (k = 0; k < INTRA_MODES; k++)
       for (j = 0; j < INTRA_MODES; j++) {
         for (i = 0; i < INTRA_MODES - 1; ++i)
@@ -3824,12 +3837,14 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
                         cm->kf_y_cdf[k][j]);
 #endif
       }
+#endif  // EC_ADAPT, DAALA_EC
   } else {
 #if !CONFIG_REF_MV
     nmv_context *const nmvc = &fc->nmvc;
 #endif
-
+#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
     read_inter_mode_probs(fc, &r);
+#endif
 
 #if CONFIG_EXT_INTER
     read_inter_compound_mode_probs(fc, &r);
@@ -3865,7 +3880,9 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
     }
 #endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
 
+#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
     if (cm->interp_filter == SWITCHABLE) read_switchable_interp_probs(fc, &r);
+#endif
 
     for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
       av1_diff_update_prob(&r, &fc->intra_inter_prob[i], ACCT_STR);
@@ -3875,6 +3892,7 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
 
     read_frame_reference_mode_probs(cm, &r);
 
+#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
     for (j = 0; j < BLOCK_SIZE_GROUPS; j++) {
       for (i = 0; i < INTRA_MODES - 1; ++i)
         av1_diff_update_prob(&r, &fc->y_mode_prob[j][i], ACCT_STR);
@@ -3883,6 +3901,7 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
                       fc->y_mode_cdf[j]);
 #endif
     }
+#endif
 
 #if CONFIG_REF_MV
     for (i = 0; i < NMV_CONTEXTS; ++i)
@@ -3890,7 +3909,9 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
 #else
     read_mv_probs(nmvc, cm->allow_high_precision_mv, &r);
 #endif
+#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
     read_ext_tx_probs(fc, &r);
+#endif  // EC_ADAPT, DAALA_EC
 #if CONFIG_SUPERTX
     if (!xd->lossless[0]) read_supertx_probs(fc, &r);
 #endif
