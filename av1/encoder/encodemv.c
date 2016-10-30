@@ -175,13 +175,9 @@ void av1_write_nmv_probs(AV1_COMMON *cm, int usehp, aom_writer *w,
   for (nmv_ctx = 0; nmv_ctx < NMV_CONTEXTS; ++nmv_ctx) {
     nmv_context *const mvc = &cm->fc->nmvc[nmv_ctx];
     nmv_context_counts *const counts = &nmv_counts[nmv_ctx];
-
+#if !CONFIG_EC_ADAPT
     write_mv_update(av1_mv_joint_tree, mvc->joints, counts->joints, MV_JOINTS,
                     w);
-#if CONFIG_DAALA_EC
-    av1_tree_to_cdf(av1_mv_joint_tree, cm->fc->nmvc.joints,
-                    cm->fc->nmvc.joint_cdf);
-#endif
 
     for (i = 0; i < 2; ++i) {
       nmv_component *comp = &mvc->comps[i];
@@ -204,6 +200,7 @@ void av1_write_nmv_probs(AV1_COMMON *cm, int usehp, aom_writer *w,
       write_mv_update(av1_mv_fp_tree, mvc->comps[i].fp, counts->comps[i].fp,
                       MV_FP_SIZE, w);
     }
+#endif
 
     if (usehp) {
       for (i = 0; i < 2; ++i) {
@@ -219,10 +216,6 @@ void av1_write_nmv_probs(AV1_COMMON *cm, int usehp, aom_writer *w,
 
 #if !CONFIG_EC_ADAPT
   write_mv_update(av1_mv_joint_tree, mvc->joints, counts->joints, MV_JOINTS, w);
-#if CONFIG_EC_MULTISYMBOL
-  av1_tree_to_cdf(av1_mv_joint_tree, cm->fc->nmvc.joints,
-                  cm->fc->nmvc.joint_cdf);
-#endif
 
   for (i = 0; i < 2; ++i) {
     nmv_component *comp = &mvc->comps[i];
@@ -231,9 +224,6 @@ void av1_write_nmv_probs(AV1_COMMON *cm, int usehp, aom_writer *w,
     update_mv(w, comp_counts->sign, &comp->sign, MV_UPDATE_PROB);
     write_mv_update(av1_mv_class_tree, comp->classes, comp_counts->classes,
                     MV_CLASSES, w);
-#if CONFIG_EC_MULTISYMBOL
-    av1_tree_to_cdf(av1_mv_class_tree, comp->classes, comp->class_cdf);
-#endif
     write_mv_update(av1_mv_class0_tree, comp->class0, comp_counts->class0,
                     CLASS0_SIZE, w);
     for (j = 0; j < MV_OFFSET_BITS; ++j)
@@ -244,16 +234,9 @@ void av1_write_nmv_probs(AV1_COMMON *cm, int usehp, aom_writer *w,
     for (j = 0; j < CLASS0_SIZE; ++j) {
       write_mv_update(av1_mv_fp_tree, mvc->comps[i].class0_fp[j],
                       counts->comps[i].class0_fp[j], MV_FP_SIZE, w);
-#if CONFIG_EC_MULTISYMBOL
-      av1_tree_to_cdf(av1_mv_fp_tree, mvc->comps[i].class0_fp[j],
-                      mvc->comps[i].class0_fp_cdf[j]);
-#endif
     }
     write_mv_update(av1_mv_fp_tree, mvc->comps[i].fp, counts->comps[i].fp,
                     MV_FP_SIZE, w);
-#if CONFIG_EC_MULTISYMBOL
-    av1_tree_to_cdf(av1_mv_fp_tree, mvc->comps[i].fp, mvc->comps[i].fp_cdf);
-#endif
   }
 #endif  // !CONFIG_EC_ADAPT
 

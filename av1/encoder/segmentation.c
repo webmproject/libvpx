@@ -374,9 +374,6 @@ void av1_choose_segmap_coding_method(AV1_COMMON *cm, MACROBLOCKD *xd) {
   } else {
     seg->temporal_update = 0;
   }
-#if !CONFIG_EC_ADAPT && CONFIG_DAALA_EC
-  av1_tree_to_cdf(av1_segment_tree, segp->tree_probs, segp->tree_cdf);
-#endif
 }
 
 void av1_reset_segment_features(AV1_COMMON *cm) {

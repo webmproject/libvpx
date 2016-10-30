@@ -1453,6 +1453,48 @@ static void init_mode_probs(FRAME_CONTEXT *fc) {
 #if CONFIG_DAALA_EC
 int av1_switchable_interp_ind[SWITCHABLE_FILTERS];
 int av1_switchable_interp_inv[SWITCHABLE_FILTERS];
+
+void av1_set_mode_cdfs(struct AV1Common *cm) {
+  FRAME_CONTEXT *fc = cm->fc;
+  int i, j;
+  if (cm->seg.enabled && cm->seg.update_map) {
+    av1_tree_to_cdf(av1_segment_tree, cm->fc->seg.tree_probs,
+                    cm->fc->seg.tree_cdf);
+  }
+
+  for (i = 0; i < INTRA_MODES; ++i)
+    av1_tree_to_cdf(av1_intra_mode_tree, fc->uv_mode_prob[j],
+                    fc->uv_mode_cdf[j]);
+
+  for (i = 0; i < PARTITION_CONTEXTS; ++i)
+    av1_tree_to_cdf(av1_partition_tree, fc->partition_prob[i],
+                    fc->partition_cdf[i]);
+
+  for (i = 0; i < INTRA_MODES; ++i)
+    for (j = 0; j < INTRA_MODES; ++j)
+      av1_tree_to_cdf(av1_intra_mode_tree, cm->kf_y_prob[i][j],
+                      cm->kf_y_cdf[i][j]);
+
+  for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; ++j)
+    av1_tree_to_cdf(av1_switchable_interp_tree, fc->switchable_interp_prob[j],
+                    fc->switchable_interp_cdf[j]);
+
+  for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
+    av1_tree_to_cdf(av1_inter_mode_tree, fc->inter_mode_probs[i],
+                    fc->inter_mode_cdf[i]);
+
+  for (i = 0; i < BLOCK_SIZE_GROUPS; ++i)
+    av1_tree_to_cdf(av1_intra_mode_tree, fc->y_mode_prob[i], fc->y_mode_cdf[i]);
+
+  for (i = TX_4X4; i < EXT_TX_SIZES; ++i)
+    for (j = 0; j < TX_TYPES; ++j)
+      av1_tree_to_cdf(av1_ext_tx_tree, fc->intra_ext_tx_prob[i][j],
+                      fc->intra_ext_tx_cdf[i][j]);
+
+  for (i = TX_4X4; i < EXT_TX_SIZES; ++i)
+    av1_tree_to_cdf(av1_ext_tx_tree, fc->inter_ext_tx_prob[i],
+                    fc->inter_ext_tx_cdf[i]);
+}
 #endif
 
 #if CONFIG_EXT_INTERP
@@ -1650,19 +1692,11 @@ void av1_adapt_intra_frame_probs(AV1_COMMON *cm) {
       aom_tree_merge_probs(av1_ext_tx_tree, pre_fc->intra_ext_tx_prob[i][j],
                            counts->intra_ext_tx[i][j],
                            fc->intra_ext_tx_prob[i][j]);
-#if CONFIG_DAALA_EC
-      av1_tree_to_cdf(av1_ext_tx_tree, fc->intra_ext_tx_prob[i][j],
-                      fc->intra_ext_tx_cdf[i][j]);
-#endif
     }
   }
   for (i = TX_4X4; i < EXT_TX_SIZES; ++i) {
     aom_tree_merge_probs(av1_ext_tx_tree, pre_fc->inter_ext_tx_prob[i],
                          counts->inter_ext_tx[i], fc->inter_ext_tx_prob[i]);
-#if CONFIG_DAALA_EC
-    av1_tree_to_cdf(av1_ext_tx_tree, fc->inter_ext_tx_prob[i],
-                    fc->inter_ext_tx_cdf[i]);
-#endif
   }
 #endif  // CONFIG_EXT_TX
 
@@ -1692,10 +1726,6 @@ void av1_adapt_intra_frame_probs(AV1_COMMON *cm) {
   for (i = 0; i < PARTITION_CONTEXTS; i++) {
     aom_tree_merge_probs(av1_partition_tree, pre_fc->partition_prob[i],
                          counts->partition[i], fc->partition_prob[i]);
-#if CONFIG_DAALA_EC
-    av1_tree_to_cdf(av1_partition_tree, fc->partition_prob[i],
-                    fc->partition_cdf[i]);
-#endif
   }
 #endif  // CONFIG_EXT_PARTITION_TYPES
 #if CONFIG_DELTA_Q
