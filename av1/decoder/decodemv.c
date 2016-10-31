@@ -249,6 +249,24 @@ static void read_drl_idx(const AV1_COMMON *cm, MACROBLOCKD *xd,
 }
 #endif
 
+#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
+static MOTION_MODE read_motion_mode(AV1_COMMON *cm, MACROBLOCKD *xd,
+                                    MB_MODE_INFO *mbmi, aom_reader *r) {
+  if (is_motion_variation_allowed(mbmi)) {
+    int motion_mode;
+    FRAME_COUNTS *counts = xd->counts;
+
+    motion_mode =
+        aom_read_tree(r, av1_motion_mode_tree,
+                      cm->fc->motion_mode_prob[mbmi->sb_type], ACCT_STR);
+    if (counts) ++counts->motion_mode[mbmi->sb_type][motion_mode];
+    return (MOTION_MODE)(SIMPLE_TRANSLATION + motion_mode);
+  } else {
+    return SIMPLE_TRANSLATION;
+  }
+}
+#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
+
 #if CONFIG_EXT_INTER
 static PREDICTION_MODE read_inter_compound_mode(AV1_COMMON *cm, MACROBLOCKD *xd,
                                                 aom_reader *r, int16_t ctx) {
@@ -975,24 +993,6 @@ static void read_ref_frames(AV1_COMMON *const cm, MACROBLOCKD *const xd,
     }
   }
 }
-
-#if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
-static MOTION_MODE read_motion_mode(AV1_COMMON *cm, MACROBLOCKD *xd,
-                                    MB_MODE_INFO *mbmi, aom_reader *r) {
-  if (is_motion_variation_allowed(mbmi)) {
-    int motion_mode;
-    FRAME_COUNTS *counts = xd->counts;
-
-    motion_mode =
-        aom_read_tree(r, av1_motion_mode_tree,
-                      cm->fc->motion_mode_prob[mbmi->sb_type], ACCT_STR);
-    if (counts) ++counts->motion_mode[mbmi->sb_type][motion_mode];
-    return (MOTION_MODE)(SIMPLE_TRANSLATION + motion_mode);
-  } else {
-    return SIMPLE_TRANSLATION;
-  }
-}
-#endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
 
 static INLINE InterpFilter read_interp_filter(AV1_COMMON *const cm,
                                               MACROBLOCKD *const xd,
