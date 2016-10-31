@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "466e220f_d062a4f3",
+        "filename": "test/stress.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-10-31T18:47:54Z",
+      "side": 1,
+      "message": "can omit braces in comment var refs (fine this way, though)",
+      "range": {
+        "startLine": 62,
+        "startChar": 10,
+        "endLine": 62,
+        "endChar": 24
+      },
+      "revId": "4bbfb8544ccb865df19d3769f12a0954f055a73a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
