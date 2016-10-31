@@ -356,13 +356,11 @@ static void write_tx_size_vartx(const AV1_COMMON *cm, const MACROBLOCKD *xd,
                                 aom_writer *w) {
   const int tx_row = blk_row >> 1;
   const int tx_col = blk_col >> 1;
-  int max_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
-  int max_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
+  const int max_blocks_high = max_block_high(xd, mbmi->sb_type, 0);
+  const int max_blocks_wide = max_block_wide(xd, mbmi->sb_type, 0);
+
   int ctx = txfm_partition_context(xd->above_txfm_context + tx_col,
                                    xd->left_txfm_context + tx_row, tx_size);
-
-  if (xd->mb_to_bottom_edge < 0) max_blocks_high += xd->mb_to_bottom_edge >> 5;
-  if (xd->mb_to_right_edge < 0) max_blocks_wide += xd->mb_to_right_edge >> 5;
 
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
 
@@ -832,13 +830,8 @@ static void pack_txb_tokens(aom_writer *w, const TOKENEXTRA **tp,
   const int tx_row = blk_row >> (1 - pd->subsampling_y);
   const int tx_col = blk_col >> (1 - pd->subsampling_x);
   TX_SIZE plane_tx_size;
-  int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
-  int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
-
-  if (xd->mb_to_bottom_edge < 0)
-    max_blocks_high += xd->mb_to_bottom_edge >> (5 + pd->subsampling_y);
-  if (xd->mb_to_right_edge < 0)
-    max_blocks_wide += xd->mb_to_right_edge >> (5 + pd->subsampling_x);
+  const int max_blocks_high = max_block_high(xd, plane_bsize, plane);
+  const int max_blocks_wide = max_block_wide(xd, plane_bsize, plane);
 
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
 

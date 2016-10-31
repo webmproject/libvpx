@@ -678,6 +678,30 @@ static INLINE int partition_plane_context(const MACROBLOCKD *xd, int mi_row,
   return (left * 2 + above) + bsl * PARTITION_PLOFFSET;
 }
 
+static INLINE int max_block_wide(const MACROBLOCKD *xd, const BLOCK_SIZE bsize,
+                                 const int plane) {
+  int max_blocks_wide = block_size_wide[bsize];
+  const struct macroblockd_plane *const pd = &xd->plane[plane];
+
+  if (xd->mb_to_right_edge < 0)
+    max_blocks_wide += xd->mb_to_right_edge >> (3 + pd->subsampling_x);
+
+  // Scale the width in the transform block unit.
+  return max_blocks_wide >> tx_size_wide_log2[0];
+}
+
+static INLINE int max_block_high(const MACROBLOCKD *xd, const BLOCK_SIZE bsize,
+                                 const int plane) {
+  int max_blocks_high = block_size_high[bsize];
+  const struct macroblockd_plane *const pd = &xd->plane[plane];
+
+  if (xd->mb_to_bottom_edge < 0)
+    max_blocks_high += xd->mb_to_bottom_edge >> (3 + pd->subsampling_y);
+
+  // Scale the width in the transform block unit.
+  return max_blocks_high >> tx_size_wide_log2[0];
+}
+
 static INLINE void av1_zero_above_context(AV1_COMMON *const cm,
                                           int mi_col_start, int mi_col_end) {
   const int width = mi_col_end - mi_col_start;

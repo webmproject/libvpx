@@ -4992,14 +4992,11 @@ static void update_txfm_count(MACROBLOCK *x, MACROBLOCKD *xd,
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   const int tx_row = blk_row >> 1;
   const int tx_col = blk_col >> 1;
-  int max_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
-  int max_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
+  const int max_blocks_high = max_block_high(xd, mbmi->sb_type, 0);
+  const int max_blocks_wide = max_block_wide(xd, mbmi->sb_type, 0);
   int ctx = txfm_partition_context(xd->above_txfm_context + tx_col,
                                    xd->left_txfm_context + tx_row, tx_size);
   const TX_SIZE plane_tx_size = mbmi->inter_tx_size[tx_row][tx_col];
-
-  if (xd->mb_to_bottom_edge < 0) max_blocks_high += xd->mb_to_bottom_edge >> 5;
-  if (xd->mb_to_right_edge < 0) max_blocks_wide += xd->mb_to_right_edge >> 5;
 
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
 
@@ -5057,12 +5054,9 @@ static void set_txfm_context(MACROBLOCKD *xd, TX_SIZE tx_size, int blk_row,
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   const int tx_row = blk_row >> 1;
   const int tx_col = blk_col >> 1;
-  int max_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
-  int max_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
+  const int max_blocks_high = max_block_high(xd, mbmi->sb_type, 0);
+  const int max_blocks_wide = max_block_wide(xd, mbmi->sb_type, 0);
   const TX_SIZE plane_tx_size = mbmi->inter_tx_size[tx_row][tx_col];
-
-  if (xd->mb_to_bottom_edge < 0) max_blocks_high += xd->mb_to_bottom_edge >> 5;
-  if (xd->mb_to_right_edge < 0) max_blocks_wide += xd->mb_to_right_edge >> 5;
 
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
 
