@@ -115,6 +115,14 @@ static TX_MODE read_tx_mode(struct aom_read_bit_buffer *rb) {
   return aom_rb_read_bit(rb) ? TX_MODE_SELECT : aom_rb_read_literal(rb, 2);
 }
 
+static void read_tx_size_probs(FRAME_CONTEXT *fc, aom_reader *r) {
+  int i, j, k;
+  for (i = 0; i < MAX_TX_DEPTH; ++i)
+    for (j = 0; j < TX_SIZE_CONTEXTS; ++j)
+      for (k = 0; k < i + 1; ++k)
+        av1_diff_update_prob(r, &fc->tx_size_probs[i][j][k], ACCT_STR);
+}
+
 #if !CONFIG_EC_ADAPT
 static void read_switchable_interp_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   int i, j;
@@ -1800,6 +1808,18 @@ static void decode_partition(AV1Decoder *const pbi, MACROBLOCKD *const xd,
     dec_update_partition_context(xd, mi_row, mi_col, subsize, num_8x8_wh);
 #endif  // CONFIG_EXT_PARTITION_TYPES
 
+#if CONFIG_DERING
+  if (bsize == BLOCK_64X64) {
+    if (cm->dering_level != 0 && !sb_all_skip(cm, mi_row, mi_col)) {
+      cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col]->mbmi.dering_gain =
+          aom_read_literal(r, DERING_REFINEMENT_BITS, ACCT_STR);
+    } else {
+      cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col]->mbmi.dering_gain =
+          0;
+    }
+  }
+#endif
+
 #if CONFIG_CLPF
   if (bsize == BLOCK_64X64 && cm->clpf_strength_y &&
       cm->clpf_size != CLPF_NOSIZE) {
@@ -1833,18 +1853,6 @@ static void decode_partition(AV1Decoder *const pbi, MACROBLOCKD *const xd,
       if (mi_col + size < cm->mi_cols && mi_row + size < cm->mi_rows &&
           !clpf_all_skip(cm, mi_col + size, mi_row + size, size))
         cm->clpf_blocks[br] = aom_read_literal(r, 1, ACCT_STR);
-    }
-  }
-#endif
-
-#if CONFIG_DERING
-  if (bsize == BLOCK_64X64) {
-    if (cm->dering_level != 0 && !sb_all_skip(cm, mi_row, mi_col)) {
-      cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col]->mbmi.dering_gain =
-          aom_read_literal(r, DERING_REFINEMENT_BITS, ACCT_STR);
-    } else {
-      cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col]->mbmi.dering_gain =
-          0;
     }
   }
 #endif
@@ -3523,11 +3531,11 @@ static size_t read_uncompressed_header(AV1Decoder *pbi,
 #endif  // CONFIG_EXT_PARTITION
 
   setup_loopfilter(cm, rb);
-#if CONFIG_CLPF
-  setup_clpf(pbi, rb);
-#endif
 #if CONFIG_DERING
   setup_dering(cm, rb);
+#endif
+#if CONFIG_CLPF
+  setup_clpf(pbi, rb);
 #endif
 #if CONFIG_LOOP_RESTORATION
   decode_restoration_mode(cm, rb);
@@ -3721,12 +3729,7 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
   decode_restoration(cm, &r);
 #endif
 
-  if (cm->tx_mode == TX_MODE_SELECT) {
-    for (i = 0; i < MAX_TX_DEPTH; ++i)
-      for (j = 0; j < TX_SIZE_CONTEXTS; ++j)
-        for (k = 0; k < i + 1; ++k)
-          av1_diff_update_prob(&r, &fc->tx_size_probs[i][j][k], ACCT_STR);
-  }
+  if (cm->tx_mode == TX_MODE_SELECT) read_tx_size_probs(fc, &r);
 
   read_coef_probs(fc, cm->tx_mode, &r);
 
@@ -4174,6 +4177,12 @@ void av1_decode_frame(AV1Decoder *pbi, const uint8_t *data,
   }
 #endif  // CONFIG_LOOP_RESTORATION
 
+#if CONFIG_DERING
+  if (cm->dering_level && !cm->skip_loop_filter) {
+    av1_dering_frame(&pbi->cur_buf->buf, cm, &pbi->mb, cm->dering_level);
+  }
+#endif  // CONFIG_DERING
+
 #if CONFIG_CLPF
   if (!cm->skip_loop_filter) {
     const YV12_BUFFER_CONFIG *const frame = &pbi->cur_buf->buf;
@@ -4195,11 +4204,6 @@ void av1_decode_frame(AV1Decoder *pbi, const uint8_t *data,
   }
   if (cm->clpf_blocks) aom_free(cm->clpf_blocks);
 #endif
-#if CONFIG_DERING
-  if (cm->dering_level && !cm->skip_loop_filter) {
-    av1_dering_frame(&pbi->cur_buf->buf, cm, &pbi->mb, cm->dering_level);
-  }
-#endif  // CONFIG_DERING
 
   if (!xd->corrupted) {
     if (cm->refresh_frame_context == REFRESH_FRAME_CONTEXT_BACKWARD) {

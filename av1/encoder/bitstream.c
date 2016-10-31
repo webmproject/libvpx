@@ -314,7 +314,7 @@ static void encode_unsigned_max(struct aom_write_bit_buffer *wb, int data,
   aom_wb_write_literal(wb, data, get_unsigned_bits(max));
 }
 
-#if !CONFIG_EC_ADAPT
+#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
 static void prob_diff_update(const aom_tree_index *tree,
                              aom_prob probs[/*n - 1*/],
                              const unsigned int counts[/*n - 1*/], int n,
@@ -628,7 +628,6 @@ static void update_ext_tx_probs(AV1_COMMON *cm, aom_writer *w) {
 
 #else
 #if !CONFIG_EC_ADAPT
-
 static void update_ext_tx_probs(AV1_COMMON *cm, aom_writer *w) {
   const int savings_thresh = av1_cost_one(GROUP_DIFF_UPDATE_PROB) -
                              av1_cost_zero(GROUP_DIFF_UPDATE_PROB);
@@ -2093,6 +2092,16 @@ static void write_modes_sb(AV1_COMP *const cpi, const TileInfo *const tile,
     update_partition_context(xd, mi_row, mi_col, subsize, bsize);
 #endif  // CONFIG_EXT_PARTITION_TYPES
 
+#if CONFIG_DERING
+  if (bsize == BLOCK_64X64 && cm->dering_level != 0 &&
+      !sb_all_skip(cm, mi_row, mi_col)) {
+    aom_write_literal(
+        w,
+        cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col]->mbmi.dering_gain,
+        DERING_REFINEMENT_BITS);
+  }
+#endif
+
 #if CONFIG_CLPF
   if (bsize == BLOCK_64X64 && cm->clpf_blocks && cm->clpf_strength_y &&
       cm->clpf_size != CLPF_NOSIZE) {
@@ -2121,16 +2130,6 @@ static void write_modes_sb(AV1_COMP *const cpi, const TileInfo *const tile,
         mi_col + MI_SIZE / 2 < cm->mi_cols &&
         cm->clpf_blocks[br] != CLPF_NOFLAG)
       aom_write_literal(w, cm->clpf_blocks[br], 1);
-  }
-#endif
-
-#if CONFIG_DERING
-  if (bsize == BLOCK_64X64 && cm->dering_level != 0 &&
-      !sb_all_skip(cm, mi_row, mi_col)) {
-    aom_write_literal(
-        w,
-        cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col]->mbmi.dering_gain,
-        DERING_REFINEMENT_BITS);
   }
 #endif
 }
@@ -2917,6 +2916,7 @@ static void write_txfm_mode(TX_MODE mode, struct aom_write_bit_buffer *wb) {
   if (mode != TX_MODE_SELECT) aom_wb_write_literal(wb, mode, 2);
 }
 
+#if !CONFIG_EC_ADAPT
 static void update_txfm_probs(AV1_COMMON *cm, aom_writer *w,
                               FRAME_COUNTS *counts) {
 #if CONFIG_TILE_GROUPS
@@ -2932,6 +2932,7 @@ static void update_txfm_probs(AV1_COMMON *cm, aom_writer *w,
                          counts->tx_size[i][j], i + 2, probwt, w);
   }
 }
+#endif
 
 static void write_interp_filter(InterpFilter filter,
                                 struct aom_write_bit_buffer *wb) {
@@ -3569,12 +3570,12 @@ static void write_uncompressed_header(AV1_COMP *cpi,
 #endif  // CONFIG_EXT_PARTITION
 
   encode_loopfilter(cm, wb);
-#if CONFIG_CLPF
-  encode_clpf(cm, wb);
-#endif
 #if CONFIG_DERING
   encode_dering(cm->dering_level, wb);
 #endif  // CONFIG_DERING
+#if CONFIG_CLPF
+  encode_clpf(cm, wb);
+#endif
 #if CONFIG_LOOP_RESTORATION
   encode_restoration_mode(cm, wb);
 #endif  // CONFIG_LOOP_RESTORATION
@@ -3706,9 +3707,9 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
 #if CONFIG_LOOP_RESTORATION
   encode_restoration(cm, header_bc);
 #endif  // CONFIG_LOOP_RESTORATION
-
+#if !CONFIG_EC_ADAPT
   update_txfm_probs(cm, header_bc, counts);
-
+#endif
   update_coef_probs(cpi, header_bc);
 
 #if CONFIG_VAR_TX
