@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e6dd565f_ab4ac999",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 626,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-31T22:29:50Z",
+      "side": 1,
+      "message": "vld1_lane_u32() generates 3-4x slow testing result for clang-3.8 compared with gcc-4.9 (with no sense). So change to vld1_u8().\nAlso happens to 4x4 d135 and will fix it separately.",
+      "range": {
+        "startLine": 625,
+        "startChar": 0,
+        "endLine": 626,
+        "endChar": 44
+      },
+      "revId": "aec031aa22347273f6350f76b13b3c16ddc79a96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_cb2cf5cd",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 633,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-31T22:29:50Z",
+      "side": 1,
+      "message": "vcombine_s16() generates lots of redundant code in clang-3.8. Change to vdupq_lane_s64() to favor clang.",
+      "range": {
+        "startLine": 633,
+        "startChar": 6,
+        "endLine": 633,
+        "endChar": 20
+      },
+      "revId": "aec031aa22347273f6350f76b13b3c16ddc79a96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_8b26ede7",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 695,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-31T22:29:50Z",
+      "side": 1,
+      "message": "Revert vst1q_u8() to original vst1_u8() to favor gcc-4.9.",
+      "range": {
+        "startLine": 695,
+        "startChar": 2,
+        "endLine": 695,
+        "endChar": 9
+      },
+      "revId": "aec031aa22347273f6350f76b13b3c16ddc79a96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
