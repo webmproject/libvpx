@@ -781,7 +781,7 @@ static int main_loop(int argc, const char **argv_) {
           warn("Failed to decode frame %d: %s", frame_in,
                vpx_codec_error(&decoder));
           if (detail) warn("Additional information: %s", detail);
-          frames_corrupted++;
+          corrupted = 1;
           if (!keep_going) goto fail;
         }
 
@@ -800,7 +800,7 @@ static int main_loop(int argc, const char **argv_) {
       // Flush the decoder in frame parallel decode.
       if (vpx_codec_decode(&decoder, NULL, 0, NULL, 0)) {
         warn("Failed to flush decoder: %s", vpx_codec_error(&decoder));
-        frames_corrupted++;
+        corrupted = 1;
         if (!keep_going) goto fail;
       }
     }
@@ -814,7 +814,7 @@ static int main_loop(int argc, const char **argv_) {
     vpx_usec_timer_mark(&timer);
     dx_time += (unsigned int)vpx_usec_timer_elapsed(&timer);
 
-    if (!frame_parallel &&
+    if (!frame_parallel && !corrupted &&
         vpx_codec_control(&decoder, VP8D_GET_FRAME_CORRUPTED, &corrupted)) {
       warn("Failed VP8_GET_FRAME_CORRUPTED: %s", vpx_codec_error(&decoder));
       if (!keep_going) goto fail;
