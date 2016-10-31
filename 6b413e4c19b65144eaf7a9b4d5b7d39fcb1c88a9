@@ -16,6 +16,24 @@
       "revId": "6b413e4c19b65144eaf7a9b4d5b7d39fcb1c88a9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_eb41f1a8",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 566,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-31T22:29:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "466e220f_6a863faf",
+      "revId": "6b413e4c19b65144eaf7a9b4d5b7d39fcb1c88a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
