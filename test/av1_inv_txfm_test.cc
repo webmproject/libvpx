@@ -24,7 +24,7 @@
 #include "av1/common/blockd.h"
 #include "av1/common/scan.h"
 #include "aom/aom_integer.h"
-#include "av1/common/av1_inv_txfm.h"
+#include "aom_dsp/inv_txfm.h"
 
 using libaom_test::ACMRandom;
 
@@ -104,10 +104,10 @@ TEST_P(AV1InvTxfm, RunInvAccuracyCheck) { RunInvAccuracyCheck(); }
 
 INSTANTIATE_TEST_CASE_P(
     C, AV1InvTxfm,
-    ::testing::Values(IdctParam(&av1_idct4_c, &reference_idct_1d, 4, 1),
-                      IdctParam(&av1_idct8_c, &reference_idct_1d, 8, 2),
-                      IdctParam(&av1_idct16_c, &reference_idct_1d, 16, 4),
-                      IdctParam(&av1_idct32_c, &reference_idct_1d, 32, 6)));
+    ::testing::Values(IdctParam(&aom_idct4_c, &reference_idct_1d, 4, 1),
+                      IdctParam(&aom_idct8_c, &reference_idct_1d, 8, 2),
+                      IdctParam(&aom_idct16_c, &reference_idct_1d, 16, 4),
+                      IdctParam(&aom_idct32_c, &reference_idct_1d, 32, 6)));
 
 #if CONFIG_AV1_ENCODER
 typedef void (*FwdTxfmFunc)(const int16_t *in, tran_low_t *out, int stride);
@@ -262,19 +262,19 @@ using std::tr1::make_tuple;
 
 INSTANTIATE_TEST_CASE_P(
     C, AV1PartialIDctTest,
-    ::testing::Values(make_tuple(&av1_fdct32x32_c, &av1_idct32x32_1024_add_c,
-                                 &av1_idct32x32_34_add_c, TX_32X32, 34),
-                      make_tuple(&av1_fdct32x32_c, &av1_idct32x32_1024_add_c,
-                                 &av1_idct32x32_1_add_c, TX_32X32, 1),
-                      make_tuple(&av1_fdct16x16_c, &av1_idct16x16_256_add_c,
-                                 &av1_idct16x16_10_add_c, TX_16X16, 10),
-                      make_tuple(&av1_fdct16x16_c, &av1_idct16x16_256_add_c,
-                                 &av1_idct16x16_1_add_c, TX_16X16, 1),
-                      make_tuple(&av1_fdct8x8_c, &av1_idct8x8_64_add_c,
-                                 &av1_idct8x8_12_add_c, TX_8X8, 12),
-                      make_tuple(&av1_fdct8x8_c, &av1_idct8x8_64_add_c,
-                                 &av1_idct8x8_1_add_c, TX_8X8, 1),
-                      make_tuple(&av1_fdct4x4_c, &av1_idct4x4_16_add_c,
-                                 &av1_idct4x4_1_add_c, TX_4X4, 1)));
+    ::testing::Values(make_tuple(&aom_fdct32x32_c, &aom_idct32x32_1024_add_c,
+                                 &aom_idct32x32_34_add_c, TX_32X32, 34),
+                      make_tuple(&aom_fdct32x32_c, &aom_idct32x32_1024_add_c,
+                                 &aom_idct32x32_1_add_c, TX_32X32, 1),
+                      make_tuple(&aom_fdct16x16_c, &aom_idct16x16_256_add_c,
+                                 &aom_idct16x16_10_add_c, TX_16X16, 10),
+                      make_tuple(&aom_fdct16x16_c, &aom_idct16x16_256_add_c,
+                                 &aom_idct16x16_1_add_c, TX_16X16, 1),
+                      make_tuple(&aom_fdct8x8_c, &aom_idct8x8_64_add_c,
+                                 &aom_idct8x8_12_add_c, TX_8X8, 12),
+                      make_tuple(&aom_fdct8x8_c, &aom_idct8x8_64_add_c,
+                                 &aom_idct8x8_1_add_c, TX_8X8, 1),
+                      make_tuple(&aom_fdct4x4_c, &aom_idct4x4_16_add_c,
+                                 &aom_idct4x4_1_add_c, TX_4X4, 1)));
 #endif  // CONFIG_AV1_ENCODER
 }  // namespace

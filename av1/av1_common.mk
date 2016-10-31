@@ -30,8 +30,6 @@ AV1_COMMON_SRCS-yes += common/filter.h
 AV1_COMMON_SRCS-yes += common/filter.c
 AV1_COMMON_SRCS-yes += common/idct.h
 AV1_COMMON_SRCS-yes += common/idct.c
-AV1_COMMON_SRCS-yes += common/av1_inv_txfm.h
-AV1_COMMON_SRCS-yes += common/av1_inv_txfm.c
 AV1_COMMON_SRCS-yes += common/loopfilter.h
 AV1_COMMON_SRCS-yes += common/thread_common.h
 AV1_COMMON_SRCS-yes += common/mv.h
@@ -61,8 +59,6 @@ AV1_COMMON_SRCS-yes += common/common_data.h
 AV1_COMMON_SRCS-yes += common/scan.c
 AV1_COMMON_SRCS-yes += common/scan.h
 # TODO(angiebird) the forward transform belongs under encoder/
-AV1_COMMON_SRCS-$(CONFIG_AV1_ENCODER) += common/av1_fwd_txfm.h
-AV1_COMMON_SRCS-$(CONFIG_AV1_ENCODER) += common/av1_fwd_txfm.c
 AV1_COMMON_SRCS-yes += common/av1_txfm.h
 AV1_COMMON_SRCS-yes += common/av1_fwd_txfm1d.h
 AV1_COMMON_SRCS-yes += common/av1_fwd_txfm1d.c
@@ -123,9 +119,6 @@ AV1_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/idct16x16_msa.c
 
 AV1_COMMON_SRCS-$(HAVE_SSE2) += common/x86/idct_intrin_sse2.c
 ifeq ($(CONFIG_AV1_ENCODER),yes)
-AV1_COMMON_SRCS-$(HAVE_SSE2) += common/x86/av1_fwd_txfm_sse2.c
-AV1_COMMON_SRCS-$(HAVE_SSE2) += common/x86/av1_fwd_dct32x32_impl_sse2.h
-AV1_COMMON_SRCS-$(HAVE_SSE2) += common/x86/av1_fwd_txfm_impl_sse2.h
 AV1_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/av1_txfm1d_sse4.h
 AV1_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/av1_fwd_txfm1d_sse4.c
 AV1_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/av1_fwd_txfm2d_sse4.c
@@ -142,8 +135,5 @@ endif
 ifeq ($(CONFIG_FILTER_INTRA),yes)
 AV1_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/filterintra_sse4.c
 endif
-
-AV1_COMMON_SRCS-$(HAVE_SSE2) += common/x86/av1_inv_txfm_sse2.c
-AV1_COMMON_SRCS-$(HAVE_SSE2) += common/x86/av1_inv_txfm_sse2.h
 
 $(eval $(call rtcd_h_template,av1_rtcd,av1/common/av1_rtcd_defs.pl))
