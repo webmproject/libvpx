@@ -22,6 +22,30 @@
       "revId": "f65b870e2768b768cd4c3b2165baecf013fa39d1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_ab640962",
+        "filename": "av1/common/onyxc_int.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 702,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2016-10-31T22:07:38Z",
+      "side": 1,
+      "message": "It does. The assumption is that the minimum transform block size (2x2 or 4x4) is square. Hence we can use tx_size_wide_log2[0] as the scaling factor.\n\nProbably should replace it with a macro later to make it more meaningful.",
+      "parentUuid": "e6dd565f_ab12c9c6",
+      "range": {
+        "startLine": 702,
+        "startChar": 28,
+        "endLine": 702,
+        "endChar": 45
+      },
+      "revId": "f65b870e2768b768cd4c3b2165baecf013fa39d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
