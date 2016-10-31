@@ -16,7 +16,7 @@
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
 
-    INCLUDE vpx_dsp/arm/idct_neon.asm.s
+    INCLUDE vpx_dsp/arm/idct_neon.asm.S
 
     ; Parallel 1D IDCT on all the columns of a 8x8 16bit data matrix which are
     ; loaded in q8-q15. The output will be stored back into q8-q15 registers.

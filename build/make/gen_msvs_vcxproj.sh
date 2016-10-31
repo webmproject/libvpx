@@ -203,7 +203,7 @@ for opt in "$@"; do
             # The paths in file_list are fixed outside of the loop.
             file_list[${#file_list[@]}]="$opt"
             case "$opt" in
-                 *.asm|*.s) uses_asm=true
+                 *.asm|*.[Ss]) uses_asm=true
                  ;;
             esac
         ;;

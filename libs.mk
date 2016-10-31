@@ -12,7 +12,7 @@
 # ARM assembly files are written in RVCT-style. We use some make magic to
 # filter those files to allow GCC compilation
 ifeq ($(ARCH_ARM),yes)
-  ASM:=$(if $(filter yes,$(CONFIG_GCC)$(CONFIG_MSVS)),.asm.s,.asm)
+  ASM:=$(if $(filter yes,$(CONFIG_GCC)$(CONFIG_MSVS)),.asm.S,.asm)
 else
   ASM:=.asm
 endif
@@ -366,7 +366,7 @@ endif
 #
 # Add assembler dependencies for configuration.
 #
-$(filter %.s.o,$(OBJS-yes)):     $(BUILD_PFX)vpx_config.asm
+$(filter %.S.o,$(OBJS-yes)):     $(BUILD_PFX)vpx_config.asm
 $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)vpx_config.asm
 
 
