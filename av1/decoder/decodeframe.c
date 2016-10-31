@@ -115,6 +115,14 @@ static TX_MODE read_tx_mode(struct aom_read_bit_buffer *rb) {
   return aom_rb_read_bit(rb) ? TX_MODE_SELECT : aom_rb_read_literal(rb, 2);
 }
 
+static void read_tx_size_probs(FRAME_CONTEXT *fc, aom_reader *r) {
+  int i, j, k;
+  for (i = 0; i < MAX_TX_DEPTH; ++i)
+    for (j = 0; j < TX_SIZE_CONTEXTS; ++j)
+      for (k = 0; k < i + 1; ++k)
+        av1_diff_update_prob(r, &fc->tx_size_probs[i][j][k], ACCT_STR);
+}
+
 #if !CONFIG_EC_ADAPT
 static void read_switchable_interp_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   int i, j;
@@ -3721,12 +3729,7 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
   decode_restoration(cm, &r);
 #endif
 
-  if (cm->tx_mode == TX_MODE_SELECT) {
-    for (i = 0; i < MAX_TX_DEPTH; ++i)
-      for (j = 0; j < TX_SIZE_CONTEXTS; ++j)
-        for (k = 0; k < i + 1; ++k)
-          av1_diff_update_prob(&r, &fc->tx_size_probs[i][j][k], ACCT_STR);
-  }
+  if (cm->tx_mode == TX_MODE_SELECT) read_tx_size_probs(fc, &r);
 
   read_coef_probs(fc, cm->tx_mode, &r);
 
