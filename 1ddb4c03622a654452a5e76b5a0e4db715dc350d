@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e6dd565f_ce0d23ad",
+        "filename": "build/make/gen_msvs_vcxproj.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-10-31T23:54:16Z",
+      "side": 1,
+      "message": "hopefully there shouldn\u0027t be any .s",
+      "revId": "1ddb4c03622a654452a5e76b5a0e4db715dc350d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
