@@ -3063,14 +3063,13 @@ static void select_tx_block(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
   int64_t this_rd = INT64_MAX;
   ENTROPY_CONTEXT *pta = ta + blk_col;
   ENTROPY_CONTEXT *ptl = tl + blk_row;
-  ENTROPY_CONTEXT stxa = 0, stxl = 0;
   int coeff_ctx, i;
   int ctx = txfm_partition_context(tx_above + (blk_col >> 1),
                                    tx_left + (blk_row >> 1), tx_size);
 
   int64_t sum_dist = 0, sum_bsse = 0;
   int64_t sum_rd = INT64_MAX;
-  int sum_rate = av1_cost_bit(cpi->common.fc->txfm_partition_prob[ctx], 1);
+  int sum_rate = 0;
   int all_skip = 1;
   int tmp_eob = 0;
   int zero_blk_rate;
@@ -3084,26 +3083,7 @@ static void select_tx_block(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
     return;
   }
 
-  switch (tx_size) {
-    case TX_4X4:
-      stxa = pta[0];
-      stxl = ptl[0];
-      break;
-    case TX_8X8:
-      stxa = !!*(const uint16_t *)&pta[0];
-      stxl = !!*(const uint16_t *)&ptl[0];
-      break;
-    case TX_16X16:
-      stxa = !!*(const uint32_t *)&pta[0];
-      stxl = !!*(const uint32_t *)&ptl[0];
-      break;
-    case TX_32X32:
-      stxa = !!*(const uint64_t *)&pta[0];
-      stxl = !!*(const uint64_t *)&ptl[0];
-      break;
-    default: assert(0 && "Invalid transform size."); break;
-  }
-  coeff_ctx = combine_entropy_contexts(stxa, stxl);
+  coeff_ctx = get_entropy_context(tx_size, pta, ptl);
 
   *rate = 0;
   *dist = 0;
@@ -3153,6 +3133,7 @@ static void select_tx_block(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
     int this_cost_valid = 1;
     int64_t tmp_rd = 0;
 
+    sum_rate = av1_cost_bit(cpi->common.fc->txfm_partition_prob[ctx], 1);
 #if CONFIG_EXT_TX
     assert(tx_size < TX_SIZES);
 #endif  // CONFIG_EXT_TX
