@@ -215,33 +215,26 @@
     ; transpose the input data
     TRANSPOSE8X8
 
-    ; generate  cospi_28_64 = 3196
-    mov             r3, #0x0c00
-    add             r3, #0x7c
+    ; cospi_28_64 = 3196
+    movw            r3, #0x0c7c
 
-    ; generate cospi_4_64  = 16069
-    mov             r4, #0x3e00
-    add             r4, #0xc5
+    ; cospi_4_64  = 16069
+    movw            r4, #0x3ec5
 
-    ; generate cospi_12_64 = 13623
-    mov             r5, #0x3500
-    add             r5, #0x37
+    ; cospi_12_64 = 13623
+    movw            r5, #0x3537
 
-    ; generate cospi_20_64 = 9102
-    mov             r6, #0x2300
-    add             r6, #0x8e
+    ; cospi_20_64 = 9102
+    movw            r6, #0x238e
 
-    ; generate cospi_16_64 = 11585
-    mov             r7, #0x2d00
-    add             r7, #0x41
+    ; cospi_16_64 = 11585
+    movw            r7, #0x2d41
 
-    ; generate cospi_24_64 = 6270
-    mov             r8, #0x1800
-    add             r8, #0x7e
+    ; cospi_24_64 = 6270
+    movw            r8, #0x187e
 
-    ; generate cospi_8_64 = 15137
-    mov             r9, #0x3b00
-    add             r9, #0x21
+    ; cospi_8_64 = 15137
+    movw            r9, #0x3b21
 
     ; First transform rows
     IDCT8x8_1D
@@ -327,33 +320,26 @@
     ; transpose the input data
     TRANSPOSE8X8
 
-    ; generate  cospi_28_64 = 3196
-    mov             r3, #0x0c00
-    add             r3, #0x7c
+    ; cospi_28_64 = 3196
+    movw            r3, #0x0c7c
 
-    ; generate cospi_4_64  = 16069
-    mov             r4, #0x3e00
-    add             r4, #0xc5
+    ; cospi_4_64  = 16069
+    movw            r4, #0x3ec5
 
-    ; generate cospi_12_64 = 13623
-    mov             r5, #0x3500
-    add             r5, #0x37
+    ; cospi_12_64 = 13623
+    movw            r5, #0x3537
 
-    ; generate cospi_20_64 = 9102
-    mov             r6, #0x2300
-    add             r6, #0x8e
+    ; cospi_20_64 = 9102
+    movw            r6, #0x238e
 
-    ; generate cospi_16_64 = 11585
-    mov             r7, #0x2d00
-    add             r7, #0x41
+    ; cospi_16_64 = 11585
+    movw            r7, #0x2d41
 
-    ; generate cospi_24_64 = 6270
-    mov             r8, #0x1800
-    add             r8, #0x7e
+    ; cospi_24_64 = 6270
+    movw            r8, #0x187e
 
-    ; generate cospi_8_64 = 15137
-    mov             r9, #0x3b00
-    add             r9, #0x21
+    ; cospi_8_64 = 15137
+    movw            r9, #0x3b21
 
     ; First transform rows
     ; stage 1

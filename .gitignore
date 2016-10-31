@@ -37,9 +37,9 @@
 /examples/twopass_encoder
 /examples/vp8_multi_resolution_encoder
 /examples/vp8cx_set_ref
+/examples/vp9cx_set_ref
 /examples/vp9_lossless_encoder
-/examples/vp9_spatial_scalable_encoder
-/examples/vpx_temporal_scalable_patterns
+/examples/vp9_spatial_svc_encoder
 /examples/vpx_temporal_svc_encoder
 /ivfdec
 /ivfdec.dox
@@ -50,6 +50,9 @@
 /samples.dox
 /test_intra_pred_speed
 /test_libvpx
+/tools.dox
+/tools/*.dox
+/tools/tiny_ssim
 /vp8_api1_migration.dox
 /vp[89x]_rtcd.h
 /vpx.pc
