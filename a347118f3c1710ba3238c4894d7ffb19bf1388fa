@@ -25,6 +25,54 @@
     },
     {
       "key": {
+        "uuid": "466e220f_10e09c10",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-31T19:01:20Z",
+      "side": 1,
+      "message": "clang looks much better; gcc-4.9 doesn\u0027t unroll this loop, no difference with this change",
+      "parentUuid": "466e220f_707c7028",
+      "range": {
+        "startLine": 426,
+        "startChar": 0,
+        "endLine": 426,
+        "endChar": 14
+      },
+      "revId": "a347118f3c1710ba3238c4894d7ffb19bf1388fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "466e220f_b0e28819",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-31T19:01:20Z",
+      "side": 1,
+      "message": "much better in clang; gcc-4.9 isn\u0027t unrolling this loop, no change here",
+      "parentUuid": "466e220f_707c7028",
+      "range": {
+        "startLine": 426,
+        "startChar": 0,
+        "endLine": 426,
+        "endChar": 14
+      },
+      "revId": "a347118f3c1710ba3238c4894d7ffb19bf1388fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "466e220f_10a25c82",
         "filename": "vpx_dsp/arm/intrapred_neon.c",
         "patchSetId": 4
