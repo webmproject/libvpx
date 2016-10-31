@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e6dd565f_4b9b655b",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 638,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-10-31T23:37:16Z",
+      "side": 1,
+      "message": "probably would have been easier if this was used at all. though we might want .asm in some cases, unless we mean strictly the suffix for as, i.e., not yasm",
+      "revId": "f5f5a054cd7b729ffbc3110d69f54ee942d1b506",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
