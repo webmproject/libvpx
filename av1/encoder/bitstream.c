@@ -849,21 +849,21 @@ static void pack_txb_tokens(aom_writer *w, const TOKENEXTRA **tp,
   if (tx_size == plane_tx_size) {
     pack_mb_tokens(w, tp, tok_end, bit_depth, tx_size);
   } else {
-    int bsl = b_width_log2_lookup[bsize];
+    const int bsl = block_size_wide[bsize] >> (tx_size_wide_log2[0] + 1);
     int i;
 
     assert(bsl > 0);
-    --bsl;
 
     for (i = 0; i < 4; ++i) {
-      const int offsetr = blk_row + ((i >> 1) << bsl);
-      const int offsetc = blk_col + ((i & 0x01) << bsl);
-      int step = num_4x4_blocks_txsize_lookup[tx_size - 1];
+      const int offsetr = blk_row + (i >> 1) * bsl;
+      const int offsetc = blk_col + (i & 0x01) * bsl;
+      const TX_SIZE sub_txs = tx_size - 1;
+      const int step = tx_size_wide_unit[sub_txs] * tx_size_high_unit[sub_txs];
 
       if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide) continue;
 
       pack_txb_tokens(w, tp, tok_end, xd, mbmi, plane, plane_bsize, bit_depth,
-                      block + i * step, offsetr, offsetc, tx_size - 1);
+                      block + i * step, offsetr, offsetc, sub_txs);
     }
   }
 }
@@ -1834,8 +1834,10 @@ static void write_modes_b(AV1_COMP *cpi, const TileInfo *const tile,
       const BLOCK_SIZE plane_bsize =
           get_plane_block_size(AOMMAX(bsize, BLOCK_8X8), pd);
 
-      const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
-      const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
+      const int num_4x4_w =
+          block_size_wide[plane_bsize] >> tx_size_wide_log2[0];
+      const int num_4x4_h =
+          block_size_high[plane_bsize] >> tx_size_wide_log2[0];
       int row, col;
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
       TX_SIZE tx_size =
@@ -1846,12 +1848,13 @@ static void write_modes_b(AV1_COMP *cpi, const TileInfo *const tile,
       if (is_inter_block(mbmi)) {
 #endif
         const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
-        const BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
         int block = 0;
-        const int step = num_4x4_blocks_txsize_lookup[max_tx_size];
-        bw = num_4x4_blocks_wide_lookup[txb_size];
-        for (row = 0; row < num_4x4_h; row += bw) {
-          for (col = 0; col < num_4x4_w; col += bw) {
+        const int step =
+            tx_size_wide_unit[max_tx_size] * tx_size_high_unit[max_tx_size];
+        const int bkw = tx_size_wide_unit[max_tx_size];
+        const int bkh = tx_size_high_unit[max_tx_size];
+        for (row = 0; row < num_4x4_h; row += bkh) {
+          for (col = 0; col < num_4x4_w; col += bkw) {
             pack_txb_tokens(w, tok, tok_end, xd, mbmi, plane, plane_bsize,
                             cm->bit_depth, block, row, col, max_tx_size);
             block += step;
@@ -1860,12 +1863,11 @@ static void write_modes_b(AV1_COMP *cpi, const TileInfo *const tile,
       } else {
         TX_SIZE tx = plane ? get_uv_tx_size(&m->mbmi, &xd->plane[plane])
                            : m->mbmi.tx_size;
-        BLOCK_SIZE txb_size = txsize_to_bsize[tx];
-        bw = num_4x4_blocks_wide_lookup[txb_size];
-        bh = num_4x4_blocks_high_lookup[txb_size];
+        const int bkw = tx_size_wide_unit[tx];
+        const int bkh = tx_size_high_unit[tx];
 
-        for (row = 0; row < num_4x4_h; row += bh)
-          for (col = 0; col < num_4x4_w; col += bw)
+        for (row = 0; row < num_4x4_h; row += bkh)
+          for (col = 0; col < num_4x4_w; col += bkw)
             pack_mb_tokens(w, tok, tok_end, cm->bit_depth, tx);
       }
 #else
