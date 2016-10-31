@@ -451,7 +451,7 @@ void av1_xform_quant(const AV1_COMMON *cm, MACROBLOCK *x, int plane, int block,
   const qm_val_t *iqmatrix = pd->seg_iqmatrix[seg_id][!is_inter][tx_size];
 #endif
   const int16_t *src_diff;
-  const int tx2d_size = get_tx2d_size(tx_size);
+  const int tx2d_size = tx_size_2d[tx_size];
 
   FWD_TXFM_PARAM fwd_txfm_param;
   QUANT_PARAM qparam;
@@ -542,14 +542,13 @@ void av1_xform_quant_nuq(const AV1_COMMON *cm, MACROBLOCK *x, int plane,
     highbd_fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
     if (tx_size == TX_32X32) {
       highbd_quantize_32x32_nuq(
-          coeff, get_tx2d_size(tx_size), x->skip_block, p->quant,
-          p->quant_shift, pd->dequant,
-          (const cuml_bins_type_nuq *)p->cuml_bins_nuq[dq],
+          coeff, tx_size_2d[tx_size], x->skip_block, p->quant, p->quant_shift,
+          pd->dequant, (const cuml_bins_type_nuq *)p->cuml_bins_nuq[dq],
           (const dequant_val_type_nuq *)pd->dequant_val_nuq[dq], qcoeff,
           dqcoeff, eob, scan_order->scan, band);
     } else {
-      highbd_quantize_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
-                          p->quant, p->quant_shift, pd->dequant,
+      highbd_quantize_nuq(coeff, tx_size_2d[tx_size], x->skip_block, p->quant,
+                          p->quant_shift, pd->dequant,
                           (const cuml_bins_type_nuq *)p->cuml_bins_nuq[dq],
                           (const dequant_val_type_nuq *)pd->dequant_val_nuq[dq],
                           qcoeff, dqcoeff, eob, scan_order->scan, band);
@@ -566,7 +565,7 @@ void av1_xform_quant_nuq(const AV1_COMMON *cm, MACROBLOCK *x, int plane,
                        (const dequant_val_type_nuq *)pd->dequant_val_nuq[dq],
                        qcoeff, dqcoeff, eob, scan_order->scan, band);
   } else {
-    quantize_nuq(coeff, get_tx2d_size(tx_size), x->skip_block, p->quant,
+    quantize_nuq(coeff, tx_size_2d[tx_size], x->skip_block, p->quant,
                  p->quant_shift, pd->dequant,
                  (const cuml_bins_type_nuq *)p->cuml_bins_nuq[dq],
                  (const dequant_val_type_nuq *)pd->dequant_val_nuq[dq], qcoeff,
@@ -613,14 +612,14 @@ void av1_xform_quant_fp_nuq(const AV1_COMMON *cm, MACROBLOCK *x, int plane,
     highbd_fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
     if (tx_size == TX_32X32) {
       highbd_quantize_32x32_fp_nuq(
-          coeff, get_tx2d_size(tx_size), x->skip_block, p->quant_fp,
-          pd->dequant, (const cuml_bins_type_nuq *)p->cuml_bins_nuq[dq],
+          coeff, tx_size_2d[tx_size], x->skip_block, p->quant_fp, pd->dequant,
+          (const cuml_bins_type_nuq *)p->cuml_bins_nuq[dq],
           (const dequant_val_type_nuq *)pd->dequant_val_nuq[dq], qcoeff,
           dqcoeff, eob, scan_order->scan, band);
     } else {
       highbd_quantize_fp_nuq(
-          coeff, get_tx2d_size(tx_size), x->skip_block, p->quant_fp,
-          pd->dequant, (const cuml_bins_type_nuq *)p->cuml_bins_nuq[dq],
+          coeff, tx_size_2d[tx_size], x->skip_block, p->quant_fp, pd->dequant,
+          (const cuml_bins_type_nuq *)p->cuml_bins_nuq[dq],
           (const dequant_val_type_nuq *)pd->dequant_val_nuq[dq], qcoeff,
           dqcoeff, eob, scan_order->scan, band);
     }
@@ -630,13 +629,13 @@ void av1_xform_quant_fp_nuq(const AV1_COMMON *cm, MACROBLOCK *x, int plane,
 
   fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
   if (tx_size == TX_32X32) {
-    quantize_32x32_fp_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
+    quantize_32x32_fp_nuq(coeff, tx_size_2d[tx_size], x->skip_block,
                           p->quant_fp, pd->dequant,
                           (const cuml_bins_type_nuq *)p->cuml_bins_nuq[dq],
                           (const dequant_val_type_nuq *)pd->dequant_val_nuq[dq],
                           qcoeff, dqcoeff, eob, scan_order->scan, band);
   } else {
-    quantize_fp_nuq(coeff, get_tx2d_size(tx_size), x->skip_block, p->quant_fp,
+    quantize_fp_nuq(coeff, tx_size_2d[tx_size], x->skip_block, p->quant_fp,
                     pd->dequant,
                     (const cuml_bins_type_nuq *)p->cuml_bins_nuq[dq],
                     (const dequant_val_type_nuq *)pd->dequant_val_nuq[dq],
@@ -681,11 +680,11 @@ void av1_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
     highbd_fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
     if (tx_size == TX_32X32) {
       highbd_quantize_dc_32x32_nuq(
-          coeff, get_tx2d_size(tx_size), x->skip_block, p->quant[0],
+          coeff, tx_size_2d[tx_size], x->skip_block, p->quant[0],
           p->quant_shift[0], pd->dequant[0], p->cuml_bins_nuq[dq][0],
           pd->dequant_val_nuq[dq][0], qcoeff, dqcoeff, eob);
     } else {
-      highbd_quantize_dc_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
+      highbd_quantize_dc_nuq(coeff, tx_size_2d[tx_size], x->skip_block,
                              p->quant[0], p->quant_shift[0], pd->dequant[0],
                              p->cuml_bins_nuq[dq][0],
                              pd->dequant_val_nuq[dq][0], qcoeff, dqcoeff, eob);
@@ -696,12 +695,12 @@ void av1_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
 
   fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
   if (tx_size == TX_32X32) {
-    quantize_dc_32x32_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
+    quantize_dc_32x32_nuq(coeff, tx_size_2d[tx_size], x->skip_block,
                           p->quant[0], p->quant_shift[0], pd->dequant[0],
                           p->cuml_bins_nuq[dq][0], pd->dequant_val_nuq[dq][0],
                           qcoeff, dqcoeff, eob);
   } else {
-    quantize_dc_nuq(coeff, get_tx2d_size(tx_size), x->skip_block, p->quant[0],
+    quantize_dc_nuq(coeff, tx_size_2d[tx_size], x->skip_block, p->quant[0],
                     p->quant_shift[0], pd->dequant[0], p->cuml_bins_nuq[dq][0],
                     pd->dequant_val_nuq[dq][0], qcoeff, dqcoeff, eob);
   }
@@ -744,12 +743,12 @@ void av1_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
     highbd_fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
     if (tx_size == TX_32X32) {
       highbd_quantize_dc_32x32_fp_nuq(
-          coeff, get_tx2d_size(tx_size), x->skip_block, p->quant_fp[0],
+          coeff, tx_size_2d[tx_size], x->skip_block, p->quant_fp[0],
           pd->dequant[0], p->cuml_bins_nuq[dq][0], pd->dequant_val_nuq[dq][0],
           qcoeff, dqcoeff, eob);
     } else {
       highbd_quantize_dc_fp_nuq(
-          coeff, get_tx2d_size(tx_size), x->skip_block, p->quant_fp[0],
+          coeff, tx_size_2d[tx_size], x->skip_block, p->quant_fp[0],
           pd->dequant[0], p->cuml_bins_nuq[dq][0], pd->dequant_val_nuq[dq][0],
           qcoeff, dqcoeff, eob);
     }
@@ -759,12 +758,12 @@ void av1_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block, int blk_row,
 
   fwd_txfm(src_diff, coeff, diff_stride, &fwd_txfm_param);
   if (tx_size == TX_32X32) {
-    quantize_dc_32x32_fp_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
+    quantize_dc_32x32_fp_nuq(coeff, tx_size_2d[tx_size], x->skip_block,
                              p->quant_fp[0], pd->dequant[0],
                              p->cuml_bins_nuq[dq][0],
                              pd->dequant_val_nuq[dq][0], qcoeff, dqcoeff, eob);
   } else {
-    quantize_dc_fp_nuq(coeff, get_tx2d_size(tx_size), x->skip_block,
+    quantize_dc_fp_nuq(coeff, tx_size_2d[tx_size], x->skip_block,
                        p->quant_fp[0], pd->dequant[0], p->cuml_bins_nuq[dq][0],
                        pd->dequant_val_nuq[dq][0], qcoeff, dqcoeff, eob);
   }

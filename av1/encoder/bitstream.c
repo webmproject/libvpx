@@ -719,11 +719,11 @@ static void update_supertx_probs(AV1_COMMON *cm, int probwt, aom_writer *w) {
 
 static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
                            const TOKENEXTRA *const stop,
-                           aom_bit_depth_t bit_depth, const TX_SIZE tx) {
+                           aom_bit_depth_t bit_depth, const TX_SIZE tx_size) {
   const TOKENEXTRA *p = *tp;
 #if CONFIG_VAR_TX
   int count = 0;
-  const int seg_eob = get_tx2d_size(tx);
+  const int seg_eob = tx_size_2d[tx_size];
 #endif
 #if CONFIG_AOM_HIGHBITDEPTH
   const av1_extra_bit *const extra_bits_table =
@@ -786,7 +786,7 @@ static void pack_mb_tokens(aom_writer *w, const TOKENEXTRA **tp,
                                                       // be written excluding
                                                       // the sign bit.
       int skip_bits = (extra_bits->base_val == CAT6_MIN_VAL)
-                          ? TX_SIZES - 1 - txsize_sqr_up_map[tx]
+                          ? TX_SIZES - 1 - txsize_sqr_up_map[tx_size]
                           : 0;
 
       if (bit_string_length > 0) {

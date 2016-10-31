@@ -443,10 +443,6 @@ static INLINE int supertx_enabled(const MB_MODE_INFO *mbmi) {
 }
 #endif  // CONFIG_SUPERTX
 
-static INLINE int get_tx2d_size(TX_SIZE tx_size) {
-  return num_4x4_blocks_txsize_lookup[tx_size] << 4;
-}
-
 #if CONFIG_EXT_TX
 #define ALLOW_INTRA_EXT_TX 1
 
