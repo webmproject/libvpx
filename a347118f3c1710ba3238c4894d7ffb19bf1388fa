@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "466e220f_707c7028",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-31T17:42:04Z",
+      "side": 1,
+      "message": "According to disassembly, this change has no impact to gcc-4.9, but improves clang-3.8 a little bit.",
+      "range": {
+        "startLine": 426,
+        "startChar": 0,
+        "endLine": 426,
+        "endChar": 14
+      },
+      "revId": "a347118f3c1710ba3238c4894d7ffb19bf1388fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "466e220f_10a25c82",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 534,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-10-31T17:42:04Z",
+      "side": 1,
+      "message": "According to disassembly, adding \"dst +\u003d 16\" benefits clang-3.8.\n\nAlso unrolling the inner loop, otherwise gcc-4.9 generates messy and redundant code.",
+      "range": {
+        "startLine": 534,
+        "startChar": 0,
+        "endLine": 534,
+        "endChar": 14
+      },
+      "revId": "a347118f3c1710ba3238c4894d7ffb19bf1388fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
