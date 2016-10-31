@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a6d27e16_479b62be",
+        "filename": ".gitignore",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2016-10-31T18:56:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "466e220f_30103830",
+      "range": {
+        "startLine": 42,
+        "startChar": 10,
+        "endLine": 42,
+        "endChar": 38
+      },
+      "revId": "5f3f09c9194c30a41da1b18c47ca6bb01884b6d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "466e220f_d0fe24bf",
         "filename": ".gitignore",
         "patchSetId": 1
@@ -36,6 +60,24 @@
       "writtenOn": "2016-10-31T18:55:03Z",
       "side": 1,
       "message": "same for this one (vp9_temporal_scalable_patterns)?",
+      "revId": "5f3f09c9194c30a41da1b18c47ca6bb01884b6d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a6d27e16_67906698",
+        "filename": ".gitignore",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2016-10-31T18:56:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "466e220f_d0fe24bf",
       "revId": "5f3f09c9194c30a41da1b18c47ca6bb01884b6d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
