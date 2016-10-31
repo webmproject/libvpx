@@ -14,7 +14,7 @@
 
 #include "av1/common/filter.h"
 #include "av1/common/onyxc_int.h"
-#include "av1/common/av1_convolve.h"
+#include "av1/common/convolve.h"
 #include "aom/aom_integer.h"
 
 #ifdef __cplusplus

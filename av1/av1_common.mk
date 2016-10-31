@@ -78,8 +78,8 @@ ifeq ($(CONFIG_AOM_HIGHBITDEPTH),yes)
 AV1_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/av1_highbd_convolve_sse4.c
 AV1_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/av1_highbd_convolve_filters_sse4.h
 endif
-AV1_COMMON_SRCS-yes += common/av1_convolve.c
-AV1_COMMON_SRCS-yes += common/av1_convolve.h
+AV1_COMMON_SRCS-yes += common/convolve.c
+AV1_COMMON_SRCS-yes += common/convolve.h
 AV1_COMMON_SRCS-$(CONFIG_LOOP_RESTORATION) += common/restoration.h
 AV1_COMMON_SRCS-$(CONFIG_LOOP_RESTORATION) += common/restoration.c
 ifeq (yes,$(filter $(CONFIG_GLOBAL_MOTION) $(CONFIG_WARPED_MOTION),yes))
