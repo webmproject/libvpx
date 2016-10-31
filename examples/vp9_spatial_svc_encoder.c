@@ -423,7 +423,6 @@ static void set_rate_control_stats(struct RateControlStats *rc,
   for (sl = 0; sl < cfg->ss_number_layers; ++sl) {
     for (tl = 0; tl < cfg->ts_number_layers; ++tl) {
       const int layer = sl * cfg->ts_number_layers + tl;
-      const int tlayer0 = sl * cfg->ts_number_layers;
       if (cfg->ts_number_layers == 1)
         rc->layer_framerate[layer] = framerate;
       else
@@ -434,8 +433,8 @@ static void set_rate_control_stats(struct RateControlStats *rc,
                       cfg->layer_target_bitrate[layer - 1]) /
             (rc->layer_framerate[layer] - rc->layer_framerate[layer - 1]);
       } else {
-        rc->layer_pfb[tlayer0] = 1000.0 * cfg->layer_target_bitrate[tlayer0] /
-                                 rc->layer_framerate[tlayer0];
+        rc->layer_pfb[layer] = 1000.0 * cfg->layer_target_bitrate[layer] /
+                               rc->layer_framerate[layer];
       }
       rc->layer_input_frames[layer] = 0;
       rc->layer_enc_frames[layer] = 0;
@@ -455,12 +454,13 @@ static void printout_rate_control_summary(struct RateControlStats *rc,
                                           vpx_codec_enc_cfg_t *cfg,
                                           int frame_cnt) {
   unsigned int sl, tl;
-  int tot_num_frames = 0;
   double perc_fluctuation = 0.0;
+  int tot_num_frames = 0;
   printf("Total number of processed frames: %d\n\n", frame_cnt - 1);
   printf("Rate control layer stats for sl%d tl%d layer(s):\n\n",
          cfg->ss_number_layers, cfg->ts_number_layers);
   for (sl = 0; sl < cfg->ss_number_layers; ++sl) {
+    tot_num_frames = 0;
     for (tl = 0; tl < cfg->ts_number_layers; ++tl) {
       const int layer = sl * cfg->ts_number_layers + tl;
       const int num_dropped =
@@ -468,7 +468,7 @@ static void printout_rate_control_summary(struct RateControlStats *rc,
               ? (rc->layer_input_frames[layer] - rc->layer_enc_frames[layer])
               : (rc->layer_input_frames[layer] - rc->layer_enc_frames[layer] -
                  1);
-      if (!sl) tot_num_frames += rc->layer_input_frames[layer];
+      tot_num_frames += rc->layer_input_frames[layer];
       rc->layer_encoding_bitrate[layer] = 0.001 * rc->layer_framerate[layer] *
                                           rc->layer_encoding_bitrate[layer] /
                                           tot_num_frames;
