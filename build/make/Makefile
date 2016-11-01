@@ -90,7 +90,7 @@ all:
 
 .PHONY: clean
 clean::
-	rm -f $(OBJS-yes) $(OBJS-yes:.o=.d) $(OBJS-yes:.asm.s.o=.asm.s)
+	rm -f $(OBJS-yes) $(OBJS-yes:.o=.d) $(OBJS-yes:.asm.S.o=.asm.S)
 	rm -f $(CLEAN-OBJS)
 
 .PHONY: clean
@@ -180,13 +180,13 @@ $(BUILD_PFX)%.asm.o: %.asm
 	$(qexec)$(if $(CONFIG_DEPENDENCY_TRACKING),,mkdir -p $(dir $@))
 	$(qexec)$(AS) $(ASFLAGS) -o $@ $<
 
-$(BUILD_PFX)%.s.d: %.s
+$(BUILD_PFX)%.S.d: %.S
 	$(if $(quiet),@echo "    [DEP] $@")
 	$(qexec)mkdir -p $(dir $@)
 	$(qexec)$(SRC_PATH_BARE)/build/make/gen_asm_deps.sh \
             --build-pfx=$(BUILD_PFX) --depfile=$@ $(ASFLAGS) $< > $@
 
-$(BUILD_PFX)%.s.o: %.s
+$(BUILD_PFX)%.S.o: %.S
 	$(if $(quiet),@echo "    [AS] $@")
 	$(qexec)$(if $(CONFIG_DEPENDENCY_TRACKING),,mkdir -p $(dir $@))
 	$(qexec)$(AS) $(ASFLAGS) -o $@ $<
@@ -198,8 +198,8 @@ $(BUILD_PFX)%.c.S: %.c
 	$(qexec)$(if $(CONFIG_DEPENDENCY_TRACKING),,mkdir -p $(dir $@))
 	$(qexec)$(CC) -S $(CFLAGS) -o $@ $<
 
-.PRECIOUS: %.asm.s
-$(BUILD_PFX)%.asm.s: %.asm
+.PRECIOUS: %.asm.S
+$(BUILD_PFX)%.asm.S: %.asm
 	$(if $(quiet),@echo "    [ASM CONVERSION] $@")
 	$(qexec)mkdir -p $(dir $@)
 	$(qexec)$(ASM_CONVERSION) <$< >$@
