@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e6dd565f_7fe01784",
+        "filename": "vpx_dsp/arm/idct32x32_34_add_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-01T18:08:29Z",
+      "side": 0,
+      "message": "The only place a transpose was called was the load. That function has been moved to idct_neon.",
+      "range": {
+        "startLine": 15,
+        "startChar": 22,
+        "endLine": 15,
+        "endChar": 36
+      },
+      "revId": "84dcfced5ba1384beb4a4957720b17db7df97d74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_5fdd5bc4",
+        "filename": "vpx_dsp/arm/idct_neon.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-01T18:08:29Z",
+      "side": 0,
+      "message": "Not sure what this line was for. I can put it back if you like.",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 80
+      },
+      "revId": "84dcfced5ba1384beb4a4957720b17db7df97d74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
