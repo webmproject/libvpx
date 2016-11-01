@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e6dd565f_c5473e19",
+        "filename": "vpx_dsp/arm/idct32x32_1_add_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-01T22:33:11Z",
+      "side": 1,
+      "message": "i\u0027m actually a little mixed on this. it\u0027s a new code block so you could have\nuint8_t a \u003d a1 \u003c 0 ? 0 : .... etc\n\nbut also checking for \u003c 0 doesn\u0027t make sense - the code is seperate for that case. It could just be\nuint8_t a \u003d a1 \u003e 255 ? 255 : a1\n\nbut maybe it would just move the location of the cast, in which case it\u0027s not really that important.",
+      "revId": "7625c803b3b72385c3990e9b36ff1527634b3f00",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
