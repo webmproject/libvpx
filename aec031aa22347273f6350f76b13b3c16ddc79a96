@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e6dd565f_0ed1ebde",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 626,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T01:33:11Z",
+      "side": 1,
+      "message": "it seems clang is falling back to arm in these cases",
+      "parentUuid": "e6dd565f_ab4ac999",
+      "range": {
+        "startLine": 625,
+        "startChar": 0,
+        "endLine": 626,
+        "endChar": 44
+      },
+      "revId": "aec031aa22347273f6350f76b13b3c16ddc79a96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e6dd565f_cb2cf5cd",
         "filename": "vpx_dsp/arm/intrapred_neon.c",
         "patchSetId": 3
@@ -42,6 +66,47 @@
         "endLine": 633,
         "endChar": 20
       },
+      "revId": "aec031aa22347273f6350f76b13b3c16ddc79a96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_4ed7f3d5",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 633,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T01:33:11Z",
+      "side": 1,
+      "message": "you could leave a comment for that",
+      "parentUuid": "e6dd565f_cb2cf5cd",
+      "range": {
+        "startLine": 633,
+        "startChar": 6,
+        "endLine": 633,
+        "endChar": 20
+      },
+      "revId": "aec031aa22347273f6350f76b13b3c16ddc79a96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_ee27bfe6",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 668,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T01:33:11Z",
+      "side": 1,
+      "message": "these could be joined with the declarations and made const as in the 4x4",
       "revId": "aec031aa22347273f6350f76b13b3c16ddc79a96",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
