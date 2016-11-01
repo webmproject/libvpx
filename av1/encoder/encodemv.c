@@ -169,7 +169,7 @@ static void write_mv_update(const aom_tree_index *tree,
 
 void av1_write_nmv_probs(AV1_COMMON *cm, int usehp, aom_writer *w,
                          nmv_context_counts *const nmv_counts) {
-  int i, j;
+  int i;
 #if CONFIG_REF_MV
   int nmv_ctx = 0;
   for (nmv_ctx = 0; nmv_ctx < NMV_CONTEXTS; ++nmv_ctx) {
@@ -180,6 +180,7 @@ void av1_write_nmv_probs(AV1_COMMON *cm, int usehp, aom_writer *w,
                     w);
 
     for (i = 0; i < 2; ++i) {
+      int j;
       nmv_component *comp = &mvc->comps[i];
       nmv_component_counts *comp_counts = &counts->comps[i];
 
@@ -193,6 +194,7 @@ void av1_write_nmv_probs(AV1_COMMON *cm, int usehp, aom_writer *w,
     }
 
     for (i = 0; i < 2; ++i) {
+      int j;
       for (j = 0; j < CLASS0_SIZE; ++j)
         write_mv_update(av1_mv_fp_tree, mvc->comps[i].class0_fp[j],
                         counts->comps[i].class0_fp[j], MV_FP_SIZE, w);
@@ -218,6 +220,7 @@ void av1_write_nmv_probs(AV1_COMMON *cm, int usehp, aom_writer *w,
   write_mv_update(av1_mv_joint_tree, mvc->joints, counts->joints, MV_JOINTS, w);
 
   for (i = 0; i < 2; ++i) {
+    int j;
     nmv_component *comp = &mvc->comps[i];
     nmv_component_counts *comp_counts = &counts->comps[i];
 
@@ -231,6 +234,7 @@ void av1_write_nmv_probs(AV1_COMMON *cm, int usehp, aom_writer *w,
   }
 
   for (i = 0; i < 2; ++i) {
+    int j;
     for (j = 0; j < CLASS0_SIZE; ++j) {
       write_mv_update(av1_mv_fp_tree, mvc->comps[i].class0_fp[j],
                       counts->comps[i].class0_fp[j], MV_FP_SIZE, w);

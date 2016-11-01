@@ -134,8 +134,8 @@ static void read_switchable_interp_probs(FRAME_CONTEXT *fc, aom_reader *r) {
 #endif
 
 static void read_inter_mode_probs(FRAME_CONTEXT *fc, aom_reader *r) {
-  int i;
 #if CONFIG_REF_MV
+  int i;
   for (i = 0; i < NEWMV_MODE_CONTEXTS; ++i)
     av1_diff_update_prob(r, &fc->newmv_prob[i], ACCT_STR);
   for (i = 0; i < ZEROMV_MODE_CONTEXTS; ++i)
@@ -148,12 +148,15 @@ static void read_inter_mode_probs(FRAME_CONTEXT *fc, aom_reader *r) {
   av1_diff_update_prob(r, &fc->new2mv_prob, ACCT_STR);
 #endif  // CONFIG_EXT_INTER
 #else
-  int j;
 #if !CONFIG_EC_ADAPT
+  int i, j;
   for (i = 0; i < INTER_MODE_CONTEXTS; ++i) {
     for (j = 0; j < INTER_MODES - 1; ++j)
       av1_diff_update_prob(r, &fc->inter_mode_probs[i][j], ACCT_STR);
   }
+#else
+  (void)fc;
+  (void)r;
 #endif
 #endif
 }
@@ -3712,7 +3715,10 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
 #endif
   FRAME_CONTEXT *const fc = cm->fc;
   aom_reader r;
-  int k, i, j;
+  int k, i;
+#if !CONFIG_EC_ADAPT
+  int j;
+#endif
 
 #if !CONFIG_ANS
   if (aom_reader_init(&r, data, partition_size, pbi->decrypt_cb,
@@ -3845,7 +3851,6 @@ static int read_compressed_header(AV1Decoder *pbi, const uint8_t *data,
 
     if (cm->reference_mode != SINGLE_REFERENCE)
       setup_compound_reference_mode(cm);
-
     read_frame_reference_mode_probs(cm, &r);
 
 #if !CONFIG_EC_ADAPT

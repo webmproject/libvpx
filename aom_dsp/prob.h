@@ -33,7 +33,7 @@ typedef uint16_t aom_cdf_prob;
 
 typedef int8_t aom_tree_index;
 
-#define TREE_SIZE(leaf_count) (2 * (leaf_count)-2)
+#define TREE_SIZE(leaf_count) (-2 + 2 * (leaf_count))
 
 #define aom_complement(x) (255 - x)
 
