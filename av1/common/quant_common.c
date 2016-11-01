@@ -16,11 +16,6 @@
 #include "av1/common/seg_common.h"
 #include "av1/common/blockd.h"
 
-#if CONFIG_AOM_QM
-static void make_qmatrices(qm_val_t *wmatrix[NUM_QM_LEVELS][2][2][TX_SIZES],
-                           qm_val_t *iwmatrix[NUM_QM_LEVELS][2][2][TX_SIZES]);
-#endif
-
 #if CONFIG_NEW_QUANT
 // Bin widths expressed as a fraction over 128 of the quant stepsize,
 // for the quantization bins 0-4.
