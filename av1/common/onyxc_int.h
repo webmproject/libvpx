@@ -747,12 +747,11 @@ static INLINE void txfm_partition_update(TXFM_CONTEXT *above_ctx,
                                          TXFM_CONTEXT *left_ctx,
                                          TX_SIZE tx_size) {
   BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
-  int bs = num_8x8_blocks_high_lookup[bsize];
+  int bh = num_8x8_blocks_high_lookup[bsize];
+  int bw = num_8x8_blocks_wide_lookup[bsize];
   int i;
-  for (i = 0; i < bs; ++i) {
-    above_ctx[i] = tx_size;
-    left_ctx[i] = tx_size;
-  }
+  for (i = 0; i < bh; ++i) left_ctx[i] = tx_size;
+  for (i = 0; i < bw; ++i) above_ctx[i] = tx_size;
 }
 
 static INLINE int txfm_partition_context(TXFM_CONTEXT *above_ctx,
