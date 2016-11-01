@@ -314,7 +314,6 @@ static void encode_unsigned_max(struct aom_write_bit_buffer *wb, int data,
   aom_wb_write_literal(wb, data, get_unsigned_bits(max));
 }
 
-#if !CONFIG_EC_ADAPT || !CONFIG_DAALA_EC
 static void prob_diff_update(const aom_tree_index *tree,
                              aom_prob probs[/*n - 1*/],
                              const unsigned int counts[/*n - 1*/], int n,
@@ -330,6 +329,7 @@ static void prob_diff_update(const aom_tree_index *tree,
     av1_cond_prob_diff_update(w, &probs[i], branch_ct[i], probwt);
 }
 
+#if !CONFIG_EC_ADAPT
 static int prob_diff_update_savings(const aom_tree_index *tree,
                                     aom_prob probs[/*n - 1*/],
                                     const unsigned int counts[/*n - 1*/], int n,
@@ -2911,7 +2911,6 @@ static void write_txfm_mode(TX_MODE mode, struct aom_write_bit_buffer *wb) {
   if (mode != TX_MODE_SELECT) aom_wb_write_literal(wb, mode, 2);
 }
 
-#if !CONFIG_EC_ADAPT
 static void update_txfm_probs(AV1_COMMON *cm, aom_writer *w,
                               FRAME_COUNTS *counts) {
 #if CONFIG_TILE_GROUPS
@@ -2927,7 +2926,6 @@ static void update_txfm_probs(AV1_COMMON *cm, aom_writer *w,
                          counts->tx_size[i][j], i + 2, probwt, w);
   }
 }
-#endif
 
 static void write_interp_filter(InterpFilter filter,
                                 struct aom_write_bit_buffer *wb) {
@@ -3702,9 +3700,7 @@ static uint32_t write_compressed_header(AV1_COMP *cpi, uint8_t *data) {
 #if CONFIG_LOOP_RESTORATION
   encode_restoration(cm, header_bc);
 #endif  // CONFIG_LOOP_RESTORATION
-#if !CONFIG_EC_ADAPT
   update_txfm_probs(cm, header_bc, counts);
-#endif
   update_coef_probs(cpi, header_bc);
 
 #if CONFIG_VAR_TX
