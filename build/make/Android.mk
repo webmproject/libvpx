@@ -164,7 +164,8 @@ endif
 LOCAL_CFLAGS += \
     -DHAVE_CONFIG_H=vpx_config.h \
     -I$(LIBVPX_PATH) \
-    -I$(ASM_CNV_PATH)
+    -I$(ASM_CNV_PATH) \
+    -I$(ASM_CNV_PATH)/libvpx
 
 LOCAL_MODULE := libvpx
 
@@ -185,7 +186,8 @@ endif
 $$(rtcd_dep_template_SRCS): vpx_scale_rtcd.h
 $$(rtcd_dep_template_SRCS): vpx_dsp_rtcd.h
 
-ifneq ($(findstring $(TARGET_ARCH_ABI),x86 x86_64),)
+rtcd_dep_template_CONFIG_ASM_ABIS := x86 x86_64 armeabi-v7a
+ifneq ($(findstring $(TARGET_ARCH_ABI),$(rtcd_dep_template_CONFIG_ASM_ABIS)),)
 $$(rtcd_dep_template_SRCS): vpx_config.asm
 endif
 endef
