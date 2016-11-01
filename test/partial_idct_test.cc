@@ -287,13 +287,12 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(&vpx_fdct4x4_c, &vpx_idct4x4_16_add_c,
                                  &vpx_idct4x4_1_add_neon, TX_4X4, 1)));
 #else   // !CONFIG_VP9_HIGHBITDEPTH
-// 32x32_135_ is implemented using the 1024 version.
 INSTANTIATE_TEST_CASE_P(
     NEON, PartialIDctTest,
     ::testing::Values(make_tuple(&vpx_fdct32x32_c, &vpx_idct32x32_1024_add_c,
                                  &vpx_idct32x32_1024_add_neon, TX_32X32, 1024),
                       make_tuple(&vpx_fdct32x32_c, &vpx_idct32x32_1024_add_c,
-                                 &vpx_idct32x32_1024_add_neon, TX_32X32, 135),
+                                 &vpx_idct32x32_135_add_neon, TX_32X32, 135),
                       make_tuple(&vpx_fdct32x32_c, &vpx_idct32x32_1024_add_c,
                                  &vpx_idct32x32_34_add_neon, TX_32X32, 34),
                       make_tuple(&vpx_fdct32x32_c, &vpx_idct32x32_1024_add_c,
