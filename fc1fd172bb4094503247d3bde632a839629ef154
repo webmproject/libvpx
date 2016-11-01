@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e6dd565f_65b40ad5",
+        "filename": "vpx_dsp/arm/idct_neon.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T22:39:50Z",
+      "side": 1,
+      "message": "this is fine for now, but I might reorganize this given sub/mul/add are more closely related than this transpose",
+      "revId": "fc1fd172bb4094503247d3bde632a839629ef154",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_2595e222",
+        "filename": "vpx_dsp/arm/idct_neon.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T22:39:50Z",
+      "side": 1,
+      "message": "this isn\u0027t as bad visually at the tm predictor, note we added a convert (i.e., zero extend) function there for readability",
+      "range": {
+        "startLine": 138,
+        "startChar": 20,
+        "endLine": 138,
+        "endChar": 54
+      },
+      "revId": "fc1fd172bb4094503247d3bde632a839629ef154",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_e098e853",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T22:39:50Z",
+      "side": 1,
+      "message": "this is set later at 246",
+      "revId": "fc1fd172bb4094503247d3bde632a839629ef154",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
