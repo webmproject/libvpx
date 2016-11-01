@@ -16,6 +16,24 @@
       "revId": "1ddb4c03622a654452a5e76b5a0e4db715dc350d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_0edd6b53",
+        "filename": "build/make/gen_msvs_vcxproj.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T02:59:51Z",
+      "side": 1,
+      "message": "hopefully not, but it seemed harmless to leave the old pattern here",
+      "parentUuid": "e6dd565f_ce0d23ad",
+      "revId": "1ddb4c03622a654452a5e76b5a0e4db715dc350d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
