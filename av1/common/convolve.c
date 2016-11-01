@@ -13,7 +13,7 @@
 #include <string.h>
 
 #include "./av1_rtcd.h"
-#include "av1/common/av1_convolve.h"
+#include "av1/common/convolve.h"
 #include "av1/common/filter.h"
 #include "aom_dsp/aom_dsp_common.h"
 #include "aom_ports/mem.h"
