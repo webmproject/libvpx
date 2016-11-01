@@ -4427,8 +4427,7 @@ void av1_update_scan_order_facade(AV1_COMMON *cm, TX_SIZE tx_size,
   int16_t *scan = get_adapt_scan(cm->fc, tx_size, tx_type);
   int16_t *iscan = get_adapt_iscan(cm->fc, tx_size, tx_type);
   int16_t *nb = get_adapt_nb(cm->fc, tx_size, tx_type);
-  const int tx2d_size = tx_size_2d[tx_size];
-  assert(tx2d_size <= 1024);
+  assert(tx_size_2d[tx_size] <= 1024);
   av1_update_sort_order(tx_size, non_zero_prob, sort_order);
   av1_update_scan_order(tx_size, sort_order, scan, iscan);
   av1_update_neighbors(tx_size, scan, iscan, nb);
