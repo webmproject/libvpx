@@ -75,6 +75,47 @@ static void ihalfright32_c(const tran_low_t *input, tran_low_t *output) {
   // Note overall scaling factor is 4 times orthogonal
 }
 
+#if CONFIG_TX64X64
+static void idct64_col_c(const tran_low_t *input, tran_low_t *output) {
+  int32_t in[64], out[64];
+  int i;
+  for (i = 0; i < 64; ++i) in[i] = (int32_t)input[i];
+  av1_idct64_new(in, out, inv_cos_bit_col_dct_dct_64,
+                 inv_stage_range_col_dct_dct_64);
+  for (i = 0; i < 64; ++i) output[i] = (tran_low_t)out[i];
+}
+
+static void idct64_row_c(const tran_low_t *input, tran_low_t *output) {
+  int32_t in[64], out[64];
+  int i;
+  for (i = 0; i < 64; ++i) in[i] = (int32_t)input[i];
+  av1_idct64_new(in, out, inv_cos_bit_row_dct_dct_64,
+                 inv_stage_range_row_dct_dct_64);
+  for (i = 0; i < 64; ++i) output[i] = (tran_low_t)out[i];
+}
+
+static void iidtx64_c(const tran_low_t *input, tran_low_t *output) {
+  int i;
+  for (i = 0; i < 64; ++i)
+    output[i] = (tran_low_t)dct_const_round_shift(input[i] * 4 * Sqrt2);
+}
+
+// For use in lieu of ADST
+static void ihalfright64_c(const tran_low_t *input, tran_low_t *output) {
+  int i;
+  tran_low_t inputhalf[32];
+  // Multiply input by sqrt(2)
+  for (i = 0; i < 32; ++i) {
+    inputhalf[i] = (tran_low_t)dct_const_round_shift(input[i] * Sqrt2);
+  }
+  for (i = 0; i < 32; ++i) {
+    output[i] = (tran_low_t)dct_const_round_shift(input[32 + i] * 4 * Sqrt2);
+  }
+  aom_idct32_c(inputhalf, output + 32);
+  // Note overall scaling factor is 4 * sqrt(2)  times orthogonal
+}
+#endif  // CONFIG_TX64X64
+
 #if CONFIG_AOM_HIGHBITDEPTH
 #if CONFIG_EXT_TX
 static void highbd_iidtx4_c(const tran_low_t *input, tran_low_t *output,
@@ -122,6 +163,56 @@ static void highbd_ihalfright32_c(const tran_low_t *input, tran_low_t *output,
   aom_highbd_idct16_c(inputhalf, output + 16, bd);
   // Note overall scaling factor is 4 times orthogonal
 }
+
+#if CONFIG_TX64X64
+static void highbd_iidtx64_c(const tran_low_t *input, tran_low_t *output,
+                             int bd) {
+  int i;
+  for (i = 0; i < 64; ++i)
+    output[i] =
+        HIGHBD_WRAPLOW(highbd_dct_const_round_shift(input[i] * 4 * Sqrt2), bd);
+}
+
+// For use in lieu of ADST
+static void highbd_ihalfright64_c(const tran_low_t *input, tran_low_t *output,
+                                  int bd) {
+  int i;
+  tran_low_t inputhalf[32];
+  // Multiply input by sqrt(2)
+  for (i = 0; i < 32; ++i) {
+    inputhalf[i] =
+        HIGHBD_WRAPLOW(highbd_dct_const_round_shift(input[i] * Sqrt2), bd);
+  }
+  for (i = 0; i < 32; ++i) {
+    output[i] = HIGHBD_WRAPLOW(
+        highbd_dct_const_round_shift(input[32 + i] * 4 * Sqrt2), bd);
+  }
+  aom_highbd_idct32_c(inputhalf, output + 32, bd);
+  // Note overall scaling factor is 4 * sqrt(2)  times orthogonal
+}
+
+static void highbd_idct64_col_c(const tran_low_t *input, tran_low_t *output,
+                                int bd) {
+  int32_t in[64], out[64];
+  int i;
+  (void)bd;
+  for (i = 0; i < 64; ++i) in[i] = (int32_t)input[i];
+  av1_idct64_new(in, out, inv_cos_bit_col_dct_dct_64,
+                 inv_stage_range_col_dct_dct_64);
+  for (i = 0; i < 64; ++i) output[i] = (tran_low_t)out[i];
+}
+
+static void highbd_idct64_row_c(const tran_low_t *input, tran_low_t *output,
+                                int bd) {
+  int32_t in[64], out[64];
+  int i;
+  (void)bd;
+  for (i = 0; i < 64; ++i) in[i] = (int32_t)input[i];
+  av1_idct64_new(in, out, inv_cos_bit_row_dct_dct_64,
+                 inv_stage_range_row_dct_dct_64);
+  for (i = 0; i < 64; ++i) output[i] = (tran_low_t)out[i];
+}
+#endif  // CONFIG_TX64X64
 #endif  // CONFIG_EXT_TX
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 
@@ -793,10 +884,10 @@ void av1_iht32x32_1024_add_c(const tran_low_t *input, uint8_t *dest, int stride,
     { iidtx32_c, iidtx32_c },            // IDTX
     { aom_idct32_c, iidtx32_c },         // V_DCT
     { iidtx32_c, aom_idct32_c },         // H_DCT
-    { ihalfright32_c, iidtx16_c },       // V_ADST
-    { iidtx16_c, ihalfright32_c },       // H_ADST
-    { ihalfright32_c, iidtx16_c },       // V_FLIPADST
-    { iidtx16_c, ihalfright32_c },       // H_FLIPADST
+    { ihalfright32_c, iidtx32_c },       // V_ADST
+    { iidtx32_c, ihalfright32_c },       // H_ADST
+    { ihalfright32_c, iidtx32_c },       // V_FLIPADST
+    { iidtx32_c, ihalfright32_c },       // H_FLIPADST
   };
 
   int i, j;
@@ -836,6 +927,68 @@ void av1_iht32x32_1024_add_c(const tran_low_t *input, uint8_t *dest, int stride,
     }
   }
 }
+
+#if CONFIG_TX64X64
+void av1_iht64x64_4096_add_c(const tran_low_t *input, uint8_t *dest, int stride,
+                             int tx_type) {
+  static const transform_2d IHT_64[] = {
+    { idct64_col_c, idct64_row_c },      // DCT_DCT
+    { ihalfright64_c, idct64_row_c },    // ADST_DCT
+    { idct64_col_c, ihalfright64_c },    // DCT_ADST
+    { ihalfright64_c, ihalfright64_c },  // ADST_ADST
+    { ihalfright64_c, idct64_row_c },    // FLIPADST_DCT
+    { idct64_col_c, ihalfright64_c },    // DCT_FLIPADST
+    { ihalfright64_c, ihalfright64_c },  // FLIPADST_FLIPADST
+    { ihalfright64_c, ihalfright64_c },  // ADST_FLIPADST
+    { ihalfright64_c, ihalfright64_c },  // FLIPADST_ADST
+    { iidtx64_c, iidtx64_c },            // IDTX
+    { idct64_col_c, iidtx64_c },         // V_DCT
+    { iidtx64_c, idct64_row_c },         // H_DCT
+    { ihalfright64_c, iidtx64_c },       // V_ADST
+    { iidtx64_c, ihalfright64_c },       // H_ADST
+    { ihalfright64_c, iidtx64_c },       // V_FLIPADST
+    { iidtx64_c, ihalfright64_c },       // H_FLIPADST
+  };
+
+  int i, j;
+  tran_low_t tmp;
+  tran_low_t out[64][64];
+  tran_low_t *outp = &out[0][0];
+  int outstride = 64;
+
+  // inverse transform row vectors
+  for (i = 0; i < 64; ++i) {
+    IHT_64[tx_type].rows(input, out[i]);
+    for (j = 0; j < 64; ++j) out[i][j] = ROUND_POWER_OF_TWO(out[i][j], 1);
+    input += 64;
+  }
+
+  // transpose
+  for (i = 1; i < 64; i++) {
+    for (j = 0; j < i; j++) {
+      tmp = out[i][j];
+      out[i][j] = out[j][i];
+      out[j][i] = tmp;
+    }
+  }
+
+  // inverse transform column vectors
+  for (i = 0; i < 64; ++i) {
+    IHT_64[tx_type].cols(out[i], out[i]);
+  }
+
+  maybe_flip_strides(&dest, &stride, &outp, &outstride, tx_type, 64, 64);
+
+  // Sum with the destination
+  for (i = 0; i < 64; ++i) {
+    for (j = 0; j < 64; ++j) {
+      int d = i * stride + j;
+      int s = j * outstride + i;
+      dest[d] = clip_pixel_add(dest[d], ROUND_POWER_OF_TWO(outp[s], 5));
+    }
+  }
+}
+#endif  // CONFIG_TX64X64
 #endif  // CONFIG_EXT_TX
 
 // idct
@@ -1658,6 +1811,71 @@ void av1_highbd_iht32x32_1024_add_c(const tran_low_t *input, uint8_t *dest8,
     }
   }
 }
+
+#if CONFIG_TX64X64
+void av1_highbd_iht64x64_4096_add_c(const tran_low_t *input, uint8_t *dest8,
+                                    int stride, int tx_type, int bd) {
+  static const highbd_transform_2d HIGH_IHT_64[] = {
+    { highbd_idct64_col_c, highbd_idct64_row_c },      // DCT_DCT
+    { highbd_ihalfright64_c, highbd_idct64_row_c },    // ADST_DCT
+    { highbd_idct64_col_c, highbd_ihalfright64_c },    // DCT_ADST
+    { highbd_ihalfright64_c, highbd_ihalfright64_c },  // ADST_ADST
+    { highbd_ihalfright64_c, highbd_idct64_row_c },    // FLIPADST_DCT
+    { highbd_idct64_col_c, highbd_ihalfright64_c },    // DCT_FLIPADST
+    { highbd_ihalfright64_c, highbd_ihalfright64_c },  // FLIPADST_FLIPADST
+    { highbd_ihalfright64_c, highbd_ihalfright64_c },  // ADST_FLIPADST
+    { highbd_ihalfright64_c, highbd_ihalfright64_c },  // FLIPADST_ADST
+    { highbd_iidtx64_c, highbd_iidtx64_c },            // IDTX
+    { highbd_idct64_col_c, highbd_iidtx64_c },         // V_DCT
+    { highbd_iidtx64_c, highbd_idct64_row_c },         // H_DCT
+    { highbd_ihalfright64_c, highbd_iidtx64_c },       // V_ADST
+    { highbd_iidtx64_c, highbd_ihalfright64_c },       // H_ADST
+    { highbd_ihalfright64_c, highbd_iidtx64_c },       // V_FLIPADST
+    { highbd_iidtx64_c, highbd_ihalfright64_c },       // H_FLIPADST
+  };
+
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+
+  int i, j;
+  tran_low_t tmp;
+  tran_low_t out[64][64];
+  tran_low_t *outp = &out[0][0];
+  int outstride = 64;
+
+  // inverse transform row vectors
+  for (i = 0; i < 64; ++i) {
+    HIGH_IHT_64[tx_type].rows(input, out[i], bd);
+    for (j = 0; j < 64; ++j) out[i][j] = ROUND_POWER_OF_TWO(out[i][j], 1);
+    input += 64;
+  }
+
+  // transpose
+  for (i = 1; i < 64; i++) {
+    for (j = 0; j < i; j++) {
+      tmp = out[i][j];
+      out[i][j] = out[j][i];
+      out[j][i] = tmp;
+    }
+  }
+
+  // inverse transform column vectors
+  for (i = 0; i < 64; ++i) {
+    HIGH_IHT_64[tx_type].cols(out[i], out[i], bd);
+  }
+
+  maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, 64, 64);
+
+  // Sum with the destination
+  for (i = 0; i < 64; ++i) {
+    for (j = 0; j < 64; ++j) {
+      int d = i * stride + j;
+      int s = j * outstride + i;
+      dest[d] =
+          highbd_clip_pixel_add(dest[d], ROUND_POWER_OF_TWO(outp[s], 5), bd);
+    }
+  }
+}
+#endif  // CONFIG_TX64X64
 #endif  // CONFIG_EXT_TX
 
 // idct

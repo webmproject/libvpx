@@ -109,7 +109,7 @@ static const TXFM_2D_CFG fwd_txfm_2d_cfg_dct_dct_32 = {
 };  // .txfm_type_row
 
 //  ---------------- config fwd_dct_dct_64 ----------------
-static const int8_t fwd_shift_dct_dct_64[3] = { 2, -2, -2 };
+static const int8_t fwd_shift_dct_dct_64[3] = { 0, -2, -2 };
 static const int8_t fwd_stage_range_col_dct_dct_64[12] = {
   13, 14, 15, 16, 17, 18, 19, 19, 19, 19, 19, 19
 };
