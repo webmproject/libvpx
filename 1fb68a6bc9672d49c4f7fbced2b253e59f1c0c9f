@@ -1,0 +1,107 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e6dd565f_31252872",
+        "filename": "test/test_intra_pred_speed.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T06:24:10Z",
+      "side": 1,
+      "message": "other references in this file use \u0027Vp9\u0027 for mixed case variables. that\u0027s a bit easier to read with complex types having many acronyms, abbreviations or other all-caps names",
+      "range": {
+        "startLine": 65,
+        "startChar": 34,
+        "endLine": 65,
+        "endChar": 37
+      },
+      "revId": "1fb68a6bc9672d49c4f7fbced2b253e59f1c0c9f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_11222c6a",
+        "filename": "test/test_intra_pred_speed.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T06:24:10Z",
+      "side": 1,
+      "message": "variables are lower + \u0027_\u0027\n\nhttps://google.github.io/styleguide/cppguide.html#Variable_Names",
+      "range": {
+        "startLine": 69,
+        "startChar": 22,
+        "endLine": 69,
+        "endChar": 38
+      },
+      "revId": "1fb68a6bc9672d49c4f7fbced2b253e59f1c0c9f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_b130f8b4",
+        "filename": "test/test_intra_pred_speed.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T06:24:10Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "1fb68a6bc9672d49c4f7fbced2b253e59f1c0c9f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_d12b844b",
+        "filename": "test/test_intra_pred_speed.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T06:24:10Z",
+      "side": 1,
+      "message": "there\u0027s minimal difference between these two versions, but the adapter need for lowbd would make things a bit messier, so let\u0027s stick with the split",
+      "revId": "1fb68a6bc9672d49c4f7fbced2b253e59f1c0c9f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_9135fca4",
+        "filename": "test/test_intra_pred_speed.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T06:24:10Z",
+      "side": 1,
+      "message": "this can be broken out to bool CheckMd5Signature() to minimize the difference a bit",
+      "range": {
+        "startLine": 337,
+        "startChar": 0,
+        "endLine": 341,
+        "endChar": 43
+      },
+      "revId": "1fb68a6bc9672d49c4f7fbced2b253e59f1c0c9f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
