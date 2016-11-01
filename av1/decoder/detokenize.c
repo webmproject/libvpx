@@ -51,7 +51,8 @@ static INLINE int read_coeff(const aom_prob *probs, int n, aom_reader *r) {
 static int decode_coefs(MACROBLOCKD *xd, PLANE_TYPE type, tran_low_t *dqcoeff,
                         TX_SIZE tx_size, TX_TYPE tx_type, const int16_t *dq,
                         int ctx, const int16_t *scan, const int16_t *nb,
-                        aom_reader *r, const qm_val_t *iqm[2][TX_SIZES])
+                        int16_t *max_scan_line, aom_reader *r,
+                        const qm_val_t *iqm[2][TX_SIZES])
 #else
 static int decode_coefs(MACROBLOCKD *xd, PLANE_TYPE type, tran_low_t *dqcoeff,
                         TX_SIZE tx_size, TX_TYPE tx_type, const int16_t *dq,
@@ -343,7 +344,7 @@ int av1_decode_block_tokens(MACROBLOCKD *const xd, int plane,
 #if CONFIG_AOM_QM
   const int eob = decode_coefs(xd, pd->plane_type, pd->dqcoeff, tx_size,
                                tx_type, dequant, ctx, sc->scan, sc->neighbors,
-                               &sc->max_scan_line, r, pd->seg_iqmatrix[seg_id]);
+                               max_scan_line, r, pd->seg_iqmatrix[seg_id]);
 #else
   const int eob =
       decode_coefs(xd, pd->plane_type, pd->dqcoeff, tx_size, tx_type, dequant,
