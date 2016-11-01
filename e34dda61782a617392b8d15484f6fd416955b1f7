@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e6dd565f_d49a52ba",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 12
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2016-11-01T16:49:59Z",
+      "side": 1,
+      "message": "Add link to webm issue in commit message: https://bugs.chromium.org/p/webm/issues/detail?id\u003d1320",
+      "revId": "e34dda61782a617392b8d15484f6fd416955b1f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
