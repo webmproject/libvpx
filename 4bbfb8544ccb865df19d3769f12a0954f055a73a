@@ -2,6 +2,98 @@
   "comments": [
     {
       "key": {
+        "uuid": "e6dd565f_9194dc8b",
+        "filename": "test/stress.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T04:11:22Z",
+      "side": 1,
+      "message": "\u0027,\u0027 isn\u0027t necessary",
+      "range": {
+        "startLine": 40,
+        "startChar": 34,
+        "endLine": 40,
+        "endChar": 35
+      },
+      "revId": "4bbfb8544ccb865df19d3769f12a0954f055a73a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_b18fd87a",
+        "filename": "test/stress.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T04:11:22Z",
+      "side": 1,
+      "message": "processes",
+      "range": {
+        "startLine": 50,
+        "startChar": 47,
+        "endLine": 50,
+        "endChar": 54
+      },
+      "revId": "4bbfb8544ccb865df19d3769f12a0954f055a73a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_718a906b",
+        "filename": "test/stress.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T04:11:22Z",
+      "side": 1,
+      "message": "prefer $()",
+      "range": {
+        "startLine": 54,
+        "startChar": 11,
+        "endLine": 54,
+        "endChar": 12
+      },
+      "revId": "4bbfb8544ccb865df19d3769f12a0954f055a73a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_5187945f",
+        "filename": "test/stress.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T04:11:22Z",
+      "side": 1,
+      "message": "space before \u0026",
+      "range": {
+        "startLine": 58,
+        "startChar": 51,
+        "endLine": 58,
+        "endChar": 52
+      },
+      "revId": "4bbfb8544ccb865df19d3769f12a0954f055a73a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "466e220f_d062a4f3",
         "filename": "test/stress.sh",
         "patchSetId": 4
@@ -18,6 +110,86 @@
         "startChar": 10,
         "endLine": 62,
         "endChar": 24
+      },
+      "revId": "4bbfb8544ccb865df19d3769f12a0954f055a73a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_31840859",
+        "filename": "test/stress.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T04:11:22Z",
+      "side": 1,
+      "message": "space before \u0026",
+      "range": {
+        "startLine": 73,
+        "startChar": 26,
+        "endLine": 73,
+        "endChar": 27
+      },
+      "revId": "4bbfb8544ccb865df19d3769f12a0954f055a73a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_11810c49",
+        "filename": "test/stress.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T04:11:22Z",
+      "side": 1,
+      "message": "you can join this and the line above",
+      "revId": "4bbfb8544ccb865df19d3769f12a0954f055a73a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_f1b8c020",
+        "filename": "test/stress.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T04:11:22Z",
+      "side": 1,
+      "message": "I forgot -n is a bashism. you can add some whitespace around the operators, though I\u0027m not sure an absolute count is necessary",
+      "revId": "4bbfb8544ccb865df19d3769f12a0954f055a73a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_d1bdc40e",
+        "filename": "test/stress.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T04:11:22Z",
+      "side": 1,
+      "message": "space before \u0027{\u0027",
+      "range": {
+        "startLine": 92,
+        "startChar": 17,
+        "endLine": 92,
+        "endChar": 18
       },
       "revId": "4bbfb8544ccb865df19d3769f12a0954f055a73a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
