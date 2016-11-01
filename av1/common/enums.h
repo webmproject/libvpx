@@ -409,7 +409,7 @@ typedef enum {
 
 #if CONFIG_VAR_TX
 #define TXFM_PARTITION_CONTEXTS 16
-typedef TX_SIZE TXFM_CONTEXT;
+typedef uint8_t TXFM_CONTEXT;
 #endif
 
 #define NONE -1

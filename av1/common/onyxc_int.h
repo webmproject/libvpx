@@ -731,16 +731,17 @@ static INLINE void av1_zero_left_context(MACROBLOCKD *const xd) {
 }
 
 #if CONFIG_VAR_TX
-static INLINE void set_txfm_ctx(TXFM_CONTEXT *txfm_ctx, TX_SIZE tx_size,
-                                int len) {
+static INLINE void set_txfm_ctx(TXFM_CONTEXT *txfm_ctx, uint8_t txs, int len) {
   int i;
-  for (i = 0; i < len; ++i) txfm_ctx[i] = tx_size;
+  for (i = 0; i < len; ++i) txfm_ctx[i] = txs;
 }
 
 static INLINE void set_txfm_ctxs(TX_SIZE tx_size, int n8_w, int n8_h,
                                  const MACROBLOCKD *xd) {
-  set_txfm_ctx(xd->above_txfm_context, txsize_horz_map[tx_size], n8_w);
-  set_txfm_ctx(xd->left_txfm_context, txsize_vert_map[tx_size], n8_h);
+  uint8_t bw = tx_size_wide[tx_size];
+  uint8_t bh = tx_size_high[tx_size];
+  set_txfm_ctx(xd->above_txfm_context, bw, n8_w);
+  set_txfm_ctx(xd->left_txfm_context, bh, n8_h);
 }
 
 static INLINE void txfm_partition_update(TXFM_CONTEXT *above_ctx,
@@ -749,17 +750,21 @@ static INLINE void txfm_partition_update(TXFM_CONTEXT *above_ctx,
   BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
   int bh = num_8x8_blocks_high_lookup[bsize];
   int bw = num_8x8_blocks_wide_lookup[bsize];
+  uint8_t txw = tx_size_wide[tx_size];
+  uint8_t txh = tx_size_high[tx_size];
   int i;
-  for (i = 0; i < bh; ++i) left_ctx[i] = tx_size;
-  for (i = 0; i < bw; ++i) above_ctx[i] = tx_size;
+  for (i = 0; i < bh; ++i) left_ctx[i] = txh;
+  for (i = 0; i < bw; ++i) above_ctx[i] = txw;
 }
 
 static INLINE int txfm_partition_context(TXFM_CONTEXT *above_ctx,
                                          TXFM_CONTEXT *left_ctx,
                                          const BLOCK_SIZE bsize,
                                          const TX_SIZE tx_size) {
-  const int above = *above_ctx < tx_size;
-  const int left = *left_ctx < tx_size;
+  const uint8_t txw = tx_size_wide[tx_size];
+  const uint8_t txh = tx_size_high[tx_size];
+  const int above = *above_ctx < txw;
+  const int left = *left_ctx < txh;
   TX_SIZE max_tx_size = max_txsize_lookup[bsize];
   int category = 15;
 
