@@ -45,6 +45,30 @@
       "revId": "84dcfced5ba1384beb4a4957720b17db7df97d74",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_5aeb2939",
+        "filename": "vpx_dsp/arm/idct_neon.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-01T20:15:47Z",
+      "side": 0,
+      "message": "a visual line break to delineate groups; sometimes with a global note below it. we use it in webp to break up logically separate functions",
+      "parentUuid": "e6dd565f_5fdd5bc4",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 80
+      },
+      "revId": "84dcfced5ba1384beb4a4957720b17db7df97d74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
