@@ -408,7 +408,7 @@ typedef enum {
 #define REF_CONTEXTS 5
 
 #if CONFIG_VAR_TX
-#define TXFM_PARTITION_CONTEXTS 9
+#define TXFM_PARTITION_CONTEXTS 16
 typedef TX_SIZE TXFM_CONTEXT;
 #endif
 

@@ -984,7 +984,7 @@ int av1_get_palette_color_context(const uint8_t *color_map, int cols, int r,
 
 #if CONFIG_VAR_TX
 static const aom_prob default_txfm_partition_probs[TXFM_PARTITION_CONTEXTS] = {
-  192, 128, 64, 192, 128, 64, 192, 128, 64,
+  250, 231, 212, 241, 166, 66, 241, 230, 135, 243, 154, 64, 248, 161, 63, 128,
 };
 #endif
 

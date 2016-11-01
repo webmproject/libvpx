@@ -301,7 +301,8 @@ static void read_tx_size_vartx(AV1_COMMON *cm, MACROBLOCKD *xd,
   int max_blocks_high = block_size_high[mbmi->sb_type];
   int max_blocks_wide = block_size_wide[mbmi->sb_type];
   int ctx = txfm_partition_context(xd->above_txfm_context + tx_col,
-                                   xd->left_txfm_context + tx_row, tx_size);
+                                   xd->left_txfm_context + tx_row,
+                                   mbmi->sb_type, tx_size);
   TX_SIZE(*const inter_tx_size)
   [MAX_MIB_SIZE] =
       (TX_SIZE(*)[MAX_MIB_SIZE]) & mbmi->inter_tx_size[tx_row][tx_col];
