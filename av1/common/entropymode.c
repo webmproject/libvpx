@@ -1463,8 +1463,8 @@ void av1_set_mode_cdfs(struct AV1Common *cm) {
   }
 
   for (i = 0; i < INTRA_MODES; ++i)
-    av1_tree_to_cdf(av1_intra_mode_tree, fc->uv_mode_prob[j],
-                    fc->uv_mode_cdf[j]);
+    av1_tree_to_cdf(av1_intra_mode_tree, fc->uv_mode_prob[i],
+                    fc->uv_mode_cdf[i]);
 
   for (i = 0; i < PARTITION_CONTEXTS; ++i)
     av1_tree_to_cdf(av1_partition_tree, fc->partition_prob[i],
