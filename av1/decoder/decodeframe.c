@@ -242,7 +242,7 @@ static void update_mv_probs(aom_prob *p, int n, aom_reader *r) {
 static void read_mv_probs(nmv_context *ctx, int allow_hp, aom_reader *r) {
   int i;
 
-#if !CONFIG_EC_ADAPT || !CONFIG_EC_MULTISYMBOL
+#if !CONFIG_EC_ADAPT
   int j;
   update_mv_probs(ctx->joints, MV_JOINTS - 1, r);
 
