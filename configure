@@ -294,6 +294,7 @@ EXPERIMENT_LIST="
     tile_groups
     ec_adapt
     simp_mv_pred
+    rd_debug
 "
 CONFIG_LIST="
     dependency_tracking
