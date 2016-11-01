@@ -103,7 +103,7 @@ void vpx_idct32x32_1_add_neon(const tran_low_t *input, uint8_t *dest,
   dest_stride8 = dest_stride * 8;
   if (a1 >= 0) {  // diff_positive_32_32
     a1 = a1 < 0 ? 0 : a1 > 255 ? 255 : a1;
-    q0u8 = vdupq_n_u8(a1);
+    q0u8 = vdupq_n_u8((uint8_t)a1);
     for (i = 0; i < 2; i++, dest += 16) {  // diff_positive_32_32_loop
       d = dest;
       for (j = 0; j < 4; j++) {
@@ -119,7 +119,7 @@ void vpx_idct32x32_1_add_neon(const tran_low_t *input, uint8_t *dest,
   } else {  // diff_negative_32_32
     a1 = -a1;
     a1 = a1 < 0 ? 0 : a1 > 255 ? 255 : a1;
-    q0u8 = vdupq_n_u8(a1);
+    q0u8 = vdupq_n_u8((uint8_t)a1);
     for (i = 0; i < 2; i++, dest += 16) {  // diff_negative_32_32_loop
       d = dest;
       for (j = 0; j < 4; j++) {
