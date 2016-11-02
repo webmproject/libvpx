@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "46cc62f9_3a9269df",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-02T19:47:58Z",
+      "side": 1,
+      "message": "\u0027adjust naming convention\u0027 would be more descriptive and in the tense the article suggests",
+      "revId": "167505042ca93fc1108234a8d43b07e19da8d1b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
