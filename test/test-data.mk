@@ -775,6 +775,8 @@ LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp91-2-mixedrefcsp-444to420.iv
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-2-07-frame_parallel-1.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-2-07-frame_parallel-2.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-2-07-frame_parallel-3.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-crbug-629481.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-crbug-629481.webm.res
 
 ifeq ($(CONFIG_DECODE_PERF_TESTS),yes)
 # Encode / Decode test

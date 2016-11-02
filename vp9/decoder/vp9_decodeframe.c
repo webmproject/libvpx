@@ -1517,7 +1517,6 @@ static int tile_worker_hook(TileWorkerData *const tile_data,
     return 0;
   }
 
-  tile_data->xd.error_info = &tile_data->error_info;
   tile_data->xd.corrupted = 0;
 
   do {
@@ -1529,6 +1528,8 @@ static int tile_worker_hook(TileWorkerData *const tile_data,
                         &tile_data->error_info, &tile_data->bit_reader,
                         pbi->decrypt_cb, pbi->decrypt_state);
     vp9_init_macroblockd(&pbi->common, &tile_data->xd, tile_data->dqcoeff);
+    // init resets xd.error_info
+    tile_data->xd.error_info = &tile_data->error_info;
 
     for (mi_row = tile->mi_row_start; mi_row < tile->mi_row_end;
          mi_row += MI_BLOCK_SIZE) {
