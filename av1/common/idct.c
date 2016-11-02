@@ -984,17 +984,12 @@ void av1_inv_txfm_add_16x16(const tran_low_t *input, uint8_t *dest, int stride,
     case FLIPADST_FLIPADST:
     case ADST_FLIPADST:
     case FLIPADST_ADST:
-      av1_iht16x16_256_add(input, dest, stride, tx_type);
-      break;
     case V_DCT:
     case H_DCT:
     case V_ADST:
     case H_ADST:
     case V_FLIPADST:
-    case H_FLIPADST:
-      // Use C version since DST only exists in C code
-      av1_iht16x16_256_add_c(input, dest, stride, tx_type);
-      break;
+    case H_FLIPADST: av1_iht16x16_256_add(input, dest, stride, tx_type); break;
     case IDTX: inv_idtx_add_c(input, dest, stride, 16, tx_type); break;
 #endif  // CONFIG_EXT_TX
     default: assert(0); break;

@@ -242,69 +242,6 @@ void av1_iht8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
   RECON_AND_STORE(dest + 7 * stride, in[7]);
 }
 
-void av1_iht16x16_256_add_sse2(const tran_low_t *input, uint8_t *dest,
-                               int stride, int tx_type) {
-  __m128i in[32];
-  __m128i *in0 = &in[0];
-  __m128i *in1 = &in[16];
-
-  load_buffer_8x16(input, in0);
-  input += 8;
-  load_buffer_8x16(input, in1);
-
-  switch (tx_type) {
-    case DCT_DCT:
-      aom_idct16_sse2(in0, in1);
-      aom_idct16_sse2(in0, in1);
-      break;
-    case ADST_DCT:
-      aom_idct16_sse2(in0, in1);
-      aom_iadst16_sse2(in0, in1);
-      break;
-    case DCT_ADST:
-      aom_iadst16_sse2(in0, in1);
-      aom_idct16_sse2(in0, in1);
-      break;
-    case ADST_ADST:
-      aom_iadst16_sse2(in0, in1);
-      aom_iadst16_sse2(in0, in1);
-      break;
-#if CONFIG_EXT_TX
-    case FLIPADST_DCT:
-      aom_idct16_sse2(in0, in1);
-      aom_iadst16_sse2(in0, in1);
-      FLIPUD_PTR(dest, stride, 16);
-      break;
-    case DCT_FLIPADST:
-      aom_iadst16_sse2(in0, in1);
-      aom_idct16_sse2(in0, in1);
-      FLIPLR_16x16(in0, in1);
-      break;
-    case FLIPADST_FLIPADST:
-      aom_iadst16_sse2(in0, in1);
-      aom_iadst16_sse2(in0, in1);
-      FLIPUD_PTR(dest, stride, 16);
-      FLIPLR_16x16(in0, in1);
-      break;
-    case ADST_FLIPADST:
-      aom_iadst16_sse2(in0, in1);
-      aom_iadst16_sse2(in0, in1);
-      FLIPLR_16x16(in0, in1);
-      break;
-    case FLIPADST_ADST:
-      aom_iadst16_sse2(in0, in1);
-      aom_iadst16_sse2(in0, in1);
-      FLIPUD_PTR(dest, stride, 16);
-      break;
-#endif  // CONFIG_EXT_TX
-    default: assert(0); break;
-  }
-
-  write_buffer_8x16(dest, in0, stride);
-  dest += 8;
-  write_buffer_8x16(dest, in1, stride);
-}
-
 #if CONFIG_EXT_TX
 static void iidtx16_8col(__m128i *in) {
   const __m128i k__zero_epi16 = _mm_set1_epi16((int16_t)0);
@@ -501,7 +438,98 @@ static void iidtx16_sse2(__m128i *in0, __m128i *in1) {
   iidtx16_8col(in0);
   iidtx16_8col(in1);
 }
+#endif
 
+void av1_iht16x16_256_add_sse2(const tran_low_t *input, uint8_t *dest,
+                               int stride, int tx_type) {
+  __m128i in[32];
+  __m128i *in0 = &in[0];
+  __m128i *in1 = &in[16];
+
+  load_buffer_8x16(input, in0);
+  input += 8;
+  load_buffer_8x16(input, in1);
+
+  switch (tx_type) {
+    case DCT_DCT:
+      aom_idct16_sse2(in0, in1);
+      aom_idct16_sse2(in0, in1);
+      break;
+    case ADST_DCT:
+      aom_idct16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
+      break;
+    case DCT_ADST:
+      aom_iadst16_sse2(in0, in1);
+      aom_idct16_sse2(in0, in1);
+      break;
+    case ADST_ADST:
+      aom_iadst16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
+      break;
+#if CONFIG_EXT_TX
+    case FLIPADST_DCT:
+      aom_idct16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
+      FLIPUD_PTR(dest, stride, 16);
+      break;
+    case DCT_FLIPADST:
+      aom_iadst16_sse2(in0, in1);
+      aom_idct16_sse2(in0, in1);
+      FLIPLR_16x16(in0, in1);
+      break;
+    case FLIPADST_FLIPADST:
+      aom_iadst16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
+      FLIPUD_PTR(dest, stride, 16);
+      FLIPLR_16x16(in0, in1);
+      break;
+    case ADST_FLIPADST:
+      aom_iadst16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
+      FLIPLR_16x16(in0, in1);
+      break;
+    case FLIPADST_ADST:
+      aom_iadst16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
+      FLIPUD_PTR(dest, stride, 16);
+      break;
+    case V_DCT:
+      iidtx16_sse2(in0, in1);
+      aom_idct16_sse2(in0, in1);
+      break;
+    case H_DCT:
+      aom_idct16_sse2(in0, in1);
+      iidtx16_sse2(in0, in1);
+      break;
+    case V_ADST:
+      iidtx16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
+      break;
+    case H_ADST:
+      aom_iadst16_sse2(in0, in1);
+      iidtx16_sse2(in0, in1);
+      break;
+    case V_FLIPADST:
+      iidtx16_sse2(in0, in1);
+      aom_iadst16_sse2(in0, in1);
+      FLIPUD_PTR(dest, stride, 16);
+      break;
+    case H_FLIPADST:
+      aom_iadst16_sse2(in0, in1);
+      iidtx16_sse2(in0, in1);
+      FLIPLR_16x16(in0, in1);
+      break;
+#endif  // CONFIG_EXT_TX
+    default: assert(0); break;
+  }
+
+  write_buffer_8x16(dest, in0, stride);
+  dest += 8;
+  write_buffer_8x16(dest, in1, stride);
+}
+
+#if CONFIG_EXT_TX
 static void iidtx8_sse2(__m128i *in) {
   in[0] = _mm_slli_epi16(in[0], 1);
   in[1] = _mm_slli_epi16(in[1], 1);
