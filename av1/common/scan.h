@@ -67,20 +67,6 @@ static INLINE int get_coef_context(const int16_t *neighbors,
          1;
 }
 
-static INLINE const SCAN_ORDER *get_intra_scan(TX_SIZE tx_size,
-                                               TX_TYPE tx_type) {
-  return &av1_intra_scan_orders[tx_size][tx_type];
-}
-
-#if CONFIG_EXT_TX
-extern const SCAN_ORDER av1_inter_scan_orders[TX_SIZES_ALL][TX_TYPES];
-
-static INLINE const SCAN_ORDER *get_inter_scan(TX_SIZE tx_size,
-                                               TX_TYPE tx_type) {
-  return &av1_inter_scan_orders[tx_size][tx_type];
-}
-#endif  // CONFIG_EXT_TX
-
 static INLINE const SCAN_ORDER *get_scan(const AV1_COMMON *cm, TX_SIZE tx_size,
                                          TX_TYPE tx_type, int is_inter) {
 #if CONFIG_ADAPT_SCAN
