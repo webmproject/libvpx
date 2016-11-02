@@ -2592,7 +2592,6 @@ void av1_fht16x16_sse2(const int16_t *input, tran_low_t *output, int stride,
   }
 }
 
-#if CONFIG_EXT_TX
 static INLINE void scale_sqrt2_8x4(__m128i *in) {
   // Implements fdct_round_shift(input * Sqrt2), which is equivalent to
   // ROUND_POWER_OF_TWO(input * Sqrt2, DCT_CONST_BITS),
@@ -2767,9 +2766,9 @@ void av1_fht4x8_sse2(const int16_t *input, tran_low_t *output, int stride,
                      int tx_type) {
   __m128i in[8];
 
+  load_buffer_4x8(input, in, stride, 0, 0);
   switch (tx_type) {
     case DCT_DCT:
-      load_buffer_4x8(input, in, stride, 0, 0);
       fdct8_sse2(in);
       // Repack data into two 4x4 blocks so we can reuse the 4x4 transforms
       // The other cases (and the 8x4 transforms) all behave similarly
@@ -2781,7 +2780,6 @@ void av1_fht4x8_sse2(const int16_t *input, tran_low_t *output, int stride,
       fdct4_sse2(in + 4);
       break;
     case ADST_DCT:
-      load_buffer_4x8(input, in, stride, 0, 0);
       fadst8_sse2(in);
       in[4] = _mm_shuffle_epi32(in[0], 0xe);
       in[5] = _mm_shuffle_epi32(in[1], 0xe);
@@ -2791,7 +2789,6 @@ void av1_fht4x8_sse2(const int16_t *input, tran_low_t *output, int stride,
       fdct4_sse2(in + 4);
       break;
     case DCT_ADST:
-      load_buffer_4x8(input, in, stride, 0, 0);
       fdct8_sse2(in);
       in[4] = _mm_shuffle_epi32(in[0], 0xe);
       in[5] = _mm_shuffle_epi32(in[1], 0xe);
@@ -2801,7 +2798,6 @@ void av1_fht4x8_sse2(const int16_t *input, tran_low_t *output, int stride,
       fadst4_sse2(in + 4);
       break;
     case ADST_ADST:
-      load_buffer_4x8(input, in, stride, 0, 0);
       fadst8_sse2(in);
       in[4] = _mm_shuffle_epi32(in[0], 0xe);
       in[5] = _mm_shuffle_epi32(in[1], 0xe);
@@ -2810,6 +2806,7 @@ void av1_fht4x8_sse2(const int16_t *input, tran_low_t *output, int stride,
       fadst4_sse2(in);
       fadst4_sse2(in + 4);
       break;
+#if CONFIG_EXT_TX
     case FLIPADST_DCT:
       load_buffer_4x8(input, in, stride, 1, 0);
       fadst8_sse2(in);
@@ -2930,6 +2927,7 @@ void av1_fht4x8_sse2(const int16_t *input, tran_low_t *output, int stride,
       fadst4_sse2(in);
       fadst4_sse2(in + 4);
       break;
+#endif
     default: assert(0); break;
   }
   write_buffer_4x8(output, in);
@@ -3023,6 +3021,7 @@ void av1_fht8x4_sse2(const int16_t *input, tran_low_t *output, int stride,
       fadst4_sse2(in + 4);
       fadst8_sse2(in);
       break;
+#if CONFIG_EXT_TX
     case FLIPADST_DCT:
       load_buffer_8x4(input, in, stride, 1, 0);
       fadst4_sse2(in);
@@ -3095,6 +3094,7 @@ void av1_fht8x4_sse2(const int16_t *input, tran_low_t *output, int stride,
       fidtx4_sse2(in + 4);
       fadst8_sse2(in);
       break;
+#endif
     default: assert(0); break;
   }
   write_buffer_8x4(output, in);
@@ -3158,6 +3158,7 @@ void av1_fht8x16_sse2(const int16_t *input, tran_low_t *output, int stride,
       fadst8_sse2(t);
       fadst8_sse2(b);
       break;
+#if CONFIG_EXT_TX
     case FLIPADST_DCT:
       load_buffer_8x16(input, in, stride, 1, 0);
       fadst16_8col(in);
@@ -3254,6 +3255,7 @@ void av1_fht8x16_sse2(const int16_t *input, tran_low_t *output, int stride,
       fadst8_sse2(t);
       fadst8_sse2(b);
       break;
+#endif
     default: assert(0); break;
   }
   right_shift_8x8(t, 2);
@@ -3314,6 +3316,7 @@ void av1_fht16x8_sse2(const int16_t *input, tran_low_t *output, int stride,
       fadst8_sse2(r);
       fadst16_8col(in);
       break;
+#if CONFIG_EXT_TX
     case FLIPADST_DCT:
       load_buffer_16x8(input, in, stride, 1, 0);
       fadst8_sse2(l);
@@ -3386,6 +3389,7 @@ void av1_fht16x8_sse2(const int16_t *input, tran_low_t *output, int stride,
       fidtx8_sse2(r);
       fadst16_8col(in);
       break;
+#endif
     default: assert(0); break;
   }
   array_transpose_8x8(l, l);
@@ -3436,6 +3440,7 @@ static INLINE void fhalfright32_16col(__m128i *tl, __m128i *tr, __m128i *bl,
   fdct16_sse2(tl, tr);
 }
 
+#if CONFIG_EXT_TX
 static INLINE void fidtx32_16col(__m128i *tl, __m128i *tr, __m128i *bl,
                                  __m128i *br) {
   int i;
@@ -3448,6 +3453,7 @@ static INLINE void fidtx32_16col(__m128i *tl, __m128i *tr, __m128i *bl,
   array_transpose_16x16(tl, tr);
   array_transpose_16x16(bl, br);
 }
+#endif
 
 static INLINE void load_buffer_16x32(const int16_t *input, __m128i *intl,
                                      __m128i *intr, __m128i *inbl,
@@ -3507,7 +3513,7 @@ static INLINE void write_buffer_16x32(tran_low_t *output, __m128i *restl,
   }
 }
 
-// Note on data layout, for both this and the 32x16 tranforms:
+// Note on data layout, for both this and the 32x16 transforms:
 // So that we can reuse the 16-element transforms easily,
 // we want to split the input into 8x16 blocks.
 // For 16x32, this means the input is a 2x2 grid of such blocks.
@@ -3541,6 +3547,7 @@ void av1_fht16x32_sse2(const int16_t *input, tran_low_t *output, int stride,
       fadst16_sse2(intl, intr);
       fadst16_sse2(inbl, inbr);
       break;
+#if CONFIG_EXT_TX
     case FLIPADST_DCT:
       load_buffer_16x32(input, intl, intr, inbl, inbr, stride, 1, 0);
       fhalfright32_16col(intl, intr, inbl, inbr);
@@ -3613,6 +3620,7 @@ void av1_fht16x32_sse2(const int16_t *input, tran_low_t *output, int stride,
       fadst16_sse2(intl, intr);
       fadst16_sse2(inbl, inbr);
       break;
+#endif
     default: assert(0); break;
   }
   write_buffer_16x32(output, intl, intr, inbl, inbr);
@@ -3671,31 +3679,29 @@ void av1_fht32x16_sse2(const int16_t *input, tran_low_t *output, int stride,
                        int tx_type) {
   __m128i in0[16], in1[16], in2[16], in3[16];
 
+  load_buffer_32x16(input, in0, in1, in2, in3, stride, 0, 0);
   switch (tx_type) {
     case DCT_DCT:
-      load_buffer_32x16(input, in0, in1, in2, in3, stride, 0, 0);
       fdct16_sse2(in0, in1);
       fdct16_sse2(in2, in3);
       fdct32_16col(in0, in1, in2, in3);
       break;
     case ADST_DCT:
-      load_buffer_32x16(input, in0, in1, in2, in3, stride, 0, 0);
       fadst16_sse2(in0, in1);
       fadst16_sse2(in2, in3);
       fdct32_16col(in0, in1, in2, in3);
       break;
     case DCT_ADST:
-      load_buffer_32x16(input, in0, in1, in2, in3, stride, 0, 0);
       fdct16_sse2(in0, in1);
       fdct16_sse2(in2, in3);
       fhalfright32_16col(in0, in1, in2, in3);
       break;
     case ADST_ADST:
-      load_buffer_32x16(input, in0, in1, in2, in3, stride, 0, 0);
       fadst16_sse2(in0, in1);
       fadst16_sse2(in2, in3);
       fhalfright32_16col(in0, in1, in2, in3);
       break;
+#if CONFIG_EXT_TX
     case FLIPADST_DCT:
       load_buffer_32x16(input, in0, in1, in2, in3, stride, 1, 0);
       fadst16_sse2(in0, in1);
@@ -3768,8 +3774,8 @@ void av1_fht32x16_sse2(const int16_t *input, tran_low_t *output, int stride,
       fidtx16_sse2(in2, in3);
       fhalfright32_16col(in0, in1, in2, in3);
       break;
+#endif
     default: assert(0); break;
   }
   write_buffer_32x16(output, in0, in1, in2, in3);
 }
-#endif  // CONFIG_EXT_TX
