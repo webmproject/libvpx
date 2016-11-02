@@ -3064,8 +3064,9 @@ static void select_tx_block(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
   ENTROPY_CONTEXT *pta = ta + blk_col;
   ENTROPY_CONTEXT *ptl = tl + blk_row;
   int coeff_ctx, i;
-  int ctx = txfm_partition_context(tx_above + (blk_col >> 1),
-                                   tx_left + (blk_row >> 1), tx_size);
+  int ctx =
+      txfm_partition_context(tx_above + (blk_col >> 1),
+                             tx_left + (blk_row >> 1), mbmi->sb_type, tx_size);
 
   int64_t sum_dist = 0, sum_bsse = 0;
   int64_t sum_rd = INT64_MAX;

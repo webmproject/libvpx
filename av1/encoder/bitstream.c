@@ -360,7 +360,8 @@ static void write_tx_size_vartx(const AV1_COMMON *cm, const MACROBLOCKD *xd,
   const int max_blocks_wide = max_block_wide(xd, mbmi->sb_type, 0);
 
   int ctx = txfm_partition_context(xd->above_txfm_context + tx_col,
-                                   xd->left_txfm_context + tx_row, tx_size);
+                                   xd->left_txfm_context + tx_row,
+                                   mbmi->sb_type, tx_size);
 
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
 

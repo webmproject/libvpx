@@ -4987,7 +4987,7 @@ static void sum_intra_stats(FRAME_COUNTS *counts, const MODE_INFO *mi,
 
 #if CONFIG_VAR_TX
 static void update_txfm_count(MACROBLOCK *x, MACROBLOCKD *xd,
-                              FRAME_COUNTS *counts, TX_SIZE tx_size,
+                              FRAME_COUNTS *counts, TX_SIZE tx_size, int depth,
                               int blk_row, int blk_col) {
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   const int tx_row = blk_row >> 1;
@@ -4995,7 +4995,8 @@ static void update_txfm_count(MACROBLOCK *x, MACROBLOCKD *xd,
   const int max_blocks_high = max_block_high(xd, mbmi->sb_type, 0);
   const int max_blocks_wide = max_block_wide(xd, mbmi->sb_type, 0);
   int ctx = txfm_partition_context(xd->above_txfm_context + tx_col,
-                                   xd->left_txfm_context + tx_row, tx_size);
+                                   xd->left_txfm_context + tx_row,
+                                   mbmi->sb_type, tx_size);
   const TX_SIZE plane_tx_size = mbmi->inter_tx_size[tx_row][tx_col];
 
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
@@ -5023,8 +5024,8 @@ static void update_txfm_count(MACROBLOCK *x, MACROBLOCKD *xd,
     for (i = 0; i < 4; ++i) {
       int offsetr = (i >> 1) * bh / 2;
       int offsetc = (i & 0x01) * bh / 2;
-      update_txfm_count(x, xd, counts, tx_size - 1, blk_row + offsetr,
-                        blk_col + offsetc);
+      update_txfm_count(x, xd, counts, tx_size - 1, depth + 1,
+                        blk_row + offsetr, blk_col + offsetc);
     }
   }
 }
@@ -5046,7 +5047,8 @@ static void tx_partition_count_update(const AV1_COMMON *const cm, MACROBLOCK *x,
 
   for (idy = 0; idy < mi_height; idy += bh)
     for (idx = 0; idx < mi_width; idx += bh)
-      update_txfm_count(x, xd, td_counts, max_tx_size, idy, idx);
+      update_txfm_count(x, xd, td_counts, max_tx_size, mi_width != mi_height,
+                        idy, idx);
 }
 
 static void set_txfm_context(MACROBLOCKD *xd, TX_SIZE tx_size, int blk_row,

@@ -756,11 +756,30 @@ static INLINE void txfm_partition_update(TXFM_CONTEXT *above_ctx,
 
 static INLINE int txfm_partition_context(TXFM_CONTEXT *above_ctx,
                                          TXFM_CONTEXT *left_ctx,
-                                         TX_SIZE tx_size) {
-  int above = *above_ctx < tx_size;
-  int left = *left_ctx < tx_size;
+                                         const BLOCK_SIZE bsize,
+                                         const TX_SIZE tx_size) {
+  const int above = *above_ctx < tx_size;
+  const int left = *left_ctx < tx_size;
+  TX_SIZE max_tx_size = max_txsize_lookup[bsize];
+  int category = 15;
 
-  return (tx_size - TX_8X8) * 3 + above + left;
+  if (max_tx_size == TX_32X32) {
+    if (tx_size == TX_32X32)
+      category = 0;
+    else
+      category = 1;
+  } else if (max_tx_size == TX_16X16) {
+    if (tx_size == TX_16X16)
+      category = 2;
+    else
+      category = 3;
+  } else if (max_tx_size == TX_8X8) {
+    category = 4;
+  }
+
+  if (category == 15) return category;
+
+  return category * 3 + above + left;
 }
 #endif
 
