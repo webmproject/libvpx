@@ -352,16 +352,8 @@ static void decode_reconstruct_tx(AV1_COMMON *cm, MACROBLOCKD *const xd,
       plane ? uv_txsize_lookup[bsize][mbmi->inter_tx_size[tx_row][tx_col]][0][0]
             : mbmi->inter_tx_size[tx_row][tx_col];
   // Scale to match transform block unit.
-  int max_blocks_high = block_size_high[plane_bsize];
-  int max_blocks_wide = block_size_wide[plane_bsize];
-
-  if (xd->mb_to_bottom_edge < 0)
-    max_blocks_high += xd->mb_to_bottom_edge >> (3 + pd->subsampling_y);
-  if (xd->mb_to_right_edge < 0)
-    max_blocks_wide += xd->mb_to_right_edge >> (3 + pd->subsampling_x);
-
-  max_blocks_high >>= tx_size_wide_log2[0];
-  max_blocks_wide >>= tx_size_wide_log2[0];
+  const int max_blocks_high = max_block_high(xd, plane_bsize, plane);
+  const int max_blocks_wide = max_block_wide(xd, plane_bsize, plane);
 
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
 
@@ -380,7 +372,8 @@ static void decode_reconstruct_tx(AV1_COMMON *cm, MACROBLOCKD *const xd,
         pd->dst.stride, max_scan_line, eob);
     *eob_total += eob;
   } else {
-    int bsl = block_size_wide[bsize] >> (tx_size_wide_log2[0] + 1);
+    const TX_SIZE sub_txs = sub_tx_size_map[tx_size];
+    const int bsl = tx_size_wide_unit[sub_txs];
     int i;
 
     assert(bsl > 0);
@@ -392,7 +385,7 @@ static void decode_reconstruct_tx(AV1_COMMON *cm, MACROBLOCKD *const xd,
       if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide) continue;
 
       decode_reconstruct_tx(cm, xd, r, mbmi, plane, plane_bsize, offsetr,
-                            offsetc, tx_size - 1, eob_total);
+                            offsetc, sub_txs, eob_total);
     }
   }
 }
@@ -1318,8 +1311,8 @@ static void decode_block(AV1Decoder *const pbi, MACROBLOCKD *const xd,
         const BLOCK_SIZE plane_bsize =
             get_plane_block_size(AOMMAX(bsize, BLOCK_8X8), pd);
         const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
-        const int bw_var_tx = tx_size_high_unit[max_tx_size];
-        const int bh_var_tx = tx_size_wide_unit[max_tx_size];
+        const int bh_var_tx = tx_size_high_unit[max_tx_size];
+        const int bw_var_tx = tx_size_wide_unit[max_tx_size];
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
         if (is_rect_tx(mbmi->tx_size)) {
           const TX_SIZE tx_size =

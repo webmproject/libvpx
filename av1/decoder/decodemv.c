@@ -298,22 +298,14 @@ static void read_tx_size_vartx(AV1_COMMON *cm, MACROBLOCKD *xd,
   int is_split = 0;
   const int tx_row = blk_row >> 1;
   const int tx_col = blk_col >> 1;
-  int max_blocks_high = block_size_high[mbmi->sb_type];
-  int max_blocks_wide = block_size_wide[mbmi->sb_type];
+  const int max_blocks_high = max_block_high(xd, mbmi->sb_type, 0);
+  const int max_blocks_wide = max_block_wide(xd, mbmi->sb_type, 0);
   int ctx = txfm_partition_context(xd->above_txfm_context + tx_col,
                                    xd->left_txfm_context + tx_row,
                                    mbmi->sb_type, tx_size);
   TX_SIZE(*const inter_tx_size)
   [MAX_MIB_SIZE] =
       (TX_SIZE(*)[MAX_MIB_SIZE]) & mbmi->inter_tx_size[tx_row][tx_col];
-
-  if (xd->mb_to_bottom_edge < 0) max_blocks_high += xd->mb_to_bottom_edge >> 3;
-  if (xd->mb_to_right_edge < 0) max_blocks_wide += xd->mb_to_right_edge >> 3;
-
-  // Scale to transform block unit.
-  max_blocks_high >>= tx_size_wide_log2[0];
-  max_blocks_wide >>= tx_size_wide_log2[0];
-
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
 
   if (depth == MAX_VARTX_DEPTH) {
@@ -332,9 +324,8 @@ static void read_tx_size_vartx(AV1_COMMON *cm, MACROBLOCKD *xd,
   is_split = aom_read(r, cm->fc->txfm_partition_prob[ctx], ACCT_STR);
 
   if (is_split) {
-    BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
-    // Half the block size in transform block unit.
-    int bsl = block_size_wide[bsize] >> (tx_size_wide_log2[0] + 1);
+    const TX_SIZE sub_txs = sub_tx_size_map[tx_size];
+    const int bsl = tx_size_wide_unit[sub_txs];
     int i;
 
     if (counts) ++counts->txfm_partition[ctx][1];
@@ -349,9 +340,9 @@ static void read_tx_size_vartx(AV1_COMMON *cm, MACROBLOCKD *xd,
 
     assert(bsl > 0);
     for (i = 0; i < 4; ++i) {
-      int offsetr = blk_row + ((i >> 1) * bsl);
-      int offsetc = blk_col + ((i & 0x01) * bsl);
-      read_tx_size_vartx(cm, xd, mbmi, counts, tx_size - 1, depth + 1, offsetr,
+      int offsetr = blk_row + (i >> 1) * bsl;
+      int offsetc = blk_col + (i & 0x01) * bsl;
+      read_tx_size_vartx(cm, xd, mbmi, counts, sub_txs, depth + 1, offsetr,
                          offsetc, r);
     }
   } else {
@@ -1802,8 +1793,8 @@ static void read_inter_frame_mode_info(AV1Decoder *const pbi,
     if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT && !mbmi->skip &&
         inter_block) {
       const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
-      const BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
-      const int bs = block_size_wide[txb_size] >> tx_size_wide_log2[0];
+      const int bh = tx_size_high_unit[max_tx_size];
+      const int bw = tx_size_wide_unit[max_tx_size];
       const int width = block_size_wide[bsize] >> tx_size_wide_log2[0];
       const int height = block_size_high[bsize] >> tx_size_wide_log2[0];
       int idx, idy;
@@ -1824,8 +1815,8 @@ static void read_inter_frame_mode_info(AV1Decoder *const pbi,
         set_txfm_ctxs(mbmi->tx_size, xd->n8_w, xd->n8_h, xd);
       } else {
 #endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
-        for (idy = 0; idy < height; idy += bs)
-          for (idx = 0; idx < width; idx += bs)
+        for (idy = 0; idy < height; idy += bh)
+          for (idx = 0; idx < width; idx += bw)
             read_tx_size_vartx(cm, xd, mbmi, xd->counts, max_tx_size,
                                height != width, idy, idx, r);
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
