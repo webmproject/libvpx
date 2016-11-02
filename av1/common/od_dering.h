@@ -12,6 +12,8 @@
 #if !defined(_dering_H)
 #define _dering_H (1)
 
+// clang-format off
+
 #include "odintrin.h"
 
 #if defined(DAALA_ODINTRIN)
@@ -19,7 +21,7 @@
 typedef int16_t od_dering_in;
 #endif
 
-#define OD_DERINGSIZES (4)
+#define OD_DERINGSIZES (2)
 
 #define OD_DERING_NBLOCKS (OD_BSIZE_MAX / 8)
 
@@ -34,26 +36,21 @@ typedef int (*od_filter_dering_direction_func)(int16_t *y, int ystride,
 typedef void (*od_filter_dering_orthogonal_func)(int16_t *y, int ystride,
                                                  const int16_t *in,
                                                  int threshold, int dir);
+void copy_blocks_16bit(int16_t *dst, int dstride, int16_t *src, int sstride,
+    unsigned char (*bskip)[2], int dering_count, int bsize);
+
 void od_dering(int16_t *y, int ystride, const od_dering_in *x, int xstride,
                int nvb, int nhb, int sbx, int sby, int nhsb, int nvsb, int xdec,
-               int ydec, int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS], int pli,
-               unsigned char *bskip, int skip_stride, int threshold,
+               int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS], int pli,
+               unsigned char (*bskip)[2], int skip_stride, int threshold,
                int coeff_shift);
 int od_filter_dering_direction_4x4_c(int16_t *y, int ystride, const int16_t *in,
                                      int threshold, int dir);
-int od_filter_dering_direction_4x8(int16_t *y, int ystride, const int16_t *in,
-                                   int threshold, int dir);
-int od_filter_dering_direction_8x4(int16_t *y, int ystride, const int16_t *in,
-                                   int threshold, int dir);
 int od_filter_dering_direction_8x8_c(int16_t *y, int ystride, const int16_t *in,
                                      int threshold, int dir);
 void od_filter_dering_orthogonal_4x4_c(int16_t *y, int ystride,
                                        const int16_t *in, int threshold,
                                        int dir);
-void od_filter_dering_orthogonal_4x8(int16_t *y, int ystride, const int16_t *in,
-                                     int threshold, int dir);
-void od_filter_dering_orthogonal_8x4(int16_t *y, int ystride, const int16_t *in,
-                                     int threshold, int dir);
 void od_filter_dering_orthogonal_8x8_c(int16_t *y, int ystride,
                                        const int16_t *in, int threshold,
                                        int dir);
