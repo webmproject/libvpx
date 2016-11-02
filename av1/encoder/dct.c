@@ -18,6 +18,8 @@
 #include "aom_dsp/fwd_txfm.h"
 #include "aom_ports/mem.h"
 #include "av1/common/blockd.h"
+#include "av1/common/av1_fwd_txfm1d.h"
+#include "av1/common/av1_fwd_txfm2d_cfg.h"
 #include "av1/common/idct.h"
 
 static INLINE void range_check(const tran_low_t *input, const int size,
@@ -1874,12 +1876,103 @@ void av1_fht32x32_c(const int16_t *input, tran_low_t *output, int stride,
   }
 }
 
+#if CONFIG_TX64X64
+#if CONFIG_EXT_TX
+static void fidtx64(const tran_low_t *input, tran_low_t *output) {
+  int i;
+  for (i = 0; i < 64; ++i)
+    output[i] = (tran_low_t)fdct_round_shift(input[i] * 4 * Sqrt2);
+}
+
+// For use in lieu of ADST
+static void fhalfright64(const tran_low_t *input, tran_low_t *output) {
+  int i;
+  tran_low_t inputhalf[32];
+  for (i = 0; i < 32; ++i) {
+    output[32 + i] = (tran_low_t)fdct_round_shift(input[i] * 4 * Sqrt2);
+  }
+  // Multiply input by sqrt(2)
+  for (i = 0; i < 32; ++i) {
+    inputhalf[i] = (tran_low_t)fdct_round_shift(input[i + 32] * Sqrt2);
+  }
+  fdct32(inputhalf, output);
+  // Note overall scaling factor is 2 times unitary
+}
+#endif  // CONFIG_EXT_TX
+
+static void fdct64_col(const tran_low_t *input, tran_low_t *output) {
+  int32_t in[64], out[64];
+  int i;
+  for (i = 0; i < 64; ++i) in[i] = (int32_t)input[i];
+  av1_fdct64_new(in, out, fwd_cos_bit_col_dct_dct_64,
+                 fwd_stage_range_col_dct_dct_64);
+  for (i = 0; i < 64; ++i) output[i] = (tran_low_t)out[i];
+}
+
+static void fdct64_row(const tran_low_t *input, tran_low_t *output) {
+  int32_t in[64], out[64];
+  int i;
+  for (i = 0; i < 64; ++i) in[i] = (int32_t)input[i];
+  av1_fdct64_new(in, out, fwd_cos_bit_row_dct_dct_64,
+                 fwd_stage_range_row_dct_dct_64);
+  for (i = 0; i < 64; ++i) output[i] = (tran_low_t)out[i];
+}
+
+void av1_fht64x64_c(const int16_t *input, tran_low_t *output, int stride,
+                    int tx_type) {
+  static const transform_2d FHT[] = {
+    { fdct64_col, fdct64_row },  // DCT_DCT
+#if CONFIG_EXT_TX
+    { fhalfright64, fdct64_row },    // ADST_DCT
+    { fdct64_col, fhalfright64 },    // DCT_ADST
+    { fhalfright64, fhalfright64 },  // ADST_ADST
+    { fhalfright64, fdct64_row },    // FLIPADST_DCT
+    { fdct64_col, fhalfright64 },    // DCT_FLIPADST
+    { fhalfright64, fhalfright64 },  // FLIPADST_FLIPADST
+    { fhalfright64, fhalfright64 },  // ADST_FLIPADST
+    { fhalfright64, fhalfright64 },  // FLIPADST_ADST
+    { fidtx64, fidtx64 },            // IDTX
+    { fdct64_col, fidtx64 },         // V_DCT
+    { fidtx64, fdct64_row },         // H_DCT
+    { fhalfright64, fidtx64 },       // V_ADST
+    { fidtx64, fhalfright64 },       // H_ADST
+    { fhalfright64, fidtx64 },       // V_FLIPADST
+    { fidtx64, fhalfright64 },       // H_FLIPADST
+#endif
+  };
+  const transform_2d ht = FHT[tx_type];
+  tran_low_t out[4096];
+  int i, j;
+  tran_low_t temp_in[64], temp_out[64];
+#if CONFIG_EXT_TX
+  int16_t flipped_input[64 * 64];
+  maybe_flip_input(&input, &stride, 64, 64, flipped_input, tx_type);
+#endif
+  // Columns
+  for (i = 0; i < 64; ++i) {
+    for (j = 0; j < 64; ++j) temp_in[j] = input[j * stride + i];
+    ht.cols(temp_in, temp_out);
+    for (j = 0; j < 64; ++j)
+      out[j * 64 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
+  }
+
+  // Rows
+  for (i = 0; i < 64; ++i) {
+    for (j = 0; j < 64; ++j) temp_in[j] = out[j + i * 64];
+    ht.rows(temp_in, temp_out);
+    for (j = 0; j < 64; ++j)
+      output[j + i * 64] =
+          (tran_low_t)((temp_out[j] + 1 + (temp_out[j] < 0)) >> 2);
+  }
+}
+#endif  // CONFIG_TX64X64
+
 #if CONFIG_EXT_TX
 // Forward identity transform.
 void av1_fwd_idtx_c(const int16_t *src_diff, tran_low_t *coeff, int stride,
                     int bs, int tx_type) {
   int r, c;
-  const int shift = bs < 32 ? 3 : 2;
+  const int shift = bs < 32 ? 3 : (bs < 64 ? 2 : 1);
   if (tx_type == IDTX) {
     for (r = 0; r < bs; ++r) {
       for (c = 0; c < bs; ++c) coeff[c] = src_diff[c] * (1 << shift);
@@ -1894,5 +1987,12 @@ void av1_highbd_fht32x32_c(const int16_t *input, tran_low_t *output, int stride,
                            int tx_type) {
   av1_fht32x32_c(input, output, stride, tx_type);
 }
+
+#if CONFIG_TX64X64
+void av1_highbd_fht64x64_c(const int16_t *input, tran_low_t *output, int stride,
+                           int tx_type) {
+  av1_fht64x64_c(input, output, stride, tx_type);
+}
+#endif  // CONFIG_TX64X64
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 #endif  // CONFIG_EXT_TX
