@@ -111,6 +111,9 @@ if (aom_config("CONFIG_AOM_HIGHBITDEPTH") eq "yes") {
 
     add_proto qw/void av1_iht16x16_256_add/, "const tran_low_t *input, uint8_t *output, int pitch, int tx_type";
     specialize qw/av1_iht16x16_256_add sse2 avx2/;
+
+    add_proto qw/void av1_iht32x32_1024_add/, "const tran_low_t *input, uint8_t *output, int pitch, int tx_type";
+    specialize qw/av1_iht32x32_1024_add/;
   }
 } else {
   # Force C versions if CONFIG_EMULATE_HARDWARE is 1
@@ -141,6 +144,10 @@ if (aom_config("CONFIG_AOM_HIGHBITDEPTH") eq "yes") {
 
     add_proto qw/void av1_iht16x16_256_add/, "const tran_low_t *input, uint8_t *output, int pitch, int tx_type";
     specialize qw/av1_iht16x16_256_add/;
+
+    add_proto qw/void av1_iht32x32_1024_add/, "const tran_low_t *input, uint8_t *output, int pitch, int tx_type";
+    specialize qw/av1_iht32x32_1024_add/;
+
   } else {
     add_proto qw/void av1_iht4x4_16_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int tx_type";
     specialize qw/av1_iht4x4_16_add sse2 neon dspr2/;
@@ -169,12 +176,22 @@ if (aom_config("CONFIG_AOM_HIGHBITDEPTH") eq "yes") {
     add_proto qw/void av1_iht16x16_256_add/, "const tran_low_t *input, uint8_t *output, int pitch, int tx_type";
     specialize qw/av1_iht16x16_256_add sse2 avx2 dspr2/;
 
+    add_proto qw/void av1_iht32x32_1024_add/, "const tran_low_t *input, uint8_t *output, int pitch, int tx_type";
+    specialize qw/av1_iht32x32_1024_add/;
+
     if (aom_config("CONFIG_EXT_TX") ne "yes") {
       specialize qw/av1_iht4x4_16_add msa/;
       specialize qw/av1_iht8x8_64_add msa/;
       specialize qw/av1_iht16x16_256_add msa/;
     }
   }
+}
+add_proto qw/void av1_iht32x32_1024_add/, "const tran_low_t *input, uint8_t *output, int pitch, int tx_type";
+specialize qw/av1_iht32x32_1024_add/;
+
+if (aom_config("CONFIG_TX64X64") eq "yes") {
+  add_proto qw/void av1_iht64x64_4096_add/, "const tran_low_t *input, uint8_t *output, int pitch, int tx_type";
+  specialize qw/av1_iht64x64_4096_add/;
 }
 
 if (aom_config("CONFIG_NEW_QUANT") eq "yes") {

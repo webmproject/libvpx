@@ -134,24 +134,32 @@ typedef enum ATTRIBUTE_PACKED {
 #if CONFIG_CB4X4
   TX_2X2,  // 2x2 transform
 #endif
-  TX_4X4,                   // 4x4 transform
-  TX_8X8,                   // 8x8 transform
-  TX_16X16,                 // 16x16 transform
-  TX_32X32,                 // 32x32 transform
-  TX_4X8,                   // 4x8 transform
-  TX_8X4,                   // 8x4 transform
-  TX_8X16,                  // 8x16 transform
-  TX_16X8,                  // 16x8 transform
-  TX_16X32,                 // 16x32 transform
-  TX_32X16,                 // 32x16 transform
-  TX_SIZES_ALL,             // Includes rectangular transforms
-  TX_SIZES = TX_32X32 + 1,  // Does NOT include rectangular transforms
-  TX_INVALID = 255          // Invalid transform size
+  TX_4X4,    // 4x4 transform
+  TX_8X8,    // 8x8 transform
+  TX_16X16,  // 16x16 transform
+  TX_32X32,  // 32x32 transform
+#if CONFIG_TX64X64
+  TX_64X64,           // 64x64 transform
+#endif                // CONFIG_TX64X64
+  TX_4X8,             // 4x8 transform
+  TX_8X4,             // 8x4 transform
+  TX_8X16,            // 8x16 transform
+  TX_16X8,            // 16x8 transform
+  TX_16X32,           // 16x32 transform
+  TX_32X16,           // 32x16 transform
+#if 0                 // CONFIG_TX64X64
+  // TODO(debargha): To be enabled later
+  TX_32X64,                 // 32x64 transform
+  TX_64X32,                 // 64x32 transform
+#endif                // CONFIG_TX64X64
+  TX_SIZES_ALL,       // Includes rectangular transforms
+  TX_SIZES = TX_4X8,  // Does NOT include rectangular transforms
+  TX_INVALID = 255    // Invalid transform size
 } TX_SIZE;
 
 #define MAX_TX_DEPTH (TX_32X32 - TX_4X4)
 
-#define MAX_TX_SIZE_LOG2 5
+#define MAX_TX_SIZE_LOG2 (5 + CONFIG_TX64X64)
 #define MAX_TX_SIZE (1 << MAX_TX_SIZE_LOG2)
 #define MIN_TX_SIZE_LOG2 2
 #define MIN_TX_SIZE (1 << MIN_TX_SIZE_LOG2)

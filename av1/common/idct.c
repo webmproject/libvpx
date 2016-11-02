@@ -23,14 +23,14 @@
 int get_tx_scale(const MACROBLOCKD *const xd, const TX_TYPE tx_type,
                  const TX_SIZE tx_size) {
   (void)tx_type;
-#if CONFIG_AOM_HIGHBITDEPTH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    return txsize_sqr_up_map[tx_size] == TX_32X32;
-  }
-#else
   (void)xd;
-#endif
-  return txsize_sqr_up_map[tx_size] == TX_32X32;
+  if (txsize_sqr_up_map[tx_size] == TX_32X32) return 1;
+#if CONFIG_TX64X64
+  else if (txsize_sqr_up_map[tx_size] == TX_64X64)
+    return 2;
+#endif  // CONFIG_TX64X64
+  else
+    return 0;
 }
 
 // NOTE: The implementation of all inverses need to be aware of the fact
@@ -58,6 +58,14 @@ static void iidtx32_c(const tran_low_t *input, tran_low_t *output) {
   int i;
   for (i = 0; i < 32; ++i) output[i] = input[i] * 4;
 }
+
+#if CONFIG_TX64X64
+static void iidtx64_c(const tran_low_t *input, tran_low_t *output) {
+  int i;
+  for (i = 0; i < 64; ++i)
+    output[i] = (tran_low_t)dct_const_round_shift(input[i] * 4 * Sqrt2);
+}
+#endif  // CONFIG_TX64X64
 #endif  // CONFIG_EXT_TX
 
 // For use in lieu of ADST
@@ -92,12 +100,6 @@ static void idct64_row_c(const tran_low_t *input, tran_low_t *output) {
   av1_idct64_new(in, out, inv_cos_bit_row_dct_dct_64,
                  inv_stage_range_row_dct_dct_64);
   for (i = 0; i < 64; ++i) output[i] = (tran_low_t)out[i];
-}
-
-static void iidtx64_c(const tran_low_t *input, tran_low_t *output) {
-  int i;
-  for (i = 0; i < 64; ++i)
-    output[i] = (tran_low_t)dct_const_round_shift(input[i] * 4 * Sqrt2);
 }
 
 // For use in lieu of ADST
@@ -174,7 +176,10 @@ static void highbd_iidtx64_c(const tran_low_t *input, tran_low_t *output,
     output[i] =
         HIGHBD_WRAPLOW(highbd_dct_const_round_shift(input[i] * 4 * Sqrt2), bd);
 }
+#endif  // CONFIG_TX64X64
+#endif  // CONFIG_EXT_TX
 
+#if CONFIG_TX64X64
 // For use in lieu of ADST
 static void highbd_ihalfright64_c(const tran_low_t *input, tran_low_t *output,
                                   int bd) {
@@ -215,7 +220,6 @@ static void highbd_idct64_row_c(const tran_low_t *input, tran_low_t *output,
   for (i = 0; i < 64; ++i) output[i] = (tran_low_t)out[i];
 }
 #endif  // CONFIG_TX64X64
-#endif  // CONFIG_EXT_TX
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 
 // Inverse identity transform and add.
@@ -223,7 +227,7 @@ static void highbd_idct64_row_c(const tran_low_t *input, tran_low_t *output,
 static void inv_idtx_add_c(const tran_low_t *input, uint8_t *dest, int stride,
                            int bs, int tx_type) {
   int r, c;
-  const int shift = bs < 32 ? 3 : 2;
+  const int shift = bs < 32 ? 3 : (bs < 64 ? 2 : 1);
   if (tx_type == IDTX) {
     for (r = 0; r < bs; ++r) {
       for (c = 0; c < bs; ++c)
@@ -929,6 +933,7 @@ void av1_iht32x32_1024_add_c(const tran_low_t *input, uint8_t *dest, int stride,
     }
   }
 }
+#endif  // CONFIG_EXT_TX
 
 #if CONFIG_TX64X64
 void av1_iht64x64_4096_add_c(const tran_low_t *input, uint8_t *dest, int stride,
@@ -938,6 +943,7 @@ void av1_iht64x64_4096_add_c(const tran_low_t *input, uint8_t *dest, int stride,
     { ihalfright64_c, idct64_row_c },    // ADST_DCT
     { idct64_col_c, ihalfright64_c },    // DCT_ADST
     { ihalfright64_c, ihalfright64_c },  // ADST_ADST
+#if CONFIG_EXT_TX
     { ihalfright64_c, idct64_row_c },    // FLIPADST_DCT
     { idct64_col_c, ihalfright64_c },    // DCT_FLIPADST
     { ihalfright64_c, ihalfright64_c },  // FLIPADST_FLIPADST
@@ -950,6 +956,7 @@ void av1_iht64x64_4096_add_c(const tran_low_t *input, uint8_t *dest, int stride,
     { iidtx64_c, ihalfright64_c },       // H_ADST
     { ihalfright64_c, iidtx64_c },       // V_FLIPADST
     { iidtx64_c, ihalfright64_c },       // H_FLIPADST
+#endif                                   // CONFIG_EXT_TX
   };
 
   int i, j;
@@ -979,7 +986,9 @@ void av1_iht64x64_4096_add_c(const tran_low_t *input, uint8_t *dest, int stride,
     IHT_64[tx_type].cols(out[i], out[i]);
   }
 
+#if CONFIG_EXT_TX
   maybe_flip_strides(&dest, &stride, &outp, &outstride, tx_type, 64, 64);
+#endif  // CONFIG_EXT_TX
 
   // Sum with the destination
   for (i = 0; i < 64; ++i) {
@@ -991,7 +1000,6 @@ void av1_iht64x64_4096_add_c(const tran_low_t *input, uint8_t *dest, int stride,
   }
 }
 #endif  // CONFIG_TX64X64
-#endif  // CONFIG_EXT_TX
 
 // idct
 void av1_idct4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
@@ -1055,6 +1063,14 @@ void av1_idct32x32_add(const tran_low_t *input, uint8_t *dest, int stride,
   else
     aom_idct32x32_1024_add(input, dest, stride);
 }
+
+#if CONFIG_TX64X64
+void av1_idct64x64_add(const tran_low_t *input, uint8_t *dest, int stride,
+                       int eob) {
+  (void)eob;
+  av1_iht64x64_4096_add(input, dest, stride, DCT_DCT);
+}
+#endif  // CONFIG_TX64X64
 
 void av1_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest, int stride,
                           int eob, TX_TYPE tx_type, int lossless) {
@@ -1205,6 +1221,35 @@ void av1_inv_txfm_add_32x32(const tran_low_t *input, uint8_t *dest, int stride,
     default: assert(0); break;
   }
 }
+
+#if CONFIG_TX64X64
+void av1_inv_txfm_add_64x64(const tran_low_t *input, uint8_t *dest, int stride,
+                            int eob, TX_TYPE tx_type) {
+  switch (tx_type) {
+    case DCT_DCT: av1_idct64x64_add(input, dest, stride, eob); break;
+#if CONFIG_EXT_TX
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+    case FLIPADST_DCT:
+    case DCT_FLIPADST:
+    case FLIPADST_FLIPADST:
+    case ADST_FLIPADST:
+    case FLIPADST_ADST:
+    case V_DCT:
+    case H_DCT:
+    case V_ADST:
+    case H_ADST:
+    case V_FLIPADST:
+    case H_FLIPADST:
+      av1_iht64x64_4096_add_c(input, dest, stride, tx_type);
+      break;
+    case IDTX: inv_idtx_add_c(input, dest, stride, 64, tx_type); break;
+#endif  // CONFIG_EXT_TX
+    default: assert(0); break;
+  }
+}
+#endif  // CONFIG_TX64X64
 
 #if CONFIG_AOM_HIGHBITDEPTH
 void av1_highbd_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
@@ -1835,6 +1880,7 @@ void av1_highbd_iht32x32_1024_add_c(const tran_low_t *input, uint8_t *dest8,
     }
   }
 }
+#endif  // CONFIG_EXT_TX
 
 #if CONFIG_TX64X64
 void av1_highbd_iht64x64_4096_add_c(const tran_low_t *input, uint8_t *dest8,
@@ -1844,6 +1890,7 @@ void av1_highbd_iht64x64_4096_add_c(const tran_low_t *input, uint8_t *dest8,
     { highbd_ihalfright64_c, highbd_idct64_row_c },    // ADST_DCT
     { highbd_idct64_col_c, highbd_ihalfright64_c },    // DCT_ADST
     { highbd_ihalfright64_c, highbd_ihalfright64_c },  // ADST_ADST
+#if CONFIG_EXT_TX
     { highbd_ihalfright64_c, highbd_idct64_row_c },    // FLIPADST_DCT
     { highbd_idct64_col_c, highbd_ihalfright64_c },    // DCT_FLIPADST
     { highbd_ihalfright64_c, highbd_ihalfright64_c },  // FLIPADST_FLIPADST
@@ -1856,6 +1903,7 @@ void av1_highbd_iht64x64_4096_add_c(const tran_low_t *input, uint8_t *dest8,
     { highbd_iidtx64_c, highbd_ihalfright64_c },       // H_ADST
     { highbd_ihalfright64_c, highbd_iidtx64_c },       // V_FLIPADST
     { highbd_iidtx64_c, highbd_ihalfright64_c },       // H_FLIPADST
+#endif                                                 // CONFIG_EXT_TX
   };
 
   uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
@@ -1887,7 +1935,9 @@ void av1_highbd_iht64x64_4096_add_c(const tran_low_t *input, uint8_t *dest8,
     HIGH_IHT_64[tx_type].cols(out[i], out[i], bd);
   }
 
+#if CONFIG_EXT_TX
   maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, 64, 64);
+#endif  // CONFIG_EXT_TX
 
   // Sum with the destination
   for (i = 0; i < 64; ++i) {
@@ -1900,7 +1950,6 @@ void av1_highbd_iht64x64_4096_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 }
 #endif  // CONFIG_TX64X64
-#endif  // CONFIG_EXT_TX
 
 // idct
 void av1_highbd_idct4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
@@ -2155,6 +2204,42 @@ void av1_highbd_inv_txfm_add_32x32(const tran_low_t *input, uint8_t *dest,
     default: assert(0); break;
   }
 }
+
+#if CONFIG_TX64X64
+void av1_highbd_inv_txfm_add_64x64(const tran_low_t *input, uint8_t *dest,
+                                   int stride, int eob, int bd,
+                                   TX_TYPE tx_type) {
+  (void)eob;
+  switch (tx_type) {
+    case DCT_DCT:
+      av1_inv_txfm2d_add_64x64(input, CONVERT_TO_SHORTPTR(dest), stride,
+                               DCT_DCT, bd);
+      break;
+#if CONFIG_EXT_TX
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+    case FLIPADST_DCT:
+    case DCT_FLIPADST:
+    case FLIPADST_FLIPADST:
+    case ADST_FLIPADST:
+    case FLIPADST_ADST:
+    case V_DCT:
+    case H_DCT:
+    case V_ADST:
+    case H_ADST:
+    case V_FLIPADST:
+    case H_FLIPADST:
+      av1_highbd_iht64x64_4096_add_c(input, dest, stride, tx_type, bd);
+      break;
+    case IDTX:
+      highbd_inv_idtx_add_c(input, dest, stride, 64, tx_type, bd);
+      break;
+#endif  // CONFIG_EXT_TX
+    default: assert(0); break;
+  }
+}
+#endif  // CONFIG_TX64X64
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 
 void inv_txfm_add(const tran_low_t *input, uint8_t *dest, int stride,
@@ -2165,6 +2250,11 @@ void inv_txfm_add(const tran_low_t *input, uint8_t *dest, int stride,
   const int lossless = inv_txfm_param->lossless;
 
   switch (tx_size) {
+#if CONFIG_TX64X64
+    case TX_64X64:
+      av1_inv_txfm_add_64x64(input, dest, stride, eob, tx_type);
+      break;
+#endif  // CONFIG_TX64X64
     case TX_32X32:
       av1_inv_txfm_add_32x32(input, dest, stride, eob, tx_type);
       break;
@@ -2206,6 +2296,11 @@ void highbd_inv_txfm_add(const tran_low_t *input, uint8_t *dest, int stride,
   const int lossless = inv_txfm_param->lossless;
 
   switch (tx_size) {
+#if CONFIG_TX64X64
+    case TX_64X64:
+      av1_highbd_inv_txfm_add_64x64(input, dest, stride, eob, bd, tx_type);
+      break;
+#endif  // CONFIG_TX64X64
     case TX_32X32:
       av1_highbd_inv_txfm_add_32x32(input, dest, stride, eob, bd, tx_type);
       break;
