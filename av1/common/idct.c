@@ -147,6 +147,7 @@ static void highbd_iidtx32_c(const tran_low_t *input, tran_low_t *output,
   (void)bd;
   for (i = 0; i < 32; ++i) output[i] = input[i] * 4;
 }
+#endif  // CONFIG_EXT_TX
 
 static void highbd_ihalfright32_c(const tran_low_t *input, tran_low_t *output,
                                   int bd) {
@@ -164,6 +165,7 @@ static void highbd_ihalfright32_c(const tran_low_t *input, tran_low_t *output,
   // Note overall scaling factor is 4 times orthogonal
 }
 
+#if CONFIG_EXT_TX
 #if CONFIG_TX64X64
 static void highbd_iidtx64_c(const tran_low_t *input, tran_low_t *output,
                              int bd) {
@@ -1271,7 +1273,6 @@ void av1_highbd_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 }
 
-#if CONFIG_EXT_TX
 void av1_highbd_iht4x8_32_add_c(const tran_low_t *input, uint8_t *dest8,
                                 int stride, int tx_type, int bd) {
   static const highbd_transform_2d HIGH_IHT_4x8[] = {
@@ -1279,6 +1280,7 @@ void av1_highbd_iht4x8_32_add_c(const tran_low_t *input, uint8_t *dest8,
     { aom_highbd_iadst8_c, aom_highbd_idct4_c },   // ADST_DCT
     { aom_highbd_idct8_c, aom_highbd_iadst4_c },   // DCT_ADST
     { aom_highbd_iadst8_c, aom_highbd_iadst4_c },  // ADST_ADST
+#if CONFIG_EXT_TX
     { aom_highbd_iadst8_c, aom_highbd_idct4_c },   // FLIPADST_DCT
     { aom_highbd_idct8_c, aom_highbd_iadst4_c },   // DCT_FLIPADST
     { aom_highbd_iadst8_c, aom_highbd_iadst4_c },  // FLIPADST_FLIPADST
@@ -1291,6 +1293,7 @@ void av1_highbd_iht4x8_32_add_c(const tran_low_t *input, uint8_t *dest8,
     { highbd_iidtx8_c, aom_highbd_iadst4_c },      // H_ADST
     { aom_highbd_iadst8_c, highbd_iidtx4_c },      // V_FLIPADST
     { highbd_iidtx8_c, aom_highbd_iadst4_c },      // H_FLIPADST
+#endif                                             // CONFIG_EXT_TX
   };
   const int n = 4;
   const int n2 = 8;
@@ -1317,7 +1320,9 @@ void av1_highbd_iht4x8_32_add_c(const tran_low_t *input, uint8_t *dest8,
     HIGH_IHT_4x8[tx_type].cols(out[i], out[i], bd);
   }
 
+#if CONFIG_EXT_TX
   maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, n2, n);
+#endif  // CONFIG_EXT_TX
 
   // Sum with the destination
   for (i = 0; i < n2; ++i) {
@@ -1337,6 +1342,7 @@ void av1_highbd_iht8x4_32_add_c(const tran_low_t *input, uint8_t *dest8,
     { aom_highbd_iadst4_c, aom_highbd_idct8_c },   // ADST_DCT
     { aom_highbd_idct4_c, aom_highbd_iadst8_c },   // DCT_ADST
     { aom_highbd_iadst4_c, aom_highbd_iadst8_c },  // ADST_ADST
+#if CONFIG_EXT_TX
     { aom_highbd_iadst4_c, aom_highbd_idct8_c },   // FLIPADST_DCT
     { aom_highbd_idct4_c, aom_highbd_iadst8_c },   // DCT_FLIPADST
     { aom_highbd_iadst4_c, aom_highbd_iadst8_c },  // FLIPADST_FLIPADST
@@ -1349,6 +1355,7 @@ void av1_highbd_iht8x4_32_add_c(const tran_low_t *input, uint8_t *dest8,
     { highbd_iidtx4_c, aom_highbd_iadst8_c },      // H_ADST
     { aom_highbd_iadst4_c, highbd_iidtx8_c },      // V_FLIPADST
     { highbd_iidtx4_c, aom_highbd_iadst8_c },      // H_FLIPADST
+#endif                                             // CONFIG_EXT_TX
   };
   const int n = 4;
   const int n2 = 8;
@@ -1375,7 +1382,9 @@ void av1_highbd_iht8x4_32_add_c(const tran_low_t *input, uint8_t *dest8,
     HIGH_IHT_8x4[tx_type].cols(out[i], out[i], bd);
   }
 
+#if CONFIG_EXT_TX
   maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, n, n2);
+#endif  // CONFIG_EXT_TX
 
   // Sum with the destination
   for (i = 0; i < n; ++i) {
@@ -1395,6 +1404,7 @@ void av1_highbd_iht8x16_128_add_c(const tran_low_t *input, uint8_t *dest8,
     { aom_highbd_iadst16_c, aom_highbd_idct8_c },   // ADST_DCT
     { aom_highbd_idct16_c, aom_highbd_iadst8_c },   // DCT_ADST
     { aom_highbd_iadst16_c, aom_highbd_iadst8_c },  // ADST_ADST
+#if CONFIG_EXT_TX
     { aom_highbd_iadst16_c, aom_highbd_idct8_c },   // FLIPADST_DCT
     { aom_highbd_idct16_c, aom_highbd_iadst8_c },   // DCT_FLIPADST
     { aom_highbd_iadst16_c, aom_highbd_iadst8_c },  // FLIPADST_FLIPADST
@@ -1407,6 +1417,7 @@ void av1_highbd_iht8x16_128_add_c(const tran_low_t *input, uint8_t *dest8,
     { highbd_iidtx16_c, aom_highbd_iadst8_c },      // H_ADST
     { aom_highbd_iadst16_c, highbd_iidtx8_c },      // V_FLIPADST
     { highbd_iidtx16_c, aom_highbd_iadst8_c },      // H_FLIPADST
+#endif                                              // CONFIG_EXT_TX
   };
   const int n = 8;
   const int n2 = 16;
@@ -1432,7 +1443,9 @@ void av1_highbd_iht8x16_128_add_c(const tran_low_t *input, uint8_t *dest8,
     HIGH_IHT_8x16[tx_type].cols(out[i], out[i], bd);
   }
 
+#if CONFIG_EXT_TX
   maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, n2, n);
+#endif  // CONFIG_EXT_TX
 
   // Sum with the destination
   for (i = 0; i < n2; ++i) {
@@ -1452,6 +1465,7 @@ void av1_highbd_iht16x8_128_add_c(const tran_low_t *input, uint8_t *dest8,
     { aom_highbd_iadst8_c, aom_highbd_idct16_c },   // ADST_DCT
     { aom_highbd_idct8_c, aom_highbd_iadst16_c },   // DCT_ADST
     { aom_highbd_iadst8_c, aom_highbd_iadst16_c },  // ADST_ADST
+#if CONFIG_EXT_TX
     { aom_highbd_iadst8_c, aom_highbd_idct16_c },   // FLIPADST_DCT
     { aom_highbd_idct8_c, aom_highbd_iadst16_c },   // DCT_FLIPADST
     { aom_highbd_iadst8_c, aom_highbd_iadst16_c },  // FLIPADST_FLIPADST
@@ -1464,6 +1478,7 @@ void av1_highbd_iht16x8_128_add_c(const tran_low_t *input, uint8_t *dest8,
     { highbd_iidtx8_c, aom_highbd_iadst16_c },      // H_ADST
     { aom_highbd_iadst8_c, highbd_iidtx16_c },      // V_FLIPADST
     { highbd_iidtx8_c, aom_highbd_iadst16_c },      // H_FLIPADST
+#endif                                              // CONFIG_EXT_TX
   };
   const int n = 8;
   const int n2 = 16;
@@ -1489,7 +1504,9 @@ void av1_highbd_iht16x8_128_add_c(const tran_low_t *input, uint8_t *dest8,
     HIGH_IHT_16x8[tx_type].cols(out[i], out[i], bd);
   }
 
+#if CONFIG_EXT_TX
   maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, n, n2);
+#endif  // CONFIG_EXT_TX
 
   // Sum with the destination
   for (i = 0; i < n; ++i) {
@@ -1509,6 +1526,7 @@ void av1_highbd_iht16x32_512_add_c(const tran_low_t *input, uint8_t *dest8,
     { highbd_ihalfright32_c, aom_highbd_idct16_c },   // ADST_DCT
     { aom_highbd_idct32_c, aom_highbd_iadst16_c },    // DCT_ADST
     { highbd_ihalfright32_c, aom_highbd_iadst16_c },  // ADST_ADST
+#if CONFIG_EXT_TX
     { highbd_ihalfright32_c, aom_highbd_idct16_c },   // FLIPADST_DCT
     { aom_highbd_idct32_c, aom_highbd_iadst16_c },    // DCT_FLIPADST
     { highbd_ihalfright32_c, aom_highbd_iadst16_c },  // FLIPADST_FLIPADST
@@ -1521,6 +1539,7 @@ void av1_highbd_iht16x32_512_add_c(const tran_low_t *input, uint8_t *dest8,
     { highbd_iidtx32_c, aom_highbd_iadst16_c },       // H_ADST
     { highbd_ihalfright32_c, highbd_iidtx16_c },      // V_FLIPADST
     { highbd_iidtx32_c, aom_highbd_iadst16_c },       // H_FLIPADST
+#endif                                                // CONFIG_EXT_TX
   };
   const int n = 16;
   const int n2 = 32;
@@ -1546,7 +1565,9 @@ void av1_highbd_iht16x32_512_add_c(const tran_low_t *input, uint8_t *dest8,
     HIGH_IHT_16x32[tx_type].cols(out[i], out[i], bd);
   }
 
+#if CONFIG_EXT_TX
   maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, n2, n);
+#endif  // CONFIG_EXT_TX
 
   // Sum with the destination
   for (i = 0; i < n2; ++i) {
@@ -1566,6 +1587,7 @@ void av1_highbd_iht32x16_512_add_c(const tran_low_t *input, uint8_t *dest8,
     { aom_highbd_iadst16_c, aom_highbd_idct32_c },    // ADST_DCT
     { aom_highbd_idct16_c, highbd_ihalfright32_c },   // DCT_ADST
     { aom_highbd_iadst16_c, highbd_ihalfright32_c },  // ADST_ADST
+#if CONFIG_EXT_TX
     { aom_highbd_iadst16_c, aom_highbd_idct32_c },    // FLIPADST_DCT
     { aom_highbd_idct16_c, highbd_ihalfright32_c },   // DCT_FLIPADST
     { aom_highbd_iadst16_c, highbd_ihalfright32_c },  // FLIPADST_FLIPADST
@@ -1578,6 +1600,7 @@ void av1_highbd_iht32x16_512_add_c(const tran_low_t *input, uint8_t *dest8,
     { highbd_iidtx16_c, highbd_ihalfright32_c },      // H_ADST
     { aom_highbd_iadst16_c, highbd_iidtx32_c },       // V_FLIPADST
     { highbd_iidtx16_c, highbd_ihalfright32_c },      // H_FLIPADST
+#endif                                                // CONFIG_EXT_TX
   };
   const int n = 16;
   const int n2 = 32;
@@ -1603,7 +1626,9 @@ void av1_highbd_iht32x16_512_add_c(const tran_low_t *input, uint8_t *dest8,
     HIGH_IHT_32x16[tx_type].cols(out[i], out[i], bd);
   }
 
+#if CONFIG_EXT_TX
   maybe_flip_strides16(&dest, &stride, &outp, &outstride, tx_type, n, n2);
+#endif  // CONFIG_EXT_TX
 
   // Sum with the destination
   for (i = 0; i < n; ++i) {
@@ -1615,7 +1640,6 @@ void av1_highbd_iht32x16_512_add_c(const tran_low_t *input, uint8_t *dest8,
     }
   }
 }
-#endif  // CONFIG_EXT_TX
 
 void av1_highbd_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest8,
                                 int stride, int tx_type, int bd) {
@@ -1983,7 +2007,6 @@ void av1_highbd_inv_txfm_add_4x4(const tran_low_t *input, uint8_t *dest,
   }
 }
 
-#if CONFIG_EXT_TX
 void av1_highbd_inv_txfm_add_4x8(const tran_low_t *input, uint8_t *dest,
                                  int stride, int eob, int bd, TX_TYPE tx_type) {
   (void)eob;
@@ -2023,7 +2046,6 @@ void av1_highbd_inv_txfm_add_32x16(const tran_low_t *input, uint8_t *dest,
   (void)eob;
   av1_highbd_iht32x16_512_add_c(input, dest, stride, tx_type, bd);
 }
-#endif  // CONFIG_EXT_TX
 
 void av1_highbd_inv_txfm_add_8x8(const tran_low_t *input, uint8_t *dest,
                                  int stride, int eob, int bd, TX_TYPE tx_type) {
@@ -2193,7 +2215,6 @@ void highbd_inv_txfm_add(const tran_low_t *input, uint8_t *dest, int stride,
     case TX_8X8:
       av1_highbd_inv_txfm_add_8x8(input, dest, stride, eob, bd, tx_type);
       break;
-#if CONFIG_EXT_TX
     case TX_4X8:
       av1_highbd_inv_txfm_add_4x8(input, dest, stride, eob, bd, tx_type);
       break;
@@ -2212,7 +2233,6 @@ void highbd_inv_txfm_add(const tran_low_t *input, uint8_t *dest, int stride,
     case TX_32X16:
       av1_highbd_inv_txfm_add_32x16(input, dest, stride, eob, bd, tx_type);
       break;
-#endif  // CONFIG_EXT_TX
     case TX_4X4:
       // this is like av1_short_idct4x4 but has a special case around eob<=1
       // which is significant (not just an optimization) for the lossless
