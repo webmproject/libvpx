@@ -6170,11 +6170,12 @@ static void rd_supertx_sb(const AV1_COMP *const cpi, ThreadData *td,
     ENTROPY_CONTEXT ctxl[2 * MAX_MIB_SIZE];
     const struct macroblockd_plane *const pd = &xd->plane[plane];
     int coeff_ctx = 1;
+    RD_STATS this_rd_stats;
 
-    this_rate = 0;
-    this_dist = 0;
-    pnsse = 0;
-    pnskip = 1;
+    this_rd_stats.rate = 0;
+    this_rd_stats.dist = 0;
+    this_rd_stats.sse = 0;
+    this_rd_stats.skip = 1;
 
     tx_size = max_txsize_lookup[bsize];
     tx_size =
@@ -6184,8 +6185,13 @@ static void rd_supertx_sb(const AV1_COMP *const cpi, ThreadData *td,
 
     av1_subtract_plane(x, bsize, plane);
     av1_tx_block_rd_b(cpi, x, tx_size, 0, 0, plane, 0,
-                      get_plane_block_size(bsize, pd), coeff_ctx, &this_rate,
-                      &this_dist, &pnsse, &pnskip);
+                      get_plane_block_size(bsize, pd), coeff_ctx,
+                      &this_rd_stats);
+
+    this_rate = this_rd_stats.rate;
+    this_dist = this_rd_stats.dist;
+    pnsse = this_rd_stats.sse;
+    pnskip = this_rd_stats.skip;
 #else
     tx_size = max_txsize_lookup[bsize];
     tx_size =
@@ -6213,7 +6219,9 @@ static void rd_supertx_sb(const AV1_COMP *const cpi, ThreadData *td,
     ENTROPY_CONTEXT ctxl[2 * MAX_MIB_SIZE];
     const struct macroblockd_plane *const pd = &xd->plane[0];
     int coeff_ctx = 1;
+    RD_STATS this_rd_stats;
 #endif  // CONFIG_VAR_TX
+
 #if CONFIG_EXT_TX
     if (!ext_tx_used_inter[ext_tx_set][tx_type]) continue;
 #else
@@ -6222,15 +6230,20 @@ static void rd_supertx_sb(const AV1_COMP *const cpi, ThreadData *td,
     mbmi->tx_type = tx_type;
 
 #if CONFIG_VAR_TX
-    this_rate = 0;
-    this_dist = 0;
-    pnsse = 0;
-    pnskip = 1;
+    this_rd_stats.rate = 0;
+    this_rd_stats.dist = 0;
+    this_rd_stats.sse = 0;
+    this_rd_stats.skip = 1;
 
     av1_get_entropy_contexts(bsize, tx_size, pd, ctxa, ctxl);
     coeff_ctx = combine_entropy_contexts(ctxa[0], ctxl[0]);
-    av1_tx_block_rd_b(cpi, x, tx_size, 0, 0, 0, 0, bsize, coeff_ctx, &this_rate,
-                      &this_dist, &pnsse, &pnskip);
+    av1_tx_block_rd_b(cpi, x, tx_size, 0, 0, 0, 0, bsize, coeff_ctx,
+                      &this_rd_stats);
+
+    this_rate = this_rd_stats.rate;
+    this_dist = this_rd_stats.dist;
+    pnsse = this_rd_stats.sse;
+    pnskip = this_rd_stats.skip;
 #else
     av1_txfm_rd_in_plane_supertx(x, cpi, &this_rate, &this_dist, &pnskip,
                                  &pnsse, INT64_MAX, 0, bsize, tx_size, 0);
