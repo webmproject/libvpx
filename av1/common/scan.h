@@ -27,6 +27,7 @@ extern "C" {
 
 extern const SCAN_ORDER av1_default_scan_orders[TX_SIZES];
 extern const SCAN_ORDER av1_intra_scan_orders[TX_SIZES][TX_TYPES];
+extern const SCAN_ORDER av1_inter_scan_orders[TX_SIZES_ALL][TX_TYPES];
 
 #if CONFIG_ADAPT_SCAN
 void av1_update_scan_prob(AV1_COMMON *cm, TX_SIZE tx_size, TX_TYPE tx_type,
@@ -87,7 +88,7 @@ static INLINE const SCAN_ORDER *get_scan(const AV1_COMMON *cm, TX_SIZE tx_size,
   return &cm->fc->sc[tx_size][tx_type];
 #else  // CONFIG_ADAPT_SCAN
   (void)cm;
-#if CONFIG_EXT_TX
+#if CONFIG_EXT_TX || CONFIG_VAR_TX
   return is_inter ? &av1_inter_scan_orders[tx_size][tx_type]
                   : &av1_intra_scan_orders[tx_size][tx_type];
 #else
