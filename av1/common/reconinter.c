@@ -567,7 +567,7 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane,
 
 // TODO(sarahparker) enable the use of DUAL_FILTER in warped motion functions
 // in order to allow GLOBAL_MOTION and DUAL_FILTER to work together
-#if CONFIG_DUAL_FILTER
+#if CONFIG_SUB8X8_MC
 #if CONFIG_MOTION_VAR
   if (mi->mbmi.sb_type < BLOCK_8X8 && plane > 0 && !build_for_obmc) {
 #else
@@ -645,91 +645,6 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane,
             av1_make_inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
                                      subpel_x, subpel_y, sf, x_step, y_step,
                                      ref, mi->mbmi.interp_filter, xs, ys, xd);
-        }
-      }
-    }
-    return;
-  }
-#endif
-
-#if CONFIG_SUB8X8_MC
-#if CONFIG_MOTION_VAR
-  if (mi->mbmi.sb_type < BLOCK_8X8 && plane > 0 && !build_for_obmc) {
-#else
-  if (mi->mbmi.sb_type < BLOCK_8X8 && plane > 0) {
-#endif  // CONFIG_MOTION_VAR
-    // block size in log2
-    const int b4_wl = b_width_log2_lookup[mi->mbmi.sb_type];
-    const int b4_hl = b_height_log2_lookup[mi->mbmi.sb_type];
-    const int b8_sl = b_width_log2_lookup[BLOCK_8X8];
-
-    // block size
-    const int b4_w = 1 << b4_wl;
-    const int b4_h = 1 << b4_hl;
-    const int b8_s = 1 << b8_sl;
-    int idx, idy;
-
-    const int x_base = x;
-    const int y_base = y;
-
-    // processing unit size
-    const int x_step = w >> (b8_sl - b4_wl);
-    const int y_step = h >> (b8_sl - b4_hl);
-
-    for (idy = 0; idy < b8_s; idy += b4_h) {
-      for (idx = 0; idx < b8_s; idx += b4_w) {
-        const int chr_idx = (idy * 2) + idx;
-        for (ref = 0; ref < 1 + is_compound; ++ref) {
-          const struct scale_factors *const sf = &xd->block_refs[ref]->sf;
-          struct buf_2d *const pre_buf = &pd->pre[ref];
-          struct buf_2d *const dst_buf = &pd->dst;
-          uint8_t *dst = dst_buf->buf;
-          const MV mv = mi->bmi[chr_idx].as_mv[ref].as_mv;
-          const MV mv_q4 = clamp_mv_to_umv_border_sb(
-              xd, &mv, bw, bh, pd->subsampling_x, pd->subsampling_y);
-          uint8_t *pre;
-          MV32 scaled_mv;
-          int xs, ys, subpel_x, subpel_y;
-          const int is_scaled = av1_is_scaled(sf);
-
-          x = x_base + idx * x_step;
-          y = y_base + idy * y_step;
-
-          dst += dst_buf->stride * y + x;
-
-          if (is_scaled) {
-            pre =
-                pre_buf->buf + scaled_buffer_offset(x, y, pre_buf->stride, sf);
-            scaled_mv = av1_scale_mv(&mv_q4, mi_x + x, mi_y + y, sf);
-            xs = sf->x_step_q4;
-            ys = sf->y_step_q4;
-          } else {
-            pre = pre_buf->buf + y * pre_buf->stride + x;
-            scaled_mv.row = mv_q4.row;
-            scaled_mv.col = mv_q4.col;
-            xs = ys = 16;
-          }
-
-          subpel_x = scaled_mv.col & SUBPEL_MASK;
-          subpel_y = scaled_mv.row & SUBPEL_MASK;
-          pre += (scaled_mv.row >> SUBPEL_BITS) * pre_buf->stride +
-                 (scaled_mv.col >> SUBPEL_BITS);
-
-#if CONFIG_AOM_HIGHBITDEPTH
-          if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-            high_inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
-                                 subpel_x, subpel_y, sf, x_step, y_step, ref,
-                                 mi->mbmi.interp_filter, xs, ys, xd->bd);
-          } else {
-            inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
-                            subpel_x, subpel_y, sf, x_step, y_step, ref,
-                            mi->mbmi.interp_filter, xs, ys);
-          }
-#else
-          inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride, subpel_x,
-                          subpel_y, sf, x_step, y_step, ref,
-                          mi->mbmi.interp_filter, xs, ys);
-#endif
         }
       }
     }
