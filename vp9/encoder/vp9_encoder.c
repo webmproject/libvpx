@@ -2801,13 +2801,13 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
     dc_quant_devisor = 4.0;
 #endif
 
-    fprintf(f, "%10u %dx%d %10d %10d %d %d %10d %10d %10d %10d"
+    fprintf(f, "%10u %dx%d %d %d %10d %10d %10d %10d"
        "%10"PRId64" %10"PRId64" %5d %5d %10"PRId64" "
        "%10"PRId64" %10"PRId64" %10d "
        "%7.2lf %7.2lf %7.2lf %7.2lf %7.2lf"
         "%6d %6d %5d %5d %5d "
         "%10"PRId64" %10.3lf"
-        "%10lf %8u %10"PRId64" %10d %10d %10d\n",
+        "%10lf %8u %10"PRId64" %10d %10d %10d %10d %10d\n",
         cpi->common.current_video_frame,
         cm->width, cm->height,
         cpi->rc.source_alt_ref_pending,
