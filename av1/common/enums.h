@@ -134,18 +134,16 @@ typedef enum ATTRIBUTE_PACKED {
 #if CONFIG_CB4X4
   TX_2X2,  // 2x2 transform
 #endif
-  TX_4X4,    // 4x4 transform
-  TX_8X8,    // 8x8 transform
-  TX_16X16,  // 16x16 transform
-  TX_32X32,  // 32x32 transform
-#if CONFIG_EXT_TX
+  TX_4X4,                   // 4x4 transform
+  TX_8X8,                   // 8x8 transform
+  TX_16X16,                 // 16x16 transform
+  TX_32X32,                 // 32x32 transform
   TX_4X8,                   // 4x8 transform
   TX_8X4,                   // 8x4 transform
   TX_8X16,                  // 8x16 transform
   TX_16X8,                  // 16x8 transform
   TX_16X32,                 // 16x32 transform
   TX_32X16,                 // 32x16 transform
-#endif                      // CONFIG_EXT_TX
   TX_SIZES_ALL,             // Includes rectangular transforms
   TX_SIZES = TX_32X32 + 1,  // Does NOT include rectangular transforms
   TX_INVALID = 255          // Invalid transform size
