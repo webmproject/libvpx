@@ -9,8 +9,6 @@
  * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 
-// clang-format off
-
 #include <string.h>
 #include <math.h>
 
@@ -43,7 +41,7 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
   int nhsb, nvsb;
   int16_t *src;
   int16_t *ref_coeff;
-  dering_list dlist[MAX_MIB_SIZE*MAX_MIB_SIZE];
+  dering_list dlist[MAX_MIB_SIZE * MAX_MIB_SIZE];
   int dir[OD_DERING_NBLOCKS][OD_DERING_NBLOCKS] = { { 0 } };
   int stride;
   int bsize[3];
@@ -101,10 +99,9 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
       int16_t tmp_dst[MAX_MIB_SIZE * MAX_MIB_SIZE * 8 * 8];
       nhb = AOMMIN(MAX_MIB_SIZE, cm->mi_cols - MAX_MIB_SIZE * sbc);
       nvb = AOMMIN(MAX_MIB_SIZE, cm->mi_rows - MAX_MIB_SIZE * sbr);
-      dering_count = sb_compute_dering_list(cm, sbr * MAX_MIB_SIZE, sbc * MAX_MIB_SIZE,
-          dlist);
-      if (dering_count == 0)
-        continue;
+      dering_count = sb_compute_dering_list(cm, sbr * MAX_MIB_SIZE,
+                                            sbc * MAX_MIB_SIZE, dlist);
+      if (dering_count == 0) continue;
       best_gi = 0;
       for (gi = 0; gi < DERING_REFINEMENT_LEVELS; gi++) {
         int cur_mse;
@@ -123,13 +120,16 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
         }
         in = inbuf + OD_FILT_VBORDER * OD_FILT_BSTRIDE + OD_FILT_HBORDER;
         /* We avoid filtering the pixels for which some of the pixels to average
-           are outside the frame. We could change the filter instead, but it would
+           are outside the frame. We could change the filter instead, but it
+           would
            add special cases for any future vectorization. */
-        for (i = 0; i < OD_DERING_INBUF_SIZE; i++) inbuf[i] = OD_DERING_VERY_LARGE;
+        for (i = 0; i < OD_DERING_INBUF_SIZE; i++)
+          inbuf[i] = OD_DERING_VERY_LARGE;
         for (i = -OD_FILT_VBORDER * (sbr != 0);
              i < (nvb << bsize[0]) + OD_FILT_VBORDER * (sbr != nvsb - 1); i++) {
           for (j = -OD_FILT_HBORDER * (sbc != 0);
-               j < (nhb << bsize[0]) + OD_FILT_HBORDER * (sbc != nhsb - 1); j++) {
+               j < (nhb << bsize[0]) + OD_FILT_HBORDER * (sbc != nhsb - 1);
+               j++) {
             int16_t *x;
             x = &src[(sbr * stride * MAX_MIB_SIZE << bsize[0]) +
                      (sbc * MAX_MIB_SIZE << bsize[0])];
@@ -137,9 +137,9 @@ int av1_dering_search(YV12_BUFFER_CONFIG *frame, const YV12_BUFFER_CONFIG *ref,
           }
         }
         od_dering(tmp_dst, in, 0, dir, 0, dlist, dering_count, threshold,
-            coeff_shift);
-        copy_dering_16bit_to_16bit(dst, MAX_MIB_SIZE << bsize[0], tmp_dst, dlist,
-            dering_count, bsize[0]);
+                  coeff_shift);
+        copy_dering_16bit_to_16bit(dst, MAX_MIB_SIZE << bsize[0], tmp_dst,
+                                   dlist, dering_count, bsize[0]);
         cur_mse = (int)compute_dist(
             dst, MAX_MIB_SIZE << bsize[0],
             &ref_coeff[(sbr * stride * MAX_MIB_SIZE << bsize[0]) +

@@ -12,8 +12,6 @@
 #include "config.h"
 #endif
 
-// clang-format off
-
 #include <stdlib.h>
 #include <math.h>
 #include "dering.h"
@@ -258,40 +256,38 @@ static INLINE int od_adjust_thresh(int threshold, int32_t var) {
   return (threshold * OD_THRESH_TABLE_Q8[OD_ILOG(v1)] + 128) >> 8;
 }
 
-static INLINE void copy_8x8_16bit_to_16bit(int16_t *dst, int dstride, int16_t *src, int sstride) {
+static INLINE void copy_8x8_16bit_to_16bit(int16_t *dst, int dstride,
+                                           int16_t *src, int sstride) {
   int i, j;
   for (i = 0; i < 8; i++)
-    for (j = 0; j < 8; j++)
-      dst[i * dstride + j] = src[i * sstride + j];
+    for (j = 0; j < 8; j++) dst[i * dstride + j] = src[i * sstride + j];
 }
 
-static INLINE void copy_4x4_16bit_to_16bit(int16_t *dst, int dstride, int16_t *src, int sstride) {
+static INLINE void copy_4x4_16bit_to_16bit(int16_t *dst, int dstride,
+                                           int16_t *src, int sstride) {
   int i, j;
   for (i = 0; i < 4; i++)
-    for (j = 0; j < 4; j++)
-      dst[i * dstride + j] = src[i * sstride + j];
+    for (j = 0; j < 4; j++) dst[i * dstride + j] = src[i * sstride + j];
 }
 
 /* TODO: Optimize this function for SSE. */
 void copy_dering_16bit_to_16bit(int16_t *dst, int dstride, int16_t *src,
-    dering_list *dlist, int dering_count, int bsize)
-{
+                                dering_list *dlist, int dering_count,
+                                int bsize) {
   int bi, bx, by;
   if (bsize == 3) {
     for (bi = 0; bi < dering_count; bi++) {
       by = dlist[bi].by;
       bx = dlist[bi].bx;
-      copy_8x8_16bit_to_16bit(&dst[(by << 3) * dstride + (bx << 3)],
-                     dstride,
-                     &src[bi << 2*bsize], 1 << bsize);
+      copy_8x8_16bit_to_16bit(&dst[(by << 3) * dstride + (bx << 3)], dstride,
+                              &src[bi << 2 * bsize], 1 << bsize);
     }
   } else {
     for (bi = 0; bi < dering_count; bi++) {
       by = dlist[bi].by;
       bx = dlist[bi].bx;
-      copy_4x4_16bit_to_16bit(&dst[(by << 2) * dstride + (bx << 2)],
-                     dstride,
-                     &src[bi << 2*bsize], 1 << bsize);
+      copy_4x4_16bit_to_16bit(&dst[(by << 2) * dstride + (bx << 2)], dstride,
+                              &src[bi << 2 * bsize], 1 << bsize);
     }
   }
 }
@@ -317,8 +313,8 @@ void od_dering(int16_t *y, int16_t *in, int xdec,
       int32_t var;
       by = dlist[bi].by;
       bx = dlist[bi].bx;
-      dir[by][bx] = od_dir_find8(&in[8 * by * OD_FILT_BSTRIDE + 8 * bx], OD_FILT_BSTRIDE,
-                                 &var, coeff_shift);
+      dir[by][bx] = od_dir_find8(&in[8 * by * OD_FILT_BSTRIDE + 8 * bx],
+                                 OD_FILT_BSTRIDE, &var, coeff_shift);
       /* Deringing orthogonal to the direction uses a tighter threshold
          because we want to be conservative. We've presumably already
          achieved some deringing, so the amount of change is expected
@@ -328,7 +324,7 @@ void od_dering(int16_t *y, int16_t *in, int xdec,
          since the ringing there tends to be directional, so it doesn't
          get removed by the directional filtering. */
       filter2_thresh[by][bx] = (filter_dering_direction[bsize - OD_LOG_BSIZE0])(
-          &y[bi << 2*bsize], 1 << bsize,
+          &y[bi << 2 * bsize], 1 << bsize,
           &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)],
           od_adjust_thresh(threshold, var), dir[by][bx]);
     }
@@ -337,20 +333,20 @@ void od_dering(int16_t *y, int16_t *in, int xdec,
       by = dlist[bi].by;
       bx = dlist[bi].bx;
       filter2_thresh[by][bx] = (filter_dering_direction[bsize - OD_LOG_BSIZE0])(
-          &y[bi << 2*bsize], 1 << bsize,
+          &y[bi << 2 * bsize], 1 << bsize,
           &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)], threshold,
           dir[by][bx]);
     }
   }
   copy_dering_16bit_to_16bit(in, OD_FILT_BSTRIDE, y, dlist, dering_count,
-      bsize);
+                             bsize);
   for (bi = 0; bi < dering_count; bi++) {
     by = dlist[bi].by;
     bx = dlist[bi].bx;
     if (filter2_thresh[by][bx] == 0) continue;
     (filter_dering_orthogonal[bsize - OD_LOG_BSIZE0])(
-        &y[bi << 2*bsize], 1 << bsize,
-        &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)], filter2_thresh[by][bx],
-        dir[by][bx]);
+        &y[bi << 2 * bsize], 1 << bsize,
+        &in[(by * OD_FILT_BSTRIDE << bsize) + (bx << bsize)],
+        filter2_thresh[by][bx], dir[by][bx]);
   }
 }
