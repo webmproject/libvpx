@@ -222,7 +222,6 @@ static INLINE int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
       above_ec = a[0] != 0;
       left_ec = l[0] != 0;
       break;
-#if CONFIG_EXT_TX
     case TX_4X8:
       above_ec = a[0] != 0;
       left_ec = !!*(const uint16_t *)l;
@@ -247,7 +246,6 @@ static INLINE int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
       above_ec = !!*(const uint64_t *)a;
       left_ec = !!*(const uint32_t *)l;
       break;
-#endif  // CONFIG_EXT_TX
     case TX_8X8:
       above_ec = !!*(const uint16_t *)a;
       left_ec = !!*(const uint16_t *)l;
