@@ -251,8 +251,7 @@ typedef struct {
   int current_q_index;
 #endif
 #if CONFIG_RD_DEBUG
-  int64_t txb_cost_y;
-  int64_t txb_cost_uv;
+  int64_t txb_coeff_cost[MAX_MB_PLANE];
   int mi_row;
   int mi_col;
 #endif
