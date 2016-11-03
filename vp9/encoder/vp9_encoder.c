@@ -3218,6 +3218,13 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   vpx_clear_system_state();
 }
 
+#define MAX_QSTEP_ADJ 4
+static int get_qstep_adj(int rate_excess, int rate_limit) {
+  int qstep =
+      rate_limit ? ((rate_excess + rate_limit / 2) / rate_limit) : INT_MAX;
+  return VPXMIN(qstep, MAX_QSTEP_ADJ);
+}
+
 static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
                                     uint8_t *dest) {
   VP9_COMMON *const cm = &cpi->common;
@@ -3391,6 +3398,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
         // to attempt to recode.
         int last_q = q;
         int retries = 0;
+        int qstep;
 
         if (cpi->resize_pending == 1) {
           // Change in frame size so go back around the recode loop.
@@ -3416,7 +3424,10 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
             q_high = rc->worst_quality;
 
           // Raise Qlow as to at least the current value
-          q_low = q < q_high ? q + 1 : q_high;
+          qstep =
+              get_qstep_adj(rc->projected_frame_size, rc->this_frame_target);
+          q_low = VPXMIN(q + qstep, q_high);
+          // q_low = q < q_high ? q + 1 : q_high;
 
           if (undershoot_seen || loop_at_this_size > 1) {
             // Update rate_correction_factor unless
@@ -3441,7 +3452,10 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
           overshoot_seen = 1;
         } else {
           // Frame is too small
-          q_high = q > q_low ? q - 1 : q_low;
+          qstep =
+              get_qstep_adj(rc->this_frame_target, rc->projected_frame_size);
+          q_high = VPXMAX(q - qstep, q_low);
+          // q_high = q > q_low ? q - 1 : q_low;
 
           if (overshoot_seen || loop_at_this_size > 1) {
             vp9_rc_update_rate_correction_factors(cpi);
