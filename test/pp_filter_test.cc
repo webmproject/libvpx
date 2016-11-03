@@ -7,22 +7,23 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
+#include "./vpx_config.h"
+#include "./vpx_dsp_rtcd.h"
+#include "test/acm_random.h"
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
-#include "./vpx_config.h"
-#include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_mem/vpx_mem.h"
 
-typedef void (*PostProcFunc)(unsigned char *src_ptr, unsigned char *dst_ptr,
-                             int src_pixels_per_line, int dst_pixels_per_line,
-                             int cols, unsigned char *flimit, int size);
+typedef void (*VpxPostProcDownAndAcrossMbRowFunc)(
+    unsigned char *src_ptr, unsigned char *dst_ptr, int src_pixels_per_line,
+    int dst_pixels_per_line, int cols, unsigned char *flimit, int size);
 
 namespace {
 
-class VPxPostProcessingFilterTest
-    : public ::testing::TestWithParam<PostProcFunc> {
+class VpxPostProcDownAndAcrossMbRowTest
+    : public ::testing::TestWithParam<VpxPostProcDownAndAcrossMbRowFunc> {
  public:
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
 };
@@ -30,7 +31,7 @@ class VPxPostProcessingFilterTest
 // Test routine for the VPx post-processing function
 // vpx_post_proc_down_and_across_mb_row_c.
 
-TEST_P(VPxPostProcessingFilterTest, FilterOutputCheck) {
+TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckFilterOutput) {
   // Size of the underlying data block that will be filtered.
   const int block_width = 16;
   const int block_height = 16;
@@ -78,14 +79,14 @@ TEST_P(VPxPostProcessingFilterTest, FilterOutputCheck) {
                                       input_stride, output_stride, block_width,
                                       flimits, 16));
 
-  static const uint8_t expected_data[block_height] = { 4, 3, 1, 1, 1, 1, 1, 1,
-                                                       1, 1, 1, 1, 1, 1, 3, 4 };
+  static const uint8_t kExpectedOutput[block_height] = {
+    4, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 4
+  };
 
   pixel_ptr = dst_image_ptr;
   for (int i = 0; i < block_height; ++i) {
     for (int j = 0; j < block_width; ++j) {
-      EXPECT_EQ(expected_data[i], pixel_ptr[j])
-          << "VPxPostProcessingFilterTest failed with invalid filter output";
+      ASSERT_EQ(kExpectedOutput[i], pixel_ptr[j]);
     }
     pixel_ptr += output_stride;
   }
@@ -96,18 +97,18 @@ TEST_P(VPxPostProcessingFilterTest, FilterOutputCheck) {
 };
 
 INSTANTIATE_TEST_CASE_P(
-    C, VPxPostProcessingFilterTest,
+    C, VpxPostProcDownAndAcrossMbRowTest,
     ::testing::Values(vpx_post_proc_down_and_across_mb_row_c));
 
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
-    SSE2, VPxPostProcessingFilterTest,
+    SSE2, VpxPostProcDownAndAcrossMbRowTest,
     ::testing::Values(vpx_post_proc_down_and_across_mb_row_sse2));
 #endif
 
 #if HAVE_MSA
 INSTANTIATE_TEST_CASE_P(
-    MSA, VPxPostProcessingFilterTest,
+    MSA, VpxPostProcDownAndAcrossMbRowTest,
     ::testing::Values(vpx_post_proc_down_and_across_mb_row_msa));
 #endif
 
