@@ -3122,10 +3122,8 @@ static void select_tx_block(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
   }
 
   if (tx_size > TX_4X4 && depth < MAX_VARTX_DEPTH) {
-    BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
-    int bsl = block_size_wide[bsize] >> (tx_size_wide_log2[0] + 1);
-    // TODO(jingning): Refactor this transform block size transition.
-    TX_SIZE sub_txs = tx_size - 1;
+    const TX_SIZE sub_txs = sub_tx_size_map[tx_size];
+    const int bsl = tx_size_wide_unit[sub_txs];
     int sub_step = tx_size_wide_unit[sub_txs] * tx_size_high_unit[sub_txs];
     int this_rate;
     int64_t this_dist;
@@ -3196,12 +3194,12 @@ static void inter_block_yrd(const AV1_COMP *cpi, MACROBLOCK *x, int *rate,
     const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
     const int mi_width = num_4x4_blocks_wide_lookup[plane_bsize];
     const int mi_height = num_4x4_blocks_high_lookup[plane_bsize];
-    BLOCK_SIZE txb_size = txsize_to_bsize[max_txsize_lookup[plane_bsize]];
-    int bh = num_4x4_blocks_wide_lookup[txb_size];
+    const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
+    const int bh = tx_size_high_unit[max_tx_size];
+    const int bw = tx_size_wide_unit[max_tx_size];
     int idx, idy;
     int block = 0;
-    int step = tx_size_wide_unit[max_txsize_lookup[plane_bsize]] *
-               tx_size_high_unit[max_txsize_lookup[plane_bsize]];
+    int step = tx_size_wide_unit[max_tx_size] * tx_size_high_unit[max_tx_size];
     ENTROPY_CONTEXT ctxa[2 * MAX_MIB_SIZE];
     ENTROPY_CONTEXT ctxl[2 * MAX_MIB_SIZE];
     TXFM_CONTEXT tx_above[MAX_MIB_SIZE];
@@ -3217,12 +3215,11 @@ static void inter_block_yrd(const AV1_COMP *cpi, MACROBLOCK *x, int *rate,
            sizeof(TXFM_CONTEXT) * (mi_height >> 1));
 
     for (idy = 0; idy < mi_height; idy += bh) {
-      for (idx = 0; idx < mi_width; idx += bh) {
-        select_tx_block(cpi, x, idy, idx, 0, block,
-                        max_txsize_lookup[plane_bsize], mi_height != mi_width,
-                        plane_bsize, ctxa, ctxl, tx_above, tx_left, &pnrate,
-                        &pndist, &pnsse, &pnskip, ref_best_rd - this_rd,
-                        &is_cost_valid);
+      for (idx = 0; idx < mi_width; idx += bw) {
+        select_tx_block(cpi, x, idy, idx, 0, block, max_tx_size,
+                        mi_height != mi_width, plane_bsize, ctxa, ctxl,
+                        tx_above, tx_left, &pnrate, &pndist, &pnsse, &pnskip,
+                        ref_best_rd - this_rd, &is_cost_valid);
         *rate += pnrate;
         *distortion += pndist;
         *sse += pnsse;
@@ -3457,20 +3454,12 @@ static void tx_block_rd(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
   const int tx_row = blk_row >> (1 - pd->subsampling_y);
   const int tx_col = blk_col >> (1 - pd->subsampling_x);
   TX_SIZE plane_tx_size;
-  int max_blocks_high = block_size_high[plane_bsize];
-  int max_blocks_wide = block_size_wide[plane_bsize];
+  const int max_blocks_high = max_block_high(xd, plane_bsize, plane);
+  const int max_blocks_wide = max_block_wide(xd, plane_bsize, plane);
 
 #if CONFIG_EXT_TX
   assert(tx_size < TX_SIZES);
 #endif  // CONFIG_EXT_TX
-
-  if (xd->mb_to_bottom_edge < 0)
-    max_blocks_high += xd->mb_to_bottom_edge >> (3 + pd->subsampling_y);
-  if (xd->mb_to_right_edge < 0)
-    max_blocks_wide += xd->mb_to_right_edge >> (3 + pd->subsampling_x);
-
-  max_blocks_high >>= tx_size_wide_log2[0];
-  max_blocks_wide >>= tx_size_wide_log2[0];
 
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
 
@@ -3482,23 +3471,7 @@ static void tx_block_rd(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
     int coeff_ctx, i;
     ENTROPY_CONTEXT *ta = above_ctx + blk_col;
     ENTROPY_CONTEXT *tl = left_ctx + blk_row;
-    switch (tx_size) {
-      case TX_4X4: break;
-      case TX_8X8:
-        ta[0] = !!*(const uint16_t *)&ta[0];
-        tl[0] = !!*(const uint16_t *)&tl[0];
-        break;
-      case TX_16X16:
-        ta[0] = !!*(const uint32_t *)&ta[0];
-        tl[0] = !!*(const uint32_t *)&tl[0];
-        break;
-      case TX_32X32:
-        ta[0] = !!*(const uint64_t *)&ta[0];
-        tl[0] = !!*(const uint64_t *)&tl[0];
-        break;
-      default: assert(0 && "Invalid transform size."); break;
-    }
-    coeff_ctx = combine_entropy_contexts(ta[0], tl[0]);
+    coeff_ctx = get_entropy_context(tx_size, ta, tl);
     av1_tx_block_rd_b(cpi, x, tx_size, blk_row, blk_col, plane, block,
                       plane_bsize, coeff_ctx, rate, dist, bsse, skip);
 
@@ -3507,8 +3480,8 @@ static void tx_block_rd(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
     for (i = 0; i < tx_size_high_unit[tx_size]; ++i)
       tl[i] = !(p->eobs[block] == 0);
   } else {
-    const int bsl = block_size_wide[bsize] >> (1 + tx_size_wide_log2[0]);
-    const TX_SIZE sub_txs = tx_size - 1;
+    const TX_SIZE sub_txs = sub_tx_size_map[tx_size];
+    const int bsl = tx_size_wide_unit[sub_txs];
     int step = tx_size_wide_unit[sub_txs] * tx_size_high_unit[sub_txs];
     int i;
 
@@ -3559,11 +3532,12 @@ static int inter_block_uvrd(const AV1_COMP *cpi, MACROBLOCK *x, int *rate,
     const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
     const int mi_width = num_4x4_blocks_wide_lookup[plane_bsize];
     const int mi_height = num_4x4_blocks_high_lookup[plane_bsize];
-    BLOCK_SIZE txb_size = txsize_to_bsize[max_txsize_lookup[plane_bsize]];
-    int bh = num_4x4_blocks_wide_lookup[txb_size];
+    const TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
+    const int bh = tx_size_high_unit[max_tx_size];
+    const int bw = tx_size_wide_unit[max_tx_size];
     int idx, idy;
     int block = 0;
-    int step = 1 << (max_txsize_lookup[plane_bsize] * 2);
+    const int step = bh * bw;
     int pnrate = 0, pnskip = 1;
     int64_t pndist = 0, pnsse = 0;
     ENTROPY_CONTEXT ta[2 * MAX_MIB_SIZE];
@@ -3572,10 +3546,9 @@ static int inter_block_uvrd(const AV1_COMP *cpi, MACROBLOCK *x, int *rate,
     av1_get_entropy_contexts(bsize, TX_4X4, pd, ta, tl);
 
     for (idy = 0; idy < mi_height; idy += bh) {
-      for (idx = 0; idx < mi_width; idx += bh) {
-        tx_block_rd(cpi, x, idy, idx, plane, block,
-                    max_txsize_lookup[plane_bsize], plane_bsize, ta, tl,
-                    &pnrate, &pndist, &pnsse, &pnskip);
+      for (idx = 0; idx < mi_width; idx += bw) {
+        tx_block_rd(cpi, x, idy, idx, plane, block, max_tx_size, plane_bsize,
+                    ta, tl, &pnrate, &pndist, &pnsse, &pnskip);
         block += step;
       }
     }
