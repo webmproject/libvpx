@@ -250,6 +250,12 @@ typedef struct {
 #if CONFIG_DELTA_Q
   int current_q_index;
 #endif
+#if CONFIG_RD_DEBUG
+  int64_t txb_cost_y;
+  int64_t txb_cost_uv;
+  int mi_row;
+  int mi_col;
+#endif
 } MB_MODE_INFO;
 
 typedef struct MODE_INFO {
