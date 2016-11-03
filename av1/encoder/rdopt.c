@@ -3134,18 +3134,23 @@ static void select_tx_block(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
     assert(tx_size < TX_SIZES);
 #endif  // CONFIG_EXT_TX
     for (i = 0; i < 4 && this_cost_valid; ++i) {
-      int offsetr = (i >> 1) * bsl;
-      int offsetc = (i & 0x01) * bsl;
-      select_tx_block(cpi, x, blk_row + offsetr, blk_col + offsetc, plane,
-                      block + i * sub_step, sub_txs, depth + 1, plane_bsize, ta,
-                      tl, tx_above, tx_left, &this_rd_stats,
-                      ref_best_rd - tmp_rd, &this_cost_valid);
+      int offsetr = blk_row + (i >> 1) * bsl;
+      int offsetc = blk_col + (i & 0x01) * bsl;
+
+      if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide) continue;
+
+      select_tx_block(cpi, x, offsetr, offsetc, plane, block, sub_txs,
+                      depth + 1, plane_bsize, ta, tl, tx_above, tx_left,
+                      &this_rd_stats, ref_best_rd - tmp_rd, &this_cost_valid);
+
       sum_rate += this_rd_stats.rate;
       sum_dist += this_rd_stats.dist;
       sum_bsse += this_rd_stats.sse;
       all_skip &= this_rd_stats.skip;
+
       tmp_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
       if (this_rd < tmp_rd) break;
+      block += sub_step;
     }
     if (this_cost_valid) sum_rd = tmp_rd;
   }
@@ -3482,11 +3487,14 @@ static void tx_block_rd(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
     assert(bsl > 0);
 
     for (i = 0; i < 4; ++i) {
-      int offsetr = (i >> 1) * bsl;
-      int offsetc = (i & 0x01) * bsl;
-      tx_block_rd(cpi, x, blk_row + offsetr, blk_col + offsetc, plane,
-                  block + i * step, sub_txs, plane_bsize, above_ctx, left_ctx,
-                  rd_stats);
+      int offsetr = blk_row + (i >> 1) * bsl;
+      int offsetc = blk_col + (i & 0x01) * bsl;
+
+      if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide) continue;
+
+      tx_block_rd(cpi, x, offsetr, offsetc, plane, block, sub_txs, plane_bsize,
+                  above_ctx, left_ctx, rd_stats);
+      block += step;
     }
   }
 }
