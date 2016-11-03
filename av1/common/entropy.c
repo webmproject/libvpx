@@ -2924,7 +2924,7 @@ void av1_adapt_coef_probs(AV1_COMMON *cm) {
 
 #if CONFIG_ADAPT_SCAN
   for (tx_size = TX_4X4; tx_size < TX_SIZES; ++tx_size)
-    for (tx_type = TX_4X4; tx_type < TX_TYPES; ++tx_type) {
+    for (tx_type = DCT_DCT; tx_type < TX_TYPES; ++tx_type) {
       av1_update_scan_prob(cm, tx_size, tx_type, ADAPT_SCAN_UPDATE_RATE_16);
       av1_update_scan_order_facade(cm, tx_size, tx_type);
     }
