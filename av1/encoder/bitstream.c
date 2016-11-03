@@ -376,9 +376,10 @@ static void write_tx_size_vartx(const AV1_COMMON *cm, const MACROBLOCKD *xd,
     txfm_partition_update(xd->above_txfm_context + tx_col,
                           xd->left_txfm_context + tx_row, tx_size);
   } else {
-    const BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
-    int bsl = b_width_log2_lookup[bsize];
+    const TX_SIZE sub_txs = sub_tx_size_map[tx_size];
+    const int bsl = tx_size_wide_unit[sub_txs];
     int i;
+
     aom_write(w, 1, cm->fc->txfm_partition_prob[ctx]);
 
     if (tx_size == TX_8X8) {
@@ -388,12 +389,11 @@ static void write_tx_size_vartx(const AV1_COMMON *cm, const MACROBLOCKD *xd,
     }
 
     assert(bsl > 0);
-    --bsl;
     for (i = 0; i < 4; ++i) {
-      int offsetr = blk_row + ((i >> 1) << bsl);
-      int offsetc = blk_col + ((i & 0x01) << bsl);
-      write_tx_size_vartx(cm, xd, mbmi, tx_size - 1, depth + 1, offsetr,
-                          offsetc, w);
+      int offsetr = blk_row + (i >> 1) * bsl;
+      int offsetc = blk_col + (i & 0x01) * bsl;
+      write_tx_size_vartx(cm, xd, mbmi, sub_txs, depth + 1, offsetr, offsetc,
+                          w);
     }
   }
 }
@@ -1194,8 +1194,8 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
 #if CONFIG_VAR_TX
     if (is_inter) {  // This implies skip flag is 0.
       const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
-      const int txb_size = txsize_to_bsize[max_tx_size];
-      const int bs = num_4x4_blocks_wide_lookup[txb_size];
+      const int bh = tx_size_high_unit[max_tx_size];
+      const int bw = tx_size_wide_unit[max_tx_size];
       const int width = num_4x4_blocks_wide_lookup[bsize];
       const int height = num_4x4_blocks_high_lookup[bsize];
       int idx, idy;
@@ -1212,8 +1212,8 @@ static void pack_inter_mode_mvs(AV1_COMP *cpi, const MODE_INFO *mi,
         set_txfm_ctxs(mbmi->tx_size, xd->n8_w, xd->n8_h, xd);
       } else {
 #endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
-        for (idy = 0; idy < height; idy += bs)
-          for (idx = 0; idx < width; idx += bs)
+        for (idy = 0; idy < height; idy += bh)
+          for (idx = 0; idx < width; idx += bw)
             write_tx_size_vartx(cm, xd, mbmi, max_tx_size, height != width, idy,
                                 idx, w);
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
