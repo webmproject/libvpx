@@ -842,3 +842,5 @@ a000d568431d07379dd5a8ec066061c07e560b47 *invalid-vp90-2-00-quantizer-63.ivf.kf_
 1e472baaf5f6113459f0399a38a5a5e68d17799d *invalid-vp90-2-10-show-existing-frame.webm.ivf.s180315_r01-05_b6-.ivf.res
 70057835bf29d14e66699ce5f022df2551fb6b37 *invalid-crbug-629481.webm
 5d9474c0309b7ca09a182d888f73b37a8fe1362c *invalid-crbug-629481.webm.res
+7602e00378161ca36ae93cc6ee12dd30b5ba1e1d *vp90-2-22-svc_1280x720_3.ivf
+02e53e3eefbf25ec0929047fe50876acdeb040bd *vp90-2-22-svc_1280x720_3.ivf.md5
