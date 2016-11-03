@@ -5007,9 +5007,10 @@ static void update_txfm_count(MACROBLOCK *x, MACROBLOCKD *xd,
     txfm_partition_update(xd->above_txfm_context + tx_col,
                           xd->left_txfm_context + tx_row, tx_size);
   } else {
-    BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
-    int bh = num_4x4_blocks_high_lookup[bsize];
+    const TX_SIZE sub_txs = sub_tx_size_map[tx_size];
+    const int bs = tx_size_wide_unit[sub_txs];
     int i;
+
     ++counts->txfm_partition[ctx][1];
     ++x->txb_split_count;
 
@@ -5022,10 +5023,10 @@ static void update_txfm_count(MACROBLOCK *x, MACROBLOCKD *xd,
     }
 
     for (i = 0; i < 4; ++i) {
-      int offsetr = (i >> 1) * bh / 2;
-      int offsetc = (i & 0x01) * bh / 2;
-      update_txfm_count(x, xd, counts, tx_size - 1, depth + 1,
-                        blk_row + offsetr, blk_col + offsetc);
+      int offsetr = (i >> 1) * bs;
+      int offsetc = (i & 0x01) * bs;
+      update_txfm_count(x, xd, counts, sub_txs, depth + 1, blk_row + offsetr,
+                        blk_col + offsetc);
     }
   }
 }
@@ -5037,8 +5038,8 @@ static void tx_partition_count_update(const AV1_COMMON *const cm, MACROBLOCK *x,
   const int mi_width = num_4x4_blocks_wide_lookup[plane_bsize];
   const int mi_height = num_4x4_blocks_high_lookup[plane_bsize];
   TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
-  BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
-  int bh = num_4x4_blocks_wide_lookup[txb_size];
+  const int bh = tx_size_high_unit[max_tx_size];
+  const int bw = tx_size_wide_unit[max_tx_size];
   int idx, idy;
 
   xd->above_txfm_context = cm->above_txfm_context + mi_col;
@@ -5046,7 +5047,7 @@ static void tx_partition_count_update(const AV1_COMMON *const cm, MACROBLOCK *x,
       xd->left_txfm_context_buffer + (mi_row & MAX_MIB_MASK);
 
   for (idy = 0; idy < mi_height; idy += bh)
-    for (idx = 0; idx < mi_width; idx += bh)
+    for (idx = 0; idx < mi_width; idx += bw)
       update_txfm_count(x, xd, td_counts, max_tx_size, mi_width != mi_height,
                         idy, idx);
 }
@@ -5068,8 +5069,8 @@ static void set_txfm_context(MACROBLOCKD *xd, TX_SIZE tx_size, int blk_row,
                           xd->left_txfm_context + tx_row, tx_size);
 
   } else {
-    BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
-    int bsl = b_width_log2_lookup[bsize];
+    const TX_SIZE sub_txs = sub_tx_size_map[tx_size];
+    const int bsl = tx_size_wide_unit[sub_txs];
     int i;
 
     if (tx_size == TX_8X8) {
@@ -5081,11 +5082,10 @@ static void set_txfm_context(MACROBLOCKD *xd, TX_SIZE tx_size, int blk_row,
     }
 
     assert(bsl > 0);
-    --bsl;
     for (i = 0; i < 4; ++i) {
-      int offsetr = (i >> 1) << bsl;
-      int offsetc = (i & 0x01) << bsl;
-      set_txfm_context(xd, tx_size - 1, blk_row + offsetr, blk_col + offsetc);
+      int offsetr = (i >> 1) * bsl;
+      int offsetc = (i & 0x01) * bsl;
+      set_txfm_context(xd, sub_txs, blk_row + offsetr, blk_col + offsetc);
     }
   }
 }
@@ -5096,8 +5096,8 @@ static void tx_partition_set_contexts(const AV1_COMMON *const cm,
   const int mi_width = num_4x4_blocks_wide_lookup[plane_bsize];
   const int mi_height = num_4x4_blocks_high_lookup[plane_bsize];
   TX_SIZE max_tx_size = max_txsize_lookup[plane_bsize];
-  BLOCK_SIZE txb_size = txsize_to_bsize[max_tx_size];
-  int bh = num_4x4_blocks_wide_lookup[txb_size];
+  const int bh = tx_size_high_unit[max_tx_size];
+  const int bw = tx_size_wide_unit[max_tx_size];
   int idx, idy;
 
   xd->above_txfm_context = cm->above_txfm_context + mi_col;
@@ -5105,7 +5105,7 @@ static void tx_partition_set_contexts(const AV1_COMMON *const cm,
       xd->left_txfm_context_buffer + (mi_row & MAX_MIB_MASK);
 
   for (idy = 0; idy < mi_height; idy += bh)
-    for (idx = 0; idx < mi_width; idx += bh)
+    for (idx = 0; idx < mi_width; idx += bw)
       set_txfm_context(xd, max_tx_size, idy, idx);
 }
 #endif

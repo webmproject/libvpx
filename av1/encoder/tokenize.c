@@ -572,21 +572,11 @@ void tokenize_vartx(ThreadData *td, TOKENEXTRA **t, RUN_TYPE dry_run,
   const BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
   const int tx_row = blk_row >> (1 - pd->subsampling_y);
   const int tx_col = blk_col >> (1 - pd->subsampling_x);
+  const int max_blocks_high = max_block_high(xd, plane_bsize, plane);
+  const int max_blocks_wide = max_block_wide(xd, plane_bsize, plane);
   TX_SIZE plane_tx_size;
 
-  int max_blocks_high = block_size_high[plane_bsize];
-  int max_blocks_wide = block_size_wide[plane_bsize];
-
   assert(tx_size < TX_SIZES);
-
-  if (xd->mb_to_bottom_edge < 0)
-    max_blocks_high += xd->mb_to_bottom_edge >> (3 + pd->subsampling_y);
-  if (xd->mb_to_right_edge < 0)
-    max_blocks_wide += xd->mb_to_right_edge >> (3 + pd->subsampling_x);
-
-  // Scale to the transform block unit.
-  max_blocks_high >>= tx_size_wide_log2[0];
-  max_blocks_wide >>= tx_size_wide_log2[0];
 
   if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide) return;
 
@@ -605,7 +595,8 @@ void tokenize_vartx(ThreadData *td, TOKENEXTRA **t, RUN_TYPE dry_run,
       cost_coeffs_b(plane, block, blk_row, blk_col, plane_bsize, tx_size, arg);
   } else {
     // Half the block size in transform block unit.
-    int bsl = block_size_wide[bsize] >> (tx_size_wide_log2[0] + 1);
+    const TX_SIZE sub_txs = sub_tx_size_map[tx_size];
+    const int bsl = tx_size_wide_unit[sub_txs];
     int i;
 
     assert(bsl > 0);
@@ -614,8 +605,6 @@ void tokenize_vartx(ThreadData *td, TOKENEXTRA **t, RUN_TYPE dry_run,
       const int offsetr = blk_row + ((i >> 1) * bsl);
       const int offsetc = blk_col + ((i & 0x01) * bsl);
 
-      // TODO(jingning): Fix this tx_size transition.
-      const TX_SIZE sub_txs = tx_size - 1;
       int step = tx_size_wide_unit[sub_txs] * tx_size_high_unit[sub_txs];
 
       if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide) continue;

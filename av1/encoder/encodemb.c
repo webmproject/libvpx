@@ -875,7 +875,9 @@ static void encode_block_inter(int plane, int block, int blk_row, int blk_col,
   if (tx_size == plane_tx_size) {
     encode_block(plane, block, blk_row, blk_col, plane_bsize, tx_size, arg);
   } else {
-    int bsl = block_size_wide[bsize] >> (tx_size_wide_log2[0] + 1);
+    const TX_SIZE sub_txs = sub_tx_size_map[tx_size];
+    // This is the square transform block partition entry point.
+    int bsl = tx_size_wide_unit[sub_txs];
     int i;
     assert(bsl > 0);
 #if CONFIG_EXT_TX
@@ -885,7 +887,6 @@ static void encode_block_inter(int plane, int block, int blk_row, int blk_col,
     for (i = 0; i < 4; ++i) {
       const int offsetr = blk_row + ((i >> 1) * bsl);
       const int offsetc = blk_col + ((i & 0x01) * bsl);
-      const TX_SIZE sub_txs = tx_size - 1;
       int step = tx_size_wide_unit[sub_txs] * tx_size_high_unit[sub_txs];
 
       if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide) continue;

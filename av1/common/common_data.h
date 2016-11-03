@@ -378,6 +378,22 @@ static const int32_t inter_tx_size_cat_lookup[BLOCK_SIZES] = {
 
 /* clang-format on */
 
+static const TX_SIZE sub_tx_size_map[TX_SIZES_ALL] = {
+#if CONFIG_CB4X4
+  TX_2X2,  // TX_2X2
+#endif
+  TX_4X4,    // TX_4X4
+  TX_4X4,    // TX_8X8
+  TX_8X8,    // TX_16X16
+  TX_16X16,  // TX_32X32
+  TX_4X4,    // TX_4X8
+  TX_4X4,    // TX_8X4
+  TX_8X8,    // TX_8X16
+  TX_8X8,    // TX_16X8
+  TX_16X16,  // TX_16X32
+  TX_16X16   // TX_32X16
+};
+
 static const TX_SIZE txsize_horz_map[TX_SIZES_ALL] = {
 #if CONFIG_CB4X4
   TX_2X2,  // TX_2X2
