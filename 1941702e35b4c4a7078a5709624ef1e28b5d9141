@@ -22,6 +22,30 @@
       "revId": "1941702e35b4c4a7078a5709624ef1e28b5d9141",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "46cc62f9_cdf9da14",
+        "filename": "av1/encoder/encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 5573,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2016-11-03T16:05:46Z",
+      "side": 1,
+      "message": "Thanks, now fixed in #3",
+      "parentUuid": "862ada5e_c899afb6",
+      "range": {
+        "startLine": 5573,
+        "startChar": 4,
+        "endLine": 5573,
+        "endChar": 16
+      },
+      "revId": "1941702e35b4c4a7078a5709624ef1e28b5d9141",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
