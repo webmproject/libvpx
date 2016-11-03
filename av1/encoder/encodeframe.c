@@ -1114,7 +1114,7 @@ static void update_state(const AV1_COMP *const cpi, ThreadData *td,
 
 #if CONFIG_DELTA_Q
   if (cpi->oxcf.aq_mode > NO_AQ && cpi->oxcf.aq_mode < DELTA_AQ)
-    av1_init_plane_quantizers(cpi, x);
+    av1_init_plane_quantizers(cpi, x, xd->mi[0]->mbmi.segment_id);
 #else
   if (cpi->oxcf.aq_mode)
     av1_init_plane_quantizers(cpi, x, xd->mi[0]->mbmi.segment_id);
@@ -1797,7 +1797,8 @@ static void update_inter_mode_stats(FRAME_COUNTS *counts, PREDICTION_MODE mode,
 }
 #endif
 
-static void update_stats(const AV1_COMMON *const cm, ThreadData *td
+static void update_stats(const AV1_COMMON *const cm, ThreadData *td, int mi_row,
+                         int mi_col
 #if CONFIG_SUPERTX
                          ,
                          int supertx_enabled
@@ -1830,6 +1831,9 @@ static void update_stats(const AV1_COMMON *const cm, ThreadData *td
     if (absdq < DELTA_Q_SMALL) td->counts->delta_q[absdq][0]++;
     xd->prev_qindex = mbmi->current_q_index;
   }
+#else
+  (void)mi_row;
+  (void)mi_col;
 #endif
   if (!frame_is_intra_only(cm)) {
     FRAME_COUNTS *const counts = td->counts;
@@ -2147,9 +2151,9 @@ static void encode_b(const AV1_COMP *const cpi, const TileInfo *const tile,
 
   if (!dry_run) {
 #if CONFIG_SUPERTX
-    update_stats(&cpi->common, td, 0);
+    update_stats(&cpi->common, td, mi_row, mi_col, 0);
 #else
-    update_stats(&cpi->common, td);
+    update_stats(&cpi->common, td, mi_row, mi_col);
 #endif
   }
 }
@@ -4240,7 +4244,7 @@ static void encode_rd_sb_row(AV1_COMP *cpi, ThreadData *td,
       set_offsets(cpi, tile_info, x, mi_row, mi_col, BLOCK_64X64);
       xd->mi[0]->mbmi.current_q_index = current_qindex;
       xd->mi[0]->mbmi.segment_id = 0;
-      av1_init_plane_quantizers(cpi, x);
+      av1_init_plane_quantizers(cpi, x, xd->mi[0]->mbmi.segment_id);
     }
 #endif
 
@@ -5565,7 +5569,13 @@ static void predict_b_extend(const AV1_COMP *const cpi, ThreadData *td,
 #endif  // CONFIG_EXT_INTER
                      mi_row_pred, mi_col_pred, bsize_pred, b_sub8x8, block);
 
-  if (!dry_run && !bextend) update_stats(&cpi->common, td, 1);
+  if (!dry_run && !bextend) {
+#if CONFIG_SUPERTX
+    update_stats(&cpi->common, td, mi_row_pred, mi_col_pred, 1);
+#else
+    update_stats(&cpi->common, td, mi_row_pred, mi_col_pred);
+#endif
+  }
 }
 
 static void extend_dir(const AV1_COMP *const cpi, ThreadData *td,
