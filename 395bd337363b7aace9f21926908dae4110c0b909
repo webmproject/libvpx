@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "46cc62f9_e69e739b",
+        "filename": "vpx_dsp/x86/fdct.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-03T22:30:52Z",
+      "side": 1,
+      "message": "I renamed the functions. Was going to use the neon style \"store_s16_s32\" but it\u0027s not always transitioning from s32. Settled on tran_low, but left off the _t because that namespace is reserved-ish",
+      "range": {
+        "startLine": 21,
+        "startChar": 22,
+        "endLine": 21,
+        "endChar": 35
+      },
+      "revId": "395bd337363b7aace9f21926908dae4110c0b909",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "46cc62f9_46b4a71d",
+        "filename": "vpx_dsp/x86/quantize_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-03T22:30:52Z",
+      "side": 1,
+      "message": "I can switch these out for store_zero_tran_low after the other patch lands.",
+      "revId": "395bd337363b7aace9f21926908dae4110c0b909",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
