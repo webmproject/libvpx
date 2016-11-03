@@ -12,14 +12,17 @@
 #include <tmmintrin.h>  // SSSE3
 
 #include "./vp9_rtcd.h"
+#include "./vpx_config.h"
+#include "vpx_dsp/vpx_dsp_common.h"
+#include "vpx_dsp/x86/fdct.h"
 #include "vpx_dsp/x86/inv_txfm_sse2.h"
 #include "vpx_dsp/x86/txfm_common_sse2.h"
 
 void vp9_fdct8x8_quant_ssse3(
-    const int16_t *input, int stride, int16_t *coeff_ptr, intptr_t n_coeffs,
+    const int16_t *input, int stride, tran_low_t *coeff_ptr, intptr_t n_coeffs,
     int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr,
     const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
-    int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr, const int16_t *dequant_ptr,
+    tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr,
     uint16_t *eob_ptr, const int16_t *scan_ptr, const int16_t *iscan_ptr) {
   __m128i zero;
   int pass;
@@ -328,15 +331,15 @@ void vp9_fdct8x8_quant_ssse3(
         qcoeff0 = _mm_sub_epi16(qcoeff0, coeff0_sign);
         qcoeff1 = _mm_sub_epi16(qcoeff1, coeff1_sign);
 
-        _mm_store_si128((__m128i *)(qcoeff_ptr + n_coeffs), qcoeff0);
-        _mm_store_si128((__m128i *)(qcoeff_ptr + n_coeffs) + 1, qcoeff1);
+        store_tran_low(qcoeff0, qcoeff_ptr + n_coeffs);
+        store_tran_low(qcoeff1, qcoeff_ptr + n_coeffs + 8);
 
         coeff0 = _mm_mullo_epi16(qcoeff0, dequant);
         dequant = _mm_unpackhi_epi64(dequant, dequant);
         coeff1 = _mm_mullo_epi16(qcoeff1, dequant);
 
-        _mm_store_si128((__m128i *)(dqcoeff_ptr + n_coeffs), coeff0);
-        _mm_store_si128((__m128i *)(dqcoeff_ptr + n_coeffs) + 1, coeff1);
+        store_tran_low(coeff0, dqcoeff_ptr + n_coeffs);
+        store_tran_low(coeff1, dqcoeff_ptr + n_coeffs + 8);
       }
 
       {
@@ -398,20 +401,21 @@ void vp9_fdct8x8_quant_ssse3(
           qcoeff0 = _mm_sub_epi16(qcoeff0, coeff0_sign);
           qcoeff1 = _mm_sub_epi16(qcoeff1, coeff1_sign);
 
-          _mm_store_si128((__m128i *)(qcoeff_ptr + n_coeffs), qcoeff0);
-          _mm_store_si128((__m128i *)(qcoeff_ptr + n_coeffs) + 1, qcoeff1);
+          store_tran_low(qcoeff0, qcoeff_ptr + n_coeffs);
+          store_tran_low(qcoeff1, qcoeff_ptr + n_coeffs + 8);
 
           coeff0 = _mm_mullo_epi16(qcoeff0, dequant);
           coeff1 = _mm_mullo_epi16(qcoeff1, dequant);
 
-          _mm_store_si128((__m128i *)(dqcoeff_ptr + n_coeffs), coeff0);
-          _mm_store_si128((__m128i *)(dqcoeff_ptr + n_coeffs) + 1, coeff1);
+          store_tran_low(coeff0, dqcoeff_ptr + n_coeffs);
+          store_tran_low(coeff1, dqcoeff_ptr + n_coeffs + 8);
         } else {
-          _mm_store_si128((__m128i *)(qcoeff_ptr + n_coeffs), zero);
-          _mm_store_si128((__m128i *)(qcoeff_ptr + n_coeffs) + 1, zero);
+          // Maybe a more efficient way to store 0?
+          store_zero_tran_low(qcoeff_ptr + n_coeffs);
+          store_zero_tran_low(qcoeff_ptr + n_coeffs + 8);
 
-          _mm_store_si128((__m128i *)(dqcoeff_ptr + n_coeffs), zero);
-          _mm_store_si128((__m128i *)(dqcoeff_ptr + n_coeffs) + 1, zero);
+          store_zero_tran_low(dqcoeff_ptr + n_coeffs);
+          store_zero_tran_low(dqcoeff_ptr + n_coeffs + 8);
         }
       }
 
@@ -452,10 +456,10 @@ void vp9_fdct8x8_quant_ssse3(
     }
   } else {
     do {
-      _mm_store_si128((__m128i *)(dqcoeff_ptr + n_coeffs), zero);
-      _mm_store_si128((__m128i *)(dqcoeff_ptr + n_coeffs) + 1, zero);
-      _mm_store_si128((__m128i *)(qcoeff_ptr + n_coeffs), zero);
-      _mm_store_si128((__m128i *)(qcoeff_ptr + n_coeffs) + 1, zero);
+      store_zero_tran_low(dqcoeff_ptr + n_coeffs);
+      store_zero_tran_low(dqcoeff_ptr + n_coeffs + 8);
+      store_zero_tran_low(qcoeff_ptr + n_coeffs);
+      store_zero_tran_low(qcoeff_ptr + n_coeffs + 8);
       n_coeffs += 8 * 2;
     } while (n_coeffs < 0);
     *eob_ptr = 0;

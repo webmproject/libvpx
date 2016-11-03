@@ -43,4 +43,15 @@ static INLINE void store_tran_low(__m128i a, tran_low_t *b) {
   _mm_store_si128((__m128i *)(b), a);
 #endif
 }
+
+// Zero fill 8 positions in the output buffer.
+static INLINE void store_zero_tran_low(tran_low_t *a) {
+  const __m128i zero = _mm_setzero_si128();
+#if CONFIG_VP9_HIGHBITDEPTH
+  _mm_store_si128((__m128i *)(a), zero);
+  _mm_store_si128((__m128i *)(a + 4), zero);
+#else
+  _mm_store_si128((__m128i *)(a), zero);
+#endif
+}
 #endif  // VPX_DSP_X86_FDCT_H_
