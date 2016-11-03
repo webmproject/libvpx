@@ -317,8 +317,8 @@ static intra_pred_fn dc_pred[2][2][TX_SIZES];
 typedef void (*intra_high_pred_fn)(uint16_t *dst, ptrdiff_t stride,
                                    const uint16_t *above, const uint16_t *left,
                                    int bd);
-static intra_high_pred_fn pred_high[INTRA_MODES][4];
-static intra_high_pred_fn dc_pred_high[2][2][4];
+static intra_high_pred_fn pred_high[INTRA_MODES][TX_SIZES];
+static intra_high_pred_fn dc_pred_high[2][2][TX_SIZES];
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 
 static void av1_init_intra_predictors_internal(void) {
