@@ -34,6 +34,28 @@ typedef struct RD_STATS {
   int64_t sse;
   int skip;
 } RD_STATS;
+
+static INLINE void init_rd_stats(RD_STATS *rd_stats) {
+  rd_stats->rate = 0;
+  rd_stats->dist = 0;
+  rd_stats->sse = 0;
+  rd_stats->skip = 1;
+}
+
+static INLINE void invalid_rd_stats(RD_STATS *rd_stats) {
+  rd_stats->rate = INT_MAX;
+  rd_stats->dist = INT64_MAX;
+  rd_stats->sse = INT64_MAX;
+  rd_stats->skip = 0;
+}
+
+static INLINE void merge_rd_stats(RD_STATS *rd_stats_dst,
+                                  const RD_STATS *rd_stats_src) {
+  rd_stats_dst->rate += rd_stats_src->rate;
+  rd_stats_dst->dist += rd_stats_src->dist;
+  rd_stats_dst->sse += rd_stats_src->sse;
+  rd_stats_dst->skip &= rd_stats_src->skip;
+}
 #endif
 
 int av1_cost_coeffs(const AV1_COMMON *const cm, MACROBLOCK *x, int plane,
