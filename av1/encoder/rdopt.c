@@ -3013,8 +3013,8 @@ void av1_tx_block_rd_b(const AV1_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
     inv_txfm_add(dqcoeff, rec_buffer, MAX_TX_SIZE, &inv_txfm_param);
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 
-    if (txb_h + blk_col > max_blocks_wide ||
-        txb_w + blk_row > max_blocks_high) {
+    if (txb_w + blk_col > max_blocks_wide ||
+        txb_h + blk_row > max_blocks_high) {
       int idx, idy;
       unsigned int this_dist;
       int blocks_height = AOMMIN(txb_h, max_blocks_high - blk_row);
