@@ -6185,11 +6185,7 @@ static void rd_supertx_sb(const AV1_COMP *const cpi, ThreadData *td,
     const struct macroblockd_plane *const pd = &xd->plane[plane];
     int coeff_ctx = 1;
     RD_STATS this_rd_stats;
-
-    this_rd_stats.rate = 0;
-    this_rd_stats.dist = 0;
-    this_rd_stats.sse = 0;
-    this_rd_stats.skip = 1;
+    init_rd_stats(&this_rd_stats);
 
     tx_size = max_txsize_lookup[bsize];
     tx_size =
@@ -6244,10 +6240,7 @@ static void rd_supertx_sb(const AV1_COMP *const cpi, ThreadData *td,
     mbmi->tx_type = tx_type;
 
 #if CONFIG_VAR_TX
-    this_rd_stats.rate = 0;
-    this_rd_stats.dist = 0;
-    this_rd_stats.sse = 0;
-    this_rd_stats.skip = 1;
+    init_rd_stats(&this_rd_stats);
 
     av1_get_entropy_contexts(bsize, tx_size, pd, ctxa, ctxl);
     coeff_ctx = combine_entropy_contexts(ctxa[0], ctxl[0]);
