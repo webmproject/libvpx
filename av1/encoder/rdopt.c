@@ -2936,6 +2936,7 @@ void av1_tx_block_rd_b(const AV1_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
   int max_blocks_wide = block_size_wide[plane_bsize];
   const int diff_stride = max_blocks_wide;
   const int16_t *diff = &p->src_diff[4 * (blk_row * diff_stride + blk_col)];
+  int txb_coeff_cost;
 #if CONFIG_EXT_TX
   assert(tx_size < TX_SIZES);
 #endif  // CONFIG_EXT_TX
@@ -3035,9 +3036,13 @@ void av1_tx_block_rd_b(const AV1_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
     }
   }
   rd_stats->dist += tmp * 16;
-  rd_stats->rate += av1_cost_coeffs(cm, x, plane, block, coeff_ctx, tx_size,
-                                    scan_order->scan, scan_order->neighbors, 0);
+  txb_coeff_cost = av1_cost_coeffs(cm, x, plane, block, coeff_ctx, tx_size,
+                                   scan_order->scan, scan_order->neighbors, 0);
+  rd_stats->rate += txb_coeff_cost;
   rd_stats->skip &= (p->eobs[block] == 0);
+#if CONFIG_RD_DEBUG
+  rd_stats->txb_coeff_cost[plane] += txb_coeff_cost;
+#endif
 }
 
 static void select_tx_block(const AV1_COMP *cpi, MACROBLOCK *x, int blk_row,
