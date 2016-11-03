@@ -38,7 +38,7 @@ typedef struct RD_STATS {
 #endif
 } RD_STATS;
 
-static INLINE void init_rd_stats(RD_STATS *rd_stats) {
+static INLINE void av1_init_rd_stats(RD_STATS *rd_stats) {
 #if CONFIG_RD_DEBUG
   int plane;
 #endif
@@ -52,7 +52,7 @@ static INLINE void init_rd_stats(RD_STATS *rd_stats) {
 #endif
 }
 
-static INLINE void invalid_rd_stats(RD_STATS *rd_stats) {
+static INLINE void av1_invalid_rd_stats(RD_STATS *rd_stats) {
 #if CONFIG_RD_DEBUG
   int plane;
 #endif
@@ -66,8 +66,8 @@ static INLINE void invalid_rd_stats(RD_STATS *rd_stats) {
 #endif
 }
 
-static INLINE void merge_rd_stats(RD_STATS *rd_stats_dst,
-                                  const RD_STATS *rd_stats_src) {
+static INLINE void av1_merge_rd_stats(RD_STATS *rd_stats_dst,
+                                      const RD_STATS *rd_stats_src) {
 #if CONFIG_RD_DEBUG
   int plane;
 #endif
