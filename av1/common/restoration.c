@@ -369,6 +369,7 @@ static void loop_bilateral_filter_tile_highbd(uint16_t *data, int tile_idx,
   const int tile_height = rst->tile_height >> rst->subsampling_y;
   int i, j, subtile_idx;
   int h_start, h_end, v_start, v_end;
+  const int shift = bit_depth - 8;
 
   for (subtile_idx = 0; subtile_idx < BILATERAL_SUBTILES; ++subtile_idx) {
     uint16_t *data_p, *tmpdata_p;
@@ -398,7 +399,7 @@ static void loop_bilateral_filter_tile_highbd(uint16_t *data, int tile_idx,
         for (y = -RESTORATION_HALFWIN; y <= RESTORATION_HALFWIN; ++y) {
           for (x = -RESTORATION_HALFWIN; x <= RESTORATION_HALFWIN; ++x) {
             wt = (int)wx_lut[y + RESTORATION_HALFWIN][x + RESTORATION_HALFWIN] *
-                 (int)wr_lut_[data_p2[x] - data_p[j]];
+                 (int)wr_lut_[(data_p2[x] >> shift) - (data_p[j] >> shift)];
             wtsum += (int64_t)wt;
             flsum += (int64_t)wt * data_p2[x];
           }
