@@ -442,6 +442,10 @@ static MB_MODE_INFO *set_offsets(AV1_COMMON *const cm, MACROBLOCKD *const xd,
   // TODO(slavarnway): Generate sb_type based on bwl and bhl, instead of
   // passing bsize from decode_partition().
   xd->mi[0]->mbmi.sb_type = bsize;
+#if CONFIG_RD_DEBUG
+  xd->mi[0]->mbmi.mi_row = mi_row;
+  xd->mi[0]->mbmi.mi_col = mi_col;
+#endif
   for (y = 0; y < y_mis; ++y)
     for (x = !y; x < x_mis; ++x) xd->mi[y * cm->mi_stride + x] = xd->mi[0];
 

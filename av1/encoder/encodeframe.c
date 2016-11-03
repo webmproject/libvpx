@@ -1634,6 +1634,10 @@ static void rd_pick_sb_modes(const AV1_COMP *const cpi, TileDataEnc *tile_data,
   set_offsets(cpi, tile_info, x, mi_row, mi_col, bsize);
   mbmi = &xd->mi[0]->mbmi;
   mbmi->sb_type = bsize;
+#if CONFIG_RD_DEBUG
+  mbmi->mi_row = mi_row;
+  mbmi->mi_col = mi_col;
+#endif
 #if CONFIG_SUPERTX
   // We set tx_size here as skip blocks would otherwise not set it.
   // tx_size needs to be set at this point as supertx_enable in
