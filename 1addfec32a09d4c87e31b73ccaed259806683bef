@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "46cc62f9_213eb5d1",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-03T23:46:28Z",
+      "side": 1,
+      "message": "The problem was the way I ran the test. It was:\nfor (i \u003c last_nonzero_)\n for (j \u003c INT16_MAX)\n  run test\n\nso it failed at position 2 at 27 thousand something. But then it hit the assert.\n\nWhen I made that value the failure value and ran it, it failed at coefficient position 9 at a lower value. Because of the assert, I hadn\u0027t exhausted the possible values.\n\nNow it\u0027s cool.",
+      "revId": "1addfec32a09d4c87e31b73ccaed259806683bef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
