@@ -9527,9 +9527,6 @@ PALETTE_EXIT:
         best_mbmode.mode = ZEROMV;
 #if CONFIG_EXT_INTER
     } else {
-      const MV_REFERENCE_FRAME refs[2] = { best_mbmode.ref_frame[0],
-                                           best_mbmode.ref_frame[1] };
-
       if (frame_mv[NEAREST_NEARESTMV][refs[0]].as_int ==
               best_mbmode.mv[0].as_int &&
           frame_mv[NEAREST_NEARESTMV][refs[1]].as_int ==
