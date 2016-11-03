@@ -31,8 +31,6 @@ extern "C" {
 
 typedef int od_coeff;
 
-typedef int16_t od_dering_in;
-
 #define OD_DIVU_DMAX (1024)
 
 extern uint32_t OD_DIVU_SMALL_CONSTS[OD_DIVU_DMAX][2];
