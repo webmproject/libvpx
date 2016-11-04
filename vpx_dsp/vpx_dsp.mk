@@ -252,6 +252,7 @@ ifeq ($(CONFIG_VP9_ENCODER),yes)
 DSP_SRCS-yes            += quantize.c
 DSP_SRCS-yes            += quantize.h
 
+DSP_SRCS-$(HAVE_SSE2)   += x86/fdct.h
 DSP_SRCS-$(HAVE_SSE2)   += x86/quantize_sse2.c
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_quantize_intrin_sse2.c
