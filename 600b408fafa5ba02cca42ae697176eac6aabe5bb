@@ -1,0 +1,107 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "46cc62f9_bc73eec8",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-04T02:10:22Z",
+      "side": 1,
+      "message": "add a comment as to what this does and/or expand the name to be more descriptive",
+      "range": {
+        "startLine": 33,
+        "startChar": 6,
+        "endLine": 33,
+        "endChar": 9
+      },
+      "revId": "600b408fafa5ba02cca42ae697176eac6aabe5bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "46cc62f9_5c63daf8",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-04T02:10:22Z",
+      "side": 1,
+      "message": "just make this a memset",
+      "revId": "600b408fafa5ba02cca42ae697176eac6aabe5bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "46cc62f9_bc9aceb8",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-04T02:10:22Z",
+      "side": 1,
+      "message": "you should add some output (\u003c\u003c \"(row, col)\") for the row/col this fails on",
+      "revId": "600b408fafa5ba02cca42ae697176eac6aabe5bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "46cc62f9_1c904297",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-04T02:10:22Z",
+      "side": 1,
+      "message": "this works for the sse2 code, the other 2 tests should be prefixed with DISABLED instead",
+      "range": {
+        "startLine": 267,
+        "startChar": 30,
+        "endLine": 267,
+        "endChar": 54
+      },
+      "revId": "600b408fafa5ba02cca42ae697176eac6aabe5bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "46cc62f9_3c87fe60",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-04T02:10:22Z",
+      "side": 1,
+      "message": "this is redundant given the memset that follows; change this to new[] if there are no alignment requirements in the sse2 code",
+      "range": {
+        "startLine": 278,
+        "startChar": 40,
+        "endLine": 278,
+        "endChar": 50
+      },
+      "revId": "600b408fafa5ba02cca42ae697176eac6aabe5bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
