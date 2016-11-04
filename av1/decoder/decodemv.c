@@ -665,6 +665,83 @@ static void read_intra_angle_info(AV1_COMMON *const cm, MACROBLOCKD *const xd,
 }
 #endif  // CONFIG_EXT_INTRA
 
+static void read_tx_type(const AV1_COMMON *const cm, MACROBLOCKD *xd,
+                         MB_MODE_INFO *mbmi,
+#if CONFIG_SUPERTX
+                         int supertx_enabled,
+#endif
+                         aom_reader *r) {
+  const int inter_block = is_inter_block(mbmi);
+  const TX_SIZE tx_size = mbmi->tx_size;
+  if (!FIXED_TX_TYPE) {
+#if CONFIG_EXT_TX
+    if (get_ext_tx_types(tx_size, mbmi->sb_type, inter_block) > 1 &&
+        cm->base_qindex > 0 && !mbmi->skip &&
+#if CONFIG_SUPERTX
+        !supertx_enabled &&
+#endif  // CONFIG_SUPERTX
+        !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+      int eset = get_ext_tx_set(tx_size, mbmi->sb_type, inter_block);
+      FRAME_COUNTS *counts = xd->counts;
+
+      if (inter_block) {
+        if (eset > 0) {
+          mbmi->tx_type = aom_read_tree(
+              r, av1_ext_tx_inter_tree[eset],
+              cm->fc->inter_ext_tx_prob[eset][txsize_sqr_map[tx_size]],
+              ACCT_STR);
+          if (counts)
+            ++counts->inter_ext_tx[eset][txsize_sqr_map[tx_size]]
+                                  [mbmi->tx_type];
+        }
+      } else if (ALLOW_INTRA_EXT_TX) {
+        if (eset > 0) {
+          mbmi->tx_type = aom_read_tree(
+              r, av1_ext_tx_intra_tree[eset],
+              cm->fc->intra_ext_tx_prob[eset][tx_size][mbmi->mode], ACCT_STR);
+          if (counts)
+            ++counts->intra_ext_tx[eset][tx_size][mbmi->mode][mbmi->tx_type];
+        }
+      }
+    } else {
+      mbmi->tx_type = DCT_DCT;
+    }
+#else
+    if (tx_size < TX_32X32 && cm->base_qindex > 0 && !mbmi->skip &&
+#if CONFIG_SUPERTX
+        !supertx_enabled &&
+#endif  // CONFIG_SUPERTX
+        !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+      FRAME_COUNTS *counts = xd->counts;
+      if (inter_block) {
+#if CONFIG_DAALA_EC
+        mbmi->tx_type = av1_ext_tx_inv[aom_read_symbol(
+            r, cm->fc->inter_ext_tx_cdf[tx_size], TX_TYPES, ACCT_STR)];
+#else
+        mbmi->tx_type = aom_read_tree(
+            r, av1_ext_tx_tree, cm->fc->inter_ext_tx_prob[tx_size], ACCT_STR);
+#endif
+        if (counts) ++counts->inter_ext_tx[tx_size][mbmi->tx_type];
+      } else {
+        const TX_TYPE tx_type_nom = intra_mode_to_tx_type_context[mbmi->mode];
+#if CONFIG_DAALA_EC
+        mbmi->tx_type = av1_ext_tx_inv[aom_read_symbol(
+            r, cm->fc->intra_ext_tx_cdf[tx_size][tx_type_nom], TX_TYPES,
+            ACCT_STR)];
+#else
+        mbmi->tx_type = aom_read_tree(
+            r, av1_ext_tx_tree, cm->fc->intra_ext_tx_prob[tx_size][tx_type_nom],
+            ACCT_STR);
+#endif
+        if (counts) ++counts->intra_ext_tx[tx_size][tx_type_nom][mbmi->tx_type];
+      }
+    } else {
+      mbmi->tx_type = DCT_DCT;
+    }
+#endif  // CONFIG_EXT_TX
+  }
+}
+
 static void read_intra_frame_mode_info(AV1_COMMON *const cm,
                                        MACROBLOCKD *const xd, int mi_row,
                                        int mi_col, aom_reader *r) {
@@ -762,47 +839,11 @@ static void read_intra_frame_mode_info(AV1_COMMON *const cm,
   if (bsize >= BLOCK_8X8) read_filter_intra_mode_info(cm, xd, r);
 #endif  // CONFIG_FILTER_INTRA
 
-  if (!FIXED_TX_TYPE) {
-#if CONFIG_EXT_TX
-    if (get_ext_tx_types(mbmi->tx_size, mbmi->sb_type, 0) > 1 &&
-        cm->base_qindex > 0 && !mbmi->skip &&
-        !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
-        ALLOW_INTRA_EXT_TX) {
-      FRAME_COUNTS *counts = xd->counts;
-      int eset = get_ext_tx_set(mbmi->tx_size, mbmi->sb_type, 0);
-      if (eset > 0) {
-        mbmi->tx_type = aom_read_tree(
-            r, av1_ext_tx_intra_tree[eset],
-            cm->fc->intra_ext_tx_prob[eset][mbmi->tx_size][mbmi->mode],
-            ACCT_STR);
-        if (counts)
-          ++counts->intra_ext_tx[eset][mbmi->tx_size][mbmi->mode]
-                                [mbmi->tx_type];
-      }
-    } else {
-      mbmi->tx_type = DCT_DCT;
-    }
-#else
-    if (mbmi->tx_size < TX_32X32 && cm->base_qindex > 0 && !mbmi->skip &&
-        !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
-      FRAME_COUNTS *counts = xd->counts;
-      TX_TYPE tx_type_nom = intra_mode_to_tx_type_context[mbmi->mode];
-#if CONFIG_DAALA_EC
-      mbmi->tx_type = av1_ext_tx_inv[aom_read_symbol(
-          r, cm->fc->intra_ext_tx_cdf[mbmi->tx_size][tx_type_nom], TX_TYPES,
-          ACCT_STR)];
-#else
-      mbmi->tx_type = aom_read_tree(
-          r, av1_ext_tx_tree,
-          cm->fc->intra_ext_tx_prob[mbmi->tx_size][tx_type_nom], ACCT_STR);
+  read_tx_type(cm, xd, mbmi,
+#if CONFIG_SUPERTX
+               0,
 #endif
-      if (counts)
-        ++counts->intra_ext_tx[mbmi->tx_size][tx_type_nom][mbmi->tx_type];
-    } else {
-      mbmi->tx_type = DCT_DCT;
-    }
-#endif  // CONFIG_EXT_TX
-  }
+               r);
 }
 
 static int read_mv_component(aom_reader *r, nmv_component *mvcomp, int usehp) {
@@ -1871,77 +1912,11 @@ static void read_inter_frame_mode_info(AV1Decoder *const pbi,
   else
     read_intra_block_mode_info(cm, xd, mi, r);
 
-  if (!FIXED_TX_TYPE) {
-#if CONFIG_EXT_TX
-    if (get_ext_tx_types(mbmi->tx_size, mbmi->sb_type, inter_block) > 1 &&
-        cm->base_qindex > 0 && !mbmi->skip &&
+  read_tx_type(cm, xd, mbmi,
 #if CONFIG_SUPERTX
-        !supertx_enabled &&
-#endif  // CONFIG_SUPERTX
-        !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
-      int eset = get_ext_tx_set(mbmi->tx_size, mbmi->sb_type, inter_block);
-      FRAME_COUNTS *counts = xd->counts;
-
-      if (inter_block) {
-        if (eset > 0) {
-          mbmi->tx_type = aom_read_tree(
-              r, av1_ext_tx_inter_tree[eset],
-              cm->fc->inter_ext_tx_prob[eset][txsize_sqr_map[mbmi->tx_size]],
-              ACCT_STR);
-          if (counts)
-            ++counts->inter_ext_tx[eset][txsize_sqr_map[mbmi->tx_size]]
-                                  [mbmi->tx_type];
-        }
-      } else if (ALLOW_INTRA_EXT_TX) {
-        if (eset > 0) {
-          mbmi->tx_type = aom_read_tree(
-              r, av1_ext_tx_intra_tree[eset],
-              cm->fc->intra_ext_tx_prob[eset][mbmi->tx_size][mbmi->mode],
-              ACCT_STR);
-          if (counts)
-            ++counts->intra_ext_tx[eset][mbmi->tx_size][mbmi->mode]
-                                  [mbmi->tx_type];
-        }
-      }
-    } else {
-      mbmi->tx_type = DCT_DCT;
-    }
-#else
-    if (mbmi->tx_size < TX_32X32 && cm->base_qindex > 0 && !mbmi->skip &&
-#if CONFIG_SUPERTX
-        !supertx_enabled &&
-#endif  // CONFIG_SUPERTX
-        !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
-      FRAME_COUNTS *counts = xd->counts;
-      if (inter_block) {
-#if CONFIG_DAALA_EC
-        mbmi->tx_type = av1_ext_tx_inv[aom_read_symbol(
-            r, cm->fc->inter_ext_tx_cdf[mbmi->tx_size], TX_TYPES, ACCT_STR)];
-#else
-        mbmi->tx_type =
-            aom_read_tree(r, av1_ext_tx_tree,
-                          cm->fc->inter_ext_tx_prob[mbmi->tx_size], ACCT_STR);
+               supertx_enabled,
 #endif
-        if (counts) ++counts->inter_ext_tx[mbmi->tx_size][mbmi->tx_type];
-      } else {
-        const TX_TYPE tx_type_nom = intra_mode_to_tx_type_context[mbmi->mode];
-#if CONFIG_DAALA_EC
-        mbmi->tx_type = av1_ext_tx_inv[aom_read_symbol(
-            r, cm->fc->intra_ext_tx_cdf[mbmi->tx_size][tx_type_nom], TX_TYPES,
-            ACCT_STR)];
-#else
-        mbmi->tx_type = aom_read_tree(
-            r, av1_ext_tx_tree,
-            cm->fc->intra_ext_tx_prob[mbmi->tx_size][tx_type_nom], ACCT_STR);
-#endif
-        if (counts)
-          ++counts->intra_ext_tx[mbmi->tx_size][tx_type_nom][mbmi->tx_type];
-      }
-    } else {
-      mbmi->tx_type = DCT_DCT;
-    }
-#endif  // CONFIG_EXT_TX
-  }
+               r);
 }
 
 void av1_read_mode_info(AV1Decoder *const pbi, MACROBLOCKD *xd,
