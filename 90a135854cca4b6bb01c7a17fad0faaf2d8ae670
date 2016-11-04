@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ebf51f92_ce22031a",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 939,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-04T17:11:52Z",
+      "side": 1,
+      "message": "wait, what are tools? there are just some scripts in the tools/ directory, and some common code in tools_common.[ch] that gets used by the examples. what actually gets built with the tools feature?",
+      "range": {
+        "startLine": 939,
+        "startChar": 28,
+        "endLine": 939,
+        "endChar": 33
+      },
+      "revId": "90a135854cca4b6bb01c7a17fad0faaf2d8ae670",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
