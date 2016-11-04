@@ -24,6 +24,24 @@ static INLINE void fdct32x32(int rd_transform, const int16_t *src,
     av1_fht32x32(src, dst, src_stride, DCT_DCT);
 }
 
+#if CONFIG_TX64X64
+static INLINE void fdct64x64(const int16_t *src, tran_low_t *dst,
+                             int src_stride) {
+  av1_fht64x64(src, dst, src_stride, DCT_DCT);
+}
+
+static INLINE void fdct64x64_1(const int16_t *src, tran_low_t *dst,
+                               int src_stride) {
+  int i, j;
+  int32_t sum = 0;
+  memset(dst, 0, sizeof(*dst) * 4096);
+  for (i = 0; i < 64; ++i)
+    for (j = 0; j < 64; ++j) sum += src[i * src_stride + j];
+  // Note: this scaling makes the transform 2 times unitary
+  dst[0] = ROUND_POWER_OF_TWO_SIGNED(sum, 5);
+}
+#endif  // CONFIG_TX64X64
+
 static void fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
                          int diff_stride, TX_TYPE tx_type, int lossless) {
   if (lossless) {
@@ -191,6 +209,41 @@ static void fwd_txfm_32x32(int rd_transform, const int16_t *src_diff,
     default: assert(0); break;
   }
 }
+
+#if CONFIG_TX64X64
+static void fwd_txfm_64x64(const int16_t *src_diff, tran_low_t *coeff,
+                           int diff_stride, TX_TYPE tx_type,
+                           FWD_TXFM_OPT fwd_txfm_opt) {
+  switch (tx_type) {
+    case DCT_DCT:
+      if (fwd_txfm_opt == FWD_TXFM_OPT_NORMAL)
+        fdct64x64(src_diff, coeff, diff_stride);
+      else  // FWD_TXFM_OPT_DC
+        fdct64x64_1(src_diff, coeff, diff_stride);
+      break;
+#if CONFIG_EXT_TX
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+    case FLIPADST_DCT:
+    case DCT_FLIPADST:
+    case FLIPADST_FLIPADST:
+    case ADST_FLIPADST:
+    case FLIPADST_ADST:
+      av1_fht64x64(src_diff, coeff, diff_stride, tx_type);
+      break;
+    case V_DCT:
+    case H_DCT:
+    case V_ADST:
+    case H_ADST:
+    case V_FLIPADST:
+    case H_FLIPADST: av1_fht32x32(src_diff, coeff, diff_stride, tx_type); break;
+    case IDTX: av1_fwd_idtx_c(src_diff, coeff, diff_stride, 64, tx_type); break;
+#endif  // CONFIG_EXT_TX
+    default: assert(0); break;
+  }
+}
+#endif  // CONFIG_TX64X64
 
 #if CONFIG_AOM_HIGHBITDEPTH
 static void highbd_fwd_txfm_4x4(const int16_t *src_diff, tran_low_t *coeff,
@@ -379,6 +432,40 @@ static void highbd_fwd_txfm_32x32(int rd_transform, const int16_t *src_diff,
     default: assert(0); break;
   }
 }
+
+#if CONFIG_TX64X64
+static void highbd_fwd_txfm_64x64(const int16_t *src_diff, tran_low_t *coeff,
+                                  int diff_stride, TX_TYPE tx_type,
+                                  FWD_TXFM_OPT fwd_txfm_opt, const int bd) {
+  (void)fwd_txfm_opt;
+  (void)bd;
+  switch (tx_type) {
+    case DCT_DCT:
+      av1_highbd_fht64x64_c(src_diff, coeff, diff_stride, tx_type);
+      break;
+#if CONFIG_EXT_TX
+    case ADST_DCT:
+    case DCT_ADST:
+    case ADST_ADST:
+    case FLIPADST_DCT:
+    case DCT_FLIPADST:
+    case FLIPADST_FLIPADST:
+    case ADST_FLIPADST:
+    case FLIPADST_ADST:
+    case V_DCT:
+    case H_DCT:
+    case V_ADST:
+    case H_ADST:
+    case V_FLIPADST:
+    case H_FLIPADST:
+      av1_highbd_fht64x64_c(src_diff, coeff, diff_stride, tx_type);
+      break;
+    case IDTX: av1_fwd_idtx_c(src_diff, coeff, diff_stride, 64, tx_type); break;
+#endif  // CONFIG_EXT_TX
+    default: assert(0); break;
+  }
+}
+#endif  // CONFIG_TX64X64
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 
 void fwd_txfm(const int16_t *src_diff, tran_low_t *coeff, int diff_stride,
@@ -389,6 +476,11 @@ void fwd_txfm(const int16_t *src_diff, tran_low_t *coeff, int diff_stride,
   const int rd_transform = fwd_txfm_param->rd_transform;
   const int lossless = fwd_txfm_param->lossless;
   switch (tx_size) {
+#if CONFIG_TX64X64
+    case TX_64X64:
+      fwd_txfm_64x64(src_diff, coeff, diff_stride, tx_type, fwd_txfm_opt);
+      break;
+#endif  // CONFIG_TX64X64
     case TX_32X32:
       fwd_txfm_32x32(rd_transform, src_diff, coeff, diff_stride, tx_type,
                      fwd_txfm_opt);
@@ -434,6 +526,12 @@ void highbd_fwd_txfm(const int16_t *src_diff, tran_low_t *coeff,
   const int lossless = fwd_txfm_param->lossless;
   const int bd = fwd_txfm_param->bd;
   switch (tx_size) {
+#if CONFIG_TX64X64
+    case TX_64X64:
+      highbd_fwd_txfm_64x64(src_diff, coeff, diff_stride, tx_type, fwd_txfm_opt,
+                            bd);
+      break;
+#endif  // CONFIG_TX64X64
     case TX_32X32:
       highbd_fwd_txfm_32x32(rd_transform, src_diff, coeff, diff_stride, tx_type,
                             fwd_txfm_opt, bd);
