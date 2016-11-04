@@ -7561,8 +7561,8 @@ static int64_t handle_inter_mode(
 #if CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
         continue;
 #else
-      restore_dst_buf(xd, orig_dst, orig_dst_stride);
-      return INT64_MAX;
+        restore_dst_buf(xd, orig_dst, orig_dst_stride);
+        return INT64_MAX;
 #endif  // CONFIG_MOTION_VAR || CONFIG_WARPED_MOTION
       }
 
