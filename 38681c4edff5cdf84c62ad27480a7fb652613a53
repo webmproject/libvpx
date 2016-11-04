@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ebf51f92_4b960596",
+        "filename": "test/stress.sh",
+        "patchSetId": 7
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-11-04T15:22:06Z",
+      "side": 1,
+      "message": "These should be in a variable named \"stress_tests\" and then ${stress_tests} should be passed here (quoted).\n\nOr, just change the instructions in the comment block at the top.",
+      "range": {
+        "startLine": 108,
+        "startChar": 36,
+        "endLine": 108,
+        "endChar": 69
+      },
+      "revId": "38681c4edff5cdf84c62ad27480a7fb652613a53",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
