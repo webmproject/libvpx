@@ -22,6 +22,30 @@
       "revId": "90a135854cca4b6bb01c7a17fad0faaf2d8ae670",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ebf51f92_6e266fd5",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 939,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-04T17:48:12Z",
+      "side": 1,
+      "message": "this got brought in under the radar:\n\nhttps://chromium-review.googlesource.com/#/q/Icc3e5aaa6636ffe17dc9da5f7a80afaccbde509a",
+      "parentUuid": "ebf51f92_ce22031a",
+      "range": {
+        "startLine": 939,
+        "startChar": 28,
+        "endLine": 939,
+        "endChar": 33
+      },
+      "revId": "90a135854cca4b6bb01c7a17fad0faaf2d8ae670",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
