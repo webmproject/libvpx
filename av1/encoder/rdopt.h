@@ -26,6 +26,16 @@ struct AV1_COMP;
 struct macroblock;
 struct RD_COST;
 
+#if CONFIG_VAR_TX
+// TODO(angiebird): Merge RD_COST and RD_STATS
+typedef struct RD_STATS {
+  int rate;
+  int64_t dist;
+  int64_t sse;
+  int skip;
+} RD_STATS;
+#endif
+
 int av1_cost_coeffs(const AV1_COMMON *const cm, MACROBLOCK *x, int plane,
                     int block, int coeff_ctx, TX_SIZE tx_size,
                     const int16_t *scan, const int16_t *nb,
@@ -77,8 +87,7 @@ void av1_rd_pick_inter_mode_sub8x8(const struct AV1_COMP *cpi,
 #if CONFIG_VAR_TX
 void av1_tx_block_rd_b(const AV1_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
                        int blk_row, int blk_col, int plane, int block,
-                       int plane_bsize, int coeff_ctx, int *rate, int64_t *dist,
-                       int64_t *bsse, int *skip);
+                       int plane_bsize, int coeff_ctx, RD_STATS *rd_stats);
 #endif
 
 void av1_txfm_rd_in_plane_supertx(MACROBLOCK *x, const AV1_COMP *cpi, int *rate,
