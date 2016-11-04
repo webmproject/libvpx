@@ -936,6 +936,7 @@ EOF
             # only "AppContainerApplication" which requires an AppxManifest.
             # Therefore disable the examples, just build the library.
             disable_feature examples
+            disable_feature tools
           fi
           ;;
         rvct)
