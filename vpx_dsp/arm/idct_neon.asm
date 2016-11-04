@@ -27,3 +27,4 @@
     vld1.s16        {$dst0-$dst1,$dst2-$dst3}, [$src]!
     ENDIF
     MEND
+    END
