@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ebf51f92_6ec2ef94",
+        "filename": "vp9/encoder/x86/vp9_dct_ssse3.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-04T18:11:02Z",
+      "side": 1,
+      "message": "this gets replaced by a jump and 8 movq $0x0,(address)\n\nwith store_zero_tran_low it does the pxor way up and then jumps and does 4 movdqa %xmm4, (address)",
+      "revId": "979c1ae2f8cb8e4ac32d5c4552ed4204e6656ab7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ebf51f92_2e5467de",
+        "filename": "vp9/encoder/x86/vp9_dct_ssse3.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-04T18:11:02Z",
+      "side": 1,
+      "message": "This made a huge mess. I was hoping the assert and *64 would make something cleaner, but I can\u0027t follow the assembly at all.",
+      "range": {
+        "startLine": 454,
+        "startChar": 4,
+        "endLine": 454,
+        "endChar": 10
+      },
+      "revId": "979c1ae2f8cb8e4ac32d5c4552ed4204e6656ab7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ebf51f92_cebe8363",
+        "filename": "vpx_dsp/x86/quantize_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-04T18:11:02Z",
+      "side": 1,
+      "message": "This is the only place where the size is not known at compile time. It reverts to a call to memset instead of inlining.",
+      "revId": "979c1ae2f8cb8e4ac32d5c4552ed4204e6656ab7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
