@@ -1129,33 +1129,33 @@ static void write_tx_type(const AV1_COMMON *const cm,
 #endif
                           aom_writer *w) {
   const int is_inter = is_inter_block(mbmi);
+  const TX_SIZE tx_size = mbmi->tx_size;
   if (!FIXED_TX_TYPE) {
 #if CONFIG_EXT_TX
     const BLOCK_SIZE bsize = mbmi->sb_type;
-    if (get_ext_tx_types(mbmi->tx_size, bsize, is_inter) > 1 &&
-        cm->base_qindex > 0 && !mbmi->skip &&
+    if (get_ext_tx_types(tx_size, bsize, is_inter) > 1 && cm->base_qindex > 0 &&
+        !mbmi->skip &&
 #if CONFIG_SUPERTX
         !supertx_enabled &&
 #endif  // CONFIG_SUPERTX
         !segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
-      int eset = get_ext_tx_set(mbmi->tx_size, bsize, is_inter);
+      int eset = get_ext_tx_set(tx_size, bsize, is_inter);
       if (is_inter) {
         assert(ext_tx_used_inter[eset][mbmi->tx_type]);
         if (eset > 0)
           av1_write_token(
               w, av1_ext_tx_inter_tree[eset],
-              cm->fc->inter_ext_tx_prob[eset][txsize_sqr_map[mbmi->tx_size]],
+              cm->fc->inter_ext_tx_prob[eset][txsize_sqr_map[tx_size]],
               &ext_tx_inter_encodings[eset][mbmi->tx_type]);
       } else if (ALLOW_INTRA_EXT_TX) {
         if (eset > 0)
-          av1_write_token(
-              w, av1_ext_tx_intra_tree[eset],
-              cm->fc->intra_ext_tx_prob[eset][mbmi->tx_size][mbmi->mode],
-              &ext_tx_intra_encodings[eset][mbmi->tx_type]);
+          av1_write_token(w, av1_ext_tx_intra_tree[eset],
+                          cm->fc->intra_ext_tx_prob[eset][tx_size][mbmi->mode],
+                          &ext_tx_intra_encodings[eset][mbmi->tx_type]);
       }
     }
 #else
-    if (mbmi->tx_size < TX_32X32 && cm->base_qindex > 0 && !mbmi->skip &&
+    if (tx_size < TX_32X32 && cm->base_qindex > 0 && !mbmi->skip &&
 #if CONFIG_SUPERTX
         !supertx_enabled &&
 #endif  // CONFIG_SUPERTX
@@ -1163,24 +1163,23 @@ static void write_tx_type(const AV1_COMMON *const cm,
       if (is_inter) {
 #if CONFIG_DAALA_EC
         aom_write_symbol(w, av1_ext_tx_ind[mbmi->tx_type],
-                         cm->fc->inter_ext_tx_cdf[mbmi->tx_size], TX_TYPES);
+                         cm->fc->inter_ext_tx_cdf[tx_size], TX_TYPES);
 #else
-        av1_write_token(w, av1_ext_tx_tree,
-                        cm->fc->inter_ext_tx_prob[mbmi->tx_size],
+        av1_write_token(w, av1_ext_tx_tree, cm->fc->inter_ext_tx_prob[tx_size],
                         &ext_tx_encodings[mbmi->tx_type]);
 #endif
       } else {
 #if CONFIG_DAALA_EC
         aom_write_symbol(
             w, av1_ext_tx_ind[mbmi->tx_type],
-            cm->fc->intra_ext_tx_cdf[mbmi->tx_size]
+            cm->fc->intra_ext_tx_cdf[tx_size]
                                     [intra_mode_to_tx_type_context[mbmi->mode]],
             TX_TYPES);
 #else
         av1_write_token(
             w, av1_ext_tx_tree,
             cm->fc
-                ->intra_ext_tx_prob[mbmi->tx_size]
+                ->intra_ext_tx_prob[tx_size]
                                    [intra_mode_to_tx_type_context[mbmi->mode]],
             &ext_tx_encodings[mbmi->tx_type]);
 #endif
