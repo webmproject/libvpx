@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ebf51f92_ce332323",
+        "filename": "av1/common/mv.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-11-04T17:44:53Z",
+      "side": 1,
+      "message": "I think naming these rotation and zoom is maybe a little misleading. These no longer correspond to rotation and zoom as they did in nextgen, these are precision parameters for values in a transformation matrix. Rotation and zoom are a function of both of these parameters.",
+      "range": {
+        "startLine": 101,
+        "startChar": 10,
+        "endLine": 101,
+        "endChar": 19
+      },
+      "revId": "f0566151e85e7e05223d8111a5c13ff3b3180acb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
