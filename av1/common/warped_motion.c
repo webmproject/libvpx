@@ -700,7 +700,7 @@ static int svdcmp(double **u, int m, int n, double w[], double **v) {
     g = s = scale = 0.0;
     if (i < m) {
       for (k = i; k < m; k++) scale += fabs(u[k][i]);
-      if (scale) {
+      if (scale != 0.) {
         for (k = i; k < m; k++) {
           u[k][i] /= scale;
           s += u[k][i] * u[k][i];
@@ -721,7 +721,7 @@ static int svdcmp(double **u, int m, int n, double w[], double **v) {
     g = s = scale = 0.0;
     if (i < m && i != n - 1) {
       for (k = l; k < n; k++) scale += fabs(u[i][k]);
-      if (scale) {
+      if (scale != 0.) {
         for (k = l; k < n; k++) {
           u[i][k] /= scale;
           s += u[i][k] * u[i][k];
@@ -743,7 +743,7 @@ static int svdcmp(double **u, int m, int n, double w[], double **v) {
 
   for (i = n - 1; i >= 0; i--) {
     if (i < n - 1) {
-      if (g) {
+      if (g != 0.) {
         for (j = l; j < n; j++) v[j][i] = (u[i][j] / u[i][l]) / g;
         for (j = l; j < n; j++) {
           for (s = 0.0, k = l; k < n; k++) s += u[i][k] * v[k][j];
@@ -760,7 +760,7 @@ static int svdcmp(double **u, int m, int n, double w[], double **v) {
     l = i + 1;
     g = w[i];
     for (j = l; j < n; j++) u[i][j] = 0.0;
-    if (g) {
+    if (g != 0.) {
       g = 1.0 / g;
       for (j = l; j < n; j++) {
         for (s = 0.0, k = l; k < m; k++) s += u[k][i] * u[k][j];
@@ -848,7 +848,7 @@ static int svdcmp(double **u, int m, int n, double w[], double **v) {
         }
         z = pythag(f, h);
         w[j] = z;
-        if (z) {
+        if (z != 0.) {
           z = 1.0 / z;
           c = f * z;
           s = h * z;
