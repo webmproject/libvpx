@@ -106,6 +106,24 @@ endif
 AV1_COMMON_SRCS-yes += common/odintrin.c
 AV1_COMMON_SRCS-yes += common/odintrin.h
 
+ifeq ($(CONFIG_PVQ),yes)
+# PVQ from daala
+AV1_COMMON_SRCS-yes += common/pvq.c
+AV1_COMMON_SRCS-yes += common/pvq.h
+AV1_COMMON_SRCS-yes += common/partition.c
+AV1_COMMON_SRCS-yes += common/partition.h
+AV1_COMMON_SRCS-yes += common/zigzag4.c
+AV1_COMMON_SRCS-yes += common/zigzag8.c
+AV1_COMMON_SRCS-yes += common/zigzag16.c
+AV1_COMMON_SRCS-yes += common/zigzag32.c
+AV1_COMMON_SRCS-yes += common/zigzag.h
+AV1_COMMON_SRCS-yes += common/generic_code.c
+AV1_COMMON_SRCS-yes += common/generic_code.h
+AV1_COMMON_SRCS-yes += common/pvq_state.c
+AV1_COMMON_SRCS-yes += common/pvq_state.h
+AV1_COMMON_SRCS-yes += common/laplace_tables.c
+endif
+
 ifneq ($(CONFIG_AOM_HIGHBITDEPTH),yes)
 AV1_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/itrans4_dspr2.c
 AV1_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/itrans8_dspr2.c

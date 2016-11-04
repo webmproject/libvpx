@@ -33,7 +33,10 @@
 
 #include "av1/decoder/decodeframe.h"
 #include "av1/decoder/decoder.h"
+
+#if !CONFIG_PVQ
 #include "av1/decoder/detokenize.h"
+#endif
 
 static void initialize_dec(void) {
   static volatile int init_done = 0;

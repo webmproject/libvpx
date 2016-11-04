@@ -9,6 +9,7 @@
  * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 
+#if !CONFIG_PVQ
 #ifndef AV1_DECODER_DETOKENIZE_H_
 #define AV1_DECODER_DETOKENIZE_H_
 
@@ -39,5 +40,5 @@ int av1_decode_block_tokens(MACROBLOCKD *const xd, int plane,
 #ifdef __cplusplus
 }  // extern "C"
 #endif
-
 #endif  // AV1_DECODER_DETOKENIZE_H_
+#endif

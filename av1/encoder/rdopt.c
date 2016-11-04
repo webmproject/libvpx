@@ -49,7 +49,9 @@
 #include "av1/encoder/rd.h"
 #include "av1/encoder/rdopt.h"
 #include "av1/encoder/tokenize.h"
-
+#if CONFIG_PVQ
+#include "av1/encoder/pvq_encoder.h"
+#endif
 #if CONFIG_DUAL_FILTER
 #if CONFIG_EXT_INTERP
 static const int filter_sets[25][2] = {
@@ -65,6 +67,7 @@ static const int filter_sets[9][2] = {
 };
 #endif
 #endif
+
 
 #if CONFIG_EXT_REFS
 
@@ -819,6 +822,33 @@ static void model_rd_for_sb(const AV1_COMP *const cpi, BLOCK_SIZE bsize,
   *out_dist_sum = dist_sum;
 }
 
+#if CONFIG_PVQ
+// Without PVQ, av1_block_error_c() return two kind of errors,
+// 1) reconstruction (i.e. decoded) error and
+// 2) Squared sum of transformed residue (i.e. 'coeff')
+// However, if PVQ is enabled, coeff does not keep the transformed residue
+// but instead a transformed original is kept.
+// Hence, new parameter ref vector (i.e. transformed predicted signal)
+// is required to derive the residue signal,
+// i.e. coeff - ref = residue (all transformed).
+
+// TODO(yushin) : Since 4x4 case does not need ssz, better to refactor into
+// a separate function that does not do the extra computations for ssz.
+int64_t av1_block_error2_c(const tran_low_t *coeff, const tran_low_t *dqcoeff,
+                           const tran_low_t *ref, intptr_t block_size,
+                           int64_t *ssz) {
+  int64_t error;
+
+  // Use the existing sse codes for calculating distortion of decoded signal:
+  // i.e. (orig - decoded)^2
+  error = av1_block_error_fp(coeff, dqcoeff, block_size);
+  // prediction residue^2 = (orig - ref)^2
+  *ssz = av1_block_error_fp(coeff, ref, block_size);
+
+  return error;
+}
+#endif
+
 int64_t av1_block_error_c(const tran_low_t *coeff, const tran_low_t *dqcoeff,
                           intptr_t block_size, int64_t *ssz) {
   int i;
@@ -870,6 +900,7 @@ int64_t av1_highbd_block_error_c(const tran_low_t *coeff,
 }
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 
+#if !CONFIG_PVQ
 /* The trailing '0' is a terminator which is used inside av1_cost_coeffs() to
  * decide whether to include cost of a trailing EOB node or not (i.e. we
  * can skip this if the last coefficient in this transform block, e.g. the
@@ -982,6 +1013,7 @@ int av1_cost_coeffs(const AV1_COMMON *const cm, MACROBLOCK *x, int plane,
 
   return cost;
 }
+#endif
 
 static void dist_block(const AV1_COMP *cpi, MACROBLOCK *x, int plane, int block,
                        int blk_row, int blk_col, TX_SIZE tx_size,
@@ -998,11 +1030,18 @@ static void dist_block(const AV1_COMP *cpi, MACROBLOCK *x, int plane, int block,
     int shift = (MAX_TX_SCALE - get_tx_scale(xd, tx_type, tx_size)) * 2;
     tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
     tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
+#if CONFIG_PVQ
+  tran_low_t *ref_coeff = BLOCK_OFFSET(pd->pvq_ref_coeff, block);
+#endif
 #if CONFIG_AOM_HIGHBITDEPTH
     const int bd = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ? xd->bd : 8;
     *out_dist =
         av1_highbd_block_error(coeff, dqcoeff, buffer_length, &this_sse, bd) >>
         shift;
+#elif CONFIG_PVQ
+    *out_dist = av1_block_error2_c(coeff, dqcoeff, ref_coeff, buffer_length,
+                                   &this_sse) >>
+                shift;
 #else
     *out_dist =
         av1_block_error(coeff, dqcoeff, buffer_length, &this_sse) >> shift;
@@ -1072,6 +1111,7 @@ static void dist_block(const AV1_COMP *cpi, MACROBLOCK *x, int plane, int block,
   }
 }
 
+#if !CONFIG_PVQ
 static int rate_block(int plane, int block, int coeff_ctx, TX_SIZE tx_size,
                       struct rdcost_block_args *args) {
   return av1_cost_coeffs(&args->cpi->common, args->x, plane, block, coeff_ctx,
@@ -1079,6 +1119,7 @@ static int rate_block(int plane, int block, int coeff_ctx, TX_SIZE tx_size,
                          args->scan_order->neighbors,
                          args->use_fast_coef_costing);
 }
+#endif
 
 static uint64_t sum_squares_2d(const int16_t *diff, int diff_stride,
                                TX_SIZE tx_size) {
@@ -1194,11 +1235,13 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     args->exit_early = 1;
     return;
   }
-
+#if !CONFIG_PVQ
   rate = rate_block(plane, block, coeff_ctx, tx_size, args);
   args->t_above[blk_col] = (x->plane[plane].eobs[block] > 0);
   args->t_left[blk_row] = (x->plane[plane].eobs[block] > 0);
-
+#else
+  rate = x->rate;
+#endif
   rd1 = RDCOST(x->rdmult, x->rddiv, rate, dist);
   rd2 = RDCOST(x->rdmult, x->rddiv, 0, sse);
 
@@ -1214,8 +1257,11 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     args->exit_early = 1;
     return;
   }
-
+#if !CONFIG_PVQ
   args->skippable &= !x->plane[plane].eobs[block];
+#else
+  args->skippable &= x->pvq_skip[plane];
+#endif
 }
 
 static void txfm_rd_in_plane(MACROBLOCK *x, const AV1_COMP *cpi, int *rate,
@@ -1550,7 +1596,14 @@ static void choose_largest_tx_size(const AV1_COMP *const cpi, MACROBLOCK *x,
 #if CONFIG_EXT_TX
   if (get_ext_tx_types(mbmi->tx_size, bs, is_inter) > 1 &&
       !xd->lossless[mbmi->segment_id]) {
-    for (tx_type = 0; tx_type < TX_TYPES; ++tx_type) {
+#if CONFIG_PVQ
+    od_rollback_buffer pre_buf, post_buf;
+
+    od_encode_checkpoint(&x->daala_enc, &pre_buf);
+    od_encode_checkpoint(&x->daala_enc, &post_buf);
+#endif
+
+    for (tx_type = DCT_DCT; tx_type < TX_TYPES; ++tx_type) {
       if (is_inter) {
         if (x->use_default_inter_tx_type &&
             tx_type != get_default_tx_type(0, xd, 0, mbmi->tx_size))
@@ -1573,7 +1626,9 @@ static void choose_largest_tx_size(const AV1_COMP *const cpi, MACROBLOCK *x,
 
       txfm_rd_in_plane(x, cpi, &r, &d, &s, &psse, ref_best_rd, 0, bs,
                        mbmi->tx_size, cpi->sf.use_fast_coef_costing);
-
+#if CONFIG_PVQ
+      od_encode_rollback(&x->daala_enc, &pre_buf);
+#endif
       if (r == INT_MAX) continue;
       if (get_ext_tx_types(mbmi->tx_size, bs, is_inter) > 1) {
         if (is_inter) {
@@ -1601,8 +1656,14 @@ static void choose_largest_tx_size(const AV1_COMP *const cpi, MACROBLOCK *x,
         *rate = r;
         *skip = s;
         *sse = psse;
+#if CONFIG_PVQ
+        od_encode_checkpoint(&x->daala_enc, &post_buf);
+#endif
       }
     }
+#if CONFIG_PVQ
+    od_encode_rollback(&x->daala_enc, &post_buf);
+#endif
   } else {
     mbmi->tx_type = DCT_DCT;
     txfm_rd_in_plane(x, cpi, rate, distortion, skip, sse, ref_best_rd, 0, bs,
@@ -1686,6 +1747,9 @@ static void choose_tx_size_type_from_rd(const AV1_COMP *const cpi,
   TX_TYPE tx_type, best_tx_type = DCT_DCT;
   int prune = 0;
 
+#if CONFIG_PVQ
+  od_rollback_buffer buf;
+#endif
   if (is_inter && cpi->sf.tx_type_search.prune_mode > NO_PRUNE)
     // passing -1 in for tx_type indicates that all 1D
     // transforms should be considered for pruning
@@ -1695,6 +1759,10 @@ static void choose_tx_size_type_from_rd(const AV1_COMP *const cpi,
   *rate = INT_MAX;
   *skip = 0;
   *psse = INT64_MAX;
+
+#if CONFIG_PVQ
+  od_encode_checkpoint(&x->daala_enc, &buf);
+#endif
 
   for (tx_type = DCT_DCT; tx_type < TX_TYPES; ++tx_type) {
 #if CONFIG_REF_MV
@@ -1718,6 +1786,11 @@ static void choose_tx_size_type_from_rd(const AV1_COMP *const cpi,
 
 #if !CONFIG_EXT_TX
   if (mbmi->tx_size >= TX_32X32) assert(mbmi->tx_type == DCT_DCT);
+#endif
+#if CONFIG_PVQ
+  if (best_tx < TX_SIZES)
+    txfm_rd_in_plane(x, cpi, &r, &d, &s, &sse, ref_best_rd, 0, bs, best_tx,
+                     cpi->sf.use_fast_coef_costing);
 #endif
 }
 
@@ -1906,7 +1979,9 @@ static int64_t rd_pick_intra4x4block(
     PREDICTION_MODE *best_mode, const int *bmode_costs, ENTROPY_CONTEXT *a,
     ENTROPY_CONTEXT *l, int *bestrate, int *bestratey, int64_t *bestdistortion,
     BLOCK_SIZE bsize, int *y_skip, int64_t rd_thresh) {
+#if !CONFIG_PVQ
   const AV1_COMMON *const cm = &cpi->common;
+#endif
   PREDICTION_MODE mode;
   MACROBLOCKD *const xd = &x->e_mbd;
   int64_t best_rd = rd_thresh;
@@ -1925,6 +2000,12 @@ static int64_t rd_pick_intra4x4block(
   uint8_t best_dst[8 * 8];
 #if CONFIG_AOM_HIGHBITDEPTH
   uint16_t best_dst16[8 * 8];
+#endif
+
+#if CONFIG_PVQ
+  od_rollback_buffer pre_buf, post_buf;
+  od_encode_checkpoint(&x->daala_enc, &pre_buf);
+  od_encode_checkpoint(&x->daala_enc, &post_buf);
 #endif
 
   memcpy(ta, a, num_4x4_blocks_wide * sizeof(a[0]));
@@ -2057,6 +2138,10 @@ static int64_t rd_pick_intra4x4block(
   }
 #endif  // CONFIG_AOM_HIGHBITDEPTH
 
+#if CONFIG_PVQ
+  od_encode_checkpoint(&x->daala_enc, &pre_buf);
+#endif
+
   for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
     int64_t this_rd;
     int ratey = 0;
@@ -2080,15 +2165,54 @@ static int64_t rd_pick_intra4x4block(
         const int block = (row + idy) * 2 + (col + idx);
         const uint8_t *const src = &src_init[idx * 4 + idy * 4 * src_stride];
         uint8_t *const dst = &dst_init[idx * 4 + idy * 4 * dst_stride];
+#if !CONFIG_PVQ
         int16_t *const src_diff =
             av1_raster_block_offset_int16(BLOCK_8X8, block, p->src_diff);
+#else
+        int lossless = xd->lossless[xd->mi[0]->mbmi.segment_id];
+        const int diff_stride = 8;
+        tran_low_t *const coeff = BLOCK_OFFSET(x->plane[0].coeff, block);
+        tran_low_t *const dqcoeff = BLOCK_OFFSET(xd->plane[0].dqcoeff, block);
+        tran_low_t *ref_coeff = BLOCK_OFFSET(pd->pvq_ref_coeff, block);
+        int16_t *pred = &pd->pred[4 * (row * diff_stride + col)];
+        int16_t *src_int16 = &p->src_int16[4 * (row * diff_stride + col)];
+        int i, j, tx_blk_size;
+        TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
+        int rate_pvq;
+        int skip;
+#endif
         xd->mi[0]->bmi[block].as_mode = mode;
         av1_predict_intra_block(xd, pd->width, pd->height, TX_4X4, mode, dst,
                                 dst_stride, dst, dst_stride, col + idx,
                                 row + idy, 0);
+#if !CONFIG_PVQ
         aom_subtract_block(4, 4, src_diff, 8, src, src_stride, dst, dst_stride);
+#else
+        if (lossless) tx_type = DCT_DCT;
+        // transform block size in pixels
+        tx_blk_size = 4;
+
+        // copy uint8 orig and predicted block to int16 buffer
+        // in order to use existing VP10 transform functions
+        for (j = 0; j < tx_blk_size; j++)
+          for (i = 0; i < tx_blk_size; i++) {
+            src_int16[diff_stride * j + i] = src[src_stride * j + i];
+            pred[diff_stride * j + i] = dst[dst_stride * j + i];
+          }
+        {
+          FWD_TXFM_PARAM fwd_txfm_param;
+          fwd_txfm_param.tx_type = tx_type;
+          fwd_txfm_param.tx_size = TX_4X4;
+          fwd_txfm_param.fwd_txfm_opt = FWD_TXFM_OPT_NORMAL;
+          fwd_txfm_param.rd_transform = 0;
+          fwd_txfm_param.lossless = lossless;
+          fwd_txfm(src_int16, coeff, diff_stride, &fwd_txfm_param);
+          fwd_txfm(pred, ref_coeff, diff_stride, &fwd_txfm_param);
+        }
+#endif
 
         if (xd->lossless[xd->mi[0]->mbmi.segment_id]) {
+#if !CONFIG_PVQ
           TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
           const SCAN_ORDER *scan_order = get_scan(cm, TX_4X4, tx_type, 0);
           const int coeff_ctx =
@@ -2106,13 +2230,28 @@ static int64_t rd_pick_intra4x4block(
           *(tempa + idx) = !(p->eobs[block] == 0);
           *(templ + idy) = !(p->eobs[block] == 0);
           can_skip &= (p->eobs[block] == 0);
+#else
+          skip = av1_pvq_encode_helper(&x->daala_enc, coeff, ref_coeff, dqcoeff,
+                                       &p->eobs[block], pd->dequant, 0, TX_4X4,
+                                       tx_type, &rate_pvq, x->pvq_speed, NULL);
+          ratey += rate_pvq;
+#endif
           if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
             goto next;
-          av1_inv_txfm_add_4x4(BLOCK_OFFSET(pd->dqcoeff, block), dst,
-                               dst_stride, p->eobs[block], DCT_DCT, 1);
+#if CONFIG_PVQ
+          if (!skip) {
+            for (j = 0; j < tx_blk_size; j++)
+              for (i = 0; i < tx_blk_size; i++) dst[j * dst_stride + i] = 0;
+#endif
+            av1_inv_txfm_add_4x4(BLOCK_OFFSET(pd->dqcoeff, block), dst,
+                                 dst_stride, p->eobs[block], DCT_DCT, 1);
+#if CONFIG_PVQ
+          }
+#endif
         } else {
           int64_t dist;
           unsigned int tmp;
+#if !CONFIG_PVQ
           TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, block, TX_4X4);
           const SCAN_ORDER *scan_order = get_scan(cm, TX_4X4, tx_type, 0);
           const int coeff_ctx =
@@ -2128,9 +2267,13 @@ static int64_t rd_pick_intra4x4block(
           ratey += av1_cost_coeffs(cm, x, 0, block, coeff_ctx, TX_4X4,
                                    scan_order->scan, scan_order->neighbors,
                                    cpi->sf.use_fast_coef_costing);
-          *(tempa + idx) = !(p->eobs[block] == 0);
-          *(templ + idy) = !(p->eobs[block] == 0);
-          can_skip &= (p->eobs[block] == 0);
+#else
+          skip = av1_pvq_encode_helper(&x->daala_enc, coeff, ref_coeff, dqcoeff,
+                                       &p->eobs[block], pd->dequant, 0, TX_4X4,
+                                       tx_type, &rate_pvq, x->pvq_speed, NULL);
+          ratey += rate_pvq;
+#endif
+          // No need for av1_block_error2_c because the ssz is unused
           av1_inv_txfm_add_4x4(BLOCK_OFFSET(pd->dqcoeff, block), dst,
                                dst_stride, p->eobs[block], tx_type, 0);
           cpi->fn_ptr[BLOCK_4X4].vf(src, src_stride, dst, dst_stride, &tmp);
@@ -2141,6 +2284,14 @@ static int64_t rd_pick_intra4x4block(
           // in the frequency domain, the overhead of encoding effort is low.
           if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
             goto next;
+#if CONFIG_PVQ
+          if (!skip) {
+            for (j = 0; j < tx_blk_size; j++)
+              for (i = 0; i < tx_blk_size; i++) dst[j * dst_stride + i] = 0;
+#endif
+#if CONFIG_PVQ
+          }
+#endif
         }
       }
     }
@@ -2157,14 +2308,24 @@ static int64_t rd_pick_intra4x4block(
       *best_mode = mode;
       memcpy(a, tempa, num_4x4_blocks_wide * sizeof(tempa[0]));
       memcpy(l, templ, num_4x4_blocks_high * sizeof(templ[0]));
+#if CONFIG_PVQ
+      od_encode_checkpoint(&x->daala_enc, &post_buf);
+#endif
       for (idy = 0; idy < num_4x4_blocks_high * 4; ++idy)
         memcpy(best_dst + idy * 8, dst_init + idy * dst_stride,
                num_4x4_blocks_wide * 4);
     }
   next : {}
-  }
+#if CONFIG_PVQ
+    od_encode_rollback(&x->daala_enc, &pre_buf);
+#endif
+  }  // mode decision loop
 
   if (best_rd >= rd_thresh) return best_rd;
+
+#if CONFIG_PVQ
+  od_encode_rollback(&x->daala_enc, &post_buf);
+#endif
 
   if (y_skip) *y_skip &= best_can_skip;
 
@@ -2672,6 +2833,12 @@ static int64_t rd_pick_intra_sby_mode(const AV1_COMP *const cpi, MACROBLOCK *x,
   const PREDICTION_MODE L = av1_left_block_mode(mic, left_mi, 0);
   const PREDICTION_MODE FINAL_MODE_SEARCH = TM_PRED + 1;
   const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
+#if CONFIG_PVQ
+  od_rollback_buffer pre_buf, post_buf;
+
+  od_encode_checkpoint(&x->daala_enc, &pre_buf);
+  od_encode_checkpoint(&x->daala_enc, &post_buf);
+#endif
   bmode_costs = cpi->y_mode_costs[A][L];
 
 #if CONFIG_EXT_INTRA
@@ -2713,6 +2880,9 @@ static int64_t rd_pick_intra_sby_mode(const AV1_COMP *const cpi, MACROBLOCK *x,
     } else {
       mic->mbmi.mode = mode_idx;
     }
+#if CONFIG_PVQ
+    od_encode_rollback(&x->daala_enc, &pre_buf);
+#endif
 #if CONFIG_EXT_INTRA
     is_directional_mode =
         (mic->mbmi.mode != DC_PRED && mic->mbmi.mode != TM_PRED);
@@ -2793,8 +2963,15 @@ static int64_t rd_pick_intra_sby_mode(const AV1_COMP *const cpi, MACROBLOCK *x,
       *rate_tokenonly = this_rate_tokenonly;
       *distortion = this_distortion;
       *skippable = s;
+#if CONFIG_PVQ
+      od_encode_checkpoint(&x->daala_enc, &post_buf);
+#endif
     }
   }
+
+#if CONFIG_PVQ
+  od_encode_rollback(&x->daala_enc, &post_buf);
+#endif
 
 #if CONFIG_PALETTE
   if (cpi->common.allow_screen_content_tools)
@@ -2861,12 +3038,12 @@ static int super_block_uvrd(const AV1_COMP *const cpi, MACROBLOCK *x, int *rate,
   int is_cost_valid = 1;
 
   if (ref_best_rd < 0) is_cost_valid = 0;
-
+#if !CONFIG_PVQ
   if (is_inter_block(mbmi) && is_cost_valid) {
     for (plane = 1; plane < MAX_MB_PLANE; ++plane)
       av1_subtract_plane(x, bsize, plane);
   }
-
+#endif
   *rate = 0;
   *distortion = 0;
   *sse = 0;
@@ -3887,6 +4064,11 @@ static int64_t rd_pick_intra_sbuv_mode(const AV1_COMP *const cpi, MACROBLOCK *x,
   int64_t best_rd = INT64_MAX, this_rd;
   int this_rate_tokenonly, this_rate, s;
   int64_t this_distortion, this_sse;
+#if CONFIG_PVQ
+  od_rollback_buffer buf;
+
+  od_encode_checkpoint(&x->daala_enc, &buf);
+#endif
 #if CONFIG_PALETTE
   const int rows =
       (4 * num_4x4_blocks_high_lookup[bsize]) >> (xd->plane[1].subsampling_y);
@@ -3925,8 +4107,12 @@ static int64_t rd_pick_intra_sbuv_mode(const AV1_COMP *const cpi, MACROBLOCK *x,
         continue;
     } else {
       if (!super_block_uvrd(cpi, x, &this_rate_tokenonly, &this_distortion, &s,
-                            &this_sse, bsize, best_rd))
+                            &this_sse, bsize, best_rd)) {
+#if CONFIG_PVQ
+        od_encode_rollback(&x->daala_enc, &buf);
+#endif
         continue;
+      }
     }
     this_rate = this_rate_tokenonly + cpi->intra_uv_mode_cost[mbmi->mode][mode];
     if (mbmi->sb_type >= BLOCK_8X8 && is_directional_mode)
@@ -3934,8 +4120,12 @@ static int64_t rd_pick_intra_sbuv_mode(const AV1_COMP *const cpi, MACROBLOCK *x,
                                       MAX_ANGLE_DELTAS + mbmi->angle_delta[1]);
 #else
     if (!super_block_uvrd(cpi, x, &this_rate_tokenonly, &this_distortion, &s,
-                          &this_sse, bsize, best_rd))
+                          &this_sse, bsize, best_rd)) {
+#if CONFIG_PVQ
+      od_encode_rollback(&x->daala_enc, &buf);
+#endif
       continue;
+    }
     this_rate = this_rate_tokenonly + cpi->intra_uv_mode_cost[mbmi->mode][mode];
 #endif  // CONFIG_EXT_INTRA
 #if CONFIG_FILTER_INTRA
@@ -3949,7 +4139,21 @@ static int64_t rd_pick_intra_sbuv_mode(const AV1_COMP *const cpi, MACROBLOCK *x,
           av1_default_palette_uv_mode_prob[pmi->palette_size[0] > 0], 0);
 #endif  // CONFIG_PALETTE
 
+#if CONFIG_PVQ
+    // For chroma channels, multiply lambda by 0.5 when doing intra prediction
+    // NOTE: Chroma intra prediction itself has a separate RDO,
+    // though final chroma intra mode's D and R is simply added to
+    // those of luma then global RDO is performed to decide the modes of SB.
+    // Also, for chroma, the RDO cannot decide tx_size (follow luma's decision)
+    // or tx_type (DCT only), then only the intra prediction is
+    // chroma's own mode decision based on separate RDO.
+    // TODO(yushin) : Seek for more reasonable solution than this.
+    this_rd = RDCOST(x->rdmult >> (1 * PVQ_CHROMA_RD), x->rddiv, this_rate,
+                     this_distortion);
+    od_encode_rollback(&x->daala_enc, &buf);
+#else
     this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
+#endif
 
     if (this_rd < best_rd) {
       mode_selected = mode;
@@ -4296,7 +4500,9 @@ static int64_t encode_inter_mb_segment(const AV1_COMP *const cpi, MACROBLOCK *x,
                                        int64_t *distortion, int64_t *sse,
                                        ENTROPY_CONTEXT *ta, ENTROPY_CONTEXT *tl,
                                        int ir, int ic, int mi_row, int mi_col) {
+#if !CONFIG_PVQ
   const AV1_COMMON *const cm = &cpi->common;
+#endif
   int k;
   MACROBLOCKD *xd = &x->e_mbd;
   struct macroblockd_plane *const pd = &xd->plane[0];
@@ -4315,9 +4521,15 @@ static int64_t encode_inter_mb_segment(const AV1_COMP *const cpi, MACROBLOCK *x,
   TX_SIZE tx_size = mi->mbmi.tx_size;
 
   TX_TYPE tx_type = get_tx_type(PLANE_TYPE_Y, xd, i, tx_size);
-  const SCAN_ORDER *scan_order = get_scan(cm, tx_size, tx_type, 1);
   const int num_4x4_w = tx_size_wide_unit[tx_size];
   const int num_4x4_h = tx_size_high_unit[tx_size];
+#if !CONFIG_PVQ
+  const SCAN_ORDER *scan_order = get_scan(cm, tx_size, tx_type, 1);
+#else
+  (void)cpi;
+  (void)ta;
+  (void)tl;
+#endif
 
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
   assert(IMPLIES(xd->lossless[mi->mbmi.segment_id], tx_size == TX_4X4));
@@ -4330,6 +4542,7 @@ static int64_t encode_inter_mb_segment(const AV1_COMP *const cpi, MACROBLOCK *x,
 
   av1_build_inter_predictor_sub8x8(xd, 0, i, ir, ic, mi_row, mi_col);
 
+#if !CONFIG_PVQ
 #if CONFIG_AOM_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     aom_highbd_subtract_block(
@@ -4345,6 +4558,7 @@ static int64_t encode_inter_mb_segment(const AV1_COMP *const cpi, MACROBLOCK *x,
                      av1_raster_block_offset_int16(BLOCK_8X8, i, p->src_diff),
                      8, src, p->src.stride, dst, pd->dst.stride);
 #endif  // CONFIG_AOM_HIGHBITDEPTH
+#endif  // !CONFIG_PVQ
 
   k = i;
   for (idy = 0; idy < height / 4; idy += num_4x4_h) {
@@ -4352,12 +4566,24 @@ static int64_t encode_inter_mb_segment(const AV1_COMP *const cpi, MACROBLOCK *x,
       int64_t dist, ssz, rd, rd1, rd2;
       int block;
       int coeff_ctx;
+#if CONFIG_PVQ
+      const int src_stride = p->src.stride;
+      const int dst_stride = pd->dst.stride;
+      const int diff_stride = 8;
+      tran_low_t *coeff;
+      tran_low_t *dqcoeff;
+      tran_low_t *ref_coeff;
+      int16_t *pred = &pd->pred[4 * (ir * diff_stride + ic)];
+      int16_t *src_int16 = &p->src_int16[4 * (ir * diff_stride + ic)];
+      int ii, j, tx_blk_size;
+      int rate_pvq;
+#endif
       k += (idy * 2 + idx);
       if (tx_size == TX_4X4)
         block = k;
       else
         block = (i ? 2 : 0);
-
+#if !CONFIG_PVQ
       coeff_ctx = combine_entropy_contexts(*(ta + (k & 1)), *(tl + (k >> 1)));
 #if CONFIG_NEW_QUANT
       av1_xform_quant_fp_nuq(cm, x, 0, block, idy + (i >> 1), idx + (i & 0x01),
@@ -4368,13 +4594,43 @@ static int64_t encode_inter_mb_segment(const AV1_COMP *const cpi, MACROBLOCK *x,
 #endif  // CONFIG_NEW_QUANT
       if (xd->lossless[xd->mi[0]->mbmi.segment_id] == 0)
         av1_optimize_b(cm, x, 0, block, tx_size, coeff_ctx);
+#else
+      coeff = BLOCK_OFFSET(p->coeff, k);
+      dqcoeff = BLOCK_OFFSET(pd->dqcoeff, k);
+      ref_coeff = BLOCK_OFFSET(pd->pvq_ref_coeff, k);
+
+      // transform block size in pixels
+      tx_blk_size = 4;
+
+      // copy uint8 orig and predicted block to int16 buffer
+      // in order to use existing VP10 transform functions
+      for (j = 0; j < tx_blk_size; j++)
+        for (ii = 0; ii < tx_blk_size; ii++) {
+          src_int16[diff_stride * j + ii] =
+              src[src_stride * (j + 4 * idy) + (ii + 4 * idx)];
+          pred[diff_stride * j + ii] =
+              dst[dst_stride * (j + 4 * idy) + (ii + 4 * idx)];
+        }
+
+      fwd_txm4x4(src_int16, coeff, diff_stride);
+      fwd_txm4x4(pred, ref_coeff, diff_stride);
+
+      av1_pvq_encode_helper(&x->daala_enc, coeff, ref_coeff, dqcoeff,
+                            &p->eobs[k], pd->dequant, 0, TX_4X4, tx_type,
+                            &rate_pvq, x->pvq_speed, NULL);
+#endif
+
       dist_block(cpi, x, 0, block, idy + (i >> 1), idx + (i & 0x1), tx_size,
                  &dist, &ssz);
       thisdistortion += dist;
       thissse += ssz;
+#if !CONFIG_PVQ
       thisrate +=
           av1_cost_coeffs(cm, x, 0, block, coeff_ctx, tx_size, scan_order->scan,
                           scan_order->neighbors, cpi->sf.use_fast_coef_costing);
+#else
+      thisrate += rate_pvq;
+#endif
       *(ta + (k & 1)) = !(p->eobs[block] == 0);
       *(tl + (k >> 1)) = !(p->eobs[block] == 0);
 #if CONFIG_EXT_TX
@@ -4840,6 +5096,11 @@ static int64_t rd_pick_best_sub8x8_mode(
   const int has_second_rf = has_second_ref(mbmi);
   const int inter_mode_mask = cpi->sf.inter_mode_mask[bsize];
   MB_MODE_INFO_EXT *const mbmi_ext = x->mbmi_ext;
+#if CONFIG_PVQ
+  od_rollback_buffer pre_buf;
+
+  od_encode_checkpoint(&x->daala_enc, &pre_buf);
+#endif
 #if CONFIG_EXT_TX && CONFIG_RECT_TX
   mbmi->tx_size =
       xd->lossless[mbmi->segment_id] ? TX_4X4 : max_txsize_rect_lookup[bsize];
@@ -4897,6 +5158,11 @@ static int64_t rd_pick_best_sub8x8_mode(
       int mv_idx;
       int_mv ref_mvs_sub8x8[2][2];
 #endif  // CONFIG_EXT_INTER
+#if CONFIG_PVQ
+      od_rollback_buffer idx_buf, post_buf;
+      od_encode_checkpoint(&x->daala_enc, &idx_buf);
+      od_encode_checkpoint(&x->daala_enc, &post_buf);
+#endif
 
       for (ref = 0; ref < 1 + has_second_rf; ++ref) {
         const MV_REFERENCE_FRAME frame = mbmi->ref_frame[ref];
@@ -5066,6 +5332,9 @@ static int64_t rd_pick_best_sub8x8_mode(
                sizeof(bsi->rdstat[index][mode_idx].ta));
         memcpy(bsi->rdstat[index][mode_idx].tl, t_left,
                sizeof(bsi->rdstat[index][mode_idx].tl));
+#if CONFIG_PVQ
+        od_encode_rollback(&x->daala_enc, &idx_buf);
+#endif
 
         // motion search for newmv (single predictor case only)
         if (!has_second_rf &&
@@ -5449,6 +5718,9 @@ static int64_t rd_pick_best_sub8x8_mode(
 #endif
               mode_selected = this_mode;
               new_best_rd = bsi->rdstat[index][mode_idx].brdcost;
+#if CONFIG_PVQ
+              od_encode_checkpoint(&x->daala_enc, &post_buf);
+#endif
             }
             continue;
           }
@@ -5494,6 +5766,10 @@ static int64_t rd_pick_best_sub8x8_mode(
 #endif
           mode_selected = this_mode;
           new_best_rd = bsi->rdstat[index][mode_idx].brdcost;
+
+#if CONFIG_PVQ
+          od_encode_checkpoint(&x->daala_enc, &post_buf);
+#endif
         }
       } /*for each 4x4 mode*/
 
@@ -5507,12 +5783,18 @@ static int64_t rd_pick_best_sub8x8_mode(
 #endif  // CONFIG_EXT_INTER
             bsi->rdstat[iy][midx].brdcost = INT64_MAX;
         bsi->segment_rd = INT64_MAX;
+#if CONFIG_PVQ
+        od_encode_rollback(&x->daala_enc, &pre_buf);
+#endif
         return INT64_MAX;
       }
 
       mode_idx = INTER_OFFSET(mode_selected);
       memcpy(t_above, bsi->rdstat[index][mode_idx].ta, sizeof(t_above));
       memcpy(t_left, bsi->rdstat[index][mode_idx].tl, sizeof(t_left));
+#if CONFIG_PVQ
+      od_encode_rollback(&x->daala_enc, &post_buf);
+#endif
 
 #if CONFIG_EXT_INTER
       mv_idx = (mode_selected == NEWFROMNEARMV) ? 1 : 0;
@@ -5545,10 +5827,16 @@ static int64_t rd_pick_best_sub8x8_mode(
 #endif  // CONFIG_EXT_INTER
             bsi->rdstat[iy][midx].brdcost = INT64_MAX;
         bsi->segment_rd = INT64_MAX;
+#if CONFIG_PVQ
+        od_encode_rollback(&x->daala_enc, &pre_buf);
+#endif
         return INT64_MAX;
       }
     }
   } /* for each label */
+#if CONFIG_PVQ
+  od_encode_rollback(&x->daala_enc, &pre_buf);
+#endif
 
   bsi->r = br;
   bsi->d = bd;
@@ -7476,8 +7764,10 @@ static int64_t handle_inter_mode(
       RD_STATS rd_stats_uv;
 #endif
 
-      // Y cost and distortion
+// Y cost and distortion
+#if !CONFIG_PVQ
       av1_subtract_plane(x, bsize, 0);
+#endif
 #if CONFIG_VAR_TX
       if (cm->tx_mode == TX_MODE_SELECT && !xd->lossless[mbmi->segment_id]) {
         RD_STATS rd_stats_y;
@@ -8142,6 +8432,10 @@ void av1_rd_pick_inter_mode_sb(const AV1_COMP *cpi, TileDataEnc *tile_data,
   int *mode_map = tile_data->mode_map[bsize];
   const int mode_search_skip_flags = sf->mode_search_skip_flags;
   const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
+#if CONFIG_PVQ
+  od_rollback_buffer pre_buf;
+#endif
+
 #if CONFIG_PALETTE || CONFIG_EXT_INTRA
   const int rows = 4 * num_4x4_blocks_high_lookup[bsize];
   const int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
@@ -8411,7 +8705,9 @@ void av1_rd_pick_inter_mode_sb(const AV1_COMP *cpi, TileDataEnc *tile_data,
     x->use_default_inter_tx_type = 1;
   else
     x->use_default_inter_tx_type = 0;
-
+#if CONFIG_PVQ
+  od_encode_checkpoint(&x->daala_enc, &pre_buf);
+#endif
 #if CONFIG_EXT_INTER
   for (i = 0; i < MB_MODE_COUNT; ++i)
     for (ref_frame = 0; ref_frame < TOTAL_REFS_PER_FRAME; ++ref_frame)
@@ -8435,6 +8731,9 @@ void av1_rd_pick_inter_mode_sb(const AV1_COMP *cpi, TileDataEnc *tile_data,
     int64_t total_sse = INT64_MAX;
 #if CONFIG_REF_MV
     uint8_t ref_frame_type;
+#endif
+#if CONFIG_PVQ
+    od_encode_rollback(&x->daala_enc, &pre_buf);
 #endif
     mode_index = mode_map[midx];
     this_mode = av1_mode_order[mode_index].mode;
@@ -9846,6 +10145,11 @@ void av1_rd_pick_inter_mode_sub8x8(const struct AV1_COMP *cpi,
   int ref_frame_skip_mask[2] = { 0 };
   int internal_active_edge =
       av1_active_edge_sb(cpi, mi_row, mi_col) && av1_internal_image_edge(cpi);
+#if CONFIG_PVQ
+  od_rollback_buffer pre_buf;
+
+  od_encode_checkpoint(&x->daala_enc, &pre_buf);
+#endif
 
 #if CONFIG_SUPERTX
   best_rd_so_far = INT64_MAX;
@@ -9923,6 +10227,10 @@ void av1_rd_pick_inter_mode_sub8x8(const struct AV1_COMP *cpi,
     int skippable = 0;
     int this_skip2 = 0;
     int64_t total_sse = INT_MAX;
+
+#if CONFIG_PVQ
+    od_encode_rollback(&x->daala_enc, &pre_buf);
+#endif
 
     ref_frame = av1_ref_order[ref_index].ref_frame[0];
     second_ref_frame = av1_ref_order[ref_index].ref_frame[1];
