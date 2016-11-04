@@ -610,7 +610,8 @@ void tokenize_vartx(ThreadData *td, TOKENEXTRA **t, RUN_TYPE dry_run,
       if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide) continue;
 
       tokenize_vartx(td, t, dry_run, sub_txs, plane_bsize, offsetr, offsetc,
-                     block + i * step, plane, arg);
+                     block, plane, arg);
+      block += step;
     }
   }
 }

@@ -856,7 +856,8 @@ static void pack_txb_tokens(aom_writer *w, const TOKENEXTRA **tp,
       if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide) continue;
 
       pack_txb_tokens(w, tp, tok_end, xd, mbmi, plane, plane_bsize, bit_depth,
-                      block + i * step, offsetr, offsetc, sub_txs);
+                      block, offsetr, offsetc, sub_txs);
+      block += step;
     }
   }
 }

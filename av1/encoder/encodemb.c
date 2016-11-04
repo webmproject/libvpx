@@ -891,8 +891,9 @@ static void encode_block_inter(int plane, int block, int blk_row, int blk_col,
 
       if (offsetr >= max_blocks_high || offsetc >= max_blocks_wide) continue;
 
-      encode_block_inter(plane, block + i * step, offsetr, offsetc, plane_bsize,
-                         sub_txs, arg);
+      encode_block_inter(plane, block, offsetr, offsetc, plane_bsize, sub_txs,
+                         arg);
+      block += step;
     }
   }
 }
