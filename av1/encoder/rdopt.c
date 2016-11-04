@@ -3417,6 +3417,10 @@ static void select_tx_type_yrd(const AV1_COMP *cpi, MACROBLOCK *x,
     for (idx = 0; idx < xd->n8_w; ++idx)
       mbmi->inter_tx_size[idy][idx] = best_tx_size[idy][idx];
   mbmi->tx_size = best_tx;
+#if CONFIG_RD_DEBUG
+  // record plane y's transform block coefficient cost
+  mbmi->txb_coeff_cost[0] = rd_stats->txb_coeff_cost[0];
+#endif
   memcpy(x->blk_skip[0], best_blk_skip, sizeof(best_blk_skip[0]) * n4);
 }
 
@@ -3537,10 +3541,7 @@ static int inter_block_uvrd(const AV1_COMP *cpi, MACROBLOCK *x,
       break;
     }
 
-    rd_stats->rate += pn_rd_stats.rate;
-    rd_stats->dist += pn_rd_stats.dist;
-    rd_stats->sse += pn_rd_stats.sse;
-    rd_stats->skip &= pn_rd_stats.skip;
+    av1_merge_rd_stats(rd_stats, &pn_rd_stats);
 
     this_rd =
         AOMMIN(RDCOST(x->rdmult, x->rddiv, rd_stats->rate, rd_stats->dist),
@@ -7524,6 +7525,11 @@ static int64_t handle_inter_mode(
 #if CONFIG_VAR_TX
       is_cost_valid_uv =
           inter_block_uvrd(cpi, x, &rd_stats_uv, bsize, ref_best_rd - rdcosty);
+#if CONFIG_RD_DEBUG
+      // record uv planes' transform block coefficient cost
+      mbmi->txb_coeff_cost[1] = rd_stats_uv.txb_coeff_cost[1];
+      mbmi->txb_coeff_cost[2] = rd_stats_uv.txb_coeff_cost[2];
+#endif
       *rate_uv = rd_stats_uv.rate;
       distortion_uv = rd_stats_uv.dist;
       skippable_uv = rd_stats_uv.skip;

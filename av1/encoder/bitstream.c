@@ -1756,8 +1756,7 @@ static void write_modes_b(AV1_COMP *cpi, const TileInfo *const tile,
   int plane;
   int bh, bw;
 #if CONFIG_RD_DEBUG
-  int64_t txb_cost_y = 0;
-  int64_t txb_cost_uv = 0;
+  int64_t txb_coeff_cost[MAX_MB_PLANE] = { 0 };
 #endif
 #if CONFIG_RANS
   (void)tok;
@@ -1903,10 +1902,7 @@ static void write_modes_b(AV1_COMP *cpi, const TileInfo *const tile,
 #endif  // CONFIG_VAR_TX
 
 #if CONFIG_RD_DEBUG
-      if (plane == 0)
-        txb_cost_y += token_stats.cost;
-      else
-        txb_cost_uv += token_stats.cost;
+      txb_coeff_cost[plane] += token_stats.cost;
 #else
       (void)token_stats;
 #endif
@@ -1916,14 +1912,11 @@ static void write_modes_b(AV1_COMP *cpi, const TileInfo *const tile,
     }
   }
 #if CONFIG_RD_DEBUG
-  if (m->mbmi.txb_cost_y != txb_cost_y) {
-    dump_mode_info(m);
-    assert(0);
-  }
-
-  if (m->mbmi.txb_cost_uv != txb_cost_uv) {
-    dump_mode_info(m);
-    assert(0);
+  for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+    if (m->mbmi.txb_coeff_cost[plane] != txb_coeff_cost[plane]) {
+      dump_mode_info(m);
+      assert(0);
+    }
   }
 #endif
 }
