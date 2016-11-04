@@ -315,6 +315,7 @@ static void read_tx_size_vartx(AV1_COMMON *cm, MACROBLOCKD *xd,
       for (idx = 0; idx < tx_size_wide_unit[tx_size] / 2; ++idx)
         inter_tx_size[idy][idx] = tx_size;
     mbmi->tx_size = tx_size;
+    mbmi->min_tx_size = AOMMIN(mbmi->min_tx_size, get_min_tx_size(tx_size));
     if (counts) ++counts->txfm_partition[ctx][0];
     txfm_partition_update(xd->above_txfm_context + tx_col,
                           xd->left_txfm_context + tx_row, tx_size);
@@ -333,6 +334,7 @@ static void read_tx_size_vartx(AV1_COMMON *cm, MACROBLOCKD *xd,
     if (tx_size == TX_8X8) {
       inter_tx_size[0][0] = TX_4X4;
       mbmi->tx_size = TX_4X4;
+      mbmi->min_tx_size = get_min_tx_size(mbmi->tx_size);
       txfm_partition_update(xd->above_txfm_context + tx_col,
                             xd->left_txfm_context + tx_row, TX_4X4);
       return;
@@ -352,6 +354,7 @@ static void read_tx_size_vartx(AV1_COMMON *cm, MACROBLOCKD *xd,
       for (idx = 0; idx < tx_size_wide_unit[tx_size] / 2; ++idx)
         inter_tx_size[idy][idx] = tx_size;
     mbmi->tx_size = tx_size;
+    mbmi->min_tx_size = AOMMIN(mbmi->min_tx_size, get_min_tx_size(tx_size));
     if (counts) ++counts->txfm_partition[ctx][0];
     txfm_partition_update(xd->above_txfm_context + tx_col,
                           xd->left_txfm_context + tx_row, tx_size);
@@ -672,7 +675,11 @@ static void read_tx_type(const AV1_COMMON *const cm, MACROBLOCKD *xd,
 #endif
                          aom_reader *r) {
   const int inter_block = is_inter_block(mbmi);
+#if CONFIG_VAR_TX
+  const TX_SIZE tx_size = inter_block ? mbmi->min_tx_size : mbmi->tx_size;
+#else
   const TX_SIZE tx_size = mbmi->tx_size;
+#endif
   if (!FIXED_TX_TYPE) {
 #if CONFIG_EXT_TX
     if (get_ext_tx_types(tx_size, mbmi->sb_type, inter_block) > 1 &&
@@ -1856,6 +1863,7 @@ static void read_inter_frame_mode_info(AV1Decoder *const pbi,
         set_txfm_ctxs(mbmi->tx_size, xd->n8_w, xd->n8_h, xd);
       } else {
 #endif  // CONFIG_EXT_TX && CONFIG_RECT_TX
+        mbmi->min_tx_size = TX_SIZES_ALL;
         for (idy = 0; idy < height; idy += bh)
           for (idx = 0; idx < width; idx += bw)
             read_tx_size_vartx(cm, xd, mbmi, xd->counts, max_tx_size,
@@ -1877,7 +1885,7 @@ static void read_inter_frame_mode_info(AV1Decoder *const pbi,
           for (idx = 0; idx < width; ++idx)
             mbmi->inter_tx_size[idy >> 1][idx >> 1] = mbmi->tx_size;
       }
-
+      mbmi->min_tx_size = get_min_tx_size(mbmi->tx_size);
       set_txfm_ctxs(mbmi->tx_size, xd->n8_w, xd->n8_h, xd);
     }
 #else

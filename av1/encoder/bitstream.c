@@ -1129,7 +1129,11 @@ static void write_tx_type(const AV1_COMMON *const cm,
 #endif
                           aom_writer *w) {
   const int is_inter = is_inter_block(mbmi);
+#if CONFIG_VAR_TX
+  const TX_SIZE tx_size = is_inter ? mbmi->min_tx_size : mbmi->tx_size;
+#else
   const TX_SIZE tx_size = mbmi->tx_size;
+#endif
   if (!FIXED_TX_TYPE) {
 #if CONFIG_EXT_TX
     const BLOCK_SIZE bsize = mbmi->sb_type;
@@ -1183,13 +1187,6 @@ static void write_tx_type(const AV1_COMMON *const cm,
                                    [intra_mode_to_tx_type_context[mbmi->mode]],
             &ext_tx_encodings[mbmi->tx_type]);
 #endif
-      }
-    } else {
-      if (!mbmi->skip) {
-#if CONFIG_SUPERTX
-        if (!supertx_enabled)
-#endif  // CONFIG_SUPERTX
-          assert(mbmi->tx_type == DCT_DCT);
       }
     }
 #endif  // CONFIG_EXT_TX
@@ -1898,6 +1895,7 @@ static void write_modes_b(AV1_COMP *cpi, const TileInfo *const tile,
       (*tok)++;
     }
   }
+
 #if CONFIG_RD_DEBUG
   for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
     if (m->mbmi.txb_coeff_cost[plane] != txb_coeff_cost[plane]) {

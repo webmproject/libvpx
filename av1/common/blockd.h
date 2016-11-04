@@ -189,6 +189,7 @@ typedef struct {
   // TODO(jingning): This effectively assigned a separate entry for each
   // 8x8 block. Apparently it takes much more space than needed.
   TX_SIZE inter_tx_size[MAX_MIB_SIZE][MAX_MIB_SIZE];
+  TX_SIZE min_tx_size;
 #endif
   int8_t skip;
   int8_t segment_id;
