@@ -33,7 +33,53 @@ typedef struct RD_STATS {
   int64_t dist;
   int64_t sse;
   int skip;
+#if CONFIG_RD_DEBUG
+  int txb_coeff_cost[MAX_MB_PLANE];
+#endif
 } RD_STATS;
+
+static INLINE void av1_init_rd_stats(RD_STATS *rd_stats) {
+#if CONFIG_RD_DEBUG
+  int plane;
+#endif
+  rd_stats->rate = 0;
+  rd_stats->dist = 0;
+  rd_stats->sse = 0;
+  rd_stats->skip = 1;
+#if CONFIG_RD_DEBUG
+  for (plane = 0; plane < MAX_MB_PLANE; ++plane)
+    rd_stats->txb_coeff_cost[plane] = 0;
+#endif
+}
+
+static INLINE void av1_invalid_rd_stats(RD_STATS *rd_stats) {
+#if CONFIG_RD_DEBUG
+  int plane;
+#endif
+  rd_stats->rate = INT_MAX;
+  rd_stats->dist = INT64_MAX;
+  rd_stats->sse = INT64_MAX;
+  rd_stats->skip = 0;
+#if CONFIG_RD_DEBUG
+  for (plane = 0; plane < MAX_MB_PLANE; ++plane)
+    rd_stats->txb_coeff_cost[plane] = INT_MAX;
+#endif
+}
+
+static INLINE void av1_merge_rd_stats(RD_STATS *rd_stats_dst,
+                                      const RD_STATS *rd_stats_src) {
+#if CONFIG_RD_DEBUG
+  int plane;
+#endif
+  rd_stats_dst->rate += rd_stats_src->rate;
+  rd_stats_dst->dist += rd_stats_src->dist;
+  rd_stats_dst->sse += rd_stats_src->sse;
+  rd_stats_dst->skip &= rd_stats_src->skip;
+#if CONFIG_RD_DEBUG
+  for (plane = 0; plane < MAX_MB_PLANE; ++plane)
+    rd_stats_dst->txb_coeff_cost[plane] += rd_stats_src->txb_coeff_cost[plane];
+#endif
+}
 #endif
 
 int av1_cost_coeffs(const AV1_COMMON *const cm, MACROBLOCK *x, int plane,

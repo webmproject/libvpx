@@ -27,6 +27,10 @@
 #endif
 #include "aom_dsp/prob.h"
 
+#if CONFIG_RD_DEBUG
+#include "av1/encoder/cost.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -38,6 +42,8 @@ typedef struct daala_writer aom_writer;
 #else
 typedef struct aom_dk_writer aom_writer;
 #endif
+
+typedef struct TOKEN_STATS { int64_t cost; } TOKEN_STATS;
 
 static INLINE void aom_start_encode(aom_writer *bc, uint8_t *buffer) {
 #if CONFIG_ANS
@@ -72,8 +78,23 @@ static INLINE void aom_write(aom_writer *br, int bit, int probability) {
 #endif
 }
 
+static INLINE void aom_write_record(aom_writer *br, int bit, int probability,
+                                    TOKEN_STATS *token_stats) {
+  aom_write(br, bit, probability);
+#if CONFIG_RD_DEBUG
+  token_stats->cost += av1_cost_bit(probability, bit);
+#else
+  (void)token_stats;
+#endif
+}
+
 static INLINE void aom_write_bit(aom_writer *w, int bit) {
   aom_write(w, bit, 128);  // aom_prob_half
+}
+
+static INLINE void aom_write_bit_record(aom_writer *w, int bit,
+                                        TOKEN_STATS *token_stats) {
+  aom_write_record(w, bit, 128, token_stats);  // aom_prob_half
 }
 
 static INLINE void aom_write_literal(aom_writer *w, int data, int bits) {
@@ -92,6 +113,18 @@ static INLINE void aom_write_tree_bits(aom_writer *w, const aom_tree_index *tr,
   } while (len);
 }
 
+static INLINE void aom_write_tree_bits_record(aom_writer *w,
+                                              const aom_tree_index *tr,
+                                              const aom_prob *probs, int bits,
+                                              int len, aom_tree_index i,
+                                              TOKEN_STATS *token_stats) {
+  do {
+    const int bit = (bits >> --len) & 1;
+    aom_write_record(w, bit, probs[i >> 1], token_stats);
+    i = tr[i + bit];
+  } while (len);
+}
+
 static INLINE void aom_write_tree(aom_writer *w, const aom_tree_index *tree,
                                   const aom_prob *probs, int bits, int len,
                                   aom_tree_index i) {
@@ -99,6 +132,19 @@ static INLINE void aom_write_tree(aom_writer *w, const aom_tree_index *tree,
   daala_write_tree_bits(w, tree, probs, bits, len, i);
 #else
   aom_write_tree_bits(w, tree, probs, bits, len, i);
+#endif
+}
+
+static INLINE void aom_write_tree_record(aom_writer *w,
+                                         const aom_tree_index *tree,
+                                         const aom_prob *probs, int bits,
+                                         int len, aom_tree_index i,
+                                         TOKEN_STATS *token_stats) {
+#if CONFIG_DAALA_EC
+  (void)token_stats;
+  daala_write_tree_bits(w, tree, probs, bits, len, i);
+#else
+  aom_write_tree_bits_record(w, tree, probs, bits, len, i, token_stats);
 #endif
 }
 
