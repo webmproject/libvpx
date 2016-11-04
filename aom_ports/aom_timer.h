@@ -97,11 +97,13 @@ struct aom_usec_timer {
   void *dummy;
 };
 
-static INLINE void aom_usec_timer_start(struct aom_usec_timer *t) {}
+static INLINE void aom_usec_timer_start(struct aom_usec_timer * /*t*/) {}
 
-static INLINE void aom_usec_timer_mark(struct aom_usec_timer *t) {}
+static INLINE void aom_usec_timer_mark(struct aom_usec_timer * /*t*/) {}
 
-static INLINE int aom_usec_timer_elapsed(struct aom_usec_timer *t) { return 0; }
+static INLINE int aom_usec_timer_elapsed(struct aom_usec_timer * /*t*/) {
+  return 0;
+}
 
 #endif /* CONFIG_OS_SUPPORT */
 
