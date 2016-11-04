@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ebf51f92_ee5d3f5d",
+        "filename": "av1/encoder/rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 9431,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-11-04T17:40:24Z",
+      "side": 1,
+      "message": "Why is this being removed? This was done to address a ubsan warning in I1b3caf3543ab385f39f5f253c9949ad89ea5af7d",
+      "range": {
+        "startLine": 9428,
+        "startChar": 0,
+        "endLine": 9431,
+        "endChar": 5
+      },
+      "revId": "4dc67bf6593fa9e382120e6b8f13ce078aff9c7f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
