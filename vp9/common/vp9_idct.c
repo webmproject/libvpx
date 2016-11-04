@@ -331,8 +331,8 @@ void vp9_highbd_idct8x8_add(const tran_low_t *input, uint8_t *dest, int stride,
   // DC only DCT coefficient
   if (eob == 1) {
     vpx_highbd_idct8x8_1_add(input, dest, stride, bd);
-  } else if (eob <= 10) {
-    vpx_highbd_idct8x8_10_add(input, dest, stride, bd);
+  } else if (eob <= 12) {
+    vpx_highbd_idct8x8_12_add(input, dest, stride, bd);
   } else {
     vpx_highbd_idct8x8_64_add(input, dest, stride, bd);
   }

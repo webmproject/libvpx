@@ -3673,7 +3673,7 @@ void vpx_highbd_idct8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest8,
   }
 }
 
-void vpx_highbd_idct8x8_10_add_sse2(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct8x8_12_add_sse2(const tran_low_t *input, uint8_t *dest8,
                                     int stride, int bd) {
   tran_low_t out[8 * 8] = { 0 };
   tran_low_t *outptr = out;

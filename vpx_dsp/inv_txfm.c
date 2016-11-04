@@ -1657,7 +1657,7 @@ void vpx_highbd_iadst8_c(const tran_low_t *input, tran_low_t *output, int bd) {
   output[7] = HIGHBD_WRAPLOW(-x1, bd);
 }
 
-void vpx_highbd_idct8x8_10_add_c(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct8x8_12_add_c(const tran_low_t *input, uint8_t *dest8,
                                  int stride, int bd) {
   int i, j;
   tran_low_t out[8 * 8] = { 0 };

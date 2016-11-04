@@ -637,7 +637,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
     add_proto qw/void vpx_highbd_idct8x8_64_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
 
-    add_proto qw/void vpx_highbd_idct8x8_10_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
+    add_proto qw/void vpx_highbd_idct8x8_12_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
 
     add_proto qw/void vpx_highbd_idct16x16_256_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
 
@@ -687,8 +687,8 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     add_proto qw/void vpx_highbd_idct8x8_64_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
     specialize qw/vpx_highbd_idct8x8_64_add sse2/;
 
-    add_proto qw/void vpx_highbd_idct8x8_10_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
-    specialize qw/vpx_highbd_idct8x8_10_add sse2/;
+    add_proto qw/void vpx_highbd_idct8x8_12_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
+    specialize qw/vpx_highbd_idct8x8_12_add sse2/;
 
     add_proto qw/void vpx_highbd_idct16x16_256_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
     specialize qw/vpx_highbd_idct16x16_256_add sse2/;
