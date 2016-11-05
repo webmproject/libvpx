@@ -16,7 +16,6 @@
 # include "generic_code.h"
 # include "odintrin.h"
 
-extern const double *OD_BASIS_MAG[2][OD_NBSIZES + 1];
 extern const int OD_QM8_Q4_FLAT[];
 extern const int OD_QM8_Q4_HVS[];
 
