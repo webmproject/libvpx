@@ -103,7 +103,7 @@ TEST(AV1, TestTell) {
   uint8_t bw_buffer[kBufferSize];
   const int kSymbols = 1024;
   // Coders are noisier at low probabilities, so we start at p = 4.
-  for (int p = 4; p <= 256; p++) {
+  for (int p = 4; p < 256; p++) {
     double probability = p / 256.;
     aom_start_encode(&bw, bw_buffer);
     for (int i = 0; i < kSymbols; i++) {
