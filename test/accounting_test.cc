@@ -35,7 +35,7 @@ TEST(AV1, TestAccounting) {
   }
   aom_stop_encode(&bw);
   aom_reader br;
-  aom_reader_init(&br, bw_buffer, kBufferSize, NULL, NULL);
+  aom_reader_init(&br, bw_buffer, bw.pos, NULL, NULL);
 
   Accounting accounting;
   aom_accounting_init(&accounting);
@@ -51,7 +51,7 @@ TEST(AV1, TestAccounting) {
   GTEST_ASSERT_EQ(accounting.syms.num_syms, 0);
 
   // Should record 2 * kSymbols accounting symbols.
-  aom_reader_init(&br, bw_buffer, kBufferSize, NULL, NULL);
+  aom_reader_init(&br, bw_buffer, bw.pos, NULL, NULL);
   br.accounting = &accounting;
   for (int i = 0; i < kSymbols; i++) {
     aom_read(&br, 32, "A");
