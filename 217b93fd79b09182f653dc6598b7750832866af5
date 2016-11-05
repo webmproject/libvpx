@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "ebf51f92_25f5a2ae",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-05T02:00:50Z",
+      "side": 1,
+      "message": "figures",
+      "parentUuid": "ebf51f92_05e18616",
+      "range": {
+        "startLine": 39,
+        "startChar": 22,
+        "endLine": 39,
+        "endChar": 26
+      },
+      "revId": "217b93fd79b09182f653dc6598b7750832866af5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ebf51f92_65968a96",
         "filename": "test/partial_idct_test.cc",
         "patchSetId": 3
@@ -119,6 +143,30 @@
       "side": 1,
       "message": "I was grouping these mentally with the helper functions like idct8x8_test.cc but that\u0027s probably a bad example to pull from",
       "parentUuid": "ebf51f92_a55eb227",
+      "range": {
+        "startLine": 50,
+        "startChar": 7,
+        "endLine": 50,
+        "endChar": 26
+      },
+      "revId": "217b93fd79b09182f653dc6598b7750832866af5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ebf51f92_85fa969a",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-05T02:00:50Z",
+      "side": 1,
+      "message": "either was probably fine here, but upper camel is less disruptive in this context",
+      "parentUuid": "ebf51f92_65632acb",
       "range": {
         "startLine": 50,
         "startChar": 7,
