@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ebf51f92_c5fdbec3",
+        "filename": "vpx_dsp/x86/fdct.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-05T01:30:05Z",
+      "side": 1,
+      "message": "Sure, this could be renamed dct.h or maybe common_neon.h or loads_and_stores_for_hbd_and_lbd.h\n\nNaming is hard",
+      "parentUuid": "ebf51f92_05d6a651",
+      "revId": "7a4c4f988e0a85ec8ecb76732adff7f11086af9a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ebf51f92_45a1cee3",
         "filename": "vpx_dsp/x86/fdct.h",
         "patchSetId": 2
@@ -30,6 +48,30 @@
       "writtenOn": "2016-11-05T01:22:54Z",
       "side": 1,
       "message": "these ()s are consistent with the existing function, but unnecessary, it\u0027s not a macro",
+      "range": {
+        "startLine": 54,
+        "startChar": 29,
+        "endLine": 54,
+        "endChar": 32
+      },
+      "revId": "7a4c4f988e0a85ec8ecb76732adff7f11086af9a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ebf51f92_e5043af4",
+        "filename": "vpx_dsp/x86/fdct.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-05T01:30:05Z",
+      "side": 1,
+      "message": "Was being consistent because at least in the a + 4 case above the pointer needs to be incremented before the cast. Could switch that one to +1 instead and drop the () though.",
+      "parentUuid": "ebf51f92_45a1cee3",
       "range": {
         "startLine": 54,
         "startChar": 29,
