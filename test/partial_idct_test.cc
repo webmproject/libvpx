@@ -170,14 +170,14 @@ TEST_P(PartialIDctTest, ResultsMatch) {
     memset(output_block_ref_, 0, sizeof(*output_block_ref_) * block_size_);
     int max_energy_leftover = max_coeff * max_coeff;
     for (int j = 0; j < last_nonzero_; ++j) {
-      int16_t coef = static_cast<int16_t>(sqrt(1.0 * max_energy_leftover) *
-                                          (rnd.Rand16() - 32768) / 65536);
-      max_energy_leftover -= coef * coef;
+      int16_t coeff = static_cast<int16_t>(sqrt(1.0 * max_energy_leftover) *
+                                           (rnd.Rand16() - 32768) / 65536);
+      max_energy_leftover -= coeff * coeff;
       if (max_energy_leftover < 0) {
         max_energy_leftover = 0;
-        coef = 0;
+        coeff = 0;
       }
-      input_block_[vp9_default_scan_orders[tx_size_].scan[j]] = coef;
+      input_block_[vp9_default_scan_orders[tx_size_].scan[j]] = coeff;
     }
 
     ASM_REGISTER_STATE_CHECK(
