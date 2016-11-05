@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ebf51f92_65f20aee",
+        "filename": "test/test.mk",
+        "patchSetId": 11
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-05T01:30:57Z",
+      "side": 1,
+      "message": "corrected the sort order in this group",
+      "revId": "eefc7d141212a50fd9e44a983d58855a587eb044",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
