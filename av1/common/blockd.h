@@ -179,6 +179,23 @@ typedef struct {
 } FILTER_INTRA_MODE_INFO;
 #endif  // CONFIG_FILTER_INTRA
 
+#if CONFIG_VAR_TX
+#define TXB_COEFF_COST_MAP_SIZE (2 * MAX_MIB_SIZE)
+
+// TODO(angiebird): Merge RD_COST and RD_STATS
+typedef struct RD_STATS {
+  int rate;
+  int64_t dist;
+  int64_t sse;
+  int skip;
+#if CONFIG_RD_DEBUG
+  int txb_coeff_cost[MAX_MB_PLANE];
+  int txb_coeff_cost_map[MAX_MB_PLANE][TXB_COEFF_COST_MAP_SIZE]
+                        [TXB_COEFF_COST_MAP_SIZE];
+#endif
+} RD_STATS;
+#endif  // CONFIG_VAR_TX
+
 // This structure now relates to 8x8 block regions.
 typedef struct {
   // Common for both INTER and INTRA blocks
@@ -251,7 +268,7 @@ typedef struct {
   int current_q_index;
 #endif
 #if CONFIG_RD_DEBUG
-  int64_t txb_coeff_cost[MAX_MB_PLANE];
+  RD_STATS rd_stats;
   int mi_row;
   int mi_col;
 #endif

@@ -3431,7 +3431,7 @@ static void select_tx_type_yrd(const AV1_COMP *cpi, MACROBLOCK *x,
   mbmi->tx_size = best_tx;
 #if CONFIG_RD_DEBUG
   // record plane y's transform block coefficient cost
-  mbmi->txb_coeff_cost[0] = rd_stats->txb_coeff_cost[0];
+  mbmi->rd_stats = *rd_stats;
 #endif
   memcpy(x->blk_skip[0], best_blk_skip, sizeof(best_blk_skip[0]) * n4);
 }
@@ -7539,8 +7539,7 @@ static int64_t handle_inter_mode(
           inter_block_uvrd(cpi, x, &rd_stats_uv, bsize, ref_best_rd - rdcosty);
 #if CONFIG_RD_DEBUG
       // record uv planes' transform block coefficient cost
-      mbmi->txb_coeff_cost[1] = rd_stats_uv.txb_coeff_cost[1];
-      mbmi->txb_coeff_cost[2] = rd_stats_uv.txb_coeff_cost[2];
+      av1_merge_rd_stats(&mbmi->rd_stats, &rd_stats_uv);
 #endif
       *rate_uv = rd_stats_uv.rate;
       distortion_uv = rd_stats_uv.dist;

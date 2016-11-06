@@ -1913,7 +1913,7 @@ static void write_modes_b(AV1_COMP *cpi, const TileInfo *const tile,
   }
 #if CONFIG_RD_DEBUG
   for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
-    if (m->mbmi.txb_coeff_cost[plane] != txb_coeff_cost[plane]) {
+    if (m->mbmi.rd_stats.txb_coeff_cost[plane] != txb_coeff_cost[plane]) {
       dump_mode_info(m);
       assert(0);
     }

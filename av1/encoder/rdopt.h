@@ -27,21 +27,6 @@ struct macroblock;
 struct RD_COST;
 
 #if CONFIG_VAR_TX
-#define TXB_COEFF_COST_MAP_SIZE (2 * MAX_MIB_SIZE)
-
-// TODO(angiebird): Merge RD_COST and RD_STATS
-typedef struct RD_STATS {
-  int rate;
-  int64_t dist;
-  int64_t sse;
-  int skip;
-#if CONFIG_RD_DEBUG
-  int txb_coeff_cost[MAX_MB_PLANE];
-  int txb_coeff_cost_map[MAX_MB_PLANE][TXB_COEFF_COST_MAP_SIZE]
-                        [TXB_COEFF_COST_MAP_SIZE];
-#endif
-} RD_STATS;
-
 static INLINE void av1_init_rd_stats(RD_STATS *rd_stats) {
 #if CONFIG_RD_DEBUG
   int plane;
