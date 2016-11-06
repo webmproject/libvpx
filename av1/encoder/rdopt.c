@@ -7542,7 +7542,7 @@ static int64_t handle_inter_mode(
           inter_block_uvrd(cpi, x, &rd_stats_uv, bsize, ref_best_rd - rdcosty);
 #if CONFIG_RD_DEBUG
       // record uv planes' transform block coefficient cost
-      av1_merge_rd_stats(&mbmi->rd_stats, &rd_stats_uv);
+      if (is_cost_valid_uv) av1_merge_rd_stats(&mbmi->rd_stats, &rd_stats_uv);
 #endif
       *rate_uv = rd_stats_uv.rate;
       distortion_uv = rd_stats_uv.dist;
