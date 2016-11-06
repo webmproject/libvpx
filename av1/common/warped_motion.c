@@ -26,7 +26,7 @@ static ProjectPointsFunc get_project_points_type(TransformationType type) {
   }
 }
 
-void project_points_translation(int16_t *mat, int *points, int *proj,
+void project_points_translation(int32_t *mat, int *points, int *proj,
                                 const int n, const int stride_points,
                                 const int stride_proj, const int subsampling_x,
                                 const int subsampling_y) {
@@ -52,7 +52,7 @@ void project_points_translation(int16_t *mat, int *points, int *proj,
   }
 }
 
-void project_points_rotzoom(int16_t *mat, int *points, int *proj, const int n,
+void project_points_rotzoom(int32_t *mat, int *points, int *proj, const int n,
                             const int stride_points, const int stride_proj,
                             const int subsampling_x, const int subsampling_y) {
   int i;
@@ -79,7 +79,7 @@ void project_points_rotzoom(int16_t *mat, int *points, int *proj, const int n,
   }
 }
 
-void project_points_affine(int16_t *mat, int *points, int *proj, const int n,
+void project_points_affine(int32_t *mat, int *points, int *proj, const int n,
                            const int stride_points, const int stride_proj,
                            const int subsampling_x, const int subsampling_y) {
   int i;
@@ -106,7 +106,7 @@ void project_points_affine(int16_t *mat, int *points, int *proj, const int n,
   }
 }
 
-void project_points_homography(int16_t *mat, int *points, int *proj,
+void project_points_homography(int32_t *mat, int *points, int *proj,
                                const int n, const int stride_points,
                                const int stride_proj, const int subsampling_x,
                                const int subsampling_y) {
@@ -443,8 +443,7 @@ static double highbd_warp_erroradv(WarpedMotionParams *wm, uint8_t *ref8,
       int in[2], out[2];
       in[0] = j;
       in[1] = i;
-      projectpoints((int16_t *)wm->wmmat, in, out, 1, 2, 2, subsampling_x,
-                    subsampling_y);
+      projectpoints(wm->wmmat, in, out, 1, 2, 2, subsampling_x, subsampling_y);
       out[0] = ROUND_POWER_OF_TWO_SIGNED(out[0] * x_scale, 4);
       out[1] = ROUND_POWER_OF_TWO_SIGNED(out[1] * y_scale, 4);
       gm_err = dst[(j - p_col) + (i - p_row) * p_stride] -
@@ -475,8 +474,7 @@ static void highbd_warp_plane(WarpedMotionParams *wm, uint8_t *ref8, int width,
       int in[2], out[2];
       in[0] = j;
       in[1] = i;
-      projectpoints((int16_t *)wm->wmmat, in, out, 1, 2, 2, subsampling_x,
-                    subsampling_y);
+      projectpoints(wm->wmmat, in, out, 1, 2, 2, subsampling_x, subsampling_y);
       out[0] = ROUND_POWER_OF_TWO_SIGNED(out[0] * x_scale, 4);
       out[1] = ROUND_POWER_OF_TWO_SIGNED(out[1] * y_scale, 4);
       if (ref_frm)
@@ -507,8 +505,7 @@ static double warp_erroradv(WarpedMotionParams *wm, uint8_t *ref, int width,
       int in[2], out[2];
       in[0] = j;
       in[1] = i;
-      projectpoints((int16_t *)wm->wmmat, in, out, 1, 2, 2, subsampling_x,
-                    subsampling_y);
+      projectpoints(wm->wmmat, in, out, 1, 2, 2, subsampling_x, subsampling_y);
       out[0] = ROUND_POWER_OF_TWO_SIGNED(out[0] * x_scale, 4);
       out[1] = ROUND_POWER_OF_TWO_SIGNED(out[1] * y_scale, 4);
       gm_err = dst[(j - p_col) + (i - p_row) * p_stride] -
@@ -535,8 +532,7 @@ static void warp_plane(WarpedMotionParams *wm, uint8_t *ref, int width,
       int in[2], out[2];
       in[0] = j;
       in[1] = i;
-      projectpoints((int16_t *)wm->wmmat, in, out, 1, 2, 2, subsampling_x,
-                    subsampling_y);
+      projectpoints(wm->wmmat, in, out, 1, 2, 2, subsampling_x, subsampling_y);
       out[0] = ROUND_POWER_OF_TWO_SIGNED(out[0] * x_scale, 4);
       out[1] = ROUND_POWER_OF_TWO_SIGNED(out[1] * y_scale, 4);
       if (ref_frm)
@@ -596,28 +592,22 @@ void av1_integerize_model(const double *model, TransformationType wmtype,
   switch (wmtype) {
     case HOMOGRAPHY:
       assert(fabs(model[8] - 1.0) < 1e-12);
-      wm->wmmat[3].as_mv.row =
-          (int16_t)lrint(model[6] * (1 << WARPEDMODEL_ROW3HOMO_PREC_BITS));
-      wm->wmmat[3].as_mv.col =
-          (int16_t)lrint(model[7] * (1 << WARPEDMODEL_ROW3HOMO_PREC_BITS));
+      wm->wmmat[6] =
+          (int32_t)lrint(model[6] * (1 << WARPEDMODEL_ROW3HOMO_PREC_BITS));
+      wm->wmmat[7] =
+          (int32_t)lrint(model[7] * (1 << WARPEDMODEL_ROW3HOMO_PREC_BITS));
     /* fallthrough intended */
     case AFFINE:
-      wm->wmmat[2].as_mv.row =
-          (int16_t)lrint(model[4] * (1 << WARPEDMODEL_PREC_BITS));
-      wm->wmmat[2].as_mv.col =
-          (int16_t)lrint(model[5] * (1 << WARPEDMODEL_PREC_BITS));
+      wm->wmmat[4] = (int32_t)lrint(model[4] * (1 << WARPEDMODEL_PREC_BITS));
+      wm->wmmat[5] = (int32_t)lrint(model[5] * (1 << WARPEDMODEL_PREC_BITS));
     /* fallthrough intended */
     case ROTZOOM:
-      wm->wmmat[1].as_mv.row =
-          (int16_t)lrint(model[2] * (1 << WARPEDMODEL_PREC_BITS));
-      wm->wmmat[1].as_mv.col =
-          (int16_t)lrint(model[3] * (1 << WARPEDMODEL_PREC_BITS));
+      wm->wmmat[2] = (int32_t)lrint(model[2] * (1 << WARPEDMODEL_PREC_BITS));
+      wm->wmmat[3] = (int32_t)lrint(model[3] * (1 << WARPEDMODEL_PREC_BITS));
     /* fallthrough intended */
     case TRANSLATION:
-      wm->wmmat[0].as_mv.row =
-          (int16_t)lrint(model[0] * (1 << WARPEDMODEL_PREC_BITS));
-      wm->wmmat[0].as_mv.col =
-          (int16_t)lrint(model[1] * (1 << WARPEDMODEL_PREC_BITS));
+      wm->wmmat[0] = (int32_t)lrint(model[0] * (1 << WARPEDMODEL_PREC_BITS));
+      wm->wmmat[1] = (int32_t)lrint(model[1] * (1 << WARPEDMODEL_PREC_BITS));
       break;
     default: assert(0 && "Invalid TransformationType");
   }
