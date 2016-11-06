@@ -32,6 +32,34 @@ typedef void (*InvTxfmFunc)(const tran_low_t *in, uint8_t *out, int stride);
 typedef std::tr1::tuple<FwdTxfmFunc, InvTxfmFunc, InvTxfmFunc, TX_SIZE, int>
     PartialInvTxfmParam;
 const int kMaxNumCoeffs = 1024;
+
+// https://bugs.chromium.org/p/webm/issues/detail?id=1332
+// The functions specified do not pass with INT16_MIN/MAX. They fail at the
+// value specified, but pass when 1 is added/subtracted.
+int16_t MaxSupportedCoeff(InvTxfmFunc a) {
+#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_VP9_HIGHBITDEPTH && \
+    !CONFIG_EMULATE_HARDWARE
+  if (a == vpx_idct8x8_64_add_ssse3 || a == vpx_idct8x8_12_add_ssse3) {
+    return 23625 - 1;
+  }
+#else
+  (void)a;
+#endif
+  return INT16_MAX;
+}
+
+int16_t MinSupportedCoeff(InvTxfmFunc a) {
+#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_VP9_HIGHBITDEPTH && \
+    !CONFIG_EMULATE_HARDWARE
+  if (a == vpx_idct8x8_64_add_ssse3 || a == vpx_idct8x8_12_add_ssse3) {
+    return -23625 + 1;
+  }
+#else
+  (void)a;
+#endif
+  return INT16_MIN;
+}
+
 class PartialIDctTest : public ::testing::TestWithParam<PartialInvTxfmParam> {
  public:
   virtual ~PartialIDctTest() {}
@@ -184,6 +212,33 @@ TEST_P(PartialIDctTest, AddOutputBlock) {
     ASSERT_EQ(0, memcmp(output_block_ref_, output_block_,
                         sizeof(*output_block_) * block_size_))
         << "Error: Transform results are not correctly added to output.";
+  }
+}
+
+TEST_P(PartialIDctTest, SingleLargeCoeff) {
+  ACMRandom rnd(ACMRandom::DeterministicSeed());
+  const int16_t max_coeff = MaxSupportedCoeff(partial_itxfm_);
+  const int16_t min_coeff = MinSupportedCoeff(partial_itxfm_);
+  for (int i = 0; i < last_nonzero_; ++i) {
+    memset(input_block_, 0, sizeof(*input_block_) * block_size_);
+    // Run once for min and once for max.
+    for (int j = 0; j < 2; ++j) {
+      const int coeff = j ? min_coeff : max_coeff;
+
+      memset(output_block_, 0, sizeof(*output_block_) * block_size_);
+      memset(output_block_ref_, 0, sizeof(*output_block_ref_) * block_size_);
+      input_block_[vp9_default_scan_orders[tx_size_].scan[i]] = coeff;
+
+      ASM_REGISTER_STATE_CHECK(
+          full_itxfm_(input_block_, output_block_ref_, size_));
+      ASM_REGISTER_STATE_CHECK(
+          partial_itxfm_(input_block_, output_block_, size_));
+
+      ASSERT_EQ(0, memcmp(output_block_ref_, output_block_,
+                          sizeof(*output_block_) * block_size_))
+          << "Error: Fails with single coeff of " << coeff << " at " << i
+          << ".";
+    }
   }
 }
 using std::tr1::make_tuple;
