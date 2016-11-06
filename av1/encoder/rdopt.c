@@ -6799,11 +6799,14 @@ static int64_t handle_inter_mode(
 
 #if CONFIG_REF_MV
 #if CONFIG_EXT_INTER
-  if (this_mode == NEAREST_NEARESTMV) {
+  if (this_mode == NEAREST_NEARESTMV)
 #else
-  if (this_mode == NEARESTMV && is_comp_pred) {
-    uint8_t ref_frame_type = av1_ref_frame_type(mbmi->ref_frame);
+  if (this_mode == NEARESTMV && is_comp_pred)
 #endif  // CONFIG_EXT_INTER
+  {
+#if !CONFIG_EXT_INTER
+    uint8_t ref_frame_type = av1_ref_frame_type(mbmi->ref_frame);
+#endif
     if (mbmi_ext->ref_mv_count[ref_frame_type] > 0) {
       cur_mv[0] = mbmi_ext->ref_mv_stack[ref_frame_type][0].this_mv;
       cur_mv[1] = mbmi_ext->ref_mv_stack[ref_frame_type][0].comp_mv;
