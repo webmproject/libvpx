@@ -3041,7 +3041,19 @@ void av1_tx_block_rd_b(const AV1_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
   rd_stats->rate += txb_coeff_cost;
   rd_stats->skip &= (p->eobs[block] == 0);
 #if CONFIG_RD_DEBUG
-  rd_stats->txb_coeff_cost[plane] += txb_coeff_cost;
+  {
+    int idx, idy;
+    rd_stats->txb_coeff_cost[plane] += txb_coeff_cost;
+
+    for (idy = 0; idy < txb_h; ++idy)
+      for (idx = 0; idx < txb_w; ++idx)
+        rd_stats->txb_coeff_cost_map[plane][blk_row + idy][blk_col + idx] = 0;
+
+    rd_stats->txb_coeff_cost_map[plane][blk_row][blk_col] = txb_coeff_cost;
+
+    assert(blk_row < 16);
+    assert(blk_col < 16);
+  }
 #endif
 }
 
