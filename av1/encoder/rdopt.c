@@ -4565,8 +4565,9 @@ static int64_t encode_inter_mb_segment(const AV1_COMP *const cpi, MACROBLOCK *x,
     for (idx = 0; idx < width / 4; idx += num_4x4_w) {
       int64_t dist, ssz, rd, rd1, rd2;
       int block;
+#if !CONFIG_PVQ
       int coeff_ctx;
-#if CONFIG_PVQ
+#else
       const int src_stride = p->src.stride;
       const int dst_stride = pd->dst.stride;
       const int diff_stride = 8;
