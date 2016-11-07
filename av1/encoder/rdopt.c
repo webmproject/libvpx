@@ -68,7 +68,6 @@ static const int filter_sets[9][2] = {
 #endif
 #endif
 
-
 #if CONFIG_EXT_REFS
 
 #define LAST_FRAME_MODE_MASK                                      \
@@ -1031,7 +1030,7 @@ static void dist_block(const AV1_COMP *cpi, MACROBLOCK *x, int plane, int block,
     tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
     tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
 #if CONFIG_PVQ
-  tran_low_t *ref_coeff = BLOCK_OFFSET(pd->pvq_ref_coeff, block);
+    tran_low_t *ref_coeff = BLOCK_OFFSET(pd->pvq_ref_coeff, block);
 #endif
 #if CONFIG_AOM_HIGHBITDEPTH
     const int bd = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ? xd->bd : 8;

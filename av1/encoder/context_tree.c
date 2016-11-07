@@ -78,8 +78,8 @@ static void free_mode_context(PICK_MODE_CONTEXT *ctx) {
       aom_free(ctx->dqcoeff[i][k]);
       ctx->dqcoeff[i][k] = 0;
 #if CONFIG_PVQ
-    aom_free(ctx->pvq_ref_coeff[i]);
-    ctx->pvq_ref_coeff[i] = 0;
+      aom_free(ctx->pvq_ref_coeff[i]);
+      ctx->pvq_ref_coeff[i] = 0;
 #endif
       aom_free(ctx->eobs[i][k]);
       ctx->eobs[i][k] = 0;
