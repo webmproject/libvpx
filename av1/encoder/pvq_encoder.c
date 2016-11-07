@@ -912,7 +912,8 @@ int od_pvq_encode(daala_enc_ctx *enc,
       int j;
       int tmp;
       tmp = 1;
-      for (j = i + 1; j < nb_bands; j += 3) {
+      // ToDo(yaowu): figure out better stop condition without gcc warning.
+      for (j = i + 1; j < nb_bands && j < PVQ_MAX_PARTITIONS; j += 3) {
         if (theta[j] != skip_theta_value || qg[j]) tmp = 0;
       }
       skip_dir |= tmp << i;
