@@ -1285,7 +1285,10 @@ void av1_encode_block_intra(int plane, int block, int blk_row, int blk_col,
     }
 
   fwd_txfm_param.rd_transform = 0;
-
+  fwd_txfm_param.tx_type = tx_type;
+  fwd_txfm_param.tx_size = tx_size;
+  fwd_txfm_param.fwd_txfm_opt = FWD_TXFM_OPT_NORMAL;
+  fwd_txfm_param.lossless = xd->lossless[mbmi->segment_id];
   fwd_txfm(src_int16, coeff, diff_stride, &fwd_txfm_param);
   fwd_txfm(pred, ref_coeff, diff_stride, &fwd_txfm_param);
 
