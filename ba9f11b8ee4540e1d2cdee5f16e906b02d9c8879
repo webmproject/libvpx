@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8baca39c_c15e7829",
+        "filename": "test/examples.sh",
+        "patchSetId": 9
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-11-07T22:19:00Z",
+      "side": 1,
+      "message": "nit: alpha sort names, stress before tools_common",
+      "revId": "ba9f11b8ee4540e1d2cdee5f16e906b02d9c8879",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_81964093",
+        "filename": "test/stress.sh",
+        "patchSetId": 9
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-11-07T22:19:00Z",
+      "side": 1,
+      "message": "can drop this line",
+      "revId": "ba9f11b8ee4540e1d2cdee5f16e906b02d9c8879",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
