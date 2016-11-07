@@ -4612,9 +4612,17 @@ static int64_t encode_inter_mb_segment(const AV1_COMP *const cpi, MACROBLOCK *x,
               dst[dst_stride * (j + 4 * idy) + (ii + 4 * idx)];
         }
 
-      fwd_txm4x4(src_int16, coeff, diff_stride);
-      fwd_txm4x4(pred, ref_coeff, diff_stride);
+      {
+        FWD_TXFM_PARAM fwd_txfm_param;
+        fwd_txfm_param.tx_type = DCT_DCT;
+        fwd_txfm_param.tx_size = TX_4X4;
+        fwd_txfm_param.fwd_txfm_opt = FWD_TXFM_OPT_NORMAL;
+        fwd_txfm_param.rd_transform = 0;
+        fwd_txfm_param.lossless = xd->lossless[xd->mi[0]->mbmi.segment_id];
 
+        fwd_txfm(src_int16, coeff, diff_stride, &fwd_txfm_param);
+        fwd_txfm(pred, ref_coeff, diff_stride, &fwd_txfm_param);
+      }
       av1_pvq_encode_helper(&x->daala_enc, coeff, ref_coeff, dqcoeff,
                             &p->eobs[k], pd->dequant, 0, TX_4X4, tx_type,
                             &rate_pvq, x->pvq_speed, NULL);
