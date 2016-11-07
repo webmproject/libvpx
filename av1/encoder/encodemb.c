@@ -417,7 +417,8 @@ static AV1_QUANT_FACADE quant_func_list[AV1_XFORM_QUANT_LAST][QUANT_FUNC_LAST] =
       { av1_quantize_dc_facade, av1_highbd_quantize_dc_facade },
       { NULL, NULL } };
 
-#else
+#elif !CONFIG_PVQ
+
 typedef enum QUANT_FUNC {
   QUANT_FUNC_LOWBD = 0,
   QUANT_FUNC_LAST = 1
