@@ -9,9 +9,11 @@
  * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
  */
 
+#if !CONFIG_PVQ
 #include "aom_mem/aom_mem.h"
 #include "aom_ports/mem.h"
-
+#endif
+#if !CONFIG_PVQ
 #if CONFIG_ANS
 #include "aom_dsp/ans.h"
 #endif  // CONFIG_ANS
@@ -356,3 +358,4 @@ int av1_decode_block_tokens(MACROBLOCKD *const xd, int plane,
   av1_set_contexts(xd, pd, tx_size, eob > 0, x, y);
   return eob;
 }
+#endif

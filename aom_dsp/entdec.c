@@ -1,26 +1,13 @@
-/*Daala video codec
-Copyright (c) 2001-2013 Daala project contributors.  All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-- Redistributions of source code must retain the above copyright notice, this
-  list of conditions and the following disclaimer.
-
-- Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
+/*
+ * Copyright (c) 2001-2016, Alliance for Open Media. All rights reserved
+ *
+ * This source code is subject to the terms of the BSD 2 Clause License and
+ * the Alliance for Open Media Patent License 1.0. If the BSD 2 Clause License
+ * was not distributed with this source code in the LICENSE file, you can
+ * obtain it at www.aomedia.org/license/software. If the Alliance for Open
+ * Media Patent License 1.0 was not distributed with this source code in the
+ * PATENTS file, you can obtain it at www.aomedia.org/license/patent.
+ */
 
 #ifdef HAVE_CONFIG_H
 #include "./config.h"
@@ -440,7 +427,7 @@ uint32_t od_ec_dec_uint(od_ec_dec *dec, uint32_t ft) {
     ftb = OD_ILOG_NZ(ft) - OD_EC_UINT_BITS;
     ft1 = (int)(ft >> ftb) + 1;
     t = od_ec_decode_cdf_q15(dec, OD_UNIFORM_CDF_Q15(ft1), ft1);
-    t = t << ftb | od_ec_dec_bits(dec, ftb);
+    t = t << ftb | od_ec_dec_bits(dec, ftb, "");
     if (t <= ft) return t;
     dec->error = 1;
     return ft;
@@ -453,7 +440,7 @@ uint32_t od_ec_dec_uint(od_ec_dec *dec, uint32_t ft) {
   ftb: The number of bits to extract.
        This must be between 0 and 25, inclusive.
   Return: The decoded bits.*/
-uint32_t od_ec_dec_bits(od_ec_dec *dec, unsigned ftb) {
+uint32_t od_ec_dec_bits_(od_ec_dec *dec, unsigned ftb) {
   od_ec_window window;
   int available;
   uint32_t ret;

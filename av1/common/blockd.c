@@ -94,6 +94,7 @@ void av1_foreach_transformed_block(const MACROBLOCKD *const xd,
     av1_foreach_transformed_block_in_plane(xd, bsize, plane, visit, arg);
 }
 
+#if !CONFIG_PVQ
 void av1_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
                       TX_SIZE tx_size, int has_eob, int aoff, int loff) {
   ENTROPY_CONTEXT *const a = pd->above_context + aoff;
@@ -130,6 +131,7 @@ void av1_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
     memset(l, has_eob, sizeof(ENTROPY_CONTEXT) * txs_high);
   }
 }
+#endif
 
 void av1_setup_block_planes(MACROBLOCKD *xd, int ss_x, int ss_y) {
   int i;

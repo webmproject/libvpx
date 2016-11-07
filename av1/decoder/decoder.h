@@ -26,6 +26,12 @@
 #include "av1/common/accounting.h"
 #endif
 
+#if CONFIG_PVQ
+#include "aom_dsp/entdec.h"
+#include "av1/decoder/decint.h"
+#include "av1/encoder/encodemb.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -37,6 +43,10 @@ typedef struct TileData {
   DECLARE_ALIGNED(16, MACROBLOCKD, xd);
   /* dqcoeff are shared by all the planes. So planes must be decoded serially */
   DECLARE_ALIGNED(16, tran_low_t, dqcoeff[MAX_TX_SQUARE]);
+#if CONFIG_PVQ
+  /* forward transformed predicted image, a reference for PVQ */
+  DECLARE_ALIGNED(16, tran_low_t, pvq_ref_coeff[OD_BSIZE_MAX * OD_BSIZE_MAX]);
+#endif
 #if CONFIG_PALETTE
   DECLARE_ALIGNED(16, uint8_t, color_index_map[2][MAX_SB_SQUARE]);
 #endif  // CONFIG_PALETTE
@@ -49,6 +59,10 @@ typedef struct TileWorkerData {
   DECLARE_ALIGNED(16, MACROBLOCKD, xd);
   /* dqcoeff are shared by all the planes. So planes must be decoded serially */
   DECLARE_ALIGNED(16, tran_low_t, dqcoeff[MAX_TX_SQUARE]);
+#if CONFIG_PVQ
+  /* forward transformed predicted image, a reference for PVQ */
+  DECLARE_ALIGNED(16, tran_low_t, pvq_ref_coeff[OD_BSIZE_MAX * OD_BSIZE_MAX]);
+#endif
 #if CONFIG_PALETTE
   DECLARE_ALIGNED(16, uint8_t, color_index_map[2][MAX_SB_SQUARE]);
 #endif  // CONFIG_PALETTE

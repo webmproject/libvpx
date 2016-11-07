@@ -14,12 +14,21 @@
 
 #include "av1/common/entropymv.h"
 #include "av1/common/entropy.h"
+#if CONFIG_PVQ
+#include "av1/encoder/encint.h"
+#endif
 #if CONFIG_REF_MV
 #include "av1/common/mvref_common.h"
 #endif
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#if CONFIG_PVQ
+// Maximum possible # of tx blocks in luma plane, which is currently 256,
+// since there can be 16x16 of 4x4 tx.
+#define MAX_PVQ_BLOCKS_IN_SB (MAX_SB_SQUARE >> 2 * OD_LOG_BSIZE0)
 #endif
 
 typedef struct {
@@ -30,6 +39,9 @@ typedef struct {
 
 typedef struct macroblock_plane {
   DECLARE_ALIGNED(16, int16_t, src_diff[MAX_SB_SQUARE]);
+#if CONFIG_PVQ
+  DECLARE_ALIGNED(16, int16_t, src_int16[MAX_SB_SQUARE]);
+#endif
   tran_low_t *qcoeff;
   tran_low_t *coeff;
   uint16_t *eobs;
@@ -176,6 +188,25 @@ struct macroblock {
   int use_default_intra_tx_type;
   // use default transform and skip transform type search for inter modes
   int use_default_inter_tx_type;
+#if CONFIG_PVQ
+  int rate;
+  // 1 if neither AC nor DC is coded. Only used during RDO.
+  int pvq_skip[MAX_MB_PLANE];
+  PVQ_QUEUE *pvq_q;
+
+  // Storage for PVQ tx block encodings in a superblock.
+  // There can be max 16x16 of 4x4 blocks (and YUV) encode by PVQ
+  // 256 is the max # of 4x4 blocks in a SB (64x64), which comes from:
+  // 1) Since PVQ is applied to each trasnform-ed block
+  // 2) 4x4 is the smallest tx size in AV1
+  // 3) AV1 allows using smaller tx size than block (i.e. partition) size
+  // TODO(yushin) : The memory usage could be improved a lot, since this has
+  // storage for 10 bands and 128 coefficients for every 4x4 block,
+  PVQ_INFO pvq[MAX_PVQ_BLOCKS_IN_SB][MAX_MB_PLANE];
+  daala_enc_ctx daala_enc;
+  int pvq_speed;
+  int pvq_coded;  // Indicates whether pvq_info needs be stored to tokenize
+#endif
 };
 
 #ifdef __cplusplus

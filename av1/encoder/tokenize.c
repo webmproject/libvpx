@@ -343,6 +343,7 @@ static void cost_coeffs_b(int plane, int block, int blk_row, int blk_col,
   av1_set_contexts(xd, pd, tx_size, p->eobs[block] > 0, blk_col, blk_row);
 }
 
+#if !CONFIG_PVQ
 static void set_entropy_context_b(int plane, int block, int blk_row,
                                   int blk_col, BLOCK_SIZE plane_bsize,
                                   TX_SIZE tx_size, void *arg) {
@@ -514,6 +515,7 @@ static void tokenize_b(int plane, int block, int blk_row, int blk_col,
 
   av1_set_contexts(xd, pd, tx_size, c > 0, blk_col, blk_row);
 }
+#endif
 
 struct is_skippable_args {
   uint16_t *eobs;
@@ -560,7 +562,41 @@ int av1_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
                                          has_high_freq_coeff, &args);
   return result;
 }
+#if CONFIG_PVQ
+void add_pvq_block(AV1_COMMON *const cm, MACROBLOCK *const x, PVQ_INFO *pvq) {
+  PVQ_QUEUE *q = x->pvq_q;
+  if (q->curr_pos >= q->buf_len) {
+    q->buf_len = 2 * q->buf_len + 1;
+    CHECK_MEM_ERROR(cm, q->buf, aom_realloc(q->buf, q->buf_len * sizeof(PVQ_INFO)));
+  }
+  //memcpy(q->buf + q->curr_pos, pvq, sizeof(PVQ_INFO));
+  OD_COPY(q->buf + q->curr_pos, pvq, 1);
+  ++q->curr_pos;
+}
 
+// NOTE: This does not actually generate tokens, instead we store the encoding
+// decisions made for PVQ in a queue that we will read from when
+// actually writing the bitstream in write_modes_b
+static void tokenize_pvq(int plane, int block, int blk_row, int blk_col,
+                         BLOCK_SIZE plane_bsize, TX_SIZE tx_size, void *arg) {
+  struct tokenize_b_args *const args = arg;
+  const AV1_COMP *cpi = args->cpi;
+  const AV1_COMMON *const cm = &cpi->common;
+  ThreadData *const td = args->td;
+  MACROBLOCK *const x = &td->mb;
+  PVQ_INFO *pvq_info;
+
+  (void)block;
+  (void)blk_row;
+  (void)blk_col;
+  (void)plane_bsize;
+  (void)tx_size;
+
+  assert(block < MAX_PVQ_BLOCKS_IN_SB);
+  pvq_info = &x->pvq[block][plane];
+  add_pvq_block((AV1_COMMON *const)cm, x, pvq_info);
+}
+#endif
 #if CONFIG_VAR_TX
 void tokenize_vartx(ThreadData *td, TOKENEXTRA **t, RUN_TYPE dry_run,
                     TX_SIZE tx_size, BLOCK_SIZE plane_bsize, int blk_row,
@@ -688,11 +724,11 @@ void av1_tokenize_sb(const AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
     return;
   }
 
+#if !CONFIG_PVQ
   if (!dry_run) {
     int plane;
 
     td->counts->skip[ctx][0] += skip_inc;
-
     for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
       av1_foreach_transformed_block_in_plane(xd, bsize, plane, tokenize_b,
                                              &arg);
@@ -704,6 +740,17 @@ void av1_tokenize_sb(const AV1_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
   } else if (dry_run == DRY_RUN_COSTCOEFFS) {
     av1_foreach_transformed_block(xd, bsize, cost_coeffs_b, &arg);
   }
+#else
+  if (!dry_run) {
+    int plane;
+
+    td->counts->skip[ctx][0] += skip_inc;
+
+    for (plane = 0; plane < MAX_MB_PLANE; ++plane)
+      av1_foreach_transformed_block_in_plane(xd, bsize, plane, tokenize_pvq,
+                                             &arg);
+  }
+#endif
   if (rate) *rate += arg.this_rate;
 }
 

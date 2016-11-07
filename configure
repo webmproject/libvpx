@@ -285,6 +285,7 @@ EXPERIMENT_LIST="
     alt_intra
     palette
     daala_ec
+    pvq
     cb4x4
     frame_size
     delta_q

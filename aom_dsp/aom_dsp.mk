@@ -216,6 +216,24 @@ DSP_SRCS-$(HAVE_MSA)    += mips/fwd_txfm_msa.c
 DSP_SRCS-$(HAVE_MSA)    += mips/fwd_dct32x32_msa.c
 endif  # CONFIG_AV1_ENCODER
 
+ifeq ($(CONFIG_PVQ),yes)
+DSP_SRCS-yes            += fwd_txfm.c
+DSP_SRCS-yes            += fwd_txfm.h
+DSP_SRCS-$(HAVE_SSE2)   += x86/fwd_txfm_sse2.h
+DSP_SRCS-$(HAVE_SSE2)   += x86/fwd_txfm_sse2.c
+DSP_SRCS-$(HAVE_SSE2)   += x86/fwd_txfm_impl_sse2.h
+DSP_SRCS-$(HAVE_SSE2)   += x86/fwd_dct32x32_impl_sse2.h
+ifeq ($(ARCH_X86_64),yes)
+DSP_SRCS-$(HAVE_SSSE3)  += x86/fwd_txfm_ssse3_x86_64.asm
+endif
+DSP_SRCS-$(HAVE_AVX2)   += x86/fwd_txfm_avx2.c
+DSP_SRCS-$(HAVE_AVX2)   += x86/fwd_dct32x32_impl_avx2.h
+DSP_SRCS-$(HAVE_NEON)   += arm/fwd_txfm_neon.c
+DSP_SRCS-$(HAVE_MSA)    += mips/fwd_txfm_msa.h
+DSP_SRCS-$(HAVE_MSA)    += mips/fwd_txfm_msa.c
+DSP_SRCS-$(HAVE_MSA)    += mips/fwd_dct32x32_msa.c
+endif  # CONFIG_PVQ
+
 # inverse transform
 ifeq ($(CONFIG_AV1), yes)
 DSP_SRCS-yes            += inv_txfm.h

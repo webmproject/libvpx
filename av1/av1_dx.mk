@@ -31,4 +31,29 @@ AV1_DX_SRCS-yes += decoder/decoder.h
 AV1_DX_SRCS-yes += decoder/dsubexp.c
 AV1_DX_SRCS-yes += decoder/dsubexp.h
 
+ifeq ($(CONFIG_PVQ),yes)
+# PVQ from daala
+AV1_DX_SRCS-yes += decoder/pvq_decoder.c
+AV1_DX_SRCS-yes += decoder/pvq_decoder.h
+AV1_DX_SRCS-yes += decoder/decint.h
+AV1_DX_SRCS-yes += decoder/generic_decoder.c
+AV1_DX_SRCS-yes += decoder/laplace_decoder.c
+AV1_DX_SRCS-yes += encoder/hybrid_fwd_txfm.c
+AV1_DX_SRCS-yes += encoder/hybrid_fwd_txfm.h
+
+AV1_DX_SRCS-yes += encoder/dct.c
+AV1_DX_SRCS-$(HAVE_SSE2) += encoder/x86/dct_sse2.asm
+AV1_DX_SRCS-$(HAVE_SSE2) += encoder/x86/dct_intrin_sse2.c
+AV1_DX_SRCS-$(HAVE_SSSE3) += encoder/x86/dct_ssse3.c
+
+ifneq ($(CONFIG_AOM_HIGHBITDEPTH),yes)
+AV1_DX_SRCS-$(HAVE_NEON) += encoder/arm/neon/dct_neon.c
+endif
+
+AV1_DX_SRCS-$(HAVE_MSA) += encoder/mips/msa/fdct4x4_msa.c
+AV1_DX_SRCS-$(HAVE_MSA) += encoder/mips/msa/fdct8x8_msa.c
+AV1_DX_SRCS-$(HAVE_MSA) += encoder/mips/msa/fdct16x16_msa.c
+AV1_DX_SRCS-$(HAVE_MSA) += encoder/mips/msa/fdct_msa.h
+endif
+
 AV1_DX_SRCS-yes := $(filter-out $(AV1_DX_SRCS_REMOVE-yes),$(AV1_DX_SRCS-yes))

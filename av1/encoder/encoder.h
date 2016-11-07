@@ -270,6 +270,9 @@ typedef struct TileDataEnc {
   int mode_map[BLOCK_SIZES][MAX_MODES];
   int m_search_count;
   int ex_search_count;
+#if CONFIG_PVQ
+  PVQ_QUEUE pvq_q;
+#endif
 } TileDataEnc;
 
 typedef struct RD_COUNTS {

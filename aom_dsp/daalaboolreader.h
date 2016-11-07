@@ -41,7 +41,7 @@ uint32_t aom_daala_reader_tell_frac(const daala_reader *r);
 
 static INLINE int aom_daala_read(daala_reader *r, int prob) {
   if (prob == 128) {
-    return od_ec_dec_bits(&r->ec, 1);
+    return od_ec_dec_bits(&r->ec, 1, "aom_bits");
   } else {
     int p = ((prob << 15) + (256 - prob)) >> 8;
     return od_ec_decode_bool_q15(&r->ec, p);
