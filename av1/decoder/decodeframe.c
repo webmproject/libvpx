@@ -410,8 +410,8 @@ static int av1_pvq_decode_helper2(MACROBLOCKD *const xd,
     int seg_id = mbmi->segment_id;
     int16_t *quant;
     FWD_TXFM_PARAM fwd_txfm_param;
-    // ToDo(yaowu): figure out how to initialize this
-    int max_scan_line = 0;
+    // ToDo(yaowu): correct this with optimal number from decoding process.
+    const int max_scan_line = tx_size_2d[tx_size];
 
     for (j = 0; j < tx_blk_size; j++)
       for (i = 0; i < tx_blk_size; i++) {
