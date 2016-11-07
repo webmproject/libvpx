@@ -2084,11 +2084,11 @@ typedef struct {
 
 static void restore_context(MACROBLOCK *x,
                             const RD_SEARCH_MACROBLOCK_CONTEXT *ctx, int mi_row,
-                            int mi_col, 
+                            int mi_col,
 #if CONFIG_PVQ
                             od_rollback_buffer *rdo_buf,
-#endif														
-							BLOCK_SIZE bsize) {
+#endif
+                            BLOCK_SIZE bsize) {
   MACROBLOCKD *xd = &x->e_mbd;
   int p;
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
@@ -2124,11 +2124,11 @@ static void restore_context(MACROBLOCK *x,
 }
 
 static void save_context(const MACROBLOCK *x, RD_SEARCH_MACROBLOCK_CONTEXT *ctx,
-                         int mi_row, int mi_col, 
+                         int mi_row, int mi_col,
 #if CONFIG_PVQ
                          od_rollback_buffer *rdo_buf,
 #endif
-						 BLOCK_SIZE bsize) {
+                         BLOCK_SIZE bsize) {
   const MACROBLOCKD *xd = &x->e_mbd;
   int p;
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
@@ -4499,8 +4499,9 @@ void av1_init_tile_data(AV1_COMP *cpi) {
 #if CONFIG_PVQ
         // This will be dynamically increased as more pvq block is encoded.
         tile_data->pvq_q.buf_len = 1000;
-        CHECK_MEM_ERROR(cm, tile_data->pvq_q.buf,
-                        aom_malloc(tile_data->pvq_q.buf_len * sizeof(PVQ_INFO)));
+        CHECK_MEM_ERROR(
+            cm, tile_data->pvq_q.buf,
+            aom_malloc(tile_data->pvq_q.buf_len * sizeof(PVQ_INFO)));
         tile_data->pvq_q.curr_pos = 0;
 #endif
       }

@@ -320,6 +320,7 @@ struct tokenize_b_args {
   int this_rate;
 };
 
+#if !CONFIG_PVQ
 static void cost_coeffs_b(int plane, int block, int blk_row, int blk_col,
                           BLOCK_SIZE plane_bsize, TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args *const args = arg;
@@ -343,7 +344,6 @@ static void cost_coeffs_b(int plane, int block, int blk_row, int blk_col,
   av1_set_contexts(xd, pd, tx_size, p->eobs[block] > 0, blk_col, blk_row);
 }
 
-#if !CONFIG_PVQ
 static void set_entropy_context_b(int plane, int block, int blk_row,
                                   int blk_col, BLOCK_SIZE plane_bsize,
                                   TX_SIZE tx_size, void *arg) {
@@ -567,9 +567,10 @@ void add_pvq_block(AV1_COMMON *const cm, MACROBLOCK *const x, PVQ_INFO *pvq) {
   PVQ_QUEUE *q = x->pvq_q;
   if (q->curr_pos >= q->buf_len) {
     q->buf_len = 2 * q->buf_len + 1;
-    CHECK_MEM_ERROR(cm, q->buf, aom_realloc(q->buf, q->buf_len * sizeof(PVQ_INFO)));
+    CHECK_MEM_ERROR(cm, q->buf,
+                    aom_realloc(q->buf, q->buf_len * sizeof(PVQ_INFO)));
   }
-  //memcpy(q->buf + q->curr_pos, pvq, sizeof(PVQ_INFO));
+  // memcpy(q->buf + q->curr_pos, pvq, sizeof(PVQ_INFO));
   OD_COPY(q->buf + q->curr_pos, pvq, 1);
   ++q->curr_pos;
 }
@@ -594,7 +595,7 @@ static void tokenize_pvq(int plane, int block, int blk_row, int blk_col,
 
   assert(block < MAX_PVQ_BLOCKS_IN_SB);
   pvq_info = &x->pvq[block][plane];
-  add_pvq_block((AV1_COMMON *const)cm, x, pvq_info);
+  add_pvq_block((AV1_COMMON * const)cm, x, pvq_info);
 }
 #endif
 #if CONFIG_VAR_TX

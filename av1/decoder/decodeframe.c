@@ -355,9 +355,8 @@ static int av1_pvq_decode_helper(od_dec_ctx *dec, int16_t *ref_coeff,
 
   od_pvq_decode(dec, ref_int32, out_int32, (int)quant[1] >> quant_shift, pli,
                 bs, OD_PVQ_BETA[use_activity_masking][pli][bs],
-                OD_ROBUST_STREAM,
-                is_keyframe, &flags, ac_dc_coded, dec->state.qm + off,
-                dec->state.qm_inv + off);
+                OD_ROBUST_STREAM, is_keyframe, &flags, ac_dc_coded,
+                dec->state.qm + off, dec->state.qm_inv + off);
 
   // copy int32 result back to int16
   for (i = 0; i < blk_size * blk_size; i++) dqcoeff_pvq[i] = out_int32[i];
@@ -379,9 +378,9 @@ static int av1_pvq_decode_helper(od_dec_ctx *dec, int16_t *ref_coeff,
   return eob;
 }
 
-static int av1_pvq_decode_helper2(
-    MACROBLOCKD *const xd, MB_MODE_INFO *const mbmi, int plane, int row,
-    int col, TX_SIZE tx_size, TX_TYPE tx_type ) {
+static int av1_pvq_decode_helper2(MACROBLOCKD *const xd,
+                                  MB_MODE_INFO *const mbmi, int plane, int row,
+                                  int col, TX_SIZE tx_size, TX_TYPE tx_type) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   // transform block size in pixels
   int tx_blk_size = tx_size_wide[tx_size];
@@ -411,6 +410,8 @@ static int av1_pvq_decode_helper2(
     int seg_id = mbmi->segment_id;
     int16_t *quant;
     FWD_TXFM_PARAM fwd_txfm_param;
+    // ToDo(yaowu): figure out how to initialize this
+    int max_scan_line = 0;
 
     for (j = 0; j < tx_blk_size; j++)
       for (i = 0; i < tx_blk_size; i++) {
@@ -436,8 +437,8 @@ static int av1_pvq_decode_helper2(
     for (j = 0; j < tx_blk_size; j++)
       for (i = 0; i < tx_blk_size; i++) dst[j * pd->dst.stride + i] = 0;
 
-    inverse_transform_block(xd, plane, tx_type, tx_size, dst,
-                            pd->dst.stride, eob);
+    inverse_transform_block(xd, plane, tx_type, tx_size, dst, pd->dst.stride,
+                            max_scan_line, eob);
   }
 
   return eob;
@@ -553,7 +554,6 @@ static int reconstruct_inter_block(AV1_COMMON *cm, MACROBLOCKD *const xd,
 #endif
                                    int segment_id, int plane, int row, int col,
                                    TX_SIZE tx_size) {
-  struct macroblockd_plane *const pd = &xd->plane[plane];
   PLANE_TYPE plane_type = (plane == 0) ? PLANE_TYPE_Y : PLANE_TYPE_UV;
   int block_idx = (row << 1) + col;
   TX_TYPE tx_type = get_tx_type(plane_type, xd, block_idx, tx_size);
@@ -561,6 +561,9 @@ static int reconstruct_inter_block(AV1_COMMON *cm, MACROBLOCKD *const xd,
   int eob;
   (void)cm;
   (void)r;
+  (void)segment_id;
+#else
+  struct macroblockd_plane *const pd = &xd->plane[plane];
 #endif
 
 #if !CONFIG_PVQ
@@ -577,7 +580,8 @@ static int reconstruct_inter_block(AV1_COMMON *cm, MACROBLOCKD *const xd,
                             &pd->dst.buf[4 * row * pd->dst.stride + 4 * col],
                             pd->dst.stride, max_scan_line, eob);
 #else
-  eob = av1_pvq_decode_helper2(xd, mbmi, plane, row, col, tx_size, tx_type);
+  eob = av1_pvq_decode_helper2(xd, &xd->mi[0]->mbmi, plane, row, col, tx_size,
+                               tx_type);
 #endif
   return eob;
 }
@@ -3032,7 +3036,7 @@ static const uint8_t *decode_tiles(AV1Decoder *pbi, const uint8_t *data,
               : NULL;
       av1_zero(td->dqcoeff);
 #if CONFIG_PVQ
-      av1_zero(tile_data->pvq_ref_coeff);
+      av1_zero(td->pvq_ref_coeff);
 #endif
       av1_tile_init(&td->xd.tile, td->cm, tile_row, tile_col);
 #if !CONFIG_ANS
@@ -3394,7 +3398,7 @@ static const uint8_t *decode_tiles_mt(AV1Decoder *pbi, const uint8_t *data,
 #endif
                              twd->dqcoeff);
 #if CONFIG_PVQ
-      daala_dec_init(&twd->xd.daala_dec, &twd->bit_reader.ec);
+        daala_dec_init(&twd->xd.daala_dec, &twd->bit_reader.ec);
 #endif
 #if CONFIG_PALETTE
         twd->xd.plane[0].color_index_map = twd->color_index_map[0];

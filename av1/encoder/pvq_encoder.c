@@ -25,7 +25,7 @@
 #include "av1/common/partition.h"
 #include "av1/common/pvq_state.h"
 #include "av1/encoder/encodemb.h"
-#include "pvq_encoder.h"
+#include "av1/encoder/pvq_encoder.h"
 
 #define OD_PVQ_RATE_APPROX (0)
 /*Shift to ensure that the upper bound (i.e. for the max blocksize) of the
