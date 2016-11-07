@@ -186,9 +186,9 @@ static int32_t do_ntap_filter(int32_t *p, int x) {
 
 static int32_t do_cubic_filter(int32_t *p, int x) {
   if (x == 0) {
-    return p[0];
+    return p[0] * (1 << WARPEDPIXEL_FILTER_BITS);
   } else if (x == (1 << WARPEDPIXEL_PREC_BITS)) {
-    return p[1];
+    return p[1] * (1 << WARPEDPIXEL_FILTER_BITS);
   } else {
     const int64_t v1 = (int64_t)x * x * x * (3 * (p[0] - p[1]) + p[2] - p[-1]);
     const int64_t v2 = x * x * (2 * p[-1] - 5 * p[0] + 4 * p[1] - p[2]);
