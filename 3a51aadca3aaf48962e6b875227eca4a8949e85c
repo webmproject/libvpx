@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8baca39c_4ecd2c1b",
+        "filename": "av1/common/enums.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 446,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-11-08T20:52:52Z",
+      "side": 1,
+      "message": "Cause some confusion. Assigning explicit values from 0-5 would be good.",
+      "revId": "3a51aadca3aaf48962e6b875227eca4a8949e85c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_6e4af074",
+        "filename": "av1/common/restoration.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-11-08T20:52:52Z",
+      "side": 1,
+      "message": "Remove code that has been commented out",
+      "revId": "3a51aadca3aaf48962e6b875227eca4a8949e85c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_eed7e0d4",
+        "filename": "av1/decoder/decodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2112,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-11-08T20:52:52Z",
+      "side": 1,
+      "message": "unnecessary else statement because the if condition is (rsi-\u003eframe_restoration_type !\u003d RESTORE_NONE)",
+      "revId": "3a51aadca3aaf48962e6b875227eca4a8949e85c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_6e5f508a",
+        "filename": "av1/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2557,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-11-08T20:52:52Z",
+      "side": 1,
+      "message": "Better to have a separate function instead of to duplicate the code twice here and below",
+      "revId": "3a51aadca3aaf48962e6b875227eca4a8949e85c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_ce4dbce1",
+        "filename": "av1/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2605,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-11-08T20:52:52Z",
+      "side": 1,
+      "message": "See above. Same comment for decoder.",
+      "revId": "3a51aadca3aaf48962e6b875227eca4a8949e85c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_ee660048",
+        "filename": "av1/encoder/pickrst.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-11-08T20:52:52Z",
+      "side": 1,
+      "message": "According to the order in the table, SRGPROJ is the second type, SWITCHABLE is the last one. So, {2, 2, 3, 3, 2}",
+      "revId": "3a51aadca3aaf48962e6b875227eca4a8949e85c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_6e45908b",
+        "filename": "av1/encoder/pickrst.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1030,
+      "author": {
+        "id": 1003078
+      },
+      "writtenOn": "2016-11-08T20:52:52Z",
+      "side": 1,
+      "message": "Remove test code",
+      "revId": "3a51aadca3aaf48962e6b875227eca4a8949e85c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
