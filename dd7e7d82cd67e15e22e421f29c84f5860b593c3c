@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8baca39c_ce05bc32",
+        "filename": "test/stress.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T20:10:49Z",
+      "side": 1,
+      "message": "I realized my comment was incorrect given this is an artifact of the makefile implementation. you can drop the \u0027;\u0027 and line continuation. we don\u0027t abort early in the makefile so it\u0027s fine to match the structure.",
+      "range": {
+        "startLine": 24,
+        "startChar": 44,
+        "endLine": 24,
+        "endChar": 47
+      },
+      "revId": "dd7e7d82cd67e15e22e421f29c84f5860b593c3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_2e34780b",
+        "filename": "test/stress.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T20:10:49Z",
+      "side": 1,
+      "message": "EXIT will cover all exit cases; I don\u0027t think you need to reset the cleanup trap if it\u0027s only EXIT",
+      "range": {
+        "startLine": 38,
+        "startChar": 20,
+        "endLine": 38,
+        "endChar": 28
+      },
+      "revId": "dd7e7d82cd67e15e22e421f29c84f5860b593c3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_4efb6c0a",
+        "filename": "test/stress.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T20:10:49Z",
+      "side": 1,
+      "message": "drop this \u0027;\u0027",
+      "range": {
+        "startLine": 58,
+        "startChar": 6,
+        "endLine": 58,
+        "endChar": 7
+      },
+      "revId": "dd7e7d82cd67e15e22e421f29c84f5860b593c3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
