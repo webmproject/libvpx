@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "8baca39c_245bb768",
+        "filename": "av1/common/restoration.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-11-08T23:06:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8baca39c_6e4af074",
+      "revId": "3a51aadca3aaf48962e6b875227eca4a8949e85c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8baca39c_eed7e0d4",
         "filename": "av1/decoder/decodeframe.c",
         "patchSetId": 3
@@ -47,6 +65,24 @@
       "writtenOn": "2016-11-08T20:52:52Z",
       "side": 1,
       "message": "unnecessary else statement because the if condition is (rsi-\u003eframe_restoration_type !\u003d RESTORE_NONE)",
+      "revId": "3a51aadca3aaf48962e6b875227eca4a8949e85c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_2482d74e",
+        "filename": "av1/decoder/decodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2112,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-11-08T23:06:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8baca39c_eed7e0d4",
       "revId": "3a51aadca3aaf48962e6b875227eca4a8949e85c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "2bde5729_ab7867a4",
+        "filename": "av1/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2557,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-11-08T23:06:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8baca39c_6e5f508a",
+      "revId": "3a51aadca3aaf48962e6b875227eca4a8949e85c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8baca39c_ce4dbce1",
         "filename": "av1/encoder/bitstream.c",
         "patchSetId": 3
@@ -81,6 +135,24 @@
       "writtenOn": "2016-11-08T20:52:52Z",
       "side": 1,
       "message": "See above. Same comment for decoder.",
+      "revId": "3a51aadca3aaf48962e6b875227eca4a8949e85c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_aa2311da",
+        "filename": "av1/encoder/bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2605,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-11-08T23:06:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8baca39c_ce4dbce1",
       "revId": "3a51aadca3aaf48962e6b875227eca4a8949e85c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "8baca39c_847803a5",
+        "filename": "av1/encoder/pickrst.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-11-08T23:06:54Z",
+      "side": 1,
+      "message": "good catch, done.",
+      "parentUuid": "8baca39c_ee660048",
+      "revId": "3a51aadca3aaf48962e6b875227eca4a8949e85c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8baca39c_6e45908b",
         "filename": "av1/encoder/pickrst.c",
         "patchSetId": 3
@@ -115,6 +205,24 @@
       "writtenOn": "2016-11-08T20:52:52Z",
       "side": 1,
       "message": "Remove test code",
+      "revId": "3a51aadca3aaf48962e6b875227eca4a8949e85c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_046cf3e4",
+        "filename": "av1/encoder/pickrst.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1030,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-11-08T23:06:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8baca39c_6e45908b",
       "revId": "3a51aadca3aaf48962e6b875227eca4a8949e85c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
