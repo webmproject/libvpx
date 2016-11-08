@@ -562,13 +562,13 @@ void av1_first_pass(AV1_COMP *cpi, const struct lookahead_entry *source) {
 #endif
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
-    p[i].coeff = ctx->coeff[i][1];
-    p[i].qcoeff = ctx->qcoeff[i][1];
-    pd[i].dqcoeff = ctx->dqcoeff[i][1];
+    p[i].coeff = ctx->coeff[i];
+    p[i].qcoeff = ctx->qcoeff[i];
+    pd[i].dqcoeff = ctx->dqcoeff[i];
 #if CONFIG_PVQ
     pd[i].pvq_ref_coeff = ctx->pvq_ref_coeff[i];
 #endif
-    p[i].eobs = ctx->eobs[i][1];
+    p[i].eobs = ctx->eobs[i];
   }
 
   av1_init_mv_probs(cm);

@@ -26,7 +26,7 @@ static void alloc_mode_context(AV1_COMMON *cm, int num_4x4_blk,
                                PICK_MODE_CONTEXT *ctx) {
   const int num_blk = (num_4x4_blk < 4 ? 4 : num_4x4_blk);
   const int num_pix = num_blk << 4;
-  int i, k;
+  int i;
   ctx->num_4x4_blk = num_blk;
 #if CONFIG_EXT_PARTITION_TYPES
   ctx->partition = partition;
@@ -36,16 +36,14 @@ static void alloc_mode_context(AV1_COMMON *cm, int num_4x4_blk,
 #if CONFIG_VAR_TX
     CHECK_MEM_ERROR(cm, ctx->blk_skip[i], aom_calloc(num_blk, sizeof(uint8_t)));
 #endif
-    for (k = 0; k < 3; ++k) {
-      CHECK_MEM_ERROR(cm, ctx->coeff[i][k],
-                      aom_memalign(32, num_pix * sizeof(*ctx->coeff[i][k])));
-      CHECK_MEM_ERROR(cm, ctx->qcoeff[i][k],
-                      aom_memalign(32, num_pix * sizeof(*ctx->qcoeff[i][k])));
-      CHECK_MEM_ERROR(cm, ctx->dqcoeff[i][k],
-                      aom_memalign(32, num_pix * sizeof(*ctx->dqcoeff[i][k])));
-      CHECK_MEM_ERROR(cm, ctx->eobs[i][k],
-                      aom_memalign(32, num_blk * sizeof(*ctx->eobs[i][k])));
-    }
+    CHECK_MEM_ERROR(cm, ctx->coeff[i],
+                    aom_memalign(32, num_pix * sizeof(*ctx->coeff[i])));
+    CHECK_MEM_ERROR(cm, ctx->qcoeff[i],
+                    aom_memalign(32, num_pix * sizeof(*ctx->qcoeff[i])));
+    CHECK_MEM_ERROR(cm, ctx->dqcoeff[i],
+                    aom_memalign(32, num_pix * sizeof(*ctx->dqcoeff[i])));
+    CHECK_MEM_ERROR(cm, ctx->eobs[i],
+                    aom_memalign(32, num_blk * sizeof(*ctx->eobs[i])));
 #if CONFIG_PVQ
     CHECK_MEM_ERROR(cm, ctx->pvq_ref_coeff[i],
                     aom_memalign(32, num_pix * sizeof(*ctx->pvq_ref_coeff[i])));
@@ -64,26 +62,24 @@ static void alloc_mode_context(AV1_COMMON *cm, int num_4x4_blk,
 }
 
 static void free_mode_context(PICK_MODE_CONTEXT *ctx) {
-  int i, k;
+  int i;
   for (i = 0; i < MAX_MB_PLANE; ++i) {
 #if CONFIG_VAR_TX
     aom_free(ctx->blk_skip[i]);
     ctx->blk_skip[i] = 0;
 #endif
-    for (k = 0; k < 3; ++k) {
-      aom_free(ctx->coeff[i][k]);
-      ctx->coeff[i][k] = 0;
-      aom_free(ctx->qcoeff[i][k]);
-      ctx->qcoeff[i][k] = 0;
-      aom_free(ctx->dqcoeff[i][k]);
-      ctx->dqcoeff[i][k] = 0;
+    aom_free(ctx->coeff[i]);
+    ctx->coeff[i] = 0;
+    aom_free(ctx->qcoeff[i]);
+    ctx->qcoeff[i] = 0;
+    aom_free(ctx->dqcoeff[i]);
+    ctx->dqcoeff[i] = 0;
 #if CONFIG_PVQ
-      aom_free(ctx->pvq_ref_coeff[i]);
-      ctx->pvq_ref_coeff[i] = 0;
+    aom_free(ctx->pvq_ref_coeff[i]);
+    ctx->pvq_ref_coeff[i] = 0;
 #endif
-      aom_free(ctx->eobs[i][k]);
-      ctx->eobs[i][k] = 0;
-    }
+    aom_free(ctx->eobs[i]);
+    ctx->eobs[i] = 0;
   }
 
 #if CONFIG_PALETTE
