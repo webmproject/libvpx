@@ -1,0 +1,164 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8baca39c_52a6b4fd",
+        "filename": "test/stress.sh",
+        "patchSetId": 10
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T01:04:21Z",
+      "side": 1,
+      "message": "drop this space; could note this matches the makefile system",
+      "range": {
+        "startLine": 22,
+        "startChar": 37,
+        "endLine": 22,
+        "endChar": 38
+      },
+      "revId": "aa45af79913aabb6ab23d646548a175eb87b09df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_d2b1e42e",
+        "filename": "test/stress.sh",
+        "patchSetId": 10
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T01:04:21Z",
+      "side": 1,
+      "message": "whitespace before \u0027\\\u0027",
+      "range": {
+        "startLine": 23,
+        "startChar": 45,
+        "endLine": 23,
+        "endChar": 46
+      },
+      "revId": "aa45af79913aabb6ab23d646548a175eb87b09df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_f2aee8cd",
+        "filename": "test/stress.sh",
+        "patchSetId": 10
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T01:04:21Z",
+      "side": 1,
+      "message": "local readonly?",
+      "revId": "aa45af79913aabb6ab23d646548a175eb87b09df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_12d35c61",
+        "filename": "test/stress.sh",
+        "patchSetId": 10
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T01:04:21Z",
+      "side": 1,
+      "message": "EXIT is a separate signal, INT/TERM won\u0027t override it, but they will override an existing INT/TERM trap",
+      "range": {
+        "startLine": 37,
+        "startChar": 15,
+        "endLine": 37,
+        "endChar": 19
+      },
+      "revId": "aa45af79913aabb6ab23d646548a175eb87b09df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_320a2005",
+        "filename": "test/stress.sh",
+        "patchSetId": 10
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T01:04:21Z",
+      "side": 1,
+      "message": "for file in \"${YUV}\" \"${VP8}\" ...",
+      "revId": "aa45af79913aabb6ab23d646548a175eb87b09df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_f271888d",
+        "filename": "test/stress.sh",
+        "patchSetId": 10
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T01:04:21Z",
+      "side": 1,
+      "message": "mix of ending/trailing whitespace; should be necessary with a space before the \u0027\\\u0027 I believe",
+      "range": {
+        "startLine": 106,
+        "startChar": 7,
+        "endLine": 106,
+        "endChar": 8
+      },
+      "revId": "aa45af79913aabb6ab23d646548a175eb87b09df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_327dc05e",
+        "filename": "test/stress.sh",
+        "patchSetId": 10
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T01:04:21Z",
+      "side": 1,
+      "message": "for ...; do\n ...\ndone",
+      "revId": "aa45af79913aabb6ab23d646548a175eb87b09df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_7277387e",
+        "filename": "test/test-data.mk",
+        "patchSetId": 10
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T01:04:21Z",
+      "side": 1,
+      "message": "this can go now, right?",
+      "revId": "aa45af79913aabb6ab23d646548a175eb87b09df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
