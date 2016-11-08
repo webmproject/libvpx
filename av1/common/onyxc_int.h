@@ -741,6 +741,11 @@ static INLINE void av1_zero_left_context(MACROBLOCKD *const xd) {
 }
 
 #if CONFIG_VAR_TX
+static INLINE TX_SIZE get_min_tx_size(const TX_SIZE tx_size) {
+  if (tx_size >= TX_SIZES_ALL) assert(0);
+  return txsize_sqr_map[tx_size];
+}
+
 static INLINE void set_txfm_ctx(TXFM_CONTEXT *txfm_ctx, uint8_t txs, int len) {
   int i;
   for (i = 0; i < len; ++i) txfm_ctx[i] = txs;
