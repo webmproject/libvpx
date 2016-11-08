@@ -1,0 +1,163 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8baca39c_2de725d3",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T01:34:41Z",
+      "side": 1,
+      "message": "I must have misread this previously. I thought it was the same value for the entire row. if it differs direct assignment would better",
+      "revId": "3f0e3ef61f4a140382e42c31e4071d9a3b5922e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_0dd261e4",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T01:34:41Z",
+      "side": 1,
+      "message": "scope these to the loop",
+      "revId": "3f0e3ef61f4a140382e42c31e4071d9a3b5922e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_4d0d39aa",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T01:34:41Z",
+      "side": 1,
+      "message": "this can be memset(src_c, r, cols); it looks incorrect as it is",
+      "revId": "3f0e3ef61f4a140382e42c31e4071d9a3b5922e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_ad1b35e1",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T01:34:41Z",
+      "side": 1,
+      "message": "src_c/_asm at the function level would make sense to match the function above and for general readability",
+      "range": {
+        "startLine": 175,
+        "startChar": 40,
+        "endLine": 175,
+        "endChar": 43
+      },
+      "revId": "3f0e3ef61f4a140382e42c31e4071d9a3b5922e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_ed252d24",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T01:34:41Z",
+      "side": 1,
+      "message": "scope these to the loop",
+      "revId": "3f0e3ef61f4a140382e42c31e4071d9a3b5922e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_4df61974",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T01:34:41Z",
+      "side": 1,
+      "message": "const int. maybe you should just do rnd_(4).",
+      "revId": "3f0e3ef61f4a140382e42c31e4071d9a3b5922e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_0d23411f",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T01:34:41Z",
+      "side": 1,
+      "message": "scope these to the loop",
+      "revId": "3f0e3ef61f4a140382e42c31e4071d9a3b5922e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_2d5ac59a",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T01:34:41Z",
+      "side": 1,
+      "message": "scope these to the loop",
+      "revId": "3f0e3ef61f4a140382e42c31e4071d9a3b5922e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_4d5ff989",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-08T01:34:41Z",
+      "side": 1,
+      "message": "scope these to the loop",
+      "revId": "3f0e3ef61f4a140382e42c31e4071d9a3b5922e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
