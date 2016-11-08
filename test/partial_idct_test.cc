@@ -25,6 +25,7 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_scan.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_ports/vpx_timer.h"
 
 using libvpx_test::ACMRandom;
 
@@ -82,7 +83,7 @@ class PartialIDctTest : public ::testing::TestWithParam<PartialInvTxfmParam> {
  public:
   virtual ~PartialIDctTest() {}
   virtual void SetUp() {
-    ACMRandom rnd(ACMRandom::DeterministicSeed());
+    rnd_.Reset(ACMRandom::DeterministicSeed());
     ftxfm_ = GET_PARAM(0);
     full_itxfm_ = GET_PARAM(1);
     partial_itxfm_ = GET_PARAM(2);
@@ -100,7 +101,7 @@ class PartialIDctTest : public ::testing::TestWithParam<PartialInvTxfmParam> {
     }
 
     // Randomize stride_ to a value less than or equal to 1024
-    stride_ = rnd(1024) + 1;
+    stride_ = rnd_(1024) + 1;
     if (stride_ < size_) {
       stride_ = size_;
     }
@@ -130,6 +131,28 @@ class PartialIDctTest : public ::testing::TestWithParam<PartialInvTxfmParam> {
     libvpx_test::ClearSystemState();
   }
 
+  void InitMem() {
+    memset(input_block_, 0, sizeof(*input_block_) * input_block_size_);
+    for (int j = 0; j < output_block_size_; ++j) {
+      output_block_[j] = output_block_ref_[j] = rnd_.Rand16() & mask_;
+    }
+  }
+
+  void InitInput() {
+    const int max_coeff = 32766 / 4;
+    int max_energy_leftover = max_coeff * max_coeff;
+    for (int j = 0; j < last_nonzero_; ++j) {
+      int16_t coeff = static_cast<int16_t>(sqrt(1.0 * max_energy_leftover) *
+                                           (rnd_.Rand16() - 32768) / 65536);
+      max_energy_leftover -= coeff * coeff;
+      if (max_energy_leftover < 0) {
+        max_energy_leftover = 0;
+        coeff = 0;
+      }
+      input_block_[vp9_default_scan_orders[tx_size_].scan[j]] = coeff;
+    }
+  }
+
   void Exec(InvTxfmFunc func, void *out) {
 #if CONFIG_VP9_HIGHBITDEPTH
     func(input_block_, CONVERT_TO_BYTEPTR(out), stride_, bit_depth_);
@@ -153,19 +176,15 @@ class PartialIDctTest : public ::testing::TestWithParam<PartialInvTxfmParam> {
   FwdTxfmFunc ftxfm_;
   InvTxfmFunc full_itxfm_;
   InvTxfmFunc partial_itxfm_;
+  ACMRandom rnd_;
 };
 
 TEST_P(PartialIDctTest, RunQuantCheck) {
-  ACMRandom rnd(ACMRandom::DeterministicSeed());
   DECLARE_ALIGNED(16, int16_t, input_extreme_block[kMaxNumCoeffs]);
   DECLARE_ALIGNED(16, tran_low_t, output_ref_block[kMaxNumCoeffs]);
 
   for (int i = 0; i < kCountTestBlock; ++i) {
-    // clear out destination buffer
-    memset(input_block_, 0, sizeof(*input_block_) * input_block_size_);
-    for (int j = 0; j < output_block_size_; ++j) {
-      output_block_[j] = output_block_ref_[j] = rnd.Rand16() & mask_;
-    }
+    InitMem();
 
     ACMRandom rnd(ACMRandom::DeterministicSeed());
 
@@ -204,25 +223,9 @@ TEST_P(PartialIDctTest, RunQuantCheck) {
 }
 
 TEST_P(PartialIDctTest, ResultsMatch) {
-  ACMRandom rnd(ACMRandom::DeterministicSeed());
-  const int max_coeff = 32766 / 4;
   for (int i = 0; i < kCountTestBlock; ++i) {
-    // clear out destination buffer
-    memset(input_block_, 0, sizeof(*input_block_) * input_block_size_);
-    for (int j = 0; j < output_block_size_; ++j) {
-      output_block_[j] = output_block_ref_[j] = rnd.Rand16() & mask_;
-    }
-    int max_energy_leftover = max_coeff * max_coeff;
-    for (int j = 0; j < last_nonzero_; ++j) {
-      int16_t coeff = static_cast<int16_t>(sqrt(1.0 * max_energy_leftover) *
-                                           (rnd.Rand16() - 32768) / 65536);
-      max_energy_leftover -= coeff * coeff;
-      if (max_energy_leftover < 0) {
-        max_energy_leftover = 0;
-        coeff = 0;
-      }
-      input_block_[vp9_default_scan_orders[tx_size_].scan[j]] = coeff;
-    }
+    InitMem();
+    InitInput();
 
     ASM_REGISTER_STATE_CHECK(Exec(full_itxfm_, output_block_ref_));
     ASM_REGISTER_STATE_CHECK(Exec(partial_itxfm_, output_block_));
@@ -234,15 +237,10 @@ TEST_P(PartialIDctTest, ResultsMatch) {
 }
 
 TEST_P(PartialIDctTest, AddOutputBlock) {
-  ACMRandom rnd(ACMRandom::DeterministicSeed());
   for (int i = 0; i < kCountTestBlock; ++i) {
-    memset(input_block_, 0, sizeof(*input_block_) * input_block_size_);
+    InitMem();
     for (int j = 0; j < last_nonzero_; ++j) {
       input_block_[vp9_default_scan_orders[tx_size_].scan[j]] = 10;
-    }
-
-    for (int j = 0; j < output_block_size_; ++j) {
-      output_block_[j] = output_block_ref_[j] = rnd.Rand16() & mask_;
     }
 
     ASM_REGISTER_STATE_CHECK(Exec(full_itxfm_, output_block_ref_));
@@ -255,7 +253,6 @@ TEST_P(PartialIDctTest, AddOutputBlock) {
 }
 
 TEST_P(PartialIDctTest, SingleExtremeCoeff) {
-  ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int16_t max_coeff = MaxSupportedCoeff(partial_itxfm_);
   const int16_t min_coeff = MinSupportedCoeff(partial_itxfm_);
   for (int i = 0; i < last_nonzero_; ++i) {
@@ -278,6 +275,32 @@ TEST_P(PartialIDctTest, SingleExtremeCoeff) {
           << ".";
     }
   }
+}
+
+TEST_P(PartialIDctTest, DISABLED_Speed) {
+  // Keep runtime stable with transform size.
+  const int kCountSpeedTestBlock = 500000000 / input_block_size_;
+  InitMem();
+  InitInput();
+
+  for (int i = 0; i < kCountSpeedTestBlock; ++i) {
+    ASM_REGISTER_STATE_CHECK(Exec(full_itxfm_, output_block_ref_));
+  }
+  vpx_usec_timer timer;
+  vpx_usec_timer_start(&timer);
+  for (int i = 0; i < kCountSpeedTestBlock; ++i) {
+    Exec(partial_itxfm_, output_block_);
+  }
+  libvpx_test::ClearSystemState();
+  vpx_usec_timer_mark(&timer);
+  const int elapsed_time =
+      static_cast<int>(vpx_usec_timer_elapsed(&timer) / 1000);
+  printf("idct%dx%d_%d (bitdepth %d) time: %5d ms ", size_, size_,
+         last_nonzero_, bit_depth_, elapsed_time);
+
+  ASSERT_EQ(0, memcmp(output_block_ref_, output_block_,
+                      sizeof(*output_block_) * output_block_size_))
+      << "Error: partial inverse transform produces different results";
 }
 
 using std::tr1::make_tuple;
