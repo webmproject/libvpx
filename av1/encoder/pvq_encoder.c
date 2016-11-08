@@ -782,7 +782,7 @@ int od_pvq_encode(daala_enc_ctx *enc,
   int max_theta[PVQ_MAX_PARTITIONS];
   int qg[PVQ_MAX_PARTITIONS];
   int k[PVQ_MAX_PARTITIONS];
-  od_coeff y[OD_BSIZE_MAX*OD_BSIZE_MAX];
+  od_coeff y[OD_TXSIZE_MAX*OD_TXSIZE_MAX];
   int *exg;
   int *ext;
   int nb_bands;
@@ -895,9 +895,9 @@ int od_pvq_encode(daala_enc_ctx *enc,
   if (pvq_info)
     pvq_info->ac_dc_coded = 2 + (out[0] != 0);
 #if OD_SIGNAL_Q_SCALING
-  if (bs == OD_NBSIZES - 1 && pli == 0) {
-    od_encode_quantizer_scaling(enc, q_scaling, bx >> (OD_NBSIZES - 1),
-     by >> (OD_NBSIZES - 1), 0);
+  if (bs == OD_TXSIZES - 1 && pli == 0) {
+    od_encode_quantizer_scaling(enc, q_scaling, bx >> (OD_TXSIZES - 1),
+     by >> (OD_TXSIZES - 1), 0);
   }
 #endif
   cfl_encoded = 0;
@@ -934,7 +934,7 @@ int od_pvq_encode(daala_enc_ctx *enc,
     if (i == 0 || (!skip_rest && !(skip_dir & (1 << ((i - 1)%3))))) {
       pvq_encode_partition(&enc->ec, qg[i], theta[i], max_theta[i], y + off[i],
        size[i], k[i], model, &enc->state.adapt, exg + i, ext + i,
-       robust || is_keyframe, (pli != 0)*OD_NBSIZES*PVQ_MAX_PARTITIONS
+       robust || is_keyframe, (pli != 0)*OD_TXSIZES*PVQ_MAX_PARTITIONS
        + bs*PVQ_MAX_PARTITIONS + i, is_keyframe, i == 0 && (i < nb_bands - 1),
        skip_rest, encode_flip, flip);
     }
@@ -998,14 +998,14 @@ int od_pvq_encode(daala_enc_ctx *enc,
     if (pvq_info)
       pvq_info->ac_dc_coded = (out[0] != 0);
 #if OD_SIGNAL_Q_SCALING
-    if (bs == OD_NBSIZES - 1 && pli == 0) {
+    if (bs == OD_TXSIZES - 1 && pli == 0) {
       int skip;
       skip = out[0] == 0;
       if (skip) {
         q_scaling = 0;
       }
-      od_encode_quantizer_scaling(enc, q_scaling, bx >> (OD_NBSIZES - 1),
-       by >> (OD_NBSIZES - 1), skip);
+      od_encode_quantizer_scaling(enc, q_scaling, bx >> (OD_TXSIZES - 1),
+       by >> (OD_TXSIZES - 1), skip);
     }
 #endif
     if (is_keyframe) for (i = 1; i < 1 << (2*bs + 4); i++) out[i] = 0;

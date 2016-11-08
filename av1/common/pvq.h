@@ -22,7 +22,7 @@ extern const int OD_QM8_Q4_HVS[];
 extern const uint16_t EXP_CDF_TABLE[][16];
 extern const uint16_t LAPLACE_OFFSET[];
 
-# define PVQ_MAX_PARTITIONS (1 + 3*(OD_NBSIZES-1))
+# define PVQ_MAX_PARTITIONS (1 + 3*(OD_TXSIZES-1))
 
 # define OD_NOREF_ADAPT_SPEED (4)
 /* Normalized lambda for PVQ quantizer. Since we normalize the gain by q, the
@@ -57,7 +57,7 @@ extern const uint16_t LAPLACE_OFFSET[];
 #define OD_QM_INV_SCALE_1 (1./OD_QM_INV_SCALE)
 #endif
 #define OD_QM_OFFSET(bs) ((((1 << 2*bs) - 1) << 2*OD_LOG_BSIZE0)/3)
-#define OD_QM_STRIDE (OD_QM_OFFSET(OD_NBSIZES))
+#define OD_QM_STRIDE (OD_QM_OFFSET(OD_TXSIZES))
 #define OD_QM_BUFFER_SIZE (2*OD_QM_STRIDE)
 
 #if !defined(OD_FLOAT_PVQ)
@@ -86,13 +86,13 @@ extern const uint16_t LAPLACE_OFFSET[];
 #define OD_CGAIN_SCALE_2 (OD_CGAIN_SCALE_1*OD_CGAIN_SCALE_1)
 
 /* Largest PVQ partition is half the coefficients of largest block size. */
-#define MAXN (OD_BSIZE_MAX*OD_BSIZE_MAX/2)
+#define MAXN (OD_TXSIZE_MAX*OD_TXSIZE_MAX/2)
 
 #define OD_COMPAND_SHIFT (8 + OD_COEFF_SHIFT)
 #define OD_COMPAND_SCALE (1 << OD_COMPAND_SHIFT)
 #define OD_COMPAND_SCALE_1 (1./OD_COMPAND_SCALE)
 
-#define OD_QM_SIZE (OD_NBSIZES*(OD_NBSIZES + 1))
+#define OD_QM_SIZE (OD_TXSIZES*(OD_TXSIZES + 1))
 
 #define OD_FLAT_QM 0
 #define OD_HVS_QM  1
@@ -110,7 +110,7 @@ typedef struct od_pvq_adapt_ctx  od_pvq_adapt_ctx;
 typedef struct od_pvq_codeword_ctx od_pvq_codeword_ctx;
 
 struct od_pvq_codeword_ctx {
-  int                 pvq_adapt[2*OD_NBSIZES*OD_NSB_ADAPT_CTXS];
+  int                 pvq_adapt[2*OD_TXSIZES*OD_NSB_ADAPT_CTXS];
   int                 pvq_k1_increment;
   /* CDFs are size 16 despite the fact that we're using less than that. */
   uint16_t            pvq_k1_cdf[12][16];
@@ -121,12 +121,12 @@ struct od_pvq_codeword_ctx {
 struct od_pvq_adapt_ctx {
   od_pvq_codeword_ctx pvq_codeword_ctx;
   generic_encoder     pvq_param_model[3];
-  int                 pvq_ext[OD_NBSIZES*PVQ_MAX_PARTITIONS];
-  int                 pvq_exg[OD_NPLANES_MAX][OD_NBSIZES][PVQ_MAX_PARTITIONS];
+  int                 pvq_ext[OD_TXSIZES*PVQ_MAX_PARTITIONS];
+  int                 pvq_exg[OD_NPLANES_MAX][OD_TXSIZES][PVQ_MAX_PARTITIONS];
   int                 pvq_gaintheta_increment;
-  uint16_t        pvq_gaintheta_cdf[2*OD_NBSIZES*PVQ_MAX_PARTITIONS][16];
+  uint16_t        pvq_gaintheta_cdf[2*OD_TXSIZES*PVQ_MAX_PARTITIONS][16];
   int                 pvq_skip_dir_increment;
-  uint16_t        pvq_skip_dir_cdf[2*(OD_NBSIZES-1)][7];
+  uint16_t        pvq_skip_dir_cdf[2*(OD_TXSIZES-1)][7];
 };
 
 void od_adapt_pvq_ctx_reset(od_pvq_adapt_ctx *state, int is_keyframe);
@@ -141,7 +141,7 @@ int od_vector_log_mag(const od_coeff *x, int n);
 
 int od_qm_get_index(int bs, int band);
 
-extern const od_val16 *const OD_PVQ_BETA[2][OD_NPLANES_MAX][OD_NBSIZES + 1];
+extern const od_val16 *const OD_PVQ_BETA[2][OD_NPLANES_MAX][OD_TXSIZES + 1];
 
 void od_init_qm(int16_t *x, int16_t *x_inv, const int *qm);
 int od_compute_householder(od_val16 *r, int n, od_val32 gr, int *sign,

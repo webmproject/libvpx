@@ -26,7 +26,7 @@ typedef struct {
   const int *const band_offsets;
 } band_layout;
 
-extern const int *const OD_BAND_OFFSETS[OD_NBSIZES + 1];
+extern const int *const OD_BAND_OFFSETS[OD_TXSIZES + 1];
 
 void od_raster_to_coding_order(int16_t *dst, int n,  TX_TYPE ty_type,
  const int16_t *src, int stride);

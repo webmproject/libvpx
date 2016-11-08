@@ -1391,13 +1391,13 @@ int av1_pvq_encode_helper(daala_enc_ctx *daala_enc, tran_low_t *const coeff,
 #if PVQ_CHROMA_RD
   double save_pvq_lambda;
 #endif
-  DECLARE_ALIGNED(16, int16_t, coeff_pvq[OD_BSIZE_MAX * OD_BSIZE_MAX]);
-  DECLARE_ALIGNED(16, int16_t, ref_coeff_pvq[OD_BSIZE_MAX * OD_BSIZE_MAX]);
-  DECLARE_ALIGNED(16, int16_t, dqcoeff_pvq[OD_BSIZE_MAX * OD_BSIZE_MAX]);
+  DECLARE_ALIGNED(16, int16_t, coeff_pvq[OD_TXSIZE_MAX * OD_TXSIZE_MAX]);
+  DECLARE_ALIGNED(16, int16_t, ref_coeff_pvq[OD_TXSIZE_MAX * OD_TXSIZE_MAX]);
+  DECLARE_ALIGNED(16, int16_t, dqcoeff_pvq[OD_TXSIZE_MAX * OD_TXSIZE_MAX]);
 
-  DECLARE_ALIGNED(16, int32_t, in_int32[OD_BSIZE_MAX * OD_BSIZE_MAX]);
-  DECLARE_ALIGNED(16, int32_t, ref_int32[OD_BSIZE_MAX * OD_BSIZE_MAX]);
-  DECLARE_ALIGNED(16, int32_t, out_int32[OD_BSIZE_MAX * OD_BSIZE_MAX]);
+  DECLARE_ALIGNED(16, int32_t, in_int32[OD_TXSIZE_MAX * OD_TXSIZE_MAX]);
+  DECLARE_ALIGNED(16, int32_t, ref_int32[OD_TXSIZE_MAX * OD_TXSIZE_MAX]);
+  DECLARE_ALIGNED(16, int32_t, out_int32[OD_TXSIZE_MAX * OD_TXSIZE_MAX]);
 
   *eob = 0;
 

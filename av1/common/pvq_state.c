@@ -20,7 +20,7 @@ void od_adapt_ctx_reset(od_adapt_ctx *adapt, int is_keyframe) {
   OD_CDFS_INIT(adapt->skip_cdf, adapt->skip_increment >> 2);
   for (pli = 0; pli < OD_NPLANES_MAX; pli++) {
     generic_model_init(&adapt->model_dc[pli]);
-    for (i = 0; i < OD_NBSIZES; i++) {
+    for (i = 0; i < OD_TXSIZES; i++) {
       adapt->ex_g[pli][i] = 8;
     }
     for (i = 0; i < 4; i++) {

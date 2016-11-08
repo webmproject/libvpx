@@ -93,7 +93,7 @@ static const int OD_BAND_OFFSETS32[] = {10, 1, 16, 24, 32, 64, 96, 128, 256,
 static const int OD_BAND_OFFSETS64[] = {13, 1, 16, 24, 32, 64, 96, 128, 256,
  384, 512, 1024, 1536, 2048, 4096};
 
-const int *const OD_BAND_OFFSETS[OD_NBSIZES + 1] = {
+const int *const OD_BAND_OFFSETS[OD_TXSIZES + 1] = {
   OD_BAND_OFFSETS4,
   OD_BAND_OFFSETS8,
   OD_BAND_OFFSETS16,
@@ -158,7 +158,7 @@ void od_raster_to_coding_order(int16_t *dst, int n, TX_TYPE ty_type,
   int bs;
   /* dst + 1 because DC is not included for 4x4 blocks. */
   od_band_from_raster(OD_LAYOUTS[0], dst + 1, src, stride, ty_type);
-  for (bs = 1; bs < OD_NBSIZES; bs++) {
+  for (bs = 1; bs < OD_TXSIZES; bs++) {
     int size;
     int offset;
     /* Length of block size > 4. */
@@ -190,7 +190,7 @@ void od_coding_order_to_raster(int16_t *dst, int stride, TX_TYPE ty_type,
   int bs;
   /* src + 1 because DC is not included for 4x4 blocks. */
   od_raster_from_band(OD_LAYOUTS[0], dst, stride, ty_type, src + 1);
-  for (bs = 1; bs < OD_NBSIZES; bs++) {
+  for (bs = 1; bs < OD_TXSIZES; bs++) {
     int size;
     int offset;
     /* Length of block size > 4 */
@@ -240,7 +240,7 @@ void od_raster_to_coding_order_16(int16_t *dst, int n, const int16_t *src,
   int bs;
   /* dst + 1 because DC is not included for 4x4 blocks. */
   od_band_from_raster_16(OD_LAYOUTS[0], dst + 1, src, stride);
-  for (bs = 1; bs < OD_NBSIZES; bs++) {
+  for (bs = 1; bs < OD_TXSIZES; bs++) {
     int size;
     int offset;
     /* Length of block size > 4. */

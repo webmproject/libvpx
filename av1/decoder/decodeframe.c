@@ -329,11 +329,11 @@ static int av1_pvq_decode_helper(od_dec_ctx *dec, int16_t *ref_coeff,
   // int use_activity_masking = dec->use_activity_masking;
   int use_activity_masking = 0;
 
-  DECLARE_ALIGNED(16, int16_t, dqcoeff_pvq[OD_BSIZE_MAX * OD_BSIZE_MAX]);
-  DECLARE_ALIGNED(16, int16_t, ref_coeff_pvq[OD_BSIZE_MAX * OD_BSIZE_MAX]);
+  DECLARE_ALIGNED(16, int16_t, dqcoeff_pvq[OD_TXSIZE_MAX * OD_TXSIZE_MAX]);
+  DECLARE_ALIGNED(16, int16_t, ref_coeff_pvq[OD_TXSIZE_MAX * OD_TXSIZE_MAX]);
 
-  od_coeff ref_int32[OD_BSIZE_MAX * OD_BSIZE_MAX];
-  od_coeff out_int32[OD_BSIZE_MAX * OD_BSIZE_MAX];
+  od_coeff ref_int32[OD_TXSIZE_MAX * OD_TXSIZE_MAX];
+  od_coeff out_int32[OD_TXSIZE_MAX * OD_TXSIZE_MAX];
 
   od_raster_to_coding_order(ref_coeff_pvq, blk_size, tx_type, ref_coeff,
                             blk_size);
