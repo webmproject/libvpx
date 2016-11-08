@@ -3217,7 +3217,19 @@ void av1_tx_block_rd_b(const AV1_COMP *cpi, MACROBLOCK *x, TX_SIZE tx_size,
   rd_stats->rate += txb_coeff_cost;
   rd_stats->skip &= (p->eobs[block] == 0);
 #if CONFIG_RD_DEBUG
-  rd_stats->txb_coeff_cost[plane] += txb_coeff_cost;
+  {
+    int idx, idy;
+    rd_stats->txb_coeff_cost[plane] += txb_coeff_cost;
+
+    for (idy = 0; idy < txb_h; ++idy)
+      for (idx = 0; idx < txb_w; ++idx)
+        rd_stats->txb_coeff_cost_map[plane][blk_row + idy][blk_col + idx] = 0;
+
+    rd_stats->txb_coeff_cost_map[plane][blk_row][blk_col] = txb_coeff_cost;
+
+    assert(blk_row < 16);
+    assert(blk_col < 16);
+  }
 #endif
 }
 
@@ -3595,7 +3607,7 @@ static void select_tx_type_yrd(const AV1_COMP *cpi, MACROBLOCK *x,
   mbmi->tx_size = best_tx;
 #if CONFIG_RD_DEBUG
   // record plane y's transform block coefficient cost
-  mbmi->txb_coeff_cost[0] = rd_stats->txb_coeff_cost[0];
+  mbmi->rd_stats = *rd_stats;
 #endif
   memcpy(x->blk_skip[0], best_blk_skip, sizeof(best_blk_skip[0]) * n4);
 }
@@ -7084,11 +7096,14 @@ static int64_t handle_inter_mode(
 
 #if CONFIG_REF_MV
 #if CONFIG_EXT_INTER
-  if (this_mode == NEAREST_NEARESTMV) {
+  if (this_mode == NEAREST_NEARESTMV)
 #else
-  if (this_mode == NEARESTMV && is_comp_pred) {
-    uint8_t ref_frame_type = av1_ref_frame_type(mbmi->ref_frame);
+  if (this_mode == NEARESTMV && is_comp_pred)
 #endif  // CONFIG_EXT_INTER
+  {
+#if !CONFIG_EXT_INTER
+    uint8_t ref_frame_type = av1_ref_frame_type(mbmi->ref_frame);
+#endif
     if (mbmi_ext->ref_mv_count[ref_frame_type] > 0) {
       cur_mv[0] = mbmi_ext->ref_mv_stack[ref_frame_type][0].this_mv;
       cur_mv[1] = mbmi_ext->ref_mv_stack[ref_frame_type][0].comp_mv;
@@ -7826,8 +7841,7 @@ static int64_t handle_inter_mode(
           inter_block_uvrd(cpi, x, &rd_stats_uv, bsize, ref_best_rd - rdcosty);
 #if CONFIG_RD_DEBUG
       // record uv planes' transform block coefficient cost
-      mbmi->txb_coeff_cost[1] = rd_stats_uv.txb_coeff_cost[1];
-      mbmi->txb_coeff_cost[2] = rd_stats_uv.txb_coeff_cost[2];
+      if (is_cost_valid_uv) av1_merge_rd_stats(&mbmi->rd_stats, &rd_stats_uv);
 #endif
       *rate_uv = rd_stats_uv.rate;
       distortion_uv = rd_stats_uv.dist;
