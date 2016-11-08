@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8baca39c_d5faabc8",
+        "filename": "av1/encoder/encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 4494,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2016-11-08T17:03:36Z",
+      "side": 1,
+      "message": "Should this be (1 \u003c\u003c GM_TRANS_PREC_BITS) ?",
+      "revId": "7fbfbf2858b27a15df07c09629a7082f83efa87c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
