@@ -37,12 +37,17 @@ extern "C" {
 
 /*Smallest blocks are 4x4*/
 #define OD_LOG_BSIZE0 (2)
-/*There are 4 block sizes total (4x4, 8x8, 16x16 and 32x32).*/
-#define OD_NBSIZES (4)
-/*The log of the maximum length of the side of a block.*/
-#define OD_LOG_BSIZE_MAX (OD_LOG_BSIZE0 + OD_NBSIZES - 1)
+/*There are 5 block sizes total (4x4, 8x8, 16x16, 32x32 and 64x64).*/
+#define OD_NBSIZES (5)
 /*The maximum length of the side of a block.*/
-#define OD_BSIZE_MAX (1 << OD_LOG_BSIZE_MAX)
+#define OD_BSIZE_MAX MAX_SB_SIZE
+
+/*There are 4 transform sizes total in AV1 (4x4, 8x8, 16x16 and 32x32).*/
+#define OD_TXSIZES TX_SIZES
+/*The log of the maximum length of the side of a transform.*/
+#define OD_LOG_TXSIZE_MAX (OD_LOG_BSIZE0 + OD_TXSIZES - 1)
+/*The maximum length of the side of a transform.*/
+#define OD_TXSIZE_MAX (1 << OD_LOG_TXSIZE_MAX)
 
 /**The maximum number of color planes allowed in a single frame.*/
 # define OD_NPLANES_MAX (3)

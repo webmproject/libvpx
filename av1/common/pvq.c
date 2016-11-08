@@ -132,7 +132,7 @@ static const od_val16 OD_PVQ_BETA64_CHROMA[13] = {OD_BETA(1.), OD_BETA(1.),
  OD_BETA(1.), OD_BETA(1.), OD_BETA(1.), OD_BETA(1.), OD_BETA(1.), OD_BETA(1.),
  OD_BETA(1.), OD_BETA(1.), OD_BETA(1.), OD_BETA(1.), OD_BETA(1.)};
 
-const od_val16 *const OD_PVQ_BETA[2][OD_NPLANES_MAX][OD_NBSIZES + 1] = {
+const od_val16 *const OD_PVQ_BETA[2][OD_NPLANES_MAX][OD_TXSIZES + 1] = {
  {{OD_PVQ_BETA4_LUMA, OD_PVQ_BETA8_LUMA,
    OD_PVQ_BETA16_LUMA, OD_PVQ_BETA32_LUMA},
   {OD_PVQ_BETA4_CHROMA, OD_PVQ_BETA8_CHROMA,
@@ -156,7 +156,7 @@ void od_adapt_pvq_ctx_reset(od_pvq_adapt_ctx *state, int is_keyframe) {
   generic_model_init(&state->pvq_param_model[0]);
   generic_model_init(&state->pvq_param_model[1]);
   generic_model_init(&state->pvq_param_model[2]);
-  for (i = 0; i < 2*OD_NBSIZES; i++) {
+  for (i = 0; i < 2*OD_TXSIZES; i++) {
     ctx->pvq_adapt[4*i + OD_ADAPT_K_Q8] = 384;
     ctx->pvq_adapt[4*i + OD_ADAPT_SUM_EX_Q8] = 256;
     ctx->pvq_adapt[4*i + OD_ADAPT_COUNT_Q8] = 104;
@@ -165,12 +165,12 @@ void od_adapt_pvq_ctx_reset(od_pvq_adapt_ctx *state, int is_keyframe) {
   ctx->pvq_k1_increment = 128;
   OD_CDFS_INIT(ctx->pvq_k1_cdf, ctx->pvq_k1_increment);
   for (pli = 0; pli < OD_NPLANES_MAX; pli++) {
-    for (bs = 0; bs < OD_NBSIZES; bs++)
+    for (bs = 0; bs < OD_TXSIZES; bs++)
     for (i = 0; i < PVQ_MAX_PARTITIONS; i++) {
       state->pvq_exg[pli][bs][i] = 2 << 16;
     }
   }
-  for (i = 0; i < OD_NBSIZES*PVQ_MAX_PARTITIONS; i++) {
+  for (i = 0; i < OD_TXSIZES*PVQ_MAX_PARTITIONS; i++) {
     state->pvq_ext[i] = is_keyframe ? 24576 : 2 << 16;
   }
   state->pvq_gaintheta_increment = 128;
@@ -195,14 +195,14 @@ int od_qm_offset(int bs, int xydec)
 void od_init_qm(int16_t *x, int16_t *x_inv, const int *qm) {
   int i;
   int j;
-  int16_t y[OD_BSIZE_MAX*OD_BSIZE_MAX];
-  int16_t y_inv[OD_BSIZE_MAX*OD_BSIZE_MAX];
+  int16_t y[OD_TXSIZE_MAX*OD_TXSIZE_MAX];
+  int16_t y_inv[OD_TXSIZE_MAX*OD_TXSIZE_MAX];
   int16_t *x1;
   int16_t *x1_inv;
   int off;
   int bs;
   int xydec;
-  for (bs = 0; bs < OD_NBSIZES; bs++) {
+  for (bs = 0; bs < OD_TXSIZES; bs++) {
     for (xydec = 0; xydec < 2; xydec++) {
       off = od_qm_offset(bs, xydec);
       x1 = x + off;
@@ -259,7 +259,7 @@ int od_pvq_k1_ctx(int n, int orig_length) {
 int od_qm_get_index(int bs, int band) {
   /* The -band/3 term is due to the fact that we force corresponding horizontal
      and vertical bands to have the same quantization. */
-  OD_ASSERT(bs >= 0 && bs < OD_NBSIZES);
+  OD_ASSERT(bs >= 0 && bs < OD_TXSIZES);
   return bs*(bs + 1) + band - band/3;
 }
 

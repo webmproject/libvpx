@@ -2004,7 +2004,7 @@ static void write_modes_b(AV1_COMP *cpi, const TileInfo *const tile,
                     &w->ec, pvq->qg[i], pvq->theta[i], pvq->max_theta[i],
                     pvq->y + pvq->off[i], pvq->size[i], pvq->k[i], model, adapt,
                     exg + i, ext + i, robust || is_keyframe,
-                    (plane != 0) * OD_NBSIZES * PVQ_MAX_PARTITIONS +
+                    (plane != 0) * OD_TXSIZES * PVQ_MAX_PARTITIONS +
                         pvq->bs * PVQ_MAX_PARTITIONS + i,
                     is_keyframe, i == 0 && (i < pvq->nb_bands - 1),
                     pvq->skip_rest, encode_flip, flip);

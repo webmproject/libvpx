@@ -30,11 +30,11 @@ struct od_adapt_ctx {
 
   generic_encoder model_dc[OD_NPLANES_MAX];
 
-  int ex_dc[OD_NPLANES_MAX][OD_NBSIZES][3];
-  int ex_g[OD_NPLANES_MAX][OD_NBSIZES];
+  int ex_dc[OD_NPLANES_MAX][OD_TXSIZES][3];
+  int ex_g[OD_NPLANES_MAX][OD_TXSIZES];
 
   /* Joint skip flag for DC and AC */
-  uint16_t skip_cdf[OD_NBSIZES*2][4];
+  uint16_t skip_cdf[OD_TXSIZES*2][4];
   int skip_increment;
 };
 

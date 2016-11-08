@@ -64,7 +64,7 @@ typedef struct PVQ_INFO {
   int max_theta[PVQ_MAX_PARTITIONS];
   int qg[PVQ_MAX_PARTITIONS];
   int k[PVQ_MAX_PARTITIONS];
-  od_coeff y[OD_BSIZE_MAX * OD_BSIZE_MAX];
+  od_coeff y[OD_TXSIZE_MAX * OD_TXSIZE_MAX];
   int nb_bands;
   int off[PVQ_MAX_PARTITIONS];
   int size[PVQ_MAX_PARTITIONS];
