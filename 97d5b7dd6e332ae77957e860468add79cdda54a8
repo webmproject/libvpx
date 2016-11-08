@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8baca39c_ce421c09",
+        "filename": "av1/common/mv.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-11-08T21:00:06Z",
+      "side": 1,
+      "message": "Maybe these comments should be updated to show these in terms of the homography",
+      "range": {
+        "startLine": 79,
+        "startChar": 0,
+        "endLine": 85,
+        "endChar": 11
+      },
+      "revId": "97d5b7dd6e332ae77957e860468add79cdda54a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_0e241476",
+        "filename": "av1/common/warped_motion.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-11-08T21:00:06Z",
+      "side": 1,
+      "message": "Just a cosmetic suggestion, but if you are changing the way the parameters are stored in mat such that mat[4] \u003d\u003d -mat[3], mat[2] \u003d\u003d mat[5], you might as well just use mat[4] and mat[5] here so the y computation becomes: \n\nmat[4] * x + mat[5] * y + mat[1].\n\nAlso seems like now global_rotzoom and global_affine can just map to the same transformation type and we don\u0027t really need both project_points_rotzoom and project_points_affine.",
+      "range": {
+        "startLine": 75,
+        "startChar": 43,
+        "endLine": 75,
+        "endChar": 78
+      },
+      "revId": "97d5b7dd6e332ae77957e860468add79cdda54a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baca39c_0eafb4cb",
+        "filename": "av1/encoder/rdopt.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 4309,
+      "author": {
+        "id": 1137754
+      },
+      "writtenOn": "2016-11-08T21:00:06Z",
+      "side": 1,
+      "message": "I think you\u0027ll need to call get_gm_type here. It is possible that the parameters were set back to default in encode frame and gmtype was not set to GLOBAL_ZERO.",
+      "range": {
+        "startLine": 4309,
+        "startChar": 10,
+        "endLine": 4309,
+        "endChar": 20
+      },
+      "revId": "97d5b7dd6e332ae77957e860468add79cdda54a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
