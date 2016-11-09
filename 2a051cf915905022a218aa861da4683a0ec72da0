@@ -46,6 +46,24 @@
       "revId": "2a051cf915905022a218aa861da4683a0ec72da0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb799f3f_eec23f24",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 674,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-09T19:44:26Z",
+      "side": 1,
+      "message": "\u003e unlike the 4x4 we have a vpx_fdct8x8_neon which is used in the non-hbd case. not sure we check fdct_asm vs. fdct_c, but this is similar to what sse2 has expect the neon would need to be updated\n\nah fair point",
+      "parentUuid": "6bbdafe5_faa0a5e2",
+      "revId": "2a051cf915905022a218aa861da4683a0ec72da0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
