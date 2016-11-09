@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4bd62b38_79594349",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 674,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-09T05:00:00Z",
+      "side": 1,
+      "message": "alternatively, could structure it as:\nNEON \u0026\u0026 !EMULATE\nTEST_CASE(FwdTrans8x8DCT)\n!HBD\nTEST_CASE(FwdTrans8x8HT)\nend !HBD\nend NEON \u0026\u0026 !EMULATE\n\nrather than duplicate the FwdTrans8x8DCT inside and outside the HBD",
+      "range": {
+        "startLine": 674,
+        "startChar": 4,
+        "endLine": 674,
+        "endChar": 27
+      },
+      "revId": "2a051cf915905022a218aa861da4683a0ec72da0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
