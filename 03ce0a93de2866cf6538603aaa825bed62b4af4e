@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2b19f7c0_482b9f99",
+        "filename": "av1/common/warped_motion.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1170389
+      },
+      "writtenOn": "2016-11-09T09:42:24Z",
+      "side": 1,
+      "message": "I think that would only work if we always have stride_points \u003d\u003d stride_proj \u003d\u003d 2, or if we never care about the values stored between one pair of points and the next. Both seem to be true right now; are they safe assumptions for the future?",
+      "parentUuid": "8baca39c_f884065d",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 43,
+        "endChar": 1
+      },
+      "revId": "03ce0a93de2866cf6538603aaa825bed62b4af4e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8baca39c_f823266d",
         "filename": "av1/encoder/bitstream.c",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2016-11-08T18:27:21Z",
       "side": 1,
       "message": "In certain cases, this type will be in correct and you\u0027ll end up sending unnecessary  bits. If write_global_motion zeros out the global motion parameters, the gmtype needs to be changed as well. There is a similar issue in encodeframe.c.",
+      "range": {
+        "startLine": 3654,
+        "startChar": 30,
+        "endLine": 3654,
+        "endChar": 45
+      },
+      "revId": "03ce0a93de2866cf6538603aaa825bed62b4af4e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b23efec_6a2657d5",
+        "filename": "av1/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3654,
+      "author": {
+        "id": 1170389
+      },
+      "writtenOn": "2016-11-09T09:42:24Z",
+      "side": 1,
+      "message": "This patch deliberately sets things up so that memset(params, 0, sizeof(params)) sets params-\u003egmtype \u003d GLOBAL_ZERO. So I don\u0027t think this will be a problem.",
+      "parentUuid": "8baca39c_f823266d",
       "range": {
         "startLine": 3654,
         "startChar": 30,
