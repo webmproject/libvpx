@@ -1,0 +1,153 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb799f3f_8ec13b91",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-09T20:24:44Z",
+      "side": 1,
+      "message": "make the first test positive (#if CONFIG) like in the lpf test",
+      "range": {
+        "startLine": 33,
+        "startChar": 4,
+        "endLine": 33,
+        "endChar": 28
+      },
+      "revId": "9263efc1281309b5daa4308e348dfadbeb8e1426",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb799f3f_cef2e3ef",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-09T20:24:44Z",
+      "side": 1,
+      "message": "for global usage rename this to kCountTestBlock",
+      "revId": "9263efc1281309b5daa4308e348dfadbeb8e1426",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb799f3f_2eacc7d3",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-09T20:24:44Z",
+      "side": 1,
+      "message": "this function should be enabled in high bitdepth now and would suffer the same problem I think",
+      "revId": "9263efc1281309b5daa4308e348dfadbeb8e1426",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb799f3f_8e137b3d",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-09T20:24:44Z",
+      "side": 1,
+      "message": "rnd(1024) + 1 should work",
+      "range": {
+        "startLine": 101,
+        "startChar": 15,
+        "endLine": 101,
+        "endChar": 40
+      },
+      "revId": "9263efc1281309b5daa4308e348dfadbeb8e1426",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb799f3f_6efbafce",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-09T20:24:44Z",
+      "side": 1,
+      "message": "not needed within a class definition; declaring it here makes it inline",
+      "range": {
+        "startLine": 131,
+        "startChar": 7,
+        "endLine": 131,
+        "endChar": 14
+      },
+      "revId": "9263efc1281309b5daa4308e348dfadbeb8e1426",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb799f3f_0e08eb04",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-09T20:24:44Z",
+      "side": 1,
+      "message": "1000 was arbitrary, but this changed from count_test_block",
+      "range": {
+        "startLine": 161,
+        "startChar": 22,
+        "endLine": 161,
+        "endChar": 25
+      },
+      "revId": "9263efc1281309b5daa4308e348dfadbeb8e1426",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb799f3f_aef197e9",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-09T20:24:44Z",
+      "side": 1,
+      "message": "good catch of the shadowed variable here...",
+      "range": {
+        "startLine": 170,
+        "startChar": 13,
+        "endLine": 170,
+        "endChar": 14
+      },
+      "revId": "9263efc1281309b5daa4308e348dfadbeb8e1426",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
