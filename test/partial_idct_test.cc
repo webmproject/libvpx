@@ -285,7 +285,13 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(&vpx_fdct16x16_c, &vpx_idct16x16_256_add_c,
                                  &vpx_idct16x16_1_add_neon, TX_16X16, 1),
                       make_tuple(&vpx_fdct8x8_c, &vpx_idct8x8_64_add_c,
+                                 &vpx_idct8x8_64_add_neon, TX_8X8, 64),
+                      make_tuple(&vpx_fdct8x8_c, &vpx_idct8x8_64_add_c,
+                                 &vpx_idct8x8_12_add_neon, TX_8X8, 12),
+                      make_tuple(&vpx_fdct8x8_c, &vpx_idct8x8_64_add_c,
                                  &vpx_idct8x8_1_add_neon, TX_8X8, 1),
+                      make_tuple(&vpx_fdct4x4_c, &vpx_idct4x4_16_add_c,
+                                 &vpx_idct4x4_16_add_neon, TX_4X4, 16),
                       make_tuple(&vpx_fdct4x4_c, &vpx_idct4x4_16_add_c,
                                  &vpx_idct4x4_1_add_neon, TX_4X4, 1)));
 #else   // !CONFIG_VP9_HIGHBITDEPTH
