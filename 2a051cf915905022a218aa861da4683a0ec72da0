@@ -22,6 +22,30 @@
       "revId": "2a051cf915905022a218aa861da4683a0ec72da0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6bbdafe5_faa0a5e2",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 674,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-09T05:03:33Z",
+      "side": 1,
+      "message": "\u003e alternatively, could structure it as:\n \u003e NEON \u0026\u0026 !EMULATE\n \u003e TEST_CASE(FwdTrans8x8DCT)\n \u003e !HBD\n \u003e TEST_CASE(FwdTrans8x8HT)\n \u003e end !HBD\n \u003e end NEON \u0026\u0026 !EMULATE\n \u003e \n \u003e rather than duplicate the FwdTrans8x8DCT inside and outside the HBD\n\nunlike the 4x4 we have a vpx_fdct8x8_neon which is used in the non-hbd case. not sure we check fdct_asm vs. fdct_c, but this is similar to what sse2 has expect the neon would need to be updated",
+      "parentUuid": "4bd62b38_79594349",
+      "range": {
+        "startLine": 674,
+        "startChar": 4,
+        "endLine": 674,
+        "endChar": 27
+      },
+      "revId": "2a051cf915905022a218aa861da4683a0ec72da0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
