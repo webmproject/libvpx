@@ -25,6 +25,24 @@
     },
     {
       "key": {
+        "uuid": "6bbdafe5_8005bc7a",
+        "filename": "test/stress.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-11-09T16:39:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8baca39c_ce05bc32",
+      "revId": "dd7e7d82cd67e15e22e421f29c84f5860b593c3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8baca39c_2e34780b",
         "filename": "test/stress.sh",
         "patchSetId": 12
@@ -48,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "6bbdafe5_20fcb049",
+        "filename": "test/stress.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-11-09T16:39:49Z",
+      "side": 1,
+      "message": "since I was trying to do something special when the curl fails I left the set and reset",
+      "parentUuid": "8baca39c_2e34780b",
+      "revId": "dd7e7d82cd67e15e22e421f29c84f5860b593c3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8baca39c_4efb6c0a",
         "filename": "test/stress.sh",
         "patchSetId": 12
@@ -65,6 +101,24 @@
         "endLine": 58,
         "endChar": 7
       },
+      "revId": "dd7e7d82cd67e15e22e421f29c84f5860b593c3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6bbdafe5_804edcda",
+        "filename": "test/stress.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-11-09T16:39:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8baca39c_4efb6c0a",
       "revId": "dd7e7d82cd67e15e22e421f29c84f5860b593c3c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
