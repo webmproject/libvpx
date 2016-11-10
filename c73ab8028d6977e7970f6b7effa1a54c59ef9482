@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb799f3f_6adb9203",
+        "filename": "test/stress.sh",
+        "patchSetId": 14
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-11-10T15:03:37Z",
+      "side": 1,
+      "message": "hmm -\u003e now the trap is left running for int term even after we know the file is good but only\nfor the final downloaded.\n\nCould fix by resetting trap on int and term: trap - INT TERM \n\nNOTE :  This script has a side effect if a file is downloaded as a result of this script it is left in LIBVPX_TEST_DATA_PATH not removed as part of the normal cleanup .  Bad practice?",
+      "revId": "c73ab8028d6977e7970f6b7effa1a54c59ef9482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
