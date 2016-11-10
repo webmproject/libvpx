@@ -1,0 +1,205 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb935fd8_842ecceb",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-10T22:50:45Z",
+      "side": 1,
+      "message": "You can rename this to DISABLED_Speed. Then it won\u0027t run by default but it will still compile and you can force it to run with --gtest_also_run_disabled_tests",
+      "revId": "d9d6ff358876d0f7381fab0a7a5bfbd0325fc5b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b8e57b3_ec3cd329",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-10T22:50:45Z",
+      "side": 1,
+      "message": "This loop seems pretty frequently used. Pull it out to it\u0027s own function?",
+      "range": {
+        "startLine": 298,
+        "startChar": 2,
+        "endLine": 298,
+        "endChar": 5
+      },
+      "revId": "d9d6ff358876d0f7381fab0a7a5bfbd0325fc5b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b8e57b3_6cffe340",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-10T22:50:45Z",
+      "side": 1,
+      "message": "Why is this divided by input_block_size_? To keep the runtime from growing with the larger transforms? Pull this out to it\u0027s own variable and add a comment about what it is doing.",
+      "range": {
+        "startLine": 309,
+        "startChar": 51,
+        "endLine": 309,
+        "endChar": 68
+      },
+      "revId": "d9d6ff358876d0f7381fab0a7a5bfbd0325fc5b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b5ca306_1e684da3",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-10T22:50:45Z",
+      "side": 1,
+      "message": "Where is count_test_block defined?",
+      "range": {
+        "startLine": 314,
+        "startChar": 32,
+        "endLine": 314,
+        "endChar": 48
+      },
+      "revId": "d9d6ff358876d0f7381fab0a7a5bfbd0325fc5b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb935fd8_04855ca1",
+        "filename": "vpx_dsp/arm/idct4x4_1_add_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-10T22:50:45Z",
+      "side": 1,
+      "message": "Is this necessary? You load both lanes. It probably used to be there because the compiler didn\u0027t realize all the values were being set.",
+      "range": {
+        "startLine": 23,
+        "startChar": 18,
+        "endLine": 23,
+        "endChar": 28
+      },
+      "revId": "d9d6ff358876d0f7381fab0a7a5bfbd0325fc5b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b91cbcd_328b786e",
+        "filename": "vpx_dsp/arm/idct4x4_1_add_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-10T22:50:45Z",
+      "side": 1,
+      "message": "\u0027d\u0027 and \u0027row\u0027 don\u0027t seem to mean anything as variable names. Maybe \u0027a\u0027 and \u0027b\u0027? Either something that describes them or something generic.",
+      "range": {
+        "startLine": 27,
+        "startChar": 12,
+        "endLine": 27,
+        "endChar": 15
+      },
+      "revId": "d9d6ff358876d0f7381fab0a7a5bfbd0325fc5b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0b97d3c5_e525ccc7",
+        "filename": "vpx_dsp/arm/idct4x4_1_add_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-10T22:50:45Z",
+      "side": 1,
+      "message": "it doesn\u0027t seem like this will be a problem since it\u0027s been this way for a long time, but maybe add an assert(dest0 % sizeof(uint32_t) \u003d\u003d 0) here or to the C code",
+      "range": {
+        "startLine": 30,
+        "startChar": 30,
+        "endLine": 30,
+        "endChar": 38
+      },
+      "revId": "d9d6ff358876d0f7381fab0a7a5bfbd0325fc5b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b5ca306_fe4d5939",
+        "filename": "vpx_dsp/arm/idct4x4_add_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-10T22:50:45Z",
+      "side": 1,
+      "message": "Just out of curiosity, did you compare to vmull_n_s16(a, b, cospi_16_64)?",
+      "range": {
+        "startLine": 31,
+        "startChar": 7,
+        "endLine": 31,
+        "endChar": 21
+      },
+      "revId": "d9d6ff358876d0f7381fab0a7a5bfbd0325fc5b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb935fd8_443a04fb",
+        "filename": "vpx_dsp/arm/idct4x4_add_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-10T22:50:45Z",
+      "side": 1,
+      "message": "Why the 0 element? Is it used somewhere?",
+      "range": {
+        "startLine": 50,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 5
+      },
+      "revId": "d9d6ff358876d0f7381fab0a7a5bfbd0325fc5b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
