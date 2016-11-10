@@ -64,6 +64,23 @@
       "revId": "2a051cf915905022a218aa861da4683a0ec72da0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb799f3f_f428c9b9",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 691,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-10T04:02:51Z",
+      "side": 1,
+      "message": "should be CONFIG_VP9_HIGHBITDEPTH",
+      "revId": "2a051cf915905022a218aa861da4683a0ec72da0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
