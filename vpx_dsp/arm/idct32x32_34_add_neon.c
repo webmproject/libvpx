@@ -34,7 +34,7 @@
 // 5 13 20 26
 // 6 21 27 33
 // 7 24 32
-static void idct32_6_neon(const int16_t *input, int16_t *output) {
+static void idct32_6_neon(const tran_low_t *input, int16_t *output) {
   int16x8_t in0, in1, in2, in3, in4, in5, in6, in7;
   int16x8_t s1_0, s1_1, s1_2, s1_3, s1_4, s1_5, s1_6, s1_7, s1_8, s1_9, s1_10,
       s1_11, s1_12, s1_13, s1_14, s1_15, s1_16, s1_17, s1_18, s1_19, s1_20,
@@ -46,8 +46,22 @@ static void idct32_6_neon(const int16_t *input, int16_t *output) {
       s2_31;
   int16x8_t s3_24, s3_25, s3_26, s3_27;
 
-  load_and_transpose_s16_8x8(input, 32, &in0, &in1, &in2, &in3, &in4, &in5,
-                             &in6, &in7);
+  in0 = load_tran_low_to_s16(input);
+  input += 32;
+  in1 = load_tran_low_to_s16(input);
+  input += 32;
+  in2 = load_tran_low_to_s16(input);
+  input += 32;
+  in3 = load_tran_low_to_s16(input);
+  input += 32;
+  in4 = load_tran_low_to_s16(input);
+  input += 32;
+  in5 = load_tran_low_to_s16(input);
+  input += 32;
+  in6 = load_tran_low_to_s16(input);
+  input += 32;
+  in7 = load_tran_low_to_s16(input);
+  transpose_s16_8x8(&in0, &in1, &in2, &in3, &in4, &in5, &in6, &in7);
 
   // stage 1
   // input[1] * cospi_31_64 - input[31] * cospi_1_64 (but input[31] == 0)
@@ -503,7 +517,7 @@ static void idct32_8_neon(const int16_t *input, uint8_t *output, int stride) {
                        output + (24 * stride), stride);
 }
 
-void vpx_idct32x32_34_add_neon(const int16_t *input, uint8_t *dest,
+void vpx_idct32x32_34_add_neon(const tran_low_t *input, uint8_t *dest,
                                int stride) {
   int i;
   int16_t temp[32 * 8];
