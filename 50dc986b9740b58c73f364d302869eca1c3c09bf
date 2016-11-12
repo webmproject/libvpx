@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "302b2880_6e0fcfa8",
+        "filename": "test/stress.sh",
+        "patchSetId": 15
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-12T01:33:55Z",
+      "side": 1,
+      "message": "break before the \u0026\u0026 and indent 2",
+      "range": {
+        "startLine": 34,
+        "startChar": 28,
+        "endLine": 34,
+        "endChar": 32
+      },
+      "revId": "50dc986b9740b58c73f364d302869eca1c3c09bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "302b2880_8ecafb2e",
+        "filename": "test/stress.sh",
+        "patchSetId": 15
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-12T01:33:55Z",
+      "side": 1,
+      "message": "leave whitespace in front of the \u0027\\\u0027, break before the \u0027|\u0027 and indent 2",
+      "range": {
+        "startLine": 40,
+        "startChar": 29,
+        "endLine": 40,
+        "endChar": 32
+      },
+      "revId": "50dc986b9740b58c73f364d302869eca1c3c09bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
