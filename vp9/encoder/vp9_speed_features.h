@@ -244,6 +244,10 @@ typedef struct SPEED_FEATURES {
   int allow_quant_coeff_opt;
   double quant_opt_thresh;
 
+  // Enable asymptotic closed-loop encoding decision for key frame and
+  // alternate reference frames.
+  int allow_acl;
+
   // Use transform domain distortion. Use pixel domain distortion in speed 0
   // and certain situations in higher speed to improve the RD model precision.
   int allow_txfm_domain_distortion;
