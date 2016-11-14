@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b7aab69_4e7842a4",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-11-14T20:09:22Z",
+      "side": 1,
+      "message": "Removing duplicated rnd exposed vpx_idct16x16_256_add_sse2() and vpx_idct16x16_256_add_neon() failure with this test. Will investigate separately.",
+      "range": {
+        "startLine": 187,
+        "startChar": 14,
+        "endLine": 187,
+        "endChar": 17
+      },
+      "revId": "6497ba0421d7a3f539af2618ec2ac7554c5ca3bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
