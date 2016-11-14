@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "4b7aab69_1ed3df1e",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-11-14T20:09:22Z",
+      "side": 1,
+      "message": "Done. NICE!",
+      "parentUuid": "eb935fd8_842ecceb",
+      "revId": "d9d6ff358876d0f7381fab0a7a5bfbd0325fc5b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2b8e57b3_ec3cd329",
         "filename": "test/partial_idct_test.cc",
         "patchSetId": 1
@@ -30,6 +48,30 @@
       "writtenOn": "2016-11-10T22:50:45Z",
       "side": 1,
       "message": "This loop seems pretty frequently used. Pull it out to it\u0027s own function?",
+      "range": {
+        "startLine": 298,
+        "startChar": 2,
+        "endLine": 298,
+        "endChar": 5
+      },
+      "revId": "d9d6ff358876d0f7381fab0a7a5bfbd0325fc5b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b7aab69_4e76824a",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-11-14T20:09:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2b8e57b3_ec3cd329",
       "range": {
         "startLine": 298,
         "startChar": 2,
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "4b7aab69_ce8a92fe",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-11-14T20:09:22Z",
+      "side": 1,
+      "message": "Yes that\u0027s the reason. Done.",
+      "parentUuid": "2b8e57b3_6cffe340",
+      "range": {
+        "startLine": 309,
+        "startChar": 51,
+        "endLine": 309,
+        "endChar": 68
+      },
+      "revId": "d9d6ff358876d0f7381fab0a7a5bfbd0325fc5b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b5ca306_1e684da3",
         "filename": "test/partial_idct_test.cc",
         "patchSetId": 1
@@ -76,6 +142,30 @@
       "writtenOn": "2016-11-10T22:50:45Z",
       "side": 1,
       "message": "Where is count_test_block defined?",
+      "range": {
+        "startLine": 314,
+        "startChar": 32,
+        "endLine": 314,
+        "endChar": 48
+      },
+      "revId": "d9d6ff358876d0f7381fab0a7a5bfbd0325fc5b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b7aab69_aea63696",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-11-14T20:09:22Z",
+      "side": 1,
+      "message": "Defined as a local static const in the beginning (which is renamed to kCountTestBlock)",
+      "parentUuid": "8b5ca306_1e684da3",
       "range": {
         "startLine": 314,
         "startChar": 32,
@@ -111,6 +201,30 @@
     },
     {
       "key": {
+        "uuid": "4b7aab69_cb99a461",
+        "filename": "vpx_dsp/arm/idct4x4_1_add_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-11-14T20:09:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eb935fd8_04855ca1",
+      "range": {
+        "startLine": 23,
+        "startChar": 18,
+        "endLine": 23,
+        "endChar": 28
+      },
+      "revId": "d9d6ff358876d0f7381fab0a7a5bfbd0325fc5b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4b91cbcd_328b786e",
         "filename": "vpx_dsp/arm/idct4x4_1_add_neon.c",
         "patchSetId": 1
@@ -122,6 +236,30 @@
       "writtenOn": "2016-11-10T22:50:45Z",
       "side": 1,
       "message": "\u0027d\u0027 and \u0027row\u0027 don\u0027t seem to mean anything as variable names. Maybe \u0027a\u0027 and \u0027b\u0027? Either something that describes them or something generic.",
+      "range": {
+        "startLine": 27,
+        "startChar": 12,
+        "endLine": 27,
+        "endChar": 15
+      },
+      "revId": "d9d6ff358876d0f7381fab0a7a5bfbd0325fc5b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b7aab69_eb96602f",
+        "filename": "vpx_dsp/arm/idct4x4_1_add_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-11-14T20:09:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4b91cbcd_328b786e",
       "range": {
         "startLine": 27,
         "startChar": 12,
@@ -157,6 +295,30 @@
     },
     {
       "key": {
+        "uuid": "4b7aab69_0e6c8a7a",
+        "filename": "vpx_dsp/arm/idct4x4_1_add_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-11-14T20:09:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0b97d3c5_e525ccc7",
+      "range": {
+        "startLine": 30,
+        "startChar": 30,
+        "endLine": 30,
+        "endChar": 38
+      },
+      "revId": "d9d6ff358876d0f7381fab0a7a5bfbd0325fc5b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b5ca306_fe4d5939",
         "filename": "vpx_dsp/arm/idct4x4_add_neon.c",
         "patchSetId": 1
@@ -180,6 +342,30 @@
     },
     {
       "key": {
+        "uuid": "4b7aab69_8b9fac45",
+        "filename": "vpx_dsp/arm/idct4x4_add_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-11-14T20:09:22Z",
+      "side": 1,
+      "message": "Tested. For vpx_idct4x4_16_add_neon(), using vmull_n_s16() is 9% slower with gcc 4.9, 1% slower with clang 3.8. Time wasted in loading 3 consts using 3 vldr instructions.",
+      "parentUuid": "8b5ca306_fe4d5939",
+      "range": {
+        "startLine": 31,
+        "startChar": 7,
+        "endLine": 31,
+        "endChar": 21
+      },
+      "revId": "d9d6ff358876d0f7381fab0a7a5bfbd0325fc5b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eb935fd8_443a04fb",
         "filename": "vpx_dsp/arm/idct4x4_add_neon.c",
         "patchSetId": 1
@@ -191,6 +377,30 @@
       "writtenOn": "2016-11-10T22:50:45Z",
       "side": 1,
       "message": "Why the 0 element? Is it used somewhere?",
+      "range": {
+        "startLine": 50,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 5
+      },
+      "revId": "d9d6ff358876d0f7381fab0a7a5bfbd0325fc5b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b7aab69_cbe9a43f",
+        "filename": "vpx_dsp/arm/idct4x4_add_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-11-14T20:09:22Z",
+      "side": 1,
+      "message": "No use at all, just a place holder. Changed to 16384.",
+      "parentUuid": "eb935fd8_443a04fb",
       "range": {
         "startLine": 50,
         "startChar": 4,
