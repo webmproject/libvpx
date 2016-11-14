@@ -22,6 +22,93 @@
       "revId": "6497ba0421d7a3f539af2618ec2ac7554c5ca3bc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1042a47e_668fa47d",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-14T23:53:36Z",
+      "side": 1,
+      "message": "Hmm a lot of the other tests have a member variable for rnd_ to avoid having to pass it around. Would that help?\n\nAlthough it\u0027s super weird that a change to the random number generator would cause a test to fail.",
+      "parentUuid": "4b7aab69_4e7842a4",
+      "revId": "6497ba0421d7a3f539af2618ec2ac7554c5ca3bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1042a47e_46a6e8f7",
+        "filename": "vpx_dsp/arm/idct4x4_add_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-14T23:53:36Z",
+      "side": 1,
+      "message": "If this is unused it\u0027s probably best to leave it as 0.",
+      "range": {
+        "startLine": 50,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 9
+      },
+      "revId": "6497ba0421d7a3f539af2618ec2ac7554c5ca3bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1042a47e_661cc452",
+        "filename": "vpx_dsp/arm/idct4x4_add_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-14T23:53:36Z",
+      "side": 1,
+      "message": "Is this just reversing s1? Confused because it looks like it\u0027s not doing anything but I probably have my high and low mixed up.",
+      "range": {
+        "startLine": 66,
+        "startChar": 7,
+        "endLine": 66,
+        "endChar": 19
+      },
+      "revId": "6497ba0421d7a3f539af2618ec2ac7554c5ca3bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1042a47e_e60734f6",
+        "filename": "vpx_dsp/arm/idct4x4_add_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-14T23:53:36Z",
+      "side": 1,
+      "message": "assert dst alignment",
+      "range": {
+        "startLine": 72,
+        "startChar": 36,
+        "endLine": 72,
+        "endChar": 44
+      },
+      "revId": "6497ba0421d7a3f539af2618ec2ac7554c5ca3bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
