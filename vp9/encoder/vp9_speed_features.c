@@ -506,6 +506,10 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed,
         content != VP9E_CONTENT_SCREEN) {
       // More aggressive short circuit for speed 8.
       sf->short_circuit_low_temp_var = 2;
+      // More aggressive short circuit for low resolution
+      if (cm->width <= 352 && cm->height <= 288) {
+        sf->short_circuit_low_temp_var = 3;
+      }
     }
     sf->limit_newmv_early_exit = 0;
   }

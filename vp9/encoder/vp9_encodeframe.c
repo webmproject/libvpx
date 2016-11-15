@@ -742,9 +742,12 @@ static void set_low_temp_var_flag(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
           continue;
 
         if ((*this_mi)->sb_type == BLOCK_32X32) {
-          if (vt->split[i].part_variances.none.variance < (thresholds[1] >> 1))
+          int64_t threshold_32x32 = cpi->sf.short_circuit_low_temp_var == 3
+                                        ? ((3 * thresholds[1]) >> 2)
+                                        : (thresholds[1] >> 1);
+          if (vt->split[i].part_variances.none.variance < threshold_32x32)
             x->variance_low[i + 5] = 1;
-        } else if (cpi->sf.short_circuit_low_temp_var == 2) {
+        } else if (cpi->sf.short_circuit_low_temp_var >= 2) {
           // For 32x16 and 16x32 blocks, the flag is set on each 16x16 block
           // inside.
           if ((*this_mi)->sb_type == BLOCK_16X16 ||
