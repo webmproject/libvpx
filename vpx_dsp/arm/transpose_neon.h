@@ -110,6 +110,37 @@ static INLINE void transpose_s16_4x4d(int16x4_t *a0, int16x4_t *a1,
   *a3 = vreinterpret_s16_s32(c1.val[1]);
 }
 
+static INLINE void transpose_s16_4x4q(int16x8_t *a0, int16x8_t *a1) {
+  // Swap 32 bit elements. Goes from:
+  // a0: 00 01 02 03  10 11 12 13
+  // a1: 20 21 22 23  30 31 32 33
+  // to:
+  // b0.val[0]: 00 01 20 21  10 11 30 31
+  // b0.val[1]: 02 03 22 23  12 13 32 33
+
+  const int32x4x2_t b0 =
+      vtrnq_s32(vreinterpretq_s32_s16(*a0), vreinterpretq_s32_s16(*a1));
+
+  // Swap 64 bit elements resulting in:
+  // c0.val[0]: 00 01 20 21  02 03 22 23
+  // c0.val[1]: 10 11 30 31  12 13 32 33
+
+  const int32x4_t c0 =
+      vcombine_s32(vget_low_s32(b0.val[0]), vget_low_s32(b0.val[1]));
+  const int32x4_t c1 =
+      vcombine_s32(vget_high_s32(b0.val[0]), vget_high_s32(b0.val[1]));
+
+  // Swap 16 bit elements resulting in:
+  // d0.val[0]: 00 10 20 30  02 12 22 32
+  // d0.val[1]: 01 11 21 31  03 13 23 33
+
+  const int16x8x2_t d0 =
+      vtrnq_s16(vreinterpretq_s16_s32(c0), vreinterpretq_s16_s32(c1));
+
+  *a0 = d0.val[0];
+  *a1 = d0.val[1];
+}
+
 static INLINE void transpose_u16_4x4q(uint16x8_t *a0, uint16x8_t *a1) {
   // Swap 32 bit elements. Goes from:
   // a0: 00 01 02 03  10 11 12 13
