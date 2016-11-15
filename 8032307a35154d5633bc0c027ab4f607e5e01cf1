@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1042a47e_1fc1beeb",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-11-15T17:16:04Z",
+      "side": 1,
+      "message": "Capitalize and end with a period.",
+      "range": {
+        "startLine": 279,
+        "startChar": 5,
+        "endLine": 279,
+        "endChar": 9
+      },
+      "revId": "8032307a35154d5633bc0c027ab4f607e5e01cf1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
