@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1042a47e_d142a60b",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-11-15T23:51:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1042a47e_51a05673",
+      "range": {
+        "startLine": 40,
+        "startChar": 11,
+        "endLine": 40,
+        "endChar": 35
+      },
+      "revId": "a23c8bdde94f6f22d54ce72fab6fcde69fb57039",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1042a47e_31b4aab0",
         "filename": "test/partial_idct_test.cc",
         "patchSetId": 10
@@ -36,6 +60,30 @@
       "writtenOn": "2016-11-15T23:34:35Z",
       "side": 1,
       "message": "stride_",
+      "range": {
+        "startLine": 105,
+        "startChar": 13,
+        "endLine": 105,
+        "endChar": 19
+      },
+      "revId": "a23c8bdde94f6f22d54ce72fab6fcde69fb57039",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1042a47e_513696a3",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-11-15T23:51:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1042a47e_31b4aab0",
       "range": {
         "startLine": 105,
         "startChar": 13,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "1042a47e_91de5e2c",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-11-15T23:51:29Z",
+      "side": 1,
+      "message": "That\u0027s exactly what I thought also. CONVERT_TO_BYTEPTR() generates extra instructions and confusion. I\u0027ll clean it up after high bitdepth.",
+      "parentUuid": "1042a47e_f1052232",
+      "range": {
+        "startLine": 133,
+        "startChar": 23,
+        "endLine": 133,
+        "endChar": 46
+      },
+      "revId": "a23c8bdde94f6f22d54ce72fab6fcde69fb57039",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1042a47e_11236e1b",
         "filename": "test/partial_idct_test.cc",
         "patchSetId": 10
@@ -82,6 +154,30 @@
       "writtenOn": "2016-11-15T23:34:35Z",
       "side": 1,
       "message": "CONFIG_VP9_HIGHBITDEPTH. this comment is meant to reference the condition in the #if",
+      "range": {
+        "startLine": 538,
+        "startChar": 11,
+        "endLine": 538,
+        "endChar": 35
+      },
+      "revId": "a23c8bdde94f6f22d54ce72fab6fcde69fb57039",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1042a47e_b1dd5a30",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 538,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-11-15T23:51:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1042a47e_11236e1b",
       "range": {
         "startLine": 538,
         "startChar": 11,
