@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <limits>
+
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "./vp9_rtcd.h"
@@ -45,7 +47,7 @@ int16_t MaxSupportedCoeff(InvTxfmFunc a) {
 #else
   (void)a;
 #endif
-  return INT16_MAX;
+  return std::numeric_limits<int16_t>::max();
 }
 
 int16_t MinSupportedCoeff(InvTxfmFunc a) {
@@ -57,11 +59,11 @@ int16_t MinSupportedCoeff(InvTxfmFunc a) {
   }
 #elif HAVE_NEON
   if (a == vpx_idct4x4_16_add_neon) {
-    return INT16_MIN + 1;
+    return std::numeric_limits<int16_t>::min() + 1;
   }
 #endif
 #endif  // !CONFIG_EMULATE_HARDWARE
-  return INT16_MIN;
+  return std::numeric_limits<int16_t>::min();
 }
 
 class PartialIDctTest : public ::testing::TestWithParam<PartialInvTxfmParam> {

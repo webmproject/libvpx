@@ -140,6 +140,9 @@ static INLINE uint64_t xgetbv(void) {
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER >= 1700
+#undef NOMINMAX
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #if WINAPI_FAMILY_PARTITION(WINAPI_FAMILY_APP)
 #define getenv(x) NULL
