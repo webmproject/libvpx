@@ -119,6 +119,24 @@
     },
     {
       "key": {
+        "uuid": "1042a47e_31866afc",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-15T23:07:01Z",
+      "side": 1,
+      "message": "\u003e For high bitdepth it should be a different file name\n \u003e vpx_highbd_idct4x4_16_add_neon otherwise builds with error. And\n \u003e actually vpx_highbd_idct4x4_16_add_neon passed SingleLargeCoeff\n \u003e test with INT16_MIN.\n\nMy mistake given you\u0027re reusing the typedef for the function pointer. Like the other unit tests though the 8-bit non-highbitdepth function will be called in the decoder, so we\u0027re losing a bit of coverage here.",
+      "parentUuid": "eb799f3f_d16da4e8",
+      "revId": "9263efc1281309b5daa4308e348dfadbeb8e1426",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eb799f3f_8e137b3d",
         "filename": "test/partial_idct_test.cc",
         "patchSetId": 9
