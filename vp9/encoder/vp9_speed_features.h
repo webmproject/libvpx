@@ -457,6 +457,7 @@ typedef struct SPEED_FEATURES {
   // 2: Skip golden non-zeromv and newmv-last for bsize >= 16x16, skip ALL
   // INTRA for bsize >= 32x32 and vert/horz INTRA for bsize 16x16, 16x32 and
   // 32x16.
+  // 3: Same as (2), also skip golden in any mode for low res
   int short_circuit_low_temp_var;
 
   // Limits the rd-threshold update for early exit for the newmv-last mode,
