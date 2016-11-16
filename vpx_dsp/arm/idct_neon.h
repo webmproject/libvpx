@@ -17,8 +17,12 @@
 #include "vpx_dsp/arm/transpose_neon.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 
-DECLARE_ALIGNED(16, static const int16_t, kCospi[4]) = { 0, 15137, 11585,
-                                                         6270 };
+DECLARE_ALIGNED(16, static const int16_t, kCospi[8]) = {
+  16384 /*  cospi_0_64 */,  15137 /* cospi_8_64 */,
+  11585 /*  cospi_16_64 */, 6270 /* cospi_24_64 */,
+  16069 /*  cospi_4_64 */,  13623 /* cospi_12_64 */,
+  -9102 /* -cospi_20_64 */, 3196 /* cospi_28_64 */
+};
 
 //------------------------------------------------------------------------------
 // Helper functions used to load tran_low_t into int16, narrowing if necessary.

@@ -16,47 +16,43 @@
 
 void vpx_idct8x8_1_add_neon(const tran_low_t *input, uint8_t *dest,
                             int dest_stride) {
-  uint8x8_t d2u8, d3u8, d30u8, d31u8;
-  uint64x1_t d2u64, d3u64, d4u64, d5u64;
-  uint16x8_t q0u16, q9u16, q10u16, q11u16, q12u16;
-  int16x8_t q0s16;
-  uint8_t *d1, *d2;
-  int16_t i, a1;
-  int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
-  out = dct_const_round_shift(out * cospi_16_64);
-  a1 = ROUND_POWER_OF_TWO(out, 5);
+  int i;
+  const int16_t out0 = dct_const_round_shift(input[0] * cospi_16_64);
+  const int16_t out1 = dct_const_round_shift(out0 * cospi_16_64);
+  const int16_t out2 = ROUND_POWER_OF_TWO(out1, 5);
+  const int16x8_t dc = vdupq_n_s16(out2);
+  const uint16x8_t dc_u16 = vreinterpretq_u16_s16(dc);
+  const uint8_t *dst = dest;
+  uint8x8_t d0, d1, d2, d3;
+  uint16x8_t d0_u16, d1_u16, d2_u16, d3_u16;
 
-  q0s16 = vdupq_n_s16(a1);
-  q0u16 = vreinterpretq_u16_s16(q0s16);
-
-  d1 = d2 = dest;
   for (i = 0; i < 2; i++) {
-    d2u64 = vld1_u64((const uint64_t *)d1);
-    d1 += dest_stride;
-    d3u64 = vld1_u64((const uint64_t *)d1);
-    d1 += dest_stride;
-    d4u64 = vld1_u64((const uint64_t *)d1);
-    d1 += dest_stride;
-    d5u64 = vld1_u64((const uint64_t *)d1);
-    d1 += dest_stride;
+    d0 = vld1_u8(dst);
+    dst += dest_stride;
+    d1 = vld1_u8(dst);
+    dst += dest_stride;
+    d2 = vld1_u8(dst);
+    dst += dest_stride;
+    d3 = vld1_u8(dst);
+    dst += dest_stride;
 
-    q9u16 = vaddw_u8(q0u16, vreinterpret_u8_u64(d2u64));
-    q10u16 = vaddw_u8(q0u16, vreinterpret_u8_u64(d3u64));
-    q11u16 = vaddw_u8(q0u16, vreinterpret_u8_u64(d4u64));
-    q12u16 = vaddw_u8(q0u16, vreinterpret_u8_u64(d5u64));
+    d0_u16 = vaddw_u8(dc_u16, d0);
+    d1_u16 = vaddw_u8(dc_u16, d1);
+    d2_u16 = vaddw_u8(dc_u16, d2);
+    d3_u16 = vaddw_u8(dc_u16, d3);
 
-    d2u8 = vqmovun_s16(vreinterpretq_s16_u16(q9u16));
-    d3u8 = vqmovun_s16(vreinterpretq_s16_u16(q10u16));
-    d30u8 = vqmovun_s16(vreinterpretq_s16_u16(q11u16));
-    d31u8 = vqmovun_s16(vreinterpretq_s16_u16(q12u16));
+    d0 = vqmovun_s16(vreinterpretq_s16_u16(d0_u16));
+    d1 = vqmovun_s16(vreinterpretq_s16_u16(d1_u16));
+    d2 = vqmovun_s16(vreinterpretq_s16_u16(d2_u16));
+    d3 = vqmovun_s16(vreinterpretq_s16_u16(d3_u16));
 
-    vst1_u64((uint64_t *)d2, vreinterpret_u64_u8(d2u8));
-    d2 += dest_stride;
-    vst1_u64((uint64_t *)d2, vreinterpret_u64_u8(d3u8));
-    d2 += dest_stride;
-    vst1_u64((uint64_t *)d2, vreinterpret_u64_u8(d30u8));
-    d2 += dest_stride;
-    vst1_u64((uint64_t *)d2, vreinterpret_u64_u8(d31u8));
-    d2 += dest_stride;
+    vst1_u8(dest, d0);
+    dest += dest_stride;
+    vst1_u8(dest, d1);
+    dest += dest_stride;
+    vst1_u8(dest, d2);
+    dest += dest_stride;
+    vst1_u8(dest, d3);
+    dest += dest_stride;
   }
 }
