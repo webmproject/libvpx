@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1042a47e_9bd5c7a3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 13
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-17T00:57:10Z",
+      "side": 1,
+      "message": "this should be attached to the earlier bug requesting unit test coverage.",
+      "revId": "1f6a308e50830eae62e886d5f7ef323ea481fa1d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
