@@ -573,7 +573,6 @@ void vpx_mbpost_proc_across_ip_msa(uint8_t *src_ptr, int32_t pitch,
 void vpx_mbpost_proc_down_msa(uint8_t *dst_ptr, int32_t pitch, int32_t rows,
                               int32_t cols, int32_t flimit) {
   int32_t row, col, cnt, i;
-  const int16_t *rv3 = &vpx_rv[63 & rand()];
   v4i32 flimit_vec;
   v16u8 dst7, dst8, dst_r_b, dst_l_b;
   v16i8 mask;
@@ -601,7 +600,7 @@ void vpx_mbpost_proc_down_msa(uint8_t *dst_ptr, int32_t pitch, int32_t rows,
 
     dst = LD_UB(dst_tmp);
     for (cnt = (col << 4), i = 0; i < 16; ++cnt) {
-      rv2[i] = rv3 + ((cnt * 17) & 127);
+      rv2[i] = vpx_rv + (i & 7);
       ++i;
     }
     for (cnt = -8; cnt < 0; ++cnt) {

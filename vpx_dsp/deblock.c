@@ -156,14 +156,12 @@ void vpx_mbpost_proc_across_ip_c(unsigned char *src, int pitch, int rows,
 void vpx_mbpost_proc_down_c(unsigned char *dst, int pitch, int rows, int cols,
                             int flimit) {
   int r, c, i;
-  const int16_t *rv3 = &vpx_rv[63 & rand()];
 
   for (c = 0; c < cols; c++) {
     unsigned char *s = &dst[c];
     int sumsq = 0;
     int sum = 0;
     unsigned char d[16];
-    const int16_t *rv2 = rv3 + ((c * 17) & 127);
 
     for (i = -8; i < 0; i++) s[i * pitch] = s[0];
 
@@ -183,7 +181,7 @@ void vpx_mbpost_proc_down_c(unsigned char *dst, int pitch, int rows, int cols,
       d[r & 15] = s[0];
 
       if (sumsq * 15 - sum * sum < flimit) {
-        d[r & 15] = (rv2[r & 127] + sum + s[0]) >> 4;
+        d[r & 15] = (vpx_rv[(r & 127) + (c & 7)] + sum + s[0]) >> 4;
       }
       if (r >= 8) s[-8 * pitch] = d[(r - 8) & 15];
       s += pitch;
