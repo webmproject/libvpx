@@ -221,7 +221,7 @@ TEST_P(PartialIDctTest, AddOutputBlock) {
   }
 }
 
-TEST_P(PartialIDctTest, SingleLargeCoeff) {
+TEST_P(PartialIDctTest, SingleExtremeCoeff) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int16_t max_coeff = MaxSupportedCoeff(partial_itxfm_);
   const int16_t min_coeff = MinSupportedCoeff(partial_itxfm_);
