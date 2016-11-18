@@ -318,10 +318,10 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Values(vpx_post_proc_down_and_across_mb_row_sse2));
 
 INSTANTIATE_TEST_CASE_P(SSE2, VpxMbPostProcAcrossIpTest,
-                        ::testing::Values(vpx_mbpost_proc_across_ip_xmm));
+                        ::testing::Values(vpx_mbpost_proc_across_ip_sse2));
 
 INSTANTIATE_TEST_CASE_P(SSE2, VpxMbPostProcDownTest,
-                        ::testing::Values(vpx_mbpost_proc_down_xmm));
+                        ::testing::Values(vpx_mbpost_proc_down_sse2));
 #endif
 
 #if HAVE_MSA
