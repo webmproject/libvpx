@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b0355864_71b942cc",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 13
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-19T00:31:51Z",
+      "side": 1,
+      "message": "if you expose both and you adopt this as the function pointer type you could wrap the non-highbitdeph calls with a template:\n\nhttps://chromium-review.googlesource.com/#/c/327692/",
+      "revId": "aeed16f4285e54e99479c56c0603f8bed4825a14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
