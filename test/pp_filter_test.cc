@@ -7,6 +7,7 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
+#include <limits.h>
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "test/acm_random.h"
@@ -123,9 +124,37 @@ class VpxMbPostProcAcrossIpTest
     : public ::testing::TestWithParam<VpxMbPostProcAcrossIpFunc> {
  public:
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
+
+ protected:
+  void SetCols(unsigned char *s, int rows, int cols, int src_width) {
+    for (int r = 0; r < rows; r++) {
+      for (int c = 0; c < cols; c++) {
+        s[c] = c;
+      }
+      s += src_width;
+    }
+  }
+
+  void RunComparison(const unsigned char *kExpectedOutput, unsigned char *src_c,
+                     int rows, int cols, int src_pitch) {
+    for (int r = 0; r < rows; r++) {
+      for (int c = 0; c < cols; c++) {
+        ASSERT_EQ(kExpectedOutput[c], src_c[c]) << "at (" << r << ", " << c
+                                                << ")";
+      }
+      src_c += src_pitch;
+    }
+  }
+
+  void RunFilterLevel(unsigned char *s, int rows, int cols, int src_width,
+                      int filter_level, const unsigned char *kExpectedOutput) {
+    ASM_REGISTER_STATE_CHECK(
+        GetParam()(s, src_width, rows, cols, filter_level));
+    RunComparison(kExpectedOutput, s, rows, cols, src_width);
+  }
 };
 
-TEST_P(VpxMbPostProcAcrossIpTest, CheckFilterOutput) {
+TEST_P(VpxMbPostProcAcrossIpTest, CheckLowFilterOutput) {
   const int rows = 16;
   const int cols = 16;
   const int src_left_padding = 8;
@@ -136,30 +165,100 @@ TEST_P(VpxMbPostProcAcrossIpTest, CheckFilterOutput) {
   unsigned char *const src = new unsigned char[src_size];
   ASSERT_TRUE(src != NULL);
   memset(src, 10, src_size);
-  unsigned char *s = src + src_left_padding;
-  for (int r = 0; r < rows; r++) {
-    for (int c = 0; c < cols; c++) {
-      s[c] = c;
-    }
-    s += src_width;
-  }
+  unsigned char *const s = src + src_left_padding;
+  SetCols(s, rows, cols, src_width);
 
-  s = src + src_left_padding;
+  unsigned char *expected_output = new unsigned char[rows * cols];
+  ASSERT_TRUE(expected_output != NULL);
+  SetCols(expected_output, rows, cols, cols);
 
-  ASM_REGISTER_STATE_CHECK(GetParam()(s, src_width, rows, cols, q2mbl(100)));
+  RunFilterLevel(s, rows, cols, src_width, q2mbl(0), expected_output);
+  delete[] src;
+  delete[] expected_output;
+}
 
+TEST_P(VpxMbPostProcAcrossIpTest, DISABLED_CheckMediumFilterOutput) {
+  const int rows = 16;
+  const int cols = 16;
+  const int src_left_padding = 8;
+  const int src_right_padding = 17;
+  const int src_width = cols + src_left_padding + src_right_padding;
+  const int src_size = rows * src_width;
+
+  unsigned char *const src = new unsigned char[src_size];
+  ASSERT_TRUE(src != NULL);
+  memset(src, 10, src_size);
+  unsigned char *const s = src + src_left_padding;
+
+  SetCols(s, rows, cols, src_width);
+  static const unsigned char kExpectedOutput[cols] = {
+    2, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 13
+  };
+
+  RunFilterLevel(s, rows, cols, src_width, q2mbl(70), kExpectedOutput);
+
+  delete[] src;
+}
+
+TEST_P(VpxMbPostProcAcrossIpTest, CheckHighFilterOutput) {
+  const int rows = 16;
+  const int cols = 16;
+  const int src_left_padding = 8;
+  const int src_right_padding = 17;
+  const int src_width = cols + src_left_padding + src_right_padding;
+  const int src_size = rows * src_width;
+
+  unsigned char *const src = new unsigned char[src_size];
+  ASSERT_TRUE(src != NULL);
+  unsigned char *const s = src + src_left_padding;
+
+  memset(src, 10, src_size);
+  SetCols(s, rows, cols, src_width);
   static const unsigned char kExpectedOutput[cols] = {
     2, 2, 3, 4, 4, 5, 6, 7, 8, 9, 10, 11, 11, 12, 13, 13
   };
-  s = src + src_left_padding;
-  for (int r = 0; r < rows; r++) {
-    for (int c = 0; c < cols; c++) {
-      ASSERT_EQ(kExpectedOutput[c], s[c]) << "at (" << r << ", " << c << ")";
-    }
-    s += src_width;
-  }
+
+  RunFilterLevel(s, rows, cols, src_width, INT_MAX, kExpectedOutput);
+
+  memset(src, 10, src_size);
+  SetCols(s, rows, cols, src_width);
+  RunFilterLevel(s, rows, cols, src_width, q2mbl(100), kExpectedOutput);
 
   delete[] src;
+}
+
+TEST_P(VpxMbPostProcAcrossIpTest, DISABLED_CheckCvsAssembly) {
+  const int rows = 16;
+  const int cols = 16;
+  const int src_left_padding = 8;
+  const int src_right_padding = 17;
+  const int src_width = cols + src_left_padding + src_right_padding;
+  const int src_size = rows * src_width;
+
+  unsigned char *const c_mem = new unsigned char[src_size];
+  unsigned char *const asm_mem = new unsigned char[src_size];
+  ASSERT_TRUE(c_mem != NULL);
+  ASSERT_TRUE(asm_mem != NULL);
+  unsigned char *const src_c = c_mem + src_left_padding;
+  unsigned char *const src_asm = asm_mem + src_left_padding;
+
+  // When level >= 100, the filter behaves the same as the level = INT_MAX
+  // When level < 20, it behaves the same as the level = 0
+  for (int level = 0; level < 100; level++) {
+    memset(c_mem, 10, src_size);
+    memset(asm_mem, 10, src_size);
+    SetCols(src_c, rows, cols, src_width);
+    SetCols(src_asm, rows, cols, src_width);
+
+    vpx_mbpost_proc_across_ip_c(src_c, src_width, rows, cols, q2mbl(level));
+    ASM_REGISTER_STATE_CHECK(
+        GetParam()(src_asm, src_width, rows, cols, q2mbl(level)));
+
+    RunComparison(src_c, src_asm, rows, cols, src_width);
+  }
+
+  delete[] c_mem;
+  delete[] asm_mem;
 }
 
 class VpxMbPostProcDownTest
@@ -230,9 +329,16 @@ class VpxMbPostProcDownTest
       src_asm += src_pitch;
     }
   }
+
+  void RunFilterLevel(unsigned char *s, int rows, int cols, int src_width,
+                      int filter_level, const unsigned char *kExpectedOutput) {
+    ASM_REGISTER_STATE_CHECK(
+        GetParam()(s, src_width, rows, cols, filter_level));
+    RunComparison(kExpectedOutput, s, rows, cols, src_width);
+  }
 };
 
-TEST_P(VpxMbPostProcDownTest, CheckFilterOutput) {
+TEST_P(VpxMbPostProcDownTest, CheckHighFilterOutput) {
   const int rows = 16;
   const int cols = 16;
   const int src_pitch = cols;
@@ -240,14 +346,12 @@ TEST_P(VpxMbPostProcDownTest, CheckFilterOutput) {
   const int src_bottom_padding = 17;
 
   const int src_size = cols * (rows + src_top_padding + src_bottom_padding);
-  unsigned char *c_mem = new unsigned char[src_size];
+  unsigned char *const c_mem = new unsigned char[src_size];
   ASSERT_TRUE(c_mem != NULL);
   memset(c_mem, 10, src_size);
   unsigned char *const src_c = c_mem + src_top_padding * src_pitch;
 
   SetRows(src_c, rows, cols);
-  ASM_REGISTER_STATE_CHECK(
-      GetParam()(src_c, src_pitch, rows, cols, q2mbl(100)));
 
   static const unsigned char kExpectedOutput[rows * cols] = {
     2,  2,  1,  1,  2,  2,  2,  2,  2,  2,  1,  1,  2,  2,  2,  2,  2,  2,  2,
@@ -266,36 +370,108 @@ TEST_P(VpxMbPostProcDownTest, CheckFilterOutput) {
     13, 13, 13, 13, 14, 13, 13, 13, 13
   };
 
-  RunComparison(kExpectedOutput, src_c, rows, cols, src_pitch);
+  RunFilterLevel(src_c, rows, cols, src_pitch, INT_MAX, kExpectedOutput);
+
+  memset(c_mem, 10, src_size);
+  SetRows(src_c, rows, cols);
+  RunFilterLevel(src_c, rows, cols, src_pitch, q2mbl(100), kExpectedOutput);
 
   delete[] c_mem;
 }
 
-TEST_P(VpxMbPostProcDownTest, CheckCvsAssembly) {
+TEST_P(VpxMbPostProcDownTest, DISABLED_CheckMediumFilterOutput) {
+  const int rows = 16;
+  const int cols = 16;
+  const int src_pitch = cols;
+  const int src_top_padding = 8;
+  const int src_bottom_padding = 17;
+
+  const int src_size = cols * (rows + src_top_padding + src_bottom_padding);
+  unsigned char *const c_mem = new unsigned char[src_size];
+  ASSERT_TRUE(c_mem != NULL);
+  memset(c_mem, 10, src_size);
+  unsigned char *const src_c = c_mem + src_top_padding * src_pitch;
+
+  SetRows(src_c, rows, cols);
+
+  static const unsigned char kExpectedOutput[rows * cols] = {
+    2,  2,  1,  1,  2,  2,  2,  2,  2,  2,  1,  1,  2,  2,  2,  2,  2,  2,  2,
+    2,  3,  2,  2,  2,  2,  2,  2,  2,  3,  2,  2,  2,  2,  2,  2,  2,  2,  2,
+    2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  3,  3,  3,  3,  3,  3,  3,  3,  3,
+    3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,
+    4,  4,  4,  4,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,
+    5,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  7,  7,
+    7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  8,  8,  8,  8,  8,
+    8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  9,  9,  9,  9,  9,  9,  9,  9,
+    9,  9,  9,  9,  9,  9,  9,  9,  10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+    10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
+    11, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 13,
+    13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 12, 12, 13, 12,
+    13, 12, 13, 12, 12, 12, 13, 12, 13, 12, 13, 12, 13, 13, 13, 14, 13, 13, 13,
+    13, 13, 13, 13, 14, 13, 13, 13, 13
+  };
+
+  RunFilterLevel(src_c, rows, cols, src_pitch, q2mbl(70), kExpectedOutput);
+
+  delete[] c_mem;
+}
+
+TEST_P(VpxMbPostProcDownTest, CheckLowFilterOutput) {
+  const int rows = 16;
+  const int cols = 16;
+  const int src_pitch = cols;
+  const int src_top_padding = 8;
+  const int src_bottom_padding = 17;
+
+  const int src_size = cols * (rows + src_top_padding + src_bottom_padding);
+  unsigned char *const c_mem = new unsigned char[src_size];
+  ASSERT_TRUE(c_mem != NULL);
+  memset(c_mem, 10, src_size);
+  unsigned char *const src_c = c_mem + src_top_padding * src_pitch;
+
+  SetRows(src_c, rows, cols);
+
+  unsigned char *expected_output = new unsigned char[rows * cols];
+  ASSERT_TRUE(expected_output != NULL);
+  SetRows(expected_output, rows, cols);
+
+  RunFilterLevel(src_c, rows, cols, src_pitch, q2mbl(0), expected_output);
+
+  delete[] c_mem;
+  delete[] expected_output;
+}
+
+TEST_P(VpxMbPostProcDownTest, DISABLED_CheckCvsAssembly) {
   const int rows = 16;
   const int cols = 16;
   const int src_pitch = cols;
   const int src_top_padding = 8;
   const int src_bottom_padding = 17;
   const int src_size = cols * (rows + src_top_padding + src_bottom_padding);
-  unsigned char *c_mem = new unsigned char[src_size];
-  unsigned char *asm_mem = new unsigned char[src_size];
-  memset(c_mem, 10, src_size);
-  memset(asm_mem, 10, src_size);
+  unsigned char *const c_mem = new unsigned char[src_size];
+  unsigned char *const asm_mem = new unsigned char[src_size];
+  ASSERT_TRUE(c_mem != NULL);
+  ASSERT_TRUE(asm_mem != NULL);
   unsigned char *const src_c = c_mem + src_top_padding * src_pitch;
   unsigned char *const src_asm = asm_mem + src_top_padding * src_pitch;
 
-  SetRandom(src_c, src_asm, rows, cols, src_pitch);
-  vpx_mbpost_proc_down_c(src_c, src_pitch, rows, cols, q2mbl(100));
-  ASM_REGISTER_STATE_CHECK(
-      GetParam()(src_asm, src_pitch, rows, cols, q2mbl(100)));
-  RunComparison(src_c, src_asm, rows, cols, src_pitch);
+  for (int level = 0; level < 100; level++) {
+    memset(c_mem, 10, src_size);
+    memset(asm_mem, 10, src_size);
+    SetRandom(src_c, src_asm, rows, cols, src_pitch);
+    vpx_mbpost_proc_down_c(src_c, src_pitch, rows, cols, q2mbl(level));
+    ASM_REGISTER_STATE_CHECK(
+        GetParam()(src_asm, src_pitch, rows, cols, q2mbl(level)));
+    RunComparison(src_c, src_asm, rows, cols, src_pitch);
 
-  SetRandomSaturation(src_c, src_asm, rows, cols, src_pitch);
-  vpx_mbpost_proc_down_c(src_c, src_pitch, rows, cols, q2mbl(100));
-  ASM_REGISTER_STATE_CHECK(
-      GetParam()(src_asm, src_pitch, rows, cols, q2mbl(100)));
-  RunComparison(src_c, src_asm, rows, cols, src_pitch);
+    memset(c_mem, 10, src_size);
+    memset(asm_mem, 10, src_size);
+    SetRandomSaturation(src_c, src_asm, rows, cols, src_pitch);
+    vpx_mbpost_proc_down_c(src_c, src_pitch, rows, cols, q2mbl(level));
+    ASM_REGISTER_STATE_CHECK(
+        GetParam()(src_asm, src_pitch, rows, cols, q2mbl(level)));
+    RunComparison(src_c, src_asm, rows, cols, src_pitch);
+  }
 
   delete[] c_mem;
   delete[] asm_mem;
