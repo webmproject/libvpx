@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b0355864_572aeeed",
+        "filename": "vpx_dsp/arm/idct4x4_1_add_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-19T01:40:03Z",
+      "side": 1,
+      "message": "you should explicitly include assert.h to be safe should any of the headers change in the future",
+      "revId": "ba2a641dcada26fd5397abafcd4335d0b306f968",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b0355864_37a08a73",
+        "filename": "vpx_dsp/arm/idct4x4_1_add_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-19T01:40:03Z",
+      "side": 1,
+      "message": "some version of gcc used to warn about this without zeroing the variable, but I guess that cleared up. maybe it was the ndk\u0027s 4.6",
+      "revId": "ba2a641dcada26fd5397abafcd4335d0b306f968",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b0355864_7723721b",
+        "filename": "vpx_dsp/arm/idct4x4_add_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-19T01:40:03Z",
+      "side": 1,
+      "message": "they\u0027re equivalent, but elsewhere we kept to vdup for consistency",
+      "range": {
+        "startLine": 55,
+        "startChar": 26,
+        "endLine": 55,
+        "endChar": 36
+      },
+      "revId": "ba2a641dcada26fd5397abafcd4335d0b306f968",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
