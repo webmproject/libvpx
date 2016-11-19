@@ -3238,8 +3238,13 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
   int frame_over_shoot_limit;
   int frame_under_shoot_limit;
   int q = 0, q_low = 0, q_high = 0;
+  int enable_acl;
 
   set_size_independent_vars(cpi);
+
+  enable_acl = cpi->sf.allow_acl
+                   ? (cm->frame_type == KEY_FRAME) || (cm->show_frame == 0)
+                   : 0;
 
   do {
     vpx_clear_system_state();
@@ -3335,7 +3340,6 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
       if (!cpi->sf.use_nonrd_pick_mode) vp9_pack_bitstream(cpi, dest, size);
 
       rc->projected_frame_size = (int)(*size) << 3;
-      restore_coding_context(cpi);
 
       if (frame_over_shoot_limit == 0) frame_over_shoot_limit = 1;
     }
@@ -3505,7 +3509,22 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
       ++cpi->tot_recode_hits;
 #endif
     }
+
+    if (cpi->sf.recode_loop >= ALLOW_RECODE_KFARFGF)
+      if (loop || !enable_acl) restore_coding_context(cpi);
   } while (loop);
+
+  if (enable_acl) {
+    vp9_encode_frame(cpi);
+    vpx_clear_system_state();
+    restore_coding_context(cpi);
+    vp9_pack_bitstream(cpi, dest, size);
+
+    vp9_encode_frame(cpi);
+    vpx_clear_system_state();
+
+    restore_coding_context(cpi);
+  }
 }
 
 static int get_ref_frame_flags(const VP9_COMP *cpi) {
