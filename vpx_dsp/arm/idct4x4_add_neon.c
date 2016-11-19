@@ -62,8 +62,8 @@ void vpx_idct4x4_16_add_neon(const tran_low_t *input, uint8_t *dest,
   assert(!(dest_stride % sizeof(uint32_t)));
 
   // Rows
-  a0 = load_tran_low_to_s16(input);
-  a1 = load_tran_low_to_s16(input + 8);
+  a0 = load_tran_low_to_s16q(input);
+  a1 = load_tran_low_to_s16q(input + 8);
   idct4x4_16_kernel(cospis, &a0, &a1);
 
   // Columns

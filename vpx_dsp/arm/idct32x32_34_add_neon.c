@@ -46,21 +46,21 @@ static void idct32_6_neon(const tran_low_t *input, int16_t *output) {
       s2_31;
   int16x8_t s3_24, s3_25, s3_26, s3_27;
 
-  in0 = load_tran_low_to_s16(input);
+  in0 = load_tran_low_to_s16q(input);
   input += 32;
-  in1 = load_tran_low_to_s16(input);
+  in1 = load_tran_low_to_s16q(input);
   input += 32;
-  in2 = load_tran_low_to_s16(input);
+  in2 = load_tran_low_to_s16q(input);
   input += 32;
-  in3 = load_tran_low_to_s16(input);
+  in3 = load_tran_low_to_s16q(input);
   input += 32;
-  in4 = load_tran_low_to_s16(input);
+  in4 = load_tran_low_to_s16q(input);
   input += 32;
-  in5 = load_tran_low_to_s16(input);
+  in5 = load_tran_low_to_s16q(input);
   input += 32;
-  in6 = load_tran_low_to_s16(input);
+  in6 = load_tran_low_to_s16q(input);
   input += 32;
-  in7 = load_tran_low_to_s16(input);
+  in7 = load_tran_low_to_s16q(input);
   transpose_s16_8x8(&in0, &in1, &in2, &in3, &in4, &in5, &in6, &in7);
 
   // stage 1

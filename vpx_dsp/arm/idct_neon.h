@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------------
 
 // Helper function used to load tran_low_t into int16, narrowing if necessary.
-static INLINE int16x8_t load_tran_low_to_s16(const tran_low_t *buf) {
+static INLINE int16x8_t load_tran_low_to_s16q(const tran_low_t *buf) {
 #if CONFIG_VP9_HIGHBITDEPTH
   const int32x4_t v0 = vld1q_s32(buf);
   const int32x4_t v1 = vld1q_s32(buf + 4);
