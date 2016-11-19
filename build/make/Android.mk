@@ -202,6 +202,7 @@ clean:
 	@$(RM) $(CLEAN-OBJS)
 
 ifeq ($(ENABLE_SHARED),1)
+  LOCAL_CFLAGS += -fPIC
   include $(BUILD_SHARED_LIBRARY)
 else
   include $(BUILD_STATIC_LIBRARY)
