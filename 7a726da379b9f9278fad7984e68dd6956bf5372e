@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b0355864_106c6642",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-21T20:20:32Z",
+      "side": 1,
+      "message": "with function parameters we typically use lower + \u0027_\u0027 even with constants like this.",
+      "range": {
+        "startLine": 138,
+        "startChar": 50,
+        "endLine": 138,
+        "endChar": 65
+      },
+      "revId": "7a726da379b9f9278fad7984e68dd6956bf5372e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b0355864_702db203",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-21T20:20:32Z",
+      "side": 1,
+      "message": "bot is a bit more common. or just use bottom.",
+      "range": {
+        "startLine": 382,
+        "startChar": 16,
+        "endLine": 382,
+        "endChar": 19
+      },
+      "revId": "7a726da379b9f9278fad7984e68dd6956bf5372e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
