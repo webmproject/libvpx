@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "b0355864_13479397",
+        "filename": "vpx_dsp/arm/idct4x4_1_add_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-11-21T17:42:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b0355864_572aeeed",
+      "revId": "ba2a641dcada26fd5397abafcd4335d0b306f968",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b0355864_37a08a73",
         "filename": "vpx_dsp/arm/idct4x4_1_add_neon.c",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "b0355864_b3582775",
+        "filename": "vpx_dsp/arm/idct4x4_1_add_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-11-21T17:42:56Z",
+      "side": 1,
+      "message": "Warning is still here if there is no for loop ...\nSo I added the init back.",
+      "parentUuid": "b0355864_37a08a73",
+      "revId": "ba2a641dcada26fd5397abafcd4335d0b306f968",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b0355864_7723721b",
         "filename": "vpx_dsp/arm/idct4x4_add_neon.c",
         "patchSetId": 4
@@ -47,6 +83,30 @@
       "writtenOn": "2016-11-19T01:40:03Z",
       "side": 1,
       "message": "they\u0027re equivalent, but elsewhere we kept to vdup for consistency",
+      "range": {
+        "startLine": 55,
+        "startChar": 26,
+        "endLine": 55,
+        "endChar": 36
+      },
+      "revId": "ba2a641dcada26fd5397abafcd4335d0b306f968",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b0355864_f32c6fc5",
+        "filename": "vpx_dsp/arm/idct4x4_add_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-11-21T17:42:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b0355864_7723721b",
       "range": {
         "startLine": 55,
         "startChar": 26,
