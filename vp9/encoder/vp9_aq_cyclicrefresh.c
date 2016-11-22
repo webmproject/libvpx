@@ -472,8 +472,8 @@ void vp9_cyclic_refresh_update_parameters(VP9_COMP *const cpi) {
   }
   // Adjust some parameters for low resolutions at low bitrates.
   if (cm->width <= 352 && cm->height <= 288 && rc->avg_frame_bandwidth < 3400) {
-    cr->motion_thresh = 4;
-    cr->rate_boost_fac = 10;
+    cr->motion_thresh = 16;
+    cr->rate_boost_fac = 13;
   }
   if (cpi->svc.spatial_layer_id > 0) {
     cr->motion_thresh = 4;
