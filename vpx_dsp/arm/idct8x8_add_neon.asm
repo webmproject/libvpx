@@ -47,12 +47,12 @@
     vmlsl.s16       q6, d23, d3
 
     ; dct_const_round_shift(input_dc * cospi_16_64)
-    vqrshrn.s32     d8, q2, #14               ; >> 14
-    vqrshrn.s32     d9, q3, #14               ; >> 14
+    vrshrn.s32      d8, q2, #14               ; >> 14
+    vrshrn.s32      d9, q3, #14               ; >> 14
 
     ; dct_const_round_shift(input_dc * cospi_16_64)
-    vqrshrn.s32     d10, q5, #14              ; >> 14
-    vqrshrn.s32     d11, q6, #14              ; >> 14
+    vrshrn.s32      d10, q5, #14              ; >> 14
+    vrshrn.s32      d11, q6, #14              ; >> 14
 
     ; input[1] * cospi_4_64
     vmull.s16       q2, d18, d1
@@ -71,15 +71,15 @@
     vmlal.s16       q13, d23, d2
 
     ; dct_const_round_shift(input_dc * cospi_16_64)
-    vqrshrn.s32     d14, q2, #14              ; >> 14
-    vqrshrn.s32     d15, q3, #14              ; >> 14
+    vrshrn.s32      d14, q2, #14              ; >> 14
+    vrshrn.s32      d15, q3, #14              ; >> 14
 
     ; stage 2 & stage 3 - even half
     vdup.16         d0, r7                    ; duplicate cospi_16_64
 
     ; dct_const_round_shift(input_dc * cospi_16_64)
-    vqrshrn.s32     d12, q9, #14              ; >> 14
-    vqrshrn.s32     d13, q13, #14              ; >> 14
+    vrshrn.s32      d12, q9, #14              ; >> 14
+    vrshrn.s32      d13, q13, #14             ; >> 14
 
     ; input[0] * cospi_16_64
     vmull.s16       q2, d16, d0
@@ -101,12 +101,12 @@
     vdup.16         d1, r9                    ; duplicate cospi_8_64
 
     ; dct_const_round_shift(input_dc * cospi_16_64)
-    vqrshrn.s32     d18, q2, #14              ; >> 14
-    vqrshrn.s32     d19, q3, #14              ; >> 14
+    vrshrn.s32      d18, q2, #14              ; >> 14
+    vrshrn.s32      d19, q3, #14              ; >> 14
 
     ; dct_const_round_shift(input_dc * cospi_16_64)
-    vqrshrn.s32     d22, q13, #14              ; >> 14
-    vqrshrn.s32     d23, q15, #14              ; >> 14
+    vrshrn.s32      d22, q13, #14             ; >> 14
+    vrshrn.s32      d23, q15, #14             ; >> 14
 
     ; input[1] * cospi_24_64 - input[3] * cospi_8_64
     ; input[1] * cospi_24_64
@@ -126,12 +126,12 @@
     vmlal.s16       q12, d29, d0
 
     ; dct_const_round_shift(input_dc * cospi_16_64)
-    vqrshrn.s32     d26, q2, #14              ; >> 14
-    vqrshrn.s32     d27, q3, #14              ; >> 14
+    vrshrn.s32      d26, q2, #14              ; >> 14
+    vrshrn.s32      d27, q3, #14              ; >> 14
 
     ; dct_const_round_shift(input_dc * cospi_16_64)
-    vqrshrn.s32     d30, q8, #14              ; >> 14
-    vqrshrn.s32     d31, q12, #14              ; >> 14
+    vrshrn.s32      d30, q8, #14              ; >> 14
+    vrshrn.s32      d31, q12, #14             ; >> 14
 
     vadd.s16        q0, q9, q15               ; output[0] = step[0] + step[3]
     vadd.s16        q1, q11, q13              ; output[1] = step[1] + step[2]
@@ -164,12 +164,12 @@
     vmlal.s16       q12, d27, d16
 
     ; dct_const_round_shift(input_dc * cospi_16_64)
-    vqrshrn.s32     d10, q9, #14              ; >> 14
-    vqrshrn.s32     d11, q10, #14             ; >> 14
+    vrshrn.s32      d10, q9, #14              ; >> 14
+    vrshrn.s32      d11, q10, #14             ; >> 14
 
     ; dct_const_round_shift(input_dc * cospi_16_64)
-    vqrshrn.s32     d12, q11, #14              ; >> 14
-    vqrshrn.s32     d13, q12, #14             ; >> 14
+    vrshrn.s32      d12, q11, #14             ; >> 14
+    vrshrn.s32      d13, q12, #14             ; >> 14
 
     ; stage 4
     vadd.s16        q8, q0, q7                ; output[0] = step1[0] + step1[7];
@@ -423,12 +423,12 @@
     vmlal.s16       q12, d27, d16
 
     ; dct_const_round_shift(input_dc * cospi_16_64)
-    vqrshrn.s32     d10, q9, #14              ; >> 14
-    vqrshrn.s32     d11, q10, #14             ; >> 14
+    vrshrn.s32      d10, q9, #14              ; >> 14
+    vrshrn.s32      d11, q10, #14             ; >> 14
 
     ; dct_const_round_shift(input_dc * cospi_16_64)
-    vqrshrn.s32     d12, q11, #14              ; >> 14
-    vqrshrn.s32     d13, q12, #14             ; >> 14
+    vrshrn.s32      d12, q11, #14             ; >> 14
+    vrshrn.s32      d13, q12, #14             ; >> 14
 
     ; stage 4
     vadd.s16        q8, q0, q7                ; output[0] = step1[0] + step1[7];

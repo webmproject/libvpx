@@ -146,8 +146,8 @@ static INLINE void DO_BUTTERFLY(int16x8_t q14s16, int16x8_t q13s16,
   q11s32 = vaddq_s32(q12s32, q11s32);
   q10s32 = vaddq_s32(q10s32, q15s32);
 
-  *qAs16 = vcombine_s16(vqrshrn_n_s32(q8s32, 14), vqrshrn_n_s32(q9s32, 14));
-  *qBs16 = vcombine_s16(vqrshrn_n_s32(q11s32, 14), vqrshrn_n_s32(q10s32, 14));
+  *qAs16 = vcombine_s16(vrshrn_n_s32(q8s32, 14), vrshrn_n_s32(q9s32, 14));
+  *qBs16 = vcombine_s16(vrshrn_n_s32(q11s32, 14), vrshrn_n_s32(q10s32, 14));
 }
 
 static INLINE void idct32_transpose_pair(const int16_t *input, int16_t *t_buf) {
