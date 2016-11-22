@@ -1307,6 +1307,7 @@ void vpx_convolve8_dspr2(const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
   assert(y_step_q4 == 16);
   assert(((const int32_t *)filter_x)[1] != 0x800000);
   assert(((const int32_t *)filter_y)[1] != 0x800000);
+  (void)x_step_q4;
 
   /* bit positon for extract from acc */
   __asm__ __volatile__("wrdsp      %[pos],     1           \n\t"
@@ -1398,6 +1399,10 @@ void vpx_convolve_copy_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                              const int16_t *filter_y, int filter_y_stride,
                              int w, int h) {
   int x, y;
+  (void)filter_x;
+  (void)filter_x_stride;
+  (void)filter_y;
+  (void)filter_y_stride;
 
   /* prefetch data to cache memory */
   prefetch_load(src);

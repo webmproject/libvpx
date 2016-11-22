@@ -403,8 +403,11 @@ void vpx_convolve_avg_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                             const int16_t *filter_y, int filter_y_stride, int w,
                             int h) {
   int x, y;
-  uint32_t tp1, tp2, tn1;
-  uint32_t tp3, tp4, tn2;
+  uint32_t tp1, tp2, tn1, tp3, tp4, tn2;
+  (void)filter_x;
+  (void)filter_x_stride;
+  (void)filter_y;
+  (void)filter_y_stride;
 
   /* prefetch data to cache memory */
   prefetch_load(src);

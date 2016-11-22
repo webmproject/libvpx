@@ -1469,6 +1469,7 @@ void vp8_filter_block2d_second_pass_8(unsigned char *RESTRICT src_ptr,
   unsigned char src_ptr_r2;
   unsigned char src_ptr_r3;
   unsigned char *cm = ff_cropTbl + CROP_WIDTH;
+  (void)output_width;
 
   vector4a = 64;
 
