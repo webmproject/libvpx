@@ -65,16 +65,11 @@ int16_t MaxSupportedCoeff(InvTxfmFunc a) {
 
 int16_t MinSupportedCoeff(InvTxfmFunc a) {
   (void)a;
-#if !CONFIG_EMULATE_HARDWARE
-#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_VP9_HIGHBITDEPTH
+#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_VP9_HIGHBITDEPTH && \
+    !CONFIG_EMULATE_HARDWARE
   if (a == vpx_idct8x8_64_add_ssse3 || a == vpx_idct8x8_12_add_ssse3) {
     return -23625 + 1;
   }
-#elif HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH
-  if (a == vpx_idct4x4_16_add_neon) {
-    return std::numeric_limits<int16_t>::min() + 1;
-  }
-#endif
 #endif  // !CONFIG_EMULATE_HARDWARE
   return std::numeric_limits<int16_t>::min();
 }

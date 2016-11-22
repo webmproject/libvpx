@@ -18,7 +18,7 @@
 
 static INLINE void idct4x4_16_kernel(const int16x4_t cospis, int16x8_t *a0,
                                      int16x8_t *a1) {
-  int16x4_t b0, b1, b2, b3, b4, b5;
+  int16x4_t b0, b1, b2, b3;
   int32x4_t c0, c1, c2, c3;
   int16x8_t d0, d1;
 
@@ -27,10 +27,10 @@ static INLINE void idct4x4_16_kernel(const int16x4_t cospis, int16x8_t *a0,
   b1 = vget_high_s16(*a0);
   b2 = vget_low_s16(*a1);
   b3 = vget_high_s16(*a1);
-  b4 = vadd_s16(b0, b1);
-  b5 = vsub_s16(b0, b1);
-  c0 = vmull_lane_s16(b4, cospis, 2);
-  c1 = vmull_lane_s16(b5, cospis, 2);
+  c0 = vmull_lane_s16(b0, cospis, 2);
+  c2 = vmull_lane_s16(b1, cospis, 2);
+  c1 = vsubq_s32(c0, c2);
+  c0 = vaddq_s32(c0, c2);
   c2 = vmull_lane_s16(b2, cospis, 3);
   c3 = vmull_lane_s16(b2, cospis, 1);
   c2 = vmlsl_lane_s16(c2, b3, cospis, 1);

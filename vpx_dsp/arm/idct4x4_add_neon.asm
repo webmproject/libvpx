@@ -72,16 +72,15 @@
     ; do the transform on transposed rows
 
     ; stage 1
-    vadd.s16  d23, d16, d18         ; (input[0] + input[2])
-    vsub.s16  d24, d16, d18         ; (input[0] - input[2])
-
     vmull.s16 q15, d17, d22         ; input[1] * cospi_24_64
     vmull.s16 q1,  d17, d20         ; input[1] * cospi_8_64
 
     ; (input[0] + input[2]) * cospi_16_64;
     ; (input[0] - input[2]) * cospi_16_64;
-    vmull.s16 q13, d23, d21
-    vmull.s16 q14, d24, d21
+    vmull.s16 q8,  d16, d21
+    vmull.s16 q14, d18, d21
+    vadd.s32  q13, q8,  q14
+    vsub.s32  q14, q8,  q14
 
     ; input[1] * cospi_24_64 - input[3] * cospi_8_64;
     ; input[1] * cospi_8_64  + input[3] * cospi_24_64;
