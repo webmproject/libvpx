@@ -16,6 +16,24 @@
       "revId": "891ef7a11450e043dbbb31dea384cc77ba9adf7b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9023f439_6dd39d69",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-11-22T23:34:59Z",
+      "side": 1,
+      "message": "Yes, I\u0027ll update the test by removing local rnd once vpx_idct16x16_256_add_sse2() can pass the same test.",
+      "parentUuid": "9023f439_cd29899d",
+      "revId": "891ef7a11450e043dbbb31dea384cc77ba9adf7b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
