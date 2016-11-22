@@ -151,6 +151,24 @@
       "revId": "70ce8954a715bf756dde384d145062c98ff082e5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b0355864_4ab1d5dd",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-22T02:09:11Z",
+      "side": 1,
+      "message": "\u003e Since we don\u0027t want to reset src_c and src_asm pointer each time we\n \u003e run the test, we define them as const pointers. Thus the comparison\n \u003e need to be run in a separate function to avoid build errors.\n\nthey can be const in the other function too. \u0027const uint8_t*  data\u0027 is referring to the data, where \u0027uint8_t* const data\u0027 is the pointer.",
+      "parentUuid": "b0355864_646f3016",
+      "revId": "70ce8954a715bf756dde384d145062c98ff082e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
