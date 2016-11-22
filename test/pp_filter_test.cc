@@ -168,15 +168,15 @@ class VpxMbPostProcDownTest
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
  protected:
-  virtual void SetRows(unsigned char *src_c, int rows, int cols) {
+  void SetRows(unsigned char *src_c, int rows, int cols) {
     for (int r = 0; r < rows; r++) {
       memset(src_c, r, cols);
       src_c += cols;
     }
   }
 
-  virtual void SetRandom(unsigned char *src_c, unsigned char *src_asm, int rows,
-                         int cols, int src_pitch) {
+  void SetRandom(unsigned char *src_c, unsigned char *src_asm, int rows,
+                 int cols, int src_pitch) {
     ACMRandom rnd;
     rnd.Reset(ACMRandom::DeterministicSeed());
 
@@ -192,8 +192,8 @@ class VpxMbPostProcDownTest
     }
   }
 
-  virtual void SetRandomSaturation(unsigned char *src_c, unsigned char *src_asm,
-                                   int rows, int cols, int src_pitch) {
+  void SetRandomSaturation(unsigned char *src_c, unsigned char *src_asm,
+                           int rows, int cols, int src_pitch) {
     ACMRandom rnd;
     rnd.Reset(ACMRandom::DeterministicSeed());
 
@@ -209,9 +209,8 @@ class VpxMbPostProcDownTest
     }
   }
 
-  virtual void RunComparison(const unsigned char *kExpectedOutput,
-                             unsigned char *src_c, int rows, int cols,
-                             int src_pitch) {
+  void RunComparison(const unsigned char *kExpectedOutput, unsigned char *src_c,
+                     int rows, int cols, int src_pitch) {
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < cols; c++) {
         ASSERT_EQ(kExpectedOutput[r * rows + c], src_c[c]) << "at (" << r
@@ -221,8 +220,8 @@ class VpxMbPostProcDownTest
     }
   }
 
-  virtual void RunComparison(unsigned char *src_c, unsigned char *src_asm,
-                             int rows, int cols, int src_pitch) {
+  void RunComparison(unsigned char *src_c, unsigned char *src_asm, int rows,
+                     int cols, int src_pitch) {
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < cols; c++) {
         ASSERT_EQ(src_c[c], src_asm[c]) << "at (" << r << ", " << c << ")";
@@ -238,9 +237,9 @@ TEST_P(VpxMbPostProcDownTest, CheckFilterOutput) {
   const int cols = 16;
   const int src_pitch = cols;
   const int src_top_padding = 8;
-  const int src_btm_padding = 17;
+  const int src_bottom_padding = 17;
 
-  const int src_size = cols * (rows + src_top_padding + src_btm_padding);
+  const int src_size = cols * (rows + src_top_padding + src_bottom_padding);
   unsigned char *c_mem = new unsigned char[src_size];
   ASSERT_TRUE(c_mem != NULL);
   memset(c_mem, 10, src_size);
@@ -277,8 +276,8 @@ TEST_P(VpxMbPostProcDownTest, CheckCvsAssembly) {
   const int cols = 16;
   const int src_pitch = cols;
   const int src_top_padding = 8;
-  const int src_btm_padding = 17;
-  const int src_size = cols * (rows + src_top_padding + src_btm_padding);
+  const int src_bottom_padding = 17;
+  const int src_size = cols * (rows + src_top_padding + src_bottom_padding);
   unsigned char *c_mem = new unsigned char[src_size];
   unsigned char *asm_mem = new unsigned char[src_size];
   memset(c_mem, 10, src_size);
