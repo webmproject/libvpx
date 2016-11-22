@@ -346,20 +346,54 @@ void vpx_d45_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
   vst1q_u8(dst, above_right);
 }
 
+void vpx_d45_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
+                                  const uint8_t *above, const uint8_t *left) {
+  const uint8x16_t A0_0 = vld1q_u8(above);
+  const uint8x16_t A0_1 = vld1q_u8(above + 16);
+  const uint8x16_t above_right = vdupq_lane_u8(vget_high_u8(A0_1), 7);
+  const uint8x16_t A1_0 = vld1q_u8(above + 1);
+  const uint8x16_t A1_1 = vld1q_u8(above + 17);
+  const uint8x16_t A2_0 = vld1q_u8(above + 2);
+  const uint8x16_t A2_1 = vld1q_u8(above + 18);
+  const uint8x16_t avg_0 = vhaddq_u8(A0_0, A2_0);
+  const uint8x16_t avg_1 = vhaddq_u8(A0_1, A2_1);
+  uint8x16_t row_0 = vrhaddq_u8(avg_0, A1_0);
+  uint8x16_t row_1 = vrhaddq_u8(avg_1, A1_1);
+  int i;
+  (void)left;
+
+  vst1q_u8(dst, row_0);
+  dst += 16;
+  vst1q_u8(dst, row_1);
+  dst += stride - 16;
+
+  for (i = 0; i < 30; ++i) {
+    row_0 = vextq_u8(row_0, row_1, 1);
+    row_1 = vextq_u8(row_1, above_right, 1);
+    vst1q_u8(dst, row_0);
+    dst += 16;
+    vst1q_u8(dst, row_1);
+    dst += stride - 16;
+  }
+
+  vst1q_u8(dst, above_right);
+  dst += 16;
+  vst1q_u8(dst, row_1);
+}
+
 // -----------------------------------------------------------------------------
 
 void vpx_d135_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
                                  const uint8_t *above, const uint8_t *left) {
-  const uint8x8_t XABCD = vld1_u8(above - 1);
-  const uint32x2_t zero = vdup_n_u32(0);
-  const uint32x2_t IJKL = vld1_lane_u32((const uint32_t *)left, zero, 0);
-  const uint8x8_t LKJI = vrev64_u8(vreinterpret_u8_u32(IJKL));
-  const uint8x8_t LKJIXABC = vext_u8(LKJI, XABCD, 4);
-  const uint8x8_t KJIXABCD = vext_u8(LKJI, XABCD, 5);
-  const uint8x8_t JIXABCD0 =
-      vreinterpret_u8_u64(vshr_n_u64(vreinterpret_u64_u8(KJIXABCD), 8));
-  const uint8x8_t avg1 = vhadd_u8(JIXABCD0, LKJIXABC);
-  const uint8x8_t avg2 = vrhadd_u8(avg1, KJIXABCD);
+  const uint8x8_t XA0123 = vld1_u8(above - 1);
+  const uint8x8_t L0123 = vld1_u8(left);
+  const uint8x8_t L3210 = vrev64_u8(L0123);
+  const uint8x8_t L3210XA012 = vext_u8(L3210, XA0123, 4);
+  const uint8x8_t L210XA0123 = vext_u8(L3210, XA0123, 5);
+  const uint8x8_t L10XA0123_ =
+      vreinterpret_u8_u64(vshr_n_u64(vreinterpret_u64_u8(L210XA0123), 8));
+  const uint8x8_t avg1 = vhadd_u8(L10XA0123_, L3210XA012);
+  const uint8x8_t avg2 = vrhadd_u8(avg1, L210XA0123);
   const uint64x1_t avg2_u64 = vreinterpret_u64_u8(avg2);
   const uint32x2_t r3 = vreinterpret_u32_u8(avg2);
   const uint32x2_t r2 = vreinterpret_u32_u64(vshr_n_u64(avg2_u64, 8));
@@ -372,6 +406,265 @@ void vpx_d135_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
   vst1_lane_u32((uint32_t *)dst, r2, 0);
   dst += stride;
   vst1_lane_u32((uint32_t *)dst, r3, 0);
+}
+
+void vpx_d135_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
+                                 const uint8_t *above, const uint8_t *left) {
+  const uint8x8_t XA0123456 = vld1_u8(above - 1);
+  const uint8x8_t A01234567 = vld1_u8(above);
+  const uint8x8_t A1234567_ = vld1_u8(above + 1);
+  const uint8x8_t L01234567 = vld1_u8(left);
+  const uint8x8_t L76543210 = vrev64_u8(L01234567);
+  const uint8x8_t L6543210X = vext_u8(L76543210, XA0123456, 1);
+  const uint8x8_t L543210XA0 = vext_u8(L76543210, XA0123456, 2);
+  const uint8x16_t L76543210XA0123456 = vcombine_u8(L76543210, XA0123456);
+  const uint8x16_t L6543210XA01234567 = vcombine_u8(L6543210X, A01234567);
+  const uint8x16_t L543210XA01234567_ = vcombine_u8(L543210XA0, A1234567_);
+  const uint8x16_t avg = vhaddq_u8(L76543210XA0123456, L543210XA01234567_);
+  const uint8x16_t row = vrhaddq_u8(avg, L6543210XA01234567);
+  const uint8x8_t row_0 = vget_low_u8(row);
+  const uint8x8_t row_1 = vget_high_u8(row);
+  const uint8x8_t r0 = vext_u8(row_0, row_1, 7);
+  const uint8x8_t r1 = vext_u8(row_0, row_1, 6);
+  const uint8x8_t r2 = vext_u8(row_0, row_1, 5);
+  const uint8x8_t r3 = vext_u8(row_0, row_1, 4);
+  const uint8x8_t r4 = vext_u8(row_0, row_1, 3);
+  const uint8x8_t r5 = vext_u8(row_0, row_1, 2);
+  const uint8x8_t r6 = vext_u8(row_0, row_1, 1);
+
+  vst1_u8(dst, r0);
+  dst += stride;
+  vst1_u8(dst, r1);
+  dst += stride;
+  vst1_u8(dst, r2);
+  dst += stride;
+  vst1_u8(dst, r3);
+  dst += stride;
+  vst1_u8(dst, r4);
+  dst += stride;
+  vst1_u8(dst, r5);
+  dst += stride;
+  vst1_u8(dst, r6);
+  dst += stride;
+  vst1_u8(dst, row_0);
+}
+
+static INLINE void d135_store_16x8(
+    uint8_t **dst, const ptrdiff_t stride, const uint8x16_t row_0,
+    const uint8x16_t row_1, const uint8x16_t row_2, const uint8x16_t row_3,
+    const uint8x16_t row_4, const uint8x16_t row_5, const uint8x16_t row_6,
+    const uint8x16_t row_7) {
+  vst1q_u8(*dst, row_0);
+  *dst += stride;
+  vst1q_u8(*dst, row_1);
+  *dst += stride;
+  vst1q_u8(*dst, row_2);
+  *dst += stride;
+  vst1q_u8(*dst, row_3);
+  *dst += stride;
+  vst1q_u8(*dst, row_4);
+  *dst += stride;
+  vst1q_u8(*dst, row_5);
+  *dst += stride;
+  vst1q_u8(*dst, row_6);
+  *dst += stride;
+  vst1q_u8(*dst, row_7);
+  *dst += stride;
+}
+
+void vpx_d135_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
+                                   const uint8_t *above, const uint8_t *left) {
+  const uint8x16_t XA0123456789abcde = vld1q_u8(above - 1);
+  const uint8x16_t A0123456789abcdef = vld1q_u8(above);
+  const uint8x16_t A123456789abcdef_ = vld1q_u8(above + 1);
+  const uint8x16_t L0123456789abcdef = vld1q_u8(left);
+  const uint8x8_t L76543210 = vrev64_u8(vget_low_u8(L0123456789abcdef));
+  const uint8x8_t Lfedcba98 = vrev64_u8(vget_high_u8(L0123456789abcdef));
+  const uint8x16_t Lfedcba9876543210 = vcombine_u8(Lfedcba98, L76543210);
+  const uint8x16_t Ledcba9876543210X =
+      vextq_u8(Lfedcba9876543210, XA0123456789abcde, 1);
+  const uint8x16_t Ldcba9876543210XA0 =
+      vextq_u8(Lfedcba9876543210, XA0123456789abcde, 2);
+  const uint8x16_t avg_0 = vhaddq_u8(Lfedcba9876543210, Ldcba9876543210XA0);
+  const uint8x16_t avg_1 = vhaddq_u8(XA0123456789abcde, A123456789abcdef_);
+  const uint8x16_t row_0 = vrhaddq_u8(avg_0, Ledcba9876543210X);
+  const uint8x16_t row_1 = vrhaddq_u8(avg_1, A0123456789abcdef);
+  const uint8x16_t r_0 = vextq_u8(row_0, row_1, 15);
+  const uint8x16_t r_1 = vextq_u8(row_0, row_1, 14);
+  const uint8x16_t r_2 = vextq_u8(row_0, row_1, 13);
+  const uint8x16_t r_3 = vextq_u8(row_0, row_1, 12);
+  const uint8x16_t r_4 = vextq_u8(row_0, row_1, 11);
+  const uint8x16_t r_5 = vextq_u8(row_0, row_1, 10);
+  const uint8x16_t r_6 = vextq_u8(row_0, row_1, 9);
+  const uint8x16_t r_7 = vcombine_u8(vget_high_u8(row_0), vget_low_u8(row_1));
+  const uint8x16_t r_8 = vextq_u8(row_0, row_1, 7);
+  const uint8x16_t r_9 = vextq_u8(row_0, row_1, 6);
+  const uint8x16_t r_a = vextq_u8(row_0, row_1, 5);
+  const uint8x16_t r_b = vextq_u8(row_0, row_1, 4);
+  const uint8x16_t r_c = vextq_u8(row_0, row_1, 3);
+  const uint8x16_t r_d = vextq_u8(row_0, row_1, 2);
+  const uint8x16_t r_e = vextq_u8(row_0, row_1, 1);
+
+  d135_store_16x8(&dst, stride, r_0, r_1, r_2, r_3, r_4, r_5, r_6, r_7);
+  d135_store_16x8(&dst, stride, r_8, r_9, r_a, r_b, r_c, r_d, r_e, row_0);
+}
+
+static INLINE void d135_store_32x2(uint8_t **dst, const ptrdiff_t stride,
+                                   const uint8x16_t row_0,
+                                   const uint8x16_t row_1,
+                                   const uint8x16_t row_2) {
+  uint8_t *dst2 = *dst;
+  vst1q_u8(dst2, row_1);
+  dst2 += 16;
+  vst1q_u8(dst2, row_2);
+  dst2 += 16 * stride - 16;
+  vst1q_u8(dst2, row_0);
+  dst2 += 16;
+  vst1q_u8(dst2, row_1);
+  *dst += stride;
+}
+
+void vpx_d135_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
+                                   const uint8_t *above, const uint8_t *left) {
+  const uint8x16_t LL0123456789abcdef = vld1q_u8(left + 16);
+  const uint8x16_t LU0123456789abcdef = vld1q_u8(left);
+  const uint8x8_t LL76543210 = vrev64_u8(vget_low_u8(LL0123456789abcdef));
+  const uint8x8_t LU76543210 = vrev64_u8(vget_low_u8(LU0123456789abcdef));
+  const uint8x8_t LLfedcba98 = vrev64_u8(vget_high_u8(LL0123456789abcdef));
+  const uint8x8_t LUfedcba98 = vrev64_u8(vget_high_u8(LU0123456789abcdef));
+  const uint8x16_t LLfedcba9876543210 = vcombine_u8(LLfedcba98, LL76543210);
+  const uint8x16_t LUfedcba9876543210 = vcombine_u8(LUfedcba98, LU76543210);
+  const uint8x16_t LLedcba9876543210Uf =
+      vextq_u8(LLfedcba9876543210, LUfedcba9876543210, 1);
+  const uint8x16_t LLdcba9876543210Ufe =
+      vextq_u8(LLfedcba9876543210, LUfedcba9876543210, 2);
+  const uint8x16_t avg_0 = vhaddq_u8(LLfedcba9876543210, LLdcba9876543210Ufe);
+  const uint8x16_t row_0 = vrhaddq_u8(avg_0, LLedcba9876543210Uf);
+
+  const uint8x16_t XAL0123456789abcde = vld1q_u8(above - 1);
+  const uint8x16_t LUedcba9876543210X =
+      vextq_u8(LUfedcba9876543210, XAL0123456789abcde, 1);
+  const uint8x16_t LUdcba9876543210XA0 =
+      vextq_u8(LUfedcba9876543210, XAL0123456789abcde, 2);
+  const uint8x16_t avg_1 = vhaddq_u8(LUfedcba9876543210, LUdcba9876543210XA0);
+  const uint8x16_t row_1 = vrhaddq_u8(avg_1, LUedcba9876543210X);
+
+  const uint8x16_t AL0123456789abcdef = vld1q_u8(above);
+  const uint8x16_t AL123456789abcdefg = vld1q_u8(above + 1);
+  const uint8x16_t ALfR0123456789abcde = vld1q_u8(above + 15);
+  const uint8x16_t AR0123456789abcdef = vld1q_u8(above + 16);
+  const uint8x16_t AR123456789abcdef_ = vld1q_u8(above + 17);
+  const uint8x16_t avg_2 = vhaddq_u8(XAL0123456789abcde, AL123456789abcdefg);
+  const uint8x16_t row_2 = vrhaddq_u8(avg_2, AL0123456789abcdef);
+  const uint8x16_t avg_3 = vhaddq_u8(ALfR0123456789abcde, AR123456789abcdef_);
+  const uint8x16_t row_3 = vrhaddq_u8(avg_3, AR0123456789abcdef);
+
+  {
+    const uint8x16_t r_0 = vextq_u8(row_0, row_1, 15);
+    const uint8x16_t r_1 = vextq_u8(row_1, row_2, 15);
+    const uint8x16_t r_2 = vextq_u8(row_2, row_3, 15);
+    d135_store_32x2(&dst, stride, r_0, r_1, r_2);
+  }
+
+  {
+    const uint8x16_t r_0 = vextq_u8(row_0, row_1, 14);
+    const uint8x16_t r_1 = vextq_u8(row_1, row_2, 14);
+    const uint8x16_t r_2 = vextq_u8(row_2, row_3, 14);
+    d135_store_32x2(&dst, stride, r_0, r_1, r_2);
+  }
+
+  {
+    const uint8x16_t r_0 = vextq_u8(row_0, row_1, 13);
+    const uint8x16_t r_1 = vextq_u8(row_1, row_2, 13);
+    const uint8x16_t r_2 = vextq_u8(row_2, row_3, 13);
+    d135_store_32x2(&dst, stride, r_0, r_1, r_2);
+  }
+
+  {
+    const uint8x16_t r_0 = vextq_u8(row_0, row_1, 12);
+    const uint8x16_t r_1 = vextq_u8(row_1, row_2, 12);
+    const uint8x16_t r_2 = vextq_u8(row_2, row_3, 12);
+    d135_store_32x2(&dst, stride, r_0, r_1, r_2);
+  }
+
+  {
+    const uint8x16_t r_0 = vextq_u8(row_0, row_1, 11);
+    const uint8x16_t r_1 = vextq_u8(row_1, row_2, 11);
+    const uint8x16_t r_2 = vextq_u8(row_2, row_3, 11);
+    d135_store_32x2(&dst, stride, r_0, r_1, r_2);
+  }
+
+  {
+    const uint8x16_t r_0 = vextq_u8(row_0, row_1, 10);
+    const uint8x16_t r_1 = vextq_u8(row_1, row_2, 10);
+    const uint8x16_t r_2 = vextq_u8(row_2, row_3, 10);
+    d135_store_32x2(&dst, stride, r_0, r_1, r_2);
+  }
+
+  {
+    const uint8x16_t r_0 = vextq_u8(row_0, row_1, 9);
+    const uint8x16_t r_1 = vextq_u8(row_1, row_2, 9);
+    const uint8x16_t r_2 = vextq_u8(row_2, row_3, 9);
+    d135_store_32x2(&dst, stride, r_0, r_1, r_2);
+  }
+
+  {
+    const uint8x16_t r_0 = vextq_u8(row_0, row_1, 8);
+    const uint8x16_t r_1 = vextq_u8(row_1, row_2, 8);
+    const uint8x16_t r_2 = vextq_u8(row_2, row_3, 8);
+    d135_store_32x2(&dst, stride, r_0, r_1, r_2);
+  }
+
+  {
+    const uint8x16_t r_0 = vextq_u8(row_0, row_1, 7);
+    const uint8x16_t r_1 = vextq_u8(row_1, row_2, 7);
+    const uint8x16_t r_2 = vextq_u8(row_2, row_3, 7);
+    d135_store_32x2(&dst, stride, r_0, r_1, r_2);
+  }
+
+  {
+    const uint8x16_t r_0 = vextq_u8(row_0, row_1, 6);
+    const uint8x16_t r_1 = vextq_u8(row_1, row_2, 6);
+    const uint8x16_t r_2 = vextq_u8(row_2, row_3, 6);
+    d135_store_32x2(&dst, stride, r_0, r_1, r_2);
+  }
+
+  {
+    const uint8x16_t r_0 = vextq_u8(row_0, row_1, 5);
+    const uint8x16_t r_1 = vextq_u8(row_1, row_2, 5);
+    const uint8x16_t r_2 = vextq_u8(row_2, row_3, 5);
+    d135_store_32x2(&dst, stride, r_0, r_1, r_2);
+  }
+
+  {
+    const uint8x16_t r_0 = vextq_u8(row_0, row_1, 4);
+    const uint8x16_t r_1 = vextq_u8(row_1, row_2, 4);
+    const uint8x16_t r_2 = vextq_u8(row_2, row_3, 4);
+    d135_store_32x2(&dst, stride, r_0, r_1, r_2);
+  }
+
+  {
+    const uint8x16_t r_0 = vextq_u8(row_0, row_1, 3);
+    const uint8x16_t r_1 = vextq_u8(row_1, row_2, 3);
+    const uint8x16_t r_2 = vextq_u8(row_2, row_3, 3);
+    d135_store_32x2(&dst, stride, r_0, r_1, r_2);
+  }
+
+  {
+    const uint8x16_t r_0 = vextq_u8(row_0, row_1, 2);
+    const uint8x16_t r_1 = vextq_u8(row_1, row_2, 2);
+    const uint8x16_t r_2 = vextq_u8(row_2, row_3, 2);
+    d135_store_32x2(&dst, stride, r_0, r_1, r_2);
+  }
+
+  {
+    const uint8x16_t r_0 = vextq_u8(row_0, row_1, 1);
+    const uint8x16_t r_1 = vextq_u8(row_1, row_2, 1);
+    const uint8x16_t r_2 = vextq_u8(row_2, row_3, 1);
+    d135_store_32x2(&dst, stride, r_0, r_1, r_2);
+  }
+
+  d135_store_32x2(&dst, stride, row_0, row_1, row_2);
 }
 
 // -----------------------------------------------------------------------------

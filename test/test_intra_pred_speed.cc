@@ -270,19 +270,22 @@ INTRA_PRED_TEST(NEON, TestIntraPred4, vpx_dc_predictor_4x4_neon,
 INTRA_PRED_TEST(NEON, TestIntraPred8, vpx_dc_predictor_8x8_neon,
                 vpx_dc_left_predictor_8x8_neon, vpx_dc_top_predictor_8x8_neon,
                 vpx_dc_128_predictor_8x8_neon, vpx_v_predictor_8x8_neon,
-                vpx_h_predictor_8x8_neon, vpx_d45_predictor_8x8_neon, NULL,
-                NULL, NULL, NULL, NULL, vpx_tm_predictor_8x8_neon)
+                vpx_h_predictor_8x8_neon, vpx_d45_predictor_8x8_neon,
+                vpx_d135_predictor_8x8_neon, NULL, NULL, NULL, NULL,
+                vpx_tm_predictor_8x8_neon)
 INTRA_PRED_TEST(NEON, TestIntraPred16, vpx_dc_predictor_16x16_neon,
                 vpx_dc_left_predictor_16x16_neon,
                 vpx_dc_top_predictor_16x16_neon,
                 vpx_dc_128_predictor_16x16_neon, vpx_v_predictor_16x16_neon,
-                vpx_h_predictor_16x16_neon, vpx_d45_predictor_16x16_neon, NULL,
-                NULL, NULL, NULL, NULL, vpx_tm_predictor_16x16_neon)
+                vpx_h_predictor_16x16_neon, vpx_d45_predictor_16x16_neon,
+                vpx_d135_predictor_16x16_neon, NULL, NULL, NULL, NULL,
+                vpx_tm_predictor_16x16_neon)
 INTRA_PRED_TEST(NEON, TestIntraPred32, vpx_dc_predictor_32x32_neon,
                 vpx_dc_left_predictor_32x32_neon,
                 vpx_dc_top_predictor_32x32_neon,
                 vpx_dc_128_predictor_32x32_neon, vpx_v_predictor_32x32_neon,
-                vpx_h_predictor_32x32_neon, NULL, NULL, NULL, NULL, NULL, NULL,
+                vpx_h_predictor_32x32_neon, vpx_d45_predictor_32x32_neon,
+                vpx_d135_predictor_32x32_neon, NULL, NULL, NULL, NULL,
                 vpx_tm_predictor_32x32_neon)
 #endif  // HAVE_NEON
 
