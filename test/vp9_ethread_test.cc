@@ -124,11 +124,31 @@ TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
   ASSERT_EQ(single_thr_md5, multi_thr_md5);
 }
 
-VP9_INSTANTIATE_TEST_CASE(VPxEncoderThreadTest,
-                          ::testing::Values(::libvpx_test::kTwoPassGood,
-                                            ::libvpx_test::kOnePassGood,
-                                            ::libvpx_test::kRealTime),
-                          ::testing::Range(0, 9),   // cpu_used
-                          ::testing::Range(0, 3),   // tile_columns
-                          ::testing::Range(2, 5));  // threads
+// Split this into two instantiations so that we can distinguish
+// between very slow runs ( ie cpu_speed 0 ) vs ones that can be
+// run nightly by adding Large to the title.
+INSTANTIATE_TEST_CASE_P(
+    VP9, VPxEncoderThreadTest,
+    ::testing::Combine(
+        ::testing::Values(
+            static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP9)),
+        ::testing::Values(::libvpx_test::kTwoPassGood,
+                          ::libvpx_test::kOnePassGood,
+                          ::libvpx_test::kRealTime),
+        ::testing::Range(2, 9),    // cpu_used
+        ::testing::Range(0, 3),    // tile_columns
+        ::testing::Range(2, 5)));  // threads
+
+INSTANTIATE_TEST_CASE_P(
+    VP9Large, VPxEncoderThreadTest,
+    ::testing::Combine(
+        ::testing::Values(
+            static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP9)),
+        ::testing::Values(::libvpx_test::kTwoPassGood,
+                          ::libvpx_test::kOnePassGood,
+                          ::libvpx_test::kRealTime),
+        ::testing::Range(0, 2),    // cpu_used
+        ::testing::Range(0, 3),    // tile_columns
+        ::testing::Range(2, 5)));  // threads
+
 }  // namespace
