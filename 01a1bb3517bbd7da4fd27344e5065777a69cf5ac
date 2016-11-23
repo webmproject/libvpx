@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9023f439_b3cef86f",
+        "filename": "vpx_dsp/arm/idct8x8_add_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-23T03:41:42Z",
+      "side": 1,
+      "message": "could normalize this naming while you\u0027re here.",
+      "range": {
+        "startLine": 19,
+        "startChar": 19,
+        "endLine": 19,
+        "endChar": 29
+      },
+      "revId": "01a1bb3517bbd7da4fd27344e5065777a69cf5ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9023f439_4ecb2f35",
+        "filename": "vpx_dsp/arm/idct8x8_add_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-23T03:41:42Z",
+      "side": 1,
+      "message": "this one too",
+      "range": {
+        "startLine": 229,
+        "startChar": 19,
+        "endLine": 229,
+        "endChar": 29
+      },
+      "revId": "01a1bb3517bbd7da4fd27344e5065777a69cf5ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9023f439_ee0ec3aa",
+        "filename": "vpx_dsp/arm/idct8x8_add_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-23T03:41:42Z",
+      "side": 1,
+      "message": "these can be *const",
+      "range": {
+        "startLine": 231,
+        "startChar": 30,
+        "endLine": 231,
+        "endChar": 43
+      },
+      "revId": "01a1bb3517bbd7da4fd27344e5065777a69cf5ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9023f439_ae18cbef",
+        "filename": "vpx_dsp/arm/idct_neon.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-23T03:41:42Z",
+      "side": 1,
+      "message": "seems we had a similar idea:\n\nhttps://chromium-review.googlesource.com/#/c/413296/\n\nwe can use \u0027q\u0027 and \u0027d\u0027 to balance this",
+      "revId": "01a1bb3517bbd7da4fd27344e5065777a69cf5ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
