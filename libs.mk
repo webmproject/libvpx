@@ -391,7 +391,7 @@ LIBVPX_TEST_SRCS=$(addprefix test/,$(call enabled,LIBVPX_TEST_SRCS))
 LIBVPX_TEST_BIN=./test_libvpx$(EXE_SFX)
 LIBVPX_TEST_DATA=$(addprefix $(LIBVPX_TEST_DATA_PATH)/,\
                      $(call enabled,LIBVPX_TEST_DATA))
-libvpx_test_data_url=http://downloads.webmproject.org/test_data/libvpx/$(1)
+libvpx_test_data_url=https://storage.googleapis.com/downloads.webmproject.org/test_data/libvpx/$(1)
 
 TEST_INTRA_PRED_SPEED_BIN=./test_intra_pred_speed$(EXE_SFX)
 TEST_INTRA_PRED_SPEED_SRCS=$(addprefix test/,$(call enabled,TEST_INTRA_PRED_SPEED_SRCS))
