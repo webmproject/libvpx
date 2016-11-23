@@ -208,17 +208,17 @@ void vp9_highbd_temporal_filter_apply_c(
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
-                                              uint8_t *arf_frame_buf,
-                                              uint8_t *frame_ptr_buf,
-                                              int stride) {
+static uint32_t temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
+                                                   uint8_t *arf_frame_buf,
+                                                   uint8_t *frame_ptr_buf,
+                                                   int stride) {
   MACROBLOCK *const x = &cpi->td.mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MV_SPEED_FEATURES *const mv_sf = &cpi->sf.mv;
   const SEARCH_METHODS old_search_method = mv_sf->search_method;
   int step_param;
   int sadpb = x->sadperbit16;
-  int bestsme = INT_MAX;
+  uint32_t bestsme = UINT_MAX;
   uint32_t distortion;
   uint32_t sse;
   int cost_list[5];
@@ -334,8 +334,8 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
           ((mb_cols - 1 - mb_col) * 16) + (17 - 2 * VP9_INTERP_EXTEND);
 
       for (frame = 0; frame < frame_count; frame++) {
-        const int thresh_low = 10000;
-        const int thresh_high = 20000;
+        const uint32_t thresh_low = 10000;
+        const uint32_t thresh_high = 20000;
 
         if (frames[frame] == NULL) continue;
 
@@ -346,7 +346,7 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
           filter_weight = 2;
         } else {
           // Find best match in this frame by MC
-          int err = temporal_filter_find_matching_mb_c(
+          uint32_t err = temporal_filter_find_matching_mb_c(
               cpi, frames[alt_ref_index]->y_buffer + mb_y_offset,
               frames[frame]->y_buffer + mb_y_offset, frames[frame]->y_stride);
 
