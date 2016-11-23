@@ -22,6 +22,30 @@
       "revId": "d4b30d37eeb12b6819f3c32aba7486b56ca5de13",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4d0d632b_d7ce5cbd",
+        "filename": "vpx_dsp/mips/deblock_msa.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2016-11-23T18:44:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9023f439_93ef34ce",
+      "range": {
+        "startLine": 477,
+        "startChar": 34,
+        "endLine": 477,
+        "endChar": 38
+      },
+      "revId": "d4b30d37eeb12b6819f3c32aba7486b56ca5de13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
