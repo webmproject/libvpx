@@ -770,6 +770,10 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
     int idx, idy;
     PREDICTION_MODE b_mode;
     int_mv best_sub8x8[2];
+    const uint32_t invalid_mv = 0x80008000;
+    // Initialize the 2nd element as even though it won't be used meaningfully
+    // if is_compound is false, copying/clamping it may trigger a MSan warning.
+    best_sub8x8[1].as_int = invalid_mv;
     for (idy = 0; idy < 2; idy += num_4x4_h) {
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         const int j = idy * 2 + idx;
