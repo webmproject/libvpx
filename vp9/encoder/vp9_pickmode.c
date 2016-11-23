@@ -1490,8 +1490,11 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   if (cpi->sf.short_circuit_low_temp_var) {
     force_skip_low_temp_var =
         get_force_skip_low_temp_var(&x->variance_low[0], mi_row, mi_col, bsize);
-    // In the most aggresive short circuit, skip golden in any mode
-    if (cpi->sf.short_circuit_low_temp_var == 3 && force_skip_low_temp_var) {
+    // If force_skip_low_temp_var is set, and for short circuit mode = 1 and 3,
+    // skip golden reference.
+    if ((cpi->sf.short_circuit_low_temp_var == 1 ||
+         cpi->sf.short_circuit_low_temp_var == 3) &&
+        force_skip_low_temp_var) {
       usable_ref_frame = LAST_FRAME;
     }
   }
