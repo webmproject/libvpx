@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9023f439_93ef34ce",
+        "filename": "vpx_dsp/mips/deblock_msa.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-23T02:34:26Z",
+      "side": 1,
+      "message": "you can move this to the initialization as in the C or drop the \u0027\u003d 0\u0027 which is a dead store I think",
+      "range": {
+        "startLine": 477,
+        "startChar": 34,
+        "endLine": 477,
+        "endChar": 38
+      },
+      "revId": "d4b30d37eeb12b6819f3c32aba7486b56ca5de13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
