@@ -402,10 +402,10 @@ void iadst4_sse2(__m128i *in) {
       MULTIPLICATION_AND_ADD(lo_04, hi_04, lo_26, hi_26, stg2_0, stg2_1,      \
                              stg2_2, stg2_3, stp2_0, stp2_1, stp2_2, stp2_3)  \
                                                                               \
-      stp2_4 = _mm_adds_epi16(stp1_4, stp1_5);                                \
-      stp2_5 = _mm_subs_epi16(stp1_4, stp1_5);                                \
-      stp2_6 = _mm_subs_epi16(stp1_7, stp1_6);                                \
-      stp2_7 = _mm_adds_epi16(stp1_7, stp1_6);                                \
+      stp2_4 = _mm_add_epi16(stp1_4, stp1_5);                                 \
+      stp2_5 = _mm_sub_epi16(stp1_4, stp1_5);                                 \
+      stp2_6 = _mm_sub_epi16(stp1_7, stp1_6);                                 \
+      stp2_7 = _mm_add_epi16(stp1_7, stp1_6);                                 \
     }                                                                         \
                                                                               \
     /* Stage3 */                                                              \
@@ -413,10 +413,10 @@ void iadst4_sse2(__m128i *in) {
       const __m128i lo_56 = _mm_unpacklo_epi16(stp2_6, stp2_5);               \
       const __m128i hi_56 = _mm_unpackhi_epi16(stp2_6, stp2_5);               \
                                                                               \
-      stp1_0 = _mm_adds_epi16(stp2_0, stp2_3);                                \
-      stp1_1 = _mm_adds_epi16(stp2_1, stp2_2);                                \
-      stp1_2 = _mm_subs_epi16(stp2_1, stp2_2);                                \
-      stp1_3 = _mm_subs_epi16(stp2_0, stp2_3);                                \
+      stp1_0 = _mm_add_epi16(stp2_0, stp2_3);                                 \
+      stp1_1 = _mm_add_epi16(stp2_1, stp2_2);                                 \
+      stp1_2 = _mm_sub_epi16(stp2_1, stp2_2);                                 \
+      stp1_3 = _mm_sub_epi16(stp2_0, stp2_3);                                 \
                                                                               \
       tmp0 = _mm_madd_epi16(lo_56, stg2_1);                                   \
       tmp1 = _mm_madd_epi16(hi_56, stg2_1);                                   \
@@ -438,14 +438,14 @@ void iadst4_sse2(__m128i *in) {
     }                                                                         \
                                                                               \
     /* Stage4  */                                                             \
-    out0 = _mm_adds_epi16(stp1_0, stp2_7);                                    \
-    out1 = _mm_adds_epi16(stp1_1, stp1_6);                                    \
-    out2 = _mm_adds_epi16(stp1_2, stp1_5);                                    \
-    out3 = _mm_adds_epi16(stp1_3, stp2_4);                                    \
-    out4 = _mm_subs_epi16(stp1_3, stp2_4);                                    \
-    out5 = _mm_subs_epi16(stp1_2, stp1_5);                                    \
-    out6 = _mm_subs_epi16(stp1_1, stp1_6);                                    \
-    out7 = _mm_subs_epi16(stp1_0, stp2_7);                                    \
+    out0 = _mm_add_epi16(stp1_0, stp2_7);                                     \
+    out1 = _mm_add_epi16(stp1_1, stp1_6);                                     \
+    out2 = _mm_add_epi16(stp1_2, stp1_5);                                     \
+    out3 = _mm_add_epi16(stp1_3, stp2_4);                                     \
+    out4 = _mm_sub_epi16(stp1_3, stp2_4);                                     \
+    out5 = _mm_sub_epi16(stp1_2, stp1_5);                                     \
+    out6 = _mm_sub_epi16(stp1_1, stp1_6);                                     \
+    out7 = _mm_sub_epi16(stp1_0, stp2_7);                                     \
   }
 
 void vpx_idct8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest,
@@ -866,8 +866,8 @@ void vpx_idct8x8_12_add_sse2(const tran_low_t *input, uint8_t *dest,
     stp2_0 = _mm_packs_epi32(tmp0, tmp2);
     stp2_2 = _mm_packs_epi32(tmp6, tmp4);
 
-    tmp0 = _mm_adds_epi16(stp1_4, stp1_5);
-    tmp1 = _mm_subs_epi16(stp1_4, stp1_5);
+    tmp0 = _mm_add_epi16(stp1_4, stp1_5);
+    tmp1 = _mm_sub_epi16(stp1_4, stp1_5);
 
     stp2_4 = tmp0;
     stp2_5 = _mm_unpacklo_epi64(tmp1, zero);
@@ -878,8 +878,8 @@ void vpx_idct8x8_12_add_sse2(const tran_low_t *input, uint8_t *dest,
   {
     const __m128i lo_56 = _mm_unpacklo_epi16(stp2_5, stp2_6);
 
-    tmp4 = _mm_adds_epi16(stp2_0, stp2_2);
-    tmp6 = _mm_subs_epi16(stp2_0, stp2_2);
+    tmp4 = _mm_add_epi16(stp2_0, stp2_2);
+    tmp6 = _mm_sub_epi16(stp2_0, stp2_2);
 
     stp1_2 = _mm_unpackhi_epi64(tmp6, tmp4);
     stp1_3 = _mm_unpacklo_epi64(tmp6, tmp4);
@@ -896,10 +896,10 @@ void vpx_idct8x8_12_add_sse2(const tran_low_t *input, uint8_t *dest,
   }
 
   // Stage4
-  tmp0 = _mm_adds_epi16(stp1_3, stp2_4);
-  tmp1 = _mm_adds_epi16(stp1_2, stp1_5);
-  tmp2 = _mm_subs_epi16(stp1_3, stp2_4);
-  tmp3 = _mm_subs_epi16(stp1_2, stp1_5);
+  tmp0 = _mm_add_epi16(stp1_3, stp2_4);
+  tmp1 = _mm_add_epi16(stp1_2, stp1_5);
+  tmp2 = _mm_sub_epi16(stp1_3, stp2_4);
+  tmp3 = _mm_sub_epi16(stp1_2, stp1_5);
 
   TRANSPOSE_4X8_10(tmp0, tmp1, tmp2, tmp3, in0, in1, in2, in3)
 
@@ -3449,7 +3449,7 @@ static INLINE __m128i clamp_high_sse2(__m128i value, int bd) {
   __m128i ubounded, retval;
   const __m128i zero = _mm_set1_epi16(0);
   const __m128i one = _mm_set1_epi16(1);
-  const __m128i max = _mm_subs_epi16(_mm_slli_epi16(one, bd), one);
+  const __m128i max = _mm_sub_epi16(_mm_slli_epi16(one, bd), one);
   ubounded = _mm_cmpgt_epi16(value, max);
   retval = _mm_andnot_si128(ubounded, value);
   ubounded = _mm_and_si128(ubounded, max);
@@ -4012,7 +4012,7 @@ void vpx_highbd_idct32x32_1_add_sse2(const tran_low_t *input, uint8_t *dest8,
   __m128i dc_value, d;
   const __m128i zero = _mm_setzero_si128();
   const __m128i one = _mm_set1_epi16(1);
-  const __m128i max = _mm_subs_epi16(_mm_slli_epi16(one, bd), one);
+  const __m128i max = _mm_sub_epi16(_mm_slli_epi16(one, bd), one);
   int a, i, j;
   uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
   tran_low_t out;
