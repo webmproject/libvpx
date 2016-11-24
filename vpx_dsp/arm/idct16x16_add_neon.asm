@@ -36,12 +36,12 @@
     MEND
 
     AREA    Block, CODE, READONLY ; name this block of code
-;void |vpx_idct16x16_256_add_neon_pass1|(int16_t *input,
-;                                          int16_t *output, int output_stride)
+;void |vpx_idct16x16_256_add_neon_pass1|(const int16_t *input,
+;                                        int16_t *output, int output_stride)
 ;
-; r0  int16_t input
+; r0  const int16_t *input
 ; r1  int16_t *output
-; r2  int  output_stride)
+; r2  int output_stride
 
 ; idct16 stage1 - stage6 on all the elements loaded in q8-q15. The output
 ; will be stored back into q8-q15 registers. This function will touch q0-q7
@@ -267,19 +267,19 @@
     bx              lr
     ENDP  ; |vpx_idct16x16_256_add_neon_pass1|
 
-;void vpx_idct16x16_256_add_neon_pass2(int16_t *src,
-;                                        int16_t *output,
-;                                        int16_t *pass1Output,
-;                                        int16_t skip_adding,
-;                                        uint8_t *dest,
-;                                        int dest_stride)
+;void vpx_idct16x16_256_add_neon_pass2(const int16_t *src,
+;                                      int16_t *output,
+;                                      int16_t *pass1_output,
+;                                      int16_t skip_adding,
+;                                      uint8_t *dest,
+;                                      int dest_stride)
 ;
-; r0  int16_t *src
-; r1  int16_t *output,
-; r2  int16_t *pass1Output,
-; r3  int16_t skip_adding,
-; r4  uint8_t *dest,
-; r5  int dest_stride)
+; r0  const int16_t *src
+; r1  int16_t *output
+; r2  int16_t *pass1_output
+; r3  int16_t skip_adding
+; r4  uint8_t *dest
+; r5  int dest_stride
 
 ; idct16 stage1 - stage7 on all the elements loaded in q8-q15. The output
 ; will be stored back into q8-q15 registers. This function will touch q0-q7
@@ -578,7 +578,7 @@
     vqrshrn.s32     d8, q13, #14              ; >> 14
     vqrshrn.s32     d9, q6, #14               ; >> 14
 
-    mov              r4, #16                  ; pass1Output stride
+    mov              r4, #16                  ; pass1_output stride
     ldr              r3, [sp]                 ; load skip_adding
     cmp              r3, #0                   ; check if need adding dest data
     beq              skip_adding_dest
@@ -767,12 +767,12 @@ end_idct16x16_pass2
     bx              lr
     ENDP  ; |vpx_idct16x16_256_add_neon_pass2|
 
-;void |vpx_idct16x16_10_add_neon_pass1|(int16_t *input,
-;                                             int16_t *output, int output_stride)
+;void |vpx_idct16x16_10_add_neon_pass1|(const int16_t *input,
+;                                       int16_t *output, int output_stride)
 ;
-; r0  int16_t input
+; r0  const int16_t *input
 ; r1  int16_t *output
-; r2  int  output_stride)
+; r2  int output_stride
 
 ; idct16 stage1 - stage6 on all the elements loaded in q8-q15. The output
 ; will be stored back into q8-q15 registers. This function will touch q0-q7
@@ -884,19 +884,12 @@ end_idct16x16_pass2
     bx              lr
     ENDP  ; |vpx_idct16x16_10_add_neon_pass1|
 
-;void vpx_idct16x16_10_add_neon_pass2(int16_t *src,
-;                                           int16_t *output,
-;                                           int16_t *pass1Output,
-;                                           int16_t skip_adding,
-;                                           uint8_t *dest,
-;                                           int dest_stride)
+;void vpx_idct16x16_10_add_neon_pass2(const int16_t *src, int16_t *output,
+;                                     int16_t *pass1_output)
 ;
-; r0  int16_t *src
-; r1  int16_t *output,
-; r2  int16_t *pass1Output,
-; r3  int16_t skip_adding,
-; r4  uint8_t *dest,
-; r5  int dest_stride)
+; r0  const int16_t *src
+; r1  int16_t *output
+; r2  int16_t *pass1_output
 
 ; idct16 stage1 - stage7 on all the elements loaded in q8-q15. The output
 ; will be stored back into q8-q15 registers. This function will touch q0-q7
@@ -1076,7 +1069,7 @@ end_idct16x16_pass2
     vqrshrn.s32     d8, q13, #14              ; >> 14
     vqrshrn.s32     d9, q6, #14               ; >> 14
 
-    mov              r4, #16                  ; pass1Output stride
+    mov              r4, #16                  ; pass1_output stride
     ldr              r3, [sp]                 ; load skip_adding
 
     ; stage 7

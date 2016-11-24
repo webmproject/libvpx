@@ -14,13 +14,13 @@
 void vpx_idct16x16_256_add_neon_pass1(const int16_t *input, int16_t *output,
                                       int output_stride);
 void vpx_idct16x16_256_add_neon_pass2(const int16_t *src, int16_t *output,
-                                      int16_t *pass1Output, int16_t skip_adding,
-                                      uint8_t *dest, int dest_stride);
+                                      int16_t *pass1_output,
+                                      int16_t skip_adding, uint8_t *dest,
+                                      int dest_stride);
 void vpx_idct16x16_10_add_neon_pass1(const int16_t *input, int16_t *output,
                                      int output_stride);
 void vpx_idct16x16_10_add_neon_pass2(const int16_t *src, int16_t *output,
-                                     int16_t *pass1Output, int16_t skip_adding,
-                                     uint8_t *dest, int dest_stride);
+                                     int16_t *pass1_output);
 
 #if HAVE_NEON_ASM
 /* For ARM NEON, d8-d15 are callee-saved registers, and need to be saved. */
@@ -113,8 +113,7 @@ void vpx_idct16x16_10_add_neon(const int16_t *input, uint8_t *dest,
   // Second pass processes odd elements 1, 3, 5, 7, 9, 11, 13, 15 and combines
   // with result in pass1(pass1_output) to calculate final result in stage 7
   // which will be saved into row_idct_output.
-  vpx_idct16x16_10_add_neon_pass2(input + 1, row_idct_output, pass1_output, 0,
-                                  dest, dest_stride);
+  vpx_idct16x16_10_add_neon_pass2(input + 1, row_idct_output, pass1_output);
 
   /* Skip Parallel idct on the lower 8 rows as they are all 0s */
 
