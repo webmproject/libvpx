@@ -153,15 +153,27 @@ CODEC_SRCS_ASM_ADS2GAS = $(patsubst %.S, \
 LOCAL_SRC_FILES += $(CODEC_SRCS_ASM_ADS2GAS)
 
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
+  ASM_INCLUDES := vpx_dsp/arm/idct_neon.asm.S
   CODEC_SRCS_ASM_NEON = $(foreach v, \
                         $(CODEC_SRCS_ASM_ARM_ALL),\
                         $(if $(findstring neon,$(v)),$(v),))
+  CODEC_SRCS_ASM_NEON := $(filter-out $(addprefix %, $(ASM_INCLUDES)), \
+                         $(CODEC_SRCS_ASM_NEON))
   CODEC_SRCS_ASM_NEON_ADS2GAS = $(patsubst %.S, \
                                 $(ASM_CNV_PATH_LOCAL)/libvpx/%.S, \
                                 $(CODEC_SRCS_ASM_NEON))
   LOCAL_SRC_FILES += $(patsubst %.S, \
                      %.S.neon, \
                      $(CODEC_SRCS_ASM_NEON_ADS2GAS))
+
+  NEON_ASM_TARGETS = $(patsubst %.S, \
+                     $(ASM_CNV_PATH)/libvpx/%.S, \
+                     $(CODEC_SRCS_ASM_NEON))
+# add a dependency to the full path to the ads2gas output to ensure the
+# includes are converted first.
+ifneq ($(strip $(NEON_ASM_TARGETS)),)
+$(NEON_ASM_TARGETS): $(addprefix $(ASM_CNV_PATH)/libvpx/, $(ASM_INCLUDES))
+endif
 endif
 
 LOCAL_CFLAGS += \
