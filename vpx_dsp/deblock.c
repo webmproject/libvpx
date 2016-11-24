@@ -117,7 +117,7 @@ void vpx_mbpost_proc_across_ip_c(unsigned char *src, int pitch, int rows,
   unsigned char d[16];
 
   for (r = 0; r < rows; r++) {
-    int sumsq = 0;
+    int sumsq = 16;
     int sum = 0;
 
     for (i = -8; i < 0; i++) s[i] = s[0];

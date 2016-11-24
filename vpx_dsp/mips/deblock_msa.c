@@ -459,7 +459,7 @@ void vpx_mbpost_proc_across_ip_msa(uint8_t *src_ptr, int32_t pitch,
 
   flimit_vec = __msa_fill_w(flimit);
   for (row = rows; row--;) {
-    int32_t sum_sq = 0;
+    int32_t sum_sq;
     int32_t sum = 0;
     src0 = (v16u8)__msa_fill_b(src_dup[0]);
     ST8x1_UB(src0, (src_dup - 8));
@@ -474,7 +474,7 @@ void vpx_mbpost_proc_across_ip_msa(uint8_t *src_ptr, int32_t pitch,
     ILVRL_B2_UH(zero, src, src_r_h, src_l_h);
     src_r_w = __msa_dotp_u_w(src_r_h, src_r_h);
     src_r_w += __msa_dotp_u_w(src_l_h, src_l_h);
-    sum_sq = HADD_SW_S32(src_r_w);
+    sum_sq = HADD_SW_S32(src_r_w) + 16;
     sum_h = __msa_hadd_u_h(src, src);
     sum = HADD_UH_U32(sum_h);
     {
