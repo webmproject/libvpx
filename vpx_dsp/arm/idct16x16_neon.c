@@ -16,8 +16,8 @@ void vpx_idct16x16_256_add_neon_pass2(const int16_t *src, int16_t *output,
                                       int16_t *pass1_output,
                                       int16_t skip_adding, uint8_t *dest,
                                       int dest_stride);
-void vpx_idct16x16_10_add_neon_pass1(const int16_t *input, int16_t *output);
-void vpx_idct16x16_10_add_neon_pass2(const int16_t *src, int16_t *output,
+void vpx_idct16x16_10_add_neon_pass1(const tran_low_t *input, int16_t *output);
+void vpx_idct16x16_10_add_neon_pass2(const tran_low_t *src, int16_t *output,
                                      int16_t *pass1_output);
 
 #if HAVE_NEON_ASM
@@ -90,7 +90,7 @@ void vpx_idct16x16_256_add_neon(const int16_t *input, uint8_t *dest,
 #endif
 }
 
-void vpx_idct16x16_10_add_neon(const int16_t *input, uint8_t *dest,
+void vpx_idct16x16_10_add_neon(const tran_low_t *input, uint8_t *dest,
                                int dest_stride) {
 #if HAVE_NEON_ASM
   int64_t store_reg[8];

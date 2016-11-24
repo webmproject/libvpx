@@ -10,8 +10,7 @@
 
 #include <arm_neon.h>
 
-#include "./vpx_config.h"
-#include "vpx_dsp/arm/transpose_neon.h"
+#include "vpx_dsp/arm/idct_neon.h"
 #include "vpx_dsp/txfm_common.h"
 
 void vpx_idct16x16_256_add_neon_pass1(const int16_t *in, int16_t *out) {
@@ -761,7 +760,7 @@ void vpx_idct16x16_256_add_neon_pass2(const int16_t *src, int16_t *out,
   }
 }
 
-void vpx_idct16x16_10_add_neon_pass1(const int16_t *in, int16_t *out) {
+void vpx_idct16x16_10_add_neon_pass1(const tran_low_t *in, int16_t *out) {
   int16x4_t d4s16;
   int16x4_t d8s16, d9s16, d10s16, d11s16, d12s16, d13s16, d14s16, d15s16;
   int16x8_t q0s16, q1s16, q2s16, q4s16, q5s16, q6s16, q7s16;
@@ -770,28 +769,28 @@ void vpx_idct16x16_10_add_neon_pass1(const int16_t *in, int16_t *out) {
   int32x4_t q10s32, q11s32, q12s32, q15s32;
   int16x8x2_t q0x2s16;
 
-  q0x2s16 = vld2q_s16(in);
+  q0x2s16 = load_tran_low_to_s16x2q(in);
   q8s16 = q0x2s16.val[0];
   in += 16;
-  q0x2s16 = vld2q_s16(in);
+  q0x2s16 = load_tran_low_to_s16x2q(in);
   q9s16 = q0x2s16.val[0];
   in += 16;
-  q0x2s16 = vld2q_s16(in);
+  q0x2s16 = load_tran_low_to_s16x2q(in);
   q10s16 = q0x2s16.val[0];
   in += 16;
-  q0x2s16 = vld2q_s16(in);
+  q0x2s16 = load_tran_low_to_s16x2q(in);
   q11s16 = q0x2s16.val[0];
   in += 16;
-  q0x2s16 = vld2q_s16(in);
+  q0x2s16 = load_tran_low_to_s16x2q(in);
   q12s16 = q0x2s16.val[0];
   in += 16;
-  q0x2s16 = vld2q_s16(in);
+  q0x2s16 = load_tran_low_to_s16x2q(in);
   q13s16 = q0x2s16.val[0];
   in += 16;
-  q0x2s16 = vld2q_s16(in);
+  q0x2s16 = load_tran_low_to_s16x2q(in);
   q14s16 = q0x2s16.val[0];
   in += 16;
-  q0x2s16 = vld2q_s16(in);
+  q0x2s16 = load_tran_low_to_s16x2q(in);
   q15s16 = q0x2s16.val[0];
 
   transpose_s16_8x8(&q8s16, &q9s16, &q10s16, &q11s16, &q12s16, &q13s16, &q14s16,
@@ -859,7 +858,7 @@ void vpx_idct16x16_10_add_neon_pass1(const int16_t *in, int16_t *out) {
   vst1q_s16(out, q15s16);
 }
 
-void vpx_idct16x16_10_add_neon_pass2(const int16_t *src, int16_t *out,
+void vpx_idct16x16_10_add_neon_pass2(const tran_low_t *src, int16_t *out,
                                      int16_t *pass1_output) {
   int16x4_t d0s16, d1s16, d2s16, d3s16, d4s16, d5s16, d6s16, d7s16;
   int16x4_t d8s16, d9s16, d10s16, d11s16, d12s16, d13s16, d14s16, d15s16;
@@ -874,28 +873,28 @@ void vpx_idct16x16_10_add_neon_pass2(const int16_t *src, int16_t *out,
   int32x4_t q10s32, q11s32, q12s32, q13s32;
   int16x8x2_t q0x2s16;
 
-  q0x2s16 = vld2q_s16(src);
+  q0x2s16 = load_tran_low_to_s16x2q(src);
   q8s16 = q0x2s16.val[0];
   src += 16;
-  q0x2s16 = vld2q_s16(src);
+  q0x2s16 = load_tran_low_to_s16x2q(src);
   q9s16 = q0x2s16.val[0];
   src += 16;
-  q0x2s16 = vld2q_s16(src);
+  q0x2s16 = load_tran_low_to_s16x2q(src);
   q10s16 = q0x2s16.val[0];
   src += 16;
-  q0x2s16 = vld2q_s16(src);
+  q0x2s16 = load_tran_low_to_s16x2q(src);
   q11s16 = q0x2s16.val[0];
   src += 16;
-  q0x2s16 = vld2q_s16(src);
+  q0x2s16 = load_tran_low_to_s16x2q(src);
   q12s16 = q0x2s16.val[0];
   src += 16;
-  q0x2s16 = vld2q_s16(src);
+  q0x2s16 = load_tran_low_to_s16x2q(src);
   q13s16 = q0x2s16.val[0];
   src += 16;
-  q0x2s16 = vld2q_s16(src);
+  q0x2s16 = load_tran_low_to_s16x2q(src);
   q14s16 = q0x2s16.val[0];
   src += 16;
-  q0x2s16 = vld2q_s16(src);
+  q0x2s16 = load_tran_low_to_s16x2q(src);
   q15s16 = q0x2s16.val[0];
 
   transpose_s16_8x8(&q8s16, &q9s16, &q10s16, &q11s16, &q12s16, &q13s16, &q14s16,
