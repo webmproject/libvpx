@@ -25,6 +25,24 @@
     },
     {
       "key": {
+        "uuid": "4d0d632b_14b3a59d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-11-28T20:54:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4d0d632b_19087e48",
+      "revId": "92a17887a4b3452b98546954f2a859645ecfc3fe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4d0d632b_591ef68b",
         "filename": "test/svc_test.cc",
         "patchSetId": 2
@@ -36,6 +54,24 @@
       "writtenOn": "2016-11-28T19:50:42Z",
       "side": 1,
       "message": "this won\u0027t compile; use an explicit assignment",
+      "revId": "92a17887a4b3452b98546954f2a859645ecfc3fe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4d0d632b_54b11d94",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 441,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2016-11-28T20:54:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4d0d632b_591ef68b",
       "revId": "92a17887a4b3452b98546954f2a859645ecfc3fe",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
