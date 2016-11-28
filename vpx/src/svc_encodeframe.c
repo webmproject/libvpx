@@ -201,7 +201,7 @@ static vpx_codec_err_t parse_options(SvcContext *svc_ctx, const char *options) {
   char *input_string;
   char *option_name;
   char *option_value;
-  char *input_ptr;
+  char *input_ptr = NULL;
   SvcInternal_t *const si = get_svc_internal(svc_ctx);
   vpx_codec_err_t res = VPX_CODEC_OK;
   int i, alt_ref_enabled = 0;
