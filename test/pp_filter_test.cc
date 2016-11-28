@@ -135,11 +135,11 @@ class VpxMbPostProcAcrossIpTest
     }
   }
 
-  void RunComparison(const unsigned char *kExpectedOutput, unsigned char *src_c,
+  void RunComparison(const unsigned char *expected_output, unsigned char *src_c,
                      int rows, int cols, int src_pitch) {
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < cols; c++) {
-        ASSERT_EQ(kExpectedOutput[c], src_c[c]) << "at (" << r << ", " << c
+        ASSERT_EQ(expected_output[c], src_c[c]) << "at (" << r << ", " << c
                                                 << ")";
       }
       src_c += src_pitch;
@@ -147,10 +147,10 @@ class VpxMbPostProcAcrossIpTest
   }
 
   void RunFilterLevel(unsigned char *s, int rows, int cols, int src_width,
-                      int filter_level, const unsigned char *kExpectedOutput) {
+                      int filter_level, const unsigned char *expected_output) {
     ASM_REGISTER_STATE_CHECK(
         GetParam()(s, src_width, rows, cols, filter_level));
-    RunComparison(kExpectedOutput, s, rows, cols, src_width);
+    RunComparison(expected_output, s, rows, cols, src_width);
   }
 };
 
@@ -308,11 +308,11 @@ class VpxMbPostProcDownTest
     }
   }
 
-  void RunComparison(const unsigned char *kExpectedOutput, unsigned char *src_c,
+  void RunComparison(const unsigned char *expected_output, unsigned char *src_c,
                      int rows, int cols, int src_pitch) {
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < cols; c++) {
-        ASSERT_EQ(kExpectedOutput[r * rows + c], src_c[c]) << "at (" << r
+        ASSERT_EQ(expected_output[r * rows + c], src_c[c]) << "at (" << r
                                                            << ", " << c << ")";
       }
       src_c += src_pitch;
@@ -331,10 +331,10 @@ class VpxMbPostProcDownTest
   }
 
   void RunFilterLevel(unsigned char *s, int rows, int cols, int src_width,
-                      int filter_level, const unsigned char *kExpectedOutput) {
+                      int filter_level, const unsigned char *expected_output) {
     ASM_REGISTER_STATE_CHECK(
         GetParam()(s, src_width, rows, cols, filter_level));
-    RunComparison(kExpectedOutput, s, rows, cols, src_width);
+    RunComparison(expected_output, s, rows, cols, src_width);
   }
 };
 
