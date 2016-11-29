@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d01acc56_a2464b98",
+        "filename": "vpx_dsp/arm/idct16x16_add_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-11-29T17:07:54Z",
+      "side": 1,
+      "message": "As the first pass, output_stride is const 8 and could be cleaned. Same to vpx_idct16x16_10_add_neon_pass1().",
+      "range": {
+        "startLine": 18,
+        "startChar": 42,
+        "endLine": 18,
+        "endChar": 55
+      },
+      "revId": "c6641782c3ea2e12417c04ac2b1b09f6a82caf88",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
