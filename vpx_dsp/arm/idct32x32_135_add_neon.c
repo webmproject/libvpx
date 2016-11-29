@@ -16,6 +16,50 @@
 #include "vpx_dsp/arm/transpose_neon.h"
 #include "vpx_dsp/txfm_common.h"
 
+static INLINE void load_8x8_s16(const tran_low_t *input, int16x8_t *const in0,
+                                int16x8_t *const in1, int16x8_t *const in2,
+                                int16x8_t *const in3, int16x8_t *const in4,
+                                int16x8_t *const in5, int16x8_t *const in6,
+                                int16x8_t *const in7) {
+  *in0 = load_tran_low_to_s16q(input);
+  input += 32;
+  *in1 = load_tran_low_to_s16q(input);
+  input += 32;
+  *in2 = load_tran_low_to_s16q(input);
+  input += 32;
+  *in3 = load_tran_low_to_s16q(input);
+  input += 32;
+  *in4 = load_tran_low_to_s16q(input);
+  input += 32;
+  *in5 = load_tran_low_to_s16q(input);
+  input += 32;
+  *in6 = load_tran_low_to_s16q(input);
+  input += 32;
+  *in7 = load_tran_low_to_s16q(input);
+}
+
+static INLINE void load_4x8_s16(const tran_low_t *input, int16x4_t *const in0,
+                                int16x4_t *const in1, int16x4_t *const in2,
+                                int16x4_t *const in3, int16x4_t *const in4,
+                                int16x4_t *const in5, int16x4_t *const in6,
+                                int16x4_t *const in7) {
+  *in0 = load_tran_low_to_s16d(input);
+  input += 32;
+  *in1 = load_tran_low_to_s16d(input);
+  input += 32;
+  *in2 = load_tran_low_to_s16d(input);
+  input += 32;
+  *in3 = load_tran_low_to_s16d(input);
+  input += 32;
+  *in4 = load_tran_low_to_s16d(input);
+  input += 32;
+  *in5 = load_tran_low_to_s16d(input);
+  input += 32;
+  *in6 = load_tran_low_to_s16d(input);
+  input += 32;
+  *in7 = load_tran_low_to_s16d(input);
+}
+
 // Only for the first pass of the  _135_ variant. Since it only uses values from
 // the top left 16x16 it can safely assume all the remaining values are 0 and
 // skip an awful lot of calculations. In fact, only the first 12 columns make
@@ -43,7 +87,7 @@
 // 13  84  93 103 110 125
 // 14  98 106 115 127
 // 15 117 128
-static void idct32_12_neon(const int16_t *input, int16_t *output) {
+static void idct32_12_neon(const tran_low_t *input, int16_t *output) {
   int16x8_t in0, in1, in2, in3, in4, in5, in6, in7;
   int16x4_t tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
   int16x8_t in8, in9, in10, in11;
@@ -66,27 +110,11 @@ static void idct32_12_neon(const int16_t *input, int16_t *output) {
       s7_11, s7_12, s7_13, s7_14, s7_15, s7_20, s7_21, s7_22, s7_23, s7_24,
       s7_25, s7_26, s7_27;
 
-  load_and_transpose_s16_8x8(input, 32, &in0, &in1, &in2, &in3, &in4, &in5,
-                             &in6, &in7);
+  load_8x8_s16(input, &in0, &in1, &in2, &in3, &in4, &in5, &in6, &in7);
+  transpose_s16_8x8(&in0, &in1, &in2, &in3, &in4, &in5, &in6, &in7);
 
-  input += 8;
-
-  tmp0 = vld1_s16(input);
-  input += 32;
-  tmp1 = vld1_s16(input);
-  input += 32;
-  tmp2 = vld1_s16(input);
-  input += 32;
-  tmp3 = vld1_s16(input);
-  input += 32;
-  tmp4 = vld1_s16(input);
-  input += 32;
-  tmp5 = vld1_s16(input);
-  input += 32;
-  tmp6 = vld1_s16(input);
-  input += 32;
-  tmp7 = vld1_s16(input);
-
+  load_4x8_s16(input + 8, &tmp0, &tmp1, &tmp2, &tmp3, &tmp4, &tmp5, &tmp6,
+               &tmp7);
   transpose_s16_4x8(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, &in8, &in9,
                     &in10, &in11);
 
@@ -669,7 +697,7 @@ static void idct32_16_neon(const int16_t *input, uint8_t *output, int stride) {
                        output + (24 * stride), stride);
 }
 
-void vpx_idct32x32_135_add_neon(const int16_t *input, uint8_t *dest,
+void vpx_idct32x32_135_add_neon(const tran_low_t *input, uint8_t *dest,
                                 int stride) {
   int i;
   int16_t temp[32 * 16];

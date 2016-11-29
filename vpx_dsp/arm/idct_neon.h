@@ -18,9 +18,9 @@
 #include "vpx_dsp/vpx_dsp_common.h"
 
 //------------------------------------------------------------------------------
+// Helper functions used to load tran_low_t into int16, narrowing if necessary.
 
-// Helper function used to load tran_low_t into int16, narrowing if necessary.
-static INLINE int16x8_t load_tran_low_to_s16(const tran_low_t *buf) {
+static INLINE int16x8_t load_tran_low_to_s16q(const tran_low_t *buf) {
 #if CONFIG_VP9_HIGHBITDEPTH
   const int32x4_t v0 = vld1q_s32(buf);
   const int32x4_t v1 = vld1q_s32(buf + 4);
@@ -31,6 +31,17 @@ static INLINE int16x8_t load_tran_low_to_s16(const tran_low_t *buf) {
   return vld1q_s16(buf);
 #endif
 }
+
+static INLINE int16x4_t load_tran_low_to_s16d(const tran_low_t *buf) {
+#if CONFIG_VP9_HIGHBITDEPTH
+  const int32x4_t v0 = vld1q_s32(buf);
+  return vmovn_s32(v0);
+#else
+  return vld1_s16(buf);
+#endif
+}
+
+//------------------------------------------------------------------------------
 
 // Multiply a by a_const. Saturate, shift and narrow by 14.
 static INLINE int16x8_t multiply_shift_and_narrow_s16(const int16x8_t a,

@@ -174,14 +174,14 @@ void vpx_idct8x8_64_add_neon(const tran_low_t *input, uint8_t *dest,
   int16x8_t q8s16, q9s16, q10s16, q11s16, q12s16, q13s16, q14s16, q15s16;
   uint16x8_t q8u16, q9u16, q10u16, q11u16;
 
-  q8s16 = load_tran_low_to_s16(input);
-  q9s16 = load_tran_low_to_s16(input + 8);
-  q10s16 = load_tran_low_to_s16(input + 16);
-  q11s16 = load_tran_low_to_s16(input + 24);
-  q12s16 = load_tran_low_to_s16(input + 32);
-  q13s16 = load_tran_low_to_s16(input + 40);
-  q14s16 = load_tran_low_to_s16(input + 48);
-  q15s16 = load_tran_low_to_s16(input + 56);
+  q8s16 = load_tran_low_to_s16q(input);
+  q9s16 = load_tran_low_to_s16q(input + 8);
+  q10s16 = load_tran_low_to_s16q(input + 16);
+  q11s16 = load_tran_low_to_s16q(input + 24);
+  q12s16 = load_tran_low_to_s16q(input + 32);
+  q13s16 = load_tran_low_to_s16q(input + 40);
+  q14s16 = load_tran_low_to_s16q(input + 48);
+  q15s16 = load_tran_low_to_s16q(input + 56);
 
   transpose_s16_8x8(&q8s16, &q9s16, &q10s16, &q11s16, &q12s16, &q13s16, &q14s16,
                     &q15s16);
@@ -280,14 +280,14 @@ void vpx_idct8x8_12_add_neon(const tran_low_t *input, uint8_t *dest,
   uint16x8_t q8u16, q9u16, q10u16, q11u16;
   int32x4_t q9s32, q10s32, q11s32, q12s32;
 
-  q8s16 = load_tran_low_to_s16(input);
-  q9s16 = load_tran_low_to_s16(input + 8);
-  q10s16 = load_tran_low_to_s16(input + 16);
-  q11s16 = load_tran_low_to_s16(input + 24);
-  q12s16 = load_tran_low_to_s16(input + 32);
-  q13s16 = load_tran_low_to_s16(input + 40);
-  q14s16 = load_tran_low_to_s16(input + 48);
-  q15s16 = load_tran_low_to_s16(input + 56);
+  q8s16 = load_tran_low_to_s16q(input);
+  q9s16 = load_tran_low_to_s16q(input + 8);
+  q10s16 = load_tran_low_to_s16q(input + 16);
+  q11s16 = load_tran_low_to_s16q(input + 24);
+  q12s16 = load_tran_low_to_s16q(input + 32);
+  q13s16 = load_tran_low_to_s16q(input + 40);
+  q14s16 = load_tran_low_to_s16q(input + 48);
+  q15s16 = load_tran_low_to_s16q(input + 56);
 
   transpose_s16_8x8(&q8s16, &q9s16, &q10s16, &q11s16, &q12s16, &q13s16, &q14s16,
                     &q15s16);
