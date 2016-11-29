@@ -8,8 +8,14 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
+    INCLUDE ./vpx_config.asm
+
     EXPORT  |vpx_idct16x16_256_add_neon_pass1|
     EXPORT  |vpx_idct16x16_256_add_neon_pass2|
+    IF CONFIG_VP9_HIGHBITDEPTH
+    EXPORT  |vpx_idct16x16_256_add_neon_pass1_tran_low|
+    EXPORT  |vpx_idct16x16_256_add_neon_pass2_tran_low|
+    ENDIF
     EXPORT  |vpx_idct16x16_10_add_neon_pass1|
     EXPORT  |vpx_idct16x16_10_add_neon_pass2|
     ARM
@@ -60,6 +66,7 @@
     vld2.s16        {q1,q2}, [r0]!
     vmov.s16        q15, q1
 
+idct16x16_256_add_neon_pass1
     ; cospi_28_64 = 3196
     movw            r3, #0x0c7c
 
@@ -255,6 +262,28 @@
     bx              lr
     ENDP  ; |vpx_idct16x16_256_add_neon_pass1|
 
+IF CONFIG_VP9_HIGHBITDEPTH
+;void |vpx_idct16x16_256_add_neon_pass1_tran_low|(const tran_low_t *input,
+;                                                 int16_t *output)
+;
+; r0  const tran_low_t *input
+; r1  int16_t *output
+
+|vpx_idct16x16_256_add_neon_pass1_tran_low| PROC
+    LOAD_TRAN_LOW_TO_S16X2 d16, d17, d18, d19, r0
+    LOAD_TRAN_LOW_TO_S16X2 d18, d19, d20, d21, r0
+    LOAD_TRAN_LOW_TO_S16X2 d20, d21, d22, d23, r0
+    LOAD_TRAN_LOW_TO_S16X2 d22, d23, d24, d25, r0
+    LOAD_TRAN_LOW_TO_S16X2 d24, d25, d26, d27, r0
+    LOAD_TRAN_LOW_TO_S16X2 d26, d27, d28, d29, r0
+    LOAD_TRAN_LOW_TO_S16X2 d28, d29, d30, d31, r0
+    LOAD_TRAN_LOW_TO_S16X2 d2, d3, d4, d5, r0
+    vmov.s16        q15, q1
+
+    b               idct16x16_256_add_neon_pass1
+    ENDP  ; |vpx_idct16x16_256_add_neon_pass1_tran_low|
+ENDIF  ; CONFIG_VP9_HIGHBITDEPTH
+
 ;void vpx_idct16x16_256_add_neon_pass2(const int16_t *src,
 ;                                      int16_t *output,
 ;                                      int16_t *pass1_output,
@@ -273,8 +302,6 @@
 ; will be stored back into q8-q15 registers. This function will touch q0-q7
 ; registers and use them as buffer during calculation.
 |vpx_idct16x16_256_add_neon_pass2| PROC
-    push            {r3-r9}
-
     ; TODO(hkuang): Find a better way to load the elements.
     ; load elements of 1, 3, 5, 7, 9, 11, 13, 15 into q8 - q15
     vld2.s16        {q8,q9}, [r0]!
@@ -286,6 +313,9 @@
     vld2.s16        {q14,q15}, [r0]!
     vld2.s16        {q0,q1}, [r0]!
     vmov.s16        q15, q0;
+
+idct16x16_256_add_neon_pass2
+    push            {r3-r9}
 
     ; cospi_30_64 = 1606
     movw            r3, #0x0646
@@ -754,6 +784,36 @@ end_idct16x16_pass2
     pop             {r3-r9}
     bx              lr
     ENDP  ; |vpx_idct16x16_256_add_neon_pass2|
+
+IF CONFIG_VP9_HIGHBITDEPTH
+;void vpx_idct16x16_256_add_neon_pass2_tran_low(const tran_low_t *src,
+;                                               int16_t *output,
+;                                               int16_t *pass1_output,
+;                                               int16_t skip_adding,
+;                                               uint8_t *dest,
+;                                               int dest_stride)
+;
+; r0  const tran_low_t *src
+; r1  int16_t *output
+; r2  int16_t *pass1_output
+; r3  int16_t skip_adding
+; r4  uint8_t *dest
+; r5  int dest_stride
+
+|vpx_idct16x16_256_add_neon_pass2_tran_low| PROC
+    LOAD_TRAN_LOW_TO_S16X2 d16, d17, d18, d19, r0
+    LOAD_TRAN_LOW_TO_S16X2 d18, d19, d20, d21, r0
+    LOAD_TRAN_LOW_TO_S16X2 d20, d21, d22, d23, r0
+    LOAD_TRAN_LOW_TO_S16X2 d22, d23, d24, d25, r0
+    LOAD_TRAN_LOW_TO_S16X2 d24, d25, d26, d27, r0
+    LOAD_TRAN_LOW_TO_S16X2 d26, d27, d28, d29, r0
+    LOAD_TRAN_LOW_TO_S16X2 d28, d29, d30, d31, r0
+    LOAD_TRAN_LOW_TO_S16X2 d0, d1, d2, d3, r0
+    vmov.s16        q15, q0
+
+    b               idct16x16_256_add_neon_pass2
+    ENDP  ; |vpx_idct16x16_256_add_neon_pass2_tran_low|
+ENDIF  ; CONFIG_VP9_HIGHBITDEPTH
 
 ;void |vpx_idct16x16_10_add_neon_pass1|(const tran_low_t *input,
 ;                                       int16_t *output)
