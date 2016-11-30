@@ -14,14 +14,11 @@
 #include "vpx_dsp/arm/transpose_neon.h"
 #include "vpx_dsp/txfm_common.h"
 
-void vpx_idct16x16_256_add_neon_pass1(const int16_t *in, int16_t *out,
-                                      int output_stride) {
+void vpx_idct16x16_256_add_neon_pass1(const int16_t *in, int16_t *out) {
   int16x4_t d0s16, d1s16, d2s16, d3s16;
   int16x4_t d8s16, d9s16, d10s16, d11s16, d12s16, d13s16, d14s16, d15s16;
   int16x4_t d16s16, d17s16, d18s16, d19s16, d20s16, d21s16, d22s16, d23s16;
   int16x4_t d24s16, d25s16, d26s16, d27s16, d28s16, d29s16, d30s16, d31s16;
-  uint64x1_t d16u64, d17u64, d18u64, d19u64, d20u64, d21u64, d22u64, d23u64;
-  uint64x1_t d24u64, d25u64, d26u64, d27u64, d28u64, d29u64, d30u64, d31u64;
   int16x8_t q0s16, q1s16, q2s16, q3s16, q4s16, q5s16, q6s16, q7s16;
   int16x8_t q8s16, q9s16, q10s16, q11s16, q12s16, q13s16, q14s16, q15s16;
   int32x4_t q0s32, q1s32, q2s32, q3s32, q5s32, q6s32, q9s32;
@@ -197,56 +194,22 @@ void vpx_idct16x16_256_add_neon_pass1(const int16_t *in, int16_t *out,
   q14s16 = vsubq_s16(q1s16, q6s16);
   q15s16 = vsubq_s16(q0s16, q15s16);
 
-  d16u64 = vreinterpret_u64_s16(vget_low_s16(q8s16));
-  d17u64 = vreinterpret_u64_s16(vget_high_s16(q8s16));
-  d18u64 = vreinterpret_u64_s16(vget_low_s16(q9s16));
-  d19u64 = vreinterpret_u64_s16(vget_high_s16(q9s16));
-  d20u64 = vreinterpret_u64_s16(vget_low_s16(q10s16));
-  d21u64 = vreinterpret_u64_s16(vget_high_s16(q10s16));
-  d22u64 = vreinterpret_u64_s16(vget_low_s16(q11s16));
-  d23u64 = vreinterpret_u64_s16(vget_high_s16(q11s16));
-  d24u64 = vreinterpret_u64_s16(vget_low_s16(q12s16));
-  d25u64 = vreinterpret_u64_s16(vget_high_s16(q12s16));
-  d26u64 = vreinterpret_u64_s16(vget_low_s16(q13s16));
-  d27u64 = vreinterpret_u64_s16(vget_high_s16(q13s16));
-  d28u64 = vreinterpret_u64_s16(vget_low_s16(q14s16));
-  d29u64 = vreinterpret_u64_s16(vget_high_s16(q14s16));
-  d30u64 = vreinterpret_u64_s16(vget_low_s16(q15s16));
-  d31u64 = vreinterpret_u64_s16(vget_high_s16(q15s16));
-
   // store the data
-  output_stride >>= 1;  // output_stride / 2, out is int16_t
-  vst1_u64((uint64_t *)out, d16u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d17u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d18u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d19u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d20u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d21u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d22u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d23u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d24u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d25u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d26u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d27u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d28u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d29u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d30u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d31u64);
+  vst1q_s16(out, q8s16);
+  out += 8;
+  vst1q_s16(out, q9s16);
+  out += 8;
+  vst1q_s16(out, q10s16);
+  out += 8;
+  vst1q_s16(out, q11s16);
+  out += 8;
+  vst1q_s16(out, q12s16);
+  out += 8;
+  vst1q_s16(out, q13s16);
+  out += 8;
+  vst1q_s16(out, q14s16);
+  out += 8;
+  vst1q_s16(out, q15s16);
 }
 
 void vpx_idct16x16_256_add_neon_pass2(const int16_t *src, int16_t *out,
@@ -798,12 +761,9 @@ void vpx_idct16x16_256_add_neon_pass2(const int16_t *src, int16_t *out,
   }
 }
 
-void vpx_idct16x16_10_add_neon_pass1(const int16_t *in, int16_t *out,
-                                     int output_stride) {
+void vpx_idct16x16_10_add_neon_pass1(const int16_t *in, int16_t *out) {
   int16x4_t d4s16;
   int16x4_t d8s16, d9s16, d10s16, d11s16, d12s16, d13s16, d14s16, d15s16;
-  uint64x1_t d4u64, d5u64, d18u64, d19u64, d20u64, d21u64, d22u64, d23u64;
-  uint64x1_t d24u64, d25u64, d26u64, d27u64, d28u64, d29u64, d30u64, d31u64;
   int16x8_t q0s16, q1s16, q2s16, q4s16, q5s16, q6s16, q7s16;
   int16x8_t q8s16, q9s16, q10s16, q11s16, q12s16, q13s16, q14s16, q15s16;
   int32x4_t q6s32, q9s32;
@@ -881,56 +841,22 @@ void vpx_idct16x16_10_add_neon_pass1(const int16_t *in, int16_t *out,
   q14s16 = vsubq_s16(q8s16, q6s16);
   q15s16 = vsubq_s16(q8s16, q7s16);
 
-  d4u64 = vreinterpret_u64_s16(vget_low_s16(q2s16));
-  d5u64 = vreinterpret_u64_s16(vget_high_s16(q2s16));
-  d18u64 = vreinterpret_u64_s16(vget_low_s16(q9s16));
-  d19u64 = vreinterpret_u64_s16(vget_high_s16(q9s16));
-  d20u64 = vreinterpret_u64_s16(vget_low_s16(q10s16));
-  d21u64 = vreinterpret_u64_s16(vget_high_s16(q10s16));
-  d22u64 = vreinterpret_u64_s16(vget_low_s16(q11s16));
-  d23u64 = vreinterpret_u64_s16(vget_high_s16(q11s16));
-  d24u64 = vreinterpret_u64_s16(vget_low_s16(q12s16));
-  d25u64 = vreinterpret_u64_s16(vget_high_s16(q12s16));
-  d26u64 = vreinterpret_u64_s16(vget_low_s16(q13s16));
-  d27u64 = vreinterpret_u64_s16(vget_high_s16(q13s16));
-  d28u64 = vreinterpret_u64_s16(vget_low_s16(q14s16));
-  d29u64 = vreinterpret_u64_s16(vget_high_s16(q14s16));
-  d30u64 = vreinterpret_u64_s16(vget_low_s16(q15s16));
-  d31u64 = vreinterpret_u64_s16(vget_high_s16(q15s16));
-
   // store the data
-  output_stride >>= 1;  // output_stride / 2, out is int16_t
-  vst1_u64((uint64_t *)out, d4u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d5u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d18u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d19u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d20u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d21u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d22u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d23u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d24u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d25u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d26u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d27u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d28u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d29u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d30u64);
-  out += output_stride;
-  vst1_u64((uint64_t *)out, d31u64);
+  vst1q_s16(out, q2s16);
+  out += 8;
+  vst1q_s16(out, q9s16);
+  out += 8;
+  vst1q_s16(out, q10s16);
+  out += 8;
+  vst1q_s16(out, q11s16);
+  out += 8;
+  vst1q_s16(out, q12s16);
+  out += 8;
+  vst1q_s16(out, q13s16);
+  out += 8;
+  vst1q_s16(out, q14s16);
+  out += 8;
+  vst1q_s16(out, q15s16);
 }
 
 void vpx_idct16x16_10_add_neon_pass2(const int16_t *src, int16_t *out,

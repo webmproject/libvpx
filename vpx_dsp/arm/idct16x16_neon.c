@@ -11,14 +11,12 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 
-void vpx_idct16x16_256_add_neon_pass1(const int16_t *input, int16_t *output,
-                                      int output_stride);
+void vpx_idct16x16_256_add_neon_pass1(const int16_t *input, int16_t *output);
 void vpx_idct16x16_256_add_neon_pass2(const int16_t *src, int16_t *output,
                                       int16_t *pass1_output,
                                       int16_t skip_adding, uint8_t *dest,
                                       int dest_stride);
-void vpx_idct16x16_10_add_neon_pass1(const int16_t *input, int16_t *output,
-                                     int output_stride);
+void vpx_idct16x16_10_add_neon_pass1(const int16_t *input, int16_t *output);
 void vpx_idct16x16_10_add_neon_pass2(const int16_t *src, int16_t *output,
                                      int16_t *pass1_output);
 
@@ -44,7 +42,7 @@ void vpx_idct16x16_256_add_neon(const int16_t *input, uint8_t *dest,
   /* Parallel idct on the upper 8 rows */
   // First pass processes even elements 0, 2, 4, 6, 8, 10, 12, 14 and save the
   // stage 6 result in pass1_output.
-  vpx_idct16x16_256_add_neon_pass1(input, pass1_output, 8);
+  vpx_idct16x16_256_add_neon_pass1(input, pass1_output);
 
   // Second pass processes odd elements 1, 3, 5, 7, 9, 11, 13, 15 and combines
   // with result in pass1(pass1_output) to calculate final result in stage 7
@@ -55,7 +53,7 @@ void vpx_idct16x16_256_add_neon(const int16_t *input, uint8_t *dest,
   /* Parallel idct on the lower 8 rows */
   // First pass processes even elements 0, 2, 4, 6, 8, 10, 12, 14 and save the
   // stage 6 result in pass1_output.
-  vpx_idct16x16_256_add_neon_pass1(input + 8 * 16, pass1_output, 8);
+  vpx_idct16x16_256_add_neon_pass1(input + 8 * 16, pass1_output);
 
   // Second pass processes odd elements 1, 3, 5, 7, 9, 11, 13, 15 and combines
   // with result in pass1(pass1_output) to calculate final result in stage 7
@@ -66,7 +64,7 @@ void vpx_idct16x16_256_add_neon(const int16_t *input, uint8_t *dest,
   /* Parallel idct on the left 8 columns */
   // First pass processes even elements 0, 2, 4, 6, 8, 10, 12, 14 and save the
   // stage 6 result in pass1_output.
-  vpx_idct16x16_256_add_neon_pass1(row_idct_output, pass1_output, 8);
+  vpx_idct16x16_256_add_neon_pass1(row_idct_output, pass1_output);
 
   // Second pass processes odd elements 1, 3, 5, 7, 9, 11, 13, 15 and combines
   // with result in pass1(pass1_output) to calculate final result in stage 7.
@@ -77,7 +75,7 @@ void vpx_idct16x16_256_add_neon(const int16_t *input, uint8_t *dest,
   /* Parallel idct on the right 8 columns */
   // First pass processes even elements 0, 2, 4, 6, 8, 10, 12, 14 and save the
   // stage 6 result in pass1_output.
-  vpx_idct16x16_256_add_neon_pass1(row_idct_output + 8 * 16, pass1_output, 8);
+  vpx_idct16x16_256_add_neon_pass1(row_idct_output + 8 * 16, pass1_output);
 
   // Second pass processes odd elements 1, 3, 5, 7, 9, 11, 13, 15 and combines
   // with result in pass1(pass1_output) to calculate final result in stage 7.
@@ -108,7 +106,7 @@ void vpx_idct16x16_10_add_neon(const int16_t *input, uint8_t *dest,
   /* Parallel idct on the upper 8 rows */
   // First pass processes even elements 0, 2, 4, 6, 8, 10, 12, 14 and save the
   // stage 6 result in pass1_output.
-  vpx_idct16x16_10_add_neon_pass1(input, pass1_output, 8);
+  vpx_idct16x16_10_add_neon_pass1(input, pass1_output);
 
   // Second pass processes odd elements 1, 3, 5, 7, 9, 11, 13, 15 and combines
   // with result in pass1(pass1_output) to calculate final result in stage 7
@@ -120,7 +118,7 @@ void vpx_idct16x16_10_add_neon(const int16_t *input, uint8_t *dest,
   /* Parallel idct on the left 8 columns */
   // First pass processes even elements 0, 2, 4, 6, 8, 10, 12, 14 and save the
   // stage 6 result in pass1_output.
-  vpx_idct16x16_256_add_neon_pass1(row_idct_output, pass1_output, 8);
+  vpx_idct16x16_256_add_neon_pass1(row_idct_output, pass1_output);
 
   // Second pass processes odd elements 1, 3, 5, 7, 9, 11, 13, 15 and combines
   // with result in pass1(pass1_output) to calculate final result in stage 7.
@@ -131,7 +129,7 @@ void vpx_idct16x16_10_add_neon(const int16_t *input, uint8_t *dest,
   /* Parallel idct on the right 8 columns */
   // First pass processes even elements 0, 2, 4, 6, 8, 10, 12, 14 and save the
   // stage 6 result in pass1_output.
-  vpx_idct16x16_256_add_neon_pass1(row_idct_output + 8 * 16, pass1_output, 8);
+  vpx_idct16x16_256_add_neon_pass1(row_idct_output + 8 * 16, pass1_output);
 
   // Second pass processes odd elements 1, 3, 5, 7, 9, 11, 13, 15 and combines
   // with result in pass1(pass1_output) to calculate final result in stage 7.
