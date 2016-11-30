@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d01acc56_299797d6",
+        "filename": "vpx_dsp/arm/highbd_idct4x4_add_neon.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-30T07:14:19Z",
+      "side": 1,
+      "message": "this could go in the function if it\u0027s a one off, otherwise I\u0027d prefer to collect constant definitions at the top of the file.",
+      "revId": "8f779fbd8b1147f4bc3a2ae24e358f5813b626d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d01acc56_c92d23c4",
+        "filename": "vpx_dsp/arm/highbd_idct4x4_add_neon.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-30T07:14:19Z",
+      "side": 1,
+      "message": "this cast is unnecessary given the declaration",
+      "range": {
+        "startLine": 152,
+        "startChar": 16,
+        "endLine": 152,
+        "endChar": 33
+      },
+      "revId": "8f779fbd8b1147f4bc3a2ae24e358f5813b626d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d01acc56_a939c703",
+        "filename": "vpx_dsp/arm/idct_neon.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-30T07:14:19Z",
+      "side": 1,
+      "message": "kCospi4x4 ? might be a bit safer if additional tables make their way here",
+      "range": {
+        "startLine": 20,
+        "startChar": 42,
+        "endLine": 20,
+        "endChar": 48
+      },
+      "revId": "8f779fbd8b1147f4bc3a2ae24e358f5813b626d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d01acc56_2924f7d1",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 9
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-30T07:14:19Z",
+      "side": 1,
+      "message": "this would remain !CONFIG as it describes the if() condition",
+      "revId": "8f779fbd8b1147f4bc3a2ae24e358f5813b626d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
