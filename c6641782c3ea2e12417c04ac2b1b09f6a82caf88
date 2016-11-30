@@ -46,6 +46,30 @@
       "revId": "c6641782c3ea2e12417c04ac2b1b09f6a82caf88",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d01acc56_6f126f1d",
+        "filename": "vpx_dsp/arm/idct16x16_add_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-11-30T07:23:53Z",
+      "side": 1,
+      "message": "\u003e \u003e As the first pass, output_stride is const 8 and could be cleaned.\n \u003e \u003e Same to vpx_idct16x16_10_add_neon_pass1().\n \u003e \n \u003e good point. I had to make additional changes for to enable _256,\n \u003e but I can make that change first. let\u0027s bring it in as a followup\n \u003e to this one before enabling _10\n\nI slipped a change in between enabling _10. I\u0027ll rebase that and upload the _256 change after that one.",
+      "parentUuid": "d01acc56_9bb1b62b",
+      "range": {
+        "startLine": 18,
+        "startChar": 42,
+        "endLine": 18,
+        "endChar": 55
+      },
+      "revId": "c6641782c3ea2e12417c04ac2b1b09f6a82caf88",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
