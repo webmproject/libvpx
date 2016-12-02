@@ -414,6 +414,24 @@ INSTANTIATE_TEST_CASE_P(
                    &vpx_highbd_idct4x4_16_add_sse2, TX_4X4, 1, 12)));
 #endif  // HAVE_SSE2 && !CONFIG_EMULATE_HARDWARE
 
+#if HAVE_NEON && !CONFIG_EMULATE_HARDWARE
+INSTANTIATE_TEST_CASE_P(
+    NEON, PartialIDctTest,
+    ::testing::Values(
+        make_tuple(&vpx_highbd_fdct4x4_c, &vpx_highbd_idct4x4_16_add_c,
+                   &vpx_highbd_idct4x4_16_add_neon, TX_4X4, 16, 8),
+        make_tuple(&vpx_highbd_fdct4x4_c, &vpx_highbd_idct4x4_16_add_c,
+                   &vpx_highbd_idct4x4_16_add_neon, TX_4X4, 16, 10),
+        make_tuple(&vpx_highbd_fdct4x4_c, &vpx_highbd_idct4x4_16_add_c,
+                   &vpx_highbd_idct4x4_16_add_neon, TX_4X4, 16, 12),
+        make_tuple(&vpx_highbd_fdct4x4_c, &vpx_highbd_idct4x4_1_add_c,
+                   &vpx_highbd_idct4x4_1_add_neon, TX_4X4, 1, 8),
+        make_tuple(&vpx_highbd_fdct4x4_c, &vpx_highbd_idct4x4_1_add_c,
+                   &vpx_highbd_idct4x4_1_add_neon, TX_4X4, 1, 10),
+        make_tuple(&vpx_highbd_fdct4x4_c, &vpx_highbd_idct4x4_1_add_c,
+                   &vpx_highbd_idct4x4_1_add_neon, TX_4X4, 1, 12)));
+#endif  // HAVE_NEON && !CONFIG_EMULATE_HARDWARE
+
 #else  // !CONFIG_VP9_HIGHBITDEPTH
 
 INSTANTIATE_TEST_CASE_P(
