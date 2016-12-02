@@ -390,6 +390,50 @@ static int get_image_bps(const vpx_image_t *img) {
   return 0;
 }
 
+// Modify the encoder config for the target level.
+static void config_target_level(VP9EncoderConfig *oxcf) {
+  double max_average_bitrate;  // in bits per second
+  int max_over_shoot_pct;
+  const int target_level_index = get_level_index(oxcf->target_level);
+
+  vpx_clear_system_state();
+  assert(target_level_index >= 0);
+  assert(target_level_index < VP9_LEVELS);
+
+  // Maximum target bit-rate is level_limit * 80%.
+  max_average_bitrate =
+      vp9_level_defs[target_level_index].average_bitrate * 800.0;
+  if ((double)oxcf->target_bandwidth > max_average_bitrate)
+    oxcf->target_bandwidth = (int64_t)(max_average_bitrate);
+  if (oxcf->ss_number_layers == 1 && oxcf->pass != 0)
+    oxcf->ss_target_bitrate[0] = (int)oxcf->target_bandwidth;
+
+  // Adjust max over-shoot percentage.
+  max_over_shoot_pct =
+      (int)((max_average_bitrate * 1.10 - (double)oxcf->target_bandwidth) *
+            100 / (double)(oxcf->target_bandwidth));
+  if (oxcf->over_shoot_pct > max_over_shoot_pct)
+    oxcf->over_shoot_pct = max_over_shoot_pct;
+
+  // Adjust worst allowed quantizer.
+  oxcf->worst_allowed_q = vp9_quantizer_to_qindex(63);
+
+  // Adjust minimum art-ref distance.
+  if (oxcf->min_gf_interval <
+      (int)vp9_level_defs[target_level_index].min_altref_distance)
+    oxcf->min_gf_interval =
+        (int)vp9_level_defs[target_level_index].min_altref_distance;
+
+  // Adjust maximum column tiles.
+  if (vp9_level_defs[target_level_index].max_col_tiles <
+      (1 << oxcf->tile_columns)) {
+    while (oxcf->tile_columns > 0 &&
+           vp9_level_defs[target_level_index].max_col_tiles <
+               (1 << oxcf->tile_columns))
+      --oxcf->tile_columns;
+  }
+}
+
 static vpx_codec_err_t set_encoder_config(
     VP9EncoderConfig *oxcf, const vpx_codec_enc_cfg_t *cfg,
     const struct vp9_extracfg *extra_cfg) {
@@ -533,6 +577,8 @@ static vpx_codec_err_t set_encoder_config(
   } else if (oxcf->ts_number_layers == 1) {
     oxcf->ts_rate_decimator[0] = 1;
   }
+
+  if (get_level_index(oxcf->target_level) >= 0) config_target_level(oxcf);
   /*
   printf("Current VP9 Settings: \n");
   printf("target_bandwidth: %d\n", oxcf->target_bandwidth);
@@ -1002,6 +1048,28 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
   size_t data_sz;
 
   if (cpi == NULL) return VPX_CODEC_INVALID_PARAM;
+
+  if (cpi->oxcf.pass == 2 && cpi->level_constraint.level_index >= 0 &&
+      !cpi->level_constraint.rc_config_updated) {
+    SVC *const svc = &cpi->svc;
+    const int is_two_pass_svc =
+        (svc->number_spatial_layers > 1) || (svc->number_temporal_layers > 1);
+    const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+    TWO_PASS *const twopass = &cpi->twopass;
+    FIRSTPASS_STATS *stats = &twopass->total_stats;
+    if (is_two_pass_svc) {
+      const double frame_rate = 10000000.0 * stats->count / stats->duration;
+      vp9_update_spatial_layer_framerate(cpi, frame_rate);
+      twopass->bits_left =
+          (int64_t)(stats->duration *
+                    svc->layer_context[svc->spatial_layer_id].target_bandwidth /
+                    10000000.0);
+    } else {
+      twopass->bits_left =
+          (int64_t)(stats->duration * oxcf->target_bandwidth / 10000000.0);
+    }
+    cpi->level_constraint.rc_config_updated = 1;
+  }
 
   if (img != NULL) {
     res = validate_img(ctx, img);
