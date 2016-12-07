@@ -117,8 +117,7 @@ static void output_stats(FIRSTPASS_STATS *stats,
             stats->intra_skip_pct, stats->intra_smooth_pct,
             stats->inactive_zone_rows, stats->inactive_zone_cols, stats->MVr,
             stats->mvr_abs, stats->MVc, stats->mvc_abs, stats->MVrv,
-            stats->MVcv, stats->mv_in_out_count, stats->new_mv_count,
-            stats->count, stats->duration);
+            stats->MVcv, stats->mv_in_out_count, stats->count, stats->duration);
     fclose(fpfile);
   }
 #endif
@@ -157,7 +156,6 @@ static void zero_stats(FIRSTPASS_STATS *section) {
   section->MVrv = 0.0;
   section->MVcv = 0.0;
   section->mv_in_out_count = 0.0;
-  section->new_mv_count = 0.0;
   section->count = 0.0;
   section->duration = 1.0;
   section->spatial_layer_id = 0;
@@ -187,7 +185,6 @@ static void accumulate_stats(FIRSTPASS_STATS *section,
   section->MVrv += frame->MVrv;
   section->MVcv += frame->MVcv;
   section->mv_in_out_count += frame->mv_in_out_count;
-  section->new_mv_count += frame->new_mv_count;
   section->count += frame->count;
   section->duration += frame->duration;
 }
@@ -215,7 +212,6 @@ static void subtract_stats(FIRSTPASS_STATS *section,
   section->MVrv -= frame->MVrv;
   section->MVcv -= frame->MVcv;
   section->mv_in_out_count -= frame->mv_in_out_count;
-  section->new_mv_count -= frame->new_mv_count;
   section->count -= frame->count;
   section->duration -= frame->duration;
 }
@@ -679,9 +675,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   int intra_skip_count = 0;
   int intra_smooth_count = 0;
   int image_data_start_row = INVALID_ROW;
-  int new_mv_count = 0;
   int sum_in_vectors = 0;
-  MV lastmv = { 0, 0 };
   TWO_PASS *twopass = &cpi->twopass;
   const MV zero_mv = { 0, 0 };
   int recon_y_stride, recon_uv_stride, uv_mb_height;
@@ -1144,10 +1138,6 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
             }
 #endif
 
-            // Non-zero vector, was it different from the last non zero vector?
-            if (!is_equal_mv(&mv, &lastmv)) ++new_mv_count;
-            lastmv = mv;
-
             // Does the row vector point inwards or outwards?
             if (mb_row < cm->mb_rows / 2) {
               if (mv.row > 0)
@@ -1263,7 +1253,6 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       fps.MVcv =
           ((double)sum_mvcs - ((double)sum_mvc * sum_mvc / mvcount)) / mvcount;
       fps.mv_in_out_count = (double)sum_in_vectors / (mvcount * 2);
-      fps.new_mv_count = new_mv_count;
       fps.pcnt_motion = (double)mvcount / num_mbs;
     } else {
       fps.MVr = 0.0;
@@ -1273,7 +1262,6 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       fps.MVrv = 0.0;
       fps.MVcv = 0.0;
       fps.mv_in_out_count = 0.0;
-      fps.new_mv_count = 0.0;
       fps.pcnt_motion = 0.0;
     }
 

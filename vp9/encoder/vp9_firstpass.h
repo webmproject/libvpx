@@ -61,7 +61,6 @@ typedef struct {
   double MVrv;
   double MVcv;
   double mv_in_out_count;
-  double new_mv_count;
   double duration;
   double count;
   int64_t spatial_layer_id;
