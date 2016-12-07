@@ -178,35 +178,30 @@ TEST_P(PartialIDctTest, RunQuantCheck) {
   DECLARE_ALIGNED(16, int16_t, input_extreme_block[kMaxNumCoeffs]);
   DECLARE_ALIGNED(16, tran_low_t, output_ref_block[kMaxNumCoeffs]);
 
-  for (int i = 0; i < kCountTestBlock; ++i) {
-    InitMem();
-
-    ACMRandom rnd(ACMRandom::DeterministicSeed());
-
-    for (int j = 0; j < kCountTestBlock; ++j) {
-      // Initialize a test block with input range [-mask_, mask_].
-      if (j == 0) {
-        for (int k = 0; k < input_block_size_; ++k) {
-          input_extreme_block[k] = mask_;
-        }
-      } else if (j == 1) {
-        for (int k = 0; k < input_block_size_; ++k) {
-          input_extreme_block[k] = -mask_;
-        }
-      } else {
-        for (int k = 0; k < input_block_size_; ++k) {
-          input_extreme_block[k] = rnd.Rand8() % 2 ? mask_ : -mask_;
-        }
+  InitMem();
+  for (int i = 0; i < kCountTestBlock * kCountTestBlock; ++i) {
+    // Initialize a test block with input range [-mask_, mask_].
+    if (i == 0) {
+      for (int k = 0; k < input_block_size_; ++k) {
+        input_extreme_block[k] = mask_;
       }
-
-      ftxfm_(input_extreme_block, output_ref_block, size_);
-
-      // quantization with maximum allowed step sizes
-      input_block_[0] = (output_ref_block[0] / 1336) * 1336;
-      for (int k = 1; k < last_nonzero_; ++k) {
-        input_block_[vp9_default_scan_orders[tx_size_].scan[k]] =
-            (output_ref_block[k] / 1828) * 1828;
+    } else if (i == 1) {
+      for (int k = 0; k < input_block_size_; ++k) {
+        input_extreme_block[k] = -mask_;
       }
+    } else {
+      for (int k = 0; k < input_block_size_; ++k) {
+        input_extreme_block[k] = rnd_.Rand8() % 2 ? mask_ : -mask_;
+      }
+    }
+
+    ftxfm_(input_extreme_block, output_ref_block, size_);
+
+    // quantization with minimum allowed step sizes
+    input_block_[0] = (output_ref_block[0] / 4) * 4;
+    for (int k = 1; k < last_nonzero_; ++k) {
+      const int pos = vp9_default_scan_orders[tx_size_].scan[k];
+      input_block_[pos] = (output_ref_block[pos] / 4) * 4;
     }
 
     ASM_REGISTER_STATE_CHECK(Exec(full_itxfm_, output_block_ref_));
