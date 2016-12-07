@@ -650,6 +650,21 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
                        lc->scaling_factor_num, lc->scaling_factor_den, &width,
                        &height);
 
+  // The usage of use_base_mv assumes down-scale of 2x2. For now, turn off use
+  // of base motion vectors if spatial scale factors for any layers are not 2.
+  // TODO(marpan): Fix this to allow for use_base_mv for scale factors != 2.
+  if (cpi->svc.number_spatial_layers > 1) {
+    int sl;
+    for (sl = 0; sl < cpi->svc.number_spatial_layers - 1; ++sl) {
+      lc = &cpi->svc.layer_context[sl * cpi->svc.number_temporal_layers +
+                                   cpi->svc.temporal_layer_id];
+      if (lc->scaling_factor_num != lc->scaling_factor_den >> 1) {
+        cpi->svc.use_base_mv = 0;
+        break;
+      }
+    }
+  }
+
   if (vp9_set_size_literal(cpi, width, height) != 0)
     return VPX_CODEC_INVALID_PARAM;
 
