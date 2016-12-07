@@ -12,6 +12,7 @@
 
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
+#include "vpx_dsp/arm/idct_neon.h"
 #include "vpx_dsp/arm/transpose_neon.h"
 #include "vpx_dsp/txfm_common.h"
 
@@ -150,51 +151,97 @@ static INLINE void DO_BUTTERFLY(int16x8_t q14s16, int16x8_t q13s16,
   *qBs16 = vcombine_s16(vrshrn_n_s32(q11s32, 14), vrshrn_n_s32(q10s32, 14));
 }
 
+static INLINE void load_s16x8q(const int16_t *in, int16x8_t *s0, int16x8_t *s1,
+                               int16x8_t *s2, int16x8_t *s3, int16x8_t *s4,
+                               int16x8_t *s5, int16x8_t *s6, int16x8_t *s7) {
+  *s0 = vld1q_s16(in);
+  in += 32;
+  *s1 = vld1q_s16(in);
+  in += 32;
+  *s2 = vld1q_s16(in);
+  in += 32;
+  *s3 = vld1q_s16(in);
+  in += 32;
+  *s4 = vld1q_s16(in);
+  in += 32;
+  *s5 = vld1q_s16(in);
+  in += 32;
+  *s6 = vld1q_s16(in);
+  in += 32;
+  *s7 = vld1q_s16(in);
+}
+
+static INLINE void transpose_and_store_s16_8x8(int16x8_t a0, int16x8_t a1,
+                                               int16x8_t a2, int16x8_t a3,
+                                               int16x8_t a4, int16x8_t a5,
+                                               int16x8_t a6, int16x8_t a7,
+                                               int16_t **out) {
+  transpose_s16_8x8(&a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7);
+
+  vst1q_s16(*out, a0);
+  *out += 8;
+  vst1q_s16(*out, a1);
+  *out += 8;
+  vst1q_s16(*out, a2);
+  *out += 8;
+  vst1q_s16(*out, a3);
+  *out += 8;
+  vst1q_s16(*out, a4);
+  *out += 8;
+  vst1q_s16(*out, a5);
+  *out += 8;
+  vst1q_s16(*out, a6);
+  *out += 8;
+  vst1q_s16(*out, a7);
+  *out += 8;
+}
+
 static INLINE void idct32_transpose_pair(const int16_t *input, int16_t *t_buf) {
-  const int16_t *in;
   int i;
-  const int stride = 32;
-  int16x8_t q8s16, q9s16, q10s16, q11s16, q12s16, q13s16, q14s16, q15s16;
+  int16x8_t s0, s1, s2, s3, s4, s5, s6, s7;
 
   for (i = 0; i < 4; i++, input += 8) {
-    in = input;
-    q8s16 = vld1q_s16(in);
-    in += stride;
-    q9s16 = vld1q_s16(in);
-    in += stride;
-    q10s16 = vld1q_s16(in);
-    in += stride;
-    q11s16 = vld1q_s16(in);
-    in += stride;
-    q12s16 = vld1q_s16(in);
-    in += stride;
-    q13s16 = vld1q_s16(in);
-    in += stride;
-    q14s16 = vld1q_s16(in);
-    in += stride;
-    q15s16 = vld1q_s16(in);
-
-    transpose_s16_8x8(&q8s16, &q9s16, &q10s16, &q11s16, &q12s16, &q13s16,
-                      &q14s16, &q15s16);
-
-    vst1q_s16(t_buf, q8s16);
-    t_buf += 8;
-    vst1q_s16(t_buf, q9s16);
-    t_buf += 8;
-    vst1q_s16(t_buf, q10s16);
-    t_buf += 8;
-    vst1q_s16(t_buf, q11s16);
-    t_buf += 8;
-    vst1q_s16(t_buf, q12s16);
-    t_buf += 8;
-    vst1q_s16(t_buf, q13s16);
-    t_buf += 8;
-    vst1q_s16(t_buf, q14s16);
-    t_buf += 8;
-    vst1q_s16(t_buf, q15s16);
-    t_buf += 8;
+    load_s16x8q(input, &s0, &s1, &s2, &s3, &s4, &s5, &s6, &s7);
+    transpose_and_store_s16_8x8(s0, s1, s2, s3, s4, s5, s6, s7, &t_buf);
   }
 }
+
+#if CONFIG_VP9_HIGHBITDEPTH
+static INLINE void load_s16x8q_tran_low(const tran_low_t *in, int16x8_t *s0,
+                                        int16x8_t *s1, int16x8_t *s2,
+                                        int16x8_t *s3, int16x8_t *s4,
+                                        int16x8_t *s5, int16x8_t *s6,
+                                        int16x8_t *s7) {
+  *s0 = load_tran_low_to_s16q(in);
+  in += 32;
+  *s1 = load_tran_low_to_s16q(in);
+  in += 32;
+  *s2 = load_tran_low_to_s16q(in);
+  in += 32;
+  *s3 = load_tran_low_to_s16q(in);
+  in += 32;
+  *s4 = load_tran_low_to_s16q(in);
+  in += 32;
+  *s5 = load_tran_low_to_s16q(in);
+  in += 32;
+  *s6 = load_tran_low_to_s16q(in);
+  in += 32;
+  *s7 = load_tran_low_to_s16q(in);
+}
+
+static INLINE void idct32_transpose_pair_tran_low(const tran_low_t *input,
+                                                  int16_t *t_buf) {
+  int i;
+  int16x8_t s0, s1, s2, s3, s4, s5, s6, s7;
+
+  for (i = 0; i < 4; i++, input += 8) {
+    load_s16x8q_tran_low(input, &s0, &s1, &s2, &s3, &s4, &s5, &s6, &s7);
+    transpose_and_store_s16_8x8(s0, s1, s2, s3, s4, s5, s6, s7, &t_buf);
+  }
+}
+#else  // !CONFIG_VP9_HIGHBITDEPTH
+#define idct32_transpose_pair_tran_low idct32_transpose_pair
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 static INLINE void idct32_bands_end_1st_pass(int16_t *out, int16x8_t q2s16,
                                              int16x8_t q3s16, int16x8_t q6s16,
@@ -383,16 +430,22 @@ void vpx_idct32x32_1024_add_neon(const tran_low_t *input, uint8_t *dest,
   int16_t trans_buf[32 * 8];
   int16_t pass1[32 * 32];
   int16_t pass2[32 * 32];
-  int16_t *out;
+  int16_t *in, *out;
   int16x8_t q0s16, q1s16, q2s16, q3s16, q4s16, q5s16, q6s16, q7s16;
   int16x8_t q8s16, q9s16, q10s16, q11s16, q12s16, q13s16, q14s16, q15s16;
 
   for (idct32_pass_loop = 0, out = pass1; idct32_pass_loop < 2;
        idct32_pass_loop++,
-      input = pass1,  // the input of pass2 is the result of pass1
+      in = pass1,  // the input of pass2 is the result of pass1
        out = pass2) {
-    for (i = 0; i < 4; i++, input += 32 * 8, out += 8) {  // idct32_bands_loop
-      idct32_transpose_pair(input, trans_buf);
+    for (i = 0; i < 4; i++, out += 8) {  // idct32_bands_loop
+      if (idct32_pass_loop == 0) {
+        idct32_transpose_pair_tran_low(input, trans_buf);
+        input += 32 * 8;
+      } else {
+        idct32_transpose_pair(in, trans_buf);
+        in += 32 * 8;
+      }
 
       // -----------------------------------------
       // BLOCK A: 16-19,28-31

@@ -201,8 +201,6 @@ endif  # ARCH_X86_64
 DSP_SRCS-$(HAVE_NEON_ASM) += arm/save_reg_neon$(ASM)
 
 ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
-DSP_SRCS-$(HAVE_NEON)  += arm/idct32x32_add_neon.c
-
 DSP_SRCS-$(HAVE_MSA)   += mips/inv_txfm_msa.h
 DSP_SRCS-$(HAVE_MSA)   += mips/idct4x4_msa.c
 DSP_SRCS-$(HAVE_MSA)   += mips/idct8x8_msa.c
@@ -240,6 +238,7 @@ DSP_SRCS-$(HAVE_NEON) += arm/idct16x16_neon.c
 DSP_SRCS-$(HAVE_NEON) += arm/idct32x32_1_add_neon.c
 DSP_SRCS-$(HAVE_NEON) += arm/idct32x32_34_add_neon.c
 DSP_SRCS-$(HAVE_NEON) += arm/idct32x32_135_add_neon.c
+DSP_SRCS-$(HAVE_NEON) += arm/idct32x32_add_neon.c
 
 endif  # CONFIG_VP9
 
