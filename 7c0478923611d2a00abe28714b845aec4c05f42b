@@ -1,0 +1,193 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed27f748_eea1e347",
+        "filename": "test/level_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-07T00:59:28Z",
+      "side": 1,
+      "message": "these comments are redundant given the name of the test",
+      "revId": "7c0478923611d2a00abe28714b845aec4c05f42b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed27f748_2ec03be8",
+        "filename": "test/level_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-07T00:59:28Z",
+      "side": 1,
+      "message": "you can ASSERT this the current parameters are 1/2-pass good at line 149",
+      "revId": "7c0478923611d2a00abe28714b845aec4c05f42b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed27f748_8e570f44",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-07T00:59:28Z",
+      "side": 1,
+      "message": "you probably want to capitalize this to match the next sentence. I think most vpx_internal_error messages are formatted this way",
+      "range": {
+        "startLine": 132,
+        "startChar": 3,
+        "endLine": 132,
+        "endChar": 4
+      },
+      "revId": "7c0478923611d2a00abe28714b845aec4c05f42b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed27f748_2eb59b16",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 1985,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-07T00:59:28Z",
+      "side": 1,
+      "message": "we don\u0027t usually send things to stdout/stderr from the library itself, unless it\u0027s debugging.",
+      "revId": "7c0478923611d2a00abe28714b845aec4c05f42b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed27f748_ee6fa318",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-07T00:59:28Z",
+      "side": 1,
+      "message": "TOO_MANY_... would sound better, OVERFLOW might be more concise",
+      "range": {
+        "startLine": 379,
+        "startChar": 2,
+        "endLine": 379,
+        "endChar": 22
+      },
+      "revId": "7c0478923611d2a00abe28714b845aec4c05f42b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed27f748_8edcefcf",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-07T00:59:28Z",
+      "side": 1,
+      "message": "we may have other instances like this, but I\u0027d prefer not to introduce more since this project hasn\u0027t fully switched to c99.",
+      "range": {
+        "startLine": 382,
+        "startChar": 27,
+        "endLine": 382,
+        "endChar": 28
+      },
+      "revId": "7c0478923611d2a00abe28714b845aec4c05f42b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed27f748_ae920be6",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-07T00:59:28Z",
+      "side": 1,
+      "message": "why u16? are you trying to keep the size of the struct down? you\u0027d be better to order these small -\u003e large with an eye towards the cache line",
+      "range": {
+        "startLine": 391,
+        "startChar": 2,
+        "endLine": 391,
+        "endChar": 10
+      },
+      "revId": "7c0478923611d2a00abe28714b845aec4c05f42b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed27f748_6e8dd3c0",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 392,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-07T00:59:28Z",
+      "side": 1,
+      "message": "there\u0027s a Vp9LevelInfo, LevelConstraint would be the more appropriate naming style. The Vp9 in the others probably isn\u0027t necessary given the context",
+      "range": {
+        "startLine": 392,
+        "startChar": 2,
+        "endLine": 392,
+        "endChar": 18
+      },
+      "revId": "7c0478923611d2a00abe28714b845aec4c05f42b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed27f748_8e8aafa8",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 788,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-07T00:59:28Z",
+      "side": 1,
+      "message": "just make it an int",
+      "range": {
+        "startLine": 788,
+        "startChar": 2,
+        "endLine": 788,
+        "endChar": 8
+      },
+      "revId": "7c0478923611d2a00abe28714b845aec4c05f42b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
