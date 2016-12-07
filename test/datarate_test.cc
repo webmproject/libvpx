@@ -1170,7 +1170,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SpatialLayers) {
   cfg_.kf_max_dist = 9999;
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 200);
-  // TODO(wonkap/marpan): Check that effective_datarate for each layer hits the
+  // TODO(marpan): Check that effective_datarate for each layer hits the
   // layer target_bitrate.
   for (int i = 200; i <= 800; i += 200) {
     cfg_.rc_target_bitrate = i;
