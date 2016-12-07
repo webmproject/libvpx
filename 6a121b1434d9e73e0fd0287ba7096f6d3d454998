@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed27f748_141309d6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-12-07T18:39:06Z",
+      "side": 1,
+      "message": "This is a false alarm caused by a couple of bugs in unit test code TEST_P(PartialIDctTest, RunQuantCheck):\n\n1. input_block_[vp9_default_scan_orders[tx_size_].scan[k]] \u003d\n          (output_ref_block[k] / 4) * 4;\nshould be input_block_[vp9_default_scan_orders[tx_size_].scan[k]] \u003d\n          (output_ref_block[vp9_default_scan_orders[tx_size_].scan[k]] / 4) * 4;\n\n2. It used a local random number generator in the inner testing loop so the outer testing loop does\u0027t run properly, which conceals bug 1.\n\nAfter fixing these 2 unit test bugs (will check in later), the false alarm in vpx_idct16x16_256_add_neon() (falsely exposed when only fixing testing bug 2) is gone.\n\nHowever, this change still should be checked in to make the NEON optimization more compliant to C code. (For x86 change 417199, it slows done a little bit so abandoned.)",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 74
+      },
+      "revId": "6a121b1434d9e73e0fd0287ba7096f6d3d454998",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
