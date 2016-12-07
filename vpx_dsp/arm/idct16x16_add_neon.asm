@@ -107,12 +107,12 @@ idct16x16_256_add_neon_pass1
     vdup.16         d3, r12                   ; duplicate cospi_20_64
 
     ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d8, q2, #14               ; >> 14
-    vqrshrn.s32     d9, q3, #14               ; >> 14
+    vrshrn.s32      d8, q2, #14               ; >> 14
+    vrshrn.s32      d9, q3, #14               ; >> 14
 
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d14, q5, #14              ; >> 14
-    vqrshrn.s32     d15, q6, #14              ; >> 14
+    vrshrn.s32      d14, q5, #14              ; >> 14
+    vrshrn.s32      d15, q6, #14              ; >> 14
 
     ; preloading to avoid stall
     ; cospi_16_64 = 11585
@@ -138,12 +138,12 @@ idct16x16_256_add_neon_pass1
     vmlal.s16       q15, d23, d2
 
     ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d10, q2, #14              ; >> 14
-    vqrshrn.s32     d11, q3, #14              ; >> 14
+    vrshrn.s32      d10, q2, #14              ; >> 14
+    vrshrn.s32      d11, q3, #14              ; >> 14
 
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d12, q9, #14              ; >> 14
-    vqrshrn.s32     d13, q15, #14             ; >> 14
+    vrshrn.s32      d12, q9, #14              ; >> 14
+    vrshrn.s32      d13, q15, #14             ; >> 14
 
     ; stage 4
     vdup.16         d30, r3                   ; cospi_16_64
@@ -171,12 +171,12 @@ idct16x16_256_add_neon_pass1
     vsub.s32        q1, q11, q1
 
     ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d16, q3, #14              ; >> 14
-    vqrshrn.s32     d17, q12, #14             ; >> 14
+    vrshrn.s32      d16, q3, #14              ; >> 14
+    vrshrn.s32      d17, q12, #14             ; >> 14
 
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d18, q13, #14             ; >> 14
-    vqrshrn.s32     d19, q1, #14              ; >> 14
+    vrshrn.s32      d18, q13, #14             ; >> 14
+    vrshrn.s32      d19, q1, #14              ; >> 14
 
     ; step1[2] * cospi_24_64 - step1[3] * cospi_8_64;
     ; step1[2] * cospi_8_64
@@ -196,12 +196,12 @@ idct16x16_256_add_neon_pass1
     vmlsl.s16       q13, d29, d31
 
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d22, q0, #14              ; >> 14
-    vqrshrn.s32     d23, q1, #14              ; >> 14
+    vrshrn.s32      d22, q0, #14              ; >> 14
+    vrshrn.s32      d23, q1, #14              ; >> 14
 
     ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d20, q12, #14             ; >> 14
-    vqrshrn.s32     d21, q13, #14             ; >> 14
+    vrshrn.s32      d20, q12, #14             ; >> 14
+    vrshrn.s32      d21, q13, #14             ; >> 14
 
     vsub.s16        q13, q4, q5               ; step2[5] = step1[4] - step1[5];
     vadd.s16        q4, q4, q5                ; step2[4] = step1[4] + step1[5];
@@ -236,15 +236,15 @@ idct16x16_256_add_neon_pass1
     vadd.s32        q10, q10, q12
 
     ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d10, q6, #14              ; >> 14
-    vqrshrn.s32     d11, q13, #14             ; >> 14
+    vrshrn.s32      d10, q6, #14              ; >> 14
+    vrshrn.s32      d11, q13, #14             ; >> 14
 
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d12, q9, #14              ; >> 14
-    vqrshrn.s32     d13, q10, #14             ; >> 14
+    vrshrn.s32      d12, q9, #14              ; >> 14
+    vrshrn.s32      d13, q10, #14             ; >> 14
 
     ; stage 6
-    vadd.s16        q8, q0, q15                ; step2[0] = step1[0] + step1[7];
+    vadd.s16        q8, q0, q15               ; step2[0] = step1[0] + step1[7];
     vadd.s16        q9, q1, q6                ; step2[1] = step1[1] + step1[6];
     vadd.s16        q10, q2, q5               ; step2[2] = step1[2] + step1[5];
     vadd.s16        q11, q3, q4               ; step2[3] = step1[3] + step1[4];
@@ -357,12 +357,12 @@ idct16x16_256_add_neon_pass2
     vdup.16         d31, r12                  ; duplicate cospi_18_64
 
     ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d0, q2, #14               ; >> 14
-    vqrshrn.s32     d1, q3, #14               ; >> 14
+    vrshrn.s32      d0, q2, #14               ; >> 14
+    vrshrn.s32      d1, q3, #14               ; >> 14
 
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d14, q1, #14              ; >> 14
-    vqrshrn.s32     d15, q4, #14              ; >> 14
+    vrshrn.s32      d14, q1, #14              ; >> 14
+    vrshrn.s32      d15, q4, #14              ; >> 14
 
     ; preloading to avoid stall
     ; cospi_22_64 = 7723
@@ -391,12 +391,12 @@ idct16x16_256_add_neon_pass2
     vdup.16         d31, r12                  ; duplicate cospi_10_64
 
     ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d2, q2, #14               ; >> 14
-    vqrshrn.s32     d3, q3, #14               ; >> 14
+    vrshrn.s32      d2, q2, #14               ; >> 14
+    vrshrn.s32      d3, q3, #14               ; >> 14
 
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d12, q4, #14              ; >> 14
-    vqrshrn.s32     d13, q5, #14              ; >> 14
+    vrshrn.s32      d12, q4, #14              ; >> 14
+    vrshrn.s32      d13, q5, #14              ; >> 14
 
     ; step1[10] * cospi_22_64
     vmull.s16       q11, d20, d30
@@ -425,12 +425,12 @@ idct16x16_256_add_neon_pass2
     vdup.16         d31, r12                  ; duplicate cospi_26_64
 
     ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d4, q11, #14              ; >> 14
-    vqrshrn.s32     d5, q12, #14              ; >> 14
+    vrshrn.s32      d4, q11, #14              ; >> 14
+    vrshrn.s32      d5, q12, #14              ; >> 14
 
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d11, q5, #14              ; >> 14
-    vqrshrn.s32     d10, q4, #14              ; >> 14
+    vrshrn.s32      d11, q5, #14              ; >> 14
+    vrshrn.s32      d10, q4, #14              ; >> 14
 
     ; step1[11] * cospi_6_64
     vmull.s16       q10, d28, d30
@@ -452,12 +452,12 @@ idct16x16_256_add_neon_pass2
     vadd.s16        q0, q0, q1                ; step1[8]=step2[8]+step2[9]
 
     ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d6, q10, #14              ; >> 14
-    vqrshrn.s32     d7, q11, #14              ; >> 14
+    vrshrn.s32      d6, q10, #14              ; >> 14
+    vrshrn.s32      d7, q11, #14              ; >> 14
 
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d8, q12, #14              ; >> 14
-    vqrshrn.s32     d9, q13, #14              ; >> 14
+    vrshrn.s32      d8, q12, #14              ; >> 14
+    vrshrn.s32      d9, q13, #14              ; >> 14
 
     ; stage 3
     vsub.s16        q10, q3, q2               ; step1[10]=-step2[10]+step2[11]
@@ -498,12 +498,12 @@ idct16x16_256_add_neon_pass2
     vdup.16         d30, r12                  ; duplicate -cospi_8_64
 
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d12, q2, #14              ; >> 14
-    vqrshrn.s32     d13, q3, #14              ; >> 14
+    vrshrn.s32      d12, q2, #14              ; >> 14
+    vrshrn.s32      d13, q3, #14              ; >> 14
 
     ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d2, q4, #14               ; >> 14
-    vqrshrn.s32     d3, q5, #14               ; >> 14
+    vrshrn.s32      d2, q4, #14               ; >> 14
+    vrshrn.s32      d3, q5, #14               ; >> 14
 
     vmov.s16        q3, q11
     vmov.s16        q4, q12
@@ -525,12 +525,12 @@ idct16x16_256_add_neon_pass2
     vmlal.s16       q9, d27, d31
 
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d4, q11, #14              ; >> 14
-    vqrshrn.s32     d5, q12, #14              ; >> 14
+    vrshrn.s32      d4, q11, #14              ; >> 14
+    vrshrn.s32      d5, q12, #14              ; >> 14
 
     ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d10, q8, #14              ; >> 14
-    vqrshrn.s32     d11, q9, #14              ; >> 14
+    vrshrn.s32      d10, q8, #14              ; >> 14
+    vrshrn.s32      d11, q9, #14              ; >> 14
 
     ; stage 5
     vadd.s16        q8, q0, q3                ; step1[8] = step2[8]+step2[11];
@@ -565,12 +565,12 @@ idct16x16_256_add_neon_pass2
     vadd.s32        q4, q4, q1
 
     ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d4, q5, #14               ; >> 14
-    vqrshrn.s32     d5, q6, #14               ; >> 14
+    vrshrn.s32      d4, q5, #14               ; >> 14
+    vrshrn.s32      d5, q6, #14               ; >> 14
 
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d10, q10, #14             ; >> 14
-    vqrshrn.s32     d11, q4, #14              ; >> 14
+    vrshrn.s32      d10, q10, #14             ; >> 14
+    vrshrn.s32      d11, q4, #14              ; >> 14
 
     ; step1[11] * cospi_16_64
     vmull.s16       q0, d22, d14
@@ -589,12 +589,12 @@ idct16x16_256_add_neon_pass2
     vadd.s32        q6, q6, q1
 
     ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d6, q10, #14              ; >> 14
-    vqrshrn.s32     d7, q4, #14               ; >> 14
+    vrshrn.s32      d6, q10, #14              ; >> 14
+    vrshrn.s32      d7, q4, #14               ; >> 14
 
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d8, q13, #14              ; >> 14
-    vqrshrn.s32     d9, q6, #14               ; >> 14
+    vrshrn.s32      d8, q13, #14              ; >> 14
+    vrshrn.s32      d9, q6, #14               ; >> 14
 
     mov              r4, #16                  ; pass1_output stride
     ldr              r3, [sp]                 ; load skip_adding
@@ -893,12 +893,12 @@ ENDIF  ; CONFIG_VP9_HIGHBITDEPTH
     vadd.s32        q10, q10, q12
 
     ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d11, q15, #14             ; >> 14
-    vqrshrn.s32     d10, q6, #14              ; >> 14
+    vrshrn.s32      d11, q15, #14             ; >> 14
+    vrshrn.s32      d10, q6, #14              ; >> 14
 
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d12, q9, #14              ; >> 14
-    vqrshrn.s32     d13, q10, #14             ; >> 14
+    vrshrn.s32      d12, q9, #14              ; >> 14
+    vrshrn.s32      d13, q10, #14             ; >> 14
 
     ; stage 6
     vadd.s16        q2, q8, q7                ; step2[0] = step1[0] + step1[7];
@@ -1010,12 +1010,12 @@ ENDIF  ; CONFIG_VP9_HIGHBITDEPTH
     vdup.16          d30, r12                 ; duplicate -cospi_8_64
 
     ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d2, q12, #14              ; >> 14
-    vqrshrn.s32     d3, q5, #14               ; >> 14
+    vrshrn.s32      d2, q12, #14              ; >> 14
+    vrshrn.s32      d3, q5, #14               ; >> 14
 
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d12, q2, #14              ; >> 14
-    vqrshrn.s32     d13, q11, #14             ; >> 14
+    vrshrn.s32      d12, q2, #14              ; >> 14
+    vrshrn.s32      d13, q11, #14             ; >> 14
 
     ; - step1[13] * cospi_8_64
     vmull.s16       q10, d8, d30
@@ -1034,12 +1034,12 @@ ENDIF  ; CONFIG_VP9_HIGHBITDEPTH
     vmlal.s16       q9, d9, d31
 
     ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d4, q10, #14              ; >> 14
-    vqrshrn.s32     d5, q13, #14              ; >> 14
+    vrshrn.s32      d4, q10, #14              ; >> 14
+    vrshrn.s32      d5, q13, #14              ; >> 14
 
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d10, q8, #14              ; >> 14
-    vqrshrn.s32     d11, q9, #14              ; >> 14
+    vrshrn.s32      d10, q8, #14              ; >> 14
+    vrshrn.s32      d11, q9, #14              ; >> 14
 
     ; stage 5
     vadd.s16        q8, q0, q3                ; step1[8] = step2[8]+step2[11];
@@ -1074,12 +1074,12 @@ ENDIF  ; CONFIG_VP9_HIGHBITDEPTH
     vadd.s32        q1, q4, q1
 
     ; dct_const_round_shift(temp1)
-    vqrshrn.s32     d4, q5, #14               ; >> 14
-    vqrshrn.s32     d5, q6, #14               ; >> 14
+    vrshrn.s32      d4, q5, #14               ; >> 14
+    vrshrn.s32      d5, q6, #14               ; >> 14
 
     ; dct_const_round_shift(temp2)
-    vqrshrn.s32     d10, q0, #14              ; >> 14
-    vqrshrn.s32     d11, q1, #14              ; >> 14
+    vrshrn.s32      d10, q0, #14              ; >> 14
+    vrshrn.s32      d11, q1, #14              ; >> 14
 
     ; step1[11] * cospi_16_64
     vmull.s16       q0, d22, d14
@@ -1098,12 +1098,12 @@ ENDIF  ; CONFIG_VP9_HIGHBITDEPTH
     vadd.s32        q6, q6, q1
 
     ; dct_const_round_shift(input_dc * cospi_16_64)
-    vqrshrn.s32     d6, q10, #14              ; >> 14
-    vqrshrn.s32     d7, q4, #14               ; >> 14
+    vrshrn.s32      d6, q10, #14              ; >> 14
+    vrshrn.s32      d7, q4, #14               ; >> 14
 
     ; dct_const_round_shift((step1[11] + step1[12]) * cospi_16_64);
-    vqrshrn.s32     d8, q13, #14              ; >> 14
-    vqrshrn.s32     d9, q6, #14               ; >> 14
+    vrshrn.s32      d8, q13, #14              ; >> 14
+    vrshrn.s32      d9, q6, #14               ; >> 14
 
     mov              r4, #16                  ; pass1_output stride
     ldr              r3, [sp]                 ; load skip_adding

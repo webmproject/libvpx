@@ -88,10 +88,10 @@
     vmlal.s16 q1,  d19, d22
 
     ; dct_const_round_shift
-    vqrshrn.s32 d26, q13, #14
-    vqrshrn.s32 d27, q14, #14
-    vqrshrn.s32 d29, q15, #14
-    vqrshrn.s32 d28, q1,  #14
+    vrshrn.s32 d26, q13, #14
+    vrshrn.s32 d27, q14, #14
+    vrshrn.s32 d29, q15, #14
+    vrshrn.s32 d28, q1,  #14
 
     ; stage 2
     ; output[0] = step[0] + step[3];
@@ -139,10 +139,10 @@
     vmlal.s16 q1,  d19, d22
 
     ; dct_const_round_shift
-    vqrshrn.s32 d26, q13, #14
-    vqrshrn.s32 d27, q14, #14
-    vqrshrn.s32 d29, q15, #14
-    vqrshrn.s32 d28, q1,  #14
+    vrshrn.s32 d26, q13, #14
+    vrshrn.s32 d27, q14, #14
+    vrshrn.s32 d29, q15, #14
+    vrshrn.s32 d28, q1,  #14
 
     ; stage 2
     ; output[0] = step[0] + step[3];

@@ -73,10 +73,10 @@ static void idct16x16_256_add_neon_pass1(const int16x8_t s0, const int16x8_t s1,
   d2s16 = vdup_n_s16((int16_t)cospi_12_64);
   d3s16 = vdup_n_s16((int16_t)cospi_20_64);
 
-  d8s16 = vqrshrn_n_s32(q2s32, 14);
-  d9s16 = vqrshrn_n_s32(q3s32, 14);
-  d14s16 = vqrshrn_n_s32(q5s32, 14);
-  d15s16 = vqrshrn_n_s32(q6s32, 14);
+  d8s16 = vrshrn_n_s32(q2s32, 14);
+  d9s16 = vrshrn_n_s32(q3s32, 14);
+  d14s16 = vrshrn_n_s32(q5s32, 14);
+  d15s16 = vrshrn_n_s32(q6s32, 14);
   q4s16 = vcombine_s16(d8s16, d9s16);
   q7s16 = vcombine_s16(d14s16, d15s16);
 
@@ -90,10 +90,10 @@ static void idct16x16_256_add_neon_pass1(const int16x8_t s0, const int16x8_t s1,
   q9s32 = vmlal_s16(q9s32, d22s16, d2s16);
   q15s32 = vmlal_s16(q15s32, d23s16, d2s16);
 
-  d10s16 = vqrshrn_n_s32(q2s32, 14);
-  d11s16 = vqrshrn_n_s32(q3s32, 14);
-  d12s16 = vqrshrn_n_s32(q9s32, 14);
-  d13s16 = vqrshrn_n_s32(q15s32, 14);
+  d10s16 = vrshrn_n_s32(q2s32, 14);
+  d11s16 = vrshrn_n_s32(q3s32, 14);
+  d12s16 = vrshrn_n_s32(q9s32, 14);
+  d13s16 = vrshrn_n_s32(q15s32, 14);
   q5s16 = vcombine_s16(d10s16, d11s16);
   q6s16 = vcombine_s16(d12s16, d13s16);
 
@@ -113,10 +113,10 @@ static void idct16x16_256_add_neon_pass1(const int16x8_t s0, const int16x8_t s1,
   q13s32 = vsubq_s32(q2s32, q0s32);
   q1s32 = vsubq_s32(q11s32, q1s32);
 
-  d16s16 = vqrshrn_n_s32(q3s32, 14);
-  d17s16 = vqrshrn_n_s32(q12s32, 14);
-  d18s16 = vqrshrn_n_s32(q13s32, 14);
-  d19s16 = vqrshrn_n_s32(q1s32, 14);
+  d16s16 = vrshrn_n_s32(q3s32, 14);
+  d17s16 = vrshrn_n_s32(q12s32, 14);
+  d18s16 = vrshrn_n_s32(q13s32, 14);
+  d19s16 = vrshrn_n_s32(q1s32, 14);
   q8s16 = vcombine_s16(d16s16, d17s16);
   q9s16 = vcombine_s16(d18s16, d19s16);
 
@@ -130,10 +130,10 @@ static void idct16x16_256_add_neon_pass1(const int16x8_t s0, const int16x8_t s1,
   q12s32 = vmlsl_s16(q12s32, d28s16, d31s16);
   q13s32 = vmlsl_s16(q13s32, d29s16, d31s16);
 
-  d22s16 = vqrshrn_n_s32(q0s32, 14);
-  d23s16 = vqrshrn_n_s32(q1s32, 14);
-  d20s16 = vqrshrn_n_s32(q12s32, 14);
-  d21s16 = vqrshrn_n_s32(q13s32, 14);
+  d22s16 = vrshrn_n_s32(q0s32, 14);
+  d23s16 = vrshrn_n_s32(q1s32, 14);
+  d20s16 = vrshrn_n_s32(q12s32, 14);
+  d21s16 = vrshrn_n_s32(q13s32, 14);
   q10s16 = vcombine_s16(d20s16, d21s16);
   q11s16 = vcombine_s16(d22s16, d23s16);
 
@@ -164,10 +164,10 @@ static void idct16x16_256_add_neon_pass1(const int16x8_t s0, const int16x8_t s1,
   q9s32 = vaddq_s32(q9s32, q11s32);
   q10s32 = vaddq_s32(q10s32, q12s32);
 
-  d10s16 = vqrshrn_n_s32(q6s32, 14);
-  d11s16 = vqrshrn_n_s32(q13s32, 14);
-  d12s16 = vqrshrn_n_s32(q9s32, 14);
-  d13s16 = vqrshrn_n_s32(q10s32, 14);
+  d10s16 = vrshrn_n_s32(q6s32, 14);
+  d11s16 = vrshrn_n_s32(q13s32, 14);
+  d12s16 = vrshrn_n_s32(q9s32, 14);
+  d13s16 = vrshrn_n_s32(q10s32, 14);
   q5s16 = vcombine_s16(d10s16, d11s16);
   q6s16 = vcombine_s16(d12s16, d13s16);
 
@@ -329,10 +329,10 @@ static void idct16x16_256_add_neon_pass2(const int16x8_t s0, const int16x8_t s1,
   q1s32 = vmlal_s16(q1s32, d30s16, d12s16);
   q4s32 = vmlal_s16(q4s32, d31s16, d12s16);
 
-  d0s16 = vqrshrn_n_s32(q2s32, 14);
-  d1s16 = vqrshrn_n_s32(q3s32, 14);
-  d14s16 = vqrshrn_n_s32(q1s32, 14);
-  d15s16 = vqrshrn_n_s32(q4s32, 14);
+  d0s16 = vrshrn_n_s32(q2s32, 14);
+  d1s16 = vrshrn_n_s32(q3s32, 14);
+  d14s16 = vrshrn_n_s32(q1s32, 14);
+  d15s16 = vrshrn_n_s32(q4s32, 14);
   q0s16 = vcombine_s16(d0s16, d1s16);
   q7s16 = vcombine_s16(d14s16, d15s16);
 
@@ -349,10 +349,10 @@ static void idct16x16_256_add_neon_pass2(const int16x8_t s0, const int16x8_t s1,
   q4s32 = vmlal_s16(q4s32, d22s16, d30s16);
   q5s32 = vmlal_s16(q5s32, d23s16, d30s16);
 
-  d2s16 = vqrshrn_n_s32(q2s32, 14);
-  d3s16 = vqrshrn_n_s32(q3s32, 14);
-  d12s16 = vqrshrn_n_s32(q4s32, 14);
-  d13s16 = vqrshrn_n_s32(q5s32, 14);
+  d2s16 = vrshrn_n_s32(q2s32, 14);
+  d3s16 = vrshrn_n_s32(q3s32, 14);
+  d12s16 = vrshrn_n_s32(q4s32, 14);
+  d13s16 = vrshrn_n_s32(q5s32, 14);
   q1s16 = vcombine_s16(d2s16, d3s16);
   q6s16 = vcombine_s16(d12s16, d13s16);
 
@@ -369,10 +369,10 @@ static void idct16x16_256_add_neon_pass2(const int16x8_t s0, const int16x8_t s1,
   q4s32 = vmlal_s16(q4s32, d26s16, d30s16);
   q5s32 = vmlal_s16(q5s32, d27s16, d30s16);
 
-  d4s16 = vqrshrn_n_s32(q11s32, 14);
-  d5s16 = vqrshrn_n_s32(q12s32, 14);
-  d11s16 = vqrshrn_n_s32(q5s32, 14);
-  d10s16 = vqrshrn_n_s32(q4s32, 14);
+  d4s16 = vrshrn_n_s32(q11s32, 14);
+  d5s16 = vrshrn_n_s32(q12s32, 14);
+  d11s16 = vrshrn_n_s32(q5s32, 14);
+  d10s16 = vrshrn_n_s32(q4s32, 14);
   q2s16 = vcombine_s16(d4s16, d5s16);
   q5s16 = vcombine_s16(d10s16, d11s16);
 
@@ -389,10 +389,10 @@ static void idct16x16_256_add_neon_pass2(const int16x8_t s0, const int16x8_t s1,
   q12s32 = vmlal_s16(q12s32, d18s16, d30s16);
   q13s32 = vmlal_s16(q13s32, d19s16, d30s16);
 
-  d6s16 = vqrshrn_n_s32(q10s32, 14);
-  d7s16 = vqrshrn_n_s32(q11s32, 14);
-  d8s16 = vqrshrn_n_s32(q12s32, 14);
-  d9s16 = vqrshrn_n_s32(q13s32, 14);
+  d6s16 = vrshrn_n_s32(q10s32, 14);
+  d7s16 = vrshrn_n_s32(q11s32, 14);
+  d8s16 = vrshrn_n_s32(q12s32, 14);
+  d9s16 = vrshrn_n_s32(q13s32, 14);
   q3s16 = vcombine_s16(d6s16, d7s16);
   q4s16 = vcombine_s16(d8s16, d9s16);
 
@@ -429,10 +429,10 @@ static void idct16x16_256_add_neon_pass2(const int16x8_t s0, const int16x8_t s1,
   q4s32 = vmlsl_s16(q4s32, d18s16, d30s16);
   q5s32 = vmlsl_s16(q5s32, d19s16, d30s16);
 
-  d12s16 = vqrshrn_n_s32(q2s32, 14);
-  d13s16 = vqrshrn_n_s32(q3s32, 14);
-  d2s16 = vqrshrn_n_s32(q4s32, 14);
-  d3s16 = vqrshrn_n_s32(q5s32, 14);
+  d12s16 = vrshrn_n_s32(q2s32, 14);
+  d13s16 = vrshrn_n_s32(q3s32, 14);
+  d2s16 = vrshrn_n_s32(q4s32, 14);
+  d3s16 = vrshrn_n_s32(q5s32, 14);
   q1s16 = vcombine_s16(d2s16, d3s16);
   q6s16 = vcombine_s16(d12s16, d13s16);
 
@@ -450,10 +450,10 @@ static void idct16x16_256_add_neon_pass2(const int16x8_t s0, const int16x8_t s1,
   q8s32 = vmlal_s16(q8s32, d26s16, d31s16);
   q9s32 = vmlal_s16(q9s32, d27s16, d31s16);
 
-  d4s16 = vqrshrn_n_s32(q11s32, 14);
-  d5s16 = vqrshrn_n_s32(q12s32, 14);
-  d10s16 = vqrshrn_n_s32(q8s32, 14);
-  d11s16 = vqrshrn_n_s32(q9s32, 14);
+  d4s16 = vrshrn_n_s32(q11s32, 14);
+  d5s16 = vrshrn_n_s32(q12s32, 14);
+  d10s16 = vrshrn_n_s32(q8s32, 14);
+  d11s16 = vrshrn_n_s32(q9s32, 14);
   q2s16 = vcombine_s16(d4s16, d5s16);
   q5s16 = vcombine_s16(d10s16, d11s16);
 
@@ -489,10 +489,10 @@ static void idct16x16_256_add_neon_pass2(const int16x8_t s0, const int16x8_t s1,
   q10s32 = vaddq_s32(q3s32, q0s32);
   q4s32 = vaddq_s32(q4s32, q1s32);
 
-  d4s16 = vqrshrn_n_s32(q5s32, 14);
-  d5s16 = vqrshrn_n_s32(q6s32, 14);
-  d10s16 = vqrshrn_n_s32(q10s32, 14);
-  d11s16 = vqrshrn_n_s32(q4s32, 14);
+  d4s16 = vrshrn_n_s32(q5s32, 14);
+  d5s16 = vrshrn_n_s32(q6s32, 14);
+  d10s16 = vrshrn_n_s32(q10s32, 14);
+  d11s16 = vrshrn_n_s32(q4s32, 14);
   q2s16 = vcombine_s16(d4s16, d5s16);
   q5s16 = vcombine_s16(d10s16, d11s16);
 
@@ -506,10 +506,10 @@ static void idct16x16_256_add_neon_pass2(const int16x8_t s0, const int16x8_t s1,
   q13s32 = vaddq_s32(q13s32, q0s32);
   q6s32 = vaddq_s32(q6s32, q1s32);
 
-  d6s16 = vqrshrn_n_s32(q10s32, 14);
-  d7s16 = vqrshrn_n_s32(q4s32, 14);
-  d8s16 = vqrshrn_n_s32(q13s32, 14);
-  d9s16 = vqrshrn_n_s32(q6s32, 14);
+  d6s16 = vrshrn_n_s32(q10s32, 14);
+  d7s16 = vrshrn_n_s32(q4s32, 14);
+  d8s16 = vrshrn_n_s32(q13s32, 14);
+  d9s16 = vrshrn_n_s32(q6s32, 14);
   q3s16 = vcombine_s16(d6s16, d7s16);
   q4s16 = vcombine_s16(d8s16, d9s16);
 
@@ -938,10 +938,10 @@ void vpx_idct16x16_10_add_neon_pass1(const tran_low_t *in, int16_t *out) {
   q9s32 = vaddq_s32(q9s32, q11s32);
   q10s32 = vaddq_s32(q10s32, q12s32);
 
-  d11s16 = vqrshrn_n_s32(q15s32, 14);
-  d10s16 = vqrshrn_n_s32(q6s32, 14);
-  d12s16 = vqrshrn_n_s32(q9s32, 14);
-  d13s16 = vqrshrn_n_s32(q10s32, 14);
+  d11s16 = vrshrn_n_s32(q15s32, 14);
+  d10s16 = vrshrn_n_s32(q6s32, 14);
+  d12s16 = vrshrn_n_s32(q9s32, 14);
+  d13s16 = vrshrn_n_s32(q10s32, 14);
   q5s16 = vcombine_s16(d10s16, d11s16);
   q6s16 = vcombine_s16(d12s16, d13s16);
 
@@ -1049,10 +1049,10 @@ void vpx_idct16x16_10_add_neon_pass2(const tran_low_t *src, int16_t *out,
   q2s32 = vmlal_s16(q2s32, d14s16, d30s16);
   q11s32 = vmlal_s16(q11s32, d15s16, d30s16);
 
-  d2s16 = vqrshrn_n_s32(q12s32, 14);
-  d3s16 = vqrshrn_n_s32(q5s32, 14);
-  d12s16 = vqrshrn_n_s32(q2s32, 14);
-  d13s16 = vqrshrn_n_s32(q11s32, 14);
+  d2s16 = vrshrn_n_s32(q12s32, 14);
+  d3s16 = vrshrn_n_s32(q5s32, 14);
+  d12s16 = vrshrn_n_s32(q2s32, 14);
+  d13s16 = vrshrn_n_s32(q11s32, 14);
   q1s16 = vcombine_s16(d2s16, d3s16);
   q6s16 = vcombine_s16(d12s16, d13s16);
 
@@ -1067,10 +1067,10 @@ void vpx_idct16x16_10_add_neon_pass2(const tran_low_t *src, int16_t *out,
   q8s32 = vmlal_s16(q8s32, d8s16, d31s16);
   q9s32 = vmlal_s16(q9s32, d9s16, d31s16);
 
-  d4s16 = vqrshrn_n_s32(q10s32, 14);
-  d5s16 = vqrshrn_n_s32(q13s32, 14);
-  d10s16 = vqrshrn_n_s32(q8s32, 14);
-  d11s16 = vqrshrn_n_s32(q9s32, 14);
+  d4s16 = vrshrn_n_s32(q10s32, 14);
+  d5s16 = vrshrn_n_s32(q13s32, 14);
+  d10s16 = vrshrn_n_s32(q8s32, 14);
+  d11s16 = vrshrn_n_s32(q9s32, 14);
   q2s16 = vcombine_s16(d4s16, d5s16);
   q5s16 = vcombine_s16(d10s16, d11s16);
 
@@ -1105,10 +1105,10 @@ void vpx_idct16x16_10_add_neon_pass2(const tran_low_t *src, int16_t *out,
   q0s32 = vaddq_s32(q3s32, q0s32);
   q4s32 = vaddq_s32(q4s32, q1s32);
 
-  d4s16 = vqrshrn_n_s32(q5s32, 14);
-  d5s16 = vqrshrn_n_s32(q6s32, 14);
-  d10s16 = vqrshrn_n_s32(q0s32, 14);
-  d11s16 = vqrshrn_n_s32(q4s32, 14);
+  d4s16 = vrshrn_n_s32(q5s32, 14);
+  d5s16 = vrshrn_n_s32(q6s32, 14);
+  d10s16 = vrshrn_n_s32(q0s32, 14);
+  d11s16 = vrshrn_n_s32(q4s32, 14);
   q2s16 = vcombine_s16(d4s16, d5s16);
   q5s16 = vcombine_s16(d10s16, d11s16);
 
@@ -1122,10 +1122,10 @@ void vpx_idct16x16_10_add_neon_pass2(const tran_low_t *src, int16_t *out,
   q13s32 = vaddq_s32(q13s32, q0s32);
   q6s32 = vaddq_s32(q6s32, q1s32);
 
-  d6s16 = vqrshrn_n_s32(q10s32, 14);
-  d7s16 = vqrshrn_n_s32(q4s32, 14);
-  d8s16 = vqrshrn_n_s32(q13s32, 14);
-  d9s16 = vqrshrn_n_s32(q6s32, 14);
+  d6s16 = vrshrn_n_s32(q10s32, 14);
+  d7s16 = vrshrn_n_s32(q4s32, 14);
+  d8s16 = vrshrn_n_s32(q13s32, 14);
+  d9s16 = vrshrn_n_s32(q6s32, 14);
   q3s16 = vcombine_s16(d6s16, d7s16);
   q4s16 = vcombine_s16(d8s16, d9s16);
 

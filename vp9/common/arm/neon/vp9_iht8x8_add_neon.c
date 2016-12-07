@@ -76,10 +76,10 @@ static INLINE void IDCT8x8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   q5s32 = vmlsl_s16(q5s32, d22s16, d3s16);
   q6s32 = vmlsl_s16(q6s32, d23s16, d3s16);
 
-  d8s16 = vqrshrn_n_s32(q2s32, 14);
-  d9s16 = vqrshrn_n_s32(q3s32, 14);
-  d10s16 = vqrshrn_n_s32(q5s32, 14);
-  d11s16 = vqrshrn_n_s32(q6s32, 14);
+  d8s16 = vrshrn_n_s32(q2s32, 14);
+  d9s16 = vrshrn_n_s32(q3s32, 14);
+  d10s16 = vrshrn_n_s32(q5s32, 14);
+  d11s16 = vrshrn_n_s32(q6s32, 14);
   q4s16 = vcombine_s16(d8s16, d9s16);
   q5s16 = vcombine_s16(d10s16, d11s16);
 
@@ -93,10 +93,10 @@ static INLINE void IDCT8x8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   q9s32 = vmlal_s16(q9s32, d22s16, d2s16);
   q13s32 = vmlal_s16(q13s32, d23s16, d2s16);
 
-  d14s16 = vqrshrn_n_s32(q2s32, 14);
-  d15s16 = vqrshrn_n_s32(q3s32, 14);
-  d12s16 = vqrshrn_n_s32(q9s32, 14);
-  d13s16 = vqrshrn_n_s32(q13s32, 14);
+  d14s16 = vrshrn_n_s32(q2s32, 14);
+  d15s16 = vrshrn_n_s32(q3s32, 14);
+  d12s16 = vrshrn_n_s32(q9s32, 14);
+  d13s16 = vrshrn_n_s32(q13s32, 14);
   q6s16 = vcombine_s16(d12s16, d13s16);
   q7s16 = vcombine_s16(d14s16, d15s16);
 
@@ -115,10 +115,10 @@ static INLINE void IDCT8x8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   d0s16 = vdup_n_s16(cospi_24_64);
   d1s16 = vdup_n_s16(cospi_8_64);
 
-  d18s16 = vqrshrn_n_s32(q2s32, 14);
-  d19s16 = vqrshrn_n_s32(q3s32, 14);
-  d22s16 = vqrshrn_n_s32(q13s32, 14);
-  d23s16 = vqrshrn_n_s32(q15s32, 14);
+  d18s16 = vrshrn_n_s32(q2s32, 14);
+  d19s16 = vrshrn_n_s32(q3s32, 14);
+  d22s16 = vrshrn_n_s32(q13s32, 14);
+  d23s16 = vrshrn_n_s32(q15s32, 14);
   *q9s16 = vcombine_s16(d18s16, d19s16);
   *q11s16 = vcombine_s16(d22s16, d23s16);
 
@@ -132,10 +132,10 @@ static INLINE void IDCT8x8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   q8s32 = vmlal_s16(q8s32, d28s16, d0s16);
   q12s32 = vmlal_s16(q12s32, d29s16, d0s16);
 
-  d26s16 = vqrshrn_n_s32(q2s32, 14);
-  d27s16 = vqrshrn_n_s32(q3s32, 14);
-  d30s16 = vqrshrn_n_s32(q8s32, 14);
-  d31s16 = vqrshrn_n_s32(q12s32, 14);
+  d26s16 = vrshrn_n_s32(q2s32, 14);
+  d27s16 = vrshrn_n_s32(q3s32, 14);
+  d30s16 = vrshrn_n_s32(q8s32, 14);
+  d31s16 = vrshrn_n_s32(q12s32, 14);
   *q13s16 = vcombine_s16(d26s16, d27s16);
   *q15s16 = vcombine_s16(d30s16, d31s16);
 
@@ -165,10 +165,10 @@ static INLINE void IDCT8x8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   q11s32 = vmlal_s16(q11s32, d26s16, d16s16);
   q12s32 = vmlal_s16(q12s32, d27s16, d16s16);
 
-  d10s16 = vqrshrn_n_s32(q9s32, 14);
-  d11s16 = vqrshrn_n_s32(q10s32, 14);
-  d12s16 = vqrshrn_n_s32(q11s32, 14);
-  d13s16 = vqrshrn_n_s32(q12s32, 14);
+  d10s16 = vrshrn_n_s32(q9s32, 14);
+  d11s16 = vrshrn_n_s32(q10s32, 14);
+  d12s16 = vrshrn_n_s32(q11s32, 14);
+  d13s16 = vrshrn_n_s32(q12s32, 14);
   q5s16 = vcombine_s16(d10s16, d11s16);
   q6s16 = vcombine_s16(d12s16, d13s16);
 
@@ -242,8 +242,8 @@ static INLINE void IADST8X8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   q1s32 = vsubq_s32(q1s32, q5s32);
   q2s32 = vsubq_s32(q2s32, q6s32);
 
-  d22s16 = vqrshrn_n_s32(q11s32, 14);
-  d23s16 = vqrshrn_n_s32(q12s32, 14);
+  d22s16 = vrshrn_n_s32(q11s32, 14);
+  d23s16 = vrshrn_n_s32(q12s32, 14);
   *q11s16 = vcombine_s16(d22s16, d23s16);
 
   q12s32 = vaddq_s32(q3s32, q7s32);
@@ -251,12 +251,12 @@ static INLINE void IADST8X8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   q3s32 = vsubq_s32(q3s32, q7s32);
   q4s32 = vsubq_s32(q4s32, q8s32);
 
-  d2s16 = vqrshrn_n_s32(q1s32, 14);
-  d3s16 = vqrshrn_n_s32(q2s32, 14);
-  d24s16 = vqrshrn_n_s32(q12s32, 14);
-  d25s16 = vqrshrn_n_s32(q15s32, 14);
-  d6s16 = vqrshrn_n_s32(q3s32, 14);
-  d7s16 = vqrshrn_n_s32(q4s32, 14);
+  d2s16 = vrshrn_n_s32(q1s32, 14);
+  d3s16 = vrshrn_n_s32(q2s32, 14);
+  d24s16 = vrshrn_n_s32(q12s32, 14);
+  d25s16 = vrshrn_n_s32(q15s32, 14);
+  d6s16 = vrshrn_n_s32(q3s32, 14);
+  d7s16 = vrshrn_n_s32(q4s32, 14);
   *q12s16 = vcombine_s16(d24s16, d25s16);
 
   d0s16 = vdup_n_s16(cospi_10_64);
@@ -291,10 +291,10 @@ static INLINE void IADST8X8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   q2s32 = vsubq_s32(q2s32, q10s32);
   q6s32 = vsubq_s32(q6s32, q9s32);
 
-  d28s16 = vqrshrn_n_s32(q14s32, 14);
-  d29s16 = vqrshrn_n_s32(q15s32, 14);
-  d4s16 = vqrshrn_n_s32(q2s32, 14);
-  d5s16 = vqrshrn_n_s32(q6s32, 14);
+  d28s16 = vrshrn_n_s32(q14s32, 14);
+  d29s16 = vrshrn_n_s32(q15s32, 14);
+  d4s16 = vrshrn_n_s32(q2s32, 14);
+  d5s16 = vrshrn_n_s32(q6s32, 14);
   *q14s16 = vcombine_s16(d28s16, d29s16);
 
   q9s32 = vaddq_s32(q4s32, q0s32);
@@ -305,10 +305,10 @@ static INLINE void IADST8X8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   d30s16 = vdup_n_s16(cospi_8_64);
   d31s16 = vdup_n_s16(cospi_24_64);
 
-  d18s16 = vqrshrn_n_s32(q9s32, 14);
-  d19s16 = vqrshrn_n_s32(q10s32, 14);
-  d8s16 = vqrshrn_n_s32(q4s32, 14);
-  d9s16 = vqrshrn_n_s32(q5s32, 14);
+  d18s16 = vrshrn_n_s32(q9s32, 14);
+  d19s16 = vrshrn_n_s32(q10s32, 14);
+  d8s16 = vrshrn_n_s32(q4s32, 14);
+  d9s16 = vrshrn_n_s32(q5s32, 14);
   *q9s16 = vcombine_s16(d18s16, d19s16);
 
   q5s32 = vmull_s16(d2s16, d30s16);
@@ -341,10 +341,10 @@ static INLINE void IADST8X8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   q5s32 = vsubq_s32(q5s32, q1s32);
   q6s32 = vsubq_s32(q6s32, q3s32);
 
-  d18s16 = vqrshrn_n_s32(q14s32, 14);
-  d19s16 = vqrshrn_n_s32(q15s32, 14);
-  d10s16 = vqrshrn_n_s32(q5s32, 14);
-  d11s16 = vqrshrn_n_s32(q6s32, 14);
+  d18s16 = vrshrn_n_s32(q14s32, 14);
+  d19s16 = vrshrn_n_s32(q15s32, 14);
+  d10s16 = vrshrn_n_s32(q5s32, 14);
+  d11s16 = vrshrn_n_s32(q6s32, 14);
   *q9s16 = vcombine_s16(d18s16, d19s16);
 
   q1s32 = vaddq_s32(q7s32, q10s32);
@@ -352,10 +352,10 @@ static INLINE void IADST8X8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   q7s32 = vsubq_s32(q7s32, q10s32);
   q0s32 = vsubq_s32(q0s32, q2s32);
 
-  d28s16 = vqrshrn_n_s32(q1s32, 14);
-  d29s16 = vqrshrn_n_s32(q3s32, 14);
-  d14s16 = vqrshrn_n_s32(q7s32, 14);
-  d15s16 = vqrshrn_n_s32(q0s32, 14);
+  d28s16 = vrshrn_n_s32(q1s32, 14);
+  d29s16 = vrshrn_n_s32(q3s32, 14);
+  d14s16 = vrshrn_n_s32(q7s32, 14);
+  d15s16 = vrshrn_n_s32(q0s32, 14);
   *q14s16 = vcombine_s16(d28s16, d29s16);
 
   d30s16 = vdup_n_s16(cospi_16_64);
@@ -374,10 +374,10 @@ static INLINE void IADST8X8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   q13s32 = vmlsl_s16(q13s32, d24s16, d30s16);
   q1s32 = vmlsl_s16(q1s32, d25s16, d30s16);
 
-  d4s16 = vqrshrn_n_s32(q2s32, 14);
-  d5s16 = vqrshrn_n_s32(q3s32, 14);
-  d24s16 = vqrshrn_n_s32(q13s32, 14);
-  d25s16 = vqrshrn_n_s32(q1s32, 14);
+  d4s16 = vrshrn_n_s32(q2s32, 14);
+  d5s16 = vrshrn_n_s32(q3s32, 14);
+  d24s16 = vrshrn_n_s32(q13s32, 14);
+  d25s16 = vrshrn_n_s32(q1s32, 14);
   q2s16 = vcombine_s16(d4s16, d5s16);
   *q12s16 = vcombine_s16(d24s16, d25s16);
 
@@ -391,10 +391,10 @@ static INLINE void IADST8X8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   q11s32 = vmlsl_s16(q11s32, d14s16, d30s16);
   q0s32 = vmlsl_s16(q0s32, d15s16, d30s16);
 
-  d20s16 = vqrshrn_n_s32(q13s32, 14);
-  d21s16 = vqrshrn_n_s32(q1s32, 14);
-  d12s16 = vqrshrn_n_s32(q11s32, 14);
-  d13s16 = vqrshrn_n_s32(q0s32, 14);
+  d20s16 = vrshrn_n_s32(q13s32, 14);
+  d21s16 = vrshrn_n_s32(q1s32, 14);
+  d12s16 = vrshrn_n_s32(q11s32, 14);
+  d13s16 = vrshrn_n_s32(q0s32, 14);
   *q10s16 = vcombine_s16(d20s16, d21s16);
   q6s16 = vcombine_s16(d12s16, d13s16);
 
