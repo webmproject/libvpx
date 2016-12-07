@@ -18,6 +18,8 @@
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
 
+    INCLUDE vpx_dsp/arm/idct_neon.asm.S
+
     ; Transpose a 8x8 16bit data matrix. Datas are loaded in q8-q15.
     MACRO
     TRANSPOSE8X8
@@ -36,12 +38,10 @@
     MEND
 
     AREA    Block, CODE, READONLY ; name this block of code
-;void |vpx_idct16x16_256_add_neon_pass1|(const int16_t *input,
-;                                        int16_t *output, int output_stride)
+;void |vpx_idct16x16_256_add_neon_pass1|(const int16_t *input, int16_t *output)
 ;
 ; r0  const int16_t *input
 ; r1  int16_t *output
-; r2  int output_stride
 
 ; idct16 stage1 - stage6 on all the elements loaded in q8-q15. The output
 ; will be stored back into q8-q15 registers. This function will touch q0-q7
@@ -247,22 +247,10 @@
     vsub.s16        q15, q0, q15              ; step2[7] = step1[0] - step1[7];
 
     ; store the data
-    vst1.64         {d16}, [r1], r2
-    vst1.64         {d17}, [r1], r2
-    vst1.64         {d18}, [r1], r2
-    vst1.64         {d19}, [r1], r2
-    vst1.64         {d20}, [r1], r2
-    vst1.64         {d21}, [r1], r2
-    vst1.64         {d22}, [r1], r2
-    vst1.64         {d23}, [r1], r2
-    vst1.64         {d24}, [r1], r2
-    vst1.64         {d25}, [r1], r2
-    vst1.64         {d26}, [r1], r2
-    vst1.64         {d27}, [r1], r2
-    vst1.64         {d28}, [r1], r2
-    vst1.64         {d29}, [r1], r2
-    vst1.64         {d30}, [r1], r2
-    vst1.64         {d31}, [r1], r2
+    vst1.64         {q8-q9}, [r1]!
+    vst1.64         {q10-q11}, [r1]!
+    vst1.64         {q12-q13}, [r1]!
+    vst1.64         {q14-q15}, [r1]
 
     bx              lr
     ENDP  ; |vpx_idct16x16_256_add_neon_pass1|
@@ -767,12 +755,11 @@ end_idct16x16_pass2
     bx              lr
     ENDP  ; |vpx_idct16x16_256_add_neon_pass2|
 
-;void |vpx_idct16x16_10_add_neon_pass1|(const int16_t *input,
-;                                       int16_t *output, int output_stride)
+;void |vpx_idct16x16_10_add_neon_pass1|(const tran_low_t *input,
+;                                       int16_t *output)
 ;
-; r0  const int16_t *input
+; r0  const tran_low_t *input
 ; r1  int16_t *output
-; r2  int output_stride
 
 ; idct16 stage1 - stage6 on all the elements loaded in q8-q15. The output
 ; will be stored back into q8-q15 registers. This function will touch q0-q7
@@ -781,14 +768,14 @@ end_idct16x16_pass2
 
     ; TODO(hkuang): Find a better way to load the elements.
     ; load elements of 0, 2, 4, 6, 8, 10, 12, 14 into q8 - q15
-    vld2.s16        {q8,q9}, [r0]!
-    vld2.s16        {q9,q10}, [r0]!
-    vld2.s16        {q10,q11}, [r0]!
-    vld2.s16        {q11,q12}, [r0]!
-    vld2.s16        {q12,q13}, [r0]!
-    vld2.s16        {q13,q14}, [r0]!
-    vld2.s16        {q14,q15}, [r0]!
-    vld2.s16        {q1,q2}, [r0]!
+    LOAD_TRAN_LOW_TO_S16X2 d16, d17, d18, d19, r0
+    LOAD_TRAN_LOW_TO_S16X2 d18, d19, d20, d21, r0
+    LOAD_TRAN_LOW_TO_S16X2 d20, d21, d22, d23, r0
+    LOAD_TRAN_LOW_TO_S16X2 d22, d23, d24, d25, r0
+    LOAD_TRAN_LOW_TO_S16X2 d24, d25, d26, d27, r0
+    LOAD_TRAN_LOW_TO_S16X2 d26, d27, d28, d29, r0
+    LOAD_TRAN_LOW_TO_S16X2 d28, d29, d30, d31, r0
+    LOAD_TRAN_LOW_TO_S16X2 d2, d3, d4, d5, r0
     vmov.s16        q15, q1
 
     ; cospi_28_64*2 = 6392
@@ -864,30 +851,19 @@ end_idct16x16_pass2
     vsub.s16        q15, q8, q7               ; step2[7] = step1[0] - step1[7];
 
     ; store the data
-    vst1.64         {d4}, [r1], r2
-    vst1.64         {d5}, [r1], r2
-    vst1.64         {d18}, [r1], r2
-    vst1.64         {d19}, [r1], r2
-    vst1.64         {d20}, [r1], r2
-    vst1.64         {d21}, [r1], r2
-    vst1.64         {d22}, [r1], r2
-    vst1.64         {d23}, [r1], r2
-    vst1.64         {d24}, [r1], r2
-    vst1.64         {d25}, [r1], r2
-    vst1.64         {d26}, [r1], r2
-    vst1.64         {d27}, [r1], r2
-    vst1.64         {d28}, [r1], r2
-    vst1.64         {d29}, [r1], r2
-    vst1.64         {d30}, [r1], r2
-    vst1.64         {d31}, [r1], r2
+    vst1.64         {q2}, [r1]!
+    vst1.64         {q9-q10}, [r1]!
+    vst1.64         {q11-q12}, [r1]!
+    vst1.64         {q13-q14}, [r1]!
+    vst1.64         {q15}, [r1]
 
     bx              lr
     ENDP  ; |vpx_idct16x16_10_add_neon_pass1|
 
-;void vpx_idct16x16_10_add_neon_pass2(const int16_t *src, int16_t *output,
+;void vpx_idct16x16_10_add_neon_pass2(const tran_low_t *src, int16_t *output,
 ;                                     int16_t *pass1_output)
 ;
-; r0  const int16_t *src
+; r0  const tran_low_t *src
 ; r1  int16_t *output
 ; r2  int16_t *pass1_output
 
@@ -899,14 +875,14 @@ end_idct16x16_pass2
 
     ; TODO(hkuang): Find a better way to load the elements.
     ; load elements of 1, 3, 5, 7, 9, 11, 13, 15 into q8 - q15
-    vld2.s16        {q8,q9}, [r0]!
-    vld2.s16        {q9,q10}, [r0]!
-    vld2.s16        {q10,q11}, [r0]!
-    vld2.s16        {q11,q12}, [r0]!
-    vld2.s16        {q12,q13}, [r0]!
-    vld2.s16        {q13,q14}, [r0]!
-    vld2.s16        {q14,q15}, [r0]!
-    vld2.s16        {q0,q1}, [r0]!
+    LOAD_TRAN_LOW_TO_S16X2 d16, d17, d18, d19, r0
+    LOAD_TRAN_LOW_TO_S16X2 d18, d19, d20, d21, r0
+    LOAD_TRAN_LOW_TO_S16X2 d20, d21, d22, d23, r0
+    LOAD_TRAN_LOW_TO_S16X2 d22, d23, d24, d25, r0
+    LOAD_TRAN_LOW_TO_S16X2 d24, d25, d26, d27, r0
+    LOAD_TRAN_LOW_TO_S16X2 d26, d27, d28, d29, r0
+    LOAD_TRAN_LOW_TO_S16X2 d28, d29, d30, d31, r0
+    LOAD_TRAN_LOW_TO_S16X2 d0, d1, d2, d3, r0
     vmov.s16        q15, q0;
 
     ; 2*cospi_30_64 = 3212
