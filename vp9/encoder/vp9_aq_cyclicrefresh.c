@@ -128,16 +128,20 @@ int vp9_cyclic_refresh_rc_bits_per_mb(const VP9_COMP *cpi, int i,
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   int bits_per_mb;
   int num8x8bl = cm->MBs << 2;
+  // Compute delta-q corresponding to qindex i.
+  int deltaq = compute_deltaq(cpi, i, cr->rate_ratio_qdelta);
   // Weight for segment prior to encoding: take the average of the target
   // number for the frame to be encoded and the actual from the previous frame.
+  // Use the target if its less.
   int target_refresh = cr->percent_refresh * cm->mi_rows * cm->mi_cols / 100;
+  double weight_segment_target = (double)(target_refresh) / num8x8bl;
   double weight_segment =
       (double)((target_refresh + cr->actual_num_seg1_blocks +
                 cr->actual_num_seg2_blocks) >>
                1) /
       num8x8bl;
-  // Compute delta-q corresponding to qindex i.
-  int deltaq = compute_deltaq(cpi, i, cr->rate_ratio_qdelta);
+  if (weight_segment_target < 7 * weight_segment / 8)
+    weight_segment = weight_segment_target;
   // Take segment weighted average for bits per mb.
   bits_per_mb = (int)((1.0 - weight_segment) *
                           vp9_rc_bits_per_mb(cm->frame_type, i,
