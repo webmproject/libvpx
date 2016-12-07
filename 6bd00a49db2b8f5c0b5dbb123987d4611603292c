@@ -16,6 +16,24 @@
       "revId": "6bd00a49db2b8f5c0b5dbb123987d4611603292c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed27f748_9182cb51",
+        "filename": "vpx_dsp/x86/inv_txfm_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-12-07T17:49:31Z",
+      "side": 1,
+      "message": "First, the title should be \"Update idct x86 intrinsics to not use saturated pack\".\n\nYesterday afternoon I found a bug in unit test code TEST_P(PartialIDctTest, RunQuantCheck):\ninput_block_[vp9_default_scan_orders[tx_size_].scan[k]] \u003d\n          (output_ref_block[k] / 4) * 4;\n\nwhich should be input_block_[vp9_default_scan_orders[tx_size_].scan[k]] \u003d\n          (output_ref_block[vp9_default_scan_orders[tx_size_].scan[k]] / 4) * 4;\n\nThe false changes of positions of real dct outputs made a lot of false alarms. Glad it\u0027s gone so I don\u0027t need to check-in 2 more \"fixes\" which are even more mess.\n\nI double checked this change this morning, and found that it is a false alarm caused by that bug.\n\nI\u0027ll abandon this change, and double check Change 413287.",
+      "parentUuid": "ed27f748_e9455d8f",
+      "revId": "6bd00a49db2b8f5c0b5dbb123987d4611603292c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
