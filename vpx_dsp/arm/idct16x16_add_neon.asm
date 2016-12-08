@@ -8,7 +8,7 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-    INCLUDE ./vpx_config.asm
+    INCLUDE vpx_dsp/arm/idct_neon.asm.S
 
     EXPORT  |vpx_idct16x16_256_add_neon_pass1|
     EXPORT  |vpx_idct16x16_256_add_neon_pass2|
@@ -23,8 +23,6 @@
     PRESERVE8
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
-
-    INCLUDE vpx_dsp/arm/idct_neon.asm.S
 
     ; Transpose a 8x8 16bit data matrix. Datas are loaded in q8-q15.
     MACRO
@@ -262,7 +260,7 @@ idct16x16_256_add_neon_pass1
     bx              lr
     ENDP  ; |vpx_idct16x16_256_add_neon_pass1|
 
-IF CONFIG_VP9_HIGHBITDEPTH
+    IF CONFIG_VP9_HIGHBITDEPTH
 ;void |vpx_idct16x16_256_add_neon_pass1_tran_low|(const tran_low_t *input,
 ;                                                 int16_t *output)
 ;
@@ -282,7 +280,7 @@ IF CONFIG_VP9_HIGHBITDEPTH
 
     b               idct16x16_256_add_neon_pass1
     ENDP  ; |vpx_idct16x16_256_add_neon_pass1_tran_low|
-ENDIF  ; CONFIG_VP9_HIGHBITDEPTH
+    ENDIF  ; CONFIG_VP9_HIGHBITDEPTH
 
 ;void vpx_idct16x16_256_add_neon_pass2(const int16_t *src,
 ;                                      int16_t *output,
@@ -785,7 +783,7 @@ end_idct16x16_pass2
     bx              lr
     ENDP  ; |vpx_idct16x16_256_add_neon_pass2|
 
-IF CONFIG_VP9_HIGHBITDEPTH
+    IF CONFIG_VP9_HIGHBITDEPTH
 ;void vpx_idct16x16_256_add_neon_pass2_tran_low(const tran_low_t *src,
 ;                                               int16_t *output,
 ;                                               int16_t *pass1_output,
@@ -813,7 +811,7 @@ IF CONFIG_VP9_HIGHBITDEPTH
 
     b               idct16x16_256_add_neon_pass2
     ENDP  ; |vpx_idct16x16_256_add_neon_pass2_tran_low|
-ENDIF  ; CONFIG_VP9_HIGHBITDEPTH
+    ENDIF  ; CONFIG_VP9_HIGHBITDEPTH
 
 ;void |vpx_idct16x16_10_add_neon_pass1|(const tran_low_t *input,
 ;                                       int16_t *output)
