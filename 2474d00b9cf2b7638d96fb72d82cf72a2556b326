@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ed27f748_c6b6398d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 4342,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-12-08T23:46:54Z",
+      "side": 1,
+      "message": "There are no new restrictions. This is to adjust encoder rate control so that the encoded frame size is not so large that the CPB size (sum of 4 adjacent frames) exceeds level limit.",
+      "parentUuid": "ed27f748_c3d5cbd5",
+      "range": {
+        "startLine": 4342,
+        "startChar": 12,
+        "endLine": 4342,
+        "endChar": 30
+      },
+      "revId": "2474d00b9cf2b7638d96fb72d82cf72a2556b326",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ed27f748_63bdd799",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 21
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "ed27f748_0674313d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 4482,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-12-08T23:46:54Z",
+      "side": 1,
+      "message": "We can only check bitrate and compression ratio after the last frame in a video sequence is encoded. Since it\u0027s not easy for the encoder inside libvpx to know if there are more frames to encode, I leave checking these two metrics to the calling application.",
+      "parentUuid": "ed27f748_63bdd799",
+      "range": {
+        "startLine": 4482,
+        "startChar": 6,
+        "endLine": 4482,
+        "endChar": 17
+      },
+      "revId": "2474d00b9cf2b7638d96fb72d82cf72a2556b326",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ed27f748_e3a4878b",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 21
@@ -59,6 +107,30 @@
       "writtenOn": "2016-12-08T22:31:18Z",
       "side": 1,
       "message": "I don\u0027t think this is correct. We are using the sample rate grace to allow the actual to go over the level stated by 1.5%. This also depends on how you calculate max_luma_sample_rate. But I think you want the check to be\nmlsr \u003e level-\u003emlsr * (1 + grace)",
+      "range": {
+        "startLine": 4492,
+        "startChar": 77,
+        "endLine": 4492,
+        "endChar": 78
+      },
+      "revId": "2474d00b9cf2b7638d96fb72d82cf72a2556b326",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed27f748_a6853df1",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 4492,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2016-12-08T23:46:54Z",
+      "side": 1,
+      "message": "Indeed, thanks!",
+      "parentUuid": "ed27f748_e3a4878b",
       "range": {
         "startLine": 4492,
         "startChar": 77,
