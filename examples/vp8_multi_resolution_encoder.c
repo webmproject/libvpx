@@ -240,9 +240,9 @@ static void set_temporal_layer_pattern(int num_temporal_layers,
       cfg->ts_layer_id[1] = 2;
       cfg->ts_layer_id[2] = 1;
       cfg->ts_layer_id[3] = 2;
-      // Use 40/20/40 bit allocation as example.
-      cfg->ts_target_bitrate[0] = 0.4f * bitrate;
-      cfg->ts_target_bitrate[1] = 0.6f * bitrate;
+      // Use 45/20/35 bit allocation as example.
+      cfg->ts_target_bitrate[0] = 0.45f * bitrate;
+      cfg->ts_target_bitrate[1] = 0.65f * bitrate;
       cfg->ts_target_bitrate[2] = bitrate;
 
       /* 0=L, 1=GF, 2=ARF */
@@ -460,7 +460,7 @@ int main(int argc, char **argv) {
 
   // Set the number of threads per encode/spatial layer.
   // (1, 1, 1) means no encoder threading.
-  cfg[0].g_threads = 2;
+  cfg[0].g_threads = 1;
   cfg[1].g_threads = 1;
   cfg[2].g_threads = 1;
 
@@ -507,9 +507,11 @@ int main(int argc, char **argv) {
 
   /* Set NOISE_SENSITIVITY to do TEMPORAL_DENOISING */
   /* Enable denoising for the highest-resolution encoder. */
-  if (vpx_codec_control(&codec[0], VP8E_SET_NOISE_SENSITIVITY, 4))
+  if (vpx_codec_control(&codec[0], VP8E_SET_NOISE_SENSITIVITY, 1))
     die_codec(&codec[0], "Failed to set noise_sensitivity");
-  for (i = 1; i < NUM_ENCODERS; i++) {
+  if (vpx_codec_control(&codec[1], VP8E_SET_NOISE_SENSITIVITY, 1))
+    die_codec(&codec[1], "Failed to set noise_sensitivity");
+  for (i = 2; i < NUM_ENCODERS; i++) {
     if (vpx_codec_control(&codec[i], VP8E_SET_NOISE_SENSITIVITY, 0))
       die_codec(&codec[i], "Failed to set noise_sensitivity");
   }
