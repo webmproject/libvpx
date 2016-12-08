@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed27f748_c3d5cbd5",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 4342,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-12-08T22:31:18Z",
+      "side": 1,
+      "message": "Why are we doing this? Is this some new restriction?",
+      "range": {
+        "startLine": 4342,
+        "startChar": 12,
+        "endLine": 4342,
+        "endChar": 30
+      },
+      "revId": "2474d00b9cf2b7638d96fb72d82cf72a2556b326",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed27f748_63bdd799",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 4482,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-12-08T22:31:18Z",
+      "side": 1,
+      "message": "I don\u0027t see where you are checking average bitrate or min compression ratio.",
+      "range": {
+        "startLine": 4482,
+        "startChar": 6,
+        "endLine": 4482,
+        "endChar": 17
+      },
+      "revId": "2474d00b9cf2b7638d96fb72d82cf72a2556b326",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed27f748_e3a4878b",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 4492,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2016-12-08T22:31:18Z",
+      "side": 1,
+      "message": "I don\u0027t think this is correct. We are using the sample rate grace to allow the actual to go over the level stated by 1.5%. This also depends on how you calculate max_luma_sample_rate. But I think you want the check to be\nmlsr \u003e level-\u003emlsr * (1 + grace)",
+      "range": {
+        "startLine": 4492,
+        "startChar": 77,
+        "endLine": 4492,
+        "endChar": 78
+      },
+      "revId": "2474d00b9cf2b7638d96fb72d82cf72a2556b326",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
