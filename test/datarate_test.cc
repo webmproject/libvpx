@@ -1052,7 +1052,7 @@ class DatarateOnePassCbrSvc
       }
       svc_params_.speed_per_layer[0] = 5;
       for (i = 1; i < VPX_SS_MAX_LAYERS; ++i) {
-        svc_params_.speed_per_layer[i] = 7;
+        svc_params_.speed_per_layer[i] = speed_setting_;
       }
       encoder->Control(VP9E_SET_SVC, 1);
       encoder->Control(VP9E_SET_SVC_PARAMETERS, &svc_params_);
@@ -1060,6 +1060,7 @@ class DatarateOnePassCbrSvc
       encoder->Control(VP9E_SET_TILE_COLUMNS, 0);
       encoder->Control(VP8E_SET_MAX_INTRA_BITRATE_PCT, 300);
       encoder->Control(VP9E_SET_TILE_COLUMNS, (cfg_.g_threads >> 1));
+      encoder->Control(VP8E_SET_STATIC_THRESHOLD, 1);
     }
     const vpx_rational_t tb = video->timebase();
     timebase_ = static_cast<double>(tb.num) / tb.den;
@@ -1387,6 +1388,41 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SpatialLayers4threads) {
       << " The datarate for the file exceeds the target by too much!";
   ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.22)
       << " The datarate for the file is lower than the target by too much!";
+  EXPECT_EQ(static_cast<unsigned int>(0), GetMismatchFrames());
+}
+
+// Run SVC encoder for 1 temporal layer, 2 spatial layers, with spatial
+// downscale 5x5.
+TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SpatialLayers5x5MultipleRuns) {
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 63;
+  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.g_lag_in_frames = 0;
+  cfg_.ss_number_layers = 2;
+  cfg_.ts_number_layers = 1;
+  cfg_.ts_rate_decimator[0] = 1;
+  cfg_.g_error_resilient = 1;
+  cfg_.g_threads = 3;
+  cfg_.temporal_layering_mode = 0;
+  svc_params_.scaling_factor_num[0] = 256;
+  svc_params_.scaling_factor_den[0] = 1280;
+  svc_params_.scaling_factor_num[1] = 1280;
+  svc_params_.scaling_factor_den[1] = 1280;
+  cfg_.rc_dropframe_thresh = 0;
+  cfg_.kf_max_dist = 999999;
+  cfg_.kf_min_dist = 0;
+  cfg_.ss_target_bitrate[0] = 300;
+  cfg_.ss_target_bitrate[1] = 1400;
+  cfg_.layer_target_bitrate[0] = 300;
+  cfg_.layer_target_bitrate[1] = 1400;
+  cfg_.rc_target_bitrate = 1700;
+  ::libvpx_test::I420VideoSource video("niklas_1280_720_30.y4m", 1280, 720, 30,
+                                       1, 0, 30);
+  ResetModel();
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   EXPECT_EQ(static_cast<unsigned int>(0), GetMismatchFrames());
 }
 
