@@ -120,30 +120,6 @@ static INLINE int16x8_t multiply_accumulate_shift_and_narrow_s16(
   return vcombine_s16(vrshrn_n_s32(temp_low, 14), vrshrn_n_s32(temp_high, 14));
 }
 
-static INLINE void load_and_transpose_s16_8x8(const int16_t *a, int a_stride,
-                                              int16x8_t *a0, int16x8_t *a1,
-                                              int16x8_t *a2, int16x8_t *a3,
-                                              int16x8_t *a4, int16x8_t *a5,
-                                              int16x8_t *a6, int16x8_t *a7) {
-  *a0 = vld1q_s16(a);
-  a += a_stride;
-  *a1 = vld1q_s16(a);
-  a += a_stride;
-  *a2 = vld1q_s16(a);
-  a += a_stride;
-  *a3 = vld1q_s16(a);
-  a += a_stride;
-  *a4 = vld1q_s16(a);
-  a += a_stride;
-  *a5 = vld1q_s16(a);
-  a += a_stride;
-  *a6 = vld1q_s16(a);
-  a += a_stride;
-  *a7 = vld1q_s16(a);
-
-  transpose_s16_8x8(a0, a1, a2, a3, a4, a5, a6, a7);
-}
-
 // Shift the output down by 6 and add it to the destination buffer.
 static INLINE void add_and_store_u8_s16(const int16x8_t a0, const int16x8_t a1,
                                         const int16x8_t a2, const int16x8_t a3,
