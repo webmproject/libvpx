@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a280382_4d1c1992",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 1394,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-09T00:15:57Z",
+      "side": 1,
+      "message": "this can be updated after dropping the loop",
+      "revId": "0755d963467727b5042e8540a2db8468491a08e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a280382_8d36810e",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 1397,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-09T00:15:57Z",
+      "side": 1,
+      "message": "the crash won\u0027t always occur even with this limit, best to leave it at 1 and we\u0027ll rely on additional tooling (asan, valgrind) to point out uses of uninitialized values.",
+      "revId": "0755d963467727b5042e8540a2db8468491a08e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
