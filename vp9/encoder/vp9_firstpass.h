@@ -60,6 +60,8 @@ typedef struct {
   int intercount;
   int second_ref_count;
   double neutral_count;
+  double intra_count_low;   // Coded intra but low variance
+  double intra_count_high;  // Coded intra high variance
   int intra_skip_count;
   int image_data_start_row;
   int mvcount;
@@ -84,6 +86,8 @@ typedef struct {
   double pcnt_motion;
   double pcnt_second_ref;
   double pcnt_neutral;
+  double pcnt_intra_low;   // Coded intra but low variance
+  double pcnt_intra_high;  // Coded intra high variance
   double intra_skip_pct;
   double intra_smooth_pct;    // % of blocks that are smooth
   double inactive_zone_rows;  // Image mask rows top and bottom.

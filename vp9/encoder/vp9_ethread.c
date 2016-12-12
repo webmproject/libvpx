@@ -229,6 +229,8 @@ static void accumulate_fp_tile_stat(TileDataEnc *tile_data,
   tile_data->fp_data.intercount += tile_data_t->fp_data.intercount;
   tile_data->fp_data.second_ref_count += tile_data_t->fp_data.second_ref_count;
   tile_data->fp_data.neutral_count += tile_data_t->fp_data.neutral_count;
+  tile_data->fp_data.intra_count_low += tile_data_t->fp_data.intra_count_low;
+  tile_data->fp_data.intra_count_high += tile_data_t->fp_data.intra_count_high;
   tile_data->fp_data.intra_skip_count += tile_data_t->fp_data.intra_skip_count;
   tile_data->fp_data.mvcount += tile_data_t->fp_data.mvcount;
   tile_data->fp_data.sum_mvr += tile_data_t->fp_data.sum_mvr;
