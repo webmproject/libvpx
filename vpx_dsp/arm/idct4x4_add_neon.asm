@@ -18,11 +18,11 @@
     INCLUDE vpx_dsp/arm/idct_neon.asm.S
 
     AREA     Block, CODE, READONLY ; name this block of code
-;void vpx_idct4x4_16_add_neon(int16_t *input, uint8_t *dest, int dest_stride)
+;void vpx_idct4x4_16_add_neon(int16_t *input, uint8_t *dest, int stride)
 ;
 ; r0  int16_t input
 ; r1  uint8_t *dest
-; r2  int dest_stride)
+; r2  int stride)
 
 |vpx_idct4x4_16_add_neon| PROC
 
@@ -167,7 +167,7 @@
     vld1.32 {d27[1]}, [r1], r2
     vld1.32 {d27[0]}, [r1]  ; no post-increment
 
-    ; ROUND_POWER_OF_TWO(temp_out[j], 4) + dest[j * dest_stride + i]
+    ; ROUND_POWER_OF_TWO(temp_out[j], 4) + dest[j * stride + i]
     vaddw.u8 q8, q8, d26
     vaddw.u8 q9, q9, d27
 

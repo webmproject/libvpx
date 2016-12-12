@@ -15,7 +15,7 @@
 #include "vpx_ports/mem.h"
 
 void vpx_idct16x16_1_add_neon(const tran_low_t *input, uint8_t *dest,
-                              int dest_stride) {
+                              int stride) {
   uint8x8_t d2u8, d3u8, d30u8, d31u8;
   uint64x1_t d2u64, d3u64, d4u64, d5u64;
   uint16x8_t q0u16, q9u16, q10u16, q11u16, q12u16;
@@ -33,10 +33,10 @@ void vpx_idct16x16_1_add_neon(const tran_low_t *input, uint8_t *dest,
     for (j = 0; j < 2; j++) {
       d2u64 = vld1_u64((const uint64_t *)d1);
       d3u64 = vld1_u64((const uint64_t *)(d1 + 8));
-      d1 += dest_stride;
+      d1 += stride;
       d4u64 = vld1_u64((const uint64_t *)d1);
       d5u64 = vld1_u64((const uint64_t *)(d1 + 8));
-      d1 += dest_stride;
+      d1 += stride;
 
       q9u16 = vaddw_u8(q0u16, vreinterpret_u8_u64(d2u64));
       q10u16 = vaddw_u8(q0u16, vreinterpret_u8_u64(d3u64));
@@ -50,10 +50,10 @@ void vpx_idct16x16_1_add_neon(const tran_low_t *input, uint8_t *dest,
 
       vst1_u64((uint64_t *)d2, vreinterpret_u64_u8(d2u8));
       vst1_u64((uint64_t *)(d2 + 8), vreinterpret_u64_u8(d3u8));
-      d2 += dest_stride;
+      d2 += stride;
       vst1_u64((uint64_t *)d2, vreinterpret_u64_u8(d30u8));
       vst1_u64((uint64_t *)(d2 + 8), vreinterpret_u64_u8(d31u8));
-      d2 += dest_stride;
+      d2 += stride;
     }
   }
 }

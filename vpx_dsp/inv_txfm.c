@@ -67,7 +67,7 @@ void vpx_iwht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   }
 }
 
-void vpx_iwht4x4_1_add_c(const tran_low_t *in, uint8_t *dest, int dest_stride) {
+void vpx_iwht4x4_1_add_c(const tran_low_t *in, uint8_t *dest, int stride) {
   int i;
   tran_high_t a1, e1;
   tran_low_t tmp[4];
@@ -84,10 +84,10 @@ void vpx_iwht4x4_1_add_c(const tran_low_t *in, uint8_t *dest, int dest_stride) {
   for (i = 0; i < 4; i++) {
     e1 = ip[0] >> 1;
     a1 = ip[0] - e1;
-    dest[dest_stride * 0] = clip_pixel_add(dest[dest_stride * 0], a1);
-    dest[dest_stride * 1] = clip_pixel_add(dest[dest_stride * 1], e1);
-    dest[dest_stride * 2] = clip_pixel_add(dest[dest_stride * 2], e1);
-    dest[dest_stride * 3] = clip_pixel_add(dest[dest_stride * 3], e1);
+    dest[stride * 0] = clip_pixel_add(dest[stride * 0], a1);
+    dest[stride * 1] = clip_pixel_add(dest[stride * 1], e1);
+    dest[stride * 2] = clip_pixel_add(dest[stride * 2], e1);
+    dest[stride * 3] = clip_pixel_add(dest[stride * 3], e1);
     ip++;
     dest++;
   }
@@ -138,8 +138,7 @@ void vpx_idct4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   }
 }
 
-void vpx_idct4x4_1_add_c(const tran_low_t *input, uint8_t *dest,
-                         int dest_stride) {
+void vpx_idct4x4_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   int i;
   tran_high_t a1;
   tran_low_t out = WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64));
@@ -152,7 +151,7 @@ void vpx_idct4x4_1_add_c(const tran_low_t *input, uint8_t *dest,
     dest[1] = clip_pixel_add(dest[1], a1);
     dest[2] = clip_pixel_add(dest[2], a1);
     dest[3] = clip_pixel_add(dest[3], a1);
-    dest += dest_stride;
+    dest += stride;
   }
 }
 
@@ -1324,7 +1323,7 @@ void vpx_highbd_iwht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
 }
 
 void vpx_highbd_iwht4x4_1_add_c(const tran_low_t *in, uint8_t *dest8,
-                                int dest_stride, int bd) {
+                                int stride, int bd) {
   int i;
   tran_high_t a1, e1;
   tran_low_t tmp[4];
@@ -1343,14 +1342,10 @@ void vpx_highbd_iwht4x4_1_add_c(const tran_low_t *in, uint8_t *dest8,
   for (i = 0; i < 4; i++) {
     e1 = ip[0] >> 1;
     a1 = ip[0] - e1;
-    dest[dest_stride * 0] =
-        highbd_clip_pixel_add(dest[dest_stride * 0], a1, bd);
-    dest[dest_stride * 1] =
-        highbd_clip_pixel_add(dest[dest_stride * 1], e1, bd);
-    dest[dest_stride * 2] =
-        highbd_clip_pixel_add(dest[dest_stride * 2], e1, bd);
-    dest[dest_stride * 3] =
-        highbd_clip_pixel_add(dest[dest_stride * 3], e1, bd);
+    dest[stride * 0] = highbd_clip_pixel_add(dest[stride * 0], a1, bd);
+    dest[stride * 1] = highbd_clip_pixel_add(dest[stride * 1], e1, bd);
+    dest[stride * 2] = highbd_clip_pixel_add(dest[stride * 2], e1, bd);
+    dest[stride * 3] = highbd_clip_pixel_add(dest[stride * 3], e1, bd);
     ip++;
     dest++;
   }
@@ -1413,7 +1408,7 @@ void vpx_highbd_idct4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
 }
 
 void vpx_highbd_idct4x4_1_add_c(const tran_low_t *input, uint8_t *dest8,
-                                int dest_stride, int bd) {
+                                int stride, int bd) {
   int i;
   tran_high_t a1;
   tran_low_t out =
@@ -1428,7 +1423,7 @@ void vpx_highbd_idct4x4_1_add_c(const tran_low_t *input, uint8_t *dest8,
     dest[1] = highbd_clip_pixel_add(dest[1], a1, bd);
     dest[2] = highbd_clip_pixel_add(dest[2], a1, bd);
     dest[3] = highbd_clip_pixel_add(dest[3], a1, bd);
-    dest += dest_stride;
+    dest += stride;
   }
 }
 

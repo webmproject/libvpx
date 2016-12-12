@@ -15,7 +15,7 @@
 #include "vpx_dsp/inv_txfm.h"
 
 void vpx_highbd_idct4x4_1_add_neon(const tran_low_t *input, uint8_t *dest8,
-                                   int dest_stride, int bd) {
+                                   int stride, int bd) {
   int i;
   const int16x8_t max = vdupq_n_s16((1 << bd) - 1);
   const tran_low_t out0 = dct_const_round_shift(input[0] * cospi_16_64);
@@ -29,15 +29,15 @@ void vpx_highbd_idct4x4_1_add_neon(const tran_low_t *input, uint8_t *dest8,
 
   for (i = 0; i < 2; i++) {
     d0 = vld1_u16(dest);
-    d1 = vld1_u16(dest + dest_stride);
+    d1 = vld1_u16(dest + stride);
     a = vreinterpretq_s16_u16(vcombine_u16(d0, d1));
     a = vaddq_s16(dc, a);
     a = vminq_s16(a, max);
     b = vqshluq_n_s16(a, 0);
     vst1_u16(dest, vget_low_u16(b));
-    dest += dest_stride;
+    dest += stride;
     vst1_u16(dest, vget_high_u16(b));
-    dest += dest_stride;
+    dest += stride;
   }
 }
 
@@ -105,7 +105,7 @@ static INLINE void idct4x4_16_kernel_bd12(const int32x4_t cospis,
 }
 
 void vpx_highbd_idct4x4_16_add_neon(const tran_low_t *input, uint8_t *dest8,
-                                    int dest_stride, int bd) {
+                                    int stride, int bd) {
   DECLARE_ALIGNED(16, static const int32_t, kCospi32[4]) = { 0, 15137, 11585,
                                                              6270 };
   const int16x8_t max = vdupq_n_s16((1 << bd) - 1);
@@ -149,11 +149,11 @@ void vpx_highbd_idct4x4_16_add_neon(const tran_low_t *input, uint8_t *dest8,
   }
 
   d0 = vreinterpret_s16_u16(vld1_u16(dst));
-  dst += dest_stride;
+  dst += stride;
   d1 = vreinterpret_s16_u16(vld1_u16(dst));
-  dst += dest_stride;
+  dst += stride;
   d2 = vreinterpret_s16_u16(vld1_u16(dst));
-  dst += dest_stride;
+  dst += stride;
   d3 = vreinterpret_s16_u16(vld1_u16(dst));
   d01 = vcombine_s16(d0, d1);
   d32 = vcombine_s16(d3, d2);
@@ -168,10 +168,10 @@ void vpx_highbd_idct4x4_16_add_neon(const tran_low_t *input, uint8_t *dest8,
   d32_u16 = vqshluq_n_s16(d32, 0);
 
   vst1_u16(dest, vget_low_u16(d01_u16));
-  dest += dest_stride;
+  dest += stride;
   vst1_u16(dest, vget_high_u16(d01_u16));
-  dest += dest_stride;
+  dest += stride;
   vst1_u16(dest, vget_high_u16(d32_u16));
-  dest += dest_stride;
+  dest += stride;
   vst1_u16(dest, vget_low_u16(d32_u16));
 }

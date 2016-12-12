@@ -15,7 +15,7 @@
 #include "vpx_ports/mem.h"
 
 void vpx_idct8x8_1_add_neon(const tran_low_t *input, uint8_t *dest,
-                            int dest_stride) {
+                            int stride) {
   int i;
   const int16_t out0 = dct_const_round_shift(input[0] * cospi_16_64);
   const int16_t out1 = dct_const_round_shift(out0 * cospi_16_64);
@@ -28,13 +28,13 @@ void vpx_idct8x8_1_add_neon(const tran_low_t *input, uint8_t *dest,
 
   for (i = 0; i < 2; i++) {
     d0 = vld1_u8(dst);
-    dst += dest_stride;
+    dst += stride;
     d1 = vld1_u8(dst);
-    dst += dest_stride;
+    dst += stride;
     d2 = vld1_u8(dst);
-    dst += dest_stride;
+    dst += stride;
     d3 = vld1_u8(dst);
-    dst += dest_stride;
+    dst += stride;
 
     d0_u16 = vaddw_u8(dc_u16, d0);
     d1_u16 = vaddw_u8(dc_u16, d1);
@@ -47,12 +47,12 @@ void vpx_idct8x8_1_add_neon(const tran_low_t *input, uint8_t *dest,
     d3 = vqmovun_s16(vreinterpretq_s16_u16(d3_u16));
 
     vst1_u8(dest, d0);
-    dest += dest_stride;
+    dest += stride;
     vst1_u8(dest, d1);
-    dest += dest_stride;
+    dest += stride;
     vst1_u8(dest, d2);
-    dest += dest_stride;
+    dest += stride;
     vst1_u8(dest, d3);
-    dest += dest_stride;
+    dest += stride;
   }
 }

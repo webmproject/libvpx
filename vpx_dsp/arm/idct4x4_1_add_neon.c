@@ -15,7 +15,7 @@
 #include "vpx_dsp/inv_txfm.h"
 
 void vpx_idct4x4_1_add_neon(const tran_low_t *input, uint8_t *dest,
-                            int dest_stride) {
+                            int stride) {
   int i;
   const int16_t out0 = dct_const_round_shift((int16_t)input[0] * cospi_16_64);
   const int16_t out1 = dct_const_round_shift(out0 * cospi_16_64);
@@ -26,16 +26,16 @@ void vpx_idct4x4_1_add_neon(const tran_low_t *input, uint8_t *dest,
   uint8x8_t b;
 
   assert(!((intptr_t)dest % sizeof(uint32_t)));
-  assert(!(dest_stride % sizeof(uint32_t)));
+  assert(!(stride % sizeof(uint32_t)));
 
   for (i = 0; i < 2; i++) {
     d = vld1_lane_u32((const uint32_t *)dest, d, 0);
-    d = vld1_lane_u32((const uint32_t *)(dest + dest_stride), d, 1);
+    d = vld1_lane_u32((const uint32_t *)(dest + stride), d, 1);
     a = vaddw_u8(vreinterpretq_u16_s16(dc), vreinterpret_u8_u32(d));
     b = vqmovun_s16(vreinterpretq_s16_u16(a));
     vst1_lane_u32((uint32_t *)dest, vreinterpret_u32_u8(b), 0);
-    dest += dest_stride;
+    dest += stride;
     vst1_lane_u32((uint32_t *)dest, vreinterpret_u32_u8(b), 1);
-    dest += dest_stride;
+    dest += stride;
   }
 }

@@ -836,7 +836,7 @@ static void idct32_rows_dspr2(const int16_t *input, int16_t *output,
 }
 
 void vpx_idct32x32_1024_add_dspr2(const int16_t *input, uint8_t *dest,
-                                  int dest_stride) {
+                                  int stride) {
   DECLARE_ALIGNED(32, int16_t, out[32 * 32]);
   int16_t *outptr = out;
   uint32_t pos = 45;
@@ -850,7 +850,7 @@ void vpx_idct32x32_1024_add_dspr2(const int16_t *input, uint8_t *dest,
   idct32_rows_dspr2(input, outptr, 32);
 
   // Columns
-  vpx_idct32_cols_add_blk_dspr2(out, dest, dest_stride);
+  vpx_idct32_cols_add_blk_dspr2(out, dest, stride);
 }
 
 void vpx_idct32x32_34_add_dspr2(const int16_t *input, uint8_t *dest,

@@ -90,7 +90,7 @@ static INLINE void ST_16x8(uint8_t *d, int d_stride, uint8x16_t *q8u8,
 }
 
 void vpx_idct32x32_1_add_neon(const tran_low_t *input, uint8_t *dest,
-                              int dest_stride) {
+                              int stride) {
   uint8x16_t q0u8, q8u8, q9u8, q10u8, q11u8, q12u8, q13u8, q14u8, q15u8;
   int i, j, dest_stride8;
   uint8_t *d;
@@ -100,19 +100,19 @@ void vpx_idct32x32_1_add_neon(const tran_low_t *input, uint8_t *dest,
   out = dct_const_round_shift(out * cospi_16_64);
   a1 = ROUND_POWER_OF_TWO(out, 6);
 
-  dest_stride8 = dest_stride * 8;
+  dest_stride8 = stride * 8;
   if (a1 >= 0) {  // diff_positive_32_32
     a1 = a1 < 0 ? 0 : a1 > 255 ? 255 : a1;
     q0u8 = vdupq_n_u8((uint8_t)a1);
     for (i = 0; i < 2; i++, dest += 16) {  // diff_positive_32_32_loop
       d = dest;
       for (j = 0; j < 4; j++) {
-        LD_16x8(d, dest_stride, &q8u8, &q9u8, &q10u8, &q11u8, &q12u8, &q13u8,
-                &q14u8, &q15u8);
+        LD_16x8(d, stride, &q8u8, &q9u8, &q10u8, &q11u8, &q12u8, &q13u8, &q14u8,
+                &q15u8);
         ADD_DIFF_16x8(q0u8, &q8u8, &q9u8, &q10u8, &q11u8, &q12u8, &q13u8,
                       &q14u8, &q15u8);
-        ST_16x8(d, dest_stride, &q8u8, &q9u8, &q10u8, &q11u8, &q12u8, &q13u8,
-                &q14u8, &q15u8);
+        ST_16x8(d, stride, &q8u8, &q9u8, &q10u8, &q11u8, &q12u8, &q13u8, &q14u8,
+                &q15u8);
         d += dest_stride8;
       }
     }
@@ -123,12 +123,12 @@ void vpx_idct32x32_1_add_neon(const tran_low_t *input, uint8_t *dest,
     for (i = 0; i < 2; i++, dest += 16) {  // diff_negative_32_32_loop
       d = dest;
       for (j = 0; j < 4; j++) {
-        LD_16x8(d, dest_stride, &q8u8, &q9u8, &q10u8, &q11u8, &q12u8, &q13u8,
-                &q14u8, &q15u8);
+        LD_16x8(d, stride, &q8u8, &q9u8, &q10u8, &q11u8, &q12u8, &q13u8, &q14u8,
+                &q15u8);
         SUB_DIFF_16x8(q0u8, &q8u8, &q9u8, &q10u8, &q11u8, &q12u8, &q13u8,
                       &q14u8, &q15u8);
-        ST_16x8(d, dest_stride, &q8u8, &q9u8, &q10u8, &q11u8, &q12u8, &q13u8,
-                &q14u8, &q15u8);
+        ST_16x8(d, stride, &q8u8, &q9u8, &q10u8, &q11u8, &q12u8, &q13u8, &q14u8,
+                &q15u8);
         d += dest_stride8;
       }
     }

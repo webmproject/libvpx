@@ -192,8 +192,7 @@ void idct8_rows_dspr2(const int16_t *input, int16_t *output, uint32_t no_rows) {
   }
 }
 
-void idct8_columns_add_blk_dspr2(int16_t *input, uint8_t *dest,
-                                 int dest_stride) {
+void idct8_columns_add_blk_dspr2(int16_t *input, uint8_t *dest, int stride) {
   int step1_0, step1_1, step1_2, step1_3, step1_4, step1_5, step1_6, step1_7;
   int Temp0, Temp1, Temp2, Temp3;
   int i;
@@ -358,7 +357,7 @@ void idct8_columns_add_blk_dspr2(int16_t *input, uint8_t *dest,
         "add      %[Temp0],             %[step1_1],     %[step1_6]      \n\t"
         "lbux     %[Temp2],             %[Temp1](%[cm])                 \n\t"
         "sb       %[Temp2],             0(%[dest_pix])                  \n\t"
-        "addu     %[dest_pix],          %[dest_pix],    %[dest_stride]  \n\t"
+        "addu     %[dest_pix],          %[dest_pix],    %[stride]       \n\t"
 
         "lbu      %[Temp1],             0(%[dest_pix])                  \n\t"
         "addi     %[Temp0],             %[Temp0],       16              \n\t"
@@ -367,7 +366,7 @@ void idct8_columns_add_blk_dspr2(int16_t *input, uint8_t *dest,
         "add      %[Temp0],             %[step1_2],     %[step1_5]      \n\t"
         "lbux     %[Temp2],             %[Temp1](%[cm])                 \n\t"
         "sb       %[Temp2],             0(%[dest_pix])                  \n\t"
-        "addu     %[dest_pix],          %[dest_pix],    %[dest_stride]  \n\t"
+        "addu     %[dest_pix],          %[dest_pix],    %[stride]       \n\t"
 
         "lbu      %[Temp1],             0(%[dest_pix])                  \n\t"
         "addi     %[Temp0],             %[Temp0],       16              \n\t"
@@ -376,7 +375,7 @@ void idct8_columns_add_blk_dspr2(int16_t *input, uint8_t *dest,
         "add      %[Temp0],             %[step1_3],     %[step1_4]      \n\t"
         "lbux     %[Temp2],             %[Temp1](%[cm])                 \n\t"
         "sb       %[Temp2],             0(%[dest_pix])                  \n\t"
-        "addu     %[dest_pix],          %[dest_pix],    %[dest_stride]  \n\t"
+        "addu     %[dest_pix],          %[dest_pix],    %[stride]       \n\t"
 
         "lbu      %[Temp1],             0(%[dest_pix])                  \n\t"
         "addi     %[Temp0],             %[Temp0],       16              \n\t"
@@ -385,7 +384,7 @@ void idct8_columns_add_blk_dspr2(int16_t *input, uint8_t *dest,
         "sub      %[Temp0],             %[step1_3],     %[step1_4]      \n\t"
         "lbux     %[Temp2],             %[Temp1](%[cm])                 \n\t"
         "sb       %[Temp2],             0(%[dest_pix])                  \n\t"
-        "addu     %[dest_pix],          %[dest_pix],    %[dest_stride]  \n\t"
+        "addu     %[dest_pix],          %[dest_pix],    %[stride]       \n\t"
 
         "lbu      %[Temp1],             0(%[dest_pix])                  \n\t"
         "addi     %[Temp0],             %[Temp0],       16              \n\t"
@@ -394,7 +393,7 @@ void idct8_columns_add_blk_dspr2(int16_t *input, uint8_t *dest,
         "sub      %[Temp0],             %[step1_2],     %[step1_5]      \n\t"
         "lbux     %[Temp2],             %[Temp1](%[cm])                 \n\t"
         "sb       %[Temp2],             0(%[dest_pix])                  \n\t"
-        "addu     %[dest_pix],          %[dest_pix],    %[dest_stride]  \n\t"
+        "addu     %[dest_pix],          %[dest_pix],    %[stride]       \n\t"
 
         "lbu      %[Temp1],             0(%[dest_pix])                  \n\t"
         "addi     %[Temp0],             %[Temp0],       16              \n\t"
@@ -403,7 +402,7 @@ void idct8_columns_add_blk_dspr2(int16_t *input, uint8_t *dest,
         "sub      %[Temp0],             %[step1_1],     %[step1_6]      \n\t"
         "lbux     %[Temp2],             %[Temp1](%[cm])                 \n\t"
         "sb       %[Temp2],             0(%[dest_pix])                  \n\t"
-        "addu     %[dest_pix],          %[dest_pix],    %[dest_stride]  \n\t"
+        "addu     %[dest_pix],          %[dest_pix],    %[stride]       \n\t"
 
         "lbu      %[Temp1],             0(%[dest_pix])                  \n\t"
         "addi     %[Temp0],             %[Temp0],       16              \n\t"
@@ -412,7 +411,7 @@ void idct8_columns_add_blk_dspr2(int16_t *input, uint8_t *dest,
         "sub      %[Temp0],             %[step1_0],     %[step1_7]      \n\t"
         "lbux     %[Temp2],             %[Temp1](%[cm])                 \n\t"
         "sb       %[Temp2],             0(%[dest_pix])                  \n\t"
-        "addu     %[dest_pix],          %[dest_pix],    %[dest_stride]  \n\t"
+        "addu     %[dest_pix],          %[dest_pix],    %[stride]       \n\t"
 
         "lbu      %[Temp1],             0(%[dest_pix])                  \n\t"
         "addi     %[Temp0],             %[Temp0],       16              \n\t"
@@ -432,14 +431,13 @@ void idct8_columns_add_blk_dspr2(int16_t *input, uint8_t *dest,
           [cospi_4_64] "r"(cospi_4_64), [cospi_12_64] "r"(cospi_12_64),
           [cospi_20_64] "r"(cospi_20_64), [cospi_8_64] "r"(cospi_8_64),
           [cospi_24_64] "r"(cospi_24_64), [input] "r"(input), [cm] "r"(cm),
-          [dest_stride] "r"(dest_stride));
+          [stride] "r"(stride));
 
     input += 8;
   }
 }
 
-void vpx_idct8x8_64_add_dspr2(const int16_t *input, uint8_t *dest,
-                              int dest_stride) {
+void vpx_idct8x8_64_add_dspr2(const int16_t *input, uint8_t *dest, int stride) {
   DECLARE_ALIGNED(32, int16_t, out[8 * 8]);
   int16_t *outptr = out;
   uint32_t pos = 45;
@@ -451,11 +449,10 @@ void vpx_idct8x8_64_add_dspr2(const int16_t *input, uint8_t *dest,
   idct8_rows_dspr2(input, outptr, 8);
 
   // Then transform columns and add to dest
-  idct8_columns_add_blk_dspr2(&out[0], dest, dest_stride);
+  idct8_columns_add_blk_dspr2(&out[0], dest, stride);
 }
 
-void vpx_idct8x8_12_add_dspr2(const int16_t *input, uint8_t *dest,
-                              int dest_stride) {
+void vpx_idct8x8_12_add_dspr2(const int16_t *input, uint8_t *dest, int stride) {
   DECLARE_ALIGNED(32, int16_t, out[8 * 8]);
   int16_t *outptr = out;
   uint32_t pos = 45;
@@ -490,11 +487,10 @@ void vpx_idct8x8_12_add_dspr2(const int16_t *input, uint8_t *dest,
       : [outptr] "r"(outptr));
 
   // Then transform columns and add to dest
-  idct8_columns_add_blk_dspr2(&out[0], dest, dest_stride);
+  idct8_columns_add_blk_dspr2(&out[0], dest, stride);
 }
 
-void vpx_idct8x8_1_add_dspr2(const int16_t *input, uint8_t *dest,
-                             int dest_stride) {
+void vpx_idct8x8_1_add_dspr2(const int16_t *input, uint8_t *dest, int stride) {
   uint32_t pos = 45;
   int32_t out;
   int32_t r;
@@ -533,11 +529,11 @@ void vpx_idct8x8_1_add_dspr2(const int16_t *input, uint8_t *dest,
           "subu_s.qb    %[vector_2],    %[t2],          %[vector_a1]    \n\t"
           "sw           %[vector_1],    0(%[dest])                      \n\t"
           "sw           %[vector_2],    4(%[dest])                      \n\t"
-          "add          %[dest],        %[dest],        %[dest_stride]  \n\t"
+          "add          %[dest],        %[dest],        %[stride]       \n\t"
 
           : [t1] "=&r"(t1), [t2] "=&r"(t2), [vector_1] "=&r"(vector_1),
             [vector_2] "=&r"(vector_2), [dest] "+&r"(dest)
-          : [dest_stride] "r"(dest_stride), [vector_a1] "r"(vector_a1));
+          : [stride] "r"(stride), [vector_a1] "r"(vector_a1));
     }
   } else {
     /* use quad-byte
@@ -555,11 +551,11 @@ void vpx_idct8x8_1_add_dspr2(const int16_t *input, uint8_t *dest,
           "addu_s.qb    %[vector_2],    %[t2],          %[vector_a1]    \n\t"
           "sw           %[vector_1],    0(%[dest])                      \n\t"
           "sw           %[vector_2],    4(%[dest])                      \n\t"
-          "add          %[dest],        %[dest],        %[dest_stride]  \n\t"
+          "add          %[dest],        %[dest],        %[stride]       \n\t"
 
           : [t1] "=&r"(t1), [t2] "=&r"(t2), [vector_1] "=&r"(vector_1),
             [vector_2] "=&r"(vector_2), [dest] "+r"(dest)
-          : [dest_stride] "r"(dest_stride), [vector_a1] "r"(vector_a1));
+          : [stride] "r"(stride), [vector_a1] "r"(vector_a1));
     }
   }
 }

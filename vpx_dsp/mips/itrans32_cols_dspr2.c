@@ -13,8 +13,7 @@
 #include "vpx_dsp/txfm_common.h"
 
 #if HAVE_DSPR2
-void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
-                                   int dest_stride) {
+void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest, int stride) {
   int16_t step1_0, step1_1, step1_2, step1_3, step1_4, step1_5, step1_6;
   int16_t step1_7, step1_8, step1_9, step1_10, step1_11, step1_12, step1_13;
   int16_t step1_14, step1_15, step1_16, step1_17, step1_18, step1_19;
@@ -49,7 +48,7 @@ void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
 
   for (i = 0; i < 32; ++i) {
     dest_pix = dest + i;
-    dest_pix1 = dest + i + 31 * dest_stride;
+    dest_pix1 = dest + i + 31 * stride;
 
     __asm__ __volatile__(
         "lh       %[load1],             2(%[input])                     \n\t"
@@ -738,14 +737,14 @@ void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
         "lbux     %[temp0],         %[temp2](%[cm])                     \n\t"
         "add      %[temp1],         %[step1_1],         %[step2_30]     \n\t"
         "sb       %[temp0],         0(%[dest_pix])                      \n\t"
-        "addu     %[dest_pix],      %[dest_pix],        %[dest_stride]  \n\t"
+        "addu     %[dest_pix],      %[dest_pix],        %[stride]       \n\t"
         "lbu      %[temp3],         0(%[dest_pix])                      \n\t"
         "addi     %[temp1],         %[temp1],           32              \n\t"
         "sra      %[temp1],         %[temp1],           6               \n\t"
         "add      %[temp3],         %[temp3],           %[temp1]        \n\t"
         "lbux     %[temp1],         %[temp3](%[cm])                     \n\t"
         "sb       %[temp1],         0(%[dest_pix])                      \n\t"
-        "addu     %[dest_pix],      %[dest_pix],        %[dest_stride]  \n\t"
+        "addu     %[dest_pix],      %[dest_pix],        %[stride]       \n\t"
 
         "lbu      %[temp2],         0(%[dest_pix])                      \n\t"
         "add      %[temp0],         %[step1_2],         %[step2_29]     \n\t"
@@ -755,18 +754,18 @@ void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
         "lbux     %[temp0],         %[temp2](%[cm])                     \n\t"
         "add      %[temp1],         %[step1_3],         %[step2_28]     \n\t"
         "sb       %[temp0],         0(%[dest_pix])                      \n\t"
-        "addu     %[dest_pix],      %[dest_pix],        %[dest_stride]  \n\t"
+        "addu     %[dest_pix],      %[dest_pix],        %[stride]       \n\t"
         "lbu      %[temp3],         0(%[dest_pix])                      \n\t"
         "addi     %[temp1],         %[temp1],           32              \n\t"
         "sra      %[temp1],         %[temp1],           6               \n\t"
         "add      %[temp3],         %[temp3],           %[temp1]        \n\t"
         "lbux     %[temp1],         %[temp3](%[cm])                     \n\t"
         "sb       %[temp1],         0(%[dest_pix])                      \n\t"
-        "addu     %[dest_pix],      %[dest_pix],        %[dest_stride]  \n\t"
+        "addu     %[dest_pix],      %[dest_pix],        %[stride]       \n\t"
 
         : [temp0] "=&r"(temp0), [temp1] "=&r"(temp1), [temp2] "=&r"(temp2),
           [temp3] "=&r"(temp3), [dest_pix] "+r"(dest_pix)
-        : [cm] "r"(cm), [dest_stride] "r"(dest_stride), [step1_0] "r"(step1_0),
+        : [cm] "r"(cm), [stride] "r"(stride), [step1_0] "r"(step1_0),
           [step1_1] "r"(step1_1), [step1_2] "r"(step1_2),
           [step1_3] "r"(step1_3), [step2_28] "r"(step2_28),
           [step2_29] "r"(step2_29), [step2_30] "r"(step2_30),
@@ -782,29 +781,29 @@ void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
         "add      %[temp2],         %[temp2],           %[step3_15]     \n\t"
         "lbux     %[temp0],         %[temp2](%[cm])                     \n\t"
         "sb       %[temp0],         0(%[dest_pix1])                     \n\t"
-        "subu     %[dest_pix1],     %[dest_pix1],       %[dest_stride]  \n\t"
+        "subu     %[dest_pix1],     %[dest_pix1],       %[stride]       \n\t"
         "lbu      %[temp3],         0(%[dest_pix1])                     \n\t"
         "add      %[temp3],         %[temp3],           %[step3_14]     \n\t"
         "lbux     %[temp1],         %[temp3](%[cm])                     \n\t"
         "sb       %[temp1],         0(%[dest_pix1])                     \n\t"
-        "subu     %[dest_pix1],     %[dest_pix1],       %[dest_stride]  \n\t"
+        "subu     %[dest_pix1],     %[dest_pix1],       %[stride]       \n\t"
 
         "lbu      %[temp2],         0(%[dest_pix1])                     \n\t"
         "add      %[temp2],         %[temp2],           %[step3_13]     \n\t"
         "lbux     %[temp0],         %[temp2](%[cm])                     \n\t"
         "sb       %[temp0],         0(%[dest_pix1])                     \n\t"
-        "subu     %[dest_pix1],     %[dest_pix1],       %[dest_stride]  \n\t"
+        "subu     %[dest_pix1],     %[dest_pix1],       %[stride]       \n\t"
         "lbu      %[temp3],         0(%[dest_pix1])                     \n\t"
         "add      %[temp3],         %[temp3],           %[step3_12]     \n\t"
         "lbux     %[temp1],         %[temp3](%[cm])                     \n\t"
         "sb       %[temp1],         0(%[dest_pix1])                     \n\t"
-        "subu     %[dest_pix1],     %[dest_pix1],       %[dest_stride]  \n\t"
+        "subu     %[dest_pix1],     %[dest_pix1],       %[stride]       \n\t"
 
         : [temp0] "=&r"(temp0), [temp1] "=&r"(temp1), [temp2] "=&r"(temp2),
           [temp3] "=&r"(temp3), [dest_pix1] "+r"(dest_pix1)
-        : [cm] "r"(cm), [dest_stride] "r"(dest_stride),
-          [step3_12] "r"(step3_12), [step3_13] "r"(step3_13),
-          [step3_14] "r"(step3_14), [step3_15] "r"(step3_15));
+        : [cm] "r"(cm), [stride] "r"(stride), [step3_12] "r"(step3_12),
+          [step3_13] "r"(step3_13), [step3_14] "r"(step3_14),
+          [step3_15] "r"(step3_15));
 
     __asm__ __volatile__(
         "lbu      %[temp2],         0(%[dest_pix])                      \n\t"
@@ -815,14 +814,14 @@ void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
         "lbux     %[temp0],         %[temp2](%[cm])                     \n\t"
         "add      %[temp1],         %[step1_5],         %[step1_26]     \n\t"
         "sb       %[temp0],         0(%[dest_pix])                      \n\t"
-        "addu     %[dest_pix],      %[dest_pix],        %[dest_stride]  \n\t"
+        "addu     %[dest_pix],      %[dest_pix],        %[stride]       \n\t"
         "lbu      %[temp3],         0(%[dest_pix])                      \n\t"
         "addi     %[temp1],         %[temp1],           32              \n\t"
         "sra      %[temp1],         %[temp1],           6               \n\t"
         "add      %[temp3],         %[temp3],           %[temp1]        \n\t"
         "lbux     %[temp1],         %[temp3](%[cm])                     \n\t"
         "sb       %[temp1],         0(%[dest_pix])                      \n\t"
-        "addu     %[dest_pix],      %[dest_pix],        %[dest_stride]  \n\t"
+        "addu     %[dest_pix],      %[dest_pix],        %[stride]       \n\t"
 
         "lbu      %[temp2],         0(%[dest_pix])                      \n\t"
         "add      %[temp0],         %[step1_6],         %[step1_25]     \n\t"
@@ -832,18 +831,18 @@ void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
         "lbux     %[temp0],         %[temp2](%[cm])                     \n\t"
         "add      %[temp1],         %[step1_7],         %[step1_24]     \n\t"
         "sb       %[temp0],         0(%[dest_pix])                      \n\t"
-        "addu     %[dest_pix],      %[dest_pix],        %[dest_stride]  \n\t"
+        "addu     %[dest_pix],      %[dest_pix],        %[stride]       \n\t"
         "lbu      %[temp3],         0(%[dest_pix])                      \n\t"
         "addi     %[temp1],         %[temp1],           32              \n\t"
         "sra      %[temp1],         %[temp1],           6               \n\t"
         "add      %[temp3],         %[temp3],           %[temp1]        \n\t"
         "lbux     %[temp1],         %[temp3](%[cm])                     \n\t"
         "sb       %[temp1],         0(%[dest_pix])                      \n\t"
-        "addu     %[dest_pix],      %[dest_pix],        %[dest_stride]  \n\t"
+        "addu     %[dest_pix],      %[dest_pix],        %[stride]       \n\t"
 
         : [temp0] "=&r"(temp0), [temp1] "=&r"(temp1), [temp2] "=&r"(temp2),
           [temp3] "=&r"(temp3), [dest_pix] "+r"(dest_pix)
-        : [cm] "r"(cm), [dest_stride] "r"(dest_stride), [step1_4] "r"(step1_4),
+        : [cm] "r"(cm), [stride] "r"(stride), [step1_4] "r"(step1_4),
           [step1_5] "r"(step1_5), [step1_6] "r"(step1_6),
           [step1_7] "r"(step1_7), [step1_24] "r"(step1_24),
           [step1_25] "r"(step1_25), [step1_26] "r"(step1_26),
@@ -859,29 +858,29 @@ void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
         "add      %[temp2],         %[temp2],           %[step3_15]     \n\t"
         "lbux     %[temp0],         %[temp2](%[cm])                     \n\t"
         "sb       %[temp0],         0(%[dest_pix1])                     \n\t"
-        "subu     %[dest_pix1],     %[dest_pix1],       %[dest_stride]  \n\t"
+        "subu     %[dest_pix1],     %[dest_pix1],       %[stride]       \n\t"
         "lbu      %[temp3],         0(%[dest_pix1])                     \n\t"
         "add      %[temp3],         %[temp3],           %[step3_14]     \n\t"
         "lbux     %[temp1],         %[temp3](%[cm])                     \n\t"
         "sb       %[temp1],         0(%[dest_pix1])                     \n\t"
-        "subu     %[dest_pix1],     %[dest_pix1],       %[dest_stride]  \n\t"
+        "subu     %[dest_pix1],     %[dest_pix1],       %[stride]       \n\t"
 
         "lbu      %[temp2],         0(%[dest_pix1])                     \n\t"
         "add      %[temp2],         %[temp2],           %[step3_13]     \n\t"
         "lbux     %[temp0],         %[temp2](%[cm])                     \n\t"
         "sb       %[temp0],         0(%[dest_pix1])                     \n\t"
-        "subu     %[dest_pix1],     %[dest_pix1],       %[dest_stride]  \n\t"
+        "subu     %[dest_pix1],     %[dest_pix1],       %[stride]       \n\t"
         "lbu      %[temp3],         0(%[dest_pix1])                     \n\t"
         "add      %[temp3],         %[temp3],           %[step3_12]     \n\t"
         "lbux     %[temp1],         %[temp3](%[cm])                     \n\t"
         "sb       %[temp1],         0(%[dest_pix1])                     \n\t"
-        "subu     %[dest_pix1],     %[dest_pix1],       %[dest_stride]  \n\t"
+        "subu     %[dest_pix1],     %[dest_pix1],       %[stride]       \n\t"
 
         : [temp0] "=&r"(temp0), [temp1] "=&r"(temp1), [temp2] "=&r"(temp2),
           [temp3] "=&r"(temp3), [dest_pix1] "+r"(dest_pix1)
-        : [cm] "r"(cm), [dest_stride] "r"(dest_stride),
-          [step3_12] "r"(step3_12), [step3_13] "r"(step3_13),
-          [step3_14] "r"(step3_14), [step3_15] "r"(step3_15));
+        : [cm] "r"(cm), [stride] "r"(stride), [step3_12] "r"(step3_12),
+          [step3_13] "r"(step3_13), [step3_14] "r"(step3_14),
+          [step3_15] "r"(step3_15));
 
     __asm__ __volatile__(
         "lbu      %[temp2],         0(%[dest_pix])                      \n\t"
@@ -892,14 +891,14 @@ void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
         "lbux     %[temp0],         %[temp2](%[cm])                     \n\t"
         "add      %[temp1],         %[step1_9],         %[step1_22]     \n\t"
         "sb       %[temp0],         0(%[dest_pix])                      \n\t"
-        "addu     %[dest_pix],      %[dest_pix],        %[dest_stride]  \n\t"
+        "addu     %[dest_pix],      %[dest_pix],        %[stride]       \n\t"
         "lbu      %[temp3],         0(%[dest_pix])                      \n\t"
         "addi     %[temp1],         %[temp1],           32              \n\t"
         "sra      %[temp1],         %[temp1],           6               \n\t"
         "add      %[temp3],         %[temp3],           %[temp1]        \n\t"
         "lbux     %[temp1],         %[temp3](%[cm])                     \n\t"
         "sb       %[temp1],         0(%[dest_pix])                      \n\t"
-        "addu     %[dest_pix],      %[dest_pix],        %[dest_stride]  \n\t"
+        "addu     %[dest_pix],      %[dest_pix],        %[stride]       \n\t"
 
         "lbu      %[temp2],         0(%[dest_pix])                      \n\t"
         "add      %[temp0],         %[step1_10],        %[step1_21]     \n\t"
@@ -909,18 +908,18 @@ void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
         "lbux     %[temp0],         %[temp2](%[cm])                     \n\t"
         "add      %[temp1],         %[step1_11],        %[step1_20]     \n\t"
         "sb       %[temp0],         0(%[dest_pix])                      \n\t"
-        "addu     %[dest_pix],      %[dest_pix],        %[dest_stride]  \n\t"
+        "addu     %[dest_pix],      %[dest_pix],        %[stride]       \n\t"
         "lbu      %[temp3],         0(%[dest_pix])                      \n\t"
         "addi     %[temp1],         %[temp1],           32              \n\t"
         "sra      %[temp1],         %[temp1],           6               \n\t"
         "add      %[temp3],         %[temp3],           %[temp1]        \n\t"
         "lbux     %[temp1],         %[temp3](%[cm])                     \n\t"
         "sb       %[temp1],         0(%[dest_pix])                      \n\t"
-        "addu     %[dest_pix],      %[dest_pix],        %[dest_stride]  \n\t"
+        "addu     %[dest_pix],      %[dest_pix],        %[stride]       \n\t"
 
         : [temp0] "=&r"(temp0), [temp1] "=&r"(temp1), [temp2] "=&r"(temp2),
           [temp3] "=&r"(temp3), [dest_pix] "+r"(dest_pix)
-        : [cm] "r"(cm), [dest_stride] "r"(dest_stride), [step1_8] "r"(step1_8),
+        : [cm] "r"(cm), [stride] "r"(stride), [step1_8] "r"(step1_8),
           [step1_9] "r"(step1_9), [step1_10] "r"(step1_10),
           [step1_11] "r"(step1_11), [step1_20] "r"(step1_20),
           [step1_21] "r"(step1_21), [step1_22] "r"(step1_22),
@@ -936,29 +935,29 @@ void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
         "add      %[temp2],         %[temp2],           %[step3_15]     \n\t"
         "lbux     %[temp0],         %[temp2](%[cm])                     \n\t"
         "sb       %[temp0],         0(%[dest_pix1])                     \n\t"
-        "subu     %[dest_pix1],     %[dest_pix1],       %[dest_stride]  \n\t"
+        "subu     %[dest_pix1],     %[dest_pix1],       %[stride]       \n\t"
         "lbu      %[temp3],         0(%[dest_pix1])                     \n\t"
         "add      %[temp3],         %[temp3],           %[step3_14]     \n\t"
         "lbux     %[temp1],         %[temp3](%[cm])                     \n\t"
         "sb       %[temp1],         0(%[dest_pix1])                     \n\t"
-        "subu     %[dest_pix1],     %[dest_pix1],       %[dest_stride]  \n\t"
+        "subu     %[dest_pix1],     %[dest_pix1],       %[stride]       \n\t"
 
         "lbu      %[temp2],         0(%[dest_pix1])                     \n\t"
         "add      %[temp2],         %[temp2],           %[step3_13]     \n\t"
         "lbux     %[temp0],         %[temp2](%[cm])                     \n\t"
         "sb       %[temp0],         0(%[dest_pix1])                     \n\t"
-        "subu     %[dest_pix1],     %[dest_pix1],       %[dest_stride]  \n\t"
+        "subu     %[dest_pix1],     %[dest_pix1],       %[stride]       \n\t"
         "lbu      %[temp3],         0(%[dest_pix1])                     \n\t"
         "add      %[temp3],         %[temp3],           %[step3_12]     \n\t"
         "lbux     %[temp1],         %[temp3](%[cm])                     \n\t"
         "sb       %[temp1],         0(%[dest_pix1])                     \n\t"
-        "subu     %[dest_pix1],     %[dest_pix1],       %[dest_stride]  \n\t"
+        "subu     %[dest_pix1],     %[dest_pix1],       %[stride]       \n\t"
 
         : [temp0] "=&r"(temp0), [temp1] "=&r"(temp1), [temp2] "=&r"(temp2),
           [temp3] "=&r"(temp3), [dest_pix1] "+r"(dest_pix1)
-        : [cm] "r"(cm), [dest_stride] "r"(dest_stride),
-          [step3_12] "r"(step3_12), [step3_13] "r"(step3_13),
-          [step3_14] "r"(step3_14), [step3_15] "r"(step3_15));
+        : [cm] "r"(cm), [stride] "r"(stride), [step3_12] "r"(step3_12),
+          [step3_13] "r"(step3_13), [step3_14] "r"(step3_14),
+          [step3_15] "r"(step3_15));
 
     __asm__ __volatile__(
         "lbu      %[temp2],         0(%[dest_pix])                      \n\t"
@@ -969,14 +968,14 @@ void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
         "lbux     %[temp0],         %[temp2](%[cm])                     \n\t"
         "add      %[temp1],         %[step1_13],        %[step2_18]     \n\t"
         "sb       %[temp0],         0(%[dest_pix])                      \n\t"
-        "addu     %[dest_pix],      %[dest_pix],        %[dest_stride]  \n\t"
+        "addu     %[dest_pix],      %[dest_pix],        %[stride]       \n\t"
         "lbu      %[temp3],         0(%[dest_pix])                      \n\t"
         "addi     %[temp1],         %[temp1],           32              \n\t"
         "sra      %[temp1],         %[temp1],           6               \n\t"
         "add      %[temp3],         %[temp3],           %[temp1]        \n\t"
         "lbux     %[temp1],         %[temp3](%[cm])                     \n\t"
         "sb       %[temp1],         0(%[dest_pix])                      \n\t"
-        "addu     %[dest_pix],      %[dest_pix],        %[dest_stride]  \n\t"
+        "addu     %[dest_pix],      %[dest_pix],        %[stride]       \n\t"
 
         "lbu      %[temp2],         0(%[dest_pix])                      \n\t"
         "add      %[temp0],         %[step1_14],        %[step2_17]     \n\t"
@@ -986,7 +985,7 @@ void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
         "lbux     %[temp0],         %[temp2](%[cm])                     \n\t"
         "add      %[temp1],         %[step1_15],        %[step2_16]     \n\t"
         "sb       %[temp0],         0(%[dest_pix])                      \n\t"
-        "addu     %[dest_pix],      %[dest_pix],        %[dest_stride]  \n\t"
+        "addu     %[dest_pix],      %[dest_pix],        %[stride]       \n\t"
         "lbu      %[temp3],         0(%[dest_pix])                      \n\t"
         "addi     %[temp1],         %[temp1],           32              \n\t"
         "sra      %[temp1],         %[temp1],           6               \n\t"
@@ -996,11 +995,11 @@ void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
 
         : [temp0] "=&r"(temp0), [temp1] "=&r"(temp1), [temp2] "=&r"(temp2),
           [temp3] "=&r"(temp3), [dest_pix] "+r"(dest_pix)
-        : [cm] "r"(cm), [dest_stride] "r"(dest_stride),
-          [step1_12] "r"(step1_12), [step1_13] "r"(step1_13),
-          [step1_14] "r"(step1_14), [step1_15] "r"(step1_15),
-          [step2_16] "r"(step2_16), [step2_17] "r"(step2_17),
-          [step2_18] "r"(step2_18), [step2_19] "r"(step2_19));
+        : [cm] "r"(cm), [stride] "r"(stride), [step1_12] "r"(step1_12),
+          [step1_13] "r"(step1_13), [step1_14] "r"(step1_14),
+          [step1_15] "r"(step1_15), [step2_16] "r"(step2_16),
+          [step2_17] "r"(step2_17), [step2_18] "r"(step2_18),
+          [step2_19] "r"(step2_19));
 
     step3_12 = ROUND_POWER_OF_TWO((step1_15 - step2_16), 6);
     step3_13 = ROUND_POWER_OF_TWO((step1_14 - step2_17), 6);
@@ -1012,18 +1011,18 @@ void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
         "add      %[temp2],         %[temp2],           %[step3_15]     \n\t"
         "lbux     %[temp0],         %[temp2](%[cm])                     \n\t"
         "sb       %[temp0],         0(%[dest_pix1])                     \n\t"
-        "subu     %[dest_pix1],     %[dest_pix1],       %[dest_stride]  \n\t"
+        "subu     %[dest_pix1],     %[dest_pix1],       %[stride]       \n\t"
         "lbu      %[temp3],         0(%[dest_pix1])                     \n\t"
         "add      %[temp3],         %[temp3],           %[step3_14]     \n\t"
         "lbux     %[temp1],         %[temp3](%[cm])                     \n\t"
         "sb       %[temp1],         0(%[dest_pix1])                     \n\t"
-        "subu     %[dest_pix1],     %[dest_pix1],       %[dest_stride]  \n\t"
+        "subu     %[dest_pix1],     %[dest_pix1],       %[stride]       \n\t"
 
         "lbu      %[temp2],         0(%[dest_pix1])                     \n\t"
         "add      %[temp2],         %[temp2],           %[step3_13]     \n\t"
         "lbux     %[temp0],         %[temp2](%[cm])                     \n\t"
         "sb       %[temp0],         0(%[dest_pix1])                     \n\t"
-        "subu     %[dest_pix1],     %[dest_pix1],       %[dest_stride]  \n\t"
+        "subu     %[dest_pix1],     %[dest_pix1],       %[stride]       \n\t"
         "lbu      %[temp3],         0(%[dest_pix1])                     \n\t"
         "add      %[temp3],         %[temp3],           %[step3_12]     \n\t"
         "lbux     %[temp1],         %[temp3](%[cm])                     \n\t"
@@ -1031,9 +1030,9 @@ void vpx_idct32_cols_add_blk_dspr2(int16_t *input, uint8_t *dest,
 
         : [temp0] "=&r"(temp0), [temp1] "=&r"(temp1), [temp2] "=&r"(temp2),
           [temp3] "=&r"(temp3), [dest_pix1] "+r"(dest_pix1)
-        : [cm] "r"(cm), [dest_stride] "r"(dest_stride),
-          [step3_12] "r"(step3_12), [step3_13] "r"(step3_13),
-          [step3_14] "r"(step3_14), [step3_15] "r"(step3_15));
+        : [cm] "r"(cm), [stride] "r"(stride), [step3_12] "r"(step3_12),
+          [step3_13] "r"(step3_13), [step3_14] "r"(step3_14),
+          [step3_15] "r"(step3_15));
 
     input += 32;
   }

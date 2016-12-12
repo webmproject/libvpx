@@ -138,7 +138,7 @@ static INLINE void IDCT8x8_1D(const int16x4_t cospis0, const int16x4_t cospis1,
 static INLINE void add8x8(int16x8_t a0, int16x8_t a1, int16x8_t a2,
                           int16x8_t a3, int16x8_t a4, int16x8_t a5,
                           int16x8_t a6, int16x8_t a7, uint8_t *dest,
-                          const int dest_stride) {
+                          const int stride) {
   const uint8_t *dst = dest;
   uint8x8_t d0, d1, d2, d3, d4, d5, d6, d7;
   uint16x8_t d0_u16, d1_u16, d2_u16, d3_u16, d4_u16, d5_u16, d6_u16, d7_u16;
@@ -153,19 +153,19 @@ static INLINE void add8x8(int16x8_t a0, int16x8_t a1, int16x8_t a2,
   a7 = vrshrq_n_s16(a7, 5);
 
   d0 = vld1_u8(dst);
-  dst += dest_stride;
+  dst += stride;
   d1 = vld1_u8(dst);
-  dst += dest_stride;
+  dst += stride;
   d2 = vld1_u8(dst);
-  dst += dest_stride;
+  dst += stride;
   d3 = vld1_u8(dst);
-  dst += dest_stride;
+  dst += stride;
   d4 = vld1_u8(dst);
-  dst += dest_stride;
+  dst += stride;
   d5 = vld1_u8(dst);
-  dst += dest_stride;
+  dst += stride;
   d6 = vld1_u8(dst);
-  dst += dest_stride;
+  dst += stride;
   d7 = vld1_u8(dst);
 
   d0_u16 = vaddw_u8(vreinterpretq_u16_s16(a0), d0);
@@ -187,24 +187,24 @@ static INLINE void add8x8(int16x8_t a0, int16x8_t a1, int16x8_t a2,
   d7 = vqmovun_s16(vreinterpretq_s16_u16(d7_u16));
 
   vst1_u8(dest, d0);
-  dest += dest_stride;
+  dest += stride;
   vst1_u8(dest, d1);
-  dest += dest_stride;
+  dest += stride;
   vst1_u8(dest, d2);
-  dest += dest_stride;
+  dest += stride;
   vst1_u8(dest, d3);
-  dest += dest_stride;
+  dest += stride;
   vst1_u8(dest, d4);
-  dest += dest_stride;
+  dest += stride;
   vst1_u8(dest, d5);
-  dest += dest_stride;
+  dest += stride;
   vst1_u8(dest, d6);
-  dest += dest_stride;
+  dest += stride;
   vst1_u8(dest, d7);
 }
 
 void vpx_idct8x8_64_add_neon(const tran_low_t *input, uint8_t *dest,
-                             int dest_stride) {
+                             int stride) {
   const int16x8_t cospis = vld1q_s16(kCospi);
   const int16x4_t cospis0 = vget_low_s16(cospis);   // cospi 0, 8, 16, 24
   const int16x4_t cospis1 = vget_high_s16(cospis);  // cospi 4, 12, 20, 28
@@ -223,7 +223,7 @@ void vpx_idct8x8_64_add_neon(const tran_low_t *input, uint8_t *dest,
   IDCT8x8_1D(cospis0, cospis1, &a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7);
   transpose_s16_8x8(&a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7);
   IDCT8x8_1D(cospis0, cospis1, &a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7);
-  add8x8(a0, a1, a2, a3, a4, a5, a6, a7, dest, dest_stride);
+  add8x8(a0, a1, a2, a3, a4, a5, a6, a7, dest, stride);
 }
 
 static INLINE void IDCT8x4_1D(const int16x4_t cospis0, const int16x4_t cospisd0,
@@ -281,7 +281,7 @@ static INLINE void IDCT8x4_1D(const int16x4_t cospis0, const int16x4_t cospisd0,
 }
 
 void vpx_idct8x8_12_add_neon(const tran_low_t *input, uint8_t *dest,
-                             int dest_stride) {
+                             int stride) {
   const int16x8_t cospis = vld1q_s16(kCospi);
   const int16x8_t cospisd = vaddq_s16(cospis, cospis);
   const int16x4_t cospis0 = vget_low_s16(cospis);     // cospi 0, 8, 16, 24
@@ -341,5 +341,5 @@ void vpx_idct8x8_12_add_neon(const tran_low_t *input, uint8_t *dest,
   transpose_s16_4x8(b8, b9, b10, b11, b4, b5, b6, b7, &a0, &a1, &a2, &a3);
   IDCT8x4_1D(cospis0, cospisd0, cospisd1, &a0, &a1, &a2, &a3, &a4, &a5, &a6,
              &a7);
-  add8x8(a0, a1, a2, a3, a4, a5, a6, a7, dest, dest_stride);
+  add8x8(a0, a1, a2, a3, a4, a5, a6, a7, dest, stride);
 }

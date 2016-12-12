@@ -406,8 +406,8 @@ static INLINE void IADST8X8_1D(int16x8_t *q8s16, int16x8_t *q9s16,
   *q15s16 = vsubq_s16(q5s16, q4s16);
 }
 
-void vp9_iht8x8_64_add_neon(const tran_low_t *input, uint8_t *dest,
-                            int dest_stride, int tx_type) {
+void vp9_iht8x8_64_add_neon(const tran_low_t *input, uint8_t *dest, int stride,
+                            int tx_type) {
   int i;
   uint8_t *d1, *d2;
   uint8x8_t d0u8, d1u8, d2u8, d3u8;
@@ -429,7 +429,7 @@ void vp9_iht8x8_64_add_neon(const tran_low_t *input, uint8_t *dest,
 
   switch (tx_type) {
     case 0:  // idct_idct is not supported. Fall back to C
-      vp9_iht8x8_64_add_c(input, dest, dest_stride, tx_type);
+      vp9_iht8x8_64_add_c(input, dest, stride, tx_type);
       return;
     case 1:  // iadst_idct
       // generate IDCT constants
@@ -508,13 +508,13 @@ void vp9_iht8x8_64_add_neon(const tran_low_t *input, uint8_t *dest,
     }
 
     d0u64 = vld1_u64((uint64_t *)d1);
-    d1 += dest_stride;
+    d1 += stride;
     d1u64 = vld1_u64((uint64_t *)d1);
-    d1 += dest_stride;
+    d1 += stride;
     d2u64 = vld1_u64((uint64_t *)d1);
-    d1 += dest_stride;
+    d1 += stride;
     d3u64 = vld1_u64((uint64_t *)d1);
-    d1 += dest_stride;
+    d1 += stride;
 
     q8u16 = vaddw_u8(vreinterpretq_u16_s16(q8s16), vreinterpret_u8_u64(d0u64));
     q9u16 = vaddw_u8(vreinterpretq_u16_s16(q9s16), vreinterpret_u8_u64(d1u64));
@@ -529,12 +529,12 @@ void vp9_iht8x8_64_add_neon(const tran_low_t *input, uint8_t *dest,
     d3u8 = vqmovun_s16(vreinterpretq_s16_u16(q11u16));
 
     vst1_u64((uint64_t *)d2, vreinterpret_u64_u8(d0u8));
-    d2 += dest_stride;
+    d2 += stride;
     vst1_u64((uint64_t *)d2, vreinterpret_u64_u8(d1u8));
-    d2 += dest_stride;
+    d2 += stride;
     vst1_u64((uint64_t *)d2, vreinterpret_u64_u8(d2u8));
-    d2 += dest_stride;
+    d2 += stride;
     vst1_u64((uint64_t *)d2, vreinterpret_u64_u8(d3u8));
-    d2 += dest_stride;
+    d2 += stride;
   }
 }

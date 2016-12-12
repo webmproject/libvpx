@@ -200,11 +200,11 @@
     MEND
 
     AREA    Block, CODE, READONLY ; name this block of code
-;void vpx_idct8x8_64_add_neon(int16_t *input, uint8_t *dest, int dest_stride)
+;void vpx_idct8x8_64_add_neon(int16_t *input, uint8_t *dest, int stride)
 ;
 ; r0  int16_t input
 ; r1  uint8_t *dest
-; r2  int dest_stride)
+; r2  int stride)
 
 |vpx_idct8x8_64_add_neon| PROC
     push            {r4-r9}
@@ -270,7 +270,7 @@
     vld1.64         {d6}, [r1], r2
     vld1.64         {d7}, [r1]
 
-    ; ROUND_POWER_OF_TWO(temp_out[j], 5) + dest[j * dest_stride + i]
+    ; ROUND_POWER_OF_TWO(temp_out[j], 5) + dest[j * stride + i]
     vaddw.u8        q8, q8, d0
     vaddw.u8        q9, q9, d1
     vaddw.u8        q10, q10, d2
@@ -305,11 +305,11 @@
     bx              lr
     ENDP  ; |vpx_idct8x8_64_add_neon|
 
-;void vpx_idct8x8_12_add_neon(int16_t *input, uint8_t *dest, int dest_stride)
+;void vpx_idct8x8_12_add_neon(int16_t *input, uint8_t *dest, int stride)
 ;
 ; r0  int16_t input
 ; r1  uint8_t *dest
-; r2  int dest_stride)
+; r2  int stride)
 
 |vpx_idct8x8_12_add_neon| PROC
     push            {r4-r9}
@@ -469,7 +469,7 @@
     vld1.64         {d6}, [r1], r2
     vld1.64         {d7}, [r1]
 
-    ; ROUND_POWER_OF_TWO(temp_out[j], 5) + dest[j * dest_stride + i]
+    ; ROUND_POWER_OF_TWO(temp_out[j], 5) + dest[j * stride + i]
     vaddw.u8        q8, q8, d0
     vaddw.u8        q9, q9, d1
     vaddw.u8        q10, q10, d2

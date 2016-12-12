@@ -287,14 +287,14 @@ idct16x16_256_add_neon_pass1
 ;                                      int16_t *pass1_output,
 ;                                      int16_t skip_adding,
 ;                                      uint8_t *dest,
-;                                      int dest_stride)
+;                                      int stride)
 ;
 ; r0  const int16_t *src
 ; r1  int16_t *output
 ; r2  int16_t *pass1_output
 ; r3  int16_t skip_adding
 ; r4  uint8_t *dest
-; r5  int dest_stride
+; r5  int stride
 
 ; idct16 stage1 - stage7 on all the elements loaded in q8-q15. The output
 ; will be stored back into q8-q15 registers. This function will touch q0-q7
@@ -601,7 +601,7 @@ idct16x16_256_add_neon_pass2
 
     ldr              r7, [sp, #28]            ; dest used to save element 0-7
     mov              r9, r7                   ; save dest pointer for later use
-    ldr              r8, [sp, #32]            ; load dest_stride
+    ldr              r8, [sp, #32]            ; load stride
 
     ; stage 7
     ; load the data in pass1
@@ -615,8 +615,8 @@ idct16x16_256_add_neon_pass2
     vadd.s16        q13, q1, q14              ; step2[1] + step2[14]
     vrshr.s16       q12, q12, #6              ; ROUND_POWER_OF_TWO
     vrshr.s16       q13, q13, #6              ; ROUND_POWER_OF_TWO
-    vaddw.u8        q12, q12, d12             ; + dest[j * dest_stride + i]
-    vaddw.u8        q13, q13, d13             ; + dest[j * dest_stride + i]
+    vaddw.u8        q12, q12, d12             ; + dest[j * stride + i]
+    vaddw.u8        q13, q13, d13             ; + dest[j * stride + i]
     vqmovun.s16     d12, q12                  ; clip pixel
     vqmovun.s16     d13, q13                  ; clip pixel
     vst1.64         {d12}, [r9], r8           ; store the data
@@ -629,8 +629,8 @@ idct16x16_256_add_neon_pass2
     vadd.s16        q13, q11, q4              ; step2[3] + step2[12]
     vrshr.s16       q12, q12, #6              ; ROUND_POWER_OF_TWO
     vrshr.s16       q13, q13, #6              ; ROUND_POWER_OF_TWO
-    vaddw.u8        q12, q12, d12             ; + dest[j * dest_stride + i]
-    vaddw.u8        q13, q13, d13             ; + dest[j * dest_stride + i]
+    vaddw.u8        q12, q12, d12             ; + dest[j * stride + i]
+    vaddw.u8        q13, q13, d13             ; + dest[j * stride + i]
     vqmovun.s16     d12, q12                  ; clip pixel
     vqmovun.s16     d13, q13                  ; clip pixel
     vst1.64         {d12}, [r9], r8           ; store the data
@@ -647,8 +647,8 @@ idct16x16_256_add_neon_pass2
     vadd.s16        q13, q1, q2               ; step2[5] + step2[10]
     vrshr.s16       q12, q12, #6              ; ROUND_POWER_OF_TWO
     vrshr.s16       q13, q13, #6              ; ROUND_POWER_OF_TWO
-    vaddw.u8        q12, q12, d12             ; + dest[j * dest_stride + i]
-    vaddw.u8        q13, q13, d13             ; + dest[j * dest_stride + i]
+    vaddw.u8        q12, q12, d12             ; + dest[j * stride + i]
+    vaddw.u8        q13, q13, d13             ; + dest[j * stride + i]
     vqmovun.s16     d12, q12                  ; clip pixel
     vqmovun.s16     d13, q13                  ; clip pixel
     vst1.64         {d12}, [r9], r8           ; store the data
@@ -661,8 +661,8 @@ idct16x16_256_add_neon_pass2
     vadd.s16        q13, q11, q8              ; step2[7] + step2[8]
     vrshr.s16       q12, q12, #6              ; ROUND_POWER_OF_TWO
     vrshr.s16       q13, q13, #6              ; ROUND_POWER_OF_TWO
-    vaddw.u8        q12, q12, d12             ; + dest[j * dest_stride + i]
-    vaddw.u8        q13, q13, d13             ; + dest[j * dest_stride + i]
+    vaddw.u8        q12, q12, d12             ; + dest[j * stride + i]
+    vaddw.u8        q13, q13, d13             ; + dest[j * stride + i]
     vqmovun.s16     d12, q12                  ; clip pixel
     vqmovun.s16     d13, q13                  ; clip pixel
     vst1.64         {d12}, [r9], r8           ; store the data
@@ -674,42 +674,42 @@ idct16x16_256_add_neon_pass2
 
     ; store the data  output 8,9,10,11,12,13,14,15
     vrshr.s16       q8, q8, #6                ; ROUND_POWER_OF_TWO
-    vaddw.u8        q8, q8, d12               ; + dest[j * dest_stride + i]
+    vaddw.u8        q8, q8, d12               ; + dest[j * stride + i]
     vqmovun.s16     d12, q8                   ; clip pixel
     vst1.64         {d12}, [r9], r8           ; store the data
     vld1.64         {d12}, [r7], r8           ; load destinatoin data
     vrshr.s16       q9, q9, #6
-    vaddw.u8        q9, q9, d13               ; + dest[j * dest_stride + i]
+    vaddw.u8        q9, q9, d13               ; + dest[j * stride + i]
     vqmovun.s16     d13, q9                   ; clip pixel
     vst1.64         {d13}, [r9], r8           ; store the data
     vld1.64         {d13}, [r7], r8           ; load destinatoin data
     vrshr.s16       q2, q2, #6
-    vaddw.u8        q2, q2, d12               ; + dest[j * dest_stride + i]
+    vaddw.u8        q2, q2, d12               ; + dest[j * stride + i]
     vqmovun.s16     d12, q2                   ; clip pixel
     vst1.64         {d12}, [r9], r8           ; store the data
     vld1.64         {d12}, [r7], r8           ; load destinatoin data
     vrshr.s16       q3, q3, #6
-    vaddw.u8        q3, q3, d13               ; + dest[j * dest_stride + i]
+    vaddw.u8        q3, q3, d13               ; + dest[j * stride + i]
     vqmovun.s16     d13, q3                   ; clip pixel
     vst1.64         {d13}, [r9], r8           ; store the data
     vld1.64         {d13}, [r7], r8           ; load destinatoin data
     vrshr.s16       q4, q4, #6
-    vaddw.u8        q4, q4, d12               ; + dest[j * dest_stride + i]
+    vaddw.u8        q4, q4, d12               ; + dest[j * stride + i]
     vqmovun.s16     d12, q4                   ; clip pixel
     vst1.64         {d12}, [r9], r8           ; store the data
     vld1.64         {d12}, [r7], r8           ; load destinatoin data
     vrshr.s16       q5, q5, #6
-    vaddw.u8        q5, q5, d13               ; + dest[j * dest_stride + i]
+    vaddw.u8        q5, q5, d13               ; + dest[j * stride + i]
     vqmovun.s16     d13, q5                   ; clip pixel
     vst1.64         {d13}, [r9], r8           ; store the data
     vld1.64         {d13}, [r7], r8           ; load destinatoin data
     vrshr.s16       q14, q14, #6
-    vaddw.u8        q14, q14, d12             ; + dest[j * dest_stride + i]
+    vaddw.u8        q14, q14, d12             ; + dest[j * stride + i]
     vqmovun.s16     d12, q14                  ; clip pixel
     vst1.64         {d12}, [r9], r8           ; store the data
     vld1.64         {d12}, [r7], r8           ; load destinatoin data
     vrshr.s16       q15, q15, #6
-    vaddw.u8        q15, q15, d13             ; + dest[j * dest_stride + i]
+    vaddw.u8        q15, q15, d13             ; + dest[j * stride + i]
     vqmovun.s16     d13, q15                  ; clip pixel
     vst1.64         {d13}, [r9], r8           ; store the data
     b               end_idct16x16_pass2
@@ -789,14 +789,14 @@ end_idct16x16_pass2
 ;                                               int16_t *pass1_output,
 ;                                               int16_t skip_adding,
 ;                                               uint8_t *dest,
-;                                               int dest_stride)
+;                                               int stride)
 ;
 ; r0  const tran_low_t *src
 ; r1  int16_t *output
 ; r2  int16_t *pass1_output
 ; r3  int16_t skip_adding
 ; r4  uint8_t *dest
-; r5  int dest_stride
+; r5  int stride
 
 |vpx_idct16x16_256_add_neon_pass2_tran_low| PROC
     LOAD_TRAN_LOW_TO_S16X2 d16, d17, d18, d19, r0

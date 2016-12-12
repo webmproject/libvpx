@@ -270,7 +270,7 @@ static void idct16x16_256_add_neon_pass2(const int16x8_t s0, const int16x8_t s1,
                                          const int16x8_t s6, const int16x8_t s7,
                                          int16_t *out, int16_t *pass1_output,
                                          int16_t skip_adding, uint8_t *dest,
-                                         int dest_stride) {
+                                         int stride) {
   uint8_t *d;
   uint8x8_t d12u8, d13u8;
   int16x4_t d0s16, d1s16, d2s16, d3s16, d4s16, d5s16, d6s16, d7s16;
@@ -522,9 +522,9 @@ static void idct16x16_256_add_neon_pass2(const int16x8_t s0, const int16x8_t s1,
     q1s16 = vld1q_s16(pass1_output);
     pass1_output += 8;
     d12s64 = vld1_s64((int64_t *)dest);
-    dest += dest_stride;
+    dest += stride;
     d13s64 = vld1_s64((int64_t *)dest);
-    dest += dest_stride;
+    dest += stride;
 
     q12s16 = vaddq_s16(q0s16, q15s16);
     q13s16 = vaddq_s16(q1s16, q14s16);
@@ -537,9 +537,9 @@ static void idct16x16_256_add_neon_pass2(const int16x8_t s0, const int16x8_t s1,
     d12u8 = vqmovun_s16(vreinterpretq_s16_u16(q12u16));
     d13u8 = vqmovun_s16(vreinterpretq_s16_u16(q13u16));
     vst1_u64((uint64_t *)d, vreinterpret_u64_u8(d12u8));
-    d += dest_stride;
+    d += stride;
     vst1_u64((uint64_t *)d, vreinterpret_u64_u8(d13u8));
-    d += dest_stride;
+    d += stride;
     q14s16 = vsubq_s16(q1s16, q14s16);
     q15s16 = vsubq_s16(q0s16, q15s16);
 
@@ -548,9 +548,9 @@ static void idct16x16_256_add_neon_pass2(const int16x8_t s0, const int16x8_t s1,
     q11s16 = vld1q_s16(pass1_output);
     pass1_output += 8;
     d12s64 = vld1_s64((int64_t *)dest);
-    dest += dest_stride;
+    dest += stride;
     d13s64 = vld1_s64((int64_t *)dest);
-    dest += dest_stride;
+    dest += stride;
     q12s16 = vaddq_s16(q10s16, q5s16);
     q13s16 = vaddq_s16(q11s16, q4s16);
     q12s16 = vrshrq_n_s16(q12s16, 6);
@@ -562,9 +562,9 @@ static void idct16x16_256_add_neon_pass2(const int16x8_t s0, const int16x8_t s1,
     d12u8 = vqmovun_s16(vreinterpretq_s16_u16(q12u16));
     d13u8 = vqmovun_s16(vreinterpretq_s16_u16(q13u16));
     vst1_u64((uint64_t *)d, vreinterpret_u64_u8(d12u8));
-    d += dest_stride;
+    d += stride;
     vst1_u64((uint64_t *)d, vreinterpret_u64_u8(d13u8));
-    d += dest_stride;
+    d += stride;
     q4s16 = vsubq_s16(q11s16, q4s16);
     q5s16 = vsubq_s16(q10s16, q5s16);
 
@@ -573,9 +573,9 @@ static void idct16x16_256_add_neon_pass2(const int16x8_t s0, const int16x8_t s1,
     q1s16 = vld1q_s16(pass1_output);
     pass1_output += 8;
     d12s64 = vld1_s64((int64_t *)dest);
-    dest += dest_stride;
+    dest += stride;
     d13s64 = vld1_s64((int64_t *)dest);
-    dest += dest_stride;
+    dest += stride;
     q12s16 = vaddq_s16(q0s16, q3s16);
     q13s16 = vaddq_s16(q1s16, q2s16);
     q12s16 = vrshrq_n_s16(q12s16, 6);
@@ -587,9 +587,9 @@ static void idct16x16_256_add_neon_pass2(const int16x8_t s0, const int16x8_t s1,
     d12u8 = vqmovun_s16(vreinterpretq_s16_u16(q12u16));
     d13u8 = vqmovun_s16(vreinterpretq_s16_u16(q13u16));
     vst1_u64((uint64_t *)d, vreinterpret_u64_u8(d12u8));
-    d += dest_stride;
+    d += stride;
     vst1_u64((uint64_t *)d, vreinterpret_u64_u8(d13u8));
-    d += dest_stride;
+    d += stride;
     q2s16 = vsubq_s16(q1s16, q2s16);
     q3s16 = vsubq_s16(q0s16, q3s16);
 
@@ -597,9 +597,9 @@ static void idct16x16_256_add_neon_pass2(const int16x8_t s0, const int16x8_t s1,
     pass1_output += 8;
     q11s16 = vld1q_s16(pass1_output);
     d12s64 = vld1_s64((int64_t *)dest);
-    dest += dest_stride;
+    dest += stride;
     d13s64 = vld1_s64((int64_t *)dest);
-    dest += dest_stride;
+    dest += stride;
     q12s16 = vaddq_s16(q10s16, q9s16);
     q13s16 = vaddq_s16(q11s16, q8s16);
     q12s16 = vrshrq_n_s16(q12s16, 6);
@@ -611,69 +611,69 @@ static void idct16x16_256_add_neon_pass2(const int16x8_t s0, const int16x8_t s1,
     d12u8 = vqmovun_s16(vreinterpretq_s16_u16(q12u16));
     d13u8 = vqmovun_s16(vreinterpretq_s16_u16(q13u16));
     vst1_u64((uint64_t *)d, vreinterpret_u64_u8(d12u8));
-    d += dest_stride;
+    d += stride;
     vst1_u64((uint64_t *)d, vreinterpret_u64_u8(d13u8));
-    d += dest_stride;
+    d += stride;
     q8s16 = vsubq_s16(q11s16, q8s16);
     q9s16 = vsubq_s16(q10s16, q9s16);
 
     // store the data  out 8,9,10,11,12,13,14,15
     d12s64 = vld1_s64((int64_t *)dest);
-    dest += dest_stride;
+    dest += stride;
     q8s16 = vrshrq_n_s16(q8s16, 6);
     q8u16 = vaddw_u8(vreinterpretq_u16_s16(q8s16), vreinterpret_u8_s64(d12s64));
     d12u8 = vqmovun_s16(vreinterpretq_s16_u16(q8u16));
     vst1_u64((uint64_t *)d, vreinterpret_u64_u8(d12u8));
-    d += dest_stride;
+    d += stride;
 
     d12s64 = vld1_s64((int64_t *)dest);
-    dest += dest_stride;
+    dest += stride;
     q9s16 = vrshrq_n_s16(q9s16, 6);
     q9u16 = vaddw_u8(vreinterpretq_u16_s16(q9s16), vreinterpret_u8_s64(d12s64));
     d12u8 = vqmovun_s16(vreinterpretq_s16_u16(q9u16));
     vst1_u64((uint64_t *)d, vreinterpret_u64_u8(d12u8));
-    d += dest_stride;
+    d += stride;
 
     d12s64 = vld1_s64((int64_t *)dest);
-    dest += dest_stride;
+    dest += stride;
     q2s16 = vrshrq_n_s16(q2s16, 6);
     q2u16 = vaddw_u8(vreinterpretq_u16_s16(q2s16), vreinterpret_u8_s64(d12s64));
     d12u8 = vqmovun_s16(vreinterpretq_s16_u16(q2u16));
     vst1_u64((uint64_t *)d, vreinterpret_u64_u8(d12u8));
-    d += dest_stride;
+    d += stride;
 
     d12s64 = vld1_s64((int64_t *)dest);
-    dest += dest_stride;
+    dest += stride;
     q3s16 = vrshrq_n_s16(q3s16, 6);
     q3u16 = vaddw_u8(vreinterpretq_u16_s16(q3s16), vreinterpret_u8_s64(d12s64));
     d12u8 = vqmovun_s16(vreinterpretq_s16_u16(q3u16));
     vst1_u64((uint64_t *)d, vreinterpret_u64_u8(d12u8));
-    d += dest_stride;
+    d += stride;
 
     d12s64 = vld1_s64((int64_t *)dest);
-    dest += dest_stride;
+    dest += stride;
     q4s16 = vrshrq_n_s16(q4s16, 6);
     q4u16 = vaddw_u8(vreinterpretq_u16_s16(q4s16), vreinterpret_u8_s64(d12s64));
     d12u8 = vqmovun_s16(vreinterpretq_s16_u16(q4u16));
     vst1_u64((uint64_t *)d, vreinterpret_u64_u8(d12u8));
-    d += dest_stride;
+    d += stride;
 
     d12s64 = vld1_s64((int64_t *)dest);
-    dest += dest_stride;
+    dest += stride;
     q5s16 = vrshrq_n_s16(q5s16, 6);
     q5u16 = vaddw_u8(vreinterpretq_u16_s16(q5s16), vreinterpret_u8_s64(d12s64));
     d12u8 = vqmovun_s16(vreinterpretq_s16_u16(q5u16));
     vst1_u64((uint64_t *)d, vreinterpret_u64_u8(d12u8));
-    d += dest_stride;
+    d += stride;
 
     d12s64 = vld1_s64((int64_t *)dest);
-    dest += dest_stride;
+    dest += stride;
     q14s16 = vrshrq_n_s16(q14s16, 6);
     q14u16 =
         vaddw_u8(vreinterpretq_u16_s16(q14s16), vreinterpret_u8_s64(d12s64));
     d12u8 = vqmovun_s16(vreinterpretq_s16_u16(q14u16));
     vst1_u64((uint64_t *)d, vreinterpret_u64_u8(d12u8));
-    d += dest_stride;
+    d += stride;
 
     d12s64 = vld1_s64((int64_t *)dest);
     q15s16 = vrshrq_n_s16(q15s16, 6);
@@ -803,7 +803,7 @@ static void idct16x16_256_add_neon_pass2(const int16x8_t s0, const int16x8_t s1,
 void vpx_idct16x16_256_add_neon_pass2(const int16_t *src, int16_t *out,
                                       int16_t *pass1_output,
                                       int16_t skip_adding, uint8_t *dest,
-                                      int dest_stride) {
+                                      int stride) {
   int16x8_t q8s16, q9s16, q10s16, q11s16, q12s16, q13s16, q14s16, q15s16;
   int16x8x2_t q0x2s16;
 
@@ -833,7 +833,7 @@ void vpx_idct16x16_256_add_neon_pass2(const int16_t *src, int16_t *out,
 
   idct16x16_256_add_neon_pass2(q8s16, q9s16, q10s16, q11s16, q12s16, q13s16,
                                q14s16, q15s16, out, pass1_output, skip_adding,
-                               dest, dest_stride);
+                               dest, stride);
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -841,7 +841,7 @@ void vpx_idct16x16_256_add_neon_pass2_tran_low(const tran_low_t *src,
                                                int16_t *out,
                                                int16_t *pass1_output,
                                                int16_t skip_adding,
-                                               uint8_t *dest, int dest_stride) {
+                                               uint8_t *dest, int stride) {
   int16x8_t q8s16, q9s16, q10s16, q11s16, q12s16, q13s16, q14s16, q15s16;
   int16x8x2_t q0x2s16;
 
@@ -871,7 +871,7 @@ void vpx_idct16x16_256_add_neon_pass2_tran_low(const tran_low_t *src,
 
   idct16x16_256_add_neon_pass2(q8s16, q9s16, q10s16, q11s16, q12s16, q13s16,
                                q14s16, q15s16, out, pass1_output, skip_adding,
-                               dest, dest_stride);
+                               dest, stride);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
