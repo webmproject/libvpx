@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a280382_0aef0142",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 9
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-12T23:30:33Z",
+      "side": 1,
+      "message": "mention vp8 here",
+      "revId": "aa4bba64491fa3bc9a3c66cebc4773e6a354acef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a280382_4afd09f7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 9
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-12T23:30:33Z",
+      "side": 1,
+      "message": "it\u0027d be better to reference the git hash here and above; these links aren\u0027t guaranteed to be stable",
+      "revId": "aa4bba64491fa3bc9a3c66cebc4773e6a354acef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a280382_eaeb9531",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 9
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-12T23:30:33Z",
+      "side": 1,
+      "message": "to be safe keep BUG\u003d in the first column. you probably could just drop the whole prefix here",
+      "revId": "aa4bba64491fa3bc9a3c66cebc4773e6a354acef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
