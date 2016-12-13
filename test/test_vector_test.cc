@@ -145,21 +145,21 @@ TEST_P(TestVectorTest, MD5Match) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(video.get(), cfg));
 }
 
-// Test VP8 decode in serial mode with single thread and with 8 threads.
+// Test VP8 decode in serial mode with single thread.
 // NOTE: VP8 only support serial mode.
 #if CONFIG_VP8_DECODER
 VP8_INSTANTIATE_TEST_CASE(
     TestVectorTest,
     ::testing::Combine(
         ::testing::Values(0),  // Serial Mode.
-        ::testing::Values(1),  // Single thread and 8 threads.
+        ::testing::Values(1),  // Single thread.
         ::testing::ValuesIn(libvpx_test::kVP8TestVectors,
                             libvpx_test::kVP8TestVectors +
                                 libvpx_test::kNumVP8TestVectors)));
 
 // Test VP8 decode in with different numbers of threads.
 INSTANTIATE_TEST_CASE_P(
-    DISABLED_VP8MultiThreaded, TestVectorTest,
+    VP8MultiThreaded, TestVectorTest,
     ::testing::Combine(
         ::testing::Values(
             static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP8)),

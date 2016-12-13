@@ -511,6 +511,8 @@ typedef struct VP8_COMP {
 
 #if CONFIG_MULTITHREAD
   /* multithread data */
+  pthread_mutex_t *pmutex;
+  pthread_mutex_t mt_mutex; /* mutex for b_multi_threaded */
   int *mt_current_mb_col;
   int mt_sync_range;
   int b_multi_threaded;

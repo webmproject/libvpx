@@ -446,6 +446,18 @@ static void dealloc_compressor_data(VP8_COMP *cpi) {
   cpi->mb.pip = 0;
 
 #if CONFIG_MULTITHREAD
+  /* De-allocate mutex */
+  if (cpi->pmutex != NULL) {
+    VP8_COMMON *const pc = &cpi->common;
+    int i;
+
+    for (i = 0; i < pc->mb_rows; ++i) {
+      pthread_mutex_destroy(&cpi->pmutex[i]);
+    }
+    vpx_free(cpi->pmutex);
+    cpi->pmutex = NULL;
+  }
+
   vpx_free(cpi->mt_current_mb_col);
   cpi->mt_current_mb_col = NULL;
 #endif
@@ -1075,6 +1087,9 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi) {
 
   int width = cm->Width;
   int height = cm->Height;
+#if CONFIG_MULTITHREAD
+  int prev_mb_rows = cm->mb_rows;
+#endif
 
   if (vp8_alloc_frame_buffers(cm, width, height)) {
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
@@ -1164,6 +1179,25 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi) {
   }
 
   if (cpi->oxcf.multi_threaded > 1) {
+    int i;
+
+    /* De-allocate and re-allocate mutex */
+    if (cpi->pmutex != NULL) {
+      for (i = 0; i < prev_mb_rows; ++i) {
+        pthread_mutex_destroy(&cpi->pmutex[i]);
+      }
+      vpx_free(cpi->pmutex);
+      cpi->pmutex = NULL;
+    }
+
+    CHECK_MEM_ERROR(cpi->pmutex,
+                    vpx_malloc(sizeof(*cpi->pmutex) * cm->mb_rows));
+    if (cpi->pmutex) {
+      for (i = 0; i < cm->mb_rows; ++i) {
+        pthread_mutex_init(&cpi->pmutex[i], NULL);
+      }
+    }
+
     vpx_free(cpi->mt_current_mb_col);
     CHECK_MEM_ERROR(cpi->mt_current_mb_col,
                     vpx_malloc(sizeof(*cpi->mt_current_mb_col) * cm->mb_rows));
