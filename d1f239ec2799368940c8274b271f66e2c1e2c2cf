@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba99b795_c87c03d7",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-13T23:57:34Z",
+      "side": 1,
+      "message": "typical order in the googletest version we have is (expected, actual) to format the error output correctly",
+      "range": {
+        "startLine": 145,
+        "startChar": 16,
+        "endLine": 145,
+        "endChar": 30
+      },
+      "revId": "d1f239ec2799368940c8274b271f66e2c1e2c2cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_a8989f04",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-13T23:57:34Z",
+      "side": 1,
+      "message": "could be \u0027uint16_t *const\u0027 for both",
+      "revId": "d1f239ec2799368940c8274b271f66e2c1e2c2cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_e84907ad",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-13T23:57:34Z",
+      "side": 1,
+      "message": "you\u0027ll have to put these in an array (and use ValuesIn) to keep the ifdef. visual studio will fail to compile as it is",
+      "revId": "d1f239ec2799368940c8274b271f66e2c1e2c2cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
