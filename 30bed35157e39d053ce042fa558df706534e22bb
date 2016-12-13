@@ -16,6 +16,24 @@
       "revId": "30bed35157e39d053ce042fa558df706534e22bb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1afac331_2382ee9d",
+        "filename": "vp8/decoder/threading.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 615,
+      "author": {
+        "id": 1000853
+      },
+      "writtenOn": "2016-12-13T12:12:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ff76b882_3243796b",
+      "revId": "30bed35157e39d053ce042fa558df706534e22bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
