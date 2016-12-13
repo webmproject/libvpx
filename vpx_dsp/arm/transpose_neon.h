@@ -179,6 +179,62 @@ static INLINE void transpose_u16_4x4q(uint16x8_t *a0, uint16x8_t *a1) {
   *a1 = d0.val[1];
 }
 
+static INLINE void transpose_u8_4x8(uint8x8_t *a0, uint8x8_t *a1, uint8x8_t *a2,
+                                    uint8x8_t *a3, const uint8x8_t a4,
+                                    const uint8x8_t a5, const uint8x8_t a6,
+                                    const uint8x8_t a7) {
+  // Swap 32 bit elements. Goes from:
+  // a0: 00 01 02 03 XX XX XX XX
+  // a1: 10 11 12 13 XX XX XX XX
+  // a2: 20 21 22 23 XX XX XX XX
+  // a3; 30 31 32 33 XX XX XX XX
+  // a4: 40 41 42 43 XX XX XX XX
+  // a5: 50 51 52 53 XX XX XX XX
+  // a6: 60 61 62 63 XX XX XX XX
+  // a7: 70 71 72 73 XX XX XX XX
+  // to:
+  // b0.val[0]: 00 01 02 03 40 41 42 43
+  // b1.val[0]: 10 11 12 13 50 51 52 53
+  // b2.val[0]: 20 21 22 23 60 61 62 63
+  // b3.val[0]: 30 31 32 33 70 71 72 73
+
+  const uint32x2x2_t b0 =
+      vtrn_u32(vreinterpret_u32_u8(*a0), vreinterpret_u32_u8(a4));
+  const uint32x2x2_t b1 =
+      vtrn_u32(vreinterpret_u32_u8(*a1), vreinterpret_u32_u8(a5));
+  const uint32x2x2_t b2 =
+      vtrn_u32(vreinterpret_u32_u8(*a2), vreinterpret_u32_u8(a6));
+  const uint32x2x2_t b3 =
+      vtrn_u32(vreinterpret_u32_u8(*a3), vreinterpret_u32_u8(a7));
+
+  // Swap 16 bit elements resulting in:
+  // c0.val[0]: 00 01 20 21 40 41 60 61
+  // c0.val[1]: 02 03 22 23 42 43 62 63
+  // c1.val[0]: 10 11 30 31 50 51 70 71
+  // c1.val[1]: 12 13 32 33 52 53 72 73
+
+  const uint16x4x2_t c0 = vtrn_u16(vreinterpret_u16_u32(b0.val[0]),
+                                   vreinterpret_u16_u32(b2.val[0]));
+  const uint16x4x2_t c1 = vtrn_u16(vreinterpret_u16_u32(b1.val[0]),
+                                   vreinterpret_u16_u32(b3.val[0]));
+
+  // Swap 8 bit elements resulting in:
+  // d0.val[0]: 00 10 20 30 40 50 60 70
+  // d0.val[1]: 01 11 21 31 41 51 61 71
+  // d1.val[0]: 02 12 22 32 42 52 62 72
+  // d1.val[1]: 03 13 23 33 43 53 63 73
+
+  const uint8x8x2_t d0 =
+      vtrn_u8(vreinterpret_u8_u16(c0.val[0]), vreinterpret_u8_u16(c1.val[0]));
+  const uint8x8x2_t d1 =
+      vtrn_u8(vreinterpret_u8_u16(c0.val[1]), vreinterpret_u8_u16(c1.val[1]));
+
+  *a0 = d0.val[0];
+  *a1 = d0.val[1];
+  *a2 = d1.val[0];
+  *a3 = d1.val[1];
+}
+
 static INLINE void transpose_s32_4x4(int32x4_t *a0, int32x4_t *a1,
                                      int32x4_t *a2, int32x4_t *a3) {
   // Swap 32 bit elements. Goes from:
@@ -936,11 +992,85 @@ static INLINE void transpose_u8_16x16(
   *o15 = e7.val[1];
 }
 
-static INLINE void load_and_transpose_s16_8x8(const int16_t *a, int a_stride,
-                                              int16x8_t *a0, int16x8_t *a1,
-                                              int16x8_t *a2, int16x8_t *a3,
-                                              int16x8_t *a4, int16x8_t *a5,
-                                              int16x8_t *a6, int16x8_t *a7) {
+static INLINE void load_and_transpose_u8_4x8(const uint8_t *a,
+                                             const int a_stride, uint8x8_t *a0,
+                                             uint8x8_t *a1, uint8x8_t *a2,
+                                             uint8x8_t *a3) {
+  uint8x8_t a4, a5, a6, a7;
+  *a0 = vld1_u8(a);
+  a += a_stride;
+  *a1 = vld1_u8(a);
+  a += a_stride;
+  *a2 = vld1_u8(a);
+  a += a_stride;
+  *a3 = vld1_u8(a);
+  a += a_stride;
+  a4 = vld1_u8(a);
+  a += a_stride;
+  a5 = vld1_u8(a);
+  a += a_stride;
+  a6 = vld1_u8(a);
+  a += a_stride;
+  a7 = vld1_u8(a);
+
+  transpose_u8_4x8(a0, a1, a2, a3, a4, a5, a6, a7);
+}
+
+static INLINE void load_and_transpose_u8_8x8(const uint8_t *a,
+                                             const int a_stride, uint8x8_t *a0,
+                                             uint8x8_t *a1, uint8x8_t *a2,
+                                             uint8x8_t *a3, uint8x8_t *a4,
+                                             uint8x8_t *a5, uint8x8_t *a6,
+                                             uint8x8_t *a7) {
+  *a0 = vld1_u8(a);
+  a += a_stride;
+  *a1 = vld1_u8(a);
+  a += a_stride;
+  *a2 = vld1_u8(a);
+  a += a_stride;
+  *a3 = vld1_u8(a);
+  a += a_stride;
+  *a4 = vld1_u8(a);
+  a += a_stride;
+  *a5 = vld1_u8(a);
+  a += a_stride;
+  *a6 = vld1_u8(a);
+  a += a_stride;
+  *a7 = vld1_u8(a);
+
+  transpose_u8_8x8(a0, a1, a2, a3, a4, a5, a6, a7);
+}
+
+static INLINE void transpose_and_store_u8_8x8(uint8_t *a, const int a_stride,
+                                              uint8x8_t a0, uint8x8_t a1,
+                                              uint8x8_t a2, uint8x8_t a3,
+                                              uint8x8_t a4, uint8x8_t a5,
+                                              uint8x8_t a6, uint8x8_t a7) {
+  transpose_u8_8x8(&a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7);
+
+  vst1_u8(a, a0);
+  a += a_stride;
+  vst1_u8(a, a1);
+  a += a_stride;
+  vst1_u8(a, a2);
+  a += a_stride;
+  vst1_u8(a, a3);
+  a += a_stride;
+  vst1_u8(a, a4);
+  a += a_stride;
+  vst1_u8(a, a5);
+  a += a_stride;
+  vst1_u8(a, a6);
+  a += a_stride;
+  vst1_u8(a, a7);
+}
+
+static INLINE void load_and_transpose_s16_8x8(const int16_t *a,
+                                              const int a_stride, int16x8_t *a0,
+                                              int16x8_t *a1, int16x8_t *a2,
+                                              int16x8_t *a3, int16x8_t *a4,
+                                              int16x8_t *a5, int16x8_t *a6,
+                                              int16x8_t *a7) {
   *a0 = vld1q_s16(a);
   a += a_stride;
   *a1 = vld1q_s16(a);

@@ -57,6 +57,7 @@ DSP_SRCS-yes += deblock.c
 DSP_SRCS-yes += postproc.h
 DSP_SRCS-$(HAVE_MSA) += mips/add_noise_msa.c
 DSP_SRCS-$(HAVE_MSA) += mips/deblock_msa.c
+DSP_SRCS-$(HAVE_NEON) += arm/deblock_neon.c
 DSP_SRCS-$(HAVE_SSE2) += x86/add_noise_sse2.asm
 DSP_SRCS-$(HAVE_SSE2) += x86/deblock_sse2.asm
 endif # CONFIG_POSTPROC
