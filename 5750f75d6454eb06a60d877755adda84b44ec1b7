@@ -221,6 +221,24 @@
       "revId": "5750f75d6454eb06a60d877755adda84b44ec1b7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a280382_fd0fdce0",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 609,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-12-13T19:31:31Z",
+      "side": 1,
+      "message": "Merged Change 418949 and removed this pair of #if/endif",
+      "parentUuid": "1a280382_95f9d65f",
+      "revId": "5750f75d6454eb06a60d877755adda84b44ec1b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
