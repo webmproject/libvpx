@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ba99b795_9c8cfd59",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-14T15:17:04Z",
+      "side": 1,
+      "message": "Done. It\u0027s throughout the rest of the file, but using Buffer would clean it up as well.",
+      "parentUuid": "ba99b795_eba58153",
+      "range": {
+        "startLine": 134,
+        "startChar": 25,
+        "endLine": 134,
+        "endChar": 36
+      },
+      "revId": "7a63c371c03709b3b67cfec0c32d583ec9c9cbe6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba99b795_cbaabd23",
         "filename": "test/pp_filter_test.cc",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2016-12-14T01:06:04Z",
       "side": 1,
       "message": "same here",
+      "range": {
+        "startLine": 140,
+        "startChar": 26,
+        "endLine": 140,
+        "endChar": 38
+      },
+      "revId": "7a63c371c03709b3b67cfec0c32d583ec9c9cbe6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_7c893947",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-14T15:17:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba99b795_cbaabd23",
       "range": {
         "startLine": 140,
         "startChar": 26,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "ba99b795_5c867537",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-14T15:17:04Z",
+      "side": 1,
+      "message": "Ack. Same about switching to Buffer. I was super lazy and copied the previous function.",
+      "parentUuid": "ba99b795_2bd369bd",
+      "range": {
+        "startLine": 170,
+        "startChar": 2,
+        "endLine": 170,
+        "endChar": 8
+      },
+      "revId": "7a63c371c03709b3b67cfec0c32d583ec9c9cbe6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba99b795_ab81b99a",
         "filename": "test/pp_filter_test.cc",
         "patchSetId": 6
@@ -82,6 +154,30 @@
       "writtenOn": "2016-12-14T01:06:04Z",
       "side": 1,
       "message": "this semi-colon can go",
+      "range": {
+        "startLine": 208,
+        "startChar": 1,
+        "endLine": 208,
+        "endChar": 2
+      },
+      "revId": "7a63c371c03709b3b67cfec0c32d583ec9c9cbe6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_3c83b127",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-14T15:17:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba99b795_ab81b99a",
       "range": {
         "startLine": 208,
         "startChar": 1,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "ba99b795_1c234d72",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-14T15:17:04Z",
+      "side": 1,
+      "message": "Also dropped stdlib.h. Pretty sure I don\u0027t need it anymore.",
+      "parentUuid": "ba99b795_6b64d13a",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 21
+      },
+      "revId": "7a63c371c03709b3b67cfec0c32d583ec9c9cbe6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba99b795_eb30e11a",
         "filename": "vpx_dsp/arm/deblock_neon.c",
         "patchSetId": 6
@@ -128,6 +248,24 @@
       "writtenOn": "2016-12-14T01:06:04Z",
       "side": 1,
       "message": "you should include the rtcd header here too",
+      "revId": "7a63c371c03709b3b67cfec0c32d583ec9c9cbe6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_fc278979",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-14T15:17:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba99b795_eb30e11a",
       "revId": "7a63c371c03709b3b67cfec0c32d583ec9c9cbe6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -157,6 +295,30 @@
     },
     {
       "key": {
+        "uuid": "ba99b795_dc2cc560",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-14T15:17:04Z",
+      "side": 1,
+      "message": "Done. Lazy copying of previous nomenclature.",
+      "parentUuid": "ba99b795_4b158d5e",
+      "range": {
+        "startLine": 88,
+        "startChar": 11,
+        "endLine": 88,
+        "endChar": 24
+      },
+      "revId": "7a63c371c03709b3b67cfec0c32d583ec9c9cbe6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba99b795_6b08514c",
         "filename": "vpx_dsp/arm/deblock_neon.c",
         "patchSetId": 6
@@ -168,6 +330,30 @@
       "writtenOn": "2016-12-14T01:06:04Z",
       "side": 1,
       "message": "if this is open to investigate or change this portion should be a TODO, otherwise it should be a more definite note as to the assumption being made",
+      "range": {
+        "startLine": 104,
+        "startChar": 15,
+        "endLine": 107,
+        "endChar": 18
+      },
+      "revId": "7a63c371c03709b3b67cfec0c32d583ec9c9cbe6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_bc3101b5",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-14T15:17:04Z",
+      "side": 1,
+      "message": "The code could be a *little* faster by not loading a2 and a1 (and b1/b2 on the other end of the stripe) but it would no longer match the C in the test because the borders are other values, not extended. I could add an Extend() function to the Buffer library for this sort of use.",
+      "parentUuid": "ba99b795_6b08514c",
       "range": {
         "startLine": 104,
         "startChar": 15,
