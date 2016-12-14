@@ -139,7 +139,6 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
     int x = qcoeff[rc];
     /* Only add a trellis state for non-zero coefficients. */
     if (x) {
-      int shortcut = 0;
       error0 = tokens[next][0].error;
       error1 = tokens[next][1].error;
       /* Evaluate the first possibility for this state. */
@@ -178,12 +177,7 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
 
       if ((abs(x) * dequant_ptr[rc != 0] > (abs(coeff[rc]) << shift)) &&
           (abs(x) * dequant_ptr[rc != 0] <
-           (abs(coeff[rc]) << shift) + dequant_ptr[rc != 0]))
-        shortcut = 1;
-      else
-        shortcut = 0;
-
-      if (shortcut) {
+           (abs(coeff[rc]) << shift) + dequant_ptr[rc != 0])) {
         sz = -(x < 0);
         x -= 2 * sz + 1;
       } else {
@@ -221,18 +215,17 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
       best = rd_cost1 < rd_cost0;
       base_bits = vp9_get_cost(t0, e0, cat6_high_cost);
 
-      if (shortcut) {
 #if CONFIG_VP9_HIGHBITDEPTH
-        if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-          dx -= ((dequant_ptr[rc != 0] >> (xd->bd - 8)) + sz) ^ sz;
-        } else {
-          dx -= (dequant_ptr[rc != 0] + sz) ^ sz;
-        }
-#else
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+        dx -= ((dequant_ptr[rc != 0] >> (xd->bd - 8)) + sz) ^ sz;
+      } else {
         dx -= (dequant_ptr[rc != 0] + sz) ^ sz;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-        d2 = dx * dx;
       }
+#else
+      dx -= (dequant_ptr[rc != 0] + sz) ^ sz;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+      d2 = dx * dx;
+
       tokens[i][1].rate = base_bits + (best ? rate1 : rate0);
       tokens[i][1].error = d2 + (best ? error1 : error0);
       tokens[i][1].next = next;
