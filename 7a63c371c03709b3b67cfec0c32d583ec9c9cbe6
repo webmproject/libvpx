@@ -387,6 +387,24 @@
       "revId": "7a63c371c03709b3b67cfec0c32d583ec9c9cbe6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_699cd654",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-14T19:20:07Z",
+      "side": 1,
+      "message": "Well if the border is extended, the C and SSE2 should match the neon just fine. The problem is that in the tests, the  border is not extended.",
+      "parentUuid": "ba99b795_a9f2de24",
+      "revId": "7a63c371c03709b3b67cfec0c32d583ec9c9cbe6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
