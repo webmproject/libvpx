@@ -164,17 +164,19 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize, MACROBLOCK *x,
   const int ref = xd->mi[0]->ref_frame[0];
   unsigned int sse;
   unsigned int var = 0;
-  unsigned int sum_sse = 0;
   int64_t total_sse = 0;
   int skip_flag = 1;
   const int shift = 6;
-  int rate;
   int64_t dist;
   const int dequant_shift =
 #if CONFIG_VP9_HIGHBITDEPTH
       (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ? xd->bd - 5 :
 #endif  // CONFIG_VP9_HIGHBITDEPTH
                                                     3;
+  unsigned int qstep_vec[MAX_MB_PLANE];
+  unsigned int nlog2_vec[MAX_MB_PLANE];
+  unsigned int sum_sse_vec[MAX_MB_PLANE];
+  int any_zero_sum_sse = 0;
 
   x->pred_sse[ref] = 0;
 
@@ -186,6 +188,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize, MACROBLOCK *x,
     const BLOCK_SIZE unit_size = txsize_to_bsize[max_tx_size];
     const int64_t dc_thr = p->quant_thred[0] >> shift;
     const int64_t ac_thr = p->quant_thred[1] >> shift;
+    unsigned int sum_sse = 0;
     // The low thresholds are used to measure if the prediction errors are
     // low enough so that we can skip the mode search.
     const int64_t low_dc_thr = VPXMIN(50, dc_thr >> 2);
@@ -195,8 +198,6 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize, MACROBLOCK *x,
     int idx, idy;
     int lw = b_width_log2_lookup[unit_size] + 2;
     int lh = b_height_log2_lookup[unit_size] + 2;
-
-    sum_sse = 0;
 
     for (idy = 0; idy < bh; ++idy) {
       for (idx = 0; idx < bw; ++idx) {
@@ -233,12 +234,18 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize, MACROBLOCK *x,
     }
 
     total_sse += sum_sse;
+    sum_sse_vec[i] = sum_sse;
+    any_zero_sum_sse = any_zero_sum_sse || (sum_sse == 0);
+    qstep_vec[i] = pd->dequant[1] >> dequant_shift;
+    nlog2_vec[i] = num_pels_log2_lookup[bs];
+  }
 
-    // Fast approximate the modelling function.
-    if (cpi->sf.simple_model_rd_from_var) {
+  // Fast approximate the modelling function.
+  if (cpi->sf.simple_model_rd_from_var) {
+    for (i = 0; i < MAX_MB_PLANE; ++i) {
       int64_t rate;
-      const int64_t square_error = sum_sse;
-      int quantizer = (pd->dequant[1] >> dequant_shift);
+      const int64_t square_error = sum_sse_vec[i];
+      int quantizer = qstep_vec[i];
 
       if (quantizer < 120)
         rate = (square_error * (280 - quantizer)) >> (16 - VP9_PROB_COST_SHIFT);
@@ -247,12 +254,19 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize, MACROBLOCK *x,
       dist = (square_error * quantizer) >> 8;
       rate_sum += rate;
       dist_sum += dist;
+    }
+  } else {
+    if (any_zero_sum_sse) {
+      for (i = 0; i < MAX_MB_PLANE; ++i) {
+        int rate;
+        vp9_model_rd_from_var_lapndz(sum_sse_vec[i], nlog2_vec[i], qstep_vec[i],
+                                     &rate, &dist);
+        rate_sum += rate;
+        dist_sum += dist;
+      }
     } else {
-      vp9_model_rd_from_var_lapndz(sum_sse, num_pels_log2_lookup[bs],
-                                   pd->dequant[1] >> dequant_shift, &rate,
-                                   &dist);
-      rate_sum += rate;
-      dist_sum += dist;
+      vp9_model_rd_from_var_lapndz_vec(sum_sse_vec, nlog2_vec, qstep_vec,
+                                       &rate_sum, &dist_sum);
     }
   }
 
