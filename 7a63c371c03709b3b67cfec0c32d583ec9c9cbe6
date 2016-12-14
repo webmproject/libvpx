@@ -237,6 +237,24 @@
     },
     {
       "key": {
+        "uuid": "ba99b795_dfdb9408",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-14T20:34:32Z",
+      "side": 1,
+      "message": "It was for abs(), which is in deblock.c. Obvs not needed anymore.",
+      "parentUuid": "ba99b795_1c234d72",
+      "revId": "7a63c371c03709b3b67cfec0c32d583ec9c9cbe6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba99b795_eb30e11a",
         "filename": "vpx_dsp/arm/deblock_neon.c",
         "patchSetId": 6
