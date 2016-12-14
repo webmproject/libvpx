@@ -318,7 +318,7 @@ static void mt_decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd,
 
     xd->left_available = 0;
 
-    xd->mb_to_top_edge = -((mb_row * 16)) << 3;
+    xd->mb_to_top_edge = -((mb_row * 16) << 3);
     xd->mb_to_bottom_edge = ((pc->mb_rows - 1 - mb_row) * 16) << 3;
 
     if (pbi->common.filter_level) {
