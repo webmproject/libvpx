@@ -45,7 +45,7 @@
 
 #define FRAME_OVERHEAD_BITS 200
 
-// Use this macro to turn on/off use of alt-refs in one-pass mode.
+// Use this macro to turn on/off use of alt-refs in one-pass vbr mode.
 #define USE_ALTREF_FOR_ONE_PASS 0
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -566,9 +566,9 @@ int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
               VPXMAX(cpi->rc.q_1_frame, cpi->rc.q_2_frame));
   }
 #if USE_ALTREF_FOR_ONE_PASS
-  if (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_VBR &&
-      cpi->oxcf.lag_in_frames > 0 && cpi->rc.is_src_frame_alt_ref &&
-      !cpi->rc.alt_ref_gf_group) {
+  if (cpi->oxcf.enable_auto_arf && cpi->oxcf.pass == 0 &&
+      cpi->oxcf.rc_mode == VPX_VBR && cpi->oxcf.lag_in_frames > 0 &&
+      cpi->rc.is_src_frame_alt_ref && !cpi->rc.alt_ref_gf_group) {
     q = VPXMIN(q, (q + cpi->rc.last_boosted_qindex) >> 1);
   }
 #endif
@@ -1528,8 +1528,14 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
     adjust_gfint_frame_constraint(cpi, rc->frames_to_key);
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
     cpi->refresh_golden_frame = 1;
-    rc->source_alt_ref_pending = USE_ALTREF_FOR_ONE_PASS;
-    rc->alt_ref_gf_group = USE_ALTREF_FOR_ONE_PASS;
+    rc->source_alt_ref_pending = 0;
+    rc->alt_ref_gf_group = 0;
+#if USE_ALTREF_FOR_ONE_PASS
+    if (cpi->oxcf.enable_auto_arf) {
+      rc->source_alt_ref_pending = 1;
+      rc->alt_ref_gf_group = 1;
+    }
+#endif
   }
   if (cm->frame_type == KEY_FRAME)
     target = calc_iframe_target_size_one_pass_vbr(cpi);
@@ -2140,20 +2146,22 @@ void adjust_gf_boost_lag_one_pass_vbr(VP9_COMP *cpi, uint64_t avg_sad_current) {
       rc->gfu_boost = DEFAULT_GF_BOOST >> 2;
     }
 #if USE_ALTREF_FOR_ONE_PASS
-    // Don't use alt-ref if there is a scene cut within the group,
-    // or content is not low.
-    if ((rc->high_source_sad_lagindex > 0 &&
-         rc->high_source_sad_lagindex <= rc->frames_till_gf_update_due) ||
-        (avg_source_sad_lag > 3 * sad_thresh1 >> 3)) {
-      rc->source_alt_ref_pending = 0;
-      rc->alt_ref_gf_group = 0;
-    } else {
-      rc->source_alt_ref_pending = 1;
-      rc->alt_ref_gf_group = 1;
-      // If alt-ref is used for this gf group, limit the interval.
-      if (rc->baseline_gf_interval > 10 &&
-          rc->baseline_gf_interval < rc->frames_to_key)
-        rc->baseline_gf_interval = 10;
+    if (cpi->oxcf.enable_auto_arf) {
+      // Don't use alt-ref if there is a scene cut within the group,
+      // or content is not low.
+      if ((rc->high_source_sad_lagindex > 0 &&
+           rc->high_source_sad_lagindex <= rc->frames_till_gf_update_due) ||
+          (avg_source_sad_lag > 3 * sad_thresh1 >> 3)) {
+        rc->source_alt_ref_pending = 0;
+        rc->alt_ref_gf_group = 0;
+      } else {
+        rc->source_alt_ref_pending = 1;
+        rc->alt_ref_gf_group = 1;
+        // If alt-ref is used for this gf group, limit the interval.
+        if (rc->baseline_gf_interval > 10 &&
+            rc->baseline_gf_interval < rc->frames_to_key)
+          rc->baseline_gf_interval = 10;
+      }
     }
 #endif
     target = calc_pframe_target_size_one_pass_vbr(cpi);
@@ -2284,7 +2292,10 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
         cpi->ext_refresh_frame_flags_pending == 0) {
       int target;
       cpi->refresh_golden_frame = 1;
-      rc->source_alt_ref_pending = USE_ALTREF_FOR_ONE_PASS;
+      rc->source_alt_ref_pending = 0;
+#if USE_ALTREF_FOR_ONE_PASS
+      if (cpi->oxcf.enable_auto_arf) rc->source_alt_ref_pending = 1;
+#endif
       rc->gfu_boost = DEFAULT_GF_BOOST >> 1;
       rc->baseline_gf_interval =
           VPXMIN(20, VPXMAX(10, rc->baseline_gf_interval));
