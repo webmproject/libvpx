@@ -363,6 +363,30 @@
       "revId": "7a63c371c03709b3b67cfec0c32d583ec9c9cbe6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_a9f2de24",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-14T19:04:53Z",
+      "side": 1,
+      "message": "they should match for now and given the odd structure of the c/sse2 we\u0027d probably do better to investigate reimplementing the filter to better regulate the border usage.",
+      "parentUuid": "ba99b795_bc3101b5",
+      "range": {
+        "startLine": 104,
+        "startChar": 15,
+        "endLine": 107,
+        "endChar": 18
+      },
+      "revId": "7a63c371c03709b3b67cfec0c32d583ec9c9cbe6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
