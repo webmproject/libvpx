@@ -69,6 +69,30 @@
       "revId": "33f18031f27ca0339a75e8726e62a476be78b9df",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_7637183e",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 599,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-12-14T01:26:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba99b795_2b6c89b0",
+      "range": {
+        "startLine": 599,
+        "startChar": 24,
+        "endLine": 599,
+        "endChar": 32
+      },
+      "revId": "33f18031f27ca0339a75e8726e62a476be78b9df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
