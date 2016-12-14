@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba99b795_4c6ec01b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-12-14T19:41:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba99b795_89627abe",
+      "revId": "c4d3d0d9db9ba346971027c02c342d0c13ee813e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba99b795_e92c6660",
         "filename": "test/partial_idct_test.cc",
         "patchSetId": 1
