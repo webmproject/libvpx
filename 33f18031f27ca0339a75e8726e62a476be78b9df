@@ -22,6 +22,53 @@
       "revId": "33f18031f27ca0339a75e8726e62a476be78b9df",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_eb5581dd",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 586,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-14T01:10:41Z",
+      "side": 1,
+      "message": "sounds good to me",
+      "parentUuid": "ba99b795_8b671540",
+      "range": {
+        "startLine": 586,
+        "startChar": 26,
+        "endLine": 586,
+        "endChar": 53
+      },
+      "revId": "33f18031f27ca0339a75e8726e62a476be78b9df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_2b6c89b0",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 599,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-14T01:10:41Z",
+      "side": 1,
+      "message": "this one could be renamed SSSE3 later to correct the filtering as discussed with the other targets earlier",
+      "range": {
+        "startLine": 599,
+        "startChar": 24,
+        "endLine": 599,
+        "endChar": 32
+      },
+      "revId": "33f18031f27ca0339a75e8726e62a476be78b9df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
