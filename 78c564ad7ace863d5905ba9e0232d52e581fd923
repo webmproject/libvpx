@@ -1,0 +1,257 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba99b795_df3149b4",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-12-15T18:29:35Z",
+      "side": 1,
+      "message": "printfs in this file almost certainly should be fprintf(stderr, ...)",
+      "range": {
+        "startLine": 1,
+        "startChar": 1,
+        "endLine": 1,
+        "endChar": 2
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_7fb23d2e",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-12-15T18:29:35Z",
+      "side": 1,
+      "message": "remove blank line above",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 5
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_bf09e5e2",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-12-15T18:29:35Z",
+      "side": 1,
+      "message": "Why not name this TopLeftPixel()?",
+      "range": {
+        "startLine": 37,
+        "startChar": 5,
+        "endLine": 37,
+        "endChar": 8
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_ffd52d04",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-12-15T18:29:35Z",
+      "side": 1,
+      "message": "s/a/value/\n\none letter var names are bad or something",
+      "range": {
+        "startLine": 42,
+        "startChar": 15,
+        "endLine": 42,
+        "endChar": 16
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_ff9d2da5",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-12-15T18:29:35Z",
+      "side": 1,
+      "message": "Get rid of this and replace call to it in ctor with code in the method? Not sure why it\u0027s needed.",
+      "range": {
+        "startLine": 46,
+        "startChar": 2,
+        "endLine": 46,
+        "endChar": 66
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_7f211d61",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-12-15T18:29:35Z",
+      "side": 1,
+      "message": "pad_value",
+      "range": {
+        "startLine": 49,
+        "startChar": 22,
+        "endLine": 49,
+        "endChar": 23
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_df5f09fb",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-12-15T18:29:35Z",
+      "side": 1,
+      "message": "s/a/pad_value/\n\nshould probably use bool and return true when good; lets you use ASSERT/EXPECT_TRUE at test site, and makes test code more readable (imo).",
+      "range": {
+        "startLine": 52,
+        "startChar": 6,
+        "endLine": 52,
+        "endChar": 17
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_3f5155f2",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-12-15T18:29:35Z",
+      "side": 1,
+      "message": "ditto re return type and condition flip",
+      "range": {
+        "startLine": 55,
+        "startChar": 6,
+        "endLine": 55,
+        "endChar": 18
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_bff0c5ae",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-12-15T18:29:35Z",
+      "side": 1,
+      "message": "None of these would need comments if they were named this way:\nrows_\ncols_\npad_count_\npad_value_\n\nYou can just ack this and not do anything. Just being a pain and pointing out that self documenting member names ain\u0027t a bad thing.",
+      "range": {
+        "startLine": 65,
+        "startChar": 0,
+        "endLine": 68,
+        "endChar": 45
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_bf8c4559",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-12-15T18:29:35Z",
+      "side": 1,
+      "message": "Why not just memset the entire buffer, and then 0 the unpadded region? Probably less code that way, and unless you\u0027re going to extend this to allow per-region pad values I don\u0027t think the extra steps are buying you anything.",
+      "range": {
+        "startLine": 105,
+        "startChar": 5,
+        "endLine": 105,
+        "endChar": 8
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_ff2c0d60",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2016-12-15T18:29:35Z",
+      "side": 1,
+      "message": "pretty sure this can be const; possibly can be const * const. if it works here it applies to left/right/bottom.",
+      "range": {
+        "startLine": 153,
+        "startChar": 2,
+        "endLine": 153,
+        "endChar": 3
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
