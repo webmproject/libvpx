@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba99b795_0a5bed12",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 9
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-15T19:35:03Z",
+      "side": 1,
+      "message": "vp8: use threading...",
+      "revId": "5ab85de9f673b394410502d9863799b7eda78fda",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_ca6505c9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 9
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-15T19:35:03Z",
+      "side": 1,
+      "message": "I guess this would be \u0027To avoid...\u0027",
+      "revId": "5ab85de9f673b394410502d9863799b7eda78fda",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_2a7d9159",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 9
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-15T19:35:03Z",
+      "side": 1,
+      "message": "BUG\u003d...",
+      "revId": "5ab85de9f673b394410502d9863799b7eda78fda",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba99b795_2a4fd139",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-15T19:35:03Z",
+      "side": 1,
+      "message": "you could check this once above and define USE_MUTEX_LOCK (and #undef it afterward). that would make any local testing between the two simpler",
+      "revId": "5ab85de9f673b394410502d9863799b7eda78fda",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
