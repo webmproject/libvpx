@@ -1396,6 +1396,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   int perform_intra_pred = 1;
   int use_golden_nonzeromv = 1;
   int force_skip_low_temp_var = 0;
+  int skip_ref_find_pred[4] = { 0 };
 #if CONFIG_VP9_TEMPORAL_DENOISING
   VP9_PICKMODE_CTX_DEN ctx_den;
   int64_t zero_last_cost_orig = INT64_MAX;
@@ -1470,9 +1471,15 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     usable_ref_frame = GOLDEN_FRAME;
   }
 
-  if (cpi->oxcf.lag_in_frames > 0 && cpi->oxcf.rc_mode == VPX_VBR &&
-      (cpi->rc.alt_ref_gf_group || cpi->rc.is_src_frame_alt_ref))
-    usable_ref_frame = ALTREF_FRAME;
+  if (cpi->oxcf.lag_in_frames > 0 && cpi->oxcf.rc_mode == VPX_VBR) {
+    if (cpi->rc.alt_ref_gf_group || cpi->rc.is_src_frame_alt_ref)
+      usable_ref_frame = ALTREF_FRAME;
+
+    if (cpi->rc.is_src_frame_alt_ref) {
+      skip_ref_find_pred[LAST_FRAME] = 1;
+      skip_ref_find_pred[GOLDEN_FRAME] = 1;
+    }
+  }
 
   // For svc mode, on spatial_layer_id > 0: if the reference has different scale
   // constrain the inter mode to only test zero motion.
@@ -1505,9 +1512,11 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     use_golden_nonzeromv = 0;
 
   for (ref_frame = LAST_FRAME; ref_frame <= usable_ref_frame; ++ref_frame) {
-    find_predictors(cpi, x, ref_frame, frame_mv, const_motion,
-                    &ref_frame_skip_mask, flag_list, tile_data, mi_row, mi_col,
-                    yv12_mb, bsize, force_skip_low_temp_var);
+    if (!skip_ref_find_pred[ref_frame]) {
+      find_predictors(cpi, x, ref_frame, frame_mv, const_motion,
+                      &ref_frame_skip_mask, flag_list, tile_data, mi_row,
+                      mi_col, yv12_mb, bsize, force_skip_low_temp_var);
+    }
   }
 
   for (idx = 0; idx < RT_INTER_MODES; ++idx) {
@@ -1527,6 +1536,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       ref_frame = ref_mode_set_svc[idx].ref_frame;
     }
     if (ref_frame > usable_ref_frame) continue;
+    if (skip_ref_find_pred[ref_frame]) continue;
 
     if (sf->short_circuit_flat_blocks && x->source_variance == 0 &&
         this_mode != NEARESTMV) {
