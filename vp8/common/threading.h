@@ -191,29 +191,24 @@ static inline int sem_destroy(sem_t *sem) {
 #define x86_pause_hint()
 #endif
 
+#if defined(__has_feature)
+#if __has_feature(thread_sanitizer)
+#define USE_MUTEX_LOCK 1
+#endif
+#endif
+
 #include "vpx_util/vpx_thread.h"
 
-static INLINE void mutex_lock(pthread_mutex_t *const mutex) {
-  const int kMaxTryLocks = 4000;
-  int locked = 0;
-  int i;
-
-  for (i = 0; i < kMaxTryLocks; ++i) {
-    if (!pthread_mutex_trylock(mutex)) {
-      locked = 1;
-      break;
-    }
-  }
-
-  if (!locked) pthread_mutex_lock(mutex);
-}
-
 static INLINE int protected_read(pthread_mutex_t *const mutex, const int *p) {
+  (void)mutex;
+#if defined(USE_MUTEX_LOCK)
   int ret;
-  mutex_lock(mutex);
+  pthread_mutex_lock(mutex);
   ret = *p;
   pthread_mutex_unlock(mutex);
   return ret;
+#endif
+  return *p;
 }
 
 static INLINE void sync_read(pthread_mutex_t *const mutex, int mb_col,
@@ -226,11 +221,17 @@ static INLINE void sync_read(pthread_mutex_t *const mutex, int mb_col,
 }
 
 static INLINE void protected_write(pthread_mutex_t *mutex, int *p, int v) {
-  mutex_lock(mutex);
+  (void)mutex;
+#if defined(USE_MUTEX_LOCK)
+  pthread_mutex_lock(mutex);
   *p = v;
   pthread_mutex_unlock(mutex);
+  return;
+#endif
+  *p = v;
 }
 
+#undef USE_MUTEX_LOCK
 #endif /* CONFIG_OS_SUPPORT && CONFIG_MULTITHREAD */
 
 #ifdef __cplusplus
