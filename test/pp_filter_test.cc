@@ -120,7 +120,7 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckFilterOutput) {
   vpx_free(flimits);
 };
 
-TEST_P(VpxPostProcDownAndAcrossMbRowTest, DISABLED_CheckCvsAssembly) {
+TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckCvsAssembly) {
   // Size of the underlying data block that will be filtered.
   // Y blocks are always a multiple of 16 wide and exactly 16 high. U and V
   // blocks are always a multiple of 8 wide and exactly 8 high.
@@ -128,13 +128,15 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, DISABLED_CheckCvsAssembly) {
   const int block_height = 16;
 
   // 5-tap filter needs 2 padding rows above and below the block in the input.
+  // SSE2 reads in blocks of 16. Pad an extra 8 in case the width is not %16.
   const int input_width = block_width;
-  const int input_height = block_height + 4;
+  const int input_height = block_height + 4 + 8;
   const int input_stride = input_width;
   const int input_size = input_stride * input_height;
 
   // Filter extends output block by 8 samples at left and right edges.
-  const int output_width = block_width + 16;
+  // SSE2 reads in blocks of 16. Pad an extra 8 in case the width is not %16.
+  const int output_width = block_width + 24;
   const int output_height = block_height;
   const int output_stride = output_width;
   const int output_size = output_stride * output_height;
@@ -158,9 +160,11 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, DISABLED_CheckCvsAssembly) {
   uint8_t *const dst_image_ref_ptr = dst_image + 16;
 
   // Filter values are set in blocks of 16 for Y and 8 for U/V. Each macroblock
-  // can have a different filter.
+  // can have a different filter. SSE2 assembly reads flimits in blocks of 16 so
+  // it must be padded out.
+  const int flimits_width = block_width % 16 ? block_width + 8 : block_width;
   uint8_t *const flimits =
-      reinterpret_cast<uint8_t *>(vpx_memalign(16, block_width));
+      reinterpret_cast<uint8_t *>(vpx_memalign(16, flimits_width));
 
   ACMRandom rnd;
   rnd.Reset(ACMRandom::DeterministicSeed());
@@ -177,7 +181,7 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, DISABLED_CheckCvsAssembly) {
   }
 
   for (int blocks = 0; blocks < block_width; blocks += 8) {
-    (void)memset(flimits, 0, sizeof(*flimits) * block_width);
+    (void)memset(flimits, 0, sizeof(*flimits) * flimits_width);
 
     for (int f = 0; f < 255; f++) {
       (void)memset(flimits + blocks, f, sizeof(*flimits) * 8);
