@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a3f8799_423da2ec",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2016-12-16T18:02:38Z",
+      "side": 1,
+      "message": "Please separate the above commit message into 2 parts: \"subject\" and \"body\". Please keep the 1-line subject short and put more details in the body. The maximum line length is 80 characters. Thanks.",
+      "revId": "8265d56fd52fe0894b9e74fd2cd532de542853ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a3f8799_82e94a3c",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 605,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2016-12-16T18:02:38Z",
+      "side": 1,
+      "message": "The change (https://chromium.googlesource.com/webm/libvpx/+/87bf1a149c2e6f89ed0a6fd804a1f4dc54e346be) modified the return type of this function from int to uint32_t. I think we should change vp9_temporal_filter.c to accept uint32_t(such as: uint32_t bestsme) instead of modifying this function. What do you think?",
+      "revId": "8265d56fd52fe0894b9e74fd2cd532de542853ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
