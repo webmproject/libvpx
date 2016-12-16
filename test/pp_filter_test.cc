@@ -120,7 +120,7 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckFilterOutput) {
   vpx_free(flimits);
 };
 
-TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckCvsAssembly) {
+TEST_P(VpxPostProcDownAndAcrossMbRowTest, DISABLED_CheckCvsAssembly) {
   // Size of the underlying data block that will be filtered.
   // Y blocks are always a multiple of 16 wide and exactly 16 high. U and V
   // blocks are always a multiple of 8 wide and exactly 8 high.
