@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a3f8799_cef8d85c",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-12-17T03:09:00Z",
+      "side": 1,
+      "message": "This is subtly different than the original code, the original promotes before the square to get a 64-bit result, this promotes the 32-bit result",
+      "range": {
+        "startLine": 406,
+        "startChar": 10,
+        "endLine": 406,
+        "endChar": 35
+      },
+      "revId": "2da8eec7bf14b0018499feaf889130f10dd72259",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
