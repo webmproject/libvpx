@@ -22,6 +22,30 @@
       "revId": "2da8eec7bf14b0018499feaf889130f10dd72259",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a3f8799_0ec740fe",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2016-12-17T03:55:43Z",
+      "side": 1,
+      "message": "I think this should be okay after all, The largest ac dequantizers for 8, 10, and 12 bits are 1828, 7312, and 29247 respectively. And that\u0027s before shifting them down.",
+      "parentUuid": "3a3f8799_cef8d85c",
+      "range": {
+        "startLine": 406,
+        "startChar": 10,
+        "endLine": 406,
+        "endChar": 35
+      },
+      "revId": "2da8eec7bf14b0018499feaf889130f10dd72259",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
