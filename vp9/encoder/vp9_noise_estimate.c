@@ -38,9 +38,11 @@ void vp9_noise_estimate_init(NOISE_ESTIMATE *const ne, int width, int height) {
 }
 
 static int enable_noise_estimation(VP9_COMP *const cpi) {
-// Enable noise estimation if denoising is on.
+// Enable noise estimation if denoising is on, but not for low resolutions.
 #if CONFIG_VP9_TEMPORAL_DENOISING
-  if (cpi->oxcf.noise_sensitivity > 0) return 1;
+  if (cpi->oxcf.noise_sensitivity > 0 && cpi->common.width >= 640 &&
+      cpi->common.height >= 360)
+    return 1;
 #endif
   // Only allow noise estimate under certain encoding mode.
   // Enabled for 1 pass CBR, speed >=5, and if resolution is same as original.
