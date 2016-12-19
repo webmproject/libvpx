@@ -14,31 +14,56 @@
 #include "vpx_dsp/arm/idct_neon.h"
 #include "vpx_dsp/inv_txfm.h"
 
+static INLINE void highbd_idct4x4_1_add_kernel1(uint16_t **dest,
+                                                const int stride,
+                                                const int16x8_t res,
+                                                const int16x8_t max) {
+  const uint16x4_t a0 = vld1_u16(*dest);
+  const uint16x4_t a1 = vld1_u16(*dest + stride);
+  const int16x8_t a = vreinterpretq_s16_u16(vcombine_u16(a0, a1));
+  // Note: In some profile tests, res is quite close to +/-32767.
+  // We use saturating addition.
+  const int16x8_t b = vqaddq_s16(res, a);
+  const int16x8_t c = vminq_s16(b, max);
+  const uint16x8_t d = vqshluq_n_s16(c, 0);
+  vst1_u16(*dest, vget_low_u16(d));
+  *dest += stride;
+  vst1_u16(*dest, vget_high_u16(d));
+  *dest += stride;
+}
+
+// res is in reverse row order
+static INLINE void highbd_idct4x4_1_add_kernel2(uint16_t **dest,
+                                                const int stride,
+                                                const int16x8_t res,
+                                                const int16x8_t max) {
+  const uint16x4_t a0 = vld1_u16(*dest);
+  const uint16x4_t a1 = vld1_u16(*dest + stride);
+  const int16x8_t a = vreinterpretq_s16_u16(vcombine_u16(a1, a0));
+  // Note: In some profile tests, res is quite close to +/-32767.
+  // We use saturating addition.
+  const int16x8_t b = vqaddq_s16(res, a);
+  const int16x8_t c = vminq_s16(b, max);
+  const uint16x8_t d = vqshluq_n_s16(c, 0);
+  vst1_u16(*dest, vget_high_u16(d));
+  *dest += stride;
+  vst1_u16(*dest, vget_low_u16(d));
+  *dest += stride;
+}
+
 void vpx_highbd_idct4x4_1_add_neon(const tran_low_t *input, uint8_t *dest8,
                                    int stride, int bd) {
-  int i;
   const int16x8_t max = vdupq_n_s16((1 << bd) - 1);
-  const tran_low_t out0 = dct_const_round_shift(input[0] * cospi_16_64);
-  const tran_low_t out1 = dct_const_round_shift(out0 * cospi_16_64);
+  const tran_low_t out0 =
+      HIGHBD_WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64), bd);
+  const tran_low_t out1 =
+      HIGHBD_WRAPLOW(dct_const_round_shift(out0 * cospi_16_64), bd);
   const int16_t a1 = ROUND_POWER_OF_TWO(out1, 4);
   const int16x8_t dc = vdupq_n_s16(a1);
   uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
-  int16x8_t a;
-  uint16x8_t b;
-  uint16x4_t d0, d1;
 
-  for (i = 0; i < 2; i++) {
-    d0 = vld1_u16(dest);
-    d1 = vld1_u16(dest + stride);
-    a = vreinterpretq_s16_u16(vcombine_u16(d0, d1));
-    a = vaddq_s16(dc, a);
-    a = vminq_s16(a, max);
-    b = vqshluq_n_s16(a, 0);
-    vst1_u16(dest, vget_low_u16(b));
-    dest += stride;
-    vst1_u16(dest, vget_high_u16(b));
-    dest += stride;
-  }
+  highbd_idct4x4_1_add_kernel1(&dest, stride, dc, max);
+  highbd_idct4x4_1_add_kernel1(&dest, stride, dc, max);
 }
 
 static INLINE void idct4x4_16_kernel_bd10(const int32x4_t cospis,
@@ -114,10 +139,7 @@ void vpx_highbd_idct4x4_16_add_neon(const tran_low_t *input, uint8_t *dest8,
   int32x4_t c2 = vld1q_s32(input + 8);
   int32x4_t c3 = vld1q_s32(input + 12);
   uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
-  const uint16_t *dst = dest;
-  int16x8_t a0, a1, d01, d32;
-  int16x4_t d0, d1, d2, d3;
-  uint16x8_t d01_u16, d32_u16;
+  int16x8_t a0, a1;
 
   if (bd == 8) {
     const int16x4_t cospis = vld1_s16(kCospi);
@@ -142,36 +164,10 @@ void vpx_highbd_idct4x4_16_add_neon(const tran_low_t *input, uint8_t *dest8,
       idct4x4_16_kernel_bd12(cospis, &c0, &c1, &c2, &c3);
       idct4x4_16_kernel_bd12(cospis, &c0, &c1, &c2, &c3);
     }
-    // Note: In some profile tests, a0 and a1 are quite close to +/-32767.
-    // We use saturating narrow shift in case they could be even larger.
     a0 = vcombine_s16(vqrshrn_n_s32(c0, 4), vqrshrn_n_s32(c1, 4));
     a1 = vcombine_s16(vqrshrn_n_s32(c3, 4), vqrshrn_n_s32(c2, 4));
   }
 
-  d0 = vreinterpret_s16_u16(vld1_u16(dst));
-  dst += stride;
-  d1 = vreinterpret_s16_u16(vld1_u16(dst));
-  dst += stride;
-  d2 = vreinterpret_s16_u16(vld1_u16(dst));
-  dst += stride;
-  d3 = vreinterpret_s16_u16(vld1_u16(dst));
-  d01 = vcombine_s16(d0, d1);
-  d32 = vcombine_s16(d3, d2);
-
-  // Note: In some profile tests, a0 and a1 is quite close to +/-32767.
-  // We use saturating addition.
-  d01 = vqaddq_s16(a0, d01);
-  d32 = vqaddq_s16(a1, d32);
-  d01 = vminq_s16(d01, max);
-  d32 = vminq_s16(d32, max);
-  d01_u16 = vqshluq_n_s16(d01, 0);
-  d32_u16 = vqshluq_n_s16(d32, 0);
-
-  vst1_u16(dest, vget_low_u16(d01_u16));
-  dest += stride;
-  vst1_u16(dest, vget_high_u16(d01_u16));
-  dest += stride;
-  vst1_u16(dest, vget_high_u16(d32_u16));
-  dest += stride;
-  vst1_u16(dest, vget_low_u16(d32_u16));
+  highbd_idct4x4_1_add_kernel1(&dest, stride, a0, max);
+  highbd_idct4x4_1_add_kernel2(&dest, stride, a1, max);
 }

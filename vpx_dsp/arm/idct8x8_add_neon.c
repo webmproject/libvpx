@@ -16,10 +16,11 @@
 #include "vpx_dsp/arm/transpose_neon.h"
 #include "vpx_dsp/txfm_common.h"
 
-static INLINE void IDCT8x8_1D(const int16x4_t cospis0, const int16x4_t cospis1,
-                              int16x8_t *a0, int16x8_t *a1, int16x8_t *a2,
-                              int16x8_t *a3, int16x8_t *a4, int16x8_t *a5,
-                              int16x8_t *a6, int16x8_t *a7) {
+static INLINE void idct8x8_1d(const int16x4_t cospis0, const int16x4_t cospis1,
+                              int16x8_t *const a0, int16x8_t *const a1,
+                              int16x8_t *const a2, int16x8_t *const a3,
+                              int16x8_t *const a4, int16x8_t *const a5,
+                              int16x8_t *const a6, int16x8_t *const a7) {
   const int16x4_t a0l = vget_low_s16(*a0);
   const int16x4_t a0h = vget_high_s16(*a0);
   const int16x4_t a1l = vget_low_s16(*a1);
@@ -220,17 +221,18 @@ void vpx_idct8x8_64_add_neon(const tran_low_t *input, uint8_t *dest,
   a7 = load_tran_low_to_s16q(input + 56);
 
   transpose_s16_8x8(&a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7);
-  IDCT8x8_1D(cospis0, cospis1, &a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7);
+  idct8x8_1d(cospis0, cospis1, &a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7);
   transpose_s16_8x8(&a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7);
-  IDCT8x8_1D(cospis0, cospis1, &a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7);
+  idct8x8_1d(cospis0, cospis1, &a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7);
   add8x8(a0, a1, a2, a3, a4, a5, a6, a7, dest, stride);
 }
 
-static INLINE void IDCT8x4_1D(const int16x4_t cospis0, const int16x4_t cospisd0,
-                              const int16x4_t cospisd1, int16x8_t *a0,
-                              int16x8_t *a1, int16x8_t *a2, int16x8_t *a3,
-                              int16x8_t *a4, int16x8_t *a5, int16x8_t *a6,
-                              int16x8_t *a7) {
+static INLINE void idct8x4_1d(const int16x4_t cospis0, const int16x4_t cospisd0,
+                              const int16x4_t cospisd1, int16x8_t *const a0,
+                              int16x8_t *const a1, int16x8_t *const a2,
+                              int16x8_t *const a3, int16x8_t *const a4,
+                              int16x8_t *const a5, int16x8_t *const a6,
+                              int16x8_t *const a7) {
   int32x4_t b0, b1, b2, b3;
   int16x4_t c0, c1, c2, c3;
   int16x8_t d0, d1, d2, d3, d4, d5, d6, d7, e0, e1, e2, e3;
@@ -339,7 +341,7 @@ void vpx_idct8x8_12_add_neon(const tran_low_t *input, uint8_t *dest,
   b7 = vsub_s16(b0, b7);
 
   transpose_s16_4x8(b8, b9, b10, b11, b4, b5, b6, b7, &a0, &a1, &a2, &a3);
-  IDCT8x4_1D(cospis0, cospisd0, cospisd1, &a0, &a1, &a2, &a3, &a4, &a5, &a6,
+  idct8x4_1d(cospis0, cospisd0, cospisd1, &a0, &a1, &a2, &a3, &a4, &a5, &a6,
              &a7);
   add8x8(a0, a1, a2, a3, a4, a5, a6, a7, dest, stride);
 }
