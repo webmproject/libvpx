@@ -430,21 +430,20 @@ void vpx_idct32x32_1024_add_neon(const tran_low_t *input, uint8_t *dest,
   int16_t trans_buf[32 * 8];
   int16_t pass1[32 * 32];
   int16_t pass2[32 * 32];
-  int16_t *in, *out;
+  const int16_t *input_pass2 = pass1;  // input of pass2 is the result of pass1
+  int16_t *out;
   int16x8_t q0s16, q1s16, q2s16, q3s16, q4s16, q5s16, q6s16, q7s16;
   int16x8_t q8s16, q9s16, q10s16, q11s16, q12s16, q13s16, q14s16, q15s16;
 
   for (idct32_pass_loop = 0, out = pass1; idct32_pass_loop < 2;
-       idct32_pass_loop++,
-      in = pass1,  // the input of pass2 is the result of pass1
-       out = pass2) {
+       idct32_pass_loop++, out = pass2) {
     for (i = 0; i < 4; i++, out += 8) {  // idct32_bands_loop
       if (idct32_pass_loop == 0) {
         idct32_transpose_pair_tran_low(input, trans_buf);
         input += 32 * 8;
       } else {
-        idct32_transpose_pair(in, trans_buf);
-        in += 32 * 8;
+        idct32_transpose_pair(input_pass2, trans_buf);
+        input_pass2 += 32 * 8;
       }
 
       // -----------------------------------------
