@@ -46,6 +46,30 @@
       "revId": "2da8eec7bf14b0018499feaf889130f10dd72259",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a3f8799_bf3f38ca",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1170679
+      },
+      "writtenOn": "2016-12-19T18:57:01Z",
+      "side": 1,
+      "message": "Yes, the parameter value in the caller is of type int16_t, but I reverted to the original types.",
+      "parentUuid": "3a3f8799_0ec740fe",
+      "range": {
+        "startLine": 406,
+        "startChar": 10,
+        "endLine": 406,
+        "endChar": 35
+      },
+      "revId": "2da8eec7bf14b0018499feaf889130f10dd72259",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
