@@ -1235,7 +1235,7 @@ static void recheck_zeromv_after_denoising(
   // denoised result. Only do this under noise conditions, and if rdcost of
   // ZEROMV onoriginal source is not significantly higher than rdcost of best
   // mode.
-  if (cpi->noise_estimate.enabled && cpi->noise_estimate.level > kHigh &&
+  if (cpi->noise_estimate.enabled && cpi->noise_estimate.level > kLow &&
       ctx_den->zero_last_cost_orig < (best_rdc->rdcost << 3) &&
       ((ctx_den->best_ref_frame == INTRA_FRAME && decision >= FILTER_BLOCK) ||
        (ctx_den->best_ref_frame == GOLDEN_FRAME &&
@@ -1259,16 +1259,17 @@ static void recheck_zeromv_after_denoising(
                                         [INTER_OFFSET(ZEROMV)];
     this_rdc.dist = dist;
     this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv, rate, dist);
-    // Switch to ZEROMV if the rdcost for ZEROMV on denoised source
-    // is lower than best_ref mode (on original source).
+    // Don't switch to ZEROMV if the rdcost for ZEROMV on denoised source
+    // is higher than best_ref mode (on original source).
     if (this_rdc.rdcost > best_rdc->rdcost) {
       this_rdc = *best_rdc;
       mi->mode = ctx_den->best_mode;
       mi->ref_frame[0] = ctx_den->best_ref_frame;
       mi->interp_filter = ctx_den->best_pred_filter;
-      if (ctx_den->best_ref_frame == INTRA_FRAME)
+      if (ctx_den->best_ref_frame == INTRA_FRAME) {
         mi->mv[0].as_int = INVALID_MV;
-      else if (ctx_den->best_ref_frame == GOLDEN_FRAME) {
+        mi->interp_filter = SWITCHABLE_FILTERS;
+      } else if (ctx_den->best_ref_frame == GOLDEN_FRAME) {
         mi->mv[0].as_int =
             ctx_den->frame_mv[ctx_den->best_mode][ctx_den->best_ref_frame]
                 .as_int;
