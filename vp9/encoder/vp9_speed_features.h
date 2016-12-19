@@ -474,6 +474,9 @@ typedef struct SPEED_FEATURES {
   // Bias to use base mv and skip 1/4 subpel search when use base mv in
   // enhancement layer.
   int base_mv_aggressive;
+
+  // Global flag to enable partition copy from the previous frame.
+  int copy_partition_flag;
 } SPEED_FEATURES;
 
 struct VP9_COMP;
