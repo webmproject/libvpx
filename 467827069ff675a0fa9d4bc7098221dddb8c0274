@@ -22,6 +22,30 @@
       "revId": "467827069ff675a0fa9d4bc7098221dddb8c0274",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a3f8799_1cf85708",
+        "filename": "vpx_dsp/arm/idct32x32_add_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 433,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-19T20:50:09Z",
+      "side": 1,
+      "message": "good point, done",
+      "parentUuid": "3a3f8799_dc996f0c",
+      "range": {
+        "startLine": 433,
+        "startChar": 2,
+        "endLine": 433,
+        "endChar": 22
+      },
+      "revId": "467827069ff675a0fa9d4bc7098221dddb8c0274",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
