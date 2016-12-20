@@ -594,6 +594,8 @@ typedef struct VP9_COMP {
   int64_t vbp_thresholds[4];
   int64_t vbp_threshold_minmax;
   int64_t vbp_threshold_sad;
+  // Threshold used for partition copy
+  int64_t vbp_threshold_copy;
   BLOCK_SIZE vbp_bsize_min;
 
   // Multi-threading
@@ -605,6 +607,10 @@ typedef struct VP9_COMP {
 
   int keep_level_stats;
   Vp9LevelInfo level_info;
+
+  // Previous Partition Info
+  BLOCK_SIZE *prev_partition;
+  int8_t *prev_segment_id;
 } VP9_COMP;
 
 void vp9_initialize_enc(void);
