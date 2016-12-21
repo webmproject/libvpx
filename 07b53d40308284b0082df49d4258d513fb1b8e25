@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f74a6a97_e531ec48",
+        "filename": "tools_common.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-21T05:07:15Z",
+      "side": 1,
+      "message": "_t is reserved for the posix namespace, I\u0027d prefer not to extend the use of this form in libvpx. prefer upper camelcase:\n\nhttps://google.github.io/styleguide/cppguide.html#Type_Names",
+      "range": {
+        "startLine": 25,
+        "startChar": 16,
+        "endLine": 25,
+        "endChar": 28
+      },
+      "revId": "07b53d40308284b0082df49d4258d513fb1b8e25",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f74a6a97_85aaa820",
+        "filename": "vpxenc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1687,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-21T05:07:15Z",
+      "side": 1,
+      "message": "instead of casting you should be able to change the declaration assuming it\u0027s only used in calls to tell \u0026 seek",
+      "range": {
+        "startLine": 1687,
+        "startChar": 35,
+        "endLine": 1687,
+        "endChar": 49
+      },
+      "revId": "07b53d40308284b0082df49d4258d513fb1b8e25",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
