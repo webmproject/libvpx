@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f74a6a97_f937d00a",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-12-21T23:27:57Z",
+      "side": 1,
+      "message": "Maybe instantiating the last row and removing the if...else... could benefit speed a little bit.",
+      "range": {
+        "startLine": 358,
+        "startChar": 6,
+        "endLine": 358,
+        "endChar": 8
+      },
+      "revId": "33dc76706f0036686eefb5077b969b0448e519f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f74a6a97_9c72fa4f",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2016-12-21T23:27:57Z",
+      "side": 1,
+      "message": "sum(32x4)/sumsq(32x4) may save four continuous pixels\u0027 sums/sumsqs, and each time get all four updated independently simultaneously. There should be no dependency between pixels I guess.",
+      "range": {
+        "startLine": 371,
+        "startChar": 6,
+        "endLine": 371,
+        "endChar": 13
+      },
+      "revId": "33dc76706f0036686eefb5077b969b0448e519f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
