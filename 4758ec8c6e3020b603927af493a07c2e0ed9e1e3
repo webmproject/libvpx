@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f74a6a97_65af9c32",
+        "filename": "tools_common.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-21T05:07:15Z",
+      "side": 1,
+      "message": "this one is correct for fseek and ftell, but if we fall through and actually use fseeko it should be off_t",
+      "revId": "4758ec8c6e3020b603927af493a07c2e0ed9e1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f74a6a97_a5b0848e",
+        "filename": "tools_common.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-21T05:07:15Z",
+      "side": 1,
+      "message": "int64_t should be all right here",
+      "revId": "4758ec8c6e3020b603927af493a07c2e0ed9e1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f74a6a97_c5b3109a",
+        "filename": "tools_common.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-21T05:07:15Z",
+      "side": 1,
+      "message": "these use off64_t",
+      "revId": "4758ec8c6e3020b603927af493a07c2e0ed9e1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
