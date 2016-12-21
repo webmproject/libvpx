@@ -954,8 +954,13 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting3TemporalLayersFrameDropping) {
 }
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
+class DatarateTestVP9LargeDenoiser : public DatarateTestVP9Large {
+ public:
+  virtual ~DatarateTestVP9LargeDenoiser() {}
+};
+
 // Check basic datarate targeting, for a single bitrate, when denoiser is on.
-TEST_P(DatarateTestVP9Large, DenoiserLevels) {
+TEST_P(DatarateTestVP9LargeDenoiser, LowNoise) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -982,9 +987,38 @@ TEST_P(DatarateTestVP9Large, DenoiserLevels) {
       << " The datarate for the file is greater than target by too much!";
 }
 
+// Check basic datarate targeting, for a single bitrate, when denoiser is on,
+// for HD clip with high noise level.
+TEST_P(DatarateTestVP9LargeDenoiser, HighNoise) {
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_dropframe_thresh = 1;
+  cfg_.rc_min_quantizer = 2;
+  cfg_.rc_max_quantizer = 56;
+  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.g_lag_in_frames = 0;
+
+  ::libvpx_test::I420VideoSource video("noisy_clip_640_360.y4m", 640, 360, 30,
+                                       1, 0, 200);
+
+  // For the temporal denoiser (#if CONFIG_VP9_TEMPORAL_DENOISING),
+  // there is only one denoiser mode: denoiserYonly(which is 1),
+  // but may add more modes in the future.
+  cfg_.rc_target_bitrate = 1000;
+  ResetModel();
+  // Turn on the denoiser.
+  denoiser_on_ = 1;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.85)
+      << " The datarate for the file is lower than target by too much!";
+  ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.15)
+      << " The datarate for the file is greater than target by too much!";
+}
+
 // Check basic datarate targeting, for a single bitrate, when denoiser is off
 // and on.
-TEST_P(DatarateTestVP9Large, DenoiserOffOn) {
+TEST_P(DatarateTestVP9LargeDenoiser, DenoiserOffOn) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -1435,6 +1469,11 @@ VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9Large,
                           ::testing::Values(::libvpx_test::kOnePassGood,
                                             ::libvpx_test::kRealTime),
                           ::testing::Range(2, 9));
+#if CONFIG_VP9_TEMPORAL_DENOISING
+VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9LargeDenoiser,
+                          ::testing::Values(::libvpx_test::kRealTime),
+                          ::testing::Range(5, 9));
+#endif
 VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvc,
                           ::testing::Values(::libvpx_test::kRealTime),
                           ::testing::Range(5, 9));
