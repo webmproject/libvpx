@@ -765,6 +765,14 @@ static INLINE int is_one_pass_cbr_svc(const struct VP9_COMP *const cpi) {
   return (cpi->use_svc && cpi->oxcf.pass == 0);
 }
 
+#if CONFIG_VP9_TEMPORAL_DENOISING
+static INLINE int denoise_svc(const struct VP9_COMP *const cpi) {
+  return (!cpi->use_svc ||
+          (cpi->use_svc &&
+           cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1));
+}
+#endif
+
 static INLINE int is_altref_enabled(const VP9_COMP *const cpi) {
   return !(cpi->oxcf.mode == REALTIME && cpi->oxcf.rc_mode == VPX_CBR) &&
          cpi->oxcf.lag_in_frames > 0 &&
