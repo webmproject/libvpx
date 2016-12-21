@@ -988,7 +988,7 @@ TEST_P(DatarateTestVP9LargeDenoiser, LowNoise) {
 }
 
 // Check basic datarate targeting, for a single bitrate, when denoiser is on,
-// for HD clip with high noise level.
+// for clip with high noise level.
 TEST_P(DatarateTestVP9LargeDenoiser, HighNoise) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
@@ -999,8 +999,7 @@ TEST_P(DatarateTestVP9LargeDenoiser, HighNoise) {
   cfg_.rc_end_usage = VPX_CBR;
   cfg_.g_lag_in_frames = 0;
 
-  ::libvpx_test::I420VideoSource video("noisy_clip_640_360.y4m", 640, 360, 30,
-                                       1, 0, 200);
+  ::libvpx_test::Y4mVideoSource video("noisy_clip_640_360.y4m", 0, 200);
 
   // For the temporal denoiser (#if CONFIG_VP9_TEMPORAL_DENOISING),
   // there is only one denoiser mode: denoiserYonly(which is 1),
