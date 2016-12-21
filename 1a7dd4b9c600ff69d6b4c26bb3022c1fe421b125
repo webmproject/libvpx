@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f74a6a97_7c9579cc",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 1003,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-21T00:40:59Z",
+      "side": 1,
+      "message": "I think there are only 200 frames here",
+      "range": {
+        "startLine": 1003,
+        "startChar": 45,
+        "endLine": 1003,
+        "endChar": 48
+      },
+      "revId": "1a7dd4b9c600ff69d6b4c26bb3022c1fe421b125",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
