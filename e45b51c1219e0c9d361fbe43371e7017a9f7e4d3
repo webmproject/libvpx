@@ -149,6 +149,24 @@
     },
     {
       "key": {
+        "uuid": "f74a6a97_3d68f9cc",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-22T21:11:35Z",
+      "side": 1,
+      "message": "No, the formula is sumsq * 15. It\u0027s multipling by 15.",
+      "parentUuid": "f7498a7c_1ea4fdec",
+      "revId": "e45b51c1219e0c9d361fbe43371e7017a9f7e4d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f7498a7c_5e9835c4",
         "filename": "vpx_dsp/arm/deblock_neon.c",
         "patchSetId": 4
