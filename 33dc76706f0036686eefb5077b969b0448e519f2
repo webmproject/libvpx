@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "f74a6a97_54b32231",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-22T18:38:43Z",
+      "side": 1,
+      "message": "Moving it out would duplicate a lot of code. Manually extending it would introduce a lot of operations.\n\nWhile this is in the inside loop there are a lot of other things going on :)\n\nThe default condition is also the normal load, so it should only branch for the last row.",
+      "parentUuid": "f74a6a97_dc400277",
+      "range": {
+        "startLine": 358,
+        "startChar": 6,
+        "endLine": 358,
+        "endChar": 8
+      },
+      "revId": "33dc76706f0036686eefb5077b969b0448e519f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f74a6a97_9c72fa4f",
         "filename": "vpx_dsp/arm/deblock_neon.c",
         "patchSetId": 2
