@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f74a6a97_7d18c18d",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-22T21:07:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f7498a7c_5e6f15dc",
+      "range": {
+        "startLine": 263,
+        "startChar": 33,
+        "endLine": 263,
+        "endChar": 44
+      },
+      "revId": "e45b51c1219e0c9d361fbe43371e7017a9f7e4d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f7498a7c_3e7459ac",
         "filename": "vpx_dsp/arm/deblock_neon.c",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2016-12-22T20:55:05Z",
       "side": 1,
       "message": "you could just note that vext takes immediates rather than going into compilation specifics",
+      "range": {
+        "startLine": 272,
+        "startChar": 42,
+        "endLine": 274,
+        "endChar": 22
+      },
+      "revId": "e45b51c1219e0c9d361fbe43371e7017a9f7e4d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f74a6a97_5d1d057c",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-22T21:07:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f7498a7c_3e7459ac",
       "range": {
         "startLine": 272,
         "startChar": 42,
@@ -65,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "f74a6a97_9d278dca",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-22T21:07:14Z",
+      "side": 1,
+      "message": "Not sure what you mean?",
+      "parentUuid": "f7498a7c_be6729ff",
+      "revId": "e45b51c1219e0c9d361fbe43371e7017a9f7e4d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f7498a7c_5e9835c4",
         "filename": "vpx_dsp/arm/deblock_neon.c",
         "patchSetId": 4
@@ -76,6 +142,30 @@
       "writtenOn": "2016-12-22T20:55:05Z",
       "side": 1,
       "message": "that reads a bit oddly; did you mean to drop the \u0027and...\u0027?",
+      "range": {
+        "startLine": 327,
+        "startChar": 33,
+        "endLine": 327,
+        "endChar": 71
+      },
+      "revId": "e45b51c1219e0c9d361fbe43371e7017a9f7e4d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f74a6a97_fd2b3192",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-22T21:07:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f7498a7c_5e9835c4",
       "range": {
         "startLine": 327,
         "startChar": 33,
