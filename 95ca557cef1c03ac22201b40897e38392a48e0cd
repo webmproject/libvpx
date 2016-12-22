@@ -16,6 +16,23 @@
       "revId": "95ca557cef1c03ac22201b40897e38392a48e0cd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f7498a7c_5ec15592",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 496,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-22T21:02:18Z",
+      "side": 1,
+      "message": "so the first 8 rows it\u0027s the same context, then we use previous rows?",
+      "revId": "95ca557cef1c03ac22201b40897e38392a48e0cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
