@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f7498a7c_5e6f15dc",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-22T20:55:05Z",
+      "side": 1,
+      "message": "these can be *const and could be the final params if we follow (input, output) params here",
+      "range": {
+        "startLine": 263,
+        "startChar": 33,
+        "endLine": 263,
+        "endChar": 44
+      },
+      "revId": "e45b51c1219e0c9d361fbe43371e7017a9f7e4d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f7498a7c_3e7459ac",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-22T20:55:05Z",
+      "side": 1,
+      "message": "you could just note that vext takes immediates rather than going into compilation specifics",
+      "range": {
+        "startLine": 272,
+        "startChar": 42,
+        "endLine": 274,
+        "endChar": 22
+      },
+      "revId": "e45b51c1219e0c9d361fbe43371e7017a9f7e4d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f7498a7c_be6729ff",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-22T20:55:05Z",
+      "side": 1,
+      "message": "alternatively you could use the hex and call it mask given the ops",
+      "revId": "e45b51c1219e0c9d361fbe43371e7017a9f7e4d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f7498a7c_5e9835c4",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-22T20:55:05Z",
+      "side": 1,
+      "message": "that reads a bit oddly; did you mean to drop the \u0027and...\u0027?",
+      "range": {
+        "startLine": 327,
+        "startChar": 33,
+        "endLine": 327,
+        "endChar": 71
+      },
+      "revId": "e45b51c1219e0c9d361fbe43371e7017a9f7e4d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
