@@ -19,6 +19,42 @@
     },
     {
       "key": {
+        "uuid": "f74a6a97_71e2b0ed",
+        "filename": "tools_common.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2016-12-22T17:27:45Z",
+      "side": 1,
+      "message": "I need to change the #else above to #elif CONFIG_OS_SUPPORT.  Or it will be redefined on both line 34 and this.",
+      "parentUuid": "f7498a7c_f33efa79",
+      "revId": "0dbe6e17d7c92ba9612a4954fa42ac980de2ee1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f74a6a97_91ddbc30",
+        "filename": "tools_common.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2016-12-22T17:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f7498a7c_f33efa79",
+      "revId": "0dbe6e17d7c92ba9612a4954fa42ac980de2ee1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f7498a7c_d33bfe87",
         "filename": "tools_common.h",
         "patchSetId": 8
@@ -30,6 +66,24 @@
       "writtenOn": "2016-12-22T14:02:02Z",
       "side": 1,
       "message": "did clang-format get broken here?",
+      "revId": "0dbe6e17d7c92ba9612a4954fa42ac980de2ee1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f74a6a97_b131d8b5",
+        "filename": "tools_common.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2016-12-22T17:27:45Z",
+      "side": 1,
+      "message": "Yes...",
+      "parentUuid": "f7498a7c_d33bfe87",
       "revId": "0dbe6e17d7c92ba9612a4954fa42ac980de2ee1b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
