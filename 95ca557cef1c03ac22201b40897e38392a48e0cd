@@ -33,6 +33,24 @@
       "revId": "95ca557cef1c03ac22201b40897e38392a48e0cd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f74a6a97_3d4f5984",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 496,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-22T21:09:42Z",
+      "side": 1,
+      "message": "The formula uses dst[-8 * stride]\n\nFor the first 8 the border is extended. Then we start a rolling window.",
+      "parentUuid": "f7498a7c_5ec15592",
+      "revId": "95ca557cef1c03ac22201b40897e38392a48e0cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
