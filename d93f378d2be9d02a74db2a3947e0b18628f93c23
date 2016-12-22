@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f74a6a97_f2f085b0",
+        "filename": "tools_common.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-22T04:24:02Z",
+      "side": 1,
+      "message": "you\u0027ll want to cover this path as well. you can mark the line // NOLINT to quiet the warning about using a long. it\u0027s appropriate here as that\u0027s the type used in the API. you should move this up to the other block to avoid redefining the typedef.",
+      "revId": "d93f378d2be9d02a74db2a3947e0b18628f93c23",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
