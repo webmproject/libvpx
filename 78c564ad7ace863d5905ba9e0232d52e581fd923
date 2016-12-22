@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f74a6a97_77b460ce",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-22T20:53:08Z",
+      "side": 1,
+      "message": "stdout makes sure it\u0027s associated with the currently running test ... if the streams get disassociated, it can be confusing.",
+      "parentUuid": "ba99b795_df3149b4",
+      "range": {
+        "startLine": 1,
+        "startChar": 1,
+        "endLine": 1,
+        "endChar": 2
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba99b795_7fb23d2e",
         "filename": "test/buffer.h",
         "patchSetId": 9
@@ -36,6 +60,30 @@
       "writtenOn": "2016-12-15T18:29:35Z",
       "side": 1,
       "message": "remove blank line above",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 5
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f74a6a97_b71d484d",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-22T20:53:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba99b795_7fb23d2e",
       "range": {
         "startLine": 24,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "f74a6a97_17023ced",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-22T20:53:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba99b795_bf09e5e2",
+      "range": {
+        "startLine": 37,
+        "startChar": 5,
+        "endLine": 37,
+        "endChar": 8
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba99b795_ffd52d04",
         "filename": "test/buffer.h",
         "patchSetId": 9
@@ -82,6 +154,30 @@
       "writtenOn": "2016-12-15T18:29:35Z",
       "side": 1,
       "message": "s/a/value/\n\none letter var names are bad or something",
+      "range": {
+        "startLine": 42,
+        "startChar": 15,
+        "endLine": 42,
+        "endChar": 16
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f74a6a97_f7feb0b8",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-22T20:53:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba99b795_ffd52d04",
       "range": {
         "startLine": 42,
         "startChar": 15,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "f74a6a97_d718d45d",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-22T20:53:08Z",
+      "side": 1,
+      "message": "It was for re-setting the border pixels, but if they get touched it\u0027s probably game over for that test anyway.",
+      "parentUuid": "ba99b795_ff9d2da5",
+      "range": {
+        "startLine": 46,
+        "startChar": 2,
+        "endLine": 46,
+        "endChar": 66
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba99b795_7f211d61",
         "filename": "test/buffer.h",
         "patchSetId": 9
@@ -128,6 +248,30 @@
       "writtenOn": "2016-12-15T18:29:35Z",
       "side": 1,
       "message": "pad_value",
+      "range": {
+        "startLine": 49,
+        "startChar": 22,
+        "endLine": 49,
+        "endChar": 23
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f74a6a97_570cc41d",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-22T20:53:08Z",
+      "side": 1,
+      "message": "padding_value",
+      "parentUuid": "ba99b795_7f211d61",
       "range": {
         "startLine": 49,
         "startChar": 22,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "f74a6a97_3709380d",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-22T20:53:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba99b795_df5f09fb",
+      "range": {
+        "startLine": 52,
+        "startChar": 6,
+        "endLine": 52,
+        "endChar": 17
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba99b795_3f5155f2",
         "filename": "test/buffer.h",
         "patchSetId": 9
@@ -174,6 +342,30 @@
       "writtenOn": "2016-12-15T18:29:35Z",
       "side": 1,
       "message": "ditto re return type and condition flip",
+      "range": {
+        "startLine": 55,
+        "startChar": 6,
+        "endLine": 55,
+        "endChar": 18
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f74a6a97_97f76cdb",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-22T20:53:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba99b795_3f5155f2",
       "range": {
         "startLine": 55,
         "startChar": 6,
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "f74a6a97_77fc60bd",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-22T20:53:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba99b795_bff0c5ae",
+      "range": {
+        "startLine": 65,
+        "startChar": 0,
+        "endLine": 68,
+        "endChar": 45
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba99b795_bf8c4559",
         "filename": "test/buffer.h",
         "patchSetId": 9
@@ -232,6 +448,30 @@
     },
     {
       "key": {
+        "uuid": "f74a6a97_f7e7d026",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-22T20:53:08Z",
+      "side": 1,
+      "message": "In case the center portion has already been set to some value. I guess I could document the procedure and say \"set border before setting center region\"\n\nI guess I could make SetPadding a private function, but some of the tests currently use custom values.\n\nI could also add it to the constructor ... but some tests run the same buffer multiple times.",
+      "parentUuid": "ba99b795_bf8c4559",
+      "range": {
+        "startLine": 105,
+        "startChar": 5,
+        "endLine": 105,
+        "endChar": 8
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba99b795_ff2c0d60",
         "filename": "test/buffer.h",
         "patchSetId": 9
@@ -243,6 +483,30 @@
       "writtenOn": "2016-12-15T18:29:35Z",
       "side": 1,
       "message": "pretty sure this can be const; possibly can be const * const. if it works here it applies to left/right/bottom.",
+      "range": {
+        "startLine": 153,
+        "startChar": 2,
+        "endLine": 153,
+        "endChar": 3
+      },
+      "revId": "78c564ad7ace863d5905ba9e0232d52e581fd923",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f74a6a97_dd37553d",
+        "filename": "test/buffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-22T20:53:08Z",
+      "side": 1,
+      "message": "Need to pull back the const stuff from the next patch",
+      "parentUuid": "ba99b795_ff2c0d60",
       "range": {
         "startLine": 153,
         "startChar": 2,
