@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f7498a7c_f33efa79",
+        "filename": "tools_common.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-22T14:02:02Z",
+      "side": 1,
+      "message": "you\u0027ll still redefine the typedef here, I think you\u0027ll need to change the #else above to #if CONFIG_OS_SUPPORT",
+      "revId": "0dbe6e17d7c92ba9612a4954fa42ac980de2ee1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f7498a7c_d33bfe87",
+        "filename": "tools_common.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-22T14:02:02Z",
+      "side": 1,
+      "message": "did clang-format get broken here?",
+      "revId": "0dbe6e17d7c92ba9612a4954fa42ac980de2ee1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
