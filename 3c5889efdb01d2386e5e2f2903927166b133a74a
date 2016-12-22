@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f7498a7c_7eff71f3",
+        "filename": "tools_common.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-22T20:03:44Z",
+      "side": 1,
+      "message": "make this a #else above, no need to perform the inverse check",
+      "revId": "3c5889efdb01d2386e5e2f2903927166b133a74a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
