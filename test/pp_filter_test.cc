@@ -598,6 +598,9 @@ INSTANTIATE_TEST_CASE_P(
 
 INSTANTIATE_TEST_CASE_P(NEON, VpxMbPostProcAcrossIpTest,
                         ::testing::Values(vpx_mbpost_proc_across_ip_neon));
+
+INSTANTIATE_TEST_CASE_P(NEON, VpxMbPostProcDownTest,
+                        ::testing::Values(vpx_mbpost_proc_down_neon));
 #endif  // HAVE_NEON
 
 #if HAVE_MSA
