@@ -131,6 +131,24 @@
     },
     {
       "key": {
+        "uuid": "f7498a7c_1ea4fdec",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-22T21:08:29Z",
+      "side": 1,
+      "message": "\u003e Not sure what you mean?\n\nit\u0027s a mask, no? typically we\u0027ve written those as 0xf to give a better visual aid",
+      "parentUuid": "f74a6a97_9d278dca",
+      "revId": "e45b51c1219e0c9d361fbe43371e7017a9f7e4d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f7498a7c_5e9835c4",
         "filename": "vpx_dsp/arm/deblock_neon.c",
         "patchSetId": 4
