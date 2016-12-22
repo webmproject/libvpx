@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f74a6a97_fcc05e3b",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 1111,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2016-12-22T00:41:53Z",
+      "side": 1,
+      "message": "add that to the commit message too",
+      "range": {
+        "startLine": 1111,
+        "startChar": 31,
+        "endLine": 1111,
+        "endChar": 40
+      },
+      "revId": "a8b1a0ad9c942e1e680087be57295a2ca83f3faf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
