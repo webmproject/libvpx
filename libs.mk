@@ -405,7 +405,7 @@ CLEAN-OBJS += libvpx_test_srcs.txt
 $(LIBVPX_TEST_DATA): $(SRC_PATH_BARE)/test/test-data.sha1
 	@echo "    [DOWNLOAD] $@"
 	$(qexec)trap 'rm -f $@' INT TERM &&\
-            curl -L -o $@ $(call libvpx_test_data_url,$(@F))
+            curl --retry 1 -L -o $@ $(call libvpx_test_data_url,$(@F))
 
 testdata:: $(LIBVPX_TEST_DATA)
 	$(qexec)[ -x "$$(which sha1sum)" ] && sha1sum=sha1sum;\

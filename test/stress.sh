@@ -32,7 +32,7 @@ download_and_check_file() {
 
   # Download the file using curl. Trap to insure non partial file.
   (trap "rm -f $1" INT TERM \
-    && eval "curl -L -o $1 ${DATA_URL}${root} ${devnull}")
+    && eval "curl --retry 1 -L -o $1 ${DATA_URL}${root} ${devnull}")
 
   # Check the sha1 sum of the file.
   if [ -n "${sha1sum}" ]; then
