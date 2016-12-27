@@ -16,124 +16,130 @@
 #include "vpx_dsp/arm/transpose_neon.h"
 #include "vpx_dsp/txfm_common.h"
 
-static INLINE void idct8x8_1d(const int16x4_t cospis0, const int16x4_t cospis1,
-                              int16x8_t *const a0, int16x8_t *const a1,
-                              int16x8_t *const a2, int16x8_t *const a3,
-                              int16x8_t *const a4, int16x8_t *const a5,
-                              int16x8_t *const a6, int16x8_t *const a7) {
-  const int16x4_t a0l = vget_low_s16(*a0);
-  const int16x4_t a0h = vget_high_s16(*a0);
-  const int16x4_t a1l = vget_low_s16(*a1);
-  const int16x4_t a1h = vget_high_s16(*a1);
-  const int16x4_t a2l = vget_low_s16(*a2);
-  const int16x4_t a2h = vget_high_s16(*a2);
-  const int16x4_t a3l = vget_low_s16(*a3);
-  const int16x4_t a3h = vget_high_s16(*a3);
-  const int16x4_t a4l = vget_low_s16(*a4);
-  const int16x4_t a4h = vget_high_s16(*a4);
-  const int16x4_t a5l = vget_low_s16(*a5);
-  const int16x4_t a5h = vget_high_s16(*a5);
-  const int16x4_t a6l = vget_low_s16(*a6);
-  const int16x4_t a6h = vget_high_s16(*a6);
-  const int16x4_t a7l = vget_low_s16(*a7);
-  const int16x4_t a7h = vget_high_s16(*a7);
-  int32x4_t b0, b1, b2, b3;
-  int16x4_t c0, c1, c2, c3;
-  int16x8_t d0, d1, d2, d3, d4, d5, d6, d7, e0, e1, e2, e3;
+static INLINE void idct8x8_64_1d_bd8(const int16x4_t cospis0,
+                                     const int16x4_t cospis1,
+                                     int16x8_t *const io0, int16x8_t *const io1,
+                                     int16x8_t *const io2, int16x8_t *const io3,
+                                     int16x8_t *const io4, int16x8_t *const io5,
+                                     int16x8_t *const io6,
+                                     int16x8_t *const io7) {
+  int16x4_t input_1l, input_1h, input_3l, input_3h, input_5l, input_5h,
+      input_7l, input_7h;
+  int16x4_t step1l[4], step1h[4];
+  int16x8_t step1[8], step2[8];
+  int32x4_t t32[8];
+  int16x4_t t16[8];
 
-  b0 = vmull_lane_s16(a1l, cospis1, 3);
-  b1 = vmull_lane_s16(a1h, cospis1, 3);
-  b2 = vmull_lane_s16(a5l, cospis1, 1);
-  b3 = vmull_lane_s16(a5h, cospis1, 1);
-  b0 = vmlsl_lane_s16(b0, a7l, cospis1, 0);
-  b1 = vmlsl_lane_s16(b1, a7h, cospis1, 0);
-  b2 = vmlal_lane_s16(b2, a3l, cospis1, 2);
-  b3 = vmlal_lane_s16(b3, a3h, cospis1, 2);
-  c0 = vrshrn_n_s32(b0, 14);
-  c1 = vrshrn_n_s32(b1, 14);
-  c2 = vrshrn_n_s32(b2, 14);
-  c3 = vrshrn_n_s32(b3, 14);
-  d4 = vcombine_s16(c0, c1);
-  d5 = vcombine_s16(c2, c3);
+  transpose_s16_8x8(io0, io1, io2, io3, io4, io5, io6, io7);
 
-  b0 = vmull_lane_s16(a1l, cospis1, 0);
-  b1 = vmull_lane_s16(a1h, cospis1, 0);
-  b2 = vmull_lane_s16(a3l, cospis1, 1);
-  b3 = vmull_lane_s16(a3h, cospis1, 1);
-  b0 = vmlal_lane_s16(b0, a7l, cospis1, 3);
-  b1 = vmlal_lane_s16(b1, a7h, cospis1, 3);
-  b2 = vmlsl_lane_s16(b2, a5l, cospis1, 2);
-  b3 = vmlsl_lane_s16(b3, a5h, cospis1, 2);
-  c0 = vrshrn_n_s32(b0, 14);
-  c1 = vrshrn_n_s32(b1, 14);
-  c2 = vrshrn_n_s32(b2, 14);
-  c3 = vrshrn_n_s32(b3, 14);
-  d6 = vcombine_s16(c2, c3);
-  d7 = vcombine_s16(c0, c1);
+  // stage 1
+  input_1l = vget_low_s16(*io1);
+  input_1h = vget_high_s16(*io1);
+  input_3l = vget_low_s16(*io3);
+  input_3h = vget_high_s16(*io3);
+  input_5l = vget_low_s16(*io5);
+  input_5h = vget_high_s16(*io5);
+  input_7l = vget_low_s16(*io7);
+  input_7h = vget_high_s16(*io7);
+  step1l[0] = vget_low_s16(*io0);
+  step1h[0] = vget_high_s16(*io0);
+  step1l[1] = vget_low_s16(*io2);
+  step1h[1] = vget_high_s16(*io2);
+  step1l[2] = vget_low_s16(*io4);
+  step1h[2] = vget_high_s16(*io4);
+  step1l[3] = vget_low_s16(*io6);
+  step1h[3] = vget_high_s16(*io6);
 
-  b2 = vmull_lane_s16(a0l, cospis0, 2);
-  b3 = vmull_lane_s16(a0h, cospis0, 2);
-  b0 = vmlal_lane_s16(b2, a4l, cospis0, 2);
-  b1 = vmlal_lane_s16(b3, a4h, cospis0, 2);
-  b2 = vmlsl_lane_s16(b2, a4l, cospis0, 2);
-  b3 = vmlsl_lane_s16(b3, a4h, cospis0, 2);
-  c0 = vrshrn_n_s32(b0, 14);
-  c1 = vrshrn_n_s32(b1, 14);
-  c2 = vrshrn_n_s32(b2, 14);
-  c3 = vrshrn_n_s32(b3, 14);
-  e0 = vcombine_s16(c0, c1);
-  e1 = vcombine_s16(c2, c3);
+  t32[0] = vmull_lane_s16(input_1l, cospis1, 3);
+  t32[1] = vmull_lane_s16(input_1h, cospis1, 3);
+  t32[2] = vmull_lane_s16(input_3l, cospis1, 2);
+  t32[3] = vmull_lane_s16(input_3h, cospis1, 2);
+  t32[4] = vmull_lane_s16(input_3l, cospis1, 1);
+  t32[5] = vmull_lane_s16(input_3h, cospis1, 1);
+  t32[6] = vmull_lane_s16(input_1l, cospis1, 0);
+  t32[7] = vmull_lane_s16(input_1h, cospis1, 0);
+  t32[0] = vmlsl_lane_s16(t32[0], input_7l, cospis1, 0);
+  t32[1] = vmlsl_lane_s16(t32[1], input_7h, cospis1, 0);
+  t32[2] = vmlal_lane_s16(t32[2], input_5l, cospis1, 1);
+  t32[3] = vmlal_lane_s16(t32[3], input_5h, cospis1, 1);
+  t32[4] = vmlsl_lane_s16(t32[4], input_5l, cospis1, 2);
+  t32[5] = vmlsl_lane_s16(t32[5], input_5h, cospis1, 2);
+  t32[6] = vmlal_lane_s16(t32[6], input_7l, cospis1, 3);
+  t32[7] = vmlal_lane_s16(t32[7], input_7h, cospis1, 3);
+  t16[0] = vrshrn_n_s32(t32[0], 14);
+  t16[1] = vrshrn_n_s32(t32[1], 14);
+  t16[2] = vrshrn_n_s32(t32[2], 14);
+  t16[3] = vrshrn_n_s32(t32[3], 14);
+  t16[4] = vrshrn_n_s32(t32[4], 14);
+  t16[5] = vrshrn_n_s32(t32[5], 14);
+  t16[6] = vrshrn_n_s32(t32[6], 14);
+  t16[7] = vrshrn_n_s32(t32[7], 14);
+  step1[4] = vcombine_s16(t16[0], t16[1]);
+  step1[5] = vcombine_s16(t16[2], t16[3]);
+  step1[6] = vcombine_s16(t16[4], t16[5]);
+  step1[7] = vcombine_s16(t16[6], t16[7]);
 
-  b0 = vmull_lane_s16(a2l, cospis0, 3);
-  b1 = vmull_lane_s16(a2h, cospis0, 3);
-  b2 = vmull_lane_s16(a2l, cospis0, 1);
-  b3 = vmull_lane_s16(a2h, cospis0, 1);
-  b0 = vmlsl_lane_s16(b0, a6l, cospis0, 1);
-  b1 = vmlsl_lane_s16(b1, a6h, cospis0, 1);
-  b2 = vmlal_lane_s16(b2, a6l, cospis0, 3);
-  b3 = vmlal_lane_s16(b3, a6h, cospis0, 3);
-  c0 = vrshrn_n_s32(b0, 14);
-  c1 = vrshrn_n_s32(b1, 14);
-  c2 = vrshrn_n_s32(b2, 14);
-  c3 = vrshrn_n_s32(b3, 14);
-  e2 = vcombine_s16(c0, c1);
-  e3 = vcombine_s16(c2, c3);
+  // stage 2
+  t32[2] = vmull_lane_s16(step1l[0], cospis0, 2);
+  t32[3] = vmull_lane_s16(step1h[0], cospis0, 2);
+  t32[4] = vmull_lane_s16(step1l[1], cospis0, 3);
+  t32[5] = vmull_lane_s16(step1h[1], cospis0, 3);
+  t32[6] = vmull_lane_s16(step1l[1], cospis0, 1);
+  t32[7] = vmull_lane_s16(step1h[1], cospis0, 1);
+  t32[0] = vmlal_lane_s16(t32[2], step1l[2], cospis0, 2);
+  t32[1] = vmlal_lane_s16(t32[3], step1h[2], cospis0, 2);
+  t32[2] = vmlsl_lane_s16(t32[2], step1l[2], cospis0, 2);
+  t32[3] = vmlsl_lane_s16(t32[3], step1h[2], cospis0, 2);
+  t32[4] = vmlsl_lane_s16(t32[4], step1l[3], cospis0, 1);
+  t32[5] = vmlsl_lane_s16(t32[5], step1h[3], cospis0, 1);
+  t32[6] = vmlal_lane_s16(t32[6], step1l[3], cospis0, 3);
+  t32[7] = vmlal_lane_s16(t32[7], step1h[3], cospis0, 3);
+  t16[0] = vrshrn_n_s32(t32[0], 14);
+  t16[1] = vrshrn_n_s32(t32[1], 14);
+  t16[2] = vrshrn_n_s32(t32[2], 14);
+  t16[3] = vrshrn_n_s32(t32[3], 14);
+  t16[4] = vrshrn_n_s32(t32[4], 14);
+  t16[5] = vrshrn_n_s32(t32[5], 14);
+  t16[6] = vrshrn_n_s32(t32[6], 14);
+  t16[7] = vrshrn_n_s32(t32[7], 14);
+  step2[0] = vcombine_s16(t16[0], t16[1]);
+  step2[1] = vcombine_s16(t16[2], t16[3]);
+  step2[2] = vcombine_s16(t16[4], t16[5]);
+  step2[3] = vcombine_s16(t16[6], t16[7]);
 
-  d0 = vaddq_s16(e0, e3);
-  d1 = vaddq_s16(e1, e2);
-  d2 = vsubq_s16(e1, e2);
-  d3 = vsubq_s16(e0, e3);
+  step2[4] = vaddq_s16(step1[4], step1[5]);
+  step2[5] = vsubq_s16(step1[4], step1[5]);
+  step2[6] = vsubq_s16(step1[7], step1[6]);
+  step2[7] = vaddq_s16(step1[7], step1[6]);
 
-  e0 = vsubq_s16(d4, d5);
-  e1 = vsubq_s16(d7, d6);
-  d4 = vaddq_s16(d4, d5);
-  d7 = vaddq_s16(d7, d6);
-  c0 = vget_low_s16(e0);
-  c1 = vget_high_s16(e0);
-  c2 = vget_low_s16(e1);
-  c3 = vget_high_s16(e1);
+  // stage 3
+  step1[0] = vaddq_s16(step2[0], step2[3]);
+  step1[1] = vaddq_s16(step2[1], step2[2]);
+  step1[2] = vsubq_s16(step2[1], step2[2]);
+  step1[3] = vsubq_s16(step2[0], step2[3]);
 
-  b2 = vmull_lane_s16(c2, cospis0, 2);
-  b3 = vmull_lane_s16(c3, cospis0, 2);
-  b0 = vmlsl_lane_s16(b2, c0, cospis0, 2);
-  b1 = vmlsl_lane_s16(b3, c1, cospis0, 2);
-  b2 = vmlal_lane_s16(b2, c0, cospis0, 2);
-  b3 = vmlal_lane_s16(b3, c1, cospis0, 2);
-  c0 = vrshrn_n_s32(b0, 14);
-  c1 = vrshrn_n_s32(b1, 14);
-  c2 = vrshrn_n_s32(b2, 14);
-  c3 = vrshrn_n_s32(b3, 14);
-  d5 = vcombine_s16(c0, c1);
-  d6 = vcombine_s16(c2, c3);
+  t32[2] = vmull_lane_s16(vget_low_s16(step2[6]), cospis0, 2);
+  t32[3] = vmull_lane_s16(vget_high_s16(step2[6]), cospis0, 2);
+  t32[0] = vmlsl_lane_s16(t32[2], vget_low_s16(step2[5]), cospis0, 2);
+  t32[1] = vmlsl_lane_s16(t32[3], vget_high_s16(step2[5]), cospis0, 2);
+  t32[2] = vmlal_lane_s16(t32[2], vget_low_s16(step2[5]), cospis0, 2);
+  t32[3] = vmlal_lane_s16(t32[3], vget_high_s16(step2[5]), cospis0, 2);
+  t16[0] = vrshrn_n_s32(t32[0], 14);
+  t16[1] = vrshrn_n_s32(t32[1], 14);
+  t16[2] = vrshrn_n_s32(t32[2], 14);
+  t16[3] = vrshrn_n_s32(t32[3], 14);
+  step1[5] = vcombine_s16(t16[0], t16[1]);
+  step1[6] = vcombine_s16(t16[2], t16[3]);
 
-  *a0 = vaddq_s16(d0, d7);
-  *a1 = vaddq_s16(d1, d6);
-  *a2 = vaddq_s16(d2, d5);
-  *a3 = vaddq_s16(d3, d4);
-  *a4 = vsubq_s16(d3, d4);
-  *a5 = vsubq_s16(d2, d5);
-  *a6 = vsubq_s16(d1, d6);
-  *a7 = vsubq_s16(d0, d7);
+  // stage 4
+  *io0 = vaddq_s16(step1[0], step2[7]);
+  *io1 = vaddq_s16(step1[1], step1[6]);
+  *io2 = vaddq_s16(step1[2], step1[5]);
+  *io3 = vaddq_s16(step1[3], step2[4]);
+  *io4 = vsubq_s16(step1[3], step2[4]);
+  *io5 = vsubq_s16(step1[2], step1[5]);
+  *io6 = vsubq_s16(step1[1], step1[6]);
+  *io7 = vsubq_s16(step1[0], step2[7]);
 }
 
 static INLINE void add8x8(int16x8_t a0, int16x8_t a1, int16x8_t a2,
@@ -209,77 +215,130 @@ void vpx_idct8x8_64_add_neon(const tran_low_t *input, uint8_t *dest,
   const int16x8_t cospis = vld1q_s16(kCospi);
   const int16x4_t cospis0 = vget_low_s16(cospis);   // cospi 0, 8, 16, 24
   const int16x4_t cospis1 = vget_high_s16(cospis);  // cospi 4, 12, 20, 28
-  int16x8_t a0, a1, a2, a3, a4, a5, a6, a7;
+  int16x8_t a0 = load_tran_low_to_s16q(input);
+  int16x8_t a1 = load_tran_low_to_s16q(input + 8);
+  int16x8_t a2 = load_tran_low_to_s16q(input + 16);
+  int16x8_t a3 = load_tran_low_to_s16q(input + 24);
+  int16x8_t a4 = load_tran_low_to_s16q(input + 32);
+  int16x8_t a5 = load_tran_low_to_s16q(input + 40);
+  int16x8_t a6 = load_tran_low_to_s16q(input + 48);
+  int16x8_t a7 = load_tran_low_to_s16q(input + 56);
 
-  a0 = load_tran_low_to_s16q(input);
-  a1 = load_tran_low_to_s16q(input + 8);
-  a2 = load_tran_low_to_s16q(input + 16);
-  a3 = load_tran_low_to_s16q(input + 24);
-  a4 = load_tran_low_to_s16q(input + 32);
-  a5 = load_tran_low_to_s16q(input + 40);
-  a6 = load_tran_low_to_s16q(input + 48);
-  a7 = load_tran_low_to_s16q(input + 56);
-
-  transpose_s16_8x8(&a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7);
-  idct8x8_1d(cospis0, cospis1, &a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7);
-  transpose_s16_8x8(&a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7);
-  idct8x8_1d(cospis0, cospis1, &a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7);
+  idct8x8_64_1d_bd8(cospis0, cospis1, &a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7);
+  idct8x8_64_1d_bd8(cospis0, cospis1, &a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7);
   add8x8(a0, a1, a2, a3, a4, a5, a6, a7, dest, stride);
 }
 
-static INLINE void idct8x4_1d(const int16x4_t cospis0, const int16x4_t cospisd0,
-                              const int16x4_t cospisd1, int16x8_t *const a0,
-                              int16x8_t *const a1, int16x8_t *const a2,
-                              int16x8_t *const a3, int16x8_t *const a4,
-                              int16x8_t *const a5, int16x8_t *const a6,
-                              int16x8_t *const a7) {
-  int32x4_t b0, b1, b2, b3;
-  int16x4_t c0, c1, c2, c3;
-  int16x8_t d0, d1, d2, d3, d4, d5, d6, d7, e0, e1, e2, e3;
+static INLINE void idct8x8_12_pass1_bd8(
+    const int16x4_t cospis0, const int16x4_t cospisd0, const int16x4_t cospisd1,
+    int16x4_t *const io0, int16x4_t *const io1, int16x4_t *const io2,
+    int16x4_t *const io3, int16x4_t *const io4, int16x4_t *const io5,
+    int16x4_t *const io6, int16x4_t *const io7) {
+  int16x4_t step1[8], step2[8];
+  int32x4_t t32[2];
 
-  d4 = vqrdmulhq_lane_s16(*a1, cospisd1, 3);
-  d5 = vqrdmulhq_lane_s16(*a3, cospisd1, 2);
-  d6 = vqrdmulhq_lane_s16(*a3, cospisd1, 1);
-  d7 = vqrdmulhq_lane_s16(*a1, cospisd1, 0);
-  e0 = vqrdmulhq_lane_s16(*a0, cospisd0, 2);
-  e2 = vqrdmulhq_lane_s16(*a2, cospisd0, 3);
-  e3 = vqrdmulhq_lane_s16(*a2, cospisd0, 1);
+  transpose_s16_4x4d(io0, io1, io2, io3);
 
-  d0 = vaddq_s16(e0, e3);
-  d1 = vaddq_s16(e0, e2);
-  d2 = vsubq_s16(e0, e2);
-  d3 = vsubq_s16(e0, e3);
+  // stage 1
+  step1[4] = vqrdmulh_lane_s16(*io1, cospisd1, 3);
+  step1[5] = vqrdmulh_lane_s16(*io3, cospisd1, 2);
+  step1[6] = vqrdmulh_lane_s16(*io3, cospisd1, 1);
+  step1[7] = vqrdmulh_lane_s16(*io1, cospisd1, 0);
 
-  e0 = vsubq_s16(d4, d5);
-  e1 = vsubq_s16(d7, d6);
-  d4 = vaddq_s16(d4, d5);
-  d7 = vaddq_s16(d7, d6);
-  c0 = vget_low_s16(e0);
-  c1 = vget_high_s16(e0);
-  c2 = vget_low_s16(e1);
-  c3 = vget_high_s16(e1);
+  // stage 2
+  step2[0] = vqrdmulh_lane_s16(*io0, cospisd0, 2);
+  step2[2] = vqrdmulh_lane_s16(*io2, cospisd0, 3);
+  step2[3] = vqrdmulh_lane_s16(*io2, cospisd0, 1);
 
-  b2 = vmull_lane_s16(c2, cospis0, 2);
-  b3 = vmull_lane_s16(c3, cospis0, 2);
-  b0 = vmlsl_lane_s16(b2, c0, cospis0, 2);
-  b1 = vmlsl_lane_s16(b3, c1, cospis0, 2);
-  b2 = vmlal_lane_s16(b2, c0, cospis0, 2);
-  b3 = vmlal_lane_s16(b3, c1, cospis0, 2);
-  c0 = vrshrn_n_s32(b0, 14);
-  c1 = vrshrn_n_s32(b1, 14);
-  c2 = vrshrn_n_s32(b2, 14);
-  c3 = vrshrn_n_s32(b3, 14);
-  d5 = vcombine_s16(c0, c1);
-  d6 = vcombine_s16(c2, c3);
+  step2[4] = vadd_s16(step1[4], step1[5]);
+  step2[5] = vsub_s16(step1[4], step1[5]);
+  step2[6] = vsub_s16(step1[7], step1[6]);
+  step2[7] = vadd_s16(step1[7], step1[6]);
 
-  *a0 = vaddq_s16(d0, d7);
-  *a1 = vaddq_s16(d1, d6);
-  *a2 = vaddq_s16(d2, d5);
-  *a3 = vaddq_s16(d3, d4);
-  *a4 = vsubq_s16(d3, d4);
-  *a5 = vsubq_s16(d2, d5);
-  *a6 = vsubq_s16(d1, d6);
-  *a7 = vsubq_s16(d0, d7);
+  // stage 3
+  step1[0] = vadd_s16(step2[0], step2[3]);
+  step1[1] = vadd_s16(step2[0], step2[2]);
+  step1[2] = vsub_s16(step2[0], step2[2]);
+  step1[3] = vsub_s16(step2[0], step2[3]);
+
+  t32[1] = vmull_lane_s16(step2[6], cospis0, 2);
+  t32[0] = vmlsl_lane_s16(t32[1], step2[5], cospis0, 2);
+  t32[1] = vmlal_lane_s16(t32[1], step2[5], cospis0, 2);
+  step1[5] = vrshrn_n_s32(t32[0], 14);
+  step1[6] = vrshrn_n_s32(t32[1], 14);
+
+  // stage 4
+  *io0 = vadd_s16(step1[0], step2[7]);
+  *io1 = vadd_s16(step1[1], step1[6]);
+  *io2 = vadd_s16(step1[2], step1[5]);
+  *io3 = vadd_s16(step1[3], step2[4]);
+  *io4 = vsub_s16(step1[3], step2[4]);
+  *io5 = vsub_s16(step1[2], step1[5]);
+  *io6 = vsub_s16(step1[1], step1[6]);
+  *io7 = vsub_s16(step1[0], step2[7]);
+}
+
+static INLINE void idct8x8_12_pass2_bd8(
+    const int16x4_t cospis0, const int16x4_t cospisd0, const int16x4_t cospisd1,
+    const int16x4_t input0, const int16x4_t input1, const int16x4_t input2,
+    const int16x4_t input3, const int16x4_t input4, const int16x4_t input5,
+    const int16x4_t input6, const int16x4_t input7, int16x8_t *const output0,
+    int16x8_t *const output1, int16x8_t *const output2,
+    int16x8_t *const output3, int16x8_t *const output4,
+    int16x8_t *const output5, int16x8_t *const output6,
+    int16x8_t *const output7) {
+  int16x8_t in[4];
+  int16x8_t step1[8], step2[8];
+  int32x4_t t32[8];
+  int16x4_t t16[8];
+
+  transpose_s16_4x8(input0, input1, input2, input3, input4, input5, input6,
+                    input7, &in[0], &in[1], &in[2], &in[3]);
+
+  // stage 1
+  step1[4] = vqrdmulhq_lane_s16(in[1], cospisd1, 3);
+  step1[5] = vqrdmulhq_lane_s16(in[3], cospisd1, 2);
+  step1[6] = vqrdmulhq_lane_s16(in[3], cospisd1, 1);
+  step1[7] = vqrdmulhq_lane_s16(in[1], cospisd1, 0);
+
+  // stage 2
+  step2[0] = vqrdmulhq_lane_s16(in[0], cospisd0, 2);
+  step2[2] = vqrdmulhq_lane_s16(in[2], cospisd0, 3);
+  step2[3] = vqrdmulhq_lane_s16(in[2], cospisd0, 1);
+
+  step2[4] = vaddq_s16(step1[4], step1[5]);
+  step2[5] = vsubq_s16(step1[4], step1[5]);
+  step2[6] = vsubq_s16(step1[7], step1[6]);
+  step2[7] = vaddq_s16(step1[7], step1[6]);
+
+  // stage 3
+  step1[0] = vaddq_s16(step2[0], step2[3]);
+  step1[1] = vaddq_s16(step2[0], step2[2]);
+  step1[2] = vsubq_s16(step2[0], step2[2]);
+  step1[3] = vsubq_s16(step2[0], step2[3]);
+
+  t32[2] = vmull_lane_s16(vget_low_s16(step2[6]), cospis0, 2);
+  t32[3] = vmull_lane_s16(vget_high_s16(step2[6]), cospis0, 2);
+  t32[0] = vmlsl_lane_s16(t32[2], vget_low_s16(step2[5]), cospis0, 2);
+  t32[1] = vmlsl_lane_s16(t32[3], vget_high_s16(step2[5]), cospis0, 2);
+  t32[2] = vmlal_lane_s16(t32[2], vget_low_s16(step2[5]), cospis0, 2);
+  t32[3] = vmlal_lane_s16(t32[3], vget_high_s16(step2[5]), cospis0, 2);
+  t16[0] = vrshrn_n_s32(t32[0], 14);
+  t16[1] = vrshrn_n_s32(t32[1], 14);
+  t16[2] = vrshrn_n_s32(t32[2], 14);
+  t16[3] = vrshrn_n_s32(t32[3], 14);
+  step1[5] = vcombine_s16(t16[0], t16[1]);
+  step1[6] = vcombine_s16(t16[2], t16[3]);
+
+  // stage 4
+  *output0 = vaddq_s16(step1[0], step2[7]);
+  *output1 = vaddq_s16(step1[1], step1[6]);
+  *output2 = vaddq_s16(step1[2], step1[5]);
+  *output3 = vaddq_s16(step1[3], step2[4]);
+  *output4 = vsubq_s16(step1[3], step2[4]);
+  *output5 = vsubq_s16(step1[2], step1[5]);
+  *output6 = vsubq_s16(step1[1], step1[6]);
+  *output7 = vsubq_s16(step1[0], step2[7]);
 }
 
 void vpx_idct8x8_12_add_neon(const tran_low_t *input, uint8_t *dest,
@@ -289,59 +348,17 @@ void vpx_idct8x8_12_add_neon(const tran_low_t *input, uint8_t *dest,
   const int16x4_t cospis0 = vget_low_s16(cospis);     // cospi 0, 8, 16, 24
   const int16x4_t cospisd0 = vget_low_s16(cospisd);   // doubled 0, 8, 16, 24
   const int16x4_t cospisd1 = vget_high_s16(cospisd);  // doubled 4, 12, 20, 28
-  int16x8_t a0, a1, a2, a3, a4, a5, a6, a7;
-  int16x4_t b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11;
-  int32x4_t c0, c1;
+  int16x4_t a0, a1, a2, a3, a4, a5, a6, a7;
+  int16x8_t b0, b1, b2, b3, b4, b5, b6, b7;
 
-  b8 = load_tran_low_to_s16d(input);
-  b9 = load_tran_low_to_s16d(input + 8);
-  b10 = load_tran_low_to_s16d(input + 16);
-  b11 = load_tran_low_to_s16d(input + 24);
+  a0 = load_tran_low_to_s16d(input);
+  a1 = load_tran_low_to_s16d(input + 8);
+  a2 = load_tran_low_to_s16d(input + 16);
+  a3 = load_tran_low_to_s16d(input + 24);
 
-  transpose_s16_4x4d(&b8, &b9, &b10, &b11);
-
-  // First transform rows
-  // stage 1
-  b4 = vqrdmulh_lane_s16(b9, cospisd1, 3);
-  b5 = vqrdmulh_lane_s16(b11, cospisd1, 2);
-  b6 = vqrdmulh_lane_s16(b11, cospisd1, 1);
-  b7 = vqrdmulh_lane_s16(b9, cospisd1, 0);
-
-  // stage 2 & stage 3 - even half
-  b8 = vqrdmulh_lane_s16(b8, cospisd0, 2);
-  b11 = vqrdmulh_lane_s16(b10, cospisd0, 3);
-  b10 = vqrdmulh_lane_s16(b10, cospisd0, 1);
-
-  // stage 3 -odd half
-  b0 = vadd_s16(b8, b10);
-  b1 = vadd_s16(b8, b11);
-  b2 = vsub_s16(b8, b11);
-  b3 = vsub_s16(b8, b10);
-
-  // stage 2 - odd half
-  b8 = vsub_s16(b4, b5);
-  b4 = vadd_s16(b4, b5);
-  b9 = vsub_s16(b7, b6);
-  b7 = vadd_s16(b7, b6);
-
-  c1 = vmull_lane_s16(b9, cospis0, 2);
-  c0 = vmlsl_lane_s16(c1, b8, cospis0, 2);
-  c1 = vmlal_lane_s16(c1, b8, cospis0, 2);
-  b5 = vrshrn_n_s32(c0, 14);
-  b6 = vrshrn_n_s32(c1, 14);
-
-  // stage 4
-  b8 = vadd_s16(b0, b7);
-  b9 = vadd_s16(b1, b6);
-  b10 = vadd_s16(b2, b5);
-  b11 = vadd_s16(b3, b4);
-  b4 = vsub_s16(b3, b4);
-  b5 = vsub_s16(b2, b5);
-  b6 = vsub_s16(b1, b6);
-  b7 = vsub_s16(b0, b7);
-
-  transpose_s16_4x8(b8, b9, b10, b11, b4, b5, b6, b7, &a0, &a1, &a2, &a3);
-  idct8x4_1d(cospis0, cospisd0, cospisd1, &a0, &a1, &a2, &a3, &a4, &a5, &a6,
-             &a7);
-  add8x8(a0, a1, a2, a3, a4, a5, a6, a7, dest, stride);
+  idct8x8_12_pass1_bd8(cospis0, cospisd0, cospisd1, &a0, &a1, &a2, &a3, &a4,
+                       &a5, &a6, &a7);
+  idct8x8_12_pass2_bd8(cospis0, cospisd0, cospisd1, a0, a1, a2, a3, a4, a5, a6,
+                       a7, &b0, &b1, &b2, &b3, &b4, &b5, &b6, &b7);
+  add8x8(b0, b1, b2, b3, b4, b5, b6, b7, dest, stride);
 }
