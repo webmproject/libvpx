@@ -131,6 +131,10 @@ struct macroblock {
   int use_lp32x32fdct;
   int skip_encode;
 
+  // In first pass, intra prediction is done based on source pixels
+  // at tile boundaries
+  int fp_src_pred;
+
   // use fast quantization process
   int quant_fp;
 
