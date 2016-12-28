@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f74a6a97_2f96f1d9",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-28T21:24:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f74a6a97_2073a656",
+      "range": {
+        "startLine": 287,
+        "startChar": 0,
+        "endLine": 288,
+        "endChar": 40
+      },
+      "revId": "08befdaea48ab5c075d3c7e855b71f693678881c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f74a6a97_607c8e22",
         "filename": "vpx_dsp/arm/deblock_neon.c",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2016-12-27T19:26:19Z",
       "side": 1,
       "message": "sum_low, sum_high can narrow and combine to an int16x8_t",
+      "range": {
+        "startLine": 331,
+        "startChar": 4,
+        "endLine": 331,
+        "endChar": 31
+      },
+      "revId": "08befdaea48ab5c075d3c7e855b71f693678881c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f74a6a97_cfa02d2e",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-28T21:24:59Z",
+      "side": 1,
+      "message": "Good catch. It can be narrowed but it can\u0027t be combined into an int16x8_t because it needs to be split for adding each block of 4.",
+      "parentUuid": "f74a6a97_607c8e22",
       "range": {
         "startLine": 331,
         "startChar": 4,
