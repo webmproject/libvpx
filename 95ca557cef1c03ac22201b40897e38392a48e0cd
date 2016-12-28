@@ -65,6 +65,30 @@
     },
     {
       "key": {
+        "uuid": "f74a6a97_cf130d41",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-28T22:29:10Z",
+      "side": 1,
+      "message": "Narrow and combined. I was using _l/_r for left/right as opposed to low/high, but the across filter does left/right things as well.",
+      "parentUuid": "f74a6a97_a09fb637",
+      "range": {
+        "startLine": 432,
+        "startChar": 4,
+        "endLine": 432,
+        "endChar": 26
+      },
+      "revId": "95ca557cef1c03ac22201b40897e38392a48e0cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f74a6a97_c0fac250",
         "filename": "vpx_dsp/arm/deblock_neon.c",
         "patchSetId": 3
@@ -88,6 +112,30 @@
     },
     {
       "key": {
+        "uuid": "f74a6a97_0f1e9547",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 453,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-28T22:29:10Z",
+      "side": 1,
+      "message": "In contrast to the comment above which says \"Load and keep\", this loads and uses but then discards the values, and reloads them later when they are s[] and s[r+7*pitch]",
+      "parentUuid": "f74a6a97_c0fac250",
+      "range": {
+        "startLine": 453,
+        "startChar": 16,
+        "endLine": 453,
+        "endChar": 23
+      },
+      "revId": "95ca557cef1c03ac22201b40897e38392a48e0cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f74a6a97_e0e37ebf",
         "filename": "vpx_dsp/arm/deblock_neon.c",
         "patchSetId": 3
@@ -99,6 +147,30 @@
       "writtenOn": "2016-12-27T19:31:05Z",
       "side": 1,
       "message": "(col \u0026 7) is always 0 and better to be deleted, though compiler may already utilize this.",
+      "range": {
+        "startLine": 490,
+        "startChar": 62,
+        "endLine": 490,
+        "endChar": 74
+      },
+      "revId": "95ca557cef1c03ac22201b40897e38392a48e0cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f74a6a97_6f02b9ee",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 490,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2016-12-28T22:29:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f74a6a97_e0e37ebf",
       "range": {
         "startLine": 490,
         "startChar": 62,
