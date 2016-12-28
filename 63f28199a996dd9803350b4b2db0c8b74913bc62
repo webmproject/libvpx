@@ -34,6 +34,24 @@
       "revId": "63f28199a996dd9803350b4b2db0c8b74913bc62",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f74a6a97_da1109cb",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1263,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2016-12-28T23:43:04Z",
+      "side": 1,
+      "message": "So you are trying to delay the resetting of rolling_arf_group_actual_bits \u0026 rolling_arf_group_target_bits to use more than one gf_group\u0027s rate result to get more stable rate_err?\nStill couldn\u0027t see any difference after you move the resetting to\nif ((cpi-\u003eoxcf.rc_mode !\u003d VPX_Q) \u0026\u0026 (rc-\u003ebaseline_gf_interval \u003e 1)) {\n}\nsince while rc_mode\u003dVPX_Q, q is fixed anyway, and the above condition should be true for non VPX_Q mode.\nCould you explain it more?",
+      "parentUuid": "778bdae0_09b61123",
+      "revId": "63f28199a996dd9803350b4b2db0c8b74913bc62",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
