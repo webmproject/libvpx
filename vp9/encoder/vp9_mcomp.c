@@ -277,7 +277,7 @@ static INLINE const uint8_t *pre(const uint8_t *buf, int stride, int r, int c) {
   const uint8_t *const z = x->plane[0].src.buf;                            \
   const int src_stride = x->plane[0].src.stride;                           \
   const MACROBLOCKD *xd = &x->e_mbd;                                       \
-  unsigned int besterr = INT_MAX;                                          \
+  unsigned int besterr = UINT_MAX;                                         \
   unsigned int sse;                                                        \
   unsigned int whichdir;                                                   \
   int thismse;                                                             \
@@ -472,7 +472,7 @@ uint32_t vp9_find_best_sub_pixel_tree_pruned_evenmore(
 
   if ((abs(bestmv->col - ref_mv->col) > (MAX_FULL_PEL_VAL << 3)) ||
       (abs(bestmv->row - ref_mv->row) > (MAX_FULL_PEL_VAL << 3)))
-    return INT_MAX;
+    return UINT_MAX;
 
   return besterr;
 }
@@ -622,7 +622,7 @@ uint32_t vp9_find_best_sub_pixel_tree_pruned(
 
   if ((abs(bestmv->col - ref_mv->col) > (MAX_FULL_PEL_VAL << 3)) ||
       (abs(bestmv->row - ref_mv->row) > (MAX_FULL_PEL_VAL << 3)))
-    return INT_MAX;
+    return UINT_MAX;
 
   return besterr;
 }
@@ -646,7 +646,7 @@ uint32_t vp9_find_best_sub_pixel_tree(
   const uint8_t *const src_address = z;
   const int src_stride = x->plane[0].src.stride;
   const MACROBLOCKD *xd = &x->e_mbd;
-  unsigned int besterr = INT_MAX;
+  unsigned int besterr = UINT_MAX;
   unsigned int sse;
   int thismse;
   const int y_stride = xd->plane[0].pre[0].stride;
@@ -708,7 +708,7 @@ uint32_t vp9_find_best_sub_pixel_tree(
           *sse1 = sse;
         }
       } else {
-        cost_array[idx] = INT_MAX;
+        cost_array[idx] = UINT_MAX;
       }
     }
 
@@ -737,7 +737,7 @@ uint32_t vp9_find_best_sub_pixel_tree(
         *sse1 = sse;
       }
     } else {
-      cost_array[idx] = INT_MAX;
+      cost_array[idx] = UINT_MAX;
     }
 
     if (best_idx < 4 && best_idx >= 0) {
@@ -771,7 +771,7 @@ uint32_t vp9_find_best_sub_pixel_tree(
 
   if ((abs(bestmv->col - ref_mv->col) > (MAX_FULL_PEL_VAL << 3)) ||
       (abs(bestmv->row - ref_mv->row) > (MAX_FULL_PEL_VAL << 3)))
-    return INT_MAX;
+    return UINT_MAX;
 
   return besterr;
 }
