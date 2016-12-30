@@ -1,4 +1,4 @@
-README - 20 July 2016
+README - 9 January 2017
 
 Welcome to the WebM VP8/VP9 Codec SDK!
 
@@ -47,6 +47,7 @@ COMPILING THE APPLICATIONS/LIBRARIES:
   --help output of the configure script. As of this writing, the list of
   available targets is:
 
+    arm64-android-gcc
     arm64-darwin-gcc
     arm64-linux-gcc
     armv7-android-gcc
