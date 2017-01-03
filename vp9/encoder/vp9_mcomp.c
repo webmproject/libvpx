@@ -2318,11 +2318,14 @@ int vp9_refining_search_8p_c(const MACROBLOCK *x, MV *ref_mv, int error_per_bit,
   const struct buf_2d *const what = &x->plane[0].src;
   const struct buf_2d *const in_what = &xd->plane[0].pre[0];
   const MV fcenter_mv = { center_mv->row >> 3, center_mv->col >> 3 };
-  unsigned int best_sad =
+  unsigned int best_sad = INT_MAX;
+  int i, j;
+  clamp_mv(ref_mv, x->mv_limits.col_min, x->mv_limits.col_max,
+           x->mv_limits.row_min, x->mv_limits.row_max);
+  best_sad =
       fn_ptr->sdaf(what->buf, what->stride, get_buf_from_mv(in_what, ref_mv),
                    in_what->stride, second_pred) +
       mvsad_err_cost(x, ref_mv, &fcenter_mv, error_per_bit);
-  int i, j;
 
   for (i = 0; i < search_range; ++i) {
     int best_site = -1;
