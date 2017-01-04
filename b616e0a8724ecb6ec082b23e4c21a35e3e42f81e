@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "77acba9b_87e2d0b8",
+        "filename": "test/buffer.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-01-04T18:15:05Z",
+      "side": 1,
+      "message": "Consider splitting these changes to Buffer into a new patch, and, as much as it pains me to say this: I think Buffer\u003cT\u003e needs some unit tests of its own since it\u0027s actually starting to get fairly complex with these additions.",
+      "revId": "b616e0a8724ecb6ec082b23e4c21a35e3e42f81e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_c7aa084f",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-01-04T18:15:05Z",
+      "side": 1,
+      "message": "swap the two lines above",
+      "revId": "b616e0a8724ecb6ec082b23e4c21a35e3e42f81e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
