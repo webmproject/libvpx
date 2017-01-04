@@ -477,8 +477,8 @@ static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q) {
     thresholds[2] = threshold_base >> 2;
     thresholds[3] = threshold_base << 2;
   } else {
-    // Increase base variance threshold based on  estimated noise level.
-    if (cpi->noise_estimate.enabled) {
+    // Increase base variance threshold based on estimated noise level.
+    if (cpi->noise_estimate.enabled && cm->width >= 640 && cm->height >= 480) {
       NOISE_LEVEL noise_level =
           vp9_noise_estimate_extract_level(&cpi->noise_estimate);
       if (noise_level == kHigh)
