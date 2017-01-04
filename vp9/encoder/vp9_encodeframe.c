@@ -745,7 +745,7 @@ static void set_low_temp_var_flag(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
         if ((*this_mi)->sb_type == BLOCK_32X32) {
           int64_t threshold_32x32 = (cpi->sf.short_circuit_low_temp_var == 1 ||
                                      cpi->sf.short_circuit_low_temp_var == 3)
-                                        ? ((3 * thresholds[1]) >> 2)
+                                        ? ((5 * thresholds[1]) >> 3)
                                         : (thresholds[1] >> 1);
           if (vt->split[i].part_variances.none.variance < threshold_32x32)
             x->variance_low[i + 5] = 1;

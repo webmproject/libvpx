@@ -522,7 +522,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed,
       // More aggressive short circuit for speed 8.
       sf->short_circuit_low_temp_var = 2;
       // More aggressive short circuit for low resolution
-      if (cm->width <= 352 && cm->height <= 288) {
+      if (cm->width <= 640 && cm->height <= 480) {
         sf->short_circuit_low_temp_var = 3;
       }
     }
