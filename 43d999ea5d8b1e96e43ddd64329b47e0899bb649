@@ -1,0 +1,107 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "77acba9b_0c1d0727",
+        "filename": "test/buffer.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-01-04T18:12:19Z",
+      "side": 1,
+      "message": "assert on the buffer pointer-- this sort of counts as work in the ctor, which is technically a style guide no-no, but given this is a test util and forcing everyone to call a stupid Init() method is, well, stupid, let\u0027s let it slide.\n\nalso, since we\u0027re already pulling in gtest here using its ASSERT_*\u0027s instead of c lib assert might be nicer (not a big deal, though)",
+      "range": {
+        "startLine": 38,
+        "startChar": 4,
+        "endLine": 38,
+        "endChar": 15
+      },
+      "revId": "43d999ea5d8b1e96e43ddd64329b47e0899bb649",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_e79e2c3c",
+        "filename": "test/buffer.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-01-04T18:12:19Z",
+      "side": 1,
+      "message": "It might be useful if you could control padding region values individually, but not necessary now. If you think it could be useful, add a TODO... maybe?",
+      "revId": "43d999ea5d8b1e96e43ddd64329b47e0899bb649",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_cc04efca",
+        "filename": "test/buffer.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-01-04T18:12:19Z",
+      "side": 1,
+      "message": "Get rid of condition, drop the ternary, and just return this conditional directly.",
+      "range": {
+        "startLine": 128,
+        "startChar": 2,
+        "endLine": 128,
+        "endChar": 70
+      },
+      "revId": "43d999ea5d8b1e96e43ddd64329b47e0899bb649",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_2cdd6b2e",
+        "filename": "test/buffer.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-01-04T18:12:19Z",
+      "side": 1,
+      "message": "drop the blank line above",
+      "range": {
+        "startLine": 142,
+        "startChar": 2,
+        "endLine": 142,
+        "endChar": 8
+      },
+      "revId": "43d999ea5d8b1e96e43ddd64329b47e0899bb649",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_c778482f",
+        "filename": "test/buffer.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-01-04T18:12:19Z",
+      "side": 1,
+      "message": "You only report the result of this check to the caller; checks subsequent to the check of the top padding need an \u0027if (!error)\u0027 for a minimal fix. Or, just return immediately when there\u0027s a mismatch.\n\nIf I were writing this I think I\u0027d go the extra step and make bools for each region and report all regions that are bad when the check fails.",
+      "revId": "43d999ea5d8b1e96e43ddd64329b47e0899bb649",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
