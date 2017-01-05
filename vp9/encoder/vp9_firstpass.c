@@ -2463,7 +2463,11 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   }
 
   // Limit maximum boost based on interval length.
+#ifdef AGRESSIVE_VBR
+  rc->gfu_boost = VPXMIN((int)rc->gfu_boost, i * 140);
+#else
   rc->gfu_boost = VPXMIN((int)rc->gfu_boost, i * 200);
+#endif
 
   // Set the interval until the next gf.
   rc->baseline_gf_interval = i - (is_key_frame || rc->source_alt_ref_pending);
@@ -2666,10 +2670,16 @@ static int test_candidate_kf(TWO_PASS *twopass,
 }
 
 #define FRAMES_TO_CHECK_DECAY 8
-#define KF_MAX_FRAME_BOOST 96.0
 #define MIN_KF_TOT_BOOST 300
-#define MAX_KF_TOT_BOOST 5400
 #define KF_BOOST_SCAN_MAX_FRAMES 32
+
+#ifdef AGRESSIVE_VBR
+#define KF_MAX_FRAME_BOOST 80.0
+#define MAX_KF_TOT_BOOST 4800
+#else
+#define KF_MAX_FRAME_BOOST 96.0
+#define MAX_KF_TOT_BOOST 5400
+#endif
 
 static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int i, j;
