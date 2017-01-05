@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "77acba9b_b51ff7d1",
+        "filename": "test/buffer.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-05T00:17:12Z",
+      "side": 1,
+      "message": "I don\u0027t think I can check \u0027null\u0027 for \u0027new\u0027:\nhttp://www.cplusplus.com/reference/new/operator%20new/\nOn failure, it throws a bad_alloc exception\n\nASSERT_* here causes \"error: returning a value from a constructor\n\nIt appears the macros expand to something you can\u0027t put in the constructor.",
+      "parentUuid": "77acba9b_0c1d0727",
+      "range": {
+        "startLine": 38,
+        "startChar": 4,
+        "endLine": 38,
+        "endChar": 15
+      },
+      "revId": "43d999ea5d8b1e96e43ddd64329b47e0899bb649",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "77acba9b_e79e2c3c",
         "filename": "test/buffer.h",
         "patchSetId": 12
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "77acba9b_f5296ffa",
+        "filename": "test/buffer.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-05T00:17:12Z",
+      "side": 1,
+      "message": "I dunno about regions, but I am thinking about adding border extension. That would also invalidate CheckPadding() under the assumption that extending the border means you want to use it for some reason.",
+      "parentUuid": "77acba9b_e79e2c3c",
+      "revId": "43d999ea5d8b1e96e43ddd64329b47e0899bb649",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "77acba9b_cc04efca",
         "filename": "test/buffer.h",
         "patchSetId": 12
@@ -53,6 +95,30 @@
       "writtenOn": "2017-01-04T18:12:19Z",
       "side": 1,
       "message": "Get rid of condition, drop the ternary, and just return this conditional directly.",
+      "range": {
+        "startLine": 128,
+        "startChar": 2,
+        "endLine": 128,
+        "endChar": 70
+      },
+      "revId": "43d999ea5d8b1e96e43ddd64329b47e0899bb649",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_55fa1b52",
+        "filename": "test/buffer.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-05T00:17:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "77acba9b_cc04efca",
       "range": {
         "startLine": 128,
         "startChar": 2,
@@ -88,6 +154,30 @@
     },
     {
       "key": {
+        "uuid": "77acba9b_d5054b7d",
+        "filename": "test/buffer.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-05T00:17:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "77acba9b_2cdd6b2e",
+      "range": {
+        "startLine": 142,
+        "startChar": 2,
+        "endLine": 142,
+        "endChar": 8
+      },
+      "revId": "43d999ea5d8b1e96e43ddd64329b47e0899bb649",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "77acba9b_c778482f",
         "filename": "test/buffer.h",
         "patchSetId": 12
@@ -99,6 +189,24 @@
       "writtenOn": "2017-01-04T18:12:19Z",
       "side": 1,
       "message": "You only report the result of this check to the caller; checks subsequent to the check of the top padding need an \u0027if (!error)\u0027 for a minimal fix. Or, just return immediately when there\u0027s a mismatch.\n\nIf I were writing this I think I\u0027d go the extra step and make bools for each region and report all regions that are bad when the check fails.",
+      "revId": "43d999ea5d8b1e96e43ddd64329b47e0899bb649",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_b508d794",
+        "filename": "test/buffer.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-05T00:17:12Z",
+      "side": 1,
+      "message": "I think I should minimize the work in here - if it fails, the user can dump the buffer for examination. Large buffers will swamp the screen.",
+      "parentUuid": "77acba9b_c778482f",
       "revId": "43d999ea5d8b1e96e43ddd64329b47e0899bb649",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
