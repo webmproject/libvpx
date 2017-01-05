@@ -3133,7 +3133,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   if (cpi->oxcf.pass == 0 && cpi->oxcf.mode == REALTIME &&
       cpi->oxcf.speed >= 5 && cpi->resize_state == 0 &&
       (cpi->oxcf.content == VP9E_CONTENT_SCREEN ||
-       cpi->oxcf.rc_mode == VPX_VBR) &&
+       cpi->oxcf.rc_mode == VPX_VBR || cpi->sf.copy_partition_flag) &&
       cm->show_frame)
     vp9_avg_source_sad(cpi);
 
