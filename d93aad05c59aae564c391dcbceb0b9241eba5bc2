@@ -1,0 +1,186 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "77acba9b_40e5e91d",
+        "filename": "test/buffer.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-06T23:16:20Z",
+      "side": 1,
+      "message": "top/left/bottom/right or top/bottom/left/right seem like a bit more logical ordering to me, your choice though",
+      "range": {
+        "startLine": 25,
+        "startChar": 31,
+        "endLine": 26,
+        "endChar": 47
+      },
+      "revId": "d93aad05c59aae564c391dcbceb0b9241eba5bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_6084ad2e",
+        "filename": "test/buffer.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-06T23:16:20Z",
+      "side": 1,
+      "message": "simple accessors can be lowercase\n\nhttps://google.github.io/styleguide/cppguide.html#Function_Names",
+      "range": {
+        "startLine": 42,
+        "startChar": 6,
+        "endLine": 42,
+        "endChar": 12
+      },
+      "revId": "d93aad05c59aae564c391dcbceb0b9241eba5bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_4020895e",
+        "filename": "test/buffer.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-06T23:16:20Z",
+      "side": 1,
+      "message": "this should come after the ctor:\n\nhttps://google.github.io/styleguide/cppguide.html#Declaration_Order",
+      "revId": "d93aad05c59aae564c391dcbceb0b9241eba5bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_601d8d26",
+        "filename": "test/buffer.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-06T23:16:20Z",
+      "side": 1,
+      "message": "this is unnecessary",
+      "revId": "d93aad05c59aae564c391dcbceb0b9241eba5bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_a05085d6",
+        "filename": "test/buffer.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-06T23:16:20Z",
+      "side": 1,
+      "message": "so is this, the destructor should only be called once",
+      "revId": "d93aad05c59aae564c391dcbceb0b9241eba5bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_003f7177",
+        "filename": "test/buffer.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-06T23:16:20Z",
+      "side": 1,
+      "message": "prefer raw_buffer_ !\u003d NULL",
+      "revId": "d93aad05c59aae564c391dcbceb0b9241eba5bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_203c7580",
+        "filename": "test/buffer.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-06T23:16:20Z",
+      "side": 1,
+      "message": "this will be wrong if sizeof(T) \u003e 1",
+      "revId": "d93aad05c59aae564c391dcbceb0b9241eba5bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_60366da2",
+        "filename": "test/buffer.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-06T23:16:20Z",
+      "side": 1,
+      "message": "you should include stdio.h above",
+      "revId": "d93aad05c59aae564c391dcbceb0b9241eba5bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_c0d7390c",
+        "filename": "test/idct_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-06T23:16:20Z",
+      "side": 1,
+      "message": "you should ASSERT these. without it a static analyzer might generate warnings",
+      "revId": "d93aad05c59aae564c391dcbceb0b9241eba5bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_00f131b2",
+        "filename": "test/idct_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-06T23:16:20Z",
+      "side": 1,
+      "message": "can be *const",
+      "revId": "d93aad05c59aae564c391dcbceb0b9241eba5bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
