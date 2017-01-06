@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "77acba9b_800e211b",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-06T23:02:22Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "67568a7369aeb69fb25dfbdb6c19af4bcb0e5955",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_000211ed",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-06T23:02:22Z",
+      "side": 1,
+      "message": "you could just make this an array for compactness in the declaration",
+      "range": {
+        "startLine": 417,
+        "startChar": 14,
+        "endLine": 417,
+        "endChar": 29
+      },
+      "revId": "67568a7369aeb69fb25dfbdb6c19af4bcb0e5955",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_60090d0c",
+        "filename": "vpx_dsp/arm/deblock_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 474,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-06T23:02:22Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "67568a7369aeb69fb25dfbdb6c19af4bcb0e5955",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
