@@ -181,6 +181,12 @@ static INLINE void add_and_store_u8_s16(const int16x8_t a0, const int16x8_t a1,
   vst1_u8(b, b7);
 }
 
+static INLINE uint8x16_t create_dcq(const int16_t dc) {
+  // Clip both sides and gcc may compile to assembly 'usat'.
+  const int16_t t = (dc < 0) ? 0 : ((dc > 255) ? 255 : dc);
+  return vdupq_n_u8((uint8_t)t);
+}
+
 static INLINE void idct4x4_16_kernel_bd8(const int16x4_t cospis,
                                          int16x8_t *const a0,
                                          int16x8_t *const a1) {
