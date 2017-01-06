@@ -520,11 +520,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed,
     if (!cpi->use_svc && cpi->oxcf.rc_mode == VPX_CBR &&
         content != VP9E_CONTENT_SCREEN) {
       // More aggressive short circuit for speed 8.
-      sf->short_circuit_low_temp_var = 2;
-      // More aggressive short circuit for low resolution
-      if (cm->width <= 640 && cm->height <= 480) {
-        sf->short_circuit_low_temp_var = 3;
-      }
+      sf->short_circuit_low_temp_var = 3;
     }
     sf->limit_newmv_early_exit = 0;
   }
