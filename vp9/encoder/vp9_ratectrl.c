@@ -414,7 +414,7 @@ static double get_rate_correction_factor(const VP9_COMP *cpi) {
   } else {
     if ((cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame) &&
         !rc->is_src_frame_alt_ref && !cpi->use_svc &&
-        (cpi->oxcf.rc_mode != VPX_CBR || cpi->oxcf.gf_cbr_boost_pct > 20))
+        (cpi->oxcf.rc_mode != VPX_CBR || cpi->oxcf.gf_cbr_boost_pct > 100))
       rcf = rc->rate_correction_factors[GF_ARF_STD];
     else
       rcf = rc->rate_correction_factors[INTER_NORMAL];
@@ -440,7 +440,7 @@ static void set_rate_correction_factor(VP9_COMP *cpi, double factor) {
   } else {
     if ((cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame) &&
         !rc->is_src_frame_alt_ref && !cpi->use_svc &&
-        (cpi->oxcf.rc_mode != VPX_CBR || cpi->oxcf.gf_cbr_boost_pct > 20))
+        (cpi->oxcf.rc_mode != VPX_CBR || cpi->oxcf.gf_cbr_boost_pct > 100))
       rc->rate_correction_factors[GF_ARF_STD] = factor;
     else
       rc->rate_correction_factors[INTER_NORMAL] = factor;
