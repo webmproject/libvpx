@@ -49,6 +49,24 @@
     },
     {
       "key": {
+        "uuid": "77acba9b_14f3372c",
+        "filename": "test/buffer.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-01-06T18:35:57Z",
+      "side": 1,
+      "message": "\u003e I don\u0027t think I can check \u0027null\u0027 for \u0027new\u0027:\n\u003e http://www.cplusplus.com/reference/new/operator%20new/\n\u003e On failure, it throws a bad_alloc exception\n\nUpdate the new to use std::nothrow:\n\nb \u003d new (std::nothrow) T[raw_size_];\n\nWe don\u0027t want bad_alloc\u0027s anyway.\n\n\u003e ASSERT_* here causes \"error: returning a value from a constructor\n\nSigh. I forgot about that. The ASSERT_* macros include a return. The last three lines in both constructors are dupes. Move them into a void Init() or something. Make it private, call it from the ctors, and put the ASSERT_ in the Init() function.",
+      "parentUuid": "77acba9b_b51ff7d1",
+      "revId": "43d999ea5d8b1e96e43ddd64329b47e0899bb649",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "77acba9b_e79e2c3c",
         "filename": "test/buffer.h",
         "patchSetId": 12
@@ -207,6 +225,24 @@
       "side": 1,
       "message": "I think I should minimize the work in here - if it fails, the user can dump the buffer for examination. Large buffers will swamp the screen.",
       "parentUuid": "77acba9b_c778482f",
+      "revId": "43d999ea5d8b1e96e43ddd64329b47e0899bb649",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_142c17ab",
+        "filename": "test/buffer.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-01-06T18:35:57Z",
+      "side": 1,
+      "message": "ok, I see you fixed the main problem, so ok now.",
+      "parentUuid": "77acba9b_b508d794",
       "revId": "43d999ea5d8b1e96e43ddd64329b47e0899bb649",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
