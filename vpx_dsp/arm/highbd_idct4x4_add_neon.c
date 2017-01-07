@@ -131,8 +131,6 @@ static INLINE void idct4x4_16_kernel_bd12(const int32x4_t cospis,
 
 void vpx_highbd_idct4x4_16_add_neon(const tran_low_t *input, uint8_t *dest8,
                                     int stride, int bd) {
-  DECLARE_ALIGNED(16, static const int32_t, kCospi32[4]) = { 0, 15137, 11585,
-                                                             6270 };
   const int16x8_t max = vdupq_n_s16((1 << bd) - 1);
   int32x4_t c0 = vld1q_s32(input);
   int32x4_t c1 = vld1q_s32(input + 4);

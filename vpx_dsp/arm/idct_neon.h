@@ -17,17 +17,21 @@
 #include "vpx_dsp/arm/transpose_neon.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 
-DECLARE_ALIGNED(16, static const int16_t, kCospi[8]) = {
-  16384 /*  cospi_0_64 */,  15137 /* cospi_8_64 */,
-  11585 /*  cospi_16_64 */, 6270 /* cospi_24_64 */,
-  16069 /*  cospi_4_64 */,  13623 /* cospi_12_64 */,
-  -9102 /* -cospi_20_64 */, 3196 /* cospi_28_64 */
+DECLARE_ALIGNED(16, static const int16_t, kCospi[16]) = {
+  16384 /*  cospi_0_64  */, 15137 /*  cospi_8_64  */,
+  11585 /*  cospi_16_64 */, 6270 /*  cospi_24_64 */,
+  16069 /*  cospi_4_64  */, 13623 /*  cospi_12_64 */,
+  -9102 /* -cospi_20_64 */, 3196 /*  cospi_28_64 */,
+  16305 /*  cospi_2_64  */, 1606 /*  cospi_30_64 */,
+  14449 /*  cospi_10_64 */, 7723 /*  cospi_22_64 */,
+  15679 /*  cospi_6_64  */, -4756 /* -cospi_26_64 */,
+  12665 /*  cospi_14_64 */, -10394 /* -cospi_18_64 */
 };
 
 DECLARE_ALIGNED(16, static const int32_t, kCospi32[8]) = {
-  16384 /*  cospi_0_64 */,  15137 /* cospi_8_64 */,
+  16384 /*  cospi_0_64  */, 15137 /* cospi_8_64  */,
   11585 /*  cospi_16_64 */, 6270 /* cospi_24_64 */,
-  16069 /*  cospi_4_64 */,  13623 /* cospi_12_64 */,
+  16069 /*  cospi_4_64  */, 13623 /* cospi_12_64 */,
   -9102 /* -cospi_20_64 */, 3196 /* cospi_28_64 */
 };
 
@@ -460,6 +464,81 @@ static INLINE void idct8x8_64_1d_bd8(const int16x4_t cospis0,
   *io5 = vsubq_s16(step1[2], step1[5]);
   *io6 = vsubq_s16(step1[1], step1[6]);
   *io7 = vsubq_s16(step1[0], step2[7]);
+}
+
+static INLINE void idct16x16_add_wrap_low_8x2(const int32x4_t *const t32,
+                                              int16x8_t *const d0,
+                                              int16x8_t *const d1) {
+  int16x4_t t16[4];
+
+  t16[0] = vrshrn_n_s32(t32[0], 14);
+  t16[1] = vrshrn_n_s32(t32[1], 14);
+  t16[2] = vrshrn_n_s32(t32[2], 14);
+  t16[3] = vrshrn_n_s32(t32[3], 14);
+  *d0 = vcombine_s16(t16[0], t16[1]);
+  *d1 = vcombine_s16(t16[2], t16[3]);
+}
+
+static INLINE void idct_cospi_8_24_q_kernel(const int16x8_t s0,
+                                            const int16x8_t s1,
+                                            const int16x4_t cospi_0_8_16_24,
+                                            int32x4_t *const t32) {
+  t32[0] = vmull_lane_s16(vget_low_s16(s0), cospi_0_8_16_24, 3);
+  t32[1] = vmull_lane_s16(vget_high_s16(s0), cospi_0_8_16_24, 3);
+  t32[2] = vmull_lane_s16(vget_low_s16(s1), cospi_0_8_16_24, 3);
+  t32[3] = vmull_lane_s16(vget_high_s16(s1), cospi_0_8_16_24, 3);
+  t32[0] = vmlsl_lane_s16(t32[0], vget_low_s16(s1), cospi_0_8_16_24, 1);
+  t32[1] = vmlsl_lane_s16(t32[1], vget_high_s16(s1), cospi_0_8_16_24, 1);
+  t32[2] = vmlal_lane_s16(t32[2], vget_low_s16(s0), cospi_0_8_16_24, 1);
+  t32[3] = vmlal_lane_s16(t32[3], vget_high_s16(s0), cospi_0_8_16_24, 1);
+}
+
+static INLINE void idct_cospi_8_24_q(const int16x8_t s0, const int16x8_t s1,
+                                     const int16x4_t cospi_0_8_16_24,
+                                     int16x8_t *const d0, int16x8_t *const d1) {
+  int32x4_t t32[4];
+
+  idct_cospi_8_24_q_kernel(s0, s1, cospi_0_8_16_24, t32);
+  idct16x16_add_wrap_low_8x2(t32, d0, d1);
+}
+
+static INLINE void idct_cospi_8_24_neg_q(const int16x8_t s0, const int16x8_t s1,
+                                         const int16x4_t cospi_0_8_16_24,
+                                         int16x8_t *const d0,
+                                         int16x8_t *const d1) {
+  int32x4_t t32[4];
+
+  idct_cospi_8_24_q_kernel(s0, s1, cospi_0_8_16_24, t32);
+  t32[2] = vnegq_s32(t32[2]);
+  t32[3] = vnegq_s32(t32[3]);
+  idct16x16_add_wrap_low_8x2(t32, d0, d1);
+}
+
+static INLINE void idct_cospi_16_16_q(const int16x8_t s0, const int16x8_t s1,
+                                      const int16x4_t cospi_0_8_16_24,
+                                      int16x8_t *const d0,
+                                      int16x8_t *const d1) {
+  int32x4_t t32[6];
+
+  t32[4] = vmull_lane_s16(vget_low_s16(s1), cospi_0_8_16_24, 2);
+  t32[5] = vmull_lane_s16(vget_high_s16(s1), cospi_0_8_16_24, 2);
+  t32[0] = vmlsl_lane_s16(t32[4], vget_low_s16(s0), cospi_0_8_16_24, 2);
+  t32[1] = vmlsl_lane_s16(t32[5], vget_high_s16(s0), cospi_0_8_16_24, 2);
+  t32[2] = vmlal_lane_s16(t32[4], vget_low_s16(s0), cospi_0_8_16_24, 2);
+  t32[3] = vmlal_lane_s16(t32[5], vget_high_s16(s0), cospi_0_8_16_24, 2);
+  idct16x16_add_wrap_low_8x2(t32, d0, d1);
+}
+
+static INLINE void idct16x16_add8x1(int16x8_t res, uint8_t **dest,
+                                    const int stride) {
+  uint8x8_t d = vld1_u8(*dest);
+  uint16x8_t q;
+
+  res = vrshrq_n_s16(res, 6);
+  q = vaddw_u8(vreinterpretq_u16_s16(res), d);
+  d = vqmovun_s16(vreinterpretq_s16_u16(q));
+  vst1_u8(*dest, d);
+  *dest += stride;
 }
 
 #endif  // VPX_DSP_ARM_IDCT_NEON_H_
