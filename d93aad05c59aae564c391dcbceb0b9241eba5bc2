@@ -359,6 +359,24 @@
     },
     {
       "key": {
+        "uuid": "77acba9b_1482509e",
+        "filename": "test/idct_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-07T02:21:27Z",
+      "side": 1,
+      "message": "\u003e ASSERT how? like add (std::nothrow) and input !\u003d NULL?\n \u003e \n \u003e or just ASSERT_TRUE the whole assignment?\n\nassert the result: input !\u003d NULL",
+      "parentUuid": "77acba9b_96ce671a",
+      "revId": "d93aad05c59aae564c391dcbceb0b9241eba5bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "77acba9b_00f131b2",
         "filename": "test/idct_test.cc",
         "patchSetId": 15
