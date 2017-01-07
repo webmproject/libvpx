@@ -271,6 +271,24 @@
     },
     {
       "key": {
+        "uuid": "77acba9b_945900a5",
+        "filename": "test/buffer.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-07T02:06:10Z",
+      "side": 1,
+      "message": "\u003e but memset writes bytes, so I\u0027m not seeing why. Is this an endian\n \u003e issue?\n \u003e \n \u003e If I call input.CheckValues() and .CheckPadding() (int16_t) I get\n \u003e correct results.\n\nOK I wasn\u0027t sure if Set() was meant to set the value of each element not a byte-wise set",
+      "parentUuid": "77acba9b_364f5b84",
+      "revId": "d93aad05c59aae564c391dcbceb0b9241eba5bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "77acba9b_60366da2",
         "filename": "test/buffer.h",
         "patchSetId": 15
