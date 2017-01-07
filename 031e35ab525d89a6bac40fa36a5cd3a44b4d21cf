@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "77acba9b_b4a0c445",
+        "filename": "test/buffer.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-07T02:21:27Z",
+      "side": 1,
+      "message": "really if you\u0027re setting bytes then 0xff would be what you wanted",
+      "revId": "031e35ab525d89a6bac40fa36a5cd3a44b4d21cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_f47cfcd5",
+        "filename": "test/buffer.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-07T02:21:27Z",
+      "side": 1,
+      "message": "these can all be *const",
+      "revId": "031e35ab525d89a6bac40fa36a5cd3a44b4d21cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
