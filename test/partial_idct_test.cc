@@ -624,6 +624,38 @@ INSTANTIATE_TEST_CASE_P(SSSE3, PartialIDctTest,
                         ::testing::ValuesIn(ssse3_partial_idct_tests));
 #endif  // HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_EMULATE_HARDWARE
 
+#if HAVE_DSPR2 && !CONFIG_EMULATE_HARDWARE && !CONFIG_VP9_HIGHBITDEPTH
+const PartialInvTxfmParam dspr2_partial_idct_tests[] = {
+  make_tuple(&vpx_fdct32x32_c, &wrapper<vpx_idct32x32_1024_add_c>,
+             &wrapper<vpx_idct32x32_1024_add_dspr2>, TX_32X32, 1024, 8, 1),
+  make_tuple(&vpx_fdct32x32_c, &wrapper<vpx_idct32x32_1024_add_c>,
+             &wrapper<vpx_idct32x32_1024_add_dspr2>, TX_32X32, 135, 8, 1),
+  make_tuple(&vpx_fdct32x32_c, &wrapper<vpx_idct32x32_1024_add_c>,
+             &wrapper<vpx_idct32x32_34_add_dspr2>, TX_32X32, 34, 8, 1),
+  make_tuple(&vpx_fdct32x32_c, &wrapper<vpx_idct32x32_1024_add_c>,
+             &wrapper<vpx_idct32x32_1_add_dspr2>, TX_32X32, 1, 8, 1),
+  make_tuple(&vpx_fdct16x16_c, &wrapper<vpx_idct16x16_256_add_c>,
+             &wrapper<vpx_idct16x16_256_add_dspr2>, TX_16X16, 256, 8, 1),
+  make_tuple(&vpx_fdct16x16_c, &wrapper<vpx_idct16x16_256_add_c>,
+             &wrapper<vpx_idct16x16_10_add_dspr2>, TX_16X16, 10, 8, 1),
+  make_tuple(&vpx_fdct16x16_c, &wrapper<vpx_idct16x16_256_add_c>,
+             &wrapper<vpx_idct16x16_1_add_dspr2>, TX_16X16, 1, 8, 1),
+  make_tuple(&vpx_fdct8x8_c, &wrapper<vpx_idct8x8_64_add_c>,
+             &wrapper<vpx_idct8x8_64_add_dspr2>, TX_8X8, 64, 8, 1),
+  make_tuple(&vpx_fdct8x8_c, &wrapper<vpx_idct8x8_64_add_c>,
+             &wrapper<vpx_idct8x8_12_add_dspr2>, TX_8X8, 12, 8, 1),
+  make_tuple(&vpx_fdct8x8_c, &wrapper<vpx_idct8x8_64_add_c>,
+             &wrapper<vpx_idct8x8_1_add_dspr2>, TX_8X8, 1, 8, 1),
+  make_tuple(&vpx_fdct4x4_c, &wrapper<vpx_idct4x4_16_add_c>,
+             &wrapper<vpx_idct4x4_16_add_dspr2>, TX_4X4, 16, 8, 1),
+  make_tuple(&vpx_fdct4x4_c, &wrapper<vpx_idct4x4_16_add_c>,
+             &wrapper<vpx_idct4x4_1_add_dspr2>, TX_4X4, 1, 8, 1)
+};
+
+INSTANTIATE_TEST_CASE_P(DSPR2, PartialIDctTest,
+                        ::testing::ValuesIn(dspr2_partial_idct_tests));
+#endif  // HAVE_DSPR2 && !CONFIG_EMULATE_HARDWARE && !CONFIG_VP9_HIGHBITDEPTH
+
 #if HAVE_MSA && !CONFIG_EMULATE_HARDWARE && !CONFIG_VP9_HIGHBITDEPTH
 // 32x32_135_ is implemented using the 1024 version.
 const PartialInvTxfmParam msa_partial_idct_tests[] = {
