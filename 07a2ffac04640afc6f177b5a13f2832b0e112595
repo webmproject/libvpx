@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b710f2cf_4d612dbb",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3800,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-01-09T11:50:02Z",
+      "side": 1,
+      "message": "We accept that conversion to integer is not required",
+      "parentUuid": "f7e0aa14_8c5e07fe",
+      "range": {
+        "startLine": 3800,
+        "startChar": 50,
+        "endLine": 3800,
+        "endChar": 60
+      },
+      "revId": "07a2ffac04640afc6f177b5a13f2832b0e112595",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f7e0aa14_ac59c319",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2017-01-06T17:15:17Z",
       "side": 1,
       "message": "I am not sure why you enforce the Q val as an integer here given that the q value returned by vp9_convert_qindex_to_q() can be non integer.",
+      "range": {
+        "startLine": 177,
+        "startChar": 4,
+        "endLine": 177,
+        "endChar": 27
+      },
+      "revId": "07a2ffac04640afc6f177b5a13f2832b0e112595",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b710f2cf_2d6ef9aa",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-01-09T11:50:02Z",
+      "side": 1,
+      "message": "We accept that vp9_convert_q_to_qindex needs to be modified to accept a floating point variable.",
+      "parentUuid": "f7e0aa14_ac59c319",
       "range": {
         "startLine": 177,
         "startChar": 4,
