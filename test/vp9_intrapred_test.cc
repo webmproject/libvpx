@@ -299,6 +299,27 @@ INSTANTIATE_TEST_CASE_P(
                        32, 8)));
 #endif  // HAVE_NEON
 
+#if HAVE_DSPR2
+INSTANTIATE_TEST_CASE_P(
+    DSPR2, VP9IntraPredTest,
+    ::testing::Values(IntraPredParam(&vpx_dc_predictor_4x4_dspr2,
+                                     &vpx_dc_predictor_4x4_c, 4, 8),
+                      IntraPredParam(&vpx_dc_predictor_8x8_dspr2,
+                                     &vpx_dc_predictor_8x8_c, 8, 8),
+                      IntraPredParam(&vpx_dc_predictor_16x16_dspr2,
+                                     &vpx_dc_predictor_16x16_c, 16, 8),
+                      IntraPredParam(&vpx_h_predictor_4x4_dspr2,
+                                     &vpx_h_predictor_4x4_c, 4, 8),
+                      IntraPredParam(&vpx_h_predictor_8x8_dspr2,
+                                     &vpx_h_predictor_8x8_c, 8, 8),
+                      IntraPredParam(&vpx_h_predictor_16x16_dspr2,
+                                     &vpx_h_predictor_16x16_c, 16, 8),
+                      IntraPredParam(&vpx_tm_predictor_4x4_dspr2,
+                                     &vpx_tm_predictor_4x4_c, 4, 8),
+                      IntraPredParam(&vpx_tm_predictor_8x8_dspr2,
+                                     &vpx_tm_predictor_8x8_c, 8, 8)));
+#endif  // HAVE_DSPR2
+
 #if HAVE_MSA
 INSTANTIATE_TEST_CASE_P(
     MSA, VP9IntraPredTest,
