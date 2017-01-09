@@ -289,6 +289,24 @@
     },
     {
       "key": {
+        "uuid": "77acba9b_ce5e8392",
+        "filename": "test/buffer.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-09T18:37:17Z",
+      "side": 1,
+      "message": "Eeek yeah no you were right. My really bad fault.",
+      "parentUuid": "77acba9b_945900a5",
+      "revId": "d93aad05c59aae564c391dcbceb0b9241eba5bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "77acba9b_60366da2",
         "filename": "test/buffer.h",
         "patchSetId": 15
@@ -371,6 +389,24 @@
       "side": 1,
       "message": "\u003e ASSERT how? like add (std::nothrow) and input !\u003d NULL?\n \u003e \n \u003e or just ASSERT_TRUE the whole assignment?\n\nassert the result: input !\u003d NULL",
       "parentUuid": "77acba9b_96ce671a",
+      "revId": "d93aad05c59aae564c391dcbceb0b9241eba5bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_2e6e1f3e",
+        "filename": "test/idct_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-09T18:37:17Z",
+      "side": 1,
+      "message": "This seems kind of weird and unnecessary given how over-asserted the library itself is and seems like a weird burden to place on callers.",
+      "parentUuid": "77acba9b_1482509e",
       "revId": "d93aad05c59aae564c391dcbceb0b9241eba5bc2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
