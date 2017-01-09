@@ -560,6 +560,8 @@ int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
   // In CBR mode, this makes sure q is between oscillating Qs to prevent
   // resonance.
   if (cpi->oxcf.rc_mode == VPX_CBR &&
+      (!cpi->oxcf.gf_cbr_boost_pct ||
+       !(cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame)) &&
       (cpi->rc.rc_1_frame * cpi->rc.rc_2_frame == -1) &&
       cpi->rc.q_1_frame != cpi->rc.q_2_frame) {
     q = clamp(q, VPXMIN(cpi->rc.q_1_frame, cpi->rc.q_2_frame),
