@@ -456,12 +456,13 @@ typedef struct SPEED_FEATURES {
   int short_circuit_flat_blocks;
 
   // Skip a number of expensive mode evaluations for blocks with very low
-  // temporal variance.
+  // temporal variance. If the low temporal variance flag is set for a block,
+  // do the following:
   // 1: Skip all golden modes and ALL INTRA for bsize >= 32x32.
   // 2: Skip golden non-zeromv and newmv-last for bsize >= 16x16, skip ALL
   // INTRA for bsize >= 32x32 and vert/horz INTRA for bsize 16x16, 16x32 and
   // 32x16.
-  // 3: Same as (2), but also skip golden zeromv for low res.
+  // 3: Same as (2), but also skip golden zeromv.
   int short_circuit_low_temp_var;
 
   // Limits the rd-threshold update for early exit for the newmv-last mode,
