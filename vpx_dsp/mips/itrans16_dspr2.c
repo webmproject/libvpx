@@ -983,6 +983,47 @@ void vpx_idct16x16_1_add_dspr2(const int16_t *input, uint8_t *dest,
             [dest] "+&r"(dest)
           : [stride] "r"(stride), [vector_a1] "r"(vector_a1));
     }
+  } else if (a1 > 255) {
+    int32_t a11, a12, vector_a11, vector_a12;
+
+    /* use quad-byte
+     * input and output memory are four byte aligned */
+    a11 = a1 >> 1;
+    a12 = a1 - a11;
+    __asm__ __volatile__(
+        "replv.qb       %[vector_a11],  %[a11]     \n\t"
+        "replv.qb       %[vector_a12],  %[a12]     \n\t"
+
+        : [vector_a11] "=&r"(vector_a11), [vector_a12] "=&r"(vector_a12)
+        : [a11] "r"(a11), [a12] "r"(a12));
+
+    for (r = 16; r--;) {
+      __asm__ __volatile__(
+          "lw             %[t1],          0(%[dest])                      \n\t"
+          "lw             %[t2],          4(%[dest])                      \n\t"
+          "lw             %[t3],          8(%[dest])                      \n\t"
+          "lw             %[t4],          12(%[dest])                     \n\t"
+          "addu_s.qb      %[vector_1],    %[t1],          %[vector_a11]   \n\t"
+          "addu_s.qb      %[vector_2],    %[t2],          %[vector_a11]   \n\t"
+          "addu_s.qb      %[vector_3],    %[t3],          %[vector_a11]   \n\t"
+          "addu_s.qb      %[vector_4],    %[t4],          %[vector_a11]   \n\t"
+          "addu_s.qb      %[vector_1],    %[vector_1],    %[vector_a12]   \n\t"
+          "addu_s.qb      %[vector_2],    %[vector_2],    %[vector_a12]   \n\t"
+          "addu_s.qb      %[vector_3],    %[vector_3],    %[vector_a12]   \n\t"
+          "addu_s.qb      %[vector_4],    %[vector_4],    %[vector_a12]   \n\t"
+          "sw             %[vector_1],    0(%[dest])                      \n\t"
+          "sw             %[vector_2],    4(%[dest])                      \n\t"
+          "sw             %[vector_3],    8(%[dest])                      \n\t"
+          "sw             %[vector_4],    12(%[dest])                     \n\t"
+          "add            %[dest],        %[dest],        %[stride]       \n\t"
+
+          : [t1] "=&r"(t1), [t2] "=&r"(t2), [t3] "=&r"(t3), [t4] "=&r"(t4),
+            [vector_1] "=&r"(vector_1), [vector_2] "=&r"(vector_2),
+            [vector_3] "=&r"(vector_3), [vector_4] "=&r"(vector_4),
+            [dest] "+&r"(dest)
+          : [stride] "r"(stride), [vector_a11] "r"(vector_a11),
+            [vector_a12] "r"(vector_a12));
+    }
   } else {
     /* use quad-byte
      * input and output memory are four byte aligned */
