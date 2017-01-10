@@ -1,0 +1,187 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f74a6a97_db33c106",
+        "filename": "vp9/common/vp9_thread_common.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-10T01:24:35Z",
+      "side": 1,
+      "message": "The above 2 structs are only used in the encoder and should be placed under /vp9/encoder instead of /vp9/common.",
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_54391d8e",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-10T01:24:35Z",
+      "side": 1,
+      "message": "Could you add a comment to state that this is used in first pass only, and also why we need it? Thanks.",
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_94165572",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 4012,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-10T01:24:35Z",
+      "side": 1,
+      "message": "Could you move this to vp9_encode_fp_tiles_row_mt()?",
+      "range": {
+        "startLine": 4011,
+        "startChar": 1,
+        "endLine": 4012,
+        "endChar": 36
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_5414bd64",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 4049,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-10T01:24:35Z",
+      "side": 1,
+      "message": "same as above",
+      "range": {
+        "startLine": 4049,
+        "startChar": 0,
+        "endLine": 4049,
+        "endChar": 30
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_8ace3044",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2181,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-10T01:24:35Z",
+      "side": 1,
+      "message": "Is it possible that threads\u003d1 when cpi-\u003enew_mt\u003d1? Do you need to add more condition \"cpi-\u003enum_workers \u003e 1\"?",
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_cf983ac7",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-10T01:24:35Z",
+      "side": 1,
+      "message": "Could you point out where these 2 variables are used?",
+      "range": {
+        "startLine": 271,
+        "startChar": 2,
+        "endLine": 272,
+        "endChar": 28
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_5b2a30ef",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-10T01:24:35Z",
+      "side": 1,
+      "message": "Pass in \u0026cpi-\u003etile_thr_data[0] is kind of confusing. Maybe remove data1 or just pass in NULL?",
+      "range": {
+        "startLine": 212,
+        "startChar": 21,
+        "endLine": 212,
+        "endChar": 43
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_4a633834",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-10T01:24:35Z",
+      "side": 1,
+      "message": "As I understand, the sync_read \u0026 sync_write are used to protect row stat accumulating. Is it possible to move accumulate_fp_mb_row_stat() to vp9_first_pass_encode_tile_mb_row()? Do it at last mb of the row. Then write cur_col after that. This may eliminate the need for top_row_sync. What do you think?",
+      "range": {
+        "startLine": 427,
+        "startChar": 6,
+        "endLine": 429,
+        "endChar": 66
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f74a6a97_5bccd1c8",
+        "filename": "vp9/encoder/vp9_multi_thread.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-10T01:24:35Z",
+      "side": 1,
+      "message": "Could you use cm-\u003emi_cols, cm-\u003emi_rows, cm-\u003emb_cols, and cm-\u003emb_rows instead?",
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
