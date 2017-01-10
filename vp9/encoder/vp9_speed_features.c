@@ -521,6 +521,14 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed,
         content != VP9E_CONTENT_SCREEN) {
       // More aggressive short circuit for speed 8.
       sf->short_circuit_low_temp_var = 3;
+      // Use level 2 for noisey cases as there is a regression in some
+      // noisy clips with level 3.
+      if (cpi->noise_estimate.enabled && cm->width >= 1280 &&
+          cm->height >= 720) {
+        NOISE_LEVEL noise_level =
+            vp9_noise_estimate_extract_level(&cpi->noise_estimate);
+        if (noise_level >= kMedium) sf->short_circuit_low_temp_var = 2;
+      }
     }
     sf->limit_newmv_early_exit = 0;
   }
