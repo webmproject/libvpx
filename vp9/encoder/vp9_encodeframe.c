@@ -516,6 +516,7 @@ void vp9_set_variance_partition_thresholds(VP9_COMP *cpi, int q) {
     // The thresholds below are not changed locally.
     if (is_key_frame) {
       cpi->vbp_threshold_sad = 0;
+      cpi->vbp_threshold_copy = 0;
       cpi->vbp_bsize_min = BLOCK_8X8;
     } else {
       if (cm->width <= 352 && cm->height <= 288)
@@ -525,8 +526,13 @@ void vp9_set_variance_partition_thresholds(VP9_COMP *cpi, int q) {
                                      ? (cpi->y_dequant[q][1] << 1)
                                      : 1000;
       cpi->vbp_bsize_min = BLOCK_16X16;
+      if (cm->width <= 352 && cm->height <= 288)
+        cpi->vbp_threshold_copy = 40960;
+      else
+        cpi->vbp_threshold_copy = (cpi->y_dequant[q][1] << 6) > 32000
+                                      ? (cpi->y_dequant[q][1] << 6)
+                                      : 32000;
     }
-    cpi->vbp_threshold_copy = cpi->vbp_thresholds[0] << 16;
     cpi->vbp_threshold_minmax = 15 + (q >> 3);
   }
 }
