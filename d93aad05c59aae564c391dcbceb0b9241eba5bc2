@@ -413,6 +413,24 @@
     },
     {
       "key": {
+        "uuid": "77acba9b_807e0f7e",
+        "filename": "test/idct_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-10T03:34:03Z",
+      "side": 1,
+      "message": "\u003e This seems kind of weird and unnecessary given how over-asserted\n \u003e the library itself is and seems like a weird burden to place on\n \u003e callers.\n\nit\u0027s a test, there\u0027s no harm in documenting the failures. it also will quiet static analysis reports for using a NULL pointer.",
+      "parentUuid": "77acba9b_2e6e1f3e",
+      "revId": "d93aad05c59aae564c391dcbceb0b9241eba5bc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "77acba9b_00f131b2",
         "filename": "test/idct_test.cc",
         "patchSetId": 15
