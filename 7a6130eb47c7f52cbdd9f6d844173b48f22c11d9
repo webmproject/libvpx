@@ -395,6 +395,30 @@
     },
     {
       "key": {
+        "uuid": "b7d8f2b0_adfe29f4",
+        "filename": "vp9/encoder/vp9_job_queue.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-01-11T14:14:27Z",
+      "side": 1,
+      "message": "Multi-threading any other stages may have different elements in job_node_t. Having this kind of implementation will make the code scalable for any future changes. However we have used one structure for now as per your comments. Please let us know your thoughts.",
+      "parentUuid": "77acba9b_1ba6e960",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 17
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f74a6a97_5bccd1c8",
         "filename": "vp9/encoder/vp9_multi_thread.c",
         "patchSetId": 4
