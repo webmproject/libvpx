@@ -122,6 +122,98 @@
     },
     {
       "key": {
+        "uuid": "77acba9b_bbb89da4",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-11T01:18:13Z",
+      "side": 1,
+      "message": "\"enc\" and \"arnr\" may share 1 JobQueueHandle ? This should remove duplicate code in vp9_prepare_job_queue().",
+      "range": {
+        "startLine": 279,
+        "startChar": 0,
+        "endLine": 280,
+        "endChar": 34
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_9b1d99db",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-11T01:18:13Z",
+      "side": 1,
+      "message": "may not be necessary",
+      "range": {
+        "startLine": 285,
+        "startChar": 0,
+        "endLine": 286,
+        "endChar": 18
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_5bf5c15e",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-11T01:18:13Z",
+      "side": 1,
+      "message": "same as above",
+      "range": {
+        "startLine": 296,
+        "startChar": 0,
+        "endLine": 297,
+        "endChar": 18
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_fb5e9591",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-11T01:18:13Z",
+      "side": 1,
+      "message": "same as above",
+      "range": {
+        "startLine": 301,
+        "startChar": 0,
+        "endLine": 302,
+        "endChar": 18
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "77acba9b_5b2a30ef",
         "filename": "vp9/encoder/vp9_ethread.c",
         "patchSetId": 4
@@ -161,6 +253,75 @@
         "startChar": 6,
         "endLine": 429,
         "endChar": 66
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_6db9ec10",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 723,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-11T01:18:13Z",
+      "side": 1,
+      "message": "Where this comes from? Should this be 0 by default in 1st pass?",
+      "range": {
+        "startLine": 723,
+        "startChar": 2,
+        "endLine": 723,
+        "endChar": 21
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_3073c756",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 790,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-11T01:18:13Z",
+      "side": 1,
+      "message": "Could you explain this part?",
+      "range": {
+        "startLine": 787,
+        "startChar": 0,
+        "endLine": 790,
+        "endChar": 5
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77acba9b_1ba6e960",
+        "filename": "vp9/encoder/vp9_job_queue.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-11T01:18:13Z",
+      "side": 1,
+      "message": "Is there a reason to define 2 structs instead of using 1?\n\n\"enc\" and \"arnr\" tasks don\u0027t happen at the same time. It will be better if they can share some data.",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 17
       },
       "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
