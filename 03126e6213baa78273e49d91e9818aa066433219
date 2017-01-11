@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "83de51f5_5e8cd98e",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 518,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-01-11T18:33:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "83de51f5_fe5b4d62",
+      "revId": "03126e6213baa78273e49d91e9818aa066433219",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "83de51f5_3eff95f0",
         "filename": "vp9/encoder/vp9_speed_features.c",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2017-01-11T18:20:05Z",
       "side": 1,
       "message": "Try using the condition:\nif (!cpi-\u003euse_svc \u0026\u0026 !cpi-\u003eresize_pending \u0026\u0026 !cpi-\u003eresize_state \u0026\u0026 !cpi-\u003eexternal_resize)\n  sf-\u003ecopy_partition_flag \u003d 1;",
+      "revId": "03126e6213baa78273e49d91e9818aa066433219",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "83de51f5_3e5315d7",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 504,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-01-11T18:33:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "83de51f5_3eff95f0",
       "revId": "03126e6213baa78273e49d91e9818aa066433219",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
