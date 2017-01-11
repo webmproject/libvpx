@@ -99,6 +99,24 @@
     },
     {
       "key": {
+        "uuid": "b7d8f2b0_cafd43f8",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2181,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-01-11T13:43:20Z",
+      "side": 1,
+      "message": "For threads\u003d1 and cpi-\u003enew_mt\u003d1, the code flows through row based multi-threading path. This would ensure that stats files are bit-exact with each other for different thread configurations when cpi-\u003enew_mt \u003d 1 (but don\u0027t match with reference). Hence the code is as expected.",
+      "parentUuid": "77acba9b_8ace3044",
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "77acba9b_cf983ac7",
         "filename": "vp9/encoder/vp9_encoder.h",
         "patchSetId": 4
@@ -133,6 +151,30 @@
       "writtenOn": "2017-01-11T01:18:13Z",
       "side": 1,
       "message": "\"enc\" and \"arnr\" may share 1 JobQueueHandle ? This should remove duplicate code in vp9_prepare_job_queue().",
+      "range": {
+        "startLine": 279,
+        "startChar": 0,
+        "endLine": 280,
+        "endChar": 34
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7d8f2b0_0d07753d",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-01-11T13:43:20Z",
+      "side": 1,
+      "message": "Having separate job handles will help in collapsing enc and arnr filtering stages together in future, if required (to save thread wastage/to aid accelerated implementation).",
+      "parentUuid": "77acba9b_bbb89da4",
       "range": {
         "startLine": 279,
         "startChar": 0,
@@ -294,6 +336,30 @@
       "writtenOn": "2017-01-11T01:18:13Z",
       "side": 1,
       "message": "Could you explain this part?",
+      "range": {
+        "startLine": 787,
+        "startChar": 0,
+        "endLine": 790,
+        "endChar": 5
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7d8f2b0_6d143165",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 790,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-01-11T13:43:20Z",
+      "side": 1,
+      "message": "These changes are to facilitate getting the intra pred data based on source pixels at tile boundaries. This is required as reconstructed left data may not be available at tile boundaries.",
+      "parentUuid": "77acba9b_3073c756",
       "range": {
         "startLine": 787,
         "startChar": 0,
