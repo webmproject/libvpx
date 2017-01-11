@@ -66,27 +66,27 @@ class LevelTest
   int level_;
 };
 
-TEST_P(LevelTest, TestTargetLevel11) {
+TEST_P(LevelTest, TestTargetLevel11Large) {
   ASSERT_NE(encoding_mode_, ::libvpx_test::kRealTime);
   ::libvpx_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
-                                       90);
+                                       60);
   target_level_ = 11;
   cfg_.rc_target_bitrate = 150;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   ASSERT_EQ(target_level_, level_);
 }
 
-TEST_P(LevelTest, TestTargetLevel20) {
+TEST_P(LevelTest, TestTargetLevel20Large) {
   ASSERT_NE(encoding_mode_, ::libvpx_test::kRealTime);
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                       30, 1, 0, 90);
+                                       30, 1, 0, 60);
   target_level_ = 20;
   cfg_.rc_target_bitrate = 1200;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   ASSERT_EQ(target_level_, level_);
 }
 
-TEST_P(LevelTest, TestTargetLevel31) {
+TEST_P(LevelTest, TestTargetLevel31Large) {
   ASSERT_NE(encoding_mode_, ::libvpx_test::kRealTime);
   ::libvpx_test::I420VideoSource video("niklas_1280_720_30.y4m", 1280, 720, 30,
                                        1, 0, 60);
