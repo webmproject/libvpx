@@ -90,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "83de51f5_433de6dc",
+        "filename": "test/buffer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-11T16:28:51Z",
+      "side": 1,
+      "message": "Removed it. There were other error messages printed before too but I think the ASSERT/EXPECT from the test using the library should be enough to figure out where to start looking.",
+      "parentUuid": "83de51f5_35e9f887",
+      "revId": "8e90ff3ce646a17ac56454f7671b9210ae843c42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "83de51f5_52d612aa",
         "filename": "test/buffer.h",
         "patchSetId": 20
