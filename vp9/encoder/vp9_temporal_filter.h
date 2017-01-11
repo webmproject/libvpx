@@ -15,6 +15,8 @@
 extern "C" {
 #endif
 
+#define ARNR_FILT_QINDEX 128
+
 void vp9_temporal_filter_init(void);
 void vp9_temporal_filter(VP9_COMP *cpi, int distance);
 
