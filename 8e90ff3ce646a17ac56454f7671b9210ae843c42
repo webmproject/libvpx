@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "83de51f5_35e9f887",
+        "filename": "test/buffer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-11T04:37:44Z",
+      "side": 1,
+      "message": "\u003e This printed the off value. Could easily drop it and rely on the\n \u003e consumer to DumpBuffer() if they really want to see what\n \u003e mismatched.\n\nEXPECT_EQ() could do the same, that tied with a wrapped call would give some detail. You\u0027d have to change the callers to just do an if (!...) Dump or use EXPECT in the other case.",
+      "parentUuid": "83de51f5_95b224d1",
+      "revId": "8e90ff3ce646a17ac56454f7671b9210ae843c42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "83de51f5_52d612aa",
         "filename": "test/buffer.h",
         "patchSetId": 20
