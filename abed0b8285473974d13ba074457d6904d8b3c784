@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "83de51f5_7ee75df6",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 530,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-01-11T18:36:24Z",
+      "side": 1,
+      "message": "should the lines 530 - 535 should go inside the else {}, \nsince for key frame its set to 0 (off).",
+      "revId": "abed0b8285473974d13ba074457d6904d8b3c784",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
