@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "83de51f5_d270c2f5",
+        "filename": "test/buffer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-11T02:25:54Z",
+      "side": 1,
+      "message": "not necessary now, but these functions could actually have their own tests to ensure the padding checks work as expected",
+      "revId": "8e90ff3ce646a17ac56454f7671b9210ae843c42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "83de51f5_d2c202e6",
+        "filename": "test/buffer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-11T02:25:54Z",
+      "side": 1,
+      "message": "this could be an EXPECT or nothing if the caller is going to wrap it",
+      "revId": "8e90ff3ce646a17ac56454f7671b9210ae843c42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "83de51f5_52d612aa",
+        "filename": "test/buffer.h",
+        "patchSetId": 20
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-11T02:25:54Z",
+      "side": 1,
+      "message": "do you want some EXPECT\u0027s here or are the callers going to wrap this",
+      "revId": "8e90ff3ce646a17ac56454f7671b9210ae843c42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "83de51f5_7250f642",
+        "filename": "test/idct_test.cc",
+        "patchSetId": 20
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-11T02:25:54Z",
+      "side": 1,
+      "message": "this seems to have changed from the earlier code. was the else never getting hit?",
+      "revId": "8e90ff3ce646a17ac56454f7671b9210ae843c42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
