@@ -187,6 +187,30 @@
     },
     {
       "key": {
+        "uuid": "83de51f5_a2060304",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-12T05:14:24Z",
+      "side": 1,
+      "message": "Are you talking about collapsing 2nd pass enc and arnr? In second pass, the alt_ref is first filtered using arnr filter, then encode the frame - they two should always happens in serial order. Right?",
+      "parentUuid": "b7d8f2b0_0d07753d",
+      "range": {
+        "startLine": 279,
+        "startChar": 0,
+        "endLine": 280,
+        "endChar": 34
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "77acba9b_9b1d99db",
         "filename": "vp9/encoder/vp9_encoder.h",
         "patchSetId": 4
@@ -372,6 +396,30 @@
     },
     {
       "key": {
+        "uuid": "83de51f5_c2a787f7",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 790,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-12T05:14:24Z",
+      "side": 1,
+      "message": "x-\u003eskip_encode \u003d 1 is a speed feature for real time encoding. I don\u0027t think it is a good choice to use it here. Here, for the first mb column in a tile, xd-\u003eleft_mi \u003d NULL, then, in build_intra_predictors(), left_available should be 0, so the dst be filled with 129. I didn\u0027t test it myself. Could you test to see if it is true?",
+      "parentUuid": "b7d8f2b0_6d143165",
+      "range": {
+        "startLine": 787,
+        "startChar": 0,
+        "endLine": 790,
+        "endChar": 5
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "77acba9b_1ba6e960",
         "filename": "vp9/encoder/vp9_job_queue.h",
         "patchSetId": 4
@@ -430,6 +478,52 @@
       "writtenOn": "2017-01-10T01:24:35Z",
       "side": 1,
       "message": "Could you use cm-\u003emi_cols, cm-\u003emi_rows, cm-\u003emb_cols, and cm-\u003emb_rows instead?",
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "83de51f5_782d3066",
+        "filename": "vp9/encoder/vp9_multi_thread.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-12T05:14:24Z",
+      "side": 1,
+      "message": "This is a reasonable way. Just thought - in some cases, if this function gets called often, what is the overhead caused by this calculation? Could we instead use (job_que_hndl-\u003etotal_jobs - job_que_hndl-\u003enum_jobs_acquired) if we know there is same job_que_hndl-\u003etotal_jobs in every tile.",
+      "range": {
+        "startLine": 237,
+        "startChar": 2,
+        "endLine": 238,
+        "endChar": 75
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "83de51f5_d8d21c3d",
+        "filename": "vp9/encoder/vp9_multi_thread.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-12T05:14:24Z",
+      "side": 1,
+      "message": "When a thread calls this function, it knows the cur_tile_id is done. The for loop always checks all tiles, which seems not efficient. Can we reduce the checks to lower the sync overhead?",
+      "range": {
+        "startLine": 323,
+        "startChar": 0,
+        "endLine": 329,
+        "endChar": 3
+      },
       "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
