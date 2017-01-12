@@ -235,6 +235,30 @@
     },
     {
       "key": {
+        "uuid": "83de51f5_47708482",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-12T19:19:51Z",
+      "side": 1,
+      "message": "I see what you mean. Thanks for that consideration. Just thought that to achieve that it may need some structural changes in VP9 which is beyond the scope of our current project. Maybe we can merge them for now to make the code more clear.",
+      "parentUuid": "b7d8f2b0_10630c36",
+      "range": {
+        "startLine": 279,
+        "startChar": 0,
+        "endLine": 280,
+        "endChar": 34
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "77acba9b_9b1d99db",
         "filename": "vp9/encoder/vp9_encoder.h",
         "patchSetId": 4
@@ -468,6 +492,30 @@
     },
     {
       "key": {
+        "uuid": "83de51f5_a79a90b3",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 790,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-12T19:19:51Z",
+      "side": 1,
+      "message": "Yes. It makes sense. To aviod confusion, can we not use x-\u003eskip_encode, and only use x-\u003esrc_pred_recon to achieve it? Could you please add \"fp\" in src_pred_recon name and also add comment to explain the purpose of using it. Thanks!",
+      "parentUuid": "b7d8f2b0_707088f5",
+      "range": {
+        "startLine": 787,
+        "startChar": 0,
+        "endLine": 790,
+        "endChar": 5
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "77acba9b_1ba6e960",
         "filename": "vp9/encoder/vp9_job_queue.h",
         "patchSetId": 4
@@ -579,6 +627,30 @@
     },
     {
       "key": {
+        "uuid": "83de51f5_e74178f8",
+        "filename": "vp9/encoder/vp9_multi_thread.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-12T19:19:51Z",
+      "side": 1,
+      "message": "Later, we may use this in real-time encoding(maybe small resolution videos). It may help if we can simplify the calculation. Thanks.",
+      "parentUuid": "b7d8f2b0_909ffcec",
+      "range": {
+        "startLine": 237,
+        "startChar": 2,
+        "endLine": 238,
+        "endChar": 75
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "83de51f5_d8d21c3d",
         "filename": "vp9/encoder/vp9_multi_thread.c",
         "patchSetId": 4
@@ -614,6 +686,30 @@
       "side": 1,
       "message": "These checks happen during switching across tiles only. \nFor 1080p with 4 tile columns, the maximum number of switches/checks per frame is, \n4+3+2+1\u003d10  for threads\u003d4 and 2*(4+3+2+1)\u003d20 for threads\u003d8. \nWe observed that above overheads are negligible. Please let us know your comments.",
       "parentUuid": "83de51f5_d8d21c3d",
+      "range": {
+        "startLine": 323,
+        "startChar": 0,
+        "endLine": 329,
+        "endChar": 3
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "83de51f5_2af665a9",
+        "filename": "vp9/encoder/vp9_multi_thread.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-12T19:19:51Z",
+      "side": 1,
+      "message": "I think that each thread can have a data to record the tiles that are already done, so here the thread only checks the unfinished tiles. This would save the # of syncs needed. Could it be done?",
+      "parentUuid": "b7d8f2b0_506d841b",
       "range": {
         "startLine": 323,
         "startChar": 0,
