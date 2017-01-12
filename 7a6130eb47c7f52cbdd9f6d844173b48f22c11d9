@@ -211,6 +211,30 @@
     },
     {
       "key": {
+        "uuid": "b7d8f2b0_10630c36",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-01-12T13:45:09Z",
+      "side": 1,
+      "message": "Yes. However, arnr filtering jobs can be interleaved with previous frame\u0027s encoding jobs if required. This is possible as arnr frame position is known before encoding previous frame. This can be helpful in future to reduce top/thread wastage on a higher core machine. \nIn the context of current implementation, we can merge job_que_enc_hdl and job_que_arnr_hdl, tile_job_mutex and arnr_job_mutex,enc_job_queue and arnr_job_queue if you don\u0027t need above. Please let us know your thoughts.",
+      "parentUuid": "83de51f5_a2060304",
+      "range": {
+        "startLine": 279,
+        "startChar": 0,
+        "endLine": 280,
+        "endChar": 34
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "77acba9b_9b1d99db",
         "filename": "vp9/encoder/vp9_encoder.h",
         "patchSetId": 4
@@ -420,6 +444,30 @@
     },
     {
       "key": {
+        "uuid": "b7d8f2b0_707088f5",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 790,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-01-12T13:45:09Z",
+      "side": 1,
+      "message": "We have tried mentioned approach earlier. We observed that intra residual error is quite higher as the pred_dc value is quite different (because of using 129) and hence BD rate drops were seen. Using source pixels from left, solved the BD rate drop issue.",
+      "parentUuid": "83de51f5_c2a787f7",
+      "range": {
+        "startLine": 787,
+        "startChar": 0,
+        "endLine": 790,
+        "endChar": 5
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "77acba9b_1ba6e960",
         "filename": "vp9/encoder/vp9_job_queue.h",
         "patchSetId": 4
@@ -507,6 +555,30 @@
     },
     {
       "key": {
+        "uuid": "b7d8f2b0_909ffcec",
+        "filename": "vp9/encoder/vp9_multi_thread.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-01-12T13:45:09Z",
+      "side": 1,
+      "message": "As per our experiments, the overhead is negligible. However, we can do this change. Please suggest.",
+      "parentUuid": "83de51f5_782d3066",
+      "range": {
+        "startLine": 237,
+        "startChar": 2,
+        "endLine": 238,
+        "endChar": 75
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "83de51f5_d8d21c3d",
         "filename": "vp9/encoder/vp9_multi_thread.c",
         "patchSetId": 4
@@ -518,6 +590,30 @@
       "writtenOn": "2017-01-12T05:14:24Z",
       "side": 1,
       "message": "When a thread calls this function, it knows the cur_tile_id is done. The for loop always checks all tiles, which seems not efficient. Can we reduce the checks to lower the sync overhead?",
+      "range": {
+        "startLine": 323,
+        "startChar": 0,
+        "endLine": 329,
+        "endChar": 3
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7d8f2b0_506d841b",
+        "filename": "vp9/encoder/vp9_multi_thread.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-01-12T13:45:09Z",
+      "side": 1,
+      "message": "These checks happen during switching across tiles only. \nFor 1080p with 4 tile columns, the maximum number of switches/checks per frame is, \n4+3+2+1\u003d10  for threads\u003d4 and 2*(4+3+2+1)\u003d20 for threads\u003d8. \nWe observed that above overheads are negligible. Please let us know your comments.",
+      "parentUuid": "83de51f5_d8d21c3d",
       "range": {
         "startLine": 323,
         "startChar": 0,
