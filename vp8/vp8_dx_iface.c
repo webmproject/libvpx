@@ -535,6 +535,14 @@ static vpx_codec_err_t vp8_get_reference(vpx_codec_alg_priv_t *ctx,
   }
 }
 
+static vpx_codec_err_t vp8_get_quantizer(vpx_codec_alg_priv_t *ctx,
+                                         va_list args) {
+  int *const arg = va_arg(args, int *);
+  if (arg == NULL) return VPX_CODEC_INVALID_PARAM;
+  *arg = vp8dx_get_quantizer(ctx->yv12_frame_buffers.pbi[0]);
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_err_t vp8_set_postproc(vpx_codec_alg_priv_t *ctx,
                                         va_list args) {
 #if CONFIG_POSTPROC
@@ -627,6 +635,7 @@ vpx_codec_ctrl_fn_map_t vp8_ctf_maps[] = {
   { VP8D_GET_LAST_REF_UPDATES, vp8_get_last_ref_updates },
   { VP8D_GET_FRAME_CORRUPTED, vp8_get_frame_corrupted },
   { VP8D_GET_LAST_REF_USED, vp8_get_last_ref_frame },
+  { VPXD_GET_LAST_QUANTIZER, vp8_get_quantizer },
   { VPXD_SET_DECRYPTOR, vp8_set_decryptor },
   { -1, NULL },
 };

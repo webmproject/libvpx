@@ -52,6 +52,7 @@ vpx_codec_err_t vp8dx_get_reference(struct VP8D_COMP *comp,
 vpx_codec_err_t vp8dx_set_reference(struct VP8D_COMP *comp,
                                     enum vpx_ref_frame_type ref_frame_flag,
                                     YV12_BUFFER_CONFIG *sd);
+int vp8dx_get_quantizer(const struct VP8D_COMP *c);
 
 #ifdef __cplusplus
 }

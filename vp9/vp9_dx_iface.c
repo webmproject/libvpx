@@ -832,6 +832,15 @@ static vpx_codec_err_t ctrl_set_postproc(vpx_codec_alg_priv_t *ctx,
 #endif
 }
 
+static vpx_codec_err_t ctrl_get_quantizer(vpx_codec_alg_priv_t *ctx,
+                                          va_list args) {
+  int *const arg = va_arg(args, int *);
+  if (arg == NULL) return VPX_CODEC_INVALID_PARAM;
+  *arg =
+      ((FrameWorkerData *)ctx->frame_workers[0].data1)->pbi->common.base_qindex;
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_err_t ctrl_get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
                                                  va_list args) {
   int *const update_info = va_arg(args, int *);
@@ -1027,6 +1036,7 @@ static vpx_codec_ctrl_fn_map_t decoder_ctrl_maps[] = {
   { VP9_DECODE_SVC_SPATIAL_LAYER, ctrl_set_spatial_layer_svc },
 
   // Getters
+  { VPXD_GET_LAST_QUANTIZER, ctrl_get_quantizer },
   { VP8D_GET_LAST_REF_UPDATES, ctrl_get_last_ref_updates },
   { VP8D_GET_FRAME_CORRUPTED, ctrl_get_frame_corrupted },
   { VP9_GET_REFERENCE, ctrl_get_reference },
