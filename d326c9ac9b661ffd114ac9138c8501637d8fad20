@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "83de51f5_f6c36435",
+        "filename": "test/buffer.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-12T23:57:30Z",
+      "side": 1,
+      "message": "these inner ()s aren\u0027t necessary",
+      "range": {
+        "startLine": 133,
+        "startChar": 6,
+        "endLine": 133,
+        "endChar": 7
+      },
+      "revId": "d326c9ac9b661ffd114ac9138c8501637d8fad20",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "83de51f5_8a718c4b",
+        "filename": "test/buffer.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-12T23:57:30Z",
+      "side": 1,
+      "message": "should be height_ no? maybe a private BufferSizesMatch() function would be helpful",
+      "revId": "d326c9ac9b661ffd114ac9138c8501637d8fad20",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "83de51f5_6aa6a897",
+        "filename": "test/buffer.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-12T23:57:30Z",
+      "side": 1,
+      "message": "postfix is a bit inconsistent with other functions, though we don\u0027t have a style preference for POD types now",
+      "range": {
+        "startLine": 144,
+        "startChar": 40,
+        "endLine": 144,
+        "endChar": 49
+      },
+      "revId": "d326c9ac9b661ffd114ac9138c8501637d8fad20",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "83de51f5_76af7485",
+        "filename": "test/buffer.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-12T23:57:30Z",
+      "side": 1,
+      "message": "same here",
+      "range": {
+        "startLine": 171,
+        "startChar": 6,
+        "endLine": 171,
+        "endChar": 7
+      },
+      "revId": "d326c9ac9b661ffd114ac9138c8501637d8fad20",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
