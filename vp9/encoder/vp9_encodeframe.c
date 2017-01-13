@@ -1193,7 +1193,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     // variance over the sub-32x32 blocks, then force this block to split.
     // Only checking this for noise level >= medium for now.
     if (!is_key_frame && noise_level >= kMedium &&
-        vt.part_variances.none.variance > (5 * avg_32x32) >> 4)
+        vt.part_variances.none.variance > (9 * avg_32x32) >> 5)
       force_split[0] = 1;
     // Else if the maximum 32x32 variance minus the miniumum 32x32 variance in
     // a 64x64 block is greater than threshold and the maximum 32x32 variance is

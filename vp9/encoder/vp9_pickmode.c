@@ -1577,8 +1577,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       continue;
     }
 
-    if (cpi->sf.short_circuit_low_temp_var >= 2 && force_skip_low_temp_var &&
-        ref_frame == LAST_FRAME && this_mode == NEWMV) {
+    if ((cpi->sf.short_circuit_low_temp_var >= 2 ||
+         (cpi->sf.short_circuit_low_temp_var == 1 && bsize == BLOCK_64X64)) &&
+        force_skip_low_temp_var && ref_frame == LAST_FRAME &&
+        this_mode == NEWMV) {
       continue;
     }
 
