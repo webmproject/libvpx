@@ -478,6 +478,10 @@ typedef struct SPEED_FEATURES {
 
   // Global flag to enable partition copy from the previous frame.
   int copy_partition_flag;
+
+  // Compute the source sad for every superblock of the frame,
+  // prior to encoding the frame, to be used to bypass some encoder decisions.
+  int use_source_sad;
 } SPEED_FEATURES;
 
 struct VP9_COMP;
