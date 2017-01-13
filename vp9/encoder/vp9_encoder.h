@@ -633,6 +633,12 @@ typedef struct VP9_COMP {
   // Previous Partition Info
   BLOCK_SIZE *prev_partition;
   int8_t *prev_segment_id;
+  // Used to save the status of whether a block has a low variance in
+  // choose_partitioning. 0 for 64x64, 1~2 for 64x32, 3~4 for 32x64, 5~8 for
+  // 32x32, 9~24 for 16x16.
+  // This is for the last frame and is copied to the current frame
+  // when partition copy happens.
+  uint8_t *prev_variance_low;
 
   LevelConstraint level_constraint;
 } VP9_COMP;
