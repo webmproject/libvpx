@@ -10,10 +10,6 @@
 
 %include "third_party/x86inc/x86inc.asm"
 
-; This file provides SSSE3 version of the inverse transformation. Part
-; of the functions are originally derived from the ffmpeg project.
-; Note that the current version applies to x86 64-bit only.
-
 SECTION_RODATA
 
 pw_11585x2: times 8 dw 23170
@@ -141,31 +137,44 @@ SECTION .text
   packssdw           m%2, m%6
 %endmacro
 
-; matrix transpose
-%macro INTERLEAVE_2X 4
-  punpckh%1          m%4, m%2, m%3
-  punpckl%1          m%2, m%3
-  SWAP               %3,  %4
-%endmacro
+; 8x8 transpose. This follows same operations as SSE2 does.
+%macro TRANSPOSE8X8 10
+  ; stage 1
+  punpcklwd  m%9, m%1, m%2
+  punpcklwd  m%10, m%3, m%4
+  punpckhwd  m%1, m%2
+  punpckhwd  m%3, m%4
 
-%macro TRANSPOSE8X8 9
-  INTERLEAVE_2X  wd, %1, %2, %9
-  INTERLEAVE_2X  wd, %3, %4, %9
-  INTERLEAVE_2X  wd, %5, %6, %9
-  INTERLEAVE_2X  wd, %7, %8, %9
+  punpcklwd  m%2, m%5, m%6
+  punpcklwd  m%4, m%7, m%8
+  punpckhwd  m%5, m%6
+  punpckhwd  m%7, m%8
 
-  INTERLEAVE_2X  dq, %1, %3, %9
-  INTERLEAVE_2X  dq, %2, %4, %9
-  INTERLEAVE_2X  dq, %5, %7, %9
-  INTERLEAVE_2X  dq, %6, %8, %9
+  ; stage 2
+  punpckldq  m%6, m%9, m%10
+  punpckldq  m%8, m%1, m%3
+  punpckhdq  m%9, m%10
+  punpckhdq  m%1, m%3
 
-  INTERLEAVE_2X  qdq, %1, %5, %9
-  INTERLEAVE_2X  qdq, %3, %7, %9
-  INTERLEAVE_2X  qdq, %2, %6, %9
-  INTERLEAVE_2X  qdq, %4, %8, %9
+  punpckldq  m%10, m%2, m%4
+  punpckldq  m%3, m%5, m%7
+  punpckhdq  m%2, m%4
+  punpckhdq  m%5, m%7
 
-  SWAP  %2, %5
-  SWAP  %4, %7
+  ; stage 3
+  punpckhqdq  m%4, m%9, m%2  ; out3
+  punpcklqdq  m%9, m%2       ; out2
+  punpcklqdq  m%7, m%1, m%5  ; out6
+  punpckhqdq  m%1, m%5       ; out7
+
+  punpckhqdq  m%2, m%6, m%10 ; out1
+  punpcklqdq  m%6, m%10      ; out0
+  punpcklqdq  m%5, m%8, m%3  ; out4
+  punpckhqdq  m%8, m%3       ; out5
+
+  SWAP %6, %1
+  SWAP %3, %9
+  SWAP %8, %6
 %endmacro
 
 %macro IDCT8_1D 0
@@ -247,9 +256,9 @@ cglobal idct8x8_64_add, 3, 5, 13, input, output, stride
   mova     m6, [inputq +  96]
   mova     m7, [inputq + 112]
 %endif
-  TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9
+  TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9, 10
   IDCT8_1D
-  TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9
+  TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9, 10
   IDCT8_1D
 
   pxor    m12, m12
@@ -821,7 +830,7 @@ idct32x32_34_transpose:
   mova            m7, [r3 + 16 * 28]
 %endif
 
-  TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9
+  TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9, 10
 
   IDCT32X32_34  16*0, 16*32, 16*64, 16*96
   lea            stp, [stp + 16 * 8]
@@ -843,7 +852,7 @@ idct32x32_34_transpose_2:
   mova            m6, [r3 + 16 * 6]
   mova            m7, [r3 + 16 * 7]
 
-  TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9
+  TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9, 10
 
   IDCT32X32_34  16*0, 16*8, 16*16, 16*24
 
@@ -1250,7 +1259,7 @@ idct32x32_135_transpose:
   mova            m6, [r3 + 16 * 24]
   mova            m7, [r3 + 16 * 28]
 %endif
-  TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9
+  TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9, 10
 
   mova [r4 +      0], m0
   mova [r4 + 16 * 1], m1
@@ -1299,7 +1308,7 @@ idct32x32_135_transpose_2:
   mova            m6, [r3 + 16 * 6]
   mova            m7, [r3 + 16 * 7]
 
-  TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9
+  TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9, 10
 
   mova [r4 +      0], m0
   mova [r4 + 16 * 1], m1
@@ -1715,7 +1724,7 @@ idct32x32_1024_transpose:
   mova            m7, [r3 + 16 * 28]
 %endif
 
-  TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9
+  TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9, 10
 
   mova [r4 +      0], m0
   mova [r4 + 16 * 1], m1
@@ -1764,7 +1773,7 @@ idct32x32_1024_transpose_2:
   mova            m6, [r3 + 16 * 6]
   mova            m7, [r3 + 16 * 7]
 
-  TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9
+  TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9, 10
 
   mova [r4 +      0], m0
   mova [r4 + 16 * 1], m1
