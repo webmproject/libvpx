@@ -743,6 +743,30 @@
       "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3a049a8_94c2eae4",
+        "filename": "vp9/encoder/vp9_multi_thread.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-13T17:37:44Z",
+      "side": 1,
+      "message": "I was thinking we can keep the tile completion status in each thread\u0027s data, not keep it as tile data. Every time a thread calls vp9_get_tiles_proc_status(), it could update its own tile completion status. So, it does not need to check finished tiles when it calls this function later. This way, each thread keeps the tile completion status based on its own knowledge. Keeping this information in thread\u0027s data eliminates the need of using mutex lock/unlock while accessing it. Hope I explain it clear. Let me know.",
+      "parentUuid": "b7d8f2b0_b35dea97",
+      "range": {
+        "startLine": 323,
+        "startChar": 0,
+        "endLine": 329,
+        "endChar": 3
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
