@@ -15,21 +15,29 @@
 #include "vpx_dsp/arm/transpose_neon.h"
 #include "vpx_dsp/inv_txfm.h"
 
-static INLINE void highbd_idct8x8_1_add_kernel(uint16_t **dest,
-                                               const int stride,
-                                               const int16x8_t res,
-                                               const int16x8_t max) {
+static INLINE void highbd_idct8x8_1_add_pos_kernel(uint16_t **dest,
+                                                   const int stride,
+                                                   const int16x8_t res,
+                                                   const int16x8_t max) {
   const uint16x8_t a = vld1q_u16(*dest);
   const int16x8_t b = vaddq_s16(res, vreinterpretq_s16_u16(a));
   const int16x8_t c = vminq_s16(b, max);
-  const uint16x8_t d = vqshluq_n_s16(c, 0);
-  vst1q_u16(*dest, d);
+  vst1q_u16(*dest, vreinterpretq_u16_s16(c));
+  *dest += stride;
+}
+
+static INLINE void highbd_idct8x8_1_add_neg_kernel(uint16_t **dest,
+                                                   const int stride,
+                                                   const int16x8_t res) {
+  const uint16x8_t a = vld1q_u16(*dest);
+  const int16x8_t b = vaddq_s16(res, vreinterpretq_s16_u16(a));
+  const uint16x8_t c = vqshluq_n_s16(b, 0);
+  vst1q_u16(*dest, c);
   *dest += stride;
 }
 
 void vpx_highbd_idct8x8_1_add_neon(const tran_low_t *input, uint8_t *dest8,
                                    int stride, int bd) {
-  const int16x8_t max = vdupq_n_s16((1 << bd) - 1);
   const tran_low_t out0 =
       HIGHBD_WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64), bd);
   const tran_low_t out1 =
@@ -38,14 +46,26 @@ void vpx_highbd_idct8x8_1_add_neon(const tran_low_t *input, uint8_t *dest8,
   const int16x8_t dc = vdupq_n_s16(a1);
   uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
 
-  highbd_idct8x8_1_add_kernel(&dest, stride, dc, max);
-  highbd_idct8x8_1_add_kernel(&dest, stride, dc, max);
-  highbd_idct8x8_1_add_kernel(&dest, stride, dc, max);
-  highbd_idct8x8_1_add_kernel(&dest, stride, dc, max);
-  highbd_idct8x8_1_add_kernel(&dest, stride, dc, max);
-  highbd_idct8x8_1_add_kernel(&dest, stride, dc, max);
-  highbd_idct8x8_1_add_kernel(&dest, stride, dc, max);
-  highbd_idct8x8_1_add_kernel(&dest, stride, dc, max);
+  if (a1 >= 0) {
+    const int16x8_t max = vdupq_n_s16((1 << bd) - 1);
+    highbd_idct8x8_1_add_pos_kernel(&dest, stride, dc, max);
+    highbd_idct8x8_1_add_pos_kernel(&dest, stride, dc, max);
+    highbd_idct8x8_1_add_pos_kernel(&dest, stride, dc, max);
+    highbd_idct8x8_1_add_pos_kernel(&dest, stride, dc, max);
+    highbd_idct8x8_1_add_pos_kernel(&dest, stride, dc, max);
+    highbd_idct8x8_1_add_pos_kernel(&dest, stride, dc, max);
+    highbd_idct8x8_1_add_pos_kernel(&dest, stride, dc, max);
+    highbd_idct8x8_1_add_pos_kernel(&dest, stride, dc, max);
+  } else {
+    highbd_idct8x8_1_add_neg_kernel(&dest, stride, dc);
+    highbd_idct8x8_1_add_neg_kernel(&dest, stride, dc);
+    highbd_idct8x8_1_add_neg_kernel(&dest, stride, dc);
+    highbd_idct8x8_1_add_neg_kernel(&dest, stride, dc);
+    highbd_idct8x8_1_add_neg_kernel(&dest, stride, dc);
+    highbd_idct8x8_1_add_neg_kernel(&dest, stride, dc);
+    highbd_idct8x8_1_add_neg_kernel(&dest, stride, dc);
+    highbd_idct8x8_1_add_neg_kernel(&dest, stride, dc);
+  }
 }
 
 static INLINE void idct8x8_12_half1d_bd10(
