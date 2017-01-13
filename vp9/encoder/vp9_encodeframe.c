@@ -1043,19 +1043,25 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
 
     // If the y_sad is small enough, copy the partition of the superblock in the
     // last frame to current frame only if the last frame is not a keyframe.
+    // Stop the copy every cpi->max_copied_frame to refresh the partition.
     // TODO(jianj) : tune the threshold.
     if (cpi->sf.copy_partition_flag && cpi->rc.frames_since_key > 1 &&
         segment_id == CR_SEGMENT_ID_BASE &&
         cpi->prev_segment_id[sb_offset] == CR_SEGMENT_ID_BASE &&
-        y_sad_last < cpi->vbp_threshold_copy) {
+        y_sad_last < cpi->vbp_threshold_copy &&
+        cpi->copied_frame_cnt[sb_offset] < cpi->max_copied_frame) {
       if (cpi->prev_partition != NULL) {
         copy_prev_partition(cpi, BLOCK_64X64, mi_row, mi_col);
         chroma_check(cpi, x, bsize, y_sad, is_key_frame);
+        cpi->copied_frame_cnt[sb_offset] += 1;
         memcpy(x->variance_low, &(cpi->prev_variance_low[sb_offset * 25]),
                sizeof(x->variance_low));
         return 0;
       }
     }
+    if (cpi->sf.copy_partition_flag &&
+        cpi->copied_frame_cnt[sb_offset] == cpi->max_copied_frame)
+      cpi->copied_frame_cnt[sb_offset] = 0;
   } else {
     d = VP9_VAR_OFFS;
     dp = 0;

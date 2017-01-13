@@ -502,8 +502,9 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed,
     if (!cpi->use_svc && !cpi->resize_pending && !cpi->resize_state &&
         !cpi->external_resize && cpi->oxcf.resize_mode == RESIZE_NONE)
       sf->copy_partition_flag = 1;
+
     if (sf->copy_partition_flag) {
-      sf->use_source_sad = 1;
+      cpi->max_copied_frame = 5;
       if (cpi->prev_partition == NULL) {
         cpi->prev_partition = (BLOCK_SIZE *)vpx_calloc(
             cm->mi_stride * cm->mi_rows, sizeof(BLOCK_SIZE));
@@ -517,7 +518,12 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed,
             (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1) * 25,
             sizeof(uint8_t));
       }
+      if (cpi->copied_frame_cnt == NULL) {
+        cpi->copied_frame_cnt = (uint8_t *)vpx_calloc(
+            (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1), sizeof(uint8_t));
+      }
     }
+
     sf->mv.subpel_force_stop = (content == VP9E_CONTENT_SCREEN) ? 3 : 2;
     if (content == VP9E_CONTENT_SCREEN) sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
     // Only keep INTRA_DC mode for speed 8.
