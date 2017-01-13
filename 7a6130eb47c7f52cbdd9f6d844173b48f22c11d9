@@ -719,6 +719,30 @@
       "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7d8f2b0_b35dea97",
+        "filename": "vp9/encoder/vp9_multi_thread.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-01-13T11:47:54Z",
+      "side": 1,
+      "message": "Reading tile completion status flags requires mutex lock mechanism as below.\n\n  for (tile_col \u003d 0; tile_col \u003c tile_cols; tile_col++) {\n    mutex_lock;\n    populate is_tile_complete as multi_thread_ctxt-\u003etile_completion_status[tile_col].\n    mutex_unlock;\n    \n    if (!is_tile_complete)  {\n      num_jobs_remaining \u003d vp9_get_job_queue_status(multi_thread_ctxt, tile_col);\n      if (num_jobs_remaining \u003e max_num_jobs_remaining) {\n        max_num_jobs_remaining \u003d num_jobs_remaining;\n        tile_id \u003d tile_col;\n      }\n    }\n  }\n  \n  multi_thread_ctxt-\u003etile_completion_status[tile_col] will be updated in vp9_get_job_queue_status using above mutex lock, if relevant tile is processed.\n\nGiven that vp9_get_job_queue_status function is simplified (after avoiding division), not using tile completion flags will be straight forward (as per our understanding).\n\nDo you have any other approach?",
+      "parentUuid": "83de51f5_2af665a9",
+      "range": {
+        "startLine": 323,
+        "startChar": 0,
+        "endLine": 329,
+        "endChar": 3
+      },
+      "revId": "7a6130eb47c7f52cbdd9f6d844173b48f22c11d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
