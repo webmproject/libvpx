@@ -527,11 +527,13 @@ void vp9_set_variance_partition_thresholds(VP9_COMP *cpi, int q) {
                                      : 1000;
       cpi->vbp_bsize_min = BLOCK_16X16;
       if (cm->width <= 352 && cm->height <= 288)
-        cpi->vbp_threshold_copy = 40960;
+        cpi->vbp_threshold_copy = 4000;
+      else if (cm->width <= 640 && cm->height <= 360)
+        cpi->vbp_threshold_copy = 9000;
       else
-        cpi->vbp_threshold_copy = (cpi->y_dequant[q][1] << 6) > 32000
-                                      ? (cpi->y_dequant[q][1] << 6)
-                                      : 32000;
+        cpi->vbp_threshold_copy = (cpi->y_dequant[q][1] << 5) > 16000
+                                      ? (cpi->y_dequant[q][1] << 5)
+                                      : 16000;
     }
     cpi->vbp_threshold_minmax = 15 + (q >> 3);
   }
