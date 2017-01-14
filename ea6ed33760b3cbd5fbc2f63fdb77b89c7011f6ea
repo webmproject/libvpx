@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c3a049a8_66bf94a0",
+        "filename": "test/buffer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-01-14T00:10:21Z",
+      "side": 1,
+      "message": "naming nit: Prefer CopyFrom or even a Copy ctor.",
+      "range": {
+        "startLine": 56,
+        "startChar": 2,
+        "endLine": 56,
+        "endChar": 31
+      },
+      "revId": "ea6ed33760b3cbd5fbc2f63fdb77b89c7011f6ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3a049a8_86db98fd",
+        "filename": "test/buffer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-01-14T00:10:21Z",
+      "side": 1,
+      "message": "This should probably be public",
+      "range": {
+        "startLine": 92,
+        "startChar": 2,
+        "endLine": 92,
+        "endChar": 50
+      },
+      "revId": "ea6ed33760b3cbd5fbc2f63fdb77b89c7011f6ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3a049a8_e6c9c431",
+        "filename": "test/buffer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-01-14T00:10:21Z",
+      "side": 1,
+      "message": "locals/args are lower_case_and_named_like_this.",
+      "range": {
+        "startLine": 134,
+        "startChar": 37,
+        "endLine": 134,
+        "endChar": 49
+      },
+      "revId": "ea6ed33760b3cbd5fbc2f63fdb77b89c7011f6ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3a049a8_8612b8cf",
+        "filename": "test/buffer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-01-14T00:10:21Z",
+      "side": 1,
+      "message": "make this public... and not sure you really want the printf inside the class. Maybe at call site after failure?",
+      "range": {
+        "startLine": 301,
+        "startChar": 0,
+        "endLine": 304,
+        "endChar": 58
+      },
+      "revId": "ea6ed33760b3cbd5fbc2f63fdb77b89c7011f6ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
