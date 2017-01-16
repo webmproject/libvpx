@@ -728,6 +728,9 @@ process_common_toolchain() {
       x86_64*mingw32*)
         tgt_os=win64
         ;;
+      x86_64*cygwin*)
+        tgt_os=win64
+        ;;
       *mingw32*|*cygwin*)
         [ -z "$tgt_isa" ] && tgt_isa=x86
         tgt_os=win32
