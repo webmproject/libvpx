@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "23b3e516_e507ec8f",
+        "filename": "test/buffer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-17T21:49:45Z",
+      "side": 1,
+      "message": "I was sticking with \u0027Set\u0027 for the similarity to the other \u0027Set\u0027 functions.\n\nAlso don\u0027t want a ctor because (may be wrong here) I want to be able to re-set the buffers multiple times in a given test.",
+      "parentUuid": "c3a049a8_66bf94a0",
+      "range": {
+        "startLine": 56,
+        "startChar": 2,
+        "endLine": 56,
+        "endChar": 31
+      },
+      "revId": "ea6ed33760b3cbd5fbc2f63fdb77b89c7011f6ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c3a049a8_86db98fd",
         "filename": "test/buffer.h",
         "patchSetId": 16
@@ -36,6 +60,30 @@
       "writtenOn": "2017-01-14T00:10:21Z",
       "side": 1,
       "message": "This should probably be public",
+      "range": {
+        "startLine": 92,
+        "startChar": 2,
+        "endLine": 92,
+        "endChar": 50
+      },
+      "revId": "ea6ed33760b3cbd5fbc2f63fdb77b89c7011f6ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a39fd578_66abeac7",
+        "filename": "test/buffer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-17T21:49:45Z",
+      "side": 1,
+      "message": "This only makes sense to run if you\u0027re calling Set, PrintDifference or CheckValues with another Buffer, and in those cases it runs automatically.",
+      "parentUuid": "c3a049a8_86db98fd",
       "range": {
         "startLine": 92,
         "startChar": 2,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "43753906_ae779b3a",
+        "filename": "test/buffer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-17T21:49:45Z",
+      "side": 1,
+      "message": "heh, I did it right in the declarations ....",
+      "parentUuid": "c3a049a8_e6c9c431",
+      "range": {
+        "startLine": 134,
+        "startChar": 37,
+        "endLine": 134,
+        "endChar": 49
+      },
+      "revId": "ea6ed33760b3cbd5fbc2f63fdb77b89c7011f6ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c3a049a8_8612b8cf",
         "filename": "test/buffer.h",
         "patchSetId": 16
@@ -82,6 +154,30 @@
       "writtenOn": "2017-01-14T00:10:21Z",
       "side": 1,
       "message": "make this public... and not sure you really want the printf inside the class. Maybe at call site after failure?",
+      "range": {
+        "startLine": 301,
+        "startChar": 0,
+        "endLine": 304,
+        "endChar": 58
+      },
+      "revId": "ea6ed33760b3cbd5fbc2f63fdb77b89c7011f6ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "23b3e516_65c07cdd",
+        "filename": "test/buffer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-17T21:49:45Z",
+      "side": 1,
+      "message": "It should be a pretty rare failure when writing a test and getting the sizes wrong. Wanted it to be a little noisier than just quietly returning \u0027false\u0027",
+      "parentUuid": "c3a049a8_8612b8cf",
       "range": {
         "startLine": 301,
         "startChar": 0,
