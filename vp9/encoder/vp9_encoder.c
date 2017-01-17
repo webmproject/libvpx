@@ -456,6 +456,9 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->prev_segment_id);
   cpi->prev_segment_id = NULL;
 
+  vpx_free(cpi->prev_variance_low);
+  cpi->prev_variance_low = NULL;
+
   vp9_cyclic_refresh_free(cpi->cyclic_refresh);
   cpi->cyclic_refresh = NULL;
 
