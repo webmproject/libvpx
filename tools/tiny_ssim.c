@@ -117,19 +117,20 @@ double vp9_mse2psnr(double samples, double peak, double mse) {
 }
 
 int main(int argc, char *argv[]) {
-  FILE *f[2];
+  FILE *f[2], *framestats = NULL;
   uint8_t *buf[2];
   int w, h, tl_skip = 0, tl_skips_remaining = 0;
-  double ssim = 0, psnravg = 0, psnrglb = 0;
-  double psnryglb = 0, psnruglb = 0, psnrvglb = 0;
-  double ssimyavg = 0, ssimuavg = 0, ssimvavg = 0;
-  double psnryavg = 0, psnruavg = 0, psnrvavg = 0;
+  double ssimavg = 0, ssimyavg = 0, ssimuavg = 0, ssimvavg = 0;
+  double psnrglb = 0, psnryglb = 0, psnruglb = 0, psnrvglb = 0;
+  double psnravg = 0, psnryavg = 0, psnruavg = 0, psnrvavg = 0;
   double *ssimy = NULL, *ssimu = NULL, *ssimv = NULL;
   uint64_t *psnry = NULL, *psnru = NULL, *psnrv = NULL;
   size_t i, n_frames = 0, allocated_frames = 0;
 
-  if (argc < 4) {
-    fprintf(stderr, "Usage: %s file1.yuv file2.yuv WxH [tl_skip={0,1,3}]\n",
+  if (argc < 4 || argc > 6) {
+    fprintf(stderr,
+            "Usage: %s file1.yuv file2.yuv WxH [tl_skip={0,1,3}] "
+            "[framestats.csv]\n",
             argv[0]);
     return 1;
   }
@@ -141,6 +142,14 @@ int main(int argc, char *argv[]) {
   // in mode 10. 7 would be reasonable for comparing TL0 of a 4-layer encoding.
   if (argc > 4) {
     sscanf(argv[4], "%d", &tl_skip);
+    if (argc > 5) {
+      framestats = fopen(argv[5], "w");
+      if (!framestats) {
+        fprintf(stderr, "Could not open \"%s\" for writing: %s\n", argv[5],
+                strerror(errno));
+        return 1;
+      }
+    }
   }
   if (!f[0] || !f[1]) {
     fprintf(stderr, "Could not open input files: %s\n", strerror(errno));
@@ -195,30 +204,50 @@ int main(int argc, char *argv[]) {
   free(buf[0]);
   free(buf[1]);
 
+  if (framestats) {
+    fprintf(framestats,
+            "ssim,ssim-y,ssim-u,ssim-v,psnr,psnr-y,psnr-u,psnr-v\n");
+  }
+
   for (i = 0; i < n_frames; ++i) {
+    double frame_ssim;
+    double frame_psnr, frame_psnry, frame_psnru, frame_psnrv;
+
+    frame_ssim = 0.8 * ssimy[i] + 0.1 * (ssimu[i] + ssimv[i]);
+    ssimavg += frame_ssim;
     ssimyavg += ssimy[i];
     ssimuavg += ssimu[i];
     ssimvavg += ssimv[i];
 
-    psnryavg += vp9_mse2psnr(w * h * 4 / 4, 255.0, (double)psnry[i]);
-    psnruavg += vp9_mse2psnr(w * h * 1 / 4, 255.0, (double)psnru[i]);
-    psnrvavg += vp9_mse2psnr(w * h * 1 / 4, 255.0, (double)psnrv[i]);
+    frame_psnr = vp9_mse2psnr(w * h * 6 / 4, 255.0,
+                              (double)psnry[i] + psnru[i] + psnrv[i]);
+    frame_psnry = vp9_mse2psnr(w * h * 4 / 4, 255.0, (double)psnry[i]);
+    frame_psnru = vp9_mse2psnr(w * h * 1 / 4, 255.0, (double)psnru[i]);
+    frame_psnrv = vp9_mse2psnr(w * h * 1 / 4, 255.0, (double)psnrv[i]);
 
-    psnravg += vp9_mse2psnr(w * h * 6 / 4, 255.0,
-                            (double)psnry[i] + psnru[i] + psnrv[i]);
+    psnravg += frame_psnr;
+    psnryavg += frame_psnry;
+    psnruavg += frame_psnru;
+    psnrvavg += frame_psnrv;
+
     psnryglb += psnry[i];
     psnruglb += psnru[i];
     psnrvglb += psnrv[i];
+
+    if (framestats) {
+      fprintf(framestats, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n", frame_ssim,
+              ssimy[i], ssimu[i], ssimv[i], frame_psnr, frame_psnry,
+              frame_psnru, frame_psnrv);
+    }
   }
 
-  ssim = 0.8 * ssimyavg + 0.1 * (ssimuavg + ssimvavg);
-  ssim /= n_frames;
+  ssimavg /= n_frames;
   ssimyavg /= n_frames;
   ssimuavg /= n_frames;
   ssimvavg /= n_frames;
 
-  printf("VpxSSIM: %lf\n", 100 * pow(ssim, 8.0));
-  printf("SSIM: %lf\n", ssim);
+  printf("VpxSSIM: %lf\n", 100 * pow(ssimavg, 8.0));
+  printf("SSIM: %lf\n", ssimavg);
   printf("SSIM-Y: %lf\n", ssimyavg);
   printf("SSIM-U: %lf\n", ssimuavg);
   printf("SSIM-V: %lf\n", ssimvavg);
@@ -249,10 +278,9 @@ int main(int argc, char *argv[]) {
 
   printf("Nframes: %d\n", (int)n_frames);
 
-  // TODO(pbos): Add command-line flag for printing per-frame SSIM/PSNR metrics.
-
   if (strcmp(argv[1], "-")) fclose(f[0]);
   if (strcmp(argv[2], "-")) fclose(f[1]);
+  if (framestats) fclose(framestats);
 
   free(ssimy);
   free(ssimu);
