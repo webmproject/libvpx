@@ -500,7 +500,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed,
     sf->adaptive_rd_thresh = 4;
     // Enable partition copy
     if (!cpi->use_svc && !cpi->resize_pending && !cpi->resize_state &&
-        !cpi->external_resize)
+        !cpi->external_resize && cpi->oxcf.resize_mode == RESIZE_NONE)
       sf->copy_partition_flag = 1;
     if (sf->copy_partition_flag) {
       sf->use_source_sad = 1;
