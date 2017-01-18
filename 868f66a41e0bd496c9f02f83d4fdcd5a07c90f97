@@ -1,0 +1,198 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c323e938_19b34bd8",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-18T00:39:31Z",
+      "side": 1,
+      "message": "Can be removed?\n\nNo change in this file.",
+      "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3a049a8_e8e98567",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 829,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-18T00:39:31Z",
+      "side": 1,
+      "message": "Change to (x-\u003eskip_encode || x-\u003efp_src_pred)  ?",
+      "range": {
+        "startLine": 829,
+        "startChar": 6,
+        "endLine": 829,
+        "endChar": 20
+      },
+      "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3e70d23_1b99275a",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2181,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-18T00:39:31Z",
+      "side": 1,
+      "message": "Deallocating row_mt_mem before deallocating threads can cause problem. Please look at the code below and modify it.",
+      "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "036b4132_fdece7d5",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-18T00:39:31Z",
+      "side": 1,
+      "message": "This can be done later. - We found that setting a sync_range(instead of using 1) helped improve the speed. Did you try it?",
+      "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3e70d23_7b5f1352",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 441,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-18T00:39:31Z",
+      "side": 1,
+      "message": "dealloc and alloc should be called under same condition? Maybe better to move this down and put them together.",
+      "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "23b3e516_0b3e69dd",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 447,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-18T00:39:31Z",
+      "side": 1,
+      "message": "The frame size(resolution) may change from one frame to the next frame. Should consider that here. Please refer to loopfilter mt code.\n\nAlso, these 2 names: max_num_tile_cols and max_num_tile_rows seem a little confusing. Should they be allocated_tile_cols/rows?",
+      "range": {
+        "startLine": 445,
+        "startChar": 6,
+        "endLine": 447,
+        "endChar": 27
+      },
+      "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e399cd94_5cd1d550",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-18T00:39:31Z",
+      "side": 1,
+      "message": "It seems no good reason to have multi_thread_ctxt-\u003enum_row_mt_workers that can be replaced by cpi-\u003enum_workers, right? If you need it before create_enc_workers(), may use a local variable.",
+      "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "236e8540_783d69dd",
+        "filename": "vp9/encoder/vp9_ethread.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-18T00:39:31Z",
+      "side": 1,
+      "message": "MAX_NUM_TILE_COLS",
+      "range": {
+        "startLine": 26,
+        "startChar": 29,
+        "endLine": 26,
+        "endChar": 35
+      },
+      "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c39e897c_7b56df0c",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1565,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-18T00:39:31Z",
+      "side": 1,
+      "message": "Providing a set control API would allow the customers to set new_mt at the frame level. Do you know if it works if one frame uses different new_mt setting than previous frame?",
+      "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c323e938_591783c0",
+        "filename": "vpxenc.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-18T00:39:31Z",
+      "side": 1,
+      "message": "\"new-mt\"",
+      "range": {
+        "startLine": 454,
+        "startChar": 19,
+        "endLine": 454,
+        "endChar": 25
+      },
+      "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
