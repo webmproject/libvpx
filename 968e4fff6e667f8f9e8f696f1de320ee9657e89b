@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4377f97f_386e0517",
+        "filename": "test/buffer.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-01-18T16:06:55Z",
+      "side": 1,
+      "message": "Needs note that it prints an error and does not show diffs for buffers with different sizes.",
+      "range": {
+        "startLine": 60,
+        "startChar": 43,
+        "endLine": 60,
+        "endChar": 50
+      },
+      "revId": "968e4fff6e667f8f9e8f696f1de320ee9657e89b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
