@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "4377f97f_bb076f90",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 931,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-01-18T17:32:39Z",
+      "side": 1,
+      "message": "Thanks i think that must be the issue.\nI wrapped it around the use_source_sad flag.",
+      "parentUuid": "4377f97f_f5365850",
+      "range": {
+        "startLine": 931,
+        "startChar": 29,
+        "endLine": 931,
+        "endChar": 38
+      },
+      "revId": "d0cf39684da18aff270dfad7b3802fbf7a964826",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4377f97f_152cb4fd",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 8
@@ -36,6 +60,30 @@
       "writtenOn": "2017-01-18T07:42:53Z",
       "side": 1,
       "message": "I\u0027m not sure if this is due to the same reason as that in vp9_encodeframe.c. Probably.",
+      "range": {
+        "startLine": 2266,
+        "startChar": 37,
+        "endLine": 2266,
+        "endChar": 48
+      },
+      "revId": "d0cf39684da18aff270dfad7b3802fbf7a964826",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4377f97f_7bc7971b",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 2266,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-01-18T17:32:39Z",
+      "side": 1,
+      "message": "Ok, not sure too.",
+      "parentUuid": "4377f97f_152cb4fd",
       "range": {
         "startLine": 2266,
         "startChar": 37,
