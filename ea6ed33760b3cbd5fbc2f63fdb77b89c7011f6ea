@@ -49,6 +49,24 @@
     },
     {
       "key": {
+        "uuid": "4377f97f_182ce9fd",
+        "filename": "test/buffer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-01-18T16:06:55Z",
+      "side": 1,
+      "message": "That\u0027s really my point here: This is not similar to the other Set()s. This one dupes the contents of a buffer into this buffer. The others simply do fills. I don\u0027t feel that strongly about this, but in general it\u0027s better to name the method by what it does-- having a bunch of overloads named Set looks nice and clean, but doesn\u0027t help with usability.\n\nAlso needs a note that the call to this method will fail if the the size of a is different than the buffer being Set().",
+      "parentUuid": "23b3e516_e507ec8f",
+      "revId": "ea6ed33760b3cbd5fbc2f63fdb77b89c7011f6ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c3a049a8_86db98fd",
         "filename": "test/buffer.h",
         "patchSetId": 16
@@ -90,6 +108,24 @@
         "endLine": 92,
         "endChar": 50
       },
+      "revId": "ea6ed33760b3cbd5fbc2f63fdb77b89c7011f6ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4377f97f_d886f1b3",
+        "filename": "test/buffer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-01-18T16:06:55Z",
+      "side": 1,
+      "message": "But why have this at all instead of size accessors, and then allowing the tests to do what they need with the class-- is it really saving that much code?",
+      "parentUuid": "a39fd578_66abeac7",
       "revId": "ea6ed33760b3cbd5fbc2f63fdb77b89c7011f6ea",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -184,6 +220,24 @@
         "endLine": 304,
         "endChar": 58
       },
+      "revId": "ea6ed33760b3cbd5fbc2f63fdb77b89c7011f6ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4377f97f_f88badba",
+        "filename": "test/buffer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-01-18T16:06:55Z",
+      "side": 1,
+      "message": "It just seems a little strange to have a private method that only compares the size of the buffer to some other buffer, and then the private method is what complains about the mismatch. Looking up where the output from this function comes from isn\u0027t going to be a good time for anyone unfamiliar with Buffer\u003cT\u003e.",
+      "parentUuid": "23b3e516_65c07cdd",
       "revId": "ea6ed33760b3cbd5fbc2f63fdb77b89c7011f6ea",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
