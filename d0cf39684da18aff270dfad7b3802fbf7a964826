@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4377f97f_f5365850",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 931,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-01-18T07:42:53Z",
+      "side": 1,
+      "message": "This array is only allocated when use_source_sad flag is set in speed 7. So for other speeds, this array is not allocated so null pointer is accessed here.",
+      "range": {
+        "startLine": 931,
+        "startChar": 29,
+        "endLine": 931,
+        "endChar": 38
+      },
+      "revId": "d0cf39684da18aff270dfad7b3802fbf7a964826",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4377f97f_152cb4fd",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 2266,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-01-18T07:42:53Z",
+      "side": 1,
+      "message": "I\u0027m not sure if this is due to the same reason as that in vp9_encodeframe.c. Probably.",
+      "range": {
+        "startLine": 2266,
+        "startChar": 37,
+        "endLine": 2266,
+        "endChar": 48
+      },
+      "revId": "d0cf39684da18aff270dfad7b3802fbf7a964826",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
