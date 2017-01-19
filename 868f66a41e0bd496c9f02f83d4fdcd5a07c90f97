@@ -76,6 +76,24 @@
     },
     {
       "key": {
+        "uuid": "289f421f_ffcd9b3d",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-01-19T14:14:38Z",
+      "side": 1,
+      "message": "Setting sync_range to 1 will help reducing the ramp-up/ramp down times of each thread while processing a tile. The speed improvements should be substantial when thread count is higher or blocks (MBs in case of first pass/SBs in case of second pass) per tile width is lower.  \nFor 1080p first pass encoding with 4 tile columns, MBs per tile width can be as low as 28. Hence the number of threads that can work in parallel is 28/sync_range. \nSimilarly for 1080p second pass encoding with 4 tile columns, SBs per tile width can be as low as 7. Hence the number of threads that can work in parallel is 7/sync_range. \nWe have seen that for higher thread count (\u003e16 threads in above example of second pass) using sync_range\u003d1 is optimal. For lower thread count, the performance was similar.\nWe are interested to know how tweaking the sync_range (\u003e1) can give better performance.",
+      "parentUuid": "036b4132_fdece7d5",
+      "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3e70d23_7b5f1352",
         "filename": "vp9/encoder/vp9_ethread.c",
         "patchSetId": 6
@@ -93,6 +111,24 @@
     },
     {
       "key": {
+        "uuid": "289f421f_bfc7131c",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 441,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-01-19T14:14:38Z",
+      "side": 1,
+      "message": "We ensured that dealloc and alloc have the same condition, but not together due to the dependency on tile_data which is reallocated in vp9_init_tile_data. However in loop filtering code, there is no such dependency.",
+      "parentUuid": "e3e70d23_7b5f1352",
+      "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "23b3e516_0b3e69dd",
         "filename": "vp9/encoder/vp9_ethread.c",
         "patchSetId": 6
@@ -104,6 +140,30 @@
       "writtenOn": "2017-01-18T00:39:31Z",
       "side": 1,
       "message": "The frame size(resolution) may change from one frame to the next frame. Should consider that here. Please refer to loopfilter mt code.\n\nAlso, these 2 names: max_num_tile_cols and max_num_tile_rows seem a little confusing. Should they be allocated_tile_cols/rows?",
+      "range": {
+        "startLine": 445,
+        "startChar": 6,
+        "endLine": 447,
+        "endChar": 27
+      },
+      "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "289f421f_5f028f84",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 447,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-01-19T14:14:38Z",
+      "side": 1,
+      "message": "We see the check based on sb_rows in case of loop filtering which helps handle dynamic resolution change. We will add similar conditions based on width/height to support the same. Can you point us to a test-bench using which we can test if dynamic change in resolution has any issues (with new_mt \u003d 1).",
+      "parentUuid": "23b3e516_0b3e69dd",
       "range": {
         "startLine": 445,
         "startChar": 6,
@@ -167,6 +227,24 @@
       "writtenOn": "2017-01-18T00:39:31Z",
       "side": 1,
       "message": "Providing a set control API would allow the customers to set new_mt at the frame level. Do you know if it works if one frame uses different new_mt setting than previous frame?",
+      "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "289f421f_1f0c07b3",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1565,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-01-19T14:14:38Z",
+      "side": 1,
+      "message": "We expect that dynamic change of new_mt works fine (as per the code review). We shall plan to test it.",
+      "parentUuid": "c39e897c_7b56df0c",
       "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
