@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e8852ac9_506fcea1",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 3162,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-01-19T23:54:42Z",
+      "side": 1,
+      "message": "we need to add here: || cpi-\u003esf.use_source_sad)\n\nsince noise_estimation is not enabled for low-res.\nIf we want to use source_sad we need to set last_source.",
+      "revId": "51a34cc795470609c45948319e9e8e2c2b22f9f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
