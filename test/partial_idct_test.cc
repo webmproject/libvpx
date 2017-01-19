@@ -302,7 +302,7 @@ TEST_P(PartialIDctTest, DISABLED_Speed) {
   vpx_usec_timer_mark(&timer);
   const int elapsed_time =
       static_cast<int>(vpx_usec_timer_elapsed(&timer) / 1000);
-  printf("idct%dx%d_%d (bitdepth %d) time: %5d ms ", size_, size_,
+  printf("idct%dx%d_%d (bitdepth %d) time: %5d ms\n", size_, size_,
          last_nonzero_, bit_depth_, elapsed_time);
 
   ASSERT_EQ(0, memcmp(output_block_ref_, output_block_,
