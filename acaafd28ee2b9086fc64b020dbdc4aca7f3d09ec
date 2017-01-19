@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e8852ac9_3099ea0b",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 932,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-01-19T23:58:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e8852ac9_30d1eadc",
+      "range": {
+        "startLine": 932,
+        "startChar": 42,
+        "endLine": 932,
+        "endChar": 43
+      },
+      "revId": "acaafd28ee2b9086fc64b020dbdc4aca7f3d09ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e8852ac9_7033f263",
         "filename": "vp9/encoder/vp9_encoder.h",
         "patchSetId": 12
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "e8852ac9_505b4e63",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 645,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-01-19T23:58:16Z",
+      "side": 1,
+      "message": "I\u0027ll change it to uint8_t since it can\u0027t be negative.",
+      "parentUuid": "e8852ac9_7033f263",
+      "revId": "acaafd28ee2b9086fc64b020dbdc4aca7f3d09ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e8852ac9_705a1294",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 12
@@ -53,6 +95,24 @@
       "writtenOn": "2017-01-19T23:41:38Z",
       "side": 1,
       "message": "compare to threshold here and set to 1 or 0, so we avoid allocation of int64",
+      "revId": "acaafd28ee2b9086fc64b020dbdc4aca7f3d09ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e8852ac9_7039b2f0",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 2266,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-01-19T23:58:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e8852ac9_705a1294",
       "revId": "acaafd28ee2b9086fc64b020dbdc4aca7f3d09ec",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
