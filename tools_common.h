@@ -39,7 +39,7 @@ typedef off_t FileOffset;
 #else
 #define fseeko fseek
 #define ftello ftell
-typedef long FileOffset /* NOLINT */
+typedef long FileOffset; /* NOLINT */
 #endif /* CONFIG_OS_SUPPORT */
 
 #if CONFIG_OS_SUPPORT
