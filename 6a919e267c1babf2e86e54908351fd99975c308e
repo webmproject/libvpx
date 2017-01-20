@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e8852ac9_5977f93c",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 1510,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-01-20T01:31:09Z",
+      "side": 1,
+      "message": "Can we add this here:\nif (cpi-\u003eoxcf.speed \u003e\u003d 8 and sb-\u003elow_source_sad_sb)\n usable_ref_frame \u003d LAST_FRAME;\n\nIt may not change much, since if low_source_sad is set probably force_skip_low_temp_var is also set too above (line 1500) and we already skip golden...",
+      "revId": "6a919e267c1babf2e86e54908351fd99975c308e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
