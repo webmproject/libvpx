@@ -925,7 +925,12 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   int variance4x4downsample[16];
   int segment_id;
   int sb_offset = (cm->mi_stride >> 3) * (mi_row >> 3) + (mi_col >> 3);
-
+  if (cpi->sf.use_source_sad && !is_key_frame) {
+    // The sb_offset2 is to make it consistent with the index in the function
+    // vp9_avg_source_sad() in vp9_ratectrl.c.
+    int sb_offset2 = ((cm->mi_cols + 7) >> 3) * (mi_row >> 3) + (mi_col >> 3);
+    x->skip_low_source_sad = cpi->avg_source_sad_sb[sb_offset2] == 1 ? 1 : 0;
+  }
   set_offsets(cpi, tile, x, mi_row, mi_col, BLOCK_64X64);
   segment_id = xd->mi[0]->segment_id;
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled) {
@@ -3857,6 +3862,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
     x->color_sensitivity[0] = 0;
     x->color_sensitivity[1] = 0;
     x->sb_is_skin = 0;
+    x->skip_low_source_sad = 0;
 
     if (seg->enabled) {
       const uint8_t *const map =
