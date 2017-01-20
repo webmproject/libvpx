@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e8852ac9_760c4ab4",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 497,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-01-20T00:45:17Z",
+      "side": 1,
+      "message": "We should only use this if frame size have not changed, so use the condition (may fix the asan error)\nif (!cpi-\u003euse_svc \u0026\u0026 !cpi-\u003eresize_pending \u0026\u0026 \n    !cpi \u003eresize_state \u0026\u0026 !cpi-\u003eexternal_resize)\n  sf-\u003euse_source_sad \u003d 1",
+      "range": {
+        "startLine": 497,
+        "startChar": 8,
+        "endLine": 497,
+        "endChar": 22
+      },
+      "revId": "014f6f9b0f11d1f77aeba5498f466d76be5bee20",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
