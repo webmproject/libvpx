@@ -94,6 +94,24 @@
     },
     {
       "key": {
+        "uuid": "e8852ac9_794f5d29",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-20T02:47:31Z",
+      "side": 1,
+      "message": "Right. If the maximum number of tiles allowed is used, which means tile width \u003c 512, then sync_range \u003d1 should be the good choice. In VP9 code, it is decided by frame width. Either way is fine I think.",
+      "parentUuid": "289f421f_ffcd9b3d",
+      "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3e70d23_7b5f1352",
         "filename": "vp9/encoder/vp9_ethread.c",
         "patchSetId": 6
@@ -123,6 +141,24 @@
       "side": 1,
       "message": "We ensured that dealloc and alloc have the same condition, but not together due to the dependency on tile_data which is reallocated in vp9_init_tile_data. However in loop filtering code, there is no such dependency.",
       "parentUuid": "e3e70d23_7b5f1352",
+      "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e8852ac9_84d674a5",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 441,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-20T02:47:31Z",
+      "side": 1,
+      "message": "Thanks. I just worry that, later, if someone modifies one but forget to modify the other one, this could cause some issue.\n\nI may miss the dependency - could we move dealloc down after vp9_init_tile_data() to resolve this?",
+      "parentUuid": "289f421f_bfc7131c",
       "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -164,6 +200,30 @@
       "side": 1,
       "message": "We see the check based on sb_rows in case of loop filtering which helps handle dynamic resolution change. We will add similar conditions based on width/height to support the same. Can you point us to a test-bench using which we can test if dynamic change in resolution has any issues (with new_mt \u003d 1).",
       "parentUuid": "23b3e516_0b3e69dd",
+      "range": {
+        "startLine": 445,
+        "startChar": 6,
+        "endLine": 447,
+        "endChar": 27
+      },
+      "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e8852ac9_245e8855",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 447,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-01-20T02:47:31Z",
+      "side": 1,
+      "message": "We have a unit test: resize_test.cc that you can try. You may have to modify it to add number of tiles \u0026 threads used as well as new_mt \u003d 1.",
+      "parentUuid": "289f421f_5f028f84",
       "range": {
         "startLine": 445,
         "startChar": 6,
