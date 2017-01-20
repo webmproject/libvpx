@@ -33,6 +33,7 @@ typedef int64_t FileOffset;
 #define ftello ftello64
 typedef off64_t FileOffset;
 #elif CONFIG_OS_SUPPORT
+#include <sys/types.h> /* NOLINT */
 typedef off_t FileOffset;
 /* Use 32-bit file operations in WebM file format when building ARM
  * executables (.axf) with RVCT. */
