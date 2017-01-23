@@ -165,6 +165,24 @@
     },
     {
       "key": {
+        "uuid": "289f421f_420f1618",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 441,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-01-23T14:01:37Z",
+      "side": 1,
+      "message": "We will modify the code as below:\n  if (\u003ccond\u003e) {\n    vp9_row_mt_mem_dealloc(cpi);\n    vp9_init_tile_data(cpi);\n    vp9_row_mt_mem_alloc(cpi);\n  } else {\n    vp9_init_tile_data(cpi);\n  }\nPlease let us know if you have any other suggestion.",
+      "parentUuid": "e8852ac9_84d674a5",
+      "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "23b3e516_0b3e69dd",
         "filename": "vp9/encoder/vp9_ethread.c",
         "patchSetId": 6
@@ -224,6 +242,30 @@
       "side": 1,
       "message": "We have a unit test: resize_test.cc that you can try. You may have to modify it to add number of tiles \u0026 threads used as well as new_mt \u003d 1.",
       "parentUuid": "289f421f_5f028f84",
+      "range": {
+        "startLine": 445,
+        "startChar": 6,
+        "endLine": 447,
+        "endChar": 27
+      },
+      "revId": "868f66a41e0bd496c9f02f83d4fdcd5a07c90f97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "289f421f_02f10ee7",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 447,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-01-23T14:01:37Z",
+      "side": 1,
+      "message": "We performed the following unit-tests (dynamic change in resolution with new_mt \u003d 1).\n1. resize-internal-test : Has given the stat files as expected. Stat files bit-matched with reference with bit-match macro on.\n2. resize-test : We see that the mode under test is supported only for single pass encoding. Hence this mode is not tested",
+      "parentUuid": "e8852ac9_245e8855",
       "range": {
         "startLine": 445,
         "startChar": 6,
