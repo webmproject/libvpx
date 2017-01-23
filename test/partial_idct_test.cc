@@ -191,7 +191,7 @@ TEST_P(PartialIDctTest, RunQuantCheck) {
   DECLARE_ALIGNED(16, tran_low_t, output_ref_block[kMaxNumCoeffs]);
 
   InitMem();
-  for (int i = 0; i < kCountTestBlock * kCountTestBlock; ++i) {
+  for (int i = 0; i < kCountTestBlock; ++i) {
     // Initialize a test block with input range [-mask_, mask_].
     if (i == 0) {
       for (int k = 0; k < input_block_size_; ++k) {
