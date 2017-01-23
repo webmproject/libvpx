@@ -958,10 +958,11 @@ static void estimate_block_intra(int plane, int block, int row, int col,
   args->rdc->dist += this_rdc.dist;
 }
 
-static const THR_MODES mode_idx[MAX_REF_FRAMES - 1][4] = {
+static const THR_MODES mode_idx[MAX_REF_FRAMES][4] = {
   { THR_DC, THR_V_PRED, THR_H_PRED, THR_TM },
   { THR_NEARESTMV, THR_NEARMV, THR_ZEROMV, THR_NEWMV },
   { THR_NEARESTG, THR_NEARG, THR_ZEROG, THR_NEWG },
+  { THR_NEARESTA, THR_NEARA, THR_ZEROA, THR_NEWA },
 };
 
 static const PREDICTION_MODE intra_mode_list[] = { DC_PRED, V_PRED, H_PRED,
