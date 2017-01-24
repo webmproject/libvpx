@@ -455,7 +455,7 @@ void vp9_cyclic_refresh_update_parameters(VP9_COMP *const cpi) {
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   cr->percent_refresh = 10;
   if (cr->reduce_refresh) cr->percent_refresh = 5;
-  cr->max_qdelta_perc = 50;
+  cr->max_qdelta_perc = 60;
   cr->time_for_refresh = 0;
   cr->motion_thresh = 32;
   cr->rate_boost_fac = 15;
@@ -474,10 +474,15 @@ void vp9_cyclic_refresh_update_parameters(VP9_COMP *const cpi) {
       cr->rate_boost_fac = 13;
     }
   }
-  // Adjust some parameters for low resolutions at low bitrates.
-  if (cm->width <= 352 && cm->height <= 288 && rc->avg_frame_bandwidth < 3400) {
-    cr->motion_thresh = 16;
-    cr->rate_boost_fac = 13;
+  // Adjust some parameters for low resolutions.
+  if (cm->width <= 352 && cm->height <= 288) {
+    if (rc->avg_frame_bandwidth < 3000) {
+      cr->motion_thresh = 16;
+      cr->rate_boost_fac = 13;
+    } else {
+      cr->max_qdelta_perc = 70;
+      cr->rate_ratio_qdelta = VPXMAX(cr->rate_ratio_qdelta, 2.5);
+    }
   }
   if (cpi->svc.spatial_layer_id > 0) {
     cr->motion_thresh = 4;
