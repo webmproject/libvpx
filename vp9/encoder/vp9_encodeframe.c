@@ -925,18 +925,35 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   int variance4x4downsample[16];
   int segment_id;
   int sb_offset = (cm->mi_stride >> 3) * (mi_row >> 3) + (mi_col >> 3);
-  if (cpi->sf.use_source_sad && !is_key_frame) {
-    // The sb_offset2 is to make it consistent with the index in the function
-    // vp9_avg_source_sad() in vp9_ratectrl.c.
-    int sb_offset2 = ((cm->mi_cols + 7) >> 3) * (mi_row >> 3) + (mi_col >> 3);
-    x->skip_low_source_sad = cpi->avg_source_sad_sb[sb_offset2] == 1 ? 1 : 0;
-  }
+
   set_offsets(cpi, tile, x, mi_row, mi_col, BLOCK_64X64);
   segment_id = xd->mi[0]->segment_id;
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled) {
     if (cyclic_refresh_segment_id_boosted(segment_id)) {
       int q = vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex);
       set_vbp_thresholds(cpi, thresholds, q);
+    }
+  }
+
+  if (cpi->sf.use_source_sad && !is_key_frame) {
+    // The sb_offset2 is to make it consistent with the index in the function
+    // vp9_avg_source_sad() in vp9_ratectrl.c.
+    int sb_offset2 = ((cm->mi_cols + 7) >> 3) * (mi_row >> 3) + (mi_col >> 3);
+    x->skip_low_source_sad = cpi->avg_source_sad_sb[sb_offset2] == 1 ? 1 : 0;
+    // If avg_source_sad is lower than the threshold, copy the partition without
+    // computing the y_sad.
+    if (cpi->avg_source_sad_sb[sb_offset2] && cpi->sf.copy_partition_flag &&
+        cpi->rc.frames_since_key > 1 && segment_id == CR_SEGMENT_ID_BASE &&
+        cpi->prev_segment_id[sb_offset] == CR_SEGMENT_ID_BASE &&
+        cpi->copied_frame_cnt[sb_offset] < cpi->max_copied_frame) {
+      if (cpi->prev_partition != NULL) {
+        copy_prev_partition(cpi, BLOCK_64X64, mi_row, mi_col);
+        chroma_check(cpi, x, bsize, y_sad, is_key_frame);
+        cpi->copied_frame_cnt[sb_offset] += 1;
+        memcpy(x->variance_low, &(cpi->prev_variance_low[sb_offset * 25]),
+               sizeof(x->variance_low));
+        return 0;
+      }
     }
   }
 
