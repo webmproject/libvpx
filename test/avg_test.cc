@@ -392,6 +392,12 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(16, 16, 0, 4, &vpx_avg_4x4_msa),
                       make_tuple(16, 16, 5, 4, &vpx_avg_4x4_msa),
                       make_tuple(32, 32, 15, 4, &vpx_avg_4x4_msa)));
+
+INSTANTIATE_TEST_CASE_P(MSA, SatdTest,
+                        ::testing::Values(make_tuple(16, &vpx_satd_msa),
+                                          make_tuple(64, &vpx_satd_msa),
+                                          make_tuple(256, &vpx_satd_msa),
+                                          make_tuple(1024, &vpx_satd_msa)));
 #endif
 
 }  // namespace

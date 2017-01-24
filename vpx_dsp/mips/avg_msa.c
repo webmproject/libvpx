@@ -7,6 +7,7 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
+#include <stdlib.h>
 
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/mips/macros_msa.h"
@@ -249,4 +250,142 @@ void vpx_hadamard_16x16_msa(const int16_t *src, int src_stride, int16_t *dst) {
 
   ST_SH4(src0, src1, src2, src3, dst, 64);
   ST_SH4(src4, src5, src6, src7, dst + 8, 64);
+}
+
+int vpx_satd_msa(const int16_t *data, int length) {
+  int i, satd;
+  v8i16 src0, src1, src2, src3, src4, src5, src6, src7;
+  v8i16 src8, src9, src10, src11, src12, src13, src14, src15;
+  v8i16 zero = { 0 };
+  v8u16 tmp0_h, tmp1_h, tmp2_h, tmp3_h, tmp4_h, tmp5_h, tmp6_h, tmp7_h;
+  v4u32 tmp0_w = { 0 };
+
+  if (16 == length) {
+    LD_SH2(data, 8, src0, src1);
+    tmp0_h = (v8u16)__msa_asub_s_h(src0, zero);
+    tmp1_h = (v8u16)__msa_asub_s_h(src1, zero);
+    tmp0_w = __msa_hadd_u_w(tmp0_h, tmp0_h);
+    tmp0_w += __msa_hadd_u_w(tmp1_h, tmp1_h);
+    satd = HADD_UW_U32(tmp0_w);
+  } else if (64 == length) {
+    LD_SH8(data, 8, src0, src1, src2, src3, src4, src5, src6, src7);
+
+    tmp0_h = (v8u16)__msa_asub_s_h(src0, zero);
+    tmp1_h = (v8u16)__msa_asub_s_h(src1, zero);
+    tmp2_h = (v8u16)__msa_asub_s_h(src2, zero);
+    tmp3_h = (v8u16)__msa_asub_s_h(src3, zero);
+    tmp4_h = (v8u16)__msa_asub_s_h(src4, zero);
+    tmp5_h = (v8u16)__msa_asub_s_h(src5, zero);
+    tmp6_h = (v8u16)__msa_asub_s_h(src6, zero);
+    tmp7_h = (v8u16)__msa_asub_s_h(src7, zero);
+
+    tmp0_w = __msa_hadd_u_w(tmp0_h, tmp0_h);
+    tmp0_w += __msa_hadd_u_w(tmp1_h, tmp1_h);
+    tmp0_w += __msa_hadd_u_w(tmp2_h, tmp2_h);
+    tmp0_w += __msa_hadd_u_w(tmp3_h, tmp3_h);
+    tmp0_w += __msa_hadd_u_w(tmp4_h, tmp4_h);
+    tmp0_w += __msa_hadd_u_w(tmp5_h, tmp5_h);
+    tmp0_w += __msa_hadd_u_w(tmp6_h, tmp6_h);
+    tmp0_w += __msa_hadd_u_w(tmp7_h, tmp7_h);
+
+    satd = HADD_UW_U32(tmp0_w);
+  } else if (256 == length) {
+    for (i = 0; i < 2; ++i) {
+      LD_SH8(data, 8, src0, src1, src2, src3, src4, src5, src6, src7);
+      data += 8 * 8;
+      LD_SH8(data, 8, src8, src9, src10, src11, src12, src13, src14, src15);
+      data += 8 * 8;
+
+      tmp0_h = (v8u16)__msa_asub_s_h(src0, zero);
+      tmp1_h = (v8u16)__msa_asub_s_h(src1, zero);
+      tmp2_h = (v8u16)__msa_asub_s_h(src2, zero);
+      tmp3_h = (v8u16)__msa_asub_s_h(src3, zero);
+      tmp4_h = (v8u16)__msa_asub_s_h(src4, zero);
+      tmp5_h = (v8u16)__msa_asub_s_h(src5, zero);
+      tmp6_h = (v8u16)__msa_asub_s_h(src6, zero);
+      tmp7_h = (v8u16)__msa_asub_s_h(src7, zero);
+
+      tmp0_w += __msa_hadd_u_w(tmp0_h, tmp0_h);
+      tmp0_w += __msa_hadd_u_w(tmp1_h, tmp1_h);
+      tmp0_w += __msa_hadd_u_w(tmp2_h, tmp2_h);
+      tmp0_w += __msa_hadd_u_w(tmp3_h, tmp3_h);
+      tmp0_w += __msa_hadd_u_w(tmp4_h, tmp4_h);
+      tmp0_w += __msa_hadd_u_w(tmp5_h, tmp5_h);
+      tmp0_w += __msa_hadd_u_w(tmp6_h, tmp6_h);
+      tmp0_w += __msa_hadd_u_w(tmp7_h, tmp7_h);
+
+      tmp0_h = (v8u16)__msa_asub_s_h(src8, zero);
+      tmp1_h = (v8u16)__msa_asub_s_h(src9, zero);
+      tmp2_h = (v8u16)__msa_asub_s_h(src10, zero);
+      tmp3_h = (v8u16)__msa_asub_s_h(src11, zero);
+      tmp4_h = (v8u16)__msa_asub_s_h(src12, zero);
+      tmp5_h = (v8u16)__msa_asub_s_h(src13, zero);
+      tmp6_h = (v8u16)__msa_asub_s_h(src14, zero);
+      tmp7_h = (v8u16)__msa_asub_s_h(src15, zero);
+
+      tmp0_w += __msa_hadd_u_w(tmp0_h, tmp0_h);
+      tmp0_w += __msa_hadd_u_w(tmp1_h, tmp1_h);
+      tmp0_w += __msa_hadd_u_w(tmp2_h, tmp2_h);
+      tmp0_w += __msa_hadd_u_w(tmp3_h, tmp3_h);
+      tmp0_w += __msa_hadd_u_w(tmp4_h, tmp4_h);
+      tmp0_w += __msa_hadd_u_w(tmp5_h, tmp5_h);
+      tmp0_w += __msa_hadd_u_w(tmp6_h, tmp6_h);
+      tmp0_w += __msa_hadd_u_w(tmp7_h, tmp7_h);
+    }
+
+    satd = HADD_UW_U32(tmp0_w);
+  } else if (1024 == length) {
+    for (i = 0; i < 8; ++i) {
+      LD_SH8(data, 8, src0, src1, src2, src3, src4, src5, src6, src7);
+      data += 8 * 8;
+      LD_SH8(data, 8, src8, src9, src10, src11, src12, src13, src14, src15);
+      data += 8 * 8;
+
+      tmp0_h = (v8u16)__msa_asub_s_h(src0, zero);
+      tmp1_h = (v8u16)__msa_asub_s_h(src1, zero);
+      tmp2_h = (v8u16)__msa_asub_s_h(src2, zero);
+      tmp3_h = (v8u16)__msa_asub_s_h(src3, zero);
+      tmp4_h = (v8u16)__msa_asub_s_h(src4, zero);
+      tmp5_h = (v8u16)__msa_asub_s_h(src5, zero);
+      tmp6_h = (v8u16)__msa_asub_s_h(src6, zero);
+      tmp7_h = (v8u16)__msa_asub_s_h(src7, zero);
+
+      tmp0_w += __msa_hadd_u_w(tmp0_h, tmp0_h);
+      tmp0_w += __msa_hadd_u_w(tmp1_h, tmp1_h);
+      tmp0_w += __msa_hadd_u_w(tmp2_h, tmp2_h);
+      tmp0_w += __msa_hadd_u_w(tmp3_h, tmp3_h);
+      tmp0_w += __msa_hadd_u_w(tmp4_h, tmp4_h);
+      tmp0_w += __msa_hadd_u_w(tmp5_h, tmp5_h);
+      tmp0_w += __msa_hadd_u_w(tmp6_h, tmp6_h);
+      tmp0_w += __msa_hadd_u_w(tmp7_h, tmp7_h);
+
+      tmp0_h = (v8u16)__msa_asub_s_h(src8, zero);
+      tmp1_h = (v8u16)__msa_asub_s_h(src9, zero);
+      tmp2_h = (v8u16)__msa_asub_s_h(src10, zero);
+      tmp3_h = (v8u16)__msa_asub_s_h(src11, zero);
+      tmp4_h = (v8u16)__msa_asub_s_h(src12, zero);
+      tmp5_h = (v8u16)__msa_asub_s_h(src13, zero);
+      tmp6_h = (v8u16)__msa_asub_s_h(src14, zero);
+      tmp7_h = (v8u16)__msa_asub_s_h(src15, zero);
+
+      tmp0_w += __msa_hadd_u_w(tmp0_h, tmp0_h);
+      tmp0_w += __msa_hadd_u_w(tmp1_h, tmp1_h);
+      tmp0_w += __msa_hadd_u_w(tmp2_h, tmp2_h);
+      tmp0_w += __msa_hadd_u_w(tmp3_h, tmp3_h);
+      tmp0_w += __msa_hadd_u_w(tmp4_h, tmp4_h);
+      tmp0_w += __msa_hadd_u_w(tmp5_h, tmp5_h);
+      tmp0_w += __msa_hadd_u_w(tmp6_h, tmp6_h);
+      tmp0_w += __msa_hadd_u_w(tmp7_h, tmp7_h);
+    }
+
+    satd = HADD_UW_U32(tmp0_w);
+  } else {
+    satd = 0;
+
+    for (i = 0; i < length; ++i) {
+      satd += abs(data[i]);
+    }
+  }
+
+  return satd;
 }

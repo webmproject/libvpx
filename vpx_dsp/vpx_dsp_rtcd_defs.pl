@@ -892,7 +892,7 @@ if (vpx_config("CONFIG_VP9_ENCODER") eq "yes") {
   specialize qw/vpx_hadamard_16x16 sse2 neon msa/;
 
   add_proto qw/int vpx_satd/, "const int16_t *coeff, int length";
-  specialize qw/vpx_satd sse2 neon/;
+  specialize qw/vpx_satd sse2 neon msa/;
 
   add_proto qw/void vpx_int_pro_row/, "int16_t *hbuf, const uint8_t *ref, const int ref_stride, const int height";
   specialize qw/vpx_int_pro_row sse2 neon/;
