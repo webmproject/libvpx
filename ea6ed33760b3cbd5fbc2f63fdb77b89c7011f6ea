@@ -67,6 +67,23 @@
     },
     {
       "key": {
+        "uuid": "c6780607_5b84f488",
+        "filename": "test/buffer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-24T21:32:11Z",
+      "side": 1,
+      "message": "Changed to CopyFrom. Still don\u0027t really think this is different from the \u0027fill\u0027 that the other Set functions are doing though.",
+      "revId": "ea6ed33760b3cbd5fbc2f63fdb77b89c7011f6ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c3a049a8_86db98fd",
         "filename": "test/buffer.h",
         "patchSetId": 16
@@ -126,6 +143,23 @@
       "side": 1,
       "message": "But why have this at all instead of size accessors, and then allowing the tests to do what they need with the class-- is it really saving that much code?",
       "parentUuid": "a39fd578_66abeac7",
+      "revId": "ea6ed33760b3cbd5fbc2f63fdb77b89c7011f6ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce09b0a2_2961e1a5",
+        "filename": "test/buffer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-24T21:32:11Z",
+      "side": 1,
+      "message": "I made a mistake the first time I wrote the function and then copied the mistake, so it saves that.",
       "revId": "ea6ed33760b3cbd5fbc2f63fdb77b89c7011f6ea",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -238,6 +272,23 @@
       "side": 1,
       "message": "It just seems a little strange to have a private method that only compares the size of the buffer to some other buffer, and then the private method is what complains about the mismatch. Looking up where the output from this function comes from isn\u0027t going to be a good time for anyone unfamiliar with Buffer\u003cT\u003e.",
       "parentUuid": "23b3e516_65c07cdd",
+      "revId": "ea6ed33760b3cbd5fbc2f63fdb77b89c7011f6ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b01edbe6_05b7853b",
+        "filename": "test/buffer.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-24T21:32:11Z",
+      "side": 1,
+      "message": "It seems stranger to me to expect the callers to check the buffer size and have it fail silently if it doesn\u0027t match, or to make the functions return values and make the callers check them to see if they failed.",
       "revId": "ea6ed33760b3cbd5fbc2f63fdb77b89c7011f6ea",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
