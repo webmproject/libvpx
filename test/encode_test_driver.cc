@@ -226,6 +226,8 @@ void EncoderTest::RunLoop(VideoSource *video) {
 
           case VPX_CODEC_PSNR_PKT: PSNRPktHook(pkt); break;
 
+          case VPX_CODEC_STATS_PKT: StatsPktHook(pkt); break;
+
           default: break;
         }
       }
