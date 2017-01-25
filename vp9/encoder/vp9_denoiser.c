@@ -188,7 +188,7 @@ static VP9_DENOISER_DECISION perform_motion_compensation(
     VP9_DENOISER *denoiser, MACROBLOCK *mb, BLOCK_SIZE bs,
     int increase_denoising, int mi_row, int mi_col, PICK_MODE_CONTEXT *ctx,
     int motion_magnitude, int is_skin, int *zeromv_filter, int consec_zeromv,
-    int num_spatial_layers) {
+    int num_spatial_layers, int width) {
   int sse_diff = ctx->zeromv_sse - ctx->newmv_sse;
   MV_REFERENCE_FRAME frame;
   MACROBLOCKD *filter_mbd = &mb->e_mbd;
@@ -203,11 +203,11 @@ static VP9_DENOISER_DECISION perform_motion_compensation(
 
   if (is_skin && (motion_magnitude > 0 || consec_zeromv < 4)) return COPY_BLOCK;
 
-  // Avoid denoising for small block (unless motion is small).
-  // Small blocks are selected in variance partition (before encoding) and
-  // will typically lie on moving areas.
-  if (denoiser->denoising_level < kDenHigh && motion_magnitude > 16 &&
-      bs <= BLOCK_8X8)
+  // Avoid denoising small blocks. When noise > kDenLow or frame width > 480,
+  // denoise 16x16 blocks.
+  if (bs == BLOCK_8X8 || bs == BLOCK_8X16 || bs == BLOCK_16X8 ||
+      (bs == BLOCK_16X16 && width > 480 &&
+       denoiser->denoising_level <= kDenLow))
     return COPY_BLOCK;
 
   // If the best reference frame uses inter-prediction and there is enough of a
@@ -366,7 +366,7 @@ void vp9_denoiser_denoise(VP9_COMP *cpi, MACROBLOCK *mb, int mi_row, int mi_col,
     decision = perform_motion_compensation(
         denoiser, mb, bs, denoiser->increase_denoising, mi_row, mi_col, ctx,
         motion_magnitude, is_skin, &zeromv_filter, consec_zeromv,
-        cpi->svc.number_spatial_layers);
+        cpi->svc.number_spatial_layers, cpi->Source->y_width);
 
   if (decision == FILTER_BLOCK) {
     decision = vp9_denoiser_filter(
