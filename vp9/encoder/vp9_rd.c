@@ -146,7 +146,7 @@ static const int rd_boost_factor[16] = { 64, 32, 32, 32, 24, 16, 12, 12,
 static const int rd_frame_type_factor[FRAME_UPDATE_TYPES] = { 128, 144, 128,
                                                               128, 144 };
 
-int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
+int64_t vp9_compute_rd_mult_based_on_qindex(const VP9_COMP *cpi, int qindex) {
   const int64_t q = vp9_dc_quant(qindex, 0, cpi->common.bit_depth);
 #if CONFIG_VP9_HIGHBITDEPTH
   int64_t rdmult = 0;
@@ -161,6 +161,12 @@ int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
 #else
   int64_t rdmult = 88 * q * q / 24;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+  return rdmult;
+}
+
+int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
+  int64_t rdmult = vp9_compute_rd_mult_based_on_qindex(cpi, qindex);
+
   if (cpi->oxcf.pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
     const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
     const FRAME_UPDATE_TYPE frame_type = gf_group->update_type[gf_group->index];

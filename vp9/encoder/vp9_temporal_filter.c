@@ -646,6 +646,7 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
   int frames_to_blur_forward;
   struct scale_factors sf;
   YV12_BUFFER_CONFIG *frames[MAX_LAG_BUFFERS] = { NULL };
+  int rdmult;
 
   // Apply context specific adjustments to the arnr filter parameters.
   adjust_arnr_filter(cpi, distance, rc->gfu_boost, &frames_to_blur, &strength);
@@ -718,6 +719,12 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     }
   }
+
+  // Initialize errorperbit and sabperbit.
+  rdmult = (int)vp9_compute_rd_mult_based_on_qindex(cpi, ARNR_FILT_QINDEX);
+  if (rdmult < 1) rdmult = 1;
+  set_error_per_bit(&cpi->td.mb, rdmult);
+  vp9_initialize_me_consts(cpi, &cpi->td.mb, ARNR_FILT_QINDEX);
 
   temporal_filter_iterate_c(cpi, frames, frames_to_blur,
                             frames_to_blur_backward, strength, &sf);
