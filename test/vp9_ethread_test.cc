@@ -82,9 +82,8 @@ class VPxFirstPassEncoderThreadTest
       encoder->Control(VP9E_SET_FRAME_PARALLEL_DECODING, 0);
 
       // For now, new_mt_mode only works for 2-pass encoding.
-      // Enable this once the fp mt patch is checked in.
-      // if (encoding_mode_ == ::libvpx_test::kTwoPassGood)
-      //  encoder->Control(VP9E_SET_NEW_MT, new_mt_mode_);
+      if (encoding_mode_ == ::libvpx_test::kTwoPassGood)
+        encoder->Control(VP9E_SET_NEW_MT, new_mt_mode_);
 
       encoder_initialized_ = true;
     }
@@ -131,7 +130,7 @@ static void compare_fp_stats(vpx_fixed_buf_t *fp_stats) {
 
     for (j = 0; j < kDbl; ++j) {
       EXPECT_LE(fabs(*frame_stats1 - *frame_stats2),
-                fabs(*frame_stats1) / 1000.0);
+                fabs(*frame_stats1) / 10000.0);
       frame_stats1++;
       frame_stats2++;
     }
@@ -146,7 +145,7 @@ static void compare_fp_stats(vpx_fixed_buf_t *fp_stats) {
 }
 
 TEST_P(VPxFirstPassEncoderThreadTest, FirstPassStatsTest) {
-  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 50);
+  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
 
   first_pass_only_ = 1;
   cfg_.rc_target_bitrate = 1000;

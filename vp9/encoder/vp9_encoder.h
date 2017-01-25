@@ -33,7 +33,9 @@
 #include "vp9/encoder/vp9_aq_cyclicrefresh.h"
 #include "vp9/encoder/vp9_context_tree.h"
 #include "vp9/encoder/vp9_encodemb.h"
+#include "vp9/encoder/vp9_ethread.h"
 #include "vp9/encoder/vp9_firstpass.h"
+#include "vp9/encoder/vp9_job_queue.h"
 #include "vp9/encoder/vp9_lookahead.h"
 #include "vp9/encoder/vp9_mbgraph.h"
 #include "vp9/encoder/vp9_mcomp.h"
@@ -256,6 +258,8 @@ typedef struct VP9EncoderConfig {
   int render_width;
   int render_height;
   VP9E_TEMPORAL_LAYERING_MODE temporal_layering_mode;
+
+  int new_mt;
 } VP9EncoderConfig;
 
 static INLINE int is_lossless_requested(const VP9EncoderConfig *cfg) {
@@ -269,7 +273,33 @@ typedef struct TileDataEnc {
   int mode_map[BLOCK_SIZES][MAX_MODES];
   int m_search_count;
   int ex_search_count;
+  FIRSTPASS_DATA fp_data;
+  VP9RowMTSync row_mt_sync;
 } TileDataEnc;
+
+typedef struct RowMTInfo {
+  JobQueueHandle job_queue_hdl;
+#if CONFIG_MULTITHREAD
+  pthread_mutex_t job_mutex;
+#endif
+} RowMTInfo;
+
+typedef struct MultiThreadHandle {
+  int allocated_tile_rows;
+  int allocated_tile_cols;
+  int allocated_vert_unit_rows;
+
+  // Frame level params
+  int num_tile_vert_sbs[MAX_NUM_TILE_ROWS];
+
+  // Job Queue structure and handles
+  JobQueue *job_queue;
+
+  int jobs_per_tile_col;
+
+  RowMTInfo row_mt_info[MAX_NUM_TILE_COLS];
+  int thread_id_to_tile_id[MAX_NUM_THREADS];  // Mapping of threads to tiles
+} MultiThreadHandle;
 
 typedef struct RD_COUNTS {
   vp9_coeff_count coef_counts[TX_SIZES][PLANE_TYPES];
@@ -629,6 +659,10 @@ typedef struct VP9_COMP {
 
   int keep_level_stats;
   Vp9LevelInfo level_info;
+  MultiThreadHandle multi_thread_ctxt;
+  void (*row_mt_sync_read_ptr)(VP9RowMTSync *const, int, int);
+  void (*row_mt_sync_write_ptr)(VP9RowMTSync *const, int, int, const int);
+  int new_mt;
 
   // Previous Partition Info
   BLOCK_SIZE *prev_partition;
@@ -806,6 +840,18 @@ static INLINE int get_chessboard_index(const int frame_index) {
 
 static INLINE int *cond_cost_list(const struct VP9_COMP *cpi, int *cost_list) {
   return cpi->sf.mv.subpel_search_method != SUBPEL_TREE ? cost_list : NULL;
+}
+
+static INLINE int get_num_vert_units(TileInfo tile, int shift) {
+  int num_vert_units =
+      (tile.mi_row_end - tile.mi_row_start + (1 << shift) - 1) >> shift;
+  return num_vert_units;
+}
+
+static INLINE int get_num_cols(TileInfo tile, int shift) {
+  int num_cols =
+      (tile.mi_col_end - tile.mi_col_start + (1 << shift) - 1) >> shift;
+  return num_cols;
 }
 
 static INLINE int get_level_index(VP9_LEVEL level) {
