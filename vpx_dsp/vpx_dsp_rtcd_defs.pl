@@ -885,14 +885,26 @@ if (vpx_config("CONFIG_VP9_ENCODER") eq "yes") {
   add_proto qw/void vpx_minmax_8x8/, "const uint8_t *s, int p, const uint8_t *d, int dp, int *min, int *max";
   specialize qw/vpx_minmax_8x8 sse2 neon msa/;
 
-  add_proto qw/void vpx_hadamard_8x8/, "const int16_t *src_diff, int src_stride, int16_t *coeff";
-  specialize qw/vpx_hadamard_8x8 sse2 neon msa/, "$ssse3_x86_64";
 
-  add_proto qw/void vpx_hadamard_16x16/, "const int16_t *src_diff, int src_stride, int16_t *coeff";
-  specialize qw/vpx_hadamard_16x16 sse2 neon msa/;
+  if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+    add_proto qw/void vpx_hadamard_8x8/, "const int16_t *src_diff, int src_stride, tran_low_t *coeff";
+    specialize qw/vpx_hadamard_8x8/;
 
-  add_proto qw/int vpx_satd/, "const int16_t *coeff, int length";
-  specialize qw/vpx_satd sse2 neon msa/;
+    add_proto qw/void vpx_hadamard_16x16/, "const int16_t *src_diff, int src_stride, tran_low_t *coeff";
+    specialize qw/vpx_hadamard_16x16/;
+
+    add_proto qw/int vpx_satd/, "const tran_low_t *coeff, int length";
+    specialize qw/vpx_satd/;
+  } else {
+    add_proto qw/void vpx_hadamard_8x8/, "const int16_t *src_diff, int src_stride, int16_t *coeff";
+    specialize qw/vpx_hadamard_8x8 sse2 neon msa/, "$ssse3_x86_64";
+
+    add_proto qw/void vpx_hadamard_16x16/, "const int16_t *src_diff, int src_stride, int16_t *coeff";
+    specialize qw/vpx_hadamard_16x16 sse2 neon msa/;
+
+    add_proto qw/int vpx_satd/, "const int16_t *coeff, int length";
+    specialize qw/vpx_satd sse2 neon msa/;
+  }
 
   add_proto qw/void vpx_int_pro_row/, "int16_t *hbuf, const uint8_t *ref, const int ref_stride, const int height";
   specialize qw/vpx_int_pro_row sse2 neon msa/;

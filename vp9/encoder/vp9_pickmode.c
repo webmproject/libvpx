@@ -590,21 +590,6 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize, MACROBLOCK *x,
   *out_dist_sum += dist << 4;
 }
 
-#if CONFIG_VP9_HIGHBITDEPTH
-static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *this_rdc,
-                      int *skippable, int64_t *sse, BLOCK_SIZE bsize,
-                      TX_SIZE tx_size) {
-  MACROBLOCKD *xd = &x->e_mbd;
-  unsigned int var_y, sse_y;
-
-  (void)tx_size;
-  model_rd_for_sb_y(cpi, bsize, x, xd, &this_rdc->rate, &this_rdc->dist, &var_y,
-                    &sse_y);
-  *sse = INT_MAX;
-  *skippable = 0;
-  return;
-}
-#else
 static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *this_rdc,
                       int *skippable, int64_t *sse, BLOCK_SIZE bsize,
                       TX_SIZE tx_size) {
@@ -623,6 +608,20 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *this_rdc,
   int eob_cost = 0;
   const int bw = 4 * num_4x4_w;
   const int bh = 4 * num_4x4_h;
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  // TODO(jingning): Implement the high bit-depth Hadamard transforms and
+  // remove this check condition.
+  if (xd->bd != 8) {
+    unsigned int var_y, sse_y;
+    (void)tx_size;
+    model_rd_for_sb_y(cpi, bsize, x, xd, &this_rdc->rate, &this_rdc->dist,
+                      &var_y, &sse_y);
+    *sse = INT_MAX;
+    *skippable = 0;
+    return;
+  }
+#endif
 
   (void)cpi;
 
@@ -648,14 +647,14 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *this_rdc,
 
         switch (tx_size) {
           case TX_16X16:
-            vpx_hadamard_16x16(src_diff, diff_stride, (int16_t *)coeff);
+            vpx_hadamard_16x16(src_diff, diff_stride, coeff);
             vp9_quantize_fp(coeff, 256, x->skip_block, p->zbin, p->round_fp,
                             p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
                             pd->dequant, eob, scan_order->scan,
                             scan_order->iscan);
             break;
           case TX_8X8:
-            vpx_hadamard_8x8(src_diff, diff_stride, (int16_t *)coeff);
+            vpx_hadamard_8x8(src_diff, diff_stride, coeff);
             vp9_quantize_fp(coeff, 64, x->skip_block, p->zbin, p->round_fp,
                             p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
                             pd->dequant, eob, scan_order->scan,
@@ -699,7 +698,7 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *this_rdc,
         if (*eob == 1)
           this_rdc->rate += (int)abs(qcoeff[0]);
         else if (*eob > 1)
-          this_rdc->rate += vpx_satd((const int16_t *)qcoeff, step << 4);
+          this_rdc->rate += vpx_satd(qcoeff, step << 4);
 
         this_rdc->dist += vp9_block_error_fp(coeff, dqcoeff, step << 4) >> 2;
       }
@@ -711,7 +710,6 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *this_rdc,
   this_rdc->rate <<= (2 + VP9_PROB_COST_SHIFT);
   this_rdc->rate += (eob_cost << VP9_PROB_COST_SHIFT);
 }
-#endif
 
 static void model_rd_for_sb_uv(VP9_COMP *cpi, BLOCK_SIZE plane_bsize,
                                MACROBLOCK *x, MACROBLOCKD *xd,

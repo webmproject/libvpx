@@ -315,11 +315,13 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Values(make_tuple(16, 16, 1, 8, &vpx_avg_8x8_c),
                       make_tuple(16, 16, 1, 4, &vpx_avg_4x4_c)));
 
+#if !CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(C, SatdTest,
                         ::testing::Values(make_tuple(16, &vpx_satd_c),
                                           make_tuple(64, &vpx_satd_c),
                                           make_tuple(256, &vpx_satd_c),
                                           make_tuple(1024, &vpx_satd_c)));
+#endif
 
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
@@ -345,11 +347,13 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(64, &vpx_int_pro_col_sse2,
                                  &vpx_int_pro_col_c)));
 
+#if !CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(SSE2, SatdTest,
                         ::testing::Values(make_tuple(16, &vpx_satd_sse2),
                                           make_tuple(64, &vpx_satd_sse2),
                                           make_tuple(256, &vpx_satd_sse2),
                                           make_tuple(1024, &vpx_satd_sse2)));
+#endif
 #endif
 
 #if HAVE_NEON
@@ -376,12 +380,14 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(64, &vpx_int_pro_col_neon,
                                  &vpx_int_pro_col_c)));
 
+#if !CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(NEON, SatdTest,
                         ::testing::Values(make_tuple(16, &vpx_satd_neon),
                                           make_tuple(64, &vpx_satd_neon),
                                           make_tuple(256, &vpx_satd_neon),
                                           make_tuple(1024, &vpx_satd_neon)));
-#endif
+#endif  // !CONFIG_VP9_HIGHBITDEPTH
+#endif  // HAVE_NEON
 
 #if HAVE_MSA
 INSTANTIATE_TEST_CASE_P(
@@ -407,11 +413,13 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(64, &vpx_int_pro_col_msa,
                                  &vpx_int_pro_col_c)));
 
+#if !CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(MSA, SatdTest,
                         ::testing::Values(make_tuple(16, &vpx_satd_msa),
                                           make_tuple(64, &vpx_satd_msa),
                                           make_tuple(256, &vpx_satd_msa),
                                           make_tuple(1024, &vpx_satd_msa)));
-#endif
+#endif  // !CONFIG_VP9_HIGHBITDEPTH
+#endif  // HAVE_MSA
 
 }  // namespace

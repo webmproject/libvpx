@@ -321,7 +321,7 @@ int64_t vp9_block_error_c(const tran_low_t *coeff, const tran_low_t *dqcoeff,
   return error;
 }
 
-int64_t vp9_block_error_fp_c(const int16_t *coeff, const int16_t *dqcoeff,
+int64_t vp9_block_error_fp_c(const tran_low_t *coeff, const tran_low_t *dqcoeff,
                              int block_size) {
   int i;
   int64_t error = 0;
