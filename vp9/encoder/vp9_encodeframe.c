@@ -775,8 +775,8 @@ static void set_low_temp_var_flag(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
   }
 }
 
-static void copy_prev_partition(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
-                                int mi_col) {
+static void copy_partitioning_helper(VP9_COMP *cpi, BLOCK_SIZE bsize,
+                                     int mi_row, int mi_col) {
   VP9_COMMON *const cm = &cpi->common;
   BLOCK_SIZE *prev_part = cpi->prev_partition;
   int start_pos = mi_row * cm->mi_stride + mi_col;
@@ -811,14 +811,31 @@ static void copy_prev_partition(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
               subsize;
         break;
       case PARTITION_SPLIT:
-        copy_prev_partition(cpi, subsize, mi_row, mi_col);
-        copy_prev_partition(cpi, subsize, mi_row + bs, mi_col);
-        copy_prev_partition(cpi, subsize, mi_row, mi_col + bs);
-        copy_prev_partition(cpi, subsize, mi_row + bs, mi_col + bs);
+        copy_partitioning_helper(cpi, subsize, mi_row, mi_col);
+        copy_partitioning_helper(cpi, subsize, mi_row + bs, mi_col);
+        copy_partitioning_helper(cpi, subsize, mi_row, mi_col + bs);
+        copy_partitioning_helper(cpi, subsize, mi_row + bs, mi_col + bs);
         break;
       default: assert(0);
     }
   }
+}
+
+static int copy_partitioning(VP9_COMP *cpi, MACROBLOCK *x, int mi_row,
+                             int mi_col, int segment_id, int sb_offset) {
+  if (cpi->rc.frames_since_key > 1 && segment_id == CR_SEGMENT_ID_BASE &&
+      cpi->prev_segment_id[sb_offset] == CR_SEGMENT_ID_BASE &&
+      cpi->copied_frame_cnt[sb_offset] < cpi->max_copied_frame) {
+    if (cpi->prev_partition != NULL) {
+      copy_partitioning_helper(cpi, BLOCK_64X64, mi_row, mi_col);
+      cpi->copied_frame_cnt[sb_offset] += 1;
+      memcpy(x->variance_low, &(cpi->prev_variance_low[sb_offset * 25]),
+             sizeof(x->variance_low));
+      return 1;
+    }
+  }
+
+  return 0;
 }
 
 static void update_prev_partition(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
@@ -943,17 +960,9 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     // If avg_source_sad is lower than the threshold, copy the partition without
     // computing the y_sad.
     if (cpi->avg_source_sad_sb[sb_offset2] && cpi->sf.copy_partition_flag &&
-        cpi->rc.frames_since_key > 1 && segment_id == CR_SEGMENT_ID_BASE &&
-        cpi->prev_segment_id[sb_offset] == CR_SEGMENT_ID_BASE &&
-        cpi->copied_frame_cnt[sb_offset] < cpi->max_copied_frame) {
-      if (cpi->prev_partition != NULL) {
-        copy_prev_partition(cpi, BLOCK_64X64, mi_row, mi_col);
-        chroma_check(cpi, x, bsize, y_sad, is_key_frame);
-        cpi->copied_frame_cnt[sb_offset] += 1;
-        memcpy(x->variance_low, &(cpi->prev_variance_low[sb_offset * 25]),
-               sizeof(x->variance_low));
-        return 0;
-      }
+        copy_partitioning(cpi, x, mi_row, mi_col, segment_id, sb_offset)) {
+      chroma_check(cpi, x, bsize, y_sad, is_key_frame);
+      return 0;
     }
   }
 
@@ -1067,23 +1076,11 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     // last frame to current frame only if the last frame is not a keyframe.
     // Stop the copy every cpi->max_copied_frame to refresh the partition.
     // TODO(jianj) : tune the threshold.
-    if (cpi->sf.copy_partition_flag && cpi->rc.frames_since_key > 1 &&
-        segment_id == CR_SEGMENT_ID_BASE &&
-        cpi->prev_segment_id[sb_offset] == CR_SEGMENT_ID_BASE &&
-        y_sad_last < cpi->vbp_threshold_copy &&
-        cpi->copied_frame_cnt[sb_offset] < cpi->max_copied_frame) {
-      if (cpi->prev_partition != NULL) {
-        copy_prev_partition(cpi, BLOCK_64X64, mi_row, mi_col);
-        chroma_check(cpi, x, bsize, y_sad, is_key_frame);
-        cpi->copied_frame_cnt[sb_offset] += 1;
-        memcpy(x->variance_low, &(cpi->prev_variance_low[sb_offset * 25]),
-               sizeof(x->variance_low));
-        return 0;
-      }
+    if (cpi->sf.copy_partition_flag && y_sad_last < cpi->vbp_threshold_copy &&
+        copy_partitioning(cpi, x, mi_row, mi_col, segment_id, sb_offset)) {
+      chroma_check(cpi, x, bsize, y_sad, is_key_frame);
+      return 0;
     }
-    if (cpi->sf.copy_partition_flag &&
-        cpi->copied_frame_cnt[sb_offset] == cpi->max_copied_frame)
-      cpi->copied_frame_cnt[sb_offset] = 0;
   } else {
     d = VP9_VAR_OFFS;
     dp = 0;
@@ -1283,6 +1280,9 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     cpi->prev_segment_id[sb_offset] = segment_id;
     memcpy(&(cpi->prev_variance_low[sb_offset * 25]), x->variance_low,
            sizeof(x->variance_low));
+    // Reset the counter for copy partitioning
+    if (cpi->copied_frame_cnt[sb_offset] == cpi->max_copied_frame)
+      cpi->copied_frame_cnt[sb_offset] = 0;
   }
 
   if (cpi->sf.short_circuit_low_temp_var) {
