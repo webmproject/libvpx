@@ -647,12 +647,14 @@ static void fill_variance_8x8avg(const uint8_t *s, int sp, const uint8_t *d,
   }
 }
 
-#if !CONFIG_VP9_HIGHBITDEPTH
 // Check if most of the superblock is skin content, and if so, force split to
 // 32x32, and set x->sb_is_skin for use in mode selection.
 static int skin_sb_split(VP9_COMP *cpi, MACROBLOCK *x, const int low_res,
                          int mi_row, int mi_col, int *force_split) {
   VP9_COMMON *const cm = &cpi->common;
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (cm->use_highbitdepth) return 0;
+#endif
   // Avoid checking superblocks on/near boundary and avoid low resolutions.
   // Note superblock may still pick 64X64 if y_sad is very small
   // (i.e., y_sad < cpi->vbp_threshold_sad) below. For now leave this as is.
@@ -707,7 +709,6 @@ static int skin_sb_split(VP9_COMP *cpi, MACROBLOCK *x, const int low_res,
   }
   return 0;
 }
-#endif
 
 static void set_low_temp_var_flag(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
                                   v64x64 *vt, int64_t thresholds[],
@@ -1048,12 +1049,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     set_ref_ptrs(cm, xd, mi->ref_frame[0], mi->ref_frame[1]);
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_64X64);
 
-    x->sb_is_skin = 0;
-#if !CONFIG_VP9_HIGHBITDEPTH
-    if (cpi->use_skin_detection)
-      x->sb_is_skin =
-          skin_sb_split(cpi, x, low_res, mi_row, mi_col, force_split);
-#endif
+    x->sb_is_skin = skin_sb_split(cpi, x, low_res, mi_row, mi_col, force_split);
 
     d = xd->plane[0].dst.buf;
     dp = xd->plane[0].dst.stride;

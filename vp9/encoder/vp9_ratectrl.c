@@ -2181,6 +2181,9 @@ void adjust_gf_boost_lag_one_pass_vbr(VP9_COMP *cpi, uint64_t avg_sad_current) {
 void vp9_avg_source_sad(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (cm->use_highbitdepth) return;
+#endif
   rc->high_source_sad = 0;
   if (cpi->Last_Source != NULL &&
       cpi->Last_Source->y_width == cpi->Source->y_width &&
