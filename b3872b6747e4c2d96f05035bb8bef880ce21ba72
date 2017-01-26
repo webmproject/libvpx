@@ -33,6 +33,23 @@
       "revId": "b3872b6747e4c2d96f05035bb8bef880ce21ba72",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0f20596a_88556e77",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 18
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-26T17:53:05Z",
+      "side": 1,
+      "message": "It was kind of a how-to hint \"you can can EXPECT and then use HasFailure\" then an actual important thing.\n\nThis function is also only 16x16, so you get a bunch of EXPECT noise but then a buffer dump and explicit test failure at the end. It\u0027s not super important so I\u0027ve removed it.",
+      "revId": "b3872b6747e4c2d96f05035bb8bef880ce21ba72",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
