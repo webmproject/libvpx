@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d5a64003_5f0c92de",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-27T16:40:17Z",
+      "side": 1,
+      "message": "Please add BUG\u003dwebm:1366",
+      "revId": "ae5f85b2e4571a52a9d17d4c88e72969c23f4d43",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
