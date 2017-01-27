@@ -21,7 +21,7 @@ namespace {
 
 using ::libvpx_test::ACMRandom;
 
-typedef void (*HadamardFunc)(const int16_t *a, int a_stride, int16_t *b);
+typedef void (*HadamardFunc)(const int16_t *a, int a_stride, tran_low_t *b);
 
 void hadamard_loop(const int16_t *a, int a_stride, int16_t *out) {
   int16_t b[8];
@@ -46,18 +46,16 @@ void hadamard_loop(const int16_t *a, int a_stride, int16_t *out) {
   out[5] = c[3] - c[7];
 }
 
-void reference_hadamard8x8(const int16_t *a, int a_stride, int16_t *b) {
+void reference_hadamard8x8(const int16_t *a, int a_stride, tran_low_t *b) {
   int16_t buf[64];
-  for (int i = 0; i < 8; ++i) {
-    hadamard_loop(a + i, a_stride, buf + i * 8);
-  }
+  int16_t buf2[64];
+  for (int i = 0; i < 8; ++i) hadamard_loop(a + i, a_stride, buf + i * 8);
+  for (int i = 0; i < 8; ++i) hadamard_loop(buf + i, 8, buf2 + i * 8);
 
-  for (int i = 0; i < 8; ++i) {
-    hadamard_loop(buf + i, 8, b + i * 8);
-  }
+  for (int i = 0; i < 64; ++i) b[i] = (tran_low_t)buf2[i];
 }
 
-void reference_hadamard16x16(const int16_t *a, int a_stride, int16_t *b) {
+void reference_hadamard16x16(const int16_t *a, int a_stride, tran_low_t *b) {
   /* The source is a 16x16 block. The destination is rearranged to 8x32.
    * Input is 9 bit. */
   reference_hadamard8x8(a + 0 + 0 * a_stride, a_stride, b + 0);
@@ -68,16 +66,16 @@ void reference_hadamard16x16(const int16_t *a, int a_stride, int16_t *b) {
   /* Overlay the 8x8 blocks and combine. */
   for (int i = 0; i < 64; ++i) {
     /* 8x8 steps the range up to 15 bits. */
-    const int16_t a0 = b[0];
-    const int16_t a1 = b[64];
-    const int16_t a2 = b[128];
-    const int16_t a3 = b[192];
+    const tran_low_t a0 = b[0];
+    const tran_low_t a1 = b[64];
+    const tran_low_t a2 = b[128];
+    const tran_low_t a3 = b[192];
 
     /* Prevent the result from escaping int16_t. */
-    const int16_t b0 = (a0 + a1) >> 1;
-    const int16_t b1 = (a0 - a1) >> 1;
-    const int16_t b2 = (a2 + a3) >> 1;
-    const int16_t b3 = (a2 - a3) >> 1;
+    const tran_low_t b0 = (a0 + a1) >> 1;
+    const tran_low_t b1 = (a0 - a1) >> 1;
+    const tran_low_t b2 = (a2 + a3) >> 1;
+    const tran_low_t b3 = (a2 - a3) >> 1;
 
     /* Store a 16 bit value. */
     b[0] = b0 + b2;
@@ -105,8 +103,8 @@ class Hadamard8x8Test : public HadamardTestBase {};
 
 TEST_P(Hadamard8x8Test, CompareReferenceRandom) {
   DECLARE_ALIGNED(16, int16_t, a[64]);
-  DECLARE_ALIGNED(16, int16_t, b[64]);
-  int16_t b_ref[64];
+  DECLARE_ALIGNED(16, tran_low_t, b[64]);
+  tran_low_t b_ref[64];
   for (int i = 0; i < 64; ++i) {
     a[i] = rnd_.Rand9Signed();
   }
@@ -124,8 +122,8 @@ TEST_P(Hadamard8x8Test, CompareReferenceRandom) {
 
 TEST_P(Hadamard8x8Test, VaryStride) {
   DECLARE_ALIGNED(16, int16_t, a[64 * 8]);
-  DECLARE_ALIGNED(16, int16_t, b[64]);
-  int16_t b_ref[64];
+  DECLARE_ALIGNED(16, tran_low_t, b[64]);
+  tran_low_t b_ref[64];
   for (int i = 0; i < 64 * 8; ++i) {
     a[i] = rnd_.Rand9Signed();
   }
@@ -144,10 +142,12 @@ TEST_P(Hadamard8x8Test, VaryStride) {
   }
 }
 
-#if !CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(C, Hadamard8x8Test,
                         ::testing::Values(&vpx_hadamard_8x8_c));
 
+// TODO(jingning): Remove highbitdepth flag when the SIMD functions are
+// in place and turn on the unit test.
+#if !CONFIG_VP9_HIGHBITDEPTH
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(SSE2, Hadamard8x8Test,
                         ::testing::Values(&vpx_hadamard_8x8_sse2));
@@ -173,8 +173,8 @@ class Hadamard16x16Test : public HadamardTestBase {};
 
 TEST_P(Hadamard16x16Test, CompareReferenceRandom) {
   DECLARE_ALIGNED(16, int16_t, a[16 * 16]);
-  DECLARE_ALIGNED(16, int16_t, b[16 * 16]);
-  int16_t b_ref[16 * 16];
+  DECLARE_ALIGNED(16, tran_low_t, b[16 * 16]);
+  tran_low_t b_ref[16 * 16];
   for (int i = 0; i < 16 * 16; ++i) {
     a[i] = rnd_.Rand9Signed();
   }
@@ -192,8 +192,8 @@ TEST_P(Hadamard16x16Test, CompareReferenceRandom) {
 
 TEST_P(Hadamard16x16Test, VaryStride) {
   DECLARE_ALIGNED(16, int16_t, a[16 * 16 * 8]);
-  DECLARE_ALIGNED(16, int16_t, b[16 * 16]);
-  int16_t b_ref[16 * 16];
+  DECLARE_ALIGNED(16, tran_low_t, b[16 * 16]);
+  tran_low_t b_ref[16 * 16];
   for (int i = 0; i < 16 * 16 * 8; ++i) {
     a[i] = rnd_.Rand9Signed();
   }
