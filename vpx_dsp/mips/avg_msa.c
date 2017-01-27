@@ -561,3 +561,119 @@ int16_t vpx_int_pro_col_msa(const uint8_t *ref, const int width) {
 
   return sum;
 }
+
+int vpx_vector_var_msa(const int16_t *ref, const int16_t *src, const int bwl) {
+  int sse, mean, var;
+  v8i16 src0, src1, src2, src3, src4, src5, src6, src7, ref0, ref1, ref2;
+  v8i16 ref3, ref4, ref5, ref6, ref7, src_l0_m, src_l1_m, src_l2_m, src_l3_m;
+  v8i16 src_l4_m, src_l5_m, src_l6_m, src_l7_m;
+  v4i32 res_l0_m, res_l1_m, res_l2_m, res_l3_m, res_l4_m, res_l5_m, res_l6_m;
+  v4i32 res_l7_m, mean_v;
+  v2i64 sse_v;
+
+  if (2 == bwl) {
+    LD_SH2(src, 8, src0, src1);
+    LD_SH2(ref, 8, ref0, ref1);
+
+    ILVRL_H2_SH(src0, ref0, src_l0_m, src_l1_m);
+    ILVRL_H2_SH(src1, ref1, src_l2_m, src_l3_m);
+    HSUB_UH2_SW(src_l0_m, src_l1_m, res_l0_m, res_l1_m);
+    HSUB_UH2_SW(src_l2_m, src_l3_m, res_l2_m, res_l3_m);
+    sse_v = __msa_dotp_s_d(res_l0_m, res_l0_m);
+    sse_v = __msa_dpadd_s_d(sse_v, res_l1_m, res_l1_m);
+    DPADD_SD2_SD(res_l2_m, res_l3_m, sse_v, sse_v);
+    mean_v = res_l0_m + res_l1_m;
+    mean_v += res_l2_m + res_l3_m;
+
+    sse_v += __msa_splati_d(sse_v, 1);
+    sse = __msa_copy_s_w((v4i32)sse_v, 0);
+
+    mean = HADD_SW_S32(mean_v);
+  } else if (3 == bwl) {
+    LD_SH4(src, 8, src0, src1, src2, src3);
+    LD_SH4(ref, 8, ref0, ref1, ref2, ref3);
+
+    ILVRL_H2_SH(src0, ref0, src_l0_m, src_l1_m);
+    ILVRL_H2_SH(src1, ref1, src_l2_m, src_l3_m);
+    ILVRL_H2_SH(src2, ref2, src_l4_m, src_l5_m);
+    ILVRL_H2_SH(src3, ref3, src_l6_m, src_l7_m);
+    HSUB_UH2_SW(src_l0_m, src_l1_m, res_l0_m, res_l1_m);
+    HSUB_UH2_SW(src_l2_m, src_l3_m, res_l2_m, res_l3_m);
+    HSUB_UH2_SW(src_l4_m, src_l5_m, res_l4_m, res_l5_m);
+    HSUB_UH2_SW(src_l6_m, src_l7_m, res_l6_m, res_l7_m);
+    sse_v = __msa_dotp_s_d(res_l0_m, res_l0_m);
+    sse_v = __msa_dpadd_s_d(sse_v, res_l1_m, res_l1_m);
+    DPADD_SD2_SD(res_l2_m, res_l3_m, sse_v, sse_v);
+    DPADD_SD2_SD(res_l4_m, res_l5_m, sse_v, sse_v);
+    DPADD_SD2_SD(res_l6_m, res_l7_m, sse_v, sse_v);
+    mean_v = res_l0_m + res_l1_m;
+    mean_v += res_l2_m + res_l3_m;
+    mean_v += res_l4_m + res_l5_m;
+    mean_v += res_l6_m + res_l7_m;
+
+    sse_v += __msa_splati_d(sse_v, 1);
+    sse = __msa_copy_s_w((v4i32)sse_v, 0);
+
+    mean = HADD_SW_S32(mean_v);
+  } else if (4 == bwl) {
+    LD_SH8(src, 8, src0, src1, src2, src3, src4, src5, src6, src7);
+    LD_SH8(ref, 8, ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7);
+
+    ILVRL_H2_SH(src0, ref0, src_l0_m, src_l1_m);
+    ILVRL_H2_SH(src1, ref1, src_l2_m, src_l3_m);
+    ILVRL_H2_SH(src2, ref2, src_l4_m, src_l5_m);
+    ILVRL_H2_SH(src3, ref3, src_l6_m, src_l7_m);
+    HSUB_UH2_SW(src_l0_m, src_l1_m, res_l0_m, res_l1_m);
+    HSUB_UH2_SW(src_l2_m, src_l3_m, res_l2_m, res_l3_m);
+    HSUB_UH2_SW(src_l4_m, src_l5_m, res_l4_m, res_l5_m);
+    HSUB_UH2_SW(src_l6_m, src_l7_m, res_l6_m, res_l7_m);
+    sse_v = __msa_dotp_s_d(res_l0_m, res_l0_m);
+    sse_v = __msa_dpadd_s_d(sse_v, res_l1_m, res_l1_m);
+    DPADD_SD2_SD(res_l2_m, res_l3_m, sse_v, sse_v);
+    DPADD_SD2_SD(res_l4_m, res_l5_m, sse_v, sse_v);
+    DPADD_SD2_SD(res_l6_m, res_l7_m, sse_v, sse_v);
+    mean_v = res_l0_m + res_l1_m;
+    mean_v += res_l2_m + res_l3_m;
+    mean_v += res_l4_m + res_l5_m;
+    mean_v += res_l6_m + res_l7_m;
+
+    ILVRL_H2_SH(src4, ref4, src_l0_m, src_l1_m);
+    ILVRL_H2_SH(src5, ref5, src_l2_m, src_l3_m);
+    ILVRL_H2_SH(src6, ref6, src_l4_m, src_l5_m);
+    ILVRL_H2_SH(src7, ref7, src_l6_m, src_l7_m);
+    HSUB_UH2_SW(src_l0_m, src_l1_m, res_l0_m, res_l1_m);
+    HSUB_UH2_SW(src_l2_m, src_l3_m, res_l2_m, res_l3_m);
+    HSUB_UH2_SW(src_l4_m, src_l5_m, res_l4_m, res_l5_m);
+    HSUB_UH2_SW(src_l6_m, src_l7_m, res_l6_m, res_l7_m);
+    DPADD_SD2_SD(res_l0_m, res_l1_m, sse_v, sse_v);
+    DPADD_SD2_SD(res_l2_m, res_l3_m, sse_v, sse_v);
+    DPADD_SD2_SD(res_l4_m, res_l5_m, sse_v, sse_v);
+    DPADD_SD2_SD(res_l6_m, res_l7_m, sse_v, sse_v);
+    mean_v += res_l0_m + res_l1_m;
+    mean_v += res_l2_m + res_l3_m;
+    mean_v += res_l4_m + res_l5_m;
+    mean_v += res_l6_m + res_l7_m;
+
+    sse_v += __msa_splati_d(sse_v, 1);
+    sse = __msa_copy_s_w((v4i32)sse_v, 0);
+
+    mean = HADD_SW_S32(mean_v);
+  } else {
+    int i;
+    const int width = 4 << bwl;
+
+    sse = 0;
+    mean = 0;
+
+    for (i = 0; i < width; ++i) {
+      const int diff = ref[i] - src[i];
+
+      mean += diff;
+      sse += diff * diff;
+    }
+  }
+
+  var = sse - ((mean * mean) >> (bwl + 2));
+
+  return var;
+}
