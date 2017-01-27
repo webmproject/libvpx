@@ -38,6 +38,9 @@ void vp9_noise_estimate_init(NOISE_ESTIMATE *const ne, int width, int height) {
 }
 
 static int enable_noise_estimation(VP9_COMP *const cpi) {
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (cpi->common.use_highbitdepth) return 0;
+#endif
 // Enable noise estimation if denoising is on, but not for low resolutions.
 #if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc(cpi) &&
