@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "930b5700_b7e2aad5",
+        "filename": "third_party/googletest/README.libvpx",
+        "patchSetId": 1
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-27T02:20:40Z",
+      "side": 1,
+      "message": "this should probably be LICENSE given the local modifications list below",
+      "revId": "e7f69b5f3536aaef7a3abf2458597efbb03f7776",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
