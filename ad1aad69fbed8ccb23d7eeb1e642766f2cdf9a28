@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8d8c9bd4_5ba3e243",
+        "filename": "test/avg_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-27T18:28:55Z",
+      "side": 0,
+      "message": "// !CONFIG, especially here where there are multiple endifs",
+      "revId": "ad1aad69fbed8ccb23d7eeb1e642766f2cdf9a28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "afae53de_e364db75",
+        "filename": "test/avg_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-27T18:28:55Z",
+      "side": 0,
+      "message": "Make sure to cover MSA functions if they are affected",
+      "revId": "ad1aad69fbed8ccb23d7eeb1e642766f2cdf9a28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}

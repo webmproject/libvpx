@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a7380540_3bf75571",
+        "filename": "test/avg_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-27T18:28:55Z",
+      "side": 1,
+      "message": "// !CONFIG....",
+      "revId": "b376999de67695fe26717f1c9f7f1133d35463b0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "35831239_fde6ed0d",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-27T18:28:55Z",
+      "side": 1,
+      "message": "// !CONFIG...",
+      "revId": "b376999de67695fe26717f1c9f7f1133d35463b0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
