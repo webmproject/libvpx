@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "361d2cb7_74655c3d",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-27T18:45:39Z",
+      "side": 1,
+      "message": "there\u0027s not a great name here, but buf2 might be a bit more normal. sec sounds like security to me",
+      "revId": "d6362f476770619cc4c471f5649fe0e454b4d0c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b86cd0b_fd627c19",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-27T18:45:39Z",
+      "side": 1,
+      "message": "will these hold if you start accepting input from 10/12-bit encodes?",
+      "revId": "d6362f476770619cc4c471f5649fe0e454b4d0c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
