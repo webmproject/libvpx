@@ -1569,7 +1569,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   cpi->new_mt = 0;
   if (((cpi->oxcf.mode == GOOD || cpi->oxcf.mode == BEST) &&
        cpi->oxcf.speed < 5 && cpi->oxcf.pass == 1) &&
-      cpi->oxcf.new_mt)
+      cpi->oxcf.new_mt && !cpi->use_svc)
     cpi->new_mt = 1;
 }
 
