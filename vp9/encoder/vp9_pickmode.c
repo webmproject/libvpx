@@ -1793,15 +1793,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
         pd->dst.stride = this_mode_pred->stride;
       }
     } else {
-// TODO(jackychen): the low-bitdepth condition causes a segfault in
-// high-bitdepth builds.
-// https://bugs.chromium.org/p/webm/issues/detail?id=1250
-#if CONFIG_VP9_HIGHBITDEPTH
-      const int large_block = bsize > BLOCK_32X32;
-#else
-      const int large_block =
-          x->sb_is_skin ? bsize > BLOCK_32X32 : bsize >= BLOCK_32X32;
-#endif
+      const int large_block = (x->sb_is_skin || cpi->oxcf.speed < 8)
+                                  ? bsize > BLOCK_32X32
+                                  : bsize >= BLOCK_32X32;
       mi->interp_filter = (filter_ref == SWITCHABLE) ? EIGHTTAP : filter_ref;
       vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
 
