@@ -888,10 +888,10 @@ if (vpx_config("CONFIG_VP9_ENCODER") eq "yes") {
 
   if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     add_proto qw/void vpx_hadamard_8x8/, "const int16_t *src_diff, int src_stride, tran_low_t *coeff";
-    specialize qw/vpx_hadamard_8x8/;
+    specialize qw/vpx_hadamard_8x8 sse2/;
 
     add_proto qw/void vpx_hadamard_16x16/, "const int16_t *src_diff, int src_stride, tran_low_t *coeff";
-    specialize qw/vpx_hadamard_16x16/;
+    specialize qw/vpx_hadamard_16x16 sse2/;
 
     add_proto qw/int vpx_satd/, "const tran_low_t *coeff, int length";
     specialize qw/vpx_satd/;
