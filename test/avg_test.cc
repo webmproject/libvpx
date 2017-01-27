@@ -186,7 +186,7 @@ class IntProColTest : public AverageTestBase,
   int16_t sum_c_;
 };
 
-typedef int (*SatdFunc)(const int16_t *coeffs, int length);
+typedef int (*SatdFunc)(const tran_low_t *coeffs, int length);
 typedef std::tr1::tuple<int, SatdFunc> SatdTestParam;
 
 class SatdTest : public ::testing::Test,
@@ -196,7 +196,7 @@ class SatdTest : public ::testing::Test,
     satd_size_ = GET_PARAM(0);
     satd_func_ = GET_PARAM(1);
     rnd_.Reset(ACMRandom::DeterministicSeed());
-    src_ = reinterpret_cast<int16_t *>(
+    src_ = reinterpret_cast<tran_low_t *>(
         vpx_memalign(16, sizeof(*src_) * satd_size_));
     ASSERT_TRUE(src_ != NULL);
   }
@@ -206,12 +206,15 @@ class SatdTest : public ::testing::Test,
     vpx_free(src_);
   }
 
-  void FillConstant(const int16_t val) {
+  void FillConstant(const tran_low_t val) {
     for (int i = 0; i < satd_size_; ++i) src_[i] = val;
   }
 
   void FillRandom() {
-    for (int i = 0; i < satd_size_; ++i) src_[i] = rnd_.Rand16();
+    for (int i = 0; i < satd_size_; ++i) {
+      const int16_t tmp = rnd_.Rand16();
+      src_[i] = (tran_low_t)tmp;
+    }
   }
 
   void Check(const int expected) {
@@ -223,7 +226,7 @@ class SatdTest : public ::testing::Test,
   int satd_size_;
 
  private:
-  int16_t *src_;
+  tran_low_t *src_;
   SatdFunc satd_func_;
   ACMRandom rnd_;
 };
@@ -315,13 +318,11 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Values(make_tuple(16, 16, 1, 8, &vpx_avg_8x8_c),
                       make_tuple(16, 16, 1, 4, &vpx_avg_4x4_c)));
 
-#if !CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(C, SatdTest,
                         ::testing::Values(make_tuple(16, &vpx_satd_c),
                                           make_tuple(64, &vpx_satd_c),
                                           make_tuple(256, &vpx_satd_c),
                                           make_tuple(1024, &vpx_satd_c)));
-#endif
 
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
@@ -347,6 +348,8 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(64, &vpx_int_pro_col_sse2,
                                  &vpx_int_pro_col_c)));
 
+// TODO(jingning): Remove the highbitdepth flag once the SIMD functions are
+// in place.
 #if !CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(SSE2, SatdTest,
                         ::testing::Values(make_tuple(16, &vpx_satd_sse2),
