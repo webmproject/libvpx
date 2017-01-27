@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "f4cdb6d3_77fff6df",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1052,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2017-01-27T18:28:57Z",
+      "side": 1,
+      "message": "Done",
+      "revId": "143812f0594fd51006ccd2be052287b361389672",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bf84fc63_55e2401d",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 5
@@ -30,6 +47,23 @@
       "writtenOn": "2017-01-27T17:55:13Z",
       "side": 1,
       "message": "sync to latest code to resolve this",
+      "revId": "143812f0594fd51006ccd2be052287b361389672",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4fd5f912_53a96916",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1798,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2017-01-27T18:28:57Z",
+      "side": 1,
+      "message": "Done",
       "revId": "143812f0594fd51006ccd2be052287b361389672",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
