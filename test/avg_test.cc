@@ -393,6 +393,20 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(16, 16, 5, 4, &vpx_avg_4x4_msa),
                       make_tuple(32, 32, 15, 4, &vpx_avg_4x4_msa)));
 
+INSTANTIATE_TEST_CASE_P(
+    MSA, IntProRowTest,
+    ::testing::Values(make_tuple(16, &vpx_int_pro_row_msa, &vpx_int_pro_row_c),
+                      make_tuple(32, &vpx_int_pro_row_msa, &vpx_int_pro_row_c),
+                      make_tuple(64, &vpx_int_pro_row_msa,
+                                 &vpx_int_pro_row_c)));
+
+INSTANTIATE_TEST_CASE_P(
+    MSA, IntProColTest,
+    ::testing::Values(make_tuple(16, &vpx_int_pro_col_msa, &vpx_int_pro_col_c),
+                      make_tuple(32, &vpx_int_pro_col_msa, &vpx_int_pro_col_c),
+                      make_tuple(64, &vpx_int_pro_col_msa,
+                                 &vpx_int_pro_col_c)));
+
 INSTANTIATE_TEST_CASE_P(MSA, SatdTest,
                         ::testing::Values(make_tuple(16, &vpx_satd_msa),
                                           make_tuple(64, &vpx_satd_msa),

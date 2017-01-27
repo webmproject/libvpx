@@ -1049,6 +1049,7 @@
   }
 #define INSERT_D2_UB(...) INSERT_D2(v16u8, __VA_ARGS__)
 #define INSERT_D2_SB(...) INSERT_D2(v16i8, __VA_ARGS__)
+#define INSERT_D2_SH(...) INSERT_D2(v8i16, __VA_ARGS__)
 
 /* Description : Interleave even byte elements from vectors
    Arguments   : Inputs  - in0, in1, in2, in3
@@ -1559,6 +1560,12 @@
    Details     : Each element of vector 'in0' is right shifted by 'shift' and
                  the result is written in-place. 'shift' is a GP variable.
 */
+#define SRA_2V(in0, in1, shift) \
+  {                             \
+    in0 = in0 >> shift;         \
+    in1 = in1 >> shift;         \
+  }
+
 #define SRA_4V(in0, in1, in2, in3, shift) \
   {                                       \
     in0 = in0 >> shift;                   \

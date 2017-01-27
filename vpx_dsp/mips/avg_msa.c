@@ -389,3 +389,175 @@ int vpx_satd_msa(const int16_t *data, int length) {
 
   return satd;
 }
+
+void vpx_int_pro_row_msa(int16_t hbuf[16], const uint8_t *ref,
+                         const int ref_stride, const int height) {
+  int i;
+  v16u8 ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7;
+  v8i16 hbuf_r = { 0 };
+  v8i16 hbuf_l = { 0 };
+  v8i16 ref0_r, ref0_l, ref1_r, ref1_l, ref2_r, ref2_l, ref3_r, ref3_l;
+  v8i16 ref4_r, ref4_l, ref5_r, ref5_l, ref6_r, ref6_l, ref7_r, ref7_l;
+
+  if (16 == height) {
+    for (i = 2; i--;) {
+      LD_UB8(ref, ref_stride, ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7);
+      ref += 8 * ref_stride;
+      UNPCK_UB_SH(ref0, ref0_r, ref0_l);
+      UNPCK_UB_SH(ref1, ref1_r, ref1_l);
+      UNPCK_UB_SH(ref2, ref2_r, ref2_l);
+      UNPCK_UB_SH(ref3, ref3_r, ref3_l);
+      UNPCK_UB_SH(ref4, ref4_r, ref4_l);
+      UNPCK_UB_SH(ref5, ref5_r, ref5_l);
+      UNPCK_UB_SH(ref6, ref6_r, ref6_l);
+      UNPCK_UB_SH(ref7, ref7_r, ref7_l);
+      ADD4(hbuf_r, ref0_r, hbuf_l, ref0_l, hbuf_r, ref1_r, hbuf_l, ref1_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+      ADD4(hbuf_r, ref2_r, hbuf_l, ref2_l, hbuf_r, ref3_r, hbuf_l, ref3_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+      ADD4(hbuf_r, ref4_r, hbuf_l, ref4_l, hbuf_r, ref5_r, hbuf_l, ref5_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+      ADD4(hbuf_r, ref6_r, hbuf_l, ref6_l, hbuf_r, ref7_r, hbuf_l, ref7_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+    }
+
+    SRA_2V(hbuf_r, hbuf_l, 3);
+    ST_SH2(hbuf_r, hbuf_l, hbuf, 8);
+  } else if (32 == height) {
+    for (i = 2; i--;) {
+      LD_UB8(ref, ref_stride, ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7);
+      ref += 8 * ref_stride;
+      UNPCK_UB_SH(ref0, ref0_r, ref0_l);
+      UNPCK_UB_SH(ref1, ref1_r, ref1_l);
+      UNPCK_UB_SH(ref2, ref2_r, ref2_l);
+      UNPCK_UB_SH(ref3, ref3_r, ref3_l);
+      UNPCK_UB_SH(ref4, ref4_r, ref4_l);
+      UNPCK_UB_SH(ref5, ref5_r, ref5_l);
+      UNPCK_UB_SH(ref6, ref6_r, ref6_l);
+      UNPCK_UB_SH(ref7, ref7_r, ref7_l);
+      ADD4(hbuf_r, ref0_r, hbuf_l, ref0_l, hbuf_r, ref1_r, hbuf_l, ref1_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+      ADD4(hbuf_r, ref2_r, hbuf_l, ref2_l, hbuf_r, ref3_r, hbuf_l, ref3_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+      ADD4(hbuf_r, ref4_r, hbuf_l, ref4_l, hbuf_r, ref5_r, hbuf_l, ref5_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+      ADD4(hbuf_r, ref6_r, hbuf_l, ref6_l, hbuf_r, ref7_r, hbuf_l, ref7_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+      LD_UB8(ref, ref_stride, ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7);
+      ref += 8 * ref_stride;
+      UNPCK_UB_SH(ref0, ref0_r, ref0_l);
+      UNPCK_UB_SH(ref1, ref1_r, ref1_l);
+      UNPCK_UB_SH(ref2, ref2_r, ref2_l);
+      UNPCK_UB_SH(ref3, ref3_r, ref3_l);
+      UNPCK_UB_SH(ref4, ref4_r, ref4_l);
+      UNPCK_UB_SH(ref5, ref5_r, ref5_l);
+      UNPCK_UB_SH(ref6, ref6_r, ref6_l);
+      UNPCK_UB_SH(ref7, ref7_r, ref7_l);
+      ADD4(hbuf_r, ref0_r, hbuf_l, ref0_l, hbuf_r, ref1_r, hbuf_l, ref1_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+      ADD4(hbuf_r, ref2_r, hbuf_l, ref2_l, hbuf_r, ref3_r, hbuf_l, ref3_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+      ADD4(hbuf_r, ref4_r, hbuf_l, ref4_l, hbuf_r, ref5_r, hbuf_l, ref5_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+      ADD4(hbuf_r, ref6_r, hbuf_l, ref6_l, hbuf_r, ref7_r, hbuf_l, ref7_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+    }
+
+    SRA_2V(hbuf_r, hbuf_l, 4);
+    ST_SH2(hbuf_r, hbuf_l, hbuf, 8);
+  } else if (64 == height) {
+    for (i = 4; i--;) {
+      LD_UB8(ref, ref_stride, ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7);
+      ref += 8 * ref_stride;
+      UNPCK_UB_SH(ref0, ref0_r, ref0_l);
+      UNPCK_UB_SH(ref1, ref1_r, ref1_l);
+      UNPCK_UB_SH(ref2, ref2_r, ref2_l);
+      UNPCK_UB_SH(ref3, ref3_r, ref3_l);
+      UNPCK_UB_SH(ref4, ref4_r, ref4_l);
+      UNPCK_UB_SH(ref5, ref5_r, ref5_l);
+      UNPCK_UB_SH(ref6, ref6_r, ref6_l);
+      UNPCK_UB_SH(ref7, ref7_r, ref7_l);
+      ADD4(hbuf_r, ref0_r, hbuf_l, ref0_l, hbuf_r, ref1_r, hbuf_l, ref1_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+      ADD4(hbuf_r, ref2_r, hbuf_l, ref2_l, hbuf_r, ref3_r, hbuf_l, ref3_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+      ADD4(hbuf_r, ref4_r, hbuf_l, ref4_l, hbuf_r, ref5_r, hbuf_l, ref5_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+      ADD4(hbuf_r, ref6_r, hbuf_l, ref6_l, hbuf_r, ref7_r, hbuf_l, ref7_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+      LD_UB8(ref, ref_stride, ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7);
+      ref += 8 * ref_stride;
+      UNPCK_UB_SH(ref0, ref0_r, ref0_l);
+      UNPCK_UB_SH(ref1, ref1_r, ref1_l);
+      UNPCK_UB_SH(ref2, ref2_r, ref2_l);
+      UNPCK_UB_SH(ref3, ref3_r, ref3_l);
+      UNPCK_UB_SH(ref4, ref4_r, ref4_l);
+      UNPCK_UB_SH(ref5, ref5_r, ref5_l);
+      UNPCK_UB_SH(ref6, ref6_r, ref6_l);
+      UNPCK_UB_SH(ref7, ref7_r, ref7_l);
+      ADD4(hbuf_r, ref0_r, hbuf_l, ref0_l, hbuf_r, ref1_r, hbuf_l, ref1_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+      ADD4(hbuf_r, ref2_r, hbuf_l, ref2_l, hbuf_r, ref3_r, hbuf_l, ref3_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+      ADD4(hbuf_r, ref4_r, hbuf_l, ref4_l, hbuf_r, ref5_r, hbuf_l, ref5_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+      ADD4(hbuf_r, ref6_r, hbuf_l, ref6_l, hbuf_r, ref7_r, hbuf_l, ref7_l,
+           hbuf_r, hbuf_l, hbuf_r, hbuf_l);
+    }
+
+    SRA_2V(hbuf_r, hbuf_l, 5);
+    ST_SH2(hbuf_r, hbuf_l, hbuf, 8);
+  } else {
+    const int norm_factor = height >> 1;
+    int cnt;
+
+    for (cnt = 0; cnt < 16; cnt++) {
+      hbuf[cnt] = 0;
+    }
+
+    for (i = 0; i < height; ++i) {
+      for (cnt = 0; cnt < 16; cnt++) {
+        hbuf[cnt] += ref[cnt];
+      }
+
+      ref += ref_stride;
+    }
+
+    for (cnt = 0; cnt < 16; cnt++) {
+      hbuf[cnt] /= norm_factor;
+    }
+  }
+}
+
+int16_t vpx_int_pro_col_msa(const uint8_t *ref, const int width) {
+  int16_t sum;
+  v16u8 ref0, ref1, ref2, ref3;
+  v8u16 ref0_h;
+
+  if (16 == width) {
+    ref0 = LD_UB(ref);
+    ref0_h = __msa_hadd_u_h(ref0, ref0);
+    sum = HADD_UH_U32(ref0_h);
+  } else if (32 == width) {
+    LD_UB2(ref, 16, ref0, ref1);
+    ref0_h = __msa_hadd_u_h(ref0, ref0);
+    ref0_h += __msa_hadd_u_h(ref1, ref1);
+    sum = HADD_UH_U32(ref0_h);
+  } else if (64 == width) {
+    LD_UB4(ref, 16, ref0, ref1, ref2, ref3);
+    ref0_h = __msa_hadd_u_h(ref0, ref0);
+    ref0_h += __msa_hadd_u_h(ref1, ref1);
+    ref0_h += __msa_hadd_u_h(ref2, ref2);
+    ref0_h += __msa_hadd_u_h(ref3, ref3);
+    sum = HADD_UH_U32(ref0_h);
+  } else {
+    int idx;
+
+    sum = 0;
+    for (idx = 0; idx < width; ++idx) {
+      sum += ref[idx];
+    }
+  }
+
+  return sum;
+}
