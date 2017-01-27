@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "efbd8979_99f1b986",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2017-01-27T18:55:30Z",
+      "side": 1,
+      "message": "Done",
+      "revId": "d6362f476770619cc4c471f5649fe0e454b4d0c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b86cd0b_fd627c19",
         "filename": "test/hadamard_test.cc",
         "patchSetId": 2
@@ -30,6 +47,23 @@
       "writtenOn": "2017-01-27T18:45:39Z",
       "side": 1,
       "message": "will these hold if you start accepting input from 10/12-bit encodes?",
+      "revId": "d6362f476770619cc4c471f5649fe0e454b4d0c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1095b371_9057a30f",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2017-01-27T18:55:30Z",
+      "side": 1,
+      "message": "no. currently the input is only 8-bit by design.\n\nif it is 10/12 bit, this function should never be called.\n\nif it is desired to use 10/12 bit input in the future, we need to redesign the mode selection pipeline.",
       "revId": "d6362f476770619cc4c471f5649fe0e454b4d0c7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
