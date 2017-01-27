@@ -67,6 +67,23 @@
       "revId": "d6362f476770619cc4c471f5649fe0e454b4d0c7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab1b1054_d0b5372e",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-27T21:51:58Z",
+      "side": 1,
+      "message": "\u003e no. currently the input is only 8-bit by design.\n \u003e \n \u003e if it is 10/12 bit, this function should never be called.\n \u003e \n \u003e if it is desired to use 10/12 bit input in the future, we need to\n \u003e redesign the mode selection pipeline.\n\nright I realized that afterward. if we wanted 10/12-bit we\u0027d probably want a highbd variant",
+      "revId": "d6362f476770619cc4c471f5649fe0e454b4d0c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
