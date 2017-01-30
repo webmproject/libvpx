@@ -16,6 +16,23 @@
       "revId": "3f0af500a559d153ec76a7e48e3460e528da4bd2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "941454a4_9ef5d7f9",
+        "filename": "vpx_dsp/x86/avg_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-30T19:38:18Z",
+      "side": 1,
+      "message": "Ack",
+      "revId": "3f0af500a559d153ec76a7e48e3460e528da4bd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
