@@ -33,6 +33,23 @@
       "revId": "b29af320f8d9fc1209a22f34b2380063f9ecf70d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "addb60d1_85d347ca",
+        "filename": "test/avg_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-01-30T22:49:34Z",
+      "side": 1,
+      "message": "Prefer a Rand16Signed call, but should be a follow up.",
+      "revId": "b29af320f8d9fc1209a22f34b2380063f9ecf70d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
