@@ -14,54 +14,6 @@
 #include "vpx_dsp/arm/idct_neon.h"
 #include "vpx_dsp/txfm_common.h"
 
-#if CONFIG_VP9_HIGHBITDEPTH
-static INLINE void idct16x16_256_add_load_tran_low_kernel(
-    const tran_low_t **input, int16_t **out) {
-  int16x8_t s;
-
-  s = load_tran_low_to_s16q(*input);
-  vst1q_s16(*out, s);
-  *input += 8;
-  *out += 8;
-}
-
-static INLINE void idct16x16_256_add_load_tran_low(const tran_low_t *input,
-                                                   int16_t *out) {
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-  idct16x16_256_add_load_tran_low_kernel(&input, &out);
-}
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
 static INLINE void wrap_low_4x2(const int32x4_t *const t32, int16x4_t *const d0,
                                 int16x4_t *const d1) {
   *d0 = vrshrn_n_s32(t32[0], 14);
@@ -71,7 +23,7 @@ static INLINE void wrap_low_4x2(const int32x4_t *const t32, int16x4_t *const d0,
 static INLINE void idct_cospi_2_30(const int16x8_t s0, const int16x8_t s1,
                                    const int16x4_t cospi_2_30_10_22,
                                    int16x8_t *const d0, int16x8_t *const d1) {
-  int32x4_t t32[6];
+  int32x4_t t32[4];
 
   t32[0] = vmull_lane_s16(vget_low_s16(s0), cospi_2_30_10_22, 1);
   t32[1] = vmull_lane_s16(vget_high_s16(s0), cospi_2_30_10_22, 1);
@@ -87,7 +39,7 @@ static INLINE void idct_cospi_2_30(const int16x8_t s0, const int16x8_t s1,
 static INLINE void idct_cospi_4_28(const int16x8_t s0, const int16x8_t s1,
                                    const int16x4_t cospi_4_12_20N_28,
                                    int16x8_t *const d0, int16x8_t *const d1) {
-  int32x4_t t32[6];
+  int32x4_t t32[4];
 
   t32[0] = vmull_lane_s16(vget_low_s16(s0), cospi_4_12_20N_28, 3);
   t32[1] = vmull_lane_s16(vget_high_s16(s0), cospi_4_12_20N_28, 3);
@@ -103,7 +55,7 @@ static INLINE void idct_cospi_4_28(const int16x8_t s0, const int16x8_t s1,
 static INLINE void idct_cospi_6_26(const int16x8_t s0, const int16x8_t s1,
                                    const int16x4_t cospi_6_26_14_18N,
                                    int16x8_t *const d0, int16x8_t *const d1) {
-  int32x4_t t32[6];
+  int32x4_t t32[4];
 
   t32[0] = vmull_lane_s16(vget_low_s16(s0), cospi_6_26_14_18N, 0);
   t32[1] = vmull_lane_s16(vget_high_s16(s0), cospi_6_26_14_18N, 0);
@@ -149,7 +101,7 @@ static INLINE void idct_cospi_8_24_neg_d(const int16x4_t s0, const int16x4_t s1,
 static INLINE void idct_cospi_10_22(const int16x8_t s0, const int16x8_t s1,
                                     const int16x4_t cospi_2_30_10_22,
                                     int16x8_t *const d0, int16x8_t *const d1) {
-  int32x4_t t32[6];
+  int32x4_t t32[4];
 
   t32[0] = vmull_lane_s16(vget_low_s16(s0), cospi_2_30_10_22, 3);
   t32[1] = vmull_lane_s16(vget_high_s16(s0), cospi_2_30_10_22, 3);
@@ -165,7 +117,7 @@ static INLINE void idct_cospi_10_22(const int16x8_t s0, const int16x8_t s1,
 static INLINE void idct_cospi_12_20(const int16x8_t s0, const int16x8_t s1,
                                     const int16x4_t cospi_4_12_20N_28,
                                     int16x8_t *const d0, int16x8_t *const d1) {
-  int32x4_t t32[6];
+  int32x4_t t32[4];
 
   t32[0] = vmull_lane_s16(vget_low_s16(s0), cospi_4_12_20N_28, 1);
   t32[1] = vmull_lane_s16(vget_high_s16(s0), cospi_4_12_20N_28, 1);
@@ -181,7 +133,7 @@ static INLINE void idct_cospi_12_20(const int16x8_t s0, const int16x8_t s1,
 static INLINE void idct_cospi_14_18(const int16x8_t s0, const int16x8_t s1,
                                     const int16x4_t cospi_6_26_14_18N,
                                     int16x8_t *const d0, int16x8_t *const d1) {
-  int32x4_t t32[6];
+  int32x4_t t32[4];
 
   t32[0] = vmull_lane_s16(vget_low_s16(s0), cospi_6_26_14_18N, 2);
   t32[1] = vmull_lane_s16(vget_high_s16(s0), cospi_6_26_14_18N, 2);
@@ -206,7 +158,7 @@ static INLINE void idct_cospi_16_16_d(const int16x4_t s0, const int16x4_t s1,
   wrap_low_4x2(t32, d0, d1);
 }
 
-static void idct16x16_256_add_half1d(const int16_t *input, int16_t *output,
+static void idct16x16_256_add_half1d(const void *const input, int16_t *output,
                                      uint8_t *dest, int stride) {
   const int16x8_t cospis0 = vld1q_s16(kCospi);
   const int16x8_t cospis1 = vld1q_s16(kCospi + 8);
@@ -217,37 +169,73 @@ static void idct16x16_256_add_half1d(const int16_t *input, int16_t *output,
   int16x8_t in[16], step1[16], step2[16], out[16];
 
   // Load input (16x8)
-  in[0] = vld1q_s16(input);
-  input += 8;
-  in[8] = vld1q_s16(input);
-  input += 8;
-  in[1] = vld1q_s16(input);
-  input += 8;
-  in[9] = vld1q_s16(input);
-  input += 8;
-  in[2] = vld1q_s16(input);
-  input += 8;
-  in[10] = vld1q_s16(input);
-  input += 8;
-  in[3] = vld1q_s16(input);
-  input += 8;
-  in[11] = vld1q_s16(input);
-  input += 8;
-  in[4] = vld1q_s16(input);
-  input += 8;
-  in[12] = vld1q_s16(input);
-  input += 8;
-  in[5] = vld1q_s16(input);
-  input += 8;
-  in[13] = vld1q_s16(input);
-  input += 8;
-  in[6] = vld1q_s16(input);
-  input += 8;
-  in[14] = vld1q_s16(input);
-  input += 8;
-  in[7] = vld1q_s16(input);
-  input += 8;
-  in[15] = vld1q_s16(input);
+  if (output) {
+    const tran_low_t *inputT = (const tran_low_t *)input;
+    in[0] = load_tran_low_to_s16q(inputT);
+    inputT += 8;
+    in[8] = load_tran_low_to_s16q(inputT);
+    inputT += 8;
+    in[1] = load_tran_low_to_s16q(inputT);
+    inputT += 8;
+    in[9] = load_tran_low_to_s16q(inputT);
+    inputT += 8;
+    in[2] = load_tran_low_to_s16q(inputT);
+    inputT += 8;
+    in[10] = load_tran_low_to_s16q(inputT);
+    inputT += 8;
+    in[3] = load_tran_low_to_s16q(inputT);
+    inputT += 8;
+    in[11] = load_tran_low_to_s16q(inputT);
+    inputT += 8;
+    in[4] = load_tran_low_to_s16q(inputT);
+    inputT += 8;
+    in[12] = load_tran_low_to_s16q(inputT);
+    inputT += 8;
+    in[5] = load_tran_low_to_s16q(inputT);
+    inputT += 8;
+    in[13] = load_tran_low_to_s16q(inputT);
+    inputT += 8;
+    in[6] = load_tran_low_to_s16q(inputT);
+    inputT += 8;
+    in[14] = load_tran_low_to_s16q(inputT);
+    inputT += 8;
+    in[7] = load_tran_low_to_s16q(inputT);
+    inputT += 8;
+    in[15] = load_tran_low_to_s16q(inputT);
+  } else {
+    const int16_t *inputT = (const int16_t *)input;
+    in[0] = vld1q_s16(inputT);
+    inputT += 8;
+    in[8] = vld1q_s16(inputT);
+    inputT += 8;
+    in[1] = vld1q_s16(inputT);
+    inputT += 8;
+    in[9] = vld1q_s16(inputT);
+    inputT += 8;
+    in[2] = vld1q_s16(inputT);
+    inputT += 8;
+    in[10] = vld1q_s16(inputT);
+    inputT += 8;
+    in[3] = vld1q_s16(inputT);
+    inputT += 8;
+    in[11] = vld1q_s16(inputT);
+    inputT += 8;
+    in[4] = vld1q_s16(inputT);
+    inputT += 8;
+    in[12] = vld1q_s16(inputT);
+    inputT += 8;
+    in[5] = vld1q_s16(inputT);
+    inputT += 8;
+    in[13] = vld1q_s16(inputT);
+    inputT += 8;
+    in[6] = vld1q_s16(inputT);
+    inputT += 8;
+    in[14] = vld1q_s16(inputT);
+    inputT += 8;
+    in[7] = vld1q_s16(inputT);
+    inputT += 8;
+    in[15] = vld1q_s16(inputT);
+  }
 
   // Transpose
   transpose_s16_8x8(&in[0], &in[1], &in[2], &in[3], &in[4], &in[5], &in[6],
@@ -442,8 +430,7 @@ static void idct16x16_10_add_half1d_pass1(const tran_low_t *input,
   const int16x4_t cospid_6_26_14_18N = vget_high_s16(cospisd1);
   int16x4_t in[4], step1[16], step2[16], out[16];
 
-// Load input (4x4)
-#if CONFIG_VP9_HIGHBITDEPTH
+  // Load input (4x4)
   in[0] = load_tran_low_to_s16d(input);
   input += 16;
   in[1] = load_tran_low_to_s16d(input);
@@ -451,15 +438,6 @@ static void idct16x16_10_add_half1d_pass1(const tran_low_t *input,
   in[2] = load_tran_low_to_s16d(input);
   input += 16;
   in[3] = load_tran_low_to_s16d(input);
-#else
-  in[0] = vld1_s16(input);
-  input += 16;
-  in[1] = vld1_s16(input);
-  input += 16;
-  in[2] = vld1_s16(input);
-  input += 16;
-  in[3] = vld1_s16(input);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
 
   // Transpose
   transpose_s16_4x4d(&in[0], &in[1], &in[2], &in[3]);
@@ -781,20 +759,12 @@ void vpx_idct16x16_256_add_neon(const tran_low_t *input, uint8_t *dest,
                                 int stride) {
   int16_t row_idct_output[16 * 16];
 
-#if CONFIG_VP9_HIGHBITDEPTH
-  int16_t pass1_input[16 * 16];
-  idct16x16_256_add_load_tran_low(input, pass1_input);
-#else
-  const int16_t *pass1_input = input;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
   // pass 1
   // Parallel idct on the upper 8 rows
-  idct16x16_256_add_half1d(pass1_input, row_idct_output, dest, stride);
+  idct16x16_256_add_half1d(input, row_idct_output, dest, stride);
 
   // Parallel idct on the lower 8 rows
-  idct16x16_256_add_half1d(pass1_input + 8 * 16, row_idct_output + 8, dest,
-                           stride);
+  idct16x16_256_add_half1d(input + 8 * 16, row_idct_output + 8, dest, stride);
 
   // pass 2
   // Parallel idct to get the left 8 columns
