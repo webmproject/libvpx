@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <assert.h>
 #include <limits.h>
 #include "vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
@@ -299,8 +300,8 @@ static int pick_intra4x4mby_modes(MACROBLOCK *mb, int *Rate, int *best_dist) {
     MODE_INFO *const mic = xd->mode_info_context;
     const int mis = xd->mode_info_stride;
 
-    B_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
-    int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(d);
+    B_PREDICTION_MODE best_mode = B_MODE_COUNT;
+    int r = 0, d = 0;
 
     if (mb->e_mbd.frame_type == KEY_FRAME) {
       const B_PREDICTION_MODE A = above_block_mode(mic, i, mis);
@@ -313,6 +314,7 @@ static int pick_intra4x4mby_modes(MACROBLOCK *mb, int *Rate, int *best_dist) {
 
     cost += r;
     distortion += d;
+    assert(best_mode != B_MODE_COUNT);
     mic->bmi[i].as_mode = best_mode;
 
     /* Break out case where we have already exceeded best so far value
@@ -353,7 +355,7 @@ static void pick_intra_mbuv_mode(MACROBLOCK *mb) {
   int Vaverage = 0;
   int diff;
   int pred_error[4] = { 0, 0, 0, 0 }, best_error = INT_MAX;
-  MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
+  MB_PREDICTION_MODE best_mode = MB_MODE_COUNT;
 
   for (i = 0; i < 8; ++i) {
     uleft_col[i] = x->dst.u_buffer[i * x->dst.uv_stride - 1];
@@ -442,6 +444,7 @@ static void pick_intra_mbuv_mode(MACROBLOCK *mb) {
     }
   }
 
+  assert(best_mode != MB_MODE_COUNT);
   mb->e_mbd.mode_info_context->mbmi.uv_mode = best_mode;
 }
 

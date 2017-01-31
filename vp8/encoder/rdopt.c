@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <math.h>
 #include <limits.h>
@@ -608,9 +609,8 @@ static int rd_pick_intra4x4mby_modes(MACROBLOCK *mb, int *Rate, int *rate_y,
   for (i = 0; i < 16; ++i) {
     MODE_INFO *const mic = xd->mode_info_context;
     const int mis = xd->mode_info_stride;
-    B_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
-    int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(ry),
-        UNINITIALIZED_IS_SAFE(d);
+    B_PREDICTION_MODE best_mode = B_MODE_COUNT;
+    int r = 0, ry = 0, d = 0;
 
     if (mb->e_mbd.frame_type == KEY_FRAME) {
       const B_PREDICTION_MODE A = above_block_mode(mic, i, mis);
@@ -627,6 +627,7 @@ static int rd_pick_intra4x4mby_modes(MACROBLOCK *mb, int *Rate, int *rate_y,
     distortion += d;
     tot_rate_y += ry;
 
+    assert(best_mode != B_MODE_COUNT);
     mic->bmi[i].as_mode = best_mode;
 
     if (total_rd >= (int64_t)best_rd) break;
@@ -644,7 +645,7 @@ static int rd_pick_intra4x4mby_modes(MACROBLOCK *mb, int *Rate, int *rate_y,
 static int rd_pick_intra16x16mby_mode(MACROBLOCK *x, int *Rate, int *rate_y,
                                       int *Distortion) {
   MB_PREDICTION_MODE mode;
-  MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
+  MB_PREDICTION_MODE mode_selected = MB_MODE_COUNT;
   int rate, ratey;
   int distortion;
   int best_rd = INT_MAX;
@@ -674,6 +675,7 @@ static int rd_pick_intra16x16mby_mode(MACROBLOCK *x, int *Rate, int *rate_y,
     }
   }
 
+  assert(mode_selected != MB_MODE_COUNT);
   xd->mode_info_context->mbmi.mode = mode_selected;
   return best_rd;
 }
@@ -741,9 +743,9 @@ static int rd_inter4x4_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
 static void rd_pick_intra_mbuv_mode(MACROBLOCK *x, int *rate,
                                     int *rate_tokenonly, int *distortion) {
   MB_PREDICTION_MODE mode;
-  MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
+  MB_PREDICTION_MODE mode_selected = MB_MODE_COUNT;
   int best_rd = INT_MAX;
-  int UNINITIALIZED_IS_SAFE(d), UNINITIALIZED_IS_SAFE(r);
+  int d = 0, r = 0;
   int rate_to;
   MACROBLOCKD *xd = &x->e_mbd;
 
@@ -787,6 +789,7 @@ static void rd_pick_intra_mbuv_mode(MACROBLOCK *x, int *rate,
   *rate = r;
   *distortion = d;
 
+  assert(mode_selected != MB_MODE_COUNT);
   xd->mode_info_context->mbmi.uv_mode = mode_selected;
 }
 
