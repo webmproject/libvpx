@@ -358,7 +358,7 @@ static int cost_coeffs(MACROBLOCK *x, int plane, int block, TX_SIZE tx_size,
   unsigned int(*token_costs)[2][COEFF_CONTEXTS][ENTROPY_TOKENS] =
       x->token_costs[tx_size][type][is_inter_block(mi)];
   uint8_t token_cache[32 * 32];
-  int c, cost;
+  int cost;
 #if CONFIG_VP9_HIGHBITDEPTH
   const int *cat6_high_cost = vp9_get_high_cost_table(xd->bd);
 #else
@@ -373,10 +373,10 @@ static int cost_coeffs(MACROBLOCK *x, int plane, int block, TX_SIZE tx_size,
   if (eob == 0) {
     // single eob token
     cost = token_costs[0][0][pt][EOB_TOKEN];
-    c = 0;
   } else {
     if (use_fast_coef_costing) {
       int band_left = *band_count++;
+      int c;
 
       // dc token
       int v = qcoeff[0];
@@ -407,6 +407,7 @@ static int cost_coeffs(MACROBLOCK *x, int plane, int block, TX_SIZE tx_size,
 
     } else {  // !use_fast_coef_costing
       int band_left = *band_count++;
+      int c;
 
       // dc token
       int v = qcoeff[0];
