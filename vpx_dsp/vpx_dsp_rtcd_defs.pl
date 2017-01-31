@@ -901,7 +901,7 @@ if (vpx_config("CONFIG_VP9_ENCODER") eq "yes") {
   specialize qw/vpx_int_pro_col sse2 neon msa/;
 
   add_proto qw/int vpx_vector_var/, "const int16_t *ref, const int16_t *src, const int bwl";
-  specialize qw/vpx_vector_var neon sse2/;
+  specialize qw/vpx_vector_var neon sse2 msa/;
 }  # CONFIG_VP9_ENCODER
 
 add_proto qw/unsigned int vpx_sad64x64_avg/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
