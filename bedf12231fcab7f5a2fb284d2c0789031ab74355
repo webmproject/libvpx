@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1b6e0968_03cf7c08",
+        "filename": "test/avg_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-31T22:39:53Z",
+      "side": 1,
+      "message": "const",
+      "revId": "bedf12231fcab7f5a2fb284d2c0789031ab74355",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
