@@ -17,6 +17,7 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
+#include "test/acm_random.h"
 #include "vpx/vpx_integer.h"
 
 namespace libvpx_test {
@@ -48,18 +49,31 @@ class Buffer {
   // Set the buffer (excluding padding) to 'value'.
   void Set(const int value);
 
+  // Set the buffer (excluding padding) to the output of ACMRandom function 'b'.
+  void Set(ACMRandom *rand_class, T (ACMRandom::*rand_func)());
+
+  // Copy the contents of Buffer 'a' (excluding padding).
+  void CopyFrom(const Buffer<T> &a);
+
   void DumpBuffer() const;
+
+  // Highlight the differences between two buffers if they are the same size.
+  void PrintDifference(const Buffer<T> &a) const;
 
   bool HasPadding() const;
 
   // Sets all the values in the buffer to 'padding_value'.
   void SetPadding(const int padding_value);
 
-  // Checks if all the values (excluding padding) are equal to 'value'.
+  // Checks if all the values (excluding padding) are equal to 'value' if the
+  // Buffers are the same size.
   bool CheckValues(const int value) const;
 
   // Check that padding matches the expected value or there is no padding.
   bool CheckPadding() const;
+
+  // Compare the non-padding portion of two buffers if they are the same size.
+  bool CheckValues(const Buffer<T> &a) const;
 
  private:
   void Init() {
@@ -75,6 +89,8 @@ class Buffer {
     ASSERT_TRUE(raw_buffer_ != NULL);
     SetPadding(std::numeric_limits<T>::max());
   }
+
+  bool BufferSizesMatch(const Buffer<T> &a) const;
 
   const int width_;
   const int height_;
@@ -105,6 +121,34 @@ void Buffer<T>::Set(const int value) {
 }
 
 template <typename T>
+void Buffer<T>::Set(ACMRandom *rand_class, T (ACMRandom::*rand_func)()) {
+  T *src = TopLeftPixel();
+  for (int height = 0; height < height_; ++height) {
+    for (int width = 0; width < width_; ++width) {
+      src[width] = (*rand_class.*rand_func)();
+    }
+    src += stride();
+  }
+}
+
+template <typename T>
+void Buffer<T>::CopyFrom(const Buffer<T> &a) {
+  if (!BufferSizesMatch(a)) {
+    return;
+  }
+
+  T *a_src = a.TopLeftPixel();
+  T *b_src = this->TopLeftPixel();
+  for (int height = 0; height < height_; ++height) {
+    for (int width = 0; width < width_; ++width) {
+      b_src[width] = a_src[width];
+    }
+    a_src += a.stride();
+    b_src += this->stride();
+  }
+}
+
+template <typename T>
 void Buffer<T>::DumpBuffer() const {
   for (int height = 0; height < height_ + top_padding_ + bottom_padding_;
        ++height) {
@@ -118,6 +162,47 @@ void Buffer<T>::DumpBuffer() const {
 template <typename T>
 bool Buffer<T>::HasPadding() const {
   return top_padding_ || left_padding_ || right_padding_ || bottom_padding_;
+}
+
+template <typename T>
+void Buffer<T>::PrintDifference(const Buffer<T> &a) const {
+  if (!BufferSizesMatch(a)) {
+    return;
+  }
+
+  T *a_src = a.TopLeftPixel();
+  T *b_src = TopLeftPixel();
+
+  printf("This buffer:\n");
+  for (int height = 0; height < height_; ++height) {
+    for (int width = 0; width < width_; ++width) {
+      if (a_src[width] != b_src[width]) {
+        printf("*%3d", b_src[width]);
+      } else {
+        printf("%4d", b_src[width]);
+      }
+    }
+    printf("\n");
+    a_src += a.stride();
+    b_src += this->stride();
+  }
+
+  a_src = a.TopLeftPixel();
+  b_src = TopLeftPixel();
+
+  printf("Reference buffer:\n");
+  for (int height = 0; height < height_; ++height) {
+    for (int width = 0; width < width_; ++width) {
+      if (a_src[width] != b_src[width]) {
+        printf("*%3d", a_src[width]);
+      } else {
+        printf("%4d", a_src[width]);
+      }
+    }
+    printf("\n");
+    a_src += a.stride();
+    b_src += this->stride();
+  }
 }
 
 template <typename T>
@@ -186,6 +271,39 @@ bool Buffer<T>::CheckPadding() const {
     if (padding_value_ != bottom[i]) {
       return false;
     }
+  }
+
+  return true;
+}
+
+template <typename T>
+bool Buffer<T>::CheckValues(const Buffer<T> &a) const {
+  if (!BufferSizesMatch(a)) {
+    return false;
+  }
+
+  T *a_src = a.TopLeftPixel();
+  T *b_src = this->TopLeftPixel();
+  for (int height = 0; height < height_; ++height) {
+    for (int width = 0; width < width_; ++width) {
+      if (a_src[width] != b_src[width]) {
+        return false;
+      }
+    }
+    a_src += a.stride();
+    b_src += this->stride();
+  }
+  return true;
+}
+
+template <typename T>
+bool Buffer<T>::BufferSizesMatch(const Buffer<T> &a) const {
+  if (a.width_ != this->width_ || a.height_ != this->height_) {
+    printf(
+        "Reference buffer of size %dx%d does not match this buffer which is "
+        "size %dx%d\n",
+        a.width_, a.height_, this->width_, this->height_);
+    return false;
   }
 
   return true;
