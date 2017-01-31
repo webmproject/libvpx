@@ -157,12 +157,14 @@ INSTANTIATE_TEST_CASE_P(SSE2, Hadamard8x8Test,
 INSTANTIATE_TEST_CASE_P(SSSE3, Hadamard8x8Test,
                         ::testing::Values(&vpx_hadamard_8x8_ssse3));
 #endif  // HAVE_SSSE3 && ARCH_X86_64
+#endif  // !CONFIG_VP9_HIGHBITDEPTH
 
 #if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(NEON, Hadamard8x8Test,
                         ::testing::Values(&vpx_hadamard_8x8_neon));
 #endif  // HAVE_NEON
 
+#if !CONFIG_VP9_HIGHBITDEPTH
 #if HAVE_MSA
 INSTANTIATE_TEST_CASE_P(MSA, Hadamard8x8Test,
                         ::testing::Values(&vpx_hadamard_8x8_msa));
@@ -220,12 +222,12 @@ INSTANTIATE_TEST_CASE_P(SSE2, Hadamard16x16Test,
                         ::testing::Values(&vpx_hadamard_16x16_sse2));
 #endif  // HAVE_SSE2
 
-#if !CONFIG_VP9_HIGHBITDEPTH
 #if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(NEON, Hadamard16x16Test,
                         ::testing::Values(&vpx_hadamard_16x16_neon));
 #endif  // HAVE_NEON
 
+#if !CONFIG_VP9_HIGHBITDEPTH
 #if HAVE_MSA
 INSTANTIATE_TEST_CASE_P(MSA, Hadamard16x16Test,
                         ::testing::Values(&vpx_hadamard_16x16_msa));

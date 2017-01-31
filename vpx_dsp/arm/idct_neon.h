@@ -76,6 +76,17 @@ static INLINE int16x4_t load_tran_low_to_s16d(const tran_low_t *buf) {
 #endif
 }
 
+static INLINE void store_s16q_to_tran_low(tran_low_t *buf, const int16x8_t a) {
+#if CONFIG_VP9_HIGHBITDEPTH
+  const int32x4_t v0 = vmovl_s16(vget_low_s16(a));
+  const int32x4_t v1 = vmovl_s16(vget_high_s16(a));
+  vst1q_s32(buf, v0);
+  vst1q_s32(buf + 4, v1);
+#else
+  vst1q_s16(buf, a);
+#endif
+}
+
 //------------------------------------------------------------------------------
 
 // Multiply a by a_const. Saturate, shift and narrow by 14.
