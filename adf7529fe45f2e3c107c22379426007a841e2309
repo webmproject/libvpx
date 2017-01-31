@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bbe5403e_577235ff",
+        "filename": "test/avg_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-31T00:55:19Z",
+      "side": 1,
+      "message": "MSA",
+      "range": {
+        "startLine": 423,
+        "startChar": 16,
+        "endLine": 423,
+        "endChar": 19
+      },
+      "revId": "adf7529fe45f2e3c107c22379426007a841e2309",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a667894_513435a6",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 617,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-31T00:55:19Z",
+      "side": 1,
+      "message": "you should normalize this or the other check to be !\u003d or \u003e. either is fine assuming we always set bd\u003d8 as the default",
+      "range": {
+        "startLine": 617,
+        "startChar": 12,
+        "endLine": 617,
+        "endChar": 14
+      },
+      "revId": "adf7529fe45f2e3c107c22379426007a841e2309",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4d14052_9f7541af",
+        "filename": "vpx_dsp/avg.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-01-31T00:55:19Z",
+      "side": 1,
+      "message": "same thing with the naming here as with buf/sec_buf. buffer2 is probably enough",
+      "range": {
+        "startLine": 73,
+        "startChar": 10,
+        "endLine": 73,
+        "endChar": 20
+      },
+      "revId": "adf7529fe45f2e3c107c22379426007a841e2309",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
