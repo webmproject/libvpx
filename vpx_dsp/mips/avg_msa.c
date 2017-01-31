@@ -677,3 +677,50 @@ int vpx_vector_var_msa(const int16_t *ref, const int16_t *src, const int bwl) {
 
   return var;
 }
+
+void vpx_minmax_8x8_msa(const uint8_t *s, int p, const uint8_t *d, int dp,
+                        int *min, int *max) {
+  v16u8 s0, s1, s2, s3, s4, s5, s6, s7, d0, d1, d2, d3, d4, d5, d6, d7;
+  v16u8 diff0, diff1, diff2, diff3, min0, min1, max0, max1;
+
+  LD_UB8(s, p, s0, s1, s2, s3, s4, s5, s6, s7);
+  LD_UB8(d, dp, d0, d1, d2, d3, d4, d5, d6, d7);
+  PCKEV_D4_UB(s1, s0, s3, s2, s5, s4, s7, s6, s0, s1, s2, s3);
+  PCKEV_D4_UB(d1, d0, d3, d2, d5, d4, d7, d6, d0, d1, d2, d3);
+
+  diff0 = __msa_asub_u_b(s0, d0);
+  diff1 = __msa_asub_u_b(s1, d1);
+  diff2 = __msa_asub_u_b(s2, d2);
+  diff3 = __msa_asub_u_b(s3, d3);
+
+  min0 = __msa_min_u_b(diff0, diff1);
+  min1 = __msa_min_u_b(diff2, diff3);
+  min0 = __msa_min_u_b(min0, min1);
+
+  max0 = __msa_max_u_b(diff0, diff1);
+  max1 = __msa_max_u_b(diff2, diff3);
+  max0 = __msa_max_u_b(max0, max1);
+
+  min1 = (v16u8)__msa_sldi_b((v16i8)min1, (v16i8)min0, 8);
+  min0 = __msa_min_u_b(min0, min1);
+  max1 = (v16u8)__msa_sldi_b((v16i8)max1, (v16i8)max0, 8);
+  max0 = __msa_max_u_b(max0, max1);
+
+  min1 = (v16u8)__msa_sldi_b((v16i8)min1, (v16i8)min0, 4);
+  min0 = __msa_min_u_b(min0, min1);
+  max1 = (v16u8)__msa_sldi_b((v16i8)max1, (v16i8)max0, 4);
+  max0 = __msa_max_u_b(max0, max1);
+
+  min1 = (v16u8)__msa_sldi_b((v16i8)min1, (v16i8)min0, 2);
+  min0 = __msa_min_u_b(min0, min1);
+  max1 = (v16u8)__msa_sldi_b((v16i8)max1, (v16i8)max0, 2);
+  max0 = __msa_max_u_b(max0, max1);
+
+  min1 = (v16u8)__msa_sldi_b((v16i8)min1, (v16i8)min0, 1);
+  min0 = __msa_min_u_b(min0, min1);
+  max1 = (v16u8)__msa_sldi_b((v16i8)max1, (v16i8)max0, 1);
+  max0 = __msa_max_u_b(max0, max1);
+
+  *min = min0[0];
+  *max = max0[0];
+}

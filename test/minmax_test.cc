@@ -127,4 +127,9 @@ INSTANTIATE_TEST_CASE_P(NEON, MinMaxTest,
                         ::testing::Values(&vpx_minmax_8x8_neon));
 #endif
 
+#if HAVE_MSA
+INSTANTIATE_TEST_CASE_P(MSA, MinMaxTest,
+                        ::testing::Values(&vpx_minmax_8x8_msa));
+#endif
+
 }  // namespace

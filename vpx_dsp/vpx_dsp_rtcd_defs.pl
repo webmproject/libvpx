@@ -883,7 +883,7 @@ if (vpx_config("CONFIG_VP9_ENCODER") eq "yes") {
   specialize qw/vpx_avg_4x4 sse2 neon msa/;
 
   add_proto qw/void vpx_minmax_8x8/, "const uint8_t *s, int p, const uint8_t *d, int dp, int *min, int *max";
-  specialize qw/vpx_minmax_8x8 sse2 neon/;
+  specialize qw/vpx_minmax_8x8 sse2 neon msa/;
 
   add_proto qw/void vpx_hadamard_8x8/, "const int16_t *src_diff, int src_stride, int16_t *coeff";
   specialize qw/vpx_hadamard_8x8 sse2 neon msa/, "$ssse3_x86_64";
