@@ -16,6 +16,23 @@
       "revId": "bedf12231fcab7f5a2fb284d2c0789031ab74355",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6bca1840_2e510eba",
+        "filename": "test/avg_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2017-01-31T22:49:56Z",
+      "side": 1,
+      "message": "Done",
+      "revId": "bedf12231fcab7f5a2fb284d2c0789031ab74355",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
