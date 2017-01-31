@@ -15,6 +15,7 @@
 #include "./vpx_config.h"
 
 #include "vpx/vpx_integer.h"
+#include "vpx_dsp/arm/idct_neon.h"
 
 static INLINE unsigned int horizontal_add_u16x8(const uint16x8_t v_16x8) {
   const uint32x4_t a = vpaddlq_u16(v_16x8);
@@ -64,13 +65,13 @@ unsigned int vpx_avg_8x8_neon(const uint8_t *s, int p) {
 
 // coeff: 16 bits, dynamic range [-32640, 32640].
 // length: value range {16, 64, 256, 1024}.
-int vpx_satd_neon(const int16_t *coeff, int length) {
+int vpx_satd_neon(const tran_low_t *coeff, int length) {
   const int16x4_t zero = vdup_n_s16(0);
   int32x4_t accum = vdupq_n_s32(0);
 
   do {
-    const int16x8_t src0 = vld1q_s16(coeff);
-    const int16x8_t src8 = vld1q_s16(coeff + 8);
+    const int16x8_t src0 = load_tran_low_to_s16q(coeff);
+    const int16x8_t src8 = load_tran_low_to_s16q(coeff + 8);
     accum = vabal_s16(accum, vget_low_s16(src0), zero);
     accum = vabal_s16(accum, vget_high_s16(src0), zero);
     accum = vabal_s16(accum, vget_low_s16(src8), zero);
