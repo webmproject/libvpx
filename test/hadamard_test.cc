@@ -150,20 +150,18 @@ INSTANTIATE_TEST_CASE_P(SSE2, Hadamard8x8Test,
                         ::testing::Values(&vpx_hadamard_8x8_sse2));
 #endif  // HAVE_SSE2
 
-// TODO(jingning): Remove highbitdepth flag when the SIMD functions are
-// in place and turn on the unit test.
-#if !CONFIG_VP9_HIGHBITDEPTH
 #if HAVE_SSSE3 && ARCH_X86_64
 INSTANTIATE_TEST_CASE_P(SSSE3, Hadamard8x8Test,
                         ::testing::Values(&vpx_hadamard_8x8_ssse3));
 #endif  // HAVE_SSSE3 && ARCH_X86_64
-#endif  // !CONFIG_VP9_HIGHBITDEPTH
 
 #if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(NEON, Hadamard8x8Test,
                         ::testing::Values(&vpx_hadamard_8x8_neon));
 #endif  // HAVE_NEON
 
+// TODO(jingning): Remove highbitdepth flag when the SIMD functions are
+// in place and turn on the unit test.
 #if !CONFIG_VP9_HIGHBITDEPTH
 #if HAVE_MSA
 INSTANTIATE_TEST_CASE_P(MSA, Hadamard8x8Test,

@@ -8,8 +8,6 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-%define private_prefix vpx
-
 %include "third_party/x86inc/x86inc.asm"
 
 SECTION .text
@@ -96,6 +94,21 @@ SECTION .text
   SWAP               7, 9
 %endmacro
 
+%if CONFIG_VP9_HIGHBITDEPTH
+; store %1 to outputq + %2
+; uses m8-m10 as scratch registers
+%macro STORE_TRAN_LOW 2
+  pxor                           m8, m8
+  mova                           m9, m%1
+  mova                          m10, m%1
+  pcmpgtw                        m8, m%1
+  punpcklwd                      m9, m8
+  punpckhwd                     m10, m8
+  mova               [outputq + %2], m9
+  mova          [outputq + %2 + 16], m10
+%endmacro
+%endif
+
 INIT_XMM ssse3
 cglobal hadamard_8x8, 3, 5, 11, input, stride, output
   lea                r3, [2 * strideq]
@@ -117,6 +130,16 @@ cglobal hadamard_8x8, 3, 5, 11, input, stride, output
   TRANSPOSE8X8 0, 1, 2, 3, 4, 5, 6, 7, 9, 10
   HMD8_1D
 
+%if CONFIG_VP9_HIGHBITDEPTH
+  STORE_TRAN_LOW                  0, 0
+  STORE_TRAN_LOW                  1, 32
+  STORE_TRAN_LOW                  2, 64
+  STORE_TRAN_LOW                  3, 96
+  STORE_TRAN_LOW                  4, 128
+  STORE_TRAN_LOW                  5, 160
+  STORE_TRAN_LOW                  6, 192
+  STORE_TRAN_LOW                  7, 224
+%else
   mova              [outputq +   0], m0
   mova              [outputq +  16], m1
   mova              [outputq +  32], m2
@@ -125,6 +148,7 @@ cglobal hadamard_8x8, 3, 5, 11, input, stride, output
   mova              [outputq +  80], m5
   mova              [outputq +  96], m6
   mova              [outputq + 112], m7
+%endif
 
   RET
 %endif
