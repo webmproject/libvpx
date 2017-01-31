@@ -117,7 +117,7 @@ double vp9_mse2psnr(double samples, double peak, double mse) {
 }
 
 int main(int argc, char *argv[]) {
-  FILE *f[2], *framestats = NULL;
+  FILE *f[2] = { NULL, NULL }, *framestats = NULL;
   uint8_t *buf[2];
   int w, h, tl_skip = 0, tl_skips_remaining = 0;
   double ssimavg = 0, ssimyavg = 0, ssimuavg = 0, ssimvavg = 0;
@@ -126,13 +126,15 @@ int main(int argc, char *argv[]) {
   double *ssimy = NULL, *ssimu = NULL, *ssimv = NULL;
   uint64_t *psnry = NULL, *psnru = NULL, *psnrv = NULL;
   size_t i, n_frames = 0, allocated_frames = 0;
+  int return_value = 0;
 
   if (argc < 4 || argc > 6) {
     fprintf(stderr,
             "Usage: %s file1.yuv file2.yuv WxH [tl_skip={0,1,3}] "
             "[framestats.csv]\n",
             argv[0]);
-    return 1;
+    return_value = 1;
+    goto clean_up;
   }
   f[0] = strcmp(argv[1], "-") ? fopen(argv[1], "rb") : stdin;
   f[1] = strcmp(argv[2], "-") ? fopen(argv[2], "rb") : stdin;
@@ -147,17 +149,20 @@ int main(int argc, char *argv[]) {
       if (!framestats) {
         fprintf(stderr, "Could not open \"%s\" for writing: %s\n", argv[5],
                 strerror(errno));
-        return 1;
+        return_value = 1;
+        goto clean_up;
       }
     }
   }
   if (!f[0] || !f[1]) {
     fprintf(stderr, "Could not open input files: %s\n", strerror(errno));
-    return 1;
+    return_value = 1;
+    goto clean_up;
   }
   if (w <= 0 || h <= 0 || w & 1 || h & 1) {
     fprintf(stderr, "Invalid size %dx%d\n", w, h);
-    return 1;
+    return_value = 1;
+    goto clean_up;
   }
   buf[0] = malloc(w * h * 3 / 2);
   buf[1] = malloc(w * h * 3 / 2);
@@ -177,7 +182,8 @@ int main(int argc, char *argv[]) {
     if (r1 && r2 && r1 != r2) {
       fprintf(stderr, "Failed to read data: %s [%d/%d]\n", strerror(errno),
               (int)r1, (int)r2);
-      return 1;
+      return_value = 1;
+      goto clean_up;
     } else if (r1 == 0 || r2 == 0) {
       break;
     }
@@ -278,8 +284,9 @@ int main(int argc, char *argv[]) {
 
   printf("Nframes: %d\n", (int)n_frames);
 
-  if (strcmp(argv[1], "-")) fclose(f[0]);
-  if (strcmp(argv[2], "-")) fclose(f[1]);
+clean_up:
+  if (f[0] && strcmp(argv[1], "-")) fclose(f[0]);
+  if (f[1] && strcmp(argv[2], "-")) fclose(f[1]);
   if (framestats) fclose(framestats);
 
   free(ssimy);
@@ -290,5 +297,5 @@ int main(int argc, char *argv[]) {
   free(psnru);
   free(psnrv);
 
-  return 0;
+  return return_value;
 }
