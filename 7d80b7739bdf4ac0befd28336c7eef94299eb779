@@ -22,6 +22,29 @@
       "revId": "7d80b7739bdf4ac0befd28336c7eef94299eb779",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1e959be1_f582b1a3",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-01-31T19:15:02Z",
+      "side": 1,
+      "message": "Done",
+      "range": {
+        "startLine": 181,
+        "startChar": 51,
+        "endLine": 181,
+        "endChar": 63
+      },
+      "revId": "7d80b7739bdf4ac0befd28336c7eef94299eb779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
