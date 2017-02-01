@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "4223bd91_a5c84ec2",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-01T03:11:46Z",
+      "side": 1,
+      "message": "!CONFIG_VP9_HIGHBITDEPTH, this probably carried over from the source change and will be cleaned up in the rebase",
+      "revId": "be2dfaba8152e57838f65b1014c46c891d6c60e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c990234b_179220a3",
         "filename": "vpx_dsp/arm/idct_neon.h",
         "patchSetId": 1
