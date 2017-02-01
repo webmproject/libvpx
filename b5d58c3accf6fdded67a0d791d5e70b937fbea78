@@ -16,6 +16,23 @@
       "revId": "b5d58c3accf6fdded67a0d791d5e70b937fbea78",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "53b7bebb_dca1b268",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-01T23:06:26Z",
+      "side": 1,
+      "message": "i wanted to move it in originally and make it \u0027const\u0027 but the error handling got in the way. at least aom moved to c99",
+      "revId": "b5d58c3accf6fdded67a0d791d5e70b937fbea78",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
