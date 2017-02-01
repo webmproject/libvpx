@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "25aebf79_2a9988de",
+        "filename": "vpx_dsp/x86/avg_ssse3_x86_64.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-01T19:40:48Z",
+      "side": 1,
+      "message": "Ack",
+      "revId": "f5fe9befd558042b9afaed52a82c77964ac72822",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "743f776c_074f35c6",
         "filename": "vpx_dsp/x86/avg_ssse3_x86_64.asm",
         "patchSetId": 1
@@ -30,6 +47,23 @@
       "writtenOn": "2017-02-01T03:27:51Z",
       "side": 1,
       "message": "trailing whitespace",
+      "revId": "f5fe9befd558042b9afaed52a82c77964ac72822",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25d9ad4e_04391c06",
+        "filename": "vpx_dsp/x86/avg_ssse3_x86_64.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-01T19:40:48Z",
+      "side": 1,
+      "message": "Done",
       "revId": "f5fe9befd558042b9afaed52a82c77964ac72822",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
