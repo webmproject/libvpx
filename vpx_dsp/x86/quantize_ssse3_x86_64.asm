@@ -200,7 +200,6 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   pand                           m13, m12
 %if CONFIG_VP9_HIGHBITDEPTH
   ; store 16bit numbers as 32bit numbers in array pointed to by qcoeff
-  pxor                           m11, m11
   mova                           m11, m14
   mova                            m6, m14
   pcmpgtw                         m5, m14
