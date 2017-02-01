@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "adc26b8a_4ee44410",
+        "filename": "test/avg_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-01T20:48:31Z",
+      "side": 1,
+      "message": "Does the HBD function accept lower kMin?\n\nAlso if this is intended to represent INT16_MIN, use std::numeric_limits\u003cint16_t\u003e::min();\n\n(and max() for INT16_MAX)",
+      "revId": "f040a5c4349c7429e45f921d83b1ea35618bdcc4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b355fdf2_afcde1cf",
+        "filename": "test/avg_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 412,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-01T20:48:31Z",
+      "side": 1,
+      "message": "This needs to pass in HBD builds.",
+      "revId": "f040a5c4349c7429e45f921d83b1ea35618bdcc4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
