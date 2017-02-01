@@ -184,9 +184,9 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   else
     center_mv = tmp_mv->as_mv;
 
-  vp9_full_pixel_search(cpi, x, bsize, &mvp_full, step_param, sadpb,
-                        cond_cost_list(cpi, cost_list), &center_mv,
-                        &tmp_mv->as_mv, INT_MAX, 0);
+  vp9_full_pixel_search(
+      cpi, x, bsize, &mvp_full, step_param, cpi->sf.mv.search_method, sadpb,
+      cond_cost_list(cpi, cost_list), &center_mv, &tmp_mv->as_mv, INT_MAX, 0);
 
   x->mv_limits = tmp_mv_limits;
 
@@ -2258,10 +2258,10 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x, int mi_row,
             vp9_set_mv_search_range(&x->mv_limits,
                                     &mbmi_ext->ref_mvs[0]->as_mv);
 
-            vp9_full_pixel_search(cpi, x, bsize, &mvp_full, step_param,
-                                  x->sadperbit4, cond_cost_list(cpi, cost_list),
-                                  &mbmi_ext->ref_mvs[ref_frame][0].as_mv,
-                                  &tmp_mv, INT_MAX, 0);
+            vp9_full_pixel_search(
+                cpi, x, bsize, &mvp_full, step_param, cpi->sf.mv.search_method,
+                x->sadperbit4, cond_cost_list(cpi, cost_list),
+                &mbmi_ext->ref_mvs[ref_frame][0].as_mv, &tmp_mv, INT_MAX, 0);
 
             x->mv_limits = tmp_mv_limits;
 

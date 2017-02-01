@@ -105,9 +105,9 @@ int vp9_refining_search_8p_c(const MACROBLOCK *x, MV *ref_mv, int error_per_bit,
 struct VP9_COMP;
 
 int vp9_full_pixel_search(struct VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
-                          MV *mvp_full, int step_param, int error_per_bit,
-                          int *cost_list, const MV *ref_mv, MV *tmp_mv,
-                          int var_max, int rd);
+                          MV *mvp_full, int step_param, int search_method,
+                          int error_per_bit, int *cost_list, const MV *ref_mv,
+                          MV *tmp_mv, int var_max, int rd);
 
 #ifdef __cplusplus
 }  // extern "C"

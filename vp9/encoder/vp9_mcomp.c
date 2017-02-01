@@ -2366,11 +2366,11 @@ static int is_exhaustive_allowed(VP9_COMP *cpi, MACROBLOCK *x) {
 }
 
 int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
-                          MV *mvp_full, int step_param, int error_per_bit,
-                          int *cost_list, const MV *ref_mv, MV *tmp_mv,
-                          int var_max, int rd) {
+                          MV *mvp_full, int step_param, int search_method,
+                          int error_per_bit, int *cost_list, const MV *ref_mv,
+                          MV *tmp_mv, int var_max, int rd) {
   const SPEED_FEATURES *const sf = &cpi->sf;
-  const SEARCH_METHODS method = sf->mv.search_method;
+  const SEARCH_METHODS method = (SEARCH_METHODS)search_method;
   vp9_variance_fn_ptr_t *fn_ptr = &cpi->fn_ptr[bsize];
   int var = 0;
   if (cost_list) {
