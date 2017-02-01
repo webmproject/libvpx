@@ -45,8 +45,8 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi, const MV *ref_mv,
 
   mv_sf->search_method = HEX;
   vp9_full_pixel_search(cpi, x, BLOCK_16X16, &ref_full, step_param,
-                        x->errorperbit, cond_cost_list(cpi, cost_list), ref_mv,
-                        dst_mv, 0, 0);
+                        cpi->sf.mv.search_method, x->errorperbit,
+                        cond_cost_list(cpi, cost_list), ref_mv, dst_mv, 0, 0);
   mv_sf->search_method = old_search_method;
 
   // Try sub-pixel MC

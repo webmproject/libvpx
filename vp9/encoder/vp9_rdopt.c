@@ -1998,7 +1998,8 @@ static int64_t rd_pick_best_sub8x8_mode(
           vp9_set_mv_search_range(&x->mv_limits, &bsi->ref_mv[0]->as_mv);
 
           bestsme = vp9_full_pixel_search(
-              cpi, x, bsize, &mvp_full, step_param, sadpb,
+              cpi, x, bsize, &mvp_full, step_param, cpi->sf.mv.search_method,
+              sadpb,
               sf->mv.subpel_search_method != SUBPEL_TREE ? cost_list : NULL,
               &bsi->ref_mv[0]->as_mv, new_mv, INT_MAX, 1);
 
@@ -2403,9 +2404,9 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   mvp_full.col >>= 3;
   mvp_full.row >>= 3;
 
-  bestsme = vp9_full_pixel_search(cpi, x, bsize, &mvp_full, step_param, sadpb,
-                                  cond_cost_list(cpi, cost_list), &ref_mv,
-                                  &tmp_mv->as_mv, INT_MAX, 1);
+  bestsme = vp9_full_pixel_search(
+      cpi, x, bsize, &mvp_full, step_param, cpi->sf.mv.search_method, sadpb,
+      cond_cost_list(cpi, cost_list), &ref_mv, &tmp_mv->as_mv, INT_MAX, 1);
 
   x->mv_limits = tmp_mv_limits;
 

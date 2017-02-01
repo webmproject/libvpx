@@ -420,6 +420,14 @@ typedef struct {
   double max_cpb_size;  // in bits
 } LevelConstraint;
 
+typedef struct ARNRFilterData {
+  YV12_BUFFER_CONFIG *frames[MAX_LAG_BUFFERS];
+  int strength;
+  int frame_count;
+  int alt_ref_index;
+  struct scale_factors sf;
+} ARNRFilterData;
+
 typedef struct VP9_COMP {
   QUANTS quants;
   ThreadData td;
@@ -662,6 +670,7 @@ typedef struct VP9_COMP {
   MultiThreadHandle multi_thread_ctxt;
   void (*row_mt_sync_read_ptr)(VP9RowMTSync *const, int, int);
   void (*row_mt_sync_write_ptr)(VP9RowMTSync *const, int, int, const int);
+  ARNRFilterData arnr_filter_data;
   int new_mt;
 
   // Previous Partition Info
