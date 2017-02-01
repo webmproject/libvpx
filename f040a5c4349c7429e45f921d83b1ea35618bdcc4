@@ -19,6 +19,40 @@
     },
     {
       "key": {
+        "uuid": "0feefc2a_33bb3e09",
+        "filename": "test/avg_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-02-01T21:50:23Z",
+      "side": 1,
+      "message": "Done",
+      "revId": "f040a5c4349c7429e45f921d83b1ea35618bdcc4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bd47cfa4_c5b63903",
+        "filename": "test/avg_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-02-01T21:50:23Z",
+      "side": 1,
+      "message": "I was intended to use INT16_MIN but I found this number was used in SatdTest so I feel safe to use it here too. INT16_MIN and _MAX also pass the tests.",
+      "revId": "f040a5c4349c7429e45f921d83b1ea35618bdcc4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b355fdf2_afcde1cf",
         "filename": "test/avg_test.cc",
         "patchSetId": 11
@@ -30,6 +64,23 @@
       "writtenOn": "2017-02-01T20:48:31Z",
       "side": 1,
       "message": "This needs to pass in HBD builds.",
+      "revId": "f040a5c4349c7429e45f921d83b1ea35618bdcc4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6378b0fe_fe3f4c64",
+        "filename": "test/avg_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 412,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-02-01T21:50:23Z",
+      "side": 1,
+      "message": "Done",
       "revId": "f040a5c4349c7429e45f921d83b1ea35618bdcc4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
