@@ -263,37 +263,6 @@ void iadst4_sse2(__m128i *in) {
   in[1] = _mm_packs_epi32(u[2], u[3]);
 }
 
-#define TRANSPOSE_8X8(in0, in1, in2, in3, in4, in5, in6, in7, out0, out1, \
-                      out2, out3, out4, out5, out6, out7)                 \
-  {                                                                       \
-    const __m128i tr0_0 = _mm_unpacklo_epi16(in0, in1);                   \
-    const __m128i tr0_1 = _mm_unpacklo_epi16(in2, in3);                   \
-    const __m128i tr0_2 = _mm_unpackhi_epi16(in0, in1);                   \
-    const __m128i tr0_3 = _mm_unpackhi_epi16(in2, in3);                   \
-    const __m128i tr0_4 = _mm_unpacklo_epi16(in4, in5);                   \
-    const __m128i tr0_5 = _mm_unpacklo_epi16(in6, in7);                   \
-    const __m128i tr0_6 = _mm_unpackhi_epi16(in4, in5);                   \
-    const __m128i tr0_7 = _mm_unpackhi_epi16(in6, in7);                   \
-                                                                          \
-    const __m128i tr1_0 = _mm_unpacklo_epi32(tr0_0, tr0_1);               \
-    const __m128i tr1_1 = _mm_unpacklo_epi32(tr0_2, tr0_3);               \
-    const __m128i tr1_2 = _mm_unpackhi_epi32(tr0_0, tr0_1);               \
-    const __m128i tr1_3 = _mm_unpackhi_epi32(tr0_2, tr0_3);               \
-    const __m128i tr1_4 = _mm_unpacklo_epi32(tr0_4, tr0_5);               \
-    const __m128i tr1_5 = _mm_unpacklo_epi32(tr0_6, tr0_7);               \
-    const __m128i tr1_6 = _mm_unpackhi_epi32(tr0_4, tr0_5);               \
-    const __m128i tr1_7 = _mm_unpackhi_epi32(tr0_6, tr0_7);               \
-                                                                          \
-    out0 = _mm_unpacklo_epi64(tr1_0, tr1_4);                              \
-    out1 = _mm_unpackhi_epi64(tr1_0, tr1_4);                              \
-    out2 = _mm_unpacklo_epi64(tr1_2, tr1_6);                              \
-    out3 = _mm_unpackhi_epi64(tr1_2, tr1_6);                              \
-    out4 = _mm_unpacklo_epi64(tr1_1, tr1_5);                              \
-    out5 = _mm_unpackhi_epi64(tr1_1, tr1_5);                              \
-    out6 = _mm_unpacklo_epi64(tr1_3, tr1_7);                              \
-    out7 = _mm_unpackhi_epi64(tr1_3, tr1_7);                              \
-  }
-
 #define TRANSPOSE_4X8_10(tmp0, tmp1, tmp2, tmp3, out0, out1, out2, out3) \
   {                                                                      \
     const __m128i tr0_0 = _mm_unpackhi_epi16(tmp0, tmp1);                \
