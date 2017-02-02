@@ -20,54 +20,6 @@ static INLINE void wrap_low_4x2(const int32x4_t *const t32, int16x4_t *const d0,
   *d1 = vrshrn_n_s32(t32[1], 14);
 }
 
-static INLINE void idct_cospi_2_30(const int16x8_t s0, const int16x8_t s1,
-                                   const int16x4_t cospi_2_30_10_22,
-                                   int16x8_t *const d0, int16x8_t *const d1) {
-  int32x4_t t32[4];
-
-  t32[0] = vmull_lane_s16(vget_low_s16(s0), cospi_2_30_10_22, 1);
-  t32[1] = vmull_lane_s16(vget_high_s16(s0), cospi_2_30_10_22, 1);
-  t32[2] = vmull_lane_s16(vget_low_s16(s1), cospi_2_30_10_22, 1);
-  t32[3] = vmull_lane_s16(vget_high_s16(s1), cospi_2_30_10_22, 1);
-  t32[0] = vmlsl_lane_s16(t32[0], vget_low_s16(s1), cospi_2_30_10_22, 0);
-  t32[1] = vmlsl_lane_s16(t32[1], vget_high_s16(s1), cospi_2_30_10_22, 0);
-  t32[2] = vmlal_lane_s16(t32[2], vget_low_s16(s0), cospi_2_30_10_22, 0);
-  t32[3] = vmlal_lane_s16(t32[3], vget_high_s16(s0), cospi_2_30_10_22, 0);
-  idct16x16_add_wrap_low_8x2(t32, d0, d1);
-}
-
-static INLINE void idct_cospi_4_28(const int16x8_t s0, const int16x8_t s1,
-                                   const int16x4_t cospi_4_12_20N_28,
-                                   int16x8_t *const d0, int16x8_t *const d1) {
-  int32x4_t t32[4];
-
-  t32[0] = vmull_lane_s16(vget_low_s16(s0), cospi_4_12_20N_28, 3);
-  t32[1] = vmull_lane_s16(vget_high_s16(s0), cospi_4_12_20N_28, 3);
-  t32[2] = vmull_lane_s16(vget_low_s16(s1), cospi_4_12_20N_28, 3);
-  t32[3] = vmull_lane_s16(vget_high_s16(s1), cospi_4_12_20N_28, 3);
-  t32[0] = vmlsl_lane_s16(t32[0], vget_low_s16(s1), cospi_4_12_20N_28, 0);
-  t32[1] = vmlsl_lane_s16(t32[1], vget_high_s16(s1), cospi_4_12_20N_28, 0);
-  t32[2] = vmlal_lane_s16(t32[2], vget_low_s16(s0), cospi_4_12_20N_28, 0);
-  t32[3] = vmlal_lane_s16(t32[3], vget_high_s16(s0), cospi_4_12_20N_28, 0);
-  idct16x16_add_wrap_low_8x2(t32, d0, d1);
-}
-
-static INLINE void idct_cospi_6_26(const int16x8_t s0, const int16x8_t s1,
-                                   const int16x4_t cospi_6_26_14_18N,
-                                   int16x8_t *const d0, int16x8_t *const d1) {
-  int32x4_t t32[4];
-
-  t32[0] = vmull_lane_s16(vget_low_s16(s0), cospi_6_26_14_18N, 0);
-  t32[1] = vmull_lane_s16(vget_high_s16(s0), cospi_6_26_14_18N, 0);
-  t32[2] = vmull_lane_s16(vget_low_s16(s1), cospi_6_26_14_18N, 0);
-  t32[3] = vmull_lane_s16(vget_high_s16(s1), cospi_6_26_14_18N, 0);
-  t32[0] = vmlal_lane_s16(t32[0], vget_low_s16(s1), cospi_6_26_14_18N, 1);
-  t32[1] = vmlal_lane_s16(t32[1], vget_high_s16(s1), cospi_6_26_14_18N, 1);
-  t32[2] = vmlsl_lane_s16(t32[2], vget_low_s16(s0), cospi_6_26_14_18N, 1);
-  t32[3] = vmlsl_lane_s16(t32[3], vget_high_s16(s0), cospi_6_26_14_18N, 1);
-  idct16x16_add_wrap_low_8x2(t32, d0, d1);
-}
-
 static INLINE void idct_cospi_8_24_d_kernel(const int16x4_t s0,
                                             const int16x4_t s1,
                                             const int16x4_t cospi_0_8_16_24,
@@ -98,54 +50,6 @@ static INLINE void idct_cospi_8_24_neg_d(const int16x4_t s0, const int16x4_t s1,
   wrap_low_4x2(t32, d0, d1);
 }
 
-static INLINE void idct_cospi_10_22(const int16x8_t s0, const int16x8_t s1,
-                                    const int16x4_t cospi_2_30_10_22,
-                                    int16x8_t *const d0, int16x8_t *const d1) {
-  int32x4_t t32[4];
-
-  t32[0] = vmull_lane_s16(vget_low_s16(s0), cospi_2_30_10_22, 3);
-  t32[1] = vmull_lane_s16(vget_high_s16(s0), cospi_2_30_10_22, 3);
-  t32[2] = vmull_lane_s16(vget_low_s16(s1), cospi_2_30_10_22, 3);
-  t32[3] = vmull_lane_s16(vget_high_s16(s1), cospi_2_30_10_22, 3);
-  t32[0] = vmlsl_lane_s16(t32[0], vget_low_s16(s1), cospi_2_30_10_22, 2);
-  t32[1] = vmlsl_lane_s16(t32[1], vget_high_s16(s1), cospi_2_30_10_22, 2);
-  t32[2] = vmlal_lane_s16(t32[2], vget_low_s16(s0), cospi_2_30_10_22, 2);
-  t32[3] = vmlal_lane_s16(t32[3], vget_high_s16(s0), cospi_2_30_10_22, 2);
-  idct16x16_add_wrap_low_8x2(t32, d0, d1);
-}
-
-static INLINE void idct_cospi_12_20(const int16x8_t s0, const int16x8_t s1,
-                                    const int16x4_t cospi_4_12_20N_28,
-                                    int16x8_t *const d0, int16x8_t *const d1) {
-  int32x4_t t32[4];
-
-  t32[0] = vmull_lane_s16(vget_low_s16(s0), cospi_4_12_20N_28, 1);
-  t32[1] = vmull_lane_s16(vget_high_s16(s0), cospi_4_12_20N_28, 1);
-  t32[2] = vmull_lane_s16(vget_low_s16(s1), cospi_4_12_20N_28, 1);
-  t32[3] = vmull_lane_s16(vget_high_s16(s1), cospi_4_12_20N_28, 1);
-  t32[0] = vmlal_lane_s16(t32[0], vget_low_s16(s1), cospi_4_12_20N_28, 2);
-  t32[1] = vmlal_lane_s16(t32[1], vget_high_s16(s1), cospi_4_12_20N_28, 2);
-  t32[2] = vmlsl_lane_s16(t32[2], vget_low_s16(s0), cospi_4_12_20N_28, 2);
-  t32[3] = vmlsl_lane_s16(t32[3], vget_high_s16(s0), cospi_4_12_20N_28, 2);
-  idct16x16_add_wrap_low_8x2(t32, d0, d1);
-}
-
-static INLINE void idct_cospi_14_18(const int16x8_t s0, const int16x8_t s1,
-                                    const int16x4_t cospi_6_26_14_18N,
-                                    int16x8_t *const d0, int16x8_t *const d1) {
-  int32x4_t t32[4];
-
-  t32[0] = vmull_lane_s16(vget_low_s16(s0), cospi_6_26_14_18N, 2);
-  t32[1] = vmull_lane_s16(vget_high_s16(s0), cospi_6_26_14_18N, 2);
-  t32[2] = vmull_lane_s16(vget_low_s16(s1), cospi_6_26_14_18N, 2);
-  t32[3] = vmull_lane_s16(vget_high_s16(s1), cospi_6_26_14_18N, 2);
-  t32[0] = vmlal_lane_s16(t32[0], vget_low_s16(s1), cospi_6_26_14_18N, 3);
-  t32[1] = vmlal_lane_s16(t32[1], vget_high_s16(s1), cospi_6_26_14_18N, 3);
-  t32[2] = vmlsl_lane_s16(t32[2], vget_low_s16(s0), cospi_6_26_14_18N, 3);
-  t32[3] = vmlsl_lane_s16(t32[3], vget_high_s16(s0), cospi_6_26_14_18N, 3);
-  idct16x16_add_wrap_low_8x2(t32, d0, d1);
-}
-
 static INLINE void idct_cospi_16_16_d(const int16x4_t s0, const int16x4_t s1,
                                       const int16x4_t cospi_0_8_16_24,
                                       int16x4_t *const d0,
@@ -156,46 +60,6 @@ static INLINE void idct_cospi_16_16_d(const int16x4_t s0, const int16x4_t s1,
   t32[0] = vmlsl_lane_s16(t32[2], s0, cospi_0_8_16_24, 2);
   t32[1] = vmlal_lane_s16(t32[2], s0, cospi_0_8_16_24, 2);
   wrap_low_4x2(t32, d0, d1);
-}
-
-static INLINE void idct16x16_add_stage7(const int16x8_t *const step2,
-                                        int16x8_t *const out) {
-#if CONFIG_VP9_HIGHBITDEPTH
-  // Use saturating add/sub to avoid overflow in 2nd pass
-  out[0] = vqaddq_s16(step2[0], step2[15]);
-  out[1] = vqaddq_s16(step2[1], step2[14]);
-  out[2] = vqaddq_s16(step2[2], step2[13]);
-  out[3] = vqaddq_s16(step2[3], step2[12]);
-  out[4] = vqaddq_s16(step2[4], step2[11]);
-  out[5] = vqaddq_s16(step2[5], step2[10]);
-  out[6] = vqaddq_s16(step2[6], step2[9]);
-  out[7] = vqaddq_s16(step2[7], step2[8]);
-  out[8] = vqsubq_s16(step2[7], step2[8]);
-  out[9] = vqsubq_s16(step2[6], step2[9]);
-  out[10] = vqsubq_s16(step2[5], step2[10]);
-  out[11] = vqsubq_s16(step2[4], step2[11]);
-  out[12] = vqsubq_s16(step2[3], step2[12]);
-  out[13] = vqsubq_s16(step2[2], step2[13]);
-  out[14] = vqsubq_s16(step2[1], step2[14]);
-  out[15] = vqsubq_s16(step2[0], step2[15]);
-#else
-  out[0] = vaddq_s16(step2[0], step2[15]);
-  out[1] = vaddq_s16(step2[1], step2[14]);
-  out[2] = vaddq_s16(step2[2], step2[13]);
-  out[3] = vaddq_s16(step2[3], step2[12]);
-  out[4] = vaddq_s16(step2[4], step2[11]);
-  out[5] = vaddq_s16(step2[5], step2[10]);
-  out[6] = vaddq_s16(step2[6], step2[9]);
-  out[7] = vaddq_s16(step2[7], step2[8]);
-  out[8] = vsubq_s16(step2[7], step2[8]);
-  out[9] = vsubq_s16(step2[6], step2[9]);
-  out[10] = vsubq_s16(step2[5], step2[10]);
-  out[11] = vsubq_s16(step2[4], step2[11]);
-  out[12] = vsubq_s16(step2[3], step2[12]);
-  out[13] = vsubq_s16(step2[2], step2[13]);
-  out[14] = vsubq_s16(step2[1], step2[14]);
-  out[15] = vsubq_s16(step2[0], step2[15]);
-#endif
 }
 
 static INLINE void idct16x16_store_pass1(const int16x8_t *const out,
@@ -255,8 +119,9 @@ static INLINE void idct16x16_add_store(const int16x8_t *const out,
   idct16x16_add8x1(out[15], &dest, stride);
 }
 
-static void idct16x16_256_add_half1d(const void *const input, int16_t *output,
-                                     uint8_t *dest, const int stride) {
+void idct16x16_256_add_half1d(const void *const input, int16_t *output,
+                              void *const dest, const int stride,
+                              const int highbd_flag) {
   const int16x8_t cospis0 = vld1q_s16(kCospi);
   const int16x8_t cospis1 = vld1q_s16(kCospi + 8);
   const int16x4_t cospi_0_8_16_24 = vget_low_s16(cospis0);
@@ -448,7 +313,45 @@ static void idct16x16_256_add_half1d(const void *const input, int16_t *output,
   if (output) {
     idct16x16_store_pass1(out, output);
   } else {
-    idct16x16_add_store(out, dest, stride);
+    if (highbd_flag) {
+      // pass 2: add the result to dest.
+      const int16x8_t max = vdupq_n_s16((1 << 8) - 1);
+      uint16_t *destT = dest;
+      out[0] = vrshrq_n_s16(out[0], 6);
+      out[1] = vrshrq_n_s16(out[1], 6);
+      out[2] = vrshrq_n_s16(out[2], 6);
+      out[3] = vrshrq_n_s16(out[3], 6);
+      out[4] = vrshrq_n_s16(out[4], 6);
+      out[5] = vrshrq_n_s16(out[5], 6);
+      out[6] = vrshrq_n_s16(out[6], 6);
+      out[7] = vrshrq_n_s16(out[7], 6);
+      out[8] = vrshrq_n_s16(out[8], 6);
+      out[9] = vrshrq_n_s16(out[9], 6);
+      out[10] = vrshrq_n_s16(out[10], 6);
+      out[11] = vrshrq_n_s16(out[11], 6);
+      out[12] = vrshrq_n_s16(out[12], 6);
+      out[13] = vrshrq_n_s16(out[13], 6);
+      out[14] = vrshrq_n_s16(out[14], 6);
+      out[15] = vrshrq_n_s16(out[15], 6);
+      highbd_idct16x16_add8x1(out[0], max, &destT, stride);
+      highbd_idct16x16_add8x1(out[1], max, &destT, stride);
+      highbd_idct16x16_add8x1(out[2], max, &destT, stride);
+      highbd_idct16x16_add8x1(out[3], max, &destT, stride);
+      highbd_idct16x16_add8x1(out[4], max, &destT, stride);
+      highbd_idct16x16_add8x1(out[5], max, &destT, stride);
+      highbd_idct16x16_add8x1(out[6], max, &destT, stride);
+      highbd_idct16x16_add8x1(out[7], max, &destT, stride);
+      highbd_idct16x16_add8x1(out[8], max, &destT, stride);
+      highbd_idct16x16_add8x1(out[9], max, &destT, stride);
+      highbd_idct16x16_add8x1(out[10], max, &destT, stride);
+      highbd_idct16x16_add8x1(out[11], max, &destT, stride);
+      highbd_idct16x16_add8x1(out[12], max, &destT, stride);
+      highbd_idct16x16_add8x1(out[13], max, &destT, stride);
+      highbd_idct16x16_add8x1(out[14], max, &destT, stride);
+      highbd_idct16x16_add8x1(out[15], max, &destT, stride);
+    } else {
+      idct16x16_add_store(out, dest, stride);
+    }
   }
 }
 
@@ -905,17 +808,18 @@ void vpx_idct16x16_256_add_neon(const tran_low_t *input, uint8_t *dest,
 
   // pass 1
   // Parallel idct on the upper 8 rows
-  idct16x16_256_add_half1d(input, row_idct_output, dest, stride);
+  idct16x16_256_add_half1d(input, row_idct_output, dest, stride, 0);
 
   // Parallel idct on the lower 8 rows
-  idct16x16_256_add_half1d(input + 8 * 16, row_idct_output + 8, dest, stride);
+  idct16x16_256_add_half1d(input + 8 * 16, row_idct_output + 8, dest, stride,
+                           0);
 
   // pass 2
   // Parallel idct to get the left 8 columns
-  idct16x16_256_add_half1d(row_idct_output, NULL, dest, stride);
+  idct16x16_256_add_half1d(row_idct_output, NULL, dest, stride, 0);
 
   // Parallel idct to get the right 8 columns
-  idct16x16_256_add_half1d(row_idct_output + 16 * 8, NULL, dest + 8, stride);
+  idct16x16_256_add_half1d(row_idct_output + 16 * 8, NULL, dest + 8, stride, 0);
 }
 
 void vpx_idct16x16_38_add_neon(const tran_low_t *input, uint8_t *dest,
@@ -924,8 +828,7 @@ void vpx_idct16x16_38_add_neon(const tran_low_t *input, uint8_t *dest,
 
   // pass 1
   // Parallel idct on the upper 8 rows
-  idct16x16_38_add_half1d((const int16_t *)input, row_idct_output, dest,
-                          stride);
+  idct16x16_38_add_half1d(input, row_idct_output, dest, stride);
 
   // pass 2
   // Parallel idct to get the left 8 columns
