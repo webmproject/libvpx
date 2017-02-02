@@ -446,16 +446,12 @@ INSTANTIATE_TEST_CASE_P(SSE2, SatdTest,
                                           make_tuple(256, &vpx_satd_sse2),
                                           make_tuple(1024, &vpx_satd_sse2)));
 
-// TODO(jianj): Remove the highbitdepth flag once the SIMD functions are
-// in place.
-#if !CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
     SSE2, BlockErrorTest,
     ::testing::Values(make_tuple(16, &vp9_block_error_fp_sse2),
                       make_tuple(64, &vp9_block_error_fp_sse2),
                       make_tuple(256, &vp9_block_error_fp_sse2),
                       make_tuple(1024, &vp9_block_error_fp_sse2)));
-#endif  // !CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_SSE2
 
 #if HAVE_NEON
