@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b581053e_5b520fc5",
+        "filename": "test/avg_test.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-02T20:17:27Z",
+      "side": 1,
+      "message": "use static_cast\u003c\u003e or make the constant an int64, same above",
+      "range": {
+        "startLine": 379,
+        "startChar": 27,
+        "endLine": 379,
+        "endChar": 36
+      },
+      "revId": "ac10120a0fafd8ec08030c809a90dad432c77f2e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
