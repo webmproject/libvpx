@@ -16,6 +16,23 @@
       "revId": "e7f69b5f3536aaef7a3abf2458597efbb03f7776",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "673127bd_f6afffe3",
+        "filename": "third_party/googletest/README.libvpx",
+        "patchSetId": 1
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-02T15:28:33Z",
+      "side": 1,
+      "message": "I wasn\u0027t sure whether to use src/LICENSE or just LICENSE. Looked around third_party for inspiration. libyuv mentions LICENSE but doesn\u0027t actually have such a file, heh",
+      "revId": "e7f69b5f3536aaef7a3abf2458597efbb03f7776",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
