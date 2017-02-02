@@ -223,20 +223,15 @@ ifeq ($(HAVE_NEON_ASM),yes)
 DSP_SRCS-yes += arm/idct_neon$(ASM)
 DSP_SRCS-yes += arm/idct4x4_1_add_neon$(ASM)
 DSP_SRCS-yes += arm/idct4x4_add_neon$(ASM)
-DSP_SRCS-yes += arm/idct8x8_1_add_neon$(ASM)
-DSP_SRCS-yes += arm/idct8x8_add_neon$(ASM)
-DSP_SRCS-yes += arm/idct16x16_1_add_neon$(ASM)
-DSP_SRCS-yes += arm/idct16x16_add_neon$(ASM)
-DSP_SRCS-yes += arm/idct16x16_neon.c
 else
 DSP_SRCS-$(HAVE_NEON) += arm/idct4x4_1_add_neon.c
 DSP_SRCS-$(HAVE_NEON) += arm/idct4x4_add_neon.c
+endif  # HAVE_NEON_ASM
+DSP_SRCS-$(HAVE_NEON) += arm/idct_neon.h
 DSP_SRCS-$(HAVE_NEON) += arm/idct8x8_1_add_neon.c
 DSP_SRCS-$(HAVE_NEON) += arm/idct8x8_add_neon.c
 DSP_SRCS-$(HAVE_NEON) += arm/idct16x16_1_add_neon.c
 DSP_SRCS-$(HAVE_NEON) += arm/idct16x16_add_neon.c
-endif  # HAVE_NEON_ASM
-DSP_SRCS-$(HAVE_NEON) += arm/idct_neon.h
 DSP_SRCS-$(HAVE_NEON) += arm/idct32x32_1_add_neon.c
 DSP_SRCS-$(HAVE_NEON) += arm/idct32x32_34_add_neon.c
 DSP_SRCS-$(HAVE_NEON) += arm/idct32x32_135_add_neon.c
