@@ -12,7 +12,7 @@
 
 #include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
-#include "vpx_dsp/x86/fdct.h"
+#include "vpx_dsp/x86/bitdepth_conversion_sse2.h"
 #include "vpx_ports/mem.h"
 
 void vpx_minmax_8x8_sse2(const uint8_t *s, int p, const uint8_t *d, int dp,

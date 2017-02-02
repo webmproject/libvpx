@@ -14,7 +14,7 @@
 #include "./vp9_rtcd.h"
 #include "./vpx_config.h"
 #include "vpx_dsp/vpx_dsp_common.h"
-#include "vpx_dsp/x86/fdct.h"
+#include "vpx_dsp/x86/bitdepth_conversion_sse2.h"
 #include "vpx_dsp/x86/inv_txfm_sse2.h"
 #include "vpx_dsp/x86/txfm_common_sse2.h"
 

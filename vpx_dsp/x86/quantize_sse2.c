@@ -13,7 +13,7 @@
 
 #include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
-#include "vpx_dsp/x86/fdct.h"
+#include "vpx_dsp/x86/bitdepth_conversion_sse2.h"
 
 void vpx_quantize_b_sse2(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                          int skip_block, const int16_t *zbin_ptr,
