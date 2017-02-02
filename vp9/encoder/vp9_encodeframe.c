@@ -4078,7 +4078,9 @@ void vp9_init_tile_data(VP9_COMP *cpi) {
   const int tile_rows = 1 << cm->log2_tile_rows;
   int tile_col, tile_row;
   TOKENEXTRA *pre_tok = cpi->tile_tok[0][0];
+  TOKENLIST *tplist = cpi->tplist[0][0];
   int tile_tok = 0;
+  int tplist_count = 0;
 
   if (cpi->tile_data == NULL || cpi->allocated_tiles < tile_cols * tile_rows) {
     if (cpi->tile_data != NULL) vpx_free(cpi->tile_data);
@@ -4109,8 +4111,42 @@ void vp9_init_tile_data(VP9_COMP *cpi) {
       cpi->tile_tok[tile_row][tile_col] = pre_tok + tile_tok;
       pre_tok = cpi->tile_tok[tile_row][tile_col];
       tile_tok = allocated_tokens(*tile_info);
+
+      cpi->tplist[tile_row][tile_col] = tplist + tplist_count;
+      tplist = cpi->tplist[tile_row][tile_col];
+      tplist_count = get_num_vert_units(*tile_info, MI_BLOCK_SIZE_LOG2);
     }
   }
+}
+
+void vp9_encode_sb_row(VP9_COMP *cpi, ThreadData *td, int tile_row,
+                       int tile_col, int mi_row) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int tile_cols = 1 << cm->log2_tile_cols;
+  TileDataEnc *this_tile = &cpi->tile_data[tile_row * tile_cols + tile_col];
+  const TileInfo *const tile_info = &this_tile->tile_info;
+  TOKENEXTRA *tok = NULL;
+  int tile_sb_row;
+  int tile_mb_cols = (tile_info->mi_col_end - tile_info->mi_col_start + 1) >> 1;
+
+  tile_sb_row = mi_cols_aligned_to_sb(mi_row - tile_info->mi_row_start) >>
+                MI_BLOCK_SIZE_LOG2;
+  get_start_tok(cpi, tile_row, tile_col, mi_row, &tok);
+  cpi->tplist[tile_row][tile_col][tile_sb_row].start = tok;
+
+  if (cpi->sf.use_nonrd_pick_mode)
+    encode_nonrd_sb_row(cpi, td, this_tile, mi_row, &tok);
+  else
+    encode_rd_sb_row(cpi, td, this_tile, mi_row, &tok);
+
+  cpi->tplist[tile_row][tile_col][tile_sb_row].stop = tok;
+  cpi->tplist[tile_row][tile_col][tile_sb_row].count =
+      (unsigned int)(cpi->tplist[tile_row][tile_col][tile_sb_row].stop -
+                     cpi->tplist[tile_row][tile_col][tile_sb_row].start);
+  assert(tok - cpi->tplist[tile_row][tile_col][tile_sb_row].start <=
+         get_token_alloc(MI_BLOCK_SIZE >> 1, tile_mb_cols));
+
+  (void)tile_mb_cols;
 }
 
 void vp9_encode_tile(VP9_COMP *cpi, ThreadData *td, int tile_row,
@@ -4119,7 +4155,6 @@ void vp9_encode_tile(VP9_COMP *cpi, ThreadData *td, int tile_row,
   const int tile_cols = 1 << cm->log2_tile_cols;
   TileDataEnc *this_tile = &cpi->tile_data[tile_row * tile_cols + tile_col];
   const TileInfo *const tile_info = &this_tile->tile_info;
-  TOKENEXTRA *tok = cpi->tile_tok[tile_row][tile_col];
   const int mi_row_start = tile_info->mi_row_start;
   const int mi_row_end = tile_info->mi_row_end;
   int mi_row;
@@ -4130,16 +4165,8 @@ void vp9_encode_tile(VP9_COMP *cpi, ThreadData *td, int tile_row,
   td->mb.m_search_count_ptr = &this_tile->m_search_count;
   td->mb.ex_search_count_ptr = &this_tile->ex_search_count;
 
-  for (mi_row = mi_row_start; mi_row < mi_row_end; mi_row += MI_BLOCK_SIZE) {
-    if (cpi->sf.use_nonrd_pick_mode)
-      encode_nonrd_sb_row(cpi, td, this_tile, mi_row, &tok);
-    else
-      encode_rd_sb_row(cpi, td, this_tile, mi_row, &tok);
-  }
-  cpi->tok_count[tile_row][tile_col] =
-      (unsigned int)(tok - cpi->tile_tok[tile_row][tile_col]);
-  assert(tok - cpi->tile_tok[tile_row][tile_col] <=
-         allocated_tokens(*tile_info));
+  for (mi_row = mi_row_start; mi_row < mi_row_end; mi_row += MI_BLOCK_SIZE)
+    vp9_encode_sb_row(cpi, td, tile_row, tile_col, mi_row);
 }
 
 static void encode_tiles(VP9_COMP *cpi) {
