@@ -285,13 +285,13 @@ void vpx_hadamard_16x16_sse2(int16_t const *src_diff, int src_stride,
   }
 }
 
-int vpx_satd_sse2(const int16_t *coeff, int length) {
+int vpx_satd_sse2(const tran_low_t *coeff, int length) {
   int i;
   const __m128i zero = _mm_setzero_si128();
   __m128i accum = zero;
 
   for (i = 0; i < length; i += 8) {
-    const __m128i src_line = _mm_load_si128((const __m128i *)coeff);
+    const __m128i src_line = load_tran_low(coeff);
     const __m128i inv = _mm_sub_epi16(zero, src_line);
     const __m128i abs = _mm_max_epi16(src_line, inv);  // abs(src_line)
     const __m128i abs_lo = _mm_unpacklo_epi16(abs, zero);
