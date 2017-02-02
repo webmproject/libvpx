@@ -59,7 +59,8 @@ const int kCountTestBlock = 1000;
 // The functions specified do not pass with INT16_MIN/MAX. They fail at the
 // value specified, but pass when 1 is added/subtracted.
 int16_t MaxSupportedCoeff(InvTxfmWithBdFunc a) {
-#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_EMULATE_HARDWARE
+#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_EMULATE_HARDWARE && \
+    !CONFIG_VP9_HIGHBITDEPTH
   if (a == &wrapper<vpx_idct8x8_64_add_ssse3> ||
       a == &wrapper<vpx_idct8x8_12_add_ssse3>) {
     return 23625 - 1;
@@ -71,7 +72,8 @@ int16_t MaxSupportedCoeff(InvTxfmWithBdFunc a) {
 }
 
 int16_t MinSupportedCoeff(InvTxfmWithBdFunc a) {
-#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_EMULATE_HARDWARE
+#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_EMULATE_HARDWARE && \
+    !CONFIG_VP9_HIGHBITDEPTH
   if (a == &wrapper<vpx_idct8x8_64_add_ssse3> ||
       a == &wrapper<vpx_idct8x8_12_add_ssse3>) {
     return -23625 + 1;
@@ -606,7 +608,8 @@ INSTANTIATE_TEST_CASE_P(SSE2, PartialIDctTest,
 
 #endif  // HAVE_SSE2 && !CONFIG_EMULATE_HARDWARE
 
-#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_EMULATE_HARDWARE
+#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_EMULATE_HARDWARE && \
+    !CONFIG_VP9_HIGHBITDEPTH
 const PartialInvTxfmParam ssse3_partial_idct_tests[] = {
   make_tuple(&vpx_fdct32x32_c, &wrapper<vpx_idct32x32_1024_add_c>,
              &wrapper<vpx_idct32x32_1024_add_ssse3>, TX_32X32, 1024, 8, 1),
