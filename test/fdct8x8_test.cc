@@ -673,7 +673,7 @@ INSTANTIATE_TEST_CASE_P(
 #if HAVE_NEON && !CONFIG_EMULATE_HARDWARE
 #if CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(NEON, FwdTrans8x8DCT,
-                        ::testing::Values(make_tuple(&vpx_fdct8x8_c,
+                        ::testing::Values(make_tuple(&vpx_fdct8x8_neon,
                                                      &vpx_idct8x8_64_add_neon,
                                                      0, VPX_BITS_8)));
 #else   // !CONFIG_VP9_HIGHBITDEPTH
