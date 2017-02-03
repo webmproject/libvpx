@@ -296,6 +296,18 @@ static void calculate_variance(int bw, int bh, TX_SIZE tx_size,
   }
 }
 
+// Adjust the ac_thr according to speed, width, height and normalized sum
+static int ac_thr_factor(const int speed, const int width, const int height,
+                         const int norm_sum) {
+  if (speed >= 8 && norm_sum < 5) {
+    if (width <= 640 && height <= 480)
+      return 4;
+    else
+      return 2;
+  }
+  return 1;
+}
+
 static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
                                     MACROBLOCK *x, MACROBLOCKD *xd,
                                     int *out_rate_sum, int64_t *out_dist_sum,
@@ -312,7 +324,7 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
   const uint32_t dc_quant = pd->dequant[0];
   const uint32_t ac_quant = pd->dequant[1];
   const int64_t dc_thr = dc_quant * dc_quant >> 6;
-  const int64_t ac_thr = ac_quant * ac_quant >> 6;
+  int64_t ac_thr = ac_quant * ac_quant >> 6;
   unsigned int var;
   int sum;
   int skip_dc = 0;
@@ -340,6 +352,9 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
 
   *var_y = var;
   *sse_y = sse;
+
+  ac_thr *= ac_thr_factor(cpi->oxcf.speed, cpi->common.width,
+                          cpi->common.height, abs(sum) >> (bw + bh));
 
   if (cpi->common.tx_mode == TX_MODE_SELECT) {
     if (sse > (var << 2))
