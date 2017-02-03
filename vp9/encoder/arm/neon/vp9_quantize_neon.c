@@ -21,13 +21,16 @@
 #include "vp9/encoder/vp9_quantize.h"
 #include "vp9/encoder/vp9_rd.h"
 
-void vp9_quantize_fp_neon(const int16_t *coeff_ptr, intptr_t count,
+#include "vpx_dsp/arm/idct_neon.h"
+#include "vpx_dsp/vpx_dsp_common.h"
+
+void vp9_quantize_fp_neon(const tran_low_t *coeff_ptr, intptr_t count,
                           int skip_block, const int16_t *zbin_ptr,
                           const int16_t *round_ptr, const int16_t *quant_ptr,
-                          const int16_t *quant_shift_ptr, int16_t *qcoeff_ptr,
-                          int16_t *dqcoeff_ptr, const int16_t *dequant_ptr,
-                          uint16_t *eob_ptr, const int16_t *scan,
-                          const int16_t *iscan) {
+                          const int16_t *quant_shift_ptr,
+                          tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
+                          const int16_t *dequant_ptr, uint16_t *eob_ptr,
+                          const int16_t *scan, const int16_t *iscan) {
   // TODO(jingning) Decide the need of these arguments after the
   // quantization process is completed.
   (void)zbin_ptr;
@@ -51,7 +54,7 @@ void vp9_quantize_fp_neon(const int16_t *coeff_ptr, intptr_t count,
     // process dc and the first seven ac coeffs
     {
       const int16x8_t v_iscan = vld1q_s16(&iscan[0]);
-      const int16x8_t v_coeff = vld1q_s16(&coeff_ptr[0]);
+      const int16x8_t v_coeff = load_tran_low_to_s16q(coeff_ptr);
       const int16x8_t v_coeff_sign = vshrq_n_s16(v_coeff, 15);
       const int16x8_t v_tmp = vabaq_s16(v_round, v_coeff, v_zero);
       const int32x4_t v_tmp_lo =
@@ -67,8 +70,8 @@ void vp9_quantize_fp_neon(const int16_t *coeff_ptr, intptr_t count,
       const int16x8_t v_qcoeff = vsubq_s16(v_qcoeff_a, v_coeff_sign);
       const int16x8_t v_dqcoeff = vmulq_s16(v_qcoeff, v_dequant);
       v_eobmax_76543210 = vmaxq_s16(v_eobmax_76543210, v_nz_iscan);
-      vst1q_s16(&qcoeff_ptr[0], v_qcoeff);
-      vst1q_s16(&dqcoeff_ptr[0], v_dqcoeff);
+      store_s16q_to_tran_low(qcoeff_ptr, v_qcoeff);
+      store_s16q_to_tran_low(dqcoeff_ptr, v_dqcoeff);
       v_round = vmovq_n_s16(round_ptr[1]);
       v_quant = vmovq_n_s16(quant_ptr[1]);
       v_dequant = vmovq_n_s16(dequant_ptr[1]);
@@ -76,7 +79,7 @@ void vp9_quantize_fp_neon(const int16_t *coeff_ptr, intptr_t count,
     // now process the rest of the ac coeffs
     for (i = 8; i < count; i += 8) {
       const int16x8_t v_iscan = vld1q_s16(&iscan[i]);
-      const int16x8_t v_coeff = vld1q_s16(&coeff_ptr[i]);
+      const int16x8_t v_coeff = load_tran_low_to_s16q(coeff_ptr + i);
       const int16x8_t v_coeff_sign = vshrq_n_s16(v_coeff, 15);
       const int16x8_t v_tmp = vabaq_s16(v_round, v_coeff, v_zero);
       const int32x4_t v_tmp_lo =
@@ -92,8 +95,8 @@ void vp9_quantize_fp_neon(const int16_t *coeff_ptr, intptr_t count,
       const int16x8_t v_qcoeff = vsubq_s16(v_qcoeff_a, v_coeff_sign);
       const int16x8_t v_dqcoeff = vmulq_s16(v_qcoeff, v_dequant);
       v_eobmax_76543210 = vmaxq_s16(v_eobmax_76543210, v_nz_iscan);
-      vst1q_s16(&qcoeff_ptr[i], v_qcoeff);
-      vst1q_s16(&dqcoeff_ptr[i], v_dqcoeff);
+      store_s16q_to_tran_low(qcoeff_ptr + i, v_qcoeff);
+      store_s16q_to_tran_low(dqcoeff_ptr + i, v_dqcoeff);
     }
     {
       const int16x4_t v_eobmax_3210 = vmax_s16(
@@ -110,8 +113,8 @@ void vp9_quantize_fp_neon(const int16_t *coeff_ptr, intptr_t count,
       *eob_ptr = (uint16_t)vget_lane_s16(v_eobmax_final, 0);
     }
   } else {
-    memset(qcoeff_ptr, 0, count * sizeof(int16_t));
-    memset(dqcoeff_ptr, 0, count * sizeof(int16_t));
+    memset(qcoeff_ptr, 0, count * sizeof(*qcoeff_ptr));
+    memset(dqcoeff_ptr, 0, count * sizeof(*dqcoeff_ptr));
     *eob_ptr = 0;
   }
 }
