@@ -40,7 +40,7 @@ class VPxFirstPassEncoderThreadTest
     init_flags_ = VPX_CODEC_USE_PSNR;
 
     new_mt_mode_ = 1;
-    first_pass_only_ = 1;
+    first_pass_only_ = true;
     firstpass_stats_.buf = NULL;
     firstpass_stats_.sz = 0;
   }
@@ -110,7 +110,7 @@ class VPxFirstPassEncoderThreadTest
   ::libvpx_test::TestMode encoding_mode_;
   int set_cpu_used_;
   int new_mt_mode_;
-  int first_pass_only_;
+  bool first_pass_only_;
   vpx_fixed_buf_t firstpass_stats_;
 };
 
@@ -147,7 +147,7 @@ static void compare_fp_stats(vpx_fixed_buf_t *fp_stats) {
 TEST_P(VPxFirstPassEncoderThreadTest, FirstPassStatsTest) {
   ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
 
-  first_pass_only_ = 1;
+  first_pass_only_ = true;
   cfg_.rc_target_bitrate = 1000;
 
   // Test new_mt_mode: 0 vs 1 (threads = 1, tiles_ = 0)
