@@ -284,6 +284,12 @@ typedef struct RowMTInfo {
 #endif
 } RowMTInfo;
 
+typedef struct {
+  TOKENEXTRA *start;
+  TOKENEXTRA *stop;
+  unsigned int count;
+} TOKENLIST;
+
 typedef struct MultiThreadHandle {
   int allocated_tile_rows;
   int allocated_tile_cols;
@@ -478,6 +484,7 @@ typedef struct VP9_COMP {
 
   TOKENEXTRA *tile_tok[4][1 << 6];
   uint32_t tok_count[4][1 << 6];
+  TOKENLIST *tplist[4][1 << 6];
 
   // Ambient reconstruction err target for force key frames
   int64_t ambient_err;
@@ -784,6 +791,20 @@ static INLINE int allocated_tokens(TileInfo tile) {
   int tile_mb_cols = (tile.mi_col_end - tile.mi_col_start + 1) >> 1;
 
   return get_token_alloc(tile_mb_rows, tile_mb_cols);
+}
+
+static INLINE void get_start_tok(VP9_COMP *cpi, int tile_row, int tile_col,
+                                 int mi_row, TOKENEXTRA **tok) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int tile_cols = 1 << cm->log2_tile_cols;
+  TileDataEnc *this_tile = &cpi->tile_data[tile_row * tile_cols + tile_col];
+  const TileInfo *const tile_info = &this_tile->tile_info;
+
+  int tile_mb_cols = (tile_info->mi_col_end - tile_info->mi_col_start + 1) >> 1;
+  const int mb_row = (mi_row - tile_info->mi_row_start) >> 1;
+
+  *tok =
+      cpi->tile_tok[tile_row][tile_col] + get_token_alloc(mb_row, tile_mb_cols);
 }
 
 int64_t vp9_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b);

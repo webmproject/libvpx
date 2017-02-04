@@ -495,6 +495,9 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->tile_tok[0][0]);
   cpi->tile_tok[0][0] = 0;
 
+  vpx_free(cpi->tplist[0][0]);
+  cpi->tplist[0][0] = NULL;
+
   vp9_free_pc_tree(&cpi->td);
 
   for (i = 0; i < cpi->svc.number_spatial_layers; ++i) {
@@ -829,6 +832,7 @@ static int alloc_context_buffers_ext(VP9_COMP *cpi) {
 
 static void alloc_compressor_data(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
+  int sb_rows;
 
   vp9_alloc_context_buffers(cm, cm->width, cm->height);
 
@@ -841,6 +845,12 @@ static void alloc_compressor_data(VP9_COMP *cpi) {
     CHECK_MEM_ERROR(cm, cpi->tile_tok[0][0],
                     vpx_calloc(tokens, sizeof(*cpi->tile_tok[0][0])));
   }
+
+  sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
+  vpx_free(cpi->tplist[0][0]);
+  CHECK_MEM_ERROR(
+      cm, cpi->tplist[0][0],
+      vpx_calloc(sb_rows * 4 * (1 << 6), sizeof(*cpi->tplist[0][0])));
 
   vp9_setup_pc_tree(&cpi->common, &cpi->td);
 }
