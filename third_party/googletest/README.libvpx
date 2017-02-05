@@ -24,3 +24,5 @@ Local Modifications:
 - Make WithParamInterface<T>::GetParam static in order to avoid
   initialization issues
   https://github.com/google/googletest/pull/1830
+- Use wcslen() instead of std::wcslen()
+  https://github.com/google/googletest/pull/1899
