@@ -61,6 +61,8 @@ void vp9_row_mt_sync_mem_alloc(VP9RowMTSync *row_mt_sync, struct VP9Common *cm,
 // Deallocate row based multi-threading synchronization related mutex and data.
 void vp9_row_mt_sync_mem_dealloc(VP9RowMTSync *row_mt_sync);
 
+void vp9_temporal_filter_row_mt(struct VP9_COMP *cpi);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
