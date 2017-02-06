@@ -33,6 +33,23 @@
       "revId": "41c5ad9351907c5fd14e9856e05fc88309313561",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7ffb8cf0_06a12d0d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-02-06T17:41:51Z",
+      "side": 1,
+      "message": "can you put this in a separate function (in the same file). \nwe will likely add more conditions to this (like denoising and noise level) in future\nfor now pass the (speed, width, height, normalized sum  \u003d abs(sum) \u003e\u003e (bw + bh)",
+      "revId": "41c5ad9351907c5fd14e9856e05fc88309313561",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
