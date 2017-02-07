@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "01b2bb41_d3bf860f",
+        "filename": "vp9/encoder/x86/vp9_error_sse2.asm",
+        "patchSetId": 6
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-07T18:42:13Z",
+      "side": 1,
+      "message": "The parent change switched the syntax for INCREMENT_ELEMENTS. Updated, passes BlockErrorTest with and without --enable-vp9-higbitdeth",
+      "revId": "537949a9df4c06f0f6f8ee087b917c5fdde6155c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
