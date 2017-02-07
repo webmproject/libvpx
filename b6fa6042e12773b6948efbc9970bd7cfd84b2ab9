@@ -1,0 +1,124 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e1b5ce89_81b527c7",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1578,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-07T00:27:45Z",
+      "side": 1,
+      "message": "It is ok now. Later, maybe better to combine them.",
+      "range": {
+        "startLine": 1570,
+        "startChar": 0,
+        "endLine": 1578,
+        "endChar": 20
+      },
+      "revId": "b6fa6042e12773b6948efbc9970bd7cfd84b2ab9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b8144d86_6b4ddbfb",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-07T00:27:45Z",
+      "side": 1,
+      "message": "Exhaustive search is only used in NSTEP search. Temporal filtering uses HEX search. So, these search count related code could be removed in temporal filter.",
+      "range": {
+        "startLine": 548,
+        "startChar": 2,
+        "endLine": 548,
+        "endChar": 31
+      },
+      "revId": "b6fa6042e12773b6948efbc9970bd7cfd84b2ab9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "81bb867f_3ad56b1a",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2412,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-07T00:27:45Z",
+      "side": 1,
+      "message": "This can be moved below under \"case NSTEP\", so other search methods don\u0027t have to deal with it.",
+      "range": {
+        "startLine": 2411,
+        "startChar": 0,
+        "endLine": 2412,
+        "endChar": 29
+      },
+      "revId": "b6fa6042e12773b6948efbc9970bd7cfd84b2ab9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5e3eaf01_e421e738",
+        "filename": "vp9/encoder/vp9_multi_thread.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-07T00:27:45Z",
+      "side": 1,
+      "message": "This can be done later - In mt code, there is inconsistency about using of tile_rows. It is used but not always. Since row tiles are not independent in VP9. In mt case, the tile_rows should always be 1.",
+      "revId": "b6fa6042e12773b6948efbc9970bd7cfd84b2ab9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a2171c22_017ffdfb",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-07T00:27:45Z",
+      "side": 1,
+      "message": "This could be removed if the search counts are removed.",
+      "revId": "b6fa6042e12773b6948efbc9970bd7cfd84b2ab9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "14d35f20_cb8fabf7",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 604,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-07T00:27:45Z",
+      "side": 1,
+      "message": "As mentioned in another file, these piece of code can be removed.",
+      "revId": "b6fa6042e12773b6948efbc9970bd7cfd84b2ab9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
