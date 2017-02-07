@@ -22,6 +22,24 @@
       "revId": "c33c4335942184036c412da4169cbed6429c15c1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "152fcbb7_3698ee75",
+        "filename": "vpx_dsp/arm/idct16x16_38_add_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-02-07T20:25:35Z",
+      "side": 1,
+      "message": "Done in the split change",
+      "parentUuid": "df424cda_7c26a04a",
+      "revId": "c33c4335942184036c412da4169cbed6429c15c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
