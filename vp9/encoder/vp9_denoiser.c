@@ -564,6 +564,25 @@ void vp9_denoiser_set_noise_level(VP9_DENOISER *denoiser, int noise_level) {
   denoiser->prev_denoising_level = denoiser->denoising_level;
 }
 
+// Scale/increase the partition threshold for denoiser speed-up.
+int64_t vp9_scale_part_thresh(int64_t threshold,
+                              VP9_DENOISER_LEVEL noise_level) {
+  if (noise_level >= kDenLow)
+    return ((5 * threshold) >> 2);
+  else
+    return threshold;
+}
+
+//  Scale/increase the ac skip threshold for denoiser speed-up.
+int64_t vp9_scale_acskip_thresh(int64_t threshold,
+                                VP9_DENOISER_LEVEL noise_level,
+                                int abs_sumdiff) {
+  if (noise_level >= kDenLow && abs_sumdiff < 5)
+    return threshold *= (noise_level == kDenLow) ? 2 : 6;
+  else
+    return threshold;
+}
+
 #ifdef OUTPUT_YUV_DENOISED
 static void make_grayscale(YV12_BUFFER_CONFIG *yuv) {
   int r, c;

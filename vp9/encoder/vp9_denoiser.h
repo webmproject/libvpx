@@ -97,6 +97,13 @@ void vp9_denoiser_free(VP9_DENOISER *denoiser);
 
 void vp9_denoiser_set_noise_level(VP9_DENOISER *denoiser, int noise_level);
 
+int64_t vp9_scale_part_thresh(int64_t threshold,
+                              VP9_DENOISER_LEVEL noise_level);
+
+int64_t vp9_scale_acskip_thresh(int64_t threshold,
+                                VP9_DENOISER_LEVEL noise_level,
+                                int abs_sumdiff);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

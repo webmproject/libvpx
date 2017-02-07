@@ -353,8 +353,17 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
   *var_y = var;
   *sse_y = sse;
 
+#if CONFIG_VP9_TEMPORAL_DENOISING
+  if (cpi->oxcf.noise_sensitivity > 0)
+    ac_thr = vp9_scale_acskip_thresh(ac_thr, cpi->denoiser.denoising_level,
+                                     (abs(sum) >> (bw + bh)));
+  else
+    ac_thr *= ac_thr_factor(cpi->oxcf.speed, cpi->common.width,
+                            cpi->common.height, abs(sum) >> (bw + bh));
+#else
   ac_thr *= ac_thr_factor(cpi->oxcf.speed, cpi->common.width,
                           cpi->common.height, abs(sum) >> (bw + bh));
+#endif
 
   if (cpi->common.tx_mode == TX_MODE_SELECT) {
     if (sse > (var << 2))
