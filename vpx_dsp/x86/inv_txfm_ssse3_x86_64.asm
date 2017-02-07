@@ -9,6 +9,7 @@
 ;
 
 %include "third_party/x86inc/x86inc.asm"
+%include "vpx_dsp/x86/bitdepth_conversion_sse2.asm"
 
 SECTION_RODATA
 
@@ -230,21 +231,10 @@ cglobal idct8x8_12_add, 3, 5, 13, input, output, stride
 
   lea        r3, [2 * strideq]
 
-%if CONFIG_VP9_HIGHBITDEPTH
-  mova       m0, [inputq +   0]
-  packssdw   m0, [inputq +  16]
-  mova       m1, [inputq +  32]
-  packssdw   m1, [inputq +  48]
-  mova       m2, [inputq +  64]
-  packssdw   m2, [inputq +  80]
-  mova       m3, [inputq +  96]
-  packssdw   m3, [inputq + 112]
-%else
-  mova       m0, [inputq +  0]
-  mova       m1, [inputq + 16]
-  mova       m2, [inputq + 32]
-  mova       m3, [inputq + 48]
-%endif
+  LOAD_TRAN_LOW 0, inputq, 0
+  LOAD_TRAN_LOW 1, inputq, 1
+  LOAD_TRAN_LOW 2, inputq, 2
+  LOAD_TRAN_LOW 3, inputq, 3
 
   punpcklwd  m0, m1
   punpcklwd  m2, m3
@@ -752,33 +742,14 @@ idct32x32_34:
   lea             r4, [rsp + transposed_in]
 
 idct32x32_34_transpose:
-%if CONFIG_VP9_HIGHBITDEPTH
-  mova            m0, [r3 +       0]
-  packssdw        m0, [r3 +      16]
-  mova            m1, [r3 + 32 *  4]
-  packssdw        m1, [r3 + 32 *  4 + 16]
-  mova            m2, [r3 + 32 *  8]
-  packssdw        m2, [r3 + 32 *  8 + 16]
-  mova            m3, [r3 + 32 * 12]
-  packssdw        m3, [r3 + 32 * 12 + 16]
-  mova            m4, [r3 + 32 * 16]
-  packssdw        m4, [r3 + 32 * 16 + 16]
-  mova            m5, [r3 + 32 * 20]
-  packssdw        m5, [r3 + 32 * 20 + 16]
-  mova            m6, [r3 + 32 * 24]
-  packssdw        m6, [r3 + 32 * 24 + 16]
-  mova            m7, [r3 + 32 * 28]
-  packssdw        m7, [r3 + 32 * 28 + 16]
-%else
-  mova            m0, [r3 +       0]
-  mova            m1, [r3 + 16 *  4]
-  mova            m2, [r3 + 16 *  8]
-  mova            m3, [r3 + 16 * 12]
-  mova            m4, [r3 + 16 * 16]
-  mova            m5, [r3 + 16 * 20]
-  mova            m6, [r3 + 16 * 24]
-  mova            m7, [r3 + 16 * 28]
-%endif
+  LOAD_TRAN_LOW 0, r3,  0
+  LOAD_TRAN_LOW 1, r3,  4
+  LOAD_TRAN_LOW 2, r3,  8
+  LOAD_TRAN_LOW 3, r3, 12
+  LOAD_TRAN_LOW 4, r3, 16
+  LOAD_TRAN_LOW 5, r3, 20
+  LOAD_TRAN_LOW 6, r3, 24
+  LOAD_TRAN_LOW 7, r3, 28
 
   TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9, 10
 
@@ -1182,33 +1153,15 @@ idct32x32_135:
   mov             r7, 2
 
 idct32x32_135_transpose:
-%if CONFIG_VP9_HIGHBITDEPTH
-  mova            m0, [r3 +       0]
-  packssdw        m0, [r3 +      16]
-  mova            m1, [r3 + 32 *  4]
-  packssdw        m1, [r3 + 32 *  4 + 16]
-  mova            m2, [r3 + 32 *  8]
-  packssdw        m2, [r3 + 32 *  8 + 16]
-  mova            m3, [r3 + 32 * 12]
-  packssdw        m3, [r3 + 32 * 12 + 16]
-  mova            m4, [r3 + 32 * 16]
-  packssdw        m4, [r3 + 32 * 16 + 16]
-  mova            m5, [r3 + 32 * 20]
-  packssdw        m5, [r3 + 32 * 20 + 16]
-  mova            m6, [r3 + 32 * 24]
-  packssdw        m6, [r3 + 32 * 24 + 16]
-  mova            m7, [r3 + 32 * 28]
-  packssdw        m7, [r3 + 32 * 28 + 16]
-%else
-  mova            m0, [r3 +       0]
-  mova            m1, [r3 + 16 *  4]
-  mova            m2, [r3 + 16 *  8]
-  mova            m3, [r3 + 16 * 12]
-  mova            m4, [r3 + 16 * 16]
-  mova            m5, [r3 + 16 * 20]
-  mova            m6, [r3 + 16 * 24]
-  mova            m7, [r3 + 16 * 28]
-%endif
+  LOAD_TRAN_LOW 0, r3,  0
+  LOAD_TRAN_LOW 1, r3,  4
+  LOAD_TRAN_LOW 2, r3,  8
+  LOAD_TRAN_LOW 3, r3, 12
+  LOAD_TRAN_LOW 4, r3, 16
+  LOAD_TRAN_LOW 5, r3, 20
+  LOAD_TRAN_LOW 6, r3, 24
+  LOAD_TRAN_LOW 7, r3, 28
+
   TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9, 10
 
   mova [r4 +      0], m0
@@ -1220,22 +1173,14 @@ idct32x32_135_transpose:
   mova [r4 + 16 * 6], m6
   mova [r4 + 16 * 7], m7
 
-%if CONFIG_VP9_HIGHBITDEPTH
-  add             r3, 32
-%else
-  add             r3, 16
-%endif
+  INCREMENT_TRAN_LOW r3
   add             r4, 16 * 8
   dec             r7
   jne idct32x32_135_transpose
 
   IDCT32X32_135 16*0, 16*32, 16*64, 16*96
   lea            stp, [stp + 16 * 8]
-%if CONFIG_VP9_HIGHBITDEPTH
-  lea         inputq, [inputq + 32 * 32]
-%else
-  lea         inputq, [inputq + 16 * 32]
-%endif
+  INCREMENT_ELEMENTS_TRAN_LOW inputq, 8*32
   dec             r6
   jnz idct32x32_135
 
@@ -1646,33 +1591,14 @@ idct32x32_1024:
   mov             r7, 4
 
 idct32x32_1024_transpose:
-%if CONFIG_VP9_HIGHBITDEPTH
-  mova            m0, [r3 +       0]
-  packssdw        m0, [r3 +      16]
-  mova            m1, [r3 + 32 *  4]
-  packssdw        m1, [r3 + 32 *  4 + 16]
-  mova            m2, [r3 + 32 *  8]
-  packssdw        m2, [r3 + 32 *  8 + 16]
-  mova            m3, [r3 + 32 * 12]
-  packssdw        m3, [r3 + 32 * 12 + 16]
-  mova            m4, [r3 + 32 * 16]
-  packssdw        m4, [r3 + 32 * 16 + 16]
-  mova            m5, [r3 + 32 * 20]
-  packssdw        m5, [r3 + 32 * 20 + 16]
-  mova            m6, [r3 + 32 * 24]
-  packssdw        m6, [r3 + 32 * 24 + 16]
-  mova            m7, [r3 + 32 * 28]
-  packssdw        m7, [r3 + 32 * 28 + 16]
-%else
-  mova            m0, [r3 +       0]
-  mova            m1, [r3 + 16 *  4]
-  mova            m2, [r3 + 16 *  8]
-  mova            m3, [r3 + 16 * 12]
-  mova            m4, [r3 + 16 * 16]
-  mova            m5, [r3 + 16 * 20]
-  mova            m6, [r3 + 16 * 24]
-  mova            m7, [r3 + 16 * 28]
-%endif
+  LOAD_TRAN_LOW 0, r3,  0
+  LOAD_TRAN_LOW 1, r3,  4
+  LOAD_TRAN_LOW 2, r3,  8
+  LOAD_TRAN_LOW 3, r3, 12
+  LOAD_TRAN_LOW 4, r3, 16
+  LOAD_TRAN_LOW 5, r3, 20
+  LOAD_TRAN_LOW 6, r3, 24
+  LOAD_TRAN_LOW 7, r3, 28
 
   TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9, 10
 
@@ -1684,11 +1610,7 @@ idct32x32_1024_transpose:
   mova [r4 + 16 * 5], m5
   mova [r4 + 16 * 6], m6
   mova [r4 + 16 * 7], m7
-%if CONFIG_VP9_HIGHBITDEPTH
-  add             r3, 32
-%else
-  add             r3, 16
-%endif
+  INCREMENT_TRAN_LOW r3
   add             r4, 16 * 8
   dec             r7
   jne idct32x32_1024_transpose
@@ -1696,11 +1618,7 @@ idct32x32_1024_transpose:
   IDCT32X32_1024 16*0, 16*32, 16*64, 16*96
 
   lea            stp, [stp + 16 * 8]
-%if CONFIG_VP9_HIGHBITDEPTH
-  lea         inputq, [inputq + 32 * 32]
-%else
-  lea         inputq, [inputq + 16 * 32]
-%endif
+  INCREMENT_ELEMENTS_TRAN_LOW inputq, 8*32
   dec             r6
   jnz idct32x32_1024
 
