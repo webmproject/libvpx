@@ -501,6 +501,8 @@ const PartialInvTxfmParam neon_partial_idct_tests[] = {
   make_tuple(&vpx_fdct16x16_c, &wrapper<vpx_idct16x16_256_add_c>,
              &wrapper<vpx_idct16x16_256_add_neon>, TX_16X16, 256, 8, 1),
   make_tuple(&vpx_fdct16x16_c, &wrapper<vpx_idct16x16_256_add_c>,
+             &wrapper<vpx_idct16x16_38_add_neon>, TX_16X16, 38, 8, 1),
+  make_tuple(&vpx_fdct16x16_c, &wrapper<vpx_idct16x16_256_add_c>,
              &wrapper<vpx_idct16x16_10_add_neon>, TX_16X16, 10, 8, 1),
   make_tuple(&vpx_fdct16x16_c, &wrapper<vpx_idct16x16_256_add_c>,
              &wrapper<vpx_idct16x16_1_add_neon>, TX_16X16, 1, 8, 1),
