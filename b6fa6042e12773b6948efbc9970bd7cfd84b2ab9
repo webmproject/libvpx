@@ -25,6 +25,24 @@
     },
     {
       "key": {
+        "uuid": "be620ea6_9ffc6c0d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1578,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-02-07T11:45:31Z",
+      "side": 1,
+      "message": "In first pass mode, the preset is set internally to \u0027best\u0027. Hence first pass optimizations are enabled for Good/Best presets. \nWhereas optimizations of encoding/arnr filtering stages are enabled for good preset mode only. Hence the conditions are slightly different.",
+      "parentUuid": "e1b5ce89_81b527c7",
+      "revId": "b6fa6042e12773b6948efbc9970bd7cfd84b2ab9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b8144d86_6b4ddbfb",
         "filename": "vp9/encoder/vp9_ethread.c",
         "patchSetId": 1
@@ -88,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "4bcbbc17_81688620",
+        "filename": "vp9/encoder/vp9_multi_thread.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-02-07T11:45:31Z",
+      "side": 1,
+      "message": "This code is removed in the current patch.\nHowever in row based MT implementation, there is no assumption that tile_rows should be 1 (due to the top dependency on tile row boundaries).  Hence this piece of code will be added as is in the next patch (Enc MT patch). Please let us know your thoughts.",
+      "parentUuid": "5e3eaf01_e421e738",
+      "revId": "b6fa6042e12773b6948efbc9970bd7cfd84b2ab9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a2171c22_017ffdfb",
         "filename": "vp9/encoder/vp9_temporal_filter.c",
         "patchSetId": 1
@@ -99,6 +135,24 @@
       "writtenOn": "2017-02-07T00:27:45Z",
       "side": 1,
       "message": "This could be removed if the search counts are removed.",
+      "revId": "b6fa6042e12773b6948efbc9970bd7cfd84b2ab9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e9562775_96047905",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-02-07T11:45:31Z",
+      "side": 1,
+      "message": "This is not removed as the prototype of vp9_temporal_filter_row_mt is present in vp9_ethread.h",
+      "parentUuid": "a2171c22_017ffdfb",
       "revId": "b6fa6042e12773b6948efbc9970bd7cfd84b2ab9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
