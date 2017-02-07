@@ -2381,9 +2381,6 @@ int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
     cost_list[4] = INT_MAX;
   }
 
-  // Keep track of number of searches (this frame in this thread).
-  ++(*x->m_search_count_ptr);
-
   switch (method) {
     case FAST_DIAMOND:
       var = fast_dia_search(x, mvp_full, step_param, error_per_bit, 0,
@@ -2409,6 +2406,9 @@ int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
       var = full_pixel_diamond(cpi, x, mvp_full, step_param, error_per_bit,
                                MAX_MVSEARCH_STEPS - 1 - step_param, 1,
                                cost_list, fn_ptr, ref_mv, tmp_mv);
+
+      // Keep track of number of searches (this frame in this thread).
+      ++(*x->m_search_count_ptr);
 
       // Should we allow a follow on exhaustive search?
       if (is_exhaustive_allowed(cpi, x)) {

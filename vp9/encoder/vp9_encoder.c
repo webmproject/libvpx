@@ -1581,6 +1581,11 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
        cpi->oxcf.speed < 5 && cpi->oxcf.pass == 1) &&
       cpi->oxcf.new_mt && !cpi->use_svc)
     cpi->new_mt = 1;
+
+  if (cpi->oxcf.mode == GOOD && cpi->oxcf.speed < 5 &&
+      (cpi->oxcf.pass == 0 || cpi->oxcf.pass == 2) && cpi->oxcf.new_mt &&
+      !cpi->use_svc)
+    cpi->new_mt = 1;
 }
 
 #ifndef M_LOG2_E

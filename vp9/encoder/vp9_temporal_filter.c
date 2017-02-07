@@ -16,6 +16,7 @@
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/encoder/vp9_encodeframe.h"
+#include "vp9/encoder/vp9_ethread.h"
 #include "vp9/encoder/vp9_extend.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_mcomp.h"
@@ -262,9 +263,9 @@ static uint32_t temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   return bestsme;
 }
 
-static void temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
-                                          int mb_row, int mb_col_start,
-                                          int mb_col_end) {
+void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
+                                       int mb_row, int mb_col_start,
+                                       int mb_col_end) {
   ARNRFilterData *arnr_filter_data = &cpi->arnr_filter_data;
   YV12_BUFFER_CONFIG **frames = arnr_filter_data->frames;
   int frame_count = arnr_filter_data->frame_count;
@@ -571,8 +572,8 @@ static void temporal_filter_iterate_tile_c(VP9_COMP *cpi, int tile_row,
   int mb_row;
 
   for (mb_row = mb_row_start; mb_row < mb_row_end; mb_row++) {
-    temporal_filter_iterate_row_c(cpi, &cpi->td, mb_row, mb_col_start,
-                                  mb_col_end);
+    vp9_temporal_filter_iterate_row_c(cpi, &cpi->td, mb_row, mb_col_start,
+                                      mb_col_end);
   }
 }
 
@@ -765,5 +766,8 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
   set_error_per_bit(&cpi->td.mb, rdmult);
   vp9_initialize_me_consts(cpi, &cpi->td.mb, ARNR_FILT_QINDEX);
 
-  temporal_filter_iterate_c(cpi);
+  if (!cpi->new_mt)
+    temporal_filter_iterate_c(cpi);
+  else
+    vp9_temporal_filter_row_mt(cpi);
 }
