@@ -2138,7 +2138,7 @@ void adjust_gf_boost_lag_one_pass_vbr(VP9_COMP *cpi, uint64_t avg_sad_current) {
     // Adjust factors for active_worst setting & af_ratio for next gf interval.
     rc->fac_active_worst_inter = 150;  // corresponds to 3/2 (= 150 /100).
     rc->fac_active_worst_gf = 100;
-    if (rate_err < 1.5 && !high_content) {
+    if (rate_err < 2.0 && !high_content) {
       rc->fac_active_worst_inter = 120;
       rc->fac_active_worst_gf = 90;
     }
