@@ -685,6 +685,42 @@ static INLINE void idct16x16_add_stage7(const int16x8_t *const step2,
 #endif
 }
 
+static INLINE void idct16x16_store_pass1(const int16x8_t *const out,
+                                         int16_t *output) {
+  // Save the result into output
+  vst1q_s16(output, out[0]);
+  output += 16;
+  vst1q_s16(output, out[1]);
+  output += 16;
+  vst1q_s16(output, out[2]);
+  output += 16;
+  vst1q_s16(output, out[3]);
+  output += 16;
+  vst1q_s16(output, out[4]);
+  output += 16;
+  vst1q_s16(output, out[5]);
+  output += 16;
+  vst1q_s16(output, out[6]);
+  output += 16;
+  vst1q_s16(output, out[7]);
+  output += 16;
+  vst1q_s16(output, out[8]);
+  output += 16;
+  vst1q_s16(output, out[9]);
+  output += 16;
+  vst1q_s16(output, out[10]);
+  output += 16;
+  vst1q_s16(output, out[11]);
+  output += 16;
+  vst1q_s16(output, out[12]);
+  output += 16;
+  vst1q_s16(output, out[13]);
+  output += 16;
+  vst1q_s16(output, out[14]);
+  output += 16;
+  vst1q_s16(output, out[15]);
+}
+
 static INLINE void idct16x16_add8x1(int16x8_t res, uint8_t **dest,
                                     const int stride) {
   uint8x8_t d = vld1_u8(*dest);
@@ -711,5 +747,9 @@ static INLINE void highbd_idct16x16_add8x1(int16x8_t res, const int16x8_t max,
 void idct16x16_256_add_half1d(const void *const input, int16_t *output,
                               void *const dest, const int stride,
                               const int highbd_flag);
+
+void idct16x16_38_add_half1d(const void *const input, int16_t *const output,
+                             void *const dest, const int stride,
+                             const int highbd_flag);
 
 #endif  // VPX_DSP_ARM_IDCT_NEON_H_

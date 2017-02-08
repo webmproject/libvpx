@@ -62,42 +62,6 @@ static INLINE void idct_cospi_16_16_d(const int16x4_t s0, const int16x4_t s1,
   wrap_low_4x2(t32, d0, d1);
 }
 
-static INLINE void idct16x16_store_pass1(const int16x8_t *const out,
-                                         int16_t *output) {
-  // Save the result into output
-  vst1q_s16(output, out[0]);
-  output += 16;
-  vst1q_s16(output, out[1]);
-  output += 16;
-  vst1q_s16(output, out[2]);
-  output += 16;
-  vst1q_s16(output, out[3]);
-  output += 16;
-  vst1q_s16(output, out[4]);
-  output += 16;
-  vst1q_s16(output, out[5]);
-  output += 16;
-  vst1q_s16(output, out[6]);
-  output += 16;
-  vst1q_s16(output, out[7]);
-  output += 16;
-  vst1q_s16(output, out[8]);
-  output += 16;
-  vst1q_s16(output, out[9]);
-  output += 16;
-  vst1q_s16(output, out[10]);
-  output += 16;
-  vst1q_s16(output, out[11]);
-  output += 16;
-  vst1q_s16(output, out[12]);
-  output += 16;
-  vst1q_s16(output, out[13]);
-  output += 16;
-  vst1q_s16(output, out[14]);
-  output += 16;
-  vst1q_s16(output, out[15]);
-}
-
 static INLINE void idct16x16_add_store(const int16x8_t *const out,
                                        uint8_t *dest, const int stride) {
   // Add the result to dest
@@ -117,6 +81,44 @@ static INLINE void idct16x16_add_store(const int16x8_t *const out,
   idct16x16_add8x1(out[13], &dest, stride);
   idct16x16_add8x1(out[14], &dest, stride);
   idct16x16_add8x1(out[15], &dest, stride);
+}
+
+static INLINE void idct16x16_add_store_bd8(int16x8_t *const out, uint16_t *dest,
+                                           const int stride) {
+  // Add the result to dest
+  const int16x8_t max = vdupq_n_s16((1 << 8) - 1);
+  out[0] = vrshrq_n_s16(out[0], 6);
+  out[1] = vrshrq_n_s16(out[1], 6);
+  out[2] = vrshrq_n_s16(out[2], 6);
+  out[3] = vrshrq_n_s16(out[3], 6);
+  out[4] = vrshrq_n_s16(out[4], 6);
+  out[5] = vrshrq_n_s16(out[5], 6);
+  out[6] = vrshrq_n_s16(out[6], 6);
+  out[7] = vrshrq_n_s16(out[7], 6);
+  out[8] = vrshrq_n_s16(out[8], 6);
+  out[9] = vrshrq_n_s16(out[9], 6);
+  out[10] = vrshrq_n_s16(out[10], 6);
+  out[11] = vrshrq_n_s16(out[11], 6);
+  out[12] = vrshrq_n_s16(out[12], 6);
+  out[13] = vrshrq_n_s16(out[13], 6);
+  out[14] = vrshrq_n_s16(out[14], 6);
+  out[15] = vrshrq_n_s16(out[15], 6);
+  highbd_idct16x16_add8x1(out[0], max, &dest, stride);
+  highbd_idct16x16_add8x1(out[1], max, &dest, stride);
+  highbd_idct16x16_add8x1(out[2], max, &dest, stride);
+  highbd_idct16x16_add8x1(out[3], max, &dest, stride);
+  highbd_idct16x16_add8x1(out[4], max, &dest, stride);
+  highbd_idct16x16_add8x1(out[5], max, &dest, stride);
+  highbd_idct16x16_add8x1(out[6], max, &dest, stride);
+  highbd_idct16x16_add8x1(out[7], max, &dest, stride);
+  highbd_idct16x16_add8x1(out[8], max, &dest, stride);
+  highbd_idct16x16_add8x1(out[9], max, &dest, stride);
+  highbd_idct16x16_add8x1(out[10], max, &dest, stride);
+  highbd_idct16x16_add8x1(out[11], max, &dest, stride);
+  highbd_idct16x16_add8x1(out[12], max, &dest, stride);
+  highbd_idct16x16_add8x1(out[13], max, &dest, stride);
+  highbd_idct16x16_add8x1(out[14], max, &dest, stride);
+  highbd_idct16x16_add8x1(out[15], max, &dest, stride);
 }
 
 void idct16x16_256_add_half1d(const void *const input, int16_t *output,
@@ -314,49 +316,16 @@ void idct16x16_256_add_half1d(const void *const input, int16_t *output,
     idct16x16_store_pass1(out, output);
   } else {
     if (highbd_flag) {
-      // pass 2: add the result to dest.
-      const int16x8_t max = vdupq_n_s16((1 << 8) - 1);
-      uint16_t *destT = dest;
-      out[0] = vrshrq_n_s16(out[0], 6);
-      out[1] = vrshrq_n_s16(out[1], 6);
-      out[2] = vrshrq_n_s16(out[2], 6);
-      out[3] = vrshrq_n_s16(out[3], 6);
-      out[4] = vrshrq_n_s16(out[4], 6);
-      out[5] = vrshrq_n_s16(out[5], 6);
-      out[6] = vrshrq_n_s16(out[6], 6);
-      out[7] = vrshrq_n_s16(out[7], 6);
-      out[8] = vrshrq_n_s16(out[8], 6);
-      out[9] = vrshrq_n_s16(out[9], 6);
-      out[10] = vrshrq_n_s16(out[10], 6);
-      out[11] = vrshrq_n_s16(out[11], 6);
-      out[12] = vrshrq_n_s16(out[12], 6);
-      out[13] = vrshrq_n_s16(out[13], 6);
-      out[14] = vrshrq_n_s16(out[14], 6);
-      out[15] = vrshrq_n_s16(out[15], 6);
-      highbd_idct16x16_add8x1(out[0], max, &destT, stride);
-      highbd_idct16x16_add8x1(out[1], max, &destT, stride);
-      highbd_idct16x16_add8x1(out[2], max, &destT, stride);
-      highbd_idct16x16_add8x1(out[3], max, &destT, stride);
-      highbd_idct16x16_add8x1(out[4], max, &destT, stride);
-      highbd_idct16x16_add8x1(out[5], max, &destT, stride);
-      highbd_idct16x16_add8x1(out[6], max, &destT, stride);
-      highbd_idct16x16_add8x1(out[7], max, &destT, stride);
-      highbd_idct16x16_add8x1(out[8], max, &destT, stride);
-      highbd_idct16x16_add8x1(out[9], max, &destT, stride);
-      highbd_idct16x16_add8x1(out[10], max, &destT, stride);
-      highbd_idct16x16_add8x1(out[11], max, &destT, stride);
-      highbd_idct16x16_add8x1(out[12], max, &destT, stride);
-      highbd_idct16x16_add8x1(out[13], max, &destT, stride);
-      highbd_idct16x16_add8x1(out[14], max, &destT, stride);
-      highbd_idct16x16_add8x1(out[15], max, &destT, stride);
+      idct16x16_add_store_bd8(out, dest, stride);
     } else {
       idct16x16_add_store(out, dest, stride);
     }
   }
 }
 
-static void idct16x16_38_add_half1d(const void *const input, int16_t *output,
-                                    uint8_t *dest, const int stride) {
+void idct16x16_38_add_half1d(const void *const input, int16_t *const output,
+                             void *const dest, const int stride,
+                             const int highbd_flag) {
   const int16x8_t cospis0 = vld1q_s16(kCospi);
   const int16x8_t cospis1 = vld1q_s16(kCospi + 8);
   const int16x8_t cospisd0 = vaddq_s16(cospis0, cospis0);
@@ -507,7 +476,11 @@ static void idct16x16_38_add_half1d(const void *const input, int16_t *output,
   if (output) {
     idct16x16_store_pass1(out, output);
   } else {
-    idct16x16_add_store(out, dest, stride);
+    if (highbd_flag) {
+      idct16x16_add_store_bd8(out, dest, stride);
+    } else {
+      idct16x16_add_store(out, dest, stride);
+    }
   }
 }
 
@@ -828,14 +801,14 @@ void vpx_idct16x16_38_add_neon(const tran_low_t *input, uint8_t *dest,
 
   // pass 1
   // Parallel idct on the upper 8 rows
-  idct16x16_38_add_half1d(input, row_idct_output, dest, stride);
+  idct16x16_38_add_half1d(input, row_idct_output, dest, stride, 0);
 
   // pass 2
   // Parallel idct to get the left 8 columns
-  idct16x16_38_add_half1d(row_idct_output, NULL, dest, stride);
+  idct16x16_38_add_half1d(row_idct_output, NULL, dest, stride, 0);
 
   // Parallel idct to get the right 8 columns
-  idct16x16_38_add_half1d(row_idct_output + 16 * 8, NULL, dest + 8, stride);
+  idct16x16_38_add_half1d(row_idct_output + 16 * 8, NULL, dest + 8, stride, 0);
 }
 
 void vpx_idct16x16_10_add_neon(const tran_low_t *input, uint8_t *dest,
