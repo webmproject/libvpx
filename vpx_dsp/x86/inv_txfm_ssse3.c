@@ -182,3 +182,143 @@ void vpx_idct8x8_64_add_ssse3(const tran_low_t *input, uint8_t *dest,
   RECON_AND_STORE(dest + 6 * stride, in6);
   RECON_AND_STORE(dest + 7 * stride, in7);
 }
+
+void vpx_idct8x8_12_add_ssse3(const tran_low_t *input, uint8_t *dest,
+                              int stride) {
+  const __m128i zero = _mm_setzero_si128();
+  const __m128i final_rounding = _mm_set1_epi16(1 << 4);
+  const __m128i stg1_0 = pair_set_epi16(2 * cospi_28_64, 2 * cospi_28_64);
+  const __m128i stg1_1 = pair_set_epi16(2 * cospi_4_64, 2 * cospi_4_64);
+  const __m128i stg1_2 = pair_set_epi16(-2 * cospi_20_64, -2 * cospi_20_64);
+  const __m128i stg1_3 = pair_set_epi16(2 * cospi_12_64, 2 * cospi_12_64);
+  const __m128i stg2_0 = pair_set_epi16(2 * cospi_16_64, 2 * cospi_16_64);
+  const __m128i stg2_2 = pair_set_epi16(2 * cospi_24_64, 2 * cospi_24_64);
+  const __m128i stg2_3 = pair_set_epi16(2 * cospi_8_64, 2 * cospi_8_64);
+
+  __m128i in0, in1, in2, in3, in4, in5, in6, in7;
+  __m128i stp1_0, stp1_1, stp1_2, stp1_3, stp1_4, stp1_5, stp1_6, stp1_7;
+  __m128i stp2_0, stp2_1, stp2_2, stp2_3, stp2_4, stp2_5, stp2_6, stp2_7;
+  __m128i tmp0, tmp1, tmp2, tmp3;
+
+  // Rows. Load 4-row input data.
+  in0 = load_input_data(input);
+  in1 = load_input_data(input + 8 * 1);
+  in2 = load_input_data(input + 8 * 2);
+  in3 = load_input_data(input + 8 * 3);
+
+  // 8x4 Transpose
+  TRANSPOSE_8X8_10(in0, in1, in2, in3, in0, in1);
+
+  // Stage1
+  tmp0 = _mm_mulhrs_epi16(in0, stg1_0);
+  tmp1 = _mm_mulhrs_epi16(in0, stg1_1);
+  tmp2 = _mm_mulhrs_epi16(in1, stg1_2);
+  tmp3 = _mm_mulhrs_epi16(in1, stg1_3);
+
+  stp1_4 = _mm_unpackhi_epi64(tmp0, tmp1);
+  stp1_5 = _mm_unpackhi_epi64(tmp2, tmp3);
+
+  // Stage2
+  tmp0 = _mm_mulhrs_epi16(in0, stg2_0);
+  stp2_0 = _mm_unpacklo_epi64(tmp0, tmp0);
+
+  tmp1 = _mm_mulhrs_epi16(in1, stg2_2);
+  tmp2 = _mm_mulhrs_epi16(in1, stg2_3);
+  stp2_2 = _mm_unpacklo_epi64(tmp2, tmp1);
+
+  tmp0 = _mm_add_epi16(stp1_4, stp1_5);
+  tmp1 = _mm_sub_epi16(stp1_4, stp1_5);
+
+  stp2_4 = tmp0;
+  stp2_5 = _mm_unpacklo_epi64(tmp1, zero);
+  stp2_6 = _mm_unpackhi_epi64(tmp1, zero);
+
+  // Stage3
+  tmp2 = _mm_add_epi16(stp2_0, stp2_2);
+  tmp3 = _mm_sub_epi16(stp2_0, stp2_2);
+
+  stp1_2 = _mm_unpackhi_epi64(tmp3, tmp2);
+  stp1_3 = _mm_unpacklo_epi64(tmp3, tmp2);
+
+  tmp0 = _mm_sub_epi16(stp2_6, stp2_5);
+  tmp1 = _mm_add_epi16(stp2_6, stp2_5);
+
+  tmp2 = _mm_mulhrs_epi16(tmp0, stg2_0);
+  tmp3 = _mm_mulhrs_epi16(tmp1, stg2_0);
+  stp1_5 = _mm_unpacklo_epi64(tmp2, tmp3);
+
+  // Stage4
+  tmp0 = _mm_add_epi16(stp1_3, stp2_4);
+  tmp1 = _mm_add_epi16(stp1_2, stp1_5);
+  tmp2 = _mm_sub_epi16(stp1_3, stp2_4);
+  tmp3 = _mm_sub_epi16(stp1_2, stp1_5);
+
+  TRANSPOSE_4X8_10(tmp0, tmp1, tmp2, tmp3, in0, in1, in2, in3)
+
+  /* Stage1 */
+  stp1_4 = _mm_mulhrs_epi16(in1, stg1_0);
+  stp1_7 = _mm_mulhrs_epi16(in1, stg1_1);
+  stp1_5 = _mm_mulhrs_epi16(in3, stg1_2);
+  stp1_6 = _mm_mulhrs_epi16(in3, stg1_3);
+
+  /* Stage2 */
+  stp2_0 = _mm_mulhrs_epi16(in0, stg2_0);
+  stp2_1 = _mm_mulhrs_epi16(in0, stg2_0);
+
+  stp2_2 = _mm_mulhrs_epi16(in2, stg2_2);
+  stp2_3 = _mm_mulhrs_epi16(in2, stg2_3);
+
+  stp2_4 = _mm_add_epi16(stp1_4, stp1_5);
+  stp2_5 = _mm_sub_epi16(stp1_4, stp1_5);
+  stp2_6 = _mm_sub_epi16(stp1_7, stp1_6);
+  stp2_7 = _mm_add_epi16(stp1_7, stp1_6);
+
+  /* Stage3 */
+  stp1_0 = _mm_add_epi16(stp2_0, stp2_3);
+  stp1_1 = _mm_add_epi16(stp2_1, stp2_2);
+  stp1_2 = _mm_sub_epi16(stp2_1, stp2_2);
+  stp1_3 = _mm_sub_epi16(stp2_0, stp2_3);
+
+  tmp0 = _mm_add_epi16(stp2_6, stp2_5);
+  tmp1 = _mm_sub_epi16(stp2_6, stp2_5);
+  stp1_6 = _mm_mulhrs_epi16(tmp0, stg2_0);
+  stp1_5 = _mm_mulhrs_epi16(tmp1, stg2_0);
+
+  /* Stage4  */
+  in0 = _mm_add_epi16(stp1_0, stp2_7);
+  in1 = _mm_add_epi16(stp1_1, stp1_6);
+  in2 = _mm_add_epi16(stp1_2, stp1_5);
+  in3 = _mm_add_epi16(stp1_3, stp2_4);
+  in4 = _mm_sub_epi16(stp1_3, stp2_4);
+  in5 = _mm_sub_epi16(stp1_2, stp1_5);
+  in6 = _mm_sub_epi16(stp1_1, stp1_6);
+  in7 = _mm_sub_epi16(stp1_0, stp2_7);
+
+  // Final rounding and shift
+  in0 = _mm_adds_epi16(in0, final_rounding);
+  in1 = _mm_adds_epi16(in1, final_rounding);
+  in2 = _mm_adds_epi16(in2, final_rounding);
+  in3 = _mm_adds_epi16(in3, final_rounding);
+  in4 = _mm_adds_epi16(in4, final_rounding);
+  in5 = _mm_adds_epi16(in5, final_rounding);
+  in6 = _mm_adds_epi16(in6, final_rounding);
+  in7 = _mm_adds_epi16(in7, final_rounding);
+
+  in0 = _mm_srai_epi16(in0, 5);
+  in1 = _mm_srai_epi16(in1, 5);
+  in2 = _mm_srai_epi16(in2, 5);
+  in3 = _mm_srai_epi16(in3, 5);
+  in4 = _mm_srai_epi16(in4, 5);
+  in5 = _mm_srai_epi16(in5, 5);
+  in6 = _mm_srai_epi16(in6, 5);
+  in7 = _mm_srai_epi16(in7, 5);
+
+  RECON_AND_STORE(dest + 0 * stride, in0);
+  RECON_AND_STORE(dest + 1 * stride, in1);
+  RECON_AND_STORE(dest + 2 * stride, in2);
+  RECON_AND_STORE(dest + 3 * stride, in3);
+  RECON_AND_STORE(dest + 4 * stride, in4);
+  RECON_AND_STORE(dest + 5 * stride, in5);
+  RECON_AND_STORE(dest + 6 * stride, in6);
+  RECON_AND_STORE(dest + 7 * stride, in7);
+}

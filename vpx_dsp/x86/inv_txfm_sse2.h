@@ -216,6 +216,32 @@ static INLINE void write_buffer_8x16(uint8_t *dest, __m128i *in, int stride) {
   RECON_AND_STORE(dest + 15 * stride, in[15]);
 }
 
+#define TRANSPOSE_4X8_10(tmp0, tmp1, tmp2, tmp3, out0, out1, out2, out3) \
+  {                                                                      \
+    const __m128i tr0_0 = _mm_unpackhi_epi16(tmp0, tmp1);                \
+    const __m128i tr0_1 = _mm_unpacklo_epi16(tmp1, tmp0);                \
+    const __m128i tr0_4 = _mm_unpacklo_epi16(tmp2, tmp3);                \
+    const __m128i tr0_5 = _mm_unpackhi_epi16(tmp3, tmp2);                \
+                                                                         \
+    const __m128i tr1_0 = _mm_unpacklo_epi32(tr0_0, tr0_1);              \
+    const __m128i tr1_2 = _mm_unpackhi_epi32(tr0_0, tr0_1);              \
+    const __m128i tr1_4 = _mm_unpacklo_epi32(tr0_4, tr0_5);              \
+    const __m128i tr1_6 = _mm_unpackhi_epi32(tr0_4, tr0_5);              \
+                                                                         \
+    out0 = _mm_unpacklo_epi64(tr1_0, tr1_4);                             \
+    out1 = _mm_unpackhi_epi64(tr1_0, tr1_4);                             \
+    out2 = _mm_unpacklo_epi64(tr1_2, tr1_6);                             \
+    out3 = _mm_unpackhi_epi64(tr1_2, tr1_6);                             \
+  }
+
+#define TRANSPOSE_8X8_10(in0, in1, in2, in3, out0, out1) \
+  {                                                      \
+    const __m128i tr0_0 = _mm_unpacklo_epi16(in0, in1);  \
+    const __m128i tr0_1 = _mm_unpacklo_epi16(in2, in3);  \
+    out0 = _mm_unpacklo_epi32(tr0_0, tr0_1);             \
+    out1 = _mm_unpackhi_epi32(tr0_0, tr0_1);             \
+  }
+
 void idct4_sse2(__m128i *in);
 void idct8_sse2(__m128i *in);
 void idct16_sse2(__m128i *in0, __m128i *in1);
