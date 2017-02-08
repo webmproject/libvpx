@@ -156,6 +156,8 @@ void vp9_idct16x16_add(const tran_low_t *input, uint8_t *dest, int stride,
     vpx_idct16x16_1_add(input, dest, stride);
   else if (eob <= 10)
     vpx_idct16x16_10_add(input, dest, stride);
+  else if (eob <= 38)
+    vpx_idct16x16_38_add(input, dest, stride);
   else
     vpx_idct16x16_256_add(input, dest, stride);
 }
