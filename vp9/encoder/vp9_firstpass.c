@@ -469,8 +469,8 @@ static int scale_sse_threshold(VP9_COMMON *cm, int thresh) {
   if (cm->use_highbitdepth) {
     switch (cm->bit_depth) {
       case VPX_BITS_8: ret_val = thresh; break;
-      case VPX_BITS_10: ret_val = thresh >> 4; break;
-      case VPX_BITS_12: ret_val = thresh >> 8; break;
+      case VPX_BITS_10: ret_val = thresh << 4; break;
+      case VPX_BITS_12: ret_val = thresh << 8; break;
       default:
         assert(0 &&
                "cm->bit_depth should be VPX_BITS_8, "
