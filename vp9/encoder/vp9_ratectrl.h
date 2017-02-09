@@ -179,6 +179,8 @@ int vp9_estimate_bits_at_q(FRAME_TYPE frame_kind, int q, int mbs,
 
 double vp9_convert_qindex_to_q(int qindex, vpx_bit_depth_t bit_depth);
 
+int vp9_convert_q_to_qindex(double q_val, vpx_bit_depth_t bit_depth);
+
 void vp9_rc_init_minq_luts(void);
 
 int vp9_rc_get_default_min_gf_interval(int width, int height, double framerate);

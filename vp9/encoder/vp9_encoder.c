@@ -3507,8 +3507,14 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
         // Frame is too large
         if (rc->projected_frame_size > rc->this_frame_target) {
           // Special case if the projected size is > the max allowed.
-          if (rc->projected_frame_size >= rc->max_frame_bandwidth)
-            q_high = rc->worst_quality;
+          if (rc->projected_frame_size >= rc->max_frame_bandwidth) {
+            double q_val_high;
+            q_val_high = vp9_convert_qindex_to_q(q_high, cm->bit_depth);
+            q_val_high = q_val_high * ((double)rc->projected_frame_size /
+                                       rc->max_frame_bandwidth);
+            q_high = vp9_convert_q_to_qindex(q_val_high, cm->bit_depth);
+            q_high = clamp(q_high, rc->best_quality, rc->worst_quality);
+          }
 
           // Raise Qlow as to at least the current value
           qstep =

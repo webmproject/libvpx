@@ -166,6 +166,19 @@ double vp9_convert_qindex_to_q(int qindex, vpx_bit_depth_t bit_depth) {
 #endif
 }
 
+int vp9_convert_q_to_qindex(double q_val, vpx_bit_depth_t bit_depth) {
+  int i;
+
+  for (i = 0; i < QINDEX_RANGE; ++i)
+    if (vp9_convert_qindex_to_q(i, bit_depth) >= q_val)
+      break;
+
+  if (i == QINDEX_RANGE)
+    i--;
+
+  return i;
+}
+
 int vp9_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,
                        double correction_factor, vpx_bit_depth_t bit_depth) {
   const double q = vp9_convert_qindex_to_q(qindex, bit_depth);
