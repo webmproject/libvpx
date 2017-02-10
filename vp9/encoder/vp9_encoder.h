@@ -276,6 +276,10 @@ typedef struct TileDataEnc {
   int ex_search_count;
   FIRSTPASS_DATA fp_data;
   VP9RowMTSync row_mt_sync;
+#if CONFIG_MULTITHREAD
+  pthread_mutex_t *search_count_mutex;
+  pthread_mutex_t *enc_row_mt_mutex;
+#endif
 } TileDataEnc;
 
 typedef struct RowMTInfo {
@@ -896,6 +900,8 @@ static INLINE int get_level_index(VP9_LEVEL level) {
 VP9_LEVEL vp9_get_level(const Vp9LevelSpec *const level_spec);
 
 void vp9_new_framerate(VP9_COMP *cpi, double framerate);
+
+void vp9_set_new_mt(VP9_COMP *cpi);
 
 #define LAYER_IDS_TO_IDX(sl, tl, num_tl) ((sl) * (num_tl) + (tl))
 

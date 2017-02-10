@@ -3095,13 +3095,18 @@ static void encode_rd_sb_row(VP9_COMP *cpi, ThreadData *td,
   const int mi_col_start = tile_info->mi_col_start;
   const int mi_col_end = tile_info->mi_col_end;
   int mi_col;
+  const int sb_row = mi_row >> MI_BLOCK_SIZE_LOG2;
+  const int num_sb_cols =
+      get_num_cols(tile_data->tile_info, MI_BLOCK_SIZE_LOG2);
+  int sb_col_in_tile;
 
   // Initialize the left context for the new SB row
   memset(&xd->left_context, 0, sizeof(xd->left_context));
   memset(xd->left_seg_context, 0, sizeof(xd->left_seg_context));
 
   // Code each SB in the row
-  for (mi_col = mi_col_start; mi_col < mi_col_end; mi_col += MI_BLOCK_SIZE) {
+  for (mi_col = mi_col_start, sb_col_in_tile = 0; mi_col < mi_col_end;
+       mi_col += MI_BLOCK_SIZE, sb_col_in_tile++) {
     const struct segmentation *const seg = &cm->seg;
     int dummy_rate;
     int64_t dummy_dist;
@@ -3111,6 +3116,9 @@ static void encode_rd_sb_row(VP9_COMP *cpi, ThreadData *td,
 
     const int idx_str = cm->mi_stride * mi_row + mi_col;
     MODE_INFO **mi = cm->mi_grid_visible + idx_str;
+
+    (*(cpi->row_mt_sync_read_ptr))(&tile_data->row_mt_sync, sb_row,
+                                   sb_col_in_tile - 1);
 
     if (sf->adaptive_pred_interp_filter) {
       for (i = 0; i < 64; ++i) td->leaf_tree[i].pred_interp_filter = SWITCHABLE;
@@ -3163,6 +3171,8 @@ static void encode_rd_sb_row(VP9_COMP *cpi, ThreadData *td,
       rd_pick_partition(cpi, td, tile_data, tp, mi_row, mi_col, BLOCK_64X64,
                         &dummy_rdc, INT64_MAX, td->pc_root);
     }
+    (*(cpi->row_mt_sync_write_ptr))(&tile_data->row_mt_sync, sb_row,
+                                    sb_col_in_tile, num_sb_cols);
   }
 }
 
@@ -4109,13 +4119,17 @@ void vp9_init_tile_data(VP9_COMP *cpi) {
             tile_data->mode_map[i][j] = j;
           }
         }
+#if CONFIG_MULTITHREAD
+        tile_data->search_count_mutex = NULL;
+        tile_data->enc_row_mt_mutex = NULL;
+#endif
       }
   }
 
   for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
     for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
-      TileInfo *tile_info =
-          &cpi->tile_data[tile_row * tile_cols + tile_col].tile_info;
+      TileDataEnc *this_tile = &cpi->tile_data[tile_row * tile_cols + tile_col];
+      TileInfo *tile_info = &this_tile->tile_info;
       vp9_tile_init(tile_info, cm, tile_row, tile_col);
 
       cpi->tile_tok[tile_row][tile_col] = pre_tok + tile_tok;
@@ -4125,6 +4139,10 @@ void vp9_init_tile_data(VP9_COMP *cpi) {
       cpi->tplist[tile_row][tile_col] = tplist + tplist_count;
       tplist = cpi->tplist[tile_row][tile_col];
       tplist_count = get_num_vert_units(*tile_info, MI_BLOCK_SIZE_LOG2);
+
+      // Set up pointers to per thread motion search counters.
+      this_tile->m_search_count = 0;   // Count of motion search hits.
+      this_tile->ex_search_count = 0;  // Exhaustive mesh search hits.
     }
   }
 }
@@ -4170,10 +4188,11 @@ void vp9_encode_tile(VP9_COMP *cpi, ThreadData *td, int tile_row,
   int mi_row;
 
   // Set up pointers to per thread motion search counters.
-  this_tile->m_search_count = 0;   // Count of motion search hits.
-  this_tile->ex_search_count = 0;  // Exhaustive mesh search hits.
   td->mb.m_search_count_ptr = &this_tile->m_search_count;
   td->mb.ex_search_count_ptr = &this_tile->ex_search_count;
+#if CONFIG_MULTITHREAD
+  td->mb.search_count_mutex = this_tile->search_count_mutex;
+#endif
 
   for (mi_row = mi_row_start; mi_row < mi_row_end; mi_row += MI_BLOCK_SIZE)
     vp9_encode_sb_row(cpi, td, tile_row, tile_col, mi_row);
@@ -4289,11 +4308,20 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     }
 #endif
 
-    // If allowed, encoding tiles in parallel with one thread handling one tile.
-    if (VPXMIN(cpi->oxcf.max_threads, 1 << cm->log2_tile_cols) > 1)
-      vp9_encode_tiles_mt(cpi);
-    else
-      encode_tiles(cpi);
+    if (!cpi->new_mt) {
+      cpi->row_mt_sync_read_ptr = vp9_row_mt_sync_read_dummy;
+      cpi->row_mt_sync_write_ptr = vp9_row_mt_sync_write_dummy;
+      // If allowed, encoding tiles in parallel with one thread handling one
+      // tile when row based multi-threading is disabled.
+      if (VPXMIN(cpi->oxcf.max_threads, 1 << cm->log2_tile_cols) > 1)
+        vp9_encode_tiles_mt(cpi);
+      else
+        encode_tiles(cpi);
+    } else {
+      cpi->row_mt_sync_read_ptr = vp9_row_mt_sync_read;
+      cpi->row_mt_sync_write_ptr = vp9_row_mt_sync_write;
+      vp9_encode_tiles_row_mt(cpi);
+    }
 
     vpx_usec_timer_mark(&emr_timer);
     cpi->time_encode_sb_row += vpx_usec_timer_elapsed(&emr_timer);

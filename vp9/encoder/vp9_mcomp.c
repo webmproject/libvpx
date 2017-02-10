@@ -1993,8 +1993,17 @@ static int full_pixel_exhaustive(VP9_COMP *cpi, MACROBLOCK *x,
   int range = sf->mesh_patterns[0].range;
   int baseline_interval_divisor;
 
+#if CONFIG_MULTITHREAD
+  if (NULL != x->search_count_mutex) pthread_mutex_lock(x->search_count_mutex);
+#endif
+
   // Keep track of number of exhaustive calls (this frame in this thread).
   ++(*x->ex_search_count_ptr);
+
+#if CONFIG_MULTITHREAD
+  if (NULL != x->search_count_mutex)
+    pthread_mutex_unlock(x->search_count_mutex);
+#endif
 
   // Trap illegal values for interval and range for this function.
   if ((range < MIN_RANGE) || (range > MAX_RANGE) || (interval < MIN_INTERVAL) ||
@@ -2356,13 +2365,27 @@ int vp9_refining_search_8p_c(const MACROBLOCK *x, MV *ref_mv, int error_per_bit,
 #define MIN_EX_SEARCH_LIMIT 128
 static int is_exhaustive_allowed(VP9_COMP *cpi, MACROBLOCK *x) {
   const SPEED_FEATURES *const sf = &cpi->sf;
-  const int max_ex =
-      VPXMAX(MIN_EX_SEARCH_LIMIT,
-             (*x->m_search_count_ptr * sf->max_exaustive_pct) / 100);
+  int is_exhaustive_allowed;
+  int max_ex;
 
-  return sf->allow_exhaustive_searches &&
-         (sf->exhaustive_searches_thresh < INT_MAX) &&
-         (*x->ex_search_count_ptr <= max_ex) && !cpi->rc.is_src_frame_alt_ref;
+#if CONFIG_MULTITHREAD
+  if (NULL != x->search_count_mutex) pthread_mutex_lock(x->search_count_mutex);
+#endif
+
+  max_ex = VPXMAX(MIN_EX_SEARCH_LIMIT,
+                  (*x->m_search_count_ptr * sf->max_exaustive_pct) / 100);
+
+  is_exhaustive_allowed = sf->allow_exhaustive_searches &&
+                          (sf->exhaustive_searches_thresh < INT_MAX) &&
+                          (*x->ex_search_count_ptr <= max_ex) &&
+                          !cpi->rc.is_src_frame_alt_ref;
+
+#if CONFIG_MULTITHREAD
+  if (NULL != x->search_count_mutex)
+    pthread_mutex_unlock(x->search_count_mutex);
+#endif
+
+  return is_exhaustive_allowed;
 }
 
 int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
@@ -2407,8 +2430,18 @@ int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
                                MAX_MVSEARCH_STEPS - 1 - step_param, 1,
                                cost_list, fn_ptr, ref_mv, tmp_mv);
 
+#if CONFIG_MULTITHREAD
+      if (NULL != x->search_count_mutex)
+        pthread_mutex_lock(x->search_count_mutex);
+#endif
+
       // Keep track of number of searches (this frame in this thread).
       ++(*x->m_search_count_ptr);
+
+#if CONFIG_MULTITHREAD
+      if (NULL != x->search_count_mutex)
+        pthread_mutex_unlock(x->search_count_mutex);
+#endif
 
       // Should we allow a follow on exhaustive search?
       if (is_exhaustive_allowed(cpi, x)) {

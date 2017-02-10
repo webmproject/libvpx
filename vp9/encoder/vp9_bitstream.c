@@ -925,10 +925,11 @@ int vp9_get_refresh_mask(VP9_COMP *cpi) {
 
 static int encode_tile_worker(VP9_COMP *cpi, VP9BitstreamWorkerData *data) {
   MACROBLOCKD *const xd = &data->xd;
+  const int tile_row = 0;
   vpx_start_encode(&data->bit_writer, data->dest);
   write_modes(cpi, xd, &cpi->tile_data[data->tile_idx].tile_info,
-              &data->bit_writer, 0, data->tile_idx, &data->max_mv_magnitude,
-              data->interp_filter_selected);
+              &data->bit_writer, tile_row, data->tile_idx,
+              &data->max_mv_magnitude, data->interp_filter_selected);
   vpx_stop_encode(&data->bit_writer);
   return 1;
 }

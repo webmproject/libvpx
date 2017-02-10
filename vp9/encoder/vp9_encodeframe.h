@@ -39,6 +39,9 @@ void vp9_init_tile_data(struct VP9_COMP *cpi);
 void vp9_encode_tile(struct VP9_COMP *cpi, struct ThreadData *td, int tile_row,
                      int tile_col);
 
+void vp9_encode_sb_row(struct VP9_COMP *cpi, struct ThreadData *td,
+                       int tile_row, int tile_col, int mi_row);
+
 void vp9_set_variance_partition_thresholds(struct VP9_COMP *cpi, int q);
 
 #ifdef __cplusplus

@@ -11,6 +11,8 @@
 #ifndef VP9_ENCODER_VP9_BLOCK_H_
 #define VP9_ENCODER_VP9_BLOCK_H_
 
+#include "vpx_util/vpx_thread.h"
+
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/common/vp9_entropy.h"
 
@@ -88,6 +90,9 @@ struct macroblock {
   int mb_energy;
   int *m_search_count_ptr;
   int *ex_search_count_ptr;
+#if CONFIG_MULTITHREAD
+  pthread_mutex_t *search_count_mutex;
+#endif
 
   // These are set to their default values at the beginning, and then adjusted
   // further in the encoding process.
