@@ -695,7 +695,6 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
     add_proto qw/void vpx_idct16x16_38_add/, "const tran_low_t *input, uint8_t *dest, int stride";
     specialize qw/vpx_idct16x16_38_add neon sse2/;
-    $vpx_idct16x16_38_add_neon=vpx_idct16x16_256_add_neon;
     $vpx_idct16x16_38_add_sse2=vpx_idct16x16_256_add_sse2;
 
     add_proto qw/void vpx_idct16x16_10_add/, "const tran_low_t *input, uint8_t *dest, int stride";
@@ -789,7 +788,6 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
     add_proto qw/void vpx_idct16x16_38_add/, "const tran_low_t *input, uint8_t *dest, int stride";
     specialize qw/vpx_idct16x16_38_add sse2 neon dspr2 msa/;
-    $vpx_idct16x16_38_add_neon=vpx_idct16x16_256_add_neon;
     $vpx_idct16x16_38_add_sse2=vpx_idct16x16_256_add_sse2;
     $vpx_idct16x16_38_add_dspr2=vpx_idct16x16_256_add_dspr2;
     $vpx_idct16x16_38_add_msa=vpx_idct16x16_256_add_msa;
