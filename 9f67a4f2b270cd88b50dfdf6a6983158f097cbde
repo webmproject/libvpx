@@ -19,6 +19,42 @@
     },
     {
       "key": {
+        "uuid": "f53f306d_d51f0ff5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-13T22:19:25Z",
+      "side": 1,
+      "message": "I closed that bug because it related to matching the 8 bit and hbd output. I thought these fixes started falling outside the scope of it.",
+      "parentUuid": "5e27e4bc_2389b136",
+      "revId": "9f67a4f2b270cd88b50dfdf6a6983158f097cbde",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "570316f5_b0e33bb5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-13T22:19:25Z",
+      "side": 1,
+      "message": "I closed that bug because the stated purpose (match 8 bit lowbd/highbd output) was done, and these seemed to be falling outside the scope of it.",
+      "parentUuid": "5e27e4bc_2389b136",
+      "revId": "9f67a4f2b270cd88b50dfdf6a6983158f097cbde",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "df03a7d5_fc635a46",
         "filename": "vp9/encoder/arm/neon/vp9_quantize_neon.c",
         "patchSetId": 2
@@ -30,6 +66,24 @@
       "writtenOn": "2017-02-11T04:08:33Z",
       "side": 1,
       "message": "make this sizeof(var)",
+      "revId": "9f67a4f2b270cd88b50dfdf6a6983158f097cbde",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0fdc47dd_0606617b",
+        "filename": "vp9/encoder/arm/neon/vp9_quantize_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-13T22:19:25Z",
+      "side": 1,
+      "message": "Will do.",
+      "parentUuid": "df03a7d5_fc635a46",
       "revId": "9f67a4f2b270cd88b50dfdf6a6983158f097cbde",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
