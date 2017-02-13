@@ -3907,13 +3907,18 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
   const int mi_col_start = tile_info->mi_col_start;
   const int mi_col_end = tile_info->mi_col_end;
   int mi_col;
+  const int sb_row = mi_row >> MI_BLOCK_SIZE_LOG2;
+  const int num_sb_cols =
+      get_num_cols(tile_data->tile_info, MI_BLOCK_SIZE_LOG2);
+  int sb_col_in_tile;
 
   // Initialize the left context for the new SB row
   memset(&xd->left_context, 0, sizeof(xd->left_context));
   memset(xd->left_seg_context, 0, sizeof(xd->left_seg_context));
 
   // Code each SB in the row
-  for (mi_col = mi_col_start; mi_col < mi_col_end; mi_col += MI_BLOCK_SIZE) {
+  for (mi_col = mi_col_start, sb_col_in_tile = 0; mi_col < mi_col_end;
+       mi_col += MI_BLOCK_SIZE, ++sb_col_in_tile) {
     const struct segmentation *const seg = &cm->seg;
     RD_COST dummy_rdc;
     const int idx_str = cm->mi_stride * mi_row + mi_col;
@@ -3921,6 +3926,10 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
     PARTITION_SEARCH_TYPE partition_search_type = sf->partition_search_type;
     BLOCK_SIZE bsize = BLOCK_64X64;
     int seg_skip = 0;
+
+    (*(cpi->row_mt_sync_read_ptr))(&tile_data->row_mt_sync, sb_row,
+                                   sb_col_in_tile - 1);
+
     x->source_variance = UINT_MAX;
     vp9_zero(x->pred_mv);
     vp9_rd_cost_init(&dummy_rdc);
@@ -3996,6 +4005,9 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
         break;
       default: assert(0); break;
     }
+
+    (*(cpi->row_mt_sync_write_ptr))(&tile_data->row_mt_sync, sb_row,
+                                    sb_col_in_tile, num_sb_cols);
   }
 }
 // end RTC play code

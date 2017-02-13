@@ -558,6 +558,12 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed,
     sf->limit_newmv_early_exit = 0;
     sf->use_simple_block_yrd = 0;
   }
+  // Turn off adaptive_rd_thresh if row_mt is on for all the non-rd paths. This
+  // causes too many locks in realtime mode in certain platforms (Android ARM,
+  // Mac).
+  if (speed >= 5 && cpi->row_mt && cpi->num_workers > 1) {
+    sf->adaptive_rd_thresh = 0;
+  }
 }
 
 void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
