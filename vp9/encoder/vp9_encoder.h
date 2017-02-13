@@ -260,6 +260,7 @@ typedef struct VP9EncoderConfig {
   VP9E_TEMPORAL_LAYERING_MODE temporal_layering_mode;
 
   int new_mt;
+  unsigned int ethread_bit_match;
 } VP9EncoderConfig;
 
 static INLINE int is_lossless_requested(const VP9EncoderConfig *cfg) {

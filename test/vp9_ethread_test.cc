@@ -190,6 +190,7 @@ class VPxEncoderThreadTest
         encoding_mode_(GET_PARAM(1)), set_cpu_used_(GET_PARAM(2)) {
     init_flags_ = VPX_CODEC_USE_PSNR;
     md5_.clear();
+    new_mt_mode_ = 1;
   }
   virtual ~VPxEncoderThreadTest() {}
 
@@ -227,6 +228,11 @@ class VPxEncoderThreadTest
         encoder->Control(VP8E_SET_ARNR_STRENGTH, 5);
         encoder->Control(VP8E_SET_ARNR_TYPE, 3);
         encoder->Control(VP9E_SET_FRAME_PARALLEL_DECODING, 0);
+
+        // While new_mt = 1(namely, using row-based multi-threading), several
+        // speed features that would adaptively adjust encoding parameters have
+        // to be disabled to guarantee the bit match of the resulted bitstream.
+        if (new_mt_mode_) encoder->Control(VP9E_ENABLE_THREAD_BIT_MATCH, 1);
       } else {
         encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 0);
         encoder->Control(VP9E_SET_AQ_MODE, 3);
@@ -258,6 +264,7 @@ class VPxEncoderThreadTest
   int threads_;
   ::libvpx_test::TestMode encoding_mode_;
   int set_cpu_used_;
+  int new_mt_mode_;
   std::vector<std::string> md5_;
 };
 

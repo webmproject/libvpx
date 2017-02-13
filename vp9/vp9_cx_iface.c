@@ -52,6 +52,7 @@ struct vp9_extracfg {
   int render_width;
   int render_height;
   unsigned int new_mt;
+  unsigned int ethread_bit_match;
 };
 
 static struct vp9_extracfg default_extra_cfg = {
@@ -84,6 +85,7 @@ static struct vp9_extracfg default_extra_cfg = {
   0,                     // render width
   0,                     // render height
   1,                     // new_mt
+  0,                     // ethread_bit_match
 };
 
 struct vpx_codec_alg_priv {
@@ -248,6 +250,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
         "or kf_max_dist instead.");
 
   RANGE_CHECK(extra_cfg, new_mt, 0, 1);
+  RANGE_CHECK(extra_cfg, ethread_bit_match, 0, 1);
   RANGE_CHECK(extra_cfg, enable_auto_alt_ref, 0, 2);
   RANGE_CHECK(extra_cfg, cpu_used, -8, 8);
   RANGE_CHECK_HI(extra_cfg, noise_sensitivity, 6);
@@ -558,6 +561,7 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->target_level = extra_cfg->target_level;
 
   oxcf->new_mt = extra_cfg->new_mt;
+  oxcf->ethread_bit_match = extra_cfg->ethread_bit_match;
 
   for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
 #if CONFIG_SPATIAL_SVC
@@ -851,6 +855,13 @@ static vpx_codec_err_t ctrl_set_new_mt(vpx_codec_alg_priv_t *ctx,
                                        va_list args) {
   struct vp9_extracfg extra_cfg = ctx->extra_cfg;
   extra_cfg.new_mt = CAST(VP9E_SET_NEW_MT, args);
+  return update_extra_cfg(ctx, &extra_cfg);
+}
+
+static vpx_codec_err_t ctrl_set_ethread_bit_match(vpx_codec_alg_priv_t *ctx,
+                                                  va_list args) {
+  struct vp9_extracfg extra_cfg = ctx->extra_cfg;
+  extra_cfg.ethread_bit_match = CAST(VP9E_ENABLE_THREAD_BIT_MATCH, args);
   return update_extra_cfg(ctx, &extra_cfg);
 }
 
@@ -1607,6 +1618,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   { VP9E_SET_RENDER_SIZE, ctrl_set_render_size },
   { VP9E_SET_TARGET_LEVEL, ctrl_set_target_level },
   { VP9E_SET_NEW_MT, ctrl_set_new_mt },
+  { VP9E_ENABLE_THREAD_BIT_MATCH, ctrl_set_ethread_bit_match },
 
   // Getters
   { VP8E_GET_LAST_QUANTIZER, ctrl_get_quantizer },

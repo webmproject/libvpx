@@ -555,6 +555,15 @@ enum vp8e_enc_control_id {
   */
   VP9E_SET_NEW_MT,
 
+  /*!\brief Codec control function to enable the bit match result in multi-
+   * threaded encoder unit tests.
+   *
+   * 0 : off, 1 : on
+   *
+   * Supported in codecs: VP9
+   */
+  VP9E_ENABLE_THREAD_BIT_MATCH,
+
   /*!\brief Codec control function to get bitstream level.
    *
    * Supported in codecs: VP9
@@ -848,6 +857,9 @@ VPX_CTRL_USE_TYPE(VP9E_SET_TARGET_LEVEL, unsigned int)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_NEW_MT, unsigned int)
 #define VPX_CTRL_VP9E_SET_NEW_MT
+
+VPX_CTRL_USE_TYPE(VP9E_ENABLE_THREAD_BIT_MATCH, unsigned int)
+#define VPX_CTRL_VP9E_ENABLE_THREAD_BIT_MATCH
 
 VPX_CTRL_USE_TYPE(VP9E_GET_LEVEL, int *)
 #define VPX_CTRL_VP9E_GET_LEVEL
