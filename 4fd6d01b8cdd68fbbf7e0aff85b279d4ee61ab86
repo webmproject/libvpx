@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "c4a1bb5d_f87ab96a",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-13T23:58:35Z",
+      "side": 1,
+      "message": "We shouldn\u0027t disable the unit test. Just modified the test: https://chromium-review.googlesource.com/c/442006/\n\nThe above patch was already checked in. Please do a \"git pull --rebase\" to get it. Then the test should pass. Please let me know if there is any issue.",
+      "range": {
+        "startLine": 264,
+        "startChar": 29,
+        "endLine": 264,
+        "endChar": 55
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "654dde93_7f47bab9",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 2
@@ -128,6 +151,30 @@
       "writtenOn": "2017-02-13T19:08:52Z",
       "side": 1,
       "message": "nit: this comment is rather silly now. please remove.",
+      "range": {
+        "startLine": 4312,
+        "startChar": 6,
+        "endLine": 4313,
+        "endChar": 14
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8f507d51_1d3f685b",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 4313,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-13T23:58:35Z",
+      "side": 1,
+      "message": "This may still be true if cpi-\u003enew_mt\u003d0?",
+      "parentUuid": "eb723747_5df404cf",
       "range": {
         "startLine": 4312,
         "startChar": 6,
@@ -306,6 +353,75 @@
       "writtenOn": "2017-02-13T19:08:52Z",
       "side": 1,
       "message": "i know that the existing code is not well documented. but please add a comment about why these are being disabled. ditto below.",
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "944aa2da_7093cfb6",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 592,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-13T23:58:35Z",
+      "side": 1,
+      "message": "Please see the thread test modification. This section may change to:\n\n+  if (cpi-\u003eoxcf.ethread_bit_match) {\n+    sf-\u003eadaptive_rd_thresh \u003d 0;\n+    sf-\u003eallow_exhaustive_searches \u003d 0;\n+    sf-\u003eadaptive_pred_interp_filter \u003d 0;\n+  }",
+      "range": {
+        "startLine": 588,
+        "startChar": 0,
+        "endLine": 592,
+        "endChar": 6
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "430cd915_bfa5a2c7",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 760,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-13T23:58:35Z",
+      "side": 1,
+      "message": "same as above",
+      "range": {
+        "startLine": 755,
+        "startChar": 0,
+        "endLine": 760,
+        "endChar": 1
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3cff1796_8f0dee07",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1452,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-13T23:58:35Z",
+      "side": 1,
+      "message": "Is this necessary?",
+      "range": {
+        "startLine": 1452,
+        "startChar": 2,
+        "endLine": 1452,
+        "endChar": 16
+      },
       "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
