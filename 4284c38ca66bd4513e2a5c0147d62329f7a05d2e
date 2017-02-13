@@ -37,6 +37,47 @@
     },
     {
       "key": {
+        "uuid": "27c9612b_41521b98",
+        "filename": "vpx_dsp/arm/highbd_idct16x16_add_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 421,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-13T23:30:49Z",
+      "side": 1,
+      "message": "\u003e tran_low_t is always int32_t in high bitdepth.\n\nright, I forgot this was high-bitdepth only. The cast in the other branch for the non-hbd threw me off",
+      "parentUuid": "1f9e0f24_894f0da7",
+      "revId": "4284c38ca66bd4513e2a5c0147d62329f7a05d2e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "555c0187_f6f0c162",
+        "filename": "vpx_dsp/arm/highbd_idct16x16_add_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 745,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-13T23:30:49Z",
+      "side": 1,
+      "message": "these casts aren\u0027t necessary given the function takes a void*",
+      "range": {
+        "startLine": 745,
+        "startChar": 29,
+        "endLine": 745,
+        "endChar": 46
+      },
+      "revId": "4284c38ca66bd4513e2a5c0147d62329f7a05d2e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a2ec0863_e9ea333f",
         "filename": "vpx_dsp/arm/highbd_idct8x8_add_neon.c",
         "patchSetId": 6
