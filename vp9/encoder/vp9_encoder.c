@@ -463,8 +463,8 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->copied_frame_cnt);
   cpi->copied_frame_cnt = NULL;
 
-  vpx_free(cpi->avg_source_sad_sb);
-  cpi->avg_source_sad_sb = NULL;
+  vpx_free(cpi->content_state_sb);
+  cpi->content_state_sb = NULL;
 
   vp9_cyclic_refresh_free(cpi->cyclic_refresh);
   cpi->cyclic_refresh = NULL;
@@ -3221,7 +3221,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   }
 
   vp9_set_quantizer(cm, q);
-  vp9_set_variance_partition_thresholds(cpi, q);
+  vp9_set_variance_partition_thresholds(cpi, q, 0);
 
   setup_frame(cpi);
 
@@ -3264,7 +3264,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     if (vp9_encodedframe_overshoot(cpi, frame_size, &q)) {
       vpx_clear_system_state();
       vp9_set_quantizer(cm, q);
-      vp9_set_variance_partition_thresholds(cpi, q);
+      vp9_set_variance_partition_thresholds(cpi, q, 0);
       suppress_active_map(cpi);
       // Turn-off cyclic refresh for re-encoded frame.
       if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {

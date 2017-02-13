@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
@@ -2290,9 +2291,20 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
                   (sbi_row % 2 != 0 && sbi_col % 2 != 0)))) {
               tmp_sad = cpi->fn_ptr[bsize].sdf(src_y, src_ystride, last_src_y,
                                                last_src_ystride);
-              if (cpi->sf.use_source_sad)
-                cpi->avg_source_sad_sb[num_samples] =
-                    tmp_sad < avg_source_sad_threshold ? 1 : 0;
+              if (cpi->sf.use_source_sad) {
+                unsigned int tmp_sse;
+                unsigned int tmp_variance = vpx_variance64x64(
+                    src_y, src_ystride, last_src_y, last_src_ystride, &tmp_sse);
+                // Note: tmp_sse - tmp_variance = ((sum * sum) >> 12)
+                if (tmp_sad < avg_source_sad_threshold)
+                  cpi->content_state_sb[num_samples] =
+                      ((tmp_sse - tmp_variance) < 25) ? kLowSadLowSumdiff
+                                                      : kLowSadHighSumdiff;
+                else
+                  cpi->content_state_sb[num_samples] =
+                      ((tmp_sse - tmp_variance) < 25) ? kHighSadLowSumdiff
+                                                      : kHighSadHighSumdiff;
+              }
               avg_sad += tmp_sad;
               num_samples++;
             }

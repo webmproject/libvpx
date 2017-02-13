@@ -131,6 +131,14 @@ typedef enum {
   RESIZE_DYNAMIC = 2  // Coded size of each frame is determined by the codec.
 } RESIZE_TYPE;
 
+typedef enum {
+  kInvalid = 0,
+  kLowSadLowSumdiff = 1,
+  kLowSadHighSumdiff = 2,
+  kHighSadLowSumdiff = 3,
+  kHighSadHighSumdiff = 4,
+} CONTENT_STATE_SB;
+
 typedef struct VP9EncoderConfig {
   BITSTREAM_PROFILE profile;
   vpx_bit_depth_t bit_depth;     // Codec bit-depth.
@@ -697,7 +705,7 @@ typedef struct VP9_COMP {
   uint8_t *copied_frame_cnt;
   uint8_t max_copied_frame;
 
-  uint8_t *avg_source_sad_sb;
+  uint8_t *content_state_sb;
 
   LevelConstraint level_constraint;
 } VP9_COMP;

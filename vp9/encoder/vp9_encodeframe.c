@@ -461,16 +461,35 @@ static int set_vt_partitioning(VP9_COMP *cpi, MACROBLOCK *const x,
   return 0;
 }
 
+int64_t scale_part_thresh_sumdiff(int64_t threshold_base, int speed, int width,
+                                  int height, int content_state) {
+  if (speed >= 8) {
+    if (width <= 640 && height <= 480)
+      return (5 * threshold_base) >> 2;
+    else if ((content_state == kLowSadLowSumdiff) ||
+             (content_state == kHighSadLowSumdiff))
+      return (5 * threshold_base) >> 2;
+  } else if (speed == 7) {
+    if ((content_state == kLowSadLowSumdiff) ||
+        (content_state == kHighSadLowSumdiff)) {
+      return (5 * threshold_base) >> 2;
+    }
+  }
+  return threshold_base;
+}
+
 // Set the variance split thresholds for following the block sizes:
 // 0 - threshold_64x64, 1 - threshold_32x32, 2 - threshold_16x16,
 // 3 - vbp_threshold_8x8. vbp_threshold_8x8 (to split to 4x4 partition) is
 // currently only used on key frame.
-static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q) {
+static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q,
+                               int content_state) {
   VP9_COMMON *const cm = &cpi->common;
   const int is_key_frame = (cm->frame_type == KEY_FRAME);
   const int threshold_multiplier = is_key_frame ? 20 : 1;
   int64_t threshold_base =
       (int64_t)(threshold_multiplier * cpi->y_dequant[q][1]);
+
   if (is_key_frame) {
     thresholds[0] = threshold_base;
     thresholds[1] = threshold_base >> 2;
@@ -489,14 +508,18 @@ static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q) {
         threshold_base = (7 * threshold_base) >> 3;
     }
 #if CONFIG_VP9_TEMPORAL_DENOISING
-    if (cpi->oxcf.noise_sensitivity > 0)
+    if (cpi->oxcf.noise_sensitivity > 0 &&
+        cpi->denoiser.denoising_level >= kDenLow)
+      threshold_base = vp9_scale_part_thresh(
+          threshold_base, cpi->denoiser.denoising_level, content_state);
+    else
       threshold_base =
-          vp9_scale_part_thresh(threshold_base, cpi->denoiser.denoising_level);
-    else if (cpi->oxcf.speed >= 8 && cm->width <= 640 && cm->height <= 480)
-      threshold_base = (5 * threshold_base) >> 2;
+          scale_part_thresh_sumdiff(threshold_base, cpi->oxcf.speed, cm->width,
+                                    cm->height, content_state);
 #else
-    if (cpi->oxcf.speed >= 8 && cm->width <= 640 && cm->height <= 480)
-      threshold_base = (5 * threshold_base) >> 2;
+    // Increase base variance threshold based on content_state/sum_diff level.
+    threshold_base = scale_part_thresh_sumdiff(
+        threshold_base, cpi->oxcf.speed, cm->width, cm->height, content_state);
 #endif
     thresholds[0] = threshold_base;
     thresholds[2] = threshold_base << cpi->oxcf.speed;
@@ -514,7 +537,8 @@ static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q) {
   }
 }
 
-void vp9_set_variance_partition_thresholds(VP9_COMP *cpi, int q) {
+void vp9_set_variance_partition_thresholds(VP9_COMP *cpi, int q,
+                                           int content_state) {
   VP9_COMMON *const cm = &cpi->common;
   SPEED_FEATURES *const sf = &cpi->sf;
   const int is_key_frame = (cm->frame_type == KEY_FRAME);
@@ -522,7 +546,7 @@ void vp9_set_variance_partition_thresholds(VP9_COMP *cpi, int q) {
       sf->partition_search_type != REFERENCE_PARTITION) {
     return;
   } else {
-    set_vbp_thresholds(cpi, cpi->vbp_thresholds, q);
+    set_vbp_thresholds(cpi, cpi->vbp_thresholds, q, content_state);
     // The thresholds below are not changed locally.
     if (is_key_frame) {
       cpi->vbp_threshold_sad = 0;
@@ -929,6 +953,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   int avg_16x16[4];
   int64_t threshold_4x4avg;
   NOISE_LEVEL noise_level = kLow;
+  int content_state = 0;
   uint8_t *s;
   const uint8_t *d;
   int sp;
@@ -956,25 +981,31 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
 
   set_offsets(cpi, tile, x, mi_row, mi_col, BLOCK_64X64);
   segment_id = xd->mi[0]->segment_id;
-  if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled) {
-    if (cyclic_refresh_segment_id_boosted(segment_id)) {
-      int q = vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex);
-      set_vbp_thresholds(cpi, thresholds, q);
-    }
-  }
 
   if (cpi->sf.use_source_sad && !is_key_frame) {
     // The sb_offset2 is to make it consistent with the index in the function
     // vp9_avg_source_sad() in vp9_ratectrl.c.
     int sb_offset2 = ((cm->mi_cols + 7) >> 3) * (mi_row >> 3) + (mi_col >> 3);
-    x->skip_low_source_sad = cpi->avg_source_sad_sb[sb_offset2] == 1 ? 1 : 0;
-    // If avg_source_sad is lower than the threshold, copy the partition without
-    // computing the y_sad.
-    if (cpi->avg_source_sad_sb[sb_offset2] && cpi->sf.copy_partition_flag &&
+    content_state = cpi->content_state_sb[sb_offset2];
+    x->skip_low_source_sad = (content_state == kLowSadLowSumdiff ||
+                              content_state == kLowSadHighSumdiff)
+                                 ? 1
+                                 : 0;
+    // If source_sad is low copy the partition without computing the y_sad.
+    if (x->skip_low_source_sad && cpi->sf.copy_partition_flag &&
         copy_partitioning(cpi, x, mi_row, mi_col, segment_id, sb_offset)) {
       chroma_check(cpi, x, bsize, y_sad, is_key_frame);
       return 0;
     }
+  }
+
+  if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled) {
+    if (cyclic_refresh_segment_id_boosted(segment_id)) {
+      int q = vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex);
+      set_vbp_thresholds(cpi, thresholds, q, content_state);
+    }
+  } else {
+    set_vbp_thresholds(cpi, thresholds, cm->base_qindex, content_state);
   }
 
   // For non keyframes, disable 4x4 average for low resolution when speed = 8

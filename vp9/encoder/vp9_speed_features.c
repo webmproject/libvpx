@@ -498,8 +498,8 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed,
         !cpi->external_resize && cpi->oxcf.resize_mode == RESIZE_NONE)
       sf->use_source_sad = 1;
     if (sf->use_source_sad) {
-      if (cpi->avg_source_sad_sb == NULL) {
-        cpi->avg_source_sad_sb = (uint8_t *)vpx_calloc(
+      if (cpi->content_state_sb == NULL) {
+        cpi->content_state_sb = (uint8_t *)vpx_calloc(
             (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1), sizeof(uint8_t));
       }
     }
