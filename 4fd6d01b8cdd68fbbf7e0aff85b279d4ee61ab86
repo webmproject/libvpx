@@ -1,0 +1,314 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "654dde93_7f47bab9",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 928,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-13T19:08:52Z",
+      "side": 1,
+      "message": "should be const.",
+      "range": {
+        "startLine": 928,
+        "startChar": 2,
+        "endLine": 928,
+        "endChar": 5
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0534a50d_187532c5",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 932,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-13T19:08:52Z",
+      "side": 1,
+      "message": "i understand that you are addressing the comment on an earlier CL.\n\nBut this change has nothing to do with this CL\u0027s description. Please make this in a separate CL.",
+      "range": {
+        "startLine": 930,
+        "startChar": 1,
+        "endLine": 932,
+        "endChar": 69
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "66de06c9_7e13d3ed",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3098,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-13T19:08:52Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 3098,
+        "startChar": 2,
+        "endLine": 3098,
+        "endChar": 5
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0e488b7f_bab3998f",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3099,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-13T19:08:52Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 3099,
+        "startChar": 2,
+        "endLine": 3099,
+        "endChar": 5
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d672085_574a2748",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3100,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-13T19:08:52Z",
+      "side": 1,
+      "message": "please rename this to something meaningful. e.g.: mi_col_index.\n\nor if i\u0027m not mistaken, this could go inside the for loop this way:\nconst int mi_col_index \u003d mi_col / MI_BLOCK_SIZE;",
+      "range": {
+        "startLine": 3100,
+        "startChar": 6,
+        "endLine": 3100,
+        "endChar": 7
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eb723747_5df404cf",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 4313,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-13T19:08:52Z",
+      "side": 1,
+      "message": "nit: this comment is rather silly now. please remove.",
+      "range": {
+        "startLine": 4312,
+        "startChar": 6,
+        "endLine": 4313,
+        "endChar": 14
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9c28cff4_1cc47bf8",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 5202,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-13T19:08:52Z",
+      "side": 1,
+      "message": "nit: this function is doing more than what the comment suggests. please remove.",
+      "range": {
+        "startLine": 5202,
+        "startChar": 2,
+        "endLine": 5202,
+        "endChar": 43
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cbd386eb_90268bea",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-13T19:08:52Z",
+      "side": 1,
+      "message": "supernit: This comment seems to have been copied from the loopfilter code. Does not make sense here. please remove.\n\nIt would also be really helpful if you can add a comment about what is going on here (i.e.) when do you signal and when do you not?\n\nYou can do this in a separate CL.",
+      "range": {
+        "startLine": 344,
+        "startChar": 2,
+        "endLine": 344,
+        "endChar": 71
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "345f57fd_115975db",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 642,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-13T19:08:52Z",
+      "side": 1,
+      "message": "nit: This code isn\u0027t necessary in this CL as cpi-\u003enew_mt is never set in the case of use_nonrd_pick_mode case (at least as of now).",
+      "range": {
+        "startLine": 627,
+        "startChar": 4,
+        "endLine": 642,
+        "endChar": 5
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "34d205cf_1a294012",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1389,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-13T19:08:52Z",
+      "side": 1,
+      "message": "It looks like both the \"const\" declarations should still be there (and so should the declaration of rd_less_than_thresh function).\n\nAny specific reason why the consts were removed?",
+      "range": {
+        "startLine": 1389,
+        "startChar": 2,
+        "endLine": 1389,
+        "endChar": 7
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6a40f45f_62ef1faf",
+        "filename": "vp9/encoder/vp9_rd.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-13T19:08:52Z",
+      "side": 1,
+      "message": "nit: This function could certainly use some comments about why synchronization is needed here.",
+      "range": {
+        "startLine": 172,
+        "startChar": 18,
+        "endLine": 172,
+        "endChar": 37
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "822cb92a_0e350366",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3170,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-13T19:08:52Z",
+      "side": 1,
+      "message": "Given that this code is already synchronized, why is this memcpy required? If there\u0027s a legit reason, please add some comments.",
+      "range": {
+        "startLine": 3170,
+        "startChar": 2,
+        "endLine": 3170,
+        "endChar": 52
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0dd31f4f_8ed8f632",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 4031,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-13T19:08:52Z",
+      "side": 1,
+      "message": "supernit: remove blank line.",
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d05b9a3_8223ec7e",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 589,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-13T19:08:52Z",
+      "side": 1,
+      "message": "i know that the existing code is not well documented. but please add a comment about why these are being disabled. ditto below.",
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
