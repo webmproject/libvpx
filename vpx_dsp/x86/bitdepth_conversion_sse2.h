@@ -16,13 +16,12 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 
-// Load 8 16 bit values. If the source is 32 bits then cast down.
-// This does not saturate values. It only truncates.
+// Load 8 16 bit values. If the source is 32 bits then pack down with
+// saturation.
 static INLINE __m128i load_tran_low(const tran_low_t *a) {
 #if CONFIG_VP9_HIGHBITDEPTH
-  return _mm_setr_epi16((int16_t)a[0], (int16_t)a[1], (int16_t)a[2],
-                        (int16_t)a[3], (int16_t)a[4], (int16_t)a[5],
-                        (int16_t)a[6], (int16_t)a[7]);
+  const __m128i a_low = _mm_load_si128((const __m128i *)a);
+  return _mm_packs_epi32(a_low, *(const __m128i *)(a + 4));
 #else
   return _mm_load_si128((const __m128i *)a);
 #endif
