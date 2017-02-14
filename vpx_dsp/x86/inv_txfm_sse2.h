@@ -242,6 +242,43 @@ static INLINE void write_buffer_8x16(uint8_t *dest, __m128i *in, int stride) {
     out1 = _mm_unpackhi_epi32(tr0_0, tr0_1);             \
   }
 
+// Define Macro for multiplying elements by constants and adding them together.
+#define MULTIPLICATION_AND_ADD(lo_0, hi_0, lo_1, hi_1, cst0, cst1, cst2, cst3, \
+                               res0, res1, res2, res3)                         \
+  {                                                                            \
+    tmp0 = _mm_madd_epi16(lo_0, cst0);                                         \
+    tmp1 = _mm_madd_epi16(hi_0, cst0);                                         \
+    tmp2 = _mm_madd_epi16(lo_0, cst1);                                         \
+    tmp3 = _mm_madd_epi16(hi_0, cst1);                                         \
+    tmp4 = _mm_madd_epi16(lo_1, cst2);                                         \
+    tmp5 = _mm_madd_epi16(hi_1, cst2);                                         \
+    tmp6 = _mm_madd_epi16(lo_1, cst3);                                         \
+    tmp7 = _mm_madd_epi16(hi_1, cst3);                                         \
+                                                                               \
+    tmp0 = _mm_add_epi32(tmp0, rounding);                                      \
+    tmp1 = _mm_add_epi32(tmp1, rounding);                                      \
+    tmp2 = _mm_add_epi32(tmp2, rounding);                                      \
+    tmp3 = _mm_add_epi32(tmp3, rounding);                                      \
+    tmp4 = _mm_add_epi32(tmp4, rounding);                                      \
+    tmp5 = _mm_add_epi32(tmp5, rounding);                                      \
+    tmp6 = _mm_add_epi32(tmp6, rounding);                                      \
+    tmp7 = _mm_add_epi32(tmp7, rounding);                                      \
+                                                                               \
+    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS);                               \
+    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS);                               \
+    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS);                               \
+    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS);                               \
+    tmp4 = _mm_srai_epi32(tmp4, DCT_CONST_BITS);                               \
+    tmp5 = _mm_srai_epi32(tmp5, DCT_CONST_BITS);                               \
+    tmp6 = _mm_srai_epi32(tmp6, DCT_CONST_BITS);                               \
+    tmp7 = _mm_srai_epi32(tmp7, DCT_CONST_BITS);                               \
+                                                                               \
+    res0 = _mm_packs_epi32(tmp0, tmp1);                                        \
+    res1 = _mm_packs_epi32(tmp2, tmp3);                                        \
+    res2 = _mm_packs_epi32(tmp4, tmp5);                                        \
+    res3 = _mm_packs_epi32(tmp6, tmp7);                                        \
+  }
+
 void idct4_sse2(__m128i *in);
 void idct8_sse2(__m128i *in);
 void idct16_sse2(__m128i *in0, __m128i *in1);

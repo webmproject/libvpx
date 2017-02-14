@@ -617,61 +617,6 @@ SECTION .text
 %define transposed_in   16*32*4
 %define pass_one_start  16*32*0
 %define stp r8
-
-INIT_XMM ssse3
-cglobal idct32x32_34_add, 3, 11, 16, i32x32_size, input, output, stride
-  mova            m8, [pd_8192]
-  lea            stp, [rsp + pass_one_start]
-
-idct32x32_34:
-  mov             r3, inputq
-  lea             r4, [rsp + transposed_in]
-
-idct32x32_34_transpose:
-  LOAD_TRAN_LOW 0, r3,  0
-  LOAD_TRAN_LOW 1, r3,  4
-  LOAD_TRAN_LOW 2, r3,  8
-  LOAD_TRAN_LOW 3, r3, 12
-  LOAD_TRAN_LOW 4, r3, 16
-  LOAD_TRAN_LOW 5, r3, 20
-  LOAD_TRAN_LOW 6, r3, 24
-  LOAD_TRAN_LOW 7, r3, 28
-
-  TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9, 10
-
-  IDCT32X32_34  16*0, 16*32, 16*64, 16*96
-  lea            stp, [stp + 16 * 8]
-  mov             r6, 4
-  lea            stp, [rsp + pass_one_start]
-  lea             r9, [rsp + pass_one_start]
-
-idct32x32_34_2:
-  lea             r4, [rsp + transposed_in]
-  mov             r3, r9
-
-idct32x32_34_transpose_2:
-  mova            m0, [r3 +      0]
-  mova            m1, [r3 + 16 * 1]
-  mova            m2, [r3 + 16 * 2]
-  mova            m3, [r3 + 16 * 3]
-  mova            m4, [r3 + 16 * 4]
-  mova            m5, [r3 + 16 * 5]
-  mova            m6, [r3 + 16 * 6]
-  mova            m7, [r3 + 16 * 7]
-
-  TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9, 10
-
-  IDCT32X32_34  16*0, 16*8, 16*16, 16*24
-
-  lea            stp, [stp + 16 * 32]
-  add             r9, 16 * 32
-  dec             r6
-  jnz idct32x32_34_2
-
-  RECON_AND_STORE pass_two_start
-
-  RET
-
 %macro IDCT32X32_135 4
   ; BLOCK A STAGE 1 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   mova                 m1, [rsp + transposed_in + 16 *  1]
