@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b0ff6357_b87a37ea",
+        "filename": "vpx_dsp/x86/bitdepth_conversion_sse2.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-02-14T22:38:35Z",
+      "side": 1,
+      "message": "Does it need () to surround a + 4?",
+      "range": {
+        "startLine": 24,
+        "startChar": 50,
+        "endLine": 24,
+        "endChar": 55
+      },
+      "revId": "2168a1e01988a160cef67a74fb2f4b822a596c01",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
