@@ -181,14 +181,14 @@ void vp9_fht4x4_sse2(const int16_t *input, tran_low_t *output, int stride,
 
 void vp9_fdct8x8_quant_sse2(const int16_t *input, int stride,
                             int16_t *coeff_ptr, intptr_t n_coeffs,
-                            int skip_block, const int16_t *zbin_ptr,
-                            const int16_t *round_ptr, const int16_t *quant_ptr,
-                            const int16_t *quant_shift_ptr, int16_t *qcoeff_ptr,
+                            int skip_block, const int16_t *round_ptr,
+                            const int16_t *quant_ptr, int16_t *qcoeff_ptr,
                             int16_t *dqcoeff_ptr, const int16_t *dequant_ptr,
                             uint16_t *eob_ptr, const int16_t *scan_ptr,
                             const int16_t *iscan_ptr) {
   __m128i zero;
   int pass;
+
   // Constants
   //    When we use them, in one case, they are all the same. In all others
   //    it's a pair of them that we need to repeat four times. This is done
@@ -215,8 +215,6 @@ void vp9_fdct8x8_quant_sse2(const int16_t *input, int stride,
   int index = 0;
 
   (void)scan_ptr;
-  (void)zbin_ptr;
-  (void)quant_shift_ptr;
   (void)coeff_ptr;
 
   // Pre-condition input (shift by two)

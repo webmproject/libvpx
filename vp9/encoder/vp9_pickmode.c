@@ -674,23 +674,20 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *this_rdc,
         switch (tx_size) {
           case TX_16X16:
             vpx_hadamard_16x16(src_diff, diff_stride, coeff);
-            vp9_quantize_fp(coeff, 256, x->skip_block, p->zbin, p->round_fp,
-                            p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
-                            pd->dequant, eob, scan_order->scan,
+            vp9_quantize_fp(coeff, 256, x->skip_block, p->round_fp, p->quant_fp,
+                            qcoeff, dqcoeff, pd->dequant, eob, scan_order->scan,
                             scan_order->iscan);
             break;
           case TX_8X8:
             vpx_hadamard_8x8(src_diff, diff_stride, coeff);
-            vp9_quantize_fp(coeff, 64, x->skip_block, p->zbin, p->round_fp,
-                            p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
-                            pd->dequant, eob, scan_order->scan,
+            vp9_quantize_fp(coeff, 64, x->skip_block, p->round_fp, p->quant_fp,
+                            qcoeff, dqcoeff, pd->dequant, eob, scan_order->scan,
                             scan_order->iscan);
             break;
           case TX_4X4:
             x->fwd_txm4x4(src_diff, coeff, diff_stride);
-            vp9_quantize_fp(coeff, 16, x->skip_block, p->zbin, p->round_fp,
-                            p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
-                            pd->dequant, eob, scan_order->scan,
+            vp9_quantize_fp(coeff, 16, x->skip_block, p->round_fp, p->quant_fp,
+                            qcoeff, dqcoeff, pd->dequant, eob, scan_order->scan,
                             scan_order->iscan);
             break;
           default: assert(0); break;

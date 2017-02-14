@@ -21,17 +21,12 @@
 #include "vp9/encoder/vp9_rd.h"
 
 void vp9_quantize_fp_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
-                       int skip_block, const int16_t *zbin_ptr,
-                       const int16_t *round_ptr, const int16_t *quant_ptr,
-                       const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr,
+                       int skip_block, const int16_t *round_ptr,
+                       const int16_t *quant_ptr, tran_low_t *qcoeff_ptr,
                        tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr,
                        uint16_t *eob_ptr, const int16_t *scan,
                        const int16_t *iscan) {
   int i, eob = -1;
-  // TODO(jingning) Decide the need of these arguments after the
-  // quantization process is completed.
-  (void)zbin_ptr;
-  (void)quant_shift_ptr;
   (void)iscan;
 
   memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
@@ -60,19 +55,14 @@ void vp9_quantize_fp_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void vp9_highbd_quantize_fp_c(const tran_low_t *coeff_ptr, intptr_t count,
-                              int skip_block, const int16_t *zbin_ptr,
-                              const int16_t *round_ptr,
-                              const int16_t *quant_ptr,
-                              const int16_t *quant_shift_ptr,
-                              tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
+                              int skip_block, const int16_t *round_ptr,
+                              const int16_t *quant_ptr, tran_low_t *qcoeff_ptr,
+                              tran_low_t *dqcoeff_ptr,
                               const int16_t *dequant_ptr, uint16_t *eob_ptr,
                               const int16_t *scan, const int16_t *iscan) {
   int i;
   int eob = -1;
-  // TODO(jingning) Decide the need of these arguments after the
-  // quantization process is completed.
-  (void)zbin_ptr;
-  (void)quant_shift_ptr;
+
   (void)iscan;
 
   memset(qcoeff_ptr, 0, count * sizeof(*qcoeff_ptr));
@@ -100,15 +90,12 @@ void vp9_highbd_quantize_fp_c(const tran_low_t *coeff_ptr, intptr_t count,
 // TODO(jingning) Refactor this file and combine functions with similar
 // operations.
 void vp9_quantize_fp_32x32_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
-                             int skip_block, const int16_t *zbin_ptr,
-                             const int16_t *round_ptr, const int16_t *quant_ptr,
-                             const int16_t *quant_shift_ptr,
-                             tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
+                             int skip_block, const int16_t *round_ptr,
+                             const int16_t *quant_ptr, tran_low_t *qcoeff_ptr,
+                             tran_low_t *dqcoeff_ptr,
                              const int16_t *dequant_ptr, uint16_t *eob_ptr,
                              const int16_t *scan, const int16_t *iscan) {
   int i, eob = -1;
-  (void)zbin_ptr;
-  (void)quant_shift_ptr;
   (void)iscan;
 
   memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
@@ -139,13 +126,11 @@ void vp9_quantize_fp_32x32_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 #if CONFIG_VP9_HIGHBITDEPTH
 void vp9_highbd_quantize_fp_32x32_c(
     const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block,
-    const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr,
-    const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr,
+    const int16_t *round_ptr, const int16_t *quant_ptr, tran_low_t *qcoeff_ptr,
     tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr,
     const int16_t *scan, const int16_t *iscan) {
   int i, eob = -1;
-  (void)zbin_ptr;
-  (void)quant_shift_ptr;
+
   (void)iscan;
 
   memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
