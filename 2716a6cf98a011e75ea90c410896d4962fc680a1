@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "76975fcd_3c6a2549",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-02-14T22:58:51Z",
+      "side": 1,
+      "message": "remove extra line:\n// Whether to factor the qpdelta of the segment into the rate control, for the estimation of bits per mb.",
+      "revId": "2716a6cf98a011e75ea90c410896d4962fc680a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "65b1a207_41ee1075",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 542,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-02-14T22:58:51Z",
+      "side": 1,
+      "message": "extra line?",
+      "revId": "2716a6cf98a011e75ea90c410896d4962fc680a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}

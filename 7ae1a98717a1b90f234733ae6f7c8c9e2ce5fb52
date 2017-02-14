@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bd02a824_32fce072",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-02-14T22:58:51Z",
+      "side": 1,
+      "message": "good to say here that reason for this came from profile on nexus 6",
+      "revId": "7ae1a98717a1b90f234733ae6f7c8c9e2ce5fb52",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
