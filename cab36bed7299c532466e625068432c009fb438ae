@@ -34,6 +34,24 @@
       "revId": "cab36bed7299c532466e625068432c009fb438ae",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "514e4fd2_c4ffda47",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-14T00:27:37Z",
+      "side": 1,
+      "message": "yes that would make sense, just to make sure all paths are setting it to something meaningful",
+      "parentUuid": "f5e1df86_865ad08f",
+      "revId": "cab36bed7299c532466e625068432c009fb438ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
