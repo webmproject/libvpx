@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8c3a47f5_3e7f89c6",
+        "filename": "vpx_ports/mem.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-14T00:44:49Z",
+      "side": 0,
+      "message": "this would have gotten Wself-assign had we ever enabled it",
+      "revId": "5cc0a364ae9bd3e3ac6248f85283cf0cfa9ab07f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
