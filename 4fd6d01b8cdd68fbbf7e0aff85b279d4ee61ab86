@@ -187,6 +187,30 @@
     },
     {
       "key": {
+        "uuid": "9f9c81e2_f5f197ab",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 4313,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-14T00:03:42Z",
+      "side": 1,
+      "message": "Yes, but the new path is changing a lot about multi-threaded encoding in general and this comment seems to add no value anymore. :)",
+      "parentUuid": "8f507d51_1d3f685b",
+      "range": {
+        "startLine": 4312,
+        "startChar": 6,
+        "endLine": 4313,
+        "endChar": 14
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "9c28cff4_1cc47bf8",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 2
