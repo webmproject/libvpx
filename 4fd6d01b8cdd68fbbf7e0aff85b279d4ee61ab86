@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0181061c_eaba7050",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-02-14T11:04:33Z",
+      "side": 1,
+      "message": "We have taken this change and it is applicable for encoding stage only.  In case of first pass, the stats file bit-match for different threads already.\nHowever the macro \u0027ENABLE_MT_BIT_MATCH\u0027 is still present in the code to ensure that stats files match with new-mt\u003d0 or 1 (if enabled) in case of first pass.",
+      "parentUuid": "c4a1bb5d_f87ab96a",
+      "range": {
+        "startLine": 264,
+        "startChar": 29,
+        "endLine": 264,
+        "endChar": 55
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "654dde93_7f47bab9",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 2
@@ -59,6 +83,30 @@
       "writtenOn": "2017-02-13T19:08:52Z",
       "side": 1,
       "message": "i understand that you are addressing the comment on an earlier CL.\n\nBut this change has nothing to do with this CL\u0027s description. Please make this in a separate CL.",
+      "range": {
+        "startLine": 930,
+        "startChar": 1,
+        "endLine": 932,
+        "endChar": 69
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f80e464a_e5abc7ca",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 932,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-02-14T11:04:33Z",
+      "side": 1,
+      "message": "We modified the variable as const and took care of the same in current patch. Please let us know if this change alone needs to be pushed as separate patch, we would  revert this change and make a separate patch.",
+      "parentUuid": "0534a50d_187532c5",
       "range": {
         "startLine": 930,
         "startChar": 1,
@@ -257,6 +305,30 @@
     },
     {
       "key": {
+        "uuid": "2839406a_71aea069",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-02-14T11:04:33Z",
+      "side": 1,
+      "message": "We modified the comment. Please let us know if this change alone needs to be pushed as separate patch, we would  revert this change and make a separate patch.",
+      "parentUuid": "cbd386eb_90268bea",
+      "range": {
+        "startLine": 344,
+        "startChar": 2,
+        "endLine": 344,
+        "endChar": 71
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "345f57fd_115975db",
         "filename": "vp9/encoder/vp9_ethread.c",
         "patchSetId": 2
@@ -291,6 +363,30 @@
       "writtenOn": "2017-02-13T19:08:52Z",
       "side": 1,
       "message": "It looks like both the \"const\" declarations should still be there (and so should the declaration of rd_less_than_thresh function).\n\nAny specific reason why the consts were removed?",
+      "range": {
+        "startLine": 1389,
+        "startChar": 2,
+        "endLine": 1389,
+        "endChar": 7
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "02052ae3_b0cbc775",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1389,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-02-14T11:04:33Z",
+      "side": 1,
+      "message": "Took care of the change. Modified the other calls to rd_less_than_thresh accordingly.",
+      "parentUuid": "34d205cf_1a294012",
       "range": {
         "startLine": 1389,
         "startChar": 2,
@@ -440,6 +536,30 @@
       "writtenOn": "2017-02-13T23:58:35Z",
       "side": 1,
       "message": "Is this necessary?",
+      "range": {
+        "startLine": 1452,
+        "startChar": 2,
+        "endLine": 1452,
+        "endChar": 16
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f8bed1a0_4f187f29",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1452,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-02-14T11:04:33Z",
+      "side": 1,
+      "message": "This is to ensure that row based MT is disabled when scalability is enabled.",
+      "parentUuid": "3cff1796_8f0dee07",
       "range": {
         "startLine": 1452,
         "startChar": 2,
