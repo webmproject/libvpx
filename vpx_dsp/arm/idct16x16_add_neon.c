@@ -484,8 +484,7 @@ void idct16x16_38_add_half1d(const void *const input, int16_t *const output,
   }
 }
 
-static void idct16x16_10_add_half1d_pass1(const tran_low_t *input,
-                                          int16_t *output) {
+void idct16x16_10_add_half1d_pass1(const tran_low_t *input, int16_t *output) {
   const int16x8_t cospis0 = vld1q_s16(kCospi);
   const int16x8_t cospis1 = vld1q_s16(kCospi + 8);
   const int16x8_t cospisd0 = vaddq_s16(cospis0, cospis0);
@@ -638,8 +637,9 @@ static void idct16x16_10_add_half1d_pass1(const tran_low_t *input,
   vst1_s16(output, out[15]);
 }
 
-static void idct16x16_10_add_half1d_pass2(const int16_t *input, int16_t *output,
-                                          uint8_t *dest, const int stride) {
+void idct16x16_10_add_half1d_pass2(const int16_t *input, int16_t *const output,
+                                   void *const dest, const int stride,
+                                   const int highbd_flag) {
   const int16x8_t cospis0 = vld1q_s16(kCospi);
   const int16x8_t cospis1 = vld1q_s16(kCospi + 8);
   const int16x8_t cospisd0 = vaddq_s16(cospis0, cospis0);
@@ -751,27 +751,16 @@ static void idct16x16_10_add_half1d_pass2(const int16_t *input, int16_t *output,
   step2[15] = step1[15];
 
   // stage 7
-  out[0] = vaddq_s16(step2[0], step2[15]);
-  out[1] = vaddq_s16(step2[1], step2[14]);
-  out[2] = vaddq_s16(step2[2], step2[13]);
-  out[3] = vaddq_s16(step2[3], step2[12]);
-  out[4] = vaddq_s16(step2[4], step2[11]);
-  out[5] = vaddq_s16(step2[5], step2[10]);
-  out[6] = vaddq_s16(step2[6], step2[9]);
-  out[7] = vaddq_s16(step2[7], step2[8]);
-  out[8] = vsubq_s16(step2[7], step2[8]);
-  out[9] = vsubq_s16(step2[6], step2[9]);
-  out[10] = vsubq_s16(step2[5], step2[10]);
-  out[11] = vsubq_s16(step2[4], step2[11]);
-  out[12] = vsubq_s16(step2[3], step2[12]);
-  out[13] = vsubq_s16(step2[2], step2[13]);
-  out[14] = vsubq_s16(step2[1], step2[14]);
-  out[15] = vsubq_s16(step2[0], step2[15]);
+  idct16x16_add_stage7(step2, out);
 
   if (output) {
     idct16x16_store_pass1(out, output);
   } else {
-    idct16x16_add_store(out, dest, stride);
+    if (highbd_flag) {
+      idct16x16_add_store_bd8(out, dest, stride);
+    } else {
+      idct16x16_add_store(out, dest, stride);
+    }
   }
 }
 
@@ -821,9 +810,9 @@ void vpx_idct16x16_10_add_neon(const tran_low_t *input, uint8_t *dest,
 
   // pass 2
   // Parallel idct to get the left 8 columns
-  idct16x16_10_add_half1d_pass2(row_idct_output, NULL, dest, stride);
+  idct16x16_10_add_half1d_pass2(row_idct_output, NULL, dest, stride, 0);
 
   // Parallel idct to get the right 8 columns
-  idct16x16_10_add_half1d_pass2(row_idct_output + 4 * 8, NULL, dest + 8,
-                                stride);
+  idct16x16_10_add_half1d_pass2(row_idct_output + 4 * 8, NULL, dest + 8, stride,
+                                0);
 }
