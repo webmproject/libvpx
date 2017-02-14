@@ -1633,8 +1633,7 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf) {
   cm->sharpness_level = cpi->oxcf.Sharpness;
 
   if (cm->horiz_scale != NORMAL || cm->vert_scale != NORMAL) {
-    int UNINITIALIZED_IS_SAFE(hr), UNINITIALIZED_IS_SAFE(hs);
-    int UNINITIALIZED_IS_SAFE(vr), UNINITIALIZED_IS_SAFE(vs);
+    int hr, hs, vr, vs;
 
     Scale2Ratio(cm->horiz_scale, &hr, &hs);
     Scale2Ratio(cm->vert_scale, &vr, &vs);
@@ -2504,8 +2503,7 @@ static void scale_and_extend_source(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi) {
   /* are we resizing the image */
   if (cm->horiz_scale != 0 || cm->vert_scale != 0) {
 #if CONFIG_SPATIAL_RESAMPLING
-    int UNINITIALIZED_IS_SAFE(hr), UNINITIALIZED_IS_SAFE(hs);
-    int UNINITIALIZED_IS_SAFE(vr), UNINITIALIZED_IS_SAFE(vs);
+    int hr, hs, vr, vs;
     int tmp_height;
 
     if (cm->vert_scale == 3) {
@@ -2538,8 +2536,7 @@ static int resize_key_frame(VP8_COMP *cpi) {
    */
   if (cpi->oxcf.allow_spatial_resampling &&
       (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)) {
-    int UNINITIALIZED_IS_SAFE(hr), UNINITIALIZED_IS_SAFE(hs);
-    int UNINITIALIZED_IS_SAFE(vr), UNINITIALIZED_IS_SAFE(vs);
+    int hr, hs, vr, vs;
     int new_width, new_height;
 
     /* If we are below the resample DOWN watermark then scale down a
