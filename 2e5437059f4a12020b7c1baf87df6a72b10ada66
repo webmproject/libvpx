@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "80b19342_a9ec9de5",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-02-14T22:21:27Z",
+      "side": 1,
+      "message": "factor_qpdelta_rc",
+      "revId": "2e5437059f4a12020b7c1baf87df6a72b10ada66",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "457b7d6e_1b1ba500",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 536,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-02-14T22:21:27Z",
+      "side": 1,
+      "message": "cr \u003d cpi-\u003ecyclic_refresh",
+      "revId": "2e5437059f4a12020b7c1baf87df6a72b10ada66",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dd5dbe83_2cc82796",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 542,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-02-14T22:21:27Z",
+      "side": 1,
+      "message": "put these two lines in vp9_aq_cyclic_refresh.c (vp9_cyclic_refresh_update_parameters)",
+      "revId": "2e5437059f4a12020b7c1baf87df6a72b10ada66",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "700efce7_37809d93",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 556,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-02-14T22:21:27Z",
+      "side": 1,
+      "message": "cr-\u003efactor_qpdelta_rc",
+      "revId": "2e5437059f4a12020b7c1baf87df6a72b10ada66",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
