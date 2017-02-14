@@ -82,10 +82,10 @@ static INLINE void idct4x4_16_kernel_bd10(const int32x4_t cospis,
   b3 = vmulq_lane_s32(*a1, vget_low_s32(cospis), 1);
   b2 = vmlsq_lane_s32(b2, *a3, vget_low_s32(cospis), 1);
   b3 = vmlaq_lane_s32(b3, *a3, vget_high_s32(cospis), 1);
-  b0 = vrshrq_n_s32(b0, 14);
-  b1 = vrshrq_n_s32(b1, 14);
-  b2 = vrshrq_n_s32(b2, 14);
-  b3 = vrshrq_n_s32(b3, 14);
+  b0 = vrshrq_n_s32(b0, DCT_CONST_BITS);
+  b1 = vrshrq_n_s32(b1, DCT_CONST_BITS);
+  b2 = vrshrq_n_s32(b2, DCT_CONST_BITS);
+  b3 = vrshrq_n_s32(b3, DCT_CONST_BITS);
   *a0 = vaddq_s32(b0, b3);
   *a1 = vaddq_s32(b1, b2);
   *a2 = vsubq_s32(b1, b2);
@@ -119,10 +119,14 @@ static INLINE void idct4x4_16_kernel_bd12(const int32x4_t cospis,
   c5 = vsubq_s64(c5, c9);
   c6 = vaddq_s64(c6, c10);
   c7 = vaddq_s64(c7, c11);
-  b0 = vcombine_s32(vrshrn_n_s64(c0, 14), vrshrn_n_s64(c1, 14));
-  b1 = vcombine_s32(vrshrn_n_s64(c2, 14), vrshrn_n_s64(c3, 14));
-  b2 = vcombine_s32(vrshrn_n_s64(c4, 14), vrshrn_n_s64(c5, 14));
-  b3 = vcombine_s32(vrshrn_n_s64(c6, 14), vrshrn_n_s64(c7, 14));
+  b0 = vcombine_s32(vrshrn_n_s64(c0, DCT_CONST_BITS),
+                    vrshrn_n_s64(c1, DCT_CONST_BITS));
+  b1 = vcombine_s32(vrshrn_n_s64(c2, DCT_CONST_BITS),
+                    vrshrn_n_s64(c3, DCT_CONST_BITS));
+  b2 = vcombine_s32(vrshrn_n_s64(c4, DCT_CONST_BITS),
+                    vrshrn_n_s64(c5, DCT_CONST_BITS));
+  b3 = vcombine_s32(vrshrn_n_s64(c6, DCT_CONST_BITS),
+                    vrshrn_n_s64(c7, DCT_CONST_BITS));
   *a0 = vaddq_s32(b0, b3);
   *a1 = vaddq_s32(b1, b2);
   *a2 = vsubq_s32(b1, b2);

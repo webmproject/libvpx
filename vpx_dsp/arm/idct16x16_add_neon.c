@@ -16,8 +16,8 @@
 
 static INLINE void wrap_low_4x2(const int32x4_t *const t32, int16x4_t *const d0,
                                 int16x4_t *const d1) {
-  *d0 = vrshrn_n_s32(t32[0], 14);
-  *d1 = vrshrn_n_s32(t32[1], 14);
+  *d0 = vrshrn_n_s32(t32[0], DCT_CONST_BITS);
+  *d1 = vrshrn_n_s32(t32[1], DCT_CONST_BITS);
 }
 
 static INLINE void idct_cospi_8_24_d_kernel(const int16x4_t s0,
