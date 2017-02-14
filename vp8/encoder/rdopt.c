@@ -107,11 +107,10 @@ const int vp8_ref_frame_order[MAX_MODES] = {
   0,
 };
 
-static void fill_token_costs(int c[BLOCK_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
-                                  [MAX_ENTROPY_TOKENS],
-                             const vp8_prob p[BLOCK_TYPES][COEF_BANDS]
-                                             [PREV_COEF_CONTEXTS]
-                                             [ENTROPY_NODES]) {
+static void fill_token_costs(
+    int c[BLOCK_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS],
+    const vp8_prob p[BLOCK_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
+                    [ENTROPY_NODES]) {
   int i, j, k;
 
   for (i = 0; i < BLOCK_TYPES; ++i) {

@@ -838,8 +838,9 @@ static void decode_block(TileWorkerData *twd, VP9Decoder *const pbi, int mi_row,
                              : xd->mb_to_right_edge >> (5 + pd->subsampling_x));
         const int max_blocks_high =
             num_4x4_h +
-            (xd->mb_to_bottom_edge >= 0 ? 0 : xd->mb_to_bottom_edge >>
-                                                  (5 + pd->subsampling_y));
+            (xd->mb_to_bottom_edge >= 0
+                 ? 0
+                 : xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
 
         xd->max_blocks_wide = xd->mb_to_right_edge >= 0 ? 0 : max_blocks_wide;
         xd->max_blocks_high = xd->mb_to_bottom_edge >= 0 ? 0 : max_blocks_high;

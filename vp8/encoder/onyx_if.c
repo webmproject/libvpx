@@ -4061,9 +4061,9 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
 #if !CONFIG_REALTIME_ONLY
       top_index = cpi->active_worst_quality;
 #endif  // !CONFIG_REALTIME_ONLY
-        /* If we have updated the active max Q do not call
-         * vp8_update_rate_correction_factors() this loop.
-         */
+      /* If we have updated the active max Q do not call
+       * vp8_update_rate_correction_factors() this loop.
+       */
       active_worst_qchanged = 1;
     } else {
       active_worst_qchanged = 0;

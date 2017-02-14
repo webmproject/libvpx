@@ -1185,9 +1185,9 @@ static int estimate_kf_group_q(VP8_COMP *cpi, double section_err,
     current_spend_ratio = (double)cpi->long_rolling_actual_bits /
                           (double)cpi->long_rolling_target_bits;
     current_spend_ratio =
-        (current_spend_ratio > 10.0) ? 10.0 : (current_spend_ratio < 0.1)
-                                                  ? 0.1
-                                                  : current_spend_ratio;
+        (current_spend_ratio > 10.0)
+            ? 10.0
+            : (current_spend_ratio < 0.1) ? 0.1 : current_spend_ratio;
   }
 
   /* Calculate a correction factor based on the quality of prediction in

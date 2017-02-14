@@ -202,10 +202,10 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->reference_masking = cpi->oxcf.resize_mode != RESIZE_DYNAMIC ? 1 : 0;
 
     sf->mode_search_skip_flags =
-        (cm->frame_type == KEY_FRAME) ? 0 : FLAG_SKIP_INTRA_DIRMISMATCH |
-                                                FLAG_SKIP_INTRA_BESTINTER |
-                                                FLAG_SKIP_COMP_BESTINTRA |
-                                                FLAG_SKIP_INTRA_LOWVAR;
+        (cm->frame_type == KEY_FRAME)
+            ? 0
+            : FLAG_SKIP_INTRA_DIRMISMATCH | FLAG_SKIP_INTRA_BESTINTER |
+                  FLAG_SKIP_COMP_BESTINTRA | FLAG_SKIP_INTRA_LOWVAR;
     sf->disable_filter_search_var_thresh = 100;
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
     sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;
@@ -337,10 +337,10 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed,
 
   if (speed >= 2) {
     sf->mode_search_skip_flags =
-        (cm->frame_type == KEY_FRAME) ? 0 : FLAG_SKIP_INTRA_DIRMISMATCH |
-                                                FLAG_SKIP_INTRA_BESTINTER |
-                                                FLAG_SKIP_COMP_BESTINTRA |
-                                                FLAG_SKIP_INTRA_LOWVAR;
+        (cm->frame_type == KEY_FRAME)
+            ? 0
+            : FLAG_SKIP_INTRA_DIRMISMATCH | FLAG_SKIP_INTRA_BESTINTER |
+                  FLAG_SKIP_COMP_BESTINTRA | FLAG_SKIP_INTRA_LOWVAR;
     sf->adaptive_pred_interp_filter = 2;
 
     // Reference masking only enabled for 1 spatial layer, and if none of the

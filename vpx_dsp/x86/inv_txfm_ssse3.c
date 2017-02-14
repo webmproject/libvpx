@@ -444,10 +444,10 @@ static INLINE void idct32_34(const __m128i *in, __m128i *stp1) {
 
   /* Stage5 */
   {
-    //  Note:
-    //  #define AVOID_OVERFLOW = 0, code would be faster.  But it can't pass
-    //  SingleExtreme test.  The MaxSupportedCoeff/MinSupportedCoeff must drop
-    //  to 23198 and -23197, respectively.
+//  Note:
+//  #define AVOID_OVERFLOW = 0, code would be faster.  But it can't pass
+//  SingleExtreme test.  The MaxSupportedCoeff/MinSupportedCoeff must drop
+//  to 23198 and -23197, respectively.
 #define AVOID_OVERFLOW (1)
 
 #if AVOID_OVERFLOW

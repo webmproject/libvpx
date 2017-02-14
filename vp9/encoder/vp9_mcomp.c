@@ -851,13 +851,12 @@ static INLINE void calc_int_cost_list(const MACROBLOCK *x, const MV *ref_mv,
 // candidates as indicated in the num_candidates and candidates arrays
 // passed into this function
 //
-static int vp9_pattern_search(const MACROBLOCK *x, MV *ref_mv, int search_param,
-                              int sad_per_bit, int do_init_search,
-                              int *cost_list, const vp9_variance_fn_ptr_t *vfp,
-                              int use_mvcost, const MV *center_mv, MV *best_mv,
-                              const int num_candidates[MAX_PATTERN_SCALES],
-                              const MV candidates[MAX_PATTERN_SCALES]
-                                                 [MAX_PATTERN_CANDIDATES]) {
+static int vp9_pattern_search(
+    const MACROBLOCK *x, MV *ref_mv, int search_param, int sad_per_bit,
+    int do_init_search, int *cost_list, const vp9_variance_fn_ptr_t *vfp,
+    int use_mvcost, const MV *center_mv, MV *best_mv,
+    const int num_candidates[MAX_PATTERN_SCALES],
+    const MV candidates[MAX_PATTERN_SCALES][MAX_PATTERN_CANDIDATES]) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   static const int search_param_to_steps[MAX_MVSEARCH_STEPS] = {
     10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,
