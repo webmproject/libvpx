@@ -2082,6 +2082,35 @@ void vpx_highbd_iadst16_c(const tran_low_t *input, tran_low_t *output, int bd) {
   output[15] = HIGHBD_WRAPLOW(-x1, bd);
 }
 
+void vpx_highbd_idct16x16_38_add_c(const tran_low_t *input, uint8_t *dest8,
+                                   int stride, int bd) {
+  int i, j;
+  tran_low_t out[16 * 16] = { 0 };
+  tran_low_t *outptr = out;
+  tran_low_t temp_in[16], temp_out[16];
+  uint16_t *const dest = CONVERT_TO_SHORTPTR(dest8);
+
+  // First transform rows. Since all non-zero dct coefficients are in
+  // upper-left 8x8 area, we only need to calculate first 8 rows here.
+  for (i = 0; i < 8; ++i) {
+    vpx_highbd_idct16_c(input, outptr, bd);
+    input += 16;
+    outptr += 16;
+  }
+
+  // Then transform columns
+  for (i = 0; i < 16; ++i) {
+    uint16_t *destT = dest;
+    for (j = 0; j < 16; ++j) temp_in[j] = out[j * 16 + i];
+    vpx_highbd_idct16_c(temp_in, temp_out, bd);
+    for (j = 0; j < 16; ++j) {
+      destT[i] = highbd_clip_pixel_add(destT[i],
+                                       ROUND_POWER_OF_TWO(temp_out[j], 6), bd);
+      destT += stride;
+    }
+  }
+}
+
 void vpx_highbd_idct16x16_10_add_c(const tran_low_t *input, uint8_t *dest8,
                                    int stride, int bd) {
   int i, j;

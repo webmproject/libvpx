@@ -349,6 +349,8 @@ void vp9_highbd_idct16x16_add(const tran_low_t *input, uint8_t *dest,
     vpx_highbd_idct16x16_1_add(input, dest, stride, bd);
   } else if (eob <= 10) {
     vpx_highbd_idct16x16_10_add(input, dest, stride, bd);
+  } else if (eob <= 38) {
+    vpx_highbd_idct16x16_38_add(input, dest, stride, bd);
   } else {
     vpx_highbd_idct16x16_256_add(input, dest, stride, bd);
   }
