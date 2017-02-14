@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5aff7af2_a94b5079",
+        "filename": "vpx_dsp/arm/highbd_idct16x16_add_neon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-14T20:27:33Z",
+      "side": 1,
+      "message": "14 is consistent here, but I realized that elsewhere we have DCT_CONST_BITS. maybe a followup after all these land",
+      "revId": "b6277c13c941c1f2051a0e38d7a99fdada33a290",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5d1005b4_9b3b5ff3",
+        "filename": "vpx_dsp/inv_txfm.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 744,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-14T20:27:33Z",
+      "side": 1,
+      "message": "this could be in another patch as it\u0027s just cosmetic to normalize the ordering",
+      "revId": "b6277c13c941c1f2051a0e38d7a99fdada33a290",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
