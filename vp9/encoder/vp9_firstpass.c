@@ -42,7 +42,6 @@
 #define OUTPUT_FPF 0
 #define ARF_STATS_OUTPUT 0
 
-#define BOOST_BREAKOUT 12.5
 #define FACTOR_PT_LOW 0.70
 #define FACTOR_PT_HIGH 0.90
 #define FIRST_PASS_Q 10.0
@@ -2269,6 +2268,7 @@ static void adjust_group_arnr_filter(VP9_COMP *cpi, double section_noise,
 }
 
 // Analyse and define a gf/arf group.
+#define ARF_DECAY_BREAKOUT 0.10
 static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -2447,7 +2447,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
             ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
              (abs_mv_in_out_accumulator > abs_mv_in_out_thresh) ||
              (mv_in_out_accumulator < -mv_in_out_thresh) ||
-             ((boost_score - old_boost_score) < BOOST_BREAKOUT)))) {
+             (decay_accumulator < ARF_DECAY_BREAKOUT)))) {
       boost_score = old_boost_score;
       break;
     }
@@ -2601,7 +2601,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 // ratio in the next frame.
 #define II_IMPROVEMENT_THRESHOLD 3.5
 #define KF_II_MAX 128.0
-#define BOOST_FACTOR 12.5
+#define II_FACTOR 12.5
 static int test_candidate_kf(TWO_PASS *twopass,
                              const FIRSTPASS_STATS *last_frame,
                              const FIRSTPASS_STATS *this_frame,
@@ -2640,7 +2640,7 @@ static int test_candidate_kf(TWO_PASS *twopass,
 
     // Examine how well the key frame predicts subsequent frames.
     for (i = 0; i < 16; ++i) {
-      double next_iiratio = (BOOST_FACTOR * local_next_frame.intra_error /
+      double next_iiratio = (II_FACTOR * local_next_frame.intra_error /
                              DOUBLE_DIVIDE_CHECK(local_next_frame.coded_error));
 
       if (next_iiratio > KF_II_MAX) next_iiratio = KF_II_MAX;
