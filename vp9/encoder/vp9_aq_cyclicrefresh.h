@@ -66,6 +66,7 @@ struct CYCLIC_REFRESH {
   double low_content_avg;
   int qindex_delta[3];
   int reduce_refresh;
+  double weight_segment;
 };
 
 struct VP9_COMP;
