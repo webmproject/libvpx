@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b79a03fa_6245695b",
+        "filename": "vpx_dsp/x86/bitdepth_conversion_sse2.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-02-15T00:53:35Z",
+      "side": 1,
+      "message": "These 2 instructions need 16-byte alignment. Please do real encoding/decoding to verify.",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 59
+      },
+      "revId": "327a02d77ef45932c7cce39fca53765b8acc158d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
