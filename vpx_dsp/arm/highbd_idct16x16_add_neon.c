@@ -19,14 +19,14 @@ static INLINE void highbd_idct16x16_add_wrap_low_8x2(const int64x2x2_t *const t,
                                                      int32x4x2_t *const d1) {
   int32x2x2_t t32[4];
 
-  t32[0].val[0] = vrshrn_n_s64(t[0].val[0], 14);
-  t32[0].val[1] = vrshrn_n_s64(t[0].val[1], 14);
-  t32[1].val[0] = vrshrn_n_s64(t[1].val[0], 14);
-  t32[1].val[1] = vrshrn_n_s64(t[1].val[1], 14);
-  t32[2].val[0] = vrshrn_n_s64(t[2].val[0], 14);
-  t32[2].val[1] = vrshrn_n_s64(t[2].val[1], 14);
-  t32[3].val[0] = vrshrn_n_s64(t[3].val[0], 14);
-  t32[3].val[1] = vrshrn_n_s64(t[3].val[1], 14);
+  t32[0].val[0] = vrshrn_n_s64(t[0].val[0], DCT_CONST_BITS);
+  t32[0].val[1] = vrshrn_n_s64(t[0].val[1], DCT_CONST_BITS);
+  t32[1].val[0] = vrshrn_n_s64(t[1].val[0], DCT_CONST_BITS);
+  t32[1].val[1] = vrshrn_n_s64(t[1].val[1], DCT_CONST_BITS);
+  t32[2].val[0] = vrshrn_n_s64(t[2].val[0], DCT_CONST_BITS);
+  t32[2].val[1] = vrshrn_n_s64(t[2].val[1], DCT_CONST_BITS);
+  t32[3].val[0] = vrshrn_n_s64(t[3].val[0], DCT_CONST_BITS);
+  t32[3].val[1] = vrshrn_n_s64(t[3].val[1], DCT_CONST_BITS);
   d0->val[0] = vcombine_s32(t32[0].val[0], t32[0].val[1]);
   d0->val[1] = vcombine_s32(t32[1].val[0], t32[1].val[1]);
   d1->val[0] = vcombine_s32(t32[2].val[0], t32[2].val[1]);

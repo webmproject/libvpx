@@ -147,8 +147,10 @@ static INLINE void DO_BUTTERFLY(int16x8_t q14s16, int16x8_t q13s16,
   q11s32 = vaddq_s32(q12s32, q11s32);
   q10s32 = vaddq_s32(q10s32, q15s32);
 
-  *qAs16 = vcombine_s16(vrshrn_n_s32(q8s32, 14), vrshrn_n_s32(q9s32, 14));
-  *qBs16 = vcombine_s16(vrshrn_n_s32(q11s32, 14), vrshrn_n_s32(q10s32, 14));
+  *qAs16 = vcombine_s16(vrshrn_n_s32(q8s32, DCT_CONST_BITS),
+                        vrshrn_n_s32(q9s32, DCT_CONST_BITS));
+  *qBs16 = vcombine_s16(vrshrn_n_s32(q11s32, DCT_CONST_BITS),
+                        vrshrn_n_s32(q10s32, DCT_CONST_BITS));
 }
 
 static INLINE void load_s16x8q(const int16_t *in, int16x8_t *s0, int16x8_t *s1,

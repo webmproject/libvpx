@@ -82,18 +82,18 @@ static INLINE void idct8x8_12_half1d_bd10(
   step1[5] = vmulq_lane_s32(*io3, vget_high_s32(cospis1), 0);
   step1[6] = vmulq_lane_s32(*io3, vget_low_s32(cospis1), 1);
   step1[7] = vmulq_lane_s32(*io1, vget_low_s32(cospis1), 0);
-  step1[4] = vrshrq_n_s32(step1[4], 14);
-  step1[5] = vrshrq_n_s32(step1[5], 14);
-  step1[6] = vrshrq_n_s32(step1[6], 14);
-  step1[7] = vrshrq_n_s32(step1[7], 14);
+  step1[4] = vrshrq_n_s32(step1[4], DCT_CONST_BITS);
+  step1[5] = vrshrq_n_s32(step1[5], DCT_CONST_BITS);
+  step1[6] = vrshrq_n_s32(step1[6], DCT_CONST_BITS);
+  step1[7] = vrshrq_n_s32(step1[7], DCT_CONST_BITS);
 
   // stage 2
   step2[1] = vmulq_lane_s32(*io0, vget_high_s32(cospis0), 0);
   step2[2] = vmulq_lane_s32(*io2, vget_high_s32(cospis0), 1);
   step2[3] = vmulq_lane_s32(*io2, vget_low_s32(cospis0), 1);
-  step2[1] = vrshrq_n_s32(step2[1], 14);
-  step2[2] = vrshrq_n_s32(step2[2], 14);
-  step2[3] = vrshrq_n_s32(step2[3], 14);
+  step2[1] = vrshrq_n_s32(step2[1], DCT_CONST_BITS);
+  step2[2] = vrshrq_n_s32(step2[2], DCT_CONST_BITS);
+  step2[3] = vrshrq_n_s32(step2[3], DCT_CONST_BITS);
 
   step2[4] = vaddq_s32(step1[4], step1[5]);
   step2[5] = vsubq_s32(step1[4], step1[5]);
@@ -109,8 +109,8 @@ static INLINE void idct8x8_12_half1d_bd10(
   step1[6] = vmulq_lane_s32(step2[6], vget_high_s32(cospis0), 0);
   step1[5] = vmlsq_lane_s32(step1[6], step2[5], vget_high_s32(cospis0), 0);
   step1[6] = vmlaq_lane_s32(step1[6], step2[5], vget_high_s32(cospis0), 0);
-  step1[5] = vrshrq_n_s32(step1[5], 14);
-  step1[6] = vrshrq_n_s32(step1[6], 14);
+  step1[5] = vrshrq_n_s32(step1[5], DCT_CONST_BITS);
+  step1[6] = vrshrq_n_s32(step1[6], DCT_CONST_BITS);
 
   // stage 4
   *io0 = vaddq_s32(step1[0], step2[7]);
@@ -154,14 +154,14 @@ static INLINE void idct8x8_12_half1d_bd12(
   t64[5] = vmull_lane_s32(input_3h, vget_low_s32(cospis1), 1);
   t64[6] = vmull_lane_s32(input_1l, vget_low_s32(cospis1), 0);
   t64[7] = vmull_lane_s32(input_1h, vget_low_s32(cospis1), 0);
-  t32[0] = vrshrn_n_s64(t64[0], 14);
-  t32[1] = vrshrn_n_s64(t64[1], 14);
-  t32[2] = vrshrn_n_s64(t64[2], 14);
-  t32[3] = vrshrn_n_s64(t64[3], 14);
-  t32[4] = vrshrn_n_s64(t64[4], 14);
-  t32[5] = vrshrn_n_s64(t64[5], 14);
-  t32[6] = vrshrn_n_s64(t64[6], 14);
-  t32[7] = vrshrn_n_s64(t64[7], 14);
+  t32[0] = vrshrn_n_s64(t64[0], DCT_CONST_BITS);
+  t32[1] = vrshrn_n_s64(t64[1], DCT_CONST_BITS);
+  t32[2] = vrshrn_n_s64(t64[2], DCT_CONST_BITS);
+  t32[3] = vrshrn_n_s64(t64[3], DCT_CONST_BITS);
+  t32[4] = vrshrn_n_s64(t64[4], DCT_CONST_BITS);
+  t32[5] = vrshrn_n_s64(t64[5], DCT_CONST_BITS);
+  t32[6] = vrshrn_n_s64(t64[6], DCT_CONST_BITS);
+  t32[7] = vrshrn_n_s64(t64[7], DCT_CONST_BITS);
   step1[4] = vcombine_s32(t32[0], t32[1]);
   step1[5] = vcombine_s32(t32[2], t32[3]);
   step1[6] = vcombine_s32(t32[4], t32[5]);
@@ -174,12 +174,12 @@ static INLINE void idct8x8_12_half1d_bd12(
   t64[5] = vmull_lane_s32(step1h[1], vget_high_s32(cospis0), 1);
   t64[6] = vmull_lane_s32(step1l[1], vget_low_s32(cospis0), 1);
   t64[7] = vmull_lane_s32(step1h[1], vget_low_s32(cospis0), 1);
-  t32[2] = vrshrn_n_s64(t64[2], 14);
-  t32[3] = vrshrn_n_s64(t64[3], 14);
-  t32[4] = vrshrn_n_s64(t64[4], 14);
-  t32[5] = vrshrn_n_s64(t64[5], 14);
-  t32[6] = vrshrn_n_s64(t64[6], 14);
-  t32[7] = vrshrn_n_s64(t64[7], 14);
+  t32[2] = vrshrn_n_s64(t64[2], DCT_CONST_BITS);
+  t32[3] = vrshrn_n_s64(t64[3], DCT_CONST_BITS);
+  t32[4] = vrshrn_n_s64(t64[4], DCT_CONST_BITS);
+  t32[5] = vrshrn_n_s64(t64[5], DCT_CONST_BITS);
+  t32[6] = vrshrn_n_s64(t64[6], DCT_CONST_BITS);
+  t32[7] = vrshrn_n_s64(t64[7], DCT_CONST_BITS);
   step2[1] = vcombine_s32(t32[2], t32[3]);
   step2[2] = vcombine_s32(t32[4], t32[5]);
   step2[3] = vcombine_s32(t32[6], t32[7]);
@@ -205,10 +205,10 @@ static INLINE void idct8x8_12_half1d_bd12(
       vmlal_lane_s32(t64[2], vget_low_s32(step2[5]), vget_high_s32(cospis0), 0);
   t64[3] = vmlal_lane_s32(t64[3], vget_high_s32(step2[5]),
                           vget_high_s32(cospis0), 0);
-  t32[0] = vrshrn_n_s64(t64[0], 14);
-  t32[1] = vrshrn_n_s64(t64[1], 14);
-  t32[2] = vrshrn_n_s64(t64[2], 14);
-  t32[3] = vrshrn_n_s64(t64[3], 14);
+  t32[0] = vrshrn_n_s64(t64[0], DCT_CONST_BITS);
+  t32[1] = vrshrn_n_s64(t64[1], DCT_CONST_BITS);
+  t32[2] = vrshrn_n_s64(t64[2], DCT_CONST_BITS);
+  t32[3] = vrshrn_n_s64(t64[3], DCT_CONST_BITS);
   step1[5] = vcombine_s32(t32[0], t32[1]);
   step1[6] = vcombine_s32(t32[2], t32[3]);
 
@@ -377,10 +377,10 @@ static INLINE void idct8x8_64_half1d_bd10(
   step1[6] = vmlsq_lane_s32(step1[6], *io5, vget_high_s32(cospis1), 0);
   step1[7] = vmlaq_lane_s32(step1[7], *io7, vget_high_s32(cospis1), 1);
 
-  step1[4] = vrshrq_n_s32(step1[4], 14);
-  step1[5] = vrshrq_n_s32(step1[5], 14);
-  step1[6] = vrshrq_n_s32(step1[6], 14);
-  step1[7] = vrshrq_n_s32(step1[7], 14);
+  step1[4] = vrshrq_n_s32(step1[4], DCT_CONST_BITS);
+  step1[5] = vrshrq_n_s32(step1[5], DCT_CONST_BITS);
+  step1[6] = vrshrq_n_s32(step1[6], DCT_CONST_BITS);
+  step1[7] = vrshrq_n_s32(step1[7], DCT_CONST_BITS);
 
   // stage 2
   step2[1] = vmulq_lane_s32(*io0, vget_high_s32(cospis0), 0);
@@ -392,10 +392,10 @@ static INLINE void idct8x8_64_half1d_bd10(
   step2[2] = vmlsq_lane_s32(step2[2], *io6, vget_low_s32(cospis0), 1);
   step2[3] = vmlaq_lane_s32(step2[3], *io6, vget_high_s32(cospis0), 1);
 
-  step2[0] = vrshrq_n_s32(step2[0], 14);
-  step2[1] = vrshrq_n_s32(step2[1], 14);
-  step2[2] = vrshrq_n_s32(step2[2], 14);
-  step2[3] = vrshrq_n_s32(step2[3], 14);
+  step2[0] = vrshrq_n_s32(step2[0], DCT_CONST_BITS);
+  step2[1] = vrshrq_n_s32(step2[1], DCT_CONST_BITS);
+  step2[2] = vrshrq_n_s32(step2[2], DCT_CONST_BITS);
+  step2[3] = vrshrq_n_s32(step2[3], DCT_CONST_BITS);
 
   step2[4] = vaddq_s32(step1[4], step1[5]);
   step2[5] = vsubq_s32(step1[4], step1[5]);
@@ -411,8 +411,8 @@ static INLINE void idct8x8_64_half1d_bd10(
   step1[6] = vmulq_lane_s32(step2[6], vget_high_s32(cospis0), 0);
   step1[5] = vmlsq_lane_s32(step1[6], step2[5], vget_high_s32(cospis0), 0);
   step1[6] = vmlaq_lane_s32(step1[6], step2[5], vget_high_s32(cospis0), 0);
-  step1[5] = vrshrq_n_s32(step1[5], 14);
-  step1[6] = vrshrq_n_s32(step1[6], 14);
+  step1[5] = vrshrq_n_s32(step1[5], DCT_CONST_BITS);
+  step1[6] = vrshrq_n_s32(step1[6], DCT_CONST_BITS);
 
   // stage 4
   *io0 = vaddq_s32(step1[0], step2[7]);
@@ -473,14 +473,14 @@ static INLINE void idct8x8_64_half1d_bd12(
   t64[5] = vmlsl_lane_s32(t64[5], input_5h, vget_high_s32(cospis1), 0);
   t64[6] = vmlal_lane_s32(t64[6], input_7l, vget_high_s32(cospis1), 1);
   t64[7] = vmlal_lane_s32(t64[7], input_7h, vget_high_s32(cospis1), 1);
-  t32[0] = vrshrn_n_s64(t64[0], 14);
-  t32[1] = vrshrn_n_s64(t64[1], 14);
-  t32[2] = vrshrn_n_s64(t64[2], 14);
-  t32[3] = vrshrn_n_s64(t64[3], 14);
-  t32[4] = vrshrn_n_s64(t64[4], 14);
-  t32[5] = vrshrn_n_s64(t64[5], 14);
-  t32[6] = vrshrn_n_s64(t64[6], 14);
-  t32[7] = vrshrn_n_s64(t64[7], 14);
+  t32[0] = vrshrn_n_s64(t64[0], DCT_CONST_BITS);
+  t32[1] = vrshrn_n_s64(t64[1], DCT_CONST_BITS);
+  t32[2] = vrshrn_n_s64(t64[2], DCT_CONST_BITS);
+  t32[3] = vrshrn_n_s64(t64[3], DCT_CONST_BITS);
+  t32[4] = vrshrn_n_s64(t64[4], DCT_CONST_BITS);
+  t32[5] = vrshrn_n_s64(t64[5], DCT_CONST_BITS);
+  t32[6] = vrshrn_n_s64(t64[6], DCT_CONST_BITS);
+  t32[7] = vrshrn_n_s64(t64[7], DCT_CONST_BITS);
   step1[4] = vcombine_s32(t32[0], t32[1]);
   step1[5] = vcombine_s32(t32[2], t32[3]);
   step1[6] = vcombine_s32(t32[4], t32[5]);
@@ -501,14 +501,14 @@ static INLINE void idct8x8_64_half1d_bd12(
   t64[5] = vmlsl_lane_s32(t64[5], step1h[3], vget_low_s32(cospis0), 1);
   t64[6] = vmlal_lane_s32(t64[6], step1l[3], vget_high_s32(cospis0), 1);
   t64[7] = vmlal_lane_s32(t64[7], step1h[3], vget_high_s32(cospis0), 1);
-  t32[0] = vrshrn_n_s64(t64[0], 14);
-  t32[1] = vrshrn_n_s64(t64[1], 14);
-  t32[2] = vrshrn_n_s64(t64[2], 14);
-  t32[3] = vrshrn_n_s64(t64[3], 14);
-  t32[4] = vrshrn_n_s64(t64[4], 14);
-  t32[5] = vrshrn_n_s64(t64[5], 14);
-  t32[6] = vrshrn_n_s64(t64[6], 14);
-  t32[7] = vrshrn_n_s64(t64[7], 14);
+  t32[0] = vrshrn_n_s64(t64[0], DCT_CONST_BITS);
+  t32[1] = vrshrn_n_s64(t64[1], DCT_CONST_BITS);
+  t32[2] = vrshrn_n_s64(t64[2], DCT_CONST_BITS);
+  t32[3] = vrshrn_n_s64(t64[3], DCT_CONST_BITS);
+  t32[4] = vrshrn_n_s64(t64[4], DCT_CONST_BITS);
+  t32[5] = vrshrn_n_s64(t64[5], DCT_CONST_BITS);
+  t32[6] = vrshrn_n_s64(t64[6], DCT_CONST_BITS);
+  t32[7] = vrshrn_n_s64(t64[7], DCT_CONST_BITS);
   step2[0] = vcombine_s32(t32[0], t32[1]);
   step2[1] = vcombine_s32(t32[2], t32[3]);
   step2[2] = vcombine_s32(t32[4], t32[5]);
@@ -535,10 +535,10 @@ static INLINE void idct8x8_64_half1d_bd12(
       vmlal_lane_s32(t64[2], vget_low_s32(step2[5]), vget_high_s32(cospis0), 0);
   t64[3] = vmlal_lane_s32(t64[3], vget_high_s32(step2[5]),
                           vget_high_s32(cospis0), 0);
-  t32[0] = vrshrn_n_s64(t64[0], 14);
-  t32[1] = vrshrn_n_s64(t64[1], 14);
-  t32[2] = vrshrn_n_s64(t64[2], 14);
-  t32[3] = vrshrn_n_s64(t64[3], 14);
+  t32[0] = vrshrn_n_s64(t64[0], DCT_CONST_BITS);
+  t32[1] = vrshrn_n_s64(t64[1], DCT_CONST_BITS);
+  t32[2] = vrshrn_n_s64(t64[2], DCT_CONST_BITS);
+  t32[3] = vrshrn_n_s64(t64[3], DCT_CONST_BITS);
   step1[5] = vcombine_s32(t32[0], t32[1]);
   step1[6] = vcombine_s32(t32[2], t32[3]);
 
