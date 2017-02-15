@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "322929af_45956b04",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3185,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-15T00:53:37Z",
+      "side": 1,
+      "message": "To save a memcpy - May be better to work on tile_mode_map directly, then copy to mode_map after the adjustment is done. This can be done later in another patch.",
+      "range": {
+        "startLine": 3174,
+        "startChar": 2,
+        "endLine": 3185,
+        "endChar": 3
+      },
+      "revId": "1562a1ed3c4e8fce0fab20d489d8b4a39208c562",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}

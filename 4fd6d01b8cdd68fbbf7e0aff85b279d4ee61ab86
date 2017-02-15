@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "04bcef41_91ce964f",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-15T00:53:37Z",
+      "side": 1,
+      "message": "Yes. ENABLE_MT_BIT_MATCH in first pass also needs to be modified in similar way so that the bit match result is generated. Could you modify that? Thanks. This can be done later in another cl.",
+      "parentUuid": "0181061c_eaba7050",
+      "range": {
+        "startLine": 264,
+        "startChar": 29,
+        "endLine": 264,
+        "endChar": 55
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "654dde93_7f47bab9",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 2
@@ -560,6 +584,30 @@
       "side": 1,
       "message": "This is to ensure that row based MT is disabled when scalability is enabled.",
       "parentUuid": "3cff1796_8f0dee07",
+      "range": {
+        "startLine": 1452,
+        "startChar": 2,
+        "endLine": 1452,
+        "endChar": 16
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4fb84086_48da8961",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1452,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-15T00:53:37Z",
+      "side": 1,
+      "message": "vp9_set_new_mt is called in vp9_change_config, which should be called when encoding config for a frame is changed. Maybe add a comment here to say this may not be needed. This can be done later.",
+      "parentUuid": "f8bed1a0_4f187f29",
       "range": {
         "startLine": 1452,
         "startChar": 2,
