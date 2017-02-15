@@ -41,6 +41,7 @@ vpx_tsvc_encoder() {
   local speed="6"
   local frame_drop_thresh="30"
   local max_threads="4"
+  local error_resilient="1"
 
   shift 2
 
@@ -54,7 +55,7 @@ vpx_tsvc_encoder() {
     eval "${VPX_TEST_PREFIX}" "${encoder}" "${YUV_RAW_INPUT}" "${output_file}" \
         "${codec}" "${YUV_RAW_INPUT_WIDTH}" "${YUV_RAW_INPUT_HEIGHT}" \
         "${timebase_num}" "${timebase_den}" "${speed}" "${frame_drop_thresh}" \
-        "${threads}" "$@" \
+        "${error_resilient}" "${threads}" "$@" \
         ${devnull}
   done
 }
