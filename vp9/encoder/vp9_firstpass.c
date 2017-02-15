@@ -1275,7 +1275,11 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
         int scaled_low_intra_thresh = scale_sse_threshold(cm, LOW_I_THRESH);
         if (this_intra_error < scaled_low_intra_thresh) {
           fp_acc_data->frame_noise_energy += fp_estimate_block_noise(x, bsize);
-          fp_acc_data->intra_count_low += 1.0;
+          if (motion_error < scaled_low_intra_thresh) {
+            fp_acc_data->intra_count_low += 1.0;
+          } else {
+            fp_acc_data->intra_count_high += 1.0;
+          }
         } else {
           fp_acc_data->frame_noise_energy += (int64_t)SECTION_NOISE_DEF;
           fp_acc_data->intra_count_high += 1.0;
@@ -1731,7 +1735,8 @@ static double get_sr_decay_rate(const VP9_COMP *cpi,
   if (((frame->coded_error / num_mbs) > LOW_CODED_ERR_PER_MB) &&
       ((frame->intra_error / DOUBLE_DIVIDE_CHECK(frame->coded_error)) <
        (double)NCOUNT_FRAME_II_THRESH)) {
-    modified_pct_inter = frame->pcnt_inter - frame->pcnt_neutral;
+    modified_pct_inter =
+        frame->pcnt_inter + frame->pcnt_intra_low - frame->pcnt_neutral;
   }
   modified_pcnt_intra = 100 * (1.0 - modified_pct_inter);
 
