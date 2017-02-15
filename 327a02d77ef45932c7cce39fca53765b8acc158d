@@ -22,6 +22,30 @@
       "revId": "327a02d77ef45932c7cce39fca53765b8acc158d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "979ec77d_b0b7efcf",
+        "filename": "vpx_dsp/x86/bitdepth_conversion_sse2.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-15T21:22:32Z",
+      "side": 1,
+      "message": "load_tran_low is only used for coeff/qcoeff/dqcoeff which are properly aligned:\nhttps://chromium.googlesource.com/webm/libvpx/+/master/vp9/encoder/vp9_context_tree.c#28\n\nand this is already used in the assembly version of this file:\nhttps://chromium.googlesource.com/webm/libvpx/+/master/vpx_dsp/x86/bitdepth_conversion_sse2.asm#42\n\nIt also runs locally without any issues.",
+      "parentUuid": "b79a03fa_6245695b",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 59
+      },
+      "revId": "327a02d77ef45932c7cce39fca53765b8acc158d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
