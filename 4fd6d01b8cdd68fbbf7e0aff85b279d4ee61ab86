@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "628823a2_490d3b52",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-02-15T15:04:14Z",
+      "side": 1,
+      "message": "First pass MT code already generates identical stats for different threads when row based MT is ON. However the code under ENABLE_MT_BIT_MATCH (in case of first pass) ensures that stats file generated with new-mt\u003d1 matches with new-mt\u003d0. We shall do the changes as per your comments and extend unit-test \u0027VPxEncoderThreadTest\u0027  to match the bit streams generated with new-mt\u003d0, threads\u003d1 and new-mt\u003d1, threads \u003e 1. \n\nPlease let us know your thoughts.",
+      "parentUuid": "04bcef41_91ce964f",
+      "range": {
+        "startLine": 264,
+        "startChar": 29,
+        "endLine": 264,
+        "endChar": 55
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "654dde93_7f47bab9",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 2
@@ -608,6 +632,30 @@
       "side": 1,
       "message": "vp9_set_new_mt is called in vp9_change_config, which should be called when encoding config for a frame is changed. Maybe add a comment here to say this may not be needed. This can be done later.",
       "parentUuid": "f8bed1a0_4f187f29",
+      "range": {
+        "startLine": 1452,
+        "startChar": 2,
+        "endLine": 1452,
+        "endChar": 16
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "985478e2_6e029893",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1452,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-02-15T15:04:14Z",
+      "side": 1,
+      "message": "When scalability is enabled, we see that vp9_change_config is not called. Hence depending on the order of control calls, it might happen that row based MT would happen with scalability (not a supported case) .  Hence we added explicit call to vp9_set_new_mt in ctrl_set_svc to avoid above.",
+      "parentUuid": "4fb84086_48da8961",
       "range": {
         "startLine": 1452,
         "startChar": 2,
