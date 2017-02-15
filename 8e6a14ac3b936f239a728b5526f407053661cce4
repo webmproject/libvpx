@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b64b84de_e5bb3313",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-15T19:27:46Z",
+      "side": 1,
+      "message": "\u0027vpx_temporal_svc_encoder:\u0027 would be clearer than \u0027Example encoder\u0027 here",
+      "revId": "8e6a14ac3b936f239a728b5526f407053661cce4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9c7d1228_25959181",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 650,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-15T19:27:46Z",
+      "side": 1,
+      "message": "the type of error_resilient is unsigned int, you should cast to that for consistency",
+      "revId": "8e6a14ac3b936f239a728b5526f407053661cce4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e851c86b_5ad18e35",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 652,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-15T19:27:46Z",
+      "side": 1,
+      "message": "you could list the accepted values here",
+      "revId": "8e6a14ac3b936f239a728b5526f407053661cce4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
