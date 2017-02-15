@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "afc084b0_d519f9cc",
+        "filename": "vpx_dsp/inv_txfm.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2091,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-15T01:11:14Z",
+      "side": 1,
+      "message": "this could be *const or the pointer shifted in the loop. I think the latter was helpful at least in platform specific code anyway.",
+      "revId": "f0b1a7898d42207128b6c18eae520e6ececf3503",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
