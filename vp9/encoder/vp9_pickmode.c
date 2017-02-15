@@ -1657,7 +1657,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       mode_rd_thresh = mode_rd_thresh << 3;
 
     if (rd_less_than_thresh(best_rdc.rdcost, mode_rd_thresh,
-                            rd_thresh_freq_fact[mode_index]))
+#if CONFIG_MULTITHREAD
+                            tile_data->enc_row_mt_mutex,
+#endif
+                            &rd_thresh_freq_fact[mode_index]))
       continue;
 
     if (this_mode == NEWMV) {
@@ -2018,7 +2021,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
         continue;
 
       if (rd_less_than_thresh(best_rdc.rdcost, mode_rd_thresh,
-                              rd_thresh_freq_fact[mode_index]))
+#if CONFIG_MULTITHREAD
+                              tile_data->enc_row_mt_mutex,
+#endif
+                              &rd_thresh_freq_fact[mode_index]))
         continue;
 
       mi->mode = this_mode;

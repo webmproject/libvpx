@@ -1459,6 +1459,9 @@ static vpx_codec_err_t ctrl_set_svc(vpx_codec_alg_priv_t *ctx, va_list args) {
       cfg->ss_number_layers > 1 && cfg->ts_number_layers > 1) {
     return VPX_CODEC_INVALID_PARAM;
   }
+
+  vp9_set_new_mt(ctx->cpi);
+
   return VPX_CODEC_OK;
 }
 

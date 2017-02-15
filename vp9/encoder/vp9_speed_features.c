@@ -585,6 +585,15 @@ void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
       rd->thresh_mult_sub8x8[i] = INT_MAX;
     }
   }
+
+  // With row based multi-threading, the following speed features
+  // have to be disabled to guarantee that bitstreams encoded with single thread
+  // and multiple threads match
+  if (cpi->oxcf.ethread_bit_match) {
+    sf->adaptive_rd_thresh = 0;
+    sf->allow_exhaustive_searches = 0;
+    sf->adaptive_pred_interp_filter = 0;
+  }
 }
 
 void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
@@ -746,5 +755,14 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
 
   if (!cpi->oxcf.frame_periodic_boost) {
     sf->max_delta_qindex = 0;
+  }
+
+  // With row based multi-threading, the following speed features
+  // have to be disabled to guarantee that bitstreams encoded with single thread
+  // and multiple threads match
+  if (cpi->oxcf.ethread_bit_match) {
+    sf->adaptive_rd_thresh = 0;
+    sf->allow_exhaustive_searches = 0;
+    sf->adaptive_pred_interp_filter = 0;
   }
 }

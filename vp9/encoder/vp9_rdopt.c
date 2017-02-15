@@ -3043,7 +3043,10 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
   const int *const rd_threshes = rd_opt->threshes[segment_id][bsize];
   const int *const rd_thresh_freq_fact = tile_data->thresh_freq_fact[bsize];
   int64_t mode_threshold[MAX_MODES];
-  int *mode_map = tile_data->mode_map[bsize];
+  int *tile_mode_map = tile_data->mode_map[bsize];
+  int mode_map[MAX_MODES];  // Maintain mode_map information locally to avoid
+                            // lock mechanism involved with reads from
+                            // tile_mode_map
   const int mode_search_skip_flags = sf->mode_search_skip_flags;
   int64_t mask_filter = 0;
   int64_t filter_cache[SWITCHABLE_FILTER_CONTEXTS];
@@ -3155,10 +3158,19 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
       ~(sf->intra_y_mode_mask[max_txsize_lookup[bsize]]);
 
   for (i = 0; i <= LAST_NEW_MV_INDEX; ++i) mode_threshold[i] = 0;
+
+#if CONFIG_MULTITHREAD
+  if (NULL != tile_data->enc_row_mt_mutex)
+    pthread_mutex_lock(tile_data->enc_row_mt_mutex);
+#endif
+
   for (i = LAST_NEW_MV_INDEX + 1; i < MAX_MODES; ++i)
     mode_threshold[i] = ((int64_t)rd_threshes[i] * rd_thresh_freq_fact[i]) >> 5;
 
   midx = sf->schedule_mode_search ? mode_skip_start : 0;
+
+  memcpy(mode_map, tile_mode_map, sizeof(mode_map));
+
   while (midx > 4) {
     uint8_t end_pos = 0;
     for (i = 5; i < midx; ++i) {
@@ -3171,6 +3183,13 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
     }
     midx = end_pos;
   }
+
+  memcpy(tile_mode_map, mode_map, sizeof(mode_map));
+
+#if CONFIG_MULTITHREAD
+  if (NULL != tile_data->enc_row_mt_mutex)
+    pthread_mutex_unlock(tile_data->enc_row_mt_mutex);
+#endif
 
   for (midx = 0; midx < MAX_MODES; ++midx) {
     int mode_index = mode_map[midx];
@@ -3573,6 +3592,9 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
   }
 
   if (best_mode_index < 0 || best_rd >= best_rd_so_far) {
+    // If adaptive interp filter is enabled, then the current leaf node of 8x8
+    // data is needed for sub8x8. Hence preserve the context.
+    if (cpi->new_mt && bsize == BLOCK_8X8) ctx->mic = *xd->mi[0];
     rd_cost->rate = INT_MAX;
     rd_cost->rdcost = INT64_MAX;
     return;
@@ -3599,7 +3621,11 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
 
   if (!cpi->rc.is_src_frame_alt_ref)
     vp9_update_rd_thresh_fact(tile_data->thresh_freq_fact,
-                              sf->adaptive_rd_thresh, bsize, best_mode_index);
+                              sf->adaptive_rd_thresh, bsize,
+#if CONFIG_MULTITHREAD
+                              tile_data->enc_row_mt_mutex,
+#endif
+                              best_mode_index);
 
   // macroblock modes
   *mi = best_mbmode;
@@ -3737,7 +3763,11 @@ void vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi, TileDataEnc *tile_data,
          (cm->interp_filter == mi->interp_filter));
 
   vp9_update_rd_thresh_fact(tile_data->thresh_freq_fact,
-                            cpi->sf.adaptive_rd_thresh, bsize, THR_ZEROMV);
+                            cpi->sf.adaptive_rd_thresh, bsize,
+#if CONFIG_MULTITHREAD
+                            tile_data->enc_row_mt_mutex,
+#endif
+                            THR_ZEROMV);
 
   vp9_zero(best_pred_diff);
   vp9_zero(best_filter_diff);
@@ -3789,6 +3819,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, TileDataEnc *tile_data,
   int64_t filter_cache[SWITCHABLE_FILTER_CONTEXTS];
   int internal_active_edge =
       vp9_active_edge_sb(cpi, mi_row, mi_col) && vp9_internal_image_edge(cpi);
+  const int *const rd_thresh_freq_fact = tile_data->thresh_freq_fact[bsize];
 
   x->skip_encode = sf->skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
   memset(x->zcoeff_blk[TX_4X4], 0, 4);
@@ -3880,7 +3911,10 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, TileDataEnc *tile_data,
     if (!internal_active_edge &&
         rd_less_than_thresh(best_rd,
                             rd_opt->threshes[segment_id][bsize][ref_index],
-                            tile_data->thresh_freq_fact[bsize][ref_index]))
+#if CONFIG_MULTITHREAD
+                            tile_data->enc_row_mt_mutex,
+#endif
+                            &rd_thresh_freq_fact[ref_index]))
       continue;
 
     comp_pred = second_ref_frame > INTRA_FRAME;
@@ -4324,7 +4358,11 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, TileDataEnc *tile_data,
          !is_inter_block(&best_mbmode));
 
   vp9_update_rd_thresh_fact(tile_data->thresh_freq_fact, sf->adaptive_rd_thresh,
-                            bsize, best_ref_index);
+                            bsize,
+#if CONFIG_MULTITHREAD
+                            tile_data->enc_row_mt_mutex,
+#endif
+                            best_ref_index);
 
   // macroblock modes
   *mi = best_mbmode;

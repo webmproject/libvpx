@@ -341,7 +341,7 @@ void vp9_row_mt_sync_write(VP9RowMTSync *const row_mt_sync, int r, int c,
 #if CONFIG_MULTITHREAD
   const int nsync = row_mt_sync->sync_range;
   int cur;
-  // Only signal when there are enough filtered SB for next row to run.
+  // Only signal when there are enough encoded blocks for next row to run.
   int sig = 1;
 
   if (c < cols - 1) {
@@ -541,4 +541,101 @@ void vp9_temporal_filter_row_mt(VP9_COMP *cpi) {
 
   launch_enc_workers(cpi, (VPxWorkerHook)temporal_filter_worker_hook,
                      multi_thread_ctxt, num_workers);
+}
+
+static int enc_row_mt_worker_hook(EncWorkerData *const thread_data,
+                                  MultiThreadHandle *multi_thread_ctxt) {
+  VP9_COMP *const cpi = thread_data->cpi;
+  const VP9_COMMON *const cm = &cpi->common;
+  const int tile_cols = 1 << cm->log2_tile_cols;
+  int tile_row, tile_col;
+  TileDataEnc *this_tile;
+  int end_of_frame;
+  int thread_id = thread_data->thread_id;
+  int cur_tile_id = multi_thread_ctxt->thread_id_to_tile_id[thread_id];
+  JobNode *proc_job = NULL;
+  int mi_row;
+
+  end_of_frame = 0;
+  while (0 == end_of_frame) {
+    // Get the next job in the queue
+    proc_job =
+        (JobNode *)vp9_enc_grp_get_next_job(multi_thread_ctxt, cur_tile_id);
+    if (NULL == proc_job) {
+      // Query for the status of other tiles
+      end_of_frame = vp9_get_tiles_proc_status(
+          multi_thread_ctxt, thread_data->tile_completion_status, &cur_tile_id,
+          tile_cols);
+    } else {
+      tile_col = proc_job->tile_col_id;
+      tile_row = proc_job->tile_row_id;
+      mi_row = proc_job->vert_unit_row_num * MI_BLOCK_SIZE;
+
+      this_tile = &cpi->tile_data[tile_row * tile_cols + tile_col];
+      thread_data->td->mb.m_search_count_ptr = &this_tile->m_search_count;
+      thread_data->td->mb.ex_search_count_ptr = &this_tile->ex_search_count;
+#if CONFIG_MULTITHREAD
+      thread_data->td->mb.search_count_mutex = this_tile->search_count_mutex;
+#endif
+
+      vp9_encode_sb_row(cpi, thread_data->td, tile_row, tile_col, mi_row);
+    }
+  }
+  return 0;
+}
+
+void vp9_encode_tiles_row_mt(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int tile_cols = 1 << cm->log2_tile_cols;
+  const int tile_rows = 1 << cm->log2_tile_rows;
+  MultiThreadHandle *multi_thread_ctxt = &cpi->multi_thread_ctxt;
+  int num_workers = VPXMAX(cpi->oxcf.max_threads, 1);
+  int i;
+
+  if (multi_thread_ctxt->allocated_tile_cols < tile_cols ||
+      multi_thread_ctxt->allocated_tile_rows < tile_rows ||
+      multi_thread_ctxt->allocated_vert_unit_rows < cm->mb_rows) {
+    vp9_row_mt_mem_dealloc(cpi);
+    vp9_init_tile_data(cpi);
+    vp9_row_mt_mem_alloc(cpi);
+  } else {
+    vp9_init_tile_data(cpi);
+  }
+
+  create_enc_workers(cpi, num_workers);
+
+  vp9_assign_tile_to_thread(multi_thread_ctxt, tile_cols, cpi->num_workers);
+
+  vp9_prepare_job_queue(cpi, ENCODE_JOB);
+
+  vp9_multi_thread_tile_init(cpi);
+
+  for (i = 0; i < num_workers; i++) {
+    EncWorkerData *thread_data;
+    thread_data = &cpi->tile_thr_data[i];
+
+    // Before encoding a frame, copy the thread data from cpi.
+    if (thread_data->td != &cpi->td) {
+      thread_data->td->mb = cpi->td.mb;
+      thread_data->td->rd_counts = cpi->td.rd_counts;
+    }
+    if (thread_data->td->counts != &cpi->common.counts) {
+      memcpy(thread_data->td->counts, &cpi->common.counts,
+             sizeof(cpi->common.counts));
+    }
+  }
+
+  launch_enc_workers(cpi, (VPxWorkerHook)enc_row_mt_worker_hook,
+                     multi_thread_ctxt, num_workers);
+
+  for (i = 0; i < num_workers; i++) {
+    VPxWorker *const worker = &cpi->workers[i];
+    EncWorkerData *const thread_data = (EncWorkerData *)worker->data1;
+
+    // Accumulate counters.
+    if (i < cpi->num_workers - 1) {
+      vp9_accumulate_frame_counts(&cm->counts, thread_data->td->counts, 0);
+      accumulate_rd_opt(&cpi->td, thread_data->td);
+    }
+  }
 }

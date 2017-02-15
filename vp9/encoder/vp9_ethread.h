@@ -44,6 +44,8 @@ typedef struct VP9RowMTSyncData {
 
 void vp9_encode_tiles_mt(struct VP9_COMP *cpi);
 
+void vp9_encode_tiles_row_mt(struct VP9_COMP *cpi);
+
 void vp9_encode_fp_row_mt(struct VP9_COMP *cpi);
 
 void vp9_row_mt_sync_read(VP9RowMTSync *const row_mt_sync, int r, int c);

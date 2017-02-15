@@ -100,11 +100,32 @@ void vp9_row_mt_mem_alloc(VP9_COMP *cpi) {
     multi_thread_ctxt->num_tile_vert_sbs[tile_row] =
         get_num_vert_units(*tile_info, MI_BLOCK_SIZE_LOG2);
   }
+
+#if CONFIG_MULTITHREAD
+  for (tile_row = 0; tile_row < tile_rows; tile_row++) {
+    for (tile_col = 0; tile_col < tile_cols; tile_col++) {
+      TileDataEnc *this_tile = &cpi->tile_data[tile_row * tile_cols + tile_col];
+
+      CHECK_MEM_ERROR(cm, this_tile->search_count_mutex,
+                      vpx_malloc(sizeof(*this_tile->search_count_mutex)));
+
+      pthread_mutex_init(this_tile->search_count_mutex, NULL);
+
+      CHECK_MEM_ERROR(cm, this_tile->enc_row_mt_mutex,
+                      vpx_malloc(sizeof(*this_tile->enc_row_mt_mutex)));
+
+      pthread_mutex_init(this_tile->enc_row_mt_mutex, NULL);
+    }
+  }
+#endif
 }
 
 void vp9_row_mt_mem_dealloc(VP9_COMP *cpi) {
   MultiThreadHandle *multi_thread_ctxt = &cpi->multi_thread_ctxt;
   int tile_col;
+#if CONFIG_MULTITHREAD
+  int tile_row;
+#endif
 
   // Deallocate memory for job queue
   if (multi_thread_ctxt->job_queue) vpx_free(multi_thread_ctxt->job_queue);
@@ -124,6 +145,25 @@ void vp9_row_mt_mem_dealloc(VP9_COMP *cpi) {
     TileDataEnc *this_tile = &cpi->tile_data[tile_col];
     vp9_row_mt_sync_mem_dealloc(&this_tile->row_mt_sync);
   }
+
+#if CONFIG_MULTITHREAD
+  for (tile_row = 0; tile_row < multi_thread_ctxt->allocated_tile_rows;
+       tile_row++) {
+    for (tile_col = 0; tile_col < multi_thread_ctxt->allocated_tile_cols;
+         tile_col++) {
+      TileDataEnc *this_tile =
+          &cpi->tile_data[tile_row * multi_thread_ctxt->allocated_tile_cols +
+                          tile_col];
+      pthread_mutex_destroy(this_tile->search_count_mutex);
+      vpx_free(this_tile->search_count_mutex);
+      this_tile->search_count_mutex = NULL;
+
+      pthread_mutex_destroy(this_tile->enc_row_mt_mutex);
+      vpx_free(this_tile->enc_row_mt_mutex);
+      this_tile->enc_row_mt_mutex = NULL;
+    }
+  }
+#endif
 }
 
 void vp9_multi_thread_tile_init(VP9_COMP *cpi) {
