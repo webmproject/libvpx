@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ccdafba4_1a464fd0",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-02-15T19:36:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b64b84de_e5bb3313",
+      "revId": "8e6a14ac3b936f239a728b5526f407053661cce4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9c7d1228_25959181",
         "filename": "examples/vpx_temporal_svc_encoder.c",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "d8c43af1_f4beed90",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 650,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-02-15T19:36:32Z",
+      "side": 1,
+      "message": "Done. cfg.g_error_resilient is uint32_t so I changed the type of error_resilient to be uint32_t explicitly.",
+      "parentUuid": "9c7d1228_25959181",
+      "revId": "8e6a14ac3b936f239a728b5526f407053661cce4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e851c86b_5ad18e35",
         "filename": "examples/vpx_temporal_svc_encoder.c",
         "patchSetId": 3
@@ -50,6 +86,24 @@
       "revId": "8e6a14ac3b936f239a728b5526f407053661cce4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "75967bd7_ee4ddbb7",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 652,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-02-15T19:36:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e851c86b_5ad18e35",
+      "revId": "8e6a14ac3b936f239a728b5526f407053661cce4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
