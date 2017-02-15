@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "d2ca2eaf_fbf578cf",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-15T19:15:00Z",
+      "side": 1,
+      "message": "Please do. We should ensure using new-mt \u003d 0 and using new-mt \u003d 1 generate same bitstream. Using a set control instead of ENABLE_MT_BIT_MATCH allows us to enable bit match test easily. After your modification, it will be consistent in both first pass and second pass. Thanks.",
+      "parentUuid": "628823a2_490d3b52",
+      "range": {
+        "startLine": 264,
+        "startChar": 29,
+        "endLine": 264,
+        "endChar": 55
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "654dde93_7f47bab9",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 2
@@ -656,6 +680,30 @@
       "side": 1,
       "message": "When scalability is enabled, we see that vp9_change_config is not called. Hence depending on the order of control calls, it might happen that row based MT would happen with scalability (not a supported case) .  Hence we added explicit call to vp9_set_new_mt in ctrl_set_svc to avoid above.",
       "parentUuid": "4fb84086_48da8961",
+      "range": {
+        "startLine": 1452,
+        "startChar": 2,
+        "endLine": 1452,
+        "endChar": 16
+      },
+      "revId": "4fd6d01b8cdd68fbbf7e0aff85b279d4ee61ab86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c7b2d0ae_91610469",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1452,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-15T19:15:00Z",
+      "side": 1,
+      "message": "I see. Thanks for looking into that. Maybe we should add a TODO here: Currently, after vp9_set_svc is called, vp9_change_config is not called. Thus, vp9_set_new_mt is explicitly called here to make sure new-mt is set correctly. Later, we should modify svc code to always call vp9_change_config after setting svc. Then vp9_set_new_mt can be removed.",
+      "parentUuid": "985478e2_6e029893",
       "range": {
         "startLine": 1452,
         "startChar": 2,
