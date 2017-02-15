@@ -2272,8 +2272,7 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
         int num_samples = 0;
         int sb_cols = (cm->mi_cols + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
         int sb_rows = (cm->mi_rows + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
-        uint64_t avg_source_sad_threshold = 5000;
-        if (cpi->oxcf.speed >= 8) avg_source_sad_threshold = 10000;
+        uint64_t avg_source_sad_threshold = 10000;
         if (cpi->oxcf.lag_in_frames > 0) {
           src_y = frames[frame]->y_buffer;
           src_ystride = frames[frame]->y_stride;
