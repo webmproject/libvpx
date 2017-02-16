@@ -13,6 +13,7 @@ DSP_SRCS-yes += vpx_dsp_common.h
 
 DSP_SRCS-$(HAVE_MSA)    += mips/macros_msa.h
 
+DSP_SRCS-$(HAVE_AVX2)   += x86/bitdepth_conversion_avx2.h
 DSP_SRCS-$(HAVE_SSE2)   += x86/bitdepth_conversion_sse2.h
 # This file is included in libs.mk. Including it here would cause it to be
 # compiled into an object. Even as an empty file, this would create an

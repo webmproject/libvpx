@@ -12,8 +12,10 @@
 
 #include "./vp9_rtcd.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_dsp/vpx_dsp_common.h"
+#include "vpx_dsp/x86/bitdepth_conversion_avx2.h"
 
-int64_t vp9_block_error_avx2(const int16_t *coeff, const int16_t *dqcoeff,
+int64_t vp9_block_error_avx2(const tran_low_t *coeff, const tran_low_t *dqcoeff,
                              intptr_t block_size, int64_t *ssz) {
   __m256i sse_reg, ssz_reg, coeff_reg, dqcoeff_reg;
   __m256i exp_dqcoeff_lo, exp_dqcoeff_hi, exp_coeff_lo, exp_coeff_hi;
@@ -29,8 +31,8 @@ int64_t vp9_block_error_avx2(const int16_t *coeff, const int16_t *dqcoeff,
 
   for (i = 0; i < block_size; i += 16) {
     // load 32 bytes from coeff and dqcoeff
-    coeff_reg = _mm256_loadu_si256((const __m256i *)(coeff + i));
-    dqcoeff_reg = _mm256_loadu_si256((const __m256i *)(dqcoeff + i));
+    coeff_reg = load_tran_low(coeff + i);
+    dqcoeff_reg = load_tran_low(dqcoeff + i);
     // dqcoeff - coeff
     dqcoeff_reg = _mm256_sub_epi16(dqcoeff_reg, coeff_reg);
     // madd (dqcoeff - coeff)
