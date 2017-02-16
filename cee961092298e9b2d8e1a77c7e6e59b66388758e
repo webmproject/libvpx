@@ -22,6 +22,30 @@
       "revId": "cee961092298e9b2d8e1a77c7e6e59b66388758e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "38eccfb6_f6d4fa14",
+        "filename": "vp9/encoder/x86/vp9_quantize_ssse3_x86_64.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-16T04:02:43Z",
+      "side": 1,
+      "message": "That\u0027s true for all the *_TRAN_LOW macros, but it follows existing macro style. On the plus side, it prevents people from using memory addresses or something instead of registers. But I definitely see your point.",
+      "parentUuid": "d0109933_584bbe44",
+      "range": {
+        "startLine": 161,
+        "startChar": 22,
+        "endLine": 161,
+        "endChar": 24
+      },
+      "revId": "cee961092298e9b2d8e1a77c7e6e59b66388758e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
