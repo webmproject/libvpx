@@ -91,8 +91,8 @@ cglobal block_error_fp, 3, 3, 6, uqc, dqc, size
 .loop:
   LOAD_TRAN_LOW 2, uqcq, 0
   LOAD_TRAN_LOW 0, dqcq, 0
-  LOAD_TRAN_LOW 3, uqcq, 1
-  LOAD_TRAN_LOW 1, dqcq, 1
+  LOAD_TRAN_LOW 3, uqcq, 8
+  LOAD_TRAN_LOW 1, dqcq, 8
   INCREMENT_ELEMENTS_TRAN_LOW uqcq, 16
   INCREMENT_ELEMENTS_TRAN_LOW dqcq, 16
   sub    sizeq, 16

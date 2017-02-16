@@ -64,6 +64,6 @@ cglobal fwht4x4, 3, 4, 8, input, output, stride
   psllw           m1,        2
 
   STORE_TRAN_LOW 0, outputq, 0, 2, 3
-  STORE_TRAN_LOW 1, outputq, 1, 2, 3
+  STORE_TRAN_LOW 1, outputq, 8, 2, 3
 
   RET

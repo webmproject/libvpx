@@ -117,14 +117,14 @@ cglobal hadamard_8x8, 3, 5, 11, input, stride, output
   TRANSPOSE8X8 0, 1, 2, 3, 4, 5, 6, 7, 9, 10
   HMD8_1D
 
-  STORE_TRAN_LOW 0, outputq, 0, 8, 9
-  STORE_TRAN_LOW 1, outputq, 1, 8, 9
-  STORE_TRAN_LOW 2, outputq, 2, 8, 9
-  STORE_TRAN_LOW 3, outputq, 3, 8, 9
-  STORE_TRAN_LOW 4, outputq, 4, 8, 9
-  STORE_TRAN_LOW 5, outputq, 5, 8, 9
-  STORE_TRAN_LOW 6, outputq, 6, 8, 9
-  STORE_TRAN_LOW 7, outputq, 7, 8, 9
+  STORE_TRAN_LOW 0, outputq,  0, 8, 9
+  STORE_TRAN_LOW 1, outputq,  8, 8, 9
+  STORE_TRAN_LOW 2, outputq, 16, 8, 9
+  STORE_TRAN_LOW 3, outputq, 24, 8, 9
+  STORE_TRAN_LOW 4, outputq, 32, 8, 9
+  STORE_TRAN_LOW 5, outputq, 40, 8, 9
+  STORE_TRAN_LOW 6, outputq, 48, 8, 9
+  STORE_TRAN_LOW 7, outputq, 56, 8, 9
 
   RET
 %endif

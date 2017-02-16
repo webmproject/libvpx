@@ -984,14 +984,14 @@ idct32x32_135:
   mov             r7, 2
 
 idct32x32_135_transpose:
-  LOAD_TRAN_LOW 0, r3,  0
-  LOAD_TRAN_LOW 1, r3,  4
-  LOAD_TRAN_LOW 2, r3,  8
-  LOAD_TRAN_LOW 3, r3, 12
-  LOAD_TRAN_LOW 4, r3, 16
-  LOAD_TRAN_LOW 5, r3, 20
-  LOAD_TRAN_LOW 6, r3, 24
-  LOAD_TRAN_LOW 7, r3, 28
+  LOAD_TRAN_LOW 0, r3,   0
+  LOAD_TRAN_LOW 1, r3,  32
+  LOAD_TRAN_LOW 2, r3,  64
+  LOAD_TRAN_LOW 3, r3,  96
+  LOAD_TRAN_LOW 4, r3, 128
+  LOAD_TRAN_LOW 5, r3, 160
+  LOAD_TRAN_LOW 6, r3, 192
+  LOAD_TRAN_LOW 7, r3, 224
 
   TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9, 10
 
@@ -1422,14 +1422,14 @@ idct32x32_1024:
   mov             r7, 4
 
 idct32x32_1024_transpose:
-  LOAD_TRAN_LOW 0, r3,  0
-  LOAD_TRAN_LOW 1, r3,  4
-  LOAD_TRAN_LOW 2, r3,  8
-  LOAD_TRAN_LOW 3, r3, 12
-  LOAD_TRAN_LOW 4, r3, 16
-  LOAD_TRAN_LOW 5, r3, 20
-  LOAD_TRAN_LOW 6, r3, 24
-  LOAD_TRAN_LOW 7, r3, 28
+  LOAD_TRAN_LOW 0, r3,   0
+  LOAD_TRAN_LOW 1, r3,  32
+  LOAD_TRAN_LOW 2, r3,  64
+  LOAD_TRAN_LOW 3, r3,  96
+  LOAD_TRAN_LOW 4, r3, 128
+  LOAD_TRAN_LOW 5, r3, 160
+  LOAD_TRAN_LOW 6, r3, 192
+  LOAD_TRAN_LOW 7, r3, 224
 
   TRANSPOSE8X8  0, 1, 2, 3, 4, 5, 6, 7, 9, 10
 

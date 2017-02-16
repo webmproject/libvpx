@@ -32,21 +32,21 @@
 %endmacro
 
 ; Load %2 + %3 into m%1.
-; %3 is the offset in elements, not bits.
+; %3 is the offset in elements, not bytes.
 ; If tran_low_t is 16 bits (low bit depth configuration) then load the value
 ; directly. If tran_low_t is 32 bits (high bit depth configuration) then pack
 ; the values down to 16 bits.
 %macro LOAD_TRAN_LOW 3
 %if CONFIG_VP9_HIGHBITDEPTH
-  mova     m%1, [%2 + %3 * 32]
-  packssdw m%1, [%2 + %3 * 32 + 16]
+  mova     m%1, [%2 + %3 * 4]
+  packssdw m%1, [%2 + %3 * 4 + 16]
 %else
-  mova     m%1, [%2 + %3 * 16]
+  mova     m%1, [%2 + %3 * 2]
 %endif
 %endmacro
 
 ; Store m%1 to %2 + %3.
-; %3 is the offset in elements, not bits.
+; %3 is the offset in elements, not bytes.
 ; If tran_low_t is 16 bits (low bit depth configuration) then store the value
 ; directly. If tran_low_t is 32 bits (high bit depth configuration) then sign
 ; extend the values first.
@@ -58,9 +58,9 @@
   pcmpgtw                   m%4, m%1
   punpcklwd                 m%5, m%4
   punpckhwd                 m%1, m%4
-  mova      [%2 + %3 * 32 +  0], m%5
-  mova      [%2 + %3 * 32 + 16], m%1
+  mova       [%2 + %3 * 4 +  0], m%5
+  mova       [%2 + %3 * 4 + 16], m%1
 %else
-  mova           [%2 + %3 * 16], m%1
+  mova            [%2 + %3 * 2], m%1
 %endif
 %endmacro
