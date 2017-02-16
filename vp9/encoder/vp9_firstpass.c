@@ -43,7 +43,6 @@
 #define ARF_STATS_OUTPUT 0
 
 #define BOOST_BREAKOUT 12.5
-#define BOOST_FACTOR 12.5
 #define FACTOR_PT_LOW 0.70
 #define FACTOR_PT_HIGH 0.90
 #define FIRST_PASS_Q 10.0
@@ -1843,7 +1842,7 @@ static void accumulate_frame_motion_stats(const FIRSTPASS_STATS *stats,
   }
 }
 
-#define BASELINE_ERR_PER_MB 1000.0
+#define BASELINE_ERR_PER_MB 12500.0
 static double calc_frame_boost(VP9_COMP *cpi, const FIRSTPASS_STATS *this_frame,
                                double *sr_accumulator,
                                double this_frame_mv_in_out, double max_boost) {
@@ -1872,12 +1871,12 @@ static double calc_frame_boost(VP9_COMP *cpi, const FIRSTPASS_STATS *this_frame,
     frame_boost += frame_boost * (this_frame_mv_in_out * 2.0);
 
   // Q correction and scalling
-  frame_boost = frame_boost * BOOST_FACTOR * boost_q_correction;
+  frame_boost = frame_boost * boost_q_correction;
 
   return VPXMIN(frame_boost, max_boost * boost_q_correction);
 }
 
-#define KF_BOOST_FACTOR 12.5
+#define KF_BASELINE_ERR_PER_MB 12500.0
 static double calc_kf_frame_boost(VP9_COMP *cpi,
                                   const FIRSTPASS_STATS *this_frame,
                                   double *sr_accumulator,
@@ -1894,7 +1893,7 @@ static double calc_kf_frame_boost(VP9_COMP *cpi,
   num_mbs = (int)VPXMAX(1, num_mbs * calculate_active_area(cpi, this_frame));
 
   // Underlying boost factor is based on inter error ratio.
-  frame_boost = (BASELINE_ERR_PER_MB * num_mbs) /
+  frame_boost = (KF_BASELINE_ERR_PER_MB * num_mbs) /
                 DOUBLE_DIVIDE_CHECK(this_frame->coded_error + *sr_accumulator);
 
   // Update the accumulator for second ref error difference.
@@ -1908,7 +1907,7 @@ static double calc_kf_frame_boost(VP9_COMP *cpi,
     frame_boost += frame_boost * (this_frame_mv_in_out * 2.0);
 
   // Q correction and scalling
-  frame_boost = frame_boost * KF_BOOST_FACTOR * boost_q_correction;
+  frame_boost = frame_boost * boost_q_correction;
 
   return VPXMIN(frame_boost, max_boost * boost_q_correction);
 }
@@ -2602,7 +2601,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 // ratio in the next frame.
 #define II_IMPROVEMENT_THRESHOLD 3.5
 #define KF_II_MAX 128.0
-
+#define BOOST_FACTOR 12.5
 static int test_candidate_kf(TWO_PASS *twopass,
                              const FIRSTPASS_STATS *last_frame,
                              const FIRSTPASS_STATS *this_frame,
