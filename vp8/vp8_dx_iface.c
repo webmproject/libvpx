@@ -80,7 +80,6 @@ static int vp8_init_ctx(vpx_codec_ctx_t *ctx) {
 static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx,
                                 vpx_codec_priv_enc_mr_cfg_t *data) {
   vpx_codec_err_t res = VPX_CODEC_OK;
-  vpx_codec_alg_priv_t *priv = NULL;
   (void)data;
 
   vp8_rtcd();
@@ -92,7 +91,10 @@ static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx,
    * information becomes known.
    */
   if (!ctx->priv) {
+    vpx_codec_alg_priv_t *priv;
+
     if (vp8_init_ctx(ctx)) return VPX_CODEC_MEM_ERROR;
+
     priv = (vpx_codec_alg_priv_t *)ctx->priv;
 
     /* initialize number of fragments to zero */
@@ -102,8 +104,6 @@ static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx,
         (priv->base.init_flags & VPX_CODEC_USE_INPUT_FRAGMENTS);
 
     /*post processing level initialized to do nothing */
-  } else {
-    priv = (vpx_codec_alg_priv_t *)ctx->priv;
   }
 
   return res;
