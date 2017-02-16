@@ -185,7 +185,7 @@ VP9_INSTANTIATE_TEST_CASE(
 
 // Test VP9 decode in frame parallel mode with different number of threads.
 INSTANTIATE_TEST_CASE_P(
-    VP9MultiThreadedFrameParallel, TestVectorTest,
+    DISABLED_VP9MultiThreadedFrameParallel, TestVectorTest,
     ::testing::Combine(
         ::testing::Values(
             static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP9)),
