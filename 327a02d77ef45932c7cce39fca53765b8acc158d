@@ -118,6 +118,53 @@
       "revId": "327a02d77ef45932c7cce39fca53765b8acc158d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "568a4a4d_5a971008",
+        "filename": "vpx_dsp/x86/bitdepth_conversion_sse2.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-16T02:06:16Z",
+      "side": 1,
+      "message": "\u003e i tried \n\u003e return _mm_packs_epi32(*(const __m128i *)a, *(const __m128i *)(a + 4));\n\u003e to drop the temp var and got the same disassembly. leaving it as it is now.\n\nOK it\u0027s simple to go to loadu if there\u0027s an issue",
+      "parentUuid": "43587682_a5ec2e36",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 59
+      },
+      "revId": "327a02d77ef45932c7cce39fca53765b8acc158d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3f020094_76cee058",
+        "filename": "vpx_dsp/x86/bitdepth_conversion_sse2.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-16T02:06:16Z",
+      "side": 1,
+      "message": "alternatively this could be a load too",
+      "range": {
+        "startLine": 24,
+        "startChar": 32,
+        "endLine": 24,
+        "endChar": 57
+      },
+      "revId": "327a02d77ef45932c7cce39fca53765b8acc158d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
