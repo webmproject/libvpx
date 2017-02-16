@@ -103,7 +103,7 @@ void DecodeFilesWithPause(const PauseFileList files[]) {
   }
 }
 
-TEST(VP9MultiThreadedFrameParallel, PauseSeekResume) {
+TEST(DISABLED_VP9MultiThreadedFrameParallel, PauseSeekResume) {
   // vp90-2-07-frame_parallel-1.webm is a 40 frame video file with
   // one key frame for every ten frames.
   static const PauseFileList files[] = {
@@ -183,7 +183,7 @@ void DecodeFiles(const FileList files[]) {
   }
 }
 
-TEST(VP9MultiThreadedFrameParallel, InvalidFileTest) {
+TEST(DISABLED_VP9MultiThreadedFrameParallel, InvalidFileTest) {
   static const FileList files[] = {
     // invalid-vp90-2-07-frame_parallel-1.webm is a 40 frame video file with
     // one key frame for every ten frames. The 11th frame has corrupted data.
@@ -204,7 +204,7 @@ TEST(VP9MultiThreadedFrameParallel, InvalidFileTest) {
   DecodeFiles(files);
 }
 
-TEST(VP9MultiThreadedFrameParallel, ValidFileTest) {
+TEST(DISABLED_VP9MultiThreadedFrameParallel, ValidFileTest) {
   static const FileList files[] = {
 #if CONFIG_VP9_HIGHBITDEPTH
     { "vp92-2-20-10bit-yuv420.webm", "a16b99df180c584e8db2ffeda987d293", 10 },
