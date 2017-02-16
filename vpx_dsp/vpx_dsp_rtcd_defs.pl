@@ -806,7 +806,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     specialize qw/vpx_idct32x32_1024_add sse2 neon dspr2 msa/, "$ssse3_x86_64";
 
     add_proto qw/void vpx_idct32x32_135_add/, "const tran_low_t *input, uint8_t *dest, int stride";
-    specialize qw/vpx_idct32x32_135_add sse2 neon dspr2 msa/, "$ssse3_x86_64";
+    specialize qw/vpx_idct32x32_135_add sse2 ssse3 neon dspr2 msa/;
     $vpx_idct32x32_135_add_sse2=vpx_idct32x32_1024_add_sse2;
     $vpx_idct32x32_135_add_dspr2=vpx_idct32x32_1024_add_dspr2;
     $vpx_idct32x32_135_add_msa=vpx_idct32x32_1024_add_msa;
