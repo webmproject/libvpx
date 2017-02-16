@@ -285,7 +285,7 @@ TEST_P(PartialIDctTest, SingleExtremeCoeff) {
   }
 }
 
-TEST_P(PartialIDctTest, DISABLED_Speed) {
+TEST_P(PartialIDctTest, Speed) {
   // Keep runtime stable with transform size.
   const int kCountSpeedTestBlock = 500000000 / input_block_size_;
   InitMem();
