@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d0109933_584bbe44",
+        "filename": "vp9/encoder/x86/vp9_quantize_ssse3_x86_64.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-16T03:53:06Z",
+      "side": 1,
+      "message": "it might be nice to change these later to take the full register. that might be clearer to the reader, e.g. STORE_ZERO_TRAN_LOW m5 here instead of just 5",
+      "range": {
+        "startLine": 161,
+        "startChar": 22,
+        "endLine": 161,
+        "endChar": 24
+      },
+      "revId": "cee961092298e9b2d8e1a77c7e6e59b66388758e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
