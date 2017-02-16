@@ -145,6 +145,30 @@
     },
     {
       "key": {
+        "uuid": "8e4e4d07_0c262dbb",
+        "filename": "vpx_dsp/x86/bitdepth_conversion_sse2.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-16T02:40:37Z",
+      "side": 1,
+      "message": "Linfeng mentioned that \"these 2 instructions\" (assuming the load and the packssdw) require 16 byte alignment. I think that means loadu would help, but only some. I guess we could load both values into registers first, if it came to that.",
+      "parentUuid": "568a4a4d_5a971008",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 59
+      },
+      "revId": "327a02d77ef45932c7cce39fca53765b8acc158d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3f020094_76cee058",
         "filename": "vpx_dsp/x86/bitdepth_conversion_sse2.h",
         "patchSetId": 2
@@ -156,6 +180,30 @@
       "writtenOn": "2017-02-16T02:06:16Z",
       "side": 1,
       "message": "alternatively this could be a load too",
+      "range": {
+        "startLine": 24,
+        "startChar": 32,
+        "endLine": 24,
+        "endChar": 57
+      },
+      "revId": "327a02d77ef45932c7cce39fca53765b8acc158d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e5b5bcd9_78b60cd5",
+        "filename": "vpx_dsp/x86/bitdepth_conversion_sse2.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-16T02:40:37Z",
+      "side": 1,
+      "message": "I didn\u0027t test with 2 loads, but we explicitly don\u0027t want 2 loads. This is currently:\npackssdw 0x10(%ebx),%xmm1\n\nwhich pulls straight from memory. Not sure how much slower loading it first would be, but it would at least require an extra register.",
+      "parentUuid": "3f020094_76cee058",
       "range": {
         "startLine": 24,
         "startChar": 32,
