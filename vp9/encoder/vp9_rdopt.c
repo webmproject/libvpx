@@ -3169,22 +3169,21 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
 
   midx = sf->schedule_mode_search ? mode_skip_start : 0;
 
-  memcpy(mode_map, tile_mode_map, sizeof(mode_map));
-
   while (midx > 4) {
     uint8_t end_pos = 0;
     for (i = 5; i < midx; ++i) {
-      if (mode_threshold[mode_map[i - 1]] > mode_threshold[mode_map[i]]) {
-        uint8_t tmp = mode_map[i];
-        mode_map[i] = mode_map[i - 1];
-        mode_map[i - 1] = tmp;
+      if (mode_threshold[tile_mode_map[i - 1]] >
+          mode_threshold[tile_mode_map[i]]) {
+        uint8_t tmp = tile_mode_map[i];
+        tile_mode_map[i] = tile_mode_map[i - 1];
+        tile_mode_map[i - 1] = tmp;
         end_pos = i;
       }
     }
     midx = end_pos;
   }
 
-  memcpy(tile_mode_map, mode_map, sizeof(mode_map));
+  memcpy(mode_map, tile_mode_map, sizeof(mode_map));
 
 #if CONFIG_MULTITHREAD
   if (NULL != tile_data->enc_row_mt_mutex)
