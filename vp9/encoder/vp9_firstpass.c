@@ -108,13 +108,15 @@ static void output_stats(FIRSTPASS_STATS *stats,
     fpfile = fopen("firstpass.stt", "a");
 
     fprintf(fpfile,
-            "%12.0lf %12.4lf %12.0lf %12.0lf %12.0lf %12.0lf %12.4lf"
+            "%12.0lf %12.4lf %12.0lf %12.0lf %12.0lf %12.0lf %12.4lf %12.4lf"
             "%12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.4lf"
-            "%12.4lf %12.4lf %12.4lf %12.4lf %12.0lf %12.0lf %12.0lf %12.4lf"
+            "%12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.0lf %12.0lf %12.0lf"
+            "%12.4lf"
             "\n",
             stats->frame, stats->weight, stats->intra_error, stats->coded_error,
             stats->sr_coded_error, stats->frame_noise_energy, stats->pcnt_inter,
             stats->pcnt_motion, stats->pcnt_second_ref, stats->pcnt_neutral,
+            stats->pcnt_intra_low, stats->pcnt_intra_high,
             stats->intra_skip_pct, stats->intra_smooth_pct,
             stats->inactive_zone_rows, stats->inactive_zone_cols, stats->MVr,
             stats->mvr_abs, stats->MVc, stats->mvc_abs, stats->MVrv,
@@ -148,6 +150,8 @@ static void zero_stats(FIRSTPASS_STATS *section) {
   section->pcnt_neutral = 0.0;
   section->intra_skip_pct = 0.0;
   section->intra_smooth_pct = 0.0;
+  section->pcnt_intra_low = 0.0;
+  section->pcnt_intra_high = 0.0;
   section->inactive_zone_rows = 0.0;
   section->inactive_zone_cols = 0.0;
   section->MVr = 0.0;
@@ -177,6 +181,8 @@ static void accumulate_stats(FIRSTPASS_STATS *section,
   section->pcnt_neutral += frame->pcnt_neutral;
   section->intra_skip_pct += frame->intra_skip_pct;
   section->intra_smooth_pct += frame->intra_smooth_pct;
+  section->pcnt_intra_low += frame->pcnt_intra_low;
+  section->pcnt_intra_high += frame->pcnt_intra_high;
   section->inactive_zone_rows += frame->inactive_zone_rows;
   section->inactive_zone_cols += frame->inactive_zone_cols;
   section->MVr += frame->MVr;
@@ -204,6 +210,8 @@ static void subtract_stats(FIRSTPASS_STATS *section,
   section->pcnt_neutral -= frame->pcnt_neutral;
   section->intra_skip_pct -= frame->intra_skip_pct;
   section->intra_smooth_pct -= frame->intra_smooth_pct;
+  section->pcnt_intra_low -= frame->pcnt_intra_low;
+  section->pcnt_intra_high -= frame->pcnt_intra_high;
   section->inactive_zone_rows -= frame->inactive_zone_rows;
   section->inactive_zone_cols -= frame->inactive_zone_cols;
   section->MVr -= frame->MVr;
@@ -710,6 +718,8 @@ static void first_pass_stat_calc(VP9_COMP *cpi, FIRSTPASS_STATS *fps,
   fps->pcnt_inter = (double)(fp_acc_data->intercount) / num_mbs;
   fps->pcnt_second_ref = (double)(fp_acc_data->second_ref_count) / num_mbs;
   fps->pcnt_neutral = (double)(fp_acc_data->neutral_count) / num_mbs;
+  fps->pcnt_intra_low = (double)(fp_acc_data->intra_count_low) / num_mbs;
+  fps->pcnt_intra_high = (double)(fp_acc_data->intra_count_high) / num_mbs;
   fps->intra_skip_pct = (double)(fp_acc_data->intra_skip_count) / num_mbs;
   fps->intra_smooth_pct = (double)(fp_acc_data->intra_smooth_count) / num_mbs;
   fps->inactive_zone_rows = (double)(fp_acc_data->image_data_start_row);
@@ -755,6 +765,8 @@ static void accumulate_fp_mb_row_stat(TileDataEnc *this_tile,
   this_tile->fp_data.intercount += fp_acc_data->intercount;
   this_tile->fp_data.second_ref_count += fp_acc_data->second_ref_count;
   this_tile->fp_data.neutral_count += fp_acc_data->neutral_count;
+  this_tile->fp_data.intra_count_low += fp_acc_data->intra_count_low;
+  this_tile->fp_data.intra_count_high += fp_acc_data->intra_count_high;
   this_tile->fp_data.intra_skip_count += fp_acc_data->intra_skip_count;
   this_tile->fp_data.mvcount += fp_acc_data->mvcount;
   this_tile->fp_data.sum_mvr += fp_acc_data->sum_mvr;
@@ -1262,10 +1274,14 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
           fp_acc_data->frame_noise_energy += (int64_t)SECTION_NOISE_DEF;
         }
       } else {  // Intra < inter error
-        if (this_intra_error < scale_sse_threshold(cm, LOW_I_THRESH))
+        int scaled_low_intra_thresh = scale_sse_threshold(cm, LOW_I_THRESH);
+        if (this_intra_error < scaled_low_intra_thresh) {
           fp_acc_data->frame_noise_energy += fp_estimate_block_noise(x, bsize);
-        else
+          fp_acc_data->intra_count_low += 1.0;
+        } else {
           fp_acc_data->frame_noise_energy += (int64_t)SECTION_NOISE_DEF;
+          fp_acc_data->intra_count_high += 1.0;
+        }
       }
     } else {
       fp_acc_data->sr_coded_error += (int64_t)this_error;
@@ -2463,8 +2479,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     rc->source_alt_ref_pending = 0;
   }
 
-  // Limit maximum boost based on interval length.
 #ifdef AGRESSIVE_VBR
+  // Limit maximum boost based on interval length.
   rc->gfu_boost = VPXMIN((int)rc->gfu_boost, i * 140);
 #else
   rc->gfu_boost = VPXMIN((int)rc->gfu_boost, i * 200);

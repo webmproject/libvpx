@@ -3335,10 +3335,10 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
         // Adjustment limits for min and max q
         qrange_adj = VPXMAX(1, (top_index - bottom_index) / 2);
 
-        bottom_index = VPXMAX(bottom_index - qrange_adj / 2,
-                              cpi->oxcf.best_allowed_q);
-        top_index = VPXMIN(cpi->oxcf.worst_allowed_q,
-                           top_index + qrange_adj / 2);
+        bottom_index =
+            VPXMAX(bottom_index - qrange_adj / 2, cpi->oxcf.best_allowed_q);
+        top_index =
+            VPXMIN(cpi->oxcf.worst_allowed_q, top_index + qrange_adj / 2);
       }
 #endif
       // TODO(agrange) Scale cpi->max_mv_magnitude if frame-size has changed.
@@ -3610,7 +3610,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
 #ifdef AGRESSIVE_VBR
   if (two_pass_first_group_inter(cpi)) {
     cpi->twopass.active_worst_quality =
-       VPXMIN(q + qrange_adj, cpi->oxcf.worst_allowed_q);
+        VPXMIN(q + qrange_adj, cpi->oxcf.worst_allowed_q);
   }
 #endif
 

@@ -21,12 +21,12 @@
 namespace {
 // FIRSTPASS_STATS struct:
 // {
-//   23 double members;
+//   25 double members;
 //   1 int64_t member;
 // }
 // Whenever FIRSTPASS_STATS struct is modified, the following constants need to
 // be revisited.
-const int kDbl = 23;
+const int kDbl = 25;
 const int kInt = 1;
 const size_t kFirstPassStatsSz = kDbl * sizeof(double) + kInt * sizeof(int64_t);
 
