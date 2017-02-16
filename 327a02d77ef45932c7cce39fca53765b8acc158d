@@ -94,6 +94,30 @@
       "revId": "327a02d77ef45932c7cce39fca53765b8acc158d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "43587682_a5ec2e36",
+        "filename": "vpx_dsp/x86/bitdepth_conversion_sse2.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-16T00:55:10Z",
+      "side": 1,
+      "message": "i tried \nreturn _mm_packs_epi32(*(const __m128i *)a, *(const __m128i *)(a + 4));\nto drop the temp var and got the same disassembly. leaving it as it is now.",
+      "parentUuid": "29751456_445b600a",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 59
+      },
+      "revId": "327a02d77ef45932c7cce39fca53765b8acc158d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
