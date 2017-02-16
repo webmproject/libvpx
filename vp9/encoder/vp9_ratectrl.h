@@ -21,8 +21,8 @@
 extern "C" {
 #endif
 
-// Used to control agressive VBR mode.
-// #define AGRESSIVE_VBR 1
+// Used to control aggressive VBR mode.
+// #define AGGRESSIVE_VBR 1
 
 // Bits Per MB at different Q (Multiplied by 512)
 #define BPER_MB_NORMBITS 9
