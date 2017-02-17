@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "397af7f0_a3b90e88",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-17T03:39:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eb799f3f_14f8f5cb",
+      "range": {
+        "startLine": 7,
+        "startChar": 30,
+        "endLine": 7,
+        "endChar": 39
+      },
+      "revId": "d70899b5fcc02667fbb8188751b027075cbec02d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eb799f3f_d49fcd95",
         "filename": "test/vp8_fdct4x4_test.cc",
         "patchSetId": 5
@@ -36,6 +60,24 @@
       "writtenOn": "2016-11-10T04:43:59Z",
       "side": 1,
       "message": "fdct_func_ or fdct_ would be a clearer name",
+      "revId": "d70899b5fcc02667fbb8188751b027075cbec02d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7f7eda8_f09d4726",
+        "filename": "test/vp8_fdct4x4_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-17T03:39:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eb799f3f_d49fcd95",
       "revId": "d70899b5fcc02667fbb8188751b027075cbec02d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
