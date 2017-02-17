@@ -23,36 +23,36 @@
 #include "vp9/common/vp9_entropy.h"
 #include "vpx/vpx_codec.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 
 using libvpx_test::ACMRandom;
 
 namespace {
-#if CONFIG_VP9_HIGHBITDEPTH
 const int kNumIterations = 1000;
 
-typedef int64_t (*ErrorBlockFunc)(const tran_low_t *coeff,
+typedef int64_t (*HBDBlockErrorFunc)(const tran_low_t *coeff,
+                                     const tran_low_t *dqcoeff,
+                                     intptr_t block_size, int64_t *ssz,
+                                     int bps);
+
+typedef std::tr1::tuple<HBDBlockErrorFunc, HBDBlockErrorFunc, vpx_bit_depth_t>
+    BlockErrorParam;
+
+typedef int64_t (*BlockErrorFunc)(const tran_low_t *coeff,
                                   const tran_low_t *dqcoeff,
-                                  intptr_t block_size, int64_t *ssz, int bps);
+                                  intptr_t block_size, int64_t *ssz);
 
-typedef std::tr1::tuple<ErrorBlockFunc, ErrorBlockFunc, vpx_bit_depth_t>
-    ErrorBlockParam;
-
-// wrapper for 8-bit block error functions without a 'bps' param.
-typedef int64_t (*HighBdBlockError8bit)(const tran_low_t *coeff,
-                                        const tran_low_t *dqcoeff,
-                                        intptr_t block_size, int64_t *ssz);
-template <HighBdBlockError8bit fn>
-int64_t HighBdBlockError8bitWrapper(const tran_low_t *coeff,
-                                    const tran_low_t *dqcoeff,
-                                    intptr_t block_size, int64_t *ssz,
-                                    int bps) {
-  EXPECT_EQ(8, bps);
+template <BlockErrorFunc fn>
+int64_t BlockError8BitWrapper(const tran_low_t *coeff,
+                              const tran_low_t *dqcoeff, intptr_t block_size,
+                              int64_t *ssz, int bps) {
+  EXPECT_EQ(bps, 8);
   return fn(coeff, dqcoeff, block_size, ssz);
 }
 
-class ErrorBlockTest : public ::testing::TestWithParam<ErrorBlockParam> {
+class BlockErrorTest : public ::testing::TestWithParam<BlockErrorParam> {
  public:
-  virtual ~ErrorBlockTest() {}
+  virtual ~BlockErrorTest() {}
   virtual void SetUp() {
     error_block_op_ = GET_PARAM(0);
     ref_error_block_op_ = GET_PARAM(1);
@@ -63,11 +63,11 @@ class ErrorBlockTest : public ::testing::TestWithParam<ErrorBlockParam> {
 
  protected:
   vpx_bit_depth_t bit_depth_;
-  ErrorBlockFunc error_block_op_;
-  ErrorBlockFunc ref_error_block_op_;
+  HBDBlockErrorFunc error_block_op_;
+  HBDBlockErrorFunc ref_error_block_op_;
 };
 
-TEST_P(ErrorBlockTest, OperationCheck) {
+TEST_P(BlockErrorTest, OperationCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   DECLARE_ALIGNED(16, tran_low_t, coeff[4096]);
   DECLARE_ALIGNED(16, tran_low_t, dqcoeff[4096]);
@@ -110,7 +110,7 @@ TEST_P(ErrorBlockTest, OperationCheck) {
       << "First failed at test case " << first_failure;
 }
 
-TEST_P(ErrorBlockTest, ExtremeValues) {
+TEST_P(BlockErrorTest, ExtremeValues) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   DECLARE_ALIGNED(16, tran_low_t, coeff[4096]);
   DECLARE_ALIGNED(16, tran_low_t, dqcoeff[4096]);
@@ -171,29 +171,28 @@ TEST_P(ErrorBlockTest, ExtremeValues) {
 using std::tr1::make_tuple;
 
 #if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(
-    SSE2, ErrorBlockTest,
-    ::testing::Values(
-        make_tuple(&vp9_highbd_block_error_sse2, &vp9_highbd_block_error_c,
-                   VPX_BITS_10),
-        make_tuple(&vp9_highbd_block_error_sse2, &vp9_highbd_block_error_c,
-                   VPX_BITS_12),
-        make_tuple(&vp9_highbd_block_error_sse2, &vp9_highbd_block_error_c,
-                   VPX_BITS_8),
-        make_tuple(
-            &HighBdBlockError8bitWrapper<vp9_highbd_block_error_8bit_sse2>,
-            &HighBdBlockError8bitWrapper<vp9_highbd_block_error_8bit_c>,
-            VPX_BITS_8)));
+const BlockErrorParam sse2_block_error_tests[] = {
+#if CONFIG_VP9_HIGHBITDEPTH
+  make_tuple(&vp9_highbd_block_error_sse2, &vp9_highbd_block_error_c,
+             VPX_BITS_10),
+  make_tuple(&vp9_highbd_block_error_sse2, &vp9_highbd_block_error_c,
+             VPX_BITS_12),
+  make_tuple(&vp9_highbd_block_error_sse2, &vp9_highbd_block_error_c,
+             VPX_BITS_8),
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  make_tuple(&BlockError8BitWrapper<vp9_block_error_sse2>,
+             &BlockError8BitWrapper<vp9_block_error_c>, VPX_BITS_8)
+};
+
+INSTANTIATE_TEST_CASE_P(SSE2, BlockErrorTest,
+                        ::testing::ValuesIn(sse2_block_error_tests));
 #endif  // HAVE_SSE2
 
-#if HAVE_AVX
+#if HAVE_AVX2
 INSTANTIATE_TEST_CASE_P(
-    AVX, ErrorBlockTest,
-    ::testing::Values(make_tuple(
-        &HighBdBlockError8bitWrapper<vp9_highbd_block_error_8bit_avx>,
-        &HighBdBlockError8bitWrapper<vp9_highbd_block_error_8bit_c>,
-        VPX_BITS_8)));
-#endif  // HAVE_AVX
-
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+    AVX2, BlockErrorTest,
+    ::testing::Values(make_tuple(&BlockError8BitWrapper<vp9_block_error_avx2>,
+                                 &BlockError8BitWrapper<vp9_block_error_c>,
+                                 VPX_BITS_8)));
+#endif  // HAVE_AVX2
 }  // namespace

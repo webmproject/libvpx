@@ -157,7 +157,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct8x8_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += hadamard_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += minmax_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += variance_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_error_block_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_block_error_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_quantize_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_subtract_test.cc
 

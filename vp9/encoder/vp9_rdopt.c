@@ -284,22 +284,12 @@ int64_t vp9_highbd_block_error_c(const tran_low_t *coeff,
   return error;
 }
 
-int64_t vp9_highbd_block_error_8bit_c(const tran_low_t *coeff,
-                                      const tran_low_t *dqcoeff,
-                                      intptr_t block_size, int64_t *ssz) {
-  // Note that the C versions of these 2 functions (vp9_block_error and
-  // vp9_highbd_block_error_8bit are the same, but the optimized assembly
-  // routines are not compatible in the non high bitdepth configuration, so
-  // they still cannot share the same name.
-  return vp9_block_error_c(coeff, dqcoeff, block_size, ssz);
-}
-
 static int64_t vp9_highbd_block_error_dispatch(const tran_low_t *coeff,
                                                const tran_low_t *dqcoeff,
                                                intptr_t block_size,
                                                int64_t *ssz, int bd) {
   if (bd == 8) {
-    return vp9_highbd_block_error_8bit(coeff, dqcoeff, block_size, ssz);
+    return vp9_block_error(coeff, dqcoeff, block_size, ssz);
   } else {
     return vp9_highbd_block_error(coeff, dqcoeff, block_size, ssz, bd);
   }
@@ -1130,16 +1120,9 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int row,
           ratey += cost_coeffs(x, 0, block, TX_4X4, coeff_ctx, so->scan,
                                so->neighbors, cpi->sf.use_fast_coef_costing);
           tempa[idx] = templ[idy] = (x->plane[0].eobs[block] > 0) ? 1 : 0;
-#if CONFIG_VP9_HIGHBITDEPTH
-          distortion +=
-              vp9_highbd_block_error_8bit(
-                  coeff, BLOCK_OFFSET(pd->dqcoeff, block), 16, &unused) >>
-              2;
-#else
           distortion += vp9_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff, block),
                                         16, &unused) >>
                         2;
-#endif
           if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
             goto next;
           vp9_iht4x4_add(tx_type, BLOCK_OFFSET(pd->dqcoeff, block), dst,

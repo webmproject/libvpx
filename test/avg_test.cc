@@ -234,11 +234,11 @@ class SatdTest : public ::testing::Test,
 
 typedef int64_t (*BlockErrorFunc)(const tran_low_t *coeff,
                                   const tran_low_t *dqcoeff, int block_size);
-typedef std::tr1::tuple<int, BlockErrorFunc> BlockErrorTestParam;
+typedef std::tr1::tuple<int, BlockErrorFunc> BlockErrorTestFPParam;
 
-class BlockErrorTest
+class BlockErrorTestFP
     : public ::testing::Test,
-      public ::testing::WithParamInterface<BlockErrorTestParam> {
+      public ::testing::WithParamInterface<BlockErrorTestFPParam> {
  protected:
   virtual void SetUp() {
     txfm_size_ = GET_PARAM(0);
@@ -367,21 +367,21 @@ TEST_P(SatdTest, Random) {
   Check(expected);
 }
 
-TEST_P(BlockErrorTest, MinValue) {
+TEST_P(BlockErrorTestFP, MinValue) {
   const int64_t kMin = -32640;
   const int64_t expected = kMin * kMin * txfm_size_;
   FillConstant(kMin, 0);
   Check(expected);
 }
 
-TEST_P(BlockErrorTest, MaxValue) {
+TEST_P(BlockErrorTestFP, MaxValue) {
   const int64_t kMax = 32640;
   const int64_t expected = kMax * kMax * txfm_size_;
   FillConstant(kMax, 0);
   Check(expected);
 }
 
-TEST_P(BlockErrorTest, Random) {
+TEST_P(BlockErrorTestFP, Random) {
   int64_t expected;
   switch (txfm_size_) {
     case 16: expected = 2051681432; break;
@@ -410,7 +410,7 @@ INSTANTIATE_TEST_CASE_P(C, SatdTest,
                                           make_tuple(1024, &vpx_satd_c)));
 
 INSTANTIATE_TEST_CASE_P(
-    C, BlockErrorTest,
+    C, BlockErrorTestFP,
     ::testing::Values(make_tuple(16, &vp9_block_error_fp_c),
                       make_tuple(64, &vp9_block_error_fp_c),
                       make_tuple(256, &vp9_block_error_fp_c),
@@ -447,7 +447,7 @@ INSTANTIATE_TEST_CASE_P(SSE2, SatdTest,
                                           make_tuple(1024, &vpx_satd_sse2)));
 
 INSTANTIATE_TEST_CASE_P(
-    SSE2, BlockErrorTest,
+    SSE2, BlockErrorTestFP,
     ::testing::Values(make_tuple(16, &vp9_block_error_fp_sse2),
                       make_tuple(64, &vp9_block_error_fp_sse2),
                       make_tuple(256, &vp9_block_error_fp_sse2),
@@ -488,7 +488,7 @@ INSTANTIATE_TEST_CASE_P(NEON, SatdTest,
 // in place.
 #if !CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
-    NEON, BlockErrorTest,
+    NEON, BlockErrorTestFP,
     ::testing::Values(make_tuple(16, &vp9_block_error_fp_neon),
                       make_tuple(64, &vp9_block_error_fp_neon),
                       make_tuple(256, &vp9_block_error_fp_neon),

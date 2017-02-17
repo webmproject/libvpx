@@ -130,9 +130,6 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/int64_t vp9_highbd_block_error/, "const tran_low_t *coeff, const tran_low_t *dqcoeff, intptr_t block_size, int64_t *ssz, int bd";
   specialize qw/vp9_highbd_block_error sse2/;
 
-  add_proto qw/int64_t vp9_highbd_block_error_8bit/, "const tran_low_t *coeff, const tran_low_t *dqcoeff, intptr_t block_size, int64_t *ssz";
-  specialize qw/vp9_highbd_block_error_8bit sse2 avx/;
-
   add_proto qw/int64_t vp9_block_error_fp/, "const tran_low_t *coeff, const tran_low_t *dqcoeff, int block_size";
   specialize qw/vp9_block_error_fp sse2/;
 
