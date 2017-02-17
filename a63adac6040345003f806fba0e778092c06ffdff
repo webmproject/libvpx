@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5ae1c0cd_94f09096",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2017-02-17T16:38:15Z",
+      "side": 1,
+      "message": "do you mean \"is\"?",
+      "range": {
+        "startLine": 11,
+        "startChar": 19,
+        "endLine": 11,
+        "endChar": 22
+      },
+      "revId": "a63adac6040345003f806fba0e778092c06ffdff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "09711d56_e6251bf6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2017-02-17T16:38:15Z",
+      "side": 1,
+      "message": "10% in what term? compression? or rate target accuracy?",
+      "range": {
+        "startLine": 14,
+        "startChar": 73,
+        "endLine": 14,
+        "endChar": 76
+      },
+      "revId": "a63adac6040345003f806fba0e778092c06ffdff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
