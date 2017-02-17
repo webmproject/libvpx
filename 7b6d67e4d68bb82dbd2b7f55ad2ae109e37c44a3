@@ -93,6 +93,30 @@
       "revId": "7b6d67e4d68bb82dbd2b7f55ad2ae109e37c44a3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "22ec67d9_133229cb",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-02-17T21:50:15Z",
+      "side": 1,
+      "message": "Johann, good to know this trick.",
+      "parentUuid": "893c01c1_886b4de3",
+      "range": {
+        "startLine": 269,
+        "startChar": 0,
+        "endLine": 269,
+        "endChar": 41
+      },
+      "revId": "7b6d67e4d68bb82dbd2b7f55ad2ae109e37c44a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
