@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "461cf99f_c074809f",
+        "filename": "vpx/vpx_codec.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-17T00:03:26Z",
+      "side": 1,
+      "message": "this will break the abi, minimally the version at line 86 needs to be bumped. this is still a bit unfortunate since the requests for capabilities isn\u0027t protected by a check, just the instantiation.\nthe check normally goes like:\n#ifdef VPX_CODEC_CAP_HIGHBITDEPTH\n        vpx_codec_caps_t codec_caps \u003d vpx_codec_get_caps(vpx_codec_vp9_cx());\n        if (codec_caps \u0026 VPX_CODEC_CAP_HIGHBITDEPTH)\n\nso the report will be wrong, but I suppose the creation of the codec would fail. the alternative would be to define a VPX_CODEC_CAP_HIGHBITDEPTH_DECODER",
+      "revId": "58d25c2441f07e57f2b210d64126df3d17bb62bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
