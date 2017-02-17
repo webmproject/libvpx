@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e896122f_40ba5dd4",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1735,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-17T19:16:34Z",
+      "side": 0,
+      "message": "ENABLE_MT_BIT_MATCH is mainly needed in unit test, and wouldn\u0027t be used in actual encoding. Always allocate this memory may not be a good way. Maybe better to move this memory allocation to vp9_first_pass(), and the de-allocation to vp9_end_first_pass() after output_stats() is done. Also, in that way, we can use\n if (cpi-\u003eoxcf.ethread_bit_match)\n    allocate\n else\n    fp_mb_float_stats \u003d NULL",
+      "range": {
+        "startLine": 1735,
+        "startChar": 23,
+        "endLine": 1735,
+        "endChar": 0
+      },
+      "revId": "61927ba4ac6390bc98396b9ba30d050f63e720fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c9a84eb_aaa7602c",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2121,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-17T19:16:34Z",
+      "side": 0,
+      "message": "See above comment.",
+      "range": {
+        "startLine": 2121,
+        "startChar": 23,
+        "endLine": 2121,
+        "endChar": 0
+      },
+      "revId": "61927ba4ac6390bc98396b9ba30d050f63e720fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "90b38bc8_319772b1",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 650,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-17T19:16:34Z",
+      "side": 0,
+      "message": "Better to add a comment to indicate that this function is only called in bit match test(namely, ethread_bit_match\u003d1).",
+      "range": {
+        "startLine": 650,
+        "startChar": 23,
+        "endLine": 650,
+        "endChar": 0
+      },
+      "revId": "61927ba4ac6390bc98396b9ba30d050f63e720fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}

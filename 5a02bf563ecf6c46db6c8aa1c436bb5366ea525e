@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b1b3fd80_33e9783c",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-17T19:16:34Z",
+      "side": 1,
+      "message": "encoder-\u003eControl(VP9E_ENABLE_THREAD_BIT_MATCH, bit_match_mode_);\n\nSame for the one below",
+      "range": {
+        "startLine": 89,
+        "startChar": 6,
+        "endLine": 89,
+        "endChar": 77
+      },
+      "revId": "5a02bf563ecf6c46db6c8aa1c436bb5366ea525e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1762b208_b40985c4",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-17T19:16:34Z",
+      "side": 1,
+      "message": "Maybe change to cfg_.g_threads \u003d threads_; This should work, right?",
+      "range": {
+        "startLine": 344,
+        "startChar": 2,
+        "endLine": 344,
+        "endChar": 21
+      },
+      "revId": "5a02bf563ecf6c46db6c8aa1c436bb5366ea525e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "49cc1abb_1490a6f2",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-17T19:16:34Z",
+      "side": 1,
+      "message": "Remove this test, and use multi_thr_md5 directly.",
+      "range": {
+        "startLine": 350,
+        "startChar": 2,
+        "endLine": 355,
+        "endChar": 15
+      },
+      "revId": "5a02bf563ecf6c46db6c8aa1c436bb5366ea525e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e4de91c6_21b0e4a9",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 967,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-17T19:16:34Z",
+      "side": 1,
+      "message": "if (cpi-\u003eoxcf.ethread_bit_match)",
+      "range": {
+        "startLine": 967,
+        "startChar": 6,
+        "endLine": 967,
+        "endChar": 64
+      },
+      "revId": "5a02bf563ecf6c46db6c8aa1c436bb5366ea525e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1b924c68_6c3568b6",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 986,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-17T19:16:34Z",
+      "side": 1,
+      "message": "if (cpi-\u003eoxcf.ethread_bit_match)",
+      "range": {
+        "startLine": 985,
+        "startChar": 6,
+        "endLine": 986,
+        "endChar": 31
+      },
+      "revId": "5a02bf563ecf6c46db6c8aa1c436bb5366ea525e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b5c7d33c_8608171f",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1157,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-17T19:16:34Z",
+      "side": 1,
+      "message": "if (cpi-\u003eoxcf.ethread_bit_match)",
+      "range": {
+        "startLine": 1157,
+        "startChar": 10,
+        "endLine": 1157,
+        "endChar": 65
+      },
+      "revId": "5a02bf563ecf6c46db6c8aa1c436bb5366ea525e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a47eab20_d61dda47",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1409,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-17T19:16:34Z",
+      "side": 1,
+      "message": "Also under if (cpi-\u003eoxcf.ethread_bit_match)",
+      "range": {
+        "startLine": 1409,
+        "startChar": 5,
+        "endLine": 1409,
+        "endChar": 62
+      },
+      "revId": "5a02bf563ecf6c46db6c8aa1c436bb5366ea525e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
