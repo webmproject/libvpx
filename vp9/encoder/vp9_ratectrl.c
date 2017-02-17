@@ -93,7 +93,7 @@ static int inter_minq_12[QINDEX_RANGE];
 static int rtc_minq_12[QINDEX_RANGE];
 #endif
 
-#ifdef AGRESSIVE_VBR
+#ifdef AGGRESSIVE_VBR
 static int gf_high = 2400;
 static int gf_low = 400;
 static int kf_high = 4000;
@@ -133,7 +133,7 @@ static void init_minq_luts(int *kf_low_m, int *kf_high_m, int *arfgf_low,
     const double maxq = vp9_convert_qindex_to_q(i, bit_depth);
     kf_low_m[i] = get_minq_index(maxq, 0.000001, -0.0004, 0.150, bit_depth);
     kf_high_m[i] = get_minq_index(maxq, 0.0000021, -0.00125, 0.55, bit_depth);
-#ifdef AGRESSIVE_VBR
+#ifdef AGGRESSIVE_VBR
     arfgf_low[i] = get_minq_index(maxq, 0.0000015, -0.0009, 0.275, bit_depth);
     inter[i] = get_minq_index(maxq, 0.00000271, -0.00113, 0.80, bit_depth);
 #else

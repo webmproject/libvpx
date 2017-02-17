@@ -2478,7 +2478,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     rc->source_alt_ref_pending = 0;
   }
 
-#ifdef AGRESSIVE_VBR
+#ifdef AGGRESSIVE_VBR
   // Limit maximum boost based on interval length.
   rc->gfu_boost = VPXMIN((int)rc->gfu_boost, i * 140);
 #else
@@ -2517,7 +2517,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   gf_group_bits = calculate_total_gf_group_bits(cpi, gf_group_err);
 
   // Calculate an estimate of the maxq needed for the group.
-  // We are more agressive about correcting for sections
+  // We are more aggressive about correcting for sections
   // where there could be significant overshoot than for easier
   // sections where we do not wish to risk creating an overshoot
   // of the allocated bit budget.
@@ -2689,7 +2689,7 @@ static int test_candidate_kf(TWO_PASS *twopass,
 #define MIN_KF_TOT_BOOST 300
 #define KF_BOOST_SCAN_MAX_FRAMES 32
 
-#ifdef AGRESSIVE_VBR
+#ifdef AGGRESSIVE_VBR
 #define KF_MAX_FRAME_BOOST 80.0
 #define MAX_KF_TOT_BOOST 4800
 #else

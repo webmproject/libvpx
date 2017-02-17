@@ -3312,7 +3312,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
   int frame_under_shoot_limit;
   int q = 0, q_low = 0, q_high = 0;
   int enable_acl;
-#ifdef AGRESSIVE_VBR
+#ifdef AGGRESSIVE_VBR
   int qrange_adj = 1;
 #endif
 
@@ -3330,7 +3330,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
     if (loop_count == 0 || cpi->resize_pending != 0) {
       set_size_dependent_vars(cpi, &q, &bottom_index, &top_index);
 
-#ifdef AGRESSIVE_VBR
+#ifdef AGGRESSIVE_VBR
       if (two_pass_first_group_inter(cpi)) {
         // Adjustment limits for min and max q
         qrange_adj = VPXMAX(1, (top_index - bottom_index) / 2);
@@ -3607,7 +3607,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
       if (loop || !enable_acl) restore_coding_context(cpi);
   } while (loop);
 
-#ifdef AGRESSIVE_VBR
+#ifdef AGGRESSIVE_VBR
   if (two_pass_first_group_inter(cpi)) {
     cpi->twopass.active_worst_quality =
         VPXMIN(q + qrange_adj, cpi->oxcf.worst_allowed_q);
