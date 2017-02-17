@@ -22,6 +22,30 @@
       "revId": "9d29dfbd921a85f999ad85c811d1b7f3c87a1234",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0fe6d600_363aa39f",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-17T23:25:16Z",
+      "side": 1,
+      "message": "Whoops, i meant 8bit but HBD internal",
+      "parentUuid": "296aed99_9734a193",
+      "range": {
+        "startLine": 294,
+        "startChar": 11,
+        "endLine": 294,
+        "endChar": 33
+      },
+      "revId": "9d29dfbd921a85f999ad85c811d1b7f3c87a1234",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
