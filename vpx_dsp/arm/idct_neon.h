@@ -752,4 +752,10 @@ void idct16x16_38_add_half1d(const void *const input, int16_t *const output,
                              void *const dest, const int stride,
                              const int highbd_flag);
 
+void idct16x16_10_add_half1d_pass1(const tran_low_t *input, int16_t *output);
+
+void idct16x16_10_add_half1d_pass2(const int16_t *input, int16_t *const output,
+                                   void *const dest, const int stride,
+                                   const int highbd_flag);
+
 #endif  // VPX_DSP_ARM_IDCT_NEON_H_
