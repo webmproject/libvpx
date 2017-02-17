@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9f0849bc_5d45cbad",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-17T20:21:26Z",
+      "side": 1,
+      "message": "Why disable the test? Are there other functions that need to be modified?",
+      "range": {
+        "startLine": 269,
+        "startChar": 0,
+        "endLine": 269,
+        "endChar": 41
+      },
+      "revId": "7b6d67e4d68bb82dbd2b7f55ad2ae109e37c44a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
