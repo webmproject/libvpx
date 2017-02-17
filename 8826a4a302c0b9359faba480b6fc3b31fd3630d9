@@ -22,6 +22,30 @@
       "revId": "8826a4a302c0b9359faba480b6fc3b31fd3630d9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b0edcd2_94c77c1a",
+        "filename": "test/vp9_block_error_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-17T22:21:22Z",
+      "side": 1,
+      "message": ":\u0027( i though VS got fixed",
+      "parentUuid": "ea059af3_07980a30",
+      "range": {
+        "startLine": 177,
+        "startChar": 27,
+        "endLine": 177,
+        "endChar": 0
+      },
+      "revId": "8826a4a302c0b9359faba480b6fc3b31fd3630d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
