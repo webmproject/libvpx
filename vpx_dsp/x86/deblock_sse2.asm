@@ -78,8 +78,8 @@
 %endmacro
 
 %macro UPDATE_FLIMIT 0
-        movdqa      xmm2,       XMMWORD PTR [rbx]
-        movdqa      [rsp],      xmm2
+        movdqu      xmm2,       XMMWORD PTR [rbx]
+        movdqu      [rsp],      xmm2
         add         rbx,        16
 %endmacro
 

@@ -3000,8 +3000,9 @@ static void set_size_dependent_vars(VP9_COMP *cpi, int *q, int *bottom_index,
       case 6: l = 150; break;
     }
     if (!cpi->common.postproc_state.limits) {
-      cpi->common.postproc_state.limits = vpx_calloc(
-          cpi->common.width, sizeof(*cpi->common.postproc_state.limits));
+      cpi->common.postproc_state.limits =
+          vpx_calloc(cpi->un_scaled_source->y_width,
+                     sizeof(*cpi->common.postproc_state.limits));
     }
     vp9_denoise(cpi->Source, cpi->Source, l, cpi->common.postproc_state.limits);
   }
