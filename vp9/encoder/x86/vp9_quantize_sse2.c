@@ -17,18 +17,16 @@
 #include "vpx_dsp/x86/bitdepth_conversion_sse2.h"
 
 void vp9_quantize_fp_sse2(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
-                          int skip_block, const int16_t *zbin_ptr,
-                          const int16_t *round_ptr, const int16_t *quant_ptr,
-                          const int16_t *quant_shift_ptr,
-                          tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
-                          const int16_t *dequant_ptr, uint16_t *eob_ptr,
-                          const int16_t *scan_ptr, const int16_t *iscan_ptr) {
+                          int skip_block, const int16_t *round_ptr,
+                          const int16_t *quant_ptr, tran_low_t *qcoeff_ptr,
+                          tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr,
+                          uint16_t *eob_ptr, const int16_t *scan_ptr,
+                          const int16_t *iscan_ptr) {
   __m128i zero;
   __m128i thr;
   int16_t nzflag;
+
   (void)scan_ptr;
-  (void)zbin_ptr;
-  (void)quant_shift_ptr;
 
   coeff_ptr += n_coeffs;
   iscan_ptr += n_coeffs;

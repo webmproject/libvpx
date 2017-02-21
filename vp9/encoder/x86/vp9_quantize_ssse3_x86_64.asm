@@ -19,8 +19,8 @@ pw_1: times 8 dw 1
 SECTION .text
 
 %macro QUANTIZE_FP 2
-cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
-                                shift, qcoeff, dqcoeff, dequant, \
+cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, round, quant, \
+                                qcoeff, dqcoeff, dequant, \
                                 eob, scan, iscan
   cmp                    dword skipm, 0
   jne .blank
@@ -29,7 +29,6 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   movifnidn                   coeffq, coeffmp
   movifnidn                  ncoeffq, ncoeffmp
   mov                             r2, dequantmp
-  movifnidn                    zbinq, zbinmp
   movifnidn                   roundq, roundmp
   movifnidn                   quantq, quantmp
   mova                            m1, [roundq]             ; m1 = round

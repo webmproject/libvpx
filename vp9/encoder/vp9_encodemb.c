@@ -339,31 +339,27 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block, int row, int col,
     switch (tx_size) {
       case TX_32X32:
         highbd_fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
-        vp9_highbd_quantize_fp_32x32(coeff, 1024, x->skip_block, p->zbin,
-                                     p->round_fp, p->quant_fp, p->quant_shift,
-                                     qcoeff, dqcoeff, pd->dequant, eob,
-                                     scan_order->scan, scan_order->iscan);
+        vp9_highbd_quantize_fp_32x32(coeff, 1024, x->skip_block, p->round_fp,
+                                     p->quant_fp, qcoeff, dqcoeff, pd->dequant,
+                                     eob, scan_order->scan, scan_order->iscan);
         break;
       case TX_16X16:
         vpx_highbd_fdct16x16(src_diff, coeff, diff_stride);
-        vp9_highbd_quantize_fp(coeff, 256, x->skip_block, p->zbin, p->round_fp,
-                               p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
-                               pd->dequant, eob, scan_order->scan,
-                               scan_order->iscan);
+        vp9_highbd_quantize_fp(coeff, 256, x->skip_block, p->round_fp,
+                               p->quant_fp, qcoeff, dqcoeff, pd->dequant, eob,
+                               scan_order->scan, scan_order->iscan);
         break;
       case TX_8X8:
         vpx_highbd_fdct8x8(src_diff, coeff, diff_stride);
-        vp9_highbd_quantize_fp(coeff, 64, x->skip_block, p->zbin, p->round_fp,
-                               p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
-                               pd->dequant, eob, scan_order->scan,
-                               scan_order->iscan);
+        vp9_highbd_quantize_fp(coeff, 64, x->skip_block, p->round_fp,
+                               p->quant_fp, qcoeff, dqcoeff, pd->dequant, eob,
+                               scan_order->scan, scan_order->iscan);
         break;
       case TX_4X4:
         x->fwd_txm4x4(src_diff, coeff, diff_stride);
-        vp9_highbd_quantize_fp(coeff, 16, x->skip_block, p->zbin, p->round_fp,
-                               p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
-                               pd->dequant, eob, scan_order->scan,
-                               scan_order->iscan);
+        vp9_highbd_quantize_fp(coeff, 16, x->skip_block, p->round_fp,
+                               p->quant_fp, qcoeff, dqcoeff, pd->dequant, eob,
+                               scan_order->scan, scan_order->iscan);
         break;
       default: assert(0);
     }
@@ -374,28 +370,26 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block, int row, int col,
   switch (tx_size) {
     case TX_32X32:
       fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
-      vp9_quantize_fp_32x32(coeff, 1024, x->skip_block, p->zbin, p->round_fp,
-                            p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
-                            pd->dequant, eob, scan_order->scan,
-                            scan_order->iscan);
+      vp9_quantize_fp_32x32(coeff, 1024, x->skip_block, p->round_fp,
+                            p->quant_fp, qcoeff, dqcoeff, pd->dequant, eob,
+                            scan_order->scan, scan_order->iscan);
       break;
     case TX_16X16:
       vpx_fdct16x16(src_diff, coeff, diff_stride);
-      vp9_quantize_fp(coeff, 256, x->skip_block, p->zbin, p->round_fp,
-                      p->quant_fp, p->quant_shift, qcoeff, dqcoeff, pd->dequant,
-                      eob, scan_order->scan, scan_order->iscan);
+      vp9_quantize_fp(coeff, 256, x->skip_block, p->round_fp, p->quant_fp,
+                      qcoeff, dqcoeff, pd->dequant, eob, scan_order->scan,
+                      scan_order->iscan);
       break;
     case TX_8X8:
       vp9_fdct8x8_quant(src_diff, diff_stride, coeff, 64, x->skip_block,
-                        p->zbin, p->round_fp, p->quant_fp, p->quant_shift,
-                        qcoeff, dqcoeff, pd->dequant, eob, scan_order->scan,
-                        scan_order->iscan);
+                        p->round_fp, p->quant_fp, qcoeff, dqcoeff, pd->dequant,
+                        eob, scan_order->scan, scan_order->iscan);
       break;
     case TX_4X4:
       x->fwd_txm4x4(src_diff, coeff, diff_stride);
-      vp9_quantize_fp(coeff, 16, x->skip_block, p->zbin, p->round_fp,
-                      p->quant_fp, p->quant_shift, qcoeff, dqcoeff, pd->dequant,
-                      eob, scan_order->scan, scan_order->iscan);
+      vp9_quantize_fp(coeff, 16, x->skip_block, p->round_fp, p->quant_fp,
+                      qcoeff, dqcoeff, pd->dequant, eob, scan_order->scan,
+                      scan_order->iscan);
       break;
     default: assert(0); break;
   }
