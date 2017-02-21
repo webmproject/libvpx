@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d21a7605_0d3cc487",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 640,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-21T20:25:23Z",
+      "side": 1,
+      "message": "May want to remove this also since intrinsics should work for 32bit as well.",
+      "range": {
+        "startLine": 640,
+        "startChar": 18,
+        "endLine": 640,
+        "endChar": 29
+      },
+      "revId": "2e9c848503799e3d98632d153472e889f26efdff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
