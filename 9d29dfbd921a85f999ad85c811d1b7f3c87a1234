@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "73e341e9_051b1b0a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-21T17:42:04Z",
+      "side": 1,
+      "message": "It looks like there are more devices with avx (but not avx2) than I thought - all of sandy/ivy bridge?\n\nShould I keep the avx? The original change cited low end devices for the change. Not sure how important of an improvement it was though.",
+      "revId": "9d29dfbd921a85f999ad85c811d1b7f3c87a1234",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "296aed99_9734a193",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 3
