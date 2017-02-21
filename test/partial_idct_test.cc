@@ -637,8 +637,7 @@ INSTANTIATE_TEST_CASE_P(SSE2, PartialIDctTest,
 
 #endif  // HAVE_SSE2 && !CONFIG_EMULATE_HARDWARE
 
-#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_EMULATE_HARDWARE && \
-    !CONFIG_VP9_HIGHBITDEPTH
+#if HAVE_SSSE3 && !CONFIG_EMULATE_HARDWARE
 const PartialInvTxfmParam ssse3_partial_idct_tests[] = {
   make_tuple(&vpx_fdct32x32_c, &wrapper<vpx_idct32x32_1024_add_c>,
              &wrapper<vpx_idct32x32_1024_add_ssse3>, TX_32X32, 1024, 8, 1),
