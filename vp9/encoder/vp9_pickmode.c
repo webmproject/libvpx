@@ -636,17 +636,19 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *this_rdc,
 #if CONFIG_VP9_HIGHBITDEPTH
   // TODO(jingning): Implement the high bit-depth Hadamard transforms and
   // remove this check condition.
-  // TODO(marpan): Disable this for 8 bit once optimizations for the functions
-  // below are merged in.
-  // if (xd->bd != 8) {
-  unsigned int var_y, sse_y;
-  (void)tx_size;
-  model_rd_for_sb_y(cpi, bsize, x, xd, &this_rdc->rate, &this_rdc->dist, &var_y,
-                    &sse_y);
-  *sse = INT_MAX;
-  *skippable = 0;
-  return;
-// }
+  // TODO(marpan): Use this path (model_rd) for 8bit under certain conditions
+  // for now, as the vp9_quantize_fp below for highbitdepth build is slow.
+  if (xd->bd != 8 ||
+      (cpi->oxcf.speed > 5 && cpi->common.frame_type != KEY_FRAME &&
+       bsize < BLOCK_32X32)) {
+    unsigned int var_y, sse_y;
+    (void)tx_size;
+    model_rd_for_sb_y(cpi, bsize, x, xd, &this_rdc->rate, &this_rdc->dist,
+                      &var_y, &sse_y);
+    *sse = INT_MAX;
+    *skippable = 0;
+    return;
+  }
 #endif
 
   (void)cpi;
