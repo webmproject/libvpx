@@ -531,6 +531,7 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
       memset(cr->last_coded_q_map, MAXQ,
              cm->mi_rows * cm->mi_cols * sizeof(*cr->last_coded_q_map));
       cr->sb_index = 0;
+      cr->reduce_refresh = 0;
     }
     return;
   } else {
