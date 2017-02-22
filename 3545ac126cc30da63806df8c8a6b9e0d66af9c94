@@ -34,6 +34,24 @@
       "revId": "3545ac126cc30da63806df8c8a6b9e0d66af9c94",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "30e8784c_73a9f346",
+        "filename": "test/vp8_fdct4x4_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-22T05:34:09Z",
+      "side": 1,
+      "message": "Huh, aligning \u0027input\u0027 must have had a knock-on effect on test. I\u0027m working on a change to buffer.h to intentionally unalign buffers unless specific alignment is requested.",
+      "parentUuid": "6149146e_4e393674",
+      "revId": "3545ac126cc30da63806df8c8a6b9e0d66af9c94",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
