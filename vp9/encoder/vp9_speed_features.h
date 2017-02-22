@@ -482,6 +482,8 @@ typedef struct SPEED_FEATURES {
   // Compute the source sad for every superblock of the frame,
   // prior to encoding the frame, to be used to bypass some encoder decisions.
   int use_source_sad;
+
+  int use_simple_block_yrd;
 } SPEED_FEATURES;
 
 struct VP9_COMP;

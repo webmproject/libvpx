@@ -313,6 +313,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed,
   sf->allow_acl = 0;
   sf->copy_partition_flag = 0;
   sf->use_source_sad = 0;
+  sf->use_simple_block_yrd = 0;
 
   if (speed >= 1) {
     sf->allow_txfm_domain_distortion = 1;
@@ -555,6 +556,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf, int speed,
       }
     }
     sf->limit_newmv_early_exit = 0;
+    sf->use_simple_block_yrd = 0;
   }
 }
 
