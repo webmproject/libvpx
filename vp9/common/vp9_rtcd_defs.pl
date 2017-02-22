@@ -228,11 +228,8 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 #
 # frame based scale
 #
-if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
-} else {
-  add_proto qw/void vp9_scale_and_extend_frame/, "const struct yv12_buffer_config *src, struct yv12_buffer_config *dst";
-  specialize qw/vp9_scale_and_extend_frame ssse3/;
-}
+add_proto qw/void vp9_scale_and_extend_frame/, "const struct yv12_buffer_config *src, struct yv12_buffer_config *dst";
+specialize qw/vp9_scale_and_extend_frame ssse3/;
 
 }
 # end encoder functions
