@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9d09e596_a194809a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-22T04:25:10Z",
+      "side": 1,
+      "message": "\u003e It looks like there are more devices with avx (but not avx2) than I thought - all of sandy/ivy bridge?\n\u003e \n\u003e Should I keep the avx? The original change cited low end devices for the change. Not sure how important of an improvement it was though.\n\nI wasn\u0027t paying attention to that removal. If it\u0027s not helping it can go, but it would be good to try it on some older hardware, maybe an old Pixel.",
+      "parentUuid": "73e341e9_051b1b0a",
+      "revId": "9d29dfbd921a85f999ad85c811d1b7f3c87a1234",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "296aed99_9734a193",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 3
