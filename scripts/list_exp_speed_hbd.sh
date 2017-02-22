@@ -12,6 +12,7 @@ root_dir=~/Dev/aomedia
 code_dir=$root_dir/aom
 build_dir=$root_dir/build
 test_dir=~/Dev/field
+script_dir=~/Dev/refine/libvpx/scripts
 
 # video=~/Dev/samples/videos/yaowu/soccer_cif.y4m
 # wi=352
@@ -34,7 +35,7 @@ frames=300
 bitrate=5000
 fps="50/1"
 
-bs=bs.webm
+bs=bs
 codec="--codec=av1"
 verbose=
 
@@ -58,7 +59,7 @@ for exp_tool in experimental var-tx ans entropy ext-intra filter-intra supertx e
 do
   cd $build_dir
   make clean > /dev/null
-  ~/Dev/bin/runconfig_hbd.sh $exp_tool
+  $script_dir/runconfig_hbd.sh $exp_tool
   make -j > /dev/null
   if [ $? -ne 0 ]; then
     echo Build failed on experiment: $exp_tool
@@ -69,6 +70,7 @@ do
   cd $test_dir
   elog=e_$exp_tool.txt
   dlog=d_$exp_tool.txt
+  bs=$bs_$exp_tool.webm
   
   ./aomenc -o $bs $video $codec --limit=$frames --skip=0 -p 2 --good --cpu-used=0 --target-bitrate=$bitrate --lag-in-frames=25 --min-q=0 --max-q=63 --auto-alt-ref=1 --kf-max-dist=150 --kf-min-dist=0 --drop-frame=0 --static-thresh=0 --bias-pct=50 --minsection-pct=0 --maxsection-pct=2000 --arnr-maxframes=7 --arnr-strength=5 --sharpness=0 --undershoot-pct=100 --overshoot-pct=100 --frame-parallel=0 --tile-columns=0 --profile=$profile $bitdepth --test-decode=warn $verbose --psnr &>> $elog
   
