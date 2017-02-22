@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "54f4b8e1_f05b6e2c",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-02-22T06:39:27Z",
+      "side": 1,
+      "message": "We see that vpx_free(x) function has a check to avoid freeing of memory if x is NULL pointer. \nIn addition we see that freeing of some other memory blocks happens in similar fashion. For Eg., cpi-\u003eworkers is allocated only in case of multi-threading, however vpx_free() is called always.\nPlease let us know if you still feel that check is required.",
+      "parentUuid": "fcba5128_fbee34e0",
+      "range": {
+        "startLine": 291,
+        "startChar": 2,
+        "endLine": 292,
+        "endChar": 40
+      },
+      "revId": "97d6a4cbd1d89224fcb2c4045a8adefa9c75bfe0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e560273c_bc0684f4",
         "filename": "vp9/encoder/vp9_firstpass.c",
         "patchSetId": 2
@@ -36,6 +60,24 @@
       "writtenOn": "2017-02-21T18:43:22Z",
       "side": 1,
       "message": "Is cpi-\u003etwopass.fp_mb_float_stats initialized to NULL for cpi-\u003eoxcf.ethread_bit_match\u003d0?",
+      "revId": "97d6a4cbd1d89224fcb2c4045a8adefa9c75bfe0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8669ae9c_45503961",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1413,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-02-22T06:39:27Z",
+      "side": 1,
+      "message": "As cpi structure is memset to 0 during initialization, cpi-\u003etwopass.fp_mb_float_stats would be a NULL pointer unless initialized.",
+      "parentUuid": "e560273c_bc0684f4",
       "revId": "97d6a4cbd1d89224fcb2c4045a8adefa9c75bfe0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
