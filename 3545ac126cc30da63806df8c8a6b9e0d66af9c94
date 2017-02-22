@@ -70,6 +70,24 @@
       "revId": "3545ac126cc30da63806df8c8a6b9e0d66af9c94",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "598799cc_17299bea",
+        "filename": "test/vp8_fdct4x4_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-22T18:27:41Z",
+      "side": 1,
+      "message": "The assembly file uses unaligned loads, but aligned stores.",
+      "parentUuid": "dec1ead8_6f4926bf",
+      "revId": "3545ac126cc30da63806df8c8a6b9e0d66af9c94",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
