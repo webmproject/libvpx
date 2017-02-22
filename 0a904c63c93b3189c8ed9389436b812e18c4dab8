@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b723d15_afa9a791",
+        "filename": "tools/tiny_ssim.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-02-22T17:43:39Z",
+      "side": 1,
+      "message": "stdlib.h provides malloc?",
+      "range": {
+        "startLine": 12,
+        "startChar": 10,
+        "endLine": 12,
+        "endChar": 16
+      },
+      "revId": "0a904c63c93b3189c8ed9389436b812e18c4dab8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c9bae1f6_d77b5a9d",
+        "filename": "tools/tiny_ssim.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-02-22T17:43:39Z",
+      "side": 1,
+      "message": "absolute path relative to libvpx root please",
+      "range": {
+        "startLine": 19,
+        "startChar": 11,
+        "endLine": 19,
+        "endChar": 12
+      },
+      "revId": "0a904c63c93b3189c8ed9389436b812e18c4dab8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d93e04d8_e018efa1",
+        "filename": "tools/tiny_ssim.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-02-22T17:43:39Z",
+      "side": 1,
+      "message": "can we consolidate these into some struct { FILE* file, uint8_t* buf, enum filetype } ?",
+      "range": {
+        "startLine": 148,
+        "startChar": 11,
+        "endLine": 148,
+        "endChar": 12
+      },
+      "revId": "0a904c63c93b3189c8ed9389436b812e18c4dab8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "12e1bac0_1fab7f5f",
+        "filename": "tools/tiny_ssim.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-02-22T17:43:39Z",
+      "side": 1,
+      "message": "y4m}",
+      "range": {
+        "startLine": 155,
+        "startChar": 53,
+        "endLine": 155,
+        "endChar": 54
+      },
+      "revId": "0a904c63c93b3189c8ed9389436b812e18c4dab8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1ca8fbf2_94c50dab",
+        "filename": "tools/tiny_ssim.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-02-22T17:43:39Z",
+      "side": 1,
+      "message": "This is required for non-y4m files, can we fail here if none of the files are y4m?\n\nAlso can we double-check that the y4m files are of the same size?",
+      "range": {
+        "startLine": 166,
+        "startChar": 10,
+        "endLine": 166,
+        "endChar": 11
+      },
+      "revId": "0a904c63c93b3189c8ed9389436b812e18c4dab8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "da72ffb1_ab23b03f",
+        "filename": "tools/tiny_ssim.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-02-22T17:43:39Z",
+      "side": 1,
+      "message": "can we do !is_y4m? Not sure if this is against libvpx style.",
+      "range": {
+        "startLine": 196,
+        "startChar": 6,
+        "endLine": 196,
+        "endChar": 12
+      },
+      "revId": "0a904c63c93b3189c8ed9389436b812e18c4dab8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f569da66_b714d44e",
+        "filename": "tools/tiny_ssim.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-02-22T17:43:39Z",
+      "side": 1,
+      "message": "can we break this part out to a function for this and below?",
+      "range": {
+        "startLine": 201,
+        "startChar": 8,
+        "endLine": 201,
+        "endChar": 14
+      },
+      "revId": "0a904c63c93b3189c8ed9389436b812e18c4dab8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "70574e91_cdb9af11",
+        "filename": "vpx/vpx_codec.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-02-22T17:43:39Z",
+      "side": 1,
+      "message": "vpx/ since you\u0027re fixing the below",
+      "range": {
+        "startLine": 45,
+        "startChar": 12,
+        "endLine": 45,
+        "endChar": 23
+      },
+      "revId": "0a904c63c93b3189c8ed9389436b812e18c4dab8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
