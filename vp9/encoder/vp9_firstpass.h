@@ -41,14 +41,11 @@ typedef struct {
 
 #define INVALID_ROW -1
 
-#define ENABLE_MT_BIT_MATCH 0
-#if ENABLE_MT_BIT_MATCH
 typedef struct {
   double frame_mb_intra_factor;
   double frame_mb_brightness_factor;
   double frame_mb_neutral_count;
 } FP_MB_FLOAT_STATS;
-#endif
 
 typedef struct {
   double intra_factor;
@@ -153,9 +150,7 @@ typedef struct {
   FIRSTPASS_MB_STATS firstpass_mb_stats;
 #endif
 
-#if ENABLE_MT_BIT_MATCH
   FP_MB_FLOAT_STATS *fp_mb_float_stats;
-#endif
 
   // An indication of the content type of the current frame
   FRAME_CONTENT_TYPE fr_content_type;

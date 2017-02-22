@@ -40,6 +40,7 @@ class VPxFirstPassEncoderThreadTest
     init_flags_ = VPX_CODEC_USE_PSNR;
 
     new_mt_mode_ = 1;
+    bit_match_mode_ = 0;
     first_pass_only_ = true;
     firstpass_stats_.buf = NULL;
     firstpass_stats_.sz = 0;
@@ -85,6 +86,8 @@ class VPxFirstPassEncoderThreadTest
       if (encoding_mode_ == ::libvpx_test::kTwoPassGood)
         encoder->Control(VP9E_SET_NEW_MT, new_mt_mode_);
 
+      encoder->Control(VP9E_ENABLE_THREAD_BIT_MATCH, bit_match_mode_);
+
       encoder_initialized_ = true;
     }
   }
@@ -110,6 +113,7 @@ class VPxFirstPassEncoderThreadTest
   ::libvpx_test::TestMode encoding_mode_;
   int set_cpu_used_;
   int new_mt_mode_;
+  int bit_match_mode_;
   bool first_pass_only_;
   vpx_fixed_buf_t firstpass_stats_;
 };
@@ -144,6 +148,28 @@ static void compare_fp_stats(vpx_fixed_buf_t *fp_stats) {
   fp_stats->sz = 0;
 }
 
+static void compare_fp_stats_md5(vpx_fixed_buf_t *fp_stats) {
+  // fp_stats consists of 2 set of first pass encoding stats. These 2 set of
+  // stats are compared to check if the stats match.
+  uint8_t *stats1 = reinterpret_cast<uint8_t *>(fp_stats->buf);
+  uint8_t *stats2 = stats1 + fp_stats->sz / 2;
+  ::libvpx_test::MD5 md5_new_mt_0, md5_new_mt_1;
+
+  md5_new_mt_0.Add(stats1, fp_stats->sz / 2);
+  const char *md5_new_mt_0_str = md5_new_mt_0.Get();
+
+  md5_new_mt_1.Add(stats2, fp_stats->sz / 2);
+  const char *md5_new_mt_1_str = md5_new_mt_1.Get();
+
+  // Check md5 match.
+  ASSERT_STREQ(md5_new_mt_0_str, md5_new_mt_1_str)
+      << "MD5 checksums don't match";
+
+  // Reset firstpass_stats_ to 0.
+  memset((uint8_t *)fp_stats->buf, 0, fp_stats->sz);
+  fp_stats->sz = 0;
+}
+
 TEST_P(VPxFirstPassEncoderThreadTest, FirstPassStatsTest) {
   ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
 
@@ -151,6 +177,7 @@ TEST_P(VPxFirstPassEncoderThreadTest, FirstPassStatsTest) {
   cfg_.rc_target_bitrate = 1000;
 
   // Test new_mt_mode: 0 vs 1 (threads = 1, tiles_ = 0)
+  bit_match_mode_ = 0;
   tiles_ = 0;
   cfg_.g_threads = 1;
 
@@ -177,6 +204,21 @@ TEST_P(VPxFirstPassEncoderThreadTest, FirstPassStatsTest) {
 
   // Compare to check if single-thread and multi-thread stats matches.
   compare_fp_stats(&firstpass_stats_);
+
+  // Test new_mt_mode: 0 vs 1 (threads = 8, tiles_ = 2)
+  bit_match_mode_ = 1;
+  tiles_ = 2;
+  cfg_.g_threads = 8;
+
+  new_mt_mode_ = 0;
+  init_flags_ = VPX_CODEC_USE_PSNR;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+
+  new_mt_mode_ = 1;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+
+  // Compare to check if stats match with new-mt=0/1.
+  compare_fp_stats_md5(&firstpass_stats_);
 }
 
 class VPxEncoderThreadTest
@@ -191,6 +233,7 @@ class VPxEncoderThreadTest
     init_flags_ = VPX_CODEC_USE_PSNR;
     md5_.clear();
     new_mt_mode_ = 1;
+    bit_match_mode_ = 0;
   }
   virtual ~VPxEncoderThreadTest() {}
 
@@ -229,10 +272,11 @@ class VPxEncoderThreadTest
         encoder->Control(VP8E_SET_ARNR_TYPE, 3);
         encoder->Control(VP9E_SET_FRAME_PARALLEL_DECODING, 0);
 
-        // While new_mt = 1(namely, using row-based multi-threading), several
+        encoder->Control(VP9E_SET_NEW_MT, new_mt_mode_);
+        // While new_mt = 1/0(with/without row-based multi-threading), several
         // speed features that would adaptively adjust encoding parameters have
         // to be disabled to guarantee the bit match of the resulted bitstream.
-        if (new_mt_mode_) encoder->Control(VP9E_ENABLE_THREAD_BIT_MATCH, 1);
+        encoder->Control(VP9E_ENABLE_THREAD_BIT_MATCH, bit_match_mode_);
       } else {
         encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 0);
         encoder->Control(VP9E_SET_AQ_MODE, 3);
@@ -265,15 +309,18 @@ class VPxEncoderThreadTest
   ::libvpx_test::TestMode encoding_mode_;
   int set_cpu_used_;
   int new_mt_mode_;
+  int bit_match_mode_;
   std::vector<std::string> md5_;
 };
 
 TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
-  std::vector<std::string> single_thr_md5, multi_thr_md5;
+  std::vector<std::string> single_thr_md5, multi_thr_md5, new_mt_0_md5;
 
   ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 15, 20);
 
   cfg_.rc_target_bitrate = 1000;
+  bit_match_mode_ = 1;
+  new_mt_mode_ = 1;
 
   // Encode using single thread.
   cfg_.g_threads = 1;
@@ -290,6 +337,17 @@ TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
 
   // Compare to check if two vectors are equal.
   ASSERT_EQ(single_thr_md5, multi_thr_md5);
+
+  // Encode with new-mt 0.
+  new_mt_mode_ = 0;
+  cfg_.g_threads = threads_;
+  init_flags_ = VPX_CODEC_USE_PSNR;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  new_mt_0_md5 = md5_;
+  md5_.clear();
+
+  // Compare to check if two vectors are equal.
+  ASSERT_EQ(new_mt_0_md5, multi_thr_md5);
 }
 
 INSTANTIATE_TEST_CASE_P(
