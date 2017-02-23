@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b027ebeb_bfd5cc38",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-23T21:28:57Z",
+      "side": 1,
+      "message": "nit: ternary.",
+      "range": {
+        "startLine": 316,
+        "startChar": 4,
+        "endLine": 317,
+        "endChar": 15
+      },
+      "revId": "6a178dd42a160e14367c35d7c614bed8495cdcd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4d9e5ee7_e8c667d1",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-23T21:28:57Z",
+      "side": 1,
+      "message": "Is this always guaranteed to be bit exact? Even with bit_match_mode_ \u003d 0?",
+      "revId": "6a178dd42a160e14367c35d7c614bed8495cdcd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7fd6e050_4a39a864",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-23T21:28:57Z",
+      "side": 1,
+      "message": "nit: Can you please re-assign new_mt_mode_ and bit_match_mode_ after each Part x description so that it is clear without having to look back at the last assigned value?",
+      "range": {
+        "startLine": 362,
+        "startChar": 2,
+        "endLine": 362,
+        "endChar": 14
+      },
+      "revId": "6a178dd42a160e14367c35d7c614bed8495cdcd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d759ef7c_1f3d1cdf",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 392,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-23T21:28:57Z",
+      "side": 1,
+      "message": "Should there be another assert here for checking equiality of |new_mt_single_thr_md5| and |single_thr_md5| ?\n\ni.e. new_mt_ \u003d 0 vs new_mt_ \u003d 1 with threads_ \u003d 1 \u0026\u0026 bit_exact_mode_ \u003d 1",
+      "revId": "6a178dd42a160e14367c35d7c614bed8495cdcd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
