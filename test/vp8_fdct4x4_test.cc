@@ -86,7 +86,7 @@ class FdctTest : public ::testing::TestWithParam<FdctFunc> {
 
 TEST_P(FdctTest, SignBiasCheck) {
   int16_t test_input_block[16];
-  int16_t test_output_block[16];
+  DECLARE_ALIGNED(16, int16_t, test_output_block[16]);
   const int pitch = 8;
   int count_sign_block[16][2];
   const int count_test_block = 1000000;
@@ -155,9 +155,9 @@ TEST_P(FdctTest, RoundTripErrorCheck) {
   double total_error = 0;
   const int count_test_block = 1000000;
   for (int i = 0; i < count_test_block; ++i) {
-    DECLARE_ALIGNED(16, int16_t, test_input_block[16]);
-    DECLARE_ALIGNED(16, int16_t, test_output_block[16]);
-    int16_t test_temp_block[16];
+    int16_t test_input_block[16];
+    int16_t test_output_block[16];
+    DECLARE_ALIGNED(16, int16_t, test_temp_block[16]);
 
     // Initialize a test block with input range [-255, 255].
     for (int j = 0; j < 16; ++j) {
