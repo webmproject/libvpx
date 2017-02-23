@@ -46,6 +46,30 @@
       "revId": "899c6959c6aea467ab5790d3f14a14dc0be55c8c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "db065581_42401625",
+        "filename": "vp9/encoder/x86/vp9_error_sse2.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-23T23:35:22Z",
+      "side": 1,
+      "message": "All uses of vp9_block_error use 16 or 16 upshifted by a value:\nhttps://chromium.googlesource.com/webm/libvpx/+/5127e58dab541a21f2953f8f0acb86da9170e042/vp9/encoder/vp9_rdopt.c#552\nhttps://chromium.googlesource.com/webm/libvpx/+/5127e58dab541a21f2953f8f0acb86da9170e042/vp9/encoder/vp9_rdopt.c#1139\nhttps://chromium.googlesource.com/webm/libvpx/+/5127e58dab541a21f2953f8f0acb86da9170e042/vp9/encoder/vp9_rdopt.c#1139\n\ndo you want me to investigate the neon?",
+      "parentUuid": "9d8b35d1_260404b4",
+      "range": {
+        "startLine": 59,
+        "startChar": 11,
+        "endLine": 59,
+        "endChar": 0
+      },
+      "revId": "899c6959c6aea467ab5790d3f14a14dc0be55c8c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
