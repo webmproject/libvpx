@@ -163,6 +163,24 @@
       "revId": "6a178dd42a160e14367c35d7c614bed8495cdcd2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "587b3224_5c62df20",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 392,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-23T22:12:06Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "f380da8f_8a7bac75",
+      "revId": "6a178dd42a160e14367c35d7c614bed8495cdcd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
