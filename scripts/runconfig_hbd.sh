@@ -6,10 +6,12 @@ libsrc=aom
 
 bitdepth=--enable-aom-highbitdepth
 #bitdepth=
+#debug=--enable-debug
+debug=
 
 if [ "$#" -eq 1 ]; then
   tool=$1
-  ../$libsrc/configure --target=$platform $codec $bitdepth --enable-experimental --enable-$tool --disable-unit-tests --disable-daala-ec > /dev/null
+  ../$libsrc/configure --target=$platform $codec $bitdepth $debug --enable-experimental --enable-$tool --disable-unit-tests --disable-daala-ec > /dev/null
 else
   tool_1=$1
   tool_2=$2
