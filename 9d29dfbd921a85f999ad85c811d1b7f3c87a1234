@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "aa9d0d90_cfca5b10",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-23T20:54:05Z",
+      "side": 1,
+      "message": "Specifically for the 2013 Pixel (no AVX2) the SSE2-\u003eAVX fast runtime goes from 260ms -\u003e 220ms, maybe 15% faster. There is still the problem of the pathological case though, which goes from 2508 for SSE2 to 3375 for AVX (I\u0027m running an arbitrary loop on the test, there happen to be more iterations for that one. general difference still holds though)",
+      "parentUuid": "e0227d80_ea73ba90",
+      "revId": "9d29dfbd921a85f999ad85c811d1b7f3c87a1234",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "296aed99_9734a193",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 3
