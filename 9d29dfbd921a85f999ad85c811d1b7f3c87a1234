@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "e0227d80_ea73ba90",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-23T20:31:19Z",
+      "side": 1,
+      "message": "I did some more testing. I was looking at the \"Extreme Values\"  test before.\n\nRunning \"OperationCheck\" instead seems to hit the pathological case for AVX (It runs twice if it hits overflow) and takes ~60% longer to run than SSE2. I modified it to work with lowbd as well and got similar results.\n\nGiven the variability of AVX and lacking information about how likely it is to hit the pathological case, I still vote for removal.",
+      "parentUuid": "9d09e596_a194809a",
+      "revId": "9d29dfbd921a85f999ad85c811d1b7f3c87a1234",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "296aed99_9734a193",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 3
