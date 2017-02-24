@@ -78,6 +78,7 @@ stress() {
   local readonly webm="$2"
   local readonly decode_count="$3"
   local readonly threads="$4"
+  local readonly enc_args="$5"
   local pids=""
   local rt_max_jobs=${STRESS_RT_MAX_JOBS:-5}
   local onepass_max_jobs=${STRESS_ONEPASS_MAX_JOBS:-5}
@@ -92,7 +93,7 @@ stress() {
     eval "${VPX_TEST_PREFIX}" "${encoder}" "--codec=${codec} -w 1280 -h 720" \
       "${YUV}" "-t ${threads} --limit=150 --test-decode=fatal --passes=1" \
       "--target-bitrate=${bitrate} -o ${VPX_TEST_OUTPUT_DIR}/${i}.1pass.webm" \
-      ${devnull} &
+      "${enc_args}" ${devnull} &
     pids="${pids} $!"
   done
 
@@ -102,7 +103,7 @@ stress() {
     eval "${VPX_TEST_PREFIX}" "${encoder}" "--codec=${codec} -w 1280 -h 720" \
       "${YUV}" "-t ${threads} --limit=150 --test-decode=fatal --passes=2" \
       "--target-bitrate=${bitrate} -o ${VPX_TEST_OUTPUT_DIR}/${i}.2pass.webm" \
-      ${devnull} &
+      "${enc_args}" ${devnull} &
     pids="${pids} $!"
   done
 
@@ -154,8 +155,15 @@ vp9_stress() {
 
 vp9_stress_test() {
   for threads in 4 8 100; do
-    vp9_stress "$threads"
+    vp9_stress "$threads" "--row-mt=0"
   done
 }
 
-run_tests stress_verify_environment "vp8_stress_test vp9_stress_test"
+vp9_stress_test_row_mt() {
+  for threads in 4 8 100; do
+    vp9_stress "$threads" "--row-mt=1"
+  done
+}
+
+run_tests stress_verify_environment \
+  "vp8_stress_test vp9_stress_test vp9_stress_test_row_mt"
