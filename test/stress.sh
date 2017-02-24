@@ -77,6 +77,7 @@ stress() {
   local readonly codec="$1"
   local readonly webm="$2"
   local readonly decode_count="$3"
+  local readonly threads="$4"
   local pids=""
   local rt_max_jobs=${STRESS_RT_MAX_JOBS:-5}
   local onepass_max_jobs=${STRESS_ONEPASS_MAX_JOBS:-5}
@@ -89,7 +90,7 @@ stress() {
   for i in $(seq ${onepass_max_jobs}); do
     bitrate=$(($i * 20 + 300))
     eval "${VPX_TEST_PREFIX}" "${encoder}" "--codec=${codec} -w 1280 -h 720" \
-      "${YUV}" "-t 4 --limit=150 --test-decode=fatal --passes=1" \
+      "${YUV}" "-t ${threads} --limit=150 --test-decode=fatal --passes=1" \
       "--target-bitrate=${bitrate} -o ${VPX_TEST_OUTPUT_DIR}/${i}.1pass.webm" \
       ${devnull} &
     pids="${pids} $!"
@@ -99,7 +100,7 @@ stress() {
   for i in $(seq ${twopass_max_jobs}); do
     bitrate=$(($i * 20 + 300))
     eval "${VPX_TEST_PREFIX}" "${encoder}" "--codec=${codec} -w 1280 -h 720" \
-      "${YUV}" "-t 4 --limit=150 --test-decode=fatal --passes=2" \
+      "${YUV}" "-t ${threads} --limit=150 --test-decode=fatal --passes=2" \
       "--target-bitrate=${bitrate} -o ${VPX_TEST_OUTPUT_DIR}/${i}.2pass.webm" \
       ${devnull} &
     pids="${pids} $!"
@@ -109,7 +110,7 @@ stress() {
   for i in $(seq ${rt_max_jobs}); do
     bitrate=$(($i * 20 + 300))
     eval "${VPX_TEST_PREFIX}" "${encoder}" "--codec=${codec} -w 1280 -h 720" \
-      "${YUV}" "-t 4 --limit=150 --test-decode=fatal " \
+      "${YUV}" "-t ${threads} --limit=150 --test-decode=fatal " \
       "--target-bitrate=${bitrate} --lag-in-frames=0 --error-resilient=1" \
       "--kf-min-dist=3000 --kf-max-dist=3000 --cpu-used=-6 --static-thresh=1" \
       "--end-usage=cbr --min-q=2 --max-q=56 --undershoot-pct=100" \
@@ -122,7 +123,7 @@ stress() {
 
   # Start $decode_count decode jobs in parallel.
   for i in $(seq "${decode_count}"); do
-    eval "${decoder}" "-t 4" "${webm}" "--noblit" ${devnull} &
+    eval "${decoder}" "-t ${threads}" "${webm}" "--noblit" ${devnull} &
     pids="${pids} $!"
   done
 
@@ -138,17 +139,23 @@ vp8_stress_test() {
   local vp8_max_jobs=${STRESS_VP8_DECODE_MAX_JOBS:-40}
   if [ "$(vp8_decode_available)" = "yes" -a \
        "$(vp8_encode_available)" = "yes" ]; then
-    stress vp8 "${VP8}" "${vp8_max_jobs}"
+    stress vp8 "${VP8}" "${vp8_max_jobs}" 4
   fi
 }
 
-vp9_stress_test() {
+vp9_stress() {
   local vp9_max_jobs=${STRESS_VP9_DECODE_MAX_JOBS:-25}
 
   if [ "$(vp9_decode_available)" = "yes" -a \
        "$(vp9_encode_available)" = "yes" ]; then
-    stress vp9 "${VP9}" "${vp9_max_jobs}"
+    stress vp9 "${VP9}" "${vp9_max_jobs}" "$@"
   fi
+}
+
+vp9_stress_test() {
+  for threads in 4 8 100; do
+    vp9_stress "$threads"
+  done
 }
 
 run_tests stress_verify_environment "vp8_stress_test vp9_stress_test"
