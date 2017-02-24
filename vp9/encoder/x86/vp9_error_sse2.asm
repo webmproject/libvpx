@@ -15,8 +15,6 @@
 
 SECTION .text
 
-%if CONFIG_VP9_HIGHBITDEPTH
-%else
 ; int64_t vp9_block_error(int16_t *coeff, int16_t *dqcoeff, intptr_t block_size,
 ;                         int64_t *ssz)
 
@@ -25,14 +23,14 @@ cglobal block_error, 3, 3, 8, uqc, dqc, size, ssz
   pxor      m4, m4                 ; sse accumulator
   pxor      m6, m6                 ; ssz accumulator
   pxor      m5, m5                 ; dedicated zero register
-  lea     uqcq, [uqcq+sizeq*2]
-  lea     dqcq, [dqcq+sizeq*2]
-  neg    sizeq
 .loop:
-  mova      m2, [uqcq+sizeq*2]
-  mova      m0, [dqcq+sizeq*2]
-  mova      m3, [uqcq+sizeq*2+mmsize]
-  mova      m1, [dqcq+sizeq*2+mmsize]
+  LOAD_TRAN_LOW 2, uqcq, 0
+  LOAD_TRAN_LOW 0, dqcq, 0
+  LOAD_TRAN_LOW 3, uqcq, 8
+  LOAD_TRAN_LOW 1, dqcq, 8
+  INCREMENT_ELEMENTS_TRAN_LOW uqcq, 16
+  INCREMENT_ELEMENTS_TRAN_LOW dqcq, 16
+  sub    sizeq, 16
   psubw     m0, m2
   psubw     m1, m3
   ; individual errors are max. 15bit+sign, so squares are 30bit, and
@@ -58,8 +56,7 @@ cglobal block_error, 3, 3, 8, uqc, dqc, size, ssz
   punpckhdq m3, m5
   paddq     m6, m7
   paddq     m6, m3
-  add    sizeq, mmsize
-  jl .loop
+  jg .loop
 
   ; accumulate horizontally and store in return value
   movhlps   m5, m4
@@ -77,7 +74,6 @@ cglobal block_error, 3, 3, 8, uqc, dqc, size, ssz
   movd    edx, m5
 %endif
   RET
-%endif  ; CONFIG_VP9_HIGHBITDEPTH
 
 ; Compute the sum of squared difference between two tran_low_t vectors.
 ; Vectors are converted (if necessary) to int16_t for calculations.
