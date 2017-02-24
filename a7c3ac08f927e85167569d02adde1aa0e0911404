@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b255c71a_41308ad2",
+        "filename": "vp9/common/vp9_rtcd_defs.pl",
+        "patchSetId": 5
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-24T03:54:27Z",
+      "side": 1,
+      "message": "this is an unnecessary edit",
+      "revId": "a7c3ac08f927e85167569d02adde1aa0e0911404",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3ac7aa50_b17467c4",
+        "filename": "vp9/common/vp9_rtcd_defs.pl",
+        "patchSetId": 5
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-24T03:54:27Z",
+      "side": 1,
+      "message": "this branch can go, they\u0027re equivalent now",
+      "revId": "a7c3ac08f927e85167569d02adde1aa0e0911404",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
