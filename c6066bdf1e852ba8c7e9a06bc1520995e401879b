@@ -16,6 +16,24 @@
       "revId": "c6066bdf1e852ba8c7e9a06bc1520995e401879b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fe732c8b_abff2a3c",
+        "filename": "vp9/common/vp9_rtcd_defs.pl",
+        "patchSetId": 4
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-02-24T00:34:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "db015fea_3910766b",
+      "revId": "c6066bdf1e852ba8c7e9a06bc1520995e401879b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
