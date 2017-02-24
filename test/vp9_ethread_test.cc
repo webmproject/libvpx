@@ -234,6 +234,8 @@ class VPxEncoderThreadTest
     md5_.clear();
     new_mt_mode_ = 1;
     bit_match_mode_ = 0;
+    psnr_ = 0.0;
+    nframes_ = 0;
   }
   virtual ~VPxEncoderThreadTest() {}
 
@@ -257,6 +259,8 @@ class VPxEncoderThreadTest
 
   virtual void BeginPassHook(unsigned int /*pass*/) {
     encoder_initialized_ = false;
+    psnr_ = 0.0;
+    nframes_ = 0;
   }
 
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource * /*video*/,
@@ -285,6 +289,11 @@ class VPxEncoderThreadTest
     }
   }
 
+  virtual void PSNRPktHook(const vpx_codec_cx_pkt_t *pkt) {
+    psnr_ += pkt->data.psnr.psnr[0];
+    nframes_++;
+  }
+
   virtual void DecompressedFrameHook(const vpx_image_t &img,
                                      vpx_codec_pts_t /*pts*/) {
     ::libvpx_test::MD5 md5_res;
@@ -303,6 +312,8 @@ class VPxEncoderThreadTest
     return true;
   }
 
+  double GetAveragePsnr() const { return nframes_ ? (psnr_ / nframes_) : 0.0; }
+
   bool encoder_initialized_;
   int tiles_;
   int threads_;
@@ -310,44 +321,86 @@ class VPxEncoderThreadTest
   int set_cpu_used_;
   int new_mt_mode_;
   int bit_match_mode_;
+  double psnr_;
+  unsigned int nframes_;
   std::vector<std::string> md5_;
 };
 
 TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
-  std::vector<std::string> single_thr_md5, multi_thr_md5, new_mt_0_md5;
-
   ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 15, 20);
-
   cfg_.rc_target_bitrate = 1000;
-  bit_match_mode_ = 1;
-  new_mt_mode_ = 1;
+
+  // Part 1: Bit exact test for new_mt_mode_ = 0.
+  // This part keeps original unit tests done before new-mt code is checked in.
+  new_mt_mode_ = 0;
+  bit_match_mode_ = 0;
 
   // Encode using single thread.
   cfg_.g_threads = 1;
   init_flags_ = VPX_CODEC_USE_PSNR;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  single_thr_md5 = md5_;
+  const std::vector<std::string> single_thr_md5 = md5_;
   md5_.clear();
 
   // Encode using multiple threads.
   cfg_.g_threads = threads_;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  multi_thr_md5 = md5_;
+  const std::vector<std::string> multi_thr_md5 = md5_;
   md5_.clear();
 
   // Compare to check if two vectors are equal.
   ASSERT_EQ(single_thr_md5, multi_thr_md5);
 
-  // Encode with new-mt 0.
-  new_mt_mode_ = 0;
-  cfg_.g_threads = threads_;
+  // Part 2: new_mt_mode_ = 0 vs new_mt_mode_ = 1 single thread bit exact test.
+  new_mt_mode_ = 1;
+  bit_match_mode_ = 0;
+
+  // Encode using single thread
+  cfg_.g_threads = 1;
   init_flags_ = VPX_CODEC_USE_PSNR;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  new_mt_0_md5 = md5_;
+  std::vector<std::string> new_mt_single_thr_md5 = md5_;
+  md5_.clear();
+
+  ASSERT_EQ(single_thr_md5, new_mt_single_thr_md5);
+
+  // Part 3: Bit exact test with new-mt on
+  new_mt_mode_ = 1;
+  bit_match_mode_ = 1;
+  new_mt_single_thr_md5.clear();
+
+  // Encode using single thread.
+  cfg_.g_threads = 1;
+  init_flags_ = VPX_CODEC_USE_PSNR;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  new_mt_single_thr_md5 = md5_;
+  md5_.clear();
+
+  // Encode using multiple threads.
+  cfg_.g_threads = threads_;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  const std::vector<std::string> new_mt_multi_thr_md5 = md5_;
   md5_.clear();
 
   // Compare to check if two vectors are equal.
-  ASSERT_EQ(new_mt_0_md5, multi_thr_md5);
+  ASSERT_EQ(new_mt_single_thr_md5, new_mt_multi_thr_md5);
+
+  // Part 4: PSNR test with bit_match_mode_ = 0
+  new_mt_mode_ = 1;
+  bit_match_mode_ = 0;
+
+  // Encode using single thread.
+  cfg_.g_threads = 1;
+  init_flags_ = VPX_CODEC_USE_PSNR;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  const double single_thr_psnr = GetAveragePsnr();
+
+  // Encode using multiple threads.
+  cfg_.g_threads = threads_;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  const double multi_thr_psnr = GetAveragePsnr();
+
+  EXPECT_NEAR(single_thr_psnr, multi_thr_psnr, 0.1);
 }
 
 INSTANTIATE_TEST_CASE_P(
