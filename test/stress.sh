@@ -8,8 +8,10 @@
 ##  in the file PATENTS.  All contributing project authors may
 ##  be found in the AUTHORS file in the root of the source tree.
 ##
-##  This file performs a stress test. It runs 5 encodes and 30 decodes in
-##  parallel.
+##  This file performs a stress test. It runs (STRESS_ONEPASS_MAX_JOBS,
+##  default=5) one, (STRESS_TWOPASS_MAX_JOBS, default=5) two pass &
+##  (STRESS_RT_MAX_JOBS, default=5) encodes and (STRESS_<codec>_DECODE_MAX_JOBS,
+##  default=30) decodes in parallel.
 
 . $(dirname $0)/tools_common.sh
 
@@ -77,17 +79,28 @@ stress() {
   local readonly decode_count="$3"
   local pids=""
   local rt_max_jobs=${STRESS_RT_MAX_JOBS:-5}
+  local onepass_max_jobs=${STRESS_ONEPASS_MAX_JOBS:-5}
   local twopass_max_jobs=${STRESS_TWOPASS_MAX_JOBS:-5}
 
   # Enable job control, so we can run multiple processes.
   set -m
 
+  # Start $onepass_max_jobs encode jobs in parallel.
+  for i in $(seq ${onepass_max_jobs}); do
+    bitrate=$(($i * 20 + 300))
+    eval "${VPX_TEST_PREFIX}" "${encoder}" "--codec=${codec} -w 1280 -h 720" \
+      "${YUV}" "-t 4 --limit=150 --test-decode=fatal --passes=1" \
+      "--target-bitrate=${bitrate} -o ${VPX_TEST_OUTPUT_DIR}/${i}.1pass.webm" \
+      ${devnull} &
+    pids="${pids} $!"
+  done
+
   # Start $twopass_max_jobs encode jobs in parallel.
   for i in $(seq ${twopass_max_jobs}); do
     bitrate=$(($i * 20 + 300))
     eval "${VPX_TEST_PREFIX}" "${encoder}" "--codec=${codec} -w 1280 -h 720" \
-      "${YUV}" "-t 4 --limit=150 --test-decode=fatal " \
-      "--target-bitrate=${bitrate} -o ${VPX_TEST_OUTPUT_DIR}/${i}.webm" \
+      "${YUV}" "-t 4 --limit=150 --test-decode=fatal --passes=2" \
+      "--target-bitrate=${bitrate} -o ${VPX_TEST_OUTPUT_DIR}/${i}.2pass.webm" \
       ${devnull} &
     pids="${pids} $!"
   done
