@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "69dac780_5fa9abec",
+        "filename": "vp9/encoder/x86/vp9_error_sse2.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-02-24T01:35:24Z",
+      "side": 1,
+      "message": "I think this prevents over running when size % 16 !\u003d0",
+      "revId": "3c16bbb73bab1ee3785f9de70d71795da489a2c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
