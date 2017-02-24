@@ -51,8 +51,8 @@ struct vp9_extracfg {
   vpx_color_range_t color_range;
   int render_width;
   int render_height;
-  unsigned int new_mt;
-  unsigned int ethread_bit_match;
+  unsigned int row_mt;
+  unsigned int row_mt_bit_exact;
 };
 
 static struct vp9_extracfg default_extra_cfg = {
@@ -84,8 +84,8 @@ static struct vp9_extracfg default_extra_cfg = {
   0,                     // color range
   0,                     // render width
   0,                     // render height
-  1,                     // new_mt
-  0,                     // ethread_bit_match
+  1,                     // row_mt
+  0,                     // row_mt_bit_exact
 };
 
 struct vpx_codec_alg_priv {
@@ -249,8 +249,8 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
         "kf_min_dist not supported in auto mode, use 0 "
         "or kf_max_dist instead.");
 
-  RANGE_CHECK(extra_cfg, new_mt, 0, 1);
-  RANGE_CHECK(extra_cfg, ethread_bit_match, 0, 1);
+  RANGE_CHECK(extra_cfg, row_mt, 0, 1);
+  RANGE_CHECK(extra_cfg, row_mt_bit_exact, 0, 1);
   RANGE_CHECK(extra_cfg, enable_auto_alt_ref, 0, 2);
   RANGE_CHECK(extra_cfg, cpu_used, -8, 8);
   RANGE_CHECK_HI(extra_cfg, noise_sensitivity, 6);
@@ -560,8 +560,8 @@ static vpx_codec_err_t set_encoder_config(
 
   oxcf->target_level = extra_cfg->target_level;
 
-  oxcf->new_mt = extra_cfg->new_mt;
-  oxcf->ethread_bit_match = extra_cfg->ethread_bit_match;
+  oxcf->row_mt = extra_cfg->row_mt;
+  oxcf->row_mt_bit_exact = extra_cfg->row_mt_bit_exact;
 
   for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
 #if CONFIG_SPATIAL_SVC
@@ -851,17 +851,17 @@ static vpx_codec_err_t ctrl_set_target_level(vpx_codec_alg_priv_t *ctx,
   return update_extra_cfg(ctx, &extra_cfg);
 }
 
-static vpx_codec_err_t ctrl_set_new_mt(vpx_codec_alg_priv_t *ctx,
+static vpx_codec_err_t ctrl_set_row_mt(vpx_codec_alg_priv_t *ctx,
                                        va_list args) {
   struct vp9_extracfg extra_cfg = ctx->extra_cfg;
-  extra_cfg.new_mt = CAST(VP9E_SET_NEW_MT, args);
+  extra_cfg.row_mt = CAST(VP9E_SET_ROW_MT, args);
   return update_extra_cfg(ctx, &extra_cfg);
 }
 
-static vpx_codec_err_t ctrl_set_ethread_bit_match(vpx_codec_alg_priv_t *ctx,
-                                                  va_list args) {
+static vpx_codec_err_t ctrl_enable_row_mt_bit_exact(vpx_codec_alg_priv_t *ctx,
+                                                    va_list args) {
   struct vp9_extracfg extra_cfg = ctx->extra_cfg;
-  extra_cfg.ethread_bit_match = CAST(VP9E_ENABLE_THREAD_BIT_MATCH, args);
+  extra_cfg.row_mt_bit_exact = CAST(VP9E_ENABLE_ROW_MT_BIT_EXACT, args);
   return update_extra_cfg(ctx, &extra_cfg);
 }
 
@@ -1460,7 +1460,7 @@ static vpx_codec_err_t ctrl_set_svc(vpx_codec_alg_priv_t *ctx, va_list args) {
     return VPX_CODEC_INVALID_PARAM;
   }
 
-  vp9_set_new_mt(ctx->cpi);
+  vp9_set_row_mt(ctx->cpi);
 
   return VPX_CODEC_OK;
 }
@@ -1620,8 +1620,8 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   { VP9E_SET_SVC_REF_FRAME_CONFIG, ctrl_set_svc_ref_frame_config },
   { VP9E_SET_RENDER_SIZE, ctrl_set_render_size },
   { VP9E_SET_TARGET_LEVEL, ctrl_set_target_level },
-  { VP9E_SET_NEW_MT, ctrl_set_new_mt },
-  { VP9E_ENABLE_THREAD_BIT_MATCH, ctrl_set_ethread_bit_match },
+  { VP9E_SET_ROW_MT, ctrl_set_row_mt },
+  { VP9E_ENABLE_ROW_MT_BIT_EXACT, ctrl_enable_row_mt_bit_exact },
 
   // Getters
   { VP8E_GET_LAST_QUANTIZER, ctrl_get_quantizer },

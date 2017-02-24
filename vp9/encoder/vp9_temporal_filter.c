@@ -766,7 +766,7 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
   set_error_per_bit(&cpi->td.mb, rdmult);
   vp9_initialize_me_consts(cpi, &cpi->td.mb, ARNR_FILT_QINDEX);
 
-  if (!cpi->new_mt)
+  if (!cpi->row_mt)
     temporal_filter_iterate_c(cpi);
   else
     vp9_temporal_filter_row_mt(cpi);

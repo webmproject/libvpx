@@ -267,8 +267,8 @@ typedef struct VP9EncoderConfig {
   int render_height;
   VP9E_TEMPORAL_LAYERING_MODE temporal_layering_mode;
 
-  int new_mt;
-  unsigned int ethread_bit_match;
+  int row_mt;
+  unsigned int row_mt_bit_exact;
 } VP9EncoderConfig;
 
 static INLINE int is_lossless_requested(const VP9EncoderConfig *cfg) {
@@ -691,7 +691,7 @@ typedef struct VP9_COMP {
   void (*row_mt_sync_read_ptr)(VP9RowMTSync *const, int, int);
   void (*row_mt_sync_write_ptr)(VP9RowMTSync *const, int, int, const int);
   ARNRFilterData arnr_filter_data;
-  int new_mt;
+  int row_mt;
 
   // Previous Partition Info
   BLOCK_SIZE *prev_partition;
@@ -909,7 +909,7 @@ VP9_LEVEL vp9_get_level(const Vp9LevelSpec *const level_spec);
 
 void vp9_new_framerate(VP9_COMP *cpi, double framerate);
 
-void vp9_set_new_mt(VP9_COMP *cpi);
+void vp9_set_row_mt(VP9_COMP *cpi);
 
 #define LAYER_IDS_TO_IDX(sl, tl, num_tl) ((sl) * (num_tl) + (tl))
 

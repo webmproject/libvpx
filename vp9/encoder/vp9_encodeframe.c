@@ -4341,7 +4341,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     }
 #endif
 
-    if (!cpi->new_mt) {
+    if (!cpi->row_mt) {
       cpi->row_mt_sync_read_ptr = vp9_row_mt_sync_read_dummy;
       cpi->row_mt_sync_write_ptr = vp9_row_mt_sync_write_dummy;
       // If allowed, encoding tiles in parallel with one thread handling one

@@ -1575,7 +1575,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   highbd_set_var_fns(cpi);
 #endif
 
-  vp9_set_new_mt(cpi);
+  vp9_set_row_mt(cpi);
 }
 
 #ifndef M_LOG2_E
@@ -5223,16 +5223,16 @@ void vp9_apply_encoding_flags(VP9_COMP *cpi, vpx_enc_frame_flags_t flags) {
   }
 }
 
-void vp9_set_new_mt(VP9_COMP *cpi) {
+void vp9_set_row_mt(VP9_COMP *cpi) {
   // Enable row based multi-threading for supported modes of encoding
-  cpi->new_mt = 0;
+  cpi->row_mt = 0;
   if (((cpi->oxcf.mode == GOOD || cpi->oxcf.mode == BEST) &&
        cpi->oxcf.speed < 5 && cpi->oxcf.pass == 1) &&
-      cpi->oxcf.new_mt && !cpi->use_svc)
-    cpi->new_mt = 1;
+      cpi->oxcf.row_mt && !cpi->use_svc)
+    cpi->row_mt = 1;
 
   if (cpi->oxcf.mode == GOOD && cpi->oxcf.speed < 5 &&
-      (cpi->oxcf.pass == 0 || cpi->oxcf.pass == 2) && cpi->oxcf.new_mt &&
+      (cpi->oxcf.pass == 0 || cpi->oxcf.pass == 2) && cpi->oxcf.row_mt &&
       !cpi->use_svc)
-    cpi->new_mt = 1;
+    cpi->row_mt = 1;
 }

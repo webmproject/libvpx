@@ -553,16 +553,16 @@ enum vp8e_enc_control_id {
   *
   * Supported in codecs: VP9
   */
-  VP9E_SET_NEW_MT,
+  VP9E_SET_ROW_MT,
 
-  /*!\brief Codec control function to enable the bit match result in multi-
-   * threaded encoder unit tests.
+  /*!\brief Codec control function to enable bit-exact bitstream when row level
+   * multi-threading is enabled.
    *
    * 0 : off, 1 : on
    *
    * Supported in codecs: VP9
    */
-  VP9E_ENABLE_THREAD_BIT_MATCH,
+  VP9E_ENABLE_ROW_MT_BIT_EXACT,
 
   /*!\brief Codec control function to get bitstream level.
    *
@@ -855,11 +855,11 @@ VPX_CTRL_USE_TYPE(VP9E_SET_RENDER_SIZE, int *)
 VPX_CTRL_USE_TYPE(VP9E_SET_TARGET_LEVEL, unsigned int)
 #define VPX_CTRL_VP9E_SET_TARGET_LEVEL
 
-VPX_CTRL_USE_TYPE(VP9E_SET_NEW_MT, unsigned int)
-#define VPX_CTRL_VP9E_SET_NEW_MT
+VPX_CTRL_USE_TYPE(VP9E_SET_ROW_MT, unsigned int)
+#define VPX_CTRL_VP9E_SET_ROW_MT
 
-VPX_CTRL_USE_TYPE(VP9E_ENABLE_THREAD_BIT_MATCH, unsigned int)
-#define VPX_CTRL_VP9E_ENABLE_THREAD_BIT_MATCH
+VPX_CTRL_USE_TYPE(VP9E_ENABLE_ROW_MT_BIT_EXACT, unsigned int)
+#define VPX_CTRL_VP9E_ENABLE_ROW_MT_BIT_EXACT
 
 VPX_CTRL_USE_TYPE(VP9E_GET_LEVEL, int *)
 #define VPX_CTRL_VP9E_GET_LEVEL

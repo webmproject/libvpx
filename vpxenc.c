@@ -471,8 +471,9 @@ static const arg_def_t target_level = ARG_DEF(
     "Target level (255: off (default); 0: only keep level stats; 10: level 1.0;"
     " 11: level 1.1; ... 62: level 6.2)");
 
-static const arg_def_t new_mt =
-    ARG_DEF(NULL, "new-mt", 1, "Enable row based multi-threading in VP9");
+static const arg_def_t row_mt =
+    ARG_DEF(NULL, "row-mt", 1,
+            "Enable row based non-deterministic multi-threading in VP9");
 #endif
 
 #if CONFIG_VP9_ENCODER
@@ -501,7 +502,7 @@ static const arg_def_t *vp9_args[] = { &cpu_used_vp9,
                                        &min_gf_interval,
                                        &max_gf_interval,
                                        &target_level,
-                                       &new_mt,
+                                       &row_mt,
 #if CONFIG_VP9_HIGHBITDEPTH
                                        &bitdeptharg,
                                        &inbitdeptharg,
@@ -532,7 +533,7 @@ static const int vp9_arg_ctrl_map[] = { VP8E_SET_CPUUSED,
                                         VP9E_SET_MIN_GF_INTERVAL,
                                         VP9E_SET_MAX_GF_INTERVAL,
                                         VP9E_SET_TARGET_LEVEL,
-                                        VP9E_SET_NEW_MT,
+                                        VP9E_SET_ROW_MT,
                                         0 };
 #endif
 
