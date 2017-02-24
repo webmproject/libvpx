@@ -2406,7 +2406,8 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
 
   vpx_extend_frame_borders(dst);
 }
-#else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 void vp9_scale_and_extend_frame_c(const YV12_BUFFER_CONFIG *src,
                                   YV12_BUFFER_CONFIG *dst) {
   const int src_w = src->y_crop_width;
@@ -2444,7 +2445,6 @@ void vp9_scale_and_extend_frame_c(const YV12_BUFFER_CONFIG *src,
 
   vpx_extend_frame_borders(dst);
 }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 static int scale_down(VP9_COMP *cpi, int q) {
   RATE_CONTROL *const rc = &cpi->rc;
@@ -3661,8 +3661,13 @@ YV12_BUFFER_CONFIG *vp9_svc_twostage_scale(VP9_COMMON *cm,
   if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
       cm->mi_rows * MI_SIZE != unscaled->y_height) {
 #if CONFIG_VP9_HIGHBITDEPTH
-    scale_and_extend_frame(unscaled, scaled_temp, (int)cm->bit_depth);
-    scale_and_extend_frame(scaled_temp, scaled, (int)cm->bit_depth);
+    if (cm->bit_depth == VPX_BITS_8) {
+      vp9_scale_and_extend_frame(unscaled, scaled_temp);
+      vp9_scale_and_extend_frame(scaled_temp, scaled);
+    } else {
+      scale_and_extend_frame(unscaled, scaled_temp, (int)cm->bit_depth);
+      scale_and_extend_frame(scaled_temp, scaled, (int)cm->bit_depth);
+    }
 #else
     vp9_scale_and_extend_frame(unscaled, scaled_temp);
     vp9_scale_and_extend_frame(scaled_temp, scaled);
@@ -3682,7 +3687,10 @@ YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
 #if CONFIG_VP9_HIGHBITDEPTH
     if (use_normative_scaler && unscaled->y_width <= (scaled->y_width << 1) &&
         unscaled->y_height <= (scaled->y_height << 1))
-      scale_and_extend_frame(unscaled, scaled, (int)cm->bit_depth);
+      if (cm->bit_depth == VPX_BITS_8)
+        vp9_scale_and_extend_frame(unscaled, scaled);
+      else
+        scale_and_extend_frame(unscaled, scaled, (int)cm->bit_depth);
     else
       scale_and_extend_frame_nonnormative(unscaled, scaled, (int)cm->bit_depth);
 #else
