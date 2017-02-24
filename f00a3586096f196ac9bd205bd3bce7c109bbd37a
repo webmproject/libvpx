@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1157bca5_05ef495b",
+        "filename": "vpxenc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-02-24T22:23:06Z",
+      "side": 1,
+      "message": "Maybe we can change this to \"Enable row based non-deterministic multi-threading in VP9\" to be more informative.",
+      "range": {
+        "startLine": 475,
+        "startChar": 32,
+        "endLine": 475,
+        "endChar": 71
+      },
+      "revId": "f00a3586096f196ac9bd205bd3bce7c109bbd37a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
