@@ -82,7 +82,6 @@ class VPxFirstPassEncoderThreadTest
       encoder->Control(VP8E_SET_ARNR_TYPE, 3);
       encoder->Control(VP9E_SET_FRAME_PARALLEL_DECODING, 0);
 
-      // For now, new_mt_mode only works for 2-pass encoding.
       if (encoding_mode_ == ::libvpx_test::kTwoPassGood)
         encoder->Control(VP9E_SET_NEW_MT, new_mt_mode_);
 
