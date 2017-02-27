@@ -329,7 +329,7 @@ TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
   ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 15, 20);
   cfg_.rc_target_bitrate = 1000;
 
-  // Part 1: Bit exact test for new_mt_mode_ = 0.
+  // Part 1: Bit exact test for row_mt_mode_ = 0.
   // This part keeps original unit tests done before new-mt code is checked in.
   row_mt_mode_ = 0;
   bit_exact_mode_ = 0;
@@ -350,7 +350,7 @@ TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
   // Compare to check if two vectors are equal.
   ASSERT_EQ(single_thr_md5, multi_thr_md5);
 
-  // Part 2: new_mt_mode_ = 0 vs new_mt_mode_ = 1 single thread bit exact test.
+  // Part 2: row_mt_mode_ = 0 vs row_mt_mode_ = 1 single thread bit exact test.
   row_mt_mode_ = 1;
   bit_exact_mode_ = 0;
 
@@ -358,31 +358,31 @@ TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
   cfg_.g_threads = 1;
   init_flags_ = VPX_CODEC_USE_PSNR;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  std::vector<std::string> new_mt_single_thr_md5 = md5_;
+  std::vector<std::string> row_mt_single_thr_md5 = md5_;
   md5_.clear();
 
-  ASSERT_EQ(single_thr_md5, new_mt_single_thr_md5);
+  ASSERT_EQ(single_thr_md5, row_mt_single_thr_md5);
 
   // Part 3: Bit exact test with new-mt on
   row_mt_mode_ = 1;
   bit_exact_mode_ = 1;
-  new_mt_single_thr_md5.clear();
+  row_mt_single_thr_md5.clear();
 
   // Encode using single thread.
   cfg_.g_threads = 1;
   init_flags_ = VPX_CODEC_USE_PSNR;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  new_mt_single_thr_md5 = md5_;
+  row_mt_single_thr_md5 = md5_;
   md5_.clear();
 
   // Encode using multiple threads.
   cfg_.g_threads = threads_;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  const std::vector<std::string> new_mt_multi_thr_md5 = md5_;
+  const std::vector<std::string> row_mt_multi_thr_md5 = md5_;
   md5_.clear();
 
   // Compare to check if two vectors are equal.
-  ASSERT_EQ(new_mt_single_thr_md5, new_mt_multi_thr_md5);
+  ASSERT_EQ(row_mt_single_thr_md5, row_mt_multi_thr_md5);
 
   // Part 4: PSNR test with bit_match_mode_ = 0
   row_mt_mode_ = 1;
