@@ -22,6 +22,30 @@
       "revId": "367b5d82a2b2e64cfb9cd05e3ff2726c503cbbba",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0075af1b_9df53ab6",
+        "filename": "test/stress.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-27T21:39:09Z",
+      "side": 1,
+      "message": "good catch, I missed that one.",
+      "parentUuid": "c84942e6_0b106fec",
+      "range": {
+        "startLine": 113,
+        "startChar": 19,
+        "endLine": 113,
+        "endChar": 20
+      },
+      "revId": "367b5d82a2b2e64cfb9cd05e3ff2726c503cbbba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
