@@ -999,11 +999,10 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     }
   }
 
-  if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled) {
-    if (cyclic_refresh_segment_id_boosted(segment_id)) {
-      int q = vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex);
-      set_vbp_thresholds(cpi, thresholds, q, content_state);
-    }
+  if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled &&
+      cyclic_refresh_segment_id_boosted(segment_id)) {
+    int q = vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex);
+    set_vbp_thresholds(cpi, thresholds, q, content_state);
   } else {
     set_vbp_thresholds(cpi, thresholds, cm->base_qindex, content_state);
   }
