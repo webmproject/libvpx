@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0266b115_104882c2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-02-28T19:51:32Z",
+      "side": 1,
+      "message": "this is a bit redundant give the subject. do you want to add a bit more detail around the reasoning here?",
+      "revId": "3fa7e5c62c6829614c51f67b255741bb4069995e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
