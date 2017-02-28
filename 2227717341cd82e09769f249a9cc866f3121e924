@@ -22,6 +22,30 @@
       "revId": "2227717341cd82e09769f249a9cc866f3121e924",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "13d57163_4379d865",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 647,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-02-28T19:49:29Z",
+      "side": 1,
+      "message": "This path should never be triggered with use_svc is on. Is that on when running the vpx_temporal_svc_encoder ?",
+      "parentUuid": "620e0e5a_08716c84",
+      "range": {
+        "startLine": 647,
+        "startChar": 2,
+        "endLine": 647,
+        "endChar": 20
+      },
+      "revId": "2227717341cd82e09769f249a9cc866f3121e924",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
