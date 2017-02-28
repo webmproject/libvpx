@@ -84,7 +84,7 @@ static struct vp9_extracfg default_extra_cfg = {
   0,                     // color range
   0,                     // render width
   0,                     // render height
-  1,                     // row_mt
+  0,                     // row_mt
   0,                     // row_mt_bit_exact
 };
 
