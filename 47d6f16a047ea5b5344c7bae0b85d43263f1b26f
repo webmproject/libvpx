@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d31275e6_bffbcfad",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-02-28T02:02:59Z",
+      "side": 0,
+      "message": "Instead of deleting this TODO comment, we should move it to high bit depth case (above), because vp9_highbd_temporal_filter_apply doesn\u0027t have SIMD implementation.",
+      "range": {
+        "startLine": 399,
+        "startChar": 8,
+        "endLine": 399,
+        "endChar": 59
+      },
+      "revId": "47d6f16a047ea5b5344c7bae0b85d43263f1b26f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
