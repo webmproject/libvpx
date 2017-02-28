@@ -330,7 +330,7 @@ TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
   cfg_.rc_target_bitrate = 1000;
 
   // Part 1: Bit exact test for row_mt_mode_ = 0.
-  // This part keeps original unit tests done before new-mt code is checked in.
+  // This part keeps original unit tests done before row-mt code is checked in.
   row_mt_mode_ = 0;
   bit_exact_mode_ = 0;
 
@@ -365,7 +365,7 @@ TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
 
   ASSERT_EQ(single_thr_md5, row_mt_single_thr_md5);
 
-  // Part 3: Bit exact test with new-mt on
+  // Part 3: Bit exact test with row-mt on
   row_mt_mode_ = 1;
   bit_exact_mode_ = 1;
   row_mt_single_thr_md5.clear();
