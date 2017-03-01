@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "31c53833_6839bd42",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-01T03:30:48Z",
+      "side": 0,
+      "message": "\u003e Similar issue happens in the low bit-depth path too. Its c version is different from the simd version. \n\u003e \n\u003e The c function was modified to improve the coding performance, but we didn\u0027t change the simd accordingly.\n\nOK so if I understand correctly (and looking at the code) the optimized versions are out of date and not called anywhere. It\u0027s bad that no tests failed due to this change. Also when the change to _c got added the specializations should have been removed from the rtcd (and possibly the asm deleted since it could always be recovered).",
+      "parentUuid": "0658f6e3_91e771a2",
+      "revId": "47d6f16a047ea5b5344c7bae0b85d43263f1b26f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d31275e6_bffbcfad",
         "filename": "vp9/encoder/vp9_temporal_filter.c",
         "patchSetId": 1
