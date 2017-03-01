@@ -83,7 +83,7 @@ extern "C" {
  * types, removing or reassigning enums, adding/removing/rearranging
  * fields to structures
  */
-#define VPX_CODEC_ABI_VERSION (3 + VPX_IMAGE_ABI_VERSION) /**<\hideinitializer*/
+#define VPX_CODEC_ABI_VERSION (4 + VPX_IMAGE_ABI_VERSION) /**<\hideinitializer*/
 
 /*!\brief Algorithm return codes */
 typedef enum {
@@ -151,6 +151,10 @@ typedef enum {
 typedef long vpx_codec_caps_t;
 #define VPX_CODEC_CAP_DECODER 0x1 /**< Is a decoder */
 #define VPX_CODEC_CAP_ENCODER 0x2 /**< Is an encoder */
+
+/*! Can support images at greater than 8 bitdepth.
+ */
+#define VPX_CODEC_CAP_HIGHBITDEPTH 0x4
 
 /*! \brief Initialization-time Feature Enabling
  *

@@ -83,10 +83,6 @@ extern "C" {
  */
 #define VPX_CODEC_CAP_OUTPUT_PARTITION 0x20000
 
-/*! Can support input images at greater than 8 bitdepth.
- */
-#define VPX_CODEC_CAP_HIGHBITDEPTH 0x40000
-
 /*! \brief Initialization-time Feature Enabling
  *
  *  Certain codec features must be known at initialization time, to allow
