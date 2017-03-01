@@ -129,7 +129,7 @@ void idct16x16_256_add_half1d(const void *const input, int16_t *output,
   const int16x4_t cospi_0_8_16_24 = vget_low_s16(cospis0);
   const int16x4_t cospi_4_12_20N_28 = vget_high_s16(cospis0);
   const int16x4_t cospi_2_30_10_22 = vget_low_s16(cospis1);
-  const int16x4_t cospi_6_26_14_18N = vget_high_s16(cospis1);
+  const int16x4_t cospi_6_26N_14_18N = vget_high_s16(cospis1);
   int16x8_t in[16], step1[16], step2[16], out[16];
 
   // Load input (16x8)
@@ -235,11 +235,11 @@ void idct16x16_256_add_half1d(const void *const input, int16_t *output,
   step2[6] = step1[6];
   step2[7] = step1[7];
   idct_cospi_2_30(step1[8], step1[15], cospi_2_30_10_22, &step2[8], &step2[15]);
-  idct_cospi_14_18(step1[9], step1[14], cospi_6_26_14_18N, &step2[9],
+  idct_cospi_14_18(step1[9], step1[14], cospi_6_26N_14_18N, &step2[9],
                    &step2[14]);
   idct_cospi_10_22(step1[10], step1[13], cospi_2_30_10_22, &step2[10],
                    &step2[13]);
-  idct_cospi_6_26(step1[11], step1[12], cospi_6_26_14_18N, &step2[11],
+  idct_cospi_6_26(step1[11], step1[12], cospi_6_26N_14_18N, &step2[11],
                   &step2[12]);
 
   // stage 3
