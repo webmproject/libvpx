@@ -16,6 +16,24 @@
       "revId": "c9ed2159c765cfde9292081b4681b7ebd59bcc79",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "58c453eb_ba215a4e",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1019,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-03-02T18:30:57Z",
+      "side": 1,
+      "message": "I\u0027ve restored this function to its original state (i.e.) no synchronization since this is never called when adaptive_rd_thresh is 0.\n\nI\u0027ve changed the calls to rd_less_than_thresh to pass the mutex only if adaptive_rd_thresh is \u003e 0. PTAL.",
+      "parentUuid": "e56d713c_fd36c52b",
+      "revId": "c9ed2159c765cfde9292081b4681b7ebd59bcc79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
