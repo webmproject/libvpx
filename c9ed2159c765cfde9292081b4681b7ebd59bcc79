@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e56d713c_fd36c52b",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1019,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-03-02T00:25:54Z",
+      "side": 1,
+      "message": "This function is not called if cpi-\u003esf.adaptive_rd_thresh \u003d 0 so no need to modify.\n\nBut rd_less_than_thresh() in file vp9_rd.h is always called, so you need to add the condition there to only lock\nif cpi-\u003esf.adaptive_rd_thresh \u003d 1 (will need to pass adaptive_rd_thresh to that function).",
+      "revId": "c9ed2159c765cfde9292081b4681b7ebd59bcc79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
