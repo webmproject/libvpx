@@ -274,16 +274,15 @@ class VPxEncoderThreadTest
         encoder->Control(VP8E_SET_ARNR_STRENGTH, 5);
         encoder->Control(VP8E_SET_ARNR_TYPE, 3);
         encoder->Control(VP9E_SET_FRAME_PARALLEL_DECODING, 0);
-
-        encoder->Control(VP9E_SET_ROW_MT, row_mt_mode_);
-        // While row_mt = 1/0(with/without row-based multi-threading), several
-        // speed features that would adaptively adjust encoding parameters have
-        // to be disabled to guarantee the bit match of the resulted bitstream.
-        encoder->Control(VP9E_ENABLE_ROW_MT_BIT_EXACT, bit_exact_mode_);
       } else {
         encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 0);
         encoder->Control(VP9E_SET_AQ_MODE, 3);
       }
+      encoder->Control(VP9E_SET_ROW_MT, row_mt_mode_);
+      // While row_mt = 1, several speed features that would adaptively adjust
+      // encoding parameters have to be disabled to guarantee the bit exactness
+      // of the resulting bitstream.
+      encoder->Control(VP9E_ENABLE_ROW_MT_BIT_EXACT, bit_exact_mode_);
       encoder_initialized_ = true;
     }
   }

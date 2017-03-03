@@ -1666,11 +1666,14 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
         cpi->rc.frames_since_golden > 4)
       mode_rd_thresh = mode_rd_thresh << 3;
 
-    if (rd_less_than_thresh(best_rdc.rdcost, mode_rd_thresh,
+    if (rd_less_than_thresh(
+            best_rdc.rdcost, mode_rd_thresh,
 #if CONFIG_MULTITHREAD
-                            tile_data->enc_row_mt_mutex,
+            // Synchronization of this function is only necessary when
+            // adaptive_rd_thresh is > 0.
+            cpi->sf.adaptive_rd_thresh ? tile_data->enc_row_mt_mutex : NULL,
 #endif
-                            &rd_thresh_freq_fact[mode_index]))
+            &rd_thresh_freq_fact[mode_index]))
       continue;
 
     if (this_mode == NEWMV) {
@@ -2030,11 +2033,14 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       if (!((1 << this_mode) & cpi->sf.intra_y_mode_bsize_mask[bsize]))
         continue;
 
-      if (rd_less_than_thresh(best_rdc.rdcost, mode_rd_thresh,
+      if (rd_less_than_thresh(
+              best_rdc.rdcost, mode_rd_thresh,
 #if CONFIG_MULTITHREAD
-                              tile_data->enc_row_mt_mutex,
+              // Synchronization of this function is only necessary when
+              // adaptive_rd_thresh is > 0.
+              cpi->sf.adaptive_rd_thresh ? tile_data->enc_row_mt_mutex : NULL,
 #endif
-                              &rd_thresh_freq_fact[mode_index]))
+              &rd_thresh_freq_fact[mode_index]))
         continue;
 
       mi->mode = this_mode;
