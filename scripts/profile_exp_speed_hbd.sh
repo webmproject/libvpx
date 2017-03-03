@@ -53,10 +53,15 @@ bitdepth="--bit-depth=10"
 
 rm *.txt
 
-#experimental var-tx ans entropy ext-intra filter-intra supertx ext-interp motion-var new-quant dual-filter ext-partition-types ext-partition ext-inter ext-refs ext-tx rect-tx global-motion loop-restoration alt-intra cb4x4
-#ans entropy ext-intra filter-intra supertx ext-interp motion-var new-quant dual-filter ext-partition-types ext-partition ext-inter ext-refs ext-tx rect-tx global-motion loop-restoration alt-intra cb4x4 experimental
+#experimental var-tx ans entropy
+#ext-intra filter-intra
+#supertx ext-interp motion-var
+#new-quant dual-filter ext-partition-types
+#ext-partition ext-inter ext-refs
+#ext-tx rect-tx global-motion
+#loop-restoration alt-intra cb4x4
 
-for exp_tool in experimental var-tx ans entropy ext-intra filter-intra supertx ext-interp motion-var new-quant dual-filter ext-partition-types ext-partition ext-inter ext-refs ext-tx rect-tx global-motion loop-restoration alt-intra cb4x4
+for exp_tool in supertx ext-interp motion-var new-quant dual-filter ext-partition-types ext-partition ext-inter ext-refs ext-tx rect-tx global-motion loop-restoration alt-intra cb4x4
 
 do
   cd $build_dir
@@ -75,14 +80,13 @@ do
 
   echo $exp_tool >> $elog
   bitstream=bs_$exp_tool.webm
+  echo $exp_tool
   
   ./aomenc -o $bitstream $video $codec --limit=$frames --fps=$fps $verbose --profile=$profile $bitdepth --target-bitrate=$bitrate --skip=0 -p 2 --good --cpu-used=0 --lag-in-frames=25 --min-q=0 --max-q=63 --auto-alt-ref=1 --kf-max-dist=150 --kf-min-dist=0 --drop-frame=0 --static-thresh=0 --bias-pct=50 --minsection-pct=0 --maxsection-pct=2000 --arnr-maxframes=7 --arnr-strength=5 --sharpness=0 --undershoot-pct=100 --overshoot-pct=100 --frame-parallel=0 --tile-columns=0 --psnr
   
-  perf_file=dec_perf_$exp_tool.data
+  #perf_file=dec_perf_$exp_tool.data
   
-  /usr/bin/perf record -e cycles -o $perf_file ./aomdec $bitstream -o too.yuv --summary
-
-  echo $exp_tool
+  #/usr/bin/perf record -e cycles -o $perf_file ./aomdec $bitstream -o too.yuv --summary
 
 done
 
