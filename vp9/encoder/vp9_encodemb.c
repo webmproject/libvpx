@@ -113,9 +113,9 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
       mb->token_costs[tx_size][type][ref];
   int best, band, pt, i, final_eob;
 #if CONFIG_VP9_HIGHBITDEPTH
-  const int *cat6_high_cost = vp9_get_high_cost_table(xd->bd);
+  const uint16_t *cat6_high_cost = vp9_get_high_cost_table(xd->bd);
 #else
-  const int *cat6_high_cost = vp9_get_high_cost_table(8);
+  const uint16_t *cat6_high_cost = vp9_get_high_cost_table(8);
 #endif
 
   assert((!type && !plane) || (type && plane));

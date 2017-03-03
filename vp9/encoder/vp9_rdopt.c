@@ -350,9 +350,9 @@ static int cost_coeffs(MACROBLOCK *x, int plane, int block, TX_SIZE tx_size,
   uint8_t token_cache[32 * 32];
   int cost;
 #if CONFIG_VP9_HIGHBITDEPTH
-  const int *cat6_high_cost = vp9_get_high_cost_table(xd->bd);
+  const uint16_t *cat6_high_cost = vp9_get_high_cost_table(xd->bd);
 #else
-  const int *cat6_high_cost = vp9_get_high_cost_table(8);
+  const uint16_t *cat6_high_cost = vp9_get_high_cost_table(8);
 #endif
 
   // Check for consistency of tx_size with mode info
