@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "63d0b44e_356034e3",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 685,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-04T01:50:25Z",
+      "side": 1,
+      "message": "these functions could use a better description, \u0027first_half\u0027 isn\u0027t all the meaningful. Note this model worked  well in the assembly:\n\nhttps://chromium.googlesource.com/webm/libvpx/+/72a43e237878cb6f7f964e2fd3aa08ee04c0efee/vpx_dsp/x86/inv_txfm_ssse3_x86_64.asm#258",
+      "revId": "58a06c468262a90cca84c8142eaf6d53d95efdb6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
