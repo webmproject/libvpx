@@ -10,8 +10,9 @@
 
 root_dir=~/Dev/aomedia
 code_dir=$root_dir/aom
-build_dir=$root_dir/build2
+build_dir=$root_dir/release
 test_dir=~/Dev/field
+script_dir=~/Dev/sandbox/libvpx/scripts
 
 # video=~/Dev/samples/videos/yaowu/soccer_cif.y4m
 # wi=352
@@ -62,7 +63,7 @@ for exp_tool in experimental var-tx ans entropy ext-intra filter-intra supertx e
 do
   cd $build_dir
   make clean > /dev/null
-  ~/Dev/bin/runconfig.sh $exp_tool
+  $script_dir/runconfig.sh $exp_tool
   make -j > /dev/null
   if [ $? -ne 0 ]; then
     echo Build failed on experiment: $exp_tool

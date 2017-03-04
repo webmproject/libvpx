@@ -10,9 +10,9 @@
 
 root_dir=~/Dev/aomedia
 code_dir=$root_dir/aom
-build_dir=$root_dir/build
+build_dir=$root_dir/release
 test_dir=~/Dev/field
-script_dir=~/Dev/refine/libvpx/scripts
+script_dir=~/Dev/sandbox/libvpx/scripts
 
 # video=~/Dev/samples/videos/yaowu/soccer_cif.y4m
 # wi=352
