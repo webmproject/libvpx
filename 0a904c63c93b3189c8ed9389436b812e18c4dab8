@@ -120,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "96122935_7d577c91",
+        "filename": "tools/tiny_ssim.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2017-03-06T17:42:41Z",
+      "side": 1,
+      "message": "our linter complains without the ./",
+      "parentUuid": "4666e425_e486920b",
+      "range": {
+        "startLine": 19,
+        "startChar": 11,
+        "endLine": 19,
+        "endChar": 12
+      },
+      "revId": "0a904c63c93b3189c8ed9389436b812e18c4dab8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d93e04d8_e018efa1",
         "filename": "tools/tiny_ssim.c",
         "patchSetId": 11
