@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2f84c9a8_1e562edf",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 1171,
+      "author": {
+        "id": 1186779
+      },
+      "writtenOn": "2017-03-07T23:15:15Z",
+      "side": 1,
+      "message": "Since the variable ARCH_EXT_LIST_PPC doesn\u0027t exists anymore, this must be changed to \"vsx\" or the ARCH_EXT_LIST, the last one will make the configure script check for extensions that doesn\u0027t belongs to PowerPC, why not keep the ARCH_EXT_LIST_PPC?",
+      "revId": "290f2b767db810a8dbc0e0f99cf24a94a59d78f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "946734cf_987626b2",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 1174,
+      "author": {
+        "id": 1186779
+      },
+      "writtenOn": "2017-03-07T23:15:15Z",
+      "side": 1,
+      "message": "Talking with IBM stakeholders in this patch go to upstream, this can be remove, making runtime detection disable for default.",
+      "revId": "290f2b767db810a8dbc0e0f99cf24a94a59d78f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9326c279_c6847ea2",
+        "filename": "build/make/rtcd.pl",
+        "patchSetId": 6
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1186779
+      },
+      "writtenOn": "2017-03-07T23:15:15Z",
+      "side": 1,
+      "message": "Removing this code bellow, will generate empty variables for vpx_dsp_rtcd.h, causing building failures.\n# Assign the helper variable for each enabled extension\n  foreach my $opt (@ALL_ARCHS) {\n    my $opt_uc \u003d uc $opt;\n    eval \"\\$have_${opt}\u003d\\\"flags \u0026 HAS_${opt_uc}\\\"\";\n}",
+      "revId": "290f2b767db810a8dbc0e0f99cf24a94a59d78f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
