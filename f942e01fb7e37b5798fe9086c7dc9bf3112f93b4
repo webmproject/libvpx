@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e3cda28a_be6b542e",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-03-07T18:50:56Z",
+      "side": 1,
+      "message": "Will be removed.  I use late_stage_butterfly() directly.  This function name is also not accurate and will be changed.",
+      "parentUuid": "51306053_3e1ac364",
+      "range": {
+        "startLine": 394,
+        "startChar": 18,
+        "endLine": 394,
+        "endChar": 41
+      },
+      "revId": "f942e01fb7e37b5798fe9086c7dc9bf3112f93b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7fa6af91_644bfb36",
         "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
         "patchSetId": 2
@@ -36,6 +60,24 @@
       "writtenOn": "2017-03-07T06:48:32Z",
       "side": 1,
       "message": "prefer do {} while (0) for these. it avoids any side-effects. you can also leave off the trailing \u0027;\u0027 and have it live with the call of the macro.",
+      "revId": "f942e01fb7e37b5798fe9086c7dc9bf3112f93b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4345c635_a62af53c",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-03-07T18:50:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7fa6af91_644bfb36",
       "revId": "f942e01fb7e37b5798fe9086c7dc9bf3112f93b4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
@@ -59,6 +101,24 @@
     },
     {
       "key": {
+        "uuid": "bc150c1d_e83aa618",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 690,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-03-07T18:50:56Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "886287e4_4a26e53d",
+      "revId": "f942e01fb7e37b5798fe9086c7dc9bf3112f93b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "9a232b7b_cc7314a1",
         "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
         "patchSetId": 2
@@ -76,6 +136,24 @@
     },
     {
       "key": {
+        "uuid": "6906e314_8ba9fc33",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 793,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-03-07T18:50:56Z",
+      "side": 1,
+      "message": "Done. Shouldn\u0027t hide this offset inside function.  The same for quarter_3_4() function.",
+      "parentUuid": "9a232b7b_cc7314a1",
+      "revId": "f942e01fb7e37b5798fe9086c7dc9bf3112f93b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "779883b8_247c1952",
         "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
         "patchSetId": 2
@@ -87,6 +165,24 @@
       "writtenOn": "2017-03-07T06:48:32Z",
       "side": 1,
       "message": "you can just use in[16] in the prototype. the output reference isn\u0027t necessary as it\u0027s local to the function",
+      "revId": "f942e01fb7e37b5798fe9086c7dc9bf3112f93b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3a90e40e_78fdac1b",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 928,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-03-07T18:50:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "779883b8_247c1952",
       "revId": "f942e01fb7e37b5798fe9086c7dc9bf3112f93b4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
