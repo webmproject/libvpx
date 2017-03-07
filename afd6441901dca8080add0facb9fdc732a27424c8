@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bd53f1fc_1dc9f5b3",
+        "filename": "build/make/Makefile",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-07T00:10:21Z",
+      "side": 1,
+      "message": "A blank line to separate and a comment would be useful here.",
+      "revId": "afd6441901dca8080add0facb9fdc732a27424c8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fb14df05_73c4b0c8",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1171,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-07T00:10:21Z",
+      "side": 1,
+      "message": "Do you anticipate options besides vsx? If not, you can leave out most of this. It is for cases where you had, for example, extension1 and extension2, so that --disable-extension1 also disabled extension2. Since you have only vsx, that is not necessary.",
+      "range": {
+        "startLine": 1171,
+        "startChar": 6,
+        "endLine": 1171,
+        "endChar": 9
+      },
+      "revId": "afd6441901dca8080add0facb9fdc732a27424c8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "06af998c_86d9f925",
+        "filename": "build/make/rtcd.pl",
+        "patchSetId": 1
+      },
+      "lineNbr": 349,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-07T00:10:21Z",
+      "side": 1,
+      "message": "are there any cases of processors without vsx where you would want this to run? if not, it would be useful to set this up like x86_64 with sse2, where the sse2 function replaces the c version, allowing the linker to strip out the c version.\n\nruntime cpu detection is not really necessary if there is only one cpu configuration.",
+      "range": {
+        "startLine": 349,
+        "startChar": 7,
+        "endLine": 349,
+        "endChar": 13
+      },
+      "revId": "afd6441901dca8080add0facb9fdc732a27424c8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c4c3efc0_9798f5f6",
+        "filename": "vpx_ports/ppc.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-07T00:10:21Z",
+      "side": 1,
+      "message": "don\u0027t\n\nAlso, we don\u0027t really expect anyone to use gcc 4.3 to build libvpx. Lots of things break already. This particular define was used as a workaround for one tricky function. You could leave this define out.",
+      "range": {
+        "startLine": 25,
+        "startChar": 25,
+        "endLine": 25,
+        "endChar": 32
+      },
+      "revId": "afd6441901dca8080add0facb9fdc732a27424c8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "599be8a3_6b33893f",
+        "filename": "vpx_ports/ppc_cpudetect.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-07T00:10:21Z",
+      "side": 1,
+      "message": "2017 for all the new files.",
+      "range": {
+        "startLine": 2,
+        "startChar": 18,
+        "endLine": 2,
+        "endChar": 22
+      },
+      "revId": "afd6441901dca8080add0facb9fdc732a27424c8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
