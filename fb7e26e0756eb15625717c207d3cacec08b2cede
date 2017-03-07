@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "458c1577_02fd865f",
+        "filename": "tools.mk",
+        "patchSetId": 15
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2017-03-07T16:37:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d189e2a9_b394900a",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 1
+      },
+      "revId": "fb7e26e0756eb15625717c207d3cacec08b2cede",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df2b246c_14c81309",
         "filename": "tools.mk",
         "patchSetId": 15
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-07T16:11:13Z",
       "side": 1,
       "message": "Is this blank line intentional?",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 0
+      },
+      "revId": "fb7e26e0756eb15625717c207d3cacec08b2cede",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc31e558_84fd7c02",
+        "filename": "tools.mk",
+        "patchSetId": 15
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2017-03-07T16:37:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df2b246c_14c81309",
       "range": {
         "startLine": 29,
         "startChar": 0,
