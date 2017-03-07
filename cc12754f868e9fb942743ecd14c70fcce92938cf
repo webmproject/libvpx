@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "90932e04_ee95daa3",
+        "filename": "vpx_ports/ppc_cpudetect.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-07T16:28:42Z",
+      "side": 1,
+      "message": "Since this will not work on anything except linux, this is unnecessary.",
+      "range": {
+        "startLine": 11,
+        "startChar": 12,
+        "endLine": 11,
+        "endChar": 21
+      },
+      "revId": "cc12754f868e9fb942743ecd14c70fcce92938cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "95e21861_22593aea",
+        "filename": "vpx_ports/ppc_cpudetect.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-07T16:28:42Z",
+      "side": 1,
+      "message": "Unfortunately this is insufficient in C89:\nhttp://flash-gordon.me.uk/ansi.c.txt\n   If there are fewer initializers in a list than there are members of\nan aggregate, the remainder of the aggregate shall be initialized\nimplicitly the same as objects that have static storage duration.\n\nIt creates warnings:\nhttps://chromium-review.googlesource.com/c/386301/",
+      "revId": "cc12754f868e9fb942743ecd14c70fcce92938cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
