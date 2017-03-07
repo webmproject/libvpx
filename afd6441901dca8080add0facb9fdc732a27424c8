@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "02b576e7_c24395fe",
+        "filename": "build/make/Makefile",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1186779
+      },
+      "writtenOn": "2017-03-07T22:15:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bd53f1fc_1dc9f5b3",
+      "revId": "afd6441901dca8080add0facb9fdc732a27424c8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fb14df05_73c4b0c8",
         "filename": "build/make/configure.sh",
         "patchSetId": 1
@@ -65,6 +83,30 @@
     },
     {
       "key": {
+        "uuid": "535b77b9_cc72e1e1",
+        "filename": "build/make/rtcd.pl",
+        "patchSetId": 1
+      },
+      "lineNbr": 349,
+      "author": {
+        "id": 1186779
+      },
+      "writtenOn": "2017-03-07T22:15:34Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "06af998c_86d9f925",
+      "range": {
+        "startLine": 349,
+        "startChar": 7,
+        "endLine": 349,
+        "endChar": 13
+      },
+      "revId": "afd6441901dca8080add0facb9fdc732a27424c8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c4c3efc0_9798f5f6",
         "filename": "vpx_ports/ppc.h",
         "patchSetId": 1
@@ -88,6 +130,30 @@
     },
     {
       "key": {
+        "uuid": "2569c090_763f711a",
+        "filename": "vpx_ports/ppc.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1186779
+      },
+      "writtenOn": "2017-03-07T22:15:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c4c3efc0_9798f5f6",
+      "range": {
+        "startLine": 25,
+        "startChar": 25,
+        "endLine": 25,
+        "endChar": 32
+      },
+      "revId": "afd6441901dca8080add0facb9fdc732a27424c8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "599be8a3_6b33893f",
         "filename": "vpx_ports/ppc_cpudetect.c",
         "patchSetId": 1
@@ -108,6 +174,30 @@
       "revId": "afd6441901dca8080add0facb9fdc732a27424c8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "66ccfbad_be935884",
+        "filename": "vpx_ports/ppc_cpudetect.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1186779
+      },
+      "writtenOn": "2017-03-07T22:15:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "599be8a3_6b33893f",
+      "range": {
+        "startLine": 2,
+        "startChar": 18,
+        "endLine": 2,
+        "endChar": 22
+      },
+      "revId": "afd6441901dca8080add0facb9fdc732a27424c8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
