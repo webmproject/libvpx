@@ -697,8 +697,10 @@ int main(int argc, const char **argv) {
 
   if (svc_ctx.speed != -1)
     vpx_codec_control(&codec, VP8E_SET_CPUUSED, svc_ctx.speed);
-  if (svc_ctx.threads)
+  if (svc_ctx.threads) {
     vpx_codec_control(&codec, VP9E_SET_TILE_COLUMNS, (svc_ctx.threads >> 1));
+    vpx_codec_control(&codec, VP9E_SET_ROW_MT, 0);
+  }
   if (svc_ctx.speed >= 5 && svc_ctx.aqmode == 1)
     vpx_codec_control(&codec, VP9E_SET_AQ_MODE, 3);
   if (svc_ctx.speed >= 5)
