@@ -1,0 +1,130 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bec2c828_4bbeeddd",
+        "filename": "tools/tiny_ssim.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-07T19:26:32Z",
+      "side": 1,
+      "message": "try not to introduce new types of this style, _t is reserved and upper camel case is the preferred style (InputFile).",
+      "range": {
+        "startLine": 129,
+        "startChar": 2,
+        "endLine": 129,
+        "endChar": 14
+      },
+      "revId": "393d9d0195cfb4b4f4a092ca41e57a146dfa678a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1f6cd5ca_a7f98e83",
+        "filename": "tools/tiny_ssim.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-07T19:26:32Z",
+      "side": 1,
+      "message": "it\u0027s; single space after \u0027.\u0027 is enough",
+      "range": {
+        "startLine": 131,
+        "startChar": 32,
+        "endLine": 131,
+        "endChar": 35
+      },
+      "revId": "393d9d0195cfb4b4f4a092ca41e57a146dfa678a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8d83e363_d124eff3",
+        "filename": "tools/tiny_ssim.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-07T19:26:32Z",
+      "side": 1,
+      "message": "should be set_binary_mode(stdin) for windows support",
+      "range": {
+        "startLine": 137,
+        "startChar": 66,
+        "endLine": 137,
+        "endChar": 71
+      },
+      "revId": "393d9d0195cfb4b4f4a092ca41e57a146dfa678a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "789b251b_1143fd4d",
+        "filename": "tools/tiny_ssim.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-07T19:26:32Z",
+      "side": 1,
+      "message": "what happens if the read fails or fewer bytes are returned?",
+      "revId": "393d9d0195cfb4b4f4a092ca41e57a146dfa678a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1d32b875_30edd6e6",
+        "filename": "tools/tiny_ssim.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-07T19:26:32Z",
+      "side": 1,
+      "message": "read_frame()?",
+      "range": {
+        "startLine": 267,
+        "startChar": 9,
+        "endLine": 267,
+        "endChar": 24
+      },
+      "revId": "393d9d0195cfb4b4f4a092ca41e57a146dfa678a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ac5fccc5_92fe77ec",
+        "filename": "tools/tiny_ssim.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-07T19:26:32Z",
+      "side": 1,
+      "message": "this line could go",
+      "revId": "393d9d0195cfb4b4f4a092ca41e57a146dfa678a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
