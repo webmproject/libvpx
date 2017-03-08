@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "99538ad5_78854934",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 984,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-03-08T22:13:48Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "514a590e_911a46a5",
+      "range": {
+        "startLine": 984,
+        "startChar": 2,
+        "endLine": 984,
+        "endChar": 18
+      },
+      "revId": "ffd57ca05a481aa27c9ae1ca9cbf33cf1bd6447b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "42ebce5e_bd7f6680",
         "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
         "patchSetId": 5
@@ -36,6 +60,24 @@
       "writtenOn": "2017-03-08T20:49:17Z",
       "side": 1,
       "message": "this could be within the if()",
+      "revId": "ffd57ca05a481aa27c9ae1ca9cbf33cf1bd6447b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2283c35b_1e7497e3",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 988,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-03-08T22:13:48Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "42ebce5e_bd7f6680",
       "revId": "ffd57ca05a481aa27c9ae1ca9cbf33cf1bd6447b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
@@ -59,6 +101,24 @@
     },
     {
       "key": {
+        "uuid": "16b6f95a_51c574dc",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 989,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-03-08T22:13:48Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "03f031d7_023d1685",
+      "revId": "ffd57ca05a481aa27c9ae1ca9cbf33cf1bd6447b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4a431af8_3cf88853",
         "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
         "patchSetId": 5
@@ -70,6 +130,30 @@
       "writtenOn": "2017-03-08T20:49:17Z",
       "side": 1,
       "message": "\u0027a\u0027 sounds more natural for this one",
+      "range": {
+        "startLine": 1006,
+        "startChar": 27,
+        "endLine": 1006,
+        "endChar": 29
+      },
+      "revId": "ffd57ca05a481aa27c9ae1ca9cbf33cf1bd6447b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "07c71174_b2ff77a5",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1006,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-03-08T22:13:48Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "4a431af8_3cf88853",
       "range": {
         "startLine": 1006,
         "startChar": 27,
