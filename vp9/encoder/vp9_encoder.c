@@ -3083,6 +3083,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
                                        uint8_t *dest) {
   VP9_COMMON *const cm = &cpi->common;
   int q = 0, bottom_index = 0, top_index = 0;  // Dummy variables.
+  int compute_source_sad = cpi->sf.use_source_sad;
 
   vpx_clear_system_state();
 
@@ -3127,6 +3128,16 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
 #endif
   }
 
+  if (cpi->use_svc &&
+      (cpi->svc.spatial_layer_id < cpi->svc.number_spatial_layers - 1 ||
+       cpi->svc.current_superframe < 1)) {
+    compute_source_sad = 0;
+    if (cpi->content_state_sb != NULL)
+      memset(cpi->content_state_sb, 0, (cm->mi_stride >> 3) *
+                                           ((cm->mi_rows >> 3) + 1) *
+                                           sizeof(*cpi->content_state_sb));
+  }
+
   // Avoid scaling last_source unless its needed.
   // Last source is needed if vp9_avg_source_sad() is used, or if
   // partition_search_type == SOURCE_VAR_BASED_PARTITION, or if noise
@@ -3137,7 +3148,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
         cpi->oxcf.mode == REALTIME && cpi->oxcf.speed >= 5) ||
        cpi->sf.partition_search_type == SOURCE_VAR_BASED_PARTITION ||
        (cpi->noise_estimate.enabled && !cpi->oxcf.noise_sensitivity) ||
-       cpi->sf.use_source_sad))
+       compute_source_sad))
     cpi->Last_Source =
         vp9_scale_if_required(cm, cpi->unscaled_last_source,
                               &cpi->scaled_last_source, (cpi->oxcf.pass == 0));
@@ -3152,7 +3163,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   if (cpi->oxcf.pass == 0 && cpi->oxcf.mode == REALTIME &&
       cpi->oxcf.speed >= 5 && cpi->resize_state == 0 &&
       (cpi->oxcf.content == VP9E_CONTENT_SCREEN ||
-       cpi->oxcf.rc_mode == VPX_VBR || cpi->sf.use_source_sad) &&
+       cpi->oxcf.rc_mode == VPX_VBR || compute_source_sad) &&
       cm->show_frame)
     vp9_avg_source_sad(cpi);
 

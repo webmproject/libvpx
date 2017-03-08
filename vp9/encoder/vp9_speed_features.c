@@ -501,11 +501,14 @@ static void set_rt_speed_feature_framesize_independent(
       sf->mv.search_method = NSTEP;
       sf->mv.fullpel_search_step_param = 6;
     }
-    if (!cpi->use_svc && !cpi->resize_pending && !cpi->resize_state &&
-        !cpi->external_resize && cpi->oxcf.resize_mode == RESIZE_NONE)
+    if (!cpi->resize_pending && !cpi->resize_state && !cpi->external_resize &&
+        cpi->oxcf.resize_mode == RESIZE_NONE)
       sf->use_source_sad = 1;
     if (sf->use_source_sad) {
-      if (cpi->content_state_sb == NULL) {
+      // For SVC allocate for top layer.
+      if (cpi->content_state_sb == NULL &&
+          (!cpi->use_svc ||
+           cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1)) {
         cpi->content_state_sb = (uint8_t *)vpx_calloc(
             (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1), sizeof(uint8_t));
       }
