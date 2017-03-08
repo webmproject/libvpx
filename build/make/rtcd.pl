@@ -335,6 +335,36 @@ EOF
   common_bottom;
 }
 
+sub ppc() {
+  determine_indirection("c", @ALL_ARCHS);
+
+  # Assign the helper variable for each enabled extension
+  foreach my $opt (@ALL_ARCHS) {
+    my $opt_uc = uc $opt;
+    eval "\$have_${opt}=\"flags & HAS_${opt_uc}\"";
+  }
+
+  common_top;
+  print <<EOF;
+#include "vpx_config.h"
+
+#ifdef RTCD_C
+#include "vpx_ports/ppc.h"
+static void setup_rtcd_internal(void)
+{
+    int flags = ppc_simd_caps();
+    (void)flags;
+EOF
+
+  set_function_pointers("c", @ALL_ARCHS);
+
+  print <<EOF;
+}
+#endif
+EOF
+  common_bottom;
+}
+
 sub unoptimized() {
   determine_indirection "c";
   common_top;
@@ -390,6 +420,9 @@ if ($opts{arch} eq 'x86') {
 } elsif ($opts{arch} eq 'armv8' || $opts{arch} eq 'arm64' ) {
   @ALL_ARCHS = filter(qw/neon/);
   arm;
+} elsif ($opts{arch} eq 'ppc' ) {
+  @ALL_ARCHS = filter(qw/vsx/);
+  ppc;
 } else {
   unoptimized;
 }
