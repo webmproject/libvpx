@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "442ff42e_af110574",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-08T03:42:26Z",
+      "side": 1,
+      "message": "you could put the rename here if it\u0027s short, otherwise in the body with a note like \u0027for consistency\u0027 would be OK",
+      "revId": "fac061e423284a0c4beff905f3e6c55e05e363a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
