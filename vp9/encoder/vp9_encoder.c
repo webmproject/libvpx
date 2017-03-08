@@ -3174,7 +3174,8 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
        (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_VBR &&
         cpi->oxcf.mode == REALTIME && cpi->oxcf.speed >= 5) ||
        cpi->sf.partition_search_type == SOURCE_VAR_BASED_PARTITION ||
-       cpi->noise_estimate.enabled || cpi->sf.use_source_sad))
+       (cpi->noise_estimate.enabled && !cpi->oxcf.noise_sensitivity) ||
+       cpi->sf.use_source_sad))
     cpi->Last_Source =
         vp9_scale_if_required(cm, cpi->unscaled_last_source,
                               &cpi->scaled_last_source, (cpi->oxcf.pass == 0));
