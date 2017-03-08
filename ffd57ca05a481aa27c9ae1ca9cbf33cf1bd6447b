@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "514a590e_911a46a5",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 984,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-08T20:49:17Z",
+      "side": 1,
+      "message": "Try not to introduce new _t typedef\u0027s, that namespace is reserved and upper camelcase (ColsIndicator) would be more correct style wise.",
+      "range": {
+        "startLine": 984,
+        "startChar": 2,
+        "endLine": 984,
+        "endChar": 18
+      },
+      "revId": "ffd57ca05a481aa27c9ae1ca9cbf33cf1bd6447b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "42ebce5e_bd7f6680",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 988,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-08T20:49:17Z",
+      "side": 1,
+      "message": "this could be within the if()",
+      "revId": "ffd57ca05a481aa27c9ae1ca9cbf33cf1bd6447b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "03f031d7_023d1685",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 989,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-08T20:49:17Z",
+      "side": 1,
+      "message": "this could be a switch given the 2 options",
+      "revId": "ffd57ca05a481aa27c9ae1ca9cbf33cf1bd6447b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4a431af8_3cf88853",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1006,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-08T20:49:17Z",
+      "side": 1,
+      "message": "\u0027a\u0027 sounds more natural for this one",
+      "range": {
+        "startLine": 1006,
+        "startChar": 27,
+        "endLine": 1006,
+        "endChar": 29
+      },
+      "revId": "ffd57ca05a481aa27c9ae1ca9cbf33cf1bd6447b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
