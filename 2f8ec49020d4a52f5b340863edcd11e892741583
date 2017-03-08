@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e34ff790_13ab7abc",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 1487,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-03-08T02:43:59Z",
+      "side": 1,
+      "message": "is this change intentional? if so, can you please edit the commit message to reflect why?",
+      "range": {
+        "startLine": 1487,
+        "startChar": 19,
+        "endLine": 1487,
+        "endChar": 20
+      },
+      "revId": "2f8ec49020d4a52f5b340863edcd11e892741583",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
