@@ -363,6 +363,8 @@ void vp9_highbd_idct32x32_add(const tran_low_t *input, uint8_t *dest,
     vpx_highbd_idct32x32_1_add(input, dest, stride, bd);
   } else if (eob <= 34) {
     vpx_highbd_idct32x32_34_add(input, dest, stride, bd);
+  } else if (eob <= 135) {
+    vpx_highbd_idct32x32_135_add(input, dest, stride, bd);
   } else {
     vpx_highbd_idct32x32_1024_add(input, dest, stride, bd);
   }

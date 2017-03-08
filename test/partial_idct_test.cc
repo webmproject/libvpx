@@ -298,6 +298,15 @@ const PartialInvTxfmParam c_partial_idct_tests[] = {
       &highbd_wrapper<vpx_highbd_idct32x32_1024_add_c>, TX_32X32, 1024, 12, 2),
   make_tuple(
       &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_1024_add_c>,
+      &highbd_wrapper<vpx_highbd_idct32x32_135_add_c>, TX_32X32, 135, 8, 2),
+  make_tuple(
+      &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_1024_add_c>,
+      &highbd_wrapper<vpx_highbd_idct32x32_135_add_c>, TX_32X32, 135, 10, 2),
+  make_tuple(
+      &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_1024_add_c>,
+      &highbd_wrapper<vpx_highbd_idct32x32_135_add_c>, TX_32X32, 135, 12, 2),
+  make_tuple(
+      &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_1024_add_c>,
       &highbd_wrapper<vpx_highbd_idct32x32_34_add_c>, TX_32X32, 34, 8, 2),
   make_tuple(
       &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_1024_add_c>,

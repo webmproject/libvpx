@@ -2569,6 +2569,35 @@ void vpx_highbd_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 }
 
+void vpx_highbd_idct32x32_135_add_c(const tran_low_t *input, uint8_t *dest8,
+                                    int stride, int bd) {
+  int i, j;
+  tran_low_t out[32 * 32] = { 0 };
+  tran_low_t *outptr = out;
+  tran_low_t temp_in[32], temp_out[32];
+  uint16_t *const dest = CONVERT_TO_SHORTPTR(dest8);
+
+  // Rows
+  // Only upper-left 16x16 has non-zero coeff
+  for (i = 0; i < 16; ++i) {
+    highbd_idct32_c(input, outptr, bd);
+    input += 32;
+    outptr += 32;
+  }
+
+  // Columns
+  for (i = 0; i < 32; ++i) {
+    uint16_t *destT = dest;
+    for (j = 0; j < 32; ++j) temp_in[j] = out[j * 32 + i];
+    highbd_idct32_c(temp_in, temp_out, bd);
+    for (j = 0; j < 32; ++j) {
+      destT[i] = highbd_clip_pixel_add(destT[i],
+                                       ROUND_POWER_OF_TWO(temp_out[j], 6), bd);
+      destT += stride;
+    }
+  }
+}
+
 void vpx_highbd_idct32x32_34_add_c(const tran_low_t *input, uint8_t *dest8,
                                    int stride, int bd) {
   int i, j;
