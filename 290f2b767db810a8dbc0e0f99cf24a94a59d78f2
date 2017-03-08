@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "c9a946cf_f3e661d4",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 1174,
+      "author": {
+        "id": 1186779
+      },
+      "writtenOn": "2017-03-08T00:20:37Z",
+      "side": 1,
+      "message": "Quoting https://github.com/edelsohn\n\u003eThe focus is systems that assume a minimum ISA with VSX. I don\u0027t expect the code to dynamically test for the feature at runtime. I expected that the library would detect or be configured for VSX when it is built. I sort of assumed that it would fall back to the current, simple C code if not configured for VSX, as opposed to completely failing to build. But a library built with the assumption of VSX is not expected to run on a hardware at an earlier ISA level.\n\nI thins we can remove RTCD for now",
+      "parentUuid": "946734cf_987626b2",
+      "revId": "290f2b767db810a8dbc0e0f99cf24a94a59d78f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "9326c279_c6847ea2",
         "filename": "build/make/rtcd.pl",
         "patchSetId": 6
