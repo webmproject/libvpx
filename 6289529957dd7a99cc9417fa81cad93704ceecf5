@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a36d7c9a_b861b6e0",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 807,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-03-08T19:32:30Z",
+      "side": 1,
+      "message": "This may be more readable and function names are also fixed.",
+      "parentUuid": "bbcbaac8_3494e471",
+      "range": {
+        "startLine": 807,
+        "startChar": 35,
+        "endLine": 807,
+        "endChar": 68
+      },
+      "revId": "6289529957dd7a99cc9417fa81cad93704ceecf5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d7140661_a8f20e1d",
         "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
         "patchSetId": 4
