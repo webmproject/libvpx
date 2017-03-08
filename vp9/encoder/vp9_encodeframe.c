@@ -2729,8 +2729,8 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   int partition_vert_allowed =
       !force_horz_split && xss <= yss && bsize >= BLOCK_8X8;
 
-  int64_t dist_breakout_thr = cpi->sf.partition_search_breakout_dist_thr;
-  int rate_breakout_thr = cpi->sf.partition_search_breakout_rate_thr;
+  int64_t dist_breakout_thr = cpi->sf.partition_search_breakout_thr.dist;
+  int rate_breakout_thr = cpi->sf.partition_search_breakout_thr.rate;
 
   (void)*tp_orig;
 
@@ -3485,8 +3485,8 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
       this_rdc.rdcost =
           RDCOST(x->rdmult, x->rddiv, this_rdc.rate, this_rdc.dist);
       if (this_rdc.rdcost < best_rdc.rdcost) {
-        int64_t dist_breakout_thr = sf->partition_search_breakout_dist_thr;
-        int64_t rate_breakout_thr = sf->partition_search_breakout_rate_thr;
+        int64_t dist_breakout_thr = sf->partition_search_breakout_thr.dist;
+        int64_t rate_breakout_thr = sf->partition_search_breakout_thr.rate;
 
         dist_breakout_thr >>=
             8 - (b_width_log2_lookup[bsize] + b_height_log2_lookup[bsize]);
