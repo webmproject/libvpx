@@ -34,6 +34,24 @@
       "revId": "66517b1779eb7419b5df7cb341676576e6e90a64",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4a3077d3_31333531",
+        "filename": "test/buffer.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-09T23:30:41Z",
+      "side": 1,
+      "message": "I guess there\u0027s a difference between wanted to test offsets into the buffer vs the base alignment. for the latter just taking the default from the allocator should be enough and only respond to non-zero requests for alignment explicitly added in the code, e.g., 16, 32, etc.",
+      "parentUuid": "f1f50bd0_8e5f455a",
+      "revId": "66517b1779eb7419b5df7cb341676576e6e90a64",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
