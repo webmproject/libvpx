@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7e477c57_5358d7bd",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 999,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-09T23:10:58Z",
+      "side": 1,
+      "message": "this would have {}s too as in the linked example",
+      "revId": "2b9cf60ee457231b51012848309a00fde57bd5b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
