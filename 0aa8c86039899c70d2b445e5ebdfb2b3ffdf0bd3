@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "6113e858_c8b4a1db",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-03-09T06:52:54Z",
+      "side": 1,
+      "message": "This is the root cause of the problem. If you\u0027re using more threads than the number of tile cols, the allocated number of workers will be capped to be the number of tile cols, which will cause a asan failure down in line 620.",
+      "range": {
+        "startLine": 81,
+        "startChar": 4,
+        "endLine": 84,
+        "endChar": 5
+      },
+      "revId": "0aa8c86039899c70d2b445e5ebdfb2b3ffdf0bd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a3b3a210_e0208890",
         "filename": "vp9/encoder/vp9_ethread.c",
         "patchSetId": 7
@@ -13,6 +36,24 @@
       "writtenOn": "2017-03-09T06:44:12Z",
       "side": 1,
       "message": "does get_max_tile_cols do something special for svc? if not, this seems to cap the number of workers at max_tile_cols (i.e.) if you have 2 tile columns, this will cap it at 2 threads (1 thread per tile).\n\nis this intentional? if so, it seems to void the point of row based multi threading.",
+      "revId": "0aa8c86039899c70d2b445e5ebdfb2b3ffdf0bd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9559a3e1_0f2f4cf2",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 601,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-03-09T06:52:54Z",
+      "side": 1,
+      "message": "I made this change because it\u0027s causing an asan failure, which was explained in the comment above (line 81). I didn\u0027t realize the problem you pointed out, though.\n\nMaybe the best practice is to delete the codes to cap the number of allocated workers above.",
+      "parentUuid": "a3b3a210_e0208890",
       "revId": "0aa8c86039899c70d2b445e5ebdfb2b3ffdf0bd3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
