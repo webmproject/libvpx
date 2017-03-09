@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5f7ddc9c_1abb56c9",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 697,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-09T02:53:55Z",
+      "side": 1,
+      "message": "does this end up generating a pmulhrsw or doing the register assignment? I think for clarity it would be best to assign one to the other rather than repeat the operation.",
+      "revId": "97bbc65612c8c2852501cd19cab365cc40044571",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0dee5ce4_8afe23d6",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 983,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-09T02:53:55Z",
+      "side": 1,
+      "message": "technically in enums the final trailing \u0027,\u0027 isn\u0027t part of c90, though it\u0027s been a while since a compiler warned or failed for this with its defaults. we might have other instances, but best not to bring in another one",
+      "range": {
+        "startLine": 983,
+        "startChar": 10,
+        "endLine": 983,
+        "endChar": 11
+      },
+      "revId": "97bbc65612c8c2852501cd19cab365cc40044571",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "50961f72_b2954908",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 998,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-09T02:53:55Z",
+      "side": 1,
+      "message": "when one case has {}s they all should:\n\nhttps://google.github.io/styleguide/cppguide.html#Loops_and_Switch_Statements",
+      "revId": "97bbc65612c8c2852501cd19cab365cc40044571",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
