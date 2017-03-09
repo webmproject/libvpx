@@ -70,6 +70,30 @@
       "revId": "33624761387fabd6f7d73190495d8e224cb477ee",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fe4e46f1_bc39cbfc",
+        "filename": "test/test_hadamard_speed.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1186779
+      },
+      "writtenOn": "2017-03-09T21:27:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "27deec8b_4464a43d",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 56
+      },
+      "revId": "33624761387fabd6f7d73190495d8e224cb477ee",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
