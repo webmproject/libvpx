@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a3b3a210_e0208890",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 601,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-03-09T06:44:12Z",
+      "side": 1,
+      "message": "does get_max_tile_cols do something special for svc? if not, this seems to cap the number of workers at max_tile_cols (i.e.) if you have 2 tile columns, this will cap it at 2 threads (1 thread per tile).\n\nis this intentional? if so, it seems to void the point of row based multi threading.",
+      "revId": "0aa8c86039899c70d2b445e5ebdfb2b3ffdf0bd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
