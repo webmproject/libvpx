@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9085d2f2_e70c34b2",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-03-09T23:28:24Z",
+      "side": 1,
+      "message": "This piece of code was added to fix a crash (I found the issue: https://bugs.chromium.org/p/webm/issues/detail?id\u003d1018). Please take a look. Not sure it is right not to do this while cpi-\u003erow_mt \u003d 1.",
+      "range": {
+        "startLine": 81,
+        "startChar": 8,
+        "endLine": 81,
+        "endChar": 20
+      },
+      "revId": "d30dfcc5e523f138901952017a01adac6c3d8e8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
