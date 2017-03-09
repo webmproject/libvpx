@@ -1,0 +1,205 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "522ef9d2_90ad3eea",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-09T21:43:24Z",
+      "side": 1,
+      "message": "Just for grouping, please put this above the \"class Hadamard8x8Test : public HadamardTestBase {};\" line, since this is used by both the 8x8 and the 16x16.",
+      "range": {
+        "startLine": 105,
+        "startChar": 5,
+        "endLine": 105,
+        "endChar": 22
+      },
+      "revId": "c89e626879cffa745635c2f2bd3af1329b0e356b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d7584385_8eecb4ae",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-09T21:43:24Z",
+      "side": 1,
+      "message": "It doesn\u0027t really make sense to use 0-\u003estrides inclusive for this value. It\u0027s the stride of the input data so it needs to be greater than the width of the data. This might even fail on other platforms if some alignment is expected.",
+      "revId": "c89e626879cffa745635c2f2bd3af1329b0e356b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aac48709_d18bc5dd",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-09T21:43:24Z",
+      "side": 1,
+      "message": "Just for grouping, please put this with the other 16x16 functions.",
+      "range": {
+        "startLine": 130,
+        "startChar": 0,
+        "endLine": 130,
+        "endChar": 65
+      },
+      "revId": "c89e626879cffa745635c2f2bd3af1329b0e356b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dfe596d1_f36a6416",
+        "filename": "vpx_dsp/ppc/hadamard_vsx.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-09T21:43:24Z",
+      "side": 1,
+      "message": "Please use \u0027int16_t\u0027 instead of \u0027signed short\u0027 everywhere in this change.",
+      "range": {
+        "startLine": 16,
+        "startChar": 56,
+        "endLine": 16,
+        "endChar": 61
+      },
+      "revId": "c89e626879cffa745635c2f2bd3af1329b0e356b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7729f5dc_f526772f",
+        "filename": "vpx_dsp/ppc/hadamard_vsx.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-09T21:43:24Z",
+      "side": 1,
+      "message": "The arm implementation manages to do this with one transpose instead of 2:\nhttps://chromium.googlesource.com/webm/libvpx/+/master/vpx_dsp/arm/hadamard_neon.c#66\n\nAny chance that would work in this case?",
+      "range": {
+        "startLine": 58,
+        "startChar": 2,
+        "endLine": 58,
+        "endChar": 23
+      },
+      "revId": "c89e626879cffa745635c2f2bd3af1329b0e356b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9a486963_c9541cf1",
+        "filename": "vpx_dsp/ppc/transpose_vsx.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-09T21:43:24Z",
+      "side": 1,
+      "message": "#include \"./vpx_config.h\"\n\nfor \u0027INLINE\u0027",
+      "range": {
+        "startLine": 14,
+        "startChar": 1,
+        "endLine": 14,
+        "endChar": 8
+      },
+      "revId": "c89e626879cffa745635c2f2bd3af1329b0e356b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a75e4b38_d6efa8f7",
+        "filename": "vpx_dsp/ppc/transpose_vsx.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-09T21:43:24Z",
+      "side": 1,
+      "message": "static INLINE void transpose_s16_8x8\nto match existing convention:\nhttps://chromium.googlesource.com/webm/libvpx/+/master/vpx_dsp/arm/transpose_neon.h#571",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 6
+      },
+      "revId": "c89e626879cffa745635c2f2bd3af1329b0e356b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ecbac1e5_42866f1e",
+        "filename": "vpx_dsp/ppc/transpose_vsx.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-09T21:43:24Z",
+      "side": 1,
+      "message": "Comments, along the lines of transpose_neon.h, would be appreciated.",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 30
+      },
+      "revId": "c89e626879cffa745635c2f2bd3af1329b0e356b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fb601ee7_a18b3a45",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-09T21:43:24Z",
+      "side": 1,
+      "message": "for reasons i don\u0027t exactly understand, hadamard is part of avg.c so this should just go up next to the old arm line.",
+      "range": {
+        "startLine": 272,
+        "startChar": 2,
+        "endLine": 272,
+        "endChar": 10
+      },
+      "revId": "c89e626879cffa745635c2f2bd3af1329b0e356b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
