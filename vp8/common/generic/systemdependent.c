@@ -14,6 +14,8 @@
 #include "vpx_ports/arm.h"
 #elif ARCH_X86 || ARCH_X86_64
 #include "vpx_ports/x86.h"
+#elif ARCH_PPC
+#include "vpx_ports/ppc.h"
 #endif
 #include "vp8/common/onyxc_int.h"
 #include "vp8/common/systemdependent.h"
