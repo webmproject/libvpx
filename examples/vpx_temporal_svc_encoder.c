@@ -722,6 +722,7 @@ int main(int argc, char **argv) {
     vpx_codec_control(&codec, VP8E_SET_STATIC_THRESHOLD, 1);
     vpx_codec_control(&codec, VP9E_SET_TUNE_CONTENT, 0);
     vpx_codec_control(&codec, VP9E_SET_TILE_COLUMNS, (cfg.g_threads >> 1));
+    vpx_codec_control(&codec, VP9E_SET_ROW_MT, 0);
     if (vpx_codec_control(&codec, VP9E_SET_SVC, layering_mode > 0 ? 1 : 0))
       die_codec(&codec, "Failed to set SVC");
     for (i = 0; i < cfg.ts_number_layers; ++i) {
