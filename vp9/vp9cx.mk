@@ -39,6 +39,7 @@ VP9_CX_SRCS-yes += encoder/vp9_encodemb.h
 VP9_CX_SRCS-yes += encoder/vp9_encodemv.h
 VP9_CX_SRCS-yes += encoder/vp9_extend.h
 VP9_CX_SRCS-yes += encoder/vp9_firstpass.h
+VP9_CX_SRCS-yes += encoder/vp9_frame_scale.c
 VP9_CX_SRCS-yes += encoder/vp9_job_queue.h
 VP9_CX_SRCS-yes += encoder/vp9_lookahead.c
 VP9_CX_SRCS-yes += encoder/vp9_lookahead.h
