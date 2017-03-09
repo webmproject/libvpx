@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9d9f4d21_d8b7f97b",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 697,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-03-09T17:28:38Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "5f7ddc9c_1abb56c9",
+      "revId": "97bbc65612c8c2852501cd19cab365cc40044571",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0dee5ce4_8afe23d6",
         "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
         "patchSetId": 7
@@ -42,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "95dee3bb_fdf5241a",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 983,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-03-09T17:28:38Z",
+      "side": 1,
+      "message": "Done.  Regarding to this, c99 is considerate to script developer.",
+      "parentUuid": "0dee5ce4_8afe23d6",
+      "range": {
+        "startLine": 983,
+        "startChar": 10,
+        "endLine": 983,
+        "endChar": 11
+      },
+      "revId": "97bbc65612c8c2852501cd19cab365cc40044571",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "50961f72_b2954908",
         "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
         "patchSetId": 7
@@ -53,6 +95,24 @@
       "writtenOn": "2017-03-09T02:53:55Z",
       "side": 1,
       "message": "when one case has {}s they all should:\n\nhttps://google.github.io/styleguide/cppguide.html#Loops_and_Switch_Statements",
+      "revId": "97bbc65612c8c2852501cd19cab365cc40044571",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2bbc92a2_694d50f6",
+        "filename": "vpx_dsp/x86/inv_txfm_ssse3.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 998,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-03-09T17:28:38Z",
+      "side": 1,
+      "message": "Done. Good to know.",
+      "parentUuid": "50961f72_b2954908",
       "revId": "97bbc65612c8c2852501cd19cab365cc40044571",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
