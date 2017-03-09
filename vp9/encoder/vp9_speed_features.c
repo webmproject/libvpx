@@ -472,9 +472,9 @@ static void set_rt_speed_feature_framesize_independent(
       sf->short_circuit_flat_blocks = 1;
     }
     if (cpi->oxcf.rc_mode == VPX_CBR &&
-        cpi->oxcf.content != VP9E_CONTENT_SCREEN && !cpi->use_svc) {
+        cpi->oxcf.content != VP9E_CONTENT_SCREEN) {
       sf->limit_newmv_early_exit = 1;
-      sf->bias_golden = 1;
+      if (!cpi->use_svc) sf->bias_golden = 1;
     }
   }
 
@@ -485,8 +485,7 @@ static void set_rt_speed_feature_framesize_independent(
     sf->mv.search_method = NSTEP;
     sf->mv.reduce_first_step_size = 1;
     sf->skip_encode_sb = 0;
-    if (!cpi->use_svc && cpi->oxcf.rc_mode == VPX_CBR &&
-        content != VP9E_CONTENT_SCREEN) {
+    if (cpi->oxcf.rc_mode == VPX_CBR && content != VP9E_CONTENT_SCREEN) {
       // Enable short circuit for low temporal variance.
       sf->short_circuit_low_temp_var = 1;
     }
