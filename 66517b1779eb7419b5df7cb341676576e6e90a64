@@ -16,6 +16,24 @@
       "revId": "66517b1779eb7419b5df7cb341676576e6e90a64",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f1f50bd0_8e5f455a",
+        "filename": "test/buffer.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-09T17:14:21Z",
+      "side": 1,
+      "message": "How do I figure out the default alignment though, without getting confused about incidental/accidental alignment? Align on sizeof(T)?",
+      "parentUuid": "a0318128_d5ad804b",
+      "revId": "66517b1779eb7419b5df7cb341676576e6e90a64",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
