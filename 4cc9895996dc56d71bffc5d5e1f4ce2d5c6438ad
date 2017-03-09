@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a23b7341_3cb010eb",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-03-09T17:39:55Z",
+      "side": 1,
+      "message": "This condition can be removed since this would only be checked when use_svc\u003d1.",
+      "range": {
+        "startLine": 501,
+        "startChar": 10,
+        "endLine": 501,
+        "endChar": 22
+      },
+      "revId": "4cc9895996dc56d71bffc5d5e1f4ce2d5c6438ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
