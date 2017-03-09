@@ -46,6 +46,30 @@
       "revId": "33624761387fabd6f7d73190495d8e224cb477ee",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "27deec8b_4464a43d",
+        "filename": "test/test_hadamard_speed.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-09T17:12:53Z",
+      "side": 1,
+      "message": "You just need to add a new TEST_P() to hadamard_test.cc which uses h_func_\n\nThen each instantiation of INSTANTIATE_TEST_CASE_P will be run, and it will run with C, and again with VSX\n\nSomething like TEST_P(Hadamard8x8Test, DISABLED_Speed)",
+      "parentUuid": "c13bd68c_7338ae50",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 56
+      },
+      "revId": "33624761387fabd6f7d73190495d8e224cb477ee",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
