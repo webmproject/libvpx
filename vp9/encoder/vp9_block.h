@@ -63,6 +63,11 @@ typedef struct {
 
 typedef struct macroblock MACROBLOCK;
 struct macroblock {
+// cf. https://bugs.chromium.org/p/webm/issues/detail?id=1054
+#if defined(_MSC_VER) && _MSC_VER < 1900
+  int64_t bsse[MAX_MB_PLANE << 2];
+#endif
+
   struct macroblock_plane plane[MAX_MB_PLANE];
 
   MACROBLOCKD e_mbd;
@@ -149,7 +154,10 @@ struct macroblock {
 #define SKIP_TXFM_AC_DC 1
 #define SKIP_TXFM_AC_ONLY 2
 
+// cf. https://bugs.chromium.org/p/webm/issues/detail?id=1054
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
   int64_t bsse[MAX_MB_PLANE << 2];
+#endif
 
   // Used to store sub partition's choices.
   MV pred_mv[MAX_REF_FRAMES];
