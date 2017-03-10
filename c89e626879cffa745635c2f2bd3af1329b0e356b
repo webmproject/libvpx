@@ -178,6 +178,30 @@
     },
     {
       "key": {
+        "uuid": "1cde96cc_d663959b",
+        "filename": "vpx_dsp/ppc/hadamard_vsx.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-10T01:42:14Z",
+      "side": 1,
+      "message": "Shoot, that\u0027s really unfortunate. I think the linter is different from clang-format.",
+      "parentUuid": "68326784_c826d0e8",
+      "range": {
+        "startLine": 16,
+        "startChar": 56,
+        "endLine": 16,
+        "endChar": 61
+      },
+      "revId": "c89e626879cffa745635c2f2bd3af1329b0e356b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7729f5dc_f526772f",
         "filename": "vpx_dsp/ppc/hadamard_vsx.c",
         "patchSetId": 4

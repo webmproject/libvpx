@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "922d680a_7a377d2e",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-10T01:42:14Z",
+      "side": 1,
+      "message": "Use \u0027tran_low_t\u0027 for output. This maps to int16_t for regular builds, and int32_t for high bitdepth builds. This will fix this jenkins build error:\nhttps://build.webmproject.org/jenkins/job/libvpx__compile/32729/arch\u003dgeneric-gnu,config\u003dhighbitdepth/console\n23:56:00     [CXX] test/hadamard_test.cc.o\n23:56:01 ../libvpx/test/hadamard_test.cc: In function ‘void {anonymous}::HadamardSpeedTest(const char*, {anonymous}::HadamardFunc, const int16_t*, int, int16_t*, int)’:\n23:56:01 ../libvpx/test/hadamard_test.cc:111:31: error: cannot convert ‘int16_t* {aka short int*}’ to ‘tran_low_t* {aka int*}’ in argument passing\n23:56:01      func(input, stride, output);\n23:56:01                                ^",
+      "range": {
+        "startLine": 104,
+        "startChar": 57,
+        "endLine": 104,
+        "endChar": 64
+      },
+      "revId": "71db13190f88ed00446d8eec11c753cb04813bc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d0bac1b_0b43e4bc",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 7
+      },
+      "lineNbr": 911,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-10T01:42:14Z",
+      "side": 1,
+      "message": "You can\u0027t enable \u0027vsx\u0027 for high bit depth builds unless you support writing out to coeff as a tran_low_t (int16_t for regular builds, int32_t for hbd)",
+      "range": {
+        "startLine": 911,
+        "startChar": 45,
+        "endLine": 911,
+        "endChar": 48
+      },
+      "revId": "71db13190f88ed00446d8eec11c753cb04813bc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
