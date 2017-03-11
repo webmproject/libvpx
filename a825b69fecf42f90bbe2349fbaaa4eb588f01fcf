@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dfeb4163_1906502d",
+        "filename": "vp8/common/quant_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-11T02:12:27Z",
+      "side": 1,
+      "message": "this should use a constant lookup into the table to make sure things stay in sync",
+      "revId": "a825b69fecf42f90bbe2349fbaaa4eb588f01fcf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
