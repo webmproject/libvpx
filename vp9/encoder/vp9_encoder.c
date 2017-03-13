@@ -3128,9 +3128,10 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
 #endif
   }
 
-  if (cpi->use_svc &&
-      (cpi->svc.spatial_layer_id < cpi->svc.number_spatial_layers - 1 ||
-       cpi->svc.current_superframe < 1)) {
+  if ((cpi->use_svc &&
+       (cpi->svc.spatial_layer_id < cpi->svc.number_spatial_layers - 1 ||
+        cpi->svc.current_superframe < 1)) ||
+      cpi->resize_pending || cpi->resize_state || cpi->external_resize) {
     compute_source_sad = 0;
     if (cpi->content_state_sb != NULL)
       memset(cpi->content_state_sb, 0, (cm->mi_stride >> 3) *
