@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4e771d83_6af9b626",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-03-13T17:20:39Z",
+      "side": 1,
+      "message": "Maybe move this here always instead of separating into 2 cases. Also, it seems bsse is used to store SSE result, and 32-bit should be enough, right?",
+      "range": {
+        "startLine": 68,
+        "startChar": 10,
+        "endLine": 68,
+        "endChar": 14
+      },
+      "revId": "c09b290ceadcced49e7b2ae37c24d2be0d1dd132",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
