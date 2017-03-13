@@ -22,6 +22,30 @@
       "revId": "c09b290ceadcced49e7b2ae37c24d2be0d1dd132",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1c19858e_a9314333",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-13T18:21:47Z",
+      "side": 1,
+      "message": "\u003e Maybe move this here always instead of separating into 2 cases.\n\nMy thought was I didn\u0027t want to unnecessarily affect other platforms for this workaround. Given this structure hasn\u0027t really been laid out with cache in mind, maybe I\u0027m being overly conservative.\n\n\u003e Also, it seems bsse is used to store SSE result, and 32-bit should be enough, right?\n\npossible if it\u0027s only working on superblocks or so. the sum stored through the loops might need to be 64-bit, but in that case this shouldn\u0027t even at high bitdepth (and would avoid the issue without the move I think).",
+      "parentUuid": "4e771d83_6af9b626",
+      "range": {
+        "startLine": 68,
+        "startChar": 10,
+        "endLine": 68,
+        "endChar": 14
+      },
+      "revId": "c09b290ceadcced49e7b2ae37c24d2be0d1dd132",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
