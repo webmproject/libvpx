@@ -28,6 +28,9 @@ TOOLS           = $(addprefix tools/,$(call enabled,TOOLS))
 ALL_SRCS        = $(foreach ex,$(TOOLS),$($(notdir $(ex:.c=)).SRCS))
 CFLAGS += -I../include
 
+ifneq ($(CONFIG_CODEC_SRCS), yes)
+  CFLAGS += -I../include/vpx
+endif
 
 # Expand all tools sources into a variable containing all sources
 # for that tools (not just them main one specified in TOOLS)
