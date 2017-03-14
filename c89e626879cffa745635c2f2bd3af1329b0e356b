@@ -202,6 +202,30 @@
     },
     {
       "key": {
+        "uuid": "ee4690fb_7743c8f5",
+        "filename": "vpx_dsp/ppc/hadamard_vsx.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1186779
+      },
+      "writtenOn": "2017-03-14T11:47:31Z",
+      "side": 1,
+      "message": "What about int16x8_t, uint16x8_t like ARM Neon?",
+      "parentUuid": "1cde96cc_d663959b",
+      "range": {
+        "startLine": 16,
+        "startChar": 56,
+        "endLine": 16,
+        "endChar": 61
+      },
+      "revId": "c89e626879cffa745635c2f2bd3af1329b0e356b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7729f5dc_f526772f",
         "filename": "vpx_dsp/ppc/hadamard_vsx.c",
         "patchSetId": 4

@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "03c0c364_05f0f529",
+        "filename": "test/hadamard_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1186779
+      },
+      "writtenOn": "2017-03-14T11:47:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "922d680a_7a377d2e",
+      "range": {
+        "startLine": 104,
+        "startChar": 57,
+        "endLine": 104,
+        "endChar": 64
+      },
+      "revId": "71db13190f88ed00446d8eec11c753cb04813bc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5d0bac1b_0b43e4bc",
         "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-10T01:42:14Z",
       "side": 1,
       "message": "You can\u0027t enable \u0027vsx\u0027 for high bit depth builds unless you support writing out to coeff as a tran_low_t (int16_t for regular builds, int32_t for hbd)",
+      "range": {
+        "startLine": 911,
+        "startChar": 45,
+        "endLine": 911,
+        "endChar": 48
+      },
+      "revId": "71db13190f88ed00446d8eec11c753cb04813bc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1218f3b1_34a06dd9",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 7
+      },
+      "lineNbr": 911,
+      "author": {
+        "id": 1186779
+      },
+      "writtenOn": "2017-03-14T11:47:31Z",
+      "side": 1,
+      "message": "Ok, just some questions:\n\nI\u0027ll need to convertion from int16_t to tran_low_t like this?\n\nExample:\nint16_t input \u003d { 0, 0xFFFF, 1, 2 };\n\nint32_t output_little_endian \u003d { 0xFFFF0000, 0x20001 };\nint32_t output_little_endian \u003d { 0xFFFF, 0x10002 };\n\nOr I must dicard some values?",
+      "parentUuid": "5d0bac1b_0b43e4bc",
       "range": {
         "startLine": 911,
         "startChar": 45,
