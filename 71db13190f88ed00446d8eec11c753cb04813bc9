@@ -93,6 +93,30 @@
       "revId": "71db13190f88ed00446d8eec11c753cb04813bc9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3a0b3e35_5efbb6e8",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 7
+      },
+      "lineNbr": 911,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-14T14:38:24Z",
+      "side": 1,
+      "message": "The conversion must be sign extended. We use \u0027store_tran_low\u0027 and \u0027load_tran_low\u0027 for x86 and arm. You can see the definitions here:\nhttps://chromium.googlesource.com/webm/libvpx/+/master/vpx_dsp/arm/idct_neon.h#46\nhttps://chromium.googlesource.com/webm/libvpx/+/master/vpx_dsp/x86/bitdepth_conversion_sse2.h\n\narm has a few extra bits of information, such as whether it is loading to a double or quadword vector. If you only need one style, like x86, you can leave out the _to_s16[dq] and just use \u0027load_tran_low\u0027",
+      "parentUuid": "1218f3b1_34a06dd9",
+      "range": {
+        "startLine": 911,
+        "startChar": 45,
+        "endLine": 911,
+        "endChar": 48
+      },
+      "revId": "71db13190f88ed00446d8eec11c753cb04813bc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }

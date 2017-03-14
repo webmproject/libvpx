@@ -226,6 +226,30 @@
     },
     {
       "key": {
+        "uuid": "80a0824b_65378cb6",
+        "filename": "vpx_dsp/ppc/hadamard_vsx.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-14T14:38:24Z",
+      "side": 1,
+      "message": "I talked to jzern@ about this and we can just ignore the linter here. It\u0027s a little annoying but if these are the generally accepted types then that is fine.\n\nIf you can use int16x8_t, that would also be a good solution. But if not, we can ignore the warnings.",
+      "parentUuid": "ee4690fb_7743c8f5",
+      "range": {
+        "startLine": 16,
+        "startChar": 56,
+        "endLine": 16,
+        "endChar": 61
+      },
+      "revId": "c89e626879cffa745635c2f2bd3af1329b0e356b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7729f5dc_f526772f",
         "filename": "vpx_dsp/ppc/hadamard_vsx.c",
         "patchSetId": 4
