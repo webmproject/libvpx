@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "67435f36_4c01e489",
+        "filename": "test/temporal_filter_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-14T16:52:08Z",
+      "side": 1,
+      "message": "Is this a good constant to use? summed_values could be as low as 4 for a corner block, instead of 9. I\u0027m not really sure what the purpose of this is mathematically.",
+      "range": {
+        "startLine": 87,
+        "startChar": 15,
+        "endLine": 87,
+        "endChar": 0
+      },
+      "revId": "a14a987c82dbc7e5d46dd9bd526fae84083a4154",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
