@@ -82,6 +82,16 @@ void vp9_row_mt_mem_alloc(VP9_COMP *cpi) {
   for (tile_col = 0; tile_col < tile_cols; tile_col++) {
     TileDataEnc *this_tile = &cpi->tile_data[tile_col];
     vp9_row_mt_sync_mem_alloc(&this_tile->row_mt_sync, cm, jobs_per_tile_col);
+    if (cpi->sf.adaptive_rd_thresh_row_mt) {
+      const int sb_rows =
+          (mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2) + 1;
+      int i;
+      this_tile->row_base_thresh_freq_fact =
+          (int *)vpx_calloc(sb_rows * BLOCK_SIZES * MAX_MODES,
+                            sizeof(*(this_tile->row_base_thresh_freq_fact)));
+      for (i = 0; i < sb_rows * BLOCK_SIZES * MAX_MODES; i++)
+        this_tile->row_base_thresh_freq_fact[i] = RD_THRESH_INIT_FACT;
+    }
   }
 
   // Assign the sync pointer of tile row zero for every tile row > 0
@@ -154,10 +164,15 @@ void vp9_row_mt_mem_dealloc(VP9_COMP *cpi) {
       TileDataEnc *this_tile =
           &cpi->tile_data[tile_row * multi_thread_ctxt->allocated_tile_cols +
                           tile_col];
+      if (cpi->sf.adaptive_rd_thresh_row_mt) {
+        if (this_tile->row_base_thresh_freq_fact != NULL) {
+          vpx_free(this_tile->row_base_thresh_freq_fact);
+          this_tile->row_base_thresh_freq_fact = NULL;
+        }
+      }
       pthread_mutex_destroy(this_tile->search_count_mutex);
       vpx_free(this_tile->search_count_mutex);
       this_tile->search_count_mutex = NULL;
-
       pthread_mutex_destroy(this_tile->enc_row_mt_mutex);
       vpx_free(this_tile->enc_row_mt_mutex);
       this_tile->enc_row_mt_mutex = NULL;
