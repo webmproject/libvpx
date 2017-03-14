@@ -449,6 +449,9 @@ typedef struct SPEED_FEATURES {
   // Partition search early breakout thresholds.
   PARTITION_SEARCH_BREAKOUT_THR partition_search_breakout_thr;
 
+  // Machine-learning based partition search early termination
+  int ml_partition_search_early_termination;
+
   // Allow skipping partition search for still image frame
   int allow_partition_search_skip;
 

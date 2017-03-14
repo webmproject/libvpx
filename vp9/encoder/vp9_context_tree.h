@@ -71,6 +71,9 @@ typedef struct {
   // search loop
   MV pred_mv[MAX_REF_FRAMES];
   INTERP_FILTER pred_interp_filter;
+
+  // Used for the machine learning-based early termination
+  int sum_eobs;
 } PICK_MODE_CONTEXT;
 
 typedef struct PC_TREE {
