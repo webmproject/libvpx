@@ -339,10 +339,10 @@ static INLINE void idct32_bands_end_2nd_pass(const int16_t *const out,
   dest3 -= str2;
 
   load_from_output(out, 30, 31, &q[0], &q[1]);
-  q[4] = vaddq_s16(q[2], q[1]);
-  q[5] = vaddq_s16(q[3], q[0]);
-  q[6] = vsubq_s16(q[3], q[0]);
-  q[7] = vsubq_s16(q[2], q[1]);
+  q[4] = final_add(q[2], q[1]);
+  q[5] = final_add(q[3], q[0]);
+  q[6] = final_sub(q[3], q[0]);
+  q[7] = final_sub(q[2], q[1]);
   store_combine_extreme_results(dest0, dest1, stride, q[4], q[5], q[6], q[7]);
   dest0 += str2;
   dest1 -= str2;
@@ -354,19 +354,19 @@ static INLINE void idct32_bands_end_2nd_pass(const int16_t *const out,
   q[5] = vsubq_s16(q[10], q[1]);
 
   load_from_output(out, 18, 19, &q[0], &q[1]);
-  q[8] = vaddq_s16(q[4], q[1]);
-  q[9] = vaddq_s16(q[5], q[0]);
-  q[6] = vsubq_s16(q[5], q[0]);
-  q[7] = vsubq_s16(q[4], q[1]);
+  q[8] = final_add(q[4], q[1]);
+  q[9] = final_add(q[5], q[0]);
+  q[6] = final_sub(q[5], q[0]);
+  q[7] = final_sub(q[4], q[1]);
   store_combine_center_results(dest2, dest3, stride, q[6], q[7], q[8], q[9]);
   dest2 += str2;
   dest3 -= str2;
 
   load_from_output(out, 28, 29, &q[0], &q[1]);
-  q[4] = vaddq_s16(q[2], q[1]);
-  q[5] = vaddq_s16(q[3], q[0]);
-  q[6] = vsubq_s16(q[3], q[0]);
-  q[7] = vsubq_s16(q[2], q[1]);
+  q[4] = final_add(q[2], q[1]);
+  q[5] = final_add(q[3], q[0]);
+  q[6] = final_sub(q[3], q[0]);
+  q[7] = final_sub(q[2], q[1]);
   store_combine_extreme_results(dest0, dest1, stride, q[4], q[5], q[6], q[7]);
   dest0 += str2;
   dest1 -= str2;
@@ -378,19 +378,19 @@ static INLINE void idct32_bands_end_2nd_pass(const int16_t *const out,
   q[5] = vsubq_s16(q[12], q[1]);
 
   load_from_output(out, 20, 21, &q[0], &q[1]);
-  q[8] = vaddq_s16(q[4], q[1]);
-  q[9] = vaddq_s16(q[5], q[0]);
-  q[6] = vsubq_s16(q[5], q[0]);
-  q[7] = vsubq_s16(q[4], q[1]);
+  q[8] = final_add(q[4], q[1]);
+  q[9] = final_add(q[5], q[0]);
+  q[6] = final_sub(q[5], q[0]);
+  q[7] = final_sub(q[4], q[1]);
   store_combine_center_results(dest2, dest3, stride, q[6], q[7], q[8], q[9]);
   dest2 += str2;
   dest3 -= str2;
 
   load_from_output(out, 26, 27, &q[0], &q[1]);
-  q[4] = vaddq_s16(q[2], q[1]);
-  q[5] = vaddq_s16(q[3], q[0]);
-  q[6] = vsubq_s16(q[3], q[0]);
-  q[7] = vsubq_s16(q[2], q[1]);
+  q[4] = final_add(q[2], q[1]);
+  q[5] = final_add(q[3], q[0]);
+  q[6] = final_sub(q[3], q[0]);
+  q[7] = final_sub(q[2], q[1]);
   store_combine_extreme_results(dest0, dest1, stride, q[4], q[5], q[6], q[7]);
   dest0 += str2;
   dest1 -= str2;
@@ -402,17 +402,17 @@ static INLINE void idct32_bands_end_2nd_pass(const int16_t *const out,
   q[5] = vsubq_s16(q[14], q[1]);
 
   load_from_output(out, 22, 23, &q[0], &q[1]);
-  q[8] = vaddq_s16(q[4], q[1]);
-  q[9] = vaddq_s16(q[5], q[0]);
-  q[6] = vsubq_s16(q[5], q[0]);
-  q[7] = vsubq_s16(q[4], q[1]);
+  q[8] = final_add(q[4], q[1]);
+  q[9] = final_add(q[5], q[0]);
+  q[6] = final_sub(q[5], q[0]);
+  q[7] = final_sub(q[4], q[1]);
   store_combine_center_results(dest2, dest3, stride, q[6], q[7], q[8], q[9]);
 
   load_from_output(out, 24, 25, &q[0], &q[1]);
-  q[4] = vaddq_s16(q[2], q[1]);
-  q[5] = vaddq_s16(q[3], q[0]);
-  q[6] = vsubq_s16(q[3], q[0]);
-  q[7] = vsubq_s16(q[2], q[1]);
+  q[4] = final_add(q[2], q[1]);
+  q[5] = final_add(q[3], q[0]);
+  q[6] = final_sub(q[3], q[0]);
+  q[7] = final_sub(q[2], q[1]);
   store_combine_extreme_results(dest0, dest1, stride, q[4], q[5], q[6], q[7]);
 }
 
@@ -656,10 +656,10 @@ void vpx_idct32x32_1024_add_neon(const tran_low_t *input, uint8_t *dest,
       q[4] = vsubq_s16(q[9], q[0]);
       q[5] = vsubq_s16(q[8], q[1]);
       load_from_output(out, 16, 17, &q[0], &q[1]);
-      q[8] = vaddq_s16(q[4], q[1]);
-      q[9] = vaddq_s16(q[5], q[0]);
-      q[6] = vsubq_s16(q[5], q[0]);
-      q[7] = vsubq_s16(q[4], q[1]);
+      q[8] = final_add(q[4], q[1]);
+      q[9] = final_add(q[5], q[0]);
+      q[6] = final_sub(q[5], q[0]);
+      q[7] = final_sub(q[4], q[1]);
 
       if (idct32_pass_loop == 0) {
         idct32_bands_end_1st_pass(out, q);

@@ -451,50 +451,50 @@ static void idct32_8_neon(const int16_t *input, uint8_t *output, int stride) {
   s1[24] = add_multiply_shift_and_narrow_s16(s1[23], s3[24], cospi_16_64);
 
   // final stage
-  out[0] = vaddq_s16(s1[0], s2[31]);
-  out[1] = vaddq_s16(s1[1], s2[30]);
-  out[2] = vaddq_s16(s1[2], s2[29]);
-  out[3] = vaddq_s16(s1[3], s2[28]);
-  out[4] = vaddq_s16(s1[4], s1[27]);
-  out[5] = vaddq_s16(s1[5], s1[26]);
-  out[6] = vaddq_s16(s1[6], s1[25]);
-  out[7] = vaddq_s16(s1[7], s1[24]);
+  out[0] = final_add(s1[0], s2[31]);
+  out[1] = final_add(s1[1], s2[30]);
+  out[2] = final_add(s1[2], s2[29]);
+  out[3] = final_add(s1[3], s2[28]);
+  out[4] = final_add(s1[4], s1[27]);
+  out[5] = final_add(s1[5], s1[26]);
+  out[6] = final_add(s1[6], s1[25]);
+  out[7] = final_add(s1[7], s1[24]);
 
   add_and_store_u8_s16(out[0], out[1], out[2], out[3], out[4], out[5], out[6],
                        out[7], output, stride);
 
-  out[0] = vaddq_s16(s1[8], s2[23]);
-  out[1] = vaddq_s16(s1[9], s2[22]);
-  out[2] = vaddq_s16(s1[10], s1[21]);
-  out[3] = vaddq_s16(s1[11], s1[20]);
-  out[4] = vaddq_s16(s1[12], s2[19]);
-  out[5] = vaddq_s16(s1[13], s2[18]);
-  out[6] = vaddq_s16(s1[14], s1[17]);
-  out[7] = vaddq_s16(s1[15], s1[16]);
+  out[0] = final_add(s1[8], s2[23]);
+  out[1] = final_add(s1[9], s2[22]);
+  out[2] = final_add(s1[10], s1[21]);
+  out[3] = final_add(s1[11], s1[20]);
+  out[4] = final_add(s1[12], s2[19]);
+  out[5] = final_add(s1[13], s2[18]);
+  out[6] = final_add(s1[14], s1[17]);
+  out[7] = final_add(s1[15], s1[16]);
 
   add_and_store_u8_s16(out[0], out[1], out[2], out[3], out[4], out[5], out[6],
                        out[7], output + (8 * stride), stride);
 
-  out[0] = vsubq_s16(s1[15], s1[16]);
-  out[1] = vsubq_s16(s1[14], s1[17]);
-  out[2] = vsubq_s16(s1[13], s2[18]);
-  out[3] = vsubq_s16(s1[12], s2[19]);
-  out[4] = vsubq_s16(s1[11], s1[20]);
-  out[5] = vsubq_s16(s1[10], s1[21]);
-  out[6] = vsubq_s16(s1[9], s2[22]);
-  out[7] = vsubq_s16(s1[8], s2[23]);
+  out[0] = final_sub(s1[15], s1[16]);
+  out[1] = final_sub(s1[14], s1[17]);
+  out[2] = final_sub(s1[13], s2[18]);
+  out[3] = final_sub(s1[12], s2[19]);
+  out[4] = final_sub(s1[11], s1[20]);
+  out[5] = final_sub(s1[10], s1[21]);
+  out[6] = final_sub(s1[9], s2[22]);
+  out[7] = final_sub(s1[8], s2[23]);
 
   add_and_store_u8_s16(out[0], out[1], out[2], out[3], out[4], out[5], out[6],
                        out[7], output + (16 * stride), stride);
 
-  out[0] = vsubq_s16(s1[7], s1[24]);
-  out[1] = vsubq_s16(s1[6], s1[25]);
-  out[2] = vsubq_s16(s1[5], s1[26]);
-  out[3] = vsubq_s16(s1[4], s1[27]);
-  out[4] = vsubq_s16(s1[3], s2[28]);
-  out[5] = vsubq_s16(s1[2], s2[29]);
-  out[6] = vsubq_s16(s1[1], s2[30]);
-  out[7] = vsubq_s16(s1[0], s2[31]);
+  out[0] = final_sub(s1[7], s1[24]);
+  out[1] = final_sub(s1[6], s1[25]);
+  out[2] = final_sub(s1[5], s1[26]);
+  out[3] = final_sub(s1[4], s1[27]);
+  out[4] = final_sub(s1[3], s2[28]);
+  out[5] = final_sub(s1[2], s2[29]);
+  out[6] = final_sub(s1[1], s2[30]);
+  out[7] = final_sub(s1[0], s2[31]);
 
   add_and_store_u8_s16(out[0], out[1], out[2], out[3], out[4], out[5], out[6],
                        out[7], output + (24 * stride), stride);
