@@ -981,4 +981,8 @@ void idct32_12_neon(const tran_low_t *const input, int16_t *output);
 void idct32_16_neon(const int16_t *const input, uint8_t *const output,
                     const int stride, const int highbd_flag);
 
+void idct32_6_neon(const tran_low_t *input, int16_t *output);
+void idct32_8_neon(const int16_t *input, uint8_t *output, int stride,
+                   const int highbd_flag);
+
 #endif  // VPX_DSP_ARM_IDCT_NEON_H_
