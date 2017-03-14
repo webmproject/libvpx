@@ -441,6 +441,15 @@ const PartialInvTxfmParam neon_partial_idct_tests[] = {
 #if CONFIG_VP9_HIGHBITDEPTH
   make_tuple(
       &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_1024_add_c>,
+      &highbd_wrapper<vpx_highbd_idct32x32_135_add_neon>, TX_32X32, 135, 8, 2),
+  make_tuple(
+      &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_1024_add_c>,
+      &highbd_wrapper<vpx_highbd_idct32x32_135_add_neon>, TX_32X32, 135, 10, 2),
+  make_tuple(
+      &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_1024_add_c>,
+      &highbd_wrapper<vpx_highbd_idct32x32_135_add_neon>, TX_32X32, 135, 12, 2),
+  make_tuple(
+      &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_1024_add_c>,
       &highbd_wrapper<vpx_highbd_idct32x32_1_add_neon>, TX_32X32, 1, 8, 2),
   make_tuple(
       &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_1024_add_c>,

@@ -87,7 +87,7 @@ static INLINE void load_4x8_s16(const tran_low_t *input, int16x4_t *const in0,
 // 13  84  93 103 110 125
 // 14  98 106 115 127
 // 15 117 128
-static void idct32_12_neon(const tran_low_t *const input, int16_t *output) {
+void idct32_12_neon(const tran_low_t *const input, int16_t *output) {
   int16x4_t tmp[8];
   int16x8_t in[12], s1[32], s2[32], s3[32], s4[32], s5[32], s6[32], s7[32];
 
@@ -371,10 +371,10 @@ static void idct32_12_neon(const tran_low_t *const input, int16_t *output) {
   vst1q_s16(output, vsubq_s16(s7[0], s6[31]));
 }
 
-static void idct32_16_neon(const int16_t *const input, uint8_t *const output,
-                           const int stride) {
+void idct32_16_neon(const int16_t *const input, uint8_t *const output,
+                    const int stride, const int highbd_flag) {
   int16x8_t in[16], s1[32], s2[32], s3[32], s4[32], s5[32], s6[32], s7[32],
-      out[8];
+      out[32];
 
   load_and_transpose_s16_8x8(input, 16, &in[0], &in[1], &in[2], &in[3], &in[4],
                              &in[5], &in[6], &in[7]);
@@ -620,45 +620,44 @@ static void idct32_16_neon(const int16_t *const input, uint8_t *const output,
   out[5] = final_add(s7[5], s7[26]);
   out[6] = final_add(s7[6], s7[25]);
   out[7] = final_add(s7[7], s7[24]);
+  out[8] = final_add(s7[8], s7[23]);
+  out[9] = final_add(s7[9], s7[22]);
+  out[10] = final_add(s7[10], s7[21]);
+  out[11] = final_add(s7[11], s7[20]);
+  out[12] = final_add(s7[12], s6[19]);
+  out[13] = final_add(s7[13], s6[18]);
+  out[14] = final_add(s7[14], s6[17]);
+  out[15] = final_add(s7[15], s6[16]);
+  out[16] = final_sub(s7[15], s6[16]);
+  out[17] = final_sub(s7[14], s6[17]);
+  out[18] = final_sub(s7[13], s6[18]);
+  out[19] = final_sub(s7[12], s6[19]);
+  out[20] = final_sub(s7[11], s7[20]);
+  out[21] = final_sub(s7[10], s7[21]);
+  out[22] = final_sub(s7[9], s7[22]);
+  out[23] = final_sub(s7[8], s7[23]);
+  out[24] = final_sub(s7[7], s7[24]);
+  out[25] = final_sub(s7[6], s7[25]);
+  out[26] = final_sub(s7[5], s7[26]);
+  out[27] = final_sub(s7[4], s7[27]);
+  out[28] = final_sub(s7[3], s6[28]);
+  out[29] = final_sub(s7[2], s6[29]);
+  out[30] = final_sub(s7[1], s6[30]);
+  out[31] = final_sub(s7[0], s6[31]);
 
-  add_and_store_u8_s16(out[0], out[1], out[2], out[3], out[4], out[5], out[6],
-                       out[7], output, stride);
-
-  out[0] = final_add(s7[8], s7[23]);
-  out[1] = final_add(s7[9], s7[22]);
-  out[2] = final_add(s7[10], s7[21]);
-  out[3] = final_add(s7[11], s7[20]);
-  out[4] = final_add(s7[12], s6[19]);
-  out[5] = final_add(s7[13], s6[18]);
-  out[6] = final_add(s7[14], s6[17]);
-  out[7] = final_add(s7[15], s6[16]);
-
-  add_and_store_u8_s16(out[0], out[1], out[2], out[3], out[4], out[5], out[6],
-                       out[7], output + (8 * stride), stride);
-
-  out[0] = final_sub(s7[15], s6[16]);
-  out[1] = final_sub(s7[14], s6[17]);
-  out[2] = final_sub(s7[13], s6[18]);
-  out[3] = final_sub(s7[12], s6[19]);
-  out[4] = final_sub(s7[11], s7[20]);
-  out[5] = final_sub(s7[10], s7[21]);
-  out[6] = final_sub(s7[9], s7[22]);
-  out[7] = final_sub(s7[8], s7[23]);
-
-  add_and_store_u8_s16(out[0], out[1], out[2], out[3], out[4], out[5], out[6],
-                       out[7], output + (16 * stride), stride);
-
-  out[0] = final_sub(s7[7], s7[24]);
-  out[1] = final_sub(s7[6], s7[25]);
-  out[2] = final_sub(s7[5], s7[26]);
-  out[3] = final_sub(s7[4], s7[27]);
-  out[4] = final_sub(s7[3], s6[28]);
-  out[5] = final_sub(s7[2], s6[29]);
-  out[6] = final_sub(s7[1], s6[30]);
-  out[7] = final_sub(s7[0], s6[31]);
-
-  add_and_store_u8_s16(out[0], out[1], out[2], out[3], out[4], out[5], out[6],
-                       out[7], output + (24 * stride), stride);
+  if (highbd_flag) {
+    uint16_t *const outputT = CONVERT_TO_SHORTPTR(output);
+    highbd_add_and_store_bd8(out, outputT, stride);
+  } else {
+    add_and_store_u8_s16(out[0], out[1], out[2], out[3], out[4], out[5], out[6],
+                         out[7], output, stride);
+    add_and_store_u8_s16(out[8], out[9], out[10], out[11], out[12], out[13],
+                         out[14], out[15], output + (8 * stride), stride);
+    add_and_store_u8_s16(out[16], out[17], out[18], out[19], out[20], out[21],
+                         out[22], out[23], output + (16 * stride), stride);
+    add_and_store_u8_s16(out[24], out[25], out[26], out[27], out[28], out[29],
+                         out[30], out[31], output + (24 * stride), stride);
+  }
 }
 
 void vpx_idct32x32_135_add_neon(const tran_low_t *input, uint8_t *dest,
@@ -671,7 +670,7 @@ void vpx_idct32x32_135_add_neon(const tran_low_t *input, uint8_t *dest,
   idct32_12_neon(input + 32 * 8, temp + 8);
 
   for (i = 0; i < 32; i += 8) {
-    idct32_16_neon(t, dest, stride);
+    idct32_16_neon(t, dest, stride, 0);
     t += (16 * 8);
     dest += 8;
   }
