@@ -523,7 +523,7 @@ static void set_rt_speed_feature_framesize_independent(
       sf->copy_partition_flag = 1;
 
     if (sf->copy_partition_flag) {
-      cpi->max_copied_frame = 5;
+      cpi->max_copied_frame = 4;
       if (cpi->prev_partition == NULL) {
         cpi->prev_partition = (BLOCK_SIZE *)vpx_calloc(
             cm->mi_stride * cm->mi_rows, sizeof(BLOCK_SIZE));
