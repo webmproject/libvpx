@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c0df0ae2_acf4119d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 3134,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-03-14T22:53:26Z",
+      "side": 1,
+      "message": "cpi-\u003esvc.current_superframe \u003c 1)  ||\n(cpi-\u003eresize_pending || cpi-\u003eresize_state || cm-\u003ecurrent_video_frame \u003c 1))",
+      "range": {
+        "startLine": 3134,
+        "startChar": 34,
+        "endLine": 3134,
+        "endChar": 35
+      },
+      "revId": "e54bbade461f866413d4f4e4eebdaf5af959f158",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3f9a3bcf_74077c80",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 504,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-03-14T22:53:26Z",
+      "side": 1,
+      "message": "if (!cpi-\u003eexternal_resize)\n sf-\u003esource_sad  \u003d1",
+      "revId": "e54bbade461f866413d4f4e4eebdaf5af959f158",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
