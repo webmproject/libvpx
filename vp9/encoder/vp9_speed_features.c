@@ -73,9 +73,10 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
 
   // Currently, the machine-learning based partition search early termination
   // is only used while VPXMIN(cm->width, cm->height) >= 480 and speed = 0.
-  if (VPXMIN(cm->width, cm->height) >= 480) {
-    sf->ml_partition_search_early_termination = 1;
-  }
+  // TODO(yunqingwang): Re-enable when test failures are fixed.
+  // if (VPXMIN(cm->width, cm->height) >= 480) {
+  //   sf->ml_partition_search_early_termination = 1;
+  // }
 
   if (speed >= 1) {
     sf->ml_partition_search_early_termination = 0;
