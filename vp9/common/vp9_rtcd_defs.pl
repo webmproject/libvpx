@@ -198,7 +198,7 @@ add_proto qw/int vp9_diamond_search_sad/, "const struct macroblock *x, const str
 specialize qw/vp9_diamond_search_sad avx/;
 
 add_proto qw/void vp9_temporal_filter_apply/, "const uint8_t *frame1, unsigned int stride, const uint8_t *frame2, unsigned int block_width, unsigned int block_height, int strength, int filter_weight, unsigned int *accumulator, uint16_t *count";
-specialize qw/vp9_temporal_filter_apply sse2 msa/;
+specialize qw/vp9_temporal_filter_apply sse4_1/;
 
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
