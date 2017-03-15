@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9d571195_ccf51a72",
+        "filename": "tools.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-15T23:04:02Z",
+      "side": 1,
+      "message": "you could make this conditional on CONFIG_CODEC_SRCS not being yes to avoid changing other existing behavior",
+      "revId": "aeff871e31433afdc8eb1138db49ea79a30f35ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
