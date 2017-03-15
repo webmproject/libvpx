@@ -207,8 +207,8 @@ int vp8_skip_fractional_mv_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d,
   (void)mvcost;
   (void)distortion;
   (void)sse;
-  bestmv->as_mv.row <<= 3;
-  bestmv->as_mv.col <<= 3;
+  bestmv->as_mv.row *= 8;
+  bestmv->as_mv.col *= 8;
   return 0;
 }
 
