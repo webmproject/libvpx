@@ -509,9 +509,7 @@ static void set_rt_speed_feature_framesize_independent(
       sf->mv.search_method = NSTEP;
       sf->mv.fullpel_search_step_param = 6;
     }
-    if (!cpi->resize_pending && !cpi->resize_state && !cpi->external_resize &&
-        cpi->oxcf.resize_mode == RESIZE_NONE)
-      sf->use_source_sad = 1;
+    if (!cpi->external_resize) sf->use_source_sad = 1;
     if (sf->use_source_sad) {
       // For SVC allocate for top layer.
       if (cpi->content_state_sb == NULL &&
