@@ -2555,10 +2555,18 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
 #if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc(cpi) &&
       cpi->denoiser.denoising_level > kDenLowLow) {
+    int svc_base_is_key = 0;
+    if (cpi->use_svc) {
+      int layer = LAYER_IDS_TO_IDX(cpi->svc.spatial_layer_id,
+                                   cpi->svc.temporal_layer_id,
+                                   cpi->svc.number_temporal_layers);
+      LAYER_CONTEXT *lc = &cpi->svc.layer_context[layer];
+      svc_base_is_key = lc->is_key_frame;
+    }
     vp9_denoiser_update_frame_info(
         &cpi->denoiser, *cpi->Source, cpi->common.frame_type,
         cpi->refresh_alt_ref_frame, cpi->refresh_golden_frame,
-        cpi->refresh_last_frame, cpi->resize_pending);
+        cpi->refresh_last_frame, cpi->resize_pending, svc_base_is_key);
   }
 #endif
   if (is_one_pass_cbr_svc(cpi)) {

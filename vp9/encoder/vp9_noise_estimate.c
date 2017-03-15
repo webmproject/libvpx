@@ -131,7 +131,8 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
     // Force noise estimation to 0 and denoiser off if content has high motion.
     ne->level = kLowLow;
 #if CONFIG_VP9_TEMPORAL_DENOISING
-    if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc(cpi))
+    if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc(cpi) &&
+        cpi->svc.current_superframe > 1)
       vp9_denoiser_set_noise_level(&cpi->denoiser, ne->level);
 #endif
     return;
