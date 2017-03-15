@@ -977,6 +977,9 @@ void idct16x16_10_add_half1d_pass2(const int16_t *input, int16_t *const output,
                                    void *const dest, const int stride,
                                    const int highbd_flag);
 
+void idct32_32_neon(const tran_low_t *input, uint8_t *dest, const int stride,
+                    const int highbd_flag);
+
 void idct32_12_neon(const tran_low_t *const input, int16_t *output);
 void idct32_16_neon(const int16_t *const input, uint8_t *const output,
                     const int stride, const int highbd_flag);
