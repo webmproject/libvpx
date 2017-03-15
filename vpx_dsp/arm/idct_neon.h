@@ -93,6 +93,24 @@ static INLINE void store_s16q_to_tran_low(tran_low_t *buf, const int16x8_t a) {
 }
 
 //------------------------------------------------------------------------------
+// Use saturating add/sub to avoid overflow in 2nd pass in high bit-depth
+static INLINE int16x8_t final_add(const int16x8_t a, const int16x8_t b) {
+#if CONFIG_VP9_HIGHBITDEPTH
+  return vqaddq_s16(a, b);
+#else
+  return vaddq_s16(a, b);
+#endif
+}
+
+static INLINE int16x8_t final_sub(const int16x8_t a, const int16x8_t b) {
+#if CONFIG_VP9_HIGHBITDEPTH
+  return vqsubq_s16(a, b);
+#else
+  return vsubq_s16(a, b);
+#endif
+}
+
+//------------------------------------------------------------------------------
 
 // Multiply a by a_const. Saturate, shift and narrow by DCT_CONST_BITS.
 static INLINE int16x8_t multiply_shift_and_narrow_s16(const int16x8_t a,
