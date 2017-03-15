@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "19734b51_3f83cce3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-15T21:32:08Z",
+      "side": 1,
+      "message": "these aren\u0027t guaranteed to be stable (and don\u0027t reference anything in the git log) better to use the commit hash or the change-id",
+      "range": {
+        "startLine": 11,
+        "startChar": 50,
+        "endLine": 11,
+        "endChar": 0
+      },
+      "revId": "3f53aadd1a060d53351463e8a7edb63ba171a3c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
