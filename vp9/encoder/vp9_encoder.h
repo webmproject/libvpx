@@ -651,7 +651,7 @@ typedef struct VP9_COMP {
 #endif
 
   int resize_pending;
-  int resize_state;
+  RESIZE_STATE resize_state;
   int external_resize;
   int resize_scale_num;
   int resize_scale_den;

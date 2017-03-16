@@ -1673,7 +1673,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
       (FRAME_CONTEXT *)vpx_calloc(FRAME_CONTEXTS, sizeof(*cm->frame_contexts)));
 
   cpi->use_svc = 0;
-  cpi->resize_state = 0;
+  cpi->resize_state = ORIG;
   cpi->external_resize = 0;
   cpi->resize_avg_qp = 0;
   cpi->resize_buffer_underflow = 0;
@@ -3170,7 +3170,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   vp9_update_noise_estimate(cpi);
 
   if (cpi->oxcf.pass == 0 && cpi->oxcf.mode == REALTIME &&
-      cpi->oxcf.speed >= 5 && cpi->resize_state == 0 &&
+      cpi->oxcf.speed >= 5 && cpi->resize_state == ORIG &&
       (cpi->oxcf.content == VP9E_CONTENT_SCREEN ||
        cpi->oxcf.rc_mode == VPX_VBR || compute_source_sad) &&
       cm->show_frame)
@@ -3223,7 +3223,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   // Check if we should drop this frame because of high overshoot.
   // Only for frames where high temporal-source SAD is detected.
   if (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR &&
-      cpi->resize_state == 0 && cm->frame_type != KEY_FRAME &&
+      cpi->resize_state == ORIG && cm->frame_type != KEY_FRAME &&
       cpi->oxcf.content == VP9E_CONTENT_SCREEN &&
       cpi->rc.high_source_sad == 1) {
     int frame_size = 0;
