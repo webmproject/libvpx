@@ -1436,6 +1436,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 #if CONFIG_VP9_TEMPORAL_DENOISING
   VP9_PICKMODE_CTX_DEN ctx_den;
   int64_t zero_last_cost_orig = INT64_MAX;
+  int denoise_svc_pickmode = 1;
 #endif
 
   init_ref_frame_cost(cm, xd, ref_frame_cost);
@@ -1495,9 +1496,16 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   }
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
-  if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc(cpi) &&
-      cpi->denoiser.denoising_level > kDenLowLow) {
-    vp9_denoiser_reset_frame_stats(ctx);
+  if (cpi->oxcf.noise_sensitivity > 0) {
+    if (cpi->use_svc) {
+      int layer = LAYER_IDS_TO_IDX(cpi->svc.spatial_layer_id,
+                                   cpi->svc.temporal_layer_id,
+                                   cpi->svc.number_temporal_layers);
+      LAYER_CONTEXT *lc = &cpi->svc.layer_context[layer];
+      denoise_svc_pickmode = denoise_svc(cpi) && !lc->is_key_frame;
+    }
+    if (cpi->denoiser.denoising_level > kDenLowLow && denoise_svc_pickmode)
+      vp9_denoiser_reset_frame_stats(ctx);
   }
 #endif
 
@@ -1546,6 +1554,14 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   if (!((cpi->ref_frame_flags & flag_list[GOLDEN_FRAME]) &&
         !svc_force_zero_mode[GOLDEN_FRAME - 1] && !force_skip_low_temp_var))
     use_golden_nonzeromv = 0;
+
+#if CONFIG_VP9_TEMPORAL_DENOISING
+  // TODO(marpan): Allowing golden as the (spatial) reference for SVC with
+  // denoising causes bad artifact. Remove this condition when artifact issue
+  // is resolved.
+  if (cpi->use_svc && cpi->oxcf.noise_sensitivity > 0 && denoise_svc_pickmode)
+    usable_ref_frame = LAST_FRAME;
+#endif
 
   for (ref_frame = LAST_FRAME; ref_frame <= usable_ref_frame; ++ref_frame) {
     if (!skip_ref_find_pred[ref_frame]) {
@@ -1923,7 +1939,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     }
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
-    if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc(cpi) &&
+    if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc_pickmode &&
         cpi->denoiser.denoising_level > kDenLowLow) {
       vp9_denoiser_update_frame_stats(mi, sse_y, this_mode, ctx);
       // Keep track of zero_last cost.
@@ -2122,7 +2138,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0 && cpi->resize_pending == 0 &&
-      denoise_svc(cpi) && cpi->denoiser.denoising_level > kDenLowLow &&
+      denoise_svc_pickmode && cpi->denoiser.denoising_level > kDenLowLow &&
       cpi->denoiser.reset == 0) {
     VP9_DENOISER_DECISION decision = COPY_BLOCK;
     vp9_pickmode_ctx_den_update(&ctx_den, zero_last_cost_orig, ref_frame_cost,
