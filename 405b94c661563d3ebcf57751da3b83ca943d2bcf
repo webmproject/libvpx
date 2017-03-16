@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "35332057_cad1bb8d",
+        "filename": "vpx_dsp/ppc/transpose_vsx.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1186779
+      },
+      "writtenOn": "2017-03-16T17:46:33Z",
+      "side": 1,
+      "message": "The following interfaces are supported for the generic and specific AltiVec operations and the AltiVec predicates. From: https://gcc.gnu.org/onlinedocs/gcc/PowerPC-AltiVec_002fVSX-Built-in-Functions.html.\n\nvector bool char vec_mergeh (vector bool char, vector bool char);\nvector signed char vec_mergeh (vector signed char, vector signed char);\nvector unsigned char vec_mergeh (vector unsigned char, vector unsigned char);\nvector bool short vec_mergeh (vector bool short, vector bool short);\nvector pixel vec_mergeh (vector pixel, vector pixel);\nvector signed short vec_mergeh (vector signed short, vector signed short);\nvector unsigned short vec_mergeh (vector unsigned short, vector unsigned short);\nvector float vec_mergeh (vector float, vector float);\nvector bool int vec_mergeh (vector bool int, vector bool int);\nvector signed int vec_mergeh (vector signed int, vector signed int);\nvector unsigned int vec_mergeh (vector unsigned int, vector unsigned int);\n\nIf the vector/scalar (VSX) instruction set is available, the following additional functions are available:\n\nvector signed long vec_mergeh (vector signed long, vector signed long);\nvector signed long vec_mergeh (vector signed long, vector bool long);\nvector signed long vec_mergeh (vector bool long, vector signed long);\nvector unsigned long vec_mergeh (vector unsigned long, vector unsigned long);\nvector unsigned long vec_mergeh (vector unsigned long, vector bool long);\nvector unsigned long vec_mergeh (vector bool long, vector unsigned long);",
+      "parentUuid": "2c8028cd_b1291c18",
+      "range": {
+        "startLine": 43,
+        "startChar": 7,
+        "endLine": 43,
+        "endChar": 17
+      },
+      "revId": "405b94c661563d3ebcf57751da3b83ca943d2bcf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "84efb4c3_1d0485cb",
         "filename": "vpx_dsp/ppc/types_vsx.h",
         "patchSetId": 15
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-16T14:07:27Z",
       "side": 1,
       "message": "Thanks for using these.",
+      "range": {
+        "startLine": 16,
+        "startChar": 28,
+        "endLine": 16,
+        "endChar": 37
+      },
+      "revId": "405b94c661563d3ebcf57751da3b83ca943d2bcf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "80c759a5_c166c854",
+        "filename": "vpx_dsp/ppc/types_vsx.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1186779
+      },
+      "writtenOn": "2017-03-16T17:46:33Z",
+      "side": 1,
+      "message": "No problem :)",
+      "parentUuid": "84efb4c3_1d0485cb",
       "range": {
         "startLine": 16,
         "startChar": 28,
