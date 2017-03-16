@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c965196_3c019af3",
+        "filename": "AUTHORS",
+        "patchSetId": 1
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-16T14:58:48Z",
+      "side": 0,
+      "message": "In order to keep this entry from coming back you could add an exclusion to tools/gen_authors.sh. Or possibly map it to someone else in .mailmap like so:\nYaowu Xu \u003cyaowu@google.com\u003e \u003cadam@xuyaowu.com\u003e",
+      "revId": "ec73bf53a5d5d7d33ba74e7b799c1bd69c16ce9e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
