@@ -128,6 +128,9 @@ struct macroblock {
   // Set during mode selection. Read during block encoding.
   uint8_t zcoeff_blk[TX_SIZES][256];
 
+  // Accumulate the tx block eobs in a partition block.
+  int32_t sum_y_eobs[TX_SIZES];
+
   int skip;
 
   int encode_breakout;

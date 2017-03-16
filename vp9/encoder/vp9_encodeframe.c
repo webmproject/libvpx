@@ -2711,18 +2711,6 @@ static INLINE int get_motion_inconsistency(MOTION_DIRECTION this_mv,
 }
 #endif
 
-// Accumulate all tx blocks' eobs results got from the partition evaluation.
-static void accumulate_eobs(int plane, int block, int row, int col,
-                            BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
-                            void *arg) {
-  PICK_MODE_CONTEXT *ctx = (PICK_MODE_CONTEXT *)arg;
-  (void)row;
-  (void)col;
-  (void)plane_bsize;
-  (void)tx_size;
-  ctx->sum_eobs += ctx->eobs_pbuf[plane][1][block];
-}
-
 // TODO(jingning,jimbankoski,rbultje): properly skip partition types that are
 // unlikely to be selected depending on previous rate-distortion optimization
 // results, for encoding speed-up.
@@ -2899,6 +2887,8 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
       }
 
       if (this_rdc.rdcost < best_rdc.rdcost) {
+        MODE_INFO *mi = xd->mi[0];
+
         best_rdc = this_rdc;
         if (bsize >= BLOCK_8X8) pc_tree->partitioning = PARTITION_NONE;
 
@@ -2917,7 +2907,9 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
           // Currently, the machine-learning based partition search early
           // termination is only used while bsize is 16x16, 32x32 or 64x64,
           // VPXMIN(cm->width, cm->height) >= 480, and speed = 0.
-          if (ctx->mic.mode >= INTRA_MODES && bsize >= BLOCK_16X16) {
+          if (!x->e_mbd.lossless &&
+              !segfeature_active(&cm->seg, mi->segment_id, SEG_LVL_SKIP) &&
+              ctx->mic.mode >= INTRA_MODES && bsize >= BLOCK_16X16) {
             const double *clf;
             const double *mean;
             const double *sd;
@@ -2935,10 +2927,6 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
             int offset = 0;
 
             assert(b_width_log2_lookup[bsize] == b_height_log2_lookup[bsize]);
-
-            ctx->sum_eobs = 0;
-            vp9_foreach_transformed_block_in_plane(xd, bsize, 0,
-                                                   accumulate_eobs, ctx);
 
             if (above_in_image) {
               context_size = xd->above_mi->sb_type;
@@ -2980,7 +2968,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
                     clf[2] * (((double)mag_mv / 2 - mean[2]) * sd[2]) +
                     clf[3] * (((double)(left_par + above_par) / 2 - mean[3]) *
                               sd[3]) +
-                    clf[4] * (((double)ctx->sum_eobs - mean[4]) / sd[4]) +
+                    clf[4] * (((double)ctx->sum_y_eobs - mean[4]) / sd[4]) +
                     clf[5] * (((double)cm->base_qindex - mean[5]) * sd[5]) +
                     clf[6] * (((double)last_par - mean[6]) * sd[6]) + clf[7];
             if (score < 0) {
