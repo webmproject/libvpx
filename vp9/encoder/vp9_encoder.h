@@ -705,7 +705,12 @@ typedef struct VP9_COMP {
   uint8_t *copied_frame_cnt;
   uint8_t max_copied_frame;
 
+  // For each superblock: saves the content value (e.g., low/high sad/sumdiff)
+  // based on source sad, prior to encoding the frame.
   uint8_t *content_state_sb;
+  // For each superblock: keeps track of the last time (in frame distance) the
+  // the superblock did not have low source sad.
+  uint8_t *content_state_sb_fd;
 
   LevelConstraint level_constraint;
 } VP9_COMP;

@@ -466,6 +466,9 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->content_state_sb);
   cpi->content_state_sb = NULL;
 
+  vpx_free(cpi->content_state_sb_fd);
+  cpi->content_state_sb_fd = NULL;
+
   vp9_cyclic_refresh_free(cpi->cyclic_refresh);
   cpi->cyclic_refresh = NULL;
 
@@ -3141,10 +3144,14 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
         cpi->svc.current_superframe < 1)) ||
       cpi->resize_pending || cpi->resize_state || cpi->external_resize) {
     compute_source_sad = 0;
-    if (cpi->content_state_sb != NULL)
+    if (cpi->content_state_sb != NULL) {
       memset(cpi->content_state_sb, 0, (cm->mi_stride >> 3) *
                                            ((cm->mi_rows >> 3) + 1) *
                                            sizeof(*cpi->content_state_sb));
+      memset(cpi->content_state_sb_fd, 0,
+             (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1) *
+                 sizeof(*cpi->content_state_sb_fd));
+    }
   }
 
   // Avoid scaling last_source unless its needed.
