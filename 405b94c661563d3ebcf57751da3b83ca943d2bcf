@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2c8028cd_b1291c18",
+        "filename": "vpx_dsp/ppc/transpose_vsx.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-16T14:07:27Z",
+      "side": 1,
+      "message": "Interesting. This is a bit of a different merge technique than the other platforms. Looks like it works though.\n\nJust out of curiosity, is it possible to specify the data size when using this instruction? Or does it only work for int16?",
+      "range": {
+        "startLine": 43,
+        "startChar": 7,
+        "endLine": 43,
+        "endChar": 17
+      },
+      "revId": "405b94c661563d3ebcf57751da3b83ca943d2bcf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "84efb4c3_1d0485cb",
+        "filename": "vpx_dsp/ppc/types_vsx.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-16T14:07:27Z",
+      "side": 1,
+      "message": "Thanks for using these.",
+      "range": {
+        "startLine": 16,
+        "startChar": 28,
+        "endLine": 16,
+        "endChar": 37
+      },
+      "revId": "405b94c661563d3ebcf57751da3b83ca943d2bcf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
