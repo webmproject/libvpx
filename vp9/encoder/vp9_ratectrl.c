@@ -688,6 +688,17 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
                    ? VPXMIN(rc->avg_frame_qindex[INTER_FRAME],
                             rc->avg_frame_qindex[KEY_FRAME])
                    : rc->avg_frame_qindex[INTER_FRAME];
+  // For SVC if the current base spatial layer was key frame, use the QP from
+  // that base layer for ambient_qp.
+  if (cpi->use_svc && cpi->svc.spatial_layer_id > 0) {
+    int layer = LAYER_IDS_TO_IDX(0, cpi->svc.temporal_layer_id,
+                                 cpi->svc.number_temporal_layers);
+    const LAYER_CONTEXT *lc = &cpi->svc.layer_context[layer];
+    if (lc->is_key_frame) {
+      const RATE_CONTROL *lrc = &lc->rc;
+      ambient_qp = VPXMIN(ambient_qp, lrc->last_q[KEY_FRAME]);
+    }
+  }
   active_worst_quality = VPXMIN(rc->worst_quality, ambient_qp * 5 >> 2);
   if (rc->buffer_level > rc->optimal_buffer_level) {
     // Adjust down.

@@ -59,12 +59,10 @@ typedef struct {
 
 struct VP9_COMP;
 
-void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
-                                    YV12_BUFFER_CONFIG src,
-                                    FRAME_TYPE frame_type,
-                                    int refresh_alt_ref_frame,
-                                    int refresh_golden_frame,
-                                    int refresh_last_frame, int resized);
+void vp9_denoiser_update_frame_info(
+    VP9_DENOISER *denoiser, YV12_BUFFER_CONFIG src, FRAME_TYPE frame_type,
+    int refresh_alt_ref_frame, int refresh_golden_frame, int refresh_last_frame,
+    int resized, int svc_base_is_key);
 
 void vp9_denoiser_denoise(struct VP9_COMP *cpi, MACROBLOCK *mb, int mi_row,
                           int mi_col, BLOCK_SIZE bs, PICK_MODE_CONTEXT *ctx,
