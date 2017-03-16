@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3135a0a4_08049da8",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-16T01:00:07Z",
+      "side": 1,
+      "message": "this doesn\u0027t have to do with vp9 specifically. you could also note how you\u0027re changing the paths and why:\n\nhttps://chromium-review.googlesource.com/c/74177/",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 5
+      },
+      "revId": "aac28ea579ba331efa05665f210263adbdb52030",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
