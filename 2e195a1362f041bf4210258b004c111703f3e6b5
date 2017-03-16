@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8a89f09d_12d593dd",
+        "filename": "tools.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-16T00:33:52Z",
+      "side": 1,
+      "message": "no tabs outside of rules, just indent 2 spaces",
+      "revId": "2e195a1362f041bf4210258b004c111703f3e6b5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
