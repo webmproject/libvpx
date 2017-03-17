@@ -3923,8 +3923,8 @@ void vpx_highbd_idct32x32_1_add_sse2(const tran_low_t *input, uint8_t *dest8,
   uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
   tran_low_t out;
 
-  out = dct_const_round_shift(input[0] * cospi_16_64);
-  out = dct_const_round_shift(out * cospi_16_64);
+  out = HIGHBD_WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64), bd);
+  out = HIGHBD_WRAPLOW(dct_const_round_shift(out * cospi_16_64), bd);
   a = ROUND_POWER_OF_TWO(out, 6);
 
   d = _mm_set1_epi32(a);
