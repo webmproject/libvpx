@@ -525,7 +525,7 @@ static void set_rt_speed_feature_framesize_independent(
   if (speed >= 8) {
     sf->adaptive_rd_thresh = 4;
     // Enable partition copy
-    if (!cpi->use_svc && !cpi->resize_pending && cpi->resize_state != ORIG &&
+    if (!cpi->use_svc && !cpi->resize_pending && cpi->resize_state == ORIG &&
         !cpi->external_resize && cpi->oxcf.resize_mode == RESIZE_NONE)
       sf->copy_partition_flag = 1;
 
