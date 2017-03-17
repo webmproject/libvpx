@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "de5cc48b_eea4fcd3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 16
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-03-17T03:42:56Z",
+      "side": 1,
+      "message": "Enable adaptive_rd_threshold for row mt for real-time speed \u003e\u003d6.",
+      "revId": "c3d657bfa1c6c73b3715f8fcfaf9478928300f8b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0a959032_2342c1c1",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-03-17T03:42:56Z",
+      "side": 1,
+      "message": "change comment to something like\n// Used for adaptive_rd_thresh with row-multithreading",
+      "revId": "c3d657bfa1c6c73b3715f8fcfaf9478928300f8b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fe64d631_9b360da9",
+        "filename": "vp9/encoder/vp9_multi_thread.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-03-17T03:42:56Z",
+      "side": 1,
+      "message": "can we initialize this elsewhere, where \"tile_data-\u003ethresh_freq_fact[bsize]\" is initialized",
+      "revId": "c3d657bfa1c6c73b3715f8fcfaf9478928300f8b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0e3b6aee_2812c5d9",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 2212,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-03-17T03:42:56Z",
+      "side": 1,
+      "message": "should be ref_frame (instead of INTRA_FRAME)",
+      "revId": "c3d657bfa1c6c73b3715f8fcfaf9478928300f8b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "69960a2d_b9861d48",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 494,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-03-17T03:42:56Z",
+      "side": 1,
+      "message": "is it better to use num_workers \u003e 1, like in line 574?",
+      "revId": "c3d657bfa1c6c73b3715f8fcfaf9478928300f8b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
