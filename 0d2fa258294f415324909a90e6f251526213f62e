@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "38692f83_8a850e92",
+        "filename": "vpx_dsp/arm/idct_neon.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-17T05:42:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fcdddc19_65aea282",
+      "range": {
+        "startLine": 194,
+        "startChar": 30,
+        "endLine": 194,
+        "endChar": 33
+      },
+      "revId": "0d2fa258294f415324909a90e6f251526213f62e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "02d3c1f8_668d4b10",
         "filename": "vpx_dsp/arm/idct_neon.h",
         "patchSetId": 3
@@ -39,6 +63,24 @@
       "revId": "0d2fa258294f415324909a90e6f251526213f62e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "260c9a9d_dc5fbab0",
+        "filename": "vpx_dsp/arm/idct_neon.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 876,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-17T05:42:53Z",
+      "side": 1,
+      "message": "\u003e I wonder if packing some of these (x4 or x8) would help the compiler control register pressure\n\nwe can leave this as a TODO",
+      "parentUuid": "02d3c1f8_668d4b10",
+      "revId": "0d2fa258294f415324909a90e6f251526213f62e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
