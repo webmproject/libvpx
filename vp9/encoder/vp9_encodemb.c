@@ -143,7 +143,7 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
       /* Evaluate the first possibility for this state. */
       rate0 = tokens[next][0].rate;
       rate1 = tokens[next][1].rate;
-      vp9_get_token_extracost(cat6_high_cost, x, &t0, &base_bits);
+      base_bits = vp9_get_token_cost(x, &t0, cat6_high_cost);
       /* Consider both possible successor states. */
       if (next < default_eob) {
         band = band_translate[i + 1];
@@ -193,7 +193,7 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
         t1 = tokens[next][1].token == EOB_TOKEN ? EOB_TOKEN : ZERO_TOKEN;
         base_bits = 0;
       } else {
-        vp9_get_token_extracost(cat6_high_cost, x, &t0, &base_bits);
+        base_bits = vp9_get_token_cost(x, &t0, cat6_high_cost);
         t1 = t0;
       }
       if (next < default_eob) {
