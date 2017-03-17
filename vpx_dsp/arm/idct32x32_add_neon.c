@@ -38,84 +38,40 @@ static INLINE void store_in_output(int16_t *const out, const int first,
   vst1q_s16(out + second * 32, q1);
 }
 
-static INLINE void store_combine_center_results(uint8_t *p1, uint8_t *p2,
-                                                const int stride, int16x8_t q0,
-                                                int16x8_t q1, int16x8_t q2,
-                                                int16x8_t q3) {
-  int16x4_t d[4];
+static INLINE void store_combine_results(uint8_t *p1, uint8_t *p2,
+                                         const int stride, int16x8_t q0,
+                                         int16x8_t q1, int16x8_t q2,
+                                         int16x8_t q3) {
+  uint8x8_t d[4];
 
-  d[0] = vld1_s16((int16_t *)p1);
+  d[0] = vld1_u8(p1);
   p1 += stride;
-  d[1] = vld1_s16((int16_t *)p1);
-  d[3] = vld1_s16((int16_t *)p2);
+  d[1] = vld1_u8(p1);
+  d[3] = vld1_u8(p2);
   p2 -= stride;
-  d[2] = vld1_s16((int16_t *)p2);
+  d[2] = vld1_u8(p2);
 
   q0 = vrshrq_n_s16(q0, 6);
   q1 = vrshrq_n_s16(q1, 6);
   q2 = vrshrq_n_s16(q2, 6);
   q3 = vrshrq_n_s16(q3, 6);
 
-  q0 = vreinterpretq_s16_u16(
-      vaddw_u8(vreinterpretq_u16_s16(q0), vreinterpret_u8_s16(d[0])));
-  q1 = vreinterpretq_s16_u16(
-      vaddw_u8(vreinterpretq_u16_s16(q1), vreinterpret_u8_s16(d[1])));
-  q2 = vreinterpretq_s16_u16(
-      vaddw_u8(vreinterpretq_u16_s16(q2), vreinterpret_u8_s16(d[2])));
-  q3 = vreinterpretq_s16_u16(
-      vaddw_u8(vreinterpretq_u16_s16(q3), vreinterpret_u8_s16(d[3])));
+  q0 = vreinterpretq_s16_u16(vaddw_u8(vreinterpretq_u16_s16(q0), d[0]));
+  q1 = vreinterpretq_s16_u16(vaddw_u8(vreinterpretq_u16_s16(q1), d[1]));
+  q2 = vreinterpretq_s16_u16(vaddw_u8(vreinterpretq_u16_s16(q2), d[2]));
+  q3 = vreinterpretq_s16_u16(vaddw_u8(vreinterpretq_u16_s16(q3), d[3]));
 
-  d[0] = vreinterpret_s16_u8(vqmovun_s16(q0));
-  d[1] = vreinterpret_s16_u8(vqmovun_s16(q1));
-  d[2] = vreinterpret_s16_u8(vqmovun_s16(q2));
-  d[3] = vreinterpret_s16_u8(vqmovun_s16(q3));
+  d[0] = vqmovun_s16(q0);
+  d[1] = vqmovun_s16(q1);
+  d[2] = vqmovun_s16(q2);
+  d[3] = vqmovun_s16(q3);
 
-  vst1_s16((int16_t *)p1, d[1]);
+  vst1_u8(p1, d[1]);
   p1 -= stride;
-  vst1_s16((int16_t *)p1, d[0]);
-  vst1_s16((int16_t *)p2, d[2]);
+  vst1_u8(p1, d[0]);
+  vst1_u8(p2, d[2]);
   p2 += stride;
-  vst1_s16((int16_t *)p2, d[3]);
-}
-
-static INLINE void store_combine_extreme_results(uint8_t *p1, uint8_t *p2,
-                                                 const int stride, int16x8_t q0,
-                                                 int16x8_t q1, int16x8_t q2,
-                                                 int16x8_t q3) {
-  int16x4_t d[4];
-
-  d[0] = vld1_s16((int16_t *)p1);
-  p1 += stride;
-  d[1] = vld1_s16((int16_t *)p1);
-  d[3] = vld1_s16((int16_t *)p2);
-  p2 -= stride;
-  d[2] = vld1_s16((int16_t *)p2);
-
-  q0 = vrshrq_n_s16(q0, 6);
-  q1 = vrshrq_n_s16(q1, 6);
-  q2 = vrshrq_n_s16(q2, 6);
-  q3 = vrshrq_n_s16(q3, 6);
-
-  q0 = vreinterpretq_s16_u16(
-      vaddw_u8(vreinterpretq_u16_s16(q0), vreinterpret_u8_s16(d[0])));
-  q1 = vreinterpretq_s16_u16(
-      vaddw_u8(vreinterpretq_u16_s16(q1), vreinterpret_u8_s16(d[1])));
-  q2 = vreinterpretq_s16_u16(
-      vaddw_u8(vreinterpretq_u16_s16(q2), vreinterpret_u8_s16(d[2])));
-  q3 = vreinterpretq_s16_u16(
-      vaddw_u8(vreinterpretq_u16_s16(q3), vreinterpret_u8_s16(d[3])));
-
-  d[0] = vreinterpret_s16_u8(vqmovun_s16(q0));
-  d[1] = vreinterpret_s16_u8(vqmovun_s16(q1));
-  d[2] = vreinterpret_s16_u8(vqmovun_s16(q2));
-  d[3] = vreinterpret_s16_u8(vqmovun_s16(q3));
-
-  vst1_s16((int16_t *)p1, d[1]);
-  p1 -= stride;
-  vst1_s16((int16_t *)p1, d[0]);
-  vst1_s16((int16_t *)p2, d[2]);
-  p2 += stride;
-  vst1_s16((int16_t *)p2, d[3]);
+  vst1_u8(p2, d[3]);
 }
 
 static INLINE void do_butterfly(const int16x8_t qIn0, const int16x8_t qIn1,
@@ -334,7 +290,7 @@ static INLINE void idct32_bands_end_2nd_pass(const int16_t *const out,
   uint8_t *dest3 = dest + 15 * stride;
   const int str2 = stride << 1;
 
-  store_combine_center_results(dest2, dest3, stride, q[6], q[7], q[8], q[9]);
+  store_combine_results(dest2, dest3, stride, q[6], q[7], q[8], q[9]);
   dest2 += str2;
   dest3 -= str2;
 
@@ -343,7 +299,7 @@ static INLINE void idct32_bands_end_2nd_pass(const int16_t *const out,
   q[5] = final_add(q[3], q[0]);
   q[6] = final_sub(q[3], q[0]);
   q[7] = final_sub(q[2], q[1]);
-  store_combine_extreme_results(dest0, dest1, stride, q[4], q[5], q[6], q[7]);
+  store_combine_results(dest0, dest1, stride, q[4], q[5], q[6], q[7]);
   dest0 += str2;
   dest1 -= str2;
 
@@ -358,7 +314,7 @@ static INLINE void idct32_bands_end_2nd_pass(const int16_t *const out,
   q[9] = final_add(q[5], q[0]);
   q[6] = final_sub(q[5], q[0]);
   q[7] = final_sub(q[4], q[1]);
-  store_combine_center_results(dest2, dest3, stride, q[6], q[7], q[8], q[9]);
+  store_combine_results(dest2, dest3, stride, q[6], q[7], q[8], q[9]);
   dest2 += str2;
   dest3 -= str2;
 
@@ -367,7 +323,7 @@ static INLINE void idct32_bands_end_2nd_pass(const int16_t *const out,
   q[5] = final_add(q[3], q[0]);
   q[6] = final_sub(q[3], q[0]);
   q[7] = final_sub(q[2], q[1]);
-  store_combine_extreme_results(dest0, dest1, stride, q[4], q[5], q[6], q[7]);
+  store_combine_results(dest0, dest1, stride, q[4], q[5], q[6], q[7]);
   dest0 += str2;
   dest1 -= str2;
 
@@ -382,7 +338,7 @@ static INLINE void idct32_bands_end_2nd_pass(const int16_t *const out,
   q[9] = final_add(q[5], q[0]);
   q[6] = final_sub(q[5], q[0]);
   q[7] = final_sub(q[4], q[1]);
-  store_combine_center_results(dest2, dest3, stride, q[6], q[7], q[8], q[9]);
+  store_combine_results(dest2, dest3, stride, q[6], q[7], q[8], q[9]);
   dest2 += str2;
   dest3 -= str2;
 
@@ -391,7 +347,7 @@ static INLINE void idct32_bands_end_2nd_pass(const int16_t *const out,
   q[5] = final_add(q[3], q[0]);
   q[6] = final_sub(q[3], q[0]);
   q[7] = final_sub(q[2], q[1]);
-  store_combine_extreme_results(dest0, dest1, stride, q[4], q[5], q[6], q[7]);
+  store_combine_results(dest0, dest1, stride, q[4], q[5], q[6], q[7]);
   dest0 += str2;
   dest1 -= str2;
 
@@ -406,14 +362,14 @@ static INLINE void idct32_bands_end_2nd_pass(const int16_t *const out,
   q[9] = final_add(q[5], q[0]);
   q[6] = final_sub(q[5], q[0]);
   q[7] = final_sub(q[4], q[1]);
-  store_combine_center_results(dest2, dest3, stride, q[6], q[7], q[8], q[9]);
+  store_combine_results(dest2, dest3, stride, q[6], q[7], q[8], q[9]);
 
   load_from_output(out, 24, 25, &q[0], &q[1]);
   q[4] = final_add(q[2], q[1]);
   q[5] = final_add(q[3], q[0]);
   q[6] = final_sub(q[3], q[0]);
   q[7] = final_sub(q[2], q[1]);
-  store_combine_extreme_results(dest0, dest1, stride, q[4], q[5], q[6], q[7]);
+  store_combine_results(dest0, dest1, stride, q[4], q[5], q[6], q[7]);
 }
 
 void vpx_idct32x32_1024_add_neon(const tran_low_t *input, uint8_t *dest,
