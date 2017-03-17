@@ -1281,4 +1281,36 @@ static INLINE void load_and_transpose_s16_8x8(const int16_t *a,
 
   transpose_s16_8x8(a0, a1, a2, a3, a4, a5, a6, a7);
 }
+
+static INLINE void load_and_transpose_s32_8x8(
+    const int32_t *a, const int a_stride, int32x4x2_t *const a0,
+    int32x4x2_t *const a1, int32x4x2_t *const a2, int32x4x2_t *const a3,
+    int32x4x2_t *const a4, int32x4x2_t *const a5, int32x4x2_t *const a6,
+    int32x4x2_t *const a7) {
+  a0->val[0] = vld1q_s32(a);
+  a0->val[1] = vld1q_s32(a + 4);
+  a += a_stride;
+  a1->val[0] = vld1q_s32(a);
+  a1->val[1] = vld1q_s32(a + 4);
+  a += a_stride;
+  a2->val[0] = vld1q_s32(a);
+  a2->val[1] = vld1q_s32(a + 4);
+  a += a_stride;
+  a3->val[0] = vld1q_s32(a);
+  a3->val[1] = vld1q_s32(a + 4);
+  a += a_stride;
+  a4->val[0] = vld1q_s32(a);
+  a4->val[1] = vld1q_s32(a + 4);
+  a += a_stride;
+  a5->val[0] = vld1q_s32(a);
+  a5->val[1] = vld1q_s32(a + 4);
+  a += a_stride;
+  a6->val[0] = vld1q_s32(a);
+  a6->val[1] = vld1q_s32(a + 4);
+  a += a_stride;
+  a7->val[0] = vld1q_s32(a);
+  a7->val[1] = vld1q_s32(a + 4);
+
+  transpose_s32_8x8(a0, a1, a2, a3, a4, a5, a6, a7);
+}
 #endif  // VPX_DSP_ARM_TRANSPOSE_NEON_H_
