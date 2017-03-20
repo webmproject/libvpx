@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "521439ed_412706ea",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1001250
+      },
+      "writtenOn": "2017-03-20T19:30:41Z",
+      "side": 1,
+      "message": "We\u0027re also going to need to pass in bit_depth and visible_size to the frame buffer at this location to ensure the correct data format and size information can be set. This should probably be qualified as the \"coded_size\"",
+      "revId": "6dd7f2b50a65373aa906d678cb5a29fb65531a55",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4fa7e922_f9ff49f4",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1001250
+      },
+      "writtenOn": "2017-03-20T19:30:41Z",
+      "side": 1,
+      "message": "This align_addr_extra_size is a bit problematic for this change. Clients are only able to allocate the buffer based on the given width and height. vpx folk, can you comment on exactly what this is for?\n\nCan the extra size be safely dropped if the planes are 32 byte aligned?",
+      "revId": "6dd7f2b50a65373aa906d678cb5a29fb65531a55",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ad6900d_6a43c854",
         "filename": "vpx_scale/generic/yv12config.c",
         "patchSetId": 13
@@ -37,6 +71,24 @@
       "side": 1,
       "message": "Looking at line 283 seems like you are probably right.\nI\u0027m going to try to change this and I\u0027ll reupload the patch. Thank you for catching this and reviving the patch.",
       "parentUuid": "3ad6900d_6a43c854",
+      "revId": "6dd7f2b50a65373aa906d678cb5a29fb65531a55",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bf0a95ad_c78808af",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1001250
+      },
+      "writtenOn": "2017-03-20T19:30:41Z",
+      "side": 1,
+      "message": "This ends up working.",
+      "parentUuid": "7ac1e86b_7deff3b8",
       "revId": "6dd7f2b50a65373aa906d678cb5a29fb65531a55",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
