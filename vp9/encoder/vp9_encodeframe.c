@@ -978,6 +978,8 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   int min_var_32x32 = INT_MAX;
   int var_32x32;
   int avg_16x16[4];
+  int maxvar_16x16[4];
+  int minvar_16x16[4];
   int64_t threshold_4x4avg;
   NOISE_LEVEL noise_level = kLow;
   int content_state = 0;
@@ -1170,6 +1172,8 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     const int i2 = i << 2;
     force_split[i + 1] = 0;
     avg_16x16[i] = 0;
+    maxvar_16x16[i] = 0;
+    minvar_16x16[i] = INT_MAX;
     for (j = 0; j < 4; j++) {
       const int x16_idx = x32_idx + ((j & 1) << 4);
       const int y16_idx = y32_idx + ((j >> 1) << 4);
@@ -1186,6 +1190,10 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
         fill_variance_tree(&vt.split[i].split[j], BLOCK_16X16);
         get_variance(&vt.split[i].split[j].part_variances.none);
         avg_16x16[i] += vt.split[i].split[j].part_variances.none.variance;
+        if (vt.split[i].split[j].part_variances.none.variance < minvar_16x16[i])
+          minvar_16x16[i] = vt.split[i].split[j].part_variances.none.variance;
+        if (vt.split[i].split[j].part_variances.none.variance > maxvar_16x16[i])
+          maxvar_16x16[i] = vt.split[i].split[j].part_variances.none.variance;
         if (vt.split[i].split[j].part_variances.none.variance > thresholds[2]) {
           // 16X16 variance is above threshold for split, so force split to 8x8
           // for this 16x16 block (this also forces splits for upper levels).
@@ -1230,6 +1238,8 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
       }
     }
   }
+  if (cpi->noise_estimate.enabled)
+    noise_level = vp9_noise_estimate_extract_level(&cpi->noise_estimate);
   // Fill the rest of the variance tree by summing split partition values.
   avg_32x32 = 0;
   for (i = 0; i < 4; i++) {
@@ -1265,6 +1275,11 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
            vt.split[i].part_variances.none.variance > (avg_16x16[i] >> 1))) {
         force_split[i + 1] = 1;
         force_split[0] = 1;
+      } else if (!is_key_frame && noise_level < kLow && cm->height <= 360 &&
+                 (maxvar_16x16[i] - minvar_16x16[i]) > (thresholds[1] >> 1) &&
+                 maxvar_16x16[i] > thresholds[1]) {
+        force_split[i + 1] = 1;
+        force_split[0] = 1;
       }
       avg_32x32 += var_32x32;
     }
@@ -1272,8 +1287,6 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   if (!force_split[0]) {
     fill_variance_tree(&vt, BLOCK_64X64);
     get_variance(&vt.part_variances.none);
-    if (cpi->noise_estimate.enabled)
-      noise_level = vp9_noise_estimate_extract_level(&cpi->noise_estimate);
     // If variance of this 64x64 block is above (some threshold of) the average
     // variance over the sub-32x32 blocks, then force this block to split.
     // Only checking this for noise level >= medium for now.
