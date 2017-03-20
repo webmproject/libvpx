@@ -1563,6 +1563,11 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     usable_ref_frame = LAST_FRAME;
 #endif
 
+  if (cpi->oxcf.speed >= 8 && !cpi->use_svc &&
+      ((cpi->rc.frames_since_golden + 1) < x->last_sb_high_content ||
+       x->last_sb_high_content > 40))
+    usable_ref_frame = LAST_FRAME;
+
   for (ref_frame = LAST_FRAME; ref_frame <= usable_ref_frame; ++ref_frame) {
     if (!skip_ref_find_pred[ref_frame]) {
       find_predictors(cpi, x, ref_frame, frame_mv, const_motion,

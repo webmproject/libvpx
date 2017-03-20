@@ -1018,6 +1018,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
                               content_state == kLowSadHighSumdiff)
                                  ? 1
                                  : 0;
+    x->last_sb_high_content = cpi->content_state_sb_fd[sb_offset2];
     // If source_sad is low copy the partition without computing the y_sad.
     if (x->skip_low_source_sad && cpi->sf.copy_partition_flag &&
         copy_partitioning(cpi, x, mi_row, mi_col, segment_id, sb_offset)) {

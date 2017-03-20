@@ -518,6 +518,8 @@ static void set_rt_speed_feature_framesize_independent(
            cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1)) {
         cpi->content_state_sb = (uint8_t *)vpx_calloc(
             (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1), sizeof(uint8_t));
+        cpi->content_state_sb_fd = (uint8_t *)vpx_calloc(
+            (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1), sizeof(uint8_t));
       }
     }
   }
