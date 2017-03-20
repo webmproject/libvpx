@@ -29,10 +29,10 @@ typedef void (*TemporalFilterFunc)(uint8_t *a, unsigned int stride, uint8_t *b,
 // Calculate the difference between 'a' and 'b', sum in blocks of 9, and apply
 // filter based on strength and weight. Store the resulting filter amount in
 // 'count' and apply it to 'b' and store it in 'accumulator'.
-void reference_filter(const Buffer<uint8_t> &a, const Buffer<uint8_t> &b,
-                      unsigned int w, unsigned int h, int filter_strength,
-                      int filter_weight, Buffer<unsigned int> &accumulator,
-                      Buffer<uint16_t> &count) {
+void reference_filter(const Buffer<uint8_t> &a, const Buffer<uint8_t> &b, int w,
+                      int h, int filter_strength, int filter_weight,
+                      Buffer<unsigned int> *accumulator,
+                      Buffer<uint16_t> *count) {
   Buffer<int> diff_sq = Buffer<int>(w, h, 0);
   diff_sq.Set(0);
 
@@ -43,8 +43,8 @@ void reference_filter(const Buffer<uint8_t> &a, const Buffer<uint8_t> &b,
 
   // Calculate all the differences. Avoids re-calculating a bunch of extra
   // values.
-  for (int height = 0; height < (int)h; ++height) {
-    for (int width = 0; width < (int)w; ++width) {
+  for (int height = 0; height < h; ++height) {
+    for (int width = 0; width < w; ++width) {
       int diff = a.TopLeftPixel()[height * a.stride() + width] -
                  b.TopLeftPixel()[height * b.stride() + width];
       diff_sq.TopLeftPixel()[height * diff_sq.stride() + width] = diff * diff;
@@ -53,16 +53,16 @@ void reference_filter(const Buffer<uint8_t> &a, const Buffer<uint8_t> &b,
 
   // For any given point, sum the neighboring values and calculate the
   // modifier.
-  for (int height = 0; height < (int)h; ++height) {
-    for (int width = 0; width < (int)w; ++width) {
+  for (int height = 0; height < h; ++height) {
+    for (int width = 0; width < w; ++width) {
       // Determine how many values are being summed.
       int summed_values = 9;
 
-      if (height == 0 || height == ((int)h - 1)) {
+      if (height == 0 || height == (h - 1)) {
         summed_values -= 3;
       }
 
-      if (width == 0 || width == ((int)w - 1)) {
+      if (width == 0 || width == (w - 1)) {
         if (summed_values == 6) {  // corner
           summed_values -= 2;
         } else {
@@ -78,7 +78,7 @@ void reference_filter(const Buffer<uint8_t> &a, const Buffer<uint8_t> &b,
           const int x = width + idx;
 
           // If inside the border.
-          if (y >= 0 && y < (int)h && x >= 0 && x < (int)w) {
+          if (y >= 0 && y < h && x >= 0 && x < w) {
             sum += diff_sq.TopLeftPixel()[y * diff_sq.stride() + x];
           }
         }
@@ -95,8 +95,8 @@ void reference_filter(const Buffer<uint8_t> &a, const Buffer<uint8_t> &b,
 
       sum *= filter_weight;
 
-      count.TopLeftPixel()[height * count.stride() + width] += sum;
-      accumulator.TopLeftPixel()[height * accumulator.stride() + width] +=
+      count->TopLeftPixel()[height * count->stride() + width] += sum;
+      accumulator->TopLeftPixel()[height * accumulator->stride() + width] +=
           sum * b.TopLeftPixel()[height * b.stride() + width];
     }
   }
@@ -135,7 +135,7 @@ TEST_P(TemporalFilterTest, CompareReferenceRandom) {
       count_ref.Set(rnd_.Rand8());
       count_chk.CopyFrom(count_ref);
       reference_filter(a, b, width, height, filter_strength, filter_weight,
-                       accum_ref, count_ref);
+                       &accum_ref, &count_ref);
       filter_func_(a.TopLeftPixel(), a.stride(), b.TopLeftPixel(), width,
                    height, filter_strength, filter_weight,
                    accum_chk.TopLeftPixel(), count_chk.TopLeftPixel());
