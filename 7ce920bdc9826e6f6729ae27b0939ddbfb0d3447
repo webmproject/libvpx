@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "98a23ced_b574f279",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 709,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-03-20T18:21:32Z",
+      "side": 1,
+      "message": "Can you add some comments for these two arrays? It would be easier to understand for others and also for our own reference in the future.",
+      "range": {
+        "startLine": 708,
+        "startChar": 2,
+        "endLine": 709,
+        "endChar": 31
+      },
+      "revId": "7ce920bdc9826e6f6729ae27b0939ddbfb0d3447",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "666d2ed9_9daccf6b",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 709,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-03-20T18:21:32Z",
+      "side": 1,
+      "message": "I don\u0027t understand why the type of content_state_sb_fd is set to uint8_t. Is it the frame distance? Since uint8_t can only represent the max value of 255, we need to cap it if this is overflow.",
+      "range": {
+        "startLine": 709,
+        "startChar": 11,
+        "endLine": 709,
+        "endChar": 30
+      },
+      "revId": "7ce920bdc9826e6f6729ae27b0939ddbfb0d3447",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a274aa4a_fa3744a9",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 2324,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-03-20T18:21:32Z",
+      "side": 1,
+      "message": "Here it\u0027s capped to 255. If it\u0027s set here and on the next frame, this superblock still satisfy these conditions, it will be increased by one and for uint8_t, 255+1 would be 0. Is this an intended behavior?",
+      "range": {
+        "startLine": 2324,
+        "startChar": 42,
+        "endLine": 2324,
+        "endChar": 61
+      },
+      "revId": "7ce920bdc9826e6f6729ae27b0939ddbfb0d3447",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
