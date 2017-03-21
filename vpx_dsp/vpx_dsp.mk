@@ -226,6 +226,7 @@ DSP_SRCS-$(HAVE_NEON)  += arm/highbd_idct16x16_add_neon.c
 DSP_SRCS-$(HAVE_NEON)  += arm/highbd_idct32x32_add_neon.c
 DSP_SRCS-$(HAVE_NEON)  += arm/highbd_idct32x32_34_add_neon.c
 DSP_SRCS-$(HAVE_NEON)  += arm/highbd_idct32x32_135_add_neon.c
+DSP_SRCS-$(HAVE_NEON)  += arm/highbd_idct32x32_1024_add_neon.c
 endif  # !CONFIG_VP9_HIGHBITDEPTH
 
 ifeq ($(HAVE_NEON_ASM),yes)

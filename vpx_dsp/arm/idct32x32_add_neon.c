@@ -74,6 +74,43 @@ static INLINE void store_combine_results(uint8_t *p1, uint8_t *p2,
   vst1_u8(p2, d[3]);
 }
 
+static INLINE void highbd_store_combine_results_bd8(uint16_t *p1, uint16_t *p2,
+                                                    const int stride,
+                                                    int16x8_t q0, int16x8_t q1,
+                                                    int16x8_t q2,
+                                                    int16x8_t q3) {
+  uint16x8_t d[4];
+
+  d[0] = vld1q_u16(p1);
+  p1 += stride;
+  d[1] = vld1q_u16(p1);
+  d[3] = vld1q_u16(p2);
+  p2 -= stride;
+  d[2] = vld1q_u16(p2);
+
+  q0 = vrshrq_n_s16(q0, 6);
+  q1 = vrshrq_n_s16(q1, 6);
+  q2 = vrshrq_n_s16(q2, 6);
+  q3 = vrshrq_n_s16(q3, 6);
+
+  q0 = vaddq_s16(q0, vreinterpretq_s16_u16(d[0]));
+  q1 = vaddq_s16(q1, vreinterpretq_s16_u16(d[1]));
+  q2 = vaddq_s16(q2, vreinterpretq_s16_u16(d[2]));
+  q3 = vaddq_s16(q3, vreinterpretq_s16_u16(d[3]));
+
+  d[0] = vmovl_u8(vqmovun_s16(q0));
+  d[1] = vmovl_u8(vqmovun_s16(q1));
+  d[2] = vmovl_u8(vqmovun_s16(q2));
+  d[3] = vmovl_u8(vqmovun_s16(q3));
+
+  vst1q_u16(p1, d[1]);
+  p1 -= stride;
+  vst1q_u16(p1, d[0]);
+  vst1q_u16(p2, d[2]);
+  p2 += stride;
+  vst1q_u16(p2, d[3]);
+}
+
 static INLINE void do_butterfly(const int16x8_t qIn0, const int16x8_t qIn1,
                                 const int16_t first_const,
                                 const int16_t second_const,
@@ -372,8 +409,107 @@ static INLINE void idct32_bands_end_2nd_pass(const int16_t *const out,
   store_combine_results(dest0, dest1, stride, q[4], q[5], q[6], q[7]);
 }
 
-void vpx_idct32x32_1024_add_neon(const tran_low_t *input, uint8_t *dest,
-                                 int stride) {
+static INLINE void highbd_idct32_bands_end_2nd_pass_bd8(
+    const int16_t *const out, uint16_t *const dest, const int stride,
+    int16x8_t *const q) {
+  uint16_t *dest0 = dest + 0 * stride;
+  uint16_t *dest1 = dest + 31 * stride;
+  uint16_t *dest2 = dest + 16 * stride;
+  uint16_t *dest3 = dest + 15 * stride;
+  const int str2 = stride << 1;
+
+  highbd_store_combine_results_bd8(dest2, dest3, stride, q[6], q[7], q[8],
+                                   q[9]);
+  dest2 += str2;
+  dest3 -= str2;
+
+  load_from_output(out, 30, 31, &q[0], &q[1]);
+  q[4] = final_add(q[2], q[1]);
+  q[5] = final_add(q[3], q[0]);
+  q[6] = final_sub(q[3], q[0]);
+  q[7] = final_sub(q[2], q[1]);
+  highbd_store_combine_results_bd8(dest0, dest1, stride, q[4], q[5], q[6],
+                                   q[7]);
+  dest0 += str2;
+  dest1 -= str2;
+
+  load_from_output(out, 12, 13, &q[0], &q[1]);
+  q[2] = vaddq_s16(q[10], q[1]);
+  q[3] = vaddq_s16(q[11], q[0]);
+  q[4] = vsubq_s16(q[11], q[0]);
+  q[5] = vsubq_s16(q[10], q[1]);
+
+  load_from_output(out, 18, 19, &q[0], &q[1]);
+  q[8] = final_add(q[4], q[1]);
+  q[9] = final_add(q[5], q[0]);
+  q[6] = final_sub(q[5], q[0]);
+  q[7] = final_sub(q[4], q[1]);
+  highbd_store_combine_results_bd8(dest2, dest3, stride, q[6], q[7], q[8],
+                                   q[9]);
+  dest2 += str2;
+  dest3 -= str2;
+
+  load_from_output(out, 28, 29, &q[0], &q[1]);
+  q[4] = final_add(q[2], q[1]);
+  q[5] = final_add(q[3], q[0]);
+  q[6] = final_sub(q[3], q[0]);
+  q[7] = final_sub(q[2], q[1]);
+  highbd_store_combine_results_bd8(dest0, dest1, stride, q[4], q[5], q[6],
+                                   q[7]);
+  dest0 += str2;
+  dest1 -= str2;
+
+  load_from_output(out, 10, 11, &q[0], &q[1]);
+  q[2] = vaddq_s16(q[12], q[1]);
+  q[3] = vaddq_s16(q[13], q[0]);
+  q[4] = vsubq_s16(q[13], q[0]);
+  q[5] = vsubq_s16(q[12], q[1]);
+
+  load_from_output(out, 20, 21, &q[0], &q[1]);
+  q[8] = final_add(q[4], q[1]);
+  q[9] = final_add(q[5], q[0]);
+  q[6] = final_sub(q[5], q[0]);
+  q[7] = final_sub(q[4], q[1]);
+  highbd_store_combine_results_bd8(dest2, dest3, stride, q[6], q[7], q[8],
+                                   q[9]);
+  dest2 += str2;
+  dest3 -= str2;
+
+  load_from_output(out, 26, 27, &q[0], &q[1]);
+  q[4] = final_add(q[2], q[1]);
+  q[5] = final_add(q[3], q[0]);
+  q[6] = final_sub(q[3], q[0]);
+  q[7] = final_sub(q[2], q[1]);
+  highbd_store_combine_results_bd8(dest0, dest1, stride, q[4], q[5], q[6],
+                                   q[7]);
+  dest0 += str2;
+  dest1 -= str2;
+
+  load_from_output(out, 8, 9, &q[0], &q[1]);
+  q[2] = vaddq_s16(q[14], q[1]);
+  q[3] = vaddq_s16(q[15], q[0]);
+  q[4] = vsubq_s16(q[15], q[0]);
+  q[5] = vsubq_s16(q[14], q[1]);
+
+  load_from_output(out, 22, 23, &q[0], &q[1]);
+  q[8] = final_add(q[4], q[1]);
+  q[9] = final_add(q[5], q[0]);
+  q[6] = final_sub(q[5], q[0]);
+  q[7] = final_sub(q[4], q[1]);
+  highbd_store_combine_results_bd8(dest2, dest3, stride, q[6], q[7], q[8],
+                                   q[9]);
+
+  load_from_output(out, 24, 25, &q[0], &q[1]);
+  q[4] = final_add(q[2], q[1]);
+  q[5] = final_add(q[3], q[0]);
+  q[6] = final_sub(q[3], q[0]);
+  q[7] = final_sub(q[2], q[1]);
+  highbd_store_combine_results_bd8(dest0, dest1, stride, q[4], q[5], q[6],
+                                   q[7]);
+}
+
+void idct32_32_neon(const tran_low_t *input, uint8_t *dest, const int stride,
+                    const int highbd_flag) {
   int i, idct32_pass_loop;
   int16_t trans_buf[32 * 8];
   int16_t pass1[32 * 32];
@@ -381,6 +517,7 @@ void vpx_idct32x32_1024_add_neon(const tran_low_t *input, uint8_t *dest,
   const int16_t *input_pass2 = pass1;  // input of pass2 is the result of pass1
   int16_t *out;
   int16x8_t q[16];
+  uint16_t *dst = CONVERT_TO_SHORTPTR(dest);
 
   for (idct32_pass_loop = 0, out = pass1; idct32_pass_loop < 2;
        idct32_pass_loop++, out = pass2) {
@@ -620,9 +757,19 @@ void vpx_idct32x32_1024_add_neon(const tran_low_t *input, uint8_t *dest,
       if (idct32_pass_loop == 0) {
         idct32_bands_end_1st_pass(out, q);
       } else {
-        idct32_bands_end_2nd_pass(out, dest, stride, q);
-        dest += 8;
+        if (highbd_flag) {
+          highbd_idct32_bands_end_2nd_pass_bd8(out, dst, stride, q);
+          dst += 8;
+        } else {
+          idct32_bands_end_2nd_pass(out, dest, stride, q);
+          dest += 8;
+        }
       }
     }
   }
+}
+
+void vpx_idct32x32_1024_add_neon(const tran_low_t *input, uint8_t *dest,
+                                 int stride) {
+  idct32_32_neon(input, dest, stride, 0);
 }
