@@ -2725,6 +2725,74 @@ static INLINE int get_motion_inconsistency(MOTION_DIRECTION this_mv,
 }
 #endif
 
+// Calculate the score used in machine-learning based partition search early
+// termination.
+static double compute_score(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+                            PICK_MODE_CONTEXT *ctx, int mi_row, int mi_col,
+                            BLOCK_SIZE bsize) {
+  const double *clf;
+  const double *mean;
+  const double *sd;
+  const int mag_mv =
+      abs(ctx->mic.mv[0].as_mv.col) + abs(ctx->mic.mv[0].as_mv.row);
+  const int left_in_image = !!xd->left_mi;
+  const int above_in_image = !!xd->above_mi;
+  MODE_INFO **prev_mi =
+      &cm->prev_mi_grid_visible[mi_col + cm->mi_stride * mi_row];
+  int above_par = 0;  // above_partitioning
+  int left_par = 0;   // left_partitioning
+  int last_par = 0;   // last_partitioning
+  BLOCK_SIZE context_size;
+  double score;
+  int offset = 0;
+
+  assert(b_width_log2_lookup[bsize] == b_height_log2_lookup[bsize]);
+
+  if (above_in_image) {
+    context_size = xd->above_mi->sb_type;
+    if (context_size < bsize)
+      above_par = 2;
+    else if (context_size == bsize)
+      above_par = 1;
+  }
+
+  if (left_in_image) {
+    context_size = xd->left_mi->sb_type;
+    if (context_size < bsize)
+      left_par = 2;
+    else if (context_size == bsize)
+      left_par = 1;
+  }
+
+  if (prev_mi) {
+    context_size = prev_mi[0]->sb_type;
+    if (context_size < bsize)
+      last_par = 2;
+    else if (context_size == bsize)
+      last_par = 1;
+  }
+
+  if (bsize == BLOCK_64X64)
+    offset = 0;
+  else if (bsize == BLOCK_32X32)
+    offset = 8;
+  else if (bsize == BLOCK_16X16)
+    offset = 16;
+
+  // early termination score calculation
+  clf = &classifiers[offset];
+  mean = &train_mean[offset];
+  sd = &train_stdm[offset];
+  score = clf[0] * (((double)ctx->rate - mean[0]) / sd[0]) +
+          clf[1] * (((double)ctx->dist - mean[1]) / sd[1]) +
+          clf[2] * (((double)mag_mv / 2 - mean[2]) * sd[2]) +
+          clf[3] * (((double)(left_par + above_par) / 2 - mean[3]) * sd[3]) +
+          clf[4] * (((double)ctx->sum_y_eobs - mean[4]) / sd[4]) +
+          clf[5] * (((double)cm->base_qindex - mean[5]) * sd[5]) +
+          clf[6] * (((double)last_par - mean[6]) * sd[6]) + clf[7];
+  return score;
+}
+
 // TODO(jingning,jimbankoski,rbultje): properly skip partition types that are
 // unlikely to be selected depending on previous rate-distortion optimization
 // results, for encoding speed-up.
@@ -2924,68 +2992,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
           if (!x->e_mbd.lossless &&
               !segfeature_active(&cm->seg, mi->segment_id, SEG_LVL_SKIP) &&
               ctx->mic.mode >= INTRA_MODES && bsize >= BLOCK_16X16) {
-            const double *clf;
-            const double *mean;
-            const double *sd;
-            const int mag_mv =
-                abs(ctx->mic.mv[0].as_mv.col) + abs(ctx->mic.mv[0].as_mv.row);
-            const int left_in_image = !!xd->left_mi;
-            const int above_in_image = !!xd->above_mi;
-            MODE_INFO **prev_mi =
-                &cm->prev_mi_grid_visible[mi_col + cm->mi_stride * mi_row];
-            int above_par = 0;  // above_partitioning
-            int left_par = 0;   // left_partitioning
-            int last_par = 0;   // last_partitioning
-            BLOCK_SIZE context_size;
-            double score;
-            int offset = 0;
-
-            assert(b_width_log2_lookup[bsize] == b_height_log2_lookup[bsize]);
-
-            if (above_in_image) {
-              context_size = xd->above_mi->sb_type;
-              if (context_size < bsize)
-                above_par = 2;
-              else if (context_size == bsize)
-                above_par = 1;
-            }
-
-            if (left_in_image) {
-              context_size = xd->left_mi->sb_type;
-              if (context_size < bsize)
-                left_par = 2;
-              else if (context_size == bsize)
-                left_par = 1;
-            }
-
-            if (prev_mi) {
-              context_size = prev_mi[0]->sb_type;
-              if (context_size < bsize)
-                last_par = 2;
-              else if (context_size == bsize)
-                last_par = 1;
-            }
-
-            if (bsize == BLOCK_64X64)
-              offset = 0;
-            else if (bsize == BLOCK_32X32)
-              offset = 8;
-            else if (bsize == BLOCK_16X16)
-              offset = 16;
-
-            // early termination score calculation
-            clf = &classifiers[offset];
-            mean = &train_mean[offset];
-            sd = &train_stdm[offset];
-            score = clf[0] * (((double)ctx->rate - mean[0]) / sd[0]) +
-                    clf[1] * (((double)ctx->dist - mean[1]) / sd[1]) +
-                    clf[2] * (((double)mag_mv / 2 - mean[2]) * sd[2]) +
-                    clf[3] * (((double)(left_par + above_par) / 2 - mean[3]) *
-                              sd[3]) +
-                    clf[4] * (((double)ctx->sum_y_eobs - mean[4]) / sd[4]) +
-                    clf[5] * (((double)cm->base_qindex - mean[5]) * sd[5]) +
-                    clf[6] * (((double)last_par - mean[6]) * sd[6]) + clf[7];
-            if (score < 0) {
+            if (compute_score(cm, xd, ctx, mi_row, mi_col, bsize) < 0.0) {
               do_split = 0;
               do_rect = 0;
             }
