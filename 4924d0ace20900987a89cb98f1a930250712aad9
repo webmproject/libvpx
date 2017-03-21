@@ -1,0 +1,297 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1be57d40_c6ae1730",
+        "filename": "test/temporal_filter_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-21T22:20:04Z",
+      "side": 1,
+      "message": "I should pull the \u0027const\u0027 change out to a separate patch",
+      "range": {
+        "startLine": 24,
+        "startChar": 35,
+        "endLine": 24,
+        "endChar": 40
+      },
+      "revId": "4924d0ace20900987a89cb98f1a930250712aad9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2415bd6d_9e8003bc",
+        "filename": "test/temporal_filter_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-21T22:20:04Z",
+      "side": 1,
+      "message": "This is only used on blocks where width and height are 8 or 16 (in theory they could be 8x16 or 16x8, but the common case is 8x8 and 16x16). The code is set up to handle widths of 8 or 16, and height is not really important.",
+      "range": {
+        "startLine": 118,
+        "startChar": 20,
+        "endLine": 118,
+        "endChar": 22
+      },
+      "revId": "4924d0ace20900987a89cb98f1a930250712aad9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d3a5d1a1_58853fed",
+        "filename": "test/temporal_filter_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-21T22:20:04Z",
+      "side": 1,
+      "message": "I wanted to do SSE2 but SSE4 has pmulld/_mm_mullo_epi32",
+      "range": {
+        "startLine": 152,
+        "startChar": 4,
+        "endLine": 152,
+        "endChar": 13
+      },
+      "revId": "4924d0ace20900987a89cb98f1a930250712aad9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "15be98f1_39001aa8",
+        "filename": "test/temporal_filter_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-21T22:20:04Z",
+      "side": 1,
+      "message": "Some debugging information. Since the maximum size is 16x16 and it halts at the first failure, this should not generate much log spam.",
+      "range": {
+        "startLine": 188,
+        "startChar": 8,
+        "endLine": 188,
+        "endChar": 45
+      },
+      "revId": "4924d0ace20900987a89cb98f1a930250712aad9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7f4216e0_0a833e74",
+        "filename": "test/temporal_filter_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-21T22:20:04Z",
+      "side": 1,
+      "message": "Eventually this will be DISABLED_Speed",
+      "range": {
+        "startLine": 196,
+        "startChar": 27,
+        "endLine": 196,
+        "endChar": 32
+      },
+      "revId": "4924d0ace20900987a89cb98f1a930250712aad9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "58d4051f_0e5980d5",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-21T22:20:04Z",
+      "side": 1,
+      "message": "Unpacks to 32bit values because the precision is necessary for squaring the difference and x86 doesn\u0027t have ways to multiply and expand at the same time.",
+      "range": {
+        "startLine": 24,
+        "startChar": 19,
+        "endLine": 24,
+        "endChar": 25
+      },
+      "revId": "4924d0ace20900987a89cb98f1a930250712aad9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0eb71bad_17b9699e",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-21T22:20:04Z",
+      "side": 1,
+      "message": "Sum three adjacent values. Shift some to the left, some to the right, and add it all together.",
+      "revId": "4924d0ace20900987a89cb98f1a930250712aad9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1d8fbccc_5d8b5df2",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-21T22:20:04Z",
+      "side": 1,
+      "message": "same as sum_16 but only does 8 values. because the border conditions are different we can\u0027t just treat 8 as half of 16, or calculate two rows at once.",
+      "range": {
+        "startLine": 80,
+        "startChar": 19,
+        "endLine": 80,
+        "endChar": 24
+      },
+      "revId": "4924d0ace20900987a89cb98f1a930250712aad9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "af845d53_78937cfe",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-21T22:20:04Z",
+      "side": 1,
+      "message": "This is part of some accumulation math and so must be zerod for the first run",
+      "range": {
+        "startLine": 135,
+        "startChar": 16,
+        "endLine": 135,
+        "endChar": 20
+      },
+      "revId": "4924d0ace20900987a89cb98f1a930250712aad9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2dfa9a76_63731222",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-21T22:20:04Z",
+      "side": 1,
+      "message": "eventually this should probably be broken down to a top level if 8 else 16",
+      "range": {
+        "startLine": 140,
+        "startChar": 6,
+        "endLine": 140,
+        "endChar": 17
+      },
+      "revId": "4924d0ace20900987a89cb98f1a930250712aad9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5f581ed4_c07765fa",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-21T22:20:04Z",
+      "side": 1,
+      "message": "part of the reason for separating 8 and 16 is reducing the if else everywhere. this is a case where there *could* be an if else but it just 0s everything",
+      "range": {
+        "startLine": 162,
+        "startChar": 20,
+        "endLine": 162,
+        "endChar": 24
+      },
+      "revId": "4924d0ace20900987a89cb98f1a930250712aad9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6ae691f8_fb07b0bd",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-21T22:20:04Z",
+      "side": 1,
+      "message": "This works and replaces the diff_sq *\u003d 3 below, but I was looking for better ways to do the /\u003d num_values",
+      "range": {
+        "startLine": 177,
+        "startChar": 0,
+        "endLine": 177,
+        "endChar": 21
+      },
+      "revId": "4924d0ace20900987a89cb98f1a930250712aad9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "256520f6_8461ee05",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-21T22:20:04Z",
+      "side": 1,
+      "message": "as an example, this replaces the *\u003d 3 and /\u003d num_values\n\nif we worked it out for all the other num_values, we could just do a big multiply/shift by a constant (setting up the constants once at the start)\n\nBUUUUUUUT\n\nalthough there is mullo_epi32, there is no mulhi_epi32. so my idea of multiply + free shift is shot. i wish i was writing this for neon instead",
+      "range": {
+        "startLine": 210,
+        "startChar": 0,
+        "endLine": 210,
+        "endChar": 52
+      },
+      "revId": "4924d0ace20900987a89cb98f1a930250712aad9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
