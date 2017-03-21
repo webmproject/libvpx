@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1f0741b2_baaee7aa",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 1007,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-03-21T22:51:41Z",
+      "side": 1,
+      "message": "kDenoiserOnYOnly",
+      "range": {
+        "startLine": 1007,
+        "startChar": 38,
+        "endLine": 1007,
+        "endChar": 51
+      },
+      "revId": "7fdc5bf9693f2e649176f5403047daf4614cacaf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
