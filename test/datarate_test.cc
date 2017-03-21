@@ -561,6 +561,7 @@ class DatarateTestVP9Large
     }
 
     encoder->Control(VP9E_SET_NOISE_SENSITIVITY, denoiser_on_);
+    encoder->Control(VP9E_SET_TILE_COLUMNS, (cfg_.g_threads >> 1));
 
     if (cfg_.ts_number_layers > 1) {
       if (video->frame() == 0) {
@@ -988,7 +989,7 @@ TEST_P(DatarateTestVP9LargeDenoiser, LowNoise) {
 }
 
 // Check basic datarate targeting, for a single bitrate, when denoiser is on,
-// for clip with high noise level.
+// for clip with high noise level. Use 2 threads.
 TEST_P(DatarateTestVP9LargeDenoiser, HighNoise) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
@@ -998,8 +999,38 @@ TEST_P(DatarateTestVP9LargeDenoiser, HighNoise) {
   cfg_.rc_max_quantizer = 56;
   cfg_.rc_end_usage = VPX_CBR;
   cfg_.g_lag_in_frames = 0;
+  cfg_.g_threads = 2;
 
   ::libvpx_test::Y4mVideoSource video("noisy_clip_640_360.y4m", 0, 200);
+
+  // For the temporal denoiser (#if CONFIG_VP9_TEMPORAL_DENOISING),
+  // there is only one denoiser mode: kDenoiserOnYOnly(which is 1),
+  // but may add more modes in the future.
+  cfg_.rc_target_bitrate = 1000;
+  ResetModel();
+  // Turn on the denoiser.
+  denoiser_on_ = 1;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.85)
+      << " The datarate for the file is lower than target by too much!";
+  ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.15)
+      << " The datarate for the file is greater than target by too much!";
+}
+
+// Check basic datarate targeting, for a single bitrate, when denoiser is on,
+// for 1280x720 clip with 4 threads.
+TEST_P(DatarateTestVP9LargeDenoiser, 4threads) {
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_dropframe_thresh = 1;
+  cfg_.rc_min_quantizer = 2;
+  cfg_.rc_max_quantizer = 56;
+  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.g_lag_in_frames = 0;
+  cfg_.g_threads = 4;
+
+  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 300);
 
   // For the temporal denoiser (#if CONFIG_VP9_TEMPORAL_DENOISING),
   // there is only one denoiser mode: denoiserYonly(which is 1),
@@ -1011,7 +1042,7 @@ TEST_P(DatarateTestVP9LargeDenoiser, HighNoise) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.85)
       << " The datarate for the file is lower than target by too much!";
-  ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.15)
+  ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.28)
       << " The datarate for the file is greater than target by too much!";
 }
 
@@ -1228,7 +1259,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SpatialLayers) {
 }
 
 // Check basic rate targeting for 1 pass CBR SVC with denoising.
-// 2 spatial layers and 3 temporal layer. Run CIF clip with 1 thread.
+// 2 spatial layers and 3 temporal layer. Run HD clip with 2 threads.
 TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SpatialLayersDenoiserOn) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
@@ -1243,7 +1274,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SpatialLayersDenoiserOn) {
   cfg_.ts_rate_decimator[1] = 2;
   cfg_.ts_rate_decimator[2] = 1;
   cfg_.g_error_resilient = 1;
-  cfg_.g_threads = 1;
+  cfg_.g_threads = 2;
   cfg_.temporal_layering_mode = 3;
   svc_params_.scaling_factor_num[0] = 144;
   svc_params_.scaling_factor_den[0] = 288;
@@ -1251,11 +1282,10 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SpatialLayersDenoiserOn) {
   svc_params_.scaling_factor_den[1] = 288;
   cfg_.rc_dropframe_thresh = 10;
   cfg_.kf_max_dist = 9999;
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                       30, 1, 0, 200);
+  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 300);
   // TODO(marpan): Check that effective_datarate for each layer hits the
   // layer target_bitrate.
-  for (int i = 200; i <= 800; i += 200) {
+  for (int i = 600; i <= 1000; i += 200) {
     cfg_.rc_target_bitrate = i;
     ResetModel();
     denoiser_on_ = 1;
