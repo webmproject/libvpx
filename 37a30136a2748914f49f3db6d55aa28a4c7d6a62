@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "667c1250_5b17d398",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-21T22:40:47Z",
+      "side": 1,
+      "message": "is this member needed at all?",
+      "range": {
+        "startLine": 362,
+        "startChar": 14,
+        "endLine": 362,
+        "endChar": 32
+      },
+      "revId": "37a30136a2748914f49f3db6d55aa28a4c7d6a62",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
