@@ -314,6 +314,7 @@ void vp9_denoiser_denoise(VP9_COMP *cpi, MACROBLOCK *mb, int mi_row, int mi_col,
       block_start(mc_avg.y_buffer, mc_avg.y_stride, mi_row, mi_col);
   struct buf_2d src = mb->plane[0].src;
   int is_skin = 0;
+  int increase_denoising = 0;
   int consec_zeromv = 0;
   mv_col = ctx->best_sse_mv.as_mv.col;
   mv_row = ctx->best_sse_mv.as_mv.row;
@@ -356,22 +357,18 @@ void vp9_denoiser_denoise(VP9_COMP *cpi, MACROBLOCK *mb, int mi_row, int mi_col,
         mb->plane[0].src.stride, mb->plane[1].src.stride, bs, consec_zeromv,
         motion_level);
   }
-  if (!is_skin && denoiser->denoising_level == kDenHigh) {
-    denoiser->increase_denoising = 1;
-  } else {
-    denoiser->increase_denoising = 0;
-  }
+  if (!is_skin && denoiser->denoising_level == kDenHigh) increase_denoising = 1;
 
   if (denoiser->denoising_level >= kDenLow)
     decision = perform_motion_compensation(
-        denoiser, mb, bs, denoiser->increase_denoising, mi_row, mi_col, ctx,
+        denoiser, mb, bs, increase_denoising, mi_row, mi_col, ctx,
         motion_magnitude, is_skin, &zeromv_filter, consec_zeromv,
         cpi->svc.number_spatial_layers, cpi->Source->y_width);
 
   if (decision == FILTER_BLOCK) {
-    decision = vp9_denoiser_filter(
-        src.buf, src.stride, mc_avg_start, mc_avg.y_stride, avg_start,
-        avg.y_stride, denoiser->increase_denoising, bs, motion_magnitude);
+    decision = vp9_denoiser_filter(src.buf, src.stride, mc_avg_start,
+                                   mc_avg.y_stride, avg_start, avg.y_stride,
+                                   increase_denoising, bs, motion_magnitude);
   }
 
   if (decision == FILTER_BLOCK) {
@@ -533,7 +530,6 @@ int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height, int ssx,
 #ifdef OUTPUT_YUV_DENOISED
   make_grayscale(&denoiser->running_avg_y[i]);
 #endif
-  denoiser->increase_denoising = 0;
   denoiser->frame_buffer_initialized = 1;
   denoiser->denoising_level = kDenLow;
   denoiser->prev_denoising_level = kDenLow;
