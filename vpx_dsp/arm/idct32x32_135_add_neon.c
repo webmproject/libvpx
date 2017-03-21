@@ -87,7 +87,7 @@ static INLINE void load_4x8_s16(const tran_low_t *input, int16x4_t *const in0,
 // 13  84  93 103 110 125
 // 14  98 106 115 127
 // 15 117 128
-void idct32_12_neon(const tran_low_t *const input, int16_t *output) {
+void vpx_idct32_12_neon(const tran_low_t *const input, int16_t *output) {
   int16x4_t tmp[8];
   int16x8_t in[12], s1[32], s2[32], s3[32], s4[32], s5[32], s6[32], s7[32];
 
@@ -371,8 +371,8 @@ void idct32_12_neon(const tran_low_t *const input, int16_t *output) {
   vst1q_s16(output, vsubq_s16(s7[0], s6[31]));
 }
 
-void idct32_16_neon(const int16_t *const input, uint8_t *const output,
-                    const int stride, const int highbd_flag) {
+void vpx_idct32_16_neon(const int16_t *const input, uint8_t *const output,
+                        const int stride, const int highbd_flag) {
   int16x8_t in[16], s1[32], s2[32], s3[32], s4[32], s5[32], s6[32], s7[32],
       out[32];
 
@@ -666,11 +666,11 @@ void vpx_idct32x32_135_add_neon(const tran_low_t *input, uint8_t *dest,
   int16_t temp[32 * 16];
   int16_t *t = temp;
 
-  idct32_12_neon(input, temp);
-  idct32_12_neon(input + 32 * 8, temp + 8);
+  vpx_idct32_12_neon(input, temp);
+  vpx_idct32_12_neon(input + 32 * 8, temp + 8);
 
   for (i = 0; i < 32; i += 8) {
-    idct32_16_neon(t, dest, stride, 0);
+    vpx_idct32_16_neon(t, dest, stride, 0);
     t += (16 * 8);
     dest += 8;
   }

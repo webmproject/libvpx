@@ -35,7 +35,7 @@
 // 5 13 20 26
 // 6 21 27 33
 // 7 24 32
-static void highbd_idct32_6_neon(const tran_low_t *input, int32_t *output) {
+static void vpx_highbd_idct32_6_neon(const tran_low_t *input, int32_t *output) {
   int32x4x2_t in[8], s1[32], s2[32], s3[32];
 
   in[0].val[0] = vld1q_s32(input);
@@ -370,8 +370,8 @@ static void highbd_idct32_6_neon(const tran_low_t *input, int32_t *output) {
   vst1q_s32(output, s3[31].val[1]);
 }
 
-static void highbd_idct32_8_neon(const int32_t *input, uint16_t *output,
-                                 int stride, const int bd) {
+static void vpx_highbd_idct32_8_neon(const int32_t *input, uint16_t *output,
+                                     int stride, const int bd) {
   int32x4x2_t in[8], s1[32], s2[32], s3[32], out[32];
 
   load_and_transpose_s32_8x8(input, 8, &in[0], &in[1], &in[2], &in[3], &in[4],
@@ -602,10 +602,10 @@ void vpx_highbd_idct32x32_34_add_neon(const tran_low_t *input, uint8_t *dest,
     int16_t temp[32 * 8];
     int16_t *t = temp;
 
-    idct32_6_neon(input, t);
+    vpx_idct32_6_neon(input, t);
 
     for (i = 0; i < 32; i += 8) {
-      idct32_8_neon(t, dest, stride, 1);
+      vpx_idct32_8_neon(t, dest, stride, 1);
       t += (8 * 8);
       dest += 8;
     }
@@ -614,10 +614,10 @@ void vpx_highbd_idct32x32_34_add_neon(const tran_low_t *input, uint8_t *dest,
     int32_t temp[32 * 8];
     int32_t *t = temp;
 
-    highbd_idct32_6_neon(input, t);
+    vpx_highbd_idct32_6_neon(input, t);
 
     for (i = 0; i < 32; i += 8) {
-      highbd_idct32_8_neon(t, dst, stride, bd);
+      vpx_highbd_idct32_8_neon(t, dst, stride, bd);
       t += (8 * 8);
       dst += 8;
     }

@@ -385,9 +385,9 @@ static INLINE void idct32_bands_end_2nd_pass(const int32_t *const out,
                                max);
 }
 
-static INLINE void highbd_idct32_32_neon(const tran_low_t *input,
-                                         uint8_t *const dest, const int stride,
-                                         const int bd) {
+static INLINE void vpx_highbd_idct32_32_neon(const tran_low_t *input,
+                                             uint8_t *const dest,
+                                             const int stride, const int bd) {
   int i, idct32_pass_loop;
   int32_t trans_buf[32 * 8];
   int32_t pass1[32 * 32];
@@ -640,8 +640,8 @@ static INLINE void highbd_idct32_32_neon(const tran_low_t *input,
 void vpx_highbd_idct32x32_1024_add_neon(const tran_low_t *input, uint8_t *dest,
                                         int stride, int bd) {
   if (bd == 8) {
-    idct32_32_neon(input, dest, stride, 1);
+    vpx_idct32_32_neon(input, dest, stride, 1);
   } else {
-    highbd_idct32_32_neon(input, dest, stride, bd);
+    vpx_highbd_idct32_32_neon(input, dest, stride, bd);
   }
 }
