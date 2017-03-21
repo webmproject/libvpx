@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "55eb1ea5_4a4a9a8d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-21T02:27:36Z",
+      "side": 1,
+      "message": "this is a bit incomplete. you could say something like:\nmake butterfly_self() consistent with other functions\nor\nnormalize butterfly_self() signature",
+      "revId": "579d6ef0ac2e5d8bc8dd2eb79968eb757093d70a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
