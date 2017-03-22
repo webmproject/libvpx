@@ -963,29 +963,30 @@ static INLINE void highbd_idct16x16_add_store(const int32x4x2_t *const out,
   highbd_idct16x16_add8x1(o[15], max, &dest, stride);
 }
 
-void idct16x16_256_add_half1d(const void *const input, int16_t *output,
-                              void *const dest, const int stride,
-                              const int highbd_flag);
+void vpx_idct16x16_256_add_half1d(const void *const input, int16_t *output,
+                                  void *const dest, const int stride,
+                                  const int highbd_flag);
 
-void idct16x16_38_add_half1d(const void *const input, int16_t *const output,
-                             void *const dest, const int stride,
-                             const int highbd_flag);
+void vpx_idct16x16_38_add_half1d(const void *const input, int16_t *const output,
+                                 void *const dest, const int stride,
+                                 const int highbd_flag);
 
-void idct16x16_10_add_half1d_pass1(const tran_low_t *input, int16_t *output);
+void vpx_idct16x16_10_add_half1d_pass1(const tran_low_t *input,
+                                       int16_t *output);
 
-void idct16x16_10_add_half1d_pass2(const int16_t *input, int16_t *const output,
-                                   void *const dest, const int stride,
-                                   const int highbd_flag);
+void vpx_idct16x16_10_add_half1d_pass2(const int16_t *input,
+                                       int16_t *const output, void *const dest,
+                                       const int stride, const int highbd_flag);
 
-void idct32_32_neon(const tran_low_t *input, uint8_t *dest, const int stride,
-                    const int highbd_flag);
+void vpx_idct32_32_neon(const tran_low_t *input, uint8_t *dest,
+                        const int stride, const int highbd_flag);
 
-void idct32_12_neon(const tran_low_t *const input, int16_t *output);
-void idct32_16_neon(const int16_t *const input, uint8_t *const output,
-                    const int stride, const int highbd_flag);
+void vpx_idct32_12_neon(const tran_low_t *const input, int16_t *output);
+void vpx_idct32_16_neon(const int16_t *const input, uint8_t *const output,
+                        const int stride, const int highbd_flag);
 
-void idct32_6_neon(const tran_low_t *input, int16_t *output);
-void idct32_8_neon(const int16_t *input, uint8_t *output, int stride,
-                   const int highbd_flag);
+void vpx_idct32_6_neon(const tran_low_t *input, int16_t *output);
+void vpx_idct32_8_neon(const int16_t *input, uint8_t *output, int stride,
+                       const int highbd_flag);
 
 #endif  // VPX_DSP_ARM_IDCT_NEON_H_
