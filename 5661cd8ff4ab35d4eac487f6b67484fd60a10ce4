@@ -16,6 +16,24 @@
       "revId": "5661cd8ff4ab35d4eac487f6b67484fd60a10ce4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f309919d_3b14c645",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 518,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2017-03-22T19:17:30Z",
+      "side": 1,
+      "message": "tx_bsize should always be square in VP9, so yes",
+      "parentUuid": "4d619803_da5f5a45",
+      "revId": "5661cd8ff4ab35d4eac487f6b67484fd60a10ce4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
