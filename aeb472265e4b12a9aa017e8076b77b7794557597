@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7d197e8f_a93e0307",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-03-22T19:09:25Z",
+      "side": 1,
+      "message": "I think your change is correct. It looks like the MV_LOW/MV_UPP are considered in full-pel search, but not in sub-pel search. Thank you for fixing this!\nCould you implement this in a separate function similar to vp9_set_mv_search_range()?",
+      "parentUuid": "e70bd1a6_f47e4738",
+      "range": {
+        "startLine": 292,
+        "startChar": 31,
+        "endLine": 292,
+        "endChar": 32
+      },
+      "revId": "aeb472265e4b12a9aa017e8076b77b7794557597",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "81ba61f6_44b75754",
         "filename": "vp9/encoder/vp9_mcomp.c",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-03-22T16:01:48Z",
       "side": 1,
       "message": "We have one more suggestion. We feel that minr,minc, maxr and maxc can be calculated using MIN((MAX_FULL_PEL_VAL \u003c\u003c 3),MV_MAX) around ref_mv. This comment is not related to current crash. We feel that this would be superior (in quality) for complex contents as range checks are ensured during evaluation itself.",
+      "range": {
+        "startLine": 774,
+        "startChar": 41,
+        "endLine": 774,
+        "endChar": 57
+      },
+      "revId": "aeb472265e4b12a9aa017e8076b77b7794557597",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fcb84260_d6e5f38d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 774,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-03-22T19:09:25Z",
+      "side": 1,
+      "message": "Yes. There is some inconsistency between the condition used here and the min/max mv calculation above. Did you see any performance difference(improvement) when using what you suggested?",
+      "parentUuid": "81ba61f6_44b75754",
       "range": {
         "startLine": 774,
         "startChar": 41,
