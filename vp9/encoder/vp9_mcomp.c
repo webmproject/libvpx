@@ -52,6 +52,24 @@ void vp9_set_mv_search_range(MvLimits *mv_limits, const MV *mv) {
   if (mv_limits->row_max > row_max) mv_limits->row_max = row_max;
 }
 
+void vp9_set_subpel_mv_search_range(MvLimits *subpel_mv_limits,
+                                    const MvLimits *umv_window_limits,
+                                    const MV *ref_mv) {
+  subpel_mv_limits->col_min = VPXMAX(umv_window_limits->col_min * 8,
+                                     ref_mv->col - MAX_FULL_PEL_VAL * 8);
+  subpel_mv_limits->col_max = VPXMIN(umv_window_limits->col_max * 8,
+                                     ref_mv->col + MAX_FULL_PEL_VAL * 8);
+  subpel_mv_limits->row_min = VPXMAX(umv_window_limits->row_min * 8,
+                                     ref_mv->row - MAX_FULL_PEL_VAL * 8);
+  subpel_mv_limits->row_max = VPXMIN(umv_window_limits->row_max * 8,
+                                     ref_mv->row + MAX_FULL_PEL_VAL * 8);
+
+  subpel_mv_limits->col_min = VPXMAX(MV_LOW + 1, subpel_mv_limits->col_min);
+  subpel_mv_limits->col_max = VPXMIN(MV_UPP - 1, subpel_mv_limits->col_max);
+  subpel_mv_limits->row_min = VPXMAX(MV_LOW + 1, subpel_mv_limits->row_min);
+  subpel_mv_limits->row_max = VPXMIN(MV_UPP - 1, subpel_mv_limits->row_max);
+}
+
 int vp9_init_search_range(int size) {
   int sr = 0;
   // Minimum search size no matter what the passed in value.
@@ -267,34 +285,38 @@ static INLINE const uint8_t *pre(const uint8_t *buf, int stride, int r, int c) {
     }                                           \
   }
 
-#define SETUP_SUBPEL_SEARCH                                                \
-  const uint8_t *const z = x->plane[0].src.buf;                            \
-  const int src_stride = x->plane[0].src.stride;                           \
-  const MACROBLOCKD *xd = &x->e_mbd;                                       \
-  unsigned int besterr = UINT_MAX;                                         \
-  unsigned int sse;                                                        \
-  unsigned int whichdir;                                                   \
-  int thismse;                                                             \
-  const unsigned int halfiters = iters_per_step;                           \
-  const unsigned int quarteriters = iters_per_step;                        \
-  const unsigned int eighthiters = iters_per_step;                         \
-  const int y_stride = xd->plane[0].pre[0].stride;                         \
-  const int offset = bestmv->row * y_stride + bestmv->col;                 \
-  const uint8_t *const y = xd->plane[0].pre[0].buf;                        \
-                                                                           \
-  int rr = ref_mv->row;                                                    \
-  int rc = ref_mv->col;                                                    \
-  int br = bestmv->row * 8;                                                \
-  int bc = bestmv->col * 8;                                                \
-  int hstep = 4;                                                           \
-  const int minc = VPXMAX(x->mv_limits.col_min * 8, ref_mv->col - MV_MAX); \
-  const int maxc = VPXMIN(x->mv_limits.col_max * 8, ref_mv->col + MV_MAX); \
-  const int minr = VPXMAX(x->mv_limits.row_min * 8, ref_mv->row - MV_MAX); \
-  const int maxr = VPXMIN(x->mv_limits.row_max * 8, ref_mv->row + MV_MAX); \
-  int tr = br;                                                             \
-  int tc = bc;                                                             \
-                                                                           \
-  bestmv->row *= 8;                                                        \
+#define SETUP_SUBPEL_SEARCH                                                 \
+  const uint8_t *const z = x->plane[0].src.buf;                             \
+  const int src_stride = x->plane[0].src.stride;                            \
+  const MACROBLOCKD *xd = &x->e_mbd;                                        \
+  unsigned int besterr = UINT_MAX;                                          \
+  unsigned int sse;                                                         \
+  unsigned int whichdir;                                                    \
+  int thismse;                                                              \
+  const unsigned int halfiters = iters_per_step;                            \
+  const unsigned int quarteriters = iters_per_step;                         \
+  const unsigned int eighthiters = iters_per_step;                          \
+  const int y_stride = xd->plane[0].pre[0].stride;                          \
+  const int offset = bestmv->row * y_stride + bestmv->col;                  \
+  const uint8_t *const y = xd->plane[0].pre[0].buf;                         \
+                                                                            \
+  int rr = ref_mv->row;                                                     \
+  int rc = ref_mv->col;                                                     \
+  int br = bestmv->row * 8;                                                 \
+  int bc = bestmv->col * 8;                                                 \
+  int hstep = 4;                                                            \
+  int minc, maxc, minr, maxr;                                               \
+  int tr = br;                                                              \
+  int tc = bc;                                                              \
+  MvLimits subpel_mv_limits;                                                \
+                                                                            \
+  vp9_set_subpel_mv_search_range(&subpel_mv_limits, &x->mv_limits, ref_mv); \
+  minc = subpel_mv_limits.col_min;                                          \
+  maxc = subpel_mv_limits.col_max;                                          \
+  minr = subpel_mv_limits.row_min;                                          \
+  maxr = subpel_mv_limits.row_max;                                          \
+                                                                            \
+  bestmv->row *= 8;                                                         \
   bestmv->col *= 8;
 
 static unsigned int setup_center_error(
@@ -395,10 +417,6 @@ uint32_t vp9_skip_sub_pixel_tree(const MACROBLOCK *x, MV *bestmv,
   (void)thismse;
   (void)cost_list;
 
-  if ((abs(bestmv->col - ref_mv->col) > (MAX_FULL_PEL_VAL << 3)) ||
-      (abs(bestmv->row - ref_mv->row) > (MAX_FULL_PEL_VAL << 3)))
-    return UINT_MAX;
-
   return besterr;
 }
 
@@ -464,10 +482,6 @@ uint32_t vp9_find_best_sub_pixel_tree_pruned_evenmore(
   bestmv->row = br;
   bestmv->col = bc;
 
-  if ((abs(bestmv->col - ref_mv->col) > (MAX_FULL_PEL_VAL << 3)) ||
-      (abs(bestmv->row - ref_mv->row) > (MAX_FULL_PEL_VAL << 3)))
-    return UINT_MAX;
-
   return besterr;
 }
 
@@ -527,10 +541,6 @@ uint32_t vp9_find_best_sub_pixel_tree_pruned_more(
 
   bestmv->row = br;
   bestmv->col = bc;
-
-  if ((abs(bestmv->col - ref_mv->col) > (MAX_FULL_PEL_VAL << 3)) ||
-      (abs(bestmv->row - ref_mv->row) > (MAX_FULL_PEL_VAL << 3)))
-    return UINT_MAX;
 
   return besterr;
 }
@@ -614,10 +624,6 @@ uint32_t vp9_find_best_sub_pixel_tree_pruned(
   bestmv->row = br;
   bestmv->col = bc;
 
-  if ((abs(bestmv->col - ref_mv->col) > (MAX_FULL_PEL_VAL << 3)) ||
-      (abs(bestmv->row - ref_mv->row) > (MAX_FULL_PEL_VAL << 3)))
-    return UINT_MAX;
-
   return besterr;
 }
 
@@ -653,16 +659,21 @@ uint32_t vp9_find_best_sub_pixel_tree(
   int bc = bestmv->col * 8;
   int hstep = 4;
   int iter, round = 3 - forced_stop;
-  const int minc = VPXMAX(x->mv_limits.col_min * 8, ref_mv->col - MV_MAX);
-  const int maxc = VPXMIN(x->mv_limits.col_max * 8, ref_mv->col + MV_MAX);
-  const int minr = VPXMAX(x->mv_limits.row_min * 8, ref_mv->row - MV_MAX);
-  const int maxr = VPXMIN(x->mv_limits.row_max * 8, ref_mv->row + MV_MAX);
+
+  int minc, maxc, minr, maxr;
   int tr = br;
   int tc = bc;
   const MV *search_step = search_step_table;
   int idx, best_idx = -1;
   unsigned int cost_array[5];
   int kr, kc;
+  MvLimits subpel_mv_limits;
+
+  vp9_set_subpel_mv_search_range(&subpel_mv_limits, &x->mv_limits, ref_mv);
+  minc = subpel_mv_limits.col_min;
+  maxc = subpel_mv_limits.col_max;
+  minr = subpel_mv_limits.row_min;
+  maxr = subpel_mv_limits.row_max;
 
   if (!(allow_hp && use_mv_hp(ref_mv)))
     if (round == 3) round = 2;
@@ -762,10 +773,6 @@ uint32_t vp9_find_best_sub_pixel_tree(
 
   bestmv->row = br;
   bestmv->col = bc;
-
-  if ((abs(bestmv->col - ref_mv->col) > (MAX_FULL_PEL_VAL << 3)) ||
-      (abs(bestmv->row - ref_mv->row) > (MAX_FULL_PEL_VAL << 3)))
-    return UINT_MAX;
 
   return besterr;
 }

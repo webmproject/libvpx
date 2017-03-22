@@ -109,6 +109,10 @@ int vp9_full_pixel_search(struct VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
                           int error_per_bit, int *cost_list, const MV *ref_mv,
                           MV *tmp_mv, int var_max, int rd);
 
+void vp9_set_subpel_mv_search_range(MvLimits *subpel_mv_limits,
+                                    const MvLimits *umv_window_limits,
+                                    const MV *ref_mv);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
