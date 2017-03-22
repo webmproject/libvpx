@@ -515,7 +515,8 @@ static int64_t sum_squares_visible(const MACROBLOCKD *xd,
                                              pd->subsampling_y, blk_row);
   if (tx_bsize == BLOCK_4X4 ||
       (b4x4s_to_right_edge >= tx_4x4_w && b4x4s_to_bottom_edge >= tx_4x4_h)) {
-    sse = (int64_t)vpx_sum_squares_2d_i16(diff, diff_stride, tx_bsize);
+    assert(tx_4x4_w == tx_4x4_h);
+    sse = (int64_t)vpx_sum_squares_2d_i16(diff, diff_stride, tx_4x4_w << 2);
   } else {
     int r, c;
     int max_r = VPXMIN(b4x4s_to_bottom_edge, tx_4x4_h);
@@ -525,7 +526,8 @@ static int64_t sum_squares_visible(const MACROBLOCKD *xd,
     for (r = 0; r < max_r; ++r) {
       // Skip visiting the sub blocks that are wholly within the UMV.
       for (c = 0; c < max_c; ++c) {
-        sse += (int64_t)vpx_sum_squares_2d_i16(diff, diff_stride, BLOCK_4X4);
+        sse += (int64_t)vpx_sum_squares_2d_i16(
+            diff + r * diff_stride * 4 + c * 4, diff_stride, 4);
       }
     }
   }
