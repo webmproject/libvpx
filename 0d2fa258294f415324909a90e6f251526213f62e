@@ -81,6 +81,24 @@
       "revId": "0d2fa258294f415324909a90e6f251526213f62e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df1f1f44_728a5685",
+        "filename": "vpx_dsp/arm/idct_neon.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 876,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-03-22T17:31:04Z",
+      "side": 1,
+      "message": "Tried packing x8 as following.\n\nSpeed is identical for 8-bit vpx_highbd_idct32x32_135_add_neon().\nFor 8-bit vpx_highbd_idct32x32_34_add_neon(), gcc is a little bit slower and clang is a little bit faster.\nFor disassembly, idct32_8_neon()\u0027s and idct32_16_neon()\u0027s sizes are a little bit bigger than before.\n\nstatic INLINE void highbd_idct16x16_add8x8_bd8(const int16x8_t *const res,\n                                               uint16_t **dest,\n                                               const int stride) {\n  uint16x8_t d[8];\n  int16x8_t r[8];\n  d[0] \u003d vld1q_u16(*dest + 0 * stride);\n  d[1] \u003d vld1q_u16(*dest + 1 * stride);\n  d[2] \u003d vld1q_u16(*dest + 2 * stride);\n  d[3] \u003d vld1q_u16(*dest + 3 * stride);\n  d[4] \u003d vld1q_u16(*dest + 4 * stride);\n  d[5] \u003d vld1q_u16(*dest + 5 * stride);\n  d[6] \u003d vld1q_u16(*dest + 6 * stride);\n  d[7] \u003d vld1q_u16(*dest + 7 * stride);\n\n  r[0] \u003d vrsraq_n_s16(vreinterpretq_s16_u16(d[0]), res[0], 6);\n  r[1] \u003d vrsraq_n_s16(vreinterpretq_s16_u16(d[1]), res[1], 6);\n  r[2] \u003d vrsraq_n_s16(vreinterpretq_s16_u16(d[2]), res[2], 6);\n  r[3] \u003d vrsraq_n_s16(vreinterpretq_s16_u16(d[3]), res[3], 6);\n  r[4] \u003d vrsraq_n_s16(vreinterpretq_s16_u16(d[4]), res[4], 6);\n  r[5] \u003d vrsraq_n_s16(vreinterpretq_s16_u16(d[5]), res[5], 6);\n  r[6] \u003d vrsraq_n_s16(vreinterpretq_s16_u16(d[6]), res[6], 6);\n  r[7] \u003d vrsraq_n_s16(vreinterpretq_s16_u16(d[7]), res[7], 6);\n  d[0] \u003d vmovl_u8(vqmovun_s16(r[0]));\n  d[1] \u003d vmovl_u8(vqmovun_s16(r[1]));\n  d[2] \u003d vmovl_u8(vqmovun_s16(r[2]));\n  d[3] \u003d vmovl_u8(vqmovun_s16(r[3]));\n  d[4] \u003d vmovl_u8(vqmovun_s16(r[4]));\n  d[5] \u003d vmovl_u8(vqmovun_s16(r[5]));\n  d[6] \u003d vmovl_u8(vqmovun_s16(r[6]));\n  d[7] \u003d vmovl_u8(vqmovun_s16(r[7]));\n  vst1q_u16(*dest, d[0]);\n  *dest +\u003d stride;\n  vst1q_u16(*dest, d[1]);\n  *dest +\u003d stride;\n  vst1q_u16(*dest, d[2]);\n  *dest +\u003d stride;\n  vst1q_u16(*dest, d[3]);\n  *dest +\u003d stride;\n  vst1q_u16(*dest, d[4]);\n  *dest +\u003d stride;\n  vst1q_u16(*dest, d[5]);\n  *dest +\u003d stride;\n  vst1q_u16(*dest, d[6]);\n  *dest +\u003d stride;\n  vst1q_u16(*dest, d[7]);\n  *dest +\u003d stride;\n}",
+      "parentUuid": "260c9a9d_dc5fbab0",
+      "revId": "0d2fa258294f415324909a90e6f251526213f62e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
