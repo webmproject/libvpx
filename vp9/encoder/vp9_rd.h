@@ -38,6 +38,7 @@ extern "C" {
 #define MAX_MODES 30
 #define MAX_REFS 6
 
+#define RD_THRESH_INIT_FACT 32
 #define RD_THRESH_MAX_FACT 64
 #define RD_THRESH_INC 1
 

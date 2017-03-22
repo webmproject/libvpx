@@ -323,6 +323,7 @@ static void set_rt_speed_feature_framesize_independent(
   const int frames_since_key = is_keyframe ? 0 : cpi->rc.frames_since_key;
   sf->static_segmentation = 0;
   sf->adaptive_rd_thresh = 1;
+  sf->adaptive_rd_thresh_row_mt = 0;
   sf->use_fast_coef_costing = 1;
   sf->allow_exhaustive_searches = 0;
   sf->exhaustive_searches_thresh = INT_MAX;
@@ -551,6 +552,9 @@ static void set_rt_speed_feature_framesize_independent(
       }
     }
 
+    if (cpi->row_mt && cpi->oxcf.max_threads > 1)
+      sf->adaptive_rd_thresh_row_mt = 1;
+
     sf->mv.subpel_force_stop = (content == VP9E_CONTENT_SCREEN) ? 3 : 2;
     if (content == VP9E_CONTENT_SCREEN) sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
     // Only keep INTRA_DC mode for speed 8.
@@ -578,11 +582,10 @@ static void set_rt_speed_feature_framesize_independent(
     sf->limit_newmv_early_exit = 0;
     if (cm->width > 640 && cm->height > 480) sf->use_simple_block_yrd = 1;
   }
-  // Turn off adaptive_rd_thresh if row_mt is on for all the non-rd paths. This
-  // causes too many locks in realtime mode in certain platforms (Android ARM,
-  // Mac).
-  if (speed >= 5 && cpi->row_mt && cpi->num_workers > 1) {
+  // Turn off adaptive_rd_thresh if row_mt is on for speed 5, 6, 7.
+  if (speed >= 5 && speed < 8 && cpi->row_mt && cpi->num_workers > 1) {
     sf->adaptive_rd_thresh = 0;
+    sf->adaptive_rd_thresh_row_mt = 0;
   }
 }
 
