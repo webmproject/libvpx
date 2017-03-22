@@ -89,8 +89,9 @@ void vp9_temporal_filter_init(void) {
   for (i = 1; i < 512; ++i) fixed_divide[i] = 0x80000 / i;
 }
 
-void vp9_temporal_filter_apply_c(uint8_t *frame1, unsigned int stride,
-                                 uint8_t *frame2, unsigned int block_width,
+void vp9_temporal_filter_apply_c(const uint8_t *frame1, unsigned int stride,
+                                 const uint8_t *frame2,
+                                 unsigned int block_width,
                                  unsigned int block_height, int strength,
                                  int filter_weight, unsigned int *accumulator,
                                  uint16_t *count) {
@@ -152,11 +153,11 @@ void vp9_temporal_filter_apply_c(uint8_t *frame1, unsigned int stride,
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void vp9_highbd_temporal_filter_apply_c(
-    uint8_t *frame1_8, unsigned int stride, uint8_t *frame2_8,
+    const uint8_t *frame1_8, unsigned int stride, const uint8_t *frame2_8,
     unsigned int block_width, unsigned int block_height, int strength,
     int filter_weight, unsigned int *accumulator, uint16_t *count) {
-  uint16_t *frame1 = CONVERT_TO_SHORTPTR(frame1_8);
-  uint16_t *frame2 = CONVERT_TO_SHORTPTR(frame2_8);
+  const uint16_t *frame1 = CONVERT_TO_SHORTPTR(frame1_8);
+  const uint16_t *frame2 = CONVERT_TO_SHORTPTR(frame2_8);
   unsigned int i, j, k;
   int modifier;
   int byte = 0;

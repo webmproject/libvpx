@@ -21,10 +21,11 @@ namespace {
 using ::libvpx_test::ACMRandom;
 using ::libvpx_test::Buffer;
 
-typedef void (*TemporalFilterFunc)(uint8_t *a, unsigned int stride, uint8_t *b,
-                                   unsigned int w, unsigned int h,
-                                   int filter_strength, int filter_weight,
-                                   unsigned int *accumulator, uint16_t *count);
+typedef void (*TemporalFilterFunc)(const uint8_t *a, unsigned int stride,
+                                   const uint8_t *b, unsigned int w,
+                                   unsigned int h, int filter_strength,
+                                   int filter_weight, unsigned int *accumulator,
+                                   uint16_t *count);
 
 // Calculate the difference between 'a' and 'b', sum in blocks of 9, and apply
 // filter based on strength and weight. Store the resulting filter amount in
