@@ -11,10 +11,11 @@
 #include "./vp9_rtcd.h"
 #include "vpx_dsp/mips/macros_msa.h"
 
-static void temporal_filter_apply_8size_msa(uint8_t *frm1_ptr, uint32_t stride,
-                                            uint8_t *frm2_ptr, int32_t filt_sth,
-                                            int32_t filt_wgt, uint32_t *acc,
-                                            uint16_t *cnt) {
+static void temporal_filter_apply_8size_msa(const uint8_t *frm1_ptr,
+                                            uint32_t stride,
+                                            const uint8_t *frm2_ptr,
+                                            int32_t filt_sth, int32_t filt_wgt,
+                                            uint32_t *acc, uint16_t *cnt) {
   uint32_t row;
   uint64_t f0, f1, f2, f3;
   v16i8 frm2, frm1 = { 0 };
@@ -138,8 +139,9 @@ static void temporal_filter_apply_8size_msa(uint8_t *frm1_ptr, uint32_t stride,
   }
 }
 
-static void temporal_filter_apply_16size_msa(uint8_t *frm1_ptr, uint32_t stride,
-                                             uint8_t *frm2_ptr,
+static void temporal_filter_apply_16size_msa(const uint8_t *frm1_ptr,
+                                             uint32_t stride,
+                                             const uint8_t *frm2_ptr,
                                              int32_t filt_sth, int32_t filt_wgt,
                                              uint32_t *acc, uint16_t *cnt) {
   uint32_t row;
@@ -265,8 +267,8 @@ static void temporal_filter_apply_16size_msa(uint8_t *frm1_ptr, uint32_t stride,
   }
 }
 
-void vp9_temporal_filter_apply_msa(uint8_t *frame1_ptr, uint32_t stride,
-                                   uint8_t *frame2_ptr, uint32_t blk_w,
+void vp9_temporal_filter_apply_msa(const uint8_t *frame1_ptr, uint32_t stride,
+                                   const uint8_t *frame2_ptr, uint32_t blk_w,
                                    uint32_t blk_h, int32_t strength,
                                    int32_t filt_wgt, uint32_t *accu,
                                    uint16_t *cnt) {
