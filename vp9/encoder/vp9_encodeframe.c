@@ -1011,7 +1011,8 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   set_offsets(cpi, tile, x, mi_row, mi_col, BLOCK_64X64);
   segment_id = xd->mi[0]->segment_id;
 
-  if (cpi->sf.use_source_sad && !is_key_frame) {
+  if (cpi->sf.use_source_sad && cpi->content_state_sb != NULL &&
+      !is_key_frame) {
     // The sb_offset2 is to make it consistent with the index in the function
     // vp9_avg_source_sad() in vp9_ratectrl.c.
     int sb_offset2 = ((cm->mi_cols + 7) >> 3) * (mi_row >> 3) + (mi_col >> 3);
