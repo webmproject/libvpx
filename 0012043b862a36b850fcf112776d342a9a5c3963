@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "067e6c2e_c4a8df08",
+        "filename": "test/convolve_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 1091,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-23T06:06:15Z",
+      "side": 1,
+      "message": "HAVE_AVX2 implies HAVE_SSE2 now, we removed selective disabling a while ago",
+      "range": {
+        "startLine": 1091,
+        "startChar": 3,
+        "endLine": 1091,
+        "endChar": 13
+      },
+      "revId": "0012043b862a36b850fcf112776d342a9a5c3963",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
