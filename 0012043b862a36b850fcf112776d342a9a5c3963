@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "4b7fece9_e7aee2c5",
+        "filename": "test/convolve_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 1091,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-03-23T18:56:33Z",
+      "side": 1,
+      "message": "Done.  Also the low bit depth case below HAVE_SSSE3 is removed.  Good to know we removed selective disabling.",
+      "parentUuid": "067e6c2e_c4a8df08",
+      "range": {
+        "startLine": 1091,
+        "startChar": 3,
+        "endLine": 1091,
+        "endChar": 13
+      },
+      "revId": "0012043b862a36b850fcf112776d342a9a5c3963",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e6c2e0d8_f6d5b970",
         "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
         "patchSetId": 4
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "c8c53027_848db936",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-03-23T18:56:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e6c2e0d8_f6d5b970",
+      "revId": "0012043b862a36b850fcf112776d342a9a5c3963",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5a1b432f_90830749",
         "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
         "patchSetId": 4
@@ -53,6 +95,30 @@
       "writtenOn": "2017-03-23T06:08:27Z",
       "side": 1,
       "message": "2017",
+      "range": {
+        "startLine": 2,
+        "startChar": 18,
+        "endLine": 2,
+        "endChar": 22
+      },
+      "revId": "0012043b862a36b850fcf112776d342a9a5c3963",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3fe9112f_ce0853f5",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-03-23T18:56:33Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "5a1b432f_90830749",
       "range": {
         "startLine": 2,
         "startChar": 18,
