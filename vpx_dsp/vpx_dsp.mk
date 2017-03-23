@@ -320,6 +320,7 @@ DSP_SRCS-$(HAVE_MSA)    += mips/variance_msa.c
 DSP_SRCS-$(HAVE_MSA)    += mips/sub_pixel_variance_msa.c
 
 DSP_SRCS-$(HAVE_SSE)    += x86/variance_sse2.c
+DSP_SRCS-$(HAVE_SSE2)   += x86/avg_pred_sse2.c
 DSP_SRCS-$(HAVE_SSE2)   += x86/variance_sse2.c  # Contains SSE2 and SSSE3
 DSP_SRCS-$(HAVE_AVX2)   += x86/variance_avx2.c
 DSP_SRCS-$(HAVE_AVX2)   += x86/variance_impl_avx2.c

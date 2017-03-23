@@ -60,25 +60,30 @@ TEST_P(AvgPredTest, SizeCombinations) {
       // Don't test 4x2 or 64x128
       if (height_pow == 1 || height_pow == 7) continue;
 
-      const int width = 1 << width_pow;
-      const int height = 1 << height_pow;
-      Buffer<uint8_t> pred = Buffer<uint8_t>(width, height, 0);
-      // Only the reference buffer may have a stride not equal to width.
-      Buffer<uint8_t> ref = Buffer<uint8_t>(width, height, 8);
-      Buffer<uint8_t> avg_ref = Buffer<uint8_t>(width, height, 0);
-      Buffer<uint8_t> avg_chk = Buffer<uint8_t>(width, height, 0);
+      // The sse2 special-cases when ref width == stride, so make sure to test
+      // it.
+      for (int ref_padding = 0; ref_padding < 2; ref_padding++) {
+        const int width = 1 << width_pow;
+        const int height = 1 << height_pow;
+        Buffer<uint8_t> pred = Buffer<uint8_t>(width, height, 0);
+        // Only the reference buffer may have a stride not equal to width.
+        Buffer<uint8_t> ref =
+            Buffer<uint8_t>(width, height, ref_padding ? 8 : 0);
+        Buffer<uint8_t> avg_ref = Buffer<uint8_t>(width, height, 0);
+        Buffer<uint8_t> avg_chk = Buffer<uint8_t>(width, height, 0);
 
-      pred.Set(&rnd_, &ACMRandom::Rand8);
-      ref.Set(&rnd_, &ACMRandom::Rand8);
+        pred.Set(&rnd_, &ACMRandom::Rand8);
+        ref.Set(&rnd_, &ACMRandom::Rand8);
 
-      reference_pred(pred, ref, width, height, &avg_ref);
-      ASM_REGISTER_STATE_CHECK(
-          avg_pred_func_(avg_chk.TopLeftPixel(), pred.TopLeftPixel(), width,
-                         height, ref.TopLeftPixel(), ref.stride()));
-      EXPECT_TRUE(avg_chk.CheckValues(avg_ref));
-      if (HasFailure()) {
-        avg_chk.PrintDifference(avg_ref);
-        return;
+        reference_pred(pred, ref, width, height, &avg_ref);
+        ASM_REGISTER_STATE_CHECK(
+            avg_pred_func_(avg_chk.TopLeftPixel(), pred.TopLeftPixel(), width,
+                           height, ref.TopLeftPixel(), ref.stride()));
+        EXPECT_TRUE(avg_chk.CheckValues(avg_ref));
+        if (HasFailure()) {
+          avg_chk.PrintDifference(avg_ref);
+          return;
+        }
       }
     }
   }
@@ -115,26 +120,30 @@ TEST_P(AvgPredTest, DISABLED_Speed) {
       // Don't test 4x2 or 64x128
       if (height_pow == 1 || height_pow == 7) continue;
 
-      const int width = 1 << width_pow;
-      const int height = 1 << height_pow;
-      Buffer<uint8_t> pred = Buffer<uint8_t>(width, height, 0);
-      Buffer<uint8_t> ref = Buffer<uint8_t>(width, height, 8);
-      Buffer<uint8_t> avg = Buffer<uint8_t>(width, height, 0);
+      for (int ref_padding = 0; ref_padding < 2; ref_padding++) {
+        const int width = 1 << width_pow;
+        const int height = 1 << height_pow;
+        Buffer<uint8_t> pred = Buffer<uint8_t>(width, height, 0);
+        Buffer<uint8_t> ref =
+            Buffer<uint8_t>(width, height, ref_padding ? 8 : 0);
+        Buffer<uint8_t> avg = Buffer<uint8_t>(width, height, 0);
 
-      pred.Set(&rnd_, &ACMRandom::Rand8);
-      ref.Set(&rnd_, &ACMRandom::Rand8);
+        pred.Set(&rnd_, &ACMRandom::Rand8);
+        ref.Set(&rnd_, &ACMRandom::Rand8);
 
-      vpx_usec_timer timer;
-      vpx_usec_timer_start(&timer);
-      for (int i = 0; i < 100000; ++i) {
-        avg_pred_func_(avg.TopLeftPixel(), pred.TopLeftPixel(), width, height,
-                       ref.TopLeftPixel(), ref.stride());
+        vpx_usec_timer timer;
+        vpx_usec_timer_start(&timer);
+        for (int i = 0; i < 10000000 / (width * height); ++i) {
+          avg_pred_func_(avg.TopLeftPixel(), pred.TopLeftPixel(), width, height,
+                         ref.TopLeftPixel(), ref.stride());
+        }
+        vpx_usec_timer_mark(&timer);
+
+        const int elapsed_time =
+            static_cast<int>(vpx_usec_timer_elapsed(&timer));
+        printf("Average Test (ref_padding: %d) %dx%d time: %5d us\n",
+               ref_padding, width, height, elapsed_time);
       }
-      vpx_usec_timer_mark(&timer);
-
-      const int elapsed_time =
-          static_cast<int>(vpx_usec_timer_elapsed(&timer) / 1000);
-      printf("Average Test %dx%d time: %5d ms\n", width, height, elapsed_time);
     }
   }
 }
@@ -142,10 +151,8 @@ TEST_P(AvgPredTest, DISABLED_Speed) {
 INSTANTIATE_TEST_CASE_P(C, AvgPredTest,
                         ::testing::Values(&vpx_comp_avg_pred_c));
 
-/* TODO(johannkoenig): https://bugs.chromium.org/p/webm/issues/detail?id=1390
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(SSE2, AvgPredTest,
                         ::testing::Values(&vpx_comp_avg_pred_sse2));
 #endif  // HAVE_SSE2
-*/
 }  // namespace
