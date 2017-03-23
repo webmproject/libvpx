@@ -1024,7 +1024,6 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     // If source_sad is low copy the partition without computing the y_sad.
     if (x->skip_low_source_sad && cpi->sf.copy_partition_flag &&
         copy_partitioning(cpi, x, mi_row, mi_col, segment_id, sb_offset)) {
-      chroma_check(cpi, x, bsize, y_sad, is_key_frame);
       return 0;
     }
   }
