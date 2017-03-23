@@ -512,12 +512,9 @@ static void set_rt_speed_feature_framesize_independent(
     }
     if (!cpi->external_resize) sf->use_source_sad = 1;
     if (sf->use_source_sad) {
-      // For SVC allocate for top layer.
-      if (cpi->content_state_sb == NULL &&
+      if (cpi->content_state_sb_fd == NULL &&
           (!cpi->use_svc ||
            cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1)) {
-        cpi->content_state_sb = (uint8_t *)vpx_calloc(
-            (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1), sizeof(uint8_t));
         cpi->content_state_sb_fd = (uint8_t *)vpx_calloc(
             (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1), sizeof(uint8_t));
       }

@@ -2213,7 +2213,7 @@ void adjust_gf_boost_lag_one_pass_vbr(VP9_COMP *cpi, uint64_t avg_sad_current) {
 // in content and allow rate control to react.
 // This function also handles special case of lag_in_frames, to measure content
 // level in #future frames set by the lag_in_frames.
-void vp9_avg_source_sad(VP9_COMP *cpi) {
+void vp9_scene_detection_onepass(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -2284,8 +2284,6 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
         int num_samples = 0;
         int sb_cols = (cm->mi_cols + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
         int sb_rows = (cm->mi_rows + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
-        uint64_t avg_source_sad_threshold = 10000;
-        uint64_t avg_source_sad_threshold2 = 12000;
         if (cpi->oxcf.lag_in_frames > 0) {
           src_y = frames[frame]->y_buffer;
           src_ystride = frames[frame]->y_stride;
@@ -2296,34 +2294,12 @@ void vp9_avg_source_sad(VP9_COMP *cpi) {
           for (sbi_col = 0; sbi_col < sb_cols; ++sbi_col) {
             // Checker-board pattern, ignore boundary.
             // If the use_source_sad is on, compute for every superblock.
-            if (cpi->sf.use_source_sad ||
-                ((sbi_row > 0 && sbi_col > 0) &&
+            if (((sbi_row > 0 && sbi_col > 0) &&
                  (sbi_row < sb_rows - 1 && sbi_col < sb_cols - 1) &&
                  ((sbi_row % 2 == 0 && sbi_col % 2 == 0) ||
                   (sbi_row % 2 != 0 && sbi_col % 2 != 0)))) {
               tmp_sad = cpi->fn_ptr[bsize].sdf(src_y, src_ystride, last_src_y,
                                                last_src_ystride);
-              if (cpi->sf.use_source_sad && cpi->content_state_sb != NULL) {
-                unsigned int tmp_sse;
-                unsigned int tmp_variance = vpx_variance64x64(
-                    src_y, src_ystride, last_src_y, last_src_ystride, &tmp_sse);
-                // Note: tmp_sse - tmp_variance = ((sum * sum) >> 12)
-                if (tmp_sad < avg_source_sad_threshold)
-                  cpi->content_state_sb[num_samples] =
-                      ((tmp_sse - tmp_variance) < 25) ? kLowSadLowSumdiff
-                                                      : kLowSadHighSumdiff;
-                else
-                  cpi->content_state_sb[num_samples] =
-                      ((tmp_sse - tmp_variance) < 25) ? kHighSadLowSumdiff
-                                                      : kHighSadHighSumdiff;
-                if (tmp_sad < avg_source_sad_threshold2) {
-                  // Cap the increment to 255.
-                  if (cpi->content_state_sb_fd[num_samples] < 255)
-                    cpi->content_state_sb_fd[num_samples]++;
-                } else {
-                  cpi->content_state_sb_fd[num_samples] = 0;
-                }
-              }
               avg_sad += tmp_sad;
               num_samples++;
             }

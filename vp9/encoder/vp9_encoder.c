@@ -463,9 +463,6 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->copied_frame_cnt);
   cpi->copied_frame_cnt = NULL;
 
-  vpx_free(cpi->content_state_sb);
-  cpi->content_state_sb = NULL;
-
   vpx_free(cpi->content_state_sb_fd);
   cpi->content_state_sb_fd = NULL;
 
@@ -3094,9 +3091,11 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
                                        uint8_t *dest) {
   VP9_COMMON *const cm = &cpi->common;
   int q = 0, bottom_index = 0, top_index = 0;  // Dummy variables.
-  int compute_source_sad = cpi->sf.use_source_sad ||
-                           cpi->oxcf.content == VP9E_CONTENT_SCREEN ||
-                           cpi->oxcf.rc_mode == VPX_VBR;
+  // Flag to check if its valid to compute the source sad (used for
+  // scene detection and for superblock content state in CBR mode).
+  // The flag may get reset below based on SVC or resizing state.
+  cpi->compute_source_sad_onepass =
+      cpi->oxcf.mode == REALTIME && cpi->oxcf.speed >= 5 && cm->show_frame;
 
   vpx_clear_system_state();
 
@@ -3144,16 +3143,13 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   if ((cpi->use_svc &&
        (cpi->svc.spatial_layer_id < cpi->svc.number_spatial_layers - 1 ||
         cpi->svc.current_superframe < 1)) ||
-      cpi->resize_pending || cpi->resize_state || cpi->external_resize) {
-    compute_source_sad = 0;
-    if (cpi->content_state_sb != NULL) {
-      memset(cpi->content_state_sb, 0, (cm->mi_stride >> 3) *
-                                           ((cm->mi_rows >> 3) + 1) *
-                                           sizeof(*cpi->content_state_sb));
+      cpi->resize_pending || cpi->resize_state || cpi->external_resize ||
+      cpi->resize_state != ORIG) {
+    cpi->compute_source_sad_onepass = 0;
+    if (cpi->content_state_sb_fd != NULL)
       memset(cpi->content_state_sb_fd, 0,
              (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1) *
                  sizeof(*cpi->content_state_sb_fd));
-    }
   }
 
   // Avoid scaling last_source unless its needed.
@@ -3166,10 +3162,15 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
         cpi->oxcf.mode == REALTIME && cpi->oxcf.speed >= 5) ||
        cpi->sf.partition_search_type == SOURCE_VAR_BASED_PARTITION ||
        (cpi->noise_estimate.enabled && !cpi->oxcf.noise_sensitivity) ||
-       compute_source_sad))
+       cpi->compute_source_sad_onepass))
     cpi->Last_Source =
         vp9_scale_if_required(cm, cpi->unscaled_last_source,
                               &cpi->scaled_last_source, (cpi->oxcf.pass == 0));
+
+  if (cpi->Last_Source == NULL ||
+      cpi->Last_Source->y_width != cpi->Source->y_width ||
+      cpi->Last_Source->y_height != cpi->Source->y_height)
+    cpi->compute_source_sad_onepass = 0;
 
   if (cm->frame_type == KEY_FRAME || cpi->resize_pending != 0) {
     memset(cpi->consec_zero_mv, 0,
@@ -3178,15 +3179,13 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
 
   vp9_update_noise_estimate(cpi);
 
-  // Compute source_sad if the flag compute_source_sad is set, and
-  // only for 1 pass realtime speed >= 5 with show_frame = 1.
-  // TODO(jianj): Look into removing the condition on resize_state,
-  // and improving these conditions (i.e., better handle SVC case and combine
-  // them with condition above in compute_source_sad).
-  if (cpi->oxcf.pass == 0 && cpi->oxcf.mode == REALTIME &&
-      cpi->oxcf.speed >= 5 && cpi->resize_state == ORIG && compute_source_sad &&
-      cm->show_frame)
-    vp9_avg_source_sad(cpi);
+  // Scene detection is used for VBR mode or screen-content case.
+  // Make sure compute_source_sad_onepass is set (which handles SVC case
+  // and dynamic resize).
+  if (cpi->compute_source_sad_onepass &&
+      (cpi->oxcf.rc_mode == VPX_VBR ||
+       cpi->oxcf.content == VP9E_CONTENT_SCREEN))
+    vp9_scene_detection_onepass(cpi);
 
   // For 1 pass SVC, since only ZEROMV is allowed for upsampled reference
   // frame (i.e, svc->force_zero_mode_spatial_ref = 0), we can avoid this

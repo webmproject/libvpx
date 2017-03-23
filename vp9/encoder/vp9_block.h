@@ -175,6 +175,10 @@ struct macroblock {
 
   uint8_t last_sb_high_content;
 
+  // For each superblock: saves the content value (e.g., low/high sad/sumdiff)
+  // based on source sad, prior to encoding the frame.
+  uint8_t content_state_sb;
+
   // Used to save the status of whether a block has a low variance in
   // choose_partitioning. 0 for 64x64, 1~2 for 64x32, 3~4 for 32x64, 5~8 for
   // 32x32, 9~24 for 16x16.
