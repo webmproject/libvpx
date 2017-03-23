@@ -11,10 +11,10 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "./vp9_rtcd.h"
-
 #include "test/acm_random.h"
 #include "test/buffer.h"
 #include "test/register_state_check.h"
+#include "vpx_ports/vpx_timer.h"
 
 namespace {
 
@@ -115,9 +115,50 @@ class TemporalFilterTest : public ::testing::TestWithParam<TemporalFilterFunc> {
   ACMRandom rnd_;
 };
 
+TEST_P(TemporalFilterTest, SizeCombinations) {
+  // Depending on subsampling this function may be called with values of 8 or 16
+  // for width and height, in any combination.
+  Buffer<uint8_t> a = Buffer<uint8_t>(16, 16, 8);
+
+  const int filter_weight = 2;
+  const int filter_strength = 6;
+
+  for (int width = 8; width <= 16; width += 8) {
+    for (int height = 8; height <= 16; height += 8) {
+      // The second buffer must not have any border.
+      Buffer<uint8_t> b = Buffer<uint8_t>(width, height, 0);
+      Buffer<unsigned int> accum_ref = Buffer<unsigned int>(width, height, 0);
+      Buffer<unsigned int> accum_chk = Buffer<unsigned int>(width, height, 0);
+      Buffer<uint16_t> count_ref = Buffer<uint16_t>(width, height, 0);
+      Buffer<uint16_t> count_chk = Buffer<uint16_t>(width, height, 0);
+
+      a.Set(&rnd_, &ACMRandom::Rand8);
+      b.Set(&rnd_, &ACMRandom::Rand8);
+
+      accum_ref.Set(rnd_.Rand8());
+      accum_chk.CopyFrom(accum_ref);
+      count_ref.Set(rnd_.Rand8());
+      count_chk.CopyFrom(count_ref);
+      reference_filter(a, b, width, height, filter_strength, filter_weight,
+                       &accum_ref, &count_ref);
+      filter_func_(a.TopLeftPixel(), a.stride(), b.TopLeftPixel(), width,
+                   height, filter_strength, filter_weight,
+                   accum_chk.TopLeftPixel(), count_chk.TopLeftPixel());
+      EXPECT_TRUE(accum_chk.CheckValues(accum_ref));
+      EXPECT_TRUE(count_chk.CheckValues(count_ref));
+      if (HasFailure()) {
+        printf("Width: %d Height: %d\n", width, height);
+        count_chk.PrintDifference(count_ref);
+        accum_chk.PrintDifference(accum_ref);
+        ASSERT_TRUE(false);
+      }
+    }
+  }
+}
+
 TEST_P(TemporalFilterTest, CompareReferenceRandom) {
-  const int width = 24;
-  const int height = 32;
+  const int width = 16;
+  const int height = 16;
   Buffer<uint8_t> a = Buffer<uint8_t>(width, height, 8);
   // The second buffer must not have any border.
   Buffer<uint8_t> b = Buffer<uint8_t>(width, height, 0);
@@ -129,8 +170,8 @@ TEST_P(TemporalFilterTest, CompareReferenceRandom) {
   a.Set(&rnd_, &ACMRandom::Rand8);
   b.Set(&rnd_, &ACMRandom::Rand8);
 
-  for (int filter_strength = 0; filter_strength < 10; ++filter_strength) {
-    for (int filter_weight = 0; filter_weight < 10; ++filter_weight) {
+  for (int filter_strength = 0; filter_strength <= 6; ++filter_strength) {
+    for (int filter_weight = 0; filter_weight <= 2; ++filter_weight) {
       accum_ref.Set(rnd_.Rand8());
       accum_chk.CopyFrom(accum_ref);
       count_ref.Set(rnd_.Rand8());
@@ -140,8 +181,51 @@ TEST_P(TemporalFilterTest, CompareReferenceRandom) {
       filter_func_(a.TopLeftPixel(), a.stride(), b.TopLeftPixel(), width,
                    height, filter_strength, filter_weight,
                    accum_chk.TopLeftPixel(), count_chk.TopLeftPixel());
-      ASSERT_TRUE(accum_chk.CheckValues(accum_ref));
-      ASSERT_TRUE(count_chk.CheckValues(count_ref));
+      EXPECT_TRUE(accum_chk.CheckValues(accum_ref));
+      EXPECT_TRUE(count_chk.CheckValues(count_ref));
+      if (HasFailure()) {
+        printf("Weight: %d Strength: %d\n", filter_weight, filter_strength);
+        count_chk.PrintDifference(count_ref);
+        accum_chk.PrintDifference(accum_ref);
+        ASSERT_TRUE(false);
+      }
+    }
+  }
+}
+
+TEST_P(TemporalFilterTest, DISABLED_Speed) {
+  Buffer<uint8_t> a = Buffer<uint8_t>(16, 16, 8);
+
+  const int filter_weight = 2;
+  const int filter_strength = 6;
+
+  for (int width = 8; width <= 16; width += 8) {
+    for (int height = 8; height <= 16; height += 8) {
+      // The second buffer must not have any border.
+      Buffer<uint8_t> b = Buffer<uint8_t>(width, height, 0);
+      Buffer<unsigned int> accum_ref = Buffer<unsigned int>(width, height, 0);
+      Buffer<unsigned int> accum_chk = Buffer<unsigned int>(width, height, 0);
+      Buffer<uint16_t> count_ref = Buffer<uint16_t>(width, height, 0);
+      Buffer<uint16_t> count_chk = Buffer<uint16_t>(width, height, 0);
+
+      a.Set(&rnd_, &ACMRandom::Rand8);
+      b.Set(&rnd_, &ACMRandom::Rand8);
+
+      accum_chk.Set(0);
+      count_chk.Set(0);
+
+      vpx_usec_timer timer;
+      vpx_usec_timer_start(&timer);
+      for (int i = 0; i < 10000; ++i) {
+        filter_func_(a.TopLeftPixel(), a.stride(), b.TopLeftPixel(), width,
+                     height, filter_strength, filter_weight,
+                     accum_chk.TopLeftPixel(), count_chk.TopLeftPixel());
+      }
+      vpx_usec_timer_mark(&timer);
+      const int elapsed_time =
+          static_cast<int>(vpx_usec_timer_elapsed(&timer) / 1000);
+      printf("Temporal filter %dx%d time: %5d ms\n", width, height,
+             elapsed_time);
     }
   }
 }
@@ -150,9 +234,9 @@ INSTANTIATE_TEST_CASE_P(C, TemporalFilterTest,
                         ::testing::Values(&vp9_temporal_filter_apply_c));
 
 /* TODO(johannkoenig): https://bugs.chromium.org/p/webm/issues/detail?id=1378
-#if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(SSE2, TemporalFilterTest,
-                        ::testing::Values(&vp9_temporal_filter_apply_sse2));
-#endif  // HAVE_SSE2
+#if HAVE_SSE4_1
+INSTANTIATE_TEST_CASE_P(SSE4_1, TemporalFilterTest,
+                        ::testing::Values(&vp9_temporal_filter_apply_sse4_1));
+#endif  // HAVE_SSE4_1
 */
 }  // namespace
