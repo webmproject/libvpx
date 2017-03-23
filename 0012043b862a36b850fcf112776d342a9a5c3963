@@ -22,6 +22,46 @@
       "revId": "0012043b862a36b850fcf112776d342a9a5c3963",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e6c2e0d8_f6d5b970",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-23T06:08:27Z",
+      "side": 1,
+      "message": "split out the simple copy/avg to their own commit to keep the review size down. For reference:\nhttps://bugs.chromium.org/p/webm/issues/detail?id\u003d1299",
+      "revId": "0012043b862a36b850fcf112776d342a9a5c3963",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5a1b432f_90830749",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-23T06:08:27Z",
+      "side": 1,
+      "message": "2017",
+      "range": {
+        "startLine": 2,
+        "startChar": 18,
+        "endLine": 2,
+        "endChar": 22
+      },
+      "revId": "0012043b862a36b850fcf112776d342a9a5c3963",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
