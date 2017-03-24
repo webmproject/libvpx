@@ -16,6 +16,29 @@
       "revId": "0d3c3d3ce74c3a1c30c8bc17f3389ac19e1ace5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8f3ace61_4a97bdc9",
+        "filename": "vp9/common/x86/vp9_high_subpixel_bilinear_sse2.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-03-24T20:30:04Z",
+      "side": 1,
+      "message": "Hi Peter,\n\nIs there any specific reason that we have to define ARCH_X86_64 here?  \n\nFollowing 4 functions are defined under x86-64:\nvp9_high_filter_block1d8_v2_sse2\nvp9_high_filter_block1d8_h2_sse2\nvp9_high_filter_block1d16_v2_sse2\nvp9_high_filter_block1d16_h2_sse2\n\nFollowing 2 functions are not:\nvp9_high_filter_block1d4_v2_sse2\nvp9_high_filter_block1d4_h2_sse2",
+      "range": {
+        "startLine": 198,
+        "startChar": 0,
+        "endLine": 198,
+        "endChar": 15
+      },
+      "revId": "0d3c3d3ce74c3a1c30c8bc17f3389ac19e1ace5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
