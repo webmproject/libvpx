@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "654879da_7197c4cb",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 3184,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-03-24T16:55:57Z",
+      "side": 1,
+      "message": "Can you make a comment about when source_sad is computed? \n\nCurrently we have almost 10+ conditions involved in computing source sad. Every time I look at the conditions, I\u0027m confused and need spend a few minutes to know what\u0027s happening.",
+      "range": {
+        "startLine": 3184,
+        "startChar": 4,
+        "endLine": 3184,
+        "endChar": 22
+      },
+      "revId": "a0b4971dd73e6400ff127d7bfa548617d1d220a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
