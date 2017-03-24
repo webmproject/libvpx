@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e7d58dce_1bc4b111",
+        "filename": "test/comp_avg_pred_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-24T22:59:26Z",
+      "side": 1,
+      "message": "I think if you make the params the long version the indices in the loop would be a bit more consistent with other code. x/y would make sense for those",
+      "range": {
+        "startLine": 31,
+        "startChar": 11,
+        "endLine": 31,
+        "endChar": 17
+      },
+      "revId": "9a5adbf529b7e15a7ea29e90ddaa669171bbfc21",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aa9a4cce_4207def5",
+        "filename": "test/comp_avg_pred_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-24T22:59:26Z",
+      "side": 1,
+      "message": "ASM_REGISTER_STATE_CHECK",
+      "revId": "9a5adbf529b7e15a7ea29e90ddaa669171bbfc21",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0dabcf8e_a5f3f8fd",
+        "filename": "test/comp_avg_pred_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-24T22:59:26Z",
+      "side": 1,
+      "message": "just return, the failure would already have been logged, no need for more noise",
+      "revId": "9a5adbf529b7e15a7ea29e90ddaa669171bbfc21",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c8a1f0db_9e0a803e",
+        "filename": "test/test.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-24T22:59:26Z",
+      "side": 1,
+      "message": "move this after line 152 to keep the sort order",
+      "revId": "9a5adbf529b7e15a7ea29e90ddaa669171bbfc21",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
