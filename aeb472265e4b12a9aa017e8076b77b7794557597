@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "076828dc_14823484",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-03-24T15:57:38Z",
+      "side": 1,
+      "message": "I agree that we should use MAX_FULL_PEL_VAL*8 in min/max mv calculation, and this is also consistent with the full-pixel search. Please make the change, and move this calculation to a separate function to reduce duplicate code. I will run the quality test after you upload the new patch to see if there is any impact to the quality. Thanks!",
+      "parentUuid": "16d94587_14373a3f",
+      "range": {
+        "startLine": 292,
+        "startChar": 31,
+        "endLine": 292,
+        "endChar": 32
+      },
+      "revId": "aeb472265e4b12a9aa017e8076b77b7794557597",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "81ba61f6_44b75754",
         "filename": "vp9/encoder/vp9_mcomp.c",
         "patchSetId": 1
