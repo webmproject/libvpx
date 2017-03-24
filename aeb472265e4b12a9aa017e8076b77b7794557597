@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "16d94587_14373a3f",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-03-24T15:31:52Z",
+      "side": 1,
+      "message": "We see that following are constraints that are typically imposed on MVs in encoder.\n1. Limitation of MV to UMV borders\n2. Limitation of MV based on MV_LOW and MV_UPP\n3. Limitation of sub-pel MV difference to MAX_FULL_PEL_VAL*8\n4. Limitation of sub-pel MV difference to MV_MAX (As MV_MAX \u003e MAX_FULL_PEL_VAL*8, 4th condition may not be required)\n\nWe see that constraints 1 and 2 are from VP9 standard. \nHowever we don\u0027t see any code related to constraints 3 and 4 in decoder. As per our understanding, these limitations are coming from the implementation of encoder.\n\nBased on above, replacing MV_MAX with MAX_FULL_PEL_VAL*8 in calculation of minc, minr,maxc and maxr should take care of all the constraints.  This will be in agreement with vp9_set_mv_search_range function as well (it is not using MV_MAX for limiting MV).  Hence the final code will be quite similar to above.\n\nPlease let us know if you still feel that nested macros should be moved to a separate function.",
+      "parentUuid": "7d197e8f_a93e0307",
+      "range": {
+        "startLine": 292,
+        "startChar": 31,
+        "endLine": 292,
+        "endChar": 32
+      },
+      "revId": "aeb472265e4b12a9aa017e8076b77b7794557597",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "81ba61f6_44b75754",
         "filename": "vp9/encoder/vp9_mcomp.c",
         "patchSetId": 1
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "Yes. There is some inconsistency between the condition used here and the min/max mv calculation above. Did you see any performance difference(improvement) when using what you suggested?",
       "parentUuid": "81ba61f6_44b75754",
+      "range": {
+        "startLine": 774,
+        "startChar": 41,
+        "endLine": 774,
+        "endChar": 57
+      },
+      "revId": "aeb472265e4b12a9aa017e8076b77b7794557597",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "afa2bd37_6d3d0d86",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 774,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-03-24T15:31:52Z",
+      "side": 1,
+      "message": "From the code review, we felt that taking care of these constrains during calculation of limits is recommended. We have not done any quality analysis using the same.",
+      "parentUuid": "fcb84260_d6e5f38d",
       "range": {
         "startLine": 774,
         "startChar": 41,
