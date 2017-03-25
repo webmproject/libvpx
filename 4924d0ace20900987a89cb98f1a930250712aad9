@@ -212,6 +212,30 @@
     },
     {
       "key": {
+        "uuid": "14e71ed2_1cc3a864",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-25T01:38:57Z",
+      "side": 1,
+      "message": "\u003e This is true. I ran into problems because the result fits in unsigned 16 bits, but I was still trying to use epi16. Switched to epu16 and managed to keep things in check.\n\u003e \n\u003e However, I believe saturating to 8 bits would work as well. Unfortunately there is no instruction to saturate *unsigned* 16 bit values to 8 bits (or maybe I didn\u0027t look hard enough?)\n\ndo you mean _mm_packus_epi16? (compare to _mm_packs_epi16) or some other op?",
+      "parentUuid": "35c0d3c7_df09e052",
+      "range": {
+        "startLine": 24,
+        "startChar": 19,
+        "endLine": 24,
+        "endChar": 25
+      },
+      "revId": "4924d0ace20900987a89cb98f1a930250712aad9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0eb71bad_17b9699e",
         "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
         "patchSetId": 1
