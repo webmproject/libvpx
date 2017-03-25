@@ -31,7 +31,7 @@ void vp8_init_intra4x4_predictors_internal(void) {
   pred[B_LD_PRED] = vpx_d45e_predictor_4x4;
   pred[B_RD_PRED] = vpx_d135_predictor_4x4;
   pred[B_VR_PRED] = vpx_d117_predictor_4x4;
-  pred[B_VL_PRED] = vpx_d63f_predictor_4x4;
+  pred[B_VL_PRED] = vpx_d63e_predictor_4x4;
   pred[B_HD_PRED] = vpx_d153_predictor_4x4;
   pred[B_HU_PRED] = vpx_d207_predictor_4x4;
 }

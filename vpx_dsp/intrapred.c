@@ -319,7 +319,7 @@ void vpx_d63_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
   DST(3, 3) = AVG3(E, F, G);  // differs from vp8
 }
 
-void vpx_d63f_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
+void vpx_d63e_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
                               const uint8_t *above, const uint8_t *left) {
   const int A = above[0];
   const int B = above[1];
