@@ -42,23 +42,6 @@ static INLINE void d207_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
       dst[r * stride + c] = dst[(r + 1) * stride + c - 2];
 }
 
-#if CONFIG_MISC_FIXES
-static INLINE void d207e_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
-                                   const uint8_t *above, const uint8_t *left) {
-  int r, c;
-  (void)above;
-
-  for (r = 0; r < bs; ++r) {
-    for (c = 0; c < bs; ++c) {
-      dst[c] = c & 1 ? AVG3(left[(c >> 1) + r], left[(c >> 1) + r + 1],
-                            left[(c >> 1) + r + 2])
-                     : AVG2(left[(c >> 1) + r], left[(c >> 1) + r + 1]);
-    }
-    dst += stride;
-  }
-}
-#endif  // CONFIG_MISC_FIXES
-
 static INLINE void d63_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                  const uint8_t *above, const uint8_t *left) {
   int r, c;
@@ -75,22 +58,6 @@ static INLINE void d63_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
     memset(dst + (r + 1) * stride + size, above[bs - 1], bs - size);
   }
 }
-
-#if CONFIG_MISC_FIXES
-static INLINE void d63e_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
-                                  const uint8_t *above, const uint8_t *left) {
-  int r, c;
-  (void)left;
-  for (r = 0; r < bs; ++r) {
-    for (c = 0; c < bs; ++c) {
-      dst[c] = r & 1 ? AVG3(above[(r >> 1) + c], above[(r >> 1) + c + 1],
-                            above[(r >> 1) + c + 2])
-                     : AVG2(above[(r >> 1) + c], above[(r >> 1) + c + 1]);
-    }
-    dst += stride;
-  }
-}
-#endif  // CONFIG_MISC_FIXES
 
 static INLINE void d45_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                  const uint8_t *above, const uint8_t *left) {
@@ -110,21 +77,6 @@ static INLINE void d45_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
     dst += stride;
   }
 }
-
-#if CONFIG_MISC_FIXES
-static INLINE void d45e_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
-                                  const uint8_t *above, const uint8_t *left) {
-  int r, c;
-  (void)left;
-  for (r = 0; r < bs; ++r) {
-    for (c = 0; c < bs; ++c) {
-      dst[c] = AVG3(above[r + c], above[r + c + 1],
-                    above[r + c + 1 + (r + c + 2 < bs * 2)]);
-    }
-    dst += stride;
-  }
-}
-#endif  // CONFIG_MISC_FIXES
 
 static INLINE void d117_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                   const uint8_t *above, const uint8_t *left) {
@@ -533,25 +485,6 @@ static INLINE void highbd_d207_predictor(uint16_t *dst, ptrdiff_t stride,
   }
 }
 
-#if CONFIG_MISC_FIXES
-static INLINE void highbd_d207e_predictor(uint16_t *dst, ptrdiff_t stride,
-                                          int bs, const uint16_t *above,
-                                          const uint16_t *left, int bd) {
-  int r, c;
-  (void)above;
-  (void)bd;
-
-  for (r = 0; r < bs; ++r) {
-    for (c = 0; c < bs; ++c) {
-      dst[c] = c & 1 ? AVG3(left[(c >> 1) + r], left[(c >> 1) + r + 1],
-                            left[(c >> 1) + r + 2])
-                     : AVG2(left[(c >> 1) + r], left[(c >> 1) + r + 1]);
-    }
-    dst += stride;
-  }
-}
-#endif  // CONFIG_MISC_FIXES
-
 static INLINE void highbd_d63_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
                                         const uint16_t *above,
                                         const uint16_t *left, int bd) {
@@ -568,8 +501,6 @@ static INLINE void highbd_d63_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
   }
 }
 
-#define highbd_d63e_predictor highbd_d63_predictor
-
 static INLINE void highbd_d45_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
                                         const uint16_t *above,
                                         const uint16_t *left, int bd) {
@@ -585,23 +516,6 @@ static INLINE void highbd_d45_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
     dst += stride;
   }
 }
-
-#if CONFIG_MISC_FIXES
-static INLINE void highbd_d45e_predictor(uint16_t *dst, ptrdiff_t stride,
-                                         int bs, const uint16_t *above,
-                                         const uint16_t *left, int bd) {
-  int r, c;
-  (void)left;
-  (void)bd;
-  for (r = 0; r < bs; ++r) {
-    for (c = 0; c < bs; ++c) {
-      dst[c] = AVG3(above[r + c], above[r + c + 1],
-                    above[r + c + 1 + (r + c + 2 < bs * 2)]);
-    }
-    dst += stride;
-  }
-}
-#endif  // CONFIG_MISC_FIXES
 
 static INLINE void highbd_d117_predictor(uint16_t *dst, ptrdiff_t stride,
                                          int bs, const uint16_t *above,
@@ -832,11 +746,6 @@ static INLINE void highbd_dc_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
 intra_pred_no_4x4(d207)
 intra_pred_no_4x4(d63)
 intra_pred_no_4x4(d45)
-#if CONFIG_MISC_FIXES
-intra_pred_allsizes(d207e)
-intra_pred_allsizes(d63e)
-intra_pred_no_4x4(d45e)
-#endif
 intra_pred_no_4x4(d117)
 intra_pred_no_4x4(d135)
 intra_pred_no_4x4(d153)
