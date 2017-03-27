@@ -22,6 +22,30 @@
       "revId": "f89884a20c4ce3d0760a32c085011eea785778f0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f2239bca_ba066a24",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 3094,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-03-27T16:05:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "092904b2_51dd939f",
+      "range": {
+        "startLine": 3094,
+        "startChar": 22,
+        "endLine": 3094,
+        "endChar": 24
+      },
+      "revId": "f89884a20c4ce3d0760a32c085011eea785778f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
