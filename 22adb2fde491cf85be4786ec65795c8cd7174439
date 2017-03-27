@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f0dac30b_44b3a1f7",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-03-27T16:55:21Z",
+      "side": 1,
+      "message": "Please see the comment in mcomp.c. This can be local variable.",
+      "range": {
+        "startLine": 122,
+        "startChar": 2,
+        "endLine": 122,
+        "endChar": 31
+      },
+      "revId": "22adb2fde491cf85be4786ec65795c8cd7174439",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b17e8e6c_4a492c90",
+        "filename": "vp9/encoder/vp9_mbgraph.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-03-27T16:55:21Z",
+      "side": 1,
+      "message": "Thanks for correcting it.",
+      "range": {
+        "startLine": 52,
+        "startChar": 2,
+        "endLine": 53,
+        "endChar": 31
+      },
+      "revId": "22adb2fde491cf85be4786ec65795c8cd7174439",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7608e29c_016330cc",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-03-27T16:55:21Z",
+      "side": 1,
+      "message": "Sorry that I didn\u0027t explain it clearly. It might be better to call vp9_set_subpel_mv_search_range()  here in sub-pixel search function, and also keep sub_pixel mv limits as local variables here instead of a member in MACROBLOCK struct.",
+      "range": {
+        "startLine": 308,
+        "startChar": 2,
+        "endLine": 311,
+        "endChar": 60
+      },
+      "revId": "22adb2fde491cf85be4786ec65795c8cd7174439",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "22a766fa_b8fe1693",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 661,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-03-27T16:55:21Z",
+      "side": 1,
+      "message": "same as above",
+      "range": {
+        "startLine": 658,
+        "startChar": 2,
+        "endLine": 661,
+        "endChar": 50
+      },
+      "revId": "22adb2fde491cf85be4786ec65795c8cd7174439",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
