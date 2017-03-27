@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4c86decc_674f4745",
+        "filename": "vp9/encoder/x86/temporal_filter_ssse3.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-03-27T16:53:11Z",
+      "side": 1,
+      "message": "Unify to C function which uses i as iterator.",
+      "range": {
+        "startLine": 109,
+        "startChar": 2,
+        "endLine": 109,
+        "endChar": 38
+      },
+      "revId": "dd8357dda12425f0798caa6a175efcc24dbd09db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ad3288c5_23454325",
+        "filename": "vp9/encoder/x86/temporal_filter_ssse3.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-03-27T16:53:11Z",
+      "side": 1,
+      "message": "((uint32_t)sum_row[i] * 21845) \u003e\u003e 16 would be closer to /3.",
+      "range": {
+        "startLine": 157,
+        "startChar": 8,
+        "endLine": 157,
+        "endChar": 51
+      },
+      "revId": "dd8357dda12425f0798caa6a175efcc24dbd09db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
