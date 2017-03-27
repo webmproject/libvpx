@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "23bae000_13526202",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 9
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-03-27T16:23:19Z",
+      "side": 1,
+      "message": "It\u0027s better to write the reason why we move that (i.e. to make computation of source_sad multithreaded) such that we\u0027re not confused by our own CL when we look back in the future.",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 8,
+        "endChar": 0
+      },
+      "revId": "e77a46a8162ffb8619bf890d8e61aae8475ef43e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
