@@ -236,6 +236,30 @@
     },
     {
       "key": {
+        "uuid": "6b06f501_63461707",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-27T18:44:05Z",
+      "side": 1,
+      "message": "_mm_packus_epi16 still takes *signed* 16 bit values. It needs to go from *unsigned* 16 to *unsigned* 8\n\nmaybe i could go up to 32 bits, then pack to signed 16 (don\u0027t need that much precision), then go to unsigned 8",
+      "parentUuid": "14e71ed2_1cc3a864",
+      "range": {
+        "startLine": 24,
+        "startChar": 19,
+        "endLine": 24,
+        "endChar": 25
+      },
+      "revId": "4924d0ace20900987a89cb98f1a930250712aad9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0eb71bad_17b9699e",
         "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
         "patchSetId": 1
@@ -379,6 +403,24 @@
       "writtenOn": "2017-03-22T18:25:06Z",
       "side": 1,
       "message": "If block_width/block_height can only be 8 and 16, then num_values can be read from a pre-calculated const table to reduce if... else....",
+      "revId": "4924d0ace20900987a89cb98f1a930250712aad9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4cab55e5_6f018d8b",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-27T18:44:05Z",
+      "side": 1,
+      "message": "Yup, that\u0027s possible to do. I was waiting until I had a good constant for the multiply/shift",
+      "parentUuid": "16c6126f_f41ab02c",
       "revId": "4924d0ace20900987a89cb98f1a930250712aad9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
