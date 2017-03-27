@@ -63,6 +63,30 @@
       "revId": "0d3c3d3ce74c3a1c30c8bc17f3389ac19e1ace5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "56103a1e_6d0cff73",
+        "filename": "vp9/common/x86/vp9_high_subpixel_bilinear_sse2.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-03-27T16:39:36Z",
+      "side": 1,
+      "message": "I see.  I will write avx2 intrinsics version to deal with both 32-bit and 64-bit.  But if we have 32-bit assembly sse2, then we have more code flexibility for the caller functions.  Thanks.",
+      "parentUuid": "38be0123_d35f85f6",
+      "range": {
+        "startLine": 198,
+        "startChar": 0,
+        "endLine": 198,
+        "endChar": 15
+      },
+      "revId": "0d3c3d3ce74c3a1c30c8bc17f3389ac19e1ace5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
