@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cb7ace43_237d28f5",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-03-28T22:56:50Z",
+      "side": 1,
+      "message": "It would be more clear that the above full pixel MV limit calculation is done in a separate patch.",
+      "range": {
+        "startLine": 236,
+        "startChar": 2,
+        "endLine": 249,
+        "endChar": 69
+      },
+      "revId": "ae30fb89b04b5ef0b5a17c3612f29229b342db99",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b3f0b8fc_a7cc7e71",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-03-28T22:56:50Z",
+      "side": 1,
+      "message": "same as above",
+      "range": {
+        "startLine": 267,
+        "startChar": 2,
+        "endLine": 268,
+        "endChar": 31
+      },
+      "revId": "ae30fb89b04b5ef0b5a17c3612f29229b342db99",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c11de563_af9b219f",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-03-28T22:56:50Z",
+      "side": 1,
+      "message": "Here, best_ref_mv1 is always 0. In original sub-pixel search, resulted mv is limited by MAX_FULL_PEL_VAL\u003c\u003c3, which is tighter than MV_LOW \u0026 MV_UPP. So, I think it is ok to use vp9_set_subpel_mv_search_range() here. In that way, we can call vp9_set_subpel_mv_search_range() in sub-pixel search function. One disadvantage of leaving this outside of sub-pixel search function is that people would forget to include this call when they write new code to call sub-pixel search function. It happens.",
+      "range": {
+        "startLine": 270,
+        "startChar": 1,
+        "endLine": 289,
+        "endChar": 45
+      },
+      "revId": "ae30fb89b04b5ef0b5a17c3612f29229b342db99",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}

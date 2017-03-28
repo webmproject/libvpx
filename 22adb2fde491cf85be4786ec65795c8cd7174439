@@ -95,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "a50e1fe1_d39b732a",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-03-28T22:56:50Z",
+      "side": 1,
+      "message": "I added comments in temporal filter file. For temporal filter, if found mv is very large, it might end up with a large err, then it might not be used anyway. The original sub-pixel search put a tight limit for temporal filter(MAX_FULL_PEL_VAL * 8), that may not be a bad thing. Calling vp9_set_subpel_mv_search_range() here makes the code more clear, and we get the same performance as the original code. I think this is ok.",
+      "parentUuid": "aae43283_98fea5c0",
+      "range": {
+        "startLine": 308,
+        "startChar": 2,
+        "endLine": 311,
+        "endChar": 60
+      },
+      "revId": "22adb2fde491cf85be4786ec65795c8cd7174439",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "22a766fa_b8fe1693",
         "filename": "vp9/encoder/vp9_mcomp.c",
         "patchSetId": 2
