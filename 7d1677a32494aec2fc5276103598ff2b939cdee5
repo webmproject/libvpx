@@ -16,6 +16,24 @@
       "revId": "7d1677a32494aec2fc5276103598ff2b939cdee5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a6ed01d5_9f8e1420",
+        "filename": "test/convolve_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 1084,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-03-28T22:53:10Z",
+      "side": 1,
+      "message": "After clarifying with James, it should be \"we\u0027ll call the non _highbd versions with CONFIG_VP9_HIGHBITDEPTH\u003d1\".  Therefore other blocks also have this same issue.",
+      "parentUuid": "097d45fc_a9c049a8",
+      "revId": "7d1677a32494aec2fc5276103598ff2b939cdee5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
