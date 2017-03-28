@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <limits>
+
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "./vp9_rtcd.h"
@@ -139,8 +141,10 @@ TEST_P(TemporalFilterTest, SizeCombinations) {
       Buffer<uint16_t> count_chk = Buffer<uint16_t>(width, height, 0);
       ASSERT_TRUE(count_chk.Init());
 
-      a.Set(&rnd_, &ACMRandom::Rand8);
-      b.Set(&rnd_, &ACMRandom::Rand8);
+      // The difference between the buffers must be small to pass the threshold
+      // to apply the filter.
+      a.Set(&rnd_, 0, 7);
+      b.Set(&rnd_, 0, 7);
 
       accum_ref.Set(rnd_.Rand8());
       accum_chk.CopyFrom(accum_ref);
@@ -183,9 +187,17 @@ TEST_P(TemporalFilterTest, CompareReferenceRandom) {
 
       for (int filter_strength = 0; filter_strength <= 6; ++filter_strength) {
         for (int filter_weight = 0; filter_weight <= 2; ++filter_weight) {
-          for (int repeat = 0; repeat < 10; ++repeat) {
-            a.Set(&rnd_, &ACMRandom::Rand8);
-            b.Set(&rnd_, &ACMRandom::Rand8);
+          for (int repeat = 0; repeat < 100; ++repeat) {
+            if (repeat < 50) {
+              a.Set(&rnd_, 0, 7);
+              b.Set(&rnd_, 0, 7);
+            } else {
+              // Check large (but close) values as well.
+              a.Set(&rnd_, std::numeric_limits<uint8_t>::max() - 7,
+                    std::numeric_limits<uint8_t>::max());
+              b.Set(&rnd_, std::numeric_limits<uint8_t>::max() - 7,
+                    std::numeric_limits<uint8_t>::max());
+            }
 
             accum_ref.Set(rnd_.Rand8());
             accum_chk.CopyFrom(accum_ref);
@@ -234,8 +246,8 @@ TEST_P(TemporalFilterTest, DISABLED_Speed) {
       Buffer<uint16_t> count_chk = Buffer<uint16_t>(width, height, 0);
       ASSERT_TRUE(count_chk.Init());
 
-      a.Set(&rnd_, &ACMRandom::Rand8);
-      b.Set(&rnd_, &ACMRandom::Rand8);
+      a.Set(&rnd_, 0, 7);
+      b.Set(&rnd_, 0, 7);
 
       accum_chk.Set(0);
       count_chk.Set(0);
