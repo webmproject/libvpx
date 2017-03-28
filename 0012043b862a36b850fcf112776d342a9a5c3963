@@ -84,6 +84,24 @@
     },
     {
       "key": {
+        "uuid": "a2bcc929_cee52944",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-28T19:31:25Z",
+      "side": 1,
+      "message": "\u003e Done\n\nI meant comp/avg could land first as they\u0027re simpler to review and least likely to have issues",
+      "parentUuid": "c8c53027_848db936",
+      "revId": "0012043b862a36b850fcf112776d342a9a5c3963",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5a1b432f_90830749",
         "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
         "patchSetId": 4
