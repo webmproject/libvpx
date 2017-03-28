@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d4de0134_7f156745",
+        "filename": "test/comp_avg_pred_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-28T21:12:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "804c5a5c_e0c475f5",
+      "range": {
+        "startLine": 148,
+        "startChar": 56,
+        "endLine": 148,
+        "endChar": 61
+      },
+      "revId": "a6ef885262138ac850e65da4999dd9451332cb13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e8d8fab4_e49dae0a",
         "filename": "test/test.mk",
         "patchSetId": 3
@@ -36,6 +60,24 @@
       "writtenOn": "2017-03-28T19:28:04Z",
       "side": 1,
       "message": "after avg_test.cc, no?",
+      "revId": "a6ef885262138ac850e65da4999dd9451332cb13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "045c4e62_d32486dc",
+        "filename": "test/test.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-28T21:12:20Z",
+      "side": 1,
+      "message": "A\nB\nD\nC\n\nNo, I think I got it right",
+      "parentUuid": "e8d8fab4_e49dae0a",
       "revId": "a6ef885262138ac850e65da4999dd9451332cb13",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
