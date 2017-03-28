@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "804c5a5c_e0c475f5",
+        "filename": "test/comp_avg_pred_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-28T19:28:04Z",
+      "side": 1,
+      "message": "doesn\u0027t matter since it\u0027s disabled, but the format of this function could match the _c",
+      "range": {
+        "startLine": 148,
+        "startChar": 56,
+        "endLine": 148,
+        "endChar": 61
+      },
+      "revId": "a6ef885262138ac850e65da4999dd9451332cb13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e8d8fab4_e49dae0a",
+        "filename": "test/test.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-28T19:28:04Z",
+      "side": 1,
+      "message": "after avg_test.cc, no?",
+      "revId": "a6ef885262138ac850e65da4999dd9451332cb13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
