@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "aae43283_98fea5c0",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-03-28T13:49:32Z",
+      "side": 1,
+      "message": "In case of ARNR filtering, we see that there need not be any other limitations on MVs except the UMV border based limits and MV_MAX based limits. To facilitate above, we feel that call to vp9_set_subpel_mv_search_range() should be outside the find_fractional_mv_step().\nIn earlier versions,  only UMV border based limits were imposed in case of full pel ME, but all other limits were forced in case of sub-pel ME (which should not be the case as per our understanding). Hence we pushed another patch which ensures only UMV border based limits and MV_MAX based limits in case of temporal filtering.\nPlease let us know your comments on our understanding.",
+      "parentUuid": "7608e29c_016330cc",
+      "range": {
+        "startLine": 308,
+        "startChar": 2,
+        "endLine": 311,
+        "endChar": 60
+      },
+      "revId": "22adb2fde491cf85be4786ec65795c8cd7174439",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "22a766fa_b8fe1693",
         "filename": "vp9/encoder/vp9_mcomp.c",
         "patchSetId": 2
