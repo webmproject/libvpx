@@ -22,6 +22,30 @@
       "revId": "9a28d9a9973dfa2436a92a0b3d5c425a5c703272",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2e1eceac_4d2b134b",
+        "filename": "test/acm_random.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-28T23:04:21Z",
+      "side": 1,
+      "message": "Oh shoot yeah the mask is the opposite bits of what I want.\n\nI\u0027d like a Rand function to pass to the Buffer though ...",
+      "parentUuid": "9a9214d9_be156b4f",
+      "range": {
+        "startLine": 49,
+        "startChar": 7,
+        "endLine": 49,
+        "endChar": 42
+      },
+      "revId": "9a28d9a9973dfa2436a92a0b3d5c425a5c703272",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
