@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "62248225_efda852d",
+        "filename": "vp9/encoder/x86/temporal_filter_ssse3.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-28T23:03:15Z",
+      "side": 1,
+      "message": "I wanted to set a row to 96, 64, 64, 64, 64, 64, 64, 96 (top/bottom row for 8 wide) and multiply the values, then shift them all at once, but first shift up so that shift + strength shift would saturate to 16. I don\u0027t think there are sufficient x86 instructions to do this, so this is pretty much the best I can do for now.",
+      "revId": "f8c2545c0cf210035d7bb4253cfde7bd91af126b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
