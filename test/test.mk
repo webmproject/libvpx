@@ -150,6 +150,7 @@ LIBVPX_TEST_SRCS-yes                   += vp9_intrapred_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += vp9_decrypt_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += vp9_thread_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += avg_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += comp_avg_pred_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += dct16x16_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += dct32x32_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct4x4_test.cc
