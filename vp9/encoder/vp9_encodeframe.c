@@ -3316,7 +3316,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, ThreadData *td,
     MODE_INFO **mi = cm->mi_grid_visible + idx_str;
 
     (*(cpi->row_mt_sync_read_ptr))(&tile_data->row_mt_sync, sb_row,
-                                   sb_col_in_tile - 1);
+                                   sb_col_in_tile);
 
     if (sf->adaptive_pred_interp_filter) {
       for (i = 0; i < 64; ++i) td->leaf_tree[i].pred_interp_filter = SWITCHABLE;
@@ -4094,7 +4094,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
     int seg_skip = 0;
 
     (*(cpi->row_mt_sync_read_ptr))(&tile_data->row_mt_sync, sb_row,
-                                   sb_col_in_tile - 1);
+                                   sb_col_in_tile);
 
     x->source_variance = UINT_MAX;
     vp9_zero(x->pred_mv);

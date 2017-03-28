@@ -884,7 +884,7 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
     const int mb_index = mb_row * cm->mb_cols + mb_col;
 #endif
 
-    (*(cpi->row_mt_sync_read_ptr))(&tile_data->row_mt_sync, mb_row, c - 1);
+    (*(cpi->row_mt_sync_read_ptr))(&tile_data->row_mt_sync, mb_row, c);
 
     // Adjust to the next column of MBs.
     x->plane[0].src.buf = cpi->Source->y_buffer +
