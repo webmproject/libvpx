@@ -3261,13 +3261,10 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     }
   }
 
-  // Update some stats from cyclic refresh, and check if we should not update
-  // golden reference, for non-SVC 1 pass CBR.
-  if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->frame_type != KEY_FRAME &&
-      !cpi->use_svc && cpi->ext_refresh_frame_flags_pending == 0 &&
-      (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR &&
-       !cpi->oxcf.gf_cbr_boost_pct))
-    vp9_cyclic_refresh_check_golden_update(cpi);
+  // Update some stats from cyclic refresh, and check for golden frame update.
+  if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled &&
+      cm->frame_type != KEY_FRAME)
+    vp9_cyclic_refresh_postencode(cpi);
 
   // Update the skip mb flag probabilities based on the distribution
   // seen in the last encoder iteration.
