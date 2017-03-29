@@ -2036,6 +2036,13 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
         !(cpi->ref_frame_flags & flag_list[GOLDEN_FRAME]) ||
         (!cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame &&
          svc_force_zero_mode[best_ref_frame - 1]);
+#if CONFIG_VP9_TEMPORAL_DENOISING
+    // TODO(marpan): Temporary fix to keep intra prediction on as we currently
+    // disallow golden as the (spatial) reference for SVC with denoising due to
+    // artifact issue, Remove this condition when artifact issue is resolved.
+    if (cpi->use_svc && cpi->oxcf.noise_sensitivity > 0 && denoise_svc_pickmode)
+      perform_intra_pred = 1;
+#endif
     inter_mode_thresh = (inter_mode_thresh << 1) + inter_mode_thresh;
   }
   if (cpi->oxcf.lag_in_frames > 0 && cpi->oxcf.rc_mode == VPX_VBR &&
