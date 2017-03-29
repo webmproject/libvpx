@@ -21,6 +21,8 @@
 #include "vp9/encoder/vp9_denoiser.h"
 #include "vp9/encoder/vp9_encoder.h"
 
+// OUTPUT_YUV_DENOISED
+
 #ifdef OUTPUT_YUV_DENOISED
 static void make_grayscale(YV12_BUFFER_CONFIG *yuv);
 #endif

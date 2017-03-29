@@ -4052,7 +4052,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
 #ifdef OUTPUT_YUV_DENOISED
-  if (oxcf->noise_sensitivity > 0) {
+  if (oxcf->noise_sensitivity > 0 && denoise_svc(cpi)) {
     vp9_write_yuv_frame_420(&cpi->denoiser.running_avg_y[INTRA_FRAME],
                             yuv_denoised_file);
   }
