@@ -262,7 +262,6 @@ EXPERIMENT_LIST="
     spatial_svc
     fp_mb_stats
     emulate_hardware
-    misc_fixes
 "
 CONFIG_LIST="
     dependency_tracking
