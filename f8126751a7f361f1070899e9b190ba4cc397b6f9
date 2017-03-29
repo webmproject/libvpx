@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fda148d1_4b2b15be",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-29T06:37:20Z",
+      "side": 1,
+      "message": "try to keep the subject \u003c 60 (or better, 50) characters:\n\n\u0027add AVX2 convolve copy/avg functions\u0027 should be enough",
+      "revId": "f8126751a7f361f1070899e9b190ba4cc397b6f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6046e417_4183e2ab",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-29T06:37:20Z",
+      "side": 1,
+      "message": "this doesn\u0027t make sense without context, you can drop it. if you have per-function timing or cycle reduction that would be better",
+      "revId": "f8126751a7f361f1070899e9b190ba4cc397b6f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4d63396a_a735b6a8",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-29T06:37:20Z",
+      "side": 1,
+      "message": "copy should be 4/8/16/32/64 I don\u0027t think you need the fallback, see highbd_vpx_convolve_copy_neon.c",
+      "revId": "f8126751a7f361f1070899e9b190ba4cc397b6f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "966967db_2842af49",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-29T06:37:20Z",
+      "side": 1,
+      "message": "any benefit in unrolling this a bit? the compiler won\u0027t be able to given height isn\u0027t a constant.",
+      "revId": "f8126751a7f361f1070899e9b190ba4cc397b6f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
