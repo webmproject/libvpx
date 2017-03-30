@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6bfd3875_e2e2acdb",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-03-30T15:23:39Z",
+      "side": 1,
+      "message": "As sub-pel MV limits (in case of temporal filtering) are made to match with that sub-pel ME during encoding stage, above checks are removed.  Instead of above, vp9_set_subpel_mv_search_range() call is added to ensure that limits in case of full-pel ME match with that of sub-pel ME. As similar code changes are made in other places, we feel that it is logical to have all these changes together.\n\nPlease let us know your thoughts.",
+      "parentUuid": "cb7ace43_237d28f5",
+      "range": {
+        "startLine": 236,
+        "startChar": 2,
+        "endLine": 249,
+        "endChar": 69
+      },
+      "revId": "ae30fb89b04b5ef0b5a17c3612f29229b342db99",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b3f0b8fc_a7cc7e71",
         "filename": "vp9/encoder/vp9_temporal_filter.c",
         "patchSetId": 3
