@@ -107,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "c122c918_32233fae",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-30T23:04:46Z",
+      "side": 1,
+      "message": "we make this assumption in the neon code, it should be true for the decoder and the denoiser where inputs are in terms of block width/height. check the call sites.",
+      "parentUuid": "fc6670e3_0314e8c3",
+      "revId": "3b56c9e67a90e11889ee6f7909caa76fa3308b8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "af4870b7_5883e0ec",
         "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
         "patchSetId": 2
