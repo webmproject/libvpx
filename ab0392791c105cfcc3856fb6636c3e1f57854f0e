@@ -16,6 +16,24 @@
       "revId": "ab0392791c105cfcc3856fb6636c3e1f57854f0e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b80c5af6_59574479",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-03-30T15:36:05Z",
+      "side": 1,
+      "message": "Why would an image buffer have 8 byte alignment? I believe many of the other simd functions expect 16 aligned images (and macroblocks)\n\nAlthough looking through vpx_image.c, now I\u0027m not so sure of that.",
+      "parentUuid": "b667922a_98b44181",
+      "revId": "ab0392791c105cfcc3856fb6636c3e1f57854f0e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
