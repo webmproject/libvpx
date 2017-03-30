@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "f7ebce6c_04448a9a",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1075,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-03-30T22:57:35Z",
+      "side": 1,
+      "message": "I didn\u0027t see x-\u003emv_limits was used in vp9_int_pro_motion_estimation(). Why do we need this here?",
+      "range": {
+        "startLine": 1075,
+        "startChar": 4,
+        "endLine": 1075,
+        "endChar": 27
+      },
+      "revId": "3e12b1cb7ba646a35005cdac1b90560beb437fbe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "59ab3315_8907126b",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1687,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-03-30T22:57:35Z",
+      "side": 1,
+      "message": "Similarly, do we need this here?",
+      "range": {
+        "startLine": 1686,
+        "startChar": 8,
+        "endLine": 1687,
+        "endChar": 75
+      },
+      "revId": "3e12b1cb7ba646a35005cdac1b90560beb437fbe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e0d312e9_5effccca",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 5
