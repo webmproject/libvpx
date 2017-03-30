@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b667922a_98b44181",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-03-30T00:11:43Z",
+      "side": 1,
+      "message": "is that correct? what if we\u0027re offsetting into a buffer with 8 byte alignment?",
+      "revId": "ab0392791c105cfcc3856fb6636c3e1f57854f0e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
