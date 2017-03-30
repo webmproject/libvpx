@@ -420,7 +420,7 @@ if ($opts{arch} eq 'x86') {
 } elsif ($opts{arch} eq 'armv8' || $opts{arch} eq 'arm64' ) {
   @ALL_ARCHS = filter(qw/neon/);
   arm;
-} elsif ($opts{arch} eq 'ppc' ) {
+} elsif ($opts{arch} =~ /^ppc/ ) {
   @ALL_ARCHS = filter(qw/vsx/);
   ppc;
 } else {
