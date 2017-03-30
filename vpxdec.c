@@ -75,7 +75,7 @@ static const arg_def_t outputfile =
 static const arg_def_t threadsarg =
     ARG_DEF("t", "threads", 1, "Max threads to use");
 static const arg_def_t frameparallelarg =
-    ARG_DEF(NULL, "frame-parallel", 0, "Frame parallel decode");
+    ARG_DEF(NULL, "frame-parallel", 0, "Frame parallel decode (ignored)");
 static const arg_def_t verbosearg =
     ARG_DEF("v", "verbose", 0, "Show version string");
 static const arg_def_t error_concealment =
@@ -493,7 +493,7 @@ static int main_loop(int argc, const char **argv_) {
   size_t bytes_in_buffer = 0, buffer_size = 0;
   FILE *infile;
   int frame_in = 0, frame_out = 0, flipuv = 0, noblit = 0;
-  int do_md5 = 0, progress = 0, frame_parallel = 0;
+  int do_md5 = 0, progress = 0;
   int stop_after = 0, postproc = 0, summary = 0, quiet = 1;
   int arg_skip = 0;
   int ec_enabled = 0;
@@ -591,8 +591,9 @@ static int main_loop(int argc, const char **argv_) {
     else if (arg_match(&arg, &threadsarg, argi))
       cfg.threads = arg_parse_uint(&arg);
 #if CONFIG_VP9_DECODER
-    else if (arg_match(&arg, &frameparallelarg, argi))
-      frame_parallel = 1;
+    else if (arg_match(&arg, &frameparallelarg, argi)) {
+      /* ignored for compatibility */
+    }
 #endif
     else if (arg_match(&arg, &verbosearg, argi))
       quiet = 0;
@@ -725,8 +726,7 @@ static int main_loop(int argc, const char **argv_) {
   if (!interface) interface = get_vpx_decoder_by_index(0);
 
   dec_flags = (postproc ? VPX_CODEC_USE_POSTPROC : 0) |
-              (ec_enabled ? VPX_CODEC_USE_ERROR_CONCEALMENT : 0) |
-              (frame_parallel ? VPX_CODEC_USE_FRAME_THREADING : 0);
+              (ec_enabled ? VPX_CODEC_USE_ERROR_CONCEALMENT : 0);
   if (vpx_codec_dec_init(&decoder, interface->codec_interface(), &cfg,
                          dec_flags)) {
     fprintf(stderr, "Failed to initialize decoder: %s\n",
@@ -840,7 +840,7 @@ static int main_loop(int argc, const char **argv_) {
     vpx_usec_timer_mark(&timer);
     dx_time += (unsigned int)vpx_usec_timer_elapsed(&timer);
 
-    if (!frame_parallel && !corrupted &&
+    if (!corrupted &&
         vpx_codec_control(&decoder, VP8D_GET_FRAME_CORRUPTED, &corrupted)) {
       warn("Failed VP8_GET_FRAME_CORRUPTED: %s", vpx_codec_error(&decoder));
       if (!keep_going) goto fail;
