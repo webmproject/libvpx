@@ -22,6 +22,30 @@
       "revId": "fe219e3d5cf8ce431d3df404b604e21ba7c6d066",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "02f70621_2110539f",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-03-31T17:56:19Z",
+      "side": 1,
+      "message": "I feel the same way - that is why I asked you to look at it. It works well when nsync\u003d1, but we want to fix it in case that nsync \u003e 1 is used. Thank you for the deep investigation and the suggestion. I will modify the code.",
+      "parentUuid": "be01a289_b7de8c21",
+      "range": {
+        "startLine": 352,
+        "startChar": 10,
+        "endLine": 352,
+        "endChar": 11
+      },
+      "revId": "fe219e3d5cf8ce431d3df404b604e21ba7c6d066",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
