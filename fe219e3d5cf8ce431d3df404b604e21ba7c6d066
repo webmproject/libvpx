@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "be01a289_b7de8c21",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-03-31T14:56:34Z",
+      "side": 1,
+      "message": "Functionally code look fine. However we feel that there is scope for speed improvement (for a given nsync when nsync \u003e 1) as the current implementation seems to take care of top right sync (top sync must be sufficient in this case). \n\nPlease find our detailed explanation below \n\ncode flow as per current implementation:\nWhen nsync is 4, cur_col for previous row is written after processing blocks 0,4,8,12,..... (in vp9_row_mt_sync_write)\nHence in vp9_row_mt_sync_read, first set of 4 blocks(0 to 3) in current row will start processing only after 5 blocks (ie 0 to 4)  in previous row are processed\nSimilarly second set of 4 blocks(4 to 7) in current row will start processing only after 4 more blocks(ie 5 to 8) in previous row are processed.\n\nHence we feel that above condition should be modified as \"if ( (c % nsync) !\u003d (nsync - 1)) sig \u003d 0; \" (to ensure top sync)\n\ncode flow after above change:\nAfter above change in vp9_row_mt_sync_read, first set of 4 blocks(0 to 3) in current row  can start processing after 4 blocks (ie 0 to 3)  in previous row are processed\nSimilarly second set of 4 blocks(4 to 7) in current row can start processing after 4 more blocks (ie 4 to 7) in previous row are processed\n\nThis change should reduce thread ramp up processing time when multiple threads are assigned to a tile.",
+      "range": {
+        "startLine": 352,
+        "startChar": 10,
+        "endLine": 352,
+        "endChar": 11
+      },
+      "revId": "fe219e3d5cf8ce431d3df404b604e21ba7c6d066",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
