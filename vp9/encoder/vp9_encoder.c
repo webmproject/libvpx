@@ -1445,6 +1445,33 @@ static void realloc_segmentation_maps(VP9_COMP *cpi) {
                   vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
 }
 
+static void alloc_copy_partition_data(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  if (cpi->prev_partition == NULL) {
+    CHECK_MEM_ERROR(cm, cpi->prev_partition,
+                    (BLOCK_SIZE *)vpx_calloc(cm->mi_stride * cm->mi_rows,
+                                             sizeof(*cpi->prev_partition)));
+  }
+  if (cpi->prev_segment_id == NULL) {
+    CHECK_MEM_ERROR(
+        cm, cpi->prev_segment_id,
+        (int8_t *)vpx_calloc((cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1),
+                             sizeof(*cpi->prev_segment_id)));
+  }
+  if (cpi->prev_variance_low == NULL) {
+    CHECK_MEM_ERROR(cm, cpi->prev_variance_low,
+                    (uint8_t *)vpx_calloc(
+                        (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1) * 25,
+                        sizeof(*cpi->prev_variance_low)));
+  }
+  if (cpi->copied_frame_cnt == NULL) {
+    CHECK_MEM_ERROR(
+        cm, cpi->copied_frame_cnt,
+        (uint8_t *)vpx_calloc((cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1),
+                              sizeof(*cpi->copied_frame_cnt)));
+  }
+}
+
 void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -3196,6 +3223,8 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
 
   set_size_independent_vars(cpi);
   set_size_dependent_vars(cpi, &q, &bottom_index, &top_index);
+
+  if (cpi->sf.copy_partition_flag) alloc_copy_partition_data(cpi);
 
   if (cpi->oxcf.speed >= 5 && cpi->oxcf.pass == 0 &&
       cpi->oxcf.rc_mode == VPX_CBR &&
