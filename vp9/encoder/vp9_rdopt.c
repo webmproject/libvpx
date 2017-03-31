@@ -3241,6 +3241,9 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
 
     if (best_rd < mode_threshold[mode_index]) continue;
 
+    // This is only used in motion vector unit test.
+    if (cpi->oxcf.motion_vector_unit_test && ref_frame == INTRA_FRAME) continue;
+
     if (sf->motion_field_mode_search) {
       const int mi_width = VPXMIN(num_8x8_blocks_wide_lookup[bsize],
                                   tile_info->mi_col_end - mi_col);
@@ -3923,6 +3926,9 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, TileDataEnc *tile_data,
 #endif
                             &rd_thresh_freq_fact[ref_index]))
       continue;
+
+    // This is only used in motion vector unit test.
+    if (cpi->oxcf.motion_vector_unit_test && ref_frame == INTRA_FRAME) continue;
 
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {

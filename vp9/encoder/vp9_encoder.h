@@ -269,6 +269,7 @@ typedef struct VP9EncoderConfig {
 
   int row_mt;
   unsigned int row_mt_bit_exact;
+  unsigned int motion_vector_unit_test;
 } VP9EncoderConfig;
 
 static INLINE int is_lossless_requested(const VP9EncoderConfig *cfg) {

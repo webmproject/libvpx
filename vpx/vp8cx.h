@@ -594,6 +594,15 @@ enum vp8e_enc_control_id {
     * Supported in codecs: VP8
     */
   VP8E_SET_GF_CBR_BOOST_PCT,
+
+  /*!\brief Codec control function to enable the extreme motion vector unit test
+   * in VP9. Please note that this is only used in motion vector unit test.
+   *
+   * 0 : off, 1 : MAX_EXTREME_MV, 2 : MIN_EXTREME_MV
+   *
+   * Supported in codecs: VP9
+   */
+  VP9E_ENABLE_MOTION_VECTOR_UNIT_TEST,
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -863,6 +872,9 @@ VPX_CTRL_USE_TYPE(VP9E_ENABLE_ROW_MT_BIT_EXACT, unsigned int)
 
 VPX_CTRL_USE_TYPE(VP9E_GET_LEVEL, int *)
 #define VPX_CTRL_VP9E_GET_LEVEL
+
+VPX_CTRL_USE_TYPE(VP9E_ENABLE_MOTION_VECTOR_UNIT_TEST, unsigned int)
+#define VPX_CTRL_VP9E_ENABLE_MOTION_VECTOR_UNIT_TEST
 
 /*!\endcond */
 /*! @} - end defgroup vp8_encoder */
