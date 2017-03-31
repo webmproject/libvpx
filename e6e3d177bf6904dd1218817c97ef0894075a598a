@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c249beef_dcce3a89",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1682,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-03-31T16:56:48Z",
+      "side": 1,
+      "message": "This also needs to be removed.",
+      "range": {
+        "startLine": 1682,
+        "startChar": 8,
+        "endLine": 1682,
+        "endChar": 52
+      },
+      "revId": "e6e3d177bf6904dd1218817c97ef0894075a598a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c5522b5d_356c3a1b",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1699,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-03-31T16:56:48Z",
+      "side": 1,
+      "message": "This also needs to be removed.",
+      "range": {
+        "startLine": 1699,
+        "startChar": 8,
+        "endLine": 1699,
+        "endChar": 37
+      },
+      "revId": "e6e3d177bf6904dd1218817c97ef0894075a598a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
