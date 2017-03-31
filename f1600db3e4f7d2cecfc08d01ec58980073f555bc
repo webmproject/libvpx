@@ -16,6 +16,24 @@
       "revId": "f1600db3e4f7d2cecfc08d01ec58980073f555bc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1f8224c2_d594b527",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-03-31T21:58:56Z",
+      "side": 1,
+      "message": "Probably not add () following our code style (examples can be found in libvpx code).",
+      "parentUuid": "feb8b9af_e7382aec",
+      "revId": "f1600db3e4f7d2cecfc08d01ec58980073f555bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
