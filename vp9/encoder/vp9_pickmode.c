@@ -2369,7 +2369,7 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x, int mi_row,
             }
 
             vp9_set_mv_search_range(&x->mv_limits,
-                                    &mbmi_ext->ref_mvs[0]->as_mv);
+                                    &mbmi_ext->ref_mvs[ref_frame][0].as_mv);
 
             vp9_full_pixel_search(
                 cpi, x, bsize, &mvp_full, step_param, cpi->sf.mv.search_method,

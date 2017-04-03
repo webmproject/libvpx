@@ -226,6 +226,7 @@ static uint32_t temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   uint32_t distortion;
   uint32_t sse;
   int cost_list[5];
+  const MvLimits tmp_mv_limits = x->mv_limits;
 
   MV best_ref_mv1 = { 0, 0 };
   MV best_ref_mv1_full; /* full-pixel value of best_ref_mv1 */
@@ -246,9 +247,14 @@ static uint32_t temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   step_param = mv_sf->reduce_first_step_size;
   step_param = VPXMIN(step_param, MAX_MVSEARCH_STEPS - 2);
 
+  vp9_set_mv_search_range(&x->mv_limits, &best_ref_mv1);
+
   vp9_full_pixel_search(cpi, x, BLOCK_16X16, &best_ref_mv1_full, step_param,
                         search_method, sadpb, cond_cost_list(cpi, cost_list),
                         &best_ref_mv1, ref_mv, 0, 0);
+
+  /* restore UMV window */
+  x->mv_limits = tmp_mv_limits;
 
   // Ignore mv costing by sending NULL pointer instead of cost array
   bestsme = cpi->find_fractional_mv_step(
