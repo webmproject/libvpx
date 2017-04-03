@@ -117,6 +117,30 @@
       "revId": "3d9afe1dd6cf1340345e90b4c5eff10c3196b645",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8dac8f8f_d417ef15",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 52
+      },
+      "lineNbr": 1360,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-04-03T23:56:35Z",
+      "side": 1,
+      "message": "its a feature in two-pass-svc, and doesn\u0027t use cyclic refresh.",
+      "parentUuid": "c8a7e26c_349ce972",
+      "range": {
+        "startLine": 1360,
+        "startChar": 5,
+        "endLine": 1360,
+        "endChar": 29
+      },
+      "revId": "3d9afe1dd6cf1340345e90b4c5eff10c3196b645",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
