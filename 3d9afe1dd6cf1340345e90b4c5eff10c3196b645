@@ -93,6 +93,30 @@
       "revId": "3d9afe1dd6cf1340345e90b4c5eff10c3196b645",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c8a7e26c_349ce972",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 52
+      },
+      "lineNbr": 1360,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-04-03T23:48:57Z",
+      "side": 1,
+      "message": "what about this condition:\ncpi-\u003esvc.encode_empty_frame_state \u003d\u003d ENCODING\n\nis it doing anything? or it\u0027s just redundant?",
+      "parentUuid": "8da72b57_93c41516",
+      "range": {
+        "startLine": 1360,
+        "startChar": 5,
+        "endLine": 1360,
+        "endChar": 29
+      },
+      "revId": "3d9afe1dd6cf1340345e90b4c5eff10c3196b645",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
