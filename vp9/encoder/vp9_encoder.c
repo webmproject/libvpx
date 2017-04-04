@@ -3153,7 +3153,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   }
 
   // Avoid scaling last_source unless its needed.
-  // Last source is needed if vp9_avg_source_sad() is used, or if
+  // Last source is needed if avg_source_sad() is used, or if
   // partition_search_type == SOURCE_VAR_BASED_PARTITION, or if noise
   // estimation is enabled.
   if (cpi->unscaled_last_source != NULL &&

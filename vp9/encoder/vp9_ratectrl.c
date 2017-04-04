@@ -2289,7 +2289,6 @@ void vp9_scene_detection_onepass(VP9_COMP *cpi) {
         for (sbi_row = 0; sbi_row < sb_rows; ++sbi_row) {
           for (sbi_col = 0; sbi_col < sb_cols; ++sbi_col) {
             // Checker-board pattern, ignore boundary.
-            // If the use_source_sad is on, compute for every superblock.
             if (((sbi_row > 0 && sbi_col > 0) &&
                  (sbi_row < sb_rows - 1 && sbi_col < sb_cols - 1) &&
                  ((sbi_row % 2 == 0 && sbi_col % 2 == 0) ||
