@@ -258,6 +258,7 @@ void vp9_cyclic_refresh_postencode(VP9_COMP *const cpi) {
   cr->actual_num_seg2_blocks = 0;
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row++) {
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col++) {
+      MV mv = mi[0]->mv[0].as_mv;
       int map_index = mi_row * cm->mi_cols + mi_col;
       if (cyclic_refresh_segment_id(seg_map[map_index]) == CR_SEGMENT_ID_BOOST1)
         cr->actual_num_seg1_blocks++;
@@ -265,7 +266,8 @@ void vp9_cyclic_refresh_postencode(VP9_COMP *const cpi) {
                CR_SEGMENT_ID_BOOST2)
         cr->actual_num_seg2_blocks++;
       // Accumulate low_content_frame.
-      if (cr->map[map_index] < 1) low_content_frame++;
+      if (is_inter_block(mi[0]) && abs(mv.row) < 16 && abs(mv.col) < 16)
+        low_content_frame++;
       mi++;
     }
     mi += 8;
@@ -288,12 +290,14 @@ void vp9_cyclic_refresh_postencode(VP9_COMP *const cpi) {
     // Update average of low content/motion in the frame.
     fraction_low = (double)low_content_frame / (cm->mi_rows * cm->mi_cols);
     cr->low_content_avg = (fraction_low + 3 * cr->low_content_avg) / 4;
-    if (!force_gf_refresh && cpi->refresh_golden_frame == 1) {
+    if (!force_gf_refresh && cpi->refresh_golden_frame == 1 &&
+        rc->frames_since_key > rc->frames_since_golden + 1) {
       // Don't update golden reference if the amount of low_content for the
       // current encoded frame is small, or if the recursive average of the
       // low_content over the update interval window falls below threshold.
-      if (fraction_low < 0.8 || cr->low_content_avg < 0.7)
+      if (fraction_low < 0.65 || cr->low_content_avg < 0.6) {
         cpi->refresh_golden_frame = 0;
+      }
       // Reset for next internal.
       cr->low_content_avg = fraction_low;
     }
