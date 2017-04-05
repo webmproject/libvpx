@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "eea62927_a9ea431a",
+        "filename": "test/comp_avg_pred_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-05T17:03:30Z",
+      "side": 1,
+      "message": "Yes, otherwise the results are less than 0. Will update the output.",
+      "parentUuid": "a83d255a_fe603ff5",
+      "revId": "addb683d0262f80b750d1e86780857e829043fe4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "46d42d90_bfc22b7e",
         "filename": "vpx_dsp/x86/avg_pred_sse2.c",
         "patchSetId": 5
@@ -30,6 +48,30 @@
       "writtenOn": "2017-04-05T00:44:02Z",
       "side": 1,
       "message": "do... while... could save a jump when counter is variable but surly positive.",
+      "range": {
+        "startLine": 21,
+        "startChar": 4,
+        "endLine": 21,
+        "endChar": 7
+      },
+      "revId": "addb683d0262f80b750d1e86780857e829043fe4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0f4a51bd_dd295f96",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-05T17:03:30Z",
+      "side": 1,
+      "message": "That particular optimization seems a bit premature, but I\u0027ll check the timings when the rest of the comments are addressed.",
+      "parentUuid": "46d42d90_bfc22b7e",
       "range": {
         "startLine": 21,
         "startChar": 4,
@@ -82,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "9434e4a8_88169ef0",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-05T17:03:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1ffa39fb_b0734020",
+      "revId": "addb683d0262f80b750d1e86780857e829043fe4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ab3bf410_650bccec",
         "filename": "vpx_dsp/x86/avg_pred_sse2.c",
         "patchSetId": 5
@@ -93,6 +153,24 @@
       "writtenOn": "2017-04-05T03:14:34Z",
       "side": 1,
       "message": "you could DECLARE_ALIGNED() this",
+      "revId": "addb683d0262f80b750d1e86780857e829043fe4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c2f85340_6d8f656a",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-05T17:03:30Z",
+      "side": 1,
+      "message": "I didn\u0027t want to put that in the inner loop, but I guess \"inner\" is relative - it maxes out at 8 times (4x8). Being able to use an aligned load was also not the slow point, packing the data was.",
+      "parentUuid": "ab3bf410_650bccec",
       "revId": "addb683d0262f80b750d1e86780857e829043fe4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
@@ -139,6 +217,30 @@
     },
     {
       "key": {
+        "uuid": "273aa7b1_b3ec8126",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-05T17:03:30Z",
+      "side": 1,
+      "message": "My issue with this section was over-reading and avoiding ASAN warnings. I can think of a few ways to avoid this though.",
+      "parentUuid": "7cd460ae_323c4ebb",
+      "range": {
+        "startLine": 47,
+        "startChar": 8,
+        "endLine": 47,
+        "endChar": 14
+      },
+      "revId": "addb683d0262f80b750d1e86780857e829043fe4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d992792e_f1866dc7",
         "filename": "vpx_dsp/x86/avg_pred_sse2.c",
         "patchSetId": 5
@@ -159,6 +261,30 @@
       "revId": "addb683d0262f80b750d1e86780857e829043fe4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8e607014_e9c4ce5d",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-05T17:03:30Z",
+      "side": 1,
+      "message": "Done. Thanks, I was looking for that but got put off by the \u0027double\u0027 part. I wish they had a __m128i version given it just loads bits into position.",
+      "parentUuid": "d992792e_f1866dc7",
+      "range": {
+        "startLine": 57,
+        "startChar": 8,
+        "endLine": 57,
+        "endChar": 54
+      },
+      "revId": "addb683d0262f80b750d1e86780857e829043fe4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
