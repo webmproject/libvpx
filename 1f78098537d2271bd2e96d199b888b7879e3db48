@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "a9190cec_5e215e0a",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-04-05T20:05:05Z",
+      "side": 1,
+      "message": "Maybe this is the only 4-byte xmm reading instruction to avoid over-reading: __m128i r_0 \u003d _mm_cvtsi32_si128(*(const int *)ref), as transpose4x4_to_dst() did.",
+      "range": {
+        "startLine": 43,
+        "startChar": 28,
+        "endLine": 43,
+        "endChar": 43
+      },
+      "revId": "1f78098537d2271bd2e96d199b888b7879e3db48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2bddc11e_763e7ebc",
         "filename": "vpx_dsp/x86/avg_pred_sse2.c",
         "patchSetId": 7
