@@ -594,11 +594,9 @@ process_toolchain() {
         if enabled mips || [ -z "${INLINE}" ]; then
           enabled extra_warnings || check_add_cflags -Wno-unused-function
         fi
-        if ! enabled vp9_highbitdepth; then
-          # Avoid this warning for third_party C++ sources. Some reorganization
-          # would be needed to apply this only to test/*.cc.
-          check_cflags -Wshorten-64-to-32 && add_cflags_only -Wshorten-64-to-32
-        fi
+        # Avoid this warning for third_party C++ sources. Some reorganization
+        # would be needed to apply this only to test/*.cc.
+        check_cflags -Wshorten-64-to-32 && add_cflags_only -Wshorten-64-to-32
     fi
 
     if enabled icc; then
