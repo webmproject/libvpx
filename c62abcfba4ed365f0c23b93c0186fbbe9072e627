@@ -34,6 +34,24 @@
       "revId": "c62abcfba4ed365f0c23b93c0186fbbe9072e627",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d11fb703_7837e395",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1451,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-04-05T21:10:23Z",
+      "side": 1,
+      "message": "\u003e Done\n\nIs there any better practice to check if the memory has been allocated? But it relies on the speed features set for each frame. I would like to get rid of these \"if\" statements.",
+      "parentUuid": "9921b818_90d39978",
+      "revId": "c62abcfba4ed365f0c23b93c0186fbbe9072e627",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
