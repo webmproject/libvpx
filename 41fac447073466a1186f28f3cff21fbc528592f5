@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "79e50d6c_42dee5ba",
+        "filename": "test/comp_avg_pred_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-05T03:14:34Z",
+      "side": 0,
+      "message": "this edit is unrelated",
+      "revId": "41fac447073466a1186f28f3cff21fbc528592f5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}

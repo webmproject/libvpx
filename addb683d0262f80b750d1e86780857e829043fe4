@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "a83d255a_fe603ff5",
+        "filename": "test/comp_avg_pred_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-05T03:14:34Z",
+      "side": 1,
+      "message": "did you mean to make this edit? if so \u0027ms\u0027 should be \u0027us\u0027 in the output I think.",
+      "revId": "addb683d0262f80b750d1e86780857e829043fe4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "46d42d90_bfc22b7e",
         "filename": "vpx_dsp/x86/avg_pred_sse2.c",
         "patchSetId": 5
@@ -42,6 +59,57 @@
         "endLine": 26,
         "endChar": 24
       },
+      "revId": "addb683d0262f80b750d1e86780857e829043fe4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1ffa39fb_b0734020",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-05T03:14:34Z",
+      "side": 1,
+      "message": "can be const or just done in the loop given it\u0027s used once",
+      "revId": "addb683d0262f80b750d1e86780857e829043fe4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ab3bf410_650bccec",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-05T03:14:34Z",
+      "side": 1,
+      "message": "you could DECLARE_ALIGNED() this",
+      "revId": "addb683d0262f80b750d1e86780857e829043fe4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f8a58f91_40c7fd1c",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-05T03:14:34Z",
+      "side": 1,
+      "message": "does _mm_set_epi32() work better in this case?",
       "revId": "addb683d0262f80b750d1e86780857e829043fe4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
