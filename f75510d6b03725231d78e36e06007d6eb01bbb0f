@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "eeca8547_0cef05f8",
+        "filename": "test/convolve_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 561,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-04-05T23:55:09Z",
+      "side": 1,
+      "message": "Done. And Avg_Speed test.",
+      "parentUuid": "64778e08_0b398d8c",
+      "revId": "f75510d6b03725231d78e36e06007d6eb01bbb0f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d8bbb1e4_78798f48",
         "filename": "test/convolve_test.cc",
         "patchSetId": 8
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "0e43b33a_9a2866ef",
+        "filename": "test/convolve_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 574,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-04-05T23:55:09Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "d8bbb1e4_78798f48",
+      "revId": "f75510d6b03725231d78e36e06007d6eb01bbb0f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "938a6125_f883ae1a",
         "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
         "patchSetId": 8
@@ -47,6 +83,24 @@
       "writtenOn": "2017-04-05T22:49:03Z",
       "side": 1,
       "message": "this could simply be \u003d\u003d 8 and \u003d\u003d 4 or \u003e 4 and \u003e / !\u003d 0 now, no?",
+      "revId": "f75510d6b03725231d78e36e06007d6eb01bbb0f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "afdf53fd_a2a7da8c",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-04-05T23:55:09Z",
+      "side": 1,
+      "message": "Done since width\u003d4/8/16/32/64.  And convolve_avg_row() below.",
+      "parentUuid": "938a6125_f883ae1a",
       "revId": "f75510d6b03725231d78e36e06007d6eb01bbb0f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
