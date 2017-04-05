@@ -159,7 +159,7 @@ typedef struct {
   int64_t kf_group_bits;
 
   // Error score of frames still to be coded in kf group
-  int64_t kf_group_error_left;
+  double kf_group_error_left;
 
   double bpm_factor;
   int rolling_arf_group_target_bits;
