@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "7d93be36_26777b1e",
+        "filename": "test/comp_avg_pred_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-05T18:39:01Z",
+      "side": 1,
+      "message": "\u003e Yes, otherwise the results are less than 0. Will update the output.\n\nthat\u0027s pretty fast then, not sure how stable the numbers will be at that level. maybe this should be extended to do something based on the amount of pixels like test_intra_pred_speed",
+      "parentUuid": "eea62927_a9ea431a",
+      "revId": "addb683d0262f80b750d1e86780857e829043fe4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "46d42d90_bfc22b7e",
         "filename": "vpx_dsp/x86/avg_pred_sse2.c",
         "patchSetId": 5
