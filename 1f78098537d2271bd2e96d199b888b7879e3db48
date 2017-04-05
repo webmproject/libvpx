@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9e5438f0_393cc294",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-05T20:35:24Z",
+      "side": 1,
+      "message": "The C variance calls this with a temporary buffer (this might also run afoul of the alignment expectations - not sure if I should change the variance call or use loadu) with width \u003d\u003d stride, so I special-cased that situation.\n\nhttps://chromium.googlesource.com/webm/libvpx/+/master/vpx_dsp/variance.c#167\n\nActually, temp3 is aligned and second_pred is passed in so this should be fine with the special casing.\n\nAlso much faster when width \u003d\u003d stride",
+      "parentUuid": "a9190cec_5e215e0a",
+      "range": {
+        "startLine": 43,
+        "startChar": 28,
+        "endLine": 43,
+        "endChar": 43
+      },
+      "revId": "1f78098537d2271bd2e96d199b888b7879e3db48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2bddc11e_763e7ebc",
         "filename": "vpx_dsp/x86/avg_pred_sse2.c",
         "patchSetId": 7
