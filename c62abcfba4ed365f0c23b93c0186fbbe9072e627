@@ -142,6 +142,24 @@
       "revId": "c62abcfba4ed365f0c23b93c0186fbbe9072e627",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3dd08363_a426a35e",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1451,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-04-05T22:54:14Z",
+      "side": 1,
+      "message": "Though the func to set speed features is called in vp9_create_compressor, the speed itself is not set at that moment. So they are not actually set there. \nIn vp9_speed_features, only encoding parameters are set, instead of allocating memories. That\u0027s why I want to move them out. It looks like I can\u0027t get rid of these \"if\" statements if I want the memory to be allocated only under speed 8.",
+      "parentUuid": "7ae871b1_df07adc4",
+      "revId": "c62abcfba4ed365f0c23b93c0186fbbe9072e627",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
