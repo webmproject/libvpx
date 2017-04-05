@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8f89cc57_b80158ac",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1453,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-05T22:17:32Z",
+      "side": 1,
+      "message": "these should be sizeof(var) or sizeof(*var) as appropriate:\n\nhttps://google.github.io/styleguide/cppguide.html#sizeof",
+      "range": {
+        "startLine": 1453,
+        "startChar": 45,
+        "endLine": 1453,
+        "endChar": 63
+      },
+      "revId": "0b960f25b8cfd1fceaa3984a83a34f8fc5678538",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
