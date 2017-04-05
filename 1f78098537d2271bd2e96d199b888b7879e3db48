@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2bddc11e_763e7ebc",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-05T19:27:20Z",
+      "side": 1,
+      "message": "this is pretty handy. shame about all the extra casting.",
+      "range": {
+        "startLine": 57,
+        "startChar": 21,
+        "endLine": 57,
+        "endChar": 33
+      },
+      "revId": "1f78098537d2271bd2e96d199b888b7879e3db48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
