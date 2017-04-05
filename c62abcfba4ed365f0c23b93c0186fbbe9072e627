@@ -124,6 +124,24 @@
       "revId": "c62abcfba4ed365f0c23b93c0186fbbe9072e627",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7ae871b1_df07adc4",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1451,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-05T22:40:16Z",
+      "side": 1,
+      "message": "\u003e yeah. I\u0027ve tried to put them in vp9_create_compressor but the speed features are not set at that stage.\n\nit looks like they\u0027re set at the end of create_compressor, but also within encode_without_recode_loop. if things can\u0027t change without tearing down the compressor then that could be split. otherwise I don\u0027t see the benefit to the move in this change",
+      "parentUuid": "920f7ec4_a086788b",
+      "revId": "c62abcfba4ed365f0c23b93c0186fbbe9072e627",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
