@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "46d42d90_bfc22b7e",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-04-05T00:44:02Z",
+      "side": 1,
+      "message": "do... while... could save a jump when counter is variable but surly positive.",
+      "range": {
+        "startLine": 21,
+        "startChar": 4,
+        "endLine": 21,
+        "endChar": 7
+      },
+      "revId": "addb683d0262f80b750d1e86780857e829043fe4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0d1755ea_366c641b",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-04-05T00:44:02Z",
+      "side": 1,
+      "message": "Could any of pred, ref and comp be 16-byte aligned when width \u003e 8?",
+      "range": {
+        "startLine": 26,
+        "startChar": 8,
+        "endLine": 26,
+        "endChar": 24
+      },
+      "revId": "addb683d0262f80b750d1e86780857e829043fe4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7cd460ae_323c4ebb",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-04-05T00:44:02Z",
+      "side": 1,
+      "message": "Another way to read 4x4 is similar to the head of transpose4x4_to_dst(), by replacing _mm_unpacklo_epi8() with _mm_unpacklo_epi32(), and replacing _mm_unpacklo_epi16() with _mm_movelh_ps().",
+      "range": {
+        "startLine": 47,
+        "startChar": 8,
+        "endLine": 47,
+        "endChar": 14
+      },
+      "revId": "addb683d0262f80b750d1e86780857e829043fe4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d992792e_f1866dc7",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-04-05T00:44:02Z",
+      "side": 1,
+      "message": "vpx_lpf_horizontal_16_sse2() has an sample of using _mm_loadh_pi() to load to upper 64-bit.",
+      "range": {
+        "startLine": 57,
+        "startChar": 8,
+        "endLine": 57,
+        "endChar": 54
+      },
+      "revId": "addb683d0262f80b750d1e86780857e829043fe4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
