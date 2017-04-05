@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "10b3b1a5_ee62fd37",
+        "filename": "test/convolve_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 542,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-05T06:05:32Z",
+      "side": 1,
+      "message": "I still think these should be split so performance in each can be measured independently a bit more easily",
+      "revId": "2aa56e7fd63e196dd3a58c912c354ae7a8feac5c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7bb1dd8e_c1259468",
+        "filename": "test/convolve_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-05T06:05:32Z",
+      "side": 1,
+      "message": "the other tests report this time within the function rather than picking up overhead from gtest; see hadamard_test, partial_idct_test, etc. there\u0027s also no reason to deviate from the other test format, it\u0027s better to be consistent where possible",
+      "revId": "2aa56e7fd63e196dd3a58c912c354ae7a8feac5c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1f0c5a6a_62e2fdbb",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-05T06:05:32Z",
+      "side": 1,
+      "message": "invert this condition, we try to avoid this Yoda style",
+      "revId": "2aa56e7fd63e196dd3a58c912c354ae7a8feac5c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "93f6a370_c69fe469",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-05T06:05:32Z",
+      "side": 1,
+      "message": "you can make this const and add another one for the avg call; I doubt the assembly will be affected",
+      "revId": "2aa56e7fd63e196dd3a58c912c354ae7a8feac5c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
