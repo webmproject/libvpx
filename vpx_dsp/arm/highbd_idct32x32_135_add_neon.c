@@ -726,9 +726,10 @@ static void vpx_highbd_idct32_16_neon(const int32_t *const input,
   highbd_idct16x16_add_store(out + 16, output + 16 * stride, stride, bd);
 }
 
-void vpx_highbd_idct32x32_135_add_neon(const tran_low_t *input, uint8_t *dest,
+void vpx_highbd_idct32x32_135_add_neon(const tran_low_t *input, uint8_t *dest8,
                                        int stride, int bd) {
   int i;
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
 
   if (bd == 8) {
     int16_t temp[32 * 16];
@@ -742,16 +743,15 @@ void vpx_highbd_idct32x32_135_add_neon(const tran_low_t *input, uint8_t *dest,
       dest += 8;
     }
   } else {
-    uint16_t *dst = CONVERT_TO_SHORTPTR(dest);
     int32_t temp[32 * 16];
     int32_t *t = temp;
     vpx_highbd_idct32_12_neon(input, temp);
     vpx_highbd_idct32_12_neon(input + 32 * 8, temp + 8);
 
     for (i = 0; i < 32; i += 8) {
-      vpx_highbd_idct32_16_neon(t, dst, stride, bd);
+      vpx_highbd_idct32_16_neon(t, dest, stride, bd);
       t += (16 * 8);
-      dst += 8;
+      dest += 8;
     }
   }
 }
