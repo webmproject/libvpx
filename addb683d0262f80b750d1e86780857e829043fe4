@@ -125,6 +125,30 @@
     },
     {
       "key": {
+        "uuid": "cb5abeab_0a78ae4e",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-05T19:19:58Z",
+      "side": 1,
+      "message": "Added comment on C version of the function with expected inputs. ref is a frame and may not be aligned.",
+      "parentUuid": "0d1755ea_366c641b",
+      "range": {
+        "startLine": 26,
+        "startChar": 8,
+        "endLine": 26,
+        "endChar": 24
+      },
+      "revId": "addb683d0262f80b750d1e86780857e829043fe4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1ffa39fb_b0734020",
         "filename": "vpx_dsp/x86/avg_pred_sse2.c",
         "patchSetId": 5
