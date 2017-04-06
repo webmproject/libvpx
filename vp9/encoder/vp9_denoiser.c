@@ -365,7 +365,10 @@ void vp9_denoiser_denoise(VP9_COMP *cpi, MACROBLOCK *mb, int mi_row, int mi_col,
   }
   if (!is_skin && denoiser->denoising_level == kDenHigh) increase_denoising = 1;
 
-  if (denoiser->denoising_level >= kDenLow)
+  // TODO(marpan): There is an issue with denoising for speed 5,
+  // due to the partitioning scheme based on pickmode.
+  // Remove this speed constraint when issue is resolved.
+  if (denoiser->denoising_level >= kDenLow && cpi->oxcf.speed > 5)
     decision = perform_motion_compensation(
         &cpi->common, denoiser, mb, bs, increase_denoising, mi_row, mi_col, ctx,
         motion_magnitude, is_skin, &zeromv_filter, consec_zeromv,

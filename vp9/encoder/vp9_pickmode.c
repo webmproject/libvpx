@@ -1974,7 +1974,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
     if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc_pickmode &&
-        cpi->denoiser.denoising_level > kDenLowLow && cpi->oxcf.speed > 5) {
+        cpi->denoiser.denoising_level > kDenLowLow) {
       vp9_denoiser_update_frame_stats(mi, sse_y, this_mode, ctx);
       // Keep track of zero_last cost.
       if (ref_frame == LAST_FRAME && frame_mv[this_mode][ref_frame].as_int == 0)
@@ -2178,7 +2178,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 #if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0 && cpi->resize_pending == 0 &&
       denoise_svc_pickmode && cpi->denoiser.denoising_level > kDenLowLow &&
-      cpi->denoiser.reset == 0 && cpi->oxcf.speed > 5) {
+      cpi->denoiser.reset == 0) {
     VP9_DENOISER_DECISION decision = COPY_BLOCK;
     vp9_pickmode_ctx_den_update(&ctx_den, zero_last_cost_orig, ref_frame_cost,
                                 frame_mv, reuse_inter_pred, best_tx_size,
