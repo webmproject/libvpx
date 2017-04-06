@@ -32,9 +32,7 @@ cglobal convolve_%1, 4, 7, 4+AUX_XMM_REGS, src, src_stride, \
   mov r4d, dword wm
 %ifidn %2, highbd
   shl r4d, 1
-  shl srcq, 1
   shl src_strideq, 1
-  shl dstq, 1
   shl dst_strideq, 1
 %else
   cmp r4d, 4
