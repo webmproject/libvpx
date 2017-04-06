@@ -238,6 +238,24 @@
       "revId": "c80134771fc9804e0aa25ae3c87c4ae8791c468f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2513d137_726bc428",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-06T22:03:17Z",
+      "side": 1,
+      "message": "\u003e Are you sure 2 row version is better than 1 row?  For large size block, 1 row version is faster.  How about we keep this switch for continuing evaluating 1-row/2-row?\n\nprior to my comments for improving the structure it was by far. let me double check. in general I\u0027d prefer not to keep dead code around, we should resolve this now before it lands",
+      "parentUuid": "570c9893_52a7bc2d",
+      "revId": "c80134771fc9804e0aa25ae3c87c4ae8791c468f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
