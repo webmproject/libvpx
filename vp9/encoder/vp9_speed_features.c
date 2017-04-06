@@ -525,28 +525,9 @@ static void set_rt_speed_feature_framesize_independent(
     sf->adaptive_rd_thresh = 4;
     // Enable partition copy
     if (!cpi->use_svc && !cpi->resize_pending && cpi->resize_state == ORIG &&
-        !cpi->external_resize && cpi->oxcf.resize_mode == RESIZE_NONE)
+        !cpi->external_resize && cpi->oxcf.resize_mode == RESIZE_NONE) {
       sf->copy_partition_flag = 1;
-
-    if (sf->copy_partition_flag) {
       cpi->max_copied_frame = 4;
-      if (cpi->prev_partition == NULL) {
-        cpi->prev_partition = (BLOCK_SIZE *)vpx_calloc(
-            cm->mi_stride * cm->mi_rows, sizeof(BLOCK_SIZE));
-      }
-      if (cpi->prev_segment_id == NULL) {
-        cpi->prev_segment_id = (int8_t *)vpx_calloc(
-            (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1), sizeof(int8_t));
-      }
-      if (cpi->prev_variance_low == NULL) {
-        cpi->prev_variance_low = (uint8_t *)vpx_calloc(
-            (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1) * 25,
-            sizeof(uint8_t));
-      }
-      if (cpi->copied_frame_cnt == NULL) {
-        cpi->copied_frame_cnt = (uint8_t *)vpx_calloc(
-            (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1), sizeof(uint8_t));
-      }
     }
 
     if (cpi->row_mt && cpi->oxcf.max_threads > 1)
