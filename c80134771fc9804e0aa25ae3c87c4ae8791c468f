@@ -274,6 +274,24 @@
       "revId": "c80134771fc9804e0aa25ae3c87c4ae8791c468f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "01e7ba37_cdd919c0",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-06T22:36:28Z",
+      "side": 1,
+      "message": "\u003e I agree.  1 row version is faster on large block sizes.  2 row version seems to become faster at small block sizes but not clear.  My opinion is to keep 1 row version for code simplicity reason.  Let me know you thoughts.\n\nI was disagreeing with you as far as 1 and 2 rows go. I\u0027ll get my numbers for 2 and we can compare test setups to ensure our timings are stable",
+      "parentUuid": "b56d7dc4_afb57681",
+      "revId": "c80134771fc9804e0aa25ae3c87c4ae8791c468f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
