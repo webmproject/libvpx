@@ -674,7 +674,6 @@ check_xcode_minimum_version() {
 process_common_toolchain() {
   if [ -z "$toolchain" ]; then
     gcctarget="${CHOST:-$(gcc -dumpmachine 2> /dev/null)}"
-
     # detect tgt_isa
     case "$gcctarget" in
       aarch64*)
@@ -696,6 +695,9 @@ process_common_toolchain() {
         ;;
       *sparc*)
         tgt_isa=sparc
+        ;;
+      power*64*-*)
+        tgt_isa=ppc64
         ;;
       power*)
         tgt_isa=ppc
