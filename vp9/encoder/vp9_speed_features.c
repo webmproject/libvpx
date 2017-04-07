@@ -609,6 +609,12 @@ void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
     sf->allow_exhaustive_searches = 0;
     sf->adaptive_pred_interp_filter = 0;
   }
+
+  // This is only used in motion vector unit test.
+  if (cpi->oxcf.motion_vector_unit_test == 1)
+    cpi->find_fractional_mv_step = vp9_return_max_sub_pixel_mv;
+  else if (cpi->oxcf.motion_vector_unit_test == 2)
+    cpi->find_fractional_mv_step = vp9_return_min_sub_pixel_mv;
 }
 
 void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
@@ -779,4 +785,10 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
     sf->allow_exhaustive_searches = 0;
     sf->adaptive_pred_interp_filter = 0;
   }
+
+  // This is only used in motion vector unit test.
+  if (cpi->oxcf.motion_vector_unit_test == 1)
+    cpi->find_fractional_mv_step = vp9_return_max_sub_pixel_mv;
+  else if (cpi->oxcf.motion_vector_unit_test == 2)
+    cpi->find_fractional_mv_step = vp9_return_min_sub_pixel_mv;
 }

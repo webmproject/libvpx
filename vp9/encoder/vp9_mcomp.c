@@ -21,6 +21,7 @@
 #include "vpx_ports/mem.h"
 
 #include "vp9/common/vp9_common.h"
+#include "vp9/common/vp9_mvref_common.h"
 #include "vp9/common/vp9_reconinter.h"
 
 #include "vp9/encoder/vp9_encoder.h"
@@ -2476,4 +2477,86 @@ int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
     var = vp9_get_mvpred_var(x, tmp_mv, ref_mv, fn_ptr, 1);
 
   return var;
+}
+
+// Note(yunqingwang): The following 2 functions are only used in the motion
+// vector unit test, which return extreme motion vectors allowed by the MV
+// limits.
+#define COMMON_MV_TEST \
+  SETUP_SUBPEL_SEARCH; \
+                       \
+  (void)error_per_bit; \
+  (void)vfp;           \
+  (void)z;             \
+  (void)src_stride;    \
+  (void)y;             \
+  (void)y_stride;      \
+  (void)second_pred;   \
+  (void)w;             \
+  (void)h;             \
+  (void)offset;        \
+  (void)mvjcost;       \
+  (void)mvcost;        \
+  (void)sse1;          \
+  (void)distortion;    \
+                       \
+  (void)halfiters;     \
+  (void)quarteriters;  \
+  (void)eighthiters;   \
+  (void)whichdir;      \
+  (void)allow_hp;      \
+  (void)forced_stop;   \
+  (void)hstep;         \
+  (void)rr;            \
+  (void)rc;            \
+                       \
+  (void)tr;            \
+  (void)tc;            \
+  (void)sse;           \
+  (void)thismse;       \
+  (void)cost_list;
+
+// Return the maximum MV.
+uint32_t vp9_return_max_sub_pixel_mv(
+    const MACROBLOCK *x, MV *bestmv, const MV *ref_mv, int allow_hp,
+    int error_per_bit, const vp9_variance_fn_ptr_t *vfp, int forced_stop,
+    int iters_per_step, int *cost_list, int *mvjcost, int *mvcost[2],
+    uint32_t *distortion, uint32_t *sse1, const uint8_t *second_pred, int w,
+    int h) {
+  COMMON_MV_TEST;
+
+  (void)minr;
+  (void)minc;
+
+  bestmv->row = maxr;
+  bestmv->col = maxc;
+  besterr = 0;
+
+  // In the sub-pel motion search, if hp is not used, then the last bit of mv
+  // has to be 0.
+  lower_mv_precision(bestmv, allow_hp && use_mv_hp(ref_mv));
+
+  return besterr;
+}
+// Return the minimum MV.
+uint32_t vp9_return_min_sub_pixel_mv(
+    const MACROBLOCK *x, MV *bestmv, const MV *ref_mv, int allow_hp,
+    int error_per_bit, const vp9_variance_fn_ptr_t *vfp, int forced_stop,
+    int iters_per_step, int *cost_list, int *mvjcost, int *mvcost[2],
+    uint32_t *distortion, uint32_t *sse1, const uint8_t *second_pred, int w,
+    int h) {
+  COMMON_MV_TEST;
+
+  (void)maxr;
+  (void)maxc;
+
+  bestmv->row = minr;
+  bestmv->col = minc;
+  besterr = 0;
+
+  // In the sub-pel motion search, if hp is not used, then the last bit of mv
+  // has to be 0.
+  lower_mv_precision(bestmv, allow_hp && use_mv_hp(ref_mv));
+
+  return besterr;
 }
