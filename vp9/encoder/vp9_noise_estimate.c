@@ -132,8 +132,10 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
     ne->level = kLowLow;
 #if CONFIG_VP9_TEMPORAL_DENOISING
     if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc(cpi) &&
-        cpi->svc.current_superframe > 1)
+        cpi->svc.current_superframe > 1) {
       vp9_denoiser_set_noise_level(&cpi->denoiser, ne->level);
+      copy_frame(&cpi->denoiser.last_source, cpi->Source);
+    }
 #endif
     return;
   } else {
