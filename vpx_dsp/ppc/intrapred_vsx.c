@@ -226,3 +226,72 @@ void vpx_tm_predictor_8x8_vsx(uint8_t *dst, ptrdiff_t stride,
   val = vec_sub(vec_add(vec_splat(l, 7), a), tl);
   vec_vsx_st(vec_packsu(val, tmp), 0, dst);
 }
+
+static void tm_predictor_16x8(uint8_t *dst, const ptrdiff_t stride, int16x8_t l,
+                              int16x8_t ah, int16x8_t al, int16x8_t tl) {
+  int16x8_t vh, vl, ls;
+
+  ls = vec_splat(l, 0);
+  vh = vec_sub(vec_add(ls, ah), tl);
+  vl = vec_sub(vec_add(ls, al), tl);
+  vec_vsx_st(vec_packsu(vh, vl), 0, dst);
+  dst += stride;
+
+  ls = vec_splat(l, 1);
+  vh = vec_sub(vec_add(ls, ah), tl);
+  vl = vec_sub(vec_add(ls, al), tl);
+  vec_vsx_st(vec_packsu(vh, vl), 0, dst);
+  dst += stride;
+
+  ls = vec_splat(l, 2);
+  vh = vec_sub(vec_add(ls, ah), tl);
+  vl = vec_sub(vec_add(ls, al), tl);
+  vec_vsx_st(vec_packsu(vh, vl), 0, dst);
+  dst += stride;
+
+  ls = vec_splat(l, 3);
+  vh = vec_sub(vec_add(ls, ah), tl);
+  vl = vec_sub(vec_add(ls, al), tl);
+  vec_vsx_st(vec_packsu(vh, vl), 0, dst);
+  dst += stride;
+
+  ls = vec_splat(l, 4);
+  vh = vec_sub(vec_add(ls, ah), tl);
+  vl = vec_sub(vec_add(ls, al), tl);
+  vec_vsx_st(vec_packsu(vh, vl), 0, dst);
+  dst += stride;
+
+  ls = vec_splat(l, 5);
+  vh = vec_sub(vec_add(ls, ah), tl);
+  vl = vec_sub(vec_add(ls, al), tl);
+  vec_vsx_st(vec_packsu(vh, vl), 0, dst);
+  dst += stride;
+
+  ls = vec_splat(l, 6);
+  vh = vec_sub(vec_add(ls, ah), tl);
+  vl = vec_sub(vec_add(ls, al), tl);
+  vec_vsx_st(vec_packsu(vh, vl), 0, dst);
+  dst += stride;
+
+  ls = vec_splat(l, 7);
+  vh = vec_sub(vec_add(ls, ah), tl);
+  vl = vec_sub(vec_add(ls, al), tl);
+  vec_vsx_st(vec_packsu(vh, vl), 0, dst);
+}
+
+void vpx_tm_predictor_16x16_vsx(uint8_t *dst, ptrdiff_t stride,
+                                const uint8_t *above, const uint8_t *left) {
+  const int16x8_t tl = unpack_to_s16_h(vec_splat(vec_vsx_ld(-1, above), 0));
+  const uint8x16_t l = vec_vsx_ld(0, left);
+  const int16x8_t lh = unpack_to_s16_h(l);
+  const int16x8_t ll = unpack_to_s16_l(l);
+  const uint8x16_t a = vec_vsx_ld(0, above);
+  const int16x8_t ah = unpack_to_s16_h(a);
+  const int16x8_t al = unpack_to_s16_l(a);
+
+  tm_predictor_16x8(dst, stride, lh, ah, al, tl);
+
+  dst += stride * 8;
+
+  tm_predictor_16x8(dst, stride, ll, ah, al, tl);
+}
