@@ -378,7 +378,7 @@ static void cyclic_refresh_update_map(VP9_COMP *const cpi) {
         VPXMIN(cm->mi_rows - mi_row, num_8x8_blocks_high_lookup[BLOCK_64X64]);
     if (cpi->noise_estimate.enabled && cpi->noise_estimate.level >= kMedium &&
         (xmis <= 2 || ymis <= 2))
-      consec_zero_mv_thresh_block = 10;
+      consec_zero_mv_thresh_block = 4;
     for (y = 0; y < ymis; y++) {
       for (x = 0; x < xmis; x++) {
         const int bl_index2 = bl_index + y * cm->mi_cols + x;
