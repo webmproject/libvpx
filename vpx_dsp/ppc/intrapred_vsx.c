@@ -295,3 +295,69 @@ void vpx_tm_predictor_16x16_vsx(uint8_t *dst, ptrdiff_t stride,
 
   tm_predictor_16x8(dst, stride, ll, ah, al, tl);
 }
+
+static INLINE void tm_predictor_32x1(uint8_t *dst, const int16x8_t ls,
+                                     const int16x8_t a0h, const int16x8_t a0l,
+                                     const int16x8_t a1h, const int16x8_t a1l,
+                                     const int16x8_t tl) {
+  int16x8_t vh, vl;
+
+  vh = vec_sub(vec_add(ls, a0h), tl);
+  vl = vec_sub(vec_add(ls, a0l), tl);
+  vec_vsx_st(vec_packsu(vh, vl), 0, dst);
+  vh = vec_sub(vec_add(ls, a1h), tl);
+  vl = vec_sub(vec_add(ls, a1l), tl);
+  vec_vsx_st(vec_packsu(vh, vl), 16, dst);
+}
+
+static void tm_predictor_32x8(uint8_t *dst, const ptrdiff_t stride,
+                              const int16x8_t l, const uint8x16_t a0,
+                              const uint8x16_t a1, const int16x8_t tl) {
+  const int16x8_t a0h = unpack_to_s16_h(a0);
+  const int16x8_t a0l = unpack_to_s16_l(a0);
+  const int16x8_t a1h = unpack_to_s16_h(a1);
+  const int16x8_t a1l = unpack_to_s16_l(a1);
+
+  tm_predictor_32x1(dst, vec_splat(l, 0), a0h, a0l, a1h, a1l, tl);
+  dst += stride;
+
+  tm_predictor_32x1(dst, vec_splat(l, 1), a0h, a0l, a1h, a1l, tl);
+  dst += stride;
+
+  tm_predictor_32x1(dst, vec_splat(l, 2), a0h, a0l, a1h, a1l, tl);
+  dst += stride;
+
+  tm_predictor_32x1(dst, vec_splat(l, 3), a0h, a0l, a1h, a1l, tl);
+  dst += stride;
+
+  tm_predictor_32x1(dst, vec_splat(l, 4), a0h, a0l, a1h, a1l, tl);
+  dst += stride;
+
+  tm_predictor_32x1(dst, vec_splat(l, 5), a0h, a0l, a1h, a1l, tl);
+  dst += stride;
+
+  tm_predictor_32x1(dst, vec_splat(l, 6), a0h, a0l, a1h, a1l, tl);
+  dst += stride;
+
+  tm_predictor_32x1(dst, vec_splat(l, 7), a0h, a0l, a1h, a1l, tl);
+}
+
+void vpx_tm_predictor_32x32_vsx(uint8_t *dst, ptrdiff_t stride,
+                                const uint8_t *above, const uint8_t *left) {
+  const int16x8_t tl = unpack_to_s16_h(vec_splat(vec_vsx_ld(-1, above), 0));
+  const uint8x16_t l0 = vec_vsx_ld(0, left);
+  const uint8x16_t l1 = vec_vsx_ld(16, left);
+  const uint8x16_t a0 = vec_vsx_ld(0, above);
+  const uint8x16_t a1 = vec_vsx_ld(16, above);
+
+  tm_predictor_32x8(dst, stride, unpack_to_s16_h(l0), a0, a1, tl);
+  dst += stride * 8;
+
+  tm_predictor_32x8(dst, stride, unpack_to_s16_l(l0), a0, a1, tl);
+  dst += stride * 8;
+
+  tm_predictor_32x8(dst, stride, unpack_to_s16_h(l1), a0, a1, tl);
+  dst += stride * 8;
+
+  tm_predictor_32x8(dst, stride, unpack_to_s16_l(l1), a0, a1, tl);
+}
