@@ -294,7 +294,7 @@ static void highbd_12_variance(const uint8_t *a8, int a_stride,
                                               uint32_t *sse) {                 \
     int sum;                                                                   \
     highbd_8_variance(a, a_stride, b, b_stride, W, H, sse, &sum);              \
-    return *sse - (((int64_t)sum * sum) / (W * H));                            \
+    return *sse - (uint32_t)(((int64_t)sum * sum) / (W * H));                  \
   }                                                                            \
                                                                                \
   uint32_t vpx_highbd_10_variance##W##x##H##_c(const uint8_t *a, int a_stride, \

@@ -157,7 +157,8 @@ unsigned int vp9_high_get_sby_perpixel_variance(VP9_COMP *cpi,
                              CONVERT_TO_BYTEPTR(VP9_HIGH_VAR_OFFS_8), 0, &sse);
       break;
   }
-  return ROUND64_POWER_OF_TWO((int64_t)var, num_pels_log2_lookup[bs]);
+  return (unsigned int)ROUND64_POWER_OF_TWO((int64_t)var,
+                                            num_pels_log2_lookup[bs]);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
