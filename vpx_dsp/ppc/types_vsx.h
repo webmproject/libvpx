@@ -13,8 +13,11 @@
 
 #include <altivec.h>
 
+typedef vector signed char int8x16_t;
+typedef vector unsigned char uint8x16_t;
 typedef vector signed short int16x8_t;
 typedef vector unsigned short uint16x8_t;
 typedef vector signed int int32x4_t;
+typedef vector unsigned int uint32x4_t;
 
 #endif  // VPX_DSP_PPC_TYPES_VSX_H_
