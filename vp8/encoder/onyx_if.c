@@ -2090,11 +2090,7 @@ void vp8_remove_compressor(VP8_COMP **ptr) {
       double time_encoded =
           (cpi->last_end_time_stamp_seen - cpi->first_time_stamp_ever) /
           10000000.000;
-      double total_encode_time =
-          (cpi->time_receive_data + cpi->time_compress_data) / 1000.000;
       double dr = (double)cpi->bytes * 8.0 / 1000.0 / time_encoded;
-      const double target_rate = (double)cpi->oxcf.target_bandwidth / 1000;
-      const double rate_err = ((100.0 * (dr - target_rate)) / target_rate);
 
       if (cpi->b_calculate_psnr) {
         if (cpi->oxcf.number_of_layers > 1) {
