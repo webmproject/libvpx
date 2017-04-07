@@ -92,3 +92,90 @@ void vpx_h_predictor_16x16_vsx(uint8_t *dst, ptrdiff_t stride,
   dst += stride;
   vec_vsx_st(v15, 0, dst);
 }
+
+#define H_PREDICTOR_32(v) \
+  vec_vsx_st(v, 0, dst);  \
+  vec_vsx_st(v, 16, dst); \
+  dst += stride
+
+void vpx_h_predictor_32x32_vsx(uint8_t *dst, ptrdiff_t stride,
+                               const uint8_t *above, const uint8_t *left) {
+  const uint8x16_t d0 = vec_vsx_ld(0, left);
+  const uint8x16_t d1 = vec_vsx_ld(16, left);
+
+  const uint8x16_t v0_0 = vec_splat(d0, 0);
+  const uint8x16_t v1_0 = vec_splat(d0, 1);
+  const uint8x16_t v2_0 = vec_splat(d0, 2);
+  const uint8x16_t v3_0 = vec_splat(d0, 3);
+  const uint8x16_t v4_0 = vec_splat(d0, 4);
+  const uint8x16_t v5_0 = vec_splat(d0, 5);
+  const uint8x16_t v6_0 = vec_splat(d0, 6);
+  const uint8x16_t v7_0 = vec_splat(d0, 7);
+  const uint8x16_t v8_0 = vec_splat(d0, 8);
+  const uint8x16_t v9_0 = vec_splat(d0, 9);
+  const uint8x16_t v10_0 = vec_splat(d0, 10);
+  const uint8x16_t v11_0 = vec_splat(d0, 11);
+  const uint8x16_t v12_0 = vec_splat(d0, 12);
+  const uint8x16_t v13_0 = vec_splat(d0, 13);
+  const uint8x16_t v14_0 = vec_splat(d0, 14);
+  const uint8x16_t v15_0 = vec_splat(d0, 15);
+
+  const uint8x16_t v0_1 = vec_splat(d1, 0);
+  const uint8x16_t v1_1 = vec_splat(d1, 1);
+  const uint8x16_t v2_1 = vec_splat(d1, 2);
+  const uint8x16_t v3_1 = vec_splat(d1, 3);
+  const uint8x16_t v4_1 = vec_splat(d1, 4);
+  const uint8x16_t v5_1 = vec_splat(d1, 5);
+  const uint8x16_t v6_1 = vec_splat(d1, 6);
+  const uint8x16_t v7_1 = vec_splat(d1, 7);
+  const uint8x16_t v8_1 = vec_splat(d1, 8);
+  const uint8x16_t v9_1 = vec_splat(d1, 9);
+  const uint8x16_t v10_1 = vec_splat(d1, 10);
+  const uint8x16_t v11_1 = vec_splat(d1, 11);
+  const uint8x16_t v12_1 = vec_splat(d1, 12);
+  const uint8x16_t v13_1 = vec_splat(d1, 13);
+  const uint8x16_t v14_1 = vec_splat(d1, 14);
+  const uint8x16_t v15_1 = vec_splat(d1, 15);
+
+  (void)above;
+
+  H_PREDICTOR_32(v0_0);
+  H_PREDICTOR_32(v1_0);
+  H_PREDICTOR_32(v2_0);
+  H_PREDICTOR_32(v3_0);
+
+  H_PREDICTOR_32(v4_0);
+  H_PREDICTOR_32(v5_0);
+  H_PREDICTOR_32(v6_0);
+  H_PREDICTOR_32(v7_0);
+
+  H_PREDICTOR_32(v8_0);
+  H_PREDICTOR_32(v9_0);
+  H_PREDICTOR_32(v10_0);
+  H_PREDICTOR_32(v11_0);
+
+  H_PREDICTOR_32(v12_0);
+  H_PREDICTOR_32(v13_0);
+  H_PREDICTOR_32(v14_0);
+  H_PREDICTOR_32(v15_0);
+
+  H_PREDICTOR_32(v0_1);
+  H_PREDICTOR_32(v1_1);
+  H_PREDICTOR_32(v2_1);
+  H_PREDICTOR_32(v3_1);
+
+  H_PREDICTOR_32(v4_1);
+  H_PREDICTOR_32(v5_1);
+  H_PREDICTOR_32(v6_1);
+  H_PREDICTOR_32(v7_1);
+
+  H_PREDICTOR_32(v8_1);
+  H_PREDICTOR_32(v9_1);
+  H_PREDICTOR_32(v10_1);
+  H_PREDICTOR_32(v11_1);
+
+  H_PREDICTOR_32(v12_1);
+  H_PREDICTOR_32(v13_1);
+  H_PREDICTOR_32(v14_1);
+  H_PREDICTOR_32(v15_1);
+}
