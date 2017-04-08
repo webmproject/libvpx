@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2cea1a34_3e67ba0c",
+        "filename": "test/convolve_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 559,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-08T03:25:39Z",
+      "side": 1,
+      "message": "this can go, it doesn\u0027t add much benefit in the output",
+      "range": {
+        "startLine": 559,
+        "startChar": 33,
+        "endLine": 559,
+        "endChar": 43
+      },
+      "revId": "a6b916d292d43c655d4661ea1e29551814f0ee32",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7cd28d52_2234b850",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-08T03:25:39Z",
+      "side": 1,
+      "message": "these branches only need to be done once. have you checked to see that they\u0027re removed from the loop? if not it may be better to have explicit checks on the 4/8/16/32/64 widths. That would also allow finer control of unrolling, we avoid unrolling 64 on neon for instance, but operate on 2 rows in the other branches",
+      "revId": "a6b916d292d43c655d4661ea1e29551814f0ee32",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
