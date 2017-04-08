@@ -177,10 +177,10 @@ add_proto qw/void vpx_dc_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, co
 specialize qw/vpx_dc_predictor_32x32 msa neon sse2/;
 
 add_proto qw/void vpx_dc_top_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vpx_dc_top_predictor_32x32 msa neon sse2/;
+specialize qw/vpx_dc_top_predictor_32x32 msa neon sse2 vsx/;
 
 add_proto qw/void vpx_dc_left_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vpx_dc_left_predictor_32x32 msa neon sse2/;
+specialize qw/vpx_dc_left_predictor_32x32 msa neon sse2 vsx/;
 
 add_proto qw/void vpx_dc_128_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vpx_dc_128_predictor_32x32 msa neon sse2 vsx/;
