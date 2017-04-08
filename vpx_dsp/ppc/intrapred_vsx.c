@@ -398,3 +398,28 @@ void vpx_dc_128_predictor_32x32_vsx(uint8_t *dst, ptrdiff_t stride,
 
   dc_fill_predictor_32x32(dst, stride, v128);
 }
+
+static uint8x16_t avg16(const uint8_t *values) {
+  const int32x4_t sum4s =
+      (int32x4_t)vec_sum4s(vec_vsx_ld(0, values), vec_splat_u32(0));
+  const uint32x4_t sum = (uint32x4_t)vec_sums(sum4s, vec_splat_s32(8));
+  const uint32x4_t avg = (uint32x4_t)vec_sr(sum, vec_splat_u32(4));
+
+  return vec_splat(vec_pack(vec_pack(avg, vec_splat_u32(0)), vec_splat_u16(0)),
+                   3);
+}
+
+void vpx_dc_left_predictor_16x16_vsx(uint8_t *dst, ptrdiff_t stride,
+                                     const uint8_t *above,
+                                     const uint8_t *left) {
+  (void)above;
+
+  dc_fill_predictor_16x16(dst, stride, avg16(left));
+}
+
+void vpx_dc_top_predictor_16x16_vsx(uint8_t *dst, ptrdiff_t stride,
+                                    const uint8_t *above, const uint8_t *left) {
+  (void)left;
+
+  dc_fill_predictor_16x16(dst, stride, avg16(above));
+}
