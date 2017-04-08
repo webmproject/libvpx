@@ -379,3 +379,22 @@ void vpx_dc_128_predictor_16x16_vsx(uint8_t *dst, ptrdiff_t stride,
 
   dc_fill_predictor_16x16(dst, stride, v128);
 }
+
+static INLINE void dc_fill_predictor_32x32(uint8_t *dst, const ptrdiff_t stride,
+                                           const uint8x16_t val) {
+  int i;
+
+  for (i = 0; i < 32; i++, dst += stride) {
+    vec_vsx_st(val, 0, dst);
+    vec_vsx_st(val, 16, dst);
+  }
+}
+
+void vpx_dc_128_predictor_32x32_vsx(uint8_t *dst, ptrdiff_t stride,
+                                    const uint8_t *above, const uint8_t *left) {
+  const uint8x16_t v128 = vec_sl(vec_splat_u8(1), vec_splat_u8(7));
+  (void)above;
+  (void)left;
+
+  dc_fill_predictor_32x32(dst, stride, v128);
+}
