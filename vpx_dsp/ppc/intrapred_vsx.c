@@ -489,3 +489,32 @@ void vpx_dc_predictor_32x32_vsx(uint8_t *dst, ptrdiff_t stride,
                                 const uint8_t *above, const uint8_t *left) {
   dc_fill_predictor_32x32(dst, stride, dc_avg32(above, left));
 }
+
+static uint8x16_t avg3(const uint8x16_t a, const uint8x16_t b,
+                       const uint8x16_t c) {
+  const uint8x16_t ac =
+      vec_adds(vec_and(a, c), vec_sr(vec_xor(a, c), vec_splat_u8(1)));
+
+  return vec_avg(ac, b);
+}
+
+// Workaround vec_sld/vec_xxsldi/vec_lsdoi being missing or broken.
+static const uint8x16_t sl1 = { 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8,
+                                0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF, 0x10 };
+
+void vpx_d45_predictor_16x16_vsx(uint8_t *dst, ptrdiff_t stride,
+                                 const uint8_t *above, const uint8_t *left) {
+  const uint8x16_t a = vec_vsx_ld(0, above);
+  const uint8x16_t above_right = vec_splat(a, 15);
+  const uint8x16_t b = vec_perm(a, above_right, sl1);
+  const uint8x16_t c = vec_perm(b, above_right, sl1);
+  uint8x16_t row = avg3(a, b, c);
+  int i;
+  (void)left;
+
+  for (i = 0; i < 16; i++) {
+    vec_vsx_st(row, 0, dst);
+    dst += stride;
+    row = vec_perm(row, above_right, sl1);
+  }
+}
