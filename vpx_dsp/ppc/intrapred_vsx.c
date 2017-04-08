@@ -451,3 +451,41 @@ void vpx_dc_top_predictor_32x32_vsx(uint8_t *dst, ptrdiff_t stride,
 
   dc_fill_predictor_32x32(dst, stride, avg32(above));
 }
+
+static uint8x16_t dc_avg16(const uint8_t *above, const uint8_t *left) {
+  const uint8x16_t a0 = vec_vsx_ld(0, above);
+  const uint8x16_t l0 = vec_vsx_ld(0, left);
+  const int32x4_t v16 = vec_sl(vec_splat_s32(1), vec_splat_u32(4));
+  const int32x4_t sum4s =
+      (int32x4_t)vec_sum4s(l0, vec_sum4s(a0, vec_splat_u32(0)));
+  const uint32x4_t sum = (uint32x4_t)vec_sums(sum4s, v16);
+  const uint32x4_t avg = (uint32x4_t)vec_sr(sum, vec_splat_u32(5));
+
+  return vec_splat(vec_pack(vec_pack(avg, vec_splat_u32(0)), vec_splat_u16(0)),
+                   3);
+}
+
+void vpx_dc_predictor_16x16_vsx(uint8_t *dst, ptrdiff_t stride,
+                                const uint8_t *above, const uint8_t *left) {
+  dc_fill_predictor_16x16(dst, stride, dc_avg16(above, left));
+}
+
+static uint8x16_t dc_avg32(const uint8_t *above, const uint8_t *left) {
+  const uint8x16_t a0 = vec_vsx_ld(0, above);
+  const uint8x16_t a1 = vec_vsx_ld(16, above);
+  const uint8x16_t l0 = vec_vsx_ld(0, left);
+  const uint8x16_t l1 = vec_vsx_ld(16, left);
+  const int32x4_t v32 = vec_sl(vec_splat_s32(1), vec_splat_u32(5));
+  const uint32x4_t a_sum = vec_sum4s(a0, vec_sum4s(a1, vec_splat_u32(0)));
+  const int32x4_t sum4s = (int32x4_t)vec_sum4s(l0, vec_sum4s(l1, a_sum));
+  const uint32x4_t sum = (uint32x4_t)vec_sums(sum4s, v32);
+  const uint32x4_t avg = (uint32x4_t)vec_sr(sum, vec_splat_u32(6));
+
+  return vec_splat(vec_pack(vec_pack(avg, vec_splat_u32(0)), vec_splat_u16(0)),
+                   3);
+}
+
+void vpx_dc_predictor_32x32_vsx(uint8_t *dst, ptrdiff_t stride,
+                                const uint8_t *above, const uint8_t *left) {
+  dc_fill_predictor_32x32(dst, stride, dc_avg32(above, left));
+}
