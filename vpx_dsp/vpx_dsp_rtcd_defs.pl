@@ -39,7 +39,7 @@ specialize qw/vpx_d63_predictor_4x4 ssse3/;
 add_proto qw/void vpx_d63e_predictor_4x4/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
 
 add_proto qw/void vpx_h_predictor_4x4/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vpx_h_predictor_4x4 neon dspr2 msa sse2/;
+specialize qw/vpx_h_predictor_4x4 neon dspr2 msa sse2 vsx/;
 
 add_proto qw/void vpx_he_predictor_4x4/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
 

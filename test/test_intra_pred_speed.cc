@@ -313,6 +313,10 @@ INTRA_PRED_TEST(MSA, TestIntraPred32, vpx_dc_predictor_32x32_msa,
 #endif  // HAVE_MSA
 
 #if HAVE_VSX
+INTRA_PRED_TEST(VSX, TestIntraPred4, NULL, NULL, NULL, NULL, NULL,
+                vpx_h_predictor_4x4_vsx, NULL, NULL, NULL, NULL, NULL, NULL,
+                NULL)
+
 INTRA_PRED_TEST(VSX, TestIntraPred8, vpx_dc_predictor_8x8_vsx, NULL, NULL, NULL,
                 NULL, NULL, vpx_d45_predictor_8x8_vsx, NULL, NULL, NULL, NULL,
                 NULL, vpx_tm_predictor_8x8_vsx)
