@@ -201,6 +201,38 @@ void vpx_h_predictor_32x32_vsx(uint8_t *dst, ptrdiff_t stride,
   H_PREDICTOR_32(v15_1);
 }
 
+void vpx_tm_predictor_4x4_vsx(uint8_t *dst, ptrdiff_t stride,
+                              const uint8_t *above, const uint8_t *left) {
+  const int16x8_t tl = unpack_to_s16_h(vec_splat(vec_vsx_ld(-1, above), 0));
+  const int16x8_t l = unpack_to_s16_h(vec_vsx_ld(0, left));
+  const int16x8_t a = unpack_to_s16_h(vec_vsx_ld(0, above));
+  int16x8_t tmp, val;
+  uint8x16_t d;
+
+  d = vec_vsx_ld(0, dst);
+  tmp = unpack_to_s16_l(d);
+  val = vec_sub(vec_add(vec_splat(l, 0), a), tl);
+  vec_vsx_st(vec_sel(vec_packsu(val, tmp), d, (uint8x16_t)mask4), 0, dst);
+  dst += stride;
+
+  d = vec_vsx_ld(0, dst);
+  tmp = unpack_to_s16_l(d);
+  val = vec_sub(vec_add(vec_splat(l, 1), a), tl);
+  vec_vsx_st(vec_sel(vec_packsu(val, tmp), d, (uint8x16_t)mask4), 0, dst);
+  dst += stride;
+
+  d = vec_vsx_ld(0, dst);
+  tmp = unpack_to_s16_l(d);
+  val = vec_sub(vec_add(vec_splat(l, 2), a), tl);
+  vec_vsx_st(vec_sel(vec_packsu(val, tmp), d, (uint8x16_t)mask4), 0, dst);
+  dst += stride;
+
+  d = vec_vsx_ld(0, dst);
+  tmp = unpack_to_s16_l(d);
+  val = vec_sub(vec_add(vec_splat(l, 3), a), tl);
+  vec_vsx_st(vec_sel(vec_packsu(val, tmp), d, (uint8x16_t)mask4), 0, dst);
+}
+
 void vpx_tm_predictor_8x8_vsx(uint8_t *dst, ptrdiff_t stride,
                               const uint8_t *above, const uint8_t *left) {
   const int16x8_t tl = unpack_to_s16_h(vec_splat(vec_vsx_ld(-1, above), 0));
