@@ -75,7 +75,7 @@ add_proto qw/void vpx_d207_predictor_8x8/, "uint8_t *dst, ptrdiff_t y_stride, co
 specialize qw/vpx_d207_predictor_8x8 ssse3/;
 
 add_proto qw/void vpx_d45_predictor_8x8/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vpx_d45_predictor_8x8 neon sse2/;
+specialize qw/vpx_d45_predictor_8x8 neon sse2 vsx/;
 
 add_proto qw/void vpx_d63_predictor_8x8/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vpx_d63_predictor_8x8 ssse3/;
