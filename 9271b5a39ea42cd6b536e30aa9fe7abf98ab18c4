@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "71e09179_a6159dd2",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-10T19:59:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a858066c_9898118e",
+      "revId": "9271b5a39ea42cd6b536e30aa9fe7abf98ab18c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3d6bbbe_0eef8a2f",
         "filename": "vpx_dsp/x86/avg_pred_sse2.c",
         "patchSetId": 10
@@ -42,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "a52747d7_a034ee41",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-10T19:59:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e3d6bbbe_0eef8a2f",
+      "range": {
+        "startLine": 47,
+        "startChar": 12,
+        "endLine": 47,
+        "endChar": 20
+      },
+      "revId": "9271b5a39ea42cd6b536e30aa9fe7abf98ab18c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0be34363_bbfc11da",
         "filename": "vpx_dsp/x86/avg_pred_sse2.c",
         "patchSetId": 10
@@ -59,6 +101,24 @@
     },
     {
       "key": {
+        "uuid": "833f44fd_68c3d7f0",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-10T19:59:22Z",
+      "side": 1,
+      "message": "Yes. But if there is a stride, I am assuming there is enough a buffer to avoid oob reads.",
+      "parentUuid": "0be34363_bbfc11da",
+      "revId": "9271b5a39ea42cd6b536e30aa9fe7abf98ab18c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8a277118_e63bf519",
         "filename": "vpx_dsp/x86/avg_pred_sse2.c",
         "patchSetId": 10
@@ -70,6 +130,30 @@
       "writtenOn": "2017-04-08T00:03:55Z",
       "side": 1,
       "message": "you can assert() that",
+      "range": {
+        "startLine": 57,
+        "startChar": 19,
+        "endLine": 57,
+        "endChar": 35
+      },
+      "revId": "9271b5a39ea42cd6b536e30aa9fe7abf98ab18c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9389268a_0b60cd8d",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-10T19:59:22Z",
+      "side": 1,
+      "message": "I meant it to clarify the missing if condition. I was more \"at this point we have exhausted the sizes. The last remaining one is 8\"",
+      "parentUuid": "8a277118_e63bf519",
       "range": {
         "startLine": 57,
         "startChar": 19,
