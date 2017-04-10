@@ -22,6 +22,30 @@
       "revId": "554f1d989f340456ae2616ba07a708e85a809c67",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cdacddb8_4d43b560",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-10T20:21:47Z",
+      "side": 1,
+      "message": "It is necessary for avoiding OOB reads here:\nhttps://chromium.googlesource.com/webm/libvpx/+/master/vpx_dsp/variance.c#167",
+      "parentUuid": "c8ba3393_343e013f",
+      "range": {
+        "startLine": 40,
+        "startChar": 7,
+        "endLine": 40,
+        "endChar": 30
+      },
+      "revId": "554f1d989f340456ae2616ba07a708e85a809c67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
