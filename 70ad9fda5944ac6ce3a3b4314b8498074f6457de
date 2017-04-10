@@ -16,6 +16,24 @@
       "revId": "70ad9fda5944ac6ce3a3b4314b8498074f6457de",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "834216a3_4b4daca4",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 558,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-04-10T22:29:43Z",
+      "side": 1,
+      "message": "use_simple_block_yrd is set outside the conditions: if (!cpi-\u003euse_svc \u0026\u0026 cpi-\u003eoxcf.rc_mode \u003d\u003d VPX_CBR \u0026\u0026 content !\u003d VP9E_CONTENT_SCREEN)\n\ndo you mean moving this outside too?",
+      "parentUuid": "ac040af0_b39dda8a",
+      "revId": "70ad9fda5944ac6ce3a3b4314b8498074f6457de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
