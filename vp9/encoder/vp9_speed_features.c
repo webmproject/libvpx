@@ -555,7 +555,10 @@ static void set_rt_speed_feature_framesize_independent(
       }
       // Since the short_circuit_low_temp_var is used, reduce the
       // adaptive_rd_thresh level.
-      sf->adaptive_rd_thresh = 1;
+      if (cm->width > 320 && cm->height > 240)
+        sf->adaptive_rd_thresh = 1;
+      else
+        sf->adaptive_rd_thresh = 2;
     }
     sf->limit_newmv_early_exit = 0;
     if (cm->width > 320 && cm->height > 240) sf->use_simple_block_yrd = 1;

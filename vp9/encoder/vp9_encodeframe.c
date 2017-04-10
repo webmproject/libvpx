@@ -1142,7 +1142,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     mi->mv[0].as_int = 0;
     mi->interp_filter = BILINEAR;
 
-    if (cpi->oxcf.speed >= 8)
+    if (cpi->oxcf.speed >= 8 && !low_res)
       y_sad = cpi->fn_ptr[bsize].sdf(
           x->plane[0].src.buf, x->plane[0].src.stride, xd->plane[0].pre[0].buf,
           xd->plane[0].pre[0].stride);
