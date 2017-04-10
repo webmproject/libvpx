@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b3f33a22_24506043",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-10T19:02:09Z",
+      "side": 1,
+      "message": "some of the jobs parse the console output for warnings and errors, drop the \u0027runtime error:\u0027 part and it shouldn\u0027t match",
+      "revId": "7d2f2bf531ed21890c787ce71bb6bb7e15679e5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
