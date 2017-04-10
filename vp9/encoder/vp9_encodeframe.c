@@ -4152,14 +4152,11 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
         break;
       case REFERENCE_PARTITION:
         set_offsets(cpi, tile_info, x, mi_row, mi_col, BLOCK_64X64);
-        // Use nonrd_pick_partition on scene-cut for VBR, or on qp-segment
-        // if cyclic_refresh is enabled.
+        // Use nonrd_pick_partition on scene-cut for VBR mode.
         // nonrd_pick_partition does not support 4x4 partition, so avoid it
         // on key frame for now.
         if ((cpi->oxcf.rc_mode == VPX_VBR && cpi->rc.high_source_sad &&
-             cm->frame_type != KEY_FRAME) ||
-            (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled &&
-             xd->mi[0]->segment_id)) {
+             cm->frame_type != KEY_FRAME)) {
           // Use lower max_partition_size for low resoultions.
           if (cm->width <= 352 && cm->height <= 288)
             x->max_partition_size = BLOCK_32X32;
