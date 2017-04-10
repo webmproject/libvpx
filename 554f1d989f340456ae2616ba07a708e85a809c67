@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c8ba3393_343e013f",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-04-10T20:17:29Z",
+      "side": 1,
+      "message": "This branch can be removed if width never or rarely equals ref_stride in real encoder.",
+      "range": {
+        "startLine": 40,
+        "startChar": 7,
+        "endLine": 40,
+        "endChar": 30
+      },
+      "revId": "554f1d989f340456ae2616ba07a708e85a809c67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
