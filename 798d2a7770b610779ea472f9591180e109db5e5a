@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3400eabb_11eecbe2",
+        "filename": "test/acm_random.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-04-10T20:42:20Z",
+      "side": 1,
+      "message": "\u003e\u003e 28",
+      "range": {
+        "startLine": 51,
+        "startChar": 18,
+        "endLine": 51,
+        "endChar": 23
+      },
+      "revId": "798d2a7770b610779ea472f9591180e109db5e5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
