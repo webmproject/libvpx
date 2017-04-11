@@ -319,7 +319,7 @@ INTRA_PRED_TEST(VSX, TestIntraPred4, NULL, NULL, NULL, NULL, NULL,
 
 INTRA_PRED_TEST(VSX, TestIntraPred8, vpx_dc_predictor_8x8_vsx, NULL, NULL, NULL,
                 NULL, NULL, vpx_d45_predictor_8x8_vsx, NULL, NULL, NULL, NULL,
-                NULL, vpx_tm_predictor_8x8_vsx)
+                vpx_d63_predictor_8x8_vsx, vpx_tm_predictor_8x8_vsx)
 
 INTRA_PRED_TEST(VSX, TestIntraPred16, vpx_dc_predictor_16x16_vsx,
                 vpx_dc_left_predictor_16x16_vsx, vpx_dc_top_predictor_16x16_vsx,
