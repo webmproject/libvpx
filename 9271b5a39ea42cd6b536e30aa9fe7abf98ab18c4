@@ -137,6 +137,24 @@
     },
     {
       "key": {
+        "uuid": "7f9b80d7_431d8b66",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-11T22:53:47Z",
+      "side": 1,
+      "message": "I was clearing the high bits manually before. Re-reading the movd documentation, that isn\u0027t necessary. It\u0027s pretty similar speed-wise now.\n\n8x8 doesn\u0027t hit this - only width \u003d\u003d 4",
+      "parentUuid": "816ce957_07af6b5e",
+      "revId": "9271b5a39ea42cd6b536e30aa9fe7abf98ab18c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8a277118_e63bf519",
         "filename": "vpx_dsp/x86/avg_pred_sse2.c",
         "patchSetId": 10
