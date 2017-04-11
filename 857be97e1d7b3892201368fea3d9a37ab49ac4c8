@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b84353de_e671364a",
+        "filename": "vp9/encoder/x86/temporal_filter_ssse3.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-04-11T23:43:39Z",
+      "side": 1,
+      "message": "Maybe compiler has already done this:\nnum_values is only used to get the const multiplier, so its values could be 384, 256 and 171 instead of 4, 6, 9.\n\nLooks like there are only 2 cases: top/bottom row, and other rows. So only 2 sets of multipliers need be initialized to a const static table.\nAfter const multipliers8[2][8], multipliers16[2][16] is created, all calculations in this function could be SIMDed.",
+      "revId": "857be97e1d7b3892201368fea3d9a37ab49ac4c8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
