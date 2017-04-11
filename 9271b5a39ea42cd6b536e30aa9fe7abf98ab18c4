@@ -119,6 +119,24 @@
     },
     {
       "key": {
+        "uuid": "816ce957_07af6b5e",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-11T19:54:29Z",
+      "side": 1,
+      "message": "\u003e Yes. But if there is a stride, I am assuming there is enough a buffer to avoid oob reads.\n\ncan that assumption be enforced or documented here? Was this much better than just loading the 32-bits? have you hit this path with an 8x8 source?",
+      "parentUuid": "833f44fd_68c3d7f0",
+      "revId": "9271b5a39ea42cd6b536e30aa9fe7abf98ab18c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8a277118_e63bf519",
         "filename": "vpx_dsp/x86/avg_pred_sse2.c",
         "patchSetId": 10
