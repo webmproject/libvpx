@@ -22,6 +22,30 @@
       "revId": "313fcf7406ed24209f4820245e7e3f3014fd975e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ac288a94_792829e4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002404
+      },
+      "writtenOn": "2017-04-11T23:23:52Z",
+      "side": 1,
+      "message": "Probably the 8x8 should live in a separate patch.",
+      "parentUuid": "09ee6e40_2fca6f6a",
+      "range": {
+        "startLine": 7,
+        "startChar": 5,
+        "endLine": 7,
+        "endChar": 8
+      },
+      "revId": "313fcf7406ed24209f4820245e7e3f3014fd975e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
