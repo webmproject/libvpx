@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a7e2f652_c2c2cf5a",
+        "filename": "compare_two_pass_to_box/temporal_filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-11T21:19:23Z",
+      "side": 1,
+      "message": "I wasn\u0027t sure what kind of processing would be good for this comparison. Difference between src and dst? Sum squared? Let me know.",
+      "revId": "dc9894390bcc0dbad27c47d13267fc4a5b24449b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
