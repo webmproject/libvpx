@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "dd95642e_4ded241f",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 3219,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-04-11T21:07:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "298ad948_5a54f6a6",
+      "revId": "5707ae4442c7abee947490f7d81960f94d5f2717",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bae5272d_bc8535e4",
         "filename": "vp9/vp9_cx_iface.c",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "e759ca23_abe1a9ed",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 516,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-04-11T21:07:13Z",
+      "side": 1,
+      "message": "I changed the condition to call rd_speed_feature to get rid of this... I don\u0027t know if that\u0027s better..",
+      "parentUuid": "bae5272d_bc8535e4",
+      "revId": "5707ae4442c7abee947490f7d81960f94d5f2717",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "277b6635_3d773d28",
         "filename": "vp9/vp9_cx_iface.c",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2017-04-11T19:36:21Z",
       "side": 1,
       "message": "there\u0027s no guarantee this is always called",
+      "revId": "5707ae4442c7abee947490f7d81960f94d5f2717",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dbfe21d9_774f93e0",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 702,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-04-11T21:07:13Z",
+      "side": 1,
+      "message": "I moved the allocation to vp9_change_config.",
+      "parentUuid": "277b6635_3d773d28",
       "revId": "5707ae4442c7abee947490f7d81960f94d5f2717",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
