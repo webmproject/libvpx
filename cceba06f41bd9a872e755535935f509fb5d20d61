@@ -45,6 +45,29 @@
       "revId": "cceba06f41bd9a872e755535935f509fb5d20d61",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6e7a006f_a7298485",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2017-04-11T18:23:28Z",
+      "side": 1,
+      "message": "Can we make this frame size adaptive? or even content adaptive?",
+      "range": {
+        "startLine": 92,
+        "startChar": 27,
+        "endLine": 92,
+        "endChar": 38
+      },
+      "revId": "cceba06f41bd9a872e755535935f509fb5d20d61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
