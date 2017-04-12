@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ce554827_808fedad",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-12T16:37:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "14e1664e_2e217e24",
+      "revId": "978fe5f1fb338494f4cb22e277186ad12bd2245b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2e1db23a_9266452f",
         "filename": "vpx_dsp/x86/avg_pred_sse2.c",
         "patchSetId": 12
@@ -30,6 +48,24 @@
       "writtenOn": "2017-04-12T03:42:33Z",
       "side": 1,
       "message": "long lines, but what about _mm_set_epi32?",
+      "revId": "978fe5f1fb338494f4cb22e277186ad12bd2245b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6b8bfe46_c4ce60dc",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-12T16:37:58Z",
+      "side": 1,
+      "message": "that\u0027s a little faster and much easier to read",
+      "parentUuid": "2e1db23a_9266452f",
       "revId": "978fe5f1fb338494f4cb22e277186ad12bd2245b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
