@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "14e1664e_2e217e24",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-12T03:42:33Z",
+      "side": 1,
+      "message": "you could add asserts for that in the assembly and here as that\u0027s a constraint that\u0027s been put in place",
+      "revId": "978fe5f1fb338494f4cb22e277186ad12bd2245b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2e1db23a_9266452f",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-12T03:42:33Z",
+      "side": 1,
+      "message": "long lines, but what about _mm_set_epi32?",
+      "revId": "978fe5f1fb338494f4cb22e277186ad12bd2245b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
