@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bd1cbb02_2611a03e",
+        "filename": "vpx_dsp/ppc/types_vsx.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-13T23:44:25Z",
+      "side": 1,
+      "message": "apparently llvm/clang doesn\u0027t have this yet:\n\nhttp://bugs.llvm.org/show_bug.cgi?id\u003d32653",
+      "revId": "5923b567c0d1cc32cd0321237bf6c06b221bb61a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
