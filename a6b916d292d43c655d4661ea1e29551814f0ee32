@@ -39,6 +39,24 @@
       "revId": "a6b916d292d43c655d4661ea1e29551814f0ee32",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "df3fa645_23e5667c",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-04-13T21:44:45Z",
+      "side": 1,
+      "message": "Thanks for suggestion.  Moving those branches out of the loop speeds up functions quite obviously.  Unrolling block width, 4/8/16 speeds up function visibly. So they work as two row each iteration.  For block width 32/64, the speed up is not visible so they still work for row by row.",
+      "parentUuid": "7cd28d52_2234b850",
+      "revId": "a6b916d292d43c655d4661ea1e29551814f0ee32",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
