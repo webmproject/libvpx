@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6477cba3_652fd158",
+        "filename": "vpx_dsp/x86/avg_pred_sse2.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-13T00:18:23Z",
+      "side": 1,
+      "message": "don\u0027t you want ((intptr_t)comp \u0026 0xf) \u003d\u003d 0?",
+      "revId": "4cd7fb44e6d461a8371a329774060df8fa46b17f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
