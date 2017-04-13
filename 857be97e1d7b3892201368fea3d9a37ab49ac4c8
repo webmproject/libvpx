@@ -16,6 +16,24 @@
       "revId": "857be97e1d7b3892201368fea3d9a37ab49ac4c8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e12c8814_a7936150",
+        "filename": "vp9/encoder/x86/temporal_filter_ssse3.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-13T22:59:36Z",
+      "side": 1,
+      "message": "Huh, I had trouble finding one of the multiply functions I needed before. This still needs some cleanup, but it\u0027s fully in SIMD now.",
+      "parentUuid": "b84353de_e671364a",
+      "revId": "857be97e1d7b3892201368fea3d9a37ab49ac4c8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a2402cf_9889598b",
+        "filename": "vp9/encoder/x86/temporal_filter_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-13T22:59:36Z",
+      "side": 1,
+      "message": "Since strength is set for the whole frame I\u0027d like to roll this into mull_constants and get rid of the extra shift. Not sure if I can make it work with the rounding bit though.",
+      "revId": "a66902ad2b51320052b55a855f2ecc252a462905",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
