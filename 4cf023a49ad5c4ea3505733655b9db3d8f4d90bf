@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9d9d549e_672b009d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 2652,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-13T00:04:51Z",
+      "side": 1,
+      "message": "a positive test might read a bit better, is_reference_frame could work; you could also make the variable a const above and set it to the result of the test in the conditional",
+      "range": {
+        "startLine": 2652,
+        "startChar": 30,
+        "endLine": 2652,
+        "endChar": 50
+      },
+      "revId": "4cf023a49ad5c4ea3505733655b9db3d8f4d90bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
