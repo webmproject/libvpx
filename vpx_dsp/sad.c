@@ -39,7 +39,7 @@ static INLINE unsigned int sad(const uint8_t *a, int a_stride, const uint8_t *b,
   unsigned int vpx_sad##m##x##n##_avg_c(const uint8_t *src, int src_stride, \
                                         const uint8_t *ref, int ref_stride, \
                                         const uint8_t *second_pred) {       \
-    uint8_t comp_pred[m * n];                                               \
+    DECLARE_ALIGNED(16, uint8_t, comp_pred[m * n]);                         \
     vpx_comp_avg_pred_c(comp_pred, second_pred, m, n, ref, ref_stride);     \
     return sad(src, src_stride, comp_pred, m, m, n);                        \
   }
@@ -178,7 +178,7 @@ static INLINE unsigned int highbd_sadb(const uint8_t *a8, int a_stride,
   unsigned int vpx_highbd_sad##m##x##n##_avg_c(                                \
       const uint8_t *src, int src_stride, const uint8_t *ref, int ref_stride,  \
       const uint8_t *second_pred) {                                            \
-    uint16_t comp_pred[m * n];                                                 \
+    DECLARE_ALIGNED(16, uint16_t, comp_pred[m * n]);                           \
     vpx_highbd_comp_avg_pred_c(comp_pred, second_pred, m, n, ref, ref_stride); \
     return highbd_sadb(src, src_stride, comp_pred, m, m, n);                   \
   }
