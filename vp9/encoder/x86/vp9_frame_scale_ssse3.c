@@ -16,7 +16,8 @@
 #include "vpx_scale/yv12config.h"
 
 extern void vp9_scale_and_extend_frame_c(const YV12_BUFFER_CONFIG *src,
-                                         YV12_BUFFER_CONFIG *dst);
+                                         YV12_BUFFER_CONFIG *dst,
+                                         int phase_scaler);
 
 static void downsample_2_to_1_ssse3(const uint8_t *src, ptrdiff_t src_stride,
                                     uint8_t *dst, ptrdiff_t dst_stride, int w,
@@ -168,7 +169,8 @@ static void upsample_1_to_2_ssse3(const uint8_t *src, ptrdiff_t src_stride,
 }
 
 void vp9_scale_and_extend_frame_ssse3(const YV12_BUFFER_CONFIG *src,
-                                      YV12_BUFFER_CONFIG *dst) {
+                                      YV12_BUFFER_CONFIG *dst,
+                                      int phase_scaler) {
   const int src_w = src->y_crop_width;
   const int src_h = src->y_crop_height;
   const int dst_w = dst->y_crop_width;
@@ -176,7 +178,7 @@ void vp9_scale_and_extend_frame_ssse3(const YV12_BUFFER_CONFIG *src,
   const int dst_uv_w = dst_w / 2;
   const int dst_uv_h = dst_h / 2;
 
-  if (dst_w * 2 == src_w && dst_h * 2 == src_h) {
+  if (dst_w * 2 == src_w && dst_h * 2 == src_h && phase_scaler == 0) {
     downsample_2_to_1_ssse3(src->y_buffer, src->y_stride, dst->y_buffer,
                             dst->y_stride, dst_w, dst_h);
     downsample_2_to_1_ssse3(src->u_buffer, src->uv_stride, dst->u_buffer,
@@ -184,7 +186,7 @@ void vp9_scale_and_extend_frame_ssse3(const YV12_BUFFER_CONFIG *src,
     downsample_2_to_1_ssse3(src->v_buffer, src->uv_stride, dst->v_buffer,
                             dst->uv_stride, dst_uv_w, dst_uv_h);
     vpx_extend_frame_borders(dst);
-  } else if (dst_w == src_w * 2 && dst_h == src_h * 2) {
+  } else if (dst_w == src_w * 2 && dst_h == src_h * 2 && phase_scaler == 0) {
     // The upsample() supports widths up to 1920 * 2.  If greater, fall back
     // to vp9_scale_and_extend_frame_c().
     if (dst_w / 2 <= 1920) {
@@ -196,9 +198,9 @@ void vp9_scale_and_extend_frame_ssse3(const YV12_BUFFER_CONFIG *src,
                             dst->uv_stride, dst_uv_w, dst_uv_h);
       vpx_extend_frame_borders(dst);
     } else {
-      vp9_scale_and_extend_frame_c(src, dst);
+      vp9_scale_and_extend_frame_c(src, dst, phase_scaler);
     }
   } else {
-    vp9_scale_and_extend_frame_c(src, dst);
+    vp9_scale_and_extend_frame_c(src, dst, phase_scaler);
   }
 }
