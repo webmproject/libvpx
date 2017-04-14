@@ -533,7 +533,11 @@ static void set_rt_speed_feature_framesize_independent(
     if (cpi->row_mt && cpi->oxcf.max_threads > 1)
       sf->adaptive_rd_thresh_row_mt = 1;
 
-    sf->mv.subpel_force_stop = (content == VP9E_CONTENT_SCREEN) ? 3 : 2;
+    if (content == VP9E_CONTENT_SCREEN)
+      sf->mv.subpel_force_stop = 3;
+    else if (cm->width > 352 && cm->height > 288)
+      sf->mv.subpel_force_stop = 2;
+
     if (content == VP9E_CONTENT_SCREEN) sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
     // Only keep INTRA_DC mode for speed 8.
     if (!is_keyframe) {
@@ -555,13 +559,13 @@ static void set_rt_speed_feature_framesize_independent(
       }
       // Since the short_circuit_low_temp_var is used, reduce the
       // adaptive_rd_thresh level.
-      if (cm->width > 320 && cm->height > 240)
+      if (cm->width > 352 && cm->height > 288)
         sf->adaptive_rd_thresh = 1;
       else
         sf->adaptive_rd_thresh = 2;
     }
     sf->limit_newmv_early_exit = 0;
-    if (cm->width > 320 && cm->height > 240) sf->use_simple_block_yrd = 1;
+    sf->use_simple_block_yrd = 1;
   }
   // Turn off adaptive_rd_thresh if row_mt is on for speed 5, 6, 7.
   if (speed >= 5 && speed < 8 && cpi->row_mt && cpi->num_workers > 1) {
