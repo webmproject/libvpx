@@ -151,7 +151,8 @@ TEST_P(AvgPredTest, DISABLED_Speed) {
 INSTANTIATE_TEST_CASE_P(C, AvgPredTest,
                         ::testing::Values(&vpx_comp_avg_pred_c));
 
-#if HAVE_SSE2
+// TODO(johannkoenig): https://bugs.chromium.org/p/webm/issues/detail?id=1390
+#if 0   // HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(SSE2, AvgPredTest,
                         ::testing::Values(&vpx_comp_avg_pred_sse2));
 #endif  // HAVE_SSE2
