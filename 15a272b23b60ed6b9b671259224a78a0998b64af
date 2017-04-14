@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30d815d4_836e1572",
+        "filename": "vpx_dsp/ppc/types_vsx.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-04-14T16:36:01Z",
+      "side": 1,
+      "message": "Hi there,\n\nDo you have any clear online reference for ppc\u0027s intrinsics?  I found this one:\nhttps://www.ibm.com/developerworks/community/wikis/home?lang\u003den#!/wiki/W51a7ffcf4dfd_4b40_9d82_446ebc23c550/page/Intel%20SSE%20to%20PowerPC%20AltiVec%20migration",
+      "range": {
+        "startLine": 25,
+        "startChar": 15,
+        "endLine": 25,
+        "endChar": 25
+      },
+      "revId": "15a272b23b60ed6b9b671259224a78a0998b64af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
