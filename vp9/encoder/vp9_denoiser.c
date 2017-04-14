@@ -573,7 +573,8 @@ void vp9_denoiser_set_noise_level(VP9_DENOISER *denoiser, int noise_level) {
 int64_t vp9_scale_part_thresh(int64_t threshold, VP9_DENOISER_LEVEL noise_level,
                               int content_state) {
   if ((content_state == kLowSadLowSumdiff) ||
-      (content_state == kHighSadLowSumdiff) || noise_level == kDenHigh)
+      (content_state == kHighSadLowSumdiff) ||
+      (content_state == kLowVarHighSumdiff) || noise_level == kDenHigh)
     return (3 * threshold) >> 1;
   else
     return (5 * threshold) >> 2;

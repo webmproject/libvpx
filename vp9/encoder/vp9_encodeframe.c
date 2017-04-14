@@ -495,11 +495,13 @@ int64_t scale_part_thresh_sumdiff(int64_t threshold_base, int speed, int width,
     if (width <= 640 && height <= 480)
       return (5 * threshold_base) >> 2;
     else if ((content_state == kLowSadLowSumdiff) ||
-             (content_state == kHighSadLowSumdiff))
+             (content_state == kHighSadLowSumdiff) ||
+             (content_state == kLowVarHighSumdiff))
       return (5 * threshold_base) >> 2;
   } else if (speed == 7) {
     if ((content_state == kLowSadLowSumdiff) ||
-        (content_state == kHighSadLowSumdiff)) {
+        (content_state == kHighSadLowSumdiff) ||
+        (content_state == kLowVarHighSumdiff)) {
       return (5 * threshold_base) >> 2;
     }
   }
@@ -994,6 +996,11 @@ static void avg_source_sad(VP9_COMP *cpi, MACROBLOCK *x, int shift,
   else
     x->content_state_sb = ((tmp_sse - tmp_variance) < 25) ? kHighSadLowSumdiff
                                                           : kHighSadHighSumdiff;
+
+  // Detect large lighting change.
+  if (tmp_variance < (tmp_sse >> 3) && (tmp_sse - tmp_variance) > 10000)
+    x->content_state_sb = kLowVarHighSumdiff;
+
   if (cpi->content_state_sb_fd != NULL) {
     if (tmp_sad < avg_source_sad_threshold2) {
       // Cap the increment to 255.
@@ -1061,6 +1068,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
                               content_state == kLowSadHighSumdiff)
                                  ? 1
                                  : 0;
+    x->lowvar_highsumdiff = (content_state == kLowVarHighSumdiff) ? 1 : 0;
     if (cpi->content_state_sb_fd != NULL)
       x->last_sb_high_content = cpi->content_state_sb_fd[sb_offset2];
     // If source_sad is low copy the partition without computing the y_sad.
@@ -4110,6 +4118,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
     x->color_sensitivity[1] = 0;
     x->sb_is_skin = 0;
     x->skip_low_source_sad = 0;
+    x->lowvar_highsumdiff = 0;
     x->content_state_sb = 0;
 
     if (seg->enabled) {

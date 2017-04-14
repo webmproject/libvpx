@@ -137,6 +137,7 @@ typedef enum {
   kLowSadHighSumdiff = 2,
   kHighSadLowSumdiff = 3,
   kHighSadHighSumdiff = 4,
+  kLowVarHighSumdiff = 5,
 } CONTENT_STATE_SB;
 
 typedef struct VP9EncoderConfig {

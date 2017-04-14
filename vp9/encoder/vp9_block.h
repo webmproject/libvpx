@@ -168,6 +168,8 @@ struct macroblock {
 
   uint8_t skip_low_source_sad;
 
+  uint8_t lowvar_highsumdiff;
+
   uint8_t last_sb_high_content;
 
   // For each superblock: saves the content value (e.g., low/high sad/sumdiff)
