@@ -16,6 +16,24 @@
       "revId": "aa5a9419926abe3034d1791ed20cca853e5281db",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "86ea7442_eb64f1f1",
+        "filename": "test/convolve_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 559,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-04-15T00:03:01Z",
+      "side": 1,
+      "message": "James, did PS12 delete them?",
+      "parentUuid": "e5638ec0_1da33978",
+      "revId": "aa5a9419926abe3034d1791ed20cca853e5281db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
