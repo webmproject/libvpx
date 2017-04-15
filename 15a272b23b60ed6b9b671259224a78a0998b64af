@@ -46,6 +46,30 @@
       "revId": "15a272b23b60ed6b9b671259224a78a0998b64af",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "48498eeb_bf3c6e57",
+        "filename": "vpx_dsp/ppc/types_vsx.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-04-15T00:16:43Z",
+      "side": 1,
+      "message": "Thanks, Luca.",
+      "parentUuid": "fb0e6eb8_267d3036",
+      "range": {
+        "startLine": 25,
+        "startChar": 15,
+        "endLine": 25,
+        "endChar": 25
+      },
+      "revId": "15a272b23b60ed6b9b671259224a78a0998b64af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
