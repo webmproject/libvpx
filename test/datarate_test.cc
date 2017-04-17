@@ -496,8 +496,8 @@ class DatarateTestVP9Large
   //      2           6
   // 0          4            ....
   // LAST is always update on base/layer 0, GOLDEN is updated on layer 1.
-  // For this 3 layer example, the 2nd enhancement layer (layer 2) does not
-  // update any reference frames.
+  // For this 3 layer example, the 2nd enhancement layer (layer 2) updates
+  // the altref frame.
   int SetFrameFlags(int frame_num, int num_temp_layers) {
     int frame_flags = 0;
     if (num_temp_layers == 2) {
@@ -519,9 +519,8 @@ class DatarateTestVP9Large
         // Layer 1: predict from L, G, ARF; update G.
         frame_flags = VP8_EFLAG_NO_UPD_ARF | VP8_EFLAG_NO_UPD_LAST;
       } else if ((frame_num - 1) % 2 == 0) {
-        // Layer 2: predict from L, G, ARF; update none.
-        frame_flags =
-            VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF | VP8_EFLAG_NO_UPD_LAST;
+        // Layer 2: predict from L, G, ARF; update ARF.
+        frame_flags = VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_LAST;
       }
     }
     return frame_flags;
