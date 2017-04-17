@@ -2619,8 +2619,8 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
   struct loopfilter *lf = &cm->lf;
 
   const int is_reference_frame =
-      (cpi->refresh_last_frame || cpi->refresh_golden_frame ||
-       cpi->refresh_alt_ref_frame);
+      (cm->frame_type == KEY_FRAME || cpi->refresh_last_frame ||
+       cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame);
 
   if (xd->lossless) {
     lf->filter_level = 0;
