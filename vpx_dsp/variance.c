@@ -226,6 +226,9 @@ MSE(8, 8)
 void vpx_comp_avg_pred_c(uint8_t *comp_pred, const uint8_t *pred, int width,
                          int height, const uint8_t *ref, int ref_stride) {
   int i, j;
+  /* comp_pred and pred must be 16 byte aligned. */
+  assert(((intptr_t)comp_pred & 0xf) == 0);
+  assert(((intptr_t)pred & 0xf) == 0);
 
   for (i = 0; i < height; ++i) {
     for (j = 0; j < width; ++j) {
