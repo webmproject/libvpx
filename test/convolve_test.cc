@@ -957,12 +957,30 @@ WRAP(convolve8_avg_sse2, 12)
 #if HAVE_AVX2
 WRAP(convolve_copy_avx2, 8)
 WRAP(convolve_avg_avx2, 8)
+WRAP(convolve8_horiz_avx2, 8)
+WRAP(convolve8_avg_horiz_avx2, 8)
+WRAP(convolve8_vert_avx2, 8)
+WRAP(convolve8_avg_vert_avx2, 8)
+WRAP(convolve8_avx2, 8)
+WRAP(convolve8_avg_avx2, 8)
 
 WRAP(convolve_copy_avx2, 10)
 WRAP(convolve_avg_avx2, 10)
+WRAP(convolve8_avx2, 10)
+WRAP(convolve8_horiz_avx2, 10)
+WRAP(convolve8_vert_avx2, 10)
+WRAP(convolve8_avg_avx2, 10)
+WRAP(convolve8_avg_horiz_avx2, 10)
+WRAP(convolve8_avg_vert_avx2, 10)
 
 WRAP(convolve_copy_avx2, 12)
 WRAP(convolve_avg_avx2, 12)
+WRAP(convolve8_avx2, 12)
+WRAP(convolve8_horiz_avx2, 12)
+WRAP(convolve8_vert_avx2, 12)
+WRAP(convolve8_avg_avx2, 12)
+WRAP(convolve8_avg_horiz_avx2, 12)
+WRAP(convolve8_avg_vert_avx2, 12)
 #endif  // HAVE_AVX2
 
 #if HAVE_NEON
@@ -1114,27 +1132,27 @@ INSTANTIATE_TEST_CASE_P(SSSE3, ConvolveTest,
 #if CONFIG_VP9_HIGHBITDEPTH
 const ConvolveFunctions convolve8_avx2(
     wrap_convolve_copy_avx2_8, wrap_convolve_avg_avx2_8,
-    wrap_convolve8_horiz_c_8, wrap_convolve8_avg_horiz_c_8,
-    wrap_convolve8_vert_c_8, wrap_convolve8_avg_vert_c_8, wrap_convolve8_c_8,
-    wrap_convolve8_avg_c_8, wrap_convolve8_horiz_c_8,
+    wrap_convolve8_horiz_avx2_8, wrap_convolve8_avg_horiz_avx2_8,
+    wrap_convolve8_vert_avx2_8, wrap_convolve8_avg_vert_avx2_8,
+    wrap_convolve8_avx2_8, wrap_convolve8_avg_avx2_8, wrap_convolve8_horiz_c_8,
     wrap_convolve8_avg_horiz_c_8, wrap_convolve8_vert_c_8,
     wrap_convolve8_avg_vert_c_8, wrap_convolve8_c_8, wrap_convolve8_avg_c_8, 8);
 const ConvolveFunctions convolve10_avx2(
     wrap_convolve_copy_avx2_10, wrap_convolve_avg_avx2_10,
+    wrap_convolve8_horiz_avx2_10, wrap_convolve8_avg_horiz_avx2_10,
+    wrap_convolve8_vert_avx2_10, wrap_convolve8_avg_vert_avx2_10,
+    wrap_convolve8_avx2_10, wrap_convolve8_avg_avx2_10,
     wrap_convolve8_horiz_c_10, wrap_convolve8_avg_horiz_c_10,
     wrap_convolve8_vert_c_10, wrap_convolve8_avg_vert_c_10, wrap_convolve8_c_10,
-    wrap_convolve8_avg_c_10, wrap_convolve8_horiz_c_10,
-    wrap_convolve8_avg_horiz_c_10, wrap_convolve8_vert_c_10,
-    wrap_convolve8_avg_vert_c_10, wrap_convolve8_c_10, wrap_convolve8_avg_c_10,
-    10);
+    wrap_convolve8_avg_c_10, 10);
 const ConvolveFunctions convolve12_avx2(
     wrap_convolve_copy_avx2_12, wrap_convolve_avg_avx2_12,
+    wrap_convolve8_horiz_avx2_12, wrap_convolve8_avg_horiz_avx2_12,
+    wrap_convolve8_vert_avx2_12, wrap_convolve8_avg_vert_avx2_12,
+    wrap_convolve8_avx2_12, wrap_convolve8_avg_avx2_12,
     wrap_convolve8_horiz_c_12, wrap_convolve8_avg_horiz_c_12,
     wrap_convolve8_vert_c_12, wrap_convolve8_avg_vert_c_12, wrap_convolve8_c_12,
-    wrap_convolve8_avg_c_12, wrap_convolve8_horiz_c_12,
-    wrap_convolve8_avg_horiz_c_12, wrap_convolve8_vert_c_12,
-    wrap_convolve8_avg_vert_c_12, wrap_convolve8_c_12, wrap_convolve8_avg_c_12,
-    12);
+    wrap_convolve8_avg_c_12, 12);
 const ConvolveParam kArrayConvolve8_avx2[] = { ALL_SIZES(convolve8_avx2),
                                                ALL_SIZES(convolve10_avx2),
                                                ALL_SIZES(convolve12_avx2) };
