@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "b7a70219_7f9165d9",
+        "filename": "vp9/encoder/x86/temporal_filter_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-04-17T22:30:47Z",
+      "side": 1,
+      "message": "_mm_srli_epi16() can handle variable strength by implicitly setting to xmm first:  sum \u003d _mm_srli_epi16(sum, strength);",
+      "range": {
+        "startLine": 93,
+        "startChar": 2,
+        "endLine": 93,
+        "endChar": 19
+      },
+      "revId": "a66902ad2b51320052b55a855f2ecc252a462905",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1a2402cf_9889598b",
         "filename": "vp9/encoder/x86/temporal_filter_ssse3.c",
         "patchSetId": 9
@@ -13,6 +36,29 @@
       "writtenOn": "2017-04-13T22:59:36Z",
       "side": 1,
       "message": "Since strength is set for the whole frame I\u0027d like to roll this into mull_constants and get rid of the extra shift. Not sure if I can make it work with the rounding bit though.",
+      "revId": "a66902ad2b51320052b55a855f2ecc252a462905",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0e556f82_4e299053",
+        "filename": "vp9/encoder/x86/temporal_filter_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-04-17T22:30:47Z",
+      "side": 1,
+      "message": "if width \u003d\u003d 16 in this branch, replacing width by 16 may save some code.",
+      "range": {
+        "startLine": 293,
+        "startChar": 4,
+        "endLine": 293,
+        "endChar": 10
+      },
       "revId": "a66902ad2b51320052b55a855f2ecc252a462905",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
