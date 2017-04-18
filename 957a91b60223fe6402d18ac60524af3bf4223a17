@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6732ddf3_f7ecaa7b",
+        "filename": "vpx_dsp/ppc/intrapred_vsx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 503,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-18T04:04:42Z",
+      "side": 1,
+      "message": "const",
+      "revId": "957a91b60223fe6402d18ac60524af3bf4223a17",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
