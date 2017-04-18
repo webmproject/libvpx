@@ -9,7 +9,7 @@ bitdepth=
 
 if [ "$#" -eq 1 ]; then
   tool=$1
-  ../$libsrc/configure --target=$platform $codec $bitdepth --enable-experimental --enable-$tool --disable-daala-ec --disable-unit-tests > /dev/null
+  ../$libsrc/configure --target=$platform $codec $bitdepth --enable-experimental --enable-$tool --disable-unit-tests > /dev/null
 else
   tool_1=$1
   tool_2=$2
