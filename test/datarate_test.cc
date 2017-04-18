@@ -1256,7 +1256,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL1TLScreenContent1) {
 
 // Check basic rate targeting for 1 pass CBR SVC: 2 spatial layers and
 // 3 temporal layers. Run CIF clip with 1 thread.
-TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TL) {
+TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc2SL3TL) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -1302,7 +1302,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TL) {
 
 // Check basic rate targeting for 1 pass CBR SVC with denoising.
 // 2 spatial layers and 3 temporal layer. Run HD clip with 2 threads.
-TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TLDenoiserOn) {
+TEST_P(DatarateOnePassCbrSvc, DISBALED_OnePassCbrSvc2SL3TLDenoiserOn) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -1348,7 +1348,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TLDenoiserOn) {
 
 // Check basic rate targeting for 1 pass CBR SVC: 2 spatial layers and 3
 // temporal layers. Run CIF clip with 1 thread, and few short key frame periods.
-TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TLSmallKf) {
+TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc2SL3TLSmallKf) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -1389,7 +1389,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TLSmallKf) {
 
 // Check basic rate targeting for 1 pass CBR SVC: 2 spatial layers and
 // 3 temporal layers. Run HD clip with 4 threads.
-TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TL4threads) {
+TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc2SL3TL4threads) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -1430,7 +1430,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TL4threads) {
 
 // Check basic rate targeting for 1 pass CBR SVC: 3 spatial layers and
 // 3 temporal layers. Run CIF clip with 1 thread.
-TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL) {
+TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc3SL3TL) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -1473,7 +1473,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL) {
 
 // Check basic rate targeting for 1 pass CBR SVC: 3 spatial layers and 3
 // temporal layers. Run CIF clip with 1 thread, and few short key frame periods.
-TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TLSmallKf) {
+TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc3SL3TLSmallKf) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -1515,7 +1515,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TLSmallKf) {
 
 // Check basic rate targeting for 1 pass CBR SVC: 3 spatial layers and
 // 3 temporal layers. Run HD clip with 4 threads.
-TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL4threads) {
+TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc3SL3TL4threads) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
