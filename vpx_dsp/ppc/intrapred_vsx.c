@@ -56,6 +56,38 @@ void vpx_h_predictor_4x4_vsx(uint8_t *dst, ptrdiff_t stride,
   vec_vsx_st(vec_sel(v3, vec_vsx_ld(0, dst), (uint8x16_t)mask4), 0, dst);
 }
 
+void vpx_h_predictor_8x8_vsx(uint8_t *dst, ptrdiff_t stride,
+                             const uint8_t *above, const uint8_t *left) {
+  const uint8x16_t d = vec_vsx_ld(0, left);
+  const uint8x16_t v0 = vec_splat(d, 0);
+  const uint8x16_t v1 = vec_splat(d, 1);
+  const uint8x16_t v2 = vec_splat(d, 2);
+  const uint8x16_t v3 = vec_splat(d, 3);
+
+  const uint8x16_t v4 = vec_splat(d, 4);
+  const uint8x16_t v5 = vec_splat(d, 5);
+  const uint8x16_t v6 = vec_splat(d, 6);
+  const uint8x16_t v7 = vec_splat(d, 7);
+
+  (void)above;
+
+  vec_vsx_st(xxpermdi(v0, vec_vsx_ld(0, dst), 1), 0, dst);
+  dst += stride;
+  vec_vsx_st(xxpermdi(v1, vec_vsx_ld(0, dst), 1), 0, dst);
+  dst += stride;
+  vec_vsx_st(xxpermdi(v2, vec_vsx_ld(0, dst), 1), 0, dst);
+  dst += stride;
+  vec_vsx_st(xxpermdi(v3, vec_vsx_ld(0, dst), 1), 0, dst);
+  dst += stride;
+  vec_vsx_st(xxpermdi(v4, vec_vsx_ld(0, dst), 1), 0, dst);
+  dst += stride;
+  vec_vsx_st(xxpermdi(v5, vec_vsx_ld(0, dst), 1), 0, dst);
+  dst += stride;
+  vec_vsx_st(xxpermdi(v6, vec_vsx_ld(0, dst), 1), 0, dst);
+  dst += stride;
+  vec_vsx_st(xxpermdi(v7, vec_vsx_ld(0, dst), 1), 0, dst);
+}
+
 void vpx_h_predictor_16x16_vsx(uint8_t *dst, ptrdiff_t stride,
                                const uint8_t *above, const uint8_t *left) {
   const uint8x16_t d = vec_vsx_ld(0, left);
