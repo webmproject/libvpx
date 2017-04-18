@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "59256e83_b92fe823",
+        "filename": "vpx_dsp/ppc/intrapred_vsx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-18T03:59:19Z",
+      "side": 1,
+      "message": "I think you can drop the newline between tm_predictor_32x1 and dst +\u003d ...",
+      "revId": "7bbb18c9f8e20b326015d64c0b843146c5e69f0e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "743c2ab4_b6c065fa",
+        "filename": "vpx_dsp/ppc/intrapred_vsx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-18T03:59:19Z",
+      "side": 1,
+      "message": "these can be const",
+      "revId": "7bbb18c9f8e20b326015d64c0b843146c5e69f0e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
