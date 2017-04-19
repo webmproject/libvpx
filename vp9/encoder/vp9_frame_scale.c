@@ -16,7 +16,7 @@
 #include "vpx_scale/yv12config.h"
 
 void vp9_scale_and_extend_frame_c(const YV12_BUFFER_CONFIG *src,
-                                  YV12_BUFFER_CONFIG *dst) {
+                                  YV12_BUFFER_CONFIG *dst, int phase_scaler) {
   const int src_w = src->y_crop_width;
   const int src_h = src->y_crop_height;
   const int dst_w = dst->y_crop_width;
@@ -34,9 +34,9 @@ void vp9_scale_and_extend_frame_c(const YV12_BUFFER_CONFIG *src,
     const int src_stride = src_strides[i];
     const int dst_stride = dst_strides[i];
     for (y = 0; y < dst_h; y += 16) {
-      const int y_q4 = y * (16 / factor) * src_h / dst_h;
+      const int y_q4 = y * (16 / factor) * src_h / dst_h + phase_scaler;
       for (x = 0; x < dst_w; x += 16) {
-        const int x_q4 = x * (16 / factor) * src_w / dst_w;
+        const int x_q4 = x * (16 / factor) * src_w / dst_w + phase_scaler;
         const uint8_t *src_ptr = srcs[i] +
                                  (y / factor) * src_h / dst_h * src_stride +
                                  (x / factor) * src_w / dst_w;
