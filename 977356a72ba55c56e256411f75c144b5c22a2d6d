@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1933d792_8852d8bc",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 1299,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-19T18:25:59Z",
+      "side": 0,
+      "message": "I think the original issue is that GetMismatchFrames() should be wrapped in #if CONFIG_VP9_DECODER. The failing ubsan test was due to the decoder being disabled with --disable-vp9-decoder",
+      "revId": "977356a72ba55c56e256411f75c144b5c22a2d6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
