@@ -1528,7 +1528,8 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       vp9_highbd_build_inter_predictor(
-          pre, y_stride, dst, pd->dst.stride, &mi->bmi[i].as_mv[ref].as_mv,
+          CONVERT_TO_SHORTPTR(pre), y_stride, CONVERT_TO_SHORTPTR(dst),
+          pd->dst.stride, &mi->bmi[i].as_mv[ref].as_mv,
           &xd->block_refs[ref]->sf, width, height, ref, kernel, MV_PRECISION_Q3,
           mi_col * MI_SIZE + 4 * (i % 2), mi_row * MI_SIZE + 4 * (i / 2),
           xd->bd);
@@ -1783,9 +1784,9 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       second_pred = CONVERT_TO_BYTEPTR(second_pred_alloc_16);
       vp9_highbd_build_inter_predictor(
-          ref_yv12[!id].buf, ref_yv12[!id].stride, second_pred, pw,
-          &frame_mv[refs[!id]].as_mv, &sf, pw, ph, 0, kernel, MV_PRECISION_Q3,
-          mi_col * MI_SIZE, mi_row * MI_SIZE, xd->bd);
+          CONVERT_TO_SHORTPTR(ref_yv12[!id].buf), ref_yv12[!id].stride,
+          second_pred_alloc_16, pw, &frame_mv[refs[!id]].as_mv, &sf, pw, ph, 0,
+          kernel, MV_PRECISION_Q3, mi_col * MI_SIZE, mi_row * MI_SIZE, xd->bd);
     } else {
       second_pred = (uint8_t *)second_pred_alloc_16;
       vp9_build_inter_predictor(ref_yv12[!id].buf, ref_yv12[!id].stride,

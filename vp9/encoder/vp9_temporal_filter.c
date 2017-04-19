@@ -53,16 +53,19 @@ static void temporal_filter_predictors_mb_c(
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    vp9_highbd_build_inter_predictor(y_mb_ptr, stride, &pred[0], 16, &mv, scale,
-                                     16, 16, which_mv, kernel, MV_PRECISION_Q3,
-                                     x, y, xd->bd);
+    vp9_highbd_build_inter_predictor(CONVERT_TO_SHORTPTR(y_mb_ptr), stride,
+                                     CONVERT_TO_SHORTPTR(&pred[0]), 16, &mv,
+                                     scale, 16, 16, which_mv, kernel,
+                                     MV_PRECISION_Q3, x, y, xd->bd);
 
-    vp9_highbd_build_inter_predictor(u_mb_ptr, uv_stride, &pred[256],
+    vp9_highbd_build_inter_predictor(CONVERT_TO_SHORTPTR(u_mb_ptr), uv_stride,
+                                     CONVERT_TO_SHORTPTR(&pred[256]),
                                      uv_block_width, &mv, scale, uv_block_width,
                                      uv_block_height, which_mv, kernel,
                                      mv_precision_uv, x, y, xd->bd);
 
-    vp9_highbd_build_inter_predictor(v_mb_ptr, uv_stride, &pred[512],
+    vp9_highbd_build_inter_predictor(CONVERT_TO_SHORTPTR(v_mb_ptr), uv_stride,
+                                     CONVERT_TO_SHORTPTR(&pred[512]),
                                      uv_block_width, &mv, scale, uv_block_width,
                                      uv_block_height, which_mv, kernel,
                                      mv_precision_uv, x, y, xd->bd);

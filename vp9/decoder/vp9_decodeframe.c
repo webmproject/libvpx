@@ -451,24 +451,19 @@ static void extend_and_predict(const uint8_t *buf_ptr1, int pre_buf_stride,
                                const struct scale_factors *sf, MACROBLOCKD *xd,
                                int w, int h, int ref, int xs, int ys) {
   DECLARE_ALIGNED(16, uint16_t, mc_buf_high[80 * 2 * 80 * 2]);
-  const uint8_t *buf_ptr;
 
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     high_build_mc_border(buf_ptr1, pre_buf_stride, mc_buf_high, b_w, x0, y0,
                          b_w, b_h, frame_width, frame_height);
-    buf_ptr = CONVERT_TO_BYTEPTR(mc_buf_high) + border_offset;
+    highbd_inter_predictor(mc_buf_high + border_offset, b_w,
+                           CONVERT_TO_SHORTPTR(dst), dst_buf_stride, subpel_x,
+                           subpel_y, sf, w, h, ref, kernel, xs, ys, xd->bd);
   } else {
     build_mc_border(buf_ptr1, pre_buf_stride, (uint8_t *)mc_buf_high, b_w, x0,
                     y0, b_w, b_h, frame_width, frame_height);
-    buf_ptr = ((uint8_t *)mc_buf_high) + border_offset;
-  }
-
-  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    highbd_inter_predictor(buf_ptr, b_w, dst, dst_buf_stride, subpel_x,
-                           subpel_y, sf, w, h, ref, kernel, xs, ys, xd->bd);
-  } else {
-    inter_predictor(buf_ptr, b_w, dst, dst_buf_stride, subpel_x, subpel_y, sf,
-                    w, h, ref, kernel, xs, ys);
+    inter_predictor(((uint8_t *)mc_buf_high) + border_offset, b_w, dst,
+                    dst_buf_stride, subpel_x, subpel_y, sf, w, h, ref, kernel,
+                    xs, ys);
   }
 }
 #else
@@ -631,7 +626,8 @@ static void dec_build_inter_predictors(
   }
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    highbd_inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
+    highbd_inter_predictor(CONVERT_TO_SHORTPTR(buf_ptr), buf_stride,
+                           CONVERT_TO_SHORTPTR(dst), dst_buf->stride, subpel_x,
                            subpel_y, sf, w, h, ref, kernel, xs, ys, xd->bd);
   } else {
     inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
