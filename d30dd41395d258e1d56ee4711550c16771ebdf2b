@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d99617c7_0f11578b",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-04-19T23:58:53Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "f8fbe385_2292e5d6",
+      "range": {
+        "startLine": 288,
+        "startChar": 31,
+        "endLine": 288,
+        "endChar": 39
+      },
+      "revId": "d30dd41395d258e1d56ee4711550c16771ebdf2b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b75f64e8_93b1bc0d",
         "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "6d84e433_2c57647b",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 343,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-04-19T23:58:53Z",
+      "side": 1,
+      "message": "Done.  mxn indicates the function purpose clearly. Keep.",
+      "parentUuid": "b75f64e8_93b1bc0d",
+      "range": {
+        "startLine": 343,
+        "startChar": 12,
+        "endLine": 343,
+        "endChar": 18
+      },
+      "revId": "d30dd41395d258e1d56ee4711550c16771ebdf2b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1ced298e_73362147",
         "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2017-04-18T03:11:49Z",
       "side": 1,
       "message": "using function pointers like this may limit what can be inlined. did you check in an optimized build that the constant is being removed?",
+      "range": {
+        "startLine": 374,
+        "startChar": 50,
+        "endLine": 374,
+        "endChar": 77
+      },
+      "revId": "d30dd41395d258e1d56ee4711550c16771ebdf2b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ffa5c89a_245d2905",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-04-19T23:58:53Z",
+      "side": 1,
+      "message": "1) I dump the assembly code:\n$ objdump -r -d vpx_dsp/x86/highbd_convolve_avx2.c.o \u003e highbd_convolve_avx2.c.s\n\n2) static function filter_block_width8_horiz() has been compiled to:\na) filter_block_width8_horiz.constprop.21\nb) filter_block_width8_horiz.constprop.22\nwhich is based on the two use-cases of this function.\n\na) contains the inline function call write_8x1_pixels()\nb) contains the inline function call write_8x1_avg_pixels()\n\nSo GCC optimized build really does inline the \"store\" functions.  I didn\u0027t try CLANG or other compiler flag (-O, -O2).\n\nMost speed intensive functions are h8, h16, v8, v16, plus avg version, have been split.  Verify both -O3 and -O2\u0027s store function are inline.",
+      "parentUuid": "1ced298e_73362147",
       "range": {
         "startLine": 374,
         "startChar": 50,
