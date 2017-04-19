@@ -13,14 +13,11 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
 
-void vpx_highbd_convolve_copy_neon(const uint8_t *src8, ptrdiff_t src_stride,
-                                   uint8_t *dst8, ptrdiff_t dst_stride,
+void vpx_highbd_convolve_copy_neon(const uint16_t *src, ptrdiff_t src_stride,
+                                   uint16_t *dst, ptrdiff_t dst_stride,
                                    const int16_t *filter_x, int filter_x_stride,
                                    const int16_t *filter_y, int filter_y_stride,
                                    int w, int h, int bd) {
-  const uint16_t *src = CAST_TO_SHORTPTR(src8);
-  uint16_t *dst = CAST_TO_SHORTPTR(dst8);
-
   (void)filter_x;
   (void)filter_x_stride;
   (void)filter_y;

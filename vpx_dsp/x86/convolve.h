@@ -103,12 +103,10 @@ typedef void highbd_filter8_1dfunction(const uint16_t *src_ptr,
 
 #define HIGH_FUN_CONV_1D(name, step_q4, filter, dir, src_start, avg, opt) \
   void vpx_highbd_convolve8_##name##_##opt(                               \
-      const uint8_t *src8, ptrdiff_t src_stride, uint8_t *dst8,           \
+      const uint16_t *src, ptrdiff_t src_stride, uint16_t *dst,           \
       ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4,       \
       const int16_t *filter_y, int y_step_q4, int w, int h, int bd) {     \
     if (step_q4 == 16 && filter[3] != 128) {                              \
-      uint16_t *src = CAST_TO_SHORTPTR(src8);                             \
-      uint16_t *dst = CAST_TO_SHORTPTR(dst8);                             \
       if (filter[0] | filter[1] | filter[2]) {                            \
         while (w >= 16) {                                                 \
           vpx_highbd_filter_block1d16_##dir##8_##avg##opt(                \
@@ -156,43 +154,42 @@ typedef void highbd_filter8_1dfunction(const uint16_t *src_ptr,
       }                                                                   \
     }                                                                     \
     if (w) {                                                              \
-      vpx_highbd_convolve8_##name##_c(src8, src_stride, dst8, dst_stride, \
+      vpx_highbd_convolve8_##name##_c(src, src_stride, dst, dst_stride,   \
                                       filter_x, x_step_q4, filter_y,      \
                                       y_step_q4, w, h, bd);               \
     }                                                                     \
   }
 
-#define HIGH_FUN_CONV_2D(avg, opt)                                             \
-  void vpx_highbd_convolve8_##avg##opt(                                        \
-      const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,                  \
-      ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4,            \
-      const int16_t *filter_y, int y_step_q4, int w, int h, int bd) {          \
-    assert(w <= 64);                                                           \
-    assert(h <= 64);                                                           \
-    if (x_step_q4 == 16 && y_step_q4 == 16) {                                  \
-      if ((filter_x[0] | filter_x[1] | filter_x[2]) || filter_x[3] == 128) {   \
-        DECLARE_ALIGNED(16, uint16_t, fdata2[64 * 71]);                        \
-        vpx_highbd_convolve8_horiz_##opt(                                      \
-            CAST_TO_BYTEPTR(CAST_TO_SHORTPTR(src) - 3 * src_stride),           \
-            src_stride, CAST_TO_BYTEPTR(fdata2), 64, filter_x, x_step_q4,      \
-            filter_y, y_step_q4, w, h + 7, bd);                                \
-        vpx_highbd_convolve8_##avg##vert_##opt(                                \
-            CAST_TO_BYTEPTR(fdata2 + 192), 64, dst, dst_stride, filter_x,      \
-            x_step_q4, filter_y, y_step_q4, w, h, bd);                         \
-      } else {                                                                 \
-        DECLARE_ALIGNED(16, uint16_t, fdata2[64 * 65]);                        \
-        vpx_highbd_convolve8_horiz_##opt(                                      \
-            src, src_stride, CAST_TO_BYTEPTR(fdata2), 64, filter_x, x_step_q4, \
-            filter_y, y_step_q4, w, h + 1, bd);                                \
-        vpx_highbd_convolve8_##avg##vert_##opt(                                \
-            CAST_TO_BYTEPTR(fdata2), 64, dst, dst_stride, filter_x, x_step_q4, \
-            filter_y, y_step_q4, w, h, bd);                                    \
-      }                                                                        \
-    } else {                                                                   \
-      vpx_highbd_convolve8_##avg##c(src, src_stride, dst, dst_stride,          \
-                                    filter_x, x_step_q4, filter_y, y_step_q4,  \
-                                    w, h, bd);                                 \
-    }                                                                          \
+#define HIGH_FUN_CONV_2D(avg, opt)                                            \
+  void vpx_highbd_convolve8_##avg##opt(                                       \
+      const uint16_t *src, ptrdiff_t src_stride, uint16_t *dst,               \
+      ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4,           \
+      const int16_t *filter_y, int y_step_q4, int w, int h, int bd) {         \
+    assert(w <= 64);                                                          \
+    assert(h <= 64);                                                          \
+    if (x_step_q4 == 16 && y_step_q4 == 16) {                                 \
+      if ((filter_x[0] | filter_x[1] | filter_x[2]) || filter_x[3] == 128) {  \
+        DECLARE_ALIGNED(16, uint16_t, fdata2[64 * 71]);                       \
+        vpx_highbd_convolve8_horiz_##opt(src - 3 * src_stride, src_stride,    \
+                                         fdata2, 64, filter_x, x_step_q4,     \
+                                         filter_y, y_step_q4, w, h + 7, bd);  \
+        vpx_highbd_convolve8_##avg##vert_##opt(                               \
+            fdata2 + 192, 64, dst, dst_stride, filter_x, x_step_q4, filter_y, \
+            y_step_q4, w, h, bd);                                             \
+      } else {                                                                \
+        DECLARE_ALIGNED(16, uint16_t, fdata2[64 * 65]);                       \
+        vpx_highbd_convolve8_horiz_##opt(src, src_stride, fdata2, 64,         \
+                                         filter_x, x_step_q4, filter_y,       \
+                                         y_step_q4, w, h + 1, bd);            \
+        vpx_highbd_convolve8_##avg##vert_##opt(fdata2, 64, dst, dst_stride,   \
+                                               filter_x, x_step_q4, filter_y, \
+                                               y_step_q4, w, h, bd);          \
+      }                                                                       \
+    } else {                                                                  \
+      vpx_highbd_convolve8_##avg##c(src, src_stride, dst, dst_stride,         \
+                                    filter_x, x_step_q4, filter_y, y_step_q4, \
+                                    w, h, bd);                                \
+    }                                                                         \
   }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 

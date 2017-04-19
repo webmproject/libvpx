@@ -2418,11 +2418,11 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
         uint8_t *dst_ptr = dsts[i] + (y / factor) * dst_stride + (x / factor);
 
         if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
-          vpx_highbd_convolve8(
-              CAST_TO_BYTEPTR(CONVERT_TO_SHORTPTR(src_ptr)), src_stride,
-              CAST_TO_BYTEPTR(CONVERT_TO_SHORTPTR(dst_ptr)), dst_stride,
-              kernel[x_q4 & 0xf], 16 * src_w / dst_w, kernel[y_q4 & 0xf],
-              16 * src_h / dst_h, 16 / factor, 16 / factor, bd);
+          vpx_highbd_convolve8(CONVERT_TO_SHORTPTR(src_ptr), src_stride,
+                               CONVERT_TO_SHORTPTR(dst_ptr), dst_stride,
+                               kernel[x_q4 & 0xf], 16 * src_w / dst_w,
+                               kernel[y_q4 & 0xf], 16 * src_h / dst_h,
+                               16 / factor, 16 / factor, bd);
         } else {
           vpx_scaled_2d(src_ptr, src_stride, dst_ptr, dst_stride,
                         kernel[x_q4 & 0xf], 16 * src_w / dst_w,

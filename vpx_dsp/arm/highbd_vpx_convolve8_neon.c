@@ -135,18 +135,16 @@ static INLINE uint16x8_t convolve8_8(const int16x8_t s0, const int16x8_t s1,
   return d;
 }
 
-void vpx_highbd_convolve8_horiz_neon(const uint8_t *src8, ptrdiff_t src_stride,
-                                     uint8_t *dst8, ptrdiff_t dst_stride,
+void vpx_highbd_convolve8_horiz_neon(const uint16_t *src, ptrdiff_t src_stride,
+                                     uint16_t *dst, ptrdiff_t dst_stride,
                                      const int16_t *filter_x, int x_step_q4,
                                      const int16_t *filter_y,  // unused
                                      int y_step_q4,            // unused
                                      int w, int h, int bd) {
   if (x_step_q4 != 16) {
-    vpx_highbd_convolve8_horiz_c(src8, src_stride, dst8, dst_stride, filter_x,
+    vpx_highbd_convolve8_horiz_c(src, src_stride, dst, dst_stride, filter_x,
                                  x_step_q4, filter_y, y_step_q4, w, h, bd);
   } else {
-    const uint16_t *src = CAST_TO_SHORTPTR(src8);
-    uint16_t *dst = CAST_TO_SHORTPTR(dst8);
     const int16x8_t filters = vld1q_s16(filter_x);
     const uint16x8_t max = vdupq_n_u16((1 << bd) - 1);
     uint16x8_t t0, t1, t2, t3;
@@ -336,20 +334,17 @@ void vpx_highbd_convolve8_horiz_neon(const uint8_t *src8, ptrdiff_t src_stride,
   }
 }
 
-void vpx_highbd_convolve8_avg_horiz_neon(const uint8_t *src8,
-                                         ptrdiff_t src_stride, uint8_t *dst8,
+void vpx_highbd_convolve8_avg_horiz_neon(const uint16_t *src,
+                                         ptrdiff_t src_stride, uint16_t *dst,
                                          ptrdiff_t dst_stride,
                                          const int16_t *filter_x, int x_step_q4,
                                          const int16_t *filter_y,  // unused
                                          int y_step_q4,            // unused
                                          int w, int h, int bd) {
   if (x_step_q4 != 16) {
-    vpx_highbd_convolve8_avg_horiz_c(src8, src_stride, dst8, dst_stride,
-                                     filter_x, x_step_q4, filter_y, y_step_q4,
-                                     w, h, bd);
+    vpx_highbd_convolve8_avg_horiz_c(src, src_stride, dst, dst_stride, filter_x,
+                                     x_step_q4, filter_y, y_step_q4, w, h, bd);
   } else {
-    const uint16_t *src = CAST_TO_SHORTPTR(src8);
-    uint16_t *dst = CAST_TO_SHORTPTR(dst8);
     const int16x8_t filters = vld1q_s16(filter_x);
     const uint16x8_t max = vdupq_n_u16((1 << bd) - 1);
     uint16x8_t t0, t1, t2, t3;
@@ -569,18 +564,16 @@ void vpx_highbd_convolve8_avg_horiz_neon(const uint8_t *src8,
   }
 }
 
-void vpx_highbd_convolve8_vert_neon(const uint8_t *src8, ptrdiff_t src_stride,
-                                    uint8_t *dst8, ptrdiff_t dst_stride,
+void vpx_highbd_convolve8_vert_neon(const uint16_t *src, ptrdiff_t src_stride,
+                                    uint16_t *dst, ptrdiff_t dst_stride,
                                     const int16_t *filter_x,  // unused
                                     int x_step_q4,            // unused
                                     const int16_t *filter_y, int y_step_q4,
                                     int w, int h, int bd) {
   if (y_step_q4 != 16) {
-    vpx_highbd_convolve8_vert_c(src8, src_stride, dst8, dst_stride, filter_x,
+    vpx_highbd_convolve8_vert_c(src, src_stride, dst, dst_stride, filter_x,
                                 x_step_q4, filter_y, y_step_q4, w, h, bd);
   } else {
-    const uint16_t *src = CAST_TO_SHORTPTR(src8);
-    uint16_t *dst = CAST_TO_SHORTPTR(dst8);
     const int16x8_t filters = vld1q_s16(filter_y);
     const uint16x8_t max = vdupq_n_u16((1 << bd) - 1);
 
@@ -736,20 +729,17 @@ void vpx_highbd_convolve8_vert_neon(const uint8_t *src8, ptrdiff_t src_stride,
   }
 }
 
-void vpx_highbd_convolve8_avg_vert_neon(const uint8_t *src8,
-                                        ptrdiff_t src_stride, uint8_t *dst8,
+void vpx_highbd_convolve8_avg_vert_neon(const uint16_t *src,
+                                        ptrdiff_t src_stride, uint16_t *dst,
                                         ptrdiff_t dst_stride,
                                         const int16_t *filter_x,  // unused
                                         int x_step_q4,            // unused
                                         const int16_t *filter_y, int y_step_q4,
                                         int w, int h, int bd) {
   if (y_step_q4 != 16) {
-    vpx_highbd_convolve8_avg_vert_c(src8, src_stride, dst8, dst_stride,
-                                    filter_x, x_step_q4, filter_y, y_step_q4, w,
-                                    h, bd);
+    vpx_highbd_convolve8_avg_vert_c(src, src_stride, dst, dst_stride, filter_x,
+                                    x_step_q4, filter_y, y_step_q4, w, h, bd);
   } else {
-    const uint16_t *src = CAST_TO_SHORTPTR(src8);
-    uint16_t *dst = CAST_TO_SHORTPTR(dst8);
     const int16x8_t filters = vld1q_s16(filter_y);
     const uint16x8_t max = vdupq_n_u16((1 << bd) - 1);
 

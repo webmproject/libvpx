@@ -2078,10 +2078,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 #if CONFIG_VP9_HIGHBITDEPTH
         if (cm->use_highbitdepth)
           vpx_highbd_convolve_copy(
-              CAST_TO_BYTEPTR(CONVERT_TO_SHORTPTR(best_pred->data)),
-              best_pred->stride,
-              CAST_TO_BYTEPTR(CONVERT_TO_SHORTPTR(this_mode_pred->data)),
-              this_mode_pred->stride, NULL, 0, NULL, 0, bw, bh, xd->bd);
+              CONVERT_TO_SHORTPTR(best_pred->data), best_pred->stride,
+              CONVERT_TO_SHORTPTR(this_mode_pred->data), this_mode_pred->stride,
+              NULL, 0, NULL, 0, bw, bh, xd->bd);
         else
           vpx_convolve_copy(best_pred->data, best_pred->stride,
                             this_mode_pred->data, this_mode_pred->stride, NULL,
@@ -2189,10 +2188,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 #if CONFIG_VP9_HIGHBITDEPTH
       if (cm->use_highbitdepth)
         vpx_highbd_convolve_copy(
-            CAST_TO_BYTEPTR(CONVERT_TO_SHORTPTR(best_pred->data)),
-            best_pred->stride,
-            CAST_TO_BYTEPTR(CONVERT_TO_SHORTPTR(pd->dst.buf)), pd->dst.stride,
-            NULL, 0, NULL, 0, bw, bh, xd->bd);
+            CONVERT_TO_SHORTPTR(best_pred->data), best_pred->stride,
+            CONVERT_TO_SHORTPTR(pd->dst.buf), pd->dst.stride, NULL, 0, NULL, 0,
+            bw, bh, xd->bd);
       else
         vpx_convolve_copy(best_pred->data, best_pred->stride, pd->dst.buf,
                           pd->dst.stride, NULL, 0, NULL, 0, bw, bh);
