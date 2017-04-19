@@ -1302,7 +1302,7 @@ TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc2SL3TL) {
 
 // Check basic rate targeting for 1 pass CBR SVC with denoising.
 // 2 spatial layers and 3 temporal layer. Run HD clip with 2 threads.
-TEST_P(DatarateOnePassCbrSvc, DISBALED_OnePassCbrSvc2SL3TLDenoiserOn) {
+TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc2SL3TLDenoiserOn) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
