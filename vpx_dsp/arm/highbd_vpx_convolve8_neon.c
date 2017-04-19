@@ -145,8 +145,8 @@ void vpx_highbd_convolve8_horiz_neon(const uint8_t *src8, ptrdiff_t src_stride,
     vpx_highbd_convolve8_horiz_c(src8, src_stride, dst8, dst_stride, filter_x,
                                  x_step_q4, filter_y, y_step_q4, w, h, bd);
   } else {
-    const uint16_t *src = CONVERT_TO_SHORTPTR(src8);
-    uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
+    const uint16_t *src = CAST_TO_SHORTPTR(src8);
+    uint16_t *dst = CAST_TO_SHORTPTR(dst8);
     const int16x8_t filters = vld1q_s16(filter_x);
     const uint16x8_t max = vdupq_n_u16((1 << bd) - 1);
     uint16x8_t t0, t1, t2, t3;
@@ -348,8 +348,8 @@ void vpx_highbd_convolve8_avg_horiz_neon(const uint8_t *src8,
                                      filter_x, x_step_q4, filter_y, y_step_q4,
                                      w, h, bd);
   } else {
-    const uint16_t *src = CONVERT_TO_SHORTPTR(src8);
-    uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
+    const uint16_t *src = CAST_TO_SHORTPTR(src8);
+    uint16_t *dst = CAST_TO_SHORTPTR(dst8);
     const int16x8_t filters = vld1q_s16(filter_x);
     const uint16x8_t max = vdupq_n_u16((1 << bd) - 1);
     uint16x8_t t0, t1, t2, t3;
@@ -579,8 +579,8 @@ void vpx_highbd_convolve8_vert_neon(const uint8_t *src8, ptrdiff_t src_stride,
     vpx_highbd_convolve8_vert_c(src8, src_stride, dst8, dst_stride, filter_x,
                                 x_step_q4, filter_y, y_step_q4, w, h, bd);
   } else {
-    const uint16_t *src = CONVERT_TO_SHORTPTR(src8);
-    uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
+    const uint16_t *src = CAST_TO_SHORTPTR(src8);
+    uint16_t *dst = CAST_TO_SHORTPTR(dst8);
     const int16x8_t filters = vld1q_s16(filter_y);
     const uint16x8_t max = vdupq_n_u16((1 << bd) - 1);
 
@@ -748,8 +748,8 @@ void vpx_highbd_convolve8_avg_vert_neon(const uint8_t *src8,
                                     filter_x, x_step_q4, filter_y, y_step_q4, w,
                                     h, bd);
   } else {
-    const uint16_t *src = CONVERT_TO_SHORTPTR(src8);
-    uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
+    const uint16_t *src = CAST_TO_SHORTPTR(src8);
+    uint16_t *dst = CAST_TO_SHORTPTR(dst8);
     const int16x8_t filters = vld1q_s16(filter_y);
     const uint16x8_t max = vdupq_n_u16((1 << bd) - 1);
 

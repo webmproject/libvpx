@@ -599,9 +599,10 @@ static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane,
 
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-        recon = CONVERT_TO_BYTEPTR(recon);
-        vpx_highbd_convolve_copy(dst, dst_stride, recon, 32, NULL, 0, NULL, 0,
-                                 bs, bs, xd->bd);
+        vpx_highbd_convolve_copy(CAST_TO_BYTEPTR(CONVERT_TO_SHORTPTR(dst)),
+                                 dst_stride, recon, 32, NULL, 0, NULL, 0, bs,
+                                 bs, xd->bd);
+        recon = CONVERT_TO_BYTEPTR(recon16);
         if (xd->lossless) {
           vp9_highbd_iwht4x4_add(dqcoeff, recon, 32, *eob, xd->bd);
         } else {

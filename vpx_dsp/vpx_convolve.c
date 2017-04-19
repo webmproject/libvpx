@@ -324,8 +324,8 @@ static void highbd_convolve_horiz(const uint8_t *src8, ptrdiff_t src_stride,
                                   const InterpKernel *x_filters, int x0_q4,
                                   int x_step_q4, int w, int h, int bd) {
   int x, y;
-  const uint16_t *src = CONVERT_TO_SHORTPTR(src8);
-  uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
+  const uint16_t *src = CAST_TO_SHORTPTR(src8);
+  uint16_t *dst = CAST_TO_SHORTPTR(dst8);
   src -= SUBPEL_TAPS / 2 - 1;
 
   for (y = 0; y < h; ++y) {
@@ -348,8 +348,8 @@ static void highbd_convolve_avg_horiz(const uint8_t *src8, ptrdiff_t src_stride,
                                       const InterpKernel *x_filters, int x0_q4,
                                       int x_step_q4, int w, int h, int bd) {
   int x, y;
-  const uint16_t *src = CONVERT_TO_SHORTPTR(src8);
-  uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
+  const uint16_t *src = CAST_TO_SHORTPTR(src8);
+  uint16_t *dst = CAST_TO_SHORTPTR(dst8);
   src -= SUBPEL_TAPS / 2 - 1;
 
   for (y = 0; y < h; ++y) {
@@ -374,8 +374,8 @@ static void highbd_convolve_vert(const uint8_t *src8, ptrdiff_t src_stride,
                                  const InterpKernel *y_filters, int y0_q4,
                                  int y_step_q4, int w, int h, int bd) {
   int x, y;
-  const uint16_t *src = CONVERT_TO_SHORTPTR(src8);
-  uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
+  const uint16_t *src = CAST_TO_SHORTPTR(src8);
+  uint16_t *dst = CAST_TO_SHORTPTR(dst8);
   src -= src_stride * (SUBPEL_TAPS / 2 - 1);
 
   for (x = 0; x < w; ++x) {
@@ -400,8 +400,8 @@ static void highbd_convolve_avg_vert(const uint8_t *src8, ptrdiff_t src_stride,
                                      const InterpKernel *y_filters, int y0_q4,
                                      int y_step_q4, int w, int h, int bd) {
   int x, y;
-  const uint16_t *src = CONVERT_TO_SHORTPTR(src8);
-  uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
+  const uint16_t *src = CAST_TO_SHORTPTR(src8);
+  uint16_t *dst = CAST_TO_SHORTPTR(dst8);
   src -= src_stride * (SUBPEL_TAPS / 2 - 1);
 
   for (x = 0; x < w; ++x) {
@@ -449,12 +449,12 @@ static void highbd_convolve(const uint8_t *src, ptrdiff_t src_stride,
   assert(y_step_q4 <= 32);
   assert(x_step_q4 <= 32);
 
-  highbd_convolve_horiz(src - src_stride * (SUBPEL_TAPS / 2 - 1), src_stride,
-                        CONVERT_TO_BYTEPTR(temp), 64, x_filters, x0_q4,
+  highbd_convolve_horiz(CAST_TO_BYTEPTR(CAST_TO_SHORTPTR(src) -
+                                        src_stride * (SUBPEL_TAPS / 2 - 1)),
+                        src_stride, CAST_TO_BYTEPTR(temp), 64, x_filters, x0_q4,
                         x_step_q4, w, intermediate_height, bd);
-  highbd_convolve_vert(CONVERT_TO_BYTEPTR(temp) + 64 * (SUBPEL_TAPS / 2 - 1),
-                       64, dst, dst_stride, y_filters, y0_q4, y_step_q4, w, h,
-                       bd);
+  highbd_convolve_vert(CAST_TO_BYTEPTR(temp + 64 * (SUBPEL_TAPS / 2 - 1)), 64,
+                       dst, dst_stride, y_filters, y0_q4, y_step_q4, w, h, bd);
 }
 
 void vpx_highbd_convolve8_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
@@ -541,10 +541,10 @@ void vpx_highbd_convolve8_avg_c(const uint8_t *src, ptrdiff_t src_stride,
   assert(w <= 64);
   assert(h <= 64);
 
-  vpx_highbd_convolve8_c(src, src_stride, CONVERT_TO_BYTEPTR(temp), 64,
-                         filter_x, x_step_q4, filter_y, y_step_q4, w, h, bd);
-  vpx_highbd_convolve_avg_c(CONVERT_TO_BYTEPTR(temp), 64, dst, dst_stride, NULL,
-                            0, NULL, 0, w, h, bd);
+  vpx_highbd_convolve8_c(src, src_stride, CAST_TO_BYTEPTR(temp), 64, filter_x,
+                         x_step_q4, filter_y, y_step_q4, w, h, bd);
+  vpx_highbd_convolve_avg_c(CAST_TO_BYTEPTR(temp), 64, dst, dst_stride, NULL, 0,
+                            NULL, 0, w, h, bd);
 }
 
 void vpx_highbd_convolve_copy_c(const uint8_t *src8, ptrdiff_t src_stride,
@@ -553,8 +553,8 @@ void vpx_highbd_convolve_copy_c(const uint8_t *src8, ptrdiff_t src_stride,
                                 const int16_t *filter_y, int filter_y_stride,
                                 int w, int h, int bd) {
   int r;
-  const uint16_t *src = CONVERT_TO_SHORTPTR(src8);
-  uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
+  const uint16_t *src = CAST_TO_SHORTPTR(src8);
+  uint16_t *dst = CAST_TO_SHORTPTR(dst8);
 
   (void)filter_x;
   (void)filter_x_stride;
@@ -575,8 +575,8 @@ void vpx_highbd_convolve_avg_c(const uint8_t *src8, ptrdiff_t src_stride,
                                const int16_t *filter_y, int filter_y_stride,
                                int w, int h, int bd) {
   int x, y;
-  const uint16_t *src = CONVERT_TO_SHORTPTR(src8);
-  uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
+  const uint16_t *src = CAST_TO_SHORTPTR(src8);
+  uint16_t *dst = CAST_TO_SHORTPTR(dst8);
 
   (void)filter_x;
   (void)filter_x_stride;

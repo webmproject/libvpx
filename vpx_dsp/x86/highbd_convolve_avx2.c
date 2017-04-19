@@ -21,8 +21,8 @@ void vpx_highbd_convolve_copy_avx2(const uint8_t *src8, ptrdiff_t src_stride,
                                    const int16_t *filter_x, int filter_x_stride,
                                    const int16_t *filter_y, int filter_y_stride,
                                    int width, int h, int bd) {
-  const uint16_t *src = CONVERT_TO_SHORTPTR(src8);
-  uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
+  const uint16_t *src = CAST_TO_SHORTPTR(src8);
+  uint16_t *dst = CAST_TO_SHORTPTR(dst8);
   (void)filter_x;
   (void)filter_y;
   (void)filter_x_stride;
@@ -104,8 +104,8 @@ void vpx_highbd_convolve_avg_avx2(const uint8_t *src8, ptrdiff_t src_stride,
                                   const int16_t *filter_x, int filter_x_stride,
                                   const int16_t *filter_y, int filter_y_stride,
                                   int width, int h, int bd) {
-  uint16_t *src = CONVERT_TO_SHORTPTR(src8);
-  uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
+  uint16_t *src = CAST_TO_SHORTPTR(src8);
+  uint16_t *dst = CAST_TO_SHORTPTR(dst8);
   (void)filter_x;
   (void)filter_y;
   (void)filter_x_stride;
