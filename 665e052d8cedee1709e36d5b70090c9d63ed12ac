@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "8c60f091_b7ee9487",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2360,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2017-04-20T09:39:37Z",
+      "side": 1,
+      "message": "OK  I see allow_exhaustive is still used to enable exhaustive only with graphics content though in theory the graphics content test could replace the flag entirely in this function.",
+      "range": {
+        "startLine": 2360,
+        "startChar": 11,
+        "endLine": 2360,
+        "endChar": 32
+      },
+      "revId": "665e052d8cedee1709e36d5b70090c9d63ed12ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0bcac706_5bcb4153",
         "filename": "vp9/encoder/vp9_speed_features.c",
         "patchSetId": 4
