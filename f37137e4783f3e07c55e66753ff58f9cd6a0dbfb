@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3992a021_1f8988b6",
+        "filename": "test/vp9_intrapred_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 433,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-20T03:21:17Z",
+      "side": 1,
+      "message": "VSX",
+      "range": {
+        "startLine": 433,
+        "startChar": 15,
+        "endLine": 433,
+        "endChar": 19
+      },
+      "revId": "f37137e4783f3e07c55e66753ff58f9cd6a0dbfb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
