@@ -36,13 +36,13 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->scaled_temp_is_alloc = 0;
   svc->scaled_one_half = 0;
   svc->current_superframe = 0;
-  svc->phase_scaler = 0;
   for (i = 0; i < REF_FRAMES; ++i) svc->ref_frame_index[i] = -1;
   for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
     cpi->svc.ext_frame_flags[sl] = 0;
     cpi->svc.ext_lst_fb_idx[sl] = 0;
     cpi->svc.ext_gld_fb_idx[sl] = 1;
     cpi->svc.ext_alt_fb_idx[sl] = 2;
+    cpi->svc.filtertype_downsample_source[sl] = 0;
   }
 
   if (cpi->oxcf.error_resilient_mode == 0 && cpi->oxcf.pass == 2) {
@@ -664,8 +664,10 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
       if ((lc->scaling_factor_num != lc->scaling_factor_den >> 1) &&
           !(lc->scaling_factor_num == lc->scaling_factor_den >> 2 && sl == 0 &&
             cpi->svc.number_spatial_layers == 3)) {
+        int sl2;
         cpi->svc.use_base_mv = 0;
-        cpi->svc.phase_scaler = 0;
+        for (sl2 = 0; sl2 < cpi->svc.number_spatial_layers - 1; ++sl2)
+          cpi->svc.filtertype_downsample_source[sl2] = 0;
         break;
       }
     }

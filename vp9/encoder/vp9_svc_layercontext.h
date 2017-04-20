@@ -88,11 +88,12 @@ typedef struct {
   int force_zero_mode_spatial_ref;
   int current_superframe;
   int use_base_mv;
-  // phase_scaler used to control the downscaling filter for source scaling.
-  // phase_scaler = 0 will do sub-sampling (no weighted average),
-  // phase_scaler = 8 will center the target pixel and use the averaging filter,
-  // for eightap regular: {-1, 6, -19, 78, 78, -19, 6, -1 }.
-  int phase_scaler;
+  // Used to control the downscaling filter for source scaling, for 1 pass CBR.
+  // 0 will do sub-sampling (no weighted average), 1 will center the target
+  // pixel and use the averaging filter, for the default eightap_regular:
+  // {-1, 6, -19, 78, 78, -19, 6, -1 }.
+  // TODO(marpan): Add option for bilinear.
+  int filtertype_downsample_source[VPX_SS_MAX_LAYERS];
 } SVC;
 
 struct VP9_COMP;

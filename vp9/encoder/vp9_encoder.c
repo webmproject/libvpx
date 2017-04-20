@@ -3124,7 +3124,11 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
                                        uint8_t *dest) {
   VP9_COMMON *const cm = &cpi->common;
   int q = 0, bottom_index = 0, top_index = 0;  // Dummy variables.
-  const int phase_scaler = is_one_pass_cbr_svc(cpi) ? cpi->svc.phase_scaler : 0;
+  const int phase_scaler =
+      (is_one_pass_cbr_svc(cpi) &&
+       cpi->svc.filtertype_downsample_source[cpi->svc.spatial_layer_id])
+          ? 8
+          : 0;
 
   // Flag to check if its valid to compute the source sad (used for
   // scene detection and for superblock content state in CBR mode).
@@ -3144,9 +3148,10 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     // For svc, if it is a 1/4x1/4 downscaling, do a two-stage scaling to take
     // advantage of the 1:2 optimized scaler. In the process, the 1/2x1/2
     // result will be saved in scaled_temp and might be used later.
-    cpi->Source =
-        vp9_svc_twostage_scale(cm, cpi->un_scaled_source, &cpi->scaled_source,
-                               &cpi->svc.scaled_temp, phase_scaler);
+    int phase_scaler2 = (cpi->svc.filtertype_downsample_source[1]) ? 8 : 0;
+    cpi->Source = vp9_svc_twostage_scale(
+        cm, cpi->un_scaled_source, &cpi->scaled_source, &cpi->svc.scaled_temp,
+        phase_scaler, phase_scaler2);
     cpi->svc.scaled_one_half = 1;
   } else if (is_one_pass_cbr_svc(cpi) &&
              cpi->un_scaled_source->y_width == cm->width << 1 &&
@@ -3685,25 +3690,23 @@ static void set_ext_overrides(VP9_COMP *cpi) {
   }
 }
 
-YV12_BUFFER_CONFIG *vp9_svc_twostage_scale(VP9_COMMON *cm,
-                                           YV12_BUFFER_CONFIG *unscaled,
-                                           YV12_BUFFER_CONFIG *scaled,
-                                           YV12_BUFFER_CONFIG *scaled_temp,
-                                           int phase_scaler) {
+YV12_BUFFER_CONFIG *vp9_svc_twostage_scale(
+    VP9_COMMON *cm, YV12_BUFFER_CONFIG *unscaled, YV12_BUFFER_CONFIG *scaled,
+    YV12_BUFFER_CONFIG *scaled_temp, int phase_scaler, int phase_scaler2) {
   if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
       cm->mi_rows * MI_SIZE != unscaled->y_height) {
 #if CONFIG_VP9_HIGHBITDEPTH
     if (cm->bit_depth == VPX_BITS_8) {
-      vp9_scale_and_extend_frame(unscaled, scaled_temp, phase_scaler);
+      vp9_scale_and_extend_frame(unscaled, scaled_temp, phase_scaler2);
       vp9_scale_and_extend_frame(scaled_temp, scaled, phase_scaler);
     } else {
       scale_and_extend_frame(unscaled, scaled_temp, (int)cm->bit_depth,
-                             phase_scaler);
+                             phase_scaler2);
       scale_and_extend_frame(scaled_temp, scaled, (int)cm->bit_depth,
                              phase_scaler);
     }
 #else
-    vp9_scale_and_extend_frame(unscaled, scaled_temp, phase_scaler);
+    vp9_scale_and_extend_frame(unscaled, scaled_temp, phase_scaler2);
     vp9_scale_and_extend_frame(scaled_temp, scaled, phase_scaler);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     return scaled;

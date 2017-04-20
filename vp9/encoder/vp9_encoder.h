@@ -844,7 +844,7 @@ YV12_BUFFER_CONFIG *vp9_svc_twostage_scale(VP9_COMMON *cm,
                                            YV12_BUFFER_CONFIG *unscaled,
                                            YV12_BUFFER_CONFIG *scaled,
                                            YV12_BUFFER_CONFIG *scaled_temp,
-                                           int phase_scaler);
+                                           int phase_scaler, int phase_scaler2);
 
 YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
                                           YV12_BUFFER_CONFIG *unscaled,
