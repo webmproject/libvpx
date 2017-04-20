@@ -1256,7 +1256,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL1TLScreenContent1) {
 
 // Check basic rate targeting for 1 pass CBR SVC: 2 spatial layers and
 // 3 temporal layers. Run CIF clip with 1 thread.
-TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc2SL3TL) {
+TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TL) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -1292,17 +1292,19 @@ TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc2SL3TL) {
         << " The datarate for the file exceeds the target by too much!";
     ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.15)
         << " The datarate for the file is lower than the target by too much!";
+#if CONFIG_VP9_DECODER
     // Number of temporal layers > 1, so half of the frames in this SVC pattern
     // will be non-reference frame and hence encoder will avoid loopfilter.
     // Since frame dropper is off, we can expcet 100 (half of the sequence)
     // mismatched frames.
     EXPECT_EQ(static_cast<unsigned int>(100), GetMismatchFrames());
+#endif
   }
 }
 
 // Check basic rate targeting for 1 pass CBR SVC with denoising.
 // 2 spatial layers and 3 temporal layer. Run HD clip with 2 threads.
-TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc2SL3TLDenoiserOn) {
+TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TLDenoiserOn) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -1338,11 +1340,13 @@ TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc2SL3TLDenoiserOn) {
         << " The datarate for the file exceeds the target by too much!";
     ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.15)
         << " The datarate for the file is lower than the target by too much!";
+#if CONFIG_VP9_DECODER
     // Number of temporal layers > 1, so half of the frames in this SVC pattern
     // will be non-reference frame and hence encoder will avoid loopfilter.
     // Since frame dropper is off, we can expcet 150 (half of the sequence)
     // mismatched frames.
     EXPECT_EQ(static_cast<unsigned int>(150), GetMismatchFrames());
+#endif
   }
 }
 
@@ -1389,7 +1393,7 @@ TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc2SL3TLSmallKf) {
 
 // Check basic rate targeting for 1 pass CBR SVC: 2 spatial layers and
 // 3 temporal layers. Run HD clip with 4 threads.
-TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc2SL3TL4threads) {
+TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TL4threads) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -1421,16 +1425,18 @@ TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc2SL3TL4threads) {
       << " The datarate for the file exceeds the target by too much!";
   ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.15)
       << " The datarate for the file is lower than the target by too much!";
+#if CONFIG_VP9_DECODER
   // Number of temporal layers > 1, so half of the frames in this SVC pattern
   // will be non-reference frame and hence encoder will avoid loopfilter.
   // Since frame dropper is off, we can expcet 150 (half of the sequence)
   // mismatched frames.
   EXPECT_EQ(static_cast<unsigned int>(150), GetMismatchFrames());
+#endif
 }
 
 // Check basic rate targeting for 1 pass CBR SVC: 3 spatial layers and
 // 3 temporal layers. Run CIF clip with 1 thread.
-TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc3SL3TL) {
+TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -1464,16 +1470,18 @@ TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc3SL3TL) {
       << " The datarate for the file exceeds the target by too much!";
   ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.22)
       << " The datarate for the file is lower than the target by too much!";
+#if CONFIG_VP9_DECODER
   // Number of temporal layers > 1, so half of the frames in this SVC pattern
   // will be non-reference frame and hence encoder will avoid loopfilter.
   // Since frame dropper is off, we can expcet 150 (half of the sequence)
   // mismatched frames.
   EXPECT_EQ(static_cast<unsigned int>(150), GetMismatchFrames());
+#endif
 }
 
 // Check basic rate targeting for 1 pass CBR SVC: 3 spatial layers and 3
 // temporal layers. Run CIF clip with 1 thread, and few short key frame periods.
-TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc3SL3TLSmallKf) {
+TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TLSmallKf) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -1515,7 +1523,7 @@ TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc3SL3TLSmallKf) {
 
 // Check basic rate targeting for 1 pass CBR SVC: 3 spatial layers and
 // 3 temporal layers. Run HD clip with 4 threads.
-TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc3SL3TL4threads) {
+TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL4threads) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -1549,11 +1557,13 @@ TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc3SL3TL4threads) {
       << " The datarate for the file exceeds the target by too much!";
   ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.22)
       << " The datarate for the file is lower than the target by too much!";
+#if CONFIG_VP9_DECODER
   // Number of temporal layers > 1, so half of the frames in this SVC pattern
   // will be non-reference frame and hence encoder will avoid loopfilter.
   // Since frame dropper is off, we can expcet 150 (half of the sequence)
   // mismatched frames.
   EXPECT_EQ(static_cast<unsigned int>(150), GetMismatchFrames());
+#endif
 }
 
 // Run SVC encoder for 1 temporal layer, 2 spatial layers, with spatial
