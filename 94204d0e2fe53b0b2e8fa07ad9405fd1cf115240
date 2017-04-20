@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "093faf94_16b12970",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-04-20T23:17:40Z",
+      "side": 1,
+      "message": "..when the speed feature use_simple_block_yrd is enabled (or for highbitdepth build under certain conditions).",
+      "revId": "94204d0e2fe53b0b2e8fa07ad9405fd1cf115240",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
