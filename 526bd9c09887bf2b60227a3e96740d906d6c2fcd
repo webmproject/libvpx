@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9897fb37_5985fa11",
+        "filename": "test/vp9_intrapred_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-20T02:38:38Z",
+      "side": 1,
+      "message": "this one has been removed from this chain",
+      "revId": "526bd9c09887bf2b60227a3e96740d906d6c2fcd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
