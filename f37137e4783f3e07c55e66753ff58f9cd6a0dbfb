@@ -22,6 +22,30 @@
       "revId": "f37137e4783f3e07c55e66753ff58f9cd6a0dbfb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d1e368d5_070e96a3",
+        "filename": "test/vp9_intrapred_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 433,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-20T03:22:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3992a021_1f8988b6",
+      "range": {
+        "startLine": 433,
+        "startChar": 15,
+        "endLine": 433,
+        "endChar": 19
+      },
+      "revId": "f37137e4783f3e07c55e66753ff58f9cd6a0dbfb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
