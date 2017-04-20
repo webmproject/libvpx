@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "060314a2_3f1b529f",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2360,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-04-20T22:19:18Z",
+      "side": 1,
+      "message": "As a speed feature, allow_exhaustive_searches can be enabled/disabled at specific speed. I checked the usage of allow_exhaustive_searches, and it looks like that it is used for all speeds of good quality encoding and not used for any speed of rt encoding. So, we still need a speed feature here. Found that exhaustive_searches_thresh can be also used for this purpose, I refactored the related code, use exhaustive_searches_thresh as the speed feature and removed allow_exhaustive_searches. Please look at the patch set 5.",
+      "parentUuid": "8c60f091_b7ee9487",
+      "range": {
+        "startLine": 2360,
+        "startChar": 11,
+        "endLine": 2360,
+        "endChar": 32
+      },
+      "revId": "665e052d8cedee1709e36d5b70090c9d63ed12ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0bcac706_5bcb4153",
         "filename": "vp9/encoder/vp9_speed_features.c",
         "patchSetId": 4
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "abbb9c5a_32c1c879",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 612,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-04-20T22:19:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0bcac706_5bcb4153",
+      "revId": "665e052d8cedee1709e36d5b70090c9d63ed12ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da8e2ba7_915c0ad6",
         "filename": "vp9/encoder/vp9_speed_features.c",
         "patchSetId": 4
@@ -56,6 +98,24 @@
       "revId": "665e052d8cedee1709e36d5b70090c9d63ed12ac",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "562508da_075e22c4",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 788,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-04-20T22:19:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da8e2ba7_915c0ad6",
+      "revId": "665e052d8cedee1709e36d5b70090c9d63ed12ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
