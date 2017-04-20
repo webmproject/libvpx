@@ -3229,10 +3229,11 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
        cpi->oxcf.content == VP9E_CONTENT_SCREEN))
     vp9_scene_detection_onepass(cpi);
 
-  // For 1 pass SVC, since only ZEROMV is allowed for upsampled reference
-  // frame (i.e, svc->force_zero_mode_spatial_ref = 0), we can avoid this
-  // frame-level upsampling.
-  if (frame_is_intra_only(cm) == 0 && !is_one_pass_cbr_svc(cpi)) {
+  // For 1 pass CBR SVC, only ZEROMV is allowed for spatial reference frame
+  // when svc->force_zero_mode_spatial_ref = 1. Under those conditions we can
+  // avoid this frame-level upsampling (for non intra_only frames).
+  if (frame_is_intra_only(cm) == 0 &&
+      !(is_one_pass_cbr_svc(cpi) && cpi->svc.force_zero_mode_spatial_ref)) {
     vp9_scale_references(cpi);
   }
 
