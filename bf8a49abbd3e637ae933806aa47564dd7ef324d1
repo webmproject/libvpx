@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4472416a_375df178",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-04-20T21:37:57Z",
+      "side": 1,
+      "message": "I think I get the point here.\n\nCan we somehow use, typedef void *Pixel;\nto deal with the ambiguous pixel pointer (hbd or lbd)?  With current patch, uint8_t * still has two possible meaning.",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 62
+      },
+      "revId": "bf8a49abbd3e637ae933806aa47564dd7ef324d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
