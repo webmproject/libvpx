@@ -93,11 +93,6 @@ struct macroblock {
   int rddiv;
   int rdmult;
   int mb_energy;
-  int *m_search_count_ptr;
-  int *ex_search_count_ptr;
-#if CONFIG_MULTITHREAD
-  pthread_mutex_t *search_count_mutex;
-#endif
 
   // These are set to their default values at the beginning, and then adjusted
   // further in the encoding process.
