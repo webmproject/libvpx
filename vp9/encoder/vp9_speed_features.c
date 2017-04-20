@@ -720,32 +720,30 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   cpi->full_search_sad = vp9_full_search_sad;
   cpi->diamond_search_sad = vp9_diamond_search_sad;
 
-  sf->allow_exhaustive_searches = 1;
-  if (oxcf->mode == BEST) {
-    if (cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION)
+  if (cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) {
+    sf->allow_exhaustive_searches = 1;
+    if (oxcf->mode == BEST) {
       sf->exhaustive_searches_thresh = (1 << 20);
-    else
-      sf->exhaustive_searches_thresh = (1 << 21);
-    sf->max_exaustive_pct = 100;
-    for (i = 0; i < MAX_MESH_STEP; ++i) {
-      sf->mesh_patterns[i].range = best_quality_mesh_pattern[i].range;
-      sf->mesh_patterns[i].interval = best_quality_mesh_pattern[i].interval;
+      sf->max_exaustive_pct = 100;
+      for (i = 0; i < MAX_MESH_STEP; ++i) {
+        sf->mesh_patterns[i].range = best_quality_mesh_pattern[i].range;
+        sf->mesh_patterns[i].interval = best_quality_mesh_pattern[i].interval;
+      }
+    } else {
+      int speed = (oxcf->speed > MAX_MESH_SPEED) ? MAX_MESH_SPEED : oxcf->speed;
+      sf->exhaustive_searches_thresh = (1 << 22);
+      sf->max_exaustive_pct = good_quality_max_mesh_pct[speed];
+      if (speed > 0)
+        sf->exhaustive_searches_thresh = sf->exhaustive_searches_thresh << 1;
+
+      for (i = 0; i < MAX_MESH_STEP; ++i) {
+        sf->mesh_patterns[i].range = good_quality_mesh_patterns[speed][i].range;
+        sf->mesh_patterns[i].interval =
+            good_quality_mesh_patterns[speed][i].interval;
+      }
     }
   } else {
-    int speed = (oxcf->speed > MAX_MESH_SPEED) ? MAX_MESH_SPEED : oxcf->speed;
-    if (cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION)
-      sf->exhaustive_searches_thresh = (1 << 22);
-    else
-      sf->exhaustive_searches_thresh = (1 << 23);
-    sf->max_exaustive_pct = good_quality_max_mesh_pct[speed];
-    if (speed > 0)
-      sf->exhaustive_searches_thresh = sf->exhaustive_searches_thresh << 1;
-
-    for (i = 0; i < MAX_MESH_STEP; ++i) {
-      sf->mesh_patterns[i].range = good_quality_mesh_patterns[speed][i].range;
-      sf->mesh_patterns[i].interval =
-          good_quality_mesh_patterns[speed][i].interval;
-    }
+    sf->allow_exhaustive_searches = 0;
   }
 
   // Slow quant, dct and trellis not worthwhile for first pass
