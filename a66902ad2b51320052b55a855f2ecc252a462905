@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3b7fac5b_65941d7c",
+        "filename": "vp9/encoder/x86/temporal_filter_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-20T19:44:08Z",
+      "side": 1,
+      "message": "_mm_srl_epi16() uses the lower 64 bits (kind of nonsensical to me), but yeah it works. good catch.",
+      "parentUuid": "b7a70219_7f9165d9",
+      "range": {
+        "startLine": 93,
+        "startChar": 2,
+        "endLine": 93,
+        "endChar": 19
+      },
+      "revId": "a66902ad2b51320052b55a855f2ecc252a462905",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1a2402cf_9889598b",
         "filename": "vp9/encoder/x86/temporal_filter_ssse3.c",
         "patchSetId": 9
@@ -53,6 +77,30 @@
       "writtenOn": "2017-04-17T22:30:47Z",
       "side": 1,
       "message": "if width \u003d\u003d 16 in this branch, replacing width by 16 may save some code.",
+      "range": {
+        "startLine": 293,
+        "startChar": 4,
+        "endLine": 293,
+        "endChar": 10
+      },
+      "revId": "a66902ad2b51320052b55a855f2ecc252a462905",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "61fd2af1_fd27857b",
+        "filename": "vp9/encoder/x86/temporal_filter_ssse3.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-20T19:44:08Z",
+      "side": 1,
+      "message": "added an assert and if (width \u003d\u003d 16)",
+      "parentUuid": "0e556f82_4e299053",
       "range": {
         "startLine": 293,
         "startChar": 4,
