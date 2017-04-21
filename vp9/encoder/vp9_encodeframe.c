@@ -946,9 +946,16 @@ static void chroma_check(VP9_COMP *cpi, MACROBLOCK *x, int bsize,
                          unsigned int y_sad, int is_key_frame) {
   int i;
   MACROBLOCKD *xd = &x->e_mbd;
+
+  if (is_key_frame) return;
+
   // For speed >= 8, avoid the chroma check if y_sad is above threshold.
-  if (is_key_frame || (cpi->oxcf.speed >= 8 && y_sad > cpi->vbp_thresholds[1]))
-    return;
+  if (cpi->oxcf.speed >= 8) {
+    if (y_sad > cpi->vbp_thresholds[1] &&
+        (!cpi->noise_estimate.enabled ||
+         vp9_noise_estimate_extract_level(&cpi->noise_estimate) < kMedium))
+      return;
+  }
 
   for (i = 1; i <= 2; ++i) {
     unsigned int uv_sad = UINT_MAX;

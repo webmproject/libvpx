@@ -452,28 +452,32 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
 
     // Transform skipping test in UV planes.
     for (i = 1; i <= 2; i++) {
-      struct macroblock_plane *const p = &x->plane[i];
-      struct macroblockd_plane *const pd = &xd->plane[i];
-      const TX_SIZE uv_tx_size = get_uv_tx_size(xd->mi[0], pd);
-      const BLOCK_SIZE unit_size = txsize_to_bsize[uv_tx_size];
-      const BLOCK_SIZE uv_bsize = get_plane_block_size(bsize, pd);
-      const int uv_bw = b_width_log2_lookup[uv_bsize];
-      const int uv_bh = b_height_log2_lookup[uv_bsize];
-      const int sf = (uv_bw - b_width_log2_lookup[unit_size]) +
-                     (uv_bh - b_height_log2_lookup[unit_size]);
-      const uint32_t uv_dc_thr = pd->dequant[0] * pd->dequant[0] >> (6 - sf);
-      const uint32_t uv_ac_thr = pd->dequant[1] * pd->dequant[1] >> (6 - sf);
-      int j = i - 1;
+      if (cpi->oxcf.speed < 8 || x->color_sensitivity[i - 1]) {
+        struct macroblock_plane *const p = &x->plane[i];
+        struct macroblockd_plane *const pd = &xd->plane[i];
+        const TX_SIZE uv_tx_size = get_uv_tx_size(xd->mi[0], pd);
+        const BLOCK_SIZE unit_size = txsize_to_bsize[uv_tx_size];
+        const BLOCK_SIZE uv_bsize = get_plane_block_size(bsize, pd);
+        const int uv_bw = b_width_log2_lookup[uv_bsize];
+        const int uv_bh = b_height_log2_lookup[uv_bsize];
+        const int sf = (uv_bw - b_width_log2_lookup[unit_size]) +
+                       (uv_bh - b_height_log2_lookup[unit_size]);
+        const uint32_t uv_dc_thr = pd->dequant[0] * pd->dequant[0] >> (6 - sf);
+        const uint32_t uv_ac_thr = pd->dequant[1] * pd->dequant[1] >> (6 - sf);
+        int j = i - 1;
 
-      vp9_build_inter_predictors_sbp(xd, mi_row, mi_col, bsize, i);
-      var_uv[j] = cpi->fn_ptr[uv_bsize].vf(
-          p->src.buf, p->src.stride, pd->dst.buf, pd->dst.stride, &sse_uv[j]);
+        vp9_build_inter_predictors_sbp(xd, mi_row, mi_col, bsize, i);
+        var_uv[j] = cpi->fn_ptr[uv_bsize].vf(
+            p->src.buf, p->src.stride, pd->dst.buf, pd->dst.stride, &sse_uv[j]);
 
-      if ((var_uv[j] < uv_ac_thr || var_uv[j] == 0) &&
-          (sse_uv[j] - var_uv[j] < uv_dc_thr || sse_uv[j] == var_uv[j]))
-        skip_uv[j] = 1;
-      else
-        break;
+        if ((var_uv[j] < uv_ac_thr || var_uv[j] == 0) &&
+            (sse_uv[j] - var_uv[j] < uv_dc_thr || sse_uv[j] == var_uv[j]))
+          skip_uv[j] = 1;
+        else
+          break;
+      } else {
+        skip_uv[i - 1] = 1;
+      }
     }
 
     // If the transform in YUV planes are skippable, the mode search checks
@@ -481,7 +485,6 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
     if (skip_uv[0] & skip_uv[1]) {
       *early_term = 1;
     }
-
     return;
   }
 
