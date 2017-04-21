@@ -354,7 +354,8 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
   *sse_y = sse;
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
-  if (cpi->oxcf.noise_sensitivity > 0 && cpi->oxcf.speed > 5)
+  if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc(cpi) &&
+      cpi->oxcf.speed > 5)
     ac_thr = vp9_scale_acskip_thresh(ac_thr, cpi->denoiser.denoising_level,
                                      (abs(sum) >> (bw + bh)));
   else

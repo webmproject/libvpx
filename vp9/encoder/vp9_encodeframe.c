@@ -536,8 +536,8 @@ static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q,
         threshold_base = (7 * threshold_base) >> 3;
     }
 #if CONFIG_VP9_TEMPORAL_DENOISING
-    if (cpi->oxcf.noise_sensitivity > 0 && cpi->oxcf.speed > 5 &&
-        cpi->denoiser.denoising_level >= kDenLow)
+    if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc(cpi) &&
+        cpi->oxcf.speed > 5 && cpi->denoiser.denoising_level >= kDenLow)
       threshold_base = vp9_scale_part_thresh(
           threshold_base, cpi->denoiser.denoising_level, content_state);
     else
