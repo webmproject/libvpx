@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "48fa5c48_197aeff2",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2017-04-21T17:55:01Z",
+      "side": 1,
+      "message": "You have two tests of cpi-\u003etwopass.fr_content_type \u003d\u003d FC_GRAPHICS_ANIMATION here. Perhaps simply move the setting of the (1 \u003c\u003c22) inside the next if and then have an else case which sets it to INT_MAX. Would this be cleaner than repeating the if test ?  I leave it to your discretion.",
+      "range": {
+        "startLine": 170,
+        "startChar": 0,
+        "endLine": 174,
+        "endChar": 62
+      },
+      "revId": "e0b3a4006b2bc17e1befb9628c2c103d0626455d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ebafe285_8f8f6ac0",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2017-04-21T17:55:01Z",
+      "side": 1,
+      "message": "This appears to be a change on what we had before (also the case for speed 3).\n\nPreviously we had:\n\n\"      for (i \u003d 0; i \u003c MAX_MESH_STEP; ++i) {\n        sf-\u003emesh_patterns[i].range \u003d good_quality_mesh_patterns[speed][i].range;\n        sf-\u003emesh_patterns[i].interval \u003d\n            good_quality_mesh_patterns[speed][i].interval;\"\n\nNow we seem to be indexing by speed - 1",
+      "range": {
+        "startLine": 244,
+        "startChar": 0,
+        "endLine": 250,
+        "endChar": 5
+      },
+      "revId": "e0b3a4006b2bc17e1befb9628c2c103d0626455d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
