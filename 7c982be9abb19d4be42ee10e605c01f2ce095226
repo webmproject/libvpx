@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da845443_ff9087ba",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1503,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-04-21T23:38:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6440247b_35ee3157",
+      "revId": "7c982be9abb19d4be42ee10e605c01f2ce095226",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ca0b61f_c0c6d4de",
         "filename": "vp9/encoder/vp9_encoder.h",
         "patchSetId": 7
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "3dc03a0b_02a7a475",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 727,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-04-21T23:38:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2ca0b61f_c0c6d4de",
+      "revId": "7c982be9abb19d4be42ee10e605c01f2ce095226",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "99159abc_4e675585",
         "filename": "vp9/vp9_cx_iface.c",
         "patchSetId": 7
@@ -47,6 +83,30 @@
       "writtenOn": "2017-04-20T19:42:17Z",
       "side": 1,
       "message": "this is used in 2 tests and is probably the most fragile part. move this to a #define indicating its use. technically we consider 5+ realtime in many cases so it would be good to document what this does",
+      "range": {
+        "startLine": 516,
+        "startChar": 30,
+        "endLine": 516,
+        "endChar": 31
+      },
+      "revId": "7c982be9abb19d4be42ee10e605c01f2ce095226",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7b8a1cc6_41853f93",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 516,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-04-21T23:38:09Z",
+      "side": 1,
+      "message": "Currently there is no settings about this VPX_DL_(REALTIME, GOOD_QUALITY, BEST_QUALITY) before the encoding starts. So I added a new control over that and changed vpxenc.c and vpx_temporal_svc_encoder.c accordingly.",
+      "parentUuid": "99159abc_4e675585",
       "range": {
         "startLine": 516,
         "startChar": 30,
