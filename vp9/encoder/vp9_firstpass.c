@@ -979,12 +979,12 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
     if (log_intra < 10.0) {
       mb_intra_factor = 1.0 + ((10.0 - log_intra) * 0.05);
       fp_acc_data->intra_factor += mb_intra_factor;
-      if (cpi->oxcf.row_mt_bit_exact)
+      if (cpi->row_mt_bit_exact)
         cpi->twopass.fp_mb_float_stats[mb_index].frame_mb_intra_factor =
             mb_intra_factor;
     } else {
       fp_acc_data->intra_factor += 1.0;
-      if (cpi->oxcf.row_mt_bit_exact)
+      if (cpi->row_mt_bit_exact)
         cpi->twopass.fp_mb_float_stats[mb_index].frame_mb_intra_factor = 1.0;
     }
 
@@ -999,12 +999,12 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
     if ((level_sample < DARK_THRESH) && (log_intra < 9.0)) {
       mb_brightness_factor = 1.0 + (0.01 * (DARK_THRESH - level_sample));
       fp_acc_data->brightness_factor += mb_brightness_factor;
-      if (cpi->oxcf.row_mt_bit_exact)
+      if (cpi->row_mt_bit_exact)
         cpi->twopass.fp_mb_float_stats[mb_index].frame_mb_brightness_factor =
             mb_brightness_factor;
     } else {
       fp_acc_data->brightness_factor += 1.0;
-      if (cpi->oxcf.row_mt_bit_exact)
+      if (cpi->row_mt_bit_exact)
         cpi->twopass.fp_mb_float_stats[mb_index].frame_mb_brightness_factor =
             1.0;
     }
@@ -1166,7 +1166,7 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
         if (((this_error - intrapenalty) * 9 <= motion_error * 10) &&
             (this_error < (2 * intrapenalty))) {
           fp_acc_data->neutral_count += 1.0;
-          if (cpi->oxcf.row_mt_bit_exact)
+          if (cpi->row_mt_bit_exact)
             cpi->twopass.fp_mb_float_stats[mb_index].frame_mb_neutral_count =
                 1.0;
           // Also track cases where the intra is not much worse than the inter
@@ -1176,7 +1176,7 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
           mb_neutral_count =
               (double)motion_error / DOUBLE_DIVIDE_CHECK((double)this_error);
           fp_acc_data->neutral_count += mb_neutral_count;
-          if (cpi->oxcf.row_mt_bit_exact)
+          if (cpi->row_mt_bit_exact)
             cpi->twopass.fp_mb_float_stats[mb_index].frame_mb_neutral_count =
                 mb_neutral_count;
         }
@@ -1424,7 +1424,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
 
   cm->log2_tile_rows = 0;
 
-  if (cpi->oxcf.row_mt_bit_exact && cpi->twopass.fp_mb_float_stats == NULL)
+  if (cpi->row_mt_bit_exact && cpi->twopass.fp_mb_float_stats == NULL)
     CHECK_MEM_ERROR(
         cm, cpi->twopass.fp_mb_float_stats,
         vpx_calloc(cm->MBs * sizeof(*cpi->twopass.fp_mb_float_stats), 1));
@@ -1441,13 +1441,13 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     } else {
       cpi->row_mt_sync_read_ptr = vp9_row_mt_sync_read;
       cpi->row_mt_sync_write_ptr = vp9_row_mt_sync_write;
-      if (cpi->oxcf.row_mt_bit_exact) {
+      if (cpi->row_mt_bit_exact) {
         cm->log2_tile_cols = 0;
         vp9_zero_array(cpi->twopass.fp_mb_float_stats, cm->MBs);
       }
       vp9_encode_fp_row_mt(cpi);
       first_tile_col = &cpi->tile_data[0];
-      if (cpi->oxcf.row_mt_bit_exact)
+      if (cpi->row_mt_bit_exact)
         accumulate_floating_point_stats(cpi, first_tile_col);
       first_pass_stat_calc(cpi, &fps, &(first_tile_col->fp_data));
     }

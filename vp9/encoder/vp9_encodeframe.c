@@ -4341,7 +4341,6 @@ void vp9_init_tile_data(VP9_COMP *cpi) {
           }
         }
 #if CONFIG_MULTITHREAD
-        tile_data->enc_row_mt_mutex = NULL;
         tile_data->row_base_thresh_freq_fact = NULL;
 #endif
       }

@@ -268,7 +268,6 @@ typedef struct VP9EncoderConfig {
   VP9E_TEMPORAL_LAYERING_MODE temporal_layering_mode;
 
   int row_mt;
-  unsigned int row_mt_bit_exact;
   unsigned int motion_vector_unit_test;
 } VP9EncoderConfig;
 
@@ -286,9 +285,6 @@ typedef struct TileDataEnc {
 
   // Used for adaptive_rd_thresh with row multithreading
   int *row_base_thresh_freq_fact;
-#if CONFIG_MULTITHREAD
-  pthread_mutex_t *enc_row_mt_mutex;
-#endif
 } TileDataEnc;
 
 typedef struct RowMTInfo {
@@ -692,7 +688,9 @@ typedef struct VP9_COMP {
   void (*row_mt_sync_read_ptr)(VP9RowMTSync *const, int, int);
   void (*row_mt_sync_write_ptr)(VP9RowMTSync *const, int, int, const int);
   ARNRFilterData arnr_filter_data;
+
   int row_mt;
+  unsigned int row_mt_bit_exact;
 
   // Previous Partition Info
   BLOCK_SIZE *prev_partition;
