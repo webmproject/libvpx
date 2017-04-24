@@ -4341,7 +4341,6 @@ void vp9_init_tile_data(VP9_COMP *cpi) {
           }
         }
 #if CONFIG_MULTITHREAD
-        tile_data->search_count_mutex = NULL;
         tile_data->enc_row_mt_mutex = NULL;
         tile_data->row_base_thresh_freq_fact = NULL;
 #endif
@@ -4361,10 +4360,6 @@ void vp9_init_tile_data(VP9_COMP *cpi) {
       cpi->tplist[tile_row][tile_col] = tplist + tplist_count;
       tplist = cpi->tplist[tile_row][tile_col];
       tplist_count = get_num_vert_units(*tile_info, MI_BLOCK_SIZE_LOG2);
-
-      // Set up pointers to per thread motion search counters.
-      this_tile->m_search_count = 0;   // Count of motion search hits.
-      this_tile->ex_search_count = 0;  // Exhaustive mesh search hits.
     }
   }
 }
@@ -4408,13 +4403,6 @@ void vp9_encode_tile(VP9_COMP *cpi, ThreadData *td, int tile_row,
   const int mi_row_start = tile_info->mi_row_start;
   const int mi_row_end = tile_info->mi_row_end;
   int mi_row;
-
-  // Set up pointers to per thread motion search counters.
-  td->mb.m_search_count_ptr = &this_tile->m_search_count;
-  td->mb.ex_search_count_ptr = &this_tile->ex_search_count;
-#if CONFIG_MULTITHREAD
-  td->mb.search_count_mutex = this_tile->search_count_mutex;
-#endif
 
   for (mi_row = mi_row_start; mi_row < mi_row_end; mi_row += MI_BLOCK_SIZE)
     vp9_encode_sb_row(cpi, td, tile_row, tile_col, mi_row);

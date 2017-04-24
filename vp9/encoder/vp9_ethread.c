@@ -552,7 +552,6 @@ static int enc_row_mt_worker_hook(EncWorkerData *const thread_data,
   const VP9_COMMON *const cm = &cpi->common;
   const int tile_cols = 1 << cm->log2_tile_cols;
   int tile_row, tile_col;
-  TileDataEnc *this_tile;
   int end_of_frame;
   int thread_id = thread_data->thread_id;
   int cur_tile_id = multi_thread_ctxt->thread_id_to_tile_id[thread_id];
@@ -573,13 +572,6 @@ static int enc_row_mt_worker_hook(EncWorkerData *const thread_data,
       tile_col = proc_job->tile_col_id;
       tile_row = proc_job->tile_row_id;
       mi_row = proc_job->vert_unit_row_num * MI_BLOCK_SIZE;
-
-      this_tile = &cpi->tile_data[tile_row * tile_cols + tile_col];
-      thread_data->td->mb.m_search_count_ptr = &this_tile->m_search_count;
-      thread_data->td->mb.ex_search_count_ptr = &this_tile->ex_search_count;
-#if CONFIG_MULTITHREAD
-      thread_data->td->mb.search_count_mutex = this_tile->search_count_mutex;
-#endif
 
       vp9_encode_sb_row(cpi, thread_data->td, tile_row, tile_col, mi_row);
     }

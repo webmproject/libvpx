@@ -281,15 +281,12 @@ typedef struct TileDataEnc {
   TileInfo tile_info;
   int thresh_freq_fact[BLOCK_SIZES][MAX_MODES];
   int mode_map[BLOCK_SIZES][MAX_MODES];
-  int m_search_count;
-  int ex_search_count;
   FIRSTPASS_DATA fp_data;
   VP9RowMTSync row_mt_sync;
 
   // Used for adaptive_rd_thresh with row multithreading
   int *row_base_thresh_freq_fact;
 #if CONFIG_MULTITHREAD
-  pthread_mutex_t *search_count_mutex;
   pthread_mutex_t *enc_row_mt_mutex;
 #endif
 } TileDataEnc;

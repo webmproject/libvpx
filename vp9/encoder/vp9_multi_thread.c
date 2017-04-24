@@ -116,11 +116,6 @@ void vp9_row_mt_mem_alloc(VP9_COMP *cpi) {
     for (tile_col = 0; tile_col < tile_cols; tile_col++) {
       TileDataEnc *this_tile = &cpi->tile_data[tile_row * tile_cols + tile_col];
 
-      CHECK_MEM_ERROR(cm, this_tile->search_count_mutex,
-                      vpx_malloc(sizeof(*this_tile->search_count_mutex)));
-
-      pthread_mutex_init(this_tile->search_count_mutex, NULL);
-
       CHECK_MEM_ERROR(cm, this_tile->enc_row_mt_mutex,
                       vpx_malloc(sizeof(*this_tile->enc_row_mt_mutex)));
 
@@ -170,9 +165,6 @@ void vp9_row_mt_mem_dealloc(VP9_COMP *cpi) {
           this_tile->row_base_thresh_freq_fact = NULL;
         }
       }
-      pthread_mutex_destroy(this_tile->search_count_mutex);
-      vpx_free(this_tile->search_count_mutex);
-      this_tile->search_count_mutex = NULL;
       pthread_mutex_destroy(this_tile->enc_row_mt_mutex);
       vpx_free(this_tile->enc_row_mt_mutex);
       this_tile->enc_row_mt_mutex = NULL;
