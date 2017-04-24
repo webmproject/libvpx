@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1af63aeb_6c26c648",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-04-24T17:07:09Z",
+      "side": 1,
+      "message": "Maybe already in your final cleanup list, use aligned load/store if any of a, b, accumulator or count are aligned.",
+      "range": {
+        "startLine": 208,
+        "startChar": 5,
+        "endLine": 208,
+        "endChar": 37
+      },
+      "revId": "b9a2be499202d1233fec74511dcd9a597bd572b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
