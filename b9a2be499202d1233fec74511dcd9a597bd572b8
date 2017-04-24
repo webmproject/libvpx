@@ -22,6 +22,30 @@
       "revId": "b9a2be499202d1233fec74511dcd9a597bd572b8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "18c29665_af534724",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-24T19:29:28Z",
+      "side": 1,
+      "message": "The test allocates unaligned buffers. When I fix that I can come back and use aligned loads and stores where applicable.",
+      "parentUuid": "1af63aeb_6c26c648",
+      "range": {
+        "startLine": 208,
+        "startChar": 5,
+        "endLine": 208,
+        "endChar": 37
+      },
+      "revId": "b9a2be499202d1233fec74511dcd9a597bd572b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
