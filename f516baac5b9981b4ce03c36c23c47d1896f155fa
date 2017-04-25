@@ -16,6 +16,24 @@
       "revId": "f516baac5b9981b4ce03c36c23c47d1896f155fa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "697c6988_c9496a42",
+        "filename": "test/convolve_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 925,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-04-25T21:54:42Z",
+      "side": 1,
+      "message": "Done.\n\nWill not change wrap_xxx() signature here to reuse the testing code.",
+      "parentUuid": "2458935c_7cffb1b7",
+      "revId": "f516baac5b9981b4ce03c36c23c47d1896f155fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
