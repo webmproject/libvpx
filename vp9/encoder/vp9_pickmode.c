@@ -211,9 +211,7 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
       !(RDCOST(x->rdmult, x->rddiv, (*rate_mv + rate_mode), 0) > best_rd_sofar);
 
   if (rv) {
-    const int subpel_force_stop = use_base_mv && cpi->sf.base_mv_aggressive
-                                      ? 2
-                                      : cpi->sf.mv.subpel_force_stop;
+    const int subpel_force_stop = cpi->sf.mv.subpel_force_stop;
     cpi->find_fractional_mv_step(
         x, &tmp_mv->as_mv, &ref_mv, cpi->common.allow_high_precision_mv,
         x->errorperbit, &cpi->fn_ptr[bsize], subpel_force_stop,
