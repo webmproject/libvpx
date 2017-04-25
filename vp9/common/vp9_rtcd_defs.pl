@@ -120,7 +120,7 @@ if (vpx_config("CONFIG_VP9_ENCODER") eq "yes") {
 #
 if (vpx_config("CONFIG_VP9_TEMPORAL_DENOISING") eq "yes") {
   add_proto qw/int vp9_denoiser_filter/, "const uint8_t *sig, int sig_stride, const uint8_t *mc_avg, int mc_avg_stride, uint8_t *avg, int avg_stride, int increase_denoising, BLOCK_SIZE bs, int motion_magnitude";
-  specialize qw/vp9_denoiser_filter sse2/;
+  specialize qw/vp9_denoiser_filter neon sse2/;
 }
 
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {

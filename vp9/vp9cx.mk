@@ -120,6 +120,7 @@ VP9_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/vp9_frame_scale_ssse3.c
 
 ifeq ($(CONFIG_VP9_TEMPORAL_DENOISING),yes)
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_denoiser_sse2.c
+VP9_CX_SRCS-$(HAVE_NEON) += encoder/arm/neon/vp9_denoiser_neon.c
 endif
 
 VP9_CX_SRCS-$(HAVE_AVX2) += encoder/x86/vp9_error_intrin_avx2.c
