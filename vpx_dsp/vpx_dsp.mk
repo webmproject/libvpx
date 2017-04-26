@@ -144,6 +144,8 @@ DSP_SRCS-$(HAVE_DSPR2)  += mips/convolve8_dspr2.c
 DSP_SRCS-$(HAVE_DSPR2)  += mips/convolve8_horiz_dspr2.c
 DSP_SRCS-$(HAVE_DSPR2)  += mips/convolve8_vert_dspr2.c
 
+DSP_SRCS-$(HAVE_VSX)  += ppc/vpx_convolve_vsx.c
+
 # loop filters
 DSP_SRCS-yes += loopfilter.c
 
