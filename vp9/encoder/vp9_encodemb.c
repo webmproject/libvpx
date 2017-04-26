@@ -810,6 +810,9 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
                                       qcoeff, dqcoeff, pd->dequant, eob,
                                       scan_order->scan, scan_order->iscan);
         }
+        if (args->enable_coeff_opt && !x->skip_recode) {
+          *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
+        }
         if (!x->skip_encode && *eob) {
           vp9_highbd_idct32x32_add(dqcoeff, dst, dst_stride, *eob, xd->bd);
         }
@@ -826,6 +829,9 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
                                 p->quant, p->quant_shift, qcoeff, dqcoeff,
                                 pd->dequant, eob, scan_order->scan,
                                 scan_order->iscan);
+        }
+        if (args->enable_coeff_opt && !x->skip_recode) {
+          *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
         }
         if (!x->skip_encode && *eob) {
           vp9_highbd_iht16x16_add(tx_type, dqcoeff, dst, dst_stride, *eob,
@@ -845,6 +851,9 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
                                 pd->dequant, eob, scan_order->scan,
                                 scan_order->iscan);
         }
+        if (args->enable_coeff_opt && !x->skip_recode) {
+          *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
+        }
         if (!x->skip_encode && *eob) {
           vp9_highbd_iht8x8_add(tx_type, dqcoeff, dst, dst_stride, *eob,
                                 xd->bd);
@@ -863,7 +872,9 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
                                 pd->dequant, eob, scan_order->scan,
                                 scan_order->iscan);
         }
-
+        if (args->enable_coeff_opt && !x->skip_recode) {
+          *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
+        }
         if (!x->skip_encode && *eob) {
           if (tx_type == DCT_DCT) {
             // this is like vp9_short_idct4x4 but has a special case around
