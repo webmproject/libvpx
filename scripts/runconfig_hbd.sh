@@ -4,7 +4,7 @@ platform=x86_64-linux-gcc
 codec=--enable-av1
 libsrc=aom
 
-bitdepth=--enable-aom-highbitdepth
+bitdepth=--enable-highbitdepth
 #bitdepth=
 #debug=--enable-debug
 debug=
