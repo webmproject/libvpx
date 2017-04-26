@@ -40,7 +40,6 @@ class VPxFirstPassEncoderThreadTest
     init_flags_ = VPX_CODEC_USE_PSNR;
 
     row_mt_mode_ = 1;
-    bit_exact_mode_ = 0;
     first_pass_only_ = true;
     firstpass_stats_.buf = NULL;
     firstpass_stats_.sz = 0;
@@ -85,8 +84,6 @@ class VPxFirstPassEncoderThreadTest
       if (encoding_mode_ == ::libvpx_test::kTwoPassGood)
         encoder->Control(VP9E_SET_ROW_MT, row_mt_mode_);
 
-      encoder->Control(VP9E_ENABLE_ROW_MT_BIT_EXACT, bit_exact_mode_);
-
       encoder_initialized_ = true;
     }
   }
@@ -112,12 +109,11 @@ class VPxFirstPassEncoderThreadTest
   ::libvpx_test::TestMode encoding_mode_;
   int set_cpu_used_;
   int row_mt_mode_;
-  int bit_exact_mode_;
   bool first_pass_only_;
   vpx_fixed_buf_t firstpass_stats_;
 };
 
-static void compare_fp_stats(vpx_fixed_buf_t *fp_stats) {
+static void compare_fp_stats(vpx_fixed_buf_t *fp_stats, double factor) {
   // fp_stats consists of 2 set of first pass encoding stats. These 2 set of
   // stats are compared to check if the stats match or at least are very close.
   FIRSTPASS_STATS *stats1 = reinterpret_cast<FIRSTPASS_STATS *>(fp_stats->buf);
@@ -133,7 +129,7 @@ static void compare_fp_stats(vpx_fixed_buf_t *fp_stats) {
 
     for (j = 0; j < kDbl; ++j) {
       EXPECT_LE(fabs(*frame_stats1 - *frame_stats2),
-                fabs(*frame_stats1) / 10000.0);
+                fabs(*frame_stats1) / factor);
       frame_stats1++;
       frame_stats2++;
     }
@@ -175,8 +171,7 @@ TEST_P(VPxFirstPassEncoderThreadTest, FirstPassStatsTest) {
   first_pass_only_ = true;
   cfg_.rc_target_bitrate = 1000;
 
-  // Test row_mt_mode: 0 vs 1 (threads = 1, tiles_ = 0)
-  bit_exact_mode_ = 0;
+  // Test row_mt_mode: 0 vs 1 at single thread case(threads = 1, tiles_ = 0)
   tiles_ = 0;
   cfg_.g_threads = 1;
 
@@ -187,12 +182,12 @@ TEST_P(VPxFirstPassEncoderThreadTest, FirstPassStatsTest) {
   row_mt_mode_ = 1;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
-  // Compare to check if using or not using row-mt generates matching stats.
-  compare_fp_stats(&firstpass_stats_);
+  // Compare to check if using or not using row-mt generates close stats.
+  compare_fp_stats(&firstpass_stats_, 1000.0);
 
-  // Test multi-threads: single thread vs 4 threads
+  // Test single thread vs multiple threads
   row_mt_mode_ = 1;
-  tiles_ = 2;
+  tiles_ = 0;
 
   cfg_.g_threads = 1;
   init_flags_ = VPX_CODEC_USE_PSNR;
@@ -201,19 +196,20 @@ TEST_P(VPxFirstPassEncoderThreadTest, FirstPassStatsTest) {
   cfg_.g_threads = 4;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
-  // Compare to check if single-thread and multi-thread stats matches.
-  compare_fp_stats(&firstpass_stats_);
+  // Compare to check if single-thread and multi-thread stats are close enough.
+  compare_fp_stats(&firstpass_stats_, 1000.0);
 
-  // Test row_mt_mode: 0 vs 1 (threads = 8, tiles_ = 2)
-  bit_exact_mode_ = 1;
+  // Bit exact test in row_mt mode.
+  // When row_mt_mode_=1 and using >1 threads, the encoder generates bit exact
+  // result.
+  row_mt_mode_ = 1;
   tiles_ = 2;
-  cfg_.g_threads = 8;
 
-  row_mt_mode_ = 0;
+  cfg_.g_threads = 2;
   init_flags_ = VPX_CODEC_USE_PSNR;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
-  row_mt_mode_ = 1;
+  cfg_.g_threads = 8;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
   // Compare to check if stats match with row-mt=0/1.
@@ -232,7 +228,6 @@ class VPxEncoderThreadTest
     init_flags_ = VPX_CODEC_USE_PSNR;
     md5_.clear();
     row_mt_mode_ = 1;
-    bit_exact_mode_ = 0;
     psnr_ = 0.0;
     nframes_ = 0;
   }
@@ -279,10 +274,7 @@ class VPxEncoderThreadTest
         encoder->Control(VP9E_SET_AQ_MODE, 3);
       }
       encoder->Control(VP9E_SET_ROW_MT, row_mt_mode_);
-      // While row_mt = 1, several speed features that would adaptively adjust
-      // encoding parameters have to be disabled to guarantee the bit exactness
-      // of the resulting bitstream.
-      encoder->Control(VP9E_ENABLE_ROW_MT_BIT_EXACT, bit_exact_mode_);
+
       encoder_initialized_ = true;
     }
   }
@@ -318,7 +310,6 @@ class VPxEncoderThreadTest
   ::libvpx_test::TestMode encoding_mode_;
   int set_cpu_used_;
   int row_mt_mode_;
-  int bit_exact_mode_;
   double psnr_;
   unsigned int nframes_;
   std::vector<std::string> md5_;
@@ -331,7 +322,6 @@ TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
   // Part 1: Bit exact test for row_mt_mode_ = 0.
   // This part keeps original unit tests done before row-mt code is checked in.
   row_mt_mode_ = 0;
-  bit_exact_mode_ = 0;
 
   // Encode using single thread.
   cfg_.g_threads = 1;
@@ -353,7 +343,6 @@ TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
   // The first-pass stats are not bit exact here, but that difference doesn't
   // cause a mismatch between the final bitstreams.
   row_mt_mode_ = 1;
-  bit_exact_mode_ = 0;
 
   // Encode using single thread
   cfg_.g_threads = 1;
@@ -365,12 +354,13 @@ TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
   ASSERT_EQ(single_thr_md5, row_mt_single_thr_md5);
 
   // Part 3: Bit exact test with row-mt on
+  // When row_mt_mode_=1 and using >1 threads, the encoder generates bit exact
+  // result.
   row_mt_mode_ = 1;
-  bit_exact_mode_ = 1;
   row_mt_single_thr_md5.clear();
 
-  // Encode using single thread.
-  cfg_.g_threads = 1;
+  // Encode using 2 threads.
+  cfg_.g_threads = 2;
   init_flags_ = VPX_CODEC_USE_PSNR;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   row_mt_single_thr_md5 = md5_;
@@ -387,7 +377,6 @@ TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
 
   // Part 4: PSNR test with bit_match_mode_ = 0
   row_mt_mode_ = 1;
-  bit_exact_mode_ = 0;
 
   // Encode using single thread.
   cfg_.g_threads = 1;

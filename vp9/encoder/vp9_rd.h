@@ -170,32 +170,11 @@ void vp9_set_rd_speed_thresholds(struct VP9_COMP *cpi);
 void vp9_set_rd_speed_thresholds_sub8x8(struct VP9_COMP *cpi);
 
 void vp9_update_rd_thresh_fact(int (*fact)[MAX_MODES], int rd_thresh, int bsize,
-#if CONFIG_MULTITHREAD
-                               pthread_mutex_t *enc_row_mt_mutex,
-#endif
                                int best_mode_index);
 
 static INLINE int rd_less_than_thresh(int64_t best_rd, int thresh,
-#if CONFIG_MULTITHREAD
-                                      pthread_mutex_t *enc_row_mt_mutex,
-#endif
                                       const int *const thresh_fact) {
-  int is_rd_less_than_thresh;
-
-#if CONFIG_MULTITHREAD
-  // Synchronize to ensure data coherency as thresh_freq_fact is maintained at
-  // tile level and not thread-safe with row based multi-threading
-  if (NULL != enc_row_mt_mutex) pthread_mutex_lock(enc_row_mt_mutex);
-#endif
-
-  is_rd_less_than_thresh =
-      best_rd < ((int64_t)thresh * (*thresh_fact) >> 5) || thresh == INT_MAX;
-
-#if CONFIG_MULTITHREAD
-  if (NULL != enc_row_mt_mutex) pthread_mutex_unlock(enc_row_mt_mutex);
-#endif
-
-  return is_rd_less_than_thresh;
+  return best_rd < ((int64_t)thresh * (*thresh_fact) >> 5) || thresh == INT_MAX;
 }
 
 static INLINE void set_error_per_bit(MACROBLOCK *x, int rdmult) {

@@ -52,7 +52,6 @@ struct vp9_extracfg {
   int render_width;
   int render_height;
   unsigned int row_mt;
-  unsigned int row_mt_bit_exact;
   unsigned int motion_vector_unit_test;
 };
 
@@ -86,7 +85,6 @@ static struct vp9_extracfg default_extra_cfg = {
   0,                     // render width
   0,                     // render height
   0,                     // row_mt
-  0,                     // row_mt_bit_exact
   0,                     // motion_vector_unit_test
 };
 
@@ -252,7 +250,6 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
         "or kf_max_dist instead.");
 
   RANGE_CHECK(extra_cfg, row_mt, 0, 1);
-  RANGE_CHECK(extra_cfg, row_mt_bit_exact, 0, 1);
   RANGE_CHECK(extra_cfg, motion_vector_unit_test, 0, 2);
   RANGE_CHECK(extra_cfg, enable_auto_alt_ref, 0, 2);
   RANGE_CHECK(extra_cfg, cpu_used, -8, 8);
@@ -564,7 +561,6 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->target_level = extra_cfg->target_level;
 
   oxcf->row_mt = extra_cfg->row_mt;
-  oxcf->row_mt_bit_exact = extra_cfg->row_mt_bit_exact;
   oxcf->motion_vector_unit_test = extra_cfg->motion_vector_unit_test;
 
   for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
@@ -859,13 +855,6 @@ static vpx_codec_err_t ctrl_set_row_mt(vpx_codec_alg_priv_t *ctx,
                                        va_list args) {
   struct vp9_extracfg extra_cfg = ctx->extra_cfg;
   extra_cfg.row_mt = CAST(VP9E_SET_ROW_MT, args);
-  return update_extra_cfg(ctx, &extra_cfg);
-}
-
-static vpx_codec_err_t ctrl_enable_row_mt_bit_exact(vpx_codec_alg_priv_t *ctx,
-                                                    va_list args) {
-  struct vp9_extracfg extra_cfg = ctx->extra_cfg;
-  extra_cfg.row_mt_bit_exact = CAST(VP9E_ENABLE_ROW_MT_BIT_EXACT, args);
   return update_extra_cfg(ctx, &extra_cfg);
 }
 
@@ -1633,7 +1622,6 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   { VP9E_SET_RENDER_SIZE, ctrl_set_render_size },
   { VP9E_SET_TARGET_LEVEL, ctrl_set_target_level },
   { VP9E_SET_ROW_MT, ctrl_set_row_mt },
-  { VP9E_ENABLE_ROW_MT_BIT_EXACT, ctrl_enable_row_mt_bit_exact },
   { VP9E_ENABLE_MOTION_VECTOR_UNIT_TEST, ctrl_enable_motion_vector_unit_test },
 
   // Getters
