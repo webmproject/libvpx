@@ -335,7 +335,7 @@ add_proto qw/void vpx_convolve_copy/, "const uint8_t *src, ptrdiff_t src_stride,
 specialize qw/vpx_convolve_copy neon dspr2 msa sse2 vsx/;
 
 add_proto qw/void vpx_convolve_avg/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
-specialize qw/vpx_convolve_avg neon dspr2 msa sse2/;
+specialize qw/vpx_convolve_avg neon dspr2 msa sse2 vsx/;
 
 add_proto qw/void vpx_convolve8/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
 specialize qw/vpx_convolve8 sse2 ssse3 avx2 neon dspr2 msa/;
