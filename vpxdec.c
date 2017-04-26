@@ -977,7 +977,7 @@ static int main_loop(int argc, const char **argv_) {
         if (do_md5) {
           update_image_md5(img, planes, &md5_ctx);
         } else {
-          write_image_file(img, planes, outfile);
+          if (!corrupted) write_image_file(img, planes, outfile);
         }
       } else {
         generate_filename(outfile_pattern, outfile_name, PATH_MAX, img->d_w,
