@@ -530,7 +530,15 @@ static void set_rt_speed_feature_framesize_independent(
       // Enable short circuit for low temporal variance.
       sf->short_circuit_low_temp_var = 1;
     }
-    if (cpi->use_svc) sf->base_mv_aggressive = 1;
+    if (cpi->svc.temporal_layer_id > 0) {
+      sf->adaptive_rd_thresh = 4;
+      sf->limit_newmv_early_exit = 0;
+      sf->mv.subpel_force_stop = (cpi->svc.temporal_layer_id == 1) ? 1 : 2;
+      sf->base_mv_aggressive =
+          (cpi->svc.temporal_layer_id == cpi->svc.number_temporal_layers - 1)
+              ? 1
+              : 0;
+    }
   }
 
   if (speed >= 7) {
