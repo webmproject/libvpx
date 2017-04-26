@@ -917,13 +917,14 @@ TEST_P(ConvolveTest, CheckScalingFiltering) {
 using std::tr1::make_tuple;
 
 #if CONFIG_VP9_HIGHBITDEPTH
-#define WRAP(func, bd)                                                       \
-  void wrap_##func##_##bd(                                                   \
-      const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,                \
-      ptrdiff_t dst_stride, const int16_t *filter_x, int filter_x_stride,    \
-      const int16_t *filter_y, int filter_y_stride, int w, int h) {          \
-    vpx_highbd_##func(src, src_stride, dst, dst_stride, filter_x,            \
-                      filter_x_stride, filter_y, filter_y_stride, w, h, bd); \
+#define WRAP(func, bd)                                                         \
+  void wrap_##func##_##bd(                                                     \
+      const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,                  \
+      ptrdiff_t dst_stride, const int16_t *filter_x, int filter_x_stride,      \
+      const int16_t *filter_y, int filter_y_stride, int w, int h) {            \
+    vpx_highbd_##func(reinterpret_cast<const uint16_t *>(src), src_stride,     \
+                      reinterpret_cast<uint16_t *>(dst), dst_stride, filter_x, \
+                      filter_x_stride, filter_y, filter_y_stride, w, h, bd);   \
   }
 
 #if HAVE_SSE2 && ARCH_X86_64
