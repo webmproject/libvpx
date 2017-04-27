@@ -1,0 +1,175 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f43bbb04_e891a45f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 18
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-27T03:28:41Z",
+      "side": 1,
+      "message": "BUG\u003dwebm:1378",
+      "revId": "05261a5255556ae4935c1c6b7616144127e78a3a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2e403d6e_25cf9eec",
+        "filename": "test/temporal_filter_test.cc",
+        "patchSetId": 18
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-27T03:28:41Z",
+      "side": 1,
+      "message": "so that\u0027s \u0027us\u0027 now",
+      "range": {
+        "startLine": 233,
+        "startChar": 46,
+        "endLine": 233,
+        "endChar": 48
+      },
+      "revId": "05261a5255556ae4935c1c6b7616144127e78a3a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ae6c597_e40ae71c",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-27T03:28:41Z",
+      "side": 1,
+      "message": "all of the call sites need to be updated else the code won\u0027t be hit. that\u0027s why the sse2 was still enabled in rtcd, was different, and had no effect. (That can be deleted later too I think)",
+      "range": {
+        "startLine": 399,
+        "startChar": 10,
+        "endLine": 399,
+        "endChar": 37
+      },
+      "revId": "05261a5255556ae4935c1c6b7616144127e78a3a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "70e5f4d1_bd4d90d6",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-27T03:28:41Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "05261a5255556ae4935c1c6b7616144127e78a3a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "71863ac2_d966c27f",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-27T03:28:41Z",
+      "side": 1,
+      "message": "you should add a note about the usage of these two; this is also a left shift so the variable name is confusing",
+      "revId": "05261a5255556ae4935c1c6b7616144127e78a3a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5ff080c6_a2dc38ac",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-27T03:28:41Z",
+      "side": 1,
+      "message": "make the shift param the second one to keep it symmetric with the next line",
+      "range": {
+        "startLine": 67,
+        "startChar": 35,
+        "endLine": 67,
+        "endChar": 58
+      },
+      "revId": "05261a5255556ae4935c1c6b7616144127e78a3a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "27fc7b91_be49be0f",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-27T03:28:41Z",
+      "side": 1,
+      "message": "this won\u0027t work on windows, you\u0027re capped at 4 or 3 parameters that can use 16-byte alignment on x64/x86. these need to be pointers",
+      "revId": "05261a5255556ae4935c1c6b7616144127e78a3a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ac571e48_991385d6",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-27T03:28:41Z",
+      "side": 1,
+      "message": "this is safely assumed for our purposes",
+      "revId": "05261a5255556ae4935c1c6b7616144127e78a3a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7b3859bd_6a601571",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-27T03:28:41Z",
+      "side": 1,
+      "message": "this can just be \u0027else\u0027 with { // width \u003d\u003d 16",
+      "revId": "05261a5255556ae4935c1c6b7616144127e78a3a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
