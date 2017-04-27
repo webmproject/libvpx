@@ -1288,7 +1288,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TL) {
     assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
                           cfg_.ts_number_layers, cfg_.temporal_layering_mode);
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-    ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.82)
+    ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.78)
         << " The datarate for the file exceeds the target by too much!";
     ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.15)
         << " The datarate for the file is lower than the target by too much!";
@@ -1336,7 +1336,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TLDenoiserOn) {
     assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
                           cfg_.ts_number_layers, cfg_.temporal_layering_mode);
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-    ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.82)
+    ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.78)
         << " The datarate for the file exceeds the target by too much!";
     ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.15)
         << " The datarate for the file is lower than the target by too much!";
@@ -1384,7 +1384,7 @@ TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc2SL3TLSmallKf) {
     assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
                           cfg_.ts_number_layers, cfg_.temporal_layering_mode);
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-    ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.85)
+    ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.80)
         << " The datarate for the file exceeds the target by too much!";
     ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.15)
         << " The datarate for the file is lower than the target by too much!";
@@ -1421,7 +1421,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TL4threads) {
   assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
                         cfg_.ts_number_layers, cfg_.temporal_layering_mode);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.82)
+  ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.78)
       << " The datarate for the file exceeds the target by too much!";
   ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.15)
       << " The datarate for the file is lower than the target by too much!";
@@ -1466,7 +1466,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL) {
   assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
                         cfg_.ts_number_layers, cfg_.temporal_layering_mode);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.82)
+  ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.78)
       << " The datarate for the file exceeds the target by too much!";
   ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.22)
       << " The datarate for the file is lower than the target by too much!";
@@ -1514,7 +1514,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TLSmallKf) {
     assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
                           cfg_.ts_number_layers, cfg_.temporal_layering_mode);
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-    ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.85)
+    ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.80)
         << " The datarate for the file exceeds the target by too much!";
     ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.30)
         << " The datarate for the file is lower than the target by too much!";
@@ -1553,7 +1553,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL4threads) {
   assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
                         cfg_.ts_number_layers, cfg_.temporal_layering_mode);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.82)
+  ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.78)
       << " The datarate for the file exceeds the target by too much!";
   ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.22)
       << " The datarate for the file is lower than the target by too much!";

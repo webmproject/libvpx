@@ -1488,6 +1488,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   int64_t zero_last_cost_orig = INT64_MAX;
   int denoise_svc_pickmode = 1;
 #endif
+  INTERP_FILTER filter_gf_svc = EIGHTTAP;
 
   init_ref_frame_cost(cm, xd, ref_frame_cost);
 
@@ -1909,6 +1910,11 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
                                   ? bsize > BLOCK_32X32
                                   : bsize >= BLOCK_32X32;
       mi->interp_filter = (filter_ref == SWITCHABLE) ? EIGHTTAP : filter_ref;
+
+      if (cpi->use_svc && ref_frame == GOLDEN_FRAME &&
+          svc_force_zero_mode[ref_frame - 1])
+        mi->interp_filter = filter_gf_svc;
+
       vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
 
       // For large partition blocks, extra testing is done.
