@@ -171,7 +171,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_INTERNAL_STATS) += consistency_test.cc
 endif
 
 ifeq ($(CONFIG_VP9_ENCODER)$(CONFIG_VP9_TEMPORAL_DENOISING),yesyes)
-LIBVPX_TEST_SRCS-$(HAVE_SSE2) += vp9_denoiser_sse2_test.cc
+LIBVPX_TEST_SRCS-yes += vp9_denoiser_test.cc
 endif
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_arf_freq_test.cc
 
