@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c69f3b64_3f23dba2",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 807,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-04-27T21:00:15Z",
+      "side": 1,
+      "message": "I think we want the condiiton to be:\nif ( !(oxcf-\u003emode \u003d\u003d REALTIME \u0026\u0026 oxcf-\u003espeed \u003e\u003d5) \u0026\u0026 cpi-\u003erow_mt_bit_exact )",
+      "revId": "ec9bc4cded2a933e01a9885b9a5b2326b663d4eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
