@@ -283,6 +283,24 @@
     },
     {
       "key": {
+        "uuid": "f9a3a4ab_382a2a68",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-27T07:06:58Z",
+      "side": 1,
+      "message": "\u003e blargh. what do you mean alignment though? or xmm registers?\n\u003e \n\n         ..\\vp9\\encoder\\x86\\temporal_filter_sse4.c(114): error C2719: \u0027rounding\u0027: formal parameter with requested alignment of 16 won\u0027t be aligned\n\nhttps://msdn.microsoft.com/en-us/library/ms235286.aspx\n\nfinding the x86 version is slightly more involved, I should bookmark it. it\u0027s 1 less though\n\n\u003e working on this. it\u0027s easy to pass in strength, rounding, weight as ints. would INLINE allow this or meh?\n\nINLINE would be risky for debug builds",
+      "parentUuid": "2f951153_4e42bc7a",
+      "revId": "05261a5255556ae4935c1c6b7616144127e78a3a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7bbf139a_a1dfa3e2",
         "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
         "patchSetId": 18
