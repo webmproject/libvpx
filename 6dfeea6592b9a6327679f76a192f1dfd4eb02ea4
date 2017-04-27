@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6c4574f2_ec92c111",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-27T05:05:15Z",
+      "side": 1,
+      "message": "didn\u0027t notice an appreciable difference (unlike dropping \u0027zero\u0027 and using cvtepu8_epi16, which was kind of surprising but cool. too bad there is no equivalent for the upper values. shifting and cvt was worse that \u0027zero\u0027)",
+      "revId": "6dfeea6592b9a6327679f76a192f1dfd4eb02ea4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
