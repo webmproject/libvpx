@@ -22,6 +22,30 @@
       "revId": "2af039d34d8c95dfd970daa36cc1983823b62b33",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1b3e183b_8ff96b94",
+        "filename": "test/vp9_denoiser_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-04-28T05:00:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9291411e_92df70cf",
+      "range": {
+        "startLine": 108,
+        "startChar": 33,
+        "endLine": 108,
+        "endChar": 57
+      },
+      "revId": "2af039d34d8c95dfd970daa36cc1983823b62b33",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
