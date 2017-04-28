@@ -22,6 +22,23 @@
       "revId": "bb0036a15d719d3ed561fe801ebe6fc242b3c012",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2ddc941a_d2b82b1f",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-28T02:49:58Z",
+      "side": 1,
+      "message": "now there are 2 ways to set the deadline. I don\u0027t like this from the api perspective. From a compatibility perspective we should try to work with the existing deadline received through the encode call.",
+      "revId": "bb0036a15d719d3ed561fe801ebe6fc242b3c012",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
