@@ -165,7 +165,7 @@ static void average_16(__m128i *sum_0_u16, __m128i *sum_1_u16,
 
 // Add 'sum_u16' to 'count'. Multiply by 'pred' and add to 'accumulator.'
 static void accumulate_and_store_8(const __m128i sum_u16, const uint8_t *pred,
-                                   uint16_t *count, unsigned int *accumulator) {
+                                   uint16_t *count, uint32_t *accumulator) {
   const __m128i pred_u8 = _mm_loadl_epi64((const __m128i *)pred);
   const __m128i zero = _mm_setzero_si128();
   __m128i count_u16 = _mm_loadu_si128((const __m128i *)count);
@@ -194,7 +194,7 @@ static void accumulate_and_store_8(const __m128i sum_u16, const uint8_t *pred,
 static void accumulate_and_store_16(const __m128i sum_0_u16,
                                     const __m128i sum_1_u16,
                                     const uint8_t *pred, uint16_t *count,
-                                    unsigned int *accumulator) {
+                                    uint32_t *accumulator) {
   const __m128i pred_u8 = _mm_loadu_si128((const __m128i *)pred);
   const __m128i zero = _mm_setzero_si128();
   __m128i count_0_u16 = _mm_loadu_si128((const __m128i *)count),
@@ -237,7 +237,7 @@ static void accumulate_and_store_16(const __m128i sum_0_u16,
 void vp9_temporal_filter_apply_sse4_1(const uint8_t *a, unsigned int stride,
                                       const uint8_t *b, unsigned int width,
                                       unsigned int height, int strength,
-                                      int weight, unsigned int *accumulator,
+                                      int weight, uint32_t *accumulator,
                                       uint16_t *count) {
   unsigned int h;
   const int rounding = strength > 0 ? 1 << (strength - 1) : 0;
@@ -249,9 +249,6 @@ void vp9_temporal_filter_apply_sse4_1(const uint8_t *a, unsigned int stride,
   assert(weight <= 2);
 
   assert(width == 8 || width == 16);
-
-  // TODO(johannkoenig) Use uint32_t for accumulator.
-  assert(sizeof(*accumulator) == sizeof(uint32_t));
 
   if (width == 8) {
     __m128i sum_row_a, sum_row_b, sum_row_c;

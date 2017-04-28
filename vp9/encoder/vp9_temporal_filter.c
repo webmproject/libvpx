@@ -13,6 +13,7 @@
 #include <limits.h>
 
 #include "vp9/common/vp9_alloccommon.h"
+#include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_reconinter.h"
@@ -94,7 +95,7 @@ void vp9_temporal_filter_apply_c(const uint8_t *frame1, unsigned int stride,
                                  const uint8_t *frame2,
                                  unsigned int block_width,
                                  unsigned int block_height, int strength,
-                                 int filter_weight, unsigned int *accumulator,
+                                 int filter_weight, uint32_t *accumulator,
                                  uint16_t *count) {
   unsigned int i, j, k;
   int modifier;
@@ -162,7 +163,7 @@ void vp9_temporal_filter_apply_c(const uint8_t *frame1, unsigned int stride,
 void vp9_highbd_temporal_filter_apply_c(
     const uint8_t *frame1_8, unsigned int stride, const uint8_t *frame2_8,
     unsigned int block_width, unsigned int block_height, int strength,
-    int filter_weight, unsigned int *accumulator, uint16_t *count) {
+    int filter_weight, uint32_t *accumulator, uint16_t *count) {
   const uint16_t *frame1 = CONVERT_TO_SHORTPTR(frame1_8);
   const uint16_t *frame2 = CONVERT_TO_SHORTPTR(frame2_8);
   unsigned int i, j, k;
@@ -292,7 +293,7 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
   unsigned int filter_weight;
   int mb_cols = (frames[alt_ref_index]->y_crop_width + 15) >> 4;
   int mb_rows = (frames[alt_ref_index]->y_crop_height + 15) >> 4;
-  DECLARE_ALIGNED(16, unsigned int, accumulator[16 * 16 * 3]);
+  DECLARE_ALIGNED(16, uint32_t, accumulator[16 * 16 * 3]);
   DECLARE_ALIGNED(16, uint16_t, count[16 * 16 * 3]);
   MACROBLOCKD *mbd = &td->mb.e_mbd;
   YV12_BUFFER_CONFIG *f = frames[alt_ref_index];
@@ -339,8 +340,8 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
     int stride;
     MV ref_mv;
 
-    memset(accumulator, 0, 16 * 16 * 3 * sizeof(accumulator[0]));
-    memset(count, 0, 16 * 16 * 3 * sizeof(count[0]));
+    vp9_zero_array(accumulator, 16 * 16 * 3);
+    vp9_zero_array(count, 16 * 16 * 3);
 
     td->mb.mv_limits.col_min = -((mb_col * 16) + (17 - 2 * VP9_INTERP_EXTEND));
     td->mb.mv_limits.col_max =
