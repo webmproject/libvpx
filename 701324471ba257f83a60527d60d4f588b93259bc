@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5f61d9_055ddf2d",
+        "filename": "vpx_dsp/ppc/vpx_convolve_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-28T22:24:00Z",
+      "side": 1,
+      "message": "\u0027TODO(author):\u0027 is the preferred form",
+      "revId": "701324471ba257f83a60527d60d4f588b93259bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7890fec2_1aeb3edb",
+        "filename": "vpx_dsp/ppc/vpx_convolve_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-28T22:24:00Z",
+      "side": 1,
+      "message": "could be a do {} while, but either way works",
+      "revId": "701324471ba257f83a60527d60d4f588b93259bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
