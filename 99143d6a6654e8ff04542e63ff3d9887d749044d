@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "98f1aa92_b02d6fb7",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-04-28T03:03:40Z",
+      "side": 1,
+      "message": "I think this part could be removed. It should be the same as\n  if (!sf-\u003eadaptive_rd_thresh_row_mt \u0026\u0026 cpi-\u003erow_mt_bit_exact)",
+      "range": {
+        "startLine": 608,
+        "startChar": 2,
+        "endLine": 610,
+        "endChar": 3
+      },
+      "revId": "99143d6a6654e8ff04542e63ff3d9887d749044d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
