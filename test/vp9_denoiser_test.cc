@@ -29,11 +29,21 @@ using libvpx_test::ACMRandom;
 namespace {
 
 const int kNumPixels = 64 * 64;
-class VP9DenoiserTest : public ::testing::TestWithParam<BLOCK_SIZE> {
+
+typedef int (*Vp9DenoiserFilterFunc)(const uint8_t *sig, int sig_stride,
+                                     const uint8_t *mc_avg, int mc_avg_stride,
+                                     uint8_t *avg, int avg_stride,
+                                     int increase_denoising, BLOCK_SIZE bs,
+                                     int motion_magnitude);
+typedef std::tr1::tuple<Vp9DenoiserFilterFunc, BLOCK_SIZE> VP9DenoiserTestParam;
+
+class VP9DenoiserTest
+    : public ::testing::Test,
+      public ::testing::WithParamInterface<VP9DenoiserTestParam> {
  public:
   virtual ~VP9DenoiserTest() {}
 
-  virtual void SetUp() { bs_ = GetParam(); }
+  virtual void SetUp() { bs_ = GET_PARAM(1); }
 
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
@@ -76,9 +86,9 @@ TEST_P(VP9DenoiserTest, BitexactCheck) {
                                                    64, avg_block_c, 64, 0, bs_,
                                                    motion_magnitude_random));
 
-    ASM_REGISTER_STATE_CHECK(vp9_denoiser_filter_sse2(
-        sig_block, 64, mc_avg_block, 64, avg_block_sse2, 64, 0, bs_,
-        motion_magnitude_random));
+    ASM_REGISTER_STATE_CHECK(GET_PARAM(0)(sig_block, 64, mc_avg_block, 64,
+                                          avg_block_sse2, 64, 0, bs_,
+                                          motion_magnitude_random));
 
     // Test bitexactness.
     for (int h = 0; h < (4 << b_height_log2_lookup[bs_]); ++h) {
@@ -89,10 +99,21 @@ TEST_P(VP9DenoiserTest, BitexactCheck) {
   }
 }
 
+using std::tr1::make_tuple;
+
 // Test for all block size.
-INSTANTIATE_TEST_CASE_P(SSE2, VP9DenoiserTest,
-                        ::testing::Values(BLOCK_8X8, BLOCK_8X16, BLOCK_16X8,
-                                          BLOCK_16X16, BLOCK_16X32, BLOCK_32X16,
-                                          BLOCK_32X32, BLOCK_32X64, BLOCK_64X32,
-                                          BLOCK_64X64));
+#if HAVE_SSE2
+INSTANTIATE_TEST_CASE_P(
+    SSE2, VP9DenoiserTest,
+    ::testing::Values(make_tuple(&vp9_denoiser_filter_sse2, BLOCK_8X8),
+                      make_tuple(&vp9_denoiser_filter_sse2, BLOCK_8X16),
+                      make_tuple(&vp9_denoiser_filter_sse2, BLOCK_16X8),
+                      make_tuple(&vp9_denoiser_filter_sse2, BLOCK_16X16),
+                      make_tuple(&vp9_denoiser_filter_sse2, BLOCK_16X32),
+                      make_tuple(&vp9_denoiser_filter_sse2, BLOCK_32X16),
+                      make_tuple(&vp9_denoiser_filter_sse2, BLOCK_32X32),
+                      make_tuple(&vp9_denoiser_filter_sse2, BLOCK_32X64),
+                      make_tuple(&vp9_denoiser_filter_sse2, BLOCK_64X32),
+                      make_tuple(&vp9_denoiser_filter_sse2, BLOCK_64X64)));
+#endif  // HAVE_SSE2
 }  // namespace
