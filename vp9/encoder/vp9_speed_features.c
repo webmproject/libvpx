@@ -162,6 +162,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
 
   sf->tx_size_search_breakout = 1;
   sf->adaptive_rd_thresh = 1;
+  sf->adaptive_rd_thresh_row_mt = 0;
   sf->allow_skip_recode = 1;
   sf->less_rectangular_check = 1;
   sf->use_square_partition_only = !frame_is_boosted(cpi);
@@ -603,11 +604,6 @@ static void set_rt_speed_feature_framesize_independent(
     sf->limit_newmv_early_exit = 0;
     if (cm->width > 320 && cm->height > 240) sf->use_simple_block_yrd = 1;
   }
-  // Turn off adaptive_rd_thresh if row_mt is on for speed 5, 6, 7.
-  if (speed >= 5 && speed < 8 && cpi->row_mt && cpi->num_workers > 1) {
-    sf->adaptive_rd_thresh = 0;
-    sf->adaptive_rd_thresh_row_mt = 0;
-  }
 }
 
 void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
@@ -647,8 +643,9 @@ void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
   // With row based multi-threading, the following speed features
   // have to be disabled to guarantee that bitstreams encoded with single thread
   // and multiple threads match.
-  // It can be used since adaptive_rd_thresh is defined per-row for REALTIME.
-  if (oxcf->mode != REALTIME && cpi->row_mt_bit_exact)
+  // It can be used in realtime when adaptive_rd_thresh_row_mt is enabled since
+  // adaptive_rd_thresh is defined per-row for non-rd pickmode.
+  if (!sf->adaptive_rd_thresh_row_mt && cpi->row_mt_bit_exact)
     sf->adaptive_rd_thresh = 0;
 
   // This is only used in motion vector unit test.
@@ -803,8 +800,9 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   // With row based multi-threading, the following speed features
   // have to be disabled to guarantee that bitstreams encoded with single thread
   // and multiple threads match.
-  // It can be used since adaptive_rd_thresh is defined per-row for REALTIME.
-  if (oxcf->mode != REALTIME && cpi->row_mt_bit_exact)
+  // It can be used in realtime when adaptive_rd_thresh_row_mt is enabled since
+  // adaptive_rd_thresh is defined per-row for non-rd pickmode.
+  if (!sf->adaptive_rd_thresh_row_mt && cpi->row_mt_bit_exact)
     sf->adaptive_rd_thresh = 0;
 
   // This is only used in motion vector unit test.
