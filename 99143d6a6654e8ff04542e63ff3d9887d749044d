@@ -22,6 +22,30 @@
       "revId": "99143d6a6654e8ff04542e63ff3d9887d749044d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a2a5c053_453db062",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-04-28T17:28:13Z",
+      "side": 1,
+      "message": "I delete this one and documented the conditions when it\u0027s turned off in the header file.",
+      "parentUuid": "98f1aa92_b02d6fb7",
+      "range": {
+        "startLine": 608,
+        "startChar": 2,
+        "endLine": 610,
+        "endChar": 3
+      },
+      "revId": "99143d6a6654e8ff04542e63ff3d9887d749044d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
