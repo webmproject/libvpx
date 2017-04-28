@@ -51,6 +51,24 @@
       "revId": "6dfeea6592b9a6327679f76a192f1dfd4eb02ea4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a4f0458a_40dd3385",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-28T13:22:38Z",
+      "side": 1,
+      "message": "I agree, this isn\u0027t an issue in practice. However, I\u0027d like to see the library use size-specified data types for everything. I\u0027ll have a patch up shortly",
+      "parentUuid": "1054c240_9256a0c4",
+      "revId": "6dfeea6592b9a6327679f76a192f1dfd4eb02ea4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
