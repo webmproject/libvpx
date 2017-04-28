@@ -16,6 +16,41 @@
       "revId": "6dfeea6592b9a6327679f76a192f1dfd4eb02ea4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e8914c4b_0504406c",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-28T04:08:21Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "6c4574f2_ec92c111",
+      "revId": "6dfeea6592b9a6327679f76a192f1dfd4eb02ea4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1054c240_9256a0c4",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-28T04:08:21Z",
+      "side": 1,
+      "message": "you can drop this given the expectation. I don\u0027t know of any modern platforms that vary the size of in",
+      "revId": "6dfeea6592b9a6327679f76a192f1dfd4eb02ea4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
