@@ -69,6 +69,24 @@
       "revId": "6dfeea6592b9a6327679f76a192f1dfd4eb02ea4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b6271bcb_f2e3c27c",
+        "filename": "vp9/encoder/x86/temporal_filter_sse4.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-04-28T13:37:28Z",
+      "side": 1,
+      "message": "https://chromium-review.googlesource.com/490266",
+      "parentUuid": "a4f0458a_40dd3385",
+      "revId": "6dfeea6592b9a6327679f76a192f1dfd4eb02ea4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
