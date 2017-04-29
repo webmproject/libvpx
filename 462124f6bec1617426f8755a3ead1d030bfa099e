@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4bb677b_02e5785f",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-29T00:11:28Z",
+      "side": 1,
+      "message": "these could just be split to their own functions to avoid this branch (though it\u0027s probably removed when inlined)",
+      "revId": "462124f6bec1617426f8755a3ead1d030bfa099e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cb45858a_599fe263",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 466,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-29T00:11:28Z",
+      "side": 1,
+      "message": "these 2 don\u0027t seems necessary",
+      "revId": "462124f6bec1617426f8755a3ead1d030bfa099e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "624338ca_41acd1b7",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-04-29T00:11:28Z",
+      "side": 1,
+      "message": "I thought these were going to be dropped?",
+      "range": {
+        "startLine": 485,
+        "startChar": 50,
+        "endLine": 485,
+        "endChar": 77
+      },
+      "revId": "462124f6bec1617426f8755a3ead1d030bfa099e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
