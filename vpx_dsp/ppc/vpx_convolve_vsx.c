@@ -9,6 +9,7 @@
  */
 #include <string.h>
 #include "./vpx_dsp_rtcd.h"
+#include "vpx_dsp/vpx_filter.h"
 #include "vpx_dsp/ppc/types_vsx.h"
 
 // TODO(lu_zero): unroll
@@ -157,4 +158,49 @@ void vpx_convolve_avg_vsx(const uint8_t *src, ptrdiff_t src_stride,
       break;
     }
   }
+}
+
+// TODO(lu_zero): Implement 8x8 and bigger block special cases
+static void convolve_horiz(const uint8_t *src, ptrdiff_t src_stride,
+                           uint8_t *dst, ptrdiff_t dst_stride,
+                           const InterpKernel *x_filters, int x0_q4,
+                           int x_step_q4, int w, int h) {
+  int x, y;
+  src -= SUBPEL_TAPS / 2 - 1;
+
+  for (y = 0; y < h; ++y) {
+    int x_q4 = x0_q4;
+    for (x = 0; x < w; ++x) {
+      const uint8_t *const src_x = &src[x_q4 >> SUBPEL_BITS];
+      const int16_t *const x_filter = x_filters[x_q4 & SUBPEL_MASK];
+      const int16x8_t s = unpack_to_s16_h(vec_vsx_ld(0, src_x));
+      const int16x8_t f = vec_vsx_ld(0, x_filter);
+      const int32x4_t sum = vec_msum(s, f, vec_splat_s32(0));
+      const int32x4_t bias =
+          vec_sl(vec_splat_s32(1), vec_splat_u32(FILTER_BITS - 1));
+      const int32x4_t avg =
+          vec_sr(vec_sums(sum, bias), vec_splat_u32(FILTER_BITS));
+      const uint8x16_t v = vec_splat(
+          vec_packsu(vec_pack(avg, vec_splat_s32(0)), vec_splat_s16(0)), 3);
+      vec_ste(v, 0, dst + x);
+      x_q4 += x_step_q4;
+    }
+    src += src_stride;
+    dst += dst_stride;
+  }
+}
+
+void vpx_convolve8_horiz_vsx(const uint8_t *src, ptrdiff_t src_stride,
+                             uint8_t *dst, ptrdiff_t dst_stride,
+                             const int16_t *filter_x, int x_step_q4,
+                             const int16_t *filter_y, int y_step_q4, int w,
+                             int h) {
+  const InterpKernel *const filters_x = get_filter_base(filter_x);
+  const int x0_q4 = get_filter_offset(filter_x, filters_x);
+
+  (void)filter_y;
+  (void)y_step_q4;
+
+  convolve_horiz(src, src_stride, dst, dst_stride, filters_x, x0_q4, x_step_q4,
+                 w, h);
 }
