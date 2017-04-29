@@ -178,7 +178,7 @@ class ExtendBorderTest
     static const int kSizesToTest[] = { 1, 15, 33, 145, 512, 1025, 16383 };
     for (int h = 0; h < kNumSizesToTest; ++h) {
       for (int w = 0; w < kNumSizesToTest; ++w) {
-        ResetImage(kSizesToTest[w], kSizesToTest[h]);
+        ASSERT_NO_FATAL_FAILURE(ResetImage(kSizesToTest[w], kSizesToTest[h]));
         ExtendBorder();
         ReferenceExtendBorder();
         CompareImages(img_);
@@ -217,7 +217,7 @@ class CopyFrameTest : public VpxScaleBase,
     static const int kSizesToTest[] = { 1, 15, 33, 145, 512, 1025, 16383 };
     for (int h = 0; h < kNumSizesToTest; ++h) {
       for (int w = 0; w < kNumSizesToTest; ++w) {
-        ResetImage(kSizesToTest[w], kSizesToTest[h]);
+        ASSERT_NO_FATAL_FAILURE(ResetImage(kSizesToTest[w], kSizesToTest[h]));
         ReferenceCopyFrame();
         CopyFrame();
         CompareImages(cpy_img_);
