@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f81f56e7_7b53cef0",
+        "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-05-01T18:13:47Z",
+      "side": 1,
+      "message": "Pass in values instead of pointers for these constants.",
+      "range": {
+        "startLine": 35,
+        "startChar": 4,
+        "endLine": 38,
+        "endChar": 43
+      },
+      "revId": "8d5c7647191183e82ce71417cabb7613544001bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "14422fd7_8114a3b9",
+        "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-05-01T18:13:47Z",
+      "side": 1,
+      "message": "This part (and the similar part in vp9_denoiser_adj_16x1_neon()) could be out of this function which is in a loop, as vp9_denoiser_16x1_sse2() did.",
+      "range": {
+        "startLine": 92,
+        "startChar": 0,
+        "endLine": 96,
+        "endChar": 73
+      },
+      "revId": "8d5c7647191183e82ce71417cabb7613544001bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f1167b1_d60ca63d",
+        "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-05-01T18:13:47Z",
+      "side": 1,
+      "message": "These comments only appear in vp8 C code. Please make sure they still make sense for vp9. Same to comments in Line 295.",
+      "range": {
+        "startLine": 195,
+        "startChar": 6,
+        "endLine": 195,
+        "endChar": 71
+      },
+      "revId": "8d5c7647191183e82ce71417cabb7613544001bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7231c1c3_dac03279",
+        "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-05-01T18:13:47Z",
+      "side": 1,
+      "message": "const int shift_inc \u003d",
+      "range": {
+        "startLine": 241,
+        "startChar": 2,
+        "endLine": 241,
+        "endChar": 15
+      },
+      "revId": "8d5c7647191183e82ce71417cabb7613544001bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "562d0f77_c909f297",
+        "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-05-01T18:13:47Z",
+      "side": 1,
+      "message": "const int",
+      "range": {
+        "startLine": 293,
+        "startChar": 4,
+        "endLine": 293,
+        "endChar": 7
+      },
+      "revId": "8d5c7647191183e82ce71417cabb7613544001bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
