@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "393c30d7_ea9e7dba",
+        "filename": "vp9/encoder/x86/vp9_error_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-01T19:52:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f45d2d92_97383077",
+      "revId": "19549c792b85d68fe7ea7a5b09d4e147753e80d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "950d7b1e_548e6e6d",
         "filename": "vp9/encoder/x86/vp9_error_avx2.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2017-05-01T19:35:58Z",
       "side": 1,
       "message": "this path should have an assert for the block_size expectation",
+      "revId": "19549c792b85d68fe7ea7a5b09d4e147753e80d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "75873a19_9be9ad77",
+        "filename": "vp9/encoder/x86/vp9_error_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-01T19:52:21Z",
+      "side": 1,
+      "message": "Not sure exactly what you\u0027re asking for here, but added an assert. Seems kind of unnecessary though.",
+      "parentUuid": "950d7b1e_548e6e6d",
       "revId": "19549c792b85d68fe7ea7a5b09d4e147753e80d1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
