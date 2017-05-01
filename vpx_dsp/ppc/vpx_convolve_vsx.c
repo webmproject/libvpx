@@ -275,6 +275,27 @@ static inline void convolve_vert(const uint8_t *src, ptrdiff_t src_stride,
   }
 }
 
+static inline void convolve_avg_vert(const uint8_t *src, ptrdiff_t src_stride,
+                                     uint8_t *dst, ptrdiff_t dst_stride,
+                                     const InterpKernel *y_filters, int y0_q4,
+                                     int y_step_q4, int w, int h) {
+  int x, y;
+  src -= src_stride * (SUBPEL_TAPS / 2 - 1);
+
+  for (x = 0; x < w; ++x) {
+    int y_q4 = y0_q4;
+    for (y = 0; y < h; ++y) {
+      uint8_t v;
+      convolve_line_v(&v, &src[(y_q4 >> SUBPEL_BITS) * src_stride], src_stride,
+                      y_filters[y_q4 & SUBPEL_MASK]);
+      dst[y * dst_stride] = ROUND_POWER_OF_TWO(dst[y * dst_stride] + v, 1);
+      y_q4 += y_step_q4;
+    }
+    ++src;
+    ++dst;
+  }
+}
+
 void vpx_convolve8_horiz_vsx(const uint8_t *src, ptrdiff_t src_stride,
                              uint8_t *dst, ptrdiff_t dst_stride,
                              const int16_t *filter_x, int x_step_q4,
@@ -318,4 +339,19 @@ void vpx_convolve8_vert_vsx(const uint8_t *src, ptrdiff_t src_stride,
 
   convolve_vert(src, src_stride, dst, dst_stride, filters_y, y0_q4, y_step_q4,
                 w, h);
+}
+
+void vpx_convolve8_avg_vert_vsx(const uint8_t *src, ptrdiff_t src_stride,
+                                uint8_t *dst, ptrdiff_t dst_stride,
+                                const int16_t *filter_x, int x_step_q4,
+                                const int16_t *filter_y, int y_step_q4, int w,
+                                int h) {
+  const InterpKernel *const filters_y = get_filter_base(filter_y);
+  const int y0_q4 = get_filter_offset(filter_y, filters_y);
+
+  (void)filter_x;
+  (void)x_step_q4;
+
+  convolve_avg_vert(src, src_stride, dst, dst_stride, filters_y, y0_q4,
+                    y_step_q4, w, h);
 }
