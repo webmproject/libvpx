@@ -344,7 +344,7 @@ add_proto qw/void vpx_convolve8_horiz/, "const uint8_t *src, ptrdiff_t src_strid
 specialize qw/vpx_convolve8_horiz sse2 ssse3 avx2 neon dspr2 msa vsx/;
 
 add_proto qw/void vpx_convolve8_vert/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
-specialize qw/vpx_convolve8_vert sse2 ssse3 avx2 neon dspr2 msa/;
+specialize qw/vpx_convolve8_vert sse2 ssse3 avx2 neon dspr2 msa vsx/;
 
 add_proto qw/void vpx_convolve8_avg/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
 specialize qw/vpx_convolve8_avg sse2 ssse3 neon dspr2 msa/;

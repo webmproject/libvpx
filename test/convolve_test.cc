@@ -1225,10 +1225,10 @@ INSTANTIATE_TEST_CASE_P(MSA, ConvolveTest,
 #if HAVE_VSX
 const ConvolveFunctions convolve8_vsx(
     vpx_convolve_copy_vsx, vpx_convolve_avg_vsx, vpx_convolve8_horiz_vsx,
-    vpx_convolve8_avg_horiz_vsx, vpx_convolve8_vert_c, vpx_convolve8_avg_vert_c,
-    vpx_convolve8_c, vpx_convolve8_avg_c, vpx_scaled_horiz_c,
-    vpx_scaled_avg_horiz_c, vpx_scaled_vert_c, vpx_scaled_avg_vert_c,
-    vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
+    vpx_convolve8_avg_horiz_vsx, vpx_convolve8_vert_vsx,
+    vpx_convolve8_avg_vert_c, vpx_convolve8_c, vpx_convolve8_avg_c,
+    vpx_scaled_horiz_c, vpx_scaled_avg_horiz_c, vpx_scaled_vert_c,
+    vpx_scaled_avg_vert_c, vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
 const ConvolveParam kArrayConvolve_vsx[] = { ALL_SIZES(convolve8_vsx) };
 INSTANTIATE_TEST_CASE_P(VSX, ConvolveTest,
                         ::testing::ValuesIn(kArrayConvolve_vsx));
