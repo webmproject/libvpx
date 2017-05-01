@@ -16,6 +16,24 @@
       "revId": "7af0214186185aea001772424cab240e685d9102",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12f1f0d4_b3ef5421",
+        "filename": "vp9/encoder/x86/vp9_error_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-01T17:54:33Z",
+      "side": 1,
+      "message": "hadd has a latency of 3. the shift has no timing information and the plain add has a latency of 1, so i don\u0027t think hadd would be a good idea.",
+      "parentUuid": "df9f6b68_c585f3fb",
+      "revId": "7af0214186185aea001772424cab240e685d9102",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
