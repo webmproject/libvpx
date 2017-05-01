@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "56c873a1_4266f340",
+        "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-05-01T21:02:01Z",
+      "side": 1,
+      "message": "vp9_denoiser_16x1_sse2() did the following in the end,\n  acc_diff \u003d _mm_adds_epi8(acc_diff, padj);\n  acc_diff \u003d _mm_subs_epi8(acc_diff, nadj);\n  return acc_diff;\n\nWhich means probably there is no need to do the pairwise additions within the for loop. The pairwise additions could be moved to sum_diff_16x1_neon() to execute only once, similar to sum_diff_16x1() in vp9_denoiser_sse2.c.",
+      "parentUuid": "dade5023_c021ec9b",
+      "range": {
+        "startLine": 92,
+        "startChar": 0,
+        "endLine": 96,
+        "endChar": 73
+      },
+      "revId": "8d5c7647191183e82ce71417cabb7613544001bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f1167b1_d60ca63d",
         "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
         "patchSetId": 4
