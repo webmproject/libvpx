@@ -21,12 +21,12 @@ script_dir=~/Dev/sandbox/libvpx/scripts
 # bitrate=500
 # fps="30/1"
 
-# video=~/Videos/aom/park_joy/park_joy_360p_10.y4m
-# wi=640
-# he=360
-# frames=5
-# bitrate=800
-# fps="50/1"
+video=~/Videos/aom/park_joy/park_joy_360p_10.y4m
+wi=640
+he=360
+frames=5
+bitrate=800
+fps="50/1"
 
 # video=~/Dev/samples/videos/speed-set/touchdown_pass_480p.y4m
 # wi=854
@@ -35,12 +35,12 @@ script_dir=~/Dev/sandbox/libvpx/scripts
 # bitrate=1200
 # fps="30000/1001"
 
-video=~/Dev/samples/videos/hbd/crowd_run_1080p_10.y4m
-wi=1920
-he=1080
-frames=100
-bitrate=8000
-fps="50/1"
+# video=~/Dev/samples/videos/hbd/crowd_run_1080p_10.y4m
+# wi=1920
+# he=1080
+# frames=100
+# bitrate=8000
+# fps="50/1"
 
 bs=bs
 codec="--codec=av1"
@@ -64,8 +64,11 @@ rm *.txt
 
 #for exp_tool in experimental var_tx tpl_mv dual_filter convolve_round ext_tx tx64x64 sub8x8_mc ext_intra intra_interp filter_intra ext_inter interintra wedge compound_segment ext_refs global_motion new_quant supertx ans new_tokenset loop_restoration ext_partition ext_partition_types unpoison_partition_ctx ext_tile motion_var ncobmc warped_motion entropy q_adapt_probs subframe_prob_update bitstream_debug rawbits pvq xiphrc cb4x4 chroma_2x2 frame_size parallel_deblocking parallel_deblocking_15tap loopfiltering_across_tiles ec_adapt tempmv_signaling coef_interleave entropy_stats masked_tx dependent_horztiles daala_dist tripred palette_throughput ref_adapt lv_map mv_compress frame_superres new_multisymbol
 
-# loop-restoration new_tokenset
-for exp_tool in experimental global-motion cb4x4 tpl-mv sub8x8_mc interintra wedge compound-segment ncobmc warped_motion q_adapt_probs convolve_round var-tx ans entropy ext-intra filter-intra supertx motion-var new-quant dual-filter ext-partition-types ext-partition ext-inter ext-refs ext-tx
+# loop-restoration new_tokenset (may have issues)
+
+#compound-segment ncobmc warped_motion q_adapt_probs convolve_round var-tx ans entropy ext-intra filter-intra supertx motion-var new-quant dual-filter ext-partition-types ext-partition ext-inter ext-refs ext-tx
+#  experimental global-motion cb4x4 tpl-mv sub8x8_mc interintra wedge
+for exp_tool in compound-segment ncobmc warped_motion q_adapt_probs convolve_round var-tx ans entropy ext-intra filter-intra supertx motion-var new-quant dual-filter ext-partition-types ext-partition ext-inter ext-refs ext-tx
 
 do
   cd $build_dir
