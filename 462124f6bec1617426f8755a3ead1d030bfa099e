@@ -56,6 +56,29 @@
       "revId": "462124f6bec1617426f8755a3ead1d030bfa099e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ada0b962_bd1a932d",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1145,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-05-01T19:52:06Z",
+      "side": 1,
+      "message": "Removing HbdFilter1dFunc and HIGHBD_FUNC could be more readable.",
+      "range": {
+        "startLine": 1145,
+        "startChar": 13,
+        "endLine": 1145,
+        "endChar": 28
+      },
+      "revId": "462124f6bec1617426f8755a3ead1d030bfa099e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
