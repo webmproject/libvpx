@@ -69,6 +69,24 @@
       "revId": "19549c792b85d68fe7ea7a5b09d4e147753e80d1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b5737d80_0c3a8c92",
+        "filename": "vp9/encoder/x86/vp9_error_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-01T23:59:44Z",
+      "side": 1,
+      "message": "code moves around, this assumes the block size is divisible by 32. the assert helps document that and will flag the error if called with e.g., 8",
+      "parentUuid": "75873a19_9be9ad77",
+      "revId": "19549c792b85d68fe7ea7a5b09d4e147753e80d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
