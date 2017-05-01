@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e48c47f6_dff1ed9f",
+        "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-05-01T20:22:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f81f56e7_7b53cef0",
+      "range": {
+        "startLine": 35,
+        "startChar": 4,
+        "endLine": 38,
+        "endChar": 43
+      },
+      "revId": "8d5c7647191183e82ce71417cabb7613544001bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "14422fd7_8114a3b9",
         "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2017-05-01T18:13:47Z",
       "side": 1,
       "message": "This part (and the similar part in vp9_denoiser_adj_16x1_neon()) could be out of this function which is in a loop, as vp9_denoiser_16x1_sse2() did.",
+      "range": {
+        "startLine": 92,
+        "startChar": 0,
+        "endLine": 96,
+        "endChar": 73
+      },
+      "revId": "8d5c7647191183e82ce71417cabb7613544001bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dade5023_c021ec9b",
+        "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-05-01T20:22:58Z",
+      "side": 1,
+      "message": "In vp8 implementation, this part is still in the loop. Also, I don\u0027t see how it\u0027s related to the implementation of vp9_denoiser_16x1_sse2() since sse2 code doesn\u0027t do the conversions.",
+      "parentUuid": "14422fd7_8114a3b9",
       "range": {
         "startLine": 92,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "21563a86_4aab5cc2",
+        "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-05-01T20:22:58Z",
+      "side": 1,
+      "message": "These comments also appear in vp9 sse2 code. So they still apply here. I removed those in line 295.",
+      "parentUuid": "4f1167b1_d60ca63d",
+      "range": {
+        "startLine": 195,
+        "startChar": 6,
+        "endLine": 195,
+        "endChar": 71
+      },
+      "revId": "8d5c7647191183e82ce71417cabb7613544001bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7231c1c3_dac03279",
         "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
         "patchSetId": 4
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "e2e7b472_ac5e2317",
+        "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-05-01T20:22:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7231c1c3_dac03279",
+      "range": {
+        "startLine": 241,
+        "startChar": 2,
+        "endLine": 241,
+        "endChar": 15
+      },
+      "revId": "8d5c7647191183e82ce71417cabb7613544001bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "562d0f77_c909f297",
         "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
         "patchSetId": 4
@@ -105,6 +201,30 @@
       "writtenOn": "2017-05-01T18:13:47Z",
       "side": 1,
       "message": "const int",
+      "range": {
+        "startLine": 293,
+        "startChar": 4,
+        "endLine": 293,
+        "endChar": 7
+      },
+      "revId": "8d5c7647191183e82ce71417cabb7613544001bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e548156_1a5e9a69",
+        "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-05-01T20:22:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "562d0f77_c909f297",
       "range": {
         "startLine": 293,
         "startChar": 4,
