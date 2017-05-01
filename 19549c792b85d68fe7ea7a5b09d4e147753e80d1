@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f45d2d92_97383077",
+        "filename": "vp9/encoder/x86/vp9_error_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-01T19:35:58Z",
+      "side": 1,
+      "message": "these can be set to zero_reg; \u0027_reg\u0027 could be dropped in most places in a follow up",
+      "revId": "19549c792b85d68fe7ea7a5b09d4e147753e80d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "950d7b1e_548e6e6d",
+        "filename": "vp9/encoder/x86/vp9_error_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-01T19:35:58Z",
+      "side": 1,
+      "message": "this path should have an assert for the block_size expectation",
+      "revId": "19549c792b85d68fe7ea7a5b09d4e147753e80d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
