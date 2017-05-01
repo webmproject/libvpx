@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "df9f6b68_c585f3fb",
+        "filename": "vp9/encoder/x86/vp9_error_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-05-01T16:48:41Z",
+      "side": 1,
+      "message": "Would _mm256_hadd_epi32() work here?\n_mm256_hadd_epi32(dqcoeff_reg, coeff_reg) and followed by _mm_hadd_epi32(low_128bit,high_128bit)",
+      "revId": "7af0214186185aea001772424cab240e685d9102",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
