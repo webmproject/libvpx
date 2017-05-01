@@ -2420,7 +2420,8 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x, int mi_row,
 #if CONFIG_VP9_HIGHBITDEPTH
           if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
             vp9_highbd_build_inter_predictor(
-                pd->pre[0].buf, pd->pre[0].stride, pd->dst.buf, pd->dst.stride,
+                CONVERT_TO_SHORTPTR(pd->pre[0].buf), pd->pre[0].stride,
+                CONVERT_TO_SHORTPTR(pd->dst.buf), pd->dst.stride,
                 &xd->mi[0]->bmi[i].as_mv[0].as_mv, &xd->block_refs[0]->sf,
                 4 * num_4x4_blocks_wide, 4 * num_4x4_blocks_high, 0,
                 vp9_filter_kernels[mi->interp_filter], MV_PRECISION_Q3,
