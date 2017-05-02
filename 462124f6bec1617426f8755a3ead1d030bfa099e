@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "246fcee8_0c277098",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-05-02T18:33:21Z",
+      "side": 1,
+      "message": "Dump out the assembly code.  Review vpx_highbd_filter_block1d8_h8_avx2, PACK_8x2 and PACK_8x1 are used here.  Inline code removes the switch branch and only keeps the corresponding operation.",
+      "parentUuid": "c4bb677b_02e5785f",
+      "revId": "462124f6bec1617426f8755a3ead1d030bfa099e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "cb45858a_599fe263",
         "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
         "patchSetId": 5
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "dcf13c07_d5c39d63",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 466,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-05-02T18:33:21Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "cb45858a_599fe263",
+      "revId": "462124f6bec1617426f8755a3ead1d030bfa099e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "624338ca_41acd1b7",
         "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
         "patchSetId": 5
@@ -47,6 +83,30 @@
       "writtenOn": "2017-04-29T00:11:28Z",
       "side": 1,
       "message": "I thought these were going to be dropped?",
+      "range": {
+        "startLine": 485,
+        "startChar": 50,
+        "endLine": 485,
+        "endChar": 77
+      },
+      "revId": "462124f6bec1617426f8755a3ead1d030bfa099e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "62cc23fd_e0a8db8a",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-05-02T18:33:21Z",
+      "side": 1,
+      "message": "Bilinear filter uses much less cycles than width8/16, v8/h8.  So I avoid code repetition and keep the code readability for 2 tap filters.",
+      "parentUuid": "624338ca_41acd1b7",
       "range": {
         "startLine": 485,
         "startChar": 50,
@@ -82,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "fb178d80_a25d1d16",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 646,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-05-02T18:33:21Z",
+      "side": 1,
+      "message": "Done.  Unit tests pass.  Encoding/decoding a sequence runs correctly.",
+      "parentUuid": "229e2760_fbe1ff48",
+      "range": {
+        "startLine": 646,
+        "startChar": 0,
+        "endLine": 646,
+        "endChar": 19
+      },
+      "revId": "462124f6bec1617426f8755a3ead1d030bfa099e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ada0b962_bd1a932d",
         "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
         "patchSetId": 5
@@ -93,6 +177,30 @@
       "writtenOn": "2017-05-01T19:52:06Z",
       "side": 1,
       "message": "Removing HbdFilter1dFunc and HIGHBD_FUNC could be more readable.",
+      "range": {
+        "startLine": 1145,
+        "startChar": 13,
+        "endLine": 1145,
+        "endChar": 28
+      },
+      "revId": "462124f6bec1617426f8755a3ead1d030bfa099e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b82d861f_84f0a56d",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1145,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-05-02T18:33:21Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "ada0b962_bd1a932d",
       "range": {
         "startLine": 1145,
         "startChar": 13,
