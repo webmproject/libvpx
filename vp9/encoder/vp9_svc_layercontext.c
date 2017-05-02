@@ -38,11 +38,12 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->current_superframe = 0;
   for (i = 0; i < REF_FRAMES; ++i) svc->ref_frame_index[i] = -1;
   for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
-    cpi->svc.ext_frame_flags[sl] = 0;
-    cpi->svc.ext_lst_fb_idx[sl] = 0;
-    cpi->svc.ext_gld_fb_idx[sl] = 1;
-    cpi->svc.ext_alt_fb_idx[sl] = 2;
-    cpi->svc.filtertype_downsample_source[sl] = 0;
+    svc->ext_frame_flags[sl] = 0;
+    svc->ext_lst_fb_idx[sl] = 0;
+    svc->ext_gld_fb_idx[sl] = 1;
+    svc->ext_alt_fb_idx[sl] = 2;
+    svc->downsample_filter_type[sl] = EIGHTTAP;
+    svc->downsample_filter_phase[sl] = 0;  // Set to 8 for averaging filter.
   }
 
   if (cpi->oxcf.error_resilient_mode == 0 && cpi->oxcf.pass == 2) {
@@ -651,10 +652,12 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
                        lc->scaling_factor_num, lc->scaling_factor_den, &width,
                        &height);
 
-  // For low resolutions: set the filtertype for downsampling source to 1,
-  // to get averaging filter.
-  if (width <= 320 && height <= 240)
-    cpi->svc.filtertype_downsample_source[cpi->svc.spatial_layer_id] = 1;
+  // For low resolutions: set phase of the filter = 8 (for symmetric averaging
+  // filter), use bilinear for now.
+  if (width <= 320 && height <= 240) {
+    cpi->svc.downsample_filter_type[cpi->svc.spatial_layer_id] = BILINEAR;
+    cpi->svc.downsample_filter_phase[cpi->svc.spatial_layer_id] = 8;
+  }
 
   // The usage of use_base_mv assumes down-scale of 2x2. For now, turn off use
   // of base motion vectors if spatial scale factors for any layers are not 2,

@@ -755,7 +755,8 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
                                "Failed to reallocate alt_ref_buffer");
           }
           frames[frame] = vp9_scale_if_required(
-              cm, frames[frame], &cpi->svc.scaled_frames[frame_used], 0, 0);
+              cm, frames[frame], &cpi->svc.scaled_frames[frame_used], 0,
+              EIGHTTAP, 0);
           ++frame_used;
         }
       }
