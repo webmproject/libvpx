@@ -79,6 +79,25 @@ static INLINE void uint32_to_mem(uint8_t *buf, uint32_t a) {
   memcpy(buf, &a, 4);
 }
 
+// Load 4 sets of 4 bytes when alignment is not guaranteed.
+static INLINE uint8x16_t load_unaligned_u8q(const uint8_t *buf, int stride) {
+  uint32_t a;
+  uint32x4_t a_u32 = vdupq_n_u32(0);
+  memcpy(&a, buf, 4);
+  buf += stride;
+  a_u32 = vld1q_lane_u32(&a, a_u32, 0);
+  memcpy(&a, buf, 4);
+  buf += stride;
+  a_u32 = vld1q_lane_u32(&a, a_u32, 1);
+  memcpy(&a, buf, 4);
+  buf += stride;
+  a_u32 = vld1q_lane_u32(&a, a_u32, 2);
+  memcpy(&a, buf, 4);
+  buf += stride;
+  a_u32 = vld1q_lane_u32(&a, a_u32, 3);
+  return vreinterpretq_u8_u32(a_u32);
+}
+
 // Store 4 sets of 4 bytes when alignment is not guaranteed.
 static INLINE void store_unaligned_u8q(uint8_t *buf, int stride,
                                        const uint8x16_t a) {

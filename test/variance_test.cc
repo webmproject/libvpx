@@ -1259,7 +1259,9 @@ INSTANTIATE_TEST_CASE_P(
                       VarianceParams(4, 3, &vpx_variance16x8_neon),
                       VarianceParams(3, 4, &vpx_variance8x16_neon),
                       VarianceParams(3, 3, &vpx_variance8x8_neon),
-                      VarianceParams(3, 2, &vpx_variance8x4_neon)));
+                      VarianceParams(3, 2, &vpx_variance8x4_neon),
+                      VarianceParams(2, 3, &vpx_variance4x8_neon),
+                      VarianceParams(2, 2, &vpx_variance4x4_neon)));
 
 INSTANTIATE_TEST_CASE_P(
     NEON, VpxSubpelVarianceTest,
