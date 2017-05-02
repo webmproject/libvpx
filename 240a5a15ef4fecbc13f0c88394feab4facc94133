@@ -16,6 +16,24 @@
       "revId": "240a5a15ef4fecbc13f0c88394feab4facc94133",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0f424f7e_a60708a2",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 1
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-05-02T18:36:47Z",
+      "side": 0,
+      "message": "Thanks. I\u0027ll only clean up those appeared in both if ... and else ...",
+      "parentUuid": "ae353766_81deadc2",
+      "revId": "240a5a15ef4fecbc13f0c88394feab4facc94133",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
