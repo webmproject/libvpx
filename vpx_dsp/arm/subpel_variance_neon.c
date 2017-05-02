@@ -22,6 +22,7 @@ static const uint8_t bilinear_filters[8][2] = {
   { 64, 64 }, { 48, 80 },  { 32, 96 }, { 16, 112 },
 };
 
+// Process a block exactly 8 wide and any height.
 static void var_filter_block2d_bil_w8(const uint8_t *src_ptr,
                                       uint8_t *output_ptr,
                                       unsigned int src_pixels_per_line,
@@ -45,6 +46,7 @@ static void var_filter_block2d_bil_w8(const uint8_t *src_ptr,
   }
 }
 
+// Process a block which is a mutiple of 16 wide and any height.
 static void var_filter_block2d_bil_w16(const uint8_t *src_ptr,
                                        uint8_t *output_ptr,
                                        unsigned int src_pixels_per_line,
@@ -99,7 +101,7 @@ unsigned int vpx_sub_pixel_variance16x16_neon(const uint8_t *src,
                              bilinear_filters[xoffset]);
   var_filter_block2d_bil_w16(fdata3, temp2, 16, 16, 16, 16,
                              bilinear_filters[yoffset]);
-  return vpx_variance16x16_neon(temp2, 16, dst, dst_stride, sse);
+  return vpx_variance16x16(temp2, 16, dst, dst_stride, sse);
 }
 
 unsigned int vpx_sub_pixel_variance32x32_neon(const uint8_t *src,
@@ -114,7 +116,7 @@ unsigned int vpx_sub_pixel_variance32x32_neon(const uint8_t *src,
                              bilinear_filters[xoffset]);
   var_filter_block2d_bil_w16(fdata3, temp2, 32, 32, 32, 32,
                              bilinear_filters[yoffset]);
-  return vpx_variance32x32_neon(temp2, 32, dst, dst_stride, sse);
+  return vpx_variance32x32(temp2, 32, dst, dst_stride, sse);
 }
 
 unsigned int vpx_sub_pixel_variance64x64_neon(const uint8_t *src,
@@ -129,5 +131,5 @@ unsigned int vpx_sub_pixel_variance64x64_neon(const uint8_t *src,
                              bilinear_filters[xoffset]);
   var_filter_block2d_bil_w16(fdata3, temp2, 64, 64, 64, 64,
                              bilinear_filters[yoffset]);
-  return vpx_variance64x64_neon(temp2, 64, dst, dst_stride, sse);
+  return vpx_variance64x64(temp2, 64, dst, dst_stride, sse);
 }
