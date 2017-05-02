@@ -39,23 +39,18 @@ cglobal block_error, 3, 3, 8, uqc, dqc, size, ssz
   pmaddwd   m1, m1
   pmaddwd   m2, m2
   pmaddwd   m3, m3
+  ; the sum of 2 31bit integers will fit in a 32bit unsigned integer
+  paddd     m0, m1
+  paddd     m2, m3
   ; accumulate in 64bit
   punpckldq m7, m0, m5
   punpckhdq m0, m5
   paddq     m4, m7
-  punpckldq m7, m1, m5
-  paddq     m4, m0
-  punpckhdq m1, m5
-  paddq     m4, m7
   punpckldq m7, m2, m5
-  paddq     m4, m1
+  paddq     m4, m0
   punpckhdq m2, m5
   paddq     m6, m7
-  punpckldq m7, m3, m5
   paddq     m6, m2
-  punpckhdq m3, m5
-  paddq     m6, m7
-  paddq     m6, m3
   jg .loop
 
   ; accumulate horizontally and store in return value
@@ -98,15 +93,13 @@ cglobal block_error_fp, 3, 3, 6, uqc, dqc, size
   ; thus the sum of 2 should fit in a 31bit integer (+ unused sign bit)
   pmaddwd   m0, m0
   pmaddwd   m1, m1
+  ; the sum of 2 31bit integers will fit in a 32bit unsigned integer
+  paddd     m0, m1
   ; accumulate in 64bit
   punpckldq m3, m0, m5
   punpckhdq m0, m5
   paddq     m4, m3
-  punpckldq m3, m1, m5
   paddq     m4, m0
-  punpckhdq m1, m5
-  paddq     m4, m3
-  paddq     m4, m1
   jnz .loop
 
   ; accumulate horizontally and store in return value
