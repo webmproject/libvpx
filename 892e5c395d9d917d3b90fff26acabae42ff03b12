@@ -479,6 +479,24 @@
       "revId": "892e5c395d9d917d3b90fff26acabae42ff03b12",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0e408125_283c5d44",
+        "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 338,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-02T23:45:57Z",
+      "side": 1,
+      "message": "\u003e This one can\u0027t be dropped since the block size might be smaller than 8x8( i.e. 4x4).\n\nI just meant \u0027} else {\u0027 wasn\u0027t strictly necessary given all paths return. it could be in the main scope",
+      "parentUuid": "c3181e9e_e5daf3cb",
+      "revId": "892e5c395d9d917d3b90fff26acabae42ff03b12",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
