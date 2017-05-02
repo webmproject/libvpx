@@ -517,7 +517,7 @@ void vpx_idct32_32_neon(const tran_low_t *input, uint8_t *dest,
   const int16_t *input_pass2 = pass1;  // input of pass2 is the result of pass1
   int16_t *out;
   int16x8_t q[16];
-  uint16_t *dst = CONVERT_TO_SHORTPTR(dest);
+  uint16_t *dst = CAST_TO_SHORTPTR(dest);
 
   for (idct32_pass_loop = 0, out = pass1; idct32_pass_loop < 2;
        idct32_pass_loop++, out = pass2) {

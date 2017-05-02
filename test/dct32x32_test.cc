@@ -137,7 +137,7 @@ TEST_P(Trans32x32Test, AccuracyCheck) {
 #if CONFIG_VP9_HIGHBITDEPTH
     } else {
       ASM_REGISTER_STATE_CHECK(
-          inv_txfm_(test_temp_block, CONVERT_TO_BYTEPTR(dst16), 32));
+          inv_txfm_(test_temp_block, CAST_TO_BYTEPTR(dst16), 32));
 #endif
     }
 
@@ -275,7 +275,7 @@ TEST_P(Trans32x32Test, InverseAccuracy) {
       ASM_REGISTER_STATE_CHECK(inv_txfm_(coeff, dst, 32));
 #if CONFIG_VP9_HIGHBITDEPTH
     } else {
-      ASM_REGISTER_STATE_CHECK(inv_txfm_(coeff, CONVERT_TO_BYTEPTR(dst16), 32));
+      ASM_REGISTER_STATE_CHECK(inv_txfm_(coeff, CAST_TO_BYTEPTR(dst16), 32));
 #endif
     }
     for (int j = 0; j < kNumCoeffs; ++j) {

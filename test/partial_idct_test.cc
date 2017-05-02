@@ -45,7 +45,7 @@ void wrapper(const tran_low_t *in, uint8_t *out, int stride, int bd) {
 #if CONFIG_VP9_HIGHBITDEPTH
 template <InvTxfmWithBdFunc fn>
 void highbd_wrapper(const tran_low_t *in, uint8_t *out, int stride, int bd) {
-  fn(in, CONVERT_TO_BYTEPTR(out), stride, bd);
+  fn(in, out, stride, bd);
 }
 #endif
 

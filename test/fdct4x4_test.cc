@@ -135,7 +135,7 @@ class Trans4x4TestBase {
 #if CONFIG_VP9_HIGHBITDEPTH
       } else {
         ASM_REGISTER_STATE_CHECK(
-            RunInvTxfm(test_temp_block, CONVERT_TO_BYTEPTR(dst16), pitch_));
+            RunInvTxfm(test_temp_block, CAST_TO_BYTEPTR(dst16), pitch_));
 #endif
       }
 
@@ -249,7 +249,7 @@ class Trans4x4TestBase {
 #if CONFIG_VP9_HIGHBITDEPTH
       } else {
         ASM_REGISTER_STATE_CHECK(
-            RunInvTxfm(coeff, CONVERT_TO_BYTEPTR(dst16), pitch_));
+            RunInvTxfm(coeff, CAST_TO_BYTEPTR(dst16), pitch_));
 #endif
       }
 

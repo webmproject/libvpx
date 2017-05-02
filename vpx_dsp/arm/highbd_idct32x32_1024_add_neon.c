@@ -394,7 +394,7 @@ static INLINE void vpx_highbd_idct32_32_neon(const tran_low_t *input,
   int32_t pass2[32 * 32];
   int32_t *out;
   int32x4x2_t q[16];
-  uint16_t *dst = CONVERT_TO_SHORTPTR(dest);
+  uint16_t *dst = CAST_TO_SHORTPTR(dest);
 
   for (idct32_pass_loop = 0, out = pass1; idct32_pass_loop < 2;
        idct32_pass_loop++, input = pass1, out = pass2) {

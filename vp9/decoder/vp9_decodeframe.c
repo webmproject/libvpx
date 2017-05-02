@@ -189,21 +189,22 @@ static void inverse_transform_block_inter(MACROBLOCKD *xd, int plane,
   assert(eob > 0);
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    uint8_t *const dst16 = CAST_TO_BYTEPTR(CONVERT_TO_SHORTPTR(dst));
     if (xd->lossless) {
-      vp9_highbd_iwht4x4_add(dqcoeff, dst, stride, eob, xd->bd);
+      vp9_highbd_iwht4x4_add(dqcoeff, dst16, stride, eob, xd->bd);
     } else {
       switch (tx_size) {
         case TX_4X4:
-          vp9_highbd_idct4x4_add(dqcoeff, dst, stride, eob, xd->bd);
+          vp9_highbd_idct4x4_add(dqcoeff, dst16, stride, eob, xd->bd);
           break;
         case TX_8X8:
-          vp9_highbd_idct8x8_add(dqcoeff, dst, stride, eob, xd->bd);
+          vp9_highbd_idct8x8_add(dqcoeff, dst16, stride, eob, xd->bd);
           break;
         case TX_16X16:
-          vp9_highbd_idct16x16_add(dqcoeff, dst, stride, eob, xd->bd);
+          vp9_highbd_idct16x16_add(dqcoeff, dst16, stride, eob, xd->bd);
           break;
         case TX_32X32:
-          vp9_highbd_idct32x32_add(dqcoeff, dst, stride, eob, xd->bd);
+          vp9_highbd_idct32x32_add(dqcoeff, dst16, stride, eob, xd->bd);
           break;
         default: assert(0 && "Invalid transform size");
       }
@@ -256,21 +257,22 @@ static void inverse_transform_block_intra(MACROBLOCKD *xd, int plane,
   assert(eob > 0);
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    uint8_t *const dst16 = CAST_TO_BYTEPTR(CONVERT_TO_SHORTPTR(dst));
     if (xd->lossless) {
-      vp9_highbd_iwht4x4_add(dqcoeff, dst, stride, eob, xd->bd);
+      vp9_highbd_iwht4x4_add(dqcoeff, dst16, stride, eob, xd->bd);
     } else {
       switch (tx_size) {
         case TX_4X4:
-          vp9_highbd_iht4x4_add(tx_type, dqcoeff, dst, stride, eob, xd->bd);
+          vp9_highbd_iht4x4_add(tx_type, dqcoeff, dst16, stride, eob, xd->bd);
           break;
         case TX_8X8:
-          vp9_highbd_iht8x8_add(tx_type, dqcoeff, dst, stride, eob, xd->bd);
+          vp9_highbd_iht8x8_add(tx_type, dqcoeff, dst16, stride, eob, xd->bd);
           break;
         case TX_16X16:
-          vp9_highbd_iht16x16_add(tx_type, dqcoeff, dst, stride, eob, xd->bd);
+          vp9_highbd_iht16x16_add(tx_type, dqcoeff, dst16, stride, eob, xd->bd);
           break;
         case TX_32X32:
-          vp9_highbd_idct32x32_add(dqcoeff, dst, stride, eob, xd->bd);
+          vp9_highbd_idct32x32_add(dqcoeff, dst16, stride, eob, xd->bd);
           break;
         default: assert(0 && "Invalid transform size");
       }

@@ -213,7 +213,7 @@ void vp9_highbd_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
     { vpx_highbd_idct4_c, vpx_highbd_iadst4_c },  // DCT_ADST = 2
     { vpx_highbd_iadst4_c, vpx_highbd_iadst4_c }  // ADST_ADST = 3
   };
-  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
 
   int i, j;
   tran_low_t out[4 * 4];
@@ -252,7 +252,7 @@ void vp9_highbd_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest8,
   tran_low_t *outptr = out;
   tran_low_t temp_in[8], temp_out[8];
   const highbd_transform_2d ht = HIGH_IHT_8[tx_type];
-  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
 
   // Inverse transform row vectors.
   for (i = 0; i < 8; ++i) {
@@ -286,7 +286,7 @@ void vp9_highbd_iht16x16_256_add_c(const tran_low_t *input, uint8_t *dest8,
   tran_low_t *outptr = out;
   tran_low_t temp_in[16], temp_out[16];
   const highbd_transform_2d ht = HIGH_IHT_16[tx_type];
-  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
 
   // Rows
   for (i = 0; i < 16; ++i) {

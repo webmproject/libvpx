@@ -601,7 +601,7 @@ static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane,
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         vpx_highbd_convolve_copy(CONVERT_TO_SHORTPTR(dst), dst_stride, recon16,
                                  32, NULL, 0, NULL, 0, bs, bs, xd->bd);
-        recon = CONVERT_TO_BYTEPTR(recon16);
+        recon = CAST_TO_BYTEPTR(recon16);
         if (xd->lossless) {
           vp9_highbd_iwht4x4_add(dqcoeff, recon, 32, *eob, xd->bd);
         } else {
@@ -621,6 +621,7 @@ static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane,
             default: assert(0 && "Invalid transform size");
           }
         }
+        recon = CONVERT_TO_BYTEPTR(recon16);
       } else {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
         vpx_convolve_copy(dst, dst_stride, recon, 32, NULL, 0, NULL, 0, bs, bs);
@@ -1004,6 +1005,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int row,
           const int block = (row + idy) * 2 + (col + idx);
           const uint8_t *const src = &src_init[idx * 4 + idy * 4 * src_stride];
           uint8_t *const dst = &dst_init[idx * 4 + idy * 4 * dst_stride];
+          uint8_t *const dst16 = CAST_TO_BYTEPTR(CONVERT_TO_SHORTPTR(dst));
           int16_t *const src_diff =
               vp9_raster_block_offset_int16(BLOCK_8X8, block, p->src_diff);
           tran_low_t *const coeff = BLOCK_OFFSET(x->plane[0].coeff, block);
@@ -1025,7 +1027,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int row,
             tempa[idx] = templ[idy] = (x->plane[0].eobs[block] > 0 ? 1 : 0);
             if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
               goto next_highbd;
-            vp9_highbd_iwht4x4_add(BLOCK_OFFSET(pd->dqcoeff, block), dst,
+            vp9_highbd_iwht4x4_add(BLOCK_OFFSET(pd->dqcoeff, block), dst16,
                                    dst_stride, p->eobs[block], xd->bd);
           } else {
             int64_t unused;
@@ -1048,7 +1050,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int row,
             if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
               goto next_highbd;
             vp9_highbd_iht4x4_add(tx_type, BLOCK_OFFSET(pd->dqcoeff, block),
-                                  dst, dst_stride, p->eobs[block], xd->bd);
+                                  dst16, dst_stride, p->eobs[block], xd->bd);
           }
         }
       }

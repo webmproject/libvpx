@@ -729,7 +729,7 @@ static void vpx_highbd_idct32_16_neon(const int32_t *const input,
 void vpx_highbd_idct32x32_135_add_neon(const tran_low_t *input, uint8_t *dest8,
                                        int stride, int bd) {
   int i;
-  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
 
   if (bd == 8) {
     int16_t temp[32 * 16];

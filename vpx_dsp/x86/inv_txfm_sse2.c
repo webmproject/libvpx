@@ -3373,7 +3373,7 @@ void vpx_highbd_idct4x4_16_add_sse2(const tran_low_t *input, uint8_t *dest8,
   __m128i sign_bits[2];
   __m128i temp_mm, min_input, max_input;
   int test;
-  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
   int optimised_cols = 0;
   const __m128i zero = _mm_set1_epi16(0);
   const __m128i eight = _mm_set1_epi16(8);
@@ -3486,7 +3486,7 @@ void vpx_highbd_idct8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest8,
   int i, j, test;
   __m128i inptr[8];
   __m128i min_input, max_input, temp1, temp2, sign_bits;
-  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
   const __m128i zero = _mm_set1_epi16(0);
   const __m128i sixteen = _mm_set1_epi16(16);
   const __m128i max = _mm_set1_epi16(6201);
@@ -3586,7 +3586,7 @@ void vpx_highbd_idct8x8_12_add_sse2(const tran_low_t *input, uint8_t *dest8,
   int i, j, test;
   __m128i inptr[8];
   __m128i min_input, max_input, temp1, temp2, sign_bits;
-  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
   const __m128i zero = _mm_set1_epi16(0);
   const __m128i sixteen = _mm_set1_epi16(16);
   const __m128i max = _mm_set1_epi16(6201);
@@ -3689,7 +3689,7 @@ void vpx_highbd_idct16x16_256_add_sse2(const tran_low_t *input, uint8_t *dest8,
   int i, j, test;
   __m128i inptr[32];
   __m128i min_input, max_input, temp1, temp2, sign_bits;
-  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
   const __m128i zero = _mm_set1_epi16(0);
   const __m128i rounding = _mm_set1_epi16(32);
   const __m128i max = _mm_set1_epi16(3155);
@@ -3802,7 +3802,7 @@ void vpx_highbd_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest8,
   int i, j, test;
   __m128i inptr[32];
   __m128i min_input, max_input, temp1, temp2, sign_bits;
-  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
   const __m128i zero = _mm_set1_epi16(0);
   const __m128i rounding = _mm_set1_epi16(32);
   const __m128i max = _mm_set1_epi16(3155);
@@ -3920,7 +3920,7 @@ void vpx_highbd_idct32x32_1_add_sse2(const tran_low_t *input, uint8_t *dest8,
   const __m128i one = _mm_set1_epi16(1);
   const __m128i max = _mm_sub_epi16(_mm_slli_epi16(one, bd), one);
   int a, i, j;
-  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
   tran_low_t out;
 
   out = HIGHBD_WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64), bd);

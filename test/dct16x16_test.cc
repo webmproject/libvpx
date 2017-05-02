@@ -353,7 +353,7 @@ class Trans16x16TestBase {
 #if CONFIG_VP9_HIGHBITDEPTH
       } else {
         ASM_REGISTER_STATE_CHECK(
-            RunInvTxfm(test_temp_block, CONVERT_TO_BYTEPTR(dst16), pitch_));
+            RunInvTxfm(test_temp_block, CAST_TO_BYTEPTR(dst16), pitch_));
 #endif
       }
 
@@ -475,10 +475,10 @@ class Trans16x16TestBase {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(output_ref_block, dst, pitch_));
 #if CONFIG_VP9_HIGHBITDEPTH
       } else {
-        inv_txfm_ref(output_ref_block, CONVERT_TO_BYTEPTR(ref16), pitch_,
+        inv_txfm_ref(output_ref_block, CAST_TO_BYTEPTR(ref16), pitch_,
                      tx_type_);
         ASM_REGISTER_STATE_CHECK(
-            RunInvTxfm(output_ref_block, CONVERT_TO_BYTEPTR(dst16), pitch_));
+            RunInvTxfm(output_ref_block, CAST_TO_BYTEPTR(dst16), pitch_));
 #endif
       }
       if (bit_depth_ == VPX_BITS_8) {
@@ -530,8 +530,7 @@ class Trans16x16TestBase {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, 16));
 #if CONFIG_VP9_HIGHBITDEPTH
       } else {
-        ASM_REGISTER_STATE_CHECK(
-            RunInvTxfm(coeff, CONVERT_TO_BYTEPTR(dst16), 16));
+        ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, CAST_TO_BYTEPTR(dst16), 16));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       }
 
@@ -585,9 +584,9 @@ class Trans16x16TestBase {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, pitch_));
       } else {
 #if CONFIG_VP9_HIGHBITDEPTH
-        ref_txfm(coeff, CONVERT_TO_BYTEPTR(ref16), pitch_);
+        ref_txfm(coeff, CAST_TO_BYTEPTR(ref16), pitch_);
         ASM_REGISTER_STATE_CHECK(
-            RunInvTxfm(coeff, CONVERT_TO_BYTEPTR(dst16), pitch_));
+            RunInvTxfm(coeff, CAST_TO_BYTEPTR(dst16), pitch_));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       }
 
