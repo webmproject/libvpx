@@ -231,6 +231,11 @@ DSP_SRCS-$(HAVE_NEON)  += arm/highbd_idct32x32_add_neon.c
 DSP_SRCS-$(HAVE_NEON)  += arm/highbd_idct32x32_34_add_neon.c
 DSP_SRCS-$(HAVE_NEON)  += arm/highbd_idct32x32_135_add_neon.c
 DSP_SRCS-$(HAVE_NEON)  += arm/highbd_idct32x32_1024_add_neon.c
+DSP_SRCS-$(HAVE_SSE2)  += x86/highbd_inv_txfm_sse2.h
+DSP_SRCS-$(HAVE_SSE2)  += x86/highbd_idct4x4_add_sse2.c
+DSP_SRCS-$(HAVE_SSE2)  += x86/highbd_idct8x8_add_sse2.c
+DSP_SRCS-$(HAVE_SSE2)  += x86/highbd_idct16x16_add_sse2.c
+DSP_SRCS-$(HAVE_SSE2)  += x86/highbd_idct32x32_add_sse2.c
 endif  # !CONFIG_VP9_HIGHBITDEPTH
 
 ifeq ($(HAVE_NEON_ASM),yes)
@@ -350,6 +355,9 @@ DSP_SRCS-$(HAVE_NEON) += arm/transpose_neon.h
 DSP_SRCS-$(HAVE_VSX)  += ppc/types_vsx.h
 DSP_SRCS-$(HAVE_VSX)  += ppc/transpose_vsx.h
 DSP_SRCS-$(HAVE_VSX)  += ppc/bitdepth_conversion_vsx.h
+
+# X86 utilities
+DSP_SRCS-$(HAVE_SSE2) += x86/transpose_sse2.h
 
 DSP_SRCS-no += $(DSP_SRCS_REMOVE-yes)
 
