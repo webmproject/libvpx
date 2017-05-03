@@ -107,3 +107,42 @@ sub_pixel_varianceNxM(32, 32);
 sub_pixel_varianceNxM(32, 64);
 sub_pixel_varianceNxM(64, 32);
 sub_pixel_varianceNxM(64, 64);
+
+// TODO(johannkoenig): support 4xM block sizes.
+#define sub_pixel_avg_varianceNxM(n, m)                              \
+  uint32_t vpx_sub_pixel_avg_variance##n##x##m##_neon(               \
+      const uint8_t *a, int a_stride, int xoffset, int yoffset,      \
+      const uint8_t *b, int b_stride, uint32_t *sse,                 \
+      const uint8_t *second_pred) {                                  \
+    DECLARE_ALIGNED(16, uint8_t, fdata3[n * (m + 1)]);               \
+    DECLARE_ALIGNED(16, uint8_t, temp2[n * m]);                      \
+    DECLARE_ALIGNED(16, uint8_t, temp3[n * m]);                      \
+                                                                     \
+    if (n == 8) {                                                    \
+      var_filter_block2d_bil_w8(a, fdata3, a_stride, 1, (m + 1),     \
+                                bilinear_filters[xoffset]);          \
+      var_filter_block2d_bil_w8(fdata3, temp2, n, n, m,              \
+                                bilinear_filters[yoffset]);          \
+    } else {                                                         \
+      var_filter_block2d_bil_w16(a, fdata3, a_stride, 1, (m + 1), n, \
+                                 bilinear_filters[xoffset]);         \
+      var_filter_block2d_bil_w16(fdata3, temp2, n, n, m, n,          \
+                                 bilinear_filters[yoffset]);         \
+    }                                                                \
+                                                                     \
+    vpx_comp_avg_pred(temp3, second_pred, n, m, temp2, n);           \
+                                                                     \
+    return vpx_variance##n##x##m(temp3, n, b, b_stride, sse);        \
+  }
+
+sub_pixel_avg_varianceNxM(8, 4);
+sub_pixel_avg_varianceNxM(8, 8);
+sub_pixel_avg_varianceNxM(8, 16);
+sub_pixel_avg_varianceNxM(16, 8);
+sub_pixel_avg_varianceNxM(16, 16);
+sub_pixel_avg_varianceNxM(16, 32);
+sub_pixel_avg_varianceNxM(32, 16);
+sub_pixel_avg_varianceNxM(32, 32);
+sub_pixel_avg_varianceNxM(32, 64);
+sub_pixel_avg_varianceNxM(64, 32);
+sub_pixel_avg_varianceNxM(64, 64);
