@@ -119,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "2d02bd90_a31aad35",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-05-03T18:55:36Z",
+      "side": 1,
+      "message": "Dropped out the function pointer.  -O2/-O3 objdump shows no store_* function any more.",
+      "parentUuid": "62cc23fd_e0a8db8a",
+      "range": {
+        "startLine": 485,
+        "startChar": 50,
+        "endLine": 485,
+        "endChar": 77
+      },
+      "revId": "462124f6bec1617426f8755a3ead1d030bfa099e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "229e2760_fbe1ff48",
         "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
         "patchSetId": 5

@@ -22,6 +22,30 @@
       "revId": "1caa2f75eef6f56bc210e26206eabdd176d96794",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "544e05b3_e50f11d3",
+        "filename": "vpx_dsp/x86/highbd_convolve_avx2.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1146639
+      },
+      "writtenOn": "2017-05-03T18:55:36Z",
+      "side": 1,
+      "message": "Thanks for explanation.  Broke to three functions for 8x1, 8x2, 16x1 functions.",
+      "parentUuid": "0334533c_0c976136",
+      "range": {
+        "startLine": 264,
+        "startChar": 0,
+        "endLine": 264,
+        "endChar": 20
+      },
+      "revId": "1caa2f75eef6f56bc210e26206eabdd176d96794",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
