@@ -88,45 +88,45 @@ void fht8x8_ref(const int16_t *in, tran_low_t *out, int stride, int tx_type) {
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void idct8x8_10(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct8x8_64_add_c(in, out, stride, 10);
+  vpx_highbd_idct8x8_64_add_c(in, CAST_TO_SHORTPTR(out), stride, 10);
 }
 
 void idct8x8_12(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct8x8_64_add_c(in, out, stride, 12);
+  vpx_highbd_idct8x8_64_add_c(in, CAST_TO_SHORTPTR(out), stride, 12);
 }
 
 void iht8x8_10(const tran_low_t *in, uint8_t *out, int stride, int tx_type) {
-  vp9_highbd_iht8x8_64_add_c(in, out, stride, tx_type, 10);
+  vp9_highbd_iht8x8_64_add_c(in, CAST_TO_SHORTPTR(out), stride, tx_type, 10);
 }
 
 void iht8x8_12(const tran_low_t *in, uint8_t *out, int stride, int tx_type) {
-  vp9_highbd_iht8x8_64_add_c(in, out, stride, tx_type, 12);
+  vp9_highbd_iht8x8_64_add_c(in, CAST_TO_SHORTPTR(out), stride, tx_type, 12);
 }
 
 #if HAVE_SSE2
 
 void idct8x8_12_add_10_c(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct8x8_12_add_c(in, out, stride, 10);
+  vpx_highbd_idct8x8_12_add_c(in, CAST_TO_SHORTPTR(out), stride, 10);
 }
 
 void idct8x8_12_add_12_c(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct8x8_12_add_c(in, out, stride, 12);
+  vpx_highbd_idct8x8_12_add_c(in, CAST_TO_SHORTPTR(out), stride, 12);
 }
 
 void idct8x8_12_add_10_sse2(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct8x8_12_add_sse2(in, out, stride, 10);
+  vpx_highbd_idct8x8_12_add_sse2(in, CAST_TO_SHORTPTR(out), stride, 10);
 }
 
 void idct8x8_12_add_12_sse2(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct8x8_12_add_sse2(in, out, stride, 12);
+  vpx_highbd_idct8x8_12_add_sse2(in, CAST_TO_SHORTPTR(out), stride, 12);
 }
 
 void idct8x8_64_add_10_sse2(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct8x8_64_add_sse2(in, out, stride, 10);
+  vpx_highbd_idct8x8_64_add_sse2(in, CAST_TO_SHORTPTR(out), stride, 10);
 }
 
 void idct8x8_64_add_12_sse2(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct8x8_64_add_sse2(in, out, stride, 12);
+  vpx_highbd_idct8x8_64_add_sse2(in, CAST_TO_SHORTPTR(out), stride, 12);
 }
 #endif  // HAVE_SSE2
 #endif  // CONFIG_VP9_HIGHBITDEPTH

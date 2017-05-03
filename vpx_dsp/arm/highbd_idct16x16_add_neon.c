@@ -1268,10 +1268,8 @@ void vpx_highbd_idct16x16_10_add_half1d_pass2(const int32_t *input,
   }
 }
 
-void vpx_highbd_idct16x16_256_add_neon(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct16x16_256_add_neon(const tran_low_t *input, uint16_t *dest,
                                        int stride, int bd) {
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
-
   if (bd == 8) {
     int16_t row_idct_output[16 * 16];
 
@@ -1313,10 +1311,8 @@ void vpx_highbd_idct16x16_256_add_neon(const tran_low_t *input, uint8_t *dest8,
   }
 }
 
-void vpx_highbd_idct16x16_38_add_neon(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct16x16_38_add_neon(const tran_low_t *input, uint16_t *dest,
                                       int stride, int bd) {
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
-
   if (bd == 8) {
     int16_t row_idct_output[16 * 16];
 
@@ -1349,10 +1345,8 @@ void vpx_highbd_idct16x16_38_add_neon(const tran_low_t *input, uint8_t *dest8,
   }
 }
 
-void vpx_highbd_idct16x16_10_add_neon(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct16x16_10_add_neon(const tran_low_t *input, uint16_t *dest,
                                       int stride, int bd) {
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
-
   if (bd == 8) {
     int16_t row_idct_output[4 * 16];
 
@@ -1414,7 +1408,7 @@ static INLINE void highbd_idct16x16_1_add_neg_kernel(uint16_t **dest,
   *dest += stride;
 }
 
-void vpx_highbd_idct16x16_1_add_neon(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct16x16_1_add_neon(const tran_low_t *input, uint16_t *dest,
                                      int stride, int bd) {
   const tran_low_t out0 =
       HIGHBD_WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64), bd);
@@ -1422,7 +1416,6 @@ void vpx_highbd_idct16x16_1_add_neon(const tran_low_t *input, uint8_t *dest8,
       HIGHBD_WRAPLOW(dct_const_round_shift(out0 * cospi_16_64), bd);
   const int16_t a1 = ROUND_POWER_OF_TWO(out1, 6);
   const int16x8_t dc = vdupq_n_s16(a1);
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
   int i;
 
   if (a1 >= 0) {

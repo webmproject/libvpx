@@ -601,22 +601,21 @@ static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane,
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         vpx_highbd_convolve_copy(CONVERT_TO_SHORTPTR(dst), dst_stride, recon16,
                                  32, NULL, 0, NULL, 0, bs, bs, xd->bd);
-        recon = CAST_TO_BYTEPTR(recon16);
         if (xd->lossless) {
-          vp9_highbd_iwht4x4_add(dqcoeff, recon, 32, *eob, xd->bd);
+          vp9_highbd_iwht4x4_add(dqcoeff, recon16, 32, *eob, xd->bd);
         } else {
           switch (tx_size) {
             case TX_4X4:
-              vp9_highbd_idct4x4_add(dqcoeff, recon, 32, *eob, xd->bd);
+              vp9_highbd_idct4x4_add(dqcoeff, recon16, 32, *eob, xd->bd);
               break;
             case TX_8X8:
-              vp9_highbd_idct8x8_add(dqcoeff, recon, 32, *eob, xd->bd);
+              vp9_highbd_idct8x8_add(dqcoeff, recon16, 32, *eob, xd->bd);
               break;
             case TX_16X16:
-              vp9_highbd_idct16x16_add(dqcoeff, recon, 32, *eob, xd->bd);
+              vp9_highbd_idct16x16_add(dqcoeff, recon16, 32, *eob, xd->bd);
               break;
             case TX_32X32:
-              vp9_highbd_idct32x32_add(dqcoeff, recon, 32, *eob, xd->bd);
+              vp9_highbd_idct32x32_add(dqcoeff, recon16, 32, *eob, xd->bd);
               break;
             default: assert(0 && "Invalid transform size");
           }
@@ -1005,7 +1004,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int row,
           const int block = (row + idy) * 2 + (col + idx);
           const uint8_t *const src = &src_init[idx * 4 + idy * 4 * src_stride];
           uint8_t *const dst = &dst_init[idx * 4 + idy * 4 * dst_stride];
-          uint8_t *const dst16 = CAST_TO_BYTEPTR(CONVERT_TO_SHORTPTR(dst));
+          uint16_t *const dst16 = CONVERT_TO_SHORTPTR(dst);
           int16_t *const src_diff =
               vp9_raster_block_offset_int16(BLOCK_8X8, block, p->src_diff);
           tran_low_t *const coeff = BLOCK_OFFSET(x->plane[0].coeff, block);

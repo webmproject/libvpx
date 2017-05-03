@@ -637,7 +637,7 @@ static void encode_block(int plane, int block, int row, int col,
   if (x->skip_encode || p->eobs[block] == 0) return;
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    uint8_t *const dst16 = CAST_TO_BYTEPTR(CONVERT_TO_SHORTPTR(dst));
+    uint16_t *const dst16 = CONVERT_TO_SHORTPTR(dst);
     switch (tx_size) {
       case TX_32X32:
         vp9_highbd_idct32x32_add(dqcoeff, dst16, pd->dst.stride, p->eobs[block],
@@ -700,8 +700,8 @@ static void encode_block_pass1(int plane, int block, int row, int col,
   if (p->eobs[block] > 0) {
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      x->highbd_itxm_add(dqcoeff, CAST_TO_BYTEPTR(CONVERT_TO_SHORTPTR(dst)),
-                         pd->dst.stride, p->eobs[block], xd->bd);
+      x->highbd_itxm_add(dqcoeff, CONVERT_TO_SHORTPTR(dst), pd->dst.stride,
+                         p->eobs[block], xd->bd);
       return;
     }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -801,7 +801,7 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    uint8_t *const dst16 = CAST_TO_BYTEPTR(CONVERT_TO_SHORTPTR(dst));
+    uint16_t *const dst16 = CONVERT_TO_SHORTPTR(dst);
     switch (tx_size) {
       case TX_32X32:
         if (!x->skip_recode) {

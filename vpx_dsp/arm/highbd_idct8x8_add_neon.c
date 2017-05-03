@@ -36,7 +36,7 @@ static INLINE void highbd_idct8x8_1_add_neg_kernel(uint16_t **dest,
   *dest += stride;
 }
 
-void vpx_highbd_idct8x8_1_add_neon(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct8x8_1_add_neon(const tran_low_t *input, uint16_t *dest,
                                    int stride, int bd) {
   const tran_low_t out0 =
       HIGHBD_WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64), bd);
@@ -44,7 +44,6 @@ void vpx_highbd_idct8x8_1_add_neon(const tran_low_t *input, uint8_t *dest8,
       HIGHBD_WRAPLOW(dct_const_round_shift(out0 * cospi_16_64), bd);
   const int16_t a1 = ROUND_POWER_OF_TWO(out1, 5);
   const int16x8_t dc = vdupq_n_s16(a1);
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
 
   if (a1 >= 0) {
     const int16x8_t max = vdupq_n_s16((1 << bd) - 1);
@@ -292,9 +291,8 @@ static INLINE void highbd_add8x8(int16x8_t a0, int16x8_t a1, int16x8_t a2,
   vst1q_u16(dest, d7_u16);
 }
 
-void vpx_highbd_idct8x8_12_add_neon(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct8x8_12_add_neon(const tran_low_t *input, uint16_t *dest,
                                     int stride, int bd) {
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
   int32x4_t a0 = vld1q_s32(input);
   int32x4_t a1 = vld1q_s32(input + 8);
   int32x4_t a2 = vld1q_s32(input + 16);
@@ -553,9 +551,8 @@ static INLINE void idct8x8_64_half1d_bd12(
   *io7 = vsubq_s32(step1[0], step2[7]);
 }
 
-void vpx_highbd_idct8x8_64_add_neon(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct8x8_64_add_neon(const tran_low_t *input, uint16_t *dest,
                                     int stride, int bd) {
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
   int32x4_t a0 = vld1q_s32(input);
   int32x4_t a1 = vld1q_s32(input + 4);
   int32x4_t a2 = vld1q_s32(input + 8);

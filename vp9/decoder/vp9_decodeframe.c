@@ -189,7 +189,7 @@ static void inverse_transform_block_inter(MACROBLOCKD *xd, int plane,
   assert(eob > 0);
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    uint8_t *const dst16 = CAST_TO_BYTEPTR(CONVERT_TO_SHORTPTR(dst));
+    uint16_t *const dst16 = CONVERT_TO_SHORTPTR(dst);
     if (xd->lossless) {
       vp9_highbd_iwht4x4_add(dqcoeff, dst16, stride, eob, xd->bd);
     } else {
@@ -257,7 +257,7 @@ static void inverse_transform_block_intra(MACROBLOCKD *xd, int plane,
   assert(eob > 0);
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    uint8_t *const dst16 = CAST_TO_BYTEPTR(CONVERT_TO_SHORTPTR(dst));
+    uint16_t *const dst16 = CONVERT_TO_SHORTPTR(dst);
     if (xd->lossless) {
       vp9_highbd_iwht4x4_add(dqcoeff, dst16, stride, eob, xd->bd);
     } else {

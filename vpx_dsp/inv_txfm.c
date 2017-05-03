@@ -1290,7 +1290,7 @@ static INLINE int detect_invalid_highbd_input(const tran_low_t *input,
   return 0;
 }
 
-void vpx_highbd_iwht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_iwht4x4_16_add_c(const tran_low_t *input, uint16_t *dest,
                                  int stride, int bd) {
   /* 4-point reversible, orthonormal inverse Walsh-Hadamard in 3.5 adds,
      0.5 shifts per pixel. */
@@ -1299,7 +1299,6 @@ void vpx_highbd_iwht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
   tran_high_t a1, b1, c1, d1, e1;
   const tran_low_t *ip = input;
   tran_low_t *op = output;
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
 
   for (i = 0; i < 4; i++) {
     a1 = ip[0] >> UNIT_QUANT_SHIFT;
@@ -1348,14 +1347,13 @@ void vpx_highbd_iwht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 }
 
-void vpx_highbd_iwht4x4_1_add_c(const tran_low_t *in, uint8_t *dest8,
+void vpx_highbd_iwht4x4_1_add_c(const tran_low_t *in, uint16_t *dest,
                                 int stride, int bd) {
   int i;
   tran_high_t a1, e1;
   tran_low_t tmp[4];
   const tran_low_t *ip = in;
   tran_low_t *op = tmp;
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
   (void)bd;
 
   a1 = ip[0] >> UNIT_QUANT_SHIFT;
@@ -1452,13 +1450,12 @@ void vpx_highbd_idct4_c(const tran_low_t *input, tran_low_t *output, int bd) {
   output[3] = HIGHBD_WRAPLOW(step[0] - step[3], bd);
 }
 
-void vpx_highbd_idct4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct4x4_16_add_c(const tran_low_t *input, uint16_t *dest,
                                  int stride, int bd) {
   int i, j;
   tran_low_t out[4 * 4];
   tran_low_t *outptr = out;
   tran_low_t temp_in[4], temp_out[4];
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
 
   // Rows
   for (i = 0; i < 4; ++i) {
@@ -1478,13 +1475,12 @@ void vpx_highbd_idct4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 }
 
-void vpx_highbd_idct4x4_1_add_c(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct4x4_1_add_c(const tran_low_t *input, uint16_t *dest,
                                 int stride, int bd) {
   int i;
   tran_high_t a1;
   tran_low_t out =
       HIGHBD_WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64), bd);
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
 
   out = HIGHBD_WRAPLOW(dct_const_round_shift(out * cospi_16_64), bd);
   a1 = ROUND_POWER_OF_TWO(out, 4);
@@ -1636,13 +1632,12 @@ void vpx_highbd_idct8_c(const tran_low_t *input, tran_low_t *output, int bd) {
   output[7] = HIGHBD_WRAPLOW(step1[0] - step1[7], bd);
 }
 
-void vpx_highbd_idct8x8_64_add_c(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct8x8_64_add_c(const tran_low_t *input, uint16_t *dest,
                                  int stride, int bd) {
   int i, j;
   tran_low_t out[8 * 8];
   tran_low_t *outptr = out;
   tran_low_t temp_in[8], temp_out[8];
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
 
   // First transform rows
   for (i = 0; i < 8; ++i) {
@@ -1662,13 +1657,12 @@ void vpx_highbd_idct8x8_64_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 }
 
-void vpx_highbd_idct8x8_12_add_c(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct8x8_12_add_c(const tran_low_t *input, uint16_t *dest,
                                  int stride, int bd) {
   int i, j;
   tran_low_t out[8 * 8] = { 0 };
   tran_low_t *outptr = out;
   tran_low_t temp_in[8], temp_out[8];
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
 
   // First transform rows
   // Only first 4 row has non-zero coefs
@@ -1689,13 +1683,12 @@ void vpx_highbd_idct8x8_12_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 }
 
-void vpx_highbd_idct8x8_1_add_c(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct8x8_1_add_c(const tran_low_t *input, uint16_t *dest,
                                 int stride, int bd) {
   int i, j;
   tran_high_t a1;
   tran_low_t out =
       HIGHBD_WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64), bd);
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
 
   out = HIGHBD_WRAPLOW(dct_const_round_shift(out * cospi_16_64), bd);
   a1 = ROUND_POWER_OF_TWO(out, 5);
@@ -2056,13 +2049,12 @@ void vpx_highbd_idct16_c(const tran_low_t *input, tran_low_t *output, int bd) {
   output[15] = HIGHBD_WRAPLOW(step2[0] - step2[15], bd);
 }
 
-void vpx_highbd_idct16x16_256_add_c(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct16x16_256_add_c(const tran_low_t *input, uint16_t *dest,
                                     int stride, int bd) {
   int i, j;
   tran_low_t out[16 * 16];
   tran_low_t *outptr = out;
   tran_low_t temp_in[16], temp_out[16];
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
 
   // First transform rows
   for (i = 0; i < 16; ++i) {
@@ -2082,13 +2074,12 @@ void vpx_highbd_idct16x16_256_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 }
 
-void vpx_highbd_idct16x16_38_add_c(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct16x16_38_add_c(const tran_low_t *input, uint16_t *dest,
                                    int stride, int bd) {
   int i, j;
   tran_low_t out[16 * 16] = { 0 };
   tran_low_t *outptr = out;
   tran_low_t temp_in[16], temp_out[16];
-  uint16_t *const dest = CAST_TO_SHORTPTR(dest8);
 
   // First transform rows. Since all non-zero dct coefficients are in
   // upper-left 8x8 area, we only need to calculate first 8 rows here.
@@ -2111,13 +2102,12 @@ void vpx_highbd_idct16x16_38_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 }
 
-void vpx_highbd_idct16x16_10_add_c(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct16x16_10_add_c(const tran_low_t *input, uint16_t *dest,
                                    int stride, int bd) {
   int i, j;
   tran_low_t out[16 * 16] = { 0 };
   tran_low_t *outptr = out;
   tran_low_t temp_in[16], temp_out[16];
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
 
   // First transform rows. Since all non-zero dct coefficients are in
   // upper-left 4x4 area, we only need to calculate first 4 rows here.
@@ -2138,13 +2128,12 @@ void vpx_highbd_idct16x16_10_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 }
 
-void vpx_highbd_idct16x16_1_add_c(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct16x16_1_add_c(const tran_low_t *input, uint16_t *dest,
                                   int stride, int bd) {
   int i, j;
   tran_high_t a1;
   tran_low_t out =
       HIGHBD_WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64), bd);
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
 
   out = HIGHBD_WRAPLOW(dct_const_round_shift(out * cospi_16_64), bd);
   a1 = ROUND_POWER_OF_TWO(out, 6);
@@ -2531,13 +2520,12 @@ static void highbd_idct32_c(const tran_low_t *input, tran_low_t *output,
   output[31] = HIGHBD_WRAPLOW(step1[0] - step1[31], bd);
 }
 
-void vpx_highbd_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct32x32_1024_add_c(const tran_low_t *input, uint16_t *dest,
                                      int stride, int bd) {
   int i, j;
   tran_low_t out[32 * 32];
   tran_low_t *outptr = out;
   tran_low_t temp_in[32], temp_out[32];
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
 
   // Rows
   for (i = 0; i < 32; ++i) {
@@ -2569,13 +2557,12 @@ void vpx_highbd_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 }
 
-void vpx_highbd_idct32x32_135_add_c(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct32x32_135_add_c(const tran_low_t *input, uint16_t *dest,
                                     int stride, int bd) {
   int i, j;
   tran_low_t out[32 * 32] = { 0 };
   tran_low_t *outptr = out;
   tran_low_t temp_in[32], temp_out[32];
-  uint16_t *const dest = CAST_TO_SHORTPTR(dest8);
 
   // Rows
   // Only upper-left 16x16 has non-zero coeff
@@ -2598,13 +2585,12 @@ void vpx_highbd_idct32x32_135_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 }
 
-void vpx_highbd_idct32x32_34_add_c(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct32x32_34_add_c(const tran_low_t *input, uint16_t *dest,
                                    int stride, int bd) {
   int i, j;
   tran_low_t out[32 * 32] = { 0 };
   tran_low_t *outptr = out;
   tran_low_t temp_in[32], temp_out[32];
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
 
   // Rows
   // Only upper-left 8x8 has non-zero coeff
@@ -2625,11 +2611,10 @@ void vpx_highbd_idct32x32_34_add_c(const tran_low_t *input, uint8_t *dest8,
   }
 }
 
-void vpx_highbd_idct32x32_1_add_c(const tran_low_t *input, uint8_t *dest8,
+void vpx_highbd_idct32x32_1_add_c(const tran_low_t *input, uint16_t *dest,
                                   int stride, int bd) {
   int i, j;
   int a1;
-  uint16_t *dest = CAST_TO_SHORTPTR(dest8);
   tran_low_t out =
       HIGHBD_WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64), bd);
 

@@ -55,36 +55,36 @@ void fwht4x4_ref(const int16_t *in, tran_low_t *out, int stride,
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void idct4x4_10(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct4x4_16_add_c(in, out, stride, 10);
+  vpx_highbd_idct4x4_16_add_c(in, CAST_TO_SHORTPTR(out), stride, 10);
 }
 
 void idct4x4_12(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct4x4_16_add_c(in, out, stride, 12);
+  vpx_highbd_idct4x4_16_add_c(in, CAST_TO_SHORTPTR(out), stride, 12);
 }
 
 void iht4x4_10(const tran_low_t *in, uint8_t *out, int stride, int tx_type) {
-  vp9_highbd_iht4x4_16_add_c(in, out, stride, tx_type, 10);
+  vp9_highbd_iht4x4_16_add_c(in, CAST_TO_SHORTPTR(out), stride, tx_type, 10);
 }
 
 void iht4x4_12(const tran_low_t *in, uint8_t *out, int stride, int tx_type) {
-  vp9_highbd_iht4x4_16_add_c(in, out, stride, tx_type, 12);
+  vp9_highbd_iht4x4_16_add_c(in, CAST_TO_SHORTPTR(out), stride, tx_type, 12);
 }
 
 void iwht4x4_10(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_iwht4x4_16_add_c(in, out, stride, 10);
+  vpx_highbd_iwht4x4_16_add_c(in, CAST_TO_SHORTPTR(out), stride, 10);
 }
 
 void iwht4x4_12(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_iwht4x4_16_add_c(in, out, stride, 12);
+  vpx_highbd_iwht4x4_16_add_c(in, CAST_TO_SHORTPTR(out), stride, 12);
 }
 
 #if HAVE_SSE2
 void idct4x4_10_sse2(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct4x4_16_add_sse2(in, out, stride, 10);
+  vpx_highbd_idct4x4_16_add_sse2(in, CAST_TO_SHORTPTR(out), stride, 10);
 }
 
 void idct4x4_12_sse2(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct4x4_16_add_sse2(in, out, stride, 12);
+  vpx_highbd_idct4x4_16_add_sse2(in, CAST_TO_SHORTPTR(out), stride, 12);
 }
 #endif  // HAVE_SSE2
 #endif  // CONFIG_VP9_HIGHBITDEPTH
