@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aade6eda_68cb0f26",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 1
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-03T00:06:24Z",
+      "side": 1,
+      "message": "!CONFIG_EMULATE_HARDWARE",
+      "range": {
+        "startLine": 625,
+        "startChar": 4,
+        "endLine": 625,
+        "endChar": 28
+      },
+      "revId": "aadc17c22871fbb631bf298930f429a9fc289aee",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
