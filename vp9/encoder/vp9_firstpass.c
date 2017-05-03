@@ -2370,8 +2370,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
                                                 cpi->common.bit_depth));
     active_min_gf_interval =
         rc->min_gf_interval + arf_active_or_kf + VPXMIN(2, int_max_q / 200);
-    if (active_min_gf_interval > rc->max_gf_interval)
-      active_min_gf_interval = rc->max_gf_interval;
+    active_min_gf_interval =
+        VPXMIN(active_min_gf_interval, rc->max_gf_interval + arf_active_or_kf);
 
     if (cpi->multi_arf_allowed) {
       active_max_gf_interval = rc->max_gf_interval;
@@ -2382,11 +2382,14 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       // interval to spread the cost of the GF.
       active_max_gf_interval = 12 + arf_active_or_kf + VPXMIN(4, (int_lbq / 6));
 
-      // We have: active_min_gf_interval <= rc->max_gf_interval
-      if (active_max_gf_interval < active_min_gf_interval)
+      // We have: active_min_gf_interval <=
+      // rc->max_gf_interval + arf_active_or_kf.
+      if (active_max_gf_interval < active_min_gf_interval) {
         active_max_gf_interval = active_min_gf_interval;
-      else if (active_max_gf_interval > rc->max_gf_interval)
-        active_max_gf_interval = rc->max_gf_interval;
+      } else {
+        active_max_gf_interval = VPXMIN(active_max_gf_interval,
+                                        rc->max_gf_interval + arf_active_or_kf);
+      }
 
       // Would the active max drop us out just before the near the next kf?
       if ((active_max_gf_interval <= rc->frames_to_key) &&
