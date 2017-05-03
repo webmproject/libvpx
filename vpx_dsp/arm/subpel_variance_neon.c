@@ -28,7 +28,6 @@ static void var_filter_block2d_bil_w8(const uint8_t *src_ptr,
                                       unsigned int src_pixels_per_line,
                                       int pixel_step,
                                       unsigned int output_height,
-                                      unsigned int output_width,
                                       const uint8_t *filter) {
   const uint8x8_t f0 = vmov_n_u8(filter[0]);
   const uint8x8_t f1 = vmov_n_u8(filter[1]);
@@ -42,7 +41,7 @@ static void var_filter_block2d_bil_w8(const uint8_t *src_ptr,
     vst1_u8(&output_ptr[0], out);
     // Next row...
     src_ptr += src_pixels_per_line;
-    output_ptr += output_width;
+    output_ptr += 8;
   }
 }
 
@@ -75,61 +74,36 @@ static void var_filter_block2d_bil_w16(const uint8_t *src_ptr,
   }
 }
 
-unsigned int vpx_sub_pixel_variance8x8_neon(const uint8_t *src, int src_stride,
-                                            int xoffset, int yoffset,
-                                            const uint8_t *dst, int dst_stride,
-                                            unsigned int *sse) {
-  DECLARE_ALIGNED(16, uint8_t, temp2[8 * 8]);
-  DECLARE_ALIGNED(16, uint8_t, fdata3[9 * 8]);
+// TODO(johannkoenig): support 4xM block sizes.
+#define sub_pixel_varianceNxM(n, m)                                      \
+  unsigned int vpx_sub_pixel_variance##n##x##m##_neon(                   \
+      const uint8_t *src, int src_stride, int xoffset, int yoffset,      \
+      const uint8_t *dst, int dst_stride, unsigned int *sse) {           \
+    DECLARE_ALIGNED(16, uint8_t, fdata3[n * (m + 1)]);                   \
+    DECLARE_ALIGNED(16, uint8_t, temp2[n * m]);                          \
+                                                                         \
+    if (n == 8) {                                                        \
+      var_filter_block2d_bil_w8(src, fdata3, src_stride, 1, (m + 1),     \
+                                bilinear_filters[xoffset]);              \
+      var_filter_block2d_bil_w8(fdata3, temp2, n, n, m,                  \
+                                bilinear_filters[yoffset]);              \
+    } else {                                                             \
+      var_filter_block2d_bil_w16(src, fdata3, src_stride, 1, (m + 1), n, \
+                                 bilinear_filters[xoffset]);             \
+      var_filter_block2d_bil_w16(fdata3, temp2, n, n, m, n,              \
+                                 bilinear_filters[yoffset]);             \
+    }                                                                    \
+    return vpx_variance##n##x##m(temp2, n, dst, dst_stride, sse);        \
+  }
 
-  var_filter_block2d_bil_w8(src, fdata3, src_stride, 1, 9, 8,
-                            bilinear_filters[xoffset]);
-  var_filter_block2d_bil_w8(fdata3, temp2, 8, 8, 8, 8,
-                            bilinear_filters[yoffset]);
-  return vpx_variance8x8_neon(temp2, 8, dst, dst_stride, sse);
-}
-
-unsigned int vpx_sub_pixel_variance16x16_neon(const uint8_t *src,
-                                              int src_stride, int xoffset,
-                                              int yoffset, const uint8_t *dst,
-                                              int dst_stride,
-                                              unsigned int *sse) {
-  DECLARE_ALIGNED(16, uint8_t, temp2[16 * 16]);
-  DECLARE_ALIGNED(16, uint8_t, fdata3[17 * 16]);
-
-  var_filter_block2d_bil_w16(src, fdata3, src_stride, 1, 17, 16,
-                             bilinear_filters[xoffset]);
-  var_filter_block2d_bil_w16(fdata3, temp2, 16, 16, 16, 16,
-                             bilinear_filters[yoffset]);
-  return vpx_variance16x16(temp2, 16, dst, dst_stride, sse);
-}
-
-unsigned int vpx_sub_pixel_variance32x32_neon(const uint8_t *src,
-                                              int src_stride, int xoffset,
-                                              int yoffset, const uint8_t *dst,
-                                              int dst_stride,
-                                              unsigned int *sse) {
-  DECLARE_ALIGNED(16, uint8_t, temp2[32 * 32]);
-  DECLARE_ALIGNED(16, uint8_t, fdata3[33 * 32]);
-
-  var_filter_block2d_bil_w16(src, fdata3, src_stride, 1, 33, 32,
-                             bilinear_filters[xoffset]);
-  var_filter_block2d_bil_w16(fdata3, temp2, 32, 32, 32, 32,
-                             bilinear_filters[yoffset]);
-  return vpx_variance32x32(temp2, 32, dst, dst_stride, sse);
-}
-
-unsigned int vpx_sub_pixel_variance64x64_neon(const uint8_t *src,
-                                              int src_stride, int xoffset,
-                                              int yoffset, const uint8_t *dst,
-                                              int dst_stride,
-                                              unsigned int *sse) {
-  DECLARE_ALIGNED(16, uint8_t, temp2[64 * 64]);
-  DECLARE_ALIGNED(16, uint8_t, fdata3[65 * 64]);
-
-  var_filter_block2d_bil_w16(src, fdata3, src_stride, 1, 65, 64,
-                             bilinear_filters[xoffset]);
-  var_filter_block2d_bil_w16(fdata3, temp2, 64, 64, 64, 64,
-                             bilinear_filters[yoffset]);
-  return vpx_variance64x64(temp2, 64, dst, dst_stride, sse);
-}
+sub_pixel_varianceNxM(8, 4);
+sub_pixel_varianceNxM(8, 8);
+sub_pixel_varianceNxM(8, 16);
+sub_pixel_varianceNxM(16, 8);
+sub_pixel_varianceNxM(16, 16);
+sub_pixel_varianceNxM(16, 32);
+sub_pixel_varianceNxM(32, 16);
+sub_pixel_varianceNxM(32, 32);
+sub_pixel_varianceNxM(32, 64);
+sub_pixel_varianceNxM(64, 32);
+sub_pixel_varianceNxM(64, 64);

@@ -1227,9 +1227,16 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     NEON, VpxSubpelVarianceTest,
     ::testing::Values(make_tuple(6, 6, &vpx_sub_pixel_variance64x64_neon, 0),
+                      make_tuple(6, 5, &vpx_sub_pixel_variance64x32_neon, 0),
+                      make_tuple(5, 6, &vpx_sub_pixel_variance32x64_neon, 0),
                       make_tuple(5, 5, &vpx_sub_pixel_variance32x32_neon, 0),
+                      make_tuple(5, 4, &vpx_sub_pixel_variance32x16_neon, 0),
+                      make_tuple(4, 5, &vpx_sub_pixel_variance16x32_neon, 0),
                       make_tuple(4, 4, &vpx_sub_pixel_variance16x16_neon, 0),
-                      make_tuple(3, 3, &vpx_sub_pixel_variance8x8_neon, 0)));
+                      make_tuple(4, 3, &vpx_sub_pixel_variance16x8_neon, 0),
+                      make_tuple(3, 4, &vpx_sub_pixel_variance8x16_neon, 0),
+                      make_tuple(3, 3, &vpx_sub_pixel_variance8x8_neon, 0),
+                      make_tuple(3, 2, &vpx_sub_pixel_variance8x4_neon, 0)));
 #endif  // HAVE_NEON
 
 #if HAVE_MSA
