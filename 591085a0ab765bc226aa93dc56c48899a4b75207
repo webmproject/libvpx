@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "06c1563d_09399640",
+        "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-03T05:02:11Z",
+      "side": 1,
+      "message": "this project doesn\u0027t compile with c99 enabled. this will fail. it seems we don\u0027t have --enable-vp9-temporal-denoising on in the jenkins builds",
+      "range": {
+        "startLine": 87,
+        "startChar": 2,
+        "endLine": 87,
+        "endChar": 17
+      },
+      "revId": "591085a0ab765bc226aa93dc56c48899a4b75207",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
