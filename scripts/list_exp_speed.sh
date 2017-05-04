@@ -29,19 +29,19 @@ script_dir=~/Dev/sandbox/libvpx/scripts
 # bitrate=500
 # fps="30/1"
 
-# video=~/Dev/samples/videos/speed-set/touchdown_pass_480p.y4m
-# wi=854
-# he=480
-# frames=150
-# bitrate=2400
-# fps="30000/1001"
+video=~/Dev/samples/videos/speed-set/touchdown_pass_480p.y4m
+wi=854
+he=480
+frames=30
+bitrate=2400
+fps="30000/1001"
 
-video=~/Dev/samples/videos/speed-set/BasketballDrive_1920x1080_50.y4m
-wi=1920
-he=1080
-frames=150
-bitrate=4000
-fps="50/1"
+# video=~/Dev/samples/videos/speed-set/BasketballDrive_1920x1080_50.y4m
+# wi=1920
+# he=1080
+# frames=100
+# bitrate=4000
+# fps="50/1"
 
 # General options
 bs=bs
@@ -71,10 +71,7 @@ rm *.txt
 #ans intrabc adapt_scan convolve_round lv_map txk_sel compound_round ext_tx filter_intra intra_interp q_adapt_probs subframe_prob_update palette_delta_encoding var_tx tpl_mv chroma_2x2 global_motion new_quant compound_segment motion_var tripred ref_adapt compound_singleref ext_inter supertx loop_restoration warped_motion tx64x64 masked_tx interintra wedge
 # delta_q filter_7bit frame_size reference_buffer tempmv_signaling dependent_horztiles palette_throughput ext_delta_q frame_superres cdef ext_partition_types cfl daala_ec rawbits fp_mb_stats xiphrc parallel_deblocking loopfiltering_across_tiles parallel_deblocking_15tap ec_adapt tile_groups new_multisymbol ec_smallmul daala_dist mv_compress
 
-# experimental ans intrabc adapt_scan convolve_round lv_map txk_sel compound_round ext_tx filter_intra intra_interp q_adapt_probs subframe_prob_update palette_delta_encoding var_tx tpl_mv chroma_2x2 global_motion new_quant compound_segment
-
-#default:
-for exp_tool in experimental ans intrabc adapt_scan convolve_round lv_map txk_sel compound_round ext_tx filter_intra intra_interp q_adapt_probs subframe_prob_update palette_delta_encoding var_tx tpl_mv chroma_2x2 global_motion new_quant compound_segment ext_partition_types tripred ref_adapt compound_singleref ext_inter supertx loop_restoration warped_motion tx64x64 masked_tx interintra wedge frame_size tempmv_signaling dependent_horztiles ext_delta_q frame_superres cfl daala_ec rawbits xiphrc parallel_deblocking loopfiltering_across_tiles parallel_deblocking_15tap new_multisymbol ec_smallmul daala_dist 
+for exp_tool in experimental chroma_2x2 tripred adapt_scan compound_singleref ans ref_adapt frame_superres subframe_prob_update parallel_deblocking masked_tx dependent_horztiles parallel_deblocking_15tap ec_smallmul frame_size new_multisymbol ext_delta_q daala_ec cfl q_adapt_probs loopfiltering_across_tiles tpl_mv tempmv_signaling loop_restoration rawbits intra_interp tx64x64 warped_motion filter_intra palette_delta_encoding intrabc var_tx supertx new_quant xiphrc ext_inter interintra wedge daala_dist lv_map compound_segment txk_sel ext_partition_types ext_tx global_motion convolve_round compound_round
 
 do
   cd $build_dir
