@@ -1292,7 +1292,9 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(4, 3, &vpx_sub_pixel_avg_variance16x8_neon, 0),
         make_tuple(3, 4, &vpx_sub_pixel_avg_variance8x16_neon, 0),
         make_tuple(3, 3, &vpx_sub_pixel_avg_variance8x8_neon, 0),
-        make_tuple(3, 2, &vpx_sub_pixel_avg_variance8x4_neon, 0)));
+        make_tuple(3, 2, &vpx_sub_pixel_avg_variance8x4_neon, 0),
+        make_tuple(2, 3, &vpx_sub_pixel_avg_variance4x8_neon, 0),
+        make_tuple(2, 2, &vpx_sub_pixel_avg_variance4x4_neon, 0)));
 #endif  // HAVE_NEON
 
 #if HAVE_MSA

@@ -1253,10 +1253,10 @@ add_proto qw/uint32_t vpx_sub_pixel_avg_variance8x4/, "const uint8_t *src_ptr, i
   specialize qw/vpx_sub_pixel_avg_variance8x4 neon msa sse2 ssse3/;
 
 add_proto qw/uint32_t vpx_sub_pixel_avg_variance4x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse, const uint8_t *second_pred";
-  specialize qw/vpx_sub_pixel_avg_variance4x8 msa sse2 ssse3/;
+  specialize qw/vpx_sub_pixel_avg_variance4x8 neon msa sse2 ssse3/;
 
 add_proto qw/uint32_t vpx_sub_pixel_avg_variance4x4/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse, const uint8_t *second_pred";
-  specialize qw/vpx_sub_pixel_avg_variance4x4 msa sse2 ssse3/;
+  specialize qw/vpx_sub_pixel_avg_variance4x4 neon msa sse2 ssse3/;
 
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/unsigned int vpx_highbd_12_variance64x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
