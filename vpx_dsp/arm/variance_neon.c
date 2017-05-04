@@ -9,6 +9,7 @@
  */
 
 #include <arm_neon.h>
+#include <assert.h>
 
 #include "./vpx_dsp_rtcd.h"
 #include "./vpx_config.h"
@@ -32,7 +33,13 @@ static INLINE int horizontal_add_s32x4(const int32x4_t v_32x4) {
   return vget_lane_s32(c, 0);
 }
 
-// w * h must be less than 2048 or sum_s16 may overflow.
+// The variance helper functions use int16_t for sum. 8 values are accumulated
+// and then added (at which point they expand up to int32_t). To avoid overflow,
+// there can be no more than 32767 / 255 ~= 128 values accumulated in each
+// column. For a 32x32 buffer, this results in 32 / 8 = 4 values per row * 32
+// rows = 128. Asserts have been added to each function to warn against reaching
+// this limit.
+
 // Process a block of width 4 four rows at a time.
 static void variance_neon_w4x4(const uint8_t *a, int a_stride, const uint8_t *b,
                                int b_stride, int h, uint32_t *sse, int *sum) {
@@ -40,6 +47,9 @@ static void variance_neon_w4x4(const uint8_t *a, int a_stride, const uint8_t *b,
   int16x8_t sum_s16 = vdupq_n_s16(0);
   int32x4_t sse_lo_s32 = vdupq_n_s32(0);
   int32x4_t sse_hi_s32 = vdupq_n_s32(0);
+
+  // Since width is only 4, sum_s16 only loads a half row per loop.
+  assert(h <= 256);
 
   for (i = 0; i < h; i += 4) {
     const uint8x16_t a_u8 = load_unaligned_u8q(a, a_stride);
@@ -73,7 +83,6 @@ static void variance_neon_w4x4(const uint8_t *a, int a_stride, const uint8_t *b,
   *sse = (uint32_t)horizontal_add_s32x4(vaddq_s32(sse_lo_s32, sse_hi_s32));
 }
 
-// w * h must be less than 2048 or sum_s16 may overflow.
 // Process a block of any size where the width is divisible by 16.
 static void variance_neon_w16(const uint8_t *a, int a_stride, const uint8_t *b,
                               int b_stride, int w, int h, uint32_t *sse,
@@ -82,6 +91,10 @@ static void variance_neon_w16(const uint8_t *a, int a_stride, const uint8_t *b,
   int16x8_t sum_s16 = vdupq_n_s16(0);
   int32x4_t sse_lo_s32 = vdupq_n_s32(0);
   int32x4_t sse_hi_s32 = vdupq_n_s32(0);
+
+  // The loop loads 16 values at a time but doubles them up when accumulating
+  // into sum_s16.
+  assert(w / 8 * h <= 128);
 
   for (i = 0; i < h; ++i) {
     for (j = 0; j < w; j += 16) {
@@ -117,7 +130,6 @@ static void variance_neon_w16(const uint8_t *a, int a_stride, const uint8_t *b,
   *sse = (unsigned int)horizontal_add_s32x4(vaddq_s32(sse_lo_s32, sse_hi_s32));
 }
 
-// w * h must be less than 2048 or sum_s16 may overflow.
 // Process a block of width 8 two rows at a time.
 static void variance_neon_w8x2(const uint8_t *a, int a_stride, const uint8_t *b,
                                int b_stride, int h, uint32_t *sse, int *sum) {
@@ -125,6 +137,9 @@ static void variance_neon_w8x2(const uint8_t *a, int a_stride, const uint8_t *b,
   int16x8_t sum_s16 = vdupq_n_s16(0);
   int32x4_t sse_lo_s32 = vdupq_n_s32(0);
   int32x4_t sse_hi_s32 = vdupq_n_s32(0);
+
+  // Each column has it's own accumulator entry in sum_s16.
+  assert(h <= 128);
 
   do {
     const uint8x8_t a_0_u8 = vld1_u8(a);
