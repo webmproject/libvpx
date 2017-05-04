@@ -16,6 +16,41 @@
       "revId": "71f2b7b1ff500f48ca11d8c9ec6186d83f2b695c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ce471145_39239271",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 496,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-04T06:10:50Z",
+      "side": 1,
+      "message": "safest to capture it to a const, then (void) it",
+      "parentUuid": "dc2aa0ad_8d74557c",
+      "revId": "71f2b7b1ff500f48ca11d8c9ec6186d83f2b695c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dec93bed_93ffba52",
+        "filename": "vpx_dsp/arm/variance_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-04T06:10:50Z",
+      "side": 1,
+      "message": "I take it the branch is removed in -O2, but note on x86 this degrades correctly given the use of unsigned",
+      "revId": "71f2b7b1ff500f48ca11d8c9ec6186d83f2b695c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
