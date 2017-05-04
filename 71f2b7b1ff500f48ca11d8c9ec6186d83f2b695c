@@ -87,6 +87,24 @@
       "revId": "71f2b7b1ff500f48ca11d8c9ec6186d83f2b695c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2fae3c0f_5651f318",
+        "filename": "vpx_dsp/arm/variance_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-04T22:17:27Z",
+      "side": 1,
+      "message": "\u003e x86 uses the casts in every case. removing uint32_t throws a bunch of warnings and removing int64_t gives incorrect results.\n\u003e \n\u003e or do you mean they can be used unconditionally?\n\nthey should be able to be used unconditionally, but it\u0027s worth a look on neon",
+      "parentUuid": "6c473bcb_b417ef63",
+      "revId": "71f2b7b1ff500f48ca11d8c9ec6186d83f2b695c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
