@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "754bacdd_67beb533",
+        "filename": "vpx_dsp/arm/variance_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-04T06:55:15Z",
+      "side": 1,
+      "message": "this could move to an assert in a followup with the comment added in the code. checking against 1024 would make sense given the limit",
+      "range": {
+        "startLine": 34,
+        "startChar": 17,
+        "endLine": 34,
+        "endChar": 31
+      },
+      "revId": "bf66e77521614c55b2dc4155600837a7508347a2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
