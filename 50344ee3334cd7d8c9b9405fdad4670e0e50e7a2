@@ -22,6 +22,30 @@
       "revId": "50344ee3334cd7d8c9b9405fdad4670e0e50e7a2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "84868ae1_772fa9bb",
+        "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-05-05T23:42:37Z",
+      "side": 1,
+      "message": "Done. This is a good catch!",
+      "parentUuid": "51931124_4fa8a414",
+      "range": {
+        "startLine": 23,
+        "startChar": 18,
+        "endLine": 23,
+        "endChar": 36
+      },
+      "revId": "50344ee3334cd7d8c9b9405fdad4670e0e50e7a2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
