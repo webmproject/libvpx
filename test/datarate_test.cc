@@ -1041,7 +1041,7 @@ TEST_P(DatarateTestVP9LargeDenoiser, 4threads) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.85)
       << " The datarate for the file is lower than target by too much!";
-  ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.28)
+  ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.29)
       << " The datarate for the file is greater than target by too much!";
 }
 
