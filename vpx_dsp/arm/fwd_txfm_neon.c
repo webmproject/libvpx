@@ -125,6 +125,8 @@ void vpx_fdct8x8_neon(const int16_t *input, tran_low_t *final_output,
       out_7 = vcombine_s16(f, h);  // 34 35 36 37 74 75 76 77
     }
     // transpose 8x8
+    // Can't use transpose_s16_8x8() because the values are arranged in two 4x8
+    // columns.
     {
       // 00 01 02 03 40 41 42 43
       // 10 11 12 13 50 51 52 53
