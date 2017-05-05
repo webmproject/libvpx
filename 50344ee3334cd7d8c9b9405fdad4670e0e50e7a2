@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "51931124_4fa8a414",
+        "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-05T22:59:48Z",
+      "side": 1,
+      "message": "this is called horizontal_add in other places, may we should gather these:\n\nhttps://chromium.googlesource.com/webm/libvpx/+/master/vpx_dsp/arm/sad_neon.c#122\nhttps://chromium.googlesource.com/webm/libvpx/+/master/vpx_dsp/arm/variance_neon.c#19\nhttps://chromium.googlesource.com/webm/libvpx/+/master/vpx_dsp/arm/avg_neon.c#20",
+      "range": {
+        "startLine": 23,
+        "startChar": 18,
+        "endLine": 23,
+        "endChar": 36
+      },
+      "revId": "50344ee3334cd7d8c9b9405fdad4670e0e50e7a2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
