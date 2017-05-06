@@ -651,6 +651,10 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
                        lc->scaling_factor_num, lc->scaling_factor_den, &width,
                        &height);
 
+  // For 3 spatial layers, on the lowest resolution layer: set the filtertype
+  // for downsampling source to 1, to get averaging filter.
+  if (cpi->svc.number_spatial_layers == 3)
+    cpi->svc.filtertype_downsample_source[0] = 1;
   // The usage of use_base_mv assumes down-scale of 2x2. For now, turn off use
   // of base motion vectors if spatial scale factors for any layers are not 2,
   // keep the case of 3 spatial layers with scale factor of 4x4 for base layer.
