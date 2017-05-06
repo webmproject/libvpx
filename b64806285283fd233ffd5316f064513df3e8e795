@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "109a9bf7_4fd93bcb",
+        "filename": "vpx_dsp/arm/variance_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-06T02:40:40Z",
+      "side": 1,
+      "message": "this looks like it will need to be version checked; this also should compile on windows too.\nthough unnecessary on x86 we added MemToUint32() to handle this, which degrades to a mov there.\n\nhttps://chromium.googlesource.com/webm/libwebp/+/e61a92ad9da28f79e7eaa8ad206ced54ae465d48/src/utils/utils.h#66",
+      "revId": "b64806285283fd233ffd5316f064513df3e8e795",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
