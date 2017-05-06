@@ -116,4 +116,19 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(&vp9_denoiser_filter_sse2, BLOCK_64X32),
                       make_tuple(&vp9_denoiser_filter_sse2, BLOCK_64X64)));
 #endif  // HAVE_SSE2
+
+#if HAVE_NEON
+INSTANTIATE_TEST_CASE_P(
+    NEON, VP9DenoiserTest,
+    ::testing::Values(make_tuple(&vp9_denoiser_filter_neon, BLOCK_8X8),
+                      make_tuple(&vp9_denoiser_filter_neon, BLOCK_8X16),
+                      make_tuple(&vp9_denoiser_filter_neon, BLOCK_16X8),
+                      make_tuple(&vp9_denoiser_filter_neon, BLOCK_16X16),
+                      make_tuple(&vp9_denoiser_filter_neon, BLOCK_16X32),
+                      make_tuple(&vp9_denoiser_filter_neon, BLOCK_32X16),
+                      make_tuple(&vp9_denoiser_filter_neon, BLOCK_32X32),
+                      make_tuple(&vp9_denoiser_filter_neon, BLOCK_32X64),
+                      make_tuple(&vp9_denoiser_filter_neon, BLOCK_64X32),
+                      make_tuple(&vp9_denoiser_filter_neon, BLOCK_64X64)));
+#endif
 }  // namespace
