@@ -22,6 +22,7 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
+#include "vpx_ports/vpx_timer.h"
 
 namespace {
 
@@ -345,6 +346,7 @@ class MainTestClass
   void RefTest();
   void RefStrideTest();
   void OneQuarterTest();
+  void SpeedTest();
 
   // MSE/SSE tests
   void RefTestMse();
@@ -363,6 +365,7 @@ class MainTestClass
   int byte_shift() const { return params_.bit_depth - 8; }
   int block_size() const { return params_.block_size; }
   int width() const { return params_.width; }
+  int height() const { return params_.height; }
   uint32_t mask() const { return params_.mask; }
 };
 
@@ -469,6 +472,35 @@ void MainTestClass<VarianceFunctionType>::OneQuarterTest() {
       var = params_.func(src_, width(), ref_, width(), &sse));
   expected = block_size() * 255 * 255 / 4;
   EXPECT_EQ(expected, var);
+}
+
+template <typename VarianceFunctionType>
+void MainTestClass<VarianceFunctionType>::SpeedTest() {
+  const int half = block_size() / 2;
+  if (!use_high_bit_depth()) {
+    memset(src_, 255, block_size());
+    memset(ref_, 255, half);
+    memset(ref_ + half, 0, half);
+#if CONFIG_VP9_HIGHBITDEPTH
+  } else {
+    vpx_memset16(CONVERT_TO_SHORTPTR(src_), 255 << byte_shift(), block_size());
+    vpx_memset16(CONVERT_TO_SHORTPTR(ref_), 255 << byte_shift(), half);
+    vpx_memset16(CONVERT_TO_SHORTPTR(ref_) + half, 0, half);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  }
+  unsigned int sse;
+
+  vpx_usec_timer timer;
+  vpx_usec_timer_start(&timer);
+  for (int i = 0; i < 100000000 / block_size(); ++i) {
+    const uint32_t variance = params_.func(src_, width(), ref_, width(), &sse);
+    // Ignore return value.
+    (void)variance;
+  }
+  vpx_usec_timer_mark(&timer);
+  const int elapsed_time = static_cast<int>(vpx_usec_timer_elapsed(&timer));
+  printf("Variance %dx%d time: %5d ms\n", width(), height(),
+         elapsed_time / 1000);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -727,6 +759,7 @@ TEST_P(VpxVarianceTest, Zero) { ZeroTest(); }
 TEST_P(VpxVarianceTest, Ref) { RefTest(); }
 TEST_P(VpxVarianceTest, RefStride) { RefStrideTest(); }
 TEST_P(VpxVarianceTest, OneQuarter) { OneQuarterTest(); }
+TEST_P(VpxVarianceTest, DISABLED_Speed) { SpeedTest(); }
 TEST_P(SumOfSquaresTest, Const) { ConstTest(); }
 TEST_P(SumOfSquaresTest, Ref) { RefTest(); }
 TEST_P(VpxSubpelVarianceTest, Ref) { RefTest(); }
@@ -809,6 +842,7 @@ TEST_P(VpxHBDVarianceTest, Zero) { ZeroTest(); }
 TEST_P(VpxHBDVarianceTest, Ref) { RefTest(); }
 TEST_P(VpxHBDVarianceTest, RefStride) { RefStrideTest(); }
 TEST_P(VpxHBDVarianceTest, OneQuarter) { OneQuarterTest(); }
+TEST_P(VpxHBDVarianceTest, DISABLED_Speed) { SpeedTest(); }
 TEST_P(VpxHBDSubpelVarianceTest, Ref) { RefTest(); }
 TEST_P(VpxHBDSubpelVarianceTest, ExtremeRef) { ExtremeRefTest(); }
 TEST_P(VpxHBDSubpelAvgVarianceTest, Ref) { RefTest(); }
@@ -1219,10 +1253,13 @@ INSTANTIATE_TEST_CASE_P(
                       VarianceParams(6, 5, &vpx_variance64x32_neon),
                       VarianceParams(5, 6, &vpx_variance32x64_neon),
                       VarianceParams(5, 5, &vpx_variance32x32_neon),
+                      VarianceParams(5, 4, &vpx_variance32x16_neon),
+                      VarianceParams(4, 5, &vpx_variance16x32_neon),
                       VarianceParams(4, 4, &vpx_variance16x16_neon),
                       VarianceParams(4, 3, &vpx_variance16x8_neon),
                       VarianceParams(3, 4, &vpx_variance8x16_neon),
-                      VarianceParams(3, 3, &vpx_variance8x8_neon)));
+                      VarianceParams(3, 3, &vpx_variance8x8_neon),
+                      VarianceParams(3, 2, &vpx_variance8x4_neon)));
 
 INSTANTIATE_TEST_CASE_P(
     NEON, VpxSubpelVarianceTest,
