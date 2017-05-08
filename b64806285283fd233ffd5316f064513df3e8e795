@@ -16,6 +16,24 @@
       "revId": "b64806285283fd233ffd5316f064513df3e8e795",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dcb5bc2b_9674d1ba",
+        "filename": "vpx_dsp/arm/variance_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-08T19:47:00Z",
+      "side": 1,
+      "message": "I don\u0027t think it needs to be version checked. Compiler, maybe/probably. From my reading of the bug, this attribute has always existed for clang and gcc but old versions of the compiler did a poor job of generating code for it.\n\nI could add smth like \"if clang older than 3.3 (what\u0027s current?) or gcc older than 4.9, use the C\"\n\nI suspect Windows does not add the alignment hint, so maybe I just need to check gcc/clang?",
+      "parentUuid": "109a9bf7_4fd93bcb",
+      "revId": "b64806285283fd233ffd5316f064513df3e8e795",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
