@@ -13,151 +13,33 @@
 #include "vpx_dsp/x86/transpose_sse2.h"
 #include "vpx_dsp/x86/txfm_common_sse2.h"
 
-#define RECON_AND_STORE4X4(dest, in_x)                    \
-  {                                                       \
-    __m128i d0 = _mm_cvtsi32_si128(*(const int *)(dest)); \
-    d0 = _mm_unpacklo_epi8(d0, zero);                     \
-    d0 = _mm_add_epi16(in_x, d0);                         \
-    d0 = _mm_packus_epi16(d0, d0);                        \
-    *(int *)(dest) = _mm_cvtsi128_si32(d0);               \
-  }
-
 void vpx_idct4x4_16_add_sse2(const tran_low_t *input, uint8_t *dest,
                              int stride) {
-  const __m128i zero = _mm_setzero_si128();
   const __m128i eight = _mm_set1_epi16(8);
-  const __m128i cst = _mm_setr_epi16(
-      (int16_t)cospi_16_64, (int16_t)cospi_16_64, (int16_t)cospi_16_64,
-      (int16_t)-cospi_16_64, (int16_t)cospi_24_64, (int16_t)-cospi_8_64,
-      (int16_t)cospi_8_64, (int16_t)cospi_24_64);
-  const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
-  __m128i input0, input1, input2, input3;
+  __m128i in[2];
 
   // Rows
-  input0 = load_input_data(input);
-  input2 = load_input_data(input + 8);
-
-  // Construct i3, i1, i3, i1, i2, i0, i2, i0
-  input0 = _mm_shufflelo_epi16(input0, 0xd8);
-  input0 = _mm_shufflehi_epi16(input0, 0xd8);
-  input2 = _mm_shufflelo_epi16(input2, 0xd8);
-  input2 = _mm_shufflehi_epi16(input2, 0xd8);
-
-  input1 = _mm_unpackhi_epi32(input0, input0);
-  input0 = _mm_unpacklo_epi32(input0, input0);
-  input3 = _mm_unpackhi_epi32(input2, input2);
-  input2 = _mm_unpacklo_epi32(input2, input2);
-
-  // Stage 1
-  input0 = _mm_madd_epi16(input0, cst);
-  input1 = _mm_madd_epi16(input1, cst);
-  input2 = _mm_madd_epi16(input2, cst);
-  input3 = _mm_madd_epi16(input3, cst);
-
-  input0 = _mm_add_epi32(input0, rounding);
-  input1 = _mm_add_epi32(input1, rounding);
-  input2 = _mm_add_epi32(input2, rounding);
-  input3 = _mm_add_epi32(input3, rounding);
-
-  input0 = _mm_srai_epi32(input0, DCT_CONST_BITS);
-  input1 = _mm_srai_epi32(input1, DCT_CONST_BITS);
-  input2 = _mm_srai_epi32(input2, DCT_CONST_BITS);
-  input3 = _mm_srai_epi32(input3, DCT_CONST_BITS);
-
-  // Stage 2
-  input0 = _mm_packs_epi32(input0, input1);
-  input1 = _mm_packs_epi32(input2, input3);
-
-  // Transpose
-  input2 = _mm_unpacklo_epi16(input0, input1);
-  input3 = _mm_unpackhi_epi16(input0, input1);
-  input0 = _mm_unpacklo_epi32(input2, input3);
-  input1 = _mm_unpackhi_epi32(input2, input3);
-
-  // Switch column2, column 3, and then, we got:
-  // input2: column1, column 0;  input3: column2, column 3.
-  input1 = _mm_shuffle_epi32(input1, 0x4e);
-  input2 = _mm_add_epi16(input0, input1);
-  input3 = _mm_sub_epi16(input0, input1);
+  in[0] = load_input_data(input);
+  in[1] = load_input_data(input + 8);
+  idct4_sse2(in);
 
   // Columns
-  // Construct i3, i1, i3, i1, i2, i0, i2, i0
-  input0 = _mm_unpacklo_epi32(input2, input2);
-  input1 = _mm_unpackhi_epi32(input2, input2);
-  input2 = _mm_unpackhi_epi32(input3, input3);
-  input3 = _mm_unpacklo_epi32(input3, input3);
-
-  // Stage 1
-  input0 = _mm_madd_epi16(input0, cst);
-  input1 = _mm_madd_epi16(input1, cst);
-  input2 = _mm_madd_epi16(input2, cst);
-  input3 = _mm_madd_epi16(input3, cst);
-
-  input0 = _mm_add_epi32(input0, rounding);
-  input1 = _mm_add_epi32(input1, rounding);
-  input2 = _mm_add_epi32(input2, rounding);
-  input3 = _mm_add_epi32(input3, rounding);
-
-  input0 = _mm_srai_epi32(input0, DCT_CONST_BITS);
-  input1 = _mm_srai_epi32(input1, DCT_CONST_BITS);
-  input2 = _mm_srai_epi32(input2, DCT_CONST_BITS);
-  input3 = _mm_srai_epi32(input3, DCT_CONST_BITS);
-
-  // Stage 2
-  input0 = _mm_packs_epi32(input0, input2);
-  input1 = _mm_packs_epi32(input1, input3);
-
-  // Transpose
-  input2 = _mm_unpacklo_epi16(input0, input1);
-  input3 = _mm_unpackhi_epi16(input0, input1);
-  input0 = _mm_unpacklo_epi32(input2, input3);
-  input1 = _mm_unpackhi_epi32(input2, input3);
-
-  // Switch column2, column 3, and then, we got:
-  // input2: column1, column 0;  input3: column2, column 3.
-  input1 = _mm_shuffle_epi32(input1, 0x4e);
-  input2 = _mm_add_epi16(input0, input1);
-  input3 = _mm_sub_epi16(input0, input1);
+  idct4_sse2(in);
 
   // Final round and shift
-  input2 = _mm_add_epi16(input2, eight);
-  input3 = _mm_add_epi16(input3, eight);
+  in[0] = _mm_add_epi16(in[0], eight);
+  in[1] = _mm_add_epi16(in[1], eight);
+  in[0] = _mm_srai_epi16(in[0], 4);
+  in[1] = _mm_srai_epi16(in[1], 4);
 
-  input2 = _mm_srai_epi16(input2, 4);
-  input3 = _mm_srai_epi16(input3, 4);
-
-  // Reconstruction and Store
-  {
-    __m128i d0 = _mm_cvtsi32_si128(*(const int *)(dest));
-    __m128i d2 = _mm_cvtsi32_si128(*(const int *)(dest + stride * 2));
-    d0 = _mm_unpacklo_epi32(d0,
-                            _mm_cvtsi32_si128(*(const int *)(dest + stride)));
-    d2 = _mm_unpacklo_epi32(
-        _mm_cvtsi32_si128(*(const int *)(dest + stride * 3)), d2);
-    d0 = _mm_unpacklo_epi8(d0, zero);
-    d2 = _mm_unpacklo_epi8(d2, zero);
-    d0 = _mm_add_epi16(d0, input2);
-    d2 = _mm_add_epi16(d2, input3);
-    d0 = _mm_packus_epi16(d0, d2);
-    // store input0
-    *(int *)dest = _mm_cvtsi128_si32(d0);
-    // store input1
-    d0 = _mm_srli_si128(d0, 4);
-    *(int *)(dest + stride) = _mm_cvtsi128_si32(d0);
-    // store input2
-    d0 = _mm_srli_si128(d0, 4);
-    *(int *)(dest + stride * 3) = _mm_cvtsi128_si32(d0);
-    // store input3
-    d0 = _mm_srli_si128(d0, 4);
-    *(int *)(dest + stride * 2) = _mm_cvtsi128_si32(d0);
-  }
+  recon_and_store4x4_sse2(in, dest, stride);
 }
 
 void vpx_idct4x4_1_add_sse2(const tran_low_t *input, uint8_t *dest,
                             int stride) {
-  __m128i dc_value;
   const __m128i zero = _mm_setzero_si128();
   int a;
+  __m128i dc_value, d[2];
 
   a = (int)dct_const_round_shift(input[0] * cospi_16_64);
   a = (int)dct_const_round_shift(a * cospi_16_64);
@@ -165,10 +47,26 @@ void vpx_idct4x4_1_add_sse2(const tran_low_t *input, uint8_t *dest,
 
   dc_value = _mm_set1_epi16(a);
 
-  RECON_AND_STORE4X4(dest + 0 * stride, dc_value);
-  RECON_AND_STORE4X4(dest + 1 * stride, dc_value);
-  RECON_AND_STORE4X4(dest + 2 * stride, dc_value);
-  RECON_AND_STORE4X4(dest + 3 * stride, dc_value);
+  // Reconstruction and Store
+  d[0] = _mm_cvtsi32_si128(*(const int *)(dest));
+  d[1] = _mm_cvtsi32_si128(*(const int *)(dest + stride * 3));
+  d[0] = _mm_unpacklo_epi32(d[0],
+                            _mm_cvtsi32_si128(*(const int *)(dest + stride)));
+  d[1] = _mm_unpacklo_epi32(
+      _mm_cvtsi32_si128(*(const int *)(dest + stride * 2)), d[1]);
+  d[0] = _mm_unpacklo_epi8(d[0], zero);
+  d[1] = _mm_unpacklo_epi8(d[1], zero);
+  d[0] = _mm_add_epi16(d[0], dc_value);
+  d[1] = _mm_add_epi16(d[1], dc_value);
+  d[0] = _mm_packus_epi16(d[0], d[1]);
+
+  *(int *)dest = _mm_cvtsi128_si32(d[0]);
+  d[0] = _mm_srli_si128(d[0], 4);
+  *(int *)(dest + stride) = _mm_cvtsi128_si32(d[0]);
+  d[0] = _mm_srli_si128(d[0], 4);
+  *(int *)(dest + stride * 2) = _mm_cvtsi128_si32(d[0]);
+  d[0] = _mm_srli_si128(d[0], 4);
+  *(int *)(dest + stride * 3) = _mm_cvtsi128_si32(d[0]);
 }
 
 void idct4_sse2(__m128i *in) {

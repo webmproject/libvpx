@@ -279,6 +279,34 @@ static INLINE void write_buffer_8x16(uint8_t *dest, __m128i *in, int stride) {
     res3 = _mm_packs_epi32(tmp6, tmp7);                                        \
   }
 
+static INLINE void recon_and_store4x4_sse2(const __m128i *const in,
+                                           uint8_t *const dest,
+                                           const int stride) {
+  const __m128i zero = _mm_setzero_si128();
+  __m128i d[2];
+
+  // Reconstruction and Store
+  d[0] = _mm_cvtsi32_si128(*(const int *)(dest));
+  d[1] = _mm_cvtsi32_si128(*(const int *)(dest + stride * 3));
+  d[0] = _mm_unpacklo_epi32(d[0],
+                            _mm_cvtsi32_si128(*(const int *)(dest + stride)));
+  d[1] = _mm_unpacklo_epi32(
+      _mm_cvtsi32_si128(*(const int *)(dest + stride * 2)), d[1]);
+  d[0] = _mm_unpacklo_epi8(d[0], zero);
+  d[1] = _mm_unpacklo_epi8(d[1], zero);
+  d[0] = _mm_add_epi16(d[0], in[0]);
+  d[1] = _mm_add_epi16(d[1], in[1]);
+  d[0] = _mm_packus_epi16(d[0], d[1]);
+
+  *(int *)dest = _mm_cvtsi128_si32(d[0]);
+  d[0] = _mm_srli_si128(d[0], 4);
+  *(int *)(dest + stride) = _mm_cvtsi128_si32(d[0]);
+  d[0] = _mm_srli_si128(d[0], 4);
+  *(int *)(dest + stride * 2) = _mm_cvtsi128_si32(d[0]);
+  d[0] = _mm_srli_si128(d[0], 4);
+  *(int *)(dest + stride * 3) = _mm_cvtsi128_si32(d[0]);
+}
+
 void idct4_sse2(__m128i *in);
 void idct8_sse2(__m128i *in);
 void idct16_sse2(__m128i *in0, __m128i *in1);
