@@ -71,11 +71,11 @@ typedef std::tr1::tuple<FwdTxfmFunc, InvTxfmFunc, int, vpx_bit_depth_t>
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void idct32x32_10(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct32x32_1024_add_c(in, out, stride, 10);
+  vpx_highbd_idct32x32_1024_add_c(in, CAST_TO_SHORTPTR(out), stride, 10);
 }
 
 void idct32x32_12(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct32x32_1024_add_c(in, out, stride, 12);
+  vpx_highbd_idct32x32_1024_add_c(in, CAST_TO_SHORTPTR(out), stride, 12);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
@@ -137,7 +137,7 @@ TEST_P(Trans32x32Test, AccuracyCheck) {
 #if CONFIG_VP9_HIGHBITDEPTH
     } else {
       ASM_REGISTER_STATE_CHECK(
-          inv_txfm_(test_temp_block, CONVERT_TO_BYTEPTR(dst16), 32));
+          inv_txfm_(test_temp_block, CAST_TO_BYTEPTR(dst16), 32));
 #endif
     }
 
@@ -275,7 +275,7 @@ TEST_P(Trans32x32Test, InverseAccuracy) {
       ASM_REGISTER_STATE_CHECK(inv_txfm_(coeff, dst, 32));
 #if CONFIG_VP9_HIGHBITDEPTH
     } else {
-      ASM_REGISTER_STATE_CHECK(inv_txfm_(coeff, CONVERT_TO_BYTEPTR(dst16), 32));
+      ASM_REGISTER_STATE_CHECK(inv_txfm_(coeff, CAST_TO_BYTEPTR(dst16), 32));
 #endif
     }
     for (int j = 0; j < kNumCoeffs; ++j) {

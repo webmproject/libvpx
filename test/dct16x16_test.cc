@@ -255,11 +255,11 @@ void iht16x16_ref(const tran_low_t *in, uint8_t *dest, int stride,
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void idct16x16_10(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct16x16_256_add_c(in, out, stride, 10);
+  vpx_highbd_idct16x16_256_add_c(in, CAST_TO_SHORTPTR(out), stride, 10);
 }
 
 void idct16x16_12(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct16x16_256_add_c(in, out, stride, 12);
+  vpx_highbd_idct16x16_256_add_c(in, CAST_TO_SHORTPTR(out), stride, 12);
 }
 
 void idct16x16_10_ref(const tran_low_t *in, uint8_t *out, int stride,
@@ -273,36 +273,36 @@ void idct16x16_12_ref(const tran_low_t *in, uint8_t *out, int stride,
 }
 
 void iht16x16_10(const tran_low_t *in, uint8_t *out, int stride, int tx_type) {
-  vp9_highbd_iht16x16_256_add_c(in, out, stride, tx_type, 10);
+  vp9_highbd_iht16x16_256_add_c(in, CAST_TO_SHORTPTR(out), stride, tx_type, 10);
 }
 
 void iht16x16_12(const tran_low_t *in, uint8_t *out, int stride, int tx_type) {
-  vp9_highbd_iht16x16_256_add_c(in, out, stride, tx_type, 12);
+  vp9_highbd_iht16x16_256_add_c(in, CAST_TO_SHORTPTR(out), stride, tx_type, 12);
 }
 
 #if HAVE_SSE2
 void idct16x16_10_add_10_c(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct16x16_10_add_c(in, out, stride, 10);
+  vpx_highbd_idct16x16_10_add_c(in, CAST_TO_SHORTPTR(out), stride, 10);
 }
 
 void idct16x16_10_add_12_c(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct16x16_10_add_c(in, out, stride, 12);
+  vpx_highbd_idct16x16_10_add_c(in, CAST_TO_SHORTPTR(out), stride, 12);
 }
 
 void idct16x16_256_add_10_sse2(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct16x16_256_add_sse2(in, out, stride, 10);
+  vpx_highbd_idct16x16_256_add_sse2(in, CAST_TO_SHORTPTR(out), stride, 10);
 }
 
 void idct16x16_256_add_12_sse2(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct16x16_256_add_sse2(in, out, stride, 12);
+  vpx_highbd_idct16x16_256_add_sse2(in, CAST_TO_SHORTPTR(out), stride, 12);
 }
 
 void idct16x16_10_add_10_sse2(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct16x16_10_add_sse2(in, out, stride, 10);
+  vpx_highbd_idct16x16_10_add_sse2(in, CAST_TO_SHORTPTR(out), stride, 10);
 }
 
 void idct16x16_10_add_12_sse2(const tran_low_t *in, uint8_t *out, int stride) {
-  vpx_highbd_idct16x16_10_add_sse2(in, out, stride, 12);
+  vpx_highbd_idct16x16_10_add_sse2(in, CAST_TO_SHORTPTR(out), stride, 12);
 }
 #endif  // HAVE_SSE2
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -353,7 +353,7 @@ class Trans16x16TestBase {
 #if CONFIG_VP9_HIGHBITDEPTH
       } else {
         ASM_REGISTER_STATE_CHECK(
-            RunInvTxfm(test_temp_block, CONVERT_TO_BYTEPTR(dst16), pitch_));
+            RunInvTxfm(test_temp_block, CAST_TO_BYTEPTR(dst16), pitch_));
 #endif
       }
 
@@ -475,10 +475,10 @@ class Trans16x16TestBase {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(output_ref_block, dst, pitch_));
 #if CONFIG_VP9_HIGHBITDEPTH
       } else {
-        inv_txfm_ref(output_ref_block, CONVERT_TO_BYTEPTR(ref16), pitch_,
+        inv_txfm_ref(output_ref_block, CAST_TO_BYTEPTR(ref16), pitch_,
                      tx_type_);
         ASM_REGISTER_STATE_CHECK(
-            RunInvTxfm(output_ref_block, CONVERT_TO_BYTEPTR(dst16), pitch_));
+            RunInvTxfm(output_ref_block, CAST_TO_BYTEPTR(dst16), pitch_));
 #endif
       }
       if (bit_depth_ == VPX_BITS_8) {
@@ -530,8 +530,7 @@ class Trans16x16TestBase {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, 16));
 #if CONFIG_VP9_HIGHBITDEPTH
       } else {
-        ASM_REGISTER_STATE_CHECK(
-            RunInvTxfm(coeff, CONVERT_TO_BYTEPTR(dst16), 16));
+        ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, CAST_TO_BYTEPTR(dst16), 16));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       }
 
@@ -585,9 +584,9 @@ class Trans16x16TestBase {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, pitch_));
       } else {
 #if CONFIG_VP9_HIGHBITDEPTH
-        ref_txfm(coeff, CONVERT_TO_BYTEPTR(ref16), pitch_);
+        ref_txfm(coeff, CAST_TO_BYTEPTR(ref16), pitch_);
         ASM_REGISTER_STATE_CHECK(
-            RunInvTxfm(coeff, CONVERT_TO_BYTEPTR(dst16), pitch_));
+            RunInvTxfm(coeff, CAST_TO_BYTEPTR(dst16), pitch_));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       }
 
