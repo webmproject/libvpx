@@ -696,10 +696,10 @@ specialize qw/vpx_subtract_block neon msa sse2/;
 # Single block SAD
 #
 add_proto qw/unsigned int vpx_sad64x64/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
-specialize qw/vpx_sad64x64 avx2 neon msa sse2/;
+specialize qw/vpx_sad64x64 avx2 neon msa sse2 vsx/;
 
 add_proto qw/unsigned int vpx_sad64x32/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
-specialize qw/vpx_sad64x32 avx2 msa sse2/;
+specialize qw/vpx_sad64x32 avx2 msa sse2 vsx/;
 
 add_proto qw/unsigned int vpx_sad32x64/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
 specialize qw/vpx_sad32x64 avx2 msa sse2 vsx/;
