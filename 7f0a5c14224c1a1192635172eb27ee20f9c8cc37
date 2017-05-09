@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "091d5560_8a7e466a",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-09T04:25:37Z",
+      "side": 1,
+      "message": "\u003e I\u0027ve written a doc about how these parameters are determined here.\n\u003e https://docs.google.com/document/d/1cOLzgW88nchzXN9KmHN2UQyppHpBfrogjy7UfKrf48M/edit?pli\u003d1\n\nthat\u0027s a good offline reference (that isn\u0027t visible to everyone), but it would be good to mention in a simplified form how this were derived.",
+      "parentUuid": "b1e1f586_304b5a8e",
+      "revId": "7f0a5c14224c1a1192635172eb27ee20f9c8cc37",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "19c4af34_63cc3f18",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 11
@@ -72,6 +90,30 @@
       "side": 1,
       "message": "Thanks for the link.\n\nAs it says in rule 6, if I don\u0027t cast to int, then the right hand side is an int multiplying an unsigned int. Since we don\u0027t know which one is larger, we can\u0027t predicate whether it converts to int or unsigned int eventually. So we\u0027d better keep the cast. Am I right?\n\nThanks.",
       "parentUuid": "19c4af34_63cc3f18",
+      "range": {
+        "startLine": 142,
+        "startChar": 14,
+        "endLine": 142,
+        "endChar": 18
+      },
+      "revId": "7f0a5c14224c1a1192635172eb27ee20f9c8cc37",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9d0f0b47_f9c29ba2",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-09T04:25:37Z",
+      "side": 1,
+      "message": "\u003e Thanks for the link.\n\u003e \n\u003e As it says in rule 6, if I don\u0027t cast to int, then the right hand side is an int multiplying an unsigned int. Since we don\u0027t know which one is larger, we can\u0027t predicate whether it converts to int or unsigned int eventually. So we\u0027d better keep the cast. Am I right?\n\u003e \n\u003e Thanks.\n\nI don\u0027t think you make it past 1 here, but if you make it to 6 that\u0027s because the int types are sized differently, e.g., long vs. int. Here you might have int and unsigned int",
+      "parentUuid": "910fd711_c47bf8c5",
       "range": {
         "startLine": 142,
         "startChar": 14,
