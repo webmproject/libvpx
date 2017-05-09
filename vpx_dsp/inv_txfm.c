@@ -1182,16 +1182,10 @@ void vpx_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest,
 
   // Rows
   for (i = 0; i < 32; ++i) {
-    int16_t zero_coeff[16];
-    for (j = 0; j < 16; ++j) zero_coeff[j] = input[2 * j] | input[2 * j + 1];
-    for (j = 0; j < 8; ++j)
-      zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
-    for (j = 0; j < 4; ++j)
-      zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
-    for (j = 0; j < 2; ++j)
-      zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
+    int16_t zero_coeff = 0;
+    for (j = 0; j < 32; ++j) zero_coeff |= input[j];
 
-    if (zero_coeff[0] | zero_coeff[1])
+    if (zero_coeff)
       idct32_c(input, outptr);
     else
       memset(outptr, 0, sizeof(tran_low_t) * 32);
@@ -2529,16 +2523,10 @@ void vpx_highbd_idct32x32_1024_add_c(const tran_low_t *input, uint16_t *dest,
 
   // Rows
   for (i = 0; i < 32; ++i) {
-    tran_low_t zero_coeff[16];
-    for (j = 0; j < 16; ++j) zero_coeff[j] = input[2 * j] | input[2 * j + 1];
-    for (j = 0; j < 8; ++j)
-      zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
-    for (j = 0; j < 4; ++j)
-      zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
-    for (j = 0; j < 2; ++j)
-      zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
+    tran_low_t zero_coeff = 0;
+    for (j = 0; j < 32; ++j) zero_coeff |= input[j];
 
-    if (zero_coeff[0] | zero_coeff[1])
+    if (zero_coeff)
       highbd_idct32_c(input, outptr, bd);
     else
       memset(outptr, 0, sizeof(tran_low_t) * 32);
