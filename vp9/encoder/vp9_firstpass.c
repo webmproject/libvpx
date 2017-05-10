@@ -1400,7 +1400,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
                  (cpi->ref_frame_flags & VP9_GOLD_FLAG) ? GOLDEN_FRAME : NONE);
 
     cpi->Source = vp9_scale_if_required(cm, cpi->un_scaled_source,
-                                        &cpi->scaled_source, 0, 0);
+                                        &cpi->scaled_source, 0, EIGHTTAP, 0);
   }
 
   vp9_setup_block_planes(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);

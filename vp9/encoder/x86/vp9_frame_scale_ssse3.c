@@ -17,7 +17,7 @@
 
 extern void vp9_scale_and_extend_frame_c(const YV12_BUFFER_CONFIG *src,
                                          YV12_BUFFER_CONFIG *dst,
-                                         int phase_scaler);
+                                         uint8_t filter_type, int phase_scaler);
 
 static void downsample_2_to_1_ssse3(const uint8_t *src, ptrdiff_t src_stride,
                                     uint8_t *dst, ptrdiff_t dst_stride, int w,
@@ -170,7 +170,7 @@ static void upsample_1_to_2_ssse3(const uint8_t *src, ptrdiff_t src_stride,
 
 void vp9_scale_and_extend_frame_ssse3(const YV12_BUFFER_CONFIG *src,
                                       YV12_BUFFER_CONFIG *dst,
-                                      int phase_scaler) {
+                                      uint8_t filter_type, int phase_scaler) {
   const int src_w = src->y_crop_width;
   const int src_h = src->y_crop_height;
   const int dst_w = dst->y_crop_width;
@@ -198,9 +198,9 @@ void vp9_scale_and_extend_frame_ssse3(const YV12_BUFFER_CONFIG *src,
                             dst->uv_stride, dst_uv_w, dst_uv_h);
       vpx_extend_frame_borders(dst);
     } else {
-      vp9_scale_and_extend_frame_c(src, dst, phase_scaler);
+      vp9_scale_and_extend_frame_c(src, dst, filter_type, phase_scaler);
     }
   } else {
-    vp9_scale_and_extend_frame_c(src, dst, phase_scaler);
+    vp9_scale_and_extend_frame_c(src, dst, filter_type, phase_scaler);
   }
 }

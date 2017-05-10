@@ -2391,6 +2391,7 @@ static void scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
 #if CONFIG_VP9_HIGHBITDEPTH
 static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
                                    YV12_BUFFER_CONFIG *dst, int bd,
+                                   INTERP_FILTER filter_type,
                                    int phase_scaler) {
   const int src_w = src->y_crop_width;
   const int src_h = src->y_crop_height;
@@ -2401,7 +2402,7 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   const int src_strides[3] = { src->y_stride, src->uv_stride, src->uv_stride };
   uint8_t *const dsts[3] = { dst->y_buffer, dst->u_buffer, dst->v_buffer };
   const int dst_strides[3] = { dst->y_stride, dst->uv_stride, dst->uv_stride };
-  const InterpKernel *const kernel = vp9_filter_kernels[EIGHTTAP];
+  const InterpKernel *const kernel = vp9_filter_kernels[filter_type];
   int x, y, i;
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
@@ -2714,7 +2715,8 @@ void vp9_scale_references(VP9_COMP *cpi) {
                                        cm->byte_alignment, NULL, NULL, NULL))
             vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                                "Failed to allocate frame buffer");
-          scale_and_extend_frame(ref, &new_fb_ptr->buf, (int)cm->bit_depth, 0);
+          scale_and_extend_frame(ref, &new_fb_ptr->buf, (int)cm->bit_depth,
+                                 EIGHTTAP, 0);
           cpi->scaled_ref_idx[ref_frame - 1] = new_fb;
           alloc_frame_mvs(cm, new_fb);
         }
@@ -2737,7 +2739,7 @@ void vp9_scale_references(VP9_COMP *cpi) {
                                        cm->byte_alignment, NULL, NULL, NULL))
             vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                                "Failed to allocate frame buffer");
-          vp9_scale_and_extend_frame(ref, &new_fb_ptr->buf, 0);
+          vp9_scale_and_extend_frame(ref, &new_fb_ptr->buf, EIGHTTAP, 0);
           cpi->scaled_ref_idx[ref_frame - 1] = new_fb;
           alloc_frame_mvs(cm, new_fb);
         }
@@ -3124,10 +3126,13 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
                                        uint8_t *dest) {
   VP9_COMMON *const cm = &cpi->common;
   int q = 0, bottom_index = 0, top_index = 0;  // Dummy variables.
+  const INTERP_FILTER filter_scaler =
+      (is_one_pass_cbr_svc(cpi))
+          ? cpi->svc.downsample_filter_type[cpi->svc.spatial_layer_id]
+          : EIGHTTAP;
   const int phase_scaler =
-      (is_one_pass_cbr_svc(cpi) &&
-       cpi->svc.filtertype_downsample_source[cpi->svc.spatial_layer_id])
-          ? 8
+      (is_one_pass_cbr_svc(cpi))
+          ? cpi->svc.downsample_filter_phase[cpi->svc.spatial_layer_id]
           : 0;
 
   // Flag to check if its valid to compute the source sad (used for
@@ -3148,10 +3153,11 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     // For svc, if it is a 1/4x1/4 downscaling, do a two-stage scaling to take
     // advantage of the 1:2 optimized scaler. In the process, the 1/2x1/2
     // result will be saved in scaled_temp and might be used later.
-    int phase_scaler2 = (cpi->svc.filtertype_downsample_source[1]) ? 8 : 0;
+    const INTERP_FILTER filter_scaler2 = cpi->svc.downsample_filter_type[1];
+    const int phase_scaler2 = cpi->svc.downsample_filter_phase[1];
     cpi->Source = vp9_svc_twostage_scale(
         cm, cpi->un_scaled_source, &cpi->scaled_source, &cpi->svc.scaled_temp,
-        phase_scaler, phase_scaler2);
+        filter_scaler, phase_scaler, filter_scaler2, phase_scaler2);
     cpi->svc.scaled_one_half = 1;
   } else if (is_one_pass_cbr_svc(cpi) &&
              cpi->un_scaled_source->y_width == cm->width << 1 &&
@@ -3162,9 +3168,9 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     cpi->Source = &cpi->svc.scaled_temp;
     cpi->svc.scaled_one_half = 0;
   } else {
-    cpi->Source =
-        vp9_scale_if_required(cm, cpi->un_scaled_source, &cpi->scaled_source,
-                              (cpi->oxcf.pass == 0), phase_scaler);
+    cpi->Source = vp9_scale_if_required(
+        cm, cpi->un_scaled_source, &cpi->scaled_source, (cpi->oxcf.pass == 0),
+        filter_scaler, phase_scaler);
   }
   // Unfiltered raw source used in metrics calculation if the source
   // has been filtered.
@@ -3173,7 +3179,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     if (is_spatial_denoise_enabled(cpi)) {
       cpi->raw_source_frame = vp9_scale_if_required(
           cm, &cpi->raw_unscaled_source, &cpi->raw_scaled_source,
-          (cpi->oxcf.pass == 0), phase_scaler);
+          (cpi->oxcf.pass == 0), EIGHTTAP, phase_scaler);
     } else {
       cpi->raw_source_frame = cpi->Source;
     }
@@ -3205,9 +3211,9 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
        cpi->sf.partition_search_type == SOURCE_VAR_BASED_PARTITION ||
        (cpi->noise_estimate.enabled && !cpi->oxcf.noise_sensitivity) ||
        cpi->compute_source_sad_onepass))
-    cpi->Last_Source = vp9_scale_if_required(cm, cpi->unscaled_last_source,
-                                             &cpi->scaled_last_source,
-                                             (cpi->oxcf.pass == 0), 0);
+    cpi->Last_Source = vp9_scale_if_required(
+        cm, cpi->unscaled_last_source, &cpi->scaled_last_source,
+        (cpi->oxcf.pass == 0), EIGHTTAP, 0);
 
   if (cpi->Last_Source == NULL ||
       cpi->Last_Source->y_width != cpi->Source->y_width ||
@@ -3392,7 +3398,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
 
     cpi->Source =
         vp9_scale_if_required(cm, cpi->un_scaled_source, &cpi->scaled_source,
-                              (cpi->oxcf.pass == 0), 0);
+                              (cpi->oxcf.pass == 0), EIGHTTAP, 0);
 
     // Unfiltered raw source used in metrics calculation if the source
     // has been filtered.
@@ -3401,7 +3407,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
       if (is_spatial_denoise_enabled(cpi)) {
         cpi->raw_source_frame = vp9_scale_if_required(
             cm, &cpi->raw_unscaled_source, &cpi->raw_scaled_source,
-            (cpi->oxcf.pass == 0), 0);
+            (cpi->oxcf.pass == 0), EIGHTTAP, 0);
       } else {
         cpi->raw_source_frame = cpi->Source;
       }
@@ -3411,9 +3417,9 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
     }
 
     if (cpi->unscaled_last_source != NULL)
-      cpi->Last_Source = vp9_scale_if_required(cm, cpi->unscaled_last_source,
-                                               &cpi->scaled_last_source,
-                                               (cpi->oxcf.pass == 0), 0);
+      cpi->Last_Source = vp9_scale_if_required(
+          cm, cpi->unscaled_last_source, &cpi->scaled_last_source,
+          (cpi->oxcf.pass == 0), EIGHTTAP, 0);
 
     if (frame_is_intra_only(cm) == 0) {
       if (loop_count > 0) {
@@ -3693,22 +3699,26 @@ static void set_ext_overrides(VP9_COMP *cpi) {
 
 YV12_BUFFER_CONFIG *vp9_svc_twostage_scale(
     VP9_COMMON *cm, YV12_BUFFER_CONFIG *unscaled, YV12_BUFFER_CONFIG *scaled,
-    YV12_BUFFER_CONFIG *scaled_temp, int phase_scaler, int phase_scaler2) {
+    YV12_BUFFER_CONFIG *scaled_temp, INTERP_FILTER filter_type,
+    int phase_scaler, INTERP_FILTER filter_type2, int phase_scaler2) {
   if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
       cm->mi_rows * MI_SIZE != unscaled->y_height) {
 #if CONFIG_VP9_HIGHBITDEPTH
     if (cm->bit_depth == VPX_BITS_8) {
-      vp9_scale_and_extend_frame(unscaled, scaled_temp, phase_scaler2);
-      vp9_scale_and_extend_frame(scaled_temp, scaled, phase_scaler);
+      vp9_scale_and_extend_frame(unscaled, scaled_temp, filter_type2,
+                                 phase_scaler2);
+      vp9_scale_and_extend_frame(scaled_temp, scaled, filter_type,
+                                 phase_scaler);
     } else {
       scale_and_extend_frame(unscaled, scaled_temp, (int)cm->bit_depth,
-                             phase_scaler2);
+                             filter_type2, phase_scaler2);
       scale_and_extend_frame(scaled_temp, scaled, (int)cm->bit_depth,
-                             phase_scaler);
+                             filter_type, phase_scaler);
     }
 #else
-    vp9_scale_and_extend_frame(unscaled, scaled_temp, phase_scaler2);
-    vp9_scale_and_extend_frame(scaled_temp, scaled, phase_scaler);
+    vp9_scale_and_extend_frame(unscaled, scaled_temp, filter_type2,
+                               phase_scaler2);
+    vp9_scale_and_extend_frame(scaled_temp, scaled, filter_type, phase_scaler);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     return scaled;
   } else {
@@ -3716,27 +3726,25 @@ YV12_BUFFER_CONFIG *vp9_svc_twostage_scale(
   }
 }
 
-YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
-                                          YV12_BUFFER_CONFIG *unscaled,
-                                          YV12_BUFFER_CONFIG *scaled,
-                                          int use_normative_scaler,
-                                          int phase_scaler) {
+YV12_BUFFER_CONFIG *vp9_scale_if_required(
+    VP9_COMMON *cm, YV12_BUFFER_CONFIG *unscaled, YV12_BUFFER_CONFIG *scaled,
+    int use_normative_scaler, INTERP_FILTER filter_type, int phase_scaler) {
   if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
       cm->mi_rows * MI_SIZE != unscaled->y_height) {
 #if CONFIG_VP9_HIGHBITDEPTH
     if (use_normative_scaler && unscaled->y_width <= (scaled->y_width << 1) &&
         unscaled->y_height <= (scaled->y_height << 1))
       if (cm->bit_depth == VPX_BITS_8)
-        vp9_scale_and_extend_frame(unscaled, scaled, phase_scaler);
+        vp9_scale_and_extend_frame(unscaled, scaled, filter_type, phase_scaler);
       else
         scale_and_extend_frame(unscaled, scaled, (int)cm->bit_depth,
-                               phase_scaler);
+                               filter_type, phase_scaler);
     else
       scale_and_extend_frame_nonnormative(unscaled, scaled, (int)cm->bit_depth);
 #else
     if (use_normative_scaler && unscaled->y_width <= (scaled->y_width << 1) &&
         unscaled->y_height <= (scaled->y_height << 1))
-      vp9_scale_and_extend_frame(unscaled, scaled, phase_scaler);
+      vp9_scale_and_extend_frame(unscaled, scaled, filter_type, phase_scaler);
     else
       scale_and_extend_frame_nonnormative(unscaled, scaled);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
