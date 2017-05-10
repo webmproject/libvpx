@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7585bdb9_13808277",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2017-05-10T17:27:34Z",
+      "side": 1,
+      "message": "occasionally, I saw ctx-\u003enewmv_sse is UINT32_MAX, which I suspect means it is not initialized with a valid new motion vector. In such case, sse_diff will become a very negative value, is that the intended behavior here?",
+      "range": {
+        "startLine": 194,
+        "startChar": 59,
+        "endLine": 194,
+        "endChar": 68
+      },
+      "revId": "95ded708651c1b636c3585168f0b2f07eece1c1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
