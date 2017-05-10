@@ -436,6 +436,10 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
       si->svc_params.scaling_factor_num[sl] = DEFAULT_SCALE_FACTORS_NUM_2x[sl2];
       si->svc_params.scaling_factor_den[sl] = DEFAULT_SCALE_FACTORS_DEN_2x[sl2];
     }
+    if (svc_ctx->spatial_layers == 1) {
+      si->svc_params.scaling_factor_num[0] = 1;
+      si->svc_params.scaling_factor_den[0] = 1;
+    }
   }
   for (tl = 0; tl < svc_ctx->temporal_layers; ++tl) {
     for (sl = 0; sl < svc_ctx->spatial_layers; ++sl) {
