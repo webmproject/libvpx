@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "db579a77_19c1c8f9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-05-10T17:03:38Z",
+      "side": 1,
+      "message": "Done.\n\nYauwu opened an issue so I just quote that issue here, instead of adding the error text.",
+      "parentUuid": "efc7e5df_360e5d82",
+      "revId": "bedb24aa4bfb434ab8e7099e202f7aa8a795fdea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5e9d9b42_28b2598f",
         "filename": "vp9/encoder/vp9_denoiser.c",
         "patchSetId": 3
@@ -39,6 +57,30 @@
       "revId": "bedb24aa4bfb434ab8e7099e202f7aa8a795fdea",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e2e61d2d_43500d42",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-05-10T17:03:38Z",
+      "side": 1,
+      "message": "Done.\n\nTo be safe, I just keep int64_t for now and will check their ranges later.",
+      "parentUuid": "5e9d9b42_28b2598f",
+      "range": {
+        "startLine": 194,
+        "startChar": 48,
+        "endLine": 194,
+        "endChar": 57
+      },
+      "revId": "bedb24aa4bfb434ab8e7099e202f7aa8a795fdea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
