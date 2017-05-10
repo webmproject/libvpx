@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "17966f45_effa1aff",
+        "filename": "test/dspbuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-10T04:41:53Z",
+      "side": 1,
+      "message": "\u003e I think you should add this to Buffer\u003cT\u003e. I don\u0027t think this needs its own class-- just overload Buffer\u003cT\u003e::Buffer w/an extra arg to add the alignment and default it to 0 in the other ctors.\n\nI made the opposite case. If we\u0027re going to do custom things to a Buffer, then it makes sense to logically split it",
+      "parentUuid": "97234ad4_1cd4aefd",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 34
+      },
+      "revId": "3c2f69b69d98993d5165ac7cb836d531d66060e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a6baf3fa_91005747",
         "filename": "test/dspbuffer.h",
         "patchSetId": 9
