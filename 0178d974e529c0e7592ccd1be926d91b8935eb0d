@@ -46,6 +46,30 @@
       "revId": "0178d974e529c0e7592ccd1be926d91b8935eb0d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "70f7a5fe_bde4e1fb",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 2
+      },
+      "lineNbr": 688,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-10T18:17:37Z",
+      "side": 1,
+      "message": "so it\u0027s kind of an append situation now? i found that really confusing.",
+      "parentUuid": "01955ee0_d5162c38",
+      "range": {
+        "startLine": 688,
+        "startChar": 18,
+        "endLine": 688,
+        "endChar": 36
+      },
+      "revId": "0178d974e529c0e7592ccd1be926d91b8935eb0d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
