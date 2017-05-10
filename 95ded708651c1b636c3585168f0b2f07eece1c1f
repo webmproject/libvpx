@@ -22,6 +22,30 @@
       "revId": "95ded708651c1b636c3585168f0b2f07eece1c1f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "076f6771_a37431f5",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-10T18:06:45Z",
+      "side": 1,
+      "message": "\u003e occasionally, I saw ctx-\u003enewmv_sse is UINT32_MAX, which I suspect means it is not initialized with a valid new motion vector. In such case, sse_diff will become a very negative value, is that the intended behavior here?\n\nit seems it\u0027s only used meaningfully when it\u0027s not UINT_MAX specifically (line 220). That was why I wondering if the check could be moved here and the diff made to be 0 in that case",
+      "parentUuid": "7585bdb9_13808277",
+      "range": {
+        "startLine": 194,
+        "startChar": 59,
+        "endLine": 194,
+        "endChar": 68
+      },
+      "revId": "95ded708651c1b636c3585168f0b2f07eece1c1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
