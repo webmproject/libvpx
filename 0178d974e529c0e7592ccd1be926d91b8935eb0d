@@ -70,6 +70,30 @@
       "revId": "0178d974e529c0e7592ccd1be926d91b8935eb0d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd5da9bd_110e9bee",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 2
+      },
+      "lineNbr": 688,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-05-10T18:55:45Z",
+      "side": 1,
+      "message": "Updated to put them closer: https://chromium-review.googlesource.com/#/c/502090\n\nIf append situation is still confusing, I can go either way.",
+      "parentUuid": "70f7a5fe_bde4e1fb",
+      "range": {
+        "startLine": 688,
+        "startChar": 18,
+        "endLine": 688,
+        "endChar": 36
+      },
+      "revId": "0178d974e529c0e7592ccd1be926d91b8935eb0d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
