@@ -22,6 +22,30 @@
       "revId": "0178d974e529c0e7592ccd1be926d91b8935eb0d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "01955ee0_d5162c38",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 2
+      },
+      "lineNbr": 688,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-10T17:47:26Z",
+      "side": 1,
+      "message": "\u003e what happened to sse2 and neon for all these functions? why did dspr2/msa stay?\n\u003e \n\u003e this whole branch is in the \u0027else\u0027 of vp9 HBD, isn\u0027t it the same as the specializations higher up?\n\nthe common block should be above, but it would be good to verify the output headers are what\u0027s expected for the x86 and neon configs",
+      "parentUuid": "bbececcc_abdfcd4a",
+      "range": {
+        "startLine": 688,
+        "startChar": 18,
+        "endLine": 688,
+        "endChar": 36
+      },
+      "revId": "0178d974e529c0e7592ccd1be926d91b8935eb0d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
