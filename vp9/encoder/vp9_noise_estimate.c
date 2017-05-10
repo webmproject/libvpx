@@ -32,7 +32,7 @@ void vp9_noise_estimate_init(NOISE_ESTIMATE *const ne, int width, int height) {
   if (width * height >= 1920 * 1080) {
     ne->thresh = 200;
   } else if (width * height >= 1280 * 720) {
-    ne->thresh = 150;
+    ne->thresh = 140;
   } else if (width * height >= 640 * 360) {
     ne->thresh = 100;
   }
@@ -116,7 +116,7 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
     // Tune these thresholds for different resolutions when denoising is
     // enabled.
     if (cm->width > 640 && cm->width < 1920) {
-      thresh_consec_zeromv = 5;
+      thresh_consec_zeromv = 4;
       thresh_sum_diff = 200;
       thresh_sum_spatial = (120 * 120) << 8;
       thresh_spatial_var = (48 * 48) << 8;
