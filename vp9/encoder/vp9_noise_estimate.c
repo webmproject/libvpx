@@ -111,16 +111,18 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
   // Estimate is between current source and last source.
   YV12_BUFFER_CONFIG *last_source = cpi->Last_Source;
 #if CONFIG_VP9_TEMPORAL_DENOISING
-  if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc(cpi))
+  if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc(cpi)) {
     last_source = &cpi->denoiser.last_source;
-#endif
-  // Tune these thresholds for different resolutions.
-  if (cm->width > 640 && cm->width < 1920) {
-    thresh_consec_zeromv = 5;
-    thresh_sum_diff = 200;
-    thresh_sum_spatial = (120 * 120) << 8;
-    thresh_spatial_var = (48 * 48) << 8;
+    // Tune these thresholds for different resolutions when denoising is
+    // enabled.
+    if (cm->width > 640 && cm->width < 1920) {
+      thresh_consec_zeromv = 5;
+      thresh_sum_diff = 200;
+      thresh_sum_spatial = (120 * 120) << 8;
+      thresh_spatial_var = (48 * 48) << 8;
+    }
   }
+#endif
   ne->enabled = enable_noise_estimation(cpi);
   if (cpi->svc.number_spatial_layers > 1)
     frame_counter = cpi->svc.current_superframe;
