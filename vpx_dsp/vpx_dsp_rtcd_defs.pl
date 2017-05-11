@@ -1174,7 +1174,7 @@ add_proto qw/unsigned int vpx_get_mb_ss/, "const int16_t *";
   specialize qw/vpx_get_mb_ss sse2 msa/;
 
 add_proto qw/unsigned int vpx_get4x4sse_cs/, "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride";
-  specialize qw/vpx_get4x4sse_cs neon msa/;
+  specialize qw/vpx_get4x4sse_cs neon msa vsx/;
 
 add_proto qw/void vpx_comp_avg_pred/, "uint8_t *comp_pred, const uint8_t *pred, int width, int height, const uint8_t *ref, int ref_stride";
   specialize qw/vpx_comp_avg_pred sse2 vsx/;

@@ -1338,4 +1338,10 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(2, 3, &vpx_sub_pixel_avg_variance4x8_msa, 0),
                       make_tuple(2, 2, &vpx_sub_pixel_avg_variance4x4_msa, 0)));
 #endif  // HAVE_MSA
+
+#if HAVE_VSX
+INSTANTIATE_TEST_CASE_P(VSX, VpxSseTest,
+                        ::testing::Values(SseParams(2, 2,
+                                                    &vpx_get4x4sse_cs_vsx)));
+#endif  // HAVE_VSX
 }  // namespace

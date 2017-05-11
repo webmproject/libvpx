@@ -13,6 +13,31 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/ppc/types_vsx.h"
 
+static inline uint8x16_t read4x2(const uint8_t *a, int stride) {
+  const uint32x4_t a0 = (uint32x4_t)vec_vsx_ld(0, a);
+  const uint32x4_t a1 = (uint32x4_t)vec_vsx_ld(0, a + stride);
+
+  return (uint8x16_t)vec_mergeh(a0, a1);
+}
+
+uint32_t vpx_get4x4sse_cs_vsx(const uint8_t *a, int a_stride, const uint8_t *b,
+                              int b_stride) {
+  int distortion;
+
+  const int16x8_t a0 = unpack_to_s16_h(read4x2(a, a_stride));
+  const int16x8_t a1 = unpack_to_s16_h(read4x2(a + a_stride * 2, a_stride));
+  const int16x8_t b0 = unpack_to_s16_h(read4x2(b, b_stride));
+  const int16x8_t b1 = unpack_to_s16_h(read4x2(b + b_stride * 2, b_stride));
+  const int16x8_t d0 = vec_sub(a0, b0);
+  const int16x8_t d1 = vec_sub(a1, b1);
+  const int32x4_t ds = vec_msum(d1, d1, vec_msum(d0, d0, vec_splat_s32(0)));
+  const int32x4_t d = vec_splat(vec_sums(ds, vec_splat_s32(0)), 3);
+
+  vec_ste(d, 0, &distortion);
+
+  return distortion;
+}
+
 void vpx_comp_avg_pred_vsx(uint8_t *comp_pred, const uint8_t *pred, int width,
                            int height, const uint8_t *ref, int ref_stride) {
   int i, j;
