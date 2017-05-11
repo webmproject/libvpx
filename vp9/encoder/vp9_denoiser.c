@@ -191,7 +191,9 @@ static VP9_DENOISER_DECISION perform_motion_compensation(
     int increase_denoising, int mi_row, int mi_col, PICK_MODE_CONTEXT *ctx,
     int motion_magnitude, int is_skin, int *zeromv_filter, int consec_zeromv,
     int num_spatial_layers, int width) {
-  int sse_diff = ctx->zeromv_sse - ctx->newmv_sse;
+  const int sse_diff = (ctx->newmv_sse == UINT_MAX)
+                           ? 0
+                           : ((int)ctx->zeromv_sse - (int)ctx->newmv_sse);
   MV_REFERENCE_FRAME frame;
   MACROBLOCKD *filter_mbd = &mb->e_mbd;
   MODE_INFO *mi = filter_mbd->mi[0];
@@ -217,7 +219,6 @@ static VP9_DENOISER_DECISION perform_motion_compensation(
   // difference in sum-squared-error, use it.
   if (frame != INTRA_FRAME &&
       (frame != GOLDEN_FRAME || num_spatial_layers == 1) &&
-      ctx->newmv_sse != UINT_MAX &&
       sse_diff > sse_diff_thresh(bs, increase_denoising, motion_magnitude)) {
     mi->ref_frame[0] = ctx->best_reference_frame;
     mi->mode = ctx->best_sse_inter_mode;
