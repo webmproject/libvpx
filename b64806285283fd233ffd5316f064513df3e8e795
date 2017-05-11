@@ -52,6 +52,24 @@
       "revId": "b64806285283fd233ffd5316f064513df3e8e795",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7d61338a_0b16866d",
+        "filename": "vpx_dsp/arm/variance_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-11T22:33:42Z",
+      "side": 1,
+      "message": "https://chromium-review.googlesource.com/c/503512/\n\nI can focus on a better windows version if anyone is using it. ISTR something setting clang version to null to avoid compiler checks though so i\u0027m wary about checking it.",
+      "parentUuid": "1c1d825f_dbc1417f",
+      "revId": "b64806285283fd233ffd5316f064513df3e8e795",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
