@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "b65c6206_552e1473",
+        "filename": "test/dspbuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-11T22:23:06Z",
+      "side": 1,
+      "message": "i can do this as a follow up, and do buffer.h as well",
+      "parentUuid": "a6baf3fa_91005747",
+      "range": {
+        "startLine": 29,
+        "startChar": 12,
+        "endLine": 29,
+        "endChar": 66
+      },
+      "revId": "3c2f69b69d98993d5165ac7cb836d531d66060e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e3749491_1a267013",
         "filename": "test/dspbuffer.h",
         "patchSetId": 9
@@ -113,6 +137,24 @@
     },
     {
       "key": {
+        "uuid": "23fdc70a_5b6058f0",
+        "filename": "test/dspbuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-11T22:23:06Z",
+      "side": 1,
+      "message": "i tried a bunch of ways around this but honestly this was the best i could come up with (outside making one class)",
+      "parentUuid": "e3749491_1a267013",
+      "revId": "3c2f69b69d98993d5165ac7cb836d531d66060e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d2bf9d75_e80504e9",
         "filename": "test/dspbuffer.h",
         "patchSetId": 9
@@ -124,6 +166,24 @@
       "writtenOn": "2017-05-09T23:05:04Z",
       "side": 1,
       "message": "could use an ASSERT_GE(alignment_bits, 0) if we\u0027re sticking with int",
+      "revId": "3c2f69b69d98993d5165ac7cb836d531d66060e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "296f8830_df13cb0f",
+        "filename": "test/dspbuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-11T22:23:06Z",
+      "side": 1,
+      "message": "done, and can follow up with size_t later",
+      "parentUuid": "d2bf9d75_e80504e9",
       "revId": "3c2f69b69d98993d5165ac7cb836d531d66060e5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
@@ -165,6 +225,30 @@
       "side": 1,
       "message": "O_o\n\nthanks for pointing out vpx_memalign",
       "parentUuid": "889178ff_355ab6f2",
+      "range": {
+        "startLine": 63,
+        "startChar": 4,
+        "endLine": 63,
+        "endChar": 73
+      },
+      "revId": "3c2f69b69d98993d5165ac7cb836d531d66060e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2a678659_fe69b7b8",
+        "filename": "test/dspbuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-11T22:23:06Z",
+      "side": 1,
+      "message": "fixed",
+      "parentUuid": "d0414efe_f7ebefe3",
       "range": {
         "startLine": 63,
         "startChar": 4,
