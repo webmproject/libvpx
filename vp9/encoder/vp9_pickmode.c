@@ -363,7 +363,8 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
   if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc(cpi) &&
       cpi->oxcf.speed > 5)
     ac_thr = vp9_scale_acskip_thresh(ac_thr, cpi->denoiser.denoising_level,
-                                     (abs(sum) >> (bw + bh)));
+                                     (abs(sum) >> (bw + bh)),
+                                     cpi->svc.temporal_layer_id);
   else
     ac_thr *= ac_thr_factor(cpi->oxcf.speed, cpi->common.width,
                             cpi->common.height, abs(sum) >> (bw + bh));

@@ -572,21 +572,26 @@ void vp9_denoiser_set_noise_level(VP9_DENOISER *denoiser, int noise_level) {
 
 // Scale/increase the partition threshold for denoiser speed-up.
 int64_t vp9_scale_part_thresh(int64_t threshold, VP9_DENOISER_LEVEL noise_level,
-                              int content_state) {
+                              int content_state, int temporal_layer_id) {
   if ((content_state == kLowSadLowSumdiff) ||
       (content_state == kHighSadLowSumdiff) ||
-      (content_state == kLowVarHighSumdiff) || noise_level == kDenHigh)
-    return (3 * threshold) >> 1;
-  else
+      (content_state == kLowVarHighSumdiff) || (noise_level == kDenHigh) ||
+      (temporal_layer_id != 0)) {
+    int64_t scaled_thr =
+        (temporal_layer_id < 2) ? (3 * threshold) >> 1 : (7 * threshold) >> 2;
+    return scaled_thr;
+  } else {
     return (5 * threshold) >> 2;
+  }
 }
 
 //  Scale/increase the ac skip threshold for denoiser speed-up.
 int64_t vp9_scale_acskip_thresh(int64_t threshold,
-                                VP9_DENOISER_LEVEL noise_level,
-                                int abs_sumdiff) {
+                                VP9_DENOISER_LEVEL noise_level, int abs_sumdiff,
+                                int temporal_layer_id) {
   if (noise_level >= kDenLow && abs_sumdiff < 5)
-    return threshold *= (noise_level == kDenLow) ? 2 : 6;
+    return threshold *=
+           (noise_level == kDenLow) ? 2 : (temporal_layer_id == 2) ? 10 : 6;
   else
     return threshold;
 }

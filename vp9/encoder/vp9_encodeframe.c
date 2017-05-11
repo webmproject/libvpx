@@ -540,8 +540,9 @@ static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q,
 #if CONFIG_VP9_TEMPORAL_DENOISING
     if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc(cpi) &&
         cpi->oxcf.speed > 5 && cpi->denoiser.denoising_level >= kDenLow)
-      threshold_base = vp9_scale_part_thresh(
-          threshold_base, cpi->denoiser.denoising_level, content_state);
+      threshold_base =
+          vp9_scale_part_thresh(threshold_base, cpi->denoiser.denoising_level,
+                                content_state, cpi->svc.temporal_layer_id);
     else
       threshold_base =
           scale_part_thresh_sumdiff(threshold_base, cpi->oxcf.speed, cm->width,
