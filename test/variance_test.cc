@@ -1340,6 +1340,9 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_MSA
 
 #if HAVE_VSX
+INSTANTIATE_TEST_CASE_P(VSX, SumOfSquaresTest,
+                        ::testing::Values(vpx_get_mb_ss_vsx));
+
 INSTANTIATE_TEST_CASE_P(VSX, VpxSseTest,
                         ::testing::Values(SseParams(2, 2,
                                                     &vpx_get4x4sse_cs_vsx)));

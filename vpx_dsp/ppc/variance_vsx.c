@@ -38,6 +38,23 @@ uint32_t vpx_get4x4sse_cs_vsx(const uint8_t *a, int a_stride, const uint8_t *b,
   return distortion;
 }
 
+// TODO(lu_zero): Unroll
+uint32_t vpx_get_mb_ss_vsx(const int16_t *a) {
+  unsigned int i, sum = 0;
+  int32x4_t s = vec_splat_s32(0);
+
+  for (i = 0; i < 256; i += 8) {
+    const int16x8_t v = vec_vsx_ld(0, a + i);
+    s = vec_msum(v, v, s);
+  }
+
+  s = vec_splat(vec_sums(s, vec_splat_s32(0)), 3);
+
+  vec_ste((uint32x4_t)s, 0, &sum);
+
+  return sum;
+}
+
 void vpx_comp_avg_pred_vsx(uint8_t *comp_pred, const uint8_t *pred, int width,
                            int height, const uint8_t *ref, int ref_stride) {
   int i, j;
