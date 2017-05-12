@@ -16,6 +16,24 @@
       "revId": "cc7f0c0f3e168b31d4b5e5f42e0a368fa24ff62a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ec8079d3_2c9276f4",
+        "filename": "vpx_dsp/ppc/sad_vsx.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-12T16:20:11Z",
+      "side": 1,
+      "message": "that was for lint",
+      "parentUuid": "a6e3b161_cc0bac13",
+      "revId": "cc7f0c0f3e168b31d4b5e5f42e0a368fa24ff62a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
