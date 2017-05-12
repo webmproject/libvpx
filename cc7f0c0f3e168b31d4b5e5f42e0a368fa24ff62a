@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a6e3b161_cc0bac13",
+        "filename": "vpx_dsp/ppc/sad_vsx.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-12T13:41:25Z",
+      "side": 1,
+      "message": "missed the \u0027;\u0027 slipping in with one of the edits; those aren\u0027t necessary here and could generate warnings in some configs. I\u0027ll normalize to this in the rebase for now and we can drop them later if they\u0027re troublesome.",
+      "revId": "cc7f0c0f3e168b31d4b5e5f42e0a368fa24ff62a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
