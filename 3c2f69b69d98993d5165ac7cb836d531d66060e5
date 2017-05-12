@@ -145,6 +145,30 @@
     },
     {
       "key": {
+        "uuid": "609a7bfc_202abf54",
+        "filename": "test/dspbuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-12T16:25:17Z",
+      "side": 1,
+      "message": "\u003e I\u0027d rather not rename this if the only feature is ever going to be aligning the buffer. I agreed to the split with the understanding that other dsp-useful things could go here, like extending borders.\n\u003e \n\u003e The ctor weirdness is due to allocating the buffer in the constructor. If I skip that, it can work, but it requires everyone who uses it calling .Init() or something which is really annoying.\n\nthat is the motivation behind this though:\nhttps://google.github.io/styleguide/cppguide.html#Doing_Work_in_Constructors",
+      "parentUuid": "06c1f99a_f94b43a8",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 34
+      },
+      "revId": "3c2f69b69d98993d5165ac7cb836d531d66060e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a6baf3fa_91005747",
         "filename": "test/dspbuffer.h",
         "patchSetId": 9
