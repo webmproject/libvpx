@@ -440,7 +440,7 @@ INSTANTIATE_TEST_CASE_P(C, Trans4x4WHT,
 
 #if HAVE_NEON && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(NEON, Trans4x4DCT,
-                        ::testing::Values(make_tuple(&vpx_fdct4x4_c,
+                        ::testing::Values(make_tuple(&vpx_fdct4x4_neon,
                                                      &vpx_idct4x4_16_add_neon,
                                                      0, VPX_BITS_8)));
 #if !CONFIG_VP9_HIGHBITDEPTH
