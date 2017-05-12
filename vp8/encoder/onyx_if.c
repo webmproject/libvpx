@@ -728,6 +728,7 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
   SPEED_FEATURES *sf = &cpi->sf;
   int Mode = cpi->compressor_speed;
   int Speed = cpi->Speed;
+  int Speed2;
   int i;
   VP8_COMMON *cm = &cpi->common;
   int last_improved_quant = sf->improved_quant;
@@ -829,9 +830,16 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
   cpi->mode_check_freq[THR_V_PRED] = cpi->mode_check_freq[THR_H_PRED] =
       cpi->mode_check_freq[THR_B_PRED] =
           speed_map(Speed, mode_check_freq_map_vhbpred);
-  cpi->mode_check_freq[THR_NEW1] = speed_map(Speed, mode_check_freq_map_new1);
+
+  // For real-time mode at speed 10 keep the mode_check_freq threshold
+  // for NEW1 similar to that of speed 9.
+  Speed2 = Speed;
+  if (cpi->Speed == 10 && Mode == 2) Speed2 = RT(9);
+  cpi->mode_check_freq[THR_NEW1] = speed_map(Speed2, mode_check_freq_map_new1);
+
   cpi->mode_check_freq[THR_NEW2] = cpi->mode_check_freq[THR_NEW3] =
       speed_map(Speed, mode_check_freq_map_new2);
+
   cpi->mode_check_freq[THR_SPLIT1] =
       speed_map(Speed, mode_check_freq_map_split1);
   cpi->mode_check_freq[THR_SPLIT2] = cpi->mode_check_freq[THR_SPLIT3] =
