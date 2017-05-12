@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "9b17514d_5af43f2f",
+        "filename": "test/dspbuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-05-12T01:09:12Z",
+      "side": 1,
+      "message": "Given the context in which this class is used I think alignment is an opaque implementation detail of the buffer object. Yes, DSPBuffer\u003cT\u003e is very small, but I think the changes req\u0027d to make Buffer\u003cT\u003e capable of supporting an alignment are even smaller. It also gets rid of the that weird looking delete in the ctor, which just looks wrong (ok, probably getting hung up on aesthetics given this is for testing, but i really hate it).  I think all that\u0027s needed to do this in Buffer\u003cT\u003e are a ctor overload and some minor tweaks in Init() and the dtor. \n\nI guess I just don\u0027t think buffer alignment is something special enough for the extra class when the original only provides access to buffer data via an accessor. In the normal unaligned use case the user shouldn\u0027t care, and in the alignment use case I don\u0027t think it\u0027s really necessary to make the test writer find another class to use. Forcing them to use the ctor overload seems like enough of an indicator that something is different. \n\nI could be convinced about keeping this setup, and if I were the main comment I have is that this should be renamed:\n- s/DSPBuffer/AlignedBuffer\n- s/dspbuffer/aligned_buffer/",
+      "parentUuid": "94abc6bb_47686f06",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 34
+      },
+      "revId": "3c2f69b69d98993d5165ac7cb836d531d66060e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a6baf3fa_91005747",
         "filename": "test/dspbuffer.h",
         "patchSetId": 9
