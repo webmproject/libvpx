@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8f39ee02_6db92df3",
+        "filename": "vp9/encoder/arm/neon/vp9_quantize_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-12T18:20:14Z",
+      "side": 1,
+      "message": "I moved the tran_low_t helper functions to keep all the memory operations together",
+      "parentUuid": "2de4f803_e94e9112",
+      "range": {
+        "startLine": 25,
+        "startChar": 22,
+        "endLine": 25,
+        "endChar": 30
+      },
+      "revId": "82d272599d0b424f2d61f2d0e7021df89df03e85",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e0799aab_f93cc10a",
         "filename": "vpx_dsp/arm/idct4x4_add_neon.c",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-05-12T17:53:03Z",
       "side": 1,
       "message": "Curious what the generated assembly looks like for this change.",
+      "range": {
+        "startLine": 43,
+        "startChar": 0,
+        "endLine": 43,
+        "endChar": 44
+      },
+      "revId": "82d272599d0b424f2d61f2d0e7021df89df03e85",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c0004cad_43276d5e",
+        "filename": "vpx_dsp/arm/idct4x4_add_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-12T18:20:14Z",
+      "side": 1,
+      "message": "clang 3.8 from the ndk. doesn\u0027t always use vld, also use a vmov.32. previous code:\n  a0:   f4e1083f        vld1.32 {d16[0]}, [r1 :32]\n  b0:   e7b3c002        ldr     ip, [r3, r2]!\n  b8:   e1a00003        mov     r0, r3\n  c0:   e7b0e002        ldr     lr, [r0, r2]!\n  c8:   e0802002        add     r2, r0, r2\n  d0:   ee20cb90        vmov.32 d16[1], ip\n  d4:   f4e2183f        vld1.32 {d17[0]}, [r2 :32]\n  e4:   ee21eb90        vmov.32 d17[1], lr\n\nloads into d16 and d17. one vld1 and one vmov.32 each\n\nnew code (wow r3 get set up early)\n   4:   e0813002        add     r3, r1, r2\n  2c:   e1a00001        mov     r0, r1\n  a8:   f4e1083f        vld1.32 {d16[0]}, [r1 :32]\n  b0:   e7b0c082        ldr     ip, [r0, r2, lsl #1]!\n  b8:   e0802002        add     r2, r0, r2\n  c4:   f4e308bf        vld1.32 {d16[1]}, [r3 :32]\n  cc:   f4e2183f        vld1.32 {d17[0]}, [r2 :32]\n  dc:   ee21cb90        vmov.32 d17[1], ip\n\ntotal length of the new function is two fewer instructions as it does not push any values to the stack. it manages to get by with only the scratch registers.\n\nneither figures out the ! auto-increment. the new code uses one more vld1 and one fewer vmov.32 for some reason, and has easier to follow pointer math, but neither is great in that regard.",
+      "parentUuid": "e0799aab_f93cc10a",
       "range": {
         "startLine": 43,
         "startChar": 0,
