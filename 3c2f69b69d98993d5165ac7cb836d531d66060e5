@@ -193,6 +193,30 @@
     },
     {
       "key": {
+        "uuid": "f1dc14f7_19015983",
+        "filename": "test/dspbuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-13T00:26:30Z",
+      "side": 1,
+      "message": "\u003e It is not calling a virtual function. I tried that, and it didn\u0027t work.\n\u003e \n\u003e Re signaling errors, it uses ASSERT() in the constructor, so it does signal error.\n\u003e \n\u003e Not sure which part of that you are trying to highlight.\n\nI was pointing out the reason for init. ASSERT only signals errors if you handle them later, it\u0027s just going to return from the constructor and crash later if you don\u0027t add another ASSERT at the call site, in which case Init makes sense.",
+      "parentUuid": "ad67c996_223fcd83",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 34
+      },
+      "revId": "3c2f69b69d98993d5165ac7cb836d531d66060e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a6baf3fa_91005747",
         "filename": "test/dspbuffer.h",
         "patchSetId": 9
