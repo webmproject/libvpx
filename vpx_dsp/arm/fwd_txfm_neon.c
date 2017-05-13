@@ -14,6 +14,7 @@
 #include "vpx_dsp/txfm_common.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_dsp/arm/idct_neon.h"
+#include "vpx_dsp/arm/mem_neon.h"
 
 void vpx_fdct8x8_neon(const int16_t *input, tran_low_t *final_output,
                       int stride) {

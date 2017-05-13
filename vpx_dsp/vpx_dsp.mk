@@ -352,6 +352,7 @@ endif  # CONFIG_VP9_HIGHBITDEPTH
 endif  # CONFIG_ENCODERS || CONFIG_POSTPROC || CONFIG_VP9_POSTPROC
 
 # Neon utilities
+DSP_SRCS-$(HAVE_NEON) += arm/mem_neon.h
 DSP_SRCS-$(HAVE_NEON) += arm/transpose_neon.h
 
 # PPC VSX utilities
