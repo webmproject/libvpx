@@ -73,6 +73,9 @@
                                        // chosen.
 // #define OUTPUT_YUV_REC
 
+#define FRAME_SIZE_FACTOR 128  // empirical params for context model threshold
+#define FRAME_RATE_FACTOR 8
+
 #ifdef OUTPUT_YUV_DENOISED
 FILE *yuv_denoised_file = NULL;
 #endif
@@ -99,6 +102,331 @@ static int is_spatial_denoise_enabled(VP9_COMP *cpi) {
          frame_is_intra_only(cm);
 }
 #endif
+
+// compute adaptive threshold for skip recoding
+static int compute_context_model_thresh(const VP9_COMP *const cpi) {
+  const VP9_COMMON *const cm = &cpi->common;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const int frame_size = (cm->width * cm->height) >> 10;
+  const int bitrate = (int)(oxcf->target_bandwidth >> 10);
+  const int qindex_factor = cm->base_qindex + (MAXQ >> 1);
+
+  // This equation makes the threshold adaptive to frame size.
+  // Coding gain obtained by recoding comes from alternate frames of large
+  // content change. We skip recoding if the difference of previous and current
+  // frame context probability model is less than a certain threshold.
+  // The first component is the most critical part to guarantee adaptivity.
+  // Other parameters are estimated based on normal setting of hd resolution
+  // parameters. e.g frame_size = 1920x1080, bitrate = 8000, qindex_factor < 50
+  const int thresh =
+      ((FRAME_SIZE_FACTOR * frame_size - FRAME_RATE_FACTOR * bitrate) *
+       qindex_factor) >>
+      9;
+
+  return thresh;
+}
+
+// compute the total cost difference between current
+// and previous frame context prob model.
+static int compute_context_model_diff(const VP9_COMMON *const cm) {
+  const FRAME_CONTEXT *const pre_fc =
+      &cm->frame_contexts[cm->frame_context_idx];
+  const FRAME_CONTEXT *const cur_fc = cm->fc;
+  const FRAME_COUNTS *counts = &cm->counts;
+  vpx_prob pre_last_prob, cur_last_prob;
+  int diff = 0;
+  int i, j, k, l, m, n;
+
+  // y_mode_prob
+  for (i = 0; i < BLOCK_SIZE_GROUPS; ++i) {
+    for (j = 0; j < INTRA_MODES - 1; ++j) {
+      diff += (int)counts->y_mode[i][j] *
+              (pre_fc->y_mode_prob[i][j] - cur_fc->y_mode_prob[i][j]);
+    }
+    pre_last_prob = MAX_PROB - pre_fc->y_mode_prob[i][INTRA_MODES - 2];
+    cur_last_prob = MAX_PROB - cur_fc->y_mode_prob[i][INTRA_MODES - 2];
+
+    diff += (int)counts->y_mode[i][INTRA_MODES - 1] *
+            (pre_last_prob - cur_last_prob);
+  }
+
+  // uv_mode_prob
+  for (i = 0; i < INTRA_MODES; ++i) {
+    for (j = 0; j < INTRA_MODES - 1; ++j) {
+      diff += (int)counts->uv_mode[i][j] *
+              (pre_fc->uv_mode_prob[i][j] - cur_fc->uv_mode_prob[i][j]);
+    }
+    pre_last_prob = MAX_PROB - pre_fc->uv_mode_prob[i][INTRA_MODES - 2];
+    cur_last_prob = MAX_PROB - cur_fc->uv_mode_prob[i][INTRA_MODES - 2];
+
+    diff += (int)counts->uv_mode[i][INTRA_MODES - 1] *
+            (pre_last_prob - cur_last_prob);
+  }
+
+  // partition_prob
+  for (i = 0; i < PARTITION_CONTEXTS; ++i) {
+    for (j = 0; j < PARTITION_TYPES - 1; ++j) {
+      diff += (int)counts->partition[i][j] *
+              (pre_fc->partition_prob[i][j] - cur_fc->partition_prob[i][j]);
+    }
+    pre_last_prob = MAX_PROB - pre_fc->partition_prob[i][PARTITION_TYPES - 2];
+    cur_last_prob = MAX_PROB - cur_fc->partition_prob[i][PARTITION_TYPES - 2];
+
+    diff += (int)counts->partition[i][PARTITION_TYPES - 1] *
+            (pre_last_prob - cur_last_prob);
+  }
+
+  // coef_probs
+  for (i = 0; i < TX_SIZES; ++i) {
+    for (j = 0; j < PLANE_TYPES; ++j) {
+      for (k = 0; k < REF_TYPES; ++k) {
+        for (l = 0; l < COEF_BANDS; ++l) {
+          for (m = 0; m < BAND_COEFF_CONTEXTS(l); ++m) {
+            for (n = 0; n < UNCONSTRAINED_NODES; ++n) {
+              diff += (int)counts->coef[i][j][k][l][m][n] *
+                      (pre_fc->coef_probs[i][j][k][l][m][n] -
+                       cur_fc->coef_probs[i][j][k][l][m][n]);
+            }
+
+            pre_last_prob =
+                MAX_PROB -
+                pre_fc->coef_probs[i][j][k][l][m][UNCONSTRAINED_NODES - 1];
+            cur_last_prob =
+                MAX_PROB -
+                cur_fc->coef_probs[i][j][k][l][m][UNCONSTRAINED_NODES - 1];
+
+            diff += (int)counts->coef[i][j][k][l][m][UNCONSTRAINED_NODES] *
+                    (pre_last_prob - cur_last_prob);
+          }
+        }
+      }
+    }
+  }
+
+  // switchable_interp_prob
+  for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i) {
+    for (j = 0; j < SWITCHABLE_FILTERS - 1; ++j) {
+      diff += (int)counts->switchable_interp[i][j] *
+              (pre_fc->switchable_interp_prob[i][j] -
+               cur_fc->switchable_interp_prob[i][j]);
+    }
+    pre_last_prob =
+        MAX_PROB - pre_fc->switchable_interp_prob[i][SWITCHABLE_FILTERS - 2];
+    cur_last_prob =
+        MAX_PROB - cur_fc->switchable_interp_prob[i][SWITCHABLE_FILTERS - 2];
+
+    diff += (int)counts->switchable_interp[i][SWITCHABLE_FILTERS - 1] *
+            (pre_last_prob - cur_last_prob);
+  }
+
+  // inter_mode_probs
+  for (i = 0; i < INTER_MODE_CONTEXTS; ++i) {
+    for (j = 0; j < INTER_MODES - 1; ++j) {
+      diff += (int)counts->inter_mode[i][j] *
+              (pre_fc->inter_mode_probs[i][j] - cur_fc->inter_mode_probs[i][j]);
+    }
+    pre_last_prob = MAX_PROB - pre_fc->inter_mode_probs[i][INTER_MODES - 2];
+    cur_last_prob = MAX_PROB - cur_fc->inter_mode_probs[i][INTER_MODES - 2];
+
+    diff += (int)counts->inter_mode[i][INTER_MODES - 1] *
+            (pre_last_prob - cur_last_prob);
+  }
+
+  // intra_inter_prob
+  for (i = 0; i < INTRA_INTER_CONTEXTS; ++i) {
+    diff += (int)counts->intra_inter[i][0] *
+            (pre_fc->intra_inter_prob[i] - cur_fc->intra_inter_prob[i]);
+
+    pre_last_prob = MAX_PROB - pre_fc->intra_inter_prob[i];
+    cur_last_prob = MAX_PROB - cur_fc->intra_inter_prob[i];
+
+    diff += (int)counts->intra_inter[i][1] * (pre_last_prob - cur_last_prob);
+  }
+
+  // comp_inter_prob
+  for (i = 0; i < COMP_INTER_CONTEXTS; ++i) {
+    diff += (int)counts->comp_inter[i][0] *
+            (pre_fc->comp_inter_prob[i] - cur_fc->comp_inter_prob[i]);
+
+    pre_last_prob = MAX_PROB - pre_fc->comp_inter_prob[i];
+    cur_last_prob = MAX_PROB - cur_fc->comp_inter_prob[i];
+
+    diff += (int)counts->comp_inter[i][1] * (pre_last_prob - cur_last_prob);
+  }
+
+  // single_ref_prob
+  for (i = 0; i < REF_CONTEXTS; ++i) {
+    for (j = 0; j < 2; ++j) {
+      diff += (int)counts->single_ref[i][j][0] *
+              (pre_fc->single_ref_prob[i][j] - cur_fc->single_ref_prob[i][j]);
+
+      pre_last_prob = MAX_PROB - pre_fc->single_ref_prob[i][j];
+      cur_last_prob = MAX_PROB - cur_fc->single_ref_prob[i][j];
+
+      diff +=
+          (int)counts->single_ref[i][j][1] * (pre_last_prob - cur_last_prob);
+    }
+  }
+
+  // comp_ref_prob
+  for (i = 0; i < REF_CONTEXTS; ++i) {
+    diff += (int)counts->comp_ref[i][0] *
+            (pre_fc->comp_ref_prob[i] - cur_fc->comp_ref_prob[i]);
+
+    pre_last_prob = MAX_PROB - pre_fc->comp_ref_prob[i];
+    cur_last_prob = MAX_PROB - cur_fc->comp_ref_prob[i];
+
+    diff += (int)counts->comp_ref[i][1] * (pre_last_prob - cur_last_prob);
+  }
+
+  // tx_probs
+  for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
+    // p32x32
+    for (j = 0; j < TX_SIZES - 1; ++j) {
+      diff += (int)counts->tx.p32x32[i][j] *
+              (pre_fc->tx_probs.p32x32[i][j] - cur_fc->tx_probs.p32x32[i][j]);
+    }
+    pre_last_prob = MAX_PROB - pre_fc->tx_probs.p32x32[i][TX_SIZES - 2];
+    cur_last_prob = MAX_PROB - cur_fc->tx_probs.p32x32[i][TX_SIZES - 2];
+
+    diff += (int)counts->tx.p32x32[i][TX_SIZES - 1] *
+            (pre_last_prob - cur_last_prob);
+
+    // p16x16
+    for (j = 0; j < TX_SIZES - 2; ++j) {
+      diff += (int)counts->tx.p16x16[i][j] *
+              (pre_fc->tx_probs.p16x16[i][j] - cur_fc->tx_probs.p16x16[i][j]);
+    }
+    pre_last_prob = MAX_PROB - pre_fc->tx_probs.p16x16[i][TX_SIZES - 3];
+    cur_last_prob = MAX_PROB - cur_fc->tx_probs.p16x16[i][TX_SIZES - 3];
+
+    diff += (int)counts->tx.p16x16[i][TX_SIZES - 2] *
+            (pre_last_prob - cur_last_prob);
+
+    // p8x8
+    for (j = 0; j < TX_SIZES - 3; ++j) {
+      diff += (int)counts->tx.p8x8[i][j] *
+              (pre_fc->tx_probs.p8x8[i][j] - cur_fc->tx_probs.p8x8[i][j]);
+    }
+    pre_last_prob = MAX_PROB - pre_fc->tx_probs.p8x8[i][TX_SIZES - 4];
+    cur_last_prob = MAX_PROB - cur_fc->tx_probs.p8x8[i][TX_SIZES - 4];
+
+    diff +=
+        (int)counts->tx.p8x8[i][TX_SIZES - 3] * (pre_last_prob - cur_last_prob);
+  }
+
+  // skip_probs
+  for (i = 0; i < SKIP_CONTEXTS; ++i) {
+    diff += (int)counts->skip[i][0] *
+            (pre_fc->skip_probs[i] - cur_fc->skip_probs[i]);
+
+    pre_last_prob = MAX_PROB - pre_fc->skip_probs[i];
+    cur_last_prob = MAX_PROB - cur_fc->skip_probs[i];
+
+    diff += (int)counts->skip[i][1] * (pre_last_prob - cur_last_prob);
+  }
+
+  // mv
+  for (i = 0; i < MV_JOINTS - 1; ++i) {
+    diff += (int)counts->mv.joints[i] *
+            (pre_fc->nmvc.joints[i] - cur_fc->nmvc.joints[i]);
+  }
+  pre_last_prob = MAX_PROB - pre_fc->nmvc.joints[MV_JOINTS - 2];
+  cur_last_prob = MAX_PROB - cur_fc->nmvc.joints[MV_JOINTS - 2];
+
+  diff +=
+      (int)counts->mv.joints[MV_JOINTS - 1] * (pre_last_prob - cur_last_prob);
+
+  for (i = 0; i < 2; ++i) {
+    const nmv_component_counts *nmv_count = &counts->mv.comps[i];
+    const nmv_component *pre_nmv_prob = &pre_fc->nmvc.comps[i];
+    const nmv_component *cur_nmv_prob = &cur_fc->nmvc.comps[i];
+
+    // sign
+    diff += (int)nmv_count->sign[0] * (pre_nmv_prob->sign - cur_nmv_prob->sign);
+
+    pre_last_prob = MAX_PROB - pre_nmv_prob->sign;
+    cur_last_prob = MAX_PROB - cur_nmv_prob->sign;
+
+    diff += (int)nmv_count->sign[1] * (pre_last_prob - cur_last_prob);
+
+    // classes
+    for (j = 0; j < MV_CLASSES - 1; ++j) {
+      diff += (int)nmv_count->classes[j] *
+              (pre_nmv_prob->classes[j] - cur_nmv_prob->classes[j]);
+    }
+    pre_last_prob = MAX_PROB - pre_nmv_prob->classes[MV_CLASSES - 2];
+    cur_last_prob = MAX_PROB - cur_nmv_prob->classes[MV_CLASSES - 2];
+
+    diff += (int)nmv_count->classes[MV_CLASSES - 1] *
+            (pre_last_prob - cur_last_prob);
+
+    // class0
+    for (j = 0; j < CLASS0_SIZE - 1; ++j) {
+      diff += (int)nmv_count->class0[j] *
+              (pre_nmv_prob->class0[j] - cur_nmv_prob->class0[j]);
+    }
+    pre_last_prob = MAX_PROB - pre_nmv_prob->class0[CLASS0_SIZE - 2];
+    cur_last_prob = MAX_PROB - cur_nmv_prob->class0[CLASS0_SIZE - 2];
+
+    diff += (int)nmv_count->class0[CLASS0_SIZE - 1] *
+            (pre_last_prob - cur_last_prob);
+
+    // bits
+    for (j = 0; j < MV_OFFSET_BITS; ++j) {
+      diff += (int)nmv_count->bits[j][0] *
+              (pre_nmv_prob->bits[j] - cur_nmv_prob->bits[j]);
+
+      pre_last_prob = MAX_PROB - pre_nmv_prob->bits[j];
+      cur_last_prob = MAX_PROB - cur_nmv_prob->bits[j];
+
+      diff += (int)nmv_count->bits[j][1] * (pre_last_prob - cur_last_prob);
+    }
+
+    // class0_fp
+    for (j = 0; j < CLASS0_SIZE; ++j) {
+      for (k = 0; k < MV_FP_SIZE - 1; ++k) {
+        diff += (int)nmv_count->class0_fp[j][k] *
+                (pre_nmv_prob->class0_fp[j][k] - cur_nmv_prob->class0_fp[j][k]);
+      }
+      pre_last_prob = MAX_PROB - pre_nmv_prob->class0_fp[j][MV_FP_SIZE - 2];
+      cur_last_prob = MAX_PROB - cur_nmv_prob->class0_fp[j][MV_FP_SIZE - 2];
+
+      diff += (int)nmv_count->class0_fp[j][MV_FP_SIZE - 1] *
+              (pre_last_prob - cur_last_prob);
+    }
+
+    // fp
+    for (j = 0; j < MV_FP_SIZE - 1; ++j) {
+      diff +=
+          (int)nmv_count->fp[j] * (pre_nmv_prob->fp[j] - cur_nmv_prob->fp[j]);
+    }
+    pre_last_prob = MAX_PROB - pre_nmv_prob->fp[MV_FP_SIZE - 2];
+    cur_last_prob = MAX_PROB - cur_nmv_prob->fp[MV_FP_SIZE - 2];
+
+    diff +=
+        (int)nmv_count->fp[MV_FP_SIZE - 1] * (pre_last_prob - cur_last_prob);
+
+    // class0_hp
+    diff += (int)nmv_count->class0_hp[0] *
+            (pre_nmv_prob->class0_hp - cur_nmv_prob->class0_hp);
+
+    pre_last_prob = MAX_PROB - pre_nmv_prob->class0_hp;
+    cur_last_prob = MAX_PROB - cur_nmv_prob->class0_hp;
+
+    diff += (int)nmv_count->class0_hp[1] * (pre_last_prob - cur_last_prob);
+
+    // hp
+    diff += (int)nmv_count->hp[0] * (pre_nmv_prob->hp - cur_nmv_prob->hp);
+
+    pre_last_prob = MAX_PROB - pre_nmv_prob->hp;
+    cur_last_prob = MAX_PROB - cur_nmv_prob->hp;
+
+    diff += (int)nmv_count->hp[1] * (pre_last_prob - cur_last_prob);
+  }
+
+  return -diff;
+}
 
 // Test for whether to calculate metrics for the frame.
 static int is_psnr_calc_enabled(VP9_COMP *cpi) {
@@ -3648,6 +3976,15 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
 #endif
 
   if (enable_acl) {
+    // Skip recoding, if model diff is below threshold
+    const int thresh = compute_context_model_thresh(cpi);
+    const int diff = compute_context_model_diff(cm);
+    if (diff < thresh) {
+      vpx_clear_system_state();
+      restore_coding_context(cpi);
+      return;
+    }
+
     vp9_encode_frame(cpi);
     vpx_clear_system_state();
     restore_coding_context(cpi);
