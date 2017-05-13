@@ -4414,12 +4414,14 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
       ++cm->current_video_frame;
       cpi->ext_refresh_frame_flags_pending = 0;
       cpi->svc.rc_drop_superframe = 1;
+      cpi->last_frame_dropped = 1;
       // TODO(marpan): Advancing the svc counters on dropped frames can break
       // the referencing scheme for the fixed svc patterns defined in
       // vp9_one_pass_cbr_svc_start_layer(). Look into fixing this issue, but
       // for now, don't advance the svc frame counters on dropped frame.
       // if (cpi->use_svc)
       //   vp9_inc_frame_in_layer(cpi);
+
       return;
     }
   }
@@ -4436,6 +4438,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
   } else {
     encode_with_recode_loop(cpi, size, dest);
   }
+
+  cpi->last_frame_dropped = 0;
 
   // Disable segmentation if it decrease rate/distortion ratio
   if (cpi->oxcf.aq_mode == LOOKAHEAD_AQ)
