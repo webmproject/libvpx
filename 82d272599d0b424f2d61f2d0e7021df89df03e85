@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "3cda9775_d4d4a9ae",
+        "filename": "vp8/common/arm/neon/bilinearpredict_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-13T00:44:34Z",
+      "side": 1,
+      "message": "could this just be store_unaligned_u8q? you\u0027re storing to a buffer so the source should be enough in the name",
+      "range": {
+        "startLine": 115,
+        "startChar": 4,
+        "endLine": 115,
+        "endChar": 32
+      },
+      "revId": "82d272599d0b424f2d61f2d0e7021df89df03e85",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2de4f803_e94e9112",
         "filename": "vp9/encoder/arm/neon/vp9_quantize_neon.c",
         "patchSetId": 1
@@ -37,6 +60,30 @@
       "side": 1,
       "message": "I moved the tran_low_t helper functions to keep all the memory operations together",
       "parentUuid": "2de4f803_e94e9112",
+      "range": {
+        "startLine": 25,
+        "startChar": 22,
+        "endLine": 25,
+        "endChar": 30
+      },
+      "revId": "82d272599d0b424f2d61f2d0e7021df89df03e85",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f9627dd5_69f76614",
+        "filename": "vp9/encoder/arm/neon/vp9_quantize_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-13T00:44:34Z",
+      "side": 1,
+      "message": "\u003e I moved the tran_low_t helper functions to keep all the memory operations together\n\ndoing that first would have helped keeping the size down and comments like this",
+      "parentUuid": "8f39ee02_6db92df3",
       "range": {
         "startLine": 25,
         "startChar": 22,
@@ -184,6 +231,23 @@
         "endLine": 82,
         "endChar": 33
       },
+      "revId": "82d272599d0b424f2d61f2d0e7021df89df03e85",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c0dbfbd3_b3afa245",
+        "filename": "vpx_dsp/arm/mem_neon.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-13T00:44:34Z",
+      "side": 1,
+      "message": "in both load and store cases what\u0027s the difference between this, u32 lanes and u8 lanes?",
       "revId": "82d272599d0b424f2d61f2d0e7021df89df03e85",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
