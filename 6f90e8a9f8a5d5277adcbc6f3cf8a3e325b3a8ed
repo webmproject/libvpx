@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "f5ae055c_7702c88f",
+        "filename": "vpx_dsp/arm/mem_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-15T15:53:23Z",
+      "side": 1,
+      "message": "\u003e It is because if it is not a multiple of 4 (say, 6) then the second load is not aligned on the 4 byte boundary.\n\noh right, I wasn\u0027t thinking of the condition you were trying to preserve here",
+      "parentUuid": "f1a644c3_a23b9b2f",
+      "range": {
+        "startLine": 77,
+        "startChar": 2,
+        "endLine": 77,
+        "endChar": 41
+      },
+      "revId": "6f90e8a9f8a5d5277adcbc6f3cf8a3e325b3a8ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e0852ba3_0c6f6336",
         "filename": "vpx_dsp/arm/mem_neon.h",
         "patchSetId": 2
