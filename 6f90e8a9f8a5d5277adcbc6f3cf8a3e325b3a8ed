@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "987636cc_6a1d75c7",
+        "filename": "vpx_dsp/arm/idct4x4_add_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-15T18:18:54Z",
+      "side": 1,
+      "message": "huh, not sure why the build didn\u0027t fail.\n\noh because i was building armv7-linux-gcc which prefers the assembly",
+      "parentUuid": "bbdd05cd_634c2c7f",
+      "range": {
+        "startLine": 43,
+        "startChar": 2,
+        "endLine": 43,
+        "endChar": 36
+      },
+      "revId": "6f90e8a9f8a5d5277adcbc6f3cf8a3e325b3a8ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "85615433_a009918f",
         "filename": "vpx_dsp/arm/mem_neon.h",
         "patchSetId": 2
@@ -116,6 +140,30 @@
       "revId": "6f90e8a9f8a5d5277adcbc6f3cf8a3e325b3a8ed",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "691c836b_c3c086e8",
+        "filename": "vpx_dsp/arm/mem_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-15T18:18:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e0852ba3_0c6f6336",
+      "range": {
+        "startLine": 86,
+        "startChar": 28,
+        "endLine": 86,
+        "endChar": 38
+      },
+      "revId": "6f90e8a9f8a5d5277adcbc6f3cf8a3e325b3a8ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
