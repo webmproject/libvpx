@@ -16,6 +16,24 @@
       "revId": "9cb0f70a2fcb58210faa92269f643f8895727a1f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d71bdbd8_e0e1ded9",
+        "filename": "vpx_ports/mem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-15T18:31:03Z",
+      "side": 1,
+      "message": "i don\u0027t think __apple__ is correct because it uses that to test the specific apple compiler, which leads me to believe it might not be defined by chromium clang targeting macho, which is where this is cropping up\n\nmy mistake on the __MACHO__/__MACH__",
+      "parentUuid": "6ebee99b_68a03caf",
+      "revId": "9cb0f70a2fcb58210faa92269f643f8895727a1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
