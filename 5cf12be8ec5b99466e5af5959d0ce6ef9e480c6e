@@ -146,6 +146,24 @@
       "revId": "5cf12be8ec5b99466e5af5959d0ce6ef9e480c6e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d4be39aa_af14ba63",
+        "filename": "vpx_dsp/arm/mem_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-15T17:53:18Z",
+      "side": 1,
+      "message": "\u003e \u003e It produces garbage:\n\u003e \u003e [...]\n\u003e \u003e $ clang --version\n\u003e \u003e Android clang version 3.8.256229  (based on LLVM 3.8.256229)\n\u003e \u003e Target: armv7a-none-linux-android\n\u003e \u003e $ clang -march\u003darmv7-a -mfloat-abi\u003dhard -mfpu\u003dneon -Wall -Wdeclaration-after-statement -Wdisabled-optimization -Wpointer-arith -Wtype-limits -Wcast-qual -Wvla -Wimplicit-function-declaration -Wuninitialized -Wunused -Wextra -Wundef -c test_neon.c \n\u003e \u003e \n\u003e \n\u003e that\u0027s a debug build; you could move it into a separate function to see what it\u0027d look like in an optimized build\n\n    #include \u003carm_neon.h\u003e\n    #include \u003cstring.h\u003e\n\n    // #define USE_UNALIGNED\n    #if defined(USE_UNALIGNED)\n    typedef uint32_t __attribute__((aligned(1))) uint32_unaligned;\n    #else\n    void inline uint32_to_mem(uint8_t* buf, uint32_t val) {\n      memcpy(buf, \u0026val, 4);\n    }\n    #endif\n\n    int func(uint8_t* dest) {\n      uint32_t source[4] \u003d {0, 1, 2, 3};\n      uint32x4_t s_u32 \u003d vld1q_u32(source);\n    #if !defined(USE_UNALIGNED)\n      uint32_to_mem(dest + 2, vgetq_lane_u32(s_u32, 0));\n      uint32_to_mem(dest + 6, vgetq_lane_u32(s_u32, 1));\n      uint32_to_mem(dest + 10, vgetq_lane_u32(s_u32, 2));\n      uint32_to_mem(dest + 14, vgetq_lane_u32(s_u32, 3));\n    #else\n      vst1q_lane_u32((uint32_unaligned *)(dest + 2), s_u32, 0);\n      vst1q_lane_u32((uint32_unaligned *)(dest + 6), s_u32, 1);\n      vst1q_lane_u32((uint32_unaligned *)(dest + 10), s_u32, 2);\n      vst1q_lane_u32((uint32_unaligned *)(dest + 14), s_u32, 3);\n    #endif\n      return 0;\n    }\n\nproduces equivalent code at -O2 with Android clang version 3.8.275480  (based on LLVM 3.8.275480) \u003d r14b. as did other variations of storing to temp then memcpy\u0027ing",
+      "parentUuid": "2cc3d197_cf709ad0",
+      "revId": "5cf12be8ec5b99466e5af5959d0ce6ef9e480c6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
