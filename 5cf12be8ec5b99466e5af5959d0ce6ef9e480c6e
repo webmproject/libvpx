@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "769e99d7_77747d68",
+        "filename": "vpx_dsp/arm/mem_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-15T15:52:27Z",
+      "side": 1,
+      "message": "load/store -- there\u0027s only store here right now",
+      "range": {
+        "startLine": 72,
+        "startChar": 56,
+        "endLine": 72,
+        "endChar": 61
+      },
+      "revId": "5cf12be8ec5b99466e5af5959d0ce6ef9e480c6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6508f4cf_941ab98e",
+        "filename": "vpx_dsp/arm/mem_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-15T15:52:27Z",
+      "side": 1,
+      "message": "if this is going to appear in future functions you could #define a USE_XXX helper to keep the conditions isolated to one place",
+      "range": {
+        "startLine": 85,
+        "startChar": 4,
+        "endLine": 85,
+        "endChar": 54
+      },
+      "revId": "5cf12be8ec5b99466e5af5959d0ce6ef9e480c6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1ff1a465_bfdec383",
+        "filename": "vpx_dsp/arm/mem_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-15T15:52:27Z",
+      "side": 1,
+      "message": "I wonder what this path looks like if you embed the memcpy in an inline\ninline uint32_to_mem(buf, u) { memcpy(buf, \u0026u, 4) }\nand then pass the lanes to that. that\u0027s similar to the pattern we use in webp for x86",
+      "revId": "5cf12be8ec5b99466e5af5959d0ce6ef9e480c6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
