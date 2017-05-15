@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6ebee99b_68a03caf",
+        "filename": "vpx_ports/mem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-15T18:21:32Z",
+      "side": 1,
+      "message": "elsewhere we test __APPLE__ or defined(__APPLE__) \u0026\u0026 defined(__apple_build_version__), but __MACH__ might be sufficient here",
+      "revId": "9cb0f70a2fcb58210faa92269f643f8895727a1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
