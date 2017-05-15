@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b435d686_4e574909",
+        "filename": "vpx_dsp/arm/mem_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-15T17:18:00Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "769e99d7_77747d68",
+      "range": {
+        "startLine": 72,
+        "startChar": 56,
+        "endLine": 72,
+        "endChar": 61
+      },
+      "revId": "5cf12be8ec5b99466e5af5959d0ce6ef9e480c6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6508f4cf_941ab98e",
         "filename": "vpx_dsp/arm/mem_neon.h",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "7a3597f5_5dc3ea7f",
+        "filename": "vpx_dsp/arm/mem_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-15T17:18:00Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "6508f4cf_941ab98e",
+      "range": {
+        "startLine": 85,
+        "startChar": 4,
+        "endLine": 85,
+        "endChar": 54
+      },
+      "revId": "5cf12be8ec5b99466e5af5959d0ce6ef9e480c6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1ff1a465_bfdec383",
         "filename": "vpx_dsp/arm/mem_neon.h",
         "patchSetId": 2
@@ -59,6 +107,24 @@
       "writtenOn": "2017-05-15T15:52:27Z",
       "side": 1,
       "message": "I wonder what this path looks like if you embed the memcpy in an inline\ninline uint32_to_mem(buf, u) { memcpy(buf, \u0026u, 4) }\nand then pass the lanes to that. that\u0027s similar to the pattern we use in webp for x86",
+      "revId": "5cf12be8ec5b99466e5af5959d0ce6ef9e480c6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ae937838_2de1cf3c",
+        "filename": "vpx_dsp/arm/mem_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-15T17:18:00Z",
+      "side": 1,
+      "message": "It produces garbage:\n#include \u003carm_neon.h\u003e\n#include \u003cstring.h\u003e\n\nint main(int argc, char **argv) {\n\n  uint32_t source[4] \u003d {0, 1, 2, 3};\n  uint32x4_t s_u32 \u003d vld1q_u32(source);\n  uint8_t dest[18];\n  uint32_t temp;\n\n  (void)argc;\n  (void)argv;\n\n  vst1q_lane_u32(\u0026temp, s_u32, 0);\n  memcpy(dest + 2, \u0026temp, 4);\n\n  vst1q_lane_u32(\u0026temp, s_u32, 1);\n  memcpy(dest + 6, \u0026temp, 4);\n\n  vst1q_lane_u32(\u0026temp, s_u32, 2);\n  memcpy(dest + 10, \u0026temp, 4);\n\n  vst1q_lane_u32(\u0026temp, s_u32, 3);\n  memcpy(dest + 14, \u0026temp, 4);\n\n  return 0;\n}\n$ clang --version\nAndroid clang version 3.8.256229  (based on LLVM 3.8.256229)\nTarget: armv7a-none-linux-android\n$ clang -march\u003darmv7-a -mfloat-abi\u003dhard -mfpu\u003dneon -Wall -Wdeclaration-after-statement -Wdisabled-optimization -Wpointer-arith -Wtype-limits -Wcast-qual -Wvla -Wimplicit-function-declaration -Wuninitialized -Wunused -Wextra -Wundef -c test_neon.c \n\n00000000 \u003cmain\u003e:\n   0:\te52db004 \tpush\t{fp}\t\t; (str fp, [sp, #-4]!)\n   4:\te1a0b00d \tmov\tfp, sp\n   8:\te24dd0ac \tsub\tsp, sp, #172\t; 0xac\n   c:\te7c3d01f \tbfc\tsp, #0, #4\n  10:\te3002000 \tmovw\tr2, #0\n  14:\te3a03000 \tmov\tr3, #0\n  18:\te58d30a8 \tstr\tr3, [sp, #168]\t; 0xa8\n  1c:\te58d00a4 \tstr\tr0, [sp, #164]\t; 0xa4\n  20:\te58d10a0 \tstr\tr1, [sp, #160]\t; 0xa0\n  24:\te59f00bc \tldr\tr0, [pc, #188]\t; e8 \u003cmain+0xe8\u003e\n  28:\te08f0000 \tadd\tr0, pc, r0\n  2c:\tf4600a8f \tvld1.32\t{d16-d17}, [r0]\n  30:\te28d0090 \tadd\tr0, sp, #144\t; 0x90\n  34:\tf4400acf \tvst1.64\t{d16-d17}, [r0]\n  38:\tf4600a8f \tvld1.32\t{d16-d17}, [r0]\n  3c:\te28d0070 \tadd\tr0, sp, #112\t; 0x70\n  40:\tf4400aef \tvst1.64\t{d16-d17}, [r0 :128]\n  44:\te28d0060 \tadd\tr0, sp, #96\t; 0x60\n  48:\tf4400aef \tvst1.64\t{d16-d17}, [r0 :128]\n  4c:\te28d0080 \tadd\tr0, sp, #128\t; 0x80\n  50:\tf4400aef \tvst1.64\t{d16-d17}, [r0 :128]\n  54:\te28d1030 \tadd\tr1, sp, #48\t; 0x30\n  58:\tf4410aef \tvst1.64\t{d16-d17}, [r1 :128]\n  5c:\te28d1048 \tadd\tr1, sp, #72\t; 0x48\n  60:\tf4c1083f \tvst1.32\t{d16[0]}, [r1 :32]\n  64:\te28d304e \tadd\tr3, sp, #78\t; 0x4e\n  68:\te283c002 \tadd\tip, r3, #2\n  6c:\tf4cc080f \tvst1.32\t{d16[0]}, [ip]\n  70:\tf4600aef \tvld1.64\t{d16-d17}, [r0 :128]\n  74:\te28dc020 \tadd\tip, sp, #32\n  78:\tf44c0aef \tvst1.64\t{d16-d17}, [ip :128]\n  7c:\tf4c108bf \tvst1.32\t{d16[1]}, [r1 :32]\n  80:\te283c006 \tadd\tip, r3, #6\n  84:\tf4cc088f \tvst1.32\t{d16[1]}, [ip]\n  88:\tf4600aef \tvld1.64\t{d16-d17}, [r0 :128]\n  8c:\te28dc010 \tadd\tip, sp, #16\n  90:\tf44c0aef \tvst1.64\t{d16-d17}, [ip :128]\n  94:\tf4c1183f \tvst1.32\t{d17[0]}, [r1 :32]\n  98:\te283100a \tadd\tr1, r3, #10\n  9c:\tf4c1180f \tvst1.32\t{d17[0]}, [r1]\n  a0:\tf4600aef \tvld1.64\t{d16-d17}, [r0 :128]\n  a4:\te1a0000d \tmov\tr0, sp\n  a8:\tf4400aef \tvst1.64\t{d16-d17}, [r0 :128]\n  ac:\teef02b61 \tvmov.f64\td18, d17\n  b0:\tee320b90 \tvmov.32\tr0, d18[1]\n  b4:\te58d0048 \tstr\tr0, [sp, #72]\t; 0x48\n  b8:\te5dd0048 \tldrb\tr0, [sp, #72]\t; 0x48\n  bc:\te5cd005c \tstrb\tr0, [sp, #92]\t; 0x5c\n  c0:\te5dd0049 \tldrb\tr0, [sp, #73]\t; 0x49\n  c4:\te5cd005d \tstrb\tr0, [sp, #93]\t; 0x5d\n  c8:\te5dd004a \tldrb\tr0, [sp, #74]\t; 0x4a\n  cc:\te5cd005e \tstrb\tr0, [sp, #94]\t; 0x5e\n  d0:\te5dd004b \tldrb\tr0, [sp, #75]\t; 0x4b\n  d4:\te5cd005f \tstrb\tr0, [sp, #95]\t; 0x5f\n  d8:\te1a00002 \tmov\tr0, r2\n  dc:\te1a0d00b \tmov\tsp, fp\n  e0:\te49db004 \tpop\t{fp}\t\t; (ldr fp, [sp], #4)\n  e4:\te12fff1e \tbx\tlr\n  e8:\t000000b8 \tstrheq\tr0, [r0], -r8",
+      "parentUuid": "1ff1a465_bfdec383",
       "revId": "5cf12be8ec5b99466e5af5959d0ce6ef9e480c6e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
