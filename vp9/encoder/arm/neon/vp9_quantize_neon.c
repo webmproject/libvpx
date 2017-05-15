@@ -22,6 +22,7 @@
 #include "vp9/encoder/vp9_rd.h"
 
 #include "vpx_dsp/arm/idct_neon.h"
+#include "vpx_dsp/arm/mem_neon.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 
 void vp9_quantize_fp_neon(const tran_low_t *coeff_ptr, intptr_t count,

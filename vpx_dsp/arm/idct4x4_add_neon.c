@@ -13,6 +13,7 @@
 
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/arm/idct_neon.h"
+#include "vpx_dsp/arm/mem_neon.h"
 #include "vpx_dsp/txfm_common.h"
 
 void vpx_idct4x4_16_add_neon(const tran_low_t *input, uint8_t *dest,

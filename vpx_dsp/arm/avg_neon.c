@@ -16,6 +16,7 @@
 
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/arm/idct_neon.h"
+#include "vpx_dsp/arm/mem_neon.h"
 
 static INLINE unsigned int horizontal_add_u16x8(const uint16x8_t v_16x8) {
   const uint32x4_t a = vpaddlq_u16(v_16x8);

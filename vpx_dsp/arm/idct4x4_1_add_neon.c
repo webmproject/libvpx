@@ -12,6 +12,7 @@
 #include <assert.h>
 
 #include "./vpx_dsp_rtcd.h"
+#include "vpx_dsp/arm/mem_neon.h"
 #include "vpx_dsp/inv_txfm.h"
 
 static INLINE void idct4x4_1_add_kernel(uint8_t **dest, const int stride,
