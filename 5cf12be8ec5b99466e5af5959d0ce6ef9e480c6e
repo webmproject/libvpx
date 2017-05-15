@@ -128,6 +128,24 @@
       "revId": "5cf12be8ec5b99466e5af5959d0ce6ef9e480c6e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2cc3d197_cf709ad0",
+        "filename": "vpx_dsp/arm/mem_neon.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-15T17:34:17Z",
+      "side": 1,
+      "message": "\u003e It produces garbage:\n\u003e [...]\n\u003e $ clang --version\n\u003e Android clang version 3.8.256229  (based on LLVM 3.8.256229)\n\u003e Target: armv7a-none-linux-android\n\u003e $ clang -march\u003darmv7-a -mfloat-abi\u003dhard -mfpu\u003dneon -Wall -Wdeclaration-after-statement -Wdisabled-optimization -Wpointer-arith -Wtype-limits -Wcast-qual -Wvla -Wimplicit-function-declaration -Wuninitialized -Wunused -Wextra -Wundef -c test_neon.c \n\u003e \n\nthat\u0027s a debug build; you could move it into a separate function to see what it\u0027d look like in an optimized build",
+      "parentUuid": "ae937838_2de1cf3c",
+      "revId": "5cf12be8ec5b99466e5af5959d0ce6ef9e480c6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
