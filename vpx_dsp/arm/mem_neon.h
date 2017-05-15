@@ -83,6 +83,7 @@ static INLINE void uint32_to_mem(uint8_t *buf, uint32_t a) {
 static INLINE uint8x16_t load_unaligned_u8q(const uint8_t *buf, int stride) {
   uint32_t a;
   uint32x4_t a_u32 = vdupq_n_u32(0);
+  if (stride == 4) return vld1q_u8(buf);
   memcpy(&a, buf, 4);
   buf += stride;
   a_u32 = vld1q_lane_u32(&a, a_u32, 0);
@@ -102,6 +103,10 @@ static INLINE uint8x16_t load_unaligned_u8q(const uint8_t *buf, int stride) {
 static INLINE void store_unaligned_u8q(uint8_t *buf, int stride,
                                        const uint8x16_t a) {
   const uint32x4_t a_u32 = vreinterpretq_u32_u8(a);
+  if (stride == 4) {
+    vst1q_u8(buf, a);
+    return;
+  }
   uint32_to_mem(buf, vgetq_lane_u32(a_u32, 0));
   buf += stride;
   uint32_to_mem(buf, vgetq_lane_u32(a_u32, 1));
