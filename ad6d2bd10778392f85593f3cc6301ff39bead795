@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f25da920_3284a4e1",
+        "filename": "vpx_dsp/arm/mem_neon.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-16T19:31:13Z",
+      "side": 1,
+      "message": "we\u0027ve found in other cases that advancing the pointer can produce better code between various gcc/clang versions",
+      "revId": "ad6d2bd10778392f85593f3cc6301ff39bead795",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
