@@ -9,9 +9,9 @@
  */
 #include <assert.h>
 #include <stdlib.h>
-#include "vpx_ports/mem.h"
+#include "vpx/vpx_integer.h"
 
-DECLARE_PROTECTED(const int16_t vpx_rv[]) = {
+const int16_t vpx_rv[] = {
   8,  5,  2,  2,  8,  12, 4,  9,  8,  3,  0,  3,  9,  0,  0,  0,  8,  3,  14,
   4,  10, 1,  11, 14, 1,  14, 9,  6,  12, 11, 8,  6,  10, 0,  0,  8,  9,  0,
   3,  14, 8,  11, 13, 4,  2,  9,  0,  3,  9,  6,  1,  2,  3,  14, 13, 1,  8,

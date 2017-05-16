@@ -23,12 +23,6 @@
 #define DECLARE_ALIGNED(n, typ, val) typ val
 #endif
 
-#if defined(__GNUC__) && __GNUC__ >= 4 && !defined(_WIN32) && !defined(__MACH__)
-#define DECLARE_PROTECTED(decl) decl __attribute__((visibility("protected")))
-#else
-#define DECLARE_PROTECTED(decl) decl
-#endif
-
 #if HAVE_NEON && defined(_MSC_VER)
 #define __builtin_prefetch(x)
 #endif
