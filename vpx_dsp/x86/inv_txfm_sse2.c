@@ -77,7 +77,7 @@ void idct4_sse2(__m128i *in) {
   const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);
   __m128i u[8], v[8];
 
-  transpose_4x4(in);
+  transpose_16bit_4x4(in);
   // stage 1
   u[0] = _mm_unpacklo_epi16(in[0], in[1]);
   u[1] = _mm_unpackhi_epi16(in[0], in[1]);
@@ -115,7 +115,7 @@ void iadst4_sse2(__m128i *in) {
   const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);
   __m128i u[8], v[8], in7;
 
-  transpose_4x4(in);
+  transpose_16bit_4x4(in);
   in7 = _mm_srli_si128(in[1], 8);
   in7 = _mm_add_epi16(in7, in[0]);
   in7 = _mm_sub_epi16(in7, in[1]);
