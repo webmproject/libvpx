@@ -17,8 +17,7 @@ DECLARE_ALIGNED(16, const short, vp8_bilinear_filters_x86_4[8][8]) = {
   { 32, 32, 32, 32, 96, 96, 96, 96 }, { 16, 16, 16, 16, 112, 112, 112, 112 }
 };
 
-DECLARE_PROTECTED(DECLARE_ALIGNED(16, const short,
-                                  vp8_bilinear_filters_x86_8[8][16])) = {
+DECLARE_ALIGNED(16, const short, vp8_bilinear_filters_x86_8[8][16]) = {
   { 128, 128, 128, 128, 128, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0 },
   { 112, 112, 112, 112, 112, 112, 112, 112, 16, 16, 16, 16, 16, 16, 16, 16 },
   { 96, 96, 96, 96, 96, 96, 96, 96, 32, 32, 32, 32, 32, 32, 32, 32 },
