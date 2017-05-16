@@ -564,10 +564,11 @@ static void set_rt_speed_feature_framesize_independent(
 
   if (speed >= 8) {
     sf->adaptive_rd_thresh = 4;
-    // Enable partition copy
-    if (!cpi->last_frame_dropped && !cpi->use_svc && !cpi->resize_pending &&
-        cpi->resize_state == ORIG && !cpi->external_resize &&
-        cpi->oxcf.resize_mode == RESIZE_NONE) {
+    // Enable partition copy. For SVC, only enabled for top resolution layer,
+    if (!cpi->last_frame_dropped && cpi->resize_state == ORIG &&
+        !cpi->external_resize &&
+        (!cpi->use_svc ||
+         cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1)) {
       sf->copy_partition_flag = 1;
       cpi->max_copied_frame = 4;
     }
