@@ -22,6 +22,30 @@
       "revId": "8739a182c8250d2e44cd01a7da0a58773e537b3b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "186353b4_11f27b2a",
+        "filename": "vpx_dsp/arm/idct4x4_add_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-16T16:58:42Z",
+      "side": 0,
+      "message": "\u003e again, confused how this build succeeded.\n\ngcc has -fno-lax-vector-conversions on by default, it can catch this. clang\u0027s arm_neon.h doesn\u0027t seem to be conversion clean (at 3.9.1) so enabling it in that configuration doesn\u0027t work. we should make sure we have gcc coverage for this path if it\u0027s still providing useful info. We\u0027re using clang in the per-commit compile as that\u0027s a bit closer to what android is doing now.",
+      "parentUuid": "2bfb3d6d_2e67a30c",
+      "range": {
+        "startLine": 23,
+        "startChar": 2,
+        "endLine": 23,
+        "endChar": 12
+      },
+      "revId": "8739a182c8250d2e44cd01a7da0a58773e537b3b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
