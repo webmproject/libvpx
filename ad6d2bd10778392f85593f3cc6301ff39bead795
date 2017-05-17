@@ -34,6 +34,24 @@
       "revId": "ad6d2bd10778392f85593f3cc6301ff39bead795",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e0937d26_32ce2e71",
+        "filename": "vpx_dsp/arm/mem_neon.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-17T09:11:47Z",
+      "side": 1,
+      "message": "\u003e What I\u0027ve seen looking at this code is that it fails to take advantage of post-increment, but separating the calculation dependency allows it to pre-calculate all the values much higher in the function and uses fewer registers to do it. clang 3.8 from ndk r14b\n\nthat could be if you\u0027re checking the inlined sites; it may have been gcc-4.9 that was problematic with this pattern. if performance is the same I still might like to be consistent with the recent decoder changes where we saw some benefit",
+      "parentUuid": "1e5761cb_04250bcf",
+      "revId": "ad6d2bd10778392f85593f3cc6301ff39bead795",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
