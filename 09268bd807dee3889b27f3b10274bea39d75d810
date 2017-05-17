@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "e171ccde_0521f084",
+        "filename": "vpx_dsp/arm/mem_neon.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-17T19:21:04Z",
+      "side": 1,
+      "message": "That loads the values into registers before pushing them to neon\n  180:       e7b2c003        ldr     ip, [r2, r3]!\n  18c:       ee00cb90        vmov.32 d16[0], ip\n\nstatic INLINE uint32_t mem_to_uint32(const uint8_t *buf) {                                                                                             \n  uint32_t a;                                                                                                                                          \n  memcpy(\u0026a, buf, 4);                                                                                                                                  \n  return a;                                                                                                                                            \n} \nstatic INLINE uint8x16_t load_unaligned_u8q(const uint8_t *buf, int stride) {                                                                          \n  uint32x4_t a_u32 \u003d vdupq_n_u32(0);                                                                                                                   \n  buf +\u003d stride;                                                                                                                                       \n  a_u32 \u003d vsetq_lane_u32(mem_to_uint32(buf), a_u32, 0);                                                                                                \n  buf +\u003d stride;                                                                                                                                       \n  a_u32 \u003d vsetq_lane_u32(mem_to_uint32(buf), a_u32, 1);                                                                                                \n  buf +\u003d stride;                                                                                                                                       \n  a_u32 \u003d vsetq_lane_u32(mem_to_uint32(buf), a_u32, 2);                                                                                                \n  buf +\u003d stride;                                                                                                                                       \n  a_u32 \u003d vsetq_lane_u32(mem_to_uint32(buf), a_u32, 3);                                                                                                \n  return vreinterpretq_u8_u32(a_u32);                                                                                                                  \n}",
+      "parentUuid": "897bd4f7_a69777bc",
+      "revId": "09268bd807dee3889b27f3b10274bea39d75d810",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0ae2918d_ad222590",
         "filename": "vpx_dsp/arm/mem_neon.h",
         "patchSetId": 4
