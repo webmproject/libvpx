@@ -214,3 +214,8 @@ void vpx_highbd_idct8x8_12_add_sse2(const tran_low_t *input, uint16_t *dest,
     }
   }
 }
+
+void vpx_highbd_idct8x8_1_add_sse2(const tran_low_t *input, uint16_t *dest,
+                                   int stride, int bd) {
+  highbd_idct_1_add_kernel(input, dest, stride, bd, 8);
+}
