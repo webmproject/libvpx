@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c7a7c1f2_9405d315",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-05-18T16:51:14Z",
+      "side": 1,
+      "message": "Should say it slightly changes the non-svc behavior, and add the metric results\nfor rtc and rtc_derf\n\nAnd say its currently only enabled for speed 8",
+      "revId": "03c254f82a20c3d8a7f87afc61de443a7c48a679",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d8295d98_c06cb73e",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 891,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-05-18T16:51:14Z",
+      "side": 1,
+      "message": "more consistent to make this 2, so for 1 spatial layer we have same offset.\nshould not have much affect on the metrics.",
+      "revId": "03c254f82a20c3d8a7f87afc61de443a7c48a679",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
