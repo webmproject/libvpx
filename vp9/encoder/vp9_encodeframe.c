@@ -887,18 +887,22 @@ static void copy_partitioning_helper(VP9_COMP *cpi, MACROBLOCK *x,
 static int copy_partitioning(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
                              int mi_row, int mi_col, int segment_id,
                              int sb_offset) {
-  int base_is_key = 0;
+  int svc_copy_allowed = 1;
   int frames_since_key_thresh = 1;
-  if (cpi->use_svc && cpi->svc.spatial_layer_id > 0) {
+  if (cpi->use_svc) {
+    // For SVC, don't allow copy if base spatial layer is key frame, or if
+    // frame is not a temporal enhancement layer frame.
     int layer = LAYER_IDS_TO_IDX(0, cpi->svc.temporal_layer_id,
                                  cpi->svc.number_temporal_layers);
     const LAYER_CONTEXT *lc = &cpi->svc.layer_context[layer];
-    if (lc->is_key_frame) base_is_key = 1;
+    if (lc->is_key_frame ||
+        (cpi->svc.temporal_layer_id != cpi->svc.number_temporal_layers - 1 &&
+         cpi->svc.number_temporal_layers > 1))
+      svc_copy_allowed = 0;
     frames_since_key_thresh = cpi->svc.number_spatial_layers << 1;
   }
-  if (cpi->rc.frames_since_key > frames_since_key_thresh &&
-      !cpi->resize_pending && !base_is_key &&
-      segment_id == CR_SEGMENT_ID_BASE &&
+  if (cpi->rc.frames_since_key > frames_since_key_thresh && svc_copy_allowed &&
+      !cpi->resize_pending && segment_id == CR_SEGMENT_ID_BASE &&
       cpi->prev_segment_id[sb_offset] == CR_SEGMENT_ID_BASE &&
       cpi->copied_frame_cnt[sb_offset] < cpi->max_copied_frame) {
     if (cpi->prev_partition != NULL) {
