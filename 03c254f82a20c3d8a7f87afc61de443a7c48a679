@@ -33,6 +33,24 @@
       "revId": "03c254f82a20c3d8a7f87afc61de443a7c48a679",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b0c6755d_1fa66094",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 891,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-05-18T18:37:45Z",
+      "side": 1,
+      "message": "For 1 spatial layer, the svc.spatial_layer_id will always be 0, so frames_since_key_thresh will still be 1 (we won\u0027t enter the following \u0027if\u0027), which is consistent with non svc cases.",
+      "parentUuid": "d8295d98_c06cb73e",
+      "revId": "03c254f82a20c3d8a7f87afc61de443a7c48a679",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
