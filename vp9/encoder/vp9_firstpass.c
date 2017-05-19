@@ -238,14 +238,14 @@ static double calculate_active_area(const VP9_COMP *cpi,
 // Calculate a modified Error used in distributing bits between easier and
 // harder frames.
 #define ACT_AREA_CORRECTION 0.5
-static double calculate_modified_err(const VP9_COMP *cpi,
-                                     const TWO_PASS *twopass,
-                                     const VP9EncoderConfig *oxcf,
-                                     const FIRSTPASS_STATS *this_frame) {
+static double calculate_mod_frame_score(const VP9_COMP *cpi,
+                                        const TWO_PASS *twopass,
+                                        const VP9EncoderConfig *oxcf,
+                                        const FIRSTPASS_STATS *this_frame) {
   const FIRSTPASS_STATS *const stats = &twopass->total_stats;
   const double av_weight = stats->weight / stats->count;
   const double av_err = (stats->coded_error * av_weight) / stats->count;
-  double modified_error =
+  double modified_score =
       av_err * pow(this_frame->coded_error * this_frame->weight /
                        DOUBLE_DIVIDE_CHECK(av_err),
                    oxcf->two_pass_vbrbias / 100.0);
@@ -255,11 +255,38 @@ static double calculate_modified_err(const VP9_COMP *cpi,
   // remaining active MBs. The correction here assumes that coding
   // 0.5N blocks of complexity 2X is a little easier than coding N
   // blocks of complexity X.
-  modified_error *=
+  modified_score *=
       pow(calculate_active_area(cpi, this_frame), ACT_AREA_CORRECTION);
 
-  return fclamp(modified_error, twopass->modified_error_min,
-                twopass->modified_error_max);
+  return modified_score;
+}
+static double calculate_norm_frame_score(const VP9_COMP *cpi,
+                                         const TWO_PASS *twopass,
+                                         const VP9EncoderConfig *oxcf,
+                                         const FIRSTPASS_STATS *this_frame) {
+  const FIRSTPASS_STATS *const stats = &twopass->total_stats;
+  const double av_weight = stats->weight / stats->count;
+  const double av_err = (stats->coded_error * av_weight) / stats->count;
+  double modified_score =
+      av_err * pow(this_frame->coded_error * this_frame->weight /
+                       DOUBLE_DIVIDE_CHECK(av_err),
+                   oxcf->two_pass_vbrbias / 100.0);
+
+  const double min_score = (double)(oxcf->two_pass_vbrmin_section) / 100.0;
+  const double max_score = (double)(oxcf->two_pass_vbrmax_section) / 100.0;
+
+  // Correction for active area. Frames with a reduced active area
+  // (eg due to formatting bars) have a higher error per mb for the
+  // remaining active MBs. The correction here assumes that coding
+  // 0.5N blocks of complexity 2X is a little easier than coding N
+  // blocks of complexity X.
+  modified_score *=
+      pow(calculate_active_area(cpi, this_frame), ACT_AREA_CORRECTION);
+
+  // Normalize to a midpoint score.
+  modified_score /= DOUBLE_DIVIDE_CHECK(twopass->mean_mod_score);
+
+  return fclamp(modified_score, min_score, max_score);
 }
 
 // This function returns the maximum target rate per frame.
@@ -1681,22 +1708,35 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   // This variable monitors how far behind the second ref update is lagging.
   twopass->sr_update_lag = 1;
 
-  // Scan the first pass file and calculate a modified total error based upon
-  // the bias/power function used to allocate bits.
+  // Scan the first pass file and calculate a modified score for each
+  // frame that is used to distribute bits. The modified score is assumed
+  // to provide a linear basis for bit allocation. I.e a frame A with a score
+  // that is double that of frame B will be allocated 2x as many bits.
   {
-    const double avg_error =
-        stats->coded_error / DOUBLE_DIVIDE_CHECK(stats->count);
     const FIRSTPASS_STATS *s = twopass->stats_in;
-    double modified_error_total = 0.0;
-    twopass->modified_error_min =
-        (avg_error * oxcf->two_pass_vbrmin_section) / 100;
-    twopass->modified_error_max =
-        (avg_error * oxcf->two_pass_vbrmax_section) / 100;
+    double modified_score_total = 0.0;
+
+    // The first scan is unclamped and gives a raw average.
     while (s < twopass->stats_in_end) {
-      modified_error_total += calculate_modified_err(cpi, twopass, oxcf, s);
+      modified_score_total += calculate_mod_frame_score(cpi, twopass, oxcf, s);
       ++s;
     }
-    twopass->modified_error_left = modified_error_total;
+
+    // The average error from this first scan is used to define the midpoint
+    // error for the rate distribution function.
+    twopass->mean_mod_score =
+        modified_score_total / DOUBLE_DIVIDE_CHECK(stats->count);
+
+    // Second scan using clamps based on the previous cycle average.
+    // This may modify the total and average somewhat but we dont bother with
+    // further itterations.
+    s = twopass->stats_in;
+    modified_score_total = 0.0;
+    while (s < twopass->stats_in_end) {
+      modified_score_total += calculate_norm_frame_score(cpi, twopass, oxcf, s);
+      ++s;
+    }
+    twopass->normalized_score_left = modified_score_total;
   }
 
   // Reset the vbr bits off target counters
@@ -2332,7 +2372,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   vp9_zero(next_frame);
 
   // Load stats for the current frame.
-  mod_frame_err = calculate_modified_err(cpi, twopass, oxcf, this_frame);
+  mod_frame_err = calculate_norm_frame_score(cpi, twopass, oxcf, this_frame);
 
   // Note the error of the frame at the start of the group. This will be
   // the GF frame error if we code a normal gf.
@@ -2398,7 +2438,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     ++i;
 
     // Accumulate error score of frames in this gf group.
-    mod_frame_err = calculate_modified_err(cpi, twopass, oxcf, this_frame);
+    mod_frame_err = calculate_norm_frame_score(cpi, twopass, oxcf, this_frame);
     gf_group_err += mod_frame_err;
     gf_group_raw_error += this_frame->coded_error;
     gf_group_noise += this_frame->frame_noise_energy;
@@ -2507,7 +2547,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     int j;
     for (j = 0; j < new_gf_interval - rc->baseline_gf_interval; ++j) {
       if (EOF == input_stats(twopass, this_frame)) break;
-      gf_group_err += calculate_modified_err(cpi, twopass, oxcf, this_frame);
+      gf_group_err +=
+          calculate_norm_frame_score(cpi, twopass, oxcf, this_frame);
       gf_group_raw_error += this_frame->coded_error;
       gf_group_noise += this_frame->frame_noise_energy;
       gf_group_skip_pct += this_frame->intra_skip_pct;
@@ -2752,7 +2793,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   twopass->kf_group_bits = 0;          // Total bits available to kf group
   twopass->kf_group_error_left = 0.0;  // Group modified error score.
 
-  kf_mod_err = calculate_modified_err(cpi, twopass, oxcf, this_frame);
+  kf_mod_err = calculate_norm_frame_score(cpi, twopass, oxcf, this_frame);
 
   // Initialize the decay rates for the recent frames to check
   for (j = 0; j < FRAMES_TO_CHECK_DECAY; ++j) recent_loop_decay[j] = 1.0;
@@ -2762,7 +2803,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   while (twopass->stats_in < twopass->stats_in_end &&
          rc->frames_to_key < cpi->oxcf.key_freq) {
     // Accumulate kf group error.
-    kf_group_err += calculate_modified_err(cpi, twopass, oxcf, this_frame);
+    kf_group_err += calculate_norm_frame_score(cpi, twopass, oxcf, this_frame);
 
     // Load the next frame's stats.
     last_frame = *this_frame;
@@ -2822,7 +2863,8 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
     // Rescan to get the correct error data for the forced kf group.
     for (i = 0; i < rc->frames_to_key; ++i) {
-      kf_group_err += calculate_modified_err(cpi, twopass, oxcf, &tmp_frame);
+      kf_group_err +=
+          calculate_norm_frame_score(cpi, twopass, oxcf, &tmp_frame);
       input_stats(twopass, &tmp_frame);
     }
     rc->next_key_frame_forced = 1;
@@ -2839,7 +2881,8 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     int j;
     for (j = 0; j < new_frame_to_key - rc->frames_to_key; ++j) {
       if (EOF == input_stats(twopass, this_frame)) break;
-      kf_group_err += calculate_modified_err(cpi, twopass, oxcf, this_frame);
+      kf_group_err +=
+          calculate_norm_frame_score(cpi, twopass, oxcf, this_frame);
     }
     rc->frames_to_key = new_frame_to_key;
   }
@@ -2847,11 +2890,11 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Special case for the last key frame of the file.
   if (twopass->stats_in >= twopass->stats_in_end) {
     // Accumulate kf group error.
-    kf_group_err += calculate_modified_err(cpi, twopass, oxcf, this_frame);
+    kf_group_err += calculate_norm_frame_score(cpi, twopass, oxcf, this_frame);
   }
 
   // Calculate the number of bits that should be assigned to the kf group.
-  if (twopass->bits_left > 0 && twopass->modified_error_left > 0.0) {
+  if (twopass->bits_left > 0 && twopass->normalized_score_left > 0.0) {
     // Maximum number of bits for a single normal frame (not key frame).
     const int max_bits = frame_max_bits(rc, &cpi->oxcf);
 
@@ -2861,7 +2904,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // Default allocation based on bits left and relative
     // complexity of the section.
     twopass->kf_group_bits = (int64_t)(
-        twopass->bits_left * (kf_group_err / twopass->modified_error_left));
+        twopass->bits_left * (kf_group_err / twopass->normalized_score_left));
 
     // Clip based on maximum per frame rate defined by the user.
     max_grp_bits = (int64_t)max_bits * (int64_t)rc->frames_to_key;
@@ -2939,7 +2982,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Adjust the count of total modified error left.
   // The count of bits left is adjusted elsewhere based on real coded frame
   // sizes.
-  twopass->modified_error_left -= kf_group_err;
+  twopass->normalized_score_left -= kf_group_err;
 
   if (oxcf->resize_mode == RESIZE_DYNAMIC) {
     // Default to normal-sized frame on keyframes.
