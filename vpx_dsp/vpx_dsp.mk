@@ -193,6 +193,7 @@ DSP_SRCS-$(HAVE_SSSE3)  += x86/fwd_txfm_ssse3_x86_64.asm
 endif
 DSP_SRCS-$(HAVE_AVX2)   += x86/fwd_txfm_avx2.c
 DSP_SRCS-$(HAVE_AVX2)   += x86/fwd_dct32x32_impl_avx2.h
+DSP_SRCS-$(HAVE_NEON)   += arm/fdct_neon.c
 DSP_SRCS-$(HAVE_NEON)   += arm/fwd_txfm_neon.c
 DSP_SRCS-$(HAVE_MSA)    += mips/fwd_txfm_msa.h
 DSP_SRCS-$(HAVE_MSA)    += mips/fwd_txfm_msa.c
