@@ -52,11 +52,19 @@ vpx_tsvc_encoder() {
 
   # TODO(tomfinegan): Verify file output for all thread runs.
   for threads in $(seq $max_threads); do
-    eval "${VPX_TEST_PREFIX}" "${encoder}" "${YUV_RAW_INPUT}" "${output_file}" \
-        "${codec}" "${YUV_RAW_INPUT_WIDTH}" "${YUV_RAW_INPUT_HEIGHT}" \
-        "${timebase_num}" "${timebase_den}" "${speed}" "${frame_drop_thresh}" \
-        "${error_resilient}" "${threads}" "$@" \
-        ${devnull}
+    if [ "$(vpx_config_option_enabled CONFIG_VP9_HIGHBITDEPTH)" != "yes" ]; then
+      eval "${VPX_TEST_PREFIX}" "${encoder}" "${YUV_RAW_INPUT}" \
+        "${output_file}" "${codec}" "${YUV_RAW_INPUT_WIDTH}" \
+        "${YUV_RAW_INPUT_HEIGHT}" "${timebase_num}" "${timebase_den}" \
+        "${speed}" "${frame_drop_thresh}" "${error_resilient}" "${threads}" \
+        "$@" ${devnull}
+    else
+      eval "${VPX_TEST_PREFIX}" "${encoder}" "${YUV_RAW_INPUT}" \
+        "${output_file}" "${codec}" "${YUV_RAW_INPUT_WIDTH}" \
+        "${YUV_RAW_INPUT_HEIGHT}" "${timebase_num}" "${timebase_den}" \
+        "${speed}" "${frame_drop_thresh}" "${error_resilient}" "${threads}" \
+        "$@" "8" ${devnull}
+    fi
   done
 }
 
