@@ -127,3 +127,26 @@ void vpx_highbd_idct4x4_16_add_sse2(const tran_low_t *input, uint16_t *dest,
     }
   }
 }
+
+void vpx_highbd_idct4x4_1_add_sse2(const tran_low_t *input, uint16_t *dest,
+                                   int stride, int bd) {
+  const __m128i zero = _mm_setzero_si128();
+  // Faster than _mm_set1_epi16((1 << bd) - 1).
+  const __m128i one = _mm_set1_epi16(1);
+  const __m128i max = _mm_sub_epi16(_mm_slli_epi16(one, bd), one);
+  int a1, i;
+  tran_low_t out;
+  __m128i dc, d;
+
+  out = HIGHBD_WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64), bd);
+  out = HIGHBD_WRAPLOW(dct_const_round_shift(out * cospi_16_64), bd);
+  a1 = ROUND_POWER_OF_TWO(out, 4);
+  dc = _mm_set1_epi16(a1);
+
+  for (i = 0; i < 4; ++i) {
+    d = _mm_loadl_epi64((const __m128i *)dest);
+    d = add_dc_clamp(&zero, &max, &dc, &d);
+    _mm_storel_epi64((__m128i *)dest, d);
+    dest += stride;
+  }
+}
