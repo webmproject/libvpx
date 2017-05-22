@@ -16,6 +16,24 @@
       "revId": "b5055002d7a57ed21badf870f2af384193ac89b6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "15e5426e_c2771d86",
+        "filename": "vpx_scale/generic/yv12extend.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-05-22T16:32:23Z",
+      "side": 0,
+      "message": "Yeah you\u0027re right. I\u0027ll look into this.",
+      "parentUuid": "5b87c832_6fd37a82",
+      "revId": "b5055002d7a57ed21badf870f2af384193ac89b6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
