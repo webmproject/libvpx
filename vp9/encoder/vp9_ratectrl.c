@@ -547,6 +547,7 @@ void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi) {
 int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
                       int active_best_quality, int active_worst_quality) {
   const VP9_COMMON *const cm = &cpi->common;
+  CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   int q = active_worst_quality;
   int last_error = INT_MAX;
   int i, target_bits_per_mb, bits_per_mb_at_this_q;
@@ -561,7 +562,7 @@ int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
 
   do {
     if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled &&
-        cpi->svc.temporal_layer_id == 0 &&
+        cr->apply_cyclic_refresh &&
         (!cpi->oxcf.gf_cbr_boost_pct || !cpi->refresh_golden_frame)) {
       bits_per_mb_at_this_q =
           (int)vp9_cyclic_refresh_rc_bits_per_mb(cpi, i, correction_factor);

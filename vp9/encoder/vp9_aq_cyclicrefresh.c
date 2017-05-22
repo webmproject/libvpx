@@ -277,8 +277,6 @@ void vp9_cyclic_refresh_postencode(VP9_COMP *const cpi) {
       !cpi->oxcf.gf_cbr_boost_pct) {
     // Force this frame as a golden update frame if this frame changes the
     // resolution (resize_pending != 0).
-    // TODO(marpan): check on forcing golden update if the background has very
-    // high motion in current frame.
     if (cpi->resize_pending != 0) {
       vp9_cyclic_refresh_set_golden_update(cpi);
       rc->frames_till_gf_update_due = rc->baseline_gf_interval;
@@ -316,6 +314,8 @@ void vp9_cyclic_refresh_set_golden_update(VP9_COMP *const cpi) {
   else
     rc->baseline_gf_interval = 40;
   if (cpi->oxcf.rc_mode == VPX_VBR) rc->baseline_gf_interval = 20;
+  if (rc->avg_frame_low_motion < 50 && rc->frames_since_key > 40)
+    rc->baseline_gf_interval = 10;
 }
 
 // Update the segmentation map, and related quantities: cyclic refresh map,
@@ -425,6 +425,13 @@ void vp9_cyclic_refresh_update_parameters(VP9_COMP *const cpi) {
   int target_refresh = 0;
   double weight_segment_target = 0;
   double weight_segment = 0;
+  cr->apply_cyclic_refresh = 1;
+  if (cm->frame_type == KEY_FRAME || cpi->svc.temporal_layer_id > 0 ||
+      (!cpi->use_svc && rc->avg_frame_low_motion < 55 &&
+       rc->frames_since_key > 40)) {
+    cr->apply_cyclic_refresh = 0;
+    return;
+  }
   cr->percent_refresh = 10;
   if (cr->reduce_refresh) cr->percent_refresh = 5;
   cr->max_qdelta_perc = 60;
@@ -493,14 +500,8 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
   const RATE_CONTROL *const rc = &cpi->rc;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   struct segmentation *const seg = &cm->seg;
-  // TODO(marpan): Look into whether we should reduce the amount/delta-qp
-  // instead of completely shutting off at low bitrates. For now keep it on.
-  // const int apply_cyclic_refresh = apply_cyclic_refresh_bitrate(cm, rc);
-  const int apply_cyclic_refresh = 1;
   if (cm->current_video_frame == 0) cr->low_content_avg = 0.0;
-  // Don't apply refresh on key frame or temporal enhancement layer frames.
-  if (!apply_cyclic_refresh || (cm->frame_type == KEY_FRAME) ||
-      (cpi->force_update_segmentation) || (cpi->svc.temporal_layer_id > 0)) {
+  if (!cr->apply_cyclic_refresh || (cpi->force_update_segmentation)) {
     // Set segmentation map to 0 and disable.
     unsigned char *const seg_map = cpi->segmentation_map;
     memset(seg_map, 0, cm->mi_rows * cm->mi_cols);
