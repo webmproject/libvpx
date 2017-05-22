@@ -74,30 +74,14 @@ void idct4_sse2(__m128i *in) {
   const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
   const __m128i k__cospi_p24_m08 = pair_set_epi16(cospi_24_64, -cospi_8_64);
   const __m128i k__cospi_p08_p24 = pair_set_epi16(cospi_8_64, cospi_24_64);
-  const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);
-  __m128i u[8], v[8];
+  __m128i u[2];
 
   transpose_16bit_4x4(in);
   // stage 1
   u[0] = _mm_unpacklo_epi16(in[0], in[1]);
   u[1] = _mm_unpackhi_epi16(in[0], in[1]);
-  v[0] = _mm_madd_epi16(u[0], k__cospi_p16_p16);
-  v[1] = _mm_madd_epi16(u[0], k__cospi_p16_m16);
-  v[2] = _mm_madd_epi16(u[1], k__cospi_p24_m08);
-  v[3] = _mm_madd_epi16(u[1], k__cospi_p08_p24);
-
-  u[0] = _mm_add_epi32(v[0], k__DCT_CONST_ROUNDING);
-  u[1] = _mm_add_epi32(v[1], k__DCT_CONST_ROUNDING);
-  u[2] = _mm_add_epi32(v[2], k__DCT_CONST_ROUNDING);
-  u[3] = _mm_add_epi32(v[3], k__DCT_CONST_ROUNDING);
-
-  v[0] = _mm_srai_epi32(u[0], DCT_CONST_BITS);
-  v[1] = _mm_srai_epi32(u[1], DCT_CONST_BITS);
-  v[2] = _mm_srai_epi32(u[2], DCT_CONST_BITS);
-  v[3] = _mm_srai_epi32(u[3], DCT_CONST_BITS);
-
-  u[0] = _mm_packs_epi32(v[0], v[1]);
-  u[1] = _mm_packs_epi32(v[3], v[2]);
+  u[0] = idct_calc_wraplow_sse2(k__cospi_p16_p16, k__cospi_p16_m16, u[0]);
+  u[1] = idct_calc_wraplow_sse2(k__cospi_p08_p24, k__cospi_p24_m08, u[1]);
 
   // stage 2
   in[0] = _mm_add_epi16(u[0], u[1]);
@@ -156,23 +140,8 @@ void iadst4_sse2(__m128i *in) {
 
 #define MULTIPLICATION_AND_ADD_2(lo_0, hi_0, cst0, cst1, res0, res1) \
   {                                                                  \
-    tmp0 = _mm_madd_epi16(lo_0, cst0);                               \
-    tmp1 = _mm_madd_epi16(hi_0, cst0);                               \
-    tmp2 = _mm_madd_epi16(lo_0, cst1);                               \
-    tmp3 = _mm_madd_epi16(hi_0, cst1);                               \
-                                                                     \
-    tmp0 = _mm_add_epi32(tmp0, rounding);                            \
-    tmp1 = _mm_add_epi32(tmp1, rounding);                            \
-    tmp2 = _mm_add_epi32(tmp2, rounding);                            \
-    tmp3 = _mm_add_epi32(tmp3, rounding);                            \
-                                                                     \
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS);                     \
-    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS);                     \
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS);                     \
-    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS);                     \
-                                                                     \
-    res0 = _mm_packs_epi32(tmp0, tmp1);                              \
-    res1 = _mm_packs_epi32(tmp2, tmp3);                              \
+    res0 = idct_calc_wraplow_sse2(lo_0, hi_0, cst0);                 \
+    res1 = idct_calc_wraplow_sse2(lo_0, hi_0, cst1);                 \
   }
 
 #define IDCT8(in0, in1, in2, in3, in4, in5, in6, in7, out0, out1, out2, out3, \
@@ -215,23 +184,8 @@ void iadst4_sse2(__m128i *in) {
       stp1_2 = _mm_sub_epi16(stp2_1, stp2_2);                                 \
       stp1_3 = _mm_sub_epi16(stp2_0, stp2_3);                                 \
                                                                               \
-      tmp0 = _mm_madd_epi16(lo_56, stg2_1);                                   \
-      tmp1 = _mm_madd_epi16(hi_56, stg2_1);                                   \
-      tmp2 = _mm_madd_epi16(lo_56, stg2_0);                                   \
-      tmp3 = _mm_madd_epi16(hi_56, stg2_0);                                   \
-                                                                              \
-      tmp0 = _mm_add_epi32(tmp0, rounding);                                   \
-      tmp1 = _mm_add_epi32(tmp1, rounding);                                   \
-      tmp2 = _mm_add_epi32(tmp2, rounding);                                   \
-      tmp3 = _mm_add_epi32(tmp3, rounding);                                   \
-                                                                              \
-      tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS);                            \
-      tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS);                            \
-      tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS);                            \
-      tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS);                            \
-                                                                              \
-      stp1_5 = _mm_packs_epi32(tmp0, tmp1);                                   \
-      stp1_6 = _mm_packs_epi32(tmp2, tmp3);                                   \
+      stp1_5 = idct_calc_wraplow_sse2(lo_56, hi_56, stg2_1);                  \
+      stp1_6 = idct_calc_wraplow_sse2(lo_56, hi_56, stg2_0);                  \
     }                                                                         \
                                                                               \
     /* Stage4  */                                                             \
@@ -248,7 +202,6 @@ void iadst4_sse2(__m128i *in) {
 void vpx_idct8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest,
                              int stride) {
   const __m128i zero = _mm_setzero_si128();
-  const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1 << 4);
   const __m128i stg1_0 = pair_set_epi16(cospi_28_64, -cospi_4_64);
   const __m128i stg1_1 = pair_set_epi16(cospi_4_64, cospi_28_64);
@@ -262,7 +215,6 @@ void vpx_idct8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest,
   __m128i in0, in1, in2, in3, in4, in5, in6, in7;
   __m128i stp1_0, stp1_1, stp1_2, stp1_3, stp1_4, stp1_5, stp1_6, stp1_7;
   __m128i stp2_0, stp2_1, stp2_2, stp2_3, stp2_4, stp2_5, stp2_6, stp2_7;
-  __m128i tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
   int i;
 
   // Load input data.
@@ -338,7 +290,6 @@ void vpx_idct8x8_1_add_sse2(const tran_low_t *input, uint8_t *dest,
 }
 
 void idct8_sse2(__m128i *in) {
-  const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i stg1_0 = pair_set_epi16(cospi_28_64, -cospi_4_64);
   const __m128i stg1_1 = pair_set_epi16(cospi_4_64, cospi_28_64);
   const __m128i stg1_2 = pair_set_epi16(-cospi_20_64, cospi_12_64);
@@ -351,7 +302,6 @@ void idct8_sse2(__m128i *in) {
   __m128i in0, in1, in2, in3, in4, in5, in6, in7;
   __m128i stp1_0, stp1_1, stp1_2, stp1_3, stp1_4, stp1_5, stp1_6, stp1_7;
   __m128i stp2_0, stp2_1, stp2_2, stp2_3, stp2_4, stp2_5, stp2_6, stp2_7;
-  __m128i tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
 
   // 8x8 Transpose is copied from vpx_fdct8x8_sse2()
   TRANSPOSE_8X8(in[0], in[1], in[2], in[3], in[4], in[5], in[6], in[7], in0,
@@ -548,37 +498,10 @@ void iadst8_sse2(__m128i *in) {
   u2 = _mm_unpacklo_epi16(s6, s7);
   u3 = _mm_unpackhi_epi16(s6, s7);
 
-  v0 = _mm_madd_epi16(u0, k__cospi_p16_p16);
-  v1 = _mm_madd_epi16(u1, k__cospi_p16_p16);
-  v2 = _mm_madd_epi16(u0, k__cospi_p16_m16);
-  v3 = _mm_madd_epi16(u1, k__cospi_p16_m16);
-  v4 = _mm_madd_epi16(u2, k__cospi_p16_p16);
-  v5 = _mm_madd_epi16(u3, k__cospi_p16_p16);
-  v6 = _mm_madd_epi16(u2, k__cospi_p16_m16);
-  v7 = _mm_madd_epi16(u3, k__cospi_p16_m16);
-
-  u0 = _mm_add_epi32(v0, k__DCT_CONST_ROUNDING);
-  u1 = _mm_add_epi32(v1, k__DCT_CONST_ROUNDING);
-  u2 = _mm_add_epi32(v2, k__DCT_CONST_ROUNDING);
-  u3 = _mm_add_epi32(v3, k__DCT_CONST_ROUNDING);
-  u4 = _mm_add_epi32(v4, k__DCT_CONST_ROUNDING);
-  u5 = _mm_add_epi32(v5, k__DCT_CONST_ROUNDING);
-  u6 = _mm_add_epi32(v6, k__DCT_CONST_ROUNDING);
-  u7 = _mm_add_epi32(v7, k__DCT_CONST_ROUNDING);
-
-  v0 = _mm_srai_epi32(u0, DCT_CONST_BITS);
-  v1 = _mm_srai_epi32(u1, DCT_CONST_BITS);
-  v2 = _mm_srai_epi32(u2, DCT_CONST_BITS);
-  v3 = _mm_srai_epi32(u3, DCT_CONST_BITS);
-  v4 = _mm_srai_epi32(u4, DCT_CONST_BITS);
-  v5 = _mm_srai_epi32(u5, DCT_CONST_BITS);
-  v6 = _mm_srai_epi32(u6, DCT_CONST_BITS);
-  v7 = _mm_srai_epi32(u7, DCT_CONST_BITS);
-
-  s2 = _mm_packs_epi32(v0, v1);
-  s3 = _mm_packs_epi32(v2, v3);
-  s6 = _mm_packs_epi32(v4, v5);
-  s7 = _mm_packs_epi32(v6, v7);
+  s2 = idct_calc_wraplow_sse2(u0, u1, k__cospi_p16_p16);
+  s3 = idct_calc_wraplow_sse2(u0, u1, k__cospi_p16_m16);
+  s6 = idct_calc_wraplow_sse2(u2, u3, k__cospi_p16_p16);
+  s7 = idct_calc_wraplow_sse2(u2, u3, k__cospi_p16_m16);
 
   in[0] = s0;
   in[1] = _mm_sub_epi16(k__const_0, s4);
@@ -593,7 +516,6 @@ void iadst8_sse2(__m128i *in) {
 void vpx_idct8x8_12_add_sse2(const tran_low_t *input, uint8_t *dest,
                              int stride) {
   const __m128i zero = _mm_setzero_si128();
-  const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1 << 4);
   const __m128i stg1_0 = pair_set_epi16(cospi_28_64, -cospi_4_64);
   const __m128i stg1_1 = pair_set_epi16(cospi_4_64, cospi_28_64);
@@ -608,7 +530,7 @@ void vpx_idct8x8_12_add_sse2(const tran_low_t *input, uint8_t *dest,
   __m128i in0, in1, in2, in3, in4, in5, in6, in7;
   __m128i stp1_0, stp1_1, stp1_2, stp1_3, stp1_4, stp1_5, stp1_6, stp1_7;
   __m128i stp2_0, stp2_1, stp2_2, stp2_3, stp2_4, stp2_5, stp2_6, stp2_7;
-  __m128i tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+  __m128i tmp0, tmp1, tmp2, tmp3;
 
   // Rows. Load 4-row input data.
   in0 = load_input_data(input);
@@ -623,22 +545,8 @@ void vpx_idct8x8_12_add_sse2(const tran_low_t *input, uint8_t *dest,
     const __m128i lo_17 = _mm_unpackhi_epi16(in0, zero);
     const __m128i lo_35 = _mm_unpackhi_epi16(in1, zero);
 
-    tmp0 = _mm_madd_epi16(lo_17, stg1_0);
-    tmp2 = _mm_madd_epi16(lo_17, stg1_1);
-    tmp4 = _mm_madd_epi16(lo_35, stg1_2);
-    tmp6 = _mm_madd_epi16(lo_35, stg1_3);
-
-    tmp0 = _mm_add_epi32(tmp0, rounding);
-    tmp2 = _mm_add_epi32(tmp2, rounding);
-    tmp4 = _mm_add_epi32(tmp4, rounding);
-    tmp6 = _mm_add_epi32(tmp6, rounding);
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS);
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS);
-    tmp4 = _mm_srai_epi32(tmp4, DCT_CONST_BITS);
-    tmp6 = _mm_srai_epi32(tmp6, DCT_CONST_BITS);
-
-    stp1_4 = _mm_packs_epi32(tmp0, tmp2);
-    stp1_5 = _mm_packs_epi32(tmp4, tmp6);
+    stp1_4 = idct_calc_wraplow_sse2(stg1_0, stg1_1, lo_17);
+    stp1_5 = idct_calc_wraplow_sse2(stg1_2, stg1_3, lo_35);
   }
 
   // Stage2
@@ -646,22 +554,8 @@ void vpx_idct8x8_12_add_sse2(const tran_low_t *input, uint8_t *dest,
     const __m128i lo_04 = _mm_unpacklo_epi16(in0, zero);
     const __m128i lo_26 = _mm_unpacklo_epi16(in1, zero);
 
-    tmp0 = _mm_madd_epi16(lo_04, stg2_0);
-    tmp2 = _mm_madd_epi16(lo_04, stg2_1);
-    tmp4 = _mm_madd_epi16(lo_26, stg2_2);
-    tmp6 = _mm_madd_epi16(lo_26, stg2_3);
-
-    tmp0 = _mm_add_epi32(tmp0, rounding);
-    tmp2 = _mm_add_epi32(tmp2, rounding);
-    tmp4 = _mm_add_epi32(tmp4, rounding);
-    tmp6 = _mm_add_epi32(tmp6, rounding);
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS);
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS);
-    tmp4 = _mm_srai_epi32(tmp4, DCT_CONST_BITS);
-    tmp6 = _mm_srai_epi32(tmp6, DCT_CONST_BITS);
-
-    stp2_0 = _mm_packs_epi32(tmp0, tmp2);
-    stp2_2 = _mm_packs_epi32(tmp6, tmp4);
+    stp2_0 = idct_calc_wraplow_sse2(stg2_0, stg2_1, lo_04);
+    stp2_2 = idct_calc_wraplow_sse2(stg2_3, stg2_2, lo_26);
 
     tmp0 = _mm_add_epi16(stp1_4, stp1_5);
     tmp1 = _mm_sub_epi16(stp1_4, stp1_5);
@@ -675,21 +569,11 @@ void vpx_idct8x8_12_add_sse2(const tran_low_t *input, uint8_t *dest,
   {
     const __m128i lo_56 = _mm_unpacklo_epi16(stp2_5, stp2_6);
 
-    tmp4 = _mm_add_epi16(stp2_0, stp2_2);
-    tmp6 = _mm_sub_epi16(stp2_0, stp2_2);
-
-    stp1_2 = _mm_unpackhi_epi64(tmp6, tmp4);
-    stp1_3 = _mm_unpacklo_epi64(tmp6, tmp4);
-
-    tmp0 = _mm_madd_epi16(lo_56, stg3_0);
-    tmp2 = _mm_madd_epi16(lo_56, stg2_0);  // stg3_1 = stg2_0
-
-    tmp0 = _mm_add_epi32(tmp0, rounding);
-    tmp2 = _mm_add_epi32(tmp2, rounding);
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS);
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS);
-
-    stp1_5 = _mm_packs_epi32(tmp0, tmp2);
+    tmp0 = _mm_add_epi16(stp2_0, stp2_2);
+    tmp1 = _mm_sub_epi16(stp2_0, stp2_2);
+    stp1_2 = _mm_unpackhi_epi64(tmp1, tmp0);
+    stp1_3 = _mm_unpacklo_epi64(tmp1, tmp0);
+    stp1_5 = idct_calc_wraplow_sse2(stg3_0, stg2_0, lo_56);  // stg3_1 = stg2_0
   }
 
   // Stage4
@@ -806,23 +690,8 @@ void vpx_idct8x8_12_add_sse2(const tran_low_t *input, uint8_t *dest,
     stp1_2 = _mm_sub_epi16(stp2_1, stp2_2);                                    \
     stp1_3 = _mm_sub_epi16(stp2_0, stp2_3);                                    \
                                                                                \
-    tmp0 = _mm_madd_epi16(lo_6_5, stg4_1);                                     \
-    tmp1 = _mm_madd_epi16(hi_6_5, stg4_1);                                     \
-    tmp2 = _mm_madd_epi16(lo_6_5, stg4_0);                                     \
-    tmp3 = _mm_madd_epi16(hi_6_5, stg4_0);                                     \
-                                                                               \
-    tmp0 = _mm_add_epi32(tmp0, rounding);                                      \
-    tmp1 = _mm_add_epi32(tmp1, rounding);                                      \
-    tmp2 = _mm_add_epi32(tmp2, rounding);                                      \
-    tmp3 = _mm_add_epi32(tmp3, rounding);                                      \
-                                                                               \
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS);                               \
-    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS);                               \
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS);                               \
-    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS);                               \
-                                                                               \
-    stp1_5 = _mm_packs_epi32(tmp0, tmp1);                                      \
-    stp1_6 = _mm_packs_epi32(tmp2, tmp3);                                      \
+    stp1_5 = idct_calc_wraplow_sse2(lo_6_5, hi_6_5, stg4_1);                   \
+    stp1_6 = idct_calc_wraplow_sse2(lo_6_5, hi_6_5, stg4_0);                   \
                                                                                \
     stp1_8 = _mm_add_epi16(stp1_8_0, stp1_11);                                 \
     stp1_9 = _mm_add_epi16(stp2_9, stp2_10);                                   \
@@ -910,23 +779,8 @@ void vpx_idct8x8_12_add_sse2(const tran_low_t *input, uint8_t *dest,
     stp1_2 = stp1_1;                                                           \
     stp1_3 = stp1_0;                                                           \
                                                                                \
-    tmp0 = _mm_madd_epi16(lo_6_5, stg4_1);                                     \
-    tmp1 = _mm_madd_epi16(hi_6_5, stg4_1);                                     \
-    tmp2 = _mm_madd_epi16(lo_6_5, stg4_0);                                     \
-    tmp3 = _mm_madd_epi16(hi_6_5, stg4_0);                                     \
-                                                                               \
-    tmp0 = _mm_add_epi32(tmp0, rounding);                                      \
-    tmp1 = _mm_add_epi32(tmp1, rounding);                                      \
-    tmp2 = _mm_add_epi32(tmp2, rounding);                                      \
-    tmp3 = _mm_add_epi32(tmp3, rounding);                                      \
-                                                                               \
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS);                               \
-    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS);                               \
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS);                               \
-    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS);                               \
-                                                                               \
-    stp1_5 = _mm_packs_epi32(tmp0, tmp1);                                      \
-    stp1_6 = _mm_packs_epi32(tmp2, tmp3);                                      \
+    stp1_5 = idct_calc_wraplow_sse2(lo_6_5, hi_6_5, stg4_1);                   \
+    stp1_6 = idct_calc_wraplow_sse2(lo_6_5, hi_6_5, stg4_0);                   \
                                                                                \
     stp1_8 = _mm_add_epi16(stp1_8_0, stp1_11);                                 \
     stp1_9 = _mm_add_epi16(stp2_9, stp2_10);                                   \
@@ -962,7 +816,6 @@ void vpx_idct8x8_12_add_sse2(const tran_low_t *input, uint8_t *dest,
 
 void vpx_idct16x16_256_add_sse2(const tran_low_t *input, uint8_t *dest,
                                 int stride) {
-  const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1 << 5);
   const __m128i zero = _mm_setzero_si128();
 
@@ -997,7 +850,6 @@ void vpx_idct16x16_256_add_sse2(const tran_low_t *input, uint8_t *dest,
       stp1_8_0, stp1_12_0;
   __m128i stp2_0, stp2_1, stp2_2, stp2_3, stp2_4, stp2_5, stp2_6, stp2_7,
       stp2_8, stp2_9, stp2_10, stp2_11, stp2_12, stp2_13, stp2_14, stp2_15;
-  __m128i tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
   int i;
 
   curr1 = l;
@@ -1505,69 +1357,19 @@ static void iadst16_8col(__m128i *in) {
   u[6] = _mm_unpacklo_epi16(s[14], s[15]);
   u[7] = _mm_unpackhi_epi16(s[14], s[15]);
 
-  v[0] = _mm_madd_epi16(u[0], k__cospi_m16_m16);
-  v[1] = _mm_madd_epi16(u[1], k__cospi_m16_m16);
-  v[2] = _mm_madd_epi16(u[0], k__cospi_p16_m16);
-  v[3] = _mm_madd_epi16(u[1], k__cospi_p16_m16);
-  v[4] = _mm_madd_epi16(u[2], k__cospi_p16_p16);
-  v[5] = _mm_madd_epi16(u[3], k__cospi_p16_p16);
-  v[6] = _mm_madd_epi16(u[2], k__cospi_m16_p16);
-  v[7] = _mm_madd_epi16(u[3], k__cospi_m16_p16);
-  v[8] = _mm_madd_epi16(u[4], k__cospi_p16_p16);
-  v[9] = _mm_madd_epi16(u[5], k__cospi_p16_p16);
-  v[10] = _mm_madd_epi16(u[4], k__cospi_m16_p16);
-  v[11] = _mm_madd_epi16(u[5], k__cospi_m16_p16);
-  v[12] = _mm_madd_epi16(u[6], k__cospi_m16_m16);
-  v[13] = _mm_madd_epi16(u[7], k__cospi_m16_m16);
-  v[14] = _mm_madd_epi16(u[6], k__cospi_p16_m16);
-  v[15] = _mm_madd_epi16(u[7], k__cospi_p16_m16);
-
-  u[0] = _mm_add_epi32(v[0], k__DCT_CONST_ROUNDING);
-  u[1] = _mm_add_epi32(v[1], k__DCT_CONST_ROUNDING);
-  u[2] = _mm_add_epi32(v[2], k__DCT_CONST_ROUNDING);
-  u[3] = _mm_add_epi32(v[3], k__DCT_CONST_ROUNDING);
-  u[4] = _mm_add_epi32(v[4], k__DCT_CONST_ROUNDING);
-  u[5] = _mm_add_epi32(v[5], k__DCT_CONST_ROUNDING);
-  u[6] = _mm_add_epi32(v[6], k__DCT_CONST_ROUNDING);
-  u[7] = _mm_add_epi32(v[7], k__DCT_CONST_ROUNDING);
-  u[8] = _mm_add_epi32(v[8], k__DCT_CONST_ROUNDING);
-  u[9] = _mm_add_epi32(v[9], k__DCT_CONST_ROUNDING);
-  u[10] = _mm_add_epi32(v[10], k__DCT_CONST_ROUNDING);
-  u[11] = _mm_add_epi32(v[11], k__DCT_CONST_ROUNDING);
-  u[12] = _mm_add_epi32(v[12], k__DCT_CONST_ROUNDING);
-  u[13] = _mm_add_epi32(v[13], k__DCT_CONST_ROUNDING);
-  u[14] = _mm_add_epi32(v[14], k__DCT_CONST_ROUNDING);
-  u[15] = _mm_add_epi32(v[15], k__DCT_CONST_ROUNDING);
-
-  v[0] = _mm_srai_epi32(u[0], DCT_CONST_BITS);
-  v[1] = _mm_srai_epi32(u[1], DCT_CONST_BITS);
-  v[2] = _mm_srai_epi32(u[2], DCT_CONST_BITS);
-  v[3] = _mm_srai_epi32(u[3], DCT_CONST_BITS);
-  v[4] = _mm_srai_epi32(u[4], DCT_CONST_BITS);
-  v[5] = _mm_srai_epi32(u[5], DCT_CONST_BITS);
-  v[6] = _mm_srai_epi32(u[6], DCT_CONST_BITS);
-  v[7] = _mm_srai_epi32(u[7], DCT_CONST_BITS);
-  v[8] = _mm_srai_epi32(u[8], DCT_CONST_BITS);
-  v[9] = _mm_srai_epi32(u[9], DCT_CONST_BITS);
-  v[10] = _mm_srai_epi32(u[10], DCT_CONST_BITS);
-  v[11] = _mm_srai_epi32(u[11], DCT_CONST_BITS);
-  v[12] = _mm_srai_epi32(u[12], DCT_CONST_BITS);
-  v[13] = _mm_srai_epi32(u[13], DCT_CONST_BITS);
-  v[14] = _mm_srai_epi32(u[14], DCT_CONST_BITS);
-  v[15] = _mm_srai_epi32(u[15], DCT_CONST_BITS);
+  in[7] = idct_calc_wraplow_sse2(u[0], u[1], k__cospi_m16_m16);
+  in[8] = idct_calc_wraplow_sse2(u[0], u[1], k__cospi_p16_m16);
+  in[4] = idct_calc_wraplow_sse2(u[2], u[3], k__cospi_p16_p16);
+  in[11] = idct_calc_wraplow_sse2(u[2], u[3], k__cospi_m16_p16);
+  in[6] = idct_calc_wraplow_sse2(u[4], u[5], k__cospi_p16_p16);
+  in[9] = idct_calc_wraplow_sse2(u[4], u[5], k__cospi_m16_p16);
+  in[5] = idct_calc_wraplow_sse2(u[6], u[7], k__cospi_m16_m16);
+  in[10] = idct_calc_wraplow_sse2(u[6], u[7], k__cospi_p16_m16);
 
   in[0] = s[0];
   in[1] = _mm_sub_epi16(kZero, s[8]);
   in[2] = s[12];
   in[3] = _mm_sub_epi16(kZero, s[4]);
-  in[4] = _mm_packs_epi32(v[4], v[5]);
-  in[5] = _mm_packs_epi32(v[12], v[13]);
-  in[6] = _mm_packs_epi32(v[8], v[9]);
-  in[7] = _mm_packs_epi32(v[0], v[1]);
-  in[8] = _mm_packs_epi32(v[2], v[3]);
-  in[9] = _mm_packs_epi32(v[10], v[11]);
-  in[10] = _mm_packs_epi32(v[14], v[15]);
-  in[11] = _mm_packs_epi32(v[6], v[7]);
   in[12] = s[5];
   in[13] = _mm_sub_epi16(kZero, s[13]);
   in[14] = s[9];
@@ -1595,8 +1397,7 @@ static void idct16_8col(__m128i *in) {
   const __m128i k__cospi_p24_p08 = pair_set_epi16(cospi_24_64, cospi_8_64);
   const __m128i k__cospi_m24_m08 = pair_set_epi16(-cospi_24_64, -cospi_8_64);
   const __m128i k__cospi_m16_p16 = pair_set_epi16(-cospi_16_64, cospi_16_64);
-  const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);
-  __m128i v[16], u[16], s[16], t[16];
+  __m128i u[16], s[16], t[16];
 
   // stage 1
   s[0] = in[0];
@@ -1626,65 +1427,14 @@ static void idct16_8col(__m128i *in) {
   u[6] = _mm_unpacklo_epi16(s[11], s[12]);
   u[7] = _mm_unpackhi_epi16(s[11], s[12]);
 
-  v[0] = _mm_madd_epi16(u[0], k__cospi_p30_m02);
-  v[1] = _mm_madd_epi16(u[1], k__cospi_p30_m02);
-  v[2] = _mm_madd_epi16(u[0], k__cospi_p02_p30);
-  v[3] = _mm_madd_epi16(u[1], k__cospi_p02_p30);
-  v[4] = _mm_madd_epi16(u[2], k__cospi_p14_m18);
-  v[5] = _mm_madd_epi16(u[3], k__cospi_p14_m18);
-  v[6] = _mm_madd_epi16(u[2], k__cospi_p18_p14);
-  v[7] = _mm_madd_epi16(u[3], k__cospi_p18_p14);
-  v[8] = _mm_madd_epi16(u[4], k__cospi_p22_m10);
-  v[9] = _mm_madd_epi16(u[5], k__cospi_p22_m10);
-  v[10] = _mm_madd_epi16(u[4], k__cospi_p10_p22);
-  v[11] = _mm_madd_epi16(u[5], k__cospi_p10_p22);
-  v[12] = _mm_madd_epi16(u[6], k__cospi_p06_m26);
-  v[13] = _mm_madd_epi16(u[7], k__cospi_p06_m26);
-  v[14] = _mm_madd_epi16(u[6], k__cospi_p26_p06);
-  v[15] = _mm_madd_epi16(u[7], k__cospi_p26_p06);
-
-  u[0] = _mm_add_epi32(v[0], k__DCT_CONST_ROUNDING);
-  u[1] = _mm_add_epi32(v[1], k__DCT_CONST_ROUNDING);
-  u[2] = _mm_add_epi32(v[2], k__DCT_CONST_ROUNDING);
-  u[3] = _mm_add_epi32(v[3], k__DCT_CONST_ROUNDING);
-  u[4] = _mm_add_epi32(v[4], k__DCT_CONST_ROUNDING);
-  u[5] = _mm_add_epi32(v[5], k__DCT_CONST_ROUNDING);
-  u[6] = _mm_add_epi32(v[6], k__DCT_CONST_ROUNDING);
-  u[7] = _mm_add_epi32(v[7], k__DCT_CONST_ROUNDING);
-  u[8] = _mm_add_epi32(v[8], k__DCT_CONST_ROUNDING);
-  u[9] = _mm_add_epi32(v[9], k__DCT_CONST_ROUNDING);
-  u[10] = _mm_add_epi32(v[10], k__DCT_CONST_ROUNDING);
-  u[11] = _mm_add_epi32(v[11], k__DCT_CONST_ROUNDING);
-  u[12] = _mm_add_epi32(v[12], k__DCT_CONST_ROUNDING);
-  u[13] = _mm_add_epi32(v[13], k__DCT_CONST_ROUNDING);
-  u[14] = _mm_add_epi32(v[14], k__DCT_CONST_ROUNDING);
-  u[15] = _mm_add_epi32(v[15], k__DCT_CONST_ROUNDING);
-
-  u[0] = _mm_srai_epi32(u[0], DCT_CONST_BITS);
-  u[1] = _mm_srai_epi32(u[1], DCT_CONST_BITS);
-  u[2] = _mm_srai_epi32(u[2], DCT_CONST_BITS);
-  u[3] = _mm_srai_epi32(u[3], DCT_CONST_BITS);
-  u[4] = _mm_srai_epi32(u[4], DCT_CONST_BITS);
-  u[5] = _mm_srai_epi32(u[5], DCT_CONST_BITS);
-  u[6] = _mm_srai_epi32(u[6], DCT_CONST_BITS);
-  u[7] = _mm_srai_epi32(u[7], DCT_CONST_BITS);
-  u[8] = _mm_srai_epi32(u[8], DCT_CONST_BITS);
-  u[9] = _mm_srai_epi32(u[9], DCT_CONST_BITS);
-  u[10] = _mm_srai_epi32(u[10], DCT_CONST_BITS);
-  u[11] = _mm_srai_epi32(u[11], DCT_CONST_BITS);
-  u[12] = _mm_srai_epi32(u[12], DCT_CONST_BITS);
-  u[13] = _mm_srai_epi32(u[13], DCT_CONST_BITS);
-  u[14] = _mm_srai_epi32(u[14], DCT_CONST_BITS);
-  u[15] = _mm_srai_epi32(u[15], DCT_CONST_BITS);
-
-  s[8] = _mm_packs_epi32(u[0], u[1]);
-  s[15] = _mm_packs_epi32(u[2], u[3]);
-  s[9] = _mm_packs_epi32(u[4], u[5]);
-  s[14] = _mm_packs_epi32(u[6], u[7]);
-  s[10] = _mm_packs_epi32(u[8], u[9]);
-  s[13] = _mm_packs_epi32(u[10], u[11]);
-  s[11] = _mm_packs_epi32(u[12], u[13]);
-  s[12] = _mm_packs_epi32(u[14], u[15]);
+  s[8] = idct_calc_wraplow_sse2(u[0], u[1], k__cospi_p30_m02);
+  s[15] = idct_calc_wraplow_sse2(u[0], u[1], k__cospi_p02_p30);
+  s[9] = idct_calc_wraplow_sse2(u[2], u[3], k__cospi_p14_m18);
+  s[14] = idct_calc_wraplow_sse2(u[2], u[3], k__cospi_p18_p14);
+  s[10] = idct_calc_wraplow_sse2(u[4], u[5], k__cospi_p22_m10);
+  s[13] = idct_calc_wraplow_sse2(u[4], u[5], k__cospi_p10_p22);
+  s[11] = idct_calc_wraplow_sse2(u[6], u[7], k__cospi_p06_m26);
+  s[12] = idct_calc_wraplow_sse2(u[6], u[7], k__cospi_p26_p06);
 
   // stage 3
   t[0] = s[0];
@@ -1696,37 +1446,10 @@ static void idct16_8col(__m128i *in) {
   u[2] = _mm_unpacklo_epi16(s[5], s[6]);
   u[3] = _mm_unpackhi_epi16(s[5], s[6]);
 
-  v[0] = _mm_madd_epi16(u[0], k__cospi_p28_m04);
-  v[1] = _mm_madd_epi16(u[1], k__cospi_p28_m04);
-  v[2] = _mm_madd_epi16(u[0], k__cospi_p04_p28);
-  v[3] = _mm_madd_epi16(u[1], k__cospi_p04_p28);
-  v[4] = _mm_madd_epi16(u[2], k__cospi_p12_m20);
-  v[5] = _mm_madd_epi16(u[3], k__cospi_p12_m20);
-  v[6] = _mm_madd_epi16(u[2], k__cospi_p20_p12);
-  v[7] = _mm_madd_epi16(u[3], k__cospi_p20_p12);
-
-  u[0] = _mm_add_epi32(v[0], k__DCT_CONST_ROUNDING);
-  u[1] = _mm_add_epi32(v[1], k__DCT_CONST_ROUNDING);
-  u[2] = _mm_add_epi32(v[2], k__DCT_CONST_ROUNDING);
-  u[3] = _mm_add_epi32(v[3], k__DCT_CONST_ROUNDING);
-  u[4] = _mm_add_epi32(v[4], k__DCT_CONST_ROUNDING);
-  u[5] = _mm_add_epi32(v[5], k__DCT_CONST_ROUNDING);
-  u[6] = _mm_add_epi32(v[6], k__DCT_CONST_ROUNDING);
-  u[7] = _mm_add_epi32(v[7], k__DCT_CONST_ROUNDING);
-
-  u[0] = _mm_srai_epi32(u[0], DCT_CONST_BITS);
-  u[1] = _mm_srai_epi32(u[1], DCT_CONST_BITS);
-  u[2] = _mm_srai_epi32(u[2], DCT_CONST_BITS);
-  u[3] = _mm_srai_epi32(u[3], DCT_CONST_BITS);
-  u[4] = _mm_srai_epi32(u[4], DCT_CONST_BITS);
-  u[5] = _mm_srai_epi32(u[5], DCT_CONST_BITS);
-  u[6] = _mm_srai_epi32(u[6], DCT_CONST_BITS);
-  u[7] = _mm_srai_epi32(u[7], DCT_CONST_BITS);
-
-  t[4] = _mm_packs_epi32(u[0], u[1]);
-  t[7] = _mm_packs_epi32(u[2], u[3]);
-  t[5] = _mm_packs_epi32(u[4], u[5]);
-  t[6] = _mm_packs_epi32(u[6], u[7]);
+  t[4] = idct_calc_wraplow_sse2(u[0], u[1], k__cospi_p28_m04);
+  t[7] = idct_calc_wraplow_sse2(u[0], u[1], k__cospi_p04_p28);
+  t[5] = idct_calc_wraplow_sse2(u[2], u[3], k__cospi_p12_m20);
+  t[6] = idct_calc_wraplow_sse2(u[2], u[3], k__cospi_p20_p12);
   t[8] = _mm_add_epi16(s[8], s[9]);
   t[9] = _mm_sub_epi16(s[8], s[9]);
   t[10] = _mm_sub_epi16(s[11], s[10]);
@@ -1746,71 +1469,20 @@ static void idct16_8col(__m128i *in) {
   u[6] = _mm_unpacklo_epi16(t[10], t[13]);
   u[7] = _mm_unpackhi_epi16(t[10], t[13]);
 
-  v[0] = _mm_madd_epi16(u[0], k__cospi_p16_p16);
-  v[1] = _mm_madd_epi16(u[1], k__cospi_p16_p16);
-  v[2] = _mm_madd_epi16(u[0], k__cospi_p16_m16);
-  v[3] = _mm_madd_epi16(u[1], k__cospi_p16_m16);
-  v[4] = _mm_madd_epi16(u[2], k__cospi_p24_m08);
-  v[5] = _mm_madd_epi16(u[3], k__cospi_p24_m08);
-  v[6] = _mm_madd_epi16(u[2], k__cospi_p08_p24);
-  v[7] = _mm_madd_epi16(u[3], k__cospi_p08_p24);
-  v[8] = _mm_madd_epi16(u[4], k__cospi_m08_p24);
-  v[9] = _mm_madd_epi16(u[5], k__cospi_m08_p24);
-  v[10] = _mm_madd_epi16(u[4], k__cospi_p24_p08);
-  v[11] = _mm_madd_epi16(u[5], k__cospi_p24_p08);
-  v[12] = _mm_madd_epi16(u[6], k__cospi_m24_m08);
-  v[13] = _mm_madd_epi16(u[7], k__cospi_m24_m08);
-  v[14] = _mm_madd_epi16(u[6], k__cospi_m08_p24);
-  v[15] = _mm_madd_epi16(u[7], k__cospi_m08_p24);
-
-  u[0] = _mm_add_epi32(v[0], k__DCT_CONST_ROUNDING);
-  u[1] = _mm_add_epi32(v[1], k__DCT_CONST_ROUNDING);
-  u[2] = _mm_add_epi32(v[2], k__DCT_CONST_ROUNDING);
-  u[3] = _mm_add_epi32(v[3], k__DCT_CONST_ROUNDING);
-  u[4] = _mm_add_epi32(v[4], k__DCT_CONST_ROUNDING);
-  u[5] = _mm_add_epi32(v[5], k__DCT_CONST_ROUNDING);
-  u[6] = _mm_add_epi32(v[6], k__DCT_CONST_ROUNDING);
-  u[7] = _mm_add_epi32(v[7], k__DCT_CONST_ROUNDING);
-  u[8] = _mm_add_epi32(v[8], k__DCT_CONST_ROUNDING);
-  u[9] = _mm_add_epi32(v[9], k__DCT_CONST_ROUNDING);
-  u[10] = _mm_add_epi32(v[10], k__DCT_CONST_ROUNDING);
-  u[11] = _mm_add_epi32(v[11], k__DCT_CONST_ROUNDING);
-  u[12] = _mm_add_epi32(v[12], k__DCT_CONST_ROUNDING);
-  u[13] = _mm_add_epi32(v[13], k__DCT_CONST_ROUNDING);
-  u[14] = _mm_add_epi32(v[14], k__DCT_CONST_ROUNDING);
-  u[15] = _mm_add_epi32(v[15], k__DCT_CONST_ROUNDING);
-
-  u[0] = _mm_srai_epi32(u[0], DCT_CONST_BITS);
-  u[1] = _mm_srai_epi32(u[1], DCT_CONST_BITS);
-  u[2] = _mm_srai_epi32(u[2], DCT_CONST_BITS);
-  u[3] = _mm_srai_epi32(u[3], DCT_CONST_BITS);
-  u[4] = _mm_srai_epi32(u[4], DCT_CONST_BITS);
-  u[5] = _mm_srai_epi32(u[5], DCT_CONST_BITS);
-  u[6] = _mm_srai_epi32(u[6], DCT_CONST_BITS);
-  u[7] = _mm_srai_epi32(u[7], DCT_CONST_BITS);
-  u[8] = _mm_srai_epi32(u[8], DCT_CONST_BITS);
-  u[9] = _mm_srai_epi32(u[9], DCT_CONST_BITS);
-  u[10] = _mm_srai_epi32(u[10], DCT_CONST_BITS);
-  u[11] = _mm_srai_epi32(u[11], DCT_CONST_BITS);
-  u[12] = _mm_srai_epi32(u[12], DCT_CONST_BITS);
-  u[13] = _mm_srai_epi32(u[13], DCT_CONST_BITS);
-  u[14] = _mm_srai_epi32(u[14], DCT_CONST_BITS);
-  u[15] = _mm_srai_epi32(u[15], DCT_CONST_BITS);
-
-  s[0] = _mm_packs_epi32(u[0], u[1]);
-  s[1] = _mm_packs_epi32(u[2], u[3]);
-  s[2] = _mm_packs_epi32(u[4], u[5]);
-  s[3] = _mm_packs_epi32(u[6], u[7]);
+  s[0] = idct_calc_wraplow_sse2(u[0], u[1], k__cospi_p16_p16);
+  s[1] = idct_calc_wraplow_sse2(u[0], u[1], k__cospi_p16_m16);
+  s[2] = idct_calc_wraplow_sse2(u[2], u[3], k__cospi_p24_m08);
+  s[3] = idct_calc_wraplow_sse2(u[2], u[3], k__cospi_p08_p24);
+  s[9] = idct_calc_wraplow_sse2(u[4], u[5], k__cospi_m08_p24);
+  s[14] = idct_calc_wraplow_sse2(u[4], u[5], k__cospi_p24_p08);
+  s[10] = idct_calc_wraplow_sse2(u[6], u[7], k__cospi_m24_m08);
+  s[13] = idct_calc_wraplow_sse2(u[6], u[7], k__cospi_m08_p24);
   s[4] = _mm_add_epi16(t[4], t[5]);
   s[5] = _mm_sub_epi16(t[4], t[5]);
   s[6] = _mm_sub_epi16(t[7], t[6]);
   s[7] = _mm_add_epi16(t[6], t[7]);
   s[8] = t[8];
   s[15] = t[15];
-  s[9] = _mm_packs_epi32(u[8], u[9]);
-  s[14] = _mm_packs_epi32(u[10], u[11]);
-  s[10] = _mm_packs_epi32(u[12], u[13]);
-  s[13] = _mm_packs_epi32(u[14], u[15]);
   s[11] = t[11];
   s[12] = t[12];
 
@@ -1824,20 +1496,8 @@ static void idct16_8col(__m128i *in) {
 
   u[0] = _mm_unpacklo_epi16(s[5], s[6]);
   u[1] = _mm_unpackhi_epi16(s[5], s[6]);
-  v[0] = _mm_madd_epi16(u[0], k__cospi_m16_p16);
-  v[1] = _mm_madd_epi16(u[1], k__cospi_m16_p16);
-  v[2] = _mm_madd_epi16(u[0], k__cospi_p16_p16);
-  v[3] = _mm_madd_epi16(u[1], k__cospi_p16_p16);
-  u[0] = _mm_add_epi32(v[0], k__DCT_CONST_ROUNDING);
-  u[1] = _mm_add_epi32(v[1], k__DCT_CONST_ROUNDING);
-  u[2] = _mm_add_epi32(v[2], k__DCT_CONST_ROUNDING);
-  u[3] = _mm_add_epi32(v[3], k__DCT_CONST_ROUNDING);
-  u[0] = _mm_srai_epi32(u[0], DCT_CONST_BITS);
-  u[1] = _mm_srai_epi32(u[1], DCT_CONST_BITS);
-  u[2] = _mm_srai_epi32(u[2], DCT_CONST_BITS);
-  u[3] = _mm_srai_epi32(u[3], DCT_CONST_BITS);
-  t[5] = _mm_packs_epi32(u[0], u[1]);
-  t[6] = _mm_packs_epi32(u[2], u[3]);
+  t[5] = idct_calc_wraplow_sse2(u[0], u[1], k__cospi_m16_p16);
+  t[6] = idct_calc_wraplow_sse2(u[0], u[1], k__cospi_p16_p16);
 
   t[8] = _mm_add_epi16(s[8], s[11]);
   t[9] = _mm_add_epi16(s[9], s[10]);
@@ -1865,37 +1525,10 @@ static void idct16_8col(__m128i *in) {
   u[2] = _mm_unpacklo_epi16(t[11], t[12]);
   u[3] = _mm_unpackhi_epi16(t[11], t[12]);
 
-  v[0] = _mm_madd_epi16(u[0], k__cospi_m16_p16);
-  v[1] = _mm_madd_epi16(u[1], k__cospi_m16_p16);
-  v[2] = _mm_madd_epi16(u[0], k__cospi_p16_p16);
-  v[3] = _mm_madd_epi16(u[1], k__cospi_p16_p16);
-  v[4] = _mm_madd_epi16(u[2], k__cospi_m16_p16);
-  v[5] = _mm_madd_epi16(u[3], k__cospi_m16_p16);
-  v[6] = _mm_madd_epi16(u[2], k__cospi_p16_p16);
-  v[7] = _mm_madd_epi16(u[3], k__cospi_p16_p16);
-
-  u[0] = _mm_add_epi32(v[0], k__DCT_CONST_ROUNDING);
-  u[1] = _mm_add_epi32(v[1], k__DCT_CONST_ROUNDING);
-  u[2] = _mm_add_epi32(v[2], k__DCT_CONST_ROUNDING);
-  u[3] = _mm_add_epi32(v[3], k__DCT_CONST_ROUNDING);
-  u[4] = _mm_add_epi32(v[4], k__DCT_CONST_ROUNDING);
-  u[5] = _mm_add_epi32(v[5], k__DCT_CONST_ROUNDING);
-  u[6] = _mm_add_epi32(v[6], k__DCT_CONST_ROUNDING);
-  u[7] = _mm_add_epi32(v[7], k__DCT_CONST_ROUNDING);
-
-  u[0] = _mm_srai_epi32(u[0], DCT_CONST_BITS);
-  u[1] = _mm_srai_epi32(u[1], DCT_CONST_BITS);
-  u[2] = _mm_srai_epi32(u[2], DCT_CONST_BITS);
-  u[3] = _mm_srai_epi32(u[3], DCT_CONST_BITS);
-  u[4] = _mm_srai_epi32(u[4], DCT_CONST_BITS);
-  u[5] = _mm_srai_epi32(u[5], DCT_CONST_BITS);
-  u[6] = _mm_srai_epi32(u[6], DCT_CONST_BITS);
-  u[7] = _mm_srai_epi32(u[7], DCT_CONST_BITS);
-
-  s[10] = _mm_packs_epi32(u[0], u[1]);
-  s[13] = _mm_packs_epi32(u[2], u[3]);
-  s[11] = _mm_packs_epi32(u[4], u[5]);
-  s[12] = _mm_packs_epi32(u[6], u[7]);
+  s[10] = idct_calc_wraplow_sse2(u[0], u[1], k__cospi_m16_p16);
+  s[13] = idct_calc_wraplow_sse2(u[0], u[1], k__cospi_p16_p16);
+  s[11] = idct_calc_wraplow_sse2(u[2], u[3], k__cospi_m16_p16);
+  s[12] = idct_calc_wraplow_sse2(u[2], u[3], k__cospi_p16_p16);
   s[14] = t[14];
   s[15] = t[15];
 
@@ -1932,7 +1565,6 @@ void iadst16_sse2(__m128i *in0, __m128i *in1) {
 
 void vpx_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
                                int stride) {
-  const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1 << 5);
   const __m128i zero = _mm_setzero_si128();
 
@@ -1958,7 +1590,7 @@ void vpx_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
       stp1_12_0;
   __m128i stp2_0, stp2_1, stp2_2, stp2_3, stp2_4, stp2_5, stp2_6, stp2_7,
       stp2_8, stp2_9, stp2_10, stp2_11, stp2_12, stp2_13, stp2_14;
-  __m128i tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+  __m128i tmp0, tmp1, tmp2, tmp3;
   int i;
   // First 1-D inverse DCT
   // Load input data.
@@ -1974,41 +1606,17 @@ void vpx_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
     const __m128i lo_1_15 = _mm_unpackhi_epi16(in[0], zero);
     const __m128i lo_13_3 = _mm_unpackhi_epi16(zero, in[1]);
 
-    tmp0 = _mm_madd_epi16(lo_1_15, stg2_0);
-    tmp2 = _mm_madd_epi16(lo_1_15, stg2_1);
-    tmp5 = _mm_madd_epi16(lo_13_3, stg2_6);
-    tmp7 = _mm_madd_epi16(lo_13_3, stg2_7);
-
-    tmp0 = _mm_add_epi32(tmp0, rounding);
-    tmp2 = _mm_add_epi32(tmp2, rounding);
-    tmp5 = _mm_add_epi32(tmp5, rounding);
-    tmp7 = _mm_add_epi32(tmp7, rounding);
-
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS);
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS);
-    tmp5 = _mm_srai_epi32(tmp5, DCT_CONST_BITS);
-    tmp7 = _mm_srai_epi32(tmp7, DCT_CONST_BITS);
-
-    stp2_8 = _mm_packs_epi32(tmp0, tmp2);
-    stp2_11 = _mm_packs_epi32(tmp5, tmp7);
+    stp2_8 = idct_calc_wraplow_sse2(stg2_0, stg2_1, lo_1_15);
+    stp2_11 = idct_calc_wraplow_sse2(stg2_6, stg2_7, lo_13_3);
   }
 
   // Stage3
   {
     const __m128i lo_2_14 = _mm_unpacklo_epi16(in[1], zero);
 
-    tmp0 = _mm_madd_epi16(lo_2_14, stg3_0);
-    tmp2 = _mm_madd_epi16(lo_2_14, stg3_1);
-
-    tmp0 = _mm_add_epi32(tmp0, rounding);
-    tmp2 = _mm_add_epi32(tmp2, rounding);
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS);
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS);
-
+    stp1_4 = idct_calc_wraplow_sse2(stg3_0, stg3_1, lo_2_14);
     stp1_13 = _mm_unpackhi_epi64(stp2_11, zero);
     stp1_14 = _mm_unpackhi_epi64(stp2_8, zero);
-
-    stp1_4 = _mm_packs_epi32(tmp0, tmp2);
   }
 
   // Stage4
@@ -2017,31 +1625,12 @@ void vpx_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
     const __m128i lo_9_14 = _mm_unpacklo_epi16(stp2_8, stp1_14);
     const __m128i lo_10_13 = _mm_unpacklo_epi16(stp2_11, stp1_13);
 
-    tmp0 = _mm_madd_epi16(lo_0_8, stg4_0);
-    tmp2 = _mm_madd_epi16(lo_0_8, stg4_1);
-    tmp1 = _mm_madd_epi16(lo_9_14, stg4_4);
-    tmp3 = _mm_madd_epi16(lo_9_14, stg4_5);
-    tmp5 = _mm_madd_epi16(lo_10_13, stg4_6);
-    tmp7 = _mm_madd_epi16(lo_10_13, stg4_7);
-
-    tmp0 = _mm_add_epi32(tmp0, rounding);
-    tmp2 = _mm_add_epi32(tmp2, rounding);
-    tmp1 = _mm_add_epi32(tmp1, rounding);
-    tmp3 = _mm_add_epi32(tmp3, rounding);
-    tmp5 = _mm_add_epi32(tmp5, rounding);
-    tmp7 = _mm_add_epi32(tmp7, rounding);
-
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS);
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS);
-    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS);
-    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS);
-    tmp5 = _mm_srai_epi32(tmp5, DCT_CONST_BITS);
-    tmp7 = _mm_srai_epi32(tmp7, DCT_CONST_BITS);
-
+    tmp0 = idct_madd_round_shift_sse2(lo_0_8, stg4_0);
+    tmp1 = idct_madd_round_shift_sse2(lo_0_8, stg4_1);
     stp1_0 = _mm_packs_epi32(tmp0, tmp0);
-    stp1_1 = _mm_packs_epi32(tmp2, tmp2);
-    stp2_9 = _mm_packs_epi32(tmp1, tmp3);
-    stp2_10 = _mm_packs_epi32(tmp5, tmp7);
+    stp1_1 = _mm_packs_epi32(tmp1, tmp1);
+    stp2_9 = idct_calc_wraplow_sse2(stg4_4, stg4_5, lo_9_14);
+    stp2_10 = idct_calc_wraplow_sse2(stg4_6, stg4_7, lo_10_13);
 
     stp2_6 = _mm_unpackhi_epi64(stp1_4, zero);
   }
@@ -2070,33 +1659,16 @@ void vpx_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
     const __m128i lo_10_13 = _mm_unpacklo_epi16(stp1_10, stp1_13);
     const __m128i lo_11_12 = _mm_unpacklo_epi16(stp1_11, stp1_12);
 
-    tmp1 = _mm_madd_epi16(lo_6_5, stg4_1);
-    tmp3 = _mm_madd_epi16(lo_6_5, stg4_0);
-    tmp0 = _mm_madd_epi16(lo_10_13, stg6_0);
-    tmp2 = _mm_madd_epi16(lo_10_13, stg4_0);
-    tmp4 = _mm_madd_epi16(lo_11_12, stg6_0);
-    tmp6 = _mm_madd_epi16(lo_11_12, stg4_0);
-
-    tmp1 = _mm_add_epi32(tmp1, rounding);
-    tmp3 = _mm_add_epi32(tmp3, rounding);
-    tmp0 = _mm_add_epi32(tmp0, rounding);
-    tmp2 = _mm_add_epi32(tmp2, rounding);
-    tmp4 = _mm_add_epi32(tmp4, rounding);
-    tmp6 = _mm_add_epi32(tmp6, rounding);
-
-    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS);
-    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS);
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS);
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS);
-    tmp4 = _mm_srai_epi32(tmp4, DCT_CONST_BITS);
-    tmp6 = _mm_srai_epi32(tmp6, DCT_CONST_BITS);
-
-    stp1_6 = _mm_packs_epi32(tmp3, tmp1);
+    stp1_6 = idct_calc_wraplow_sse2(stg4_0, stg4_1, lo_6_5);
+    tmp0 = idct_madd_round_shift_sse2(lo_10_13, stg6_0);
+    tmp1 = idct_madd_round_shift_sse2(lo_10_13, stg4_0);
+    tmp2 = idct_madd_round_shift_sse2(lo_11_12, stg6_0);
+    tmp3 = idct_madd_round_shift_sse2(lo_11_12, stg4_0);
 
     stp2_10 = _mm_packs_epi32(tmp0, zero);
-    stp2_13 = _mm_packs_epi32(tmp2, zero);
-    stp2_11 = _mm_packs_epi32(tmp4, zero);
-    stp2_12 = _mm_packs_epi32(tmp6, zero);
+    stp2_13 = _mm_packs_epi32(tmp1, zero);
+    stp2_11 = _mm_packs_epi32(tmp2, zero);
+    stp2_12 = _mm_packs_epi32(tmp3, zero);
 
     tmp0 = _mm_add_epi16(stp1_0, stp1_4);
     tmp1 = _mm_sub_epi16(stp1_0, stp1_4);
@@ -2330,23 +1902,8 @@ void vpx_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
     stp1_2 = stp2_1;                                                           \
     stp1_3 = stp2_0;                                                           \
                                                                                \
-    tmp0 = _mm_madd_epi16(lo_6_5, stg4_1);                                     \
-    tmp1 = _mm_madd_epi16(hi_6_5, stg4_1);                                     \
-    tmp2 = _mm_madd_epi16(lo_6_5, stg4_0);                                     \
-    tmp3 = _mm_madd_epi16(hi_6_5, stg4_0);                                     \
-                                                                               \
-    tmp0 = _mm_add_epi32(tmp0, rounding);                                      \
-    tmp1 = _mm_add_epi32(tmp1, rounding);                                      \
-    tmp2 = _mm_add_epi32(tmp2, rounding);                                      \
-    tmp3 = _mm_add_epi32(tmp3, rounding);                                      \
-                                                                               \
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS);                               \
-    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS);                               \
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS);                               \
-    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS);                               \
-                                                                               \
-    stp1_5 = _mm_packs_epi32(tmp0, tmp1);                                      \
-    stp1_6 = _mm_packs_epi32(tmp2, tmp3);                                      \
+    stp1_5 = idct_calc_wraplow_sse2(lo_6_5, hi_6_5, stg4_1);                   \
+    stp1_6 = idct_calc_wraplow_sse2(lo_6_5, hi_6_5, stg4_0);                   \
                                                                                \
     stp1_4 = stp2_4;                                                           \
     stp1_7 = stp2_7;                                                           \
@@ -2660,23 +2217,8 @@ void vpx_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
     stp1_2 = _mm_sub_epi16(stp2_1, stp2_2);                                    \
     stp1_3 = _mm_sub_epi16(stp2_0, stp2_3);                                    \
                                                                                \
-    tmp0 = _mm_madd_epi16(lo_6_5, stg4_1);                                     \
-    tmp1 = _mm_madd_epi16(hi_6_5, stg4_1);                                     \
-    tmp2 = _mm_madd_epi16(lo_6_5, stg4_0);                                     \
-    tmp3 = _mm_madd_epi16(hi_6_5, stg4_0);                                     \
-                                                                               \
-    tmp0 = _mm_add_epi32(tmp0, rounding);                                      \
-    tmp1 = _mm_add_epi32(tmp1, rounding);                                      \
-    tmp2 = _mm_add_epi32(tmp2, rounding);                                      \
-    tmp3 = _mm_add_epi32(tmp3, rounding);                                      \
-                                                                               \
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS);                               \
-    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS);                               \
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS);                               \
-    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS);                               \
-                                                                               \
-    stp1_5 = _mm_packs_epi32(tmp0, tmp1);                                      \
-    stp1_6 = _mm_packs_epi32(tmp2, tmp3);                                      \
+    stp1_5 = idct_calc_wraplow_sse2(lo_6_5, hi_6_5, stg4_1);                   \
+    stp1_6 = idct_calc_wraplow_sse2(lo_6_5, hi_6_5, stg4_0);                   \
                                                                                \
     stp1_4 = stp2_4;                                                           \
     stp1_7 = stp2_7;                                                           \
@@ -2803,7 +2345,6 @@ void vpx_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
 void vpx_idct32x32_34_add_sse2(const tran_low_t *input, uint8_t *dest,
                                int stride) {
   const __m128i zero = _mm_setzero_si128();
-  const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1 << 5);
 
   // idct constants for each stage
@@ -2847,7 +2388,6 @@ void vpx_idct32x32_34_add_sse2(const tran_low_t *input, uint8_t *dest,
       stp2_8, stp2_9, stp2_10, stp2_11, stp2_12, stp2_13, stp2_14, stp2_15,
       stp2_16, stp2_17, stp2_18, stp2_19, stp2_20, stp2_21, stp2_22, stp2_23,
       stp2_24, stp2_25, stp2_26, stp2_27, stp2_28, stp2_29, stp2_30, stp2_31;
-  __m128i tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
   int i;
 
   // Load input data. Only need to load the top left 8x8 block.
@@ -2949,7 +2489,6 @@ void vpx_idct32x32_34_add_sse2(const tran_low_t *input, uint8_t *dest,
 
 void vpx_idct32x32_1024_add_sse2(const tran_low_t *input, uint8_t *dest,
                                  int stride) {
-  const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1 << 5);
   const __m128i zero = _mm_setzero_si128();
 
@@ -3010,7 +2549,6 @@ void vpx_idct32x32_1024_add_sse2(const tran_low_t *input, uint8_t *dest,
       stp2_8, stp2_9, stp2_10, stp2_11, stp2_12, stp2_13, stp2_14, stp2_15,
       stp2_16, stp2_17, stp2_18, stp2_19, stp2_20, stp2_21, stp2_22, stp2_23,
       stp2_24, stp2_25, stp2_26, stp2_27, stp2_28, stp2_29, stp2_30, stp2_31;
-  __m128i tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
   int i, j, i32;
 
   for (i = 0; i < 4; i++) {

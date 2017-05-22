@@ -120,6 +120,26 @@ static INLINE void array_transpose_16x16(__m128i *res0, __m128i *res1) {
   res0[15] = tbuf[7];
 }
 
+static INLINE __m128i dct_const_round_shift_sse2(const __m128i in) {
+  const __m128i t = _mm_add_epi32(in, _mm_set1_epi32(DCT_CONST_ROUNDING));
+  return _mm_srai_epi32(t, DCT_CONST_BITS);
+}
+
+static INLINE __m128i idct_madd_round_shift_sse2(const __m128i in,
+                                                 const __m128i cospi) {
+  const __m128i t = _mm_madd_epi16(in, cospi);
+  return dct_const_round_shift_sse2(t);
+}
+
+// Calculate the dot product between in0/1 and x and wrap to short.
+static INLINE __m128i idct_calc_wraplow_sse2(const __m128i in0,
+                                             const __m128i in1,
+                                             const __m128i x) {
+  const __m128i t0 = idct_madd_round_shift_sse2(in0, x);
+  const __m128i t1 = idct_madd_round_shift_sse2(in1, x);
+  return _mm_packs_epi32(t0, t1);
+}
+
 // Function to allow 8 bit optimisations to be used when profile 0 is used with
 // highbitdepth enabled
 static INLINE __m128i load_input_data(const tran_low_t *data) {
@@ -246,37 +266,10 @@ static INLINE void write_buffer_8x16(uint8_t *dest, __m128i *in, int stride) {
 #define MULTIPLICATION_AND_ADD(lo_0, hi_0, lo_1, hi_1, cst0, cst1, cst2, cst3, \
                                res0, res1, res2, res3)                         \
   {                                                                            \
-    tmp0 = _mm_madd_epi16(lo_0, cst0);                                         \
-    tmp1 = _mm_madd_epi16(hi_0, cst0);                                         \
-    tmp2 = _mm_madd_epi16(lo_0, cst1);                                         \
-    tmp3 = _mm_madd_epi16(hi_0, cst1);                                         \
-    tmp4 = _mm_madd_epi16(lo_1, cst2);                                         \
-    tmp5 = _mm_madd_epi16(hi_1, cst2);                                         \
-    tmp6 = _mm_madd_epi16(lo_1, cst3);                                         \
-    tmp7 = _mm_madd_epi16(hi_1, cst3);                                         \
-                                                                               \
-    tmp0 = _mm_add_epi32(tmp0, rounding);                                      \
-    tmp1 = _mm_add_epi32(tmp1, rounding);                                      \
-    tmp2 = _mm_add_epi32(tmp2, rounding);                                      \
-    tmp3 = _mm_add_epi32(tmp3, rounding);                                      \
-    tmp4 = _mm_add_epi32(tmp4, rounding);                                      \
-    tmp5 = _mm_add_epi32(tmp5, rounding);                                      \
-    tmp6 = _mm_add_epi32(tmp6, rounding);                                      \
-    tmp7 = _mm_add_epi32(tmp7, rounding);                                      \
-                                                                               \
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS);                               \
-    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS);                               \
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS);                               \
-    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS);                               \
-    tmp4 = _mm_srai_epi32(tmp4, DCT_CONST_BITS);                               \
-    tmp5 = _mm_srai_epi32(tmp5, DCT_CONST_BITS);                               \
-    tmp6 = _mm_srai_epi32(tmp6, DCT_CONST_BITS);                               \
-    tmp7 = _mm_srai_epi32(tmp7, DCT_CONST_BITS);                               \
-                                                                               \
-    res0 = _mm_packs_epi32(tmp0, tmp1);                                        \
-    res1 = _mm_packs_epi32(tmp2, tmp3);                                        \
-    res2 = _mm_packs_epi32(tmp4, tmp5);                                        \
-    res3 = _mm_packs_epi32(tmp6, tmp7);                                        \
+    res0 = idct_calc_wraplow_sse2(lo_0, hi_0, cst0);                           \
+    res1 = idct_calc_wraplow_sse2(lo_0, hi_0, cst1);                           \
+    res2 = idct_calc_wraplow_sse2(lo_1, hi_1, cst2);                           \
+    res3 = idct_calc_wraplow_sse2(lo_1, hi_1, cst3);                           \
   }
 
 static INLINE void recon_and_store4x4_sse2(const __m128i *const in,
