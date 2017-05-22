@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7e398cd4_c1f7b8de",
+        "filename": "vpx_dsp/arm/variance_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-22T18:27:52Z",
+      "side": 1,
+      "message": "max sum is 255 / -255 \u003d\u003e 32767 at most 128.xxx times, so it can accumulate at most 128 values. Updated asserts and added a comment with the math.",
+      "parentUuid": "dac22d6a_d392f072",
+      "range": {
+        "startLine": 64,
+        "startChar": 15,
+        "endLine": 64,
+        "endChar": 21
+      },
+      "revId": "b937e563044513f824a89700a9de4fe06d6bf753",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8bc60649_6d7621ba",
         "filename": "vpx_dsp/arm/variance_neon.c",
         "patchSetId": 1
@@ -42,6 +66,47 @@
         "endLine": 109,
         "endChar": 10
       },
+      "revId": "b937e563044513f824a89700a9de4fe06d6bf753",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "733957e8_9f31361c",
+        "filename": "vpx_dsp/arm/variance_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-22T18:27:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8bc60649_6d7621ba",
+      "range": {
+        "startLine": 109,
+        "startChar": 9,
+        "endLine": 109,
+        "endChar": 10
+      },
+      "revId": "b937e563044513f824a89700a9de4fe06d6bf753",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d8c8b68_0f193d1c",
+        "filename": "vpx_dsp/arm/variance_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-05-22T18:27:52Z",
+      "side": 1,
+      "message": "It must not compile NDEBUG for arm because w is not defined here.",
       "revId": "b937e563044513f824a89700a9de4fe06d6bf753",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
