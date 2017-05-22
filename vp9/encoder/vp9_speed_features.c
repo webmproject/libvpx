@@ -578,7 +578,7 @@ static void set_rt_speed_feature_framesize_independent(
 
     if (content == VP9E_CONTENT_SCREEN)
       sf->mv.subpel_force_stop = 3;
-    else if (cm->width > 352 && cm->height > 288)
+    else if (cm->width * cm->height > 352 * 288)
       sf->mv.subpel_force_stop = 2;
 
     if (content == VP9E_CONTENT_SCREEN) sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
@@ -602,7 +602,7 @@ static void set_rt_speed_feature_framesize_independent(
       }
       // Since the short_circuit_low_temp_var is used, reduce the
       // adaptive_rd_thresh level.
-      if (cm->width > 352 && cm->height > 288)
+      if (cm->width * cm->height > 352 * 288)
         sf->adaptive_rd_thresh = 1;
       else
         sf->adaptive_rd_thresh = 2;
