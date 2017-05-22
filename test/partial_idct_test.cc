@@ -128,8 +128,8 @@ class PartialIDctTest : public ::testing::TestWithParam<PartialInvTxfmParam> {
   }
 
   void InitInput() {
-    const int max_coeff = (32766 << (bit_depth_ - 8)) / 4;
-    int max_energy_leftover = max_coeff * max_coeff;
+    const int64_t max_coeff = (32766 << (bit_depth_ - 8)) / 4;
+    int64_t max_energy_leftover = max_coeff * max_coeff;
     for (int j = 0; j < last_nonzero_; ++j) {
       tran_low_t coeff = static_cast<tran_low_t>(
           sqrt(1.0 * max_energy_leftover) * (rnd_.Rand16() - 32768) / 65536);
@@ -160,6 +160,14 @@ class PartialIDctTest : public ::testing::TestWithParam<PartialInvTxfmParam> {
             printf("dest[%d][%d] diff:%6d (ref),%6d (opt)\n", y, x, ref, opt);
           }
         }
+      }
+
+      printf("\ninput_block_:\n");
+      for (int y = 0; y < size_; y++) {
+        for (int x = 0; x < size_; x++) {
+          printf("%6d,", input_block_[y * size_ + x]);
+        }
+        printf("\n");
       }
     }
   }
