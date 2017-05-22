@@ -14,6 +14,7 @@
 #include "./vpx_config.h"
 
 #include "vpx/vpx_integer.h"
+#include "vpx_dsp/arm/mem_neon.h"
 #include "vpx_ports/mem.h"
 
 static INLINE int horizontal_add_s16x8(const int16x8_t v_16x8) {
@@ -29,6 +30,47 @@ static INLINE int horizontal_add_s32x4(const int32x4_t v_32x4) {
   const int32x2_t c = vadd_s32(vreinterpret_s32_s64(vget_low_s64(b)),
                                vreinterpret_s32_s64(vget_high_s64(b)));
   return vget_lane_s32(c, 0);
+}
+
+// w * h must be less than 2048 or sum_s16 may overflow.
+// Process a block of width 4 four rows at a time.
+static void variance_neon_w4x4(const uint8_t *a, int a_stride, const uint8_t *b,
+                               int b_stride, int h, uint32_t *sse, int *sum) {
+  int i;
+  int16x8_t sum_s16 = vdupq_n_s16(0);
+  int32x4_t sse_lo_s32 = vdupq_n_s32(0);
+  int32x4_t sse_hi_s32 = vdupq_n_s32(0);
+
+  for (i = 0; i < h; i += 4) {
+    const uint8x16_t a_u8 = load_unaligned_u8q(a, a_stride);
+    const uint8x16_t b_u8 = load_unaligned_u8q(b, b_stride);
+    const uint16x8_t diff_lo_u16 =
+        vsubl_u8(vget_low_u8(a_u8), vget_low_u8(b_u8));
+    const uint16x8_t diff_hi_u16 =
+        vsubl_u8(vget_high_u8(a_u8), vget_high_u8(b_u8));
+
+    const int16x8_t diff_lo_s16 = vreinterpretq_s16_u16(diff_lo_u16);
+    const int16x8_t diff_hi_s16 = vreinterpretq_s16_u16(diff_hi_u16);
+
+    sum_s16 = vaddq_s16(sum_s16, diff_lo_s16);
+    sum_s16 = vaddq_s16(sum_s16, diff_hi_s16);
+
+    sse_lo_s32 = vmlal_s16(sse_lo_s32, vget_low_s16(diff_lo_s16),
+                           vget_low_s16(diff_lo_s16));
+    sse_lo_s32 = vmlal_s16(sse_lo_s32, vget_high_s16(diff_lo_s16),
+                           vget_high_s16(diff_lo_s16));
+
+    sse_hi_s32 = vmlal_s16(sse_hi_s32, vget_low_s16(diff_hi_s16),
+                           vget_low_s16(diff_hi_s16));
+    sse_hi_s32 = vmlal_s16(sse_hi_s32, vget_high_s16(diff_hi_s16),
+                           vget_high_s16(diff_hi_s16));
+
+    a += 4 * a_stride;
+    b += 4 * b_stride;
+  }
+
+  *sum = horizontal_add_s16x8(sum_s16);
+  *sse = (uint32_t)horizontal_add_s32x4(vaddq_s32(sse_lo_s32, sse_hi_s32));
 }
 
 // w * h must be less than 2048 or sum_s16 may overflow.
@@ -127,7 +169,9 @@ void vpx_get16x16var_neon(const uint8_t *a, int a_stride, const uint8_t *b,
                                             const uint8_t *b, int b_stride, \
                                             unsigned int *sse) {            \
     int sum;                                                                \
-    if (n == 8)                                                             \
+    if (n == 4)                                                             \
+      variance_neon_w4x4(a, a_stride, b, b_stride, m, sse, &sum);           \
+    else if (n == 8)                                                        \
       variance_neon_w8x2(a, a_stride, b, b_stride, m, sse, &sum);           \
     else                                                                    \
       variance_neon_w16(a, a_stride, b, b_stride, n, m, sse, &sum);         \
@@ -137,6 +181,8 @@ void vpx_get16x16var_neon(const uint8_t *a, int a_stride, const uint8_t *b,
       return *sse - (uint32_t)(((int64_t)sum * sum) >> shift);              \
   }
 
+varianceNxM(4, 4, 4);
+varianceNxM(4, 8, 5);
 varianceNxM(8, 4, 5);
 varianceNxM(8, 8, 6);
 varianceNxM(8, 16, 7);
