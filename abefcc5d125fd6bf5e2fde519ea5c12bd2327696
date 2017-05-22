@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "5ce075b7_a2351346",
+        "filename": "vpx_dsp/x86/highbd_inv_txfm_sse2.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-22T20:35:15Z",
+      "side": 1,
+      "message": "\u003e Done\n\u003e \n\u003e Can you explain more? Is it dependent with the number of __m128i arguments or their positions in the arguments list?\n\nit\u0027s limited to the registers used in the call, for x64 only the first four (right to left) will receive 16-byte alignment; x86 has one less.\n\nhttps://msdn.microsoft.com/en-us/library/ms235286.aspx",
+      "parentUuid": "82f58bd0_6d416cd2",
+      "revId": "abefcc5d125fd6bf5e2fde519ea5c12bd2327696",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e6023cb4_44c3805b",
         "filename": "vpx_dsp/x86/highbd_inv_txfm_sse2.h",
         "patchSetId": 1
