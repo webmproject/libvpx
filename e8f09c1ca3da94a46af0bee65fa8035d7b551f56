@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a80490eb_9716e49e",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2539,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2017-05-23T22:39:09Z",
+      "side": 1,
+      "message": "Note here the actual gf_interval is i - 1, assuming rc-\u003esource_alt_ref_pending is true.",
+      "range": {
+        "startLine": 2539,
+        "startChar": 2,
+        "endLine": 2539,
+        "endChar": 78
+      },
+      "revId": "e8f09c1ca3da94a46af0bee65fa8035d7b551f56",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
