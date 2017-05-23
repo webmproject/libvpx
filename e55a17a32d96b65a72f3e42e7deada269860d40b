@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "28d9190c_4e74eabf",
+        "filename": "vpx_dsp/x86/inv_txfm_sse2.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-05-23T21:57:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3110dd82_8faa8897",
+      "revId": "e55a17a32d96b65a72f3e42e7deada269860d40b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f80a9793_e43c4ce8",
         "filename": "vpx_dsp/x86/inv_txfm_sse2.h",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2017-05-23T21:19:42Z",
       "side": 1,
       "message": "I think you could just generalize the parameter names in the first and avoid this ambiguous wraplow2 version. maybe (in0, in1, x) and describe the operation in a function level comment (applies x to in0/1 ...)",
+      "revId": "e55a17a32d96b65a72f3e42e7deada269860d40b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e7444c5b_23ee764d",
+        "filename": "vpx_dsp/x86/inv_txfm_sse2.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-05-23T21:57:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f80a9793_e43c4ce8",
       "revId": "e55a17a32d96b65a72f3e42e7deada269860d40b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
