@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "917e1dbb_c8fb82bc",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 734,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-23T15:03:20Z",
+      "side": 1,
+      "message": "shouldn\u0027t this vary with the function?",
+      "range": {
+        "startLine": 734,
+        "startChar": 42,
+        "endLine": 734,
+        "endChar": 48
+      },
+      "revId": "71ea8e3fb122ef087a9cd60a270b04520c7e8c5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
