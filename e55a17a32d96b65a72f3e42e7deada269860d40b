@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3110dd82_8faa8897",
+        "filename": "vpx_dsp/x86/inv_txfm_sse2.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-23T21:19:16Z",
+      "side": 1,
+      "message": "I don\u0027t think this one is necessary",
+      "revId": "e55a17a32d96b65a72f3e42e7deada269860d40b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
