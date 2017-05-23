@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "88d63da1_d68d0fe3",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-23T14:04:41Z",
+      "side": 1,
+      "message": "can InitInput be modified to avoid that?",
+      "revId": "520a3a33b8d03b038379a54db473e84ff97f57d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
