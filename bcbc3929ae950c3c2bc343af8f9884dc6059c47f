@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a35e6f8c_69fae213",
+        "filename": "vpx_dsp/ppc/sad_vsx.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-23T14:17:05Z",
+      "side": 1,
+      "message": "these and the others look like they could be factored into SAD*(width, height) later",
+      "revId": "bcbc3929ae950c3c2bc343af8f9884dc6059c47f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
