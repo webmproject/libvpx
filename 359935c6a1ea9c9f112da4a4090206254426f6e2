@@ -16,6 +16,24 @@
       "revId": "359935c6a1ea9c9f112da4a4090206254426f6e2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "751ce5e4_9fe44220",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2514,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2017-05-24T17:53:36Z",
+      "side": 1,
+      "message": "I\u0027m not sure arf_active_or_kf is relevant here. If we decide to use an altref, rc-\u003esource_alt_ref_pending is set. Then rc-\u003ebaseline_gf_interval, which should be no smaller than rc-\u003emin_gf_interval, will be assigned as i - 1 in line 2539.",
+      "parentUuid": "294e0b79_e4aec7b4",
+      "revId": "359935c6a1ea9c9f112da4a4090206254426f6e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
