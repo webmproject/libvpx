@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7d1d9347_d76fd146",
+        "filename": "test/vpx_temporal_svc_encoder.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-05-24T21:51:46Z",
+      "side": 1,
+      "message": "Is it bit depth? Should it only exist when CONFIG_VP9_HIGHBITDEPTH \u003d 1?",
+      "range": {
+        "startLine": 58,
+        "startChar": 48,
+        "endLine": 58,
+        "endChar": 49
+      },
+      "revId": "51bc73fe7f1b93c0e39d05ed77df91b7b2b9dd41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
