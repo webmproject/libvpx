@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ad8c556_f4357323",
+        "filename": "vpx_dsp/arm/subpel_variance_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-24T16:28:31Z",
+      "side": 1,
+      "message": "use vdup for consistency with other code",
+      "revId": "188d58eaa99ed5b47af77b354e303a82614ce62a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
