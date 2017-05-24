@@ -16,6 +16,24 @@
       "revId": "188d58eaa99ed5b47af77b354e303a82614ce62a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "15947695_919ac1b7",
+        "filename": "vpx_dsp/arm/subpel_variance_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-24T16:29:51Z",
+      "side": 1,
+      "message": "\u003e use vdup for consistency with other code\n\noh, maybe it\u0027s consistent here. In general I\u0027d prefer to normalize to one (vdup)",
+      "parentUuid": "9ad8c556_f4357323",
+      "revId": "188d58eaa99ed5b47af77b354e303a82614ce62a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
