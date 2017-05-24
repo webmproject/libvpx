@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1ebdb159_a33f72ce",
+        "filename": "vpx_dsp/arm/subpel_variance_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-24T14:47:46Z",
+      "side": 1,
+      "message": "you could reuse fdata3 here, no?\nthose names are inherited from elsewhere, but I\u0027m not too sure they\u0027re all that helpful",
+      "range": {
+        "startLine": 133,
+        "startChar": 22,
+        "endLine": 133,
+        "endChar": 27
+      },
+      "revId": "9b0d306a2fcbdefe31fa35a367293dbf23af0048",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
