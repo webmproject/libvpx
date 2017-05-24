@@ -133,7 +133,7 @@ class PartialIDctTest : public ::testing::TestWithParam<PartialInvTxfmParam> {
     for (int j = 0; j < last_nonzero_; ++j) {
       tran_low_t coeff = static_cast<tran_low_t>(
           sqrt(1.0 * max_energy_leftover) * (rnd_.Rand16() - 32768) / 65536);
-      max_energy_leftover -= coeff * coeff;
+      max_energy_leftover -= static_cast<int64_t>(coeff) * coeff;
       if (max_energy_leftover < 0) {
         max_energy_leftover = 0;
         coeff = 0;
