@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "40a998a3_0d995da6",
+        "filename": "vp8/common/skin_detection.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-05-25T22:40:13Z",
+      "side": 1,
+      "message": "can remove/update the comment, since i think we don\u0027t have the skin_color_detector_test.cc",
+      "revId": "2c1f20b7cd3ecea804a4ed730f6c21606248bafa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
