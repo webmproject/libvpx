@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7b6bcd6e_a7f29404",
+        "filename": "vp8/common/skin_detection.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-05-25T23:10:45Z",
+      "side": 1,
+      "message": "put these as thresholds, see vp9_skin_detection.c",
+      "range": {
+        "startLine": 46,
+        "startChar": 20,
+        "endLine": 46,
+        "endChar": 21
+      },
+      "revId": "856ad15a7e5198dae69128114ef06238450690ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
