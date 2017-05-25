@@ -16,6 +16,24 @@
       "revId": "2c1f20b7cd3ecea804a4ed730f6c21606248bafa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e88ac738_16aee22f",
+        "filename": "vp8/common/skin_detection.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-05-25T23:04:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "40a998a3_0d995da6",
+      "revId": "2c1f20b7cd3ecea804a4ed730f6c21606248bafa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
