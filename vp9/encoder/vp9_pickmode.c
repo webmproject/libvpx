@@ -158,6 +158,7 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   const MvLimits tmp_mv_limits = x->mv_limits;
   int rv = 0;
   int cost_list[5];
+  int search_subpel = 1;
   const YV12_BUFFER_CONFIG *scaled_ref_frame =
       vp9_get_scaled_ref_frame(cpi, ref);
   if (scaled_ref_frame) {
@@ -210,7 +211,12 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   rv =
       !(RDCOST(x->rdmult, x->rddiv, (*rate_mv + rate_mode), 0) > best_rd_sofar);
 
-  if (rv) {
+  // For SVC on non-reference frame, avoid subpel for (0, 0) motion.
+  if (cpi->use_svc && cpi->svc.non_reference_frame) {
+    if (mvp_full.row == 0 && mvp_full.col == 0) search_subpel = 0;
+  }
+
+  if (rv && search_subpel) {
     const int subpel_force_stop = cpi->sf.mv.subpel_force_stop;
     cpi->find_fractional_mv_step(
         x, &tmp_mv->as_mv, &ref_mv, cpi->common.allow_high_precision_mv,

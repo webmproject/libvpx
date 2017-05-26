@@ -534,7 +534,11 @@ static void set_rt_speed_feature_framesize_independent(
     if (cpi->svc.temporal_layer_id > 0) {
       sf->adaptive_rd_thresh = 4;
       sf->limit_newmv_early_exit = 0;
-      sf->mv.subpel_force_stop = (cpi->svc.temporal_layer_id == 1) ? 1 : 2;
+      // Use 1/2-pel for non-reference frame.
+      if (cpi->svc.non_reference_frame)
+        sf->mv.subpel_force_stop = 2;
+      else
+        sf->mv.subpel_force_stop = 1;
       sf->base_mv_aggressive =
           (cpi->svc.temporal_layer_id == cpi->svc.number_temporal_layers - 1)
               ? 1

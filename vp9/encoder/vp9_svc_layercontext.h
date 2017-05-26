@@ -87,6 +87,7 @@ typedef struct {
   int ref_frame_index[REF_FRAMES];
   int force_zero_mode_spatial_ref;
   int current_superframe;
+  int non_reference_frame;
   int use_base_mv;
   // Used to control the downscaling filter for source scaling, for 1 pass CBR.
   // downsample_filter_phase: = 0 will do sub-sampling (no weighted average),

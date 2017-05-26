@@ -36,6 +36,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->scaled_temp_is_alloc = 0;
   svc->scaled_one_half = 0;
   svc->current_superframe = 0;
+  svc->non_reference_frame = 0;
   for (i = 0; i < REF_FRAMES; ++i) svc->ref_frame_index[i] = -1;
   for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
     svc->ext_frame_flags[sl] = 0;
@@ -675,6 +676,12 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
         break;
       }
     }
+  }
+
+  cpi->svc.non_reference_frame = 0;
+  if (cpi->common.frame_type != KEY_FRAME && !cpi->ext_refresh_last_frame &&
+      !cpi->ext_refresh_golden_frame && !cpi->ext_refresh_alt_ref_frame) {
+    cpi->svc.non_reference_frame = 1;
   }
 
   if (vp9_set_size_literal(cpi, width, height) != 0)
