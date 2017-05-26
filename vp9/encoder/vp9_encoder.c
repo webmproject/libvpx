@@ -3518,6 +3518,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
 
   if ((cpi->use_svc &&
        (cpi->svc.spatial_layer_id < cpi->svc.number_spatial_layers - 1 ||
+        cpi->svc.temporal_layer_id != cpi->svc.number_temporal_layers - 1 ||
         cpi->svc.current_superframe < 1)) ||
       cpi->resize_pending || cpi->resize_state || cpi->external_resize ||
       cpi->resize_state != ORIG) {
