@@ -20,7 +20,7 @@ void vpx_highbd_convolve8_neon(const uint16_t *src, ptrdiff_t src_stride,
                                int h, int bd) {
   const int y0_q4 = get_filter_offset(filter_y, get_filter_base(filter_y));
   // + 1 to make it divisible by 4
-  DECLARE_ALIGNED(16, uint16_t, temp[64 * 136]);
+  uint16_t temp[64 * 136];
   const int intermediate_height =
       (((h - 1) * y_step_q4 + y0_q4) >> SUBPEL_BITS) + SUBPEL_TAPS;
 
@@ -44,7 +44,7 @@ void vpx_highbd_convolve8_avg_neon(const uint16_t *src, ptrdiff_t src_stride,
                                    int w, int h, int bd) {
   const int y0_q4 = get_filter_offset(filter_y, get_filter_base(filter_y));
   // + 1 to make it divisible by 4
-  DECLARE_ALIGNED(16, uint16_t, temp[64 * 136]);
+  uint16_t temp[64 * 136];
   const int intermediate_height =
       (((h - 1) * y_step_q4 + y0_q4) >> SUBPEL_BITS) + SUBPEL_TAPS;
 

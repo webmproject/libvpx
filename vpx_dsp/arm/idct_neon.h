@@ -18,7 +18,7 @@
 #include "vpx_dsp/txfm_common.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 
-DECLARE_ALIGNED(16, static const int16_t, kCospi[16]) = {
+static const int16_t kCospi[16] = {
   16384 /*  cospi_0_64  */, 15137 /*  cospi_8_64  */,
   11585 /*  cospi_16_64 */, 6270 /*  cospi_24_64 */,
   16069 /*  cospi_4_64  */, 13623 /*  cospi_12_64 */,
@@ -29,7 +29,7 @@ DECLARE_ALIGNED(16, static const int16_t, kCospi[16]) = {
   12665 /*  cospi_14_64 */, -10394 /* -cospi_18_64 */
 };
 
-DECLARE_ALIGNED(16, static const int32_t, kCospi32[16]) = {
+static const int32_t kCospi32[16] = {
   16384 /*  cospi_0_64  */, 15137 /*  cospi_8_64  */,
   11585 /*  cospi_16_64 */, 6270 /*  cospi_24_64 */,
   16069 /*  cospi_4_64  */, 13623 /*  cospi_12_64 */,
