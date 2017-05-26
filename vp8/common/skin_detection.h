@@ -11,17 +11,29 @@
 #ifndef VP8_ENCODER_SKIN_DETECTION_H_
 #define VP8_ENCODER_SKIN_DETECTION_H_
 
+#include "vp8/encoder/onyx_int.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_scale/yv12config.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+struct VP8_COMP;
+
+// #define OUTPUT_YUV_SKINMAP
 
 int skin_pixel(int y, int cb, int cr, int motion);
 
 int compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
                        int stride, int strideuv, int consec_zeromv,
                        int curr_motion_magn);
+
+#ifdef OUTPUT_YUV_SKINMAP
+// For viewing skin map on input source.
+void compute_skin_map(struct VP8_COMP *const cpi, FILE *yuv_skinmap_file);
+extern void vp8_write_yuv_frame(FILE *f, YV12_BUFFER_CONFIG *s);
+#endif
 
 #ifdef __cplusplus
 }  // extern "C"
