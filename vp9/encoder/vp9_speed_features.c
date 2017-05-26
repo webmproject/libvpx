@@ -560,19 +560,26 @@ static void set_rt_speed_feature_framesize_independent(
             (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1), sizeof(uint8_t));
       }
     }
-  }
-
-  if (speed >= 8) {
-    sf->adaptive_rd_thresh = 4;
-    // Enable partition copy. For SVC, only enabled for top resolution layer,
+    // Enable partition copy. For SVC only enabled for top spatial resolution
+    // layer.
+    cpi->max_copied_frame = 0;
     if (!cpi->last_frame_dropped && cpi->resize_state == ORIG &&
         !cpi->external_resize &&
         (!cpi->use_svc ||
          cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1)) {
       sf->copy_partition_flag = 1;
-      cpi->max_copied_frame = 4;
+      cpi->max_copied_frame = 2;
+      // The top temporal enhancement layer (for number of temporal layers > 1)
+      // are non-reference frames, so use large/max value for max_copied_frame.
+      if (cpi->svc.number_temporal_layers > 1 &&
+          cpi->svc.temporal_layer_id == cpi->svc.number_temporal_layers - 1)
+        cpi->max_copied_frame = 255;
     }
+  }
 
+  if (speed >= 8) {
+    sf->adaptive_rd_thresh = 4;
+    if (!cpi->use_svc) cpi->max_copied_frame = 4;
     if (cpi->row_mt && cpi->oxcf.max_threads > 1)
       sf->adaptive_rd_thresh_row_mt = 1;
 
