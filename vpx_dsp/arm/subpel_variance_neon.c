@@ -30,8 +30,8 @@ static void var_filter_block2d_bil_w4(const uint8_t *src_ptr,
                                       int pixel_step,
                                       unsigned int output_height,
                                       const uint8_t *filter) {
-  const uint8x8_t f0 = vmov_n_u8(filter[0]);
-  const uint8x8_t f1 = vmov_n_u8(filter[1]);
+  const uint8x8_t f0 = vdup_n_u8(filter[0]);
+  const uint8x8_t f1 = vdup_n_u8(filter[1]);
   unsigned int i;
   for (i = 0; i < output_height; i += 2) {
     const uint8x8_t src_0 = load_unaligned_u8(src_ptr, src_pixels_per_line);
@@ -54,8 +54,8 @@ static void var_filter_block2d_bil_w8(const uint8_t *src_ptr,
                                       int pixel_step,
                                       unsigned int output_height,
                                       const uint8_t *filter) {
-  const uint8x8_t f0 = vmov_n_u8(filter[0]);
-  const uint8x8_t f1 = vmov_n_u8(filter[1]);
+  const uint8x8_t f0 = vdup_n_u8(filter[0]);
+  const uint8x8_t f1 = vdup_n_u8(filter[1]);
   unsigned int i;
   for (i = 0; i < output_height; ++i) {
     const uint8x8_t src_0 = vld1_u8(&src_ptr[0]);
@@ -78,8 +78,8 @@ static void var_filter_block2d_bil_w16(const uint8_t *src_ptr,
                                        unsigned int output_height,
                                        unsigned int output_width,
                                        const uint8_t *filter) {
-  const uint8x8_t f0 = vmov_n_u8(filter[0]);
-  const uint8x8_t f1 = vmov_n_u8(filter[1]);
+  const uint8x8_t f0 = vdup_n_u8(filter[0]);
+  const uint8x8_t f1 = vdup_n_u8(filter[1]);
   unsigned int i, j;
   for (i = 0; i < output_height; ++i) {
     for (j = 0; j < output_width; j += 16) {
