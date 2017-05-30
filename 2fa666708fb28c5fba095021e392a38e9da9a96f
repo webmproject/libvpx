@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4c65a9f_d55628b0",
+        "filename": "vpx_dsp/arm/avg_pred_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-05-30T16:11:34Z",
+      "side": 1,
+      "message": "we had moved h/w to y/x elsewhere I thought",
+      "range": {
+        "startLine": 21,
+        "startChar": 9,
+        "endLine": 21,
+        "endChar": 10
+      },
+      "revId": "2fa666708fb28c5fba095021e392a38e9da9a96f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
