@@ -57,6 +57,30 @@
       "revId": "359935c6a1ea9c9f112da4a4090206254426f6e2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "68e3c780_bc7993b5",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2514,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2017-05-30T16:57:20Z",
+      "side": 1,
+      "message": "Switching in and out of arf or GF only mode and cases with key frames either at the start or forced key frames complicate things.\n\nConsider a min of 4 (N is normal frame G golden K key and A is the logical position of the arf where we code an overlay)\n\nif we have K N N N  G N N N  G N N N we are fine 3 groups of 4 with K or G at the start of each group giving forward prediction for that group\n\nIf we have a long sequence of arfs we are also fine  but here the ARF logical position (where we code the overlay) is at the end of a group and it predicts back but also is the GF for the subsequent group.\n\nso groups might be N N N A  N N N A... etc\n\nbut where we switch in and out there can be double counting as we change from groups where the boosted frame of the group is at the start to ones where it is at the end.\n\nSo when we have a key frame or previously were coding GF only the GF which would have been the first frame of a new group followed by 3 N is now part of the subsequent arf group.. hence that first arf group when arfs are re-enabled is G N N A followed thereafter N N N A   N N N A etc..\n\nThe same is true after a key frame... it is logically part of the first arf group.. so we have K N N A  N N N A....\n\nfor a simple case then we have arf overlays at 0, 4, 8, 12 etc but the first group comprises a KF/GF two normal and an arf.",
+      "parentUuid": "880b1794_2054fa73",
+      "range": {
+        "startLine": 2513,
+        "startChar": 40,
+        "endLine": 2514,
+        "endChar": 34
+      },
+      "revId": "359935c6a1ea9c9f112da4a4090206254426f6e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
