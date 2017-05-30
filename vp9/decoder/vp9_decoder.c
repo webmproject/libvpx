@@ -169,7 +169,7 @@ vpx_codec_err_t vp9_copy_reference_dec(VP9Decoder *pbi,
       vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                          "Incorrect buffer dimensions");
     else
-      vp8_yv12_copy_frame(cfg, sd);
+      vpx_yv12_copy_frame(cfg, sd);
   } else {
     vpx_internal_error(&cm->error, VPX_CODEC_ERROR, "Invalid reference frame");
   }
@@ -217,7 +217,7 @@ vpx_codec_err_t vp9_set_reference_dec(VP9_COMMON *cm,
                        "Incorrect buffer dimensions");
   } else {
     // Overwrite the reference frame buffer.
-    vp8_yv12_copy_frame(sd, ref_buf);
+    vpx_yv12_copy_frame(sd, ref_buf);
   }
 
   return cm->error.error_code;
