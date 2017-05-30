@@ -34,6 +34,29 @@
       "revId": "359935c6a1ea9c9f112da4a4090206254426f6e2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "880b1794_2054fa73",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2514,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2017-05-30T16:47:09Z",
+      "side": 1,
+      "message": "Wont this break things and turn arf off given the loop above breaks out on \u003e\u003d... I.e. we terminate the loop thinking we are OK then decide here the  group is not long enough",
+      "range": {
+        "startLine": 2513,
+        "startChar": 40,
+        "endLine": 2514,
+        "endChar": 34
+      },
+      "revId": "359935c6a1ea9c9f112da4a4090206254426f6e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
