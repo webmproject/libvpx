@@ -16,6 +16,7 @@
 #include "vp8/common/blockd.h"
 #include "onyx_int.h"
 #include "vp8/common/systemdependent.h"
+#include "vp8/common/skin_detection.h"
 #include "vp8/encoder/quantize.h"
 #include "vp8/common/alloccommon.h"
 #include "mcomp.h"
@@ -86,6 +87,9 @@ FILE *yuv_file;
 #endif
 #ifdef OUTPUT_YUV_DENOISED
 FILE *yuv_denoised_file;
+#endif
+#ifdef OUTPUT_YUV_SKINMAP
+FILE *yuv_skinmap_file = NULL;
 #endif
 
 #if 0
@@ -1933,6 +1937,9 @@ struct VP8_COMP *vp8_create_compressor(VP8_CONFIG *oxcf) {
 #ifdef OUTPUT_YUV_DENOISED
   yuv_denoised_file = fopen("denoised.yuv", "ab");
 #endif
+#ifdef OUTPUT_YUV_SKINMAP
+  yuv_skinmap_file = fopen("skinmap.yuv", "ab");
+#endif
 
 #if 0
     framepsnr = fopen("framepsnr.stt", "a");
@@ -2298,6 +2305,9 @@ void vp8_remove_compressor(VP8_COMP **ptr) {
 #ifdef OUTPUT_YUV_DENOISED
   fclose(yuv_denoised_file);
 #endif
+#ifdef OUTPUT_YUV_SKINMAP
+  fclose(yuv_skinmap_file);
+#endif
 
 #if 0
 
@@ -2474,7 +2484,8 @@ int vp8_update_entropy(VP8_COMP *cpi, int update) {
   return 0;
 }
 
-#if defined(OUTPUT_YUV_SRC) || defined(OUTPUT_YUV_DENOISED)
+#if defined(OUTPUT_YUV_SRC) || defined(OUTPUT_YUV_DENOISED) || \
+    defined(OUTPUT_YUV_SKINMAP)
 void vp8_write_yuv_frame(FILE *yuv_file, YV12_BUFFER_CONFIG *s) {
   unsigned char *src = s->y_buffer;
   int h = s->y_height;
@@ -4418,6 +4429,12 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
   if (cpi->oxcf.noise_sensitivity == 4 && !cpi->oxcf.screen_content_mode &&
       cpi->frames_since_key % 8 == 0 && cm->frame_type != KEY_FRAME) {
     process_denoiser_mode_change(cpi);
+  }
+#endif
+
+#ifdef OUTPUT_YUV_SKINMAP
+  if (cpi->common.current_video_frame > 1) {
+    compute_skin_map(cpi, yuv_skinmap_file);
   }
 #endif
 
