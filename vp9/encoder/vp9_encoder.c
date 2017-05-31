@@ -2588,7 +2588,7 @@ int vp9_update_entropy(VP9_COMP *cpi, int update) {
 // denoising we will have to modify this.
 void vp9_write_yuv_frame_420(YV12_BUFFER_CONFIG *s, FILE *f) {
   uint8_t *src = s->y_buffer;
-  int h = s->y_height;
+  int h = s->y_crop_height;
 
   do {
     fwrite(src, s->y_width, 1, f);
@@ -2596,7 +2596,7 @@ void vp9_write_yuv_frame_420(YV12_BUFFER_CONFIG *s, FILE *f) {
   } while (--h);
 
   src = s->u_buffer;
-  h = s->uv_height;
+  h = s->uv_crop_height;
 
   do {
     fwrite(src, s->uv_width, 1, f);
@@ -2604,7 +2604,7 @@ void vp9_write_yuv_frame_420(YV12_BUFFER_CONFIG *s, FILE *f) {
   } while (--h);
 
   src = s->v_buffer;
-  h = s->uv_height;
+  h = s->uv_crop_height;
 
   do {
     fwrite(src, s->uv_width, 1, f);

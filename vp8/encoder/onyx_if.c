@@ -2488,7 +2488,7 @@ int vp8_update_entropy(VP8_COMP *cpi, int update) {
     defined(OUTPUT_YUV_SKINMAP)
 void vp8_write_yuv_frame(FILE *yuv_file, YV12_BUFFER_CONFIG *s) {
   unsigned char *src = s->y_buffer;
-  int h = s->y_height;
+  int h = s->y_crop_height;
 
   do {
     fwrite(src, s->y_width, 1, yuv_file);
@@ -2496,7 +2496,7 @@ void vp8_write_yuv_frame(FILE *yuv_file, YV12_BUFFER_CONFIG *s) {
   } while (--h);
 
   src = s->u_buffer;
-  h = s->uv_height;
+  h = s->uv_crop_height;
 
   do {
     fwrite(src, s->uv_width, 1, yuv_file);
@@ -2504,7 +2504,7 @@ void vp8_write_yuv_frame(FILE *yuv_file, YV12_BUFFER_CONFIG *s) {
   } while (--h);
 
   src = s->v_buffer;
-  h = s->uv_height;
+  h = s->uv_crop_height;
 
   do {
     fwrite(src, s->uv_width, 1, yuv_file);
