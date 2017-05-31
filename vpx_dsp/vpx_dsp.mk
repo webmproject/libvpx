@@ -325,6 +325,7 @@ ifneq ($(filter yes,$(CONFIG_ENCODERS) $(CONFIG_POSTPROC) $(CONFIG_VP9_POSTPROC)
 DSP_SRCS-yes            += variance.c
 DSP_SRCS-yes            += variance.h
 
+DSP_SRCS-$(HAVE_NEON)   += arm/avg_pred_neon.c
 DSP_SRCS-$(HAVE_NEON)   += arm/subpel_variance_neon.c
 DSP_SRCS-$(HAVE_NEON)   += arm/variance_neon.c
 
