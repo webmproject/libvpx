@@ -30,7 +30,8 @@ static const int y_low = 40;
 static const int y_high = 220;
 
 // Evaluates the Mahalanobis distance measure for the input CbCr values.
-static int evaluate_skin_color_difference(int cb, int cr, int idx) {
+static int evaluate_skin_color_difference(const int cb, const int cr,
+                                          const int idx) {
   const int cb_q6 = cb << 6;
   const int cr_q6 = cr << 6;
   const int cb_diff_q12 =
@@ -49,7 +50,7 @@ static int evaluate_skin_color_difference(int cb, int cr, int idx) {
 }
 
 // Checks if the input yCbCr values corresponds to skin color.
-int skin_pixel(int y, int cb, int cr, int motion) {
+int skin_pixel(const int y, const int cb, const int cr, const int motion) {
   if (y < y_low || y > y_high) {
     return 0;
   } else {
@@ -84,14 +85,14 @@ int skin_pixel(int y, int cb, int cr, int motion) {
 }
 
 int compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
-                       int stride, int strideuv, int consec_zeromv,
-                       int curr_motion_magn) {
+                       const int stride, const int strideuv,
+                       const int consec_zeromv, const int curr_motion_magn) {
   // No skin if block has been zero/small motion for long consecutive time.
   if (consec_zeromv > 60 && curr_motion_magn == 0) {
     return 0;
   } else {
     int motion = 1;
-    // Take center pixel in block to determine is_skin.
+    // Take the average of center 2x2 pixels.
     const int ysource = (y[7 * stride + 7] + y[7 * stride + 8] +
                          y[8 * stride + 7] + y[8 * stride + 8]) >>
                         2;
@@ -118,8 +119,6 @@ void compute_skin_map(VP8_COMP *const cpi, FILE *yuv_skinmap_file) {
   const int src_ystride = cpi->Source->y_stride;
   const int src_uvstride = cpi->Source->uv_stride;
 
-  // Use center pixel or average of center 2x2 pixels.
-  const int mode_filter = 0;
   YV12_BUFFER_CONFIG skinmap;
   memset(&skinmap, 0, sizeof(skinmap));
   if (vp8_yv12_alloc_frame_buffer(&skinmap, cm->Width, cm->Height,
@@ -132,42 +131,21 @@ void compute_skin_map(VP8_COMP *const cpi, FILE *yuv_skinmap_file) {
   // Loop through blocks and set skin map based on center pixel of block.
   // Set y to white for skin block, otherwise set to source with gray scale.
   // Ignore rightmost/bottom boundary blocks.
-  for (mb_row = 0; mb_row < cm->mb_rows - 1; mb_row += 1) {
+  for (mb_row = 0; mb_row < cm->mb_rows; mb_row += 1) {
     num_bl = 0;
-    for (mb_col = 0; mb_col < cm->mb_cols - 1; mb_col += 1) {
+    for (mb_col = 0; mb_col < cm->mb_cols; mb_col += 1) {
       int is_skin = 0;
-      if (mode_filter == 1) {
-        // Use 2x2 average at center.
-        uint8_t ysource = src_y[8 * src_ystride + 8];
-        uint8_t usource = src_u[4 * src_uvstride + 4];
-        uint8_t vsource = src_v[4 * src_uvstride + 4];
-        const uint8_t ysource2 = src_y[(8 + 1) * src_ystride + 8];
-        const uint8_t usource2 = src_u[(4 + 1) * src_uvstride + 4];
-        const uint8_t vsource2 = src_v[(4 + 1) * src_uvstride + 4];
-        const uint8_t ysource3 = src_y[8 * src_ystride + (8 + 1)];
-        const uint8_t usource3 = src_u[4 * src_uvstride + (4 + 1)];
-        const uint8_t vsource3 = src_v[4 * src_uvstride + (4 + 1)];
-        const uint8_t ysource4 = src_y[(8 + 1) * src_ystride + (8 + 1)];
-        const uint8_t usource4 = src_u[(4 + 1) * src_uvstride + (4 + 1)];
-        const uint8_t vsource4 = src_v[(4 + 1) * src_uvstride + (4 + 1)];
-        ysource = (ysource + ysource2 + ysource3 + ysource4) >> 2;
-        usource = (usource + usource2 + usource3 + usource4) >> 2;
-        vsource = (vsource + vsource2 + vsource3 + vsource4) >> 2;
-        is_skin = skin_pixel(ysource, usource, vsource, 1);
-      } else {
-        int consec_zeromv = 0;
-        const int bl_index = mb_row * cm->mb_cols + mb_col;
-        const int bl_index1 = bl_index + 1;
-        const int bl_index2 = bl_index + cm->mb_cols;
-        const int bl_index3 = bl_index2 + 1;
-        consec_zeromv =
-            VPXMIN(cpi->consec_zero_last[bl_index],
-                   VPXMIN(cpi->consec_zero_last[bl_index1],
-                          VPXMIN(cpi->consec_zero_last[bl_index2],
-                                 cpi->consec_zero_last[bl_index3])));
-        is_skin = compute_skin_block(src_y, src_u, src_v, src_ystride,
-                                     src_uvstride, consec_zeromv, 0);
-      }
+      int consec_zeromv = 0;
+      const int bl_index = mb_row * cm->mb_cols + mb_col;
+      const int bl_index1 = bl_index + 1;
+      const int bl_index2 = bl_index + cm->mb_cols;
+      const int bl_index3 = bl_index2 + 1;
+      consec_zeromv = VPXMIN(cpi->consec_zero_last[bl_index],
+                             VPXMIN(cpi->consec_zero_last[bl_index1],
+                                    VPXMIN(cpi->consec_zero_last[bl_index2],
+                                           cpi->consec_zero_last[bl_index3])));
+      is_skin = compute_skin_block(src_y, src_u, src_v, src_ystride,
+                                   src_uvstride, consec_zeromv, 0);
       for (i = 0; i < 16; i++) {
         for (j = 0; j < 16; j++) {
           if (is_skin)
