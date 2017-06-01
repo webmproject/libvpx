@@ -39,6 +39,29 @@
       "revId": "e0bdfdc10ee821e0eff5a3dd5861debfcba44533",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1bd1d0c1_0e6094f7",
+        "filename": "vpx_dsp/arm/fdct16x16_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-06-01T23:36:46Z",
+      "side": 1,
+      "message": "Doubled \"into\". Another pair 15 lines below.",
+      "range": {
+        "startLine": 344,
+        "startChar": 47,
+        "endLine": 344,
+        "endChar": 56
+      },
+      "revId": "e0bdfdc10ee821e0eff5a3dd5861debfcba44533",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
