@@ -50,7 +50,7 @@ static int evaluate_skin_color_difference(const int cb, const int cr,
 }
 
 // Checks if the input yCbCr values corresponds to skin color.
-int skin_pixel(const int y, const int cb, const int cr, const int motion) {
+int skin_pixel(int y, int cb, int cr, int motion) {
   if (y < y_low || y > y_high) {
     return 0;
   } else {
@@ -85,8 +85,8 @@ int skin_pixel(const int y, const int cb, const int cr, const int motion) {
 }
 
 int compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
-                       const int stride, const int strideuv,
-                       const int consec_zeromv, const int curr_motion_magn) {
+                       int stride, int strideuv, int consec_zeromv,
+                       int curr_motion_magn) {
   // No skin if block has been zero/small motion for long consecutive time.
   if (consec_zeromv > 60 && curr_motion_magn == 0) {
     return 0;
