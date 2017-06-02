@@ -361,7 +361,7 @@ static unsigned int setup_center_error(
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 }
 
-static INLINE int divide_and_round(const int n, const int d) {
+static INLINE int64_t divide_and_round(const int64_t n, const int64_t d) {
   return ((n < 0) ^ (d < 0)) ? ((n - d / 2) / d) : ((n + d / 2) / d);
 }
 
@@ -379,10 +379,13 @@ static INLINE int is_cost_list_wellbehaved(int *cost_list) {
 // y0 = 1/2 (S4 - S2)/(S4 + S2 - 2*S0).
 // The code below is an integerized version of that.
 static void get_cost_surf_min(int *cost_list, int *ir, int *ic, int bits) {
-  *ic = divide_and_round((cost_list[1] - cost_list[3]) * (1 << (bits - 1)),
-                         (cost_list[1] - 2 * cost_list[0] + cost_list[3]));
-  *ir = divide_and_round((cost_list[4] - cost_list[2]) * (1 << (bits - 1)),
-                         (cost_list[4] - 2 * cost_list[0] + cost_list[2]));
+  const int64_t x0 = (int64_t)cost_list[1] - cost_list[3];
+  const int64_t y0 = cost_list[1] - 2 * (int64_t)cost_list[0] + cost_list[3];
+  const int64_t x1 = (int64_t)cost_list[4] - cost_list[2];
+  const int64_t y1 = cost_list[4] - 2 * (int64_t)cost_list[0] + cost_list[2];
+  const int64_t b = 1 << (bits - 1);
+  *ic = (int)divide_and_round(x0 * b, y0);
+  *ir = (int)divide_and_round(x1 * b, y1);
 }
 
 uint32_t vp9_skip_sub_pixel_tree(const MACROBLOCK *x, MV *bestmv,
