@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9836fcac_64329f9c",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-06-03T04:37:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4d7ef7e2_10571332",
+      "revId": "b5f609df94264347c28fb39959a36665cea2110e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "293573ba_6d8fd17d",
         "filename": "vp9/encoder/vp9_mcomp.c",
         "patchSetId": 1
@@ -42,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "3d9787ec_63de5b95",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-06-03T04:37:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "293573ba_6d8fd17d",
+      "range": {
+        "startLine": 386,
+        "startChar": 35,
+        "endLine": 386,
+        "endChar": 51
+      },
+      "revId": "b5f609df94264347c28fb39959a36665cea2110e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "36de92cd_b07ea253",
         "filename": "vp9/encoder/vp9_mcomp.c",
         "patchSetId": 1
@@ -53,6 +95,30 @@
       "writtenOn": "2017-06-03T01:36:51Z",
       "side": 1,
       "message": "any chance these might exceed int bounds?",
+      "range": {
+        "startLine": 387,
+        "startChar": 2,
+        "endLine": 387,
+        "endChar": 13
+      },
+      "revId": "b5f609df94264347c28fb39959a36665cea2110e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "64a6ee14_32edafc2",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-06-03T04:37:52Z",
+      "side": 1,
+      "message": "(n +- d/2)/d \u003d n/d +- 1/2 so should be ok.",
+      "parentUuid": "36de92cd_b07ea253",
       "range": {
         "startLine": 387,
         "startChar": 2,
