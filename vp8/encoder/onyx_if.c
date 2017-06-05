@@ -89,7 +89,7 @@ FILE *yuv_file;
 FILE *yuv_denoised_file;
 #endif
 #ifdef OUTPUT_YUV_SKINMAP
-FILE *yuv_skinmap_file = NULL;
+static FILE *yuv_skinmap_file = NULL;
 #endif
 
 #if 0

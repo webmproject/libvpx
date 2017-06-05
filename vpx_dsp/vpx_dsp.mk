@@ -286,6 +286,10 @@ DSP_SRCS-$(HAVE_VSX)   += ppc/hadamard_vsx.c
 
 endif  # CONFIG_VP9_ENCODER
 
+# skin detection
+DSP_SRCS-yes            += skin_detection.h
+DSP_SRCS-yes            += skin_detection.c
+
 ifeq ($(CONFIG_ENCODERS),yes)
 DSP_SRCS-yes            += sad.c
 DSP_SRCS-yes            += subtract.c
