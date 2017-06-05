@@ -87,6 +87,24 @@
       "revId": "ed3ded4a4ece2456735d098b260bc421e0a31e5d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b3304693_efa94d28",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1761,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-06-05T21:38:49Z",
+      "side": 1,
+      "message": "this is a special path for golden reference in CBR, where the subpel search (which used cost_list) follows\nvp9_int_pro_motion_estimation() which doesn\u0027t  set cost_list. In other cases subpel search follows\nvp9_full_pixel_search which does initialize cost_list.",
+      "parentUuid": "3668cf0a_498de579",
+      "revId": "ed3ded4a4ece2456735d098b260bc421e0a31e5d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
