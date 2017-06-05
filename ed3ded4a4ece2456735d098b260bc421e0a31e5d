@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3371b484_20fb0182",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-06-05T20:21:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "669f356e_eb8df9e0",
+      "revId": "ed3ded4a4ece2456735d098b260bc421e0a31e5d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df54636f_ab5a910e",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 1
