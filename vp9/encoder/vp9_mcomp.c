@@ -441,7 +441,7 @@ uint32_t vp9_find_best_sub_pixel_tree_pruned_evenmore(
       cost_list[2] != INT_MAX && cost_list[3] != INT_MAX &&
       cost_list[4] != INT_MAX && is_cost_list_wellbehaved(cost_list)) {
     int ir, ic;
-    unsigned int minpt;
+    unsigned int minpt = INT_MAX;
     get_cost_surf_min(cost_list, &ir, &ic, 2);
     if (ir != 0 || ic != 0) {
       CHECK_BETTER(minpt, tr + 2 * ir, tc + 2 * ic);
