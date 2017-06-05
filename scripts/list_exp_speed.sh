@@ -25,23 +25,23 @@ script_dir=~/Dev/sandbox/libvpx/scripts
 # video=~/Dev/samples/videos/yaowu/soccer_cif.y4m
 # wi=352
 # he=288
-# frames=10
+# frames=2
 # bitrate=500
 # fps="30/1"
 
-video=~/Dev/samples/videos/speed-set/touchdown_pass_480p.y4m
-wi=854
-he=480
-frames=30
-bitrate=2400
-fps="30000/1001"
+# video=~/Dev/samples/videos/speed-set/touchdown_pass_480p.y4m
+# wi=854
+# he=480
+# frames=30
+# bitrate=2400
+# fps="30000/1001"
 
-# video=~/Dev/samples/videos/speed-set/BasketballDrive_1920x1080_50.y4m
-# wi=1920
-# he=1080
-# frames=100
-# bitrate=4000
-# fps="50/1"
+video=~/Dev/samples/videos/speed-set/BasketballDrive_1920x1080_50.y4m
+wi=1920
+he=1080
+frames=50
+bitrate=4000
+fps="50/1"
 
 # General options
 bs=bs
@@ -62,16 +62,7 @@ verbose=
 profile=0
 rm *.txt
 
-# mismatch: sub8x8_mc, ncobmc, ext-partition
-# ext_tile?
-# enc segfault: coef_interleave, pvq
-# dec error: pvq
-# entropy_stats: not an experiment
-
-#ans intrabc adapt_scan convolve_round lv_map txk_sel compound_round ext_tx filter_intra intra_interp q_adapt_probs subframe_prob_update palette_delta_encoding var_tx tpl_mv chroma_2x2 global_motion new_quant compound_segment motion_var tripred ref_adapt compound_singleref ext_inter supertx loop_restoration warped_motion tx64x64 masked_tx interintra wedge
-# delta_q filter_7bit frame_size reference_buffer tempmv_signaling dependent_horztiles palette_throughput ext_delta_q frame_superres cdef ext_partition_types cfl daala_ec rawbits fp_mb_stats xiphrc parallel_deblocking loopfiltering_across_tiles parallel_deblocking_15tap ec_adapt tile_groups new_multisymbol ec_smallmul daala_dist mv_compress
-
-for exp_tool in experimental chroma_2x2 tripred adapt_scan compound_singleref ans ref_adapt frame_superres subframe_prob_update parallel_deblocking masked_tx dependent_horztiles parallel_deblocking_15tap ec_smallmul frame_size new_multisymbol ext_delta_q daala_ec cfl q_adapt_probs loopfiltering_across_tiles tpl_mv tempmv_signaling loop_restoration rawbits intra_interp tx64x64 warped_motion filter_intra palette_delta_encoding intrabc var_tx supertx new_quant xiphrc ext_inter interintra wedge daala_dist lv_map compound_segment txk_sel ext_partition_types ext_tx global_motion convolve_round compound_round
+for exp_tool in experimental cb4x4 chroma_sub8x8 rect_tx global_motion ext_tx cdef ext_intra ext_refs dual_filter motion_var warped_motion var_tx alt_intra tx64x64 ncobmc supertx ext_partition tpl_mv tripred unpoison_partition_ctx  wedge adapt_scan ans aom_qm chroma_2x2 compound_segment compound_singleref ext_inter ext_tile filter_intra intrabc intra_interp loop_restoration lv_map masked_tx q_adapt_probs ref_adapt compound_round convolve_round interintra txk_sel
 
 do
   cd $build_dir
