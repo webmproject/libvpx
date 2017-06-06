@@ -10,9 +10,12 @@
 
 #include <stdlib.h>
 
+#include "./vpx_dsp_rtcd.h"
+
 #include "vpx_dsp/ppc/types_vsx.h"
 
 #include "vpx/vpx_integer.h"
+#include "vpx_ports/mem.h"
 
 #define PROCESS16(offset)           \
   v_a = vec_vsx_ld(offset, a);      \
@@ -100,3 +103,45 @@ SAD32(32);
 SAD32(64);
 SAD64(32);
 SAD64(64);
+
+#define SAD16AVG(height)                                                      \
+  unsigned int vpx_sad16x##height##_avg_vsx(                                  \
+      const uint8_t *src, int src_stride, const uint8_t *ref, int ref_stride, \
+      const uint8_t *second_pred) {                                           \
+    DECLARE_ALIGNED(16, uint8_t, comp_pred[16 * height]);                     \
+    vpx_comp_avg_pred_vsx(comp_pred, second_pred, 16, height, ref,            \
+                          ref_stride);                                        \
+                                                                              \
+    return vpx_sad16x##height##_vsx(src, src_stride, comp_pred, 16);          \
+  }
+
+#define SAD32AVG(height)                                                      \
+  unsigned int vpx_sad32x##height##_avg_vsx(                                  \
+      const uint8_t *src, int src_stride, const uint8_t *ref, int ref_stride, \
+      const uint8_t *second_pred) {                                           \
+    DECLARE_ALIGNED(32, uint8_t, comp_pred[32 * height]);                     \
+    vpx_comp_avg_pred_vsx(comp_pred, second_pred, 32, height, ref,            \
+                          ref_stride);                                        \
+                                                                              \
+    return vpx_sad32x##height##_vsx(src, src_stride, comp_pred, 32);          \
+  }
+
+#define SAD64AVG(height)                                                      \
+  unsigned int vpx_sad64x##height##_avg_vsx(                                  \
+      const uint8_t *src, int src_stride, const uint8_t *ref, int ref_stride, \
+      const uint8_t *second_pred) {                                           \
+    DECLARE_ALIGNED(64, uint8_t, comp_pred[64 * height]);                     \
+    vpx_comp_avg_pred_vsx(comp_pred, second_pred, 64, height, ref,            \
+                          ref_stride);                                        \
+                                                                              \
+    return vpx_sad64x##height##_vsx(src, src_stride, comp_pred, 64);          \
+  }
+
+SAD16AVG(8);
+SAD16AVG(16);
+SAD16AVG(32);
+SAD32AVG(16);
+SAD32AVG(32);
+SAD32AVG(64);
+SAD64AVG(32);
+SAD64AVG(64);

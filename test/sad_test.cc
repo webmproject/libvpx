@@ -934,5 +934,17 @@ const SadMxNParam vsx_tests[] = {
   SadMxNParam(16, 8, &vpx_sad16x8_vsx),
 };
 INSTANTIATE_TEST_CASE_P(VSX, SADTest, ::testing::ValuesIn(vsx_tests));
+
+const SadMxNAvgParam avg_vsx_tests[] = {
+  SadMxNAvgParam(64, 64, &vpx_sad64x64_avg_vsx),
+  SadMxNAvgParam(64, 32, &vpx_sad64x32_avg_vsx),
+  SadMxNAvgParam(32, 64, &vpx_sad32x64_avg_vsx),
+  SadMxNAvgParam(32, 32, &vpx_sad32x32_avg_vsx),
+  SadMxNAvgParam(32, 16, &vpx_sad32x16_avg_vsx),
+  SadMxNAvgParam(16, 32, &vpx_sad16x32_avg_vsx),
+  SadMxNAvgParam(16, 16, &vpx_sad16x16_avg_vsx),
+  SadMxNAvgParam(16, 8, &vpx_sad16x8_avg_vsx),
+};
+INSTANTIATE_TEST_CASE_P(VSX, SADavgTest, ::testing::ValuesIn(avg_vsx_tests));
 #endif  // HAVE_VSX
 }  // namespace
