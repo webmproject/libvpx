@@ -105,6 +105,24 @@
       "revId": "ed3ded4a4ece2456735d098b260bc421e0a31e5d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "42027dd7_229e8583",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1761,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-06T03:55:00Z",
+      "side": 1,
+      "message": "\u003e this is a special path for golden reference in CBR, where the subpel search (which used cost_list) follows\n\u003e vp9_int_pro_motion_estimation() which doesn\u0027t  set cost_list. In other cases subpel search follows\n\u003e vp9_full_pixel_search which does initialize cost_list.\n\nOK. My point was the values in cost_list[] will be { INT_MAX, 0, 0, 0, 0 }. I was wondering if that was intentional",
+      "parentUuid": "b3304693_efa94d28",
+      "revId": "ed3ded4a4ece2456735d098b260bc421e0a31e5d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
