@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4d1fcb05_3de8452d",
+        "filename": "test/buffer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-06T23:24:49Z",
+      "side": 1,
+      "message": "this should fail with multiple invocations",
+      "revId": "de4cb716eea72a4daf6b0aff8c3ea51890a4afba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e758c4ce_8d1a6e88",
+        "filename": "test/idct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-06T23:24:49Z",
+      "side": 1,
+      "message": "checking the alloc here would still be good",
+      "revId": "de4cb716eea72a4daf6b0aff8c3ea51890a4afba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
