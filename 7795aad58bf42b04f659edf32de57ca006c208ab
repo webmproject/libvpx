@@ -22,6 +22,30 @@
       "revId": "7795aad58bf42b04f659edf32de57ca006c208ab",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e0546e85_1f7e6def",
+        "filename": "test/buffer.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-06T22:12:14Z",
+      "side": 1,
+      "message": "heh, didn\u0027t even think of it",
+      "parentUuid": "e6bd6bdc_f1dde51c",
+      "range": {
+        "startLine": 33,
+        "startChar": 4,
+        "endLine": 33,
+        "endChar": 22
+      },
+      "revId": "7795aad58bf42b04f659edf32de57ca006c208ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
