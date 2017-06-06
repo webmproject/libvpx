@@ -19,6 +19,7 @@
 
 #include "test/acm_random.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_mem/vpx_mem.h"
 
 namespace libvpx_test {
 
@@ -29,16 +30,36 @@ class Buffer {
          int right_padding, int bottom_padding)
       : width_(width), height_(height), top_padding_(top_padding),
         left_padding_(left_padding), right_padding_(right_padding),
-        bottom_padding_(bottom_padding), padding_value_(0), stride_(0),
-        raw_size_(0), num_elements_(0), raw_buffer_(NULL) {}
+        bottom_padding_(bottom_padding), alignment_(0), padding_value_(0),
+        stride_(0), raw_size_(0), num_elements_(0), raw_buffer_(NULL) {}
+
+  Buffer(int width, int height, int top_padding, int left_padding,
+         int right_padding, int bottom_padding, unsigned int alignment)
+      : width_(width), height_(height), top_padding_(top_padding),
+        left_padding_(left_padding), right_padding_(right_padding),
+        bottom_padding_(bottom_padding), alignment_(alignment),
+        padding_value_(0), stride_(0), raw_size_(0), num_elements_(0),
+        raw_buffer_(NULL) {}
 
   Buffer(int width, int height, int padding)
       : width_(width), height_(height), top_padding_(padding),
         left_padding_(padding), right_padding_(padding),
-        bottom_padding_(padding), padding_value_(0), stride_(0), raw_size_(0),
-        num_elements_(0), raw_buffer_(NULL) {}
+        bottom_padding_(padding), alignment_(0), padding_value_(0), stride_(0),
+        raw_size_(0), num_elements_(0), raw_buffer_(NULL) {}
 
-  ~Buffer() { delete[] raw_buffer_; }
+  Buffer(int width, int height, int padding, unsigned int alignment)
+      : width_(width), height_(height), top_padding_(padding),
+        left_padding_(padding), right_padding_(padding),
+        bottom_padding_(padding), alignment_(alignment), padding_value_(0),
+        stride_(0), raw_size_(0), num_elements_(0), raw_buffer_(NULL) {}
+
+  ~Buffer() {
+    if (alignment_) {
+      vpx_free(raw_buffer_);
+    } else {
+      delete[] raw_buffer_;
+    }
+  }
 
   T *TopLeftPixel() const;
 
@@ -82,8 +103,20 @@ class Buffer {
     EXPECT_GE(bottom_padding_, 0);
     stride_ = left_padding_ + width_ + right_padding_;
     num_elements_ = stride_ * (top_padding_ + height_ + bottom_padding_);
-    raw_buffer_ = new (std::nothrow) T[num_elements_];
     raw_size_ = num_elements_ * sizeof(T);
+    if (alignment_) {
+      EXPECT_GE(alignment_, sizeof(T));
+      // Ensure alignment of the first value will be preserved.
+      EXPECT_EQ((left_padding_ * sizeof(T)) % alignment_, 0u);
+      // Ensure alignment of the subsequent rows will be preserved when there is
+      // a stride.
+      if (stride_ != width_) {
+        EXPECT_EQ((stride_ * sizeof(T)) % alignment_, 0u);
+      }
+      raw_buffer_ = reinterpret_cast<T *>(vpx_memalign(alignment_, raw_size_));
+    } else {
+      raw_buffer_ = new (std::nothrow) T[num_elements_];
+    }
     EXPECT_TRUE(raw_buffer_ != NULL);
     SetPadding(std::numeric_limits<T>::max());
     return !::testing::Test::HasFailure();
@@ -98,6 +131,7 @@ class Buffer {
   const int left_padding_;
   const int right_padding_;
   const int bottom_padding_;
+  const unsigned int alignment_;
   T padding_value_;
   int stride_;
   int raw_size_;
