@@ -80,6 +80,7 @@ TEST_P(AvgPredTest, SizeCombinations) {
         // Only the reference buffer may have a stride not equal to width.
         Buffer<uint8_t> ref =
             Buffer<uint8_t>(width, height, ref_padding ? 8 : 0);
+        ASSERT_TRUE(ref.Init());
 
         fill(&rnd_, pred, width, height);
         ref.Set(&rnd_, &ACMRandom::Rand8);
@@ -98,6 +99,7 @@ TEST_P(AvgPredTest, CompareReferenceRandom) {
   const int width = 64;
   const int height = 32;
   Buffer<uint8_t> ref = Buffer<uint8_t>(width, height, 8);
+  ASSERT_TRUE(ref.Init());
   DECLARE_ALIGNED(16, uint8_t, pred[width * height]);
   DECLARE_ALIGNED(16, uint8_t, avg_ref[width * height]);
   DECLARE_ALIGNED(16, uint8_t, avg_chk[width * height]);
@@ -128,6 +130,7 @@ TEST_P(AvgPredTest, DISABLED_Speed) {
         const int height = 1 << height_pow;
         Buffer<uint8_t> ref =
             Buffer<uint8_t>(width, height, ref_padding ? 8 : 0);
+        ASSERT_TRUE(ref.Init());
 
         fill(&rnd_, pred, width, height);
         ref.Set(&rnd_, &ACMRandom::Rand8);

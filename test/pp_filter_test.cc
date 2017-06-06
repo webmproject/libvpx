@@ -57,12 +57,14 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckFilterOutput) {
 
   // 5-tap filter needs 2 padding rows above and below the block in the input.
   Buffer<uint8_t> src_image = Buffer<uint8_t>(block_width, block_height, 2);
+  ASSERT_TRUE(src_image.Init());
 
   // Filter extends output block by 8 samples at left and right edges.
   // Though the left padding is only 8 bytes, the assembly code tries to
   // read 16 bytes before the pointer.
   Buffer<uint8_t> dst_image =
       Buffer<uint8_t>(block_width, block_height, 8, 16, 8, 8);
+  ASSERT_TRUE(dst_image.Init());
 
   uint8_t *const flimits =
       reinterpret_cast<uint8_t *>(vpx_memalign(16, block_width));
@@ -108,6 +110,7 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckCvsAssembly) {
   // SSE2 reads in blocks of 16. Pad an extra 8 in case the width is not %16.
   Buffer<uint8_t> src_image =
       Buffer<uint8_t>(block_width, block_height, 2, 2, 10, 2);
+  ASSERT_TRUE(src_image.Init());
 
   // Filter extends output block by 8 samples at left and right edges.
   // Though the left padding is only 8 bytes, there is 'above' padding as well
@@ -116,7 +119,9 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckCvsAssembly) {
   // SSE2 reads in blocks of 16. Pad an extra 8 in case the width is not %16.
   Buffer<uint8_t> dst_image =
       Buffer<uint8_t>(block_width, block_height, 8, 8, 16, 8);
+  ASSERT_TRUE(dst_image.Init());
   Buffer<uint8_t> dst_image_ref = Buffer<uint8_t>(block_width, block_height, 8);
+  ASSERT_TRUE(dst_image_ref.Init());
 
   // Filter values are set in blocks of 16 for Y and 8 for U/V. Each macroblock
   // can have a different filter. SSE2 assembly reads flimits in blocks of 16 so
@@ -197,10 +202,12 @@ TEST_P(VpxMbPostProcAcrossIpTest, CheckLowFilterOutput) {
   const int cols = 16;
 
   Buffer<uint8_t> src = Buffer<uint8_t>(cols, rows, 8, 8, 17, 8);
+  ASSERT_TRUE(src.Init());
   src.SetPadding(10);
   SetCols(src.TopLeftPixel(), rows, cols, src.stride());
 
   Buffer<uint8_t> expected_output = Buffer<uint8_t>(cols, rows, 0);
+  ASSERT_TRUE(expected_output.Init());
   SetCols(expected_output.TopLeftPixel(), rows, cols, expected_output.stride());
 
   RunFilterLevel(src.TopLeftPixel(), rows, cols, src.stride(), q2mbl(0),
@@ -212,6 +219,7 @@ TEST_P(VpxMbPostProcAcrossIpTest, CheckMediumFilterOutput) {
   const int cols = 16;
 
   Buffer<uint8_t> src = Buffer<uint8_t>(cols, rows, 8, 8, 17, 8);
+  ASSERT_TRUE(src.Init());
   src.SetPadding(10);
   SetCols(src.TopLeftPixel(), rows, cols, src.stride());
 
@@ -228,6 +236,7 @@ TEST_P(VpxMbPostProcAcrossIpTest, CheckHighFilterOutput) {
   const int cols = 16;
 
   Buffer<uint8_t> src = Buffer<uint8_t>(cols, rows, 8, 8, 17, 8);
+  ASSERT_TRUE(src.Init());
   src.SetPadding(10);
   SetCols(src.TopLeftPixel(), rows, cols, src.stride());
 
@@ -249,7 +258,9 @@ TEST_P(VpxMbPostProcAcrossIpTest, CheckCvsAssembly) {
   const int cols = 16;
 
   Buffer<uint8_t> c_mem = Buffer<uint8_t>(cols, rows, 8, 8, 17, 8);
+  ASSERT_TRUE(c_mem.Init());
   Buffer<uint8_t> asm_mem = Buffer<uint8_t>(cols, rows, 8, 8, 17, 8);
+  ASSERT_TRUE(asm_mem.Init());
 
   // When level >= 100, the filter behaves the same as the level = INT_MAX
   // When level < 20, it behaves the same as the level = 0
@@ -305,6 +316,7 @@ TEST_P(VpxMbPostProcDownTest, CheckHighFilterOutput) {
   const int cols = 16;
 
   Buffer<uint8_t> src_c = Buffer<uint8_t>(cols, rows, 8, 8, 8, 17);
+  ASSERT_TRUE(src_c.Init());
   src_c.SetPadding(10);
 
   SetRows(src_c.TopLeftPixel(), rows, cols, src_c.stride());
@@ -340,6 +352,7 @@ TEST_P(VpxMbPostProcDownTest, CheckMediumFilterOutput) {
   const int cols = 16;
 
   Buffer<uint8_t> src_c = Buffer<uint8_t>(cols, rows, 8, 8, 8, 17);
+  ASSERT_TRUE(src_c.Init());
   src_c.SetPadding(10);
 
   SetRows(src_c.TopLeftPixel(), rows, cols, src_c.stride());
@@ -370,6 +383,7 @@ TEST_P(VpxMbPostProcDownTest, CheckLowFilterOutput) {
   const int cols = 16;
 
   Buffer<uint8_t> src_c = Buffer<uint8_t>(cols, rows, 8, 8, 8, 17);
+  ASSERT_TRUE(src_c.Init());
   src_c.SetPadding(10);
 
   SetRows(src_c.TopLeftPixel(), rows, cols, src_c.stride());
@@ -392,7 +406,9 @@ TEST_P(VpxMbPostProcDownTest, CheckCvsAssembly) {
   rnd.Reset(ACMRandom::DeterministicSeed());
 
   Buffer<uint8_t> src_c = Buffer<uint8_t>(cols, rows, 8, 8, 8, 17);
+  ASSERT_TRUE(src_c.Init());
   Buffer<uint8_t> src_asm = Buffer<uint8_t>(cols, rows, 8, 8, 8, 17);
+  ASSERT_TRUE(src_asm.Init());
 
   for (int level = 0; level < 100; level++) {
     src_c.SetPadding(10);
