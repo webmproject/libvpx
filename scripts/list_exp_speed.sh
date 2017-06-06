@@ -39,7 +39,7 @@ script_dir=~/Dev/sandbox/libvpx/scripts
 video=~/Dev/samples/videos/speed-set/BasketballDrive_1920x1080_50.y4m
 wi=1920
 he=1080
-frames=50
+frames=100
 bitrate=4000
 fps="50/1"
 
