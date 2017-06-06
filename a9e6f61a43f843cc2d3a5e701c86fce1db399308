@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a33ad6cd_d71f9396",
+        "filename": "test/buffer.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-06T21:14:15Z",
+      "side": 1,
+      "message": "Seems this might be the cause of the warning about signed/unsigned. Could drop it as well, or EXPECT_TRUE(width \u003e 0)?",
+      "range": {
+        "startLine": 79,
+        "startChar": 0,
+        "endLine": 79,
+        "endChar": 25
+      },
+      "revId": "a9e6f61a43f843cc2d3a5e701c86fce1db399308",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
