@@ -383,7 +383,7 @@ static void get_cost_surf_min(int *cost_list, int *ir, int *ic, int bits) {
   const int64_t y0 = cost_list[1] - 2 * (int64_t)cost_list[0] + cost_list[3];
   const int64_t x1 = (int64_t)cost_list[4] - cost_list[2];
   const int64_t y1 = cost_list[4] - 2 * (int64_t)cost_list[0] + cost_list[2];
-  const int64_t b = 1 << (bits - 1);
+  const int b = 1 << (bits - 1);
   *ic = (int)divide_and_round(x0 * b, y0);
   *ir = (int)divide_and_round(x1 * b, y1);
 }
