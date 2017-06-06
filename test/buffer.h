@@ -30,13 +30,13 @@ class Buffer {
       : width_(width), height_(height), top_padding_(top_padding),
         left_padding_(left_padding), right_padding_(right_padding),
         bottom_padding_(bottom_padding), padding_value_(0), stride_(0),
-        raw_size_(0), raw_buffer_(NULL) {}
+        raw_size_(0), num_elements_(0), raw_buffer_(NULL) {}
 
   Buffer(size_t width, size_t height, size_t padding)
       : width_(width), height_(height), top_padding_(padding),
         left_padding_(padding), right_padding_(padding),
         bottom_padding_(padding), padding_value_(0), stride_(0), raw_size_(0),
-        raw_buffer_(NULL) {}
+        num_elements_(0), raw_buffer_(NULL) {}
 
   ~Buffer() { delete[] raw_buffer_; }
 
@@ -77,8 +77,9 @@ class Buffer {
     EXPECT_GT(width_, 0u);
     EXPECT_GT(height_, 0u);
     stride_ = left_padding_ + width_ + right_padding_;
-    raw_size_ = stride_ * (top_padding_ + height_ + bottom_padding_);
-    raw_buffer_ = new (std::nothrow) T[raw_size_];
+    num_elements_ = stride_ * (top_padding_ + height_ + bottom_padding_);
+    raw_buffer_ = new (std::nothrow) T[num_elements_];
+    raw_size_ = num_elements_ * sizeof(T);
     EXPECT_TRUE(raw_buffer_ != NULL);
     SetPadding(std::numeric_limits<T>::max());
     return !::testing::Test::HasFailure();
@@ -96,6 +97,7 @@ class Buffer {
   T padding_value_;
   size_t stride_;
   size_t raw_size_;
+  size_t num_elements_;
   T *raw_buffer_;
 };
 
@@ -209,7 +211,7 @@ void Buffer<T>::SetPadding(const T padding_value) {
   padding_value_ = padding_value;
 
   T *src = raw_buffer_;
-  for (size_t i = 0; i < raw_size_; ++i) {
+  for (size_t i = 0; i < num_elements_; ++i) {
     src[i] = padding_value;
   }
 }
