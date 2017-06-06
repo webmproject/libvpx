@@ -75,6 +75,24 @@
       "revId": "a9e6f61a43f843cc2d3a5e701c86fce1db399308",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1e0c5828_6f43a270",
+        "filename": "test/buffer.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-06T22:37:45Z",
+      "side": 1,
+      "message": "But those are all sizes, used in pointer arithmetic to calculate offsets. None of them are allowed to be negative, and only width and height must not be 0.",
+      "parentUuid": "2a2da097_0a568c44",
+      "revId": "a9e6f61a43f843cc2d3a5e701c86fce1db399308",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
