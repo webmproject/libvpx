@@ -39,6 +39,24 @@
       "revId": "a9e6f61a43f843cc2d3a5e701c86fce1db399308",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "546dc877_a1d91810",
+        "filename": "test/buffer.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-06T21:37:43Z",
+      "side": 1,
+      "message": "Tom had mentioned size_t in conversation before. Are there any of these which should be size_t?",
+      "parentUuid": "197a63ff_fa2e33ce",
+      "revId": "a9e6f61a43f843cc2d3a5e701c86fce1db399308",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
