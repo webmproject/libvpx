@@ -57,6 +57,24 @@
       "revId": "a9e6f61a43f843cc2d3a5e701c86fce1db399308",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2a2da097_0a568c44",
+        "filename": "test/buffer.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-06T22:31:18Z",
+      "side": 1,
+      "message": "\u003e Tom had mentioned size_t in conversation before. Are there any of these which should be size_t?\n\nsize_t for actual sizes and offsets (another option is ptrdiff for a signed offset or int64) is fine. though it\u0027s different in 32/64-bit so calculations may need to be done carefully.\n\nhttps://google.github.io/styleguide/cppguide.html#Integer_Types",
+      "parentUuid": "546dc877_a1d91810",
+      "revId": "a9e6f61a43f843cc2d3a5e701c86fce1db399308",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
