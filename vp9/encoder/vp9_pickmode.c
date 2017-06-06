@@ -1758,7 +1758,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
           cpi->oxcf.rc_mode == VPX_CBR) {
         int tmp_sad;
         uint32_t dis;
-        int cost_list[5];
+        int cost_list[5] = { INT_MAX };
 
         if (bsize < BLOCK_16X16) continue;
 
