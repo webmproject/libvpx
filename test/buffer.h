@@ -47,7 +47,7 @@ class Buffer {
   int stride() const { return stride_; }
 
   // Set the buffer (excluding padding) to 'value'.
-  void Set(const int value);
+  void Set(const T value);
 
   // Set the buffer (excluding padding) to the output of ACMRandom function 'b'.
   void Set(ACMRandom *rand_class, T (ACMRandom::*rand_func)());
@@ -63,11 +63,11 @@ class Buffer {
   bool HasPadding() const;
 
   // Sets all the values in the buffer to 'padding_value'.
-  void SetPadding(const int padding_value);
+  void SetPadding(const T padding_value);
 
   // Checks if all the values (excluding padding) are equal to 'value' if the
   // Buffers are the same size.
-  bool CheckValues(const int value) const;
+  bool CheckValues(const T value) const;
 
   // Check that padding matches the expected value or there is no padding.
   bool CheckPadding() const;
@@ -98,7 +98,7 @@ class Buffer {
   const int left_padding_;
   const int right_padding_;
   const int bottom_padding_;
-  int padding_value_;
+  T padding_value_;
   int stride_;
   int raw_size_;
   T *raw_buffer_;
@@ -110,7 +110,7 @@ T *Buffer<T>::TopLeftPixel() const {
 }
 
 template <typename T>
-void Buffer<T>::Set(const int value) {
+void Buffer<T>::Set(const T value) {
   T *src = TopLeftPixel();
   for (int height = 0; height < height_; ++height) {
     for (int width = 0; width < width_; ++width) {
@@ -206,7 +206,7 @@ void Buffer<T>::PrintDifference(const Buffer<T> &a) const {
 }
 
 template <typename T>
-void Buffer<T>::SetPadding(const int padding_value) {
+void Buffer<T>::SetPadding(const T padding_value) {
   padding_value_ = padding_value;
 
   T *src = raw_buffer_;
@@ -216,7 +216,7 @@ void Buffer<T>::SetPadding(const int padding_value) {
 }
 
 template <typename T>
-bool Buffer<T>::CheckValues(const int value) const {
+bool Buffer<T>::CheckValues(const T value) const {
   T *src = TopLeftPixel();
   for (int height = 0; height < height_; ++height) {
     for (int width = 0; width < width_; ++width) {
