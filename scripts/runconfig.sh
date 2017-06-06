@@ -54,6 +54,10 @@ experiment_dependency() {
   if [ "$1" == txk_sel ] ; then
     tool="--enable-$1 --enable-lv_map"
   fi
+
+  if [ "$1" == intra_interp ] ; then
+    tool="--enable-$1 --enable-ext-intra"
+  fi
 }
 
 common="--disable-unit-tests --disable-docs --enable-experimental"
