@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a2115a2b_4517c2ac",
+        "filename": "vpx_dsp/ppc/sad_vsx.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-06T23:52:35Z",
+      "side": 1,
+      "message": "these could be wrapped in \u0027do {} while (0)\u0027 to prevent side effects. it might also be helpful to capitalize macro params to distinguish them from the locals being operated on given there\u0027s a mix here.",
+      "revId": "8bf6eaf433c18bb17dcd29b6070583e0002d2297",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
