@@ -59,6 +59,24 @@
     },
     {
       "key": {
+        "uuid": "69b2c9e6_eb6d99f9",
+        "filename": "vpx_dsp/arm/fdct16x16_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-06T04:03:05Z",
+      "side": 1,
+      "message": "\u003e blocking inline on this function or cross_input+load is enough to avoid the bad code. that seems a bit fragile though without getting to the bottom of the bad output\n\nfor that I was doing something like:\n\n    #if defined(__arm__) \u0026\u0026 defined(__GNUC__) \u0026\u0026 \\\n      ((__GNUC__ \u003c\u003c 8) | __GNUC_MINOR__) \u003e\u003d 0x409\n    #define LOCAL_INLINE __attribute__ ((noinline))\n    #else\n    #define LOCAL_INLINE INLINE\n    #endif",
+      "parentUuid": "1da5b421_c9dc4a59",
+      "revId": "e0bdfdc10ee821e0eff5a3dd5861debfcba44533",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1bd1d0c1_0e6094f7",
         "filename": "vpx_dsp/arm/fdct16x16_neon.c",
         "patchSetId": 2
