@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "94bb4bbd_a6795e60",
+        "filename": "vpx_dsp/arm/fdct16x16_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-07T18:53:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a196b74_edd1bccd",
+      "revId": "e0bdfdc10ee821e0eff5a3dd5861debfcba44533",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "43650acd_cec4ac2b",
         "filename": "vpx_dsp/arm/fdct16x16_neon.c",
         "patchSetId": 2
@@ -30,6 +48,30 @@
       "writtenOn": "2017-06-01T01:23:02Z",
       "side": 1,
       "message": "you could add \u0027 /*b[8]*/\u0027 for documentation purposes",
+      "range": {
+        "startLine": 54,
+        "startChar": 40,
+        "endLine": 54,
+        "endChar": 58
+      },
+      "revId": "e0bdfdc10ee821e0eff5a3dd5861debfcba44533",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "634b2195_d0cf522b",
+        "filename": "vpx_dsp/arm/fdct16x16_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-07T18:53:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "43650acd_cec4ac2b",
       "range": {
         "startLine": 54,
         "startChar": 40,
@@ -142,6 +184,30 @@
       "writtenOn": "2017-06-01T23:36:46Z",
       "side": 1,
       "message": "Doubled \"into\". Another pair 15 lines below.",
+      "range": {
+        "startLine": 344,
+        "startChar": 47,
+        "endLine": 344,
+        "endChar": 56
+      },
+      "revId": "e0bdfdc10ee821e0eff5a3dd5861debfcba44533",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "386a9572_04773779",
+        "filename": "vpx_dsp/arm/fdct16x16_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-07T18:53:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1bd1d0c1_0e6094f7",
       "range": {
         "startLine": 344,
         "startChar": 47,
