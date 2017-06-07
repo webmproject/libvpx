@@ -95,6 +95,7 @@ class Buffer {
   bool CheckValues(const Buffer<T> &a) const;
 
   bool Init() {
+    if (raw_buffer_ != NULL) return false;
     EXPECT_GT(width_, 0);
     EXPECT_GT(height_, 0);
     EXPECT_GE(top_padding_, 0);
