@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ee15d842_376d9d70",
+        "filename": "test/buffer.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-07T20:49:40Z",
+      "side": 1,
+      "message": "at least for all the const stuff (size, padding) it needs to be set here ... I\u0027m OK with setting the rest in Init, but you expressed concerns about uninit\u0027d warnings.\n\nOr do you mean a separate Init() function that gets called with the constructor?",
+      "parentUuid": "67917f22_ce544fd3",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 34
+      },
+      "revId": "f7c6a64a417785a3ce3210b7758166cf494948ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2a41c7d6_3a25b49c",
         "filename": "test/buffer.h",
         "patchSetId": 17
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "ae6231b6_bfccbffd",
+        "filename": "test/buffer.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-07T20:49:40Z",
+      "side": 1,
+      "message": "vpx_memalign gives you a byte buffer with byte alignment, while new gives you \"natural\" alignment based on a given type.",
+      "parentUuid": "2a41c7d6_3a25b49c",
+      "range": {
+        "startLine": 111,
+        "startChar": 6,
+        "endLine": 111,
+        "endChar": 7
+      },
+      "revId": "f7c6a64a417785a3ce3210b7758166cf494948ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8f584906_acb0b624",
         "filename": "test/buffer.h",
         "patchSetId": 17
@@ -59,6 +107,30 @@
       "writtenOn": "2017-06-07T20:38:21Z",
       "side": 1,
       "message": "size_t? don\u0027t really care :)",
+      "range": {
+        "startLine": 130,
+        "startChar": 8,
+        "endLine": 130,
+        "endChar": 20
+      },
+      "revId": "f7c6a64a417785a3ce3210b7758166cf494948ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1af9d851_752a9078",
+        "filename": "test/buffer.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-07T20:49:40Z",
+      "side": 1,
+      "message": "me neither, but it didn\u0027t seem quite the same as the other size_t stuff.",
+      "parentUuid": "8f584906_acb0b624",
       "range": {
         "startLine": 130,
         "startChar": 8,
