@@ -29,12 +29,14 @@ class Buffer {
          size_t right_padding, size_t bottom_padding)
       : width_(width), height_(height), top_padding_(top_padding),
         left_padding_(left_padding), right_padding_(right_padding),
-        bottom_padding_(bottom_padding), raw_buffer_(NULL) {}
+        bottom_padding_(bottom_padding), padding_value_(0), stride_(0),
+        raw_size_(0), raw_buffer_(NULL) {}
 
   Buffer(size_t width, size_t height, size_t padding)
       : width_(width), height_(height), top_padding_(padding),
         left_padding_(padding), right_padding_(padding),
-        bottom_padding_(padding), raw_buffer_(NULL) {}
+        bottom_padding_(padding), padding_value_(0), stride_(0), raw_size_(0),
+        raw_buffer_(NULL) {}
 
   ~Buffer() { delete[] raw_buffer_; }
 
