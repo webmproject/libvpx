@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "57b0b680_82c497b1",
+        "filename": "test/buffer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-07T22:52:57Z",
+      "side": 1,
+      "message": "\u003e EXPECT_EQ(raw_buffer_, NULL) or something more drastic?\n\nyou could just return false there or add the expect in that block for logging purposes",
+      "parentUuid": "ee31a6c2_fdaeeb1a",
+      "revId": "de4cb716eea72a4daf6b0aff8c3ea51890a4afba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e758c4ce_8d1a6e88",
         "filename": "test/idct_test.cc",
         "patchSetId": 3
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "Init has EXPECT_TRUE(raw_buffer_ !\u003d NULL);\n\nbut I guess this isn\u0027t quite the same, but wouldn\u0027t calling Init() fail if input was not allocated?",
       "parentUuid": "e758c4ce_8d1a6e88",
+      "revId": "de4cb716eea72a4daf6b0aff8c3ea51890a4afba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6e5c3164_94f89f01",
+        "filename": "test/idct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-07T22:52:57Z",
+      "side": 1,
+      "message": "\u003e Init has EXPECT_TRUE(raw_buffer_ !\u003d NULL);\n\u003e \n\u003e but I guess this isn\u0027t quite the same, but wouldn\u0027t calling Init() fail if input was not allocated?\n\ninput would be NULL though so you\u0027d segfault",
+      "parentUuid": "51823828_aee36dbe",
       "revId": "de4cb716eea72a4daf6b0aff8c3ea51890a4afba",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
