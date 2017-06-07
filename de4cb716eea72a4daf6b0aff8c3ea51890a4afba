@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ee31a6c2_fdaeeb1a",
+        "filename": "test/buffer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-07T18:34:49Z",
+      "side": 1,
+      "message": "EXPECT_EQ(raw_buffer_, NULL) or something more drastic?",
+      "parentUuid": "4d1fcb05_3de8452d",
+      "revId": "de4cb716eea72a4daf6b0aff8c3ea51890a4afba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e758c4ce_8d1a6e88",
         "filename": "test/idct_test.cc",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2017-06-06T23:24:49Z",
       "side": 1,
       "message": "checking the alloc here would still be good",
+      "revId": "de4cb716eea72a4daf6b0aff8c3ea51890a4afba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "51823828_aee36dbe",
+        "filename": "test/idct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-07T18:34:49Z",
+      "side": 1,
+      "message": "Init has EXPECT_TRUE(raw_buffer_ !\u003d NULL);\n\nbut I guess this isn\u0027t quite the same, but wouldn\u0027t calling Init() fail if input was not allocated?",
+      "parentUuid": "e758c4ce_8d1a6e88",
       "revId": "de4cb716eea72a4daf6b0aff8c3ea51890a4afba",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
