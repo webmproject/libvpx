@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "67917f22_ce544fd3",
+        "filename": "test/buffer.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-06-07T20:38:21Z",
+      "side": 1,
+      "message": "ctor overload hell... not in this patch, but consider getting rid of the ctor overloads in favor of Init(), InitWithPaddingRect() (you\u0027ll need to define a rect struct or something), InitWithAlignment(). Or, a single Init that takes pointers and ignores NULLs.",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 34
+      },
+      "revId": "f7c6a64a417785a3ce3210b7758166cf494948ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2a41c7d6_3a25b49c",
+        "filename": "test/buffer.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-06-07T20:38:21Z",
+      "side": 1,
+      "message": "just an opinion, feel free to ack and do nothing\n\nI would close the if (alignment_) block here, drop the usage of new, and always use vpx_memalign. It\u0027ll get rid of the extra check in dtor as well.",
+      "range": {
+        "startLine": 111,
+        "startChar": 6,
+        "endLine": 111,
+        "endChar": 7
+      },
+      "revId": "f7c6a64a417785a3ce3210b7758166cf494948ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8f584906_acb0b624",
+        "filename": "test/buffer.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-06-07T20:38:21Z",
+      "side": 1,
+      "message": "size_t? don\u0027t really care :)",
+      "range": {
+        "startLine": 130,
+        "startChar": 8,
+        "endLine": 130,
+        "endChar": 20
+      },
+      "revId": "f7c6a64a417785a3ce3210b7758166cf494948ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
