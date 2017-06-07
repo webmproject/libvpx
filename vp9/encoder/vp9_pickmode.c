@@ -670,7 +670,7 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *this_rdc,
 #endif
 
   if (cpi->sf.use_simple_block_yrd && cpi->common.frame_type != KEY_FRAME &&
-      bsize < BLOCK_32X32) {
+      (bsize < BLOCK_32X32 || cpi->use_svc)) {
     unsigned int var_y, sse_y;
     (void)tx_size;
     if (!rd_computed)
