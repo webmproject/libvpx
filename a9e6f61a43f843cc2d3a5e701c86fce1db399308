@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "18aca5aa_f1ecb056",
+        "filename": "test/buffer.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-06-07T18:20:10Z",
+      "side": 1,
+      "message": "s/0/0u/ should fix it: you\u0027ll want to hit the next line too",
+      "parentUuid": "a33ad6cd_d71f9396",
+      "range": {
+        "startLine": 79,
+        "startChar": 0,
+        "endLine": 79,
+        "endChar": 25
+      },
+      "revId": "a9e6f61a43f843cc2d3a5e701c86fce1db399308",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "197a63ff_fa2e33ce",
         "filename": "test/buffer.h",
         "patchSetId": 2
