@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ee546a7a_c465a732",
+        "filename": "test/buffer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-06-07T18:21:38Z",
+      "side": 1,
+      "message": "should 0 this in the ctor",
+      "range": {
+        "startLine": 98,
+        "startChar": 2,
+        "endLine": 98,
+        "endChar": 23
+      },
+      "revId": "fcca10a0c47bcc64034da7df53552a553bc779c8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
