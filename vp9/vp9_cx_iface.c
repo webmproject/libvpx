@@ -425,10 +425,16 @@ static void config_target_level(VP9EncoderConfig *oxcf) {
   oxcf->worst_allowed_q = vp9_quantizer_to_qindex(63);
 
   // Adjust minimum art-ref distance.
-  if (oxcf->min_gf_interval <
-      (int)vp9_level_defs[target_level_index].min_altref_distance)
+  // min_gf_interval should be no less than min_altref_distance + 1,
+  // as the encoder may produce bitstream with alt-ref distance being
+  // min_gf_interval - 1.
+  if (oxcf->min_gf_interval <=
+      (int)vp9_level_defs[target_level_index].min_altref_distance) {
     oxcf->min_gf_interval =
-        (int)vp9_level_defs[target_level_index].min_altref_distance;
+        (int)vp9_level_defs[target_level_index].min_altref_distance + 1;
+    oxcf->max_gf_interval =
+        VPXMAX(oxcf->max_gf_interval, oxcf->min_gf_interval);
+  }
 
   // Adjust maximum column tiles.
   if (vp9_level_defs[target_level_index].max_col_tiles <
