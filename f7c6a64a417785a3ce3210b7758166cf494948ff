@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "097b13ed_d6fd9e54",
+        "filename": "test/buffer.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-06-07T20:57:57Z",
+      "side": 1,
+      "message": "I meant drop everything but the simplest version of the constructor and have that 0 everything out that\u0027s optional. I don\u0027t know that there\u0027s really a good way to go about doing that, so possibly not worth it anyway. These really aren\u0027t that bad, anyway. It\u0027s just a big wall o\u0027 ctor text.",
+      "parentUuid": "ee15d842_376d9d70",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 34
+      },
+      "revId": "f7c6a64a417785a3ce3210b7758166cf494948ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2a41c7d6_3a25b49c",
         "filename": "test/buffer.h",
         "patchSetId": 17
@@ -93,6 +117,30 @@
       "revId": "f7c6a64a417785a3ce3210b7758166cf494948ff",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "993ed06c_14d09446",
+        "filename": "test/buffer.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2017-06-07T20:57:57Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "ae6231b6_bfccbffd",
+      "range": {
+        "startLine": 111,
+        "startChar": 6,
+        "endLine": 111,
+        "endChar": 7
+      },
+      "revId": "f7c6a64a417785a3ce3210b7758166cf494948ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
