@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b733c37b_9d94a802",
+        "filename": "vp9/encoder/vp9_skin_detection.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-07T22:50:33Z",
+      "side": 1,
+      "message": "this can go, right?",
+      "revId": "d4642faca5697fe377504229bd12e1913f951820",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c43018f4_82e76b7d",
+        "filename": "vpx_dsp/skin_detection.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-07T22:50:33Z",
+      "side": 1,
+      "message": "I don\u0027t think this global needs to be in the header if the use of it is within one module, it can be a static there",
+      "revId": "d4642faca5697fe377504229bd12e1913f951820",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
