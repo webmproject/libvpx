@@ -58,6 +58,10 @@ experiment_dependency() {
   if [ "$1" == intra_interp ] ; then
     tool="--enable-$1 --enable-ext-intra"
   fi
+
+  if [ "$1" == ext_tile ] ; then
+    tool="--enable-$1 --disable-cdef"
+  fi
 }
 
 common="--disable-unit-tests --disable-docs --enable-experimental"

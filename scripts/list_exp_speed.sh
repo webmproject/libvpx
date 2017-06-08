@@ -62,7 +62,7 @@ verbose=
 profile=0
 rm *.txt
 
-for exp_tool in experimental cb4x4 chroma_sub8x8 rect_tx global_motion ext_tx cdef ext_intra ext_refs dual_filter motion_var warped_motion var_tx alt_intra tx64x64 ncobmc supertx ext_partition tpl_mv tripred unpoison_partition_ctx  wedge adapt_scan ans aom_qm chroma_2x2 compound_segment compound_singleref ext_inter ext_tile filter_intra intrabc intra_interp loop_restoration lv_map masked_tx q_adapt_probs ref_adapt compound_round convolve_round interintra txk_sel
+for exp_tool in experimental cb4x4 chroma_sub8x8 rect_tx global_motion ext_tx cdef ext_intra ext_refs dual_filter motion_var warped_motion var_tx alt_intra tx64x64 ncobmc supertx ext_partition tpl_mv unpoison_partition_ctx  wedge adapt_scan ans aom_qm chroma_2x2 compound_segment compound_singleref ext_inter ext_tile filter_intra intrabc intra_interp loop_restoration lv_map masked_tx q_adapt_probs ref_adapt compound_round convolve_round interintra mv_compound txk_sel
 
 do
   cd $build_dir
