@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e97149a5_373d8ae3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-08T19:14:09Z",
+      "side": 1,
+      "message": "you can still build without exceptions enabled, so better to add the check. I\u0027m surprised this one didn\u0027t trigger a static analysis warning. in any case it\u0027s more consistent with the rest of the code that does allocations.",
+      "revId": "0c38adb5455b2c628f2aec5ad766b43346510737",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
