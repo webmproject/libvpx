@@ -105,6 +105,24 @@
       "revId": "de4cb716eea72a4daf6b0aff8c3ea51890a4afba",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dd2eedf4_1fbecb52",
+        "filename": "test/idct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-08T17:10:06Z",
+      "side": 1,
+      "message": "new Buffer() no longer allocates tons of memory, so maybe this is sufficient now?\nhttps://chromium-review.googlesource.com/528293",
+      "parentUuid": "6e5c3164_94f89f01",
+      "revId": "de4cb716eea72a4daf6b0aff8c3ea51890a4afba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
