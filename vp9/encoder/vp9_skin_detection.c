@@ -130,7 +130,7 @@ void vp9_compute_skin_map(VP9_COMP *const cpi, FILE *yuv_skinmap_file) {
     src_u += (src_uvstride << shuv) - (num_bl << shuv);
     src_v += (src_uvstride << shuv) - (num_bl << shuv);
   }
-  vp9_write_yuv_frame_420(&skinmap, yuv_skinmap_file);
+  vpx_write_yuv_frame(yuv_skinmap_file, &skinmap);
   vpx_free_frame_buffer(&skinmap);
 }
 #endif

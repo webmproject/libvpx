@@ -12,6 +12,7 @@
 #include "vp8/common/alloccommon.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_util/vpx_write_yuv_frame.h"
 
 int compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
                        int stride, int strideuv, int consec_zeromv,
@@ -94,7 +95,7 @@ void compute_skin_map(VP8_COMP *const cpi, FILE *yuv_skinmap_file) {
     src_u += (src_uvstride << 3) - (num_bl << 3);
     src_v += (src_uvstride << 3) - (num_bl << 3);
   }
-  vp8_write_yuv_frame(yuv_skinmap_file, &skinmap);
+  vpx_write_yuv_frame(yuv_skinmap_file, &skinmap);
   vpx_free_frame_buffer(&skinmap);
 }
 #endif  // OUTPUT_YUV_SKINMAP
