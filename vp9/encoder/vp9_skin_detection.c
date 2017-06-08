@@ -15,75 +15,6 @@
 #include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_skin_detection.h"
 
-#define MODEL_MODE 1
-
-// Fixed-point skin color model parameters.
-static const int skin_mean[5][2] = { { 7463, 9614 },
-                                     { 6400, 10240 },
-                                     { 7040, 10240 },
-                                     { 8320, 9280 },
-                                     { 6800, 9614 } };
-static const int skin_inv_cov[4] = { 4107, 1663, 1663, 2157 };  // q16
-static const int skin_threshold[6] = { 1570636, 1400000, 800000,
-                                       800000,  800000,  800000 };  // q18
-
-// Thresholds on luminance.
-static const int y_low = 40;
-static const int y_high = 220;
-
-// Evaluates the Mahalanobis distance measure for the input CbCr values.
-static int evaluate_skin_color_difference(int cb, int cr, int idx) {
-  const int cb_q6 = cb << 6;
-  const int cr_q6 = cr << 6;
-  const int cb_diff_q12 =
-      (cb_q6 - skin_mean[idx][0]) * (cb_q6 - skin_mean[idx][0]);
-  const int cbcr_diff_q12 =
-      (cb_q6 - skin_mean[idx][0]) * (cr_q6 - skin_mean[idx][1]);
-  const int cr_diff_q12 =
-      (cr_q6 - skin_mean[idx][1]) * (cr_q6 - skin_mean[idx][1]);
-  const int cb_diff_q2 = (cb_diff_q12 + (1 << 9)) >> 10;
-  const int cbcr_diff_q2 = (cbcr_diff_q12 + (1 << 9)) >> 10;
-  const int cr_diff_q2 = (cr_diff_q12 + (1 << 9)) >> 10;
-  const int skin_diff =
-      skin_inv_cov[0] * cb_diff_q2 + skin_inv_cov[1] * cbcr_diff_q2 +
-      skin_inv_cov[2] * cbcr_diff_q2 + skin_inv_cov[3] * cr_diff_q2;
-  return skin_diff;
-}
-
-int vp9_skin_pixel(const uint8_t y, const uint8_t cb, const uint8_t cr,
-                   int motion) {
-  if (y < y_low || y > y_high) {
-    return 0;
-  } else {
-    if (MODEL_MODE == 0) {
-      return (evaluate_skin_color_difference(cb, cr, 0) < skin_threshold[0]);
-    } else {
-      int i = 0;
-      // Exit on grey.
-      if (cb == 128 && cr == 128) return 0;
-      // Exit on very strong cb.
-      if (cb > 150 && cr < 110) return 0;
-      for (; i < 5; i++) {
-        int skin_color_diff = evaluate_skin_color_difference(cb, cr, i);
-        if (skin_color_diff < skin_threshold[i + 1]) {
-          if (y < 60 && skin_color_diff > 3 * (skin_threshold[i + 1] >> 2))
-            return 0;
-          else if (motion == 0 &&
-                   skin_color_diff > (skin_threshold[i + 1] >> 1))
-            return 0;
-          else
-            return 1;
-        }
-        // Exit if difference is much large than the threshold.
-        if (skin_color_diff > (skin_threshold[i + 1] << 3)) {
-          return 0;
-        }
-      }
-      return 0;
-    }
-  }
-}
-
 int vp9_compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
                            int stride, int strideuv, int bsize,
                            int consec_zeromv, int curr_motion_magn) {
@@ -101,7 +32,7 @@ int vp9_compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
     const uint8_t usource = u[uv_height_shift * strideuv + uv_width_shift];
     const uint8_t vsource = v[uv_height_shift * strideuv + uv_width_shift];
     if (consec_zeromv > 25 && curr_motion_magn == 0) motion = 0;
-    return vp9_skin_pixel(ysource, usource, vsource, motion);
+    return vpx_skin_pixel(ysource, usource, vsource, motion);
   }
 }
 
@@ -159,7 +90,7 @@ void vp9_compute_skin_map(VP9_COMP *const cpi, FILE *yuv_skinmap_file) {
         ysource = (ysource + ysource2 + ysource3 + ysource4) >> 2;
         usource = (usource + usource2 + usource3 + usource4) >> 2;
         vsource = (vsource + vsource2 + vsource3 + vsource4) >> 2;
-        is_skin = vp9_skin_pixel(ysource, usource, vsource, 1);
+        is_skin = vpx_skin_pixel(ysource, usource, vsource, 1);
       } else {
         int block_size = BLOCK_8X8;
         int consec_zeromv = 0;

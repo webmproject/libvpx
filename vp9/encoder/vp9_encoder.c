@@ -80,7 +80,7 @@
 FILE *yuv_denoised_file = NULL;
 #endif
 #ifdef OUTPUT_YUV_SKINMAP
-FILE *yuv_skinmap_file = NULL;
+static FILE *yuv_skinmap_file = NULL;
 #endif
 #ifdef OUTPUT_YUV_REC
 FILE *yuv_rec_file;
@@ -2586,6 +2586,7 @@ int vp9_update_entropy(VP9_COMP *cpi, int update) {
 // as YUV 420. We simply use the top-left pixels of the UV buffers, since we do
 // not denoise the UV channels at this time. If ever we implement UV channel
 // denoising we will have to modify this.
+// TODO(jianj): Remove the duplicated one in vp8 and move it to vpx_util.
 void vp9_write_yuv_frame_420(YV12_BUFFER_CONFIG *s, FILE *f) {
   uint8_t *src = s->y_buffer;
   int h = s->y_crop_height;
