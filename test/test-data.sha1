@@ -848,3 +848,5 @@ a000d568431d07379dd5a8ec066061c07e560b47 *invalid-vp90-2-00-quantizer-63.ivf.kf_
 6fa3d3ac306a3d9ce1d610b78441dc00d2c2d4b9 *tos_vp8.webm
 e402cbbf9e550ae017a1e9f1f73931c1d18474e8 *invalid-crbug-667044.webm
 d3964f9dad9f60363c81b688324d95b4ec7c8038 *invalid-crbug-667044.webm.res
+fd9df7f3f6992af1d7a9dde975c9a0d6f28c053d *invalid-bug-1443.ivf
+fd3020fa6e9ca5966206738654c97dec313b0a95 *invalid-bug-1443.ivf.res

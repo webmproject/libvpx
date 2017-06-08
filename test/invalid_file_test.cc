@@ -120,6 +120,15 @@ class InvalidFileTest : public ::libvpx_test::DecoderTest,
 
 TEST_P(InvalidFileTest, ReturnCode) { RunTest(); }
 
+#if CONFIG_VP8_DECODER
+const DecodeParam kVP8InvalidFileTests[] = {
+  { 1, "invalid-bug-1443.ivf" },
+};
+
+VP8_INSTANTIATE_TEST_CASE(InvalidFileTest,
+                          ::testing::ValuesIn(kVP8InvalidFileTests));
+#endif  // CONFIG_VP8_DECODER
+
 #if CONFIG_VP9_DECODER
 const DecodeParam kVP9InvalidFileTests[] = {
   { 1, "invalid-vp90-02-v2.webm" },
@@ -164,12 +173,12 @@ class InvalidFileInvalidPeekTest : public InvalidFileTest {
 TEST_P(InvalidFileInvalidPeekTest, ReturnCode) { RunTest(); }
 
 #if CONFIG_VP8_DECODER
-const DecodeParam kVP8InvalidFileTests[] = {
+const DecodeParam kVP8InvalidPeekTests[] = {
   { 1, "invalid-vp80-00-comprehensive-018.ivf.2kf_0x6.ivf" },
 };
 
 VP8_INSTANTIATE_TEST_CASE(InvalidFileInvalidPeekTest,
-                          ::testing::ValuesIn(kVP8InvalidFileTests));
+                          ::testing::ValuesIn(kVP8InvalidPeekTests));
 #endif  // CONFIG_VP8_DECODER
 
 #if CONFIG_VP9_DECODER

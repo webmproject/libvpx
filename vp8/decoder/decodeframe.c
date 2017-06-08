@@ -930,7 +930,7 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
       /* When error concealment is enabled we should only check the sync
        * code if we have enough bits available
        */
-      if (!pbi->ec_active || data + 3 < data_end) {
+      if (data + 3 < data_end) {
         if (clear[0] != 0x9d || clear[1] != 0x01 || clear[2] != 0x2a) {
           vpx_internal_error(&pc->error, VPX_CODEC_UNSUP_BITSTREAM,
                              "Invalid frame sync code");
@@ -941,13 +941,19 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
        * if we have enough data. Otherwise we will end up with the wrong
        * size.
        */
-      if (!pbi->ec_active || data + 6 < data_end) {
+      if (data + 6 < data_end) {
         pc->Width = (clear[3] | (clear[4] << 8)) & 0x3fff;
         pc->horiz_scale = clear[4] >> 6;
         pc->Height = (clear[5] | (clear[6] << 8)) & 0x3fff;
         pc->vert_scale = clear[6] >> 6;
+        data += 7;
+      } else if (!pbi->ec_active) {
+        vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                           "Truncated key frame header");
+      } else {
+        /* Error concealment is active, clear the frame. */
+        data = data_end;
       }
-      data += 7;
     } else {
       memcpy(&xd->pre, yv12_fb_new, sizeof(YV12_BUFFER_CONFIG));
       memcpy(&xd->dst, yv12_fb_new, sizeof(YV12_BUFFER_CONFIG));
