@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "08fd9584_19721160",
+        "filename": "vpx_dsp/skin_detection.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-08T01:47:38Z",
+      "side": 1,
+      "message": "this could be joined with the else later to reduce the indent. the final return is hard to see as a catch all given its indent level",
+      "revId": "b2dc8fb8a4608bf9b0d8a559387c5e473e7a4cdf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "745d7829_a1ed32a5",
+        "filename": "vpx_dsp/skin_detection.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-08T01:47:38Z",
+      "side": 1,
+      "message": "neither one of these look like they\u0027re needed in this header",
+      "revId": "b2dc8fb8a4608bf9b0d8a559387c5e473e7a4cdf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
