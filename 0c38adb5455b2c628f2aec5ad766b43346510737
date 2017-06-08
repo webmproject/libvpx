@@ -34,6 +34,24 @@
       "revId": "0c38adb5455b2c628f2aec5ad766b43346510737",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ce46654_49cd51ba",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-08T19:23:24Z",
+      "side": 1,
+      "message": "\u003e So I was a little hasty, there are other checks on \u0027new\u0027 but none of them use std::nothrow. Some of them are simple [] allocations, but some of them are class instantiations. Should I drop the nothrow but still check for NULL? Or update those other sites?\n\u003e \n\nI\u0027d leave the checks. nothrow can go in the tests. if they abort or hit the assert it doesn\u0027t make much difference for logging",
+      "parentUuid": "5ac73c4d_9c733de5",
+      "revId": "0c38adb5455b2c628f2aec5ad766b43346510737",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
