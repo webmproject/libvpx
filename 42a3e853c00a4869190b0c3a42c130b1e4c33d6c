@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "28d65841_32c5dc28",
+        "filename": "test/buffer.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-08T22:48:41Z",
+      "side": 1,
+      "message": "leftover mix of size_t here I think. also +1 to thinking about simplifying this to Init or a combination of Set then Init later",
+      "range": {
+        "startLine": 36,
+        "startChar": 9,
+        "endLine": 36,
+        "endChar": 15
+      },
+      "revId": "42a3e853c00a4869190b0c3a42c130b1e4c33d6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
