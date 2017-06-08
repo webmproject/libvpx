@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4720aabb_20eba80c",
+        "filename": "test/buffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-08T18:50:37Z",
+      "side": 1,
+      "message": "this one could be restored in the end, but it\u0027s not critical",
+      "revId": "e50ea014c3d41652df34ed1325511803268e2ca7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
