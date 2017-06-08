@@ -16,6 +16,24 @@
       "revId": "0c38adb5455b2c628f2aec5ad766b43346510737",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5ac73c4d_9c733de5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-08T19:21:38Z",
+      "side": 1,
+      "message": "So I was a little hasty, there are other checks on \u0027new\u0027 but none of them use std::nothrow. Some of them are simple [] allocations, but some of them are class instantiations. Should I drop the nothrow but still check for NULL? Or update those other sites?\n\nbyte_alignment_test.cc:    video_ \u003d new libvpx_test::WebMVideoSource(kVP9TestFile);\nbyte_alignment_test.cc-    ASSERT_TRUE(video_ !\u003d NULL);\n--\nbyte_alignment_test.cc:    decoder_ \u003d new libvpx_test::VP9Decoder(cfg, 0);\nbyte_alignment_test.cc-    ASSERT_TRUE(decoder_ !\u003d NULL);\n--\ndecode_svc_test.cc:  video.reset(new libvpx_test::IVFVideoSource(filename));\ndecode_svc_test.cc-  ASSERT_TRUE(video.get() !\u003d NULL);\n--\ndecode_svc_test.cc:  video.reset(new libvpx_test::IVFVideoSource(filename));\ndecode_svc_test.cc-  ASSERT_TRUE(video.get() !\u003d NULL);\n--\ndecode_svc_test.cc:  video.reset(new libvpx_test::IVFVideoSource(filename));\ndecode_svc_test.cc-  ASSERT_TRUE(video.get() !\u003d NULL);\n--\ndecode_svc_test.cc:  video.reset(new libvpx_test::IVFVideoSource(filename));\ndecode_svc_test.cc-  ASSERT_TRUE(video.get() !\u003d NULL);\n--\nexternal_frame_buffer_test.cc:    video_ \u003d new libvpx_test::WebMVideoSource(kVP9TestFile);\nexternal_frame_buffer_test.cc-    ASSERT_TRUE(video_ !\u003d NULL);\n--\nexternal_frame_buffer_test.cc:    decoder_ \u003d new libvpx_test::VP9Decoder(cfg, 0);\nexternal_frame_buffer_test.cc-    ASSERT_TRUE(decoder_ !\u003d NULL);\n--\nidct_test.cc:    input \u003d new (std::nothrow) Buffer\u003cint16_t\u003e(4, 4, 0);\nidct_test.cc-    ASSERT_TRUE(input-\u003eInit());\nidct_test.cc:    predict \u003d new (std::nothrow) Buffer\u003cuint8_t\u003e(4, 4, 3);\nidct_test.cc-    ASSERT_TRUE(predict-\u003eInit());\nidct_test.cc:    output \u003d new (std::nothrow) Buffer\u003cuint8_t\u003e(4, 4, 3);\nidct_test.cc-    ASSERT_TRUE(output-\u003eInit());\n--\nivf_video_source.h:    compressed_frame_buf_ \u003d new uint8_t[libvpx_test::kCodeBufferSize];\nivf_video_source.h-    ASSERT_TRUE(compressed_frame_buf_ !\u003d NULL)\n--\npp_filter_test.cc:  unsigned char *expected_output \u003d new unsigned char[rows * cols];\npp_filter_test.cc-  ASSERT_TRUE(expected_output !\u003d NULL);\n--\npredict_test.cc:    src_ \u003d new uint8_t[kSrcSize];\npredict_test.cc-    ASSERT_TRUE(src_ !\u003d NULL);\n--\npredict_test.cc:    dst_c_ \u003d new uint8_t[16 * 16];\npredict_test.cc-    ASSERT_TRUE(dst_c_ !\u003d NULL);\n--\nvariance_test.cc:    ref_ \u003d new uint8_t[block_size() * unit];\nvariance_test.cc-    ASSERT_TRUE(src_ !\u003d NULL);\n--\nvp9_encoder_parms_get_to_decoder.cc:      new libvpx_test::Y4mVideoSource(test_video_.name, 0, test_video_.frames));\nvp9_encoder_parms_get_to_decoder.cc-  ASSERT_TRUE(video.get() !\u003d NULL);\n--\nvp9_skip_loopfilter_test.cc:    video_ \u003d new libvpx_test::WebMVideoSource(kVp9TestFile);\nvp9_skip_loopfilter_test.cc-    ASSERT_TRUE(video_ !\u003d NULL);\n--\nvp9_skip_loopfilter_test.cc:    decoder_ \u003d new libvpx_test::VP9Decoder(cfg, 0);\nvp9_skip_loopfilter_test.cc-    ASSERT_TRUE(decoder_ !\u003d NULL);\n--\ny4m_test.cc:    tmpfile_ \u003d new libvpx_test::TempOutFile;\ny4m_test.cc-    ASSERT_TRUE(tmpfile_-\u003efile() !\u003d NULL);",
+      "parentUuid": "e97149a5_373d8ae3",
+      "revId": "0c38adb5455b2c628f2aec5ad766b43346510737",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
