@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5e8e25e7_f2983dbf",
+        "filename": "vp8/decoder/decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 954,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-08T03:56:37Z",
+      "side": 1,
+      "message": "I\u0027m not quite sure what the error concealment was trying to achieve here, but sending in a negative size to the bit reader is not a good idea",
+      "revId": "08d09b4b46d2dea406a4f2e309df69c18d4a6242",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
