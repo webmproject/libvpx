@@ -15,7 +15,6 @@
 #include "test/acm_random.h"
 #include "test/buffer.h"
 #include "test/register_state_check.h"
-#include "vpx_ports/mem.h"
 #include "vpx_ports/vpx_timer.h"
 
 namespace {
@@ -28,12 +27,13 @@ typedef void (*AvgPredFunc)(uint8_t *a, const uint8_t *b, int w, int h,
 
 uint8_t avg_with_rounding(uint8_t a, uint8_t b) { return (a + b + 1) >> 1; }
 
-void reference_pred(const uint8_t *pred, const Buffer<uint8_t> &ref, int width,
-                    int height, uint8_t *avg) {
+void reference_pred(const Buffer<uint8_t> &pred, const Buffer<uint8_t> &ref,
+                    int width, int height, Buffer<uint8_t> *avg) {
   for (int y = 0; y < height; ++y) {
     for (int x = 0; x < width; ++x) {
-      avg[y * width + x] = avg_with_rounding(
-          pred[y * width + x], ref.TopLeftPixel()[y * ref.stride() + x]);
+      avg->TopLeftPixel()[y * avg->stride() + x] =
+          avg_with_rounding(pred.TopLeftPixel()[y * pred.stride() + x],
+                            ref.TopLeftPixel()[y * ref.stride() + x]);
     }
   }
 }
@@ -50,21 +50,9 @@ class AvgPredTest : public ::testing::TestWithParam<AvgPredFunc> {
   ACMRandom rnd_;
 };
 
-void fill(ACMRandom *r, uint8_t *a, const int width, const int height) {
-  for (int y = 0; y < height; ++y) {
-    for (int x = 0; x < width; ++x) {
-      a[x + width * y] = r->Rand8();
-    }
-  }
-}
-
 TEST_P(AvgPredTest, SizeCombinations) {
   // This is called as part of the sub pixel variance. As such it must be one of
   // the variance block sizes.
-
-  DECLARE_ALIGNED(16, uint8_t, pred[64 * 64]);
-  DECLARE_ALIGNED(16, uint8_t, avg_ref[64 * 64]);
-  DECLARE_ALIGNED(16, uint8_t, avg_chk[64 * 64]);
 
   for (int width_pow = 2; width_pow <= 6; ++width_pow) {
     for (int height_pow = width_pow - 1; height_pow <= width_pow + 1;
@@ -81,15 +69,27 @@ TEST_P(AvgPredTest, SizeCombinations) {
         Buffer<uint8_t> ref =
             Buffer<uint8_t>(width, height, ref_padding ? 8 : 0);
         ASSERT_TRUE(ref.Init());
+        Buffer<uint8_t> pred = Buffer<uint8_t>(width, height, 0, 16);
+        ASSERT_TRUE(pred.Init());
+        Buffer<uint8_t> avg_ref = Buffer<uint8_t>(width, height, 0, 16);
+        ASSERT_TRUE(avg_ref.Init());
+        Buffer<uint8_t> avg_chk = Buffer<uint8_t>(width, height, 0, 16);
+        ASSERT_TRUE(avg_chk.Init());
 
-        fill(&rnd_, pred, width, height);
         ref.Set(&rnd_, &ACMRandom::Rand8);
+        pred.Set(&rnd_, &ACMRandom::Rand8);
 
-        reference_pred(pred, ref, width, height, avg_ref);
-        ASM_REGISTER_STATE_CHECK(avg_pred_func_(
-            avg_chk, pred, width, height, ref.TopLeftPixel(), ref.stride()));
-        ASSERT_EQ(memcmp(avg_ref, avg_chk, sizeof(*avg_ref) * width * height),
-                  0);
+        reference_pred(pred, ref, width, height, &avg_ref);
+        ASM_REGISTER_STATE_CHECK(
+            avg_pred_func_(avg_chk.TopLeftPixel(), pred.TopLeftPixel(), width,
+                           height, ref.TopLeftPixel(), ref.stride()));
+
+        EXPECT_TRUE(avg_chk.CheckValues(avg_ref));
+        if (HasFailure()) {
+          printf("Width: %d Height: %d\n", width, height);
+          avg_chk.PrintDifference(avg_ref);
+          return;
+        }
       }
     }
   }
@@ -100,25 +100,31 @@ TEST_P(AvgPredTest, CompareReferenceRandom) {
   const int height = 32;
   Buffer<uint8_t> ref = Buffer<uint8_t>(width, height, 8);
   ASSERT_TRUE(ref.Init());
-  DECLARE_ALIGNED(16, uint8_t, pred[width * height]);
-  DECLARE_ALIGNED(16, uint8_t, avg_ref[width * height]);
-  DECLARE_ALIGNED(16, uint8_t, avg_chk[width * height]);
+  Buffer<uint8_t> pred = Buffer<uint8_t>(width, height, 0, 16);
+  ASSERT_TRUE(pred.Init());
+  Buffer<uint8_t> avg_ref = Buffer<uint8_t>(width, height, 0, 16);
+  ASSERT_TRUE(avg_ref.Init());
+  Buffer<uint8_t> avg_chk = Buffer<uint8_t>(width, height, 0, 16);
+  ASSERT_TRUE(avg_chk.Init());
 
   for (int i = 0; i < 500; ++i) {
-    fill(&rnd_, pred, width, height);
     ref.Set(&rnd_, &ACMRandom::Rand8);
+    pred.Set(&rnd_, &ACMRandom::Rand8);
 
-    reference_pred(pred, ref, width, height, avg_ref);
-    ASM_REGISTER_STATE_CHECK(avg_pred_func_(avg_chk, pred, width, height,
+    reference_pred(pred, ref, width, height, &avg_ref);
+    ASM_REGISTER_STATE_CHECK(avg_pred_func_(avg_chk.TopLeftPixel(),
+                                            pred.TopLeftPixel(), width, height,
                                             ref.TopLeftPixel(), ref.stride()));
-    ASSERT_EQ(memcmp(avg_ref, avg_chk, sizeof(*avg_ref) * width * height), 0);
+    EXPECT_TRUE(avg_chk.CheckValues(avg_ref));
+    if (HasFailure()) {
+      printf("Width: %d Height: %d\n", width, height);
+      avg_chk.PrintDifference(avg_ref);
+      return;
+    }
   }
 }
 
 TEST_P(AvgPredTest, DISABLED_Speed) {
-  DECLARE_ALIGNED(16, uint8_t, pred[64 * 64]);
-  DECLARE_ALIGNED(16, uint8_t, avg[64 * 64]);
-
   for (int width_pow = 2; width_pow <= 6; ++width_pow) {
     for (int height_pow = width_pow - 1; height_pow <= width_pow + 1;
          ++height_pow) {
@@ -131,15 +137,19 @@ TEST_P(AvgPredTest, DISABLED_Speed) {
         Buffer<uint8_t> ref =
             Buffer<uint8_t>(width, height, ref_padding ? 8 : 0);
         ASSERT_TRUE(ref.Init());
+        Buffer<uint8_t> pred = Buffer<uint8_t>(width, height, 0, 16);
+        ASSERT_TRUE(pred.Init());
+        Buffer<uint8_t> avg = Buffer<uint8_t>(width, height, 0, 16);
+        ASSERT_TRUE(avg.Init());
 
-        fill(&rnd_, pred, width, height);
         ref.Set(&rnd_, &ACMRandom::Rand8);
+        pred.Set(&rnd_, &ACMRandom::Rand8);
 
         vpx_usec_timer timer;
         vpx_usec_timer_start(&timer);
         for (int i = 0; i < 10000000 / (width * height); ++i) {
-          avg_pred_func_(avg, pred, width, height, ref.TopLeftPixel(),
-                         ref.stride());
+          avg_pred_func_(avg.TopLeftPixel(), pred.TopLeftPixel(), width, height,
+                         ref.TopLeftPixel(), ref.stride());
         }
         vpx_usec_timer_mark(&timer);
 
