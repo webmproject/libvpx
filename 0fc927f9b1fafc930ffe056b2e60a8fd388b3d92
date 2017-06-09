@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c41f24aa_284b3d7f",
+        "filename": "vpx_util/vpx_write_yuv_frame.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-09T23:14:13Z",
+      "side": 1,
+      "message": "you should expose the prototype given a stub is being created. this will avoid a -Wmissing-prototypes warning",
+      "revId": "0fc927f9b1fafc930ffe056b2e60a8fd388b3d92",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
