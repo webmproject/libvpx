@@ -1500,9 +1500,6 @@ int vp8_drop_encodedframe_overshoot(VP8_COMP *cpi, int Q) {
         cpi->rate_correction_factor = MAX_BPB_FACTOR;
       }
       return 1;
-    } else {
-      cpi->force_maxqp = 0;
-      return 0;
     }
     cpi->force_maxqp = 0;
     return 0;
