@@ -22,6 +22,30 @@
       "revId": "42a3e853c00a4869190b0c3a42c130b1e4c33d6c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f625e17_1b39c652",
+        "filename": "test/buffer.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-09T18:06:27Z",
+      "side": 1,
+      "message": "Woops, my apologies.\n\nI feel like there is enough protection from just setting raw_buffer_ to NULL to skip initializing padding_value_, stride_, raw_size_, num_elements_, but could add a Set() later",
+      "parentUuid": "28d65841_32c5dc28",
+      "range": {
+        "startLine": 36,
+        "startChar": 9,
+        "endLine": 36,
+        "endChar": 15
+      },
+      "revId": "42a3e853c00a4869190b0c3a42c130b1e4c33d6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
