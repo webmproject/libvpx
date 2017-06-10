@@ -29,7 +29,6 @@ int compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
 #ifdef OUTPUT_YUV_SKINMAP
 // For viewing skin map on input source.
 void compute_skin_map(struct VP8_COMP *const cpi, FILE *yuv_skinmap_file);
-extern void vp8_write_yuv_frame(FILE *f, YV12_BUFFER_CONFIG *s);
 #endif
 
 #ifdef __cplusplus

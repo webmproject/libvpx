@@ -13,6 +13,7 @@
 
 #include "vp9/common/vp9_blockd.h"
 #include "vpx_dsp/skin_detection.h"
+#include "vpx_util/vpx_write_yuv_frame.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,7 +28,6 @@ int vp9_compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
 #ifdef OUTPUT_YUV_SKINMAP
 // For viewing skin map on input source.
 void vp9_compute_skin_map(struct VP9_COMP *const cpi, FILE *yuv_skinmap_file);
-extern void vp9_write_yuv_frame_420(YV12_BUFFER_CONFIG *s, FILE *f);
 #endif
 
 #ifdef __cplusplus
