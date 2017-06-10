@@ -551,8 +551,9 @@ static void set_rt_speed_feature_framesize_independent(
       sf->mv.fullpel_search_step_param = 6;
     }
     if (cpi->svc.temporal_layer_id > 0) {
-      sf->mv.subpel_search_method = SUBPEL_TREE_PRUNED_EVENMORE;
       sf->use_simple_block_yrd = 1;
+      if (cpi->svc.non_reference_frame)
+        sf->mv.subpel_search_method = SUBPEL_TREE_PRUNED_EVENMORE;
     }
     if (!cpi->external_resize) sf->use_source_sad = 1;
     if (sf->use_source_sad) {
