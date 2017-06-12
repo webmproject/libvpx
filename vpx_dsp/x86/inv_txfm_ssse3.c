@@ -670,14 +670,6 @@ static void load_buffer_16x16(const tran_low_t *input, __m128i *in0,
   }
 }
 
-static void array_transpose_16x16_2(__m128i *in0, __m128i *in1, __m128i *out0,
-                                    __m128i *out1) {
-  transpose_16bit_8x8(in0, out0);
-  transpose_16bit_8x8(&in0[8], out1);
-  transpose_16bit_8x8(in1, &out0[8]);
-  transpose_16bit_8x8(&in1[8], &out1[8]);
-}
-
 // Group the coefficient calculation into smaller functions
 // to prevent stack spillover:
 // quarter_1: 0-7
@@ -986,7 +978,7 @@ static void transpose_and_copy_16x16(__m128i *in0, __m128i *in1, __m128i *store,
   switch (cols) {
     case left_16: {
       int i;
-      array_transpose_16x16(in0, in1);
+      transpose_16bit_16x16(in0, in1);
       for (i = 0; i < 16; ++i) {
         store[i] = in0[16 + i];
         store[16 + i] = in1[16 + i];
@@ -994,7 +986,10 @@ static void transpose_and_copy_16x16(__m128i *in0, __m128i *in1, __m128i *store,
       break;
     }
     case right_16: {
-      array_transpose_16x16_2(store, &store[16], in0, in1);
+      transpose_16bit_8x8(store, in0);
+      transpose_16bit_8x8(&store[8], in1);
+      transpose_16bit_8x8(&store[16], &in0[8]);
+      transpose_16bit_8x8(&store[24], &in1[8]);
       break;
     }
     default: { assert(0); }
@@ -1013,7 +1008,7 @@ void vpx_idct32x32_135_add_ssse3(const tran_low_t *input, uint8_t *dest,
   load_buffer_16x16(input, col0, col1);
 
   // columns
-  array_transpose_16x16(col0, col1);
+  transpose_16bit_16x16(col0, col1);
   idct32_135(col0, col1);
 
   // rows

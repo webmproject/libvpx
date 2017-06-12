@@ -165,7 +165,7 @@ void vpx_highbd_idct8x8_12_add_sse2(const tran_low_t *input, uint16_t *dest,
 
     if (test) {
       // Use fact only first 4 rows contain non-zero coeffs
-      array_transpose_4X8(inptr, inptr);
+      transpose_16bit_4x8(inptr, inptr);
       for (i = 0; i < 4; i++) {
         sign_bits = _mm_cmplt_epi16(inptr[i], zero);
         temp1 = _mm_unpackhi_epi16(inptr[i], sign_bits);

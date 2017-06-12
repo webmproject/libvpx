@@ -1462,13 +1462,13 @@ static void idct16_8col(__m128i *in) {
 }
 
 void idct16_sse2(__m128i *in0, __m128i *in1) {
-  array_transpose_16x16(in0, in1);
+  transpose_16bit_16x16(in0, in1);
   idct16_8col(in0);
   idct16_8col(in1);
 }
 
 void iadst16_sse2(__m128i *in0, __m128i *in1) {
-  array_transpose_16x16(in0, in1);
+  transpose_16bit_16x16(in0, in1);
   iadst16_8col(in0);
   iadst16_8col(in1);
 }
@@ -1616,7 +1616,7 @@ void vpx_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
   // Second 1-D inverse transform, performed per 8x16 block
   for (i = 0; i < 2; i++) {
     int j;
-    array_transpose_4X8(l + 8 * i, in);
+    transpose_16bit_4x8(l + 8 * i, in);
 
     IDCT16_10
 

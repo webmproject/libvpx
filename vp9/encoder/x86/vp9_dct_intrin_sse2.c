@@ -1131,23 +1131,6 @@ static INLINE void write_buffer_16x16(tran_low_t *output, __m128i *in0,
   write_buffer_8x8(output + 8 * stride, in1 + 8, stride);
 }
 
-static INLINE void array_transpose_16x16(__m128i *res0, __m128i *res1) {
-  __m128i tbuf[8];
-  transpose_16bit_8x8(res0, res0);
-  transpose_16bit_8x8(res1, tbuf);
-  transpose_16bit_8x8(res0 + 8, res1);
-  transpose_16bit_8x8(res1 + 8, res1 + 8);
-
-  res0[8] = tbuf[0];
-  res0[9] = tbuf[1];
-  res0[10] = tbuf[2];
-  res0[11] = tbuf[3];
-  res0[12] = tbuf[4];
-  res0[13] = tbuf[5];
-  res0[14] = tbuf[6];
-  res0[15] = tbuf[7];
-}
-
 static INLINE void right_shift_16x16(__m128i *res0, __m128i *res1) {
   // perform rounding operations
   right_shift_8x8(res0, 2);
@@ -1951,13 +1934,13 @@ static void fadst16_8col(__m128i *in) {
 static void fdct16_sse2(__m128i *in0, __m128i *in1) {
   fdct16_8col(in0);
   fdct16_8col(in1);
-  array_transpose_16x16(in0, in1);
+  transpose_16bit_16x16(in0, in1);
 }
 
 static void fadst16_sse2(__m128i *in0, __m128i *in1) {
   fadst16_8col(in0);
   fadst16_8col(in1);
-  array_transpose_16x16(in0, in1);
+  transpose_16bit_16x16(in0, in1);
 }
 
 void vp9_fht16x16_sse2(const int16_t *input, tran_low_t *output, int stride,

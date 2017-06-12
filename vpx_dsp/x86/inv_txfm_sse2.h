@@ -56,40 +56,6 @@ static INLINE void idct8x8_12_transpose_16bit_4x8(const __m128i *const in,
   out[3] = _mm_unpackhi_epi64(tr1_2, tr1_3);
 }
 
-static INLINE void array_transpose_4X8(__m128i *in, __m128i *out) {
-  const __m128i tr0_0 = _mm_unpacklo_epi16(in[0], in[1]);
-  const __m128i tr0_1 = _mm_unpacklo_epi16(in[2], in[3]);
-  const __m128i tr0_4 = _mm_unpacklo_epi16(in[4], in[5]);
-  const __m128i tr0_5 = _mm_unpacklo_epi16(in[6], in[7]);
-
-  const __m128i tr1_0 = _mm_unpacklo_epi32(tr0_0, tr0_1);
-  const __m128i tr1_2 = _mm_unpackhi_epi32(tr0_0, tr0_1);
-  const __m128i tr1_4 = _mm_unpacklo_epi32(tr0_4, tr0_5);
-  const __m128i tr1_6 = _mm_unpackhi_epi32(tr0_4, tr0_5);
-
-  out[0] = _mm_unpacklo_epi64(tr1_0, tr1_4);
-  out[1] = _mm_unpackhi_epi64(tr1_0, tr1_4);
-  out[2] = _mm_unpacklo_epi64(tr1_2, tr1_6);
-  out[3] = _mm_unpackhi_epi64(tr1_2, tr1_6);
-}
-
-static INLINE void array_transpose_16x16(__m128i *res0, __m128i *res1) {
-  __m128i tbuf[8];
-  transpose_16bit_8x8(res0, res0);
-  transpose_16bit_8x8(res1, tbuf);
-  transpose_16bit_8x8(res0 + 8, res1);
-  transpose_16bit_8x8(res1 + 8, res1 + 8);
-
-  res0[8] = tbuf[0];
-  res0[9] = tbuf[1];
-  res0[10] = tbuf[2];
-  res0[11] = tbuf[3];
-  res0[12] = tbuf[4];
-  res0[13] = tbuf[5];
-  res0[14] = tbuf[6];
-  res0[15] = tbuf[7];
-}
-
 static INLINE __m128i dct_const_round_shift_sse2(const __m128i in) {
   const __m128i t = _mm_add_epi32(in, _mm_set1_epi32(DCT_CONST_ROUNDING));
   return _mm_srai_epi32(t, DCT_CONST_BITS);
