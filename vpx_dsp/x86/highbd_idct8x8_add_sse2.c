@@ -63,7 +63,7 @@ void vpx_highbd_idct8x8_64_add_sse2(const tran_low_t *input, uint16_t *dest,
     test = _mm_movemask_epi8(temp1);
 
     if (test) {
-      array_transpose_8x8(inptr, inptr);
+      transpose_16bit_8x8(inptr, inptr);
       for (i = 0; i < 8; i++) {
         sign_bits = _mm_cmplt_epi16(inptr[i], zero);
         temp1 = _mm_unpackhi_epi16(inptr[i], sign_bits);

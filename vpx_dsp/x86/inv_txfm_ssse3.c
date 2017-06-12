@@ -632,7 +632,7 @@ void vpx_idct32x32_34_add_ssse3(const tran_low_t *input, uint8_t *dest,
   in[6] = load_input_data(input + 192);
   in[7] = load_input_data(input + 224);
 
-  array_transpose_8x8(in, in);
+  transpose_16bit_8x8(in, in);
   idct32_34_first_half(in, stp1);
   idct32_34_second_half(in, stp1);
 
@@ -641,7 +641,7 @@ void vpx_idct32x32_34_add_ssse3(const tran_low_t *input, uint8_t *dest,
   for (i = 0; i < 4; i++) {
     int j;
     // Transpose 32x8 block to 8x32 block
-    array_transpose_8x8(col + i * 8, in);
+    transpose_16bit_8x8(col + i * 8, in);
     idct32_34_first_half(in, stp1);
     idct32_34_second_half(in, stp1);
 
@@ -672,10 +672,10 @@ static void load_buffer_16x16(const tran_low_t *input, __m128i *in0,
 
 static void array_transpose_16x16_2(__m128i *in0, __m128i *in1, __m128i *out0,
                                     __m128i *out1) {
-  array_transpose_8x8(in0, out0);
-  array_transpose_8x8(&in0[8], out1);
-  array_transpose_8x8(in1, &out0[8]);
-  array_transpose_8x8(&in1[8], &out1[8]);
+  transpose_16bit_8x8(in0, out0);
+  transpose_16bit_8x8(&in0[8], out1);
+  transpose_16bit_8x8(in1, &out0[8]);
+  transpose_16bit_8x8(&in1[8], &out1[8]);
 }
 
 // Group the coefficient calculation into smaller functions
@@ -1306,10 +1306,10 @@ void vpx_idct32x32_1024_add_ssse3(const tran_low_t *input, uint8_t *dest,
     input += 32 << 3;
 
     // Transpose 32x8 block to 8x32 block
-    array_transpose_8x8(in, in);
-    array_transpose_8x8(in + 8, in + 8);
-    array_transpose_8x8(in + 16, in + 16);
-    array_transpose_8x8(in + 24, in + 24);
+    transpose_16bit_8x8(in, in);
+    transpose_16bit_8x8(in + 8, in + 8);
+    transpose_16bit_8x8(in + 16, in + 16);
+    transpose_16bit_8x8(in + 24, in + 24);
 
     idct32_full_8x32(in, col + (i << 5));
   }
@@ -1318,10 +1318,10 @@ void vpx_idct32x32_1024_add_ssse3(const tran_low_t *input, uint8_t *dest,
   for (i = 0; i < 4; ++i) {
     j = i << 3;
     // Transpose 32x8 block to 8x32 block
-    array_transpose_8x8(col + j, in);
-    array_transpose_8x8(col + j + 32, in + 8);
-    array_transpose_8x8(col + j + 64, in + 16);
-    array_transpose_8x8(col + j + 96, in + 24);
+    transpose_16bit_8x8(col + j, in);
+    transpose_16bit_8x8(col + j + 32, in + 8);
+    transpose_16bit_8x8(col + j + 64, in + 16);
+    transpose_16bit_8x8(col + j + 96, in + 24);
 
     idct32_full_8x32(in, in);
     store_buffer_8x32(in, dest, stride);

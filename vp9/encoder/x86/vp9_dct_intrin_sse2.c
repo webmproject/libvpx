@@ -15,6 +15,7 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/txfm_common.h"
 #include "vpx_dsp/x86/fwd_txfm_sse2.h"
+#include "vpx_dsp/x86/transpose_sse2.h"
 #include "vpx_dsp/x86/txfm_common_sse2.h"
 #include "vpx_ports/mem.h"
 
@@ -706,58 +707,6 @@ static INLINE void write_buffer_8x8(tran_low_t *output, __m128i *res,
   store_output(&res[7], (output + 7 * stride));
 }
 
-// perform in-place transpose
-static INLINE void array_transpose_8x8(__m128i *in, __m128i *res) {
-  const __m128i tr0_0 = _mm_unpacklo_epi16(in[0], in[1]);
-  const __m128i tr0_1 = _mm_unpacklo_epi16(in[2], in[3]);
-  const __m128i tr0_2 = _mm_unpackhi_epi16(in[0], in[1]);
-  const __m128i tr0_3 = _mm_unpackhi_epi16(in[2], in[3]);
-  const __m128i tr0_4 = _mm_unpacklo_epi16(in[4], in[5]);
-  const __m128i tr0_5 = _mm_unpacklo_epi16(in[6], in[7]);
-  const __m128i tr0_6 = _mm_unpackhi_epi16(in[4], in[5]);
-  const __m128i tr0_7 = _mm_unpackhi_epi16(in[6], in[7]);
-  // 00 10 01 11 02 12 03 13
-  // 20 30 21 31 22 32 23 33
-  // 04 14 05 15 06 16 07 17
-  // 24 34 25 35 26 36 27 37
-  // 40 50 41 51 42 52 43 53
-  // 60 70 61 71 62 72 63 73
-  // 44 54 45 55 46 56 47 57
-  // 64 74 65 75 66 76 67 77
-  const __m128i tr1_0 = _mm_unpacklo_epi32(tr0_0, tr0_1);
-  const __m128i tr1_1 = _mm_unpacklo_epi32(tr0_4, tr0_5);
-  const __m128i tr1_2 = _mm_unpackhi_epi32(tr0_0, tr0_1);
-  const __m128i tr1_3 = _mm_unpackhi_epi32(tr0_4, tr0_5);
-  const __m128i tr1_4 = _mm_unpacklo_epi32(tr0_2, tr0_3);
-  const __m128i tr1_5 = _mm_unpacklo_epi32(tr0_6, tr0_7);
-  const __m128i tr1_6 = _mm_unpackhi_epi32(tr0_2, tr0_3);
-  const __m128i tr1_7 = _mm_unpackhi_epi32(tr0_6, tr0_7);
-  // 00 10 20 30 01 11 21 31
-  // 40 50 60 70 41 51 61 71
-  // 02 12 22 32 03 13 23 33
-  // 42 52 62 72 43 53 63 73
-  // 04 14 24 34 05 15 25 35
-  // 44 54 64 74 45 55 65 75
-  // 06 16 26 36 07 17 27 37
-  // 46 56 66 76 47 57 67 77
-  res[0] = _mm_unpacklo_epi64(tr1_0, tr1_1);
-  res[1] = _mm_unpackhi_epi64(tr1_0, tr1_1);
-  res[2] = _mm_unpacklo_epi64(tr1_2, tr1_3);
-  res[3] = _mm_unpackhi_epi64(tr1_2, tr1_3);
-  res[4] = _mm_unpacklo_epi64(tr1_4, tr1_5);
-  res[5] = _mm_unpackhi_epi64(tr1_4, tr1_5);
-  res[6] = _mm_unpacklo_epi64(tr1_6, tr1_7);
-  res[7] = _mm_unpackhi_epi64(tr1_6, tr1_7);
-  // 00 10 20 30 40 50 60 70
-  // 01 11 21 31 41 51 61 71
-  // 02 12 22 32 42 52 62 72
-  // 03 13 23 33 43 53 63 73
-  // 04 14 24 34 44 54 64 74
-  // 05 15 25 35 45 55 65 75
-  // 06 16 26 36 46 56 66 76
-  // 07 17 27 37 47 57 67 77
-}
-
 static void fdct8_sse2(__m128i *in) {
   // constants
   const __m128i k__cospi_p16_p16 = _mm_set1_epi16((int16_t)cospi_16_64);
@@ -895,7 +844,7 @@ static void fdct8_sse2(__m128i *in) {
   in[7] = _mm_packs_epi32(v6, v7);
 
   // transpose
-  array_transpose_8x8(in, in);
+  transpose_16bit_8x8(in, in);
 }
 
 static void fadst8_sse2(__m128i *in) {
@@ -1125,7 +1074,7 @@ static void fadst8_sse2(__m128i *in) {
   in[7] = _mm_sub_epi16(k__const_0, s1);
 
   // transpose
-  array_transpose_8x8(in, in);
+  transpose_16bit_8x8(in, in);
 }
 
 void vp9_fht8x8_sse2(const int16_t *input, tran_low_t *output, int stride,
@@ -1184,10 +1133,10 @@ static INLINE void write_buffer_16x16(tran_low_t *output, __m128i *in0,
 
 static INLINE void array_transpose_16x16(__m128i *res0, __m128i *res1) {
   __m128i tbuf[8];
-  array_transpose_8x8(res0, res0);
-  array_transpose_8x8(res1, tbuf);
-  array_transpose_8x8(res0 + 8, res1);
-  array_transpose_8x8(res1 + 8, res1 + 8);
+  transpose_16bit_8x8(res0, res0);
+  transpose_16bit_8x8(res1, tbuf);
+  transpose_16bit_8x8(res0 + 8, res1);
+  transpose_16bit_8x8(res1 + 8, res1 + 8);
 
   res0[8] = tbuf[0];
   res0[9] = tbuf[1];

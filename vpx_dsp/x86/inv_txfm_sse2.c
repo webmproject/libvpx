@@ -325,7 +325,7 @@ void iadst8_sse2(__m128i *in) {
   __m128i in0, in1, in2, in3, in4, in5, in6, in7;
 
   // transpose
-  array_transpose_8x8(in, in);
+  transpose_16bit_8x8(in, in);
 
   // properly aligned for butterfly input
   in0 = in[7];
@@ -787,8 +787,8 @@ void vpx_idct16x16_256_add_sse2(const tran_low_t *input, uint8_t *dest,
     in[7] = load_input_data(input + 8 * 14);
     in[15] = load_input_data(input + 8 * 15);
 
-    array_transpose_8x8(in, in);
-    array_transpose_8x8(in + 8, in + 8);
+    transpose_16bit_8x8(in, in);
+    transpose_16bit_8x8(in + 8, in + 8);
 
     IDCT16
 
@@ -816,8 +816,8 @@ void vpx_idct16x16_256_add_sse2(const tran_low_t *input, uint8_t *dest,
   for (i = 0; i < 2; i++) {
     int j;
     // 1-D idct
-    array_transpose_8x8(l + i * 8, in);
-    array_transpose_8x8(r + i * 8, in + 8);
+    transpose_16bit_8x8(l + i * 8, in);
+    transpose_16bit_8x8(r + i * 8, in + 8);
 
     IDCT16
 
@@ -2131,7 +2131,7 @@ void vpx_idct32x32_34_add_sse2(const tran_low_t *input, uint8_t *dest,
   in[6] = load_input_data(input + 192);
   in[7] = load_input_data(input + 224);
 
-  array_transpose_8x8(in, in);
+  transpose_16bit_8x8(in, in);
   IDCT32_34
 
   // 1_D: Store 32 intermediate results for each 8x32 block.
@@ -2170,7 +2170,7 @@ void vpx_idct32x32_34_add_sse2(const tran_low_t *input, uint8_t *dest,
   for (i = 0; i < 4; i++) {
     int j;
     // Transpose 32x8 block to 8x32 block
-    array_transpose_8x8(col + i * 8, in);
+    transpose_16bit_8x8(col + i * 8, in);
     IDCT32_34
 
     // 2_D: Calculate the results and store them to destination.
@@ -2392,10 +2392,10 @@ void vpx_idct32x32_1024_add_sse2(const tran_low_t *input, uint8_t *dest,
     }
 
     // Transpose 32x8 block to 8x32 block
-    array_transpose_8x8(in, in);
-    array_transpose_8x8(in + 8, in + 8);
-    array_transpose_8x8(in + 16, in + 16);
-    array_transpose_8x8(in + 24, in + 24);
+    transpose_16bit_8x8(in, in);
+    transpose_16bit_8x8(in + 8, in + 8);
+    transpose_16bit_8x8(in + 16, in + 16);
+    transpose_16bit_8x8(in + 24, in + 24);
 
     IDCT32
 
@@ -2438,10 +2438,10 @@ void vpx_idct32x32_1024_add_sse2(const tran_low_t *input, uint8_t *dest,
     j = i << 3;
 
     // Transpose 32x8 block to 8x32 block
-    array_transpose_8x8(col + j, in);
-    array_transpose_8x8(col + j + 32, in + 8);
-    array_transpose_8x8(col + j + 64, in + 16);
-    array_transpose_8x8(col + j + 96, in + 24);
+    transpose_16bit_8x8(col + j, in);
+    transpose_16bit_8x8(col + j + 32, in + 8);
+    transpose_16bit_8x8(col + j + 64, in + 16);
+    transpose_16bit_8x8(col + j + 96, in + 24);
 
     IDCT32
 
