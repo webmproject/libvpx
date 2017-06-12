@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa7a0805_9b4fe9f5",
+        "filename": "vpx_dsp/x86/inv_txfm_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-12T23:05:23Z",
+      "side": 1,
+      "message": "this will break on x86 windows; the abi will only guarantee alignment for 3",
+      "revId": "64256a12b1572a49cee0300be8ba05b134c31717",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c617fba6_2e96249b",
+        "filename": "vpx_dsp/x86/inv_txfm_sse2.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-12T23:05:23Z",
+      "side": 1,
+      "message": "this will break under windows if it isn\u0027t inlined",
+      "revId": "64256a12b1572a49cee0300be8ba05b134c31717",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
