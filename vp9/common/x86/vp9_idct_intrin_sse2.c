@@ -54,7 +54,6 @@ void vp9_iht4x4_16_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
 void vp9_iht8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
                             int tx_type) {
   __m128i in[8];
-  const __m128i zero = _mm_setzero_si128();
   const __m128i final_rounding = _mm_set1_epi16(1 << 4);
 
   // load input data
@@ -106,14 +105,14 @@ void vp9_iht8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
   in[6] = _mm_srai_epi16(in[6], 5);
   in[7] = _mm_srai_epi16(in[7], 5);
 
-  RECON_AND_STORE(dest + 0 * stride, in[0]);
-  RECON_AND_STORE(dest + 1 * stride, in[1]);
-  RECON_AND_STORE(dest + 2 * stride, in[2]);
-  RECON_AND_STORE(dest + 3 * stride, in[3]);
-  RECON_AND_STORE(dest + 4 * stride, in[4]);
-  RECON_AND_STORE(dest + 5 * stride, in[5]);
-  RECON_AND_STORE(dest + 6 * stride, in[6]);
-  RECON_AND_STORE(dest + 7 * stride, in[7]);
+  recon_and_store(dest + 0 * stride, in[0]);
+  recon_and_store(dest + 1 * stride, in[1]);
+  recon_and_store(dest + 2 * stride, in[2]);
+  recon_and_store(dest + 3 * stride, in[3]);
+  recon_and_store(dest + 4 * stride, in[4]);
+  recon_and_store(dest + 5 * stride, in[5]);
+  recon_and_store(dest + 6 * stride, in[6]);
+  recon_and_store(dest + 7 * stride, in[7]);
 }
 
 void vp9_iht16x16_256_add_sse2(const tran_low_t *input, uint8_t *dest,

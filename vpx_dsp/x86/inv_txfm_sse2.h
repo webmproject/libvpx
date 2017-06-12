@@ -46,45 +46,44 @@ static INLINE void array_transpose_8x8(__m128i *in, __m128i *res) {
   res[6] = _mm_unpacklo_epi64(tr1_6, tr1_7);
   res[7] = _mm_unpackhi_epi64(tr1_6, tr1_7);
 }
-#define TRANSPOSE_8X8(in0, in1, in2, in3, in4, in5, in6, in7, out0, out1, \
-                      out2, out3, out4, out5, out6, out7)                 \
-  {                                                                       \
-    const __m128i tr0_0 = _mm_unpacklo_epi16(in0, in1);                   \
-    const __m128i tr0_1 = _mm_unpacklo_epi16(in2, in3);                   \
-    const __m128i tr0_2 = _mm_unpackhi_epi16(in0, in1);                   \
-    const __m128i tr0_3 = _mm_unpackhi_epi16(in2, in3);                   \
-    const __m128i tr0_4 = _mm_unpacklo_epi16(in4, in5);                   \
-    const __m128i tr0_5 = _mm_unpacklo_epi16(in6, in7);                   \
-    const __m128i tr0_6 = _mm_unpackhi_epi16(in4, in5);                   \
-    const __m128i tr0_7 = _mm_unpackhi_epi16(in6, in7);                   \
-                                                                          \
-    const __m128i tr1_0 = _mm_unpacklo_epi32(tr0_0, tr0_1);               \
-    const __m128i tr1_1 = _mm_unpacklo_epi32(tr0_2, tr0_3);               \
-    const __m128i tr1_2 = _mm_unpackhi_epi32(tr0_0, tr0_1);               \
-    const __m128i tr1_3 = _mm_unpackhi_epi32(tr0_2, tr0_3);               \
-    const __m128i tr1_4 = _mm_unpacklo_epi32(tr0_4, tr0_5);               \
-    const __m128i tr1_5 = _mm_unpacklo_epi32(tr0_6, tr0_7);               \
-    const __m128i tr1_6 = _mm_unpackhi_epi32(tr0_4, tr0_5);               \
-    const __m128i tr1_7 = _mm_unpackhi_epi32(tr0_6, tr0_7);               \
-                                                                          \
-    out0 = _mm_unpacklo_epi64(tr1_0, tr1_4);                              \
-    out1 = _mm_unpackhi_epi64(tr1_0, tr1_4);                              \
-    out2 = _mm_unpacklo_epi64(tr1_2, tr1_6);                              \
-    out3 = _mm_unpackhi_epi64(tr1_2, tr1_6);                              \
-    out4 = _mm_unpacklo_epi64(tr1_1, tr1_5);                              \
-    out5 = _mm_unpackhi_epi64(tr1_1, tr1_5);                              \
-    out6 = _mm_unpacklo_epi64(tr1_3, tr1_7);                              \
-    out7 = _mm_unpackhi_epi64(tr1_3, tr1_7);                              \
-  }
 
-#define TRANSPOSE_8X4(in0, in1, in2, in3, out0, out1)   \
-  {                                                     \
-    const __m128i tr0_0 = _mm_unpacklo_epi16(in0, in1); \
-    const __m128i tr0_1 = _mm_unpacklo_epi16(in2, in3); \
-                                                        \
-    in0 = _mm_unpacklo_epi32(tr0_0, tr0_1); /* i1 i0 */ \
-    in1 = _mm_unpackhi_epi32(tr0_0, tr0_1); /* i3 i2 */ \
-  }
+static INLINE void idct8x8_12_transpose_16bit_4x8(const __m128i *const in,
+                                                  __m128i *const out) {
+  // Unpack 16 bit elements. Goes from:
+  // in[0]: 30 31 32 33  00 01 02 03
+  // in[1]: 20 21 22 23  10 11 12 13
+  // in[2]: 40 41 42 43  70 71 72 73
+  // in[3]: 50 51 52 53  60 61 62 63
+  // to:
+  // tr0_0: 00 10 01 11  02 12 03 13
+  // tr0_1: 20 30 21 31  22 32 23 33
+  // tr0_2: 40 50 41 51  42 52 43 53
+  // tr0_3: 60 70 61 71  62 72 63 73
+  const __m128i tr0_0 = _mm_unpackhi_epi16(in[0], in[1]);
+  const __m128i tr0_1 = _mm_unpacklo_epi16(in[1], in[0]);
+  const __m128i tr0_2 = _mm_unpacklo_epi16(in[2], in[3]);
+  const __m128i tr0_3 = _mm_unpackhi_epi16(in[3], in[2]);
+
+  // Unpack 32 bit elements resulting in:
+  // tr1_0: 00 10 20 30  01 11 21 31
+  // tr1_1: 02 12 22 32  03 13 23 33
+  // tr1_2: 40 50 60 70  41 51 61 71
+  // tr1_3: 42 52 62 72  43 53 63 73
+  const __m128i tr1_0 = _mm_unpacklo_epi32(tr0_0, tr0_1);
+  const __m128i tr1_1 = _mm_unpacklo_epi32(tr0_2, tr0_3);
+  const __m128i tr1_2 = _mm_unpackhi_epi32(tr0_0, tr0_1);
+  const __m128i tr1_3 = _mm_unpackhi_epi32(tr0_2, tr0_3);
+
+  // Unpack 64 bit elements resulting in:
+  // out[0]: 00 10 20 30  40 50 60 70
+  // out[1]: 01 11 21 31  41 51 61 71
+  // out[2]: 02 12 22 32  42 52 62 72
+  // out[3]: 03 13 23 33  43 53 63 73
+  out[0] = _mm_unpacklo_epi64(tr1_0, tr1_1);
+  out[1] = _mm_unpackhi_epi64(tr1_0, tr1_1);
+  out[2] = _mm_unpacklo_epi64(tr1_2, tr1_3);
+  out[3] = _mm_unpackhi_epi64(tr1_2, tr1_3);
+}
 
 static INLINE void array_transpose_4X8(__m128i *in, __m128i *out) {
   const __m128i tr0_0 = _mm_unpacklo_epi16(in[0], in[1]);
@@ -151,7 +150,8 @@ static INLINE __m128i load_input_data(const tran_low_t *data) {
 #endif
 }
 
-static INLINE void load_buffer_8x16(const tran_low_t *input, __m128i *in) {
+static INLINE void load_buffer_8x16(const tran_low_t *const input,
+                                    __m128i *const in) {
   in[0] = load_input_data(input + 0 * 16);
   in[1] = load_input_data(input + 1 * 16);
   in[2] = load_input_data(input + 2 * 16);
@@ -171,18 +171,17 @@ static INLINE void load_buffer_8x16(const tran_low_t *input, __m128i *in) {
   in[15] = load_input_data(input + 15 * 16);
 }
 
-#define RECON_AND_STORE(dest, in_x)                  \
-  {                                                  \
-    __m128i d0 = _mm_loadl_epi64((__m128i *)(dest)); \
-    d0 = _mm_unpacklo_epi8(d0, zero);                \
-    d0 = _mm_add_epi16(in_x, d0);                    \
-    d0 = _mm_packus_epi16(d0, d0);                   \
-    _mm_storel_epi64((__m128i *)(dest), d0);         \
-  }
+static INLINE void recon_and_store(uint8_t *const dest, const __m128i in_x) {
+  const __m128i zero = _mm_setzero_si128();
+  __m128i d0 = _mm_loadl_epi64((__m128i *)(dest));
+  d0 = _mm_unpacklo_epi8(d0, zero);
+  d0 = _mm_add_epi16(in_x, d0);
+  d0 = _mm_packus_epi16(d0, d0);
+  _mm_storel_epi64((__m128i *)(dest), d0);
+}
 
 static INLINE void write_buffer_8x16(uint8_t *dest, __m128i *in, int stride) {
   const __m128i final_rounding = _mm_set1_epi16(1 << 5);
-  const __m128i zero = _mm_setzero_si128();
   // Final rounding and shift
   in[0] = _mm_adds_epi16(in[0], final_rounding);
   in[1] = _mm_adds_epi16(in[1], final_rounding);
@@ -218,59 +217,23 @@ static INLINE void write_buffer_8x16(uint8_t *dest, __m128i *in, int stride) {
   in[14] = _mm_srai_epi16(in[14], 6);
   in[15] = _mm_srai_epi16(in[15], 6);
 
-  RECON_AND_STORE(dest + 0 * stride, in[0]);
-  RECON_AND_STORE(dest + 1 * stride, in[1]);
-  RECON_AND_STORE(dest + 2 * stride, in[2]);
-  RECON_AND_STORE(dest + 3 * stride, in[3]);
-  RECON_AND_STORE(dest + 4 * stride, in[4]);
-  RECON_AND_STORE(dest + 5 * stride, in[5]);
-  RECON_AND_STORE(dest + 6 * stride, in[6]);
-  RECON_AND_STORE(dest + 7 * stride, in[7]);
-  RECON_AND_STORE(dest + 8 * stride, in[8]);
-  RECON_AND_STORE(dest + 9 * stride, in[9]);
-  RECON_AND_STORE(dest + 10 * stride, in[10]);
-  RECON_AND_STORE(dest + 11 * stride, in[11]);
-  RECON_AND_STORE(dest + 12 * stride, in[12]);
-  RECON_AND_STORE(dest + 13 * stride, in[13]);
-  RECON_AND_STORE(dest + 14 * stride, in[14]);
-  RECON_AND_STORE(dest + 15 * stride, in[15]);
+  recon_and_store(dest + 0 * stride, in[0]);
+  recon_and_store(dest + 1 * stride, in[1]);
+  recon_and_store(dest + 2 * stride, in[2]);
+  recon_and_store(dest + 3 * stride, in[3]);
+  recon_and_store(dest + 4 * stride, in[4]);
+  recon_and_store(dest + 5 * stride, in[5]);
+  recon_and_store(dest + 6 * stride, in[6]);
+  recon_and_store(dest + 7 * stride, in[7]);
+  recon_and_store(dest + 8 * stride, in[8]);
+  recon_and_store(dest + 9 * stride, in[9]);
+  recon_and_store(dest + 10 * stride, in[10]);
+  recon_and_store(dest + 11 * stride, in[11]);
+  recon_and_store(dest + 12 * stride, in[12]);
+  recon_and_store(dest + 13 * stride, in[13]);
+  recon_and_store(dest + 14 * stride, in[14]);
+  recon_and_store(dest + 15 * stride, in[15]);
 }
-
-#define TRANSPOSE_4X8_10(tmp0, tmp1, tmp2, tmp3, out0, out1, out2, out3) \
-  {                                                                      \
-    const __m128i tr0_0 = _mm_unpackhi_epi16(tmp0, tmp1);                \
-    const __m128i tr0_1 = _mm_unpacklo_epi16(tmp1, tmp0);                \
-    const __m128i tr0_4 = _mm_unpacklo_epi16(tmp2, tmp3);                \
-    const __m128i tr0_5 = _mm_unpackhi_epi16(tmp3, tmp2);                \
-                                                                         \
-    const __m128i tr1_0 = _mm_unpacklo_epi32(tr0_0, tr0_1);              \
-    const __m128i tr1_2 = _mm_unpackhi_epi32(tr0_0, tr0_1);              \
-    const __m128i tr1_4 = _mm_unpacklo_epi32(tr0_4, tr0_5);              \
-    const __m128i tr1_6 = _mm_unpackhi_epi32(tr0_4, tr0_5);              \
-                                                                         \
-    out0 = _mm_unpacklo_epi64(tr1_0, tr1_4);                             \
-    out1 = _mm_unpackhi_epi64(tr1_0, tr1_4);                             \
-    out2 = _mm_unpacklo_epi64(tr1_2, tr1_6);                             \
-    out3 = _mm_unpackhi_epi64(tr1_2, tr1_6);                             \
-  }
-
-#define TRANSPOSE_8X8_10(in0, in1, in2, in3, out0, out1) \
-  {                                                      \
-    const __m128i tr0_0 = _mm_unpacklo_epi16(in0, in1);  \
-    const __m128i tr0_1 = _mm_unpacklo_epi16(in2, in3);  \
-    out0 = _mm_unpacklo_epi32(tr0_0, tr0_1);             \
-    out1 = _mm_unpackhi_epi32(tr0_0, tr0_1);             \
-  }
-
-// Define Macro for multiplying elements by constants and adding them together.
-#define MULTIPLICATION_AND_ADD(lo_0, hi_0, lo_1, hi_1, cst0, cst1, cst2, cst3, \
-                               res0, res1, res2, res3)                         \
-  {                                                                            \
-    res0 = idct_calc_wraplow_sse2(lo_0, hi_0, cst0);                           \
-    res1 = idct_calc_wraplow_sse2(lo_0, hi_0, cst1);                           \
-    res2 = idct_calc_wraplow_sse2(lo_1, hi_1, cst2);                           \
-    res3 = idct_calc_wraplow_sse2(lo_1, hi_1, cst3);                           \
-  }
 
 static INLINE void recon_and_store4x4_sse2(const __m128i *const in,
                                            uint8_t *const dest,
