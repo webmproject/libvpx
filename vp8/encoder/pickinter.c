@@ -25,7 +25,7 @@
 #include "vp8/common/reconintra4x4.h"
 #include "vpx_dsp/variance.h"
 #include "mcomp.h"
-#include "vp8/common/skin_detection.h"
+#include "vp8/common/vp8_skin_detection.h"
 #include "rdopt.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"

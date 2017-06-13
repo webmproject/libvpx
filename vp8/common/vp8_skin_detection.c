@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vp8/common/skin_detection.h"
 #include "vp8/common/alloccommon.h"
+#include "vp8/common/vp8_skin_detection.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_util/vpx_write_yuv_frame.h"

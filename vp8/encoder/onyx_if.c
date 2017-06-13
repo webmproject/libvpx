@@ -16,7 +16,7 @@
 #include "vp8/common/blockd.h"
 #include "onyx_int.h"
 #include "vp8/common/systemdependent.h"
-#include "vp8/common/skin_detection.h"
+#include "vp8/common/vp8_skin_detection.h"
 #include "vp8/encoder/quantize.h"
 #include "vp8/common/alloccommon.h"
 #include "mcomp.h"
