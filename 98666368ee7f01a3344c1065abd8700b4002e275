@@ -22,6 +22,30 @@
       "revId": "98666368ee7f01a3344c1065abd8700b4002e275",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "80ed984f_42df2c4d",
+        "filename": "vp8/vp8cx.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-13T03:54:18Z",
+      "side": 1,
+      "message": "\u003e I think it\u0027s better to move these to vp8_common.mk while you\u0027re doing some cleanup. I\u0027ll then rebase my change.\n\nthey\u0027re technically correct right now. if you disable the encoder the files are unnecessary. once they\u0027re needed in the decoder they can be moved, but we\u0027ll avoid the back and forth on the actual file as the change is coming (eventually).",
+      "parentUuid": "e8df274c_df087dbb",
+      "range": {
+        "startLine": 64,
+        "startChar": 19,
+        "endLine": 65,
+        "endChar": 46
+      },
+      "revId": "98666368ee7f01a3344c1065abd8700b4002e275",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
