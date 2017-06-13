@@ -80,8 +80,20 @@ static INLINE __m128i idct_calc_wraplow_sse2(const __m128i in0,
 // highbitdepth enabled
 static INLINE __m128i load_input_data(const tran_low_t *data) {
 #if CONFIG_VP9_HIGHBITDEPTH
-  return octa_set_epi16(data[0], data[1], data[2], data[3], data[4], data[5],
-                        data[6], data[7]);
+  // in0: 0 X 1 X  2 X 3 X
+  // in1: 4 X 5 X  6 X 7 X
+  // t0:  0 4 X X  1 5 X X
+  // t1:  2 6 X X  3 7 X X
+  // t2:  0 2 4 6  X X X X
+  // t3:  1 3 5 7  X X X X
+  // rtn: 0 1 2 3  4 5 6 7
+  const __m128i in0 = _mm_load_si128((const __m128i *)data);
+  const __m128i in1 = _mm_load_si128((const __m128i *)(data + 4));
+  const __m128i t0 = _mm_unpacklo_epi16(in0, in1);
+  const __m128i t1 = _mm_unpackhi_epi16(in0, in1);
+  const __m128i t2 = _mm_unpacklo_epi16(t0, t1);
+  const __m128i t3 = _mm_unpackhi_epi16(t0, t1);
+  return _mm_unpacklo_epi16(t2, t3);
 #else
   return _mm_load_si128((const __m128i *)data);
 #endif
