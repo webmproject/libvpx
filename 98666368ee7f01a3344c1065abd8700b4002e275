@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e8df274c_df087dbb",
+        "filename": "vp8/vp8cx.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-06-13T03:27:24Z",
+      "side": 1,
+      "message": "I think it\u0027s better to move these to vp8_common.mk while you\u0027re doing some cleanup. I\u0027ll then rebase my change.",
+      "range": {
+        "startLine": 64,
+        "startChar": 19,
+        "endLine": 65,
+        "endChar": 46
+      },
+      "revId": "98666368ee7f01a3344c1065abd8700b4002e275",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
