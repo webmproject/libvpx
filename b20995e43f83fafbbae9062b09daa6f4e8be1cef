@@ -22,6 +22,30 @@
       "revId": "b20995e43f83fafbbae9062b09daa6f4e8be1cef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ec9b2dd7_12ca8a23",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-13T03:14:27Z",
+      "side": 1,
+      "message": "\u003e It was put into vp8/common in this change:\n\u003e https://chromium-review.googlesource.com/c/516264/\n\u003e \n\u003e Because I want to use it in post proc:\n\u003e https://chromium-review.googlesource.com/c/527520/\n\u003e \n\u003e Since it will be used on both encoder and decoder sides, is it better to keep them in the common?\n\nthat\u0027s fine. when you\u0027re done with that I think the reference can move from the vp8cx.mk to the common one.",
+      "parentUuid": "76659669_0ef977eb",
+      "range": {
+        "startLine": 9,
+        "startChar": 2,
+        "endLine": 9,
+        "endChar": 44
+      },
+      "revId": "b20995e43f83fafbbae9062b09daa6f4e8be1cef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
