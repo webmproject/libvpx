@@ -4405,7 +4405,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
 
 #ifdef OUTPUT_YUV_SKINMAP
   if (cpi->common.current_video_frame > 1) {
-    compute_skin_map(cpi, yuv_skinmap_file);
+    vp8_compute_skin_map(cpi, yuv_skinmap_file);
   }
 #endif
 

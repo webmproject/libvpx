@@ -22,13 +22,13 @@ extern "C" {
 
 struct VP8_COMP;
 
-int compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
-                       int stride, int strideuv, int consec_zeromv,
-                       int curr_motion_magn);
+int vp8_compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
+                           int stride, int strideuv, int consec_zeromv,
+                           int curr_motion_magn);
 
 #ifdef OUTPUT_YUV_SKINMAP
 // For viewing skin map on input source.
-void compute_skin_map(struct VP8_COMP *const cpi, FILE *yuv_skinmap_file);
+void vp8_compute_skin_map(struct VP8_COMP *const cpi, FILE *yuv_skinmap_file);
 #endif
 
 #ifdef __cplusplus

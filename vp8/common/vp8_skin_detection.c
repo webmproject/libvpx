@@ -14,9 +14,9 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_util/vpx_write_yuv_frame.h"
 
-int compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
-                       int stride, int strideuv, int consec_zeromv,
-                       int curr_motion_magn) {
+int vp8_compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
+                           int stride, int strideuv, int consec_zeromv,
+                           int curr_motion_magn) {
   // No skin if block has been zero/small motion for long consecutive time.
   if (consec_zeromv > 60 && curr_motion_magn == 0) {
     return 0;
@@ -39,7 +39,7 @@ int compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
 
 #ifdef OUTPUT_YUV_SKINMAP
 // For viewing skin map on input source.
-void compute_skin_map(VP8_COMP *const cpi, FILE *yuv_skinmap_file) {
+void vp8_compute_skin_map(VP8_COMP *const cpi, FILE *yuv_skinmap_file) {
   int i, j, mb_row, mb_col, num_bl;
   VP8_COMMON *const cm = &cpi->common;
   uint8_t *y;
@@ -74,8 +74,8 @@ void compute_skin_map(VP8_COMP *const cpi, FILE *yuv_skinmap_file) {
                              VPXMIN(cpi->consec_zero_last[bl_index1],
                                     VPXMIN(cpi->consec_zero_last[bl_index2],
                                            cpi->consec_zero_last[bl_index3])));
-      is_skin = compute_skin_block(src_y, src_u, src_v, src_ystride,
-                                   src_uvstride, consec_zeromv, 0);
+      is_skin = vp8_compute_skin_block(src_y, src_u, src_v, src_ystride,
+                                       src_uvstride, consec_zeromv, 0);
       for (i = 0; i < 16; i++) {
         for (j = 0; j < 16; j++) {
           if (is_skin)
