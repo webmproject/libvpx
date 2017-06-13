@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "76659669_0ef977eb",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-06-13T02:37:21Z",
+      "side": 1,
+      "message": "It was put into vp8/common in this change:\nhttps://chromium-review.googlesource.com/c/516264/\n\nBecause I want to use it in post proc:\nhttps://chromium-review.googlesource.com/c/527520/\n\nSince it will be used on both encoder and decoder sides, is it better to keep them in the common?",
+      "range": {
+        "startLine": 9,
+        "startChar": 2,
+        "endLine": 9,
+        "endChar": 44
+      },
+      "revId": "b20995e43f83fafbbae9062b09daa6f4e8be1cef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
