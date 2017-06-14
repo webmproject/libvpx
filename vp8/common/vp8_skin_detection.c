@@ -14,26 +14,55 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_util/vpx_write_yuv_frame.h"
 
+static int avg_2x2(const uint8_t *s, int p) {
+  int i, j;
+  int sum = 0;
+  for (i = 0; i < 2; ++i, s += p) {
+    for (j = 0; j < 2; ++j) {
+      sum += s[j];
+    }
+  }
+  return (sum + 2) >> 2;
+}
+
 int vp8_compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
-                           int stride, int strideuv, int consec_zeromv,
+                           int stride, int strideuv,
+                           SKIN_DETECTION_BLOCK_SIZE bsize, int consec_zeromv,
                            int curr_motion_magn) {
   // No skin if block has been zero/small motion for long consecutive time.
   if (consec_zeromv > 60 && curr_motion_magn == 0) {
     return 0;
   } else {
     int motion = 1;
-    // Take the average of center 2x2 pixels.
-    const int ysource = (y[7 * stride + 7] + y[7 * stride + 8] +
-                         y[8 * stride + 7] + y[8 * stride + 8]) >>
-                        2;
-    const int usource = (u[3 * strideuv + 3] + u[3 * strideuv + 4] +
-                         u[4 * strideuv + 3] + u[4 * strideuv + 4]) >>
-                        2;
-    const int vsource = (v[3 * strideuv + 3] + v[3 * strideuv + 4] +
-                         v[4 * strideuv + 3] + v[4 * strideuv + 4]) >>
-                        2;
     if (consec_zeromv > 25 && curr_motion_magn == 0) motion = 0;
-    return vpx_skin_pixel(ysource, usource, vsource, motion);
+    if (bsize == SKIN_16X16) {
+      // Take the average of center 2x2 pixels.
+      const int ysource = avg_2x2(y + 7 * stride + 7, stride);
+      const int usource = avg_2x2(u + 3 * strideuv + 3, strideuv);
+      const int vsource = avg_2x2(v + 3 * strideuv + 3, strideuv);
+      return vpx_skin_pixel(ysource, usource, vsource, motion);
+    } else {
+      int num_skin = 0;
+      int i, j;
+      for (i = 0; i < 2; i++) {
+        for (j = 0; j < 2; j++) {
+          // Take the average of center 2x2 pixels.
+          const int ysource = avg_2x2(y + 3 * stride + 3, stride);
+          const int usource = avg_2x2(u + strideuv + 1, strideuv);
+          const int vsource = avg_2x2(v + strideuv + 1, strideuv);
+          num_skin += vpx_skin_pixel(ysource, usource, vsource, motion);
+          if (num_skin >= 2) return 1;
+          y += 8;
+          u += 4;
+          v += 4;
+        }
+        y += (stride << 3) - 16;
+        u += (strideuv << 2) - 8;
+        v += (strideuv << 2) - 8;
+      }
+
+      return 0;
+    }
   }
 }
 
@@ -74,8 +103,9 @@ void vp8_compute_skin_map(VP8_COMP *const cpi, FILE *yuv_skinmap_file) {
                              VPXMIN(cpi->consec_zero_last[bl_index1],
                                     VPXMIN(cpi->consec_zero_last[bl_index2],
                                            cpi->consec_zero_last[bl_index3])));
-      is_skin = vp8_compute_skin_block(src_y, src_u, src_v, src_ystride,
-                                       src_uvstride, consec_zeromv, 0);
+      is_skin =
+          vp8_compute_skin_block(src_y, src_u, src_v, src_ystride, src_uvstride,
+                                 SKIN_8X8, consec_zeromv, 0);
       for (i = 0; i < 16; i++) {
         for (j = 0; j < 16; j++) {
           if (is_skin)
