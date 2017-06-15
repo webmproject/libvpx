@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "18044082_89b6cdc0",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-06-15T21:44:04Z",
+      "side": 1,
+      "message": "limit",
+      "range": {
+        "startLine": 174,
+        "startChar": 24,
+        "endLine": 174,
+        "endChar": 28
+      },
+      "revId": "f4d6603d82c27914259034bee49891e60af17d9a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6527ce6f_2cdad5bd",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1245,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-06-15T21:44:04Z",
+      "side": 1,
+      "message": "is it better to define a local variable like this:\nconst int mv_limit \u003d 48;\nand use (abs(mv_row) \u003e mv_limit || abs(mv_col) \u003e mv_limit)?",
+      "range": {
+        "startLine": 1245,
+        "startChar": 16,
+        "endLine": 1245,
+        "endChar": 18
+      },
+      "revId": "f4d6603d82c27914259034bee49891e60af17d9a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "748468cc_3a8037aa",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1245,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-06-15T21:44:04Z",
+      "side": 1,
+      "message": "is it better to define a local variable like this:\nconst int mv_limit \u003d 48;\nand use (abs(mv_row) \u003e mv_limit || abs(mv_col) \u003e mv_limit)?",
+      "range": {
+        "startLine": 1245,
+        "startChar": 16,
+        "endLine": 1245,
+        "endChar": 18
+      },
+      "revId": "f4d6603d82c27914259034bee49891e60af17d9a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
