@@ -34,6 +34,24 @@
       "revId": "9789c3ff4b578d07de544769e0dec0ffa49993b9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0270ad36_6e9f6880",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1123219
+      },
+      "writtenOn": "2017-06-15T18:34:31Z",
+      "side": 1,
+      "message": "Ported this part as well.",
+      "parentUuid": "7f443fc6_c6ce9d70",
+      "revId": "9789c3ff4b578d07de544769e0dec0ffa49993b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
