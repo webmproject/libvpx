@@ -66,7 +66,7 @@ void vpx_highbd_idct16x16_256_add_sse2(const tran_low_t *input, uint16_t *dest,
     test = _mm_movemask_epi8(temp1);
 
     if (test) {
-      array_transpose_16x16(inptr, inptr + 16);
+      transpose_16bit_16x16(inptr, inptr + 16);
       for (i = 0; i < 16; i++) {
         sign_bits = _mm_cmplt_epi16(inptr[i], zero);
         temp1 = _mm_unpacklo_epi16(inptr[i], sign_bits);
@@ -182,8 +182,8 @@ void vpx_highbd_idct16x16_10_add_sse2(const tran_low_t *input, uint16_t *dest,
 
     if (test) {
       // Use fact only first 4 rows contain non-zero coeffs
-      array_transpose_8x8(inptr, inptr);
-      array_transpose_8x8(inptr + 8, inptr + 16);
+      transpose_16bit_8x8(inptr, inptr);
+      transpose_16bit_8x8(inptr + 8, inptr + 16);
       for (i = 0; i < 4; i++) {
         sign_bits = _mm_cmplt_epi16(inptr[i], zero);
         temp1 = _mm_unpacklo_epi16(inptr[i], sign_bits);
