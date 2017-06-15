@@ -233,25 +233,40 @@ void vpx_idct8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest,
   write_buffer_8x8(in, dest, stride);
 }
 
+static INLINE void recon_and_store_8_dual(uint8_t *const dest,
+                                          const __m128i in_x,
+                                          const int stride) {
+  const __m128i zero = _mm_setzero_si128();
+  __m128i d0, d1;
+
+  d0 = _mm_loadl_epi64((__m128i *)(dest + 0 * stride));
+  d1 = _mm_loadl_epi64((__m128i *)(dest + 1 * stride));
+  d0 = _mm_unpacklo_epi8(d0, zero);
+  d1 = _mm_unpacklo_epi8(d1, zero);
+  d0 = _mm_add_epi16(in_x, d0);
+  d1 = _mm_add_epi16(in_x, d1);
+  d0 = _mm_packus_epi16(d0, d1);
+  _mm_storel_epi64((__m128i *)(dest + 0 * stride), d0);
+  _mm_storeh_pi((__m64 *)(dest + 1 * stride), _mm_castsi128_ps(d0));
+}
+
 void vpx_idct8x8_1_add_sse2(const tran_low_t *input, uint8_t *dest,
                             int stride) {
   __m128i dc_value;
-  int a;
+  tran_high_t a1;
+  tran_low_t out = WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64));
 
-  a = (int)dct_const_round_shift(input[0] * cospi_16_64);
-  a = (int)dct_const_round_shift(a * cospi_16_64);
-  a = ROUND_POWER_OF_TWO(a, 5);
+  out = WRAPLOW(dct_const_round_shift(out * cospi_16_64));
+  a1 = ROUND_POWER_OF_TWO(out, 5);
+  dc_value = _mm_set1_epi16(a1);
 
-  dc_value = _mm_set1_epi16(a);
-
-  recon_and_store(dest + 0 * stride, dc_value);
-  recon_and_store(dest + 1 * stride, dc_value);
-  recon_and_store(dest + 2 * stride, dc_value);
-  recon_and_store(dest + 3 * stride, dc_value);
-  recon_and_store(dest + 4 * stride, dc_value);
-  recon_and_store(dest + 5 * stride, dc_value);
-  recon_and_store(dest + 6 * stride, dc_value);
-  recon_and_store(dest + 7 * stride, dc_value);
+  recon_and_store_8_dual(dest, dc_value, stride);
+  dest += 2 * stride;
+  recon_and_store_8_dual(dest, dc_value, stride);
+  dest += 2 * stride;
+  recon_and_store_8_dual(dest, dc_value, stride);
+  dest += 2 * stride;
+  recon_and_store_8_dual(dest, dc_value, stride);
 }
 
 void idct8_sse2(__m128i *in) {
@@ -784,20 +799,32 @@ void vpx_idct16x16_256_add_sse2(const tran_low_t *input, uint8_t *dest,
   }
 }
 
+static INLINE void recon_and_store_16(uint8_t *const dest, const __m128i in_x) {
+  const __m128i zero = _mm_setzero_si128();
+  __m128i d0, d1;
+
+  d0 = _mm_load_si128((__m128i *)(dest));
+  d1 = _mm_unpackhi_epi8(d0, zero);
+  d0 = _mm_unpacklo_epi8(d0, zero);
+  d0 = _mm_add_epi16(in_x, d0);
+  d1 = _mm_add_epi16(in_x, d1);
+  d0 = _mm_packus_epi16(d0, d1);
+  _mm_store_si128((__m128i *)(dest), d0);
+}
+
 void vpx_idct16x16_1_add_sse2(const tran_low_t *input, uint8_t *dest,
                               int stride) {
   __m128i dc_value;
-  int a, i;
+  int i;
+  tran_high_t a1;
+  tran_low_t out = WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64));
 
-  a = (int)dct_const_round_shift(input[0] * cospi_16_64);
-  a = (int)dct_const_round_shift(a * cospi_16_64);
-  a = ROUND_POWER_OF_TWO(a, 6);
-
-  dc_value = _mm_set1_epi16(a);
+  out = WRAPLOW(dct_const_round_shift(out * cospi_16_64));
+  a1 = ROUND_POWER_OF_TWO(out, 6);
+  dc_value = _mm_set1_epi16(a1);
 
   for (i = 0; i < 16; ++i) {
-    recon_and_store(dest + 0, dc_value);
-    recon_and_store(dest + 8, dc_value);
+    recon_and_store_16(dest, dc_value);
     dest += stride;
   }
 }
@@ -2233,18 +2260,16 @@ void vpx_idct32x32_1024_add_sse2(const tran_low_t *input, uint8_t *dest,
 void vpx_idct32x32_1_add_sse2(const tran_low_t *input, uint8_t *dest,
                               int stride) {
   __m128i dc_value;
-  int a, j;
+  int j;
+  tran_high_t a1;
+  tran_low_t out = WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64));
 
-  a = (int)dct_const_round_shift(input[0] * cospi_16_64);
-  a = (int)dct_const_round_shift(a * cospi_16_64);
-  a = ROUND_POWER_OF_TWO(a, 6);
-
-  dc_value = _mm_set1_epi16(a);
+  out = WRAPLOW(dct_const_round_shift(out * cospi_16_64));
+  a1 = ROUND_POWER_OF_TWO(out, 6);
+  dc_value = _mm_set1_epi16(a1);
 
   for (j = 0; j < 32; ++j) {
-    recon_and_store(dest + 0 + j * stride, dc_value);
-    recon_and_store(dest + 8 + j * stride, dc_value);
-    recon_and_store(dest + 16 + j * stride, dc_value);
-    recon_and_store(dest + 24 + j * stride, dc_value);
+    recon_and_store_16(dest + j * stride + 0, dc_value);
+    recon_and_store_16(dest + j * stride + 16, dc_value);
   }
 }
