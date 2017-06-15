@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "88c16186_3b1093e5",
+        "filename": "vp8/common/vp8_skin_detection.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-15T22:18:25Z",
+      "side": 1,
+      "message": "prefer {}s on multi-line loops/conditionals",
+      "revId": "9acd4b97e37367df7e36582fe6d091ad63b09c9a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1ac10ad5_04e1dfa1",
+        "filename": "vp8/common/vp8_skin_detection.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-15T22:18:25Z",
+      "side": 1,
+      "message": "put this in the body to make it a bit more obvious",
+      "range": {
+        "startLine": 21,
+        "startChar": 23,
+        "endLine": 21,
+        "endChar": 34
+      },
+      "revId": "9acd4b97e37367df7e36582fe6d091ad63b09c9a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c2b89e29_fad95979",
+        "filename": "vp8/common/vp8_skin_detection.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-15T22:18:25Z",
+      "side": 1,
+      "message": "an enum would make this distinction clear at the call sites",
+      "revId": "9acd4b97e37367df7e36582fe6d091ad63b09c9a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
