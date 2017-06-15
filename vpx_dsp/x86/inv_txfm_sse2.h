@@ -99,6 +99,18 @@ static INLINE __m128i load_input_data(const tran_low_t *data) {
 #endif
 }
 
+static INLINE void load_buffer_8x8(const tran_low_t *const input,
+                                   __m128i *const in) {
+  in[0] = load_input_data(input + 0 * 8);
+  in[1] = load_input_data(input + 1 * 8);
+  in[2] = load_input_data(input + 2 * 8);
+  in[3] = load_input_data(input + 3 * 8);
+  in[4] = load_input_data(input + 4 * 8);
+  in[5] = load_input_data(input + 5 * 8);
+  in[6] = load_input_data(input + 6 * 8);
+  in[7] = load_input_data(input + 7 * 8);
+}
+
 static INLINE void load_buffer_8x16(const tran_low_t *const input,
                                     __m128i *const in) {
   in[0] = load_input_data(input + 0 * 16);
@@ -129,7 +141,41 @@ static INLINE void recon_and_store(uint8_t *const dest, const __m128i in_x) {
   _mm_storel_epi64((__m128i *)(dest), d0);
 }
 
-static INLINE void write_buffer_8x16(uint8_t *dest, __m128i *in, int stride) {
+static INLINE void write_buffer_8x8(const __m128i *const in,
+                                    uint8_t *const dest, const int stride) {
+  const __m128i final_rounding = _mm_set1_epi16(1 << 4);
+  __m128i t[8];
+  // Final rounding and shift
+  t[0] = _mm_adds_epi16(in[0], final_rounding);
+  t[1] = _mm_adds_epi16(in[1], final_rounding);
+  t[2] = _mm_adds_epi16(in[2], final_rounding);
+  t[3] = _mm_adds_epi16(in[3], final_rounding);
+  t[4] = _mm_adds_epi16(in[4], final_rounding);
+  t[5] = _mm_adds_epi16(in[5], final_rounding);
+  t[6] = _mm_adds_epi16(in[6], final_rounding);
+  t[7] = _mm_adds_epi16(in[7], final_rounding);
+
+  t[0] = _mm_srai_epi16(t[0], 5);
+  t[1] = _mm_srai_epi16(t[1], 5);
+  t[2] = _mm_srai_epi16(t[2], 5);
+  t[3] = _mm_srai_epi16(t[3], 5);
+  t[4] = _mm_srai_epi16(t[4], 5);
+  t[5] = _mm_srai_epi16(t[5], 5);
+  t[6] = _mm_srai_epi16(t[6], 5);
+  t[7] = _mm_srai_epi16(t[7], 5);
+
+  recon_and_store(dest + 0 * stride, t[0]);
+  recon_and_store(dest + 1 * stride, t[1]);
+  recon_and_store(dest + 2 * stride, t[2]);
+  recon_and_store(dest + 3 * stride, t[3]);
+  recon_and_store(dest + 4 * stride, t[4]);
+  recon_and_store(dest + 5 * stride, t[5]);
+  recon_and_store(dest + 6 * stride, t[6]);
+  recon_and_store(dest + 7 * stride, t[7]);
+}
+
+static INLINE void write_buffer_8x16(uint8_t *const dest, __m128i *const in,
+                                     const int stride) {
   const __m128i final_rounding = _mm_set1_epi16(1 << 5);
   // Final rounding and shift
   in[0] = _mm_adds_epi16(in[0], final_rounding);
