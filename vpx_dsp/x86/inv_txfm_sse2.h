@@ -258,6 +258,78 @@ static INLINE void recon_and_store4x4_sse2(const __m128i *const in,
   *(int *)(dest + stride * 3) = _mm_cvtsi128_si32(d[0]);
 }
 
+static INLINE void store_buffer_8x32(__m128i *in, uint8_t *dst, int stride) {
+  const __m128i final_rounding = _mm_set1_epi16(1 << 5);
+  int j = 0;
+  while (j < 32) {
+    in[j] = _mm_adds_epi16(in[j], final_rounding);
+    in[j + 1] = _mm_adds_epi16(in[j + 1], final_rounding);
+
+    in[j] = _mm_srai_epi16(in[j], 6);
+    in[j + 1] = _mm_srai_epi16(in[j + 1], 6);
+
+    recon_and_store(dst, in[j]);
+    dst += stride;
+    recon_and_store(dst, in[j + 1]);
+    dst += stride;
+    j += 2;
+  }
+}
+
+// Only do addition and subtraction butterfly, size = 16, 32
+static INLINE void add_sub_butterfly(const __m128i *in, __m128i *out,
+                                     int size) {
+  int i = 0;
+  const int num = size >> 1;
+  const int bound = size - 1;
+  while (i < num) {
+    out[i] = _mm_add_epi16(in[i], in[bound - i]);
+    out[bound - i] = _mm_sub_epi16(in[i], in[bound - i]);
+    i++;
+  }
+}
+
+#define BUTTERFLY_PAIR(x0, x1, co0, co1)         \
+  do {                                           \
+    tmp0 = _mm_madd_epi16(x0, co0);              \
+    tmp1 = _mm_madd_epi16(x1, co0);              \
+    tmp2 = _mm_madd_epi16(x0, co1);              \
+    tmp3 = _mm_madd_epi16(x1, co1);              \
+    tmp0 = _mm_add_epi32(tmp0, rounding);        \
+    tmp1 = _mm_add_epi32(tmp1, rounding);        \
+    tmp2 = _mm_add_epi32(tmp2, rounding);        \
+    tmp3 = _mm_add_epi32(tmp3, rounding);        \
+    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS); \
+    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS); \
+    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS); \
+    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS); \
+  } while (0)
+
+static INLINE void butterfly(const __m128i *x0, const __m128i *x1,
+                             const __m128i *c0, const __m128i *c1, __m128i *y0,
+                             __m128i *y1) {
+  __m128i tmp0, tmp1, tmp2, tmp3, u0, u1;
+  const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
+
+  u0 = _mm_unpacklo_epi16(*x0, *x1);
+  u1 = _mm_unpackhi_epi16(*x0, *x1);
+  BUTTERFLY_PAIR(u0, u1, *c0, *c1);
+  *y0 = _mm_packs_epi32(tmp0, tmp1);
+  *y1 = _mm_packs_epi32(tmp2, tmp3);
+}
+
+static INLINE void butterfly_self(__m128i *x0, __m128i *x1, const __m128i *c0,
+                                  const __m128i *c1) {
+  __m128i tmp0, tmp1, tmp2, tmp3, u0, u1;
+  const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
+
+  u0 = _mm_unpacklo_epi16(*x0, *x1);
+  u1 = _mm_unpackhi_epi16(*x0, *x1);
+  BUTTERFLY_PAIR(u0, u1, *c0, *c1);
+  *x0 = _mm_packs_epi32(tmp0, tmp1);
+  *x1 = _mm_packs_epi32(tmp2, tmp3);
+}
+
 void idct4_sse2(__m128i *in);
 void idct8_sse2(__m128i *in);
 void idct16_sse2(__m128i *in0, __m128i *in1);
