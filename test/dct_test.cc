@@ -529,7 +529,10 @@ INSTANTIATE_TEST_CASE_P(
 #if !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     NEON, TransDCT,
-    ::testing::Values(make_tuple(&vpx_fdct16x16_neon,
+    ::testing::Values(make_tuple(&vpx_fdct32x32_neon,
+                                 &vpx_idct32x32_1024_add_neon, 32, 0,
+                                 VPX_BITS_8),
+                      make_tuple(&vpx_fdct16x16_neon,
                                  &vpx_idct16x16_256_add_neon, 16, 0,
                                  VPX_BITS_8),
                       make_tuple(&vpx_fdct8x8_neon, &vpx_idct8x8_64_add_neon, 8,
