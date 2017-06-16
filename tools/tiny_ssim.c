@@ -17,9 +17,9 @@
 #include "vpx/vpx_integer.h"
 #include "./y4minput.h"
 
-void vp8_ssim_parms_8x8_c(unsigned char *s, int sp, unsigned char *r, int rp,
-                          uint32_t *sum_s, uint32_t *sum_r, uint32_t *sum_sq_s,
-                          uint32_t *sum_sq_r, uint32_t *sum_sxr) {
+static void ssim_parms_8x8(unsigned char *s, int sp, unsigned char *r, int rp,
+                           uint32_t *sum_s, uint32_t *sum_r, uint32_t *sum_sq_s,
+                           uint32_t *sum_sq_r, uint32_t *sum_sxr) {
   int i, j;
   for (i = 0; i < 8; i++, s += sp, r += rp) {
     for (j = 0; j < 8; j++) {
@@ -56,16 +56,15 @@ static double similarity(uint32_t sum_s, uint32_t sum_r, uint32_t sum_sq_s,
 
 static double ssim_8x8(unsigned char *s, int sp, unsigned char *r, int rp) {
   uint32_t sum_s = 0, sum_r = 0, sum_sq_s = 0, sum_sq_r = 0, sum_sxr = 0;
-  vp8_ssim_parms_8x8_c(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r,
-                       &sum_sxr);
+  ssim_parms_8x8(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r, &sum_sxr);
   return similarity(sum_s, sum_r, sum_sq_s, sum_sq_r, sum_sxr, 64);
 }
 
 // We are using a 8x8 moving window with starting location of each 8x8 window
 // on the 4x4 pixel grid. Such arrangement allows the windows to overlap
 // block boundaries to penalize blocking artifacts.
-double vp8_ssim2(unsigned char *img1, unsigned char *img2, int stride_img1,
-                 int stride_img2, int width, int height) {
+static double ssim2(unsigned char *img1, unsigned char *img2, int stride_img1,
+                    int stride_img2, int width, int height) {
   int i, j;
   int samples = 0;
   double ssim_total = 0;
@@ -103,7 +102,7 @@ static uint64_t calc_plane_error(uint8_t *orig, int orig_stride, uint8_t *recon,
 }
 
 #define MAX_PSNR 100
-double vp9_mse2psnr(double samples, double peak, double mse) {
+static double mse2psnr(double samples, double peak, double mse) {
   double psnr;
 
   if (mse > 0.0)
@@ -129,7 +128,8 @@ typedef struct input_file {
 } input_file_t;
 
 // Open a file and determine if its y4m or raw.  If y4m get the header.
-int open_input_file(const char *file_name, input_file_t *input, int w, int h) {
+static int open_input_file(const char *file_name, input_file_t *input, int w,
+                           int h) {
   char y4m_buf[4];
   size_t r1;
   input->type = RAW_YUV;
@@ -159,7 +159,7 @@ int open_input_file(const char *file_name, input_file_t *input, int w, int h) {
   return 0;
 }
 
-void close_input_file(input_file_t *in) {
+static void close_input_file(input_file_t *in) {
   if (in->file) fclose(in->file);
   if (in->type == Y4M) {
     vpx_img_free(&in->img);
@@ -168,8 +168,8 @@ void close_input_file(input_file_t *in) {
   }
 }
 
-size_t read_input_file(input_file_t *in, unsigned char **y, unsigned char **u,
-                       unsigned char **v) {
+static size_t read_input_file(input_file_t *in, unsigned char **y,
+                              unsigned char **u, unsigned char **v) {
   size_t r1 = 0;
   switch (in->type) {
     case Y4M:
@@ -287,7 +287,7 @@ int main(int argc, char *argv[]) {
       break;
     }
 #define psnr_and_ssim(ssim, psnr, buf0, buf1, w, h) \
-  ssim = vp8_ssim2(buf0, buf1, w, w, w, h);         \
+  ssim = ssim2(buf0, buf1, w, w, w, h);             \
   psnr = calc_plane_error(buf0, w, buf1, w, w, h);
 
     if (n_frames == allocated_frames) {
@@ -321,11 +321,11 @@ int main(int argc, char *argv[]) {
     ssimuavg += ssimu[i];
     ssimvavg += ssimv[i];
 
-    frame_psnr = vp9_mse2psnr(w * h * 6 / 4, 255.0,
-                              (double)psnry[i] + psnru[i] + psnrv[i]);
-    frame_psnry = vp9_mse2psnr(w * h * 4 / 4, 255.0, (double)psnry[i]);
-    frame_psnru = vp9_mse2psnr(w * h * 1 / 4, 255.0, (double)psnru[i]);
-    frame_psnrv = vp9_mse2psnr(w * h * 1 / 4, 255.0, (double)psnrv[i]);
+    frame_psnr =
+        mse2psnr(w * h * 6 / 4, 255.0, (double)psnry[i] + psnru[i] + psnrv[i]);
+    frame_psnry = mse2psnr(w * h * 4 / 4, 255.0, (double)psnry[i]);
+    frame_psnru = mse2psnr(w * h * 1 / 4, 255.0, (double)psnru[i]);
+    frame_psnrv = mse2psnr(w * h * 1 / 4, 255.0, (double)psnrv[i]);
 
     psnravg += frame_psnr;
     psnryavg += frame_psnry;
@@ -367,10 +367,10 @@ int main(int argc, char *argv[]) {
   puts("");
 
   psnrglb = psnryglb + psnruglb + psnrvglb;
-  psnrglb = vp9_mse2psnr((double)n_frames * w * h * 6 / 4, 255.0, psnrglb);
-  psnryglb = vp9_mse2psnr((double)n_frames * w * h * 4 / 4, 255.0, psnryglb);
-  psnruglb = vp9_mse2psnr((double)n_frames * w * h * 1 / 4, 255.0, psnruglb);
-  psnrvglb = vp9_mse2psnr((double)n_frames * w * h * 1 / 4, 255.0, psnrvglb);
+  psnrglb = mse2psnr((double)n_frames * w * h * 6 / 4, 255.0, psnrglb);
+  psnryglb = mse2psnr((double)n_frames * w * h * 4 / 4, 255.0, psnryglb);
+  psnruglb = mse2psnr((double)n_frames * w * h * 1 / 4, 255.0, psnruglb);
+  psnrvglb = mse2psnr((double)n_frames * w * h * 1 / 4, 255.0, psnrvglb);
 
   printf("GlbPSNR: %lf\n", psnrglb);
   printf("GlbPSNR-Y: %lf\n", psnryglb);
