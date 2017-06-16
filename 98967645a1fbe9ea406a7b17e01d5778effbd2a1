@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "348fb3f6_7d8a9f02",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 738,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-16T03:20:40Z",
+      "side": 1,
+      "message": "this whole block could go assuming the function is within a HAVE_SSE2 block",
+      "range": {
+        "startLine": 738,
+        "startChar": 4,
+        "endLine": 738,
+        "endChar": 14
+      },
+      "revId": "98967645a1fbe9ea406a7b17e01d5778effbd2a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
