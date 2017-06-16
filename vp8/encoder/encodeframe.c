@@ -39,8 +39,6 @@
 #include "encodeframe.h"
 
 extern void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t);
-extern void vp8cx_initialize_me_consts(VP8_COMP *cpi, int QIndex);
-extern void vp8_auto_select_speed(VP8_COMP *cpi);
 static void adjust_act_zbin(VP8_COMP *cpi, MACROBLOCK *x);
 
 #ifdef MODE_STATS

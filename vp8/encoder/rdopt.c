@@ -16,6 +16,7 @@
 #include "vpx_config.h"
 #include "vp8_rtcd.h"
 #include "./vpx_dsp_rtcd.h"
+#include "encodeframe.h"
 #include "tokenize.h"
 #include "treewriter.h"
 #include "onyx_int.h"
