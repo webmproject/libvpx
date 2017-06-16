@@ -72,12 +72,14 @@ VP8_CX_SRCS-yes += encoder/treewriter.c
 VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/postproc.h
 VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/postproc.c
 VP8_CX_SRCS-yes += encoder/temporal_filter.c
+VP8_CX_SRCS-yes += encoder/temporal_filter.h
 VP8_CX_SRCS-$(CONFIG_MULTI_RES_ENCODING) += encoder/mr_dissim.c
 VP8_CX_SRCS-$(CONFIG_MULTI_RES_ENCODING) += encoder/mr_dissim.h
 
 ifeq ($(CONFIG_REALTIME_ONLY),yes)
 VP8_CX_SRCS_REMOVE-yes += encoder/firstpass.c
 VP8_CX_SRCS_REMOVE-yes += encoder/temporal_filter.c
+VP8_CX_SRCS_REMOVE-yes += encoder/temporal_filter.h
 endif
 
 VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/dct_sse2.asm
