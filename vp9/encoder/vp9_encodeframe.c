@@ -489,8 +489,9 @@ static int set_vt_partitioning(VP9_COMP *cpi, MACROBLOCK *const x,
   return 0;
 }
 
-int64_t scale_part_thresh_sumdiff(int64_t threshold_base, int speed, int width,
-                                  int height, int content_state) {
+static int64_t scale_part_thresh_sumdiff(int64_t threshold_base, int speed,
+                                         int width, int height,
+                                         int content_state) {
   if (speed >= 8) {
     if (width <= 640 && height <= 480)
       return (5 * threshold_base) >> 2;
