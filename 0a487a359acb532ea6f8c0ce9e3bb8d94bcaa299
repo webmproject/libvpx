@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "96b8b01f_422b2bbf",
+        "filename": "vpx_dsp/x86/inv_txfm_sse2.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-16T03:29:40Z",
+      "side": 1,
+      "message": "could be do {} while.",
+      "revId": "0a487a359acb532ea6f8c0ce9e3bb8d94bcaa299",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "99cfd25e_3e87c9f4",
+        "filename": "vpx_dsp/x86/inv_txfm_sse2.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-16T03:29:40Z",
+      "side": 1,
+      "message": "could be do {} while assuming num \u003e 0",
+      "revId": "0a487a359acb532ea6f8c0ce9e3bb8d94bcaa299",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
