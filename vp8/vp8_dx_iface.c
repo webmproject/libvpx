@@ -580,7 +580,6 @@ static vpx_codec_err_t vp8_get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
   }
 }
 
-extern int vp8dx_references_buffer(VP8_COMMON *oci, int ref_frame);
 static vpx_codec_err_t vp8_get_last_ref_frame(vpx_codec_alg_priv_t *ctx,
                                               va_list args) {
   int *ref_info = va_arg(args, int *);
