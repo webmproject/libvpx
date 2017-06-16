@@ -47,6 +47,7 @@
 #if CONFIG_MULTITHREAD
 #include "ethreading.h"
 #endif
+#include "picklpf.h"
 
 #include <assert.h>
 #include <math.h>
@@ -56,10 +57,6 @@
 #if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
 extern int vp8_update_coef_context(VP8_COMP *cpi);
 #endif
-
-extern void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
-extern void vp8cx_set_alt_lf_level(VP8_COMP *cpi, int filt_val);
-extern void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
 
 extern void vp8_deblock_frame(YV12_BUFFER_CONFIG *source,
                               YV12_BUFFER_CONFIG *post, int filt_lvl,

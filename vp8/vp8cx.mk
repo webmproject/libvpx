@@ -57,6 +57,7 @@ VP8_CX_SRCS-yes += encoder/modecosts.c
 VP8_CX_SRCS-yes += encoder/onyx_if.c
 VP8_CX_SRCS-yes += encoder/pickinter.c
 VP8_CX_SRCS-yes += encoder/picklpf.c
+VP8_CX_SRCS-yes += encoder/picklpf.h
 VP8_CX_SRCS-yes += encoder/vp8_quantize.c
 VP8_CX_SRCS-yes += encoder/ratectrl.c
 VP8_CX_SRCS-yes += encoder/rdopt.c
