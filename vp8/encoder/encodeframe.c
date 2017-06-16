@@ -14,6 +14,9 @@
 #include "bitstream.h"
 #include "encodemb.h"
 #include "encodemv.h"
+#if CONFIG_MULTITHREAD
+#include "ethreading.h"
+#endif
 #include "vp8/common/common.h"
 #include "onyx_int.h"
 #include "vp8/common/extend.h"
@@ -38,8 +41,6 @@
 extern void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t);
 extern void vp8cx_initialize_me_consts(VP8_COMP *cpi, int QIndex);
 extern void vp8_auto_select_speed(VP8_COMP *cpi);
-extern void vp8cx_init_mbrthread_data(VP8_COMP *cpi, MACROBLOCK *x,
-                                      MB_ROW_COMP *mbr_ei, int count);
 static void adjust_act_zbin(VP8_COMP *cpi, MACROBLOCK *x);
 
 #ifdef MODE_STATS

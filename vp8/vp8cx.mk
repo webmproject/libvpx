@@ -30,6 +30,7 @@ VP8_CX_SRCS-yes += encoder/encodeintra.c
 VP8_CX_SRCS-yes += encoder/encodemb.c
 VP8_CX_SRCS-yes += encoder/encodemv.c
 VP8_CX_SRCS-$(CONFIG_MULTITHREAD) += encoder/ethreading.c
+VP8_CX_SRCS-$(CONFIG_MULTITHREAD) += encoder/ethreading.h
 VP8_CX_SRCS-yes += encoder/firstpass.c
 VP8_CX_SRCS-yes += encoder/block.h
 VP8_CX_SRCS-yes += encoder/boolhuff.h
