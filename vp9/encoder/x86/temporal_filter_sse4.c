@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <smmintrin.h>
 
+#include "./vp9_rtcd.h"
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
 

@@ -20,6 +20,7 @@
 #include "vp8/common/loopfilter.h"
 #include "vp8/common/extend.h"
 #include "vpx_ports/vpx_timer.h"
+#include "decoderthreading.h"
 #include "detokenize.h"
 #include "vp8/common/reconintra4x4.h"
 #include "vp8/common/reconinter.h"
