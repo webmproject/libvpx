@@ -12,6 +12,7 @@
 #include "./vpx_scale_rtcd.h"
 #include "./vpx_dsp_rtcd.h"
 #include "./vp8_rtcd.h"
+#include "bitstream.h"
 #include "vp8/common/onyxc_int.h"
 #include "vp8/common/blockd.h"
 #include "onyx_int.h"
@@ -51,7 +52,6 @@
 
 #if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
 extern int vp8_update_coef_context(VP8_COMP *cpi);
-extern void vp8_update_coef_probs(VP8_COMP *cpi);
 #endif
 
 extern void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
@@ -66,8 +66,6 @@ extern unsigned int vp8_get_processor_freq();
 extern void print_tree_update_probs();
 extern int vp8cx_create_encoder_threads(VP8_COMP *cpi);
 extern void vp8cx_remove_encoder_threads(VP8_COMP *cpi);
-
-int vp8_estimate_entropy_savings(VP8_COMP *cpi);
 
 int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest);
 
