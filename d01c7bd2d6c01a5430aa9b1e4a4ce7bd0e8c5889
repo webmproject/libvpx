@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d4a6b8e7_553f39c3",
+        "filename": "test/dct_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 400,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-17T00:06:49Z",
+      "side": 1,
+      "message": "you can call TransTestBase::SetUp() or shift this work into the constructors",
+      "revId": "d01c7bd2d6c01a5430aa9b1e4a4ce7bd0e8c5889",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2fa0b679_b96a8612",
+        "filename": "test/dct_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-17T00:06:49Z",
+      "side": 1,
+      "message": "extra whitespace can go",
+      "range": {
+        "startLine": 529,
+        "startChar": 38,
+        "endLine": 529,
+        "endChar": 39
+      },
+      "revId": "d01c7bd2d6c01a5430aa9b1e4a4ce7bd0e8c5889",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
