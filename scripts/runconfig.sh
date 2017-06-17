@@ -62,6 +62,15 @@ experiment_dependency() {
   if [ "$1" == ext_tile ] ; then
     tool="--enable-$1 --disable-cdef"
   fi
+
+  if [ "$1" == lv_map ] ; then
+    tool="--enable-$1 --enable-cb4x4 --enable-chroma_sub8x8"
+  fi
+
+  if [ "$1" == chroma_sub8x8 ] ; then
+    tool="--enable-$1 --enable-cb4x4"
+  fi
+  
 }
 
 common="--disable-unit-tests --disable-docs --enable-experimental"
