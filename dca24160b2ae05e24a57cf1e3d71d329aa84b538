@@ -16,6 +16,24 @@
       "revId": "dca24160b2ae05e24a57cf1e3d71d329aa84b538",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b5a06838_0a30a308",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-19T21:41:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6bc16026_db0d43da",
+      "revId": "dca24160b2ae05e24a57cf1e3d71d329aa84b538",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
