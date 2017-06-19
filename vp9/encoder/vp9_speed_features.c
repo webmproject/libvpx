@@ -589,7 +589,7 @@ static void set_rt_speed_feature_framesize_independent(
 
     if (content == VP9E_CONTENT_SCREEN)
       sf->mv.subpel_force_stop = 3;
-    else if (cm->width * cm->height > 352 * 288) {
+    else if (cm->width * cm->height > 1280 * 720) {
       sf->mv.subpel_force_stop = 2;
       if (cpi->rc.avg_frame_low_motion > 87 && cm->current_video_frame > 30)
         sf->mv.subpel_search_method = SUBPEL_TREE_PRUNED_EVENMORE;
