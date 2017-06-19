@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6bc16026_db0d43da",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-19T18:51:20Z",
+      "side": 1,
+      "message": "looks like 18 is a partial file. maybe a comment about that? -C looks like a neat trick tho",
+      "revId": "dca24160b2ae05e24a57cf1e3d71d329aa84b538",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
