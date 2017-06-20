@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c307f088_4fa82f6f",
+        "filename": "vp8/encoder/ethreading.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-06-20T19:47:24Z",
+      "side": 1,
+      "message": "should these two be removed from onyx_if.c?",
+      "revId": "e4c983e7267c529b9cf4be1b1ec25615753485a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
