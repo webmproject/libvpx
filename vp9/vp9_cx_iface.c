@@ -432,8 +432,12 @@ static void config_target_level(VP9EncoderConfig *oxcf) {
       (int)vp9_level_defs[target_level_index].min_altref_distance) {
     oxcf->min_gf_interval =
         (int)vp9_level_defs[target_level_index].min_altref_distance + 1;
-    oxcf->max_gf_interval =
-        VPXMAX(oxcf->max_gf_interval, oxcf->min_gf_interval);
+    // If oxcf->max_gf_interval == 0, it will be assigned with a default value
+    // in vp9_rc_set_gf_interval_range().
+    if (oxcf->max_gf_interval != 0) {
+      oxcf->max_gf_interval =
+          VPXMAX(oxcf->max_gf_interval, oxcf->min_gf_interval);
+    }
   }
 
   // Adjust maximum column tiles.
