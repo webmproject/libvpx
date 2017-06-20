@@ -16,6 +16,24 @@
       "revId": "e4c983e7267c529b9cf4be1b1ec25615753485a4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7233c90a_b001609f",
+        "filename": "vp8/encoder/ethreading.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-20T23:20:43Z",
+      "side": 1,
+      "message": "\u003e should these two be removed from onyx_if.c?\n\ngood catch. I missed making an \u0027extern\u0027 pass on this one",
+      "parentUuid": "c307f088_4fa82f6f",
+      "revId": "e4c983e7267c529b9cf4be1b1ec25615753485a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
