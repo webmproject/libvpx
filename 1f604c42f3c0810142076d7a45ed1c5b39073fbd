@@ -34,6 +34,24 @@
       "revId": "1f604c42f3c0810142076d7a45ed1c5b39073fbd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7d364962_ad48b6bc",
+        "filename": "vp8/encoder/rdopt.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-20T23:46:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "72e4f08e_4684f5f5",
+      "revId": "1f604c42f3c0810142076d7a45ed1c5b39073fbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
