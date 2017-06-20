@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f84dfa17_a4dc467e",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-20T01:44:14Z",
+      "side": 1,
+      "message": "shouldn\u0027t be needed",
+      "revId": "e812176ba1471fec7e31268b3e913debccff2028",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "57e24012_378011a1",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-20T01:44:14Z",
+      "side": 1,
+      "message": "these could all be do {} while (0) to avoid any potential side effects",
+      "revId": "e812176ba1471fec7e31268b3e913debccff2028",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dffc8a36_7a123d83",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-20T01:44:14Z",
+      "side": 1,
+      "message": "here too",
+      "revId": "e812176ba1471fec7e31268b3e913debccff2028",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1b7f31f6_90806c48",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-20T01:44:14Z",
+      "side": 1,
+      "message": "this doesn\u0027t appear to match the code; I see a rounding shift + sub of sign",
+      "revId": "e812176ba1471fec7e31268b3e913debccff2028",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f0173ca9_231b50d7",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-20T01:44:14Z",
+      "side": 1,
+      "message": "maybe break the sign extraction out to keep the size of this line down",
+      "revId": "e812176ba1471fec7e31268b3e913debccff2028",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9bc0969b_53afb466",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 525,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-20T01:44:14Z",
+      "side": 1,
+      "message": "could these just be small inlines?",
+      "revId": "e812176ba1471fec7e31268b3e913debccff2028",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
