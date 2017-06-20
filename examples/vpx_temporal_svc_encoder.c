@@ -637,7 +637,7 @@ int main(int argc, char **argv) {
   if (strncmp(encoder->name, "vp9", 3) == 0) cfg.rc_max_quantizer = 52;
   cfg.rc_undershoot_pct = 50;
   cfg.rc_overshoot_pct = 50;
-  cfg.rc_buf_initial_sz = 700;
+  cfg.rc_buf_initial_sz = 600;
   cfg.rc_buf_optimal_sz = 600;
   cfg.rc_buf_sz = 1000;
 
@@ -746,7 +746,7 @@ int main(int argc, char **argv) {
   // For generating smaller key frames, use a smaller max_intra_size_pct
   // value, like 100 or 200.
   {
-    const int max_intra_size_pct = 1500;
+    const int max_intra_size_pct = 1000;
     vpx_codec_control(&codec, VP8E_SET_MAX_INTRA_BITRATE_PCT,
                       max_intra_size_pct);
   }
