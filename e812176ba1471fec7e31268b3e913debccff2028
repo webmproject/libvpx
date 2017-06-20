@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "bc63b745_42e91d3e",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-20T16:25:52Z",
+      "side": 1,
+      "message": "string.h too",
+      "parentUuid": "f84dfa17_a4dc467e",
+      "revId": "e812176ba1471fec7e31268b3e913debccff2028",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "57e24012_378011a1",
         "filename": "vpx_dsp/arm/fdct32x32_neon.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2017-06-20T01:44:14Z",
       "side": 1,
       "message": "these could all be do {} while (0) to avoid any potential side effects",
+      "revId": "e812176ba1471fec7e31268b3e913debccff2028",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c617f951_a955ad31",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-20T16:25:52Z",
+      "side": 1,
+      "message": "not sure what you mean? separate the functions?\n\ndo {\nconst a \u003d vsub(),\nsrc[index1] \u003d vshlq(a);\n} while(0)\n\nI don\u0027t think that\u0027s necessary here ... no side effects to those calls, just the returns.",
+      "parentUuid": "57e24012_378011a1",
       "revId": "e812176ba1471fec7e31268b3e913debccff2028",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "d913fe74_41725064",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-20T16:25:52Z",
+      "side": 1,
+      "message": "whoops, that was for add_round_shift",
+      "parentUuid": "1b7f31f6_90806c48",
+      "revId": "e812176ba1471fec7e31268b3e913debccff2028",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f0173ca9_231b50d7",
         "filename": "vpx_dsp/arm/fdct32x32_neon.c",
         "patchSetId": 2
@@ -87,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "9c014932_b7bcdfbc",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-20T16:25:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f0173ca9_231b50d7",
+      "revId": "e812176ba1471fec7e31268b3e913debccff2028",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9bc0969b_53afb466",
         "filename": "vpx_dsp/arm/fdct32x32_neon.c",
         "patchSetId": 2
@@ -98,6 +170,24 @@
       "writtenOn": "2017-06-20T01:44:14Z",
       "side": 1,
       "message": "could these just be small inlines?",
+      "revId": "e812176ba1471fec7e31268b3e913debccff2028",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b7f0d35e_738bb5fd",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 525,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-20T16:25:52Z",
+      "side": 1,
+      "message": "It gets very repetitive with the _lo/_hi part, which the macro helps with but an inline would not.",
+      "parentUuid": "9bc0969b_53afb466",
       "revId": "e812176ba1471fec7e31268b3e913debccff2028",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
