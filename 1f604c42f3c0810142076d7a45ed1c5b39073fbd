@@ -16,6 +16,24 @@
       "revId": "1f604c42f3c0810142076d7a45ed1c5b39073fbd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "72e4f08e_4684f5f5",
+        "filename": "vp8/encoder/rdopt.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-20T23:21:50Z",
+      "side": 1,
+      "message": "\u003e should these be removed from encodeframe.c?\n\ngood catch again. I wasn\u0027t so consistent on these it seems",
+      "parentUuid": "f1a81792_74fb1280",
+      "revId": "1f604c42f3c0810142076d7a45ed1c5b39073fbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
