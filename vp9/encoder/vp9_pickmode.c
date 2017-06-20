@@ -217,7 +217,8 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (rv && search_subpel) {
-    const int subpel_force_stop = cpi->sf.mv.subpel_force_stop;
+    int subpel_force_stop = cpi->sf.mv.subpel_force_stop;
+    if (use_base_mv && cpi->sf.base_mv_aggressive) subpel_force_stop = 2;
     cpi->find_fractional_mv_step(
         x, &tmp_mv->as_mv, &ref_mv, cpi->common.allow_high_precision_mv,
         x->errorperbit, &cpi->fn_ptr[bsize], subpel_force_stop,
@@ -1489,6 +1490,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   int force_skip_low_temp_var = 0;
   int skip_ref_find_pred[4] = { 0 };
   unsigned int sse_zeromv_normalized = UINT_MAX;
+  unsigned int best_sse_sofar = UINT_MAX;
   unsigned int thresh_svc_skip_golden = 500;
 #if CONFIG_VP9_TEMPORAL_DENOISING
   VP9_PICKMODE_CTX_DEN ctx_den;
@@ -1786,17 +1788,29 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       } else if (svc->use_base_mv && svc->spatial_layer_id) {
         if (frame_mv[NEWMV][ref_frame].as_int != INVALID_MV) {
           const int pre_stride = xd->plane[0].pre[0].stride;
-          int base_mv_sad = INT_MAX;
-          const float base_mv_bias = sf->base_mv_aggressive ? 1.5f : 1.0f;
+          unsigned int base_mv_sse = UINT_MAX;
+          int scale = (cpi->rc.avg_frame_low_motion > 60) ? 2 : 4;
           const uint8_t *const pre_buf =
               xd->plane[0].pre[0].buf +
               (frame_mv[NEWMV][ref_frame].as_mv.row >> 3) * pre_stride +
               (frame_mv[NEWMV][ref_frame].as_mv.col >> 3);
-          base_mv_sad = cpi->fn_ptr[bsize].sdf(
-              x->plane[0].src.buf, x->plane[0].src.stride, pre_buf, pre_stride);
-
-          if (base_mv_sad < (int)(base_mv_bias * x->pred_mv_sad[ref_frame])) {
+          cpi->fn_ptr[bsize].vf(x->plane[0].src.buf, x->plane[0].src.stride,
+                                pre_buf, pre_stride, &base_mv_sse);
+          // Exit NEWMV search if base_mv_sse is large.
+          if (sf->base_mv_aggressive && base_mv_sse > (best_sse_sofar << scale))
+            continue;
+          if (base_mv_sse < (best_sse_sofar << 1)) {
             // Base layer mv is good.
+            // Exit NEWMV search if the base_mv is (0, 0) and sse is low, since
+            // (0, 0) mode is already tested.
+            unsigned int base_mv_sse_normalized =
+                base_mv_sse >>
+                (b_width_log2_lookup[bsize] + b_height_log2_lookup[bsize]);
+            if (sf->base_mv_aggressive && base_mv_sse <= best_sse_sofar &&
+                base_mv_sse_normalized < 400 &&
+                frame_mv[NEWMV][ref_frame].as_mv.row == 0 &&
+                frame_mv[NEWMV][ref_frame].as_mv.col == 0)
+              continue;
             if (!combined_motion_search(cpi, x, bsize, mi_row, mi_col,
                                         &frame_mv[NEWMV][ref_frame], &rate_mv,
                                         best_rdc.rdcost, 1)) {
@@ -1942,6 +1956,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
         sse_zeromv_normalized =
             sse_y >> (b_width_log2_lookup[bsize] + b_height_log2_lookup[bsize]);
       }
+      if (sse_y < best_sse_sofar) best_sse_sofar = sse_y;
     }
 
     if (!this_early_term) {

@@ -534,10 +534,7 @@ static void set_rt_speed_feature_framesize_independent(
     if (cpi->svc.temporal_layer_id > 0) {
       sf->adaptive_rd_thresh = 4;
       sf->limit_newmv_early_exit = 0;
-      sf->base_mv_aggressive =
-          (cpi->svc.temporal_layer_id == cpi->svc.number_temporal_layers - 1)
-              ? 1
-              : 0;
+      sf->base_mv_aggressive = 1;
     }
   }
 
