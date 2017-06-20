@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc4bf45b_0fcc819e",
+        "filename": "vpx_dsp/x86/inv_txfm_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 762,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-06-20T23:55:34Z",
+      "side": 1,
+      "message": "The new version is about 7% slower than original one. The only reason is that idct16_8col() isn\u0027t inlined after calling several multiplication_and_add(). I\u0027ll manipulate to make it inlined again.",
+      "range": {
+        "startLine": 762,
+        "startChar": 5,
+        "endLine": 762,
+        "endChar": 31
+      },
+      "revId": "3384a7ab5384eb5a2afd9b8a6484b7a1219d67de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "385dff26_0710bd22",
+        "filename": "vpx_dsp/x86/inv_txfm_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 785,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-06-20T23:55:34Z",
+      "side": 1,
+      "message": "Using for loop is faster and smaller in size than calling 2 write_buffer_8x8().",
+      "range": {
+        "startLine": 785,
+        "startChar": 4,
+        "endLine": 785,
+        "endChar": 30
+      },
+      "revId": "3384a7ab5384eb5a2afd9b8a6484b7a1219d67de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
