@@ -471,6 +471,8 @@ typedef struct VP8_COMP {
   int zeromv_count;
   int lf_zeromv_pct;
 
+  unsigned char *skin_map;
+
   unsigned char *segmentation_map;
   signed char segment_feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];
   int segment_encode_breakout[MAX_MB_SEGMENTS];
