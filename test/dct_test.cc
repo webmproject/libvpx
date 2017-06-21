@@ -307,13 +307,13 @@ class TransTestBase {
     const int count_test_block = 1000;
     Buffer<int16_t> in = Buffer<int16_t>(size_, size_, 4);
     ASSERT_TRUE(in.Init());
-    Buffer<tran_low_t> coeff = Buffer<tran_low_t>(size_, size_, 0);
+    Buffer<tran_low_t> coeff = Buffer<tran_low_t>(size_, size_, 0, 16);
     ASSERT_TRUE(coeff.Init());
-    Buffer<uint8_t> dst = Buffer<uint8_t>(size_, size_, 0);
+    Buffer<uint8_t> dst = Buffer<uint8_t>(size_, size_, 0, 16);
     ASSERT_TRUE(dst.Init());
     Buffer<uint8_t> src = Buffer<uint8_t>(size_, size_, 0);
     ASSERT_TRUE(src.Init());
-    Buffer<uint16_t> dst16 = Buffer<uint16_t>(size_, size_, 0);
+    Buffer<uint16_t> dst16 = Buffer<uint16_t>(size_, size_, 0, 16);
     ASSERT_TRUE(dst16.Init());
     Buffer<uint16_t> src16 = Buffer<uint16_t>(size_, size_, 0);
     ASSERT_TRUE(src16.Init());
