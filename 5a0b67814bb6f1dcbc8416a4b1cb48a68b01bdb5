@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "b9eb914f_7826e33d",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-21T01:33:00Z",
+      "side": 1,
+      "message": "I think you\u0027ll want to disable this for all gcc-4.9 (non-android) at least. I haven\u0027t found one to work.",
+      "revId": "5a0b67814bb6f1dcbc8416a4b1cb48a68b01bdb5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "aff5c565_46f54b63",
         "filename": "vpx_dsp/arm/fdct32x32_neon.c",
         "patchSetId": 4
