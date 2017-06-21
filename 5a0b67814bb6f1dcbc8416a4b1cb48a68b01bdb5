@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "f4ef2eed_19c20b40",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-21T22:56:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9eb914f_7826e33d",
+      "revId": "5a0b67814bb6f1dcbc8416a4b1cb48a68b01bdb5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aff5c565_46f54b63",
         "filename": "vpx_dsp/arm/fdct32x32_neon.c",
         "patchSetId": 4
@@ -30,6 +48,30 @@
       "writtenOn": "2017-06-20T23:35:18Z",
       "side": 1,
       "message": "Not very sure. Could the left shift 2 be removed by rounding shifting right 2 bits less?",
+      "range": {
+        "startLine": 32,
+        "startChar": 18,
+        "endLine": 32,
+        "endChar": 69
+      },
+      "revId": "5a0b67814bb6f1dcbc8416a4b1cb48a68b01bdb5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "129d0829_5b50a6f2",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-21T22:56:52Z",
+      "side": 1,
+      "message": "Potentially, but it might be needed for accuracy. I attempted to change the C version but couldn\u0027t get it working.",
+      "parentUuid": "aff5c565_46f54b63",
       "range": {
         "startLine": 32,
         "startChar": 18,
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "657c4b27_c6be7283",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-21T22:56:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1150077d_fdc4c9ca",
+      "range": {
+        "startLine": 221,
+        "startChar": 0,
+        "endLine": 221,
+        "endChar": 79
+      },
+      "revId": "5a0b67814bb6f1dcbc8416a4b1cb48a68b01bdb5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1c76f5a5_7339eafc",
         "filename": "vpx_dsp/arm/fdct32x32_neon.c",
         "patchSetId": 4
@@ -88,6 +154,30 @@
     },
     {
       "key": {
+        "uuid": "910ed2a1_b56c21ed",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 551,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-21T22:56:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1c76f5a5_7339eafc",
+      "range": {
+        "startLine": 551,
+        "startChar": 60,
+        "endLine": 551,
+        "endChar": 61
+      },
+      "revId": "5a0b67814bb6f1dcbc8416a4b1cb48a68b01bdb5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "93d54e37_15036795",
         "filename": "vpx_dsp/arm/fdct32x32_neon.c",
         "patchSetId": 4
@@ -99,6 +189,30 @@
       "writtenOn": "2017-06-20T23:35:18Z",
       "side": 1,
       "message": "For both pass 1 and 2, is it possible to put the 4 8x32 parts in a loop to save code size? Then dct_body_first_pass() and dct_body_second_pass() can be inlined to save tiny CPU cycles.",
+      "range": {
+        "startLine": 1007,
+        "startChar": 5,
+        "endLine": 1007,
+        "endChar": 23
+      },
+      "revId": "5a0b67814bb6f1dcbc8416a4b1cb48a68b01bdb5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a22ccc0_f881200f",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1007,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-21T22:56:52Z",
+      "side": 1,
+      "message": "The first pass could potentially be put in a loop. The second pass transposes would be a little tricky.\n\nI tried to avoid loops to give the compiler as much freedom with the registers as possible. To put it in a loop I would re-write it to use intermediate memory buffers, and read/write to those each time.",
+      "parentUuid": "93d54e37_15036795",
       "range": {
         "startLine": 1007,
         "startChar": 5,
