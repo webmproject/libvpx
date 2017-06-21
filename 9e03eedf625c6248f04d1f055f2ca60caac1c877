@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8ed3c41e_c07e9601",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-21T21:56:19Z",
+      "side": 0,
+      "message": "previously this would cause vp8_decode to exit early. Now it continues.",
+      "revId": "9e03eedf625c6248f04d1f055f2ca60caac1c877",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
