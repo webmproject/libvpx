@@ -501,8 +501,8 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Values(make_tuple(&vpx_fdct32x32_c,
                                  &vpx_idct32x32_1024_add_ssse3, 32, 0,
                                  VPX_BITS_8),
-                      make_tuple(&vpx_fdct8x8_c, &vpx_idct8x8_64_add_ssse3, 8,
-                                 0, VPX_BITS_8)));
+                      make_tuple(&vpx_fdct8x8_c, &vpx_idct8x8_64_add_sse2, 8, 0,
+                                 VPX_BITS_8)));
 #else
 // vpx_fdct8x8_ssse3 is only available in 64 bit builds.
 INSTANTIATE_TEST_CASE_P(
@@ -510,7 +510,7 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Values(make_tuple(&vpx_fdct32x32_c,
                                  &vpx_idct32x32_1024_add_ssse3, 32, 0,
                                  VPX_BITS_8),
-                      make_tuple(&vpx_fdct8x8_ssse3, &vpx_idct8x8_64_add_ssse3,
+                      make_tuple(&vpx_fdct8x8_ssse3, &vpx_idct8x8_64_add_sse2,
                                  8, 0, VPX_BITS_8)));
 #endif  // !ARCH_X86_64
 #endif  // HAVE_SSSE3 && !CONFIG_EMULATE_HARDWARE
