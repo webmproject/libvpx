@@ -739,7 +739,7 @@ INSTANTIATE_TEST_CASE_P(
     !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(SSSE3, FwdTrans8x8DCT,
                         ::testing::Values(make_tuple(&vpx_fdct8x8_ssse3,
-                                                     &vpx_idct8x8_64_add_ssse3,
+                                                     &vpx_idct8x8_64_add_sse2,
                                                      0, VPX_BITS_8)));
 #endif
 
