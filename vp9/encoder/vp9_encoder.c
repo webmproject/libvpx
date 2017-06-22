@@ -3524,12 +3524,13 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
 
   vp9_update_noise_estimate(cpi);
 
-  // Scene detection is used for VBR mode or screen-content case.
-  // Make sure compute_source_sad_onepass is set (which handles SVC case
-  // and dynamic resize).
+  // Scene detection is always used for VBR mode or screen-content case.
+  // For other cases (e.g., CBR mode) use it for 5 <= speed < 8 for now
+  // (need to check encoding time cost for doing this for speed 8).
   if (cpi->compute_source_sad_onepass &&
       (cpi->oxcf.rc_mode == VPX_VBR ||
-       cpi->oxcf.content == VP9E_CONTENT_SCREEN))
+       cpi->oxcf.content == VP9E_CONTENT_SCREEN ||
+       (cpi->oxcf.speed >= 5 && cpi->oxcf.speed < 8)))
     vp9_scene_detection_onepass(cpi);
 
   // For 1 pass CBR SVC, only ZEROMV is allowed for spatial reference frame

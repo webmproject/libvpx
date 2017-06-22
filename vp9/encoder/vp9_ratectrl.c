@@ -353,6 +353,7 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->af_ratio_onepass_vbr = 10;
   rc->prev_avg_source_sad_lag = 0;
   rc->high_source_sad = 0;
+  rc->reset_high_source_sad = 0;
   rc->high_source_sad_lagindex = -1;
   rc->alt_ref_gf_group = 0;
   rc->fac_active_worst_inter = 150;
@@ -585,7 +586,7 @@ int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
 
   // In CBR mode, this makes sure q is between oscillating Qs to prevent
   // resonance.
-  if (cpi->oxcf.rc_mode == VPX_CBR &&
+  if (cpi->oxcf.rc_mode == VPX_CBR && !cpi->rc.reset_high_source_sad &&
       (!cpi->oxcf.gf_cbr_boost_pct ||
        !(cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame)) &&
       (cpi->rc.rc_1_frame * cpi->rc.rc_2_frame == -1) &&
@@ -679,7 +680,8 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
   int active_worst_quality;
   int ambient_qp;
   unsigned int num_frames_weight_key = 5 * cpi->svc.number_temporal_layers;
-  if (cm->frame_type == KEY_FRAME) return rc->worst_quality;
+  if (cm->frame_type == KEY_FRAME || rc->reset_high_source_sad)
+    return rc->worst_quality;
   // For ambient_qp we use minimum of avg_frame_qindex[KEY_FRAME/INTER_FRAME]
   // for the first few frames following key frame. These are both initialized
   // to worst_quality and updated with (3/4, 1/4) average in postencode_update.
@@ -1464,6 +1466,7 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   if (oxcf->pass == 0) {
     if (cm->frame_type != KEY_FRAME) compute_frame_low_motion(cpi);
   }
+  if (cm->frame_type != KEY_FRAME) rc->reset_high_source_sad = 0;
 }
 
 void vp9_rc_postencode_update_drop_frame(VP9_COMP *cpi) {
@@ -2330,6 +2333,23 @@ void vp9_scene_detection_onepass(VP9_COMP *cpi) {
           rc->avg_source_sad[lagframe_idx] = avg_sad;
         }
       }
+    }
+    // For CBR non-screen content mode, check if we should reset the rate
+    // control. Reset is done if high_source_sad is detected and the rate
+    // control is at very low QP with rate correction factor at min level.
+    if (cpi->oxcf.rc_mode == VPX_CBR &&
+        cpi->oxcf.content != VP9E_CONTENT_SCREEN && !cpi->use_svc) {
+      if (rc->high_source_sad && rc->last_q[INTER_FRAME] == rc->best_quality &&
+          rc->avg_frame_qindex[INTER_FRAME] < (rc->best_quality << 1) &&
+          rc->rate_correction_factors[INTER_NORMAL] == MIN_BPB_FACTOR) {
+        rc->rate_correction_factors[INTER_NORMAL] = 0.5;
+        rc->avg_frame_qindex[INTER_FRAME] = rc->worst_quality;
+        rc->buffer_level = rc->optimal_buffer_level;
+        rc->bits_off_target = rc->optimal_buffer_level;
+        rc->reset_high_source_sad = 1;
+      }
+      if (cm->frame_type != KEY_FRAME && rc->reset_high_source_sad)
+        rc->this_frame_target = rc->avg_frame_bandwidth;
     }
     // For VBR, under scene change/high content change, force golden refresh.
     if (cpi->oxcf.rc_mode == VPX_VBR && cm->frame_type != KEY_FRAME &&
