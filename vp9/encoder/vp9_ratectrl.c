@@ -209,7 +209,7 @@ int vp9_estimate_bits_at_q(FRAME_TYPE frame_type, int q, int mbs,
   const int bpm =
       (int)(vp9_rc_bits_per_mb(frame_type, q, correction_factor, bit_depth));
   return VPXMAX(FRAME_OVERHEAD_BITS,
-                (int)((uint64_t)bpm * mbs) >> BPER_MB_NORMBITS);
+                (int)(((uint64_t)bpm * mbs) >> BPER_MB_NORMBITS));
 }
 
 int vp9_rc_clamp_pframe_target_size(const VP9_COMP *const cpi, int target) {
