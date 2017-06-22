@@ -1197,7 +1197,9 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     set_ref_ptrs(cm, xd, mi->ref_frame[0], mi->ref_frame[1]);
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_64X64);
 
-    x->sb_is_skin = skin_sb_split(cpi, x, low_res, mi_row, mi_col, force_split);
+    if (cpi->use_skin_detection)
+      x->sb_is_skin =
+          skin_sb_split(cpi, x, low_res, mi_row, mi_col, force_split);
 
     d = xd->plane[0].dst.buf;
     dp = xd->plane[0].dst.stride;
