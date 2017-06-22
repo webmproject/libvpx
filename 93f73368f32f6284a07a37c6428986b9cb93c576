@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6c2d5b_afecc2ab",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-22T03:29:34Z",
+      "side": 1,
+      "message": "maybe \u0027shift/restore the values we didn\u0027t want to modify yet\u0027",
+      "revId": "93f73368f32f6284a07a37c6428986b9cb93c576",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e43a489e_3ac5fbc7",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 571,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-22T03:29:34Z",
+      "side": 1,
+      "message": "DCT_CONST_BITS",
+      "range": {
+        "startLine": 571,
+        "startChar": 31,
+        "endLine": 571,
+        "endChar": 33
+      },
+      "revId": "93f73368f32f6284a07a37c6428986b9cb93c576",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c5f079ab_3ccd59b5",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 590,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-22T03:29:34Z",
+      "side": 1,
+      "message": "what\u0027s this TODO meant to accomplish? maybe just document the constant range or adjust the origin to be int32",
+      "revId": "93f73368f32f6284a07a37c6428986b9cb93c576",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
