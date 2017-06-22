@@ -228,7 +228,8 @@ static void yuvconfig2image(vpx_image_t *img, const YV12_BUFFER_CONFIG *yv12,
 }
 
 static int update_fragments(vpx_codec_alg_priv_t *ctx, const uint8_t *data,
-                            unsigned int data_sz, vpx_codec_err_t *res) {
+                            unsigned int data_sz,
+                            volatile vpx_codec_err_t *res) {
   *res = VPX_CODEC_OK;
 
   if (ctx->fragments.count == 0) {
@@ -267,7 +268,7 @@ static int update_fragments(vpx_codec_alg_priv_t *ctx, const uint8_t *data,
 static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
                                   const uint8_t *data, unsigned int data_sz,
                                   void *user_priv, long deadline) {
-  vpx_codec_err_t res = VPX_CODEC_OK;
+  volatile vpx_codec_err_t res;
   unsigned int resolution_change = 0;
   unsigned int w, h;
 
