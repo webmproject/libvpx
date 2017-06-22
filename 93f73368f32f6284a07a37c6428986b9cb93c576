@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ffb3c8e1_c645148c",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-22T13:42:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6c2d5b_afecc2ab",
+      "revId": "93f73368f32f6284a07a37c6428986b9cb93c576",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e43a489e_3ac5fbc7",
         "filename": "vpx_dsp/arm/fdct32x32_neon.c",
         "patchSetId": 5
@@ -42,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "6913e9d7_51a2460c",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 571,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-22T13:42:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e43a489e_3ac5fbc7",
+      "range": {
+        "startLine": 571,
+        "startChar": 31,
+        "endLine": 571,
+        "endChar": 33
+      },
+      "revId": "93f73368f32f6284a07a37c6428986b9cb93c576",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c5f079ab_3ccd59b5",
         "filename": "vpx_dsp/arm/fdct32x32_neon.c",
         "patchSetId": 5
@@ -53,6 +95,24 @@
       "writtenOn": "2017-06-22T03:29:34Z",
       "side": 1,
       "message": "what\u0027s this TODO meant to accomplish? maybe just document the constant range or adjust the origin to be int32",
+      "revId": "93f73368f32f6284a07a37c6428986b9cb93c576",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c5640047_5b3992af",
+        "filename": "vpx_dsp/arm/fdct32x32_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 590,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-22T13:42:12Z",
+      "side": 1,
+      "message": "I don\u0027t think it should be passing around tran_high_t values. Using a 64 bit value seems like it could create performance issues on armv7",
+      "parentUuid": "c5f079ab_3ccd59b5",
       "revId": "93f73368f32f6284a07a37c6428986b9cb93c576",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
