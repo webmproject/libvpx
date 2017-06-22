@@ -138,7 +138,7 @@ void vp9_highbd_quantize_fp_32x32_c(
 
   if (!skip_block) {
     for (i = 0; i < n_coeffs; i++) {
-      uint32_t abs_qcoeff = 0;
+      int abs_qcoeff = 0;
       const int rc = scan[i];
       const int coeff = coeff_ptr[rc];
       const int coeff_sign = (coeff >> 31);
@@ -147,7 +147,7 @@ void vp9_highbd_quantize_fp_32x32_c(
       if (abs_coeff >= (dequant_ptr[rc != 0] >> 2)) {
         const int64_t tmp =
             abs_coeff + ROUND_POWER_OF_TWO(round_ptr[rc != 0], 1);
-        abs_qcoeff = (uint32_t)((tmp * quant_ptr[rc != 0]) >> 15);
+        abs_qcoeff = (int)((tmp * quant_ptr[rc != 0]) >> 15);
         qcoeff_ptr[rc] = (tran_low_t)((abs_qcoeff ^ coeff_sign) - coeff_sign);
         dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr[rc != 0] / 2;
       }
