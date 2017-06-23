@@ -12,7 +12,6 @@
 #include "vpx_dsp/x86/highbd_inv_txfm_sse2.h"
 #include "vpx_dsp/x86/inv_txfm_sse2.h"
 #include "vpx_dsp/x86/transpose_sse2.h"
-#include "vpx_dsp/x86/txfm_common_sse2.h"
 
 static INLINE __m128i dct_const_round_shift_4_sse2(const __m128i in0,
                                                    const __m128i in1) {
@@ -20,16 +19,6 @@ static INLINE __m128i dct_const_round_shift_4_sse2(const __m128i in0,
   const __m128i t1 = _mm_unpackhi_epi32(in0, in1);  // 2, 3
   const __m128i t2 = _mm_unpacklo_epi64(t0, t1);    // 0, 1, 2, 3
   return dct_const_round_shift_sse2(t2);
-}
-
-static INLINE __m128i wraplow_16bit_sse2(const __m128i in0, const __m128i in1,
-                                         const __m128i rounding) {
-  __m128i temp[2];
-  temp[0] = _mm_add_epi32(in0, rounding);
-  temp[1] = _mm_add_epi32(in1, rounding);
-  temp[0] = _mm_srai_epi32(temp[0], 4);
-  temp[1] = _mm_srai_epi32(temp[1], 4);
-  return _mm_packs_epi32(temp[0], temp[1]);
 }
 
 static INLINE void highbd_idct4_small_sse2(__m128i *const io) {
@@ -100,19 +89,6 @@ static INLINE __m128i multiply_apply_sign_sse2(const __m128i in,
   return _mm_sub_epi64(out, sign);
 }
 
-static INLINE __m128i dct_const_round_shift_64bit_sse2(const __m128i in) {
-  const __m128i t = _mm_add_epi64(
-      in,
-      _mm_setr_epi32(DCT_CONST_ROUNDING << 2, 0, DCT_CONST_ROUNDING << 2, 0));
-  return _mm_srli_si128(t, 2);
-}
-
-static INLINE __m128i pack_4_sse2(const __m128i in0, const __m128i in1) {
-  const __m128i t0 = _mm_unpacklo_epi32(in0, in1);  // 0, 2
-  const __m128i t1 = _mm_unpackhi_epi32(in0, in1);  // 1, 3
-  return _mm_unpacklo_epi32(t0, t1);                // 0, 1, 2, 3
-}
-
 static INLINE void highbd_idct4_large_sse2(__m128i *const io) {
   const __m128i cospi_p16_p16 =
       _mm_setr_epi32(cospi_16_64 << 2, 0, cospi_16_64 << 2, 0);
@@ -133,12 +109,12 @@ static INLINE void highbd_idct4_large_sse2(__m128i *const io) {
   temp1[1] = multiply_apply_sign_sse2(temp1[1], sign1[1], cospi_p16_p16);
   temp2[0] = multiply_apply_sign_sse2(temp2[0], sign2[0], cospi_p16_p16);
   temp2[1] = multiply_apply_sign_sse2(temp2[1], sign2[1], cospi_p16_p16);
-  temp1[0] = dct_const_round_shift_64bit_sse2(temp1[0]);
-  temp1[1] = dct_const_round_shift_64bit_sse2(temp1[1]);
-  temp2[0] = dct_const_round_shift_64bit_sse2(temp2[0]);
-  temp2[1] = dct_const_round_shift_64bit_sse2(temp2[1]);
-  step[0] = pack_4_sse2(temp1[0], temp1[1]);
-  step[1] = pack_4_sse2(temp2[0], temp2[1]);
+  temp1[0] = dct_const_round_shift_64bit(temp1[0]);
+  temp1[1] = dct_const_round_shift_64bit(temp1[1]);
+  temp2[0] = dct_const_round_shift_64bit(temp2[0]);
+  temp2[1] = dct_const_round_shift_64bit(temp2[1]);
+  step[0] = pack_4(temp1[0], temp1[1]);
+  step[1] = pack_4(temp2[0], temp2[1]);
 
   abs_extend_64bit_sse2(io[1], temp1, sign1);
   abs_extend_64bit_sse2(io[3], temp2, sign2);
@@ -154,12 +130,12 @@ static INLINE void highbd_idct4_large_sse2(__m128i *const io) {
   temp1[1] = _mm_sub_epi64(temp1[1], temp2[1]);  // [1]*cospi_24 - [3]*cospi_8
   temp2[0] = _mm_add_epi64(temp1[2], temp2[2]);  // [1]*cospi_8 + [3]*cospi_24
   temp2[1] = _mm_add_epi64(temp1[3], temp2[3]);  // [1]*cospi_8 + [3]*cospi_24
-  temp1[0] = dct_const_round_shift_64bit_sse2(temp1[0]);
-  temp1[1] = dct_const_round_shift_64bit_sse2(temp1[1]);
-  temp2[0] = dct_const_round_shift_64bit_sse2(temp2[0]);
-  temp2[1] = dct_const_round_shift_64bit_sse2(temp2[1]);
-  step[2] = pack_4_sse2(temp1[0], temp1[1]);
-  step[3] = pack_4_sse2(temp2[0], temp2[1]);
+  temp1[0] = dct_const_round_shift_64bit(temp1[0]);
+  temp1[1] = dct_const_round_shift_64bit(temp1[1]);
+  temp2[0] = dct_const_round_shift_64bit(temp2[0]);
+  temp2[1] = dct_const_round_shift_64bit(temp2[1]);
+  step[2] = pack_4(temp1[0], temp1[1]);
+  step[3] = pack_4(temp2[0], temp2[1]);
 
   // stage 2
   io[0] = _mm_add_epi32(step[0], step[3]);  // step[0] + step[3]
@@ -211,31 +187,11 @@ void vpx_highbd_idct4x4_16_add_sse2(const tran_low_t *input, uint16_t *dest,
       highbd_idct4_large_sse2(io);
       highbd_idct4_large_sse2(io);
     }
-    io[0] = wraplow_16bit_sse2(io[0], io[1], _mm_set1_epi32(8));
-    io[1] = wraplow_16bit_sse2(io[2], io[3], _mm_set1_epi32(8));
+    io[0] = wraplow_16bit(io[0], io[1], _mm_set1_epi32(8));
+    io[1] = wraplow_16bit(io[2], io[3], _mm_set1_epi32(8));
   }
 
-  // Reconstruction and Store
-  {
-    __m128i d0 = _mm_loadl_epi64((const __m128i *)dest);
-    __m128i d2 = _mm_loadl_epi64((const __m128i *)(dest + stride * 2));
-    d0 = _mm_unpacklo_epi64(d0,
-                            _mm_loadl_epi64((const __m128i *)(dest + stride)));
-    d2 = _mm_unpacklo_epi64(
-        d2, _mm_loadl_epi64((const __m128i *)(dest + stride * 3)));
-    d0 = clamp_high_sse2(_mm_adds_epi16(d0, io[0]), bd);
-    d2 = clamp_high_sse2(_mm_adds_epi16(d2, io[1]), bd);
-    // store input0
-    _mm_storel_epi64((__m128i *)dest, d0);
-    // store input1
-    d0 = _mm_srli_si128(d0, 8);
-    _mm_storel_epi64((__m128i *)(dest + stride), d0);
-    // store input2
-    _mm_storel_epi64((__m128i *)(dest + stride * 2), d2);
-    // store input3
-    d2 = _mm_srli_si128(d2, 8);
-    _mm_storel_epi64((__m128i *)(dest + stride * 3), d2);
-  }
+  recon_and_store_4(dest, io, stride, bd);
 }
 
 void vpx_highbd_idct4x4_1_add_sse2(const tran_low_t *input, uint16_t *dest,
