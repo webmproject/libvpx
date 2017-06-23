@@ -36,10 +36,10 @@ void vpx_idct8x8_12_add_ssse3(const tran_low_t *input, uint8_t *dest,
   __m128i tmp[4];
 
   // Rows. Load 4-row input data.
-  in[0] = load_input_data(input);
-  in[1] = load_input_data(input + 8 * 1);
-  in[2] = load_input_data(input + 8 * 2);
-  in[3] = load_input_data(input + 8 * 3);
+  in[0] = load_input_data4(input + 0 * 8);
+  in[1] = load_input_data4(input + 1 * 8);
+  in[2] = load_input_data4(input + 2 * 8);
+  in[3] = load_input_data4(input + 3 * 8);
 
   // 4x4 Transpose
   transpose_16bit_4x4(in, in);
@@ -342,14 +342,14 @@ void vpx_idct32x32_34_add_ssse3(const tran_low_t *input, uint8_t *dest,
   int i;
 
   // Load input data. Only need to load the top left 8x8 block.
-  in[0] = load_input_data(input);
-  in[1] = load_input_data(input + 32);
-  in[2] = load_input_data(input + 64);
-  in[3] = load_input_data(input + 96);
-  in[4] = load_input_data(input + 128);
-  in[5] = load_input_data(input + 160);
-  in[6] = load_input_data(input + 192);
-  in[7] = load_input_data(input + 224);
+  in[0] = load_input_data8(input + 0 * 32);
+  in[1] = load_input_data8(input + 1 * 32);
+  in[2] = load_input_data8(input + 2 * 32);
+  in[3] = load_input_data8(input + 3 * 32);
+  in[4] = load_input_data8(input + 4 * 32);
+  in[5] = load_input_data8(input + 5 * 32);
+  in[6] = load_input_data8(input + 6 * 32);
+  in[7] = load_input_data8(input + 7 * 32);
 
   transpose_16bit_8x8(in, in);
   idct32_34_first_half(in, stp1);
@@ -383,8 +383,8 @@ static void load_buffer_16x16(const tran_low_t *input, __m128i *in0,
                               __m128i *in1) {
   int i;
   for (i = 0; i < 16; i++) {
-    in0[i] = load_input_data(input);
-    in1[i] = load_input_data(input + 8);
+    in0[i] = load_input_data8(input);
+    in1[i] = load_input_data8(input + 8);
     input += 32;
   }
 }

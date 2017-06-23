@@ -27,8 +27,8 @@ void vpx_idct4x4_16_add_sse2(const tran_low_t *input, uint8_t *dest,
   __m128i in[2];
 
   // Rows
-  in[0] = load_input_data(input);
-  in[1] = load_input_data(input + 8);
+  in[0] = load_input_data8(input);
+  in[1] = load_input_data8(input + 8);
   idct4_sse2(in);
 
   // Columns
@@ -491,10 +491,10 @@ void vpx_idct8x8_12_add_sse2(const tran_low_t *input, uint8_t *dest,
   const __m128i cp_16_n16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
   __m128i in[8], step1[8], step2[8], tmp[4];
 
-  in[0] = load_input_data(input + 0 * 8);
-  in[1] = load_input_data(input + 1 * 8);
-  in[2] = load_input_data(input + 2 * 8);
-  in[3] = load_input_data(input + 3 * 8);
+  in[0] = load_input_data4(input + 0 * 8);
+  in[1] = load_input_data4(input + 1 * 8);
+  in[2] = load_input_data4(input + 2 * 8);
+  in[3] = load_input_data4(input + 3 * 8);
 
   transpose_16bit_4x4(in, in);
   // in[0]: 00 10 20 30  01 11 21 31
@@ -721,14 +721,14 @@ static INLINE void idct16_8col(__m128i *const in) {
 
 static INLINE void idct16_load8x8(const tran_low_t *const input,
                                   __m128i *const in) {
-  in[0] = load_input_data(input);
-  in[1] = load_input_data(input + 8 * 2);
-  in[2] = load_input_data(input + 8 * 4);
-  in[3] = load_input_data(input + 8 * 6);
-  in[4] = load_input_data(input + 8 * 8);
-  in[5] = load_input_data(input + 8 * 10);
-  in[6] = load_input_data(input + 8 * 12);
-  in[7] = load_input_data(input + 8 * 14);
+  in[0] = load_input_data8(input);
+  in[1] = load_input_data8(input + 8 * 2);
+  in[2] = load_input_data8(input + 8 * 4);
+  in[3] = load_input_data8(input + 8 * 6);
+  in[4] = load_input_data8(input + 8 * 8);
+  in[5] = load_input_data8(input + 8 * 10);
+  in[6] = load_input_data8(input + 8 * 12);
+  in[7] = load_input_data8(input + 8 * 14);
 }
 
 void vpx_idct16x16_256_add_sse2(const tran_low_t *input, uint8_t *dest,
@@ -1258,10 +1258,10 @@ void vpx_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
   int i;
   // First 1-D inverse DCT
   // Load input data.
-  in[0] = load_input_data(input);
-  in[1] = load_input_data(input + 8 * 2);
-  in[2] = load_input_data(input + 8 * 4);
-  in[3] = load_input_data(input + 8 * 6);
+  in[0] = load_input_data4(input + 0 * 16);
+  in[1] = load_input_data4(input + 1 * 16);
+  in[2] = load_input_data4(input + 2 * 16);
+  in[3] = load_input_data4(input + 3 * 16);
 
   transpose_16bit_4x4(in, in);
 
@@ -1651,14 +1651,14 @@ void vpx_idct32x32_34_add_sse2(const tran_low_t *input, uint8_t *dest,
   int i;
 
   // Load input data. Only need to load the top left 8x8 block.
-  in[0] = load_input_data(input);
-  in[1] = load_input_data(input + 32);
-  in[2] = load_input_data(input + 64);
-  in[3] = load_input_data(input + 96);
-  in[4] = load_input_data(input + 128);
-  in[5] = load_input_data(input + 160);
-  in[6] = load_input_data(input + 192);
-  in[7] = load_input_data(input + 224);
+  in[0] = load_input_data8(input + 0 * 32);
+  in[1] = load_input_data8(input + 1 * 32);
+  in[2] = load_input_data8(input + 2 * 32);
+  in[3] = load_input_data8(input + 3 * 32);
+  in[4] = load_input_data8(input + 4 * 32);
+  in[5] = load_input_data8(input + 5 * 32);
+  in[6] = load_input_data8(input + 6 * 32);
+  in[7] = load_input_data8(input + 7 * 32);
 
   transpose_16bit_8x8(in, in);
   IDCT32_34
@@ -2008,10 +2008,10 @@ static void idct32_full_8x32(const __m128i *in /*in[32]*/,
 static void load_buffer_8x32(const tran_low_t *input, __m128i *in) {
   int i;
   for (i = 0; i < 8; ++i) {
-    in[i] = load_input_data(input);
-    in[i + 8] = load_input_data(input + 8);
-    in[i + 16] = load_input_data(input + 16);
-    in[i + 24] = load_input_data(input + 24);
+    in[i] = load_input_data8(input);
+    in[i + 8] = load_input_data8(input + 8);
+    in[i + 16] = load_input_data8(input + 16);
+    in[i + 24] = load_input_data8(input + 24);
     input += 32;
   }
 }

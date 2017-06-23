@@ -18,8 +18,8 @@ void vp9_iht4x4_16_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
   __m128i in[2];
   const __m128i eight = _mm_set1_epi16(8);
 
-  in[0] = load_input_data(input);
-  in[1] = load_input_data(input + 8);
+  in[0] = load_input_data8(input);
+  in[1] = load_input_data8(input + 8);
 
   switch (tx_type) {
     case 0:  // DCT_DCT
@@ -57,14 +57,14 @@ void vp9_iht8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
   const __m128i final_rounding = _mm_set1_epi16(1 << 4);
 
   // load input data
-  in[0] = load_input_data(input);
-  in[1] = load_input_data(input + 8 * 1);
-  in[2] = load_input_data(input + 8 * 2);
-  in[3] = load_input_data(input + 8 * 3);
-  in[4] = load_input_data(input + 8 * 4);
-  in[5] = load_input_data(input + 8 * 5);
-  in[6] = load_input_data(input + 8 * 6);
-  in[7] = load_input_data(input + 8 * 7);
+  in[0] = load_input_data8(input);
+  in[1] = load_input_data8(input + 8 * 1);
+  in[2] = load_input_data8(input + 8 * 2);
+  in[3] = load_input_data8(input + 8 * 3);
+  in[4] = load_input_data8(input + 8 * 4);
+  in[5] = load_input_data8(input + 8 * 5);
+  in[6] = load_input_data8(input + 8 * 6);
+  in[7] = load_input_data8(input + 8 * 7);
 
   switch (tx_type) {
     case 0:  // DCT_DCT
