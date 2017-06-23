@@ -242,6 +242,11 @@ ARCH_EXT_LIST_X86="
     avx
     avx2
 "
+
+ARCH_EXT_LIST_LOONGSON="
+    mmi
+"
+
 ARCH_EXT_LIST="
     neon
     neon_asm
@@ -254,6 +259,8 @@ ARCH_EXT_LIST="
     ${ARCH_EXT_LIST_X86}
 
     vsx
+
+    ${ARCH_EXT_LIST_LOONGSON}
 "
 HAVE_LIST="
     ${ARCH_EXT_LIST}
