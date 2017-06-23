@@ -169,6 +169,7 @@ typedef struct {
   int avg_frame_low_motion;
   int af_ratio_onepass_vbr;
   int force_qpmin;
+  int reset_high_source_sad;
 } RATE_CONTROL;
 
 struct VP9_COMP;
