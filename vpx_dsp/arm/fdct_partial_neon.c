@@ -12,6 +12,41 @@
 
 #include "./vpx_dsp_rtcd.h"
 #include "./vpx_config.h"
+#include "vpx_dsp/arm/mem_neon.h"
+
+static INLINE tran_low_t sum_int16x8(const int16x8_t a) {
+  const int32x4_t b = vpaddlq_s16(a);
+  const int64x2_t c = vpaddlq_s32(b);
+  const int32x2_t d = vadd_s32(vreinterpret_s32_s64(vget_low_s64(c)),
+                               vreinterpret_s32_s64(vget_high_s64(c)));
+#if CONFIG_VP9_HIGHBITDEPTH
+  return vget_lane_s32(d, 0);
+#else
+  return vget_lane_s16(vreinterpret_s16_s32(d), 0);
+#endif
+}
+
+void vpx_fdct4x4_1_neon(const int16_t *input, tran_low_t *output, int stride) {
+  int16x4_t a0, a1, a2, a3;
+  int16x8_t b0, b1;
+  int16x8_t c;
+
+  a0 = vld1_s16(input);
+  input += stride;
+  a1 = vld1_s16(input);
+  input += stride;
+  a2 = vld1_s16(input);
+  input += stride;
+  a3 = vld1_s16(input);
+
+  b0 = vcombine_s16(a0, a1);
+  b1 = vcombine_s16(a2, a3);
+
+  c = vaddq_s16(b0, b1);
+
+  output[0] = sum_int16x8(c) << 1;
+  output[1] = 0;
+}
 
 void vpx_fdct8x8_1_neon(const int16_t *input, tran_low_t *output, int stride) {
   int r;
@@ -20,16 +55,7 @@ void vpx_fdct8x8_1_neon(const int16_t *input, tran_low_t *output, int stride) {
     const int16x8_t input_00 = vld1q_s16(&input[r * stride]);
     sum = vaddq_s16(sum, input_00);
   }
-  {
-    const int32x4_t a = vpaddlq_s16(sum);
-    const int64x2_t b = vpaddlq_s32(a);
-    const int32x2_t c = vadd_s32(vreinterpret_s32_s64(vget_low_s64(b)),
-                                 vreinterpret_s32_s64(vget_high_s64(b)));
-#if CONFIG_VP9_HIGHBITDEPTH
-    output[0] = vget_lane_s32(c, 0);
-#else
-    output[0] = vget_lane_s16(vreinterpret_s16_s32(c), 0);
-#endif
-    output[1] = 0;
-  }
+
+  output[0] = sum_int16x8(sum);
+  output[1] = 0;
 }
