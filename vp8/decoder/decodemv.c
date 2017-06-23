@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "decodemv.h"
 #include "treereader.h"
 #include "vp8/common/entropymv.h"
 #include "vp8/common/entropymode.h"

@@ -14,6 +14,7 @@
 #include "vp8/common/extend.h"
 #include "bitstream.h"
 #include "encodeframe.h"
+#include "ethreading.h"
 
 #if CONFIG_MULTITHREAD
 

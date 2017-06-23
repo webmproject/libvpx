@@ -10,6 +10,7 @@
 
 #include <tmmintrin.h> /* SSSE3 */
 
+#include "./vp8_rtcd.h"
 #include "vp8/encoder/block.h"
 
 /* bitscan reverse (bsr) */

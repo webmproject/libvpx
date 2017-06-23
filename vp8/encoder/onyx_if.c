@@ -12,6 +12,7 @@
 #include "./vpx_scale_rtcd.h"
 #include "./vpx_dsp_rtcd.h"
 #include "./vp8_rtcd.h"
+#include "bitstream.h"
 #include "vp8/common/onyxc_int.h"
 #include "vp8/common/blockd.h"
 #include "onyx_int.h"
@@ -43,6 +44,13 @@
 #include "mr_dissim.h"
 #endif
 #include "encodeframe.h"
+#if CONFIG_MULTITHREAD
+#include "ethreading.h"
+#endif
+#include "picklpf.h"
+#if !CONFIG_REALTIME_ONLY
+#include "temporal_filter.h"
+#endif
 
 #include <assert.h>
 #include <math.h>
@@ -51,12 +59,7 @@
 
 #if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
 extern int vp8_update_coef_context(VP8_COMP *cpi);
-extern void vp8_update_coef_probs(VP8_COMP *cpi);
 #endif
-
-extern void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
-extern void vp8cx_set_alt_lf_level(VP8_COMP *cpi, int filt_val);
-extern void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
 
 extern void vp8_deblock_frame(YV12_BUFFER_CONFIG *source,
                               YV12_BUFFER_CONFIG *post, int filt_lvl,
@@ -64,14 +67,8 @@ extern void vp8_deblock_frame(YV12_BUFFER_CONFIG *source,
 extern void print_parms(VP8_CONFIG *ocf, char *filenam);
 extern unsigned int vp8_get_processor_freq();
 extern void print_tree_update_probs();
-extern int vp8cx_create_encoder_threads(VP8_COMP *cpi);
-extern void vp8cx_remove_encoder_threads(VP8_COMP *cpi);
-
-int vp8_estimate_entropy_savings(VP8_COMP *cpi);
 
 int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest);
-
-extern void vp8_temporal_filter_prepare_c(VP8_COMP *cpi, int distance);
 
 static void set_default_lf_deltas(VP8_COMP *cpi);
 

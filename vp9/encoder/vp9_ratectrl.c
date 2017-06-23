@@ -2070,7 +2070,8 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
   return resize_action;
 }
 
-void adjust_gf_boost_lag_one_pass_vbr(VP9_COMP *cpi, uint64_t avg_sad_current) {
+static void adjust_gf_boost_lag_one_pass_vbr(VP9_COMP *cpi,
+                                             uint64_t avg_sad_current) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   int target;

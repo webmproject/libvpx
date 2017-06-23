@@ -20,6 +20,7 @@
 #include "vp8/common/loopfilter.h"
 #include "vp8/common/extend.h"
 #include "vpx_ports/vpx_timer.h"
+#include "decoderthreading.h"
 #include "detokenize.h"
 #include "vp8/common/reconintra4x4.h"
 #include "vp8/common/reconinter.h"
@@ -35,8 +36,6 @@
     CHECK_MEM_ERROR((p), vpx_memalign((algn), sizeof(*(p)) * (n))); \
     memset((p), 0, (n) * sizeof(*(p)));                             \
   } while (0)
-
-void vp8_mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd);
 
 static void setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd,
                                        MB_ROW_DEC *mbrd, int count) {
