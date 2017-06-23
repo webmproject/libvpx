@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7e1f69ec_9b9e5951",
+        "filename": "test/dct_partial_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-23T05:56:48Z",
+      "side": 1,
+      "message": "these 2 could be const",
+      "revId": "95c227a74d38c085f4fbbd124a940751bc71fc9e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "578d5762_1a49ccaf",
+        "filename": "test/dct_partial_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-23T05:56:48Z",
+      "side": 1,
+      "message": "you can probably just make this signed",
+      "range": {
+        "startLine": 88,
+        "startChar": 23,
+        "endLine": 88,
+        "endChar": 35
+      },
+      "revId": "95c227a74d38c085f4fbbd124a940751bc71fc9e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
