@@ -493,7 +493,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_fdct8x8 neon sse2/;
 
   add_proto qw/void vpx_fdct8x8_1/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vpx_fdct8x8_1 neon sse2/;
+  specialize qw/vpx_fdct8x8_1 neon sse2 msa/;
 
   add_proto qw/void vpx_fdct16x16/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vpx_fdct16x16 neon sse2/;
