@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c489a0df_93ee499d",
+        "filename": "test/dct_partial_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-23T00:44:44Z",
+      "side": 1,
+      "message": "??",
+      "range": {
+        "startLine": 11,
+        "startChar": 10,
+        "endLine": 11,
+        "endChar": 16
+      },
+      "revId": "31e1aede8c69b31a467f5f3fd084a01f577901aa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
