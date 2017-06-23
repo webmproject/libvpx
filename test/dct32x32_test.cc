@@ -383,14 +383,14 @@ INSTANTIATE_TEST_CASE_P(C, PartialTrans32x32Test,
                                                      VPX_BITS_8)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-#if HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#if HAVE_NEON && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     NEON, Trans32x32Test,
-    ::testing::Values(make_tuple(&vpx_fdct32x32_c, &vpx_idct32x32_1024_add_neon,
-                                 0, VPX_BITS_8),
+    ::testing::Values(make_tuple(&vpx_fdct32x32_neon,
+                                 &vpx_idct32x32_1024_add_neon, 0, VPX_BITS_8),
                       make_tuple(&vpx_fdct32x32_rd_c,
                                  &vpx_idct32x32_1024_add_neon, 1, VPX_BITS_8)));
-#endif  // HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#endif  // HAVE_NEON && !CONFIG_EMULATE_HARDWARE
 
 #if HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
