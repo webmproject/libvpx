@@ -1969,7 +1969,7 @@ struct VP8_COMP *vp8_create_compressor(VP8_CONFIG *oxcf) {
   yuv_denoised_file = fopen("denoised.yuv", "ab");
 #endif
 #ifdef OUTPUT_YUV_SKINMAP
-  yuv_skinmap_file = fopen("skinmap.yuv", "ab");
+  yuv_skinmap_file = fopen("skinmap.yuv", "wb");
 #endif
 
 #if 0
