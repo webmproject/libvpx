@@ -16,6 +16,24 @@
       "revId": "2dcc9001af399b74ae15c09fff0cfe33e704585a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5f37b681_a51a5d27",
+        "filename": "vp8/decoder/onyxd_int.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-23T03:25:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f195ae1d_2761d32b",
+      "revId": "2dcc9001af399b74ae15c09fff0cfe33e704585a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
