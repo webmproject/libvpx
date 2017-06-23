@@ -561,46 +561,26 @@ void MainTestClass<FunctionType>::MaxTestSse() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using ::std::tr1::get;
-using ::std::tr1::make_tuple;
-using ::std::tr1::tuple;
-
-template <typename SubpelVarianceFunctionType>
+template <typename FunctionType>
 class SubpelVarianceTest
-    : public ::testing::TestWithParam<
-          tuple<int, int, SubpelVarianceFunctionType, int> > {
+    : public ::testing::TestWithParam<TestParams<FunctionType> > {
  public:
   virtual void SetUp() {
-    const tuple<int, int, SubpelVarianceFunctionType, int> &params =
-        this->GetParam();
-    log2width_ = get<0>(params);
-    width_ = 1 << log2width_;
-    log2height_ = get<1>(params);
-    height_ = 1 << log2height_;
-    subpel_variance_ = get<2>(params);
-    if (get<3>(params)) {
-      bit_depth_ = (vpx_bit_depth_t)get<3>(params);
-      use_high_bit_depth_ = true;
-    } else {
-      bit_depth_ = VPX_BITS_8;
-      use_high_bit_depth_ = false;
-    }
-    mask_ = (1 << bit_depth_) - 1;
+    params_ = this->GetParam();
 
     rnd_.Reset(ACMRandom::DeterministicSeed());
-    block_size_ = width_ * height_;
-    if (!use_high_bit_depth_) {
-      src_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size_));
-      sec_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size_));
-      ref_ = new uint8_t[block_size_ + width_ + height_ + 1];
+    if (!use_high_bit_depth()) {
+      src_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size()));
+      sec_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size()));
+      ref_ = new uint8_t[block_size() + width() + height() + 1];
 #if CONFIG_VP9_HIGHBITDEPTH
     } else {
       src_ = CONVERT_TO_BYTEPTR(reinterpret_cast<uint16_t *>(
-          vpx_memalign(16, block_size_ * sizeof(uint16_t))));
+          vpx_memalign(16, block_size() * sizeof(uint16_t))));
       sec_ = CONVERT_TO_BYTEPTR(reinterpret_cast<uint16_t *>(
-          vpx_memalign(16, block_size_ * sizeof(uint16_t))));
-      ref_ =
-          CONVERT_TO_BYTEPTR(new uint16_t[block_size_ + width_ + height_ + 1]);
+          vpx_memalign(16, block_size() * sizeof(uint16_t))));
+      ref_ = CONVERT_TO_BYTEPTR(
+          new uint16_t[block_size() + width() + height() + 1]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     }
     ASSERT_TRUE(src_ != NULL);
@@ -609,7 +589,7 @@ class SubpelVarianceTest
   }
 
   virtual void TearDown() {
-    if (!use_high_bit_depth_) {
+    if (!use_high_bit_depth()) {
       vpx_free(src_);
       delete[] ref_;
       vpx_free(sec_);
@@ -631,42 +611,45 @@ class SubpelVarianceTest
   uint8_t *src_;
   uint8_t *ref_;
   uint8_t *sec_;
-  bool use_high_bit_depth_;
-  vpx_bit_depth_t bit_depth_;
-  int width_, log2width_;
-  int height_, log2height_;
-  int block_size_, mask_;
-  SubpelVarianceFunctionType subpel_variance_;
+  TestParams<FunctionType> params_;
+
+  // some relay helpers
+  bool use_high_bit_depth() const { return params_.use_high_bit_depth; }
+  int byte_shift() const { return params_.bit_depth - 8; }
+  int block_size() const { return params_.block_size; }
+  int width() const { return params_.width; }
+  int height() const { return params_.height; }
+  uint32_t mask() const { return params_.mask; }
 };
 
 template <typename SubpelVarianceFunctionType>
 void SubpelVarianceTest<SubpelVarianceFunctionType>::RefTest() {
   for (int x = 0; x < 8; ++x) {
     for (int y = 0; y < 8; ++y) {
-      if (!use_high_bit_depth_) {
-        for (int j = 0; j < block_size_; j++) {
+      if (!use_high_bit_depth()) {
+        for (int j = 0; j < block_size(); j++) {
           src_[j] = rnd_.Rand8();
         }
-        for (int j = 0; j < block_size_ + width_ + height_ + 1; j++) {
+        for (int j = 0; j < block_size() + width() + height() + 1; j++) {
           ref_[j] = rnd_.Rand8();
         }
 #if CONFIG_VP9_HIGHBITDEPTH
       } else {
-        for (int j = 0; j < block_size_; j++) {
-          CONVERT_TO_SHORTPTR(src_)[j] = rnd_.Rand16() & mask_;
+        for (int j = 0; j < block_size(); j++) {
+          CONVERT_TO_SHORTPTR(src_)[j] = rnd_.Rand16() & mask();
         }
-        for (int j = 0; j < block_size_ + width_ + height_ + 1; j++) {
-          CONVERT_TO_SHORTPTR(ref_)[j] = rnd_.Rand16() & mask_;
+        for (int j = 0; j < block_size() + width() + height() + 1; j++) {
+          CONVERT_TO_SHORTPTR(ref_)[j] = rnd_.Rand16() & mask();
         }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       }
       unsigned int sse1, sse2;
       unsigned int var1;
       ASM_REGISTER_STATE_CHECK(
-          var1 = subpel_variance_(ref_, width_ + 1, x, y, src_, width_, &sse1));
-      const unsigned int var2 =
-          subpel_variance_ref(ref_, src_, log2width_, log2height_, x, y, &sse2,
-                              use_high_bit_depth_, bit_depth_);
+          var1 = params_.func(ref_, width() + 1, x, y, src_, width(), &sse1));
+      const unsigned int var2 = subpel_variance_ref(
+          ref_, src_, params_.log2width, params_.log2height, x, y, &sse2,
+          use_high_bit_depth(), params_.bit_depth);
       EXPECT_EQ(sse1, sse2) << "at position " << x << ", " << y;
       EXPECT_EQ(var1, var2) << "at position " << x << ", " << y;
     }
@@ -680,28 +663,28 @@ void SubpelVarianceTest<SubpelVarianceFunctionType>::ExtremeRefTest() {
   // Ref: Set the first half of values to the maximum, the second half to 0.
   for (int x = 0; x < 8; ++x) {
     for (int y = 0; y < 8; ++y) {
-      const int half = block_size_ / 2;
-      if (!use_high_bit_depth_) {
+      const int half = block_size() / 2;
+      if (!use_high_bit_depth()) {
         memset(src_, 0, half);
         memset(src_ + half, 255, half);
         memset(ref_, 255, half);
-        memset(ref_ + half, 0, half + width_ + height_ + 1);
+        memset(ref_ + half, 0, half + width() + height() + 1);
 #if CONFIG_VP9_HIGHBITDEPTH
       } else {
-        vpx_memset16(CONVERT_TO_SHORTPTR(src_), mask_, half);
+        vpx_memset16(CONVERT_TO_SHORTPTR(src_), mask(), half);
         vpx_memset16(CONVERT_TO_SHORTPTR(src_) + half, 0, half);
         vpx_memset16(CONVERT_TO_SHORTPTR(ref_), 0, half);
-        vpx_memset16(CONVERT_TO_SHORTPTR(ref_) + half, mask_,
-                     half + width_ + height_ + 1);
+        vpx_memset16(CONVERT_TO_SHORTPTR(ref_) + half, mask(),
+                     half + width() + height() + 1);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       }
       unsigned int sse1, sse2;
       unsigned int var1;
       ASM_REGISTER_STATE_CHECK(
-          var1 = subpel_variance_(ref_, width_ + 1, x, y, src_, width_, &sse1));
-      const unsigned int var2 =
-          subpel_variance_ref(ref_, src_, log2width_, log2height_, x, y, &sse2,
-                              use_high_bit_depth_, bit_depth_);
+          var1 = params_.func(ref_, width() + 1, x, y, src_, width(), &sse1));
+      const unsigned int var2 = subpel_variance_ref(
+          ref_, src_, params_.log2width, params_.log2height, x, y, &sse2,
+          use_high_bit_depth(), params_.bit_depth);
       EXPECT_EQ(sse1, sse2) << "for xoffset " << x << " and yoffset " << y;
       EXPECT_EQ(var1, var2) << "for xoffset " << x << " and yoffset " << y;
     }
@@ -712,33 +695,32 @@ template <>
 void SubpelVarianceTest<SubpixAvgVarMxNFunc>::RefTest() {
   for (int x = 0; x < 8; ++x) {
     for (int y = 0; y < 8; ++y) {
-      if (!use_high_bit_depth_) {
-        for (int j = 0; j < block_size_; j++) {
+      if (!use_high_bit_depth()) {
+        for (int j = 0; j < block_size(); j++) {
           src_[j] = rnd_.Rand8();
           sec_[j] = rnd_.Rand8();
         }
-        for (int j = 0; j < block_size_ + width_ + height_ + 1; j++) {
+        for (int j = 0; j < block_size() + width() + height() + 1; j++) {
           ref_[j] = rnd_.Rand8();
         }
 #if CONFIG_VP9_HIGHBITDEPTH
       } else {
-        for (int j = 0; j < block_size_; j++) {
-          CONVERT_TO_SHORTPTR(src_)[j] = rnd_.Rand16() & mask_;
-          CONVERT_TO_SHORTPTR(sec_)[j] = rnd_.Rand16() & mask_;
+        for (int j = 0; j < block_size(); j++) {
+          CONVERT_TO_SHORTPTR(src_)[j] = rnd_.Rand16() & mask();
+          CONVERT_TO_SHORTPTR(sec_)[j] = rnd_.Rand16() & mask();
         }
-        for (int j = 0; j < block_size_ + width_ + height_ + 1; j++) {
-          CONVERT_TO_SHORTPTR(ref_)[j] = rnd_.Rand16() & mask_;
+        for (int j = 0; j < block_size() + width() + height() + 1; j++) {
+          CONVERT_TO_SHORTPTR(ref_)[j] = rnd_.Rand16() & mask();
         }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       }
       uint32_t sse1, sse2;
       uint32_t var1, var2;
-      ASM_REGISTER_STATE_CHECK(var1 =
-                                   subpel_variance_(ref_, width_ + 1, x, y,
-                                                    src_, width_, &sse1, sec_));
-      var2 = subpel_avg_variance_ref(ref_, src_, sec_, log2width_, log2height_,
-                                     x, y, &sse2, use_high_bit_depth_,
-                                     static_cast<vpx_bit_depth_t>(bit_depth_));
+      ASM_REGISTER_STATE_CHECK(var1 = params_.func(ref_, width() + 1, x, y,
+                                                   src_, width(), &sse1, sec_));
+      var2 = subpel_avg_variance_ref(ref_, src_, sec_, params_.log2width,
+                                     params_.log2height, x, y, &sse2,
+                                     use_high_bit_depth(), params_.bit_depth);
       EXPECT_EQ(sse1, sse2) << "at position " << x << ", " << y;
       EXPECT_EQ(var1, var2) << "at position " << x << ", " << y;
     }
@@ -798,37 +780,41 @@ INSTANTIATE_TEST_CASE_P(
                       VarianceParams(2, 3, &vpx_variance4x8_c),
                       VarianceParams(2, 2, &vpx_variance4x4_c)));
 
+typedef TestParams<SubpixVarMxNFunc> SubpelVarianceParams;
 INSTANTIATE_TEST_CASE_P(
     C, VpxSubpelVarianceTest,
-    ::testing::Values(make_tuple(6, 6, &vpx_sub_pixel_variance64x64_c, 0),
-                      make_tuple(6, 5, &vpx_sub_pixel_variance64x32_c, 0),
-                      make_tuple(5, 6, &vpx_sub_pixel_variance32x64_c, 0),
-                      make_tuple(5, 5, &vpx_sub_pixel_variance32x32_c, 0),
-                      make_tuple(5, 4, &vpx_sub_pixel_variance32x16_c, 0),
-                      make_tuple(4, 5, &vpx_sub_pixel_variance16x32_c, 0),
-                      make_tuple(4, 4, &vpx_sub_pixel_variance16x16_c, 0),
-                      make_tuple(4, 3, &vpx_sub_pixel_variance16x8_c, 0),
-                      make_tuple(3, 4, &vpx_sub_pixel_variance8x16_c, 0),
-                      make_tuple(3, 3, &vpx_sub_pixel_variance8x8_c, 0),
-                      make_tuple(3, 2, &vpx_sub_pixel_variance8x4_c, 0),
-                      make_tuple(2, 3, &vpx_sub_pixel_variance4x8_c, 0),
-                      make_tuple(2, 2, &vpx_sub_pixel_variance4x4_c, 0)));
+    ::testing::Values(
+        SubpelVarianceParams(6, 6, &vpx_sub_pixel_variance64x64_c, 0),
+        SubpelVarianceParams(6, 5, &vpx_sub_pixel_variance64x32_c, 0),
+        SubpelVarianceParams(5, 6, &vpx_sub_pixel_variance32x64_c, 0),
+        SubpelVarianceParams(5, 5, &vpx_sub_pixel_variance32x32_c, 0),
+        SubpelVarianceParams(5, 4, &vpx_sub_pixel_variance32x16_c, 0),
+        SubpelVarianceParams(4, 5, &vpx_sub_pixel_variance16x32_c, 0),
+        SubpelVarianceParams(4, 4, &vpx_sub_pixel_variance16x16_c, 0),
+        SubpelVarianceParams(4, 3, &vpx_sub_pixel_variance16x8_c, 0),
+        SubpelVarianceParams(3, 4, &vpx_sub_pixel_variance8x16_c, 0),
+        SubpelVarianceParams(3, 3, &vpx_sub_pixel_variance8x8_c, 0),
+        SubpelVarianceParams(3, 2, &vpx_sub_pixel_variance8x4_c, 0),
+        SubpelVarianceParams(2, 3, &vpx_sub_pixel_variance4x8_c, 0),
+        SubpelVarianceParams(2, 2, &vpx_sub_pixel_variance4x4_c, 0)));
 
+typedef TestParams<SubpixAvgVarMxNFunc> SubpelAvgVarianceParams;
 INSTANTIATE_TEST_CASE_P(
     C, VpxSubpelAvgVarianceTest,
-    ::testing::Values(make_tuple(6, 6, &vpx_sub_pixel_avg_variance64x64_c, 0),
-                      make_tuple(6, 5, &vpx_sub_pixel_avg_variance64x32_c, 0),
-                      make_tuple(5, 6, &vpx_sub_pixel_avg_variance32x64_c, 0),
-                      make_tuple(5, 5, &vpx_sub_pixel_avg_variance32x32_c, 0),
-                      make_tuple(5, 4, &vpx_sub_pixel_avg_variance32x16_c, 0),
-                      make_tuple(4, 5, &vpx_sub_pixel_avg_variance16x32_c, 0),
-                      make_tuple(4, 4, &vpx_sub_pixel_avg_variance16x16_c, 0),
-                      make_tuple(4, 3, &vpx_sub_pixel_avg_variance16x8_c, 0),
-                      make_tuple(3, 4, &vpx_sub_pixel_avg_variance8x16_c, 0),
-                      make_tuple(3, 3, &vpx_sub_pixel_avg_variance8x8_c, 0),
-                      make_tuple(3, 2, &vpx_sub_pixel_avg_variance8x4_c, 0),
-                      make_tuple(2, 3, &vpx_sub_pixel_avg_variance4x8_c, 0),
-                      make_tuple(2, 2, &vpx_sub_pixel_avg_variance4x4_c, 0)));
+    ::testing::Values(
+        SubpelAvgVarianceParams(6, 6, &vpx_sub_pixel_avg_variance64x64_c, 0),
+        SubpelAvgVarianceParams(6, 5, &vpx_sub_pixel_avg_variance64x32_c, 0),
+        SubpelAvgVarianceParams(5, 6, &vpx_sub_pixel_avg_variance32x64_c, 0),
+        SubpelAvgVarianceParams(5, 5, &vpx_sub_pixel_avg_variance32x32_c, 0),
+        SubpelAvgVarianceParams(5, 4, &vpx_sub_pixel_avg_variance32x16_c, 0),
+        SubpelAvgVarianceParams(4, 5, &vpx_sub_pixel_avg_variance16x32_c, 0),
+        SubpelAvgVarianceParams(4, 4, &vpx_sub_pixel_avg_variance16x16_c, 0),
+        SubpelAvgVarianceParams(4, 3, &vpx_sub_pixel_avg_variance16x8_c, 0),
+        SubpelAvgVarianceParams(3, 4, &vpx_sub_pixel_avg_variance8x16_c, 0),
+        SubpelAvgVarianceParams(3, 3, &vpx_sub_pixel_avg_variance8x8_c, 0),
+        SubpelAvgVarianceParams(3, 2, &vpx_sub_pixel_avg_variance8x4_c, 0),
+        SubpelAvgVarianceParams(2, 3, &vpx_sub_pixel_avg_variance4x8_c, 0),
+        SubpelAvgVarianceParams(2, 2, &vpx_sub_pixel_avg_variance4x4_c, 0)));
 
 #if CONFIG_VP9_HIGHBITDEPTH
 typedef MainTestClass<VarianceMxNFunc> VpxHBDMseTest;
@@ -850,18 +836,18 @@ TEST_P(VpxHBDSubpelAvgVarianceTest, Ref) { RefTest(); }
 /* TODO(debargha): This test does not support the highbd version
 INSTANTIATE_TEST_CASE_P(
     C, VpxHBDMseTest,
-    ::testing::Values(make_tuple(4, 4, &vpx_highbd_12_mse16x16_c),
-                      make_tuple(4, 4, &vpx_highbd_12_mse16x8_c),
-                      make_tuple(4, 4, &vpx_highbd_12_mse8x16_c),
-                      make_tuple(4, 4, &vpx_highbd_12_mse8x8_c),
-                      make_tuple(4, 4, &vpx_highbd_10_mse16x16_c),
-                      make_tuple(4, 4, &vpx_highbd_10_mse16x8_c),
-                      make_tuple(4, 4, &vpx_highbd_10_mse8x16_c),
-                      make_tuple(4, 4, &vpx_highbd_10_mse8x8_c),
-                      make_tuple(4, 4, &vpx_highbd_8_mse16x16_c),
-                      make_tuple(4, 4, &vpx_highbd_8_mse16x8_c),
-                      make_tuple(4, 4, &vpx_highbd_8_mse8x16_c),
-                      make_tuple(4, 4, &vpx_highbd_8_mse8x8_c)));
+    ::testing::Values(MseParams(4, 4, &vpx_highbd_12_mse16x16_c),
+                      MseParams(4, 4, &vpx_highbd_12_mse16x8_c),
+                      MseParams(4, 4, &vpx_highbd_12_mse8x16_c),
+                      MseParams(4, 4, &vpx_highbd_12_mse8x8_c),
+                      MseParams(4, 4, &vpx_highbd_10_mse16x16_c),
+                      MseParams(4, 4, &vpx_highbd_10_mse16x8_c),
+                      MseParams(4, 4, &vpx_highbd_10_mse8x16_c),
+                      MseParams(4, 4, &vpx_highbd_10_mse8x8_c),
+                      MseParams(4, 4, &vpx_highbd_8_mse16x16_c),
+                      MseParams(4, 4, &vpx_highbd_8_mse16x8_c),
+                      MseParams(4, 4, &vpx_highbd_8_mse8x16_c),
+                      MseParams(4, 4, &vpx_highbd_8_mse8x8_c)));
 */
 
 INSTANTIATE_TEST_CASE_P(
@@ -909,88 +895,161 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     C, VpxHBDSubpelVarianceTest,
     ::testing::Values(
-        make_tuple(6, 6, &vpx_highbd_8_sub_pixel_variance64x64_c, 8),
-        make_tuple(6, 5, &vpx_highbd_8_sub_pixel_variance64x32_c, 8),
-        make_tuple(5, 6, &vpx_highbd_8_sub_pixel_variance32x64_c, 8),
-        make_tuple(5, 5, &vpx_highbd_8_sub_pixel_variance32x32_c, 8),
-        make_tuple(5, 4, &vpx_highbd_8_sub_pixel_variance32x16_c, 8),
-        make_tuple(4, 5, &vpx_highbd_8_sub_pixel_variance16x32_c, 8),
-        make_tuple(4, 4, &vpx_highbd_8_sub_pixel_variance16x16_c, 8),
-        make_tuple(4, 3, &vpx_highbd_8_sub_pixel_variance16x8_c, 8),
-        make_tuple(3, 4, &vpx_highbd_8_sub_pixel_variance8x16_c, 8),
-        make_tuple(3, 3, &vpx_highbd_8_sub_pixel_variance8x8_c, 8),
-        make_tuple(3, 2, &vpx_highbd_8_sub_pixel_variance8x4_c, 8),
-        make_tuple(2, 3, &vpx_highbd_8_sub_pixel_variance4x8_c, 8),
-        make_tuple(2, 2, &vpx_highbd_8_sub_pixel_variance4x4_c, 8),
-        make_tuple(6, 6, &vpx_highbd_10_sub_pixel_variance64x64_c, 10),
-        make_tuple(6, 5, &vpx_highbd_10_sub_pixel_variance64x32_c, 10),
-        make_tuple(5, 6, &vpx_highbd_10_sub_pixel_variance32x64_c, 10),
-        make_tuple(5, 5, &vpx_highbd_10_sub_pixel_variance32x32_c, 10),
-        make_tuple(5, 4, &vpx_highbd_10_sub_pixel_variance32x16_c, 10),
-        make_tuple(4, 5, &vpx_highbd_10_sub_pixel_variance16x32_c, 10),
-        make_tuple(4, 4, &vpx_highbd_10_sub_pixel_variance16x16_c, 10),
-        make_tuple(4, 3, &vpx_highbd_10_sub_pixel_variance16x8_c, 10),
-        make_tuple(3, 4, &vpx_highbd_10_sub_pixel_variance8x16_c, 10),
-        make_tuple(3, 3, &vpx_highbd_10_sub_pixel_variance8x8_c, 10),
-        make_tuple(3, 2, &vpx_highbd_10_sub_pixel_variance8x4_c, 10),
-        make_tuple(2, 3, &vpx_highbd_10_sub_pixel_variance4x8_c, 10),
-        make_tuple(2, 2, &vpx_highbd_10_sub_pixel_variance4x4_c, 10),
-        make_tuple(6, 6, &vpx_highbd_12_sub_pixel_variance64x64_c, 12),
-        make_tuple(6, 5, &vpx_highbd_12_sub_pixel_variance64x32_c, 12),
-        make_tuple(5, 6, &vpx_highbd_12_sub_pixel_variance32x64_c, 12),
-        make_tuple(5, 5, &vpx_highbd_12_sub_pixel_variance32x32_c, 12),
-        make_tuple(5, 4, &vpx_highbd_12_sub_pixel_variance32x16_c, 12),
-        make_tuple(4, 5, &vpx_highbd_12_sub_pixel_variance16x32_c, 12),
-        make_tuple(4, 4, &vpx_highbd_12_sub_pixel_variance16x16_c, 12),
-        make_tuple(4, 3, &vpx_highbd_12_sub_pixel_variance16x8_c, 12),
-        make_tuple(3, 4, &vpx_highbd_12_sub_pixel_variance8x16_c, 12),
-        make_tuple(3, 3, &vpx_highbd_12_sub_pixel_variance8x8_c, 12),
-        make_tuple(3, 2, &vpx_highbd_12_sub_pixel_variance8x4_c, 12),
-        make_tuple(2, 3, &vpx_highbd_12_sub_pixel_variance4x8_c, 12),
-        make_tuple(2, 2, &vpx_highbd_12_sub_pixel_variance4x4_c, 12)));
+        SubpelVarianceParams(6, 6, &vpx_highbd_8_sub_pixel_variance64x64_c, 8),
+        SubpelVarianceParams(6, 5, &vpx_highbd_8_sub_pixel_variance64x32_c, 8),
+        SubpelVarianceParams(5, 6, &vpx_highbd_8_sub_pixel_variance32x64_c, 8),
+        SubpelVarianceParams(5, 5, &vpx_highbd_8_sub_pixel_variance32x32_c, 8),
+        SubpelVarianceParams(5, 4, &vpx_highbd_8_sub_pixel_variance32x16_c, 8),
+        SubpelVarianceParams(4, 5, &vpx_highbd_8_sub_pixel_variance16x32_c, 8),
+        SubpelVarianceParams(4, 4, &vpx_highbd_8_sub_pixel_variance16x16_c, 8),
+        SubpelVarianceParams(4, 3, &vpx_highbd_8_sub_pixel_variance16x8_c, 8),
+        SubpelVarianceParams(3, 4, &vpx_highbd_8_sub_pixel_variance8x16_c, 8),
+        SubpelVarianceParams(3, 3, &vpx_highbd_8_sub_pixel_variance8x8_c, 8),
+        SubpelVarianceParams(3, 2, &vpx_highbd_8_sub_pixel_variance8x4_c, 8),
+        SubpelVarianceParams(2, 3, &vpx_highbd_8_sub_pixel_variance4x8_c, 8),
+        SubpelVarianceParams(2, 2, &vpx_highbd_8_sub_pixel_variance4x4_c, 8),
+        SubpelVarianceParams(6, 6, &vpx_highbd_10_sub_pixel_variance64x64_c,
+                             10),
+        SubpelVarianceParams(6, 5, &vpx_highbd_10_sub_pixel_variance64x32_c,
+                             10),
+        SubpelVarianceParams(5, 6, &vpx_highbd_10_sub_pixel_variance32x64_c,
+                             10),
+        SubpelVarianceParams(5, 5, &vpx_highbd_10_sub_pixel_variance32x32_c,
+                             10),
+        SubpelVarianceParams(5, 4, &vpx_highbd_10_sub_pixel_variance32x16_c,
+                             10),
+        SubpelVarianceParams(4, 5, &vpx_highbd_10_sub_pixel_variance16x32_c,
+                             10),
+        SubpelVarianceParams(4, 4, &vpx_highbd_10_sub_pixel_variance16x16_c,
+                             10),
+        SubpelVarianceParams(4, 3, &vpx_highbd_10_sub_pixel_variance16x8_c, 10),
+        SubpelVarianceParams(3, 4, &vpx_highbd_10_sub_pixel_variance8x16_c, 10),
+        SubpelVarianceParams(3, 3, &vpx_highbd_10_sub_pixel_variance8x8_c, 10),
+        SubpelVarianceParams(3, 2, &vpx_highbd_10_sub_pixel_variance8x4_c, 10),
+        SubpelVarianceParams(2, 3, &vpx_highbd_10_sub_pixel_variance4x8_c, 10),
+        SubpelVarianceParams(2, 2, &vpx_highbd_10_sub_pixel_variance4x4_c, 10),
+        SubpelVarianceParams(6, 6, &vpx_highbd_12_sub_pixel_variance64x64_c,
+                             12),
+        SubpelVarianceParams(6, 5, &vpx_highbd_12_sub_pixel_variance64x32_c,
+                             12),
+        SubpelVarianceParams(5, 6, &vpx_highbd_12_sub_pixel_variance32x64_c,
+                             12),
+        SubpelVarianceParams(5, 5, &vpx_highbd_12_sub_pixel_variance32x32_c,
+                             12),
+        SubpelVarianceParams(5, 4, &vpx_highbd_12_sub_pixel_variance32x16_c,
+                             12),
+        SubpelVarianceParams(4, 5, &vpx_highbd_12_sub_pixel_variance16x32_c,
+                             12),
+        SubpelVarianceParams(4, 4, &vpx_highbd_12_sub_pixel_variance16x16_c,
+                             12),
+        SubpelVarianceParams(4, 3, &vpx_highbd_12_sub_pixel_variance16x8_c, 12),
+        SubpelVarianceParams(3, 4, &vpx_highbd_12_sub_pixel_variance8x16_c, 12),
+        SubpelVarianceParams(3, 3, &vpx_highbd_12_sub_pixel_variance8x8_c, 12),
+        SubpelVarianceParams(3, 2, &vpx_highbd_12_sub_pixel_variance8x4_c, 12),
+        SubpelVarianceParams(2, 3, &vpx_highbd_12_sub_pixel_variance4x8_c, 12),
+        SubpelVarianceParams(2, 2, &vpx_highbd_12_sub_pixel_variance4x4_c,
+                             12)));
 
 INSTANTIATE_TEST_CASE_P(
     C, VpxHBDSubpelAvgVarianceTest,
     ::testing::Values(
-        make_tuple(6, 6, &vpx_highbd_8_sub_pixel_avg_variance64x64_c, 8),
-        make_tuple(6, 5, &vpx_highbd_8_sub_pixel_avg_variance64x32_c, 8),
-        make_tuple(5, 6, &vpx_highbd_8_sub_pixel_avg_variance32x64_c, 8),
-        make_tuple(5, 5, &vpx_highbd_8_sub_pixel_avg_variance32x32_c, 8),
-        make_tuple(5, 4, &vpx_highbd_8_sub_pixel_avg_variance32x16_c, 8),
-        make_tuple(4, 5, &vpx_highbd_8_sub_pixel_avg_variance16x32_c, 8),
-        make_tuple(4, 4, &vpx_highbd_8_sub_pixel_avg_variance16x16_c, 8),
-        make_tuple(4, 3, &vpx_highbd_8_sub_pixel_avg_variance16x8_c, 8),
-        make_tuple(3, 4, &vpx_highbd_8_sub_pixel_avg_variance8x16_c, 8),
-        make_tuple(3, 3, &vpx_highbd_8_sub_pixel_avg_variance8x8_c, 8),
-        make_tuple(3, 2, &vpx_highbd_8_sub_pixel_avg_variance8x4_c, 8),
-        make_tuple(2, 3, &vpx_highbd_8_sub_pixel_avg_variance4x8_c, 8),
-        make_tuple(2, 2, &vpx_highbd_8_sub_pixel_avg_variance4x4_c, 8),
-        make_tuple(6, 6, &vpx_highbd_10_sub_pixel_avg_variance64x64_c, 10),
-        make_tuple(6, 5, &vpx_highbd_10_sub_pixel_avg_variance64x32_c, 10),
-        make_tuple(5, 6, &vpx_highbd_10_sub_pixel_avg_variance32x64_c, 10),
-        make_tuple(5, 5, &vpx_highbd_10_sub_pixel_avg_variance32x32_c, 10),
-        make_tuple(5, 4, &vpx_highbd_10_sub_pixel_avg_variance32x16_c, 10),
-        make_tuple(4, 5, &vpx_highbd_10_sub_pixel_avg_variance16x32_c, 10),
-        make_tuple(4, 4, &vpx_highbd_10_sub_pixel_avg_variance16x16_c, 10),
-        make_tuple(4, 3, &vpx_highbd_10_sub_pixel_avg_variance16x8_c, 10),
-        make_tuple(3, 4, &vpx_highbd_10_sub_pixel_avg_variance8x16_c, 10),
-        make_tuple(3, 3, &vpx_highbd_10_sub_pixel_avg_variance8x8_c, 10),
-        make_tuple(3, 2, &vpx_highbd_10_sub_pixel_avg_variance8x4_c, 10),
-        make_tuple(2, 3, &vpx_highbd_10_sub_pixel_avg_variance4x8_c, 10),
-        make_tuple(2, 2, &vpx_highbd_10_sub_pixel_avg_variance4x4_c, 10),
-        make_tuple(6, 6, &vpx_highbd_12_sub_pixel_avg_variance64x64_c, 12),
-        make_tuple(6, 5, &vpx_highbd_12_sub_pixel_avg_variance64x32_c, 12),
-        make_tuple(5, 6, &vpx_highbd_12_sub_pixel_avg_variance32x64_c, 12),
-        make_tuple(5, 5, &vpx_highbd_12_sub_pixel_avg_variance32x32_c, 12),
-        make_tuple(5, 4, &vpx_highbd_12_sub_pixel_avg_variance32x16_c, 12),
-        make_tuple(4, 5, &vpx_highbd_12_sub_pixel_avg_variance16x32_c, 12),
-        make_tuple(4, 4, &vpx_highbd_12_sub_pixel_avg_variance16x16_c, 12),
-        make_tuple(4, 3, &vpx_highbd_12_sub_pixel_avg_variance16x8_c, 12),
-        make_tuple(3, 4, &vpx_highbd_12_sub_pixel_avg_variance8x16_c, 12),
-        make_tuple(3, 3, &vpx_highbd_12_sub_pixel_avg_variance8x8_c, 12),
-        make_tuple(3, 2, &vpx_highbd_12_sub_pixel_avg_variance8x4_c, 12),
-        make_tuple(2, 3, &vpx_highbd_12_sub_pixel_avg_variance4x8_c, 12),
-        make_tuple(2, 2, &vpx_highbd_12_sub_pixel_avg_variance4x4_c, 12)));
+        SubpelAvgVarianceParams(6, 6,
+                                &vpx_highbd_8_sub_pixel_avg_variance64x64_c, 8),
+        SubpelAvgVarianceParams(6, 5,
+                                &vpx_highbd_8_sub_pixel_avg_variance64x32_c, 8),
+        SubpelAvgVarianceParams(5, 6,
+                                &vpx_highbd_8_sub_pixel_avg_variance32x64_c, 8),
+        SubpelAvgVarianceParams(5, 5,
+                                &vpx_highbd_8_sub_pixel_avg_variance32x32_c, 8),
+        SubpelAvgVarianceParams(5, 4,
+                                &vpx_highbd_8_sub_pixel_avg_variance32x16_c, 8),
+        SubpelAvgVarianceParams(4, 5,
+                                &vpx_highbd_8_sub_pixel_avg_variance16x32_c, 8),
+        SubpelAvgVarianceParams(4, 4,
+                                &vpx_highbd_8_sub_pixel_avg_variance16x16_c, 8),
+        SubpelAvgVarianceParams(4, 3,
+                                &vpx_highbd_8_sub_pixel_avg_variance16x8_c, 8),
+        SubpelAvgVarianceParams(3, 4,
+                                &vpx_highbd_8_sub_pixel_avg_variance8x16_c, 8),
+        SubpelAvgVarianceParams(3, 3, &vpx_highbd_8_sub_pixel_avg_variance8x8_c,
+                                8),
+        SubpelAvgVarianceParams(3, 2, &vpx_highbd_8_sub_pixel_avg_variance8x4_c,
+                                8),
+        SubpelAvgVarianceParams(2, 3, &vpx_highbd_8_sub_pixel_avg_variance4x8_c,
+                                8),
+        SubpelAvgVarianceParams(2, 2, &vpx_highbd_8_sub_pixel_avg_variance4x4_c,
+                                8),
+        SubpelAvgVarianceParams(6, 6,
+                                &vpx_highbd_10_sub_pixel_avg_variance64x64_c,
+                                10),
+        SubpelAvgVarianceParams(6, 5,
+                                &vpx_highbd_10_sub_pixel_avg_variance64x32_c,
+                                10),
+        SubpelAvgVarianceParams(5, 6,
+                                &vpx_highbd_10_sub_pixel_avg_variance32x64_c,
+                                10),
+        SubpelAvgVarianceParams(5, 5,
+                                &vpx_highbd_10_sub_pixel_avg_variance32x32_c,
+                                10),
+        SubpelAvgVarianceParams(5, 4,
+                                &vpx_highbd_10_sub_pixel_avg_variance32x16_c,
+                                10),
+        SubpelAvgVarianceParams(4, 5,
+                                &vpx_highbd_10_sub_pixel_avg_variance16x32_c,
+                                10),
+        SubpelAvgVarianceParams(4, 4,
+                                &vpx_highbd_10_sub_pixel_avg_variance16x16_c,
+                                10),
+        SubpelAvgVarianceParams(4, 3,
+                                &vpx_highbd_10_sub_pixel_avg_variance16x8_c,
+                                10),
+        SubpelAvgVarianceParams(3, 4,
+                                &vpx_highbd_10_sub_pixel_avg_variance8x16_c,
+                                10),
+        SubpelAvgVarianceParams(3, 3,
+                                &vpx_highbd_10_sub_pixel_avg_variance8x8_c, 10),
+        SubpelAvgVarianceParams(3, 2,
+                                &vpx_highbd_10_sub_pixel_avg_variance8x4_c, 10),
+        SubpelAvgVarianceParams(2, 3,
+                                &vpx_highbd_10_sub_pixel_avg_variance4x8_c, 10),
+        SubpelAvgVarianceParams(2, 2,
+                                &vpx_highbd_10_sub_pixel_avg_variance4x4_c, 10),
+        SubpelAvgVarianceParams(6, 6,
+                                &vpx_highbd_12_sub_pixel_avg_variance64x64_c,
+                                12),
+        SubpelAvgVarianceParams(6, 5,
+                                &vpx_highbd_12_sub_pixel_avg_variance64x32_c,
+                                12),
+        SubpelAvgVarianceParams(5, 6,
+                                &vpx_highbd_12_sub_pixel_avg_variance32x64_c,
+                                12),
+        SubpelAvgVarianceParams(5, 5,
+                                &vpx_highbd_12_sub_pixel_avg_variance32x32_c,
+                                12),
+        SubpelAvgVarianceParams(5, 4,
+                                &vpx_highbd_12_sub_pixel_avg_variance32x16_c,
+                                12),
+        SubpelAvgVarianceParams(4, 5,
+                                &vpx_highbd_12_sub_pixel_avg_variance16x32_c,
+                                12),
+        SubpelAvgVarianceParams(4, 4,
+                                &vpx_highbd_12_sub_pixel_avg_variance16x16_c,
+                                12),
+        SubpelAvgVarianceParams(4, 3,
+                                &vpx_highbd_12_sub_pixel_avg_variance16x8_c,
+                                12),
+        SubpelAvgVarianceParams(3, 4,
+                                &vpx_highbd_12_sub_pixel_avg_variance8x16_c,
+                                12),
+        SubpelAvgVarianceParams(3, 3,
+                                &vpx_highbd_12_sub_pixel_avg_variance8x8_c, 12),
+        SubpelAvgVarianceParams(3, 2,
+                                &vpx_highbd_12_sub_pixel_avg_variance8x4_c, 12),
+        SubpelAvgVarianceParams(2, 3,
+                                &vpx_highbd_12_sub_pixel_avg_variance4x8_c, 12),
+        SubpelAvgVarianceParams(2, 2,
+                                &vpx_highbd_12_sub_pixel_avg_variance4x4_c,
+                                12)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if HAVE_SSE2
@@ -1021,36 +1080,37 @@ INSTANTIATE_TEST_CASE_P(
 
 INSTANTIATE_TEST_CASE_P(
     SSE2, VpxSubpelVarianceTest,
-    ::testing::Values(make_tuple(6, 6, &vpx_sub_pixel_variance64x64_sse2, 0),
-                      make_tuple(6, 5, &vpx_sub_pixel_variance64x32_sse2, 0),
-                      make_tuple(5, 6, &vpx_sub_pixel_variance32x64_sse2, 0),
-                      make_tuple(5, 5, &vpx_sub_pixel_variance32x32_sse2, 0),
-                      make_tuple(5, 4, &vpx_sub_pixel_variance32x16_sse2, 0),
-                      make_tuple(4, 5, &vpx_sub_pixel_variance16x32_sse2, 0),
-                      make_tuple(4, 4, &vpx_sub_pixel_variance16x16_sse2, 0),
-                      make_tuple(4, 3, &vpx_sub_pixel_variance16x8_sse2, 0),
-                      make_tuple(3, 4, &vpx_sub_pixel_variance8x16_sse2, 0),
-                      make_tuple(3, 3, &vpx_sub_pixel_variance8x8_sse2, 0),
-                      make_tuple(3, 2, &vpx_sub_pixel_variance8x4_sse2, 0),
-                      make_tuple(2, 3, &vpx_sub_pixel_variance4x8_sse2, 0),
-                      make_tuple(2, 2, &vpx_sub_pixel_variance4x4_sse2, 0)));
+    ::testing::Values(
+        SubpelVarianceParams(6, 6, &vpx_sub_pixel_variance64x64_sse2, 0),
+        SubpelVarianceParams(6, 5, &vpx_sub_pixel_variance64x32_sse2, 0),
+        SubpelVarianceParams(5, 6, &vpx_sub_pixel_variance32x64_sse2, 0),
+        SubpelVarianceParams(5, 5, &vpx_sub_pixel_variance32x32_sse2, 0),
+        SubpelVarianceParams(5, 4, &vpx_sub_pixel_variance32x16_sse2, 0),
+        SubpelVarianceParams(4, 5, &vpx_sub_pixel_variance16x32_sse2, 0),
+        SubpelVarianceParams(4, 4, &vpx_sub_pixel_variance16x16_sse2, 0),
+        SubpelVarianceParams(4, 3, &vpx_sub_pixel_variance16x8_sse2, 0),
+        SubpelVarianceParams(3, 4, &vpx_sub_pixel_variance8x16_sse2, 0),
+        SubpelVarianceParams(3, 3, &vpx_sub_pixel_variance8x8_sse2, 0),
+        SubpelVarianceParams(3, 2, &vpx_sub_pixel_variance8x4_sse2, 0),
+        SubpelVarianceParams(2, 3, &vpx_sub_pixel_variance4x8_sse2, 0),
+        SubpelVarianceParams(2, 2, &vpx_sub_pixel_variance4x4_sse2, 0)));
 
 INSTANTIATE_TEST_CASE_P(
     SSE2, VpxSubpelAvgVarianceTest,
     ::testing::Values(
-        make_tuple(6, 6, &vpx_sub_pixel_avg_variance64x64_sse2, 0),
-        make_tuple(6, 5, &vpx_sub_pixel_avg_variance64x32_sse2, 0),
-        make_tuple(5, 6, &vpx_sub_pixel_avg_variance32x64_sse2, 0),
-        make_tuple(5, 5, &vpx_sub_pixel_avg_variance32x32_sse2, 0),
-        make_tuple(5, 4, &vpx_sub_pixel_avg_variance32x16_sse2, 0),
-        make_tuple(4, 5, &vpx_sub_pixel_avg_variance16x32_sse2, 0),
-        make_tuple(4, 4, &vpx_sub_pixel_avg_variance16x16_sse2, 0),
-        make_tuple(4, 3, &vpx_sub_pixel_avg_variance16x8_sse2, 0),
-        make_tuple(3, 4, &vpx_sub_pixel_avg_variance8x16_sse2, 0),
-        make_tuple(3, 3, &vpx_sub_pixel_avg_variance8x8_sse2, 0),
-        make_tuple(3, 2, &vpx_sub_pixel_avg_variance8x4_sse2, 0),
-        make_tuple(2, 3, &vpx_sub_pixel_avg_variance4x8_sse2, 0),
-        make_tuple(2, 2, &vpx_sub_pixel_avg_variance4x4_sse2, 0)));
+        SubpelAvgVarianceParams(6, 6, &vpx_sub_pixel_avg_variance64x64_sse2, 0),
+        SubpelAvgVarianceParams(6, 5, &vpx_sub_pixel_avg_variance64x32_sse2, 0),
+        SubpelAvgVarianceParams(5, 6, &vpx_sub_pixel_avg_variance32x64_sse2, 0),
+        SubpelAvgVarianceParams(5, 5, &vpx_sub_pixel_avg_variance32x32_sse2, 0),
+        SubpelAvgVarianceParams(5, 4, &vpx_sub_pixel_avg_variance32x16_sse2, 0),
+        SubpelAvgVarianceParams(4, 5, &vpx_sub_pixel_avg_variance16x32_sse2, 0),
+        SubpelAvgVarianceParams(4, 4, &vpx_sub_pixel_avg_variance16x16_sse2, 0),
+        SubpelAvgVarianceParams(4, 3, &vpx_sub_pixel_avg_variance16x8_sse2, 0),
+        SubpelAvgVarianceParams(3, 4, &vpx_sub_pixel_avg_variance8x16_sse2, 0),
+        SubpelAvgVarianceParams(3, 3, &vpx_sub_pixel_avg_variance8x8_sse2, 0),
+        SubpelAvgVarianceParams(3, 2, &vpx_sub_pixel_avg_variance8x4_sse2, 0),
+        SubpelAvgVarianceParams(2, 3, &vpx_sub_pixel_avg_variance4x8_sse2, 0),
+        SubpelAvgVarianceParams(2, 2, &vpx_sub_pixel_avg_variance4x4_sse2, 0)));
 
 #if CONFIG_VP9_HIGHBITDEPTH
 /* TODO(debargha): This test does not support the highbd version
@@ -1107,112 +1167,219 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     SSE2, VpxHBDSubpelVarianceTest,
     ::testing::Values(
-        make_tuple(6, 6, &vpx_highbd_12_sub_pixel_variance64x64_sse2, 12),
-        make_tuple(6, 5, &vpx_highbd_12_sub_pixel_variance64x32_sse2, 12),
-        make_tuple(5, 6, &vpx_highbd_12_sub_pixel_variance32x64_sse2, 12),
-        make_tuple(5, 5, &vpx_highbd_12_sub_pixel_variance32x32_sse2, 12),
-        make_tuple(5, 4, &vpx_highbd_12_sub_pixel_variance32x16_sse2, 12),
-        make_tuple(4, 5, &vpx_highbd_12_sub_pixel_variance16x32_sse2, 12),
-        make_tuple(4, 4, &vpx_highbd_12_sub_pixel_variance16x16_sse2, 12),
-        make_tuple(4, 3, &vpx_highbd_12_sub_pixel_variance16x8_sse2, 12),
-        make_tuple(3, 4, &vpx_highbd_12_sub_pixel_variance8x16_sse2, 12),
-        make_tuple(3, 3, &vpx_highbd_12_sub_pixel_variance8x8_sse2, 12),
-        make_tuple(3, 2, &vpx_highbd_12_sub_pixel_variance8x4_sse2, 12),
-        make_tuple(6, 6, &vpx_highbd_10_sub_pixel_variance64x64_sse2, 10),
-        make_tuple(6, 5, &vpx_highbd_10_sub_pixel_variance64x32_sse2, 10),
-        make_tuple(5, 6, &vpx_highbd_10_sub_pixel_variance32x64_sse2, 10),
-        make_tuple(5, 5, &vpx_highbd_10_sub_pixel_variance32x32_sse2, 10),
-        make_tuple(5, 4, &vpx_highbd_10_sub_pixel_variance32x16_sse2, 10),
-        make_tuple(4, 5, &vpx_highbd_10_sub_pixel_variance16x32_sse2, 10),
-        make_tuple(4, 4, &vpx_highbd_10_sub_pixel_variance16x16_sse2, 10),
-        make_tuple(4, 3, &vpx_highbd_10_sub_pixel_variance16x8_sse2, 10),
-        make_tuple(3, 4, &vpx_highbd_10_sub_pixel_variance8x16_sse2, 10),
-        make_tuple(3, 3, &vpx_highbd_10_sub_pixel_variance8x8_sse2, 10),
-        make_tuple(3, 2, &vpx_highbd_10_sub_pixel_variance8x4_sse2, 10),
-        make_tuple(6, 6, &vpx_highbd_8_sub_pixel_variance64x64_sse2, 8),
-        make_tuple(6, 5, &vpx_highbd_8_sub_pixel_variance64x32_sse2, 8),
-        make_tuple(5, 6, &vpx_highbd_8_sub_pixel_variance32x64_sse2, 8),
-        make_tuple(5, 5, &vpx_highbd_8_sub_pixel_variance32x32_sse2, 8),
-        make_tuple(5, 4, &vpx_highbd_8_sub_pixel_variance32x16_sse2, 8),
-        make_tuple(4, 5, &vpx_highbd_8_sub_pixel_variance16x32_sse2, 8),
-        make_tuple(4, 4, &vpx_highbd_8_sub_pixel_variance16x16_sse2, 8),
-        make_tuple(4, 3, &vpx_highbd_8_sub_pixel_variance16x8_sse2, 8),
-        make_tuple(3, 4, &vpx_highbd_8_sub_pixel_variance8x16_sse2, 8),
-        make_tuple(3, 3, &vpx_highbd_8_sub_pixel_variance8x8_sse2, 8),
-        make_tuple(3, 2, &vpx_highbd_8_sub_pixel_variance8x4_sse2, 8)));
+        SubpelVarianceParams(6, 6, &vpx_highbd_12_sub_pixel_variance64x64_sse2,
+                             12),
+        SubpelVarianceParams(6, 5, &vpx_highbd_12_sub_pixel_variance64x32_sse2,
+                             12),
+        SubpelVarianceParams(5, 6, &vpx_highbd_12_sub_pixel_variance32x64_sse2,
+                             12),
+        SubpelVarianceParams(5, 5, &vpx_highbd_12_sub_pixel_variance32x32_sse2,
+                             12),
+        SubpelVarianceParams(5, 4, &vpx_highbd_12_sub_pixel_variance32x16_sse2,
+                             12),
+        SubpelVarianceParams(4, 5, &vpx_highbd_12_sub_pixel_variance16x32_sse2,
+                             12),
+        SubpelVarianceParams(4, 4, &vpx_highbd_12_sub_pixel_variance16x16_sse2,
+                             12),
+        SubpelVarianceParams(4, 3, &vpx_highbd_12_sub_pixel_variance16x8_sse2,
+                             12),
+        SubpelVarianceParams(3, 4, &vpx_highbd_12_sub_pixel_variance8x16_sse2,
+                             12),
+        SubpelVarianceParams(3, 3, &vpx_highbd_12_sub_pixel_variance8x8_sse2,
+                             12),
+        SubpelVarianceParams(3, 2, &vpx_highbd_12_sub_pixel_variance8x4_sse2,
+                             12),
+        SubpelVarianceParams(6, 6, &vpx_highbd_10_sub_pixel_variance64x64_sse2,
+                             10),
+        SubpelVarianceParams(6, 5, &vpx_highbd_10_sub_pixel_variance64x32_sse2,
+                             10),
+        SubpelVarianceParams(5, 6, &vpx_highbd_10_sub_pixel_variance32x64_sse2,
+                             10),
+        SubpelVarianceParams(5, 5, &vpx_highbd_10_sub_pixel_variance32x32_sse2,
+                             10),
+        SubpelVarianceParams(5, 4, &vpx_highbd_10_sub_pixel_variance32x16_sse2,
+                             10),
+        SubpelVarianceParams(4, 5, &vpx_highbd_10_sub_pixel_variance16x32_sse2,
+                             10),
+        SubpelVarianceParams(4, 4, &vpx_highbd_10_sub_pixel_variance16x16_sse2,
+                             10),
+        SubpelVarianceParams(4, 3, &vpx_highbd_10_sub_pixel_variance16x8_sse2,
+                             10),
+        SubpelVarianceParams(3, 4, &vpx_highbd_10_sub_pixel_variance8x16_sse2,
+                             10),
+        SubpelVarianceParams(3, 3, &vpx_highbd_10_sub_pixel_variance8x8_sse2,
+                             10),
+        SubpelVarianceParams(3, 2, &vpx_highbd_10_sub_pixel_variance8x4_sse2,
+                             10),
+        SubpelVarianceParams(6, 6, &vpx_highbd_8_sub_pixel_variance64x64_sse2,
+                             8),
+        SubpelVarianceParams(6, 5, &vpx_highbd_8_sub_pixel_variance64x32_sse2,
+                             8),
+        SubpelVarianceParams(5, 6, &vpx_highbd_8_sub_pixel_variance32x64_sse2,
+                             8),
+        SubpelVarianceParams(5, 5, &vpx_highbd_8_sub_pixel_variance32x32_sse2,
+                             8),
+        SubpelVarianceParams(5, 4, &vpx_highbd_8_sub_pixel_variance32x16_sse2,
+                             8),
+        SubpelVarianceParams(4, 5, &vpx_highbd_8_sub_pixel_variance16x32_sse2,
+                             8),
+        SubpelVarianceParams(4, 4, &vpx_highbd_8_sub_pixel_variance16x16_sse2,
+                             8),
+        SubpelVarianceParams(4, 3, &vpx_highbd_8_sub_pixel_variance16x8_sse2,
+                             8),
+        SubpelVarianceParams(3, 4, &vpx_highbd_8_sub_pixel_variance8x16_sse2,
+                             8),
+        SubpelVarianceParams(3, 3, &vpx_highbd_8_sub_pixel_variance8x8_sse2, 8),
+        SubpelVarianceParams(3, 2, &vpx_highbd_8_sub_pixel_variance8x4_sse2,
+                             8)));
 
 INSTANTIATE_TEST_CASE_P(
     SSE2, VpxHBDSubpelAvgVarianceTest,
     ::testing::Values(
-        make_tuple(6, 6, &vpx_highbd_12_sub_pixel_avg_variance64x64_sse2, 12),
-        make_tuple(6, 5, &vpx_highbd_12_sub_pixel_avg_variance64x32_sse2, 12),
-        make_tuple(5, 6, &vpx_highbd_12_sub_pixel_avg_variance32x64_sse2, 12),
-        make_tuple(5, 5, &vpx_highbd_12_sub_pixel_avg_variance32x32_sse2, 12),
-        make_tuple(5, 4, &vpx_highbd_12_sub_pixel_avg_variance32x16_sse2, 12),
-        make_tuple(4, 5, &vpx_highbd_12_sub_pixel_avg_variance16x32_sse2, 12),
-        make_tuple(4, 4, &vpx_highbd_12_sub_pixel_avg_variance16x16_sse2, 12),
-        make_tuple(4, 3, &vpx_highbd_12_sub_pixel_avg_variance16x8_sse2, 12),
-        make_tuple(3, 4, &vpx_highbd_12_sub_pixel_avg_variance8x16_sse2, 12),
-        make_tuple(3, 3, &vpx_highbd_12_sub_pixel_avg_variance8x8_sse2, 12),
-        make_tuple(3, 2, &vpx_highbd_12_sub_pixel_avg_variance8x4_sse2, 12),
-        make_tuple(6, 6, &vpx_highbd_10_sub_pixel_avg_variance64x64_sse2, 10),
-        make_tuple(6, 5, &vpx_highbd_10_sub_pixel_avg_variance64x32_sse2, 10),
-        make_tuple(5, 6, &vpx_highbd_10_sub_pixel_avg_variance32x64_sse2, 10),
-        make_tuple(5, 5, &vpx_highbd_10_sub_pixel_avg_variance32x32_sse2, 10),
-        make_tuple(5, 4, &vpx_highbd_10_sub_pixel_avg_variance32x16_sse2, 10),
-        make_tuple(4, 5, &vpx_highbd_10_sub_pixel_avg_variance16x32_sse2, 10),
-        make_tuple(4, 4, &vpx_highbd_10_sub_pixel_avg_variance16x16_sse2, 10),
-        make_tuple(4, 3, &vpx_highbd_10_sub_pixel_avg_variance16x8_sse2, 10),
-        make_tuple(3, 4, &vpx_highbd_10_sub_pixel_avg_variance8x16_sse2, 10),
-        make_tuple(3, 3, &vpx_highbd_10_sub_pixel_avg_variance8x8_sse2, 10),
-        make_tuple(3, 2, &vpx_highbd_10_sub_pixel_avg_variance8x4_sse2, 10),
-        make_tuple(6, 6, &vpx_highbd_8_sub_pixel_avg_variance64x64_sse2, 8),
-        make_tuple(6, 5, &vpx_highbd_8_sub_pixel_avg_variance64x32_sse2, 8),
-        make_tuple(5, 6, &vpx_highbd_8_sub_pixel_avg_variance32x64_sse2, 8),
-        make_tuple(5, 5, &vpx_highbd_8_sub_pixel_avg_variance32x32_sse2, 8),
-        make_tuple(5, 4, &vpx_highbd_8_sub_pixel_avg_variance32x16_sse2, 8),
-        make_tuple(4, 5, &vpx_highbd_8_sub_pixel_avg_variance16x32_sse2, 8),
-        make_tuple(4, 4, &vpx_highbd_8_sub_pixel_avg_variance16x16_sse2, 8),
-        make_tuple(4, 3, &vpx_highbd_8_sub_pixel_avg_variance16x8_sse2, 8),
-        make_tuple(3, 4, &vpx_highbd_8_sub_pixel_avg_variance8x16_sse2, 8),
-        make_tuple(3, 3, &vpx_highbd_8_sub_pixel_avg_variance8x8_sse2, 8),
-        make_tuple(3, 2, &vpx_highbd_8_sub_pixel_avg_variance8x4_sse2, 8)));
+        SubpelAvgVarianceParams(6, 6,
+                                &vpx_highbd_12_sub_pixel_avg_variance64x64_sse2,
+                                12),
+        SubpelAvgVarianceParams(6, 5,
+                                &vpx_highbd_12_sub_pixel_avg_variance64x32_sse2,
+                                12),
+        SubpelAvgVarianceParams(5, 6,
+                                &vpx_highbd_12_sub_pixel_avg_variance32x64_sse2,
+                                12),
+        SubpelAvgVarianceParams(5, 5,
+                                &vpx_highbd_12_sub_pixel_avg_variance32x32_sse2,
+                                12),
+        SubpelAvgVarianceParams(5, 4,
+                                &vpx_highbd_12_sub_pixel_avg_variance32x16_sse2,
+                                12),
+        SubpelAvgVarianceParams(4, 5,
+                                &vpx_highbd_12_sub_pixel_avg_variance16x32_sse2,
+                                12),
+        SubpelAvgVarianceParams(4, 4,
+                                &vpx_highbd_12_sub_pixel_avg_variance16x16_sse2,
+                                12),
+        SubpelAvgVarianceParams(4, 3,
+                                &vpx_highbd_12_sub_pixel_avg_variance16x8_sse2,
+                                12),
+        SubpelAvgVarianceParams(3, 4,
+                                &vpx_highbd_12_sub_pixel_avg_variance8x16_sse2,
+                                12),
+        SubpelAvgVarianceParams(3, 3,
+                                &vpx_highbd_12_sub_pixel_avg_variance8x8_sse2,
+                                12),
+        SubpelAvgVarianceParams(3, 2,
+                                &vpx_highbd_12_sub_pixel_avg_variance8x4_sse2,
+                                12),
+        SubpelAvgVarianceParams(6, 6,
+                                &vpx_highbd_10_sub_pixel_avg_variance64x64_sse2,
+                                10),
+        SubpelAvgVarianceParams(6, 5,
+                                &vpx_highbd_10_sub_pixel_avg_variance64x32_sse2,
+                                10),
+        SubpelAvgVarianceParams(5, 6,
+                                &vpx_highbd_10_sub_pixel_avg_variance32x64_sse2,
+                                10),
+        SubpelAvgVarianceParams(5, 5,
+                                &vpx_highbd_10_sub_pixel_avg_variance32x32_sse2,
+                                10),
+        SubpelAvgVarianceParams(5, 4,
+                                &vpx_highbd_10_sub_pixel_avg_variance32x16_sse2,
+                                10),
+        SubpelAvgVarianceParams(4, 5,
+                                &vpx_highbd_10_sub_pixel_avg_variance16x32_sse2,
+                                10),
+        SubpelAvgVarianceParams(4, 4,
+                                &vpx_highbd_10_sub_pixel_avg_variance16x16_sse2,
+                                10),
+        SubpelAvgVarianceParams(4, 3,
+                                &vpx_highbd_10_sub_pixel_avg_variance16x8_sse2,
+                                10),
+        SubpelAvgVarianceParams(3, 4,
+                                &vpx_highbd_10_sub_pixel_avg_variance8x16_sse2,
+                                10),
+        SubpelAvgVarianceParams(3, 3,
+                                &vpx_highbd_10_sub_pixel_avg_variance8x8_sse2,
+                                10),
+        SubpelAvgVarianceParams(3, 2,
+                                &vpx_highbd_10_sub_pixel_avg_variance8x4_sse2,
+                                10),
+        SubpelAvgVarianceParams(6, 6,
+                                &vpx_highbd_8_sub_pixel_avg_variance64x64_sse2,
+                                8),
+        SubpelAvgVarianceParams(6, 5,
+                                &vpx_highbd_8_sub_pixel_avg_variance64x32_sse2,
+                                8),
+        SubpelAvgVarianceParams(5, 6,
+                                &vpx_highbd_8_sub_pixel_avg_variance32x64_sse2,
+                                8),
+        SubpelAvgVarianceParams(5, 5,
+                                &vpx_highbd_8_sub_pixel_avg_variance32x32_sse2,
+                                8),
+        SubpelAvgVarianceParams(5, 4,
+                                &vpx_highbd_8_sub_pixel_avg_variance32x16_sse2,
+                                8),
+        SubpelAvgVarianceParams(4, 5,
+                                &vpx_highbd_8_sub_pixel_avg_variance16x32_sse2,
+                                8),
+        SubpelAvgVarianceParams(4, 4,
+                                &vpx_highbd_8_sub_pixel_avg_variance16x16_sse2,
+                                8),
+        SubpelAvgVarianceParams(4, 3,
+                                &vpx_highbd_8_sub_pixel_avg_variance16x8_sse2,
+                                8),
+        SubpelAvgVarianceParams(3, 4,
+                                &vpx_highbd_8_sub_pixel_avg_variance8x16_sse2,
+                                8),
+        SubpelAvgVarianceParams(3, 3,
+                                &vpx_highbd_8_sub_pixel_avg_variance8x8_sse2,
+                                8),
+        SubpelAvgVarianceParams(3, 2,
+                                &vpx_highbd_8_sub_pixel_avg_variance8x4_sse2,
+                                8)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_SSE2
 
 #if HAVE_SSSE3
 INSTANTIATE_TEST_CASE_P(
     SSSE3, VpxSubpelVarianceTest,
-    ::testing::Values(make_tuple(6, 6, &vpx_sub_pixel_variance64x64_ssse3, 0),
-                      make_tuple(6, 5, &vpx_sub_pixel_variance64x32_ssse3, 0),
-                      make_tuple(5, 6, &vpx_sub_pixel_variance32x64_ssse3, 0),
-                      make_tuple(5, 5, &vpx_sub_pixel_variance32x32_ssse3, 0),
-                      make_tuple(5, 4, &vpx_sub_pixel_variance32x16_ssse3, 0),
-                      make_tuple(4, 5, &vpx_sub_pixel_variance16x32_ssse3, 0),
-                      make_tuple(4, 4, &vpx_sub_pixel_variance16x16_ssse3, 0),
-                      make_tuple(4, 3, &vpx_sub_pixel_variance16x8_ssse3, 0),
-                      make_tuple(3, 4, &vpx_sub_pixel_variance8x16_ssse3, 0),
-                      make_tuple(3, 3, &vpx_sub_pixel_variance8x8_ssse3, 0),
-                      make_tuple(3, 2, &vpx_sub_pixel_variance8x4_ssse3, 0),
-                      make_tuple(2, 3, &vpx_sub_pixel_variance4x8_ssse3, 0),
-                      make_tuple(2, 2, &vpx_sub_pixel_variance4x4_ssse3, 0)));
+    ::testing::Values(
+        SubpelVarianceParams(6, 6, &vpx_sub_pixel_variance64x64_ssse3, 0),
+        SubpelVarianceParams(6, 5, &vpx_sub_pixel_variance64x32_ssse3, 0),
+        SubpelVarianceParams(5, 6, &vpx_sub_pixel_variance32x64_ssse3, 0),
+        SubpelVarianceParams(5, 5, &vpx_sub_pixel_variance32x32_ssse3, 0),
+        SubpelVarianceParams(5, 4, &vpx_sub_pixel_variance32x16_ssse3, 0),
+        SubpelVarianceParams(4, 5, &vpx_sub_pixel_variance16x32_ssse3, 0),
+        SubpelVarianceParams(4, 4, &vpx_sub_pixel_variance16x16_ssse3, 0),
+        SubpelVarianceParams(4, 3, &vpx_sub_pixel_variance16x8_ssse3, 0),
+        SubpelVarianceParams(3, 4, &vpx_sub_pixel_variance8x16_ssse3, 0),
+        SubpelVarianceParams(3, 3, &vpx_sub_pixel_variance8x8_ssse3, 0),
+        SubpelVarianceParams(3, 2, &vpx_sub_pixel_variance8x4_ssse3, 0),
+        SubpelVarianceParams(2, 3, &vpx_sub_pixel_variance4x8_ssse3, 0),
+        SubpelVarianceParams(2, 2, &vpx_sub_pixel_variance4x4_ssse3, 0)));
 
 INSTANTIATE_TEST_CASE_P(
     SSSE3, VpxSubpelAvgVarianceTest,
     ::testing::Values(
-        make_tuple(6, 6, &vpx_sub_pixel_avg_variance64x64_ssse3, 0),
-        make_tuple(6, 5, &vpx_sub_pixel_avg_variance64x32_ssse3, 0),
-        make_tuple(5, 6, &vpx_sub_pixel_avg_variance32x64_ssse3, 0),
-        make_tuple(5, 5, &vpx_sub_pixel_avg_variance32x32_ssse3, 0),
-        make_tuple(5, 4, &vpx_sub_pixel_avg_variance32x16_ssse3, 0),
-        make_tuple(4, 5, &vpx_sub_pixel_avg_variance16x32_ssse3, 0),
-        make_tuple(4, 4, &vpx_sub_pixel_avg_variance16x16_ssse3, 0),
-        make_tuple(4, 3, &vpx_sub_pixel_avg_variance16x8_ssse3, 0),
-        make_tuple(3, 4, &vpx_sub_pixel_avg_variance8x16_ssse3, 0),
-        make_tuple(3, 3, &vpx_sub_pixel_avg_variance8x8_ssse3, 0),
-        make_tuple(3, 2, &vpx_sub_pixel_avg_variance8x4_ssse3, 0),
-        make_tuple(2, 3, &vpx_sub_pixel_avg_variance4x8_ssse3, 0),
-        make_tuple(2, 2, &vpx_sub_pixel_avg_variance4x4_ssse3, 0)));
+        SubpelAvgVarianceParams(6, 6, &vpx_sub_pixel_avg_variance64x64_ssse3,
+                                0),
+        SubpelAvgVarianceParams(6, 5, &vpx_sub_pixel_avg_variance64x32_ssse3,
+                                0),
+        SubpelAvgVarianceParams(5, 6, &vpx_sub_pixel_avg_variance32x64_ssse3,
+                                0),
+        SubpelAvgVarianceParams(5, 5, &vpx_sub_pixel_avg_variance32x32_ssse3,
+                                0),
+        SubpelAvgVarianceParams(5, 4, &vpx_sub_pixel_avg_variance32x16_ssse3,
+                                0),
+        SubpelAvgVarianceParams(4, 5, &vpx_sub_pixel_avg_variance16x32_ssse3,
+                                0),
+        SubpelAvgVarianceParams(4, 4, &vpx_sub_pixel_avg_variance16x16_ssse3,
+                                0),
+        SubpelAvgVarianceParams(4, 3, &vpx_sub_pixel_avg_variance16x8_ssse3, 0),
+        SubpelAvgVarianceParams(3, 4, &vpx_sub_pixel_avg_variance8x16_ssse3, 0),
+        SubpelAvgVarianceParams(3, 3, &vpx_sub_pixel_avg_variance8x8_ssse3, 0),
+        SubpelAvgVarianceParams(3, 2, &vpx_sub_pixel_avg_variance8x4_ssse3, 0),
+        SubpelAvgVarianceParams(2, 3, &vpx_sub_pixel_avg_variance4x8_ssse3, 0),
+        SubpelAvgVarianceParams(2, 2, &vpx_sub_pixel_avg_variance4x4_ssse3,
+                                0)));
 #endif  // HAVE_SSSE3
 
 #if HAVE_AVX2
@@ -1229,14 +1396,16 @@ INSTANTIATE_TEST_CASE_P(
 
 INSTANTIATE_TEST_CASE_P(
     AVX2, VpxSubpelVarianceTest,
-    ::testing::Values(make_tuple(6, 6, &vpx_sub_pixel_variance64x64_avx2, 0),
-                      make_tuple(5, 5, &vpx_sub_pixel_variance32x32_avx2, 0)));
+    ::testing::Values(
+        SubpelVarianceParams(6, 6, &vpx_sub_pixel_variance64x64_avx2, 0),
+        SubpelVarianceParams(5, 5, &vpx_sub_pixel_variance32x32_avx2, 0)));
 
 INSTANTIATE_TEST_CASE_P(
     AVX2, VpxSubpelAvgVarianceTest,
     ::testing::Values(
-        make_tuple(6, 6, &vpx_sub_pixel_avg_variance64x64_avx2, 0),
-        make_tuple(5, 5, &vpx_sub_pixel_avg_variance32x32_avx2, 0)));
+        SubpelAvgVarianceParams(6, 6, &vpx_sub_pixel_avg_variance64x64_avx2, 0),
+        SubpelAvgVarianceParams(5, 5, &vpx_sub_pixel_avg_variance32x32_avx2,
+                                0)));
 #endif  // HAVE_AVX2
 
 #if HAVE_NEON
@@ -1265,36 +1434,37 @@ INSTANTIATE_TEST_CASE_P(
 
 INSTANTIATE_TEST_CASE_P(
     NEON, VpxSubpelVarianceTest,
-    ::testing::Values(make_tuple(6, 6, &vpx_sub_pixel_variance64x64_neon, 0),
-                      make_tuple(6, 5, &vpx_sub_pixel_variance64x32_neon, 0),
-                      make_tuple(5, 6, &vpx_sub_pixel_variance32x64_neon, 0),
-                      make_tuple(5, 5, &vpx_sub_pixel_variance32x32_neon, 0),
-                      make_tuple(5, 4, &vpx_sub_pixel_variance32x16_neon, 0),
-                      make_tuple(4, 5, &vpx_sub_pixel_variance16x32_neon, 0),
-                      make_tuple(4, 4, &vpx_sub_pixel_variance16x16_neon, 0),
-                      make_tuple(4, 3, &vpx_sub_pixel_variance16x8_neon, 0),
-                      make_tuple(3, 4, &vpx_sub_pixel_variance8x16_neon, 0),
-                      make_tuple(3, 3, &vpx_sub_pixel_variance8x8_neon, 0),
-                      make_tuple(3, 2, &vpx_sub_pixel_variance8x4_neon, 0),
-                      make_tuple(2, 3, &vpx_sub_pixel_variance4x8_neon, 0),
-                      make_tuple(2, 2, &vpx_sub_pixel_variance4x4_neon, 0)));
+    ::testing::Values(
+        SubpelVarianceParams(6, 6, &vpx_sub_pixel_variance64x64_neon, 0),
+        SubpelVarianceParams(6, 5, &vpx_sub_pixel_variance64x32_neon, 0),
+        SubpelVarianceParams(5, 6, &vpx_sub_pixel_variance32x64_neon, 0),
+        SubpelVarianceParams(5, 5, &vpx_sub_pixel_variance32x32_neon, 0),
+        SubpelVarianceParams(5, 4, &vpx_sub_pixel_variance32x16_neon, 0),
+        SubpelVarianceParams(4, 5, &vpx_sub_pixel_variance16x32_neon, 0),
+        SubpelVarianceParams(4, 4, &vpx_sub_pixel_variance16x16_neon, 0),
+        SubpelVarianceParams(4, 3, &vpx_sub_pixel_variance16x8_neon, 0),
+        SubpelVarianceParams(3, 4, &vpx_sub_pixel_variance8x16_neon, 0),
+        SubpelVarianceParams(3, 3, &vpx_sub_pixel_variance8x8_neon, 0),
+        SubpelVarianceParams(3, 2, &vpx_sub_pixel_variance8x4_neon, 0),
+        SubpelVarianceParams(2, 3, &vpx_sub_pixel_variance4x8_neon, 0),
+        SubpelVarianceParams(2, 2, &vpx_sub_pixel_variance4x4_neon, 0)));
 
 INSTANTIATE_TEST_CASE_P(
     NEON, VpxSubpelAvgVarianceTest,
     ::testing::Values(
-        make_tuple(6, 6, &vpx_sub_pixel_avg_variance64x64_neon, 0),
-        make_tuple(6, 5, &vpx_sub_pixel_avg_variance64x32_neon, 0),
-        make_tuple(5, 6, &vpx_sub_pixel_avg_variance32x64_neon, 0),
-        make_tuple(5, 5, &vpx_sub_pixel_avg_variance32x32_neon, 0),
-        make_tuple(5, 4, &vpx_sub_pixel_avg_variance32x16_neon, 0),
-        make_tuple(4, 5, &vpx_sub_pixel_avg_variance16x32_neon, 0),
-        make_tuple(4, 4, &vpx_sub_pixel_avg_variance16x16_neon, 0),
-        make_tuple(4, 3, &vpx_sub_pixel_avg_variance16x8_neon, 0),
-        make_tuple(3, 4, &vpx_sub_pixel_avg_variance8x16_neon, 0),
-        make_tuple(3, 3, &vpx_sub_pixel_avg_variance8x8_neon, 0),
-        make_tuple(3, 2, &vpx_sub_pixel_avg_variance8x4_neon, 0),
-        make_tuple(2, 3, &vpx_sub_pixel_avg_variance4x8_neon, 0),
-        make_tuple(2, 2, &vpx_sub_pixel_avg_variance4x4_neon, 0)));
+        SubpelAvgVarianceParams(6, 6, &vpx_sub_pixel_avg_variance64x64_neon, 0),
+        SubpelAvgVarianceParams(6, 5, &vpx_sub_pixel_avg_variance64x32_neon, 0),
+        SubpelAvgVarianceParams(5, 6, &vpx_sub_pixel_avg_variance32x64_neon, 0),
+        SubpelAvgVarianceParams(5, 5, &vpx_sub_pixel_avg_variance32x32_neon, 0),
+        SubpelAvgVarianceParams(5, 4, &vpx_sub_pixel_avg_variance32x16_neon, 0),
+        SubpelAvgVarianceParams(4, 5, &vpx_sub_pixel_avg_variance16x32_neon, 0),
+        SubpelAvgVarianceParams(4, 4, &vpx_sub_pixel_avg_variance16x16_neon, 0),
+        SubpelAvgVarianceParams(4, 3, &vpx_sub_pixel_avg_variance16x8_neon, 0),
+        SubpelAvgVarianceParams(3, 4, &vpx_sub_pixel_avg_variance8x16_neon, 0),
+        SubpelAvgVarianceParams(3, 3, &vpx_sub_pixel_avg_variance8x8_neon, 0),
+        SubpelAvgVarianceParams(3, 2, &vpx_sub_pixel_avg_variance8x4_neon, 0),
+        SubpelAvgVarianceParams(2, 3, &vpx_sub_pixel_avg_variance4x8_neon, 0),
+        SubpelAvgVarianceParams(2, 2, &vpx_sub_pixel_avg_variance4x4_neon, 0)));
 #endif  // HAVE_NEON
 
 #if HAVE_MSA
@@ -1329,35 +1499,37 @@ INSTANTIATE_TEST_CASE_P(
 
 INSTANTIATE_TEST_CASE_P(
     MSA, VpxSubpelVarianceTest,
-    ::testing::Values(make_tuple(2, 2, &vpx_sub_pixel_variance4x4_msa, 0),
-                      make_tuple(2, 3, &vpx_sub_pixel_variance4x8_msa, 0),
-                      make_tuple(3, 2, &vpx_sub_pixel_variance8x4_msa, 0),
-                      make_tuple(3, 3, &vpx_sub_pixel_variance8x8_msa, 0),
-                      make_tuple(3, 4, &vpx_sub_pixel_variance8x16_msa, 0),
-                      make_tuple(4, 3, &vpx_sub_pixel_variance16x8_msa, 0),
-                      make_tuple(4, 4, &vpx_sub_pixel_variance16x16_msa, 0),
-                      make_tuple(4, 5, &vpx_sub_pixel_variance16x32_msa, 0),
-                      make_tuple(5, 4, &vpx_sub_pixel_variance32x16_msa, 0),
-                      make_tuple(5, 5, &vpx_sub_pixel_variance32x32_msa, 0),
-                      make_tuple(5, 6, &vpx_sub_pixel_variance32x64_msa, 0),
-                      make_tuple(6, 5, &vpx_sub_pixel_variance64x32_msa, 0),
-                      make_tuple(6, 6, &vpx_sub_pixel_variance64x64_msa, 0)));
+    ::testing::Values(
+        SubpelVarianceParams(2, 2, &vpx_sub_pixel_variance4x4_msa, 0),
+        SubpelVarianceParams(2, 3, &vpx_sub_pixel_variance4x8_msa, 0),
+        SubpelVarianceParams(3, 2, &vpx_sub_pixel_variance8x4_msa, 0),
+        SubpelVarianceParams(3, 3, &vpx_sub_pixel_variance8x8_msa, 0),
+        SubpelVarianceParams(3, 4, &vpx_sub_pixel_variance8x16_msa, 0),
+        SubpelVarianceParams(4, 3, &vpx_sub_pixel_variance16x8_msa, 0),
+        SubpelVarianceParams(4, 4, &vpx_sub_pixel_variance16x16_msa, 0),
+        SubpelVarianceParams(4, 5, &vpx_sub_pixel_variance16x32_msa, 0),
+        SubpelVarianceParams(5, 4, &vpx_sub_pixel_variance32x16_msa, 0),
+        SubpelVarianceParams(5, 5, &vpx_sub_pixel_variance32x32_msa, 0),
+        SubpelVarianceParams(5, 6, &vpx_sub_pixel_variance32x64_msa, 0),
+        SubpelVarianceParams(6, 5, &vpx_sub_pixel_variance64x32_msa, 0),
+        SubpelVarianceParams(6, 6, &vpx_sub_pixel_variance64x64_msa, 0)));
 
 INSTANTIATE_TEST_CASE_P(
     MSA, VpxSubpelAvgVarianceTest,
-    ::testing::Values(make_tuple(6, 6, &vpx_sub_pixel_avg_variance64x64_msa, 0),
-                      make_tuple(6, 5, &vpx_sub_pixel_avg_variance64x32_msa, 0),
-                      make_tuple(5, 6, &vpx_sub_pixel_avg_variance32x64_msa, 0),
-                      make_tuple(5, 5, &vpx_sub_pixel_avg_variance32x32_msa, 0),
-                      make_tuple(5, 4, &vpx_sub_pixel_avg_variance32x16_msa, 0),
-                      make_tuple(4, 5, &vpx_sub_pixel_avg_variance16x32_msa, 0),
-                      make_tuple(4, 4, &vpx_sub_pixel_avg_variance16x16_msa, 0),
-                      make_tuple(4, 3, &vpx_sub_pixel_avg_variance16x8_msa, 0),
-                      make_tuple(3, 4, &vpx_sub_pixel_avg_variance8x16_msa, 0),
-                      make_tuple(3, 3, &vpx_sub_pixel_avg_variance8x8_msa, 0),
-                      make_tuple(3, 2, &vpx_sub_pixel_avg_variance8x4_msa, 0),
-                      make_tuple(2, 3, &vpx_sub_pixel_avg_variance4x8_msa, 0),
-                      make_tuple(2, 2, &vpx_sub_pixel_avg_variance4x4_msa, 0)));
+    ::testing::Values(
+        SubpelAvgVarianceParams(6, 6, &vpx_sub_pixel_avg_variance64x64_msa, 0),
+        SubpelAvgVarianceParams(6, 5, &vpx_sub_pixel_avg_variance64x32_msa, 0),
+        SubpelAvgVarianceParams(5, 6, &vpx_sub_pixel_avg_variance32x64_msa, 0),
+        SubpelAvgVarianceParams(5, 5, &vpx_sub_pixel_avg_variance32x32_msa, 0),
+        SubpelAvgVarianceParams(5, 4, &vpx_sub_pixel_avg_variance32x16_msa, 0),
+        SubpelAvgVarianceParams(4, 5, &vpx_sub_pixel_avg_variance16x32_msa, 0),
+        SubpelAvgVarianceParams(4, 4, &vpx_sub_pixel_avg_variance16x16_msa, 0),
+        SubpelAvgVarianceParams(4, 3, &vpx_sub_pixel_avg_variance16x8_msa, 0),
+        SubpelAvgVarianceParams(3, 4, &vpx_sub_pixel_avg_variance8x16_msa, 0),
+        SubpelAvgVarianceParams(3, 3, &vpx_sub_pixel_avg_variance8x8_msa, 0),
+        SubpelAvgVarianceParams(3, 2, &vpx_sub_pixel_avg_variance8x4_msa, 0),
+        SubpelAvgVarianceParams(2, 3, &vpx_sub_pixel_avg_variance4x8_msa, 0),
+        SubpelAvgVarianceParams(2, 2, &vpx_sub_pixel_avg_variance4x4_msa, 0)));
 #endif  // HAVE_MSA
 
 #if HAVE_VSX
