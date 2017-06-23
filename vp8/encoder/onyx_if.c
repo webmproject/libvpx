@@ -617,6 +617,37 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment) {
   set_segment_data(cpi, &feature_data[0][0], SEGMENT_DELTADATA);
 }
 
+static void compute_skin_map(VP8_COMP *cpi) {
+  int mb_row, mb_col, num_bl;
+  VP8_COMMON *cm = &cpi->common;
+  const uint8_t *src_y = cpi->Source->y_buffer;
+  const uint8_t *src_u = cpi->Source->u_buffer;
+  const uint8_t *src_v = cpi->Source->v_buffer;
+  const int src_ystride = cpi->Source->y_stride;
+  const int src_uvstride = cpi->Source->uv_stride;
+
+  const SKIN_DETECTION_BLOCK_SIZE bsize =
+      (cm->Width * cm->Height <= 352 * 288) ? SKIN_8X8 : SKIN_16X16;
+  int offset = 0;
+  for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
+    num_bl = 0;
+    for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
+      const int bl_index = mb_row * cm->mb_cols + mb_col;
+      cpi->skin_map[offset] =
+          vp8_compute_skin_block(src_y, src_u, src_v, src_ystride, src_uvstride,
+                                 bsize, cpi->consec_zero_last[bl_index], 0);
+      num_bl++;
+      offset++;
+      src_y += 16;
+      src_u += 8;
+      src_v += 8;
+    }
+    src_y += (src_ystride << 4) - (num_bl << 4);
+    src_u += (src_uvstride << 3) - (num_bl << 3);
+    src_v += (src_uvstride << 3) - (num_bl << 3);
+  }
+}
+
 static void set_default_lf_deltas(VP8_COMP *cpi) {
   cpi->mb.e_mbd.mode_ref_lf_delta_enabled = 1;
   cpi->mb.e_mbd.mode_ref_lf_delta_update = 1;
@@ -1858,6 +1889,9 @@ struct VP8_COMP *vp8_create_compressor(VP8_CONFIG *oxcf) {
     cpi->cyclic_refresh_map = (signed char *)NULL;
   }
 
+  CHECK_MEM_ERROR(cpi->skin_map, vpx_calloc(cm->mb_rows * cm->mb_cols,
+                                            sizeof(cpi->skin_map[0])));
+
   CHECK_MEM_ERROR(cpi->consec_zero_last,
                   vpx_calloc(cm->mb_rows * cm->mb_cols, 1));
   CHECK_MEM_ERROR(cpi->consec_zero_last_mvbias,
@@ -2288,6 +2322,7 @@ void vp8_remove_compressor(VP8_COMP **ptr) {
   dealloc_compressor_data(cpi);
   vpx_free(cpi->mb.ss);
   vpx_free(cpi->tok);
+  vpx_free(cpi->skin_map);
   vpx_free(cpi->cyclic_refresh_map);
   vpx_free(cpi->consec_zero_last);
   vpx_free(cpi->consec_zero_last_mvbias);
@@ -3766,6 +3801,8 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
     zbin_oq_high = ZBIN_OQ_MAX;
   }
 #endif
+
+  compute_skin_map(cpi);
 
   /* Setup background Q adjustment for error resilient mode.
    * For multi-layer encodes only enable this for the base layer.

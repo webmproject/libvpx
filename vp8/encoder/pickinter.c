@@ -691,9 +691,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
   x->is_skin = 0;
   if (!cpi->oxcf.screen_content_mode) {
     int block_index = mb_row * cpi->common.mb_cols + mb_col;
-    x->is_skin = vp8_compute_skin_block(
-        x->src.y_buffer, x->src.u_buffer, x->src.v_buffer, x->src.y_stride,
-        x->src.uv_stride, SKIN_16X16, cpi->consec_zero_last[block_index], 0);
+    x->is_skin = cpi->skin_map[block_index];
   }
 #if CONFIG_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity) {
