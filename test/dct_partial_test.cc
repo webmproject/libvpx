@@ -142,7 +142,8 @@ INSTANTIATE_TEST_CASE_P(
 #if CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
     NEON, PartialFdctTest,
-    ::testing::Values(make_tuple(&vpx_fdct16x16_1_neon, 16, VPX_BITS_8),
+    ::testing::Values(make_tuple(&vpx_fdct32x32_1_neon, 32, VPX_BITS_8),
+                      make_tuple(&vpx_fdct16x16_1_neon, 16, VPX_BITS_8),
                       make_tuple(&vpx_fdct8x8_1_neon, 8, VPX_BITS_12),
                       make_tuple(&vpx_fdct8x8_1_neon, 8, VPX_BITS_10),
                       make_tuple(&vpx_fdct8x8_1_neon, 8, VPX_BITS_8),
@@ -150,7 +151,8 @@ INSTANTIATE_TEST_CASE_P(
 #else
 INSTANTIATE_TEST_CASE_P(
     NEON, PartialFdctTest,
-    ::testing::Values(make_tuple(&vpx_fdct16x16_1_neon, 16, VPX_BITS_8),
+    ::testing::Values(make_tuple(&vpx_fdct32x32_1_neon, 32, VPX_BITS_8),
+                      make_tuple(&vpx_fdct16x16_1_neon, 16, VPX_BITS_8),
                       make_tuple(&vpx_fdct8x8_1_neon, 8, VPX_BITS_8),
                       make_tuple(&vpx_fdct4x4_1_neon, 4, VPX_BITS_8)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
