@@ -61,8 +61,8 @@ verbose=
 
 profile=0
 rm *.txt
-
-for exp_tool in experimental cb4x4 chroma_sub8x8 rect_tx global_motion ext_tx cdef ext_intra ext_refs dual_filter motion_var warped_motion var_tx tx64x64 ncobmc supertx ext_partition tpl_mv unpoison_partition_ctx  wedge adapt_scan ans aom_qm chroma_2x2 compound_segment compound_singleref ext_inter ext_tile filter_intra intrabc intra_interp loop_restoration lv_map masked_tx q_adapt_probs ref_adapt compound_round convolve_round interintra mv_compound txk_sel
+# ncobmc
+for exp_tool in experimental one_sided_compound chroma_sub8x8 rect_tx global_motion ext_tx cdef ext_intra ext_refs dual_filter motion_var warped_motion var_tx tx64x64 supertx ext_partition tpl_mv unpoison_partition_ctx wedge adapt_scan ans aom_qm chroma_2x2 compound_segment ext_inter ext_tile filter_intra intrabc intra_interp loop_restoration lv_map masked_tx q_adapt_probs ref_adapt compound_round convolve_round interintra mv_compound txk_sel
 
 do
   cd $build_dir
@@ -86,8 +86,14 @@ do
   else
     tune_content=
   fi
+
+  if [ $exp_tool == ext_tile ]; then
+    col_num=1
+  else
+    col_num=0
+  fi
   
-  taskset -c 3 ./aomenc $verbose -o /dev/shm/$bs $video $codec --limit=$frames --profile=$profile --fps=$fps $tune_content --target-bitrate=$bitrate --skip=0 -p 2 --good --cpu-used=0 --lag-in-frames=25 --min-q=0 --max-q=63 --auto-alt-ref=1 --kf-max-dist=150 --kf-min-dist=0 --drop-frame=0 --static-thresh=0 --bias-pct=50 --minsection-pct=0 --maxsection-pct=2000 --arnr-maxframes=7 --arnr-strength=5 --sharpness=0 --undershoot-pct=100 --overshoot-pct=100 --frame-parallel=0 --tile-columns=0 --test-decode=warn --psnr &>> $elog
+  taskset -c 3 ./aomenc $verbose -o /dev/shm/$bs $video $codec --limit=$frames --profile=$profile --fps=$fps $tune_content --target-bitrate=$bitrate --skip=0 -p 2 --good --cpu-used=0 --lag-in-frames=25 --min-q=0 --max-q=63 --auto-alt-ref=1 --kf-max-dist=150 --kf-min-dist=0 --drop-frame=0 --static-thresh=0 --bias-pct=50 --minsection-pct=0 --maxsection-pct=2000 --arnr-maxframes=7 --arnr-strength=5 --sharpness=0 --undershoot-pct=100 --overshoot-pct=100 --frame-parallel=0 --tile-columns=$col_num --test-decode=warn --psnr &>> $elog
   
   etime=`cat $elog | grep 'Pass 2/2' | grep 'fps)' | sed -e 's/^.*b\/s//' | awk '{print $1" "$2}'`
   psnr=`cat $elog | grep 'PSNR' | awk '{print $5, $6, $7, $8, $9}'`

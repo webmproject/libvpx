@@ -31,13 +31,13 @@ experiment_dependency() {
     tool="--enable-$1 --enable-cb4x4 --enable-rect-tx"
   fi
   
-  if [ "$1" == ext_tx ]; then
-    tool="--enable-$1 --enable-cb4x4"
-  fi
+  # if [ "$1" == ext_tx ]; then
+  #   tool="--enable-$1 --enable-cb4x4"
+  # fi
   
-  if [ "$1" == chroma_2x2 ]; then
-    tool="--enable-$1 --enable-cb4x4"
-  fi
+  # if [ "$1" == chroma_2x2 ]; then
+  #   tool="--enable-$1 --enable-cb4x4"
+  # fi
 
   if [ "$1" == ncobmc ]; then
     tool="--enable-$1 --enable-motion-var"
@@ -67,9 +67,9 @@ experiment_dependency() {
     tool="--enable-$1 --enable-cb4x4 --enable-chroma_sub8x8"
   fi
 
-  if [ "$1" == chroma_sub8x8 ] ; then
-    tool="--enable-$1 --enable-cb4x4"
-  fi
+  # if [ "$1" == chroma_sub8x8 ] ; then
+  #   tool="--enable-$1 --enable-cb4x4"
+  # fi
   
 }
 
