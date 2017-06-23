@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "be203249_6fbffad4",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 565,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-23T19:54:10Z",
+      "side": 1,
+      "message": "missed the tuple and get here",
+      "revId": "7eb39836ffe2a123584c505e1d0ee16e8647c2ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
