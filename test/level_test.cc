@@ -73,7 +73,7 @@ TEST_P(LevelTest, TestTargetLevel11Large) {
   target_level_ = 11;
   cfg_.rc_target_bitrate = 150;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  ASSERT_EQ(target_level_, level_);
+  ASSERT_GE(target_level_, level_);
 }
 
 TEST_P(LevelTest, TestTargetLevel20Large) {
@@ -83,7 +83,7 @@ TEST_P(LevelTest, TestTargetLevel20Large) {
   target_level_ = 20;
   cfg_.rc_target_bitrate = 1200;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  ASSERT_EQ(target_level_, level_);
+  ASSERT_GE(target_level_, level_);
 }
 
 TEST_P(LevelTest, TestTargetLevel31Large) {
@@ -103,11 +103,11 @@ TEST_P(LevelTest, TestTargetLevel0) {
   target_level_ = 0;
   min_gf_internal_ = 4;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  ASSERT_EQ(11, level_);
+  ASSERT_GE(11, level_);
 
   cfg_.rc_target_bitrate = 1600;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  ASSERT_EQ(20, level_);
+  ASSERT_GE(20, level_);
 }
 
 // Test for level control being turned off
