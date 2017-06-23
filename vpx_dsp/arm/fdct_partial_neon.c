@@ -59,3 +59,21 @@ void vpx_fdct8x8_1_neon(const int16_t *input, tran_low_t *output, int stride) {
   output[0] = sum_int16x8(sum);
   output[1] = 0;
 }
+
+void vpx_fdct16x16_1_neon(const int16_t *input, tran_low_t *output,
+                          int stride) {
+  int r;
+  int16x8_t left = vld1q_s16(input);
+  int16x8_t right = vld1q_s16(input + 8);
+  input += stride;
+  for (r = 1; r < 16; ++r) {
+    const int16x8_t a = vld1q_s16(input);
+    const int16x8_t b = vld1q_s16(input + 8);
+    input += stride;
+    left = vaddq_s16(left, a);
+    right = vaddq_s16(right, b);
+  }
+
+  output[0] = (sum_int16x8(left) + sum_int16x8(right)) >> 1;
+  output[1] = 0;
+}
