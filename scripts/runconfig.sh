@@ -70,6 +70,10 @@ experiment_dependency() {
   # if [ "$1" == chroma_sub8x8 ] ; then
   #   tool="--enable-$1 --enable-cb4x4"
   # fi
+
+  if [ "$1" == one_sided_compound ] ; then
+    tool="--enable-$1 --enable-ext-refs"
+  fi
   
 }
 
