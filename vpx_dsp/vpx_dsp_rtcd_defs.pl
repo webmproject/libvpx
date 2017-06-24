@@ -652,7 +652,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vpx_highbd_iwht4x4_1_add/, "const tran_low_t *input, uint16_t *dest, int stride, int bd";
 
   if (vpx_config("CONFIG_EMULATE_HARDWARE") ne "yes") {
-    specialize qw/vpx_highbd_idct4x4_16_add neon sse2/;
+    specialize qw/vpx_highbd_idct4x4_16_add neon sse2 sse4_1/;
     specialize qw/vpx_highbd_idct8x8_64_add neon sse2/;
     specialize qw/vpx_highbd_idct8x8_12_add neon sse2/;
     specialize qw/vpx_highbd_idct16x16_256_add neon sse2/;

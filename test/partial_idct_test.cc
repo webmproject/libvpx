@@ -477,7 +477,9 @@ const PartialInvTxfmParam c_partial_idct_tests[] = {
 INSTANTIATE_TEST_CASE_P(C, PartialIDctTest,
                         ::testing::ValuesIn(c_partial_idct_tests));
 
-#if HAVE_NEON && !CONFIG_EMULATE_HARDWARE
+#if !CONFIG_EMULATE_HARDWARE
+
+#if HAVE_NEON
 const PartialInvTxfmParam neon_partial_idct_tests[] = {
 #if CONFIG_VP9_HIGHBITDEPTH
   make_tuple(&vpx_highbd_fdct32x32_c,
@@ -625,9 +627,9 @@ const PartialInvTxfmParam neon_partial_idct_tests[] = {
 
 INSTANTIATE_TEST_CASE_P(NEON, PartialIDctTest,
                         ::testing::ValuesIn(neon_partial_idct_tests));
-#endif  // HAVE_NEON && !CONFIG_EMULATE_HARDWARE
+#endif  // HAVE_NEON
 
-#if HAVE_SSE2 && !CONFIG_EMULATE_HARDWARE
+#if HAVE_SSE2
 // 32x32_135_ is implemented using the 1024 version.
 const PartialInvTxfmParam sse2_partial_idct_tests[] = {
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -734,9 +736,9 @@ const PartialInvTxfmParam sse2_partial_idct_tests[] = {
 INSTANTIATE_TEST_CASE_P(SSE2, PartialIDctTest,
                         ::testing::ValuesIn(sse2_partial_idct_tests));
 
-#endif  // HAVE_SSE2 && !CONFIG_EMULATE_HARDWARE
+#endif  // HAVE_SSE2
 
-#if HAVE_SSSE3 && !CONFIG_EMULATE_HARDWARE
+#if HAVE_SSSE3
 const PartialInvTxfmParam ssse3_partial_idct_tests[] = {
   make_tuple(&vpx_fdct32x32_c, &wrapper<vpx_idct32x32_135_add_c>,
              &wrapper<vpx_idct32x32_135_add_ssse3>, TX_32X32, 135, 8, 1),
@@ -748,9 +750,26 @@ const PartialInvTxfmParam ssse3_partial_idct_tests[] = {
 
 INSTANTIATE_TEST_CASE_P(SSSE3, PartialIDctTest,
                         ::testing::ValuesIn(ssse3_partial_idct_tests));
-#endif  // HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_EMULATE_HARDWARE
+#endif  // HAVE_SSSE3
 
-#if HAVE_DSPR2 && !CONFIG_EMULATE_HARDWARE && !CONFIG_VP9_HIGHBITDEPTH
+#if HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
+const PartialInvTxfmParam sse4_1_partial_idct_tests[] = {
+  make_tuple(
+      &vpx_highbd_fdct4x4_c, &highbd_wrapper<vpx_highbd_idct4x4_16_add_c>,
+      &highbd_wrapper<vpx_highbd_idct4x4_16_add_sse4_1>, TX_4X4, 16, 8, 2),
+  make_tuple(
+      &vpx_highbd_fdct4x4_c, &highbd_wrapper<vpx_highbd_idct4x4_16_add_c>,
+      &highbd_wrapper<vpx_highbd_idct4x4_16_add_sse4_1>, TX_4X4, 16, 10, 2),
+  make_tuple(
+      &vpx_highbd_fdct4x4_c, &highbd_wrapper<vpx_highbd_idct4x4_16_add_c>,
+      &highbd_wrapper<vpx_highbd_idct4x4_16_add_sse4_1>, TX_4X4, 16, 12, 2)
+};
+
+INSTANTIATE_TEST_CASE_P(SSE4_1, PartialIDctTest,
+                        ::testing::ValuesIn(sse4_1_partial_idct_tests));
+#endif  // HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
+
+#if HAVE_DSPR2 && !CONFIG_VP9_HIGHBITDEPTH
 const PartialInvTxfmParam dspr2_partial_idct_tests[] = {
   make_tuple(&vpx_fdct32x32_c, &wrapper<vpx_idct32x32_1024_add_c>,
              &wrapper<vpx_idct32x32_1024_add_dspr2>, TX_32X32, 1024, 8, 1),
@@ -778,9 +797,9 @@ const PartialInvTxfmParam dspr2_partial_idct_tests[] = {
 
 INSTANTIATE_TEST_CASE_P(DSPR2, PartialIDctTest,
                         ::testing::ValuesIn(dspr2_partial_idct_tests));
-#endif  // HAVE_DSPR2 && !CONFIG_EMULATE_HARDWARE && !CONFIG_VP9_HIGHBITDEPTH
+#endif  // HAVE_DSPR2 && !CONFIG_VP9_HIGHBITDEPTH
 
-#if HAVE_MSA && !CONFIG_EMULATE_HARDWARE && !CONFIG_VP9_HIGHBITDEPTH
+#if HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH
 // 32x32_135_ is implemented using the 1024 version.
 const PartialInvTxfmParam msa_partial_idct_tests[] = {
   make_tuple(&vpx_fdct32x32_c, &wrapper<vpx_idct32x32_1024_add_c>,
@@ -809,6 +828,8 @@ const PartialInvTxfmParam msa_partial_idct_tests[] = {
 
 INSTANTIATE_TEST_CASE_P(MSA, PartialIDctTest,
                         ::testing::ValuesIn(msa_partial_idct_tests));
-#endif  // HAVE_MSA && !CONFIG_EMULATE_HARDWARE && !CONFIG_VP9_HIGHBITDEPTH
+#endif  // HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH
+
+#endif  // !CONFIG_EMULATE_HARDWARE
 
 }  // namespace
