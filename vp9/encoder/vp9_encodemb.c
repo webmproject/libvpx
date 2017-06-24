@@ -53,7 +53,7 @@ static const int plane_rd_mult[REF_TYPES][PLANE_TYPES] = {
   { 10, 6 }, { 8, 5 },
 };
 
-#define USE_GREEDY_OPTIMIZE_B 0
+#define USE_GREEDY_OPTIMIZE_B 1
 
 #if USE_GREEDY_OPTIMIZE_B
 
