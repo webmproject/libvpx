@@ -76,24 +76,23 @@ static INLINE __m128i idct_calc_wraplow_sse2(const __m128i in0,
   return _mm_packs_epi32(t0, t1);
 }
 
-// Function to allow 8 bit optimisations to be used when profile 0 is used with
+// Functions to allow 8 bit optimisations to be used when profile 0 is used with
 // highbitdepth enabled
-static INLINE __m128i load_input_data(const tran_low_t *data) {
+static INLINE __m128i load_input_data4(const tran_low_t *data) {
 #if CONFIG_VP9_HIGHBITDEPTH
-  // in0: 0 X 1 X  2 X 3 X
-  // in1: 4 X 5 X  6 X 7 X
-  // t0:  0 4 X X  1 5 X X
-  // t1:  2 6 X X  3 7 X X
-  // t2:  0 2 4 6  X X X X
-  // t3:  1 3 5 7  X X X X
-  // rtn: 0 1 2 3  4 5 6 7
+  const __m128i zero = _mm_setzero_si128();
+  const __m128i in = _mm_load_si128((const __m128i *)data);
+  return _mm_packs_epi32(in, zero);
+#else
+  return _mm_loadl_epi64((const __m128i *)data);
+#endif
+}
+
+static INLINE __m128i load_input_data8(const tran_low_t *data) {
+#if CONFIG_VP9_HIGHBITDEPTH
   const __m128i in0 = _mm_load_si128((const __m128i *)data);
   const __m128i in1 = _mm_load_si128((const __m128i *)(data + 4));
-  const __m128i t0 = _mm_unpacklo_epi16(in0, in1);
-  const __m128i t1 = _mm_unpackhi_epi16(in0, in1);
-  const __m128i t2 = _mm_unpacklo_epi16(t0, t1);
-  const __m128i t3 = _mm_unpackhi_epi16(t0, t1);
-  return _mm_unpacklo_epi16(t2, t3);
+  return _mm_packs_epi32(in0, in1);
 #else
   return _mm_load_si128((const __m128i *)data);
 #endif
@@ -101,35 +100,35 @@ static INLINE __m128i load_input_data(const tran_low_t *data) {
 
 static INLINE void load_buffer_8x8(const tran_low_t *const input,
                                    __m128i *const in) {
-  in[0] = load_input_data(input + 0 * 8);
-  in[1] = load_input_data(input + 1 * 8);
-  in[2] = load_input_data(input + 2 * 8);
-  in[3] = load_input_data(input + 3 * 8);
-  in[4] = load_input_data(input + 4 * 8);
-  in[5] = load_input_data(input + 5 * 8);
-  in[6] = load_input_data(input + 6 * 8);
-  in[7] = load_input_data(input + 7 * 8);
+  in[0] = load_input_data8(input + 0 * 8);
+  in[1] = load_input_data8(input + 1 * 8);
+  in[2] = load_input_data8(input + 2 * 8);
+  in[3] = load_input_data8(input + 3 * 8);
+  in[4] = load_input_data8(input + 4 * 8);
+  in[5] = load_input_data8(input + 5 * 8);
+  in[6] = load_input_data8(input + 6 * 8);
+  in[7] = load_input_data8(input + 7 * 8);
 }
 
 static INLINE void load_buffer_8x16(const tran_low_t *const input,
                                     __m128i *const in) {
-  in[0] = load_input_data(input + 0 * 16);
-  in[1] = load_input_data(input + 1 * 16);
-  in[2] = load_input_data(input + 2 * 16);
-  in[3] = load_input_data(input + 3 * 16);
-  in[4] = load_input_data(input + 4 * 16);
-  in[5] = load_input_data(input + 5 * 16);
-  in[6] = load_input_data(input + 6 * 16);
-  in[7] = load_input_data(input + 7 * 16);
+  in[0] = load_input_data8(input + 0 * 16);
+  in[1] = load_input_data8(input + 1 * 16);
+  in[2] = load_input_data8(input + 2 * 16);
+  in[3] = load_input_data8(input + 3 * 16);
+  in[4] = load_input_data8(input + 4 * 16);
+  in[5] = load_input_data8(input + 5 * 16);
+  in[6] = load_input_data8(input + 6 * 16);
+  in[7] = load_input_data8(input + 7 * 16);
 
-  in[8] = load_input_data(input + 8 * 16);
-  in[9] = load_input_data(input + 9 * 16);
-  in[10] = load_input_data(input + 10 * 16);
-  in[11] = load_input_data(input + 11 * 16);
-  in[12] = load_input_data(input + 12 * 16);
-  in[13] = load_input_data(input + 13 * 16);
-  in[14] = load_input_data(input + 14 * 16);
-  in[15] = load_input_data(input + 15 * 16);
+  in[8] = load_input_data8(input + 8 * 16);
+  in[9] = load_input_data8(input + 9 * 16);
+  in[10] = load_input_data8(input + 10 * 16);
+  in[11] = load_input_data8(input + 11 * 16);
+  in[12] = load_input_data8(input + 12 * 16);
+  in[13] = load_input_data8(input + 13 * 16);
+  in[14] = load_input_data8(input + 14 * 16);
+  in[15] = load_input_data8(input + 15 * 16);
 }
 
 static INLINE void recon_and_store(uint8_t *const dest, const __m128i in_x) {
