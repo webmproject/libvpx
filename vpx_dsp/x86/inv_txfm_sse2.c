@@ -163,17 +163,6 @@ static INLINE void multiplication_and_add(
   *res3 = idct_calc_wraplow_sse2(lo_1, hi_1, *cst3);
 }
 
-static void multiplication_and_add_2(const __m128i *const in0,
-                                     const __m128i *const in1,
-                                     const __m128i *const cst0,
-                                     const __m128i *const cst1,
-                                     __m128i *const res0, __m128i *const res1) {
-  const __m128i lo = _mm_unpacklo_epi16(*in0, *in1);
-  const __m128i hi = _mm_unpackhi_epi16(*in0, *in1);
-  *res0 = idct_calc_wraplow_sse2(lo, hi, *cst0);
-  *res1 = idct_calc_wraplow_sse2(lo, hi, *cst1);
-}
-
 static INLINE void idct8(const __m128i *const in, __m128i *const out) {
   const __m128i cp_16_16 = pair_set_epi16(cospi_16_64, cospi_16_64);
   const __m128i cp_16_n16 = pair_set_epi16(cospi_16_64, -cospi_16_64);

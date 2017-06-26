@@ -76,6 +76,18 @@ static INLINE __m128i idct_calc_wraplow_sse2(const __m128i in0,
   return _mm_packs_epi32(t0, t1);
 }
 
+static INLINE void multiplication_and_add_2(const __m128i *const in0,
+                                            const __m128i *const in1,
+                                            const __m128i *const cst0,
+                                            const __m128i *const cst1,
+                                            __m128i *const res0,
+                                            __m128i *const res1) {
+  const __m128i lo = _mm_unpacklo_epi16(*in0, *in1);
+  const __m128i hi = _mm_unpackhi_epi16(*in0, *in1);
+  *res0 = idct_calc_wraplow_sse2(lo, hi, *cst0);
+  *res1 = idct_calc_wraplow_sse2(lo, hi, *cst1);
+}
+
 // Functions to allow 8 bit optimisations to be used when profile 0 is used with
 // highbitdepth enabled
 static INLINE __m128i load_input_data4(const tran_low_t *data) {
