@@ -16,6 +16,24 @@
       "revId": "e187b27438fbbcd07bc5b891ce30a39845d62711",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c4c2af0a_2bed8aea",
+        "filename": "vp9/encoder/vp9_noise_estimate.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-06-27T23:19:10Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "f8b6ab86_bbef26aa",
+      "revId": "e187b27438fbbcd07bc5b891ce30a39845d62711",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
