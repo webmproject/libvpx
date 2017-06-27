@@ -743,16 +743,7 @@ static int skin_sb_split(VP9_COMP *cpi, MACROBLOCK *x, const int low_res,
     for (i = 0; i < ymis; i += 2) {
       for (j = 0; j < xmis; j += 2) {
         int bl_index = block_index + i * cm->mi_cols + j;
-        int bl_index1 = bl_index + 1;
-        int bl_index2 = bl_index + cm->mi_cols;
-        int bl_index3 = bl_index2 + 1;
-        int consec_zeromv =
-            VPXMIN(cpi->consec_zero_mv[bl_index],
-                   VPXMIN(cpi->consec_zero_mv[bl_index1],
-                          VPXMIN(cpi->consec_zero_mv[bl_index2],
-                                 cpi->consec_zero_mv[bl_index3])));
-        int is_skin = vp9_compute_skin_block(
-            ysignal, usignal, vsignal, sp, spuv, BLOCK_16X16, consec_zeromv, 0);
+        int is_skin = cpi->skin_map[bl_index];
         num_16x16_skin += is_skin;
         num_16x16_nonskin += (1 - is_skin);
         if (num_16x16_nonskin > 3) {

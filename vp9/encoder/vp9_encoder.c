@@ -779,6 +779,9 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   cpi->nmvsadcosts_hp[0] = NULL;
   cpi->nmvsadcosts_hp[1] = NULL;
 
+  vpx_free(cpi->skin_map);
+  cpi->skin_map = NULL;
+
   vpx_free(cpi->prev_partition);
   cpi->prev_partition = NULL;
 
@@ -2045,6 +2048,9 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   cpi->tile_data = NULL;
 
   realloc_segmentation_maps(cpi);
+
+  CHECK_MEM_ERROR(cm, cpi->skin_map, vpx_calloc(cm->mi_rows * cm->mi_cols,
+                                                sizeof(cpi->skin_map[0])));
 
   CHECK_MEM_ERROR(cm, cpi->alt_ref_aq, vp9_alt_ref_aq_create());
 
@@ -3550,6 +3556,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
       cpi->oxcf.content != VP9E_CONTENT_SCREEN &&
       cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
     cpi->use_skin_detection = 1;
+    vp9_compute_skin_map(cpi, BLOCK_16X16);
   }
 
   vp9_set_quantizer(cm, q);
@@ -4424,7 +4431,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
 #endif
 #ifdef OUTPUT_YUV_SKINMAP
   if (cpi->common.current_video_frame > 1) {
-    vp9_compute_skin_map(cpi, yuv_skinmap_file);
+    vp9_output_skin_map(cpi, yuv_skinmap_file);
   }
 #endif
 
