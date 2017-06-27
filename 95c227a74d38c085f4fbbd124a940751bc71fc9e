@@ -81,6 +81,30 @@
       "revId": "95c227a74d38c085f4fbbd124a940751bc71fc9e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5fbb5d13_32e19235",
+        "filename": "test/dct_partial_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-27T22:23:15Z",
+      "side": 1,
+      "message": "There is Rand9Signed, but that is only -256 -\u003e 255. This goes from 8 bits to 12 for hbd.",
+      "parentUuid": "d8d6b654_56c872ff",
+      "range": {
+        "startLine": 88,
+        "startChar": 23,
+        "endLine": 88,
+        "endChar": 35
+      },
+      "revId": "95c227a74d38c085f4fbbd124a940751bc71fc9e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
