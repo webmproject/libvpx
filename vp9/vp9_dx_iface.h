@@ -41,7 +41,6 @@ struct vpx_codec_alg_priv {
   int skip_loop_filter;
 
   // Frame parallel related.
-  int frame_parallel_decode;  // frame-based threading.
   VPxWorker *frame_workers;
   int num_frame_workers;
   int next_submit_worker_id;
