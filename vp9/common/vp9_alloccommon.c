@@ -62,8 +62,7 @@ static int alloc_seg_map(VP9_COMMON *cm, int seg_map_size) {
   cm->prev_seg_map_idx = 1;
 
   cm->current_frame_seg_map = cm->seg_map_array[cm->seg_map_idx];
-  if (!cm->frame_parallel_decode)
-    cm->last_frame_seg_map = cm->seg_map_array[cm->prev_seg_map_idx];
+  cm->last_frame_seg_map = cm->seg_map_array[cm->prev_seg_map_idx];
 
   return 0;
 }
@@ -77,10 +76,7 @@ static void free_seg_map(VP9_COMMON *cm) {
   }
 
   cm->current_frame_seg_map = NULL;
-
-  if (!cm->frame_parallel_decode) {
-    cm->last_frame_seg_map = NULL;
-  }
+  cm->last_frame_seg_map = NULL;
 }
 
 void vp9_free_ref_frame_buffers(BufferPool *pool) {
@@ -186,7 +182,7 @@ void vp9_remove_common(VP9_COMMON *cm) {
 
 void vp9_init_context_buffers(VP9_COMMON *cm) {
   cm->setup_mi(cm);
-  if (cm->last_frame_seg_map && !cm->frame_parallel_decode)
+  if (cm->last_frame_seg_map)
     memset(cm->last_frame_seg_map, 0, cm->mi_rows * cm->mi_cols);
 }
 

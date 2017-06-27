@@ -347,7 +347,6 @@ static vpx_codec_err_t init_decoder(vpx_codec_alg_priv_t *ctx) {
     frame_worker_data->pbi->max_threads = ctx->cfg.threads;
 
     frame_worker_data->pbi->inv_tile_order = ctx->invert_tile_order;
-    frame_worker_data->pbi->common.frame_parallel_decode = 0;
     worker->hook = (VPxWorkerHook)frame_worker_hook;
   }
 
