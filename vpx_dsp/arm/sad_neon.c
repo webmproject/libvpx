@@ -156,51 +156,55 @@ uint32_t vpx_sad32x64_neon(const uint8_t *src, int src_stride,
   return horizontal_add_16x8(abs);
 }
 
-static INLINE unsigned int horizontal_long_add_16x8(const uint16x8_t vec_lo,
-                                                    const uint16x8_t vec_hi) {
-  const uint32x4_t vec_l_lo =
-      vaddl_u16(vget_low_u16(vec_lo), vget_high_u16(vec_lo));
-  const uint32x4_t vec_l_hi =
-      vaddl_u16(vget_low_u16(vec_hi), vget_high_u16(vec_hi));
-  const uint32x4_t a = vaddq_u32(vec_l_lo, vec_l_hi);
+static INLINE uint32_t horizontal_add_32x4(const uint32x4_t a) {
   const uint64x2_t b = vpaddlq_u32(a);
   const uint32x2_t c = vadd_u32(vreinterpret_u32_u64(vget_low_u64(b)),
                                 vreinterpret_u32_u64(vget_high_u64(b)));
   return vget_lane_u32(c, 0);
 }
 
-unsigned int vpx_sad64x64_neon(const uint8_t *src, int src_stride,
-                               const uint8_t *ref, int ref_stride) {
+static INLINE uint32x4_t sad64x(const uint8_t *a, int a_stride,
+                                const uint8_t *b, int b_stride,
+                                const int height) {
   int i;
-  uint16x8_t vec_accum_lo = vdupq_n_u16(0);
-  uint16x8_t vec_accum_hi = vdupq_n_u16(0);
-  for (i = 0; i < 64; ++i) {
-    const uint8x16_t vec_src_00 = vld1q_u8(src);
-    const uint8x16_t vec_src_16 = vld1q_u8(src + 16);
-    const uint8x16_t vec_src_32 = vld1q_u8(src + 32);
-    const uint8x16_t vec_src_48 = vld1q_u8(src + 48);
-    const uint8x16_t vec_ref_00 = vld1q_u8(ref);
-    const uint8x16_t vec_ref_16 = vld1q_u8(ref + 16);
-    const uint8x16_t vec_ref_32 = vld1q_u8(ref + 32);
-    const uint8x16_t vec_ref_48 = vld1q_u8(ref + 48);
-    src += src_stride;
-    ref += ref_stride;
-    vec_accum_lo = vabal_u8(vec_accum_lo, vget_low_u8(vec_src_00),
-                            vget_low_u8(vec_ref_00));
-    vec_accum_hi = vabal_u8(vec_accum_hi, vget_high_u8(vec_src_00),
-                            vget_high_u8(vec_ref_00));
-    vec_accum_lo = vabal_u8(vec_accum_lo, vget_low_u8(vec_src_16),
-                            vget_low_u8(vec_ref_16));
-    vec_accum_hi = vabal_u8(vec_accum_hi, vget_high_u8(vec_src_16),
-                            vget_high_u8(vec_ref_16));
-    vec_accum_lo = vabal_u8(vec_accum_lo, vget_low_u8(vec_src_32),
-                            vget_low_u8(vec_ref_32));
-    vec_accum_hi = vabal_u8(vec_accum_hi, vget_high_u8(vec_src_32),
-                            vget_high_u8(vec_ref_32));
-    vec_accum_lo = vabal_u8(vec_accum_lo, vget_low_u8(vec_src_48),
-                            vget_low_u8(vec_ref_48));
-    vec_accum_hi = vabal_u8(vec_accum_hi, vget_high_u8(vec_src_48),
-                            vget_high_u8(vec_ref_48));
+  uint16x8_t abs_0 = vdupq_n_u16(0);
+  uint16x8_t abs_1 = vdupq_n_u16(0);
+
+  for (i = 0; i < height; ++i) {
+    const uint8x16_t a_0 = vld1q_u8(a);
+    const uint8x16_t a_1 = vld1q_u8(a + 16);
+    const uint8x16_t a_2 = vld1q_u8(a + 32);
+    const uint8x16_t a_3 = vld1q_u8(a + 48);
+    const uint8x16_t b_0 = vld1q_u8(b);
+    const uint8x16_t b_1 = vld1q_u8(b + 16);
+    const uint8x16_t b_2 = vld1q_u8(b + 32);
+    const uint8x16_t b_3 = vld1q_u8(b + 48);
+    a += a_stride;
+    b += b_stride;
+    abs_0 = vabal_u8(abs_0, vget_low_u8(a_0), vget_low_u8(b_0));
+    abs_0 = vabal_u8(abs_0, vget_high_u8(a_0), vget_high_u8(b_0));
+    abs_0 = vabal_u8(abs_0, vget_low_u8(a_1), vget_low_u8(b_1));
+    abs_0 = vabal_u8(abs_0, vget_high_u8(a_1), vget_high_u8(b_1));
+    abs_1 = vabal_u8(abs_1, vget_low_u8(a_2), vget_low_u8(b_2));
+    abs_1 = vabal_u8(abs_1, vget_high_u8(a_2), vget_high_u8(b_2));
+    abs_1 = vabal_u8(abs_1, vget_low_u8(a_3), vget_low_u8(b_3));
+    abs_1 = vabal_u8(abs_1, vget_high_u8(a_3), vget_high_u8(b_3));
   }
-  return horizontal_long_add_16x8(vec_accum_lo, vec_accum_hi);
+
+  {
+    const uint32x4_t sum = vpaddlq_u16(abs_0);
+    return vpadalq_u16(sum, abs_1);
+  }
+}
+
+uint32_t vpx_sad64x32_neon(const uint8_t *src, int src_stride,
+                           const uint8_t *ref, int ref_stride) {
+  const uint32x4_t abs = sad64x(src, src_stride, ref, ref_stride, 32);
+  return horizontal_add_32x4(abs);
+}
+
+uint32_t vpx_sad64x64_neon(const uint8_t *src, int src_stride,
+                           const uint8_t *ref, int ref_stride) {
+  const uint32x4_t abs = sad64x(src, src_stride, ref, ref_stride, 64);
+  return horizontal_add_32x4(abs);
 }
