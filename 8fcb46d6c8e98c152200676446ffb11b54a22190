@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2d17dae8_e68a6dd5",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3363,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-27T22:02:45Z",
+      "side": 1,
+      "message": "note this is different than prior to this change as you\u0027re using a rounding average here.",
+      "revId": "8fcb46d6c8e98c152200676446ffb11b54a22190",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
