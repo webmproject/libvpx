@@ -289,12 +289,8 @@ static vpx_codec_err_t init_decoder(vpx_codec_alg_priv_t *ctx) {
   const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
 
   ctx->last_show_frame = -1;
-  ctx->next_submit_worker_id = 0;
-  ctx->last_submit_worker_id = 0;
-  ctx->next_output_worker_id = 0;
   ctx->need_resync = 1;
   ctx->num_frame_workers = 1;
-  ctx->available_threads = ctx->num_frame_workers;
   ctx->flushed = 0;
 
   ctx->buffer_pool = (BufferPool *)vpx_calloc(1, sizeof(BufferPool));
@@ -500,43 +496,35 @@ static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
   // iter acts as a flip flop, so an image is only returned on the first
   // call to get_frame.
   if (*iter == NULL && ctx->frame_workers != NULL) {
-    do {
-      YV12_BUFFER_CONFIG sd;
-      vp9_ppflags_t flags = { 0, 0, 0 };
-      const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
-      VPxWorker *const worker = &ctx->frame_workers[ctx->next_output_worker_id];
-      FrameWorkerData *const frame_worker_data =
-          (FrameWorkerData *)worker->data1;
-      ctx->next_output_worker_id =
-          (ctx->next_output_worker_id + 1) % ctx->num_frame_workers;
-      if (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC)
-        set_ppflags(ctx, &flags);
-      // Wait for the frame from worker thread.
-      if (winterface->sync(worker)) {
-        // Check if worker has received any frames.
-        if (frame_worker_data->received_frame == 1) {
-          ++ctx->available_threads;
-          frame_worker_data->received_frame = 0;
-          check_resync(ctx, frame_worker_data->pbi);
-        }
-        if (vp9_get_raw_frame(frame_worker_data->pbi, &sd, &flags) == 0) {
-          VP9_COMMON *const cm = &frame_worker_data->pbi->common;
-          RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
-          ctx->last_show_frame = frame_worker_data->pbi->common.new_fb_idx;
-          if (ctx->need_resync) return NULL;
-          yuvconfig2image(&ctx->img, &sd, frame_worker_data->user_priv);
-          ctx->img.fb_priv = frame_bufs[cm->new_fb_idx].raw_frame_buffer.priv;
-          img = &ctx->img;
-          return img;
-        }
-      } else {
-        // Decoding failed. Release the worker thread.
+    YV12_BUFFER_CONFIG sd;
+    vp9_ppflags_t flags = { 0, 0, 0 };
+    const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
+    VPxWorker *const worker = &ctx->frame_workers[0];
+    FrameWorkerData *const frame_worker_data = (FrameWorkerData *)worker->data1;
+    if (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC) set_ppflags(ctx, &flags);
+    // Wait for the frame from worker thread.
+    if (winterface->sync(worker)) {
+      // Check if worker has received any frames.
+      if (frame_worker_data->received_frame == 1) {
         frame_worker_data->received_frame = 0;
-        ++ctx->available_threads;
-        ctx->need_resync = 1;
-        if (ctx->flushed != 1) return NULL;
+        check_resync(ctx, frame_worker_data->pbi);
       }
-    } while (ctx->next_output_worker_id != ctx->next_submit_worker_id);
+      if (vp9_get_raw_frame(frame_worker_data->pbi, &sd, &flags) == 0) {
+        VP9_COMMON *const cm = &frame_worker_data->pbi->common;
+        RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
+        ctx->last_show_frame = frame_worker_data->pbi->common.new_fb_idx;
+        if (ctx->need_resync) return NULL;
+        yuvconfig2image(&ctx->img, &sd, frame_worker_data->user_priv);
+        ctx->img.fb_priv = frame_bufs[cm->new_fb_idx].raw_frame_buffer.priv;
+        img = &ctx->img;
+        return img;
+      }
+    } else {
+      // Decoding failed. Release the worker thread.
+      frame_worker_data->received_frame = 0;
+      ctx->need_resync = 1;
+      if (ctx->flushed != 1) return NULL;
+    }
   }
   return NULL;
 }
@@ -726,7 +714,7 @@ static vpx_codec_err_t ctrl_get_render_size(vpx_codec_alg_priv_t *ctx,
 static vpx_codec_err_t ctrl_get_bit_depth(vpx_codec_alg_priv_t *ctx,
                                           va_list args) {
   unsigned int *const bit_depth = va_arg(args, unsigned int *);
-  VPxWorker *const worker = &ctx->frame_workers[ctx->next_output_worker_id];
+  VPxWorker *const worker = &ctx->frame_workers[0];
 
   if (bit_depth) {
     if (worker) {

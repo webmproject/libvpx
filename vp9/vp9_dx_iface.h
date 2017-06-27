@@ -34,10 +34,6 @@ struct vpx_codec_alg_priv {
   // Frame parallel related.
   VPxWorker *frame_workers;
   int num_frame_workers;
-  int next_submit_worker_id;
-  int last_submit_worker_id;
-  int next_output_worker_id;
-  int available_threads;
   int need_resync;  // wait for key/intra-only frame
   // BufferPool that holds all reference frames. Shared by all the FrameWorkers.
   BufferPool *buffer_pool;
