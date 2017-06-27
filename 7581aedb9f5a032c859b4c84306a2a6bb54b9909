@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "29e4ef6b_b7609839",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3335,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-06-27T21:39:24Z",
+      "side": 1,
+      "message": "Is is better to move this function into the vp9_skin_detection.c?",
+      "revId": "7581aedb9f5a032c859b4c84306a2a6bb54b9909",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d8431076_2bdbb638",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3352,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-06-27T21:39:24Z",
+      "side": 1,
+      "message": "you can remove this comment \"Set y to white....\"",
+      "revId": "7581aedb9f5a032c859b4c84306a2a6bb54b9909",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f859753b_f05fd777",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3353,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-06-27T21:39:24Z",
+      "side": 1,
+      "message": "is the cpi-\u003eskin_map memset to 0 so it will never be set on rightmost/bottom boundary?",
+      "revId": "7581aedb9f5a032c859b4c84306a2a6bb54b9909",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
