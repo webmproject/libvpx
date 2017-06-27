@@ -53,8 +53,6 @@ typedef struct VP9Decoder {
 
   int refresh_frame_flags;
 
-  int frame_parallel_decode;  // frame-based threading.
-
   // TODO(hkuang): Combine this with cur_buf in macroblockd as they are
   // the same.
   RefCntBuffer *cur_buf;  //  Current decoding frame buffer.
