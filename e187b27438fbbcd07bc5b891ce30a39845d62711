@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f8b6ab86_bbef26aa",
+        "filename": "vp9/encoder/vp9_noise_estimate.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-06-27T23:07:01Z",
+      "side": 0,
+      "message": "you can keep these comments, they refer to the noise estimation",
+      "revId": "e187b27438fbbcd07bc5b891ce30a39845d62711",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
