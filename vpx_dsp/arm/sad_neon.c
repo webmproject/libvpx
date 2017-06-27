@@ -15,37 +15,6 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/arm/mem_neon.h"
 
-unsigned int vpx_sad8x16_neon(unsigned char *src_ptr, int src_stride,
-                              unsigned char *ref_ptr, int ref_stride) {
-  uint8x8_t d0, d8;
-  uint16x8_t q12;
-  uint32x4_t q1;
-  uint64x2_t q3;
-  uint32x2_t d5;
-  int i;
-
-  d0 = vld1_u8(src_ptr);
-  src_ptr += src_stride;
-  d8 = vld1_u8(ref_ptr);
-  ref_ptr += ref_stride;
-  q12 = vabdl_u8(d0, d8);
-
-  for (i = 0; i < 15; i++) {
-    d0 = vld1_u8(src_ptr);
-    src_ptr += src_stride;
-    d8 = vld1_u8(ref_ptr);
-    ref_ptr += ref_stride;
-    q12 = vabal_u8(q12, d0, d8);
-  }
-
-  q1 = vpaddlq_u16(q12);
-  q3 = vpaddlq_u32(q1);
-  d5 = vadd_u32(vreinterpret_u32_u64(vget_low_u64(q3)),
-                vreinterpret_u32_u64(vget_high_u64(q3)));
-
-  return vget_lane_u32(d5, 0);
-}
-
 // TODO(johannkoenig): combine with avg_neon.h version.
 static INLINE uint32_t horizontal_add_16x8(const uint16x8_t vec_16x8) {
   const uint32x4_t a = vpaddlq_u16(vec_16x8);
@@ -77,6 +46,39 @@ uint32_t vpx_sad4x8_neon(const uint8_t *src_ptr, int src_stride,
     abs = vabal_u8(abs, vget_high_u8(src_u8), vget_high_u8(ref_u8));
   }
 
+  return horizontal_add_16x8(abs);
+}
+
+static INLINE uint16x8_t sad8x(const uint8_t *a, int a_stride, const uint8_t *b,
+                               int b_stride, const int height) {
+  int i;
+  uint16x8_t abs = vdupq_n_u16(0);
+
+  for (i = 0; i < height; ++i) {
+    const uint8x8_t a_u8 = vld1_u8(a);
+    const uint8x8_t b_u8 = vld1_u8(b);
+    a += a_stride;
+    b += b_stride;
+    abs = vabal_u8(abs, a_u8, b_u8);
+  }
+  return abs;
+}
+
+uint32_t vpx_sad8x4_neon(const uint8_t *src, int src_stride, const uint8_t *ref,
+                         int ref_stride) {
+  const uint16x8_t abs = sad8x(src, src_stride, ref, ref_stride, 4);
+  return horizontal_add_16x8(abs);
+}
+
+uint32_t vpx_sad8x8_neon(const uint8_t *src, int src_stride, const uint8_t *ref,
+                         int ref_stride) {
+  const uint16x8_t abs = sad8x(src, src_stride, ref, ref_stride, 8);
+  return horizontal_add_16x8(abs);
+}
+
+uint32_t vpx_sad8x16_neon(const uint8_t *src, int src_stride,
+                          const uint8_t *ref, int ref_stride) {
+  const uint16x8_t abs = sad8x(src, src_stride, ref, ref_stride, 16);
   return horizontal_add_16x8(abs);
 }
 
@@ -205,19 +207,4 @@ unsigned int vpx_sad16x16_neon(const uint8_t *src, int src_stride,
         vabal_u8(vec_accum_hi, vget_high_u8(vec_src), vget_high_u8(vec_ref));
   }
   return horizontal_add_16x8(vaddq_u16(vec_accum_lo, vec_accum_hi));
-}
-
-unsigned int vpx_sad8x8_neon(const uint8_t *src, int src_stride,
-                             const uint8_t *ref, int ref_stride) {
-  int i;
-  uint16x8_t vec_accum = vdupq_n_u16(0);
-
-  for (i = 0; i < 8; ++i) {
-    const uint8x8_t vec_src = vld1_u8(src);
-    const uint8x8_t vec_ref = vld1_u8(ref);
-    src += src_stride;
-    ref += ref_stride;
-    vec_accum = vabal_u8(vec_accum, vec_src, vec_ref);
-  }
-  return horizontal_add_16x8(vec_accum);
 }
