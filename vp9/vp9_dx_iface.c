@@ -292,9 +292,6 @@ static vpx_codec_err_t init_decoder(vpx_codec_alg_priv_t *ctx) {
   ctx->next_submit_worker_id = 0;
   ctx->last_submit_worker_id = 0;
   ctx->next_output_worker_id = 0;
-  ctx->frame_cache_read = 0;
-  ctx->frame_cache_write = 0;
-  ctx->num_cache_frames = 0;
   ctx->need_resync = 1;
   ctx->num_frame_workers = 1;
   ctx->available_threads = ctx->num_frame_workers;

@@ -15,15 +15,6 @@
 
 typedef vpx_codec_stream_info_t vp9_stream_info_t;
 
-// This limit is due to framebuffer numbers.
-// TODO(hkuang): Remove this limit after implementing ondemand framebuffers.
-#define FRAME_CACHE_SIZE 6  // Cache maximum 6 decoded frames.
-
-typedef struct cache_frame {
-  int fb_idx;
-  vpx_image_t img;
-} cache_frame;
-
 struct vpx_codec_alg_priv {
   vpx_codec_priv_t base;
   vpx_codec_dec_cfg_t cfg;
@@ -47,10 +38,6 @@ struct vpx_codec_alg_priv {
   int last_submit_worker_id;
   int next_output_worker_id;
   int available_threads;
-  cache_frame frame_cache[FRAME_CACHE_SIZE];
-  int frame_cache_write;
-  int frame_cache_read;
-  int num_cache_frames;
   int need_resync;  // wait for key/intra-only frame
   // BufferPool that holds all reference frames. Shared by all the FrameWorkers.
   BufferPool *buffer_pool;
