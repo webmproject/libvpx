@@ -649,6 +649,7 @@ const SadMxNParam neon_tests[] = {
   SadMxNParam(16, 8, &vpx_sad16x8_neon),
   SadMxNParam(8, 16, &vpx_sad8x16_neon),
   SadMxNParam(8, 8, &vpx_sad8x8_neon),
+  SadMxNParam(4, 8, &vpx_sad4x8_neon),
   SadMxNParam(4, 4, &vpx_sad4x4_neon),
 };
 INSTANTIATE_TEST_CASE_P(NEON, SADTest, ::testing::ValuesIn(neon_tests));
