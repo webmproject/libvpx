@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d029459f_acd62798",
+        "filename": "vpx_dsp/arm/sad_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-06-27T23:11:22Z",
+      "side": 1,
+      "message": "Though compiler may combine them into vabal_u8(), maybe it\u0027s better to use vabal_u8() directly as you did below.",
+      "range": {
+        "startLine": 62,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 51
+      },
+      "revId": "cb24b0771a49d44a256b0e39d1025fe32f838f9a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
