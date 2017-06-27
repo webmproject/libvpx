@@ -31,6 +31,7 @@ int vp9_compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
     const uint8_t ysource = y[y_height_shift * stride + y_width_shift];
     const uint8_t usource = u[uv_height_shift * strideuv + uv_width_shift];
     const uint8_t vsource = v[uv_height_shift * strideuv + uv_width_shift];
+
     if (consec_zeromv > 25 && curr_motion_magn == 0) motion = 0;
     return vpx_skin_pixel(ysource, usource, vsource, motion);
   }
@@ -49,53 +50,26 @@ void vp9_compute_skin_map(VP9_COMP *const cpi, BLOCK_SIZE bsize) {
   const int shy = (y_bsize == 8) ? 3 : 4;
   const int shuv = shy - 1;
   const int fac = y_bsize / 8;
-  // Use center pixel or average of center 2x2 pixels.
-  const int mode_filter = 0;
-
   // Loop through blocks and set skin map based on center pixel of block.
   // Ignore rightmost/bottom boundary blocks.
   for (mi_row = 0; mi_row < cm->mi_rows - 1; mi_row += fac) {
     num_bl = 0;
     for (mi_col = 0; mi_col < cm->mi_cols - 1; mi_col += fac) {
-      int is_skin = 0;
-      if (mode_filter == 1) {
-        const int ypos = y_bsize >> 1;
-        const int uvpos = uv_bsize >> 1;
-        // Use 2x2 average at center.
-        uint8_t ysource = src_y[ypos * src_ystride + ypos];
-        uint8_t usource = src_u[uvpos * src_uvstride + uvpos];
-        uint8_t vsource = src_v[uvpos * src_uvstride + uvpos];
-        uint8_t ysource2 = src_y[(ypos + 1) * src_ystride + ypos];
-        uint8_t usource2 = src_u[(uvpos + 1) * src_uvstride + uvpos];
-        uint8_t vsource2 = src_v[(uvpos + 1) * src_uvstride + uvpos];
-        uint8_t ysource3 = src_y[ypos * src_ystride + (ypos + 1)];
-        uint8_t usource3 = src_u[uvpos * src_uvstride + (uvpos + 1)];
-        uint8_t vsource3 = src_v[uvpos * src_uvstride + (uvpos + 1)];
-        uint8_t ysource4 = src_y[(ypos + 1) * src_ystride + (ypos + 1)];
-        uint8_t usource4 = src_u[(uvpos + 1) * src_uvstride + (uvpos + 1)];
-        uint8_t vsource4 = src_v[(uvpos + 1) * src_uvstride + (uvpos + 1)];
-        ysource = (ysource + ysource2 + ysource3 + ysource4) >> 2;
-        usource = (usource + usource2 + usource3 + usource4) >> 2;
-        vsource = (vsource + vsource2 + vsource3 + vsource4) >> 2;
-        is_skin = vpx_skin_pixel(ysource, usource, vsource, 1);
-      } else {
-        int consec_zeromv = 0;
-        int bl_index = mi_row * cm->mi_cols + mi_col;
-        int bl_index1 = bl_index + 1;
-        int bl_index2 = bl_index + cm->mi_cols;
-        int bl_index3 = bl_index2 + 1;
-        if (bsize == BLOCK_8X8)
-          consec_zeromv = cpi->consec_zero_mv[bl_index];
-        else
-          consec_zeromv =
-              VPXMIN(cpi->consec_zero_mv[bl_index],
-                     VPXMIN(cpi->consec_zero_mv[bl_index1],
-                            VPXMIN(cpi->consec_zero_mv[bl_index2],
-                                   cpi->consec_zero_mv[bl_index3])));
-        is_skin = vp9_compute_skin_block(src_y, src_u, src_v, src_ystride,
-                                         src_uvstride, bsize, consec_zeromv, 0);
-      }
-      cpi->skin_map[mi_row * cm->mi_cols + mi_col] = is_skin;
+      int consec_zeromv = 0;
+      int bl_index = mi_row * cm->mi_cols + mi_col;
+      int bl_index1 = bl_index + 1;
+      int bl_index2 = bl_index + cm->mi_cols;
+      int bl_index3 = bl_index2 + 1;
+      if (bsize == BLOCK_8X8)
+        consec_zeromv = cpi->consec_zero_mv[bl_index];
+      else
+        consec_zeromv = VPXMIN(cpi->consec_zero_mv[bl_index],
+                               VPXMIN(cpi->consec_zero_mv[bl_index1],
+                                      VPXMIN(cpi->consec_zero_mv[bl_index2],
+                                             cpi->consec_zero_mv[bl_index3])));
+      cpi->skin_map[mi_row * cm->mi_cols + mi_col] =
+          vp9_compute_skin_block(src_y, src_u, src_v, src_ystride, src_uvstride,
+                                 bsize, consec_zeromv, 0);
       num_bl++;
       src_y += y_bsize;
       src_u += uv_bsize;
@@ -115,7 +89,6 @@ void vp9_output_skin_map(VP9_COMP *const cpi, FILE *yuv_skinmap_file) {
   uint8_t *y;
   const uint8_t *src_y = cpi->Source->y_buffer;
   const int src_ystride = cpi->Source->y_stride;
-
   const int y_bsize = 16;  // Use 8x8 or 16x16.
   const int shy = (y_bsize == 8) ? 3 : 4;
   const int fac = y_bsize / 8;
