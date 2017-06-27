@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "f721c938_5fc5f984",
+        "filename": "vpx_dsp/arm/sad_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-27T23:20:30Z",
+      "side": 1,
+      "message": "note, avg_neon.c has the same implementation",
+      "revId": "cb24b0771a49d44a256b0e39d1025fe32f838f9a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d029459f_acd62798",
         "filename": "vpx_dsp/arm/sad_neon.c",
         "patchSetId": 4
