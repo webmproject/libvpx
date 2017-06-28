@@ -17,24 +17,6 @@
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
-// TODO(hkuang): Don't need to lock the whole pool after implementing atomic
-// frame reference count.
-void lock_buffer_pool(BufferPool *const pool) {
-#if CONFIG_MULTITHREAD
-  pthread_mutex_lock(&pool->pool_mutex);
-#else
-  (void)pool;
-#endif
-}
-
-void unlock_buffer_pool(BufferPool *const pool) {
-#if CONFIG_MULTITHREAD
-  pthread_mutex_unlock(&pool->pool_mutex);
-#else
-  (void)pool;
-#endif
-}
-
 void vp9_set_mb_mi(VP9_COMMON *cm, int width, int height) {
   const int aligned_width = ALIGN_POWER_OF_TWO(width, MI_SIZE_LOG2);
   const int aligned_height = ALIGN_POWER_OF_TWO(height, MI_SIZE_LOG2);

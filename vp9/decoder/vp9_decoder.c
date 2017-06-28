@@ -230,7 +230,6 @@ static void swap_frame_buffers(VP9Decoder *pbi) {
   BufferPool *const pool = cm->buffer_pool;
   RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
 
-  lock_buffer_pool(pool);
   for (mask = pbi->refresh_frame_flags; mask; mask >>= 1) {
     const int old_idx = cm->ref_frame_map[ref_index];
     // Current thread releases the holding of reference frame.
@@ -250,13 +249,10 @@ static void swap_frame_buffers(VP9Decoder *pbi) {
     decrease_ref_count(old_idx, frame_bufs, pool);
     cm->ref_frame_map[ref_index] = cm->next_ref_frame_map[ref_index];
   }
-  unlock_buffer_pool(pool);
   pbi->hold_ref_buf = 0;
   cm->frame_to_show = get_frame_new_buffer(cm);
 
-  lock_buffer_pool(pool);
   --frame_bufs[cm->new_fb_idx].ref_count;
-  unlock_buffer_pool(pool);
 
   // Invalidate these references until the next frame starts.
   for (ref_index = 0; ref_index < 3; ref_index++)
@@ -321,7 +317,6 @@ int vp9_receive_compressed_data(VP9Decoder *pbi, size_t size,
       winterface->sync(&pbi->tile_workers[i]);
     }
 
-    lock_buffer_pool(pool);
     // Release all the reference buffers if worker thread is holding them.
     if (pbi->hold_ref_buf == 1) {
       int ref_index = 0, mask;
@@ -346,7 +341,6 @@ int vp9_receive_compressed_data(VP9Decoder *pbi, size_t size,
     }
     // Release current frame.
     decrease_ref_count(cm->new_fb_idx, frame_bufs, pool);
-    unlock_buffer_pool(pool);
 
     vpx_clear_system_state();
     return -1;

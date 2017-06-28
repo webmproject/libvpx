@@ -81,9 +81,6 @@ static vpx_codec_err_t decoder_destroy(vpx_codec_alg_priv_t *ctx) {
 #endif
       vpx_free(frame_worker_data);
     }
-#if CONFIG_MULTITHREAD
-    pthread_mutex_destroy(&ctx->buffer_pool->pool_mutex);
-#endif
   }
 
   if (ctx->buffer_pool) {
@@ -295,13 +292,6 @@ static vpx_codec_err_t init_decoder(vpx_codec_alg_priv_t *ctx) {
 
   ctx->buffer_pool = (BufferPool *)vpx_calloc(1, sizeof(BufferPool));
   if (ctx->buffer_pool == NULL) return VPX_CODEC_MEM_ERROR;
-
-#if CONFIG_MULTITHREAD
-  if (pthread_mutex_init(&ctx->buffer_pool->pool_mutex, NULL)) {
-    set_error_detail(ctx, "Failed to allocate buffer pool mutex");
-    return VPX_CODEC_MEM_ERROR;
-  }
-#endif
 
   ctx->frame_workers = (VPxWorker *)vpx_malloc(ctx->num_frame_workers *
                                                sizeof(*ctx->frame_workers));

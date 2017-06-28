@@ -1171,7 +1171,6 @@ static void setup_frame_size(VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
   resize_context_buffers(cm, width, height);
   setup_render_size(cm, rb);
 
-  lock_buffer_pool(pool);
   if (vpx_realloc_frame_buffer(
           get_frame_new_buffer(cm), cm->width, cm->height, cm->subsampling_x,
           cm->subsampling_y,
@@ -1181,11 +1180,9 @@ static void setup_frame_size(VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
           VP9_DEC_BORDER_IN_PIXELS, cm->byte_alignment,
           &pool->frame_bufs[cm->new_fb_idx].raw_frame_buffer, pool->get_fb_cb,
           pool->cb_priv)) {
-    unlock_buffer_pool(pool);
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffer");
   }
-  unlock_buffer_pool(pool);
 
   pool->frame_bufs[cm->new_fb_idx].buf.subsampling_x = cm->subsampling_x;
   pool->frame_bufs[cm->new_fb_idx].buf.subsampling_y = cm->subsampling_y;
@@ -1257,7 +1254,6 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   resize_context_buffers(cm, width, height);
   setup_render_size(cm, rb);
 
-  lock_buffer_pool(pool);
   if (vpx_realloc_frame_buffer(
           get_frame_new_buffer(cm), cm->width, cm->height, cm->subsampling_x,
           cm->subsampling_y,
@@ -1267,11 +1263,9 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
           VP9_DEC_BORDER_IN_PIXELS, cm->byte_alignment,
           &pool->frame_bufs[cm->new_fb_idx].raw_frame_buffer, pool->get_fb_cb,
           pool->cb_priv)) {
-    unlock_buffer_pool(pool);
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffer");
   }
-  unlock_buffer_pool(pool);
 
   pool->frame_bufs[cm->new_fb_idx].buf.subsampling_x = cm->subsampling_x;
   pool->frame_bufs[cm->new_fb_idx].buf.subsampling_y = cm->subsampling_y;
@@ -1756,16 +1750,13 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
   if (cm->show_existing_frame) {
     // Show an existing frame directly.
     const int frame_to_show = cm->ref_frame_map[vpx_rb_read_literal(rb, 3)];
-    lock_buffer_pool(pool);
     if (frame_to_show < 0 || frame_bufs[frame_to_show].ref_count < 1) {
-      unlock_buffer_pool(pool);
       vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                          "Buffer %d does not contain a decoded frame",
                          frame_to_show);
     }
 
     ref_cnt_fb(frame_bufs, &cm->new_fb_idx, frame_to_show);
-    unlock_buffer_pool(pool);
     pbi->refresh_frame_flags = 0;
     cm->lf.filter_level = 0;
     cm->show_frame = 1;
@@ -1886,7 +1877,6 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
   cm->frame_context_idx = vpx_rb_read_literal(rb, FRAME_CONTEXTS_LOG2);
 
   // Generate next_ref_frame_map.
-  lock_buffer_pool(pool);
   for (mask = pbi->refresh_frame_flags; mask; mask >>= 1) {
     if (mask & 1) {
       cm->next_ref_frame_map[ref_index] = cm->new_fb_idx;
@@ -1906,7 +1896,6 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
     if (cm->ref_frame_map[ref_index] >= 0)
       ++frame_bufs[cm->ref_frame_map[ref_index]].ref_count;
   }
-  unlock_buffer_pool(pool);
   pbi->hold_ref_buf = 1;
 
   if (frame_is_intra_only(cm) || cm->error_resilient_mode)
