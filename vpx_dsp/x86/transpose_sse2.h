@@ -21,16 +21,16 @@ static INLINE void transpose_16bit_4x4(const __m128i *const in,
   // in[2]: 20 21 22 23  XX XX XX XX
   // in[3]: 30 31 32 33  XX XX XX XX
   // to:
-  // tr0_0: 00 10 01 11  02 12 03 13
-  // tr0_1: 20 30 21 31  22 32 23 33
-  const __m128i tr0_0 = _mm_unpacklo_epi16(in[0], in[1]);
-  const __m128i tr0_1 = _mm_unpacklo_epi16(in[2], in[3]);
+  // a0:    00 10 01 11  02 12 03 13
+  // a1:    20 30 21 31  22 32 23 33
+  const __m128i a0 = _mm_unpacklo_epi16(in[0], in[1]);
+  const __m128i a1 = _mm_unpacklo_epi16(in[2], in[3]);
 
   // Unpack 32 bit elements resulting in:
   // out[0]: 00 10 20 30  01 11 21 31
   // out[1]: 02 12 22 32  03 13 23 33
-  out[0] = _mm_unpacklo_epi32(tr0_0, tr0_1);
-  out[1] = _mm_unpackhi_epi32(tr0_0, tr0_1);
+  out[0] = _mm_unpacklo_epi32(a0, a1);
+  out[1] = _mm_unpackhi_epi32(a0, a1);
 }
 
 static INLINE void transpose_16bit_4x8(const __m128i *const in,
@@ -45,34 +45,34 @@ static INLINE void transpose_16bit_4x8(const __m128i *const in,
   // in[6]: 60 61 62 63  XX XX XX XX
   // in[7]: 70 71 72 73  XX XX XX XX
   // to:
-  // tr0_0: 00 10 01 11  02 12 03 13
-  // tr0_1: 20 30 21 31  22 32 23 33
-  // tr0_2: 40 50 41 51  42 52 43 53
-  // tr0_3: 60 70 61 71  62 72 63 73
-  const __m128i tr0_0 = _mm_unpacklo_epi16(in[0], in[1]);
-  const __m128i tr0_1 = _mm_unpacklo_epi16(in[2], in[3]);
-  const __m128i tr0_2 = _mm_unpacklo_epi16(in[4], in[5]);
-  const __m128i tr0_3 = _mm_unpacklo_epi16(in[6], in[7]);
+  // a0:    00 10 01 11  02 12 03 13
+  // a1:    20 30 21 31  22 32 23 33
+  // a2:    40 50 41 51  42 52 43 53
+  // a3:    60 70 61 71  62 72 63 73
+  const __m128i a0 = _mm_unpacklo_epi16(in[0], in[1]);
+  const __m128i a1 = _mm_unpacklo_epi16(in[2], in[3]);
+  const __m128i a2 = _mm_unpacklo_epi16(in[4], in[5]);
+  const __m128i a3 = _mm_unpacklo_epi16(in[6], in[7]);
 
   // Unpack 32 bit elements resulting in:
-  // tr1_0: 00 10 20 30  01 11 21 31
-  // tr1_1: 40 50 60 70  41 51 61 71
-  // tr1_2: 02 12 22 32  03 13 23 33
-  // tr1_3: 42 52 62 72  43 53 63 73
-  const __m128i tr1_0 = _mm_unpacklo_epi32(tr0_0, tr0_1);
-  const __m128i tr1_1 = _mm_unpacklo_epi32(tr0_2, tr0_3);
-  const __m128i tr1_2 = _mm_unpackhi_epi32(tr0_0, tr0_1);
-  const __m128i tr1_3 = _mm_unpackhi_epi32(tr0_2, tr0_3);
+  // b0: 00 10 20 30  01 11 21 31
+  // b1: 40 50 60 70  41 51 61 71
+  // b2: 02 12 22 32  03 13 23 33
+  // b3: 42 52 62 72  43 53 63 73
+  const __m128i b0 = _mm_unpacklo_epi32(a0, a1);
+  const __m128i b1 = _mm_unpacklo_epi32(a2, a3);
+  const __m128i b2 = _mm_unpackhi_epi32(a0, a1);
+  const __m128i b3 = _mm_unpackhi_epi32(a2, a3);
 
   // Unpack 64 bit elements resulting in:
   // out[0]: 00 10 20 30  40 50 60 70
   // out[1]: 01 11 21 31  41 51 61 71
   // out[2]: 02 12 22 32  42 52 62 72
   // out[3]: 03 13 23 33  43 53 63 73
-  out[0] = _mm_unpacklo_epi64(tr1_0, tr1_1);
-  out[1] = _mm_unpackhi_epi64(tr1_0, tr1_1);
-  out[2] = _mm_unpacklo_epi64(tr1_2, tr1_3);
-  out[3] = _mm_unpackhi_epi64(tr1_2, tr1_3);
+  out[0] = _mm_unpacklo_epi64(b0, b1);
+  out[1] = _mm_unpackhi_epi64(b0, b1);
+  out[2] = _mm_unpacklo_epi64(b2, b3);
+  out[3] = _mm_unpackhi_epi64(b2, b3);
 }
 
 static INLINE void transpose_16bit_8x8(const __m128i *const in,
@@ -87,40 +87,40 @@ static INLINE void transpose_16bit_8x8(const __m128i *const in,
   // in[6]: 60 61 62 63  64 65 66 67
   // in[7]: 70 71 72 73  74 75 76 77
   // to:
-  // tr0_0: 00 10 01 11  02 12 03 13
-  // tr0_1: 20 30 21 31  22 32 23 33
-  // tr0_2: 40 50 41 51  42 52 43 53
-  // tr0_3: 60 70 61 71  62 72 63 73
-  // tr0_4: 04 14 05 15  06 16 07 17
-  // tr0_5: 24 34 25 35  26 36 27 37
-  // tr0_6: 44 54 45 55  46 56 47 57
-  // tr0_7: 64 74 65 75  66 76 67 77
-  const __m128i tr0_0 = _mm_unpacklo_epi16(in[0], in[1]);
-  const __m128i tr0_1 = _mm_unpacklo_epi16(in[2], in[3]);
-  const __m128i tr0_2 = _mm_unpacklo_epi16(in[4], in[5]);
-  const __m128i tr0_3 = _mm_unpacklo_epi16(in[6], in[7]);
-  const __m128i tr0_4 = _mm_unpackhi_epi16(in[0], in[1]);
-  const __m128i tr0_5 = _mm_unpackhi_epi16(in[2], in[3]);
-  const __m128i tr0_6 = _mm_unpackhi_epi16(in[4], in[5]);
-  const __m128i tr0_7 = _mm_unpackhi_epi16(in[6], in[7]);
+  // a0:    00 10 01 11  02 12 03 13
+  // a1:    20 30 21 31  22 32 23 33
+  // a2:    40 50 41 51  42 52 43 53
+  // a3:    60 70 61 71  62 72 63 73
+  // a4:    04 14 05 15  06 16 07 17
+  // a5:    24 34 25 35  26 36 27 37
+  // a6:    44 54 45 55  46 56 47 57
+  // a7:    64 74 65 75  66 76 67 77
+  const __m128i a0 = _mm_unpacklo_epi16(in[0], in[1]);
+  const __m128i a1 = _mm_unpacklo_epi16(in[2], in[3]);
+  const __m128i a2 = _mm_unpacklo_epi16(in[4], in[5]);
+  const __m128i a3 = _mm_unpacklo_epi16(in[6], in[7]);
+  const __m128i a4 = _mm_unpackhi_epi16(in[0], in[1]);
+  const __m128i a5 = _mm_unpackhi_epi16(in[2], in[3]);
+  const __m128i a6 = _mm_unpackhi_epi16(in[4], in[5]);
+  const __m128i a7 = _mm_unpackhi_epi16(in[6], in[7]);
 
   // Unpack 32 bit elements resulting in:
-  // tr1_0: 00 10 20 30  01 11 21 31
-  // tr1_1: 40 50 60 70  41 51 61 71
-  // tr1_2: 04 14 24 34  05 15 25 35
-  // tr1_3: 44 54 64 74  45 55 65 75
-  // tr1_4: 02 12 22 32  03 13 23 33
-  // tr1_5: 42 52 62 72  43 53 63 73
-  // tr1_6: 06 16 26 36  07 17 27 37
-  // tr1_7: 46 56 66 76  47 57 67 77
-  const __m128i tr1_0 = _mm_unpacklo_epi32(tr0_0, tr0_1);
-  const __m128i tr1_1 = _mm_unpacklo_epi32(tr0_2, tr0_3);
-  const __m128i tr1_2 = _mm_unpacklo_epi32(tr0_4, tr0_5);
-  const __m128i tr1_3 = _mm_unpacklo_epi32(tr0_6, tr0_7);
-  const __m128i tr1_4 = _mm_unpackhi_epi32(tr0_0, tr0_1);
-  const __m128i tr1_5 = _mm_unpackhi_epi32(tr0_2, tr0_3);
-  const __m128i tr1_6 = _mm_unpackhi_epi32(tr0_4, tr0_5);
-  const __m128i tr1_7 = _mm_unpackhi_epi32(tr0_6, tr0_7);
+  // b0: 00 10 20 30  01 11 21 31
+  // b1: 40 50 60 70  41 51 61 71
+  // b2: 04 14 24 34  05 15 25 35
+  // b3: 44 54 64 74  45 55 65 75
+  // b4: 02 12 22 32  03 13 23 33
+  // b5: 42 52 62 72  43 53 63 73
+  // b6: 06 16 26 36  07 17 27 37
+  // b7: 46 56 66 76  47 57 67 77
+  const __m128i b0 = _mm_unpacklo_epi32(a0, a1);
+  const __m128i b1 = _mm_unpacklo_epi32(a2, a3);
+  const __m128i b2 = _mm_unpacklo_epi32(a4, a5);
+  const __m128i b3 = _mm_unpacklo_epi32(a6, a7);
+  const __m128i b4 = _mm_unpackhi_epi32(a0, a1);
+  const __m128i b5 = _mm_unpackhi_epi32(a2, a3);
+  const __m128i b6 = _mm_unpackhi_epi32(a4, a5);
+  const __m128i b7 = _mm_unpackhi_epi32(a6, a7);
 
   // Unpack 64 bit elements resulting in:
   // out[0]: 00 10 20 30  40 50 60 70
@@ -131,14 +131,14 @@ static INLINE void transpose_16bit_8x8(const __m128i *const in,
   // out[5]: 05 15 25 35  45 55 65 75
   // out[6]: 06 16 26 36  46 56 66 76
   // out[7]: 07 17 27 37  47 57 67 77
-  out[0] = _mm_unpacklo_epi64(tr1_0, tr1_1);
-  out[1] = _mm_unpackhi_epi64(tr1_0, tr1_1);
-  out[2] = _mm_unpacklo_epi64(tr1_4, tr1_5);
-  out[3] = _mm_unpackhi_epi64(tr1_4, tr1_5);
-  out[4] = _mm_unpacklo_epi64(tr1_2, tr1_3);
-  out[5] = _mm_unpackhi_epi64(tr1_2, tr1_3);
-  out[6] = _mm_unpacklo_epi64(tr1_6, tr1_7);
-  out[7] = _mm_unpackhi_epi64(tr1_6, tr1_7);
+  out[0] = _mm_unpacklo_epi64(b0, b1);
+  out[1] = _mm_unpackhi_epi64(b0, b1);
+  out[2] = _mm_unpacklo_epi64(b4, b5);
+  out[3] = _mm_unpackhi_epi64(b4, b5);
+  out[4] = _mm_unpacklo_epi64(b2, b3);
+  out[5] = _mm_unpackhi_epi64(b2, b3);
+  out[6] = _mm_unpacklo_epi64(b6, b7);
+  out[7] = _mm_unpackhi_epi64(b6, b7);
 }
 
 // Transpose in-place
@@ -160,33 +160,81 @@ static INLINE void transpose_16bit_16x16(__m128i *const left,
   left[15] = tbuf[7];
 }
 
-static INLINE void transpose_32bit_4x4(__m128i *const a0, __m128i *const a1,
-                                       __m128i *const a2, __m128i *const a3) {
+static INLINE void transpose_32bit_4x4(const __m128i *const in,
+                                       __m128i *const out) {
   // Unpack 32 bit elements. Goes from:
-  // a0: 00 01 02 03
-  // a1: 10 11 12 13
-  // a2: 20 21 22 23
-  // a3: 30 31 32 33
+  // in[0]: 00 01 02 03
+  // in[1]: 10 11 12 13
+  // in[2]: 20 21 22 23
+  // in[3]: 30 31 32 33
   // to:
-  // b0: 00 10 01 11
-  // b1: 20 30 21 31
-  // b2: 02 12 03 13
-  // b3: 22 32 23 33
+  // a0:    00 10 01 11
+  // a1:    20 30 21 31
+  // a2:    02 12 03 13
+  // a3:    22 32 23 33
 
-  const __m128i b0 = _mm_unpacklo_epi32(*a0, *a1);
-  const __m128i b1 = _mm_unpacklo_epi32(*a2, *a3);
-  const __m128i b2 = _mm_unpackhi_epi32(*a0, *a1);
-  const __m128i b3 = _mm_unpackhi_epi32(*a2, *a3);
+  const __m128i a0 = _mm_unpacklo_epi32(in[0], in[1]);
+  const __m128i a1 = _mm_unpacklo_epi32(in[2], in[3]);
+  const __m128i a2 = _mm_unpackhi_epi32(in[0], in[1]);
+  const __m128i a3 = _mm_unpackhi_epi32(in[2], in[3]);
 
   // Unpack 64 bit elements resulting in:
-  // a0: 00 10 20 30
-  // a1: 01 11 21 31
-  // a2: 02 12 22 32
-  // a3: 03 13 23 33
-  *a0 = _mm_unpacklo_epi64(b0, b1);
-  *a1 = _mm_unpackhi_epi64(b0, b1);
-  *a2 = _mm_unpacklo_epi64(b2, b3);
-  *a3 = _mm_unpackhi_epi64(b2, b3);
+  // out[0]: 00 10 20 30
+  // out[1]: 01 11 21 31
+  // out[2]: 02 12 22 32
+  // out[3]: 03 13 23 33
+  out[0] = _mm_unpacklo_epi64(a0, a1);
+  out[1] = _mm_unpackhi_epi64(a0, a1);
+  out[2] = _mm_unpacklo_epi64(a2, a3);
+  out[3] = _mm_unpackhi_epi64(a2, a3);
+}
+
+static INLINE void transpose_32bit_4x4x2(const __m128i *const in,
+                                         __m128i *const out) {
+  // Unpack 32 bit elements. Goes from:
+  // in[0]: 00 01 02 03
+  // in[1]: 10 11 12 13
+  // in[2]: 20 21 22 23
+  // in[3]: 30 31 32 33
+  // in[4]: 04 05 06 07
+  // in[5]: 14 15 16 17
+  // in[6]: 24 25 26 27
+  // in[7]: 34 35 36 37
+  // to:
+  // a0:    00 10 01 11
+  // a1:    20 30 21 31
+  // a2:    02 12 03 13
+  // a3:    22 32 23 33
+  // a4:    04 14 05 15
+  // a5:    24 34 25 35
+  // a6:    06 16 07 17
+  // a7:    26 36 27 37
+  const __m128i a0 = _mm_unpacklo_epi32(in[0], in[1]);
+  const __m128i a1 = _mm_unpacklo_epi32(in[2], in[3]);
+  const __m128i a2 = _mm_unpackhi_epi32(in[0], in[1]);
+  const __m128i a3 = _mm_unpackhi_epi32(in[2], in[3]);
+  const __m128i a4 = _mm_unpacklo_epi32(in[4], in[5]);
+  const __m128i a5 = _mm_unpacklo_epi32(in[6], in[7]);
+  const __m128i a6 = _mm_unpackhi_epi32(in[4], in[5]);
+  const __m128i a7 = _mm_unpackhi_epi32(in[6], in[7]);
+
+  // Unpack 64 bit elements resulting in:
+  // out[0]: 00 10 20 30
+  // out[1]: 01 11 21 31
+  // out[2]: 02 12 22 32
+  // out[3]: 03 13 23 33
+  // out[4]: 04 14 24 34
+  // out[5]: 05 15 25 35
+  // out[6]: 06 16 26 36
+  // out[7]: 07 17 27 37
+  out[0] = _mm_unpacklo_epi64(a0, a1);
+  out[1] = _mm_unpackhi_epi64(a0, a1);
+  out[2] = _mm_unpacklo_epi64(a2, a3);
+  out[3] = _mm_unpackhi_epi64(a2, a3);
+  out[4] = _mm_unpacklo_epi64(a4, a5);
+  out[5] = _mm_unpackhi_epi64(a4, a5);
+  out[6] = _mm_unpacklo_epi64(a6, a7);
+  out[7] = _mm_unpackhi_epi64(a6, a7);
 }
 
 #endif  // VPX_DSP_X86_TRANSPOSE_SSE2_H_

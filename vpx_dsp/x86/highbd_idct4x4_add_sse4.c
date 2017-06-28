@@ -25,7 +25,7 @@ static INLINE void highbd_idct4(__m128i *const io) {
       _mm_setr_epi32(cospi_24_64 << 2, 0, cospi_24_64 << 2, 0);
   __m128i temp1[4], step[4];
 
-  transpose_32bit_4x4(&io[0], &io[1], &io[2], &io[3]);
+  transpose_32bit_4x4(io, io);
 
   // stage 1
   temp1[0] = _mm_add_epi32(io[0], io[2]);  // input[0] + input[2]

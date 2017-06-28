@@ -27,7 +27,7 @@ static INLINE void highbd_idct4_small_sse2(__m128i *const io) {
   const __m128i cospi_p24_p24 = _mm_setr_epi32(cospi_24_64, 0, cospi_24_64, 0);
   __m128i temp1[4], temp2[4], step[4];
 
-  transpose_32bit_4x4(&io[0], &io[1], &io[2], &io[3]);
+  transpose_32bit_4x4(io, io);
 
   // Note: There is no 32-bit signed multiply SIMD instruction in SSE2.
   //       _mm_mul_epu32() is used which can only guarantee the lower 32-bit
@@ -98,7 +98,7 @@ static INLINE void highbd_idct4_large_sse2(__m128i *const io) {
       _mm_setr_epi32(cospi_24_64 << 2, 0, cospi_24_64 << 2, 0);
   __m128i temp1[4], temp2[4], step[4], sign1[4], sign2[4];
 
-  transpose_32bit_4x4(&io[0], &io[1], &io[2], &io[3]);
+  transpose_32bit_4x4(io, io);
 
   // stage 1
   temp1[0] = _mm_add_epi32(io[0], io[2]);  // input[0] + input[2]
