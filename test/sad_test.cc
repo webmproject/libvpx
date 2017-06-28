@@ -644,11 +644,15 @@ INSTANTIATE_TEST_CASE_P(C, SADx4Test, ::testing::ValuesIn(x4d_c_tests));
 #if HAVE_NEON
 const SadMxNParam neon_tests[] = {
   SadMxNParam(64, 64, &vpx_sad64x64_neon),
+  SadMxNParam(64, 32, &vpx_sad64x32_neon),
   SadMxNParam(32, 32, &vpx_sad32x32_neon),
+  SadMxNParam(16, 32, &vpx_sad16x32_neon),
   SadMxNParam(16, 16, &vpx_sad16x16_neon),
   SadMxNParam(16, 8, &vpx_sad16x8_neon),
   SadMxNParam(8, 16, &vpx_sad8x16_neon),
   SadMxNParam(8, 8, &vpx_sad8x8_neon),
+  SadMxNParam(8, 4, &vpx_sad8x4_neon),
+  SadMxNParam(4, 8, &vpx_sad4x8_neon),
   SadMxNParam(4, 4, &vpx_sad4x4_neon),
 };
 INSTANTIATE_TEST_CASE_P(NEON, SADTest, ::testing::ValuesIn(neon_tests));
