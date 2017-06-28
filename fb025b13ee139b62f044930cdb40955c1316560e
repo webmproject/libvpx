@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5cd473a4_90c110e5",
+        "filename": "vp9/encoder/vp9_skin_detection.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-28T05:33:03Z",
+      "side": 1,
+      "message": "this is always false. it might be good to leave this for another change if you\u0027re planning on making this conditional somehow",
+      "revId": "fb025b13ee139b62f044930cdb40955c1316560e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
