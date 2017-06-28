@@ -33,6 +33,18 @@ uint32_t vpx_sad4x4_neon(const uint8_t *src_ptr, int src_stride,
   return horizontal_add_16x8(abs);
 }
 
+uint32_t vpx_sad4x4_avg_neon(const uint8_t *src_ptr, int src_stride,
+                             const uint8_t *ref_ptr, int ref_stride,
+                             const uint8_t *second_pred) {
+  const uint8x16_t src_u8 = load_unaligned_u8q(src_ptr, src_stride);
+  const uint8x16_t ref_u8 = load_unaligned_u8q(ref_ptr, ref_stride);
+  const uint8x16_t second_pred_u8 = vld1q_u8(second_pred);
+  const uint8x16_t avg = vrhaddq_u8(ref_u8, second_pred_u8);
+  uint16x8_t abs = vabdl_u8(vget_low_u8(src_u8), vget_low_u8(avg));
+  abs = vabal_u8(abs, vget_high_u8(src_u8), vget_high_u8(avg));
+  return horizontal_add_16x8(abs);
+}
+
 uint32_t vpx_sad4x8_neon(const uint8_t *src_ptr, int src_stride,
                          const uint8_t *ref_ptr, int ref_stride) {
   int i;
@@ -44,6 +56,26 @@ uint32_t vpx_sad4x8_neon(const uint8_t *src_ptr, int src_stride,
     ref_ptr += 4 * ref_stride;
     abs = vabal_u8(abs, vget_low_u8(src_u8), vget_low_u8(ref_u8));
     abs = vabal_u8(abs, vget_high_u8(src_u8), vget_high_u8(ref_u8));
+  }
+
+  return horizontal_add_16x8(abs);
+}
+
+uint32_t vpx_sad4x8_avg_neon(const uint8_t *src_ptr, int src_stride,
+                             const uint8_t *ref_ptr, int ref_stride,
+                             const uint8_t *second_pred) {
+  int i;
+  uint16x8_t abs = vdupq_n_u16(0);
+  for (i = 0; i < 8; i += 4) {
+    const uint8x16_t src_u8 = load_unaligned_u8q(src_ptr, src_stride);
+    const uint8x16_t ref_u8 = load_unaligned_u8q(ref_ptr, ref_stride);
+    const uint8x16_t second_pred_u8 = vld1q_u8(second_pred);
+    const uint8x16_t avg = vrhaddq_u8(ref_u8, second_pred_u8);
+    src_ptr += 4 * src_stride;
+    ref_ptr += 4 * ref_stride;
+    second_pred += 16;
+    abs = vabal_u8(abs, vget_low_u8(src_u8), vget_low_u8(avg));
+    abs = vabal_u8(abs, vget_high_u8(src_u8), vget_high_u8(avg));
   }
 
   return horizontal_add_16x8(abs);

@@ -813,10 +813,10 @@ add_proto qw/unsigned int vpx_sad8x4_avg/, "const uint8_t *src_ptr, int src_stri
 specialize qw/vpx_sad8x4_avg msa sse2/;
 
 add_proto qw/unsigned int vpx_sad4x8_avg/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
-specialize qw/vpx_sad4x8_avg msa sse2/;
+specialize qw/vpx_sad4x8_avg neon msa sse2/;
 
 add_proto qw/unsigned int vpx_sad4x4_avg/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
-specialize qw/vpx_sad4x4_avg msa sse2/;
+specialize qw/vpx_sad4x4_avg neon msa sse2/;
 
 #
 # Multi-block SAD, comparing a reference to N blocks 1 pixel apart horizontally
