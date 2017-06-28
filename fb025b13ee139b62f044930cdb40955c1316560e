@@ -34,6 +34,24 @@
       "revId": "fb025b13ee139b62f044930cdb40955c1316560e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e265c1be_da34c31a",
+        "filename": "vp9/encoder/vp9_skin_detection.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-28T23:09:40Z",
+      "side": 1,
+      "message": "\u003e It\u0027s refactored from the function below and it has been like this for a long time...\n\u003e A better solution would be put this into function parameters. I\u0027ll leave it to the next change.\n\nor drop it if it isn\u0027t used which it appears not to be",
+      "parentUuid": "aeab257d_571fb321",
+      "revId": "fb025b13ee139b62f044930cdb40955c1316560e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
