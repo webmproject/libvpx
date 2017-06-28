@@ -68,8 +68,14 @@ class Buffer {
   // Set the buffer (excluding padding) to 'value'.
   void Set(const T value);
 
-  // Set the buffer (excluding padding) to the output of ACMRandom function 'b'.
+  // Set the buffer (excluding padding) to the output of ACMRandom function
+  // 'rand_func'.
   void Set(ACMRandom *rand_class, T (ACMRandom::*rand_func)());
+
+  // Set the buffer (excluding padding) to the output of ACMRandom function
+  // 'RandRange' with range 'low' to 'high' which must be within
+  // testing::internal::Random::kMaxRange (1u << 31).
+  void Set(ACMRandom *rand_class, const int32_t low, const int32_t high);
 
   // Copy the contents of Buffer 'a' (excluding padding).
   void CopyFrom(const Buffer<T> &a);
@@ -167,6 +173,24 @@ void Buffer<T>::Set(ACMRandom *rand_class, T (ACMRandom::*rand_func)()) {
       src[width] = (*rand_class.*rand_func)();
     }
     src += stride();
+  }
+}
+
+template <typename T>
+void Buffer<T>::Set(ACMRandom *rand_class, const int32_t low,
+                    const int32_t high) {
+  if (!raw_buffer_) return;
+
+  EXPECT_LE(low, high);
+  EXPECT_GE(low, std::numeric_limits<T>::min());
+  EXPECT_LE(high, std::numeric_limits<T>::max());
+
+  T *src = TopLeftPixel();
+  for (int height = 0; height < height_; ++height) {
+    for (int width = 0; width < width_; ++width) {
+      src[width] = static_cast<T>((*rand_class).RandRange(high - low) + low);
+    }
+    src += stride_;
   }
 }
 

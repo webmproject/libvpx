@@ -83,12 +83,7 @@ class PartialFdctTest : public ::testing::TestWithParam<PartialFdctParam> {
       } else if (i == 1) {
         input_block.Set(minvalue);
       } else {
-        for (int y = 0; y < size_; ++y) {
-          for (int x = 0; x < size_; ++x) {
-            input_block.TopLeftPixel()[y * input_block.stride() + x] =
-                clamp((rnd.Rand16() - rnd.Rand16()), minvalue, maxvalue);
-          }
-        }
+        input_block.Set(&rnd, minvalue, maxvalue);
       }
 
       ASM_REGISTER_STATE_CHECK(fwd_txfm_(input_block.TopLeftPixel(),

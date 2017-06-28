@@ -166,11 +166,10 @@ class TransTestBase {
         }
 #if CONFIG_VP9_HIGHBITDEPTH
       } else {
+        src16.Set(&rnd, 0, max_pixel_value_);
+        dst16.Set(&rnd, 0, max_pixel_value_);
         for (int h = 0; h < size_; ++h) {
           for (int w = 0; w < size_; ++w) {
-            src16.TopLeftPixel()[h * src16.stride() + w] = rnd.Rand16() & mask_;
-            dst16.TopLeftPixel()[h * dst16.stride() + w] = rnd.Rand16() & mask_;
-
             test_input_block.TopLeftPixel()[h * test_input_block.stride() + w] =
                 src16.TopLeftPixel()[h * src16.stride() + w] -
                 dst16.TopLeftPixel()[h * dst16.stride() + w];
@@ -231,13 +230,9 @@ class TransTestBase {
     ASSERT_TRUE(output_block.Init());
 
     for (int i = 0; i < count_test_block; ++i) {
-      // Initialize a test block with input range [-mask_, mask_].
-      for (int h = 0; h < size_; ++h) {
-        for (int w = 0; w < size_; ++w) {
-          input_block.TopLeftPixel()[h * input_block.stride() + w] =
-              (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
-        }
-      }
+      // Initialize a test block with input range [-max_pixel_value_,
+      // max_pixel_value_].
+      input_block.Set(&rnd, -max_pixel_value_, max_pixel_value_);
 
       fwd_txfm_ref(input_block, &output_ref_block, size_, tx_type_);
       ASM_REGISTER_STATE_CHECK(RunFwdTxfm(input_block, &output_block));
@@ -264,17 +259,17 @@ class TransTestBase {
     ASSERT_TRUE(output_block.Init());
 
     for (int i = 0; i < count_test_block; ++i) {
-      // Initialize a test block with -mask_ or mask_.
+      // Initialize a test block with -max_pixel_value_ or max_pixel_value_.
       if (i == 0) {
-        input_extreme_block.Set(mask_);
+        input_extreme_block.Set(max_pixel_value_);
       } else if (i == 1) {
-        input_extreme_block.Set(-mask_);
+        input_extreme_block.Set(-max_pixel_value_);
       } else {
         for (int h = 0; h < size_; ++h) {
           for (int w = 0; w < size_; ++w) {
             input_extreme_block
                 .TopLeftPixel()[h * input_extreme_block.stride() + w] =
-                rnd.Rand8() % 2 ? mask_ : -mask_;
+                rnd.Rand8() % 2 ? max_pixel_value_ : -max_pixel_value_;
           }
         }
       }
@@ -319,7 +314,8 @@ class TransTestBase {
     ASSERT_TRUE(src16.Init());
 
     for (int i = 0; i < count_test_block; ++i) {
-      // Initialize a test block with input range [-mask_, mask_].
+      // Initialize a test block with input range [-max_pixel_value_,
+      // max_pixel_value_].
       if (bit_depth_ == VPX_BITS_8) {
         src.Set(&rnd, &ACMRandom::Rand8);
         dst.Set(&rnd, &ACMRandom::Rand8);
@@ -332,10 +328,10 @@ class TransTestBase {
         }
 #if CONFIG_VP9_HIGHBITDEPTH
       } else {
+        src16.Set(&rnd, 0, max_pixel_value_);
+        dst16.Set(&rnd, 0, max_pixel_value_);
         for (int h = 0; h < size_; ++h) {
           for (int w = 0; w < size_; ++w) {
-            src16.TopLeftPixel()[h * src16.stride() + w] = rnd.Rand16() & mask_;
-            dst16.TopLeftPixel()[h * dst16.stride() + w] = rnd.Rand16() & mask_;
             in.TopLeftPixel()[h * in.stride() + w] =
                 src16.TopLeftPixel()[h * src16.stride() + w] -
                 dst16.TopLeftPixel()[h * dst16.stride() + w];
@@ -381,7 +377,7 @@ class TransTestBase {
   FhtFuncRef fwd_txfm_ref;
   vpx_bit_depth_t bit_depth_;
   int tx_type_;
-  int mask_;
+  int max_pixel_value_;
   int size_;
 };
 
@@ -395,7 +391,7 @@ class TransDCT : public TransTestBase,
     size_ = GET_PARAM(2);
     tx_type_ = GET_PARAM(3);
     bit_depth_ = GET_PARAM(4);
-    mask_ = (1 << bit_depth_) - 1;
+    max_pixel_value_ = (1 << bit_depth_) - 1;
   }
 
  protected:
@@ -566,7 +562,7 @@ class TransHT : public TransTestBase, public ::testing::TestWithParam<HtParam> {
     size_ = GET_PARAM(2);
     tx_type_ = GET_PARAM(3);
     bit_depth_ = GET_PARAM(4);
-    mask_ = (1 << bit_depth_) - 1;
+    max_pixel_value_ = (1 << bit_depth_) - 1;
   }
 
  protected:
@@ -687,7 +683,7 @@ class TransWHT : public TransTestBase,
     size_ = GET_PARAM(2);
     tx_type_ = GET_PARAM(3);
     bit_depth_ = GET_PARAM(4);
-    mask_ = (1 << bit_depth_) - 1;
+    max_pixel_value_ = (1 << bit_depth_) - 1;
   }
 
  protected:
