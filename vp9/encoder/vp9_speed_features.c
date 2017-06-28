@@ -584,14 +584,7 @@ static void set_rt_speed_feature_framesize_independent(
     if (cpi->row_mt && cpi->oxcf.max_threads > 1)
       sf->adaptive_rd_thresh_row_mt = 1;
 
-    if (content == VP9E_CONTENT_SCREEN)
-      sf->mv.subpel_force_stop = 3;
-    else if (cm->width * cm->height > 1280 * 720) {
-      sf->mv.subpel_force_stop = 2;
-      if (cpi->rc.avg_frame_low_motion > 87 && cm->current_video_frame > 30)
-        sf->mv.subpel_search_method = SUBPEL_TREE_PRUNED_EVENMORE;
-    }
-
+    if (content == VP9E_CONTENT_SCREEN) sf->mv.subpel_force_stop = 3;
     if (content == VP9E_CONTENT_SCREEN) sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
     // Only keep INTRA_DC mode for speed 8.
     if (!is_keyframe) {
