@@ -37,13 +37,10 @@ extern "C" {
 #define REF_FRAMES_LOG2 3
 #define REF_FRAMES (1 << REF_FRAMES_LOG2)
 
-// 4 scratch frames for the new frames to support a maximum of 4 cores decoding
-// in parallel, 3 for scaled references on the encoder.
-// TODO(hkuang): Add ondemand frame buffers instead of hardcoding the number
-// of framebuffers.
+// 1 scratch frame for the new frame, 3 for scaled references on the encoder.
 // TODO(jkoleszar): These 3 extra references could probably come from the
 // normal reference pool.
-#define FRAME_BUFFERS (REF_FRAMES + 7)
+#define FRAME_BUFFERS (REF_FRAMES + 4)
 
 #define FRAME_CONTEXTS_LOG2 2
 #define FRAME_CONTEXTS (1 << FRAME_CONTEXTS_LOG2)
