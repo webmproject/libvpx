@@ -240,6 +240,7 @@ DSP_SRCS-$(HAVE_SSE2)  += x86/highbd_idct4x4_add_sse2.c
 DSP_SRCS-$(HAVE_SSE2)  += x86/highbd_idct8x8_add_sse2.c
 DSP_SRCS-$(HAVE_SSE2)  += x86/highbd_idct16x16_add_sse2.c
 DSP_SRCS-$(HAVE_SSE2)  += x86/highbd_idct32x32_add_sse2.c
+DSP_SRCS-$(HAVE_SSE4_1) += x86/highbd_inv_txfm_sse4.h
 DSP_SRCS-$(HAVE_SSE4_1) += x86/highbd_idct4x4_add_sse4.c
 endif  # !CONFIG_VP9_HIGHBITDEPTH
 

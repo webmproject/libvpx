@@ -191,15 +191,11 @@ void vpx_highbd_idct4x4_16_add_sse2(const tran_low_t *input, uint16_t *dest,
     io[1] = wraplow_16bit(io[2], io[3], _mm_set1_epi32(8));
   }
 
-  recon_and_store_4(dest, io, stride, bd);
+  recon_and_store_4(io, dest, stride, bd);
 }
 
 void vpx_highbd_idct4x4_1_add_sse2(const tran_low_t *input, uint16_t *dest,
                                    int stride, int bd) {
-  const __m128i zero = _mm_setzero_si128();
-  // Faster than _mm_set1_epi16((1 << bd) - 1).
-  const __m128i one = _mm_set1_epi16(1);
-  const __m128i max = _mm_sub_epi16(_mm_slli_epi16(one, bd), one);
   int a1, i;
   tran_low_t out;
   __m128i dc, d;
@@ -211,7 +207,7 @@ void vpx_highbd_idct4x4_1_add_sse2(const tran_low_t *input, uint16_t *dest,
 
   for (i = 0; i < 4; ++i) {
     d = _mm_loadl_epi64((const __m128i *)dest);
-    d = add_dc_clamp(&zero, &max, &dc, &d);
+    d = add_clamp(d, dc, bd);
     _mm_storel_epi64((__m128i *)dest, d);
     dest += stride;
   }

@@ -152,28 +152,34 @@ static INLINE void recon_and_store(uint8_t *const dest, const __m128i in_x) {
   _mm_storel_epi64((__m128i *)(dest), d0);
 }
 
+static INLINE void round_shift_8x8(const __m128i *const in,
+                                   __m128i *const out) {
+  const __m128i final_rounding = _mm_set1_epi16(1 << 4);
+
+  out[0] = _mm_add_epi16(in[0], final_rounding);
+  out[1] = _mm_add_epi16(in[1], final_rounding);
+  out[2] = _mm_add_epi16(in[2], final_rounding);
+  out[3] = _mm_add_epi16(in[3], final_rounding);
+  out[4] = _mm_add_epi16(in[4], final_rounding);
+  out[5] = _mm_add_epi16(in[5], final_rounding);
+  out[6] = _mm_add_epi16(in[6], final_rounding);
+  out[7] = _mm_add_epi16(in[7], final_rounding);
+
+  out[0] = _mm_srai_epi16(out[0], 5);
+  out[1] = _mm_srai_epi16(out[1], 5);
+  out[2] = _mm_srai_epi16(out[2], 5);
+  out[3] = _mm_srai_epi16(out[3], 5);
+  out[4] = _mm_srai_epi16(out[4], 5);
+  out[5] = _mm_srai_epi16(out[5], 5);
+  out[6] = _mm_srai_epi16(out[6], 5);
+  out[7] = _mm_srai_epi16(out[7], 5);
+}
+
 static INLINE void write_buffer_8x8(const __m128i *const in,
                                     uint8_t *const dest, const int stride) {
-  const __m128i final_rounding = _mm_set1_epi16(1 << 4);
   __m128i t[8];
-  // Final rounding and shift
-  t[0] = _mm_adds_epi16(in[0], final_rounding);
-  t[1] = _mm_adds_epi16(in[1], final_rounding);
-  t[2] = _mm_adds_epi16(in[2], final_rounding);
-  t[3] = _mm_adds_epi16(in[3], final_rounding);
-  t[4] = _mm_adds_epi16(in[4], final_rounding);
-  t[5] = _mm_adds_epi16(in[5], final_rounding);
-  t[6] = _mm_adds_epi16(in[6], final_rounding);
-  t[7] = _mm_adds_epi16(in[7], final_rounding);
 
-  t[0] = _mm_srai_epi16(t[0], 5);
-  t[1] = _mm_srai_epi16(t[1], 5);
-  t[2] = _mm_srai_epi16(t[2], 5);
-  t[3] = _mm_srai_epi16(t[3], 5);
-  t[4] = _mm_srai_epi16(t[4], 5);
-  t[5] = _mm_srai_epi16(t[5], 5);
-  t[6] = _mm_srai_epi16(t[6], 5);
-  t[7] = _mm_srai_epi16(t[7], 5);
+  round_shift_8x8(in, t);
 
   recon_and_store(dest + 0 * stride, t[0]);
   recon_and_store(dest + 1 * stride, t[1]);
