@@ -190,21 +190,12 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
           int bl_index1 = bl_index + 1;
           int bl_index2 = bl_index + cm->mi_cols;
           int bl_index3 = bl_index2 + 1;
+          int is_skin = 0;
+          if (cpi->use_skin_detection) is_skin = cpi->skin_map[bl_index];
           // Only consider blocks that are likely steady background. i.e, have
           // been encoded as zero/low motion x (= thresh_consec_zeromv) frames
           // in a row. consec_zero_mv[] defined for 8x8 blocks, so consider all
           // 4 sub-blocks for 16x16 block. Also, avoid skin blocks.
-          int consec_zeromv =
-              VPXMIN(cpi->consec_zero_mv[bl_index],
-                     VPXMIN(cpi->consec_zero_mv[bl_index1],
-                            VPXMIN(cpi->consec_zero_mv[bl_index2],
-                                   cpi->consec_zero_mv[bl_index3])));
-          int is_skin = 0;
-          if (cpi->use_skin_detection) {
-            is_skin =
-                vp9_compute_skin_block(src_y, src_u, src_v, src_ystride,
-                                       src_uvstride, bsize, consec_zeromv, 0);
-          }
           if (frame_low_motion &&
               cpi->consec_zero_mv[bl_index] > thresh_consec_zeromv &&
               cpi->consec_zero_mv[bl_index1] > thresh_consec_zeromv &&

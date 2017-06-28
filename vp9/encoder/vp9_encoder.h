@@ -542,6 +542,8 @@ typedef struct VP9_COMP {
 
   uint8_t *segmentation_map;
 
+  uint8_t *skin_map;
+
   // segment threashold for encode breakout
   int segment_encode_breakout[MAX_SEGMENTS];
 
