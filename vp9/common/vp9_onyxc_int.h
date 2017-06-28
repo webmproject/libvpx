@@ -71,18 +71,6 @@ typedef struct {
   int mi_cols;
   vpx_codec_frame_buffer_t raw_frame_buffer;
   YV12_BUFFER_CONFIG buf;
-
-  // The Following variables will only be used in frame parallel decode.
-
-  // frame_worker_owner indicates which FrameWorker owns this buffer. NULL means
-  // that no FrameWorker owns, or is decoding, this buffer.
-  VPxWorker *frame_worker_owner;
-
-  // row and col indicate which position frame has been decoded to in real
-  // pixel unit. They are reset to -1 when decoding begins and set to INT_MAX
-  // when the frame is fully decoded.
-  int row;
-  int col;
 } RefCntBuffer;
 
 typedef struct BufferPool {
