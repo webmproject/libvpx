@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "8721451f_e6be01c1",
+        "filename": "vpx_dsp/arm/sad_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-28T18:15:49Z",
+      "side": 1,
+      "message": "added a note to reconcile them",
+      "parentUuid": "f721c938_5fc5f984",
+      "revId": "cb24b0771a49d44a256b0e39d1025fe32f838f9a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d029459f_acd62798",
         "filename": "vpx_dsp/arm/sad_neon.c",
         "patchSetId": 4
@@ -30,6 +48,30 @@
       "writtenOn": "2017-06-27T23:11:22Z",
       "side": 1,
       "message": "Though compiler may combine them into vabal_u8(), maybe it\u0027s better to use vabal_u8() directly as you did below.",
+      "range": {
+        "startLine": 62,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 51
+      },
+      "revId": "cb24b0771a49d44a256b0e39d1025fe32f838f9a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e7b23b5a_6b045e94",
+        "filename": "vpx_dsp/arm/sad_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-28T18:15:49Z",
+      "side": 1,
+      "message": "ahh good catch. i would not expect the compiler to omit any intrinsics.",
+      "parentUuid": "d029459f_acd62798",
       "range": {
         "startLine": 62,
         "startChar": 0,
