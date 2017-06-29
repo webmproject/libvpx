@@ -139,6 +139,7 @@ void vp9_decoder_remove(VP9Decoder *pbi) {
     vp9_loop_filter_dealloc(&pbi->lf_row_sync);
   }
 
+  vp9_remove_common(&pbi->common);
   vpx_free(pbi);
 }
 

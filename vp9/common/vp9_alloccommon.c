@@ -154,6 +154,9 @@ fail:
 }
 
 void vp9_remove_common(VP9_COMMON *cm) {
+#if CONFIG_VP9_POSTPROC
+  vp9_free_postproc_buffers(cm);
+#endif
   vp9_free_context_buffers(cm);
 
   vpx_free(cm->fc);
