@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "09fa6f33_e3d519f7",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-06-29T21:40:54Z",
+      "side": 1,
+      "message": "supernit (probably just for the record): it\u0027s more readable to have a struct here so that the numerical constants can go and we can add or remove params with minimal diffs.",
+      "revId": "e5b07b52d20103962379ce0f211cc214696198ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f5edc69d_82ee0931",
         "filename": "test/test_vector_test.cc",
         "patchSetId": 1
