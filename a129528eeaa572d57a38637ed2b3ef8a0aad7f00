@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fd1dfedc_66c76b6a",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-06-29T22:01:00Z",
+      "side": 1,
+      "message": "the range in the comment is still wrong. it should be 1 ~ 7.",
+      "revId": "a129528eeaa572d57a38637ed2b3ef8a0aad7f00",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
