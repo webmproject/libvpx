@@ -187,8 +187,8 @@ void vpx_highbd_idct4x4_16_add_sse2(const tran_low_t *input, uint16_t *dest,
       highbd_idct4_large_sse2(io);
       highbd_idct4_large_sse2(io);
     }
-    io[0] = wraplow_16bit(io[0], io[1], _mm_set1_epi32(8));
-    io[1] = wraplow_16bit(io[2], io[3], _mm_set1_epi32(8));
+    io[0] = wraplow_16bit_shift4(io[0], io[1], _mm_set1_epi32(8));
+    io[1] = wraplow_16bit_shift4(io[2], io[3], _mm_set1_epi32(8));
   }
 
   recon_and_store_4(io, dest, stride, bd);

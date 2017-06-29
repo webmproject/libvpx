@@ -23,13 +23,23 @@ static INLINE void extend_64bit(const __m128i in,
   out[1] = _mm_unpackhi_epi32(in, in);  // 2, 2, 3, 3
 }
 
-static INLINE __m128i wraplow_16bit(const __m128i in0, const __m128i in1,
-                                    const __m128i rounding) {
+static INLINE __m128i wraplow_16bit_shift4(const __m128i in0, const __m128i in1,
+                                           const __m128i rounding) {
   __m128i temp[2];
   temp[0] = _mm_add_epi32(in0, rounding);
   temp[1] = _mm_add_epi32(in1, rounding);
   temp[0] = _mm_srai_epi32(temp[0], 4);
   temp[1] = _mm_srai_epi32(temp[1], 4);
+  return _mm_packs_epi32(temp[0], temp[1]);
+}
+
+static INLINE __m128i wraplow_16bit_shift5(const __m128i in0, const __m128i in1,
+                                           const __m128i rounding) {
+  __m128i temp[2];
+  temp[0] = _mm_add_epi32(in0, rounding);
+  temp[1] = _mm_add_epi32(in1, rounding);
+  temp[0] = _mm_srai_epi32(temp[0], 5);
+  temp[1] = _mm_srai_epi32(temp[1], 5);
   return _mm_packs_epi32(temp[0], temp[1]);
 }
 
@@ -101,6 +111,29 @@ static INLINE void recon_and_store_4(const __m128i *const in, uint16_t *dest,
   recon_and_store_4_dual(in[0], dest, stride, bd);
   dest += 2 * stride;
   recon_and_store_4_dual(in[1], dest, stride, bd);
+}
+
+static INLINE void recon_and_store_8_kernel(const __m128i in,
+                                            uint16_t **const dest,
+                                            const int stride, const int bd) {
+  __m128i d;
+
+  d = _mm_load_si128((const __m128i *)(*dest));
+  d = add_clamp(d, in, bd);
+  _mm_store_si128((__m128i *)(*dest), d);
+  *dest += stride;
+}
+
+static INLINE void recon_and_store_8(const __m128i *const in, uint16_t *dest,
+                                     const int stride, const int bd) {
+  recon_and_store_8_kernel(in[0], &dest, stride, bd);
+  recon_and_store_8_kernel(in[1], &dest, stride, bd);
+  recon_and_store_8_kernel(in[2], &dest, stride, bd);
+  recon_and_store_8_kernel(in[3], &dest, stride, bd);
+  recon_and_store_8_kernel(in[4], &dest, stride, bd);
+  recon_and_store_8_kernel(in[5], &dest, stride, bd);
+  recon_and_store_8_kernel(in[6], &dest, stride, bd);
+  recon_and_store_8_kernel(in[7], &dest, stride, bd);
 }
 
 #endif  // VPX_DSP_X86_HIGHBD_INV_TXFM_SSE2_H_
