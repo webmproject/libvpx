@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9920d9f2_6ff4c14c",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-29T21:52:59Z",
+      "side": 1,
+      "message": "\u003e supernit (probably just for the record): it\u0027s more readable to have a struct here so that the numerical constants can go and we can add or remove params with minimal diffs.\n\nI totally agree. There was some cleanup like this in variance, which is more readable and has better --gtest_list_tests output",
+      "parentUuid": "09fa6f33_e3d519f7",
+      "revId": "e5b07b52d20103962379ce0f211cc214696198ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f5edc69d_82ee0931",
         "filename": "test/test_vector_test.cc",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2017-06-29T21:38:37Z",
       "side": 1,
       "message": "why did this have to change to 2?\n\nif intentional, please update the comment too. also, the 1~8 comment seems wrong anyway given the second parameter is not inclusive.",
+      "revId": "e5b07b52d20103962379ce0f211cc214696198ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fe075f3b_e66fae8c",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-29T21:52:59Z",
+      "side": 1,
+      "message": "\u003e why did this have to change to 2?\n\u003e \n\u003e if intentional, please update the comment too. also, the 1~8 comment seems wrong anyway given the second parameter is not inclusive.\n\nI blanked on the comment. The single threaded case was already covered above. Let me do this in a separate change",
+      "parentUuid": "f5edc69d_82ee0931",
       "revId": "e5b07b52d20103962379ce0f211cc214696198ec",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
