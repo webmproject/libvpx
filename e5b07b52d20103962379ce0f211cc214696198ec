@@ -69,6 +69,24 @@
       "revId": "e5b07b52d20103962379ce0f211cc214696198ec",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1f7f0f96_d671a9b9",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-06-29T21:54:18Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "fe075f3b_e66fae8c",
+      "revId": "e5b07b52d20103962379ce0f211cc214696198ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
