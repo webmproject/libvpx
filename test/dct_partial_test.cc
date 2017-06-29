@@ -46,7 +46,7 @@ tran_low_t partial_fdct_ref(const Buffer<int16_t> &in, int size) {
   }
 
   switch (size) {
-    case 4: sum <<= 1; break;
+    case 4: sum *= 2; break;
     case 8: /*sum = sum;*/ break;
     case 16: sum >>= 1; break;
     case 32: sum >>= 3; break;
