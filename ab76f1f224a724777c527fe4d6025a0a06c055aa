@@ -16,6 +16,24 @@
       "revId": "ab76f1f224a724777c527fe4d6025a0a06c055aa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5190a1f3_fbef1b68",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-30T18:46:52Z",
+      "side": 1,
+      "message": "\u003e i understand that the block here makes this diff simpler. but is the block really necessary?\n\njust for scoping the variable temporarily. this all goes away eventually.",
+      "parentUuid": "88a4c8ab_e8e289da",
+      "revId": "ab76f1f224a724777c527fe4d6025a0a06c055aa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
