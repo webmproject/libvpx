@@ -70,6 +70,30 @@
       "revId": "128e282f7ed0c36cdd2cbea21783c0297a8c5d5f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d62d097_58cf31b7",
+        "filename": "test/acm_random.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-30T03:56:13Z",
+      "side": 1,
+      "message": "I see your point, but I feel like with some EXPECT_x() or assert() this could be effectively documented, especially because the Buffer call needs to do this for you anyway.",
+      "parentUuid": "ad23881b_f60a1979",
+      "range": {
+        "startLine": 58,
+        "startChar": 62,
+        "endLine": 58,
+        "endChar": 70
+      },
+      "revId": "128e282f7ed0c36cdd2cbea21783c0297a8c5d5f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
