@@ -5223,16 +5223,16 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     const int lossless = is_lossless_requested(oxcf);
 #if CONFIG_VP9_HIGHBITDEPTH
     if (cpi->oxcf.use_highbitdepth)
-      cpi->td.mb.fwd_txm4x4 =
+      cpi->td.mb.fwd_txfm4x4 =
           lossless ? vp9_highbd_fwht4x4 : vpx_highbd_fdct4x4;
     else
-      cpi->td.mb.fwd_txm4x4 = lossless ? vp9_fwht4x4 : vpx_fdct4x4;
-    cpi->td.mb.highbd_itxm_add =
+      cpi->td.mb.fwd_txfm4x4 = lossless ? vp9_fwht4x4 : vpx_fdct4x4;
+    cpi->td.mb.highbd_itxfm_add =
         lossless ? vp9_highbd_iwht4x4_add : vp9_highbd_idct4x4_add;
 #else
-    cpi->td.mb.fwd_txm4x4 = lossless ? vp9_fwht4x4 : vpx_fdct4x4;
+    cpi->td.mb.fwd_txfm4x4 = lossless ? vp9_fwht4x4 : vpx_fdct4x4;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-    cpi->td.mb.itxm_add = lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
+    cpi->td.mb.itxfm_add = lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
     vp9_first_pass(cpi, source);
   } else if (oxcf->pass == 2 && (!cpi->use_svc || is_two_pass_svc(cpi))) {
     Pass2Encode(cpi, size, dest, frame_flags);

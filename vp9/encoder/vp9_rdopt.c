@@ -632,7 +632,7 @@ static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane,
             // this is like vp9_short_idct4x4 but has a special case around
             // eob<=1, which is significant (not just an optimization) for
             // the lossless case.
-            x->itxm_add(dqcoeff, recon, 32, *eob);
+            x->itxfm_add(dqcoeff, recon, 32, *eob);
             break;
           default: assert(0 && "Invalid transform size"); break;
         }
@@ -1576,8 +1576,8 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi, MACROBLOCK *x,
       k += (idy * 2 + idx);
       coeff_ctx = combine_entropy_contexts(ta[k & 1], tl[k >> 1]);
       coeff = BLOCK_OFFSET(p->coeff, k);
-      x->fwd_txm4x4(vp9_raster_block_offset_int16(BLOCK_8X8, k, p->src_diff),
-                    coeff, 8);
+      x->fwd_txfm4x4(vp9_raster_block_offset_int16(BLOCK_8X8, k, p->src_diff),
+                     coeff, 8);
       vp9_regular_quantize_b_4x4(x, 0, k, so->scan, so->iscan);
 #if CONFIG_VP9_HIGHBITDEPTH
       thisdistortion += vp9_highbd_block_error_dispatch(
