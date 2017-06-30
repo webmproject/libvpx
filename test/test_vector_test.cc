@@ -143,7 +143,7 @@ INSTANTIATE_TEST_CASE_P(
         ::testing::Values(
             static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP8)),
         ::testing::Combine(
-            ::testing::Range(1, 8),  // With 1 ~ 8 threads.
+            ::testing::Range(2, 9),  // With 2 ~ 8 threads.
             ::testing::ValuesIn(libvpx_test::kVP8TestVectors,
                                 libvpx_test::kVP8TestVectors +
                                     libvpx_test::kNumVP8TestVectors))));
