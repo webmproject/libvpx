@@ -240,10 +240,10 @@ case "${vs_ver:-10}" in
     12) sln_vers="12.00"
        sln_vers_str="Visual Studio 2013"
     ;;
-    14) sln_vers="14.00"
+    14) sln_vers="12.00"
        sln_vers_str="Visual Studio 2015"
     ;;
-    15) sln_vers="15.00"
+    15) sln_vers="12.00"
        sln_vers_str="Visual Studio 2017"
     ;;
 esac
