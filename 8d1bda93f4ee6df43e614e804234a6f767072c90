@@ -22,6 +22,30 @@
       "revId": "8d1bda93f4ee6df43e614e804234a6f767072c90",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d0ec134d_bec33445",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-06-30T00:07:58Z",
+      "side": 1,
+      "message": "In partial_idct_test, it uses\n  FwdTxfmFunc ftxfm_;\n  InvTxfmWithBdFunc full_itxfm_;\n  InvTxfmWithBdFunc partial_itxfm_;\n\nso maybe ftxfm and itxfm is another option. fwd_txfm and inv_txfm are also OK for me.",
+      "parentUuid": "ec2e8756_08c34f58",
+      "range": {
+        "startLine": 185,
+        "startChar": 9,
+        "endLine": 185,
+        "endChar": 14
+      },
+      "revId": "8d1bda93f4ee6df43e614e804234a6f767072c90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
