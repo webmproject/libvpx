@@ -632,7 +632,7 @@ static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane,
             // this is like vp9_short_idct4x4 but has a special case around
             // eob<=1, which is significant (not just an optimization) for
             // the lossless case.
-            x->itxfm_add(dqcoeff, recon, 32, *eob);
+            x->inv_txfm_add(dqcoeff, recon, 32, *eob);
             break;
           default: assert(0 && "Invalid transform size"); break;
         }

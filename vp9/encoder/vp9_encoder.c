@@ -5227,12 +5227,12 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
           lossless ? vp9_highbd_fwht4x4 : vpx_highbd_fdct4x4;
     else
       cpi->td.mb.fwd_txfm4x4 = lossless ? vp9_fwht4x4 : vpx_fdct4x4;
-    cpi->td.mb.highbd_itxfm_add =
+    cpi->td.mb.highbd_inv_txfm_add =
         lossless ? vp9_highbd_iwht4x4_add : vp9_highbd_idct4x4_add;
 #else
     cpi->td.mb.fwd_txfm4x4 = lossless ? vp9_fwht4x4 : vpx_fdct4x4;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-    cpi->td.mb.itxfm_add = lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
+    cpi->td.mb.inv_txfm_add = lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
     vp9_first_pass(cpi, source);
   } else if (oxcf->pass == 2 && (!cpi->use_svc || is_two_pass_svc(cpi))) {
     Pass2Encode(cpi, size, dest, frame_flags);

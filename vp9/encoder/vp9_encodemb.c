@@ -924,8 +924,8 @@ static void encode_block(int plane, int block, int row, int col,
         // this is like vp9_short_idct4x4 but has a special case around eob<=1
         // which is significant (not just an optimization) for the lossless
         // case.
-        x->highbd_itxfm_add(dqcoeff, dst16, pd->dst.stride, p->eobs[block],
-                            xd->bd);
+        x->highbd_inv_txfm_add(dqcoeff, dst16, pd->dst.stride, p->eobs[block],
+                               xd->bd);
         break;
       default: assert(0 && "Invalid transform size");
     }
@@ -947,7 +947,7 @@ static void encode_block(int plane, int block, int row, int col,
       // this is like vp9_short_idct4x4 but has a special case around eob<=1
       // which is significant (not just an optimization) for the lossless
       // case.
-      x->itxfm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
+      x->inv_txfm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
       break;
     default: assert(0 && "Invalid transform size"); break;
   }
@@ -969,12 +969,12 @@ static void encode_block_pass1(int plane, int block, int row, int col,
   if (p->eobs[block] > 0) {
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      x->highbd_itxfm_add(dqcoeff, CONVERT_TO_SHORTPTR(dst), pd->dst.stride,
-                          p->eobs[block], xd->bd);
+      x->highbd_inv_txfm_add(dqcoeff, CONVERT_TO_SHORTPTR(dst), pd->dst.stride,
+                             p->eobs[block], xd->bd);
       return;
     }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-    x->itxfm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
+    x->inv_txfm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
   }
 }
 
@@ -1152,7 +1152,7 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
             // this is like vp9_short_idct4x4 but has a special case around
             // eob<=1 which is significant (not just an optimization) for the
             // lossless case.
-            x->highbd_itxfm_add(dqcoeff, dst16, dst_stride, *eob, xd->bd);
+            x->highbd_inv_txfm_add(dqcoeff, dst16, dst_stride, *eob, xd->bd);
           } else {
             vp9_highbd_iht4x4_16_add(dqcoeff, dst16, dst_stride, tx_type,
                                      xd->bd);
@@ -1233,7 +1233,7 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
           // this is like vp9_short_idct4x4 but has a special case around eob<=1
           // which is significant (not just an optimization) for the lossless
           // case.
-          x->itxfm_add(dqcoeff, dst, dst_stride, *eob);
+          x->inv_txfm_add(dqcoeff, dst, dst_stride, *eob);
         else
           vp9_iht4x4_16_add(dqcoeff, dst, dst_stride, tx_type);
       }
