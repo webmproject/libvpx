@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b0de4b86_c1417a38",
+        "filename": "test/buffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-30T15:06:53Z",
+      "side": 1,
+      "message": "In these instances I left it as this-\u003estride() for clarity.",
+      "range": {
+        "startLine": 250,
+        "startChar": 19,
+        "endLine": 250,
+        "endChar": 25
+      },
+      "revId": "c2044fda1d00421ddab27c9fd80383546a8ba844",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
