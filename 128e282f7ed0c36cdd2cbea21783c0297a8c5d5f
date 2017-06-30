@@ -22,6 +22,30 @@
       "revId": "128e282f7ed0c36cdd2cbea21783c0297a8c5d5f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "caa9bbd4_4e81e4bd",
+        "filename": "test/acm_random.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-30T02:00:23Z",
+      "side": 1,
+      "message": "So this would be used like:\n\na \u003d RandRange(range);\na \u003d a - low;\n\n?",
+      "parentUuid": "919a28fd_827103c6",
+      "range": {
+        "startLine": 58,
+        "startChar": 62,
+        "endLine": 58,
+        "endChar": 70
+      },
+      "revId": "128e282f7ed0c36cdd2cbea21783c0297a8c5d5f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
