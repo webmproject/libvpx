@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "733c8bf0_c6a8728c",
+        "filename": "test/acm_random.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-30T14:26:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "48a98774_47255ad9",
+      "revId": "e404fc2e4674e8665b24a35fc4f16d59239abaf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b31565d3_45783a56",
         "filename": "test/buffer.h",
         "patchSetId": 5
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "78bb4f90_c1eeac9c",
+        "filename": "test/buffer.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-30T14:26:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b31565d3_45783a56",
+      "revId": "e404fc2e4674e8665b24a35fc4f16d59239abaf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c1320d6c_3f16f209",
         "filename": "test/buffer.h",
         "patchSetId": 5
@@ -47,6 +83,30 @@
       "writtenOn": "2017-06-30T06:13:08Z",
       "side": 1,
       "message": "missed this earlier, but it\u0027s more common to use the private members (stride_) when accessible",
+      "range": {
+        "startLine": 192,
+        "startChar": 11,
+        "endLine": 192,
+        "endChar": 20
+      },
+      "revId": "e404fc2e4674e8665b24a35fc4f16d59239abaf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "841ad997_b5ef386f",
+        "filename": "test/buffer.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-06-30T14:26:10Z",
+      "side": 1,
+      "message": "ok, i used stride() throughout the file. i\u0027ll update the rest in a follow up",
+      "parentUuid": "c1320d6c_3f16f209",
       "range": {
         "startLine": 192,
         "startChar": 11,
