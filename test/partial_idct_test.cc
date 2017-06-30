@@ -755,6 +755,24 @@ INSTANTIATE_TEST_CASE_P(SSSE3, PartialIDctTest,
 #if HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
 const PartialInvTxfmParam sse4_1_partial_idct_tests[] = {
   make_tuple(
+      &vpx_highbd_fdct8x8_c, &highbd_wrapper<vpx_highbd_idct8x8_64_add_c>,
+      &highbd_wrapper<vpx_highbd_idct8x8_64_add_sse4_1>, TX_8X8, 64, 8, 2),
+  make_tuple(
+      &vpx_highbd_fdct8x8_c, &highbd_wrapper<vpx_highbd_idct8x8_64_add_c>,
+      &highbd_wrapper<vpx_highbd_idct8x8_64_add_sse4_1>, TX_8X8, 64, 10, 2),
+  make_tuple(
+      &vpx_highbd_fdct8x8_c, &highbd_wrapper<vpx_highbd_idct8x8_64_add_c>,
+      &highbd_wrapper<vpx_highbd_idct8x8_64_add_sse4_1>, TX_8X8, 64, 12, 2),
+  make_tuple(
+      &vpx_highbd_fdct8x8_c, &highbd_wrapper<vpx_highbd_idct8x8_12_add_c>,
+      &highbd_wrapper<vpx_highbd_idct8x8_12_add_sse4_1>, TX_8X8, 12, 8, 2),
+  make_tuple(
+      &vpx_highbd_fdct8x8_c, &highbd_wrapper<vpx_highbd_idct8x8_12_add_c>,
+      &highbd_wrapper<vpx_highbd_idct8x8_12_add_sse4_1>, TX_8X8, 12, 10, 2),
+  make_tuple(
+      &vpx_highbd_fdct8x8_c, &highbd_wrapper<vpx_highbd_idct8x8_12_add_c>,
+      &highbd_wrapper<vpx_highbd_idct8x8_12_add_sse4_1>, TX_8X8, 12, 12, 2),
+  make_tuple(
       &vpx_highbd_fdct4x4_c, &highbd_wrapper<vpx_highbd_idct4x4_16_add_c>,
       &highbd_wrapper<vpx_highbd_idct4x4_16_add_sse4_1>, TX_4X4, 16, 8, 2),
   make_tuple(

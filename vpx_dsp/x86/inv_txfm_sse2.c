@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <emmintrin.h>  // SSE2
+
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/x86/inv_txfm_sse2.h"
 #include "vpx_dsp/x86/transpose_sse2.h"
@@ -144,72 +146,6 @@ void iadst4_sse2(__m128i *in) {
 
   in[0] = _mm_packs_epi32(u[0], u[1]);
   in[1] = _mm_packs_epi32(u[2], u[3]);
-}
-
-// Multiply elements by constants and add them together.
-static INLINE void multiplication_and_add(
-    const __m128i *const in0, const __m128i *const in1,
-    const __m128i *const in2, const __m128i *const in3,
-    const __m128i *const cst0, const __m128i *const cst1,
-    const __m128i *const cst2, const __m128i *const cst3, __m128i *const res0,
-    __m128i *const res1, __m128i *const res2, __m128i *const res3) {
-  const __m128i lo_0 = _mm_unpacklo_epi16(*in0, *in1);
-  const __m128i hi_0 = _mm_unpackhi_epi16(*in0, *in1);
-  const __m128i lo_1 = _mm_unpacklo_epi16(*in2, *in3);
-  const __m128i hi_1 = _mm_unpackhi_epi16(*in2, *in3);
-  *res0 = idct_calc_wraplow_sse2(lo_0, hi_0, *cst0);
-  *res1 = idct_calc_wraplow_sse2(lo_0, hi_0, *cst1);
-  *res2 = idct_calc_wraplow_sse2(lo_1, hi_1, *cst2);
-  *res3 = idct_calc_wraplow_sse2(lo_1, hi_1, *cst3);
-}
-
-static INLINE void idct8(const __m128i *const in, __m128i *const out) {
-  const __m128i cp_16_16 = pair_set_epi16(cospi_16_64, cospi_16_64);
-  const __m128i cp_16_n16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
-  __m128i step1[8], step2[8];
-
-  // stage 1
-  {
-    const __m128i cp_28_n4 = pair_set_epi16(cospi_28_64, -cospi_4_64);
-    const __m128i cp_4_28 = pair_set_epi16(cospi_4_64, cospi_28_64);
-    const __m128i cp_n20_12 = pair_set_epi16(-cospi_20_64, cospi_12_64);
-    const __m128i cp_12_20 = pair_set_epi16(cospi_12_64, cospi_20_64);
-    multiplication_and_add(&in[1], &in[7], &in[3], &in[5], &cp_28_n4, &cp_4_28,
-                           &cp_n20_12, &cp_12_20, &step1[4], &step1[7],
-                           &step1[5], &step1[6]);
-  }
-
-  // stage 2
-  {
-    const __m128i cp_24_n8 = pair_set_epi16(cospi_24_64, -cospi_8_64);
-    const __m128i cp_8_24 = pair_set_epi16(cospi_8_64, cospi_24_64);
-    multiplication_and_add(&in[0], &in[4], &in[2], &in[6], &cp_16_16,
-                           &cp_16_n16, &cp_24_n8, &cp_8_24, &step2[0],
-                           &step2[1], &step2[2], &step2[3]);
-  }
-
-  step2[4] = _mm_add_epi16(step1[4], step1[5]);
-  step2[5] = _mm_sub_epi16(step1[4], step1[5]);
-  step2[6] = _mm_sub_epi16(step1[7], step1[6]);
-  step2[7] = _mm_add_epi16(step1[7], step1[6]);
-
-  // stage 3
-  step1[0] = _mm_add_epi16(step2[0], step2[3]);
-  step1[1] = _mm_add_epi16(step2[1], step2[2]);
-  step1[2] = _mm_sub_epi16(step2[1], step2[2]);
-  step1[3] = _mm_sub_epi16(step2[0], step2[3]);
-  multiplication_and_add_2(&step2[6], &step2[5], &cp_16_n16, &cp_16_16,
-                           &step1[5], &step1[6]);
-
-  // stage 4
-  out[0] = _mm_add_epi16(step1[0], step2[7]);
-  out[1] = _mm_add_epi16(step1[1], step1[6]);
-  out[2] = _mm_add_epi16(step1[2], step1[5]);
-  out[3] = _mm_add_epi16(step1[3], step2[4]);
-  out[4] = _mm_sub_epi16(step1[3], step2[4]);
-  out[5] = _mm_sub_epi16(step1[2], step1[5]);
-  out[6] = _mm_sub_epi16(step1[1], step1[6]);
-  out[7] = _mm_sub_epi16(step1[0], step2[7]);
 }
 
 void vpx_idct8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest,
@@ -475,66 +411,15 @@ void iadst8_sse2(__m128i *in) {
 
 void vpx_idct8x8_12_add_sse2(const tran_low_t *input, uint8_t *dest,
                              int stride) {
-  const __m128i zero = _mm_setzero_si128();
-  const __m128i cp_16_16 = pair_set_epi16(cospi_16_64, cospi_16_64);
-  const __m128i cp_16_n16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
-  __m128i in[8], step1[8], step2[8], tmp[4];
+  __m128i io[8];
 
-  in[0] = load_input_data4(input + 0 * 8);
-  in[1] = load_input_data4(input + 1 * 8);
-  in[2] = load_input_data4(input + 2 * 8);
-  in[3] = load_input_data4(input + 3 * 8);
+  io[0] = load_input_data4(input + 0 * 8);
+  io[1] = load_input_data4(input + 1 * 8);
+  io[2] = load_input_data4(input + 2 * 8);
+  io[3] = load_input_data4(input + 3 * 8);
 
-  transpose_16bit_4x4(in, in);
-  // in[0]: 00 10 20 30  01 11 21 31
-  // in[1]: 02 12 22 32  03 13 23 33
-
-  // stage 1
-  {
-    const __m128i cp_28_n4 = pair_set_epi16(cospi_28_64, -cospi_4_64);
-    const __m128i cp_4_28 = pair_set_epi16(cospi_4_64, cospi_28_64);
-    const __m128i cp_n20_12 = pair_set_epi16(-cospi_20_64, cospi_12_64);
-    const __m128i cp_12_20 = pair_set_epi16(cospi_12_64, cospi_20_64);
-    const __m128i lo_1 = _mm_unpackhi_epi16(in[0], zero);
-    const __m128i lo_3 = _mm_unpackhi_epi16(in[1], zero);
-    step1[4] = idct_calc_wraplow_sse2(cp_28_n4, cp_4_28, lo_1);    // step1 4&7
-    step1[5] = idct_calc_wraplow_sse2(cp_n20_12, cp_12_20, lo_3);  // step1 5&6
-  }
-
-  // stage 2
-  {
-    const __m128i cp_24_n8 = pair_set_epi16(cospi_24_64, -cospi_8_64);
-    const __m128i cp_8_24 = pair_set_epi16(cospi_8_64, cospi_24_64);
-    const __m128i lo_0 = _mm_unpacklo_epi16(in[0], zero);
-    const __m128i lo_2 = _mm_unpacklo_epi16(in[1], zero);
-    step2[0] = idct_calc_wraplow_sse2(cp_16_16, cp_16_n16, lo_0);  // step2 0&1
-    step2[2] = idct_calc_wraplow_sse2(cp_8_24, cp_24_n8, lo_2);    // step2 3&2
-    step2[4] = _mm_add_epi16(step1[4], step1[5]);                  // step2 4&7
-    step2[5] = _mm_sub_epi16(step1[4], step1[5]);                  // step2 5&6
-    step2[6] = _mm_unpackhi_epi64(step2[5], zero);                 // step2 6
-  }
-
-  // stage 3
-  {
-    const __m128i lo_65 = _mm_unpacklo_epi16(step2[6], step2[5]);
-    tmp[0] = _mm_add_epi16(step2[0], step2[2]);                     // step1 0&1
-    tmp[1] = _mm_sub_epi16(step2[0], step2[2]);                     // step1 3&2
-    step1[2] = _mm_unpackhi_epi64(tmp[1], tmp[0]);                  // step1 2&1
-    step1[3] = _mm_unpacklo_epi64(tmp[1], tmp[0]);                  // step1 3&0
-    step1[5] = idct_calc_wraplow_sse2(cp_16_n16, cp_16_16, lo_65);  // step1 5&6
-  }
-
-  // stage 4
-  tmp[0] = _mm_add_epi16(step1[3], step2[4]);  // output 3&0
-  tmp[1] = _mm_add_epi16(step1[2], step1[5]);  // output 2&1
-  tmp[2] = _mm_sub_epi16(step1[3], step2[4]);  // output 4&7
-  tmp[3] = _mm_sub_epi16(step1[2], step1[5]);  // output 5&6
-
-  idct8x8_12_transpose_16bit_4x8(tmp, in);
-  in[4] = in[5] = in[6] = in[7] = zero;
-
-  idct8(in, in);
-  write_buffer_8x8(in, dest, stride);
+  idct8x8_12_add_kernel_sse2(io);
+  write_buffer_8x8(io, dest, stride);
 }
 
 #define IDCT16_10                                                              \
