@@ -46,6 +46,30 @@
       "revId": "8d1bda93f4ee6df43e614e804234a6f767072c90",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "afd42734_85c8a0c6",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-30T05:57:59Z",
+      "side": 1,
+      "message": "\u003e In partial_idct_test, it uses\n\u003e   FwdTxfmFunc ftxfm_;\n\u003e   InvTxfmWithBdFunc full_itxfm_;\n\u003e   InvTxfmWithBdFunc partial_itxfm_;\n\u003e \n\u003e so maybe ftxfm and itxfm is another option. fwd_txfm and inv_txfm are also OK for me.\n\nlet\u0027s do this normalization and I\u0027ll post 2 followups so we can have a look. I think f/i probably works.",
+      "parentUuid": "d0ec134d_bec33445",
+      "range": {
+        "startLine": 185,
+        "startChar": 9,
+        "endLine": 185,
+        "endChar": 14
+      },
+      "revId": "8d1bda93f4ee6df43e614e804234a6f767072c90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
