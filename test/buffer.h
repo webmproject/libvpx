@@ -149,7 +149,7 @@ class Buffer {
 template <typename T>
 T *Buffer<T>::TopLeftPixel() const {
   if (!raw_buffer_) return NULL;
-  return raw_buffer_ + (top_padding_ * stride()) + left_padding_;
+  return raw_buffer_ + (top_padding_ * stride_) + left_padding_;
 }
 
 template <typename T>
@@ -160,7 +160,7 @@ void Buffer<T>::Set(const T value) {
     for (int width = 0; width < width_; ++width) {
       src[width] = value;
     }
-    src += stride();
+    src += stride_;
   }
 }
 
@@ -172,7 +172,7 @@ void Buffer<T>::Set(ACMRandom *rand_class, T (ACMRandom::*rand_func)()) {
     for (int width = 0; width < width_; ++width) {
       src[width] = (*rand_class.*rand_func)();
     }
-    src += stride();
+    src += stride_;
   }
 }
 
@@ -215,8 +215,8 @@ void Buffer<T>::DumpBuffer() const {
   if (!raw_buffer_) return;
   for (int height = 0; height < height_ + top_padding_ + bottom_padding_;
        ++height) {
-    for (int width = 0; width < stride(); ++width) {
-      printf("%4d", raw_buffer_[height + width * stride()]);
+    for (int width = 0; width < stride_; ++width) {
+      printf("%4d", raw_buffer_[height + width * stride_]);
     }
     printf("\n");
   }
@@ -289,7 +289,7 @@ bool Buffer<T>::CheckValues(const T value) const {
         return false;
       }
     }
-    src += stride();
+    src += stride_;
   }
   return true;
 }
@@ -301,7 +301,7 @@ bool Buffer<T>::CheckPadding() const {
 
   // Top padding.
   T const *top = raw_buffer_;
-  for (int i = 0; i < stride() * top_padding_; ++i) {
+  for (int i = 0; i < stride_ * top_padding_; ++i) {
     if (padding_value_ != top[i]) {
       return false;
     }
@@ -315,7 +315,7 @@ bool Buffer<T>::CheckPadding() const {
         return false;
       }
     }
-    left += stride();
+    left += stride_;
   }
 
   // Right padding.
@@ -326,12 +326,12 @@ bool Buffer<T>::CheckPadding() const {
         return false;
       }
     }
-    right += stride();
+    right += stride_;
   }
 
   // Bottom padding
-  T const *bottom = raw_buffer_ + (top_padding_ + height_) * stride();
-  for (int i = 0; i < stride() * bottom_padding_; ++i) {
+  T const *bottom = raw_buffer_ + (top_padding_ + height_) * stride_;
+  for (int i = 0; i < stride_ * bottom_padding_; ++i) {
     if (padding_value_ != bottom[i]) {
       return false;
     }
