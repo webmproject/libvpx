@@ -27,7 +27,7 @@ static INLINE void highbd_idct4_small_sse2(__m128i *const io) {
   const __m128i cospi_p24_p24 = _mm_setr_epi32(cospi_24_64, 0, cospi_24_64, 0);
   __m128i temp1[4], temp2[4], step[4];
 
-  transpose_32bit_4x4(&io[0], &io[1], &io[2], &io[3]);
+  transpose_32bit_4x4(io, io);
 
   // Note: There is no 32-bit signed multiply SIMD instruction in SSE2.
   //       _mm_mul_epu32() is used which can only guarantee the lower 32-bit
@@ -98,7 +98,7 @@ static INLINE void highbd_idct4_large_sse2(__m128i *const io) {
       _mm_setr_epi32(cospi_24_64 << 2, 0, cospi_24_64 << 2, 0);
   __m128i temp1[4], temp2[4], step[4], sign1[4], sign2[4];
 
-  transpose_32bit_4x4(&io[0], &io[1], &io[2], &io[3]);
+  transpose_32bit_4x4(io, io);
 
   // stage 1
   temp1[0] = _mm_add_epi32(io[0], io[2]);  // input[0] + input[2]
@@ -187,19 +187,15 @@ void vpx_highbd_idct4x4_16_add_sse2(const tran_low_t *input, uint16_t *dest,
       highbd_idct4_large_sse2(io);
       highbd_idct4_large_sse2(io);
     }
-    io[0] = wraplow_16bit(io[0], io[1], _mm_set1_epi32(8));
-    io[1] = wraplow_16bit(io[2], io[3], _mm_set1_epi32(8));
+    io[0] = wraplow_16bit_shift4(io[0], io[1], _mm_set1_epi32(8));
+    io[1] = wraplow_16bit_shift4(io[2], io[3], _mm_set1_epi32(8));
   }
 
-  recon_and_store_4(dest, io, stride, bd);
+  recon_and_store_4(io, dest, stride, bd);
 }
 
 void vpx_highbd_idct4x4_1_add_sse2(const tran_low_t *input, uint16_t *dest,
                                    int stride, int bd) {
-  const __m128i zero = _mm_setzero_si128();
-  // Faster than _mm_set1_epi16((1 << bd) - 1).
-  const __m128i one = _mm_set1_epi16(1);
-  const __m128i max = _mm_sub_epi16(_mm_slli_epi16(one, bd), one);
   int a1, i;
   tran_low_t out;
   __m128i dc, d;
@@ -211,7 +207,7 @@ void vpx_highbd_idct4x4_1_add_sse2(const tran_low_t *input, uint16_t *dest,
 
   for (i = 0; i < 4; ++i) {
     d = _mm_loadl_epi64((const __m128i *)dest);
-    d = add_dc_clamp(&zero, &max, &dc, &d);
+    d = add_clamp(d, dc, bd);
     _mm_storel_epi64((__m128i *)dest, d);
     dest += stride;
   }
