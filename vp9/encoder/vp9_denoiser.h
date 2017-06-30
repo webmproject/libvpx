@@ -21,6 +21,10 @@ extern "C" {
 
 #define MOTION_MAGNITUDE_THRESHOLD (8 * 3)
 
+// Denoiser is used in real-time mode which does not use alt-ref, so no need to
+// allocate for it, and hence we need MAX_REF_FRAME - 1
+#define DENOISER_REF_FRAMES MAX_REF_FRAMES - 1
+
 typedef enum vp9_denoiser_decision {
   COPY_BLOCK,
   FILTER_BLOCK,
@@ -35,7 +39,7 @@ typedef enum vp9_denoiser_level {
 } VP9_DENOISER_LEVEL;
 
 typedef struct vp9_denoiser {
-  YV12_BUFFER_CONFIG running_avg_y[MAX_REF_FRAMES];
+  YV12_BUFFER_CONFIG running_avg_y[DENOISER_REF_FRAMES];
   YV12_BUFFER_CONFIG mc_running_avg_y;
   YV12_BUFFER_CONFIG last_source;
   int frame_buffer_initialized;
@@ -58,10 +62,12 @@ typedef struct {
 
 struct VP9_COMP;
 
-void vp9_denoiser_update_frame_info(
-    VP9_DENOISER *denoiser, YV12_BUFFER_CONFIG src, FRAME_TYPE frame_type,
-    int refresh_alt_ref_frame, int refresh_golden_frame, int refresh_last_frame,
-    int resized, int svc_base_is_key);
+void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
+                                    YV12_BUFFER_CONFIG src,
+                                    FRAME_TYPE frame_type,
+                                    int refresh_golden_frame,
+                                    int refresh_last_frame, int resized,
+                                    int svc_base_is_key);
 
 void vp9_denoiser_denoise(struct VP9_COMP *cpi, MACROBLOCK *mb, int mi_row,
                           int mi_col, BLOCK_SIZE bs, PICK_MODE_CONTEXT *ctx,

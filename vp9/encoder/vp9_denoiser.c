@@ -217,7 +217,7 @@ static VP9_DENOISER_DECISION perform_motion_compensation(
 
   // If the best reference frame uses inter-prediction and there is enough of a
   // difference in sum-squared-error, use it.
-  if (frame != INTRA_FRAME &&
+  if (frame != INTRA_FRAME && frame != ALTREF_FRAME &&
       (frame != GOLDEN_FRAME || num_spatial_layers == 1) &&
       sse_diff > sse_diff_thresh(bs, increase_denoising, motion_magnitude)) {
     mi->ref_frame[0] = ctx->best_reference_frame;
@@ -228,7 +228,7 @@ static VP9_DENOISER_DECISION perform_motion_compensation(
     frame = ctx->best_zeromv_reference_frame;
     ctx->newmv_sse = ctx->zeromv_sse;
     // Bias to last reference.
-    if (num_spatial_layers > 1 ||
+    if (num_spatial_layers > 1 || frame == ALTREF_FRAME ||
         (frame != LAST_FRAME &&
          ((ctx->zeromv_lastref_sse<(5 * ctx->zeromv_sse)>> 2) ||
           denoiser->denoising_level >= kDenHigh))) {
@@ -420,10 +420,12 @@ static void swap_frame_buffer(YV12_BUFFER_CONFIG *const dest,
   src->y_buffer = tmp_buf;
 }
 
-void vp9_denoiser_update_frame_info(
-    VP9_DENOISER *denoiser, YV12_BUFFER_CONFIG src, FRAME_TYPE frame_type,
-    int refresh_alt_ref_frame, int refresh_golden_frame, int refresh_last_frame,
-    int resized, int svc_base_is_key) {
+void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
+                                    YV12_BUFFER_CONFIG src,
+                                    FRAME_TYPE frame_type,
+                                    int refresh_golden_frame,
+                                    int refresh_last_frame, int resized,
+                                    int svc_base_is_key) {
   // Copy source into denoised reference buffers on KEY_FRAME or
   // if the just encoded frame was resized. For SVC, copy source if the base
   // spatial layer was key frame.
@@ -431,18 +433,14 @@ void vp9_denoiser_update_frame_info(
       svc_base_is_key) {
     int i;
     // Start at 1 so as not to overwrite the INTRA_FRAME
-    for (i = 1; i < MAX_REF_FRAMES; ++i)
+    for (i = 1; i < DENOISER_REF_FRAMES; ++i)
       copy_frame(&denoiser->running_avg_y[i], &src);
     denoiser->reset = 0;
     return;
   }
 
   // If more than one refresh occurs, must copy frame buffer.
-  if ((refresh_alt_ref_frame + refresh_golden_frame + refresh_last_frame) > 1) {
-    if (refresh_alt_ref_frame) {
-      copy_frame(&denoiser->running_avg_y[ALTREF_FRAME],
-                 &denoiser->running_avg_y[INTRA_FRAME]);
-    }
+  if (refresh_golden_frame + refresh_last_frame > 1) {
     if (refresh_golden_frame) {
       copy_frame(&denoiser->running_avg_y[GOLDEN_FRAME],
                  &denoiser->running_avg_y[INTRA_FRAME]);
@@ -452,10 +450,6 @@ void vp9_denoiser_update_frame_info(
                  &denoiser->running_avg_y[INTRA_FRAME]);
     }
   } else {
-    if (refresh_alt_ref_frame) {
-      swap_frame_buffer(&denoiser->running_avg_y[ALTREF_FRAME],
-                        &denoiser->running_avg_y[INTRA_FRAME]);
-    }
     if (refresh_golden_frame) {
       swap_frame_buffer(&denoiser->running_avg_y[GOLDEN_FRAME],
                         &denoiser->running_avg_y[INTRA_FRAME]);
@@ -501,7 +495,7 @@ int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height, int ssx,
   const int legacy_byte_alignment = 0;
   assert(denoiser != NULL);
 
-  for (i = 0; i < MAX_REF_FRAMES; ++i) {
+  for (i = 0; i < DENOISER_REF_FRAMES; ++i) {
     fail = vpx_alloc_frame_buffer(&denoiser->running_avg_y[i], width, height,
                                   ssx, ssy,
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -553,7 +547,7 @@ void vp9_denoiser_free(VP9_DENOISER *denoiser) {
     return;
   }
   denoiser->frame_buffer_initialized = 0;
-  for (i = 0; i < MAX_REF_FRAMES; ++i) {
+  for (i = 0; i < DENOISER_REF_FRAMES; ++i) {
     vpx_free_frame_buffer(&denoiser->running_avg_y[i]);
   }
   vpx_free_frame_buffer(&denoiser->mc_running_avg_y);
