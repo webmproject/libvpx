@@ -487,7 +487,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_fdct4x4 neon sse2/;
 
   add_proto qw/void vpx_fdct4x4_1/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vpx_fdct4x4_1 sse2/;
+  specialize qw/vpx_fdct4x4_1 sse2 neon/;
 
   add_proto qw/void vpx_fdct8x8/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vpx_fdct8x8 neon sse2/;
@@ -499,7 +499,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_fdct16x16 neon sse2/;
 
   add_proto qw/void vpx_fdct16x16_1/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vpx_fdct16x16_1 sse2/;
+  specialize qw/vpx_fdct16x16_1 sse2 neon/;
 
   add_proto qw/void vpx_fdct32x32/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vpx_fdct32x32 neon sse2/;
@@ -508,7 +508,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_fdct32x32_rd sse2/;
 
   add_proto qw/void vpx_fdct32x32_1/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vpx_fdct32x32_1 sse2/;
+  specialize qw/vpx_fdct32x32_1 sse2 neon/;
 
   add_proto qw/void vpx_highbd_fdct4x4/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vpx_highbd_fdct4x4 sse2/;
@@ -517,6 +517,8 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_highbd_fdct8x8 sse2/;
 
   add_proto qw/void vpx_highbd_fdct8x8_1/, "const int16_t *input, tran_low_t *output, int stride";
+  specialize qw/vpx_highbd_fdct8x8_1 neon/;
+  $vpx_highbd_fdct8x8_1_neon=vpx_fdct8x8_1_neon;
 
   add_proto qw/void vpx_highbd_fdct16x16/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vpx_highbd_fdct16x16 sse2/;
@@ -535,7 +537,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_fdct4x4 neon sse2 msa/;
 
   add_proto qw/void vpx_fdct4x4_1/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vpx_fdct4x4_1 sse2/;
+  specialize qw/vpx_fdct4x4_1 sse2 neon/;
 
   add_proto qw/void vpx_fdct8x8/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vpx_fdct8x8 sse2 neon msa/, "$ssse3_x86_64";
@@ -547,7 +549,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_fdct16x16 neon sse2 msa/;
 
   add_proto qw/void vpx_fdct16x16_1/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vpx_fdct16x16_1 sse2 msa/;
+  specialize qw/vpx_fdct16x16_1 sse2 neon msa/;
 
   add_proto qw/void vpx_fdct32x32/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vpx_fdct32x32 neon sse2 avx2 msa/;
@@ -556,7 +558,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_fdct32x32_rd sse2 avx2 msa/;
 
   add_proto qw/void vpx_fdct32x32_1/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vpx_fdct32x32_1 sse2 msa/;
+  specialize qw/vpx_fdct32x32_1 sse2 neon msa/;
 }  # CONFIG_VP9_HIGHBITDEPTH
 }  # CONFIG_VP9_ENCODER
 

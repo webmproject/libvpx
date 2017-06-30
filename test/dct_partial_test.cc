@@ -139,9 +139,23 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_SSE2
 
 #if HAVE_NEON
-INSTANTIATE_TEST_CASE_P(NEON, PartialFdctTest,
-                        ::testing::Values(make_tuple(&vpx_fdct8x8_1_neon, 8,
-                                                     VPX_BITS_8)));
+#if CONFIG_VP9_HIGHBITDEPTH
+INSTANTIATE_TEST_CASE_P(
+    NEON, PartialFdctTest,
+    ::testing::Values(make_tuple(&vpx_fdct32x32_1_neon, 32, VPX_BITS_8),
+                      make_tuple(&vpx_fdct16x16_1_neon, 16, VPX_BITS_8),
+                      make_tuple(&vpx_fdct8x8_1_neon, 8, VPX_BITS_12),
+                      make_tuple(&vpx_fdct8x8_1_neon, 8, VPX_BITS_10),
+                      make_tuple(&vpx_fdct8x8_1_neon, 8, VPX_BITS_8),
+                      make_tuple(&vpx_fdct4x4_1_neon, 4, VPX_BITS_8)));
+#else
+INSTANTIATE_TEST_CASE_P(
+    NEON, PartialFdctTest,
+    ::testing::Values(make_tuple(&vpx_fdct32x32_1_neon, 32, VPX_BITS_8),
+                      make_tuple(&vpx_fdct16x16_1_neon, 16, VPX_BITS_8),
+                      make_tuple(&vpx_fdct8x8_1_neon, 8, VPX_BITS_8),
+                      make_tuple(&vpx_fdct4x4_1_neon, 4, VPX_BITS_8)));
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_NEON
 
 #if HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH
