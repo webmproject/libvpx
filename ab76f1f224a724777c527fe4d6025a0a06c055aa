@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "88a4c8ab_e8e289da",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-06-30T17:52:13Z",
+      "side": 1,
+      "message": "i understand that the block here makes this diff simpler. but is the block really necessary?",
+      "revId": "ab76f1f224a724777c527fe4d6025a0a06c055aa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
