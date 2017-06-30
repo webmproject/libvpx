@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "48a98774_47255ad9",
+        "filename": "test/acm_random.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-30T06:13:08Z",
+      "side": 1,
+      "message": "you can use testing::internal::Random::kMaxRange like in Rand16()",
+      "revId": "e404fc2e4674e8665b24a35fc4f16d59239abaf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b31565d3_45783a56",
+        "filename": "test/buffer.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-30T06:13:08Z",
+      "side": 1,
+      "message": "you could mention the max range here. the assert documents it for our test purposes, but it\u0027s good to add regular docs too",
+      "revId": "e404fc2e4674e8665b24a35fc4f16d59239abaf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c1320d6c_3f16f209",
+        "filename": "test/buffer.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-06-30T06:13:08Z",
+      "side": 1,
+      "message": "missed this earlier, but it\u0027s more common to use the private members (stride_) when accessible",
+      "range": {
+        "startLine": 192,
+        "startChar": 11,
+        "endLine": 192,
+        "endChar": 20
+      },
+      "revId": "e404fc2e4674e8665b24a35fc4f16d59239abaf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
