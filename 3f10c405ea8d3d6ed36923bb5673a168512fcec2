@@ -16,6 +16,24 @@
       "revId": "3f10c405ea8d3d6ed36923bb5673a168512fcec2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8905a044_3fc791bf",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 4193,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-06-30T00:07:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a1006220_72c53fde",
+      "revId": "3f10c405ea8d3d6ed36923bb5673a168512fcec2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
