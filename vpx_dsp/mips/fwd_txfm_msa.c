@@ -215,7 +215,7 @@ void vpx_fdct8x8_msa(const int16_t *input, int16_t *output,
   ST_SH8(in0, in1, in2, in3, in4, in5, in6, in7, output, 8);
 }
 
-void vpx_fdct8x8_1_msa(const int16_t *input, int16_t *out, int32_t stride) {
+void vpx_fdct8x8_1_msa(const int16_t *input, tran_low_t *out, int32_t stride) {
   v8i16 in0, in1, in2, in3, in4, in5, in6, in7;
   v4i32 vec_w;
 
