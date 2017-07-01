@@ -91,7 +91,7 @@ static void highbd_idct8x8_12_half1d(__m128i *const io) {
   const __m128i cp_4q_4q =
       _mm_setr_epi32(cospi_4_64 << 2, 0, cospi_4_64 << 2, 0);
   const __m128i cp_n20q_n20q =
-      _mm_setr_epi32(-cospi_20_64 << 2, 0, -cospi_20_64 << 2, 0);
+      _mm_setr_epi32(-cospi_20_64 * 4, 0, -cospi_20_64 * 4, 0);
   const __m128i cp_12q_12q =
       _mm_setr_epi32(cospi_12_64 << 2, 0, cospi_12_64 << 2, 0);
   const __m128i cp_16q_16q =
