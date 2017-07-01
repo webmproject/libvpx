@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d9e25152_e98cc7c2",
+        "filename": "test/buffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-01T19:56:39Z",
+      "side": 1,
+      "message": "Yeah, I guess then I could rely on the compiler / ubsan to catch when incoherent values are passed in.",
+      "parentUuid": "19163138_edd3febb",
+      "range": {
+        "startLine": 182,
+        "startChar": 48,
+        "endLine": 182,
+        "endChar": 56
+      },
+      "revId": "08dd812e7b5687d7ce89a1c82713d6b60b29e3f8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2173f453_0cc43cdd",
         "filename": "test/buffer.h",
         "patchSetId": 1
@@ -36,6 +60,24 @@
       "writtenOn": "2017-07-01T18:39:48Z",
       "side": 1,
       "message": "this would have to be promoted to int64 to not trigger overflow warnings (which would still pass the test). I think there are other issues if both values are negative, but that may be covered by the range assertion in RandRange",
+      "revId": "08dd812e7b5687d7ce89a1c82713d6b60b29e3f8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "738f385c_07068987",
+        "filename": "test/buffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-01T19:56:39Z",
+      "side": 1,
+      "message": "I was trying to avoid going to int64_t.\n\n-100 (low) to -50 (high)\n\n-100 \u003c -50\n-100 \u003e INTMIN\n-50 \u003c INTMAX\n\n-50 - - 100 \u003d 50 \u003c INTMAX\n\nI think it works?",
+      "parentUuid": "2173f453_0cc43cdd",
       "revId": "08dd812e7b5687d7ce89a1c82713d6b60b29e3f8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
@@ -62,6 +104,30 @@
       "revId": "08dd812e7b5687d7ce89a1c82713d6b60b29e3f8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6917b3ca_b50aaeaa",
+        "filename": "test/buffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-01T19:56:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1db2e1f2_70680a7c",
+      "range": {
+        "startLine": 194,
+        "startChar": 71,
+        "endLine": 194,
+        "endChar": 77
+      },
+      "revId": "08dd812e7b5687d7ce89a1c82713d6b60b29e3f8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
