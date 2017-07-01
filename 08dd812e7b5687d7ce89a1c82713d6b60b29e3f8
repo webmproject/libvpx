@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "19163138_edd3febb",
+        "filename": "test/buffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-01T18:39:48Z",
+      "side": 1,
+      "message": "TODO(later): making these T might save some of the range checks aside from the RandRange related ones",
+      "range": {
+        "startLine": 182,
+        "startChar": 48,
+        "endLine": 182,
+        "endChar": 56
+      },
+      "revId": "08dd812e7b5687d7ce89a1c82713d6b60b29e3f8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2173f453_0cc43cdd",
+        "filename": "test/buffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-01T18:39:48Z",
+      "side": 1,
+      "message": "this would have to be promoted to int64 to not trigger overflow warnings (which would still pass the test). I think there are other issues if both values are negative, but that may be covered by the range assertion in RandRange",
+      "revId": "08dd812e7b5687d7ce89a1c82713d6b60b29e3f8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1db2e1f2_70680a7c",
+        "filename": "test/buffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-01T18:39:48Z",
+      "side": 1,
+      "message": "wreaks, but maybe just say force the result to int to allow negative lower bounds to be applied without triggering an unsigned overflow warning.",
+      "range": {
+        "startLine": 194,
+        "startChar": 71,
+        "endLine": 194,
+        "endChar": 77
+      },
+      "revId": "08dd812e7b5687d7ce89a1c82713d6b60b29e3f8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
