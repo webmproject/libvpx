@@ -102,6 +102,24 @@
     },
     {
       "key": {
+        "uuid": "4c8c87cf_25089d8c",
+        "filename": "test/buffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-01T20:19:10Z",
+      "side": 1,
+      "message": "\u003e \u003e I was trying to avoid going to int64_t.\n\u003e \u003e \n\u003e \u003e -100 (low) to -50 (high)\n\u003e \u003e \n\u003e \u003e -100 \u003c -50\n\u003e \u003e -100 \u003e INTMIN\n\u003e \u003e -50 \u003c INTMAX\n\u003e \u003e \n\u003e \u003e -50 - - 100 \u003d 50 \u003c INTMAX\n\u003e \u003e \n\u003e \u003e I think it works?\n\u003e \n\u003e I think you have the potential of triggering another overflow warning in extreme cases; [INT32_MIN, 1] for instance\n\nalso in those cases you could exceed the max, but the rollover would hide it. [INT32_MIN, INT32_MAX]",
+      "parentUuid": "f8da7586_22914a3b",
+      "revId": "08dd812e7b5687d7ce89a1c82713d6b60b29e3f8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1db2e1f2_70680a7c",
         "filename": "test/buffer.h",
         "patchSetId": 1
