@@ -73,8 +73,10 @@ class Buffer {
   void Set(ACMRandom *rand_class, T (ACMRandom::*rand_func)());
 
   // Set the buffer (excluding padding) to the output of ACMRandom function
-  // 'RandRange' with range 'low' to 'high' which must be within
-  // testing::internal::Random::kMaxRange (1u << 31).
+  // 'RandRange' with range 'low' to 'high' which typically must be within
+  // testing::internal::Random::kMaxRange (1u << 31). However, because we want
+  // to allow negative low (and high) values, it is restricted to INT32_MAX
+  // here.
   void Set(ACMRandom *rand_class, const int32_t low, const int32_t high);
 
   // Copy the contents of Buffer 'a' (excluding padding).
@@ -176,6 +178,7 @@ void Buffer<T>::Set(ACMRandom *rand_class, T (ACMRandom::*rand_func)()) {
   }
 }
 
+// TODO(johannkoenig): Use T for low/high.
 template <typename T>
 void Buffer<T>::Set(ACMRandom *rand_class, const int32_t low,
                     const int32_t high) {
@@ -184,11 +187,18 @@ void Buffer<T>::Set(ACMRandom *rand_class, const int32_t low,
   EXPECT_LE(low, high);
   EXPECT_GE(low, std::numeric_limits<T>::min());
   EXPECT_LE(high, std::numeric_limits<T>::max());
+  EXPECT_LE(static_cast<int64_t>(high) - low,
+            std::numeric_limits<int32_t>::max());
 
   T *src = TopLeftPixel();
   for (int height = 0; height < height_; ++height) {
     for (int width = 0; width < width_; ++width) {
-      src[width] = static_cast<T>((*rand_class).RandRange(high - low) + low);
+      // 'low' will be promoted to unsigned given the return type of RandRange.
+      // Store the value as an int to avoid unsigned overflow warnings when
+      // 'low' is negative.
+      const int32_t value =
+          static_cast<int32_t>((*rand_class).RandRange(high - low));
+      src[width] = static_cast<T>(value + low);
     }
     src += stride_;
   }
