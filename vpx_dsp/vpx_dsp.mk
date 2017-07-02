@@ -215,6 +215,8 @@ DSP_SRCS-$(HAVE_SSSE3)  += x86/inv_txfm_ssse3.c
 
 DSP_SRCS-$(HAVE_NEON_ASM) += arm/save_reg_neon$(ASM)
 
+DSP_SRCS-$(HAVE_VSX) += ppc/inv_txfm_vsx.c
+
 ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_MSA)   += mips/inv_txfm_msa.h
 DSP_SRCS-$(HAVE_MSA)   += mips/idct4x4_msa.c

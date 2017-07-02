@@ -584,9 +584,9 @@ add_proto qw/void vpx_iwht4x4_1_add/, "const tran_low_t *input, uint8_t *dest, i
 
 if (vpx_config("CONFIG_EMULATE_HARDWARE") ne "yes") {
   # Note that there are more specializations appended when CONFIG_VP9_HIGHBITDEPTH is off.
-  specialize qw/vpx_idct4x4_16_add neon sse2/;
+  specialize qw/vpx_idct4x4_16_add neon sse2 vsx/;
   specialize qw/vpx_idct4x4_1_add neon sse2/;
-  specialize qw/vpx_idct8x8_64_add neon sse2/;
+  specialize qw/vpx_idct8x8_64_add neon sse2 vsx/;
   specialize qw/vpx_idct8x8_12_add neon sse2 ssse3/;
   specialize qw/vpx_idct8x8_1_add neon sse2/;
   specialize qw/vpx_idct16x16_256_add neon sse2/;
