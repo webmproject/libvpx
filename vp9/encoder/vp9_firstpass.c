@@ -2250,7 +2250,7 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
 
     target_frame_size = (i == (normal_frames - 1))
                             ? last_frame_bits
-                            : (i == mid_frame_idx)
+                            : (frame_index == mid_frame_idx)
                                   ? normal_frame_bits + last_frame_reduction
                                   : normal_frame_bits;
 
