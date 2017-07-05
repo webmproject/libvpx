@@ -153,11 +153,17 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_NEON
 
-#if HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH
+#if HAVE_MSA
+#if CONFIG_VP9_HIGHBITDEPTH
+INSTANTIATE_TEST_CASE_P(MSA, PartialFdctTest,
+                        ::testing::Values(make_tuple(&vpx_fdct8x8_1_msa, 8,
+                                                     VPX_BITS_8)));
+#else   // !CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
     MSA, PartialFdctTest,
     ::testing::Values(make_tuple(&vpx_fdct32x32_1_msa, 32, VPX_BITS_8),
                       make_tuple(&vpx_fdct16x16_1_msa, 16, VPX_BITS_8),
                       make_tuple(&vpx_fdct8x8_1_msa, 8, VPX_BITS_8)));
-#endif  // HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // HAVE_MSA
 }  // namespace
