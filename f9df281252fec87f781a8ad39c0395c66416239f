@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "866b546e_6ecccebc",
+        "filename": "test/dct_partial_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-05T20:01:06Z",
+      "side": 1,
+      "message": "oops, typo",
+      "range": {
+        "startLine": 167,
+        "startChar": 34,
+        "endLine": 167,
+        "endChar": 35
+      },
+      "revId": "f9df281252fec87f781a8ad39c0395c66416239f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
