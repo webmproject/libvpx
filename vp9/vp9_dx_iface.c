@@ -347,13 +347,7 @@ static vpx_codec_err_t init_decoder(vpx_codec_alg_priv_t *ctx) {
     frame_worker_data->pbi->max_threads = ctx->cfg.threads;
 
     frame_worker_data->pbi->inv_tile_order = ctx->invert_tile_order;
-    frame_worker_data->pbi->frame_parallel_decode = 0;
-    frame_worker_data->pbi->common.frame_parallel_decode = 0;
     worker->hook = (VPxWorkerHook)frame_worker_hook;
-    if (!winterface->reset(worker)) {
-      set_error_detail(ctx, "Frame Worker thread creation failed");
-      return VPX_CODEC_MEM_ERROR;
-    }
   }
 
   // If postprocessing was enabled by the application and a
