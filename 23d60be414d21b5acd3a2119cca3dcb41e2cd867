@@ -16,6 +16,24 @@
       "revId": "23d60be414d21b5acd3a2119cca3dcb41e2cd867",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f8532629_d06b3f21",
+        "filename": "test/dct_partial_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-05T21:08:30Z",
+      "side": 1,
+      "message": "\u003e 3 spaces?\n\nclang-format\u0027s config here attempts to vertically align comments within some range; I think \u0027AlignTrailingComments: true\u0027 controls that",
+      "parentUuid": "b8307eba_2860b146",
+      "revId": "23d60be414d21b5acd3a2119cca3dcb41e2cd867",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
