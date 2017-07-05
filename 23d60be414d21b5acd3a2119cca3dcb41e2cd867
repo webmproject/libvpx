@@ -34,6 +34,24 @@
       "revId": "23d60be414d21b5acd3a2119cca3dcb41e2cd867",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b7ac2daa_9d25ed7a",
+        "filename": "test/dct_partial_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-05T21:14:31Z",
+      "side": 1,
+      "message": "oic!",
+      "parentUuid": "f8532629_d06b3f21",
+      "revId": "23d60be414d21b5acd3a2119cca3dcb41e2cd867",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
