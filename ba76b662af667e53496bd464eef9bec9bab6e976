@@ -34,6 +34,24 @@
       "revId": "ba76b662af667e53496bd464eef9bec9bab6e976",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "229f879e_7df06cf2",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-05T21:35:02Z",
+      "side": 1,
+      "message": "\u003e \u003e if (!cm-\u003eshow_frame) ?\n\u003e \u003e \n\u003e \u003e even if this is intentional, i think this shouldn\u0027t be in this change.\n\u003e \n\u003e the logic had been:\n\u003e \n\u003e if (true || !cm-\u003eshow_frame)\n\u003e \n\u003e were frame_parallel_decode ever set then the condition would matter as it only wanted to drop the ref count on an invisible frame. unless I\u0027m reading it wrong\n\nfor definiteness, if I make your suggested change test vectors will fail",
+      "parentUuid": "232df0af_11299d57",
+      "revId": "ba76b662af667e53496bd464eef9bec9bab6e976",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
