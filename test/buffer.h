@@ -77,7 +77,7 @@ class Buffer {
   // testing::internal::Random::kMaxRange (1u << 31). However, because we want
   // to allow negative low (and high) values, it is restricted to INT32_MAX
   // here.
-  void Set(ACMRandom *rand_class, const int32_t low, const int32_t high);
+  void Set(ACMRandom *rand_class, const T low, const T high);
 
   // Copy the contents of Buffer 'a' (excluding padding).
   void CopyFrom(const Buffer<T> &a);
@@ -178,15 +178,11 @@ void Buffer<T>::Set(ACMRandom *rand_class, T (ACMRandom::*rand_func)()) {
   }
 }
 
-// TODO(johannkoenig): Use T for low/high.
 template <typename T>
-void Buffer<T>::Set(ACMRandom *rand_class, const int32_t low,
-                    const int32_t high) {
+void Buffer<T>::Set(ACMRandom *rand_class, const T low, const T high) {
   if (!raw_buffer_) return;
 
   EXPECT_LE(low, high);
-  EXPECT_GE(low, std::numeric_limits<T>::min());
-  EXPECT_LE(high, std::numeric_limits<T>::max());
   EXPECT_LE(static_cast<int64_t>(high) - low,
             std::numeric_limits<int32_t>::max());
 
