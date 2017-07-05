@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/mips/macros_msa.h"
 
 static void avg_width4_msa(const uint8_t *src, int32_t src_stride, uint8_t *dst,
