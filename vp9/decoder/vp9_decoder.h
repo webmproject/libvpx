@@ -57,7 +57,6 @@ typedef struct VP9Decoder {
   // the same.
   RefCntBuffer *cur_buf;  //  Current decoding frame buffer.
 
-  VPxWorker *frame_worker_owner;  // frame_worker that owns this pbi.
   VPxWorker lf_worker;
   VPxWorker *tile_workers;
   TileWorkerData *tile_worker_data;
