@@ -211,23 +211,16 @@ static INLINE uint16x8_t sad32x(const uint8_t *a, int a_stride,
   return abs;
 }
 
-uint32_t vpx_sad32x16_neon(const uint8_t *src, int src_stride,
-                           const uint8_t *ref, int ref_stride) {
-  const uint16x8_t abs = sad32x(src, src_stride, ref, ref_stride, 16);
-  return horizontal_add_16x8(abs);
-}
+#define sad32xN(n)                                                      \
+  uint32_t vpx_sad32x##n##_neon(const uint8_t *src, int src_stride,     \
+                                const uint8_t *ref, int ref_stride) {   \
+    const uint16x8_t abs = sad32x(src, src_stride, ref, ref_stride, n); \
+    return horizontal_add_16x8(abs);                                    \
+  }
 
-uint32_t vpx_sad32x32_neon(const uint8_t *src, int src_stride,
-                           const uint8_t *ref, int ref_stride) {
-  const uint16x8_t abs = sad32x(src, src_stride, ref, ref_stride, 32);
-  return horizontal_add_16x8(abs);
-}
-
-uint32_t vpx_sad32x64_neon(const uint8_t *src, int src_stride,
-                           const uint8_t *ref, int ref_stride) {
-  const uint16x8_t abs = sad32x(src, src_stride, ref, ref_stride, 64);
-  return horizontal_add_16x8(abs);
-}
+sad32xN(16);
+sad32xN(32);
+sad32xN(64);
 
 static INLINE uint32_t horizontal_add_32x4(const uint32x4_t a) {
   const uint64x2_t b = vpaddlq_u32(a);
