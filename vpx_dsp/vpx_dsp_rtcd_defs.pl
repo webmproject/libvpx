@@ -795,13 +795,13 @@ add_proto qw/unsigned int vpx_sad32x16_avg/, "const uint8_t *src_ptr, int src_st
 specialize qw/vpx_sad32x16_avg avx2 msa sse2 vsx/;
 
 add_proto qw/unsigned int vpx_sad16x32_avg/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
-specialize qw/vpx_sad16x32_avg msa sse2 vsx/;
+specialize qw/vpx_sad16x32_avg neon msa sse2 vsx/;
 
 add_proto qw/unsigned int vpx_sad16x16_avg/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
-specialize qw/vpx_sad16x16_avg msa sse2 vsx/;
+specialize qw/vpx_sad16x16_avg neon msa sse2 vsx/;
 
 add_proto qw/unsigned int vpx_sad16x8_avg/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
-specialize qw/vpx_sad16x8_avg msa sse2 vsx/;
+specialize qw/vpx_sad16x8_avg neon msa sse2 vsx/;
 
 add_proto qw/unsigned int vpx_sad8x16_avg/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
 specialize qw/vpx_sad8x16_avg neon msa sse2/;

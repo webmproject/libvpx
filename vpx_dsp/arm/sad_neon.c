@@ -151,10 +151,38 @@ static INLINE uint16x8_t sad16x(const uint8_t *a, int a_stride,
   return abs;
 }
 
+static INLINE uint16x8_t sad16x_avg(const uint8_t *a, int a_stride,
+                                    const uint8_t *b, int b_stride,
+                                    const uint8_t *c, const int height) {
+  int i;
+  uint16x8_t abs = vdupq_n_u16(0);
+
+  for (i = 0; i < height; ++i) {
+    const uint8x16_t a_u8 = vld1q_u8(a);
+    const uint8x16_t b_u8 = vld1q_u8(b);
+    const uint8x16_t c_u8 = vld1q_u8(c);
+    const uint8x16_t avg = vrhaddq_u8(b_u8, c_u8);
+    a += a_stride;
+    b += b_stride;
+    c += 16;
+    abs = vabal_u8(abs, vget_low_u8(a_u8), vget_low_u8(avg));
+    abs = vabal_u8(abs, vget_high_u8(a_u8), vget_high_u8(avg));
+  }
+  return abs;
+}
+
 #define sad16xN(n)                                                      \
   uint32_t vpx_sad16x##n##_neon(const uint8_t *src, int src_stride,     \
                                 const uint8_t *ref, int ref_stride) {   \
     const uint16x8_t abs = sad16x(src, src_stride, ref, ref_stride, n); \
+    return horizontal_add_16x8(abs);                                    \
+  }                                                                     \
+                                                                        \
+  uint32_t vpx_sad16x##n##_avg_neon(const uint8_t *src, int src_stride, \
+                                    const uint8_t *ref, int ref_stride, \
+                                    const uint8_t *second_pred) {       \
+    const uint16x8_t abs =                                              \
+        sad16x_avg(src, src_stride, ref, ref_stride, second_pred, n);   \
     return horizontal_add_16x8(abs);                                    \
   }
 
