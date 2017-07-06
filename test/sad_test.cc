@@ -658,6 +658,8 @@ const SadMxNParam neon_tests[] = {
 INSTANTIATE_TEST_CASE_P(NEON, SADTest, ::testing::ValuesIn(neon_tests));
 
 const SadMxNAvgParam avg_neon_tests[] = {
+  SadMxNAvgParam(64, 64, &vpx_sad64x64_avg_neon),
+  SadMxNAvgParam(64, 32, &vpx_sad64x32_avg_neon),
   SadMxNAvgParam(32, 64, &vpx_sad32x64_avg_neon),
   SadMxNAvgParam(32, 32, &vpx_sad32x32_avg_neon),
   SadMxNAvgParam(32, 16, &vpx_sad32x16_avg_neon),

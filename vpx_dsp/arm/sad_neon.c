@@ -297,10 +297,61 @@ static INLINE uint32x4_t sad64x(const uint8_t *a, int a_stride,
   }
 }
 
+static INLINE uint32x4_t sad64x_avg(const uint8_t *a, int a_stride,
+                                    const uint8_t *b, int b_stride,
+                                    const uint8_t *c, const int height) {
+  int i;
+  uint16x8_t abs_0 = vdupq_n_u16(0);
+  uint16x8_t abs_1 = vdupq_n_u16(0);
+
+  for (i = 0; i < height; ++i) {
+    const uint8x16_t a_0 = vld1q_u8(a);
+    const uint8x16_t a_1 = vld1q_u8(a + 16);
+    const uint8x16_t a_2 = vld1q_u8(a + 32);
+    const uint8x16_t a_3 = vld1q_u8(a + 48);
+    const uint8x16_t b_0 = vld1q_u8(b);
+    const uint8x16_t b_1 = vld1q_u8(b + 16);
+    const uint8x16_t b_2 = vld1q_u8(b + 32);
+    const uint8x16_t b_3 = vld1q_u8(b + 48);
+    const uint8x16_t c_0 = vld1q_u8(c);
+    const uint8x16_t c_1 = vld1q_u8(c + 16);
+    const uint8x16_t c_2 = vld1q_u8(c + 32);
+    const uint8x16_t c_3 = vld1q_u8(c + 48);
+    const uint8x16_t avg_0 = vrhaddq_u8(b_0, c_0);
+    const uint8x16_t avg_1 = vrhaddq_u8(b_1, c_1);
+    const uint8x16_t avg_2 = vrhaddq_u8(b_2, c_2);
+    const uint8x16_t avg_3 = vrhaddq_u8(b_3, c_3);
+    a += a_stride;
+    b += b_stride;
+    c += 64;
+    abs_0 = vabal_u8(abs_0, vget_low_u8(a_0), vget_low_u8(avg_0));
+    abs_0 = vabal_u8(abs_0, vget_high_u8(a_0), vget_high_u8(avg_0));
+    abs_0 = vabal_u8(abs_0, vget_low_u8(a_1), vget_low_u8(avg_1));
+    abs_0 = vabal_u8(abs_0, vget_high_u8(a_1), vget_high_u8(avg_1));
+    abs_1 = vabal_u8(abs_1, vget_low_u8(a_2), vget_low_u8(avg_2));
+    abs_1 = vabal_u8(abs_1, vget_high_u8(a_2), vget_high_u8(avg_2));
+    abs_1 = vabal_u8(abs_1, vget_low_u8(a_3), vget_low_u8(avg_3));
+    abs_1 = vabal_u8(abs_1, vget_high_u8(a_3), vget_high_u8(avg_3));
+  }
+
+  {
+    const uint32x4_t sum = vpaddlq_u16(abs_0);
+    return vpadalq_u16(sum, abs_1);
+  }
+}
+
 #define sad64xN(n)                                                      \
   uint32_t vpx_sad64x##n##_neon(const uint8_t *src, int src_stride,     \
                                 const uint8_t *ref, int ref_stride) {   \
     const uint32x4_t abs = sad64x(src, src_stride, ref, ref_stride, n); \
+    return horizontal_add_32x4(abs);                                    \
+  }                                                                     \
+                                                                        \
+  uint32_t vpx_sad64x##n##_avg_neon(const uint8_t *src, int src_stride, \
+                                    const uint8_t *ref, int ref_stride, \
+                                    const uint8_t *second_pred) {       \
+    const uint32x4_t abs =                                              \
+        sad64x_avg(src, src_stride, ref, ref_stride, second_pred, n);   \
     return horizontal_add_32x4(abs);                                    \
   }
 
