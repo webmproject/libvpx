@@ -297,14 +297,12 @@ static INLINE uint32x4_t sad64x(const uint8_t *a, int a_stride,
   }
 }
 
-uint32_t vpx_sad64x32_neon(const uint8_t *src, int src_stride,
-                           const uint8_t *ref, int ref_stride) {
-  const uint32x4_t abs = sad64x(src, src_stride, ref, ref_stride, 32);
-  return horizontal_add_32x4(abs);
-}
+#define sad64xN(n)                                                      \
+  uint32_t vpx_sad64x##n##_neon(const uint8_t *src, int src_stride,     \
+                                const uint8_t *ref, int ref_stride) {   \
+    const uint32x4_t abs = sad64x(src, src_stride, ref, ref_stride, n); \
+    return horizontal_add_32x4(abs);                                    \
+  }
 
-uint32_t vpx_sad64x64_neon(const uint8_t *src, int src_stride,
-                           const uint8_t *ref, int ref_stride) {
-  const uint32x4_t abs = sad64x(src, src_stride, ref, ref_stride, 64);
-  return horizontal_add_32x4(abs);
-}
+sad64xN(32);
+sad64xN(64);
