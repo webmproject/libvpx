@@ -151,23 +151,16 @@ static INLINE uint16x8_t sad16x(const uint8_t *a, int a_stride,
   return abs;
 }
 
-uint32_t vpx_sad16x8_neon(const uint8_t *src, int src_stride,
-                          const uint8_t *ref, int ref_stride) {
-  const uint16x8_t abs = sad16x(src, src_stride, ref, ref_stride, 8);
-  return horizontal_add_16x8(abs);
-}
+#define sad16xN(n)                                                      \
+  uint32_t vpx_sad16x##n##_neon(const uint8_t *src, int src_stride,     \
+                                const uint8_t *ref, int ref_stride) {   \
+    const uint16x8_t abs = sad16x(src, src_stride, ref, ref_stride, n); \
+    return horizontal_add_16x8(abs);                                    \
+  }
 
-uint32_t vpx_sad16x16_neon(const uint8_t *src, int src_stride,
-                           const uint8_t *ref, int ref_stride) {
-  const uint16x8_t abs = sad16x(src, src_stride, ref, ref_stride, 16);
-  return horizontal_add_16x8(abs);
-}
-
-uint32_t vpx_sad16x32_neon(const uint8_t *src, int src_stride,
-                           const uint8_t *ref, int ref_stride) {
-  const uint16x8_t abs = sad16x(src, src_stride, ref, ref_stride, 32);
-  return horizontal_add_16x8(abs);
-}
+sad16xN(8);
+sad16xN(16);
+sad16xN(32);
 
 static INLINE uint16x8_t sad32x(const uint8_t *a, int a_stride,
                                 const uint8_t *b, int b_stride,
