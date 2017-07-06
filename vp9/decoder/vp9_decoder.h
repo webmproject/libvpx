@@ -21,7 +21,6 @@
 #include "vp9/common/vp9_thread_common.h"
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_ppflags.h"
-#include "vp9/decoder/vp9_dthread.h"
 
 #ifdef __cplusplus
 extern "C" {

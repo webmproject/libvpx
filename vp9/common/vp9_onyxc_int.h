@@ -74,13 +74,6 @@ typedef struct {
 } RefCntBuffer;
 
 typedef struct BufferPool {
-// Protect BufferPool from being accessed by several FrameWorkers at
-// the same time during frame parallel decode.
-// TODO(hkuang): Try to use atomic variable instead of locking the whole pool.
-#if CONFIG_MULTITHREAD
-  pthread_mutex_t pool_mutex;
-#endif
-
   // Private data associated with the frame buffer callbacks.
   void *cb_priv;
 
@@ -264,11 +257,6 @@ typedef struct VP9Common {
   int above_context_alloc_cols;
 } VP9_COMMON;
 
-// TODO(hkuang): Don't need to lock the whole pool after implementing atomic
-// frame reference count.
-void lock_buffer_pool(BufferPool *const pool);
-void unlock_buffer_pool(BufferPool *const pool);
-
 static INLINE YV12_BUFFER_CONFIG *get_ref_frame(VP9_COMMON *cm, int index) {
   if (index < 0 || index >= REF_FRAMES) return NULL;
   if (cm->ref_frame_map[index] < 0) return NULL;
@@ -284,7 +272,6 @@ static INLINE int get_free_fb(VP9_COMMON *cm) {
   RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
   int i;
 
-  lock_buffer_pool(cm->buffer_pool);
   for (i = 0; i < FRAME_BUFFERS; ++i)
     if (frame_bufs[i].ref_count == 0) break;
 
@@ -295,7 +282,6 @@ static INLINE int get_free_fb(VP9_COMMON *cm) {
     i = INVALID_IDX;
   }
 
-  unlock_buffer_pool(cm->buffer_pool);
   return i;
 }
 

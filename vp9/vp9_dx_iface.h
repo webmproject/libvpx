@@ -19,6 +19,8 @@ struct vpx_codec_alg_priv {
   vpx_codec_priv_t base;
   vpx_codec_dec_cfg_t cfg;
   vp9_stream_info_t si;
+  VP9Decoder *pbi;
+  void *user_priv;
   int postproc_cfg_set;
   vp8_postproc_cfg_t postproc_cfg;
   vpx_decrypt_cb decrypt_cb;
@@ -31,11 +33,8 @@ struct vpx_codec_alg_priv {
   int byte_alignment;
   int skip_loop_filter;
 
-  // Frame parallel related.
-  VPxWorker *frame_workers;
-  int num_frame_workers;
   int need_resync;  // wait for key/intra-only frame
-  // BufferPool that holds all reference frames. Shared by all the FrameWorkers.
+  // BufferPool that holds all reference frames.
   BufferPool *buffer_pool;
 
   // External frame buffer info to save for VP9 common.
