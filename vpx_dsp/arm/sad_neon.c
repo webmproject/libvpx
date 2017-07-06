@@ -211,10 +211,44 @@ static INLINE uint16x8_t sad32x(const uint8_t *a, int a_stride,
   return abs;
 }
 
+static INLINE uint16x8_t sad32x_avg(const uint8_t *a, int a_stride,
+                                    const uint8_t *b, int b_stride,
+                                    const uint8_t *c, const int height) {
+  int i;
+  uint16x8_t abs = vdupq_n_u16(0);
+
+  for (i = 0; i < height; ++i) {
+    const uint8x16_t a_lo = vld1q_u8(a);
+    const uint8x16_t a_hi = vld1q_u8(a + 16);
+    const uint8x16_t b_lo = vld1q_u8(b);
+    const uint8x16_t b_hi = vld1q_u8(b + 16);
+    const uint8x16_t c_lo = vld1q_u8(c);
+    const uint8x16_t c_hi = vld1q_u8(c + 16);
+    const uint8x16_t avg_lo = vrhaddq_u8(b_lo, c_lo);
+    const uint8x16_t avg_hi = vrhaddq_u8(b_hi, c_hi);
+    a += a_stride;
+    b += b_stride;
+    c += 32;
+    abs = vabal_u8(abs, vget_low_u8(a_lo), vget_low_u8(avg_lo));
+    abs = vabal_u8(abs, vget_high_u8(a_lo), vget_high_u8(avg_lo));
+    abs = vabal_u8(abs, vget_low_u8(a_hi), vget_low_u8(avg_hi));
+    abs = vabal_u8(abs, vget_high_u8(a_hi), vget_high_u8(avg_hi));
+  }
+  return abs;
+}
+
 #define sad32xN(n)                                                      \
   uint32_t vpx_sad32x##n##_neon(const uint8_t *src, int src_stride,     \
                                 const uint8_t *ref, int ref_stride) {   \
     const uint16x8_t abs = sad32x(src, src_stride, ref, ref_stride, n); \
+    return horizontal_add_16x8(abs);                                    \
+  }                                                                     \
+                                                                        \
+  uint32_t vpx_sad32x##n##_avg_neon(const uint8_t *src, int src_stride, \
+                                    const uint8_t *ref, int ref_stride, \
+                                    const uint8_t *second_pred) {       \
+    const uint16x8_t abs =                                              \
+        sad32x_avg(src, src_stride, ref, ref_stride, second_pred, n);   \
     return horizontal_add_16x8(abs);                                    \
   }
 
