@@ -96,24 +96,6 @@ static INLINE uint16x8_t sad8x(const uint8_t *a, int a_stride, const uint8_t *b,
   return abs;
 }
 
-uint32_t vpx_sad8x4_neon(const uint8_t *src, int src_stride, const uint8_t *ref,
-                         int ref_stride) {
-  const uint16x8_t abs = sad8x(src, src_stride, ref, ref_stride, 4);
-  return horizontal_add_16x8(abs);
-}
-
-uint32_t vpx_sad8x8_neon(const uint8_t *src, int src_stride, const uint8_t *ref,
-                         int ref_stride) {
-  const uint16x8_t abs = sad8x(src, src_stride, ref, ref_stride, 8);
-  return horizontal_add_16x8(abs);
-}
-
-uint32_t vpx_sad8x16_neon(const uint8_t *src, int src_stride,
-                          const uint8_t *ref, int ref_stride) {
-  const uint16x8_t abs = sad8x(src, src_stride, ref, ref_stride, 16);
-  return horizontal_add_16x8(abs);
-}
-
 static INLINE uint16x8_t sad8x_avg(const uint8_t *a, int a_stride,
                                    const uint8_t *b, int b_stride,
                                    const uint8_t *c, const int height) {
@@ -133,29 +115,24 @@ static INLINE uint16x8_t sad8x_avg(const uint8_t *a, int a_stride,
   return abs;
 }
 
-uint32_t vpx_sad8x4_avg_neon(const uint8_t *src, int src_stride,
-                             const uint8_t *ref, int ref_stride,
-                             const uint8_t *second_pred) {
-  const uint16x8_t abs =
-      sad8x_avg(src, src_stride, ref, ref_stride, second_pred, 4);
-  return horizontal_add_16x8(abs);
-}
+#define sad8xN(n)                                                      \
+  uint32_t vpx_sad8x##n##_neon(const uint8_t *src, int src_stride,     \
+                               const uint8_t *ref, int ref_stride) {   \
+    const uint16x8_t abs = sad8x(src, src_stride, ref, ref_stride, n); \
+    return horizontal_add_16x8(abs);                                   \
+  }                                                                    \
+                                                                       \
+  uint32_t vpx_sad8x##n##_avg_neon(const uint8_t *src, int src_stride, \
+                                   const uint8_t *ref, int ref_stride, \
+                                   const uint8_t *second_pred) {       \
+    const uint16x8_t abs =                                             \
+        sad8x_avg(src, src_stride, ref, ref_stride, second_pred, n);   \
+    return horizontal_add_16x8(abs);                                   \
+  }
 
-uint32_t vpx_sad8x8_avg_neon(const uint8_t *src, int src_stride,
-                             const uint8_t *ref, int ref_stride,
-                             const uint8_t *second_pred) {
-  const uint16x8_t abs =
-      sad8x_avg(src, src_stride, ref, ref_stride, second_pred, 8);
-  return horizontal_add_16x8(abs);
-}
-
-uint32_t vpx_sad8x16_avg_neon(const uint8_t *src, int src_stride,
-                              const uint8_t *ref, int ref_stride,
-                              const uint8_t *second_pred) {
-  const uint16x8_t abs =
-      sad8x_avg(src, src_stride, ref, ref_stride, second_pred, 16);
-  return horizontal_add_16x8(abs);
-}
+sad8xN(4);
+sad8xN(8);
+sad8xN(16);
 
 static INLINE uint16x8_t sad16x(const uint8_t *a, int a_stride,
                                 const uint8_t *b, int b_stride,
