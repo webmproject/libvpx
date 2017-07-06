@@ -368,10 +368,10 @@ enum vp8e_enc_control_id {
    * VP9 has a bitstream feature to reduce decoding dependency between frames
    * by turning off backward update of probability context used in encoding
    * and decoding. This allows staged parallel processing of more than one
-   * video frames in the decoder. This control function provides a mean to
+   * video frame in the decoder. This control function provides a means to
    * turn this feature on or off for bitstreams produced by encoder.
    *
-   * By default, this feature is off.
+   * By default, this feature is on.
    *
    * Supported in codecs: VP9
    */
