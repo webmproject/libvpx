@@ -62,9 +62,9 @@ class PartialIDctTest : public ::testing::TestWithParam<PartialInvTxfmParam> {
   virtual ~PartialIDctTest() {}
   virtual void SetUp() {
     rnd_.Reset(ACMRandom::DeterministicSeed());
-    ftxfm_ = GET_PARAM(0);
-    full_itxfm_ = GET_PARAM(1);
-    partial_itxfm_ = GET_PARAM(2);
+    fwd_txfm_ = GET_PARAM(0);
+    full_inv_txfm_ = GET_PARAM(1);
+    partial_inv_txfm_ = GET_PARAM(2);
     tx_size_ = GET_PARAM(3);
     last_nonzero_ = GET_PARAM(4);
     bit_depth_ = GET_PARAM(5);
@@ -185,9 +185,9 @@ class PartialIDctTest : public ::testing::TestWithParam<PartialInvTxfmParam> {
   int output_block_size_;
   int bit_depth_;
   int mask_;
-  FwdTxfmFunc ftxfm_;
-  InvTxfmWithBdFunc full_itxfm_;
-  InvTxfmWithBdFunc partial_itxfm_;
+  FwdTxfmFunc fwd_txfm_;
+  InvTxfmWithBdFunc full_inv_txfm_;
+  InvTxfmWithBdFunc partial_inv_txfm_;
   ACMRandom rnd_;
 };
 
@@ -221,7 +221,7 @@ TEST_P(PartialIDctTest, RunQuantCheck) {
       }
     }
 
-    ftxfm_(input_extreme_block, output_ref_block, size_);
+    fwd_txfm_(input_extreme_block, output_ref_block, size_);
 
     // quantization with minimum allowed step sizes
     input_block_[0] = (output_ref_block[0] / 4) * 4;
@@ -231,9 +231,9 @@ TEST_P(PartialIDctTest, RunQuantCheck) {
     }
 
     ASM_REGISTER_STATE_CHECK(
-        full_itxfm_(input_block_, output_block_ref_, stride_, bit_depth_));
+        full_inv_txfm_(input_block_, output_block_ref_, stride_, bit_depth_));
     ASM_REGISTER_STATE_CHECK(
-        partial_itxfm_(input_block_, output_block_, stride_, bit_depth_));
+        partial_inv_txfm_(input_block_, output_block_, stride_, bit_depth_));
     ASSERT_EQ(0, memcmp(output_block_ref_, output_block_,
                         pixel_size_ * output_block_size_))
         << "Error: partial inverse transform produces different results";
@@ -246,9 +246,9 @@ TEST_P(PartialIDctTest, ResultsMatch) {
     InitInput();
 
     ASM_REGISTER_STATE_CHECK(
-        full_itxfm_(input_block_, output_block_ref_, stride_, bit_depth_));
+        full_inv_txfm_(input_block_, output_block_ref_, stride_, bit_depth_));
     ASM_REGISTER_STATE_CHECK(
-        partial_itxfm_(input_block_, output_block_, stride_, bit_depth_));
+        partial_inv_txfm_(input_block_, output_block_, stride_, bit_depth_));
     ASSERT_EQ(0, memcmp(output_block_ref_, output_block_,
                         pixel_size_ * output_block_size_))
         << "Error: partial inverse transform produces different results";
@@ -263,9 +263,9 @@ TEST_P(PartialIDctTest, AddOutputBlock) {
     }
 
     ASM_REGISTER_STATE_CHECK(
-        full_itxfm_(input_block_, output_block_ref_, stride_, bit_depth_));
+        full_inv_txfm_(input_block_, output_block_ref_, stride_, bit_depth_));
     ASM_REGISTER_STATE_CHECK(
-        partial_itxfm_(input_block_, output_block_, stride_, bit_depth_));
+        partial_inv_txfm_(input_block_, output_block_, stride_, bit_depth_));
     ASSERT_EQ(0, memcmp(output_block_ref_, output_block_,
                         pixel_size_ * output_block_size_))
         << "Error: Transform results are not correctly added to output.";
@@ -286,9 +286,9 @@ TEST_P(PartialIDctTest, SingleExtremeCoeff) {
       input_block_[vp9_default_scan_orders[tx_size_].scan[i]] = coeff;
 
       ASM_REGISTER_STATE_CHECK(
-          full_itxfm_(input_block_, output_block_ref_, stride_, bit_depth_));
+          full_inv_txfm_(input_block_, output_block_ref_, stride_, bit_depth_));
       ASM_REGISTER_STATE_CHECK(
-          partial_itxfm_(input_block_, output_block_, stride_, bit_depth_));
+          partial_inv_txfm_(input_block_, output_block_, stride_, bit_depth_));
       ASSERT_EQ(0, memcmp(output_block_ref_, output_block_,
                           pixel_size_ * output_block_size_))
           << "Error: Fails with single coeff of " << coeff << " at " << i
@@ -305,12 +305,12 @@ TEST_P(PartialIDctTest, DISABLED_Speed) {
 
   for (int i = 0; i < kCountSpeedTestBlock; ++i) {
     ASM_REGISTER_STATE_CHECK(
-        full_itxfm_(input_block_, output_block_ref_, stride_, bit_depth_));
+        full_inv_txfm_(input_block_, output_block_ref_, stride_, bit_depth_));
   }
   vpx_usec_timer timer;
   vpx_usec_timer_start(&timer);
   for (int i = 0; i < kCountSpeedTestBlock; ++i) {
-    partial_itxfm_(input_block_, output_block_, stride_, bit_depth_);
+    partial_inv_txfm_(input_block_, output_block_, stride_, bit_depth_);
   }
   libvpx_test::ClearSystemState();
   vpx_usec_timer_mark(&timer);
