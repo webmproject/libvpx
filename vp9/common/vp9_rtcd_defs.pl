@@ -190,11 +190,6 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 #
 # Motion search
 #
-add_proto qw/int vp9_full_search_sad/, "const struct macroblock *x, const struct mv *ref_mv, int sad_per_bit, int distance, const struct vp9_variance_vtable *fn_ptr, const struct mv *center_mv, struct mv *best_mv";
-specialize qw/vp9_full_search_sad sse3 sse4_1/;
-$vp9_full_search_sad_sse3=vp9_full_search_sadx3;
-$vp9_full_search_sad_sse4_1=vp9_full_search_sadx8;
-
 add_proto qw/int vp9_diamond_search_sad/, "const struct macroblock *x, const struct search_site_config *cfg,  struct mv *ref_mv, struct mv *best_mv, int search_param, int sad_per_bit, int *num00, const struct vp9_variance_vtable *fn_ptr, const struct mv *center_mv";
 specialize qw/vp9_diamond_search_sad avx/;
 
