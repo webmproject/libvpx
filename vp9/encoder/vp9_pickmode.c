@@ -1928,9 +1928,14 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
         pd->dst.stride = this_mode_pred->stride;
       }
     } else {
-      const int large_block = (x->sb_is_skin || cpi->oxcf.speed < 7)
-                                  ? bsize > BLOCK_32X32
-                                  : bsize >= BLOCK_32X32;
+      // For low motion content use x->sb_is_skin in addition to VeryHighSad
+      // for setting large_block.
+      const int large_block =
+          (x->content_state_sb == kVeryHighSad ||
+           (x->sb_is_skin && cpi->rc.avg_frame_low_motion > 70) ||
+           cpi->oxcf.speed < 7)
+              ? bsize > BLOCK_32X32
+              : bsize >= BLOCK_32X32;
       mi->interp_filter = (filter_ref == SWITCHABLE) ? EIGHTTAP : filter_ref;
 
       if (cpi->use_svc && ref_frame == GOLDEN_FRAME &&
