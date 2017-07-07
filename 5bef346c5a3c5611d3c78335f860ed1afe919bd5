@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "68473780_96c911f3",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2284,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-07T18:49:23Z",
+      "side": 1,
+      "message": "I thought vp8 and vp9 shared this struct but they do not. If the vp8 followup is not used, this can be cleaned a little further.",
+      "revId": "5bef346c5a3c5611d3c78335f860ed1afe919bd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
