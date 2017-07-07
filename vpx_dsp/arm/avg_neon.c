@@ -17,14 +17,7 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/arm/idct_neon.h"
 #include "vpx_dsp/arm/mem_neon.h"
-
-static INLINE unsigned int horizontal_add_u16x8(const uint16x8_t v_16x8) {
-  const uint32x4_t a = vpaddlq_u16(v_16x8);
-  const uint64x2_t b = vpaddlq_u32(a);
-  const uint32x2_t c = vadd_u32(vreinterpret_u32_u64(vget_low_u64(b)),
-                                vreinterpret_u32_u64(vget_high_u64(b)));
-  return vget_lane_u32(c, 0);
-}
+#include "vpx_dsp/arm/sum_neon.h"
 
 unsigned int vpx_avg_4x4_neon(const uint8_t *s, int p) {
   uint16x8_t v_sum;
@@ -35,7 +28,7 @@ unsigned int vpx_avg_4x4_neon(const uint8_t *s, int p) {
   v_s1 = vld1_lane_u32((const uint32_t *)(s + 2 * p), v_s1, 0);
   v_s1 = vld1_lane_u32((const uint32_t *)(s + 3 * p), v_s1, 1);
   v_sum = vaddl_u8(vreinterpret_u8_u32(v_s0), vreinterpret_u8_u32(v_s1));
-  return (horizontal_add_u16x8(v_sum) + 8) >> 4;
+  return (vget_lane_u32(horizontal_add_uint16x8(v_sum), 0) + 8) >> 4;
 }
 
 unsigned int vpx_avg_8x8_neon(const uint8_t *s, int p) {
@@ -61,7 +54,7 @@ unsigned int vpx_avg_8x8_neon(const uint8_t *s, int p) {
   v_s0 = vld1_u8(s + 7 * p);
   v_sum = vaddw_u8(v_sum, v_s0);
 
-  return (horizontal_add_u16x8(v_sum) + 32) >> 6;
+  return (vget_lane_u32(horizontal_add_uint16x8(v_sum), 0) + 32) >> 6;
 }
 
 // coeff: 16 bits, dynamic range [-32640, 32640].
@@ -155,7 +148,8 @@ int16_t vpx_int_pro_col_neon(uint8_t const *ref, const int width) {
     ref += 16;
   }
 
-  return horizontal_add_u16x8(vec_sum);
+  return vget_lane_s16(vreinterpret_s16_u32(horizontal_add_uint16x8(vec_sum)),
+                       0);
 }
 
 // ref, src = [0, 510] - max diff = 16-bits
@@ -185,7 +179,7 @@ int vpx_vector_var_neon(int16_t const *ref, int16_t const *src, const int bwl) {
 
   {
     // Note: 'total''s pairwise addition could be implemented similarly to
-    // horizontal_add_u16x8(), but one less vpaddl with 'total' when paired
+    // horizontal_add_uint16x8(), but one less vpaddl with 'total' when paired
     // with the summation of 'sse' performed better on a Cortex-A15.
     const int32x4_t t0 = vpaddlq_s16(total);  // cascading summation of 'total'
     const int32x2_t t1 = vadd_s32(vget_low_s32(t0), vget_high_s32(t0));

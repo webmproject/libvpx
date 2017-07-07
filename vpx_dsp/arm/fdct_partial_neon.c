@@ -13,13 +13,7 @@
 #include "./vpx_dsp_rtcd.h"
 #include "./vpx_config.h"
 #include "vpx_dsp/arm/mem_neon.h"
-
-static INLINE int32x2_t sum_int16x8(const int16x8_t a) {
-  const int32x4_t b = vpaddlq_s16(a);
-  const int64x2_t c = vpaddlq_s32(b);
-  return vadd_s32(vreinterpret_s32_s64(vget_low_s64(c)),
-                  vreinterpret_s32_s64(vget_high_s64(c)));
-}
+#include "vpx_dsp/arm/sum_neon.h"
 
 static INLINE tran_low_t get_lane(const int32x2_t a) {
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -48,7 +42,7 @@ void vpx_fdct4x4_1_neon(const int16_t *input, tran_low_t *output, int stride) {
 
   c = vaddq_s16(b0, b1);
 
-  d = sum_int16x8(c);
+  d = horizontal_add_int16x8(c);
 
   output[0] = get_lane(vshl_n_s32(d, 1));
   output[1] = 0;
@@ -63,7 +57,7 @@ void vpx_fdct8x8_1_neon(const int16_t *input, tran_low_t *output, int stride) {
     sum = vaddq_s16(sum, input_00);
   }
 
-  output[0] = get_lane(sum_int16x8(sum));
+  output[0] = get_lane(horizontal_add_int16x8(sum));
   output[1] = 0;
 }
 
@@ -83,7 +77,7 @@ void vpx_fdct16x16_1_neon(const int16_t *input, tran_low_t *output,
     right = vaddq_s16(right, b);
   }
 
-  sum = vadd_s32(sum_int16x8(left), sum_int16x8(right));
+  sum = vadd_s32(horizontal_add_int16x8(left), horizontal_add_int16x8(right));
 
   output[0] = get_lane(vshr_n_s32(sum, 1));
   output[1] = 0;
@@ -111,9 +105,9 @@ void vpx_fdct32x32_1_neon(const int16_t *input, tran_low_t *output,
     a3 = vaddq_s16(a3, b3);
   }
 
-  sum = vadd_s32(sum_int16x8(a0), sum_int16x8(a1));
-  sum = vadd_s32(sum, sum_int16x8(a2));
-  sum = vadd_s32(sum, sum_int16x8(a3));
+  sum = vadd_s32(horizontal_add_int16x8(a0), horizontal_add_int16x8(a1));
+  sum = vadd_s32(sum, horizontal_add_int16x8(a2));
+  sum = vadd_s32(sum, horizontal_add_int16x8(a3));
   output[0] = get_lane(vshr_n_s32(sum, 3));
   output[1] = 0;
 }

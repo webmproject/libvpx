@@ -16,22 +16,8 @@
 
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/arm/mem_neon.h"
+#include "vpx_dsp/arm/sum_neon.h"
 #include "vpx_ports/mem.h"
-
-static INLINE int horizontal_add_s16x8(const int16x8_t v_16x8) {
-  const int32x4_t a = vpaddlq_s16(v_16x8);
-  const int64x2_t b = vpaddlq_s32(a);
-  const int32x2_t c = vadd_s32(vreinterpret_s32_s64(vget_low_s64(b)),
-                               vreinterpret_s32_s64(vget_high_s64(b)));
-  return vget_lane_s32(c, 0);
-}
-
-static INLINE int horizontal_add_s32x4(const int32x4_t v_32x4) {
-  const int64x2_t b = vpaddlq_s32(v_32x4);
-  const int32x2_t c = vadd_s32(vreinterpret_s32_s64(vget_low_s64(b)),
-                               vreinterpret_s32_s64(vget_high_s64(b)));
-  return vget_lane_s32(c, 0);
-}
 
 // The variance helper functions use int16_t for sum. 8 values are accumulated
 // and then added (at which point they expand up to int32_t). To avoid overflow,
@@ -79,8 +65,10 @@ static void variance_neon_w4x4(const uint8_t *a, int a_stride, const uint8_t *b,
     b += 4 * b_stride;
   }
 
-  *sum = horizontal_add_s16x8(sum_s16);
-  *sse = (uint32_t)horizontal_add_s32x4(vaddq_s32(sse_lo_s32, sse_hi_s32));
+  *sum = vget_lane_s32(horizontal_add_int16x8(sum_s16), 0);
+  *sse = vget_lane_u32(horizontal_add_uint32x4(vreinterpretq_u32_s32(
+                           vaddq_s32(sse_lo_s32, sse_hi_s32))),
+                       0);
 }
 
 // Process a block of any size where the width is divisible by 16.
@@ -126,8 +114,10 @@ static void variance_neon_w16(const uint8_t *a, int a_stride, const uint8_t *b,
     b += b_stride;
   }
 
-  *sum = horizontal_add_s16x8(sum_s16);
-  *sse = (unsigned int)horizontal_add_s32x4(vaddq_s32(sse_lo_s32, sse_hi_s32));
+  *sum = vget_lane_s32(horizontal_add_int16x8(sum_s16), 0);
+  *sse = vget_lane_u32(horizontal_add_uint32x4(vreinterpretq_u32_s32(
+                           vaddq_s32(sse_lo_s32, sse_hi_s32))),
+                       0);
 }
 
 // Process a block of width 8 two rows at a time.
@@ -165,8 +155,10 @@ static void variance_neon_w8x2(const uint8_t *a, int a_stride, const uint8_t *b,
     i += 2;
   } while (i < h);
 
-  *sum = horizontal_add_s16x8(sum_s16);
-  *sse = (uint32_t)horizontal_add_s32x4(vaddq_s32(sse_lo_s32, sse_hi_s32));
+  *sum = vget_lane_s32(horizontal_add_int16x8(sum_s16), 0);
+  *sse = vget_lane_u32(horizontal_add_uint32x4(vreinterpretq_u32_s32(
+                           vaddq_s32(sse_lo_s32, sse_hi_s32))),
+                       0);
 }
 
 void vpx_get8x8var_neon(const uint8_t *a, int a_stride, const uint8_t *b,
