@@ -25,6 +25,11 @@ void vpx_fdct32x32_neon(const int16_t *input, tran_low_t *output, int stride) {
   vpx_fdct32x32_c(input, output, stride);
 }
 
+void vpx_fdct32x32_rd_neon(const int16_t *input, tran_low_t *output,
+                           int stride) {
+  vpx_fdct32x32_rd_c(input, output, stride);
+}
+
 #else
 
 #define LOAD_INCREMENT(src, stride, dest, index) \
@@ -969,6 +974,307 @@ static void dct_body_second_pass(const int16x8_t *in, int16x8_t *out) {
   out[3] = add_round_shift_s32(d_lo[3], d_hi[3]);
 }
 
+// Add 1 if positive, 2 if negative, and shift by 2.
+// In practice, add 1, then add the sign bit, then shift without rounding.
+static INLINE int16x8_t add_round_shift_s16(const int16x8_t a) {
+  const int16x8_t one = vdupq_n_s16(1);
+  const uint16x8_t a_u16 = vreinterpretq_u16_s16(a);
+  const uint16x8_t a_sign_u16 = vshrq_n_u16(a_u16, 15);
+  const int16x8_t a_sign_s16 = vreinterpretq_s16_u16(a_sign_u16);
+  return vshrq_n_s16(vaddq_s16(vaddq_s16(a, a_sign_s16), one), 2);
+}
+
+static void dct_body_second_pass_rd(const int16x8_t *in, int16x8_t *out) {
+  int16x8_t a[32];
+  int16x8_t b[32];
+
+  // Stage 1. Done as part of the load for the first pass.
+  a[0] = vaddq_s16(in[0], in[31]);
+  a[1] = vaddq_s16(in[1], in[30]);
+  a[2] = vaddq_s16(in[2], in[29]);
+  a[3] = vaddq_s16(in[3], in[28]);
+  a[4] = vaddq_s16(in[4], in[27]);
+  a[5] = vaddq_s16(in[5], in[26]);
+  a[6] = vaddq_s16(in[6], in[25]);
+  a[7] = vaddq_s16(in[7], in[24]);
+  a[8] = vaddq_s16(in[8], in[23]);
+  a[9] = vaddq_s16(in[9], in[22]);
+  a[10] = vaddq_s16(in[10], in[21]);
+  a[11] = vaddq_s16(in[11], in[20]);
+  a[12] = vaddq_s16(in[12], in[19]);
+  a[13] = vaddq_s16(in[13], in[18]);
+  a[14] = vaddq_s16(in[14], in[17]);
+  a[15] = vaddq_s16(in[15], in[16]);
+  a[16] = vsubq_s16(in[15], in[16]);
+  a[17] = vsubq_s16(in[14], in[17]);
+  a[18] = vsubq_s16(in[13], in[18]);
+  a[19] = vsubq_s16(in[12], in[19]);
+  a[20] = vsubq_s16(in[11], in[20]);
+  a[21] = vsubq_s16(in[10], in[21]);
+  a[22] = vsubq_s16(in[9], in[22]);
+  a[23] = vsubq_s16(in[8], in[23]);
+  a[24] = vsubq_s16(in[7], in[24]);
+  a[25] = vsubq_s16(in[6], in[25]);
+  a[26] = vsubq_s16(in[5], in[26]);
+  a[27] = vsubq_s16(in[4], in[27]);
+  a[28] = vsubq_s16(in[3], in[28]);
+  a[29] = vsubq_s16(in[2], in[29]);
+  a[30] = vsubq_s16(in[1], in[30]);
+  a[31] = vsubq_s16(in[0], in[31]);
+
+  // Stage 2.
+  // For the "rd" version, all the values are rounded down after stage 2 to keep
+  // the values in 16 bits.
+  b[0] = add_round_shift_s16(vaddq_s16(a[0], a[15]));
+  b[1] = add_round_shift_s16(vaddq_s16(a[1], a[14]));
+  b[2] = add_round_shift_s16(vaddq_s16(a[2], a[13]));
+  b[3] = add_round_shift_s16(vaddq_s16(a[3], a[12]));
+  b[4] = add_round_shift_s16(vaddq_s16(a[4], a[11]));
+  b[5] = add_round_shift_s16(vaddq_s16(a[5], a[10]));
+  b[6] = add_round_shift_s16(vaddq_s16(a[6], a[9]));
+  b[7] = add_round_shift_s16(vaddq_s16(a[7], a[8]));
+
+  b[8] = add_round_shift_s16(vsubq_s16(a[7], a[8]));
+  b[9] = add_round_shift_s16(vsubq_s16(a[6], a[9]));
+  b[10] = add_round_shift_s16(vsubq_s16(a[5], a[10]));
+  b[11] = add_round_shift_s16(vsubq_s16(a[4], a[11]));
+  b[12] = add_round_shift_s16(vsubq_s16(a[3], a[12]));
+  b[13] = add_round_shift_s16(vsubq_s16(a[2], a[13]));
+  b[14] = add_round_shift_s16(vsubq_s16(a[1], a[14]));
+  b[15] = add_round_shift_s16(vsubq_s16(a[0], a[15]));
+
+  b[16] = add_round_shift_s16(a[16]);
+  b[17] = add_round_shift_s16(a[17]);
+  b[18] = add_round_shift_s16(a[18]);
+  b[19] = add_round_shift_s16(a[19]);
+
+  butterfly_one_coeff(a[27], a[20], cospi_16_64, &b[27], &b[20]);
+  butterfly_one_coeff(a[26], a[21], cospi_16_64, &b[26], &b[21]);
+  butterfly_one_coeff(a[25], a[22], cospi_16_64, &b[25], &b[22]);
+  butterfly_one_coeff(a[24], a[23], cospi_16_64, &b[24], &b[23]);
+  b[20] = add_round_shift_s16(b[20]);
+  b[21] = add_round_shift_s16(b[21]);
+  b[22] = add_round_shift_s16(b[22]);
+  b[23] = add_round_shift_s16(b[23]);
+  b[24] = add_round_shift_s16(b[24]);
+  b[25] = add_round_shift_s16(b[25]);
+  b[26] = add_round_shift_s16(b[26]);
+  b[27] = add_round_shift_s16(b[27]);
+
+  b[28] = add_round_shift_s16(a[28]);
+  b[29] = add_round_shift_s16(a[29]);
+  b[30] = add_round_shift_s16(a[30]);
+  b[31] = add_round_shift_s16(a[31]);
+
+  // Stage 3.
+  a[0] = vaddq_s16(b[0], b[7]);
+  a[1] = vaddq_s16(b[1], b[6]);
+  a[2] = vaddq_s16(b[2], b[5]);
+  a[3] = vaddq_s16(b[3], b[4]);
+
+  a[4] = vsubq_s16(b[3], b[4]);
+  a[5] = vsubq_s16(b[2], b[5]);
+  a[6] = vsubq_s16(b[1], b[6]);
+  a[7] = vsubq_s16(b[0], b[7]);
+
+  a[8] = b[8];
+  a[9] = b[9];
+
+  butterfly_one_coeff(b[13], b[10], cospi_16_64, &a[13], &a[10]);
+  butterfly_one_coeff(b[12], b[11], cospi_16_64, &a[12], &a[11]);
+
+  a[14] = b[14];
+  a[15] = b[15];
+
+  a[16] = vaddq_s16(b[16], b[23]);
+  a[17] = vaddq_s16(b[17], b[22]);
+  a[18] = vaddq_s16(b[18], b[21]);
+  a[19] = vaddq_s16(b[19], b[20]);
+
+  a[20] = vsubq_s16(b[19], b[20]);
+  a[21] = vsubq_s16(b[18], b[21]);
+  a[22] = vsubq_s16(b[17], b[22]);
+  a[23] = vsubq_s16(b[16], b[23]);
+
+  a[24] = vsubq_s16(b[31], b[24]);
+  a[25] = vsubq_s16(b[30], b[25]);
+  a[26] = vsubq_s16(b[29], b[26]);
+  a[27] = vsubq_s16(b[28], b[27]);
+
+  a[28] = vaddq_s16(b[28], b[27]);
+  a[29] = vaddq_s16(b[29], b[26]);
+  a[30] = vaddq_s16(b[30], b[25]);
+  a[31] = vaddq_s16(b[31], b[24]);
+
+  // Stage 4.
+  b[0] = vaddq_s16(a[0], a[3]);
+  b[1] = vaddq_s16(a[1], a[2]);
+  b[2] = vsubq_s16(a[1], a[2]);
+  b[3] = vsubq_s16(a[0], a[3]);
+
+  b[4] = a[4];
+
+  butterfly_one_coeff(a[6], a[5], cospi_16_64, &b[6], &b[5]);
+
+  b[7] = a[7];
+
+  b[8] = vaddq_s16(a[8], a[11]);
+  b[9] = vaddq_s16(a[9], a[10]);
+  b[10] = vsubq_s16(a[9], a[10]);
+  b[11] = vsubq_s16(a[8], a[11]);
+  b[12] = vsubq_s16(a[15], a[12]);
+  b[13] = vsubq_s16(a[14], a[13]);
+  b[14] = vaddq_s16(a[14], a[13]);
+  b[15] = vaddq_s16(a[15], a[12]);
+
+  b[16] = a[16];
+  b[17] = a[17];
+
+  butterfly_two_coeff(a[29], a[18], cospi_24_64, cospi_8_64, &b[29], &b[18]);
+  butterfly_two_coeff(a[28], a[19], cospi_24_64, cospi_8_64, &b[28], &b[19]);
+  butterfly_two_coeff(a[27], a[20], -cospi_8_64, cospi_24_64, &b[27], &b[20]);
+  butterfly_two_coeff(a[26], a[21], -cospi_8_64, cospi_24_64, &b[26], &b[21]);
+
+  b[22] = a[22];
+  b[23] = a[23];
+  b[24] = a[24];
+  b[25] = a[25];
+
+  b[30] = a[30];
+  b[31] = a[31];
+
+  // Stage 5.
+  butterfly_one_coeff(b[0], b[1], cospi_16_64, &a[0], &a[1]);
+  butterfly_two_coeff(b[3], b[2], cospi_24_64, cospi_8_64, &a[2], &a[3]);
+
+  a[4] = vaddq_s16(b[4], b[5]);
+  a[5] = vsubq_s16(b[4], b[5]);
+  a[6] = vsubq_s16(b[7], b[6]);
+  a[7] = vaddq_s16(b[7], b[6]);
+
+  a[8] = b[8];
+
+  butterfly_two_coeff(b[14], b[9], cospi_24_64, cospi_8_64, &a[14], &a[9]);
+  butterfly_two_coeff(b[13], b[10], -cospi_8_64, cospi_24_64, &a[13], &a[10]);
+
+  a[11] = b[11];
+  a[12] = b[12];
+
+  a[15] = b[15];
+
+  a[16] = vaddq_s16(b[19], b[16]);
+  a[17] = vaddq_s16(b[18], b[17]);
+  a[18] = vsubq_s16(b[17], b[18]);
+  a[19] = vsubq_s16(b[16], b[19]);
+  a[20] = vsubq_s16(b[23], b[20]);
+  a[21] = vsubq_s16(b[22], b[21]);
+  a[22] = vaddq_s16(b[21], b[22]);
+  a[23] = vaddq_s16(b[20], b[23]);
+  a[24] = vaddq_s16(b[27], b[24]);
+  a[25] = vaddq_s16(b[26], b[25]);
+  a[26] = vsubq_s16(b[25], b[26]);
+  a[27] = vsubq_s16(b[24], b[27]);
+  a[28] = vsubq_s16(b[31], b[28]);
+  a[29] = vsubq_s16(b[30], b[29]);
+  a[30] = vaddq_s16(b[29], b[30]);
+  a[31] = vaddq_s16(b[28], b[31]);
+
+  // Stage 6.
+  b[0] = a[0];
+  b[1] = a[1];
+  b[2] = a[2];
+  b[3] = a[3];
+
+  butterfly_two_coeff(a[7], a[4], cospi_28_64, cospi_4_64, &b[4], &b[7]);
+  butterfly_two_coeff(a[6], a[5], cospi_12_64, cospi_20_64, &b[5], &b[6]);
+
+  b[8] = vaddq_s16(a[8], a[9]);
+  b[9] = vsubq_s16(a[8], a[9]);
+  b[10] = vsubq_s16(a[11], a[10]);
+  b[11] = vaddq_s16(a[11], a[10]);
+  b[12] = vaddq_s16(a[12], a[13]);
+  b[13] = vsubq_s16(a[12], a[13]);
+  b[14] = vsubq_s16(a[15], a[14]);
+  b[15] = vaddq_s16(a[15], a[14]);
+
+  b[16] = a[16];
+  b[19] = a[19];
+  b[20] = a[20];
+  b[23] = a[23];
+  b[24] = a[24];
+  b[27] = a[27];
+  b[28] = a[28];
+  b[31] = a[31];
+
+  butterfly_two_coeff(a[30], a[17], cospi_28_64, cospi_4_64, &b[30], &b[17]);
+  butterfly_two_coeff(a[29], a[18], -cospi_4_64, cospi_28_64, &b[29], &b[18]);
+
+  butterfly_two_coeff(a[26], a[21], cospi_12_64, cospi_20_64, &b[26], &b[21]);
+  butterfly_two_coeff(a[25], a[22], -cospi_20_64, cospi_12_64, &b[25], &b[22]);
+
+  // Stage 7.
+  a[0] = b[0];
+  a[1] = b[1];
+  a[2] = b[2];
+  a[3] = b[3];
+  a[4] = b[4];
+  a[5] = b[5];
+  a[6] = b[6];
+  a[7] = b[7];
+
+  butterfly_two_coeff(b[15], b[8], cospi_30_64, cospi_2_64, &a[8], &a[15]);
+  butterfly_two_coeff(b[14], b[9], cospi_14_64, cospi_18_64, &a[9], &a[14]);
+  butterfly_two_coeff(b[13], b[10], cospi_22_64, cospi_10_64, &a[10], &a[13]);
+  butterfly_two_coeff(b[12], b[11], cospi_6_64, cospi_26_64, &a[11], &a[12]);
+
+  a[16] = vaddq_s16(b[16], b[17]);
+  a[17] = vsubq_s16(b[16], b[17]);
+  a[18] = vsubq_s16(b[19], b[18]);
+  a[19] = vaddq_s16(b[19], b[18]);
+  a[20] = vaddq_s16(b[20], b[21]);
+  a[21] = vsubq_s16(b[20], b[21]);
+  a[22] = vsubq_s16(b[23], b[22]);
+  a[23] = vaddq_s16(b[23], b[22]);
+  a[24] = vaddq_s16(b[24], b[25]);
+  a[25] = vsubq_s16(b[24], b[25]);
+  a[26] = vsubq_s16(b[27], b[26]);
+  a[27] = vaddq_s16(b[27], b[26]);
+  a[28] = vaddq_s16(b[28], b[29]);
+  a[29] = vsubq_s16(b[28], b[29]);
+  a[30] = vsubq_s16(b[31], b[30]);
+  a[31] = vaddq_s16(b[31], b[30]);
+
+  // Final stage.
+  out[0] = a[0];
+  out[16] = a[1];
+  out[8] = a[2];
+  out[24] = a[3];
+  out[4] = a[4];
+  out[20] = a[5];
+  out[12] = a[6];
+  out[28] = a[7];
+  out[2] = a[8];
+  out[18] = a[9];
+  out[10] = a[10];
+  out[26] = a[11];
+  out[6] = a[12];
+  out[22] = a[13];
+  out[14] = a[14];
+  out[30] = a[15];
+
+  butterfly_two_coeff(a[31], a[16], cospi_31_64, cospi_1_64, &out[1], &out[31]);
+  butterfly_two_coeff(a[30], a[17], cospi_15_64, cospi_17_64, &out[17],
+                      &out[15]);
+  butterfly_two_coeff(a[29], a[18], cospi_23_64, cospi_9_64, &out[9], &out[23]);
+  butterfly_two_coeff(a[28], a[19], cospi_7_64, cospi_25_64, &out[25], &out[7]);
+  butterfly_two_coeff(a[27], a[20], cospi_27_64, cospi_5_64, &out[5], &out[27]);
+  butterfly_two_coeff(a[26], a[21], cospi_11_64, cospi_21_64, &out[21],
+                      &out[11]);
+  butterfly_two_coeff(a[25], a[22], cospi_19_64, cospi_13_64, &out[13],
+                      &out[19]);
+  butterfly_two_coeff(a[24], a[23], cospi_3_64, cospi_29_64, &out[29], &out[3]);
+}
+
 #undef PASS_THROUGH
 #undef ADD_S16_S32
 #undef SUB_S16_S32
@@ -1098,6 +1404,101 @@ void vpx_fdct32x32_neon(const int16_t *input, tran_low_t *output, int stride) {
   transpose_8x8(&temp4[24], &temp0[24]);
 
   dct_body_second_pass(temp0, temp5);
+
+  transpose_s16_8x8(&temp5[0], &temp5[1], &temp5[2], &temp5[3], &temp5[4],
+                    &temp5[5], &temp5[6], &temp5[7]);
+  transpose_s16_8x8(&temp5[8], &temp5[9], &temp5[10], &temp5[11], &temp5[12],
+                    &temp5[13], &temp5[14], &temp5[15]);
+  transpose_s16_8x8(&temp5[16], &temp5[17], &temp5[18], &temp5[19], &temp5[20],
+                    &temp5[21], &temp5[22], &temp5[23]);
+  transpose_s16_8x8(&temp5[24], &temp5[25], &temp5[26], &temp5[27], &temp5[28],
+                    &temp5[29], &temp5[30], &temp5[31]);
+  store(output + 24 * 32, temp5);
+}
+
+void vpx_fdct32x32_rd_neon(const int16_t *input, tran_low_t *output,
+                           int stride) {
+  int16x8_t temp0[32];
+  int16x8_t temp1[32];
+  int16x8_t temp2[32];
+  int16x8_t temp3[32];
+  int16x8_t temp4[32];
+  int16x8_t temp5[32];
+
+  // Process in 8x32 columns.
+  load(input, stride, temp0);
+  dct_body_first_pass(temp0, temp1);
+
+  load(input + 8, stride, temp0);
+  dct_body_first_pass(temp0, temp2);
+
+  load(input + 16, stride, temp0);
+  dct_body_first_pass(temp0, temp3);
+
+  load(input + 24, stride, temp0);
+  dct_body_first_pass(temp0, temp4);
+
+  // Generate the top row by munging the first set of 8 from each one together.
+  transpose_8x8(&temp1[0], &temp0[0]);
+  transpose_8x8(&temp2[0], &temp0[8]);
+  transpose_8x8(&temp3[0], &temp0[16]);
+  transpose_8x8(&temp4[0], &temp0[24]);
+
+  dct_body_second_pass_rd(temp0, temp5);
+
+  transpose_s16_8x8(&temp5[0], &temp5[1], &temp5[2], &temp5[3], &temp5[4],
+                    &temp5[5], &temp5[6], &temp5[7]);
+  transpose_s16_8x8(&temp5[8], &temp5[9], &temp5[10], &temp5[11], &temp5[12],
+                    &temp5[13], &temp5[14], &temp5[15]);
+  transpose_s16_8x8(&temp5[16], &temp5[17], &temp5[18], &temp5[19], &temp5[20],
+                    &temp5[21], &temp5[22], &temp5[23]);
+  transpose_s16_8x8(&temp5[24], &temp5[25], &temp5[26], &temp5[27], &temp5[28],
+                    &temp5[29], &temp5[30], &temp5[31]);
+  store(output, temp5);
+
+  // Second row of 8x32.
+  transpose_8x8(&temp1[8], &temp0[0]);
+  transpose_8x8(&temp2[8], &temp0[8]);
+  transpose_8x8(&temp3[8], &temp0[16]);
+  transpose_8x8(&temp4[8], &temp0[24]);
+
+  dct_body_second_pass_rd(temp0, temp5);
+
+  transpose_s16_8x8(&temp5[0], &temp5[1], &temp5[2], &temp5[3], &temp5[4],
+                    &temp5[5], &temp5[6], &temp5[7]);
+  transpose_s16_8x8(&temp5[8], &temp5[9], &temp5[10], &temp5[11], &temp5[12],
+                    &temp5[13], &temp5[14], &temp5[15]);
+  transpose_s16_8x8(&temp5[16], &temp5[17], &temp5[18], &temp5[19], &temp5[20],
+                    &temp5[21], &temp5[22], &temp5[23]);
+  transpose_s16_8x8(&temp5[24], &temp5[25], &temp5[26], &temp5[27], &temp5[28],
+                    &temp5[29], &temp5[30], &temp5[31]);
+  store(output + 8 * 32, temp5);
+
+  // Third row of 8x32
+  transpose_8x8(&temp1[16], &temp0[0]);
+  transpose_8x8(&temp2[16], &temp0[8]);
+  transpose_8x8(&temp3[16], &temp0[16]);
+  transpose_8x8(&temp4[16], &temp0[24]);
+
+  dct_body_second_pass_rd(temp0, temp5);
+
+  transpose_s16_8x8(&temp5[0], &temp5[1], &temp5[2], &temp5[3], &temp5[4],
+                    &temp5[5], &temp5[6], &temp5[7]);
+  transpose_s16_8x8(&temp5[8], &temp5[9], &temp5[10], &temp5[11], &temp5[12],
+                    &temp5[13], &temp5[14], &temp5[15]);
+  transpose_s16_8x8(&temp5[16], &temp5[17], &temp5[18], &temp5[19], &temp5[20],
+                    &temp5[21], &temp5[22], &temp5[23]);
+  transpose_s16_8x8(&temp5[24], &temp5[25], &temp5[26], &temp5[27], &temp5[28],
+                    &temp5[29], &temp5[30], &temp5[31]);
+  store(output + 16 * 32, temp5);
+
+  // Final row of 8x32.
+  transpose_8x8(&temp1[24], &temp0[0]);
+  transpose_8x8(&temp2[24], &temp0[8]);
+  transpose_8x8(&temp3[24], &temp0[16]);
+  transpose_8x8(&temp4[24], &temp0[24]);
+
+  dct_body_second_pass_rd(temp0, temp5);
 
   transpose_s16_8x8(&temp5[0], &temp5[1], &temp5[2], &temp5[3], &temp5[4],
                     &temp5[5], &temp5[6], &temp5[7]);

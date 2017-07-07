@@ -319,7 +319,7 @@ INSTANTIATE_TEST_CASE_P(
     NEON, Trans32x32Test,
     ::testing::Values(make_tuple(&vpx_fdct32x32_neon,
                                  &vpx_idct32x32_1024_add_neon, 0, VPX_BITS_8),
-                      make_tuple(&vpx_fdct32x32_rd_c,
+                      make_tuple(&vpx_fdct32x32_rd_neon,
                                  &vpx_idct32x32_1024_add_neon, 1, VPX_BITS_8)));
 #endif  // HAVE_NEON && !CONFIG_EMULATE_HARDWARE
 
