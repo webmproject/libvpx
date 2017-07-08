@@ -176,7 +176,11 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK_HI(cfg, rc_dropframe_thresh, 100);
   RANGE_CHECK_HI(cfg, rc_resize_up_thresh, 100);
   RANGE_CHECK_HI(cfg, rc_resize_down_thresh, 100);
+#if CONFIG_REALTIME_ONLY
+  RANGE_CHECK(cfg, g_pass, VPX_RC_ONE_PASS, VPX_RC_ONE_PASS);
+#else
   RANGE_CHECK(cfg, g_pass, VPX_RC_ONE_PASS, VPX_RC_LAST_PASS);
+#endif
   RANGE_CHECK(extra_cfg, min_gf_interval, 0, (MAX_LAG_BUFFERS - 1));
   RANGE_CHECK(extra_cfg, max_gf_interval, 0, (MAX_LAG_BUFFERS - 1));
   if (extra_cfg->max_gf_interval > 0) {
@@ -269,6 +273,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   if (extra_cfg->tuning == VP8_TUNE_SSIM)
     ERROR("Option --tune=ssim is not currently supported in VP9.");
 
+#if !CONFIG_REALTIME_ONLY
   if (cfg->g_pass == VPX_RC_LAST_PASS) {
     const size_t packet_sz = sizeof(FIRSTPASS_STATS);
     const int n_packets = (int)(cfg->rc_twopass_stats_in.sz / packet_sz);
@@ -320,6 +325,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
         ERROR("rc_twopass_stats_in missing EOS stats packet");
     }
   }
+#endif  // !CONFIG_REALTIME_ONLY
 
 #if !CONFIG_VP9_HIGHBITDEPTH
   if (cfg->g_profile > (unsigned int)PROFILE_1) {
@@ -939,6 +945,10 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t *ctx,
                                     unsigned long deadline) {
   MODE new_mode = BEST;
 
+#if CONFIG_REALTIME_ONLY
+  (void)duration;
+  deadline = VPX_DL_REALTIME;
+#else
   switch (ctx->cfg.g_pass) {
     case VPX_RC_ONE_PASS:
       if (deadline > 0) {
@@ -959,6 +969,7 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t *ctx,
     case VPX_RC_FIRST_PASS: break;
     case VPX_RC_LAST_PASS: new_mode = deadline > 0 ? GOOD : BEST; break;
   }
+#endif  // CONFIG_REALTIME_ONLY
 
   if (deadline == VPX_DL_REALTIME) {
     ctx->oxcf.pass = 0;

@@ -2181,6 +2181,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 
   cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
 
+#if !CONFIG_REALTIME_ONLY
   if (oxcf->pass == 1) {
     vp9_init_first_pass(cpi);
   } else if (oxcf->pass == 2) {
@@ -2245,6 +2246,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
       vp9_init_second_pass(cpi);
     }
   }
+#endif  // !CONFIG_REALTIME_ONLY
 
   vp9_set_speed_features_framesize_independent(cpi);
   vp9_set_speed_features_framesize_dependent(cpi);
@@ -3338,6 +3340,7 @@ static void set_frame_size(VP9_COMP *cpi) {
   VP9EncoderConfig *const oxcf = &cpi->oxcf;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
 
+#if !CONFIG_REALTIME_ONLY
   if (oxcf->pass == 2 && oxcf->rc_mode == VPX_VBR &&
       ((oxcf->resize_mode == RESIZE_FIXED && cm->current_video_frame == 0) ||
        (oxcf->resize_mode == RESIZE_DYNAMIC && cpi->resize_pending))) {
@@ -3348,6 +3351,7 @@ static void set_frame_size(VP9_COMP *cpi) {
     vp9_set_size_literal(cpi, oxcf->scaled_frame_width,
                          oxcf->scaled_frame_height);
   }
+#endif  // !CONFIG_REALTIME_ONLY
 
   if (oxcf->pass == 0 && oxcf->rc_mode == VPX_CBR && !cpi->use_svc &&
       oxcf->resize_mode == RESIZE_DYNAMIC && cpi->resize_pending != 0) {
@@ -4569,6 +4573,7 @@ static void Pass0Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
 }
 
+#if !CONFIG_REALTIME_ONLY
 static void Pass2Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
                         unsigned int *frame_flags) {
   cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
@@ -4577,6 +4582,7 @@ static void Pass2Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
   if (!(is_two_pass_svc(cpi) && cpi->svc.encode_empty_frame_state == ENCODING))
     vp9_twopass_postencode_update(cpi);
 }
+#endif  // !CONFIG_REALTIME_ONLY
 
 static void init_ref_frame_bufs(VP9_COMMON *cm) {
   int i;
@@ -5152,10 +5158,12 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   } else {
     *size = 0;
+#if !CONFIG_REALTIME_ONLY
     if (flush && oxcf->pass == 1 && !cpi->twopass.first_pass_done) {
       vp9_end_first_pass(cpi); /* get last stats packet */
       cpi->twopass.first_pass_done = 1;
     }
+#endif  // !CONFIG_REALTIME_ONLY
     return -1;
   }
 
@@ -5202,6 +5210,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   cpi->frame_flags = *frame_flags;
 
+#if !CONFIG_REALTIME_ONLY
   if ((oxcf->pass == 2) &&
       (!cpi->use_svc || (is_two_pass_svc(cpi) &&
                          cpi->svc.encode_empty_frame_state != ENCODING))) {
@@ -5209,6 +5218,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   } else if (oxcf->pass == 1) {
     set_frame_size(cpi);
   }
+#endif  // !CONFIG_REALTIME_ONLY
 
   if (oxcf->pass != 1 && cpi->level_constraint.level_index >= 0 &&
       cpi->level_constraint.fail_flag == 0)
@@ -5219,6 +5229,14 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   }
 
   cpi->td.mb.fp_src_pred = 0;
+#if CONFIG_REALTIME_ONLY
+  if (cpi->use_svc) {
+    SvcEncode(cpi, size, dest, frame_flags);
+  } else {
+    // One pass encode
+    Pass0Encode(cpi, size, dest, frame_flags);
+  }
+#else  // !CONFIG_REALTIME_ONLY
   if (oxcf->pass == 1 && (!cpi->use_svc || is_two_pass_svc(cpi))) {
     const int lossless = is_lossless_requested(oxcf);
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -5242,6 +5260,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     // One pass encode
     Pass0Encode(cpi, size, dest, frame_flags);
   }
+#endif  // CONFIG_REALTIME_ONLY
 
   if (cm->refresh_frame_context)
     cm->frame_contexts[cm->frame_context_idx] = *cm->fc;

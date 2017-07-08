@@ -217,6 +217,7 @@ void vp9_encode_tiles_mt(VP9_COMP *cpi) {
   }
 }
 
+#if !CONFIG_REALTIME_ONLY
 static void accumulate_fp_tile_stat(TileDataEnc *tile_data,
                                     TileDataEnc *tile_data_t) {
   tile_data->fp_data.intra_factor += tile_data_t->fp_data.intra_factor;
@@ -251,6 +252,7 @@ static void accumulate_fp_tile_stat(TileDataEnc *tile_data,
           : VPXMIN(tile_data->fp_data.image_data_start_row,
                    tile_data_t->fp_data.image_data_start_row);
 }
+#endif  // !CONFIG_REALTIME_ONLY
 
 // Allocate memory for row synchronization
 void vp9_row_mt_sync_mem_alloc(VP9RowMTSync *row_mt_sync, VP9_COMMON *cm,
@@ -379,6 +381,7 @@ void vp9_row_mt_sync_write_dummy(VP9RowMTSync *const row_mt_sync, int r, int c,
   return;
 }
 
+#if !CONFIG_REALTIME_ONLY
 static int first_pass_worker_hook(EncWorkerData *const thread_data,
                                   MultiThreadHandle *multi_thread_ctxt) {
   VP9_COMP *const cpi = thread_data->cpi;
@@ -468,6 +471,7 @@ void vp9_encode_fp_row_mt(VP9_COMP *cpi) {
     accumulate_fp_tile_stat(first_tile_col, this_tile);
   }
 }
+#endif  // !CONFIG_REALTIME_ONLY
 
 static int temporal_filter_worker_hook(EncWorkerData *const thread_data,
                                        MultiThreadHandle *multi_thread_ctxt) {

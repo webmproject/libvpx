@@ -352,6 +352,7 @@ void vp9_save_layer_context(VP9_COMP *const cpi) {
   }
 }
 
+#if !CONFIG_REALTIME_ONLY
 void vp9_init_second_pass_spatial_svc(VP9_COMP *cpi) {
   SVC *const svc = &cpi->svc;
   int i;
@@ -367,6 +368,7 @@ void vp9_init_second_pass_spatial_svc(VP9_COMP *cpi) {
   }
   svc->spatial_layer_id = 0;
 }
+#endif  // !CONFIG_REALTIME_ONLY
 
 void vp9_inc_frame_in_layer(VP9_COMP *const cpi) {
   LAYER_CONTEXT *const lc =
