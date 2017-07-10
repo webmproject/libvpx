@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "81e244dc_c535d418",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-07-10T17:29:10Z",
+      "side": 1,
+      "message": "should we remove this too, since application can select to refresh/update\nthe alt_ref buffer anytime it wants, and if so running_avg_y[ALTREF_FRAME]\nwouldn\u0027t be allocated.\n\nsame with lines 455",
+      "revId": "9346b03ec9f5406796f74c1f392a59cd0576cb1c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0b509ae2_e58c7b54",
+        "filename": "vp9/encoder/vp9_denoiser.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-07-10T17:29:10Z",
+      "side": 1,
+      "message": "may be good to add comment here why we did this, something like:\n\"Denoiser is uses in real-time mode which does not use alt-ref, so no need to allocate for it,\nand hence we need MAX_REF_FRAME -1\"",
+      "range": {
+        "startLine": 24,
+        "startChar": 28,
+        "endLine": 24,
+        "endChar": 42
+      },
+      "revId": "9346b03ec9f5406796f74c1f392a59cd0576cb1c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
