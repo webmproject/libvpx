@@ -19,42 +19,33 @@
 #include "vpx_dsp/arm/mem_neon.h"
 #include "vpx_dsp/arm/sum_neon.h"
 
-unsigned int vpx_avg_4x4_neon(const uint8_t *s, int p) {
-  uint16x8_t v_sum;
-  uint32x2_t v_s0 = vdup_n_u32(0);
-  uint32x2_t v_s1 = vdup_n_u32(0);
-  v_s0 = vld1_lane_u32((const uint32_t *)s, v_s0, 0);
-  v_s0 = vld1_lane_u32((const uint32_t *)(s + p), v_s0, 1);
-  v_s1 = vld1_lane_u32((const uint32_t *)(s + 2 * p), v_s1, 0);
-  v_s1 = vld1_lane_u32((const uint32_t *)(s + 3 * p), v_s1, 1);
-  v_sum = vaddl_u8(vreinterpret_u8_u32(v_s0), vreinterpret_u8_u32(v_s1));
-  return (vget_lane_u32(horizontal_add_uint16x8(v_sum), 0) + 8) >> 4;
+uint32_t vpx_avg_4x4_neon(const uint8_t *a, int a_stride) {
+  const uint8x16_t b = load_unaligned_u8q(a, a_stride);
+  const uint16x8_t c = vaddl_u8(vget_low_u8(b), vget_high_u8(b));
+  const uint32x2_t d = horizontal_add_uint16x8(c);
+  return vget_lane_u32(vrshr_n_u32(d, 4), 0);
 }
 
-unsigned int vpx_avg_8x8_neon(const uint8_t *s, int p) {
-  uint8x8_t v_s0 = vld1_u8(s);
-  const uint8x8_t v_s1 = vld1_u8(s + p);
-  uint16x8_t v_sum = vaddl_u8(v_s0, v_s1);
+uint32_t vpx_avg_8x8_neon(const uint8_t *a, int a_stride) {
+  int i;
+  uint8x8_t b, c;
+  uint16x8_t sum;
+  uint32x2_t d;
+  b = vld1_u8(a);
+  a += a_stride;
+  c = vld1_u8(a);
+  a += a_stride;
+  sum = vaddl_u8(b, c);
 
-  v_s0 = vld1_u8(s + 2 * p);
-  v_sum = vaddw_u8(v_sum, v_s0);
+  for (i = 0; i < 6; ++i) {
+    const uint8x8_t d = vld1_u8(a);
+    a += a_stride;
+    sum = vaddw_u8(sum, d);
+  }
 
-  v_s0 = vld1_u8(s + 3 * p);
-  v_sum = vaddw_u8(v_sum, v_s0);
+  d = horizontal_add_uint16x8(sum);
 
-  v_s0 = vld1_u8(s + 4 * p);
-  v_sum = vaddw_u8(v_sum, v_s0);
-
-  v_s0 = vld1_u8(s + 5 * p);
-  v_sum = vaddw_u8(v_sum, v_s0);
-
-  v_s0 = vld1_u8(s + 6 * p);
-  v_sum = vaddw_u8(v_sum, v_s0);
-
-  v_s0 = vld1_u8(s + 7 * p);
-  v_sum = vaddw_u8(v_sum, v_s0);
-
-  return (vget_lane_u32(horizontal_add_uint16x8(v_sum), 0) + 32) >> 6;
+  return vget_lane_u32(vrshr_n_u32(d, 6), 0);
 }
 
 // coeff: 16 bits, dynamic range [-32640, 32640].
