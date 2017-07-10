@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9b2ab2a4_37e376d7",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 1521,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-07-10T17:00:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6de94d77_bf98d255",
+      "range": {
+        "startLine": 1521,
+        "startChar": 49,
+        "endLine": 1521,
+        "endChar": 73
+      },
+      "revId": "41a1ca0596e6053a2132bc3568175d555410bd4b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f5dc6061_32f392ce",
         "filename": "vp8/encoder/ratectrl.c",
         "patchSetId": 21
@@ -36,6 +60,30 @@
       "writtenOn": "2017-07-10T09:00:03Z",
       "side": 1,
       "message": "just a question: why was teporal_pattern_counter++ not needed before? Because the screenshare settings didn\u0027t use the built-in temporal pattern, but rather depended on explicit dependency flags?",
+      "range": {
+        "startLine": 1524,
+        "startChar": 38,
+        "endLine": 1524,
+        "endChar": 0
+      },
+      "revId": "41a1ca0596e6053a2132bc3568175d555410bd4b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "55d1c733_a8bb50bb",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 1524,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-07-10T17:00:33Z",
+      "side": 1,
+      "message": "Correct, the temporal_pattern_counter update was not needed for screenshare since it did not use the built-in temporal patterns.",
+      "parentUuid": "f5dc6061_32f392ce",
       "range": {
         "startLine": 1524,
         "startChar": 38,
