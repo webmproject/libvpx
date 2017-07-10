@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f43feeee_b2762228",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-07-10T17:54:41Z",
+      "side": 1,
+      "message": "good to add comments why we\u0027re doing this here",
+      "revId": "4cf29fba5f72f6e4d6dc77614c817b0621054849",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
