@@ -2897,8 +2897,8 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
     }
     vp9_denoiser_update_frame_info(
         &cpi->denoiser, *cpi->Source, cpi->common.frame_type,
-        cpi->refresh_alt_ref_frame, cpi->refresh_golden_frame,
-        cpi->refresh_last_frame, cpi->resize_pending, svc_base_is_key);
+        cpi->refresh_golden_frame, cpi->refresh_last_frame, cpi->resize_pending,
+        svc_base_is_key);
   }
 #endif
   if (is_one_pass_cbr_svc(cpi)) {
