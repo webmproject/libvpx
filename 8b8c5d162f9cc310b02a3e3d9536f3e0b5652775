@@ -22,6 +22,30 @@
       "revId": "8b8c5d162f9cc310b02a3e3d9536f3e0b5652775",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f67770f3_05fa4b59",
+        "filename": "vp9/vp9cx.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-10T19:52:58Z",
+      "side": 1,
+      "message": "\u003e also exclude vp9_firstpass.h?\n\nI left the #include\u0027s untouched to keep the noise down. I know there\u0027s a mix of checks like:\n#if CONFIG_...\n#include ...\n\nI can move to that, but I don\u0027t know if it\u0027s all that helpful when the header doesn\u0027t include static\u0027s that would cause unused warnings.",
+      "parentUuid": "0f0fe5ac_8eff63d8",
+      "range": {
+        "startLine": 142,
+        "startChar": 54,
+        "endLine": 142,
+        "endChar": 69
+      },
+      "revId": "8b8c5d162f9cc310b02a3e3d9536f3e0b5652775",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
