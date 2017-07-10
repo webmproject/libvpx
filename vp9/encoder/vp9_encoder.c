@@ -3557,7 +3557,6 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
       cpi->oxcf.content != VP9E_CONTENT_SCREEN &&
       cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
     cpi->use_skin_detection = 1;
-    vp9_compute_skin_map(cpi, BLOCK_16X16);
   }
 
   vp9_set_quantizer(cm, q);

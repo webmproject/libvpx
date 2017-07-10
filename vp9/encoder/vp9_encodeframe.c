@@ -4129,6 +4129,10 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
     (*(cpi->row_mt_sync_read_ptr))(&tile_data->row_mt_sync, sb_row,
                                    sb_col_in_tile);
 
+    if (cpi->use_skin_detection) {
+      vp9_compute_skin_sb(cpi, BLOCK_16X16, mi_row, mi_col);
+    }
+
     x->source_variance = UINT_MAX;
     vp9_zero(x->pred_mv);
     vp9_rd_cost_init(&dummy_rdc);

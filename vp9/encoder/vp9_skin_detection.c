@@ -37,8 +37,9 @@ int vp9_compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
   }
 }
 
-void vp9_compute_skin_map(VP9_COMP *const cpi, BLOCK_SIZE bsize) {
-  int mi_row, mi_col, num_bl;
+void vp9_compute_skin_sb(VP9_COMP *const cpi, BLOCK_SIZE bsize, int mi_row,
+                         int mi_col) {
+  int i, j, num_bl;
   VP9_COMMON *const cm = &cpi->common;
   const uint8_t *src_y = cpi->Source->y_buffer;
   const uint8_t *src_u = cpi->Source->u_buffer;
@@ -50,13 +51,17 @@ void vp9_compute_skin_map(VP9_COMP *const cpi, BLOCK_SIZE bsize) {
   const int shy = (y_bsize == 8) ? 3 : 4;
   const int shuv = shy - 1;
   const int fac = y_bsize / 8;
-  // Loop through blocks and set skin map based on center pixel of block.
-  // Ignore rightmost/bottom boundary blocks.
-  for (mi_row = 0; mi_row < cm->mi_rows - 1; mi_row += fac) {
+  const int y_shift = src_ystride * (mi_row << 3) + (mi_col << 3);
+  const int uv_shift = src_uvstride * (mi_row << 2) + (mi_col << 2);
+  src_y += y_shift;
+  src_u += uv_shift;
+  src_v += uv_shift;
+
+  for (i = mi_row; i < VPXMIN(mi_row + 7, cm->mi_rows - 1); i += fac) {
     num_bl = 0;
-    for (mi_col = 0; mi_col < cm->mi_cols - 1; mi_col += fac) {
+    for (j = mi_col; j < VPXMIN(mi_col + 7, cm->mi_cols - 1); j += fac) {
       int consec_zeromv = 0;
-      int bl_index = mi_row * cm->mi_cols + mi_col;
+      int bl_index = i * cm->mi_cols + j;
       int bl_index1 = bl_index + 1;
       int bl_index2 = bl_index + cm->mi_cols;
       int bl_index3 = bl_index2 + 1;
@@ -67,7 +72,7 @@ void vp9_compute_skin_map(VP9_COMP *const cpi, BLOCK_SIZE bsize) {
                                VPXMIN(cpi->consec_zero_mv[bl_index1],
                                       VPXMIN(cpi->consec_zero_mv[bl_index2],
                                              cpi->consec_zero_mv[bl_index3])));
-      cpi->skin_map[mi_row * cm->mi_cols + mi_col] =
+      cpi->skin_map[bl_index] =
           vp9_compute_skin_block(src_y, src_u, src_v, src_ystride, src_uvstride,
                                  bsize, consec_zeromv, 0);
       num_bl++;
@@ -78,6 +83,18 @@ void vp9_compute_skin_map(VP9_COMP *const cpi, BLOCK_SIZE bsize) {
     src_y += (src_ystride << shy) - (num_bl << shy);
     src_u += (src_uvstride << shuv) - (num_bl << shuv);
     src_v += (src_uvstride << shuv) - (num_bl << shuv);
+  }
+}
+
+void vp9_compute_skin_map(VP9_COMP *const cpi, BLOCK_SIZE bsize) {
+  int mi_row, mi_col;
+  VP9_COMMON *const cm = &cpi->common;
+  // Loop through blocks and set skin map based on center pixel of block.
+  // Ignore rightmost/bottom boundary blocks.
+  for (mi_row = 0; mi_row < cm->mi_rows - 1; mi_row += MI_BLOCK_SIZE) {
+    for (mi_col = 0; mi_col < cm->mi_cols - 1; mi_col += MI_BLOCK_SIZE) {
+      vp9_compute_skin_sb(cpi, bsize, mi_row, mi_col);
+    }
   }
 }
 
