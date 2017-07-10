@@ -772,7 +772,6 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   else if (oxcf->mode == GOOD)
     set_good_speed_feature_framesize_independent(cpi, cm, sf, oxcf->speed);
 
-  cpi->full_search_sad = vp9_full_search_sad;
   cpi->diamond_search_sad = vp9_diamond_search_sad;
 
   // Slow quant, dct and trellis not worthwhile for first pass
