@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "05211bcd_b404d86a",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-07-10T17:36:51Z",
+      "side": 1,
+      "message": "i think it would be safer to add here frame !\u003d INTRA_FRAME \u0026\u0026 frame !\u003d ALTEF_FRAME....\n\nsince denoiser does use alt_ref buffer. This would be to safeguard against scenario\nwhere someone changes the nonrd-pickmode to use alt_ref as a reference.",
+      "revId": "9346b03ec9f5406796f74c1f392a59cd0576cb1c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7295f711_71d9821c",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-07-10T17:36:51Z",
+      "side": 1,
+      "message": "same here:\nif (num_spatial_layer \u003e 1 || frame \u003d\u003d ALTREF_FRAME ....\n\nso if the nonrd-pickmode ever chooses alt_ref as the best \"frame\" mode, we will force\ndenoiser to use last reference with zeromv.",
+      "revId": "9346b03ec9f5406796f74c1f392a59cd0576cb1c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "81e244dc_c535d418",
         "filename": "vp9/encoder/vp9_denoiser.c",
         "patchSetId": 3
