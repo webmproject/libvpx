@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6de94d77_bf98d255",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 1521,
+      "author": {
+        "id": 1125049
+      },
+      "writtenOn": "2017-07-10T09:00:03Z",
+      "side": 1,
+      "message": "nit: Drop \", and set force_maxqp flag\"",
+      "range": {
+        "startLine": 1521,
+        "startChar": 49,
+        "endLine": 1521,
+        "endChar": 73
+      },
+      "revId": "41a1ca0596e6053a2132bc3568175d555410bd4b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f5dc6061_32f392ce",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 1524,
+      "author": {
+        "id": 1125049
+      },
+      "writtenOn": "2017-07-10T09:00:03Z",
+      "side": 1,
+      "message": "just a question: why was teporal_pattern_counter++ not needed before? Because the screenshare settings didn\u0027t use the built-in temporal pattern, but rather depended on explicit dependency flags?",
+      "range": {
+        "startLine": 1524,
+        "startChar": 38,
+        "endLine": 1524,
+        "endChar": 0
+      },
+      "revId": "41a1ca0596e6053a2132bc3568175d555410bd4b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
