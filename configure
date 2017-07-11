@@ -319,6 +319,7 @@ CONFIG_LIST="
     better_hw_compatibility
     experimental
     size_limit
+    always_adjust_bpm
     ${EXPERIMENT_LIST}
 "
 CMDLINE_SELECT="
@@ -378,6 +379,7 @@ CMDLINE_SELECT="
     better_hw_compatibility
     vp9_highbitdepth
     experimental
+    always_adjust_bpm
 "
 
 process_cmdline() {
