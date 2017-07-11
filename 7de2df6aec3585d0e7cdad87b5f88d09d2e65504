@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e95ca290_d15f5620",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-11T18:38:30Z",
+      "side": 1,
+      "message": "reintroduce",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 12
+      },
+      "revId": "7de2df6aec3585d0e7cdad87b5f88d09d2e65504",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a5eb2b8a_1fe4e410",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-11T18:38:30Z",
+      "side": 1,
+      "message": "reintroduce",
+      "revId": "7de2df6aec3585d0e7cdad87b5f88d09d2e65504",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2851513f_aa87f204",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-11T18:38:30Z",
+      "side": 1,
+      "message": "this might work, but to be safe you may want BUG\u003d in the first column",
+      "revId": "7de2df6aec3585d0e7cdad87b5f88d09d2e65504",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
