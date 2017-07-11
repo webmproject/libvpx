@@ -47,6 +47,47 @@ void vpx_sad4x8x4d_neon(const uint8_t *src, int src_stride,
   }
 }
 
+static INLINE void sad8x_4d(const uint8_t *a, int a_stride,
+                            const uint8_t *const b[4], int b_stride,
+                            uint32_t *result, const int height) {
+  int i, j;
+  uint16x8_t sum[4] = { vdupq_n_u16(0), vdupq_n_u16(0), vdupq_n_u16(0),
+                        vdupq_n_u16(0) };
+  const uint8_t *b_loop[4] = { b[0], b[1], b[2], b[3] };
+
+  for (i = 0; i < height; ++i) {
+    const uint8x8_t a_u8 = vld1_u8(a);
+    a += a_stride;
+    for (j = 0; j < 4; ++j) {
+      const uint8x8_t b_u8 = vld1_u8(b_loop[j]);
+      b_loop[j] += b_stride;
+      sum[j] = vabal_u8(sum[j], a_u8, b_u8);
+    }
+  }
+
+  for (j = 0; j < 4; ++j) {
+    result[j] = vget_lane_u32(horizontal_add_uint16x8(sum[j]), 0);
+  }
+}
+
+void vpx_sad8x4x4d_neon(const uint8_t *src, int src_stride,
+                        const uint8_t *const ref[4], int ref_stride,
+                        uint32_t *res) {
+  sad8x_4d(src, src_stride, ref, ref_stride, res, 4);
+}
+
+void vpx_sad8x8x4d_neon(const uint8_t *src, int src_stride,
+                        const uint8_t *const ref[4], int ref_stride,
+                        uint32_t *res) {
+  sad8x_4d(src, src_stride, ref, ref_stride, res, 8);
+}
+
+void vpx_sad8x16x4d_neon(const uint8_t *src, int src_stride,
+                         const uint8_t *const ref[4], int ref_stride,
+                         uint32_t *res) {
+  sad8x_4d(src, src_stride, ref, ref_stride, res, 16);
+}
+
 static INLINE unsigned int horizontal_long_add_16x8(const uint16x8_t vec_lo,
                                                     const uint16x8_t vec_hi) {
   const uint32x4_t vec_l_lo =
