@@ -860,7 +860,7 @@ add_proto qw/void vpx_sad64x64x4d/, "const uint8_t *src_ptr, int src_stride, con
 specialize qw/vpx_sad64x64x4d avx2 neon msa sse2 vsx/;
 
 add_proto qw/void vpx_sad64x32x4d/, "const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array";
-specialize qw/vpx_sad64x32x4d msa sse2 vsx/;
+specialize qw/vpx_sad64x32x4d neon msa sse2 vsx/;
 
 add_proto qw/void vpx_sad32x64x4d/, "const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array";
 specialize qw/vpx_sad32x64x4d neon msa sse2 vsx/;
