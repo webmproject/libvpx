@@ -25,6 +25,9 @@ int vp9_compute_skin_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
                            int stride, int strideuv, int bsize,
                            int consec_zeromv, int curr_motion_magn);
 
+void vp9_compute_skin_sb(struct VP9_COMP *const cpi, BLOCK_SIZE bsize,
+                         int mi_row, int mi_col);
+
 void vp9_compute_skin_map(struct VP9_COMP *const cpi, BLOCK_SIZE bsize);
 
 #ifdef OUTPUT_YUV_SKINMAP

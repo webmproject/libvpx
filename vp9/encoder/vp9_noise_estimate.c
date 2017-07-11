@@ -172,6 +172,7 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
     int mi_row, mi_col;
     int num_low_motion = 0;
     int frame_low_motion = 1;
+    if (cpi->use_skin_detection) vp9_compute_skin_map(cpi, BLOCK_16X16);
     for (mi_row = 0; mi_row < cm->mi_rows; mi_row++) {
       for (mi_col = 0; mi_col < cm->mi_cols; mi_col++) {
         int bl_index = mi_row * cm->mi_cols + mi_col;
