@@ -53,18 +53,22 @@ void vp9_compute_skin_sb(VP9_COMP *const cpi, BLOCK_SIZE bsize, int mi_row,
   const int fac = y_bsize / 8;
   const int y_shift = src_ystride * (mi_row << 3) + (mi_col << 3);
   const int uv_shift = src_uvstride * (mi_row << 2) + (mi_col << 2);
+  const int mi_row_limit = VPXMIN(mi_row + 8, cm->mi_rows - 2);
+  const int mi_col_limit = VPXMIN(mi_col + 8, cm->mi_cols - 2);
   src_y += y_shift;
   src_u += uv_shift;
   src_v += uv_shift;
 
-  for (i = mi_row; i < VPXMIN(mi_row + 7, cm->mi_rows - 1); i += fac) {
+  for (i = mi_row; i < mi_row_limit; i += fac) {
     num_bl = 0;
-    for (j = mi_col; j < VPXMIN(mi_col + 7, cm->mi_cols - 1); j += fac) {
+    for (j = mi_col; j < mi_col_limit; j += fac) {
       int consec_zeromv = 0;
       int bl_index = i * cm->mi_cols + j;
       int bl_index1 = bl_index + 1;
       int bl_index2 = bl_index + cm->mi_cols;
       int bl_index3 = bl_index2 + 1;
+      // Don't detect skin on the boundary.
+      if (i == 0 || j == 0) continue;
       if (bsize == BLOCK_8X8)
         consec_zeromv = cpi->consec_zero_mv[bl_index];
       else
@@ -83,6 +87,42 @@ void vp9_compute_skin_sb(VP9_COMP *const cpi, BLOCK_SIZE bsize, int mi_row,
     src_y += (src_ystride << shy) - (num_bl << shy);
     src_u += (src_uvstride << shuv) - (num_bl << shuv);
     src_v += (src_uvstride << shuv) - (num_bl << shuv);
+  }
+
+  // Remove isolated skin blocks (none of its neighbors are skin) and isolated
+  // non-skin blocks (all of its neighbors are skin).
+  // Skip 4 corner blocks which have only 3 neighbors to remove isolated skin
+  // blocks. Skip superblock borders to remove isolated non-skin blocks.
+  for (i = mi_row; i < mi_row_limit; i += fac) {
+    for (j = mi_col; j < mi_col_limit; j += fac) {
+      int bl_index = i * cm->mi_cols + j;
+      int num_neighbor = 0;
+      int mi, mj;
+      int non_skin_threshold = 8;
+      // Skip 4 corners.
+      if ((i == mi_row && (j == mi_col || j == mi_col_limit - fac)) ||
+          (i == mi_row_limit - fac && (j == mi_col || j == mi_col_limit - fac)))
+        continue;
+      // There are only 5 neighbors for non-skin blocks on the border.
+      if (i == mi_row || i == mi_row_limit - fac || j == mi_col ||
+          j == mi_col_limit - fac)
+        non_skin_threshold = 5;
+
+      for (mi = -fac; mi <= fac; mi += fac) {
+        for (mj = -fac; mj <= fac; mj += fac) {
+          if (i + mi >= mi_row && i + mi < mi_row_limit && j + mj >= mi_col &&
+              j + mj < mi_col_limit) {
+            int bl_neighbor_index = (i + mi) * cm->mi_cols + j + mj;
+            if (cpi->skin_map[bl_neighbor_index]) num_neighbor++;
+          }
+        }
+      }
+
+      if (cpi->skin_map[bl_index] && num_neighbor < 2)
+        cpi->skin_map[bl_index] = 0;
+      if (!cpi->skin_map[bl_index] && num_neighbor == non_skin_threshold)
+        cpi->skin_map[bl_index] = 1;
+    }
   }
 }
 
