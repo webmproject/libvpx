@@ -57,12 +57,6 @@ static const int plane_rd_mult[REF_TYPES][PLANE_TYPES] = {
 
 #if USE_GREEDY_OPTIMIZE_B
 
-typedef struct {
-  int16_t token;
-  tran_low_t qc;
-  tran_low_t dqc;
-} vp9_token_state;
-
 // 'num' can be negative, but 'shift' must be non-negative.
 #define RIGHT_SHIFT_POSSIBLY_NEGATIVE(num, shift) \
   ((num) >= 0) ? (num) >> (shift) : -((-(num)) >> (shift))
@@ -73,7 +67,6 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
   struct macroblock_plane *const p = &mb->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int ref = is_inter_block(xd->mi[0]);
-  vp9_token_state tokens[1025][2];
   uint8_t token_cache[1024];
   const tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
@@ -110,22 +103,16 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
   int64_t accu_error = ((int64_t)1) << 50;
   int64_t best_block_rd_cost = INT64_MAX;
   int x_prev = 1;
+  tran_low_t before_best_eob_qc = 0;
+  tran_low_t before_best_eob_dqc = 0;
+
   assert((!plane_type && !plane) || (plane_type && plane));
   assert(eob <= default_eob);
 
   for (i = 0; i < eob; i++) {
     const int rc = scan[i];
-    int x = qcoeff[rc];
-    t0 = vp9_get_token(x);
-    tokens[i][0].qc = x;
-    tokens[i][0].token = t0;
-    tokens[i][0].dqc = dqcoeff[rc];
-    token_cache[rc] = vp9_pt_energy_class[t0];
+    token_cache[rc] = vp9_pt_energy_class[vp9_get_token(qcoeff[rc])];
   }
-  tokens[eob][0].token = EOB_TOKEN;
-  tokens[eob][0].qc = 0;
-  tokens[eob][0].dqc = 0;
-  tokens[eob][1] = tokens[eob][0];
   final_eob = 0;
 
   // Initial RD cost.
@@ -144,8 +131,8 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
     const int token_tree_sel_cur = (x_prev == 0);
     token_costs_cur = token_costs + band_cur;
     if (x == 0) {  // No need to search
-      rate0 =
-          (*token_costs_cur)[token_tree_sel_cur][ctx_cur][tokens[i][0].token];
+      const int token = vp9_get_token(x);
+      rate0 = (*token_costs_cur)[token_tree_sel_cur][ctx_cur][token];
       accu_rate += rate0;
       x_prev = 0;
       // Note: accu_error does not change.
@@ -205,6 +192,7 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
         int rdcost_better_for_x1, eob_rdcost_better_for_x1;
         int dqc0, dqc1;
         int64_t best_eob_cost_cur;
+        int use_x1;
 
         // Calculate RD Cost effect on the next coeff for the two candidates.
         int64_t next_bits0 = 0;
@@ -214,21 +202,23 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
         if (i < default_eob - 1) {
           int ctx_next, token_tree_sel_next;
           const int band_next = band_translate[i + 1];
+          const int token_next =
+              (i + 1 != eob) ? vp9_get_token(qcoeff[scan[i + 1]]) : EOB_TOKEN;
           unsigned int(
               *const token_costs_next)[2][COEFF_CONTEXTS][ENTROPY_TOKENS] =
               token_costs + band_next;
           token_cache[rc] = vp9_pt_energy_class[t0];
           ctx_next = get_coef_context(nb, token_cache, i + 1);
           token_tree_sel_next = (x == 0);
-          next_bits0 = (*token_costs_next)[token_tree_sel_next][ctx_next]
-                                          [tokens[i + 1][0].token];
+          next_bits0 =
+              (*token_costs_next)[token_tree_sel_next][ctx_next][token_next];
           next_eob_bits0 =
               (*token_costs_next)[token_tree_sel_next][ctx_next][EOB_TOKEN];
           token_cache[rc] = vp9_pt_energy_class[t1];
           ctx_next = get_coef_context(nb, token_cache, i + 1);
           token_tree_sel_next = (x1 == 0);
-          next_bits1 = (*token_costs_next)[token_tree_sel_next][ctx_next]
-                                          [tokens[i + 1][0].token];
+          next_bits1 =
+              (*token_costs_next)[token_tree_sel_next][ctx_next][token_next];
           if (x1 != 0) {
             next_eob_bits1 =
                 (*token_costs_next)[token_tree_sel_next][ctx_next][EOB_TOKEN];
@@ -279,21 +269,20 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
         assert(accu_error >= 0);
         x_prev = qcoeff[rc];  // Update based on selected quantized value.
 
-        best_eob_cost_cur = eob_cost0;
-        tokens[i][1].token = t0;
-        tokens[i][1].qc = x;
-        tokens[i][1].dqc = dqc0;
-        if ((x1 != 0) && eob_rdcost_better_for_x1) {
-          best_eob_cost_cur = eob_cost1;
-          tokens[i][1].token = t1;
-          tokens[i][1].qc = x1;
-          tokens[i][1].dqc = dqc1;
-        }
+        use_x1 = (x1 != 0) && eob_rdcost_better_for_x1;
+        best_eob_cost_cur = use_x1 ? eob_cost1 : eob_cost0;
 
         // Determine whether to move the eob position to i+1
         if (best_eob_cost_cur < best_block_rd_cost) {
           best_block_rd_cost = best_eob_cost_cur;
           final_eob = i + 1;
+          if (use_x1) {
+            before_best_eob_qc = x1;
+            before_best_eob_dqc = dqc1;
+          } else {
+            before_best_eob_qc = x;
+            before_best_eob_dqc = dqc0;
+          }
         }
       }
     }
@@ -301,11 +290,11 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
   assert(final_eob <= eob);
   if (final_eob > 0) {
     int rc;
-    assert(tokens[final_eob - 1][1].qc != 0);
+    assert(before_best_eob_qc != 0);
     i = final_eob - 1;
     rc = scan[i];
-    qcoeff[rc] = tokens[i][1].qc;
-    dqcoeff[rc] = tokens[i][1].dqc;
+    qcoeff[rc] = before_best_eob_qc;
+    dqcoeff[rc] = before_best_eob_dqc;
   }
   for (i = final_eob; i < eob; i++) {
     int rc = scan[i];
