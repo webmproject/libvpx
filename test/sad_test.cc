@@ -678,6 +678,8 @@ const SadMxNx4Param x4d_neon_tests[] = {
   SadMxNx4Param(64, 64, &vpx_sad64x64x4d_neon),
   SadMxNx4Param(32, 32, &vpx_sad32x32x4d_neon),
   SadMxNx4Param(16, 16, &vpx_sad16x16x4d_neon),
+  SadMxNx4Param(4, 8, &vpx_sad4x8x4d_neon),
+  SadMxNx4Param(4, 4, &vpx_sad4x4x4d_neon),
 };
 INSTANTIATE_TEST_CASE_P(NEON, SADx4Test, ::testing::ValuesIn(x4d_neon_tests));
 #endif  // HAVE_NEON

@@ -13,6 +13,39 @@
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_dsp/arm/mem_neon.h"
+#include "vpx_dsp/arm/sum_neon.h"
+
+void vpx_sad4x4x4d_neon(const uint8_t *src, int src_stride,
+                        const uint8_t *const ref[4], int ref_stride,
+                        uint32_t *res) {
+  int i;
+  const uint8x16_t src_u8 = load_unaligned_u8q(src, src_stride);
+  for (i = 0; i < 4; ++i) {
+    const uint8x16_t ref_u8 = load_unaligned_u8q(ref[i], ref_stride);
+    uint16x8_t abs = vabdl_u8(vget_low_u8(src_u8), vget_low_u8(ref_u8));
+    abs = vabal_u8(abs, vget_high_u8(src_u8), vget_high_u8(ref_u8));
+    res[i] = vget_lane_u32(horizontal_add_uint16x8(abs), 0);
+  }
+}
+
+void vpx_sad4x8x4d_neon(const uint8_t *src, int src_stride,
+                        const uint8_t *const ref[4], int ref_stride,
+                        uint32_t *res) {
+  int i;
+  const uint8x16_t src_0 = load_unaligned_u8q(src, src_stride);
+  const uint8x16_t src_1 = load_unaligned_u8q(src + 4 * src_stride, src_stride);
+  for (i = 0; i < 4; ++i) {
+    const uint8x16_t ref_0 = load_unaligned_u8q(ref[i], ref_stride);
+    const uint8x16_t ref_1 =
+        load_unaligned_u8q(ref[i] + 4 * ref_stride, ref_stride);
+    uint16x8_t abs = vabdl_u8(vget_low_u8(src_0), vget_low_u8(ref_0));
+    abs = vabal_u8(abs, vget_high_u8(src_0), vget_high_u8(ref_0));
+    abs = vabal_u8(abs, vget_low_u8(src_1), vget_low_u8(ref_1));
+    abs = vabal_u8(abs, vget_high_u8(src_1), vget_high_u8(ref_1));
+    res[i] = vget_lane_u32(horizontal_add_uint16x8(abs), 0);
+  }
+}
 
 static INLINE unsigned int horizontal_long_add_16x8(const uint16x8_t vec_lo,
                                                     const uint16x8_t vec_hi) {
