@@ -16,6 +16,23 @@
       "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "31fbe49c_57cf3812",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-12T23:29:00Z",
+      "side": 1,
+      "message": "this can be joined with the line above as #elif defined(...)",
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
