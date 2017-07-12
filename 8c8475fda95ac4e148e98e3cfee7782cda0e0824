@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "64dc2704_5df3bec7",
+        "filename": "vpx_dsp/arm/sad4d_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-12T03:26:26Z",
+      "side": 1,
+      "message": "I was about to start testing it (my assumption is that is switches from two loops where the inside loop is unrolled, to two full loops) but it turns out we only want to load \u0027a\u0027 once and compare it 4 times, and switching the looping breaks that.",
+      "range": {
+        "startLine": 63,
+        "startChar": 29,
+        "endLine": 63,
+        "endChar": 36
+      },
+      "revId": "8c8475fda95ac4e148e98e3cfee7782cda0e0824",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "39a64157_01ad95ca",
         "filename": "vpx_dsp/arm/sad4d_neon.c",
         "patchSetId": 1
