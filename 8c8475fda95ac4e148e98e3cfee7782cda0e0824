@@ -16,6 +16,24 @@
       "revId": "8c8475fda95ac4e148e98e3cfee7782cda0e0824",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a66d4db_c78ab21e",
+        "filename": "vpx_dsp/arm/sad4d_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-12T03:05:43Z",
+      "side": 1,
+      "message": "It seems to handle it quite well. The accumulator does not get pushed to the stack. That\u0027s why the 64x version is written differently. When I tried to use an array for sum[] the 64x fell apart.\n\nAll the b_loop[] values stay in registers too. It might not need to push/save as many if it was only tracking one at a time, but the code is pretty much all vector instructions.",
+      "parentUuid": "39a64157_01ad95ca",
+      "revId": "8c8475fda95ac4e148e98e3cfee7782cda0e0824",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
