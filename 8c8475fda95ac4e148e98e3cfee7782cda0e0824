@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "39a64157_01ad95ca",
+        "filename": "vpx_dsp/arm/sad4d_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-12T02:43:22Z",
+      "side": 1,
+      "message": "I wonder if there\u0027s any reordering be done to access all of b[0], then b[1]. might be mildly better",
+      "revId": "8c8475fda95ac4e148e98e3cfee7782cda0e0824",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
