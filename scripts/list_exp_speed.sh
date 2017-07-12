@@ -25,7 +25,7 @@ script_dir=~/Dev/sandbox/libvpx/scripts
 # video=~/Dev/samples/videos/yaowu/soccer_cif.y4m
 # wi=352
 # he=288
-# frames=2
+# frames=50
 # bitrate=500
 # fps="30/1"
 
@@ -61,8 +61,10 @@ verbose=
 
 profile=0
 rm *.txt
-#
-for exp_tool in experimental ec_adapt ncobmc one_sided_compound chroma_sub8x8 rect_tx global_motion ext_tx cdef ext_intra ext_refs dual_filter motion_var warped_motion var_tx tx64x64 supertx ext_partition tpl_mv unpoison_partition_ctx wedge adapt_scan ans chroma_2x2 compound_segment ext_inter ext_tile filter_intra intrabc intra_interp loop_restoration lv_map q_adapt_probs compound_round convolve_round interintra mv_compound txk_sel
+# ncobmc one_sided_compound chroma_sub8x8 rect_tx global_motion ext_tx cdef ext_intra ext_refs dual_filter motion_var warped_motion var_tx tx64x64 supertx ext_partition tpl_mv unpoison_partition_ctx wedge adapt_scan ans chroma_2x2 compound_segment ext_inter ext_tile filter_intra intrabc intra_interp loop_restoration lv_map q_adapt_probs compound_round convolve_round interintra mv_compound txk_sel
+
+#experimental ext_inter
+for exp_tool in ec_adapt
 
 do
   cd $build_dir

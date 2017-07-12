@@ -8,7 +8,7 @@ experiment_dependency() {
   tool=--enable-$1
 
   if [ "$1" == ec_adapt ]; then
-    tool="--enable-$1 --enable-daala-ec --enable-ec-multisymbol"
+    tool="--enable-$1 --enable-ext-inter"
   fi
 
   if [ "$1" == ec_multisymbol ]; then
