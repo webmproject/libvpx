@@ -34,6 +34,23 @@
       "revId": "8c8475fda95ac4e148e98e3cfee7782cda0e0824",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4cd8c72b_f3ecf37b",
+        "filename": "vpx_dsp/arm/sad4d_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-12T03:12:07Z",
+      "side": 1,
+      "message": "The 8x8 (and 8x4) even manages to skip the vdup_n_u16() by using vabdl.u8 before vabal.u8, even though the code calls for vabal_u8(sum[j], a_u8, b_u8).\n\nThose are both fully unrolled. When it gets to 16x it has a loop and zeros the registers and then uses accumulate.\n\nI was super surprised to see that. Did not expect it to go changing instructions on me.",
+      "revId": "8c8475fda95ac4e148e98e3cfee7782cda0e0824",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
