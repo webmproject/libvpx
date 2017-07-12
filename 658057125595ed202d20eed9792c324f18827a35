@@ -22,6 +22,30 @@
       "revId": "658057125595ed202d20eed9792c324f18827a35",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "526e5ce5_220b1485",
+        "filename": "vpx_dsp/arm/sad4d_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-12T03:07:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "52a3ae16_aa952afd",
+      "range": {
+        "startLine": 38,
+        "startChar": 31,
+        "endLine": 38,
+        "endChar": 32
+      },
+      "revId": "658057125595ed202d20eed9792c324f18827a35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
