@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6fe6f63c_1684e6cb",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-12T23:26:48Z",
+      "side": 1,
+      "message": "you can add the bug reference here too (or we can to avoid the new committer round trip)\n\nBUG\u003db/63112600",
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
