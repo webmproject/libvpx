@@ -26,6 +26,29 @@
     },
     {
       "key": {
+        "uuid": "da3270a4_672d70e0",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-13T22:18:50Z",
+      "side": 1,
+      "message": "woops, also we define HAVE_ values to 0 or 1, so this needs to be if and not ifdef",
+      "range": {
+        "startLine": 46,
+        "startChar": 1,
+        "endLine": 46,
+        "endChar": 6
+      },
+      "revId": "16c542b764c6d2aa29bebb6a823f78b3bb738c38",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d12c79c8_e8b75915",
         "filename": "vp8/common/reconintra4x4.c",
         "patchSetId": 6
