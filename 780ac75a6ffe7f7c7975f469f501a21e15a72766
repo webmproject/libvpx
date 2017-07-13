@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "38feee1b_79d5ea6c",
+        "filename": "vp9/encoder/vp9_skin_detection.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-07-13T17:36:21Z",
+      "side": 1,
+      "message": "Add some comment to explain you are removing isolated skin blocks\n\nAlso we we also remove isolated non-skin blocks?\nThat is, if all 8 neighbors are skin, but center is not, seems like\nwe should make center also skin? Maybe we do this only for the blocks\naway from the 4 superblock edges (ones that have 8 neighbors).",
+      "revId": "780ac75a6ffe7f7c7975f469f501a21e15a72766",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1e8dce8d_785e76b3",
+        "filename": "vp9/encoder/vp9_skin_detection.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-07-13T17:36:21Z",
+      "side": 1,
+      "message": "are we still considering the 4 corners, as they only have 3 neighbors?",
+      "revId": "780ac75a6ffe7f7c7975f469f501a21e15a72766",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
