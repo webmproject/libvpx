@@ -19,6 +19,115 @@
     },
     {
       "key": {
+        "uuid": "f43ff430_17d2d9dd",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-13T17:58:09Z",
+      "side": 1,
+      "message": "\u0026\u0026 ASAN (see other file)",
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1e5ae337_52ac94c8",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-13T17:58:09Z",
+      "side": 1,
+      "message": "vec_vsx_ld takes two arguments, but I can\u0027t find any information on the first argument. For example:\nconst uint8x16_t d0 \u003d vec_vsx_ld(0, above);\nconst uint8x16_t d1 \u003d vec_vsx_ld(16, above);\n\nIf it always reads 16 bytes, 20 are not enough for the second call",
+      "range": {
+        "startLine": 43,
+        "startChar": 33,
+        "endLine": 43,
+        "endChar": 43
+      },
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d5f3d3b2_2263f098",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-13T17:58:09Z",
+      "side": 1,
+      "message": "This only needs to be 16. All the uses I can find in intrapred_vsx.c (first parameter notwithstanding) only load from the first element.\n\nAs far as the first parameter goes, -1, 0, 16, and 32 are used.",
+      "range": {
+        "startLine": 47,
+        "startChar": 23,
+        "endLine": 47,
+        "endChar": 25
+      },
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3ed5eeee_782d5ad6",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-13T17:58:09Z",
+      "side": 1,
+      "message": "They style check wants the * on Above:\nchar *Above",
+      "range": {
+        "startLine": 51,
+        "startChar": 15,
+        "endLine": 51,
+        "endChar": 17
+      },
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c0570d2c_8ff6bd50",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-13T17:58:09Z",
+      "side": 1,
+      "message": "These could also be tucked under this heading, as they are well understood to not be an issue.",
+      "range": {
+        "startLine": 56,
+        "startChar": 4,
+        "endLine": 56,
+        "endChar": 17
+      },
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "31fbe49c_57cf3812",
         "filename": "vp8/common/reconintra4x4.c",
         "patchSetId": 5
@@ -30,6 +139,75 @@
       "writtenOn": "2017-07-12T23:29:00Z",
       "side": 1,
       "message": "this can be joined with the line above as #elif defined(...)",
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e5a2e92a_cf557b3f",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-13T17:58:09Z",
+      "side": 1,
+      "message": "This is only used for the C version of this function. How is it catching the vec_vsx_ld issue?",
+      "range": {
+        "startLine": 143,
+        "startChar": 26,
+        "endLine": 143,
+        "endChar": 28
+      },
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "42c850c3_236e39c3",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-13T17:58:09Z",
+      "side": 1,
+      "message": "local to this file",
+      "range": {
+        "startLine": 145,
+        "startChar": 4,
+        "endLine": 145,
+        "endChar": 37
+      },
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0d2d1880_da5bd655",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-13T17:58:09Z",
+      "side": 1,
+      "message": "explicitly calls the C version",
+      "range": {
+        "startLine": 150,
+        "startChar": 34,
+        "endLine": 150,
+        "endChar": 36
+      },
       "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
