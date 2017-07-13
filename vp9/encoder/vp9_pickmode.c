@@ -193,9 +193,14 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   else
     center_mv = tmp_mv->as_mv;
 
-  vp9_full_pixel_search(
-      cpi, x, bsize, &mvp_full, step_param, cpi->sf.mv.search_method, sadpb,
-      cond_cost_list(cpi, cost_list), &center_mv, &tmp_mv->as_mv, INT_MAX, 0);
+  if (x->sb_use_mv_part) {
+    tmp_mv->as_mv.row = x->sb_mvrow_part >> 3;
+    tmp_mv->as_mv.col = x->sb_mvcol_part >> 3;
+  } else {
+    vp9_full_pixel_search(
+        cpi, x, bsize, &mvp_full, step_param, cpi->sf.mv.search_method, sadpb,
+        cond_cost_list(cpi, cost_list), &center_mv, &tmp_mv->as_mv, INT_MAX, 0);
+  }
 
   x->mv_limits = tmp_mv_limits;
 
@@ -1627,6 +1632,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
                       mi_col, yv12_mb, bsize, force_skip_low_temp_var);
     }
   }
+
+  if (cpi->oxcf.speed <= 7 || bsize < BLOCK_32X32) x->sb_use_mv_part = 0;
 
   for (idx = 0; idx < RT_INTER_MODES; ++idx) {
     int rate_mv = 0;

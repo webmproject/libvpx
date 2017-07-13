@@ -172,6 +172,12 @@ struct macroblock {
 
   uint8_t last_sb_high_content;
 
+  int sb_use_mv_part;
+
+  int sb_mvcol_part;
+
+  int sb_mvrow_part;
+
   // For each superblock: saves the content value (e.g., low/high sad/sumdiff)
   // based on source sad, prior to encoding the frame.
   uint8_t content_state_sb;
