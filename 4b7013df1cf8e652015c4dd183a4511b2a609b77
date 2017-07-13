@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "8ce2f3a0_2e70f04e",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-13T22:17:02Z",
+      "side": 1,
+      "message": "Ah right, I was wrong. But I\u0027m a little surprised that vsx doesn\u0027t have the same issue with uninit\u0027d read? or is it just better at tracking unused values and not warning?",
+      "parentUuid": "1c854b8a_8f4168eb",
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1e5ae337_52ac94c8",
         "filename": "vp8/common/reconintra4x4.c",
         "patchSetId": 5
