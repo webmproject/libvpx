@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "66a133ad_1e57f1cf",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1001115
+      },
+      "writtenOn": "2017-07-13T21:59:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6fe6f63c_1684e6cb",
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f43ff430_17d2d9dd",
         "filename": "vp8/common/reconintra.c",
         "patchSetId": 5
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "1c854b8a_8f4168eb",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1001115
+      },
+      "writtenOn": "2017-07-13T21:59:45Z",
+      "side": 1,
+      "message": "I see your point. But reading 16 bytes into uleft_col[8] or vleft_col[8] is itself illegal (what if the memory happens to be in IO mapped area or out-of-allocated stack space, unlikely, but still possible.), regardless of ASAN.\n\n(I do see this part - \n  #if VPX_WITH_ASAN\n    // Silence an \u0027uninitialized read\u0027 warning. Although uninitialized values are\n    // indeed read, they are not used.\n    vp8_zero_array(Left, 8);\n  #endif  // VPX_WITH_ASAN\nBut to read from uninitialized memory and never use the values are perfectly legal and does not cause any problems, so we can wrap it with \"VPX_WITH_ASAN\".)",
+      "parentUuid": "f43ff430_17d2d9dd",
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1e5ae337_52ac94c8",
         "filename": "vp8/common/reconintra4x4.c",
         "patchSetId": 5
@@ -47,6 +83,30 @@
       "writtenOn": "2017-07-13T17:58:09Z",
       "side": 1,
       "message": "vec_vsx_ld takes two arguments, but I can\u0027t find any information on the first argument. For example:\nconst uint8x16_t d0 \u003d vec_vsx_ld(0, above);\nconst uint8x16_t d1 \u003d vec_vsx_ld(16, above);\n\nIf it always reads 16 bytes, 20 are not enough for the second call",
+      "range": {
+        "startLine": 43,
+        "startChar": 33,
+        "endLine": 43,
+        "endChar": 43
+      },
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2d1a0e80_90e02ef8",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1001115
+      },
+      "writtenOn": "2017-07-13T21:59:45Z",
+      "side": 1,
+      "message": "vec_vsx_ld(a,b) reads 16 bytes from [a+b]. (one of them could be register or offset, the other one has to be a register.)",
+      "parentUuid": "1e5ae337_52ac94c8",
       "range": {
         "startLine": 43,
         "startChar": 33,
@@ -82,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "509fa29f_601159e1",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1001115
+      },
+      "writtenOn": "2017-07-13T21:59:45Z",
+      "side": 1,
+      "message": "Actually \"Above\" (not Aboveb) are passed to intrapred_vsx.c. See line 76.\nAbove \u003d Aboveb + 4, so Aboveb has to be 20 to make Above 16.",
+      "parentUuid": "d5f3d3b2_2263f098",
+      "range": {
+        "startLine": 47,
+        "startChar": 23,
+        "endLine": 47,
+        "endChar": 25
+      },
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3ed5eeee_782d5ad6",
         "filename": "vp8/common/reconintra4x4.c",
         "patchSetId": 5
@@ -105,6 +189,30 @@
     },
     {
       "key": {
+        "uuid": "d089f458_e0455615",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1001115
+      },
+      "writtenOn": "2017-07-13T21:59:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3ed5eeee_782d5ad6",
+      "range": {
+        "startLine": 51,
+        "startChar": 15,
+        "endLine": 51,
+        "endChar": 17
+      },
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c0570d2c_8ff6bd50",
         "filename": "vp8/common/reconintra4x4.c",
         "patchSetId": 5
@@ -116,6 +224,30 @@
       "writtenOn": "2017-07-13T17:58:09Z",
       "side": 1,
       "message": "These could also be tucked under this heading, as they are well understood to not be an issue.",
+      "range": {
+        "startLine": 56,
+        "startChar": 4,
+        "endLine": 56,
+        "endChar": 17
+      },
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4462fb36_aad6888c",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1001115
+      },
+      "writtenOn": "2017-07-13T21:59:45Z",
+      "side": 1,
+      "message": "I put some comments in \"reconintra.c\" - whether to wrap that with \"VPX_WITH_ASAN\".",
+      "parentUuid": "c0570d2c_8ff6bd50",
       "range": {
         "startLine": 56,
         "startChar": 4,
@@ -145,6 +277,24 @@
     },
     {
       "key": {
+        "uuid": "00ac10fc_4be4947c",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1001115
+      },
+      "writtenOn": "2017-07-13T21:59:45Z",
+      "side": 1,
+      "message": "I put some comments in \"reconintra.c\" - whether to wrap that with \"VPX_WITH_ASAN\".",
+      "parentUuid": "31fbe49c_57cf3812",
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e5a2e92a_cf557b3f",
         "filename": "vpx_dsp/variance.c",
         "patchSetId": 5
@@ -156,6 +306,30 @@
       "writtenOn": "2017-07-13T17:58:09Z",
       "side": 1,
       "message": "This is only used for the C version of this function. How is it catching the vec_vsx_ld issue?",
+      "range": {
+        "startLine": 143,
+        "startChar": 26,
+        "endLine": 143,
+        "endChar": 28
+      },
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "386eacdf_9ac5fec8",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1001115
+      },
+      "writtenOn": "2017-07-13T21:59:45Z",
+      "side": 1,
+      "message": "Yeah, you are right. Reverted.",
+      "parentUuid": "e5a2e92a_cf557b3f",
       "range": {
         "startLine": 143,
         "startChar": 26,
@@ -191,6 +365,30 @@
     },
     {
       "key": {
+        "uuid": "ea0fcb63_66e979c4",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1001115
+      },
+      "writtenOn": "2017-07-13T21:59:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "42c850c3_236e39c3",
+      "range": {
+        "startLine": 145,
+        "startChar": 4,
+        "endLine": 145,
+        "endChar": 37
+      },
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d2d1880_da5bd655",
         "filename": "vpx_dsp/variance.c",
         "patchSetId": 5
@@ -202,6 +400,30 @@
       "writtenOn": "2017-07-13T17:58:09Z",
       "side": 1,
       "message": "explicitly calls the C version",
+      "range": {
+        "startLine": 150,
+        "startChar": 34,
+        "endLine": 150,
+        "endChar": 36
+      },
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d60aba24_3e272fc0",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1001115
+      },
+      "writtenOn": "2017-07-13T21:59:45Z",
+      "side": 1,
+      "message": "Yeah, you are right. Reverted.",
+      "parentUuid": "0d2d1880_da5bd655",
       "range": {
         "startLine": 150,
         "startChar": 34,
