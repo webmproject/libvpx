@@ -1285,7 +1285,10 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
                                           xd->cur_buf->flags,
 #endif
                                           pixels_wide, pixels_high);
-          if (minmax > cpi->vbp_threshold_minmax) {
+          int thresh_minmax = (int)cpi->vbp_threshold_minmax;
+          if (x->content_state_sb == kVeryHighSad)
+            thresh_minmax = thresh_minmax << 1;
+          if (minmax > thresh_minmax) {
             force_split[split_index] = 1;
             force_split[i + 1] = 1;
             force_split[0] = 1;
