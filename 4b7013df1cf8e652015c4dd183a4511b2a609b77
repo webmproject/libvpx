@@ -90,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "c2fcc9ba_0d26b524",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1001115
+      },
+      "writtenOn": "2017-07-14T18:05:44Z",
+      "side": 1,
+      "message": "Yeah, ASAN fails to notice that uleft_col and vleft_col is not fully initialized... (It\u0027s unlikely ASAN knows the values are not used, because they are read into vector registers, and later operations are all register-wise ops, no memory are involved. )",
+      "parentUuid": "8ce2f3a0_2e70f04e",
+      "revId": "4b7013df1cf8e652015c4dd183a4511b2a609b77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1e5ae337_52ac94c8",
         "filename": "vp8/common/reconintra4x4.c",
         "patchSetId": 5
