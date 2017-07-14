@@ -172,7 +172,6 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
     int mi_row, mi_col;
     int num_low_motion = 0;
     int frame_low_motion = 1;
-    if (cpi->use_skin_detection) vp9_compute_skin_map(cpi, BLOCK_16X16);
     for (mi_row = 0; mi_row < cm->mi_rows; mi_row++) {
       for (mi_col = 0; mi_col < cm->mi_cols; mi_col++) {
         int bl_index = mi_row * cm->mi_cols + mi_col;
@@ -191,35 +190,42 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
           int bl_index1 = bl_index + 1;
           int bl_index2 = bl_index + cm->mi_cols;
           int bl_index3 = bl_index2 + 1;
-          int is_skin = 0;
-          if (cpi->use_skin_detection) is_skin = cpi->skin_map[bl_index];
+          int consec_zeromv =
+              VPXMIN(cpi->consec_zero_mv[bl_index],
+                     VPXMIN(cpi->consec_zero_mv[bl_index1],
+                            VPXMIN(cpi->consec_zero_mv[bl_index2],
+                                   cpi->consec_zero_mv[bl_index3])));
           // Only consider blocks that are likely steady background. i.e, have
           // been encoded as zero/low motion x (= thresh_consec_zeromv) frames
           // in a row. consec_zero_mv[] defined for 8x8 blocks, so consider all
           // 4 sub-blocks for 16x16 block. Also, avoid skin blocks.
-          if (frame_low_motion &&
-              cpi->consec_zero_mv[bl_index] > thresh_consec_zeromv &&
-              cpi->consec_zero_mv[bl_index1] > thresh_consec_zeromv &&
-              cpi->consec_zero_mv[bl_index2] > thresh_consec_zeromv &&
-              cpi->consec_zero_mv[bl_index3] > thresh_consec_zeromv &&
-              !is_skin) {
-            // Compute variance.
-            unsigned int sse;
-            unsigned int variance = cpi->fn_ptr[bsize].vf(
-                src_y, src_ystride, last_src_y, last_src_ystride, &sse);
-            // Only consider this block as valid for noise measurement if the
-            // average term (sse - variance = N * avg^{2}, N = 16X16) of the
-            // temporal residual is small (avoid effects from lighting change).
-            if ((sse - variance) < thresh_sum_diff) {
-              unsigned int sse2;
-              const unsigned int spatial_variance = cpi->fn_ptr[bsize].vf(
-                  src_y, src_ystride, const_source, 0, &sse2);
-              // Avoid blocks with high brightness and high spatial variance.
-              if ((sse2 - spatial_variance) < thresh_sum_spatial &&
-                  spatial_variance < thresh_spatial_var) {
-                avg_est += low_res ? variance >> 4
-                                   : variance / ((spatial_variance >> 9) + 1);
-                num_samples++;
+          if (frame_low_motion && consec_zeromv > thresh_consec_zeromv) {
+            int is_skin = 0;
+            if (cpi->use_skin_detection) {
+              is_skin =
+                  vp9_compute_skin_block(src_y, src_u, src_v, src_ystride,
+                                         src_uvstride, bsize, consec_zeromv, 0);
+            }
+            if (!is_skin) {
+              unsigned int sse;
+              // Compute variance.
+              unsigned int variance = cpi->fn_ptr[bsize].vf(
+                  src_y, src_ystride, last_src_y, last_src_ystride, &sse);
+              // Only consider this block as valid for noise measurement if the
+              // average term (sse - variance = N * avg^{2}, N = 16X16) of the
+              // temporal residual is small (avoid effects from lighting
+              // change).
+              if ((sse - variance) < thresh_sum_diff) {
+                unsigned int sse2;
+                const unsigned int spatial_variance = cpi->fn_ptr[bsize].vf(
+                    src_y, src_ystride, const_source, 0, &sse2);
+                // Avoid blocks with high brightness and high spatial variance.
+                if ((sse2 - spatial_variance) < thresh_sum_spatial &&
+                    spatial_variance < thresh_spatial_var) {
+                  avg_est += low_res ? variance >> 4
+                                     : variance / ((spatial_variance >> 9) + 1);
+                  num_samples++;
+                }
               }
             }
           }
