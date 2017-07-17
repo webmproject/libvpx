@@ -16,6 +16,24 @@
       "revId": "87a46213db830534aea6ce1f9440b9f8fbb2447f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f695e70_b6d46dc4",
+        "filename": "vp9/encoder/vp9_skin_detection.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-07-17T21:12:37Z",
+      "side": 1,
+      "message": "No. It will be worse.\n\nLast time you saw some non-skin isolated blocks were not removed. That\u0027s exactly because they are on the border of the superblock. If we skip the border of the superblock, we only consider 4 16x16 blocks in the center of a superblock, which has 16 16x16 blocks totally. So for non-skin isolated blocks, we are only considering 1/4.",
+      "parentUuid": "be70a704_3d777071",
+      "revId": "87a46213db830534aea6ce1f9440b9f8fbb2447f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
