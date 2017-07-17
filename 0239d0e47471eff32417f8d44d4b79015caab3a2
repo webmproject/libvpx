@@ -22,6 +22,30 @@
       "revId": "0239d0e47471eff32417f8d44d4b79015caab3a2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a2aefe66_b0874ecf",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1001115
+      },
+      "writtenOn": "2017-07-17T16:57:40Z",
+      "side": 1,
+      "message": "Ah, bad. Done",
+      "parentUuid": "deec446e_51d35e8b",
+      "range": {
+        "startLine": 65,
+        "startChar": 6,
+        "endLine": 65,
+        "endChar": 0
+      },
+      "revId": "0239d0e47471eff32417f8d44d4b79015caab3a2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }

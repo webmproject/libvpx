@@ -16,6 +16,24 @@
       "revId": "31587529808c0774c062e40e5e3369ccabda3304",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "77809d71_59c2034e",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1001115
+      },
+      "writtenOn": "2017-07-17T16:57:40Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "9acdc8d2_8825d7dc",
+      "revId": "31587529808c0774c062e40e5e3369ccabda3304",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
