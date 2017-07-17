@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aebd6847_f36fd8e1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-07-17T21:48:27Z",
+      "side": 1,
+      "message": "now it should be \"For speed \u003e 6\"",
+      "range": {
+        "startLine": 13,
+        "startChar": 12,
+        "endLine": 13,
+        "endChar": 13
+      },
+      "revId": "0c9e2f4c15a6edd982cdd3fed1209c7a93b9ecd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
