@@ -22,6 +22,30 @@
       "revId": "0c9e2f4c15a6edd982cdd3fed1209c7a93b9ecd2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ce525205_5f2604b9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-07-17T21:51:38Z",
+      "side": 1,
+      "message": "no, i changed it back in latest patch",
+      "parentUuid": "aebd6847_f36fd8e1",
+      "range": {
+        "startLine": 13,
+        "startChar": 12,
+        "endLine": 13,
+        "endChar": 13
+      },
+      "revId": "0c9e2f4c15a6edd982cdd3fed1209c7a93b9ecd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
