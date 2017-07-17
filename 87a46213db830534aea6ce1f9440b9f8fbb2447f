@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "be70a704_3d777071",
+        "filename": "vp9/encoder/vp9_skin_detection.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-07-17T21:02:51Z",
+      "side": 1,
+      "message": "isn\u0027t it better to add condition !cpi-\u003eskin and then \"continue\"?",
+      "revId": "87a46213db830534aea6ce1f9440b9f8fbb2447f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
