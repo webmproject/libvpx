@@ -1633,7 +1633,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     }
   }
 
-  if (cpi->oxcf.speed <= 7 || bsize < BLOCK_32X32) x->sb_use_mv_part = 0;
+  if (cpi->use_svc || cpi->oxcf.speed <= 7 || bsize < BLOCK_32X32)
+    x->sb_use_mv_part = 0;
 
   for (idx = 0; idx < RT_INTER_MODES; ++idx) {
     int rate_mv = 0;
