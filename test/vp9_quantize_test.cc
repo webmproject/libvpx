@@ -85,10 +85,11 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   Buffer<tran_low_t> coeff = Buffer<tran_low_t>(16, 16, 0, 16);
   ASSERT_TRUE(coeff.Init());
-  DECLARE_ALIGNED(16, int16_t, zbin_ptr[2]);
-  DECLARE_ALIGNED(16, int16_t, round_ptr[2]);
-  DECLARE_ALIGNED(16, int16_t, quant_ptr[2]);
-  DECLARE_ALIGNED(16, int16_t, quant_shift_ptr[2]);
+  DECLARE_ALIGNED(16, int16_t, zbin_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, round_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, quant_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, quant_shift_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, dequant_ptr[8]);
   // These will need to be aligned to 32 when avx code is tested.
   Buffer<tran_low_t> qcoeff = Buffer<tran_low_t>(16, 16, 0, 16);
   ASSERT_TRUE(qcoeff.Init());
@@ -98,7 +99,6 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
   ASSERT_TRUE(ref_qcoeff.Init());
   Buffer<tran_low_t> ref_dqcoeff = Buffer<tran_low_t>(16, 16, 0);
   ASSERT_TRUE(ref_dqcoeff.Init());
-  DECLARE_ALIGNED(16, int16_t, dequant_ptr[2]);
   uint16_t eob, ref_eob;
 
   for (int i = 0; i < number_of_iterations; ++i) {
@@ -125,6 +125,14 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
       // dequant maxes out at 1828 for all cases.
       dequant_ptr[j] = rnd.RandRange(1828);
     }
+    for (int j = 2; j < 8; j++) {
+      zbin_ptr[j] = zbin_ptr[1];
+      round_ptr[j] = round_ptr[1];
+      quant_ptr[j] = quant_ptr[1];
+      quant_shift_ptr[j] = quant_shift_ptr[1];
+      dequant_ptr[j] = dequant_ptr[1];
+    }
+
     ref_quantize_op_(
         coeff.TopLeftPixel(), count, skip_block, zbin_ptr, round_ptr, quant_ptr,
         quant_shift_ptr, ref_qcoeff.TopLeftPixel(), ref_dqcoeff.TopLeftPixel(),
@@ -152,10 +160,11 @@ TEST_P(VP9Quantize32Test, OperationCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   Buffer<tran_low_t> coeff = Buffer<tran_low_t>(32, 32, 0, 16);
   ASSERT_TRUE(coeff.Init());
-  DECLARE_ALIGNED(16, int16_t, zbin_ptr[2]);
-  DECLARE_ALIGNED(16, int16_t, round_ptr[2]);
-  DECLARE_ALIGNED(16, int16_t, quant_ptr[2]);
-  DECLARE_ALIGNED(16, int16_t, quant_shift_ptr[2]);
+  DECLARE_ALIGNED(16, int16_t, zbin_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, round_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, quant_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, quant_shift_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, dequant_ptr[8]);
   Buffer<tran_low_t> qcoeff = Buffer<tran_low_t>(32, 32, 0, 16);
   ASSERT_TRUE(qcoeff.Init());
   Buffer<tran_low_t> dqcoeff = Buffer<tran_low_t>(32, 32, 0, 16);
@@ -164,7 +173,6 @@ TEST_P(VP9Quantize32Test, OperationCheck) {
   ASSERT_TRUE(ref_qcoeff.Init());
   Buffer<tran_low_t> ref_dqcoeff = Buffer<tran_low_t>(32, 32, 0);
   ASSERT_TRUE(ref_dqcoeff.Init());
-  DECLARE_ALIGNED(16, int16_t, dequant_ptr[2]);
   uint16_t eob, ref_eob;
 
   for (int i = 0; i < number_of_iterations; ++i) {
@@ -183,6 +191,14 @@ TEST_P(VP9Quantize32Test, OperationCheck) {
       quant_shift_ptr[j] = rnd.RandRange(16384);
       dequant_ptr[j] = rnd.RandRange(1828);
     }
+    for (int j = 2; j < 8; j++) {
+      zbin_ptr[j] = zbin_ptr[1];
+      round_ptr[j] = round_ptr[1];
+      quant_ptr[j] = quant_ptr[1];
+      quant_shift_ptr[j] = quant_shift_ptr[1];
+      dequant_ptr[j] = dequant_ptr[1];
+    }
+
     ref_quantize_op_(
         coeff.TopLeftPixel(), count, skip_block, zbin_ptr, round_ptr, quant_ptr,
         quant_shift_ptr, ref_qcoeff.TopLeftPixel(), ref_dqcoeff.TopLeftPixel(),
@@ -210,10 +226,11 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   Buffer<tran_low_t> coeff = Buffer<tran_low_t>(16, 16, 0, 16);
   ASSERT_TRUE(coeff.Init());
-  DECLARE_ALIGNED(16, int16_t, zbin_ptr[2]);
-  DECLARE_ALIGNED(16, int16_t, round_ptr[2]);
-  DECLARE_ALIGNED(16, int16_t, quant_ptr[2]);
-  DECLARE_ALIGNED(16, int16_t, quant_shift_ptr[2]);
+  DECLARE_ALIGNED(16, int16_t, zbin_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, round_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, quant_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, quant_shift_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, dequant_ptr[8]);
   Buffer<tran_low_t> qcoeff = Buffer<tran_low_t>(16, 16, 0, 16);
   ASSERT_TRUE(qcoeff.Init());
   Buffer<tran_low_t> dqcoeff = Buffer<tran_low_t>(16, 16, 0, 16);
@@ -222,7 +239,6 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
   ASSERT_TRUE(ref_qcoeff.Init());
   Buffer<tran_low_t> ref_dqcoeff = Buffer<tran_low_t>(16, 16, 0);
   ASSERT_TRUE(ref_dqcoeff.Init());
-  DECLARE_ALIGNED(16, int16_t, dequant_ptr[2]);
   uint16_t eob, ref_eob;
 
   for (int i = 0; i < number_of_iterations; ++i) {
@@ -243,6 +259,13 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
       quant_ptr[j] = rnd.RandRange(32704) - 32703;
       quant_shift_ptr[j] = rnd.RandRange(16384);
       dequant_ptr[j] = rnd.RandRange(1828);
+    }
+    for (int j = 2; j < 8; j++) {
+      zbin_ptr[j] = zbin_ptr[1];
+      round_ptr[j] = round_ptr[1];
+      quant_ptr[j] = quant_ptr[1];
+      quant_shift_ptr[j] = quant_shift_ptr[1];
+      dequant_ptr[j] = dequant_ptr[1];
     }
 
     ref_quantize_op_(
@@ -272,10 +295,11 @@ TEST_P(VP9Quantize32Test, EOBCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   Buffer<tran_low_t> coeff = Buffer<tran_low_t>(32, 32, 0, 16);
   ASSERT_TRUE(coeff.Init());
-  DECLARE_ALIGNED(16, int16_t, zbin_ptr[2]);
-  DECLARE_ALIGNED(16, int16_t, round_ptr[2]);
-  DECLARE_ALIGNED(16, int16_t, quant_ptr[2]);
-  DECLARE_ALIGNED(16, int16_t, quant_shift_ptr[2]);
+  DECLARE_ALIGNED(16, int16_t, zbin_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, round_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, quant_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, quant_shift_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, dequant_ptr[8]);
   Buffer<tran_low_t> qcoeff = Buffer<tran_low_t>(32, 32, 0, 16);
   ASSERT_TRUE(qcoeff.Init());
   Buffer<tran_low_t> dqcoeff = Buffer<tran_low_t>(32, 32, 0, 16);
@@ -284,7 +308,6 @@ TEST_P(VP9Quantize32Test, EOBCheck) {
   ASSERT_TRUE(ref_qcoeff.Init());
   Buffer<tran_low_t> ref_dqcoeff = Buffer<tran_low_t>(32, 32, 0);
   ASSERT_TRUE(ref_dqcoeff.Init());
-  DECLARE_ALIGNED(16, int16_t, dequant_ptr[2]);
   uint16_t eob, ref_eob;
 
   for (int i = 0; i < number_of_iterations; ++i) {
@@ -305,6 +328,13 @@ TEST_P(VP9Quantize32Test, EOBCheck) {
       quant_ptr[j] = rnd.RandRange(32704) - 32703;
       quant_shift_ptr[j] = rnd.RandRange(16384);
       dequant_ptr[j] = rnd.RandRange(1828);
+    }
+    for (int j = 2; j < 8; j++) {
+      zbin_ptr[j] = zbin_ptr[1];
+      round_ptr[j] = round_ptr[1];
+      quant_ptr[j] = quant_ptr[1];
+      quant_shift_ptr[j] = quant_shift_ptr[1];
+      dequant_ptr[j] = dequant_ptr[1];
     }
 
     ref_quantize_op_(
