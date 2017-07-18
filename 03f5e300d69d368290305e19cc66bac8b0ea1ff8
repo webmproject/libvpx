@@ -46,6 +46,30 @@
       "revId": "03f5e300d69d368290305e19cc66bac8b0ea1ff8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5051f1f7_17611cbb",
+        "filename": "vpx_dsp/x86/quantize_ssse3_x86_64.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2017-07-18T21:58:33Z",
+      "side": 1,
+      "message": "It seems the registers are reused here.",
+      "parentUuid": "aa407d59_97802f2c",
+      "range": {
+        "startLine": 313,
+        "startChar": 2,
+        "endLine": 313,
+        "endChar": 42
+      },
+      "revId": "03f5e300d69d368290305e19cc66bac8b0ea1ff8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
