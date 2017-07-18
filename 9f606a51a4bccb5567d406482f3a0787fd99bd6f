@@ -52,6 +52,24 @@
       "revId": "9f606a51a4bccb5567d406482f3a0787fd99bd6f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dcb6f011_5763de1e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-18T20:24:59Z",
+      "side": 1,
+      "message": "The partial benefit might be interesting, but it\u0027s inconsistent with rest of these functions. comp_avg_pred is well tested, but a bug in the optimized code could end up here in the \"reference\" version.\n\nThe speed up from this part is also pretty minimal - the variance is the expensive part, and that calls the C",
+      "parentUuid": "34d9d9e3_3cc83f59",
+      "revId": "9f606a51a4bccb5567d406482f3a0787fd99bd6f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
