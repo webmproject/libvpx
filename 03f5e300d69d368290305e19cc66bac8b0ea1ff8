@@ -22,6 +22,30 @@
       "revId": "03f5e300d69d368290305e19cc66bac8b0ea1ff8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aa407d59_97802f2c",
+        "filename": "vpx_dsp/x86/quantize_ssse3_x86_64.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-18T20:00:55Z",
+      "side": 1,
+      "message": "I have no idea, but it matches the avx and now the code passes instead of being wrong on linux or crashing on macos\n\nhttps://chromium.googlesource.com/webm/libvpx/+/master/vpx_dsp/x86/quantize_avx_x86_64.asm#498",
+      "parentUuid": "61aeedd6_4219e9b0",
+      "range": {
+        "startLine": 313,
+        "startChar": 2,
+        "endLine": 313,
+        "endChar": 42
+      },
+      "revId": "03f5e300d69d368290305e19cc66bac8b0ea1ff8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
