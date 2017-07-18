@@ -105,8 +105,6 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
     const TX_TYPE tx_type = (TX_TYPE)((i >> 2) % 3);
     const scan_order *scan_order = &vp9_scan_orders[sz][tx_type];
     const int count = (4 << sz) * (4 << sz);  // 16, 64, 256
-    eob = rnd.Rand16();
-    ref_eob = eob;
     coeff.Set(&rnd, 0, max_value_);
     for (int j = 0; j < 2; j++) {
       // Values determined by deconstructing vp9_init_quantizer().
@@ -179,8 +177,6 @@ TEST_P(VP9Quantize32Test, OperationCheck) {
     const TX_TYPE tx_type = (TX_TYPE)(i % 4);
     const scan_order *scan_order = &vp9_scan_orders[sz][tx_type];
     const int count = (4 << sz) * (4 << sz);  // 1024
-    eob = rnd.Rand16();
-    ref_eob = eob;
     coeff.Set(&rnd, 0, max_value_);
     for (int j = 0; j < 2; j++) {
       zbin_ptr[j] = rnd.RandRange(1200);
@@ -245,8 +241,6 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
     TX_TYPE tx_type = (TX_TYPE)((i >> 2) % 3);
     const scan_order *scan_order = &vp9_scan_orders[sz][tx_type];
     int count = (4 << sz) * (4 << sz);  // 16, 64, 256
-    eob = rnd.Rand16();
-    ref_eob = eob;
     // Two random entries
     coeff.Set(0);
     coeff.TopLeftPixel()[rnd(count)] = rnd.RandRange(max_value_);
@@ -314,8 +308,6 @@ TEST_P(VP9Quantize32Test, EOBCheck) {
     TX_TYPE tx_type = (TX_TYPE)(i % 4);
     const scan_order *scan_order = &vp9_scan_orders[sz][tx_type];
     int count = (4 << sz) * (4 << sz);  // 1024
-    eob = rnd.Rand16();
-    ref_eob = eob;
     coeff.Set(0);
     // Two random entries
     coeff.TopLeftPixel()[rnd(count)] = rnd.RandRange(max_value_);
