@@ -389,7 +389,7 @@ INSTANTIATE_TEST_CASE_P(SSE2, VP9QuantizeTest,
 
 // TODO(johannkoenig): SSSE3 optimizations do not yet pass these tests.
 #if HAVE_SSSE3 && ARCH_X86_64
-INSTANTIATE_TEST_CASE_P(DISABLED_SSSE3, VP9QuantizeTest,
+INSTANTIATE_TEST_CASE_P(SSSE3, VP9QuantizeTest,
                         ::testing::Values(make_tuple(&vpx_quantize_b_ssse3,
                                                      &vpx_quantize_b_c,
                                                      VPX_BITS_8)));
