@@ -111,11 +111,19 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
     ref_eob = eob;
     coeff.Set(&rnd, 0, max_value_);
     for (int j = 0; j < 2; j++) {
-      zbin_ptr[j] = rnd.RandRange(max_value_);
-      round_ptr[j] = rnd.Rand16();
-      quant_ptr[j] = rnd.Rand16();
-      quant_shift_ptr[j] = rnd.Rand16();
-      dequant_ptr[j] = rnd.Rand16();
+      // Values determined by deconstructing vp9_init_quantizer().
+      // zbin may be up to 1143 for 8 and 10 bit Y values, or 1200 for 12 bit Y
+      // values or U/V values of any bit depth. This is because y_delta is not
+      // factored into the vp9_ac_quant() call.
+      zbin_ptr[j] = rnd.RandRange(1200);
+      // round may be up to 685 for Y values or 914 for U/V.
+      round_ptr[j] = rnd.RandRange(914);
+      // quant ranges from 1 to -32703
+      quant_ptr[j] = rnd.RandRange(32704) - 32703;
+      // quant_shift goes up to 1 << 16.
+      quant_shift_ptr[j] = rnd.RandRange(16384);
+      // dequant maxes out at 1828 for all cases.
+      dequant_ptr[j] = rnd.RandRange(1828);
     }
     ref_quantize_op_(
         coeff.TopLeftPixel(), count, skip_block, zbin_ptr, round_ptr, quant_ptr,
@@ -169,11 +177,11 @@ TEST_P(VP9Quantize32Test, OperationCheck) {
     ref_eob = eob;
     coeff.Set(&rnd, 0, max_value_);
     for (int j = 0; j < 2; j++) {
-      zbin_ptr[j] = rnd.RandRange(max_value_);
-      round_ptr[j] = rnd.Rand16();
-      quant_ptr[j] = rnd.Rand16();
-      quant_shift_ptr[j] = rnd.Rand16();
-      dequant_ptr[j] = rnd.Rand16();
+      zbin_ptr[j] = rnd.RandRange(1200);
+      round_ptr[j] = rnd.RandRange(914);
+      quant_ptr[j] = rnd.RandRange(32704) - 32703;
+      quant_shift_ptr[j] = rnd.RandRange(16384);
+      dequant_ptr[j] = rnd.RandRange(1828);
     }
     ref_quantize_op_(
         coeff.TopLeftPixel(), count, skip_block, zbin_ptr, round_ptr, quant_ptr,
@@ -230,11 +238,11 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
     coeff.TopLeftPixel()[rnd(count)] = rnd.RandRange(max_value_);
     coeff.TopLeftPixel()[rnd(count)] = rnd.RandRange(max_value_);
     for (int j = 0; j < 2; j++) {
-      zbin_ptr[j] = rnd.RandRange(max_value_);
-      round_ptr[j] = rnd.Rand16();
-      quant_ptr[j] = rnd.Rand16();
-      quant_shift_ptr[j] = rnd.Rand16();
-      dequant_ptr[j] = rnd.Rand16();
+      zbin_ptr[j] = rnd.RandRange(1200);
+      round_ptr[j] = rnd.RandRange(914);
+      quant_ptr[j] = rnd.RandRange(32704) - 32703;
+      quant_shift_ptr[j] = rnd.RandRange(16384);
+      dequant_ptr[j] = rnd.RandRange(1828);
     }
 
     ref_quantize_op_(
@@ -292,11 +300,11 @@ TEST_P(VP9Quantize32Test, EOBCheck) {
     coeff.TopLeftPixel()[rnd(count)] = rnd.RandRange(max_value_);
     coeff.TopLeftPixel()[rnd(count)] = rnd.RandRange(max_value_);
     for (int j = 0; j < 2; j++) {
-      zbin_ptr[j] = rnd.RandRange(max_value_);
-      round_ptr[j] = rnd.Rand16();
-      quant_ptr[j] = rnd.Rand16();
-      quant_shift_ptr[j] = rnd.Rand16();
-      dequant_ptr[j] = rnd.Rand16();
+      zbin_ptr[j] = rnd.RandRange(1200);
+      round_ptr[j] = rnd.RandRange(914);
+      quant_ptr[j] = rnd.RandRange(32704) - 32703;
+      quant_shift_ptr[j] = rnd.RandRange(16384);
+      dequant_ptr[j] = rnd.RandRange(1828);
     }
 
     ref_quantize_op_(
