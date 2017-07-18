@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b1688d69_6dc1cd61",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-18T18:57:59Z",
+      "side": 1,
+      "message": "these comments are inverted now",
+      "revId": "145571f3932072078f81a8c27fe6913ec7d185db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5306f4dc_b55249f7",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-18T18:57:59Z",
+      "side": 1,
+      "message": "you could mark these DISABLED_",
+      "revId": "145571f3932072078f81a8c27fe6913ec7d185db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
