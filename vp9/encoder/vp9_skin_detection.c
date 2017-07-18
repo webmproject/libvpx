@@ -126,18 +126,6 @@ void vp9_compute_skin_sb(VP9_COMP *const cpi, BLOCK_SIZE bsize, int mi_row,
   }
 }
 
-void vp9_compute_skin_map(VP9_COMP *const cpi, BLOCK_SIZE bsize) {
-  int mi_row, mi_col;
-  VP9_COMMON *const cm = &cpi->common;
-  // Loop through blocks and set skin map based on center pixel of block.
-  // Ignore rightmost/bottom boundary blocks.
-  for (mi_row = 0; mi_row < cm->mi_rows - 1; mi_row += MI_BLOCK_SIZE) {
-    for (mi_col = 0; mi_col < cm->mi_cols - 1; mi_col += MI_BLOCK_SIZE) {
-      vp9_compute_skin_sb(cpi, bsize, mi_row, mi_col);
-    }
-  }
-}
-
 #ifdef OUTPUT_YUV_SKINMAP
 // For viewing skin map on input source.
 void vp9_output_skin_map(VP9_COMP *const cpi, FILE *yuv_skinmap_file) {
