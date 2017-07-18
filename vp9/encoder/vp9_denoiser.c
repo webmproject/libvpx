@@ -444,7 +444,7 @@ void vp9_denoiser_update_frame_info(
       svc_base_is_key) {
     int i;
     // Start at 1 so as not to overwrite the INTRA_FRAME
-    for (i = 1; i < DENOISER_REF_FRAMES; ++i)
+    for (i = 1; i < denoiser->num_ref_frames; ++i)
       copy_frame(&denoiser->running_avg_y[i], &src);
     denoiser->reset = 0;
     return;
@@ -512,8 +512,8 @@ void vp9_denoiser_update_frame_stats(MODE_INFO *mi, unsigned int sse,
   }
 }
 
-int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height, int ssx,
-                       int ssy,
+int vp9_denoiser_alloc(VP9_COMMON *cm, int use_svc, VP9_DENOISER *denoiser,
+                       int width, int height, int ssx, int ssy,
 #if CONFIG_VP9_HIGHBITDEPTH
                        int use_highbitdepth,
 #endif
@@ -522,7 +522,11 @@ int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height, int ssx,
   const int legacy_byte_alignment = 0;
   assert(denoiser != NULL);
 
-  for (i = 0; i < DENOISER_REF_FRAMES; ++i) {
+  denoiser->num_ref_frames = use_svc ? MAX_REF_FRAMES : NONSVC_REF_FRAMES;
+  CHECK_MEM_ERROR(
+      cm, denoiser->running_avg_y,
+      vpx_calloc(denoiser->num_ref_frames, sizeof(denoiser->running_avg_y[0])));
+  for (i = 0; i < denoiser->num_ref_frames; ++i) {
     fail = vpx_alloc_frame_buffer(&denoiser->running_avg_y[i], width, height,
                                   ssx, ssy,
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -574,9 +578,11 @@ void vp9_denoiser_free(VP9_DENOISER *denoiser) {
     return;
   }
   denoiser->frame_buffer_initialized = 0;
-  for (i = 0; i < DENOISER_REF_FRAMES; ++i) {
+  for (i = 0; i < denoiser->num_ref_frames; ++i) {
     vpx_free_frame_buffer(&denoiser->running_avg_y[i]);
   }
+  vpx_free(denoiser->running_avg_y);
+  denoiser->running_avg_y = NULL;
   vpx_free_frame_buffer(&denoiser->mc_running_avg_y);
   vpx_free_frame_buffer(&denoiser->last_source);
 }

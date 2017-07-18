@@ -3234,8 +3234,8 @@ static void setup_denoiser_buffer(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   if (cpi->oxcf.noise_sensitivity > 0 &&
       !cpi->denoiser.frame_buffer_initialized) {
-    if (vp9_denoiser_alloc(&cpi->denoiser, cm->width, cm->height,
-                           cm->subsampling_x, cm->subsampling_y,
+    if (vp9_denoiser_alloc(cm, cpi->use_svc, &cpi->denoiser, cm->width,
+                           cm->height, cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
                            cm->use_highbitdepth,
 #endif
