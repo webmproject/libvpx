@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3f9f68bd_2aa1a066",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-19T20:54:29Z",
+      "side": 1,
+      "message": "#if HAVE_VSX, because it is always defined",
+      "range": {
+        "startLine": 74,
+        "startChar": 1,
+        "endLine": 74,
+        "endChar": 6
+      },
+      "revId": "3b1e2a1a6574547af1120f6ac316fc8f1a315034",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
