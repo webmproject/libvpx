@@ -16,6 +16,24 @@
       "revId": "57ae6d7f38b8f0d1286a7d4701dc03c7dbb0e7b8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "69cbdb94_ebab19bc",
+        "filename": "vpx_dsp/variance.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1001115
+      },
+      "writtenOn": "2017-07-19T20:36:03Z",
+      "side": 1,
+      "message": "We still need this change here. \"temp2\" is used in \"vpx_comp_avg_pred\" (which points to \"vpx_comp_avg_pred_vsx\").",
+      "parentUuid": "3d276d7a_50e3d399",
+      "revId": "57ae6d7f38b8f0d1286a7d4701dc03c7dbb0e7b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
