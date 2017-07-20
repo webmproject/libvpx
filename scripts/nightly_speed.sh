@@ -37,7 +37,6 @@ bitrate=4000
 fps="50/1"
 
 # General options
-bs=bs
 codec="--codec=av1"
 verbose=
 
@@ -80,7 +79,7 @@ do
   
   elog=e_$exp_tool.txt
   dlog=d_$exp_tool.txt
-  bs=$exp_tool_nightly.webm
+  bstream="$exp_tool"_nightly.webm
   
   if [ $exp_tool == intrabc ] || [ $exp_tool == palette ] || [ $exp_tool == palette_delta_encoding ] || [ $exp_tool == palette_throughput ]; then
     tune_content="--tune-content=screen"
@@ -94,7 +93,7 @@ do
     col_num=0
   fi
   
-  taskset -c $core_id ./aomenc $verbose -o /dev/shm/$bs $video $codec --limit=$frames --profile=$profile --fps=$fps $tune_content --target-bitrate=$bitrate --skip=0 -p 2 --good --cpu-used=0 --lag-in-frames=25 --min-q=0 --max-q=63 --auto-alt-ref=1 --kf-max-dist=150 --kf-min-dist=0 --drop-frame=0 --static-thresh=0 --bias-pct=50 --minsection-pct=0 --maxsection-pct=2000 --arnr-maxframes=7 --arnr-strength=5 --sharpness=0 --undershoot-pct=100 --overshoot-pct=100 --frame-parallel=0 --tile-columns=$col_num --test-decode=warn --psnr &>> $elog
+  taskset -c $core_id ./aomenc $verbose -o /dev/shm/"$bstream" $video $codec --limit=$frames --profile=$profile --fps=$fps $tune_content --target-bitrate=$bitrate --skip=0 -p 2 --good --cpu-used=0 --lag-in-frames=25 --min-q=0 --max-q=63 --auto-alt-ref=1 --kf-max-dist=150 --kf-min-dist=0 --drop-frame=0 --static-thresh=0 --bias-pct=50 --minsection-pct=0 --maxsection-pct=2000 --arnr-maxframes=7 --arnr-strength=5 --sharpness=0 --undershoot-pct=100 --overshoot-pct=100 --frame-parallel=0 --tile-columns=$col_num --test-decode=warn --psnr &>> $elog
 
   # Note: $2 is the time unit, ms or us
   etime=`cat $elog | grep 'Pass 2/2' | grep 'fps)' | sed -e 's/^.*b\/s//' | awk '{print $1" "$2}'`
@@ -106,8 +105,10 @@ do
   else
     eflag=mismatch
   fi
+
+  echo "Encoded bitstream is " "$bstream"
   
-  taskset -c $core_id ./aomdec /dev/shm/$bs $codec --i420 --noblit --summary 2>&1 &>> $dlog
+  taskset -c $core_id ./aomdec /dev/shm/"$bstream" $codec --i420 --noblit --summary 2>&1 &>> $dlog
   if [ "$?" -ne 0 ]; then
     dflag=fault
   else
