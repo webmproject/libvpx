@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "40ae972c_29b95b03",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-20T15:18:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a13db7fd_4552bab7",
+      "revId": "0634fea7069ece8e870213c85e174f12ed3eaba0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "08fb7484_1eca4d52",
         "filename": "test/vp9_quantize_test.cc",
         "patchSetId": 1
