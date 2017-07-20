@@ -61,7 +61,8 @@ for exp_tool in experimental
 do
   cd $code_dir
   git checkout master
-  git pull
+  git pull -q
+  git log -1 --oneline
   
   cd $build_dir
   make clean > /dev/null
