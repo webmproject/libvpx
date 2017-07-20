@@ -717,6 +717,8 @@ const PartialInvTxfmParam sse2_partial_idct_tests[] = {
              &wrapper<vpx_idct32x32_1_add_sse2>, TX_32X32, 1, 8, 1),
   make_tuple(&vpx_fdct16x16_c, &wrapper<vpx_idct16x16_256_add_c>,
              &wrapper<vpx_idct16x16_256_add_sse2>, TX_16X16, 256, 8, 1),
+  make_tuple(&vpx_fdct16x16_c, &wrapper<vpx_idct16x16_38_add_c>,
+             &wrapper<vpx_idct16x16_38_add_sse2>, TX_16X16, 38, 8, 1),
   make_tuple(&vpx_fdct16x16_c, &wrapper<vpx_idct16x16_10_add_c>,
              &wrapper<vpx_idct16x16_10_add_sse2>, TX_16X16, 10, 8, 1),
   make_tuple(&vpx_fdct16x16_c, &wrapper<vpx_idct16x16_1_add_c>,

@@ -89,6 +89,17 @@ static INLINE void multiplication_and_add_2(const __m128i *const in0,
   *res1 = idct_calc_wraplow_sse2(lo, hi, *cst1);
 }
 
+// Multiply elements by constants and add them together.
+static INLINE void multiplication_and_add(
+    const __m128i *const in0, const __m128i *const in1,
+    const __m128i *const in2, const __m128i *const in3,
+    const __m128i *const cst0, const __m128i *const cst1,
+    const __m128i *const cst2, const __m128i *const cst3, __m128i *const res0,
+    __m128i *const res1, __m128i *const res2, __m128i *const res3) {
+  multiplication_and_add_2(in0, in1, cst0, cst1, res0, res1);
+  multiplication_and_add_2(in2, in3, cst2, cst3, res2, res3);
+}
+
 // Functions to allow 8 bit optimisations to be used when profile 0 is used with
 // highbitdepth enabled
 static INLINE __m128i load_input_data4(const tran_low_t *data) {
@@ -346,23 +357,6 @@ static INLINE void butterfly_self(__m128i *x0, __m128i *x1, const __m128i *c0,
   BUTTERFLY_PAIR(u0, u1, *c0, *c1);
   *x0 = _mm_packs_epi32(tmp0, tmp1);
   *x1 = _mm_packs_epi32(tmp2, tmp3);
-}
-
-// Multiply elements by constants and add them together.
-static INLINE void multiplication_and_add(
-    const __m128i *const in0, const __m128i *const in1,
-    const __m128i *const in2, const __m128i *const in3,
-    const __m128i *const cst0, const __m128i *const cst1,
-    const __m128i *const cst2, const __m128i *const cst3, __m128i *const res0,
-    __m128i *const res1, __m128i *const res2, __m128i *const res3) {
-  const __m128i lo_0 = _mm_unpacklo_epi16(*in0, *in1);
-  const __m128i hi_0 = _mm_unpackhi_epi16(*in0, *in1);
-  const __m128i lo_1 = _mm_unpacklo_epi16(*in2, *in3);
-  const __m128i hi_1 = _mm_unpackhi_epi16(*in2, *in3);
-  *res0 = idct_calc_wraplow_sse2(lo_0, hi_0, *cst0);
-  *res1 = idct_calc_wraplow_sse2(lo_0, hi_0, *cst1);
-  *res2 = idct_calc_wraplow_sse2(lo_1, hi_1, *cst2);
-  *res3 = idct_calc_wraplow_sse2(lo_1, hi_1, *cst3);
 }
 
 static INLINE void idct8(const __m128i *const in /*in[8]*/,
