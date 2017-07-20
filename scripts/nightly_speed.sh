@@ -59,6 +59,10 @@ core_id=1
 for exp_tool in experimental
 
 do
+  cd $code_dir
+  git checkout master
+  git pull
+  
   cd $build_dir
   make clean > /dev/null
   $script_dir/nightly_config.sh $exp_tool
