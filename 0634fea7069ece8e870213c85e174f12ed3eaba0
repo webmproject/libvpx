@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "a13db7fd_4552bab7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-20T13:25:03Z",
+      "side": 1,
+      "message": "No bug, just the jenkins failure. Or do you want a bug to track?",
+      "parentUuid": "40c7e545_adbb00bd",
+      "revId": "0634fea7069ece8e870213c85e174f12ed3eaba0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "08fb7484_1eca4d52",
         "filename": "test/vp9_quantize_test.cc",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2017-07-20T06:27:31Z",
       "side": 1,
       "message": "this could be DISABLED_ to make sure the functions didn\u0027t fall out of sync, but it\u0027s covered in low bitdepth so it\u0027s fine as is",
+      "revId": "0634fea7069ece8e870213c85e174f12ed3eaba0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "395afdcb_0f2b580f",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-20T13:25:03Z",
+      "side": 1,
+      "message": "Can you mark just the one tuple as disabled? I couldn\u0027t think of a way to separate it without also disabling all the highbd functions",
+      "parentUuid": "08fb7484_1eca4d52",
       "revId": "0634fea7069ece8e870213c85e174f12ed3eaba0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
