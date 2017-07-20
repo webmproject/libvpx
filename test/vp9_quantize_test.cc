@@ -115,7 +115,7 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
       // round may be up to 685 for Y values or 914 for U/V.
       round_ptr[j] = rnd.RandRange(914);
       // quant ranges from 1 to -32703
-      quant_ptr[j] = rnd.RandRange(32704) - 32703;
+      quant_ptr[j] = static_cast<int>(rnd.RandRange(32704)) - 32703;
       // quant_shift goes up to 1 << 16.
       quant_shift_ptr[j] = rnd.RandRange(16384);
       // dequant maxes out at 1828 for all cases.
@@ -181,7 +181,7 @@ TEST_P(VP9Quantize32Test, OperationCheck) {
     for (int j = 0; j < 2; j++) {
       zbin_ptr[j] = rnd.RandRange(1200);
       round_ptr[j] = rnd.RandRange(914);
-      quant_ptr[j] = rnd.RandRange(32704) - 32703;
+      quant_ptr[j] = static_cast<int>(rnd.RandRange(32704)) - 32703;
       quant_shift_ptr[j] = rnd.RandRange(16384);
       dequant_ptr[j] = rnd.RandRange(1828);
     }
@@ -248,7 +248,7 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
     for (int j = 0; j < 2; j++) {
       zbin_ptr[j] = rnd.RandRange(1200);
       round_ptr[j] = rnd.RandRange(914);
-      quant_ptr[j] = rnd.RandRange(32704) - 32703;
+      quant_ptr[j] = static_cast<int>(rnd.RandRange(32704)) - 32703;
       quant_shift_ptr[j] = rnd.RandRange(16384);
       dequant_ptr[j] = rnd.RandRange(1828);
     }
@@ -315,7 +315,7 @@ TEST_P(VP9Quantize32Test, EOBCheck) {
     for (int j = 0; j < 2; j++) {
       zbin_ptr[j] = rnd.RandRange(1200);
       round_ptr[j] = rnd.RandRange(914);
-      quant_ptr[j] = rnd.RandRange(32704) - 32703;
+      quant_ptr[j] = static_cast<int>(rnd.RandRange(32704)) - 32703;
       quant_shift_ptr[j] = rnd.RandRange(16384);
       dequant_ptr[j] = rnd.RandRange(1828);
     }
