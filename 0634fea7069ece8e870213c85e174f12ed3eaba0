@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "d6a53153_c39f967c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-20T19:25:32Z",
+      "side": 1,
+      "message": "\u003e Done\n\nthanks, a bug is what I was after",
+      "parentUuid": "40ae972c_29b95b03",
+      "revId": "0634fea7069ece8e870213c85e174f12ed3eaba0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "08fb7484_1eca4d52",
         "filename": "test/vp9_quantize_test.cc",
         "patchSetId": 1
@@ -84,6 +102,24 @@
       "side": 1,
       "message": "Can you mark just the one tuple as disabled? I couldn\u0027t think of a way to separate it without also disabling all the highbd functions",
       "parentUuid": "08fb7484_1eca4d52",
+      "revId": "0634fea7069ece8e870213c85e174f12ed3eaba0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "40c1ac3d_68eb50ff",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-20T19:25:32Z",
+      "side": 1,
+      "message": "\u003e Can you mark just the one tuple as disabled? I couldn\u0027t think of a way to separate it without also disabling all the highbd functions\n\nthe new instantiation would have a new name DISABLED_SSE2 so it would be unique from the existing one",
+      "parentUuid": "395afdcb_0f2b580f",
       "revId": "0634fea7069ece8e870213c85e174f12ed3eaba0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
