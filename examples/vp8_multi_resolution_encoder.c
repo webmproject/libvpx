@@ -469,7 +469,7 @@ int main(int argc, char **argv) {
     if (!vpx_img_alloc(&raw[i], VPX_IMG_FMT_I420, cfg[i].g_w, cfg[i].g_h, 32))
       die("Failed to allocate image", cfg[i].g_w, cfg[i].g_h);
 
-  if (raw[0].stride[VPX_PLANE_Y] == raw[0].d_w)
+  if (raw[0].stride[VPX_PLANE_Y] == (int)raw[0].d_w)
     read_frame_p = read_frame;
   else
     read_frame_p = read_frame_by_row;
@@ -558,7 +558,8 @@ int main(int argc, char **argv) {
         /* Write out down-sampled input. */
         length_frame = cfg[i].g_w * cfg[i].g_h * 3 / 2;
         if (fwrite(raw[i].planes[0], 1, length_frame,
-                   downsampled_input[NUM_ENCODERS - i - 1]) != length_frame) {
+                   downsampled_input[NUM_ENCODERS - i - 1]) !=
+            (unsigned int)length_frame) {
           return EXIT_FAILURE;
         }
       }
