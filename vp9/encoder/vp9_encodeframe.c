@@ -4231,6 +4231,17 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
 }
 // end RTC play code
 
+static INLINE uint32_t variance(const diff *const d) {
+  return d->sse - (uint32_t)(((int64_t)d->sum * d->sum) >> 8);
+}
+
+#if CONFIG_VP9_HIGHBITDEPTH
+static INLINE uint32_t variance_highbd(diff *const d) {
+  const int64_t var = (int64_t)d->sse - (((int64_t)d->sum * d->sum) >> 8);
+  return (var >= 0) ? (uint32_t)var : 0;
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 static int set_var_thresh_from_histogram(VP9_COMP *cpi) {
   const SPEED_FEATURES *const sf = &cpi->sf;
   const VP9_COMMON *const cm = &cpi->common;
@@ -4260,14 +4271,17 @@ static int set_var_thresh_from_histogram(VP9_COMP *cpi) {
           case VPX_BITS_8:
             vpx_highbd_8_get16x16var(src, src_stride, last_src, last_stride,
                                      &var16->sse, &var16->sum);
+            var16->var = variance(var16);
             break;
           case VPX_BITS_10:
             vpx_highbd_10_get16x16var(src, src_stride, last_src, last_stride,
                                       &var16->sse, &var16->sum);
+            var16->var = variance_highbd(var16);
             break;
           case VPX_BITS_12:
             vpx_highbd_12_get16x16var(src, src_stride, last_src, last_stride,
                                       &var16->sse, &var16->sum);
+            var16->var = variance_highbd(var16);
             break;
           default:
             assert(0 &&
@@ -4278,12 +4292,13 @@ static int set_var_thresh_from_histogram(VP9_COMP *cpi) {
       } else {
         vpx_get16x16var(src, src_stride, last_src, last_stride, &var16->sse,
                         &var16->sum);
+        var16->var = variance(var16);
       }
 #else
       vpx_get16x16var(src, src_stride, last_src, last_stride, &var16->sse,
                       &var16->sum);
+      var16->var = variance(var16);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-      var16->var = var16->sse - (((uint32_t)var16->sum * var16->sum) >> 8);
 
       if (var16->var >= VAR_HIST_MAX_BG_VAR)
         hist[VAR_HIST_BINS - 1]++;
