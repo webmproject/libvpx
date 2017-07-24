@@ -22,19 +22,19 @@ build_dir=$root_dir/release
 test_dir=~/Dev/nightly
 script_dir=~/Dev/sandbox/libvpx/scripts
 
-# video=~/Dev/samples/videos/yaowu/soccer_cif.y4m
-# wi=352
-# he=288
-# frames=5
-# bitrate=500
-# fps="30/1"
+video=~/Dev/samples/videos/yaowu/soccer_cif.y4m
+wi=352
+he=288
+frames=5
+bitrate=500
+fps="30/1"
 
-video=~/Dev/samples/videos/speed-set/BasketballDrive_1920x1080_50.y4m
-wi=1920
-he=1080
-frames=150
-bitrate=4000
-fps="50/1"
+# video=~/Dev/samples/videos/speed-set/BasketballDrive_1920x1080_50.y4m
+# wi=1920
+# he=1080
+# frames=150
+# bitrate=4000
+# fps="50/1"
 
 # General options
 codec="--codec=av1"
@@ -59,7 +59,7 @@ for exp_tool in experimental
 
 do
   cd $code_dir
-  git checkout master
+  git checkout -q master
   git pull -q
   git log -1 --oneline
   
@@ -79,7 +79,7 @@ do
   
   elog=e_$exp_tool.txt
   dlog=d_$exp_tool.txt
-  bstream="$exp_tool"_nightly.webm
+  bstream="$exp_tool"_nightly_av1.webm
   
   if [ $exp_tool == intrabc ] || [ $exp_tool == palette ] || [ $exp_tool == palette_delta_encoding ] || [ $exp_tool == palette_throughput ]; then
     tune_content="--tune-content=screen"
@@ -96,7 +96,9 @@ do
   taskset -c $core_id ./aomenc $verbose -o /dev/shm/"$bstream" $video $codec --limit=$frames --profile=$profile --fps=$fps $tune_content --target-bitrate=$bitrate --skip=0 -p 2 --good --cpu-used=0 --lag-in-frames=25 --min-q=0 --max-q=63 --auto-alt-ref=1 --kf-max-dist=150 --kf-min-dist=0 --drop-frame=0 --static-thresh=0 --bias-pct=50 --minsection-pct=0 --maxsection-pct=2000 --arnr-maxframes=7 --arnr-strength=5 --sharpness=0 --undershoot-pct=100 --overshoot-pct=100 --frame-parallel=0 --tile-columns=$col_num --test-decode=warn --psnr &>> $elog
 
   # Note: $2 is the time unit, ms or us
-  etime=`cat $elog | grep 'Pass 2/2' | grep 'fps)' | sed -e 's/^.*b\/s//' | awk '{print $1" "$2}'`
+  #etime=`cat $elog | grep 'Pass 2/2' | grep 'fps)' | sed -e 's/^.*b\/s//' | awk '{print $1" "$2}'`
+  efps=`cat $elog | grep 'Pass 2/2' | grep 'fps)' | sed -e 's/^.*b\/s//' | awk '{print $3}'`
+  efps=`echo $efps | sed 's/(//'`
   
   psnr=`cat $elog | grep 'PSNR' | awk '{print $5, $6, $7, $8, $9}'`
   tmp=`cat $elog | grep mismatch`
@@ -106,7 +108,7 @@ do
     eflag=mismatch
   fi
 
-  echo "Encoded bitstream is " "$bstream"
+  echo "AV1 bitstream: " "$bstream"
   
   taskset -c $core_id ./aomdec /dev/shm/"$bstream" $codec --i420 --noblit --summary 2>&1 &>> $dlog
   if [ "$?" -ne 0 ]; then
@@ -116,9 +118,11 @@ do
   fi
 
   # Note: $8 is the time unit ms or us
-  dtime=`awk '{print $7" "$8}' < $dlog`
-  
-  echo -e $exp_tool '\t'$etime'\t'$dtime'\t'$psnr'\t'$eflag'\t'$dflag
+  dfps=`awk '{print $9}' < $dlog`
+  dfps=`echo $dfps | sed 's/(//'`
 
+  echo -e '\t'"Enc fps   Dec fps    PSNR"'\t\t\t\t\t\t\t'"Enc status   Dec status"
+  echo -e '\t'$efps"        "$dfps"     "$psnr'\t'$eflag"            "$dflag
+  printf "\n"
 done
 
