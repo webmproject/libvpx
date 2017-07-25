@@ -32,6 +32,6 @@ $script_path/vp9_nightly_speed.sh $vp9_code 2 >> $log_path/$log_file 2>&1
 users=luoyi
 host_name=`hostname`
 sender=luoyi
-#cc_list="--cc=yunqingwang"
+cc_list="--cc=yunqingwang"
 
 sendgmr --to=$users $cc_list --subject="Codec Daily Report" --from=$sender --reply_to=$sender < $log_path/$log_file
