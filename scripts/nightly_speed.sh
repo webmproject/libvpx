@@ -82,7 +82,7 @@ else
   eflag=mismatch
 fi
 
-echo "AV1 bitstream: " "$bstream"
+echo "AV1: $(basename $video), bitrate=$bitrate profile=$profile frames=$frames"
 
 taskset -c $core_id ./aomdec /dev/shm/"$bstream" $codec --i420 --noblit --summary 2>&1 &>> $dlog
 if [ "$?" -ne 0 ]; then

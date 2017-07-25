@@ -69,7 +69,7 @@ else
   eflag=mismatch
 fi
 
-echo "VP9 bitstream: " "$bstream"
+echo "VP9: $(basename $video), bitrate=$bitrate profile=$profile frames=$frames"
 
 taskset -c $core_id ./vpxdec /dev/shm/"$bstream" $codec --i420 --noblit --summary 2>&1 &>> $dlog
 if [ "$?" -ne 0 ]; then
@@ -84,5 +84,6 @@ dfps=`awk '{print $9}' < $dlog`
 dfps=`echo $dfps | sed 's/(//'`
 
 echo -e '\t'"Enc fps   Dec fps    PSNR"'\t\t\t\t\t\t\t'"Enc status   Dec status"
-echo -e '\t'$efps"        "$dfps"   "$psnr'\t'$eflag"            "$dflag
+echo -e '\t'$efps"        "$dfps"     "$psnr'\t'$eflag"            "$dflag
+printf "\n"
 

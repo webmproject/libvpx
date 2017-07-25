@@ -2,6 +2,7 @@
 
 root_dir=$1
 build_dir=$root_dir/release
+script_dir=~/Dev/sandbox/libvpx/scripts
 exp_tool=experimental
 
 cd $build_dir
