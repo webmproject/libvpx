@@ -20,12 +20,14 @@
 #   1) profile=2
 #   2) bitdepth="--bit-depth=10/12"
 
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 3 ]; then
   root_dir=~/Dev/av1d
   profile=0
+  pdfps=1
 else
   root_dir=$1
   profile=$2
+  pdfps=$3
 fi
 
 if [ "$profile" == "2" ]; then
@@ -95,8 +97,9 @@ fi
 dfps=`awk '{print $9}' < $dlog`
 dfps=`echo $dfps | sed 's/(//'`
 
-echo -e '\t'"Enc fps   Dec fps    PSNR"'\t\t\t\t\t\t\t'"Enc status   Dec status"
-echo -e '\t'$efps"        "$dfps"     "$psnr'\t'$eflag"            "$dflag
+percent=`echo "($dfps - $pdfps) / $pdfps * 100" | bc -l`
+percent=${percent:0:5}
+
+echo -e '\t'"Enc fps   Dec fps    PSNR"'\t\t\t\t\t\t\t'"Enc status   Dec status   Change (%)"
+echo -e '\t'$efps"        "$dfps"     "$psnr'\t'$eflag"            "$dflag"           "$percent
 printf "\n"
-
-
